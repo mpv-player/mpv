@@ -1,108 +1,108 @@
-<?xml version="1.0" encoding="koi8-r"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with  r20304  -->
 <chapter id="faq" xreflabel="FAQ">
-<title>Часто Задаваемые вопросы</title>
+<title>п╖п╟я│я┌п╬ п≈п╟п╢п╟п╡п╟п╣п╪я▀п╣ п╡п╬п©я─п╬я│я▀</title>
 
 <qandaset defaultlabel="qanda">
 
 <qandadiv id="faq-development">
-<title>Разработка</title>
+<title>п═п╟п╥я─п╟п╠п╬я┌п╨п╟</title>
 
 <qandaentry>
 <question><para>
-Как создать правильный патч для <application>MPlayer</application>?
+п п╟п╨ я│п╬п╥п╢п╟я┌я▄ п©я─п╟п╡п╦п╩я▄п╫я▀п╧ п©п╟я┌я┤ п╢п╩я▐ <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Мы создали <ulink url="../../tech/patches.txt">краткий документ</ulink>
-описывающий все необходимые детали. Пожалуйста, следуйте инструкциям.
+п°я▀ я│п╬п╥п╢п╟п╩п╦ <ulink url="../../tech/patches.txt">п╨я─п╟я┌п╨п╦п╧ п╢п╬п╨я┐п╪п╣п╫я┌</ulink>
+п╬п©п╦я│я▀п╡п╟я▌я┴п╦п╧ п╡я│п╣ п╫п╣п╬п╠я┘п╬п╢п╦п╪я▀п╣ п╢п╣я┌п╟п╩п╦. п÷п╬п╤п╟п╩я┐п╧я│я┌п╟, я│п╩п╣п╢я┐п╧я┌п╣ п╦п╫я│я┌я─я┐п╨я├п╦я▐п╪.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как перевести <application>MPlayer</application> на новый язык?
+п п╟п╨ п©п╣я─п╣п╡п╣я│я┌п╦ <application>MPlayer</application> п╫п╟ п╫п╬п╡я▀п╧ я▐п╥я▀п╨?
 </para></question>
 <answer><para>
-Прочитайте <ulink url="../../tech/translations.txt">HOWTO по переводу</ulink> (англ.),
-там все описано. За дополнительной помощью вы можете обратиться в рассылку 
+п÷я─п╬я┤п╦я┌п╟п╧я┌п╣ <ulink url="../../tech/translations.txt">HOWTO п©п╬ п©п╣я─п╣п╡п╬п╢я┐</ulink> (п╟п╫пЁп╩.),
+я┌п╟п╪ п╡я│п╣ п╬п©п╦я│п╟п╫п╬. п≈п╟ п╢п╬п©п╬п╩п╫п╦я┌п╣п╩я▄п╫п╬п╧ п©п╬п╪п╬я┴я▄я▌ п╡я▀ п╪п╬п╤п╣я┌п╣ п╬п╠я─п╟я┌п╦я┌я▄я│я▐ п╡ я─п╟я│я│я▀п╩п╨я┐ 
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как можно помочь развитию <application>MPlayer</application>?
+п п╟п╨ п╪п╬п╤п╫п╬ п©п╬п╪п╬я┤я▄ я─п╟п╥п╡п╦я┌п╦я▌ <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Мы будем более чем счастливы принять 
-<ulink url="http://www.mplayerhq.hu/donations.html">пожертвования</ulink> оборудованием
-и программным обеспечением. Они позволяют нам постоянно улучшать 
+п°я▀ п╠я┐п╢п╣п╪ п╠п╬п╩п╣п╣ я┤п╣п╪ я│я┤п╟я│я┌п╩п╦п╡я▀ п©я─п╦п╫я▐я┌я▄ 
+<ulink url="http://www.mplayerhq.hu/donations.html">п©п╬п╤п╣я─я┌п╡п╬п╡п╟п╫п╦я▐</ulink> п╬п╠п╬я─я┐п╢п╬п╡п╟п╫п╦п╣п╪
+п╦ п©я─п╬пЁя─п╟п╪п╪п╫я▀п╪ п╬п╠п╣я│п©п╣я┤п╣п╫п╦п╣п╪. п·п╫п╦ п©п╬п╥п╡п╬п╩я▐я▌я┌ п╫п╟п╪ п©п╬я│я┌п╬я▐п╫п╫п╬ я┐п╩я┐я┤я┬п╟я┌я▄ 
 <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как стать разработчиком <application>MPlayer</application>?
+п п╟п╨ я│я┌п╟я┌я▄ я─п╟п╥я─п╟п╠п╬я┌я┤п╦п╨п╬п╪ <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Мы всегда рады приветствовать людей, занимающихся написанием кода и документации.
-Для начала прочтите <ulink url="../../tech/">техническую документацию</ulink> (англ.).
-Затем вам следует подписаться на список рассылки 
+п°я▀ п╡я│п╣пЁп╢п╟ я─п╟п╢я▀ п©я─п╦п╡п╣я┌я│я┌п╡п╬п╡п╟я┌я▄ п╩я▌п╢п╣п╧, п╥п╟п╫п╦п╪п╟я▌я┴п╦я┘я│я▐ п╫п╟п©п╦я│п╟п╫п╦п╣п╪ п╨п╬п╢п╟ п╦ п╢п╬п╨я┐п╪п╣п╫я┌п╟я├п╦п╦.
+п■п╩я▐ п╫п╟я┤п╟п╩п╟ п©я─п╬я┤я┌п╦я┌п╣ <ulink url="../../tech/">я┌п╣я┘п╫п╦я┤п╣я│п╨я┐я▌ п╢п╬п╨я┐п╪п╣п╫я┌п╟я├п╦я▌</ulink> (п╟п╫пЁп╩.).
+п≈п╟я┌п╣п╪ п╡п╟п╪ я│п╩п╣п╢я┐п╣я┌ п©п╬п╢п©п╦я│п╟я┌я▄я│я▐ п╫п╟ я│п©п╦я│п╬п╨ я─п╟я│я│я▀п╩п╨п╦ 
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-и начать написание кода. Если вы хотите помочь с документацией, то подпишитесь на
+п╦ п╫п╟я┤п╟я┌я▄ п╫п╟п©п╦я│п╟п╫п╦п╣ п╨п╬п╢п╟. п∙я│п╩п╦ п╡я▀ я┘п╬я┌п╦я┌п╣ п©п╬п╪п╬я┤я▄ я│ п╢п╬п╨я┐п╪п╣п╫я┌п╟я├п╦п╣п╧, я┌п╬ п©п╬п╢п©п╦я┬п╦я┌п╣я│я▄ п╫п╟
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Почему вы не используете autoconf/automake?
+п÷п╬я┤п╣п╪я┐ п╡я▀ п╫п╣ п╦я│п©п╬п╩я▄п╥я┐п╣я┌п╣ autoconf/automake?
 </para></question>
 <answer><para>
-У нас есть модульная, написанная вручную система сборки. Она хорошо справляется 
-со своей работой, зачем же ее менять? Кроме того, нам, как и 
-<ulink url="http://freshmeat.net/articles/view/889/">некоторым другим</ulink>, не нравятся 
-auto* утилиты.
+пё п╫п╟я│ п╣я│я┌я▄ п╪п╬п╢я┐п╩я▄п╫п╟я▐, п╫п╟п©п╦я│п╟п╫п╫п╟я▐ п╡я─я┐я┤п╫я┐я▌ я│п╦я│я┌п╣п╪п╟ я│п╠п╬я─п╨п╦. п·п╫п╟ я┘п╬я─п╬я┬п╬ я│п©я─п╟п╡п╩я▐п╣я┌я│я▐ 
+я│п╬ я│п╡п╬п╣п╧ я─п╟п╠п╬я┌п╬п╧, п╥п╟я┤п╣п╪ п╤п╣ п╣п╣ п╪п╣п╫я▐я┌я▄? п я─п╬п╪п╣ я┌п╬пЁп╬, п╫п╟п╪, п╨п╟п╨ п╦ 
+<ulink url="http://freshmeat.net/articles/view/889/">п╫п╣п╨п╬я┌п╬я─я▀п╪ п╢я─я┐пЁп╦п╪</ulink>, п╫п╣ п╫я─п╟п╡я▐я┌я│я▐ 
+auto* я┐я┌п╦п╩п╦я┌я▀.
 </para></answer>
 </qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-compilation-installation">
-<title>Компиляция и установка</title>
+<title>п п╬п╪п©п╦п╩я▐я├п╦я▐ п╦ я┐я│я┌п╟п╫п╬п╡п╨п╟</title>
 <qandaentry>
 <question><para>
-Компиляция завершается с ошибкой и <application>gcc</application> вываливается
-с загадочным сообщением, содержащим фразу 
-<systemitem>internal compiler error</systemitem> или
+п п╬п╪п©п╦п╩я▐я├п╦я▐ п╥п╟п╡п╣я─я┬п╟п╣я┌я│я▐ я│ п╬я┬п╦п╠п╨п╬п╧ п╦ <application>gcc</application> п╡я▀п╡п╟п╩п╦п╡п╟п╣я┌я│я▐
+я│ п╥п╟пЁп╟п╢п╬я┤п╫я▀п╪ я│п╬п╬п╠я┴п╣п╫п╦п╣п╪, я│п╬п╢п╣я─п╤п╟я┴п╦п╪ я└я─п╟п╥я┐ 
+<systemitem>internal compiler error</systemitem> п╦п╩п╦
 <systemitem>unable to find a register to spill</systemitem>.
 </para></question>
 <answer><para>
-Вы столкнулись с ошибкой в <application>gcc</application>. Пожалуйста, 
-<ulink url="http://gcc.gnu.org/bugs.html">сообщите об этом разработчикам gcc</ulink>
-но не нам. В силу некоторых причин <application>MPlayer</application>, похоже, 
-часто вызывает ошибки компилятора. Тем не менее, мы не можем их исправить, но и 
-добавлять специальный код для обхода ошибок компилятора не будем.
-Чтобы избежать этой проблемы, либо используйте надежную и стабильную версию компилятора, либо
-часто обновляйтесь.
+п▓я▀ я│я┌п╬п╩п╨п╫я┐п╩п╦я│я▄ я│ п╬я┬п╦п╠п╨п╬п╧ п╡ <application>gcc</application>. п÷п╬п╤п╟п╩я┐п╧я│я┌п╟, 
+<ulink url="http://gcc.gnu.org/bugs.html">я│п╬п╬п╠я┴п╦я┌п╣ п╬п╠ я█я┌п╬п╪ я─п╟п╥я─п╟п╠п╬я┌я┤п╦п╨п╟п╪ gcc</ulink>
+п╫п╬ п╫п╣ п╫п╟п╪. п▓ я│п╦п╩я┐ п╫п╣п╨п╬я┌п╬я─я▀я┘ п©я─п╦я┤п╦п╫ <application>MPlayer</application>, п©п╬я┘п╬п╤п╣, 
+я┤п╟я│я┌п╬ п╡я▀п╥я▀п╡п╟п╣я┌ п╬я┬п╦п╠п╨п╦ п╨п╬п╪п©п╦п╩я▐я┌п╬я─п╟. п╒п╣п╪ п╫п╣ п╪п╣п╫п╣п╣, п╪я▀ п╫п╣ п╪п╬п╤п╣п╪ п╦я┘ п╦я│п©я─п╟п╡п╦я┌я▄, п╫п╬ п╦ 
+п╢п╬п╠п╟п╡п╩я▐я┌я▄ я│п©п╣я├п╦п╟п╩я▄п╫я▀п╧ п╨п╬п╢ п╢п╩я▐ п╬п╠я┘п╬п╢п╟ п╬я┬п╦п╠п╬п╨ п╨п╬п╪п©п╦п╩я▐я┌п╬я─п╟ п╫п╣ п╠я┐п╢п╣п╪.
+п╖я┌п╬п╠я▀ п╦п╥п╠п╣п╤п╟я┌я▄ я█я┌п╬п╧ п©я─п╬п╠п╩п╣п╪я▀, п╩п╦п╠п╬ п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣ п╫п╟п╢п╣п╤п╫я┐я▌ п╦ я│я┌п╟п╠п╦п╩я▄п╫я┐я▌ п╡п╣я─я│п╦я▌ п╨п╬п╪п©п╦п╩я▐я┌п╬я─п╟, п╩п╦п╠п╬
+я┤п╟я│я┌п╬ п╬п╠п╫п╬п╡п╩я▐п╧я┌п╣я│я▄.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Существуют ли бинарные (RPM/Debian) пакеты <application>MPlayer</application>?
+п║я┐я┴п╣я│я┌п╡я┐я▌я┌ п╩п╦ п╠п╦п╫п╟я─п╫я▀п╣ (RPM/Debian) п©п╟п╨п╣я┌я▀ <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Смотрите разделы <link linkend="debian">Debian</link> и <link linkend="rpm">RPM</link>.
+п║п╪п╬я┌я─п╦я┌п╣ я─п╟п╥п╢п╣п╩я▀ <link linkend="debian">Debian</link> п╦ <link linkend="rpm">RPM</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как собрать 32-х битную версию <application>MPlayer</application> на 64-х битном Athlon?
+п п╟п╨ я│п╬п╠я─п╟я┌я▄ 32-я┘ п╠п╦я┌п╫я┐я▌ п╡п╣я─я│п╦я▌ <application>MPlayer</application> п╫п╟ 64-я┘ п╠п╦я┌п╫п╬п╪ Athlon?
 </para></question>
 <answer><para>
-Попробуйте следующие опции configure:
+п÷п╬п©я─п╬п╠я┐п╧я┌п╣ я│п╩п╣п╢я┐я▌я┴п╦п╣ п╬п©я├п╦п╦ configure:
 <screen>
 ./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
 </screen>
@@ -111,292 +111,292 @@ auto* утилиты.
 
 <qandaentry>
 <question><para>
-Configure завершается с указанным сообщением, и <application>MPlayer</application> 
-не компилируется!
+Configure п╥п╟п╡п╣я─я┬п╟п╣я┌я│я▐ я│ я┐п╨п╟п╥п╟п╫п╫я▀п╪ я│п╬п╬п╠я┴п╣п╫п╦п╣п╪, п╦ <application>MPlayer</application> 
+п╫п╣ п╨п╬п╪п©п╦п╩п╦я─я┐п╣я┌я│я▐!
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
-Ваш gcc некорректно установлен, проверьте <filename>configure.log</filename>
-для более подробной информации.
+п▓п╟я┬ gcc п╫п╣п╨п╬я─я─п╣п╨я┌п╫п╬ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫, п©я─п╬п╡п╣я─я▄я┌п╣ <filename>configure.log</filename>
+п╢п╩я▐ п╠п╬п╩п╣п╣ п©п╬п╢я─п╬п╠п╫п╬п╧ п╦п╫я└п╬я─п╪п╟я├п╦п╦.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Я имею Matrox G200/G400/G450/G550, как мне скомпилировать/использовать 
-<systemitem>mga_vid</systemitem> драйвер?
+п╞ п╦п╪п╣я▌ Matrox G200/G400/G450/G550, п╨п╟п╨ п╪п╫п╣ я│п╨п╬п╪п©п╦п╩п╦я─п╬п╡п╟я┌я▄/п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ 
+<systemitem>mga_vid</systemitem> п╢я─п╟п╧п╡п╣я─?
 </para></question>
 <answer><para>
-Прочитайте раздел <link linkend="mga_vid">mga_vid</link>.
+п÷я─п╬я┤п╦я┌п╟п╧я┌п╣ я─п╟п╥п╢п╣п╩ <link linkend="mga_vid">mga_vid</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-На этапе 'make', <application>MPlayer</application> жалуется на отсутствующие 
-библиотеки X11. Я не понимаю, ведь X11 у меня <emphasis>установлен</emphasis>!?
+п²п╟ я█я┌п╟п©п╣ 'make', <application>MPlayer</application> п╤п╟п╩я┐п╣я┌я│я▐ п╫п╟ п╬я┌я│я┐я┌я│я┌п╡я┐я▌я┴п╦п╣ 
+п╠п╦п╠п╩п╦п╬я┌п╣п╨п╦ X11. п╞ п╫п╣ п©п╬п╫п╦п╪п╟я▌, п╡п╣п╢я▄ X11 я┐ п╪п╣п╫я▐ <emphasis>я┐я│я┌п╟п╫п╬п╡п╩п╣п╫</emphasis>!?
 </para></question>
 <answer><para>
-... но вы не имеете установленных пакетов разработки X11. Либо они установлены
-некорректно. Они называются  <filename>XFree86-devel*</filename> в Red Hat, 
-<filename>xlibs-dev</filename> в Debian Woody и 
-<filename>libx11-dev</filename> в Debian Sarge. Также проверьте существуют ли
-символические ссылки <filename class="directory">/usr/X11</filename> и
-<filename class="directory">/usr/include/X11</filename> (это может быть 
-проблемой в Mandrake).
+... п╫п╬ п╡я▀ п╫п╣ п╦п╪п╣п╣я┌п╣ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╫я▀я┘ п©п╟п╨п╣я┌п╬п╡ я─п╟п╥я─п╟п╠п╬я┌п╨п╦ X11. п⌡п╦п╠п╬ п╬п╫п╦ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫я▀
+п╫п╣п╨п╬я─я─п╣п╨я┌п╫п╬. п·п╫п╦ п╫п╟п╥я▀п╡п╟я▌я┌я│я▐  <filename>XFree86-devel*</filename> п╡ Red Hat, 
+<filename>xlibs-dev</filename> п╡ Debian Woody п╦ 
+<filename>libx11-dev</filename> п╡ Debian Sarge. п╒п╟п╨п╤п╣ п©я─п╬п╡п╣я─я▄я┌п╣ я│я┐я┴п╣я│я┌п╡я┐я▌я┌ п╩п╦
+я│п╦п╪п╡п╬п╩п╦я┤п╣я│п╨п╦п╣ я│я│я▀п╩п╨п╦ <filename class="directory">/usr/X11</filename> п╦
+<filename class="directory">/usr/include/X11</filename> (я█я┌п╬ п╪п╬п╤п╣я┌ п╠я▀я┌я▄ 
+п©я─п╬п╠п╩п╣п╪п╬п╧ п╡ Mandrake).
 </para></answer>
 </qandaentry>
 
 
 <qandaentry>
 <question><para>
-Сборка в Mac OS 10.3 приводит к нескольким ошибкам линковки</para></question>
+п║п╠п╬я─п╨п╟ п╡ Mac OS 10.3 п©я─п╦п╡п╬п╢п╦я┌ п╨ п╫п╣я│п╨п╬п╩я▄п╨п╦п╪ п╬я┬п╦п╠п╨п╟п╪ п╩п╦п╫п╨п╬п╡п╨п╦</para></question>
 <answer><para>
-Как правило, ошибка линковки выглядит так:
+п п╟п╨ п©я─п╟п╡п╦п╩п╬, п╬я┬п╦п╠п╨п╟ п╩п╦п╫п╨п╬п╡п╨п╦ п╡я▀пЁп╩я▐п╢п╦я┌ я┌п╟п╨:
 <screen>
 ld: Undefined symbols:
 _LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
 _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
 </screen>
-Эта проблема - результат разработчиков Apple, использующих 10.4 для компиляции их программ и
-распространяющих бинарники пользователям 10.3 через Software Update.
-Неопределённые символы присутствуют в 10.4, но их нет в 10.3.
-Одно из решений - откат QuickTime до версии 7.0.1, но есть и лучшее.
+п╜я┌п╟ п©я─п╬п╠п╩п╣п╪п╟ - я─п╣п╥я┐п╩я▄я┌п╟я┌ я─п╟п╥я─п╟п╠п╬я┌я┤п╦п╨п╬п╡ Apple, п╦я│п©п╬п╩я▄п╥я┐я▌я┴п╦я┘ 10.4 п╢п╩я▐ п╨п╬п╪п©п╦п╩я▐я├п╦п╦ п╦я┘ п©я─п╬пЁя─п╟п╪п╪ п╦
+я─п╟я│п©я─п╬я│я┌я─п╟п╫я▐я▌я┴п╦я┘ п╠п╦п╫п╟я─п╫п╦п╨п╦ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐п╪ 10.3 я┤п╣я─п╣п╥ Software Update.
+п²п╣п╬п©я─п╣п╢п╣п╩я▒п╫п╫я▀п╣ я│п╦п╪п╡п╬п╩я▀ п©я─п╦я│я┐я┌я│я┌п╡я┐я▌я┌ п╡ 10.4, п╫п╬ п╦я┘ п╫п╣я┌ п╡ 10.3.
+п·п╢п╫п╬ п╦п╥ я─п╣я┬п╣п╫п╦п╧ - п╬я┌п╨п╟я┌ QuickTime п╢п╬ п╡п╣я─я│п╦п╦ 7.0.1, п╫п╬ п╣я│я┌я▄ п╦ п╩я┐я┤я┬п╣п╣.
 </para><para>
-Загрузите <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">более старую версию фреймворка</ulink>.
-Вы получите архив, содержащий фреймворк QuickTime 7.0.1 и QuartzCore 10.3.9.
+п≈п╟пЁя─я┐п╥п╦я┌п╣ <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">п╠п╬п╩п╣п╣ я│я┌п╟я─я┐я▌ п╡п╣я─я│п╦я▌ я└я─п╣п╧п╪п╡п╬я─п╨п╟</ulink>.
+п▓я▀ п©п╬п╩я┐я┤п╦я┌п╣ п╟я─я┘п╦п╡, я│п╬п╢п╣я─п╤п╟я┴п╦п╧ я└я─п╣п╧п╪п╡п╬я─п╨ QuickTime 7.0.1 п╦ QuartzCore 10.3.9.
 </para><para>
-Распакуйте файл куда-нибудь, кроме папки System (т.е. не устанавливайте эти программы
-в. <filename class="directory">/System/Library/Frameworks</filename>!
-Эта старая копия нужна только для решения проблем с линковкой!)
+п═п╟я│п©п╟п╨я┐п╧я┌п╣ я└п╟п╧п╩ п╨я┐п╢п╟-п╫п╦п╠я┐п╢я▄, п╨я─п╬п╪п╣ п©п╟п©п╨п╦ System (я┌.п╣. п╫п╣ я┐я│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╧я┌п╣ я█я┌п╦ п©я─п╬пЁя─п╟п╪п╪я▀
+п╡. <filename class="directory">/System/Library/Frameworks</filename>!
+п╜я┌п╟ я│я┌п╟я─п╟я▐ п╨п╬п©п╦я▐ п╫я┐п╤п╫п╟ я┌п╬п╩я▄п╨п╬ п╢п╩я▐ я─п╣я┬п╣п╫п╦я▐ п©я─п╬п╠п╩п╣п╪ я│ п╩п╦п╫п╨п╬п╡п╨п╬п╧!)
 <screen>
 gunzip &lt; CompatFrameworks.tgz | tar xvf -
 </screen>
-В config.mak следует добавить 
+п▓ config.mak я│п╩п╣п╢я┐п╣я┌ п╢п╬п╠п╟п╡п╦я┌я▄ 
 <systemitem>-F/path/to/where/you/extracted</systemitem>
-к переменной <systemitem>OPTFLAGS</systemitem>.
-При использвании <application>X-Code</application> вы можете просто выбрать эти фреймворки
-вместо системных.
+п╨ п©п╣я─п╣п╪п╣п╫п╫п╬п╧ <systemitem>OPTFLAGS</systemitem>.
+п÷я─п╦ п╦я│п©п╬п╩я▄п╥п╡п╟п╫п╦п╦ <application>X-Code</application> п╡я▀ п╪п╬п╤п╣я┌п╣ п©я─п╬я│я┌п╬ п╡я▀п╠я─п╟я┌я▄ я█я┌п╦ я└я─п╣п╧п╪п╡п╬я─п╨п╦
+п╡п╪п╣я│я┌п╬ я│п╦я│я┌п╣п╪п╫я▀я┘.
 </para><para>
-Получившийся бинарный <application>MPlayer</application> будет использовать фреймворк,
-установленный в вашей системе, используя динамические ссылки времени исполнения.
-(Это можно проверить, запустив <systemitem>otool -l</systemitem>).
+п÷п╬п╩я┐я┤п╦п╡я┬п╦п╧я│я▐ п╠п╦п╫п╟я─п╫я▀п╧ <application>MPlayer</application> п╠я┐п╢п╣я┌ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ я└я─п╣п╧п╪п╡п╬я─п╨,
+я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╫я▀п╧ п╡ п╡п╟я┬п╣п╧ я│п╦я│я┌п╣п╪п╣, п╦я│п©п╬п╩я▄п╥я┐я▐ п╢п╦п╫п╟п╪п╦я┤п╣я│п╨п╦п╣ я│я│я▀п╩п╨п╦ п╡я─п╣п╪п╣п╫п╦ п╦я│п©п╬п╩п╫п╣п╫п╦я▐.
+(п╜я┌п╬ п╪п╬п╤п╫п╬ п©я─п╬п╡п╣я─п╦я┌я▄, п╥п╟п©я┐я│я┌п╦п╡ <systemitem>otool -l</systemitem>).
 </para></answer>
 </qandaentry>
 
 </qandadiv>
 
 <qandadiv id="faq-general">
-<title>Общие вопросы</title>
+<title>п·п╠я┴п╦п╣ п╡п╬п©я─п╬я│я▀</title>
 
 <qandaentry>
 <question><para>
-Есть ли списки рассылки, посвященные <application>MPlayer</application>?
+п∙я│я┌я▄ п╩п╦ я│п©п╦я│п╨п╦ я─п╟я│я│я▀п╩п╨п╦, п©п╬я│п╡я▐я┴п╣п╫п╫я▀п╣ <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Да. Смотрите раздел <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">списки рассылки</ulink>
-нашего сайта.
+п■п╟. п║п╪п╬я┌я─п╦я┌п╣ я─п╟п╥п╢п╣п╩ <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">я│п©п╦я│п╨п╦ я─п╟я│я│я▀п╩п╨п╦</ulink>
+п╫п╟я┬п╣пЁп╬ я│п╟п╧я┌п╟.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Я обнаружил неприятную ошибку, появляющуюся при просмотре моего любимого фильма! 
-Кому мне следует сообщить об этом?
+п╞ п╬п╠п╫п╟я─я┐п╤п╦п╩ п╫п╣п©я─п╦я▐я┌п╫я┐я▌ п╬я┬п╦п╠п╨я┐, п©п╬я▐п╡п╩я▐я▌я┴я┐я▌я│я▐ п©я─п╦ п©я─п╬я│п╪п╬я┌я─п╣ п╪п╬п╣пЁп╬ п╩я▌п╠п╦п╪п╬пЁп╬ я└п╦п╩я▄п╪п╟! 
+п п╬п╪я┐ п╪п╫п╣ я│п╩п╣п╢я┐п╣я┌ я│п╬п╬п╠я┴п╦я┌я▄ п╬п╠ я█я┌п╬п╪?
 </para></question>
 <answer><para>
-Прочтите 
-<link linkend="bugreports">руководство по составлению отчетов об ошибках</link>
-и следуйте инструкциям.
+п÷я─п╬я┤я┌п╦я┌п╣ 
+<link linkend="bugreports">я─я┐п╨п╬п╡п╬п╢я│я┌п╡п╬ п©п╬ я│п╬я│я┌п╟п╡п╩п╣п╫п╦я▌ п╬я┌я┤п╣я┌п╬п╡ п╬п╠ п╬я┬п╦п╠п╨п╟я┘</link>
+п╦ я│п╩п╣п╢я┐п╧я┌п╣ п╦п╫я│я┌я─я┐п╨я├п╦я▐п╪.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-у меня проблемы с проигрыванием файлов ... кодеком. Можно ли его использовать?
+я┐ п╪п╣п╫я▐ п©я─п╬п╠п╩п╣п╪я▀ я│ п©я─п╬п╦пЁя─я▀п╡п╟п╫п╦п╣п╪ я└п╟п╧п╩п╬п╡ ... п╨п╬п╢п╣п╨п╬п╪. п°п╬п╤п╫п╬ п╩п╦ п╣пЁп╬ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄?
 </para></question>
 <answer><para>
-Проверьте <ulink url="../../codecs-status.html">состояние кодеков</ulink>,
-если его там нет, то прочтите <link linkend="codecs">документацию на кодеки</link>,
-особенно <link linkend="codec-importing">HOWTO по импортированию кодеков</link>, и 
-свяжитесь с нами.
+п÷я─п╬п╡п╣я─я▄я┌п╣ <ulink url="../../codecs-status.html">я│п╬я│я┌п╬я▐п╫п╦п╣ п╨п╬п╢п╣п╨п╬п╡</ulink>,
+п╣я│п╩п╦ п╣пЁп╬ я┌п╟п╪ п╫п╣я┌, я┌п╬ п©я─п╬я┤я┌п╦я┌п╣ <link linkend="codecs">п╢п╬п╨я┐п╪п╣п╫я┌п╟я├п╦я▌ п╫п╟ п╨п╬п╢п╣п╨п╦</link>,
+п╬я│п╬п╠п╣п╫п╫п╬ <link linkend="codec-importing">HOWTO п©п╬ п╦п╪п©п╬я─я┌п╦я─п╬п╡п╟п╫п╦я▌ п╨п╬п╢п╣п╨п╬п╡</link>, п╦ 
+я│п╡я▐п╤п╦я┌п╣я│я▄ я│ п╫п╟п╪п╦.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-В начале воспроизведения появляется следующее сообщение, хотя все 
-вроде бы работает прекрасно:
+п▓ п╫п╟я┤п╟п╩п╣ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦я▐ п©п╬я▐п╡п╩я▐п╣я┌я│я▐ я│п╩п╣п╢я┐я▌я┴п╣п╣ я│п╬п╬п╠я┴п╣п╫п╦п╣, я┘п╬я┌я▐ п╡я│п╣ 
+п╡я─п╬п╢п╣ п╠я▀ я─п╟п╠п╬я┌п╟п╣я┌ п©я─п╣п╨я─п╟я│п╫п╬:
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-Чтобы использовать RTC тайминг, вам необходимо специально настроенное ядро.
-Подробности ищите в разделе <link linkend="rtc">RTC</link>.
+п╖я┌п╬п╠я▀ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ RTC я┌п╟п╧п╪п╦п╫пЁ, п╡п╟п╪ п╫п╣п╬п╠я┘п╬п╢п╦п╪п╬ я│п©п╣я├п╦п╟п╩я▄п╫п╬ п╫п╟я│я┌я─п╬п╣п╫п╫п╬п╣ я▐п╢я─п╬.
+п÷п╬п╢я─п╬п╠п╫п╬я│я┌п╦ п╦я┴п╦я┌п╣ п╡ я─п╟п╥п╢п╣п╩п╣ <link linkend="rtc">RTC</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как сделать скриншот??
+п п╟п╨ я│п╢п╣п╩п╟я┌я▄ я│п╨я─п╦п╫я┬п╬я┌??
 </para></question>
 <answer><para>
-Чтобы иметь возможность сделать скриншот, Вы должны использовать драйвер 
-вывода видео, который не использует оверлей.
-В X11 это <option>-vo x11</option>, в Windows используйте 
+п╖я┌п╬п╠я▀ п╦п╪п╣я┌я▄ п╡п╬п╥п╪п╬п╤п╫п╬я│я┌я▄ я│п╢п╣п╩п╟я┌я▄ я│п╨я─п╦п╫я┬п╬я┌, п▓я▀ п╢п╬п╩п╤п╫я▀ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╢я─п╟п╧п╡п╣я─ 
+п╡я▀п╡п╬п╢п╟ п╡п╦п╢п╣п╬, п╨п╬я┌п╬я─я▀п╧ п╫п╣ п╦я│п©п╬п╩я▄п╥я┐п╣я┌ п╬п╡п╣я─п╩п╣п╧.
+п▓ X11 я█я┌п╬ <option>-vo x11</option>, п╡ Windows п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣ 
 <option>-vo directx:noaccel</option>.
 </para>
 <para>
-Есть и другой способ. Запустите <application>MPlayer</application> с видео фильтром
+п∙я│я┌я▄ п╦ п╢я─я┐пЁп╬п╧ я│п©п╬я│п╬п╠. п≈п╟п©я┐я│я┌п╦я┌п╣ <application>MPlayer</application> я│ п╡п╦п╢п╣п╬ я└п╦п╩я▄я┌я─п╬п╪
 <systemitem>screenshot</systemitem>
-(<option>-vf screenshot</option>), и нажмите клавишу <keycap>s</keycap> для 
-создания скриншота.
+(<option>-vf screenshot</option>), п╦ п╫п╟п╤п╪п╦я┌п╣ п╨п╩п╟п╡п╦я┬я┐ <keycap>s</keycap> п╢п╩я▐ 
+я│п╬п╥п╢п╟п╫п╦я▐ я│п╨я─п╦п╫я┬п╬я┌п╟.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Каков смысл чисел в статусной строке?
+п п╟п╨п╬п╡ я│п╪я▀я│п╩ я┤п╦я│п╣п╩ п╡ я│я┌п╟я┌я┐я│п╫п╬п╧ я│я┌я─п╬п╨п╣?
 </para></question>
 <answer><para>
-Пример:
+п÷я─п╦п╪п╣я─:
 <screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
 <variablelist>
 <varlistentry><term><systemitem>A: 2.1</systemitem></term>
-<listitem><para>позиция аудио в секундах</para></listitem>
+<listitem><para>п©п╬п╥п╦я├п╦я▐ п╟я┐п╢п╦п╬ п╡ я│п╣п╨я┐п╫п╢п╟я┘</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>V: 2.2</systemitem></term>
-<listitem><para>позиция видео в секундах</para></listitem>
+<listitem><para>п©п╬п╥п╦я├п╦я▐ п╡п╦п╢п╣п╬ п╡ я│п╣п╨я┐п╫п╢п╟я┘</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
-<listitem><para>сдвиг аудио-видео в секундах (задержка)</para></listitem>
+<listitem><para>я│п╢п╡п╦пЁ п╟я┐п╢п╦п╬-п╡п╦п╢п╣п╬ п╡ я│п╣п╨я┐п╫п╢п╟я┘ (п╥п╟п╢п╣я─п╤п╨п╟)</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>ct: 0.042</systemitem></term>
-<listitem><para>сделано соррекций A-V синхронизации</para></listitem>
+<listitem><para>я│п╢п╣п╩п╟п╫п╬ я│п╬я─я─п╣п╨я├п╦п╧ A-V я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦п╦</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>57/57</systemitem></term>
-<listitem><para>кадров проиграно/декодировано (считая от места последней перемотки)</para></listitem>
+<listitem><para>п╨п╟п╢я─п╬п╡ п©я─п╬п╦пЁя─п╟п╫п╬/п╢п╣п╨п╬п╢п╦я─п╬п╡п╟п╫п╬ (я│я┤п╦я┌п╟я▐ п╬я┌ п╪п╣я│я┌п╟ п©п╬я│п╩п╣п╢п╫п╣п╧ п©п╣я─п╣п╪п╬я┌п╨п╦)</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>41%</systemitem></term>
-<listitem><para>время CPU в процентах, используемое видео кодеком
-  (для поблочного и прямого рендеринга сюда включается и video_out)</para></listitem>
+<listitem><para>п╡я─п╣п╪я▐ CPU п╡ п©я─п╬я├п╣п╫я┌п╟я┘, п╦я│п©п╬п╩я▄п╥я┐п╣п╪п╬п╣ п╡п╦п╢п╣п╬ п╨п╬п╢п╣п╨п╬п╪
+  (п╢п╩я▐ п©п╬п╠п╩п╬я┤п╫п╬пЁп╬ п╦ п©я─я▐п╪п╬пЁп╬ я─п╣п╫п╢п╣я─п╦п╫пЁп╟ я│я▌п╢п╟ п╡п╨п╩я▌я┤п╟п╣я┌я│я▐ п╦ video_out)</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>0%</systemitem></term>
-<listitem><para>время CPU, используемое video_out</para></listitem>
+<listitem><para>п╡я─п╣п╪я▐ CPU, п╦я│п©п╬п╩я▄п╥я┐п╣п╪п╬п╣ video_out</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>2.6%</systemitem></term>
-<listitem><para>время CPU в процентах, исползуемое аудио кодеком</para></listitem>
+<listitem><para>п╡я─п╣п╪я▐ CPU п╡ п©я─п╬я├п╣п╫я┌п╟я┘, п╦я│п©п╬п╩п╥я┐п╣п╪п╬п╣ п╟я┐п╢п╦п╬ п╨п╬п╢п╣п╨п╬п╪</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>0</systemitem></term>
-<listitem><para>выброшено кадров для сохранения синхронизации A-V</para></listitem>
+<listitem><para>п╡я▀п╠я─п╬я┬п╣п╫п╬ п╨п╟п╢я─п╬п╡ п╢п╩я▐ я│п╬я┘я─п╟п╫п╣п╫п╦я▐ я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦п╦ A-V</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>4</systemitem></term>
-<listitem><para>текущий уровень постпроцессинга (при использовании 
+<listitem><para>я┌п╣п╨я┐я┴п╦п╧ я┐я─п╬п╡п╣п╫я▄ п©п╬я│я┌п©я─п╬я├п╣я│я│п╦п╫пЁп╟ (п©я─п╦ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦п╦ 
 <option>-autoq</option>)</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>49%</systemitem></term>
-<listitem><para>текущий уровень использования кеша. (нормальное значение - около 50%)</para></listitem>
+<listitem><para>я┌п╣п╨я┐я┴п╦п╧ я┐я─п╬п╡п╣п╫я▄ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦я▐ п╨п╣я┬п╟. (п╫п╬я─п╪п╟п╩я▄п╫п╬п╣ п╥п╫п╟я┤п╣п╫п╦п╣ - п╬п╨п╬п╩п╬ 50%)</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>1.00x</systemitem></term>
-<listitem><para>скорость воспроизведения (множитель от нормальной скорости)</para></listitem>
+<listitem><para>я│п╨п╬я─п╬я│я┌я▄ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦я▐ (п╪п╫п╬п╤п╦я┌п╣п╩я▄ п╬я┌ п╫п╬я─п╪п╟п╩я▄п╫п╬п╧ я│п╨п╬я─п╬я│я┌п╦)</para></listitem>
 </varlistentry>
 </variablelist>
-Большинство из них используются для отладки, используйте опцию <option>-quiet</option>
-чтобы их скрыть. Имейте ввиду, что для некоторых файлов использование CPU модулем video_out 
-равно нулю (0%). Дело в том, что иногда он вызывается непосредственно из кодека и не может 
-быть измерен отдельно. Если вы хотите узнать скорость video_out в этом случае сравните 
-разницу при  воспроизведении с  <option>-vo null</option> и вашим драйвером вывода видео.
+п▒п╬п╩я▄я┬п╦п╫я│я┌п╡п╬ п╦п╥ п╫п╦я┘ п╦я│п©п╬п╩я▄п╥я┐я▌я┌я│я▐ п╢п╩я▐ п╬я┌п╩п╟п╢п╨п╦, п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣ п╬п©я├п╦я▌ <option>-quiet</option>
+я┤я┌п╬п╠я▀ п╦я┘ я│п╨я─я▀я┌я▄. п≤п╪п╣п╧я┌п╣ п╡п╡п╦п╢я┐, я┤я┌п╬ п╢п╩я▐ п╫п╣п╨п╬я┌п╬я─я▀я┘ я└п╟п╧п╩п╬п╡ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦п╣ CPU п╪п╬п╢я┐п╩п╣п╪ video_out 
+я─п╟п╡п╫п╬ п╫я┐п╩я▌ (0%). п■п╣п╩п╬ п╡ я┌п╬п╪, я┤я┌п╬ п╦п╫п╬пЁп╢п╟ п╬п╫ п╡я▀п╥я▀п╡п╟п╣я┌я│я▐ п╫п╣п©п╬я│я─п╣п╢я│я┌п╡п╣п╫п╫п╬ п╦п╥ п╨п╬п╢п╣п╨п╟ п╦ п╫п╣ п╪п╬п╤п╣я┌ 
+п╠я▀я┌я▄ п╦п╥п╪п╣я─п╣п╫ п╬я┌п╢п╣п╩я▄п╫п╬. п∙я│п╩п╦ п╡я▀ я┘п╬я┌п╦я┌п╣ я┐п╥п╫п╟я┌я▄ я│п╨п╬я─п╬я│я┌я▄ video_out п╡ я█я┌п╬п╪ я│п╩я┐я┤п╟п╣ я│я─п╟п╡п╫п╦я┌п╣ 
+я─п╟п╥п╫п╦я├я┐ п©я─п╦  п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╦ я│  <option>-vo null</option> п╦ п╡п╟я┬п╦п╪ п╢я─п╟п╧п╡п╣я─п╬п╪ п╡я▀п╡п╬п╢п╟ п╡п╦п╢п╣п╬.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Появляется сообщение, что не найден файл <filename>/usr/local/lib/codecs/</filename> ...
+п÷п╬я▐п╡п╩я▐п╣я┌я│я▐ я│п╬п╬п╠я┴п╣п╫п╦п╣, я┤я┌п╬ п╫п╣ п╫п╟п╧п╢п╣п╫ я└п╟п╧п╩ <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
-Загрузите и установите бинарные кодеки с нашей 
-<ulink url="http://www.mplayerhq.hu/design7/dload.html">страницы загрузки</ulink>.
+п≈п╟пЁя─я┐п╥п╦я┌п╣ п╦ я┐я│я┌п╟п╫п╬п╡п╦я┌п╣ п╠п╦п╫п╟я─п╫я▀п╣ п╨п╬п╢п╣п╨п╦ я│ п╫п╟я┬п╣п╧ 
+<ulink url="http://www.mplayerhq.hu/design7/dload.html">я│я┌я─п╟п╫п╦я├я▀ п╥п╟пЁя─я┐п╥п╨п╦</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как сделать, чтобы <application>MPlayer</application> запомнил мои особые опции 
-для определенного файла, например <filename>movie.avi</filename>?
+п п╟п╨ я│п╢п╣п╩п╟я┌я▄, я┤я┌п╬п╠я▀ <application>MPlayer</application> п╥п╟п©п╬п╪п╫п╦п╩ п╪п╬п╦ п╬я│п╬п╠я▀п╣ п╬п©я├п╦п╦ 
+п╢п╩я▐ п╬п©я─п╣п╢п╣п╩п╣п╫п╫п╬пЁп╬ я└п╟п╧п╩п╟, п╫п╟п©я─п╦п╪п╣я─ <filename>movie.avi</filename>?
 </para></question>
 <answer><para>
-Создайте файл с именем <filename>movie.avi.conf</filename> и вашими опциями в нем,
-сохраните его в каталог  <filename class="directory">~/.mplayer</filename>
-или в один каталог с медиа-файлом.
+п║п╬п╥п╢п╟п╧я┌п╣ я└п╟п╧п╩ я│ п╦п╪п╣п╫п╣п╪ <filename>movie.avi.conf</filename> п╦ п╡п╟я┬п╦п╪п╦ п╬п©я├п╦я▐п╪п╦ п╡ п╫п╣п╪,
+я│п╬я┘я─п╟п╫п╦я┌п╣ п╣пЁп╬ п╡ п╨п╟я┌п╟п╩п╬пЁ  <filename class="directory">~/.mplayer</filename>
+п╦п╩п╦ п╡ п╬п╢п╦п╫ п╨п╟я┌п╟п╩п╬пЁ я│ п╪п╣п╢п╦п╟-я└п╟п╧п╩п╬п╪.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Субтитры великолепные, лучшие из виденных когда-либо, но они замедляют 
-воспроизведение! Я знаю, это необычно...
+п║я┐п╠я┌п╦я┌я─я▀ п╡п╣п╩п╦п╨п╬п╩п╣п©п╫я▀п╣, п╩я┐я┤я┬п╦п╣ п╦п╥ п╡п╦п╢п╣п╫п╫я▀я┘ п╨п╬пЁп╢п╟-п╩п╦п╠п╬, п╫п╬ п╬п╫п╦ п╥п╟п╪п╣п╢п╩я▐я▌я┌ 
+п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╣! п╞ п╥п╫п╟я▌, я█я┌п╬ п╫п╣п╬п╠я▀я┤п╫п╬...
 </para></question>
 <answer><para>
-После запуска <filename>./configure</filename>, отредактируйте <filename>config.h</filename>
-и замените <systemitem>#undef FAST_OSD</systemitem> на 
-<systemitem>#define FAST_OSD</systemitem>. Перекомпилируйте.
+п÷п╬я│п╩п╣ п╥п╟п©я┐я│п╨п╟ <filename>./configure</filename>, п╬я┌я─п╣п╢п╟п╨я┌п╦я─я┐п╧я┌п╣ <filename>config.h</filename>
+п╦ п╥п╟п╪п╣п╫п╦я┌п╣ <systemitem>#undef FAST_OSD</systemitem> п╫п╟ 
+<systemitem>#define FAST_OSD</systemitem>. п÷п╣я─п╣п╨п╬п╪п©п╦п╩п╦я─я┐п╧я┌п╣.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Я не могу получить доступ к GUI меню. Я делаю щелчок правой кнопкой мыши, но пункты меню 
-отсутствуют.
+п╞ п╫п╣ п╪п╬пЁя┐ п©п╬п╩я┐я┤п╦я┌я▄ п╢п╬я│я┌я┐п© п╨ GUI п╪п╣п╫я▌. п╞ п╢п╣п╩п╟я▌ я┴п╣п╩я┤п╬п╨ п©я─п╟п╡п╬п╧ п╨п╫п╬п©п╨п╬п╧ п╪я▀я┬п╦, п╫п╬ п©я┐п╫п╨я┌я▀ п╪п╣п╫я▌ 
+п╬я┌я│я┐я┌я│я┌п╡я┐я▌я┌.
 </para></question>
 <answer><para>
-Используете FVWM? Попробуйте следующее:
+п≤я│п©п╬п╩я▄п╥я┐п╣я┌п╣ FVWM? п÷п╬п©я─п╬п╠я┐п╧я┌п╣ я│п╩п╣п╢я┐я▌я┴п╣п╣:
 <orderedlist>
 <listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
-<listitem><para>Установите <systemitem>Use Applications position hints</systemitem>
-в <systemitem>Yes</systemitem></para></listitem>
+<listitem><para>пёя│я┌п╟п╫п╬п╡п╦я┌п╣ <systemitem>Use Applications position hints</systemitem>
+п╡ <systemitem>Yes</systemitem></para></listitem>
 </orderedlist>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как запустить <application>MPlayer</application> в фоновой режиме?
+п п╟п╨ п╥п╟п©я┐я│я┌п╦я┌я▄ <application>MPlayer</application> п╡ я└п╬п╫п╬п╡п╬п╧ я─п╣п╤п╦п╪п╣?
 </para></question>
 <answer><para>
-Используйте:
-<screen>mplayer <replaceable>опции</replaceable> <replaceable>имя_файла</replaceable> &lt; /dev/null &amp;</screen>
+п≤я│п©п╬п╩я▄п╥я┐п╧я┌п╣:
+<screen>mplayer <replaceable>п╬п©я├п╦п╦</replaceable> <replaceable>п╦п╪я▐_я└п╟п╧п╩п╟</replaceable> &lt; /dev/null &amp;</screen>
 </para></answer>
 </qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-playback">
-<title>Проблемы воспроизведения</title>
+<title>п÷я─п╬п╠п╩п╣п╪я▀ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦я▐</title>
 
 <qandaentry>
 <question><para>
-Не могу локализовать причину некоторой странной проблемы произведения.
+п²п╣ п╪п╬пЁя┐ п╩п╬п╨п╟п╩п╦п╥п╬п╡п╟я┌я▄ п©я─п╦я┤п╦п╫я┐ п╫п╣п╨п╬я┌п╬я─п╬п╧ я│я┌я─п╟п╫п╫п╬п╧ п©я─п╬п╠п╩п╣п╪я▀ п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦я▐.
 </para></question>
 <answer><para>
-Завалялся файл <filename>codecs.conf</filename> в 
+п≈п╟п╡п╟п╩я▐п╩я│я▐ я└п╟п╧п╩ <filename>codecs.conf</filename> п╡ 
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
-<filename>/usr/local/etc/</filename> или в аналогичном месте? Удалите его,
-Устаревший <filename>codecs.conf</filename> может стать причиной непонятных
-проблем и предназначается только для использования разработчиками, 
-занимающимися поддержкой кодеков. Он переопределяет внутренние настройки кодеков 
-<application>MPlayer</application>'а, что не сулит ничего хорошего, если 
-в новых версиях программы внесены несовместимые изменения.
-При использовании неэкспертами, это верный путь к, на первый взгляд, случайным и 
-неподдающимся локализации крахам и проблемам воспроизведения.
-Если этот файл присутствует где-либо в вашей системе, удалите его.
+<filename>/usr/local/etc/</filename> п╦п╩п╦ п╡ п╟п╫п╟п╩п╬пЁп╦я┤п╫п╬п╪ п╪п╣я│я┌п╣? пёп╢п╟п╩п╦я┌п╣ п╣пЁп╬,
+пёя│я┌п╟я─п╣п╡я┬п╦п╧ <filename>codecs.conf</filename> п╪п╬п╤п╣я┌ я│я┌п╟я┌я▄ п©я─п╦я┤п╦п╫п╬п╧ п╫п╣п©п╬п╫я▐я┌п╫я▀я┘
+п©я─п╬п╠п╩п╣п╪ п╦ п©я─п╣п╢п╫п╟п╥п╫п╟я┤п╟п╣я┌я│я▐ я┌п╬п╩я▄п╨п╬ п╢п╩я▐ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦я▐ я─п╟п╥я─п╟п╠п╬я┌я┤п╦п╨п╟п╪п╦, 
+п╥п╟п╫п╦п╪п╟я▌я┴п╦п╪п╦я│я▐ п©п╬п╢п╢п╣я─п╤п╨п╬п╧ п╨п╬п╢п╣п╨п╬п╡. п·п╫ п©п╣я─п╣п╬п©я─п╣п╢п╣п╩я▐п╣я┌ п╡п╫я┐я┌я─п╣п╫п╫п╦п╣ п╫п╟я│я┌я─п╬п╧п╨п╦ п╨п╬п╢п╣п╨п╬п╡ 
+<application>MPlayer</application>'п╟, я┤я┌п╬ п╫п╣ я│я┐п╩п╦я┌ п╫п╦я┤п╣пЁп╬ я┘п╬я─п╬я┬п╣пЁп╬, п╣я│п╩п╦ 
+п╡ п╫п╬п╡я▀я┘ п╡п╣я─я│п╦я▐я┘ п©я─п╬пЁя─п╟п╪п╪я▀ п╡п╫п╣я│п╣п╫я▀ п╫п╣я│п╬п╡п╪п╣я│я┌п╦п╪я▀п╣ п╦п╥п╪п╣п╫п╣п╫п╦я▐.
+п÷я─п╦ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦п╦ п╫п╣я█п╨я│п©п╣я─я┌п╟п╪п╦, я█я┌п╬ п╡п╣я─п╫я▀п╧ п©я┐я┌я▄ п╨, п╫п╟ п©п╣я─п╡я▀п╧ п╡п╥пЁп╩я▐п╢, я│п╩я┐я┤п╟п╧п╫я▀п╪ п╦ 
+п╫п╣п©п╬п╢п╢п╟я▌я┴п╦п╪я│я▐ п╩п╬п╨п╟п╩п╦п╥п╟я├п╦п╦ п╨я─п╟я┘п╟п╪ п╦ п©я─п╬п╠п╩п╣п╪п╟п╪ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦я▐.
+п∙я│п╩п╦ я█я┌п╬я┌ я└п╟п╧п╩ п©я─п╦я│я┐я┌я│я┌п╡я┐п╣я┌ пЁп╢п╣-п╩п╦п╠п╬ п╡ п╡п╟я┬п╣п╧ я│п╦я│я┌п╣п╪п╣, я┐п╢п╟п╩п╦я┌п╣ п╣пЁп╬.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как настроить субтитры для вывода на черных полях вокруг изображения?
+п п╟п╨ п╫п╟я│я┌я─п╬п╦я┌я▄ я│я┐п╠я┌п╦я┌я─я▀ п╢п╩я▐ п╡я▀п╡п╬п╢п╟ п╫п╟ я┤п╣я─п╫я▀я┘ п©п╬п╩я▐я┘ п╡п╬п╨я─я┐пЁ п╦п╥п╬п╠я─п╟п╤п╣п╫п╦я▐?
 </para></question>
 <answer><para>
-Воспользуйтесь видео фильтром <systemitem>expand</systemitem> для увеличения области 
-рендеринга по вертикали и разместите изображение у верхней кромки:
+п▓п╬я│п©п╬п╩я▄п╥я┐п╧я┌п╣я│я▄ п╡п╦п╢п╣п╬ я└п╦п╩я▄я┌я─п╬п╪ <systemitem>expand</systemitem> п╢п╩я▐ я┐п╡п╣п╩п╦я┤п╣п╫п╦я▐ п╬п╠п╩п╟я│я┌п╦ 
+я─п╣п╫п╢п╣я─п╦п╫пЁп╟ п©п╬ п╡п╣я─я┌п╦п╨п╟п╩п╦ п╦ я─п╟п╥п╪п╣я│я┌п╦я┌п╣ п╦п╥п╬п╠я─п╟п╤п╣п╫п╦п╣ я┐ п╡п╣я─я┘п╫п╣п╧ п╨я─п╬п╪п╨п╦:
 <screen>
 mplayer -vf expand=0:-100:0:0 -slang de dvd://1
 </screen>
@@ -404,92 +404,92 @@ mplayer -vf expand=0:-100:0:0 -slang de dvd://1
 </qandaentry>
 <qandaentry>
 <question><para>
-Как выбрать дорожки звука/субтитров в DVD, OGM, Matroska или NUT файле?
+п п╟п╨ п╡я▀п╠я─п╟я┌я▄ п╢п╬я─п╬п╤п╨п╦ п╥п╡я┐п╨п╟/я│я┐п╠я┌п╦я┌я─п╬п╡ п╡ DVD, OGM, Matroska п╦п╩п╦ NUT я└п╟п╧п╩п╣?
 </para></question>
 <answer><para>
-Нужно использовать опцию <option>-aid</option> (аудио ID) или <option>-alang</option>
-(язык аудио), <option>-sid</option> (ID субтитров) или <option>-slang</option>
-(язык субтитров), например:
+п²я┐п╤п╫п╬ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╬п©я├п╦я▌ <option>-aid</option> (п╟я┐п╢п╦п╬ ID) п╦п╩п╦ <option>-alang</option>
+(я▐п╥я▀п╨ п╟я┐п╢п╦п╬), <option>-sid</option> (ID я│я┐п╠я┌п╦я┌я─п╬п╡) п╦п╩п╦ <option>-slang</option>
+(я▐п╥я▀п╨ я│я┐п╠я┌п╦я┌я─п╬п╡), п╫п╟п©я─п╦п╪п╣я─:
 <screen>
 mplayer -alang eng -slang eng <replaceable>example.mkv</replaceable>
 mplayer -aid 1 -sid 1 <replaceable>example.mkv</replaceable>
 </screen>
-Посмотреть список доступных:
+п÷п╬я│п╪п╬я┌я─п╣я┌я▄ я│п©п╦я│п╬п╨ п╢п╬я│я┌я┐п©п╫я▀я┘:
 <screen>
-mplayer -vo null -ao null -frames 0 -v <replaceable>имя_файла</replaceable> | grep sid
-mplayer -vo null -ao null -frames 0 -v <replaceable>имя_файла</replaceable> | grep aid
+mplayer -vo null -ao null -frames 0 -v <replaceable>п╦п╪я▐_я└п╟п╧п╩п╟</replaceable> | grep sid
+mplayer -vo null -ao null -frames 0 -v <replaceable>п╦п╪я▐_я└п╟п╧п╩п╟</replaceable> | grep aid
 </screen>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Пытаюсь воспроизвести поток через интернет, но ничего не получается.
+п÷я▀я┌п╟я▌я│я▄ п╡п╬я│п©я─п╬п╦п╥п╡п╣я│я┌п╦ п©п╬я┌п╬п╨ я┤п╣я─п╣п╥ п╦п╫я┌п╣я─п╫п╣я┌, п╫п╬ п╫п╦я┤п╣пЁп╬ п╫п╣ п©п╬п╩я┐я┤п╟п╣я┌я│я▐.
 </para></question>
 <answer><para>
-Попробуйте воспроизвести поток с опцией <option>-playlist</option>.
+п÷п╬п©я─п╬п╠я┐п╧я┌п╣ п╡п╬я│п©я─п╬п╦п╥п╡п╣я│я┌п╦ п©п╬я┌п╬п╨ я│ п╬п©я├п╦п╣п╧ <option>-playlist</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Я загрузил фильм из P2P сети, но он не работает!
+п╞ п╥п╟пЁя─я┐п╥п╦п╩ я└п╦п╩я▄п╪ п╦п╥ P2P я│п╣я┌п╦, п╫п╬ п╬п╫ п╫п╣ я─п╟п╠п╬я┌п╟п╣я┌!
 </para></question>
 <answer><para>
-У вас испорченный или поддельный файл. Если вы получили его от друзей, которые 
-утверждают, что он работает, проверьте контрольную сумму <application>md5sum</application>.
+пё п╡п╟я│ п╦я│п©п╬я─я┤п╣п╫п╫я▀п╧ п╦п╩п╦ п©п╬п╢п╢п╣п╩я▄п╫я▀п╧ я└п╟п╧п╩. п∙я│п╩п╦ п╡я▀ п©п╬п╩я┐я┤п╦п╩п╦ п╣пЁп╬ п╬я┌ п╢я─я┐п╥п╣п╧, п╨п╬я┌п╬я─я▀п╣ 
+я┐я┌п╡п╣я─п╤п╢п╟я▌я┌, я┤я┌п╬ п╬п╫ я─п╟п╠п╬я┌п╟п╣я┌, п©я─п╬п╡п╣я─я▄я┌п╣ п╨п╬п╫я┌я─п╬п╩я▄п╫я┐я▌ я│я┐п╪п╪я┐ <application>md5sum</application>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-У меня проблемы с отображением субтитров, помогите!
+пё п╪п╣п╫я▐ п©я─п╬п╠п╩п╣п╪я▀ я│ п╬я┌п╬п╠я─п╟п╤п╣п╫п╦п╣п╪ я│я┐п╠я┌п╦я┌я─п╬п╡, п©п╬п╪п╬пЁп╦я┌п╣!
 </para></question>
 <answer><para>
-Убедитесь, что шрифты установлены правильно. Снова пройдите все шаги части 
-<link linkend="fonts-osd">Шрифты и OSD</link> раздела, посвященного установке.
-Если используете TrueType шрифты, проверьте, что установлена 
-библиотека <systemitem class="library">FreeType</systemitem>.
-Стоит также проверить ваши субтитры при помощи текстового редактора или
-стороннего проигрывателя. Попробуйте преобразовать их в другой формат.
+пёп╠п╣п╢п╦я┌п╣я│я▄, я┤я┌п╬ я┬я─п╦я└я┌я▀ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫я▀ п©я─п╟п╡п╦п╩я▄п╫п╬. п║п╫п╬п╡п╟ п©я─п╬п╧п╢п╦я┌п╣ п╡я│п╣ я┬п╟пЁп╦ я┤п╟я│я┌п╦ 
+<link linkend="fonts-osd">п╗я─п╦я└я┌я▀ п╦ OSD</link> я─п╟п╥п╢п╣п╩п╟, п©п╬я│п╡я▐я┴п╣п╫п╫п╬пЁп╬ я┐я│я┌п╟п╫п╬п╡п╨п╣.
+п∙я│п╩п╦ п╦я│п©п╬п╩я▄п╥я┐п╣я┌п╣ TrueType я┬я─п╦я└я┌я▀, п©я─п╬п╡п╣я─я▄я┌п╣, я┤я┌п╬ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╟ 
+п╠п╦п╠п╩п╦п╬я┌п╣п╨п╟ <systemitem class="library">FreeType</systemitem>.
+п║я┌п╬п╦я┌ я┌п╟п╨п╤п╣ п©я─п╬п╡п╣я─п╦я┌я▄ п╡п╟я┬п╦ я│я┐п╠я┌п╦я┌я─я▀ п©я─п╦ п©п╬п╪п╬я┴п╦ я┌п╣п╨я│я┌п╬п╡п╬пЁп╬ я─п╣п╢п╟п╨я┌п╬я─п╟ п╦п╩п╦
+я│я┌п╬я─п╬п╫п╫п╣пЁп╬ п©я─п╬п╦пЁя─я▀п╡п╟я┌п╣п╩я▐. п÷п╬п©я─п╬п╠я┐п╧я┌п╣ п©я─п╣п╬п╠я─п╟п╥п╬п╡п╟я┌я▄ п╦я┘ п╡ п╢я─я┐пЁп╬п╧ я└п╬я─п╪п╟я┌.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Почему <application>MPlayer</application> не работает в Fedora Core?
+п÷п╬я┤п╣п╪я┐ <application>MPlayer</application> п╫п╣ я─п╟п╠п╬я┌п╟п╣я┌ п╡ Fedora Core?
 </para></question>
 <answer><para>
-Из-за плохого взаимодействия между exec-shield, prelink и любым приложением, использующим
-Windows DLLs (таким как <application>MPlayer</application>).
+п≤п╥-п╥п╟ п©п╩п╬я┘п╬пЁп╬ п╡п╥п╟п╦п╪п╬п╢п╣п╧я│я┌п╡п╦я▐ п╪п╣п╤п╢я┐ exec-shield, prelink п╦ п╩я▌п╠я▀п╪ п©я─п╦п╩п╬п╤п╣п╫п╦п╣п╪, п╦я│п©п╬п╩я▄п╥я┐я▌я┴п╦п╪
+Windows DLLs (я┌п╟п╨п╦п╪ п╨п╟п╨ <application>MPlayer</application>).
 </para>
 <para>
-Проблема в том, что exec-shield делает случайными адреса загрузки всех системных
-библиотек. Смена адресов производится на стадии prelink (один раз каждые две недели).
+п÷я─п╬п╠п╩п╣п╪п╟ п╡ я┌п╬п╪, я┤я┌п╬ exec-shield п╢п╣п╩п╟п╣я┌ я│п╩я┐я┤п╟п╧п╫я▀п╪п╦ п╟п╢я─п╣я│п╟ п╥п╟пЁя─я┐п╥п╨п╦ п╡я│п╣я┘ я│п╦я│я┌п╣п╪п╫я▀я┘
+п╠п╦п╠п╩п╦п╬я┌п╣п╨. п║п╪п╣п╫п╟ п╟п╢я─п╣я│п╬п╡ п©я─п╬п╦п╥п╡п╬п╢п╦я┌я│я▐ п╫п╟ я│я┌п╟п╢п╦п╦ prelink (п╬п╢п╦п╫ я─п╟п╥ п╨п╟п╤п╢я▀п╣ п╢п╡п╣ п╫п╣п╢п╣п╩п╦).
 </para>
 <para>
-Когда <application>MPlayer</application> пытается загрузить Windows DLL, он хочет 
-поместить ее по определенному адресу (0x400000). Если там уже находится важная 
-системная библиотека, <application>MPlayer</application> рухнет.
-(Типичные симптомы - segmentation fault при попытке воспроизвести файлы
+п п╬пЁп╢п╟ <application>MPlayer</application> п©я▀я┌п╟п╣я┌я│я▐ п╥п╟пЁя─я┐п╥п╦я┌я▄ Windows DLL, п╬п╫ я┘п╬я┤п╣я┌ 
+п©п╬п╪п╣я│я┌п╦я┌я▄ п╣п╣ п©п╬ п╬п©я─п╣п╢п╣п╩п╣п╫п╫п╬п╪я┐ п╟п╢я─п╣я│я┐ (0x400000). п∙я│п╩п╦ я┌п╟п╪ я┐п╤п╣ п╫п╟я┘п╬п╢п╦я┌я│я▐ п╡п╟п╤п╫п╟я▐ 
+я│п╦я│я┌п╣п╪п╫п╟я▐ п╠п╦п╠п╩п╦п╬я┌п╣п╨п╟, <application>MPlayer</application> я─я┐я┘п╫п╣я┌.
+(п╒п╦п©п╦я┤п╫я▀п╣ я│п╦п╪п©я┌п╬п╪я▀ - segmentation fault п©я─п╦ п©п╬п©я▀я┌п╨п╣ п╡п╬я│п©я─п╬п╦п╥п╡п╣я│я┌п╦ я└п╟п╧п╩я▀
 Windows Media 9.)
 </para>
 <para>
-Если столкнулись с этой проблемой, то у вас есть два варианта:
+п∙я│п╩п╦ я│я┌п╬п╩п╨п╫я┐п╩п╦я│я▄ я│ я█я┌п╬п╧ п©я─п╬п╠п╩п╣п╪п╬п╧, я┌п╬ я┐ п╡п╟я│ п╣я│я┌я▄ п╢п╡п╟ п╡п╟я─п╦п╟п╫я┌п╟:
 <itemizedlist>
-<listitem><para>Подождать пару недель. Все может снова заработать.</para></listitem>
-<listitem><para>Слинковать все бинарники в системе с различными prelink опциями.
-Вот пошаговая инструкция:</para>
+<listitem><para>п÷п╬п╢п╬п╤п╢п╟я┌я▄ п©п╟я─я┐ п╫п╣п╢п╣п╩я▄. п▓я│п╣ п╪п╬п╤п╣я┌ я│п╫п╬п╡п╟ п╥п╟я─п╟п╠п╬я┌п╟я┌я▄.</para></listitem>
+<listitem><para>п║п╩п╦п╫п╨п╬п╡п╟я┌я▄ п╡я│п╣ п╠п╦п╫п╟я─п╫п╦п╨п╦ п╡ я│п╦я│я┌п╣п╪п╣ я│ я─п╟п╥п╩п╦я┤п╫я▀п╪п╦ prelink п╬п©я├п╦я▐п╪п╦.
+п▓п╬я┌ п©п╬я┬п╟пЁп╬п╡п╟я▐ п╦п╫я│я┌я─я┐п╨я├п╦я▐:</para>
 <para>
 <orderedlist>
-<listitem><para>Отредактируйте <filename>/etc/syconfig/prelink</filename> и измените</para>
+<listitem><para>п·я┌я─п╣п╢п╟п╨я┌п╦я─я┐п╧я┌п╣ <filename>/etc/syconfig/prelink</filename> п╦ п╦п╥п╪п╣п╫п╦я┌п╣</para>
 <para>
 <programlisting>
 PRELINK_OPTS=-mR
 </programlisting>
 </para>
 <para>
-на
+п╫п╟
 <programlisting>
 PRELINK_OPTS="-mR --no-exec-shield"
 </programlisting>
@@ -497,10 +497,10 @@ PRELINK_OPTS="-mR --no-exec-shield"
 </listitem>
 <listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
 <listitem><para><command>/etc/cron.daily/prelink</command>
-(Это перелинкует все приложения, что может занять длительное время.)</para></listitem>
+(п╜я┌п╬ п©п╣я─п╣п╩п╦п╫п╨я┐п╣я┌ п╡я│п╣ п©я─п╦п╩п╬п╤п╣п╫п╦я▐, я┤я┌п╬ п╪п╬п╤п╣я┌ п╥п╟п╫я▐я┌я▄ п╢п╩п╦я┌п╣п╩я▄п╫п╬п╣ п╡я─п╣п╪я▐.)</para></listitem>
 <listitem>
 <para><command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
-(Это отключит exec-shield для исполняемого файла <application>MPlayer</application>.)
+(п╜я┌п╬ п╬я┌п╨п╩я▌я┤п╦я┌ exec-shield п╢п╩я▐ п╦я│п©п╬п╩п╫я▐п╣п╪п╬пЁп╬ я└п╟п╧п╩п╟ <application>MPlayer</application>.)
 </para>
 </listitem>
 </orderedlist>
@@ -512,165 +512,165 @@ PRELINK_OPTS="-mR --no-exec-shield"
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> умирает с собщением:
+<application>MPlayer</application> я┐п╪п╦я─п╟п╣я┌ я│ я│п╬п╠я┴п╣п╫п╦п╣п╪:
 <screen>MPlayer interrupted by signal 4 in module: decode_video</screen>
 </para></question>
 <answer><para>
-Не используйте <application>MPlayer</application> на процессоре, отличном от того,
-на котором он компилировался, либо перекомпилируйте с определением CPU "на лету"
+п²п╣ п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣ <application>MPlayer</application> п╫п╟ п©я─п╬я├п╣я│я│п╬я─п╣, п╬я┌п╩п╦я┤п╫п╬п╪ п╬я┌ я┌п╬пЁп╬,
+п╫п╟ п╨п╬я┌п╬я─п╬п╪ п╬п╫ п╨п╬п╪п©п╦п╩п╦я─п╬п╡п╟п╩я│я▐, п╩п╦п╠п╬ п©п╣я─п╣п╨п╬п╪п©п╦п╩п╦я─я┐п╧я┌п╣ я│ п╬п©я─п╣п╢п╣п╩п╣п╫п╦п╣п╪ CPU "п╫п╟ п╩п╣я┌я┐"
 (<command>./configure --enable-runtime-cpudetection</command>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-При попытке захвата с тюнера, все работает, но цвета - неправильные. С другими приложениями 
-все в порядке.
+п÷я─п╦ п©п╬п©я▀я┌п╨п╣ п╥п╟я┘п╡п╟я┌п╟ я│ я┌я▌п╫п╣я─п╟, п╡я│п╣ я─п╟п╠п╬я┌п╟п╣я┌, п╫п╬ я├п╡п╣я┌п╟ - п╫п╣п©я─п╟п╡п╦п╩я▄п╫я▀п╣. п║ п╢я─я┐пЁп╦п╪п╦ п©я─п╦п╩п╬п╤п╣п╫п╦я▐п╪п╦ 
+п╡я│п╣ п╡ п©п╬я─я▐п╢п╨п╣.
 </para></question>
 <answer><para>
-Ваша карта сообщает о некотором пространстве цветов как поддерживаемом, хотя на самом 
-деле его не поддерживает. Попробуйте с YUY2 вместо  YV12 по умолчанию (смотрите
-секцию <link linkend="tv-input">TV</link>).
+п▓п╟я┬п╟ п╨п╟я─я┌п╟ я│п╬п╬п╠я┴п╟п╣я┌ п╬ п╫п╣п╨п╬я┌п╬я─п╬п╪ п©я─п╬я│я┌я─п╟п╫я│я┌п╡п╣ я├п╡п╣я┌п╬п╡ п╨п╟п╨ п©п╬п╢п╢п╣я─п╤п╦п╡п╟п╣п╪п╬п╪, я┘п╬я┌я▐ п╫п╟ я│п╟п╪п╬п╪ 
+п╢п╣п╩п╣ п╣пЁп╬ п╫п╣ п©п╬п╢п╢п╣я─п╤п╦п╡п╟п╣я┌. п÷п╬п©я─п╬п╠я┐п╧я┌п╣ я│ YUY2 п╡п╪п╣я│я┌п╬  YV12 п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌ (я│п╪п╬я┌я─п╦я┌п╣
+я│п╣п╨я├п╦я▌ <link linkend="tv-input">TV</link>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Получаю странные процентные значения (слишком большие) при проигрывании файлов на ноутбуке.
+п÷п╬п╩я┐я┤п╟я▌ я│я┌я─п╟п╫п╫я▀п╣ п©я─п╬я├п╣п╫я┌п╫я▀п╣ п╥п╫п╟я┤п╣п╫п╦я▐ (я│п╩п╦я┬п╨п╬п╪ п╠п╬п╩я▄я┬п╦п╣) п©я─п╦ п©я─п╬п╦пЁя─я▀п╡п╟п╫п╦п╦ я└п╟п╧п╩п╬п╡ п╫п╟ п╫п╬я┐я┌п╠я┐п╨п╣.
 </para></question>
 <answer><para>
-Это эффект системы управления энергопотреблением ноутбука (BIOS, не ядра).
-Подсоедините разъем внешнего питания <emphasis role="bold">до</emphasis> 
-включения ноутбука. Также можно попробовать 
-<ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink> (SpeedStep интерфейс для Linux),
-возможно это поможет.
+п╜я┌п╬ я█я└я└п╣п╨я┌ я│п╦я│я┌п╣п╪я▀ я┐п©я─п╟п╡п╩п╣п╫п╦я▐ я█п╫п╣я─пЁп╬п©п╬я┌я─п╣п╠п╩п╣п╫п╦п╣п╪ п╫п╬я┐я┌п╠я┐п╨п╟ (BIOS, п╫п╣ я▐п╢я─п╟).
+п÷п╬п╢я│п╬п╣п╢п╦п╫п╦я┌п╣ я─п╟п╥я┼п╣п╪ п╡п╫п╣я┬п╫п╣пЁп╬ п©п╦я┌п╟п╫п╦я▐ <emphasis role="bold">п╢п╬</emphasis> 
+п╡п╨п╩я▌я┤п╣п╫п╦я▐ п╫п╬я┐я┌п╠я┐п╨п╟. п╒п╟п╨п╤п╣ п╪п╬п╤п╫п╬ п©п╬п©я─п╬п╠п╬п╡п╟я┌я▄ 
+<ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink> (SpeedStep п╦п╫я┌п╣я─я└п╣п╧я│ п╢п╩я▐ Linux),
+п╡п╬п╥п╪п╬п╤п╫п╬ я█я┌п╬ п©п╬п╪п╬п╤п╣я┌.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Аудио/видео теряют синхронизацию, при запуске <application>MPlayer</application>
-с правами root на ноутбуке. При запуске с правами обычного пользователся все работает
-нормально.
+п░я┐п╢п╦п╬/п╡п╦п╢п╣п╬ я┌п╣я─я▐я▌я┌ я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦я▌, п©я─п╦ п╥п╟п©я┐я│п╨п╣ <application>MPlayer</application>
+я│ п©я─п╟п╡п╟п╪п╦ root п╫п╟ п╫п╬я┐я┌п╠я┐п╨п╣. п÷я─п╦ п╥п╟п©я┐я│п╨п╣ я│ п©я─п╟п╡п╟п╪п╦ п╬п╠я▀я┤п╫п╬пЁп╬ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я│я▐ п╡я│п╣ я─п╟п╠п╬я┌п╟п╣я┌
+п╫п╬я─п╪п╟п╩я▄п╫п╬.
 </para></question>
 <answer><para>
-Это тоже эффект системы управления энергопотреблением (смотрите выше).
-Подсоедините разъем внешнего питания <emphasis role="bold">до</emphasis> 
-включения ноутбука лиюо используйте опцию <option>-nortc</option>.
+п╜я┌п╬ я┌п╬п╤п╣ я█я└я└п╣п╨я┌ я│п╦я│я┌п╣п╪я▀ я┐п©я─п╟п╡п╩п╣п╫п╦я▐ я█п╫п╣я─пЁп╬п©п╬я┌я─п╣п╠п╩п╣п╫п╦п╣п╪ (я│п╪п╬я┌я─п╦я┌п╣ п╡я▀я┬п╣).
+п÷п╬п╢я│п╬п╣п╢п╦п╫п╦я┌п╣ я─п╟п╥я┼п╣п╪ п╡п╫п╣я┬п╫п╣пЁп╬ п©п╦я┌п╟п╫п╦я▐ <emphasis role="bold">п╢п╬</emphasis> 
+п╡п╨п╩я▌я┤п╣п╫п╦я▐ п╫п╬я┐я┌п╠я┐п╨п╟ п╩п╦я▌п╬ п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣ п╬п©я├п╦я▌ <option>-nortc</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-При воспроизведении фильма изображение вдруг начинает дергаться и появляется
-следующее сообщение:
+п÷я─п╦ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╦ я└п╦п╩я▄п╪п╟ п╦п╥п╬п╠я─п╟п╤п╣п╫п╦п╣ п╡п╢я─я┐пЁ п╫п╟я┤п╦п╫п╟п╣я┌ п╢п╣я─пЁп╟я┌я▄я│я▐ п╦ п©п╬я▐п╡п╩я▐п╣я┌я│я▐
+я│п╩п╣п╢я┐я▌я┴п╣п╣ я│п╬п╬п╠я┴п╣п╫п╦п╣:
 <screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
 </para></question>
 <answer><para>
-Файлы с некорретным чередованием и опция
-<option>-cache</option> вместе работают не очень хорошо..
-Попробуйте <option>-nocache</option>.
+п╓п╟п╧п╩я▀ я│ п╫п╣п╨п╬я─я─п╣я┌п╫я▀п╪ я┤п╣я─п╣п╢п╬п╡п╟п╫п╦п╣п╪ п╦ п╬п©я├п╦я▐
+<option>-cache</option> п╡п╪п╣я│я┌п╣ я─п╟п╠п╬я┌п╟я▌я┌ п╫п╣ п╬я┤п╣п╫я▄ я┘п╬я─п╬я┬п╬..
+п÷п╬п©я─п╬п╠я┐п╧я┌п╣ <option>-nocache</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-driver">
-<title>Проблемы драйверов вывода аудио/видео (ao/vo)</title>
+<title>п÷я─п╬п╠п╩п╣п╪я▀ п╢я─п╟п╧п╡п╣я─п╬п╡ п╡я▀п╡п╬п╢п╟ п╟я┐п╢п╦п╬/п╡п╦п╢п╣п╬ (ao/vo)</title>
 
 <qandaentry>
 <question><para>
-При запуске в полноэкранном режиме, наблюдаются черные полосы вокруг изображения
-вместно полноэкранного масштабирования.
+п÷я─п╦ п╥п╟п©я┐я│п╨п╣ п╡ п©п╬п╩п╫п╬я█п╨я─п╟п╫п╫п╬п╪ я─п╣п╤п╦п╪п╣, п╫п╟п╠п╩я▌п╢п╟я▌я┌я│я▐ я┤п╣я─п╫я▀п╣ п©п╬п╩п╬я│я▀ п╡п╬п╨я─я┐пЁ п╦п╥п╬п╠я─п╟п╤п╣п╫п╦я▐
+п╡п╪п╣я│я┌п╫п╬ п©п╬п╩п╫п╬я█п╨я─п╟п╫п╫п╬пЁп╬ п╪п╟я│я┬я┌п╟п╠п╦я─п╬п╡п╟п╫п╦я▐.
 </para></question>
 <answer><para>
-Ваш дайвер вывода видео аппаратно не поддерживает масштабирование, и, поскольку
-поблочное программное масштабирование может быть ужасно медленным, 
-<application>MPlayer</application> не задействует его автоматически.
-Скорее всего вы используете драйвер вывода <systemitem>x11</systemitem> вместо
+п▓п╟я┬ п╢п╟п╧п╡п╣я─ п╡я▀п╡п╬п╢п╟ п╡п╦п╢п╣п╬ п╟п©п©п╟я─п╟я┌п╫п╬ п╫п╣ п©п╬п╢п╢п╣я─п╤п╦п╡п╟п╣я┌ п╪п╟я│я┬я┌п╟п╠п╦я─п╬п╡п╟п╫п╦п╣, п╦, п©п╬я│п╨п╬п╩я▄п╨я┐
+п©п╬п╠п╩п╬я┤п╫п╬п╣ п©я─п╬пЁя─п╟п╪п╪п╫п╬п╣ п╪п╟я│я┬я┌п╟п╠п╦я─п╬п╡п╟п╫п╦п╣ п╪п╬п╤п╣я┌ п╠я▀я┌я▄ я┐п╤п╟я│п╫п╬ п╪п╣п╢п╩п╣п╫п╫я▀п╪, 
+<application>MPlayer</application> п╫п╣ п╥п╟п╢п╣п╧я│я┌п╡я┐п╣я┌ п╣пЁп╬ п╟п╡я┌п╬п╪п╟я┌п╦я┤п╣я│п╨п╦.
+п║п╨п╬я─п╣п╣ п╡я│п╣пЁп╬ п╡я▀ п╦я│п©п╬п╩я▄п╥я┐п╣я┌п╣ п╢я─п╟п╧п╡п╣я─ п╡я▀п╡п╬п╢п╟ <systemitem>x11</systemitem> п╡п╪п╣я│я┌п╬
 <systemitem>xv</systemitem>.
-Попробуйте указать <option>-vo xv</option> в командной строке или
-прочтите <link linkend="video">раздел видео</link>, чтобы узнать о других
-драйверах вывода видео. Опция <option>-zoom</option> явно задействует
-программное масштабирование.
+п÷п╬п©я─п╬п╠я┐п╧я┌п╣ я┐п╨п╟п╥п╟я┌я▄ <option>-vo xv</option> п╡ п╨п╬п╪п╟п╫п╢п╫п╬п╧ я│я┌я─п╬п╨п╣ п╦п╩п╦
+п©я─п╬я┤я┌п╦я┌п╣ <link linkend="video">я─п╟п╥п╢п╣п╩ п╡п╦п╢п╣п╬</link>, я┤я┌п╬п╠я▀ я┐п╥п╫п╟я┌я▄ п╬ п╢я─я┐пЁп╦я┘
+п╢я─п╟п╧п╡п╣я─п╟я┘ п╡я▀п╡п╬п╢п╟ п╡п╦п╢п╣п╬. п·п©я├п╦я▐ <option>-zoom</option> я▐п╡п╫п╬ п╥п╟п╢п╣п╧я│я┌п╡я┐п╣я┌
+п©я─п╬пЁя─п╟п╪п╪п╫п╬п╣ п╪п╟я│я┬я┌п╟п╠п╦я─п╬п╡п╟п╫п╦п╣.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Я только что установил <application>MPlayer</application>. Попытка открыть файл
-приводит к фатальной ошибке:
+п╞ я┌п╬п╩я▄п╨п╬ я┤я┌п╬ я┐я│я┌п╟п╫п╬п╡п╦п╩ <application>MPlayer</application>. п÷п╬п©я▀я┌п╨п╟ п╬я┌п╨я─я▀я┌я▄ я└п╟п╧п╩
+п©я─п╦п╡п╬п╢п╦я┌ п╨ я└п╟я┌п╟п╩я▄п╫п╬п╧ п╬я┬п╦п╠п╨п╣:
 <screen>
 Error opening/initializing the selected video_out (-vo) device.
 </screen>
-Как решить проблему?
+п п╟п╨ я─п╣я┬п╦я┌я▄ п©я─п╬п╠п╩п╣п╪я┐?
 </para></question>
 <answer><para>
-Просто смените драйвер вывода видео. Введите следующую коданду для получения списка 
-доступных драйверов:
+п÷я─п╬я│я┌п╬ я│п╪п╣п╫п╦я┌п╣ п╢я─п╟п╧п╡п╣я─ п╡я▀п╡п╬п╢п╟ п╡п╦п╢п╣п╬. п▓п╡п╣п╢п╦я┌п╣ я│п╩п╣п╢я┐я▌я┴я┐я▌ п╨п╬п╢п╟п╫п╢я┐ п╢п╩я▐ п©п╬п╩я┐я┤п╣п╫п╦я▐ я│п©п╦я│п╨п╟ 
+п╢п╬я│я┌я┐п©п╫я▀я┘ п╢я─п╟п╧п╡п╣я─п╬п╡:
 <screen>
 mplayer -vo help
 </screen>
-Как только выберите правильный драйвер, добавьте его в файл конфигурации. Добавьте
+п п╟п╨ я┌п╬п╩я▄п╨п╬ п╡я▀п╠п╣я─п╦я┌п╣ п©я─п╟п╡п╦п╩я▄п╫я▀п╧ п╢я─п╟п╧п╡п╣я─, п╢п╬п╠п╟п╡я▄я┌п╣ п╣пЁп╬ п╡ я└п╟п╧п╩ п╨п╬п╫я└п╦пЁя┐я─п╟я├п╦п╦. п■п╬п╠п╟п╡я▄я┌п╣
 <programlisting>
- vo = <replaceable>выбранный_драйвер</replaceable>
+ vo = <replaceable>п╡я▀п╠я─п╟п╫п╫я▀п╧_п╢я─п╟п╧п╡п╣я─</replaceable>
 </programlisting>
-в <filename>~/.mplayer/config</filename> и/или
+п╡ <filename>~/.mplayer/config</filename> п╦/п╦п╩п╦
 <programlisting>
-vo_driver = <replaceable>выбранный_драйвер</replaceable>
+vo_driver = <replaceable>п╡я▀п╠я─п╟п╫п╫я▀п╧_п╢я─п╟п╧п╡п╣я─</replaceable>
 </programlisting>
-в <filename>~/.mplayer/gui.conf</filename>.
+п╡ <filename>~/.mplayer/gui.conf</filename>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-У меня проблемы с <replaceable>[ваш оконный менеджер]</replaceable> и
-полноэкранным режимом xv/xmga/sdl/x11 ...
+пё п╪п╣п╫я▐ п©я─п╬п╠п╩п╣п╪я▀ я│ <replaceable>[п╡п╟я┬ п╬п╨п╬п╫п╫я▀п╧ п╪п╣п╫п╣п╢п╤п╣я─]</replaceable> п╦
+п©п╬п╩п╫п╬я█п╨я─п╟п╫п╫я▀п╪ я─п╣п╤п╦п╪п╬п╪ xv/xmga/sdl/x11 ...
 </para></question>
 <answer><para>
-Прочтите <link linkend="bugreports">руководство по составлению отчетов об ошибках</link>
-и отошлите соответствуюющий отчет нам.
-Попробуйте также поэкспериментировать в опцией <option>-fstype</option>.
+п÷я─п╬я┤я┌п╦я┌п╣ <link linkend="bugreports">я─я┐п╨п╬п╡п╬п╢я│я┌п╡п╬ п©п╬ я│п╬я│я┌п╟п╡п╩п╣п╫п╦я▌ п╬я┌я┤п╣я┌п╬п╡ п╬п╠ п╬я┬п╦п╠п╨п╟я┘</link>
+п╦ п╬я┌п╬я┬п╩п╦я┌п╣ я│п╬п╬я┌п╡п╣я┌я│я┌п╡я┐я▌я▌я┴п╦п╧ п╬я┌я┤п╣я┌ п╫п╟п╪.
+п÷п╬п©я─п╬п╠я┐п╧я┌п╣ я┌п╟п╨п╤п╣ п©п╬я█п╨я│п©п╣я─п╦п╪п╣п╫я┌п╦я─п╬п╡п╟я┌я▄ п╡ п╬п©я├п╦п╣п╧ <option>-fstype</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Теряется синхронизация звука при воспроизведении AVI файла.
+п╒п╣я─я▐п╣я┌я│я▐ я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦я▐ п╥п╡я┐п╨п╟ п©я─п╦ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╦ AVI я└п╟п╧п╩п╟.
 </para></question>
 <answer><para>
-Попробуйте опцию <option>-bps</option> или <option>-nobps</option>. Если это не помогает 
-прочтите <link linkend="bugreports">руководство по составлению отчетов об ошибках</link>
-и загрузите этот файл на наш FTP.
+п÷п╬п©я─п╬п╠я┐п╧я┌п╣ п╬п©я├п╦я▌ <option>-bps</option> п╦п╩п╦ <option>-nobps</option>. п∙я│п╩п╦ я█я┌п╬ п╫п╣ п©п╬п╪п╬пЁп╟п╣я┌ 
+п©я─п╬я┤я┌п╦я┌п╣ <link linkend="bugreports">я─я┐п╨п╬п╡п╬п╢я│я┌п╡п╬ п©п╬ я│п╬я│я┌п╟п╡п╩п╣п╫п╦я▌ п╬я┌я┤п╣я┌п╬п╡ п╬п╠ п╬я┬п╦п╠п╨п╟я┘</link>
+п╦ п╥п╟пЁя─я┐п╥п╦я┌п╣ я█я┌п╬я┌ я└п╟п╧п╩ п╫п╟ п╫п╟я┬ FTP.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Мой компьютер проигрывет MS DivX AVI с разрешениями ~ 640x300 и MP3 стереозвуком
-слишком медленно. Если указать опцию <option>-nosound</option>, все ОК (но без звука).
+п°п╬п╧ п╨п╬п╪п©я▄я▌я┌п╣я─ п©я─п╬п╦пЁя─я▀п╡п╣я┌ MS DivX AVI я│ я─п╟п╥я─п╣я┬п╣п╫п╦я▐п╪п╦ ~ 640x300 п╦ MP3 я│я┌п╣я─п╣п╬п╥п╡я┐п╨п╬п╪
+я│п╩п╦я┬п╨п╬п╪ п╪п╣п╢п╩п╣п╫п╫п╬. п∙я│п╩п╦ я┐п╨п╟п╥п╟я┌я▄ п╬п©я├п╦я▌ <option>-nosound</option>, п╡я│п╣ п·п  (п╫п╬ п╠п╣п╥ п╥п╡я┐п╨п╟).
 </para></question>
 <answer><para>
-Ваша машина слишком медленная либо драйвер звуковой карты неправильно работает.
-Обратитесь к документации, чтобы узнать можно ли улучшить производительность.
+п▓п╟я┬п╟ п╪п╟я┬п╦п╫п╟ я│п╩п╦я┬п╨п╬п╪ п╪п╣п╢п╩п╣п╫п╫п╟я▐ п╩п╦п╠п╬ п╢я─п╟п╧п╡п╣я─ п╥п╡я┐п╨п╬п╡п╬п╧ п╨п╟я─я┌я▀ п╫п╣п©я─п╟п╡п╦п╩я▄п╫п╬ я─п╟п╠п╬я┌п╟п╣я┌.
+п·п╠я─п╟я┌п╦я┌п╣я│я▄ п╨ п╢п╬п╨я┐п╪п╣п╫я┌п╟я├п╦п╦, я┤я┌п╬п╠я▀ я┐п╥п╫п╟я┌я▄ п╪п╬п╤п╫п╬ п╩п╦ я┐п╩я┐я┤я┬п╦я┌я▄ п©я─п╬п╦п╥п╡п╬п╢п╦я┌п╣п╩я▄п╫п╬я│я┌я▄.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как использовать <application>dmix</application> с 
+п п╟п╨ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ <application>dmix</application> я│ 
 <application>MPlayer</application>?
 </para></question>
 <answer><para>
-После настройки 
+п÷п╬я│п╩п╣ п╫п╟я│я┌я─п╬п╧п╨п╦ 
 <ulink url="http://alsa.opensrc.org/index.php?page=DmixPlugin">asoundrc</ulink>
-используйте <option>-ao alsa:device=dmix</option>.
+п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣ <option>-ao alsa:device=dmix</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Нет звука при воспроизведении видео и появляется ошибка подобная этой:
+п²п╣я┌ п╥п╡я┐п╨п╟ п©я─п╦ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╦ п╡п╦п╢п╣п╬ п╦ п©п╬я▐п╡п╩я▐п╣я┌я│я▐ п╬я┬п╦п╠п╨п╟ п©п╬п╢п╬п╠п╫п╟я▐ я█я┌п╬п╧:
 <screen>
     AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
     audio_setup: Can't open audio device /dev/dsp: Device or resource busy
@@ -680,68 +680,68 @@ vo_driver = <replaceable>выбранный_драйвер</replaceable>
 </screen>
 </para></question>
 <answer><para>
-Используете KDE или GNOME со звуковыми службами aRts или ESD?
-Попроуйте отключить службу звука или используйте <option>-ao arts</option> или
-<option>-ao esd</option> опции, для указания <application>MPlayer</application> 
-использовать aRts или ESD. Также возможно, что вы используете ALSA без
-эмуляции OSS, попробуйте загрузить ALSA OSS модули ядра или добавьте опцию 
-<option>-ao alsa</option> в командную строку, для использования ALSA напрямую.
+п≤я│п©п╬п╩я▄п╥я┐п╣я┌п╣ KDE п╦п╩п╦ GNOME я│п╬ п╥п╡я┐п╨п╬п╡я▀п╪п╦ я│п╩я┐п╤п╠п╟п╪п╦ aRts п╦п╩п╦ ESD?
+п÷п╬п©я─п╬я┐п╧я┌п╣ п╬я┌п╨п╩я▌я┤п╦я┌я▄ я│п╩я┐п╤п╠я┐ п╥п╡я┐п╨п╟ п╦п╩п╦ п╦я│п©п╬п╩я▄п╥я┐п╧я┌п╣ <option>-ao arts</option> п╦п╩п╦
+<option>-ao esd</option> п╬п©я├п╦п╦, п╢п╩я▐ я┐п╨п╟п╥п╟п╫п╦я▐ <application>MPlayer</application> 
+п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ aRts п╦п╩п╦ ESD. п╒п╟п╨п╤п╣ п╡п╬п╥п╪п╬п╤п╫п╬, я┤я┌п╬ п╡я▀ п╦я│п©п╬п╩я▄п╥я┐п╣я┌п╣ ALSA п╠п╣п╥
+я█п╪я┐п╩я▐я├п╦п╦ OSS, п©п╬п©я─п╬п╠я┐п╧я┌п╣ п╥п╟пЁя─я┐п╥п╦я┌я▄ ALSA OSS п╪п╬п╢я┐п╩п╦ я▐п╢я─п╟ п╦п╩п╦ п╢п╬п╠п╟п╡я▄я┌п╣ п╬п©я├п╦я▌ 
+<option>-ao alsa</option> п╡ п╨п╬п╪п╟п╫п╢п╫я┐я▌ я│я┌я─п╬п╨я┐, п╢п╩я▐ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦я▐ ALSA п╫п╟п©я─я▐п╪я┐я▌.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-При запуске <application>MPlayer</application> в KDE наблюдается черный экран 
-и ничего более. Примерно через минуту начинается воспроизведение.
+п÷я─п╦ п╥п╟п©я┐я│п╨п╣ <application>MPlayer</application> п╡ KDE п╫п╟п╠п╩я▌п╢п╟п╣я┌я│я▐ я┤п╣я─п╫я▀п╧ я█п╨я─п╟п╫ 
+п╦ п╫п╦я┤п╣пЁп╬ п╠п╬п╩п╣п╣. п÷я─п╦п╪п╣я─п╫п╬ я┤п╣я─п╣п╥ п╪п╦п╫я┐я┌я┐ п╫п╟я┤п╦п╫п╟п╣я┌я│я▐ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╣.
 </para></question>
 <answer><para>
-aRts блокирует звуковое устройство. Либо подождите старта видео, либо 
-отключите службу aRts в центре управления. Если вы хотите использовать звук 
-через aRts, укажите вывод звука через встроенный звуковой драйвер aRts
-(<option>-ao arts</option>). Если он не работает, либо 
-<application>MPlayer</application> собран без него, попробуйте SDL
-(<option>-ao sdl</option>) и убедитесь, что SDL может работать со
-звуком aRts. Ещё один вариант - запуск <application>MPlayer</application>
-с artsdsp.
+aRts п╠п╩п╬п╨п╦я─я┐п╣я┌ п╥п╡я┐п╨п╬п╡п╬п╣ я┐я│я┌я─п╬п╧я│я┌п╡п╬. п⌡п╦п╠п╬ п©п╬п╢п╬п╤п╢п╦я┌п╣ я│я┌п╟я─я┌п╟ п╡п╦п╢п╣п╬, п╩п╦п╠п╬ 
+п╬я┌п╨п╩я▌я┤п╦я┌п╣ я│п╩я┐п╤п╠я┐ aRts п╡ я├п╣п╫я┌я─п╣ я┐п©я─п╟п╡п╩п╣п╫п╦я▐. п∙я│п╩п╦ п╡я▀ я┘п╬я┌п╦я┌п╣ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╥п╡я┐п╨ 
+я┤п╣я─п╣п╥ aRts, я┐п╨п╟п╤п╦я┌п╣ п╡я▀п╡п╬п╢ п╥п╡я┐п╨п╟ я┤п╣я─п╣п╥ п╡я│я┌я─п╬п╣п╫п╫я▀п╧ п╥п╡я┐п╨п╬п╡п╬п╧ п╢я─п╟п╧п╡п╣я─ aRts
+(<option>-ao arts</option>). п∙я│п╩п╦ п╬п╫ п╫п╣ я─п╟п╠п╬я┌п╟п╣я┌, п╩п╦п╠п╬ 
+<application>MPlayer</application> я│п╬п╠я─п╟п╫ п╠п╣п╥ п╫п╣пЁп╬, п©п╬п©я─п╬п╠я┐п╧я┌п╣ SDL
+(<option>-ao sdl</option>) п╦ я┐п╠п╣п╢п╦я┌п╣я│я▄, я┤я┌п╬ SDL п╪п╬п╤п╣я┌ я─п╟п╠п╬я┌п╟я┌я▄ я│п╬
+п╥п╡я┐п╨п╬п╪ aRts. п∙я┴я▒ п╬п╢п╦п╫ п╡п╟я─п╦п╟п╫я┌ - п╥п╟п©я┐я│п╨ <application>MPlayer</application>
+я│ artsdsp.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Проблема с синхронизацией A/V. Некоторые из моих AVI файлов проигрываются нормально, но
-некоторые - с двойной скоростью!
+п÷я─п╬п╠п╩п╣п╪п╟ я│ я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦п╣п╧ A/V. п²п╣п╨п╬я┌п╬я─я▀п╣ п╦п╥ п╪п╬п╦я┘ AVI я└п╟п╧п╩п╬п╡ п©я─п╬п╦пЁя─я▀п╡п╟я▌я┌я│я▐ п╫п╬я─п╪п╟п╩я▄п╫п╬, п╫п╬
+п╫п╣п╨п╬я┌п╬я─я▀п╣ - я│ п╢п╡п╬п╧п╫п╬п╧ я│п╨п╬я─п╬я│я┌я▄я▌!
 </para></question>
 <answer><para>
-У вас неверно работающая звуковая карта/драйвер. Скорее всего, поддерживается работа
-только с 44100Hz, а вы пытаетесь проиграть файл с 22050Hz звуком. Попробуйте
-звуковой фильтр <systemitem>resample</systemitem>.
+пё п╡п╟я│ п╫п╣п╡п╣я─п╫п╬ я─п╟п╠п╬я┌п╟я▌я┴п╟я▐ п╥п╡я┐п╨п╬п╡п╟я▐ п╨п╟я─я┌п╟/п╢я─п╟п╧п╡п╣я─. п║п╨п╬я─п╣п╣ п╡я│п╣пЁп╬, п©п╬п╢п╢п╣я─п╤п╦п╡п╟п╣я┌я│я▐ я─п╟п╠п╬я┌п╟
+я┌п╬п╩я▄п╨п╬ я│ 44100Hz, п╟ п╡я▀ п©я▀я┌п╟п╣я┌п╣я│я▄ п©я─п╬п╦пЁя─п╟я┌я▄ я└п╟п╧п╩ я│ 22050Hz п╥п╡я┐п╨п╬п╪. п÷п╬п©я─п╬п╠я┐п╧я┌п╣
+п╥п╡я┐п╨п╬п╡п╬п╧ я└п╦п╩я▄я┌я─ <systemitem>resample</systemitem>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-При проигрывании фильма происходит рассинхронизация звука и видео или 
-<application>MPlayer</application> рушится с ошибкой:
+п÷я─п╦ п©я─п╬п╦пЁя─я▀п╡п╟п╫п╦п╦ я└п╦п╩я▄п╪п╟ п©я─п╬п╦я│я┘п╬п╢п╦я┌ я─п╟я│я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦я▐ п╥п╡я┐п╨п╟ п╦ п╡п╦п╢п╣п╬ п╦п╩п╦ 
+<application>MPlayer</application> я─я┐я┬п╦я┌я│я▐ я│ п╬я┬п╦п╠п╨п╬п╧:
 <screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
 </para></question>
 <answer><para>
-Причин может быть несколько.
+п÷я─п╦я┤п╦п╫ п╪п╬п╤п╣я┌ п╠я▀я┌я▄ п╫п╣я│п╨п╬п╩я▄п╨п╬.
 <itemizedlist>
 <listitem><para>
-Ваш CPU <emphasis>и/или</emphasis> видеокарта <emphasis>и/или</emphasis>
-шина слишком медленные. В этом случае <application>MPlayer</application> 
-выводит соответствующее сообщение (и количество выброшенных кадров быстро 
-увеличивается).
+п▓п╟я┬ CPU <emphasis>п╦/п╦п╩п╦</emphasis> п╡п╦п╢п╣п╬п╨п╟я─я┌п╟ <emphasis>п╦/п╦п╩п╦</emphasis>
+я┬п╦п╫п╟ я│п╩п╦я┬п╨п╬п╪ п╪п╣п╢п╩п╣п╫п╫я▀п╣. п▓ я█я┌п╬п╪ я│п╩я┐я┤п╟п╣ <application>MPlayer</application> 
+п╡я▀п╡п╬п╢п╦я┌ я│п╬п╬я┌п╡п╣я┌я│я┌п╡я┐я▌я┴п╣п╣ я│п╬п╬п╠я┴п╣п╫п╦п╣ (п╦ п╨п╬п╩п╦я┤п╣я│я┌п╡п╬ п╡я▀п╠я─п╬я┬п╣п╫п╫я▀я┘ п╨п╟п╢я─п╬п╡ п╠я▀я│я┌я─п╬ 
+я┐п╡п╣п╩п╦я┤п╦п╡п╟п╣я┌я│я▐).
 </para></listitem>
 <listitem><para>
-Если это AVI, возможно, у него проблемы с чередованием звука/видео,
-попробуйте опцию <option>-ni</option> для обхода проблемы. Или файл имеет
-неверный заголовок. В этом случае могут помочь опции <option>-nobps</option>
-и/или <option>-mc 0</option>.
+п∙я│п╩п╦ я█я┌п╬ AVI, п╡п╬п╥п╪п╬п╤п╫п╬, я┐ п╫п╣пЁп╬ п©я─п╬п╠п╩п╣п╪я▀ я│ я┤п╣я─п╣п╢п╬п╡п╟п╫п╦п╣п╪ п╥п╡я┐п╨п╟/п╡п╦п╢п╣п╬,
+п©п╬п©я─п╬п╠я┐п╧я┌п╣ п╬п©я├п╦я▌ <option>-ni</option> п╢п╩я▐ п╬п╠я┘п╬п╢п╟ п©я─п╬п╠п╩п╣п╪я▀. п≤п╩п╦ я└п╟п╧п╩ п╦п╪п╣п╣я┌
+п╫п╣п╡п╣я─п╫я▀п╧ п╥п╟пЁп╬п╩п╬п╡п╬п╨. п▓ я█я┌п╬п╪ я│п╩я┐я┤п╟п╣ п╪п╬пЁя┐я┌ п©п╬п╪п╬я┤я▄ п╬п©я├п╦п╦ <option>-nobps</option>
+п╦/п╦п╩п╦ <option>-mc 0</option>.
 </para></listitem>
 <listitem><para>
-У вас неверно работает звуковой драйвер. Смотрите 
-<link linkend="audio">аудио раздел</link>.
+пё п╡п╟я│ п╫п╣п╡п╣я─п╫п╬ я─п╟п╠п╬я┌п╟п╣я┌ п╥п╡я┐п╨п╬п╡п╬п╧ п╢я─п╟п╧п╡п╣я─. п║п╪п╬я┌я─п╦я┌п╣ 
+<link linkend="audio">п╟я┐п╢п╦п╬ я─п╟п╥п╢п╣п╩</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -749,213 +749,213 @@ aRts блокирует звуковое устройство. Либо подождите старта видео, либо
 
 <qandaentry>
 <question><para>
-Как избавиться от рассинхронизации при перемотке потоков RealMedia?
+п п╟п╨ п╦п╥п╠п╟п╡п╦я┌я▄я│я▐ п╬я┌ я─п╟я│я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦п╦ п©я─п╦ п©п╣я─п╣п╪п╬я┌п╨п╣ п©п╬я┌п╬п╨п╬п╡ RealMedia?
 </para></question>
 <answer><para>
-Может помочь опция <option>-mc 0.1</option>.
+п°п╬п╤п╣я┌ п©п╬п╪п╬я┤я▄ п╬п©я├п╦я▐ <option>-mc 0.1</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-dvd">
-<title>Воспроизведение DVD</title>
+<title>п▓п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╣ DVD</title>
 <qandaentry>
 <question><para>
-Как насчет DVD навигации/Меню?
+п п╟п╨ п╫п╟я│я┤п╣я┌ DVD п╫п╟п╡п╦пЁп╟я├п╦п╦/п°п╣п╫я▌?
 </para></question>
 <answer><para>
-<application>MPlayer</application> не поддерживает DVD меню в силу серъезных
-архитектурных ограничений, которые мешают правильной обработке неподвижных
-изображений и интерактивного содержимого. Если хотите модные меню, вам 
-придется использовать другой проигрыватель, например <application>xine</application>,
-<application>vlc</application> или <application>Ogle</application>.
-Если вы хотите получить DVD навигацию в <application>MPlayer</application>,
-реализуйте ее самостоятельно, но имейте ввиду, что это нелегкое и ответственное дело.
+<application>MPlayer</application> п╫п╣ п©п╬п╢п╢п╣я─п╤п╦п╡п╟п╣я┌ DVD п╪п╣п╫я▌ п╡ я│п╦п╩я┐ я│п╣я─я┼п╣п╥п╫я▀я┘
+п╟я─я┘п╦я┌п╣п╨я┌я┐я─п╫я▀я┘ п╬пЁя─п╟п╫п╦я┤п╣п╫п╦п╧, п╨п╬я┌п╬я─я▀п╣ п╪п╣я┬п╟я▌я┌ п©я─п╟п╡п╦п╩я▄п╫п╬п╧ п╬п╠я─п╟п╠п╬я┌п╨п╣ п╫п╣п©п╬п╢п╡п╦п╤п╫я▀я┘
+п╦п╥п╬п╠я─п╟п╤п╣п╫п╦п╧ п╦ п╦п╫я┌п╣я─п╟п╨я┌п╦п╡п╫п╬пЁп╬ я│п╬п╢п╣я─п╤п╦п╪п╬пЁп╬. п∙я│п╩п╦ я┘п╬я┌п╦я┌п╣ п╪п╬п╢п╫я▀п╣ п╪п╣п╫я▌, п╡п╟п╪ 
+п©я─п╦п╢п╣я┌я│я▐ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╢я─я┐пЁп╬п╧ п©я─п╬п╦пЁя─я▀п╡п╟я┌п╣п╩я▄, п╫п╟п©я─п╦п╪п╣я─ <application>xine</application>,
+<application>vlc</application> п╦п╩п╦ <application>Ogle</application>.
+п∙я│п╩п╦ п╡я▀ я┘п╬я┌п╦я┌п╣ п©п╬п╩я┐я┤п╦я┌я▄ DVD п╫п╟п╡п╦пЁп╟я├п╦я▌ п╡ <application>MPlayer</application>,
+я─п╣п╟п╩п╦п╥я┐п╧я┌п╣ п╣п╣ я│п╟п╪п╬я│я┌п╬я▐я┌п╣п╩я▄п╫п╬, п╫п╬ п╦п╪п╣п╧я┌п╣ п╡п╡п╦п╢я┐, я┤я┌п╬ я█я┌п╬ п╫п╣п╩п╣пЁп╨п╬п╣ п╦ п╬я┌п╡п╣я┌я│я┌п╡п╣п╫п╫п╬п╣ п╢п╣п╩п╬.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Я не могу посмотреть некоторые новые DVD от Sony Pictures/BMG.
+п╞ п╫п╣ п╪п╬пЁя┐ п©п╬я│п╪п╬я┌я─п╣я┌я▄ п╫п╣п╨п╬я┌п╬я─я▀п╣ п╫п╬п╡я▀п╣ DVD п╬я┌ Sony Pictures/BMG.
 </para></question>
 <answer><para>
-Это нормально. Вас ободрали и продали намеренно испорченный диск. Единственный способ 
-просмотреть его - избежать воспроизведения плохих блоков, воспользовавшись DVDnav 
-вместо mpdvdkit2. Это можно сделать, собрав <application>MPlayer</application>
-с поддержкой DVDnav, и заменив после этого dvd:// на dvdnav:// в командной строке.
-DVDnav пока что настолько несовместим с mpdvdkit, что вам придется указать опцию
-<option>--disable-mpdvdkit</option> скрипту configure.
+п╜я┌п╬ п╫п╬я─п╪п╟п╩я▄п╫п╬. п▓п╟я│ п╬п╠п╬п╢я─п╟п╩п╦ п╦ п©я─п╬п╢п╟п╩п╦ п╫п╟п╪п╣я─п╣п╫п╫п╬ п╦я│п©п╬я─я┤п╣п╫п╫я▀п╧ п╢п╦я│п╨. п∙п╢п╦п╫я│я┌п╡п╣п╫п╫я▀п╧ я│п©п╬я│п╬п╠ 
+п©я─п╬я│п╪п╬я┌я─п╣я┌я▄ п╣пЁп╬ - п╦п╥п╠п╣п╤п╟я┌я▄ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦я▐ п©п╩п╬я┘п╦я┘ п╠п╩п╬п╨п╬п╡, п╡п╬я│п©п╬п╩я▄п╥п╬п╡п╟п╡я┬п╦я│я▄ DVDnav 
+п╡п╪п╣я│я┌п╬ mpdvdkit2. п╜я┌п╬ п╪п╬п╤п╫п╬ я│п╢п╣п╩п╟я┌я▄, я│п╬п╠я─п╟п╡ <application>MPlayer</application>
+я│ п©п╬п╢п╢п╣я─п╤п╨п╬п╧ DVDnav, п╦ п╥п╟п╪п╣п╫п╦п╡ п©п╬я│п╩п╣ я█я┌п╬пЁп╬ dvd:// п╫п╟ dvdnav:// п╡ п╨п╬п╪п╟п╫п╢п╫п╬п╧ я│я┌я─п╬п╨п╣.
+DVDnav п©п╬п╨п╟ я┤я┌п╬ п╫п╟я│я┌п╬п╩я▄п╨п╬ п╫п╣я│п╬п╡п╪п╣я│я┌п╦п╪ я│ mpdvdkit, я┤я┌п╬ п╡п╟п╪ п©я─п╦п╢п╣я┌я│я▐ я┐п╨п╟п╥п╟я┌я▄ п╬п©я├п╦я▌
+<option>--disable-mpdvdkit</option> я│п╨я─п╦п©я┌я┐ configure.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как насчет субтитров? <application>MPlayer</application> умеет их отображать?
+п п╟п╨ п╫п╟я│я┤п╣я┌ я│я┐п╠я┌п╦я┌я─п╬п╡? <application>MPlayer</application> я┐п╪п╣п╣я┌ п╦я┘ п╬я┌п╬п╠я─п╟п╤п╟я┌я▄?
 </para></question>
 <answer><para>
-Да. Смотрите <link linkend="dvd">DVD раздел</link>.
+п■п╟. п║п╪п╬я┌я─п╦я┌п╣ <link linkend="dvd">DVD я─п╟п╥п╢п╣п╩</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как установить регион для DVD-привода? У меня нет Windows!
+п п╟п╨ я┐я│я┌п╟п╫п╬п╡п╦я┌я▄ я─п╣пЁп╦п╬п╫ п╢п╩я▐ DVD-п©я─п╦п╡п╬п╢п╟? пё п╪п╣п╫я▐ п╫п╣я┌ Windows!
 </para></question>
 <answer><para>
-Воспользуйтесь <ulink url="http://linvdr.org/projects/regionset/">утилитой regionset</ulink>.
+п▓п╬я│п©п╬п╩я▄п╥я┐п╧я┌п╣я│я▄ <ulink url="http://linvdr.org/projects/regionset/">я┐я┌п╦п╩п╦я┌п╬п╧ regionset</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-DVD не проигрываются, MPlayer зависает или выводит ошибку "Encrypted VOB file!".
+DVD п╫п╣ п©я─п╬п╦пЁя─я▀п╡п╟я▌я┌я│я▐, MPlayer п╥п╟п╡п╦я│п╟п╣я┌ п╦п╩п╦ п╡я▀п╡п╬п╢п╦я┌ п╬я┬п╦п╠п╨я┐ "Encrypted VOB file!".
 </para></question>
 <answer><para>
-Код расшифровки CSS не работает с некоторыми приводами, если регион неверно установлен.
-Смотрите ответ на предыдущий вопрос.
+п п╬п╢ я─п╟я│я┬п╦я└я─п╬п╡п╨п╦ CSS п╫п╣ я─п╟п╠п╬я┌п╟п╣я┌ я│ п╫п╣п╨п╬я┌п╬я─я▀п╪п╦ п©я─п╦п╡п╬п╢п╟п╪п╦, п╣я│п╩п╦ я─п╣пЁп╦п╬п╫ п╫п╣п╡п╣я─п╫п╬ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫.
+п║п╪п╬я┌я─п╦я┌п╣ п╬я┌п╡п╣я┌ п╫п╟ п©я─п╣п╢я▀п╢я┐я┴п╦п╧ п╡п╬п©я─п╬я│.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Нужны ли права root (setuid) для воспроизведения DVD?
+п²я┐п╤п╫я▀ п╩п╦ п©я─п╟п╡п╟ root (setuid) п╢п╩я▐ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦я▐ DVD?
 </para></question>
 <answer><para>
-Нет. Конечно, вы дожны иметь необходимые права на файл DVD устройства 
-(в <filename class="directory">/dev/</filename>).
+п²п╣я┌. п п╬п╫п╣я┤п╫п╬, п╡я▀ п╢п╬п╤п╫я▀ п╦п╪п╣я┌я▄ п╫п╣п╬п╠я┘п╬п╢п╦п╪я▀п╣ п©я─п╟п╡п╟ п╫п╟ я└п╟п╧п╩ DVD я┐я│я┌я─п╬п╧я│я┌п╡п╟ 
+(п╡ <filename class="directory">/dev/</filename>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Возможно ли проигрывать/кодировать только выбранные разделы?
+п▓п╬п╥п╪п╬п╤п╫п╬ п╩п╦ п©я─п╬п╦пЁя─я▀п╡п╟я┌я▄/п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ я┌п╬п╩я▄п╨п╬ п╡я▀п╠я─п╟п╫п╫я▀п╣ я─п╟п╥п╢п╣п╩я▀?
 </para></question>
 <answer><para>
-Да, попробуйте опцию <option>-chapter</option>.
+п■п╟, п©п╬п©я─п╬п╠я┐п╧я┌п╣ п╬п©я├п╦я▌ <option>-chapter</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Воспроизведение DVD медленное!
+п▓п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╣ DVD п╪п╣п╢п╩п╣п╫п╫п╬п╣!
 </para></question>
 <answer><para>
-Используйте опцию <option>-cache</option> (описанную на странице man) и попробуйте
-включить DMA для DVD привода утилитой <command>hdparm</command> (описанной в 
-<link linkend="drives">разделе CD</link>).
+п≤я│п©п╬п╩я▄п╥я┐п╧я┌п╣ п╬п©я├п╦я▌ <option>-cache</option> (п╬п©п╦я│п╟п╫п╫я┐я▌ п╫п╟ я│я┌я─п╟п╫п╦я├п╣ man) п╦ п©п╬п©я─п╬п╠я┐п╧я┌п╣
+п╡п╨п╩я▌я┤п╦я┌я▄ DMA п╢п╩я▐ DVD п©я─п╦п╡п╬п╢п╟ я┐я┌п╦п╩п╦я┌п╬п╧ <command>hdparm</command> (п╬п©п╦я│п╟п╫п╫п╬п╧ п╡ 
+<link linkend="drives">я─п╟п╥п╢п╣п╩п╣ CD</link>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Я скопировал DVD используя vobcopy. Как его проигрывать/кодировать с жесткого
-диска?
+п╞ я│п╨п╬п©п╦я─п╬п╡п╟п╩ DVD п╦я│п©п╬п╩я▄п╥я┐я▐ vobcopy. п п╟п╨ п╣пЁп╬ п©я─п╬п╦пЁя─я▀п╡п╟я┌я▄/п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ я│ п╤п╣я│я┌п╨п╬пЁп╬
+п╢п╦я│п╨п╟?
 </para></question>
 <answer><para>
-Используйте опцию <option>-dvd-device</option>, чтобы указать каталог, содержащий файлы:
+п≤я│п©п╬п╩я▄п╥я┐п╧я┌п╣ п╬п©я├п╦я▌ <option>-dvd-device</option>, я┤я┌п╬п╠я▀ я┐п╨п╟п╥п╟я┌я▄ п╨п╟я┌п╟п╩п╬пЁ, я│п╬п╢п╣я─п╤п╟я┴п╦п╧ я└п╟п╧п╩я▀:
 <screen>
-mplayer dvd://1 -dvd-device <replaceable>/путь/к/каталогу</replaceable>
+mplayer dvd://1 -dvd-device <replaceable>/п©я┐я┌я▄/п╨/п╨п╟я┌п╟п╩п╬пЁя┐</replaceable>
 </screen>
 </para></answer>
 </qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-features">
-<title>Просьбы о новых возможностях</title>
+<title>п÷я─п╬я│я▄п╠я▀ п╬ п╫п╬п╡я▀я┘ п╡п╬п╥п╪п╬п╤п╫п╬я│я┌я▐я┘</title>
 <qandaentry>
 <question><para>
-Если <application>MPlayer</application> приостановлен, и я пытаюсь перемотать фильм или нажимаю
-любую клавишу, воспроизведение продолжается. Хотелось бы иметь возможность перемотки во
-время паузы.
+п∙я│п╩п╦ <application>MPlayer</application> п©я─п╦п╬я│я┌п╟п╫п╬п╡п╩п╣п╫, п╦ я▐ п©я▀я┌п╟я▌я│я▄ п©п╣я─п╣п╪п╬я┌п╟я┌я▄ я└п╦п╩я▄п╪ п╦п╩п╦ п╫п╟п╤п╦п╪п╟я▌
+п╩я▌п╠я┐я▌ п╨п╩п╟п╡п╦я┬я┐, п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╣ п©я─п╬п╢п╬п╩п╤п╟п╣я┌я│я▐. п╔п╬я┌п╣п╩п╬я│я▄ п╠я▀ п╦п╪п╣я┌я▄ п╡п╬п╥п╪п╬п╤п╫п╬я│я┌я▄ п©п╣я─п╣п╪п╬я┌п╨п╦ п╡п╬
+п╡я─п╣п╪я▐ п©п╟я┐п╥я▀.
 </para></question>
 <answer><para>
-Это нелегко реализовать без потери синхронизации A/V. Пока ни одна попытка не
-увенчалась успехом, но патчи приветствуются.
+п╜я┌п╬ п╫п╣п╩п╣пЁп╨п╬ я─п╣п╟п╩п╦п╥п╬п╡п╟я┌я▄ п╠п╣п╥ п©п╬я┌п╣я─п╦ я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦п╦ A/V. п÷п╬п╨п╟ п╫п╦ п╬п╢п╫п╟ п©п╬п©я▀я┌п╨п╟ п╫п╣
+я┐п╡п╣п╫я┤п╟п╩п╟я│я▄ я┐я│п©п╣я┘п╬п╪, п╫п╬ п©п╟я┌я┤п╦ п©я─п╦п╡п╣я┌я│я┌п╡я┐я▌я┌я│я▐.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Хочется перематывать на +/- 1 кадр  вместо 10 секунд.
+п╔п╬я┤п╣я┌я│я▐ п©п╣я─п╣п╪п╟я┌я▀п╡п╟я┌я▄ п╫п╟ +/- 1 п╨п╟п╢я─  п╡п╪п╣я│я┌п╬ 10 я│п╣п╨я┐п╫п╢.
 </para></question>
 <answer><para>
-Вы можете перемещаться на 1 кадр вперед, нажимая клавишу 
-<keycap>.</keycap>. После этого вопроизведение будет приостановлено
-(смотрите страницу руководства man для подробностей).
-Перемещение назад вряд ли будет реализовано в ближайщем будущем.
+п▓я▀ п╪п╬п╤п╣я┌п╣ п©п╣я─п╣п╪п╣я┴п╟я┌я▄я│я▐ п╫п╟ 1 п╨п╟п╢я─ п╡п©п╣я─п╣п╢, п╫п╟п╤п╦п╪п╟я▐ п╨п╩п╟п╡п╦я┬я┐ 
+<keycap>.</keycap>. п÷п╬я│п╩п╣ я█я┌п╬пЁп╬ п╡п╬п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦п╣ п╠я┐п╢п╣я┌ п©я─п╦п╬я│я┌п╟п╫п╬п╡п╩п╣п╫п╬
+(я│п╪п╬я┌я─п╦я┌п╣ я│я┌я─п╟п╫п╦я├я┐ я─я┐п╨п╬п╡п╬п╢я│я┌п╡п╟ man п╢п╩я▐ п©п╬п╢я─п╬п╠п╫п╬я│я┌п╣п╧).
+п÷п╣я─п╣п╪п╣я┴п╣п╫п╦п╣ п╫п╟п╥п╟п╢ п╡я─я▐п╢ п╩п╦ п╠я┐п╢п╣я┌ я─п╣п╟п╩п╦п╥п╬п╡п╟п╫п╬ п╡ п╠п╩п╦п╤п╟п╧я┴п╣п╪ п╠я┐п╢я┐я┴п╣п╪.
 </para></answer>
 </qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-encoding">
-<title>Кодирование</title>
+<title>п п╬п╢п╦я─п╬п╡п╟п╫п╦п╣</title>
 <qandaentry>
 <question><para>
-Как производить кодирование?
+п п╟п╨ п©я─п╬п╦п╥п╡п╬п╢п╦я┌я▄ п╨п╬п╢п╦я─п╬п╡п╟п╫п╦п╣?
 
 </para></question>
 <answer><para>
-Прочтите раздел <link linkend="mencoder"><application>MEncoder</application></link>.
+п÷я─п╬я┤я┌п╦я┌п╣ я─п╟п╥п╢п╣п╩ <link linkend="mencoder"><application>MEncoder</application></link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как сохранить весь ролик DVD в файл?
+п п╟п╨ я│п╬я┘я─п╟п╫п╦я┌я▄ п╡п╣я│я▄ я─п╬п╩п╦п╨ DVD п╡ я└п╟п╧п╩?
 </para></question>
 <answer><para>
-Как только определитесь с выбором ролика и проверите, что он проигрывается в 
-<application>MPlayer</application>, воспользуйтесь опцией 
+п п╟п╨ я┌п╬п╩я▄п╨п╬ п╬п©я─п╣п╢п╣п╩п╦я┌п╣я│я▄ я│ п╡я▀п╠п╬я─п╬п╪ я─п╬п╩п╦п╨п╟ п╦ п©я─п╬п╡п╣я─п╦я┌п╣, я┤я┌п╬ п╬п╫ п©я─п╬п╦пЁя─я▀п╡п╟п╣я┌я│я▐ п╡ 
+<application>MPlayer</application>, п╡п╬я│п©п╬п╩я▄п╥я┐п╧я┌п╣я│я▄ п╬п©я├п╦п╣п╧ 
 <option>-dumpstream</option>.
-Например:
+п²п╟п©я─п╦п╪п╣я─:
 <screen>
 mplayer dvd://5 -dumpstream -dumpfile <replaceable>dvd_dump.vob</replaceable>
 </screen>
-сохранит 5-й ролик в файл 
+я│п╬я┘я─п╟п╫п╦я┌ 5-п╧ я─п╬п╩п╦п╨ п╡ я└п╟п╧п╩ 
 <replaceable>dvd_dump.vob</replaceable>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как автоматически создавать (S)VCD?
+п п╟п╨ п╟п╡я┌п╬п╪п╟я┌п╦я┤п╣я│п╨п╦ я│п╬п╥п╢п╟п╡п╟я┌я▄ (S)VCD?
 </para></question>
 <answer><para>
-Попробуйте скрипт <filename>mencvcd</filename> из каталога 
-<filename class="directory">TOOLS</filename>. С его помощью вы можете перекодировать
-DVD или другие фильмы в VCD или SVCD формат и даже записывать их на CD.
+п÷п╬п©я─п╬п╠я┐п╧я┌п╣ я│п╨я─п╦п©я┌ <filename>mencvcd</filename> п╦п╥ п╨п╟я┌п╟п╩п╬пЁп╟ 
+<filename class="directory">TOOLS</filename>. п║ п╣пЁп╬ п©п╬п╪п╬я┴я▄я▌ п╡я▀ п╪п╬п╤п╣я┌п╣ п©п╣я─п╣п╨п╬п╢п╦я─п╬п╡п╟я┌я▄
+DVD п╦п╩п╦ п╢я─я┐пЁп╦п╣ я└п╦п╩я▄п╪я▀ п╡ VCD п╦п╩п╦ SVCD я└п╬я─п╪п╟я┌ п╦ п╢п╟п╤п╣ п╥п╟п©п╦я│я▀п╡п╟я┌я▄ п╦я┘ п╫п╟ CD.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как создать (S)VCD?
+п п╟п╨ я│п╬п╥п╢п╟я┌я▄ (S)VCD?
 </para></question>
 <answer><para>
-Новые версии  <application>MEncoder</application> могут самостоятельно создавать
-MPEG-2 файлы, которые можно использовать в качестве основы для VCD или SVCD,
-воспроизводящиеся "из коробки" на всех платформах (например, чтобы поделиться 
-фильмом, снятым на видеокамеру, с компьютерно-неграмотными друзями).
-Прочтите
-<link linkend="menc-feat-vcd-dvd">Использование MEncoder для создания VCD/SVCD/DVD-совместимых файлов</link>.
+п²п╬п╡я▀п╣ п╡п╣я─я│п╦п╦  <application>MEncoder</application> п╪п╬пЁя┐я┌ я│п╟п╪п╬я│я┌п╬я▐я┌п╣п╩я▄п╫п╬ я│п╬п╥п╢п╟п╡п╟я┌я▄
+MPEG-2 я└п╟п╧п╩я▀, п╨п╬я┌п╬я─я▀п╣ п╪п╬п╤п╫п╬ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╡ п╨п╟я┤п╣я│я┌п╡п╣ п╬я│п╫п╬п╡я▀ п╢п╩я▐ VCD п╦п╩п╦ SVCD,
+п╡п╬я│п©я─п╬п╦п╥п╡п╬п╢я▐я┴п╦п╣я│я▐ "п╦п╥ п╨п╬я─п╬п╠п╨п╦" п╫п╟ п╡я│п╣я┘ п©п╩п╟я┌я└п╬я─п╪п╟я┘ (п╫п╟п©я─п╦п╪п╣я─, я┤я┌п╬п╠я▀ п©п╬п╢п╣п╩п╦я┌я▄я│я▐ 
+я└п╦п╩я▄п╪п╬п╪, я│п╫я▐я┌я▀п╪ п╫п╟ п╡п╦п╢п╣п╬п╨п╟п╪п╣я─я┐, я│ п╨п╬п╪п©я▄я▌я┌п╣я─п╫п╬-п╫п╣пЁя─п╟п╪п╬я┌п╫я▀п╪п╦ п╢я─я┐п╥я▐п╪п╦).
+п÷я─п╬я┤я┌п╦я┌п╣
+<link linkend="menc-feat-vcd-dvd">п≤я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦п╣ MEncoder п╢п╩я▐ я│п╬п╥п╢п╟п╫п╦я▐ VCD/SVCD/DVD-я│п╬п╡п╪п╣я│я┌п╦п╪я▀я┘ я└п╟п╧п╩п╬п╡</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как склеить два файла?
+п п╟п╨ я│п╨п╩п╣п╦я┌я▄ п╢п╡п╟ я└п╟п╧п╩п╟?
 </para></question>
 <answer><para>
-MPEG файлы могут быть объединены в один, если сильно повезет.
-Для файлов AVI, можете воспользоваться встроеной возможностью <application>MEncoder</application>'а
-работать с несколькими файлами сразу:
+MPEG я└п╟п╧п╩я▀ п╪п╬пЁя┐я┌ п╠я▀я┌я▄ п╬п╠я┼п╣п╢п╦п╫п╣п╫я▀ п╡ п╬п╢п╦п╫, п╣я│п╩п╦ я│п╦п╩я▄п╫п╬ п©п╬п╡п╣п╥п╣я┌.
+п■п╩я▐ я└п╟п╧п╩п╬п╡ AVI, п╪п╬п╤п╣я┌п╣ п╡п╬я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄я│я▐ п╡я│я┌я─п╬п╣п╫п╬п╧ п╡п╬п╥п╪п╬п╤п╫п╬я│я┌я▄я▌ <application>MEncoder</application>'п╟
+я─п╟п╠п╬я┌п╟я┌я▄ я│ п╫п╣я│п╨п╬п╩я▄п╨п╦п╪п╦ я└п╟п╧п╩п╟п╪п╦ я│я─п╟п╥я┐:
 <screen>
 mencoder -ovc copy -oac copy -o <replaceable>out.avi</replaceable> <replaceable>file1.avi</replaceable> <replaceable>file2.avi</replaceable>
 </screen>
-Это будет работать только если файлы имеют одинаковое разрешение и сжаты одинаковым
-кодеком. Также попробуйте 
-<ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> и
-<application>avimerge</application> (часть набора утилит 
+п╜я┌п╬ п╠я┐п╢п╣я┌ я─п╟п╠п╬я┌п╟я┌я▄ я┌п╬п╩я▄п╨п╬ п╣я│п╩п╦ я└п╟п╧п╩я▀ п╦п╪п╣я▌я┌ п╬п╢п╦п╫п╟п╨п╬п╡п╬п╣ я─п╟п╥я─п╣я┬п╣п╫п╦п╣ п╦ я│п╤п╟я┌я▀ п╬п╢п╦п╫п╟п╨п╬п╡я▀п╪
+п╨п╬п╢п╣п╨п╬п╪. п╒п╟п╨п╤п╣ п©п╬п©я─п╬п╠я┐п╧я┌п╣ 
+<ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> п╦
+<application>avimerge</application> (я┤п╟я│я┌я▄ п╫п╟п╠п╬я─п╟ я┐я┌п╦п╩п╦я┌ 
 <ulink url="http://www.transcoding.org/">transcode</ulink>
 ).
 </para></answer>
@@ -963,28 +963,28 @@ mencoder -ovc copy -oac copy -o <replaceable>out.avi</replaceable> <replaceable>
 
 <qandaentry>
 <question><para>
-Как исправить AVI файлы с испорченным индексом или неверным чередованием?
+п п╟п╨ п╦я│п©я─п╟п╡п╦я┌я▄ AVI я└п╟п╧п╩я▀ я│ п╦я│п©п╬я─я┤п╣п╫п╫я▀п╪ п╦п╫п╢п╣п╨я│п╬п╪ п╦п╩п╦ п╫п╣п╡п╣я─п╫я▀п╪ я┤п╣я─п╣п╢п╬п╡п╟п╫п╦п╣п╪?
 </para></question>
 <answer><para>
-Избежать использования <option>-idx</option> и иметь возможность перемотки в
-AVI файлах с испорченным индексом, либо избежать <option>-ni</option> для воспроизведения файлов 
-с неверным чередованием поможет команда
+п≤п╥п╠п╣п╤п╟я┌я▄ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦я▐ <option>-idx</option> п╦ п╦п╪п╣я┌я▄ п╡п╬п╥п╪п╬п╤п╫п╬я│я┌я▄ п©п╣я─п╣п╪п╬я┌п╨п╦ п╡
+AVI я└п╟п╧п╩п╟я┘ я│ п╦я│п©п╬я─я┤п╣п╫п╫я▀п╪ п╦п╫п╢п╣п╨я│п╬п╪, п╩п╦п╠п╬ п╦п╥п╠п╣п╤п╟я┌я▄ <option>-ni</option> п╢п╩я▐ п╡п╬я│п©я─п╬п╦п╥п╡п╣п╢п╣п╫п╦я▐ я└п╟п╧п╩п╬п╡ 
+я│ п╫п╣п╡п╣я─п╫я▀п╪ я┤п╣я─п╣п╢п╬п╡п╟п╫п╦п╣п╪ п©п╬п╪п╬п╤п╣я┌ п╨п╬п╪п╟п╫п╢п╟
 <screen>
 mencoder <replaceable>input.avi</replaceable> -idx -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
-Она скопирует видео и аудио в новый файл, генерируя новый индекс и исправляя чередование. 
-Конечно, это не поможет исправить ошибки в видео и/или аудио потоке.
+п·п╫п╟ я│п╨п╬п©п╦я─я┐п╣я┌ п╡п╦п╢п╣п╬ п╦ п╟я┐п╢п╦п╬ п╡ п╫п╬п╡я▀п╧ я└п╟п╧п╩, пЁп╣п╫п╣я─п╦я─я┐я▐ п╫п╬п╡я▀п╧ п╦п╫п╢п╣п╨я│ п╦ п╦я│п©я─п╟п╡п╩я▐я▐ я┤п╣я─п╣п╢п╬п╡п╟п╫п╦п╣. 
+п п╬п╫п╣я┤п╫п╬, я█я┌п╬ п╫п╣ п©п╬п╪п╬п╤п╣я┌ п╦я│п©я─п╟п╡п╦я┌я▄ п╬я┬п╦п╠п╨п╦ п╡ п╡п╦п╢п╣п╬ п╦/п╦п╩п╦ п╟я┐п╢п╦п╬ п©п╬я┌п╬п╨п╣.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как исправить пропорции в AVI файле?
+п п╟п╨ п╦я│п©я─п╟п╡п╦я┌я▄ п©я─п╬п©п╬я─я├п╦п╦ п╡ AVI я└п╟п╧п╩п╣?
 </para></question>
 <answer><para>
-Вы можете это сделать при помощи опции <application>MEncoder</application>'а
-<option>-force-avi-aspect</option>, которая переопределяет информацию о пропорциях, хранящуюся
-в опции vprp AVI OpenDML заголовка. Например:
+п▓я▀ п╪п╬п╤п╣я┌п╣ я█я┌п╬ я│п╢п╣п╩п╟я┌я▄ п©я─п╦ п©п╬п╪п╬я┴п╦ п╬п©я├п╦п╦ <application>MEncoder</application>'п╟
+<option>-force-avi-aspect</option>, п╨п╬я┌п╬я─п╟я▐ п©п╣я─п╣п╬п©я─п╣п╢п╣п╩я▐п╣я┌ п╦п╫я└п╬я─п╪п╟я├п╦я▌ п╬ п©я─п╬п©п╬я─я├п╦я▐я┘, я┘я─п╟п╫я▐я┴я┐я▌я│я▐
+п╡ п╬п©я├п╦п╦ vprp AVI OpenDML п╥п╟пЁп╬п╩п╬п╡п╨п╟. п²п╟п©я─п╦п╪п╣я─:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable> -force-avi-aspect 4/3
 </screen>
@@ -993,86 +993,86 @@ mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceabl
 
 <qandaentry>
 <question><para>
-Как сделать копию/закодировать VOB файл с испорченным началом?
+п п╟п╨ я│п╢п╣п╩п╟я┌я▄ п╨п╬п©п╦я▌/п╥п╟п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ VOB я└п╟п╧п╩ я│ п╦я│п©п╬я─я┤п╣п╫п╫я▀п╪ п╫п╟я┤п╟п╩п╬п╪?
 </para></question>
 <answer><para>
-Основная проблема при попытке кодировать испорченный VOB файл
+п·я│п╫п╬п╡п╫п╟я▐ п©я─п╬п╠п╩п╣п╪п╟ п©я─п╦ п©п╬п©я▀я┌п╨п╣ п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ п╦я│п©п╬я─я┤п╣п╫п╫я▀п╧ VOB я└п╟п╧п╩
 <footnote id='fn-corrupted-files-or-copy-protection'><para>
-В какой-то мере некоторые формы защиты от копирования могут быть восприняты как 
-испорченное содержимое.
+п▓ п╨п╟п╨п╬п╧-я┌п╬ п╪п╣я─п╣ п╫п╣п╨п╬я┌п╬я─я▀п╣ я└п╬я─п╪я▀ п╥п╟я┴п╦я┌я▀ п╬я┌ п╨п╬п©п╦я─п╬п╡п╟п╫п╦я▐ п╪п╬пЁя┐я┌ п╠я▀я┌я▄ п╡п╬я│п©я─п╦п╫я▐я┌я▀ п╨п╟п╨ 
+п╦я│п©п╬я─я┤п╣п╫п╫п╬п╣ я│п╬п╢п╣я─п╤п╦п╪п╬п╣.
 </para></footnote>
-состоит в том, что будет трудно закодировать файл с хорошей
-A/V синхронизацией.  Один из способов заключается в отбрасывании испорченных данных
-и кодирования только корретной части. Сначала ищите начало корректных данных (меняя
-параметр "колво_байтов_для_пропуска"):
+я│п╬я│я┌п╬п╦я┌ п╡ я┌п╬п╪, я┤я┌п╬ п╠я┐п╢п╣я┌ я┌я─я┐п╢п╫п╬ п╥п╟п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ я└п╟п╧п╩ я│ я┘п╬я─п╬я┬п╣п╧
+A/V я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦п╣п╧.  п·п╢п╦п╫ п╦п╥ я│п©п╬я│п╬п╠п╬п╡ п╥п╟п╨п╩я▌я┤п╟п╣я┌я│я▐ п╡ п╬я┌п╠я─п╟я│я▀п╡п╟п╫п╦п╦ п╦я│п©п╬я─я┤п╣п╫п╫я▀я┘ п╢п╟п╫п╫я▀я┘
+п╦ п╨п╬п╢п╦я─п╬п╡п╟п╫п╦я▐ я┌п╬п╩я▄п╨п╬ п╨п╬я─я─п╣я┌п╫п╬п╧ я┤п╟я│я┌п╦. п║п╫п╟я┤п╟п╩п╟ п╦я┴п╦я┌п╣ п╫п╟я┤п╟п╩п╬ п╨п╬я─я─п╣п╨я┌п╫я▀я┘ п╢п╟п╫п╫я▀я┘ (п╪п╣п╫я▐я▐
+п©п╟я─п╟п╪п╣я┌я─ "п╨п╬п╩п╡п╬_п╠п╟п╧я┌п╬п╡_п╢п╩я▐_п©я─п╬п©я┐я│п╨п╟"):
 <screen>
-mplayer <replaceable>input.vob</replaceable> -sb <replaceable>колво_байтов_для_пропуска</replaceable>
+mplayer <replaceable>input.vob</replaceable> -sb <replaceable>п╨п╬п╩п╡п╬_п╠п╟п╧я┌п╬п╡_п╢п╩я▐_п©я─п╬п©я┐я│п╨п╟</replaceable>
 </screen>
-Затем создаете новый файл, содержащий корректную часть:
+п≈п╟я┌п╣п╪ я│п╬п╥п╢п╟п╣я┌п╣ п╫п╬п╡я▀п╧ я└п╟п╧п╩, я│п╬п╢п╣я─п╤п╟я┴п╦п╧ п╨п╬я─я─п╣п╨я┌п╫я┐я▌ я┤п╟я│я┌я▄:
 <screen>
-dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</replaceable> skip=1 ibs=<replaceable>колво_байтов_для_пропуска</replaceable>
+dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</replaceable> skip=1 ibs=<replaceable>п╨п╬п╩п╡п╬_п╠п╟п╧я┌п╬п╡_п╢п╩я▐_п©я─п╬п©я┐я│п╨п╟</replaceable>
 </screen>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Не могу закодировать DVD субтитры в AVI!
+п²п╣ п╪п╬пЁя┐ п╥п╟п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ DVD я│я┐п╠я┌п╦я┌я─я▀ п╡ AVI!
 </para></question>
 <answer><para>
-Необходимо правильно указать опцию <option>-sid</option>
+п²п╣п╬п╠я┘п╬п╢п╦п╪п╬ п©я─п╟п╡п╦п╩я▄п╫п╬ я┐п╨п╟п╥п╟я┌я▄ п╬п©я├п╦я▌ <option>-sid</option>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как кодировать только выбранные эпизоды из DVD?
+п п╟п╨ п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ я┌п╬п╩я▄п╨п╬ п╡я▀п╠я─п╟п╫п╫я▀п╣ я█п©п╦п╥п╬п╢я▀ п╦п╥ DVD?
 </para></question>
 <answer><para>
-Используйте опцию <option>-chapter</option>, например <option>-chapter 5-7</option>.
+п≤я│п©п╬п╩я▄п╥я┐п╧я┌п╣ п╬п©я├п╦я▌ <option>-chapter</option>, п╫п╟п©я─п╦п╪п╣я─ <option>-chapter 5-7</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Я хочу работать с файлами более 2Гб в файловой системе VFAT. Это возможно?
+п╞ я┘п╬я┤я┐ я─п╟п╠п╬я┌п╟я┌я▄ я│ я└п╟п╧п╩п╟п╪п╦ п╠п╬п╩п╣п╣ 2п⌠п╠ п╡ я└п╟п╧п╩п╬п╡п╬п╧ я│п╦я│я┌п╣п╪п╣ VFAT. п╜я┌п╬ п╡п╬п╥п╪п╬п╤п╫п╬?
 </para></question>
 <answer><para>
-Нет. VFAT не поддерживает файлы более 2Гб.
+п²п╣я┌. VFAT п╫п╣ п©п╬п╢п╢п╣я─п╤п╦п╡п╟п╣я┌ я└п╟п╧п╩я▀ п╠п╬п╩п╣п╣ 2п⌠п╠.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Что означают числа в статусной строке в процессе кодировании?
+п╖я┌п╬ п╬п╥п╫п╟я┤п╟я▌я┌ я┤п╦я│п╩п╟ п╡ я│я┌п╟я┌я┐я│п╫п╬п╧ я│я┌я─п╬п╨п╣ п╡ п©я─п╬я├п╣я│я│п╣ п╨п╬п╢п╦я─п╬п╡п╟п╫п╦п╦?
 </para></question>
 <answer><para>
-Пример:
+п÷я─п╦п╪п╣я─:
 <screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb A-V:0.065 [2156:192]</screen>
 <variablelist>
 <varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
-<listitem><para>временная позиция в кодируемом потоке</para></listitem>
+<listitem><para>п╡я─п╣п╪п╣п╫п╫п╟я▐ п©п╬п╥п╦я├п╦я▐ п╡ п╨п╬п╢п╦я─я┐п╣п╪п╬п╪ п©п╬я┌п╬п╨п╣</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>6612f</systemitem></term>
-<listitem><para>количество закодированных кадров</para></listitem>
+<listitem><para>п╨п╬п╩п╦я┤п╣я│я┌п╡п╬ п╥п╟п╨п╬п╢п╦я─п╬п╡п╟п╫п╫я▀я┘ п╨п╟п╢я─п╬п╡</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>2%</systemitem></term>
-<listitem><para>размер закодированной части входного потока</para></listitem>
+<listitem><para>я─п╟п╥п╪п╣я─ п╥п╟п╨п╬п╢п╦я─п╬п╡п╟п╫п╫п╬п╧ я┤п╟я│я┌п╦ п╡я┘п╬п╢п╫п╬пЁп╬ п©п╬я┌п╬п╨п╟</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>7.12fps</systemitem></term>
-<listitem><para>скорость кодирования</para></listitem>
+<listitem><para>я│п╨п╬я─п╬я│я┌я▄ п╨п╬п╢п╦я─п╬п╡п╟п╫п╦я▐</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>Trem: 576min</systemitem></term>
-<listitem><para>оценка времени, оставшегося до конца кодирования</para></listitem>
+<listitem><para>п╬я├п╣п╫п╨п╟ п╡я─п╣п╪п╣п╫п╦, п╬я│я┌п╟п╡я┬п╣пЁп╬я│я▐ п╢п╬ п╨п╬п╫я├п╟ п╨п╬п╢п╦я─п╬п╡п╟п╫п╦я▐</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>2856mb</systemitem></term>
-<listitem><para>оценка окончательного размера перекодированного файла</para></listitem>
+<listitem><para>п╬я├п╣п╫п╨п╟ п╬п╨п╬п╫я┤п╟я┌п╣п╩я▄п╫п╬пЁп╬ я─п╟п╥п╪п╣я─п╟ п©п╣я─п╣п╨п╬п╢п╦я─п╬п╡п╟п╫п╫п╬пЁп╬ я└п╟п╧п╩п╟</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>A-V:0.065</systemitem></term>
-<listitem><para>текушая задержка между аудио и видео потоками</para></listitem>
+<listitem><para>я┌п╣п╨я┐я┬п╟я▐ п╥п╟п╢п╣я─п╤п╨п╟ п╪п╣п╤п╢я┐ п╟я┐п╢п╦п╬ п╦ п╡п╦п╢п╣п╬ п©п╬я┌п╬п╨п╟п╪п╦</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>[2156:192]</systemitem></term>
-<listitem><para>средний видео битпоток (в Мбит/с) и средний аудио битпоток (в Мбит/с)</para></listitem>
+<listitem><para>я│я─п╣п╢п╫п╦п╧ п╡п╦п╢п╣п╬ п╠п╦я┌п©п╬я┌п╬п╨ (п╡ п°п╠п╦я┌/я│) п╦ я│я─п╣п╢п╫п╦п╧ п╟я┐п╢п╦п╬ п╠п╦я┌п©п╬я┌п╬п╨ (п╡ п°п╠п╦я┌/я│)</para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
@@ -1080,123 +1080,123 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 
 <qandaentry>
 <question><para>
-Почему рекомендуемй <application>MEncoder</application>'ом битрейт отрицателен?
+п÷п╬я┤п╣п╪я┐ я─п╣п╨п╬п╪п╣п╫п╢я┐п╣п╪п╧ <application>MEncoder</application>'п╬п╪ п╠п╦я┌я─п╣п╧я┌ п╬я┌я─п╦я├п╟я┌п╣п╩п╣п╫?
 </para></question>
 <answer><para>
-Потому что аудио битрейт в процессе кодирования становится слишком велик, чтобы 
-уместить фильм на CD. Проверьте, правильно ли установлена libmp3lame.
+п÷п╬я┌п╬п╪я┐ я┤я┌п╬ п╟я┐п╢п╦п╬ п╠п╦я┌я─п╣п╧я┌ п╡ п©я─п╬я├п╣я│я│п╣ п╨п╬п╢п╦я─п╬п╡п╟п╫п╦я▐ я│я┌п╟п╫п╬п╡п╦я┌я│я▐ я│п╩п╦я┬п╨п╬п╪ п╡п╣п╩п╦п╨, я┤я┌п╬п╠я▀ 
+я┐п╪п╣я│я┌п╦я┌я▄ я└п╦п╩я▄п╪ п╫п╟ CD. п÷я─п╬п╡п╣я─я▄я┌п╣, п©я─п╟п╡п╦п╩я▄п╫п╬ п╩п╦ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╟ libmp3lame.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Не могу перекодировать ASF файл в AVI/MPEG-4, потому что используется 1000fps.
+п²п╣ п╪п╬пЁя┐ п©п╣я─п╣п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ ASF я└п╟п╧п╩ п╡ AVI/MPEG-4, п©п╬я┌п╬п╪я┐ я┤я┌п╬ п╦я│п©п╬п╩я▄п╥я┐п╣я┌я│я▐ 1000fps.
 </para></question>
 <answer><para>
-Поскольку ASF использует переменную частоту кадров, а AVI - фиксированную,
-необходимо её установить вручную опцией <option>-ofps</option>.
+п÷п╬я│п╨п╬п╩я▄п╨я┐ ASF п╦я│п©п╬п╩я▄п╥я┐п╣я┌ п©п╣я─п╣п╪п╣п╫п╫я┐я▌ я┤п╟я│я┌п╬я┌я┐ п╨п╟п╢я─п╬п╡, п╟ AVI - я└п╦п╨я│п╦я─п╬п╡п╟п╫п╫я┐я▌,
+п╫п╣п╬п╠я┘п╬п╢п╦п╪п╬ п╣я▒ я┐я│я┌п╟п╫п╬п╡п╦я┌я▄ п╡я─я┐я┤п╫я┐я▌ п╬п©я├п╦п╣п╧ <option>-ofps</option>.
 </para></answer>
 </qandaentry>
 
 
 <qandaentry>
 <question><para>
-Как поместить субтитры в выходной файл?
+п п╟п╨ п©п╬п╪п╣я│я┌п╦я┌я▄ я│я┐п╠я┌п╦я┌я─я▀ п╡ п╡я▀я┘п╬п╢п╫п╬п╧ я└п╟п╧п╩?
 </para></question>
 <answer><para>
-Просто укажите <application>MEncoder</application> опцию <option>-sub &lt;имя_файла&gt;</option> 
-(или <option>-sid</option>, соответственно).
+п÷я─п╬я│я┌п╬ я┐п╨п╟п╤п╦я┌п╣ <application>MEncoder</application> п╬п©я├п╦я▌ <option>-sub &lt;п╦п╪я▐_я└п╟п╧п╩п╟&gt;</option> 
+(п╦п╩п╦ <option>-sid</option>, я│п╬п╬я┌п╡п╣я┌я│я┌п╡п╣п╫п╫п╬).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как закодировать только звук из видеоклипа?
+п п╟п╨ п╥п╟п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ я┌п╬п╩я▄п╨п╬ п╥п╡я┐п╨ п╦п╥ п╡п╦п╢п╣п╬п╨п╩п╦п©п╟?
 </para></question>
 <answer><para>
-Напрямую это невозможно, но можете попробовать такой способ
-(обратите внимание на 
-<emphasis role="bold">&amp;</emphasis> в конце команды 
+п²п╟п©я─я▐п╪я┐я▌ я█я┌п╬ п╫п╣п╡п╬п╥п╪п╬п╤п╫п╬, п╫п╬ п╪п╬п╤п╣я┌п╣ п©п╬п©я─п╬п╠п╬п╡п╟я┌я▄ я┌п╟п╨п╬п╧ я│п©п╬я│п╬п╠
+(п╬п╠я─п╟я┌п╦я┌п╣ п╡п╫п╦п╪п╟п╫п╦п╣ п╫п╟ 
+<emphasis role="bold">&amp;</emphasis> п╡ п╨п╬п╫я├п╣ п╨п╬п╪п╟п╫п╢я▀ 
 <command>mplayer</command>):
 <screen>
     mkfifo encode
     mplayer -ao pcm -aofile encode dvd://1 &amp;
-    lame <replaceable>ваши_опции</replaceable> encode music.mp3
+    lame <replaceable>п╡п╟я┬п╦_п╬п©я├п╦п╦</replaceable> encode music.mp3
     rm encode
 </screen>
-Это позволяет использовать любой кодер, не только 
+п╜я┌п╬ п©п╬п╥п╡п╬п╩я▐п╣я┌ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╩я▌п╠п╬п╧ п╨п╬п╢п╣я─, п╫п╣ я┌п╬п╩я▄п╨п╬ 
 <application>LAME</application>,
-просто замените <command>lame</command> на ваш предпочитаемый кодер.
+п©я─п╬я│я┌п╬ п╥п╟п╪п╣п╫п╦я┌п╣ <command>lame</command> п╫п╟ п╡п╟я┬ п©я─п╣п╢п©п╬я┤п╦я┌п╟п╣п╪я▀п╧ п╨п╬п╢п╣я─.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Почему сторонние проигрыватели не могут воспроизвести MPEG-4 файлы, 
-сжатые <application>MEncoder</application>'ом версий старше 1.0pre7?
+п÷п╬я┤п╣п╪я┐ я│я┌п╬я─п╬п╫п╫п╦п╣ п©я─п╬п╦пЁя─я▀п╡п╟я┌п╣п╩п╦ п╫п╣ п╪п╬пЁя┐я┌ п╡п╬я│п©я─п╬п╦п╥п╡п╣я│я┌п╦ MPEG-4 я└п╟п╧п╩я▀, 
+я│п╤п╟я┌я▀п╣ <application>MEncoder</application>'п╬п╪ п╡п╣я─я│п╦п╧ я│я┌п╟я─я┬п╣ 1.0pre7?
 </para></question>
 
 <answer><para>
-<systemitem class="library">libavcodec</systemitem>, родная библиотека 
-кодирования MPEG-4, обычно поставляемая с <application>MEncoder</application>,
-устанавливала FourCC в 'DIVX' при сжатии MPEG-4 видео (FourCC -
-это тэг AVI, указывающий нужную программу сжатия и декодирования видео,
-т.е. кодек). Поэтому многие люди считают, что 
-<systemitem class="library">libavcodec</systemitem> была библиотекой
-кодирования DivX, когда на самом деле это совершенно другая библиотека
-кодирования MPEG-4, реализующая стандарт MPEG-4 значительно лучше, чем DivX.
-Поэтому новый FourCC, по умолчанию используемый 
-<systemitem class="library">libavcodec</systemitem> -это 'FMP4', но вы 
-можете переопределить это поведение, используя опцию 
-<application>MEncoder</application>'а
+<systemitem class="library">libavcodec</systemitem>, я─п╬п╢п╫п╟я▐ п╠п╦п╠п╩п╦п╬я┌п╣п╨п╟ 
+п╨п╬п╢п╦я─п╬п╡п╟п╫п╦я▐ MPEG-4, п╬п╠я▀я┤п╫п╬ п©п╬я│я┌п╟п╡п╩я▐п╣п╪п╟я▐ я│ <application>MEncoder</application>,
+я┐я│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╩п╟ FourCC п╡ 'DIVX' п©я─п╦ я│п╤п╟я┌п╦п╦ MPEG-4 п╡п╦п╢п╣п╬ (FourCC -
+я█я┌п╬ я┌я█пЁ AVI, я┐п╨п╟п╥я▀п╡п╟я▌я┴п╦п╧ п╫я┐п╤п╫я┐я▌ п©я─п╬пЁя─п╟п╪п╪я┐ я│п╤п╟я┌п╦я▐ п╦ п╢п╣п╨п╬п╢п╦я─п╬п╡п╟п╫п╦я▐ п╡п╦п╢п╣п╬,
+я┌.п╣. п╨п╬п╢п╣п╨). п÷п╬я█я┌п╬п╪я┐ п╪п╫п╬пЁп╦п╣ п╩я▌п╢п╦ я│я┤п╦я┌п╟я▌я┌, я┤я┌п╬ 
+<systemitem class="library">libavcodec</systemitem> п╠я▀п╩п╟ п╠п╦п╠п╩п╦п╬я┌п╣п╨п╬п╧
+п╨п╬п╢п╦я─п╬п╡п╟п╫п╦я▐ DivX, п╨п╬пЁп╢п╟ п╫п╟ я│п╟п╪п╬п╪ п╢п╣п╩п╣ я█я┌п╬ я│п╬п╡п╣я─я┬п╣п╫п╫п╬ п╢я─я┐пЁп╟я▐ п╠п╦п╠п╩п╦п╬я┌п╣п╨п╟
+п╨п╬п╢п╦я─п╬п╡п╟п╫п╦я▐ MPEG-4, я─п╣п╟п╩п╦п╥я┐я▌я┴п╟я▐ я│я┌п╟п╫п╢п╟я─я┌ MPEG-4 п╥п╫п╟я┤п╦я┌п╣п╩я▄п╫п╬ п╩я┐я┤я┬п╣, я┤п╣п╪ DivX.
+п÷п╬я█я┌п╬п╪я┐ п╫п╬п╡я▀п╧ FourCC, п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌ п╦я│п©п╬п╩я▄п╥я┐п╣п╪я▀п╧ 
+<systemitem class="library">libavcodec</systemitem> -я█я┌п╬ 'FMP4', п╫п╬ п╡я▀ 
+п╪п╬п╤п╣я┌п╣ п©п╣я─п╣п╬п©я─п╣п╢п╣п╩п╦я┌я▄ я█я┌п╬ п©п╬п╡п╣п╢п╣п╫п╦п╣, п╦я│п©п╬п╩я▄п╥я┐я▐ п╬п©я├п╦я▌ 
+<application>MEncoder</application>'п╟
 <option>-ffourcc</option>.
-Вы также можете сменить FourCC у существующего файла тем же способом:
+п▓я▀ я┌п╟п╨п╤п╣ п╪п╬п╤п╣я┌п╣ я│п╪п╣п╫п╦я┌я▄ FourCC я┐ я│я┐я┴п╣я│я┌п╡я┐я▌я┴п╣пЁп╬ я└п╟п╧п╩п╟ я┌п╣п╪ п╤п╣ я│п©п╬я│п╬п╠п╬п╪:
 <screen>
   mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
 </screen>
-Имейте ввиду, что этот пример устанавливает FourCC в XVID, а не DIVX.
-Это рекомендуется, т.к. DIVX FourCC означает DivX4, очень простой MPEG-4
-кодек, в то время как DX50 и XVID оба - полные MPEG-4 (ASP).
-Таким образом, если вы установите FourCC в DIVX, некоторые плохие
-программные или аппаратные проигрыватели могут быть в шоке от дополнительных
-возможностей, которые 
-<systemitem class="library">libavcodec</systemitem> поддерживает , а DivX - нет;
-с другой стороны <systemitem class="library">XviD</systemitem>
-по функциональности ближе к <systemitem class="library">libavcodec</systemitem>
-и подерживается практически любыми приличными проигрывателями.
+п≤п╪п╣п╧я┌п╣ п╡п╡п╦п╢я┐, я┤я┌п╬ я█я┌п╬я┌ п©я─п╦п╪п╣я─ я┐я│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╣я┌ FourCC п╡ XVID, п╟ п╫п╣ DIVX.
+п╜я┌п╬ я─п╣п╨п╬п╪п╣п╫п╢я┐п╣я┌я│я▐, я┌.п╨. DIVX FourCC п╬п╥п╫п╟я┤п╟п╣я┌ DivX4, п╬я┤п╣п╫я▄ п©я─п╬я│я┌п╬п╧ MPEG-4
+п╨п╬п╢п╣п╨, п╡ я┌п╬ п╡я─п╣п╪я▐ п╨п╟п╨ DX50 п╦ XVID п╬п╠п╟ - п©п╬п╩п╫я▀п╣ MPEG-4 (ASP).
+п╒п╟п╨п╦п╪ п╬п╠я─п╟п╥п╬п╪, п╣я│п╩п╦ п╡я▀ я┐я│я┌п╟п╫п╬п╡п╦я┌п╣ FourCC п╡ DIVX, п╫п╣п╨п╬я┌п╬я─я▀п╣ п©п╩п╬я┘п╦п╣
+п©я─п╬пЁя─п╟п╪п╪п╫я▀п╣ п╦п╩п╦ п╟п©п©п╟я─п╟я┌п╫я▀п╣ п©я─п╬п╦пЁя─я▀п╡п╟я┌п╣п╩п╦ п╪п╬пЁя┐я┌ п╠я▀я┌я▄ п╡ я┬п╬п╨п╣ п╬я┌ п╢п╬п©п╬п╩п╫п╦я┌п╣п╩я▄п╫я▀я┘
+п╡п╬п╥п╪п╬п╤п╫п╬я│я┌п╣п╧, п╨п╬я┌п╬я─я▀п╣ 
+<systemitem class="library">libavcodec</systemitem> п©п╬п╢п╢п╣я─п╤п╦п╡п╟п╣я┌ , п╟ DivX - п╫п╣я┌;
+я│ п╢я─я┐пЁп╬п╧ я│я┌п╬я─п╬п╫я▀ <systemitem class="library">XviD</systemitem>
+п©п╬ я└я┐п╫п╨я├п╦п╬п╫п╟п╩я▄п╫п╬я│я┌п╦ п╠п╩п╦п╤п╣ п╨ <systemitem class="library">libavcodec</systemitem>
+п╦ п©п╬п╢п╣я─п╤п╦п╡п╟п╣я┌я│я▐ п©я─п╟п╨я┌п╦я┤п╣я│п╨п╦ п╩я▌п╠я▀п╪п╦ п©я─п╦п╩п╦я┤п╫я▀п╪п╦ п©я─п╬п╦пЁя─я▀п╡п╟я┌п╣п╩я▐п╪п╦.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как перекодировать звуковой файл (без видео)?
+п п╟п╨ п©п╣я─п╣п╨п╬п╢п╦я─п╬п╡п╟я┌я▄ п╥п╡я┐п╨п╬п╡п╬п╧ я└п╟п╧п╩ (п╠п╣п╥ п╡п╦п╢п╣п╬)?
 </para></question>
 <answer><para>
-Используйте <filename>aconvert</filename> из подкаталога 
+п≤я│п©п╬п╩я▄п╥я┐п╧я┌п╣ <filename>aconvert</filename> п╦п╥ п©п╬п╢п╨п╟я┌п╟п╩п╬пЁп╟ 
 <filename class="directory">TOOLS</filename>
-дерева каталогов MPlayer.
+п╢п╣я─п╣п╡п╟ п╨п╟я┌п╟п╩п╬пЁп╬п╡ MPlayer.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Как воспроизвести субтитры внедренные в AVI?
+п п╟п╨ п╡п╬я│п©я─п╬п╦п╥п╡п╣я│я┌п╦ я│я┐п╠я┌п╦я┌я─я▀ п╡п╫п╣п╢я─п╣п╫п╫я▀п╣ п╡ AVI?
 </para></question>
 <answer><para>
-Используйте <filename>avisubdump.c</filename> из подкаталога 
-<filename class="directory">TOOLS</filename> или прочтите 
-<ulink url="http://xlife.zuavra.net/curse/0012/">этот документ о извлечении/мультиплексировании субтитров внедренных в OpenDML AVI файлы</ulink>.
+п≤я│п©п╬п╩я▄п╥я┐п╧я┌п╣ <filename>avisubdump.c</filename> п╦п╥ п©п╬п╢п╨п╟я┌п╟п╩п╬пЁп╟ 
+<filename class="directory">TOOLS</filename> п╦п╩п╦ п©я─п╬я┤я┌п╦я┌п╣ 
+<ulink url="http://xlife.zuavra.net/curse/0012/">я█я┌п╬я┌ п╢п╬п╨я┐п╪п╣п╫я┌ п╬ п╦п╥п╡п╩п╣я┤п╣п╫п╦п╦/п╪я┐п╩я▄я┌п╦п©п╩п╣п╨я│п╦я─п╬п╡п╟п╫п╦п╦ я│я┐п╠я┌п╦я┌я─п╬п╡ п╡п╫п╣п╢я─п╣п╫п╫я▀я┘ п╡ OpenDML AVI я└п╟п╧п╩я▀</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-MPlayer не хочет...
+MPlayer п╫п╣ я┘п╬я┤п╣я┌...
 </para></question>
 <answer><para>
-Посмотрите коллекцию всевозможных скриптов и хаков в подкаталоге
+п÷п╬я│п╪п╬я┌я─п╦я┌п╣ п╨п╬п╩п╩п╣п╨я├п╦я▌ п╡я│п╣п╡п╬п╥п╪п╬п╤п╫я▀я┘ я│п╨я─п╦п©я┌п╬п╡ п╦ я┘п╟п╨п╬п╡ п╡ п©п╬п╢п╨п╟я┌п╟п╩п╬пЁп╣
 <filename class="directory">TOOLS</filename>.
-<filename>TOOLS/README</filename> содержит документацию.
+<filename>TOOLS/README</filename> я│п╬п╢п╣я─п╤п╦я┌ п╢п╬п╨я┐п╪п╣п╫я┌п╟я├п╦я▌.
 </para></answer>
 </qandaentry>
 

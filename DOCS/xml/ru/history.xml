@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="KOI8-R"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20085 -->
 <!-- FIXME: history really should be in the appendix -->
 <appendix id="history">
-<title>История</title>
+<title>п≤я│я┌п╬я─п╦я▐</title>
  
 <blockquote><para>
 This began a year ago...  I have tried lots of players under Linux
@@ -16,16 +16,16 @@ MPEG1, MPEG2 and AVI (DivX) files. Many players have image quality or speed
 problems too. So I've decided to write/modify one...
 </para>
 <para>
-[Это началось около года назад...
-Я попробовал множество плееров под Linux (<application>mtv</application>,
+[п╜я┌п╬ п╫п╟я┤п╟п╩п╬я│я▄ п╬п╨п╬п╩п╬ пЁп╬п╢п╟ п╫п╟п╥п╟п╢...
+п╞ п©п╬п©я─п╬п╠п╬п╡п╟п╩ п╪п╫п╬п╤п╣я│я┌п╡п╬ п©п╩п╣п╣я─п╬п╡ п©п╬п╢ Linux (<application>mtv</application>,
 <application>xmps</application>, <application>dvdview</application>, <application>
 livid/oms</application>, <application>videolan</application>, <application>xine
 </application>, <application>xanim</application>, <application>avifile</application>,
-<application>xmmp), но у них у всех были какие-нибудь проблемы.</application>
-По большей части со специальными файлами или аудио/видео синхронизацией.
-Большинство из них было не способно проигрывать как MPEG1, MPEG2, так и AVI
-(DivX) файлы. У многих плееров были проблемы с качеством изображения или
-со скоростью. Поэтому я решил написать/модифицировать свой...]
+<application>xmmp), п╫п╬ я┐ п╫п╦я┘ я┐ п╡я│п╣я┘ п╠я▀п╩п╦ п╨п╟п╨п╦п╣-п╫п╦п╠я┐п╢я▄ п©я─п╬п╠п╩п╣п╪я▀.</application>
+п÷п╬ п╠п╬п╩я▄я┬п╣п╧ я┤п╟я│я┌п╦ я│п╬ я│п©п╣я├п╦п╟п╩я▄п╫я▀п╪п╦ я└п╟п╧п╩п╟п╪п╦ п╦п╩п╦ п╟я┐п╢п╦п╬/п╡п╦п╢п╣п╬ я│п╦п╫я┘я─п╬п╫п╦п╥п╟я├п╦п╣п╧.
+п▒п╬п╩я▄я┬п╦п╫я│я┌п╡п╬ п╦п╥ п╫п╦я┘ п╠я▀п╩п╬ п╫п╣ я│п©п╬я│п╬п╠п╫п╬ п©я─п╬п╦пЁя─я▀п╡п╟я┌я▄ п╨п╟п╨ MPEG1, MPEG2, я┌п╟п╨ п╦ AVI
+(DivX) я└п╟п╧п╩я▀. пё п╪п╫п╬пЁп╦я┘ п©п╩п╣п╣я─п╬п╡ п╠я▀п╩п╦ п©я─п╬п╠п╩п╣п╪я▀ я│ п╨п╟я┤п╣я│я┌п╡п╬п╪ п╦п╥п╬п╠я─п╟п╤п╣п╫п╦я▐ п╦п╩п╦
+я│п╬ я│п╨п╬я─п╬я│я┌я▄я▌. п÷п╬я█я┌п╬п╪я┐ я▐ я─п╣я┬п╦п╩ п╫п╟п©п╦я│п╟я┌я▄/п╪п╬п╢п╦я└п╦я├п╦я─п╬п╡п╟я┌я▄ я│п╡п╬п╧...]
 </para></blockquote><para>A'rpi, 2001</para>
 
 <para>
@@ -33,104 +33,104 @@ livid/oms</application>, <application>videolan</application>, <application>xine
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.1-v0.3:</emphasis> Sep 22-25, 2000
   </para>
-  <para>Первая попытка, создавалась полчаса!
-  До версии 0.3 использовалась libmpeg3 с
+  <para>п÷п╣я─п╡п╟я▐ п©п╬п©я▀я┌п╨п╟, я│п╬п╥п╢п╟п╡п╟п╩п╟я│я▄ п©п╬п╩я┤п╟я│п╟!
+  п■п╬ п╡п╣я─я│п╦п╦ 0.3 п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╩п╟я│я▄ libmpeg3 я│
   <ulink url="http://www.heroinewarrior.com"/>,
-  но там были проблемы с качеством изображения и скоростью.
+  п╫п╬ я┌п╟п╪ п╠я▀п╩п╦ п©я─п╬п╠п╩п╣п╪я▀ я│ п╨п╟я┤п╣я│я┌п╡п╬п╪ п╦п╥п╬п╠я─п╟п╤п╣п╫п╦я▐ п╦ я│п╨п╬я─п╬я│я┌я▄я▌.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87:</emphasis> Sep 28-Oct 20, 2000
-  </para><para>MPEG кодек заменён на DVDview от Dirk Farin, это был превосходный
-  код, но он был медленный и был написан на C++ (A'rpi ненавидит C++!!!)
+  </para><para>MPEG п╨п╬п╢п╣п╨ п╥п╟п╪п╣п╫я▒п╫ п╫п╟ DVDview п╬я┌ Dirk Farin, я█я┌п╬ п╠я▀п╩ п©я─п╣п╡п╬я│я┘п╬п╢п╫я▀п╧
+  п╨п╬п╢, п╫п╬ п╬п╫ п╠я▀п╩ п╪п╣п╢п╩п╣п╫п╫я▀п╧ п╦ п╠я▀п╩ п╫п╟п©п╦я│п╟п╫ п╫п╟ C++ (A'rpi п╫п╣п╫п╟п╡п╦п╢п╦я┌ C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5:</emphasis> Oct 21-Nov 2, 2000
-  </para><para>MPEG кодек был libmpeg2 (mpeg2dec) от Aaron Holtzman и
-  Michel Lespinasse. Это превосходный, очень хорошо оптимизированный
-  C код с совершенным качеством
-  изображения и 100% совместимостью с MPEG стандартом.
+  </para><para>MPEG п╨п╬п╢п╣п╨ п╠я▀п╩ libmpeg2 (mpeg2dec) п╬я┌ Aaron Holtzman п╦
+  Michel Lespinasse. п╜я┌п╬ п©я─п╣п╡п╬я│я┘п╬п╢п╫я▀п╧, п╬я┤п╣п╫я▄ я┘п╬я─п╬я┬п╬ п╬п©я┌п╦п╪п╦п╥п╦я─п╬п╡п╟п╫п╫я▀п╧
+  C п╨п╬п╢ я│ я│п╬п╡п╣я─я┬п╣п╫п╫я▀п╪ п╨п╟я┤п╣я│я┌п╡п╬п╪
+  п╦п╥п╬п╠я─п╟п╤п╣п╫п╦я▐ п╦ 100% я│п╬п╡п╪п╣я│я┌п╦п╪п╬я│я┌я▄я▌ я│ MPEG я│я┌п╟п╫п╢п╟я─я┌п╬п╪.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.3-v0.9:</emphasis> Nov 18-Dec 4, 2000</para>
   <para>
-Это был набор двух программ: mpg12playv0.95pre6 и моего нового простого AVI
-плеера 'avip' базирующегося на avifile загрузчике Win32 DLL.
+п╜я┌п╬ п╠я▀п╩ п╫п╟п╠п╬я─ п╢п╡я┐я┘ п©я─п╬пЁя─п╟п╪п╪: mpg12playv0.95pre6 п╦ п╪п╬п╣пЁп╬ п╫п╬п╡п╬пЁп╬ п©я─п╬я│я┌п╬пЁп╬ AVI
+п©п╩п╣п╣я─п╟ 'avip' п╠п╟п╥п╦я─я┐я▌я┴п╣пЁп╬я│я▐ п╫п╟ avifile п╥п╟пЁя─я┐п╥я┤п╦п╨п╣ Win32 DLL.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.10:</emphasis> Jan 1, 2001</para>
   <para>
-MPEG и AVI плеер в одном бинарнике!
+MPEG п╦ AVI п©п╩п╣п╣я─ п╡ п╬п╢п╫п╬п╪ п╠п╦п╫п╟я─п╫п╦п╨п╣!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.11pre series:</emphasis></para>
   <para>
-Присоединились некоторые новые разработчики и с версии 0.11 проект <application>MPlayer</application>
-это командная разработка! Добавлена поддержка .ASF файлов, и OpenDivX
-(см. www.projectmayo.com) кодер/декодер
+п÷я─п╦я│п╬п╣п╢п╦п╫п╦п╩п╦я│я▄ п╫п╣п╨п╬я┌п╬я─я▀п╣ п╫п╬п╡я▀п╣ я─п╟п╥я─п╟п╠п╬я┌я┤п╦п╨п╦ п╦ я│ п╡п╣я─я│п╦п╦ 0.11 п©я─п╬п╣п╨я┌ <application>MPlayer</application>
+я█я┌п╬ п╨п╬п╪п╟п╫п╢п╫п╟я▐ я─п╟п╥я─п╟п╠п╬я┌п╨п╟! п■п╬п╠п╟п╡п╩п╣п╫п╟ п©п╬п╢п╢п╣я─п╤п╨п╟ .ASF я└п╟п╧п╩п╬п╡, п╦ OpenDivX
+(я│п╪. www.projectmayo.com) п╨п╬п╢п╣я─/п╢п╣п╨п╬п╢п╣я─
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.17a "The IdegCounter"</emphasis> Apr 27, 2001</para>
   <para>
-Релиз версии 0.11pre после 4 месяцев напряжённой разработки!
-Попробуйте его и изумитесь! Добавлены тысячи новых особенностей... и конечно
-старый код был улучшен, исправлены ошибки и т.д.
+п═п╣п╩п╦п╥ п╡п╣я─я│п╦п╦ 0.11pre п©п╬я│п╩п╣ 4 п╪п╣я│я▐я├п╣п╡ п╫п╟п©я─я▐п╤я▒п╫п╫п╬п╧ я─п╟п╥я─п╟п╠п╬я┌п╨п╦!
+п÷п╬п©я─п╬п╠я┐п╧я┌п╣ п╣пЁп╬ п╦ п╦п╥я┐п╪п╦я┌п╣я│я▄! п■п╬п╠п╟п╡п╩п╣п╫я▀ я┌я▀я│я▐я┤п╦ п╫п╬п╡я▀я┘ п╬я│п╬п╠п╣п╫п╫п╬я│я┌п╣п╧... п╦ п╨п╬п╫п╣я┤п╫п╬
+я│я┌п╟я─я▀п╧ п╨п╬п╢ п╠я▀п╩ я┐п╩я┐я┤я┬п╣п╫, п╦я│п©я─п╟п╡п╩п╣п╫я▀ п╬я┬п╦п╠п╨п╦ п╦ я┌.п╢.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.18 "The BugCounter"</emphasis> Jul 9, 2001</para>
   <para>
-Прошло 2 месяца со времён 0.17 и вот Вам новый релиз.. Завершена поддержка ASF,
-больше форматов субтитров, представлена libao (подобно libvo но для аудио),
-даже более стабилен чем раньше, и так далее. Это необходимо!
+п÷я─п╬я┬п╩п╬ 2 п╪п╣я│я▐я├п╟ я│п╬ п╡я─п╣п╪я▒п╫ 0.17 п╦ п╡п╬я┌ п▓п╟п╪ п╫п╬п╡я▀п╧ я─п╣п╩п╦п╥.. п≈п╟п╡п╣я─я┬п╣п╫п╟ п©п╬п╢п╢п╣я─п╤п╨п╟ ASF,
+п╠п╬п╩я▄я┬п╣ я└п╬я─п╪п╟я┌п╬п╡ я│я┐п╠я┌п╦я┌я─п╬п╡, п©я─п╣п╢я│я┌п╟п╡п╩п╣п╫п╟ libao (п©п╬п╢п╬п╠п╫п╬ libvo п╫п╬ п╢п╩я▐ п╟я┐п╢п╦п╬),
+п╢п╟п╤п╣ п╠п╬п╩п╣п╣ я│я┌п╟п╠п╦п╩п╣п╫ я┤п╣п╪ я─п╟п╫я▄я┬п╣, п╦ я┌п╟п╨ п╢п╟п╩п╣п╣. п╜я┌п╬ п╫п╣п╬п╠я┘п╬п╢п╦п╪п╬!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.50 "The Faszom(C)ounter"</emphasis> Oct 8, 2001</para>
   <para>
-Хмм. Снова релиз. Тонны новых возможностей, бета версия GUI, исправлены
-ошибки, новые vo и ao драйвера, порты во многие системы, включён DivX
-кодек с открытыми исходниками и многое другое. Попробуйте его!
+п╔п╪п╪. п║п╫п╬п╡п╟ я─п╣п╩п╦п╥. п╒п╬п╫п╫я▀ п╫п╬п╡я▀я┘ п╡п╬п╥п╪п╬п╤п╫п╬я│я┌п╣п╧, п╠п╣я┌п╟ п╡п╣я─я│п╦я▐ GUI, п╦я│п©я─п╟п╡п╩п╣п╫я▀
+п╬я┬п╦п╠п╨п╦, п╫п╬п╡я▀п╣ vo п╦ ao п╢я─п╟п╧п╡п╣я─п╟, п©п╬я─я┌я▀ п╡п╬ п╪п╫п╬пЁп╦п╣ я│п╦я│я┌п╣п╪я▀, п╡п╨п╩я▌я┤я▒п╫ DivX
+п╨п╬п╢п╣п╨ я│ п╬я┌п╨я─я▀я┌я▀п╪п╦ п╦я│я┘п╬п╢п╫п╦п╨п╟п╪п╦ п╦ п╪п╫п╬пЁп╬п╣ п╢я─я┐пЁп╬п╣. п÷п╬п©я─п╬п╠я┐п╧я┌п╣ п╣пЁп╬!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.60 "The RTFMCounter"</emphasis> Jan 3, 2002</para>
   <para>
-Поддержка MOV/VIVO/RM/FLI/NUV форматов файлов, "родные" CRAM, Cinepak,
-ADPCM кодеки, и поддержка для XAnim'овских двоичных кодеков; поддержка
-DVD субтитров, первый релиз <application>MEncoder</application>, TV захват, кэш, liba52, бесчисленные
-исправления.
+п÷п╬п╢п╢п╣я─п╤п╨п╟ MOV/VIVO/RM/FLI/NUV я└п╬я─п╪п╟я┌п╬п╡ я└п╟п╧п╩п╬п╡, "я─п╬п╢п╫я▀п╣" CRAM, Cinepak,
+ADPCM п╨п╬п╢п╣п╨п╦, п╦ п©п╬п╢п╢п╣я─п╤п╨п╟ п╢п╩я▐ XAnim'п╬п╡я│п╨п╦я┘ п╢п╡п╬п╦я┤п╫я▀я┘ п╨п╬п╢п╣п╨п╬п╡; п©п╬п╢п╢п╣я─п╤п╨п╟
+DVD я│я┐п╠я┌п╦я┌я─п╬п╡, п©п╣я─п╡я▀п╧ я─п╣п╩п╦п╥ <application>MEncoder</application>, TV п╥п╟я┘п╡п╟я┌, п╨я█я┬, liba52, п╠п╣я│я┤п╦я│п╩п╣п╫п╫я▀п╣
+п╦я│п©я─п╟п╡п╩п╣п╫п╦я▐.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90pre10 "The BirthdayCounter"</emphasis> Nov 11, 2002</para>
   <para>
-Хотя это не релиз, Я собираюсь отметить это, поскольку прошло 2 года
-после <application>MPlayer</application> v0.01. С днем рождения <application>MPlayer</application>!
+п╔п╬я┌я▐ я█я┌п╬ п╫п╣ я─п╣п╩п╦п╥, п╞ я│п╬п╠п╦я─п╟я▌я│я▄ п╬я┌п╪п╣я┌п╦я┌я▄ я█я┌п╬, п©п╬я│п╨п╬п╩я▄п╨я┐ п©я─п╬я┬п╩п╬ 2 пЁп╬п╢п╟
+п©п╬я│п╩п╣ <application>MPlayer</application> v0.01. п║ п╢п╫п╣п╪ я─п╬п╤п╢п╣п╫п╦я▐ <application>MPlayer</application>!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90rc1 "The CodecCounter"</emphasis> Dec 7, 2002</para>
   <para>
-Снова не релиз, но после добавления поддержки Sorenson 3 (QuickTime) и
-Windows Media 9, <application>MPlayer</application> - это первый в мире плеер, поддерживающий все
-известные видео форматы!
+п║п╫п╬п╡п╟ п╫п╣ я─п╣п╩п╦п╥, п╫п╬ п©п╬я│п╩п╣ п╢п╬п╠п╟п╡п╩п╣п╫п╦я▐ п©п╬п╢п╢п╣я─п╤п╨п╦ Sorenson 3 (QuickTime) п╦
+Windows Media 9, <application>MPlayer</application> - я█я┌п╬ п©п╣я─п╡я▀п╧ п╡ п╪п╦я─п╣ п©п╩п╣п╣я─, п©п╬п╢п╢п╣я─п╤п╦п╡п╟я▌я┴п╦п╧ п╡я│п╣
+п╦п╥п╡п╣я│я┌п╫я▀п╣ п╡п╦п╢п╣п╬ я└п╬я─п╪п╟я┌я▀!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90 "The CounterCounter"</emphasis> Apr 6, 2003
-  </para><para>Прошёл год прежде, чем мы решили, что код вновь достаточно
-    стабилен и готов к публикации в качестве релиза. К несчастью, мы даже забыли
-	увеличить номер версии, туда попали другие досадные ошибки, так что
-	приготовьтесь к...
+  </para><para>п÷я─п╬я┬я▒п╩ пЁп╬п╢ п©я─п╣п╤п╢п╣, я┤п╣п╪ п╪я▀ я─п╣я┬п╦п╩п╦, я┤я┌п╬ п╨п╬п╢ п╡п╫п╬п╡я▄ п╢п╬я│я┌п╟я┌п╬я┤п╫п╬
+    я│я┌п╟п╠п╦п╩п╣п╫ п╦ пЁп╬я┌п╬п╡ п╨ п©я┐п╠п╩п╦п╨п╟я├п╦п╦ п╡ п╨п╟я┤п╣я│я┌п╡п╣ я─п╣п╩п╦п╥п╟. п  п╫п╣я│я┤п╟я│я┌я▄я▌, п╪я▀ п╢п╟п╤п╣ п╥п╟п╠я▀п╩п╦
+	я┐п╡п╣п╩п╦я┤п╦я┌я▄ п╫п╬п╪п╣я─ п╡п╣я─я│п╦п╦, я┌я┐п╢п╟ п©п╬п©п╟п╩п╦ п╢я─я┐пЁп╦п╣ п╢п╬я│п╟п╢п╫я▀п╣ п╬я┬п╦п╠п╨п╦, я┌п╟п╨ я┤я┌п╬
+	п©я─п╦пЁп╬я┌п╬п╡я▄я┌п╣я│я▄ п╨...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis> Aug 13, 2003
-  </para><para>Все вышеупомянутые и множество других ошибок исправлены.
-    Это последняя стабильная версия.
+  </para><para>п▓я│п╣ п╡я▀я┬п╣я┐п©п╬п╪я▐п╫я┐я┌я▀п╣ п╦ п╪п╫п╬п╤п╣я│я┌п╡п╬ п╢я─я┐пЁп╦я┘ п╬я┬п╦п╠п╬п╨ п╦я│п©я─п╟п╡п╩п╣п╫я▀.
+    п╜я┌п╬ п©п╬я│п╩п╣п╢п╫я▐я▐ я│я┌п╟п╠п╦п╩я▄п╫п╟я▐ п╡п╣я─я│п╦я▐.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 1.0pre1 "Development on the beach"</emphasis> Sep 1, 2003
-  </para><para>Хотя это и не стабильный релиз, я хочу упомянуть его, поскольку
-    это &mdash; первая пре версия серии 1.0 <application>MPlayer</application>'а и она предназначена помочь
-    <emphasis>большой компании по отлову ошибок</emphasis>.
-    Это огромный шаг вперёд!
+  </para><para>п╔п╬я┌я▐ я█я┌п╬ п╦ п╫п╣ я│я┌п╟п╠п╦п╩я▄п╫я▀п╧ я─п╣п╩п╦п╥, я▐ я┘п╬я┤я┐ я┐п©п╬п╪я▐п╫я┐я┌я▄ п╣пЁп╬, п©п╬я│п╨п╬п╩я▄п╨я┐
+    я█я┌п╬ &mdash; п©п╣я─п╡п╟я▐ п©я─п╣ п╡п╣я─я│п╦я▐ я│п╣я─п╦п╦ 1.0 <application>MPlayer</application>'п╟ п╦ п╬п╫п╟ п©я─п╣п╢п╫п╟п╥п╫п╟я┤п╣п╫п╟ п©п╬п╪п╬я┤я▄
+    <emphasis>п╠п╬п╩я▄я┬п╬п╧ п╨п╬п╪п©п╟п╫п╦п╦ п©п╬ п╬я┌п╩п╬п╡я┐ п╬я┬п╦п╠п╬п╨</emphasis>.
+    п╜я┌п╬ п╬пЁя─п╬п╪п╫я▀п╧ я┬п╟пЁ п╡п©п╣я─я▒п╢!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis> дата ещё не известна
+  <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis> п╢п╟я┌п╟ п╣я┴я▒ п╫п╣ п╦п╥п╡п╣я│я┌п╫п╟
   </para></listitem>
 </itemizedlist>
 </para>
