@@ -74,7 +74,8 @@ struct rtsp_session_s {
 };
 
 //rtsp_session_t *rtsp_session_start(char *mrl) {
-rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, int port, int *redir, uint32_t bandwidth) {
+rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
+  int port, int *redir, uint32_t bandwidth, char *user, char *pass) {
 
   rtsp_session_t *rtsp_session = NULL;
   char *server;
@@ -111,7 +112,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
   {
     /* we are talking to a real server ... */
 
-    h=real_setup_and_get_header(rtsp_session->s, bandwidth);
+    h=real_setup_and_get_header(rtsp_session->s, bandwidth, user, pass);
     if (!h) {
       /* got an redirect? */
       if (rtsp_search_answers(rtsp_session->s, RTSP_OPTIONS_LOCATION))

@@ -96,7 +96,9 @@ rtsp_streaming_start (stream_t *stream)
     rtsp = rtsp_session_start (fd, &mrl, file,
                                stream->streaming_ctrl->url->hostname,
                                port, &redirected,
-                               stream->streaming_ctrl->bandwidth);
+                               stream->streaming_ctrl->bandwidth,
+                               stream->streaming_ctrl->url->username,
+                               stream->streaming_ctrl->url->password);
 
     if (redirected == 1)
     {

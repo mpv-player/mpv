@@ -41,6 +41,8 @@
 #else
 #include "libavutil/md5.h"
 #endif
+#include "../http.h"
+#include "mp_msg.h"
 
 /*
 #define LOG
@@ -436,7 +438,8 @@ static int convert_timestamp(char *str, int *sec, int *msec) {
 
 //! maximum size of the rtsp description, must be < INT_MAX
 #define MAX_DESC_BUF (20 * 1024 * 1024)
-rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidth) {
+rmff_header_t *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidth,
+  char *username, char *password) {
 
   char *description=NULL;
   char *session_id=NULL;
@@ -450,6 +453,7 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   unsigned int size;
   int status;
   uint32_t maxbandwidth = bandwidth;
+  char* authfield = NULL;
   
   /* get challenge */
   challenge1=strdup(rtsp_search_answers(rtsp_session,"RealChallenge1"));
@@ -462,6 +466,7 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
       bandwidth = 10485800;
   
   /* request stream description */
+rtsp_send_describe:
   rtsp_schedule_field(rtsp_session, "Accept: application/sdp");
   sprintf(buf, "Bandwidth: %u", bandwidth);
   rtsp_schedule_field(rtsp_session, buf);
@@ -471,7 +476,49 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   rtsp_schedule_field(rtsp_session, "SupportsMaximumASMBandwidth: 1");
   rtsp_schedule_field(rtsp_session, "Language: en-US");
   rtsp_schedule_field(rtsp_session, "Require: com.real.retain-entity-for-setup");
+  if(authfield)
+    rtsp_schedule_field(rtsp_session, authfield);
   status=rtsp_request_describe(rtsp_session,NULL);
+
+  if (status == 401) {
+    int authlen, b64_authlen;
+    char *authreq;
+    char* authstr = NULL;
+
+    if (authfield) {
+      mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: authorization failed, check your credentials\n");
+      goto autherr;
+    }
+    if (!(authreq = rtsp_search_answers(rtsp_session,"WWW-Authenticate"))) {
+      mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: 401 but no auth request, aborting\n");
+      goto autherr;
+    }
+    if (!username) {
+      mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: auth required but no username supplied\n");
+      goto autherr;
+    }
+    if (!strstr(authreq, "Basic")) {
+      mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: authenticator not supported (%s)\n", authreq);
+      goto autherr;
+    }
+    authlen = strlen(username) + (password ? strlen(password) : 0) + 2;
+    authstr = malloc(authlen);
+    sprintf(authstr, "%s:%s", username, password ? password : "");
+    authfield = malloc(authlen*2+22);
+    strcpy(authfield, "Authorization: Basic ");
+    b64_authlen = base64_encode(authstr, authlen, authfield+21, authlen*2);
+    free(authstr);
+    if (b64_authlen < 0) {
+      mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: base64 output overflow, this should never happen\n");
+      goto autherr;
+    }
+    authfield[b64_authlen+21] = 0;
+    goto rtsp_send_describe;
+  }
+autherr:
+
+  if (authfield)
+     free(authfield);
 
   if ( status<200 || status>299 )
   {
