@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- In sync with r20477 -->
+<!-- In sync with r20500 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -1680,7 +1680,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
         der Encodierqualität 1 encodieren, was annähernd 80Kb/s ergibt und
         die Minimalqualität darstellt, mit der du encodieren solltest, wenn du
         Wert auf Qualität legst.
-        Nimm bitte zur Kenntnis, dass MEncoder aktuell keine Vorbis-Audiotracks
+        Nimm bitte zur Kenntnis, dass <application>MEncoder</application> aktuell keine Vorbis-Audiotracks
         in die Output-Datei muxen kann, da er nur AVI- und MPEG-Container als
         Output unterstützt, wobei es beim Audio-/Videoplayback zu
         Synchronisationproblemen mit einigen Playern führen wird, wenn die AVI-Datei
@@ -1710,7 +1710,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
       </para>
 
       <para>
-        MEncoder zeichnet sich aus durch experimentellen Support für
+        <application>MEncoder</application> zeichnet sich aus durch experimentellen Support für
         <systemitem class="library">libavformat</systemitem>, das eine
         Programmbibliothek des FFmpeg-Projekts ist, welches das Muxen und
         Demuxen einer Vielzahl von Containern unterstützt.
@@ -4480,7 +4480,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 
   <sect1 id="menc-feat-vcd-dvd">
-    <title>Verwenden des MEncoder zum Erzeugen VCD/SVCD/DVD-konformer Dateien.</title>
+    <title>Verwendung von <application>MEncoder</application> zum Erzeugen VCD/SVCD/DVD-konformer Dateien.</title>
 
     <sect2 id="menc-feat-vcd-dvd-constraints">
       <title>Formatbeschränkungen</title>

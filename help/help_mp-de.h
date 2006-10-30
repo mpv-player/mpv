@@ -789,7 +789,7 @@ static char help_text[]=
 #define MSGTR_MENU_ShowDVDMenu "Zeige DVD Menü"
 #define MSGTR_MENU_Titles "Titel"
 #define MSGTR_MENU_Title "Titel %2d"
-#define MSGTR_MENU_None "(nichts)"
+#define MSGTR_MENU_None "(keine)"
 #define MSGTR_MENU_Chapters "Kapitel"
 #define MSGTR_MENU_Chapter "Kapitel %2d"
 #define MSGTR_MENU_AudioLanguages "Audio-Sprachen"
