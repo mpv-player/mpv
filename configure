@@ -4577,8 +4577,6 @@ EOF
             _def_sdlbuggy='#undef BUGGY_SDL'
           fi
           _sdl=yes
-        else
-          _res_comment="outdated"
         fi
      fi
   fi
@@ -8445,22 +8443,6 @@ EOF
 if test "$_mtrr" = yes ; then
   echo "Please check mtrr settings at /proc/mtrr (see DOCS/HTML/$_doc_lang/video.html#mtrr)"
   echo
-fi
-
-if test "$_sdl" = "outdated" ; then
-  cat <<EOF
-You have an outdated version of libSDL installed (older than v1.1.7) and SDL
-support has therefore been disabled.
-
-Please upgrade to a more recent version (version 1.1.8 and above are known to
-work). You may get this library from: http://www.libsdl.org
-
-You need to rerun ./configure and recompile after updating SDL.  If you are
-only interested in the libSDL audio drivers, then an older version might work.
-
-Use --enable-sdl to force usage of libSDL.
-
-EOF
 fi
 
 if x86; then
