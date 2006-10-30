@@ -3583,7 +3583,6 @@ int main(void) {
 }
 EOF
   if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then 
-    _macosx=yes
     _macosx_frameworks="-framework Carbon -framework QuickTime -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
     _def_macosx='#define MACOSX 1'
     _aosrc="$_aosrc ao_macosx.c"
