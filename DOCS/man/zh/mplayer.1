@@ -473,7 +473,7 @@ MEncoder 的配置文件是 'mencoder.conf' 位于你的配置目录
 (例如\& /etc/\:mplayer 或者 /usr/\:local/\:etc/\:mplayer)中, 
 用户指定的配置文件是 '~/\:.mplayer/\:mencoder.conf'。
 用户指定的选项优先于系统范围的选项, 而命令行选项优先于以上两者。
-配置文件的语法是 'option=<value>', 任何 '#' 后面的都认为是注释。
+配置文件的语法是 'option=<值>', 任何 '#' 后面的都认为是注释。
 启用没有参数值的选项可以把参数设为 'yes' 或者 '1' 或者 'true', 
 而如果要停用就把它们设置为 'no' 或者'0' 或者 'false'。
 甚至子选项也可以如此设定选项。
@@ -1129,7 +1129,7 @@ HTTP 请求时发送 cookies。
 .TP
 .B \-dumpstream (仅用于 MPlayer)
 转储原始流到 ./stream.dump。
-当从 DVD 或网络上抓取时候有用。
+从 DVD 或网络上抓取的时候有用。
 如果你在命令行中指定多于其中 \-dumpaudio, \-dumpvideo, \-dumpstream
 的一个, 只有最后一个生效。
 .
@@ -1163,11 +1163,11 @@ HTTP 请求时发送 cookies。
 首先注意使用 \-dumpstream 通常是更好的拷贝 DVD 的方法(请参见示例)。
 .
 .TP
-.TP
 .B \-dvdangle <视角标识> (仅用于 DVD)
 有些 DVD 碟片中的场景可以从多个视角观看。
 这里你可以告诉 MPlayer 使用哪个视角(默认值是: 1)。
 .
+.TP
 .B \-edl <文件名>
 回放时启用编辑决定列表(EDL)。
 根据给定文件的条目视频被跳过, 而音频或静音或不静音。
@@ -1423,12 +1423,12 @@ dvd:   DVD compatible stream (DVD 可兼容流)
 .
 .TP
 .B \-rtsp-port
-与 'rtsp://' 的 URL 地址一起用来锁定客户端的端口号。
+与 "rtsp://" 的 URL 地址一起用来锁定客户端的端口号。
 如果你在路由器后面, 想把 RTSP 流从服务器转到指定客户端, 此选项可能有用。
 .
 .TP
 .B \-rtsp-destination
-与 'rtsp://' 的 URL 地址一起用来强制目标绑定 IP 地址。
+与 "rtsp://" 的 URL 地址一起用来强制目标绑定 IP 地址。
 对某些 RTSP 服务器不能把 RTP 包送到正确的接口, 此选项可能有用。
 如果连接 RTSP 服务器失败, 使用 \-v 看看 MPlayer 试图绑定到
 哪个 IP 地址, 然后试试用它强制分配到你的计算机。
@@ -2115,7 +2115,7 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 不得不是无后缀名的完整路径名, 例如没有".idx", ".ifo" 及 ".sub"。
 .
 .TP
-.B \-vobsubid <0-31>
+.B \-vobsubid <0\-31>
 指定 VOBsub 字幕标识。
 .
 .
