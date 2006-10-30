@@ -8469,11 +8469,17 @@ fi
 
 
 cat <<EOF
+Check $TMPLOG if you wonder why an autodetection failed (make sure
+development headers/packages are installed).
 
-Check $TMPLOG if you wonder why an autodetection failed (check whether
-the development headers/packages are installed).
-Do not report compilation errors if you used any of the --enable-* options
-(except --enable-gui and maybe --enable-debug).
+NOTE: The --enable-* parameters unconditionally force options on, completely
+skipping autodetection. This behavior is unlike what you may be used to from
+autoconf-based configure scripts that can decide to override you. This greater
+level of control comes at a price. You may have to provide the correct compiler
+and linker flags yourself.
+If you used one of these options (except --enable-gui and similar ones that
+turn on internal features) and experience a compilation or linking failure,
+make sure you have passed the necessary compiler/linker flags to configure.
 
 If you suspect a bug, please read DOCS/HTML/$_doc_lang/bugreports.html.
 
