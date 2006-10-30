@@ -249,6 +249,7 @@ COMMON_DEPS += libfame/libfame.a
 endif
 ifeq ($(DVDKIT2),yes)
 COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
+COMMON_LIBS += libmpdvdkit2/libmpdvdkit.a
 endif
 ifeq ($(CONFIG_ASS),yes)
 COMMON_DEPS += libass/libass.a

@@ -5253,7 +5253,6 @@ case "$_dvdread" in
   libmpdvdkit2)
 	_largefiles=yes
 	_def_dvdread='#define USE_DVDREAD 1'
-	_ld_dvdread='-Llibmpdvdkit2 -lmpdvdkit'
 	_noinputmodules="dvdread $_noinputmodules"
 	_def_mpdvdkit="#define USE_MPDVDKIT 2"
 	_have_dvd=yes
