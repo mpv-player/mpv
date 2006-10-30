@@ -1,134 +1,134 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.5 -->
 <appendix id="bugreports">
-<title>Cómo reportar errores</title>
+<title>CÃ³mo reportar errores</title>
 <para>
-Informes de errores buenos son una contribución muy valiosa para el desarrollo
+Informes de errores buenos son una contribuciÃ³n muy valiosa para el desarrollo
 de cualquier proyecto de software. Pero solo por escribir buen software, buenos
-informes de problemas involucran algún trabajo. Por favor tenga en cuenta que
-la mayoría de los desarrolladores están extremadamente ocupados y reciben
-cantidades inmensas de correo. La realimentación es crucial para mejorar
+informes de problemas involucran algÃºn trabajo. Por favor tenga en cuenta que
+la mayorÃ­a de los desarrolladores estÃ¡n extremadamente ocupados y reciben
+cantidades inmensas de correo. La realimentaciÃ³n es crucial para mejorar
 <application>MPlayer</application> y es muy apreciada, por favor entienda
 todo lo que tiene que hacer para proveer <emphasis role="bold">toda</emphasis>
-la información que le pedimos y siga las instrucciones de este documento
+la informaciÃ³n que le pedimos y siga las instrucciones de este documento
 al pie de la letra.
 </para>
 <sect1 id="bugreports_fix">
-<title>Cómo corregir fallos</title>
+<title>CÃ³mo corregir fallos</title>
 <para>
-Si tiene los conocimientos necesarios está invitado a corregir los fallos usted
-mismo. ¿O quizá ya lo ha hecho? Por favor lea
-<ulink url="../../tech/patches.txt">este pequeño documento</ulink> para ver cómo
-obtener el código incluido en <application>MPlayer</application>.
+Si tiene los conocimientos necesarios estÃ¡ invitado a corregir los fallos usted
+mismo. Â¿O quizÃ¡ ya lo ha hecho? Por favor lea
+<ulink url="../../tech/patches.txt">este pequeÃ±o documento</ulink> para ver cÃ³mo
+obtener el cÃ³digo incluido en <application>MPlayer</application>.
 La gente de la lista de correo
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
-le ayudará si aún le quedan dudas.
+le ayudarÃ¡ si aÃºn le quedan dudas.
 </para>
 </sect1>
 <sect1 id="bugreports_report">
-<title>Cómo informar de errores</title>
+<title>CÃ³mo informar de errores</title>
 <para>
-Lo primero de todo pruebe la última versión CVS de
-<application>MPlayer</application> por si el fallo ya está arreglado allí.
-El desarrollo se mueve extremadamente rápido, la
-mayoría de los problemas en las liberaciones oficiales son reportados en
+Lo primero de todo pruebe la Ãºltima versiÃ³n CVS de
+<application>MPlayer</application> por si el fallo ya estÃ¡ arreglado allÃ­.
+El desarrollo se mueve extremadamente rÃ¡pido, la
+mayorÃ­a de los problemas en las liberaciones oficiales son reportados en
 pocos dias e incluso en horas, use por favor
 <emphasis role="bold">solo CVS</emphasis> para informar de fallos.
 Esto incluye los paquetes binarios de <application>MPlayer</application>.
 Instrucciones para el CVS pueden encontrarse al final de
-<ulink url="http://www.mplayerhq.hu/dload.html">esta página</ulink>
-o en el README. Si esto no le ayuda diríjase a la lista de
-<link linkend="bugs">fallos conocidos</link> y al resto de la documentación.
+<ulink url="http://www.mplayerhq.hu/dload.html">esta pÃ¡gina</ulink>
+o en el README. Si esto no le ayuda dirÃ­jase a la lista de
+<link linkend="bugs">fallos conocidos</link> y al resto de la documentaciÃ³n.
 Si su problema no es conocido o no se puede solucionar siguiendo nuestras
 instrucciones, entonces informe por favor del error.
 </para>
 
 <para>
-Por favor, no envíe informes de errores de manera privada a desarrolladores
-individuales. Esto es trabajo en común y puede haber más gente interesada en
-él. Algunas veces otros usuarios han experimentado los mismos problemas y saben
-como solucionar el problema incluso aun siendo un error en el código de
+Por favor, no envÃ­e informes de errores de manera privada a desarrolladores
+individuales. Esto es trabajo en comÃºn y puede haber mÃ¡s gente interesada en
+Ã©l. Algunas veces otros usuarios han experimentado los mismos problemas y saben
+como solucionar el problema incluso aun siendo un error en el cÃ³digo de
 <application>MPlayer</application>.
 </para>
 
 <para>
-Por favor, describa su problema con tanto detalle como sea posible. Haga un pequeño
+Por favor, describa su problema con tanto detalle como sea posible. Haga un pequeÃ±o
 trabajo de detective para arrinconar las circunstancias bajo las que el problema
-ocurre. ¿El error solo ocurre en determinadas situaciones? ¿Es específico de cierto
-tipo de archivos o con archivos concretos? ¿Ocurre con un codec específico o es
-independiente del codec? ¿Puede reproducirse con todos los controladores de salida?
-Cuanta más información nos proporcione mejor podremos actuar para arreglar su problema.
-Por favor, no olvide también incluir la información valiosa que se indica más abajo,
-en caso contrario será más dificil diagnosticar el problema correctamente.
+ocurre. Â¿El error solo ocurre en determinadas situaciones? Â¿Es especÃ­fico de cierto
+tipo de archivos o con archivos concretos? Â¿Ocurre con un codec especÃ­fico o es
+independiente del codec? Â¿Puede reproducirse con todos los controladores de salida?
+Cuanta mÃ¡s informaciÃ³n nos proporcione mejor podremos actuar para arreglar su problema.
+Por favor, no olvide tambiÃ©n incluir la informaciÃ³n valiosa que se indica mÃ¡s abajo,
+en caso contrario serÃ¡ mÃ¡s dificil diagnosticar el problema correctamente.
 </para>
 
 <para>
-Una guía excelente y bien escrita para hacer preguntas en foros públicos es
-<ulink url="http://www.sindominio.net/ayuda/preguntas-inteligentes.html"> Cómo hacer
+Una guÃ­a excelente y bien escrita para hacer preguntas en foros pÃºblicos es
+<ulink url="http://www.sindominio.net/ayuda/preguntas-inteligentes.html"> CÃ³mo hacer
 preguntas inteligentes</ulink> por 
 <ulink url="http://www.catb.org/~esr/">Eric S. Raymond</ulink>.
 Hay otra llamada
-<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">Cómo informar de errores
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">CÃ³mo informar de errores
 de manera efectiva</ulink> por
 <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>.
-Si sigue los pasos de estas guías deberás ser capaz de obtener ayuda. Pero por favor
+Si sigue los pasos de estas guÃ­as deberÃ¡s ser capaz de obtener ayuda. Pero por favor
 entienda que la lista de correo la siguen voluntarios en su tiempo libre. Estamos
-muy ocupados y no podemos garantizar que tengamos una solución para su problema o
+muy ocupados y no podemos garantizar que tengamos una soluciÃ³n para su problema o
 ni tan siquiera una respuesta.
 </para>
 
 </sect1>
 
 <sect1 id="bugreports_where">
-<title>Dónde informar de los errores</title>
+<title>DÃ³nde informar de los errores</title>
 <para>
-Suscríbase a la lista de correo mplayer-users:
+SuscrÃ­base a la lista de correo mplayer-users:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
-y envíe su informe de error a:
+y envÃ­e su informe de error a:
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/>
 </para>
 <para>
-El idioma de esta lista es <emphasis role="bold">Inglés</emphasis>. Por favor siga las
+El idioma de esta lista es <emphasis role="bold">InglÃ©s</emphasis>. Por favor siga las
 <ulink url="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Guidelines</ulink> estandar
-y <emphasis role="bold">no envíe correo en HTML</emphasis> a ninguna de nuestras listas
-de correo. Si lo hace puede ser ignorado o expulsado. Si no sabe qué es el correo HTML
-o por qué es el demonio, lea este
+y <emphasis role="bold">no envÃ­e correo en HTML</emphasis> a ninguna de nuestras listas
+de correo. Si lo hace puede ser ignorado o expulsado. Si no sabe quÃ© es el correo HTML
+o por quÃ© es el demonio, lea este
 <ulink url="http://expita.com/nomime.html">buen documento</ulink>. Explica todos los
-detalles y las instrucciones para desactivar el correo HTML. Note también que no
+detalles y las instrucciones para desactivar el correo HTML. Note tambiÃ©n que no
 debe hacer CC (carbon-copy) a personas individuales no es buena idea si quiere recibir
 una respuesta.
 </para>
 </sect1>
 
 <sect1 id="bugreports_what">
-<title>De qué informar</title>
+<title>De quÃ© informar</title>
 <para>
-Necesita incluir un historial, archivos de configuración o muestras en su informe
+Necesita incluir un historial, archivos de configuraciÃ³n o muestras en su informe
 de error. Si alguno de estos es muy grande entonces es mejor subirlos a nuestro
 <ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/">servidor FTP</ulink> en un
 formato comprimido (gzip y bzip2 preferentemente) e incluir solo la ruta al nombre
-del archivo en su informe de error. Nuestras listas de correo tienen un límite
-en el tamaño del mensaje de 80k, si tiene algo más grande entonces deberá comprimirlo
+del archivo en su informe de error. Nuestras listas de correo tienen un lÃ­mite
+en el tamaÃ±o del mensaje de 80k, si tiene algo mÃ¡s grande entonces deberÃ¡ comprimirlo
 y subirlo.
 </para>
 
 <sect2 id="bugreports_system">
-<title>Información del Sistema</title>
+<title>InformaciÃ³n del Sistema</title>
 <para>
 <itemizedlist>
 <listitem><para>
-Si distribución de Linux o sistema operativo y versión p.e.:
+Si distribuciÃ³n de Linux o sistema operativo y versiÃ³n p.e.:
   <itemizedlist>
     <listitem><para>Red Hat 7.1</para></listitem>
     <listitem><para>Slackware 7.0 + devel packs from 7.1 ...</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-versión del kernel:
+versiÃ³n del kernel:
 <screen>uname -a</screen>
 </para></listitem>
 <listitem><para>
-versión de libc:
+versiÃ³n de libc:
 <screen>ls -l /lib/libc[.-]*</screen>
 </para></listitem>
 <listitem><para>
@@ -139,7 +139,7 @@ ld -v
 </screen>
 </para></listitem>
 <listitem><para>
-versión de binutils:
+versiÃ³n de binutils:
 <screen>
 as --version
 </screen>
@@ -147,7 +147,7 @@ as --version
 <listitem><para>
 Si tiene problemas con el modo de pantalla completa:
   <itemizedlist>
-    <listitem><para>Administrador de ventanas, tipo y versión</para></listitem>
+    <listitem><para>Administrador de ventanas, tipo y versiÃ³n</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
@@ -159,12 +159,12 @@ Si tiene problemas con XVIDIX:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Si solo el GUI está fallando:
+Si solo el GUI estÃ¡ fallando:
   <itemizedlist>
-    <listitem><para>versión de GTK</para></listitem>
-    <listitem><para>versión de GLIB</para></listitem>
-    <listitem><para>versión de libpng</para></listitem>
-    <listitem><para>situación del GUI cuando ocurre el error</para></listitem>
+    <listitem><para>versiÃ³n de GTK</para></listitem>
+    <listitem><para>versiÃ³n de GLIB</para></listitem>
+    <listitem><para>versiÃ³n de libpng</para></listitem>
+    <listitem><para>situaciÃ³n del GUI cuando ocurre el error</para></listitem>
   </itemizedlist>
 </para></listitem>
 </itemizedlist>
@@ -176,18 +176,18 @@ Si solo el GUI está fallando:
 <para>
 <itemizedlist>
 <listitem><para>
-Información de la CPU (esto funciona solo en Linux):
+InformaciÃ³n de la CPU (esto funciona solo en Linux):
 <screen>cat /proc/cpuinfo</screen>
 </para></listitem>
 <listitem><para>
-Fabricante de la tarjeta gráfica y modelo, p.e.:
+Fabricante de la tarjeta grÃ¡fica y modelo, p.e.:
   <itemizedlist>
     <listitem><para>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
     <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Tipo y versión del controlador de video, p.e.:
+Tipo y versiÃ³n del controlador de video, p.e.:
   <itemizedlist>
     <listitem><para>X built-in driver</para></listitem>
     <listitem><para>nVidia 0.9.623</para></listitem>
@@ -200,7 +200,7 @@ Tipo y controlador de la tarjeta de sonido, p.e.:
   <itemizedlist>
     <listitem><para>Creative SBLive! Gold con controlador OSS de oss.creative.com</para></listitem>
     <listitem><para>Creative SB16 con controlador del kernel OSS</para></listitem>
-    <listitem><para>GUS PnP con emulación ALSA OSS</para></listitem>
+    <listitem><para>GUS PnP con emulaciÃ³n ALSA OSS</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
@@ -212,11 +212,11 @@ en sistemas Linux.
 </sect2>
 
 <sect2 id="bugreports_configure">
-<title>Problemas de configuración</title>
+<title>Problemas de configuraciÃ³n</title>
 <para>
 Si obtiene errores cuando ejecuta <command>./configure</command>, o la
-autodetección o algo falla, lea <filename>configure.log</filename>. Puede
-encontrar la respuesta ahí, por ejemplo múltiples versiones de la misma
+autodetecciÃ³n o algo falla, lea <filename>configure.log</filename>. Puede
+encontrar la respuesta ahÃ­, por ejemplo mÃºltiples versiones de la misma
 biblioteca mezcladas en su sistema, o ha olvidado instalar los paquetes
 de desarrollo (los que tienen el sufijo -dev). Si cree que puede ser un error,
 incluya <filename>configure.log</filename> en su informe.
@@ -224,14 +224,14 @@ incluya <filename>configure.log</filename> en su informe.
 </sect2>
 
 <sect2 id="bugreports_conpilation">
-<title>Problemas de compilación</title>
+<title>Problemas de compilaciÃ³n</title>
 <para>
 Por favor incluya los siguientes archivos:
 <itemizedlist>
 <listitem><para>config.h</para></listitem>
 <listitem><para>config.mak</para></listitem>
 </itemizedlist>
-Solo si falla la compilación bajo uno de los siguientes directorios, incluya
+Solo si falla la compilaciÃ³n bajo uno de los siguientes directorios, incluya
 estos archivos:
 <itemizedlist>
 <listitem><para>Gui/config.mak</para></listitem>
@@ -242,36 +242,36 @@ estos archivos:
 </sect2>
 
 <sect2 id="bugreports_playback">
-<title>Problemas de reproducción</title>
+<title>Problemas de reproducciÃ³n</title>
 <para>
 Por favor incluya la salida de <application>MPlayer</application> con nivel
 de prolijo 1, pero recuerde <emphasis role="bold">no truncar la salida</emphasis>
 cuando pegue esto en su correo. Los desarrolladores necesitan todos los mensajes
 para diagnosticar correctamente el problema. Puede dirigir la salida a un archivo
-así:
+asÃ­:
 <screen>mplayer -v <replaceable>opciones</replaceable> <replaceable>nombre-archivo</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
 </para>
 
 <para>
-Si su problema es específico con uno o más archivos, suba las víctimas a:
+Si su problema es especÃ­fico con uno o mÃ¡s archivos, suba las vÃ­ctimas a:
 <ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>
-Suba también un pequeño archivo de texto que tenga la misma base en el nombre de
-su archivo con una extensión .txt. Describa el problema que tiene con el archivo
-en particular e incluya su dirección de correo electrónico así como la salida de
+Suba tambiÃ©n un pequeÃ±o archivo de texto que tenga la misma base en el nombre de
+su archivo con una extensiÃ³n .txt. Describa el problema que tiene con el archivo
+en particular e incluya su direcciÃ³n de correo electrÃ³nico asÃ­ como la salida de
 <application>MPlayer</application> con nivel de prolijo 1.
 Usualmente los primeros 1-5 MB del archivo son suficientes para reproducir
 el problema, pero para asegurarse haga:
-<screen>dd if=<replaceable>su-archivo</replaceable> of=<replaceable>archivo-pequeño</replaceable> bs=1024k count=5</screen>
+<screen>dd if=<replaceable>su-archivo</replaceable> of=<replaceable>archivo-pequeÃ±o</replaceable> bs=1024k count=5</screen>
 Esto coje los primeros cinco megabytes de '<emphasis role="bold">su-archivo</emphasis>'
-y los escribe a '<emphasis role="bold">archivo-pequeño</emphasis>. Entonces pruebe de
-nuevo con este archivo pequeño y si el error sigue apareciendo su muestra será suficiente
+y los escribe a '<emphasis role="bold">archivo-pequeÃ±o</emphasis>. Entonces pruebe de
+nuevo con este archivo pequeÃ±o y si el error sigue apareciendo su muestra serÃ¡ suficiente
 para nosotros.
-Por favor, ¡<emphasis role="bold">nunca</emphasis> envíe estos archivos por correo!
-Súbalos, y envío solo la ruta/nombre del archivo en nuestro servidor FTP. Si el
-archivo está disponible en la red, entonces enviar la URL 
+Por favor, Â¡<emphasis role="bold">nunca</emphasis> envÃ­e estos archivos por correo!
+SÃºbalos, y envÃ­o solo la ruta/nombre del archivo en nuestro servidor FTP. Si el
+archivo estÃ¡ disponible en la red, entonces enviar la URL 
 <emphasis role="bold">exacta</emphasis> es suficiente.
 </para>
 </sect2>
@@ -279,25 +279,25 @@ archivo está disponible en la red, entonces enviar la URL
 <sect2 id="bugreports_crash">
 <title>Cuelgues</title>
 <para>
-Debería ejecutar <application>MPlayer</application> dentro de <command>gdb</command>
+DeberÃ­a ejecutar <application>MPlayer</application> dentro de <command>gdb</command>
 y enviarnos la salida completa o si tiene un volcado <filename>core</filename> de
-cuelgue puede extraer información útil desde el archivo Core. Aquí tiene cómo:
+cuelgue puede extraer informaciÃ³n Ãºtil desde el archivo Core. AquÃ­ tiene cÃ³mo:
 </para>
 
 <sect3 id="bugreports_debug">
-<title>Cómo conservar información acerca de un error reproducible</title>
+<title>CÃ³mo conservar informaciÃ³n acerca de un error reproducible</title>
 <para>
-Recompile <application>MPlayer</application> con debug de código activado:
+Recompile <application>MPlayer</application> con debug de cÃ³digo activado:
 <screen>
 ./configure --enable-debug=3
 make
 </screen>
 y luego ejecute <application>MPlayer</application> dentro de gdb usando:
 <screen>gdb ./mplayer</screen>
-Ahora ya está dentro de gdb. Escriba:
+Ahora ya estÃ¡ dentro de gdb. Escriba:
 <screen>run -v <replaceable>opciones-para-mplayer</replaceable>
 <replaceable>nombre-archivo</replaceable></screen> y reproduzca el error.
-Tan pronto como muera, gdb le devuelve a la línea de órdenes donde entró
+Tan pronto como muera, gdb le devuelve a la lÃ­nea de Ã³rdenes donde entrÃ³
 <screen>
 bt
 disass $pc-32 $pc+32
@@ -307,15 +307,15 @@ info all-registers
 </sect3>
 
 <sect3 id="bugreports_core">
-<title>Cómo extraer información significativa desde un volcado core</title>
+<title>CÃ³mo extraer informaciÃ³n significativa desde un volcado core</title>
 <para>
-Cree el siguiente archivo de órdenes:
+Cree el siguiente archivo de Ã³rdenes:
 <screen>
 bt
 disass $pc-32 $pc+32
 info all-registers
 </screen>
-y después ejecute ésta orden:
+y despuÃ©s ejecute Ã©sta orden:
 <screen>gdb mplayer --core=core -batch --command=<replaceable>command_file</replaceable> &gt; mplayer.bug</screen>
 </para>
 </sect3>
@@ -323,24 +323,24 @@ y después ejecute ésta orden:
 </sect1>
 
 <sect1 id="bugreports_advusers">
-<title>Yo sé lo que estoy haciendo...</title>
+<title>Yo sÃ© lo que estoy haciendo...</title>
 <para>
 Si ha creado un informe de error correcto siguiendo los pasos anteriores y
 sabe que es un error en <application>MPlayer</application>, no un problema
-del compilador o un archivo en mal estado, ha leido ya la documentación
-y no puede encontrar una solución, sus controladores de sonido están en
+del compilador o un archivo en mal estado, ha leido ya la documentaciÃ³n
+y no puede encontrar una soluciÃ³n, sus controladores de sonido estÃ¡n en
 buen estado, entonces puede que quiera suscribirse a la lista de correo
-mplayer-advusers y enviar su informe de error ahí para obtener
-una respuesta más rápida y mejor.
+mplayer-advusers y enviar su informe de error ahÃ­ para obtener
+una respuesta mÃ¡s rÃ¡pida y mejor.
 </para>
 
 <para>
 Por favor tenga en cuenta que si plantea preguntas de novato o preguntas que ya
-han sido respondidas en el manual, entonces será ignorado o amenazado en lugar
-de obtener la respuesta apropiada. No nos amenaze a nosotros y suscríbase a
--advusers solo si realmente sabe lo que está haciendo y se siente un usuario
+han sido respondidas en el manual, entonces serÃ¡ ignorado o amenazado en lugar
+de obtener la respuesta apropiada. No nos amenaze a nosotros y suscrÃ­base a
+-advusers solo si realmente sabe lo que estÃ¡ haciendo y se siente un usuario
 avanzado de <application>MPlayer</application> o un desarrollador.
-Si usted tiene este criterio no debería serle dificil encontrar cómo
+Si usted tiene este criterio no deberÃ­a serle dificil encontrar cÃ³mo
 suscribirse a esta lista...
 </para>
 

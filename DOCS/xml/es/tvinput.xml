@@ -1,28 +1,28 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.10 -->
 <sect1 id="tv-input" xreflabel="Entrada de TV">
 <title>Entrada de TV</title>
 
 <para>
-Esta sección es acerca de como poder <emphasis role="bold">mirar/capturar
+Esta secciÃ³n es acerca de como poder <emphasis role="bold">mirar/capturar
 desde un dispositivo sintonizador de TV compatible con V4L</emphasis>. Vea
-la página del manual para una descripción de las opciones de TV y los controles
+la pÃ¡gina del manual para una descripciÃ³n de las opciones de TV y los controles
 del teclado.
 </para>
 
 
 <sect2 id="tv-compilation">
-<title>Compilación</title>
+<title>CompilaciÃ³n</title>
 
 <procedure>
 <step><para>
-  Primero, deberá recompilar. <filename>./configure</filename> detectará
+  Primero, deberÃ¡ recompilar. <filename>./configure</filename> detectarÃ¡
   los archivos de encabezados de las cosas de v4l y la existencia de
   las entradas <filename>/dev/video*</filename>. Si existen, el soporte
-  de TV se compilará (vea la salida de <filename>./configure</filename>).
+  de TV se compilarÃ¡ (vea la salida de <filename>./configure</filename>).
   </para></step>
 <step><para>
-  Asegúrese de que su sintonizador funcione bien con otro software de TV
+  AsegÃºrese de que su sintonizador funcione bien con otro software de TV
   en Linux, como por ejemplo con <application>XawTV</application>.
   </para></step>
 </procedure>
@@ -31,38 +31,38 @@ del teclado.
 <sect2 id="tv-tips">
 <title>Consejos de Uso</title>
 <para>
-El listado completo de opciones esta disponible en la página del manual.
-Aquí hay solamente un par de consejos:
+El listado completo de opciones esta disponible en la pÃ¡gina del manual.
+AquÃ­ hay solamente un par de consejos:
 </para>
 <itemizedlist>
 <listitem>
 <para>
-Use la opción <option>channels</option>(canales). Ejemplo:
+Use la opciÃ³n <option>channels</option>(canales). Ejemplo:
 <screen>-tv channels=26-MTV,23-TV2</screen>
-Explicación: usando esta opción, solo se podrá ver el canal 26 y el 23 y
-habrá un bonito texto en pantalla (OSD) por cada cambio de canal, mostrando
+ExplicaciÃ³n: usando esta opciÃ³n, solo se podrÃ¡ ver el canal 26 y el 23 y
+habrÃ¡ un bonito texto en pantalla (OSD) por cada cambio de canal, mostrando
 el nombre del canal. Los espacios en el nombre del canal deben ser reemplazados
-por el carácter &quot;_&quot;.
+por el carÃ¡cter &quot;_&quot;.
 </para>
 </listitem>
 
 <listitem>
 <para>
 Elija varias dimensiones de imagen razonables. Las dimensiones de la imagen
-resultante deberían ser divisibles por 16.
+resultante deberÃ­an ser divisibles por 16.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Si captura el vídeo con una resolución vertical más grande que la mitad de
-la resolución total (por ejemplo: 288 para PAL o 240 para NTSC), asegúrese que
-activó el desentrelazado. De otro modo obtendrá una película la cual esta 
-distorsionada durante las escenas con movimientos rápidos y el controlador de tasa
-de bits probablemente no podrá ser capaz de retener la cantidad de información necesaria 
+Si captura el vÃ­deo con una resoluciÃ³n vertical mÃ¡s grande que la mitad de
+la resoluciÃ³n total (por ejemplo: 288 para PAL o 240 para NTSC), asegÃºrese que
+activÃ³ el desentrelazado. De otro modo obtendrÃ¡ una pelÃ­cula la cual esta 
+distorsionada durante las escenas con movimientos rÃ¡pidos y el controlador de tasa
+de bits probablemente no podrÃ¡ ser capaz de retener la cantidad de informaciÃ³n necesaria 
 ya que el entrelazado produce una gran cantidad de detalles y por lo tanto consume
 una gran cantidad de ancho de banda. Puede activar el desentrelazado con
-la opción <option>-vf pp=DEINT_TYPE</option>. Normalmente
+la opciÃ³n <option>-vf pp=DEINT_TYPE</option>. Normalmente
 <option>pp=lb</option> funciona bien, pero es un problema de preferencias
 personales. Vea otros algoritmos de desentrelazado en el manual y pruebelos.
 </para>
@@ -70,12 +70,12 @@ personales. Vea otros algoritmos de desentrelazado en el manual y pruebelos.
 
 <listitem>
 <para>
-Corte el área no usada. Cuando captura vídeo, las áreas en los bordes normalmente
-son negras y contienen algo de ruido. Esto también consume un montón de ancho
-de banda innecesario. Más precisamente no son las áreas en negro por si mismas 
-pero si las bruscas transcisiones entre el negro y la imagen de vídeo brillante
+Corte el Ã¡rea no usada. Cuando captura vÃ­deo, las Ã¡reas en los bordes normalmente
+son negras y contienen algo de ruido. Esto tambiÃ©n consume un montÃ³n de ancho
+de banda innecesario. MÃ¡s precisamente no son las Ã¡reas en negro por si mismas 
+pero si las bruscas transcisiones entre el negro y la imagen de vÃ­deo brillante
 pero por ahora eso no es importante por ahora. Antes de empezar a capturar,
-ajuste los argumentos de la opción <option>crop</option> de tal manera que todo
+ajuste los argumentos de la opciÃ³n <option>crop</option> de tal manera que todo
 lo negro quede afuera. Nuevamente, no se olvide de mantener las dimensiones 
 de manera razonables.
 </para>
@@ -83,9 +83,9 @@ de manera razonables.
 
 <listitem>
 <para>
-Observe la carga de CPU. La mayoría del tiempo no debería cruzar el límite
+Observe la carga de CPU. La mayorÃ­a del tiempo no deberÃ­a cruzar el lÃ­mite
 del 90%. Si tiene un gran buffer de captura, <application>MEncoder</application>
-puede sobrevivir una sobrecarga por unos pocos segundos y nada más. Es mejor apagar 
+puede sobrevivir una sobrecarga por unos pocos segundos y nada mÃ¡s. Es mejor apagar 
 los salvadores de pantalla 3D OpenGL y ese tipo de cosas.
 </para>
 </listitem>
@@ -93,47 +93,47 @@ los salvadores de pantalla 3D OpenGL y ese tipo de cosas.
 <listitem>
 <para>
 No se meta con el reloj del sistema. <application>MEncoder</application> usa
-el reloj del sistema para mantener sincronía entre Audio y Vídeo. Si ajusta
-el reloj del sistema (particularmente volviendo hacia atrás en el tiempo), 
+el reloj del sistema para mantener sincronÃ­a entre Audio y VÃ­deo. Si ajusta
+el reloj del sistema (particularmente volviendo hacia atrÃ¡s en el tiempo), 
 <application>MEncoder</application> se confunde y pierde cuadros. Esto es un
-problema importante si está conectado a una red y corre algún tipo de software
-de sincronización como NTP. Debería desactivar NTP durante el proceso de captura
+problema importante si estÃ¡ conectado a una red y corre algÃºn tipo de software
+de sincronizaciÃ³n como NTP. DeberÃ­a desactivar NTP durante el proceso de captura
 si quiere capturar en forma confiable.
 </para>
 </listitem>
 
 <listitem>
 <para>
-No cambie la opción <option>outfmt</option> a menos que sepa lo que está haciendo
-o su tarjeta/controlador realmente no soporte la opción por omisión (espacio de color
+No cambie la opciÃ³n <option>outfmt</option> a menos que sepa lo que estÃ¡ haciendo
+o su tarjeta/controlador realmente no soporte la opciÃ³n por omisiÃ³n (espacio de color
 YV12). En las versiones viejas de <application>MPlayer</application>/<application>
 MEncoder</application> era necesario especificar el formato de salida. Este
-problema se debería estar resuelto en las versiones actuales y la opción <option>outfmt</option>
-no se requiere más, ya que la opción por omisión sirve para la mayoría de los propósitos. Por
-ejemplo si está capturando en DivX usando
+problema se deberÃ­a estar resuelto en las versiones actuales y la opciÃ³n <option>outfmt</option>
+no se requiere mÃ¡s, ya que la opciÃ³n por omisiÃ³n sirve para la mayorÃ­a de los propÃ³sitos. Por
+ejemplo si estÃ¡ capturando en DivX usando
 <systemitem class="library">libavcodec</systemitem> y especifica <option>outfmt=RGB24</option>
-para incrementar la calidad de las imágenes capturadas, las imágenes capturadas serán
-realmente convertidas nuevamente a YV12 por lo que lo único que logra es un desperdicio
+para incrementar la calidad de las imÃ¡genes capturadas, las imÃ¡genes capturadas serÃ¡n
+realmente convertidas nuevamente a YV12 por lo que lo Ãºnico que logra es un desperdicio
 masivo de ciclos de CPU.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Para especificar el espacio de colores I420 (<option>outfmt=i420</option>), deberá
-agregar una opción <option>-vc rawi420</option> debido a un conflicto de fourcc con 
-un codec de vídeo de Intel Indeo.
+Para especificar el espacio de colores I420 (<option>outfmt=i420</option>), deberÃ¡
+agregar una opciÃ³n <option>-vc rawi420</option> debido a un conflicto de fourcc con 
+un codec de vÃ­deo de Intel Indeo.
 </para>
 </listitem>
 
 <listitem>
 <para>
 Hay muchas maneras de capturar audio. Puede capturar el sonido ya sea usando
-su tarjeta de sonido por medio de un cable de conexión externo entre la placa
+su tarjeta de sonido por medio de un cable de conexiÃ³n externo entre la placa
 sintonizadora y la linea de entrada, o usando el chip ADC incorporado en el chip
-bt878. En este ultimo caso, deberá cargar el controlador <emphasis role="bold">btaudio
+bt878. En este ultimo caso, deberÃ¡ cargar el controlador <emphasis role="bold">btaudio
 </emphasis>. Lea el archivo <filename>linux/Documentation/sound/btaudio</filename>
-(en el árbol de directorio del núcleo, no el de
+(en el Ã¡rbol de directorio del nÃºcleo, no el de
 <application>MPlayer</application>) para instrucciones de como
 usar este controlador.
 </para>
@@ -142,10 +142,10 @@ usar este controlador.
 <listitem>
 <para>
 Si <application>MEncoder</application> no puede abrir el dispositivo de audio,
-asegúrese que este realmente disponible. Puede haber algunos problemas con
+asegÃºrese que este realmente disponible. Puede haber algunos problemas con
 algunos servidores de sonido como arts (KDE) o esd (GNOME). Si tiene una placa
-de sonido full dúplex (casi todas las placas decentes lo soportan hoy en día), y
-está usando KDE, trate activando la opción "full dúplex" en el menú de preferencias del
+de sonido full dÃºplex (casi todas las placas decentes lo soportan hoy en dÃ­a), y
+estÃ¡ usando KDE, trate activando la opciÃ³n "full dÃºplex" en el menÃº de preferencias del
 servidor de sonido.
 </para>
 </listitem>
@@ -167,7 +167,7 @@ mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://<!--
 
 <informalexample>
 <para>
-Entrada desde un dispositivo estándar V4L:
+Entrada desde un dispositivo estÃ¡ndar V4L:
 <screen>
 mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://<!--
 --></screen>
@@ -176,11 +176,11 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
 
 <informalexample>
 <para>
-Un ejemplo más sofisticado. Esto hace que <application>MEncoder</application>
+Un ejemplo mÃ¡s sofisticado. Esto hace que <application>MEncoder</application>
 capture la imagen completa PAL, corte los margenes y desentrelazando la
 imagen usando un algoritmo linear blend. El audio es comprimido con una
-tasa de bits constante de 64kbps, usando el codec LAME. Esta configuración
-es satisfactoria para capturar películas.
+tasa de bits constante de 64kbps, usando el codec LAME. Esta configuraciÃ³n
+es satisfactoria para capturar pelÃ­culas.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
@@ -192,11 +192,11 @@ es satisfactoria para capturar películas.
 
 <informalexample>
 <para>
-Esto adicionalmente escalará la imagen a 384x288 y comprimirá el vídeo
-a una tasa de bits de 350kbps en modo alta calidad. La opción <option>
-vqmax</option> suelta al cuantizador y le permite al compresor de vídeo
+Esto adicionalmente escalarÃ¡ la imagen a 384x288 y comprimirÃ¡ el vÃ­deo
+a una tasa de bits de 350kbps en modo alta calidad. La opciÃ³n <option>
+vqmax</option> suelta al cuantizador y le permite al compresor de vÃ­deo
 alcanzar tasas de bits muy bajas a expensas de la calidad. Esto puede ser
-usado para capturar series de TV largas, donde la calidad del vídeo no
+usado para capturar series de TV largas, donde la calidad del vÃ­deo no
 es tan importante.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
@@ -205,10 +205,10 @@ es tan importante.
      -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 \
      -o <replaceable>salida.avi</replaceable> tv://
 </screen>
-Es posible especificar una dimensión de imagen más chica en la opción <option>-tv</option>
-y omitir el escalado de software pero este enfoque usa la máxima cantidad de información
-disponible y es un poco más resistente al ruido. Los chips bt8x8 pueden hacer
-el promediado de pixels solo en dirección horizontal debido a limitaciones de hardware.
+Es posible especificar una dimensiÃ³n de imagen mÃ¡s chica en la opciÃ³n <option>-tv</option>
+y omitir el escalado de software pero este enfoque usa la mÃ¡xima cantidad de informaciÃ³n
+disponible y es un poco mÃ¡s resistente al ruido. Los chips bt8x8 pueden hacer
+el promediado de pixels solo en direcciÃ³n horizontal debido a limitaciones de hardware.
 </para>
 </informalexample>
 </sect2>

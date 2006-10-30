@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.3 -->
 <chapter id="features">
-<title>Características</title>
+<title>CaracterÃ­sticas</title>
 
 &formats.xml;
 &codecs.xml;

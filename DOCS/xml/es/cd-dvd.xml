@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.11 -->
 <chapter id="cd-dvd">
 <title>Uso de CD/DVD</title>
@@ -6,7 +6,7 @@
 <sect1 id="drives">
 <title>Unidades de CD/DVD</title>
 <para>
-Extracto de documentación de Linux:
+Extracto de documentaciÃ³n de Linux:
 </para>
 
 <para>
@@ -20,7 +20,7 @@ considerar cambiar la velocidad de la unidad de CD-ROM:
 <listitem><para>
 Ha habido varios informes de errores de lectura a velocidades altas,
 especialmente en unidades de CD-ROM en mal estado. Reducir la velocidad
-puede prevenir la pérdida de datos bajo estas circunstancias.
+puede prevenir la pÃ©rdida de datos bajo estas circunstancias.
 </para></listitem>
 
 <listitem><para>
@@ -38,31 +38,31 @@ Funciona de la siguiente manera:
 </para>
 
 <para>
-Si tiene privilegios de root la siguiente órden puede también ayudarle:
+Si tiene privilegios de root la siguiente Ã³rden puede tambiÃ©n ayudarle:
 <screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
 </para>
 
 <para>
 Esto establece prelectura de 2MB del archivo, lo cual ayuda en CD-ROMs rayados.
-Si establece un valor demasiado alto, la unidad puede estar contínuamente
-girando y parando, y puede decrementar dramáticamente el rendimiento.
-Se recomienda que también afine su unidad de CD-ROM con <command>hdparm</command>:
+Si establece un valor demasiado alto, la unidad puede estar contÃ­nuamente
+girando y parando, y puede decrementar dramÃ¡ticamente el rendimiento.
+Se recomienda que tambiÃ©n afine su unidad de CD-ROM con <command>hdparm</command>:
 <screen>hdparm -d1 -a8 -u1 <replaceable>cdrom device</replaceable></screen>
 </para>
 
 <para>
-Esto activa el acceso DMA, pre-lectura, y desenmascarado de IRQ (lea la página
-de manual de <command>hdparm</command> para una explicación detallada).
+Esto activa el acceso DMA, pre-lectura, y desenmascarado de IRQ (lea la pÃ¡gina
+de manual de <command>hdparm</command> para una explicaciÃ³n detallada).
 </para>
 
 <para>
-Por favor, diríjase a &quot;<filename>/proc/ide/<replaceable>cdrom device</replaceable>/settings&quot;</filename>
+Por favor, dirÃ­jase a &quot;<filename>/proc/ide/<replaceable>cdrom device</replaceable>/settings&quot;</filename>
 para ajuste-fino de su CD-ROM.
 </para>
 
 <para>
 Las unidades SCSI no tienen una manera uniforme para estableces estos
-parámetros (¿conoce alguna? ¡Díganoslo!) Aquí hay una herramienta que funciona
+parÃ¡metros (Â¿conoce alguna? Â¡DÃ­ganoslo!) AquÃ­ hay una herramienta que funciona
 para
 <ulink url="http://das.ist.org/~georg/">unidades Plextor SCSI</ulink>.
 </para>
@@ -73,10 +73,10 @@ para
 </sect1>
 
 <sect1 id="dvd">
-<title>Reproducción de DVD</title>
+<title>ReproducciÃ³n de DVD</title>
 <para>
-Para una lista completa de opciones disponibles, lea por favor la página de manual.
-La Sintaxis para un Disco Versátil Digital (DVD) estándar es la siguiente:
+Para una lista completa de opciones disponibles, lea por favor la pÃ¡gina de manual.
+La Sintaxis para un Disco VersÃ¡til Digital (DVD) estÃ¡ndar es la siguiente:
 <screen>mplayer dvd://<replaceable>&lt;pista&gt;</replaceable> [-dvd-device <replaceable>&lt;dispositivo&gt;</replaceable>]</screen>
 </para>
 
@@ -87,8 +87,8 @@ Ejemplo:
 
 <para>
 El dispositivo DVD por defecto es <filename>/dev/dvd</filename>. Si su
-configuración es diferente, haga un enlace simbólico o especifique el 
-dispositivo correcto en la línea de órdenes con la opción
+configuraciÃ³n es diferente, haga un enlace simbÃ³lico o especifique el 
+dispositivo correcto en la lÃ­nea de Ã³rdenes con la opciÃ³n
 <option>-dvd-device</option>.
 </para>
 
@@ -96,13 +96,13 @@ dispositivo correcto en la línea de órdenes con la opción
 <title>Soporte para el DVD de Nuevo-estilo (mpdvdkit2)</title>
 <para>
 <application>MPlayer</application> usa <systemitem>libdvdread</systemitem> y
-<systemitem>libdvdcss</systemitem> para desencriptación y reproducción. Estas
-dos bibliotecas están contenidas en el subdirectorio
+<systemitem>libdvdcss</systemitem> para desencriptaciÃ³n y reproducciÃ³n. Estas
+dos bibliotecas estÃ¡n contenidas en el subdirectorio
 <filename class="directory">libmpdvdkit2/</filename>
-del árbol de código fuente de <application>MPlayer</application>, no tiene
-que instalarlo por separado. Hemos optado por esta solución porque hemos
+del Ã¡rbol de cÃ³digo fuente de <application>MPlayer</application>, no tiene
+que instalarlo por separado. Hemos optado por esta soluciÃ³n porque hemos
 corregido un error de <systemitem>libdvdread</systemitem> y aplicado un
-parche que añade <emphasis role="bold">soporte para cacheo de claves CSS
+parche que aÃ±ade <emphasis role="bold">soporte para cacheo de claves CSS
 crackeadas</emphasis> para <systemitem>libdvdcss</systemitem>. Esto resulta
 en un gran incremento de velocidad porque las claves no tienen que ser
 crackeadas cada vez que se reproduce.
@@ -110,14 +110,14 @@ crackeadas cada vez que se reproduce.
 </formalpara>
 
 <para>
-<application>MPlayer</application> puede usar también bibliotecas
+<application>MPlayer</application> puede usar tambiÃ©n bibliotecas
 <systemitem>libdvdread</systemitem> del sistema y <systemitem>libdvdcss</systemitem>,
-pero esta solución <emphasis role="bold">no</emphasis> se recomienda, porque puede
-resultar en fallos, incompatibilidades de bibliotecas y velocidad más lenta.
+pero esta soluciÃ³n <emphasis role="bold">no</emphasis> se recomienda, porque puede
+resultar en fallos, incompatibilidades de bibliotecas y velocidad mÃ¡s lenta.
 </para>
 
 <note><para>
-En caso de problemas de decodificación de DVD, pruebe a deshabilitar supermount, o
+En caso de problemas de decodificaciÃ³n de DVD, pruebe a deshabilitar supermount, o
 cualquier otra utilidad de este tipo.
 </para></note>
 
@@ -126,36 +126,36 @@ cualquier otra utilidad de este tipo.
 <para>
 Los discos de DVD tienen 2048 bytes por sector con ECC/CRC. Normalmente tienen
 un sistema de archivos UDF en una pista simple, conteniendo varios archivos
-(archivos pequeños .IFO y .BUK y archivos grandes (1GB) .VOB). Son archivos
+(archivos pequeÃ±os .IFO y .BUK y archivos grandes (1GB) .VOB). Son archivos
 reales y pueden ser copiados/reproducidos desde un sistema de archivos montado
 de un DVD sin encriptar.
 </para>
 </formalpara>
 
 <para>
-Los archivos .IFO contienen la información de navegación por la película
-(capítulos/títulos/mapas de ángulos, tablas de idiomas, etc) y son necesarios
-para leer e interpretar el contenido del .VOB (la película). Los archivos
+Los archivos .IFO contienen la informaciÃ³n de navegaciÃ³n por la pelÃ­cula
+(capÃ­tulos/tÃ­tulos/mapas de Ã¡ngulos, tablas de idiomas, etc) y son necesarios
+para leer e interpretar el contenido del .VOB (la pelÃ­cula). Los archivos
 .BUK son copias de seguridad de estos. Usan <emphasis role="bold">sectores</emphasis>
 por todos sitios, por lo que necesita usar direccionamiento crudo de sectores
-del disco para implementar navegación DVD o desencriptar el contenido.
+del disco para implementar navegaciÃ³n DVD o desencriptar el contenido.
 </para>
 
 <para>
 El soporte DVD necesita acceso basado en sectores al dispositivo. Desafortunadamente
-debe (bajo Linux) ser root para obtener la dirección de un sector dentro de un
+debe (bajo Linux) ser root para obtener la direcciÃ³n de un sector dentro de un
 archivo. Este es el motivo por el que no se usa el controlador interno del sistema
 de archivos del kernel, en su lugar se ha reimplementado en el espacio de usuario.
 <systemitem>libdvdread</systemitem> 0.9.x y <systemitem>libmpdvdkit</systemitem>
 hacen esto. El controlador de sistema de archivos UDF del kernel no es necesario
-ya que tenemos nuestro propio controlador de sistema de archivos UDF. Además
+ya que tenemos nuestro propio controlador de sistema de archivos UDF. AdemÃ¡s
 el DVD no necesita estar montado ya que solo se usa acceso a nivel de sectores.
 </para>
 
 <para>
-Algunas veces <filename>/dev/dvd</filename> no puede ser leído por los
+Algunas veces <filename>/dev/dvd</filename> no puede ser leÃ­do por los
 usuarios, por lo que los autores de <systemitem>libdvdread</systemitem>
-han implementado una capa de emulación que transfiere el direccionamiento
+han implementado una capa de emulaciÃ³n que transfiere el direccionamiento
 por sectores a nombres de archivo + desplazamiento, para emular un acceso
 crudo sobre un sistema de archivos montado o incluso en un disco duro.
 </para>
@@ -165,37 +165,37 @@ crudo sobre un sistema de archivos montado o incluso en un disco duro.
 en lugar del nombre del dispositivo para acceso crudo y comprueba
 <filename>/proc/mounts</filename> para obtener el nombre del dispositivo.
 Esto ha sido desarrollado por Solaris, donde los nombres de los
-dispositivos son asignados dinámicamente.
+dispositivos son asignados dinÃ¡micamente.
 </para>
 
 <para>
 El dispositivo por defecto de DVD es <filename>/dev/dvd</filename>. Si su
-configuración no coincide con esto, haga un enlace simbólico, o especifique
-el dispositivo correcto en la línea de órdenes con la opción
+configuraciÃ³n no coincide con esto, haga un enlace simbÃ³lico, o especifique
+el dispositivo correcto en la lÃ­nea de Ã³rdenes con la opciÃ³n
 <option>-dvd-device</option>.
 </para>
 
 <formalpara>
-<title>Autenticación para DVD</title>
+<title>AutenticaciÃ³n para DVD</title>
 <para>
-La autenticación y el método de desencriptación del soporte de DVD al
-nuevo-estilo se ha hecho usando una versión modificada de
-<systemitem>libdvdcss</systemitem> (vea más arriba). Este método peude ser
-especificado a través de la variable de entorno <envar>DVDCSS_METHOD</envar>,
+La autenticaciÃ³n y el mÃ©todo de desencriptaciÃ³n del soporte de DVD al
+nuevo-estilo se ha hecho usando una versiÃ³n modificada de
+<systemitem>libdvdcss</systemitem> (vea mÃ¡s arriba). Este mÃ©todo peude ser
+especificado a travÃ©s de la variable de entorno <envar>DVDCSS_METHOD</envar>,
 que puede ser establecido a key, disk o title.
 </para>
 </formalpara>
 
 <para>
-Si no se especifica nada se prueban los siguientes métodos (por defecto:
-key, petición de título):
+Si no se especifica nada se prueban los siguientes mÃ©todos (por defecto:
+key, peticiÃ³n de tÃ­tulo):
 </para>
 
 <orderedlist>
 <listitem><para>
 <emphasis role="bold">bus key</emphasis>: Esta clave es negociada durante
-la autenticación (una larga mezcla de ioctls y varios intercambios de
-claves, material de encriptación) y es usada para encriptar el título y 
+la autenticaciÃ³n (una larga mezcla de ioctls y varios intercambios de
+claves, material de encriptaciÃ³n) y es usada para encriptar el tÃ­tulo y 
 las claves de disco antes de enviarlas sobre el bus sin proteger
 (para prevenir robos de claves). El bus key necesita obtener y
 predesencriptar la clave encriptada de disco.
@@ -203,87 +203,87 @@ predesencriptar la clave encriptada de disco.
 
 <listitem><para>
 <emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
-mira a ver si el título ya ha sido crackeado con una clave almacenada en el
-directorio <filename class="directory">~/.mplayer/DVDKeys</filename> (rápido ;).
+mira a ver si el tÃ­tulo ya ha sido crackeado con una clave almacenada en el
+directorio <filename class="directory">~/.mplayer/DVDKeys</filename> (rÃ¡pido ;).
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">key</emphasis>: Si no hay una clave disponible en caché,
+<emphasis role="bold">key</emphasis>: Si no hay una clave disponible en cachÃ©,
 <application>MPlayer</application> intenta desencriptar la clave del disco con
 un conjunto de claves de reproductor incluidas.
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">disk</emphasis>: Si el método key falla (p.e. no hay
-claves de reproductor incluídas), <application>MPlayer</application>
-crackeará la clave del disco usando un algoritmo de fuerza bruta. Este proceso
+<emphasis role="bold">disk</emphasis>: Si el mÃ©todo key falla (p.e. no hay
+claves de reproductor incluÃ­das), <application>MPlayer</application>
+crackearÃ¡ la clave del disco usando un algoritmo de fuerza bruta. Este proceso
 usa la CPU de manera intensiva y requiere 64 MB de memoria (una tabla hash de
-16M 32Bit entradas) para almacenamiento temporal de datos. Este método debe
+16M 32Bit entradas) para almacenamiento temporal de datos. Este mÃ©todo debe
 funcionar siempre (lento).
 </para></listitem>
 
 <listitem><para>
 <emphasis role="bold">title request</emphasis>: Con la clave del disco
 <application>MPlayer</application> pide las claves encriptadas de los
-títulos que están dentro de <emphasis>sectores escondidos</emphasis> usando
-<systemitem>ioctl()</systemitem>. La protección por región de unidades
+tÃ­tulos que estÃ¡n dentro de <emphasis>sectores escondidos</emphasis> usando
+<systemitem>ioctl()</systemitem>. La protecciÃ³n por regiÃ³n de unidades
 RPC-2 se hace en este paso y puede fallas en algunas unidades de disco.
-Si funciona bien, las claves de títulos son desencriptadas con las claves
+Si funciona bien, las claves de tÃ­tulos son desencriptadas con las claves
 de bus y de disco.
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">title</emphasis>: Este método es usado si la
-búsqueda de título falla y no sale en ningun intercambio de clave
-con la unidad de DVD. Usa un ataque de encriptación para buscar
-la clave del título directamente (encontrando un patrón que se
+<emphasis role="bold">title</emphasis>: Este mÃ©todo es usado si la
+bÃºsqueda de tÃ­tulo falla y no sale en ningun intercambio de clave
+con la unidad de DVD. Usa un ataque de encriptaciÃ³n para buscar
+la clave del tÃ­tulo directamente (encontrando un patrÃ³n que se
 repita en el contenido del VOB desencriptado y comprobando que
 el texto plano corresponde a los primeros bytes encriptados como
-una continuación del patrón). El método es también conocido como
+una continuaciÃ³n del patrÃ³n). El mÃ©todo es tambiÃ©n conocido como
 &quot;ataque de texto plano conocido&quot; o &quot;DeCSSPlus&quot;.
 En raras ocasiones esto falla porque no hay suficientes datos
-desencriptados en el disco para realizar un ataque estadístico
-o porque las claves cambian en mitad de un título. Este método es la
-única manera de desencriptar un DVD almacenado en un disco duro o en 
-un DVD con la región incorrecta en una unidad RPC2 (lento).
+desencriptados en el disco para realizar un ataque estadÃ­stico
+o porque las claves cambian en mitad de un tÃ­tulo. Este mÃ©todo es la
+Ãºnica manera de desencriptar un DVD almacenado en un disco duro o en 
+un DVD con la regiÃ³n incorrecta en una unidad RPC2 (lento).
 </para></listitem>
 </orderedlist>
 
 <para>
-Las unidades de DVD RPC-1 solo protegen la configuración de región a través
-de software. Las unidades RPC-2 tienen una protección por hardware que
+Las unidades de DVD RPC-1 solo protegen la configuraciÃ³n de regiÃ³n a travÃ©s
+de software. Las unidades RPC-2 tienen una protecciÃ³n por hardware que
 permite tan solo 5 cambios. Puede ser necesario/recomendable actualizar el
 firmware a RPC-1 si tiene una unidad RPC-2. Las actualizaciones de
 firmware puede encontrarse en esta
-<ulink url="http://www.firmware-flash.com">página del firmware</ulink>.
-Si no hay una actualización del firmware disponible para su dispositivo, use la
+<ulink url="http://www.firmware-flash.com">pÃ¡gina del firmware</ulink>.
+Si no hay una actualizaciÃ³n del firmware disponible para su dispositivo, use la
 <ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">herramienta regionset</ulink>
-para establecer el código de región de su unidad de DVD (bajo Linux).
-<emphasis role="bold">Advertencia</emphasis>: Solo puede establecer la región 5 veces.
+para establecer el cÃ³digo de regiÃ³n de su unidad de DVD (bajo Linux).
+<emphasis role="bold">Advertencia</emphasis>: Solo puede establecer la regiÃ³n 5 veces.
 </para>
 </sect1>
 
 <sect1 id="vcd">
-<title>Reproducción de VCD</title>
+<title>ReproducciÃ³n de VCD</title>
 <para>
-Para una lista completa de las opciones disponibles, lea por favor la página de manual. La
-sintaxis para un Video CD (VCD) estándar es la siguiente:
+Para una lista completa de las opciones disponibles, lea por favor la pÃ¡gina de manual. La
+sintaxis para un Video CD (VCD) estÃ¡ndar es la siguiente:
 <screen>mplayer vcd://<replaceable>&lt;track&gt;</replaceable> [-cdrom-device <replaceable>&lt;device&gt;</replaceable>]</screen>
 Ejemplo:
 <screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
 El dispositivo para VCD Por defecto es <filename>/dev/cdrom</filename>.
-Si su configuracio no coincide con esto, haga un enlace simbólico o
-especifique el dispositivo correcto en la línea de órdenes con la
-opción <option>-cdrom-device</option>.
+Si su configuracio no coincide con esto, haga un enlace simbÃ³lico o
+especifique el dispositivo correcto en la lÃ­nea de Ã³rdenes con la
+opciÃ³n <option>-cdrom-device</option>.
 </para>
 
 <note><para>
 Al menos las unidades de CD-ROM SCSI Plextor y algunas Toshiba tienen un
 rendimiento horrible leyendo VCDs. Esto es porque el <systemitem>ioctl</systemitem>
-CDROMREADRAW no está completamente implementado en estas unidades. Si tiene 
-conocimientos sobre la programación SCSI, por favor
-<ulink url="../../tech/patches.txt">ayúdenos</ulink> a implementar soporte SCSI
-genérico para VCDs.
+CDROMREADRAW no estÃ¡ completamente implementado en estas unidades. Si tiene 
+conocimientos sobre la programaciÃ³n SCSI, por favor
+<ulink url="../../tech/patches.txt">ayÃºdenos</ulink> a implementar soporte SCSI
+genÃ©rico para VCDs.
 </para></note>
 
 <para>
@@ -294,28 +294,28 @@ y reproducir el archivo resultante con <application>MPlayer</application>.
 
 <formalpara>
 <title>Estructura de un VCD</title>
-<para>Los discos de VCD consisten en una o más pistas:</para>
+<para>Los discos de VCD consisten en una o mÃ¡s pistas:</para>
 </formalpara>
 
 <itemizedlist>
 <listitem><para>
-La primera piesta es una pista pequeña de datos 2048 bytes/sector con
+La primera piesta es una pista pequeÃ±a de datos 2048 bytes/sector con
 un sistema de archivos iso9660, normalmente conteniendo programas reproductores
-de VCD para Windows o quizá alguna otra información (imágenes, texto, etc).
+de VCD para Windows o quizÃ¡ alguna otra informaciÃ³n (imÃ¡genes, texto, etc).
 </para></listitem>
 
 <listitem><para>
-La segunda y otras pistas son 2324 bytes/sector crudas de MPEG (película),
+La segunda y otras pistas son 2324 bytes/sector crudas de MPEG (pelÃ­cula),
 conteniendo un paquete de datos MPEG PS por sector en lugar de un sistema
 de archivos. De manera similar a las pistas de CD de audio, estas pistas
-<emphasis role="bold">no pueden ser montadas</emphasis> (¿Alguna vez ha
+<emphasis role="bold">no pueden ser montadas</emphasis> (Â¿Alguna vez ha
 montado un CD de audio para reproducirlo?).
-Como las películas están dentro de esta pista, debería probar <option>vcd://2</option>
+Como las pelÃ­culas estÃ¡n dentro de esta pista, deberÃ­a probar <option>vcd://2</option>
 primero.
 </para></listitem>
 
 <listitem><para>
-Existen discos de VCD sin la primera pista (pista simple y sin ningún sistema
+Existen discos de VCD sin la primera pista (pista simple y sin ningÃºn sistema
 de archivos). Siguen siendo reproducibles, pero no pueden ser montadas.
 </para></listitem>
 </itemizedlist>
@@ -323,18 +323,18 @@ de archivos). Siguen siendo reproducibles, pero no pueden ser montadas.
 <formalpara>
 <title>Acerca de los archivos .DAT</title>
 <para>
-Los archivos visibles de ~600 MB en la primera pista de un VCD montado ¡no son
+Los archivos visibles de ~600 MB en la primera pista de un VCD montado Â¡no son
 archivos reales! Son llamadas puertas de acceso ISO, creadas para permitir a
 Windows administrar estas pistas (Windows no permite acceso crudo al dispositivo
 en ninguna de sus aplicaciones). Bajo Linux no puede copiar o reproducir estos
 archivos (solo contienen basura). Bajo Windows es posible que el controlador
 iso9660 emule lectura cruda de las pistas en estos archivos. Para reproducir
 un archivo .DAT necesita el controlador del kernel que se encuentra en la
-versión para Linux de PowerDVD. Contiene un controlador de sistema de archivos iso9660 
+versiÃ³n para Linux de PowerDVD. Contiene un controlador de sistema de archivos iso9660 
 modificado (<filename>vcdfs/isofs-2.4.X.o</filename>), que permite emular las
-pistas crudas a través de este archivo de sombra .DAT. Si monta el disco usando
+pistas crudas a travÃ©s de este archivo de sombra .DAT. Si monta el disco usando
 ese controlador, puede copiar e incluso reproducir los archivos .DAT con
-<application>MPlayer</application>. ¡Pero no funciona con el controlador estandar
+<application>MPlayer</application>. Â¡Pero no funciona con el controlador estandar
 iso9660 del kernel de Linux! Use <option>vcd://</option> en su lugar. Alternativas
 para copiar un VCD son los nuevos controladores del kernel
 <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> (que no forman

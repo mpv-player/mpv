@@ -1,41 +1,41 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.6 -->
 <appendix id="bugs">
 <title>Problemas conocidos</title>
 <sect1 id="bugs-special">
-<title>Problemas con sistemas especiales/Fallos o defectos específicos de CPU</title>
+<title>Problemas con sistemas especiales/Fallos o defectos especÃ­ficos de CPU</title>
 <itemizedlist>
 <listitem>
-<para>SIGILL (señal 4) en P3 usando núcleos 2.2.x:</para>
-<para>Problema: El núcleo 2.2.x no tiene soporte (funcional) adecuado para SSE</para>
-<para>Solución: actualizar a un núcleo 2.4.x</para>
-<para>Solución temporal: <command>./configure --disable-sse</command></para>
+<para>SIGILL (seÃ±al 4) en P3 usando nÃºcleos 2.2.x:</para>
+<para>Problema: El nÃºcleo 2.2.x no tiene soporte (funcional) adecuado para SSE</para>
+<para>SoluciÃ³n: actualizar a un nÃºcleo 2.4.x</para>
+<para>SoluciÃ³n temporal: <command>./configure --disable-sse</command></para>
 </listitem>
 <listitem>
-<para>SIGILL general (señal 4):</para>
-<para>Problema: compiló y corrió <application>MPlayer</application> en
-máquinas diferentes (por ejemplo compilado para P3 y corriendo en un
+<para>SIGILL general (seÃ±al 4):</para>
+<para>Problema: compilÃ³ y corriÃ³ <application>MPlayer</application> en
+mÃ¡quinas diferentes (por ejemplo compilado para P3 y corriendo en un
 Celeron)</para>
-<para>Solución: ¡Compile <application>MPlayer</application> en la misma
-máquina que lo va a usar!</para>
-<para>Solución temporal: Compile usando: <command>./configure --disable-sse</command>, etc. </para>
+<para>SoluciÃ³n: Â¡Compile <application>MPlayer</application> en la misma
+mÃ¡quina que lo va a usar!</para>
+<para>SoluciÃ³n temporal: Compile usando: <command>./configure --disable-sse</command>, etc. </para>
 </listitem>
 <listitem>
 <para>&quot;Inconsistencia interna del buffer&quot; mientras ejecuta
 <application>MEncoder</application>:</para>
 <para>Problema: problema conocido cuando lame &lt; 3.90 fue compilado con el gcc 2.96 o 3.x.</para>
-<para>Solución: use lame &gt;=3.90.</para>
-<para>Solución temporal: compile lame con gcc 2.95.x y quite cualquier paquete de lame que ya
-haya instalado, podrían haber sido compilados con gcc. 2.96</para>
+<para>SoluciÃ³n: use lame &gt;=3.90.</para>
+<para>SoluciÃ³n temporal: compile lame con gcc 2.95.x y quite cualquier paquete de lame que ya
+haya instalado, podrÃ­an haber sido compilados con gcc. 2.96</para>
 </listitem>
 <listitem>
 <para>Sonido mezcla de MP2/MP3 en PPC:</para>
-<para>Problema: es un problema de compilación de GCC en plataformas PPC, no hay arreglo todavía.</para>
-<para>Solución temporal: use el decodificador de FFmpeg (lento) MP1/MP2/MP3 (<option>-ac ffmpeg
+<para>Problema: es un problema de compilaciÃ³n de GCC en plataformas PPC, no hay arreglo todavÃ­a.</para>
+<para>SoluciÃ³n temporal: use el decodificador de FFmpeg (lento) MP1/MP2/MP3 (<option>-ac ffmpeg
 </option>)</para>
 </listitem>
 <listitem>
-<para>SIG11 en libmpeg2, cuando se aplica escalado + codificación:</para>
+<para>SIG11 en libmpeg2, cuando se aplica escalado + codificaciÃ³n:</para>
 <para>Problema: es una falla conocida de GCC 2.95.2 MMX, actualice a 2.95.3.</para>
 </listitem>
 </itemizedlist>
@@ -48,17 +48,17 @@ haya instalado, podrían haber sido compilados con gcc. 2.96</para>
 <title>Retraso general de audio o sonido accidentado (existe con uno o muchos archivos)</title>
 <itemizedlist>
 <listitem><para>
-lo más común: ¡controlador de audio defectuoso! - pruebe usando otro controlador, pruebe la
-emulación ALSA 0.9 de OSS con la opción <option>-ao oss</option>, también pruebe <option>
--ao sdl</option>, muchas veces ayuda. Si su archivo se reproduce bien con la opción 
+lo mÃ¡s comÃºn: Â¡controlador de audio defectuoso! - pruebe usando otro controlador, pruebe la
+emulaciÃ³n ALSA 0.9 de OSS con la opciÃ³n <option>-ao oss</option>, tambiÃ©n pruebe <option>
+-ao sdl</option>, muchas veces ayuda. Si su archivo se reproduce bien con la opciÃ³n 
 <option>-nosound</option>, entonces puede estar seguro que es un problema con la placa
 de sonido (el controlador).
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
 <listitem>
-<para>problemas con el buffer de audio (tamaño del buffer de audio mal detectado)</para>
-<para>Solución temporal: La opción de <application>MPlayer</application> <option>-abs</option></para>
+<para>problemas con el buffer de audio (tamaÃ±o del buffer de audio mal detectado)</para>
+<para>SoluciÃ³n temporal: La opciÃ³n de <application>MPlayer</application> <option>-abs</option></para>
 </listitem>
 </itemizedlist>
 <itemizedlist>
@@ -70,26 +70,26 @@ de muestreo usada en sus archivos - pruebe el plugin de cambio de frecuencia de 
 </itemizedlist>
 <itemizedlist>
 <listitem>
-<para>máquina lenta (CPU o VGA)</para>
+<para>mÃ¡quina lenta (CPU o VGA)</para>
 <para>pruebe con <option>-vo null</option>, si se reproduce bien, entonces tiene
 una placa o controlador VGA lento.</para>
-<para>Solución: comprese una placa de vídeo más rápida o lea esta documentación
+<para>SoluciÃ³n: comprese una placa de vÃ­deo mÃ¡s rÃ¡pida o lea esta documentaciÃ³n
 acerca de como mejorar la velocidad</para>
-<para>Vea también <option>-framedrop</option></para>
+<para>Vea tambiÃ©n <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-delay-specific">
-<title>Retraso o desincronización de audio específico de uno o pocos archivos</title>
+<title>Retraso o desincronizaciÃ³n de audio especÃ­fico de uno o pocos archivos</title>
 <itemizedlist>
 <listitem>
 <para>archivo defectuoso</para>
 <para>
-Solución:
+SoluciÃ³n:
   <itemizedlist>
   <listitem>
-    <para>opción <option>-ni</option> o <option>-nobps</option> (para
+    <para>opciÃ³n <option>-ni</option> o <option>-nobps</option> (para
     archivos no entrelazados o archivos defectuosos)</para>
     <para>y/o</para>
   </listitem>
@@ -100,32 +100,32 @@ Solución:
   </listitem>
   <listitem>
     <para><option>-delay</option> o teclas <keycap>+</keycap>/<keycap>-</keycap>
-    en tiempo de reproducción para ajustar el retraso.</para>
+    en tiempo de reproducciÃ³n para ajustar el retraso.</para>
   </listitem>
   </itemizedlist>
 Si nada de esto ayuda, por favor suba el archivo, y lo verificaremos (y arreglaremos).
 </para>
 </listitem>
 <listitem>
-<para>su tarjeta de sonido no soporta reproducción de 48kHz</para>
-<para>Solución: comprese una tarjeta de sonido mejor... o intente decrementar los
-cuadros por segundo en un 10% (use <option>-fps 27</option> para una película de
+<para>su tarjeta de sonido no soporta reproducciÃ³n de 48kHz</para>
+<para>SoluciÃ³n: comprese una tarjeta de sonido mejor... o intente decrementar los
+cuadros por segundo en un 10% (use <option>-fps 27</option> para una pelÃ­cula de
 30 cuadros por segundo) o use el plugin de cambio de frecuencia de muestreo</para>
 </listitem>
 <listitem>
-<para>máquina lenta(si A-V esta casi en cero, y el último número en la linea de
+<para>mÃ¡quina lenta(si A-V esta casi en cero, y el Ãºltimo nÃºmero en la linea de
 estado se incrementa)</para>
-<para>Solución: <option>-framedrop</option></para>
+<para>SoluciÃ³n: <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-nosound">
-<title>Sin ningún sonido</title>
+<title>Sin ningÃºn sonido</title>
 <itemizedlist>
 <listitem>
 <para>su archivo usa un codec de audio no soportado</para>
-<para>Solución: lea la documentación y ayudenos a agregar soporte para el mismo</para>
+<para>SoluciÃ³n: lea la documentaciÃ³n y ayudenos a agregar soporte para el mismo</para>
 </listitem>
 </itemizedlist>
 </sect2>
@@ -134,18 +134,18 @@ estado se incrementa)</para>
 <title>No hay imagen (solo una ventana gris o verde)</title>
 <itemizedlist>
 <listitem>
-<para>su archivo utiliza un codec de vídeo no soportado</para>
-<para>Solución: lea la documentación y ayudenos a agregar soporte para el mismo</para>
+<para>su archivo utiliza un codec de vÃ­deo no soportado</para>
+<para>SoluciÃ³n: lea la documentaciÃ³n y ayudenos a agregar soporte para el mismo</para>
 </listitem>
 <listitem>
 <para>
-codec elegido automáticamente no puede decodificar el archivo, pruebe eligiendo otro
+codec elegido automÃ¡ticamente no puede decodificar el archivo, pruebe eligiendo otro
 codec usando las opciones <option>-vc</option> o <option>-vfm</option>.
 </para>
 </listitem>
 <listitem>
 <para>
-intentó reproducir un archivo DivX 3.x con el decodificador OpenDivX o XviD
+intentÃ³ reproducir un archivo DivX 3.x con el decodificador OpenDivX o XviD
 (<option>-vc odivx</option>) - instale DivX4Linux y recompile
 <application>MPlayer</application>
 </para>
@@ -154,20 +154,20 @@ intentó reproducir un archivo DivX 3.x con el decodificador OpenDivX o XviD
 </sect2>
 
 <sect2 id="bugs-video">
-<title>Problemas con la salida de vídeo</title>
+<title>Problemas con la salida de vÃ­deo</title>
 <para>
-Primera aclaración: las opciones <option>-fs -vm</option> y <option>-zoom</option>
-son solo recomendaciones, (todavía) no están soportadas por todos los controladores. 
+Primera aclaraciÃ³n: las opciones <option>-fs -vm</option> y <option>-zoom</option>
+son solo recomendaciones, (todavÃ­a) no estÃ¡n soportadas por todos los controladores. 
 Por lo tanto no es un defecto si no funciona. Solo unos pocos controladores soportan
 escalado/acercamiento, no espere esto de x11 o DGA.
 </para>
 
 <formalpara>
-<title>Parpadeo de OSD o subtítulos</title>
+<title>Parpadeo de OSD o subtÃ­tulos</title>
 <para>
 <itemizedlist>
 <listitem><para>controlador x11: lo lamento, no puede ser arreglado en este momento</para></listitem>
-<listitem><para>controlador xv: use la opción <option>-double</option></para></listitem>
+<listitem><para>controlador xv: use la opciÃ³n <option>-double</option></para></listitem>
 </itemizedlist>
 </para>
 </formalpara>
@@ -176,8 +176,8 @@ escalado/acercamiento, no espere esto de x11 o DGA.
 <title>Imagen verde cuando usa mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
 <para>
 <itemizedlist>
-<listitem><para>mga_vid ha detectado erróneamente la cantidad de RAM de su placa, recargue
-el módulo usando la opción <option>mga_ram_size</option>.
+<listitem><para>mga_vid ha detectado errÃ³neamente la cantidad de RAM de su placa, recargue
+el mÃ³dulo usando la opciÃ³n <option>mga_ram_size</option>.
 </para></listitem>
 </itemizedlist>
 </para>

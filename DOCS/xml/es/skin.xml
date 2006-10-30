@@ -1,25 +1,25 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.7 -->
 <appendix id="skin">
 <title>Formato del skin de <application>MPlayer</application></title>
 <para>
-El propósito de este documento es describir el formato de los skin
-de <application>MPlayer</application>. La información contenida aquí
-puede ser errónea, porque
+El propÃ³sito de este documento es describir el formato de los skin
+de <application>MPlayer</application>. La informaciÃ³n contenida aquÃ­
+puede ser errÃ³nea, porque
 <orderedlist>
 <listitem><para>No soy yo quien ha escrito el GUI.</para></listitem>
-<listitem><para>El GUI no está terminado.</para></listitem>
+<listitem><para>El GUI no estÃ¡ terminado.</para></listitem>
 <listitem><para>Puedo equivocarme.</para></listitem>
 </orderedlist>
-No se sorprenda si algo no funciona como se describe aquí.
+No se sorprenda si algo no funciona como se describe aquÃ­.
 </para>
 
-<para>Gracias a <emphasis>Zoltán Ponekker</emphasis> por su ayuda.</para>
+<para>Gracias a <emphasis>ZoltÃ¡n Ponekker</emphasis> por su ayuda.</para>
 
-<para><emphasis>András Mohari &lt;mayday@freemail.hu&gt;</emphasis></para>
+<para><emphasis>AndrÃ¡s Mohari &lt;mayday@freemail.hu&gt;</emphasis></para>
 
 <sect1 id="skin-overview">
-<title>Visión general</title>
+<title>VisiÃ³n general</title>
 <para>
 Realmente no hay nada que hacer con el formato del skin, pero debe saber
 que MPlaner <emphasis role="bold">no</emphasis> tiene un skin integrado,
@@ -45,7 +45,7 @@ Los directorios donde se buscan los skins son (en orden):
 </para>
 
 <para>
-Tenga en cuenta que la primera ruta puede variar de acuerdo a cómo fue
+Tenga en cuenta que la primera ruta puede variar de acuerdo a cÃ³mo fue
 configurado <application>MPlayer</application> (vea los argumentos
 <option>--prefix</option> y <option>--datadir</option> del script
 <command>configure</command>).
@@ -53,20 +53,20 @@ configurado <application>MPlayer</application> (vea los argumentos
 
 <para>
 Todo skin es instalado en su propio directorio bajo uno de los directorios
-listados más arriba, por ejemplo:
+listados mÃ¡s arriba, por ejemplo:
 <screen>$(PREFIX)/share/mplayer/skins/default/</screen>
 </para>
 </sect2>
 
 <sect2 id="skin-overview-formats">
-<title>Formato de las imágenes</title>
-<para>Las imágenes deben ser PNGs a color verdadero (24 or 32 bpp).</para>
+<title>Formato de las imÃ¡genes</title>
+<para>Las imÃ¡genes deben ser PNGs a color verdadero (24 or 32 bpp).</para>
 <para>
-En la ventana principal y en la barra de reproducción (ver más abajo) puede
-usar imágenes con `transparencia': Regiones rellenas con color #FF00FF
+En la ventana principal y en la barra de reproducciÃ³n (ver mÃ¡s abajo) puede
+usar imÃ¡genes con `transparencia': Regiones rellenas con color #FF00FF
 (magenta) son completamente transparentes cuando se ven con
 <application>MPlayer</application>. Esto significa que puede incluso tener
-ventanas con formas si su servidor X tiene la extensión XShape.
+ventanas con formas si su servidor X tiene la extensiÃ³n XShape.
 </para>
 </sect2>
 
@@ -82,74 +82,74 @@ por ejemplo), de manera que pueda crear algo grande.
 Actualmente hay tres ventanas que decorar: la
 <link linkend="skin-file-main">ventana principal</link>, la
 <link linkend="skin-file-subwindow">subventana</link>, la
-<link linkend="skin-file-main">barra de reproducción</link>, y el 
-<link linkend="skin-file-menu">skin del menú</link> (que puede activarse
+<link linkend="skin-file-main">barra de reproducciÃ³n</link>, y el 
+<link linkend="skin-file-menu">skin del menÃº</link> (que puede activarse
 con clic derecho).
 
 <itemizedlist>
 <listitem><para>
   La <emphasis role="bold">ventana principal</emphasis> y/o la
-  <emphasis role="bold">barra de reproducción</emphasis> es donde puede
+  <emphasis role="bold">barra de reproducciÃ³n</emphasis> es donde puede
   controlar <application>MPlayer</application>. El fondo de la ventana es
   una imagen. Varios objetos pueden (y deben) ser colocados en la ventana:
   <emphasis>botones</emphasis>, <emphasis>medidores</emphasis>
   (desplazables) y <emphasis>etiquetas</emphasis>. Para cada objeto, debe
-  especificar su posición y tamaño.
+  especificar su posiciÃ³n y tamaÃ±o.
 </para><para>
-  Un <emphasis role="bold">botón</emphasis> tiene tres estados (pulsado, soltado,
+  Un <emphasis role="bold">botÃ³n</emphasis> tiene tres estados (pulsado, soltado,
   desactivado), por eso la imagen debe estar dividida en tres partes verticalmente.
-  Vea el objeto <link linkend="skin-button">botón</link> para detalles.
+  Vea el objeto <link linkend="skin-button">botÃ³n</link> para detalles.
 </para><para>
   Un <emphasis role="bold">medidor</emphasis> (usado principalmente para la barra
-  de búsqueda y el control de volumen/balance) puede tener cualquier número de fases
+  de bÃºsqueda y el control de volumen/balance) puede tener cualquier nÃºmero de fases
   dividiendo su imagen en diferentes partes unas debajo de otras. Vea
   <link linkend="skin-hpotmeter">hpotmeter</link> y 
   <link linkend="skin-potmeter">potmeter</link> para detalles.
 </para><para>
   <emphasis role="bold">Etiquetas</emphasis> son un poco especiales: Los caractere
   necesarios para pintarlas se toman de un archivo de imagen, y los caracteres en
-  la imagen son descritos por un <link linkend="skin-fonts">archivo de descriptión
-  de tipografía</link>. Lo último es un archivo de texto plano que especifica la
-  posición x,y y el tamaño de cada carater en la imagen (el archivo de imagen y su
-  archivo de descripción de tipografía forman <emphasis>juntos</emphasis> un tipo
+  la imagen son descritos por un <link linkend="skin-fonts">archivo de descriptiÃ³n
+  de tipografÃ­a</link>. Lo Ãºltimo es un archivo de texto plano que especifica la
+  posiciÃ³n x,y y el tamaÃ±o de cada carater en la imagen (el archivo de imagen y su
+  archivo de descripciÃ³n de tipografÃ­a forman <emphasis>juntos</emphasis> un tipo
   de letra). Vea <link linkend="skin-dlabel">dlabel</link> y
   <link linkend="skin-slabel">slabel</link> para detalles.
 </para>
-<note><para>Todas las imágenes pueden tener transparencia completa como se describe
-  en la sección que habla de <link linkend="skin-overview-formats">formatos
-  de imagen</link>. Si el servidor X no soporta la extensión XShape, las partes
-  marcadas como transparentes se verán negras. Si le gusta usar esta característica,
+<note><para>Todas las imÃ¡genes pueden tener transparencia completa como se describe
+  en la secciÃ³n que habla de <link linkend="skin-overview-formats">formatos
+  de imagen</link>. Si el servidor X no soporta la extensiÃ³n XShape, las partes
+  marcadas como transparentes se verÃ¡n negras. Si le gusta usar esta caracterÃ­stica,
   el ancho del fondo de la imagen de la ventana principal debe ser divisible por 8.
 </para></note>
 </listitem>
 
 <listitem><para>
-  La <emphasis role="bold">subventana</emphasis> es donde aparece la película.
-  Puede mostrar una imagen específica si no hay película cargada (es bastante
-  aburrido tener una ventana vacía :-)) <emphasis role="bold">Nota:</emphasis>
-  la transparencia <emphasis role="bold">no está permitida</emphasis> aquí.
+  La <emphasis role="bold">subventana</emphasis> es donde aparece la pelÃ­cula.
+  Puede mostrar una imagen especÃ­fica si no hay pelÃ­cula cargada (es bastante
+  aburrido tener una ventana vacÃ­a :-)) <emphasis role="bold">Nota:</emphasis>
+  la transparencia <emphasis role="bold">no estÃ¡ permitida</emphasis> aquÃ­.
 </para></listitem>
 
 <listitem><para>
-  El <emphasis role="bold">skin del menú</emphasis> es una forma de controlar
-  <application>MPlayer</application> con entradas de menú. Dos imágenes son
-  requeridas para el menú: una es la imagen base que muestra el menú en su
+  El <emphasis role="bold">skin del menÃº</emphasis> es una forma de controlar
+  <application>MPlayer</application> con entradas de menÃº. Dos imÃ¡genes son
+  requeridas para el menÃº: una es la imagen base que muestra el menÃº en su
   estado normal, la otra es usada para mostrar las entradas seleccionadas.
-  Cuando hace salir el menú, la entrada seleccionada actualmente es copiada
-  desde la segunda imagen sobre la entrada de menú que hay bajo el puntero
-  del ratón (la segunda imagen nunca se muestra entera).
+  Cuando hace salir el menÃº, la entrada seleccionada actualmente es copiada
+  desde la segunda imagen sobre la entrada de menÃº que hay bajo el puntero
+  del ratÃ³n (la segunda imagen nunca se muestra entera).
 </para><para>
-  Una entrada de menú se define por su posición y tamaño en la imagen (vea la
-  sección que habla del <link linkend="skin-file-menu">skin del menú</link>
+  Una entrada de menÃº se define por su posiciÃ³n y tamaÃ±o en la imagen (vea la
+  secciÃ³n que habla del <link linkend="skin-file-menu">skin del menÃº</link>
   para detalles).
 </para></listitem>
 </itemizedlist>
 </para>
 
 <para>
-  Hay algo importante que aún no he mencionado: Para que los botones, medidores
-  deposición y entradas de menú funcionen, <application>MPlayer</application>
-  tiene que saber qué hacer cuando se hace clic en ellos. Esto se hace con
+  Hay algo importante que aÃºn no he mencionado: Para que los botones, medidores
+  deposiciÃ³n y entradas de menÃº funcionen, <application>MPlayer</application>
+  tiene que saber quÃ© hacer cuando se hace clic en ellos. Esto se hace con
   <link linkend="skin-gui">mensajes</link> (eventos). Para estos objetos
   debe definir los mensajes que se generan cuando se hace clic en ellos.
 </para>
@@ -161,29 +161,29 @@ con clic derecho).
 Necesita los siguientes archivos para construir un skin:
 <itemizedlist>
 <listitem><para>
-  El archivo de configuración llamado <link linkend="skin-file">skin</link>
-  le dice a <application>MPlayer</application> cómo poner las diferentes
-  partes del skin juntas y qué debe hacer cuando se hace clic en alguna
+  El archivo de configuraciÃ³n llamado <link linkend="skin-file">skin</link>
+  le dice a <application>MPlayer</application> cÃ³mo poner las diferentes
+  partes del skin juntas y quÃ© debe hacer cuando se hace clic en alguna
   parte de la ventana.
 </para></listitem>
 <listitem><para>
   La imagen de fondo para la ventana principal
 </para></listitem>
 <listitem><para>
-  Imágenes para los objetos en la ventana principal (incluyendo uno o más
-  archivos de descripción de tipografía necesarios para dibujar las etiquetas).
+  ImÃ¡genes para los objetos en la ventana principal (incluyendo uno o mÃ¡s
+  archivos de descripciÃ³n de tipografÃ­a necesarios para dibujar las etiquetas).
 </para></listitem>
 <listitem><para>
-  La imagen que se mostrará en la subventana (opcional).
+  La imagen que se mostrarÃ¡ en la subventana (opcional).
 </para></listitem>
 <listitem><para>
-  Dos imágenes para el skin del menú (son necesarias solo si quiere crear
-  un menú).
+  Dos imÃ¡genes para el skin del menÃº (son necesarias solo si quiere crear
+  un menÃº).
 </para></listitem>
 </itemizedlist>
-  Con la excepción del archivo de configuración del skin, puede nombrar
-  los otros archivos como quiera (pero note que los archivos de descripción
-  de tipografía deben tener extensión <filename>.fnt</filename>).
+  Con la excepciÃ³n del archivo de configuraciÃ³n del skin, puede nombrar
+  los otros archivos como quiera (pero note que los archivos de descripciÃ³n
+  de tipografÃ­a deben tener extensiÃ³n <filename>.fnt</filename>).
 </para>
 </sect2>
 </sect1>
@@ -191,17 +191,17 @@ Necesita los siguientes archivos para construir un skin:
 <sect1 id="skin-file">
 <title>El archivo de skin</title>
 <para>
-Como se menciona más arriba, este es el archivo de configuración del skin.
-Su orientación en lineal; las líneas que son comentarios comienzan por
-un caracter '<literal>;</literal>' al principio de la línea (solo espacios
-y tabuladores están permitidos antes del '<literal>;</literal>').
+Como se menciona mÃ¡s arriba, este es el archivo de configuraciÃ³n del skin.
+Su orientaciÃ³n en lineal; las lÃ­neas que son comentarios comienzan por
+un caracter '<literal>;</literal>' al principio de la lÃ­nea (solo espacios
+y tabuladores estÃ¡n permitidos antes del '<literal>;</literal>').
 </para>
 
 <para>
-El archivo está dividido en secciones. Cada sección describe el skin para
-una aplicación y tiene la siguiente forma:
+El archivo estÃ¡ dividido en secciones. Cada secciÃ³n describe el skin para
+una aplicaciÃ³n y tiene la siguiente forma:
 <programlisting>
-section = <replaceable>nombre de la sección</replaceable>
+section = <replaceable>nombre de la secciÃ³n</replaceable>
 .
 .
 .
@@ -210,12 +210,12 @@ end
 </para>
 
 <para>
-Actualmente solo hay una aplicación, por lo que necesita una sola sección: su nombre
+Actualmente solo hay una aplicaciÃ³n, por lo que necesita una sola secciÃ³n: su nombre
 es <emphasis role="bold">movieplayer</emphasis>.
 </para>
 
 <para>
-Dentro de esta sección cada ventana está descrita por un bloque de la siguiente forma:
+Dentro de esta secciÃ³n cada ventana estÃ¡ descrita por un bloque de la siguiente forma:
 <programlisting>
 window = <replaceable>nombre de la ventana</replaceable>
 .
@@ -231,27 +231,27 @@ cadenas de texto:
 <itemizedlist>
 <listitem><para><emphasis role="bold">main</emphasis> - para la ventana principal</para></listitem>
 <listitem><para><emphasis role="bold">sub</emphasis> - para la subventana</para></listitem>
-<listitem><para><emphasis role="bold">menu</emphasis> - para el skin del menú</para></listitem>
-<listitem><para><emphasis role="bold">playbar</emphasis> - barra de reproducción</para></listitem>
+<listitem><para><emphasis role="bold">menu</emphasis> - para el skin del menÃº</para></listitem>
+<listitem><para><emphasis role="bold">playbar</emphasis> - barra de reproducciÃ³n</para></listitem>
 </itemizedlist>
 </para>
 
 <para>
-(Los bloques sub y menú son opcionales - no necesita crear un menú o decorar
+(Los bloques sub y menÃº son opcionales - no necesita crear un menÃº o decorar
 la subventana.)
 </para>
 
 <para>
 Dentro de un bloque de ventana, puede definir cada objeto para la ventana con
-una línea del siguiente modo:
-<programlisting>objeto = parámetro</programlisting>
+una lÃ­nea del siguiente modo:
+<programlisting>objeto = parÃ¡metro</programlisting>
 Donde <literal>objeto</literal> es una cadena que identifica el tipo de objeto GUI,
-<literal>parámetro</literal> es un valor numérico o textual (o una lista
+<literal>parÃ¡metro</literal> es un valor numÃ©rico o textual (o una lista
 de valores separados por comas).
 </para>
 
 <para>
-Poniendo todo lo de arriba jutno, el archivo entero quedará algo similar a esto:
+Poniendo todo lo de arriba jutno, el archivo entero quedarÃ¡ algo similar a esto:
 <programlisting>
 section = movieplayer
   window = main
@@ -263,25 +263,25 @@ section = movieplayer
   end
   
   window = menu
-  ; ... objetos para el menú ...
+  ; ... objetos para el menÃº ...
   end
 
   window = playbar
-  ; ... objetos para la barra de reproducción ...
+  ; ... objetos para la barra de reproducciÃ³n ...
   end
 end
 </programlisting>
 </para>
 
 <para>
-El nombre de un archivo de imagen se debe dar sin los directorios - las imágenes
+El nombre de un archivo de imagen se debe dar sin los directorios - las imÃ¡genes
 se buscan en el directorio <filename class="directory">skins</filename>.
-También puede (pero necesita ser root) especificar la extensión del archivo. Si
-el archivo no existe, <application>MPlayer</application> intentará cargar el
+TambiÃ©n puede (pero necesita ser root) especificar la extensiÃ³n del archivo. Si
+el archivo no existe, <application>MPlayer</application> intentarÃ¡ cargar el
 archivo
 <filename>&lt;filename&gt;.&lt;ext&gt;</filename>, donde <literal>png</literal>
 y <literal>PNG</literal> son probados para <filename>&lt;ext&gt;</filename>
-(en ese orden). El primer nombre de archivo que coincida será el que se use.
+(en ese orden). El primer nombre de archivo que coincida serÃ¡ el que se use.
 </para>
 
 <para>
@@ -304,19 +304,19 @@ es a la derecha o abajo, como se muestra en la ilustracion:
 </informalfigure>
 
 <para>
-Aquí tiene un ejemplo para clarificar esto. Suponga que tiene una imagen llamada
+AquÃ­ tiene un ejemplo para clarificar esto. Suponga que tiene una imagen llamada
 <filename>main.png</filename> que usa para la ventana principal:
 <programlisting>base = main, -1, -1</programlisting>
-<application>MPlayer</application> intentará cargar los archivos
+<application>MPlayer</application> intentarÃ¡ cargar los archivos
 <filename>main</filename>, <filename>main.png</filename>,
 <filename>main.PNG</filename>.
 </para>
 
 
 <sect2 id="skin-file-main">
-<title>Ventana principal y barra de reproducción</title>
+<title>Ventana principal y barra de reproducciÃ³n</title>
 <para>
-Más abajo tiene la lista de entradas que pueden usarse en los bloques
+MÃ¡s abajo tiene la lista de entradas que pueden usarse en los bloques
 '<literal>window = main</literal>' ... '<literal>end</literal>',
 y '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
 </para>
@@ -328,13 +328,13 @@ y '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   </literal></term>
   <listitem><para>
 Le permite especificar la imagen de fondo para usar en la ventana principal.
-La ventana aparecerá en la posición <literal>X,Y</literal> dada de la pantalla.
-La ventana tendrá el tamaño de la imagen.
+La ventana aparecerÃ¡ en la posiciÃ³n <literal>X,Y</literal> dada de la pantalla.
+La ventana tendrÃ¡ el tamaÃ±o de la imagen.
     </para>
     <note><para>Estas coordenadas no funcionan actualmente para la ventana de
-    reproducción.</para></note><warning><para>Las regiones transparentes en la
+    reproducciÃ³n.</para></note><warning><para>Las regiones transparentes en la
     imagen (coloreadas con #FF00FF) aparecen en negro en servidores X sin la
-    extensión XShape. El ancho de la imagen debe ser divisible por 8.</para></warning>
+    extensiÃ³n XShape. El ancho de la imagen debe ser divisible por 8.</para></warning>
     </listitem>
 </varlistentry>
 
@@ -343,11 +343,11 @@ La ventana tendrá el tamaño de la imagen.
   <anchor id="skin-button"/>button = imagen, X, Y, ancho, alto, mensaje
   </literal></term>
   <listitem><para>
-Coloca un botón de tamaño <literal>ancho</literal> * <literal>alto</literal> en
-la posición <literal>X,Y</literal>. El <literal>mensaje</literal> especificado
-es generado cuando se hace clic en el botón. La imagen dada en
+Coloca un botÃ³n de tamaÃ±o <literal>ancho</literal> * <literal>alto</literal> en
+la posiciÃ³n <literal>X,Y</literal>. El <literal>mensaje</literal> especificado
+es generado cuando se hace clic en el botÃ³n. La imagen dada en
 <literal>imagen</literal> debe tener tres partes una debajo de otra (de acuerdo con
-los posibles estados del botón), como esto:
+los posibles estados del botÃ³n), como esto:
 </para>
 <informalfigure>
 <screen>
@@ -368,16 +368,16 @@ los posibles estados del botón), como esto:
   <anchor id="skin-decoration"/>decoration = enable|disable
   </literal></term>
   <listitem><para>
-Activa o desactiva la decoración del administrador de ventanas para la
+Activa o desactiva la decoraciÃ³n del administrador de ventanas para la
 ventana principal. Por defecto toma el valor <emphasis role="bold">disable</emphasis>.
     </para>
-    <note><para>Esto no funciona para la ventana de reproducción, no lo necesita.</para></note>
+    <note><para>Esto no funciona para la ventana de reproducciÃ³n, no lo necesita.</para></note>
   </listitem>
 </varlistentry>
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-hpotmeter"/>hpotmeter = botón, bancho, balto, fases, numfases, defecto, X, Y, ancho, alto, mensaje
+  <anchor id="skin-hpotmeter"/>hpotmeter = botÃ³n, bancho, balto, fases, numfases, defecto, X, Y, ancho, alto, mensaje
   </literal></term>
   <listitem><para>
 
@@ -386,26 +386,26 @@ ventana principal. Por defecto toma el valor <emphasis role="bold">disable</emph
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-vpotmeter"/>vpotmeter = botón, bancho, balto, fases, numfases, defecto, X, Y, ancho, alto, mensaje
+  <anchor id="skin-vpotmeter"/>vpotmeter = botÃ³n, bancho, balto, fases, numfases, defecto, X, Y, ancho, alto, mensaje
   </literal></term>
   <listitem><para>
-Coloca un medidor horizontal (hpotmeter) o vertical (vpotmeter) de tamaño
-<literal>ancho</literal> * <literal>alto</literal> en la posición
+Coloca un medidor horizontal (hpotmeter) o vertical (vpotmeter) de tamaÃ±o
+<literal>ancho</literal> * <literal>alto</literal> en la posiciÃ³n
 <literal>X,Y</literal>. La imagen puede ser dividida en diferentes partes para
 las diferentes fases del medidor (por ejemplo, puede tener un medidor para
 el control del volumen que vaya de verde a rojo mientras sus valores cambian
-desde el mínimo al máximo.). <literal>hpotmeter</literal> puede tener un botón
-que se desplaze horizontalmente. Los parámetros son:
+desde el mÃ­nimo al mÃ¡ximo.). <literal>hpotmeter</literal> puede tener un botÃ³n
+que se desplaze horizontalmente. Los parÃ¡metros son:
     </para>
     <itemizedlist>
-    <listitem><para><literal>botón</literal> - la imagen que se usará para el
-    botón (debe tener tres partes una debajo de otra, como en el caso de
-    <link linkend="skin-button">botón</link>)
+    <listitem><para><literal>botÃ³n</literal> - la imagen que se usarÃ¡ para el
+    botÃ³n (debe tener tres partes una debajo de otra, como en el caso de
+    <link linkend="skin-button">botÃ³n</link>)
     </para></listitem>
-    <listitem><para><literal>bancho</literal>,<literal>balto</literal> - tamaño
-    del botón
+    <listitem><para><literal>bancho</literal>,<literal>balto</literal> - tamaÃ±o
+    del botÃ³n
     </para></listitem>
-   <listitem><para><literal>fases</literal> - la imagen que se usará para las
+   <listitem><para><literal>fases</literal> - la imagen que se usarÃ¡ para las
    diferentes fases del medidor horizontal. Un valor especial <literal>NULL</literal>
    puede usarse si no desea una imagen. La imagen debe estar dividida en
    <literal>numfasespartes</literal> verticalmente como esto:
@@ -424,13 +424,13 @@ que se desplaze horizontalmente. Los parámetros son:
 </screen>
 </informalfigure>
     </listitem>
-    <listitem><para><literal>numfases</literal> - número de fases almacenadas en la
+    <listitem><para><literal>numfases</literal> - nÃºmero de fases almacenadas en la
     imagen de <literal>fases</literal>
     </para></listitem>
     <listitem><para><literal>defecto</literal> - valor por defecto en el medidor
     (en el rango de <literal>0</literal> a <literal>100</literal>)
     </para></listitem>
-    <listitem><para><literal>X</literal>,<literal>Y</literal> - posición del medidor
+    <listitem><para><literal>X</literal>,<literal>Y</literal> - posiciÃ³n del medidor
     </para></listitem>
     <listitem><para><literal>ancho</literal>,<literal>alto</literal> - ancho y alto
     del <literal>medidor</literal>
@@ -448,11 +448,11 @@ que se desplaze horizontalmente. Los parámetros son:
   <anchor id="skin-potmeter"/>potmeter = fases, numfases, defecto, X, Y, ancho, alto, mensaje
   </literal></term>
   <listitem><para>
-Un <literal>hpotmeter</literal> sin un botón. (Creo que está hecho para hacer una especie
-de botón que gire sobre sí mismo, pero reacciona a arrastre horizontal solamente). Para la
-descripción de los parámetros vea <link linkend="skin-hpotmeter">hpotmeter</link>.
-<literal>fases</literal> puede ser <literal>NULL</literal>, pero es poco útil,
-porque no le permite ver donde está establecido el valor del <literal>potmeter</literal>.
+Un <literal>hpotmeter</literal> sin un botÃ³n. (Creo que estÃ¡ hecho para hacer una especie
+de botÃ³n que gire sobre sÃ­ mismo, pero reacciona a arrastre horizontal solamente). Para la
+descripciÃ³n de los parÃ¡metros vea <link linkend="skin-hpotmeter">hpotmeter</link>.
+<literal>fases</literal> puede ser <literal>NULL</literal>, pero es poco Ãºtil,
+porque no le permite ver donde estÃ¡ establecido el valor del <literal>potmeter</literal>.
     </para></listitem>
 </varlistentry>
 
@@ -461,11 +461,11 @@ porque no le permite ver donde está establecido el valor del <literal>potmeter</
   <anchor id="skin-font"/>font = fontfile, fontid
   </literal></term>
   <listitem><para>
-Define una tipografía. <literal>fontfile</literal> es el nombre del archivo de
-descripción de la tipografía con extensión <filename>.fnt</filename> (no especifique
-la extensión aquí). <literal>fontid</literal> es usado para referirse a la tipografía
+Define una tipografÃ­a. <literal>fontfile</literal> es el nombre del archivo de
+descripciÃ³n de la tipografÃ­a con extensiÃ³n <filename>.fnt</filename> (no especifique
+la extensiÃ³n aquÃ­). <literal>fontid</literal> es usado para referirse a la tipografÃ­a
 (vea <link linkend="skin-dlabel">dlabel</link> y <link linkend="skin-slabel">slabel</link>).
-Pueden definirse hasta 25 tipografías.
+Pueden definirse hasta 25 tipografÃ­as.
     </para></listitem>
 </varlistentry>
 
@@ -474,11 +474,11 @@ Pueden definirse hasta 25 tipografías.
   <anchor id="skin-slabel"/>slabel = X, Y, fontid, &quot;text&quot;
   </literal></term>
   <listitem><para>
-Coloca una etiqueta estática en la posición <literal>X,Y</literal>. <literal>text</literal>
-se muestra usando la tipografía identificada con <literal>fontid</literal>. El texto es
-una cadena de texto en crudo (variables como <literal>$x</literal> no funcionarán) que debe
+Coloca una etiqueta estÃ¡tica en la posiciÃ³n <literal>X,Y</literal>. <literal>text</literal>
+se muestra usando la tipografÃ­a identificada con <literal>fontid</literal>. El texto es
+una cadena de texto en crudo (variables como <literal>$x</literal> no funcionarÃ¡n) que debe
 ser encerrada entre comillas dobles (el caracter &quot; no puede ser parte del texto).
-La etiqueta es mostrada usando la tipografía identificada por <literal>fontid</literal>.
+La etiqueta es mostrada usando la tipografÃ­a identificada por <literal>fontid</literal>.
     </para></listitem>
 </varlistentry>
 
@@ -488,18 +488,18 @@ La etiqueta es mostrada usando la tipografía identificada por <literal>fontid</l
   </literal></term>
   <listitem>
 <para>
-Coloca una etiqueta dinámica en la posición <literal>X,Y</literal>. La etiqueta se
-llama dinámica porque su texto es refrescado periódicamente. La longitud máxima de la
+Coloca una etiqueta dinÃ¡mica en la posiciÃ³n <literal>X,Y</literal>. La etiqueta se
+llama dinÃ¡mica porque su texto es refrescado periÃ³dicamente. La longitud mÃ¡xima de la
 etiqueta viene dada por <literal>length</literal> (su altura es la altura de un caracter).
-Si el texto que ha de ser mostrado es más ancho que esta, será desplazado,
-si no será alineado dentro del espacio especificado por el valor del parámetro
+Si el texto que ha de ser mostrado es mÃ¡s ancho que esta, serÃ¡ desplazado,
+si no serÃ¡ alineado dentro del espacio especificado por el valor del parÃ¡metro
 <literal>align</literal>: <literal>0</literal> es para derecha,
 <literal>1</literal> para centrado, <literal>2</literal> para izquierda.
 </para>
 <para>
 El texto que ha de ser mostrado viene dado por <literal>text</literal>: Debe ser
 escrito entre comillas dobles (por eso el caracter &quot; no puede ser parte del
-texto). La etiqueta es mostrada usando la tipografía identificada por
+texto). La etiqueta es mostrada usando la tipografÃ­a identificada por
 <literal>fontid</literal>. Puede usar las siguientes variables en el texto:
 </para>
 
@@ -511,35 +511,35 @@ texto). La etiqueta es mostrada usando la tipografía identificada por
 <tbody>
 <row>
 <entry>$1</entry>
-<entry>tiempo de reproducción en formato <emphasis>hh:mm:ss</emphasis></entry>
+<entry>tiempo de reproducciÃ³n en formato <emphasis>hh:mm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$2</entry>
-<entry>tiempo de reproducción en formato <emphasis>mmmm:ss</emphasis></entry>
+<entry>tiempo de reproducciÃ³n en formato <emphasis>mmmm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$3</entry>
-<entry>tiempo de reproducción en formato <emphasis>hh</emphasis> (horas)</entry>
+<entry>tiempo de reproducciÃ³n en formato <emphasis>hh</emphasis> (horas)</entry>
 </row>
 <row>
 <entry>$4</entry>
-<entry>tiempo de reproducción en formato<emphasis>mm</emphasis> (minutos)</entry>
+<entry>tiempo de reproducciÃ³n en formato<emphasis>mm</emphasis> (minutos)</entry>
 </row>
 <row>
 <entry>$5</entry>
-<entry>tiempo de reproducción en formato <emphasis>ss</emphasis> (segundos)</entry>
+<entry>tiempo de reproducciÃ³n en formato <emphasis>ss</emphasis> (segundos)</entry>
 </row>
 <row>
 <entry>$6</entry>
-<entry>longitud de película en formato <emphasis>hh:mm:ss</emphasis></entry>
+<entry>longitud de pelÃ­cula en formato <emphasis>hh:mm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$7</entry>
-<entry>longitud de película en formato <emphasis>mmmm:ss</emphasis></entry>
+<entry>longitud de pelÃ­cula en formato <emphasis>mmmm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$8</entry>
-<entry>tiempo de reproducción en formato <emphasis>h:mm:ss</emphasis></entry>
+<entry>tiempo de reproducciÃ³n en formato <emphasis>h:mm:ss</emphasis></entry>
 </row>
 <row>
 <entry>$v</entry>
@@ -564,11 +564,11 @@ texto). La etiqueta es mostrada usando la tipografía identificada por
 <row>
 <entry>$a</entry>
 <entry>un caracter de acuerdo con el tipo de audio (ninguno: <literal>n</literal>,
-mono: <literal>m</literal>, estéreo: <literal>t</literal>)</entry>
+mono: <literal>m</literal>, estÃ©reo: <literal>t</literal>)</entry>
 </row>
 <row>
 <entry>$t</entry>
-<entry>número de pista (en lista de reproducción)</entry>
+<entry>nÃºmero de pista (en lista de reproducciÃ³n)</entry>
 </row>
 <row>
 <entry>$o</entry>
@@ -576,39 +576,39 @@ mono: <literal>m</literal>, estéreo: <literal>t</literal>)</entry>
 </row>
 <row>
 <entry>$f</entry>
-<entry>nombre del archivo en minúsculas</entry>
+<entry>nombre del archivo en minÃºsculas</entry>
 </row>
 <row>
 <entry>$F</entry>
-<entry>nombre del archivo en mayúsculas</entry>
+<entry>nombre del archivo en mayÃºsculas</entry>
 </row>
 <row>
 <entry>$T</entry>
-<entry>un caracter en función del tipo de flujo (archivo: <literal>f</literal>,
+<entry>un caracter en funciÃ³n del tipo de flujo (archivo: <literal>f</literal>,
 Video CD: <literal>v</literal>, DVD: <literal>d</literal>, URL: <literal>u</literal>)</entry>
 </row>
 <row>
 <entry>$p</entry>
-<entry>el caracter <keycap>p</keycap> (si una película está siendo mostrada y la
-tipografía tiene el caracter <keycap>p</keycap></entry>
+<entry>el caracter <keycap>p</keycap> (si una pelÃ­cula estÃ¡ siendo mostrada y la
+tipografÃ­a tiene el caracter <keycap>p</keycap></entry>
 </row>
 <row>
 <entry>$s</entry>
-<entry>el caracter <keycap>s</keycap> (si la película ha sido detenida y la
-tipografía tiene el caracter <keycap>s</keycap></entry>
+<entry>el caracter <keycap>s</keycap> (si la pelÃ­cula ha sido detenida y la
+tipografÃ­a tiene el caracter <keycap>s</keycap></entry>
 </row>
 <row>
 <entry>$e</entry>
-<entry>el caracter <keycap>e</keycap> (si se ha pausado la reproducción y la
-tipografía tiene el caracter <keycap>e</keycap></entry>
+<entry>el caracter <keycap>e</keycap> (si se ha pausado la reproducciÃ³n y la
+tipografÃ­a tiene el caracter <keycap>e</keycap></entry>
 </row>
 <row>
 <entry>$x</entry>
-<entry>ancho de la película</entry>
+<entry>ancho de la pelÃ­cula</entry>
 </row>
 <row>
 <entry>$y</entry>
-<entry>alto de la película</entry>
+<entry>alto de la pelÃ­cula</entry>
 </row>
 <row>
 <entry>$C</entry>
@@ -625,11 +625,11 @@ tipografía tiene el caracter <keycap>e</keycap></entry>
 
 <note><para>
 Las variables <literal>$a, $T, $p, $s</literal> y <literal>$e</literal> devuelven
-caracteres que deben mostrarse como símbolos especiales (por ejemplo, <keycap>e</keycap>
-es para el símbolo de la pausa que normalmente es algo parecido a ||). Debe tener
-una tipografía para caracteres normales y una diferente para los símbolos. Vea la
-sección acerca de <link linkend="skin-fonts-symbols">símbolos</link> para más
-información.
+caracteres que deben mostrarse como sÃ­mbolos especiales (por ejemplo, <keycap>e</keycap>
+es para el sÃ­mbolo de la pausa que normalmente es algo parecido a ||). Debe tener
+una tipografÃ­a para caracteres normales y una diferente para los sÃ­mbolos. Vea la
+secciÃ³n acerca de <link linkend="skin-fonts-symbols">sÃ­mbolos</link> para mÃ¡s
+informaciÃ³n.
 </para></note>
 </sect2>
 
@@ -646,13 +646,13 @@ Las siguientes entradas pueden ser usadas en el bloque
   <anchor id="skin-sub-base"/>base = image, X, Y, width, height
   </literal></term>
   <listitem><para>
-La imagen que se mostrará en la ventana. La ventana aparecerá en la posición
+La imagen que se mostrarÃ¡ en la ventana. La ventana aparecerÃ¡ en la posiciÃ³n
 <literal>X,Y</literal> dada de la pantalla (<literal>0,0</literal> es la
 esquina arriba a la izquierda). Puede especificar <literal>-1</literal> para
 el centro y <literal>-2</literal> para el lado derecho (<literal>X</literal>) y
-abajo (<literal>Y</literal>). La ventana será tan grande como sea la imagen.
-<literal>width</literal> y <literal>height</literal> definen el tamaño de la ventana;
-son opcionales (si no se especifican, la ventana tendrá el mismo tamaño que la imagen).
+abajo (<literal>Y</literal>). La ventana serÃ¡ tan grande como sea la imagen.
+<literal>width</literal> y <literal>height</literal> definen el tamaÃ±o de la ventana;
+son opcionales (si no se especifican, la ventana tendrÃ¡ el mismo tamaÃ±o que la imagen).
     </para></listitem>
 </varlistentry>
 
@@ -661,7 +661,7 @@ son opcionales (si no se especifican, la ventana tendrá el mismo tamaño que la i
   <anchor id="skin-background"/>background = R, G, B
   </literal></term>
   <listitem><para>
-Le permite especificar el color de fondo. Es útil si la imagen es más pequeña
+Le permite especificar el color de fondo. Es Ãºtil si la imagen es mÃ¡s pequeÃ±a
 que la ventana. <literal>R</literal>, <literal>G</literal> y <literal>B</literal>
 especifican los valores de las componentes de color para rojo, verde y azul (cada
 uno ha de tener un valor decimal de 0 a 255).
@@ -671,13 +671,13 @@ uno ha de tener un valor decimal de 0 a 255).
 </sect2>
 
 <sect2 id="skin-file-menu">
-<title>Menú del skin</title>
+<title>MenÃº del skin</title>
 <para>
-Como se mencionó anteriormente, el menú es mostrado usando dos imágenes. Las entradas
-normales para el menú se toman de la imagen especificada por el objeto <literal>base</literal>,
-mientras que la entrada que actualmente esté seleccionada es tomada desde la imagen
-especificada por el objeto <literal>selected</literal>. Debe definir la posición y el
-tamaño de cada entrada de menú a través del objeto de menú.
+Como se mencionÃ³ anteriormente, el menÃº es mostrado usando dos imÃ¡genes. Las entradas
+normales para el menÃº se toman de la imagen especificada por el objeto <literal>base</literal>,
+mientras que la entrada que actualmente estÃ© seleccionada es tomada desde la imagen
+especificada por el objeto <literal>selected</literal>. Debe definir la posiciÃ³n y el
+tamaÃ±o de cada entrada de menÃº a travÃ©s del objeto de menÃº.
 </para>
 
 <para>
@@ -691,7 +691,7 @@ Las siguientes entradas pueden usarse en el bloque de
   <anchor id="skin-menu-base"/>base = image
   </literal></term>
   <listitem><para>
-La imagen para las entradas normales del menú.
+La imagen para las entradas normales del menÃº.
     </para></listitem>
 </varlistentry>
 
@@ -700,7 +700,7 @@ La imagen para las entradas normales del menú.
   <anchor id="skin-selected"/>selected = image
   </literal></term>
   <listitem><para>
-La imagen mostrando el menú con todas las entradas seleccionadas.
+La imagen mostrando el menÃº con todas las entradas seleccionadas.
     </para></listitem>
 </varlistentry>
 
@@ -709,9 +709,9 @@ La imagen mostrando el menú con todas las entradas seleccionadas.
   <anchor id="skin-menu"/>menu = X, Y, width, height, message
   </literal></term>
   <listitem><para>
-Define la posición <literal>X,Y</literal> y el tamaño de una entrada
-de menú en la imagen. <literal>message</literal> es el mensaje que ha de
-generarse cuando el ratón del botón es soltado sobre la entrada.
+Define la posiciÃ³n <literal>X,Y</literal> y el tamaÃ±o de una entrada
+de menÃº en la imagen. <literal>message</literal> es el mensaje que ha de
+generarse cuando el ratÃ³n del botÃ³n es soltado sobre la entrada.
     </para></listitem>
 </varlistentry>
 </variablelist>
@@ -719,25 +719,25 @@ generarse cuando el ratón del botón es soltado sobre la entrada.
 </sect1>
 
 <sect1 id="skin-fonts">
-<title>Tipografías</title>
+<title>TipografÃ­as</title>
 <para>
-Como se mencionó en la sección acerca de las partes de un skin, una tipografía
-viene definida por una imagen y un archivo de descripción. Puede colocar caracteres
-en cualquier parte de la imagen, pero ha de asegurarse de que su posición y tamaño
-vienen dados en el archivo de descripción de manera exacta.
+Como se mencionÃ³ en la secciÃ³n acerca de las partes de un skin, una tipografÃ­a
+viene definida por una imagen y un archivo de descripciÃ³n. Puede colocar caracteres
+en cualquier parte de la imagen, pero ha de asegurarse de que su posiciÃ³n y tamaÃ±o
+vienen dados en el archivo de descripciÃ³n de manera exacta.
 </para>
 
 <para>
-El archivo de descripción de la tipografía (con extensión <filename>.fnt</filename>)
-puede tener líneas de comentarios que empiecen por '<literal>;</literal>'. El archivo
-debe tener una línea en la forma
+El archivo de descripciÃ³n de la tipografÃ­a (con extensiÃ³n <filename>.fnt</filename>)
+puede tener lÃ­neas de comentarios que empiecen por '<literal>;</literal>'. El archivo
+debe tener una lÃ­nea en la forma
 <anchor id="skin-font-image"/>
 <programlisting>image = <replaceable>image</replaceable></programlisting>
 Donde <literal><replaceable>image</replaceable></literal> es el nombre del
-archivo de imagen que se usará para la tipografía (puede no especificar la extensión).
+archivo de imagen que se usarÃ¡ para la tipografÃ­a (puede no especificar la extensiÃ³n).
 <anchor id="skin-font-char"/>
 <programlisting>&quot;char&quot; = X, Y, width, height</programlisting>
-Aquí <literal>X</literal> e <literal>Y</literal> especifican la posición del
+AquÃ­ <literal>X</literal> e <literal>Y</literal> especifican la posiciÃ³n del
 caracter <literal>char</literal> en la imagen (<literal>0,0</literal> es la
 esquina superior izquierda). <literal>width</literal> y <literal>height</literal>
 son las dimensiones del caracter en pixels.
@@ -749,7 +749,7 @@ Este ejemplo define los caracteres A, B, C usando <filename>font.png</filename>.
 ; Puede ser &quot;font&quot; en lugar de &quot;font.png&quot;.
 image = font.png
 
-; Tres caracteres son suficientes para el propósito de esta demostración :-)
+; Tres caracteres son suficientes para el propÃ³sito de esta demostraciÃ³n :-)
 &quot;A&quot; =  0,0, 7,13
 &quot;B&quot; =  7,0, 7,13
 &quot;C&quot; = 14,0, 7,13
@@ -757,22 +757,22 @@ image = font.png
 </para>
 
 <sect2 id="skin-fonts-symbols">
-<title>Símbolos</title>
+<title>SÃ­mbolos</title>
 <para>
 Algunos caracteres tienen significado especial cuando son devueltos por algunas
 de las variables usadas en <link linkend="skin-dlabel">dlabel</link>. Estos
-caracteres se deben mostrar como símbolos para que parezca un bonito logotipo
+caracteres se deben mostrar como sÃ­mbolos para que parezca un bonito logotipo
 de DVD en lugar del caracter '<literal>d</literal>' para un flujo de DVD por ejemplo.
 </para>
 <para>
 La siguiente tabla lista todos los caracters que pueden ser usados para
-mostrar símbolos (y que por lo tanto requieren una tipografía diferente).
+mostrar sÃ­mbolos (y que por lo tanto requieren una tipografÃ­a diferente).
 </para>
 
 <informaltable>
 <tgroup cols="2">
 <thead>
-  <row><entry>Caracter</entry><entry>Símbolo</entry></row>
+  <row><entry>Caracter</entry><entry>SÃ­mbolo</entry></row>
 </thead>
 <tbody>
 <row><entry><keycap>p</keycap></entry><entry>play</entry></row>
@@ -795,19 +795,19 @@ mostrar símbolos (y que por lo tanto requieren una tipografía diferente).
 <title>Mensajes GUI</title>
 <para>
 Son los mensajes que pueden ser generados por los botones, potmetros y entradas
-de menú.
+de menÃº.
 </para>
 <note><para>
 Algunos de los mensajes pueden no funcionar como se espera (o ni funcionar).
-Como ya sabe, el GUI está bajo desarrollo.
+Como ya sabe, el GUI estÃ¡ bajo desarrollo.
 </para></note>
 
 <variablelist>
-<title>Control de reproducción:</title>
+<title>Control de reproducciÃ³n:</title>
 <varlistentry>
   <term><emphasis role="bold">evNext</emphasis></term>
   <listitem><para>
-Salta a la siguiente pista en la lista de reproducción.
+Salta a la siguiente pista en la lista de reproducciÃ³n.
     </para></listitem>
 </varlistentry>
 
@@ -815,18 +815,18 @@ Salta a la siguiente pista en la lista de reproducción.
   <term><emphasis role="bold">evPause</emphasis></term>
   <listitem><para>
 Forma un cambio junto con <literal>evPlaySwitchToPause</literal>. Puede ser
-usado para tener un botón normal de play/pausa. Ambos mensajes deben ser asignados
-a botones que se muestren exactamente en la misma posición en la ventana. Este mensaje
-pausa la reproducción y la imagen para el botón <literal>evPlaySwitchToPause</literal>
-es mostrada (para indicar que el botón puede ser pulsado de nuevo para continuar
-la reproducción).
+usado para tener un botÃ³n normal de play/pausa. Ambos mensajes deben ser asignados
+a botones que se muestren exactamente en la misma posiciÃ³n en la ventana. Este mensaje
+pausa la reproducciÃ³n y la imagen para el botÃ³n <literal>evPlaySwitchToPause</literal>
+es mostrada (para indicar que el botÃ³n puede ser pulsado de nuevo para continuar
+la reproducciÃ³n).
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPlay</emphasis></term>
   <listitem><para>
-Inicia la reproducción.
+Inicia la reproducciÃ³n.
     </para></listitem>
 </varlistentry>
 
@@ -834,47 +834,47 @@ Inicia la reproducción.
   <term><emphasis role="bold">evPlaySwitchToPause</emphasis></term>
   <listitem><para>
 Lo contrario a <literal>evPauseSwitchToPlay</literal>. Este mensaje inicia
-la reproducción y la imagen para el botón <literal>evPauseSwitchToPlay</literal>
-es mostrada (para indicar que el botón puede ser pulsado de nuevo para
-volver a pausar la reproducción).
+la reproducciÃ³n y la imagen para el botÃ³n <literal>evPauseSwitchToPlay</literal>
+es mostrada (para indicar que el botÃ³n puede ser pulsado de nuevo para
+volver a pausar la reproducciÃ³n).
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPrev</emphasis></term>
   <listitem><para>
-Salta a la pista previa en la lista de reproducción.
+Salta a la pista previa en la lista de reproducciÃ³n.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evStop</emphasis></term>
   <listitem><para>
-Detiene la reproducción.
+Detiene la reproducciÃ³n.
     </para></listitem>
 </varlistentry>
 </variablelist>
 
 <variablelist>
-<title>Búsqueda:</title>
+<title>BÃºsqueda:</title>
 <varlistentry>
   <term><emphasis role="bold">evBackward10sec</emphasis></term>
   <listitem><para>
-Busca 10 segundos hacia atrás.
+Busca 10 segundos hacia atrÃ¡s.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evBackward1min</emphasis></term>
   <listitem><para>
-Busca 1 minuto hacia atrás.
+Busca 1 minuto hacia atrÃ¡s.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evBackward10min</emphasis></term>
   <listitem><para>
-Busca 10 minutos hacia atrás.
+Busca 10 minutos hacia atrÃ¡s.
     </para></listitem>
 </varlistentry>
 
@@ -902,8 +902,8 @@ Busca 10 minutos hacia adelante.
 <varlistentry>
   <term><emphasis role="bold">evSetMoviePosition</emphasis></term>
   <listitem><para>
-Busca la posición (puede ser usado por un potmetro; el
-valor relativo (0-100%) del potmetro será el que se use).
+Busca la posiciÃ³n (puede ser usado por un potmetro; el
+valor relativo (0-100%) del potmetro serÃ¡ el que se use).
     </para></listitem>
 </varlistentry>
 </variablelist>
@@ -913,7 +913,7 @@ valor relativo (0-100%) del potmetro será el que se use).
 <varlistentry>
   <term><emphasis role="bold">evDoubleSize</emphasis></term>
   <listitem><para>
-Establece doble tamaño para la ventana de la película.
+Establece doble tamaÃ±o para la ventana de la pelÃ­cula.
     </para></listitem>
 </varlistentry>
 <varlistentry>
@@ -925,7 +925,7 @@ Cambia el modo pantalla completa activado/desactivado.
 <varlistentry>
   <term><emphasis role="bold">evNormalSize</emphasis></term>
   <listitem><para>
-Establece la ventana de video a tu tamaño normal
+Establece la ventana de video a tu tamaÃ±o normal
     </para></listitem>
 </varlistentry>
 </variablelist>
@@ -985,7 +985,7 @@ Silencia/activa el sonido.
   <term><emphasis role="bold">evSetBalance</emphasis></term>
   <listitem><para>
 Establece el balance (puede ser usado por un potmetro; el
-valor relativo (0-100%) del potmetro será el que se use).
+valor relativo (0-100%) del potmetro serÃ¡ el que se use).
     </para></listitem>
 </varlistentry>
 
@@ -993,13 +993,13 @@ valor relativo (0-100%) del potmetro será el que se use).
   <term><emphasis role="bold">evSetVolume</emphasis></term>
   <listitem><para>
 Establece el volumen (puede ser usado por un potmetro; el
-valor relativo (0-100%) del potmetro será el que se use).
+valor relativo (0-100%) del potmetro serÃ¡ el que se use).
     </para></listitem>
 </varlistentry>
 </variablelist>
 
 <variablelist>
-<title>Miscelánea:</title>
+<title>MiscelÃ¡nea:</title>
 <varlistentry>
   <term><emphasis role="bold">evAbout</emphasis></term>
   <listitem><para>
@@ -1010,7 +1010,7 @@ Abre la ventana de acerca de.
 <varlistentry>
   <term><emphasis role="bold">evDropSubtitle</emphasis></term>
   <listitem><para>
-Desactiva el uso de subtítulos actual.
+Desactiva el uso de subtÃ­tulos actual.
     </para></listitem>
 </varlistentry>
 
@@ -1045,15 +1045,15 @@ Carga un archivo (abriendo una ventana del navegador de archivos, para que pueda
 <varlistentry>
   <term><emphasis role="bold">evLoadPlay</emphasis></term>
   <listitem><para>
-Hace lo mismo que <literal>evLoad</literal>, pero inicia automáticamente la reproducción
-después de cargar el archivo.
+Hace lo mismo que <literal>evLoad</literal>, pero inicia automÃ¡ticamente la reproducciÃ³n
+despuÃ©s de cargar el archivo.
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoadSubtitle</emphasis></term>
   <listitem><para>
-Carga un archivo de subtítulos (con el selector de archivos)
+Carga un archivo de subtÃ­tulos (con el selector de archivos)
     </para></listitem>
 </varlistentry>
 
@@ -1067,14 +1067,14 @@ Carga un archivo de audio (con el selector de archivos)
 <varlistentry>
   <term><emphasis role="bold">evNone</emphasis></term>
   <listitem><para>
-Mensaje vacío, no tiene efecto (excepto quizá en las versiones CVS :-)).
+Mensaje vacÃ­o, no tiene efecto (excepto quizÃ¡ en las versiones CVS :-)).
     </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPlaylist</emphasis></term>
   <listitem><para>
-Abre/cierra la ventana de lista de reproducción.
+Abre/cierra la ventana de lista de reproducciÃ³n.
     </para></listitem>
 </varlistentry>
 
@@ -1109,7 +1109,7 @@ Establece el aspecto de la imagen mostrada.
 <varlistentry>
   <term><emphasis role="bold">evSetURL</emphasis></term>
   <listitem><para>
-Muestra la ventana de diálogo para URL.
+Muestra la ventana de diÃ¡logo para URL.
     </para></listitem>
 </varlistentry>
 
