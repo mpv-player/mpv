@@ -209,7 +209,8 @@ static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection
   numrules=BE_16(mlti_chunk);
 
   if (codec >= numrules) {
-    printf("codec index >= number of codecs. %i %i\n", codec, numrules);
+    mp_msg(MSGT_STREAM, MSGL_WARN, "realrtsp: codec index >= number of codecs. %i %i\n",
+      codec, numrules);
     return 0;
   }
 
@@ -355,7 +356,8 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
   if (n<8) return 0;
   if (header[0] != 0x24)
   {
-    printf("rdt chunk not recognized: got 0x%02x\n", header[0]);
+    mp_msg(MSGT_STREAM, MSGL_WARN, "realrtsp: rdt chunk not recognized: got 0x%02x\n",
+      header[0]);
     return 0;
   }
   size=(header[1]<<16)+(header[2]<<8)+(header[3]);
@@ -366,7 +368,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
     printf("got flags1: 0x%02x\n",flags1);
 #endif
     if(header[6] == 0x06) {
-      printf("Stream EOF detected\n");
+      mp_msg(MSGT_STREAM, MSGL_INFO, "realrtsp: Stream EOF detected\n");
       return -1;
     }
     header[0]=header[5];
@@ -524,7 +526,8 @@ autherr:
   {
     char *alert=rtsp_search_answers(rtsp_session,"Alert");
     if (alert) {
-      printf("real: got message from server:\n%s\n", alert);
+      mp_msg(MSGT_STREAM, MSGL_WARN, "realrtsp: got message from server:\n%s\n",
+        alert);
     }
     rtsp_send_ok(rtsp_session);
     buf = xbuffer_free(buf);
@@ -534,20 +537,20 @@ autherr:
   /* receive description */
   size=0;
   if (!rtsp_search_answers(rtsp_session,"Content-length"))
-    printf("real: got no Content-length!\n");
+    mp_msg(MSGT_STREAM, MSGL_WARN, "real: got no Content-length!\n");
   else
     size=atoi(rtsp_search_answers(rtsp_session,"Content-length"));
 
   // as size is unsigned this also catches the case (size < 0)
   if (size > MAX_DESC_BUF) {
-    printf("real: Content-length for description too big (> %uMB)!\n",
+    mp_msg(MSGT_STREAM, MSGL_ERR, "realrtsp: Content-length for description too big (> %uMB)!\n",
             MAX_DESC_BUF/(1024*1024) );
     xbuffer_free(buf);
     return NULL;
   }
 
   if (!rtsp_search_answers(rtsp_session,"ETag"))
-    printf("real: got no ETag!\n");
+    mp_msg(MSGT_STREAM, MSGL_WARN, "realrtsp: got no ETag!\n");
   else
     session_id=strdup(rtsp_search_answers(rtsp_session,"ETag"));
     
