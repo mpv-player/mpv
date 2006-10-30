@@ -396,6 +396,7 @@ Miscellaneous options:
   --install-path=PATH    the path to a custom install program 
                          this option is obsolete and will be removed soon,
                          use --with-install instead.
+  --enable-color-console enable color console output [disable]
 
 Advanced options:
   --enable-mmx           build with MMX support [autodetect]
@@ -1723,6 +1724,7 @@ _pthreads=auto
 _ass=auto
 _rpath=no
 _asmalign_pot=auto
+_color_console=no
 for ac_option do
   case "$ac_option" in
   # Skip 1st pass
@@ -2036,6 +2038,8 @@ for ac_option do
   --disable-ass)        _ass=no         ;;
   --enable-rpath)       _rpath=yes      ;;
   --disable-rpath)      _rpath=no       ;;
+  --enable-color-console)  _color_console=yes ;;
+  --disable-color-console) _color_console=no  ;;
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
@@ -7418,6 +7422,14 @@ fi
 echores "$_maemo"
 fi
 
+echocheck "color console output"
+if test "$_color_console" = yes ; then
+  _def_color_console='#define MSG_USE_COLORS 1'
+else
+  _def_color_console='#undef MSG_USE_COLORS'
+fi
+echores "$_color_console"
+
 #############################################################################
 echo "Creating config.mak"
 cat > config.mak << EOF
@@ -7729,8 +7741,8 @@ $_def_crash_debug
 /* Toggles debugging informations */
 $_def_debug
 
-/* Toggles colorized output */
-//#define MSG_USE_COLORS 1
+/* Toggles color console output */
+$_def_color_console
 
 /* Indicates that libcdio is available for VCD and CD-DA playback */
 $_def_libcdio
