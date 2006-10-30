@@ -5426,6 +5426,8 @@ EOF
   _fontconfig=yes
   if cc_check -lfontconfig ; then
     _ld_fontconfig="-lfontconfig"
+  elif cc_check -lfontconfig -lexpat -lfreetype ; then
+    _ld_fontconfig="-lfontconfig -lexpat -lfreetype"
   elif cc_check `pkg-config --silence-errors --cflags --libs fontconfig` ; then
     _inc_extra="$_inc_extra `pkg-config --cflags fontconfig`"
     _ld_fontconfig=`pkg-config --libs fontconfig`
