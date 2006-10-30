@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Synced with r19973 -->
 
 <bookinfo id="toc">
-<title><application>MPlayer</application> - Multimediální přehrávač</title>
+<title><application>MPlayer</application> - MultimediĂĄlnĂ­ pĹehrĂĄvaÄ</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
-<date>24. března 2003</date>
+<date>24. bĹezna 2003</date>
 <copyright>
   <year>2000</year>
   <year>2001</year>
@@ -37,70 +37,70 @@
 
 
 <preface id="howtoread">
-<title>Jak číst tuto  dokumentaci</title>
+<title>Jak ÄĂ­st tuto  dokumentaci</title>
 
 <para>
-Pokud instalujete poprvé: měli byste si přečíst celou dokumentaci odtud až
-do konce kapitoly Instalace a následovat linky, které naleznete.
-Pokud máte jiné dotazy, vraťte se zpět na  <link linkend="toc">Obsah</link>
-a vyhledejte si příslušnou část. Přečtěte si <xref linkend="faq"/>,
-nebo zkuste grep na souborech. Odpovědi na většinu otázek by měly být někde tady,
-zbytek byl pravděpodobně probrán v některé z našich 
-<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">e-mailových konferencí</ulink>.
+Pokud instalujete poprvĂŠ: mÄli byste si pĹeÄĂ­st celou dokumentaci odtud aĹž
+do konce kapitoly Instalace a nĂĄsledovat linky, kterĂŠ naleznete.
+Pokud mĂĄte jinĂŠ dotazy, vraĹĽte se zpÄt na  <link linkend="toc">Obsah</link>
+a vyhledejte si pĹĂ­sluĹĄnou ÄĂĄst. PĹeÄtÄte si <xref linkend="faq"/>,
+nebo zkuste grep na souborech. OdpovÄdi na vÄtĹĄinu otĂĄzek by mÄly bĂ˝t nÄkde tady,
+zbytek byl pravdÄpodobnÄ probrĂĄn v nÄkterĂŠ z naĹĄich 
+<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">e-mailovĂ˝ch konferencĂ­</ulink>.
 <!-- FIXME: This refers to nonexistent links
 Prohledejte
 <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">archivy</ulink>, zde naleznete
-mnoho hodnotných informací.
+mnoho hodnotnĂ˝ch informacĂ­.
 -->
 </para>
 </preface>
 
 
 <chapter id="intro">
-<title>Představení</title>
+<title>PĹedstavenĂ­</title>
 
 <para>
-<application>MPlayer</application> je multimediální přehrávač pro Linux (běží na mnoha
-jiných Unixech a <emphasis role="bold">ne-x86</emphasis> CPU, viz
-<xref linkend="ports"/>). Přehraje většinu MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV,
-QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska souborů s podporou 
-mnoha nativních XAnim, RealPlayer a Win32 DLL kodeků. Můžete sledovat
-<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis> a také
-<emphasis role="bold">MPEG-4 (DivX)</emphasis> filmy. Další skvělou vlastností
-<application>MPlayer</application>u je velké množství podporovaných
-výstupních rozhraní. Pracuje s X11, Xv, DGA, OpenGL, SVGAlib,
-fbdev, AAlib, libcaca, DirectFB, rovněž můžete použít GGI a SDL (a takto i jejich ovladače)
-a také některé nízkoúrovňové ovladače konkrétních karet (pro Matrox, 3Dfx a
-Radeon, Mach64, Permedia3)! Většina z nich podporuje softwarové nebo hardwarové škálování
-(změna velikosti obrazu), takže si můžete užít video na celé obrazovce.
-<application>MPlayer</application> podporuje zobrazování přes některé hardwarové MPEG
-dekódovací karty, jako je <link linkend="dvb">DVB</link> a
-<link linkend="dxr3">DXR3/Hollywood+</link>. A což teprve velké krásné vyhlazené a
-stínované titulky (<emphasis role="bold">14 podporovaných typů</emphasis>)
-spolu s Evropskými/ISO 8859-1,2 (Bulharskými, Anglickými, Českými, atd), Cyrilickými a Korejskými
+<application>MPlayer</application> je multimediĂĄlnĂ­ pĹehrĂĄvaÄ pro Linux (bÄĹžĂ­ na mnoha
+jinĂ˝ch Unixech a <emphasis role="bold">ne-x86</emphasis> CPU, viz
+<xref linkend="ports"/>). PĹehraje vÄtĹĄinu MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV,
+QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska souborĹŻ s podporou 
+mnoha nativnĂ­ch XAnim, RealPlayer a Win32 DLL kodekĹŻ. MĹŻĹžete sledovat
+<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis> a takĂŠ
+<emphasis role="bold">MPEG-4 (DivX)</emphasis> filmy. DalĹĄĂ­ skvÄlou vlastnostĂ­
+<application>MPlayer</application>u je velkĂŠ mnoĹžstvĂ­ podporovanĂ˝ch
+vĂ˝stupnĂ­ch rozhranĂ­. Pracuje s X11, Xv, DGA, OpenGL, SVGAlib,
+fbdev, AAlib, libcaca, DirectFB, rovnÄĹž mĹŻĹžete pouĹžĂ­t GGI a SDL (a takto i jejich ovladaÄe)
+a takĂŠ nÄkterĂŠ nĂ­zkoĂşrovĹovĂŠ ovladaÄe konkrĂŠtnĂ­ch karet (pro Matrox, 3Dfx a
+Radeon, Mach64, Permedia3)! VÄtĹĄina z nich podporuje softwarovĂŠ nebo hardwarovĂŠ ĹĄkĂĄlovĂĄnĂ­
+(zmÄna velikosti obrazu), takĹže si mĹŻĹžete uĹžĂ­t video na celĂŠ obrazovce.
+<application>MPlayer</application> podporuje zobrazovĂĄnĂ­ pĹes nÄkterĂŠ hardwarovĂŠ MPEG
+dekĂłdovacĂ­ karty, jako je <link linkend="dvb">DVB</link> a
+<link linkend="dxr3">DXR3/Hollywood+</link>. A coĹž teprve velkĂŠ krĂĄsnĂŠ vyhlazenĂŠ a
+stĂ­novanĂŠ titulky (<emphasis role="bold">14 podporovanĂ˝ch typĹŻ</emphasis>)
+spolu s EvropskĂ˝mi/ISO 8859-1,2 (BulharskĂ˝mi, AnglickĂ˝mi, ÄeskĂ˝mi, atd), CyrilickĂ˝mi a KorejskĂ˝mi
 fonty a displej na obrazovce (OSD)?
 </para>
 
 <para>
-Přehrávač je pevný jako skála při přehrávání poškozených MPEG souborů
-(použitelné pro některá VCD), také přehrává špatné AVI soubory, které
-nelze přehrávat ani věhlasným windows media playerem.
-Dokonce lze přehrávat i AVI bez indexu a navíc můžete jejich indexy dočasně
-obnovit pomocí volby <option>-idx</option>, nebo trvale pomocí
-<application>MEncoder</application>u, což umožní převíjení!
-Jak vidíte, kvalita a stabilita jsou těmi nejdůležitějšími vlastnostmi,
-rychlost je ovšem také skvělá. Rovněž máme účinný systém filtrů pro manipulaci
+PĹehrĂĄvaÄ je pevnĂ˝ jako skĂĄla pĹi pĹehrĂĄvĂĄnĂ­ poĹĄkozenĂ˝ch MPEG souborĹŻ
+(pouĹžitelnĂŠ pro nÄkterĂĄ VCD), takĂŠ pĹehrĂĄvĂĄ ĹĄpatnĂŠ AVI soubory, kterĂŠ
+nelze pĹehrĂĄvat ani vÄhlasnĂ˝m windows media playerem.
+Dokonce lze pĹehrĂĄvat i AVI bez indexu a navĂ­c mĹŻĹžete jejich indexy doÄasnÄ
+obnovit pomocĂ­ volby <option>-idx</option>, nebo trvale pomocĂ­
+<application>MEncoder</application>u, coĹž umoĹžnĂ­ pĹevĂ­jenĂ­!
+Jak vidĂ­te, kvalita a stabilita jsou tÄmi nejdĹŻleĹžitÄjĹĄĂ­mi vlastnostmi,
+rychlost je ovĹĄem takĂŠ skvÄlĂĄ. RovnÄĹž mĂĄme ĂşÄinnĂ˝ systĂŠm filtrĹŻ pro manipulaci
 s videem i se zvukem.
 </para>
 
 <para>
-<application>MEncoder</application> (<application>MPlayer</application>ův Filmový
-Enkodér) je jednoduchý filmový enkodér, navržený k enkódování
-<application>MPlayer</application>em přehrávatelných filmů
+<application>MEncoder</application> (<application>MPlayer</application>ĹŻv FilmovĂ˝
+EnkodĂŠr) je jednoduchĂ˝ filmovĂ˝ enkodĂŠr, navrĹženĂ˝ k enkĂłdovĂĄnĂ­
+<application>MPlayer</application>em pĹehrĂĄvatelnĂ˝ch filmĹŻ
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
-do jiných <application>MPlayer</application>em přehrávatelných formátů (viz níže).
-Může enkódovat různými kodeky. jako je <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
-(jedním nebo dvěma průchody), <systemitem class="library">libavcodec</systemitem>,
+do jinĂ˝ch <application>MPlayer</application>em pĹehrĂĄvatelnĂ˝ch formĂĄtĹŻ (viz nĂ­Ĺže).
+MĹŻĹže enkĂłdovat rĹŻznĂ˝mi kodeky. jako je <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
+(jednĂ­m nebo dvÄma prĹŻchody), <systemitem class="library">libavcodec</systemitem>,
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
 audia.
 </para>
@@ -109,71 +109,71 @@ audia.
 <itemizedlist>
 <title>Vlastnosti <application>MEncoder</application>u</title>
 <listitem><simpara>
-  Enkódování ze široké řady formátů souboru a dekodérů
+  EnkĂłdovĂĄnĂ­ ze ĹĄirokĂŠ Ĺady formĂĄtĹŻ souboru a dekodĂŠrĹŻ
   <application>MPlayer</application>u
   </simpara></listitem>
 <listitem><simpara>
-  Enkódování pomocí všech FFmpeg
+  EnkĂłdovĂĄnĂ­ pomocĂ­ vĹĄech FFmpeg
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-   kodeků
+   kodekĹŻ
   </simpara></listitem>
 <listitem><simpara>
-  Video enkódování z <emphasis role="bold">V4L kompatibilních TV tunerů</emphasis>
+  Video enkĂłdovĂĄnĂ­ z <emphasis role="bold">V4L kompatibilnĂ­ch TV tunerĹŻ</emphasis>
   </simpara></listitem>
 <listitem><simpara>
-  Enkódování/multiplexování do prokládaných AVI souborů se správným indexem
+  EnkĂłdovĂĄnĂ­/multiplexovĂĄnĂ­ do proklĂĄdanĂ˝ch AVI souborĹŻ se sprĂĄvnĂ˝m indexem
   </simpara></listitem>
 <listitem><simpara>
-  Tvorba souborů z externího audio proudu
+  Tvorba souborĹŻ z externĂ­ho audio proudu
   </simpara></listitem>
 <listitem><simpara>
-  1, 2 nebo 3 průchodové enkódování
+  1, 2 nebo 3 prĹŻchodovĂŠ enkĂłdovĂĄnĂ­
   </simpara></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 zvuk
   <important><simpara>
-  VBR MP3 zvuk není vždy přehráván dobře přehrávači pro windows!
+  VBR MP3 zvuk nenĂ­ vĹždy pĹehrĂĄvĂĄn dobĹe pĹehrĂĄvaÄi pro windows!
   </simpara></important>
   </para></listitem>
 <listitem><simpara>
   PCM zvuk
   </simpara></listitem>
 <listitem><simpara>
-  Kopírování datového proudu
+  KopĂ­rovĂĄnĂ­ datovĂŠho proudu
   </simpara></listitem>
 <listitem><simpara>
-  Vstupní A/V synchronizace (založená na PTS, lze ji vypnout pomocí
+  VstupnĂ­ A/V synchronizace (zaloĹženĂĄ na PTS, lze ji vypnout pomocĂ­
   volby <option>-mc 0</option>)
   </simpara></listitem>
 <listitem><simpara>
-  Korekce snímkové rychlosti pomocí volby <option>-ofps</option> (užitečné při enkódování
+  Korekce snĂ­mkovĂŠ rychlosti pomocĂ­ volby <option>-ofps</option> (uĹžiteÄnĂŠ pĹi enkĂłdovĂĄnĂ­
   30000/1001 fps VOB do 24000/1001 fps AVI)
   </simpara></listitem>
 <listitem><simpara>
-  Používá výkonný systém filtrů (ořez, expanze, postproces, rotace, škálování (změna velikosti),
+  PouĹžĂ­vĂĄ vĂ˝konnĂ˝ systĂŠm filtrĹŻ (oĹez, expanze, postproces, rotace, ĹĄkĂĄlovĂĄnĂ­ (zmÄna velikosti),
   konverze rgb/yuv)
   </simpara></listitem>
 <listitem><simpara>
-  Umí enkódovat DVD/VOBsub <emphasis role="bold">A</emphasis> textové titulky do výstupního
+  UmĂ­ enkĂłdovat DVD/VOBsub <emphasis role="bold">A</emphasis> textovĂŠ titulky do vĂ˝stupnĂ­ho
   souboru
   </simpara></listitem>
 <listitem><simpara>
-  Umí ripovat DVD titulky do VOBsub formátu
+  UmĂ­ ripovat DVD titulky do VOBsub formĂĄtu
   </simpara></listitem>
 </itemizedlist>
 
 <itemizedlist>
-<title>Plánované vlastnosti</title>
+<title>PlĂĄnovanĂŠ vlastnosti</title>
 <listitem><simpara>
-  Ještě širší možnosti dostupných en/dekódovacích formátů/kodeků
-  (tvorba VOB souborů s DivX4/Indeo5/VIVO datovými proudy :).
+  JeĹĄtÄ ĹĄirĹĄĂ­ moĹžnosti dostupnĂ˝ch en/dekĂłdovacĂ­ch formĂĄtĹŻ/kodekĹŻ
+  (tvorba VOB souborĹŻ s DivX4/Indeo5/VIVO datovĂ˝mi proudy :).
   </simpara></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->
 <para>
 <application>MPlayer</application> a <application>MEncoder</application>
-mohou být distribuovány za podmínek stanovených v GNU General Public License Version 2.
+mohou bĂ˝t distribuovĂĄny za podmĂ­nek stanovenĂ˝ch v GNU General Public License Version 2.
 </para>
 
 &history.xml;

@@ -1,70 +1,70 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Synced with r19685 -->
 <chapter id="mencoder">
-<title>Základní použití <application>MEncoder</application>u</title>
+<title>ZĂĄkladnĂ­ pouĹžitĂ­ <application>MEncoder</application>u</title>
 
 <para>
-Úplný seznam dostupných voleb a příkladů pro <application>MEncoder</application>
-naleznete v man stránce. Řadu užitečných příkladů a podrobných návodů pro
-použití mnoha enkódovacích voleb naleznete v
-<ulink url="../../tech/encoding-tips.txt">tipech pro enkódování</ulink>, které
-byly získány z několika diskusí v konferenci MPlayer-users. Prohledejte
+ĂplnĂ˝ seznam dostupnĂ˝ch voleb a pĹĂ­kladĹŻ pro <application>MEncoder</application>
+naleznete v man strĂĄnce. Ĺadu uĹžiteÄnĂ˝ch pĹĂ­kladĹŻ a podrobnĂ˝ch nĂĄvodĹŻ pro
+pouĹžitĂ­ mnoha enkĂłdovacĂ­ch voleb naleznete v
+<ulink url="../../tech/encoding-tips.txt">tipech pro enkĂłdovĂĄnĂ­</ulink>, kterĂŠ
+byly zĂ­skĂĄny z nÄkolika diskusĂ­ v konferenci MPlayer-users. Prohledejte
 <ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">archivy</ulink>,
-chcete-li bohatost diskusí o všech aspektech a problémech vztažených
-k enkódování <application>MEncoder</application>em.
+chcete-li bohatost diskusĂ­ o vĹĄech aspektech a problĂŠmech vztaĹženĂ˝ch
+k enkĂłdovĂĄnĂ­ <application>MEncoder</application>em.
 </para>
 
 <sect1 id="menc-feat-selecting-codec">
-<title>Výběr kodeků a nosných formátů</title>
+<title>VĂ˝bÄr kodekĹŻ a nosnĂ˝ch formĂĄtĹŻ</title>
 
 <para>
-  Audio a video kodeky pro enkódování jsou vybírány příslušnými volbami
+  Audio a video kodeky pro enkĂłdovĂĄnĂ­ jsou vybĂ­rĂĄny pĹĂ­sluĹĄnĂ˝mi volbami
   <option>-oac</option> a <option>-ovc</option> options.
-  Napište například:
+  NapiĹĄte napĹĂ­klad:
   <screen>mencoder -ovc help</screen>
-  pro seznam video kodeků podporovaných verzí programu
-  <application>MEncoder</application> na vašem počítači.
-  Dostupné jsou následující možnosti:
+  pro seznam video kodekĹŻ podporovanĂ˝ch verzĂ­ programu
+  <application>MEncoder</application> na vaĹĄem poÄĂ­taÄi.
+  DostupnĂŠ jsou nĂĄsledujĂ­cĂ­ moĹžnosti:
 </para>
 <para>
-Audio (zvukové) kodeky:
+Audio (zvukovĂŠ) kodeky:
 
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Jméno audio kodeku</entry><entry>Popis</entry></row>
+<row><entry>JmĂŠno audio kodeku</entry><entry>Popis</entry></row>
 </thead>
 <tbody>
   <row>
     <entry>mp3lame</entry>
-    <entry>Enkóduje do VBR, ABR nebo CBR MP3 pomocí LAME</entry>
+    <entry>EnkĂłduje do VBR, ABR nebo CBR MP3 pomocĂ­ LAME</entry>
   </row>
   <row>
     <entry>lavc</entry>
-    <entry>Použije se některý z
+    <entry>PouĹžije se nÄkterĂ˝ z
     <link linkend="menc-feat-enc-libavcodec-audio-codecs">
-    <systemitem class="library">libavcodec</systemitem> audio kodeků</link>
+    <systemitem class="library">libavcodec</systemitem> audio kodekĹŻ</link>
     </entry>
   </row>
   <row>
     <entry>faac</entry>
-    <entry>FAAC AAC audio enkodér</entry>
+    <entry>FAAC AAC audio enkodĂŠr</entry>
   </row>
   <row>
     <entry>toolame</entry>
-    <entry>Enkodér MPEG Audio Layer 2</entry>
+    <entry>EnkodĂŠr MPEG Audio Layer 2</entry>
   </row>
   <row>
     <entry>twolame</entry>
-    <entry>Enkodér MPEG Audio Layer 2 založený na tooLAME</entry>
+    <entry>EnkodĂŠr MPEG Audio Layer 2 zaloĹženĂ˝ na tooLAME</entry>
   </row>
   <row>
     <entry>pcm</entry>
-    <entry>Nekomprimovaný PCM zvuk</entry>
+    <entry>NekomprimovanĂ˝ PCM zvuk</entry>
   </row>
   <row>
     <entry>copy</entry>
-    <entry>Nereenkóduje, pouze kopíruje komprimované vzorky</entry>
+    <entry>NereenkĂłduje, pouze kopĂ­ruje komprimovanĂŠ vzorky</entry>
   </row>
 </tbody>
 </tgroup>
@@ -76,14 +76,14 @@ Video kodeky:
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Jméno video kodeku</entry><entry>Popis</entry></row>
+<row><entry>JmĂŠno video kodeku</entry><entry>Popis</entry></row>
 </thead>
 <tbody>
   <row>
     <entry>lavc</entry>
-    <entry>Použije se některý z
+    <entry>PouĹžije se nÄkterĂ˝ z
     <link linkend="menc-feat-enc-libavcodec-video-codecs">
-    <systemitem class="library">libavcodec</systemitem> video kodeků</link>
+    <systemitem class="library">libavcodec</systemitem> video kodekĹŻ</link>
     </entry>
   </row>
   <row>
@@ -96,48 +96,48 @@ Video kodeky:
   </row>
   <row>
     <entry>nuv</entry>
-    <entry>nuppel video, používaný některými realtime aplikacemi</entry>
+    <entry>nuppel video, pouĹžĂ­vanĂ˝ nÄkterĂ˝mi realtime aplikacemi</entry>
   </row>
   <row>
     <entry>raw</entry>
-    <entry>Nekomprimované videosnímky</entry>
+    <entry>NekomprimovanĂŠ videosnĂ­mky</entry>
   </row>
   <row>
     <entry>copy</entry>
-    <entry>Nereenkóduje, pouze kopíruje komprimované snímky</entry>
+    <entry>NereenkĂłduje, pouze kopĂ­ruje komprimovanĂŠ snĂ­mky</entry>
   </row>
   <row>
     <entry>frameno</entry>
-    <entry>Použité pro 3-průchodové enkódování (nedoporučujeme)</entry>
+    <entry>PouĹžitĂŠ pro 3-prĹŻchodovĂŠ enkĂłdovĂĄnĂ­ (nedoporuÄujeme)</entry>
   </row>
 </tbody>
 </tgroup>
 </informaltable>
 </para>
 <para>
-  Výstupní nosný formát je vybírán volbou <option>-of</option>.
+  VĂ˝stupnĂ­ nosnĂ˝ formĂĄt je vybĂ­rĂĄn volbou <option>-of</option>.
   Zadejte:
   <screen>mencoder -of help</screen>
-  pro seznam všech nosných formátů podporovaných verzí programu
-  <application>MEncoder</application> na vašem počítači.
-  Dostupné jsou následující možnosti:
+  pro seznam vĹĄech nosnĂ˝ch formĂĄtĹŻ podporovanĂ˝ch verzĂ­ programu
+  <application>MEncoder</application> na vaĹĄem poÄĂ­taÄi.
+  DostupnĂŠ jsou nĂĄsledujĂ­cĂ­ moĹžnosti:
 </para>
 <para>
-Nosné formáty:
+NosnĂŠ formĂĄty:
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Název nosného formátu</entry><entry>Popis</entry></row>
+<row><entry>NĂĄzev nosnĂŠho formĂĄtu</entry><entry>Popis</entry></row>
 </thead>
 <tbody>
   <row>
     <entry>lavf</entry>
-    <entry>Jeden z nosných formátů podporovaných
+    <entry>Jeden z nosnĂ˝ch formĂĄtĹŻ podporovanĂ˝ch
     <systemitem class="library">libavformat</systemitem></entry>
   </row>
   <row>
     <entry>avi</entry>
-    <entry>Audio-Video Interleaved (Prokládané audio s videem)</entry>
+    <entry>Audio-Video Interleaved (ProklĂĄdanĂŠ audio s videem)</entry>
   </row>
   <row>
     <entry>mpeg</entry>
@@ -145,39 +145,39 @@ Nosné formáty:
   </row>
   <row>
     <entry>rawvideo</entry>
-    <entry>surový (raw) video datový proud (žádný muxing &ndash; pouze jeden
+    <entry>surovĂ˝ (raw) video datovĂ˝ proud (ĹžĂĄdnĂ˝ muxing &ndash; pouze jeden
     video proud)</entry>
   </row>
   <row>
     <entry>rawaudio</entry>
-    <entry>surový (raw) audio datový proud (žádný muxing &ndash; pouze jeden
+    <entry>surovĂ˝ (raw) audio datovĂ˝ proud (ĹžĂĄdnĂ˝ muxing &ndash; pouze jeden
     audio proud)</entry>
   </row>
 </tbody>
 </tgroup>
 </informaltable>
-  Nosný formát AVI je nativním nosným formátem
-  <application>MEncoder</application>u, což znamená, že je tím, který je nejlépe
-  zpracován a pro nějž byl <application>MEncoder</application>
-  navržen.
-  Jak bylo zmíněno, ostatní nosné formáty jsou použitelné, ale můžete
-  při jejich použití narazit na problémy.
+  NosnĂ˝ formĂĄt AVI je nativnĂ­m nosnĂ˝m formĂĄtem
+  <application>MEncoder</application>u, coĹž znamenĂĄ, Ĺže je tĂ­m, kterĂ˝ je nejlĂŠpe
+  zpracovĂĄn a pro nÄjĹž byl <application>MEncoder</application>
+  navrĹžen.
+  Jak bylo zmĂ­nÄno, ostatnĂ­ nosnĂŠ formĂĄty jsou pouĹžitelnĂŠ, ale mĹŻĹžete
+  pĹi jejich pouĹžitĂ­ narazit na problĂŠmy.
 </para>
 
 <para>
-Nosné formáty <systemitem class="library">libavformat</systemitem>:
+NosnĂŠ formĂĄty <systemitem class="library">libavformat</systemitem>:
 </para>
 <para>
   Pokud jste si zvolili <systemitem class="library">libavformat</systemitem>
-  pro provádění muxování výstupního souboru (pomocí <option>-of lavf</option>),
-  příslušný nosný formát bude určen z přípony výstupního souboru.
-  Můžete vynutit určitý nosný formát pomocí parametru <option>format</option>
+  pro provĂĄdÄnĂ­ muxovĂĄnĂ­ vĂ˝stupnĂ­ho souboru (pomocĂ­ <option>-of lavf</option>),
+  pĹĂ­sluĹĄnĂ˝ nosnĂ˝ formĂĄt bude urÄen z pĹĂ­pony vĂ˝stupnĂ­ho souboru.
+  MĹŻĹžete vynutit urÄitĂ˝ nosnĂ˝ formĂĄt pomocĂ­ parametru <option>format</option>
   knihovny <systemitem class="library">libavformat</systemitem>.
 
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Název <systemitem class="library">libavformat</systemitem> nosného formátu</entry><entry>Popis</entry></row>
+<row><entry>NĂĄzev <systemitem class="library">libavformat</systemitem> nosnĂŠho formĂĄtu</entry><entry>Popis</entry></row>
 </thead>
 <tbody>
   <row>
@@ -214,7 +214,7 @@ Nosné formáty <systemitem class="library">libavformat</systemitem>:
   </row>
   <row>
     <entry>nut</entry>
-    <entry>otevřený nosný formát NUT (experimentální a dosud neslučitelný se specifikací)</entry>
+    <entry>otevĹenĂ˝ nosnĂ˝ formĂĄt NUT (experimentĂĄlnĂ­ a dosud nesluÄitelnĂ˝ se specifikacĂ­)</entry>
   </row>
   <row>
     <entry>mov</entry>
@@ -222,7 +222,7 @@ Nosné formáty <systemitem class="library">libavformat</systemitem>:
   </row>
   <row>
     <entry>mp4</entry>
-    <entry>formát MPEG-4</entry>
+    <entry>formĂĄt MPEG-4</entry>
   </row>
   <row>
     <entry>dv</entry>
@@ -231,24 +231,24 @@ Nosné formáty <systemitem class="library">libavformat</systemitem>:
 </tbody>
 </tgroup>
 </informaltable>
-  Jak vidíte, <systemitem class="library">libavformat</systemitem>
-  umožňuje <application>MEncoder</application>u muxovat do velkého množství
-  nosných formátů.
-  Naneštěstí, jelikož <application>MEncoder</application> nebyl od počátku
-  navržen pro podporu jiných nosných formátů než AVI, měli byste být
-  paranoidní ve vstahu k výstupnímu souboru.
-  Ověřte si prosím pro jistotu, že audio/video synchronizace je OK
-  a soubor lze správně přehrát i jinými přehrávači, než
+  Jak vidĂ­te, <systemitem class="library">libavformat</systemitem>
+  umoĹžĹuje <application>MEncoder</application>u muxovat do velkĂŠho mnoĹžstvĂ­
+  nosnĂ˝ch formĂĄtĹŻ.
+  NaneĹĄtÄstĂ­, jelikoĹž <application>MEncoder</application> nebyl od poÄĂĄtku
+  navrĹžen pro podporu jinĂ˝ch nosnĂ˝ch formĂĄtĹŻ neĹž AVI, mÄli byste bĂ˝t
+  paranoidnĂ­ ve vstahu k vĂ˝stupnĂ­mu souboru.
+  OvÄĹte si prosĂ­m pro jistotu, Ĺže audio/video synchronizace je OK
+  a soubor lze sprĂĄvnÄ pĹehrĂĄt i jinĂ˝mi pĹehrĂĄvaÄi, neĹž
   <application>MPlayer</application>.
 </para>
 
 <informalexample>
-<para>Příklad:</para>
+<para>PĹĂ­klad:</para>
 <para>
-  Vytvoření Macromedia Flash videa vhodného pro přehrávání ve webovém prohlížeči
-  pomocí Macromedia Flash pluginu:
+  VytvoĹenĂ­ Macromedia Flash videa vhodnĂŠho pro pĹehrĂĄvĂĄnĂ­ ve webovĂŠm prohlĂ­ĹžeÄi
+  pomocĂ­ Macromedia Flash pluginu:
 <screen>
-mencoder <replaceable>vstupní.avi</replaceable> -o <replaceable>výstupní.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
+mencoder <replaceable>vstupnĂ­.avi</replaceable> -o <replaceable>vĂ˝stupnĂ­.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
 -lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3 \
 -srate 22050
 </screen>
@@ -259,85 +259,85 @@ mencoder <replaceable>vstupní.avi</replaceable> -o <replaceable>výstupní.flv</re
 
 
 <sect1 id="menc-feat-selecting-input">
-<title>Výběr vstupního souboru nebo zařízení</title>
+<title>VĂ˝bÄr vstupnĂ­ho souboru nebo zaĹĂ­zenĂ­</title>
 
 <para>
-  <application>MEncoder</application> umí enkódovat ze souborů nebo přímo z
-  DVD či VCD disku.
-  Vložte na příkazovém řádku jméno souboru pro enkódování souboru,
-  nebo <option>dvd://</option><replaceable>číslo_titulu</replaceable> nebo
-  <option>vcd://</option><replaceable>číslo_stopy</replaceable> pro enkódování
-  DVD titulu či VCD stopy.
-  Máte-li již zkopírováno DVD na hard disk (k tomu můžete použít nástroj jako
-  <application>dvdbackup</application>, dostupný na mnoha systémech),
-  a chcete enkódovat z kopie, měli byste i zde použít syntaxi
-  <option>dvd://</option> ve spojení s volbou <option>-dvd-device</option>
-  následovanou cestou do kořenového adresáře skopírovaného DVD.
+  <application>MEncoder</application> umĂ­ enkĂłdovat ze souborĹŻ nebo pĹĂ­mo z
+  DVD Äi VCD disku.
+  VloĹžte na pĹĂ­kazovĂŠm ĹĂĄdku jmĂŠno souboru pro enkĂłdovĂĄnĂ­ souboru,
+  nebo <option>dvd://</option><replaceable>ÄĂ­slo_titulu</replaceable> nebo
+  <option>vcd://</option><replaceable>ÄĂ­slo_stopy</replaceable> pro enkĂłdovĂĄnĂ­
+  DVD titulu Äi VCD stopy.
+  MĂĄte-li jiĹž zkopĂ­rovĂĄno DVD na hard disk (k tomu mĹŻĹžete pouĹžĂ­t nĂĄstroj jako
+  <application>dvdbackup</application>, dostupnĂ˝ na mnoha systĂŠmech),
+  a chcete enkĂłdovat z kopie, mÄli byste i zde pouĹžĂ­t syntaxi
+  <option>dvd://</option> ve spojenĂ­ s volbou <option>-dvd-device</option>
+  nĂĄsledovanou cestou do koĹenovĂŠho adresĂĄĹe skopĂ­rovanĂŠho DVD.
 
   Volby <option>-dvd-device</option> a <option>-cdrom-device</option>
-  lze rovněž použít k přenastavení cest k souborům zařízení pro přímé
-  čtení disků, pokud výchozí 
-  <filename>/dev/dvd</filename> a <filename>/dev/cdrom</filename> na vašem
-  systému nepracují.
+  lze rovnÄĹž pouĹžĂ­t k pĹenastavenĂ­ cest k souborĹŻm zaĹĂ­zenĂ­ pro pĹĂ­mĂŠ
+  ÄtenĂ­ diskĹŻ, pokud vĂ˝chozĂ­ 
+  <filename>/dev/dvd</filename> a <filename>/dev/cdrom</filename> na vaĹĄem
+  systĂŠmu nepracujĂ­.
 </para>
 <para>
-  Enkódujete-li z DVD, je často vhodné vybrat kapitolu nebo rozsah
-  kapitol k enkódování.
-  Pro tento účel můžete použít volbu <option>-chapter</option>.
-  Například s volbou <option>-chapter</option> <replaceable>1-4</replaceable>
-  se budou z DVD enkódovat pouze kapitoly 1 až 4.
-  To se zvlášť hodí, pokud budete enkódovat film na velikost 1400 MB
-  určený pro dvě CD, jelikož budete mít jistotu, že zlom nastane přesně
-  na hranici kapitol místo uprostřed scény.
+  EnkĂłdujete-li z DVD, je Äasto vhodnĂŠ vybrat kapitolu nebo rozsah
+  kapitol k enkĂłdovĂĄnĂ­.
+  Pro tento ĂşÄel mĹŻĹžete pouĹžĂ­t volbu <option>-chapter</option>.
+  NapĹĂ­klad s volbou <option>-chapter</option> <replaceable>1-4</replaceable>
+  se budou z DVD enkĂłdovat pouze kapitoly 1 aĹž 4.
+  To se zvlĂĄĹĄĹĽ hodĂ­, pokud budete enkĂłdovat film na velikost 1400 MB
+  urÄenĂ˝ pro dvÄ CD, jelikoĹž budete mĂ­t jistotu, Ĺže zlom nastane pĹesnÄ
+  na hranici kapitol mĂ­sto uprostĹed scĂŠny.
 </para>
 <para>
-  Pokud máte podporovanou TV zachytávací kartu, můžete rovněž enkódovat ze
-  zařízení TV vstupu.
-  Použijte <option>tv://</option><replaceable>číslo_kanálu</replaceable> jako
-  jméno souboru a volbu <option>-tv</option> pro konfiguraci různých nastavení
-  zachytávání.
-  Vstup z DVB pracuje obdobně.
+  Pokud mĂĄte podporovanou TV zachytĂĄvacĂ­ kartu, mĹŻĹžete rovnÄĹž enkĂłdovat ze
+  zaĹĂ­zenĂ­ TV vstupu.
+  PouĹžijte <option>tv://</option><replaceable>ÄĂ­slo_kanĂĄlu</replaceable> jako
+  jmĂŠno souboru a volbu <option>-tv</option> pro konfiguraci rĹŻznĂ˝ch nastavenĂ­
+  zachytĂĄvĂĄnĂ­.
+  Vstup z DVB pracuje obdobnÄ.
 </para>
 </sect1>
 
 
 <sect1 id="menc-feat-mpeg4">
-<title>Dvouprůchodové enkódování MPEG-4 (&quot;DivX&quot;)</title>
+<title>DvouprĹŻchodovĂŠ enkĂłdovĂĄnĂ­ MPEG-4 (&quot;DivX&quot;)</title>
 
 <para>
-Název vychází z faktu, že soubor je enkódován <emphasis>dvakrát</emphasis>.
-První enkódování (dubbed pass) vytvoří dočasné soubory
-(<filename>*.log</filename>) velikosti několika megabajtů, které zatím nemažte
-(můžete smazat AVI, nebo raději žádné nevytvářejte a přesměrujte je do
+NĂĄzev vychĂĄzĂ­ z faktu, Ĺže soubor je enkĂłdovĂĄn <emphasis>dvakrĂĄt</emphasis>.
+PrvnĂ­ enkĂłdovĂĄnĂ­ (dubbed pass) vytvoĹĂ­ doÄasnĂŠ soubory
+(<filename>*.log</filename>) velikosti nÄkolika megabajtĹŻ, kterĂŠ zatĂ­m nemaĹžte
+(mĹŻĹžete smazat AVI, nebo radÄji ĹžĂĄdnĂŠ nevytvĂĄĹejte a pĹesmÄrujte je do
 <filename>/dev/null</filename>).
-Ve druhém průchodu je vytvořen dvouprůchodový výstupní
-soubor s použitím řízení datového toku z dočasných souborů. Výsledný soubor
-bude mít lepší kvalitu obrazu. Pokud jste o tom teď slyšeli poprvé, měli byste
-si prostudovat některé návody dostupné na netu.
+Ve druhĂŠm prĹŻchodu je vytvoĹen dvouprĹŻchodovĂ˝ vĂ˝stupnĂ­
+soubor s pouĹžitĂ­m ĹĂ­zenĂ­ datovĂŠho toku z doÄasnĂ˝ch souborĹŻ. VĂ˝slednĂ˝ soubor
+bude mĂ­t lepĹĄĂ­ kvalitu obrazu. Pokud jste o tom teÄ slyĹĄeli poprvĂŠ, mÄli byste
+si prostudovat nÄkterĂŠ nĂĄvody dostupnĂŠ na netu.
 </para>
 
 <example>
-<title>Kopírování zvukové stopy</title>
+<title>KopĂ­rovĂĄnĂ­ zvukovĂŠ stopy</title>
 <para>
-Dvouprůchodové enkódování druhé stopy z DVD do MPEG-4 (&quot;DivX&quot;)
-AVI zatímco se zvuk pouze zkopíruje.
+DvouprĹŻchodovĂŠ enkĂłdovĂĄnĂ­ druhĂŠ stopy z DVD do MPEG-4 (&quot;DivX&quot;)
+AVI zatĂ­mco se zvuk pouze zkopĂ­ruje.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy -o <replaceable>vĂ˝stup.avi</replaceable>
 </screen>
 </para>
 </example>
 
 <example>
-<title>Enkódování zvukové stopy</title>
+<title>EnkĂłdovĂĄnĂ­ zvukovĂŠ stopy</title>
 <para>
-Dvouprůchodové enkódování DVD do MPEG-4 (&quot;DivX&quot;) AVI a současně
-enkódování zvukové stopy do MP3.
-Při této metodě buďte opatrní, jelikož v některých případech může vést k rozjetí
+DvouprĹŻchodovĂŠ enkĂłdovĂĄnĂ­ DVD do MPEG-4 (&quot;DivX&quot;) AVI a souÄasnÄ
+enkĂłdovĂĄnĂ­ zvukovĂŠ stopy do MP3.
+PĹi tĂŠto metodÄ buÄte opatrnĂ­, jelikoĹž v nÄkterĂ˝ch pĹĂ­padech mĹŻĹže vĂŠst k rozjetĂ­
 zvuku s videem.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o /dev/null
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>výstup.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>vĂ˝stup.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -345,73 +345,73 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
 
 
 <sect1 id="menc-feat-handheld-psp">
-<title>Enkódovánído video formátu Sony PSP</title>
+<title>EnkĂłdovĂĄnĂ­do video formĂĄtu Sony PSP</title>
 
 <para>
-  <application>MEncoder</application> podporuje enkódování do Sony PSP video
-  formátu, ale mohou se lišit, v závislosti na revizi PSP softwaru, s tím
-  spojená omezení.
-  Budete-li respektovat následující omezení, neměli byste narazit na potíže:
+  <application>MEncoder</application> podporuje enkĂłdovĂĄnĂ­ do Sony PSP video
+  formĂĄtu, ale mohou se liĹĄit, v zĂĄvislosti na revizi PSP softwaru, s tĂ­m
+  spojenĂĄ omezenĂ­.
+  Budete-li respektovat nĂĄsledujĂ­cĂ­ omezenĂ­, nemÄli byste narazit na potĂ­Ĺže:
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Datový tok</emphasis>: by neměl překročit 1500kbps,
-  ale poslední verze podporovaly prakticky jakýkoli datový tok pokud hlavička
-  tvrdí, že není příliš vysoký.
+  <emphasis role="bold">DatovĂ˝ tok</emphasis>: by nemÄl pĹekroÄit 1500kbps,
+  ale poslednĂ­ verze podporovaly prakticky jakĂ˝koli datovĂ˝ tok pokud hlaviÄka
+  tvrdĂ­, Ĺže nenĂ­ pĹĂ­liĹĄ vysokĂ˝.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Rozměry</emphasis>: šířka a výška PSP videa
-  by měly být násobky 16 a výsledek šířka * výška musí
-  být &lt;= 64000.
-  Za určitých okolností může být možné, aby PSP hrál i ve vyšším rozlišení.
+  <emphasis role="bold">RozmÄry</emphasis>: ĹĄĂ­Ĺka a vĂ˝ĹĄka PSP videa
+  by mÄly bĂ˝t nĂĄsobky 16 a vĂ˝sledek ĹĄĂ­Ĺka * vĂ˝ĹĄka musĂ­
+  bĂ˝t &lt;= 64000.
+  Za urÄitĂ˝ch okolnostĂ­ mĹŻĹže bĂ˝t moĹžnĂŠ, aby PSP hrĂĄl i ve vyĹĄĹĄĂ­m rozliĹĄenĂ­.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Audio</emphasis>: jeho vzorkovací kmitočet by měl být 24khz
+  <emphasis role="bold">Audio</emphasis>: jeho vzorkovacĂ­ kmitoÄet by mÄl bĂ˝t 24khz
   pro videa MPEG-4 a 48khz pro H.264.
 </para></listitem>
 </itemizedlist>
 </para>
 
 <example>
-<title>Příklad</title>
+<title>PĹĂ­klad</title>
 <para>
 <screen>
 mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
 -af lavcresample=24000 -vf harddup -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
--ofps 30000/1001 vstup.video -o výstup.psp
+-ofps 30000/1001 vstup.video -o vĂ˝stup.psp
 </screen>
-  Poznamenejme, že můžete nastavit jméno videa pomocí
-  <option>-info name=<replaceable>JménoFilmu</replaceable></option>.
+  Poznamenejme, Ĺže mĹŻĹžete nastavit jmĂŠno videa pomocĂ­
+  <option>-info name=<replaceable>JmĂŠnoFilmu</replaceable></option>.
 </para>
 </example>
 </sect1>
 
 
 <sect1 id="menc-feat-mpeg">
-<title>Enkódování do MPEG formátu</title>
+<title>EnkĂłdovĂĄnĂ­ do MPEG formĂĄtu</title>
 <para>
-<application>MEncoder</application> umí vytvořit výstupní soubor formátu
+<application>MEncoder</application> umĂ­ vytvoĹit vĂ˝stupnĂ­ soubor formĂĄtu
 MPEG (MPEG-PS).
-Pokud používáte MPEG-1 nebo MPEG-2 video, obvykle je to proto, že enkódujete
-pro omezený formát jako je SVCD, VCD nebo DVD.
-Konkrétní požadavky těchto formátů jsou objasněny v sekci
-<link linkend="menc-feat-vcd-dvd">návod pro vytvoření VCD a DVD</link>.
+Pokud pouĹžĂ­vĂĄte MPEG-1 nebo MPEG-2 video, obvykle je to proto, Ĺže enkĂłdujete
+pro omezenĂ˝ formĂĄt jako je SVCD, VCD nebo DVD.
+KonkrĂŠtnĂ­ poĹžadavky tÄchto formĂĄtĹŻ jsou objasnÄny v sekci
+<link linkend="menc-feat-vcd-dvd">nĂĄvod pro vytvoĹenĂ­ VCD a DVD</link>.
 </para>
 
 <para>
-Výstupní souborový formát <application>MEncoder</application>u změníte použitím
+VĂ˝stupnĂ­ souborovĂ˝ formĂĄt <application>MEncoder</application>u zmÄnĂ­te pouĹžitĂ­m
 volby <option>-of mpeg</option>.
 </para>
 
 <informalexample>
 <para>
-Příklad:
+PĹĂ­klad:
 <screen>
-mencoder <replaceable>vstup.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>další_volby</replaceable> -o <replaceable>výstup.mpg</replaceable>
+mencoder <replaceable>vstup.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>dalĹĄĂ­_volby</replaceable> -o <replaceable>vĂ˝stup.mpg</replaceable>
 </screen>
-Vytvoření MPEG-1 souboru vhodného pro přehrávání na systémech s minimální
-podporou multimédií, jako je výchozí instalace Windows:
+VytvoĹenĂ­ MPEG-1 souboru vhodnĂŠho pro pĹehrĂĄvĂĄnĂ­ na systĂŠmech s minimĂĄlnĂ­
+podporou multimĂŠdiĂ­, jako je vĂ˝chozĂ­ instalace Windows:
 <screen>
-mencoder <replaceable>vstup.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>výstup.mpg</replaceable> -oac lavc -ovc lavc \
+mencoder <replaceable>vstup.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>vĂ˝stup.mpg</replaceable> -oac lavc -ovc lavc \
 -lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 </para>
@@ -419,86 +419,86 @@ mencoder <replaceable>vstup.avi</replaceable> -of mpeg -mpegopts format=mpeg1:ts
 
 <note><title>Tip:</title>
 <para>
-  Pokud vás z nějakého důvodu neuspokojí kvalita videa z druhého průchodu,
-  můžete znovu spustit enkódování videa s jiným cílovým datovým tokem, s tím,
-  že máte uložen soubor se statistikami z předchozího průchodu.
-  To je možné proto, že cílem statistického souboru je především zaznamenat
-  komplexitu každého snímku, která příliš nezávisí na datovém toku.
-  Povšimněte si, že ačkoli nejvyšší kvality dosáhnete pokud všechny
-  průchody poběží při stejném datovém toku, tak se výsledek příliš neliší.
+  Pokud vĂĄs z nÄjakĂŠho dĹŻvodu neuspokojĂ­ kvalita videa z druhĂŠho prĹŻchodu,
+  mĹŻĹžete znovu spustit enkĂłdovĂĄnĂ­ videa s jinĂ˝m cĂ­lovĂ˝m datovĂ˝m tokem, s tĂ­m,
+  Ĺže mĂĄte uloĹžen soubor se statistikami z pĹedchozĂ­ho prĹŻchodu.
+  To je moĹžnĂŠ proto, Ĺže cĂ­lem statistickĂŠho souboru je pĹedevĹĄĂ­m zaznamenat
+  komplexitu kaĹždĂŠho snĂ­mku, kterĂĄ pĹĂ­liĹĄ nezĂĄvisĂ­ na datovĂŠm toku.
+  PovĹĄimnÄte si, Ĺže aÄkoli nejvyĹĄĹĄĂ­ kvality dosĂĄhnete pokud vĹĄechny
+  prĹŻchody pobÄĹžĂ­ pĹi stejnĂŠm datovĂŠm toku, tak se vĂ˝sledek pĹĂ­liĹĄ neliĹĄĂ­.
 </para>
 </note>
 
 </sect1>
 
 <sect1 id="menc-feat-rescale">
-<title>Škálování (změna velikosti) filmů</title>
+<title>Ĺ kĂĄlovĂĄnĂ­ (zmÄna velikosti) filmĹŻ</title>
 
 <para>
-Často potřebujeme změnit velikost obrázků ve filmu a to z mnoha důvodů: zmenšení
-souboru, zátěže sítě atd. Mnoho lidí dokonce mění velikost při převodu DVD nebo
-SVCD do DivX AVI. Pokud si přejete video přeškálovat, přečtěte si sekci
-<link linkend="aspect">Zachování poměru stran</link>.
+Äasto potĹebujeme zmÄnit velikost obrĂĄzkĹŻ ve filmu a to z mnoha dĹŻvodĹŻ: zmenĹĄenĂ­
+souboru, zĂĄtÄĹže sĂ­tÄ atd. Mnoho lidĂ­ dokonce mÄnĂ­ velikost pĹi pĹevodu DVD nebo
+SVCD do DivX AVI. Pokud si pĹejete video pĹeĹĄkĂĄlovat, pĹeÄtÄte si sekci
+<link linkend="aspect">ZachovĂĄnĂ­ pomÄru stran</link>.
 </para>
 
 <para>
-Samotný proces škálování je prováděn video filtrem <literal>scale</literal>:
-<option>-vf scale=<replaceable>šířka</replaceable>:<replaceable>výška</replaceable></option>.
-Jeho kvalita může být nastavena volbou <option>-sws</option>.
-Pokud ji neuvedete, <application>MEncoder</application> použije 2: bikubickou.
+SamotnĂ˝ proces ĹĄkĂĄlovĂĄnĂ­ je provĂĄdÄn video filtrem <literal>scale</literal>:
+<option>-vf scale=<replaceable>ĹĄĂ­Ĺka</replaceable>:<replaceable>vĂ˝ĹĄka</replaceable></option>.
+Jeho kvalita mĹŻĹže bĂ˝t nastavena volbou <option>-sws</option>.
+Pokud ji neuvedete, <application>MEncoder</application> pouĹžije 2: bikubickou.
 </para>
 
 <para>
-Použití:
+PouĹžitĂ­:
 <screen>
-mencoder <replaceable>vstup.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -vf scale=640:480 -o <replaceable>výstup.avi</replaceable>
+mencoder <replaceable>vstup.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -vf scale=640:480 -o <replaceable>vĂ˝stup.avi</replaceable>
 </screen>
 </para>
 </sect1>
 
 
 <sect1 id="menc-feat-streamcopy">
-<title>Proudové kopírování</title>
+<title>ProudovĂŠ kopĂ­rovĂĄnĂ­</title>
 
 <para>
-<application>MEncoder</application> může zpracovat vstupní datové proudy dvěma
-způsoby:
-<emphasis role="bold">enkóduje</emphasis> je, nebo je
-<emphasis role="bold">kopíruje</emphasis>. Tato část je o
-<emphasis role="bold">kopírování</emphasis>.
+<application>MEncoder</application> mĹŻĹže zpracovat vstupnĂ­ datovĂŠ proudy dvÄma
+zpĹŻsoby:
+<emphasis role="bold">enkĂłduje</emphasis> je, nebo je
+<emphasis role="bold">kopĂ­ruje</emphasis>. Tato ÄĂĄst je o
+<emphasis role="bold">kopĂ­rovĂĄnĂ­</emphasis>.
 </para>
 
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Video proud</emphasis> (volba <option>-ovc copy</option>):
-  můžete dělat pěkné věci :) Jako umístění (nikoli konverze!) FLI nebo VIVO nebo
-  MPEG-1 videa do AVI souboru! Samozřejmě takové soubory přehraje pouze
-  <application>MPlayer</application> :) A proto to nejspíš nemá žádnou rozumnou
-  hodnotu. A teď vážně: kopírování video proudu může být užitečné například
-  tehdy, když má být enkódován pouze zvuk (např. nekomprimovaný PCM do MP3).
+  mĹŻĹžete dÄlat pÄknĂŠ vÄci :) Jako umĂ­stÄnĂ­ (nikoli konverze!) FLI nebo VIVO nebo
+  MPEG-1 videa do AVI souboru! SamozĹejmÄ takovĂŠ soubory pĹehraje pouze
+  <application>MPlayer</application> :) A proto to nejspĂ­ĹĄ nemĂĄ ĹžĂĄdnou rozumnou
+  hodnotu. A teÄ vĂĄĹžnÄ: kopĂ­rovĂĄnĂ­ video proudu mĹŻĹže bĂ˝t uĹžiteÄnĂŠ napĹĂ­klad
+  tehdy, kdyĹž mĂĄ bĂ˝t enkĂłdovĂĄn pouze zvuk (napĹ. nekomprimovanĂ˝ PCM do MP3).
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Audio proud</emphasis> (volba <option>-oac copy</option>):
-  jednoduché. Je možné vzít externí zvukový soubor (MP3, WAV) a namultiplexovat
-  jej do výstupního proudu. K tomu použijte volbu
+  jednoduchĂŠ. Je moĹžnĂŠ vzĂ­t externĂ­ zvukovĂ˝ soubor (MP3, WAV) a namultiplexovat
+  jej do vĂ˝stupnĂ­ho proudu. K tomu pouĹžijte volbu
   <option>-audiofile <replaceable>soubor</replaceable></option>.
   </para></listitem>
 </itemizedlist>
 
 <para>
-  Použití <option>-oac copy</option> pro kopírování z jednoho nosného fomátu
-  do jiného může vyžadovat použití <option>-fafmttag</option> pro zachování
-  příznaku formátu zvuku původního souboru.
-  Například pokud konvertujete NSV soubor a AAC zvukem do nosného formátu AVI,
-  bude příznak formátu zvuku nesprávný a bude jej nutno změnit.
-  Seznam příznaků audio formátu naleznete v souboru
+  PouĹžitĂ­ <option>-oac copy</option> pro kopĂ­rovĂĄnĂ­ z jednoho nosnĂŠho fomĂĄtu
+  do jinĂŠho mĹŻĹže vyĹžadovat pouĹžitĂ­ <option>-fafmttag</option> pro zachovĂĄnĂ­
+  pĹĂ­znaku formĂĄtu zvuku pĹŻvodnĂ­ho souboru.
+  NapĹĂ­klad pokud konvertujete NSV soubor a AAC zvukem do nosnĂŠho formĂĄtu AVI,
+  bude pĹĂ­znak formĂĄtu zvuku nesprĂĄvnĂ˝ a bude jej nutno zmÄnit.
+  Seznam pĹĂ­znakĹŻ audio formĂĄtu naleznete v souboru
   <filename>codecs.conf</filename>.
 </para>
 
 <para>
-Příklad:
+PĹĂ­klad:
 <screen>
-mencoder <replaceable>vstupní.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>výstupní.avi</replaceable>
+mencoder <replaceable>vstupnĂ­.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>vĂ˝stupnĂ­.avi</replaceable>
 </screen>
 </para>
 
@@ -506,99 +506,99 @@ mencoder <replaceable>vstupní.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc 
 
 
 <sect1 id="menc-feat-enc-images">
-<title>Enkódování z množství vstupních obrázkových souborů (JPEG, PNG, TGA, SGI)</title>
+<title>EnkĂłdovĂĄnĂ­ z mnoĹžstvĂ­ vstupnĂ­ch obrĂĄzkovĂ˝ch souborĹŻ (JPEG, PNG, TGA, SGI)</title>
 
 <para>
-<application>MEncoder</application> je schopen vytvořit film z jednoho nebo více
-JPEG, PNG nebo TGA souborů. Pomocí jednoduchého snímkového kopírování může
-vytvořit MJPEG (Motion JPEG), MPNG (Motion PNG) nebo MTGA (Motion TGA) soubory.
+<application>MEncoder</application> je schopen vytvoĹit film z jednoho nebo vĂ­ce
+JPEG, PNG nebo TGA souborĹŻ. PomocĂ­ jednoduchĂŠho snĂ­mkovĂŠho kopĂ­rovĂĄnĂ­ mĹŻĹže
+vytvoĹit MJPEG (Motion JPEG), MPNG (Motion PNG) nebo MTGA (Motion TGA) soubory.
 </para>
 
 <orderedlist>
-<title>Vysvětlení procesu:</title>
+<title>VysvÄtlenĂ­ procesu:</title>
 <listitem><para>
-  <application>MEncoder</application> <emphasis>dekóduje</emphasis> vstupní
-  soubor(y) pomocí knihovny <systemitem class="library">libjpeg</systemitem>
-  (když dekóduje PNG, použije <systemitem class="library">libpng</systemitem>).
+  <application>MEncoder</application> <emphasis>dekĂłduje</emphasis> vstupnĂ­
+  soubor(y) pomocĂ­ knihovny <systemitem class="library">libjpeg</systemitem>
+  (kdyĹž dekĂłduje PNG, pouĹžije <systemitem class="library">libpng</systemitem>).
   </para></listitem>
 <listitem><para>
-  Potom <application>MEncoder</application> nakrmí dekódovaný snímek do
-  zvoleného video kompresoru (DivX4, XviD, FFmpeg msmpeg4, atd).
+  Potom <application>MEncoder</application> nakrmĂ­ dekĂłdovanĂ˝ snĂ­mek do
+  zvolenĂŠho video kompresoru (DivX4, XviD, FFmpeg msmpeg4, atd).
   </para></listitem>
 </orderedlist>
 
 <formalpara>
-<title>Příklady</title>
+<title>PĹĂ­klady</title>
 <para>
-Vysvětlení volby <option>-mf</option> je v man stránce.
+VysvÄtlenĂ­ volby <option>-mf</option> je v man strĂĄnce.
 
 <informalexample>
 <para>
-Vytvoření MPEG-4 souboru ze všech JPEG souborů v aktuálním adresáři:
+VytvoĹenĂ­ MPEG-4 souboru ze vĹĄech JPEG souborĹŻ v aktuĂĄlnĂ­m adresĂĄĹi:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>vĂ˝stup.avi</replaceable>
 </screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Vytvoření MPEG-4 souboru z některých JPEG souborů v aktuálním adresáři:
+VytvoĹenĂ­ MPEG-4 souboru z nÄkterĂ˝ch JPEG souborĹŻ v aktuĂĄlnĂ­m adresĂĄĹi:
 <screen>
-mencoder mf://<replaceable>snímek001.jpg,snímek002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder mf://<replaceable>snĂ­mek001.jpg,snĂ­mek002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>vĂ˝stup.avi</replaceable>
 </screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Vytvoření MPEG-4 souboru ze seznamu vyjmenovaných JPEG souborů
-(seznam.txt v aktuálním adresáři obsahuje seznam souborů k použití
-jako zdroj, každý soubor na samostatném řádku):
+VytvoĹenĂ­ MPEG-4 souboru ze seznamu vyjmenovanĂ˝ch JPEG souborĹŻ
+(seznam.txt v aktuĂĄlnĂ­m adresĂĄĹi obsahuje seznam souborĹŻ k pouĹžitĂ­
+jako zdroj, kaĹždĂ˝ soubor na samostatnĂŠm ĹĂĄdku):
 <screen>
 mencoder mf://<replaceable>@seznam.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
--ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>výstup.avi</replaceable>
+-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>vĂ˝stup.avi</replaceable>
 </screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Vytvoření Motion JPEG (MJPEG) souboru ze všech JPEG souborů v aktuálním
-adresáři:
+VytvoĹenĂ­ Motion JPEG (MJPEG) souboru ze vĹĄech JPEG souborĹŻ v aktuĂĄlnĂ­m
+adresĂĄĹi:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <replaceable>vĂ˝stup.avi</replaceable>
 </screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Vytvoření nekomprimovaného souboru ze všech PNG souborů v aktuálním adresáři:
+VytvoĹenĂ­ nekomprimovanĂŠho souboru ze vĹĄech PNG souborĹŻ v aktuĂĄlnĂ­m adresĂĄĹi:
 <screen>
-mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>vĂ˝stup.avi</replaceable>
 </screen>
 </para>
 </informalexample>
 
 <note><para>
-Šířka musí být celé číslo násobek 4, to je dáno omezením RAW RGB AVI formátu.
+Ĺ Ă­Ĺka musĂ­ bĂ˝t celĂŠ ÄĂ­slo nĂĄsobek 4, to je dĂĄno omezenĂ­m RAW RGB AVI formĂĄtu.
 </para></note>
 
 <informalexample>
 <para>
-Vytvoření Motion PNG (MPNG) souboru ze všech PNG souborů v aktuálním adresáři:
+VytvoĹenĂ­ Motion PNG (MPNG) souboru ze vĹĄech PNG souborĹŻ v aktuĂĄlnĂ­m adresĂĄĹi:
 <screen>
-mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>výstup.avi</replaceable> <!--
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>vĂ˝stup.avi</replaceable> <!--
 --></screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Vytvoření Motion TGA (MTGA) souboru ze všech TGA souborů v aktuálním adresáři:
+VytvoĹenĂ­ Motion TGA (MTGA) souboru ze vĹĄech TGA souborĹŻ v aktuĂĄlnĂ­m adresĂĄĹi:
 <screen>
-mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <replaceable>výstup.avi</replaceable><!--
+mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <replaceable>vĂ˝stup.avi</replaceable><!--
 --></screen>
 </para>
 </informalexample>
@@ -609,44 +609,44 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
 
 
 <sect1 id="menc-feat-extractsub">
-<title>Extrakce DVD titulků do VOBsub souboru</title>
+<title>Extrakce DVD titulkĹŻ do VOBsub souboru</title>
 
 <para>
 <application>MEncoder</application> je schopen vyextrahovat titulky z DVD do
-VOBsub formátovaných souborů. Ty sestávají ze dvou souborů zakončených
+VOBsub formĂĄtovanĂ˝ch souborĹŻ. Ty sestĂĄvajĂ­ ze dvou souborĹŻ zakonÄenĂ˝ch
 <filename>.idx</filename> a <filename>.sub</filename> a jsou obvykle zabaleny
-v jediném <filename>.rar</filename> archivu.
-<application>MPlayer</application> je umí přehrávat s pomocí voleb
+v jedinĂŠm <filename>.rar</filename> archivu.
+<application>MPlayer</application> je umĂ­ pĹehrĂĄvat s pomocĂ­ voleb
 <option>-vobsub</option> a <option>-vobsubid</option>.
 </para>
 
 <para>
-Zadejte základní jméno (čili bez přípony <filename>.idx</filename> nebo
-<filename>.sub</filename>) výstupních souborů pomocí volby
-<option>-vobsubout</option> a index pro tyto titulky ve zbývajících souborech
-pomocí <option>-vobsuboutindex</option>.
+Zadejte zĂĄkladnĂ­ jmĂŠno (Äili bez pĹĂ­pony <filename>.idx</filename> nebo
+<filename>.sub</filename>) vĂ˝stupnĂ­ch souborĹŻ pomocĂ­ volby
+<option>-vobsubout</option> a index pro tyto titulky ve zbĂ˝vajĂ­cĂ­ch souborech
+pomocĂ­ <option>-vobsuboutindex</option>.
 </para>
 
 <para>
-Pokud není vstup z DVD, měli byste použít <option>-ifo</option> pro indikaci
-<filename>.ifo</filename> souboru nutného k vytvoření výsledného
+Pokud nenĂ­ vstup z DVD, mÄli byste pouĹžĂ­t <option>-ifo</option> pro indikaci
+<filename>.ifo</filename> souboru nutnĂŠho k vytvoĹenĂ­ vĂ˝slednĂŠho
 <filename>.idx</filename> souboru.
 </para>
 
 <para>
-Pokud vstup není z DVD a nemáte <filename>.ifo</filename> soubor, budete muset
-použít volbu <option>-vobsubid</option> k nastavení, pro které id jazyka se má
-vytvořit <filename>.idx</filename> soubor.
+Pokud vstup nenĂ­ z DVD a nemĂĄte <filename>.ifo</filename> soubor, budete muset
+pouĹžĂ­t volbu <option>-vobsubid</option> k nastavenĂ­, pro kterĂŠ id jazyka se mĂĄ
+vytvoĹit <filename>.idx</filename> soubor.
 </para>
 
 <para>
-Každým spuštěním se přidají běžící titulky pokud soubory <filename>.idx</filename>
-a <filename>.sub</filename> již existují. Takže byste je měli všechny odstranit
-dříve než začnete.
+KaĹždĂ˝m spuĹĄtÄnĂ­m se pĹidajĂ­ bÄĹžĂ­cĂ­ titulky pokud soubory <filename>.idx</filename>
+a <filename>.sub</filename> jiĹž existujĂ­. TakĹže byste je mÄli vĹĄechny odstranit
+dĹĂ­ve neĹž zaÄnete.
 </para>
 
 <example>
-<title>Kopírování dvojích titulků z DVD během dvouprůchodového enkódování</title>
+<title>KopĂ­rovĂĄnĂ­ dvojĂ­ch titulkĹŻ z DVD bÄhem dvouprĹŻchodovĂŠho enkĂłdovĂĄnĂ­</title>
 <screen>
 rm titulky.idx titulky.sub
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout titulky
@@ -655,7 +655,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 </example>
 
 <example>
-<title>Kopírování francouzských titulků z MPEG souboru</title>
+<title>KopĂ­rovĂĄnĂ­ francouzskĂ˝ch titulkĹŻ z MPEG souboru</title>
 <screen>
 rm titulky.idx titulky.sub
 mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable> -vobsubout titulky -vobsuboutindex 0 -vobsuboutid fr -sid 1 -nosound -ovc copy
@@ -665,41 +665,41 @@ mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replace
 </sect1>
 
 <sect1 id="aspect">
-<title>Zachování poměru stran</title>
+<title>ZachovĂĄnĂ­ pomÄru stran</title>
 <para>
-DVD a SVCD (čili MPEG-1/2) soubory obsahují hodnotu poměru stran,
-popisující, jak by měl přehrávač škálovat video proud, takže lidé nebudou mít
-šišaté hlavy (př.: 480x480 + 4:3 = 640x480). Pokud ovšem enkódujeme do AVI
-(DivX) souborů, mějte na paměti, že AVI hlavičky neukládají tuto hodnotu.
-Přeškálování videa je odporné a časově náročné, takže musí být lepší způsob!
+DVD a SVCD (Äili MPEG-1/2) soubory obsahujĂ­ hodnotu pomÄru stran,
+popisujĂ­cĂ­, jak by mÄl pĹehrĂĄvaÄ ĹĄkĂĄlovat video proud, takĹže lidĂŠ nebudou mĂ­t
+ĹĄiĹĄatĂŠ hlavy (pĹ.: 480x480 + 4:3 = 640x480). Pokud ovĹĄem enkĂłdujeme do AVI
+(DivX) souborĹŻ, mÄjte na pamÄti, Ĺže AVI hlaviÄky neuklĂĄdajĂ­ tuto hodnotu.
+PĹeĹĄkĂĄlovĂĄnĂ­ videa je odpornĂŠ a ÄasovÄ nĂĄroÄnĂŠ, takĹže musĂ­ bĂ˝t lepĹĄĂ­ zpĹŻsob!
 </para>
 
-<para>A zde jej máte</para>
+<para>A zde jej mĂĄte</para>
 
 <para>
-MPEG-4 má unikátní vlastnost: video proud může obsahovat svůj požadovaný poměr
-stran. Ano, přesně jako MPEG-1/2 (DVD, SVCD) a H.263 soubory. Naneštěstí,
-<emphasis role="bold">žádný</emphasis> video přehrávač nepodporuje tento atribut
-MPEG-4, s výjimkou <application>MPlayer</application>u.
+MPEG-4 mĂĄ unikĂĄtnĂ­ vlastnost: video proud mĹŻĹže obsahovat svĹŻj poĹžadovanĂ˝ pomÄr
+stran. Ano, pĹesnÄ jako MPEG-1/2 (DVD, SVCD) a H.263 soubory. NaneĹĄtÄstĂ­,
+<emphasis role="bold">ĹžĂĄdnĂ˝</emphasis> video pĹehrĂĄvaÄ nepodporuje tento atribut
+MPEG-4, s vĂ˝jimkou <application>MPlayer</application>u.
 </para>
 
 <para>
-Tato vlastnost může být použita pouze s kodekem <systemitem>mpeg4</systemitem> z
+Tato vlastnost mĹŻĹže bĂ˝t pouĹžita pouze s kodekem <systemitem>mpeg4</systemitem> z
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>u.
-Mějte na paměti: ačkoli
-<application>MPlayer</application> korektně přehraje vytvořený soubor, ostatní
-přehrávače použijí špatný poměr stran.
+MÄjte na pamÄti: aÄkoli
+<application>MPlayer</application> korektnÄ pĹehraje vytvoĹenĂ˝ soubor, ostatnĂ­
+pĹehrĂĄvaÄe pouĹžijĂ­ ĹĄpatnĂ˝ pomÄr stran.
 </para>
 
 <para>
-Opravdu byste měli oříznout černé okraje nad a pod filmem.
-Nastudujte si použití filtrů <systemitem>cropdetect</systemitem> a
-<systemitem>crop</systemitem> v man stránce.
+Opravdu byste mÄli oĹĂ­znout ÄernĂŠ okraje nad a pod filmem.
+Nastudujte si pouĹžitĂ­ filtrĹŻ <systemitem>cropdetect</systemitem> a
+<systemitem>crop</systemitem> v man strĂĄnce.
 </para>
 
 <para>
-Použití
-<screen>mencoder <replaceable>vzorové-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>výstup.avi</replaceable></screen>
+PouĹžitĂ­
+<screen>mencoder <replaceable>vzorovĂŠ-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>vĂ˝stup.avi</replaceable></screen>
 </para>
 </sect1>
 

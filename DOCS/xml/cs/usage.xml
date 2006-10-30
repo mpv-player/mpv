@@ -1,34 +1,34 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Synced with r19828  -->
 <chapter id="usage">
-<title>Použití</title>
+<title>PouĹžitĂ­</title>
 
 <sect1 id="commandline">
-<title>Příkazový řádek</title>
+<title>PĹĂ­kazovĂ˝ ĹĂĄdek</title>
 
 <para>
-<application>MPlayer</application> využívá komplexní strukturu voleb. Ta sestává
-z globálních voleb uváděných jako první, například:
+<application>MPlayer</application> vyuĹžĂ­vĂĄ komplexnĂ­ strukturu voleb. Ta sestĂĄvĂĄ
+z globĂĄlnĂ­ch voleb uvĂĄdÄnĂ˝ch jako prvnĂ­, napĹĂ­klad:
 
 <screen>mplayer -vfm 5</screen>
 
-a voleb zapisovaných za jménem souboru, které se projeví pouze u tohoto jména
-souboru/URL/čehokoli, například:
+a voleb zapisovanĂ˝ch za jmĂŠnem souboru, kterĂŠ se projevĂ­ pouze u tohoto jmĂŠna
+souboru/URL/Äehokoli, napĹĂ­klad:
 
 <screen>mplayer -vfm 5 <replaceable>film1.avi</replaceable> <replaceable>film2.avi</replaceable> -vfm 4</screen>
 </para>
 
 <para>
-Můžete seskupovat jména souborů/adresy URL pomocí <literal>{</literal> a
-<literal>}</literal>. Toho se dá využít s volbou <option>-loop</option>:
+MĹŻĹžete seskupovat jmĂŠna souborĹŻ/adresy URL pomocĂ­ <literal>{</literal> a
+<literal>}</literal>. Toho se dĂĄ vyuĹžĂ­t s volbou <option>-loop</option>:
 
 <screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
 
-Výše uvedený příkaz přehraje soubory v tomto pořadí: 1, 1, 2, 1, 1, 2, 1, 1, 2.
+VĂ˝ĹĄe uvedenĂ˝ pĹĂ­kaz pĹehraje soubory v tomto poĹadĂ­: 1, 1, 2, 1, 1, 2, 1, 1, 2.
 </para>
 
 <para>
-Přehrávání souboru:
+PĹehrĂĄvĂĄnĂ­ souboru:
 <synopsis>
 <command>mplayer</command><!--
 --> [<replaceable>volby</replaceable>]<!--
@@ -37,19 +37,19 @@ Přehrávání souboru:
 </para>
 
 <para>
-Jiný způsob přehrání souboru:
+JinĂ˝ zpĹŻsob pĹehrĂĄnĂ­ souboru:
 <synopsis>
 <command>mplayer</command><!--
 --> [<replaceable>volby</replaceable>]<!--
---> <replaceable>file:///uri-eskejpovaná-cesta-k-souboru</replaceable>
+--> <replaceable>file:///uri-eskejpovanĂĄ-cesta-k-souboru</replaceable>
 </synopsis>
 </para>
 
 <para>
-Přehrávání více souborů:
+PĹehrĂĄvĂĄnĂ­ vĂ­ce souborĹŻ:
 <synopsis>
 <command>mplayer</command><!--
---> [<replaceable>výchozí volby</replaceable>]<!--
+--> [<replaceable>vĂ˝chozĂ­ volby</replaceable>]<!--
 --> [<replaceable>cesta</replaceable>/]<replaceable>soubor1</replaceable><!--
 --> [<replaceable>volby pro soubor1</replaceable>]<!--
 --> <replaceable>soubor2</replaceable><!--
@@ -58,34 +58,34 @@ Přehrávání více souborů:
 </para>
 
 <para>
-Přehrávání VCD:
+PĹehrĂĄvĂĄnĂ­ VCD:
 <synopsis>
 <command>mplayer</command> [<replaceable>volby</replaceable>]<!--
---> vcd://<replaceable>číslo_stopy</replaceable><!--
+--> vcd://<replaceable>ÄĂ­slo_stopy</replaceable><!--
 --> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
 </synopsis>
 </para>
 
 <para>
-Přehrávání DVD:
+PĹehrĂĄvĂĄnĂ­ DVD:
 <synopsis>
 <command>mplayer</command> [<replaceable>volby</replaceable>]<!--
---> dvd://<replaceable>číslo_titulu</replaceable><!--
+--> dvd://<replaceable>ÄĂ­slo_titulu</replaceable><!--
 --> [-dvd-device <replaceable>/dev/dvd</replaceable>]
 </synopsis>
 </para>
 
 <para>
-Přehrávání z WWW:
+PĹehrĂĄvĂĄnĂ­ z WWW:
 <synopsis>
 <command>mplayer</command> [<replaceable>volby</replaceable>]<!--
---> http://<replaceable>doména.com/soubor.asf</replaceable>
+--> http://<replaceable>domĂŠna.com/soubor.asf</replaceable>
 </synopsis>
-(rovněž lze použít playlisty)
+(rovnÄĹž lze pouĹžĂ­t playlisty)
 </para>
 
 <para>
-Přehrávání z RTSP:
+PĹehrĂĄvĂĄnĂ­ z RTSP:
 <synopsis>
 <command>mplayer</command> [<replaceable>volby</replaceable>]<!--
 --> rtsp://<replaceable>server.priklad.com/JmenoProudu</replaceable>
@@ -93,7 +93,7 @@ Přehrávání z RTSP:
 </para>
 
 <para>
-Příklady:
+PĹĂ­klady:
 <screen>
 mplayer -vo x11 <replaceable>/mnt/Filmy/Kontakt/kontakt2.mpg</replaceable>
 mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable>
@@ -109,8 +109,8 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/filmy/test.avi</replaceable
 <title>Titulky a OSD</title>
 
 <para>
-<application>MPlayer</application> umí zobrazovat titulky spolu s filmem.
-V současnosti podporuje tyto formáty:
+<application>MPlayer</application> umĂ­ zobrazovat titulky spolu s filmem.
+V souÄasnosti podporuje tyto formĂĄty:
 <itemizedlist>
 <listitem><para>VOBsub</para></listitem>
 <listitem><para>OGM</para></listitem>
@@ -130,9 +130,9 @@ V současnosti podporuje tyto formáty:
 </para>
 
 <para>
-<application>MPlayer</application> umí vyextrahovat výše uvedené formáty titulků
-(<emphasis role="bold">s výjimkou prvních třech</emphasis>) do následujících
-cílových formátů zadáním příslušných voleb:
+<application>MPlayer</application> umĂ­ vyextrahovat vĂ˝ĹĄe uvedenĂŠ formĂĄty titulkĹŻ
+(<emphasis role="bold">s vĂ˝jimkou prvnĂ­ch tĹech</emphasis>) do nĂĄsledujĂ­cĂ­ch
+cĂ­lovĂ˝ch formĂĄtĹŻ zadĂĄnĂ­m pĹĂ­sluĹĄnĂ˝ch voleb:
 <itemizedlist>
 <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
 <listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
@@ -143,125 +143,125 @@ cílových formátů zadáním příslušných voleb:
 </para>
 
 <para>
-<application>MEncoder</application> umí vyextrahovat DVD titulky do formátu
+<application>MEncoder</application> umĂ­ vyextrahovat DVD titulky do formĂĄtu
 <link linkend="menc-feat-extractsub">VOBsub</link>.
 </para>
 
 <para>
-Volby příkazového řádku se pro různé formáty mírně liší:
+Volby pĹĂ­kazovĂŠho ĹĂĄdku se pro rĹŻznĂŠ formĂĄty mĂ­rnÄ liĹĄĂ­:
 </para>
 
 <formalpara>
 <title>VOBsub titulky</title>
 <para>
-VOBsub titulky se skládají z velkého (řádově megabajty) <filename>.SUB</filename>
-souboru a volitelného <filename>.IDX</filename> a/nebo <filename>.IFO</filename>
-souboru. Pokud máte soubory jako
+VOBsub titulky se sklĂĄdajĂ­ z velkĂŠho (ĹĂĄdovÄ megabajty) <filename>.SUB</filename>
+souboru a volitelnĂŠho <filename>.IDX</filename> a/nebo <filename>.IFO</filename>
+souboru. Pokud mĂĄte soubory jako
 <filename><replaceable>sample.sub</replaceable></filename>,
-<filename><replaceable>sample.ifo</replaceable></filename> (volitelný),
-<filename><replaceable>sample.idx</replaceable></filename> &ndash; musíte předat
+<filename><replaceable>sample.ifo</replaceable></filename> (volitelnĂ˝),
+<filename><replaceable>sample.idx</replaceable></filename> &ndash; musĂ­te pĹedat
 <application>MPlayer</application>u volby <option>-vobsub sample
 [-vobsubid <replaceable>id</replaceable>]</option>
-(volitelně s plnou cestou). Volba <option>-vobsubid</option> je jako
-<option>-sid</option> pro DVD, můžete jí vybírat mezi titulkovými stopami
-(jazyky). Je-li <option>-vobsubid</option> vynechána, pak se
-<application>MPLayer</application> pokusí použít jazyky zadané volbou
-<option>-slang</option> a při selhání použije <systemitem>langidx</systemitem>
-v <filename>.IDX</filename> souboru. Pokud selže i zde, nebudou titulky.
+(volitelnÄ s plnou cestou). Volba <option>-vobsubid</option> je jako
+<option>-sid</option> pro DVD, mĹŻĹžete jĂ­ vybĂ­rat mezi titulkovĂ˝mi stopami
+(jazyky). Je-li <option>-vobsubid</option> vynechĂĄna, pak se
+<application>MPLayer</application> pokusĂ­ pouĹžĂ­t jazyky zadanĂŠ volbou
+<option>-slang</option> a pĹi selhĂĄnĂ­ pouĹžije <systemitem>langidx</systemitem>
+v <filename>.IDX</filename> souboru. Pokud selĹže i zde, nebudou titulky.
 </para>
 </formalpara>
 
 <formalpara>
-<title>Ostatní titulky</title>
+<title>OstatnĂ­ titulky</title>
 <para>
-Ostatní formáty tvoří jediný textový soubor obsahující časování,
-umístění a textovou část. Použití: máte-li soubor jako
+OstatnĂ­ formĂĄty tvoĹĂ­ jedinĂ˝ textovĂ˝ soubor obsahujĂ­cĂ­ ÄasovĂĄnĂ­,
+umĂ­stÄnĂ­ a textovou ÄĂĄst. PouĹžitĂ­: mĂĄte-li soubor jako
 <filename><replaceable>sample.txt</replaceable></filename>,
-musíte předat volbu <option>-sub
-<replaceable>sample.txt</replaceable></option> (volitelně s plnou cestou).
+musĂ­te pĹedat volbu <option>-sub
+<replaceable>sample.txt</replaceable></option> (volitelnÄ s plnou cestou).
 </para>
 </formalpara>
 
 <variablelist>
-<title>Úpravy časování a umístění titulků:</title>
+<title>Ăpravy ÄasovĂĄnĂ­ a umĂ­stÄnĂ­ titulkĹŻ:</title>
 <varlistentry>
   <term><option>-subdelay <replaceable>sec</replaceable></option></term>
   <listitem><simpara>
-    Opozdí titulky o <option><replaceable>sec</replaceable></option> sekund.
-    Může být i záporné. Hodnota je přidána k čítači pozice ve filmu.
+    OpozdĂ­ titulky o <option><replaceable>sec</replaceable></option> sekund.
+    MĹŻĹže bĂ˝t i zĂĄpornĂŠ. Hodnota je pĹidĂĄna k ÄĂ­taÄi pozice ve filmu.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>RYCHLOST</replaceable></option></term>
   <listitem><simpara>
-    Nastavuje rychlost ve snímcích/sek titulkového souboru (desetinné číslo).
+    Nastavuje rychlost ve snĂ­mcĂ­ch/sek titulkovĂŠho souboru (desetinnĂŠ ÄĂ­slo).
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
   <listitem><simpara>
-    Nastavuje pozici titulků.
+    Nastavuje pozici titulkĹŻ.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-Pokud se vám zvětšuje rozdíl mezi filmem a titulky, při použití
-titulkového souboru formátu MicroDVD, nejspíš se snímková rychlost
-titulků a filmu liší. Poznamenejme, že MicroDVD formát používá
-pro časování absolutní čísla snímků, ale není v něm informace
-o snímkové rychlosti, a proto byste měli s tímto formátem používat volbu
-<option>-subfps</option>. Chcete-li tento problém vyřešit trvale,
-musíte manuálně převést snímkovou rychlost souboru s titulky.
-<application>MPlayer</application> může převod udělat za
-vás:
+Pokud se vĂĄm zvÄtĹĄuje rozdĂ­l mezi filmem a titulky, pĹi pouĹžitĂ­
+titulkovĂŠho souboru formĂĄtu MicroDVD, nejspĂ­ĹĄ se snĂ­mkovĂĄ rychlost
+titulkĹŻ a filmu liĹĄĂ­. Poznamenejme, Ĺže MicroDVD formĂĄt pouĹžĂ­vĂĄ
+pro ÄasovĂĄnĂ­ absolutnĂ­ ÄĂ­sla snĂ­mkĹŻ, ale nenĂ­ v nÄm informace
+o snĂ­mkovĂŠ rychlosti, a proto byste mÄli s tĂ­mto formĂĄtem pouĹžĂ­vat volbu
+<option>-subfps</option>. Chcete-li tento problĂŠm vyĹeĹĄit trvale,
+musĂ­te manuĂĄlnÄ pĹevĂŠst snĂ­mkovou rychlost souboru s titulky.
+<application>MPlayer</application> mĹŻĹže pĹevod udÄlat za
+vĂĄs:
 
-<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_titulků</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>soubor_titulků</replaceable> <replaceable>dummy.avi</replaceable></screen>
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_titulkĹŻ</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>soubor_titulkĹŻ</replaceable> <replaceable>dummy.avi</replaceable></screen>
 </para>
 
 <para>
-O DVD titulcích si přečtěte v sekci <link linkend="dvd">DVD</link>.
+O DVD titulcĂ­ch si pĹeÄtÄte v sekci <link linkend="dvd">DVD</link>.
 </para>
 </sect1>
 
 
 <sect1 id="control">
-<title>Ovládání</title>
+<title>OvlĂĄdĂĄnĂ­</title>
 
 <para>
-<application>MPlayer</application> má plně konfigurovatelnou, příkazy řízenou,
-ovládací vrstvu, která vám umožní ovládat <application>MPlayer</application>
-pomocí klávesnice, myši, joysticku nebo dálkového ovládače (používající LIRC).
-Úplný seznam ovládacích prvků na klávesnici naleznete v man stránce.
+<application>MPlayer</application> mĂĄ plnÄ konfigurovatelnou, pĹĂ­kazy ĹĂ­zenou,
+ovlĂĄdacĂ­ vrstvu, kterĂĄ vĂĄm umoĹžnĂ­ ovlĂĄdat <application>MPlayer</application>
+pomocĂ­ klĂĄvesnice, myĹĄi, joysticku nebo dĂĄlkovĂŠho ovlĂĄdaÄe (pouĹžĂ­vajĂ­cĂ­ LIRC).
+ĂplnĂ˝ seznam ovlĂĄdacĂ­ch prvkĹŻ na klĂĄvesnici naleznete v man strĂĄnce.
 </para>
 
 
 <sect2 id="ctrl-cfg">
-<title>Konfigurace ovládání</title>
+<title>Konfigurace ovlĂĄdĂĄnĂ­</title>
 
 <para>
-<application>MPlayer</application> umožňuje přiřadit jakoukoli klávesu jakémukoli
-příkazu <application>MPlayer</application>u pomocí jednoduchého konfiguračního
+<application>MPlayer</application> umoĹžĹuje pĹiĹadit jakoukoli klĂĄvesu jakĂŠmukoli
+pĹĂ­kazu <application>MPlayer</application>u pomocĂ­ jednoduchĂŠho konfiguraÄnĂ­ho
 souboru.
-Syntaxe sestává z názvu klávesy následovaného příkazem. Výchozí umístění
-konfiguračního souboru je
-<filename>$HOME/.mplayer/input.conf</filename> ale můžete jej potlačit použitím
+Syntaxe sestĂĄvĂĄ z nĂĄzvu klĂĄvesy nĂĄsledovanĂŠho pĹĂ­kazem. VĂ˝chozĂ­ umĂ­stÄnĂ­
+konfiguraÄnĂ­ho souboru je
+<filename>$HOME/.mplayer/input.conf</filename> ale mĹŻĹžete jej potlaÄit pouĹžitĂ­m
 volby <option>-input <replaceable>konfig</replaceable></option>
-(relativní cesty jsou vztaženy k <filename>$HOME/.mplayer</filename>).
+(relativnĂ­ cesty jsou vztaĹženy k <filename>$HOME/.mplayer</filename>).
 </para>
 
 <para>
-Úplný seznam podporovaných jmen kláves dostanete příkazem
+ĂplnĂ˝ seznam podporovanĂ˝ch jmen klĂĄves dostanete pĹĂ­kazem
 <command>mplayer -input keylist</command>
-a úplný seznam dostupných příkazů příkazem
+a ĂşplnĂ˝ seznam dostupnĂ˝ch pĹĂ­kazĹŻ pĹĂ­kazem
 <command>mplayer -input cmdlist</command>.
 </para>
 
 <example>
-<title>Jednoduchý vstupní ovládací soubor</title>
+<title>JednoduchĂ˝ vstupnĂ­ ovlĂĄdacĂ­ soubor</title>
 <programlisting>
 ##
-## Vstupní soubor ovládání MPlayeru
+## VstupnĂ­ soubor ovlĂĄdĂĄnĂ­ MPlayeru
 ##
 
 RIGHT seek +10
@@ -278,31 +278,31 @@ ENTER pt_step 1 1<!--
 
 
 <sect2 id="lirc">
-<title>Ovládání z LIRC</title>
+<title>OvlĂĄdĂĄnĂ­ z LIRC</title>
 
 <para>
-Linux Infrared Remote Control &ndash; použijte jednoduše vyrobitelný doma udělaný
-IR-přijímač,
-(téměř) libovolný dálkový ovládač a ovládejte jím svůj Linux!
-Více se o tom dovíte na <ulink url="http://www.lirc.org">domácí stránce LIRC</ulink>.
+Linux Infrared Remote Control &ndash; pouĹžijte jednoduĹĄe vyrobitelnĂ˝ doma udÄlanĂ˝
+IR-pĹijĂ­maÄ,
+(tĂŠmÄĹ) libovolnĂ˝ dĂĄlkovĂ˝ ovlĂĄdaÄ a ovlĂĄdejte jĂ­m svĹŻj Linux!
+VĂ­ce se o tom dovĂ­te na <ulink url="http://www.lirc.org">domĂĄcĂ­ strĂĄnce LIRC</ulink>.
 </para>
 
 <para>
-Pokud máte nainstalován balíček LIRC, <filename>configure</filename> jej zdetekuje.
-Pokud vše dopadne dobře, <application>MPlayer</application> při startu
-vypíše &quot;<systemitem>Nastavuji podporu LIRC...</systemitem>&quot;.
-Pokud dojde k chybě, oznámí vám to. Pokud nevypíše žádnou zprávu o LIRC,
-pak pro něj není podpora zakompilována. To je vše :-)
+Pokud mĂĄte nainstalovĂĄn balĂ­Äek LIRC, <filename>configure</filename> jej zdetekuje.
+Pokud vĹĄe dopadne dobĹe, <application>MPlayer</application> pĹi startu
+vypĂ­ĹĄe &quot;<systemitem>Nastavuji podporu LIRC...</systemitem>&quot;.
+Pokud dojde k chybÄ, oznĂĄmĂ­ vĂĄm to. Pokud nevypĂ­ĹĄe ĹžĂĄdnou zprĂĄvu o LIRC,
+pak pro nÄj nenĂ­ podpora zakompilovĂĄna. To je vĹĄe :-)
 </para>
 
 <para>
-Jméno spustitelného souboru <application>MPlayer</application>u je - překvapení -
-<filename>mplayer</filename>. Můžete použít jakýkoli příkaz
-<application>MPlayer</application>u a dokonce i více než jeden, pokud je oddělíte
+JmĂŠno spustitelnĂŠho souboru <application>MPlayer</application>u je - pĹekvapenĂ­ -
+<filename>mplayer</filename>. MĹŻĹžete pouĹžĂ­t jakĂ˝koli pĹĂ­kaz
+<application>MPlayer</application>u a dokonce i vĂ­ce neĹž jeden, pokud je oddÄlĂ­te
 znakem <literal>\n</literal>.
-Nezapomeňte zapnout opakovací (repeat) příznak v <filename>.lircrc</filename> tam,
-kde to dává smysl (vyhledávání, hlasitost, atd.).
-Zde je výňatek z demonstračního
+NezapomeĹte zapnout opakovacĂ­ (repeat) pĹĂ­znak v <filename>.lircrc</filename> tam,
+kde to dĂĄvĂĄ smysl (vyhledĂĄvĂĄnĂ­, hlasitost, atd.).
+Zde je vĂ˝Ĺatek z demonstraÄnĂ­ho
 <filename>.lircrc</filename>:
 </para>
 
@@ -335,21 +335,21 @@ end<!--
 --></programlisting>
 
 <para>
-Pokud se vám nelíbí standardní umístění lirc-config souboru
-(<filename>~/.lircrc</filename>) použijte volbu <option>-lircconf
-<replaceable>soubor</replaceable></option> k určení jiného souboru.
+Pokud se vĂĄm nelĂ­bĂ­ standardnĂ­ umĂ­stÄnĂ­ lirc-config souboru
+(<filename>~/.lircrc</filename>) pouĹžijte volbu <option>-lircconf
+<replaceable>soubor</replaceable></option> k urÄenĂ­ jinĂŠho souboru.
 </para>
 </sect2>
 
 
 <sect2 id="slave-mode">
-<title>Závislý režim</title>
+<title>ZĂĄvislĂ˝ reĹžim</title>
 <para>
-Závislý režim vám umožňuje vytvořit jednoduché ovládací panely (frontendy)
+ZĂĄvislĂ˝ reĹžim vĂĄm umoĹžĹuje vytvoĹit jednoduchĂŠ ovlĂĄdacĂ­ panely (frontendy)
 <application>MPlayer</application>u. Pokud je <application>MPlayer</application>
-spuštěn s volbou <option>-slave</option>, pak bude číst příkazy oddělené novým
-řádkem (\n) ze standardního vstupu.
-Příkazy jsou dokumentovány v souboru
+spuĹĄtÄn s volbou <option>-slave</option>, pak bude ÄĂ­st pĹĂ­kazy oddÄlenĂŠ novĂ˝m
+ĹĂĄdkem (\n) ze standardnĂ­ho vstupu.
+PĹĂ­kazy jsou dokumentovĂĄny v souboru
 <ulink url="../../tech/slave.txt">slave.txt</ulink>.
 </para>
 </sect2>
@@ -357,169 +357,169 @@ Příkazy jsou dokumentovány v souboru
 
 
 <sect1 id="streaming">
-<title>Přehrávání datových proudů ze sítě nebo rour</title>
+<title>PĹehrĂĄvĂĄnĂ­ datovĂ˝ch proudĹŻ ze sĂ­tÄ nebo rour</title>
 
 <para>
-<application>MPlayer</application> umí přehrávat soubory ze sítě s použitím protokolu
+<application>MPlayer</application> umĂ­ pĹehrĂĄvat soubory ze sĂ­tÄ s pouĹžitĂ­m protokolu
 HTTP, FTP, MMS nebo RTSP/RTP.
 </para>
 
 <para>
-Přehrávání pracuje jednoduše tak, že uvedete URL na příkazovém řádku.
-<application>MPlayer</application> ctí systémovou proměnnou <envar>http_proxy</envar>
-a použije proxy pokud je k dispozici. Proxy může být rovněž vynucena:
+PĹehrĂĄvĂĄnĂ­ pracuje jednoduĹĄe tak, Ĺže uvedete URL na pĹĂ­kazovĂŠm ĹĂĄdku.
+<application>MPlayer</application> ctĂ­ systĂŠmovou promÄnnou <envar>http_proxy</envar>
+a pouĹžije proxy pokud je k dispozici. Proxy mĹŻĹže bĂ˝t rovnÄĹž vynucena:
 <screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
 </para>
 
 <para>
-<application>MPlayer</application> umí číst ze std. vstupu
-(<emphasis>ne</emphasis> z pojmenovaných rour). To může být například použito
-pro přehrávání z FTP:
+<application>MPlayer</application> umĂ­ ÄĂ­st ze std. vstupu
+(<emphasis>ne</emphasis> z pojmenovanĂ˝ch rour). To mĹŻĹže bĂ˝t napĹĂ­klad pouĹžito
+pro pĹehrĂĄvĂĄnĂ­ z FTP:
 <screen>wget <replaceable>ftp://micorsops.com/cokoli.avi</replaceable> -O - | mplayer -</screen>
 </para>
 
 <note><para>
-Také doporučujeme zapnout <option>-cache</option> při přehrávání
-ze sítě:
+TakĂŠ doporuÄujeme zapnout <option>-cache</option> pĹi pĹehrĂĄvĂĄnĂ­
+ze sĂ­tÄ:
 <screen>wget <replaceable>ftp://micorsops.com/cokoli.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
 
 <sect2 id="streaming-save">
-<title>Uložení proudového obsahu</title>
+<title>UloĹženĂ­ proudovĂŠho obsahu</title>
 <para>
-  Jakmile jste přiměli <application>MPlayer</application> přehrát
-  váš oblíbený internetový proud, můžete použít volbu
-  <option>-dumpstream</option> k uložení datového proudu do souboru.
+  Jakmile jste pĹimÄli <application>MPlayer</application> pĹehrĂĄt
+  vĂĄĹĄ oblĂ­benĂ˝ internetovĂ˝ proud, mĹŻĹžete pouĹžĂ­t volbu
+  <option>-dumpstream</option> k uloĹženĂ­ datovĂŠho proudu do souboru.
   For example:
 <screen>
   mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>proud.asf</replaceable>
 </screen>
-  uloží proudové video z
+  uloĹžĂ­ proudovĂŠ video z
   <replaceable>http://217.71.208.37:8006</replaceable> do
   <replaceable>proud.asf</replaceable>.
-  Pracovat to bude se všemi <application>MPlayer</application>em podporovanými
-  protokoly, jako MMS, RTSP, a tak dále.
-  Pokud chcete z proudu uložit pouze zvuk nebo video, použijte
+  Pracovat to bude se vĹĄemi <application>MPlayer</application>em podporovanĂ˝mi
+  protokoly, jako MMS, RTSP, a tak dĂĄle.
+  Pokud chcete z proudu uloĹžit pouze zvuk nebo video, pouĹžijte
   <option>-dumpaudio</option> nebo <option>-dumpvideo</option>, ale pamatujte,
-  že <application>MPlayer</application> bude ignorovat všechny vyjma poslední
-  <option>-dump*</option> volby zadané na příkazovém řádku.
+  Ĺže <application>MPlayer</application> bude ignorovat vĹĄechny vyjma poslednĂ­
+  <option>-dump*</option> volby zadanĂŠ na pĹĂ­kazovĂŠm ĹĂĄdku.
 </para>
 </sect2>
 
 </sect1>
 
 <sect1 id="mpst" xreflabel="Remote streams">
-<title>Vzdálené datové proudy</title>
+<title>VzdĂĄlenĂŠ datovĂŠ proudy</title>
 
 <para>
-Vzdálené datové proudy umožňují přístup k většině <application>MPlayer</application>em
-podporovaných proudů ze vzdáleného počítače. Hlavní určení této funkce je umožnit
-přímo použít CD nebo DVD mechaniku jiného počítače na síti (předpokladem je,
-že máte dostatečně rychlé připojení). Na spodní hranici nejsou některé typy datových
-proudů (v současnosti TV a MF) použitelné přes síť protože jsou implementovány na úrovni
-demuxeru. Je to škoda pro MF ale TV proudy by tak jako tak vyžadovaly šíleně
+VzdĂĄlenĂŠ datovĂŠ proudy umoĹžĹujĂ­ pĹĂ­stup k vÄtĹĄinÄ <application>MPlayer</application>em
+podporovanĂ˝ch proudĹŻ ze vzdĂĄlenĂŠho poÄĂ­taÄe. HlavnĂ­ urÄenĂ­ tĂŠto funkce je umoĹžnit
+pĹĂ­mo pouĹžĂ­t CD nebo DVD mechaniku jinĂŠho poÄĂ­taÄe na sĂ­ti (pĹedpokladem je,
+Ĺže mĂĄte dostateÄnÄ rychlĂŠ pĹipojenĂ­). Na spodnĂ­ hranici nejsou nÄkterĂŠ typy datovĂ˝ch
+proudĹŻ (v souÄasnosti TV a MF) pouĹžitelnĂŠ pĹes sĂ­ĹĽ protoĹže jsou implementovĂĄny na Ăşrovni
+demuxeru. Je to ĹĄkoda pro MF ale TV proudy by tak jako tak vyĹžadovaly ĹĄĂ­lenÄ
 vysokou rychlost
 </para>
 
 <sect2 id="compile_mpst_server">
 <title>Kompilace serveru</title>
 <para>
-Poté co zkompilujete <application>MPlayer</application> běžte do adresáře
-<filename>TOOLS/netstream</filename> a proveďte
-<application>make</application> pro sestavení serverové binárky.
-Potom můžete zkopírovat program <application>netstream</application>
-na správné místo v systému (v Linuxu obvykle
+PotĂŠ co zkompilujete <application>MPlayer</application> bÄĹžte do adresĂĄĹe
+<filename>TOOLS/netstream</filename> a proveÄte
+<application>make</application> pro sestavenĂ­ serverovĂŠ binĂĄrky.
+Potom mĹŻĹžete zkopĂ­rovat program <application>netstream</application>
+na sprĂĄvnĂŠ mĂ­sto v systĂŠmu (v Linuxu obvykle
 <filename class="directory">/usr/local/bin</filename>).
 </para>
 </sect2>
 
 <sect2 id="use_mpst">
-<title>Použití vzdálených datových proudů</title>
+<title>PouĹžitĂ­ vzdĂĄlenĂ˝ch datovĂ˝ch proudĹŻ</title>
 <para>
-Nejprve spusťte server na počítači na který se chcete připojit ze sítě.
-Server je zatím velmi jednoduchý a nemá žádné volby příkazového řádku,
-proto jen zadejte <filename>netstream</filename>. Teď můžete například
-přehrát druhou stopu na VCD na serveru:
+Nejprve spusĹĽte server na poÄĂ­taÄi na kterĂ˝ se chcete pĹipojit ze sĂ­tÄ.
+Server je zatĂ­m velmi jednoduchĂ˝ a nemĂĄ ĹžĂĄdnĂŠ volby pĹĂ­kazovĂŠho ĹĂĄdku,
+proto jen zadejte <filename>netstream</filename>. TeÄ mĹŻĹžete napĹĂ­klad
+pĹehrĂĄt druhou stopu na VCD na serveru:
 <screen>
-mplayer -cache 5000 <replaceable>mpst://jméno_serveru/vcd://2</replaceable>
+mplayer -cache 5000 <replaceable>mpst://jmĂŠno_serveru/vcd://2</replaceable>
 </screen>
-Taky můžete přistupovat k souborům na tomto serveru:
+Taky mĹŻĹžete pĹistupovat k souborĹŻm na tomto serveru:
 <screen>
 mplayer -cache 5000 <replaceable>mpst://jmeno_serveru//usr/local/filmy/lol.avi</replaceable>
 </screen>
-Poznamenejme, že cesty nezačínající / jsou relativní k adresáři kde byl spuštěn server.
-Volba <option>-cache</option> není nutná, ale velmi ji doporučujeme.
+Poznamenejme, Ĺže cesty nezaÄĂ­najĂ­cĂ­ / jsou relativnĂ­ k adresĂĄĹi kde byl spuĹĄtÄn server.
+Volba <option>-cache</option> nenĂ­ nutnĂĄ, ale velmi ji doporuÄujeme.
 </para>
 
 <para>
-Berte na vědomí že v současnosti není tento server vůbec bezpečný. Nenadávejte
-tedy na množství průniků do systému, které je s ním možné. Místo toho raději
-zašlete (dobrý) patch který by jej vylepšil, nebo napište svůj vlastní server.
+Berte na vÄdomĂ­ Ĺže v souÄasnosti nenĂ­ tento server vĹŻbec bezpeÄnĂ˝. NenadĂĄvejte
+tedy na mnoĹžstvĂ­ prĹŻnikĹŻ do systĂŠmu, kterĂŠ je s nĂ­m moĹžnĂŠ. MĂ­sto toho radÄji
+zaĹĄlete (dobrĂ˝) patch kterĂ˝ by jej vylepĹĄil, nebo napiĹĄte svĹŻj vlastnĂ­ server.
 </para>
 
 </sect2>
 
 </sect1>
 
-<sect1 id="edl" xreflabel="Seznamy editačních zásahů (EDL)">
-<title>Seznamy editačních zásahů (EDL)</title>
+<sect1 id="edl" xreflabel="Seznamy editaÄnĂ­ch zĂĄsahĹŻ (EDL)">
+<title>Seznamy editaÄnĂ­ch zĂĄsahĹŻ (EDL)</title>
 
 <para>
-Systém seznamů editačních zásahů (EDL) umožňuje automaticky vynechat nebo vypnout
-zvuk v částech videa při přehrávání, což je zajišťováno pro každý film zvláštním
-EDL konfiguračním souborem.
+SystĂŠm seznamĹŻ editaÄnĂ­ch zĂĄsahĹŻ (EDL) umoĹžĹuje automaticky vynechat nebo vypnout
+zvuk v ÄĂĄstech videa pĹi pĹehrĂĄvĂĄnĂ­, coĹž je zajiĹĄĹĽovĂĄno pro kaĹždĂ˝ film zvlĂĄĹĄtnĂ­m
+EDL konfiguraÄnĂ­m souborem.
 </para>
 
 <para>
-Toho se dá využít pro ty, kdo chtějí sledovat film v "rodinném" režimu.
-Můžete vystříhat veškeré násilí, nechutnosti, Jar-Jar Binkse .. z filmu
-podle svých vlastních osobních preferencí. Mimoto jsou zde i jiná využití,
-jako je automatické vystřihávání reklam z videa které sleduješ.
+Toho se dĂĄ vyuĹžĂ­t pro ty, kdo chtÄjĂ­ sledovat film v "rodinnĂŠm" reĹžimu.
+MĹŻĹžete vystĹĂ­hat veĹĄkerĂŠ nĂĄsilĂ­, nechutnosti, Jar-Jar Binkse .. z filmu
+podle svĂ˝ch vlastnĂ­ch osobnĂ­ch preferencĂ­. Mimoto jsou zde i jinĂĄ vyuĹžitĂ­,
+jako je automatickĂŠ vystĹihĂĄvĂĄnĂ­ reklam z videa kterĂŠ sledujeĹĄ.
 </para>
 
 <para>
-Formát EDL souboru je poměrně kostrbatý. Každý příkaz je na samostatném
-řádku a označuje co dělat (vystřihnout/ztišit) a kdy to dělat
-(pomocí ukazatelů v sekundách).
+FormĂĄt EDL souboru je pomÄrnÄ kostrbatĂ˝. KaĹždĂ˝ pĹĂ­kaz je na samostatnĂŠm
+ĹĂĄdku a oznaÄuje co dÄlat (vystĹihnout/ztiĹĄit) a kdy to dÄlat
+(pomocĂ­ ukazatelĹŻ v sekundĂĄch).
 </para>
 
 <sect2 id="edl_using">
-<title>Použití EDL souboru</title>
+<title>PouĹžitĂ­ EDL souboru</title>
 <para>
-Vložte volbu <option>-edl &lt;soubor&gt;</option> při spouštění
-<application>MPlayer</application>, se jménem EDL souboru, který chcete použít
+VloĹžte volbu <option>-edl &lt;soubor&gt;</option> pĹi spouĹĄtÄnĂ­
+<application>MPlayer</application>, se jmĂŠnem EDL souboru, kterĂ˝ chcete pouĹžĂ­t
 na video.
 </para>
 </sect2>
 
 <sect2 id="edl_making">
-<title>Vytvoření EDL souboru</title>
+<title>VytvoĹenĂ­ EDL souboru</title>
 <para>
-Současný formát EDL souboru je:
+SouÄasnĂ˝ formĂĄt EDL souboru je:
 <programlisting>
-[počáteční sekunda] [koncová sekunda] [akce]
+[poÄĂĄteÄnĂ­ sekunda] [koncovĂĄ sekunda] [akce]
 </programlisting>
-Kde jsou sekundy desetinnými čísly a akce je buď
-<literal>0</literal> pro vynechání nebo <literal>1</literal> pro vypnutí zvuku.
-Příklad:
+Kde jsou sekundy desetinnĂ˝mi ÄĂ­sly a akce je buÄ
+<literal>0</literal> pro vynechĂĄnĂ­ nebo <literal>1</literal> pro vypnutĂ­ zvuku.
+PĹĂ­klad:
 <programlisting>
 5.3   7.1    0
 15    16.7   1
 420   422    0
 </programlisting>
-To vynechá část videa mezi sekundami 5.3 a 7.1, pak vypne zvuk na
-15 sekundě, zapne jej na 16.7 sekundy a vynechá část videa mezi sekundami 420 a 422.
-Tyto akce budou provedeny jakmile časovač přehrávání dosáhne hodnoty zadané
+To vynechĂĄ ÄĂĄst videa mezi sekundami 5.3 a 7.1, pak vypne zvuk na
+15 sekundÄ, zapne jej na 16.7 sekundy a vynechĂĄ ÄĂĄst videa mezi sekundami 420 a 422.
+Tyto akce budou provedeny jakmile ÄasovaÄ pĹehrĂĄvĂĄnĂ­ dosĂĄhne hodnoty zadanĂŠ
 v souboru.
 </para>
 
 <para>
-Pro vytvoření EDL souboru se kterým budete moci začít, použijte volbu
-<option>-edlout &lt;soubor&gt;</option>. Během přehrávání jen stiskněte
-<keycap>i</keycap> pro označení začátku a konce bloku. Pro vyznačený čas
-bude do souboru zapsán odpovídající záznam. Můžete se pak vrátit a doladit
-vygenerovaný EDL soubor, stejně jako změnit výchozí akci, což je vystřižení
-vyznačených bloků.
+Pro vytvoĹenĂ­ EDL souboru se kterĂ˝m budete moci zaÄĂ­t, pouĹžijte volbu
+<option>-edlout &lt;soubor&gt;</option>. BÄhem pĹehrĂĄvĂĄnĂ­ jen stisknÄte
+<keycap>i</keycap> pro oznaÄenĂ­ zaÄĂĄtku a konce bloku. Pro vyznaÄenĂ˝ Äas
+bude do souboru zapsĂĄn odpovĂ­dajĂ­cĂ­ zĂĄznam. MĹŻĹžete se pak vrĂĄtit a doladit
+vygenerovanĂ˝ EDL soubor, stejnÄ jako zmÄnit vĂ˝chozĂ­ akci, coĹž je vystĹiĹženĂ­
+vyznaÄenĂ˝ch blokĹŻ.
 </para>
 </sect2>
 
@@ -527,50 +527,50 @@ vyznačených bloků.
 
 
 <sect1 id="advaudio" xreflabel="Advanced Audio">
-<title>Pokročilé audio</title>
+<title>PokroÄilĂŠ audio</title>
 
 <sect2 id="advaudio-surround">
-<title>Surround/Vícekanálové přehrávání</title>
+<title>Surround/VĂ­cekanĂĄlovĂŠ pĹehrĂĄvĂĄnĂ­</title>
 
 <sect3 id="advaudio-surround-DVD">
 <title>DVD</title>
 <para>
-Většina DVD a mnoho jiných souborů obsahuje surround zvuk.
-<application>MPlayer</application> podporuje přehrávání přehrávání surround,
-ale ve výchozím nastavení jej nezapíná, jelikož stereo vybavení je mnohem
-častější. Pro přehrávání souboru, který má více než dvoukanálový zvuk použijte
+VÄtĹĄina DVD a mnoho jinĂ˝ch souborĹŻ obsahuje surround zvuk.
+<application>MPlayer</application> podporuje pĹehrĂĄvĂĄnĂ­ pĹehrĂĄvĂĄnĂ­ surround,
+ale ve vĂ˝chozĂ­m nastavenĂ­ jej nezapĂ­nĂĄ, jelikoĹž stereo vybavenĂ­ je mnohem
+ÄastÄjĹĄĂ­. Pro pĹehrĂĄvĂĄnĂ­ souboru, kterĂ˝ mĂĄ vĂ­ce neĹž dvoukanĂĄlovĂ˝ zvuk pouĹžijte
 volbu <option>-channels</option>.
-Například pro přehrání DVD s 5.1 zvukem:
+NapĹĂ­klad pro pĹehrĂĄnĂ­ DVD s 5.1 zvukem:
 
 <screen>mplayer dvd://1 -channels 6</screen>
 
-Poznamenejme, že ačkoli se jmenuje "5.1", ve skutečnosti má šest kanálů.
-Pokud máte surround zvukové vybavení, můžete si přidat volbu
-<option>channels</option> do svého konfiguračního souboru
+Poznamenejme, Ĺže aÄkoli se jmenuje "5.1", ve skuteÄnosti mĂĄ ĹĄest kanĂĄlĹŻ.
+Pokud mĂĄte surround zvukovĂŠ vybavenĂ­, mĹŻĹžete si pĹidat volbu
+<option>channels</option> do svĂŠho konfiguraÄnĂ­ho souboru
 <application>MPlayer</application>u <filename>~/.mplayer/config</filename>.
-Například pro použití čtyřkanálového přehrávání zvuku jako výchozí, přidejte
-následující řádek:
+NapĹĂ­klad pro pouĹžitĂ­ ÄtyĹkanĂĄlovĂŠho pĹehrĂĄvĂĄnĂ­ zvuku jako vĂ˝chozĂ­, pĹidejte
+nĂĄsledujĂ­cĂ­ ĹĂĄdek:
 
 <programlisting>channels=4</programlisting>
 
-<application>MPlayer</application> pak poskytuje zvuk ve čtyřech kanálech,
-pokud jsou všechny čtyři kanály k dispozici.
+<application>MPlayer</application> pak poskytuje zvuk ve ÄtyĹech kanĂĄlech,
+pokud jsou vĹĄechny ÄtyĹi kanĂĄly k dispozici.
 </para>
 </sect3>
 
 
 <sect3 id="advaudio-surround-stereoinfour">
-<title>Přehrávání stereo souborů do čtyřech reproduktorů</title>
+<title>PĹehrĂĄvĂĄnĂ­ stereo souborĹŻ do ÄtyĹech reproduktorĹŻ</title>
 
 <para>
-<application>MPlayer</application> ve výchozím nastavení neduplikuje žádné
-kanály a nedělá to ani většina audio ovladačů. Pokud to chcete udělat
-ručně:
+<application>MPlayer</application> ve vĂ˝chozĂ­m nastavenĂ­ neduplikuje ĹžĂĄdnĂŠ
+kanĂĄly a nedÄlĂĄ to ani vÄtĹĄina audio ovladaÄĹŻ. Pokud to chcete udÄlat
+ruÄnÄ:
 
 <screen>mplayer <replaceable>soubor</replaceable> -af channels=2:2:0:1:0:0</screen>
 
-Vysvětlení naleznete v sekci
-<link linkend="advaudio-channels-copying">kopírování kanálů</link>.
+VysvÄtlenĂ­ naleznete v sekci
+<link linkend="advaudio-channels-copying">kopĂ­rovĂĄnĂ­ kanĂĄlĹŻ</link>.
 </para>
 
 </sect3>
@@ -580,78 +580,78 @@ Vysvětlení naleznete v sekci
 <title>AC3/DTS Passthrough</title>
 
 <para>
-DVD mají obvykle surround zvuk enkódovaný ve formátu AC3 (Dolby Digital) nebo
-DTS (Digital Theater System). Některá moderní zařízení jsou schopna dekódovat
-tyto formáty interně. <application>MPlayer</application> lze nakonfigurovat
-tak, aby přenesl zvuková data bez dekódování. To bude fungovat pouze pokud máte
-S/PDIF (Sony/Philips Digital Interface) jack ve zvukové kartě.
+DVD majĂ­ obvykle surround zvuk enkĂłdovanĂ˝ ve formĂĄtu AC3 (Dolby Digital) nebo
+DTS (Digital Theater System). NÄkterĂĄ modernĂ­ zaĹĂ­zenĂ­ jsou schopna dekĂłdovat
+tyto formĂĄty internÄ. <application>MPlayer</application> lze nakonfigurovat
+tak, aby pĹenesl zvukovĂĄ data bez dekĂłdovĂĄnĂ­. To bude fungovat pouze pokud mĂĄte
+S/PDIF (Sony/Philips Digital Interface) jack ve zvukovĂŠ kartÄ.
 </para>
 
 <para>
-Pokud vaše zařízení umí dekódovat jak AC3, tak DTS, můžete bezpečně zapnout
-passthrough pro oba formáty. Jinak zapněte passthrough pouze pro formát, který
-vaše zařízení podporuje.
+Pokud vaĹĄe zaĹĂ­zenĂ­ umĂ­ dekĂłdovat jak AC3, tak DTS, mĹŻĹžete bezpeÄnÄ zapnout
+passthrough pro oba formĂĄty. Jinak zapnÄte passthrough pouze pro formĂĄt, kterĂ˝
+vaĹĄe zaĹĂ­zenĂ­ podporuje.
 </para>
 
 <itemizedlist>
-<title>Zapnutí passthrough z příkazového řádku:</title>
+<title>ZapnutĂ­ passthrough z pĹĂ­kazovĂŠho ĹĂĄdku:</title>
 <listitem><para>
-Jen pro AC3 použijte <option>-ac hwac3</option>
+Jen pro AC3 pouĹžijte <option>-ac hwac3</option>
 </para></listitem>
 <listitem><para>
-Jen pro DTS použijte <option>-ac hwdts</option>
+Jen pro DTS pouĹžijte <option>-ac hwdts</option>
 </para></listitem>
 <listitem><para>
-Pro oba (AC3 i DTS) použijte <option>-afm hwac3</option>
+Pro oba (AC3 i DTS) pouĹžijte <option>-afm hwac3</option>
 </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
-<title>Zapnutí passthrough v konfiguračním souboru
+<title>ZapnutĂ­ passthrough v konfiguraÄnĂ­m souboru
 <application>MPlayer</application>u: </title>
 <listitem><para>
-Jen pro AC3 použijte <option>ac=hwac3,</option>
+Jen pro AC3 pouĹžijte <option>ac=hwac3,</option>
 </para></listitem>
 <listitem><para>
-Jen pro DTS použijte <option>ac=hwdts,</option>
+Jen pro DTS pouĹžijte <option>ac=hwdts,</option>
 </para></listitem>
 <listitem><para>
-Pro oba (AC3 i DTS) použijte <option>afm=hwac3</option>
+Pro oba (AC3 i DTS) pouĹžijte <option>afm=hwac3</option>
 </para></listitem>
 </itemizedlist>
 
 <para>
-Povšimněte si čárky (",") na konci
-<option>ac=hwac3,</option> a <option>ac=hwdts,</option>. To umožní
-<application>MPlayer</application>u použít normální kodek, když přehrávaný
-soubor nemá AC3 nebo DTS zvuk. Volba <option>afm=hwac3</option> nevyžaduje
-čárku; <application>MPlayer</application> se zařídí podle potřeby automaticky,
-pokud je zvolena rodina audio kodeků.
+PovĹĄimnÄte si ÄĂĄrky (",") na konci
+<option>ac=hwac3,</option> a <option>ac=hwdts,</option>. To umoĹžnĂ­
+<application>MPlayer</application>u pouĹžĂ­t normĂĄlnĂ­ kodek, kdyĹž pĹehrĂĄvanĂ˝
+soubor nemĂĄ AC3 nebo DTS zvuk. Volba <option>afm=hwac3</option> nevyĹžaduje
+ÄĂĄrku; <application>MPlayer</application> se zaĹĂ­dĂ­ podle potĹeby automaticky,
+pokud je zvolena rodina audio kodekĹŻ.
 </para>
 
 </sect3>
 
 
 <sect3 id="advaudio-surround-matrix">
-<title>Maticově enkódovaný zvuk</title>
+<title>MaticovÄ enkĂłdovanĂ˝ zvuk</title>
 
 <para>
 <emphasis>***TODO***</emphasis>
 </para>
 <para>
-Tato sekce musí být teprve napsaná a nemůže být dokončena dokud nám někdo
-nepošle vzorkové soubory pro testování. Pokud máte nějaké maticově enkódované
-zvukové soubory, víte, kde je lze najít, nebo máte jakoukoli informaci, která
-by mohla pomoci, pošlete prosím zprávu do konference
+Tato sekce musĂ­ bĂ˝t teprve napsanĂĄ a nemĹŻĹže bĂ˝t dokonÄena dokud nĂĄm nÄkdo
+nepoĹĄle vzorkovĂŠ soubory pro testovĂĄnĂ­. Pokud mĂĄte nÄjakĂŠ maticovÄ enkĂłdovanĂŠ
+zvukovĂŠ soubory, vĂ­te, kde je lze najĂ­t, nebo mĂĄte jakoukoli informaci, kterĂĄ
+by mohla pomoci, poĹĄlete prosĂ­m zprĂĄvu do konference
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
-Do předmětu vložte "[matrix-encoded audio]".
+Do pĹedmÄtu vloĹžte "[matrix-encoded audio]".
 </para>
 <para>
-Pokud nepřijdou žádné soubory nebo informace, tato sekce bude odstraněna.
+Pokud nepĹijdou ĹžĂĄdnĂŠ soubory nebo informace, tato sekce bude odstranÄna.
 </para>
 
 <para>
-Dobré odkazy:
+DobrĂŠ odkazy:
 <itemizedlist>
 <listitem><para>
 <ulink url="http://electronics.howstuffworks.com/surround-sound5.htm">http://electronics.howstuffworks.com/surround-sound5.htm</ulink>
@@ -666,37 +666,37 @@ Dobré odkazy:
 
 
 <sect3 id="advaudio-surround-hrtf">
-<title>Surround emulace ve sluchátkách</title>
+<title>Surround emulace ve sluchĂĄtkĂĄch</title>
 
 <para>
 <application>MPlayer</application> obsahuje HRTF (Head Related Transfer
-Function) filtr založený na
+Function) filtr zaloĹženĂ˝ na
 <ulink url="http://sound.media.mit.edu/KEMAR.html">projektu MIT</ulink>,
-kde jsou měření vzata z mikrofonů na umělé lidské hlavě.
+kde jsou mÄĹenĂ­ vzata z mikrofonĹŻ na umÄlĂŠ lidskĂŠ hlavÄ.
 </para>
 
 <para>
-Ačkoli není možné přesně imitovat surround systém,
-<application>MPlayer</application>ův HRTF filtr produkuje prostorově mnohem
-prokreslenější zvuk ve 2-kanálových sluchátkách. Obvyklé míchání jednoduše
-kombinuje všechny kanály do dvou; krom kombinace kanálů, <option>hrtf</option>
-generuje slabá echa, poněkud zvětšuje oddělení stereo kanálů a mění hlasitost
-některých kmitočtů. Jestli HRTF zní lépe může záviset na zdrojovém zvuku a
-osobním vkusu, ale určitě stojí za zkoušku.
+AÄkoli nenĂ­ moĹžnĂŠ pĹesnÄ imitovat surround systĂŠm,
+<application>MPlayer</application>ĹŻv HRTF filtr produkuje prostorovÄ mnohem
+prokreslenÄjĹĄĂ­ zvuk ve 2-kanĂĄlovĂ˝ch sluchĂĄtkĂĄch. ObvyklĂŠ mĂ­chĂĄnĂ­ jednoduĹĄe
+kombinuje vĹĄechny kanĂĄly do dvou; krom kombinace kanĂĄlĹŻ, <option>hrtf</option>
+generuje slabĂĄ echa, ponÄkud zvÄtĹĄuje oddÄlenĂ­ stereo kanĂĄlĹŻ a mÄnĂ­ hlasitost
+nÄkterĂ˝ch kmitoÄtĹŻ. Jestli HRTF znĂ­ lĂŠpe mĹŻĹže zĂĄviset na zdrojovĂŠm zvuku a
+osobnĂ­m vkusu, ale urÄitÄ stojĂ­ za zkouĹĄku.
 </para>
 
 <para>
-Pro přehrání DVD s HRTF:
+Pro pĹehrĂĄnĂ­ DVD s HRTF:
 
 <screen>mplayer dvd://1 -channels 6 -af hrtf</screen>
 
 </para>
 
 <para>
-<option>hrtf</option> pracuje dobře pouze s 5 nebo 6 kanály.
-<option>hrtf</option> také vyžaduje zvuk 48 kHz. DVD audio již je 48 kHz, ale
-pokud máte soubor s odlišným vzorkovacím kmitočtem, který chcete přehrávat
-pomocí <option>hrtf</option>, musíte jej převzorkovat:
+<option>hrtf</option> pracuje dobĹe pouze s 5 nebo 6 kanĂĄly.
+<option>hrtf</option> takĂŠ vyĹžaduje zvuk 48 kHz. DVD audio jiĹž je 48 kHz, ale
+pokud mĂĄte soubor s odliĹĄnĂ˝m vzorkovacĂ­m kmitoÄtem, kterĂ˝ chcete pĹehrĂĄvat
+pomocĂ­ <option>hrtf</option>, musĂ­te jej pĹevzorkovat:
 
 <screen>mplayer <replaceable>soubor</replaceable> -channels 6 -af resample=48000,hrtf</screen>
 
@@ -706,12 +706,12 @@ pomocí <option>hrtf</option>, musíte jej převzorkovat:
 
 
 <sect3 id="advaudio-surround-troubleshooting">
-<title>Potíže</title>
+<title>PotĂ­Ĺže</title>
 
 <para>
-Pokud neslyšíte ze surround kanálů žádný zvuk, ověřte si nastavení směšovače
-pomocí programu jako je <application>alsamixer</application>;
-audio výstupy jsou často vypnuty a nastaveny na nulovou hlasitost jako výchozí.
+Pokud neslyĹĄĂ­te ze surround kanĂĄlĹŻ ĹžĂĄdnĂ˝ zvuk, ovÄĹte si nastavenĂ­ smÄĹĄovaÄe
+pomocĂ­ programu jako je <application>alsamixer</application>;
+audio vĂ˝stupy jsou Äasto vypnuty a nastaveny na nulovou hlasitost jako vĂ˝chozĂ­.
 </para>
 
 </sect3>
@@ -720,105 +720,105 @@ audio výstupy jsou často vypnuty a nastaveny na nulovou hlasitost jako výchozí.
 
 
 <sect2 id="advaudio-channels">
-<title>Manipulace s kanály</title>
+<title>Manipulace s kanĂĄly</title>
 
 <sect3 id="advaudio-channels-general">
-<title>Obecné informace</title>
+<title>ObecnĂŠ informace</title>
 
 <para>
-Naneštěstí neexistuje standard pro řazení kanálů. Následující řazení jsou
-používaná v AC3 a jsou poměrně typická; zkuste je a uvidíte, zda tomu váš zdroj
-odpovídá. Kanály jsou číslovány od 0.
+NaneĹĄtÄstĂ­ neexistuje standard pro ĹazenĂ­ kanĂĄlĹŻ. NĂĄsledujĂ­cĂ­ ĹazenĂ­ jsou
+pouĹžĂ­vanĂĄ v AC3 a jsou pomÄrnÄ typickĂĄ; zkuste je a uvidĂ­te, zda tomu vĂĄĹĄ zdroj
+odpovĂ­dĂĄ. KanĂĄly jsou ÄĂ­slovĂĄny od 0.
 
 <orderedlist spacing="compact">
 <title>mono</title>
-<listitem override="0"><simpara>střed</simpara></listitem>
+<listitem override="0"><simpara>stĹed</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>stereo</title>
-<listitem override="0"><simpara>levý</simpara></listitem>
-<listitem><simpara>pravý</simpara></listitem>
+<listitem override="0"><simpara>levĂ˝</simpara></listitem>
+<listitem><simpara>pravĂ˝</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
-<title>kvadrofonní</title>
-<listitem override="0"><simpara>levý čelní</simpara></listitem>
-<listitem><simpara>pravý čelní</simpara></listitem>
-<listitem><simpara>levý zadní</simpara></listitem>
-<listitem><simpara>pravý zadní</simpara></listitem>
+<title>kvadrofonnĂ­</title>
+<listitem override="0"><simpara>levĂ˝ ÄelnĂ­</simpara></listitem>
+<listitem><simpara>pravĂ˝ ÄelnĂ­</simpara></listitem>
+<listitem><simpara>levĂ˝ zadnĂ­</simpara></listitem>
+<listitem><simpara>pravĂ˝ zadnĂ­</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 4.0</title>
-<listitem override="0"><simpara>levý čelní</simpara></listitem>
-<listitem><simpara>pravý čelní</simpara></listitem>
-<listitem><simpara>středový zadní</simpara></listitem>
-<listitem><simpara>středový čelní</simpara></listitem>
+<listitem override="0"><simpara>levĂ˝ ÄelnĂ­</simpara></listitem>
+<listitem><simpara>pravĂ˝ ÄelnĂ­</simpara></listitem>
+<listitem><simpara>stĹedovĂ˝ zadnĂ­</simpara></listitem>
+<listitem><simpara>stĹedovĂ˝ ÄelnĂ­</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.0</title>
-<listitem override="0"><simpara>levý čelní</simpara></listitem>
-<listitem><simpara>pravý čelní</simpara></listitem>
-<listitem><simpara>levý zadní</simpara></listitem>
-<listitem><simpara>pravý zadní</simpara></listitem>
-<listitem><simpara>středový čelní</simpara></listitem>
+<listitem override="0"><simpara>levĂ˝ ÄelnĂ­</simpara></listitem>
+<listitem><simpara>pravĂ˝ ÄelnĂ­</simpara></listitem>
+<listitem><simpara>levĂ˝ zadnĂ­</simpara></listitem>
+<listitem><simpara>pravĂ˝ zadnĂ­</simpara></listitem>
+<listitem><simpara>stĹedovĂ˝ ÄelnĂ­</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.1</title>
-<listitem override="0"><simpara>levý čelní</simpara></listitem>
-<listitem><simpara>pravý čelní</simpara></listitem>
-<listitem><simpara>levý zadní</simpara></listitem>
-<listitem><simpara>pravý zadní</simpara></listitem>
-<listitem><simpara>středový čelní</simpara></listitem>
+<listitem override="0"><simpara>levĂ˝ ÄelnĂ­</simpara></listitem>
+<listitem><simpara>pravĂ˝ ÄelnĂ­</simpara></listitem>
+<listitem><simpara>levĂ˝ zadnĂ­</simpara></listitem>
+<listitem><simpara>pravĂ˝ zadnĂ­</simpara></listitem>
+<listitem><simpara>stĹedovĂ˝ ÄelnĂ­</simpara></listitem>
 <listitem><simpara>subwoofer</simpara></listitem>
 </orderedlist>
 
 </para>
 
 <para>
-Volba <option>-channels</option> se používá pro požadavek na počet kanálů z
-dekodéru zvuku. Některé audio kodeky používají počet zadaných kanálů pro
-rozhodování, zda je nutné podmixovat zdroj. Poznamenejme, že to ne vždy
-ovlivní počet výstupních kanálů. Například použití
-<option>-channels 4</option> pro přehrání stereo MP3 souboru povede ke
-2-kanálovému výstupu, jelikož MP3 kodek neprodukuje extra kanály.
+Volba <option>-channels</option> se pouĹžĂ­vĂĄ pro poĹžadavek na poÄet kanĂĄlĹŻ z
+dekodĂŠru zvuku. NÄkterĂŠ audio kodeky pouĹžĂ­vajĂ­ poÄet zadanĂ˝ch kanĂĄlĹŻ pro
+rozhodovĂĄnĂ­, zda je nutnĂŠ podmixovat zdroj. Poznamenejme, Ĺže to ne vĹždy
+ovlivnĂ­ poÄet vĂ˝stupnĂ­ch kanĂĄlĹŻ. NapĹĂ­klad pouĹžitĂ­
+<option>-channels 4</option> pro pĹehrĂĄnĂ­ stereo MP3 souboru povede ke
+2-kanĂĄlovĂŠmu vĂ˝stupu, jelikoĹž MP3 kodek neprodukuje extra kanĂĄly.
 </para>
 
 <para>
-Pro vytvoření nebo odstranění kanálů slouží zvukový filtr
-<option>channels</option>, který je rovněž vhodný k ovládání počtu zvukových
-kanálů posílaných do zvukové karty. Viz následující sekce pro více informací
-o manipulacích s kanály.
+Pro vytvoĹenĂ­ nebo odstranÄnĂ­ kanĂĄlĹŻ slouĹžĂ­ zvukovĂ˝ filtr
+<option>channels</option>, kterĂ˝ je rovnÄĹž vhodnĂ˝ k ovlĂĄdĂĄnĂ­ poÄtu zvukovĂ˝ch
+kanĂĄlĹŻ posĂ­lanĂ˝ch do zvukovĂŠ karty. Viz nĂĄsledujĂ­cĂ­ sekce pro vĂ­ce informacĂ­
+o manipulacĂ­ch s kanĂĄly.
 </para>
 
 </sect3>
 
 
 <sect3 id="advaudio-channels-mono">
-<title>Přehrávání mono na dvou reproduktorech</title>
+<title>PĹehrĂĄvĂĄnĂ­ mono na dvou reproduktorech</title>
 
 <para>
-Mono zní mnohem lépe, když je přehráván dvěma reproduktory &ndash; zvlášť při
-použití sluchátek. Audio soubory, které ve skutečnosti mají jeden kanál,
-jsou automaticky přehrávány dvěma reproduktory; naneštěstí je většina
-mono souborů ve skutečnosti enkódována jako stereo s jedním kanálem utlumeným.
-Nejjednodušší a nejblbuvzdornější způsob, jak přinutit oba reproduktory
-poskytovat stejný zvuk je filtr <option>extrastereo</option>:
+Mono znĂ­ mnohem lĂŠpe, kdyĹž je pĹehrĂĄvĂĄn dvÄma reproduktory &ndash; zvlĂĄĹĄĹĽ pĹi
+pouĹžitĂ­ sluchĂĄtek. Audio soubory, kterĂŠ ve skuteÄnosti majĂ­ jeden kanĂĄl,
+jsou automaticky pĹehrĂĄvĂĄny dvÄma reproduktory; naneĹĄtÄstĂ­ je vÄtĹĄina
+mono souborĹŻ ve skuteÄnosti enkĂłdovĂĄna jako stereo s jednĂ­m kanĂĄlem utlumenĂ˝m.
+NejjednoduĹĄĹĄĂ­ a nejblbuvzdornÄjĹĄĂ­ zpĹŻsob, jak pĹinutit oba reproduktory
+poskytovat stejnĂ˝ zvuk je filtr <option>extrastereo</option>:
 
 <screen>mplayer <replaceable>soubor</replaceable> -af extrastereo=0</screen>
 
 </para>
 
 <para>
-To zprůměruje oba kanály, takže budou mít poloviční hlasitost originálu.
-Další sekce přinášejí příklady dalších možností, jak to udělat bez snížení
-hlasitosti, ale ty jsou mnohem komplexnější a vyžadují odlišné volby
-v závislosti na tom, který kanál ponecháte. Pokud potřebujete jen upravit
-hlasitost, může být lehčí experimentovat s filtrem <option>volume</option>
-a najít vhodnou hodnotu. Například:
+To zprĹŻmÄruje oba kanĂĄly, takĹže budou mĂ­t poloviÄnĂ­ hlasitost originĂĄlu.
+DalĹĄĂ­ sekce pĹinĂĄĹĄejĂ­ pĹĂ­klady dalĹĄĂ­ch moĹžnostĂ­, jak to udÄlat bez snĂ­ĹženĂ­
+hlasitosti, ale ty jsou mnohem komplexnÄjĹĄĂ­ a vyĹžadujĂ­ odliĹĄnĂŠ volby
+v zĂĄvislosti na tom, kterĂ˝ kanĂĄl ponechĂĄte. Pokud potĹebujete jen upravit
+hlasitost, mĹŻĹže bĂ˝t lehÄĂ­ experimentovat s filtrem <option>volume</option>
+a najĂ­t vhodnou hodnotu. NapĹĂ­klad:
 
 <screen>mplayer <replaceable>soubor</replaceable> -af extrastereo=0,volume=5</screen>
 
@@ -828,104 +828,104 @@ a najít vhodnou hodnotu. Například:
 
 
 <sect3 id="advaudio-channels-copying">
-<title>Kopírování/přesun kanálů</title>
+<title>KopĂ­rovĂĄnĂ­/pĹesun kanĂĄlĹŻ</title>
 
 <para>
-Filtr <option>channels</option> umí přesunout jakýkoli nebo všechny kanály.
-Nastavení všech parametrů filtru <option>channels</option> může být
-komplikované a vyžaduje pozornost.
+Filtr <option>channels</option> umĂ­ pĹesunout jakĂ˝koli nebo vĹĄechny kanĂĄly.
+NastavenĂ­ vĹĄech parametrĹŻ filtru <option>channels</option> mĹŻĹže bĂ˝t
+komplikovanĂŠ a vyĹžaduje pozornost.
 
 <orderedlist spacing="compact">
 <listitem><para>
-Rozhodněte, kolik výstupních kanálů potřebujete. To je první parametr.
+RozhodnÄte, kolik vĂ˝stupnĂ­ch kanĂĄlĹŻ potĹebujete. To je prvnĂ­ parametr.
 </para></listitem>
 <listitem><para>
-Spočítejte, kolik přesunů kanálů budete dělat. To je druhý parametr. Každý
-kanál může být přesunut naráz do několika různých kanálů, ale pamatujte, že
-pokud je kanál přesunut (dokonce i jen do jednoho cíle), bude zdrojový kanál
-prázdný dokud do něj nepřesunete jiný kanál. Chcete-li kanál zkopírovat,
-aby zdroj zůstal stejný, jednoduše přesuňte kanál do obou, cíle i zdroje.
-Například:
+SpoÄĂ­tejte, kolik pĹesunĹŻ kanĂĄlĹŻ budete dÄlat. To je druhĂ˝ parametr. KaĹždĂ˝
+kanĂĄl mĹŻĹže bĂ˝t pĹesunut narĂĄz do nÄkolika rĹŻznĂ˝ch kanĂĄlĹŻ, ale pamatujte, Ĺže
+pokud je kanĂĄl pĹesunut (dokonce i jen do jednoho cĂ­le), bude zdrojovĂ˝ kanĂĄl
+prĂĄzdnĂ˝ dokud do nÄj nepĹesunete jinĂ˝ kanĂĄl. Chcete-li kanĂĄl zkopĂ­rovat,
+aby zdroj zĹŻstal stejnĂ˝, jednoduĹĄe pĹesuĹte kanĂĄl do obou, cĂ­le i zdroje.
+NapĹĂ­klad:
 <programlisting>
 channel 2 --> channel 3
 channel 2 --> channel 2
 </programlisting>
 </para></listitem>
 <listitem><para>
-Zapište kopie kanálů jako dvojici parametrů. Pamatujte, že první kanál je 0,
-druhý 1 atd. Na pořadí parametrů nezáleží, pokud jsou správně sdruženy do
-párů <replaceable>zdroj:cíl</replaceable>.
+ZapiĹĄte kopie kanĂĄlĹŻ jako dvojici parametrĹŻ. Pamatujte, Ĺže prvnĂ­ kanĂĄl je 0,
+druhĂ˝ 1 atd. Na poĹadĂ­ parametrĹŻ nezĂĄleĹžĂ­, pokud jsou sprĂĄvnÄ sdruĹženy do
+pĂĄrĹŻ <replaceable>zdroj:cĂ­l</replaceable>.
 </para></listitem>
 </orderedlist>
 
 </para>
 
 
-<bridgehead>Příklad: jeden kanál ve dvou reproduktorech</bridgehead>
+<bridgehead>PĹĂ­klad: jeden kanĂĄl ve dvou reproduktorech</bridgehead>
 
 <para>
-Zde máte příklad jiného způsobu, jak hrát jeden kanál v obou reproduktorech.
-Pro náš účel předpokládejme, že by měl být přehráván levý kanál a zahozen pravý.
-Následujeme výše uvedený postup:
+Zde mĂĄte pĹĂ­klad jinĂŠho zpĹŻsobu, jak hrĂĄt jeden kanĂĄl v obou reproduktorech.
+Pro nĂĄĹĄ ĂşÄel pĹedpoklĂĄdejme, Ĺže by mÄl bĂ˝t pĹehrĂĄvĂĄn levĂ˝ kanĂĄl a zahozen pravĂ˝.
+NĂĄsledujeme vĂ˝ĹĄe uvedenĂ˝ postup:
 <orderedlist>
 <listitem><para>
-Abychom měli výstupní kanál pro každý z obou reproduktorů, musí být první
+Abychom mÄli vĂ˝stupnĂ­ kanĂĄl pro kaĹždĂ˝ z obou reproduktorĹŻ, musĂ­ bĂ˝t prvnĂ­
 parametr "2".
 </para></listitem>
 <listitem><para>
-Levý kanál musí být přesunut do pravého a také sám do sebe, aby nezůstal
-prázdný. To jsou celkem dva přesuny, takže druhý parametr bude také "2".
+LevĂ˝ kanĂĄl musĂ­ bĂ˝t pĹesunut do pravĂŠho a takĂŠ sĂĄm do sebe, aby nezĹŻstal
+prĂĄzdnĂ˝. To jsou celkem dva pĹesuny, takĹže druhĂ˝ parametr bude takĂŠ "2".
 </para></listitem>
 <listitem><para>
-Pro přesun levého kanálu (channel 0) do pravého kanálu (channel 1) bude dvojice
-parametrů "0:1" a "0:0" přesune levý kanál na sebe.
+Pro pĹesun levĂŠho kanĂĄlu (channel 0) do pravĂŠho kanĂĄlu (channel 1) bude dvojice
+parametrĹŻ "0:1" a "0:0" pĹesune levĂ˝ kanĂĄl na sebe.
 </para></listitem>
 </orderedlist>
-Vše dohromady pak dá:
+VĹĄe dohromady pak dĂĄ:
 
 <screen>mplayer <replaceable>soubor</replaceable> -af channels=2:2:0:1:0:0</screen>
 </para>
 
 <para>
-Výhoda tohoto postupu před <option>extrastereo</option> je v tom, že
-je hlasitost každého výstupního kanálu stejná jako hlasitost zdrojového
-kanálu. Nevýhodou je to, že parametry musí být změněny na "2:2:1:0:1:1",
-pokud je požadovaný zvuk v pravém kanálu. Také je těžší si je pamatovat
+VĂ˝hoda tohoto postupu pĹed <option>extrastereo</option> je v tom, Ĺže
+je hlasitost kaĹždĂŠho vĂ˝stupnĂ­ho kanĂĄlu stejnĂĄ jako hlasitost zdrojovĂŠho
+kanĂĄlu. NevĂ˝hodou je to, Ĺže parametry musĂ­ bĂ˝t zmÄnÄny na "2:2:1:0:1:1",
+pokud je poĹžadovanĂ˝ zvuk v pravĂŠm kanĂĄlu. TakĂŠ je tÄĹžĹĄĂ­ si je pamatovat
 a napsat.
 </para>
 
-<bridgehead>Příklad: levý kanál v obou reproduktorech &ndash; zkratka</bridgehead>
+<bridgehead>PĹĂ­klad: levĂ˝ kanĂĄl v obou reproduktorech &ndash; zkratka</bridgehead>
 
 <para>
-Ve skutečnosti je mnohem jednodušší způsob použití filtru
-<option>channels</option> pro přehrávání levého kanálu v obou reproduktorech:
+Ve skuteÄnosti je mnohem jednoduĹĄĹĄĂ­ zpĹŻsob pouĹžitĂ­ filtru
+<option>channels</option> pro pĹehrĂĄvĂĄnĂ­ levĂŠho kanĂĄlu v obou reproduktorech:
 
 <screen>mplayer <replaceable>soubor</replaceable> -af channels=1</screen>
 
-Druhý kanál je zahozen a bez dalších parametrů je ponechán jediný zbývající
-kanál. Ovladače zvukových karet hrají jednokanálový zvuk automaticky v obou
-reproduktorech. To pracuje pouze pokud je požadovaný levý kanál.
+DruhĂ˝ kanĂĄl je zahozen a bez dalĹĄĂ­ch parametrĹŻ je ponechĂĄn jedinĂ˝ zbĂ˝vajĂ­cĂ­
+kanĂĄl. OvladaÄe zvukovĂ˝ch karet hrajĂ­ jednokanĂĄlovĂ˝ zvuk automaticky v obou
+reproduktorech. To pracuje pouze pokud je poĹžadovanĂ˝ levĂ˝ kanĂĄl.
 </para>
 
-<bridgehead>Příklad: kopírování čelních kanálů do zadních</bridgehead>
+<bridgehead>PĹĂ­klad: kopĂ­rovĂĄnĂ­ ÄelnĂ­ch kanĂĄlĹŻ do zadnĂ­ch</bridgehead>
 <para>
-Dalším běžným úkonem je duplikace čelních kanálů a jejich přehrávání v zadních
-reproduktorech kvadrofonní sestavy.
+DalĹĄĂ­m bÄĹžnĂ˝m Ăşkonem je duplikace ÄelnĂ­ch kanĂĄlĹŻ a jejich pĹehrĂĄvĂĄnĂ­ v zadnĂ­ch
+reproduktorech kvadrofonnĂ­ sestavy.
 <orderedlist>
 <listitem><para>
-Zde by mely být čtyři výstupní kanály. První parametr je "4".
+Zde by mely bĂ˝t ÄtyĹi vĂ˝stupnĂ­ kanĂĄly. PrvnĂ­ parametr je "4".
 </para></listitem>
 <listitem><para>
-Oba přední kanály musí být přesunuty do odpovídajících zadních kanálů a
-také na sebe. To jsou čtyři přesuny, takže druhý parametr bude "4".
+Oba pĹednĂ­ kanĂĄly musĂ­ bĂ˝t pĹesunuty do odpovĂ­dajĂ­cĂ­ch zadnĂ­ch kanĂĄlĹŻ a
+takĂŠ na sebe. To jsou ÄtyĹi pĹesuny, takĹže druhĂ˝ parametr bude "4".
 </para></listitem>
 <listitem><para>
-Levý čelní (channel 0) přesuneme do levého zadního (channel 2): "0:2".
-Levý čelní musíme rovněž přesunout do sama sebe: "0:0". Pravý přední (channel
-1) je přesunut do pravého zadního (channel 3): "1:3" a také do sebe: "1:1".
+LevĂ˝ ÄelnĂ­ (channel 0) pĹesuneme do levĂŠho zadnĂ­ho (channel 2): "0:2".
+LevĂ˝ ÄelnĂ­ musĂ­me rovnÄĹž pĹesunout do sama sebe: "0:0". PravĂ˝ pĹednĂ­ (channel
+1) je pĹesunut do pravĂŠho zadnĂ­ho (channel 3): "1:3" a takĂŠ do sebe: "1:1".
 </para></listitem>
 </orderedlist>
-Po zkombinování všech nastavení dostaneme:
+Po zkombinovĂĄnĂ­ vĹĄech nastavenĂ­ dostaneme:
 
 <screen>mplayer <replaceable>soubor</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1</screen>
 
@@ -935,167 +935,167 @@ Po zkombinování všech nastavení dostaneme:
 
 
 <sect3 id="advaudio-channels-mixing">
-<title>Mixování kanálů</title>
+<title>MixovĂĄnĂ­ kanĂĄlĹŻ</title>
 
 <para>
-Filtr <option>pan</option> umí mixovat kanály podle požadavků uživatele.
-Umožňuje vše co filtr <option>channels</option> a ještě víc. Naneštěstí jsou
-jeho parametry ještě komplikovanější.
+Filtr <option>pan</option> umĂ­ mixovat kanĂĄly podle poĹžadavkĹŻ uĹživatele.
+UmoĹžĹuje vĹĄe co filtr <option>channels</option> a jeĹĄtÄ vĂ­c. NaneĹĄtÄstĂ­ jsou
+jeho parametry jeĹĄtÄ komplikovanÄjĹĄĂ­.
 <orderedlist>
 <listitem><para>
-Rozhodněte, s kolika kanály budeme pracovat. To můžete nastavit pomocí volby
-<option>-channels</option> a/nebo <option>-af channels</option>. Později se
-v příkladech dozvíte, kdy použít kterou.
+RozhodnÄte, s kolika kanĂĄly budeme pracovat. To mĹŻĹžete nastavit pomocĂ­ volby
+<option>-channels</option> a/nebo <option>-af channels</option>. PozdÄji se
+v pĹĂ­kladech dozvĂ­te, kdy pouĹžĂ­t kterou.
 </para></listitem>
 <listitem><para>
-Rozhodněte, kolik kanálů propustíme do <option>pan</option> (ostatní dekódované
-kanály jsou zahozeny). To je první parametr a také ovládá, kolik kanálů bude mít
-výstup.
+RozhodnÄte, kolik kanĂĄlĹŻ propustĂ­me do <option>pan</option> (ostatnĂ­ dekĂłdovanĂŠ
+kanĂĄly jsou zahozeny). To je prvnĂ­ parametr a takĂŠ ovlĂĄdĂĄ, kolik kanĂĄlĹŻ bude mĂ­t
+vĂ˝stup.
 </para></listitem>
 <listitem><para>
-Zbývající parametry nastavují, kolik z daného kanálu bude namixováno do každého
-dalšího kanálu. Toto je ta komplikovaná část. Pro usnadnění si rozdělte
-parametry do několika skupin, jednu pro každý výstupní kanál. Každý parametr
-uvnitř skupiny odpovídá vstupnímu kanálu. Číslo, které nastavíte bude procento
-vstupního kanálu, které bude namixováno do výstupního kanálu.
+ZbĂ˝vajĂ­cĂ­ parametry nastavujĂ­, kolik z danĂŠho kanĂĄlu bude namixovĂĄno do kaĹždĂŠho
+dalĹĄĂ­ho kanĂĄlu. Toto je ta komplikovanĂĄ ÄĂĄst. Pro usnadnÄnĂ­ si rozdÄlte
+parametry do nÄkolika skupin, jednu pro kaĹždĂ˝ vĂ˝stupnĂ­ kanĂĄl. KaĹždĂ˝ parametr
+uvnitĹ skupiny odpovĂ­dĂĄ vstupnĂ­mu kanĂĄlu. ÄĂ­slo, kterĂŠ nastavĂ­te bude procento
+vstupnĂ­ho kanĂĄlu, kterĂŠ bude namixovĂĄno do vĂ˝stupnĂ­ho kanĂĄlu.
 </para>
 <para>
-<option>pan</option> akceptuje hodnoty od 0 do 512, což odpovídá 0% až 51200%
-původní hlasitosti. Buďte opatrní, pokud používáte hodnoty větší než 1. Nejen,
-že vám to dá velmi vysokou hlasitost, ale pokud překročíte dynamický rozsah
-své zvukové karty, můžete uslyšet rány a praskání. Pokud chcete, můžete
-za <option>pan</option> přidat <option>,volume</option> pro zapnutí omezení,
-ale i tak je nejlepší udržet hodnoty <option>pan</option> dostatečně nízko,
-aby omezování nebylo potřeba.
+<option>pan</option> akceptuje hodnoty od 0 do 512, coĹž odpovĂ­dĂĄ 0% aĹž 51200%
+pĹŻvodnĂ­ hlasitosti. BuÄte opatrnĂ­, pokud pouĹžĂ­vĂĄte hodnoty vÄtĹĄĂ­ neĹž 1. Nejen,
+Ĺže vĂĄm to dĂĄ velmi vysokou hlasitost, ale pokud pĹekroÄĂ­te dynamickĂ˝ rozsah
+svĂŠ zvukovĂŠ karty, mĹŻĹžete uslyĹĄet rĂĄny a praskĂĄnĂ­. Pokud chcete, mĹŻĹžete
+za <option>pan</option> pĹidat <option>,volume</option> pro zapnutĂ­ omezenĂ­,
+ale i tak je nejlepĹĄĂ­ udrĹžet hodnoty <option>pan</option> dostateÄnÄ nĂ­zko,
+aby omezovĂĄnĂ­ nebylo potĹeba.
 </para></listitem>
 </orderedlist>
 </para>
 
-<bridgehead>Příklad: jeden kanál do dvou reproduktorů</bridgehead>
+<bridgehead>PĹĂ­klad: jeden kanĂĄl do dvou reproduktorĹŻ</bridgehead>
 
 <para>
-Zde máte další příklad pro přehrávání levého kanálu ve dvou reproduktorech.
-Následujme výše uvedené kroky:
+Zde mĂĄte dalĹĄĂ­ pĹĂ­klad pro pĹehrĂĄvĂĄnĂ­ levĂŠho kanĂĄlu ve dvou reproduktorech.
+NĂĄsledujme vĂ˝ĹĄe uvedenĂŠ kroky:
 <orderedlist>
 <listitem><para>
-Na výstupu <option>pan</option> by měly být dva kanály, takže první parametr
+Na vĂ˝stupu <option>pan</option> by mÄly bĂ˝t dva kanĂĄly, takĹže prvnĂ­ parametr
 je "2".
 </para></listitem>
 <listitem><para>
-Jelikož máme dva vstupní kanály, budeme mít dvě sady parametrů.
-Jelikož máme rovněž dva výstupní kanály, budeme mít dva parametry v každé
-sadě. Levý kanál ze souboru by měl jít s plnou hlasitostí do nového levého
-i pravého kanálu.
-Takže první sada parametrů je "1:1".
-Pravý kanál by měl být zahozen, takže druhá sada bude "0:0".
-Hodnoty 0 na konci je možné vynechat, ale pro snadnější pochopení
-je zde necháváme.
+JelikoĹž mĂĄme dva vstupnĂ­ kanĂĄly, budeme mĂ­t dvÄ sady parametrĹŻ.
+JelikoĹž mĂĄme rovnÄĹž dva vĂ˝stupnĂ­ kanĂĄly, budeme mĂ­t dva parametry v kaĹždĂŠ
+sadÄ. LevĂ˝ kanĂĄl ze souboru by mÄl jĂ­t s plnou hlasitostĂ­ do novĂŠho levĂŠho
+i pravĂŠho kanĂĄlu.
+TakĹže prvnĂ­ sada parametrĹŻ je "1:1".
+PravĂ˝ kanĂĄl by mÄl bĂ˝t zahozen, takĹže druhĂĄ sada bude "0:0".
+Hodnoty 0 na konci je moĹžnĂŠ vynechat, ale pro snadnÄjĹĄĂ­ pochopenĂ­
+je zde nechĂĄvĂĄme.
 </para></listitem>
 </orderedlist>
-Dáme-li vše dohromady, dostaneme:
+DĂĄme-li vĹĄe dohromady, dostaneme:
 
 <screen>mplayer <replaceable>soubor</replaceable> -af pan=2:1:1:0:0</screen>
 
-Pokud chceme místo levého kanálu pravý, budou parametry
+Pokud chceme mĂ­sto levĂŠho kanĂĄlu pravĂ˝, budou parametry
 <option>pan</option> tyto: "2:0:0:1:1".
 </para>
 
 
-<bridgehead>Příklad: levý kanál ve dvou reproduktorech zkráceně</bridgehead>
+<bridgehead>PĹĂ­klad: levĂ˝ kanĂĄl ve dvou reproduktorech zkrĂĄcenÄ</bridgehead>
 
 <para>
-Stejně jako s <option>channels</option> můžeme použít zkrácený zápis, který
-funguje pouze pro levý kanál:
+StejnÄ jako s <option>channels</option> mĹŻĹžeme pouĹžĂ­t zkrĂĄcenĂ˝ zĂĄpis, kterĂ˝
+funguje pouze pro levĂ˝ kanĂĄl:
 
 <screen>mplayer <replaceable>soubor</replaceable> -af pan=1:1</screen>
 
-Jelikož má <option>pan</option> pouze jeden vstupní kanál (druhý je zahozen),
-máme pouze jednu sadu s jedním parametrem, takže tento jediný kanál dává
-100% sám ze sebe.
+JelikoĹž mĂĄ <option>pan</option> pouze jeden vstupnĂ­ kanĂĄl (druhĂ˝ je zahozen),
+mĂĄme pouze jednu sadu s jednĂ­m parametrem, takĹže tento jedinĂ˝ kanĂĄl dĂĄvĂĄ
+100% sĂĄm ze sebe.
 </para>
 
-<bridgehead>Příklad: podmixování 6-kanálového PCM</bridgehead>
+<bridgehead>PĹĂ­klad: podmixovĂĄnĂ­ 6-kanĂĄlovĂŠho PCM</bridgehead>
 <para>
-<application>MPlayer</application>ův dekodér 6-kanálového PCM neumí podmixování.
-Máme však možnost k tomu použít <option>pan</option>:
+<application>MPlayer</application>ĹŻv dekodĂŠr 6-kanĂĄlovĂŠho PCM neumĂ­ podmixovĂĄnĂ­.
+MĂĄme vĹĄak moĹžnost k tomu pouĹžĂ­t <option>pan</option>:
 <orderedlist>
 <listitem><para>
-Počet výstupních kanálů je 2, takže první parametr je "2".
+PoÄet vĂ˝stupnĂ­ch kanĂĄlĹŻ je 2, takĹže prvnĂ­ parametr je "2".
 </para></listitem>
 <listitem><para>
-Při šesti vstupních kanálech budeme mít šest sad parametrů. Jelikož nás
-však zajímá pouze výstup z prvních dvou kanálů, vystačíme s pouhými dvěma
-sadami; zbývající čtyři sady můžeme vynechat. Pozor na to, že ne všechny
-vícekanálové zvukové soubory mají stejné řazení kanálů! Tento příklad
-demonstruje podmixování souboru se stejným řazením kanálů jako má AC3 5.1:
+PĹi ĹĄesti vstupnĂ­ch kanĂĄlech budeme mĂ­t ĹĄest sad parametrĹŻ. JelikoĹž nĂĄs
+vĹĄak zajĂ­mĂĄ pouze vĂ˝stup z prvnĂ­ch dvou kanĂĄlĹŻ, vystaÄĂ­me s pouhĂ˝mi dvÄma
+sadami; zbĂ˝vajĂ­cĂ­ ÄtyĹi sady mĹŻĹžeme vynechat. Pozor na to, Ĺže ne vĹĄechny
+vĂ­cekanĂĄlovĂŠ zvukovĂŠ soubory majĂ­ stejnĂŠ ĹazenĂ­ kanĂĄlĹŻ! Tento pĹĂ­klad
+demonstruje podmixovĂĄnĂ­ souboru se stejnĂ˝m ĹazenĂ­m kanĂĄlĹŻ jako mĂĄ AC3 5.1:
 <programlisting>
-0 - levý přední
-1 - pravý přední
-2 - levý zadní
-3 - pravý zadní
-4 - středový přední
+0 - levĂ˝ pĹednĂ­
+1 - pravĂ˝ pĹednĂ­
+2 - levĂ˝ zadnĂ­
+3 - pravĂ˝ zadnĂ­
+4 - stĹedovĂ˝ pĹednĂ­
 5 - subwoofer
 </programlisting>
-První sada parametrů je výčtem procentních hodnot hlasitostí v daném pořadí,
-kterou by měl dostat každý výstupní kanál z levého předního kanálu: "1:0".
-Pravý přední kanál by měl jít do pravého výstupu: "0:1".
-Stejně tak zadní kanály: "1:0" a "0:1".
-Středový kanál jde do obou výstupních kanálů s poloviční hlasitostí:
-"0.5:0.5" a subwoofer jde do obou s plnou hlasitostí: "1:1".
+PrvnĂ­ sada parametrĹŻ je vĂ˝Ätem procentnĂ­ch hodnot hlasitostĂ­ v danĂŠm poĹadĂ­,
+kterou by mÄl dostat kaĹždĂ˝ vĂ˝stupnĂ­ kanĂĄl z levĂŠho pĹednĂ­ho kanĂĄlu: "1:0".
+PravĂ˝ pĹednĂ­ kanĂĄl by mÄl jĂ­t do pravĂŠho vĂ˝stupu: "0:1".
+StejnÄ tak zadnĂ­ kanĂĄly: "1:0" a "0:1".
+StĹedovĂ˝ kanĂĄl jde do obou vĂ˝stupnĂ­ch kanĂĄlĹŻ s poloviÄnĂ­ hlasitostĂ­:
+"0.5:0.5" a subwoofer jde do obou s plnou hlasitostĂ­: "1:1".
 </para></listitem>
 </orderedlist>
-Dáme-li vše dohromady, dostaneme:
+DĂĄme-li vĹĄe dohromady, dostaneme:
 
-<screen>mplayer <replaceable>6-kanálové.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1</screen>
+<screen>mplayer <replaceable>6-kanĂĄlovĂŠ.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1</screen>
 
-Uvedené procentní hodnoty jsou pouhým příkladem. Upravte si je podle vlastního
-uvážení.
+UvedenĂŠ procentnĂ­ hodnoty jsou pouhĂ˝m pĹĂ­kladem. Upravte si je podle vlastnĂ­ho
+uvĂĄĹženĂ­.
 </para>
 
-<bridgehead>Příklad: Přehrávání 5.1 zvuku na velkých reprobednách bez subwooferu</bridgehead>
+<bridgehead>PĹĂ­klad: PĹehrĂĄvĂĄnĂ­ 5.1 zvuku na velkĂ˝ch reprobednĂĄch bez subwooferu</bridgehead>
 
 <para>
-Pokud máte robustní čelní reprobedny, nemusíte utrácet za nákup subwooferu
-pro kompletní 5.1 zvukový systém. Použijete-li volbu
-<option>-channels 5</option> pro požadavek, aby liba52 dekódovala 5.1 zvuk
-do 5.0, bude zkrátka kanál pro subwoofer zahozen. Pokud jeho obsah chcete
-roznést do ostatních kanálů, musíte jej podmixovat ručně pomocí
+Pokud mĂĄte robustnĂ­ ÄelnĂ­ reprobedny, nemusĂ­te utrĂĄcet za nĂĄkup subwooferu
+pro kompletnĂ­ 5.1 zvukovĂ˝ systĂŠm. PouĹžijete-li volbu
+<option>-channels 5</option> pro poĹžadavek, aby liba52 dekĂłdovala 5.1 zvuk
+do 5.0, bude zkrĂĄtka kanĂĄl pro subwoofer zahozen. Pokud jeho obsah chcete
+roznĂŠst do ostatnĂ­ch kanĂĄlĹŻ, musĂ­te jej podmixovat ruÄnÄ pomocĂ­
 <option>pan</option>:
 
 <orderedlist>
 <listitem><para>
-Jelikož se <option>pan</option> potřebuje dostat ke všem šesti kanálům, nastavte
-<option>-channels 6</option>, takže je liba52 dekóduje všechny.
+JelikoĹž se <option>pan</option> potĹebuje dostat ke vĹĄem ĹĄesti kanĂĄlĹŻm, nastavte
+<option>-channels 6</option>, takĹže je liba52 dekĂłduje vĹĄechny.
 </para></listitem>
 <listitem><para>
-Filtr <option>pan</option> produkuje pouze pět kanálů, takže první parametr je 5.
+Filtr <option>pan</option> produkuje pouze pÄt kanĂĄlĹŻ, takĹže prvnĂ­ parametr je 5.
 </para></listitem>
 <listitem><para>
-Šest vstupních a pět výstupních kanálů znamená šest sad po pěti parametrech.
+Ĺ est vstupnĂ­ch a pÄt vĂ˝stupnĂ­ch kanĂĄlĹŻ znamenĂĄ ĹĄest sad po pÄti parametrech.
   <itemizedlist spacing="compact">
   <listitem><simpara>
-  Levý přední kanál půjde jen sám do sebe:
+  LevĂ˝ pĹednĂ­ kanĂĄl pĹŻjde jen sĂĄm do sebe:
   "1:0:0:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  Stejně tak pravý přední kanál:
+  StejnÄ tak pravĂ˝ pĹednĂ­ kanĂĄl:
   "0:1:0:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  Taktéž levý zadní kanál:
+  TaktĂŠĹž levĂ˝ zadnĂ­ kanĂĄl:
   "0:0:1:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  Rovněž pravý zadní kanál:
+  RovnÄĹž pravĂ˝ zadnĂ­ kanĂĄl:
   "0:0:0:1:0"
   </simpara></listitem>
   <listitem><simpara>
-  Středový kanál jakbysmet:
+  StĹedovĂ˝ kanĂĄl jakbysmet:
   "0:0:0:0:1"
   </simpara></listitem>
   <listitem><simpara>
-  A nyní se musíme rozhodnout, co uděláme se subwooferem,
-  například půlku do předního levého a půlku do předního pravého:
+  A nynĂ­ se musĂ­me rozhodnout, co udÄlĂĄme se subwooferem,
+  napĹĂ­klad pĹŻlku do pĹednĂ­ho levĂŠho a pĹŻlku do pĹednĂ­ho pravĂŠho:
   "0.5:0.5:0:0:0"
   </simpara></listitem>
   </itemizedlist>
@@ -1113,50 +1113,50 @@ Zkombinujeme-li to dohromady, dostaneme:
 
 
 <sect2 id="advaudio-volume">
-<title>Softwarové nastavení hlasitosti</title>
+<title>SoftwarovĂŠ nastavenĂ­ hlasitosti</title>
 
 <para>
-Některé zvukové stopy jsou příliš tiché na to, aby mohly být pohodlně
-poslouchány bez zesílení. To je problém, pokud váš zvukový systém neumožňuje
-potřebné zesílení. Volba <option>-softvol</option> poručí
-<application>MPlayer</application>u použití vestavěného směšovače. Pak můžete
-použít klávesy pro nastavení hlasitosti (výchozí <keycap>9</keycap> a
-<keycap>0</keycap>) pro dosažení mnohem vyšších úrovní hlasitosti.
-Takto neobejdete směšovač vaší zvukové karty; <application>MPlayer</application>
-pouze zesílí signál před jeho odesláním do zvukové karty.
+NÄkterĂŠ zvukovĂŠ stopy jsou pĹĂ­liĹĄ tichĂŠ na to, aby mohly bĂ˝t pohodlnÄ
+poslouchĂĄny bez zesĂ­lenĂ­. To je problĂŠm, pokud vĂĄĹĄ zvukovĂ˝ systĂŠm neumoĹžĹuje
+potĹebnĂŠ zesĂ­lenĂ­. Volba <option>-softvol</option> poruÄĂ­
+<application>MPlayer</application>u pouĹžitĂ­ vestavÄnĂŠho smÄĹĄovaÄe. Pak mĹŻĹžete
+pouĹžĂ­t klĂĄvesy pro nastavenĂ­ hlasitosti (vĂ˝chozĂ­ <keycap>9</keycap> a
+<keycap>0</keycap>) pro dosaĹženĂ­ mnohem vyĹĄĹĄĂ­ch ĂşrovnĂ­ hlasitosti.
+Takto neobejdete smÄĹĄovaÄ vaĹĄĂ­ zvukovĂŠ karty; <application>MPlayer</application>
+pouze zesĂ­lĂ­ signĂĄl pĹed jeho odeslĂĄnĂ­m do zvukovĂŠ karty.
 
-Následující příklad je dobrým startem:
+NĂĄsledujĂ­cĂ­ pĹĂ­klad je dobrĂ˝m startem:
 
-<screen>mplayer <replaceable>tichý-soubor</replaceable> -softvol -softvol-max 300</screen>
+<screen>mplayer <replaceable>tichĂ˝-soubor</replaceable> -softvol -softvol-max 300</screen>
 
-Volba <option>-softvol-max</option> nastavuje maximální povolenou výstupní
-hlasitost v procentech původní hlasitosti. Například,
-<option>-softvol-max 200</option> umožní nastavit hlasitost až na dvojnásobek
-původní úrovně.
-Je bezpečné nastavit vysoké hodnoty volbou
-<option>-softvol-max</option>; vyšší hlasitost se nepoužije, dokud nepoužijete
-tlačítka nastavení hlasitosti. Jedinou nevýhodou velkých hodnot je to, že
-jelikož <application>MPlayer</application> nastavuje hlasitost o podíl
-z maximální hlasitosti, nebudete mít tak jemný krok nastavení pomocí tlačítek.
-Pokud potřebujete přesnější nastavování, použijte nižší hodnotu pro
+Volba <option>-softvol-max</option> nastavuje maximĂĄlnĂ­ povolenou vĂ˝stupnĂ­
+hlasitost v procentech pĹŻvodnĂ­ hlasitosti. NapĹĂ­klad,
+<option>-softvol-max 200</option> umoĹžnĂ­ nastavit hlasitost aĹž na dvojnĂĄsobek
+pĹŻvodnĂ­ ĂşrovnÄ.
+Je bezpeÄnĂŠ nastavit vysokĂŠ hodnoty volbou
+<option>-softvol-max</option>; vyĹĄĹĄĂ­ hlasitost se nepouĹžije, dokud nepouĹžijete
+tlaÄĂ­tka nastavenĂ­ hlasitosti. Jedinou nevĂ˝hodou velkĂ˝ch hodnot je to, Ĺže
+jelikoĹž <application>MPlayer</application> nastavuje hlasitost o podĂ­l
+z maximĂĄlnĂ­ hlasitosti, nebudete mĂ­t tak jemnĂ˝ krok nastavenĂ­ pomocĂ­ tlaÄĂ­tek.
+Pokud potĹebujete pĹesnÄjĹĄĂ­ nastavovĂĄnĂ­, pouĹžijte niĹžĹĄĂ­ hodnotu pro
 <option>-softvol-max</option> a/nebo nastavte
 <option>-volstep 1</option>.
 </para>
 
 <para>
-Volba <option>-softvol</option> pracuje tak, že ovládá zvukový filtr
-<option>volume</option>. Chcete-li přehrávat soubor od začátku při určité
-hlasitosti, můžete nastavit <option>volume</option> ručně:
+Volba <option>-softvol</option> pracuje tak, Ĺže ovlĂĄdĂĄ zvukovĂ˝ filtr
+<option>volume</option>. Chcete-li pĹehrĂĄvat soubor od zaÄĂĄtku pĹi urÄitĂŠ
+hlasitosti, mĹŻĹžete nastavit <option>volume</option> ruÄnÄ:
 
-<screen>mplayer <replaceable>tichý-soubor</replaceable> -af volume=10</screen>
+<screen>mplayer <replaceable>tichĂ˝-soubor</replaceable> -af volume=10</screen>
 
-Takto přehrajete soubor se ziskem 10 decibelů. Při použití filtru
-<option>volume</option> buďte velmi opatrní. Pokud použijete příliš vysokou
-hodnotu, můžete si poškodit sluch. Začněte s nízkou hodnotou a postupně
-zvyšujte, až docílíte požadované hlasitosti. Při nastavení příliš vysokých
-hodnot také hrozí, že <option>volume</option> bude nucen ořezat signál, aby
-předešel odeslání dat mimo dovolený rozsah do zvukové karty; to povede ke
-zkreslení signálu.
+Takto pĹehrajete soubor se ziskem 10 decibelĹŻ. PĹi pouĹžitĂ­ filtru
+<option>volume</option> buÄte velmi opatrnĂ­. Pokud pouĹžijete pĹĂ­liĹĄ vysokou
+hodnotu, mĹŻĹžete si poĹĄkodit sluch. ZaÄnÄte s nĂ­zkou hodnotou a postupnÄ
+zvyĹĄujte, aĹž docĂ­lĂ­te poĹžadovanĂŠ hlasitosti. PĹi nastavenĂ­ pĹĂ­liĹĄ vysokĂ˝ch
+hodnot takĂŠ hrozĂ­, Ĺže <option>volume</option> bude nucen oĹezat signĂĄl, aby
+pĹedeĹĄel odeslĂĄnĂ­ dat mimo dovolenĂ˝ rozsah do zvukovĂŠ karty; to povede ke
+zkreslenĂ­ signĂĄlu.
 </para>
 
 </sect2>

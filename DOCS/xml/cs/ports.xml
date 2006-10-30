@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Synced with r19820 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
@@ -6,64 +6,64 @@
 <sect1 id="linux">
 <title>Linux</title>
 <para>
-Hlavní vývojovou platformou je Linux na x86, ačkoli
-<application>MPlayer</application> pracuje na mnoha jiných portech Linuxu.
-Binární balíčky <application>MPlayer</application>u jsou dostupné z několika
-zdrojů. Nicméně <emphasis role="bold">není žádný z těchto balíčků podporován</emphasis>.
-Hlaste tedy problémy jejich autorům, nikoli nám.
+HlavnĂ­ vĂ˝vojovou platformou je Linux na x86, aÄkoli
+<application>MPlayer</application> pracuje na mnoha jinĂ˝ch portech Linuxu.
+BinĂĄrnĂ­ balĂ­Äky <application>MPlayer</application>u jsou dostupnĂŠ z nÄkolika
+zdrojĹŻ. NicmĂŠnÄ <emphasis role="bold">nenĂ­ ĹžĂĄdnĂ˝ z tÄchto balĂ­ÄkĹŻ podporovĂĄn</emphasis>.
+Hlaste tedy problĂŠmy jejich autorĹŻm, nikoli nĂĄm.
 </para>
 
 <sect2 id="debian">
-<title>Vytvoření balíčku pro Debian</title>
+<title>VytvoĹenĂ­ balĂ­Äku pro Debian</title>
 <para>
-Pro vytvoření balíčku pro Debian spusťte následující příkaz v adresáři se
-zdrojovým kódem <application>MPlayer</application>u:
+Pro vytvoĹenĂ­ balĂ­Äku pro Debian spusĹĽte nĂĄsledujĂ­cĂ­ pĹĂ­kaz v adresĂĄĹi se
+zdrojovĂ˝m kĂłdem <application>MPlayer</application>u:
 
 <screen>fakeroot debian/rules binary</screen>
 
-Pokud chcete předat nějaké volby pro configure, můžete nastavit proměnnou
-prostředí <envar>DEB_BUILD_OPTIONS</envar>. Například, pokud chcete GUI a
-podporu OSD menu, měli byste použít:
+Pokud chcete pĹedat nÄjakĂŠ volby pro configure, mĹŻĹžete nastavit promÄnnou
+prostĹedĂ­ <envar>DEB_BUILD_OPTIONS</envar>. NapĹĂ­klad, pokud chcete GUI a
+podporu OSD menu, mÄli byste pouĹžĂ­t:
 
 <screen>DEB_BUILD_OPTIONS="--enable-gui --enable-menu" fakeroot debian/rules binary</screen>
 
-Rovněž můžete předat některé proměnné do Makefile. Například, pokud chcete
-kompilovat pomocí gcc 3.4 i v případě, že to není výchozí kompilátor:
+RovnÄĹž mĹŻĹžete pĹedat nÄkterĂŠ promÄnnĂŠ do Makefile. NapĹĂ­klad, pokud chcete
+kompilovat pomocĂ­ gcc 3.4 i v pĹĂ­padÄ, Ĺže to nenĂ­ vĂ˝chozĂ­ kompilĂĄtor:
 
 <screen>CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules binary</screen>
 
-K vyčistění zdrojového stromu spusťte následující příkaz:
+K vyÄistÄnĂ­ zdrojovĂŠho stromu spusĹĽte nĂĄsledujĂ­cĂ­ pĹĂ­kaz:
 
 <screen>fakeroot debian/rules clean</screen>
 
-Jako root můžete nainstalovat <filename>.deb</filename> balíček obvyklým
-způsobem:
+Jako root mĹŻĹžete nainstalovat <filename>.deb</filename> balĂ­Äek obvyklĂ˝m
+zpĹŻsobem:
 
 <screen>dpkg -i ../mplayer_<replaceable>version</replaceable>.deb</screen>
 </para>
 
 <para>
-Christian Marillat vytvářel jistou dobu neoficiální Debianí balíčky
+Christian Marillat vytvĂĄĹel jistou dobu neoficiĂĄlnĂ­ DebianĂ­ balĂ­Äky
 <application>MPlayer</application>u, <application>MEncoder</application>u a
-našich binárních balíků s kodeky, můžete si je stáhnout (apt-get) z
-<ulink url="http://www.debian-multimedia.org/">jeho domácí stránky</ulink>.
+naĹĄich binĂĄrnĂ­ch balĂ­kĹŻ s kodeky, mĹŻĹžete si je stĂĄhnout (apt-get) z
+<ulink url="http://www.debian-multimedia.org/">jeho domĂĄcĂ­ strĂĄnky</ulink>.
 </para>
 </sect2>
 
 <sect2 id="rpm">
-<title>Balení RPM</title>
+<title>BalenĂ­ RPM</title>
 <para>
-Dominik Mierzejewski vytvořil a udržuje oficiální RPM balíčky
-<application>MPlayer</application>u pro Red Hat a Fedora Core. Ty jsou dostupné
+Dominik Mierzejewski vytvoĹil a udrĹžuje oficiĂĄlnĂ­ RPM balĂ­Äky
+<application>MPlayer</application>u pro Red Hat a Fedora Core. Ty jsou dostupnĂŠ
 z jeho
-<ulink url="http://rpm.greysector.net/mplayer/">repozitáře</ulink>.
+<ulink url="http://rpm.greysector.net/mplayer/">repozitĂĄĹe</ulink>.
 </para>
 
 <para>
-RPM balíčky pro Mandrake/Mandriva jsou dostupné z
+RPM balĂ­Äky pro Mandrake/Mandriva jsou dostupnĂŠ z
 <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SuSE zařadilo do své distribuce zmrzačenou verzi
-<application>MPlayer</application>u. V posledních verzích ji odstranili. Funkční
+SuSE zaĹadilo do svĂŠ distribuce zmrzaÄenou verzi
+<application>MPlayer</application>u. V poslednĂ­ch verzĂ­ch ji odstranili. FunkÄnĂ­
 RPM naleznete na
 <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
@@ -72,18 +72,18 @@ RPM naleznete na
 <sect2 id="arm">
 <title>ARM</title>
 <para>
-<application>MPlayer</application> pracuje na Linuxových PDA s ARM CPU např.
-Sharp Zaurus, Compaq Ipaq. Nejjednodušší způsob jak si opatřit
-<application>MPlayer</application> je, stáhnout si jej z některého
-<ulink url="http://www.openzaurus.org">OpenZaurus</ulink> balíčkového kanálu.
-Pokud si jej chcete skompilovat sami, měli byste nahlédnout do adresáře
+<application>MPlayer</application> pracuje na LinuxovĂ˝ch PDA s ARM CPU napĹ.
+Sharp Zaurus, Compaq Ipaq. NejjednoduĹĄĹĄĂ­ zpĹŻsob jak si opatĹit
+<application>MPlayer</application> je, stĂĄhnout si jej z nÄkterĂŠho
+<ulink url="http://www.openzaurus.org">OpenZaurus</ulink> balĂ­ÄkovĂŠho kanĂĄlu.
+Pokud si jej chcete skompilovat sami, mÄli byste nahlĂŠdnout do adresĂĄĹe
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</ulink>
 a
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
-v buildroot OpenZaurus distribuce. Zde mají vždy poslední Makefile a patche používané
-pro sestavení CVS verze <application>MPlayer</application>u s
+v buildroot OpenZaurus distribuce. Zde majĂ­ vĹždy poslednĂ­ Makefile a patche pouĹžĂ­vanĂŠ
+pro sestavenĂ­ CVS verze <application>MPlayer</application>u s
 <systemitem class="library">libavcodec</systemitem>em.
-Pokud potřebujete GUI rozhraní, můžete použít xmms-embedded.
+Pokud potĹebujete GUI rozhranĂ­, mĹŻĹžete pouĹžĂ­t xmms-embedded.
 </para>
 </sect2>
 </sect1>
@@ -91,51 +91,51 @@ Pokud potřebujete GUI rozhraní, můžete použít xmms-embedded.
 <sect1 id="bsd">
 <title>*BSD</title>
 <para>
-<application>MPlayer</application> běží na všech známých BSD verzích.
-Existují portované/pkgsrc/fink/atd verze
-<application>MPlayer</application>u, které lze pravděpodobně snadněji použít,
-než naše surové zdrojové kódy.
+<application>MPlayer</application> bÄĹžĂ­ na vĹĄech znĂĄmĂ˝ch BSD verzĂ­ch.
+ExistujĂ­ portovanĂŠ/pkgsrc/fink/atd verze
+<application>MPlayer</application>u, kterĂŠ lze pravdÄpodobnÄ snadnÄji pouĹžĂ­t,
+neĹž naĹĄe surovĂŠ zdrojovĂŠ kĂłdy.
 </para>
 
 <para>
-K sestavení <application>MPlayer</application>u budete potřebovat GNU make
-(gmake - nativní BSD make nebude pracovat) a současnou verzi binutils.
+K sestavenĂ­ <application>MPlayer</application>u budete potĹebovat GNU make
+(gmake - nativnĂ­ BSD make nebude pracovat) a souÄasnou verzi binutils.
 </para>
 
 <para>
-Pokud si <application>MPlayer</application> stěžuje, že nemůže najít
+Pokud si <application>MPlayer</application> stÄĹžuje, Ĺže nemĹŻĹže najĂ­t
 <filename>/dev/cdrom</filename> nebo <filename>/dev/dvd</filename>,
-vytvořte příslušný symbolický link:
-<screen>ln -s /dev/<replaceable>vaše_cdrom_zařízení</replaceable> /dev/cdrom</screen>
+vytvoĹte pĹĂ­sluĹĄnĂ˝ symbolickĂ˝ link:
+<screen>ln -s /dev/<replaceable>vaĹĄe_cdrom_zaĹĂ­zenĂ­</replaceable> /dev/cdrom</screen>
 </para>
 
 <para>
-Chcete-li používat Win32 DLL v <application>MPlayer</application>u, budete muset
-rekompilovat jádro s volbou &quot;<envar>USER_LDT</envar>&quot;
-(pokud nepoužíváte FreeBSD-CURRENT, kde je to výchozí).
+Chcete-li pouĹžĂ­vat Win32 DLL v <application>MPlayer</application>u, budete muset
+rekompilovat jĂĄdro s volbou &quot;<envar>USER_LDT</envar>&quot;
+(pokud nepouĹžĂ­vĂĄte FreeBSD-CURRENT, kde je to vĂ˝chozĂ­).
 </para>
 
 
 <sect2 id="freebsd">
 <title>FreeBSD</title>
 <para>
-Pokud váš procesor má SSE, rekompilujte jádro s volbami
-&quot;<envar>CPU_ENABLE_SSE</envar>&quot; (vyžaduje FreeBSD-STABLE nebo patche
-do jádra).
+Pokud vĂĄĹĄ procesor mĂĄ SSE, rekompilujte jĂĄdro s volbami
+&quot;<envar>CPU_ENABLE_SSE</envar>&quot; (vyĹžaduje FreeBSD-STABLE nebo patche
+do jĂĄdra).
 </para>
 </sect2>
 
 <sect2 id="openbsd">
 <title>OpenBSD</title>
 <para>
-Vzhledem k omezením v různých verzích gas (GNU assembleru &ndash; pozn. překl.)
-(relokace vs MMX), budete muset kompilovat ve dvou krocích:
-Nejprve se ujistěte že je nenativní as jako první ve vaší <envar>$PATH</envar>
-a proveďte <command>gmake -k</command>, pak zajistěte, aby se použila nativní
-verze a proveďte <command>gmake</command>.
+Vzhledem k omezenĂ­m v rĹŻznĂ˝ch verzĂ­ch gas (GNU assembleru &ndash; pozn. pĹekl.)
+(relokace vs MMX), budete muset kompilovat ve dvou krocĂ­ch:
+Nejprve se ujistÄte Ĺže je nenativnĂ­ as jako prvnĂ­ ve vaĹĄĂ­ <envar>$PATH</envar>
+a proveÄte <command>gmake -k</command>, pak zajistÄte, aby se pouĹžila nativnĂ­
+verze a proveÄte <command>gmake</command>.
 </para>
 <para>
-Od OpenBSD 3.4 není již výše uvedená metoda potřeba.
+Od OpenBSD 3.4 nenĂ­ jiĹž vĂ˝ĹĄe uvedenĂĄ metoda potĹeba.
 </para>
 </sect2>
 
@@ -148,57 +148,57 @@ Viz sekce <link linkend="macos">Mac OS</link>.
 </sect1>
 
 <sect1 id="unix">
-<title>Komerční Unix</title>
+<title>KomerÄnĂ­ Unix</title>
 
 <para>
-<application>MPlayer</application> byl portován na mnoho komerčních variant
-Unixu. Jelikož vývojová prostředí na těchto systémech bývají odlišná od těch
-na svobodných Unixech, budete muset provést ruční úpravy, aby se kompilace
+<application>MPlayer</application> byl portovĂĄn na mnoho komerÄnĂ­ch variant
+Unixu. JelikoĹž vĂ˝vojovĂĄ prostĹedĂ­ na tÄchto systĂŠmech bĂ˝vajĂ­ odliĹĄnĂĄ od tÄch
+na svobodnĂ˝ch Unixech, budete muset provĂŠst ruÄnĂ­ Ăşpravy, aby se kompilace
 povedla.
 </para>
 
 <sect2 id="solaris">
 <title>Solaris</title>
 <para>
-<application>MPlayer</application> by měl běžet na Solarisu 2.6 nebo novějším.
-Použijte SUN audio rozhraní pomocí volby <option>-ao sun</option> pro přehrávání
+<application>MPlayer</application> by mÄl bÄĹžet na Solarisu 2.6 nebo novÄjĹĄĂ­m.
+PouĹžijte SUN audio rozhranĂ­ pomocĂ­ volby <option>-ao sun</option> pro pĹehrĂĄvĂĄnĂ­
 zvuku.
 </para>
 
 <para>
-Na <emphasis role="bold">UltraSPARC</emphasis>ích, <application>MPlayer</application>
-využívá jejich rozšíření <emphasis role="bold">VIS</emphasis>
-(ekvivalentní MMX), zatím jen v
+Na <emphasis role="bold">UltraSPARC</emphasis>Ă­ch, <application>MPlayer</application>
+vyuĹžĂ­vĂĄ jejich rozĹĄĂ­ĹenĂ­ <emphasis role="bold">VIS</emphasis>
+(ekvivalentnĂ­ MMX), zatĂ­m jen v
 <systemitem class="library">libmpeg2</systemitem>,
 <systemitem class="library">libvo</systemitem>
 a <systemitem class="library">libavcodec</systemitem>, ale nikoli v
-<systemitem class="library">mp3lib</systemitem>. Můžete přehrávat VOB soubor
-na 400MHz CPU. Budete k tomu potřebovat nainstalovanou
+<systemitem class="library">mp3lib</systemitem>. MĹŻĹžete pĹehrĂĄvat VOB soubor
+na 400MHz CPU. Budete k tomu potĹebovat nainstalovanou
 <ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>.
 </para>
 
 <para><emphasis role="bold">Caveat:</emphasis></para>
 <itemizedlist>
 <listitem><para>Podpora <emphasis role="bold">mediaLib</emphasis> je
-<emphasis role="bold">v současnosti vypnutá</emphasis> ve výchozím nastavení
-<application>MPlayer</application>u kvůli chybovosti. Uživatelé SPARCu
-překládající MPlayer s podporou mediaLib hlásili tlustý zelený pruh
-v enkódovaném videu dekódovaném libavcodecem. Pokud chcete, můžete si ji
+<emphasis role="bold">v souÄasnosti vypnutĂĄ</emphasis> ve vĂ˝chozĂ­m nastavenĂ­
+<application>MPlayer</application>u kvĹŻli chybovosti. UĹživatelĂŠ SPARCu
+pĹeklĂĄdajĂ­cĂ­ MPlayer s podporou mediaLib hlĂĄsili tlustĂ˝ zelenĂ˝ pruh
+v enkĂłdovanĂŠm videu dekĂłdovanĂŠm libavcodecem. Pokud chcete, mĹŻĹžete si ji
 zapnout:
 <screen>
 $ ./configure --enable-mlib
 </screen>
-Děláte to na vlastní nebezpečí. Uživatelé x86 by
-<emphasis role="bold">nikdy</emphasis> neměli používat mediaLib, jelikož
-vede k velmi slabému výkonu MPlayeru.
+DÄlĂĄte to na vlastnĂ­ nebezpeÄĂ­. UĹživatelĂŠ x86 by
+<emphasis role="bold">nikdy</emphasis> nemÄli pouĹžĂ­vat mediaLib, jelikoĹž
+vede k velmi slabĂŠmu vĂ˝konu MPlayeru.
 </para></listitem>
 </itemizedlist>
 
 <para>
-Pro kompilaci balíku budete potřebovat GNU <application>make</application>
-(<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), jelikož
-nativní make Solarisu nebude pracovat. Typickou chybou kompilace s make
-Solarisu namísto GNU make je:
+Pro kompilaci balĂ­ku budete potĹebovat GNU <application>make</application>
+(<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), jelikoĹž
+nativnĂ­ make Solarisu nebude pracovat. Typickou chybou kompilace s make
+Solarisu namĂ­sto GNU make je:
 <screen>
    % /usr/ccs/bin/make
    make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
@@ -206,42 +206,42 @@ Solarisu namísto GNU make je:
 </para>
 
 <para>
-Na Solarisu SPARC, potřebujete GNU C/C++ Compiler; nezáleží na tom, zda je
-GNU C/C++ compiler konfigurován s nebo bez GNU assembleru.
+Na Solarisu SPARC, potĹebujete GNU C/C++ Compiler; nezĂĄleĹžĂ­ na tom, zda je
+GNU C/C++ compiler konfigurovĂĄn s nebo bez GNU assembleru.
 </para>
 
 <para>
-Na Solarisu x86, potřebujete GNU assembler a GNU C/C++ compiler,
-konfigurovaný pro použití GNU assembleru! Kód <application>MPlayer</application>u
-na platformě x86 intenzivně používá MMX, SSE a 3DNOW! instrukce,
-které nemůže být kompilovány Sun assemblerem <filename>/usr/ccs/bin/as</filename>.
+Na Solarisu x86, potĹebujete GNU assembler a GNU C/C++ compiler,
+konfigurovanĂ˝ pro pouĹžitĂ­ GNU assembleru! KĂłd <application>MPlayer</application>u
+na platformÄ x86 intenzivnÄ pouĹžĂ­vĂĄ MMX, SSE a 3DNOW! instrukce,
+kterĂŠ nemĹŻĹže bĂ˝t kompilovĂĄny Sun assemblerem <filename>/usr/ccs/bin/as</filename>.
 </para>
 
 <para>
-Skript <filename>configure</filename> zkouší zjistit, který assembler je použitý
-vaším příkazem &quot;gcc&quot; (v případě že autodetekce selže, použijte volbu
-<option>--as=<replaceable>/kdekoli/máte/nainstalován/gnu-as</replaceable></option>
-pro nastavení <filename>configure</filename> skriptu tak, aby našel GNU
-"as" na vašem systému).
+Skript <filename>configure</filename> zkouĹĄĂ­ zjistit, kterĂ˝ assembler je pouĹžitĂ˝
+vaĹĄĂ­m pĹĂ­kazem &quot;gcc&quot; (v pĹĂ­padÄ Ĺže autodetekce selĹže, pouĹžijte volbu
+<option>--as=<replaceable>/kdekoli/mĂĄte/nainstalovĂĄn/gnu-as</replaceable></option>
+pro nastavenĂ­ <filename>configure</filename> skriptu tak, aby naĹĄel GNU
+"as" na vaĹĄem systĂŠmu).
 </para>
 
-<para>Řešení běžných potíží:</para>
+<para>ĹeĹĄenĂ­ bÄĹžnĂ˝ch potĂ­ĹžĂ­:</para>
 <itemizedlist>
 <listitem><para>
-Chybová zpráva z <filename>configure</filename> na systému Solaris x86
-s použitím GCC bez GNU assembleru:
+ChybovĂĄ zprĂĄva z <filename>configure</filename> na systĂŠmu Solaris x86
+s pouĹžitĂ­m GCC bez GNU assembleru:
 <screen>
    % configure
    ...
    Checking assembler (/usr/ccs/bin/as) ... , failed
    Please upgrade(downgrade) binutils to 2.10.1...
 </screen>
-(Řešení: Nainstalujte a použijte gcc konfigurovaný s <option>--with-as=gas</option>)
+(ĹeĹĄenĂ­: Nainstalujte a pouĹžijte gcc konfigurovanĂ˝ s <option>--with-as=gas</option>)
 </para>
 
 <para>
-Typická chyba, kterou dostanete při kompilaci pomocí GNU C kompilátoru, který
-nepoužívá GNU as:
+TypickĂĄ chyba, kterou dostanete pĹi kompilaci pomocĂ­ GNU C kompilĂĄtoru, kterĂ˝
+nepouĹžĂ­vĂĄ GNU as:
 <screen>
    % gmake
    ...
@@ -255,8 +255,8 @@ nepoužívá GNU as:
 </para>
 </listitem>
 
-<listitem><para><application>MPlayer</application> může zhavarovat (segfault),
-pokud dekódujete nebo enkódujete video používající win32 kodeky:
+<listitem><para><application>MPlayer</application> mĹŻĹže zhavarovat (segfault),
+pokud dekĂłdujete nebo enkĂłdujete video pouĹžĂ­vajĂ­cĂ­ win32 kodeky:
 <screen>
 ...
 Trying to force audio codec driver family acm...
@@ -268,11 +268,11 @@ Couldn't install fs segment, expect segfault
 MPlayer interrupted by signal 11 in module: init_audio_codec
 ...
 </screen>
-To díky změně na sysi86() ve verzích Solaris 10 a před-Solaris
+To dĂ­ky zmÄnÄ na sysi86() ve verzĂ­ch Solaris 10 a pĹed-Solaris
 Nevada b31. V Solaris Nevada b32 to bylo opraveno;
-Sun však ještě musí portovat opravu do Solaris 10. MPlayer
-Project upozornil Sun na tento problém a záplata pro Solaris 10
-je v současnosti rozpracována. Více informací o této chybě naleznete
+Sun vĹĄak jeĹĄtÄ musĂ­ portovat opravu do Solaris 10. MPlayer
+Project upozornil Sun na tento problĂŠm a zĂĄplata pro Solaris 10
+je v souÄasnosti rozpracovĂĄna. VĂ­ce informacĂ­ o tĂŠto chybÄ naleznete
 na:
 <ulink
 url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
@@ -280,24 +280,24 @@ url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
 </listitem>
 
 <listitem><para>
-Díky chybám v Solarisu 8, nemůžete přehrávat DVD disky větší než 4 GB:
+DĂ­ky chybĂĄm v Solarisu 8, nemĹŻĹžete pĹehrĂĄvat DVD disky vÄtĹĄĂ­ neĹž 4 GB:
 </para>
 
 <itemizedlist>
 <listitem><para>
-Ovladač sd(7D) na Solarisu 8 x86 má chybu v přístupu k diskovému bloku >4GB
-na zařízeních, které mají logical blocksize != DEV_BSIZE (čili CD-ROM a DVD média).
-Díky 32Bit int overflow, dostanete přístupovou diskovou adresu modulo 4GB
+OvladaÄ sd(7D) na Solarisu 8 x86 mĂĄ chybu v pĹĂ­stupu k diskovĂŠmu bloku >4GB
+na zaĹĂ­zenĂ­ch, kterĂŠ majĂ­ logical blocksize != DEV_BSIZE (Äili CD-ROM a DVD mĂŠdia).
+DĂ­ky 32Bit int overflow, dostanete pĹĂ­stupovou diskovou adresu modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
-Tento problém neexistuje ve SPARC verzi Solarisu 8.
+Tento problĂŠm neexistuje ve SPARC verzi Solarisu 8.
 </para></listitem>
 
 <listitem><para>
-Podobná chyba je i v kódu systému souborů hsfs(7FS) (AKA ISO9660),
-hsfs nemusí podporovat oddíly/disky větší než 4GB, ke všem datům je přistupováno
+PodobnĂĄ chyba je i v kĂłdu systĂŠmu souborĹŻ hsfs(7FS) (AKA ISO9660),
+hsfs nemusĂ­ podporovat oddĂ­ly/disky vÄtĹĄĂ­ neĹž 4GB, ke vĹĄem datĹŻm je pĹistupovĂĄno
 modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
-Problém hsfs může být odstraněn nainstalováním patche 109764-04 (sparc) / 109765-04 (x86).
+ProblĂŠm hsfs mĹŻĹže bĂ˝t odstranÄn nainstalovĂĄnĂ­m patche 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
 </listitem>
@@ -307,15 +307,15 @@ Problém hsfs může být odstraněn nainstalováním patche 109764-04 (sparc) / 109765
 <sect2 id="irix">
 <title>IRIX</title>
 <para>
-Můžete buď zkusit nainstalovat program GNU install a (pokud jste si ho
-nedali do globální cesty) odkázat na jeho umístění pomocí:
-<screen>./configure --with-install=<replaceable>/cesta/a/název/programu/install</replaceable></screen>
+MĹŻĹžete buÄ zkusit nainstalovat program GNU install a (pokud jste si ho
+nedali do globĂĄlnĂ­ cesty) odkĂĄzat na jeho umĂ­stÄnĂ­ pomocĂ­:
+<screen>./configure --with-install=<replaceable>/cesta/a/nĂĄzev/programu/install</replaceable></screen>
 </para>
 
 <para>
-nebo můžete použít výchozí install dodávaný s IRIXem 6.5. V tom případě
-budete muset ručně upravit <filename>Makefile</filename>.
-Změňte následující dva řádky:
+nebo mĹŻĹžete pouĹžĂ­t vĂ˝chozĂ­ install dodĂĄvanĂ˝ s IRIXem 6.5. V tom pĹĂ­padÄ
+budete muset ruÄnÄ upravit <filename>Makefile</filename>.
+ZmÄĹte nĂĄsledujĂ­cĂ­ dva ĹĂĄdky:
 <programlisting>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 
@@ -327,9 +327,9 @@ na:
 
   $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
-Pak spusťte (z adresáře se zdrojovými kódy <application>MPlayer</application>u):
+Pak spusĹĽte (z adresĂĄĹe se zdrojovĂ˝mi kĂłdy <application>MPlayer</application>u):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
-a pokračujte kompilací a instalací.
+a pokraÄujte kompilacĂ­ a instalacĂ­.
 </para>
 </sect2>
 
@@ -337,23 +337,23 @@ a pokračujte kompilací a instalací.
 <sect2 id="hp-ux">
 <title>HP-UX</title>
 <para>
-Joe Page hostuje podrobné HP-UX <application>MPlayer</application>
+Joe Page hostuje podrobnĂŠ HP-UX <application>MPlayer</application>
 <ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOWTO</ulink>
-od Martina Ganssera na jeho domácí stránce. Podle těchto instrukcí by kompilace
-měla proběhnout bez potíží. Následující informace jsou vytaženy ze zmíněného
+od Martina Ganssera na jeho domĂĄcĂ­ strĂĄnce. Podle tÄchto instrukcĂ­ by kompilace
+mÄla probÄhnout bez potĂ­ĹžĂ­. NĂĄsledujĂ­cĂ­ informace jsou vytaĹženy ze zmĂ­nÄnĂŠho
 HOWTO.
 </para>
 
 <para>
-Potřebujete GCC 3.4.0 nebo pozdější, GNU make 3.80 nebo pozdější a SDL 1.2.7 nebo pozdější.
-HP cc nevytvoří funkční program, předchozí verze GCC jsou chybové.
-Pro funkci OpenGL musíte nainstalovat Mesa a video rozhraní gl a gl2 by měly
-pracovat. Jejich rychlost však může být velmi malá, podle rychlosti CPU.
-Dobrou náhradou za spíše slabý nativní HP-UX systém je GNU esound.
+PotĹebujete GCC 3.4.0 nebo pozdÄjĹĄĂ­, GNU make 3.80 nebo pozdÄjĹĄĂ­ a SDL 1.2.7 nebo pozdÄjĹĄĂ­.
+HP cc nevytvoĹĂ­ funkÄnĂ­ program, pĹedchozĂ­ verze GCC jsou chybovĂŠ.
+Pro funkci OpenGL musĂ­te nainstalovat Mesa a video rozhranĂ­ gl a gl2 by mÄly
+pracovat. Jejich rychlost vĹĄak mĹŻĹže bĂ˝t velmi malĂĄ, podle rychlosti CPU.
+Dobrou nĂĄhradou za spĂ­ĹĄe slabĂ˝ nativnĂ­ HP-UX systĂŠm je GNU esound.
 </para>
 
 <para>
-Vytvořte DVD zařízení průzkumem SCSI pomocí:
+VytvoĹte DVD zaĹĂ­zenĂ­ prĹŻzkumem SCSI pomocĂ­:
 </para>
 
 <screen>
@@ -372,12 +372,12 @@ ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE  
 </screen>
 
 <para>
-Výstup na obrazovce ukazuje Pioneer DVD-ROM na SCSI adrese 2.
+VĂ˝stup na obrazovce ukazuje Pioneer DVD-ROM na SCSI adrese 2.
 Instance karty pro hardwarovou cestu 8/16 je 1.
 </para>
 
 <para>
-Vytvořte link ze surového zařízení na DVD zařízení.
+VytvoĹte link ze surovĂŠho zaĹĂ­zenĂ­ na DVD zaĹĂ­zenĂ­.
 </para>
 
 <screen>
@@ -385,7 +385,7 @@ Vytvořte link ze surového zařízení na DVD zařízení.
 </screen>
 
 <para>
-Příklad:
+PĹĂ­klad:
 </para>
 
 <screen>
@@ -393,43 +393,43 @@ Příklad:
 </screen>
 
 <para>
-Níže uvádíme řešení některých běžných problémů:
+NĂ­Ĺže uvĂĄdĂ­me ĹeĹĄenĂ­ nÄkterĂ˝ch bÄĹžnĂ˝ch problĂŠmĹŻ:
 </para>
 
 <itemizedlist>
 <listitem>
 <para>
-Spadne při startu s hlášením:
+Spadne pĹi startu s hlĂĄĹĄenĂ­m:
 <screen>
 /usr/lib/dld.sl: Unresolved symbol: finite (code) from /usr/local/lib/gcc-lib/hppa2.0n-hp-hpux11.00/3.2/../../../libGL.sl
 </screen>
 </para>
 
 <para>
-To znamená, že funkce <systemitem>.finite().</systemitem> není
-dostupná ve standardní HP-UX matematické knihovně.
-Místo ní je zde <systemitem>.isfinite().</systemitem>.
-Řešení: Použijte poslední Mesa depot soubor.
+To znamenĂĄ, Ĺže funkce <systemitem>.finite().</systemitem> nenĂ­
+dostupnĂĄ ve standardnĂ­ HP-UX matematickĂŠ knihovnÄ.
+MĂ­sto nĂ­ je zde <systemitem>.isfinite().</systemitem>.
+ĹeĹĄenĂ­: PouĹžijte poslednĂ­ Mesa depot soubor.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Spadne při přehrávání s hlášením:
+Spadne pĹi pĹehrĂĄvĂĄnĂ­ s hlĂĄĹĄenĂ­m:
 <screen>
 /usr/lib/dld.sl: Unresolved symbol: sem_init (code) from /usr/local/lib/libSDL-1.2.sl.0
 </screen>
 </para>
 
 <para>
-Řešení: Použijte volbu extralibdir v configure
+ĹeĹĄenĂ­: PouĹžijte volbu extralibdir v configure
 <option>--with-extralibdir="/usr/lib -lrt"</option>
 </para>
 </listitem>
 
 <listitem>
 <para>
-MPlayer havaruje (segfault) s hlášením:
+MPlayer havaruje (segfault) s hlĂĄĹĄenĂ­m:
 <screen>
 Pid 10166 received a SIGSEGV for stack growth failure.
 Possible causes: insufficient memory or swap space, or stack size exceeded maxssiz.
@@ -438,14 +438,14 @@ Segmentation fault
 </para>
 
 <para>
-Řešení:
-HP-UX kernel má výchozí velikost zásobníku 8MB(?) na proces.(11.0 a
-novější 10.20 patche vám umožní zvýšit <systemitem>maxssiz</systemitem> až na
-350MB pro 32-bit programy). Musíte zvětšit <systemitem>maxssiz</systemitem>
-a rekompilovat kernel (a restartovat). Pro tento účel můžete použít SAM. (Když
-už to budete dělat, ověřte parametr <systemitem>maxdsiz</systemitem> pro
-maximální množství paměti, které může program použít. Závisí na vašich
-aplikacích, jestli je výchozích 64MB dost nebo ne.)
+ĹeĹĄenĂ­:
+HP-UX kernel mĂĄ vĂ˝chozĂ­ velikost zĂĄsobnĂ­ku 8MB(?) na proces.(11.0 a
+novÄjĹĄĂ­ 10.20 patche vĂĄm umoĹžnĂ­ zvĂ˝ĹĄit <systemitem>maxssiz</systemitem> aĹž na
+350MB pro 32-bit programy). MusĂ­te zvÄtĹĄit <systemitem>maxssiz</systemitem>
+a rekompilovat kernel (a restartovat). Pro tento ĂşÄel mĹŻĹžete pouĹžĂ­t SAM. (KdyĹž
+uĹž to budete dÄlat, ovÄĹte parametr <systemitem>maxdsiz</systemitem> pro
+maximĂĄlnĂ­ mnoĹžstvĂ­ pamÄti, kterĂŠ mĹŻĹže program pouĹžĂ­t. ZĂĄvisĂ­ na vaĹĄich
+aplikacĂ­ch, jestli je vĂ˝chozĂ­ch 64MB dost nebo ne.)
 </para>
 </listitem>
 </itemizedlist>
@@ -455,25 +455,25 @@ aplikacích, jestli je výchozích 64MB dost nebo ne.)
 <sect2 id="aix">
 <title>AIX</title>
 <para>
-<application>MPlayer</application> lze úspěšně přeložit na AIX 5.1,
-5.2 a 5.3, pomocí GCC 3.3 nebo vyšší. Kompilace
-<application>MPlayer</application>u na AIX 4.3.3 a nížsích nebyla
-testována. Velmi doporučujeme kompilovat
-<application>MPlayer</application> pomocí GCC 3.4 nebo vašší,
+<application>MPlayer</application> lze ĂşspÄĹĄnÄ pĹeloĹžit na AIX 5.1,
+5.2 a 5.3, pomocĂ­ GCC 3.3 nebo vyĹĄĹĄĂ­. Kompilace
+<application>MPlayer</application>u na AIX 4.3.3 a nĂ­ĹžsĂ­ch nebyla
+testovĂĄna. Velmi doporuÄujeme kompilovat
+<application>MPlayer</application> pomocĂ­ GCC 3.4 nebo vaĹĄĹĄĂ­,
 nebo pokud kompilujete na
-POWER5, vyžaduje se GCC 4.0.
+POWER5, vyĹžaduje se GCC 4.0.
 </para>
 
 <para>
-Ujistěte se, že používáte GNU make
-(<filename>/opt/freeware/bin/gmake</filename>) pro sestavení
-<application>MPlayer</application>u, jelikož při použití
-<filename>/usr/ccs/bin/make</filename> budete mít problémy.
+UjistÄte se, Ĺže pouĹžĂ­vĂĄte GNU make
+(<filename>/opt/freeware/bin/gmake</filename>) pro sestavenĂ­
+<application>MPlayer</application>u, jelikoĹž pĹi pouĹžitĂ­
+<filename>/usr/ccs/bin/make</filename> budete mĂ­t problĂŠmy.
 </para>
 
 <para>
-Detekce procesoru je stále nedokončena.
-Testovány byly následující architektury:
+Detekce procesoru je stĂĄle nedokonÄena.
+TestovĂĄny byly nĂĄsledujĂ­cĂ­ architektury:
 </para>
 
 <itemizedlist>
@@ -483,7 +483,7 @@ Testovány byly následující architektury:
 </itemizedlist>
 
 <para>
-Následující architektury nebyly testovány, ale měly by pracovat:
+NĂĄsledujĂ­cĂ­ architektury nebyly testovĂĄny, ale mÄly by pracovat:
 </para>
 <itemizedlist>
 <listitem><para>POWER</para></listitem>
@@ -492,23 +492,23 @@ Následující architektury nebyly testovány, ale měly by pracovat:
 </itemizedlist>
 
 <para>
-Zvuk přes Ultimedia Services není podporován, jelikož Ultimedia byla
-opuštěna v AIX 5.1; tudíš je jedinou možností použití ovladačů AIX Open
+Zvuk pĹes Ultimedia Services nenĂ­ podporovĂĄn, jelikoĹž Ultimedia byla
+opuĹĄtÄna v AIX 5.1; tudĂ­ĹĄ je jedinou moĹžnostĂ­ pouĹžitĂ­ ovladaÄĹŻ AIX Open
 Sound System (OSS) od 4Front Technologies z <ulink
 url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html
 </ulink>.
-4Front Technologies volně poskytuje OSS ovladače pro AIX 5.1 pro
-nekomerční použití; zatím však neexistují zvukové ovladače
-pro AIX 5.2 nebo 5.3. To znamená, že <emphasis role="bold">AIX 5.2
-a 5.3 nejsou nyní schopny provozovat MPlayer se zvukem.</emphasis>
+4Front Technologies volnÄ poskytuje OSS ovladaÄe pro AIX 5.1 pro
+nekomerÄnĂ­ pouĹžitĂ­; zatĂ­m vĹĄak neexistujĂ­ zvukovĂŠ ovladaÄe
+pro AIX 5.2 nebo 5.3. To znamenĂĄ, Ĺže <emphasis role="bold">AIX 5.2
+a 5.3 nejsou nynĂ­ schopny provozovat MPlayer se zvukem.</emphasis>
 </para>
 
-<para>Řešení běžných potíží:</para>
+<para>ĹeĹĄenĂ­ bÄĹžnĂ˝ch potĂ­ĹžĂ­:</para>
 
 <itemizedlist>
 <listitem>
 <para>
-Pokud dostanete tuto chybovou hlášku z <filename>configure</filename>:
+Pokud dostanete tuto chybovou hlĂĄĹĄku z <filename>configure</filename>:
 <screen>
 $ ./configure
 ...
@@ -517,9 +517,9 @@ No working iconv program found, use
 --charset=US-ASCII to continue anyway.
 Messages in the GTK-2 interface will be broken then.
 </screen>
-To proto, že AIX používá nestandardní názvy znakových sad; proto
-konverze výstupu MPlayeru do jiné znakové sady není zatím podporováno.
-Řešením je:
+To proto, Ĺže AIX pouĹžĂ­vĂĄ nestandardnĂ­ nĂĄzvy znakovĂ˝ch sad; proto
+konverze vĂ˝stupu MPlayeru do jinĂŠ znakovĂŠ sady nenĂ­ zatĂ­m podporovĂĄno.
+ĹeĹĄenĂ­m je:
 <screen>
 $ ./configure --charset=noconv
 </screen>
@@ -533,121 +533,121 @@ $ ./configure --charset=noconv
 <sect1 id="windows">
 <title>Windows</title>
 
-<para>Ano, <application>MPlayer</application> běží na Windows pod
+<para>Ano, <application>MPlayer</application> bÄĹžĂ­ na Windows pod
   <ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> a
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
-  Nemá zatím oficiální GUI, ale verze pro příkazový řádek je plně funkční.
-  Měli byste navštívit konferenci
+  NemĂĄ zatĂ­m oficiĂĄlnĂ­ GUI, ale verze pro pĹĂ­kazovĂ˝ ĹĂĄdek je plnÄ funkÄnĂ­.
+  MÄli byste navĹĄtĂ­vit konferenci
   <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
-  pro pomoc a poslední informace.
-  Oficiální Windows binárky naleznete na
-  <ulink url="http://www.mplayerhq.hu/design7/dload.html">download stránce</ulink>.
-  Instalátor a jednoduché GUI frontendy jsou dostupné z externích zdrojů.
-  Odkazy na ně jsme umístili v sekci Windows na naší
-  <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">stránce s
+  pro pomoc a poslednĂ­ informace.
+  OficiĂĄlnĂ­ Windows binĂĄrky naleznete na
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">download strĂĄnce</ulink>.
+  InstalĂĄtor a jednoduchĂŠ GUI frontendy jsou dostupnĂŠ z externĂ­ch zdrojĹŻ.
+  Odkazy na nÄ jsme umĂ­stili v sekci Windows na naĹĄĂ­
+  <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">strĂĄnce s
   projekty</ulink>.
 </para>
 
-<para>Pokud se chcete vyhnout použití příkazové řádky, můžete použít malý trik
-  s umístěním zástupce na pracovní plochu, který bude obsahovat v sekci
-  spuštění něco takového:
+<para>Pokud se chcete vyhnout pouĹžitĂ­ pĹĂ­kazovĂŠ ĹĂĄdky, mĹŻĹžete pouĹžĂ­t malĂ˝ trik
+  s umĂ­stÄnĂ­m zĂĄstupce na pracovnĂ­ plochu, kterĂ˝ bude obsahovat v sekci
+  spuĹĄtÄnĂ­ nÄco takovĂŠho:
   <screen><replaceable>c:\cesta\k\</replaceable>mplayer.exe %1</screen>
-  To nechá <application>MPlayer</application> přehrát jakýkoli film, který je
-  přetažen na zástupce. Přidejte <option>-fs</option> pro celoobrazovkový
-  režim.
+  To nechĂĄ <application>MPlayer</application> pĹehrĂĄt jakĂ˝koli film, kterĂ˝ je
+  pĹetaĹžen na zĂĄstupce. PĹidejte <option>-fs</option> pro celoobrazovkovĂ˝
+  reĹžim.
 </para>
 
-<para>Nejlepších výsledků dosáhnete použitím nativního DirectX video rozhraní
-  (<option>-vo directx</option>). Alternativami jsou OpenGL a SDL, ale výkon
-  OpenGL se velmi různí na jednotlivých systémech a o SDL je známo, že na
-  některých systémech drobí video nebo padá. Pokud je obraz rozsypán, zkuste
-  vypnout hardwarovou akceleraci pomocí
-  <option>-vo directx:noaccel</option>. Stáhněte si
+<para>NejlepĹĄĂ­ch vĂ˝sledkĹŻ dosĂĄhnete pouĹžitĂ­m nativnĂ­ho DirectX video rozhranĂ­
+  (<option>-vo directx</option>). Alternativami jsou OpenGL a SDL, ale vĂ˝kon
+  OpenGL se velmi rĹŻznĂ­ na jednotlivĂ˝ch systĂŠmech a o SDL je znĂĄmo, Ĺže na
+  nÄkterĂ˝ch systĂŠmech drobĂ­ video nebo padĂĄ. Pokud je obraz rozsypĂĄn, zkuste
+  vypnout hardwarovou akceleraci pomocĂ­
+  <option>-vo directx:noaccel</option>. StĂĄhnÄte si
   <ulink
-  url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">hlavičkové
+  url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">hlaviÄkovĂŠ
   soubory DirectX 7</ulink>
-  pro kompilaci výstupního rozhraní DirectX. Navíc budete muset mít
-  nainstalovány DirectX 7 nebo vyšší, aby rozhraní pracovalo.
+  pro kompilaci vĂ˝stupnĂ­ho rozhranĂ­ DirectX. NavĂ­c budete muset mĂ­t
+  nainstalovĂĄny DirectX 7 nebo vyĹĄĹĄĂ­, aby rozhranĂ­ pracovalo.
   </para>
 
-<para><link linkend="vidix">VIDIX</link> nyní pracuje pod Windows jako
-  <option>-vo winvidix</option>, ačkoli je stále experimentální
-  a vyžaduje trochu manuálního nastavování. Stáhněte si
+<para><link linkend="vidix">VIDIX</link> nynĂ­ pracuje pod Windows jako
+  <option>-vo winvidix</option>, aÄkoli je stĂĄle experimentĂĄlnĂ­
+  a vyĹžaduje trochu manuĂĄlnĂ­ho nastavovĂĄnĂ­. StĂĄhnÄte si
   <ulink
   url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> nebo
   <ulink
   url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (s podporou MTRR)</ulink>
-  a zkopírujte jej do adresáře
-  <filename class="directory">libdha/dhahelperwin</filename> ve svém stromě se
-  zdrojovými kódy <application>MPlayer</application>u.
-  Otevřete konzoli a přesuňte se do tohoto adresáře. Pak zadejte
+  a zkopĂ­rujte jej do adresĂĄĹe
+  <filename class="directory">libdha/dhahelperwin</filename> ve svĂŠm stromÄ se
+  zdrojovĂ˝mi kĂłdy <application>MPlayer</application>u.
+  OtevĹete konzoli a pĹesuĹte se do tohoto adresĂĄĹe. Pak zadejte
 
   <screen>gcc -o dhasetup.exe dhasetup.c</screen>
 
-  a spusťte
+  a spusĹĽte
 
   <screen>dhasetup.exe install</screen>
 
   jako Administrator. Pak budete muset restartovat. Jakmile budete hotovi,
-  zkopírujte <systemitem class="library">.so</systemitem> soubory z
-  <filename class="directory">vidix/drivers</filename> do adresáře
+  zkopĂ­rujte <systemitem class="library">.so</systemitem> soubory z
+  <filename class="directory">vidix/drivers</filename> do adresĂĄĹe
   <filename class="directory">mplayer/vidix</filename>
-  relativního k vašemu <filename>mplayer.exe</filename>.</para>
+  relativnĂ­ho k vaĹĄemu <filename>mplayer.exe</filename>.</para>
 
-<para>Pro nejlepší výsledky by měl <application>MPlayer</application> používat
-  barevný prostor, který podporuje vaše video karta v hardware. Naneštěstí
-  některé Windows ovladače grafických karet špatně hlásí některé barevné
-  prostory jako podporované v hardware. Chcete-li zjistit které, zkuste
+<para>Pro nejlepĹĄĂ­ vĂ˝sledky by mÄl <application>MPlayer</application> pouĹžĂ­vat
+  barevnĂ˝ prostor, kterĂ˝ podporuje vaĹĄe video karta v hardware. NaneĹĄtÄstĂ­
+  nÄkterĂŠ Windows ovladaÄe grafickĂ˝ch karet ĹĄpatnÄ hlĂĄsĂ­ nÄkterĂŠ barevnĂŠ
+  prostory jako podporovanĂŠ v hardware. Chcete-li zjistit kterĂŠ, zkuste
 
   <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>barevny_prostor</replaceable> <replaceable>film</replaceable></screen>
 
-  kde <replaceable>barevny_prostor</replaceable> může být barevný prostor
-  vypsaný volbou <option>-vf format=fmt=help</option>. Pokud najdete
-  barevný prostor, který vaše karta zvládá zjevně špatně,
+  kde <replaceable>barevny_prostor</replaceable> mĹŻĹže bĂ˝t barevnĂ˝ prostor
+  vypsanĂ˝ volbou <option>-vf format=fmt=help</option>. Pokud najdete
+  barevnĂ˝ prostor, kterĂ˝ vaĹĄe karta zvlĂĄdĂĄ zjevnÄ ĹĄpatnÄ,
   <option>-vf noformat=<replaceable>barevny_prostor</replaceable></option>
-  zakáže jeho použití. Přidejte si to do vašeho konfig souboru, aby zůstal
-  zakázán natrvalo.</para>
+  zakĂĄĹže jeho pouĹžitĂ­. PĹidejte si to do vaĹĄeho konfig souboru, aby zĹŻstal
+  zakĂĄzĂĄn natrvalo.</para>
 
-<para>Pro Windows máme k dispozici speciální balíčky kodeků na naší
-  <ulink url="http://www.mplayerhq.hu/design7/dload.html">download stránce</ulink>,
-  abyste mohli přehrávat formáty, pro které zatím není nativní podpora.
-  Umístěte kodeky někde do cesty (path), nebo přidejte
-  <option>--with-codecsdir=<replaceable>c:/cesta/ke/kodekům</replaceable></option>
-  (případně
-  <option>--with-codecsdir=<replaceable>/cesta/ke/kodekům</replaceable></option>
-  používate-li <application>Cygwin</application>) do <filename>configure</filename>.
-  Máme několik zpráv, že Real DLL musí mít práva zápisu pro uživatele, který
-  pouští <application>MPlayer</application>, ale pouze na některých systémech (NT4).
-  Máte-li potíže, zkuste jim přidat právo zápisu.</para>
+<para>Pro Windows mĂĄme k dispozici speciĂĄlnĂ­ balĂ­Äky kodekĹŻ na naĹĄĂ­
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">download strĂĄnce</ulink>,
+  abyste mohli pĹehrĂĄvat formĂĄty, pro kterĂŠ zatĂ­m nenĂ­ nativnĂ­ podpora.
+  UmĂ­stÄte kodeky nÄkde do cesty (path), nebo pĹidejte
+  <option>--with-codecsdir=<replaceable>c:/cesta/ke/kodekĹŻm</replaceable></option>
+  (pĹĂ­padnÄ
+  <option>--with-codecsdir=<replaceable>/cesta/ke/kodekĹŻm</replaceable></option>
+  pouĹžĂ­vate-li <application>Cygwin</application>) do <filename>configure</filename>.
+  MĂĄme nÄkolik zprĂĄv, Ĺže Real DLL musĂ­ mĂ­t prĂĄva zĂĄpisu pro uĹživatele, kterĂ˝
+  pouĹĄtĂ­ <application>MPlayer</application>, ale pouze na nÄkterĂ˝ch systĂŠmech (NT4).
+  MĂĄte-li potĂ­Ĺže, zkuste jim pĹidat prĂĄvo zĂĄpisu.</para>
 
-<para>Můžete přehrávat VCD přehráváním <filename>.DAT</filename> nebo <filename>.MPG</filename>
-  souborů, které Windows ukazuje na VCD. Pracuje to takto
-  (upravte písmeno disku vaší CD-ROM):</para>
+<para>MĹŻĹžete pĹehrĂĄvat VCD pĹehrĂĄvĂĄnĂ­m <filename>.DAT</filename> nebo <filename>.MPG</filename>
+  souborĹŻ, kterĂŠ Windows ukazuje na VCD. Pracuje to takto
+  (upravte pĂ­smeno disku vaĹĄĂ­ CD-ROM):</para>
 
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
 
-<para>DVD pracují také, upravte <option>-dvd-device</option> na písmeno
+<para>DVD pracujĂ­ takĂŠ, upravte <option>-dvd-device</option> na pĂ­smeno
   DVD-ROM mechaniky:</para>
 
 <screen>mplayer dvd://<replaceable>&lt;titul&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
 
 <para><application>Cygwin</application>/<application>MinGW</application>
-  terminál je spíše pomalý. Přesměrování výstupu nebo použití volby
-  <option>-quiet</option> podle hlášení zvýší výkon na některých systémech.
-  Direct rendering (<option>-dr</option>) může rovněž pomoci.
-  Pokud je přehrávání trhané, zkuste
-  <option>-autosync 100</option>. Pokud vám některé z těchto voleb pomohly,
-  měli byste si je zapsat do konfiguračního souboru.</para>
+  terminĂĄl je spĂ­ĹĄe pomalĂ˝. PĹesmÄrovĂĄnĂ­ vĂ˝stupu nebo pouĹžitĂ­ volby
+  <option>-quiet</option> podle hlĂĄĹĄenĂ­ zvĂ˝ĹĄĂ­ vĂ˝kon na nÄkterĂ˝ch systĂŠmech.
+  Direct rendering (<option>-dr</option>) mĹŻĹže rovnÄĹž pomoci.
+  Pokud je pĹehrĂĄvĂĄnĂ­ trhanĂŠ, zkuste
+  <option>-autosync 100</option>. Pokud vĂĄm nÄkterĂŠ z tÄchto voleb pomohly,
+  mÄli byste si je zapsat do konfiguraÄnĂ­ho souboru.</para>
 
 <note>
 
-<para>Runtime CPU detekce na Windows vypíná podporu SSE kvůli opakovaným a
-  těžko vystopovatelným se SSE souvisejícím pádům. Pokud chcete mít podporu
+<para>Runtime CPU detekce na Windows vypĂ­nĂĄ podporu SSE kvĹŻli opakovanĂ˝m a
+  tÄĹžko vystopovatelnĂ˝m se SSE souvisejĂ­cĂ­m pĂĄdĹŻm. Pokud chcete mĂ­t podporu
   SSE pod Windows, budete muset kompilovat bez runtime CPU detekce.
 </para>
 
-<para>Máte-li Pentium 4 a dojde k pádu při použití
-  RealPlayer kodeků, možná budete muset vypnout podporu hyperthreading.
+<para>MĂĄte-li Pentium 4 a dojde k pĂĄdu pĹi pouĹžitĂ­
+  RealPlayer kodekĹŻ, moĹžnĂĄ budete muset vypnout podporu hyperthreading.
 </para>
 
 </note>
@@ -656,15 +656,15 @@ $ ./configure --charset=noconv
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
 
-<para>Musíte používat <application>Cygwin</application> 1.5.0 nebo vyšší,
+<para>MusĂ­te pouĹžĂ­vat <application>Cygwin</application> 1.5.0 nebo vyĹĄĹĄĂ­,
   abyste mohli kompilovat <application>MPlayer</application>.</para>
 
-<para>Hlavičkové soubory DirectX musí být rozbaleny do <filename class="directory">/usr/include/</filename> nebo
+<para>HlaviÄkovĂŠ soubory DirectX musĂ­ bĂ˝t rozbaleny do <filename class="directory">/usr/include/</filename> nebo
   <filename class="directory">/usr/local/include/</filename>.</para>
 
-<para>Instrukce a soubory nutné pro běh SDL pod
-  <application>Cygwin</application> lze nalézt na
-  <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl stránkách</ulink>.</para>
+<para>Instrukce a soubory nutnĂŠ pro bÄh SDL pod
+  <application>Cygwin</application> lze nalĂŠzt na
+  <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl strĂĄnkĂĄch</ulink>.</para>
 
 </sect2>
 
@@ -672,22 +672,22 @@ $ ./configure --charset=noconv
 <sect2 id="mingw">
 <title><application>MinGW</application></title>
 
-<para>Instalace takové verze <application>MinGW</application>, aby bylo lze
-  kompilovat <application>MPlayer</application> byla obtížná, ale nyní
-  pracuje bez dalších úprav. Jen nainstalujte <application>MinGW</application>
-  3.1.0 nebo vyšší a MSYS 1.0.9 nebo vyšší a zvolte v MSYS postinstall, že je
-  <application>MinGW</application> nainstalováno.</para>
+<para>Instalace takovĂŠ verze <application>MinGW</application>, aby bylo lze
+  kompilovat <application>MPlayer</application> byla obtĂ­ĹžnĂĄ, ale nynĂ­
+  pracuje bez dalĹĄĂ­ch Ăşprav. Jen nainstalujte <application>MinGW</application>
+  3.1.0 nebo vyĹĄĹĄĂ­ a MSYS 1.0.9 nebo vyĹĄĹĄĂ­ a zvolte v MSYS postinstall, Ĺže je
+  <application>MinGW</application> nainstalovĂĄno.</para>
 
-<para>Rozbalte DirectX hlavičkové soubory do <filename class="directory">/mingw/include/</filename>.</para>
+<para>Rozbalte DirectX hlaviÄkovĂŠ soubory do <filename class="directory">/mingw/include/</filename>.</para>
 
-<para>Podpora MOV compressed header vyžaduje
+<para>Podpora MOV compressed header vyĹžaduje
   <ulink url="http://www.gzip.org/zlib/">zlib</ulink>, kterou
   <application>MinGW</application> neobsahuje.
   Konfigurujte ji s <option>--prefix=/mingw</option> a nainstalujte
-  ji před kompilací <application>MPlayer</application>u.</para>
+  ji pĹed kompilacĂ­ <application>MPlayer</application>u.</para>
 
-<para>Kompletní instrukce pro překlad <application>MPlayer</application>u
-  a potřebné knihovny naleznete v
+<para>KompletnĂ­ instrukce pro pĹeklad <application>MPlayer</application>u
+  a potĹebnĂŠ knihovny naleznete v
   <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
 
 </sect2>
@@ -699,56 +699,56 @@ $ ./configure --charset=noconv
 <title>Mac OS</title>
 
 <para>
-<application>MPlayer</application> nepracuje na Mac OS verzích pod
-10, ale měl by být bez úprav kompilovatelný na Mac OS X 10.2 a vyšších.
-Preferovaná verze kompileru je Apple verze
-GCC 3.x a vyšších.
-Základní prostředí pro kompilaci můžete získat instalací
+<application>MPlayer</application> nepracuje na Mac OS verzĂ­ch pod
+10, ale mÄl by bĂ˝t bez Ăşprav kompilovatelnĂ˝ na Mac OS X 10.2 a vyĹĄĹĄĂ­ch.
+PreferovanĂĄ verze kompileru je Apple verze
+GCC 3.x a vyĹĄĹĄĂ­ch.
+ZĂĄkladnĂ­ prostĹedĂ­ pro kompilaci mĹŻĹžete zĂ­skat instalacĂ­
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>
-od Apple. Máte-li Mac OS X 10.3.9 nebo pozdější a QuickTime 7
-můžete použít výstupní video rozhraní <option>macosx</option>.
+od Apple. MĂĄte-li Mac OS X 10.3.9 nebo pozdÄjĹĄĂ­ a QuickTime 7
+mĹŻĹžete pouĹžĂ­t vĂ˝stupnĂ­ video rozhranĂ­ <option>macosx</option>.
 </para>
 
 <para>
-Naneštěstí toto základní prostředí neumožňuje využít všechny
-pěkné vlastnosti <application>MPlayer</application>u.
-Například, budete-li chtít mít zakompilovánu podporu OSD, budete
-muset mít na svém stroji nainstalovány knihovny
+NaneĹĄtÄstĂ­ toto zĂĄkladnĂ­ prostĹedĂ­ neumoĹžĹuje vyuĹžĂ­t vĹĄechny
+pÄknĂŠ vlastnosti <application>MPlayer</application>u.
+NapĹĂ­klad, budete-li chtĂ­t mĂ­t zakompilovĂĄnu podporu OSD, budete
+muset mĂ­t na svĂŠm stroji nainstalovĂĄny knihovny
 <systemitem class="library">fontconfig</systemitem>
 a <systemitem class="library">freetype</systemitem>.
- Narozdíl od jiných Unixů, jako je většina variant Linuxu a BSD, OS X
- nemá balíčkovací systém distribuovaný se systémem.
+ NarozdĂ­l od jinĂ˝ch UnixĹŻ, jako je vÄtĹĄina variant Linuxu a BSD, OS X
+ nemĂĄ balĂ­ÄkovacĂ­ systĂŠm distribuovanĂ˝ se systĂŠmem.
 </para>
 
 <para>
-Můžete vybírat minimálně ze dvou:
+MĹŻĹžete vybĂ­rat minimĂĄlnÄ ze dvou:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink>u a
 <ulink url="http://www.macports.org/">DarwinPorts</ulink>.
-Oba poskytují zhruba stejné služby (např. mnoho dostupných balíčků,
-řešení závislostí, schopnost jednoduše přidávat/aktualizovat/odebírat
-balíčky, atp...).
-Fink nabízí jak předkompilované binární balíčky, tak možnost kompilovat
-všechno ze zdrojového kódu, zatímco DarwinPorts nabízí pouze možnost
-kompilace ze zdrojového kódu.
-Autor této příručky zvolil DarwinPorts z jednoduchého důvodu, že jeho
-základní nastavení je mnohem lehčí.
-Pozdější příklady budou založeny na DarwinPorts.
+Oba poskytujĂ­ zhruba stejnĂŠ sluĹžby (napĹ. mnoho dostupnĂ˝ch balĂ­ÄkĹŻ,
+ĹeĹĄenĂ­ zĂĄvislostĂ­, schopnost jednoduĹĄe pĹidĂĄvat/aktualizovat/odebĂ­rat
+balĂ­Äky, atp...).
+Fink nabĂ­zĂ­ jak pĹedkompilovanĂŠ binĂĄrnĂ­ balĂ­Äky, tak moĹžnost kompilovat
+vĹĄechno ze zdrojovĂŠho kĂłdu, zatĂ­mco DarwinPorts nabĂ­zĂ­ pouze moĹžnost
+kompilace ze zdrojovĂŠho kĂłdu.
+Autor tĂŠto pĹĂ­ruÄky zvolil DarwinPorts z jednoduchĂŠho dĹŻvodu, Ĺže jeho
+zĂĄkladnĂ­ nastavenĂ­ je mnohem lehÄĂ­.
+PozdÄjĹĄĂ­ pĹĂ­klady budou zaloĹženy na DarwinPorts.
 </para>
 
 <para>
-Například pro kompilaci <application>MPlayer</application> s podporou OSD:
+NapĹĂ­klad pro kompilaci <application>MPlayer</application> s podporou OSD:
 <screen>sudo port install pkgconfig</screen>
-Takto nainstalujete <application>pkg-config</application>, což je systém pro správu
-knihovních příznaků compile/link.
-<application>MPlayer</application>ův skript <systemitem>configure</systemitem> jej
-používá pro správnou detekci knihoven.
-Pak můžete nainstalovat <application>fontconfig</application>
-podobným způsobem:
+Takto nainstalujete <application>pkg-config</application>, coĹž je systĂŠm pro sprĂĄvu
+knihovnĂ­ch pĹĂ­znakĹŻ compile/link.
+<application>MPlayer</application>ĹŻv skript <systemitem>configure</systemitem> jej
+pouĹžĂ­vĂĄ pro sprĂĄvnou detekci knihoven.
+Pak mĹŻĹžete nainstalovat <application>fontconfig</application>
+podobnĂ˝m zpĹŻsobem:
 <screen>sudo port install fontconfig</screen>
-Následně můžete pokračovat spuštěním <application>MPlayer</application>ova
-<systemitem>configure</systemitem> skriptu (ověřte proměnné prostředí
+NĂĄslednÄ mĹŻĹžete pokraÄovat spuĹĄtÄnĂ­m <application>MPlayer</application>ova
+<systemitem>configure</systemitem> skriptu (ovÄĹte promÄnnĂŠ prostĹedĂ­
 <systemitem>PKG_CONFIG_PATH</systemitem> a <systemitem>PATH</systemitem>,
-aby <systemitem>configure</systemitem> našel knihovny instalované pomocí
+aby <systemitem>configure</systemitem> naĹĄel knihovny instalovanĂŠ pomocĂ­
 DarwinPorts):
 <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
@@ -757,33 +757,33 @@ DarwinPorts):
 <title>MPlayer OS X GUI</title>
 
 <para>
-Můžete si stáhnout nativní GUI pro <application>MPlayer</application> spolu
-s předkompilovanými binárkami <application>MPlayer</application>u pro Mac OS X
-z <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> projektu, ale upozorňujeme:
-tento projekt již není aktivní.
+MĹŻĹžete si stĂĄhnout nativnĂ­ GUI pro <application>MPlayer</application> spolu
+s pĹedkompilovanĂ˝mi binĂĄrkami <application>MPlayer</application>u pro Mac OS X
+z <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> projektu, ale upozorĹujeme:
+tento projekt jiĹž nenĂ­ aktivnĂ­.
 </para>
 
 <para>
-Naštěstí byl <application>MPlayerOSX</application> převzat členem
-<application>MPlayer</application> týmu.
-Předváděcí verze lze stáhnout z naší
-<ulink url="http://mplayerhq.hu/dload.html">download stránky</ulink>
-a oficiální verze by měla přijít již brzy.
+NaĹĄtÄstĂ­ byl <application>MPlayerOSX</application> pĹevzat Älenem
+<application>MPlayer</application> tĂ˝mu.
+PĹedvĂĄdÄcĂ­ verze lze stĂĄhnout z naĹĄĂ­
+<ulink url="http://mplayerhq.hu/dload.html">download strĂĄnky</ulink>
+a oficiĂĄlnĂ­ verze by mÄla pĹijĂ­t jiĹž brzy.
 </para>
 
 <para>
-Abyste mohli skompilovat <application>MPlayerOSX</application> ze zdrojového
-kódu sami, budete potřebovat <systemitem>mplayerosx</systemitem>,
+Abyste mohli skompilovat <application>MPlayerOSX</application> ze zdrojovĂŠho
+kĂłdu sami, budete potĹebovat <systemitem>mplayerosx</systemitem>,
 <systemitem>main</systemitem> a kopii
-<systemitem>main</systemitem> CVS modulu jménem
+<systemitem>main</systemitem> CVS modulu jmĂŠnem
 <systemitem>main_noaltivec</systemitem>.
 <systemitem>mplayerosx</systemitem> je GUI nadstavba,
 <systemitem>main</systemitem> je MPlayer a
-<systemitem>main_noaltivec</systemitem> je MPlayer přeložený bez podpory AltiVec.
+<systemitem>main_noaltivec</systemitem> je MPlayer pĹeloĹženĂ˝ bez podpory AltiVec.
 </para>
 
 <para>
-Pro stažení SVN modulů použijte:
+Pro staĹženĂ­ SVN modulĹŻ pouĹžijte:
 
 <screen>
 svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
@@ -796,20 +796,20 @@ Abyste skompilovali <application>MPlayerOSX</application> budete muset setavit
 asi toto:
 
 <screen>
-Adresář_se_zdrojáky_MPlayeru
+AdresĂĄĹ_se_zdrojĂĄky_MPlayeru
    |
-   |--->main           (Zdrojový kód MPlayeru ze Subversion)
+   |--->main           (ZdrojovĂ˝ kĂłd MPlayeru ze Subversion)
    |
-   |--->main_noaltivec (Zdrojový kód MPlayeru ze Subversion konfigurován s --disable-altivec)
+   |--->main_noaltivec (ZdrojovĂ˝ kĂłd MPlayeru ze Subversion konfigurovĂĄn s --disable-altivec)
    |
-   |--->mplayerosx     (Zdrojový kód MPlayer OS X ze Subversion)
+   |--->mplayerosx     (ZdrojovĂ˝ kĂłd MPlayer OS X ze Subversion)
 </screen>
 
-Nejdřív musíte skompilovat main a main_noaltivec.
+NejdĹĂ­v musĂ­te skompilovat main a main_noaltivec.
 </para>
 
 <para>
-Pak nastavte globální proměnnou:
+Pak nastavte globĂĄlnĂ­ promÄnnou:
 
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
@@ -819,81 +819,81 @@ Pak konfigurujte:
 </para>
 
 <para>
-Pokud konfigurujete pro G4 nebo pozdější CPU s podporou AltiVec, proveďte následující:
+Pokud konfigurujete pro G4 nebo pozdÄjĹĄĂ­ CPU s podporou AltiVec, proveÄte nĂĄsledujĂ­cĂ­:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 </screen>
-Pokud konfigurujete pro stroj s G3 bez AltiVec, použijte:
+Pokud konfigurujete pro stroj s G3 bez AltiVec, pouĹžijte:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 --disable-altivec
 </screen>
-Možná budete muset editovat <filename>config.mak</filename> a změnit
+MoĹžnĂĄ budete muset editovat <filename>config.mak</filename> a zmÄnit
 <systemitem>-mcpu</systemitem> a <systemitem>-mtune</systemitem>
 z <systemitem>74XX</systemitem> na <systemitem>G3</systemitem>.
 </para>
 
 <para>
-Pokračujte s
+PokraÄujte s
 <screen>
 make
 </screen>
-pak jděte do adresáře mplayerosx a napište
+pak jdÄte do adresĂĄĹe mplayerosx a napiĹĄte
 
 <screen>
 make dist
 </screen>
-To vytvoří komprimovaný <systemitem>.dmg</systemitem> archiv
-s binárkou připravenou k použití.
+To vytvoĹĂ­ komprimovanĂ˝ <systemitem>.dmg</systemitem> archiv
+s binĂĄrkou pĹipravenou k pouĹžitĂ­.
 </para>
 
 <para>
-Také lze použít projekt <application>Xcode</application> 2.1;
-starý projekt pro <application>Xcode</application> 1.x
-již nepracuje.
+TakĂŠ lze pouĹžĂ­t projekt <application>Xcode</application> 2.1;
+starĂ˝ projekt pro <application>Xcode</application> 1.x
+jiĹž nepracuje.
 </para>
 </sect2>
 </sect1>
 
 <sect1 id="exotic_platforms">
-<title>Exotické platformy</title>
+<title>ExotickĂŠ platformy</title>
 
 <para>
-<application>MPlayer</application> běží na mnoha exotických platformách,
-ale většina platformně závislých změn z těchto systémů nebyla přidána zpět
-do hlavního zdrojového stromu.
-Pokyny k sestavení byste měli najít v dokumentaci pro daný systém.
+<application>MPlayer</application> bÄĹžĂ­ na mnoha exotickĂ˝ch platformĂĄch,
+ale vÄtĹĄina platformnÄ zĂĄvislĂ˝ch zmÄn z tÄchto systĂŠmĹŻ nebyla pĹidĂĄna zpÄt
+do hlavnĂ­ho zdrojovĂŠho stromu.
+Pokyny k sestavenĂ­ byste mÄli najĂ­t v dokumentaci pro danĂ˝ systĂŠm.
 </para>
 
 <sect2 id="qnx">
 <title>QNX</title>
 <para>
-Musíte si stáhnout a nainstalovat SDL pro QNX. Pak spusťte
+MusĂ­te si stĂĄhnout a nainstalovat SDL pro QNX. Pak spusĹĽte
 <application>MPlayer</application> s volbami <option>-vo sdl:driver=photon</option>
-a <option>-ao sdl:nto</option>, mělo by to být rychlé.
+a <option>-ao sdl:nto</option>, mÄlo by to bĂ˝t rychlĂŠ.
 </para>
 
 <para>
-Výstup <option>-vo x11</option> bude ještě pomalejší než na Linuxu,
-jelikož QNX má pouze X <emphasis>emulaci</emphasis>, která je velmi pomalá.
+VĂ˝stup <option>-vo x11</option> bude jeĹĄtÄ pomalejĹĄĂ­ neĹž na Linuxu,
+jelikoĹž QNX mĂĄ pouze X <emphasis>emulaci</emphasis>, kterĂĄ je velmi pomalĂĄ.
 </para>
 </sect2>
 
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
-Lidé z okruhu <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
-tvoří současné balíčky <application>MPlayer</application> a
+LidĂŠ z okruhu <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
+tvoĹĂ­ souÄasnĂŠ balĂ­Äky <application>MPlayer</application> a
 <application>MEncoder</application>.
 </para>
 
 <para>
-Nicholas Det at Genesi vytvořil velký a výkonný port <application>MPlayer
-</application>u pro MorphOS. Naneštěstí je založen na verzi 0.90.
+Nicholas Det at Genesi vytvoĹil velkĂ˝ a vĂ˝konnĂ˝ port <application>MPlayer
+</application>u pro MorphOS. NaneĹĄtÄstĂ­ je zaloĹžen na verzi 0.90.
 </para>
 
 <para>
-Stáhněte si ji z <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
+StĂĄhnÄte si ji z <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
 <itemizedlist>
 <listitem><para>
 <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">

@@ -1,58 +1,58 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r17322 -->
 <chapter id="audio">
-<title>Výstupní zvuková zařízení</title>
+<title>VĂ˝stupnĂ­ zvukovĂĄ zaĹĂ­zenĂ­</title>
 <sect1 id="sync">
 <title>Audio/Video synchronizace</title>
 
 <para>
-Linuxové ovladače zvukových karet mají problémy s kompatibilitou. Proto
-<application>MPlayer</application> spoléhá na vestavěnou vlastnost
-<emphasis>správně</emphasis> naprogramovaných ovladačů zvukových karet,
-která umožňuje udržet audio a video synchronizované. Bohužel, někteří
-autoři ovladačů nezakódovávají tuto vlastnost, protože není nutná pro
-přehrávání MP3 nebo zvukové efekty.
+LinuxovĂŠ ovladaÄe zvukovĂ˝ch karet majĂ­ problĂŠmy s kompatibilitou. Proto
+<application>MPlayer</application> spolĂŠhĂĄ na vestavÄnou vlastnost
+<emphasis>sprĂĄvnÄ</emphasis> naprogramovanĂ˝ch ovladaÄĹŻ zvukovĂ˝ch karet,
+kterĂĄ umoĹžĹuje udrĹžet audio a video synchronizovanĂŠ. BohuĹžel, nÄkteĹĂ­
+autoĹi ovladaÄĹŻ nezakĂłdovĂĄvajĂ­ tuto vlastnost, protoĹže nenĂ­ nutnĂĄ pro
+pĹehrĂĄvĂĄnĂ­ MP3 nebo zvukovĂŠ efekty.
 </para>
 
 <para>
-Ostatní přehrávače médií jako je <ulink url="http://avifile.sf.net">aviplay</ulink>
-nebo <ulink url="http://xinehq.de">xine</ulink> pravděpodobně fungují
-s těmito ovladači jak jsou, protože používají "jednoduché" metody
-s interním časováním. Měření prokázalo, že jejich metody nejsou tak
-výkonné jako ty z <application>MPlayer</application>u.
+OstatnĂ­ pĹehrĂĄvaÄe mĂŠdiĂ­ jako je <ulink url="http://avifile.sf.net">aviplay</ulink>
+nebo <ulink url="http://xinehq.de">xine</ulink> pravdÄpodobnÄ fungujĂ­
+s tÄmito ovladaÄi jak jsou, protoĹže pouĹžĂ­vajĂ­ "jednoduchĂŠ" metody
+s internĂ­m ÄasovĂĄnĂ­m. MÄĹenĂ­ prokĂĄzalo, Ĺže jejich metody nejsou tak
+vĂ˝konnĂŠ jako ty z <application>MPlayer</application>u.
 </para>
 
 <para>
-Při použití <application>MPlayer</application>u s dobře napsanými audio
-ovladači nebudete mít nikdy potíže s rozcházením zvuku s videem v závislosti
-na zvuku. Výjimkou jsou pouze velmi špatně vytvořené soubory (prostudujte
-si man stránku jak to obejít).
+PĹi pouĹžitĂ­ <application>MPlayer</application>u s dobĹe napsanĂ˝mi audio
+ovladaÄi nebudete mĂ­t nikdy potĂ­Ĺže s rozchĂĄzenĂ­m zvuku s videem v zĂĄvislosti
+na zvuku. VĂ˝jimkou jsou pouze velmi ĹĄpatnÄ vytvoĹenĂŠ soubory (prostudujte
+si man strĂĄnku jak to obejĂ­t).
 </para>
 
 <para>
-Pokud se stalo, že máte špatný zvukový ovladač, zkuste volbu
-<option>-autosync</option>, ta by měla vyřešit vaše problémy. Podrobné informace
-viz man stránka.
+Pokud se stalo, Ĺže mĂĄte ĹĄpatnĂ˝ zvukovĂ˝ ovladaÄ, zkuste volbu
+<option>-autosync</option>, ta by mÄla vyĹeĹĄit vaĹĄe problĂŠmy. PodrobnĂŠ informace
+viz man strĂĄnka.
 </para>
 </sect1>
 
 <sect1 id="troubleshooting">
-<title>Odstraňování problémů</title>
+<title>OdstraĹovĂĄnĂ­ problĂŠmĹŻ</title>
 
-<para>Několik poznámek:</para>
+<para>NÄkolik poznĂĄmek:</para>
 
 <para>
-  Pokud máte ALSA verze 0.5, pak budete téměř vždy použít 
-  <option>-ao alsa5</option>, jelikož ALSA 0.5 má vadný kód OSS emulace a
+  Pokud mĂĄte ALSA verze 0.5, pak budete tĂŠmÄĹ vĹždy pouĹžĂ­t 
+  <option>-ao alsa5</option>, jelikoĹž ALSA 0.5 mĂĄ vadnĂ˝ kĂłd OSS emulace a
 	<emphasis role="bold">zhavaruje <application>MPlayer</application></emphasis>
-  se zprávou podobnou této:
+  se zprĂĄvou podobnou tĂŠto:
   <screen>
-DEMUXER: Příliš mnoho (945 ve 8390980 bajtech) video paketů v bufferu!<!--
+DEMUXER: PĹĂ­liĹĄ mnoho (945 ve 8390980 bajtech) video paketĹŻ v bufferu!<!--
 --></screen>
 </para>
 <para>
-  Pokud vám zvuk klape při přehrávání z CD-ROM, zapněte odmaskování IRQ tak,
-	jak je to popsáno v sekci <link linkend="drives">CD-ROM</link>.
+  Pokud vĂĄm zvuk klape pĹi pĹehrĂĄvĂĄnĂ­ z CD-ROM, zapnÄte odmaskovĂĄnĂ­ IRQ tak,
+	jak je to popsĂĄno v sekci <link linkend="drives">CD-ROM</link>.
 </para>
 </sect1>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r17322 -->
 <chapter id="tv">
 <title>TV</title>
@@ -6,10 +6,10 @@
 <title>TV vstup</title>
 
 <para>
-Tato sekce je zaměřena na zpřístupnění
-<emphasis role="bold">sledování/grabování z V4L kompatibilního TV tuneru
-</emphasis>. Popis voleb k TV a ovládání z klávesnice naleznete v man
-stránce.
+Tato sekce je zamÄĹena na zpĹĂ­stupnÄnĂ­
+<emphasis role="bold">sledovĂĄnĂ­/grabovĂĄnĂ­ z V4L kompatibilnĂ­ho TV tuneru
+</emphasis>. Popis voleb k TV a ovlĂĄdĂĄnĂ­ z klĂĄvesnice naleznete v man
+strĂĄnce.
 </para>
 
 
@@ -18,138 +18,138 @@ stránce.
 
 <procedure>
 <step><para>
-  Zaprvé musíte rekompilovat. <filename>./configure</filename> zdetekuje
-  v4l hlavičkové soubory kernelu a existenci zařízení
-  <filename>/dev/video*</filename>. Pokud existují, bude zabudována
-  podpora pro TV (viz výstup z <filename>./configure</filename>).
+  ZaprvĂŠ musĂ­te rekompilovat. <filename>./configure</filename> zdetekuje
+  v4l hlaviÄkovĂŠ soubory kernelu a existenci zaĹĂ­zenĂ­
+  <filename>/dev/video*</filename>. Pokud existujĂ­, bude zabudovĂĄna
+  podpora pro TV (viz vĂ˝stup z <filename>./configure</filename>).
   </para></step>
 <step><para>
-  Ujistěte se, že váš tuner pracuje s jiným Linuxovým TV softwarem,
-  například <application>XawTV</application>.
+  UjistÄte se, Ĺže vĂĄĹĄ tuner pracuje s jinĂ˝m LinuxovĂ˝m TV softwarem,
+  napĹĂ­klad <application>XawTV</application>.
   </para></step>
 </procedure>
 </sect2>
 
 <sect2 id="tv-tips">
-<title>Tipy pro používání</title>
+<title>Tipy pro pouĹžĂ­vĂĄnĂ­</title>
 <para>
-Úplný seznam voleb je dostupný v manuálové stránce.
-Zde je jen několik typů:
+ĂplnĂ˝ seznam voleb je dostupnĂ˝ v manuĂĄlovĂŠ strĂĄnce.
+Zde je jen nÄkolik typĹŻ:
 </para>
 <itemizedlist>
 <listitem>
 <para>
-Použijte volbu <option>channels</option>. Příklad:
+PouĹžijte volbu <option>channels</option>. PĹĂ­klad:
 <screen>-tv channels=26-MTV1,23-TV2</screen>
-Vysvětlení: použití této volby, použitelné budou pouze kanály 26 a 23 a
-bude zde rovněž krásný OSD text po přepnutí kanálů, zobrazující jméno
-kanálu. Mezery ve jméně kanálu musí být nahrazeny znakem
+VysvÄtlenĂ­: pouĹžitĂ­ tĂŠto volby, pouĹžitelnĂŠ budou pouze kanĂĄly 26 a 23 a
+bude zde rovnÄĹž krĂĄsnĂ˝ OSD text po pĹepnutĂ­ kanĂĄlĹŻ, zobrazujĂ­cĂ­ jmĂŠno
+kanĂĄlu. Mezery ve jmĂŠnÄ kanĂĄlu musĂ­ bĂ˝t nahrazeny znakem
 &quot;_&quot;.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Zvolte rozumné rozměry obrazu. Rozměry výsledného obrazu by měly být
-bezezbytku dělitelné 16.
+Zvolte rozumnĂŠ rozmÄry obrazu. RozmÄry vĂ˝slednĂŠho obrazu by mÄly bĂ˝t
+bezezbytku dÄlitelnĂŠ 16.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Pokud zachytáváte video se svislým rozlišením vyšším než polovina plného
-rozlišení (čili 288 pro PAL nebo 240 pro NTSC), pak 'snímky', které dostanete,
-budou ve skutečnosti prokládané páry půlsnímků.
-V závislosti na tom, co chcete s videem dělat, je můžete nechat jak jsou,
-destruktivně odstranit proklad, nebo rozdělit páry do individuálních políček.
+Pokud zachytĂĄvĂĄte video se svislĂ˝m rozliĹĄenĂ­m vyĹĄĹĄĂ­m neĹž polovina plnĂŠho
+rozliĹĄenĂ­ (Äili 288 pro PAL nebo 240 pro NTSC), pak 'snĂ­mky', kterĂŠ dostanete,
+budou ve skuteÄnosti proklĂĄdanĂŠ pĂĄry pĹŻlsnĂ­mkĹŻ.
+V zĂĄvislosti na tom, co chcete s videem dÄlat, je mĹŻĹžete nechat jak jsou,
+destruktivnÄ odstranit proklad, nebo rozdÄlit pĂĄry do individuĂĄlnĂ­ch polĂ­Äek.
 </para>
 <para>
-Jinak bude získaný snímek roztřepený
-během rychlých scén a regulátor datového toku nebude pravděpodobně schopen
-ani udržet nastavený datový tok, vzhledem k tomu, že prokladové artefakty
-produkují velké množství detailů, což spotřebovává velké přenosové pásmo.
-Odstraňování prokladu můžete zapnout pomocí volby
-<option>-vf pp=DEINT_TYPE</option>. Dobrou práci obvykle odvede
-<option>pp=lb</option>, ale záleží na osobních preferencích. Prostudujte si
-ostatní možnosti odstraňování prokladu v manuálu a vyzkoušejte je.
-</para>
-</listitem>
-
-<listitem>
-<para>
-Odstřihněte mrtvý prostor. Když zachytáváte video, oblasti na okrajích jsou
-obvykle černé, nebo obsahují nějaký šum. Což opět zbytečně spotřebovává
-přenosové pásmo. Přesněji to nejsou samotné černé oblasti, ale ostrý přechod
-mezi černou a světlejším videem, ale to teď není důležité.
-Než začnete zachytávat, nastavte parametry volby <option>crop</option> tak,
-aby byl veškerý binec na okrajích odstřižen. Opět se snažte zachovat rozumné
-rozměry výsledného obrazu.
+Jinak bude zĂ­skanĂ˝ snĂ­mek roztĹepenĂ˝
+bÄhem rychlĂ˝ch scĂŠn a regulĂĄtor datovĂŠho toku nebude pravdÄpodobnÄ schopen
+ani udrĹžet nastavenĂ˝ datovĂ˝ tok, vzhledem k tomu, Ĺže prokladovĂŠ artefakty
+produkujĂ­ velkĂŠ mnoĹžstvĂ­ detailĹŻ, coĹž spotĹebovĂĄvĂĄ velkĂŠ pĹenosovĂŠ pĂĄsmo.
+OdstraĹovĂĄnĂ­ prokladu mĹŻĹžete zapnout pomocĂ­ volby
+<option>-vf pp=DEINT_TYPE</option>. Dobrou prĂĄci obvykle odvede
+<option>pp=lb</option>, ale zĂĄleĹžĂ­ na osobnĂ­ch preferencĂ­ch. Prostudujte si
+ostatnĂ­ moĹžnosti odstraĹovĂĄnĂ­ prokladu v manuĂĄlu a vyzkouĹĄejte je.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Sledujte zatížení CPU. Většinu času by nemělo překročit hranici 90%. Pokud
-máte velkou vyrovnávací paměť pro zachytávání, dokáže
-<application>MEncoder</application> přežít několikasekundové přetížení, ale
-nic víc. Raději vypněte 3D OpenGL spořiče obrazovky a podobné věci.
+OdstĹihnÄte mrtvĂ˝ prostor. KdyĹž zachytĂĄvĂĄte video, oblasti na okrajĂ­ch jsou
+obvykle ÄernĂŠ, nebo obsahujĂ­ nÄjakĂ˝ ĹĄum. CoĹž opÄt zbyteÄnÄ spotĹebovĂĄvĂĄ
+pĹenosovĂŠ pĂĄsmo. PĹesnÄji to nejsou samotnĂŠ ÄernĂŠ oblasti, ale ostrĂ˝ pĹechod
+mezi Äernou a svÄtlejĹĄĂ­m videem, ale to teÄ nenĂ­ dĹŻleĹžitĂŠ.
+NeĹž zaÄnete zachytĂĄvat, nastavte parametry volby <option>crop</option> tak,
+aby byl veĹĄkerĂ˝ binec na okrajĂ­ch odstĹiĹžen. OpÄt se snaĹžte zachovat rozumnĂŠ
+rozmÄry vĂ˝slednĂŠho obrazu.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Nehrajte si se systémovými hodinami. <application>MEncoder</application>
-používá systémové hodiny pro A/V synchronizaci. Pokud přestavíte systémové
-hodiny (zvlášť nazpět), <application>MEncoder</application> bude zmaten a
-vy přijdete o snímky. To je velmi důležité pokud jste připojeni k síti a
-používáte nějaký časový synchronizační software jako je NTP. Musíte vypnout
-NTP během zachytávání, pokud chcete spolehlivě zachytávat.
+Sledujte zatĂ­ĹženĂ­ CPU. VÄtĹĄinu Äasu by nemÄlo pĹekroÄit hranici 90%. Pokud
+mĂĄte velkou vyrovnĂĄvacĂ­ pamÄĹĽ pro zachytĂĄvĂĄnĂ­, dokĂĄĹže
+<application>MEncoder</application> pĹeĹžĂ­t nÄkolikasekundovĂŠ pĹetĂ­ĹženĂ­, ale
+nic vĂ­c. RadÄji vypnÄte 3D OpenGL spoĹiÄe obrazovky a podobnĂŠ vÄci.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Neměňte <option>outfmt</option> pokud nevíte co děláte, nebo vaše
-karta/ovladač opravdu nepodporuje výchozí (YV12 barevný prostor).
-Ve starší verzi <application>MPlayer</application>u/
-<application>MEncoder</application>u bylo nutné nastavit výstupní formát.
-Tento problém by měl být v současných verzích vyřešen,
-<option>outfmt</option> již není nadále potřeba a výchozí hodnoty vyhovují
-pro většinu případů. Například pokud zachytáváte do DivX pomocí
+Nehrajte si se systĂŠmovĂ˝mi hodinami. <application>MEncoder</application>
+pouĹžĂ­vĂĄ systĂŠmovĂŠ hodiny pro A/V synchronizaci. Pokud pĹestavĂ­te systĂŠmovĂŠ
+hodiny (zvlĂĄĹĄĹĽ nazpÄt), <application>MEncoder</application> bude zmaten a
+vy pĹijdete o snĂ­mky. To je velmi dĹŻleĹžitĂŠ pokud jste pĹipojeni k sĂ­ti a
+pouĹžĂ­vĂĄte nÄjakĂ˝ ÄasovĂ˝ synchronizaÄnĂ­ software jako je NTP. MusĂ­te vypnout
+NTP bÄhem zachytĂĄvĂĄnĂ­, pokud chcete spolehlivÄ zachytĂĄvat.
+</para>
+</listitem>
+
+<listitem>
+<para>
+NemÄĹte <option>outfmt</option> pokud nevĂ­te co dÄlĂĄte, nebo vaĹĄe
+karta/ovladaÄ opravdu nepodporuje vĂ˝chozĂ­ (YV12 barevnĂ˝ prostor).
+Ve starĹĄĂ­ verzi <application>MPlayer</application>u/
+<application>MEncoder</application>u bylo nutnĂŠ nastavit vĂ˝stupnĂ­ formĂĄt.
+Tento problĂŠm by mÄl bĂ˝t v souÄasnĂ˝ch verzĂ­ch vyĹeĹĄen,
+<option>outfmt</option> jiĹž nenĂ­ nadĂĄle potĹeba a vĂ˝chozĂ­ hodnoty vyhovujĂ­
+pro vÄtĹĄinu pĹĂ­padĹŻ. NapĹĂ­klad pokud zachytĂĄvĂĄte do DivX pomocĂ­
 <systemitem class="library">libavcodec</systemitem>u a uvedete
-<option>outfmt=RGB24</option> pro zvýšení kvality zachytávaných snímků,
-stejně budou tyto snímky později konvertovány zpět na YV12, takže jediné co
-tím získáte je spousta vyplýtvaného výkonu CPU.
+<option>outfmt=RGB24</option> pro zvĂ˝ĹĄenĂ­ kvality zachytĂĄvanĂ˝ch snĂ­mkĹŻ,
+stejnÄ budou tyto snĂ­mky pozdÄji konvertovĂĄny zpÄt na YV12, takĹže jedinĂŠ co
+tĂ­m zĂ­skĂĄte je spousta vyplĂ˝tvanĂŠho vĂ˝konu CPU.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Chcete-li nastavit barevný prostor I420 (<option>outfmt=i420</option>),
-musíte přidat i volbu <option>-vc rawi420</option> kvůli konfliktu fourcc
+Chcete-li nastavit barevnĂ˝ prostor I420 (<option>outfmt=i420</option>),
+musĂ­te pĹidat i volbu <option>-vc rawi420</option> kvĹŻli konfliktu fourcc
 Intel Indeo video kodekem.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Existuje několik cest, jak zachytávat zvuk. Můžete nahrát zvuk buď pomocí
-zvukové karty pomocí externího propojení mezi video kartou a linkovým
-vstupem, nebo použitím vestavěného ADC v čipu bt878. Ve druhém případě
-musíte načíst ovladač <emphasis role="bold">btaudio</emphasis>. Přečtěte si
-soubor <filename>linux/Documentation/sound/btaudio</filename> (ve zdrojácích
-kernelu, nikoli <application>MPlayer</application>u) pro několik instrukcí
-jak použít tento ovladač.
+Existuje nÄkolik cest, jak zachytĂĄvat zvuk. MĹŻĹžete nahrĂĄt zvuk buÄ pomocĂ­
+zvukovĂŠ karty pomocĂ­ externĂ­ho propojenĂ­ mezi video kartou a linkovĂ˝m
+vstupem, nebo pouĹžitĂ­m vestavÄnĂŠho ADC v Äipu bt878. Ve druhĂŠm pĹĂ­padÄ
+musĂ­te naÄĂ­st ovladaÄ <emphasis role="bold">btaudio</emphasis>. PĹeÄtÄte si
+soubor <filename>linux/Documentation/sound/btaudio</filename> (ve zdrojĂĄcĂ­ch
+kernelu, nikoli <application>MPlayer</application>u) pro nÄkolik instrukcĂ­
+jak pouĹžĂ­t tento ovladaÄ.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Pokud <application>MEncoder</application> nedokáže otevřít audio zařízení,
-ujistěte se, že je opravdu k dispozici. Můžete mít potíže se zvukovými
-servery jako aRts (KDE) nebo ESD (GNOME). Pokud máte plně duplexní zvukovou
-kartu (téměř každá slušná karta to již podporuje) a používáte KDE, zkuste
-zaškrtnout volbu "full duplex" v menu nastavení zvukového serveru.
+Pokud <application>MEncoder</application> nedokĂĄĹže otevĹĂ­t audio zaĹĂ­zenĂ­,
+ujistÄte se, Ĺže je opravdu k dispozici. MĹŻĹžete mĂ­t potĂ­Ĺže se zvukovĂ˝mi
+servery jako aRts (KDE) nebo ESD (GNOME). Pokud mĂĄte plnÄ duplexnĂ­ zvukovou
+kartu (tĂŠmÄĹ kaĹždĂĄ sluĹĄnĂĄ karta to jiĹž podporuje) a pouĹžĂ­vĂĄte KDE, zkuste
+zaĹĄkrtnout volbu "full duplex" v menu nastavenĂ­ zvukovĂŠho serveru.
 </para>
 </listitem>
 </itemizedlist>
@@ -157,11 +157,11 @@ zaškrtnout volbu "full duplex" v menu nastavení zvukového serveru.
 
 
 <sect2 id="tv-examples">
-<title>Příklady</title>
+<title>PĹĂ­klady</title>
 
 <informalexample>
 <para>
-Modelový výstup do AAlib :)
+ModelovĂ˝ vĂ˝stup do AAlib :)
 <screen>
 mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://<!--
 --></screen>
@@ -170,7 +170,7 @@ mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://<!--
 
 <informalexample>
 <para>
-Vstup ze standardního V4L:
+Vstup ze standardnĂ­ho V4L:
 <screen>
 mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://<!--
 --></screen>
@@ -179,36 +179,36 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
 
 <informalexample>
 <para>
-Mnohem sofistikovanější příklad. Zde <application>MEncoder</application>
-zachytává obraz v plném PALu, ořízne okraje a odstraní proklad obrazu pomocí
-lineárního směšovacího algoritmu. Zvuk je komprimován konstantním datovým
-tokem 64kbps LAME kodekem. Toto nastavení je vhodné pro zachytávání filmů.
+Mnohem sofistikovanÄjĹĄĂ­ pĹĂ­klad. Zde <application>MEncoder</application>
+zachytĂĄvĂĄ obraz v plnĂŠm PALu, oĹĂ­zne okraje a odstranĂ­ proklad obrazu pomocĂ­
+lineĂĄrnĂ­ho smÄĹĄovacĂ­ho algoritmu. Zvuk je komprimovĂĄn konstantnĂ­m datovĂ˝m
+tokem 64kbps LAME kodekem. Toto nastavenĂ­ je vhodnĂŠ pro zachytĂĄvĂĄnĂ­ filmĹŻ.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
      -oac mp3lame -lameopts cbr:br=64 \
-     -vf crop=720:544:24:16,pp=lb -o <replaceable>výstupní.avi</replaceable> tv://
+     -vf crop=720:544:24:16,pp=lb -o <replaceable>vĂ˝stupnĂ­.avi</replaceable> tv://
 </screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Toto navíc přeškáluje video na 384x288 a zkomprimuje jej s datovým tokem
-350kbps v režimu vysoké kvality. Volba vqmax uvolňuje kvantizer a umožní
-video kompresoru podržet takto nízký datový tok i za cenu snížení kvality.
-To lze použít pro záznam dlouhých TV seriálů, kde kvalita obrazu není až
-tolik důležitá.
+Toto navĂ­c pĹeĹĄkĂĄluje video na 384x288 a zkomprimuje jej s datovĂ˝m tokem
+350kbps v reĹžimu vysokĂŠ kvality. Volba vqmax uvolĹuje kvantizer a umoĹžnĂ­
+video kompresoru podrĹžet takto nĂ­zkĂ˝ datovĂ˝ tok i za cenu snĂ­ĹženĂ­ kvality.
+To lze pouĹžĂ­t pro zĂĄznam dlouhĂ˝ch TV seriĂĄlĹŻ, kde kvalita obrazu nenĂ­ aĹž
+tolik dĹŻleĹžitĂĄ.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vf crop=720:540:24:18,pp=lb,scale=384:288 -sws 1 -o <replaceable>výstupní.avi</replaceable> tv://
+     -vf crop=720:540:24:18,pp=lb,scale=384:288 -sws 1 -o <replaceable>vĂ˝stupnĂ­.avi</replaceable> tv://
 </screen>
-Rovněž můžete nastavit menší rozměry obrazu ve volbě <option>-tv</option>
-a vyhnout se tak softwarovému škálování, ale tento přístup vyžaduje
-maximální množství informací a je trochu odolnější proti šumu. Čipy bt8x8
-umí průměrování pixelů pouze ve svislém směru díky hardwarovým omezením.
+RovnÄĹž mĹŻĹžete nastavit menĹĄĂ­ rozmÄry obrazu ve volbÄ <option>-tv</option>
+a vyhnout se tak softwarovĂŠmu ĹĄkĂĄlovĂĄnĂ­, ale tento pĹĂ­stup vyĹžaduje
+maximĂĄlnĂ­ mnoĹžstvĂ­ informacĂ­ a je trochu odolnÄjĹĄĂ­ proti ĹĄumu. Äipy bt8x8
+umĂ­ prĹŻmÄrovĂĄnĂ­ pixelĹŻ pouze ve svislĂŠm smÄru dĂ­ky hardwarovĂ˝m omezenĂ­m.
 </para>
 </informalexample>
 </sect2>

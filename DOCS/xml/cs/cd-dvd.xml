@@ -1,26 +1,26 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r19751 -->
 <chapter id="cd-dvd">
-<title>Použití CD/DVD</title>
+<title>PouĹžitĂ­ CD/DVD</title>
 
 <sect1 id="drives">
 <title>CD/DVD mechaniky</title>
 
 <para>
-Moderní CD-ROM mechaniky dosahují velmi vysokých otáček a některé z nich
-mohou pracovat i se sníženými otáčkami. Existuje několik důvodů, pro
-které byste mohli chtít změnit rychlost CD-ROM mechaniky:
+ModernĂ­ CD-ROM mechaniky dosahujĂ­ velmi vysokĂ˝ch otĂĄÄek a nÄkterĂŠ z nich
+mohou pracovat i se snĂ­ĹženĂ˝mi otĂĄÄkami. Existuje nÄkolik dĹŻvodĹŻ, pro
+kterĂŠ byste mohli chtĂ­t zmÄnit rychlost CD-ROM mechaniky:
 </para>
 
 <itemizedlist>
 <listitem><para>
-Byly zprávy o chybách čtení při vysokých rychlostech, zvláště u špatně
-vylisovaných CD-ROMů. Z těchto důvodů může snížení rychlosti působit
-jako prevence ztráty dat.
+Byly zprĂĄvy o chybĂĄch ÄtenĂ­ pĹi vysokĂ˝ch rychlostech, zvlĂĄĹĄtÄ u ĹĄpatnÄ
+vylisovanĂ˝ch CD-ROMĹŻ. Z tÄchto dĹŻvodĹŻ mĹŻĹže snĂ­ĹženĂ­ rychlosti pĹŻsobit
+jako prevence ztrĂĄty dat.
 </para></listitem>
 
 <listitem><para>
-Mnoho CD-ROM mechanik je nechutně hlučných, nižší rychlost může omezit
+Mnoho CD-ROM mechanik je nechutnÄ hluÄnĂ˝ch, niĹžĹĄĂ­ rychlost mĹŻĹže omezit
 tento hluk.
 </para></listitem>
 </itemizedlist>
@@ -29,7 +29,7 @@ tento hluk.
 <title>Linux</title>
 
 <para>
-Můžete snížit rychlost IDE CD-ROM mechanik pomocí <command>hdparm</command>,
+MĹŻĹžete snĂ­Ĺžit rychlost IDE CD-ROM mechanik pomocĂ­ <command>hdparm</command>,
 <command>setcd</command> nebo <command>cdctl</command>. Pracuje to asi takto:
 <screen>hdparm -E <replaceable>[rychlost]</replaceable> <replaceable>[mechanika cdrom]</replaceable></screen>
 <screen>setcd -x <replaceable>[rychlost]</replaceable> <replaceable>[mechanika cdrom]</replaceable></screen>
@@ -37,36 +37,36 @@ Můžete snížit rychlost IDE CD-ROM mechanik pomocí <command>hdparm</command>,
 </para>
 
 <para>
-Pokud používáte SCSI emulaci, budete muset předat tato nastavení do skutečného
-IDE zařízení, nikoli emulovaného SCSI zařízení.
+Pokud pouĹžĂ­vĂĄte SCSI emulaci, budete muset pĹedat tato nastavenĂ­ do skuteÄnĂŠho
+IDE zaĹĂ­zenĂ­, nikoli emulovanĂŠho SCSI zaĹĂ­zenĂ­.
 </para>
 
 <para>
-Pokud máte práva root-a, následující příkaz vám rovněž může pomoci:
+Pokud mĂĄte prĂĄva root-a, nĂĄsledujĂ­cĂ­ pĹĂ­kaz vĂĄm rovnÄĹž mĹŻĹže pomoci:
 <screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[mechanika cdrom]</replaceable>/settings</screen>
 </para>
 
 <para>
-To nastaví čtení napřed na 2MB, což pomůže při poškrábaných médiích.
-Pokud ji však nastavíte příliš vysoko, bude mechanika stále zrychlovat a
-zpomalovat, což výrazně sníží její výkon.
-Doporučujeme vám rovněž vyladit vaši CD-ROM mechaniku pomocí <command>hdparm</command>:
-<screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom zařízení]</replaceable></screen>
+To nastavĂ­ ÄtenĂ­ napĹed na 2MB, coĹž pomĹŻĹže pĹi poĹĄkrĂĄbanĂ˝ch mĂŠdiĂ­ch.
+Pokud ji vĹĄak nastavĂ­te pĹĂ­liĹĄ vysoko, bude mechanika stĂĄle zrychlovat a
+zpomalovat, coĹž vĂ˝raznÄ snĂ­ĹžĂ­ jejĂ­ vĂ˝kon.
+DoporuÄujeme vĂĄm rovnÄĹž vyladit vaĹĄi CD-ROM mechaniku pomocĂ­ <command>hdparm</command>:
+<screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom zaĹĂ­zenĂ­]</replaceable></screen>
 </para>
 
 <para>
-To zapne DMA přístup, čtení napřed a odmaskování IRQ (přečtěte si man stránku
-programu <command>hdparm</command> pro podrobné vysvětlení).
+To zapne DMA pĹĂ­stup, ÄtenĂ­ napĹed a odmaskovĂĄnĂ­ IRQ (pĹeÄtÄte si man strĂĄnku
+programu <command>hdparm</command> pro podrobnĂŠ vysvÄtlenĂ­).
 </para>
 
 <para>
-Prostudujte si &quot;<filename>/proc/ide/<replaceable>cdrom zařízení</replaceable>/settings&quot;</filename>
-pro jemné doladění vaší CD-ROM.
+Prostudujte si &quot;<filename>/proc/ide/<replaceable>cdrom zaĹĂ­zenĂ­</replaceable>/settings&quot;</filename>
+pro jemnĂŠ doladÄnĂ­ vaĹĄĂ­ CD-ROM.
 </para>
 
 <para>
-SCSI mechaniky nemají jednotný způsob pro nastavení těchto parametrů (Znáte nějaký?
-Řekněte nám jej!). Existuje nástroj, který pracuje se
+SCSI mechaniky nemajĂ­ jednotnĂ˝ zpĹŻsob pro nastavenĂ­ tÄchto parametrĹŻ (ZnĂĄte nÄjakĂ˝?
+ĹeknÄte nĂĄm jej!). Existuje nĂĄstroj, kterĂ˝ pracuje se
 <ulink url="http://das.ist.org/~georg/">SCSI mechanikami Plextor</ulink>.
 </para>
 
@@ -78,7 +78,7 @@ SCSI mechaniky nemají jednotný způsob pro nastavení těchto parametrů (Znáte něja
 
 <para>rychlost:
 <screen>
-cdcontrol [-f <replaceable>zařízení</replaceable>] speed <replaceable>[rychlost]</replaceable>
+cdcontrol [-f <replaceable>zaĹĂ­zenĂ­</replaceable>] speed <replaceable>[rychlost]</replaceable>
 </screen>
 </para>
 
@@ -93,293 +93,293 @@ sysctl hw.ata.atapi_dma=1
 </sect1>
 
 <sect1 id="dvd">
-<title>Přehrávání DVD</title>
+<title>PĹehrĂĄvĂĄnĂ­ DVD</title>
 <para>
-Úplný seznam dostupných voleb naleznete v man stránce.
-Syntaxe pro standardní Digital Versatile Disc (DVD) je následující:
-<screen>mplayer dvd://<replaceable>&lt;track&gt;</replaceable> [-dvd-device <replaceable>&lt;DVD_zařízení&gt;</replaceable>]</screen>
+ĂplnĂ˝ seznam dostupnĂ˝ch voleb naleznete v man strĂĄnce.
+Syntaxe pro standardnĂ­ Digital Versatile Disc (DVD) je nĂĄsledujĂ­cĂ­:
+<screen>mplayer dvd://<replaceable>&lt;track&gt;</replaceable> [-dvd-device <replaceable>&lt;DVD_zaĹĂ­zenĂ­&gt;</replaceable>]</screen>
 </para>
 
 <para>
-Příklad:
+PĹĂ­klad:
 <screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
 </para>
 
 <para>
 Pokud jste kompilovali <application>MPlayer</application> s podporou dvdnav,
-je syntaxe stejná až na to, že musíte používat dvdnav:// místo dvd://.
+je syntaxe stejnĂĄ aĹž na to, Ĺže musĂ­te pouĹžĂ­vat dvdnav:// mĂ­sto dvd://.
 </para>
 
 <para>
-Výchozím DVD zařízením je <filename>/dev/dvd</filename>. Pokud se vaše nastavení
-liší, vytvořte symlink, nebo uveďte správné zařízení na příkazovém řádku
-pomocí volby <option>-dvd-device</option>.
+VĂ˝chozĂ­m DVD zaĹĂ­zenĂ­m je <filename>/dev/dvd</filename>. Pokud se vaĹĄe nastavenĂ­
+liĹĄĂ­, vytvoĹte symlink, nebo uveÄte sprĂĄvnĂŠ zaĹĂ­zenĂ­ na pĹĂ­kazovĂŠm ĹĂĄdku
+pomocĂ­ volby <option>-dvd-device</option>.
 </para>
 
 <formalpara>
-<title>Nový styl podpory DVD (mpdvdkit2)</title>
+<title>NovĂ˝ styl podpory DVD (mpdvdkit2)</title>
 <para>
-<application>MPlayer</application> používá <systemitem>libdvdread</systemitem> a
-<systemitem>libdvdcss</systemitem> pro dekódování a přehrávání DVD. Tyto dvě
-knihovny jsou obsaženy v podadresáři
-<filename class="directory">libmpdvdkit2/</filename> zdrojových kódů
-<application>MPlayer</application>u, nemusíte je tedy instalovat zvlášť
-Zvolili jsme tento způsob, protože jsme museli opravit chybu v
-<systemitem>libdvdread</systemitem> a aplikovat patch, který přidává podporu
-<emphasis role="bold">kešování zlomených CSS klíčů</emphasis>, na
-<systemitem>libdvdcss</systemitem>. To vedlo k výraznému zvýšení rychlosti,
-protože klíče nemusí být nyní lámány pokaždé před přehráváním.
+<application>MPlayer</application> pouĹžĂ­vĂĄ <systemitem>libdvdread</systemitem> a
+<systemitem>libdvdcss</systemitem> pro dekĂłdovĂĄnĂ­ a pĹehrĂĄvĂĄnĂ­ DVD. Tyto dvÄ
+knihovny jsou obsaĹženy v podadresĂĄĹi
+<filename class="directory">libmpdvdkit2/</filename> zdrojovĂ˝ch kĂłdĹŻ
+<application>MPlayer</application>u, nemusĂ­te je tedy instalovat zvlĂĄĹĄĹĽ
+Zvolili jsme tento zpĹŻsob, protoĹže jsme museli opravit chybu v
+<systemitem>libdvdread</systemitem> a aplikovat patch, kterĂ˝ pĹidĂĄvĂĄ podporu
+<emphasis role="bold">keĹĄovĂĄnĂ­ zlomenĂ˝ch CSS klĂ­ÄĹŻ</emphasis>, na
+<systemitem>libdvdcss</systemitem>. To vedlo k vĂ˝raznĂŠmu zvĂ˝ĹĄenĂ­ rychlosti,
+protoĹže klĂ­Äe nemusĂ­ bĂ˝t nynĂ­ lĂĄmĂĄny pokaĹždĂŠ pĹed pĹehrĂĄvĂĄnĂ­m.
 </para>
 </formalpara>
 
 <para>
-<application>MPlayer</application> umí rovněž použít knihovny
+<application>MPlayer</application> umĂ­ rovnÄĹž pouĹžĂ­t knihovny
 <systemitem>libdvdread</systemitem> a <systemitem>libdvdcss</systemitem>
-na systémové úrovni, ale toto řešení <emphasis role="bold">nedoporučujeme</emphasis>,
-protože může vést k chybám, nekompatibilitě knihovny a nižší rychlosti.
+na systĂŠmovĂŠ Ăşrovni, ale toto ĹeĹĄenĂ­ <emphasis role="bold">nedoporuÄujeme</emphasis>,
+protoĹže mĹŻĹže vĂŠst k chybĂĄm, nekompatibilitÄ knihovny a niĹžĹĄĂ­ rychlosti.
 </para>
 
 <note><para>
-V případě problémů s dekódováním DVD, zkuste vypnout supermount a podobná udělátka.
-Některé RPC-2 mechaniky mohou rovněž vyžadovat nastavení region kódu.
+V pĹĂ­padÄ problĂŠmĹŻ s dekĂłdovĂĄnĂ­m DVD, zkuste vypnout supermount a podobnĂĄ udÄlĂĄtka.
+NÄkterĂŠ RPC-2 mechaniky mohou rovnÄĹž vyĹžadovat nastavenĂ­ region kĂłdu.
 </para></note>
 
 <formalpara>
 <title>Struktura DVD</title>
 <para>
-DVD disky mají 2048 bajtů na sektor s ECC/CRC. Obvykle mají souborový systém UDF
-v jediné stopě, obsahující různé soubory (malé .IFO a .BUK soubory a velké (1GB)
-.VOB soubory). Jsou to reálné soubory a mohou být kopírovány/přehrávány
-z připojeného systému souborů nešifrovaného DVD.
+DVD disky majĂ­ 2048 bajtĹŻ na sektor s ECC/CRC. Obvykle majĂ­ souborovĂ˝ systĂŠm UDF
+v jedinĂŠ stopÄ, obsahujĂ­cĂ­ rĹŻznĂŠ soubory (malĂŠ .IFO a .BUK soubory a velkĂŠ (1GB)
+.VOB soubory). Jsou to reĂĄlnĂŠ soubory a mohou bĂ˝t kopĂ­rovĂĄny/pĹehrĂĄvĂĄny
+z pĹipojenĂŠho systĂŠmu souborĹŻ neĹĄifrovanĂŠho DVD.
 </para>
 </formalpara>
 
 <para>
-Soubory .IFO obsahují informace pro navigaci ve filmu (kapitola/titul/mapa úhlů,
-tabulka jazyků, atd) a jsou potřeba pro čtení a interpretaci obsahu .VOBu
-(filmu). Soubory .BUK jsou jejich zálohami. Všude používají
-<emphasis role="bold">sektory</emphasis>, takže musíte použít surové (RAW)
-adresování sektorů na disku, abyste se mohli navigovat v DVD, nebo dekryptovat
+Soubory .IFO obsahujĂ­ informace pro navigaci ve filmu (kapitola/titul/mapa ĂşhlĹŻ,
+tabulka jazykĹŻ, atd) a jsou potĹeba pro ÄtenĂ­ a interpretaci obsahu .VOBu
+(filmu). Soubory .BUK jsou jejich zĂĄlohami. VĹĄude pouĹžĂ­vajĂ­
+<emphasis role="bold">sektory</emphasis>, takĹže musĂ­te pouĹžĂ­t surovĂŠ (RAW)
+adresovĂĄnĂ­ sektorĹŻ na disku, abyste se mohli navigovat v DVD, nebo dekryptovat
 jeho obsah.
 </para>
 
 <para>
-Podpora DVD vyžaduje přímý sektorově-orientovaný přístup k zařízení. Naneštěstí
-musíte (pod Linuxem) být root, abyste dostali adresu sektoru souboru.
-To je důvod proč vůbec nepoužíváme modul souborového systému z kernelu a místo
-něj jej implementujeme v uživatelském prostoru. To zajišťují
+Podpora DVD vyĹžaduje pĹĂ­mĂ˝ sektorovÄ-orientovanĂ˝ pĹĂ­stup k zaĹĂ­zenĂ­. NaneĹĄtÄstĂ­
+musĂ­te (pod Linuxem) bĂ˝t root, abyste dostali adresu sektoru souboru.
+To je dĹŻvod proÄ vĹŻbec nepouĹžĂ­vĂĄme modul souborovĂŠho systĂŠmu z kernelu a mĂ­sto
+nÄj jej implementujeme v uĹživatelskĂŠm prostoru. To zajiĹĄĹĽujĂ­
 <systemitem>libdvdread</systemitem> 0.9.x a <systemitem>libmpdvdkit</systemitem>.
-UDF ovladač z kernelu není potřeba, jelikož tyto knihovny mají zabudován svůj
-vlastní. Rovněž nemusí být DVD přimountováno vzhledem k tomu že používáme
-pouze přímý (raw) přístup.
+UDF ovladaÄ z kernelu nenĂ­ potĹeba, jelikoĹž tyto knihovny majĂ­ zabudovĂĄn svĹŻj
+vlastnĂ­. RovnÄĹž nemusĂ­ bĂ˝t DVD pĹimountovĂĄno vzhledem k tomu Ĺže pouĹžĂ­vĂĄme
+pouze pĹĂ­mĂ˝ (raw) pĹĂ­stup.
 </para>
 
 <para>
-Někdy <filename>/dev/dvd</filename> nemůže být čteno uživateli, proto autoři
-<systemitem>libdvdread</systemitem> implementovali emulační vrstvu, která
-převádí sektorové adresy na soubor+offset za účelem emulace raw přístupu
-nad připojeným souborovým systémem nebo dokonce i hard diskem.
+NÄkdy <filename>/dev/dvd</filename> nemĹŻĹže bĂ˝t Äteno uĹživateli, proto autoĹi
+<systemitem>libdvdread</systemitem> implementovali emulaÄnĂ­ vrstvu, kterĂĄ
+pĹevĂĄdĂ­ sektorovĂŠ adresy na soubor+offset za ĂşÄelem emulace raw pĹĂ­stupu
+nad pĹipojenĂ˝m souborovĂ˝m systĂŠmem nebo dokonce i hard diskem.
 </para>
 
 <para>
-<systemitem>libdvdread</systemitem> dokonce přijme bod připojení (mountpoint)
-místo názvu zařízení pro přímý přístup a podívá se do
-<filename>/proc/mounts</filename> na jméno zařízení. To bylo vyvinuto pro
-Solaris, kde jsou názvy souborů dynamicky alokovány.
+<systemitem>libdvdread</systemitem> dokonce pĹijme bod pĹipojenĂ­ (mountpoint)
+mĂ­sto nĂĄzvu zaĹĂ­zenĂ­ pro pĹĂ­mĂ˝ pĹĂ­stup a podĂ­vĂĄ se do
+<filename>/proc/mounts</filename> na jmĂŠno zaĹĂ­zenĂ­. To bylo vyvinuto pro
+Solaris, kde jsou nĂĄzvy souborĹŻ dynamicky alokovĂĄny.
 </para>
 
 <para>
-Výchozím DVD zařízením je <filename>/dev/dvd</filename>. Pokud se vaše
-nastavení liší, vytvořte symlink, nebo uveďte správné zařízení na příkazovém
-řádku pomocí volby <option>-dvd-device</option>.
+VĂ˝chozĂ­m DVD zaĹĂ­zenĂ­m je <filename>/dev/dvd</filename>. Pokud se vaĹĄe
+nastavenĂ­ liĹĄĂ­, vytvoĹte symlink, nebo uveÄte sprĂĄvnĂŠ zaĹĂ­zenĂ­ na pĹĂ­kazovĂŠm
+ĹĂĄdku pomocĂ­ volby <option>-dvd-device</option>.
 </para>
 
 <formalpara>
 <title>DVD autentifikace</title>
 <para>
-Tato autentifikační a dekryptovací metoda nového stylu podpory DVD je
-zajišťována použitím patchované knihovny <systemitem>libdvdcss</systemitem>
-(viz výš). Metoda může být nastavena pomocí proměnné prostředí
-<envar>DVDCSS_METHOD</envar> nastavené na klíč, disk nebo titul.
+Tato autentifikaÄnĂ­ a dekryptovacĂ­ metoda novĂŠho stylu podpory DVD je
+zajiĹĄĹĽovĂĄna pouĹžitĂ­m patchovanĂŠ knihovny <systemitem>libdvdcss</systemitem>
+(viz vĂ˝ĹĄ). Metoda mĹŻĹže bĂ˝t nastavena pomocĂ­ promÄnnĂŠ prostĹedĂ­
+<envar>DVDCSS_METHOD</envar> nastavenĂŠ na klĂ­Ä, disk nebo titul.
 </para>
 </formalpara>
 
 <para>
-Pokud není nastavena, zkouší se následující metody (výchozí: "key",
+Pokud nenĂ­ nastavena, zkouĹĄĂ­ se nĂĄsledujĂ­cĂ­ metody (vĂ˝chozĂ­: "key",
 "title request"):
 </para>
 
 <orderedlist>
 <listitem><para>
-<emphasis role="bold">bus key</emphasis>: Tento klíč je dohodnut během
-autentifikace (dlouhá směs ioctl volání a výměn různých klíčů, kryptování)
-a je použit pro zašifrování klíčů titulu a disku než jsou odeslány přes
-nechráněnou sběrnici (jako prevence odposlechnutí). Klíč "bus key" je potřeba
-pro předdešifrování šifrovaného klíče disku.
+<emphasis role="bold">bus key</emphasis>: Tento klĂ­Ä je dohodnut bÄhem
+autentifikace (dlouhĂĄ smÄs ioctl volĂĄnĂ­ a vĂ˝mÄn rĹŻznĂ˝ch klĂ­ÄĹŻ, kryptovĂĄnĂ­)
+a je pouĹžit pro zaĹĄifrovĂĄnĂ­ klĂ­ÄĹŻ titulu a disku neĹž jsou odeslĂĄny pĹes
+nechrĂĄnÄnou sbÄrnici (jako prevence odposlechnutĂ­). KlĂ­Ä "bus key" je potĹeba
+pro pĹeddeĹĄifrovĂĄnĂ­ ĹĄifrovanĂŠho klĂ­Äe disku.
 </para></listitem>
 
 <listitem><para>
 <emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
-se poohlédne po již zlomených klíčích titulu, které jsou uloženy v adresáři
-<filename class="directory">~/.mplayer/DVDKeys</filename> (rychlé ;).
+se poohlĂŠdne po jiĹž zlomenĂ˝ch klĂ­ÄĂ­ch titulu, kterĂŠ jsou uloĹženy v adresĂĄĹi
+<filename class="directory">~/.mplayer/DVDKeys</filename> (rychlĂŠ ;).
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">key</emphasis>: Pokud není k dispozici "cached key",
-<application>MPlayer</application> zkusí rozšifrovat klíč disku pomocí
-sady přiložených klíčů přehrávače.
+<emphasis role="bold">key</emphasis>: Pokud nenĂ­ k dispozici "cached key",
+<application>MPlayer</application> zkusĂ­ rozĹĄifrovat klĂ­Ä disku pomocĂ­
+sady pĹiloĹženĂ˝ch klĂ­ÄĹŻ pĹehrĂĄvaÄe.
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">disk</emphasis>: Pokud selže "key" metoda,
-(např. nejsou přiloženy klíče přehrávače), <application>MPlayer</application>
-crackne klíč disku algoritmem hrubé síly. Tento proces je náročný na CPU a
-vyžaduje 64 MB paměti (16M 32Bitových položek hash tabulky) pro uložení
-pracovních dat. Tato metoda by měla fungovat vždy (pomalé).
+<emphasis role="bold">disk</emphasis>: Pokud selĹže "key" metoda,
+(napĹ. nejsou pĹiloĹženy klĂ­Äe pĹehrĂĄvaÄe), <application>MPlayer</application>
+crackne klĂ­Ä disku algoritmem hrubĂŠ sĂ­ly. Tento proces je nĂĄroÄnĂ˝ na CPU a
+vyĹžaduje 64 MB pamÄti (16M 32BitovĂ˝ch poloĹžek hash tabulky) pro uloĹženĂ­
+pracovnĂ­ch dat. Tato metoda by mÄla fungovat vĹždy (pomalĂŠ).
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">title request</emphasis>: S pomocí klíče disku, požádá
-<application>MPlayer</application> o šifrované klíče titulu, které jsou
-ukryty ve <emphasis>skrytých sektorech</emphasis> pomocí
+<emphasis role="bold">title request</emphasis>: S pomocĂ­ klĂ­Äe disku, poĹžĂĄdĂĄ
+<application>MPlayer</application> o ĹĄifrovanĂŠ klĂ­Äe titulu, kterĂŠ jsou
+ukryty ve <emphasis>skrytĂ˝ch sektorech</emphasis> pomocĂ­
 <systemitem>ioctl()</systemitem>.
-Ochrana regiony v RPC-2 mechanikách je prováděna v tomto kroku a na některých
-mechanikách může selhat.
-Pokud uspěje, budou klíče titulu (title keys) dekryptovány pomocí klíče disku
-(disk key) a klíče sběrnice (bus key).
+Ochrana regiony v RPC-2 mechanikĂĄch je provĂĄdÄna v tomto kroku a na nÄkterĂ˝ch
+mechanikĂĄch mĹŻĹže selhat.
+Pokud uspÄje, budou klĂ­Äe titulu (title keys) dekryptovĂĄny pomocĂ­ klĂ­Äe disku
+(disk key) a klĂ­Äe sbÄrnice (bus key).
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">title</emphasis>: Tato metoda je použita pokud selže
-požadavek na titul a nespoléhá se na výměnu klíčů s DVD mechanikou.
-Používá se zde kryptografický útok na přímé určení klíče (vyhledáváním
-opakujícího se vzoru v dešifrovaném obsahu VOB a rozhodnutím zda čistý text
-odpovídající prvním šifrovaným bajtům je pokračováním tohoto vzoru).
-Metoda je také známa jako &quot;known plaintext attack&quot;
-nebo &quot;DeCSSPlus&quot;. V nemnoha případech může metoda selhat z důvodu
-nedostatku šifrovaných dat na disku pro provedení statistického útoku, nebo
-protože se klíč mění uprostřed titulu. Tato metoda je jediným způsobem jak
-dekryptovat DVD uložené na harddisku nebo DVD se špatným regionem na
-RPC2 mechanice (pomalé).
+<emphasis role="bold">title</emphasis>: Tato metoda je pouĹžita pokud selĹže
+poĹžadavek na titul a nespolĂŠhĂĄ se na vĂ˝mÄnu klĂ­ÄĹŻ s DVD mechanikou.
+PouĹžĂ­vĂĄ se zde kryptografickĂ˝ Ăştok na pĹĂ­mĂŠ urÄenĂ­ klĂ­Äe (vyhledĂĄvĂĄnĂ­m
+opakujĂ­cĂ­ho se vzoru v deĹĄifrovanĂŠm obsahu VOB a rozhodnutĂ­m zda ÄistĂ˝ text
+odpovĂ­dajĂ­cĂ­ prvnĂ­m ĹĄifrovanĂ˝m bajtĹŻm je pokraÄovĂĄnĂ­m tohoto vzoru).
+Metoda je takĂŠ znĂĄma jako &quot;known plaintext attack&quot;
+nebo &quot;DeCSSPlus&quot;. V nemnoha pĹĂ­padech mĹŻĹže metoda selhat z dĹŻvodu
+nedostatku ĹĄifrovanĂ˝ch dat na disku pro provedenĂ­ statistickĂŠho Ăştoku, nebo
+protoĹže se klĂ­Ä mÄnĂ­ uprostĹed titulu. Tato metoda je jedinĂ˝m zpĹŻsobem jak
+dekryptovat DVD uloĹženĂŠ na harddisku nebo DVD se ĹĄpatnĂ˝m regionem na
+RPC2 mechanice (pomalĂŠ).
 </para></listitem>
 </orderedlist>
 
 <para>
-RPC-1 DVD mechaniky chrání nastavení regionu pouze softwarově. RPC-2 mechaniky
-mají hardwarovou ochranu umožňující pouze 5 změn. Může být potřeba/doporučeno
-provést upgrade firmwaru na RPC-1 pokud máte RPC-2 DVD mechaniku.
-Můžete zkusit najít upgrady firmwaru pro svou mechaniku na internetu,
-<ulink url="http://forum.rpc-1.com/dl_all.php">toto firmwarové fórum</ulink>
-může být dobrým začátkem pro vaše hledání.
-Pokud pro vaši mechaniku není k dispozici upgrade firmwaru, použijte
-<ulink url="http://linvdr.org/projects/regionset/">nástroj regionset</ulink>
-pro nastavení region kódu vaší DVD mechaniky (pod Linux).
-<emphasis role="bold">Varování</emphasis>: Region můžete přenastavit pouze
-pětkrát.
+RPC-1 DVD mechaniky chrĂĄnĂ­ nastavenĂ­ regionu pouze softwarovÄ. RPC-2 mechaniky
+majĂ­ hardwarovou ochranu umoĹžĹujĂ­cĂ­ pouze 5 zmÄn. MĹŻĹže bĂ˝t potĹeba/doporuÄeno
+provĂŠst upgrade firmwaru na RPC-1 pokud mĂĄte RPC-2 DVD mechaniku.
+MĹŻĹžete zkusit najĂ­t upgrady firmwaru pro svou mechaniku na internetu,
+<ulink url="http://forum.rpc-1.com/dl_all.php">toto firmwarovĂŠ fĂłrum</ulink>
+mĹŻĹže bĂ˝t dobrĂ˝m zaÄĂĄtkem pro vaĹĄe hledĂĄnĂ­.
+Pokud pro vaĹĄi mechaniku nenĂ­ k dispozici upgrade firmwaru, pouĹžijte
+<ulink url="http://linvdr.org/projects/regionset/">nĂĄstroj regionset</ulink>
+pro nastavenĂ­ region kĂłdu vaĹĄĂ­ DVD mechaniky (pod Linux).
+<emphasis role="bold">VarovĂĄnĂ­</emphasis>: Region mĹŻĹžete pĹenastavit pouze
+pÄtkrĂĄt.
 </para>
 </sect1>
 
 
 
 <sect1 id="vcd">
-<title>Přehrávání VCD</title>
+<title>PĹehrĂĄvĂĄnĂ­ VCD</title>
 <para>
-Úplný seznam dostupných voleb naleznete v man stránce. Syntaxe pro standardní
-Video CD (VCD) je následující:
-<screen>mplayer vcd://<replaceable>&lt;stopa&gt;</replaceable> [-cdrom-device <replaceable>&lt;zařízení&gt;</replaceable>]</screen>
-Příklad:
+ĂplnĂ˝ seznam dostupnĂ˝ch voleb naleznete v man strĂĄnce. Syntaxe pro standardnĂ­
+Video CD (VCD) je nĂĄsledujĂ­cĂ­:
+<screen>mplayer vcd://<replaceable>&lt;stopa&gt;</replaceable> [-cdrom-device <replaceable>&lt;zaĹĂ­zenĂ­&gt;</replaceable>]</screen>
+PĹĂ­klad:
 <screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
-Výchozím VCD zařízením je <filename>/dev/cdrom</filename>. Pokud se vaše nastavení
-liší, vytvořte symlink nebo uveďte správné zařízení na příkazovém řádku pomocí volby
+VĂ˝chozĂ­m VCD zaĹĂ­zenĂ­m je <filename>/dev/cdrom</filename>. Pokud se vaĹĄe nastavenĂ­
+liĹĄĂ­, vytvoĹte symlink nebo uveÄte sprĂĄvnĂŠ zaĹĂ­zenĂ­ na pĹĂ­kazovĂŠm ĹĂĄdku pomocĂ­ volby
 <option>-cdrom-device</option>.
 </para>
 
 <note><para>
-Minimálně SCSI CD-ROM mechaniky Plextor a Toshiba vykazují mizerný výkon
-při čtení VCD. To proto, že CDROMREADRAW <systemitem>ioctl</systemitem>
-není pro tyto mechaniky plně implementováno. Pokud máte zkušenosti se
-SCSI programováním, prosíme
-<ulink url="../../tech/patches.txt">pomozte nám</ulink>
+MinimĂĄlnÄ SCSI CD-ROM mechaniky Plextor a Toshiba vykazujĂ­ mizernĂ˝ vĂ˝kon
+pĹi ÄtenĂ­ VCD. To proto, Ĺže CDROMREADRAW <systemitem>ioctl</systemitem>
+nenĂ­ pro tyto mechaniky plnÄ implementovĂĄno. Pokud mĂĄte zkuĹĄenosti se
+SCSI programovĂĄnĂ­m, prosĂ­me
+<ulink url="../../tech/patches.txt">pomozte nĂĄm</ulink>
 implementovat obecnou SCSI podporu pro VCD.
 </para></note>
 
 <para>
-Mezitím můžete extrahovat data z VCD pomocí
+MezitĂ­m mĹŻĹžete extrahovat data z VCD pomocĂ­
 <ulink url="http://ftp.ntut.edu.tw/ftp/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
-a výsledný soubor přehrát v <application>MPlayer</application>u.
+a vĂ˝slednĂ˝ soubor pĹehrĂĄt v <application>MPlayer</application>u.
 </para>
 
 <formalpara>
 <title>Struktura VCD</title>
 
 <para>
-Video CD (VCD) je tvořeno CD-ROM XA sektory, čili stopy CD-ROM mode 2
-třída 1 a 2:</para>
+Video CD (VCD) je tvoĹeno CD-ROM XA sektory, Äili stopy CD-ROM mode 2
+tĹĂ­da 1 a 2:</para>
 </formalpara>
 
 <itemizedlist>
 <listitem><para>
-První stopa je ve formátu mode 2 třída 2 což znamená, že používá L2
-korekci chyb. Stopa obsahuje souborový systém ISO-9660 s 2048
-bajty/sektor. Tento souborový systém obsahuje VCD metadata informace,
-stejně jako statické snímky často používané v menu. MPEG segmenty menu
-mohou být rovněž uloženy v této první stopě, ale tyto MPEGy musí být
-rozsekány na série 150 sektorových chunků. Souborový systém ISO-9660
-může obsahovat další soubory, které nejsou potřeba pro operace
+PrvnĂ­ stopa je ve formĂĄtu mode 2 tĹĂ­da 2 coĹž znamenĂĄ, Ĺže pouĹžĂ­vĂĄ L2
+korekci chyb. Stopa obsahuje souborovĂ˝ systĂŠm ISO-9660 s 2048
+bajty/sektor. Tento souborovĂ˝ systĂŠm obsahuje VCD metadata informace,
+stejnÄ jako statickĂŠ snĂ­mky Äasto pouĹžĂ­vanĂŠ v menu. MPEG segmenty menu
+mohou bĂ˝t rovnÄĹž uloĹženy v tĂŠto prvnĂ­ stopÄ, ale tyto MPEGy musĂ­ bĂ˝t
+rozsekĂĄny na sĂŠrie 150 sektorovĂ˝ch chunkĹŻ. SouborovĂ˝ systĂŠm ISO-9660
+mĹŻĹže obsahovat dalĹĄĂ­ soubory, kterĂŠ nejsou potĹeba pro operace
 s VCD.
 </para></listitem>
 
 <listitem><para>
-Druhá a ostatní stopy jsou všeobecně surovými MPEG (film) stopami
-s 2324 bajty/sektor, obsahující jeden MPEG PS datový paket na
-sektor. Ty jsou v mode 2 třída 1 formátu, takže obsahují více dat
-v každém sektoru za cenu omezení korekce chyb. Je rovněž možné mít
-CD-DA stopy na VCD za první stopou.
-V některých operačních systémech jsou triky, které umožňují zpřístupnit
-tyto ne-ISO-9660 stopy v systému souborů. V dalších operačních
-systémech jako GNU/Linux to není možné (zatím). Zde MPEG data
-<emphasis role="bold">nemohou být připojena</emphasis>. Protože většina
-filmů je uložena uvnitř tohoto druhu stopy, měli byste nejprve zkusit
+DruhĂĄ a ostatnĂ­ stopy jsou vĹĄeobecnÄ surovĂ˝mi MPEG (film) stopami
+s 2324 bajty/sektor, obsahujĂ­cĂ­ jeden MPEG PS datovĂ˝ paket na
+sektor. Ty jsou v mode 2 tĹĂ­da 1 formĂĄtu, takĹže obsahujĂ­ vĂ­ce dat
+v kaĹždĂŠm sektoru za cenu omezenĂ­ korekce chyb. Je rovnÄĹž moĹžnĂŠ mĂ­t
+CD-DA stopy na VCD za prvnĂ­ stopou.
+V nÄkterĂ˝ch operaÄnĂ­ch systĂŠmech jsou triky, kterĂŠ umoĹžĹujĂ­ zpĹĂ­stupnit
+tyto ne-ISO-9660 stopy v systĂŠmu souborĹŻ. V dalĹĄĂ­ch operaÄnĂ­ch
+systĂŠmech jako GNU/Linux to nenĂ­ moĹžnĂŠ (zatĂ­m). Zde MPEG data
+<emphasis role="bold">nemohou bĂ˝t pĹipojena</emphasis>. ProtoĹže vÄtĹĄina
+filmĹŻ je uloĹžena uvnitĹ tohoto druhu stopy, mÄli byste nejprve zkusit
 <option>vcd://2</option>.
 </para></listitem>
 
 <listitem><para>
-Existují také VCD disky bez první stopy (jediná stopa bez systému souborů).
-Můžete je přehrát, ale nemohou být namountovány.
+ExistujĂ­ takĂŠ VCD disky bez prvnĂ­ stopy (jedinĂĄ stopa bez systĂŠmu souborĹŻ).
+MĹŻĹžete je pĹehrĂĄt, ale nemohou bĂ˝t namountovĂĄny.
 </para></listitem>
 
-<listitem><para> Definice standardu Video CD se nazývá
-Philips "White Book" a není obecně přístupná online, ale musí být zakoupena
-od Philipsu. Podrobnější informace o Video CD můžete nalézt
+<listitem><para> Definice standardu Video CD se nazĂ˝vĂĄ
+Philips "White Book" a nenĂ­ obecnÄ pĹĂ­stupnĂĄ online, ale musĂ­ bĂ˝t zakoupena
+od Philipsu. PodrobnÄjĹĄĂ­ informace o Video CD mĹŻĹžete nalĂŠzt
 <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">v dokumentaci programu vcdimager</ulink>.
 </para></listitem>
 
 </itemizedlist>
 
 <formalpara>
-<title>Pár slov o .DAT souborech</title>
+<title>PĂĄr slov o .DAT souborech</title>
 <para>
-Soubor veliký ~600 MB viditelný v první stopě připojeného VCD není
-skutečným souborem! Je to takzvaná ISO gateway, vytvořená proto,
-aby mohl Windows přistupovat k těmto stopám (Windows vůbec neumožňuje
-aplikacím surový přístup k zařízení).
-Pod Linuxem nemůžete kopírovat nebo přehrávat tyto soubory
-(obsahují jen nesmysly). Pod Windows je to možné, protože jeho iso9660
-ovladač emuluje surový přístup ke stopě v tomto souboru. Abyste mohli
-přehrát .DAT soubor, potřebujete ovladač kernelu který můžete nalézt
-v Linuxové verzi PowerDVD. Obsahuje upravený ovladač systému souborů
-iso9660 (<filename>vcdfs/isofs-2.4.X.o</filename>), který umí emulovat
-surové stopy přes tento stínový .DAT soubor. Pokud připojíte disk
-s pomocí jejich ovladače, můžete kopírovat či dokonce přehrávat .DAT
+Soubor velikĂ˝ ~600 MB viditelnĂ˝ v prvnĂ­ stopÄ pĹipojenĂŠho VCD nenĂ­
+skuteÄnĂ˝m souborem! Je to takzvanĂĄ ISO gateway, vytvoĹenĂĄ proto,
+aby mohl Windows pĹistupovat k tÄmto stopĂĄm (Windows vĹŻbec neumoĹžĹuje
+aplikacĂ­m surovĂ˝ pĹĂ­stup k zaĹĂ­zenĂ­).
+Pod Linuxem nemĹŻĹžete kopĂ­rovat nebo pĹehrĂĄvat tyto soubory
+(obsahujĂ­ jen nesmysly). Pod Windows je to moĹžnĂŠ, protoĹže jeho iso9660
+ovladaÄ emuluje surovĂ˝ pĹĂ­stup ke stopÄ v tomto souboru. Abyste mohli
+pĹehrĂĄt .DAT soubor, potĹebujete ovladaÄ kernelu kterĂ˝ mĹŻĹžete nalĂŠzt
+v LinuxovĂŠ verzi PowerDVD. Obsahuje upravenĂ˝ ovladaÄ systĂŠmu souborĹŻ
+iso9660 (<filename>vcdfs/isofs-2.4.X.o</filename>), kterĂ˝ umĂ­ emulovat
+surovĂŠ stopy pĹes tento stĂ­novĂ˝ .DAT soubor. Pokud pĹipojĂ­te disk
+s pomocĂ­ jejich ovladaÄe, mĹŻĹžete kopĂ­rovat Äi dokonce pĹehrĂĄvat .DAT
 soubory <application>MPlayer</application>em. Ale nebude to fungovat
-se standardním iso9660 ovladačem z Linuxového kernelu! Místo toho
-použijte <option>vcd://</option>. Alternativou kopírování VCD je
-nový ovladač do kernelu jménem
+se standardnĂ­m iso9660 ovladaÄem z LinuxovĂŠho kernelu! MĂ­sto toho
+pouĹžijte <option>vcd://</option>. Alternativou kopĂ­rovĂĄnĂ­ VCD je
+novĂ˝ ovladaÄ do kernelu jmĂŠnem
 <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink>
-(není součástí oficiálního kernelu), který zobrazuje CD sekce jako
-obrazové soubory a program
-<ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, který bit-po-bitu
-grabuje/kopíruje CD.
+(nenĂ­ souÄĂĄstĂ­ oficiĂĄlnĂ­ho kernelu), kterĂ˝ zobrazuje CD sekce jako
+obrazovĂŠ soubory a program
+<ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, kterĂ˝ bit-po-bitu
+grabuje/kopĂ­ruje CD.
 </para>
 </formalpara>
 </sect1>

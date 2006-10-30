@@ -1,131 +1,131 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r14025 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Historie</title>
 
 <blockquote><para>
-Začalo to před rokem... Vyzkoušel jsem mnoho přehrávačů pod Linuxem
+ZaÄalo to pĹed rokem... VyzkouĹĄel jsem mnoho pĹehrĂĄvaÄĹŻ pod Linuxem
 (<application>mtv</application>, <application>xmps</application>,
 <application>dvdview</application>, <application>livid/oms</application>,
 <application>videolan</application>, <application>xine</application>,
 <application>xanim</application>, <application>avifile</application>,
-<application>xmmp</application>), ale všechny měly nějaký problém.
-Většinou se zvláštními soubory nebo audio/video synchronizací. Mnoho z nich
-neumí přehrát MPEG-1, MPEG-2 a zároveň AVI (DivX) soubory. Mnoho z nich má
-i potíže se zobrazováním nebo s rychlostí. Proto jsem se rozhodl, že si nějaký
-napíšu nebo upravím...
+<application>xmmp</application>), ale vĹĄechny mÄly nÄjakĂ˝ problĂŠm.
+VÄtĹĄinou se zvlĂĄĹĄtnĂ­mi soubory nebo audio/video synchronizacĂ­. Mnoho z nich
+neumĂ­ pĹehrĂĄt MPEG-1, MPEG-2 a zĂĄroveĹ AVI (DivX) soubory. Mnoho z nich mĂĄ
+i potĂ­Ĺže se zobrazovĂĄnĂ­m nebo s rychlostĂ­. Proto jsem se rozhodl, Ĺže si nÄjakĂ˝
+napĂ­ĹĄu nebo upravĂ­m...
 </para></blockquote><para>A'rpi, 2001</para>
 
 <para>
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">
-	<application>mpg12play</application> v0.1-v0.3</emphasis>: 22-25 září 2000
+	<application>mpg12play</application> v0.1-v0.3</emphasis>: 22-25 zĂĄĹĂ­ 2000
   </para>
-  <para>První pokus, zbastlený za půl hodiny! Používal jsem libmpeg3
-  z <ulink url="http://www.heroinewarrior.com"/> až do verze 0.3, ale měl jsem
-	s ní problémy s obrazem i rychlostí.
+  <para>PrvnĂ­ pokus, zbastlenĂ˝ za pĹŻl hodiny! PouĹžĂ­val jsem libmpeg3
+  z <ulink url="http://www.heroinewarrior.com"/> aĹž do verze 0.3, ale mÄl jsem
+	s nĂ­ problĂŠmy s obrazem i rychlostĂ­.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application>
-	v0.5-v0.87</emphasis>: 28. září&ndash;20. říjen 2000
+	v0.5-v0.87</emphasis>: 28. zĂĄĹĂ­&ndash;20. ĹĂ­jen 2000
   </para><para>MPEG kodek byl nahrazen knihovnou DVDview od Dirka Farina,
-  	byla skvělá, ale byla pomalá a psaná v C++ (A'rpi nenávidí C++!!!)
+  	byla skvÄlĂĄ, ale byla pomalĂĄ a psanĂĄ v C++ (A'rpi nenĂĄvidĂ­ C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application>
-	v0.9-v0.95pre5</emphasis>: 21. říjen&ndash;2. listopad 2000
+	v0.9-v0.95pre5</emphasis>: 21. ĹĂ­jen&ndash;2. listopad 2000
   </para><para>MPEG kodekem je libmpeg2 (mpeg2dec) od Aarona Holtzmana a
-  Michela Lespinasse. Je to skvělý, optimalizovaný velmi rychlý kód v C se
-	skvělou kvalitou obrazu a 100% v souladu s MPEG standardem.
+  Michela Lespinasse. Je to skvÄlĂ˝, optimalizovanĂ˝ velmi rychlĂ˝ kĂłd v C se
+	skvÄlou kvalitou obrazu a 100% v souladu s MPEG standardem.
   </para></listitem>
 <listitem><para><emphasis role="bold"><application>MPlayer</application>
 	v0.3-v0.9</emphasis>: 18. listopad&ndash;4. prosinec 2000
-  </para><para>Byl to balíček dvou programů: mpg12play v0.95pre6 a mého nového
-	jednoduchého AVI přehrávače 'avip' založeného na Win32 DLL loaderu z avifile.
+  </para><para>Byl to balĂ­Äek dvou programĹŻ: mpg12play v0.95pre6 a mĂŠho novĂŠho
+	jednoduchĂŠho AVI pĹehrĂĄvaÄe 'avip' zaloĹženĂŠho na Win32 DLL loaderu z avifile.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
 	v0.10</emphasis>: 1. leden 2001
-  </para><para>MPEG a AVI přehrávač v jedné binárce!
+  </para><para>MPEG a AVI pĹehrĂĄvaÄ v jednĂŠ binĂĄrce!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
-	v0.11pre řada</emphasis>:
-  </para><para>Přidali se někteří noví vývojáři a počínaje verzí 0.11 je
-	projekt <application>MPlayer</application> týmovou prací! Přidána podpora ASF
+	v0.11pre Ĺada</emphasis>:
+  </para><para>PĹidali se nÄkteĹĂ­ novĂ­ vĂ˝vojĂĄĹi a poÄĂ­naje verzĂ­ 0.11 je
+	projekt <application>MPlayer</application> tĂ˝movou pracĂ­! PĹidĂĄna podpora ASF
 	souboru a OpenDivX
-	(viz <ulink url="http://www.projectmayo.com"/>) en/dekódování.
+	(viz <ulink url="http://www.projectmayo.com"/>) en/dekĂłdovĂĄnĂ­.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
 	v0.17a "The IdegCounter"</emphasis> 27. duben 2001
-  </para><para>Ostrá verze vycházející z 0.11pre po 4 měsících intenzivního
-	vývoje! Zkuste ji a užasnete! Přidány tisíce nových vlastností...
-	a samozřejmě byl starý kód rovněž vylepšen, chyby odstraněny atd.
+  </para><para>OstrĂĄ verze vychĂĄzejĂ­cĂ­ z 0.11pre po 4 mÄsĂ­cĂ­ch intenzivnĂ­ho
+	vĂ˝voje! Zkuste ji a uĹžasnete! PĹidĂĄny tisĂ­ce novĂ˝ch vlastnostĂ­...
+	a samozĹejmÄ byl starĂ˝ kĂłd rovnÄĹž vylepĹĄen, chyby odstranÄny atd.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
-	0.18 "The BugCounter"</emphasis> 9. červenec 2001
-  </para><para>Uběhly 2 měsíce od 0.17 a máme novou verzi... Dokončena podpora
-	ASF, více formátů titulků, představena libao (podobná libvo, ale pro zvuk),
-	dokonce ještě stabilnější a tak dále. Už je to POTŘEBA!
+	0.18 "The BugCounter"</emphasis> 9. Äervenec 2001
+  </para><para>UbÄhly 2 mÄsĂ­ce od 0.17 a mĂĄme novou verzi... DokonÄena podpora
+	ASF, vĂ­ce formĂĄtĹŻ titulkĹŻ, pĹedstavena libao (podobnĂĄ libvo, ale pro zvuk),
+	dokonce jeĹĄtÄ stabilnÄjĹĄĂ­ a tak dĂĄle. UĹž je to POTĹEBA!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
-	0.50 "The Faszom(C)ounter"</emphasis> 8. říjen 2001
-  </para><para>Hmm. Opět ostrá. Tuny nových vlastností, beta verze GUI,
-	oprava chyb, nové vo a ao rozhraní, portován do mnoha systémů, zahrnuje
-	opensource DivX kodeky a je toho ještě víc. Zkuste to!
+	0.50 "The Faszom(C)ounter"</emphasis> 8. ĹĂ­jen 2001
+  </para><para>Hmm. OpÄt ostrĂĄ. Tuny novĂ˝ch vlastnostĂ­, beta verze GUI,
+	oprava chyb, novĂŠ vo a ao rozhranĂ­, portovĂĄn do mnoha systĂŠmĹŻ, zahrnuje
+	opensource DivX kodeky a je toho jeĹĄtÄ vĂ­c. Zkuste to!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
 	0.60 "The RTFMCounter"</emphasis> 3. ledna 2002
-  </para><para>Podpora pro souborové formáty MOV/VIVO/RM/FLI/NUV, nativní CRAM,
-	Cinepak, ADPCM kodeky a podpora pro binární kodeky XAnim; podpora DVD titulků,
-	první vydání <application>MEncoder</application>u, zachytávání TV, vyrovnávací
-	paměť, liba52, nespočet vylepšení.
+  </para><para>Podpora pro souborovĂŠ formĂĄty MOV/VIVO/RM/FLI/NUV, nativnĂ­ CRAM,
+	Cinepak, ADPCM kodeky a podpora pro binĂĄrnĂ­ kodeky XAnim; podpora DVD titulkĹŻ,
+	prvnĂ­ vydĂĄnĂ­ <application>MEncoder</application>u, zachytĂĄvĂĄnĂ­ TV, vyrovnĂĄvacĂ­
+	pamÄĹĽ, liba52, nespoÄet vylepĹĄenĂ­.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
 	0.90pre10 "The BirthdayCounter"</emphasis> 11. listopad 2002
-  </para><para> Ačkoli to není ostrá verze, zmiňuji ji protože vyšla 2 roky po
+  </para><para> AÄkoli to nenĂ­ ostrĂĄ verze, zmiĹuji ji protoĹže vyĹĄla 2 roky po
   <application>MPlayer</application>u v0.01.
-  Šťastné narozeniny, <application>MPlayer</application>e!
+  Ĺ ĹĽastnĂŠ narozeniny, <application>MPlayer</application>e!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
 	0.90rc1 "The CodecCounter"</emphasis> 7. prosinec 2002
-  </para><para>Opět to není ostrá verze, ale po přidání podpory pro Sorenson 3
-	(QuickTime) a Windows Media 9, je <application>MPlayer</application> prvním
-	filmovým přehrávačem na světě s podporou všech známých video formátů!
+  </para><para>OpÄt to nenĂ­ ostrĂĄ verze, ale po pĹidĂĄnĂ­ podpory pro Sorenson 3
+	(QuickTime) a Windows Media 9, je <application>MPlayer</application> prvnĂ­m
+	filmovĂ˝m pĹehrĂĄvaÄem na svÄtÄ s podporou vĹĄech znĂĄmĂ˝ch video formĂĄtĹŻ!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
 	0.90 "The CounterCounter"</emphasis> 6. duben 2003
-  </para><para>Po více než roce jsme se nakonec shodli, že je kód opět
-	dostatečně stabilní a připravený k vydání jako ostrá verze. Naneštěstí jsme
-	dokonce zapomněli zvýšit číslo verze a objevily se další otravné chyby,
-	takže zůstaňte připraveni...
+  </para><para>Po vĂ­ce neĹž roce jsme se nakonec shodli, Ĺže je kĂłd opÄt
+	dostateÄnÄ stabilnĂ­ a pĹipravenĂ˝ k vydĂĄnĂ­ jako ostrĂĄ verze. NaneĹĄtÄstĂ­ jsme
+	dokonce zapomnÄli zvĂ˝ĹĄit ÄĂ­slo verze a objevily se dalĹĄĂ­ otravnĂŠ chyby,
+	takĹže zĹŻstaĹte pĹipraveni...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
 	0.91</emphasis> 13. srpna 2003
-  </para><para>Výše zmíněné a mnoho dalších chyb bylo odstraněno.
-	Toto je poslední stabilní verze.
+  </para><para>VĂ˝ĹĄe zmĂ­nÄnĂŠ a mnoho dalĹĄĂ­ch chyb bylo odstranÄno.
+	Toto je poslednĂ­ stabilnĂ­ verze.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application>
-	1.0pre1 "Development on the beach"</emphasis> 1. září 2003
-  </para><para>Ačkoli to není stabilní verze, zmiňuji se o ní, protože je to
-	první pre verze řady 1.0 <application>MPlayer</application>u, zamýšlená pomoci
-	<emphasis>velké lovecké výpravě na chyby</emphasis>.
-   Je to velký krok vpřed!
+	1.0pre1 "Development on the beach"</emphasis> 1. zĂĄĹĂ­ 2003
+  </para><para>AÄkoli to nenĂ­ stabilnĂ­ verze, zmiĹuji se o nĂ­, protoĹže je to
+	prvnĂ­ pre verze Ĺady 1.0 <application>MPlayer</application>u, zamĂ˝ĹĄlenĂĄ pomoci
+	<emphasis>velkĂŠ loveckĂŠ vĂ˝pravÄ na chyby</emphasis>.
+   Je to velkĂ˝ krok vpĹed!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis>
-	datum dosud neznámý
+	datum dosud neznĂĄmĂ˝
   </para></listitem>
 </itemizedlist>
 </para>

@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Synced with r19832 -->
 <chapter id="video">
-<title>Výstupní video zařízení/rozhraní</title>
+<title>VĂ˝stupnĂ­ video zaĹĂ­zenĂ­/rozhranĂ­</title>
 
 <sect1 id="mtrr">
-<title>Nastavení MTRR</title>
+<title>NastavenĂ­ MTRR</title>
 
 <para>
-VELMI doporučujeme skontrolovat, zda jsou MTRR registry
-správně nastaveny, jelikož mohou velice zvýšit výkon.
+VELMI doporuÄujeme skontrolovat, zda jsou MTRR registry
+sprĂĄvnÄ nastaveny, jelikoĹž mohou velice zvĂ˝ĹĄit vĂ˝kon.
 </para>
 
 <para>
-Proveďte <command>cat /proc/mtrr</command>:
+ProveÄte <command>cat /proc/mtrr</command>:
 <screen>
 <prompt>--($:~)--</prompt> cat /proc/mtrr
 reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9
@@ -21,24 +21,24 @@ reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<!--
 </para>
 
 <para>
-Takto to správně ukazuje má Matrox G400 se 16MB paměti. Provedl jsem to z
-XFree 4.x.x, které nastavuje MTRR registry automaticky.
+Takto to sprĂĄvnÄ ukazuje mĂĄ Matrox G400 se 16MB pamÄti. Provedl jsem to z
+XFree 4.x.x, kterĂŠ nastavuje MTRR registry automaticky.
 </para>
 
 <para>
-Pokud nic nefunguje, budete to muset udělat ručně. Nejprve musíte najít
-bázovou adresu. Máte tři možnosti, jak ji zjistit:
+Pokud nic nefunguje, budete to muset udÄlat ruÄnÄ. Nejprve musĂ­te najĂ­t
+bĂĄzovou adresu. MĂĄte tĹi moĹžnosti, jak ji zjistit:
 
 <orderedlist>
 <listitem><para>
-  ze startovacích informací X11, například:
+  ze startovacĂ­ch informacĂ­ X11, napĹĂ­klad:
   <screen>
 (--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
 (--) SVGA: Linear framebuffer at 0xD8000000<!--
 --></screen>
   </para></listitem>
 <listitem><para>
-  z <filename>/proc/pci</filename> (použijte příkaz <command>lspci -v</command>
+  z <filename>/proc/pci</filename> (pouĹžijte pĹĂ­kaz <command>lspci -v</command>
   ):
   <screen>
 01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
@@ -46,15 +46,15 @@ Memory at d8000000 (32-bit, prefetchable)
   </screen>
   </para></listitem>
 <listitem><para>
-  ze zpráv jaderného modulu mga_vid (použijte <command>dmesg</command>):
+  ze zprĂĄv jadernĂŠho modulu mga_vid (pouĹžijte <command>dmesg</command>):
   <screen>mga_mem_base = d8000000</screen>
   </para></listitem>
 </orderedlist>
 </para>
 
 <para>
-Pak zjistěte velikost paměti. Je to velmi snadné, stačí převést velikost
-video RAM do hexadecimální soustavy, nebo použijte následující tabulku:
+Pak zjistÄte velikost pamÄti. Je to velmi snadnĂŠ, staÄĂ­ pĹevĂŠst velikost
+video RAM do hexadecimĂĄlnĂ­ soustavy, nebo pouĹžijte nĂĄsledujĂ­cĂ­ tabulku:
 <informaltable frame="none">
 <tgroup cols="2">
 <tbody>
@@ -70,58 +70,58 @@ video RAM do hexadecimální soustavy, nebo použijte následující tabulku:
 </para>
 
 <para>
-Pokud znáte bázovou adresu a velikost paměti, začněme nastavovat MTRR registry!
-Například pro výše uvedenou kartu Matrox (<literal>base=0xd8000000</literal>)
-s 32MB RAM (<literal>size=0x2000000</literal>) stačí spustit:
+Pokud znĂĄte bĂĄzovou adresu a velikost pamÄti, zaÄnÄme nastavovat MTRR registry!
+NapĹĂ­klad pro vĂ˝ĹĄe uvedenou kartu Matrox (<literal>base=0xd8000000</literal>)
+s 32MB RAM (<literal>size=0x2000000</literal>) staÄĂ­ spustit:
 <screen>
 echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
 </screen>
 </para>
 
 <para>
-Ne všechny procesory mají MTRR. Například starší CPU K6-2 (okolo 266MHz,
-stepping 0) nemají MTRR, ale stepping 12 je mají
-(pro ověření spusťte <command>cat /proc/cpuinfo</command>).
+Ne vĹĄechny procesory majĂ­ MTRR. NapĹĂ­klad starĹĄĂ­ CPU K6-2 (okolo 266MHz,
+stepping 0) nemajĂ­ MTRR, ale stepping 12 je majĂ­
+(pro ovÄĹenĂ­ spusĹĽte <command>cat /proc/cpuinfo</command>).
 </para>
 </sect1>
 
 <sect1 id="output-trad">
-<title>Video výstupy pro tradiční video karty</title>
+<title>Video vĂ˝stupy pro tradiÄnĂ­ video karty</title>
 <sect2 id="xv">
 <title>Xv</title>
 
 <para>
-Pod XFree86 4.0.2, nebo novějším, můžete použít hardwarové YUV rutiny karty
-pomocí rozšíření XVideo. Přesně toto používá volba
-'<option>-vo xv</option>'. Toto rozhraní také podporuje nastavování
-jasu/kontrastu/barevného tónu atd. (pokud nepoužíváte strarý, pomalý DirectShow
-DivX kodek, který to podporuje všude), viz man stránka.
+Pod XFree86 4.0.2, nebo novÄjĹĄĂ­m, mĹŻĹžete pouĹžĂ­t hardwarovĂŠ YUV rutiny karty
+pomocĂ­ rozĹĄĂ­ĹenĂ­ XVideo. PĹesnÄ toto pouĹžĂ­vĂĄ volba
+'<option>-vo xv</option>'. Toto rozhranĂ­ takĂŠ podporuje nastavovĂĄnĂ­
+jasu/kontrastu/barevnĂŠho tĂłnu atd. (pokud nepouĹžĂ­vĂĄte strarĂ˝, pomalĂ˝ DirectShow
+DivX kodek, kterĂ˝ to podporuje vĹĄude), viz man strĂĄnka.
 </para>
 
 <para>
-Abyste to zprovoznili, ujistěte se o následujícím:
+Abyste to zprovoznili, ujistÄte se o nĂĄsledujĂ­cĂ­m:
 
 <orderedlist>
 <listitem><para>
-  Musíte používat XFree86 4.0.2 nebo novější (předchozí verze nemají XVideo)
+  MusĂ­te pouĹžĂ­vat XFree86 4.0.2 nebo novÄjĹĄĂ­ (pĹedchozĂ­ verze nemajĂ­ XVideo)
   </para></listitem>
 <listitem><para>
-  Vaše karta aktuálně podporuje hardwarovou akceleraci (moderní karty ano)
+  VaĹĄe karta aktuĂĄlnÄ podporuje hardwarovou akceleraci (modernĂ­ karty ano)
   </para></listitem>
 <listitem><para>
-  X nahrává rozšíření XVideo. Zpráva ve <filename>/var/log/XFree86.0.log</filename>
-  vypadá asi takto:
+  X nahrĂĄvĂĄ rozĹĄĂ­ĹenĂ­ XVideo. ZprĂĄva ve <filename>/var/log/XFree86.0.log</filename>
+  vypadĂĄ asi takto:
   <programlisting>(II) Loading extension XVideo</programlisting>
   <note><para>
-   Takto se nahraje pouze rozšíření pro XFree86. To je v dobré instalaci nahráno
-   vždy a neznamená to, že je načtena i podpora XVideo pro
+   Takto se nahraje pouze rozĹĄĂ­ĹenĂ­ pro XFree86. To je v dobrĂŠ instalaci nahrĂĄno
+   vĹždy a neznamenĂĄ to, Ĺže je naÄtena i podpora XVideo pro
    <emphasis role="bold">kartu</emphasis>!
   </para></note>
   </para></listitem>
 <listitem><para>
-  Vaše karta má podporu Xv pod Linuxem. Abyste si to ověřili, zkuste
-  <command>xvinfo</command>, které je součástí distribuce XFree86. Měl by se
-  vypsat dlouhý text podobný tomuto:
+  VaĹĄe karta mĂĄ podporu Xv pod Linuxem. Abyste si to ovÄĹili, zkuste
+  <command>xvinfo</command>, kterĂŠ je souÄĂĄstĂ­ distribuce XFree86. MÄl by se
+  vypsat dlouhĂ˝ text podobnĂ˝ tomuto:
   <screen>
 X-Video Extension version 2.2
 screen #0
@@ -147,13 +147,13 @@ screen #0
         type: YUV (planar)
 (...atd...)<!--
 --></screen>
-  Musí podporovat pixelové formáty YUY2 packed a YV12 planar, aby byla
-  použitelná s <application>MPlayer</application>em.
+  MusĂ­ podporovat pixelovĂŠ formĂĄty YUY2 packed a YV12 planar, aby byla
+  pouĹžitelnĂĄ s <application>MPlayer</application>em.
   </para></listitem>
 <listitem><para>
-  A nakonec si ověřte, jestli byl <application>MPlayer</application> skompilován
-  s podporou 'xv'. Proveďte <command>mplayer -vo help | grep xv </command>.
-  Pokud byla skompilována podpora 'xv', měl by se objevi řádek podpobný tomuto:
+  A nakonec si ovÄĹte, jestli byl <application>MPlayer</application> skompilovĂĄn
+  s podporou 'xv'. ProveÄte <command>mplayer -vo help | grep xv </command>.
+  Pokud byla skompilovĂĄna podpora 'xv', mÄl by se objevi ĹĂĄdek podpobnĂ˝ tomuto:
   <screen>
   xv      X11/Xv<!--
   --></screen>
@@ -165,18 +165,18 @@ screen #0
 <title>Karty 3dfx</title>
 
 <para>
-Starší ovladače 3dfx byly známy svými problémy s XVideo akcelerací.
-Nepodporovaly ani YUY2 ani YV12, atp. Ověřte, že máte XFree86
-verze 4.2.0 nebo vyšší, které pracuje dobře s YV12 a YUY2. Předchozí verze,
-včetně 4.1.0, <emphasis role="bold">padá s YV12</emphasis>.
-Pokud zažívate podivné situace při používání <option>-vo xv</option>, zkuste SDL
-(má rovněž XVideo) a uvidíte, zda to pomůže. Prostudujte si sekci
-<link linkend="sdl">SDL</link> pro více informací.
+StarĹĄĂ­ ovladaÄe 3dfx byly znĂĄmy svĂ˝mi problĂŠmy s XVideo akceleracĂ­.
+Nepodporovaly ani YUY2 ani YV12, atp. OvÄĹte, Ĺže mĂĄte XFree86
+verze 4.2.0 nebo vyĹĄĹĄĂ­, kterĂŠ pracuje dobĹe s YV12 a YUY2. PĹedchozĂ­ verze,
+vÄetnÄ 4.1.0, <emphasis role="bold">padĂĄ s YV12</emphasis>.
+Pokud zaĹžĂ­vate podivnĂŠ situace pĹi pouĹžĂ­vĂĄnĂ­ <option>-vo xv</option>, zkuste SDL
+(mĂĄ rovnÄĹž XVideo) a uvidĂ­te, zda to pomĹŻĹže. Prostudujte si sekci
+<link linkend="sdl">SDL</link> pro vĂ­ce informacĂ­.
 </para>
 
 <para>
-<emphasis role="bold">NEBO</emphasis>, zkuste NOVÉ
-<option>-vo tdfxfb</option> rozhraní! Viz sekce
+<emphasis role="bold">NEBO</emphasis>, zkuste NOVĂ
+<option>-vo tdfxfb</option> rozhranĂ­! Viz sekce
 <link linkend="tdfxfb">tdfxfb</link>.
 </para>
 </sect3>
@@ -186,24 +186,24 @@ Pokud zažívate podivné situace při používání <option>-vo xv</option>, zkuste SDL
 <title>Karty S3</title>
 
 <para>
-S3 Savage3D by měly fungovat dobře, ale pro Savage4 použijte XFree86 verze 4.0.3
-nebo vyšší (v případě problémů s obrazem, zkuste 16bpp). Stejně ajko S3 Virge:
-má sice podporu xv, ale karta samotná je velmi pomalá, takže ji raději prodejte.
+S3 Savage3D by mÄly fungovat dobĹe, ale pro Savage4 pouĹžijte XFree86 verze 4.0.3
+nebo vyĹĄĹĄĂ­ (v pĹĂ­padÄ problĂŠmĹŻ s obrazem, zkuste 16bpp). StejnÄ ajko S3 Virge:
+mĂĄ sice podporu xv, ale karta samotnĂĄ je velmi pomalĂĄ, takĹže ji radÄji prodejte.
 </para>
 
 <para>
-Pro karty S3 Virge nyní existuje nativní framebuffer ovladač podobný 
-tdfxfb. Nastavte si framebuffer (čili přidejte
-"<option>vga=792 video=vesa:mtrr</option>" do kernelu) a použijte
+Pro karty S3 Virge nynĂ­ existuje nativnĂ­ framebuffer ovladaÄ podobnĂ˝ 
+tdfxfb. Nastavte si framebuffer (Äili pĹidejte
+"<option>vga=792 video=vesa:mtrr</option>" do kernelu) a pouĹžijte
 <option>-vo s3fb</option> (<option>-vf yuy2</option> a <option>-dr</option>
-rovněž pomůžou).
+rovnÄĹž pomĹŻĹžou).
 </para>
 
 <note>
 <para>
-Zatím není jasné, kterým modelům Savage chybí podpora YV12 a konvertují
-ovladačem (pomalé). Pokud podezříváte kartu, opatřete si novější ovladač, nebo
-slušně požádejte v konferenci MPlayer-users o ovladač s MMX/3DNow!.
+ZatĂ­m nenĂ­ jasnĂŠ, kterĂ˝m modelĹŻm Savage chybĂ­ podpora YV12 a konvertujĂ­
+ovladaÄem (pomalĂŠ). Pokud podezĹĂ­vĂĄte kartu, opatĹete si novÄjĹĄĂ­ ovladaÄ, nebo
+sluĹĄnÄ poĹžĂĄdejte v konferenci MPlayer-users o ovladaÄ s MMX/3DNow!.
 </para>
 </note>
 </sect3>
@@ -213,22 +213,22 @@ slušně požádejte v konferenci MPlayer-users o ovladač s MMX/3DNow!.
 <title>Karty nVidia</title>
 
 <para>
-nVidia není vždy pod Linuxem nejlepší volbou... Open-source ovladač
-v XFree86 podporuje většinu těchto karet, ale v některých případech musíte
-použít binární closed-source ovladač od nVidie, který je k dispozici na
+nVidia nenĂ­ vĹždy pod Linuxem nejlepĹĄĂ­ volbou... Open-source ovladaÄ
+v XFree86 podporuje vÄtĹĄinu tÄchto karet, ale v nÄkterĂ˝ch pĹĂ­padech musĂ­te
+pouĹžĂ­t binĂĄrnĂ­ closed-source ovladaÄ od nVidie, kterĂ˝ je k dispozici na
 <ulink url="http://www.nvidia.com/object/linux.html">serveru nVidia</ulink>.
-Tento ovladač budete potřebovat vždy, pokud zároveň chcete 3D akceleraci.
+Tento ovladaÄ budete potĹebovat vĹždy, pokud zĂĄroveĹ chcete 3D akceleraci.
 </para>
 
 <para>
-Karty Riva128 nemají podporu XVideo v nVidia ovladači z XFree86 :(
-Stěžujte si nVidii.
+Karty Riva128 nemajĂ­ podporu XVideo v nVidia ovladaÄi z XFree86 :(
+StÄĹžujte si nVidii.
 </para>
 
 <para>
-Ačkoli <application>MPlayer</application> obsahuje
-<link linkend="vidix">VIDIX</link> ovladač pro většinu nVidia karet, zatím je
-ve stavu beta verze a má jisté nedostatky. Více informací naleznete v sekci
+AÄkoli <application>MPlayer</application> obsahuje
+<link linkend="vidix">VIDIX</link> ovladaÄ pro vÄtĹĄinu nVidia karet, zatĂ­m je
+ve stavu beta verze a mĂĄ jistĂŠ nedostatky. VĂ­ce informacĂ­ naleznete v sekci
 <link linkend="vidix-nvidia">nVidia VIDIX</link>.
 </para>
 </sect3>
@@ -238,21 +238,21 @@ ve stavu beta verze a má jisté nedostatky. Více informací naleznete v sekci
 <title>Karty ATI</title>
 
 <para>
-<ulink url="http://gatos.sf.net">Ovladač GATOS</ulink>
-(který byste měli použít, pokud nemáte Rage128 nebo Radeon) má zapnutý VSYNC
-ve výchozím stavu. To znamená, že rychlost dekódování (!) je synchronizována
-s obnovovacím kmitočtem monitoru. Pokud se vám zdá přehrávání pomalé, zkuste
-nějak vypnout VSYNC, nebo nastavte obnovovací kmitočet na n*(snímková rychlost
+<ulink url="http://gatos.sf.net">OvladaÄ GATOS</ulink>
+(kterĂ˝ byste mÄli pouĹžĂ­t, pokud nemĂĄte Rage128 nebo Radeon) mĂĄ zapnutĂ˝ VSYNC
+ve vĂ˝chozĂ­m stavu. To znamenĂĄ, Ĺže rychlost dekĂłdovĂĄnĂ­ (!) je synchronizovĂĄna
+s obnovovacĂ­m kmitoÄtem monitoru. Pokud se vĂĄm zdĂĄ pĹehrĂĄvĂĄnĂ­ pomalĂŠ, zkuste
+nÄjak vypnout VSYNC, nebo nastavte obnovovacĂ­ kmitoÄet na n*(snĂ­mkovĂĄ rychlost
 filmu) Hz.
 </para>
 
 <para>
-Radeon VE - pokud potřebujete X, použijte pro tuto kartu XFree86 4.2.0 nebo
-vyšší. Není zde podpora pro TV out. Samozřejmě s
-<application>MPlayer</application>em můžete mít s trochou štěstí
-<emphasis role="bold">akcelerovaný</emphasis> display s nebo bez
-<emphasis role="bold">TV výstupu</emphasis> a nepotřebujete žádné X knihovny.
-Přečtěte si sekci <link linkend="vidix">VIDIX</link>.
+Radeon VE - pokud potĹebujete X, pouĹžijte pro tuto kartu XFree86 4.2.0 nebo
+vyĹĄĹĄĂ­. NenĂ­ zde podpora pro TV out. SamozĹejmÄ s
+<application>MPlayer</application>em mĹŻĹžete mĂ­t s trochou ĹĄtÄstĂ­
+<emphasis role="bold">akcelerovanĂ˝</emphasis> display s nebo bez
+<emphasis role="bold">TV vĂ˝stupu</emphasis> a nepotĹebujete ĹžĂĄdnĂŠ X knihovny.
+PĹeÄtÄte si sekci <link linkend="vidix">VIDIX</link>.
 </para>
 </sect3>
 
@@ -261,23 +261,23 @@ Přečtěte si sekci <link linkend="vidix">VIDIX</link>.
 <title>Karty NeoMagic</title>
 
 <para>
-Tyto karty lze nalézt v mnoha laptopech. Musíte použít XFree86 4.3.0 nebo
-vyšší, nebo použijte
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">ovladače s podporou Xv</ulink>
+Tyto karty lze nalĂŠzt v mnoha laptopech. MusĂ­te pouĹžĂ­t XFree86 4.3.0 nebo
+vyĹĄĹĄĂ­, nebo pouĹžijte
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">ovladaÄe s podporou Xv</ulink>
 od Stefana Seyfrieda.
-Stačí vybrat ten, který je vhodný pro vaši verzi XFree86.
+StaÄĂ­ vybrat ten, kterĂ˝ je vhodnĂ˝ pro vaĹĄi verzi XFree86.
 </para>
 
 <para>
-XFree86 4.3.0 obsahuje podporu Xv, avšak Bohdan Horst poslal malý
+XFree86 4.3.0 obsahuje podporu Xv, avĹĄak Bohdan Horst poslal malĂ˝
 <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</ulink>
-pro zdrojový kód XFree86, který zrychluje operace s framebufferem (čili XVideo)
-až čtyřikrát. Patch byl zařazen do XFree86 CVS a měl by být v další verzi
-vydané po 4.3.0.
+pro zdrojovĂ˝ kĂłd XFree86, kterĂ˝ zrychluje operace s framebufferem (Äili XVideo)
+aĹž ÄtyĹikrĂĄt. Patch byl zaĹazen do XFree86 CVS a mÄl by bĂ˝t v dalĹĄĂ­ verzi
+vydanĂŠ po 4.3.0.
 </para>
 
 <para>
-Abyste mohli přehrávat obsah velikosti DVD, změňte svůj XF86Config takto:
+Abyste mohli pĹehrĂĄvat obsah velikosti DVD, zmÄĹte svĹŻj XF86Config takto:
 <programlisting>
 Section "Device"
     [...]
@@ -293,14 +293,14 @@ EndSection<!--
 <sect3 id="trident">
 <title>Karty Trident</title>
 <para>
-Chcete-li používat Xv s kartou Trident, což nepracuje s 4.1.0,
-nainstalujte si XFree 4.2.0. 4.2.0 přidává podporu pro celoobrazovkové Xv
+Chcete-li pouĹžĂ­vat Xv s kartou Trident, coĹž nepracuje s 4.1.0,
+nainstalujte si XFree 4.2.0. 4.2.0 pĹidĂĄvĂĄ podporu pro celoobrazovkovĂŠ Xv
 pro kartu Cyberblade XP.
 </para>
 
 <para>
-Alternativně, <application>MPlayer</application> obsahuje
-<link linkend="vidix">VIDIX</link> ovladač pro kartu Cyberblade/i1.
+AlternativnÄ, <application>MPlayer</application> obsahuje
+<link linkend="vidix">VIDIX</link> ovladaÄ pro kartu Cyberblade/i1.
 </para>
 
 </sect3>
@@ -309,8 +309,8 @@ Alternativně, <application>MPlayer</application> obsahuje
 <sect3 id="kyro">
 <title>Karty Kyro/PowerVR</title>
 <para>
-Pokud chcete používat Xv s kartou založenou na čipu Kyro (například Hercules
-Prophet 4000XT), měli byste si stáhnout ovladače z
+Pokud chcete pouĹžĂ­vat Xv s kartou zaloĹženou na Äipu Kyro (napĹĂ­klad Hercules
+Prophet 4000XT), mÄli byste si stĂĄhnout ovladaÄe z
 <ulink url="http://www.powervr.com/">PowerVR serveru</ulink>.
 </para>
 </sect3>
@@ -322,11 +322,11 @@ Prophet 4000XT), měli byste si stáhnout ovladače z
 <title>DGA</title>
 
 <formalpara>
-<title>PŘEDMLUVA</title>
+<title>PĹEDMLUVA</title>
 <para>
-Tento dokument se několika slovy snaží vysvětlit co je to DGA a co
-výstupní videorozhraní DGA pro <application>MPlayer</application>
-udělat může (a co ne).
+Tento dokument se nÄkolika slovy snaĹžĂ­ vysvÄtlit co je to DGA a co
+vĂ˝stupnĂ­ videorozhranĂ­ DGA pro <application>MPlayer</application>
+udÄlat mĹŻĹže (a co ne).
 </para>
 </formalpara>
 
@@ -334,66 +334,66 @@ udělat může (a co ne).
 <title>CO JE DGA</title>
 <para>
 <acronym>DGA</acronym> je zkratka pro <emphasis>Direct Graphics
-Access</emphasis>, což je program pro obejití X servru a
-přímou modifikaci paměti framebufferu. Technicky to znamená mapování paměti
-framebufferu do paměťového prostoru vašeho procesu.
-To kernel umožňuje pouze pokud máte práva superuživatele. Ty dostanete buď
-nalogováním se jako <systemitem class="username">root</systemitem>, nebo
-nastavením SUID bitu spustitelnému souboru
-<application>MPlayer</application>u (<emphasis role="bold">nedoporučujeme
+Access</emphasis>, coĹž je program pro obejitĂ­ X servru a
+pĹĂ­mou modifikaci pamÄti framebufferu. Technicky to znamenĂĄ mapovĂĄnĂ­ pamÄti
+framebufferu do pamÄĹĽovĂŠho prostoru vaĹĄeho procesu.
+To kernel umoĹžĹuje pouze pokud mĂĄte prĂĄva superuĹživatele. Ty dostanete buÄ
+nalogovĂĄnĂ­m se jako <systemitem class="username">root</systemitem>, nebo
+nastavenĂ­m SUID bitu spustitelnĂŠmu souboru
+<application>MPlayer</application>u (<emphasis role="bold">nedoporuÄujeme
 </emphasis>).
 </para>
 </formalpara>
 <para>
-Existují dvě verze DGA: DGA1 je používáno XFree 3.x.x a DGA2 bylo
-představeno v XFree 4.0.1.
+ExistujĂ­ dvÄ verze DGA: DGA1 je pouĹžĂ­vĂĄno XFree 3.x.x a DGA2 bylo
+pĹedstaveno v XFree 4.0.1.
 </para>
 
 <para>
-DGA1 poskytuje pouze přímý přístup k framebufferu jak byl popsán výše.
-Chcete-li přepínat rozlišení videosignálu, musíte se spolehnout na
-rozšíření XVidMode.
+DGA1 poskytuje pouze pĹĂ­mĂ˝ pĹĂ­stup k framebufferu jak byl popsĂĄn vĂ˝ĹĄe.
+Chcete-li pĹepĂ­nat rozliĹĄenĂ­ videosignĂĄlu, musĂ­te se spolehnout na
+rozĹĄĂ­ĹenĂ­ XVidMode.
 </para>
 
 <para>
-DGA2 zahrnuje vlastnosti rozšíření XVidMode a rovněž umožňuje přepínat
-barevnou hloubku zobrazovače. Takže můžete jendoduše provozovat X server
-s hloubkou 32 bitů a přepnout na barevnou hloubku 15 bitů a naopak.
+DGA2 zahrnuje vlastnosti rozĹĄĂ­ĹenĂ­ XVidMode a rovnÄĹž umoĹžĹuje pĹepĂ­nat
+barevnou hloubku zobrazovaÄe. TakĹže mĹŻĹžete jendoduĹĄe provozovat X server
+s hloubkou 32 bitĹŻ a pĹepnout na barevnou hloubku 15 bitĹŻ a naopak.
 </para>
 
 <para>
-DGA má ovšem i jisté obtíže. Zdá se, že je nějak závislé na grafickém čipu,
-který používáte a na implementaci video ovladače X serveru, který tento čip
-obsluhuje. Takže nefunguje na všech systémech...
+DGA mĂĄ ovĹĄem i jistĂŠ obtĂ­Ĺže. ZdĂĄ se, Ĺže je nÄjak zĂĄvislĂŠ na grafickĂŠm Äipu,
+kterĂ˝ pouĹžĂ­vĂĄte a na implementaci video ovladaÄe X serveru, kterĂ˝ tento Äip
+obsluhuje. TakĹže nefunguje na vĹĄech systĂŠmech...
 </para>
 
 <formalpara>
 <title>INSTALACE PODPORY DGA PRO MPLAYER</title>
 
 <para>
-Nejprve si ověřte, že X nahrávají rozšíření DGA, viz v
+Nejprve si ovÄĹte, Ĺže X nahrĂĄvajĂ­ rozĹĄĂ­ĹenĂ­ DGA, viz v
 <filename>/var/log/XFree86.0.log</filename>:
 
 <programlisting>(II) Loading extension XFree86-DGA</programlisting>
 
-XFree86 4.0.x nebo vyšší je <emphasis role="bold">vřele doporučován</emphasis>!
-Video rozhraní DGA <application>MPlayer</application>u je autodetekováno
-<filename>./configure</filename>, nebo jej můžete vynutit pomocí
+XFree86 4.0.x nebo vyĹĄĹĄĂ­ je <emphasis role="bold">vĹele doporuÄovĂĄn</emphasis>!
+Video rozhranĂ­ DGA <application>MPlayer</application>u je autodetekovĂĄno
+<filename>./configure</filename>, nebo jej mĹŻĹžete vynutit pomocĂ­
 <option>--enable-dga</option>.
 </para>
 </formalpara>
 
 <para>
-Pokud rozhraní nemůže přepnout do menšího rozlišení, experimentujte s
+Pokud rozhranĂ­ nemĹŻĹže pĹepnout do menĹĄĂ­ho rozliĹĄenĂ­, experimentujte s
 volbami <option>-vm</option> (pouze s X 3.3.x), <option>-fs</option>,
-<option>-bpp</option>, <option>-zoom</option>, abyste nalezli videorežim, do
-kterého se video napasuje. Momentálně není žádný převodník :(
+<option>-bpp</option>, <option>-zoom</option>, abyste nalezli videoreĹžim, do
+kterĂŠho se video napasuje. MomentĂĄlnÄ nenĂ­ ĹžĂĄdnĂ˝ pĹevodnĂ­k :(
 </para>
 
 <para>
-Staňte se <systemitem class="username">root</systemitem>em. DGA vyžaduje
-práva roota, aby mohl přímo zapisovat do video paměti. Pokud jej chcete
-provozovat jako uživatel, pak nainstalujte <application>MPlayer</application>
+StaĹte se <systemitem class="username">root</systemitem>em. DGA vyĹžaduje
+prĂĄva roota, aby mohl pĹĂ­mo zapisovat do video pamÄti. Pokud jej chcete
+provozovat jako uĹživatel, pak nainstalujte <application>MPlayer</application>
 jako SUID root:
 
 <screen>
@@ -402,50 +402,50 @@ chmod 750 <replaceable>/usr/local/bin/mplayer</replaceable>
 chmod +s <replaceable>/usr/local/bin/mplayer</replaceable>
 </screen>
 
-A nyní to bude pracovat také pod obyčejným uživatelem.
+A nynĂ­ to bude pracovat takĂŠ pod obyÄejnĂ˝m uĹživatelem.
 </para>
 
 <caution>
-<title>Bezpečnostní riziko</title>
+<title>BezpeÄnostnĂ­ riziko</title>
 <para>
-Toto je <emphasis role="bold">velké</emphasis> bezpečnostní riziko!
-<emphasis role="bold">Nikdy</emphasis> to nedělejte na serveru nebo počítači
-ke kterému mohou mít přístup ostatní lidé, jelikož ti mohou získat
-superuživatelská práva díky SUID root
+Toto je <emphasis role="bold">velkĂŠ</emphasis> bezpeÄnostnĂ­ riziko!
+<emphasis role="bold">Nikdy</emphasis> to nedÄlejte na serveru nebo poÄĂ­taÄi
+ke kterĂŠmu mohou mĂ­t pĹĂ­stup ostatnĂ­ lidĂŠ, jelikoĹž ti mohou zĂ­skat
+superuĹživatelskĂĄ prĂĄva dĂ­ky SUID root
 <application>MPlayer</application>u.
 </para>
 </caution>
 
 <para>
-Nyní použijte volbu <option>-vo dga</option> a je to! (doufám:)
-Také byste měli vyzkoušet, jestli vám pracuje volba
+NynĂ­ pouĹžijte volbu <option>-vo dga</option> a je to! (doufĂĄm:)
+TakĂŠ byste mÄli vyzkouĹĄet, jestli vĂĄm pracuje volba
 <option>-vo sdl:dga</option>!
-Je mnohem rychlejší!
+Je mnohem rychlejĹĄĂ­!
 </para>
 
 
 <formalpara id="dga-modelines">
-<title>PŘEPÍNÁNÍ ROZLIŠENÍ</title>
+<title>PĹEPĂNĂNĂ ROZLIĹ ENĂ</title>
 
 <para>
-Rozhraní DGA umožňuje přepínání rozlišení výstupního signálu.
-To odstraňuje potřebu (pomalého) softwarového škálování a zároveň
-poskytuje obraz na celou obrazovku. Ideálně by se mělo přepnout na přesné
-rozlišení (s výjimkou dodržení poměru stran) video dat, ale X
-server umožňuje poze přepínání do rozlišení předdefinovaných v
+RozhranĂ­ DGA umoĹžĹuje pĹepĂ­nĂĄnĂ­ rozliĹĄenĂ­ vĂ˝stupnĂ­ho signĂĄlu.
+To odstraĹuje potĹebu (pomalĂŠho) softwarovĂŠho ĹĄkĂĄlovĂĄnĂ­ a zĂĄroveĹ
+poskytuje obraz na celou obrazovku. IdeĂĄlnÄ by se mÄlo pĹepnout na pĹesnĂŠ
+rozliĹĄenĂ­ (s vĂ˝jimkou dodrĹženĂ­ pomÄru stran) video dat, ale X
+server umoĹžĹuje poze pĹepĂ­nĂĄnĂ­ do rozliĹĄenĂ­ pĹeddefinovanĂ˝ch v
 <filename>/etc/X11/XF86Config</filename>
 (nebo <filename>/etc/X11/XF86Config-4</filename> pro XFree 4.X.X).
-Ty jsou definovány takzvanými "modelines" a závisí na
-schopnostech vašeho video hardwaru. X server projíždí tento konfigurační
-soubor při startu a zakáže režimy (modelines) nevhodné pro váš hardware.
-Povolené videorežimy naleznete v X11 log souboru. Tel lze nalézt zde:
+Ty jsou definovĂĄny takzvanĂ˝mi "modelines" a zĂĄvisĂ­ na
+schopnostech vaĹĄeho video hardwaru. X server projĂ­ĹždĂ­ tento konfiguraÄnĂ­
+soubor pĹi startu a zakĂĄĹže reĹžimy (modelines) nevhodnĂŠ pro vĂĄĹĄ hardware.
+PovolenĂŠ videoreĹžimy naleznete v X11 log souboru. Tel lze nalĂŠzt zde:
 <filename>/var/log/XFree86.0.log</filename>.
 </para>
 </formalpara>
 
 <para>
-Tyto vstupy jsou známy dobrou funkcí na Riva128 čipu, s použitím modulu
-ovladače nv.o X serveru.
+Tyto vstupy jsou znĂĄmy dobrou funkcĂ­ na Riva128 Äipu, s pouĹžitĂ­m modulu
+ovladaÄe nv.o X serveru.
 </para>
 
 
@@ -466,10 +466,10 @@ EndSection
 <formalpara>
 <title>DGA &amp; MPLAYER</title>
 <para>
-DGA je v <application>MPlayer</application>u použito na dvou místech: SDL
-rozhraní může být nastaveno pro jeho použití (<option>-vo sdl:dga</option>) a
-přímé DGA rozhraní (<option>-vo dga</option>). Výše uvedené je platné
-pro obě varianty; v následující sekci vysvětlíme jak pracuje DGA rozhraní
+DGA je v <application>MPlayer</application>u pouĹžito na dvou mĂ­stech: SDL
+rozhranĂ­ mĹŻĹže bĂ˝t nastaveno pro jeho pouĹžitĂ­ (<option>-vo sdl:dga</option>) a
+pĹĂ­mĂŠ DGA rozhranĂ­ (<option>-vo dga</option>). VĂ˝ĹĄe uvedenĂŠ je platnĂŠ
+pro obÄ varianty; v nĂĄsledujĂ­cĂ­ sekci vysvÄtlĂ­me jak pracuje DGA rozhranĂ­
 <application>MPlayer</application>u.
 </para>
 </formalpara>
@@ -479,127 +479,127 @@ pro obě varianty; v následující sekci vysvětlíme jak pracuje DGA rozhraní
 <title>VLASTNOSTI</title>
 
 <para>
-DGA rozhraní je použito zadáním volby <option>-vo dga</option> na příkazovém
-řádku. Výchozím chováním je přepnout na rozlišení co nejbižší originálním
-rozměrům videa. Zcela záměrně se ignorují volby <option>-vm</option> a
-<option>-fs</option> (umožňující přepínání videorežimů a zobrazení na celou
-obrazovku) - vždy zkouší pokrýt tak velkou plochu obrazovky, jak je to jen možné
-pomocí přepnutí videorežimu, což nás oprostí od využívání dalších CPU cyklů
-pro škálování obrazu. Pokud se vám nelíbí režim, který vybere automatika,
-můžete ji přinutit pro výběr režimu nejblíže odpovídajícímu rozlišení,
-které zadáte pomocí <option>-x</option> a <option>-y</option>.
-Při zadání volby <option>-v</option>, vypíše DGA rozhraní, spolu s dalšími
-věcmi, seznam všech rozlišení podporovaných vašim aktuálním
+DGA rozhranĂ­ je pouĹžito zadĂĄnĂ­m volby <option>-vo dga</option> na pĹĂ­kazovĂŠm
+ĹĂĄdku. VĂ˝chozĂ­m chovĂĄnĂ­m je pĹepnout na rozliĹĄenĂ­ co nejbiĹžĹĄĂ­ originĂĄlnĂ­m
+rozmÄrĹŻm videa. Zcela zĂĄmÄrnÄ se ignorujĂ­ volby <option>-vm</option> a
+<option>-fs</option> (umoĹžĹujĂ­cĂ­ pĹepĂ­nĂĄnĂ­ videoreĹžimĹŻ a zobrazenĂ­ na celou
+obrazovku) - vĹždy zkouĹĄĂ­ pokrĂ˝t tak velkou plochu obrazovky, jak je to jen moĹžnĂŠ
+pomocĂ­ pĹepnutĂ­ videoreĹžimu, coĹž nĂĄs oprostĂ­ od vyuĹžĂ­vĂĄnĂ­ dalĹĄĂ­ch CPU cyklĹŻ
+pro ĹĄkĂĄlovĂĄnĂ­ obrazu. Pokud se vĂĄm nelĂ­bĂ­ reĹžim, kterĂ˝ vybere automatika,
+mĹŻĹžete ji pĹinutit pro vĂ˝bÄr reĹžimu nejblĂ­Ĺže odpovĂ­dajĂ­cĂ­mu rozliĹĄenĂ­,
+kterĂŠ zadĂĄte pomocĂ­ <option>-x</option> a <option>-y</option>.
+PĹi zadĂĄnĂ­ volby <option>-v</option>, vypĂ­ĹĄe DGA rozhranĂ­, spolu s dalĹĄĂ­mi
+vÄcmi, seznam vĹĄech rozliĹĄenĂ­ podporovanĂ˝ch vaĹĄim aktuĂĄlnĂ­m
 <filename>XF86Config</filename> souborem.
-Máte-li DGA2, můžete jej rovněž přinutit použít různé barevné hloubky pomocí
-volby <option>-bpp</option>. Platné barevné hloubky jsou 15, 16, 24 a 32.
-To jestli jsou tyto barevné hloubky nativně podporovány, nebo musí být provedena
-(pravděpodobně pomalá) konverze závisí na vašem hardware.
+MĂĄte-li DGA2, mĹŻĹžete jej rovnÄĹž pĹinutit pouĹžĂ­t rĹŻznĂŠ barevnĂŠ hloubky pomocĂ­
+volby <option>-bpp</option>. PlatnĂŠ barevnĂŠ hloubky jsou 15, 16, 24 a 32.
+To jestli jsou tyto barevnĂŠ hloubky nativnÄ podporovĂĄny, nebo musĂ­ bĂ˝t provedena
+(pravdÄpodobnÄ pomalĂĄ) konverze zĂĄvisĂ­ na vaĹĄem hardware.
 </para>
 </formalpara>
 <para>
-Pokud jste natolik šťastlivci, že máte dostatek volné mimoobrazové paměti,
-aby se zde vměstnal celý obrázek, použije DGA rozhraní dvojitou vyrovnávací
-paměť, což vám zajistí mnohem plynulejší přehrávání filmů. Rozhraní vás bude
-informovat jestli je dvojitý buffer zapnutý nebo ne.
+Pokud jste natolik ĹĄĹĽastlivci, Ĺže mĂĄte dostatek volnĂŠ mimoobrazovĂŠ pamÄti,
+aby se zde vmÄstnal celĂ˝ obrĂĄzek, pouĹžije DGA rozhranĂ­ dvojitou vyrovnĂĄvacĂ­
+pamÄĹĽ, coĹž vĂĄm zajistĂ­ mnohem plynulejĹĄĂ­ pĹehrĂĄvĂĄnĂ­ filmĹŻ. RozhranĂ­ vĂĄs bude
+informovat jestli je dvojitĂ˝ buffer zapnutĂ˝ nebo ne.
 </para>
 
 <para>
-Dvojitou vyrovnávací pamětí se rozumí to, že je další snímek vykreslován do
-paměti mimo zobrazovanou plochu, zatímco je zobrazován aktuální snímek.
-Jakmile je další snímek připraven, grafický čip je informován o pozici v paměti,
-kde je nový snímek a jednoduše přesune data k zobrazení odtud.
-Mezitím je další buffer v paměti zaplňován novými videodaty.
+Dvojitou vyrovnĂĄvacĂ­ pamÄtĂ­ se rozumĂ­ to, Ĺže je dalĹĄĂ­ snĂ­mek vykreslovĂĄn do
+pamÄti mimo zobrazovanou plochu, zatĂ­mco je zobrazovĂĄn aktuĂĄlnĂ­ snĂ­mek.
+Jakmile je dalĹĄĂ­ snĂ­mek pĹipraven, grafickĂ˝ Äip je informovĂĄn o pozici v pamÄti,
+kde je novĂ˝ snĂ­mek a jednoduĹĄe pĹesune data k zobrazenĂ­ odtud.
+MezitĂ­m je dalĹĄĂ­ buffer v pamÄti zaplĹovĂĄn novĂ˝mi videodaty.
 </para>
 
 <para>
-Dvojitá vyrovnávací paměť může být zapnuta volbou
+DvojitĂĄ vyrovnĂĄvacĂ­ pamÄĹĽ mĹŻĹže bĂ˝t zapnuta volbou
 <option>-double</option> a vypnuta volbou
-<option>-nodouble</option>. Současná výchozí hodnota je vypnutí dvojité
-vyrovnávací paměti. Při použití DGA rozhraní bude display na obrazovce (OSD)
-pracovat pouze při zapnuté dvojité vyrovnávací paměti.
-Zapnutí dvojité vyrovnávací paměti však může vyústit velkou ztrátou výkonu
-(na mé K6-II+ 525 to použije dalších 20% CPU výkonu!) v závislosti na
-implementaci DGA pro váš hardware.
+<option>-nodouble</option>. SouÄasnĂĄ vĂ˝chozĂ­ hodnota je vypnutĂ­ dvojitĂŠ
+vyrovnĂĄvacĂ­ pamÄti. PĹi pouĹžitĂ­ DGA rozhranĂ­ bude display na obrazovce (OSD)
+pracovat pouze pĹi zapnutĂŠ dvojitĂŠ vyrovnĂĄvacĂ­ pamÄti.
+ZapnutĂ­ dvojitĂŠ vyrovnĂĄvacĂ­ pamÄti vĹĄak mĹŻĹže vyĂşstit velkou ztrĂĄtou vĂ˝konu
+(na mĂŠ K6-II+ 525 to pouĹžije dalĹĄĂ­ch 20% CPU vĂ˝konu!) v zĂĄvislosti na
+implementaci DGA pro vĂĄĹĄ hardware.
 </para>
 
 
 <formalpara>
-<title>OTÁZKA RYCHLOSTI</title>
+<title>OTĂZKA RYCHLOSTI</title>
 
 <para>
-Obecně by přístup přes DGA framebuffer měl být alespoň tak rychlý jako
-použití rozhraní X11 navíc s celoobrazovkovým režimem.
-Procentní hodnoty rychlosti vypisované
-<application>MPlayer</application>em byste měli brát s rezervou, jelikož
-například při použití X11 nezahrnují čas spotřebovaný X serverem pro
-vlastní vykreslování. Zavěste terminál na sériovou linku počítače a
-spusťte <command>top</command>, abyste viděli co se opravdu děje ve vašem
-počítači.
+ObecnÄ by pĹĂ­stup pĹes DGA framebuffer mÄl bĂ˝t alespoĹ tak rychlĂ˝ jako
+pouĹžitĂ­ rozhranĂ­ X11 navĂ­c s celoobrazovkovĂ˝m reĹžimem.
+ProcentnĂ­ hodnoty rychlosti vypisovanĂŠ
+<application>MPlayer</application>em byste mÄli brĂĄt s rezervou, jelikoĹž
+napĹĂ­klad pĹi pouĹžitĂ­ X11 nezahrnujĂ­ Äas spotĹebovanĂ˝ X serverem pro
+vlastnĂ­ vykreslovĂĄnĂ­. ZavÄste terminĂĄl na sĂŠriovou linku poÄĂ­taÄe a
+spusĹĽte <command>top</command>, abyste vidÄli co se opravdu dÄje ve vaĹĄem
+poÄĂ­taÄi.
 </para>
 </formalpara>
 
 <para>
-Obecně zrychlení použitím DGA oproti 'běžnému' X11 velmi závisí na vaší
-grafické kertě a jak dobře je pro ni optimalizován modul X serveru.
+ObecnÄ zrychlenĂ­ pouĹžitĂ­m DGA oproti 'bÄĹžnĂŠmu' X11 velmi zĂĄvisĂ­ na vaĹĄĂ­
+grafickĂŠ kertÄ a jak dobĹe je pro ni optimalizovĂĄn modul X serveru.
 </para>
 
 <para>
-Pokud máte pomalý stroj, raději použijte 15 nebo 16 bitovou hloubku, jelikož
-vyžaduje pouze poloviční průchodnost paměti oproti 32 bitovému zobrazení.
+Pokud mĂĄte pomalĂ˝ stroj, radÄji pouĹžijte 15 nebo 16 bitovou hloubku, jelikoĹž
+vyĹžaduje pouze poloviÄnĂ­ prĹŻchodnost pamÄti oproti 32 bitovĂŠmu zobrazenĂ­.
 </para>
 
 <para>
-Použití hloubky 24 bitů je dobré i v případě, že vaše karta nativně podporuje
-pouze barevnou hloubku 32 bitů, jelikož se přenáší o 25% méně dat oproti
-režimu 32/32.
+PouĹžitĂ­ hloubky 24 bitĹŻ je dobrĂŠ i v pĹĂ­padÄ, Ĺže vaĹĄe karta nativnÄ podporuje
+pouze barevnou hloubku 32 bitĹŻ, jelikoĹž se pĹenĂĄĹĄĂ­ o 25% mĂŠnÄ dat oproti
+reĹžimu 32/32.
 </para>
 
 <para>
-Viděl jsem pár AVI souborů přehrávat na Pentiu MMX 266. Procesory AMD K6-2
-pracují při 400 MHZ a výše.
+VidÄl jsem pĂĄr AVI souborĹŻ pĹehrĂĄvat na Pentiu MMX 266. Procesory AMD K6-2
+pracujĂ­ pĹi 400 MHZ a vĂ˝ĹĄe.
 </para>
 
 
 <formalpara>
-<title>ZNÁMÉ CHYBY</title>
+<title>ZNĂMĂ CHYBY</title>
 
 <para>
-Podle některých vývojářů XFree je DGA zvěrstvo. Říkají, abyste je raději
-nepoužívali. Jeho implementace není vždy bezproblémová v každém dostupném
-ovladači pro XFree.
+Podle nÄkterĂ˝ch vĂ˝vojĂĄĹĹŻ XFree je DGA zvÄrstvo. ĹĂ­kajĂ­, abyste je radÄji
+nepouĹžĂ­vali. Jeho implementace nenĂ­ vĹždy bezproblĂŠmovĂĄ v kaĹždĂŠm dostupnĂŠm
+ovladaÄi pro XFree.
 </para>
 </formalpara>
 
 <itemizedlist>
 <listitem><simpara>
-  V XFree 4.0.3 je v <filename>nv.o</filename> chyba vedoucí
-  k podivným barvám.
+  V XFree 4.0.3 je v <filename>nv.o</filename> chyba vedoucĂ­
+  k podivnĂ˝m barvĂĄm.
   </simpara></listitem>
 <listitem><simpara>
-  Ovladač pro ATI vyžaduje více než jedno zpětné přepnutí režimu po skončení
-  používání DGA.
+  OvladaÄ pro ATI vyĹžaduje vĂ­ce neĹž jedno zpÄtnĂŠ pĹepnutĂ­ reĹžimu po skonÄenĂ­
+  pouĹžĂ­vĂĄnĂ­ DGA.
   </simpara></listitem>
 <listitem><simpara>
-  Některé ovladače selžou při přepnutí do normálního rozlišení (použijte
+  NÄkterĂŠ ovladaÄe selĹžou pĹi pĹepnutĂ­ do normĂĄlnĂ­ho rozliĹĄenĂ­ (pouĹžijte
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> a
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
-  pro ruční přepnutí).
+  pro ruÄnĂ­ pĹepnutĂ­).
   </simpara></listitem>
 <listitem><simpara>
-  Některé ovladače zobrazují divné barvy.
+  NÄkterĂŠ ovladaÄe zobrazujĂ­ divnĂŠ barvy.
   </simpara></listitem>
 <listitem><simpara>
-  Některé ovladače lžou o množství paměti kterou mapují do adresového prostoru
-  procesu, takže vo_dga nepoužije dvojitou vyrovnávací paměť (SIS?).
+  NÄkterĂŠ ovladaÄe lĹžou o mnoĹžstvĂ­ pamÄti kterou mapujĂ­ do adresovĂŠho prostoru
+  procesu, takĹže vo_dga nepouĹžije dvojitou vyrovnĂĄvacĂ­ pamÄĹĽ (SIS?).
   </simpara></listitem>
 <listitem><simpara>
-  Některé ovladače nezvládnou ohlásit dokonce ani jeden platný režim.
-  V tom případě rozhraní DGA spadne s hláškou o nesmaslném režimu
+  NÄkterĂŠ ovladaÄe nezvlĂĄdnou ohlĂĄsit dokonce ani jeden platnĂ˝ reĹžim.
+  V tom pĹĂ­padÄ rozhranĂ­ DGA spadne s hlĂĄĹĄkou o nesmaslnĂŠm reĹžimu
   100000x100000 nebo tak.
   </simpara></listitem>
 <listitem><simpara>
-  OSD pracuje pouze se zapnutou dvojitou vyrovnávací pamětí (jinak poblikává).
+  OSD pracuje pouze se zapnutou dvojitou vyrovnĂĄvacĂ­ pamÄtĂ­ (jinak poblikĂĄvĂĄ).
   </simpara></listitem>
 </itemizedlist>
 
@@ -612,88 +612,88 @@ ovladači pro XFree.
 <title>SDL</title>
 
 <para>
-<acronym>SDL</acronym> (Simple Directmedia Layer) je zjednodušeně unifikované
-video/audio rozhraní. Programy, které ji používají, znají pouze SDL a ne
-jaký audio nebo video ovladač SDL aktuálně používá. Například klon DOOMa
-může běžet na svgalib, aalib, X, fbdev a dalších. Musíte jen nastavit
-(například) video ovladač pomocí proměnné prostředí
-<envar>SDL_VIDEODRIVER</envar>. Aspoň teoreticky.
+<acronym>SDL</acronym> (Simple Directmedia Layer) je zjednoduĹĄenÄ unifikovanĂŠ
+video/audio rozhranĂ­. Programy, kterĂŠ ji pouĹžĂ­vajĂ­, znajĂ­ pouze SDL a ne
+jakĂ˝ audio nebo video ovladaÄ SDL aktuĂĄlnÄ pouĹžĂ­vĂĄ. NapĹĂ­klad klon DOOMa
+mĹŻĹže bÄĹžet na svgalib, aalib, X, fbdev a dalĹĄĂ­ch. MusĂ­te jen nastavit
+(napĹĂ­klad) video ovladaÄ pomocĂ­ promÄnnĂŠ prostĹedĂ­
+<envar>SDL_VIDEODRIVER</envar>. AspoĹ teoreticky.
 </para>
 
 <para>
-V <application>MPlayer</application>u používáme její softwarový škálovač
-ovladače X11 pro karty/ovladače, které nepodporují XVideo, dokud nevytvoříme
-vlastní (rychlejší, hezčí) softwarový škálovač. Rovněž jsme používali její
-výstup na aalib, ale nyní máme vlastní, což je mnohem pohodlnější.
-Její DGA režim byl až doposud lepší než náš. Sledujete? :)
+V <application>MPlayer</application>u pouĹžĂ­vĂĄme jejĂ­ softwarovĂ˝ ĹĄkĂĄlovaÄ
+ovladaÄe X11 pro karty/ovladaÄe, kterĂŠ nepodporujĂ­ XVideo, dokud nevytvoĹĂ­me
+vlastnĂ­ (rychlejĹĄĂ­, hezÄĂ­) softwarovĂ˝ ĹĄkĂĄlovaÄ. RovnÄĹž jsme pouĹžĂ­vali jejĂ­
+vĂ˝stup na aalib, ale nynĂ­ mĂĄme vlastnĂ­, coĹž je mnohem pohodlnÄjĹĄĂ­.
+JejĂ­ DGA reĹžim byl aĹž doposud lepĹĄĂ­ neĹž nĂĄĹĄ. Sledujete? :)
 </para>
 
 <para>
-Rovněž pomáhá s některými chybnými ovladači/kartami, pokud je video roztřesené
-(nikoli problém pomalého stroje), nebo se zpožďuje zvuk.
+RovnÄĹž pomĂĄhĂĄ s nÄkterĂ˝mi chybnĂ˝mi ovladaÄi/kartami, pokud je video roztĹesenĂŠ
+(nikoli problĂŠm pomalĂŠho stroje), nebo se zpoĹžÄuje zvuk.
 </para>
 
 <para>
-SDL video rozhraní podporuje zobrazování titulků pod filmem, v (pokud je) černém
+SDL video rozhranĂ­ podporuje zobrazovĂĄnĂ­ titulkĹŻ pod filmem, v (pokud je) ÄernĂŠm
 okraji.
 </para>
 
 <variablelist>
-<title>Pro SDL existuje několik voleb příkazového řádku:</title>
+<title>Pro SDL existuje nÄkolik voleb pĹĂ­kazovĂŠho ĹĂĄdku:</title>
 <varlistentry>
-  <term><option>-vo sdl:<replaceable>jméno</replaceable></option></term>
+  <term><option>-vo sdl:<replaceable>jmĂŠno</replaceable></option></term>
   <listitem><simpara>
-    nastavuje použití SDL video ovladače (např. <literal>aalib</literal>,
+    nastavuje pouĹžitĂ­ SDL video ovladaÄe (napĹ. <literal>aalib</literal>,
     <literal>dga</literal>, <literal>x11</literal>)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
-  <term><option>-ao sdl:<replaceable>jméno</replaceable></option></term>
+  <term><option>-ao sdl:<replaceable>jmĂŠno</replaceable></option></term>
   <listitem><simpara>
-    nastavuje použití SDL audio ovladače (např. <literal>dsp</literal>,
+    nastavuje pouĹžitĂ­ SDL audio ovladaÄe (napĹ. <literal>dsp</literal>,
     <literal>esd</literal>, <literal>artsc</literal>)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-noxv</option></term>
   <listitem><simpara>
-    vypíná hardwarovou akceleraci XVideo
+    vypĂ­nĂĄ hardwarovou akceleraci XVideo
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-forcexv</option></term>
   <listitem><simpara>
-    zkusí vynutit XVideo akceleraci
+    zkusĂ­ vynutit XVideo akceleraci
   </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <table>
-<title>Klávesy pouze pro SDL</title>
+<title>KlĂĄvesy pouze pro SDL</title>
 <tgroup cols="2">
 <thead>
-<row><entry>Klávesa</entry><entry>Akce</entry></row>
+<row><entry>KlĂĄvesa</entry><entry>Akce</entry></row>
 </thead>
 <tbody>
 <row><entry><keycap>c</keycap></entry><entry>
-    cykluje dostupné celoobrazovkové režimy
+    cykluje dostupnĂŠ celoobrazovkovĂŠ reĹžimy
     </entry></row>
 <row><entry><keycap>n</keycap></entry><entry>
-    změní režim zpět na normální
+    zmÄnĂ­ reĹžim zpÄt na normĂĄlnĂ­
     </entry></row>
 </tbody>
 </tgroup>
 </table>
 
 <itemizedlist>
-<title>Známé chyby:</title>
+<title>ZnĂĄmĂŠ chyby:</title>
 <listitem><simpara>
-  Klávesy stisknuté při použití sdl:aalib konzolového ovladače se donekonečna
-  opakují. (použijte <option>-vo aa</option>!) Je to chyba v SDL, já to nezměním
-  (testováno s SDL 1.2.1).
+  KlĂĄvesy stisknutĂŠ pĹi pouĹžitĂ­ sdl:aalib konzolovĂŠho ovladaÄe se donekoneÄna
+  opakujĂ­. (pouĹžijte <option>-vo aa</option>!) Je to chyba v SDL, jĂĄ to nezmÄnĂ­m
+  (testovĂĄno s SDL 1.2.1).
   </simpara></listitem>
 <listitem><simpara>
-  NEPOUŽÍVEJTE SDL s GUI! Nefunguje to jak by mělo.
+  NEPOUĹ˝ĂVEJTE SDL s GUI! Nefunguje to jak by mÄlo.
   </simpara></listitem>
 </itemizedlist>
 </sect2>
@@ -705,27 +705,27 @@ okraji.
 <formalpara>
 <title>INSTALACE</title>
 <para>
-Budete muset nainstalovat svgalib i s development balíčkem, aby
-<application>MPlayer</application> vytvořil své SVGAlib rozhraní
-(autodetekováno, ale nelze vynutit) a nezapomeňte upravit
-<filename>/etc/vga/libvga.config</filename> tak, aby odpovídal vaší kartě a
+Budete muset nainstalovat svgalib i s development balĂ­Äkem, aby
+<application>MPlayer</application> vytvoĹil svĂŠ SVGAlib rozhranĂ­
+(autodetekovĂĄno, ale nelze vynutit) a nezapomeĹte upravit
+<filename>/etc/vga/libvga.config</filename> tak, aby odpovĂ­dal vaĹĄĂ­ kartÄ a
 monitoru.
 </para>
 </formalpara>
 
 <note>
 <para>
-Ujistěte se, že nepoužíváte volbu <option>-fs</option>, jelikož zapíná
-použití softwarového škálování, což je pomalé. Pokud jej opravdu potřebujete,
-použijte volbu <option>-sws 4</option>, což poskytuje špatnou kvalitu, ale je
-o poznání rychlejší.
+UjistÄte se, Ĺže nepouĹžĂ­vĂĄte volbu <option>-fs</option>, jelikoĹž zapĂ­nĂĄ
+pouĹžitĂ­ softwarovĂŠho ĹĄkĂĄlovĂĄnĂ­, coĹž je pomalĂŠ. Pokud jej opravdu potĹebujete,
+pouĹžijte volbu <option>-sws 4</option>, coĹž poskytuje ĹĄpatnou kvalitu, ale je
+o poznĂĄnĂ­ rychlejĹĄĂ­.
 </para>
 </note>
 
 <formalpara><title>PODPORA EGA (4BPP)</title>
 <para>
-SVGAlib obsahuje EGAlib a <application>MPlayer</application> umí zobrazovat
-jakýkoli film v 16 barvách, což je vhodné v následujících konfiguracích:
+SVGAlib obsahuje EGAlib a <application>MPlayer</application> umĂ­ zobrazovat
+jakĂ˝koli film v 16 barvĂĄch, coĹž je vhodnĂŠ v nĂĄsledujĂ­cĂ­ch konfiguracĂ­ch:
 </para>
 </formalpara>
 
@@ -739,81 +739,81 @@ jakýkoli film v 16 barvách, což je vhodné v následujících konfiguracích:
 </itemizedlist>
 
 <para>
-Hodnota bpp (bitů na pixel) musí být nastavena na 4 ručně:
+Hodnota bpp (bitĹŻ na pixel) musĂ­ bĂ˝t nastavena na 4 ruÄnÄ:
 <option>-bpp 4</option>
 </para>
 
 <para>
-Obraz bude nejspíš muset být zmenšený tak, aby se vešel v EGA režimu:
+Obraz bude nejspĂ­ĹĄ muset bĂ˝t zmenĹĄenĂ˝ tak, aby se veĹĄel v EGA reĹžimu:
 <screen>-vf scale=640:350</screen>
 nebo
 <screen>-vf scale=320:200</screen>
 </para>
 
 <para>
-Když potřebujeme rychlou, ale nekvalitní škálovací rutinu:
+KdyĹž potĹebujeme rychlou, ale nekvalitnĂ­ ĹĄkĂĄlovacĂ­ rutinu:
 <screen>-sws 4</screen>
 </para>
 
 <para>
-Možná bude muset být vypnuta automatická korekce poměru stran:
+MoĹžnĂĄ bude muset bĂ˝t vypnuta automatickĂĄ korekce pomÄru stran:
 <screen>-noaspect</screen>
 </para>
 
 <note><para>
-Podle mých zkušeností lze dosáhnout nejlepší kvality obrazu na
-EGA obrazovkách mírným snížením jasu:
-<option>-vf eq=-20:0</option>. Na svém počítači jsem rovněž musel snížit
-vzorkovací kmitočet zvuku, protože zvuk pří 44kHz byl vadný:
+Podle mĂ˝ch zkuĹĄenostĂ­ lze dosĂĄhnout nejlepĹĄĂ­ kvality obrazu na
+EGA obrazovkĂĄch mĂ­rnĂ˝m snĂ­ĹženĂ­m jasu:
+<option>-vf eq=-20:0</option>. Na svĂŠm poÄĂ­taÄi jsem rovnÄĹž musel snĂ­Ĺžit
+vzorkovacĂ­ kmitoÄet zvuku, protoĹže zvuk pĹĂ­ 44kHz byl vadnĂ˝:
 <option>-srate 22050</option>.
 </para></note>
 
 <para>
-Zapnout OSD a titulky můžete pouze v kombinaci s <option>expand</option>
-filtrem, viz man stránka pro přesné parametry.
+Zapnout OSD a titulky mĹŻĹžete pouze v kombinaci s <option>expand</option>
+filtrem, viz man strĂĄnka pro pĹesnĂŠ parametry.
 </para>
 </sect2>
 
 
 <sect2 id="fbdev">
-<title>Výstup na Framebuffer (FBdev)</title>
+<title>VĂ˝stup na Framebuffer (FBdev)</title>
 
 <para>
-Podpora pro cíl FBdev je autodetekována během
-<filename>./configure</filename>. Přečtěte si dokumentaci framebufferu ve
-zdrojových kódech kernelu (<filename>Documentation/fb/*</filename>) pro více
-informací.
+Podpora pro cĂ­l FBdev je autodetekovĂĄna bÄhem
+<filename>./configure</filename>. PĹeÄtÄte si dokumentaci framebufferu ve
+zdrojovĂ˝ch kĂłdech kernelu (<filename>Documentation/fb/*</filename>) pro vĂ­ce
+informacĂ­.
 </para>
 
 <para>
-Pokud vaše karta nepodporuje standard VBE 2.0 (starší ISA/PCI karty, jako
-S3 Trio64), pouze VBE 1.2 (nebo straší?): Nuže, stále máte k dispozici VESAfb,
-ale budete muset nahrát SciTech Display Doctor (původně UniVBE) před startem
-Linuxu. Použijte bootovací disk DOSu nebo tak. A nezapoměňte si zaregistrovat
-svůj UniVBE ;))
+Pokud vaĹĄe karta nepodporuje standard VBE 2.0 (starĹĄĂ­ ISA/PCI karty, jako
+S3 Trio64), pouze VBE 1.2 (nebo straĹĄĂ­?): NuĹže, stĂĄle mĂĄte k dispozici VESAfb,
+ale budete muset nahrĂĄt SciTech Display Doctor (pĹŻvodnÄ UniVBE) pĹed startem
+Linuxu. PouĹžijte bootovacĂ­ disk DOSu nebo tak. A nezapomÄĹte si zaregistrovat
+svĹŻj UniVBE ;))
 </para>
 
 <para>
-Výstup FBdev přijímá několik dodatečných voleb:
+VĂ˝stup FBdev pĹijĂ­mĂĄ nÄkolik dodateÄnĂ˝ch voleb:
 </para>
 
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
   <listitem><simpara>
-    nastaví zařízení framebufferu k použití (výchozí: <filename>/dev/fb0</filename>)
+    nastavĂ­ zaĹĂ­zenĂ­ framebufferu k pouĹžitĂ­ (vĂ˝chozĂ­: <filename>/dev/fb0</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
   <listitem><simpara>
-    název režimu k použití (podle <filename>/etc/fb.modes</filename>)
+    nĂĄzev reĹžimu k pouĹžitĂ­ (podle <filename>/etc/fb.modes</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
   <listitem><simpara>
-    config soubor režimů (výchozí: <filename>/etc/fb.modes</filename>)
+    config soubor reĹžimĹŻ (vĂ˝chozĂ­: <filename>/etc/fb.modes</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -821,14 +821,14 @@ Výstup FBdev přijímá několik dodatečných voleb:
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
   <listitem><simpara>
-    <emphasis role="bold">důležité</emphasis> hodnoty, viz
+    <emphasis role="bold">dĹŻleĹžitĂŠ</emphasis> hodnoty, viz
     <filename>example.conf</filename>
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-Pokud se chcete přepnout do určitého režimu, pak použijte
+Pokud se chcete pĹepnout do urÄitĂŠho reĹžimu, pak pouĹžijte
 <screen>
 mplayer -vm -fbmode <replaceable>name_of_mode</replaceable> <replaceable>soubor</replaceable>
 </screen>
@@ -836,26 +836,26 @@ mplayer -vm -fbmode <replaceable>name_of_mode</replaceable> <replaceable>soubor<
 
 <itemizedlist>
 <listitem><para>
-  <option>-vm</option> samotná zvolí nejpříhodnější režim z
-  <filename>/etc/fb.modes</filename>. Může být rovněž použita spolu s volbami
+  <option>-vm</option> samotnĂĄ zvolĂ­ nejpĹĂ­hodnÄjĹĄĂ­ reĹžim z
+  <filename>/etc/fb.modes</filename>. MĹŻĹže bĂ˝t rovnÄĹž pouĹžita spolu s volbami
   <option>-x</option> a <option>-y</option>. Volba
-  <option>-flip</option> je podporována pouze pokud pixelový formát filmu
-  odpovídá pixelovému formátu videorežimu. Věnujte pozornost hodnotě bpp.
-  Ovladač fbdev zkusí použít aktuální, nebo pokud zadáte volbu
+  <option>-flip</option> je podporovĂĄna pouze pokud pixelovĂ˝ formĂĄt filmu
+  odpovĂ­dĂĄ pixelovĂŠmu formĂĄtu videoreĹžimu. VÄnujte pozornost hodnotÄ bpp.
+  OvladaÄ fbdev zkusĂ­ pouĹžĂ­t aktuĂĄlnĂ­, nebo pokud zadĂĄte volbu
   <option>-bpp</option>, pak tuto.
   </para></listitem>
 <listitem><para>
-  Volba <option>-zoom</option> není podporována (použijte <option>-vf scale</option>).
-  Nelze použít režimy 8bpp (nebo nižší).
+  Volba <option>-zoom</option> nenĂ­ podporovĂĄna (pouĹžijte <option>-vf scale</option>).
+  Nelze pouĹžĂ­t reĹžimy 8bpp (nebo niĹžĹĄĂ­).
   </para></listitem>
 <listitem><para>
-  Pravděpodobně budete chtít vypnout kursor:
+  PravdÄpodobnÄ budete chtĂ­t vypnout kursor:
   <screen>echo -e '\033[?25l'</screen>
   nebo
   <screen>setterm -cursor off</screen>
-  a spořič obrazovky:
+  a spoĹiÄ obrazovky:
   <screen>setterm -blank 0</screen>
-  Pro opětovné zapnutí kursoru:
+  Pro opÄtovnĂŠ zapnutĂ­ kursoru:
   <screen>echo -e '\033[?25h'</screen>
   nebo
   <screen>setterm -cursor on</screen>
@@ -864,8 +864,8 @@ mplayer -vm -fbmode <replaceable>name_of_mode</replaceable> <replaceable>soubor<
 
 <note>
 <para>
-Změna videorežimu FBdev <emphasis>nepracuje</emphasis> ve VESA
-framebufferu a nechtějte to po nás, jelikož to není omezení
+ZmÄna videoreĹžimu FBdev <emphasis>nepracuje</emphasis> ve VESA
+framebufferu a nechtÄjte to po nĂĄs, jelikoĹž to nenĂ­ omezenĂ­
 <application>MPlayer</application>u.
 </para>
 </note>
@@ -876,23 +876,23 @@ framebufferu a nechtějte to po nás, jelikož to není omezení
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
-Tato sekce je o podpoře Matrox G200/G400/G450/G550 BES (Back-End Scaler)
-jaderného modulu <systemitem>mga_vid</systemitem>.
-Má hardwarovou podporu VSYNC s trojitou vyrovnávací pamětí.
+Tato sekce je o podpoĹe Matrox G200/G400/G450/G550 BES (Back-End Scaler)
+jadernĂŠho modulu <systemitem>mga_vid</systemitem>.
+MĂĄ hardwarovou podporu VSYNC s trojitou vyrovnĂĄvacĂ­ pamÄtĂ­.
 Pracuje jak v konzoli, tak pod X.
 </para>
 
 <warning>
 <para>
-Toto je pouze pro Linux! Na ne-Linuxech (testováno na FreeBSD) můžete místo něj
-použít <link linkend="vidix">VIDIX</link>.
+Toto je pouze pro Linux! Na ne-Linuxech (testovĂĄno na FreeBSD) mĹŻĹžete mĂ­sto nÄj
+pouĹžĂ­t <link linkend="vidix">VIDIX</link>.
 </para>
 </warning>
 
 <procedure>
 <title>Instalace:</title>
 <step><para>
-  Pokud jej chcete použít, nejdříve musíte sestavit
+  Pokud jej chcete pouĹžĂ­t, nejdĹĂ­ve musĂ­te sestavit
   <filename>mga_vid.o</filename>:
   <screen>
 cd drivers
@@ -900,51 +900,51 @@ make<!--
 --></screen>
   </para></step>
 <step><para>
-  Pak vytvořte zařízení <filename>/dev/mga_vid</filename>:
+  Pak vytvoĹte zaĹĂ­zenĂ­ <filename>/dev/mga_vid</filename>:
   <screen>mknod /dev/mga_vid c 178 0</screen>
-  a nahrajte ovladač pomocí
+  a nahrajte ovladaÄ pomocĂ­
   <screen>insmod mga_vid.o</screen>
   </para></step>
 <step><para>
-  Měli byste ověřit velikost detekované paměti pomocí příkazu
-  <command>dmesg</command>. Pokud je špatná, použijte volbu
+  MÄli byste ovÄĹit velikost detekovanĂŠ pamÄti pomocĂ­ pĹĂ­kazu
+  <command>dmesg</command>. Pokud je ĹĄpatnĂĄ, pouĹžijte volbu
   <option>mga_ram_size</option>
-  (nejdřív <command>rmmod mga_vid</command>),
-  nastavte velikost paměti karty v MB:
+  (nejdĹĂ­v <command>rmmod mga_vid</command>),
+  nastavte velikost pamÄti karty v MB:
   <screen>insmod mga_vid.o mga_ram_size=16</screen>
   </para></step>
 <step><para>
-  Aby se nahrával/odstraňoval automaticky podle potřeby, nejdříve přidejte
-  následující řádek na konec <filename>/etc/modules.conf</filename>:
+  Aby se nahrĂĄval/odstraĹoval automaticky podle potĹeby, nejdĹĂ­ve pĹidejte
+  nĂĄsledujĂ­cĂ­ ĹĂĄdek na konec <filename>/etc/modules.conf</filename>:
 
   <programlisting>alias char-major-178 mga_vid</programlisting>
 
-  Pak zkopírujte modul <filename>mga_vid.o</filename> na vhodné místo
-  pod <filename>/lib/modules/<replaceable>verze jádra
-  </replaceable>/<replaceable>někde</replaceable></filename>.
+  Pak zkopĂ­rujte modul <filename>mga_vid.o</filename> na vhodnĂŠ mĂ­sto
+  pod <filename>/lib/modules/<replaceable>verze jĂĄdra
+  </replaceable>/<replaceable>nÄkde</replaceable></filename>.
   </para><para>
-  Pak spusťte
+  Pak spusĹĽte
   <screen>depmod -a</screen>
   </para></step>
 <step><para>
-  Teď budete muset (pře)kompilovat <application>MPlayer</application>,
+  TeÄ budete muset (pĹe)kompilovat <application>MPlayer</application>,
   <filename>./configure</filename> zdetekuje
-  <filename>/dev/mga_vid</filename> a zakompiluje 'mga' rozhraní.
-  V <application>MPlayer</application>u se používá pomocí <option>-vo mga</option>
-  pokud máte matroxfb konzoli, nebo <option>-vo xmga</option> pod XFree86
+  <filename>/dev/mga_vid</filename> a zakompiluje 'mga' rozhranĂ­.
+  V <application>MPlayer</application>u se pouĹžĂ­vĂĄ pomocĂ­ <option>-vo mga</option>
+  pokud mĂĄte matroxfb konzoli, nebo <option>-vo xmga</option> pod XFree86
   3.x.x nebo 4.x.x.
   </para></step>
 </procedure>
 
 <para>
-Ovladač mga_vid spolupracuje s Xv.
+OvladaÄ mga_vid spolupracuje s Xv.
 </para>
 
 <para>
-Určité informace lze přečíst z <filename>/dev/mga_vid</filename> zařízení,
-například pomocí
+UrÄitĂŠ informace lze pĹeÄĂ­st z <filename>/dev/mga_vid</filename> zaĹĂ­zenĂ­,
+napĹĂ­klad pomocĂ­
 <screen>cat /dev/mga_vid</screen>
-a může do něj být zapsána změna jasu:
+a mĹŻĹže do nÄj bĂ˝t zapsĂĄna zmÄna jasu:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
 </sect2>
@@ -953,8 +953,8 @@ a může do něj být zapsána změna jasu:
 <sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>Podpora 3Dfx YUV</title>
 <para>
-Tento ovladač používá ovladač framebufferu tdfx z jádra pro přehrávání
-filmů s YUV akcelerací. Budete potřebovat jádro s podporou tdfxfb a
+Tento ovladaÄ pouĹžĂ­vĂĄ ovladaÄ framebufferu tdfx z jĂĄdra pro pĹehrĂĄvĂĄnĂ­
+filmĹŻ s YUV akceleracĂ­. Budete potĹebovat jĂĄdro s podporou tdfxfb a
 rekompilovat s
 <screen>./configure --enable-tdfxfb</screen>
 </para>
@@ -962,31 +962,31 @@ rekompilovat s
 
 
 <sect2 id="opengl">
-<title>Rozhraní OpenGL</title>
+<title>RozhranĂ­ OpenGL</title>
 
 <para>
-<application>MPlayer</application> podporuje zobrazování filmů pomocí OpenGL,
-ale pokud vaše platforma/ovladač podporuje xv což by měl být případ PC s
-Linuxem, použijte raději xv, jelikož výkon OpenGL je o poznání horší.
-Pokud máte X11 implementaci bez podpory xv, je OpenGL slušná alternativa.
+<application>MPlayer</application> podporuje zobrazovĂĄnĂ­ filmĹŻ pomocĂ­ OpenGL,
+ale pokud vaĹĄe platforma/ovladaÄ podporuje xv coĹž by mÄl bĂ˝t pĹĂ­pad PC s
+Linuxem, pouĹžijte radÄji xv, jelikoĹž vĂ˝kon OpenGL je o poznĂĄnĂ­ horĹĄĂ­.
+Pokud mĂĄte X11 implementaci bez podpory xv, je OpenGL sluĹĄnĂĄ alternativa.
 </para>
 
 <para>
-Naneštěstí ne všechny ovladače tuto vlastnost podporují. Ovladače Utah-GLX
-(pro XFree86 3.3.6) ji podporují pro všechny karty.
+NaneĹĄtÄstĂ­ ne vĹĄechny ovladaÄe tuto vlastnost podporujĂ­. OvladaÄe Utah-GLX
+(pro XFree86 3.3.6) ji podporujĂ­ pro vĹĄechny karty.
 Viz <ulink url="http://utah-glx.sf.net"/> pro detaily jak je nainstalovat.
 </para>
 
 <para>
-XFree86(DRI) 4.0.3 nebo pozdější podporují OpenGL s kartami Matrox a Radeon,
-4.2.0 a pozdější podporují Rage128.
-Viz <ulink url="http://dri.sf.net"/> pro stažení a instalační instrukce.
+XFree86(DRI) 4.0.3 nebo pozdÄjĹĄĂ­ podporujĂ­ OpenGL s kartami Matrox a Radeon,
+4.2.0 a pozdÄjĹĄĂ­ podporujĂ­ Rage128.
+Viz <ulink url="http://dri.sf.net"/> pro staĹženĂ­ a instalaÄnĂ­ instrukce.
 </para>
 
 <para>
-Rada od jednoho z uživatelů: GL video výstup lze použít pro dosažení
-vertikálně synchronizovaného TV výstupu. Budete muset nastavit proměnnou
-prostředí (aspoň na nVidii):
+Rada od jednoho z uĹživatelĹŻ: GL video vĂ˝stup lze pouĹžĂ­t pro dosaĹženĂ­
+vertikĂĄlnÄ synchronizovanĂŠho TV vĂ˝stupu. Budete muset nastavit promÄnnou
+prostĹedĂ­ (aspoĹ na nVidii):
 </para>
 
 <para>
@@ -997,357 +997,357 @@ prostředí (aspoň na nVidii):
 
 
 <sect2 id="aalib">
-<title>AAlib - zobrazování v textovém režimu</title>
+<title>AAlib - zobrazovĂĄnĂ­ v textovĂŠm reĹžimu</title>
 
 <para>
-AAlib je knihovna pro zobrazování grafiky v textovém režimu pomocí výkonného
-ASCII renderovače. Existuje <emphasis>spousta</emphasis> programů, ktaré ji již
-podporují, jako DOOM, Quake, atd. <application>MPlayer</application>
-pro ni obsahuje šikovné rozhraní. Pokud <filename>./configure</filename>
-zjistí nainstalovanou aalib, sestaví se aalib libvo rozhraní.
+AAlib je knihovna pro zobrazovĂĄnĂ­ grafiky v textovĂŠm reĹžimu pomocĂ­ vĂ˝konnĂŠho
+ASCII renderovaÄe. Existuje <emphasis>spousta</emphasis> programĹŻ, ktarĂŠ ji jiĹž
+podporujĂ­, jako DOOM, Quake, atd. <application>MPlayer</application>
+pro ni obsahuje ĹĄikovnĂŠ rozhranĂ­. Pokud <filename>./configure</filename>
+zjistĂ­ nainstalovanou aalib, sestavĂ­ se aalib libvo rozhranĂ­.
 </para>
 
 <para>
-Můžete použít některé klávesy v AA okně pro změnu renderovacích voleb:
+MĹŻĹžete pouĹžĂ­t nÄkterĂŠ klĂĄvesy v AA oknÄ pro zmÄnu renderovacĂ­ch voleb:
 </para>
 
 <informaltable>
 <tgroup cols="2">
 <thead>
-  <row><entry>Klávesa</entry><entry>Akce</entry></row>
+  <row><entry>KlĂĄvesa</entry><entry>Akce</entry></row>
 </thead>
 <tbody>
 <row><entry><keycap>1</keycap></entry><entry>
-  sníží kontrast
+  snĂ­ĹžĂ­ kontrast
   </entry></row>
 <row><entry><keycap>2</keycap></entry><entry>
-  zvýší kontrast
+  zvĂ˝ĹĄĂ­ kontrast
   </entry></row>
 <row><entry><keycap>3</keycap></entry><entry>
-  sníží jas
+  snĂ­ĹžĂ­ jas
   </entry></row>
 <row><entry><keycap>4</keycap></entry><entry>
-  zvýší jas
+  zvĂ˝ĹĄĂ­ jas
   </entry></row>
 <row><entry><keycap>5</keycap></entry><entry>
-  vypíná/zapíná rychlé renderování
+  vypĂ­nĂĄ/zapĂ­nĂĄ rychlĂŠ renderovĂĄnĂ­
   </entry></row>
 <row><entry><keycap>6</keycap></entry><entry>
-  nastaví rozhodovací režim (žádný, error distribution, Floyd Steinberg)
+  nastavĂ­ rozhodovacĂ­ reĹžim (ĹžĂĄdnĂ˝, error distribution, Floyd Steinberg)
   </entry></row>
 <row><entry><keycap>7</keycap></entry><entry>
   inverze obrazu
   </entry></row>
 <row><entry><keycap>8</keycap></entry><entry>
-  přepíná mezi ovládáním aa a <application>MPlayer</application>u
+  pĹepĂ­nĂĄ mezi ovlĂĄdĂĄnĂ­m aa a <application>MPlayer</application>u
   </entry></row>
 </tbody>
 </tgroup>
 </informaltable>
 
 <variablelist>
-<title>Můžete použít následující volby příkazového řádku:</title>
+<title>MĹŻĹžete pouĹžĂ­t nĂĄsledujĂ­cĂ­ volby pĹĂ­kazovĂŠho ĹĂĄdku:</title>
 <varlistentry>
   <term><option>-aaosdcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    změna barvy OSD
+    zmÄna barvy OSD
     </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aasubcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    změna barvy titulků
+    zmÄna barvy titulkĹŻ
     </para><para>
-    kde <replaceable>V</replaceable> může být:
-    <literal>0</literal> (normální),
-    <literal>1</literal> (tmavé),
-    <literal>2</literal> (tučné),
-    <literal>3</literal> (polotučný font),
+    kde <replaceable>V</replaceable> mĹŻĹže bĂ˝t:
+    <literal>0</literal> (normĂĄlnĂ­),
+    <literal>1</literal> (tmavĂŠ),
+    <literal>2</literal> (tuÄnĂŠ),
+    <literal>3</literal> (polotuÄnĂ˝ font),
     <literal>4</literal> (reverz),
-    <literal>5</literal> (speciální).
+    <literal>5</literal> (speciĂĄlnĂ­).
     </para></listitem>
 </varlistentry>
 </variablelist>
 
 <variablelist>
-<title>AAlib samotná poskytuje velké množství voleb. Zde je několik
-důležitých:</title>
+<title>AAlib samotnĂĄ poskytuje velkĂŠ mnoĹžstvĂ­ voleb. Zde je nÄkolik
+dĹŻleĹžitĂ˝ch:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
   <listitem><simpara>
-    Nastaví doporučený aa ovladač (X11, curses, Linux).
+    NastavĂ­ doporuÄenĂ˝ aa ovladaÄ (X11, curses, Linux).
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
   <listitem><simpara>
-    Použití všech 256 znaků.
+    PouĹžitĂ­ vĹĄech 256 znakĹŻ.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
   <listitem><simpara>
-    Použití osmibitového ASCII.
+    PouĹžitĂ­ osmibitovĂŠho ASCII.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
   <listitem><simpara>
-    Vypíše všechny aalib volby.
+    VypĂ­ĹĄe vĹĄechny aalib volby.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <note>
 <para>
-Renderování je velmi náročné na CPU, zvlášť při použití AA-na-X
-(aalib na X) a nejméně náročné je na standardní neframebuferované
-konzoli. Použijte SVGATextMode pro nastavení velkého textového režimu
-a užijte si! (secondary head Hercules cards rock :)) (ale IMHO můžete použít
+RenderovĂĄnĂ­ je velmi nĂĄroÄnĂŠ na CPU, zvlĂĄĹĄĹĽ pĹi pouĹžitĂ­ AA-na-X
+(aalib na X) a nejmĂŠnÄ nĂĄroÄnĂŠ je na standardnĂ­ neframebuferovanĂŠ
+konzoli. PouĹžijte SVGATextMode pro nastavenĂ­ velkĂŠho textovĂŠho reĹžimu
+a uĹžijte si! (secondary head Hercules cards rock :)) (ale IMHO mĹŻĹžete pouĹžĂ­t
 volbu <option>-vf 1bpp</option> pro grafiku na hgafb:)
 </para>
 </note>
 
 <para>
-Použijte volbu <option>-framedrop</option>, pokud váš počítač není dostatečně
-rychlý pro renderování všech snímků!
+PouĹžijte volbu <option>-framedrop</option>, pokud vĂĄĹĄ poÄĂ­taÄ nenĂ­ dostateÄnÄ
+rychlĂ˝ pro renderovĂĄnĂ­ vĹĄech snĂ­mkĹŻ!
 </para>
 
 <para>
-Při přehrávání na terminálu dosáhnete lepší rychlosti i kvality použitím
-ovladače Linux, bez curses (<option>-aadriver linux</option>). Ale pak budete
-potřebovat práva k zápisu do
+PĹi pĹehrĂĄvĂĄnĂ­ na terminĂĄlu dosĂĄhnete lepĹĄĂ­ rychlosti i kvality pouĹžitĂ­m
+ovladaÄe Linux, bez curses (<option>-aadriver linux</option>). Ale pak budete
+potĹebovat prĂĄva k zĂĄpisu do
 <filename>/dev/vcsa<replaceable>&lt;terminal&gt;</replaceable></filename>!
-Aalib to nedetekuje, ale vo_aa zkouší najít nejlepší režim.
-Pro více ladících možností viz <ulink url="http://aa-project.sf.net/tune"/>.
+Aalib to nedetekuje, ale vo_aa zkouĹĄĂ­ najĂ­t nejlepĹĄĂ­ reĹžim.
+Pro vĂ­ce ladĂ­cĂ­ch moĹžnostĂ­ viz <ulink url="http://aa-project.sf.net/tune"/>.
 </para>
 </sect2>
 
 
 <sect2 id="caca">
-<title><systemitem class="library">libcaca</systemitem> - Barevná ASCII Art knihovna</title>
+<title><systemitem class="library">libcaca</systemitem> - BarevnĂĄ ASCII Art knihovna</title>
 
 <para>
 Knihovna <ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
-je grafická knihovna produkující text místo pixelů, takže může fungovat na
-starších video kartách a textových terminálech. Není nepodobná známé knihovně
+je grafickĂĄ knihovna produkujĂ­cĂ­ text mĂ­sto pixelĹŻ, takĹže mĹŻĹže fungovat na
+starĹĄĂ­ch video kartĂĄch a textovĂ˝ch terminĂĄlech. NenĂ­ nepodobnĂĄ znĂĄmĂŠ knihovnÄ
 <systemitem class="library">AAlib</systemitem>.
-<systemitem class="library">libcaca</systemitem> vyžaduje k činnosti terminál,
-takže by měla fungovat na všech Unixových systémech (včetně Mac OS X) pomocí buď
+<systemitem class="library">libcaca</systemitem> vyĹžaduje k Äinnosti terminĂĄl,
+takĹže by mÄla fungovat na vĹĄech UnixovĂ˝ch systĂŠmech (vÄetnÄ Mac OS X) pomocĂ­ buÄ
 knihovny <systemitem class="library">slang</systemitem> nebo knihovny
-<systemitem class="library">ncurses</systemitem>, pod DOSem pomocí knihovny
-<systemitem class="library">conio.h</systemitem> a na systémech Windows
-pomocí buď <systemitem class="library">slang</systemitem> nebo
-<systemitem class="library">ncurses</systemitem> (pomocí emulace Cygwin) nebo
+<systemitem class="library">ncurses</systemitem>, pod DOSem pomocĂ­ knihovny
+<systemitem class="library">conio.h</systemitem> a na systĂŠmech Windows
+pomocĂ­ buÄ <systemitem class="library">slang</systemitem> nebo
+<systemitem class="library">ncurses</systemitem> (pomocĂ­ emulace Cygwin) nebo
 <systemitem class="library">conio.h</systemitem>. Pokud
 <filename>./configure</filename>
 detekuje <systemitem class="library">libcaca</systemitem>, bude sestaveno
-rozhraní caca libvo.
+rozhranĂ­ caca libvo.
 </para>
 
 <itemizedlist>
-<title>Odlišnosti od <systemitem class="library">AAlib</systemitem> jsou:</title>
+<title>OdliĹĄnosti od <systemitem class="library">AAlib</systemitem> jsou:</title>
 <listitem><simpara>
-   16 dostupných barev pro znakový výstup (256 barev pro pár)
+   16 dostupnĂ˝ch barev pro znakovĂ˝ vĂ˝stup (256 barev pro pĂĄr)
   </simpara></listitem>
 <listitem><simpara>
-   rozhodování podle barev v obrázku
+   rozhodovĂĄnĂ­ podle barev v obrĂĄzku
   </simpara></listitem>
 </itemizedlist>
 
 <itemizedlist>
-<title>Ale <systemitem class="library">libcaca</systemitem> má také následující
-  omezení:</title>
+<title>Ale <systemitem class="library">libcaca</systemitem> mĂĄ takĂŠ nĂĄsledujĂ­cĂ­
+  omezenĂ­:</title>
 <listitem><simpara>
-   nemá podpora pro jas, kontrast a gamu
+   nemĂĄ podpora pro jas, kontrast a gamu
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-V caca okně můžete použít některé klávesy pro změnu renderovacích volby:
+V caca oknÄ mĹŻĹžete pouĹžĂ­t nÄkterĂŠ klĂĄvesy pro zmÄnu renderovacĂ­ch volby:
 </para>
 
 <informaltable>
 <tgroup cols="2">
 <thead>
-  <row><entry>Klávesa</entry><entry>Akce</entry></row>
+  <row><entry>KlĂĄvesa</entry><entry>Akce</entry></row>
 </thead>
 <tbody>
 <row><entry><keycap>d</keycap></entry><entry>
-  Přepíná metody rozhodování v <systemitem class="library">libcaca</systemitem>.
+  PĹepĂ­nĂĄ metody rozhodovĂĄnĂ­ v <systemitem class="library">libcaca</systemitem>.
   </entry></row>
 <row><entry><keycap>a</keycap></entry><entry>
-  Přepíná vyhlazování v <systemitem class="library">libcaca</systemitem>.
+  PĹepĂ­nĂĄ vyhlazovĂĄnĂ­ v <systemitem class="library">libcaca</systemitem>.
   </entry></row>
 <row><entry><keycap>b</keycap></entry><entry>
-  Přepíná pozadí v <systemitem class="library">libcaca</systemitem>.
+  PĹepĂ­nĂĄ pozadĂ­ v <systemitem class="library">libcaca</systemitem>.
   </entry></row>
 </tbody>
 </tgroup>
 </informaltable>
 
 <variablelist>
-<title><systemitem class="library">libcaca</systemitem> také respektuje některé
-   proměnné prostředí:</title>
+<title><systemitem class="library">libcaca</systemitem> takĂŠ respektuje nÄkterĂŠ
+   promÄnnĂŠ prostĹedĂ­:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
   <listitem><simpara>
-    Nastaví doporučený caca ovladač, jako ncurses, slang, x11.
+    NastavĂ­ doporuÄenĂ˝ caca ovladaÄ, jako ncurses, slang, x11.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (pouze X11)</option></term>
   <listitem><simpara>
-    Nastaví počet řad a sloupců. Např. 128x50.
+    NastavĂ­ poÄet Ĺad a sloupcĹŻ. NapĹ. 128x50.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (pouze X11)</option></term>
   <listitem><simpara>
-    Nastaví použitý font. Např. fixed, nexus.
+    NastavĂ­ pouĹžitĂ˝ font. NapĹ. fixed, nexus.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-Použijte volbu <option>-framedrop</option>, pokud váš počítač není dost rychlý
-pro renderování všech snímků.
+PouĹžijte volbu <option>-framedrop</option>, pokud vĂĄĹĄ poÄĂ­taÄ nenĂ­ dost rychlĂ˝
+pro renderovĂĄnĂ­ vĹĄech snĂ­mkĹŻ.
 </para>
 
 </sect2>
 
 
 <sect2 id="vesa">
-<title>VESA - výstup do VESA BIOSu</title>
+<title>VESA - vĂ˝stup do VESA BIOSu</title>
 
 <para>
-Tento ovladač byl navržen a představen jako <emphasis role="bold">obecný
-ovladač</emphasis> pro jakoukoli video kartu, která má VESA VBE 2.0 kompatibilní
-BIOS. Další výhodou tohoto ovladače je, že zkouší vynutit zapnutí výstupu na TV.
+Tento ovladaÄ byl navrĹžen a pĹedstaven jako <emphasis role="bold">obecnĂ˝
+ovladaÄ</emphasis> pro jakoukoli video kartu, kterĂĄ mĂĄ VESA VBE 2.0 kompatibilnĂ­
+BIOS. DalĹĄĂ­ vĂ˝hodou tohoto ovladaÄe je, Ĺže zkouĹĄĂ­ vynutit zapnutĂ­ vĂ˝stupu na TV.
 <citetitle>VESA BIOS EXTENSION (VBE) Version 3.0 Date: September 16,
-1998</citetitle> (Strana 70) uvádí:
+1998</citetitle> (Strana 70) uvĂĄdĂ­:
 </para>
 
 <blockquote>
 <formalpara><title>Karty Dual-Controller</title>
 <para>
-VBE 3.0 podporuje karty s dual-controllerem za předpokladu že, jelikož jsou
-typicky oba controllery vybaveny stejným OEM a nastavovány jedinou
-BIOS ROM na stejné grafické kartě, je možné skrýt před aplikací přítomnost
-dvou controllerů. To omezuje nezávislé použití jednotlivých controllerů,
-ale umožňuje aplikacím vydaným před VBE 3.0 pracovat normálně.
-VBE funkce 00h (Návrat informací o controlleru) vrací kombinované informace
-obou conrollerů, včetně kombinovaného seznamu platných režimů.
-Příslušný controller je aktivován jakmile aplikace vybere režim. Všechny
-ostatní VBE funkce pak pracují s aktivním controllerem.
+VBE 3.0 podporuje karty s dual-controllerem za pĹedpokladu Ĺže, jelikoĹž jsou
+typicky oba controllery vybaveny stejnĂ˝m OEM a nastavovĂĄny jedinou
+BIOS ROM na stejnĂŠ grafickĂŠ kartÄ, je moĹžnĂŠ skrĂ˝t pĹed aplikacĂ­ pĹĂ­tomnost
+dvou controllerĹŻ. To omezuje nezĂĄvislĂŠ pouĹžitĂ­ jednotlivĂ˝ch controllerĹŻ,
+ale umoĹžĹuje aplikacĂ­m vydanĂ˝m pĹed VBE 3.0 pracovat normĂĄlnÄ.
+VBE funkce 00h (NĂĄvrat informacĂ­ o controlleru) vracĂ­ kombinovanĂŠ informace
+obou conrollerĹŻ, vÄetnÄ kombinovanĂŠho seznamu platnĂ˝ch reĹžimĹŻ.
+PĹĂ­sluĹĄnĂ˝ controller je aktivovĂĄn jakmile aplikace vybere reĹžim. VĹĄechny
+ostatnĂ­ VBE funkce pak pracujĂ­ s aktivnĂ­m controllerem.
 </para>
 </formalpara>
 </blockquote>
 
 <para>
-Máte tedy možnost s tímto rozhraním dostat funkční TV výstup.
-(Soudím že TV výstup má velmi často samostatnou jednotku, nebo aspoň samostatný
-výstup.)
+MĂĄte tedy moĹžnost s tĂ­mto rozhranĂ­m dostat funkÄnĂ­ TV vĂ˝stup.
+(SoudĂ­m Ĺže TV vĂ˝stup mĂĄ velmi Äasto samostatnou jednotku, nebo aspoĹ samostatnĂ˝
+vĂ˝stup.)
 </para>
 
 <itemizedlist spacing="compact">
-<title>VÝHODY</title>
+<title>VĂHODY</title>
 <listitem><simpara>
-  Máte šanci sledovat video <emphasis role="bold">dokonce i když Linux nezná
-  </emphasis> váš video hardware.
+  MĂĄte ĹĄanci sledovat video <emphasis role="bold">dokonce i kdyĹž Linux neznĂĄ
+  </emphasis> vĂĄĹĄ video hardware.
   </simpara></listitem>
 <listitem><simpara>
-  Nepotřebujete mít ve svém Linuxu nainstalovány žádné věci související s
-  grafikou (jako X11 (alias XFree86), fbdev atd). Toto rozhraní lze provozovat
-  z <emphasis role="bold">textového režimu</emphasis>.
+  NepotĹebujete mĂ­t ve svĂŠm Linuxu nainstalovĂĄny ĹžĂĄdnĂŠ vÄci souvisejĂ­cĂ­ s
+  grafikou (jako X11 (alias XFree86), fbdev atd). Toto rozhranĂ­ lze provozovat
+  z <emphasis role="bold">textovĂŠho reĹžimu</emphasis>.
   </simpara></listitem>
 <listitem><simpara>
-  Máte šanci získat <emphasis role="bold">funkční TV-out</emphasis>.
-  (Je to pravda minimálně s kartami ATI).
+  MĂĄte ĹĄanci zĂ­skat <emphasis role="bold">funkÄnĂ­ TV-out</emphasis>.
+  (Je to pravda minimĂĄlnÄ s kartami ATI).
   </simpara></listitem>
 <listitem><simpara>
-  Toto rozhraní volá <function>int 10h</function> handler, takže není
-  emulátorem &ndash; volá <emphasis role="bold">skutečné</emphasis> věci
-  <emphasis>skutečného</emphasis> BIOSu v <emphasis>reálném režimu</emphasis>
-  (ve skutečnosti v režimu vm86).
+  Toto rozhranĂ­ volĂĄ <function>int 10h</function> handler, takĹže nenĂ­
+  emulĂĄtorem &ndash; volĂĄ <emphasis role="bold">skuteÄnĂŠ</emphasis> vÄci
+  <emphasis>skuteÄnĂŠho</emphasis> BIOSu v <emphasis>reĂĄlnĂŠm reĹžimu</emphasis>
+  (ve skuteÄnosti v reĹžimu vm86).
   </simpara></listitem>
 <listitem><simpara>
-  Můžete s ním použít VIDIX, takže dostanete akcelerované video
-  <emphasis role="bold">a</emphasis> TV výstup současně!
-  (Doporučeno pro karty ATI.)
+  MĹŻĹžete s nĂ­m pouĹžĂ­t VIDIX, takĹže dostanete akcelerovanĂŠ video
+  <emphasis role="bold">a</emphasis> TV vĂ˝stup souÄasnÄ!
+  (DoporuÄeno pro karty ATI.)
   </simpara></listitem>
 <listitem><simpara>
-  Máte-li VESA VBE 3.0+ a nastavili jste si někde
+  MĂĄte-li VESA VBE 3.0+ a nastavili jste si nÄkde
   <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option>
-  (config soubor nebo příkazový řádek) dostanete nejvyšší možný obnovovací
-  kmitočet. (Using General Timing Formula). Abyste této funkce dosáhli, musíte
-  nastavit <emphasis role="bold">všechna</emphasis> nastavení monitoru.
+  (config soubor nebo pĹĂ­kazovĂ˝ ĹĂĄdek) dostanete nejvyĹĄĹĄĂ­ moĹžnĂ˝ obnovovacĂ­
+  kmitoÄet. (Using General Timing Formula). Abyste tĂŠto funkce dosĂĄhli, musĂ­te
+  nastavit <emphasis role="bold">vĹĄechna</emphasis> nastavenĂ­ monitoru.
   </simpara></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
-<title>NEVÝHODY</title>
+<title>NEVĂHODY</title>
 <listitem><simpara>
-   Pracuje pouze na <emphasis role="bold">systémech x86</emphasis>.
+   Pracuje pouze na <emphasis role="bold">systĂŠmech x86</emphasis>.
   </simpara></listitem>
 <listitem><simpara>
-  Může to použít pouze <systemitem class="username">root</systemitem>.
+  MĹŻĹže to pouĹžĂ­t pouze <systemitem class="username">root</systemitem>.
   </simpara></listitem>
 <listitem><simpara>
-  Zatím je dostupné pouze pro <emphasis role="bold">Linux</emphasis>.
+  ZatĂ­m je dostupnĂŠ pouze pro <emphasis role="bold">Linux</emphasis>.
   </simpara></listitem>
 </itemizedlist>
 
 <important>
 <para>
-Nepoužívejte toto rozhraní s <emphasis role="bold">GCC 2.96</emphasis>!
+NepouĹžĂ­vejte toto rozhranĂ­ s <emphasis role="bold">GCC 2.96</emphasis>!
 Nefunguje!
 </para>
 </important>
 
 <variablelist>
-<title>VOLBY PŘÍKAZOVÉHO ŘÁDKU DOSTUPNÉ PRO VESA</title>
+<title>VOLBY PĹĂKAZOVĂHO ĹĂDKU DOSTUPNĂ PRO VESA</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>volby</replaceable></option></term>
   <listitem><simpara>
-    zatím dostupné: <literal>dga</literal> pro vynucení dga režimu a
-    <literal>nodga</literal> pro jeho potlačení. V režimu dga můžete zapnout
-    dvojitou vyrovnávací paměť pomocí volby <option>-double</option>.
-    Poznámka: Tyto volby můžete vynechat, abyste zapli
-    <emphasis role="bold">autodetekci</emphasis> dga režimu.
+    zatĂ­m dostupnĂŠ: <literal>dga</literal> pro vynucenĂ­ dga reĹžimu a
+    <literal>nodga</literal> pro jeho potlaÄenĂ­. V reĹžimu dga mĹŻĹžete zapnout
+    dvojitou vyrovnĂĄvacĂ­ pamÄĹĽ pomocĂ­ volby <option>-double</option>.
+    PoznĂĄmka: Tyto volby mĹŻĹžete vynechat, abyste zapli
+    <emphasis role="bold">autodetekci</emphasis> dga reĹžimu.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
-<title>ZNÁMÉ PROBLÉMY A KLIČKY</title>
+<title>ZNĂMĂ PROBLĂMY A KLIÄKY</title>
 <listitem><simpara>
-  Pokud máte nainstalován <emphasis role="bold">NLS</emphasis> font v
-  Linuxové konzoli a použijete VESA rozhraní v textovém režimu, pak po
-  ukončení <application>MPlayer</application>u budete mít nahrán
-  <emphasis role="bold">ROM font</emphasis> místo národního.
-  Můžete si opět nahrát národní font například pomocí utility
+  Pokud mĂĄte nainstalovĂĄn <emphasis role="bold">NLS</emphasis> font v
+  LinuxovĂŠ konzoli a pouĹžijete VESA rozhranĂ­ v textovĂŠm reĹžimu, pak po
+  ukonÄenĂ­ <application>MPlayer</application>u budete mĂ­t nahrĂĄn
+  <emphasis role="bold">ROM font</emphasis> mĂ­sto nĂĄrodnĂ­ho.
+  MĹŻĹžete si opÄt nahrĂĄt nĂĄrodnĂ­ font napĹĂ­klad pomocĂ­ utility
   <command>setsysfont</command> z distribuce Mandrake/Mandriva.
-  (<emphasis role="bold">Tip</emphasis>: Stejná utilita je použita pro
+  (<emphasis role="bold">Tip</emphasis>: StejnĂĄ utilita je pouĹžita pro
   lokalizaci fbdev).
   </simpara></listitem>
 <listitem><simpara>
-  Některé <emphasis role="bold">Linuxové grafické ovladače</emphasis> neobnovují
-  aktivní <emphasis role="bold">režim BIOSu</emphasis> v DOSové paměti.
-  Takže pokud máte tento problém &ndash; vždy používejte VESA rozhraní pouze v
-  <emphasis role="bold">textovém režimu</emphasis>. Jinak bude přesto aktivován
-  textový režim (#03) a budete muset restartovat počítač.
+  NÄkterĂŠ <emphasis role="bold">LinuxovĂŠ grafickĂŠ ovladaÄe</emphasis> neobnovujĂ­
+  aktivnĂ­ <emphasis role="bold">reĹžim BIOSu</emphasis> v DOSovĂŠ pamÄti.
+  TakĹže pokud mĂĄte tento problĂŠm &ndash; vĹždy pouĹžĂ­vejte VESA rozhranĂ­ pouze v
+  <emphasis role="bold">textovĂŠm reĹžimu</emphasis>. Jinak bude pĹesto aktivovĂĄn
+  textovĂ˝ reĹžim (#03) a budete muset restartovat poÄĂ­taÄ.
   </simpara></listitem>
 <listitem><simpara>
-  Často po ukončení VESA rozhraní dostanete <emphasis role="bold">černou</emphasis>
-  obrazovku. Chcete-li vrátit obraz do původního stavu &ndash; jednoduše se
-  přepněte do jiné konzole (stiskem <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>)
-  a pak se přepněte zpět stejným způsobem.
+  Äasto po ukonÄenĂ­ VESA rozhranĂ­ dostanete <emphasis role="bold">Äernou</emphasis>
+  obrazovku. Chcete-li vrĂĄtit obraz do pĹŻvodnĂ­ho stavu &ndash; jednoduĹĄe se
+  pĹepnÄte do jinĂŠ konzole (stiskem <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>)
+  a pak se pĹepnÄte zpÄt stejnĂ˝m zpĹŻsobem.
   </simpara></listitem>
 <listitem><simpara>
-  Chcete-li <emphasis role="bold">funkční TV-out</emphasis>, musíte mít
-  připojený TV konektor před startem počítače, jelikož se video BIOS
-  inicializuje pouze jednou během POST procedury.
+  Chcete-li <emphasis role="bold">funkÄnĂ­ TV-out</emphasis>, musĂ­te mĂ­t
+  pĹipojenĂ˝ TV konektor pĹed startem poÄĂ­taÄe, jelikoĹž se video BIOS
+  inicializuje pouze jednou bÄhem POST procedury.
   </simpara></listitem>
 </itemizedlist>
 </sect2>
@@ -1357,33 +1357,33 @@ Nefunguje!
 <title>X11</title>
 
 <para>
-Pokud možno se mu vyhněte. Posílá obraz do X11 (používá rozšíření sdílená paměť)
-bez jakékoli hardwarové akcelerace. Podporuje (MMX/3DNow/SSE akcelerované, ale
-přesto pomalé) softwarové škálování. Použijte volby <option>-fs -zoom</option>.
-Většina karet má hardwarovou podporu škálování, použijte pro ně volbu
+Pokud moĹžno se mu vyhnÄte. PosĂ­lĂĄ obraz do X11 (pouĹžĂ­vĂĄ rozĹĄĂ­ĹenĂ­ sdĂ­lenĂĄ pamÄĹĽ)
+bez jakĂŠkoli hardwarovĂŠ akcelerace. Podporuje (MMX/3DNow/SSE akcelerovanĂŠ, ale
+pĹesto pomalĂŠ) softwarovĂŠ ĹĄkĂĄlovĂĄnĂ­. PouĹžijte volby <option>-fs -zoom</option>.
+VÄtĹĄina karet mĂĄ hardwarovou podporu ĹĄkĂĄlovĂĄnĂ­, pouĹžijte pro nÄ volbu
 <option>-vo xv</option>, nebo <option>-vo xmga</option> pro karty Matrox.
 </para>
 
 <para>
-Problém je, že většina karet nepodporuje hardwarovou akceleraci na sekundárním
-výstupu/TV. V těchto případech uvidíte místo filmu zelenou/modrou obrazovku.
-Teď se hodí toto rozhraní, ale potřebujete silný procesor pro použití
-softwarového škálování. Nepoužívejte SDL softwarový výstup a škálování, má horší
+ProblĂŠm je, Ĺže vÄtĹĄina karet nepodporuje hardwarovou akceleraci na sekundĂĄrnĂ­m
+vĂ˝stupu/TV. V tÄchto pĹĂ­padech uvidĂ­te mĂ­sto filmu zelenou/modrou obrazovku.
+TeÄ se hodĂ­ toto rozhranĂ­, ale potĹebujete silnĂ˝ procesor pro pouĹžitĂ­
+softwarovĂŠho ĹĄkĂĄlovĂĄnĂ­. NepouĹžĂ­vejte SDL softwarovĂ˝ vĂ˝stup a ĹĄkĂĄlovĂĄnĂ­, mĂĄ horĹĄĂ­
 kvalitu obrazu!
 </para>
 
 <para>
-Softwarové škálování je velmi pomalé, zkuste raději měnit videorežimy.
-Je to jednoduché. Viz <link linkend="dga-modelines">modelines v DGA sekci</link>
-a přidejte je do svého <filename>XF86Config</filename>.
+SoftwarovĂŠ ĹĄkĂĄlovĂĄnĂ­ je velmi pomalĂŠ, zkuste radÄji mÄnit videoreĹžimy.
+Je to jednoduchĂŠ. Viz <link linkend="dga-modelines">modelines v DGA sekci</link>
+a pĹidejte je do svĂŠho <filename>XF86Config</filename>.
 
 <itemizedlist spacing="compact">
 <listitem><simpara>
-  Máte-li XFree86 4.x.x: použijte volbu <option>-vm</option>. Ta změní
-  rozlišení tak, aby do něj film dobře vešel. Když ne:
+  MĂĄte-li XFree86 4.x.x: pouĹžijte volbu <option>-vm</option>. Ta zmÄnĂ­
+  rozliĹĄenĂ­ tak, aby do nÄj film dobĹe veĹĄel. KdyĹž ne:
   </simpara></listitem>
 <listitem><simpara>
-  S XFree86 3.x.x: musíte cyklovat dostupnými rozlišeními pomocí tlačítek
+  S XFree86 3.x.x: musĂ­te cyklovat dostupnĂ˝mi rozliĹĄenĂ­mi pomocĂ­ tlaÄĂ­tek
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
   a
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>.
@@ -1392,9 +1392,9 @@ a přidejte je do svého <filename>XF86Config</filename>.
 </para>
 
 <para>
-Pokud nemůžete najír rozlišení, která jste vložili, pročtěte si výstup XFree86.
-Některé ovladače nezvládnou nízké bodové kmitočty potřebné pro režimy s nízkým
-rozlišením videa.
+Pokud nemĹŻĹžete najĂ­r rozliĹĄenĂ­, kterĂĄ jste vloĹžili, proÄtÄte si vĂ˝stup XFree86.
+NÄkterĂŠ ovladaÄe nezvlĂĄdnou nĂ­zkĂŠ bodovĂŠ kmitoÄty potĹebnĂŠ pro reĹžimy s nĂ­zkĂ˝m
+rozliĹĄenĂ­m videa.
 </para>
 </sect2>
 
@@ -1403,164 +1403,164 @@ rozlišením videa.
 <title>VIDIX</title>
 
 <formalpara>
-<title>PŘEDMLUVA</title>
+<title>PĹEDMLUVA</title>
 <para>
 <acronym>VIDIX</acronym> je zkratka pro <emphasis role="bold">VID</emphasis>eo
 <emphasis role="bold">I</emphasis>nterface for *ni<emphasis role="bold">X</emphasis>
-(video rozhraní pro *nix).
-VIDIX bylo navrženo a představeno jako rozhraní pro rychlé uživatelské ovladače
-dosahujících video výkonu jako dosahuje mga_vid na kartách Matrox. Je rovněž
-dobře přenositelné.
+(video rozhranĂ­ pro *nix).
+VIDIX bylo navrĹženo a pĹedstaveno jako rozhranĂ­ pro rychlĂŠ uĹživatelskĂŠ ovladaÄe
+dosahujĂ­cĂ­ch video vĂ˝konu jako dosahuje mga_vid na kartĂĄch Matrox. Je rovnÄĹž
+dobĹe pĹenositelnĂŠ.
 </para>
 </formalpara>
 <para>
-Toto rozhraní bylo navrženo jako pokus napasovat existující video akcelerující
-rozhraní (známé jako mga_vid, rage128_vid, radeon_vid, pm3_vid) do pevného
-schéma. Poskytuje vysokoúrovňové rozhraní k čipům známým jako BES
-(BackEnd scalers) nebo OV (Video Overlays). Neposkytuje nízkoúrovňové rozhraní
-k věcem známým jako grafické servery.
-(Nechci konkurovat X11 týmu v přepínání grafických režimů). Čili hlavním cílem
-tohoto rozhraní je maximalizace rychlosti přehrávání videa.
+Toto rozhranĂ­ bylo navrĹženo jako pokus napasovat existujĂ­cĂ­ video akcelerujĂ­cĂ­
+rozhranĂ­ (znĂĄmĂŠ jako mga_vid, rage128_vid, radeon_vid, pm3_vid) do pevnĂŠho
+schĂŠma. Poskytuje vysokoĂşrovĹovĂŠ rozhranĂ­ k ÄipĹŻm znĂĄmĂ˝m jako BES
+(BackEnd scalers) nebo OV (Video Overlays). Neposkytuje nĂ­zkoĂşrovĹovĂŠ rozhranĂ­
+k vÄcem znĂĄmĂ˝m jako grafickĂŠ servery.
+(Nechci konkurovat X11 tĂ˝mu v pĹepĂ­nĂĄnĂ­ grafickĂ˝ch reĹžimĹŻ). Äili hlavnĂ­m cĂ­lem
+tohoto rozhranĂ­ je maximalizace rychlosti pĹehrĂĄvĂĄnĂ­ videa.
 </para>
 
 <itemizedlist spacing="compact">
-<title>POUŽITÍ</title>
+<title>POUĹ˝ITĂ</title>
 <listitem><simpara>
-  Můžete použít samostatné video rozhraní: <option>-vo xvidix</option>.
-  Toto rozhraní bylo vytvořeno jako front end X11 k technologii VIDIX.
-  Vyžaduje X server a může pracovat pouze pod X serverem. Poznamenejme, že
-  jelikož přímo komunikuje s hardwarem a obchází X ovladač, pixmapy uložené
-  v paměti grafické karty můžou být poškozeny. Můžete se tomu vyhnout omezením
-  množství video paměti použité X pomocí volby "VideoRam" v XF86Config o 4MB.
-  Pokud máte méně než 8MB video ram, můžete místo toho použít volbu
+  MĹŻĹžete pouĹžĂ­t samostatnĂŠ video rozhranĂ­: <option>-vo xvidix</option>.
+  Toto rozhranĂ­ bylo vytvoĹeno jako front end X11 k technologii VIDIX.
+  VyĹžaduje X server a mĹŻĹže pracovat pouze pod X serverem. Poznamenejme, Ĺže
+  jelikoĹž pĹĂ­mo komunikuje s hardwarem a obchĂĄzĂ­ X ovladaÄ, pixmapy uloĹženĂŠ
+  v pamÄti grafickĂŠ karty mĹŻĹžou bĂ˝t poĹĄkozeny. MĹŻĹžete se tomu vyhnout omezenĂ­m
+  mnoĹžstvĂ­ video pamÄti pouĹžitĂŠ X pomocĂ­ volby "VideoRam" v XF86Config o 4MB.
+  Pokud mĂĄte mĂŠnÄ neĹž 8MB video ram, mĹŻĹžete mĂ­sto toho pouĹžĂ­t volbu
   "XaaNoPixmapCache" v sekci screen.
   </simpara></listitem>
 <listitem><simpara>
-  Existuje konzolové VIDIX rozhraní: <option>-vo cvidix</option>.
-  To vyžaduje pro většinu karet funkční inicializovaný framebuffer (jinak pouze
-  rozhodíte obrazovku) a dosáhnete podobného efektu jako s
-  <option>-vo mga</option> nebo <option>-vo fbdev</option>. nVidia karty však
-  jsou schopny zobrazit plně grafické video na reálné textové konzoli. Viz
-  sekci <link linkend="vidix-nvidia">nvidia_vid</link> pro více informací.
+  Existuje konzolovĂŠ VIDIX rozhranĂ­: <option>-vo cvidix</option>.
+  To vyĹžaduje pro vÄtĹĄinu karet funkÄnĂ­ inicializovanĂ˝ framebuffer (jinak pouze
+  rozhodĂ­te obrazovku) a dosĂĄhnete podobnĂŠho efektu jako s
+  <option>-vo mga</option> nebo <option>-vo fbdev</option>. nVidia karty vĹĄak
+  jsou schopny zobrazit plnÄ grafickĂŠ video na reĂĄlnĂŠ textovĂŠ konzoli. Viz
+  sekci <link linkend="vidix-nvidia">nvidia_vid</link> pro vĂ­ce informacĂ­.
   </simpara></listitem>
 <listitem><simpara>
-  Můžete použít VIDIXové podzařízení, které bylo zabudováno do několika video
-  ovladačů, například: <option>-vo vesa:vidix</option>
+  MĹŻĹžete pouĹžĂ­t VIDIXovĂŠ podzaĹĂ­zenĂ­, kterĂŠ bylo zabudovĂĄno do nÄkolika video
+  ovladaÄĹŻ, napĹĂ­klad: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">pouze Linux</emphasis>) a
   <option>-vo fbdev:vidix</option>.
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-Nezáleží na tom, které video výstupní rozhraní je použito s
+NezĂĄleĹžĂ­ na tom, kterĂŠ video vĂ˝stupnĂ­ rozhranĂ­ je pouĹžito s
 <emphasis role="bold">VIDIX</emphasis>.
 </para>
 
 <itemizedlist spacing="compact">
-<title>POŽADAVKY</title>
+<title>POĹ˝ADAVKY</title>
 <listitem><simpara>
-  Video karta by měla být v grafickém režimu (vyjma karet nVidia s výstupním
-  rozhraním <option>-vo cvidix</option>).
+  Video karta by mÄla bĂ˝t v grafickĂŠm reĹžimu (vyjma karet nVidia s vĂ˝stupnĂ­m
+  rozhranĂ­m <option>-vo cvidix</option>).
   </simpara></listitem>
 <listitem><simpara>
-  Výstupní video rozhraní <application>MPlayer</application>u by mělo znát
-  aktivní video režim a být schopno sdělit VIDIXovému podzařízení některé video
+  VĂ˝stupnĂ­ video rozhranĂ­ <application>MPlayer</application>u by mÄlo znĂĄt
+  aktivnĂ­ video reĹžim a bĂ˝t schopno sdÄlit VIDIXovĂŠmu podzaĹĂ­zenĂ­ nÄkterĂŠ video
   charakteristiky serveru.
   </simpara></listitem>
 </itemizedlist>
 
 <formalpara>
-<title>METODY POUŽITÍ</title>
+<title>METODY POUĹ˝ITĂ</title>
 <para>
-Když použijete VIDIX jako <emphasis role="bold">subdevice</emphasis>
-(<option>-vo vesa:vidix</option>), pak je konfigurace video režimu je provedeno
-výstupním video rozhraním (zkrátka <emphasis role="bold">vo_server</emphasis>em).
-Takže můžete zadat na příkazovém řádku <application>MPlayer</application>u
-stejné volby jako pro vo_server. Návdavkem rozeznává volbu
-<option>-double</option> jako globální parametr. (Doporučuji použít tuto volbu
-s VIDIX aspoň pro ATI kartu). Stejně jako <option>-vo xvidix</option>, dosud
-zná následující volby: <option>-fs -zoom -x -y -double</option>.
+KdyĹž pouĹžijete VIDIX jako <emphasis role="bold">subdevice</emphasis>
+(<option>-vo vesa:vidix</option>), pak je konfigurace video reĹžimu je provedeno
+vĂ˝stupnĂ­m video rozhranĂ­m (zkrĂĄtka <emphasis role="bold">vo_server</emphasis>em).
+TakĹže mĹŻĹžete zadat na pĹĂ­kazovĂŠm ĹĂĄdku <application>MPlayer</application>u
+stejnĂŠ volby jako pro vo_server. NĂĄvdavkem rozeznĂĄvĂĄ volbu
+<option>-double</option> jako globĂĄlnĂ­ parametr. (DoporuÄuji pouĹžĂ­t tuto volbu
+s VIDIX aspoĹ pro ATI kartu). StejnÄ jako <option>-vo xvidix</option>, dosud
+znĂĄ nĂĄsledujĂ­cĂ­ volby: <option>-fs -zoom -x -y -double</option>.
 </para>
 </formalpara>
 <para>
-Rovněž můžete uvést VIDIXový ovladač jako třetí podvolbu na příkazovém řádku:
+RovnÄĹž mĹŻĹžete uvĂŠst VIDIXovĂ˝ ovladaÄ jako tĹetĂ­ podvolbu na pĹĂ­kazovĂŠm ĹĂĄdku:
 
 <screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>soubor.avi</replaceable></screen>
 nebo
 <screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>soubor.avi</replaceable></screen>
 
-Ale je to nebezpečné a neměli byste to dělat. V tomto případě bude zadaný
-ovladač vynucen a výsledek je nepředvídatelný (může vám
-<emphasis role="bold">zatuhnout</emphasis> počítač). Měli byste to použít
-POUZE pokud jste si absolutně jistí, že to bude fungovat a
-<application>MPlayer</application> to neudělá automaticky. Řekněte o tom prosím
-vývojářům. Správný způsob je použití VIDIX bez argumentů, aby proběhla
+Ale je to nebezpeÄnĂŠ a nemÄli byste to dÄlat. V tomto pĹĂ­padÄ bude zadanĂ˝
+ovladaÄ vynucen a vĂ˝sledek je nepĹedvĂ­datelnĂ˝ (mĹŻĹže vĂĄm
+<emphasis role="bold">zatuhnout</emphasis> poÄĂ­taÄ). MÄli byste to pouĹžĂ­t
+POUZE pokud jste si absolutnÄ jistĂ­, Ĺže to bude fungovat a
+<application>MPlayer</application> to neudÄlĂĄ automaticky. ĹeknÄte o tom prosĂ­m
+vĂ˝vojĂĄĹĹŻm. SprĂĄvnĂ˝ zpĹŻsob je pouĹžitĂ­ VIDIX bez argumentĹŻ, aby probÄhla
 autodetekce.
 </para>
 
 <para>
-Jelikož VIDIX vyžaduje přímý přístup k hardware, můžete jej buď spustit jako
-root, nebo nastavit SETUID bit binárce <application>MPlayer</application>u
-(<emphasis role="bold">Varování: Toto je bezpečnostní risk!</emphasis>).
-Alternativně můžete použít speciální jaderný modul, například:
+JelikoĹž VIDIX vyĹžaduje pĹĂ­mĂ˝ pĹĂ­stup k hardware, mĹŻĹžete jej buÄ spustit jako
+root, nebo nastavit SETUID bit binĂĄrce <application>MPlayer</application>u
+(<emphasis role="bold">VarovĂĄnĂ­: Toto je bezpeÄnostnĂ­ risk!</emphasis>).
+AlternativnÄ mĹŻĹžete pouĹžĂ­t speciĂĄlnĂ­ jadernĂ˝ modul, napĹĂ­klad:
 </para>
 
 <procedure>
 <step><para>
-  Stáhněte si <ulink url="http://www.arava.co.il/matan/svgalib/">vývojovou verzi</ulink>
-  svgalib (například 1.9.17), <emphasis role="bold">NEBO</emphasis> si
-  stáhněte verzi vatvořenou Alexem speciálně pro použití s
-  <application>MPlayer</application>em (ke kompilaci nepotřebuje zdrojový kód
+  StĂĄhnÄte si <ulink url="http://www.arava.co.il/matan/svgalib/">vĂ˝vojovou verzi</ulink>
+  svgalib (napĹĂ­klad 1.9.17), <emphasis role="bold">NEBO</emphasis> si
+  stĂĄhnÄte verzi vatvoĹenou Alexem speciĂĄlnÄ pro pouĹžitĂ­ s
+  <application>MPlayer</application>em (ke kompilaci nepotĹebuje zdrojovĂ˝ kĂłd
   svgalib)
   <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">odtud</ulink>.
   </para></step>
 <step><para>
-  Skompilujte modul v adresáři <filename class="directory">svgalib_helper</filename>
+  Skompilujte modul v adresĂĄĹi <filename class="directory">svgalib_helper</filename>
   (naleznete ji v <filename class="directory">svgalib-1.9.17/kernel/</filename>,
-  pokud jste si stáhli zdrojový kód ze serveru svgalib) a nahrajte (insmod) jej.
+  pokud jste si stĂĄhli zdrojovĂ˝ kĂłd ze serveru svgalib) a nahrajte (insmod) jej.
   </para></step>
 <step><para>
-  Pro vytvoření potřebných zařízení v adresáři
-  <filename class="directory">/dev</filename> proveďte jako root
-  <screen>make device</screen> v adresáři
+  Pro vytvoĹenĂ­ potĹebnĂ˝ch zaĹĂ­zenĂ­ v adresĂĄĹi
+  <filename class="directory">/dev</filename> proveÄte jako root
+  <screen>make device</screen> v adresĂĄĹi
   <filename class="directory">svgalib_helper</filename>.
   </para></step>
 <step><para>
-  Přesuňte adresář <filename class="directory">svgalib_helper</filename> do
+  PĹesuĹte adresĂĄĹ <filename class="directory">svgalib_helper</filename> do
   <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
   </para></step>
 <step><para>
-  Pokud jste si stáhli zdroj ze stránek svgalib, musíte odkomentovat řádek
-  CFLAGS obsahující text "svgalib_helper" v souboru
+  Pokud jste si stĂĄhli zdroj ze strĂĄnek svgalib, musĂ­te odkomentovat ĹĂĄdek
+  CFLAGS obsahujĂ­cĂ­ text "svgalib_helper" v souboru
   <filename class="directory">libdha/Makefile</filename>.
   </para></step>
 <step><para>
-  Překompilujte a nainstalujte libdha.
+  PĹekompilujte a nainstalujte libdha.
   </para></step>
 </procedure>
 
 <sect3 id="vidix-ati">
 <title>Karty ATI</title>
 <para>
-V současnosti je většina ATI karet podporována nativně od Mach64 až po
-nejnovější Radeony.
+V souÄasnosti je vÄtĹĄina ATI karet podporovĂĄna nativnÄ od Mach64 aĹž po
+nejnovÄjĹĄĂ­ Radeony.
 </para>
 
 <para>
-Existují dvě skompilované binárky: <filename>radeon_vid</filename> pro Radeony a
-<filename>rage128_vid</filename> pro karty Rage 128. Můžete některou vynutit,
- nebo nechat VIDIX rozhraní autodetekovat všechny dostupné ovladače.
+ExistujĂ­ dvÄ skompilovanĂŠ binĂĄrky: <filename>radeon_vid</filename> pro Radeony a
+<filename>rage128_vid</filename> pro karty Rage 128. MĹŻĹžete nÄkterou vynutit,
+ nebo nechat VIDIX rozhranĂ­ autodetekovat vĹĄechny dostupnĂŠ ovladaÄe.
 </para>
 </sect3>
 
 <sect3 id="vidix-mga">
 <title>Karty Matrox</title>
 <para>
-Matrox G200, G400, G450 a G550 jsou hlášeny jako funkční.
+Matrox G200, G400, G450 a G550 jsou hlĂĄĹĄeny jako funkÄnĂ­.
 </para>
 
 <para>
-Ovladač podporuje video ekvalizéry a měl by být téměř tak rychlý jako
+OvladaÄ podporuje video ekvalizĂŠry a mÄl by bĂ˝t tĂŠmÄĹ tak rychlĂ˝ jako
 <link linkend="mga_vid">Matrox framebuffer</link>
 </para>
 </sect3>
@@ -1568,12 +1568,12 @@ Ovladač podporuje video ekvalizéry a měl by být téměř tak rychlý jako
 <sect3 id="vidix-trident">
 <title>Karty Trident</title>
 <para>
-Existuje ovladač pro čipset Trident Cyberblade/i1, který lze nalézt na
+Existuje ovladaÄ pro Äipset Trident Cyberblade/i1, kterĂ˝ lze nalĂŠzt na
 motherboardech VIA Epia.
 </para>
 
 <para>
-Ovladač byl napsán a je udržován
+OvladaÄ byl napsĂĄn a je udrĹžovĂĄn
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastairem M. Robinsonem</ulink>
 </para>
 </sect3>
@@ -1581,20 +1581,20 @@ Ovladač byl napsán a je udržován
 <sect3 id="vidix-3dlabs">
 <title>Karty 3DLabs</title>
 <para>
-Ačkoli existuje ovladač pro čipy 3DLabs GLINT R3 a Permedia3, nikdo je
-netestoval, takže hlášení vítáme.
+AÄkoli existuje ovladaÄ pro Äipy 3DLabs GLINT R3 a Permedia3, nikdo je
+netestoval, takĹže hlĂĄĹĄenĂ­ vĂ­tĂĄme.
 </para>
 </sect3>
 
 <sect3 id="vidix-nvidia">
 <title>Karty nVidia</title>
 <para>
-  Unikátní vlastností ovladače nvidia_vid je jeho schopnost zobrazit video na
-  <emphasis role="bold">jednoduché, čisté, pouze textové konzoli</emphasis>
-  &ndash; bez framebufferu nebo nějaké X magie. Pro tento účel budete muset
-  použít video rozhraní <option>cvidix</option>, jak to ukazuje následující
-  příklad:
-  <screen>mplayer -vo cvidix <replaceable>příklad.avi</replaceable></screen>
+  UnikĂĄtnĂ­ vlastnostĂ­ ovladaÄe nvidia_vid je jeho schopnost zobrazit video na
+  <emphasis role="bold">jednoduchĂŠ, ÄistĂŠ, pouze textovĂŠ konzoli</emphasis>
+  &ndash; bez framebufferu nebo nÄjakĂŠ X magie. Pro tento ĂşÄel budete muset
+  pouĹžĂ­t video rozhranĂ­ <option>cvidix</option>, jak to ukazuje nĂĄsledujĂ­cĂ­
+  pĹĂ­klad:
+  <screen>mplayer -vo cvidix <replaceable>pĹĂ­klad.avi</replaceable></screen>
 </para>
 
 </sect3>
@@ -1602,16 +1602,16 @@ netestoval, takže hlášení vítáme.
 <sect3 id="vidix-sis">
 <title>Karty SiS</title>
 <para>
-Toto je velmi experimentální kód, stejně jako nvidia_vid.
+Toto je velmi experimentĂĄlnĂ­ kĂłd, stejnÄ jako nvidia_vid.
 </para>
 
 <para>
-Byl testován na SiS 650/651/740 (nejobvyklejší čipsety použité v SiS
-verzích "Shuttle XPC" barebones boxes out there)
+Byl testovĂĄn na SiS 650/651/740 (nejobvyklejĹĄĂ­ Äipsety pouĹžitĂŠ v SiS
+verzĂ­ch "Shuttle XPC" barebones boxes out there)
 </para>
 
 <para>
-Hlášení očekávána!
+HlĂĄĹĄenĂ­ oÄekĂĄvĂĄna!
 </para>
 </sect3>
 </sect2>
@@ -1619,91 +1619,91 @@ Hlášení očekávána!
 <sect2 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
-&quot;DirectFB je grafická knihovna navržená se zřetelem na vestavěné systémy.
-Nabízí maximálně hardwarově akcelerovaný výkon při minimální spotřebě
-zdrojů a zatížení.&quot; &ndash; citováno z <ulink url="http://www.directfb.org"/>
+&quot;DirectFB je grafickĂĄ knihovna navrĹženĂĄ se zĹetelem na vestavÄnĂŠ systĂŠmy.
+NabĂ­zĂ­ maximĂĄlnÄ hardwarovÄ akcelerovanĂ˝ vĂ˝kon pĹi minimĂĄlnĂ­ spotĹebÄ
+zdrojĹŻ a zatĂ­ĹženĂ­.&quot; &ndash; citovĂĄno z <ulink url="http://www.directfb.org"/>
 </para></blockquote>
 
-<para>Vlastnosti DirectFB v této sekci vynechám.</para>
+<para>Vlastnosti DirectFB v tĂŠto sekci vynechĂĄm.</para>
 
 <para>
 
-Ačkoli <application>MPlayer</application> není podporován jako &quot;video
-provider&quot; v DirectFB, toto video rozhraní umožní přehrávání videa přes
-DirectFB. Bude to samozřejmě akcelerované. Na mém Matroxu G400 byla rychlost
-DirectFB stejná jako XVideo.
+AÄkoli <application>MPlayer</application> nenĂ­ podporovĂĄn jako &quot;video
+provider&quot; v DirectFB, toto video rozhranĂ­ umoĹžnĂ­ pĹehrĂĄvĂĄnĂ­ videa pĹes
+DirectFB. Bude to samozĹejmÄ akcelerovanĂŠ. Na mĂŠm Matroxu G400 byla rychlost
+DirectFB stejnĂĄ jako XVideo.
 </para>
 
 <para>
-Vždy se snažte používat nejnovější verzi DirectFB. Můžete nastavovat volby pro
-DirectFB na příkazovém řádku pomocí volby <option>-dfbopts</option>. Volbu
-vrstvy lze provést metodou podzařízení, např.: <option>-vo directfb:2</option>
-(výchozí je vrstva -1: autodetekce)
+VĹždy se snaĹžte pouĹžĂ­vat nejnovÄjĹĄĂ­ verzi DirectFB. MĹŻĹžete nastavovat volby pro
+DirectFB na pĹĂ­kazovĂŠm ĹĂĄdku pomocĂ­ volby <option>-dfbopts</option>. Volbu
+vrstvy lze provĂŠst metodou podzaĹĂ­zenĂ­, napĹ.: <option>-vo directfb:2</option>
+(vĂ˝chozĂ­ je vrstva -1: autodetekce)
 </para>
 </sect2>
 
 <sect2 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
-Přečtěte si prosím <link linkend="directfb">hlavní DirectFB</link> sekci pro
-obecné informaci.
+PĹeÄtÄte si prosĂ­m <link linkend="directfb">hlavnĂ­ DirectFB</link> sekci pro
+obecnĂŠ informaci.
 </para>
 
 <para>
-Toto video výstupní zařízení zapne CRTC2 (na sekundárním výstupu) na kartách
-Matrox G400/G450/G550, takže zobrazuje video
-<emphasis role="bold">nezávisle</emphasis> na hlavním výstupu.
+Toto video vĂ˝stupnĂ­ zaĹĂ­zenĂ­ zapne CRTC2 (na sekundĂĄrnĂ­m vĂ˝stupu) na kartĂĄch
+Matrox G400/G450/G550, takĹže zobrazuje video
+<emphasis role="bold">nezĂĄvisle</emphasis> na hlavnĂ­m vĂ˝stupu.
 </para>
 
 <para>
-Ville Syrjala's má
+Ville Syrjala's mĂĄ
 <ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">README</ulink>
 a
 <ulink url="http://www.sci.fi/~syrjala/directfb/matrox-tv-out-howto">HOWTO</ulink>
-na své domácí stránce, kde vysvětluje, jak rozběhnout DirectFB TV výstup na
-kartách Matrox.
+na svĂŠ domĂĄcĂ­ strĂĄnce, kde vysvÄtluje, jak rozbÄhnout DirectFB TV vĂ˝stup na
+kartĂĄch Matrox.
 </para>
 
 <note><para>
-První DirectFB verze se kterou se nám to povedlo byla
-0.9.17 (je chybová, potřebuje <systemitem>surfacemanager</systemitem>
-patch z výše uvedeného URL). Portace CRTC2 kódu do
-<link linkend="mga_vid">mga_vid</link> bylo plánováno léta,
-<ulink url="../../tech/patches.txt">patche</ulink> vítáme.
+PrvnĂ­ DirectFB verze se kterou se nĂĄm to povedlo byla
+0.9.17 (je chybovĂĄ, potĹebuje <systemitem>surfacemanager</systemitem>
+patch z vĂ˝ĹĄe uvedenĂŠho URL). Portace CRTC2 kĂłdu do
+<link linkend="mga_vid">mga_vid</link> bylo plĂĄnovĂĄno lĂŠta,
+<ulink url="../../tech/patches.txt">patche</ulink> vĂ­tĂĄme.
 </para></note>
 </sect2>
 </sect1>
 
 <sect1 id="mpeg_decoders">
-<title>MPEG dekodéry</title>
+<title>MPEG dekodĂŠry</title>
 
 <sect2 id="dvb">
-<title>DVB výstup a vstup</title>
+<title>DVB vĂ˝stup a vstup</title>
 <para>
-<application>MPlayer</application> podporuje karty s čipsetem Siemens DVB od
-výrobců jako Siemens, Technotrend, Galaxis nebo Hauppauge. Poslední DVB
-ovladače jsou dostupné na <ulink url="http://www.linuxtv.org">Linux TV stránkách</ulink>.
-Pokud chcete provádět softwarové transkódování, měli byste mít aspoň 1GHz CPU.
+<application>MPlayer</application> podporuje karty s Äipsetem Siemens DVB od
+vĂ˝robcĹŻ jako Siemens, Technotrend, Galaxis nebo Hauppauge. PoslednĂ­ DVB
+ovladaÄe jsou dostupnĂŠ na <ulink url="http://www.linuxtv.org">Linux TV strĂĄnkĂĄch</ulink>.
+Pokud chcete provĂĄdÄt softwarovĂŠ transkĂłdovĂĄnĂ­, mÄli byste mĂ­t aspoĹ 1GHz CPU.
 </para>
 
 <para>
-Configure by měl detekovat vaši DVB kartu. Pokud ne, vynuťte detekci pomocí
+Configure by mÄl detekovat vaĹĄi DVB kartu. Pokud ne, vynuĹĽte detekci pomocĂ­
 </para>
 
 <para><screen>./configure --enable-dvb</screen></para>
 
-<para>Pokud máte ost hlavičky na nestandardním místě, nastavte cestu pomocí</para>
+<para>Pokud mĂĄte ost hlaviÄky na nestandardnĂ­m mĂ­stÄ, nastavte cestu pomocĂ­</para>
 
-<para><screen>./configure --with-extraincdir=<replaceable>zdrojový adresář DVB</replaceable>/ost/include
+<para><screen>./configure --with-extraincdir=<replaceable>zdrojovĂ˝ adresĂĄĹ DVB</replaceable>/ost/include
 </screen></para>
 
-<para>Pak kompilujte a instalujte obvyklým způsobem.</para>
+<para>Pak kompilujte a instalujte obvyklĂ˝m zpĹŻsobem.</para>
 
 <formalpara>
-<title>POUŽITÍ</title>
+<title>POUĹ˝ITĂ</title>
 <para>
-Hardwarové dekódování (přehrávání standardních MPEG-1/2 souborů) lze provést
-tímto příkazem:
+HardwarovĂŠ dekĂłdovĂĄnĂ­ (pĹehrĂĄvĂĄnĂ­ standardnĂ­ch MPEG-1/2 souborĹŻ) lze provĂŠst
+tĂ­mto pĹĂ­kazem:
 </para>
 </formalpara>
 
@@ -1712,29 +1712,29 @@ tímto příkazem:
 </para>
 
 <para>
-Softwarového dekódování nebo transkódování odlišných formátů do MPEG-1 můžete
-dosáhnout příkazem podobným tomuto:
+SoftwarovĂŠho dekĂłdovĂĄnĂ­ nebo transkĂłdovĂĄnĂ­ odliĹĄnĂ˝ch formĂĄtĹŻ do MPEG-1 mĹŻĹžete
+dosĂĄhnout pĹĂ­kazem podobnĂ˝m tomuto:
 </para>
 <para><screen>
-mplayer -ao mpegpes -vo mpegpes <replaceable>váš_soubor.ext</replaceable>
-mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>váš_soubor.ext</replaceable>
+mplayer -ao mpegpes -vo mpegpes <replaceable>vĂĄĹĄ_soubor.ext</replaceable>
+mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>vĂĄĹĄ_soubor.ext</replaceable>
 </screen></para>
 
 <para>
-Pamatujte, že DVB karty podporují pouze výšky 288 a 576 pro PAL nebo 240 a 480
-pro NTSC. Jiné výšky <emphasis role="bold">musíte</emphasis> přeškálovat
-přidáním <option>scale=šířka:výška</option> s šířkou a výškou, které chcete
-do volby <option>-vf</option>. DVB karty akceptují různé šířka jako 720, 704,
-640, 512, 480, 352 atd, ale neprovádí žádné vodorovné hardwarové škálování,
-takže ve většině případů nemusíte vodorovně škálovat. Pro 512x384
-(poměr stran 4:3) MPEG-4 (DivX) zkuste:
+Pamatujte, Ĺže DVB karty podporujĂ­ pouze vĂ˝ĹĄky 288 a 576 pro PAL nebo 240 a 480
+pro NTSC. JinĂŠ vĂ˝ĹĄky <emphasis role="bold">musĂ­te</emphasis> pĹeĹĄkĂĄlovat
+pĹidĂĄnĂ­m <option>scale=ĹĄĂ­Ĺka:vĂ˝ĹĄka</option> s ĹĄĂ­Ĺkou a vĂ˝ĹĄkou, kterĂŠ chcete
+do volby <option>-vf</option>. DVB karty akceptujĂ­ rĹŻznĂŠ ĹĄĂ­Ĺka jako 720, 704,
+640, 512, 480, 352 atd, ale neprovĂĄdĂ­ ĹžĂĄdnĂŠ vodorovnĂŠ hardwarovĂŠ ĹĄkĂĄlovĂĄnĂ­,
+takĹže ve vÄtĹĄinÄ pĹĂ­padĹŻ nemusĂ­te vodorovnÄ ĹĄkĂĄlovat. Pro 512x384
+(pomÄr stran 4:3) MPEG-4 (DivX) zkuste:
 </para>
 
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen></para>
 
-<para>Pokud máte širokoúhlý film a nechcete jej škálovat na plnou výšku, můžete
-použít filtr <option>expand=š:v</option> pro přidání černých okrajů. Pro
-promítání 640x384 MPEG-4 (DivX), zkuste:
+<para>Pokud mĂĄte ĹĄirokoĂşhlĂ˝ film a nechcete jej ĹĄkĂĄlovat na plnou vĂ˝ĹĄku, mĹŻĹžete
+pouĹžĂ­t filtr <option>expand=ĹĄ:v</option> pro pĹidĂĄnĂ­ ÄernĂ˝ch okrajĹŻ. Pro
+promĂ­tĂĄnĂ­ 640x384 MPEG-4 (DivX), zkuste:
 </para>
 
 <para>
@@ -1743,7 +1743,7 @@ promítání 640x384 MPEG-4 (DivX), zkuste:
 </para>
 
 <para>
-Pokud je váš procesor příliš slabý pro 720x576 MPEG-4 (DivX), zkuste podškálovat:
+Pokud je vĂĄĹĄ procesor pĹĂ­liĹĄ slabĂ˝ pro 720x576 MPEG-4 (DivX), zkuste podĹĄkĂĄlovat:
 </para>
 
 <para>
@@ -1751,7 +1751,7 @@ Pokud je váš procesor příliš slabý pro 720x576 MPEG-4 (DivX), zkuste podškálovat
 </screen>
 </para>
 
-<para>Pokud se rychlost nezlepší, zkuste podškálovat i výšku:</para>
+<para>Pokud se rychlost nezlepĹĄĂ­, zkuste podĹĄkĂĄlovat i vĂ˝ĹĄku:</para>
 
 <para>
 <screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 <replaceable>soubor.avi</replaceable>
@@ -1759,24 +1759,24 @@ Pokud je váš procesor příliš slabý pro 720x576 MPEG-4 (DivX), zkuste podškálovat
 </para>
 
 <para>
-Pro OSD a titulky použijte OSD vlastnost expand filtru. Takže místo
-<option>expand=š:v</option> nebo <option>expand=š:v:x:y</option>, použijte
-<option>expand=š:v:x:y:1</option> (pátý parametr <option>:1</option>
-na konci zapne renderování OSD). Možná byste měli trochu posunout obraz nahoru,
-abyste měli větší černý okraj pro titulky. Rovněž byste měli posunout nahoru
-titulky, pokud jsou mimo TV obrazovku. Použijte volbu <option>-subpos &lt;0-100&gt;</option>
-pro toto nastavení (<option>-subpos 80</option> je dobrá volba).
+Pro OSD a titulky pouĹžijte OSD vlastnost expand filtru. TakĹže mĂ­sto
+<option>expand=ĹĄ:v</option> nebo <option>expand=ĹĄ:v:x:y</option>, pouĹžijte
+<option>expand=ĹĄ:v:x:y:1</option> (pĂĄtĂ˝ parametr <option>:1</option>
+na konci zapne renderovĂĄnĂ­ OSD). MoĹžnĂĄ byste mÄli trochu posunout obraz nahoru,
+abyste mÄli vÄtĹĄĂ­ ÄernĂ˝ okraj pro titulky. RovnÄĹž byste mÄli posunout nahoru
+titulky, pokud jsou mimo TV obrazovku. PouĹžijte volbu <option>-subpos &lt;0-100&gt;</option>
+pro toto nastavenĂ­ (<option>-subpos 80</option> je dobrĂĄ volba).
 </para>
 
 <para>
-Chcete-li přehrávat filmy s jinou snímkovou rychlostí než 25 fps na PAL TV, nebo
-na pomalém CPU, přidejte volbu <option>-framedrop</option>.
+Chcete-li pĹehrĂĄvat filmy s jinou snĂ­mkovou rychlostĂ­ neĹž 25 fps na PAL TV, nebo
+na pomalĂŠm CPU, pĹidejte volbu <option>-framedrop</option>.
 </para>
 
 <para>
-Chcete-li zachovat poměr stran MPEG-4 (DivX) souborů a dosáhnout optimálních
-škálovacích parametrů (hardwarové horizontální škálování a softwarové vertikální
-škálování zatímco zachováte správný poměr stran), použijte filtr dvbscale:
+Chcete-li zachovat pomÄr stran MPEG-4 (DivX) souborĹŻ a dosĂĄhnout optimĂĄlnĂ­ch
+ĹĄkĂĄlovacĂ­ch parametrĹŻ (hardwarovĂŠ horizontĂĄlnĂ­ ĹĄkĂĄlovĂĄnĂ­ a softwarovĂŠ vertikĂĄlnĂ­
+ĹĄkĂĄlovĂĄnĂ­ zatĂ­mco zachovĂĄte sprĂĄvnĂ˝ pomÄr stran), pouĹžijte filtr dvbscale:
 </para>
 
 <para><screen>
@@ -1785,69 +1785,69 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
 
 <formalpara>
-<title>Digitální TV (vstupní DVB modul)</title>
-<para>Můžete použít svou DVB kartu pro sledování Digitální TV.</para>
+<title>DigitĂĄlnĂ­ TV (vstupnĂ­ DVB modul)</title>
+<para>MĹŻĹžete pouĹžĂ­t svou DVB kartu pro sledovĂĄnĂ­ DigitĂĄlnĂ­ TV.</para>
 </formalpara>
 
 <para>
-  Měli byste mít nainstalovány programy <command>scan</command> a
-  <command>szap/tzap/czap/azap</command>; všechny jsou zařazeny v balíčku
-  ovladačů.
+  MÄli byste mĂ­t nainstalovĂĄny programy <command>scan</command> a
+  <command>szap/tzap/czap/azap</command>; vĹĄechny jsou zaĹazeny v balĂ­Äku
+  ovladaÄĹŻ.
 </para>
 
 <para>
-  Ověřte si, zda vaše ovladače pracují správně s progamy jako je
+  OvÄĹte si, zda vaĹĄe ovladaÄe pracujĂ­ sprĂĄvnÄ s progamy jako je
   <ulink url="http://sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
-  (to je základ vstupního DVB modulu).
+  (to je zĂĄklad vstupnĂ­ho DVB modulu).
 </para>
 
 <para>
-  Nyní byste měli skompilovat soubor <filename>~/.mplayer/channels.conf</filename>,
-  se syntaxí akceptovanou <command>szap/tzap/czap/azap</command>, nebo nechat
+  NynĂ­ byste mÄli skompilovat soubor <filename>~/.mplayer/channels.conf</filename>,
+  se syntaxĂ­ akceptovanou <command>szap/tzap/czap/azap</command>, nebo nechat
   <command>scan</command>, aby jej skompiloval.
 </para>
 
 <para>
-  Pokud máte více než jeden typ karty (Např. Satellitar, Terrestrial, Cable a ATSC)
-  můžete si uložit své channels soubory podle typu jako
+  Pokud mĂĄte vĂ­ce neĹž jeden typ karty (NapĹ. Satellitar, Terrestrial, Cable a ATSC)
+  mĹŻĹžete si uloĹžit svĂŠ channels soubory podle typu jako
   <filename>~/.mplayer/channels.conf.sat</filename>,
   <filename>~/.mplayer/channels.conf.ter</filename>,
   <filename>~/.mplayer/channels.conf.cbl</filename>,
   a <filename>~/.mplayer/channels.conf.atsc</filename>,
-  kdy <application>MPlayer</application> použije tyto soubory spíše než
+  kdy <application>MPlayer</application> pouĹžije tyto soubory spĂ­ĹĄe neĹž
   <filename>~/.mplayer/channels.conf</filename>,
-  a vy musíte pouze nastavit, kterou kartu použít.
+  a vy musĂ­te pouze nastavit, kterou kartu pouĹžĂ­t.
 </para>
 
 <para>
-  Ujistěte se, že máte <emphasis>pouze</emphasis> nekódované
-  kanály ve svém <filename>channels.conf</filename> souboru, jinak se
-  <application>MPlayer</application> pokusí přeladit na nejbližší zobrazitelný,
-  ale to může trvat dlouho, pokud je zde mnoho po sobě jdoucích šifrovaných
-  kanálů.
+  UjistÄte se, Ĺže mĂĄte <emphasis>pouze</emphasis> nekĂłdovanĂŠ
+  kanĂĄly ve svĂŠm <filename>channels.conf</filename> souboru, jinak se
+  <application>MPlayer</application> pokusĂ­ pĹeladit na nejbliĹžĹĄĂ­ zobrazitelnĂ˝,
+  ale to mĹŻĹže trvat dlouho, pokud je zde mnoho po sobÄ jdoucĂ­ch ĹĄifrovanĂ˝ch
+  kanĂĄlĹŻ.
 </para>
 
 <para>
-  V polích audio a video můžete použít rozšířenou syntaxi:
-  <option>...:pid[+pid]:...</option> (maximálně 6 pidů každé);
-  v tom případě zahrne <application>MPlayer</application> do datového proudu
-  všechny zadané pidy plus pid 0 (který obsahuje PAT).
-  Doporučujeme zahrnout do každého řádku PMT pid pro odpovídající kanál
-  (pokud jej znáte)
-  Další možná použití jsou: televideo pid, druhá audio stopa, atd.
+  V polĂ­ch audio a video mĹŻĹžete pouĹžĂ­t rozĹĄĂ­Ĺenou syntaxi:
+  <option>...:pid[+pid]:...</option> (maximĂĄlnÄ 6 pidĹŻ kaĹždĂŠ);
+  v tom pĹĂ­padÄ zahrne <application>MPlayer</application> do datovĂŠho proudu
+  vĹĄechny zadanĂŠ pidy plus pid 0 (kterĂ˝ obsahuje PAT).
+  DoporuÄujeme zahrnout do kaĹždĂŠho ĹĂĄdku PMT pid pro odpovĂ­dajĂ­cĂ­ kanĂĄl
+  (pokud jej znĂĄte)
+  DalĹĄĂ­ moĹžnĂĄ pouĹžitĂ­ jsou: televideo pid, druhĂĄ audio stopa, atd.
 </para>
 
 <para>
-  Pokud <application>MPlayer</application> často protestuje o
-  <screen>Příliš mnoha video/audio paketech ve vyrovnávací paměti</screen> nebo
-  pokud si povšimnete rostoucí desynchronizace mezi zvukem a
-  videem, zkuste použít MPEG-TS demuxer z libavformat přidáím
+  Pokud <application>MPlayer</application> Äasto protestuje o
+  <screen>PĹĂ­liĹĄ mnoha video/audio paketech ve vyrovnĂĄvacĂ­ pamÄti</screen> nebo
+  pokud si povĹĄimnete rostoucĂ­ desynchronizace mezi zvukem a
+  videem, zkuste pouĹžĂ­t MPEG-TS demuxer z libavformat pĹidĂĄĂ­m
   <option>-demuxer lavf -lavfdopts probesize=128</option>
-  na příkazovém řádku.
+  na pĹĂ­kazovĂŠm ĹĂĄdku.
 </para>
 
 <para>
-  Pro zobrazení prvního z kanálů uvedeného v seznamu, spusťte
+  Pro zobrazenĂ­ prvnĂ­ho z kanĂĄlĹŻ uvedenĂŠho v seznamu, spusĹĽte
 </para>
 
 <screen>
@@ -1855,7 +1855,7 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Pokud chcete sledovat určitý kanál, například R1, spusťte
+  Pokud chcete sledovat urÄitĂ˝ kanĂĄl, napĹĂ­klad R1, spusĹĽte
 </para>
 
 <screen>
@@ -1863,8 +1863,8 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Pokud máte více než jednu kartu, musíte rovněž uvést číslo karty, na které lze
-  kanál sledovat (např. 2). Syntyxe je:
+  Pokud mĂĄte vĂ­ce neĹž jednu kartu, musĂ­te rovnÄĹž uvĂŠst ÄĂ­slo karty, na kterĂŠ lze
+  kanĂĄl sledovat (napĹ. 2). Syntyxe je:
 </para>
 
 <screen>
@@ -1872,23 +1872,23 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Pro změnu kanálu stiskněte klávesu <keycap>h</keycap> (další) a
-  <keycap>k</keycap> (předchozí), nebo použijte
+  Pro zmÄnu kanĂĄlu stisknÄte klĂĄvesu <keycap>h</keycap> (dalĹĄĂ­) a
+  <keycap>k</keycap> (pĹedchozĂ­), nebo pouĹžijte
   <link linkend="osdmenu">OSD menu</link>.
 </para>
 
 <para>
-  Pokud váš <filename>~/.mplayer/menu.conf</filename> obsahuje řádek
-  <literal>&lt;dvbsel&gt;</literal> podobný tomu v ukázkovém souboru
-  <filename>etc/dvb-menu.conf</filename> (který můžete použít k přepsání
-  <filename>~/.mplayer/menu.conf</filename>), bude v hlavním menu podseznam,
-  kde si budete moci zvolit kanál ze svého <filename>channels.conf</filename>.
-  Může mu případně předcházet menu se seznamem dostupných karet, pokud máte
-  více než jednu použitelnou <application>MPlayer</application>em.
+  Pokud vĂĄĹĄ <filename>~/.mplayer/menu.conf</filename> obsahuje ĹĂĄdek
+  <literal>&lt;dvbsel&gt;</literal> podobnĂ˝ tomu v ukĂĄzkovĂŠm souboru
+  <filename>etc/dvb-menu.conf</filename> (kterĂ˝ mĹŻĹžete pouĹžĂ­t k pĹepsĂĄnĂ­
+  <filename>~/.mplayer/menu.conf</filename>), bude v hlavnĂ­m menu podseznam,
+  kde si budete moci zvolit kanĂĄl ze svĂŠho <filename>channels.conf</filename>.
+  MĹŻĹže mu pĹĂ­padnÄ pĹedchĂĄzet menu se seznamem dostupnĂ˝ch karet, pokud mĂĄte
+  vĂ­ce neĹž jednu pouĹžitelnou <application>MPlayer</application>em.
 </para>
 
 <para>
-  Pokud si chcete uložit program na disk, můžete použít
+  Pokud si chcete uloĹžit program na disk, mĹŻĹžete pouĹžĂ­t
 </para>
 
 <screen>
@@ -1896,8 +1896,8 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Pokud jej chcete zaznamenat v odlišném formátu (reenkódovat jej), spusťte
-  místo toho příkaz podobný následujícímu
+  Pokud jej chcete zaznamenat v odliĹĄnĂŠm formĂĄtu (reenkĂłdovat jej), spusĹĽte
+  mĂ­sto toho pĹĂ­kaz podobnĂ˝ nĂĄsledujĂ­cĂ­mu
 </para>
 
 <screen>
@@ -1905,127 +1905,127 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Přečtěte si man stránku pro seznam voleb, které můžete předat vstupnímu
+  PĹeÄtÄte si man strĂĄnku pro seznam voleb, kterĂŠ mĹŻĹžete pĹedat vstupnĂ­mu
   DVB modulu.
 </para>
 
 <formalpara>
 <title>BUDOUCNOST</title>
 <para>
-Máte-li otázky, nebo chcete dostávat oznámení o nových vlastnostech a zapojit
-se do diskuse o těchto věcech, připojte se k naší
+MĂĄte-li otĂĄzky, nebo chcete dostĂĄvat oznĂĄmenĂ­ o novĂ˝ch vlastnostech a zapojit
+se do diskuse o tÄchto vÄcech, pĹipojte se k naĹĄĂ­
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
-e-mailové konferenci. Pamatujte prosím, že jazykem konference je angličtina.
+e-mailovĂŠ konferenci. Pamatujte prosĂ­m, Ĺže jazykem konference je angliÄtina.
 </para>
 </formalpara>
 
 <para>
-V budoucnu můžete očekávat schopnost zobrazovat OSD a titulky pomocí nativní
-podpory OSD v DVB kartách, stejně jako plynulejší přehrávání filmů s jinou
-snímkovou rychlostí, než 25 fps a transkódování MPEG-2 na MPEG-4 v reálném čase
-(částečná dekomprese).
+V budoucnu mĹŻĹžete oÄekĂĄvat schopnost zobrazovat OSD a titulky pomocĂ­ nativnĂ­
+podpory OSD v DVB kartĂĄch, stejnÄ jako plynulejĹĄĂ­ pĹehrĂĄvĂĄnĂ­ filmĹŻ s jinou
+snĂ­mkovou rychlostĂ­, neĹž 25 fps a transkĂłdovĂĄnĂ­ MPEG-2 na MPEG-4 v reĂĄlnĂŠm Äase
+(ÄĂĄsteÄnĂĄ dekomprese).
 </para>
 </sect2>
 
 <sect2 id="dxr2">
 <title>DXR2</title>
-<para><application>MPlayer</application> podporuje hardwarově akcelerované
-přehrávání pomocí karty Creative DXR2.</para>
+<para><application>MPlayer</application> podporuje hardwarovÄ akcelerovanĂŠ
+pĹehrĂĄvĂĄnĂ­ pomocĂ­ karty Creative DXR2.</para>
 <para>
-Nejdříve musíte mít správně nainstalované DXR2 ovladače. Ovladače a návod
-k jejich instalaci naleznete na stránkách
+NejdĹĂ­ve musĂ­te mĂ­t sprĂĄvnÄ nainstalovanĂŠ DXR2 ovladaÄe. OvladaÄe a nĂĄvod
+k jejich instalaci naleznete na strĂĄnkĂĄch
 <ulink url="http://dxr2.sf.net/">DXR2 Resource Center</ulink>.
 </para>
 
 <variablelist>
-<title>POUŽITÍ</title>
+<title>POUĹ˝ITĂ</title>
 <varlistentry>
 <term><option>-vo dxr2</option></term>
-<listitem><para>Zapíná TV výstup.</para></listitem>
+<listitem><para>ZapĂ­nĂĄ TV vĂ˝stup.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vo dxr2:x11</option> nebo <option>-vo dxr2:xv</option></term>
-<listitem><para>Zapíná Overlay výstup v X11.</para></listitem>
+<listitem><para>ZapĂ­nĂĄ Overlay vĂ˝stup v X11.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-dxr2 &lt;volba1:volba2:...&gt;</option></term>
-<listitem><para>Tato volba je použita k ovládání DXR2 ovladače.</para></listitem>
+<listitem><para>Tato volba je pouĹžita k ovlĂĄdĂĄnĂ­ DXR2 ovladaÄe.</para></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-Overlay čipset použitý v DXR2 má mizernou kvalitu, ale výchozí nastavení pracuje
-vždy. OSD lze použít spolu s overlay (ne na TV) při jeho vykreslení v klíčovací
-barvě. S výchozím nastavením klíčovací barvy můžete dosáhnout různých výsledků,
-obvykle uvidíte klíčovací barvu kolem znaků nebo jiné srandovní věci. Pokud ale
-vhodně upravíte klíčování, můžete dosáhnout použitelných výsledků.
+Overlay Äipset pouĹžitĂ˝ v DXR2 mĂĄ mizernou kvalitu, ale vĂ˝chozĂ­ nastavenĂ­ pracuje
+vĹždy. OSD lze pouĹžĂ­t spolu s overlay (ne na TV) pĹi jeho vykreslenĂ­ v klĂ­ÄovacĂ­
+barvÄ. S vĂ˝chozĂ­m nastavenĂ­m klĂ­ÄovacĂ­ barvy mĹŻĹžete dosĂĄhnout rĹŻznĂ˝ch vĂ˝sledkĹŻ,
+obvykle uvidĂ­te klĂ­ÄovacĂ­ barvu kolem znakĹŻ nebo jinĂŠ srandovnĂ­ vÄci. Pokud ale
+vhodnÄ upravĂ­te klĂ­ÄovĂĄnĂ­, mĹŻĹžete dosĂĄhnout pouĹžitelnĂ˝ch vĂ˝sledkĹŻ.
 </para>
 
-<para>Prostudujte si prosím man stránku pro dostupné volby.</para>
+<para>Prostudujte si prosĂ­m man strĂĄnku pro dostupnĂŠ volby.</para>
 </sect2>
 
 <sect2 id="dxr3">
 <title>DXR3/Hollywood+</title>
 <para>
-<application>MPlayer</application> podporuje hardwarově akcelerované
-přehrávání videa pomocí karet Creative DXR3 a Sigma Designs Hollywood Plus.
-Obě tyto karty používají MPEG dekodér em8300 od Sigma Designs.
+<application>MPlayer</application> podporuje hardwarovÄ akcelerovanĂŠ
+pĹehrĂĄvĂĄnĂ­ videa pomocĂ­ karet Creative DXR3 a Sigma Designs Hollywood Plus.
+ObÄ tyto karty pouĹžĂ­vajĂ­ MPEG dekodĂŠr em8300 od Sigma Designs.
 </para>
 
 <para>
-Nejprve budete potřebovat správně nainstalované DXR3/H+ ovladače verze 0.12.0
-nebo pozdější. Ovladače a návod na jejich instalaci naleznete na stránkách
+Nejprve budete potĹebovat sprĂĄvnÄ nainstalovanĂŠ DXR3/H+ ovladaÄe verze 0.12.0
+nebo pozdÄjĹĄĂ­. OvladaÄe a nĂĄvod na jejich instalaci naleznete na strĂĄnkĂĄch
 <ulink url="http://dxr3.sf.net/">DXR3 &amp; Hollywood Plus for Linux</ulink>.
-<filename>configure</filename> by mělo automaticky detekovat vaši kartu a
-kompilace by se měla obejít bez potíží.
+<filename>configure</filename> by mÄlo automaticky detekovat vaĹĄi kartu a
+kompilace by se mÄla obejĂ­t bez potĂ­ĹžĂ­.
 </para>
 
 <!-- FIXME: find a more clear presentation -->
 <variablelist>
-<title>POUŽITÍ</title>
+<title>POUĹ˝ITĂ</title>
 <varlistentry>
-<term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>zařízení</replaceable></option></term>
+<term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>zaĹĂ­zenĂ­</replaceable></option></term>
 <listitem><para>
-<option>overlay</option> aktivuje overlay místo TVOut. Pro správnou funkci
-vyžaduje, abyste měli správně nakonfigurované nastavení overlay. Nejjednodužší
-způsob nastavení overlay, je spuštění autocal. Pak spusťte MPlayer s video
-výstupem nastaveným na dxr3 s vypnutým overlay, spusťte dxr3view. V dxr3view
-si můžete hrát s nastavením overlay a pozorovat změny v reálném čase. Snad bude
-tato funkce časem dostupná z GUI <application>MPlayer</application>u. Jakmile
-máte správně nastaveno overlay, není již nutné používat dxr3view.
-<option>prebuf</option> zapíná prebuffering. Prebuffering je vlastnost čipu
-em8300, terá mu umožňuje podržet si více než jeden videosnímek v daném čase.
-To znamená, že pokud jej máte zapnutý, snaží se <application>MPlayer</application>
-udržet vyrovnávací paměť videa (buffer) naplněný daty. Pokud jej provozujete na
-pomalém stroji, použije <application>MPlayer</application> téměř nebo přesně
-100% výkonu CPU. To je zvlášť časté, pokud přehráváte čisté MPEG datové proudy
-(jako DVD, SVCD atp.) jelikož je <application>MPlayer</application> nemusí
-převádět do MPEG, naplní buffer velmi rychle.
-S prebufferingem je přehrávání videa <emphasis role="bold">mnohem</emphasis>
-méně citlivé na zaměstnávání CPU jinými programy. Nebudou zahozeny snímky, pokud
+<option>overlay</option> aktivuje overlay mĂ­sto TVOut. Pro sprĂĄvnou funkci
+vyĹžaduje, abyste mÄli sprĂĄvnÄ nakonfigurovanĂŠ nastavenĂ­ overlay. NejjednoduĹžĹĄĂ­
+zpĹŻsob nastavenĂ­ overlay, je spuĹĄtÄnĂ­ autocal. Pak spusĹĽte MPlayer s video
+vĂ˝stupem nastavenĂ˝m na dxr3 s vypnutĂ˝m overlay, spusĹĽte dxr3view. V dxr3view
+si mĹŻĹžete hrĂĄt s nastavenĂ­m overlay a pozorovat zmÄny v reĂĄlnĂŠm Äase. Snad bude
+tato funkce Äasem dostupnĂĄ z GUI <application>MPlayer</application>u. Jakmile
+mĂĄte sprĂĄvnÄ nastaveno overlay, nenĂ­ jiĹž nutnĂŠ pouĹžĂ­vat dxr3view.
+<option>prebuf</option> zapĂ­nĂĄ prebuffering. Prebuffering je vlastnost Äipu
+em8300, terĂĄ mu umoĹžĹuje podrĹžet si vĂ­ce neĹž jeden videosnĂ­mek v danĂŠm Äase.
+To znamenĂĄ, Ĺže pokud jej mĂĄte zapnutĂ˝, snaĹžĂ­ se <application>MPlayer</application>
+udrĹžet vyrovnĂĄvacĂ­ pamÄĹĽ videa (buffer) naplnÄnĂ˝ daty. Pokud jej provozujete na
+pomalĂŠm stroji, pouĹžije <application>MPlayer</application> tĂŠmÄĹ nebo pĹesnÄ
+100% vĂ˝konu CPU. To je zvlĂĄĹĄĹĽ ÄastĂŠ, pokud pĹehrĂĄvĂĄte ÄistĂŠ MPEG datovĂŠ proudy
+(jako DVD, SVCD atp.) jelikoĹž je <application>MPlayer</application> nemusĂ­
+pĹevĂĄdÄt do MPEG, naplnĂ­ buffer velmi rychle.
+S prebufferingem je pĹehrĂĄvĂĄnĂ­ videa <emphasis role="bold">mnohem</emphasis>
+mĂŠnÄ citlivĂŠ na zamÄstnĂĄvĂĄnĂ­ CPU jinĂ˝mi programy. Nebudou zahozeny snĂ­mky, pokud
 si aplikace neuzme CPU na dlouhou dobu.
-Pokud přehráváte bez prebufferingu, je em8300 mnohem citlivější na vytížení CPU,
-takže doporučujeme zapnout <application>MPlayer</application>ovu volbu
-<option>-framedrop</option> pro zachování synchronizace.
-<option>sync</option> zapíná nový sync-engine. To je zatím experimentální
-vlastnost. Se zaplým sync budou vnitřní hodiny em8300 neustále sledovány a
-pokud se začnou rozcházet s časovačem <application>MPlayer</application>u,
-budou resetovány, což způsobí, že em8300 zahodí veškeré snímky, které čekají ve
-frontě.
-<option>norm=x</option> nastaví TV normu DXR3 karty bez nutnosti externího
-nástroje jako em8300setup. Platné normy jsou 5 = NTSC, 4 = PAL-60,
-3 = PAL. Zvláštní normy jsou 2 (automaticné nastavení s použitím PAL/PAL-60) a
-1 (automatické nastavení s použitím PAL/NTSC), jelikož ty určí použitou normu
-podle snímkové rychlosti filmu. norm = 0 (výchozí) nezmění aktuální normu.
-<option><replaceable>device</replaceable></option> = číslo zařízení, které se
-má použít, pokud máte více než jednu em8300 kartu.
-Jakoukoli z těchto voleb můžete vynechat.
-Volby <option>:prebuf:sync</option> zdá se pracují skvěle při přehrávání filmů
-v MPEG-4 (DivX). Lidé však hlásili potíže s volbou prebuf při přehrávání souborů
-v MPEG-1/2. Měli byste je nejprve zkusit přehrát bez dodatečných voleb a pokud
-narazíte na potíže se synchronizací nebo DVD titulky, zkuste to s volbou
+Pokud pĹehrĂĄvĂĄte bez prebufferingu, je em8300 mnohem citlivÄjĹĄĂ­ na vytĂ­ĹženĂ­ CPU,
+takĹže doporuÄujeme zapnout <application>MPlayer</application>ovu volbu
+<option>-framedrop</option> pro zachovĂĄnĂ­ synchronizace.
+<option>sync</option> zapĂ­nĂĄ novĂ˝ sync-engine. To je zatĂ­m experimentĂĄlnĂ­
+vlastnost. Se zaplĂ˝m sync budou vnitĹnĂ­ hodiny em8300 neustĂĄle sledovĂĄny a
+pokud se zaÄnou rozchĂĄzet s ÄasovaÄem <application>MPlayer</application>u,
+budou resetovĂĄny, coĹž zpĹŻsobĂ­, Ĺže em8300 zahodĂ­ veĹĄkerĂŠ snĂ­mky, kterĂŠ ÄekajĂ­ ve
+frontÄ.
+<option>norm=x</option> nastavĂ­ TV normu DXR3 karty bez nutnosti externĂ­ho
+nĂĄstroje jako em8300setup. PlatnĂŠ normy jsou 5 = NTSC, 4 = PAL-60,
+3 = PAL. ZvlĂĄĹĄtnĂ­ normy jsou 2 (automaticnĂŠ nastavenĂ­ s pouĹžitĂ­m PAL/PAL-60) a
+1 (automatickĂŠ nastavenĂ­ s pouĹžitĂ­m PAL/NTSC), jelikoĹž ty urÄĂ­ pouĹžitou normu
+podle snĂ­mkovĂŠ rychlosti filmu. norm = 0 (vĂ˝chozĂ­) nezmÄnĂ­ aktuĂĄlnĂ­ normu.
+<option><replaceable>device</replaceable></option> = ÄĂ­slo zaĹĂ­zenĂ­, kterĂŠ se
+mĂĄ pouĹžĂ­t, pokud mĂĄte vĂ­ce neĹž jednu em8300 kartu.
+Jakoukoli z tÄchto voleb mĹŻĹžete vynechat.
+Volby <option>:prebuf:sync</option> zdĂĄ se pracujĂ­ skvÄle pĹi pĹehrĂĄvĂĄnĂ­ filmĹŻ
+v MPEG-4 (DivX). LidĂŠ vĹĄak hlĂĄsili potĂ­Ĺže s volbou prebuf pĹi pĹehrĂĄvĂĄnĂ­ souborĹŻ
+v MPEG-1/2. MÄli byste je nejprve zkusit pĹehrĂĄt bez dodateÄnĂ˝ch voleb a pokud
+narazĂ­te na potĂ­Ĺže se synchronizacĂ­ nebo DVD titulky, zkuste to s volbou
 <option>:sync</option>.
 </para></listitem>
 </varlistentry>
@@ -2033,51 +2033,51 @@ narazíte na potíže se synchronizací nebo DVD titulky, zkuste to s volbou
 <varlistentry>
 <term><option>-ao oss:/dev/em8300_ma-<replaceable>X</replaceable></option></term>
 <listitem><para>
-Pro zvukový výstup, kde <replaceable>X</replaceable> je číslo zařízení
-(0 máte-li jen jednu kartu).
+Pro zvukovĂ˝ vĂ˝stup, kde <replaceable>X</replaceable> je ÄĂ­slo zaĹĂ­zenĂ­
+(0 mĂĄte-li jen jednu kartu).
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-af resample=<replaceable>xxxxx</replaceable></option></term>
 <listitem><para>
-Čip em8300 neumí přehrávat signál vzorkovaný méně než 44100Hz. Pokud je
-vzorkovací kmitočet pod 44100Hz, zvolte buď 44100Hz nebo 48000Hz podle toho,
-násobek kterého je blíž. Čili pokud má film zvuk 22050Hz použijte 44100Hz,
-jelikož 44100 / 2 = 22050, pokud jej má 24000Hz použijte 48000Hz jelikož
-48000 / 2 = 24000 a tak dále.
-S výstupem digitálního audia to nefunguje (<option>-ac hwac3</option>).
+Äip em8300 neumĂ­ pĹehrĂĄvat signĂĄl vzorkovanĂ˝ mĂŠnÄ neĹž 44100Hz. Pokud je
+vzorkovacĂ­ kmitoÄet pod 44100Hz, zvolte buÄ 44100Hz nebo 48000Hz podle toho,
+nĂĄsobek kterĂŠho je blĂ­Ĺž. Äili pokud mĂĄ film zvuk 22050Hz pouĹžijte 44100Hz,
+jelikoĹž 44100 / 2 = 22050, pokud jej mĂĄ 24000Hz pouĹžijte 48000Hz jelikoĹž
+48000 / 2 = 24000 a tak dĂĄle.
+S vĂ˝stupem digitĂĄlnĂ­ho audia to nefunguje (<option>-ac hwac3</option>).
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
-Pro přehrávání ne-MPEG obsahu na em8300 (např. MPEG-4 (DivX) nebo RealVideo)
-musíte nastavit MPEG-1 video filtr jako
+Pro pĹehrĂĄvĂĄnĂ­ ne-MPEG obsahu na em8300 (napĹ. MPEG-4 (DivX) nebo RealVideo)
+musĂ­te nastavit MPEG-1 video filtr jako
 <systemitem class="library">libavcodec</systemitem> (lavc) nebo
-<systemitem class="library">libfame</systemitem> (fame). V tuto chvíli
-je lavc jak rychlejší, tak poskytuje lepší kvalitu obrazu, takže vám radíme jej
-používat, pokud s ním nemáte potáže. Prostudujte si v man stránce dodatečné
+<systemitem class="library">libfame</systemitem> (fame). V tuto chvĂ­li
+je lavc jak rychlejĹĄĂ­, tak poskytuje lepĹĄĂ­ kvalitu obrazu, takĹže vĂĄm radĂ­me jej
+pouĹžĂ­vat, pokud s nĂ­m nemĂĄte potĂĄĹže. Prostudujte si v man strĂĄnce dodateÄnĂŠ
 informace o <option>-vf lavc/fame</option>.
-Použití lavc silně doporučujeme. Zatím nelze nastavit snímkovou rychlost em8300,
-takže je pevně nastavena na 30000/1001 fps. Z toho důvodu doporučujeme,
-abyste použili <option>-vf lavc=<replaceable>quality</replaceable>:25</option>
-zvlášť pokud používáte prebuffering. Proč tedy 25 a ne 30000/1001? Nu, důvodem
-je, že pokud zadáte 30000/1001, začne obraz trochu poskakovat. Důvod tohoto
-jevu nám není znám. Pokud to nastavíte někdemezi 25 a 27, obraz se ustálí.
-Pro tuto chvíli se to dá pouze uznat jako fakt.
+PouĹžitĂ­ lavc silnÄ doporuÄujeme. ZatĂ­m nelze nastavit snĂ­mkovou rychlost em8300,
+takĹže je pevnÄ nastavena na 30000/1001 fps. Z toho dĹŻvodu doporuÄujeme,
+abyste pouĹžili <option>-vf lavc=<replaceable>quality</replaceable>:25</option>
+zvlĂĄĹĄĹĽ pokud pouĹžĂ­vĂĄte prebuffering. ProÄ tedy 25 a ne 30000/1001? Nu, dĹŻvodem
+je, Ĺže pokud zadĂĄte 30000/1001, zaÄne obraz trochu poskakovat. DĹŻvod tohoto
+jevu nĂĄm nenĂ­ znĂĄm. Pokud to nastavĂ­te nÄkdemezi 25 a 27, obraz se ustĂĄlĂ­.
+Pro tuto chvĂ­li se to dĂĄ pouze uznat jako fakt.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vf expand=-1:-1:-1:-1:1</option></term>
 <listitem><para>
-Ačkoli DXR3 ovladač umí dodat OSD do MPEG-1/2/4 videa, má to mnohem nižší
-kvalitu než tradiční OSD <application>MPlayer</application>u a má i různé
-problémy s obnovováním. Výše uvedený příkazový řádek nejprve převede vstupní
-video do MPEG-4 (je to nutné, sorry), pak aplikuje filtr expand, který však
-nic neexpanduje (-1: výchozí), ale doplní normální OSD do obrazu
+AÄkoli DXR3 ovladaÄ umĂ­ dodat OSD do MPEG-1/2/4 videa, mĂĄ to mnohem niĹžĹĄĂ­
+kvalitu neĹž tradiÄnĂ­ OSD <application>MPlayer</application>u a mĂĄ i rĹŻznĂŠ
+problĂŠmy s obnovovĂĄnĂ­m. VĂ˝ĹĄe uvedenĂ˝ pĹĂ­kazovĂ˝ ĹĂĄdek nejprve pĹevede vstupnĂ­
+video do MPEG-4 (je to nutnĂŠ, sorry), pak aplikuje filtr expand, kterĂ˝ vĹĄak
+nic neexpanduje (-1: vĂ˝chozĂ­), ale doplnĂ­ normĂĄlnĂ­ OSD do obrazu
 (na to je ta "1" na konci).
 </para></listitem>
 </varlistentry>
@@ -2085,9 +2085,9 @@ nic neexpanduje (-1: výchozí), ale doplní normální OSD do obrazu
 <varlistentry>
 <term><option>-ac hwac3</option></term>
 <listitem><para>
-Čip em8300 podporuje přehrávání zvuku v AC3 (prostorový zvuk) přes digitální
-audio výstup na kartě. Viz výš volbu <option>-ao oss</option>. Ta musí být
-použita pro nastavení výstupu do DXR3 místo zvukové karty.
+Äip em8300 podporuje pĹehrĂĄvĂĄnĂ­ zvuku v AC3 (prostorovĂ˝ zvuk) pĹes digitĂĄlnĂ­
+audio vĂ˝stup na kartÄ. Viz vĂ˝ĹĄ volbu <option>-ao oss</option>. Ta musĂ­ bĂ˝t
+pouĹžita pro nastavenĂ­ vĂ˝stupu do DXR3 mĂ­sto zvukovĂŠ karty.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -2096,77 +2096,77 @@ použita pro nastavení výstupu do DXR3 místo zvukové karty.
 </sect1>
 
 <sect1 id="other">
-<title>Ostatní vizualizační hardware</title>
+<title>OstatnĂ­ vizualizaÄnĂ­ hardware</title>
 
 <sect2 id="zr">
 <title>Zr</title>
 
 <para>
-Toto je zobrazovací rozhraní (<option>-vo zr</option>) pro mnoho MJPEG
-zachytávacích/přehrávacích karet (testováno na DC10+ a Buz a mělo by pracovat
-i s LML33, tedy DC10). Rozhraní pracuje tak, že snímek zakóduje do JPEG a pak
-jej pošle do karty. Pro enkódování do JPEG se používá
-<systemitem class="library">libavcodec</systemitem> a je pro ně nezbytný.
-Ve speciálním <emphasis>cinerama</emphasis> režimu můžete sledovat filmy
-v pravém širokoúhlém formátu, kterého je dosaženo tak, že máte dvě promítačky
-a dvě MJPEG karty. V závislosti na rozlišení a nastavení kvality může toto
-rozhraní vyžadovat spoustu výkonu CPU. Nezapomeňte zadat
-<option>-framedrop</option>, pokud je váš počítač příliš pomalý.
-Poznámka: Můj AMD K6-2 350MHz je (s <option>-framedrop</option>) vcelku
-adekvátní pro sledování materiálu o rozměru VCD a podškálovaných filmů.
+Toto je zobrazovacĂ­ rozhranĂ­ (<option>-vo zr</option>) pro mnoho MJPEG
+zachytĂĄvacĂ­ch/pĹehrĂĄvacĂ­ch karet (testovĂĄno na DC10+ a Buz a mÄlo by pracovat
+i s LML33, tedy DC10). RozhranĂ­ pracuje tak, Ĺže snĂ­mek zakĂłduje do JPEG a pak
+jej poĹĄle do karty. Pro enkĂłdovĂĄnĂ­ do JPEG se pouĹžĂ­vĂĄ
+<systemitem class="library">libavcodec</systemitem> a je pro nÄ nezbytnĂ˝.
+Ve speciĂĄlnĂ­m <emphasis>cinerama</emphasis> reĹžimu mĹŻĹžete sledovat filmy
+v pravĂŠm ĹĄirokoĂşhlĂŠm formĂĄtu, kterĂŠho je dosaĹženo tak, Ĺže mĂĄte dvÄ promĂ­taÄky
+a dvÄ MJPEG karty. V zĂĄvislosti na rozliĹĄenĂ­ a nastavenĂ­ kvality mĹŻĹže toto
+rozhranĂ­ vyĹžadovat spoustu vĂ˝konu CPU. NezapomeĹte zadat
+<option>-framedrop</option>, pokud je vĂĄĹĄ poÄĂ­taÄ pĹĂ­liĹĄ pomalĂ˝.
+PoznĂĄmka: MĹŻj AMD K6-2 350MHz je (s <option>-framedrop</option>) vcelku
+adekvĂĄtnĂ­ pro sledovĂĄnĂ­ materiĂĄlu o rozmÄru VCD a podĹĄkĂĄlovanĂ˝ch filmĹŻ.
 </para>
 
 <para>
-Toto rozhraní komunikuje s jaderným modulem dostupným na
-<ulink url="http://mjpeg.sf.net"/>, takže jej nejdříve musíte zprovoznit.
-Přítomnost MJPEG karty je autodetekována skriptem
-<filename>configure</filename>. Pokud detekce selže, vynuťte ji pomocí
+Toto rozhranĂ­ komunikuje s jadernĂ˝m modulem dostupnĂ˝m na
+<ulink url="http://mjpeg.sf.net"/>, takĹže jej nejdĹĂ­ve musĂ­te zprovoznit.
+PĹĂ­tomnost MJPEG karty je autodetekovĂĄna skriptem
+<filename>configure</filename>. Pokud detekce selĹže, vynuĹĽte ji pomocĂ­
 <screen>./configure --enable-zr</screen>
 </para>
 <para>
-Výstup může být ovlivňován několika volbami. Obšírný výklad těchto voleb
-naleznete v man stránce, krátký přehled obržíte spuštěním
+VĂ˝stup mĹŻĹže bĂ˝t ovlivĹovĂĄn nÄkolika volbami. ObĹĄĂ­rnĂ˝ vĂ˝klad tÄchto voleb
+naleznete v man strĂĄnce, krĂĄtkĂ˝ pĹehled obrĹžĂ­te spuĹĄtÄnĂ­m
 <screen>mplayer -zrhelp</screen>
 </para>
 
 <para>
-Věci jako škálování a OSD (display na obrazovce) nejsou tímto rozhraním pokryty,
-ale lze jich dosáhnout pomocí video filtrů. Například mějte video o rozlišení
-512x272 a chcete jej přehrávat na celé obrazovce přes DC10+, pak máte tři
-základní možnosti, jak to udělat. Můžete škálovat video na šířku 768, 384 nebo
-192. Z důvodu výkonu a kvality si zvolíte škálování filmu na 384x204 pomocí
-bilineárního softwarového škálovače. Příkazový řádek je pak
+VÄci jako ĹĄkĂĄlovĂĄnĂ­ a OSD (display na obrazovce) nejsou tĂ­mto rozhranĂ­m pokryty,
+ale lze jich dosĂĄhnout pomocĂ­ video filtrĹŻ. NapĹĂ­klad mÄjte video o rozliĹĄenĂ­
+512x272 a chcete jej pĹehrĂĄvat na celĂŠ obrazovce pĹes DC10+, pak mĂĄte tĹi
+zĂĄkladnĂ­ moĹžnosti, jak to udÄlat. MĹŻĹžete ĹĄkĂĄlovat video na ĹĄĂ­Ĺku 768, 384 nebo
+192. Z dĹŻvodu vĂ˝konu a kvality si zvolĂ­te ĹĄkĂĄlovĂĄnĂ­ filmu na 384x204 pomocĂ­
+bilineĂĄrnĂ­ho softwarovĂŠho ĹĄkĂĄlovaÄe. PĹĂ­kazovĂ˝ ĹĂĄdek je pak
 <screen>
 mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>film.avi</replaceable>
 </screen>
 </para>
 
 <para>
-Ořezání lze provést <option>crop</option> filtrem a samotným rozhraním.
-Řekněme, že film je příliš široký pro promítání na vaší Buz a proto chcete
-použít <option>-zrcrop</option> pro zůžení filmu, pak byste měli použít
-následující příkaz
+OĹezĂĄnĂ­ lze provĂŠst <option>crop</option> filtrem a samotnĂ˝m rozhranĂ­m.
+ĹeknÄme, Ĺže film je pĹĂ­liĹĄ ĹĄirokĂ˝ pro promĂ­tĂĄnĂ­ na vaĹĄĂ­ Buz a proto chcete
+pouĹžĂ­t <option>-zrcrop</option> pro zĹŻĹženĂ­ filmu, pak byste mÄli pouĹžĂ­t
+nĂĄsledujĂ­cĂ­ pĹĂ­kaz
 <screen>
 mplayer -vo zr -zrcrop 720x320+80+0 <replaceable>benhur.avi</replaceable>
 </screen>
 </para>
 
 <para>
-chcete-li použít filtr <option>crop</option>, proveďte
+chcete-li pouĹžĂ­t filtr <option>crop</option>, proveÄte
 <screen>
 mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
 </screen>
 </para>
 
 <para>
-Zvláštní případy <option>-zrcrop</option> vyvolá režim
-<emphasis>cinerama</emphasis>, takže rozprostřete film na několik televizí nebo
-promítaček, čímž se vytvoří větší obraz. Předpokládejme, že máte dvě promítačky.
-Levá je připojena k vaší Buz na <filename>/dev/video1</filename> a
-pravý je připojen do vaší DC10+ na <filename>/dev/video0</filename>.
-Film má rozlišení 704x288. Předpokládejme rovněž, že pravá promítačka je
-černobílá a levá umí JPEG snímky s kvalitou 10, pak byste měli použít
-následující příkaz
+ZvlĂĄĹĄtnĂ­ pĹĂ­pady <option>-zrcrop</option> vyvolĂĄ reĹžim
+<emphasis>cinerama</emphasis>, takĹže rozprostĹete film na nÄkolik televizĂ­ nebo
+promĂ­taÄek, ÄĂ­mĹž se vytvoĹĂ­ vÄtĹĄĂ­ obraz. PĹedpoklĂĄdejme, Ĺže mĂĄte dvÄ promĂ­taÄky.
+LevĂĄ je pĹipojena k vaĹĄĂ­ Buz na <filename>/dev/video1</filename> a
+pravĂ˝ je pĹipojen do vaĹĄĂ­ DC10+ na <filename>/dev/video0</filename>.
+Film mĂĄ rozliĹĄenĂ­ 704x288. PĹedpoklĂĄdejme rovnÄĹž, Ĺže pravĂĄ promĂ­taÄka je
+ÄernobĂ­lĂĄ a levĂĄ umĂ­ JPEG snĂ­mky s kvalitou 10, pak byste mÄli pouĹžĂ­t
+nĂĄsledujĂ­cĂ­ pĹĂ­kaz
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
           -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
@@ -2175,18 +2175,18 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
 </para>
 
 <para>
-Jak vidíte, volby uvedené před druhým <option>-zrcrop</option> jsou předány
-pouze do DC10+ a volby za druhým <option>-zrcrop</option> do Buz.
-Maximální počet MJPEG karet zahrnutých do <emphasis>cinerama</emphasis>
-režimu jsou čtyři, takže můžete sestavit zobrazovací stěnu 2x2.
+Jak vidĂ­te, volby uvedenĂŠ pĹed druhĂ˝m <option>-zrcrop</option> jsou pĹedĂĄny
+pouze do DC10+ a volby za druhĂ˝m <option>-zrcrop</option> do Buz.
+MaximĂĄlnĂ­ poÄet MJPEG karet zahrnutĂ˝ch do <emphasis>cinerama</emphasis>
+reĹžimu jsou ÄtyĹi, takĹže mĹŻĹžete sestavit zobrazovacĂ­ stÄnu 2x2.
 </para>
 
 <para>
-Nakonec důležité upozornění: Nespouštějte ani nezastavujte XawTV na přehrávacím
-zařízení během přehrávání, zhavaru je vám počítač. Můžete však
-<emphasis role="bold">NEJDŘÍV</emphasis> spustit XawTV a
+Nakonec dĹŻleĹžitĂŠ upozornÄnĂ­: NespouĹĄtÄjte ani nezastavujte XawTV na pĹehrĂĄvacĂ­m
+zaĹĂ­zenĂ­ bÄhem pĹehrĂĄvĂĄnĂ­, zhavaru je vĂĄm poÄĂ­taÄ. MĹŻĹžete vĹĄak
+<emphasis role="bold">NEJDĹĂV</emphasis> spustit XawTV a
 <emphasis role="bold">PAK</emphasis> spustit <application>MPlayer</application>,
-počkat až <application>MPlayer</application> skončí a
+poÄkat aĹž <application>MPlayer</application> skonÄĂ­ a
 <emphasis role="bold">PAK</emphasis> zastavit XawTV.
 </para>
 </sect2>
@@ -2194,32 +2194,32 @@ počkat až <application>MPlayer</application> skončí a
 <sect2 id="blinkenlights">
 <title>Blinkenlights</title>
 <para>
-Toto rozhraní je schopno přehrávání pomocí Blinkenlights UDP protokolu. Pokud
-nevíte co je <ulink url="http://www.blinkenlights.de/">Blinkenlights</ulink>
-nebo jeho nástupce
+Toto rozhranĂ­ je schopno pĹehrĂĄvĂĄnĂ­ pomocĂ­ Blinkenlights UDP protokolu. Pokud
+nevĂ­te co je <ulink url="http://www.blinkenlights.de/">Blinkenlights</ulink>
+nebo jeho nĂĄstupce
 <ulink url="http://www.blinkenlights.de/arcade/">Arcade</ulink>,
-zjistěte si to. Ačkoli je to dost možná nejméně používané video výstupní
-rozhraní, bezpochyby je tím nejlepším, co může <application>MPlayer</application>
-nabídnout. Stačí shlédnout některá z
-<ulink url="http://www.blinkenlights.de/video.en.html">Blinkenlights dokumentačních videí</ulink>.
-Na Arcade video můžete vidět výstupní rozhraní Blinkenlights v akci v 00:07:50.
+zjistÄte si to. AÄkoli je to dost moĹžnĂĄ nejmĂŠnÄ pouĹžĂ­vanĂŠ video vĂ˝stupnĂ­
+rozhranĂ­, bezpochyby je tĂ­m nejlepĹĄĂ­m, co mĹŻĹže <application>MPlayer</application>
+nabĂ­dnout. StaÄĂ­ shlĂŠdnout nÄkterĂĄ z
+<ulink url="http://www.blinkenlights.de/video.en.html">Blinkenlights dokumentaÄnĂ­ch videĂ­</ulink>.
+Na Arcade video mĹŻĹžete vidÄt vĂ˝stupnĂ­ rozhranĂ­ Blinkenlights v akci v 00:07:50.
 </para>
 </sect2>
 </sect1>
 
 <sect1 id="tvout">
-<title>pODPORA TV výstupu</title>
+<title>pODPORA TV vĂ˝stupu</title>
 
 <sect2 id="tvout-mga-g400">
 <title>Karty Matrox G400</title>
 
 <para>
-Pod Linuxem máte dva způsoby jak zprovoznit TV výstup na G400:
+Pod Linuxem mĂĄte dva zpĹŻsoby jak zprovoznit TV vĂ˝stup na G400:
 </para>
 
 <important>
 <para>
-pro instrukce k TV výstupu na Matrox G450/G550 si prostudujte textovou část!
+pro instrukce k TV vĂ˝stupu na Matrox G450/G550 si prostudujte textovou ÄĂĄst!
 </para>
 </important>
 
@@ -2227,31 +2227,31 @@ pro instrukce k TV výstupu na Matrox G450/G550 si prostudujte textovou část!
 <varlistentry>
   <term>XFree86</term>
   <listitem><para>
-    Pomocí ovladače a HAL modulu dostupného na stránkách <ulink
+    PomocĂ­ ovladaÄe a HAL modulu dostupnĂŠho na strĂĄnkĂĄch <ulink
     url="http://www.matrox.com">Matrox</ulink>. Takto dostanete X na TV.
     </para><para>
-    <emphasis role="bold">Tato metoda vám neposkytne akcelerované přehrávání</emphasis>
-    jako pod Windows! Sekundární jednotka má pouze YUV framebuffer, <emphasis>BES</emphasis>
-    (Back End Scaler, YUV škálovač na kartách G200/G400/G450/G550) na něm
-    nepracuje! Ovladač pro Windows to nějak obchází, pravděpodobně použitím
-    3D jednotky pro zoom a YUV framebufferu pro zobrazení zoomovaného
-    obrazu. Pokud opravdu chcete použít X, použijte volby <option>-vo x11 -fs
-    -zoom</option>, ale bude to <emphasis role="bold">POMALÉ</emphasis> a
-    bude zapnuta ochrana proti kopírování
+    <emphasis role="bold">Tato metoda vĂĄm neposkytne akcelerovanĂŠ pĹehrĂĄvĂĄnĂ­</emphasis>
+    jako pod Windows! SekundĂĄrnĂ­ jednotka mĂĄ pouze YUV framebuffer, <emphasis>BES</emphasis>
+    (Back End Scaler, YUV ĹĄkĂĄlovaÄ na kartĂĄch G200/G400/G450/G550) na nÄm
+    nepracuje! OvladaÄ pro Windows to nÄjak obchĂĄzĂ­, pravdÄpodobnÄ pouĹžitĂ­m
+    3D jednotky pro zoom a YUV framebufferu pro zobrazenĂ­ zoomovanĂŠho
+    obrazu. Pokud opravdu chcete pouĹžĂ­t X, pouĹžijte volby <option>-vo x11 -fs
+    -zoom</option>, ale bude to <emphasis role="bold">POMALĂ</emphasis> a
+    bude zapnuta ochrana proti kopĂ­rovĂĄnĂ­
     <emphasis role="bold">Macrovision</emphasis>
-    (Macrovision můžete obejít pomocí tohoto
-    <ulink url="http://avifile.sf.net/mgamacro.pl">perlového skriptu</ulink>).
+    (Macrovision mĹŻĹžete obejĂ­t pomocĂ­ tohoto
+    <ulink url="http://avifile.sf.net/mgamacro.pl">perlovĂŠho skriptu</ulink>).
     </para></listitem>
 </varlistentry>
 <varlistentry>
   <term>Framebuffer</term>
   <listitem><para>
-    Pomocí <emphasis role="bold">matroxfb modulů</emphasis> v jádrech řady 2.4.
-    Jádra 2.2 v nich neobsahují podporu pro TV, takže jsou pro tento účel
-    nepoužitelná. Měli byste povolit VŠECHNY matroxfb-specifické vlastnosti
-    během kompilace (vyjma MultiHead) a zakompilovat je do
-    <emphasis role="bold">modulů</emphasis>!
-    Rovněž potřebujete zapnuté I2C.
+    PomocĂ­ <emphasis role="bold">matroxfb modulĹŻ</emphasis> v jĂĄdrech Ĺady 2.4.
+    JĂĄdra 2.2 v nich neobsahujĂ­ podporu pro TV, takĹže jsou pro tento ĂşÄel
+    nepouĹžitelnĂĄ. MÄli byste povolit VĹ ECHNY matroxfb-specifickĂŠ vlastnosti
+    bÄhem kompilace (vyjma MultiHead) a zakompilovat je do
+    <emphasis role="bold">modulĹŻ</emphasis>!
+    RovnÄĹž potĹebujete zapnutĂŠ I2C.
     </para>
 
     <procedure>
@@ -2259,35 +2259,35 @@ pro instrukce k TV výstupu na Matrox G450/G550 si prostudujte textovou část!
       Vstupte do <filename class="directory">TVout</filename> a zadejte
       <command>./compile.sh</command>. Nainstalujte
       <filename>TVout/matroxset/matroxset</filename>
-      někde do cesty <envar>PATH</envar>.
+      nÄkde do cesty <envar>PATH</envar>.
       </para></step>
     <step><para>
-      Nemáte-li nainstalován <command>fbset</command>, vložte
+      NemĂĄte-li nainstalovĂĄn <command>fbset</command>, vloĹžte
       <filename>TVout/fbset/fbset</filename>
-      někde do cesty <envar>PATH</envar>.
+      nÄkde do cesty <envar>PATH</envar>.
       </para></step>
     <step><para>
-      Nemáte-li nainstalován <command>con2fb</command>, vložte
+      NemĂĄte-li nainstalovĂĄn <command>con2fb</command>, vloĹžte
       <filename>TVout/con2fb/con2fb</filename>
-      někde do cesty <envar>PATH</envar>.
+      nÄkde do cesty <envar>PATH</envar>.
       </para></step>
     <step><para>
-      Pak vstupte do adresáře <filename class="directory">TVout/</filename>
-      ve zdrojovém adresáři <application>MPlayer</application>u a spusťte
-      <filename>./modules</filename> jako root. Vaše textová konzole přejde
-      do režimu framebuffer (není cesta zpět!).
+      Pak vstupte do adresĂĄĹe <filename class="directory">TVout/</filename>
+      ve zdrojovĂŠm adresĂĄĹi <application>MPlayer</application>u a spusĹĽte
+      <filename>./modules</filename> jako root. VaĹĄe textovĂĄ konzole pĹejde
+      do reĹžimu framebuffer (nenĂ­ cesta zpÄt!).
       </para></step>
     <step><para>
-      Dále EDITUJTE a spusťte skript <filename>./matroxtv</filename>. Objeví se
-      vám velmi jednoduché menu. Stiskněte <keycap>2</keycap> a
-      <keycap>Enter</keycap>. Nyní byste měli mít stejný obraz na svém monitoru
-      i TV. Pokud má obraz na TV (výchozí je PAL) nějaké podivné šrámy, nebyl
-      skript schopen nastavit správně rozlišení (na výchozích 640x512).
-      Zkuste jiná rozlišení z menu a/nebo experimentujte s fbset.
+      DĂĄle EDITUJTE a spusĹĽte skript <filename>./matroxtv</filename>. ObjevĂ­ se
+      vĂĄm velmi jednoduchĂŠ menu. StisknÄte <keycap>2</keycap> a
+      <keycap>Enter</keycap>. NynĂ­ byste mÄli mĂ­t stejnĂ˝ obraz na svĂŠm monitoru
+      i TV. Pokud mĂĄ obraz na TV (vĂ˝chozĂ­ je PAL) nÄjakĂŠ podivnĂŠ ĹĄrĂĄmy, nebyl
+      skript schopen nastavit sprĂĄvnÄ rozliĹĄenĂ­ (na vĂ˝chozĂ­ch 640x512).
+      Zkuste jinĂĄ rozliĹĄenĂ­ z menu a/nebo experimentujte s fbset.
       </para></step>
     <step><para>
-      Jo. Dalším úkolem je nechat zmizet kurzor z tty1 (nebo odjinud) a
-      vypnout mazání obrazovky. Spusťe následující příkazy:
+      Jo. DalĹĄĂ­m Ăşkolem je nechat zmizet kurzor z tty1 (nebo odjinud) a
+      vypnout mazĂĄnĂ­ obrazovky. SpusĹĽe nĂĄsledujĂ­cĂ­ pĹĂ­kazy:
 
       <screen>
 echo -e '\033[?25l'
@@ -2299,25 +2299,25 @@ setterm -cursor off
 setterm -blank 0<!--
    --></screen>
 
-      Předchozí nejspíš bude lepší umístit do skriptu a také vyčistit obrazovku.
-      Pro zpětné zapnutí kurzoru:
+      PĹedchozĂ­ nejspĂ­ĹĄ bude lepĹĄĂ­ umĂ­stit do skriptu a takĂŠ vyÄistit obrazovku.
+      Pro zpÄtnĂŠ zapnutĂ­ kurzoru:
       <screen>echo -e '\033[?25h'</screen> nebo
       <screen>setterm -cursor on</screen>
       </para></step>
     <step><para>
-      A jasně. Spusťte přehrávání filmu:
+      A jasnÄ. SpusĹĽte pĹehrĂĄvĂĄnĂ­ filmu:
       <screen>
 mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>soubor</replaceable><!--
    --></screen>
 
-      (Pokud používáte X, přepněte se nyní do matroxfb pomocí například
+      (Pokud pouĹžĂ­vĂĄte X, pĹepnÄte se nynĂ­ do matroxfb pomocĂ­ napĹĂ­klad
       <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>F1</keycap>.)
-      Změňte <literal>640</literal> a <literal>512</literal> pokud máte
-      nastaveno jiné rozlišení...
+      ZmÄĹte <literal>640</literal> a <literal>512</literal> pokud mĂĄte
+      nastaveno jinĂŠ rozliĹĄenĂ­...
       </para></step>
     <step><para>
-      <emphasis role="bold">Užijte si ultra-rychlý ultra-vybavený Matrox TV
-      výstup (lepší než Xv)!</emphasis>
+      <emphasis role="bold">UĹžijte si ultra-rychlĂ˝ ultra-vybavenĂ˝ Matrox TV
+      vĂ˝stup (lepĹĄĂ­ neĹž Xv)!</emphasis>
       </para></step>
     </procedure>
   </listitem>
@@ -2325,28 +2325,28 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>soubor</replaceable><
 </variablelist>
 
 <formalpara>
-<title>Výroba kabelu pro Matrox TV-out</title>
+<title>VĂ˝roba kabelu pro Matrox TV-out</title>
 <para>
-Zříkáme se jakékoli odpovědnosti nebo záruky za jakékoli poškození způsobené
-touto dokumentací.
+ZĹĂ­kĂĄme se jakĂŠkoli odpovÄdnosti nebo zĂĄruky za jakĂŠkoli poĹĄkozenĂ­ zpĹŻsobenĂŠ
+touto dokumentacĂ­.
 </para>
 </formalpara>
 
 <formalpara>
 <title>Kabel pro G400</title>
 <para>
-Na čtvrtém pinu CRTC2 konektoru je kompozitní video signál. Zem je
-na šestém, sedmém a osmém pinu. (informaci poskytl
-Balázs Rácz)
+Na ÄtvrtĂŠm pinu CRTC2 konektoru je kompozitnĂ­ video signĂĄl. Zem je
+na ĹĄestĂŠm, sedmĂŠm a osmĂŠm pinu. (informaci poskytl
+BalĂĄzs RĂĄcz)
 </para>
 </formalpara>
 
 <formalpara>
 <title>Kabel pro G450</title>
 <para>
-Kompozitní video signál je na pinu jedna. Zem je na pátém,
-šestém, sedmém a patnáctém (5, 6, 7, 15) pinu.
-(informaci poskytl Balázs Kerekes)
+KompozitnĂ­ video signĂĄl je na pinu jedna. Zem je na pĂĄtĂŠm,
+ĹĄestĂŠm, sedmĂŠm a patnĂĄctĂŠm (5, 6, 7, 15) pinu.
+(informaci poskytl BalĂĄzs Kerekes)
 </para>
 </formalpara>
 </sect2>
@@ -2354,25 +2354,25 @@ Kompozitní video signál je na pinu jedna. Zem je na pátém,
 <sect2 id="tv-out_matrox_g450">
 <title>Karty Matrox G450/G550</title>
 <para>
-Podpora TV výstupu pro tyto karty byla přidána teprve nedávno a dosud není
-v ostré verzi jádra. V současnosti nelze (aspoň pokud vím) použít modul
-<emphasis role="bold">mga_vid</emphasis>, protože ovladač G450/G550 pracuje
-pouze v jedné konfiguraci: první CRTC čip (s mnohem více schopnostmi) na první
-displej a druhá CRTC (žádné <emphasis role="bold">BES</emphasis> &ndash; pro
-popis BES viz sekci G400 výše) na TV. Takže v současnosti můžete použít pouze
-<application>MPlayer</application>ovo <emphasis>fbdev</emphasis> výstupní
-rozhraní.
+Podpora TV vĂ˝stupu pro tyto karty byla pĹidĂĄna teprve nedĂĄvno a dosud nenĂ­
+v ostrĂŠ verzi jĂĄdra. V souÄasnosti nelze (aspoĹ pokud vĂ­m) pouĹžĂ­t modul
+<emphasis role="bold">mga_vid</emphasis>, protoĹže ovladaÄ G450/G550 pracuje
+pouze v jednĂŠ konfiguraci: prvnĂ­ CRTC Äip (s mnohem vĂ­ce schopnostmi) na prvnĂ­
+displej a druhĂĄ CRTC (ĹžĂĄdnĂŠ <emphasis role="bold">BES</emphasis> &ndash; pro
+popis BES viz sekci G400 vĂ˝ĹĄe) na TV. TakĹže v souÄasnosti mĹŻĹžete pouĹžĂ­t pouze
+<application>MPlayer</application>ovo <emphasis>fbdev</emphasis> vĂ˝stupnĂ­
+rozhranĂ­.
 </para>
 
 <para>
-První CRTC nemůže být v současnosti přesměrována na sekundární výstup. Autor
-jaderného ovladače matroxfb &ndash; Petr Vandrovec &ndash; pro to snad
-vyrobí podporu pomocí zobrazení výstupu prvního CRTC na oba výstupy najednou,
-což se pro tuto chvíli doporučuje pro G400, viz předchozí sekce.
+PrvnĂ­ CRTC nemĹŻĹže bĂ˝t v souÄasnosti pĹesmÄrovĂĄna na sekundĂĄrnĂ­ vĂ˝stup. Autor
+jadernĂŠho ovladaÄe matroxfb &ndash; Petr Vandrovec &ndash; pro to snad
+vyrobĂ­ podporu pomocĂ­ zobrazenĂ­ vĂ˝stupu prvnĂ­ho CRTC na oba vĂ˝stupy najednou,
+coĹž se pro tuto chvĂ­li doporuÄuje pro G400, viz pĹedchozĂ­ sekce.
 </para>
 
 <para>
-Potřebnou záplatu jádra a podrobné HOWTO lze stáhnout z
+PotĹebnou zĂĄplatu jĂĄdra a podrobnĂŠ HOWTO lze stĂĄhnout z
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
 </sect2>
@@ -2382,44 +2382,44 @@ Potřebnou záplatu jádra a podrobné HOWTO lze stáhnout z
 <title>Karty ATI</title>
 
 <formalpara>
-<title>ÚVOD</title>
+<title>ĂVOD</title>
 <para>
-V současnosti nechce ATI podporovat žádný ze svých TV-out čipů pod Linuxem
-z důvodu jejich licencované technologii Macrovision.
+V souÄasnosti nechce ATI podporovat ĹžĂĄdnĂ˝ ze svĂ˝ch TV-out ÄipĹŻ pod Linuxem
+z dĹŻvodu jejich licencovanĂŠ technologii Macrovision.
 </para>
 </formalpara>
 
 <itemizedlist>
-<title>STATUS TV VÝSTUPU NA KARTÁCH ATI POD LINUXEM</title>
+<title>STATUS TV VĂSTUPU NA KARTĂCH ATI POD LINUXEM</title>
 <listitem><simpara>
   <emphasis role="bold">ATI Mach64</emphasis>:
-  podporovaný <ulink url="http://gatos.sf.net">GATOS</ulink>em.
+  podporovanĂ˝ <ulink url="http://gatos.sf.net">GATOS</ulink>em.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
-  podporovaný <ulink url="http://gatos.sf.net">GATOS</ulink>em.
+  podporovanĂ˝ <ulink url="http://gatos.sf.net">GATOS</ulink>em.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Radeon</emphasis> a <emphasis role="bold">Rage128</emphasis>:
-  podporovaný <application>MPlayer</application>em!
-  Podívejte se na sekce <link linkend="vesa">VESA</link> a
+  podporovanĂ˝ <application>MPlayer</application>em!
+  PodĂ­vejte se na sekce <link linkend="vesa">VESA</link> a
   <link linkend="vidix">VIDIX</link>.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
-  podporovaný <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>em.
+  podporovanĂ˝ <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>em.
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-Ne ostatních kartách prostě použijte rozhraní <link linkend="vesa">VESA</link>
-bez VIDIX. Vyžaduje to výkoný CPU.
+Ne ostatnĂ­ch kartĂĄch prostÄ pouĹžijte rozhranĂ­ <link linkend="vesa">VESA</link>
+bez VIDIX. VyĹžaduje to vĂ˝konĂ˝ CPU.
 </para>
 
 <para>
-Jediné co musíte, je <emphasis role="bold">mít TV konektor zapojený
-před zapnutím PC</emphasis> jelikož video BIOS se inicializuje pouze
-jednou během POST procedury.
+JedinĂŠ co musĂ­te, je <emphasis role="bold">mĂ­t TV konektor zapojenĂ˝
+pĹed zapnutĂ­m PC</emphasis> jelikoĹž video BIOS se inicializuje pouze
+jednou bÄhem POST procedury.
 </para>
 </sect2>
 
@@ -2427,15 +2427,15 @@ jednou během POST procedury.
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
-Nejprve si MUSÍTE stáhnout closed-source ovladače z <ulink url="http://nvidia.com"/>.
-Nebudu zde popisovat instalaci a konfiguraci, jelikož je to mimo rámec této
+Nejprve si MUSĂTE stĂĄhnout closed-source ovladaÄe z <ulink url="http://nvidia.com"/>.
+Nebudu zde popisovat instalaci a konfiguraci, jelikoĹž je to mimo rĂĄmec tĂŠto
 dokumentace.
 </para>
 
 <para>
-Jakmile je funkční XFree86, XVideo a 3D akcelerace, editujte sekci
+Jakmile je funkÄnĂ­ XFree86, XVideo a 3D akcelerace, editujte sekci
 Device v souboru <filename>XF86Config</filename>, podle
-následujícího příkladu (upravte si to pro svou kartu/TV):
+nĂĄsledujĂ­cĂ­ho pĹĂ­kladu (upravte si to pro svou kartu/TV):
 
 <programlisting>
 Section "Device"
@@ -2458,55 +2458,55 @@ EndSection
 </para>
 
 <para>
-Samozřejmě je nejdůležitější část TwinView.
+SamozĹejmÄ je nejdĹŻleĹžitÄjĹĄĂ­ ÄĂĄst TwinView.
 </para>
 </sect2>
 
 <sect2 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
-Čip NeoMagic lze nalézt v různých laptopech. Některé z nich jsou vybaveny
-jednoduchým analogovým TV enkodérem, některé jej mají mnohem pokročilejší.
+Äip NeoMagic lze nalĂŠzt v rĹŻznĂ˝ch laptopech. NÄkterĂŠ z nich jsou vybaveny
+jednoduchĂ˝m analogovĂ˝m TV enkodĂŠrem, nÄkterĂŠ jej majĂ­ mnohem pokroÄilejĹĄĂ­.
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">Analogový enkodér</emphasis>:
-  Testováno na Toshibě Tecra 8000. Její čip pro TV výstup je mizerný křáp.
-  Pokud možno se mu obloukem vyhněte.
+  <emphasis role="bold">AnalogovĂ˝ enkodĂŠr</emphasis>:
+  TestovĂĄno na ToshibÄ Tecra 8000. JejĂ­ Äip pro TV vĂ˝stup je mizernĂ˝ kĹĂĄp.
+  Pokud moĹžno se mu obloukem vyhnÄte.
   </simpara> <simpara>
-  Musíte použít <option>-vo vesa</option>. Testovaný čip umí jen poměr stran
-  1.333333, takže se ujistěte, že používáte volby <option>-x</option>,
+  MusĂ­te pouĹžĂ­t <option>-vo vesa</option>. TestovanĂ˝ Äip umĂ­ jen pomÄr stran
+  1.333333, takĹže se ujistÄte, Ĺže pouĹžĂ­vĂĄte volby <option>-x</option>,
   <option>-y</option> a/nebo filtry
-  <option>-vf scale,crop,expand</option>, pokud počítač neumožní TV výstup.
-  Maximální rozlišení je 720*576 v 16bpp.
+  <option>-vf scale,crop,expand</option>, pokud poÄĂ­taÄ neumoĹžnĂ­ TV vĂ˝stup.
+  MaximĂĄlnĂ­ rozliĹĄenĂ­ je 720*576 v 16bpp.
   </simpara>
   <simpara>
-  Známá omezení: pouze VESA, omezení poměru stran 1.33333, obraz není vždy
-  vycentrován, barevná hloubka filmu se každých 10 minut změní na 4bpp a
-  zůstane tak. Často zatuhává, problémy se zobrazováním na LCD.
+  ZnĂĄmĂĄ omezenĂ­: pouze VESA, omezenĂ­ pomÄru stran 1.33333, obraz nenĂ­ vĹždy
+  vycentrovĂĄn, barevnĂĄ hloubka filmu se kaĹždĂ˝ch 10 minut zmÄnĂ­ na 4bpp a
+  zĹŻstane tak. Äasto zatuhĂĄvĂĄ, problĂŠmy se zobrazovĂĄnĂ­m na LCD.
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">Chrontel 70xx enkodér</emphasis>:
-  Nalezen v  IBM Thinkpad 390E a bude pravděpodobně i ostatních Thinkpadech nebo
-  noteboocích.
+  <emphasis role="bold">Chrontel 70xx enkodĂŠr</emphasis>:
+  Nalezen v  IBM Thinkpad 390E a bude pravdÄpodobnÄ i ostatnĂ­ch Thinkpadech nebo
+  noteboocĂ­ch.
   </simpara><simpara>
-  Musíte použít <option>-vo vesa:neotv_pal</option> pro PAL nebo
+  MusĂ­te pouĹžĂ­t <option>-vo vesa:neotv_pal</option> pro PAL nebo
   <option>-vo vesa:neotv_ntsc</option> pro NTSC.
-  To vám zpřístupní funkci TV výstupu v následujících 16 bpp a 8 bpp režimech:
+  To vĂĄm zpĹĂ­stupnĂ­ funkci TV vĂ˝stupu v nĂĄsledujĂ­cĂ­ch 16 bpp a 8 bpp reĹžimech:
   </simpara>
   <itemizedlist>
-    <listitem><simpara>NTSC 320x240, 640x480 a možná také 800x600.</simpara></listitem>
+    <listitem><simpara>NTSC 320x240, 640x480 a moĹžnĂĄ takĂŠ 800x600.</simpara></listitem>
     <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.</simpara></listitem>
   </itemizedlist>
-  <simpara>Režim 512x384 není podporován BIOSem. Musíte obraz škálovat do
-  jiného rozlišení pro aktivaci TV výstupu. Pokud vidíte obraz na obrazovce
-  v 640x480 nebo v 800x600, ale ne v 320x240 nebo jiném menším rozlišení,
-  musíte nahradit dvě tabulky ve <filename>vbelib.c</filename>.
-  Viz funkci vbeSetTV pro více informací. V tomto případě prosím kontaktujte
+  <simpara>ReĹžim 512x384 nenĂ­ podporovĂĄn BIOSem. MusĂ­te obraz ĹĄkĂĄlovat do
+  jinĂŠho rozliĹĄenĂ­ pro aktivaci TV vĂ˝stupu. Pokud vidĂ­te obraz na obrazovce
+  v 640x480 nebo v 800x600, ale ne v 320x240 nebo jinĂŠm menĹĄĂ­m rozliĹĄenĂ­,
+  musĂ­te nahradit dvÄ tabulky ve <filename>vbelib.c</filename>.
+  Viz funkci vbeSetTV pro vĂ­ce informacĂ­. V tomto pĹĂ­padÄ prosĂ­m kontaktujte
   autora.
   </simpara>
   <simpara>
-  Známá omezení: pouze VESA, žádné další ovládací prvky jako jas, kontrast,
-  úroveň černé, filtrace blikání nejsou implementovány.
+  ZnĂĄmĂĄ omezenĂ­: pouze VESA, ĹžĂĄdnĂŠ dalĹĄĂ­ ovlĂĄdacĂ­ prvky jako jas, kontrast,
+  ĂşroveĹ ÄernĂŠ, filtrace blikĂĄnĂ­ nejsou implementovĂĄny.
   </simpara>
 </listitem>
 </itemizedlist>

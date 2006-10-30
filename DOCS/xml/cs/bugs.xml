@@ -1,112 +1,112 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r19686 -->
 <appendix id="bugs">
-<title>Známé chyby</title>
+<title>ZnĂĄmĂŠ chyby</title>
 <sect1 id="bugs-special">
-<title>Speciální systémové/CPU-specifické chyby/problémy</title>
+<title>SpeciĂĄlnĂ­ systĂŠmovĂŠ/CPU-specifickĂŠ chyby/problĂŠmy</title>
 <itemizedlist>
 <listitem>
-<para>SIGILL (signal 4) na P3 s jádry 2.2.x:</para>
-<para>Problém: jádro 2.2.x nemá správnou (funkční) podporu SSE</para>
-<para>Řešení: upgradujte jádro na 2.4.x</para>
-<para>Obejití: <command>./configure --disable-sse</command></para>
+<para>SIGILL (signal 4) na P3 s jĂĄdry 2.2.x:</para>
+<para>ProblĂŠm: jĂĄdro 2.2.x nemĂĄ sprĂĄvnou (funkÄnĂ­) podporu SSE</para>
+<para>ĹeĹĄenĂ­: upgradujte jĂĄdro na 2.4.x</para>
+<para>ObejitĂ­: <command>./configure --disable-sse</command></para>
 </listitem>
 <listitem>
-<para>Obecný SIGILL (signal 4):</para>
-<para>Problém: zkompilovali jste a používáte <application>MPlayer</application>
-na různých strojích (například jste kompilovali na P3 a pouštíte jej na Celeronu)
+<para>ObecnĂ˝ SIGILL (signal 4):</para>
+<para>ProblĂŠm: zkompilovali jste a pouĹžĂ­vĂĄte <application>MPlayer</application>
+na rĹŻznĂ˝ch strojĂ­ch (napĹĂ­klad jste kompilovali na P3 a pouĹĄtĂ­te jej na Celeronu)
 </para>
-<para>Řešení: kompilujte <application>MPlayer</application> na stejném stroji,
-kde jej budete používat!</para>
-<para>Obejití: Na toto všechno můžete zapomenout, když budete konfigurovat
-kompilaci s volbou <option>--enable-runtime-cpudetection</option>, nebo můžete
-vyřadit určité sady CPU instrukcí pomocí mnohem konkrétnějších voleb (jako
+<para>ĹeĹĄenĂ­: kompilujte <application>MPlayer</application> na stejnĂŠm stroji,
+kde jej budete pouĹžĂ­vat!</para>
+<para>ObejitĂ­: Na toto vĹĄechno mĹŻĹžete zapomenout, kdyĹž budete konfigurovat
+kompilaci s volbou <option>--enable-runtime-cpudetection</option>, nebo mĹŻĹžete
+vyĹadit urÄitĂŠ sady CPU instrukcĂ­ pomocĂ­ mnohem konkrĂŠtnÄjĹĄĂ­ch voleb (jako
 <option>--disable-mmx</option>, <option>--disable-3dnow</option>, atd.).
 </para>
 </listitem>
 <listitem>
-<para>Havaruje při ukládání datových proudů (dump):</para>
-<para>Problém: vylití jádra (core dump)</para>
-<para>Řešení: Nepanikařte. Zjistěte, kde máte ručník.</para>
+<para>Havaruje pĹi uklĂĄdĂĄnĂ­ datovĂ˝ch proudĹŻ (dump):</para>
+<para>ProblĂŠm: vylitĂ­ jĂĄdra (core dump)</para>
+<para>ĹeĹĄenĂ­: NepanikaĹte. ZjistÄte, kde mĂĄte ruÄnĂ­k.</para>
 </listitem>
 </itemizedlist>
 </sect1>
 
 <sect1 id="bugs-audio">
-<title>Různé A-V sync a další problémy se zvukem</title>
+<title>RĹŻznĂŠ A-V sync a dalĹĄĂ­ problĂŠmy se zvukem</title>
 
 <sect2 id="bugs-delay-all">
-<title>Obecné zpoždění zvuku nebo mizerný zvuk (ve všech nebo mnoha souborech)</title>
+<title>ObecnĂŠ zpoĹždÄnĂ­ zvuku nebo mizernĂ˝ zvuk (ve vĹĄech nebo mnoha souborech)</title>
 <itemizedlist>
 <listitem><para>
-nejčastěji: vadný ovládač zvukové karty! &ndash; zkuste použít jiné ovladače,
-Zkuste OSS emulaci z ALSA pomocí <option>-ao oss</option>, také zkuste
-<option>-ao sdl</option>, občas to pomůže. Pokud se váš soubor přehrává dobře
-s <option>-nosound</option>, pak si můžete být jisti, že je to problém zvukové
-karty (ovladače).
+nejÄastÄji: vadnĂ˝ ovlĂĄdaÄ zvukovĂŠ karty! &ndash; zkuste pouĹžĂ­t jinĂŠ ovladaÄe,
+Zkuste OSS emulaci z ALSA pomocĂ­ <option>-ao oss</option>, takĂŠ zkuste
+<option>-ao sdl</option>, obÄas to pomĹŻĹže. Pokud se vĂĄĹĄ soubor pĹehrĂĄvĂĄ dobĹe
+s <option>-nosound</option>, pak si mĹŻĹžete bĂ˝t jisti, Ĺže je to problĂŠm zvukovĂŠ
+karty (ovladaÄe).
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
 <listitem>
-<para>problémy audio bufferu (špatně detekovaná velikost bufferu)</para>
-<para>Obejití: <application>MPlayer</application>ova volba <option>-abs</option></para>
+<para>problĂŠmy audio bufferu (ĹĄpatnÄ detekovanĂĄ velikost bufferu)</para>
+<para>ObejitĂ­: <application>MPlayer</application>ova volba <option>-abs</option></para>
 </listitem>
 </itemizedlist>
 <itemizedlist>
 <listitem><para>
-problémy se vzorkovací rychlostí &ndash; možná vaše zvuková karta nepodporuje
-vzorkovací rychlost používanou ve vašich souborech. Zkuste převzorkovávací
+problĂŠmy se vzorkovacĂ­ rychlostĂ­ &ndash; moĹžnĂĄ vaĹĄe zvukovĂĄ karta nepodporuje
+vzorkovacĂ­ rychlost pouĹžĂ­vanou ve vaĹĄich souborech. Zkuste pĹevzorkovĂĄvacĂ­
 filtr (<option>-af resample=...</option>)
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
 <listitem>
-<para>pomalý stroj (CPU nebo VGA)</para>
-<para>zkuste s <option>-vo null</option>, pokud se přehrává dobře, pak máte
-pomalou VGA kartu/rozhraní</para>
-<para>Obejití: kupte si rychlejší kartu, nebo si přečtěte tu část dokumentace
-pojednávající o tom jak urychlovat</para>
-<para>Rovněž zkuste <option>-framedrop</option></para>
+<para>pomalĂ˝ stroj (CPU nebo VGA)</para>
+<para>zkuste s <option>-vo null</option>, pokud se pĹehrĂĄvĂĄ dobĹe, pak mĂĄte
+pomalou VGA kartu/rozhranĂ­</para>
+<para>ObejitĂ­: kupte si rychlejĹĄĂ­ kartu, nebo si pĹeÄtÄte tu ÄĂĄst dokumentace
+pojednĂĄvajĂ­cĂ­ o tom jak urychlovat</para>
+<para>RovnÄĹž zkuste <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-delay-specific">
-<title>Zpoždění zvuku/de-sync typické pro jeden nebo málo souborů</title>
+<title>ZpoĹždÄnĂ­ zvuku/de-sync typickĂŠ pro jeden nebo mĂĄlo souborĹŻ</title>
 <itemizedlist>
 <listitem>
-<para>vadný soubor</para>
+<para>vadnĂ˝ soubor</para>
 <para>
-Obejití:
+ObejitĂ­:
   <itemizedlist>
   <listitem>
     <para>volba <option>-ni</option> nebo <option>-nobps</option> (pro
-		neprokládané nebo vadné soubory)</para>
+		neproklĂĄdanĂŠ nebo vadnĂŠ soubory)</para>
     <para>a/nebo</para>
   </listitem>
   <listitem>
-    <para><option>-mc 0</option>(vyžadováno soubory se špatně prokládaným
+    <para><option>-mc 0</option>(vyĹžadovĂĄno soubory se ĹĄpatnÄ proklĂĄdanĂ˝m
 		VBR zvukem)</para>
     <para>a/nebo</para>
   </listitem>
   <listitem>
     <para><option>-delay</option> nebo <keycap>+</keycap>/<keycap>-</keycap>
-    klávesy za běhu pro nastavení zpoždění</para>
+    klĂĄvesy za bÄhu pro nastavenĂ­ zpoĹždÄnĂ­</para>
   </listitem>
   </itemizedlist>
-Pokud nic z toho nepomůže, uploadujte prosíme soubor, otestujeme jej a opravíme.
+Pokud nic z toho nepomĹŻĹže, uploadujte prosĂ­me soubor, otestujeme jej a opravĂ­me.
 </para>
 </listitem>
 <listitem>
-<para>vaše zvuková karta nepodporuje přehrávání při 48 kHz</para>
-<para>Obejití: kupte si lepší zvukovou kartu... nebo zkuste snížit snímkovou
-rychlost o 10% (použijte <option>-fps 27</option> pro film 30fps) nebo použijte
+<para>vaĹĄe zvukovĂĄ karta nepodporuje pĹehrĂĄvĂĄnĂ­ pĹi 48 kHz</para>
+<para>ObejitĂ­: kupte si lepĹĄĂ­ zvukovou kartu... nebo zkuste snĂ­Ĺžit snĂ­mkovou
+rychlost o 10% (pouĹžijte <option>-fps 27</option> pro film 30fps) nebo pouĹžijte
 resample filtr</para>
 </listitem>
 <listitem>
-<para>pomalý počítač (pokud není A-V okolo 0 a poslední číslo stavového řádku se
-zvyšuje)</para>
-<para>Obejití: <option>-framedrop</option></para>
+<para>pomalĂ˝ poÄĂ­taÄ (pokud nenĂ­ A-V okolo 0 a poslednĂ­ ÄĂ­slo stavovĂŠho ĹĂĄdku se
+zvyĹĄuje)</para>
+<para>ObejitĂ­: <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
@@ -115,51 +115,51 @@ zvyšuje)</para>
 <title>Naprosto bez zvuku</title>
 <itemizedlist>
 <listitem>
-<para>váš soubor používá nepodporovaný audio kodek</para>
-<para>přečtěte si dokumentaci a pomozte nám přidat pro něj podporu</para>
+<para>vĂĄĹĄ soubor pouĹžĂ­vĂĄ nepodporovanĂ˝ audio kodek</para>
+<para>pĹeÄtÄte si dokumentaci a pomozte nĂĄm pĹidat pro nÄj podporu</para>
 </listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-nopicture">
-<title>Žádný obraz (pouze šedá/zelená plocha)</title>
+<title>Ĺ˝ĂĄdnĂ˝ obraz (pouze ĹĄedĂĄ/zelenĂĄ plocha)</title>
 <itemizedlist>
 <listitem>
-<para>váš soubor používá nepodporovaný video kodek</para>
-<para>Obejití: přečtěte si dokumentaci a pomozte nám přidat pro něj podporu</para>
+<para>vĂĄĹĄ soubor pouĹžĂ­vĂĄ nepodporovanĂ˝ video kodek</para>
+<para>ObejitĂ­: pĹeÄtÄte si dokumentaci a pomozte nĂĄm pĹidat pro nÄj podporu</para>
 </listitem>
 <listitem>
 <para>
-automaticky vybraný kodek neumí dekódovat soubor &ndash; zkuste vybrat jiný
-pomocí volby <option>-vc</option> nebo <option>-vfm</option>
+automaticky vybranĂ˝ kodek neumĂ­ dekĂłdovat soubor &ndash; zkuste vybrat jinĂ˝
+pomocĂ­ volby <option>-vc</option> nebo <option>-vfm</option>
 </para>
 </listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-video">
-<title>Problémy s výstupem videa</title>
+<title>ProblĂŠmy s vĂ˝stupem videa</title>
 <para>
-Nejprve poznamenejme, že volby <option>-fs -vm</option> a
-<option>-zoom</option> nejsou podporované všemi rozhraními. Navíc
-ne všechna rozhraní podporují škálování/zvětšování v hardwaru.
+Nejprve poznamenejme, Ĺže volby <option>-fs -vm</option> a
+<option>-zoom</option> nejsou podporovanĂŠ vĹĄemi rozhranĂ­mi. NavĂ­c
+ne vĹĄechna rozhranĂ­ podporujĂ­ ĹĄkĂĄlovĂĄnĂ­/zvÄtĹĄovĂĄnĂ­ v hardwaru.
 </para>
 
 <formalpara>
-<title>Poblikávání OSD/titulků</title>
+<title>PoblikĂĄvĂĄnĂ­ OSD/titulkĹŻ</title>
 <para>
 <itemizedlist>
-<listitem><para>rozhraní x11: bohužel, zatím nelze odstranit</para></listitem>
-<listitem><para>rozhraní xv: použijte volbu <option>-double</option></para></listitem>
+<listitem><para>rozhranĂ­ x11: bohuĹžel, zatĂ­m nelze odstranit</para></listitem>
+<listitem><para>rozhranĂ­ xv: pouĹžijte volbu <option>-double</option></para></listitem>
 </itemizedlist>
 </para>
 </formalpara>
 
 <formalpara>
-<title>Zelený obraz při použití mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<title>ZelenĂ˝ obraz pĹi pouĹžitĂ­ mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
 <para>
 <itemizedlist>
-<listitem><para>mga_vid špatně detekovalo množství RAM videokarty, načtěte jej
+<listitem><para>mga_vid ĹĄpatnÄ detekovalo mnoĹžstvĂ­ RAM videokarty, naÄtÄte jej
 znovu s volbou <option>mga_ram_size</option>
 </para></listitem>
 </itemizedlist>

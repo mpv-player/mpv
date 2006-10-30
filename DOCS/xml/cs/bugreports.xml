@@ -1,215 +1,215 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r19715 -->
 <appendix id="bugreports">
-<title>Jak hlásit chyby</title>
+<title>Jak hlĂĄsit chyby</title>
 <para>
-Dobrá hlášení chyb jsou velmi cenným příspěvkem do vývoje jakéhokoli
-softwarového projektu. Ale je to s nimi jako se psaním dobrého
-programu, sepsání dobrého hlášení problému vyžaduje trochu práce.
-Prosím berte na vědomí, že většina vývojářů je velmi zaneprázdněna a
-dostává kvanta e-mailů. Takže ačkoli je vaše zpětná vazba kritická pro
-vylepšování <application>MPlayer</application>u a velmi ceněná, prosíme
-pochopte, že musíte poskytnout <emphasis role="bold">veškeré</emphasis>
-informace které požadujeme a postupovat přesně podle instrukcí v tomto
+DobrĂĄ hlĂĄĹĄenĂ­ chyb jsou velmi cennĂ˝m pĹĂ­spÄvkem do vĂ˝voje jakĂŠhokoli
+softwarovĂŠho projektu. Ale je to s nimi jako se psanĂ­m dobrĂŠho
+programu, sepsĂĄnĂ­ dobrĂŠho hlĂĄĹĄenĂ­ problĂŠmu vyĹžaduje trochu prĂĄce.
+ProsĂ­m berte na vÄdomĂ­, Ĺže vÄtĹĄina vĂ˝vojĂĄĹĹŻ je velmi zaneprĂĄzdnÄna a
+dostĂĄvĂĄ kvanta e-mailĹŻ. TakĹže aÄkoli je vaĹĄe zpÄtnĂĄ vazba kritickĂĄ pro
+vylepĹĄovĂĄnĂ­ <application>MPlayer</application>u a velmi cenÄnĂĄ, prosĂ­me
+pochopte, Ĺže musĂ­te poskytnout <emphasis role="bold">veĹĄkerĂŠ</emphasis>
+informace kterĂŠ poĹžadujeme a postupovat pĹesnÄ podle instrukcĂ­ v tomto
 dokumentu.
 </para>
 <sect1 id="bugreports_security">
-<title>Hlášení bezpečnostních chyb</title>
+<title>HlĂĄĹĄenĂ­ bezpeÄnostnĂ­ch chyb</title>
 <para>
-V případě že jste nalezli exploitovatelnou chybu, chtěli byste udělat správnou
-věc a nechali nás ji opravit než ji odhalíte, budeme rádi, když nám pošlete
-bezpečnostní hlášení na
+V pĹĂ­padÄ Ĺže jste nalezli exploitovatelnou chybu, chtÄli byste udÄlat sprĂĄvnou
+vÄc a nechali nĂĄs ji opravit neĹž ji odhalĂ­te, budeme rĂĄdi, kdyĹž nĂĄm poĹĄlete
+bezpeÄnostnĂ­ hlĂĄĹĄenĂ­ na
 <ulink url="mailto:&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;">&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;</ulink>.
-Do hlavičky prosíme přidejte [SECURITY] nebo [ADVISORY].
-Ujistěte se, že vaše hlášení obsahuje úplnou a podrobnou analýzu chyby.
-Zaslání opravy je velice žádoucí.
-Prosíme neodkládejte hlášení do doby než vytvoříte 'dokazovací' exploit, ten nám
-můžete zaslat dalším mailem.
+Do hlaviÄky prosĂ­me pĹidejte [SECURITY] nebo [ADVISORY].
+UjistÄte se, Ĺže vaĹĄe hlĂĄĹĄenĂ­ obsahuje Ăşplnou a podrobnou analĂ˝zu chyby.
+ZaslĂĄnĂ­ opravy je velice ĹžĂĄdoucĂ­.
+ProsĂ­me neodklĂĄdejte hlĂĄĹĄenĂ­ do doby neĹž vytvoĹĂ­te 'dokazovacĂ­' exploit, ten nĂĄm
+mĹŻĹžete zaslat dalĹĄĂ­m mailem.
 </para>
 </sect1>
 <sect1 id="bugreports_fix">
 <title>Jak napravovat chyby</title>
 <para>
-Pokud si myslíte, že máte potřebné schopnosti, pak vás vybízíme abyste
-opravil(a) chybu samostatně. Nebo jste to již udělal(a)? Přečtěte si prosím
-<ulink url="../../tech/patches.txt">tento krátký dokument</ulink>, abyste se
-dozvěděli jak zahrnout váš kód do <application>MPlayer</application>u.
-Lidé z konference
+Pokud si myslĂ­te, Ĺže mĂĄte potĹebnĂŠ schopnosti, pak vĂĄs vybĂ­zĂ­me abyste
+opravil(a) chybu samostatnÄ. Nebo jste to jiĹž udÄlal(a)? PĹeÄtÄte si prosĂ­m
+<ulink url="../../tech/patches.txt">tento krĂĄtkĂ˝ dokument</ulink>, abyste se
+dozvÄdÄli jak zahrnout vĂĄĹĄ kĂłd do <application>MPlayer</application>u.
+LidĂŠ z konference
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-vám pomohou, pokud budete mít otázky.
+vĂĄm pomohou, pokud budete mĂ­t otĂĄzky.
 </para>
 </sect1>
 <sect1 id="bugreports_regression_test">
-<title>Jak provádět regresní testování pomocí Subversion</title>
+<title>Jak provĂĄdÄt regresnĂ­ testovĂĄnĂ­ pomocĂ­ Subversion</title>
 <para>
-Občas nastane problém typu 'předtím to fungovalo, teď už ne...'.
-Zde přinášíme postup krok za krokem, jak vyhledat, kdy problém
-nastal. Toto <emphasis role="bold">není</emphasis> určeno příležitostným
-uživatelům.
+ObÄas nastane problĂŠm typu 'pĹedtĂ­m to fungovalo, teÄ uĹž ne...'.
+Zde pĹinĂĄĹĄĂ­me postup krok za krokem, jak vyhledat, kdy problĂŠm
+nastal. Toto <emphasis role="bold">nenĂ­</emphasis> urÄeno pĹĂ­leĹžitostnĂ˝m
+uĹživatelĹŻm.
 </para>
 <para>
-Nejprve si musíte opatřit zdrojové kódy MPlayeru ze Subversion.
-Instrukce lze nalést na konci
-<ulink url="http://www.mplayerhq.hu/dload.html">této stránky</ulink>.
+Nejprve si musĂ­te opatĹit zdrojovĂŠ kĂłdy MPlayeru ze Subversion.
+Instrukce lze nalĂŠst na konci
+<ulink url="http://www.mplayerhq.hu/dload.html">tĂŠto strĂĄnky</ulink>.
 </para>
 <para>
-Tak dostanete v adresáři mplayer/ obraz Subversion stromu na straně klienta.
-Nyní aktualizujte tento obraz k datu, které chcete:
+Tak dostanete v adresĂĄĹi mplayer/ obraz Subversion stromu na stranÄ klienta.
+NynĂ­ aktualizujte tento obraz k datu, kterĂŠ chcete:
 <screen>
 cd mplayer/
 svn update -r {"2004-08-23"}
 </screen>
-Formát data je YYYY-MM-DD HH:MM:SS.
-Požití tohoto datového formátu zajišťuje, že budete schopni extrahovat
-patche podle data, kdy byly zapsány (commit) stejně, jak jsou v
+FormĂĄt data je YYYY-MM-DD HH:MM:SS.
+PoĹžitĂ­ tohoto datovĂŠho formĂĄtu zajiĹĄĹĽuje, Ĺže budete schopni extrahovat
+patche podle data, kdy byly zapsĂĄny (commit) stejnÄ, jak jsou v
 <ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archivu</ulink>.
 </para>
 <para>
-A teď proveďte sestavení jako při normální aktualizaci:
+A teÄ proveÄte sestavenĂ­ jako pĹi normĂĄlnĂ­ aktualizaci:
 <screen>
 ./configure
 make
 </screen>
 </para>
 <para>
-Pokud to čte nějaký neprogramátor, nejrychlejší metodou, jak se dostat
-k bodu, kde problém nastal, je použití binárního vyhledávání &ndash; to je
-vyhledávání data poruchy opakovaným dělením vyhledávacího intervalu napůl.
-Například pokud problém nastal v 2003, začneme v polovině roku a ptáme se,
-"Už je tu problém?".
-Pokud ano, vraťte se na prvního dubna; pokud ne, běžte na prvního října
-a tak dále.
+Pokud to Äte nÄjakĂ˝ neprogramĂĄtor, nejrychlejĹĄĂ­ metodou, jak se dostat
+k bodu, kde problĂŠm nastal, je pouĹžitĂ­ binĂĄrnĂ­ho vyhledĂĄvĂĄnĂ­ &ndash; to je
+vyhledĂĄvĂĄnĂ­ data poruchy opakovanĂ˝m dÄlenĂ­m vyhledĂĄvacĂ­ho intervalu napĹŻl.
+NapĹĂ­klad pokud problĂŠm nastal v 2003, zaÄneme v polovinÄ roku a ptĂĄme se,
+"UĹž je tu problĂŠm?".
+Pokud ano, vraĹĽte se na prvnĂ­ho dubna; pokud ne, bÄĹžte na prvnĂ­ho ĹĂ­jna
+a tak dĂĄle.
 </para>
 <para>
-Pokud máte spoustu místa na disku (plná kompilace obvykle zabírá 100 MB
-a kolem 300&ndash;350 MB, pokud jsou zapnuty debugovací symboly), zkopírujte
-nejstarší známou funkční verzi před jejím updatem; to vám ušetří čas,
+Pokud mĂĄte spoustu mĂ­sta na disku (plnĂĄ kompilace obvykle zabĂ­rĂĄ 100 MB
+a kolem 300&ndash;350 MB, pokud jsou zapnuty debugovacĂ­ symboly), zkopĂ­rujte
+nejstarĹĄĂ­ znĂĄmou funkÄnĂ­ verzi pĹed jejĂ­m updatem; to vĂĄm uĹĄetĹĂ­ Äas,
 pokud se budete vracet.
-(Obvykla je nutné spustit 'make distclean' před rekompilací starší verze,
-takže pokud si neuděláte záložní kopii originálního zdrojového stromu,
-budete v něm muset rekompilovat vše, až se vrátíte do současnosti.)
+(Obvykla je nutnĂŠ spustit 'make distclean' pĹed rekompilacĂ­ starĹĄĂ­ verze,
+takĹže pokud si neudÄlĂĄte zĂĄloĹžnĂ­ kopii originĂĄlnĂ­ho zdrojovĂŠho stromu,
+budete v nÄm muset rekompilovat vĹĄe, aĹž se vrĂĄtĂ­te do souÄasnosti.)
 </para>
 <para>
-Pokud jste našli den, kdy k problému došlo, pokračujte v hledání pomocí
-archivu mplayer-cvslog (řazeného podle data) a preciznějším cvs update
-s uvedením hodiny, minuty a sekundy:
+Pokud jste naĹĄli den, kdy k problĂŠmu doĹĄlo, pokraÄujte v hledĂĄnĂ­ pomocĂ­
+archivu mplayer-cvslog (ĹazenĂŠho podle data) a preciznÄjĹĄĂ­m cvs update
+s uvedenĂ­m hodiny, minuty a sekundy:
 <screen>
 cvs update -PAd -D "2004-08-23 15:17:25"
 </screen>
-To vám umožní lehce najít patch, který problém způsobil.
+To vĂĄm umoĹžnĂ­ lehce najĂ­t patch, kterĂ˝ problĂŠm zpĹŻsobil.
 </para>
 <para>
-Pokud jste našli patch, který je příčinou problému, máte téměř vyhráno;
+Pokud jste naĹĄli patch, kterĂ˝ je pĹĂ­Äinou problĂŠmu, mĂĄte tĂŠmÄĹ vyhrĂĄno;
 ohlaste to do
 <ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilly</ulink> nebo
-se přihlaste do
+se pĹihlaste do
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
-a pošlete to tam.
-Je šance, že autor navrhne opravu.
-Rovněž si můžete patch rozpitvat, dokud z něj nevytlučete, kde je chyba :-).
+a poĹĄlete to tam.
+Je ĹĄance, Ĺže autor navrhne opravu.
+RovnÄĹž si mĹŻĹžete patch rozpitvat, dokud z nÄj nevytluÄete, kde je chyba :-).
 </para>
 </sect1>
 <sect1 id="bugreports_report">
 <title>Jak oznamovat chyby</title>
 <para>
-Nejprve, prosím, vyzkoušejte poslední Subversion verzi
-<application>MPlayer</application>u, jelikož vaše chyba již mohla být
-odstraněna. Vývoj je velmi rychlý, většina chyb v oficiálních balíčcích je
-nahlášena během několika dnů, nebo dokonce hodin, takže prosím používejte
-<emphasis role="bold">pouze Subversion</emphasis> pro hlášení chyb. To zahrnuje binární
-balíčky <application>MPlayer</application>u. Subversion instrukce naleznete na konci
-<ulink url="http://www.mplayerhq.hu/dload.html">této stránky</ulink>,
-nebo v souboru README. Pokud to nepomůže, prostudujte si prosím seznam
-<link linkend="bugs">známých chyb</link> a zbytek dokumentace. Pokud je váš
-problém neznámý nebo jej nelze řešit pomocí našich instrukcí pak jej nahlaste
+Nejprve, prosĂ­m, vyzkouĹĄejte poslednĂ­ Subversion verzi
+<application>MPlayer</application>u, jelikoĹž vaĹĄe chyba jiĹž mohla bĂ˝t
+odstranÄna. VĂ˝voj je velmi rychlĂ˝, vÄtĹĄina chyb v oficiĂĄlnĂ­ch balĂ­ÄcĂ­ch je
+nahlĂĄĹĄena bÄhem nÄkolika dnĹŻ, nebo dokonce hodin, takĹže prosĂ­m pouĹžĂ­vejte
+<emphasis role="bold">pouze Subversion</emphasis> pro hlĂĄĹĄenĂ­ chyb. To zahrnuje binĂĄrnĂ­
+balĂ­Äky <application>MPlayer</application>u. Subversion instrukce naleznete na konci
+<ulink url="http://www.mplayerhq.hu/dload.html">tĂŠto strĂĄnky</ulink>,
+nebo v souboru README. Pokud to nepomĹŻĹže, prostudujte si prosĂ­m seznam
+<link linkend="bugs">znĂĄmĂ˝ch chyb</link> a zbytek dokumentace. Pokud je vĂĄĹĄ
+problĂŠm neznĂĄmĂ˝ nebo jej nelze ĹeĹĄit pomocĂ­ naĹĄich instrukcĂ­ pak jej nahlaste
 jako chybu.
 </para>
 
 <para>
-Prosíme, neposílejte hlášení chyb soukromě jednotlivým vývojářům. Toto je týmová
-práce a proto se o ně může zajímat více lidí. Čas od času měli ostatní uživatelé
-stejný problém a vědí jak jej obejít, dokonce i když se jedná o chybu v kódu
+ProsĂ­me, neposĂ­lejte hlĂĄĹĄenĂ­ chyb soukromÄ jednotlivĂ˝m vĂ˝vojĂĄĹĹŻm. Toto je tĂ˝movĂĄ
+prĂĄce a proto se o nÄ mĹŻĹže zajĂ­mat vĂ­ce lidĂ­. Äas od Äasu mÄli ostatnĂ­ uĹživatelĂŠ
+stejnĂ˝ problĂŠm a vÄdĂ­ jak jej obejĂ­t, dokonce i kdyĹž se jednĂĄ o chybu v kĂłdu
 <application>MPlayer</application>u.
 </para>
 
 <para>
-Prosíme popište svůj problém tak podrobně, jak je to jen možné. Proveďte malé
-pátrání po okolnostech za kterých problém nastává. Projevuje se ta chyba jen
-v určitých situacích? Je vlastní určitým souborům nebo typům souborů? Stává se
-pouze s jedním kodekem, nebo je nezávislá na použitém kodeku? Dokážete ji
-zopakovat se všemi výstupními rozhraními nebo ovladači?
-Čím více nám poskytnete informací, tím je větší šance na odstranění problému.
-Nezapomeňte také připojit hodnotné informace požadované níže, jinak nebudeme
-schopni stanovit příčinu problému.
+ProsĂ­me popiĹĄte svĹŻj problĂŠm tak podrobnÄ, jak je to jen moĹžnĂŠ. ProveÄte malĂŠ
+pĂĄtrĂĄnĂ­ po okolnostech za kterĂ˝ch problĂŠm nastĂĄvĂĄ. Projevuje se ta chyba jen
+v urÄitĂ˝ch situacĂ­ch? Je vlastnĂ­ urÄitĂ˝m souborĹŻm nebo typĹŻm souborĹŻ? StĂĄvĂĄ se
+pouze s jednĂ­m kodekem, nebo je nezĂĄvislĂĄ na pouĹžitĂŠm kodeku? DokĂĄĹžete ji
+zopakovat se vĹĄemi vĂ˝stupnĂ­mi rozhranĂ­mi nebo ovladaÄi?
+ÄĂ­m vĂ­ce nĂĄm poskytnete informacĂ­, tĂ­m je vÄtĹĄĂ­ ĹĄance na odstranÄnĂ­ problĂŠmu.
+NezapomeĹte takĂŠ pĹipojit hodnotnĂŠ informace poĹžadovanĂŠ nĂ­Ĺže, jinak nebudeme
+schopni stanovit pĹĂ­Äinu problĂŠmu.
 </para>
 
 <para>
-Skvělá, dobře napsaná příručka jak se ptát ve veřejných konferencích je
+SkvÄlĂĄ, dobĹe napsanĂĄ pĹĂ­ruÄka jak se ptĂĄt ve veĹejnĂ˝ch konferencĂ­ch je
 <ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">How To Ask
 Questions The Smart Way</ulink> od
 <ulink url="http://www.catb.org/~esr/">Erica S. Raymonda</ulink>.
-Další příručka je
+DalĹĄĂ­ pĹĂ­ruÄka je
 <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report
 Bugs Effectively</ulink> od
 <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simona Tathama</ulink>.
-Pokud budete postupovat podle těchto rad, jistě se vám dostane pomoci. Pochopte
-však, že my všichni sledujeme konference dobrovolně ve svém volném čase. Máme
-mnoho práce a nemůžeme vám zaručit že vyřešíme váš problém nebo že vůbec
-dostanete odpověď.
+Pokud budete postupovat podle tÄchto rad, jistÄ se vĂĄm dostane pomoci. Pochopte
+vĹĄak, Ĺže my vĹĄichni sledujeme konference dobrovolnÄ ve svĂŠm volnĂŠm Äase. MĂĄme
+mnoho prĂĄce a nemĹŻĹžeme vĂĄm zaruÄit Ĺže vyĹeĹĄĂ­me vĂĄĹĄ problĂŠm nebo Ĺže vĹŻbec
+dostanete odpovÄÄ.
 </para>
 
 </sect1>
 
 <sect1 id="bugreports_where">
-<title>Kam hlásit chyby</title>
+<title>Kam hlĂĄsit chyby</title>
 <para>
-Přihlaste se do e-mailové konference MPlayer-users:
+PĹihlaste se do e-mailovĂŠ konference MPlayer-users:
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
-a pošlete své hlášení o chybách na adresu
-<ulink url="mailto:mplayer-users@mplayerhq.hu"/> kde o tom můžeme diskutovat.
+a poĹĄlete svĂŠ hlĂĄĹĄenĂ­ o chybĂĄch na adresu
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/> kde o tom mĹŻĹžeme diskutovat.
 </para>
 <para>
-Pokud chcete, můžete místo toho použít zbrusu novou
+Pokud chcete, mĹŻĹžete mĂ­sto toho pouĹžĂ­t zbrusu novou
 <ulink url="http://bugzilla.mplayerhq.hu/">Bugzillu</ulink>.
 </para>
 <para>
-Jazykem konference je <emphasis role="bold">Angličtina</emphasis>. Zachovávejte
-prosím
+Jazykem konference je <emphasis role="bold">AngliÄtina</emphasis>. ZachovĂĄvejte
+prosĂ­m
 <ulink url="http://www.ietf.org/rfc/rfc1855.txt">Pravidla Netikety</ulink> a
-<emphasis role="bold">neposílejte HTML mail</emphasis> do žádné z našich
-konferencí. Jinak můžete být ignorováni nebo vyhozeni. Pokud nevíte co je to
-HTML mail, nebo proč je tak zatracován, přečtěte si tento
-<ulink url="http://expita.com/nomime.html">výborný dokument</ulink>. Zde se
-dovíte detaily včetně instrukcí pro vypnutí HTML. Poznamenejme též, že nebudeme
-individuálně dělat CC (kopie) lidem, takže je dobré se přihlásit, abyste
-obdrželi svou odpověď.
+<emphasis role="bold">neposĂ­lejte HTML mail</emphasis> do ĹžĂĄdnĂŠ z naĹĄich
+konferencĂ­. Jinak mĹŻĹžete bĂ˝t ignorovĂĄni nebo vyhozeni. Pokud nevĂ­te co je to
+HTML mail, nebo proÄ je tak zatracovĂĄn, pĹeÄtÄte si tento
+<ulink url="http://expita.com/nomime.html">vĂ˝bornĂ˝ dokument</ulink>. Zde se
+dovĂ­te detaily vÄetnÄ instrukcĂ­ pro vypnutĂ­ HTML. Poznamenejme tĂŠĹž, Ĺže nebudeme
+individuĂĄlnÄ dÄlat CC (kopie) lidem, takĹže je dobrĂŠ se pĹihlĂĄsit, abyste
+obdrĹželi svou odpovÄÄ.
 </para>
 </sect1>
 
 <sect1 id="bugreports_what">
-<title>Co nahlásit</title>
+<title>Co nahlĂĄsit</title>
 <para>
-Bude potřeba připojit log, konfiguraci nebo vzorky souborů ke svému hlášení chyb.
-Pokud jsou některé z nich opravdu velké, pak je raději nahrajte na náš
+Bude potĹeba pĹipojit log, konfiguraci nebo vzorky souborĹŻ ke svĂŠmu hlĂĄĹĄenĂ­ chyb.
+Pokud jsou nÄkterĂŠ z nich opravdu velkĂŠ, pak je radÄji nahrajte na nĂĄĹĄ
 <ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/">FTP server</ulink>
-v komprimovaném formátu (preferujeme gzip a bzip2) a do zprávy zahrňte pouze
-cestu a název souboru. Naše konference mají limit velikosti zprávy 80k, pokud
-máte něco většího, musíte to zkomprimovat a nahrát na FTP.
+v komprimovanĂŠm formĂĄtu (preferujeme gzip a bzip2) a do zprĂĄvy zahrĹte pouze
+cestu a nĂĄzev souboru. NaĹĄe konference majĂ­ limit velikosti zprĂĄvy 80k, pokud
+mĂĄte nÄco vÄtĹĄĂ­ho, musĂ­te to zkomprimovat a nahrĂĄt na FTP.
 </para>
 
 <sect2 id="bugreports_system">
-<title>Systémové informace</title>
+<title>SystĂŠmovĂŠ informace</title>
 <para>
 <itemizedlist>
 <listitem><para>
-Vaše Linuxová distribuce nebo operační systém a jeho verze jako:
+VaĹĄe LinuxovĂĄ distribuce nebo operaÄnĂ­ systĂŠm a jeho verze jako:
   <itemizedlist>
     <listitem><para>Red Hat 7.1</para></listitem>
     <listitem><para>Slackware 7.0 + devel packs from 7.1 ...</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-verze jádra:
+verze jĂĄdra:
 <screen>uname -a</screen>
 </para></listitem>
 <listitem><para>
@@ -230,13 +230,13 @@ as --version
 </screen>
 </para></listitem>
 <listitem><para>
-Pokud máte problémy s celoobrazovkovým režimem:
+Pokud mĂĄte problĂŠmy s celoobrazovkovĂ˝m reĹžimem:
   <itemizedlist>
     <listitem><para>Druh Window manageru a jeho verze</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Pokud máte problémy s XVIDIX:
+Pokud mĂĄte problĂŠmy s XVIDIX:
   <itemizedlist>
     <listitem><para>Hloubka barev v X:
 <screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
@@ -244,7 +244,7 @@ Pokud máte problémy s XVIDIX:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Pokud je chybné pouze GUI:
+Pokud je chybnĂŠ pouze GUI:
   <itemizedlist>
     <listitem><para>verze GTK</para></listitem>
     <listitem><para>verze GLIB</para></listitem>
@@ -257,7 +257,7 @@ Pokud je chybné pouze GUI:
 </sect2>
 
 <sect2 id="bugreports_hardware">
-<title>Hardware a rozhraní (ovladače)</title>
+<title>Hardware a rozhranĂ­ (ovladaÄe)</title>
 <para>
 <itemizedlist>
 <listitem><para>
@@ -265,7 +265,7 @@ CPU info (to funguje pouze v Linuxu):
 <screen>cat /proc/cpuinfo</screen>
 </para></listitem>
 <listitem><para>
-Výrobce a model videokarty, např:
+VĂ˝robce a model videokarty, napĹ:
   <itemizedlist>
     <listitem><para>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
     <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
@@ -289,29 +289,29 @@ Sound card type &amp; driver, e.g.:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Pokud si nejste jisti, přidejte výstup z <command>lspci -vv</command>
-na systémech Linux.
+Pokud si nejste jisti, pĹidejte vĂ˝stup z <command>lspci -vv</command>
+na systĂŠmech Linux.
 </para></listitem>
 </itemizedlist>
 </para>
 </sect2>
 
 <sect2 id="bugreports_configure">
-<title>Problémy s konfigurací</title>
+<title>ProblĂŠmy s konfiguracĂ­</title>
 <para>
-Pokud nastanou chyby během běhu <command>./configure</command>, nebo selže
-autodetekce něčeho, prostudujte <filename>configure.log</filename>. Možná
-naleznete odpověď zde. Například několik verzí stejné knihovny v systému, nebo
-jste zapomněli nainstalovat vývojový (devel) balíček (to jsou ty s koncovkou
--dev). Pokud si myslíte, že je zde chyba, přidejte
-<filename>configure.log</filename> do svého hlášení.
+Pokud nastanou chyby bÄhem bÄhu <command>./configure</command>, nebo selĹže
+autodetekce nÄÄeho, prostudujte <filename>configure.log</filename>. MoĹžnĂĄ
+naleznete odpovÄÄ zde. NapĹĂ­klad nÄkolik verzĂ­ stejnĂŠ knihovny v systĂŠmu, nebo
+jste zapomnÄli nainstalovat vĂ˝vojovĂ˝ (devel) balĂ­Äek (to jsou ty s koncovkou
+-dev). Pokud si myslĂ­te, Ĺže je zde chyba, pĹidejte
+<filename>configure.log</filename> do svĂŠho hlĂĄĹĄenĂ­.
 </para>
 </sect2>
 
 <sect2 id="bugreports_compilation">
-<title>Problémy s kompilací</title>
+<title>ProblĂŠmy s kompilacĂ­</title>
 <para>
-Zahrňte prosím tyto soubory:
+ZahrĹte prosĂ­m tyto soubory:
 <itemizedlist>
 <listitem><para>config.h</para></listitem>
 <listitem><para>config.mak</para></listitem>
@@ -320,62 +320,62 @@ Zahrňte prosím tyto soubory:
 </sect2>
 
 <sect2 id="bugreports_playback">
-<title>Problémy s přehráváním</title>
+<title>ProblĂŠmy s pĹehrĂĄvĂĄnĂ­m</title>
 <para>
-Zahrňte prosíme výstup <application>MPlayer</application>u v upovídaném režimu
-úrovně 1 ale dejte pozor, abyste jej <emphasis role="bold">nezkrátili</emphasis>
-při kopírování do mailu. Vývojáři potřebují všechny zprávy pro dobrou diagnózu
-problému. Takto můžete přesměrovat výstup do souboru:
+ZahrĹte prosĂ­me vĂ˝stup <application>MPlayer</application>u v upovĂ­danĂŠm reĹžimu
+ĂşrovnÄ 1 ale dejte pozor, abyste jej <emphasis role="bold">nezkrĂĄtili</emphasis>
+pĹi kopĂ­rovĂĄnĂ­ do mailu. VĂ˝vojĂĄĹi potĹebujĂ­ vĹĄechny zprĂĄvy pro dobrou diagnĂłzu
+problĂŠmu. Takto mĹŻĹžete pĹesmÄrovat vĂ˝stup do souboru:
 <screen>mplayer -v <replaceable>volby</replaceable> <replaceable>film</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
 </para>
 
 <para>
-Pokud se problém vztahuje k jednomu nebo více souborům, pak prosím nahrajte
-potížisty na:
+Pokud se problĂŠm vztahuje k jednomu nebo vĂ­ce souborĹŻm, pak prosĂ­m nahrajte
+potĂ­Ĺžisty na:
 <ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>
-Rovněž zde nahrajte malý textový soubor se stejným základním jménem a příponou
-.txt. Popište problém který máte s daným souborem a připojte svůj e-mail a také
-výstup <application>MPlayer</application>u v upovídaném režimu úrovně 1.
-Pro reprodukci problému stačí obvykle prvních 1-5 MB souboru, ale pro jistotu
-vás žádáme o:
-<screen>dd if=<replaceable>váš_soubor</replaceable> of=<replaceable>malý_soubor</replaceable> bs=1024k count=5</screen>
-To vezme prvních pět megabajtů '<emphasis role="bold">vašeho_souboru</emphasis>'
-a zapíše je do '<emphasis role="bold">malého_souboru</emphasis>'. Pak znovu
-zkuste tento malý vzorek a pokud se na něm chyba projeví, pak je tento vzorek
-pro nás dostatečný.
-Prosíme <emphasis role="bold">nikdy</emphasis> neposílejte tyto soubory e-mailem!
-Nahrajte je na FTP a pošlete pouze cestu/název_souboru daného souboru na FTP
-serveru. Pokud je soubor přístupný na internetu, pak stačí poslat
-<emphasis role="bold">přesnou</emphasis> adresu URL.
+RovnÄĹž zde nahrajte malĂ˝ textovĂ˝ soubor se stejnĂ˝m zĂĄkladnĂ­m jmĂŠnem a pĹĂ­ponou
+.txt. PopiĹĄte problĂŠm kterĂ˝ mĂĄte s danĂ˝m souborem a pĹipojte svĹŻj e-mail a takĂŠ
+vĂ˝stup <application>MPlayer</application>u v upovĂ­danĂŠm reĹžimu ĂşrovnÄ 1.
+Pro reprodukci problĂŠmu staÄĂ­ obvykle prvnĂ­ch 1-5 MB souboru, ale pro jistotu
+vĂĄs ĹžĂĄdĂĄme o:
+<screen>dd if=<replaceable>vĂĄĹĄ_soubor</replaceable> of=<replaceable>malĂ˝_soubor</replaceable> bs=1024k count=5</screen>
+To vezme prvnĂ­ch pÄt megabajtĹŻ '<emphasis role="bold">vaĹĄeho_souboru</emphasis>'
+a zapĂ­ĹĄe je do '<emphasis role="bold">malĂŠho_souboru</emphasis>'. Pak znovu
+zkuste tento malĂ˝ vzorek a pokud se na nÄm chyba projevĂ­, pak je tento vzorek
+pro nĂĄs dostateÄnĂ˝.
+ProsĂ­me <emphasis role="bold">nikdy</emphasis> neposĂ­lejte tyto soubory e-mailem!
+Nahrajte je na FTP a poĹĄlete pouze cestu/nĂĄzev_souboru danĂŠho souboru na FTP
+serveru. Pokud je soubor pĹĂ­stupnĂ˝ na internetu, pak staÄĂ­ poslat
+<emphasis role="bold">pĹesnou</emphasis> adresu URL.
 </para>
 </sect2>
 
 <sect2 id="bugreports_crash">
-<title>Pády</title>
+<title>PĂĄdy</title>
 <para>
-Musíte spustit <application>MPlayer</application> z <command>gdb</command>
-a poslat nám úplný výstup nebo pokud máte <filename>core</filename> dump
-z pádu, můžete nám vyextrahovat užitečné informace ze souboru Core.
-Jak to udělat:
+MusĂ­te spustit <application>MPlayer</application> z <command>gdb</command>
+a poslat nĂĄm ĂşplnĂ˝ vĂ˝stup nebo pokud mĂĄte <filename>core</filename> dump
+z pĂĄdu, mĹŻĹžete nĂĄm vyextrahovat uĹžiteÄnĂŠ informace ze souboru Core.
+Jak to udÄlat:
 </para>
 
 <sect3 id="bugreports_debug">
-<title>Jak uchovat informace o zopakovatelném pádu</title>
+<title>Jak uchovat informace o zopakovatelnĂŠm pĂĄdu</title>
 <para>
-Překompilujte <application>MPlayer</application> se zapnutým debugovacím kódem:
+PĹekompilujte <application>MPlayer</application> se zapnutĂ˝m debugovacĂ­m kĂłdem:
 <screen>
 ./configure --enable-debug=3
 make
 </screen>
-a spusťte <application>MPlayer</application> z gdb pomocí:
+a spusĹĽte <application>MPlayer</application> z gdb pomocĂ­:
 <screen>gdb ./mplayer</screen>
-Nyní jste v gdb. Zadejte:
+NynĂ­ jste v gdb. Zadejte:
 <screen>run -v <replaceable>volby-pro-mplayer</replaceable> <replaceable>soubor</replaceable></screen>
-a zopakujte pád. Jakmile to dokážete, vrátí se gdb do režimu příkazového řádku,
-kde musíte zadat
+a zopakujte pĂĄd. Jakmile to dokĂĄĹžete, vrĂĄtĂ­ se gdb do reĹžimu pĹĂ­kazovĂŠho ĹĂĄdku,
+kde musĂ­te zadat
 <screen>
 bt
 disass $pc-32 $pc+32
@@ -385,39 +385,39 @@ info all-registers
 </sect3>
 
 <sect3 id="bugreports_core">
-<title>Jak získat smysluplné informace z core dump</title>
+<title>Jak zĂ­skat smysluplnĂŠ informace z core dump</title>
 <para>
-Vytvořte následující příkazový řádek:
+VytvoĹte nĂĄsledujĂ­cĂ­ pĹĂ­kazovĂ˝ ĹĂĄdek:
 <screen>
 bt
 disass $pc-32 $pc+32
 info all-registers
 </screen>
-Pak jednoduše spusťte tento příkaz:
-<screen>gdb mplayer --core=core -batch --command=<replaceable>příkazový_soubor</replaceable> &gt; mplayer.bug</screen>
+Pak jednoduĹĄe spusĹĽte tento pĹĂ­kaz:
+<screen>gdb mplayer --core=core -batch --command=<replaceable>pĹĂ­kazovĂ˝_soubor</replaceable> &gt; mplayer.bug</screen>
 </para>
 </sect3>
 </sect2>
 </sect1>
 
 <sect1 id="bugreports_advusers">
-<title>Vím co dělám...</title>
+<title>VĂ­m co dÄlĂĄm...</title>
 <para>
-Pokud jste vytvořili příkladné hlášení chyby pomocí výšeuvedených kroků a jste
-si jisti, že chyba je v <application>MPlayer</application>u, nikoli chyba
-kompilátoru nebo poškozený soubor, již jste si přečetli dokumentaci ale nenalezli
-řešení, vaše ovladače zvuku jsou OK, pak byste se měli přihlásit do konference
-MPlayer-advusers a poslat hlášení chyb zde, abyste dostali lepší a rychlejší
-odpověď.
+Pokud jste vytvoĹili pĹĂ­kladnĂŠ hlĂĄĹĄenĂ­ chyby pomocĂ­ vĂ˝ĹĄeuvedenĂ˝ch krokĹŻ a jste
+si jisti, Ĺže chyba je v <application>MPlayer</application>u, nikoli chyba
+kompilĂĄtoru nebo poĹĄkozenĂ˝ soubor, jiĹž jste si pĹeÄetli dokumentaci ale nenalezli
+ĹeĹĄenĂ­, vaĹĄe ovladaÄe zvuku jsou OK, pak byste se mÄli pĹihlĂĄsit do konference
+MPlayer-advusers a poslat hlĂĄĹĄenĂ­ chyb zde, abyste dostali lepĹĄĂ­ a rychlejĹĄĂ­
+odpovÄÄ.
 </para>
 
 <para>
-Mějte na paměti, že pokud zde pošlete nováčkovské otázky nebo otázky zodpovězené
-v manuálu, budete ignorováni nebo vyhozeni, místo abyste dostali vhodnou odpověď.
-Takže nám nenadávejte a přihlaste se do -advusers pouze pokud opravdu víte co
-děláte a cítíte se být pokročilým uživatelem <application>MPlayer</application>u,
-nebo vývojářem. Pokud splňujete tato kritéria, nebude pro vás těžké se
-přihlásit...
+MÄjte na pamÄti, Ĺže pokud zde poĹĄlete novĂĄÄkovskĂŠ otĂĄzky nebo otĂĄzky zodpovÄzenĂŠ
+v manuĂĄlu, budete ignorovĂĄni nebo vyhozeni, mĂ­sto abyste dostali vhodnou odpovÄÄ.
+TakĹže nĂĄm nenadĂĄvejte a pĹihlaste se do -advusers pouze pokud opravdu vĂ­te co
+dÄlĂĄte a cĂ­tĂ­te se bĂ˝t pokroÄilĂ˝m uĹživatelem <application>MPlayer</application>u,
+nebo vĂ˝vojĂĄĹem. Pokud splĹujete tato kritĂŠria, nebude pro vĂĄs tÄĹžkĂŠ se
+pĹihlĂĄsit...
 </para>
 
 </sect1>
