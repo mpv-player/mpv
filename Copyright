@@ -11,6 +11,7 @@ Name:       FFmpeg
 Version:    Subversion HEAD
 Homepage:   http://www.ffmpeg.org
 Directory:  libavcodec, libavformat, libavutil, libpostproc
+Copyright:  Many, see individual files for copyright notices.
 License:    GNU Lesser General Public License, some parts GNU General Public
             License, GNU General Public License when combined
 
@@ -18,106 +19,148 @@ Name:       FAAD2
 Version:    2.1 beta (20040915 CVS snapshot) + fixes and portability patches
 Homepage:   http://www.audiocoding.com
 Directory:  libfaad2
+Copyright:  2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 License:    GNU General Public License
 
 Name:       GSM 06.10 library
 Version:    patchlevel 10
 Homepage:   http://kbs.cs.tu-berlin.de/~jutta/toast.html
 Directory:  libmpcodecs/native/
+Copyright:  1992 by Jutta Degener and Carsten Bormann, TU Berlin
 License:    permissive, see libmpcodecs/native/xa_gsm.c
+
 
 Name:       miniLZO
 Version:    1.07
 Homepage:   http://www.oberhumer.com/opensource/lzo/#minilzo
 Directory:  libmpcodecs/native/
+Copyright:  1996-2000 Markus Franz Xaver Johannes Oberhumer
 License:    GNU General Public License
 
 Name:       liba52
 Version:    0.7.4 + patches
 Homepage:   http://liba52.sourceforge.net/
 Directory:  liba52
+Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+            2000-2001 Michel Lespinasse <walken@zoy.org>
+            2000 Yuqing Deng <Yuqing_Deng@brown.edu>
+            2002 Nick Kurshev
+            2004 Romain Dolbeau <romain@dolbeau.org>
 License:    GNU General Public License
 
 Name:       libdvdcss
 Version:    Subversion r201 (post 1.2.9 release)
 Homepage:   http://developers.videolan.org/libdvdcss/
 Directory:  libmpdvdkit2
+Copyright:  1998-2006 VideoLAN
 License:    GNU General Public License
 
 Name:       libdvdread
 Version:    0.9.4 + patches
 Homepage:   http://www.dtek.chalmers.se/groups/dvd/development.shtml
 Directory:  libmpdvdkit2
+Copyright:  1998, 1999 Eric Smith <eric@brouhaha.com>
+            1999 Christian Wolff for convergence integrated media
+            2000-2001 Billy Biggs <vektor@dumbterm.net>,
+            2001-2002 Samuel Hocevar <sam@zoy.org>,
+            2000-2003 Björn Englund <d4bjorn@dtek.chalmers.se>,
+            2000-2003 Håkan Hjort <d95hjort@dtek.chalmers.se>
 License:    GNU General Public License
 
 Name:       libmpeg2
 Version:    0.4.0b + patches
 Homepage:   http://libmpeg2.sourceforge.net/
 Directory:  libmpeg2
+Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+            2000-2003 Michel Lespinasse <walken@zoy.org>
+            2002-2003 Falk Hueffner <falk@debian.org>
+            2003 David S. Miller <davem@redhat.com>
+            2003 Regis Duchesne <hpreg@zoy.org>
+            2003 Peter Gubanov <peter@elecard.net.ru>
 License:    GNU General Public License
 
 Name:       mpg123
 Version:    0.59s + significant changes
 Homepage:   http://www.mpg123.de/
 Directory:  mp3lib
+Copyright:  1995-1999 by Michael Hipp
+            2004 Romain Dolbeau <romain@dolbeau.org>
+            2006 Zuxy Meng <zuxy.meng@gmail.com
 License:    GNU General Public License
 
 Name:       Tremor
 Version:    1.0 + parts CVS from December 2004 + patches
 Homepage:   http://xiph.org/
 Directory:  tremor
+Copyright:  1994-2002, Xiph.org Foundation http://www.xiph.org/
 License:    BSD-like, see tremor/COPYING
 
 Name:       avifile DLL loader
 Version:    0.47 + patches + CVS updates
 Homepage:   http://avifile.sourceforge.net/
 Directory:  loader/
+Copyright:  1993 Robert J. Amstadt
+            1994 Eric Youndale & Erik Bos
+            1995 Thomas Sandford
+            1995-1996 Alexandre Julliard
+            1996-1998 Marcus Meissner
+            1996 Martin von Loewis
+            2000-2001 Eugene Kuznetsov (divx@euro.ru)
 License:    GNU General Public License
 
 Name:       dvbstream
-Version:    0.4.3-pre3 (cvs checkout)
+Version:    0.4.3-pre3 (CVS checkout)
 Homepage:   http://sourceforge.net/projects/dvbtools/
 Directory:  stream/dvbin.h stream/rtp.[ch] stream/stream_dvb.c
+Copyright:  2001-2002 Dave Chapman <dave@dchapman.com>
 License:    GNU General Public License
 
 Name:       librtsp
 Version:    xine CVS 2003/04/10 + patches
 Homepage:   http://www.xinehq.de
 Directory:  stream/librtsp/
+Copyright:  2000-2002 the xine project
 License:    GNU General Public License
 
 Name:       realrtsp
 Version:    xine CVS 2003/04/17 + patches
 Homepage:   http://www.xinehq.de
 Directory:  stream/realrtsp/
+Copyright:  2002 the xine project
 License:    GNU General Public License
 
 Name:       pnm protocol implementation
 Version:    xine CVS 2002/12/26 + patches
 Homepage:   http://www.xinehq.de
 Directory:  stream/pnm.[ch]
+Copyright:  2000-2002 the xine project
 License:    GNU General Public License
 
 Name:       id3edit
 Version:    1.9 + patches
 Homepage:   http://id3edit.sourceforge.net/
 Directory:  libmpdemux/genres.h
+Copyright:  2001 Jason Carter
 License:    GNU General Public License
 
 Name:       matroxset
 Version:    0.3
 Homepage:   ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/
 Directory:  TOOLS/TVout/matroxset/
+Copyright:  2001 Petr Vandrovec
 License:    GNU General Public License
 
 Name:       unrarlib
 Version:    0.4.0 + patches
 Homepage:   http://www.unrarlib.org/
 Directory:  unrarlib.[ch]
+Copyright:  2000-2002 Christian Scheurer (www.ChristianScheurer.ch)
+            2000-2002 by Johannes Winkelmann (jw@tks6.net)
 License:    GNU General Public License / UniquE RAR File Library License
 
 Name:       FreeSDP
 Version:    0.4.1
 Homepage:   https://savannah.nongnu.org/projects/freesdp/
 Directory:  stream/freesdp/
+Copyright:  2001-2003 Federico Montesino Pouzols <fedemp@suidzer0.org>
 License:    GNU General Public License
