@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20514
+.\" In sync with r20535
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -6842,7 +6842,15 @@ Konfigurationsdatei mit aufzunehmen.
 Verschiebt das Zeichnen der SSA/ASS-Untertitel an einen beliebigen Punkt in der
 Videofilterkette.
 Nur sinnvoll mit der Option \-ass.
+.sp 1
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs "\-vf ass,screenshot"
+Verschiebt das Rendern von SSA/ASS vor den Filter screenshot.
+Auf diese Weise geschossene Schnappschüsse werden die Untertitel enthalten.
 .RE
+.PD 1
 .
 .TP
 .B blackframe[=Menge:Schwellenwert]
