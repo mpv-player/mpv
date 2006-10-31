@@ -67,93 +67,18 @@ SRCS_MPLAYER = mplayer.c \
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
-VO_LIBS = $(AA_LIB) \
-          $(X_LIB) \
-          $(SDL_LIB) \
-          $(GGI_LIB) \
-          $(SVGA_LIB) \
-          $(DIRECTFB_LIB) \
-          $(CACA_LIB) \
-	  $(VESA_LIB) \
-
 ifeq ($(VIDIX),yes)
 VO_LIBS += vidix/libvidix.a
 endif
-ifeq ($(EXTERNAL_VIDIX),yes)
-VO_LIBS += $(EXTERNAL_VIDIX_LIB)
-endif
-
-AO_LIBS = $(ARTS_LIB) \
-          $(ESD_LIB) \
-          $(JACK_LIB) \
-          $(OPENAL_LIB) \
-          $(NAS_LIB) \
-          $(SGIAUDIO_LIB) \
-          $(POLYP_LIB) \
-
-CODEC_LIBS = $(AV_LIB) \
-             $(FAME_LIB) \
-             $(MAD_LIB) \
-             $(LIBDV_LIB) \
-             $(VORBIS_LIB) \
-             $(THEORA_LIB) \
-             $(FAAD_LIB) \
-             $(LIBLZO_LIB) \
-             $(XVID_LIB) \
-             $(DTS_LIB) \
-             $(PNG_LIB) \
-             $(Z_LIB) \
-             $(JPEG_LIB) \
-             $(ALSA_LIB) \
-             $(XMMS_LIB) \
-             $(X264_LIB) \
-             $(MUSEPACK_LIB) \
-             $(SPEEX_LIB) \
-             $(NUT_LIB) \
-
-ifeq ($(LAVC_MP3LAME),yes)
-CODEC_LIBS += $(MP3LAME_LIB)
-endif
-
-ifeq ($(TOOLAME),yes)
-CODEC_LIBS += $(TOOLAME_LIB)
-endif
-
-ifeq ($(TWOLAME),yes)
-CODEC_LIBS += $(TWOLAME_LIB)
-endif
-
-ifeq ($(FAAC),yes)
-CODEC_LIBS += $(FAAC_LIB)
-endif
 
 COMMON_LIBS = libmpcodecs/libmpcodecs.a \
-              $(W32_LIB) \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
               stream/stream.a \
               libswscale/libswscale.a \
               osdep/libosdep.a \
+              $(AV_LIB) \
               $(EXTRA_LIB)\
-              $(DVDREAD_LIB) \
-              $(DVDNAV_LIB) \
-              $(CODEC_LIBS) \
-              $(TERMCAP_LIB) \
-              $(CDPARANOIA_LIB) \
-              $(MPLAYER_NETWORK_LIB) \
-              $(LIBCDIO_LIB) \
-              $(WIN32_LIB) \
-              $(MLIB_LIB) \
-              $(GIF_LIB) \
-              $(MACOSX_FRAMEWORKS) \
-              $(SMBSUPPORT_LIB) \
-              $(FRIBIDI_LIB) \
-              $(ENCA_LIB) \
-              $(LIRC_LIB) \
-              $(LIRCC_LIB) \
-              $(ARCH_LIB) \
-              $(MATH_LIB) \
-              $(LIBC_LIB) \
               $(EXTRALIBS) \
 
 PARTS = libmpdemux \
@@ -382,7 +307,6 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(COMMON_LIBS) \
                $(VO_LIBS) \
                $(AO_LIBS) \
-               $(STATIC_LIB) \
 
 $(PRG):	$(MPLAYER_DEP)
 	$(CC) -o $(PRG) $(OBJS_MPLAYER) $(LIBS_MPLAYER)

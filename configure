@@ -7477,12 +7477,10 @@ MPLAYER_NETWORK = $_network
 FTP = $_ftp
 STREAMING_LIVE555 = $_live
 VSTREAM = $_vstream
-MPLAYER_NETWORK_LIB = $_ld_live $_ld_vstream $_ld_network
 STREAM_CACHE = yes
 DVBIN = $_dvbin
 VIDIX = $_vidix_internal
 EXTERNAL_VIDIX = $_vidix_external
-EXTERNAL_VIDIX_LIB = $_ld_vidix_external
 CONFIG_PP = yes
 CONFIG_MP3LAME = $_mp3lame
 LIBMENU = $_menu
@@ -7503,15 +7501,27 @@ JPEG = $_jpeg
 GIF = $_gif
 
 EXTRALIBS = $_extra_libs
-EXTRA_LIB = $_ld_extra
-Z_LIB =  $_ld_static $_ld_zlib
+EXTRA_LIB = $_ld_extra $_ld_live $_ld_vstream $_ld_network $_ld_enca \
+  $_ld_static $_ld_zlib $_ld_termcap $_ld_lirc $_ld_lircc $_ld_win32 \
+  $_ld_win32libs $_ld_lm $_ld_libC $_ld_fribidi $_ld_smb $_ld_gif \
+  $_ld_libcdio $_ld_dvdread $_ld_dvdnav $_macosx_frameworks $_ld_cdparanoia \
+  $_ld_libfame $_ld_xvid $_ld_x264 $_ld_mp3lame $_ld_libdts $_ld_mad \
+  $_ld_vorbis $_ld_libdv $_ld_theora $_ld_faad $_ld_speex $_xmms_lib \
+  $_toolame_lib $_twolame_lib $_ld_faac $_ld_musepack $_ld_liblzo $_ld_png \
+  $_ld_jpeg $_ld_alsa $_ld_nut $_ld_arch $_ld_iconv $_ld_mlib
+VO_LIBS = $_ld_aa $_ld_sdl $_ld_ggi $_ld_svga $_ld_directfb $_ld_caca \
+  $_ld_vesa $_ld_vidix_external $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm \
+  $_ld_xinerama $_ld_x11 $_ld_sock
+AO_LIBS = $_ld_arts $_ld_esd $_ld_jack $_ld_openal $_ld_nas $_ld_sgiaudio \
+  $_ld_polyp
+ENCORE_LIB = $_ld_mp3lame
+LAVC_MP3LAME = $_lavc_mp3lame
+FREETYPE_LIB = $_ld_freetype
+FONTCONFIG_LIB = $_ld_fontconfig
+GTK_LIBS = $_ld_static $_ld_gtk $_ld_glib
+
 HAVE_MLIB = $_mlib
-WIN32_LIB = $_ld_win32libs
-STATIC_LIB = $_ld_static
-ENCA_LIB = $_ld_enca
 HAVE_PTHREADS = $_pthreads
-MATH_LIB = $_ld_lm
-LIBC_LIB = $_ld_libC
 
 HAVE_XVMC_ACCEL = $_xvmc
 
@@ -7522,40 +7532,16 @@ LIBPREF=lib
 LIBSUF=.a
 LIB=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 
-# video output
-X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm $_ld_xinerama $_ld_x11 $_ld_sock
-GGI_LIB = $_ld_ggi
-MLIB_LIB =  $_ld_mlib
-PNG_LIB = $_ld_png
-JPEG_LIB = $_ld_jpeg
-GIF_LIB = $_ld_gif
-SDL_LIB = $_ld_sdl
-SVGA_LIB = $_ld_svga
-VESA_LIB = $_ld_vesa
-AA_LIB = $_ld_aa
-CACA_LIB = $_ld_caca
-
 # audio output
 OSS = $_ossaudio
 ALSA = $_alsa
 ALSA5 = $_alsa5
 ALSA9 = $_alsa9
 ALSA1X = $_alsa1x
-ALSA_LIB = $_ld_alsa
-NAS_LIB = $_ld_nas
-ARTS_LIB = $_ld_arts
-ESD_LIB = $_ld_esd
-POLYP_LIB = $_ld_polyp
-JACK_LIB = $_ld_jack
-OPENAL_LIB = $_ld_openal
-SGIAUDIO_LIB = $_ld_sgiaudio
 
 # input/demuxer/codecs
-TERMCAP_LIB = $_ld_termcap
 JOYSTICK = $_joystick
 LIRC = $_lirc
-LIRC_LIB = $_ld_lirc
-LIRCC_LIB = $_ld_lircc
 TV = $_tv
 TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
@@ -7565,13 +7551,10 @@ PVR = $_pvr
 VCD = $_vcd
 HAVE_DVD = $_have_dvd
 DVDREAD = $_dvdread
-DVDREAD_LIB = $_ld_dvdread
 DVDKIT2 = $_mpdvdkit
 DVDNAV = $_dvdnav
-DVDNAV_LIB = $_ld_dvdnav
 WIN32DLL = $_win32
 W32_DEP = $_dep_win32
-W32_LIB = $_ld_win32
 QTX_CODECS = $_qtx
 REAL_CODECS = $_real
 XANIM_CODECS = $_xanim
@@ -7587,59 +7570,31 @@ CONFIG_LIBPOSTPROC = $_libpostproc
 CONFIG_LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
 FAME = $_libfame
-FAME_LIB = $_ld_libfame
 LIBDV = $_libdv
-LIBDV_LIB = $_ld_libdv
-ARCH_LIB =  $_ld_arch $_ld_iconv
 XVID = $_xvid
 XVID4 = $_xvid4
-XVID_LIB = $_ld_xvid
 X264 = $_x264
-X264_LIB = $_ld_x264
 LIBNUT = $_nut
-NUT_LIB = $_ld_nut
 CONFIG_DTS = $_libdts
-DTS_LIB = $_ld_libdts
 MENCODER = $_mencoder
-MP3LAME_LIB = $_ld_mp3lame
-LAVC_MP3LAME = $_lavc_mp3lame
-DIRECTFB_LIB = $_ld_directfb
 CDDA = $_cdda
-CDPARANOIA_LIB = $_ld_cdparanoia
 BITMAP_FONT = $_bitmap_font
 FREETYPE = $_freetype
-FREETYPE_LIB = $_ld_freetype
-FONTCONFIG_LIB = $_ld_fontconfig
 CONFIG_ASS = $_ass
-FRIBIDI_LIB = $_ld_fribidi
-LIBCDIO_LIB = $_ld_libcdio
-LIBLZO_LIB= $_ld_liblzo
 LIBMAD = $_mad
-MAD_LIB = $_ld_mad
 LIBVORBIS = $_vorbis
-VORBIS_LIB = $_ld_vorbis
-SPEEX_LIB = $_ld_speex
 LIBTHEORA = $_theora
-THEORA_LIB = $_ld_theora
-FAAD_LIB = $_ld_faad
 FAAD_INTERNAL = $_faad_internal
 FAAD_FIXED = $_faad_fixed
 LIBSMBCLIENT = $_smbsupport
-SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
-XMMS_LIB = $_xmms_lib
 MACOSX = $_macosx
 MACOSX_FINDER_SUPPORT = $_macosx_finder_support
 MACOSX_BUNDLE = $_macosx_bundle
-MACOSX_FRAMEWORKS = $_macosx_frameworks
 MACOSX_COREVIDEO = $_macosx_corevideo
 TOOLAME=$_toolame
-TOOLAME_LIB=$_toolame_lib
 TWOLAME=$_twolame
-TWOLAME_LIB=$_twolame_lib
-MUSEPACK_LIB = $_ld_musepack
 FAAC=$_faac
-FAAC_LIB=$_ld_faac
 CONFIG_AMR=$_amr
 CONFIG_AMR_NB=$_amr_nb
 CONFIG_AMR_NB_FIXED=$_amr_nb_fixed
@@ -7676,9 +7631,6 @@ TARGET_BUILTIN_VECTOR = $_builtin_vector
 TARGET_BUILTIN_3DNOW  = $_mm3dnow
 
 # --- GUI stuff ---
-GTKLIB = $_ld_gtk
-GLIBLIB = $_ld_glib
-GTK_LIBS = $_ld_static \$(GTKLIB) \$(GLIBLIB)
 GUI = $_gui
 
 # --- libvo stuff ---
