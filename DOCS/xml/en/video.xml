@@ -1386,7 +1386,7 @@ main goal of this interface is to maximize the speed of video playback.
   <option>-vo mga</option> or <option>-vo fbdev</option>. nVidia cards however
   are able to output truly graphical video on a real text console. See the
   <link linkend="vidix-nvidia">nvidia_vid</link> section for more information.
-  To rid of text on the borders and the blinking cursor, try something like
+  To get rid of text on the borders and the blinking cursor, try something like
   </simpara>
 
   <screen>setterm -cursor off > /dev/tty9</screen>
