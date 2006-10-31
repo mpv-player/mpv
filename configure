@@ -5972,10 +5972,12 @@ if test "$_win32" = auto ; then
           break;
         fi;
       done
-      _win32codecsdir="$_codecsdir"
-      # Fall back on a subfolder of the current dir on Windows
-      mingw32 && _win32codecsdir="codecs"
     fi
+  # Fall back on default directory.
+  if test -z "$_win32codecsdir" ; then
+    _win32codecsdir="$_codecsdir"
+    mingw32 && _win32codecsdir="codecs"
+  fi
 fi
 
 echocheck "Win32 codec DLL support"
@@ -6027,6 +6029,9 @@ if test "$_xanim" = auto ; then
             break;
           fi;
         done
+    fi
+    # Fall back on default directory.
+    if test -z "$_xanimcodecsdir" ; then
       _xanimcodecsdir="$_codecsdir"
     fi
     test "$_xanimcodecsdir" && _xanim=yes
@@ -6063,10 +6068,12 @@ if test "$_real" = auto ; then
             _realcodecsdir="$I"
             break
           fi
-          _realcodecsdir="$_codecsdir"
-          # Fall back on a subfolder of the current dir on Windows
-          mingw32 && _realcodecsdir="codecs"
         done
+      fi
+      # Fall back on default directory.
+      if test -z "$_realcodecsdir" ; then
+        _realcodecsdir="$_codecsdir"
+        mingw32 && _realcodecsdir="codecs"
       fi
       test "$_realcodecsdir" && _real=yes
     fi
