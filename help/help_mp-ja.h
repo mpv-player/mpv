@@ -1,4 +1,4 @@
-// Translated to Japanese. Encoding: EUC-JP
+// Translated to Japanese.
 // Translated by smoker <http://smokerz.net/~smoker/>
 
 // This translation is not complete yet.

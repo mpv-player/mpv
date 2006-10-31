@@ -1,5 +1,4 @@
 // Sync'ed with help_mp-en.h 1.167
-// Encoding/Кодировка: MS CP1251
 //
 // Преведено от А. Димитров, plazmus@gmail.com
 // Всички предложения са добре дошли.
