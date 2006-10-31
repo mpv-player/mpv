@@ -76,7 +76,7 @@ License:    GNU General Public License
 
 Name:       dvbstream
 Version:    0.4.3-pre3 (cvs checkout)
-Homepage:   http://www.linuxstb.org/dvbstream/
+Homepage:   http://sourceforge.net/projects/dvbtools/
 Directory:  stream
 License:    GNU General Public License
 
@@ -109,12 +109,6 @@ Version:    0.4.0 + patches
 Homepage:   http://www.unrarlib.org/
 Directory:  unrarlib.[ch]
 License:    GNU General Public License / UniquE RAR File Library License
-
-Name:       uCIFS library
-Version:    development files as of september 2004
-Homepage:   http://ubiqx.org/libcifs/
-Directory:  libvo/md5sum.[ch]
-License:    GNU Lesser General Public License
 
 Name:       FreeSDP
 Version:    0.4.1
