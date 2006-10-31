@@ -385,7 +385,7 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(STATIC_LIB) \
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(LIBS_MPLAYER)
+	$(CC) -o $(PRG) $(OBJS_MPLAYER) $(LIBS_MPLAYER)
 
 ifeq ($(MENCODER),yes)
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
@@ -393,7 +393,7 @@ LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(COMMON_LIBS) \
 
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)
+	$(CC) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)
 endif
 
 osdep/mplayer-rc.o: osdep/mplayer.rc
