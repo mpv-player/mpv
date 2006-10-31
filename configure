@@ -3648,7 +3648,7 @@ fi #if darwin
 
 echocheck "pkg-config"
 _pkg_config=pkg-config
-if `$_pkg_config 2> /dev/null`; then
+if `$_pkg_config --version 2> /dev/null`; then
   echores "yes"
 else
   _pkg_config=false
