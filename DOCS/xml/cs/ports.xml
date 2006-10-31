@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r19820 -->
+<!-- Synced with r20419 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -81,8 +81,7 @@ Pokud si jej chcete skompilovat sami, měli byste nahlédnout do adresáře
 a
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 v buildroot OpenZaurus distribuce. Zde mají vždy poslední Makefile a patche používané
-pro sestavení CVS verze <application>MPlayer</application>u s
-<systemitem class="library">libavcodec</systemitem>em.
+pro sestavení SVN verze <application>MPlayer</application>u.
 Pokud potřebujete GUI rozhraní, můžete použít xmms-embedded.
 </para>
 </sect2>
@@ -723,16 +722,16 @@ a <systemitem class="library">freetype</systemitem>.
 <para>
 Můžete vybírat minimálně ze dvou:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink>u a
-<ulink url="http://www.macports.org/">DarwinPorts</ulink>.
+<ulink url="http://www.macports.org/">MacPorts</ulink>.
 Oba poskytují zhruba stejné služby (např. mnoho dostupných balíčků,
 řešení závislostí, schopnost jednoduše přidávat/aktualizovat/odebírat
 balíčky, atp...).
 Fink nabízí jak předkompilované binární balíčky, tak možnost kompilovat
-všechno ze zdrojového kódu, zatímco DarwinPorts nabízí pouze možnost
+všechno ze zdrojového kódu, zatímco MacPorts nabízí pouze možnost
 kompilace ze zdrojového kódu.
-Autor této příručky zvolil DarwinPorts z jednoduchého důvodu, že jeho
+Autor této příručky zvolil MacPorts z jednoduchého důvodu, že jeho
 základní nastavení je mnohem lehčí.
-Pozdější příklady budou založeny na DarwinPorts.
+Pozdější příklady budou založeny na MacPorts.
 </para>
 
 <para>
@@ -749,7 +748,7 @@ Následně můžete pokračovat spuštěním <application>MPlayer</application>o
 <systemitem>configure</systemitem> skriptu (ověřte proměnné prostředí
 <systemitem>PKG_CONFIG_PATH</systemitem> a <systemitem>PATH</systemitem>,
 aby <systemitem>configure</systemitem> našel knihovny instalované pomocí
-DarwinPorts):
+MacPorts):
 <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
 
@@ -775,7 +774,7 @@ a oficiální verze by měla přijít již brzy.
 Abyste mohli skompilovat <application>MPlayerOSX</application> ze zdrojového
 kódu sami, budete potřebovat <systemitem>mplayerosx</systemitem>,
 <systemitem>main</systemitem> a kopii
-<systemitem>main</systemitem> CVS modulu jménem
+<systemitem>main</systemitem> SVN modulu jménem
 <systemitem>main_noaltivec</systemitem>.
 <systemitem>mplayerosx</systemitem> je GUI nadstavba,
 <systemitem>main</systemitem> je MPlayer a

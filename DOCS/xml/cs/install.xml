@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r19975 -->
+<!-- Synced with r20412 -->
 <chapter id="install">
 <title>Instalace</title>
 
@@ -33,7 +33,7 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro �
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> &ndash; Doporučené verze jsou 2.95
   a 3.3+. 2.96 a 3.0.x jsou známy generováním vadného kódu, 3.1 a
-  3.2 měly rovněž problémy.
+  3.2 měly rovněž problémy. Na PowerPC použijte 4.x+.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> &ndash; Doporučená verze je
@@ -112,16 +112,6 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro �
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> &ndash; volitelná, pro podporu ALSA
   zvukového výstupu. Vyžadujeme aspoň 0.9.0rc4.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">bio2jack</emphasis> &ndash; volitelný, pro podporu JACK audio
-  výstupu, potřebný pouze při kompilaci. Můžete jej získat z
-  <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>.
-  Protože nemá volbu install, uložte ručně soubor
-  <filename>libbio2jack.a</filename> někam do knihovní vyhledávací
-  cesty  (např. <filename>/usr/local/lib</filename>) nebo volbou
-  <option>--with-bio2jack=DIR</option> sdělte <filename>./configure</filename>
-  kde ten soubor najde.
   </para></listitem>
 </itemizedlist>
 </sect1>
@@ -486,11 +476,15 @@ Pokud byl <application>MPlayer</application> kompilován s podporou
 <systemitem class="library">fontconfig</systemitem>, výše uvedené nebude
 fungovat, místo toho <option>-font</option> očekává
 <systemitem class="library">fontconfig</systemitem> název fontu
-a jako výchozí bere bezpatkový font. Seznam fontů známých
-<systemitem class="library">fontconfig</systemitem>u,
-získáte pomocí <command>fc-list</command>. Příklad:
+a jako výchozí bere bezpatkový font. Příklad:
 
 <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
+</para>
+
+<para>
+Seznam fontů známých
+<systemitem class="library">fontconfig</systemitem>u,
+získáte pomocí <command>fc-list</command>.
 </para>
 </sect2>
 
@@ -520,10 +514,10 @@ Pak přejmenujte nebo slinkujte jeden z rozbalených adresářů na
 <para>
 Fonty by měly mít vhodný <filename>font.desc</filename> soubor,
 který mapuje unicode pozice ve fontu na aktuální znakovou sadu
-textu titulků. Dalším řešením je mít titulky kódované v UTF-8 a použití
-volby <option>-utf8</option>, nebo jen pojmenovat soubor s titulky
-<filename>&lt;video_název&gt;.utf</filename> a umístěte jej do
-adresáře s filmem.
+textu titulků. Dalším řešením je mít titulky kódované v UTF-8 a použít
+volbu <option>-utf8</option>, nebo pojmenujte soubor s titulky
+stejně jako film a dejte mu příponu <filename>.utf</filename>
+a umístěte jej do adresáře s filmem.
 </para>
 
 </sect2>

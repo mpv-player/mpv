@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.cz
 //                 Jiri Heryan
-// Synced with r19979
+// Synced with r20440
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -200,6 +200,7 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "zapnuto"
 #define MSGTR_OSDdisabled "vypnuto"
+#define MSGTR_OSDAudio "Zvuk: %s"
 #define MSGTR_OSDChannel "Kanál: %s"
 #define MSGTR_OSDSubDelay "Zpoždění tit: %d ms"
 #define MSGTR_OSDSpeed "Rychlost: x %6.2f"
@@ -641,8 +642,7 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Zapínám podporu LIRC...\n"
-#define MSGTR_LIRCdisabled "Nebudete moci používat dálkový ovladač.\n"
-#define MSGTR_LIRCopenfailed "Nepovedlo se zapnout podporu LIRC.\n"
+#define MSGTR_LIRCopenfailed "Selhalo otevření podpory LIRC. Nebudete moci používat dálkové ovládání.\n"
 #define MSGTR_LIRCcfgerr "Nepovedlo se přečíst konfigurační soubor LIRC %s.\n"
 
 // vf.c
@@ -850,6 +850,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_MPSUB "Převést dané titulky do vlastního formátu MPlayeru"
 #define MSGTR_PREFERENCES_SUB_SRT "Převést dané titulky do časově orientovaného formátu SubViewer (SRT)"
 #define MSGTR_PREFERENCES_SUB_Overlap "Zapnout překrývání titulků"
+#define MSGTR_PREFERENCES_SUB_USE_ASS "SSA/ASS renderování titulku"
+#define MSGTR_PREFERENCES_SUB_ASS_USE_MARGINS "Použijí se okraje"
+#define MSGTR_PREFERENCES_SUB_ASS_TOP_MARGIN "Horní: "
+#define MSGTR_PREFERENCES_SUB_ASS_BOTTOM_MARGIN "Dolní: "
 #define MSGTR_PREFERENCES_Font "Font:"
 #define MSGTR_PREFERENCES_FontFactor "Zvětšení Fontu:"
 #define MSGTR_PREFERENCES_PostProcess "Aktivovat postprocessing"

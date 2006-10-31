@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r19043 -->
+<!-- synced with r20408 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -131,8 +131,8 @@
   některých jsou snímky a jiných půlsnímky.
   <emphasis role="bold">Vždy</emphasis>, když je film připravován pro promítání
   v televizi (včetně DVD), je převeden na půlsnímky.
-  Různé metody jak toho lze dosáhnout jsou souhrnně nazývány "pulldown" a
-  nechvalně známé NTSC "3:2 telecine" je jednou z variant.
+  Různé metody jak toho lze dosáhnout jsou souhrnně nazývány "telecine" a
+  nechvalně známé NTSC "3:2 pulldown" je jednou z variant.
   Pokud nebyl základ vašeho filmu rovněž půlsnímkový (se stejnou půlsnímkovou
   rychlostí), máte film v jiném formátu, než byl původně.
 </para>
@@ -1303,8 +1303,8 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
   neuděláte chybu,
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
   <para>Buďte však opartní: Dekódování MPEG-4 AVC videa v DVD
-  rozlišení vyžaduje rychlý stroj (např.Pentium 4 nad 1.5Ghz, nebo
-  Pentium M nad 1Ghz).
+  rozlišení vyžaduje rychlý stroj (např.Pentium 4 nad 1.5GHz, nebo
+  Pentium M nad 1GHz).
   </para></footnote>
   když zvolíte MPEG-4 AVC kodeky, jako
   <systemitem class="library">x264</systemitem> místo MPEG-4 ASP kodeků
@@ -2267,7 +2267,7 @@ Můžete enkódovat do následujících kodeků (více méně aktuální):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  standardní ISO MPEG-4 (DivX 5, XviD kompatibilní)
+  standardní ISO MPEG-4 (DivX, XviD kompatibilní)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   prvotní MPEG-4 varianta od MS, v3 (DivX3)
@@ -2548,7 +2548,7 @@ Příklad s kompresí AC3:
 <para>
   Veškerá nastavení byla testována na video vzorku 720x448 @30000/1001
   snímků za sekundu, cílový datový tok byl 900kbps a prováděly se na
-  AMD-64 3400+ při 2400 Mhz v režimu 64 bitů.
+  AMD-64 3400+ při 2400 MHz v režimu 64 bitů.
   Každá kombinace nastavení má uvedenu změřenou rychlost enkódování
   (ve snímcích za sekundu) a ztrátu PSNR (v dB) oproti nastavení
   "velmi vysoká kvalita".
@@ -3271,7 +3271,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Veškerá nastavení byla testována na video vzorku 720x448 @30000/1001
   snímků za sekundu, cílový datový tok byl 900kbps a prováděly se na
-  AMD-64 3400+ při 2400 Mhz v režimu 64 bitů.
+  AMD-64 3400+ při 2400 MHz v režimu 64 bitů.
   Každá kombinace nastavení má uvedenu změřenou rychlost enkódování
   (ve snímcích za sekundu) a ztrátu PSNR (v dB) oproti nastavení
   "velmi vysoká kvalita".
@@ -3487,27 +3487,28 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">me</emphasis>:
   Tato volba je určena pro výběr metody vyhledávání pohybu.
   Změnou této volby jednoduše měníte poměr kvalita-versus-rychlost.
-  Volba <option>me=1</option> je jen o málo procent rychlejší než
+  Volba <option>me=dia</option> je jen o málo procent rychlejší než
   výchozí vyhledávání za cenu pod 0.1dB globálního PSNR.
-  Výchozí nastavení (<option>me=2</option>) je rozumným kompromisem
-  mezi rychlostí a kvalitou. Volba <option>me=3</option> získá o trošku méně
+  Výchozí nastavení (<option>me=hex</option>) je rozumným kompromisem
+  mezi rychlostí a kvalitou. Volba <option>me=umh</option> získá o trošku méně
   než 0.1dB globální PSNR, při spomalení, které se liší v závislosti na
   <option>frameref</option>.  Při vysokých hodnotách
-  <option>frameref</option> (řekněme 12 nebo tak), je <option>me=3</option>
-  asi o 40% pomalejší než výchozí <option> me=2</option>. Při
+  <option>frameref</option> (řekněme 12 nebo tak), je <option>me=umh</option>
+  asi o 40% pomalejší než výchozí <option> me=hex</option>. Při
   <option>frameref=3</option>, klesne způsobené spomalení na
   25%-30%.
 </para>
 <para>
-  Volba <option>me=4</option> používá tak rozsáhlé vyhledávání, že je příliš
+  Volba <option>me=esa</option> používá tak rozsáhlé vyhledávání, že je příliš
   pomalá pro praktické využití.
 </para>
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">4x4mv</emphasis>:
-  Tato volba zapíná použití podčástí 8x4, 4x8 a 4x4 v predikovaných
-  makroblocích. Její aktivace vede k poměrně stálé 
+  <emphasis role="bold">partitions=all</emphasis>:
+  Tato volba zapíná použití bloků 8x4, 4x8 a 4x4 v predikovaných
+  makroblocích (navíc k výchozím blokům).
+  Její aktivace vede k poměrně stálé 
   10%-15% ztrátě rychlosti. Tato volba je poměrně neužitečná ve zdroji
   obsahujícím pouze pomalý pohyb, naproti tomu u některých zdrojů s rychlým
   pohybem, přesněji zdrojů s velkým množstvím malých pohyblivých objektů,
@@ -3641,7 +3642,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <option>subq=1:frameref=1</option> do <option>x264encopts</option>
   prvnímu průchodu. Pak ve druhém průchodu použijte pomalejší volby pro
   vyšší kvalitu:
-  <option>subq=6:frameref=15:4x4mv:me=3</option>
+  <option>subq=6:frameref=15:partitions=all:me=umh</option>
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Tříprůchodové enkódování</emphasis>?
@@ -3691,7 +3692,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Video proud bude stále mít převíjecí body, pokud jsou zde nějaké změny scény.
 </para></listitem> 
 <listitem><para>
-  <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
+  <emphasis role="bold">deblock</emphasis>:
   Tato věc začíná být trochu kontroverzní.
 </para>
 <para>
@@ -3702,8 +3703,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Přednastavené síly definované standardem jsou dobře zvoleny a
   vyváženy tak, že jsou optimální z hlediska PSNR pro libovolné
   video, které zkoušíte enkódovat.
-  Volby <option>deblockalpha</option> a <option>deblockbeta</option>
-  umožňují nastavit offsety přednastaveným deblokovacím prahům.
+  Volba <option>deblock</option> umožňuje nastavit offsety přednastaveným
+  deblokovacím prahům.
 </para>
 <para>
   Zdá se, že si mnoho lidí myslí, že je dobré snížit sílu deblokovacího filtru
@@ -3764,7 +3765,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Veškerá nastavení byla testována na video vzorku 720x448 @30000/1001
   snímků za sekundu, cílový datový tok byl 900kbps a prováděly se na
-  AMD-64 3400+ při 2400 Mhz v režimu 64 bitů.
+  AMD-64 3400+ při 2400 MHz v režimu 64 bitů.
   Každá kombinace nastavení má uvedenu změřenou rychlost enkódování
   (ve snímcích za sekundu) a ztrátu PSNR (v dB) oproti nastavení
   "velmi vysoká kvalita".
@@ -3781,13 +3782,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <tbody>
 <row>
   <entry>Velmi vysoká kvalita</entry>
-  <entry><option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=6:partitions=all:8x8dct:me=umh:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6</entry>
   <entry>0</entry>
 </row>
 <row>
   <entry>Vysoká kvalita</entry>
-  <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=5:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>13</entry>
   <entry>-0.89</entry>
 </row>

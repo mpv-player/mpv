@@ -24,8 +24,8 @@ Nejdůležitější ze všech jsou:
   <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) video
   </simpara></listitem>
 <listitem><simpara>
-  nativní dekodéry pro <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX 5 (Pro), 3ivX, MS MPEG-4</emphasis> v1, v2 a ostatní MPEG-4 varianty
+  nativní dekodéry pro <emphasis role="bold">všechny DivX varianty,
+  3ivX, MS MPEG-4</emphasis> v1, v2 a ostatní MPEG-4 varianty
   </simpara></listitem>
 <listitem><simpara>
   nativní dekodér pro <emphasis role="bold">Windows Media Video 7/8</emphasis>
@@ -84,24 +84,15 @@ a pomozte nám přidat pro něj podporu.
 <title>FFmpeg/libavcodec</title>
 
 <para>
-<ulink url="http://ffmpeg.org">FFmpeg</ulink> obsahuje balík
-<emphasis role="bold">open source</emphasis> kodeků, které jsou schopny
-dekódovat datové proudy enkódované různými audio a video kodeky.
-Rovněž nabízí úctyhodný enkódovací potenciál a vyšší rychlost než Win32 kodeky
-nebo DivX.com DivX4/5 knihovny!
-</para>
-
-<para>
-Obsahuje mnoho hezkých kodeků, zvláště důležité jsou MPEG-4 varianty:
-DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Rovněž velmi
-zajímavý je WMA dekodér.
-</para>
-
-<para>
-Nejnovějším kodekem zasluhujícím uznání je kodek
-<emphasis role="bold">Sorenson 3</emphasis> (SVQ3). Toto je jeho první, plně
-Open Source implementace. Je dokonce rychlejší než originál.
-Ujistěte se že preferujete tuto verzi před binárním kodekem!
+<ulink url="http://ffmpeg.org">FFmpeg</ulink> obsahuje
+<systemitem class="library">libavcodec</systemitem>, vedoucí
+open source video a audio kodekovou knihovnu. Ta je schopna
+dekódovat většinu formátů multimédií, obvykle vyšší rychlostí
+než alternativy, a plánuje se nakonec přidat podporu všech.
+Je to výchozí dekodér pro většinu kodeků, které
+<application>MPlayer</application> podporuje.
+Pro některé formáty je k dispozici také enkódování podporované
+v <application>MEncoder</application>u.
 </para>
 
 <para>
@@ -111,157 +102,11 @@ a <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> kodeky.
 </para>
 
 <para>
-Jak ostré verze <application>MPlayer</application>u, tak
-<application>MPlayer</application> ze Subversion obsahují
-<systemitem class="library">libavcodec</systemitem>, takže jej nemusíte
-stahovat zvlášť.
+<application>MPlayer</application> obsahuje
+<systemitem class="library">libavcodec</systemitem>.
 Jen spusťte <filename>configure</filename> a kompilujte.
 </para>
 
-<para>
-S pomocí FFmpeg a mé Matrox G400, mohu sledovat DivX dokonce i v tom nejvyšším
-rozlišení bez zahazování snímků na své K6-2 500.
-</para>
-</sect2>
-
-
-<sect2 id="xanim">
-<title>XAnim kodeky</title>
-
-<note>
-<para>
-Upozorňujeme, že binární XAnim kodeky jsou baleny spolu s textem, který se
-tváří jako softwarová licence, která, kromě jiného, zakazuje uživateli použití
-kodeků ve spojení s jiným programem než <application>XAnim</application>.
-Nicméně autor XAnim dosud nepodnikl žádné právní kroky proti komukoli v
-souvislosti s kodeky.
-</para>
-</note>
-
-<formalpara>
-<title>INSTALACE A POUŽITÍ</title>
-<para>
-<application>MPlayer</application> je schopen používat XAnim kodeky pro
-dekódování. Následující postup vám to umožní:
-</para>
-</formalpara>
-
-<procedure>
-<step><para>
-  Stáhněte si kodeky, které chcete použít, ze stránek
-  <ulink url="http://xanim.polter.net/">XAnim</ulink>.
-  Kodek <emphasis role="bold">3ivx</emphasis> není zde, ale na stránce
-  <ulink url="http://www.3ivx.com">3ivx</ulink>.
-  </para></step>
-<step><para>
-  <emphasis role="bold">NEBO</emphasis> si stáhněte balík kodeků z naší
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">kodekové stránky</ulink>.
-  </para></step>
-<step><para>
-  Použijte volbu <option>--with-xanimlibdir</option> pro oznámení
-  <filename>configure</filename> kde může nalézt XAnim kodeky.
-  Ve výchozím stavu je hledá v
-  <filename class="directory">/usr/local/lib/codecs</filename>,
-  <filename class="directory">/usr/local/lib/xanim/mods</filename>,
-  <filename class="directory">/usr/lib/xanim/mods</filename> and
-  <filename class="directory">/usr/lib/xanim</filename>.
-  Alternativně můžete nastavit systémovou proměnnou
-  <envar>XANIM_MOD_DIR</envar> na adresář s XAnim kodeky.
-  </para></step>
-<step><para>
-  Přejmenujte/nalinkujte soubory tak, abyste odstranili část názvu
-  s architekturou, takže dostanet názvy podobné těmto:
-  <filename>vid_cvid.xa</filename>,
-  <filename>vid_h263.xa</filename>, <filename>vid_iv50.xa</filename>
-  </para></step>
-</procedure>
-
-<para>
-XAnim tvoří rodinu video kodeků <systemitem>xanim</systemitem>, takže byste
-měli použít volbu <option>-vfm xanim</option>, aby je
-<application>MPlayer</application> použil kdykoli je to možné.
-</para>
-
-<para>
-Mezi testované kodeky patří: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID,
-3ivX, H.263.</emphasis>
-</para>
-</sect2>
-
-
-<sect2 id="vivo-video">
-<title>VIVO video</title>
-<para>
-<application>MPlayer</application> umí přehrávat Vivo (1.0 a 2.0) videa.
-Nejpoužitelnějším kodekem pro soubory verze 1.0 je H.263 dekodér z FFmpegu.
-Můžete jej použít pomocí volby <option>-vc ffh263</option>. Soubory verze 2.0
-přehrávejte pomocí Win32 DLL, pomocí volby <option>-vc vivo</option>.
-Pokud nezadáte volby na příkazovém řádku, <application>MPlayer</application>
-zvolí nejlepší kodek automaticky.
-</para>
-</sect2>
-
-
-<sect2 id="mpeg12">
-<title>MPEG-1/2 video</title>
-<para>
-MPEG-1 a MPEG-2 jsou dekódovány multiplatformní nativní knihovnou <systemitem
-class="library">libmpeg2</systemitem>, jejíž zdrojový kód je zahrnut
-v <application>MPlayer</application>u. Chyby v MPEG-1/2 video souborech řešíme
-odchytáváním <systemitem>Signal 11</systemitem>
-(<systemitem>segmentation fault</systemitem>), a rychlou reinicializací
-kodeku tak, aby pokračoval tam, kde skončil.
-Tato opravná technika nemá měřitelný vliv na rychlost.
-</para>
-</sect2>
-
-
-<sect2 id="avicodecs">
-<title>MS Video1, Cinepak CVID a jiné starší kodeky</title>
-<para>
-<application>MPlayer</application> umí přehrát většinu starších kodeků
-používaných v AVI a MOV souborech.
-V minulosti byly dekódovány binárními Win32 kodeky, nyní však máme pro většinu
-z nich <emphasis role="bold">nativní kodeky</emphasis> zahrnuté v kolekci
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
-</para>
-</sect2>
-
-
-<sect2 id="realvideo">
-<title>RealVideo</title>
-
-<para>
-<application>MPlayer</application> podporuje dekódování všech verzí
-RealVidea:
-
-<itemizedlist>
-<listitem><simpara>
-  RealVideo 1.0, 2.0 (fourcc RV10, RV20) - en/dekódování je podporováno
-  <systemitem class="library">libavcodec</systemitem> kodeky
-  </simpara></listitem>
-<listitem><simpara>
-  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - dekódování je podporováno
-  <emphasis role="bold">RealPlayer  knihovnami</emphasis>
-  </simpara></listitem>
-</itemizedlist>
-</para>
-
-<para>
-Stáhněte si Real kodeky z
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>
-a rozbalte je do adrsáře
-<filename class="directory">/usr/local/lib/codecs</filename>.
-Pokud je chcete mít na jiném místě, zadejte skriptu
-<command>configure</command> volbu <option>--with-reallibdir</option>.
-</para>
-
-<note><para>
-<application>RealPlayer</application> knihovny v současnosti
-<emphasis role="bold"> pracují pouze v Linuxu, FreeBSD, NetBSD a Cygwin
-na platformách x86, Alpha a PowerPC (Linux/Alpha a Linux/PowerPC byly
-testovány) a v Mac OS X</emphasis>.
-</para></note>
 </sect2>
 
 
@@ -279,8 +124,14 @@ pro většinu moderních procesorů.
 <para>
 Jeho vývoj je odvozen od OpenDivX kodeku.
 To se stalo poté co ProjectMayo uzavřel zdrojový kód kodeku,
-vydal jej jako DivX4 (nyní DivX5) a lidé mimo ProjectMayo pracující na kodeku
-se naštvali a založili XviD. Oba projekty tedy mají stejný základ.
+vydal jej jako DivX4 a lidé mimo ProjectMayo pracující na kodeku
+OpenDivX se naštvali a založili XviD. Oba projekty tedy mají stejný základ.
+</para>
+
+<para>
+Poznamenejme, že XviD není nutný pro dekódování XviDem enkódovaného videa.
+Jako výchozí je používán <systemitem class="library">libavcodec</systemitem>,
+jelikož poskytuje vyšší rychlost.
 </para>
 
 <procedure>
@@ -303,7 +154,7 @@ se naštvali a založili XviD. Oba projekty tedy mají stejný základ.
 </para></step>
 <step><para>
   <screen>cd xvidcore/build/generic</screen>
-  </para></step>
+</para></step>
 <step><para>
   <screen>./bootstrap.sh</screen>
   </para></step>
@@ -322,51 +173,12 @@ se naštvali a založili XviD. Oba projekty tedy mají stejný základ.
   </para></step>
 <step><para>
   Znovu zkompilujte <application>MPlayer</application> s volbami
-  <option>--with-xvidlibdir=<replaceable>/path/to/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>
+  <option>--with-xvidlibdir=<replaceable>/cesta/k/</replaceable>libxvidcore.a</option>
+  <option>--with-xvidincdir=<replaceable>/cesta/k/</replaceable>xvid.h</option>.
   </para></step>
 </procedure>
 </sect2>
 
-
-<sect2 id="sorenson">
-<title>Sorenson</title>
-
-<para>
-Sorenson je video kodek vyvinutý firmou Sorenson Media a licencovaný Aplu,
-který jej distribuuje se svým <application>QuickTime Player</application>em.
-V současnosti jsme schopni dekódovat všechny verze Sorenson video souborů
-pomocí následujících dekodérů:
-</para>
-
-<itemizedlist>
-<listitem><simpara>
-  Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - dekódování
-  podporováno <emphasis role="bold">nativním kodekem</emphasis>
-  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
-<listitem><simpara>
-  Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - dekódování
-  podporováno <emphasis role="bold">nativním kodekem</emphasis>
-  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
-</itemizedlist>
-
-<procedure>
-<title>KOMPILACE MPLAYERU S PODPOROU QUICKTIME KNIHOVEN</title>
-<note><para>V současnosti jsou podporovány pouze 32-bitové Intel kompatibilní
-platformy.</para></note>
-<step><para>stáhněte si <application>MPlayer</application> ze Subversion</para></step>
-<step><para>stáhněte si balíček QuickTime DLL z
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
-</para></step>
-<step><para>rozbalte QuickTime DLL do adresáře s Win32 kodeky
-(výchozí: <filename class="directory">/usr/local/lib/codecs/</filename>)
-</para></step>
-<step><para>zkomilujte <application>MPlayer</application></para></step>
-</procedure>
-
-</sect2>
 
 <sect2 id="codec-x264">
 <title>x264</title>
@@ -374,7 +186,8 @@ platformy.</para></note>
 <sect3 id="codec-x264-whatis">
 <title>Co je x264?</title>
 <para>
-  <systemitem class="library">x264</systemitem> je knihovna pro tvorbu
+  <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+  je knihovna pro tvorbu
   H.264 video proudů.
   Není 100% dokončena, ale již má alespoň určitou podporu většiny H.264
   vlastností ovlivňujících kvalitu.
@@ -622,8 +435,9 @@ FPU (jako je <link linkend="arm">ARM</link>) než mp3lib.
 </para>
 
 <para>
-Pokud pro ni chcete podporu, předejte před kompilací skriptu configure volbu
-<option>--enable-mad</option>.
+Máte-li správně nainstalovánu libmad, <filename>configure</filename>
+si toho všimne a podpora dekódování MPEG zvuku přes
+<systemitem class="library">libmad</systemitem> bude zakompilována automaticky.
 </para>
 </sect2>
 
@@ -640,62 +454,6 @@ Nepoužívejte je v kombinaci s jinými výstupními audio rozhraními
 </sect2>
 
 
-<sect2 id="vivo-audio">
-<title>VIVO audio</title>
-<para>
-The audio kodek používaný ve VIVO souborech závisí na tom, jestli je to soubor
-VIVO/1.0 nebo VIVO/2.0. Soubory VIVO/1.0 mají
-<emphasis role="bold">g.723</emphasis> audio, zatímco soubory VIVO/2.0
-mají <emphasis role="bold">Vivo Siren</emphasis> audio. Obojí je podporováno.
-</para>
-</sect2>
-
-
-<sect2 id="realaudio">
-<title>RealAudio</title>
-
-<para>
-<application>MPlayer</application> podporuje dekódování téměř všech verzí
-RealAudio:
-</para>
-
-<itemizedlist>
-<listitem><simpara>
-  RealAudio DNET - dekódování podporováno pomocí
-  <systemitem class="library">liba52</systemitem>
-  </simpara></listitem>
-<listitem><simpara>
-  RealAudio Cook/Sipro/ATRAC3 - dekódování podporováno pomocí
-  <emphasis role="bold">RealPlayer knihoven</emphasis>
-  </simpara></listitem>
-</itemizedlist>
-
-<para>
-Návod k instalaci knihoven RealPlayeru naleznete v sekci
-<link linkend="realvideo">RealVideo</link>.
-</para>
-</sect2>
-
-<sect2 id="qdesign">
-<title>Kodeky QDesign</title>
-<para>
-Audio proudy QDesign (fourcc:<emphasis>QDMC, QDM2</emphasis>) lze nalézt
-v MOV/QT souborech. Obě verze tohoto kodeku mohou být dekódovány pomocí
-QuickTime knihoven. Návod k instalaci naleznete v sekci
-<link linkend="sorenson">Sorenson video kodek</link>.
-</para>
-</sect2>
-
-<sect2 id="qualcomm">
-<title>Kodeky Qualcomm</title>
-<para>
-Audio proudy Qualcomm (fourcc:<emphasis>Qclp</emphasis>) lze nalézt
-v MOV/QT souborech. Mohou být dekódovány pomocí QuickTime knihoven.
-Návod k instalaci naleznete v sekci
-<link linkend="sorenson">Sorenson video kodek</link>.
-</para>
-</sect2>
-
 <sect2 id="aac">
 <title>Kodek AAC</title>
 <para>
@@ -710,7 +468,7 @@ takže jej nemusíte stahovat dodatečně.
 Pokud používáte gcc 3.2 které nedokáže zkompilovat naši zabudovanou FAAD,
 nebo chcete použít externí knihovnu z jiných důvodů, stáhněte si ji z 
 <ulink url="http://www.audiocoding.com/modules/mydownloads/">download stránky</ulink>
-a předejte volbu <option>--enable-external-faad</option> skriptu
+a předejte volbu <option>--enable-faad-external</option> skriptu
 <filename>configure</filename>.
 Pro dekódování AAC souborů nepotřebujete celou faad2, libfaad stačí.
 Zkompilujete ji takto:
@@ -838,7 +596,7 @@ Using <application>Microsoft GraphEdit</application> (rychlý)
 </para>
 <step><para>
   Opatřete si <application>GraphEdit</application> buď z DirectX SDK nebo
-  <ulink url="http://doom9.net">doom9</ulink>
+  <ulink url="http://doom9.net">doom9</ulink>.
   </para></step>
 <step><para>
   Spusťte <command>graphedit.exe</command>.
@@ -847,7 +605,7 @@ Using <application>Microsoft GraphEdit</application> (rychlý)
   V menu vyberte Graph -> Insert Filters.
   </para></step>
 <step><para>
-  Vyrolujte položku <systemitem>DirectShow Filters</systemitem>
+  Vyrolujte položku <systemitem>DirectShow Filters</systemitem>.
   </para></step>
 
 

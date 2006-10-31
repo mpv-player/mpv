@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r19828  -->
+<!-- Synced with r20304  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -1072,7 +1072,44 @@ Ne, VFAT nepodporuje 2GB+ soubory.
 
 <qandaentry>
 <question><para>
-Jakto že je doporučený bitrate vypisovaný <application>MEncoder</application>em
+Co znamenají čísla na stavovém řádku během enkódování?
+</para></question>
+<answer><para>
+Příklad:
+<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+<variablelist>
+<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
+<listitem><para>časová značka (pozice) v enkódovaném proudu</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>6612f</systemitem></term>
+<listitem><para>počet dokončených video snímků</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>( 2%)</systemitem></term>
+<listitem><para>enkódovaná část vstupního proudu</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>7.12fps</systemitem></term>
+<listitem><para>rychlost enkódování</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
+<listitem><para>odhadovaný čas potřebný pro dokončení enkódování</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>2856mb</systemitem></term>
+<listitem><para>odhadovaná velikost výsledného souboru</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
+<listitem><para>aktuální odchylka datových proudů zvuku a videa</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>[2126:192]</systemitem></term>
+<listitem>
+<para>průměrný datový tok videa (v Mb/s) a průměrný datový tok zvuku (v Mb/s)</para></listitem>
+</varlistentry>
+</variablelist>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jakto že je doporučený datový tok vypisovaný <application>MEncoder</application>em
 záporný?
 </para></question>
 <answer><para>

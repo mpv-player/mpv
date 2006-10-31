@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r19686 -->
+<!-- synced with r20083 -->
 <appendix id="bugs">
 <title>Známé chyby</title>
+
+
 <sect1 id="bugs-special">
 <title>Speciální systémové/CPU-specifické chyby/problémy</title>
 <itemizedlist>
@@ -11,6 +13,7 @@
 <para>Řešení: upgradujte jádro na 2.4.x</para>
 <para>Obejití: <command>./configure --disable-sse</command></para>
 </listitem>
+
 <listitem>
 <para>Obecný SIGILL (signal 4):</para>
 <para>Problém: zkompilovali jste a používáte <application>MPlayer</application>
@@ -24,6 +27,7 @@ vyřadit určité sady CPU instrukcí pomocí mnohem konkrétnějších voleb (j
 <option>--disable-mmx</option>, <option>--disable-3dnow</option>, atd.).
 </para>
 </listitem>
+
 <listitem>
 <para>Havaruje při ukládání datových proudů (dump):</para>
 <para>Problém: vylití jádra (core dump)</para>
@@ -31,6 +35,7 @@ vyřadit určité sady CPU instrukcí pomocí mnohem konkrétnějších voleb (j
 </listitem>
 </itemizedlist>
 </sect1>
+
 
 <sect1 id="bugs-audio">
 <title>Různé A-V sync a další problémy se zvukem</title>
@@ -45,21 +50,18 @@ Zkuste OSS emulaci z ALSA pomocí <option>-ao oss</option>, také zkuste
 s <option>-nosound</option>, pak si můžete být jisti, že je to problém zvukové
 karty (ovladače).
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem>
 <para>problémy audio bufferu (špatně detekovaná velikost bufferu)</para>
 <para>Obejití: <application>MPlayer</application>ova volba <option>-abs</option></para>
 </listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem><para>
 problémy se vzorkovací rychlostí &ndash; možná vaše zvuková karta nepodporuje
 vzorkovací rychlost používanou ve vašich souborech. Zkuste převzorkovávací
 filtr (<option>-af resample=...</option>)
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem>
 <para>pomalý stroj (CPU nebo VGA)</para>
 <para>zkuste s <option>-vo null</option>, pokud se přehrává dobře, pak máte
@@ -70,6 +72,7 @@ pojednávající o tom jak urychlovat</para>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-delay-specific">
 <title>Zpoždění zvuku/de-sync typické pro jeden nebo málo souborů</title>
@@ -85,7 +88,7 @@ Obejití:
     <para>a/nebo</para>
   </listitem>
   <listitem>
-    <para><option>-mc 0</option>(vyžadováno soubory se špatně prokládaným
+    <para><option>-mc 0</option> (vyžadováno soubory se špatně prokládaným
 		VBR zvukem)</para>
     <para>a/nebo</para>
   </listitem>
@@ -97,12 +100,14 @@ Obejití:
 Pokud nic z toho nepomůže, uploadujte prosíme soubor, otestujeme jej a opravíme.
 </para>
 </listitem>
+
 <listitem>
 <para>vaše zvuková karta nepodporuje přehrávání při 48 kHz</para>
 <para>Obejití: kupte si lepší zvukovou kartu... nebo zkuste snížit snímkovou
 rychlost o 10% (použijte <option>-fps 27</option> pro film 30fps) nebo použijte
 resample filtr</para>
 </listitem>
+
 <listitem>
 <para>pomalý počítač (pokud není A-V okolo 0 a poslední číslo stavového řádku se
 zvyšuje)</para>
@@ -111,23 +116,26 @@ zvyšuje)</para>
 </itemizedlist>
 </sect2>
 
+
 <sect2 id="bugs-nosound">
 <title>Naprosto bez zvuku</title>
 <itemizedlist>
 <listitem>
 <para>váš soubor používá nepodporovaný audio kodek</para>
-<para>přečtěte si dokumentaci a pomozte nám přidat pro něj podporu</para>
+<para>Řešení: přečtěte si dokumentaci a pomozte nám přidat pro něj podporu</para>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-nopicture">
 <title>Žádný obraz (pouze šedá/zelená plocha)</title>
 <itemizedlist>
 <listitem>
 <para>váš soubor používá nepodporovaný video kodek</para>
-<para>Obejití: přečtěte si dokumentaci a pomozte nám přidat pro něj podporu</para>
+<para>Řešení: přečtěte si dokumentaci a pomozte nám přidat pro něj podporu</para>
 </listitem>
+
 <listitem>
 <para>
 automaticky vybraný kodek neumí dekódovat soubor &ndash; zkuste vybrat jiný
@@ -136,6 +144,7 @@ pomocí volby <option>-vc</option> nebo <option>-vfm</option>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-video">
 <title>Problémy s výstupem videa</title>

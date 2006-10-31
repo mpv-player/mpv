@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r19685 -->
+<!-- Synced with r20043 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -316,7 +316,7 @@ bude mít lepší kvalitu obrazu. Pokud jste o tom teď slyšeli poprvé, měli 
 si prostudovat některé návody dostupné na netu.
 </para>
 
-<example>
+<example id="copy_audio_track">
 <title>Kopírování zvukové stopy</title>
 <para>
 Dvouprůchodové enkódování druhé stopy z DVD do MPEG-4 (&quot;DivX&quot;)
@@ -328,7 +328,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy 
 </para>
 </example>
 
-<example>
+<example id="encode_audio_track">
 <title>Enkódování zvukové stopy</title>
 <para>
 Dvouprůchodové enkódování DVD do MPEG-4 (&quot;DivX&quot;) AVI a současně
@@ -365,14 +365,14 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
   Za určitých okolností může být možné, aby PSP hrál i ve vyšším rozlišení.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Audio</emphasis>: jeho vzorkovací kmitočet by měl být 24khz
-  pro videa MPEG-4 a 48khz pro H.264.
+  <emphasis role="bold">Audio</emphasis>: jeho vzorkovací kmitočet by měl být 24kHz
+  pro videa MPEG-4 a 48kHz pro H.264.
 </para></listitem>
 </itemizedlist>
 </para>
 
-<example>
-<title>Příklad</title>
+<example id="encode_for_psp">
+<title>Enkódování  do PSP</title>
 <para>
 <screen>
 mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
@@ -645,7 +645,7 @@ a <filename>.sub</filename> již existují. Takže byste je měli všechny odstr
 dříve než začnete.
 </para>
 
-<example>
+<example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
 <title>Kopírování dvojích titulků z DVD během dvouprůchodového enkódování</title>
 <screen>
 rm titulky.idx titulky.sub
@@ -654,7 +654,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 --></screen>
 </example>
 
-<example>
+<example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Kopírování francouzských titulků z MPEG souboru</title>
 <screen>
 rm titulky.idx titulky.sub

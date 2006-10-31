@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r19832 -->
+<!-- Synced with r20054 -->
 <chapter id="video">
 <title>Výstupní video zařízení/rozhraní</title>
 
@@ -638,64 +638,6 @@ SDL video rozhraní podporuje zobrazování titulků pod filmem, v (pokud je) č
 okraji.
 </para>
 
-<variablelist>
-<title>Pro SDL existuje několik voleb příkazového řádku:</title>
-<varlistentry>
-  <term><option>-vo sdl:<replaceable>jméno</replaceable></option></term>
-  <listitem><simpara>
-    nastavuje použití SDL video ovladače (např. <literal>aalib</literal>,
-    <literal>dga</literal>, <literal>x11</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-ao sdl:<replaceable>jméno</replaceable></option></term>
-  <listitem><simpara>
-    nastavuje použití SDL audio ovladače (např. <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>artsc</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-noxv</option></term>
-  <listitem><simpara>
-    vypíná hardwarovou akceleraci XVideo
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-forcexv</option></term>
-  <listitem><simpara>
-    zkusí vynutit XVideo akceleraci
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<table>
-<title>Klávesy pouze pro SDL</title>
-<tgroup cols="2">
-<thead>
-<row><entry>Klávesa</entry><entry>Akce</entry></row>
-</thead>
-<tbody>
-<row><entry><keycap>c</keycap></entry><entry>
-    cykluje dostupné celoobrazovkové režimy
-    </entry></row>
-<row><entry><keycap>n</keycap></entry><entry>
-    změní režim zpět na normální
-    </entry></row>
-</tbody>
-</tgroup>
-</table>
-
-<itemizedlist>
-<title>Známé chyby:</title>
-<listitem><simpara>
-  Klávesy stisknuté při použití sdl:aalib konzolového ovladače se donekonečna
-  opakují. (použijte <option>-vo aa</option>!) Je to chyba v SDL, já to nezměním
-  (testováno s SDL 1.2.1).
-  </simpara></listitem>
-<listitem><simpara>
-  NEPOUŽÍVEJTE SDL s GUI! Nefunguje to jak by mělo.
-  </simpara></listitem>
-</itemizedlist>
 </sect2>
 
 

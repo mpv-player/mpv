@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r19751 -->
+<!-- synced with r20442 -->
 <chapter id="cd-dvd">
 <title>Použití CD/DVD</title>
 
@@ -60,7 +60,7 @@ programu <command>hdparm</command> pro podrobné vysvětlení).
 </para>
 
 <para>
-Prostudujte si &quot;<filename>/proc/ide/<replaceable>cdrom zařízení</replaceable>/settings&quot;</filename>
+Prostudujte si &quot;<filename>/proc/ide/<replaceable>(cdrom zařízení)</replaceable>/settings</filename>&quot;
 pro jemné doladění vaší CD-ROM.
 </para>
 
@@ -96,13 +96,13 @@ sysctl hw.ata.atapi_dma=1
 <title>Přehrávání DVD</title>
 <para>
 Úplný seznam dostupných voleb naleznete v man stránce.
-Syntaxe pro standardní Digital Versatile Disc (DVD) je následující:
+Syntaxe pro přehrání standardního DVD je následující:
 <screen>mplayer dvd://<replaceable>&lt;track&gt;</replaceable> [-dvd-device <replaceable>&lt;DVD_zařízení&gt;</replaceable>]</screen>
 </para>
 
 <para>
 Příklad:
-<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
 </para>
 
 <para>
@@ -116,27 +116,15 @@ liší, vytvořte symlink, nebo uveďte správné zařízení na příkazovém �
 pomocí volby <option>-dvd-device</option>.
 </para>
 
-<formalpara>
-<title>Nový styl podpory DVD (mpdvdkit2)</title>
 <para>
 <application>MPlayer</application> používá <systemitem>libdvdread</systemitem> a
-<systemitem>libdvdcss</systemitem> pro dekódování a přehrávání DVD. Tyto dvě
+<systemitem>libdvdcss</systemitem> pro přehrávání a dekódování DVD. Tyto dvě
 knihovny jsou obsaženy v podadresáři
-<filename class="directory">libmpdvdkit2/</filename> zdrojových kódů
-<application>MPlayer</application>u, nemusíte je tedy instalovat zvlášť
-Zvolili jsme tento způsob, protože jsme museli opravit chybu v
-<systemitem>libdvdread</systemitem> a aplikovat patch, který přidává podporu
-<emphasis role="bold">kešování zlomených CSS klíčů</emphasis>, na
-<systemitem>libdvdcss</systemitem>. To vedlo k výraznému zvýšení rychlosti,
-protože klíče nemusí být nyní lámány pokaždé před přehráváním.
-</para>
-</formalpara>
-
-<para>
-<application>MPlayer</application> umí rovněž použít knihovny
-<systemitem>libdvdread</systemitem> a <systemitem>libdvdcss</systemitem>
-na systémové úrovni, ale toto řešení <emphasis role="bold">nedoporučujeme</emphasis>,
-protože může vést k chybám, nekompatibilitě knihovny a nižší rychlosti.
+<filename class="directory">libmpdvdkit2</filename> zdrojových kódů
+<application>MPlayer</application>u, nemusíte je tedy instalovat zvlášť.
+Můžete rovněž použít systémové verze těchto knihoven, ale toto řešení
+nedoporučujeme, protože může vést k chybám,
+nekompatibilitě knihovny a nižší rychlosti.
 </para>
 
 <note><para>
@@ -188,81 +176,14 @@ místo názvu zařízení pro přímý přístup a podívá se do
 Solaris, kde jsou názvy souborů dynamicky alokovány.
 </para>
 
-<para>
-Výchozím DVD zařízením je <filename>/dev/dvd</filename>. Pokud se vaše
-nastavení liší, vytvořte symlink, nebo uveďte správné zařízení na příkazovém
-řádku pomocí volby <option>-dvd-device</option>.
-</para>
-
 <formalpara>
-<title>DVD autentifikace</title>
+<title>Dešifrování DVD</title>
 <para>
-Tato autentifikační a dekryptovací metoda nového stylu podpory DVD je
-zajišťována použitím patchované knihovny <systemitem>libdvdcss</systemitem>
-(viz výš). Metoda může být nastavena pomocí proměnné prostředí
-<envar>DVDCSS_METHOD</envar> nastavené na klíč, disk nebo titul.
+Dešifrování DVD provádí <systemitem>libdvdcss</systemitem>. Metoda
+může být zvolena pomocí proměnné prostředí <envar>DVDCSS_METHOD</envar>,
+detaily viz manuálovou stránku.
 </para>
 </formalpara>
-
-<para>
-Pokud není nastavena, zkouší se následující metody (výchozí: "key",
-"title request"):
-</para>
-
-<orderedlist>
-<listitem><para>
-<emphasis role="bold">bus key</emphasis>: Tento klíč je dohodnut během
-autentifikace (dlouhá směs ioctl volání a výměn různých klíčů, kryptování)
-a je použit pro zašifrování klíčů titulu a disku než jsou odeslány přes
-nechráněnou sběrnici (jako prevence odposlechnutí). Klíč "bus key" je potřeba
-pro předdešifrování šifrovaného klíče disku.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
-se poohlédne po již zlomených klíčích titulu, které jsou uloženy v adresáři
-<filename class="directory">~/.mplayer/DVDKeys</filename> (rychlé ;).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">key</emphasis>: Pokud není k dispozici "cached key",
-<application>MPlayer</application> zkusí rozšifrovat klíč disku pomocí
-sady přiložených klíčů přehrávače.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">disk</emphasis>: Pokud selže "key" metoda,
-(např. nejsou přiloženy klíče přehrávače), <application>MPlayer</application>
-crackne klíč disku algoritmem hrubé síly. Tento proces je náročný na CPU a
-vyžaduje 64 MB paměti (16M 32Bitových položek hash tabulky) pro uložení
-pracovních dat. Tato metoda by měla fungovat vždy (pomalé).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">title request</emphasis>: S pomocí klíče disku, požádá
-<application>MPlayer</application> o šifrované klíče titulu, které jsou
-ukryty ve <emphasis>skrytých sektorech</emphasis> pomocí
-<systemitem>ioctl()</systemitem>.
-Ochrana regiony v RPC-2 mechanikách je prováděna v tomto kroku a na některých
-mechanikách může selhat.
-Pokud uspěje, budou klíče titulu (title keys) dekryptovány pomocí klíče disku
-(disk key) a klíče sběrnice (bus key).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">title</emphasis>: Tato metoda je použita pokud selže
-požadavek na titul a nespoléhá se na výměnu klíčů s DVD mechanikou.
-Používá se zde kryptografický útok na přímé určení klíče (vyhledáváním
-opakujícího se vzoru v dešifrovaném obsahu VOB a rozhodnutím zda čistý text
-odpovídající prvním šifrovaným bajtům je pokračováním tohoto vzoru).
-Metoda je také známa jako &quot;known plaintext attack&quot;
-nebo &quot;DeCSSPlus&quot;. V nemnoha případech může metoda selhat z důvodu
-nedostatku šifrovaných dat na disku pro provedení statistického útoku, nebo
-protože se klíč mění uprostřed titulu. Tato metoda je jediným způsobem jak
-dekryptovat DVD uložené na harddisku nebo DVD se špatným regionem na
-RPC2 mechanice (pomalé).
-</para></listitem>
-</orderedlist>
 
 <para>
 RPC-1 DVD mechaniky chrání nastavení regionu pouze softwarově. RPC-2 mechaniky
@@ -288,7 +209,7 @@ pětkrát.
 Video CD (VCD) je následující:
 <screen>mplayer vcd://<replaceable>&lt;stopa&gt;</replaceable> [-cdrom-device <replaceable>&lt;zařízení&gt;</replaceable>]</screen>
 Příklad:
-<screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
 Výchozím VCD zařízením je <filename>/dev/cdrom</filename>. Pokud se vaše nastavení
 liší, vytvořte symlink nebo uveďte správné zařízení na příkazovém řádku pomocí volby
 <option>-cdrom-device</option>.
