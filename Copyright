@@ -8,7 +8,7 @@ notices can be found in the file headers. Furthermore, MPlayer includes code
 from several external sources:
 
 Name:       FFmpeg
-Version:    CVS snapshot
+Version:    Subversion HEAD
 Homepage:   http://www.ffmpeg.org
 Directory:  libavcodec, libavformat, libavutil, libpostproc
 License:    GNU Lesser General Public License, some parts GNU General Public
@@ -90,6 +90,12 @@ Name:       realrtsp
 Version:    xine CVS 2003/04/17 + patches
 Homepage:   http://www.xinehq.de
 Directory:  stream/realrtsp/
+License:    GNU General Public License
+
+Name:       pnm protocol implementation
+Version:    xine CVS 2002/12/26 + patches
+Homepage:   http://www.xinehq.de
+Directory:  stream/pnm.[ch]
 License:    GNU General Public License
 
 Name:       id3edit
