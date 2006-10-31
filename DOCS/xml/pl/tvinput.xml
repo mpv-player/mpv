@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r17322 -->
+<!-- synced with r20551 -->
 <!-- Opiekun: Cobra -->
 <chapter id="tv">
 <title>TV</title>
@@ -42,8 +42,8 @@ Tu jest tylko kilka wskazówek:
 <para>
 Używaj opcji <option>channels</option>. Przykład
 <screen>-tv channels=26-MTV1,23-TV2</screen>
-Wyjaśnienie: używając tej opcji, tylko kanały 23 i 26 będą dostępne oraz pojawi
-się fajny napis na OSD przy zmianie kanału, wyświetlający jego nazwę.
+Wyjaśnienie: jeśli użyjesz tej opcji, dostępne będą tylko kanały 23 i 26 oraz
+przy zmianie kanału pojawi się ładny napis na OSD, wyświetlający jego nazwę.
 Odstępy w nazwie kanału muszą zostać zastąpione znakiem &quot;_&quot;.
 </para>
 </listitem>
@@ -81,18 +81,20 @@ innych algorytmach usuwania przeplotu na stronie man i zacznij eksperymentować.
 <para>
 Usuwaj "martwe miejsca". Kiedy nagrywasz video, są pewnie miejsca przy brzegach,
 które są zazwyczaj czarne lub zawierają szum. Jak się łatwo domyślić,
-niepotrzebnie wymagają większej przepustowości (dokładniej, to nie same czarne
+niepotrzebnie zużywają sporo przepustowości (dokładniej, to nie same czarne
 miejsca, lecz ostre przejścia pomiędzy czarnym kolorem i jaśniejszym obrazem
 video, ale nie jest to akurat takie ważne). Zanim zaczniesz nagrywać, ustaw
-argumenty opcji <option>crop</option> by wszystkie "śmieci" na brzegach zostały
-wycięte. Oczywiście nie zapomnij o utrzymaniu prawidłowych wymiarów obrazu.
+argumenty opcji <option>crop</option> by wyciąć wszystkie "śmieci" na
+brzegach.
+Oczywiście nie zapomnij o utrzymaniu prawidłowych wymiarów obrazu.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Uważaj na obciążenie CPU. Nie powinno ono przekroczyć granicy 90% przez
-większość czasu. Jeśli masz duży bufor nagrywania,
+Uważaj na obciążenie CPU. Przez większość czasu Nie powinno ono przekroczyć
+granicy 90%.
+Jeśli masz duży bufor nagrywania,
 <application>MEncoder</application> może przetrwać przeciążenie przez najwyżej
 kilka sekund i nic więcej. Lepiej więc wyłączyć wszystkie trójwymiarowe
 wygaszacze OpenGL i inne tego typu bajery.
@@ -120,7 +122,8 @@ konieczne było podanie formatu wyjścia.
 Ten problem powinien być rozwiązany w aktualnych wydaniach i opcja
 <option>outfmt</option> nie jest już wymagana, a ustawienie domyślne powinno
 pasować każdemu. Na przykład, jeśli nagrywasz do formatu DivX używając
-<systemitem class="library">libavcodec</systemitem> i podasz opcję <option>outfmt=RGB24</option>
+<systemitem class="library">libavcodec</systemitem> i podasz opcję
+<option>outfmt=RGB24</option>
 aby zwiększyć jakość nagrywanego obrazu, zostanie on i tak później z
 powrotem przekonwertowany do YV12, więc jedyne, co osiągniesz, to ogromna
 strata mocy obliczeniowej.
@@ -189,7 +192,7 @@ Bardziej skomplikowany przykład. Każe on
 <application>MEncoderowi</application> nagrać pełen
 obraz PAL, wykadrować go i usunąć przeplot korzystając z algorytmu
 liniowego zlewania (linear blend). Audio jest kompresowane ze stałą
-szybkością równą 64kbps, korzystając z kodeka LAME. To ustawienie jest
+szybkością równą 64kbps, przy użyciu kodeka LAME. To ustawienie jest
 dobre do nagrywania filmów.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
@@ -216,7 +219,8 @@ nagrywania długich seriali TV, kiedy jakość obrazu nie jest tak ważna.
 Jest również możliwe podanie mniejszych wymiarów obrazu w opcji
 <option>-tv</option> i pominięcie programowego skalowania, ale to podejście
 wykorzystuje maksymalną ilość dostępnych informacji i jest trochę bardziej
-odporne na szum. Z powodu ograniczeń sprzętowych Układy bt878 mogą stosować
+odporne na szum.
+Układy bt878, ze względu na ograniczenia sprzętowe, mogą stosować
 uśrednianie pikseli jedynie w kierunku poziomym.
 </para>
 </informalexample>
