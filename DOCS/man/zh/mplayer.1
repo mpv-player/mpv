@@ -1,5 +1,5 @@
-.\" Partial sync with en/mplayer.1 r20445
-.\" up to line 2123 (.SH "AUDIO OUTPUT OPTIONS")
+.\" Partial sync with en/mplayer.1 r20535
+.\" up to line 2772 (.SH "VIDEO OUTPUT DRIVERS ...
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; palytree in parent list; colorkey; 
 .\"   wrapper script ... shellescapes; keyframe;
@@ -559,7 +559,7 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .
 .TP
 .B \-codecs-file <文件名> (也请参见 \-afm, \-ac, \-vfm, \-vc)
-过载标准的搜索路径并使用指定的文件代替内置的 codecs.conf。
+重载标准的搜索路径并使用指定的文件代替内置的 codecs.conf。
 .
 .TP
 .B \-include <配置文件>
@@ -708,7 +708,7 @@ xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 .B \-correct-pts (试验)
 切换 mplayer 到试验模式。
 视频过滤器决定视频帧的演示时戳而不是视频源。
-还不支持大多数过滤器。
+大多数过滤器还不支持。
 .
 .TP
 .B \-crash-debug (调试代码)
@@ -956,7 +956,7 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的音频标识。
 .
 .TP
 .B \-alang <语言代号[,语言代号,...]> (也请参见 \-aid)
-指定音频语言的优先使用列表。
+指定使用音频语言的优先级列表。
 不同的容器格式使用不同的语言代号。DVDs 使用 ISO 639-1 的
 两字符语言代号, Matroska 和 NUT 使用 ISO 639-2 的
 三字符语言代号, 而 OGM 使用自由格式标识符。
@@ -1141,7 +1141,7 @@ HTTP 请求时发送 cookies。
 .
 .TP
 .B \-dvbin <选项> (仅用于 DVB)
-为了过载默认的值, 把下面的参数传递给 DVB 输入模块:
+为了替代默认的值, 把下面的参数传递给 DVB 输入模块:
 .sp 1
 .PD 0
 .RSs
@@ -1207,7 +1207,7 @@ HTTP 请求时发送 cookies。
 .
 .TP
 .B \-fps <浮点数>
-过载帧速率。
+重载帧速率。
 如果原先的值是错误的或缺少的有用。
 .
 .TP
@@ -1689,7 +1689,7 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .
 .TP
 .B \-ass-bottom-margin <参数值>
-在帧底部添加黑带。
+在帧底部添加黑条。
 SSA/ASS 提供器能在那里放置字幕 (与 \-ass-use-margins 组合用)。
 .
 .TP
@@ -1703,7 +1703,7 @@ SSA/ASS 提供器能在那里放置字幕 (与 \-ass-use-margins 组合用)。
 .
 .TP
 .B \-ass-force-style <[Style.]Param=参数值[,...]>
-过载一些风格参数。
+重载一些风格参数。
 .sp
 .I 示例:
 .PD 0
@@ -1723,7 +1723,7 @@ SSA/ASS 提供器能在那里放置字幕 (与 \-ass-use-margins 组合用)。
 .
 .TP
 .B \-ass-top-margin <参数值>
-在帧顶部添加黑带。
+在帧顶部添加黑条。
 SSA/ASS 提供器能在那里放置字幕 (与 \-ass-use-margins 组合用)。
 .
 .TP
@@ -1869,7 +1869,7 @@ MPlayer 运行在 verbose (\-v) 模式时, 打印可用的字幕标识。
 .
 .TP
 .B \-slang <语言代号[,语言代号,...]> (也请参见 \-sid)
-指定字幕语言的优先使用列表。
+指定使用字幕语言的优先级列表。
 不同的容器格式使用不同的语言代号。DVDs 使用 ISO 639-1 的
 两字符语言代号, Matroska 使用 uses ISO 639-2 的
 三字符语言代号, 而 OGM 使用自由格式标识符。
@@ -1889,7 +1889,7 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 .B \-spuaa <模式> (仅用于 OSD)
 设置 DVD/\:VOBsub 的反锯齿/\:缩放模式。
 甚至在原始的与缩放的帧尺寸已匹配时, 还可能在 <模式> 上增加 16 以强制进行缩放, 
-比如使用高斯模糊来平滑字幕。
+比如使用高斯柔化来平滑字幕。
 可用模式有:
 .PD 0
 .RSs
@@ -1902,7 +1902,7 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 .IPs 3
 二次线性缩放(默认值, 快速而且效果不坏)
 .IPs 4
-使用软件缩放的高斯模糊(看起来很好)
+使用软件缩放的高斯柔化(看起来很好)
 .RE
 .PD 1
 .
@@ -1925,7 +1925,7 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 .TP
 .B \-spugauss <0.0\-3.0> (仅用于 OSD)
 高斯模糊的可变参数用于 \-spuaa 4。
-越高表示越模糊 (默认值是: 1.0)。
+越高表示越柔化 (默认值是: 1.0)。
 .
 .TP
 .B \-sub <字幕文件1,字幕文件2,...>
@@ -2054,7 +2054,7 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 .
 .TP
 .B \-subfont-blur <0\-8> (仅用于 FreeType)
-设置字体模糊半径(默认值是: 2)。
+设置字体柔化半径(默认值是: 2)。
 .
 .TP
 .B \-subfont-encoding <参数值> (仅用于 FreeType)
@@ -2121,207 +2121,277 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 .
 .
 .SH "AUDIO OUTPUT OPTIONS (音频输出选项) (仅适用于 MPLAYER)"
-.\" The below is only synced with r9821
 .
 .TP
-.B \-abs <参数> (已被放弃)
-替代音频驱动/\:声卡的缓冲区大小检测, 仅用于\-ao oss
-.TP
-.B \-af <滤镜1[=选项],滤镜2,...>
-激活一个逗号分隔的带参数的音频滤镜列表.
-.br
-可用滤镜有:
-.
-.RSs
-.IPs resample[=srate[:sloppy][:type]]
-将音频流的采样率变为整数值srate(Hz). 它只支持16 bit低位在前格式.
-.IPs channels[=nch]
-将声道变为nch个输出声道. 如果输出声道数比输入声道数多时,
-将插入空声道(但在将单声道混合为立体声时, 会把单声道复制到两个输出声道).
-如果输出声道数比输入声道数少, 多余的声道会被去掉.
-.IPs format[=bps,f]
-选择插件层输出格式为f, 样本比特率为bps.
-选项bps是一个整数表示每个样本的字节数. 格式f是下面几个字符串的连接:
-.br
-alaw, mulaw或imaadpcm
-.br
-float或int
-.br
-unsigned或signed
-.br
-le或be(低位或高位在前)
-.br
-.IPs "volume[=v:sc]"
-选择输出音量级别.这个选项是不可重入的, 所以对每个音频流只能使用一次.
-.RSss
-v: 对流中所有声道的增益, 以dB为单位.
-增益可以从-200dB到+40dB(-200dB完全静音completely而+40dB等于放大1000倍).
-.br
-sc: 启用软修饰.
-.REss
-.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
-任意混合声道, 细节参见DOCS/sound.html.
-.RSss
-n: 输出声道数(1 - 6).
-.br
-lij: 输出声道i中混合多少输入声道j的成分.
-.REss
-.IPs "sub[=fc:ch]"
-增加副低音声道.
-.RSss
-fc: 低通滤波器的剪除频率(20Hz to 300Hz)默认值为60Hz.
-.br
-ch: 副声道的声道号.
-.REss
-.IPs "surround[=d]"
-矩阵编码的环绕音效解码器, 能用于许多2声道文件.
-.RSss
-d: 以毫秒为单位的后部扬声器的延迟时间(0ms到1000ms), 默认值为15ms.
-.REss
-.IPs delay[=ch1:ch2:...]
-延迟声音的输出. 以百万分之一秒为单位设置每个声道的延迟(0到1000之间的浮点数).
-.RE
+.B \-abs <参数值> (仅用于 \-ao oss) (废弃)
+重载音频驱动/\:声卡的缓冲区大小检测。
 .
 .TP
-.B \-af-adv <force=(0\-3):list=(filters)> (参见\-af选项)
-设置高级音频滤镜选项:
-.
-.RSs
-.IPs force=<0-3>
-将插入音频滤镜的方式指定为下面之一:
-.RSss
-0: 完全自动插入滤镜(默认)
-.br
-1: 速度优化
-.br
-2: 精度优化
-.br
-3: 关闭自动插入
-.REss
-.IPs list=<滤镜>
-与\-af相同(参见\-af选项).
-.RE
-.
-.TP
-.B \-ao <驱动1[:设备],驱动2,...[,]>
-设置可用的音频输出驱动的优先级列表(可以加上设备).
-\'设备'也用于SDL, 那里它表示子驱动.
-
-.I 注意:
-.br
-要获得完整的可用驱动列表, 参考\-ao help.
-.br
-如果列表结尾有一个',' 它将可以使用没有列出的驱动作为后备.
-
-.I 示例
-.PD 0
-.RSs
-.IPs "\-ao oss:/\:dev/\:dsp2,oss:/\:dev/\:dsp1,"
-尝试使用指定声音设备的OSS而把其它设置作为后备
-.IPs "\-ao sdl:esd"
-设置SDL的子驱动
-.RE
-.PD 1
-.
-.TP
-.B \-aofile <文件名>
-用于\-ao pcm的文件.
-.TP
-.B \-aop <list=插件1,插件2...:选项1=参数1:选项2=参数2...>
-设置音频插件和他们的选项(参见文档).
-.br
-可用选项有:
-.
-.RSs
-.IPs list=[插件]
-逗号分隔的插件列表(resample, surround, format, volume,
-extrastereo, volnorm)
-.IPs delay=<秒>
-插件例子, 没有用
-.IPs format=<格式>
-输出格式(仅用于format插件)
-.IPs fout=<Hz>
-输出频率(仅用于resample插件)
-.IPs volume=<0\-255>
-音量(仅用于volume插件)
-.IPs mul=<参数>
-立体声系数(默认值: 2.5)(仅用于extrastereo插件)
-.IPs softclip
-使用'软修饰'压缩功能(仅用于volume插件)
-.RE
-.
-.TP
-.B \-delay <秒>
-以秒为单位延迟音频(可以是+/\:\-浮点值).
-.TP
-.B \-format <0\-8192>
-选择滤镜层使用的输出格式
-(依据libao2/afmt.h中的定义):
-
-.PD 0
-.RSs
-.IPs 1
-Mu-Law
-.IPs 2
-A-Law
-.IPs 4
-Ima-ADPCM
-.IPs 8
-Signed 8-bit
-.IPs 16
-Unsigned 8-bit
-.IPs 32
-Unsigned 16-bit (低位优先)
-.IPs 64
-Unsigned 16-bit (高位优先)
-.IPs 128
-Signed  16-bit (低位优先)
-.IPs 256
-Signed 16-bit (高位优先)
-.IPs 512
-MPEG (2)音频
-.IPs 1024
-AC3
-.IPs 4096
-Signed 32-bit (低位优先)
-.IPs 8192
-Signed 32-bit (高位优先)
-.RE
-.PD 1
+.B \-format <格式> (也请参见音频过滤器一节中的格式)
+选择样本格式用于从音频过滤器层输出到声卡。
+下面音频过滤器一节中的格式描述列出了可采用的<格式>值。
 .
 .TP
 .B \-mixer <设备>
-这个选项让MPlayer使用/dev/\:mixer之外的设备进行混音.
-.TP
-.B \-nowaveheader (仅用于-ao pcm)
-不包括wave文件头. 用于原始RAW PCM.
-
-
-.SH "视频输出选项(仅用于MPLAYER)"
-.TP
-.B \-aa* (仅用于\-vo aa)
-你可以运行
-.I mplayer \-aahelp
-来获得一份可用选项的解释的列表.
-.TP
-.B \-bpp <深度>
-使用与自动检测结果不同的颜色深度.
-不是所有\-vo驱动都支持它(fbdev, dga2, svga, vesa).
+使用不是默认的 /dev/\:mixer 混音设备。
+对于 ALSA 来说是混音名称。
 .
 .TP
-.B \-brightness <\-100\-100>
-调整视频输出的亮度(默认值为0). 它改变视频信号中RGB组份的亮度, 从黑到白.
+.B \-mixer-channel <混音线>[,混音索引] (仅用于 \-ao oss 和 \-ao alsa)
+此选项告诉 MPlayer 使用不同的通道控制音量而不是默认的 PCM。
+用于 OSS 的选项包括
+.B vol, pcm, line。
+有关选项的完全列表请查找 /usr/\:include/\:linux/\:soundcard.h 中的 
+SOUND_DEVICE_NAMES。
+对于 ALSA (如 alsamixer displays), 你可以使用的名称, 如 
+.B Master, Line, PCM。
+.br
+.I 注意:
+ALSA 混音通道名称后面跟的数字必须用 <名称,数字> 格式指定, 
+例如 alsamixer 的通道标为 'PCM 1' 的必须转换为
+.BR PCM,1 。
+.
 .TP
-.B \-contrast <\-100\-100>
-调整视频输出的对比度(默认值为0).
-工作方式与brightness差不多.
+.B \-softvol
+锁定使用软件混音, 而不用声卡混音。
+.
 .TP
-.B \-dfbopts <参数> (仅用于\-vo directfb2)
-设置directfb驱动的参数列表.
+.B \-softvol-max <10.0\-10000.0>
+设置最大扩音级别(以百分比为单位) (默认值是: 110)。
+值 200 允许你调整的音量最高达到目前级别的两倍。
+对于值低于 100 的, 初始音量(为 100%) 会高于最大值,  OSD 不能正确显示。
+.
 .TP
-.B \-display <name>
-设置你希望使用的X server的hostname和display number.
-
+.B \-volstep <0\-100>
+设置混音音量调整的步进单位为整个范围的百分比 (默认值是: 3)。
+.
+.
+.
+.SH "AUDIO OUTPUT DRIVERS (音频输出驱动) (仅适用于 MPLAYER)"
+音频输出驱动是各种音频输出设备的接口。
+语法是:
+.
+.TP
+.B \-ao <驱动1[:子选项1[=参数值]:...],驱动2,...[,]>
+指定使用音频输出驱动的优先级列表。
+.PP
+如果列表尾有',' MPlayer 使用没有列出的驱动作为后备。
+子选项是可选的, 大多数省略。
+.br
+.I 注意:
+已编译进的音频输出驱动参见于 \-ao help 的列表。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+.IPs "\-ao alsa,oss,"
+尝试使用 ALSA 驱动, 然后是 OSS 驱动, 再后是其他的。
+.IPs "\-ao alsa:noblock:device=hw=0.3"
+设置 noblock-模式和 device-名称为第一个卡, 第四个设备。
+.RE
+.PD 1
+.sp 1
+可用的音频输出驱动有:
+.
+.TP
+.B "alsa\ \ \ "
+ALSA 0.9/1.x 音频输出驱动
+.PD 0
+.RSs
+.IPs noblock
+设置 noblock-模式。
+.IPs device=<设备>
+设置设备名称。
+在 ALSA 设备名称中替换 ',' 为 '.', ':' 为 '='。
+对于通过 S/PDIF 输出的 hwac3, 使用 "iec958" 或 "spdif" 设备, 
+除非你真的知道如何正确设置。
+.RE
+.PD 1
+.
+.TP
+.B "alsa5\ \ "
+ALSA 0.5 音频输出驱动
+.
+.TP
+.B "oss\ \ \ \ "
+OSS 音频输出驱动
+.PD 0
+.RSs
+.IPs <dsp-device>
+设置音频输出设备 (默认是: /dev/\:dsp)。
+.IPs <mixer-device>
+设置音频混音设备 (默认是: /dev/\:mixer)。
+.IPs <mixer-channel>
+设置音频混音通道 (默认是: pcm)。
+.RE
+.PD 1
+.
+.TP
+.B sdl (仅用于 SDL)
+高级平台独立的 SDL(简单 Directmedia 层) 库音频输出驱动
+.PD 0
+.RSs
+.IPs <driver>
+显式选择 SDL 音频输出 (默认是: 让 SDL 选)。
+.RE
+.PD 1
+.
+.TP
+.B "arts\ \ \ "
+音频输出通过 aRts daemon
+.
+.TP
+.B "esd\ \ \ \ "
+音频输出通过 ESD daemon
+.PD 0
+.RSs
+.IPs <server>
+显式选择 ESD 服务器 (默认是: localhost)。
+.RE
+.PD 1
+.
+.TP
+.B "jack\ \ \ \ "
+音频输出通过 JACK(Jack 音频连接工具)
+.PD 0
+.RSs
+.IPs port=<名>
+连接给定端口名 (默认是: 物理端口)。
+.IPs name=<客户端名>
+传递客户端名给 JACK (默认是: MPlayer [<PID>])。
+如果你想自动建立某些连接时有用。
+.IPs (no)estimate
+估计音频延迟, 假定让视频回放更流畅 (默认是: 启用)。
+.RE
+.PD 1
+.
+.TP
+.B "nas\ \ \ \ "
+音频输出通过 NAS
+.
+.TP
+.B macosx (仅用于 Mac OS X)
+原生 Mac OS X 音频输出驱动
+.
+.TP
+.B sgi (仅用于 SGI)
+原生 SGI 音频输出驱动
+.PD 0
+.RSs
+.IPs "<输出设备名>"
+显式选择音频输出设备/\:接口 (默认是: system-wide default)。
+例如, 'Analog Out' 或 'Digital Out'。
+.RE
+.PD 1
+.
+.TP
+.B sun (仅用于 Sun)
+原生 Sun 音频输出驱动
+.PD 0
+.RSs
+.IPs <device>
+显式选择音频设备 (默认是: /dev/\:audio)。
+.RE
+.PD 1
+.
+.TP
+.B win32 (仅用于 Windows)
+原生 Windows waveout 音频输出驱动
+.
+.TP
+.B dsound (仅用于 Windows)
+DirectX DirectSound 音频输出驱动
+.PD 0
+.RSs
+.IPs device=<devicenum>
+设置设备号。
+用 \-v 播放文件能显示可用设备列表。
+.RE
+.PD 1
+.
+.TP
+.B dxr2 (也请参见 \-dxr2) (仅用于 DXR2)
+Creative DXR2 专用的输出驱动
+.
+.TP
+.B ivtv (仅用于 IVTV)
+IVTV 专用的 MPEG 音频输出驱动。
+只能与 \-ac hwmpa 一起用。
+.
+.TP
+.B mpegpes (仅用于 DVB)
+DVB 卡音频输出驱动输出到 MPEG-PES 文件如果没安装 DVB 卡。
+.PD 0
+.RSs
+.IPs card=<1\-4>
+指定 DVB 卡如果有多于一个卡。
+.IPs file=<文件名>
+输出文件名
+.RE
+.PD 1
+.
+.TP
+.B "null\ \ \ "
+不产生音频输出但维持视频回放速度。
+基准测试用 \-nosound。
+.
+.TP
+.B "pcm\ \ \ \ "
+原始 PCM/wave 文件记录器的音频输出
+.PD 0
+.RSs
+.IPs (no)waveheader
+包括或不包括声波头 (默认是: 包括)。
+如果不包括, 会产生原始的 PCM。
+.IPs file=<文件名>
+写声音到 <文件名> 而不是默认的 audiodump.wav。
+如果没指定声波头, 默认是 audiodump.pcm。
+.IPs "fast\ "
+尝试比实时更快地转储。
+确保输出不被截掉 (通常有"缓冲中视频包太多" 消息)。
+你得到消息"你的系统太“慢”了, 播放不了!" 是正常的。
+.RE
+.PD 1
+.
+.TP
+.B "plugin\ \ "
+音频输出驱动插件
+.
+.
+.
+.SH "VIDEO OUTPUT OPTIONS 视频输出选项 (仅适用于 MPLAYER)"
+.
+.TP
+.B \-adapter <参数值>
+设置显卡接受图像。
+用此选项带 \-v 能得到可用卡的列表。
+目前只能与 directx 视频输出驱动一起工作。
+.
+.TP
+.B \-bpp <深度>
+重载自动检测的色彩深度。
+只被 fbdev, dga, svga, vesa 视频输出驱动支持。
+.
+.TP
+.B \-border
+使用窗口边框和装饰来播放电影。
+既然默认是启用, 使用 \-noborder 停用标准的窗口装饰。
+被 directx 视频输出驱动支持。
+.
+.TP
+.B \-brightness <-100\-100>
+调整视频信号的亮度 (默认值是: 0)。
+不被所有的视频输出驱动支持。
+.
+.TP
+.B \-contrast <-100\-100>
+调整视频信号的对比度 (默认值是: 0)。
+不被所有的视频输出驱动支持。
+.
+.TP
+.B \-display <名> (仅用于 X11)
+指定你希望使用 X server 的主机名和显示号。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
@@ -2330,267 +2400,391 @@ Signed 32-bit (高位优先)
 .PD 1
 .
 .TP
-.B \-double
-启用双缓冲. 通过在内存里储存两帧来解决闪烁问题, 在显示一帧的同时解码另一帧.
-会影响OSD. 需要单一缓冲方式两倍的内存. 所以不能用于显存很少的显卡.
-.TP
-.B \-dr
-打开直接渲染功能(不是所有的编解码器和视频输出都支持)(默认为关闭).
-警告: 可能导致OSD/\:字幕损坏!
+.B "\-dr \ \ \ "
+打开直接渲染功能(还不被所有的编解码器视频输出支持)
+.br
+.I 警告:
+可能导致 OSD/字幕 损坏!
+.
 .TP
 .B \-dxr2 <选项1:选项2:...>
-这个选项用来控制dxr2驱动. 注意: 现在当你播放非MPEG1/2格式时lavc滤镜会自动插入,
-所以现在所有MPlayer支持的格式都可以播放(如果你有实时编码所需要的CPU速度).
-dxr2的叠加芯片的质量相当差不过默认设置应该可以用于每一个人.
-OSD可能可以通过使用colorkey的绘制方法在叠加(不能用于TV)输出中实现.
-使用默认的colorkey设定你可能获得各种效果,
-一般情况下你可能看到colorkey环绕在字符周围或者其它可笑的效果.
-但只要你适当的调节colorkey的设定你应该可以获得可接受的效果.
-.
+此选项用来控制 dxr2 视频输出驱动。
 .RSs
-.IPs ar-mode=<参数>
-长宽比模式(0 = 普通, 1 = pan scan模式, 2 = letterbox模式(默认))
-.IPs iec958\-encoded/\:decoded
-iec958输出模式
-.IPs mute
-声音输出静音
-.IPs ucode=<参数>
-microcode的路径
+.IPs ar-mode=<参数值>
+宽高比模式 (0 = 普通, 1 = pan-and-scan, 2 = letterbox (默认是))
+.IPs iec958-encoded
+设置 iec958 输出模式为 encoded。
+.IPs iec958-decoded
+设置 iec958 输出模式为 decoded (默认)。
+.IPs macrovision=<参数值>
+macrovision 模式 (0 = off (默认), 1 = agc, 2 = agc 2 colorstripe,
+3 = agc 4 colorstripe)
+.IPs "mute\ "
+静音输出
+.IPs unmute
+非静音输出
+.IPs ucode=<参数值>
+microcode 的路径
 .RE
 .RS
-
-.I TV Out
+.sp 1
+.I TV output
 .RE
 .RSs
 .IPs 75ire
-启用7.5IRE
-.IPs bw
+启用 7.5 IRE 输出模式
+.IPs no75ire
+停用 7.5 IRE 输出模式 (默认)
+.IPs "bw\ \ \ "
 黑白电视输出
 .IPs color
-彩色电视输出
+彩色电视输出 (默认)
 .IPs interlaced
-交错电视输出
-.IPs macrovision=<参数>
-macrovision模式(0 = 关闭(默认值), 1 = agc, 2 = agc 2 colorstripe,
-3 = agc 4 colorstripe)
-.IPs norm=<参数>
-电视制式(ntsc(默认), pal,pal60,palm,paln,palnc)
-.IPs square/\:ccir601\-pixel
-电视像素模式
+交错电视输出 (默认)
+.IPs nointerlaced
+停用交错电视输出
+.IPs norm=<参数值>
+TV 制式 (ntsc (默认), pal, pal60, palm, paln, palnc)
+.IPs square-pixel
+设置像素模式为 square
+.IPs ccir601-pixel
+设置像素模式为 ccir601
 .RE
 .RS
-
-.I 叠加
+.sp 1
+.I overlay
 .RE
 .RSs
-.IPs cr-[left|right|top|bot]=<\-20\-20>
-调整叠加裁减
-.IPs ck-[rgb]min=<0\-255>
-color key参数最小值
-.IPs ck-[rgb]max=<0\-255>
-color key参数最大值
-.IPs ck-[rgb]=<0\-255>
-color key参数
-.IPs ignore\-cache
-不使用VGA缓存
+.IPs cr-left=<0\-500>
+设置左裁减值 (默认是: 50)。
+.IPs cr-right=<0\-500>
+设置右裁减值 (默认是: 300)。
+.IPs cr-top=<0\-500>
+设置上裁减值 (默认是: 0)。
+.IPs cr-bottom=<0\-500>
+设置下裁减值 (默认是: 0)。
+.IPs ck-[r|g|b]=<0\-255>
+设置叠加 color-key 的红(r), 绿(g)和蓝(b)增益。
+.IPs ck-[r|g|b]min=<0\-255>
+各自 color key 的最小值
+.IPs ck-[r|g|b]max=<0\-255>
+各自 color key 最大值
+.IPs ignore-cache
+忽略缓存的叠加设置。
+.IPs update-cache
+更新缓存的叠加设置。
 .IPs ol-osd
-启用叠加模式的osd hack
-.IPs ol[hwxy]\-cor=<参数>
-调整叠加尺寸和位置, 如果它跟窗口匹配不够完美
+启用叠加屏上显示(OSD)。
+.IPs nool-osd
+停用屏上显示(OSD) (默认)。
+.IPs ol[h|w|x|y]-cor=<-20\-20>
+调整叠加尺寸(h,w) 和位置(x,y), 万一跟窗口匹配不够完美 (默认是: 0)。
 .IPs overlay
-启用叠加
+激活叠加 (默认)。
+.IPs nooverlay
+激活电视输出。
 .IPs overlay-ratio=<1\-2500>
-调整叠加模式(默认值为1000)
-.IPs update\-cache
-重建VGA缓存
+调整叠加 (默认是: 1000)。
 .RE
 .
 .TP
-.B \-fb <设备> (仅用于fbdev或者DirectFB)
-设置使用的帧缓冲设备.
-默认为/dev/\:fb0.
+.B \-fbmode <模式名> (仅用于 \-vo fbdev)
+改变视频模式为 /etc/\:fb.modes 中标记为 <模式名> 的模式。
+.
+.br
+.I 注意:
+VESA 帧缓冲不支持改变模式。
 .
 .TP
-.B \-fbmode <模式名> (仅用于fbdev)
-把视频模式设为/etc/\:fb.modes中标记为<模式名>的模式
+.B \-fbmodeconfig <文件名> (仅用于 \-vo fbdev)
+重载帧缓冲模式的配置文件 (默认是: /etc/\:fb.modes)。
 .
-
+.TP
+.B \-fs (也请参见 \-zoom)
+全屏幕回放 (电影居中, 四周填充黑色条边)。
+还不被所有的视频输出驱动支持。
+.
+.TP
+.B \-fsmode-dontuse <0\-31> (废弃, 使用 \-fs 选项)
+如果你仍然有全屏问题试试此选项。
+.
+.TP
+.B \-fstype <类型1,类型2,...> (仅用于 X11)
+指定使用全屏模式的优先级列表。
+你可以用前缀 '\-' 取消模式。
+如果你遇到像全屏窗口被其他窗口遮住问题, 试试不同的顺序。
+.br
 .I 注意:
-.br
-VESA帧缓冲不支持改变显示模式.
-.TP
-.B \-fbmodeconfig <文件名> (仅用于fbdev)
-使用这个配置文件取代默认的/etc/\:fb.modes. 只对fbdev驱动有效.
-.TP
-.B \-forcexv (仅用于SDL)
-指定使用XVideo.
-.TP
-.B \-fs
-全屏播放(电影显示在中央, 四周填充黑色条边).
-用'f'键触发(不是所有的视频输出都支持它).
-参见\-zoom.
-.TP
-.B \-fsmode-dontuse <0-31> (已放弃) (使用\-fs选项)
-如果你还有全屏问题试试这个选项.
-.TP
-.B \-fstype <type1,type2,...>
-设置可用的全屏层设置模式的优先级列表.
-
-默认的次序是"layer,stays_on_top,above,fullscreen".
-如果设置的模式不正确或不支持会使用后备项.
-.br
-如果你遇到全屏窗口被别的窗口覆盖的问题试试设置不同的顺序.
-
-.I 注意:
-.br
-参考\-fstype help列出的全部可用模式的列表.
+参见 \-fstype help 列出的全部可用模式的列表。
+.sp 1
+可用的类型有:
+.sp 1
+.PD 0
+.RSs
+.IPs above
+如果可用的话, 使用 _NETWM_STATE_ABOVE 提示。
+.IPs below
+如果可用的话, 使用 _NETWM_STATE_BELOW 提示。
+.IPs fullscreen
+如果可用的话, 使用 _NETWM_STATE_FULLSCREEN 提示。
+.IPs layer
+与默认层一起使用 _WIN_LAYER 提示。
+.IPs layer=<0...15>
+与给定的层号一起使用 _WIN_LAYER 提示。
+.IPs netwm
+锁定 NETWM 风格。
+.IPs "none\ "
+不设置全屏窗口层。
+.IPs stays_on_top
+如果可用的话, 使用 _NETWM_STATE_STAYS_ON_TOP 提示。
+.REss
+.sp 1
+.RS
+.I 示例:
+.RE
+.PD 0
+.RSs
+.IPs layer,stays_on_top,above,fullscreen
+如果指定了不正确的或不支持的模式, 默认的顺序作为备用而使用。
+.IPs \-fullscreen
+修复 OpenBox 1.x 的全屏开关。
+.RE
+.PD 1
+.
 .TP
 .B \-geometry x[%][:y[%]] or [WxH][+x+y]
-调整屏幕输出的初始位置.
-x和y代表从屏幕右上角到显示图像右上角的距离, 以像素为单位.
-不过如果在参数后有百分号记号它将把参数理解为该方向上的屏幕尺寸比例.
-它也支持标准的X \-geometry的标准选项格式. 参数必须为整数.
-
-注意: 这个选项只有一个vo支持: xv.
-
+调整屏幕输出的初始位置。
+x 和 y 代表从屏幕左上角到显示图像左上角的距离(以像素为单位)。
+不过如果在参数值后有百分号记号, 参数值就变为该方向上的屏幕尺寸的百分数。
+它也支持标准 X11 的 \-geometry 选项格式。
+如果使用 \-wid 选项指定了外部窗口, 那么 x 和 y 坐标是相对于窗口而不是屏幕的左上角。
+.br
+.I 注意:
+此选项仅被 x11, xmga, xv, xvmc, xvidix, 
+gl, gl2, directx 和 tdfxfb 视频输出驱动支持。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
 .IPs 50:40
-把窗口放在x=50, y=40处
+把窗口放在 x=50, y=40 处。
 .IPs 50%:50%
-把窗口放在屏幕中央
-.IPs 100%
-把窗口放在屏幕左上角
+把窗口放在屏幕中央。
+.IPs "100%\ "
+把窗口放在屏幕右边中央。
 .IPs 100%:100%
-把窗口放在屏幕左下角
+把窗口放在屏幕右下角。
 .RE
 .PD 1
 .
 .TP
-.B \-guiwid <窗口标识>
-这告诉GUI也使用一个X11窗口并把自己粘到视频窗口的下方,
-在将一个mini-GUI嵌入到浏览器时(比如mplayer插件)有用.
-.TP
-.B \-hue <\-100\-100>
-调整视频信号的色相(默认: 0).
-你可以通过这个选项得到负片效果的图像.
-.TP
-.B \-icelayer <0\-15> (仅用于icewm)
-设置icewm下mplayer的全屏窗口层.
-
-.PD 0
-.RSs
-.IPs 0
-Desktop
-.IPs 2
-Below
-.IPs 4
-Normal
-.IPs 6
-OnTop
-.IPs 8
-Dock
-.IPs 10
-AboveDock
-.IPs 12
-Menu (默认)
-.RE
-.PD 1
+.B \-guiwid <窗口标识> (也请参见 \-wid) (仅用于 GUI)
+告诉 GUI 也使用 X11 窗口并把自己钉在视频窗口的下方, 
+这对于将一个 mini-GUI 嵌入到浏览器时(比如 MPlayer 插件)有用。
 .
 .TP
-.B \-jpeg <选项1:选项2:...> (仅用于\-vo jpeg)
-设置JPEG输出的选项.
-.br
-可用选项有:
-
-.PD 0
-.RSs
-.IPs [no]progressive
-设置标准的或渐进的JPEG.
-.IPs [no]baseline
-设置是否使用基线.
-.IPs optimize=<参数>
-优化因子[0-100]
-.IPs smooth=<参数>
-平滑因子[0-100]
-.IPs quality=<参数>
-质量因子[0-100]
-.IPs outdir=<参数>
-保存JPEG文件的目录
-.RE
-.PD 1
+.B \-hue <-100\-100>
+调视频信号的色调 (默认是: 0)。
+你可以通过此选项得到负片效果的图像。
+还不被所有视频输出驱动支持。
 .
 .TP
-.B \-monitor-dotclock <dotclock\ (or\ pixelclock) range> (仅用于fbdev和vesa)
-察看etc/\:example.conf和DOCS/\:video.html来进一步了解信息.
+.B \-monitor-dotclock <范围[,范围,...]> (仅用于 \-vo fbdev 和 vesa)
+指定监视器的 dotclock 或 pixelclock 范围。
+.
 .TP
-.B \-monitor-hfreq <水平频率范围> (仅用于fbdev和vesa)
+.B \-monitor-hfreq <范围[,范围,...]> (仅用于 \-vo fbdev 和 vesa)
+指定监视器的水平频率范围。
+.
 .TP
-.B \-monitor-vfreq <垂直频率范围> (仅用于fbdev和vesa)
+.B \-monitor-vfreq <范围[,范围,...]> (仅用于 \-vo fbdev 和 vesa)
+指定监视器的垂直频率范围。
+.
 .TP
-.B \-monitoraspect <长宽比>
-设置你的显示器或电视屏幕的长宽比, 参见用于电影长宽比的\-aspect选项.
-
+.B \-monitoraspect <宽高比> (也请参见 \-aspect)
+设置监视器或电视屏幕的宽高比。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
-\-monitoraspect 4:3或者1.3333
+\-monitoraspect 4:3 或者 1.3333
 .br
-\-monitoraspect 16:9或者1.7777
+\-monitoraspect 16:9 或者 1.7777
 .RE
 .PD 1
 .
 .TP
+.B \-monitorpixelaspect <宽高比> (也请参见 \-aspect)
+设置监视器或电视屏幕的单像素宽高比 (默认是停用的)。
+重载 \-monitoraspect 设置。
+值 0 停用, 值 1 表示方像素((几乎?)对所有的 LCD 是正确的)。
+.
+.TP
+.B \-nodouble
+停用双缓冲, 多数用于调试目的。
+双缓冲通过在内存里储存两帧来解决闪烁问题, 在显示一帧的同时解码另一帧。
+会负面影响 OSD, 但常常能去除 OSD 闪烁。
+.
+.TP
 .B \-nograbpointer
-VidMode改变(\-vm)后不截获鼠标焦点, 用于多输出头设置.
-
+视频模式改变(\-vm)后, 不截获鼠标焦点。
+对多输出头设置有用。
+.
 .TP
 .B \-nokeepaspect
-缩放X11窗口时不保持窗口的长宽比(只工作于\-vo x11, xv,
-xmga和xvidix而且你的窗口管理器必须理解window aspect hints.).
-
+缩放窗口时不保持窗口的宽高比。
+只能与 x11, xv, xmga, xvidix, directx 视频输出驱动一起工作。
+而且在 X11 下你的窗口管理器必须尊重窗口宽高比的提示。
+.
 .TP
-.B \-noslices
-禁用把视频分隔成16像素高的条/\:带绘制的方式, 而是一次绘制整个帧.
-可能更快或更慢, 取决于显卡/\:缓存.
-它只对libmpeg2和libavcodec编解码器有效.
+.B "\-ontop\ "
+使得此播放器窗口位于其他窗口之上。
+视频输出驱动使用 X11 的, 除了 SDL, 还有使用 directx, macosx, quartz, 
+ggi 和 gl2 的都支持此功能。
+.
 .TP
 .B \-panscan <0.0\-1.0>
-启用Pan & Scan功能, 也就是为了在4:3的显示器上显示16:9,
-把电影的边缘切掉来获得4:3的, 与屏幕匹配的图像的方法.
-这个功能只能用于xv, xmga, mga和xvidix视频输出驱动.
-.br
-参数用来控制切掉多少图像.
+启用 pan-and-scan 功能 (裁减如 16:9 电影的边适应 4:3 显示不带黑边)。
+范围参数值用来控制裁减多少图像。
+只能与 xv, xmga, mga, gl, gl2, quartz, macosx 和 xvidix 的
+视频输出驱动一起工作。
+.
+.TP
+.B \-panscanrange <-19.0\-99.0> (试验)
+改变 pan-and-scan 功能的范围参数值 (默认是: 1)。
+正值表示倍扩默认范围。
+负值表示你可以放大到因子 \-panscanrange+1 所允许的范围。
+例如 \-panscanrange -3 允许缩放因子达到 4。
+此特性属实验性, 不要报告相关错误除非你在用 using \-vo gl。
+.
+.TP
+.B \-refreshrate <Hz>
+设置监视器的刷新率(以 Hz 为单位)。
+目前仅被 \-vo directx 与 \-vm 的组合支持。
+.
 .TP
 .B \-rootwin
-在根窗口(桌面背景)中播放电影而不是重新打开一个新窗口.
-只能用于x11, xv, xmga和xvidix驱动.
+在根窗口(桌面背景)中播放电影。
+虽然桌面背景图像可能盖住电影窗口。
+只能与 x11, xv, xmga, xvidix, quartz, macosx 和 directx 的
+视频输出驱动一起工作。
+.
 .TP
-.B \-saturation <\-100\-100>
-调整视频输出的饱和度(默认值: 0).
-你可以通过这个选项获得灰度输出.
+.B \-saturation <-100\-100>
+调整视频信号的饱和度(默认值: 0)。
+你可以通过此选项获得灰度输出。
+还不被所有的视频输出驱动支持。
+.
 .TP
-.B \-screenw <像素> \-screenh <像素>
-如果你使用的输出驱动无法获得屏幕分辨率(fbdev/\:x11和/\:或者 TVout)，
-你可以在这里设置水平和垂直分辨率.
+.B \-screenh <像素>
+指定垂直分辨率, 如果视频输出驱动不知道屏幕分辨率, 如 fbdev, x11 和 TVout。
+.
 .TP
-.B \-stop-xscreensaver
-在启动是关闭xscreensaver在退出时再打开它.
+.B \-screenw <pixels>
+指定水平分辨率, 如果视频输出驱动不知道屏幕分辨率, 如 fbdev, x11 和 TVout。
+.
 .TP
-.B \-vm
-尝试改变到更合适的视频模式. dga, x11/\:xv (XF86VidMode)和sdl输出驱动支持.
+.B \-stop-xscreensaver (仅用于 X11)
+启动时关闭 xscreensaver, 退出时再打开它。
+.
 .TP
+.B "\-vm \ \ \ "
+尝试改变不同的视频模式。
+视频输出驱动支持的有 dga, x11, xv, sdl 和 directx。
+如果用于 directx 视频输出驱动 \-screenw, \-screenh, \-bpp 和 
+\-refreshrate 选项可用来设置新的显示模式。
+.
+.TP
+.B "\-vsync \ \ "
+启用 VBI 用于 vesa, dfbmga 和 svga 视频输出驱动。
+.
+.TP
+.B \-wid <窗口标识> (也请参见 \-guiwid) (仅用于 X11, OpenGL 和 DirectX)
+告诉 MPlayer 附着于一个已有的窗口。
+把 MPlayer 嵌入浏览器(比如 plugger 扩展)时有用。
+.
+.TP
+.B \-xineramascreen <\-2\-...> (仅用于 X11)
+在 Xinerama 配置中(就是一个单一桌面展开在多个显示器上), 
+此选项告诉 MPlayer 把电影显示在哪个屏幕上。
+值 \-2 表示全屏幕展开到整个虚拟的显示屏幕上, 
+\-1 表示在目前窗口所在的显示屏上全屏幕。
+通过 \-geometry 选项设置的初始位置是相对于指定屏幕的。
+通常只能与 "\-fstype \-fullscreen" 或 "\-fstype none" 一起工作。
+.
+.TP
+.B \-zrbw (仅用于 \-vo zr)
+黑白显示。
+用于优化性能, 此选项可以与 '\-lavdopts gray' 组合使用。
+.
+.TP
+.B \-zrcrop <[宽]x[高]+[x 偏移]+[y 偏移]> (仅用于 \-vo zr)
+选择显示输入图像的一部分, 使用多个这样的选项就启动了 cinerama 模式。
+在 cinerama 模式下电影分布在多个电视(或投影仪)上, 用于创建一个较大的图像。
+在第 n 个 \-zrcrop 后面的选项应用于第 n 个 MJPEG 解码卡, 
+每一个编码卡至少需要有一个 \-zrcrop 选项加上一个 \-zrdev 选项。
+请察看 \-zrhelp 的输出和文档 Zr 一节中的示例。
+.
+.TP
+.B \-zrdev <设备> (仅用于 \-vo zr)
+指定你的 MJPEG 编码卡使用的设备文件名, 默认情况下
+此 zr 视频输出驱动使用它所能找到的第一个 v4l 设备。
+.
+.TP
+.B \-zrfd (仅用于 \-vo zr)
+强制简化取样: 简化取样由 \-zrhdec 和 \-zrvdec 指定,
+一般只有在硬件缩放能把图像伸展到原始尺寸时才使用。
+.
+.TP
+.B \-zrhdec <1|2|4> (仅用于 \-vo zr)
+水平简化取样: 要求驱动只发送输入图像的每 2 或 4 行/\:像素到 MJPEG 编码卡, 
+并使用 MJPEG 卡的缩放器把图像回复到原始尺寸。
+.
+.TP
+.B \-zrhelp (仅用于 \-vo zr)
+显示一个列表包括所有 \-zr* 的选项, 它们的默认值和使用 cinerama 模式的例子
+.
+.TP
+.B \-zrnorm <制式> (仅用于 \-vo zr)
+指定电视制式为 PAL 或 NTSC (默认是: 不改变)。
+.
+.TP
+.B \-zrquality <1\-20> (仅用于 \-vo zr)
+从数值 1(最好) 到 20(最差) 代表 JPEG 编码质量。
+.
+.TP
+.B \-zrvdec <1|2|4> (仅用于 \-vo zr)
+垂直简化取样: 要求驱动只发送输入图像的每 2 或 4 行/\:像素到 MJPEG 编码卡, 
+并使用 MJPEG 卡的缩放器把图像回复到原始尺寸。
+.
+.TP
+.B \-zrxdoff <x 显示偏移量> (仅用于 \-vo zr)
+如果电影屏幕比电视的小, 此选项指定
+相对于电视屏幕左上角的 x 偏移量 (默认是: 中央位置)。
+.
+.TP
+.B \-zrydoff <y 显示偏移量> (仅用于 \-vo zr)
+如果电影屏幕比电视的小, 此选项指定
+相对于电视屏幕左上角的 y 偏移量 (默认是: 中央位置)。
+.
+.
+.
+.SH "VIDEO OUTPUT DRIVERS 视频输出驱动 (仅适用于 MPLAYER)"
+视频输出驱动是各种视频输出设备的接口。
+语法是:
+.
+.TP
+.\" The below is only synced with r9821 (except section "BUGS" and "AUTHORS")
 .B \-vo <驱动1[:设备],驱动2,...[,]>
 设置可用的视频输出驱动的优先级列表(可以加上设备).
-\'设备'也用于SDL和GGI, 那里它表示子驱动.
-
+\'设备'也用于SDL和GGI, 那里它表示子驱动
+.
 .I 注意:
 .br
 要获得完整的可用驱动列表, 参考\-vo help.
 .br
-如果列表结尾有一个',' 它将可以使用没有列出的驱动作为后备.
-
+如果列表结尾有一个',' 它将可以使用没有列出的驱动作为后备
+.
 .I 示例:
 .PD 0
 .RSs
@@ -2602,67 +2796,8 @@ xmga和xvidix而且你的窗口管理器必须理解window aspect hints.).
 .RE
 .PD 1
 .
-.TP
-.B \-vsync
-启用vesa的VBI支持.
-.TP
-.B \-wid <窗口标识>
-告诉MPlayer使用一个X11窗口, 在把MPlayer嵌入浏览器是有用(比如plugger扩展).
-.TP
-.B \-xineramascreen <0\-...>
-在Xinerama配置时，(就是一个单一桌面展开在多个显示器上)，
-这个选项告诉MPlayer把电影显示在哪个屏幕上.
-.TP
-.B \-z <0\-9>
-设置PNG输出的压缩级别(仅用于\-vo png)
-
-.PD 0
-.RSs
-.IPs 0
-不压缩
-.IPs 9
-最大压缩
-.RE
-.PD 1
 .
-.TP
-.B \-zrbw (仅用于\-vo zr)
-黑白显示(用于优化性能,
-这个选项可以跟属于FFmpeg家族的编解码器的'黑白解码'的选项联合使用).
-.TP
-.B \-zrcrop <[宽]x[高]+[x偏移]+[y偏移]> (仅用于\-vo zr)
-选择显示输入图像的一部分, 使用多个这样的选项就启动了cinerama模式.
-在cinerama模式下电影分布在多个电视(或投影仪)来创造一个更大的屏幕.
-在第n个\-zrcrop后面的选项应用于第n个MJPEG解码卡,
-每一个编码卡至少需要有一个\-zrcrop选项加上一个\-zrdev选项.
-察看\-zrhelp的输出和文档的Zr部分可以找到示例.
-.TP
-.B \-zrdev <设备> (仅用于\-vo zr)
-设置你的MJPEG编码卡使用的设备文件名, 默认情况下这个驱动将使用它找到的第一个v4l设备.
-.TP
-.B \-zrfd (仅用于\-vo zr)
-指定使用简化取样: 简化取样由\-zrhdec和\-zrvdec设置,
-一般只有在硬件缩放能把图像延展到原始尺寸时才使用. 使用这个选项指定使用简化取样.
-.TP
-.B \-zrhelp (仅用于\-vo zr)
-显示所有\-zr*选项列表, 他们的默认值和使用cinerama模式的例子.
-.TP
-.B \-zrnorm <制式> (仅用于\-vo zr)
-设置制式为PAL/\:NTSC, 默认值为'不改变'
-.TP
-.B \-zrquality <1\-20> (仅用于\-vo zr)
-从1到20的数值代表jpeg编码质量. 1的质量最好而20的质量非常差.
-.TP
-.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (仅用于\-vo zr)
-垂直/\:水平简化取样:
-驱动只会把输入图像的每2或4行/\:点发送到MJPEG编码卡,
-而使用MJPEG卡的缩放器把图像回复到原有尺寸.
-.TP
-.B \-zrxdoff <x显示位移>, \-zrydoff <y显示位移> (仅用于\-vo zr)
-如果电影比电视屏幕小, 这些选项控制电影相对于屏幕左上角的显示位置.
-默认情况下电影放在中央位置.
-
-
+.
 .SH "解码/滤镜选项"
 .TP
 .B \-ac <[-]编解码器1,[-]编解码器2,...[,]>
@@ -2688,6 +2823,26 @@ xmga和xvidix而且你的窗口管理器必须理解window aspect hints.).
 尝试除了FFmpeg的MP3解码器之外的所有解码器
 .RE
 .PD 1
+.
+.TP
+.B \-af-adv <force=(0\-3):list=(filters)> (参见\-af选项)
+设置高级音频滤镜选项:
+.
+.RSs
+.IPs force=<0-3>
+将插入音频滤镜的方式指定为下面之一:
+.RSss
+0: 完全自动插入滤镜(默认)
+.br
+1: 速度优化
+.br
+2: 精度优化
+.br
+3: 关闭自动插入
+.REss
+.IPs list=<滤镜>
+与\-af相同(参见\-af选项).
+.RE
 .
 .TP
 .B \-afm <驱动1,驱动2,...>
@@ -2805,6 +2960,12 @@ xmga和xvidix而且你的窗口管理器必须理解window aspect hints.).
 .TP
 .B \-noaspect
 禁用电影长宽比自动尝试.
+.TP
+.B \-noslices
+禁用把视频分隔成16像素高的条/\:带绘制的方式, 而是一次绘制整个帧.
+可能更快或更慢, 取决于显卡/\:缓存.
+它只对libmpeg2和libavcodec编解码器有效
+.
 .TP
 .B \-nosound
 不播放/\:编码声音.
@@ -3393,8 +3554,71 @@ clear: 传送前清楚帧缓冲.
 .I 注意:
 .br
 如果没有\-zoom选项\-vf scale将忽略\-x / \-y / \-xy / \-fs / \-aspect等选项.
-
-
+.
+.
+.
+.SH "AUDIO FILTERS"
+Audio filters allow you to modify the audio stream and its properties.
+The syntax is:
+.
+.TP
+.B \-af <滤镜1[=选项],滤镜2,...>
+激活一个逗号分隔的带参数的音频滤镜列表.
+.br
+可用滤镜有:
+.
+.RSs
+.IPs resample[=srate[:sloppy][:type]]
+将音频流的采样率变为整数值srate(Hz). 它只支持16 bit低位在前格式.
+.IPs channels[=nch]
+将声道变为nch个输出声道. 如果输出声道数比输入声道数多时,
+将插入空声道(但在将单声道混合为立体声时, 会把单声道复制到两个输出声道).
+如果输出声道数比输入声道数少, 多余的声道会被去掉.
+.IPs format[=bps,f]
+选择插件层输出格式为f, 样本比特率为bps.
+选项bps是一个整数表示每个样本的字节数. 格式f是下面几个字符串的连接:
+.br
+alaw, mulaw或imaadpcm
+.br
+float或int
+.br
+unsigned或signed
+.br
+le或be(低位或高位在前)
+.br
+.IPs "volume[=v:sc]"
+选择输出音量级别.这个选项是不可重入的, 所以对每个音频流只能使用一次.
+.RSss
+v: 对流中所有声道的增益, 以dB为单位.
+增益可以从-200dB到+40dB(-200dB完全静音completely而+40dB等于放大1000倍).
+.br
+sc: 启用软修饰.
+.REss
+.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
+任意混合声道, 细节参见DOCS/sound.html.
+.RSss
+n: 输出声道数(1 - 6).
+.br
+lij: 输出声道i中混合多少输入声道j的成分.
+.REss
+.IPs "sub[=fc:ch]"
+增加副低音声道.
+.RSss
+fc: 低通滤波器的剪除频率(20Hz to 300Hz)默认值为60Hz.
+.br
+ch: 副声道的声道号.
+.REss
+.IPs "surround[=d]"
+矩阵编码的环绕音效解码器, 能用于许多2声道文件.
+.RSss
+d: 以毫秒为单位的后部扬声器的延迟时间(0ms到1000ms), 默认值为15ms.
+.REss
+.IPs delay[=ch1:ch2:...]
+延迟声音的输出. 以百万分之一秒为单位设置每个声道的延迟(0到1000之间的浮点数).
+.RE
+.
+.
+.
 .SH "编码选项 (仅用于MENCODER)"
 .TP
 .B \-audio-density <1\-50>
@@ -4337,186 +4561,9 @@ B帧和非B帧之间的量化偏移, 100=1.00 (默认值=100)
 并把每帧的psnr储存在一个类似'psnr_hhmmss.log'的文件里.
 返回值以dB(分贝)为单位, 越高越好.
 .RE
-
-
-.\" --------------------------------------------------------------------------
-.\" Keyboard control
-.\" --------------------------------------------------------------------------
 .
-.SH "键盘控制"
-.I 注意:
-.br
-MPlayer有一个完全可配置的，命令驱动的控制层使你可以键盘,
-鼠标，游戏杆或遥控器(使用LIRC)控制MPlayer.
-.br
-输入系统的默认配置文件是~/.mplayer/\:input.conf,
-但可以用\-input conf选项来替代.
-.br
-这些键可能(不)工作, 取决于你的视频输出驱动.
-.TP
-.B 一般控制
-.PD 0
-.RSs
-.IPs "<\- 和 \->"
-后退/\:前进10秒
-.IPs "up 和 down"
-后退/\:前进1分钟
-.IPs "pgup和pgdown"
-后退/\:前进10分钟
-.IPs "< 和 >"
-在播放列表中前进/\:后退
-.IPs "HOME 和 END"
-跳转到上级播放列表中的下一个/\:上一个播放项
-.IPs "INS 和 DEL"
-跳转到下一个/\:上一个供选择的源(仅用于asx播放列表)
-.IPs "p / SPACE"
-暂停电影(按任意键继续)
-.IPs "q / ESC"
-停止播放并退出
-.IPs "+ 和 \-"
-调整音频延迟+/\:\- 0.1秒
-.IPs "/ 和 *"
-降低/\:升高音量
-.IPs "9 and 0"
-降低/\:升高音量
-.IPs m
-静音
-.IPs f
-触发全屏
-.IPs "w 和 e"
-降低/\:升高panscan范围
-.IPs o
-触发不同OSD状态: 无/\:搜索/\:搜索+计时器
-.IPs d
-触发掉帧
-.IPs v
-触发字幕是否可见
-.IPs j
-切换字幕语言
-.IPs a
-切换字幕对齐: 上/中/下
-.IPs "z 和 x"
-调整字幕延迟+/\:\- 0.1秒
-.IPs "r 和 t"
-调整字幕位置
-.IPs "i"
-设置EDL标记
-
-.PP
-(下列键只对\-vo xv或者\-vo [vesa|fbdev]:vidix或者\-vo xvidix
-(下列键只能用于使用硬件加速的视频输出(xv, (x)vidix, (x)mga等等),
-或者软件均衡滤镜(-vf eq或者-vf eq2)).
-.IPs "1 and 2"
-调整对比度
-.IPs "3 and 4"
-调整亮度
-.IPs "5 and 6"
-调整色相
-.IPs "7 and 8"
-调整饱和度
-.RE
-.PD 1
 .
-.TP
-.B GUI键盘控制
-.PD 0
-.RSs
-.IPs "ENTER"
-开始播放
-.IPs s
-停止播放
-.IPs l
-加载文件
-.IPs c
-skin浏览器
-.IPs p
-触发播放列表
-.RE
-.PD 1
 .
-.TP
-.B 电视输入控制
-.PD 0
-.RSs
-.IPs "h 和 k"
-选择上一个/\:下一个频道
-.IPs n
-改变制式
-.IPs u
-改变频道列表
-.RE
-.PD 1
-.
-.TP
-.B DVDNAV输入控制
-.PD 0
-.RSs
-.IPs "K,J,H,L"
-上/\:下/\:左/\:右
-.IPs M
-跳转到主菜单
-.IPs S
-选择
-.RE
-.PD 1
-
-
-.\" --------------------------------------------------------------------------
-.\" Slave mode protocol
-.\" --------------------------------------------------------------------------
-.
-.SH "SLAVE模式协议"
-如果有\-slave选项, 播放由一个基于行输入的协议控制.
-每一行都必须包含一个命令或者下列符号之一:
-.TP
-.B 命令
-.RSs
-.IPs "seek <参数> [type=<0/\:1/\:2>]"
-搜索到电影的某个位置.
-Type 0表示相对搜索+/\:-<参数>秒.
-Type 1表示搜索到电影的<参数>%处.
-Type 2表示搜索到<参数>秒的绝对位置.
-.IPs "audio_delay <参数>"
-调整音频延迟<参数>秒
-.IPs quit
-退出MPlayer
-.IPs pause
-暂停/\:继续播放
-.IPs grap_frames
-有人知道吗?
-.IPs "pt_step <参数> [force=<参数>]"
-跳转到播放列表的下一个/\:上一个输入.
-.IPs "pt_up_step <参数> [force=<参数>]"
-类似pt_step但它跳转到上一级列表的下一个/上一个输入.
-.IPs "alt_src_step <参数>"
-当有多个源可用是选择下一个/\:上一个(只支持asx播放列表).
-.IPs "sub_delay <参数> [abs=<参数>]"
-调整字幕字幕延迟+/\:-<参数>秒或者当abs不等于0时设置为<参数>秒.
-.IPs "osd [level=<参数>]"
-触发osd模式或者当level > 0时设置把它设为level.
-.IPs "volume <dir>"
-升高/\:降低音量.
-.IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<参数>]"
-设置/\:调整视频参数.
-.IPs "frame_drop [type=<参数>]"
-触发/\:设置掉帧模式.
-.IPs "sub_visibility"
-触发字幕是否可见.
-.IPs "sub_pos <参数>"
-调整字幕位置.
-.IPs vo_fullscreen
-切换到全屏模式.
-.IPs "tv_step_channel <dir>"
-选择下一个/\:上一个电视频道.
-.IPs "tv_step_norm"
-改变电视制式.
-.IPs "tv_step_chanlist"
-改变频道列表.
-.IPs "gui_[loadsubtitle|about|play|stop]"
-GUI动作.
-.RE
-
-
 .\" --------------------------------------------------------------------------
 .\" Files
 .\" --------------------------------------------------------------------------
@@ -4641,7 +4688,7 @@ cat *.vob | mencoder <选项> \-
 .
 .
 .SH "AUTHORS (作者)"
-MPlayer 由 Arpad Gereoffy 起稿。
+MPlayer 最初由 Arpad Gereoffy 制作。
 其它许多贡献者的部分清单, 请参见 AUTHORS(作者) 文件。
 .PP
 MPlayer 是 (C) 2000\-2006 The MPlayer Team (MPlayer 团队)所有
