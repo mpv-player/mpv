@@ -3646,6 +3646,16 @@ echores "$_macosx_bundle"
 fi #if darwin
 
 
+echocheck "pkg-config"
+_pkg_config=pkg-config
+if `$_pkg_config 2> /dev/null`; then
+  echores "yes"
+else
+  _pkg_config=false
+  echores "no"
+fi
+
+
 echocheck "Samba support (libsmbclient)"
 if test "$_smbsupport" = yes; then
 	_ld_smb="-lsmbclient"
@@ -4891,7 +4901,7 @@ fi
 echocheck "Polyp"
 if test "$_polyp" = auto ; then
   _polyp=no
-  if pkg-config --exists 'polyplib >= 0.6 polyplib-error >= 0.6 polyplib-mainloop >= 0.6' ; then
+  if $_pkg_config --exists 'polyplib >= 0.6 polyplib-error >= 0.6 polyplib-mainloop >= 0.6' ; then
 
 cat > $TMPC << EOF
 #include <polyp/polyplib.h>
@@ -4899,7 +4909,7 @@ cat > $TMPC << EOF
 #include <polyp/polyplib-error.h>
 int main(void) { return 0; }
 EOF
-cc_check `pkg-config --libs --cflags polyplib polyplib-error polyplib-mainloop` && tmp_run && _polyp=yes
+cc_check `$_pkg_config --libs --cflags polyplib polyplib-error polyplib-mainloop` && tmp_run && _polyp=yes
 
   fi
 fi
@@ -4909,8 +4919,8 @@ if test "$_polyp" = yes ; then
   _def_polyp='#define USE_POLYP 1'
   _aosrc="$_aosrc ao_polyp.c"
   _aomodules="polyp $_aomodules"
-  _ld_polyp=`pkg-config --libs polyplib polyplib-error polyplib-mainloop`
-  _inc_extra="$_inc_extra `pkg-config --cflags polyplib polyplib-error polyplib-mainloop`"
+  _ld_polyp=`$_pkg_config --libs polyplib polyplib-error polyplib-mainloop`
+  _inc_extra="$_inc_extra `$_pkg_config --cflags polyplib polyplib-error polyplib-mainloop`"
 else
   _def_polyp='#undef USE_POLYP'
   _noaomodules="polyp $_noaomodules"
@@ -4927,9 +4937,9 @@ int main(void) { jack_client_new("test"); return 0; }
 EOF
   if cc_check -ljack ; then
     _ld_jack="-ljack"
-  elif cc_check `pkg-config --libs --cflags --silence-errors jack` ; then
-    _ld_jack="`pkg-config --libs jack`"
-    _inc_extra="$_inc_extra "`pkg-config --cflags jack`""
+  elif cc_check `$_pkg_config --libs --cflags --silence-errors jack` ; then
+    _ld_jack="`$_pkg_config --libs jack`"
+    _inc_extra="$_inc_extra "`$_pkg_config --cflags jack`""
   else
     _jack=no
   fi
@@ -5295,7 +5305,7 @@ echores "$_cdparanoia"
 
 echocheck "libcdio"
 if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
-    if pkg-config --exists libcdio ; then
+    if $_pkg_config --exists libcdio ; then
         cat > $TMPC << EOF
 #include <stdio.h>
 #include <cdio/version.h>
@@ -5310,7 +5320,7 @@ int main()
 EOF
         _libcdio=no
     for _inc_tmp in "" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
-        cc_check `pkg-config --cflags --libs libcdio_paranoia` $_inc_tmp $_ld_lm \
+        cc_check `$_pkg_config --cflags --libs libcdio_paranoia` $_inc_tmp $_ld_lm \
           && tmp_run && _libcdio=yes && _inc_extra="$_inc_extra $_inc_tmp" && break
     done
     else
@@ -5321,8 +5331,8 @@ if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _cdda='yes'
     _def_libcdio='#define HAVE_LIBCDIO'
     _def_havelibcdio='yes'
-    _inc_extra="$_inc_extra `pkg-config --cflags libcdio`"
-    _ld_libcdio=`pkg-config --libs libcdio_paranoia`
+    _inc_extra="$_inc_extra `$_pkg_config --cflags libcdio`"
+    _ld_libcdio=`$_pkg_config --libs libcdio_paranoia`
 else
     if test "$_cdparanoia" = yes ; then
        _res_comment="using cdparanoia"
@@ -5426,9 +5436,9 @@ EOF
     _ld_fontconfig="-lfontconfig"
   elif cc_check -lfontconfig -lexpat -lfreetype ; then
     _ld_fontconfig="-lfontconfig -lexpat -lfreetype"
-  elif cc_check `pkg-config --silence-errors --cflags --libs fontconfig` ; then
-    _inc_extra="$_inc_extra `pkg-config --cflags fontconfig`"
-    _ld_fontconfig=`pkg-config --libs fontconfig`
+  elif cc_check `$_pkg_config --silence-errors --cflags --libs fontconfig` ; then
+    _inc_extra="$_inc_extra `$_pkg_config --cflags fontconfig`"
+    _ld_fontconfig=`$_pkg_config --libs fontconfig`
   else
     _fontconfig=no
   fi
@@ -5757,11 +5767,11 @@ int main(void)
   return 0;
 }
 EOF
-  for _ld_theora in "`pkg-config --silence-errors --libs --cflags theora`" "-ltheora"; do
+  for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora"; do
     cc_check $_ld_theora && _theora=yes && break
   done
   if test "$_theora" = no && test "$_tremor_internal" = yes; then
-    for _ld_theora in "`pkg-config --silence-errors --libs --cflags theora`" "-ltheora"; do
+    for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora"; do
       cc_check -I. tremor/bitwise.c $_ld_theora && _theora=yes && break
     done
   fi
@@ -6191,9 +6201,9 @@ if test "$_libavutil_so" = auto ; then
 #include <ffmpeg/common.h>
 int main(void) { ff_gcd(1,1); return 0; }
 EOF
-  if pkg-config --exists libavutil ; then
-    _inc_libavutil=`pkg-config --cflags libavutil`
-    _ld_libavutil=`pkg-config --libs libavutil`
+  if $_pkg_config --exists libavutil ; then
+    _inc_libavutil=`$_pkg_config --cflags libavutil`
+    _ld_libavutil=`$_pkg_config --libs libavutil`
     cc_check $_inc_libavutil $_ld_libavutil && _libavutil_so=yes
   elif cc_check -lavutil $_ld_lm ; then
     _libavutil_so=yes
@@ -6222,9 +6232,9 @@ int main(void) {
     return 0; 
 }
 EOF
-  if pkg-config --exists libavcodec ; then
-    _inc_libavcodec=`pkg-config --cflags libavcodec`
-    _ld_libavcodec=`pkg-config --libs libavcodec`
+  if $_pkg_config --exists libavcodec ; then
+    _inc_libavcodec=`$_pkg_config --cflags libavcodec`
+    _ld_libavcodec=`$_pkg_config --libs libavcodec`
     cc_check $_inc_libavcodec $_ld_libavcodec && _libavcodec_so=yes
   elif cc_check -lavcodec $_ld_lm ; then
     _libavcodec_so=yes
@@ -6245,9 +6255,9 @@ if test "$_libavformat_so" = auto ; then
   #include <ffmpeg/opt.h>
   int main(void) { av_alloc_format_context(); return 0; }
 EOF
-  if pkg-config --exists libavformat ; then
-    _inc_libavformat=`pkg-config --cflags libavformat`
-    _ld_libavformat=`pkg-config --libs libavformat`
+  if $_pkg_config --exists libavformat ; then
+    _inc_libavformat=`$_pkg_config --cflags libavformat`
+    _ld_libavformat=`$_pkg_config --libs libavformat`
     cc_check $_inc_libavformat $_ld_libavformat && _libavformat_so=yes
   elif cc_check $_ld_lm -lavformat ; then
     _libavformat_so=yes  
@@ -7087,17 +7097,17 @@ if test "$_gtk1" = no ; then
   #Check for GTK2 :
   echocheck "GTK+ version"
 
-  if pkg-config gtk+-2.0 --exists ; then
-    _gtk=`pkg-config gtk+-2.0 --modversion 2>/dev/null`
-    _inc_extra="$_inc_extra `pkg-config gtk+-2.0 --cflags 2>/dev/null`"
-    _ld_gtk=`pkg-config gtk+-2.0 --libs 2>/dev/null`
+  if $_pkg_config gtk+-2.0 --exists ; then
+    _gtk=`$_pkg_config gtk+-2.0 --modversion 2>/dev/null`
+    _inc_extra="$_inc_extra `$_pkg_config gtk+-2.0 --cflags 2>/dev/null`"
+    _ld_gtk=`$_pkg_config gtk+-2.0 --libs 2>/dev/null`
     echores "$_gtk"
 
     # Check for GLIB2
-    if pkg-config glib-2.0 --exists ; then
+    if $_pkg_config glib-2.0 --exists ; then
       echocheck "glib version"
-      _glib=`pkg-config glib-2.0 --modversion 2>/dev/null`
-      _ld_glib=`pkg-config glib-2.0 --libs 2>/dev/null`
+      _glib=`$_pkg_config glib-2.0 --modversion 2>/dev/null`
+      _ld_glib=`$_pkg_config glib-2.0 --libs 2>/dev/null`
       echores "$_glib"
 
       _def_gui='#define HAVE_NEW_GUI 1'
@@ -7410,12 +7420,12 @@ if test "$_maemo" = auto ; then
 #include <libosso.h>
 int main(void) { (void) osso_initialize("", "", 0, NULL); return 0; }
 EOF
-  cc_check `pkg-config --cflags --libs libosso 2>/dev/null` && _maemo=yes
+  cc_check `$_pkg_config --cflags --libs libosso 2>/dev/null` && _maemo=yes
 fi
 if test "$_maemo" = yes ; then
   _def_maemo='#define HAVE_MAEMO 1'
-  _inc_extra="$_inc_extra `pkg-config --cflags libosso`"
-  _ld_extra="$_ld_extra `pkg-config --libs libosso` -lXsp"
+  _inc_extra="$_inc_extra `$_pkg_config --cflags libosso`"
+  _ld_extra="$_ld_extra `$_pkg_config --libs libosso` -lXsp"
 else
   _def_maemo='#undef HAVE_MAEMO'
 fi
