@@ -2084,9 +2084,7 @@ for ac_option do
     ;;
 
   --codecsdir=*)
-    _win32codecsdir=`echo $ac_option | cut -d '=' -f 2`
-    _xanimcodecsdir=`echo $ac_option | cut -d '=' -f 2`
-    _realcodecsdir=`echo $ac_option  | cut -d '=' -f 2`
+    _codecsdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --win32codecsdir=*)
     _win32codecsdir=`echo $ac_option | cut -d '=' -f 2`
@@ -2222,6 +2220,7 @@ test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
 test -z "$_mandir" && _mandir="$_prefix/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir" && _libdir="$_prefix/lib"
+test -z "$_codecsdir" && _codecsdir="$_libdir/codecs"
 
 if x86 ; then
   # Checking assembler (_as) compatibility...
@@ -5967,12 +5966,13 @@ if x86 && not qnx; then
 
 if test "$_win32" = auto ; then
     if test -z "$_win32codecsdir" ; then
-      for I in "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/codecs /usr/lib/codecs /usr/local/lib/win32 /usr/lib/win32 ; do
+      for I in "$_codecsdir" "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/codecs /usr/lib/codecs /usr/local/lib/win32 /usr/lib/win32 ; do
         if test -d "$I" ; then
           _win32codecsdir="$I"
           break;
         fi;
       done
+      _win32codecsdir="$_codecsdir"
       # Fall back on a subfolder of the current dir on Windows
       mingw32 && _win32codecsdir="codecs"
     fi
@@ -6021,12 +6021,13 @@ if test "$_xanim" = auto ; then
   if test "$_dl" = yes ; then
     _res_comment="no suitable directory found - see DOCS/HTML/$_doc_lang/codecs.html"
     if test -z "$_xanimcodecsdir" ; then
-	for I in "$_libdir/codecs" /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim $XANIM_MOD_DIR ; do
+	for I in "$_codecsdir" "$_libdir/codecs" /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim $XANIM_MOD_DIR ; do
           if test -d "$I" ; then
             _xanimcodecsdir="$I"
             break;
           fi;
         done
+      _xanimcodecsdir="$_codecsdir"
     fi
     test "$_xanimcodecsdir" && _xanim=yes
   fi
@@ -6053,7 +6054,7 @@ if test "$_real" = auto ; then
     if linux || freebsd || netbsd || win32 || darwin ; then
       _res_comment="no suitable directory found - see DOCS/HTML/$_doc_lang/codecs.html"
       if test -z "$_realcodecsdir" ; then
-	for I in "$_libdir/codecs" "$_libdir/real" /usr/lib/real \
+	for I in "$_codecsdir" "$_libdir/codecs" "$_libdir/real" /usr/lib/real \
 	  /usr/lib/RealPlayer{9,8,}/Codecs /usr/local/RealPlayer{9,8,}/Codecs \
 	  /usr/local/lib/RealPlayer{9,8,}/Codecs /opt/RealPlayer{9,8,}/{Real/,}Codecs \
 	  {~,}/Applications/RealOne\ Player.app/Contents/MacOS/Library/Codecs \
@@ -6062,6 +6063,7 @@ if test "$_real" = auto ; then
             _realcodecsdir="$I"
             break
           fi
+          _realcodecsdir="$_codecsdir"
           # Fall back on a subfolder of the current dir on Windows
           mingw32 && _realcodecsdir="codecs"
         done
