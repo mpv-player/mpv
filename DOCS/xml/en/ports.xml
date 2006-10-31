@@ -598,9 +598,9 @@ $ ./configure --charset=noconv
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">download page</ulink>
   to allow playing formats for which there is no native support yet.
   Put the codecs somewhere in your path or pass
-  <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
+  <option>--codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
   (alternatively
-  <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>
+  <option>--codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>
   only on <application>Cygwin</application>) to <filename>configure</filename>.
   We have had some reports that Real DLLs need to be writable by the user
   running <application>MPlayer</application>, but only on some systems (NT4).

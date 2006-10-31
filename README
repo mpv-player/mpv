@@ -75,8 +75,7 @@ We provide packages for x86 and PowerPC.
 Unpack the codecs archives and put the contents in a directory where MPlayer
 will find them. The default directory is /usr/local/lib/codecs/ (it used to be
 /usr/local/lib/win32 in the past, this also works) but you can change that to
-something else by using the '--with-codecsdir=DIR' option when you run
-'./configure'.
+something else by passing the '--codecsdir' option to './configure'.
 
 
 __________________________
