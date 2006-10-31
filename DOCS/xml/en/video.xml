@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- $Revision$ -->
 <chapter id="video">
 <title>Video output devices</title>
@@ -2279,7 +2279,7 @@ by this documentation.
 <para>
 The CRTC2 connector's fourth pin is the composite video signal. The
 ground are the sixth, seventh and eighth pins. (info contributed
-from Balázs Rácz)
+from BalÃ¡zs RÃ¡cz)
 </para>
 </formalpara>
 
@@ -2288,7 +2288,7 @@ from Balázs Rácz)
 <para>
 The CRTC2 connector's first pin is the composite video signal. The
 ground are the fifth, sixth, seventh, and fifteenth (5, 6, 7, 15)
-pins. (info contributed from Balázs Kerekes)
+pins. (info contributed from BalÃ¡zs Kerekes)
 </para>
 </formalpara>
 </sect2>
