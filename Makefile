@@ -401,7 +401,7 @@ dirclean:
 clean: dirclean
 	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
 
-distclean: clean doxygen_clean
+distclean: dirclean doxygen_clean
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 	-rm -f *~ $(PRG) $(PRG_MENCODER) codec-cfg codecs2html codecs.conf.h \
           .depend configure.log config.mak config.h help_mp.h version.h
