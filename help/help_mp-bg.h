@@ -1,1030 +1,1030 @@
 // Sync'ed with help_mp-en.h 1.167
-// Encoding/Кодировка: MS CP1251
+// Encoding/РљРѕРґРёСЂРѕРІРєР°: MS CP1251
 //
-// Преведено от А. Димитров, plazmus@gmail.com
-// Всички предложения са добре дошли.
+// РџСЂРµРІРµРґРµРЅРѕ РѕС‚ Рђ. Р”РёРјРёС‚СЂРѕРІ, plazmus@gmail.com
+// Р’СЃРёС‡РєРё РїСЂРµРґР»РѕР¶РµРЅРёСЏ СЃР° РґРѕР±СЂРµ РґРѕС€Р»Рё.
 
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
-"Употреба:   mplayer [опции] [url|път/]име_на_файл\n"
+"РЈРїРѕС‚СЂРµР±Р°:   mplayer [РѕРїС†РёРё] [url|РїСЉС‚/]РёРјРµ_РЅР°_С„Р°Р№Р»\n"
 "\n"
-"Основни опции:   (пълният списък е в ръководството - 'man mplayer')\n"
-" -vo <дрв[:устр]>  избор на видео драйвер & устройство ('-vo help' дава списък)\n"
-" -ao <дрв[:устр]>  избор на звуков драйвер & устройство ('-ao help' дава списък)\n"
+"РћСЃРЅРѕРІРЅРё РѕРїС†РёРё:   (РїСЉР»РЅРёСЏС‚ СЃРїРёСЃСЉРє Рµ РІ СЂСЉРєРѕРІРѕРґСЃС‚РІРѕС‚Рѕ - 'man mplayer')\n"
+" -vo <РґСЂРІ[:СѓСЃС‚СЂ]>  РёР·Р±РѕСЂ РЅР° РІРёРґРµРѕ РґСЂР°Р№РІРµСЂ & СѓСЃС‚СЂРѕР№СЃС‚РІРѕ ('-vo help' РґР°РІР° СЃРїРёСЃСЉРє)\n"
+" -ao <РґСЂРІ[:СѓСЃС‚СЂ]>  РёР·Р±РѕСЂ РЅР° Р·РІСѓРєРѕРІ РґСЂР°Р№РІРµСЂ & СѓСЃС‚СЂРѕР№СЃС‚РІРѕ ('-ao help' РґР°РІР° СЃРїРёСЃСЉРє)\n"
 #ifdef HAVE_VCD
-" vcd://<пътечка>   пуска (S)VCD (Super Video CD) пътечка (без монтиране!)\n"
+" vcd://<РїСЉС‚РµС‡РєР°>   РїСѓСЃРєР° (S)VCD (Super Video CD) РїСЉС‚РµС‡РєР° (Р±РµР· РјРѕРЅС‚РёСЂР°РЅРµ!)\n"
 #endif
 #ifdef USE_DVDREAD
-" dvd://<номер>     пуска DVD заглавие от устройство, вместо от файл\n"
-" -alang/-slang     избор на език за DVD аудиo/субтитри (чрез 2-буквен код)\n"
+" dvd://<РЅРѕРјРµСЂ>     РїСѓСЃРєР° DVD Р·Р°РіР»Р°РІРёРµ РѕС‚ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ, РІРјРµСЃС‚Рѕ РѕС‚ С„Р°Р№Р»\n"
+" -alang/-slang     РёР·Р±РѕСЂ РЅР° РµР·РёРє Р·Р° DVD Р°СѓРґРёo/СЃСѓР±С‚РёС‚СЂРё (С‡СЂРµР· 2-Р±СѓРєРІРµРЅ РєРѕРґ)\n"
 #endif
-" -ss <позиция>     превъртане до дадена (в секунди или чч:мм:сс) позиция\n"
-" -nosound          изключване на звука\n"
-" -fs               пълноекранно възпроизвеждане (или -vm, -zoom, вж. manpage)\n"
-" -x <x> -y <y>     избор на резолюция (използва се с -vm или -zoom)\n"
-" -sub <файл>       задава файла със субтитри (вижте също -subfps и -subdelay)\n"
-" -playlist <файл>  отваря playlist файл\n"
-" -vid x -aid y     избор на видео (x) и аудио (y) поток за възпроизвеждане\n"
-" -fps x -srate y   смяна на видео (x кадри в секунда) и аудио (y Hz) честотата\n"
-" -pp <качество>    включва филтър за допълнителна обработка на образа\n"
-"                   вижте ръководството и документацията за подробности\n"
-" -framedrop        разрешава прескачането на кадри (при бавни машини)\n"
+" -ss <РїРѕР·РёС†РёСЏ>     РїСЂРµРІСЉСЂС‚Р°РЅРµ РґРѕ РґР°РґРµРЅР° (РІ СЃРµРєСѓРЅРґРё РёР»Рё С‡С‡:РјРј:СЃСЃ) РїРѕР·РёС†РёСЏ\n"
+" -nosound          РёР·РєР»СЋС‡РІР°РЅРµ РЅР° Р·РІСѓРєР°\n"
+" -fs               РїСЉР»РЅРѕРµРєСЂР°РЅРЅРѕ РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ (РёР»Рё -vm, -zoom, РІР¶. manpage)\n"
+" -x <x> -y <y>     РёР·Р±РѕСЂ РЅР° СЂРµР·РѕР»СЋС†РёСЏ (РёР·РїРѕР»Р·РІР° СЃРµ СЃ -vm РёР»Рё -zoom)\n"
+" -sub <С„Р°Р№Р»>       Р·Р°РґР°РІР° С„Р°Р№Р»Р° СЃСЉСЃ СЃСѓР±С‚РёС‚СЂРё (РІРёР¶С‚Рµ СЃСЉС‰Рѕ -subfps Рё -subdelay)\n"
+" -playlist <С„Р°Р№Р»>  РѕС‚РІР°СЂСЏ playlist С„Р°Р№Р»\n"
+" -vid x -aid y     РёР·Р±РѕСЂ РЅР° РІРёРґРµРѕ (x) Рё Р°СѓРґРёРѕ (y) РїРѕС‚РѕРє Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ\n"
+" -fps x -srate y   СЃРјСЏРЅР° РЅР° РІРёРґРµРѕ (x РєР°РґСЂРё РІ СЃРµРєСѓРЅРґР°) Рё Р°СѓРґРёРѕ (y Hz) С‡РµСЃС‚РѕС‚Р°С‚Р°\n"
+" -pp <РєР°С‡РµСЃС‚РІРѕ>    РІРєР»СЋС‡РІР° С„РёР»С‚СЉСЂ Р·Р° РґРѕРїСЉР»РЅРёС‚РµР»РЅР° РѕР±СЂР°Р±РѕС‚РєР° РЅР° РѕР±СЂР°Р·Р°\n"
+"                   РІРёР¶С‚Рµ СЂСЉРєРѕРІРѕРґСЃС‚РІРѕС‚Рѕ Рё РґРѕРєСѓРјРµРЅС‚Р°С†РёСЏС‚Р° Р·Р° РїРѕРґСЂРѕР±РЅРѕСЃС‚Рё\n"
+" -framedrop        СЂР°Р·СЂРµС€Р°РІР° РїСЂРµСЃРєР°С‡Р°РЅРµС‚Рѕ РЅР° РєР°РґСЂРё (РїСЂРё Р±Р°РІРЅРё РјР°С€РёРЅРё)\n"
 "\n"
-"Основни клавиши:   (пълен списък има в ръководството, проверете също input.conf)\n"
-" <-  или  ->       превърта назад/напред с 10 секунди\n"
-" up или down       превърта назад/напред с 1 минута\n"
-" pgup или pgdown   превърта назад/напред с 10 минути\n"
-" < или >           стъпка назад/напред в playlist списъка\n"
-" p или SPACE       пауза (натиснете произволен клавиш за продължение)\n"
-" q или ESC         спиране на възпроизвеждането и изход от програмата\n"
-" + или -           промяна закъснението на звука с +/- 0.1 секунда\n"
-" o                 превключва OSD режима: без/лента за превъртане/лента и таймер\n"
-" * или /           увеличава или намалява силата на звука (PCM)\n"
-" z или x           променя закъснението на субтитрите с +/- 0.1 секунда\n"
-" r или t           премества субтитрите нагоре/надолу, вижте и -vf expand\n"
+"РћСЃРЅРѕРІРЅРё РєР»Р°РІРёС€Рё:   (РїСЉР»РµРЅ СЃРїРёСЃСЉРє РёРјР° РІ СЂСЉРєРѕРІРѕРґСЃС‚РІРѕС‚Рѕ, РїСЂРѕРІРµСЂРµС‚Рµ СЃСЉС‰Рѕ input.conf)\n"
+" <-  РёР»Рё  ->       РїСЂРµРІСЉСЂС‚Р° РЅР°Р·Р°Рґ/РЅР°РїСЂРµРґ СЃ 10 СЃРµРєСѓРЅРґРё\n"
+" up РёР»Рё down       РїСЂРµРІСЉСЂС‚Р° РЅР°Р·Р°Рґ/РЅР°РїСЂРµРґ СЃ 1 РјРёРЅСѓС‚Р°\n"
+" pgup РёР»Рё pgdown   РїСЂРµРІСЉСЂС‚Р° РЅР°Р·Р°Рґ/РЅР°РїСЂРµРґ СЃ 10 РјРёРЅСѓС‚Рё\n"
+" < РёР»Рё >           СЃС‚СЉРїРєР° РЅР°Р·Р°Рґ/РЅР°РїСЂРµРґ РІ playlist СЃРїРёСЃСЉРєР°\n"
+" p РёР»Рё SPACE       РїР°СѓР·Р° (РЅР°С‚РёСЃРЅРµС‚Рµ РїСЂРѕРёР·РІРѕР»РµРЅ РєР»Р°РІРёС€ Р·Р° РїСЂРѕРґСЉР»Р¶РµРЅРёРµ)\n"
+" q РёР»Рё ESC         СЃРїРёСЂР°РЅРµ РЅР° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµС‚Рѕ Рё РёР·С…РѕРґ РѕС‚ РїСЂРѕРіСЂР°РјР°С‚Р°\n"
+" + РёР»Рё -           РїСЂРѕРјСЏРЅР° Р·Р°РєСЉСЃРЅРµРЅРёРµС‚Рѕ РЅР° Р·РІСѓРєР° СЃ +/- 0.1 СЃРµРєСѓРЅРґР°\n"
+" o                 РїСЂРµРІРєР»СЋС‡РІР° OSD СЂРµР¶РёРјР°: Р±РµР·/Р»РµРЅС‚Р° Р·Р° РїСЂРµРІСЉСЂС‚Р°РЅРµ/Р»РµРЅС‚Р° Рё С‚Р°Р№РјРµСЂ\n"
+" * РёР»Рё /           СѓРІРµР»РёС‡Р°РІР° РёР»Рё РЅР°РјР°Р»СЏРІР° СЃРёР»Р°С‚Р° РЅР° Р·РІСѓРєР° (PCM)\n"
+" z РёР»Рё x           РїСЂРѕРјРµРЅСЏ Р·Р°РєСЉСЃРЅРµРЅРёРµС‚Рѕ РЅР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ СЃ +/- 0.1 СЃРµРєСѓРЅРґР°\n"
+" r РёР»Рё t           РїСЂРµРјРµСЃС‚РІР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ РЅР°РіРѕСЂРµ/РЅР°РґРѕР»Сѓ, РІРёР¶С‚Рµ Рё -vf expand\n"
 "\n"
-" * * * ЗА ПОДРОБНОСТИ, ДОПЪЛНИТЕЛНИ ОПЦИИ И КЛАВИШИ, ВИЖТЕ РЪКОВОДСТВОТО! * * *\n"
+" * * * Р—Рђ РџРћР”Р РћР‘РќРћРЎРўР, Р”РћРџРЄР›РќРРўР•Р›РќР РћРџР¦РР Р РљР›РђР’РРЁР, Р’РР–РўР• Р РЄРљРћР’РћР”РЎРўР’РћРўРћ! * * *\n"
 "\n";
 #endif
 
-#define MSGTR_SamplesWanted "Мостри от този формат са нужни за подобряване на поддръжката. Свържете се с нас!\n"
+#define MSGTR_SamplesWanted "РњРѕСЃС‚СЂРё РѕС‚ С‚РѕР·Рё С„РѕСЂРјР°С‚ СЃР° РЅСѓР¶РЅРё Р·Р° РїРѕРґРѕР±СЂСЏРІР°РЅРµ РЅР° РїРѕРґРґСЂСЉР¶РєР°С‚Р°. РЎРІСЉСЂР¶РµС‚Рµ СЃРµ СЃ РЅР°СЃ!\n"
 
 // ========================= MPlayer messages ===========================
 
 // mplayer.c:
 
-#define MSGTR_Exiting "\nИзлизане от програмата...\n"
-#define MSGTR_ExitingHow "\nИзлизане от програмата... (%s)\n"
-#define MSGTR_Exit_quit "Изход"
-#define MSGTR_Exit_eof "Край на файла"
-#define MSGTR_Exit_error "Фатална грешка"
-#define MSGTR_IntBySignal "\nMPlayer е прекъснат от сигнал %d в модул: %s\n"
-#define MSGTR_NoHomeDir "HOME директорията не може да бъде открита.\n"
-#define MSGTR_GetpathProblem "Проблем с функция get_path(\"config\") \n"
-#define MSGTR_CreatingCfgFile "Създава се конфигурационен файл: %s\n"
-#define MSGTR_CopyCodecsConf "(Копирайте/свържете etc/codecs.conf от сорса на MPlayer в ~/.mplayer/codecs.conf)\n"
-#define MSGTR_BuiltinCodecsConf "Използва се вградения codecs.conf.\n"
-#define MSGTR_CantLoadFont "Не може да се зареди шрифт: %s\n"
-#define MSGTR_CantLoadSub "Не могат да бъдат заредени субтитри: %s\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: ФАТАЛНО: Избраният поток липсва!\n"
-#define MSGTR_CantOpenDumpfile "Не може да се отвори файл за извличане.\n"
-#define MSGTR_CoreDumped "Данните извлечени ;)\n"
-#define MSGTR_FPSnotspecified "Броя кадри в секунда не е указан или е невалиден, ползвайте опцията -fps .\n"
-#define MSGTR_TryForceAudioFmtStr "Опит за ползване на фамилия аудио кодеци %s...\n"
-#define MSGTR_CantFindAudioCodec "Не може да бъде намерен кодек за този аудио формат 0x%X.\n"
-#define MSGTR_RTFMCodecs "Прочетете DOCS/HTML/en/codecs.html!\n"
-#define MSGTR_TryForceVideoFmtStr "Опит за ползване на фамилия видео кодеци %s...\n"
-#define MSGTR_CantFindVideoCodec "Няма подходящ кодек за указаните -vo и видео формат 0x%X.\n"
-#define MSGTR_CannotInitVO "ФАТАЛНО: Видео драйвера не може да бъде инициализиран.\n"
-#define MSGTR_CannotInitAO "Аудио устройството не може да бъде отворено/инициализирано -> няма звук.\n"
-#define MSGTR_StartPlaying "Започва възпроизвеждането...\n"
+#define MSGTR_Exiting "\nРР·Р»РёР·Р°РЅРµ РѕС‚ РїСЂРѕРіСЂР°РјР°С‚Р°...\n"
+#define MSGTR_ExitingHow "\nРР·Р»РёР·Р°РЅРµ РѕС‚ РїСЂРѕРіСЂР°РјР°С‚Р°... (%s)\n"
+#define MSGTR_Exit_quit "РР·С…РѕРґ"
+#define MSGTR_Exit_eof "РљСЂР°Р№ РЅР° С„Р°Р№Р»Р°"
+#define MSGTR_Exit_error "Р¤Р°С‚Р°Р»РЅР° РіСЂРµС€РєР°"
+#define MSGTR_IntBySignal "\nMPlayer Рµ РїСЂРµРєСЉСЃРЅР°С‚ РѕС‚ СЃРёРіРЅР°Р» %d РІ РјРѕРґСѓР»: %s\n"
+#define MSGTR_NoHomeDir "HOME РґРёСЂРµРєС‚РѕСЂРёСЏС‚Р° РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РєСЂРёС‚Р°.\n"
+#define MSGTR_GetpathProblem "РџСЂРѕР±Р»РµРј СЃ С„СѓРЅРєС†РёСЏ get_path(\"config\") \n"
+#define MSGTR_CreatingCfgFile "РЎСЉР·РґР°РІР° СЃРµ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРµРЅ С„Р°Р№Р»: %s\n"
+#define MSGTR_CopyCodecsConf "(РљРѕРїРёСЂР°Р№С‚Рµ/СЃРІСЉСЂР¶РµС‚Рµ etc/codecs.conf РѕС‚ СЃРѕСЂСЃР° РЅР° MPlayer РІ ~/.mplayer/codecs.conf)\n"
+#define MSGTR_BuiltinCodecsConf "РР·РїРѕР»Р·РІР° СЃРµ РІРіСЂР°РґРµРЅРёСЏ codecs.conf.\n"
+#define MSGTR_CantLoadFont "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°СЂРµРґРё С€СЂРёС„С‚: %s\n"
+#define MSGTR_CantLoadSub "РќРµ РјРѕРіР°С‚ РґР° Р±СЉРґР°С‚ Р·Р°СЂРµРґРµРЅРё СЃСѓР±С‚РёС‚СЂРё: %s\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: Р¤РђРўРђР›РќРћ: РР·Р±СЂР°РЅРёСЏС‚ РїРѕС‚РѕРє Р»РёРїСЃРІР°!\n"
+#define MSGTR_CantOpenDumpfile "РќРµ РјРѕР¶Рµ РґР° СЃРµ РѕС‚РІРѕСЂРё С„Р°Р№Р» Р·Р° РёР·РІР»РёС‡Р°РЅРµ.\n"
+#define MSGTR_CoreDumped "Р”Р°РЅРЅРёС‚Рµ РёР·РІР»РµС‡РµРЅРё ;)\n"
+#define MSGTR_FPSnotspecified "Р‘СЂРѕСЏ РєР°РґСЂРё РІ СЃРµРєСѓРЅРґР° РЅРµ Рµ СѓРєР°Р·Р°РЅ РёР»Рё Рµ РЅРµРІР°Р»РёРґРµРЅ, РїРѕР»Р·РІР°Р№С‚Рµ РѕРїС†РёСЏС‚Р° -fps .\n"
+#define MSGTR_TryForceAudioFmtStr "РћРїРёС‚ Р·Р° РїРѕР»Р·РІР°РЅРµ РЅР° С„Р°РјРёР»РёСЏ Р°СѓРґРёРѕ РєРѕРґРµС†Рё %s...\n"
+#define MSGTR_CantFindAudioCodec "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РЅР°РјРµСЂРµРЅ РєРѕРґРµРє Р·Р° С‚РѕР·Рё Р°СѓРґРёРѕ С„РѕСЂРјР°С‚ 0x%X.\n"
+#define MSGTR_RTFMCodecs "РџСЂРѕС‡РµС‚РµС‚Рµ DOCS/HTML/en/codecs.html!\n"
+#define MSGTR_TryForceVideoFmtStr "РћРїРёС‚ Р·Р° РїРѕР»Р·РІР°РЅРµ РЅР° С„Р°РјРёР»РёСЏ РІРёРґРµРѕ РєРѕРґРµС†Рё %s...\n"
+#define MSGTR_CantFindVideoCodec "РќСЏРјР° РїРѕРґС…РѕРґСЏС‰ РєРѕРґРµРє Р·Р° СѓРєР°Р·Р°РЅРёС‚Рµ -vo Рё РІРёРґРµРѕ С„РѕСЂРјР°С‚ 0x%X.\n"
+#define MSGTR_CannotInitVO "Р¤РђРўРђР›РќРћ: Р’РёРґРµРѕ РґСЂР°Р№РІРµСЂР° РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅ.\n"
+#define MSGTR_CannotInitAO "РђСѓРґРёРѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕС‚Рѕ РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅРѕ/РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅРѕ -> РЅСЏРјР° Р·РІСѓРє.\n"
+#define MSGTR_StartPlaying "Р—Р°РїРѕС‡РІР° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµС‚Рѕ...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
 "           ************************************************\n"\
-"           **** Вашата система е твърде БАВНА за това!  ****\n"\
+"           **** Р’Р°С€Р°С‚Р° СЃРёСЃС‚РµРјР° Рµ С‚РІСЉСЂРґРµ Р‘РђР’РќРђ Р·Р° С‚РѕРІР°!  ****\n"\
 "           ************************************************\n\n"\
-"Възможни причини, проблеми, решения:\n"\
-"- Най-вероятно: неработещ/бъгав _аудио_ драйвер\n"\
-"  - Опитайте -ao sdl или ползвайте OSS емулацията на ALSA.\n"\
-"  - Експериментирайте с различни стойности на -autosync, 30 е добро начало.\n"\
-"- Бавно видео извеждане\n"\
-"  - Опитайте друг -vo драйвер (-vo help за списък) или пробвайте -framedrop!\n"\
-"- Бавен процесор\n"\
-"  - Не пускайте голям DVD/DivX филм на бавен процесор! Пробвайте -hardframedrop.\n"\
-"- Повреден файл\n"\
-"  - Опитайте различни комбинации от  -nobps -ni -forceidx -mc 0.\n"\
-"- Бавен източник (NFS/SMB, DVD, VCD и т.н.)\n"\
-"  - Опитайте -cache 8192.\n"\
-"- Използвате -cache за non-interleaved AVI файл?\n"\
-"  - Опитайте -nocache.\n"\
-"Прочетете DOCS/HTML/en/video.html за съвети относно настройките.\n"\
-"Ако нищо не помага, прочетете DOCS/HTML/en/bugreports.html.\n\n"
+"Р’СЉР·РјРѕР¶РЅРё РїСЂРёС‡РёРЅРё, РїСЂРѕР±Р»РµРјРё, СЂРµС€РµРЅРёСЏ:\n"\
+"- РќР°Р№-РІРµСЂРѕСЏС‚РЅРѕ: РЅРµСЂР°Р±РѕС‚РµС‰/Р±СЉРіР°РІ _Р°СѓРґРёРѕ_ РґСЂР°Р№РІРµСЂ\n"\
+"  - РћРїРёС‚Р°Р№С‚Рµ -ao sdl РёР»Рё РїРѕР»Р·РІР°Р№С‚Рµ OSS РµРјСѓР»Р°С†РёСЏС‚Р° РЅР° ALSA.\n"\
+"  - Р•РєСЃРїРµСЂРёРјРµРЅС‚РёСЂР°Р№С‚Рµ СЃ СЂР°Р·Р»РёС‡РЅРё СЃС‚РѕР№РЅРѕСЃС‚Рё РЅР° -autosync, 30 Рµ РґРѕР±СЂРѕ РЅР°С‡Р°Р»Рѕ.\n"\
+"- Р‘Р°РІРЅРѕ РІРёРґРµРѕ РёР·РІРµР¶РґР°РЅРµ\n"\
+"  - РћРїРёС‚Р°Р№С‚Рµ РґСЂСѓРі -vo РґСЂР°Р№РІРµСЂ (-vo help Р·Р° СЃРїРёСЃСЉРє) РёР»Рё РїСЂРѕР±РІР°Р№С‚Рµ -framedrop!\n"\
+"- Р‘Р°РІРµРЅ РїСЂРѕС†РµСЃРѕСЂ\n"\
+"  - РќРµ РїСѓСЃРєР°Р№С‚Рµ РіРѕР»СЏРј DVD/DivX С„РёР»Рј РЅР° Р±Р°РІРµРЅ РїСЂРѕС†РµСЃРѕСЂ! РџСЂРѕР±РІР°Р№С‚Рµ -hardframedrop.\n"\
+"- РџРѕРІСЂРµРґРµРЅ С„Р°Р№Р»\n"\
+"  - РћРїРёС‚Р°Р№С‚Рµ СЂР°Р·Р»РёС‡РЅРё РєРѕРјР±РёРЅР°С†РёРё РѕС‚  -nobps -ni -forceidx -mc 0.\n"\
+"- Р‘Р°РІРµРЅ РёР·С‚РѕС‡РЅРёРє (NFS/SMB, DVD, VCD Рё С‚.РЅ.)\n"\
+"  - РћРїРёС‚Р°Р№С‚Рµ -cache 8192.\n"\
+"- РР·РїРѕР»Р·РІР°С‚Рµ -cache Р·Р° non-interleaved AVI С„Р°Р№Р»?\n"\
+"  - РћРїРёС‚Р°Р№С‚Рµ -nocache.\n"\
+"РџСЂРѕС‡РµС‚РµС‚Рµ DOCS/HTML/en/video.html Р·Р° СЃСЉРІРµС‚Рё РѕС‚РЅРѕСЃРЅРѕ РЅР°СЃС‚СЂРѕР№РєРёС‚Рµ.\n"\
+"РђРєРѕ РЅРёС‰Рѕ РЅРµ РїРѕРјР°РіР°, РїСЂРѕС‡РµС‚РµС‚Рµ DOCS/HTML/en/bugreports.html.\n\n"
 
-#define MSGTR_NoGui "MPlayer е компилиран без графичен интерфейс.\n"
-#define MSGTR_GuiNeedsX "Графичния интерфейс на MPlayer изисква X11.\n"
-#define MSGTR_Playing "Възпроизвеждане на %s.\n"
-#define MSGTR_NoSound "Аудио: няма звук\n"
-#define MSGTR_FPSforced "Наложени са %5.3f кадъра в секунда (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "Компилиран с динамично установяване на процесора - ВНИМАНИЕ - това не е оптимално!\nЗа най-добра производителност, рекомпилирайте MPlayer с --disable-runtime-cpudetection.\n"
-#define MSGTR_CompiledWithCPUExtensions "Компилиран за x86 процесори с разширения:"
-#define MSGTR_AvailableVideoOutputDrivers "Достъпни видео драйвери:\n"
-#define MSGTR_AvailableAudioOutputDrivers "Достъпни аудио драйвери:\n"
-#define MSGTR_AvailableAudioCodecs "Достъпни аудио кодеци:\n"
-#define MSGTR_AvailableVideoCodecs "Достъпни видео кодеци:\n"
-#define MSGTR_AvailableAudioFm "Достъпни (вградени) фамилии аудио кодеци/драйвери:\n"
-#define MSGTR_AvailableVideoFm "Достъпни (вградени) фамилии видео кодеци/драйвери:\n"
-#define MSGTR_AvailableFsType "Достъпни пълноекранни режими:\n"
-#define MSGTR_UsingRTCTiming "Използва се хардуерния RTC таймер (%ldHz).\n"
-#define MSGTR_CannotReadVideoProperties "Видео: Параметрите не могат да бъдат прочетени.\n"
-#define MSGTR_NoStreamFound "Не е открит поток.\n"
-#define MSGTR_ErrorInitializingVODevice "Грешка при отваряне/инициализиране на избраното видео устройство (-vo).\n"
-#define MSGTR_ForcedVideoCodec "Наложен видео кодек: %s\n"
-#define MSGTR_ForcedAudioCodec "Наложен аудио кодек: %s\n"
-#define MSGTR_Video_NoVideo "Видео: няма видео\n"
-#define MSGTR_NotInitializeVOPorVO "\nФАТАЛНО: Видео филтъра (-vf) или изхода (-vo) не могат да бъдат инициализирани.\n"
-#define MSGTR_Paused "\n  =====  ПАУЗА  =====\r" // no more than 23 characters (status line for audio files)
-#define MSGTR_PlaylistLoadUnable "\nPlaylist-ът не може да бъде зареден %s.\n"
+#define MSGTR_NoGui "MPlayer Рµ РєРѕРјРїРёР»РёСЂР°РЅ Р±РµР· РіСЂР°С„РёС‡РµРЅ РёРЅС‚РµСЂС„РµР№СЃ.\n"
+#define MSGTR_GuiNeedsX "Р“СЂР°С„РёС‡РЅРёСЏ РёРЅС‚РµСЂС„РµР№СЃ РЅР° MPlayer РёР·РёСЃРєРІР° X11.\n"
+#define MSGTR_Playing "Р’СЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ РЅР° %s.\n"
+#define MSGTR_NoSound "РђСѓРґРёРѕ: РЅСЏРјР° Р·РІСѓРє\n"
+#define MSGTR_FPSforced "РќР°Р»РѕР¶РµРЅРё СЃР° %5.3f РєР°РґСЉСЂР° РІ СЃРµРєСѓРЅРґР° (ftime: %5.3f).\n"
+#define MSGTR_CompiledWithRuntimeDetection "РљРѕРјРїРёР»РёСЂР°РЅ СЃ РґРёРЅР°РјРёС‡РЅРѕ СѓСЃС‚Р°РЅРѕРІСЏРІР°РЅРµ РЅР° РїСЂРѕС†РµСЃРѕСЂР° - Р’РќРРњРђРќРР• - С‚РѕРІР° РЅРµ Рµ РѕРїС‚РёРјР°Р»РЅРѕ!\nР—Р° РЅР°Р№-РґРѕР±СЂР° РїСЂРѕРёР·РІРѕРґРёС‚РµР»РЅРѕСЃС‚, СЂРµРєРѕРјРїРёР»РёСЂР°Р№С‚Рµ MPlayer СЃ --disable-runtime-cpudetection.\n"
+#define MSGTR_CompiledWithCPUExtensions "РљРѕРјРїРёР»РёСЂР°РЅ Р·Р° x86 РїСЂРѕС†РµСЃРѕСЂРё СЃ СЂР°Р·С€РёСЂРµРЅРёСЏ:"
+#define MSGTR_AvailableVideoOutputDrivers "Р”РѕСЃС‚СЉРїРЅРё РІРёРґРµРѕ РґСЂР°Р№РІРµСЂРё:\n"
+#define MSGTR_AvailableAudioOutputDrivers "Р”РѕСЃС‚СЉРїРЅРё Р°СѓРґРёРѕ РґСЂР°Р№РІРµСЂРё:\n"
+#define MSGTR_AvailableAudioCodecs "Р”РѕСЃС‚СЉРїРЅРё Р°СѓРґРёРѕ РєРѕРґРµС†Рё:\n"
+#define MSGTR_AvailableVideoCodecs "Р”РѕСЃС‚СЉРїРЅРё РІРёРґРµРѕ РєРѕРґРµС†Рё:\n"
+#define MSGTR_AvailableAudioFm "Р”РѕСЃС‚СЉРїРЅРё (РІРіСЂР°РґРµРЅРё) С„Р°РјРёР»РёРё Р°СѓРґРёРѕ РєРѕРґРµС†Рё/РґСЂР°Р№РІРµСЂРё:\n"
+#define MSGTR_AvailableVideoFm "Р”РѕСЃС‚СЉРїРЅРё (РІРіСЂР°РґРµРЅРё) С„Р°РјРёР»РёРё РІРёРґРµРѕ РєРѕРґРµС†Рё/РґСЂР°Р№РІРµСЂРё:\n"
+#define MSGTR_AvailableFsType "Р”РѕСЃС‚СЉРїРЅРё РїСЉР»РЅРѕРµРєСЂР°РЅРЅРё СЂРµР¶РёРјРё:\n"
+#define MSGTR_UsingRTCTiming "РР·РїРѕР»Р·РІР° СЃРµ С…Р°СЂРґСѓРµСЂРЅРёСЏ RTC С‚Р°Р№РјРµСЂ (%ldHz).\n"
+#define MSGTR_CannotReadVideoProperties "Р’РёРґРµРѕ: РџР°СЂР°РјРµС‚СЂРёС‚Рµ РЅРµ РјРѕРіР°С‚ РґР° Р±СЉРґР°С‚ РїСЂРѕС‡РµС‚РµРЅРё.\n"
+#define MSGTR_NoStreamFound "РќРµ Рµ РѕС‚РєСЂРёС‚ РїРѕС‚РѕРє.\n"
+#define MSGTR_ErrorInitializingVODevice "Р“СЂРµС€РєР° РїСЂРё РѕС‚РІР°СЂСЏРЅРµ/РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅРµ РЅР° РёР·Р±СЂР°РЅРѕС‚Рѕ РІРёРґРµРѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ (-vo).\n"
+#define MSGTR_ForcedVideoCodec "РќР°Р»РѕР¶РµРЅ РІРёРґРµРѕ РєРѕРґРµРє: %s\n"
+#define MSGTR_ForcedAudioCodec "РќР°Р»РѕР¶РµРЅ Р°СѓРґРёРѕ РєРѕРґРµРє: %s\n"
+#define MSGTR_Video_NoVideo "Р’РёРґРµРѕ: РЅСЏРјР° РІРёРґРµРѕ\n"
+#define MSGTR_NotInitializeVOPorVO "\nР¤РђРўРђР›РќРћ: Р’РёРґРµРѕ С„РёР»С‚СЉСЂР° (-vf) РёР»Рё РёР·С…РѕРґР° (-vo) РЅРµ РјРѕРіР°С‚ РґР° Р±СЉРґР°С‚ РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅРё.\n"
+#define MSGTR_Paused "\n  =====  РџРђРЈР—Рђ  =====\r" // no more than 23 characters (status line for audio files)
+#define MSGTR_PlaylistLoadUnable "\nPlaylist-СЉС‚ РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ Р·Р°СЂРµРґРµРЅ %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPlayer катастрофира заради 'Невалидна инструкция'.\n"\
-"  Може да е бъг в кода за динамично установяване на процесора...\n"\
-"  Моля прочетете DOCS/HTML/en/bugreports.html.\n"
+"- MPlayer РєР°С‚Р°СЃС‚СЂРѕС„РёСЂР° Р·Р°СЂР°РґРё 'РќРµРІР°Р»РёРґРЅР° РёРЅСЃС‚СЂСѓРєС†РёСЏ'.\n"\
+"  РњРѕР¶Рµ РґР° Рµ Р±СЉРі РІ РєРѕРґР° Р·Р° РґРёРЅР°РјРёС‡РЅРѕ СѓСЃС‚Р°РЅРѕРІСЏРІР°РЅРµ РЅР° РїСЂРѕС†РµСЃРѕСЂР°...\n"\
+"  РњРѕР»СЏ РїСЂРѕС‡РµС‚РµС‚Рµ DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
-"- MPlayer катастрофира заради 'Невалидна инструкция'.\n"\
-"  Това обикновено се случва когато бъде пуснат на процесор, различен от този\n"\
-"  за който е компилиран/оптимизиран.\n"\
-"  Проверете това!\n"
+"- MPlayer РєР°С‚Р°СЃС‚СЂРѕС„РёСЂР° Р·Р°СЂР°РґРё 'РќРµРІР°Р»РёРґРЅР° РёРЅСЃС‚СЂСѓРєС†РёСЏ'.\n"\
+"  РўРѕРІР° РѕР±РёРєРЅРѕРІРµРЅРѕ СЃРµ СЃР»СѓС‡РІР° РєРѕРіР°С‚Рѕ Р±СЉРґРµ РїСѓСЃРЅР°С‚ РЅР° РїСЂРѕС†РµСЃРѕСЂ, СЂР°Р·Р»РёС‡РµРЅ РѕС‚ С‚РѕР·Рё\n"\
+"  Р·Р° РєРѕР№С‚Рѕ Рµ РєРѕРјРїРёР»РёСЂР°РЅ/РѕРїС‚РёРјРёР·РёСЂР°РЅ.\n"\
+"  РџСЂРѕРІРµСЂРµС‚Рµ С‚РѕРІР°!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- MPlayer катастрофира заради лоша употреба на процесора/копроцесора/паметта.\n"\
-"  рекомпилирайте MPlayer с --enable-debug и направете  backtrace и\n"\
-"  дизасемблиране с 'gdb'.\nЗа подробности - DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
+"- MPlayer РєР°С‚Р°СЃС‚СЂРѕС„РёСЂР° Р·Р°СЂР°РґРё Р»РѕС€Р° СѓРїРѕС‚СЂРµР±Р° РЅР° РїСЂРѕС†РµСЃРѕСЂР°/РєРѕРїСЂРѕС†РµСЃРѕСЂР°/РїР°РјРµС‚С‚Р°.\n"\
+"  СЂРµРєРѕРјРїРёР»РёСЂР°Р№С‚Рµ MPlayer СЃ --enable-debug Рё РЅР°РїСЂР°РІРµС‚Рµ  backtrace Рё\n"\
+"  РґРёР·Р°СЃРµРјР±Р»РёСЂР°РЅРµ СЃ 'gdb'.\nР—Р° РїРѕРґСЂРѕР±РЅРѕСЃС‚Рё - DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
-"- MPlayer катастрофира. Tова не трябва да се случва.\n"\
-"  Може да е бъг в кода на MPlayer _или_ във драйверите ви _или_ във\n"\
-"  версията на gcc. Ако смятате, че е по вина на MPlayer, прочетете\n"\
-"  DOCS/HTML/en/bugreports.html и следвайте инструкциите там. Ние не можем\n"\
-"  и няма да помогнем, ако не осигурите тази информация, когато съобщавате за бъг.\n"
-#define MSGTR_LoadingConfig "Зарежда се конфигурационен файл '%s'\n"
-#define MSGTR_AddedSubtitleFile "SUB: добавен е файл със субтитри (%d): %s\n"
-#define MSGTR_ErrorOpeningOutputFile "Грешка при отваряне на файла [%s] за запис!\n"
-#define MSGTR_CommandLine "Команден ред:"
-#define MSGTR_RTCDeviceNotOpenable "Грешка при отваряне на %s: %s (необходими са права за четене).\n"
-#define MSGTR_LinuxRTCInitErrorIrqpSet "Linux RTC грешка при инициализация в ioctl (rtc_irqp_set кд%lu): %s\n"
-#define MSGTR_IncreaseRTCMaxUserFreq "Добавете \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" към системните стартови скриптове.\n"
-#define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC init грешка в ioctl (rtc_pie_on): %s\n"
-#define MSGTR_UsingTimingType "използва се  %s таймер.\n"
-#define MSGTR_MenuInitialized "Менюто е инициализирано: %s\n"
-#define MSGTR_MenuInitFailed "Менюто не може да бъде инициализирано.\n"
-#define MSGTR_Getch2InitializedTwice "Внимание: Функцията getch2_init е извикана двукратно!\n"
-#define MSGTR_DumpstreamFdUnavailable "Потока не може да бъде извлечен - няма наличен 'fd'.\n"
-#define MSGTR_FallingBackOnPlaylist "Повторен опит за обработка на playlist %s...\n"
-#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Видео филтъра libmenu не може да бъде отворен без root меню %s.\n"
-#define MSGTR_AudioFilterChainPreinitError "Грешка при предварителна инициализация на аудио филтрите!\n"
-#define MSGTR_LinuxRTCReadError "Linux RTC грешка при четене: %s\n"
-#define MSGTR_SoftsleepUnderflow "Внимание! Softsleep underflow!\n"
-#define MSGTR_DvdnavNullEvent "DVDNAV Събитие NULL?!\n"
-#define MSGTR_DvdnavHighlightEventBroken "DVDNAV Събитие: Highlight event broken\n"
-#define MSGTR_DvdnavEvent "DVDNAV Събитие: %s\n"
-#define MSGTR_DvdnavHighlightHide "DVDNAV Събитие: Highlight Hide\n"
-#define MSGTR_DvdnavStillFrame "###################################### DVDNAV Събитие: Неподвижен кадър: %d сек\n"
-#define MSGTR_DvdnavNavStop "DVDNAV Събитие: Nav Стоп\n"
-#define MSGTR_DvdnavNavNOP "DVDNAV Събитие: Nav NOP\n"
-#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV Събитие: Nav Смяна на SPU Поток: физ: %d/%d/%d лог: %d\n"
-#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV Събитие: Nav Смяна на SPU Поток: физ: %d лог: %d\n"
-#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV Събитие: Nav Смяна на Аудио Поток: физ: %d лог: %d\n"
-#define MSGTR_DvdnavNavVTSChange "DVDNAV Събитие: Nav Смяна на VTS\n"
-#define MSGTR_DvdnavNavCellChange "DVDNAV Събитие: Nav Смяна на Клетка\n"
-#define MSGTR_DvdnavNavSpuClutChange "DVDNAV Събитие: Nav Смяна на SPU CLUT\n"
-#define MSGTR_DvdnavNavSeekDone "DVDNAV Събитие: Nav Превъртането Приключено\n"
+"- MPlayer РєР°С‚Р°СЃС‚СЂРѕС„РёСЂР°. TРѕРІР° РЅРµ С‚СЂСЏР±РІР° РґР° СЃРµ СЃР»СѓС‡РІР°.\n"\
+"  РњРѕР¶Рµ РґР° Рµ Р±СЉРі РІ РєРѕРґР° РЅР° MPlayer _РёР»Рё_ РІСЉРІ РґСЂР°Р№РІРµСЂРёС‚Рµ РІРё _РёР»Рё_ РІСЉРІ\n"\
+"  РІРµСЂСЃРёСЏС‚Р° РЅР° gcc. РђРєРѕ СЃРјСЏС‚Р°С‚Рµ, С‡Рµ Рµ РїРѕ РІРёРЅР° РЅР° MPlayer, РїСЂРѕС‡РµС‚РµС‚Рµ\n"\
+"  DOCS/HTML/en/bugreports.html Рё СЃР»РµРґРІР°Р№С‚Рµ РёРЅСЃС‚СЂСѓРєС†РёРёС‚Рµ С‚Р°Рј. РќРёРµ РЅРµ РјРѕР¶РµРј\n"\
+"  Рё РЅСЏРјР° РґР° РїРѕРјРѕРіРЅРµРј, Р°РєРѕ РЅРµ РѕСЃРёРіСѓСЂРёС‚Рµ С‚Р°Р·Рё РёРЅС„РѕСЂРјР°С†РёСЏ, РєРѕРіР°С‚Рѕ СЃСЉРѕР±С‰Р°РІР°С‚Рµ Р·Р° Р±СЉРі.\n"
+#define MSGTR_LoadingConfig "Р—Р°СЂРµР¶РґР° СЃРµ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРµРЅ С„Р°Р№Р» '%s'\n"
+#define MSGTR_AddedSubtitleFile "SUB: РґРѕР±Р°РІРµРЅ Рµ С„Р°Р№Р» СЃСЉСЃ СЃСѓР±С‚РёС‚СЂРё (%d): %s\n"
+#define MSGTR_ErrorOpeningOutputFile "Р“СЂРµС€РєР° РїСЂРё РѕС‚РІР°СЂСЏРЅРµ РЅР° С„Р°Р№Р»Р° [%s] Р·Р° Р·Р°РїРёСЃ!\n"
+#define MSGTR_CommandLine "РљРѕРјР°РЅРґРµРЅ СЂРµРґ:"
+#define MSGTR_RTCDeviceNotOpenable "Р“СЂРµС€РєР° РїСЂРё РѕС‚РІР°СЂСЏРЅРµ РЅР° %s: %s (РЅРµРѕР±С…РѕРґРёРјРё СЃР° РїСЂР°РІР° Р·Р° С‡РµС‚РµРЅРµ).\n"
+#define MSGTR_LinuxRTCInitErrorIrqpSet "Linux RTC РіСЂРµС€РєР° РїСЂРё РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РІ ioctl (rtc_irqp_set РєРґ%lu): %s\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "Р”РѕР±Р°РІРµС‚Рµ \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" РєСЉРј СЃРёСЃС‚РµРјРЅРёС‚Рµ СЃС‚Р°СЂС‚РѕРІРё СЃРєСЂРёРїС‚РѕРІРµ.\n"
+#define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC init РіСЂРµС€РєР° РІ ioctl (rtc_pie_on): %s\n"
+#define MSGTR_UsingTimingType "РёР·РїРѕР»Р·РІР° СЃРµ  %s С‚Р°Р№РјРµСЂ.\n"
+#define MSGTR_MenuInitialized "РњРµРЅСЋС‚Рѕ Рµ РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅРѕ: %s\n"
+#define MSGTR_MenuInitFailed "РњРµРЅСЋС‚Рѕ РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅРѕ.\n"
+#define MSGTR_Getch2InitializedTwice "Р’РЅРёРјР°РЅРёРµ: Р¤СѓРЅРєС†РёСЏС‚Р° getch2_init Рµ РёР·РІРёРєР°РЅР° РґРІСѓРєСЂР°С‚РЅРѕ!\n"
+#define MSGTR_DumpstreamFdUnavailable "РџРѕС‚РѕРєР° РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РёР·РІР»РµС‡РµРЅ - РЅСЏРјР° РЅР°Р»РёС‡РµРЅ 'fd'.\n"
+#define MSGTR_FallingBackOnPlaylist "РџРѕРІС‚РѕСЂРµРЅ РѕРїРёС‚ Р·Р° РѕР±СЂР°Р±РѕС‚РєР° РЅР° playlist %s...\n"
+#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Р’РёРґРµРѕ С„РёР»С‚СЉСЂР° libmenu РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ Р±РµР· root РјРµРЅСЋ %s.\n"
+#define MSGTR_AudioFilterChainPreinitError "Р“СЂРµС€РєР° РїСЂРё РїСЂРµРґРІР°СЂРёС‚РµР»РЅР° РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РЅР° Р°СѓРґРёРѕ С„РёР»С‚СЂРёС‚Рµ!\n"
+#define MSGTR_LinuxRTCReadError "Linux RTC РіСЂРµС€РєР° РїСЂРё С‡РµС‚РµРЅРµ: %s\n"
+#define MSGTR_SoftsleepUnderflow "Р’РЅРёРјР°РЅРёРµ! Softsleep underflow!\n"
+#define MSGTR_DvdnavNullEvent "DVDNAV РЎСЉР±РёС‚РёРµ NULL?!\n"
+#define MSGTR_DvdnavHighlightEventBroken "DVDNAV РЎСЉР±РёС‚РёРµ: Highlight event broken\n"
+#define MSGTR_DvdnavEvent "DVDNAV РЎСЉР±РёС‚РёРµ: %s\n"
+#define MSGTR_DvdnavHighlightHide "DVDNAV РЎСЉР±РёС‚РёРµ: Highlight Hide\n"
+#define MSGTR_DvdnavStillFrame "###################################### DVDNAV РЎСЉР±РёС‚РёРµ: РќРµРїРѕРґРІРёР¶РµРЅ РєР°РґСЉСЂ: %d СЃРµРє\n"
+#define MSGTR_DvdnavNavStop "DVDNAV РЎСЉР±РёС‚РёРµ: Nav РЎС‚РѕРї\n"
+#define MSGTR_DvdnavNavNOP "DVDNAV РЎСЉР±РёС‚РёРµ: Nav NOP\n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV РЎСЉР±РёС‚РёРµ: Nav РЎРјСЏРЅР° РЅР° SPU РџРѕС‚РѕРє: С„РёР·: %d/%d/%d Р»РѕРі: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV РЎСЉР±РёС‚РёРµ: Nav РЎРјСЏРЅР° РЅР° SPU РџРѕС‚РѕРє: С„РёР·: %d Р»РѕРі: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV РЎСЉР±РёС‚РёРµ: Nav РЎРјСЏРЅР° РЅР° РђСѓРґРёРѕ РџРѕС‚РѕРє: С„РёР·: %d Р»РѕРі: %d\n"
+#define MSGTR_DvdnavNavVTSChange "DVDNAV РЎСЉР±РёС‚РёРµ: Nav РЎРјСЏРЅР° РЅР° VTS\n"
+#define MSGTR_DvdnavNavCellChange "DVDNAV РЎСЉР±РёС‚РёРµ: Nav РЎРјСЏРЅР° РЅР° РљР»РµС‚РєР°\n"
+#define MSGTR_DvdnavNavSpuClutChange "DVDNAV РЎСЉР±РёС‚РёРµ: Nav РЎРјСЏРЅР° РЅР° SPU CLUT\n"
+#define MSGTR_DvdnavNavSeekDone "DVDNAV РЎСЉР±РёС‚РёРµ: Nav РџСЂРµРІСЉСЂС‚Р°РЅРµС‚Рѕ РџСЂРёРєР»СЋС‡РµРЅРѕ\n"
 #define MSGTR_MenuCall "Menu call\n"
 
-#define MSGTR_EdlOutOfMem "Не може да се задели достатъчно памет за EDL данните.\n"
-#define MSGTR_EdlRecordsNo "Прочетени са %d EDL действия.\n"
-#define MSGTR_EdlQueueEmpty "Няма EDL действия, които да бъдат извършени.\n"
-#define MSGTR_EdlCantOpenForWrite "EDL файла [%s] не може да бъде отворен за запис.\n"
-#define MSGTR_EdlCantOpenForRead "EDL файла [%s] не може да бъде отворен за четене.\n"
-#define MSGTR_EdlNOsh_video "EDL не може да се ползва без видео, изключва се.\n"
-#define MSGTR_EdlNOValidLine "Невалиден ред в EDL: %s\n"
-#define MSGTR_EdlBadlyFormattedLine "Зле форматиран EDL ред [%d] Отхвърля се.\n"
-#define MSGTR_EdlBadLineOverlap "Последната позиция за спиране беше [%f]; следващата за пускане е "\
-"[%f]. Елементите в списъка трябва да са в хронологичен ред, не могат да се препокриват.\n"
-#define MSGTR_EdlBadLineBadStop "Времето за спиране трябва да е след времето за пускане.\n"
+#define MSGTR_EdlOutOfMem "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РґРµР»Рё РґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚ Р·Р° EDL РґР°РЅРЅРёС‚Рµ.\n"
+#define MSGTR_EdlRecordsNo "РџСЂРѕС‡РµС‚РµРЅРё СЃР° %d EDL РґРµР№СЃС‚РІРёСЏ.\n"
+#define MSGTR_EdlQueueEmpty "РќСЏРјР° EDL РґРµР№СЃС‚РІРёСЏ, РєРѕРёС‚Рѕ РґР° Р±СЉРґР°С‚ РёР·РІСЉСЂС€РµРЅРё.\n"
+#define MSGTR_EdlCantOpenForWrite "EDL С„Р°Р№Р»Р° [%s] РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ Р·Р° Р·Р°РїРёСЃ.\n"
+#define MSGTR_EdlCantOpenForRead "EDL С„Р°Р№Р»Р° [%s] РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ Р·Р° С‡РµС‚РµРЅРµ.\n"
+#define MSGTR_EdlNOsh_video "EDL РЅРµ РјРѕР¶Рµ РґР° СЃРµ РїРѕР»Р·РІР° Р±РµР· РІРёРґРµРѕ, РёР·РєР»СЋС‡РІР° СЃРµ.\n"
+#define MSGTR_EdlNOValidLine "РќРµРІР°Р»РёРґРµРЅ СЂРµРґ РІ EDL: %s\n"
+#define MSGTR_EdlBadlyFormattedLine "Р—Р»Рµ С„РѕСЂРјР°С‚РёСЂР°РЅ EDL СЂРµРґ [%d] РћС‚С…РІСЉСЂР»СЏ СЃРµ.\n"
+#define MSGTR_EdlBadLineOverlap "РџРѕСЃР»РµРґРЅР°С‚Р° РїРѕР·РёС†РёСЏ Р·Р° СЃРїРёСЂР°РЅРµ Р±РµС€Рµ [%f]; СЃР»РµРґРІР°С‰Р°С‚Р° Р·Р° РїСѓСЃРєР°РЅРµ Рµ "\
+"[%f]. Р•Р»РµРјРµРЅС‚РёС‚Рµ РІ СЃРїРёСЃСЉРєР° С‚СЂСЏР±РІР° РґР° СЃР° РІ С…СЂРѕРЅРѕР»РѕРіРёС‡РµРЅ СЂРµРґ, РЅРµ РјРѕРіР°С‚ РґР° СЃРµ РїСЂРµРїРѕРєСЂРёРІР°С‚.\n"
+#define MSGTR_EdlBadLineBadStop "Р’СЂРµРјРµС‚Рѕ Р·Р° СЃРїРёСЂР°РЅРµ С‚СЂСЏР±РІР° РґР° Рµ СЃР»РµРґ РІСЂРµРјРµС‚Рѕ Р·Р° РїСѓСЃРєР°РЅРµ.\n"
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControlFile "Използва се файл за контрол на pass3: %s\n"
-#define MSGTR_MissingFilename "\nЛипсва име на файл.\n\n"
-#define MSGTR_CannotOpenFile_Device "Файла/устройството не може да бъде отворен.\n"
-#define MSGTR_CannotOpenDemuxer "Не може да бъде отворен разпределител.\n"
-#define MSGTR_NoAudioEncoderSelected "\nНе е избран аудио енкодер (-oac). Изберете или енкодер (вижте -oac help) или опцията -nosound.\n"
-#define MSGTR_NoVideoEncoderSelected "\nНе е избран видео енкодер (-ovc). Изберете си (вижте -ovc help).\n"
-#define MSGTR_CannotOpenOutputFile "Изходния файл '%s'не може да бъде отворен.\n"
-#define MSGTR_EncoderOpenFailed "Енкодерът не може да бъде отворен.\n"
-#define MSGTR_ForcingOutputFourcc "Налагане на изходния fourcc код да бъде %x [%.4s]\n"
-#define MSGTR_DuplicateFrames "\n%d дублиращи се кадъра!\n"
-#define MSGTR_SkipFrame "\nПрескочен кадър!\n"
-#define MSGTR_ResolutionDoesntMatch "\nНовият видео файл има различна резолюция или цветови формат от предишния.\n" 
-#define MSGTR_FrameCopyFileMismatch "\nВсички видео файлове трябва да имат идентични резолюции, кадрови честоти и кодеци за -ovc copy.\n"
-#define MSGTR_AudioCopyFileMismatch "\nВсички файлове трябва да имат идентични аудио кодеци и формати за -oac copy.\n"
-#define MSGTR_NoSpeedWithFrameCopy "ПРЕДУПРЕЖДЕНИЕ: -speed не работи гарантирано правилно с -oac copy!\n"\
-"Кодирането ви може да се окаже повредено!\n"
-#define MSGTR_ErrorWritingFile "%s: Грешка при запис на файла.\n"
-#define MSGTR_RecommendedVideoBitrate "Препоръчителен битрейт за %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nВидео поток: %8.3f Кбита/с  (%d B/s)  размер: %"PRIu64" байта  %5.3f сек.  %d кадъра\n"
-#define MSGTR_AudioStreamResult "\nАудио поток: %8.3f Кбита/с  (%d B/s)  размер: %"PRIu64" байта  %5.3f сек.\n"
-#define MSGTR_OpenedStream "успех: формат: %d  данни: 0x%X - 0x%x\n"
+#define MSGTR_UsingPass3ControlFile "РР·РїРѕР»Р·РІР° СЃРµ С„Р°Р№Р» Р·Р° РєРѕРЅС‚СЂРѕР» РЅР° pass3: %s\n"
+#define MSGTR_MissingFilename "\nР›РёРїСЃРІР° РёРјРµ РЅР° С„Р°Р№Р».\n\n"
+#define MSGTR_CannotOpenFile_Device "Р¤Р°Р№Р»Р°/СѓСЃС‚СЂРѕР№СЃС‚РІРѕС‚Рѕ РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ.\n"
+#define MSGTR_CannotOpenDemuxer "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ СЂР°Р·РїСЂРµРґРµР»РёС‚РµР».\n"
+#define MSGTR_NoAudioEncoderSelected "\nРќРµ Рµ РёР·Р±СЂР°РЅ Р°СѓРґРёРѕ РµРЅРєРѕРґРµСЂ (-oac). РР·Р±РµСЂРµС‚Рµ РёР»Рё РµРЅРєРѕРґРµСЂ (РІРёР¶С‚Рµ -oac help) РёР»Рё РѕРїС†РёСЏС‚Р° -nosound.\n"
+#define MSGTR_NoVideoEncoderSelected "\nРќРµ Рµ РёР·Р±СЂР°РЅ РІРёРґРµРѕ РµРЅРєРѕРґРµСЂ (-ovc). РР·Р±РµСЂРµС‚Рµ СЃРё (РІРёР¶С‚Рµ -ovc help).\n"
+#define MSGTR_CannotOpenOutputFile "РР·С…РѕРґРЅРёСЏ С„Р°Р№Р» '%s'РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ.\n"
+#define MSGTR_EncoderOpenFailed "Р•РЅРєРѕРґРµСЂСЉС‚ РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ.\n"
+#define MSGTR_ForcingOutputFourcc "РќР°Р»Р°РіР°РЅРµ РЅР° РёР·С…РѕРґРЅРёСЏ fourcc РєРѕРґ РґР° Р±СЉРґРµ %x [%.4s]\n"
+#define MSGTR_DuplicateFrames "\n%d РґСѓР±Р»РёСЂР°С‰Рё СЃРµ РєР°РґСЉСЂР°!\n"
+#define MSGTR_SkipFrame "\nРџСЂРµСЃРєРѕС‡РµРЅ РєР°РґСЉСЂ!\n"
+#define MSGTR_ResolutionDoesntMatch "\nРќРѕРІРёСЏС‚ РІРёРґРµРѕ С„Р°Р№Р» РёРјР° СЂР°Р·Р»РёС‡РЅР° СЂРµР·РѕР»СЋС†РёСЏ РёР»Рё С†РІРµС‚РѕРІРё С„РѕСЂРјР°С‚ РѕС‚ РїСЂРµРґРёС€РЅРёСЏ.\n" 
+#define MSGTR_FrameCopyFileMismatch "\nР’СЃРёС‡РєРё РІРёРґРµРѕ С„Р°Р№Р»РѕРІРµ С‚СЂСЏР±РІР° РґР° РёРјР°С‚ РёРґРµРЅС‚РёС‡РЅРё СЂРµР·РѕР»СЋС†РёРё, РєР°РґСЂРѕРІРё С‡РµСЃС‚РѕС‚Рё Рё РєРѕРґРµС†Рё Р·Р° -ovc copy.\n"
+#define MSGTR_AudioCopyFileMismatch "\nР’СЃРёС‡РєРё С„Р°Р№Р»РѕРІРµ С‚СЂСЏР±РІР° РґР° РёРјР°С‚ РёРґРµРЅС‚РёС‡РЅРё Р°СѓРґРёРѕ РєРѕРґРµС†Рё Рё С„РѕСЂРјР°С‚Рё Р·Р° -oac copy.\n"
+#define MSGTR_NoSpeedWithFrameCopy "РџР Р•Р”РЈРџР Р•Р–Р”Р•РќРР•: -speed РЅРµ СЂР°Р±РѕС‚Рё РіР°СЂР°РЅС‚РёСЂР°РЅРѕ РїСЂР°РІРёР»РЅРѕ СЃ -oac copy!\n"\
+"РљРѕРґРёСЂР°РЅРµС‚Рѕ РІРё РјРѕР¶Рµ РґР° СЃРµ РѕРєР°Р¶Рµ РїРѕРІСЂРµРґРµРЅРѕ!\n"
+#define MSGTR_ErrorWritingFile "%s: Р“СЂРµС€РєР° РїСЂРё Р·Р°РїРёСЃ РЅР° С„Р°Р№Р»Р°.\n"
+#define MSGTR_RecommendedVideoBitrate "РџСЂРµРїРѕСЂСЉС‡РёС‚РµР»РµРЅ Р±РёС‚СЂРµР№С‚ Р·Р° %s CD: %d\n"
+#define MSGTR_VideoStreamResult "\nР’РёРґРµРѕ РїРѕС‚РѕРє: %8.3f РљР±РёС‚Р°/СЃ  (%d B/s)  СЂР°Р·РјРµСЂ: %"PRIu64" Р±Р°Р№С‚Р°  %5.3f СЃРµРє.  %d РєР°РґСЉСЂР°\n"
+#define MSGTR_AudioStreamResult "\nРђСѓРґРёРѕ РїРѕС‚РѕРє: %8.3f РљР±РёС‚Р°/СЃ  (%d B/s)  СЂР°Р·РјРµСЂ: %"PRIu64" Р±Р°Р№С‚Р°  %5.3f СЃРµРє.\n"
+#define MSGTR_OpenedStream "СѓСЃРїРµС…: С„РѕСЂРјР°С‚: %d  РґР°РЅРЅРё: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
-#define MSGTR_CBRPCMAudioSelected "Избрано е CBR (постоянен битрейт) PCM аудио\n"
-#define MSGTR_MP3AudioSelected "Избрано е MP3 аудио\n"
-#define MSGTR_CannotAllocateBytes "Не може да се заделят %d байта\n"
-#define MSGTR_SettingAudioDelay "АУДИО ЗАКЪСНЕНИЕТО е настроено на %5.3f\n"
-#define MSGTR_SettingAudioInputGain "Аудио усилването е нагласено на %f\n"
-#define MSGTR_LamePresetEquals "\nпрофил=%s\n\n"
-#define MSGTR_LimitingAudioPreload "Предварителното аудио зареждане е ограничено на 0.4с\n"
-#define MSGTR_IncreasingAudioDensity "Гъстотата на звука е увеличена на 4\n"
-#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Налагане на нулево предварително аудио зареждане, max pts correction to 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR аудио: %d байта/сек, %d байта за блок\n"
-#define MSGTR_LameVersion "LAME версия %s (%s)\n\n"
-#define MSGTR_InvalidBitrateForLamePreset "Грешка: Указаният битрейт е извън допустимите граници за този профил\n"\
+#define MSGTR_CBRPCMAudioSelected "РР·Р±СЂР°РЅРѕ Рµ CBR (РїРѕСЃС‚РѕСЏРЅРµРЅ Р±РёС‚СЂРµР№С‚) PCM Р°СѓРґРёРѕ\n"
+#define MSGTR_MP3AudioSelected "РР·Р±СЂР°РЅРѕ Рµ MP3 Р°СѓРґРёРѕ\n"
+#define MSGTR_CannotAllocateBytes "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РґРµР»СЏС‚ %d Р±Р°Р№С‚Р°\n"
+#define MSGTR_SettingAudioDelay "РђРЈР”РРћ Р—РђРљРЄРЎРќР•РќРР•РўРћ Рµ РЅР°СЃС‚СЂРѕРµРЅРѕ РЅР° %5.3f\n"
+#define MSGTR_SettingAudioInputGain "РђСѓРґРёРѕ СѓСЃРёР»РІР°РЅРµС‚Рѕ Рµ РЅР°РіР»Р°СЃРµРЅРѕ РЅР° %f\n"
+#define MSGTR_LamePresetEquals "\nРїСЂРѕС„РёР»=%s\n\n"
+#define MSGTR_LimitingAudioPreload "РџСЂРµРґРІР°СЂРёС‚РµР»РЅРѕС‚Рѕ Р°СѓРґРёРѕ Р·Р°СЂРµР¶РґР°РЅРµ Рµ РѕРіСЂР°РЅРёС‡РµРЅРѕ РЅР° 0.4СЃ\n"
+#define MSGTR_IncreasingAudioDensity "Р“СЉСЃС‚РѕС‚Р°С‚Р° РЅР° Р·РІСѓРєР° Рµ СѓРІРµР»РёС‡РµРЅР° РЅР° 4\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "РќР°Р»Р°РіР°РЅРµ РЅР° РЅСѓР»РµРІРѕ РїСЂРµРґРІР°СЂРёС‚РµР»РЅРѕ Р°СѓРґРёРѕ Р·Р°СЂРµР¶РґР°РЅРµ, max pts correction to 0\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR Р°СѓРґРёРѕ: %d Р±Р°Р№С‚Р°/СЃРµРє, %d Р±Р°Р№С‚Р° Р·Р° Р±Р»РѕРє\n"
+#define MSGTR_LameVersion "LAME РІРµСЂСЃРёСЏ %s (%s)\n\n"
+#define MSGTR_InvalidBitrateForLamePreset "Р“СЂРµС€РєР°: РЈРєР°Р·Р°РЅРёСЏС‚ Р±РёС‚СЂРµР№С‚ Рµ РёР·РІСЉРЅ РґРѕРїСѓСЃС‚РёРјРёС‚Рµ РіСЂР°РЅРёС†Рё Р·Р° С‚РѕР·Рё РїСЂРѕС„РёР»\n"\
 "\n"\
-"Когато използвате този режим трябва да въведете стойност между \"8\" и \"320\"\n"\
+"РљРѕРіР°С‚Рѕ РёР·РїРѕР»Р·РІР°С‚Рµ С‚РѕР·Рё СЂРµР¶РёРј С‚СЂСЏР±РІР° РґР° РІСЉРІРµРґРµС‚Рµ СЃС‚РѕР№РЅРѕСЃС‚ РјРµР¶РґСѓ \"8\" Рё \"320\"\n"\
 "\n"\
-"Допълнителна информация може да получите с: \"-lameopts preset=help\"\n"
-#define MSGTR_InvalidLamePresetOptions "Грешка: Не сте въвели валиден профил и/или опции с preset\n"\
+"Р”РѕРїСЉР»РЅРёС‚РµР»РЅР° РёРЅС„РѕСЂРјР°С†РёСЏ РјРѕР¶Рµ РґР° РїРѕР»СѓС‡РёС‚Рµ СЃ: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Р“СЂРµС€РєР°: РќРµ СЃС‚Рµ РІСЉРІРµР»Рё РІР°Р»РёРґРµРЅ РїСЂРѕС„РёР» Рё/РёР»Рё РѕРїС†РёРё СЃ preset\n"\
 "\n"\
-"Достъпните профили са:\n"\
+"Р”РѕСЃС‚СЉРїРЅРёС‚Рµ РїСЂРѕС„РёР»Рё СЃР°:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
 "                 insane\n"\
-"   <cbr> (ABR Режим) - Не е нужно изрично да указвате ABR режима.\n"\
-"                      За да го ползвате, просто укажете битрейт. Например:\n"\
-"                      \"preset=185\" активира този\n"\
-"                      профил и ползва средно 185 килобита в секунда.\n"\
+"   <cbr> (ABR Р РµР¶РёРј) - РќРµ Рµ РЅСѓР¶РЅРѕ РёР·СЂРёС‡РЅРѕ РґР° СѓРєР°Р·РІР°С‚Рµ ABR СЂРµР¶РёРјР°.\n"\
+"                      Р—Р° РґР° РіРѕ РїРѕР»Р·РІР°С‚Рµ, РїСЂРѕСЃС‚Рѕ СѓРєР°Р¶РµС‚Рµ Р±РёС‚СЂРµР№С‚. РќР°РїСЂРёРјРµСЂ:\n"\
+"                      \"preset=185\" Р°РєС‚РёРІРёСЂР° С‚РѕР·Рё\n"\
+"                      РїСЂРѕС„РёР» Рё РїРѕР»Р·РІР° СЃСЂРµРґРЅРѕ 185 РєРёР»РѕР±РёС‚Р° РІ СЃРµРєСѓРЅРґР°.\n"\
 "\n"\
-"    Няколко примера:\n"\
+"    РќСЏРєРѕР»РєРѕ РїСЂРёРјРµСЂР°:\n"\
 "\n"\
 "    \"-lameopts fast:preset=standard  \"\n"\
-" или \"-lameopts  cbr:preset=192       \"\n"\
-" или \"-lameopts      preset=172       \"\n"\
-" или \"-lameopts      preset=extreme   \"\n"\
+" РёР»Рё \"-lameopts  cbr:preset=192       \"\n"\
+" РёР»Рё \"-lameopts      preset=172       \"\n"\
+" РёР»Рё \"-lameopts      preset=extreme   \"\n"\
 "\n"\
-"Допълнителна информация можете да получите с: \"-lameopts preset=help\"\n"
+"Р”РѕРїСЉР»РЅРёС‚РµР»РЅР° РёРЅС„РѕСЂРјР°С†РёСЏ РјРѕР¶РµС‚Рµ РґР° РїРѕР»СѓС‡РёС‚Рµ СЃ: \"-lameopts preset=help\"\n"
 #define MSGTR_LamePresetsLongInfo "\n"\
-"Профилите са създадени за да осигуряват най-доброто възможно качество.\n"\
+"РџСЂРѕС„РёР»РёС‚Рµ СЃР° СЃСЉР·РґР°РґРµРЅРё Р·Р° РґР° РѕСЃРёРіСѓСЂСЏРІР°С‚ РЅР°Р№-РґРѕР±СЂРѕС‚Рѕ РІСЉР·РјРѕР¶РЅРѕ РєР°С‡РµСЃС‚РІРѕ.\n"\
 "\n"\
-"В по-голямата си част те са били предмет на сериозни тестове\n"\
-"за да се осигури и потвърди това качество.\n"\
+"Р’ РїРѕ-РіРѕР»СЏРјР°С‚Р° СЃРё С‡Р°СЃС‚ С‚Рµ СЃР° Р±РёР»Рё РїСЂРµРґРјРµС‚ РЅР° СЃРµСЂРёРѕР·РЅРё С‚РµСЃС‚РѕРІРµ\n"\
+"Р·Р° РґР° СЃРµ РѕСЃРёРіСѓСЂРё Рё РїРѕС‚РІСЉСЂРґРё С‚РѕРІР° РєР°С‡РµСЃС‚РІРѕ.\n"\
 "\n"\
-"Непрекъснато се обновяват, съгласно най-новите разработки\n"\
-"и полученият резултат би трябвало да ви осигури най-доброто\n"\
-"качество постижимо с LAME.\n"\
+"РќРµРїСЂРµРєСЉСЃРЅР°С‚Рѕ СЃРµ РѕР±РЅРѕРІСЏРІР°С‚, СЃСЉРіР»Р°СЃРЅРѕ РЅР°Р№-РЅРѕРІРёС‚Рµ СЂР°Р·СЂР°Р±РѕС‚РєРё\n"\
+"Рё РїРѕР»СѓС‡РµРЅРёСЏС‚ СЂРµР·СѓР»С‚Р°С‚ Р±Рё С‚СЂСЏР±РІР°Р»Рѕ РґР° РІРё РѕСЃРёРіСѓСЂРё РЅР°Р№-РґРѕР±СЂРѕС‚Рѕ\n"\
+"РєР°С‡РµСЃС‚РІРѕ РїРѕСЃС‚РёР¶РёРјРѕ СЃ LAME.\n"\
 "\n"\
-"За да активирате тези профили:\n"\
+"Р—Р° РґР° Р°РєС‚РёРІРёСЂР°С‚Рµ С‚РµР·Рё РїСЂРѕС„РёР»Рё:\n"\
 "\n"\
-"   За VBR режими (най-високо качество):\n"\
+"   Р—Р° VBR СЂРµР¶РёРјРё (РЅР°Р№-РІРёСЃРѕРєРѕ РєР°С‡РµСЃС‚РІРѕ):\n"\
 "\n"\
-"     \"preset=standard\" Tози профил е подходящ за повеето хора и повечето\n"\
-"                             видове музика и притежава доста високо качество.\n"\
+"     \"preset=standard\" TРѕР·Рё РїСЂРѕС„РёР» Рµ РїРѕРґС…РѕРґСЏС‰ Р·Р° РїРѕРІРµРµС‚Рѕ С…РѕСЂР° Рё РїРѕРІРµС‡РµС‚Рѕ\n"\
+"                             РІРёРґРѕРІРµ РјСѓР·РёРєР° Рё РїСЂРёС‚РµР¶Р°РІР° РґРѕСЃС‚Р° РІРёСЃРѕРєРѕ РєР°С‡РµСЃС‚РІРѕ.\n"\
 "\n"\
-"     \"preset=extreme\" Ако имате изключително добър слух и оборудване от\n"\
-"                             високо ниво, този профил ще осигури\n"\
-"                             малко по-добро качество от \"standard\"\n"\
-"                             режима.\n"\
+"     \"preset=extreme\" РђРєРѕ РёРјР°С‚Рµ РёР·РєР»СЋС‡РёС‚РµР»РЅРѕ РґРѕР±СЉСЂ СЃР»СѓС… Рё РѕР±РѕСЂСѓРґРІР°РЅРµ РѕС‚\n"\
+"                             РІРёСЃРѕРєРѕ РЅРёРІРѕ, С‚РѕР·Рё РїСЂРѕС„РёР» С‰Рµ РѕСЃРёРіСѓСЂРё\n"\
+"                             РјР°Р»РєРѕ РїРѕ-РґРѕР±СЂРѕ РєР°С‡РµСЃС‚РІРѕ РѕС‚ \"standard\"\n"\
+"                             СЂРµР¶РёРјР°.\n"\
 "\n"\
-"   За CBR 320Кбита/с (профил с най-високото възможно качество):\n"\
+"   Р—Р° CBR 320РљР±РёС‚Р°/СЃ (РїСЂРѕС„РёР» СЃ РЅР°Р№-РІРёСЃРѕРєРѕС‚Рѕ РІСЉР·РјРѕР¶РЅРѕ РєР°С‡РµСЃС‚РІРѕ):\n"\
 "\n"\
-"     \"preset=insane\"  Настройките в този профил са прекалени за повечето\n"\
-"                             хора и ситуации, но ако се налага\n"\
-"                             да постигнете абсолютно максимално качество\n"\
-"                             без значение от размера на файла, това е начина.\n"\
+"     \"preset=insane\"  РќР°СЃС‚СЂРѕР№РєРёС‚Рµ РІ С‚РѕР·Рё РїСЂРѕС„РёР» СЃР° РїСЂРµРєР°Р»РµРЅРё Р·Р° РїРѕРІРµС‡РµС‚Рѕ\n"\
+"                             С…РѕСЂР° Рё СЃРёС‚СѓР°С†РёРё, РЅРѕ Р°РєРѕ СЃРµ РЅР°Р»Р°РіР°\n"\
+"                             РґР° РїРѕСЃС‚РёРіРЅРµС‚Рµ Р°Р±СЃРѕР»СЋС‚РЅРѕ РјР°РєСЃРёРјР°Р»РЅРѕ РєР°С‡РµСЃС‚РІРѕ\n"\
+"                             Р±РµР· Р·РЅР°С‡РµРЅРёРµ РѕС‚ СЂР°Р·РјРµСЂР° РЅР° С„Р°Р№Р»Р°, С‚РѕРІР° Рµ РЅР°С‡РёРЅР°.\n"\
 "\n"\
-"   За ABR режим (високо качество при зададем битрейт, но не колкото при VBR):\n"\
+"   Р—Р° ABR СЂРµР¶РёРј (РІРёСЃРѕРєРѕ РєР°С‡РµСЃС‚РІРѕ РїСЂРё Р·Р°РґР°РґРµРј Р±РёС‚СЂРµР№С‚, РЅРѕ РЅРµ РєРѕР»РєРѕС‚Рѕ РїСЂРё VBR):\n"\
 "\n"\
-"     \"preset=<кбита/с>\"  Този профил обикновено дава добро качество за\n"\
-"                             зададения битрейт. В зависимост от указания\n"\
-"                             битрейт, профилът ще определи оптималните за\n"\
-"                             случая настройки.\n"\
-"                             Въпреки че този метод върши работа, той не е\n"\
-"                             толкова гъвкав, колкото VBR, и обикновено не\n"\
-"                             достига качеството на VBR при високи битрейтове.\n"\
+"     \"preset=<РєР±РёС‚Р°/СЃ>\"  РўРѕР·Рё РїСЂРѕС„РёР» РѕР±РёРєРЅРѕРІРµРЅРѕ РґР°РІР° РґРѕР±СЂРѕ РєР°С‡РµСЃС‚РІРѕ Р·Р°\n"\
+"                             Р·Р°РґР°РґРµРЅРёСЏ Р±РёС‚СЂРµР№С‚. Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚ РѕС‚ СѓРєР°Р·Р°РЅРёСЏ\n"\
+"                             Р±РёС‚СЂРµР№С‚, РїСЂРѕС„РёР»СЉС‚ С‰Рµ РѕРїСЂРµРґРµР»Рё РѕРїС‚РёРјР°Р»РЅРёС‚Рµ Р·Р°\n"\
+"                             СЃР»СѓС‡Р°СЏ РЅР°СЃС‚СЂРѕР№РєРё.\n"\
+"                             Р’СЉРїСЂРµРєРё С‡Рµ С‚РѕР·Рё РјРµС‚РѕРґ РІСЉСЂС€Рё СЂР°Р±РѕС‚Р°, С‚РѕР№ РЅРµ Рµ\n"\
+"                             С‚РѕР»РєРѕРІР° РіСЉРІРєР°РІ, РєРѕР»РєРѕС‚Рѕ VBR, Рё РѕР±РёРєРЅРѕРІРµРЅРѕ РЅРµ\n"\
+"                             РґРѕСЃС‚РёРіР° РєР°С‡РµСЃС‚РІРѕС‚Рѕ РЅР° VBR РїСЂРё РІРёСЃРѕРєРё Р±РёС‚СЂРµР№С‚РѕРІРµ.\n"\
 "\n"\
-"Следните опции са достъпни за съответните профили:\n"\
+"РЎР»РµРґРЅРёС‚Рµ РѕРїС†РёРё СЃР° РґРѕСЃС‚СЉРїРЅРё Р·Р° СЃСЉРѕС‚РІРµС‚РЅРёС‚Рµ РїСЂРѕС„РёР»Рё:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
 "                 insane\n"\
-"   <cbr> (ABR Режим) - Не е нужно изрично да указвате ABR режима.\n"\
-"                      За да го ползвате, просто укажете битрейт. Например:\n"\
-"                      \"preset=185\" активира този\n"\
-"                      профил и ползва средно 185 килобита в секунда.\n"\
+"   <cbr> (ABR Р РµР¶РёРј) - РќРµ Рµ РЅСѓР¶РЅРѕ РёР·СЂРёС‡РЅРѕ РґР° СѓРєР°Р·РІР°С‚Рµ ABR СЂРµР¶РёРјР°.\n"\
+"                      Р—Р° РґР° РіРѕ РїРѕР»Р·РІР°С‚Рµ, РїСЂРѕСЃС‚Рѕ СѓРєР°Р¶РµС‚Рµ Р±РёС‚СЂРµР№С‚. РќР°РїСЂРёРјРµСЂ:\n"\
+"                      \"preset=185\" Р°РєС‚РёРІРёСЂР° С‚РѕР·Рё\n"\
+"                      РїСЂРѕС„РёР» Рё РїРѕР»Р·РІР° СЃСЂРµРґРЅРѕ 185 РєРёР»РѕР±РёС‚Р° РІ СЃРµРєСѓРЅРґР°.\n"\
 "\n"\
-"   \"fast\" - Разрешава новия, бърз VBR за определен профил. Недостаък на това\n"\
-"            е, че за сметка на скоростта често полученият битрейт е по-висок,\n"\
-"            а качеството дори по-ниско в сранение с нормалния режим на работа.\n"\
-"   Внимание: С настоящата версия, полученият с бързия режим битрейт, може да се\n"\
-"            окаже твърде висок, в сравнение с нормалните профили.\n"\
+"   \"fast\" - Р Р°Р·СЂРµС€Р°РІР° РЅРѕРІРёСЏ, Р±СЉСЂР· VBR Р·Р° РѕРїСЂРµРґРµР»РµРЅ РїСЂРѕС„РёР». РќРµРґРѕСЃС‚Р°СЉРє РЅР° С‚РѕРІР°\n"\
+"            Рµ, С‡Рµ Р·Р° СЃРјРµС‚РєР° РЅР° СЃРєРѕСЂРѕСЃС‚С‚Р° С‡РµСЃС‚Рѕ РїРѕР»СѓС‡РµРЅРёСЏС‚ Р±РёС‚СЂРµР№С‚ Рµ РїРѕ-РІРёСЃРѕРє,\n"\
+"            Р° РєР°С‡РµСЃС‚РІРѕС‚Рѕ РґРѕСЂРё РїРѕ-РЅРёСЃРєРѕ РІ СЃСЂР°РЅРµРЅРёРµ СЃ РЅРѕСЂРјР°Р»РЅРёСЏ СЂРµР¶РёРј РЅР° СЂР°Р±РѕС‚Р°.\n"\
+"   Р’РЅРёРјР°РЅРёРµ: РЎ РЅР°СЃС‚РѕСЏС‰Р°С‚Р° РІРµСЂСЃРёСЏ, РїРѕР»СѓС‡РµРЅРёСЏС‚ СЃ Р±СЉСЂР·РёСЏ СЂРµР¶РёРј Р±РёС‚СЂРµР№С‚, РјРѕР¶Рµ РґР° СЃРµ\n"\
+"            РѕРєР°Р¶Рµ С‚РІСЉСЂРґРµ РІРёСЃРѕРє, РІ СЃСЂР°РІРЅРµРЅРёРµ СЃ РЅРѕСЂРјР°Р»РЅРёС‚Рµ РїСЂРѕС„РёР»Рё.\n"\
 "\n"\
-"   \"cbr\"  - Ако ползвате ABR режим (прочетете по-горе) със значителен\n"\
-"            битрейт като 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
-"            може да ползвате опцията \"cbr\" за да наложите кодиране в CBR\n"\
-"            режим, вместо стандартния abr mode. ABR осигурява по-високо\n"\
-"            качество, но CBR може да е по-подходящ в ситуации, като\n"\
-"            предаването на mp3 през интернет поток.\n"\
+"   \"cbr\"  - РђРєРѕ РїРѕР»Р·РІР°С‚Рµ ABR СЂРµР¶РёРј (РїСЂРѕС‡РµС‚РµС‚Рµ РїРѕ-РіРѕСЂРµ) СЃСЉСЃ Р·РЅР°С‡РёС‚РµР»РµРЅ\n"\
+"            Р±РёС‚СЂРµР№С‚ РєР°С‚Рѕ 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"            РјРѕР¶Рµ РґР° РїРѕР»Р·РІР°С‚Рµ РѕРїС†РёСЏС‚Р° \"cbr\" Р·Р° РґР° РЅР°Р»РѕР¶РёС‚Рµ РєРѕРґРёСЂР°РЅРµ РІ CBR\n"\
+"            СЂРµР¶РёРј, РІРјРµСЃС‚Рѕ СЃС‚Р°РЅРґР°СЂС‚РЅРёСЏ abr mode. ABR РѕСЃРёРіСѓСЂСЏРІР° РїРѕ-РІРёСЃРѕРєРѕ\n"\
+"            РєР°С‡РµСЃС‚РІРѕ, РЅРѕ CBR РјРѕР¶Рµ РґР° Рµ РїРѕ-РїРѕРґС…РѕРґСЏС‰ РІ СЃРёС‚СѓР°С†РёРё, РєР°С‚Рѕ\n"\
+"            РїСЂРµРґР°РІР°РЅРµС‚Рѕ РЅР° mp3 РїСЂРµР· РёРЅС‚РµСЂРЅРµС‚ РїРѕС‚РѕРє.\n"\
 "\n"\
-"    Например:\n"\
+"    РќР°РїСЂРёРјРµСЂ:\n"\
 "\n"\
 "    \"-lameopts fast:preset=standard  \"\n"\
-" или \"-lameopts  cbr:preset=192       \"\n"\
-" или \"-lameopts      preset=172       \"\n"\
-" или \"-lameopts      preset=extreme   \"\n"\
+" РёР»Рё \"-lameopts  cbr:preset=192       \"\n"\
+" РёР»Рё \"-lameopts      preset=172       \"\n"\
+" РёР»Рё \"-lameopts      preset=extreme   \"\n"\
 "\n"\
 "\n"\
-"Достъпни са някои псевдоними за ABR режим:\n"\
-"phone => 16kbps/моно        phon+/lw/mw-eu/sw => 24kbps/моно\n"\
-"mw-us => 40kbps/моно        voice => 56kbps/моно\n"\
+"Р”РѕСЃС‚СЉРїРЅРё СЃР° РЅСЏРєРѕРё РїСЃРµРІРґРѕРЅРёРјРё Р·Р° ABR СЂРµР¶РёРј:\n"\
+"phone => 16kbps/РјРѕРЅРѕ        phon+/lw/mw-eu/sw => 24kbps/РјРѕРЅРѕ\n"\
+"mw-us => 40kbps/РјРѕРЅРѕ        voice => 56kbps/РјРѕРЅРѕ\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_LameCantInit "Не могат да се зададат LAME опциите, проверете битрейтовете/честотите на дискретите,"\
-"някои много ниски битрейтове (<32) изискват ниски честоти на дискретите (напр. -srate 8000)."\
-"Ако нищо друго не помага пробвайте някой preset."
-#define MSGTR_ConfigFileError "грешка в конфигурационния файл"
-#define MSGTR_ErrorParsingCommandLine "грешка при обработката на командния ред"
-#define MSGTR_VideoStreamRequired "Задължително е да има видео поток!\n"
-#define MSGTR_ForcingInputFPS "Входящите кадри в секунда ще се интерпретират като %5.2f\n"
-#define MSGTR_RawvideoDoesNotSupportAudio "Изходния формат RAWVIDEO не поддържа аудио - звука се премахва\n"
-#define MSGTR_DemuxerDoesntSupportNosound "Tози разпределител все още не поддържа -nosound .\n"
-#define MSGTR_MemAllocFailed "не може да задели памет"
-#define MSGTR_NoMatchingFilter "Не може да бъде намерен подходящ филтър/изходен аудио формат!\n"
-#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, може би заради C компилатора?\n"
-#define MSGTR_NoLavcAudioCodecName "LAVC аудио, Липсва име на кодек!\n"
-#define MSGTR_LavcAudioCodecNotFound "Aудио LAVC, не може да се намери енкодер за кодека %s\n"
-#define MSGTR_CouldntAllocateLavcContext "Aудио LAVC, не може да задели контекст!\n"
-#define MSGTR_CouldntOpenCodec "Не може да отвори кодек %s, br=%d\n"
+#define MSGTR_LameCantInit "РќРµ РјРѕРіР°С‚ РґР° СЃРµ Р·Р°РґР°РґР°С‚ LAME РѕРїС†РёРёС‚Рµ, РїСЂРѕРІРµСЂРµС‚Рµ Р±РёС‚СЂРµР№С‚РѕРІРµС‚Рµ/С‡РµСЃС‚РѕС‚РёС‚Рµ РЅР° РґРёСЃРєСЂРµС‚РёС‚Рµ,"\
+"РЅСЏРєРѕРё РјРЅРѕРіРѕ РЅРёСЃРєРё Р±РёС‚СЂРµР№С‚РѕРІРµ (<32) РёР·РёСЃРєРІР°С‚ РЅРёСЃРєРё С‡РµСЃС‚РѕС‚Рё РЅР° РґРёСЃРєСЂРµС‚РёС‚Рµ (РЅР°РїСЂ. -srate 8000)."\
+"РђРєРѕ РЅРёС‰Рѕ РґСЂСѓРіРѕ РЅРµ РїРѕРјР°РіР° РїСЂРѕР±РІР°Р№С‚Рµ РЅСЏРєРѕР№ preset."
+#define MSGTR_ConfigFileError "РіСЂРµС€РєР° РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРёСЏ С„Р°Р№Р»"
+#define MSGTR_ErrorParsingCommandLine "РіСЂРµС€РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєР°С‚Р° РЅР° РєРѕРјР°РЅРґРЅРёСЏ СЂРµРґ"
+#define MSGTR_VideoStreamRequired "Р—Р°РґСЉР»Р¶РёС‚РµР»РЅРѕ Рµ РґР° РёРјР° РІРёРґРµРѕ РїРѕС‚РѕРє!\n"
+#define MSGTR_ForcingInputFPS "Р’С…РѕРґСЏС‰РёС‚Рµ РєР°РґСЂРё РІ СЃРµРєСѓРЅРґР° С‰Рµ СЃРµ РёРЅС‚РµСЂРїСЂРµС‚РёСЂР°С‚ РєР°С‚Рѕ %5.2f\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "РР·С…РѕРґРЅРёСЏ С„РѕСЂРјР°С‚ RAWVIDEO РЅРµ РїРѕРґРґСЉСЂР¶Р° Р°СѓРґРёРѕ - Р·РІСѓРєР° СЃРµ РїСЂРµРјР°С…РІР°\n"
+#define MSGTR_DemuxerDoesntSupportNosound "TРѕР·Рё СЂР°Р·РїСЂРµРґРµР»РёС‚РµР» РІСЃРµ РѕС‰Рµ РЅРµ РїРѕРґРґСЉСЂР¶Р° -nosound .\n"
+#define MSGTR_MemAllocFailed "РЅРµ РјРѕР¶Рµ РґР° Р·Р°РґРµР»Рё РїР°РјРµС‚"
+#define MSGTR_NoMatchingFilter "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РЅР°РјРµСЂРµРЅ РїРѕРґС…РѕРґСЏС‰ С„РёР»С‚СЉСЂ/РёР·С…РѕРґРµРЅ Р°СѓРґРёРѕ С„РѕСЂРјР°С‚!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, РјРѕР¶Рµ Р±Рё Р·Р°СЂР°РґРё C РєРѕРјРїРёР»Р°С‚РѕСЂР°?\n"
+#define MSGTR_NoLavcAudioCodecName "LAVC Р°СѓРґРёРѕ, Р›РёРїСЃРІР° РёРјРµ РЅР° РєРѕРґРµРє!\n"
+#define MSGTR_LavcAudioCodecNotFound "AСѓРґРёРѕ LAVC, РЅРµ РјРѕР¶Рµ РґР° СЃРµ РЅР°РјРµСЂРё РµРЅРєРѕРґРµСЂ Р·Р° РєРѕРґРµРєР° %s\n"
+#define MSGTR_CouldntAllocateLavcContext "AСѓРґРёРѕ LAVC, РЅРµ РјРѕР¶Рµ РґР° Р·Р°РґРµР»Рё РєРѕРЅС‚РµРєСЃС‚!\n"
+#define MSGTR_CouldntOpenCodec "РќРµ РјРѕР¶Рµ РґР° РѕС‚РІРѕСЂРё РєРѕРґРµРє %s, br=%d\n"
 
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
-" vbr=<0-4>     променлив битрейт метод\n"\
+" vbr=<0-4>     РїСЂРѕРјРµРЅР»РёРІ Р±РёС‚СЂРµР№С‚ РјРµС‚РѕРґ\n"\
 "                0: cbr\n"\
 "                1: mt\n"\
-"                2: rh(подразбира се)\n"\
+"                2: rh(РїРѕРґСЂР°Р·Р±РёСЂР° СЃРµ)\n"\
 "                3: abr\n"\
 "                4: mtrh\n"\
 "\n"\
-" abr           среден битрейт\n"\
+" abr           СЃСЂРµРґРµРЅ Р±РёС‚СЂРµР№С‚\n"\
 "\n"\
-" cbr           постоянен bitrate\n"\
-"               Също така налага CBR кодиране за последователни ABR режими.\n"\
+" cbr           РїРѕСЃС‚РѕСЏРЅРµРЅ bitrate\n"\
+"               РЎСЉС‰Рѕ С‚Р°РєР° РЅР°Р»Р°РіР° CBR РєРѕРґРёСЂР°РЅРµ Р·Р° РїРѕСЃР»РµРґРѕРІР°С‚РµР»РЅРё ABR СЂРµР¶РёРјРё.\n"\
 "\n"\
-" br=<0-1024>   указва битрейта в КБита (само за CBR и ABR)\n"\
+" br=<0-1024>   СѓРєР°Р·РІР° Р±РёС‚СЂРµР№С‚Р° РІ РљР‘РёС‚Р° (СЃР°РјРѕ Р·Р° CBR Рё ABR)\n"\
 "\n"\
-" q=<0-9>       качество (0-максимално, 9-минимално) (само за VBR)\n"\
+" q=<0-9>       РєР°С‡РµСЃС‚РІРѕ (0-РјР°РєСЃРёРјР°Р»РЅРѕ, 9-РјРёРЅРёРјР°Р»РЅРѕ) (СЃР°РјРѕ Р·Р° VBR)\n"\
 "\n"\
-" aq=<0-9>      качество на алгоритъма (0-най-добро/бавно, 9-най-лошо/бързо)\n"\
+" aq=<0-9>      РєР°С‡РµСЃС‚РІРѕ РЅР° Р°Р»РіРѕСЂРёС‚СЉРјР° (0-РЅР°Р№-РґРѕР±СЂРѕ/Р±Р°РІРЅРѕ, 9-РЅР°Р№-Р»РѕС€Рѕ/Р±СЉСЂР·Рѕ)\n"\
 "\n"\
-" ratio=<1-100> коефициент на компресия\n"\
+" ratio=<1-100> РєРѕРµС„РёС†РёРµРЅС‚ РЅР° РєРѕРјРїСЂРµСЃРёСЏ\n"\
 "\n"\
-" vol=<0-10>    усилване на входния звук\n"\
+" vol=<0-10>    СѓСЃРёР»РІР°РЅРµ РЅР° РІС…РѕРґРЅРёСЏ Р·РІСѓРє\n"\
 "\n"\
-" mode=<0-3>    (по-подразбиране: автоматичен)\n"\
+" mode=<0-3>    (РїРѕ-РїРѕРґСЂР°Р·Р±РёСЂР°РЅРµ: Р°РІС‚РѕРјР°С‚РёС‡РµРЅ)\n"\
 "                0: stereo\n"\
-"                1: joint-стерео\n"\
-"                2: двуканален\n"\
-"                3: моно\n"\
+"                1: joint-СЃС‚РµСЂРµРѕ\n"\
+"                2: РґРІСѓРєР°РЅР°Р»РµРЅ\n"\
+"                3: РјРѕРЅРѕ\n"\
 "\n"\
 " padding=<0-2>\n"\
-"                0: без\n"\
-"                1: всички\n"\
-"                2: регулирано\n"\
+"                0: Р±РµР·\n"\
+"                1: РІСЃРёС‡РєРё\n"\
+"                2: СЂРµРіСѓР»РёСЂР°РЅРѕ\n"\
 "\n"\
-" fast          По-бързо кодиране на последователни VBR режими,\n"\
-"               малко по-ниско качество и по-високи битрейтове.\n"\
+" fast          РџРѕ-Р±СЉСЂР·Рѕ РєРѕРґРёСЂР°РЅРµ РЅР° РїРѕСЃР»РµРґРѕРІР°С‚РµР»РЅРё VBR СЂРµР¶РёРјРё,\n"\
+"               РјР°Р»РєРѕ РїРѕ-РЅРёСЃРєРѕ РєР°С‡РµСЃС‚РІРѕ Рё РїРѕ-РІРёСЃРѕРєРё Р±РёС‚СЂРµР№С‚РѕРІРµ.\n"\
 "\n"\
-" preset=<value> Осигурява най-високото възможно качество при зададени настройки.\n"\
-"                 medium: VBR  кодиране,  добро качество\n"\
-"                 (150-180 КБита/с битрейт)\n"\
-"                 standard:  VBR кодиране, високо качество\n"\
-"                 (170-210 Кбита/с битрейт)\n"\
-"                 extreme: VBR кодиране, много-високо качество\n"\
-"                 (200-240 КБита/с битрейт)\n"\
-"                 insane:  CBR  кодиране, най-високо качество\n"\
-"                 (320 Кбита/с битрейт)\n"\
-"                 <8-320>: ABR кодиране със зададен среден битрейт.\n\n"
+" preset=<value> РћСЃРёРіСѓСЂСЏРІР° РЅР°Р№-РІРёСЃРѕРєРѕС‚Рѕ РІСЉР·РјРѕР¶РЅРѕ РєР°С‡РµСЃС‚РІРѕ РїСЂРё Р·Р°РґР°РґРµРЅРё РЅР°СЃС‚СЂРѕР№РєРё.\n"\
+"                 medium: VBR  РєРѕРґРёСЂР°РЅРµ,  РґРѕР±СЂРѕ РєР°С‡РµСЃС‚РІРѕ\n"\
+"                 (150-180 РљР‘РёС‚Р°/СЃ Р±РёС‚СЂРµР№С‚)\n"\
+"                 standard:  VBR РєРѕРґРёСЂР°РЅРµ, РІРёСЃРѕРєРѕ РєР°С‡РµСЃС‚РІРѕ\n"\
+"                 (170-210 РљР±РёС‚Р°/СЃ Р±РёС‚СЂРµР№С‚)\n"\
+"                 extreme: VBR РєРѕРґРёСЂР°РЅРµ, РјРЅРѕРіРѕ-РІРёСЃРѕРєРѕ РєР°С‡РµСЃС‚РІРѕ\n"\
+"                 (200-240 РљР‘РёС‚Р°/СЃ Р±РёС‚СЂРµР№С‚)\n"\
+"                 insane:  CBR  РєРѕРґРёСЂР°РЅРµ, РЅР°Р№-РІРёСЃРѕРєРѕ РєР°С‡РµСЃС‚РІРѕ\n"\
+"                 (320 РљР±РёС‚Р°/СЃ Р±РёС‚СЂРµР№С‚)\n"\
+"                 <8-320>: ABR РєРѕРґРёСЂР°РЅРµ СЃСЉСЃ Р·Р°РґР°РґРµРЅ СЃСЂРµРґРµРЅ Р±РёС‚СЂРµР№С‚.\n\n"
 
 //codec-cfg.c:
-#define MSGTR_DuplicateFourcc "дублиран FourCC код"
-#define MSGTR_TooManyFourccs "твърде много FourCC кодoве/формати..."
-#define MSGTR_ParseError "грешка при разчитане"
-#define MSGTR_ParseErrorFIDNotNumber "грешка при разчитане (ID на формата не е число?)"
-#define MSGTR_ParseErrorFIDAliasNotNumber "грешка при разчитане (ID псевдонима на формата не е число?)"
-#define MSGTR_DuplicateFID "дублирано ID на формата"
-#define MSGTR_TooManyOut "твърде много изходни формати..."
-#define MSGTR_InvalidCodecName "\nкодекът(%s) има невалидно име!\n"
-#define MSGTR_CodecLacksFourcc "\nкодекът(%s) няма FourCC код/формат!\n"
-#define MSGTR_CodecLacksDriver "\nкодекът(%s) няма драйвер!\n"
-#define MSGTR_CodecNeedsDLL "\nкодекът(%s) се нуждае от 'dll'!\n"
-#define MSGTR_CodecNeedsOutfmt "\nкодекът(%s) се нуждае от 'outfmt'!\n"
-#define MSGTR_CantAllocateComment "Не може да се задели памет за коментар. "
+#define MSGTR_DuplicateFourcc "РґСѓР±Р»РёСЂР°РЅ FourCC РєРѕРґ"
+#define MSGTR_TooManyFourccs "С‚РІСЉСЂРґРµ РјРЅРѕРіРѕ FourCC РєРѕРґoРІРµ/С„РѕСЂРјР°С‚Рё..."
+#define MSGTR_ParseError "РіСЂРµС€РєР° РїСЂРё СЂР°Р·С‡РёС‚Р°РЅРµ"
+#define MSGTR_ParseErrorFIDNotNumber "РіСЂРµС€РєР° РїСЂРё СЂР°Р·С‡РёС‚Р°РЅРµ (ID РЅР° С„РѕСЂРјР°С‚Р° РЅРµ Рµ С‡РёСЃР»Рѕ?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "РіСЂРµС€РєР° РїСЂРё СЂР°Р·С‡РёС‚Р°РЅРµ (ID РїСЃРµРІРґРѕРЅРёРјР° РЅР° С„РѕСЂРјР°С‚Р° РЅРµ Рµ С‡РёСЃР»Рѕ?)"
+#define MSGTR_DuplicateFID "РґСѓР±Р»РёСЂР°РЅРѕ ID РЅР° С„РѕСЂРјР°С‚Р°"
+#define MSGTR_TooManyOut "С‚РІСЉСЂРґРµ РјРЅРѕРіРѕ РёР·С…РѕРґРЅРё С„РѕСЂРјР°С‚Рё..."
+#define MSGTR_InvalidCodecName "\nРєРѕРґРµРєСЉС‚(%s) РёРјР° РЅРµРІР°Р»РёРґРЅРѕ РёРјРµ!\n"
+#define MSGTR_CodecLacksFourcc "\nРєРѕРґРµРєСЉС‚(%s) РЅСЏРјР° FourCC РєРѕРґ/С„РѕСЂРјР°С‚!\n"
+#define MSGTR_CodecLacksDriver "\nРєРѕРґРµРєСЉС‚(%s) РЅСЏРјР° РґСЂР°Р№РІРµСЂ!\n"
+#define MSGTR_CodecNeedsDLL "\nРєРѕРґРµРєСЉС‚(%s) СЃРµ РЅСѓР¶РґР°Рµ РѕС‚ 'dll'!\n"
+#define MSGTR_CodecNeedsOutfmt "\nРєРѕРґРµРєСЉС‚(%s) СЃРµ РЅСѓР¶РґР°Рµ РѕС‚ 'outfmt'!\n"
+#define MSGTR_CantAllocateComment "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РґРµР»Рё РїР°РјРµС‚ Р·Р° РєРѕРјРµРЅС‚Р°СЂ. "
 #define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
-#define MSGTR_ReadingFile "Четене от %s: "
-#define MSGTR_CantOpenFileError "'%s': %s не може да бъде отворен\n"
-#define MSGTR_CantGetMemoryForLine "Няма достатъчно памет за 'line': %s\n"
-#define MSGTR_CantReallocCodecsp "Не може да презадели памет за '*codecsp': %s\n"
-#define MSGTR_CodecNameNotUnique "Името на кодека '%s' не е уникално."
-#define MSGTR_CantStrdupName "Не може да се изпълни strdup -> 'name': %s\n"
-#define MSGTR_CantStrdupInfo "Не може да се изпълни strdup -> 'info': %s\n"
-#define MSGTR_CantStrdupDriver "Не може да се изпълни strdup -> 'driver': %s\n"
-#define MSGTR_CantStrdupDLL "Не може да се изпълни strdup -> 'dll': %s"
-#define MSGTR_AudioVideoCodecTotals "%d аудио & %d видео кодека\n"
-#define MSGTR_CodecDefinitionIncorrect "Кодекът не е дефиниран коректно."
-#define MSGTR_OutdatedCodecsConf "Tози codecs.conf е твърде стар и несъвместим с тази версия на MPlayer!"
+#define MSGTR_ReadingFile "Р§РµС‚РµРЅРµ РѕС‚ %s: "
+#define MSGTR_CantOpenFileError "'%s': %s РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ\n"
+#define MSGTR_CantGetMemoryForLine "РќСЏРјР° РґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚ Р·Р° 'line': %s\n"
+#define MSGTR_CantReallocCodecsp "РќРµ РјРѕР¶Рµ РґР° РїСЂРµР·Р°РґРµР»Рё РїР°РјРµС‚ Р·Р° '*codecsp': %s\n"
+#define MSGTR_CodecNameNotUnique "РРјРµС‚Рѕ РЅР° РєРѕРґРµРєР° '%s' РЅРµ Рµ СѓРЅРёРєР°Р»РЅРѕ."
+#define MSGTR_CantStrdupName "РќРµ РјРѕР¶Рµ РґР° СЃРµ РёР·РїСЉР»РЅРё strdup -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "РќРµ РјРѕР¶Рµ РґР° СЃРµ РёР·РїСЉР»РЅРё strdup -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "РќРµ РјРѕР¶Рµ РґР° СЃРµ РёР·РїСЉР»РЅРё strdup -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "РќРµ РјРѕР¶Рµ РґР° СЃРµ РёР·РїСЉР»РЅРё strdup -> 'dll': %s"
+#define MSGTR_AudioVideoCodecTotals "%d Р°СѓРґРёРѕ & %d РІРёРґРµРѕ РєРѕРґРµРєР°\n"
+#define MSGTR_CodecDefinitionIncorrect "РљРѕРґРµРєСЉС‚ РЅРµ Рµ РґРµС„РёРЅРёСЂР°РЅ РєРѕСЂРµРєС‚РЅРѕ."
+#define MSGTR_OutdatedCodecsConf "TРѕР·Рё codecs.conf Рµ С‚РІСЉСЂРґРµ СЃС‚Р°СЂ Рё РЅРµСЃСЉРІРјРµСЃС‚РёРј СЃ С‚Р°Р·Рё РІРµСЂСЃРёСЏ РЅР° MPlayer!"
 
 // divx4_vbr.c:
-#define MSGTR_OutOfMemory "недостатъчно памет"
-#define MSGTR_OverridingTooLowBitrate "Указаният битрейт е недостатъчен за този клип.\n"\
-"Минималният допустим битрейт за този клип е %.0f КБита/с. Указаната стойност\n"\
-"се отменя.\n"
+#define MSGTR_OutOfMemory "РЅРµРґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚"
+#define MSGTR_OverridingTooLowBitrate "РЈРєР°Р·Р°РЅРёСЏС‚ Р±РёС‚СЂРµР№С‚ Рµ РЅРµРґРѕСЃС‚Р°С‚СЉС‡РµРЅ Р·Р° С‚РѕР·Рё РєР»РёРї.\n"\
+"РњРёРЅРёРјР°Р»РЅРёСЏС‚ РґРѕРїСѓСЃС‚РёРј Р±РёС‚СЂРµР№С‚ Р·Р° С‚РѕР·Рё РєР»РёРї Рµ %.0f РљР‘РёС‚Р°/СЃ. РЈРєР°Р·Р°РЅР°С‚Р° СЃС‚РѕР№РЅРѕСЃС‚\n"\
+"СЃРµ РѕС‚РјРµРЅСЏ.\n"
 
 // fifo.c
-#define MSGTR_CannotMakePipe "Не може да се създаде програмен канал (PIPE)!\n"
+#define MSGTR_CannotMakePipe "РќРµ РјРѕР¶Рµ РґР° СЃРµ СЃСЉР·РґР°РґРµ РїСЂРѕРіСЂР°РјРµРЅ РєР°РЅР°Р» (PIPE)!\n"
 
 // m_config.c
-#define MSGTR_SaveSlotTooOld "Твърде стар save slot е открит в lvl %d: %d !!!\n"
-#define MSGTR_InvalidCfgfileOption "Опцията %s не може да се използва в конфигурационен файл.\n"
-#define MSGTR_InvalidCmdlineOption "Опцията %s не може да се ползва от командния ред.\n"
-#define MSGTR_InvalidSuboption "Грешка: опцията '%s' няма подопция '%s'.\n"
-#define MSGTR_MissingSuboptionParameter "Грешка: подопцията '%s' на '%s' изисква параметър!\n"
-#define MSGTR_MissingOptionParameter "Грешка: опцията '%s' изисква параметър!\n"
-#define MSGTR_OptionListHeader "\n Име                 Вид            Мин        Mакс      Global  CL    Конф\n\n"
-#define MSGTR_TotalOptions "\nОбщо: %d опции\n"
+#define MSGTR_SaveSlotTooOld "РўРІСЉСЂРґРµ СЃС‚Р°СЂ save slot Рµ РѕС‚РєСЂРёС‚ РІ lvl %d: %d !!!\n"
+#define MSGTR_InvalidCfgfileOption "РћРїС†РёСЏС‚Р° %s РЅРµ РјРѕР¶Рµ РґР° СЃРµ РёР·РїРѕР»Р·РІР° РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРµРЅ С„Р°Р№Р».\n"
+#define MSGTR_InvalidCmdlineOption "РћРїС†РёСЏС‚Р° %s РЅРµ РјРѕР¶Рµ РґР° СЃРµ РїРѕР»Р·РІР° РѕС‚ РєРѕРјР°РЅРґРЅРёСЏ СЂРµРґ.\n"
+#define MSGTR_InvalidSuboption "Р“СЂРµС€РєР°: РѕРїС†РёСЏС‚Р° '%s' РЅСЏРјР° РїРѕРґРѕРїС†РёСЏ '%s'.\n"
+#define MSGTR_MissingSuboptionParameter "Р“СЂРµС€РєР°: РїРѕРґРѕРїС†РёСЏС‚Р° '%s' РЅР° '%s' РёР·РёСЃРєРІР° РїР°СЂР°РјРµС‚СЉСЂ!\n"
+#define MSGTR_MissingOptionParameter "Р“СЂРµС€РєР°: РѕРїС†РёСЏС‚Р° '%s' РёР·РёСЃРєРІР° РїР°СЂР°РјРµС‚СЉСЂ!\n"
+#define MSGTR_OptionListHeader "\n РРјРµ                 Р’РёРґ            РњРёРЅ        MР°РєСЃ      Global  CL    РљРѕРЅС„\n\n"
+#define MSGTR_TotalOptions "\nРћР±С‰Рѕ: %d РѕРїС†РёРё\n"
 
 // open.c, stream.c:
-#define MSGTR_CdDevNotfound "CD-ROM устройство '%s' не е открито.\n"
-#define MSGTR_ErrTrackSelect "Грешка при избор на VCD пътечка."
-#define MSGTR_ReadSTDIN "Четене от стандартния вход (stdin)...\n"
-#define MSGTR_UnableOpenURL "URL адреса не може да бъде отворен: %s\n"
-#define MSGTR_ConnToServer "Установена е връзка със сървъра: %s\n"
-#define MSGTR_FileNotFound "Файла не е намерен: '%s'\n"
+#define MSGTR_CdDevNotfound "CD-ROM СѓСЃС‚СЂРѕР№СЃС‚РІРѕ '%s' РЅРµ Рµ РѕС‚РєСЂРёС‚Рѕ.\n"
+#define MSGTR_ErrTrackSelect "Р“СЂРµС€РєР° РїСЂРё РёР·Р±РѕСЂ РЅР° VCD РїСЉС‚РµС‡РєР°."
+#define MSGTR_ReadSTDIN "Р§РµС‚РµРЅРµ РѕС‚ СЃС‚Р°РЅРґР°СЂС‚РЅРёСЏ РІС…РѕРґ (stdin)...\n"
+#define MSGTR_UnableOpenURL "URL Р°РґСЂРµСЃР° РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ: %s\n"
+#define MSGTR_ConnToServer "РЈСЃС‚Р°РЅРѕРІРµРЅР° Рµ РІСЂСЉР·РєР° СЃСЉСЃ СЃСЉСЂРІСЉСЂР°: %s\n"
+#define MSGTR_FileNotFound "Р¤Р°Р№Р»Р° РЅРµ Рµ РЅР°РјРµСЂРµРЅ: '%s'\n"
 
-#define MSGTR_SMBInitError "Библиотеката libsmbclient не може да бъде инициализирана: %d\n"
-#define MSGTR_SMBFileNotFound "'%s' не може да бъде отворен през LAN\n"
-#define MSGTR_SMBNotCompiled "MPlayer не е компилиран със поддръжка на четене от SMB.\n"
+#define MSGTR_SMBInitError "Р‘РёР±Р»РёРѕС‚РµРєР°С‚Р° libsmbclient РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅР°: %d\n"
+#define MSGTR_SMBFileNotFound "'%s' РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ РїСЂРµР· LAN\n"
+#define MSGTR_SMBNotCompiled "MPlayer РЅРµ Рµ РєРѕРјРїРёР»РёСЂР°РЅ СЃСЉСЃ РїРѕРґРґСЂСЉР¶РєР° РЅР° С‡РµС‚РµРЅРµ РѕС‚ SMB.\n"
 
-#define MSGTR_CantOpenDVD "Не може да бъде отворено DVD устройство: %s\n"
-#define MSGTR_DVDnumTitles "Има %d заглавия на това DVD.\n"
-#define MSGTR_DVDinvalidTitle "Невалиден номер на DVD заглавие: %d\n"
-#define MSGTR_DVDnumChapters "Има %d раздела в това DVD заглавие.\n"
-#define MSGTR_DVDinvalidChapter "Невалиден номер на DVD раздел: %d\n"
-#define MSGTR_DVDnumAngles "Има %d гледни точки в това DVD заглавие..\n"
-#define MSGTR_DVDinvalidAngle "Невалиден номер на гледна точка: %d\n"
-#define MSGTR_DVDnoIFO "Не може да бъде отворен IFO файла на това DVD заглавие %d.\n"
-#define MSGTR_DVDnoVOBs "Заглавието не може да бъде отворено (VTS_%02d_1.VOB).\n"
+#define MSGTR_CantOpenDVD "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅРѕ DVD СѓСЃС‚СЂРѕР№СЃС‚РІРѕ: %s\n"
+#define MSGTR_DVDnumTitles "РРјР° %d Р·Р°РіР»Р°РІРёСЏ РЅР° С‚РѕРІР° DVD.\n"
+#define MSGTR_DVDinvalidTitle "РќРµРІР°Р»РёРґРµРЅ РЅРѕРјРµСЂ РЅР° DVD Р·Р°РіР»Р°РІРёРµ: %d\n"
+#define MSGTR_DVDnumChapters "РРјР° %d СЂР°Р·РґРµР»Р° РІ С‚РѕРІР° DVD Р·Р°РіР»Р°РІРёРµ.\n"
+#define MSGTR_DVDinvalidChapter "РќРµРІР°Р»РёРґРµРЅ РЅРѕРјРµСЂ РЅР° DVD СЂР°Р·РґРµР»: %d\n"
+#define MSGTR_DVDnumAngles "РРјР° %d РіР»РµРґРЅРё С‚РѕС‡РєРё РІ С‚РѕРІР° DVD Р·Р°РіР»Р°РІРёРµ..\n"
+#define MSGTR_DVDinvalidAngle "РќРµРІР°Р»РёРґРµРЅ РЅРѕРјРµСЂ РЅР° РіР»РµРґРЅР° С‚РѕС‡РєР°: %d\n"
+#define MSGTR_DVDnoIFO "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ IFO С„Р°Р№Р»Р° РЅР° С‚РѕРІР° DVD Р·Р°РіР»Р°РІРёРµ %d.\n"
+#define MSGTR_DVDnoVOBs "Р—Р°РіР»Р°РІРёРµС‚Рѕ РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅРѕ (VTS_%02d_1.VOB).\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "ПРЕДУПРЕЖДЕНИЕ: Заглавната част на аудио потока %d е редефинирана.\n"
-#define MSGTR_VideoStreamRedefined "ПРЕДУПРЕЖДЕНИЕ: Заглавната част на видео потока %d е редефинирана.\n"
-#define MSGTR_TooManyAudioInBuffer "\nTвърде много аудио пакети в буфера: (%d в %d байта).\n"
-#define MSGTR_TooManyVideoInBuffer "\nТвърде много видео пакети в буфера: (%d в %d байта).\n"
-#define MSGTR_MaybeNI "Може би възпроизвеждате non-interleaved поток/файл или кодекът не се е справил?\n" \
-		      "За AVI файлове, опитайте да наложите non-interleaved режим със опцията -ni.\n"
-#define MSGTR_SwitchToNi "\nЗле структуриран AVI файл - превключване към -ni режим...\n"
-#define MSGTR_Detected_XXX_FileFormat "%s формат.\n"
-#define MSGTR_DetectedAudiofile "Аудио файл.\n"
-#define MSGTR_NotSystemStream "Не е MPEG System Stream... (може би Transport Stream?)\n"
-#define MSGTR_InvalidMPEGES "Невалиден MPEG-ES поток??? Свържете се с автора, може да е бъг :(\n"
-#define MSGTR_FormatNotRecognized "============ За съжаление, този формат не се разпознава/поддържа =============\n"\
-				  "=== Ако този файл е AVI, ASF или MPEG поток, моля уведомете автора! ===\n"
-#define MSGTR_MissingVideoStream "Не е открит видео поток.\n"
-#define MSGTR_MissingAudioStream "Не е открит аудио поток -> няма звук.\n"
-#define MSGTR_MissingVideoStreamBug "Липсва видео поток!? Свържете се с автора, може да е бъг :(\n"
+#define MSGTR_AudioStreamRedefined "РџР Р•Р”РЈРџР Р•Р–Р”Р•РќРР•: Р—Р°РіР»Р°РІРЅР°С‚Р° С‡Р°СЃС‚ РЅР° Р°СѓРґРёРѕ РїРѕС‚РѕРєР° %d Рµ СЂРµРґРµС„РёРЅРёСЂР°РЅР°.\n"
+#define MSGTR_VideoStreamRedefined "РџР Р•Р”РЈРџР Р•Р–Р”Р•РќРР•: Р—Р°РіР»Р°РІРЅР°С‚Р° С‡Р°СЃС‚ РЅР° РІРёРґРµРѕ РїРѕС‚РѕРєР° %d Рµ СЂРµРґРµС„РёРЅРёСЂР°РЅР°.\n"
+#define MSGTR_TooManyAudioInBuffer "\nTРІСЉСЂРґРµ РјРЅРѕРіРѕ Р°СѓРґРёРѕ РїР°РєРµС‚Рё РІ Р±СѓС„РµСЂР°: (%d РІ %d Р±Р°Р№С‚Р°).\n"
+#define MSGTR_TooManyVideoInBuffer "\nРўРІСЉСЂРґРµ РјРЅРѕРіРѕ РІРёРґРµРѕ РїР°РєРµС‚Рё РІ Р±СѓС„РµСЂР°: (%d РІ %d Р±Р°Р№С‚Р°).\n"
+#define MSGTR_MaybeNI "РњРѕР¶Рµ Р±Рё РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°С‚Рµ non-interleaved РїРѕС‚РѕРє/С„Р°Р№Р» РёР»Рё РєРѕРґРµРєСЉС‚ РЅРµ СЃРµ Рµ СЃРїСЂР°РІРёР»?\n" \
+		      "Р—Р° AVI С„Р°Р№Р»РѕРІРµ, РѕРїРёС‚Р°Р№С‚Рµ РґР° РЅР°Р»РѕР¶РёС‚Рµ non-interleaved СЂРµР¶РёРј СЃСЉСЃ РѕРїС†РёСЏС‚Р° -ni.\n"
+#define MSGTR_SwitchToNi "\nР—Р»Рµ СЃС‚СЂСѓРєС‚СѓСЂРёСЂР°РЅ AVI С„Р°Р№Р» - РїСЂРµРІРєР»СЋС‡РІР°РЅРµ РєСЉРј -ni СЂРµР¶РёРј...\n"
+#define MSGTR_Detected_XXX_FileFormat "%s С„РѕСЂРјР°С‚.\n"
+#define MSGTR_DetectedAudiofile "РђСѓРґРёРѕ С„Р°Р№Р».\n"
+#define MSGTR_NotSystemStream "РќРµ Рµ MPEG System Stream... (РјРѕР¶Рµ Р±Рё Transport Stream?)\n"
+#define MSGTR_InvalidMPEGES "РќРµРІР°Р»РёРґРµРЅ MPEG-ES РїРѕС‚РѕРє??? РЎРІСЉСЂР¶РµС‚Рµ СЃРµ СЃ Р°РІС‚РѕСЂР°, РјРѕР¶Рµ РґР° Рµ Р±СЉРі :(\n"
+#define MSGTR_FormatNotRecognized "============ Р—Р° СЃСЉР¶Р°Р»РµРЅРёРµ, С‚РѕР·Рё С„РѕСЂРјР°С‚ РЅРµ СЃРµ СЂР°Р·РїРѕР·РЅР°РІР°/РїРѕРґРґСЉСЂР¶Р° =============\n"\
+				  "=== РђРєРѕ С‚РѕР·Рё С„Р°Р№Р» Рµ AVI, ASF РёР»Рё MPEG РїРѕС‚РѕРє, РјРѕР»СЏ СѓРІРµРґРѕРјРµС‚Рµ Р°РІС‚РѕСЂР°! ===\n"
+#define MSGTR_MissingVideoStream "РќРµ Рµ РѕС‚РєСЂРёС‚ РІРёРґРµРѕ РїРѕС‚РѕРє.\n"
+#define MSGTR_MissingAudioStream "РќРµ Рµ РѕС‚РєСЂРёС‚ Р°СѓРґРёРѕ РїРѕС‚РѕРє -> РЅСЏРјР° Р·РІСѓРє.\n"
+#define MSGTR_MissingVideoStreamBug "Р›РёРїСЃРІР° РІРёРґРµРѕ РїРѕС‚РѕРє!? РЎРІСЉСЂР¶РµС‚Рµ СЃРµ СЃ Р°РІС‚РѕСЂР°, РјРѕР¶Рµ РґР° Рµ Р±СЉРі :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "разпределител: Файлът не съдържа избрания аудио или видео поток.\n"
+#define MSGTR_DoesntContainSelectedStream "СЂР°Р·РїСЂРµРґРµР»РёС‚РµР»: Р¤Р°Р№Р»СЉС‚ РЅРµ СЃСЉРґСЉСЂР¶Р° РёР·Р±СЂР°РЅРёСЏ Р°СѓРґРёРѕ РёР»Рё РІРёРґРµРѕ РїРѕС‚РѕРє.\n"
 
-#define MSGTR_NI_Forced "Наложен"
-#define MSGTR_NI_Detected "Определен"
-#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI файл.\n"
+#define MSGTR_NI_Forced "РќР°Р»РѕР¶РµРЅ"
+#define MSGTR_NI_Detected "РћРїСЂРµРґРµР»РµРЅ"
+#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI С„Р°Р№Р».\n"
 
-#define MSGTR_UsingNINI "Използва се NON-INTERLEAVED AVI формат.\n"
-#define MSGTR_CouldntDetFNo "Не може да се определи броя на кадрите (за превъртане).\n"
-#define MSGTR_CantSeekRawAVI "Не могат да се превъртат сурови AVI потоци. (Изисква се индекс, опитайте с -idx .)\n"
-#define MSGTR_CantSeekFile "Този файл не може да се превърта.\n"
+#define MSGTR_UsingNINI "РР·РїРѕР»Р·РІР° СЃРµ NON-INTERLEAVED AVI С„РѕСЂРјР°С‚.\n"
+#define MSGTR_CouldntDetFNo "РќРµ РјРѕР¶Рµ РґР° СЃРµ РѕРїСЂРµРґРµР»Рё Р±СЂРѕСЏ РЅР° РєР°РґСЂРёС‚Рµ (Р·Р° РїСЂРµРІСЉСЂС‚Р°РЅРµ).\n"
+#define MSGTR_CantSeekRawAVI "РќРµ РјРѕРіР°С‚ РґР° СЃРµ РїСЂРµРІСЉСЂС‚Р°С‚ СЃСѓСЂРѕРІРё AVI РїРѕС‚РѕС†Рё. (РР·РёСЃРєРІР° СЃРµ РёРЅРґРµРєСЃ, РѕРїРёС‚Р°Р№С‚Рµ СЃ -idx .)\n"
+#define MSGTR_CantSeekFile "РўРѕР·Рё С„Р°Р№Р» РЅРµ РјРѕР¶Рµ РґР° СЃРµ РїСЂРµРІСЉСЂС‚Р°.\n"
 
-#define MSGTR_EncryptedVOB "Криптиран VOB файл! Прочетете DOCS/HTML/en/dvd.html.\n"
+#define MSGTR_EncryptedVOB "РљСЂРёРїС‚РёСЂР°РЅ VOB С„Р°Р№Р»! РџСЂРѕС‡РµС‚РµС‚Рµ DOCS/HTML/en/dvd.html.\n"
 
-#define MSGTR_MOVcomprhdr "MOV: Поддръжката на компресирани хедъри изисква ZLIB!\n"
-#define MSGTR_MOVvariableFourCC "MOV: ВНИМАНИЕ: Открит е променлив FOURCC код!?\n"
-#define MSGTR_MOVtooManyTrk "MOV: ВНИМАНИЕ: твърде много пътечки"
-#define MSGTR_FoundAudioStream "==> Открит е аудио поток: %d\n"
-#define MSGTR_FoundVideoStream "==> Открит е видео поток: %d\n"
-#define MSGTR_DetectedTV "Открита е телевизия! ;-)\n"
-#define MSGTR_ErrorOpeningOGGDemuxer "Не може да бъде отворен ogg разпределител.\n"
-#define MSGTR_ASFSearchingForAudioStream "ASF: Търсене на звуков поток (id:%d).\n"
-#define MSGTR_CannotOpenAudioStream "Не може да се отвори звуков поток: %s\n"
-#define MSGTR_CannotOpenSubtitlesStream "Не могат да бъдат отворени субтитри: %s\n"
-#define MSGTR_OpeningAudioDemuxerFailed "Не може да бъде отворен аудио разпределител: %s\n"
-#define MSGTR_OpeningSubtitlesDemuxerFailed "Не може да бъде отворен разпределител на субтитри: %s\n"
-#define MSGTR_TVInputNotSeekable "Телевизията не може да се превърта! (Могат да се превключват евентуално каналите ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Информацията за разпределител %s е вече налична !\n"
-#define MSGTR_ClipInfo "Информация за клипа:\n"
+#define MSGTR_MOVcomprhdr "MOV: РџРѕРґРґСЂСЉР¶РєР°С‚Р° РЅР° РєРѕРјРїСЂРµСЃРёСЂР°РЅРё С…РµРґСЉСЂРё РёР·РёСЃРєРІР° ZLIB!\n"
+#define MSGTR_MOVvariableFourCC "MOV: Р’РќРРњРђРќРР•: РћС‚РєСЂРёС‚ Рµ РїСЂРѕРјРµРЅР»РёРІ FOURCC РєРѕРґ!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: Р’РќРРњРђРќРР•: С‚РІСЉСЂРґРµ РјРЅРѕРіРѕ РїСЉС‚РµС‡РєРё"
+#define MSGTR_FoundAudioStream "==> РћС‚РєСЂРёС‚ Рµ Р°СѓРґРёРѕ РїРѕС‚РѕРє: %d\n"
+#define MSGTR_FoundVideoStream "==> РћС‚РєСЂРёС‚ Рµ РІРёРґРµРѕ РїРѕС‚РѕРє: %d\n"
+#define MSGTR_DetectedTV "РћС‚РєСЂРёС‚Р° Рµ С‚РµР»РµРІРёР·РёСЏ! ;-)\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ ogg СЂР°Р·РїСЂРµРґРµР»РёС‚РµР».\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: РўСЉСЂСЃРµРЅРµ РЅР° Р·РІСѓРєРѕРІ РїРѕС‚РѕРє (id:%d).\n"
+#define MSGTR_CannotOpenAudioStream "РќРµ РјРѕР¶Рµ РґР° СЃРµ РѕС‚РІРѕСЂРё Р·РІСѓРєРѕРІ РїРѕС‚РѕРє: %s\n"
+#define MSGTR_CannotOpenSubtitlesStream "РќРµ РјРѕРіР°С‚ РґР° Р±СЉРґР°С‚ РѕС‚РІРѕСЂРµРЅРё СЃСѓР±С‚РёС‚СЂРё: %s\n"
+#define MSGTR_OpeningAudioDemuxerFailed "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ Р°СѓРґРёРѕ СЂР°Р·РїСЂРµРґРµР»РёС‚РµР»: %s\n"
+#define MSGTR_OpeningSubtitlesDemuxerFailed "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ СЂР°Р·РїСЂРµРґРµР»РёС‚РµР» РЅР° СЃСѓР±С‚РёС‚СЂРё: %s\n"
+#define MSGTR_TVInputNotSeekable "РўРµР»РµРІРёР·РёСЏС‚Р° РЅРµ РјРѕР¶Рµ РґР° СЃРµ РїСЂРµРІСЉСЂС‚Р°! (РњРѕРіР°С‚ РґР° СЃРµ РїСЂРµРІРєР»СЋС‡РІР°С‚ РµРІРµРЅС‚СѓР°Р»РЅРѕ РєР°РЅР°Р»РёС‚Рµ ;)\n"
+#define MSGTR_DemuxerInfoAlreadyPresent "РРЅС„РѕСЂРјР°С†РёСЏС‚Р° Р·Р° СЂР°Р·РїСЂРµРґРµР»РёС‚РµР» %s Рµ РІРµС‡Рµ РЅР°Р»РёС‡РЅР° !\n"
+#define MSGTR_ClipInfo "РРЅС„РѕСЂРјР°С†РёСЏ Р·Р° РєР»РёРїР°:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC съдържание, превключване на кадровата честота.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps прогресивен NTSC, превключване на кадровата честота.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC СЃСЉРґСЉСЂР¶Р°РЅРёРµ, РїСЂРµРІРєР»СЋС‡РІР°РЅРµ РЅР° РєР°РґСЂРѕРІР°С‚Р° С‡РµСЃС‚РѕС‚Р°.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps РїСЂРѕРіСЂРµСЃРёРІРµРЅ NTSC, РїСЂРµРІРєР»СЋС‡РІР°РЅРµ РЅР° РєР°РґСЂРѕРІР°С‚Р° С‡РµСЃС‚РѕС‚Р°.\n"
 
 // dec_video.c & dec_audio.c:
-#define MSGTR_CantOpenCodec "Не може да бъде отворен кодек.\n"
-#define MSGTR_CantCloseCodec "Не може да бъде затворен кодек.\n"
+#define MSGTR_CantOpenCodec "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ РєРѕРґРµРє.\n"
+#define MSGTR_CantCloseCodec "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ Р·Р°С‚РІРѕСЂРµРЅ РєРѕРґРµРє.\n"
 
-#define MSGTR_MissingDLLcodec "ГРЕШКА: необходимият DirectShow кодек %s не може да бъде отворен.\n"
-#define MSGTR_ACMiniterror "Не може да се зареди/инициализира Win32/ACM АУДИО кодек (липсващ DLL файл?).\n"
-#define MSGTR_MissingLAVCcodec "Не може да бъде открит кодек '%s' в libavcodec...\n"
+#define MSGTR_MissingDLLcodec "Р“Р Р•РЁРљРђ: РЅРµРѕР±С…РѕРґРёРјРёСЏС‚ DirectShow РєРѕРґРµРє %s РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ.\n"
+#define MSGTR_ACMiniterror "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°СЂРµРґРё/РёРЅРёС†РёР°Р»РёР·РёСЂР° Win32/ACM РђРЈР”РРћ РєРѕРґРµРє (Р»РёРїСЃРІР°С‰ DLL С„Р°Р№Р»?).\n"
+#define MSGTR_MissingLAVCcodec "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РєСЂРёС‚ РєРѕРґРµРє '%s' РІ libavcodec...\n"
 
-#define MSGTR_MpegNoSequHdr "MPEG: ФАТАЛНО: Достигнат е края на файла, по-време на търсене за sequence header.\n"
-#define MSGTR_CannotReadMpegSequHdr "ФАТАЛНО: Не може да бъде прочетен sequence header.\n"
-#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Не може да бъде прочетено разширението на sequence header.\n"
-#define MSGTR_BadMpegSequHdr "MPEG: лош sequence header\n"
-#define MSGTR_BadMpegSequHdrEx "MPEG: лошо разширение на sequence header\n"
+#define MSGTR_MpegNoSequHdr "MPEG: Р¤РђРўРђР›РќРћ: Р”РѕСЃС‚РёРіРЅР°С‚ Рµ РєСЂР°СЏ РЅР° С„Р°Р№Р»Р°, РїРѕ-РІСЂРµРјРµ РЅР° С‚СЉСЂСЃРµРЅРµ Р·Р° sequence header.\n"
+#define MSGTR_CannotReadMpegSequHdr "Р¤РђРўРђР›РќРћ: РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РїСЂРѕС‡РµС‚РµРЅ sequence header.\n"
+#define MSGTR_CannotReadMpegSequHdrEx "FATAL: РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РїСЂРѕС‡РµС‚РµРЅРѕ СЂР°Р·С€РёСЂРµРЅРёРµС‚Рѕ РЅР° sequence header.\n"
+#define MSGTR_BadMpegSequHdr "MPEG: Р»РѕС€ sequence header\n"
+#define MSGTR_BadMpegSequHdrEx "MPEG: Р»РѕС€Рѕ СЂР°Р·С€РёСЂРµРЅРёРµ РЅР° sequence header\n"
 
-#define MSGTR_ShMemAllocFail "Не може да се задели споделена памет.\n"
-#define MSGTR_CantAllocAudioBuf "Не може да се задели аудио буфер.\n"
+#define MSGTR_ShMemAllocFail "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РґРµР»Рё СЃРїРѕРґРµР»РµРЅР° РїР°РјРµС‚.\n"
+#define MSGTR_CantAllocAudioBuf "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РґРµР»Рё Р°СѓРґРёРѕ Р±СѓС„РµСЂ.\n"
 
-#define MSGTR_UnknownAudio "Неизвестен/липсващ аудио формат -> няма звук\n"
+#define MSGTR_UnknownAudio "РќРµРёР·РІРµСЃС‚РµРЅ/Р»РёРїСЃРІР°С‰ Р°СѓРґРёРѕ С„РѕСЂРјР°С‚ -> РЅСЏРјР° Р·РІСѓРє\n"
 
-#define MSGTR_UsingExternalPP "[PP] Използване на външен филтър за допълнителна обработка, max q = %d.\n"
-#define MSGTR_UsingCodecPP "[PP] Използване на допълнителна обработка от страна на кодека, max q = %d.\n"
-#define MSGTR_VideoAttributeNotSupportedByVO_VD "Видео атрибут '%s' не се поддържа от vo & vd.\n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "Заявената фамилия видео кодеци [%s] (vfm=%s) не е достъпна.\nРазрешете я по време на компилация.\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "Заявената фамилия аудио кодеци [%s] (afm=%s) не е достъпна.\nРазрешете я по време на компилация.\n"
-#define MSGTR_OpeningVideoDecoder "Отваряне на видео декодер: [%s] %s\n"
-#define MSGTR_OpeningAudioDecoder "Отваряне на аудио декодер: [%s] %s\n"
+#define MSGTR_UsingExternalPP "[PP] РР·РїРѕР»Р·РІР°РЅРµ РЅР° РІСЉРЅС€РµРЅ С„РёР»С‚СЉСЂ Р·Р° РґРѕРїСЉР»РЅРёС‚РµР»РЅР° РѕР±СЂР°Р±РѕС‚РєР°, max q = %d.\n"
+#define MSGTR_UsingCodecPP "[PP] РР·РїРѕР»Р·РІР°РЅРµ РЅР° РґРѕРїСЉР»РЅРёС‚РµР»РЅР° РѕР±СЂР°Р±РѕС‚РєР° РѕС‚ СЃС‚СЂР°РЅР° РЅР° РєРѕРґРµРєР°, max q = %d.\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Р’РёРґРµРѕ Р°С‚СЂРёР±СѓС‚ '%s' РЅРµ СЃРµ РїРѕРґРґСЉСЂР¶Р° РѕС‚ vo & vd.\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Р—Р°СЏРІРµРЅР°С‚Р° С„Р°РјРёР»РёСЏ РІРёРґРµРѕ РєРѕРґРµС†Рё [%s] (vfm=%s) РЅРµ Рµ РґРѕСЃС‚СЉРїРЅР°.\nР Р°Р·СЂРµС€РµС‚Рµ СЏ РїРѕ РІСЂРµРјРµ РЅР° РєРѕРјРїРёР»Р°С†РёСЏ.\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Р—Р°СЏРІРµРЅР°С‚Р° С„Р°РјРёР»РёСЏ Р°СѓРґРёРѕ РєРѕРґРµС†Рё [%s] (afm=%s) РЅРµ Рµ РґРѕСЃС‚СЉРїРЅР°.\nР Р°Р·СЂРµС€РµС‚Рµ СЏ РїРѕ РІСЂРµРјРµ РЅР° РєРѕРјРїРёР»Р°С†РёСЏ.\n"
+#define MSGTR_OpeningVideoDecoder "РћС‚РІР°СЂСЏРЅРµ РЅР° РІРёРґРµРѕ РґРµРєРѕРґРµСЂ: [%s] %s\n"
+#define MSGTR_OpeningAudioDecoder "РћС‚РІР°СЂСЏРЅРµ РЅР° Р°СѓРґРёРѕ РґРµРєРѕРґРµСЂ: [%s] %s\n"
 #define MSGTR_UninitVideoStr "uninit video: %s\n"
 #define MSGTR_UninitAudioStr "uninit audio: %s\n"
-#define MSGTR_VDecoderInitFailed "Инициализацията на VDecoder се провали :(\n"
-#define MSGTR_ADecoderInitFailed "Инициализацията на ADecoder се провали :(\n"
-#define MSGTR_ADecoderPreinitFailed "Предварителната инициализация на ADecoder се провали :(\n"
-#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Заделяне на %d байта за входния буфер.\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Заделяне на %d + %d = %d байта за изходния буфер.\n"
+#define MSGTR_VDecoderInitFailed "РРЅРёС†РёР°Р»РёР·Р°С†РёСЏС‚Р° РЅР° VDecoder СЃРµ РїСЂРѕРІР°Р»Рё :(\n"
+#define MSGTR_ADecoderInitFailed "РРЅРёС†РёР°Р»РёР·Р°С†РёСЏС‚Р° РЅР° ADecoder СЃРµ РїСЂРѕРІР°Р»Рё :(\n"
+#define MSGTR_ADecoderPreinitFailed "РџСЂРµРґРІР°СЂРёС‚РµР»РЅР°С‚Р° РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РЅР° ADecoder СЃРµ РїСЂРѕРІР°Р»Рё :(\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Р—Р°РґРµР»СЏРЅРµ РЅР° %d Р±Р°Р№С‚Р° Р·Р° РІС…РѕРґРЅРёСЏ Р±СѓС„РµСЂ.\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Р—Р°РґРµР»СЏРЅРµ РЅР° %d + %d = %d Р±Р°Р№С‚Р° Р·Р° РёР·С…РѕРґРЅРёСЏ Р±СѓС„РµСЂ.\n"
 
 // LIRC:
-#define MSGTR_SettingUpLIRC "Установяване на LIRC поддръжка...\n"
-#define MSGTR_LIRCdisabled "Няма да можете да ползвате дистанционното управление.\n"
-#define MSGTR_LIRCopenfailed "Няма да има LIRC поддръжка.\n"
-#define MSGTR_LIRCcfgerr "Конфигурационният файл за LIRC %s не може да бъде прочетен.\n"
+#define MSGTR_SettingUpLIRC "РЈСЃС‚Р°РЅРѕРІСЏРІР°РЅРµ РЅР° LIRC РїРѕРґРґСЂСЉР¶РєР°...\n"
+#define MSGTR_LIRCdisabled "РќСЏРјР° РґР° РјРѕР¶РµС‚Рµ РґР° РїРѕР»Р·РІР°С‚Рµ РґРёСЃС‚Р°РЅС†РёРѕРЅРЅРѕС‚Рѕ СѓРїСЂР°РІР»РµРЅРёРµ.\n"
+#define MSGTR_LIRCopenfailed "РќСЏРјР° РґР° РёРјР° LIRC РїРѕРґРґСЂСЉР¶РєР°.\n"
+#define MSGTR_LIRCcfgerr "РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРёСЏС‚ С„Р°Р№Р» Р·Р° LIRC %s РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РїСЂРѕС‡РµС‚РµРЅ.\n"
 
 // vf.c
-#define MSGTR_CouldNotFindVideoFilter "Не може да бъде открит видео филтър '%s'.\n"
-#define MSGTR_CouldNotOpenVideoFilter "Не може да бъде отворен видео филтър '%s'.\n"
-#define MSGTR_OpeningVideoFilter "Отваряне на видео филтър: "
-#define MSGTR_CannotFindColorspace "Не може да бъде открит съответстващ цветови формат, дори с вмъкване на 'scale':(\n"
+#define MSGTR_CouldNotFindVideoFilter "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РєСЂРёС‚ РІРёРґРµРѕ С„РёР»С‚СЉСЂ '%s'.\n"
+#define MSGTR_CouldNotOpenVideoFilter "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ РІРёРґРµРѕ С„РёР»С‚СЉСЂ '%s'.\n"
+#define MSGTR_OpeningVideoFilter "РћС‚РІР°СЂСЏРЅРµ РЅР° РІРёРґРµРѕ С„РёР»С‚СЉСЂ: "
+#define MSGTR_CannotFindColorspace "РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РєСЂРёС‚ СЃСЉРѕС‚РІРµС‚СЃС‚РІР°С‰ С†РІРµС‚РѕРІРё С„РѕСЂРјР°С‚, РґРѕСЂРё СЃ РІРјСЉРєРІР°РЅРµ РЅР° 'scale':(\n"
 
 // vd.c
-#define MSGTR_CodecDidNotSet "VDec: Кодекът не е указал sh->disp_w и sh->disp_h, опит за решение.\n"
-#define MSGTR_VoConfigRequest "VDec: заявка на vo config - %d x %d (preferred csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Не е открит подходящ цветови формат - повторен опит с -vf scale...\n"
-#define MSGTR_MovieAspectIsSet "Пропорциите на филма са %.2f:1 - мащабиране до правилните пропорции .\n"
-#define MSGTR_MovieAspectUndefined "Не са дефинирани пропорции - без предварително мащабиране.\n"
+#define MSGTR_CodecDidNotSet "VDec: РљРѕРґРµРєСЉС‚ РЅРµ Рµ СѓРєР°Р·Р°Р» sh->disp_w Рё sh->disp_h, РѕРїРёС‚ Р·Р° СЂРµС€РµРЅРёРµ.\n"
+#define MSGTR_VoConfigRequest "VDec: Р·Р°СЏРІРєР° РЅР° vo config - %d x %d (preferred csp: %s)\n"
+#define MSGTR_CouldNotFindColorspace "РќРµ Рµ РѕС‚РєСЂРёС‚ РїРѕРґС…РѕРґСЏС‰ С†РІРµС‚РѕРІРё С„РѕСЂРјР°С‚ - РїРѕРІС‚РѕСЂРµРЅ РѕРїРёС‚ СЃ -vf scale...\n"
+#define MSGTR_MovieAspectIsSet "РџСЂРѕРїРѕСЂС†РёРёС‚Рµ РЅР° С„РёР»РјР° СЃР° %.2f:1 - РјР°С‰Р°Р±РёСЂР°РЅРµ РґРѕ РїСЂР°РІРёР»РЅРёС‚Рµ РїСЂРѕРїРѕСЂС†РёРё .\n"
+#define MSGTR_MovieAspectUndefined "РќРµ СЃР° РґРµС„РёРЅРёСЂР°РЅРё РїСЂРѕРїРѕСЂС†РёРё - Р±РµР· РїСЂРµРґРІР°СЂРёС‚РµР»РЅРѕ РјР°С‰Р°Р±РёСЂР°РЅРµ.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Трябва да обновите/инсталирате пакета с двоичните кодеци.\nОтидете на http://www.mplayerhq.hu/dload.html\n"
-#define MSGTR_DShowInitOK "INFO: Видеокодек Win32/DShow е инициализиран успешно.\n"
-#define MSGTR_DMOInitOK "INFO: Видеокодек Win32/DMO е инициализиран успешно.\n"
+#define MSGTR_DownloadCodecPackage "РўСЂСЏР±РІР° РґР° РѕР±РЅРѕРІРёС‚Рµ/РёРЅСЃС‚Р°Р»РёСЂР°С‚Рµ РїР°РєРµС‚Р° СЃ РґРІРѕРёС‡РЅРёС‚Рµ РєРѕРґРµС†Рё.\nРћС‚РёРґРµС‚Рµ РЅР° http://www.mplayerhq.hu/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Р’РёРґРµРѕРєРѕРґРµРє Win32/DShow Рµ РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅ СѓСЃРїРµС€РЅРѕ.\n"
+#define MSGTR_DMOInitOK "INFO: Р’РёРґРµРѕРєРѕРґРµРє Win32/DMO Рµ РёРЅРёС†РёР°Р»РёР·РёСЂР°РЅ СѓСЃРїРµС€РЅРѕ.\n"
 
 // x11_common.c
-#define MSGTR_EwmhFullscreenStateFailed "\nX11: Не може да прати EWMH fullscreen Event!\n"
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: РќРµ РјРѕР¶Рµ РґР° РїСЂР°С‚Рё EWMH fullscreen Event!\n"
 
-#define MSGTR_InsertingAfVolume "[Смесител] Няма хардуерно смесване, вмъкване на филтър за силата на звука.\n"
-#define MSGTR_NoVolume "[Смесител] Не е достъпна настройка на звука.\n"
+#define MSGTR_InsertingAfVolume "[РЎРјРµСЃРёС‚РµР»] РќСЏРјР° С…Р°СЂРґСѓРµСЂРЅРѕ СЃРјРµСЃРІР°РЅРµ, РІРјСЉРєРІР°РЅРµ РЅР° С„РёР»С‚СЉСЂ Р·Р° СЃРёР»Р°С‚Р° РЅР° Р·РІСѓРєР°.\n"
+#define MSGTR_NoVolume "[РЎРјРµСЃРёС‚РµР»] РќРµ Рµ РґРѕСЃС‚СЉРїРЅР° РЅР°СЃС‚СЂРѕР№РєР° РЅР° Р·РІСѓРєР°.\n"
 
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "Информация"
-#define MSGTR_FileSelect "Избор на файл..."
-#define MSGTR_SubtitleSelect "Избор на субтитри..."
-#define MSGTR_OtherSelect "Избор..."
-#define MSGTR_AudioFileSelect "Избор на външен аудио канал..."
-#define MSGTR_FontSelect "Избор на шрифт..."
-#define MSGTR_PlayList "Списък за възпроизвеждане"
-#define MSGTR_Equalizer "Еквалайзер"
-#define MSGTR_SkinBrowser "Избор на Skin"
-#define MSGTR_Network "Поток от мрежата..."
-#define MSGTR_Preferences "Предпочитания"
-#define MSGTR_AudioPreferences "Конфигуриране на аудио драйвера"
-#define MSGTR_NoMediaOpened "Няма отворени елементи."
-#define MSGTR_VCDTrack "VCD писта %d"
-#define MSGTR_NoChapter "Няма раздели"
-#define MSGTR_Chapter "Раздел %d"
-#define MSGTR_NoFileLoaded "Не е зареден файл."
+#define MSGTR_About "РРЅС„РѕСЂРјР°С†РёСЏ"
+#define MSGTR_FileSelect "РР·Р±РѕСЂ РЅР° С„Р°Р№Р»..."
+#define MSGTR_SubtitleSelect "РР·Р±РѕСЂ РЅР° СЃСѓР±С‚РёС‚СЂРё..."
+#define MSGTR_OtherSelect "РР·Р±РѕСЂ..."
+#define MSGTR_AudioFileSelect "РР·Р±РѕСЂ РЅР° РІСЉРЅС€РµРЅ Р°СѓРґРёРѕ РєР°РЅР°Р»..."
+#define MSGTR_FontSelect "РР·Р±РѕСЂ РЅР° С€СЂРёС„С‚..."
+#define MSGTR_PlayList "РЎРїРёСЃСЉРє Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ"
+#define MSGTR_Equalizer "Р•РєРІР°Р»Р°Р№Р·РµСЂ"
+#define MSGTR_SkinBrowser "РР·Р±РѕСЂ РЅР° Skin"
+#define MSGTR_Network "РџРѕС‚РѕРє РѕС‚ РјСЂРµР¶Р°С‚Р°..."
+#define MSGTR_Preferences "РџСЂРµРґРїРѕС‡РёС‚Р°РЅРёСЏ"
+#define MSGTR_AudioPreferences "РљРѕРЅС„РёРіСѓСЂРёСЂР°РЅРµ РЅР° Р°СѓРґРёРѕ РґСЂР°Р№РІРµСЂР°"
+#define MSGTR_NoMediaOpened "РќСЏРјР° РѕС‚РІРѕСЂРµРЅРё РµР»РµРјРµРЅС‚Рё."
+#define MSGTR_VCDTrack "VCD РїРёСЃС‚Р° %d"
+#define MSGTR_NoChapter "РќСЏРјР° СЂР°Р·РґРµР»Рё"
+#define MSGTR_Chapter "Р Р°Р·РґРµР» %d"
+#define MSGTR_NoFileLoaded "РќРµ Рµ Р·Р°СЂРµРґРµРЅ С„Р°Р№Р»."
 
 // --- buttons ---
 #define MSGTR_Ok "OK"
-#define MSGTR_Cancel "Отказ"
-#define MSGTR_Add "Добавяне"
-#define MSGTR_Remove "Премахване"
-#define MSGTR_Clear "Изчистване"
-#define MSGTR_Config "Конфигурация"
-#define MSGTR_ConfigDriver "Конфигуриране на драйвера"
-#define MSGTR_Browse "Избор"
+#define MSGTR_Cancel "РћС‚РєР°Р·"
+#define MSGTR_Add "Р”РѕР±Р°РІСЏРЅРµ"
+#define MSGTR_Remove "РџСЂРµРјР°С…РІР°РЅРµ"
+#define MSGTR_Clear "РР·С‡РёСЃС‚РІР°РЅРµ"
+#define MSGTR_Config "РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ"
+#define MSGTR_ConfigDriver "РљРѕРЅС„РёРіСѓСЂРёСЂР°РЅРµ РЅР° РґСЂР°Р№РІРµСЂР°"
+#define MSGTR_Browse "РР·Р±РѕСЂ"
 
 // --- error messages ---
-#define MSGTR_NEMDB "За съжаление, няма достатъчно памет за draw buffer."
-#define MSGTR_NEMFMR "За съжаление, няма достатъчно памет за менюто."
-#define MSGTR_IDFGCVD "За съжаление, няма съвместим с GUI видео драйвер."
-#define MSGTR_NEEDLAVCFAME "За съжаление, не можете да възпроизвеждате различни от MPEG\nфайлове с вашето DXR3/H+ устройство без прекодиране.\nМоля разрешете lavc или fame в полето за конфигурация на DXR3/H+ ."
-#define MSGTR_UNKNOWNWINDOWTYPE "Неизвестен тип на прозорец ..."
+#define MSGTR_NEMDB "Р—Р° СЃСЉР¶Р°Р»РµРЅРёРµ, РЅСЏРјР° РґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚ Р·Р° draw buffer."
+#define MSGTR_NEMFMR "Р—Р° СЃСЉР¶Р°Р»РµРЅРёРµ, РЅСЏРјР° РґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚ Р·Р° РјРµРЅСЋС‚Рѕ."
+#define MSGTR_IDFGCVD "Р—Р° СЃСЉР¶Р°Р»РµРЅРёРµ, РЅСЏРјР° СЃСЉРІРјРµСЃС‚РёРј СЃ GUI РІРёРґРµРѕ РґСЂР°Р№РІРµСЂ."
+#define MSGTR_NEEDLAVCFAME "Р—Р° СЃСЉР¶Р°Р»РµРЅРёРµ, РЅРµ РјРѕР¶РµС‚Рµ РґР° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°С‚Рµ СЂР°Р·Р»РёС‡РЅРё РѕС‚ MPEG\nС„Р°Р№Р»РѕРІРµ СЃ РІР°С€РµС‚Рѕ DXR3/H+ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ Р±РµР· РїСЂРµРєРѕРґРёСЂР°РЅРµ.\nРњРѕР»СЏ СЂР°Р·СЂРµС€РµС‚Рµ lavc РёР»Рё fame РІ РїРѕР»РµС‚Рѕ Р·Р° РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ РЅР° DXR3/H+ ."
+#define MSGTR_UNKNOWNWINDOWTYPE "РќРµРёР·РІРµСЃС‚РµРЅ С‚РёРї РЅР° РїСЂРѕР·РѕСЂРµС† ..."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[skin] грешка в конфигурационния файл на skin-а на ред %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] внимание в конфигурационния файл на ред %d:\nоткрит widget (%s) без \"section\" преди това"
-#define MSGTR_SKIN_WARNING2 "[skin] внимание в конфигурациония файл на ред %d:\nоткрит widget (%s) без \"subsection\" преди това"
-#define MSGTR_SKIN_WARNING3 "[skin] внимание в конфигурационния файл на ред %d:\nтази подсекция не се поддържа от widget (%s)"
-#define MSGTR_SKIN_SkinFileNotFound "[skin] файлът ( %s ) не е намерен.\n"
-#define MSGTR_SKIN_BITMAP_16bit  "Bitmap с 16 и по-малко бита за цвят не се поддържа (%s).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "файлът не е намерен (%s)\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "грешка при четене на BMP (%s)\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "грешка при четене на TGA (%s)\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "грешка при четене на PNG (%s)\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "TGA с RLE компресия не се поддържа (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "неизвестен вид на файла (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConversionError "Грешка при преобразуване от 24 към 32 бита (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownMessage "неизвестно съобщение: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "недостатъчно памет\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "Декларирани са твърде много шрифтове.\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "Файлът със шрифта не е намерен.\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "Файл с изображението на шрифта не е намерен.\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "несъществуващ идентификатор на шрифт (%s)\n"
-#define MSGTR_SKIN_UnknownParameter "неизвестен параметър (%s)\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "Скинът не е намерен (%s).\n"
-#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Избраният скин ( %s ) не е намерен, ще се ползва 'default'...\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Грешка в конфигурационен файл (%s)\n"
-#define MSGTR_SKIN_LABEL "Скинове:"
+#define MSGTR_SKIN_ERRORMESSAGE "[skin] РіСЂРµС€РєР° РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРёСЏ С„Р°Р№Р» РЅР° skin-Р° РЅР° СЂРµРґ %d: %s"
+#define MSGTR_SKIN_WARNING1 "[skin] РІРЅРёРјР°РЅРёРµ РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРёСЏ С„Р°Р№Р» РЅР° СЂРµРґ %d:\nРѕС‚РєСЂРёС‚ widget (%s) Р±РµР· \"section\" РїСЂРµРґРё С‚РѕРІР°"
+#define MSGTR_SKIN_WARNING2 "[skin] РІРЅРёРјР°РЅРёРµ РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРёСЏ С„Р°Р№Р» РЅР° СЂРµРґ %d:\nРѕС‚РєСЂРёС‚ widget (%s) Р±РµР· \"subsection\" РїСЂРµРґРё С‚РѕРІР°"
+#define MSGTR_SKIN_WARNING3 "[skin] РІРЅРёРјР°РЅРёРµ РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРёСЏ С„Р°Р№Р» РЅР° СЂРµРґ %d:\nС‚Р°Р·Рё РїРѕРґСЃРµРєС†РёСЏ РЅРµ СЃРµ РїРѕРґРґСЉСЂР¶Р° РѕС‚ widget (%s)"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] С„Р°Р№Р»СЉС‚ ( %s ) РЅРµ Рµ РЅР°РјРµСЂРµРЅ.\n"
+#define MSGTR_SKIN_BITMAP_16bit  "Bitmap СЃ 16 Рё РїРѕ-РјР°Р»РєРѕ Р±РёС‚Р° Р·Р° С†РІСЏС‚ РЅРµ СЃРµ РїРѕРґРґСЉСЂР¶Р° (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "С„Р°Р№Р»СЉС‚ РЅРµ Рµ РЅР°РјРµСЂРµРЅ (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "РіСЂРµС€РєР° РїСЂРё С‡РµС‚РµРЅРµ РЅР° BMP (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "РіСЂРµС€РєР° РїСЂРё С‡РµС‚РµРЅРµ РЅР° TGA (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "РіСЂРµС€РєР° РїСЂРё С‡РµС‚РµРЅРµ РЅР° PNG (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "TGA СЃ RLE РєРѕРјРїСЂРµСЃРёСЏ РЅРµ СЃРµ РїРѕРґРґСЉСЂР¶Р° (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "РЅРµРёР·РІРµСЃС‚РµРЅ РІРёРґ РЅР° С„Р°Р№Р»Р° (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "Р“СЂРµС€РєР° РїСЂРё РїСЂРµРѕР±СЂР°Р·СѓРІР°РЅРµ РѕС‚ 24 РєСЉРј 32 Р±РёС‚Р° (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownMessage "РЅРµРёР·РІРµСЃС‚РЅРѕ СЃСЉРѕР±С‰РµРЅРёРµ: %s\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "РЅРµРґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "Р”РµРєР»Р°СЂРёСЂР°РЅРё СЃР° С‚РІСЉСЂРґРµ РјРЅРѕРіРѕ С€СЂРёС„С‚РѕРІРµ.\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "Р¤Р°Р№Р»СЉС‚ СЃСЉСЃ С€СЂРёС„С‚Р° РЅРµ Рµ РЅР°РјРµСЂРµРЅ.\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "Р¤Р°Р№Р» СЃ РёР·РѕР±СЂР°Р¶РµРЅРёРµС‚Рѕ РЅР° С€СЂРёС„С‚Р° РЅРµ Рµ РЅР°РјРµСЂРµРЅ.\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "РЅРµСЃСЉС‰РµСЃС‚РІСѓРІР°С‰ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РЅР° С€СЂРёС„С‚ (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "РЅРµРёР·РІРµСЃС‚РµРЅ РїР°СЂР°РјРµС‚СЉСЂ (%s)\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "РЎРєРёРЅСЉС‚ РЅРµ Рµ РЅР°РјРµСЂРµРЅ (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "РР·Р±СЂР°РЅРёСЏС‚ СЃРєРёРЅ ( %s ) РЅРµ Рµ РЅР°РјРµСЂРµРЅ, С‰Рµ СЃРµ РїРѕР»Р·РІР° 'default'...\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Р“СЂРµС€РєР° РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРµРЅ С„Р°Р№Р» (%s)\n"
+#define MSGTR_SKIN_LABEL "РЎРєРёРЅРѕРІРµ:"
 
 // --- gtk menus
-#define MSGTR_MENU_AboutMPlayer "Относно MPlayer"
-#define MSGTR_MENU_Open "Oтваряне..."
-#define MSGTR_MENU_PlayFile "Пускане на файл..."
-#define MSGTR_MENU_PlayVCD "Пускане на VCD..."
-#define MSGTR_MENU_PlayDVD "Пускане на DVD..."
-#define MSGTR_MENU_PlayURL "Пускане от URL..."
-#define MSGTR_MENU_LoadSubtitle "Зареждане на субтитри..."
-#define MSGTR_MENU_DropSubtitle "Премахване на субтитри..."
-#define MSGTR_MENU_LoadExternAudioFile "Зареждане на външен звуков файл..."
+#define MSGTR_MENU_AboutMPlayer "РћС‚РЅРѕСЃРЅРѕ MPlayer"
+#define MSGTR_MENU_Open "OС‚РІР°СЂСЏРЅРµ..."
+#define MSGTR_MENU_PlayFile "РџСѓСЃРєР°РЅРµ РЅР° С„Р°Р№Р»..."
+#define MSGTR_MENU_PlayVCD "РџСѓСЃРєР°РЅРµ РЅР° VCD..."
+#define MSGTR_MENU_PlayDVD "РџСѓСЃРєР°РЅРµ РЅР° DVD..."
+#define MSGTR_MENU_PlayURL "РџСѓСЃРєР°РЅРµ РѕС‚ URL..."
+#define MSGTR_MENU_LoadSubtitle "Р—Р°СЂРµР¶РґР°РЅРµ РЅР° СЃСѓР±С‚РёС‚СЂРё..."
+#define MSGTR_MENU_DropSubtitle "РџСЂРµРјР°С…РІР°РЅРµ РЅР° СЃСѓР±С‚РёС‚СЂРё..."
+#define MSGTR_MENU_LoadExternAudioFile "Р—Р°СЂРµР¶РґР°РЅРµ РЅР° РІСЉРЅС€РµРЅ Р·РІСѓРєРѕРІ С„Р°Р№Р»..."
 #define MSGTR_MENU_Playing "Playing"
-#define MSGTR_MENU_Play "Старт"
-#define MSGTR_MENU_Pause "Пауза"
-#define MSGTR_MENU_Stop "Стоп"
-#define MSGTR_MENU_NextStream "Следващ"
-#define MSGTR_MENU_PrevStream "Предишен"
-#define MSGTR_MENU_Size "Размер"
-#define MSGTR_MENU_HalfSize   "Половин размер"
-#define MSGTR_MENU_NormalSize "Нормален размер"
-#define MSGTR_MENU_DoubleSize "Двоен размер"
-#define MSGTR_MENU_FullScreen "На цял екран"
+#define MSGTR_MENU_Play "РЎС‚Р°СЂС‚"
+#define MSGTR_MENU_Pause "РџР°СѓР·Р°"
+#define MSGTR_MENU_Stop "РЎС‚РѕРї"
+#define MSGTR_MENU_NextStream "РЎР»РµРґРІР°С‰"
+#define MSGTR_MENU_PrevStream "РџСЂРµРґРёС€РµРЅ"
+#define MSGTR_MENU_Size "Р Р°Р·РјРµСЂ"
+#define MSGTR_MENU_HalfSize   "РџРѕР»РѕРІРёРЅ СЂР°Р·РјРµСЂ"
+#define MSGTR_MENU_NormalSize "РќРѕСЂРјР°Р»РµРЅ СЂР°Р·РјРµСЂ"
+#define MSGTR_MENU_DoubleSize "Р”РІРѕРµРЅ СЂР°Р·РјРµСЂ"
+#define MSGTR_MENU_FullScreen "РќР° С†СЏР» РµРєСЂР°РЅ"
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "Oтваряне на диск..."
-#define MSGTR_MENU_ShowDVDMenu "Показване на DVD меню"
-#define MSGTR_MENU_Titles "Заглавия"
-#define MSGTR_MENU_Title "Заглавие %2d"
-#define MSGTR_MENU_None "(няма)"
-#define MSGTR_MENU_Chapters "Раздели"
-#define MSGTR_MENU_Chapter "Раздел %2d"
-#define MSGTR_MENU_AudioLanguages "Език за аудио"
-#define MSGTR_MENU_SubtitleLanguages "Език на субтитрите"
+#define MSGTR_MENU_PlayDisc "OС‚РІР°СЂСЏРЅРµ РЅР° РґРёСЃРє..."
+#define MSGTR_MENU_ShowDVDMenu "РџРѕРєР°Р·РІР°РЅРµ РЅР° DVD РјРµРЅСЋ"
+#define MSGTR_MENU_Titles "Р—Р°РіР»Р°РІРёСЏ"
+#define MSGTR_MENU_Title "Р—Р°РіР»Р°РІРёРµ %2d"
+#define MSGTR_MENU_None "(РЅСЏРјР°)"
+#define MSGTR_MENU_Chapters "Р Р°Р·РґРµР»Рё"
+#define MSGTR_MENU_Chapter "Р Р°Р·РґРµР» %2d"
+#define MSGTR_MENU_AudioLanguages "Р•Р·РёРє Р·Р° Р°СѓРґРёРѕ"
+#define MSGTR_MENU_SubtitleLanguages "Р•Р·РёРє РЅР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ"
 // TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "Playlist"
-#define MSGTR_MENU_SkinBrowser "Избор на Skin"
+#define MSGTR_MENU_SkinBrowser "РР·Р±РѕСЂ РЅР° Skin"
 // TODO: Why is this different from MSGTR_Preferences?
-#define MSGTR_MENU_Preferences "Настройки"
-#define MSGTR_MENU_Exit "Изход..."
-#define MSGTR_MENU_Mute "Без звук"
-#define MSGTR_MENU_Original "Без промяна"
-#define MSGTR_MENU_AspectRatio "Съотношение"
-#define MSGTR_MENU_AudioTrack "Аудио писта"
-#define MSGTR_MENU_Track "Писта %d"
-#define MSGTR_MENU_VideoTrack "видео писта"
+#define MSGTR_MENU_Preferences "РќР°СЃС‚СЂРѕР№РєРё"
+#define MSGTR_MENU_Exit "РР·С…РѕРґ..."
+#define MSGTR_MENU_Mute "Р‘РµР· Р·РІСѓРє"
+#define MSGTR_MENU_Original "Р‘РµР· РїСЂРѕРјСЏРЅР°"
+#define MSGTR_MENU_AspectRatio "РЎСЉРѕС‚РЅРѕС€РµРЅРёРµ"
+#define MSGTR_MENU_AudioTrack "РђСѓРґРёРѕ РїРёСЃС‚Р°"
+#define MSGTR_MENU_Track "РџРёСЃС‚Р° %d"
+#define MSGTR_MENU_VideoTrack "РІРёРґРµРѕ РїРёСЃС‚Р°"
 
 // --- equalizer
-#define MSGTR_EQU_Audio "Аудио"
-#define MSGTR_EQU_Video "Видео"
-#define MSGTR_EQU_Contrast "Контраст: "
-#define MSGTR_EQU_Brightness "Светлост: "
-#define MSGTR_EQU_Hue "Тон: "
-#define MSGTR_EQU_Saturation "Наситеност: "
-#define MSGTR_EQU_Front_Left "Преден Ляв"
-#define MSGTR_EQU_Front_Right "Преден Десен"
-#define MSGTR_EQU_Back_Left "Заден Ляв"
-#define MSGTR_EQU_Back_Right "Заден Десен"
-#define MSGTR_EQU_Center "Централен"
-#define MSGTR_EQU_Bass "Бас"
-#define MSGTR_EQU_All "Всички"
-#define MSGTR_EQU_Channel1 "Канал 1:"
-#define MSGTR_EQU_Channel2 "Канал 2:"
-#define MSGTR_EQU_Channel3 "Канал 3:"
-#define MSGTR_EQU_Channel4 "Канал 4:"
-#define MSGTR_EQU_Channel5 "Канал 5:"
-#define MSGTR_EQU_Channel6 "Канал 6:"
+#define MSGTR_EQU_Audio "РђСѓРґРёРѕ"
+#define MSGTR_EQU_Video "Р’РёРґРµРѕ"
+#define MSGTR_EQU_Contrast "РљРѕРЅС‚СЂР°СЃС‚: "
+#define MSGTR_EQU_Brightness "РЎРІРµС‚Р»РѕСЃС‚: "
+#define MSGTR_EQU_Hue "РўРѕРЅ: "
+#define MSGTR_EQU_Saturation "РќР°СЃРёС‚РµРЅРѕСЃС‚: "
+#define MSGTR_EQU_Front_Left "РџСЂРµРґРµРЅ Р›СЏРІ"
+#define MSGTR_EQU_Front_Right "РџСЂРµРґРµРЅ Р”РµСЃРµРЅ"
+#define MSGTR_EQU_Back_Left "Р—Р°РґРµРЅ Р›СЏРІ"
+#define MSGTR_EQU_Back_Right "Р—Р°РґРµРЅ Р”РµСЃРµРЅ"
+#define MSGTR_EQU_Center "Р¦РµРЅС‚СЂР°Р»РµРЅ"
+#define MSGTR_EQU_Bass "Р‘Р°СЃ"
+#define MSGTR_EQU_All "Р’СЃРёС‡РєРё"
+#define MSGTR_EQU_Channel1 "РљР°РЅР°Р» 1:"
+#define MSGTR_EQU_Channel2 "РљР°РЅР°Р» 2:"
+#define MSGTR_EQU_Channel3 "РљР°РЅР°Р» 3:"
+#define MSGTR_EQU_Channel4 "РљР°РЅР°Р» 4:"
+#define MSGTR_EQU_Channel5 "РљР°РЅР°Р» 5:"
+#define MSGTR_EQU_Channel6 "РљР°РЅР°Р» 6:"
 
 // --- playlist
-#define MSGTR_PLAYLIST_Path "Път"
-#define MSGTR_PLAYLIST_Selected "Избрани файлове"
-#define MSGTR_PLAYLIST_Files "Файлове"
-#define MSGTR_PLAYLIST_DirectoryTree "Директории"
+#define MSGTR_PLAYLIST_Path "РџСЉС‚"
+#define MSGTR_PLAYLIST_Selected "РР·Р±СЂР°РЅРё С„Р°Р№Р»РѕРІРµ"
+#define MSGTR_PLAYLIST_Files "Р¤Р°Р№Р»РѕРІРµ"
+#define MSGTR_PLAYLIST_DirectoryTree "Р”РёСЂРµРєС‚РѕСЂРёРё"
 
 // --- preferences
-#define MSGTR_PREFERENCES_SubtitleOSD "Субтитри и OSD"
-#define MSGTR_PREFERENCES_Codecs "Кодеци & demuxer"
-#define MSGTR_PREFERENCES_Misc "Разни"
+#define MSGTR_PREFERENCES_SubtitleOSD "РЎСѓР±С‚РёС‚СЂРё Рё OSD"
+#define MSGTR_PREFERENCES_Codecs "РљРѕРґРµС†Рё & demuxer"
+#define MSGTR_PREFERENCES_Misc "Р Р°Р·РЅРё"
 
-#define MSGTR_PREFERENCES_None "Без"
-#define MSGTR_PREFERENCES_DriverDefault "Подразбиращи се за драйвера"
-#define MSGTR_PREFERENCES_AvailableDrivers "Достъпни драйвери:"
-#define MSGTR_PREFERENCES_DoNotPlaySound "Без звук"
-#define MSGTR_PREFERENCES_NormalizeSound "Изравняване на звука"
-#define MSGTR_PREFERENCES_EnableEqualizer "Включване на еквалайзера"
-#define MSGTR_PREFERENCES_SoftwareMixer "Включва Софтуерен Смесител"
-#define MSGTR_PREFERENCES_ExtraStereo "Включване на допълнително стерео"
-#define MSGTR_PREFERENCES_Coefficient "Коефициент:"
-#define MSGTR_PREFERENCES_AudioDelay "Закъснение на звука"
-#define MSGTR_PREFERENCES_DoubleBuffer "Двойно буфериране"
-#define MSGTR_PREFERENCES_DirectRender "Включване на direct rendering"
-#define MSGTR_PREFERENCES_FrameDrop "Разрешаване на прескачането на кадри"
-#define MSGTR_PREFERENCES_HFrameDrop "Разрешаване на ИНТЕНЗИВНО прескачане на кадри (опасно)"
-#define MSGTR_PREFERENCES_Flip "Преобръщане на образа"
+#define MSGTR_PREFERENCES_None "Р‘РµР·"
+#define MSGTR_PREFERENCES_DriverDefault "РџРѕРґСЂР°Р·Р±РёСЂР°С‰Рё СЃРµ Р·Р° РґСЂР°Р№РІРµСЂР°"
+#define MSGTR_PREFERENCES_AvailableDrivers "Р”РѕСЃС‚СЉРїРЅРё РґСЂР°Р№РІРµСЂРё:"
+#define MSGTR_PREFERENCES_DoNotPlaySound "Р‘РµР· Р·РІСѓРє"
+#define MSGTR_PREFERENCES_NormalizeSound "РР·СЂР°РІРЅСЏРІР°РЅРµ РЅР° Р·РІСѓРєР°"
+#define MSGTR_PREFERENCES_EnableEqualizer "Р’РєР»СЋС‡РІР°РЅРµ РЅР° РµРєРІР°Р»Р°Р№Р·РµСЂР°"
+#define MSGTR_PREFERENCES_SoftwareMixer "Р’РєР»СЋС‡РІР° РЎРѕС„С‚СѓРµСЂРµРЅ РЎРјРµСЃРёС‚РµР»"
+#define MSGTR_PREFERENCES_ExtraStereo "Р’РєР»СЋС‡РІР°РЅРµ РЅР° РґРѕРїСЉР»РЅРёС‚РµР»РЅРѕ СЃС‚РµСЂРµРѕ"
+#define MSGTR_PREFERENCES_Coefficient "РљРѕРµС„РёС†РёРµРЅС‚:"
+#define MSGTR_PREFERENCES_AudioDelay "Р—Р°РєСЉСЃРЅРµРЅРёРµ РЅР° Р·РІСѓРєР°"
+#define MSGTR_PREFERENCES_DoubleBuffer "Р”РІРѕР№РЅРѕ Р±СѓС„РµСЂРёСЂР°РЅРµ"
+#define MSGTR_PREFERENCES_DirectRender "Р’РєР»СЋС‡РІР°РЅРµ РЅР° direct rendering"
+#define MSGTR_PREFERENCES_FrameDrop "Р Р°Р·СЂРµС€Р°РІР°РЅРµ РЅР° РїСЂРµСЃРєР°С‡Р°РЅРµС‚Рѕ РЅР° РєР°РґСЂРё"
+#define MSGTR_PREFERENCES_HFrameDrop "Р Р°Р·СЂРµС€Р°РІР°РЅРµ РЅР° РРќРўР•РќР—РР’РќРћ РїСЂРµСЃРєР°С‡Р°РЅРµ РЅР° РєР°РґСЂРё (РѕРїР°СЃРЅРѕ)"
+#define MSGTR_PREFERENCES_Flip "РџСЂРµРѕР±СЂСЉС‰Р°РЅРµ РЅР° РѕР±СЂР°Р·Р°"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_OSDTimer "Часовник и индикатори"
-#define MSGTR_PREFERENCES_OSDProgress "Само индикатори за напредване"
-#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Часовник, проценти и общо време"
-#define MSGTR_PREFERENCES_Subtitle "Субтитри:"
-#define MSGTR_PREFERENCES_SUB_Delay "Закъснение: "
+#define MSGTR_PREFERENCES_OSDTimer "Р§Р°СЃРѕРІРЅРёРє Рё РёРЅРґРёРєР°С‚РѕСЂРё"
+#define MSGTR_PREFERENCES_OSDProgress "РЎР°РјРѕ РёРЅРґРёРєР°С‚РѕСЂРё Р·Р° РЅР°РїСЂРµРґРІР°РЅРµ"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Р§Р°СЃРѕРІРЅРёРє, РїСЂРѕС†РµРЅС‚Рё Рё РѕР±С‰Рѕ РІСЂРµРјРµ"
+#define MSGTR_PREFERENCES_Subtitle "РЎСѓР±С‚РёС‚СЂРё:"
+#define MSGTR_PREFERENCES_SUB_Delay "Р—Р°РєСЉСЃРЅРµРЅРёРµ: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
-#define MSGTR_PREFERENCES_SUB_POS "Местоположение: "
-#define MSGTR_PREFERENCES_SUB_AutoLoad "Изключване на автоматичното зареждане на субтитри"
-#define MSGTR_PREFERENCES_SUB_Unicode "Субтитри с Unicode кодиране"
-#define MSGTR_PREFERENCES_SUB_MPSUB "Преобразуване на субтитрите в формата на MPlayer"
-#define MSGTR_PREFERENCES_SUB_SRT "Преобразуване на субтитрите в SubViewer (SRT) формат"
-#define MSGTR_PREFERENCES_SUB_Overlap "Препокриване на субтитрите"
-#define MSGTR_PREFERENCES_Font "Шрифт:"
-#define MSGTR_PREFERENCES_FontFactor "Дебелина на сянката на шрифта:"
-#define MSGTR_PREFERENCES_PostProcess "Разрешаване на допълнителна обработка"
-#define MSGTR_PREFERENCES_AutoQuality "Автоматичен контрол на качеството: "
-#define MSGTR_PREFERENCES_NI "Разчитане на non-interleaved AVI формат"
-#define MSGTR_PREFERENCES_IDX "Построяване на индексната таблица наново, при необходимост"
-#define MSGTR_PREFERENCES_VideoCodecFamily "Фамилия видео кодеци:"
-#define MSGTR_PREFERENCES_AudioCodecFamily "Фамилия аудио кодеци:"
-#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD степен"
-#define MSGTR_PREFERENCES_FRAME_Subtitle "Субтитри"
-#define MSGTR_PREFERENCES_FRAME_Font "Шрифт"
-#define MSGTR_PREFERENCES_FRAME_PostProcess "Допълнителна обработка"
-#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Кодек & разпределител"
-#define MSGTR_PREFERENCES_FRAME_Cache "Кеширане"
-#define MSGTR_PREFERENCES_Audio_Device "Устройство:"
-#define MSGTR_PREFERENCES_Audio_Mixer "Смесител:"
-#define MSGTR_PREFERENCES_Audio_MixerChannel "Канал на смесителя:"
-#define MSGTR_PREFERENCES_Message "Не забравяйте, да рестартирате възпроизвеждането за да влязат в сила някои опции!"
-#define MSGTR_PREFERENCES_DXR3_VENC "Видео енкодер:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "Използване на LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Използване на FAME"
+#define MSGTR_PREFERENCES_SUB_POS "РњРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёРµ: "
+#define MSGTR_PREFERENCES_SUB_AutoLoad "РР·РєР»СЋС‡РІР°РЅРµ РЅР° Р°РІС‚РѕРјР°С‚РёС‡РЅРѕС‚Рѕ Р·Р°СЂРµР¶РґР°РЅРµ РЅР° СЃСѓР±С‚РёС‚СЂРё"
+#define MSGTR_PREFERENCES_SUB_Unicode "РЎСѓР±С‚РёС‚СЂРё СЃ Unicode РєРѕРґРёСЂР°РЅРµ"
+#define MSGTR_PREFERENCES_SUB_MPSUB "РџСЂРµРѕР±СЂР°Р·СѓРІР°РЅРµ РЅР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ РІ С„РѕСЂРјР°С‚Р° РЅР° MPlayer"
+#define MSGTR_PREFERENCES_SUB_SRT "РџСЂРµРѕР±СЂР°Р·СѓРІР°РЅРµ РЅР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ РІ SubViewer (SRT) С„РѕСЂРјР°С‚"
+#define MSGTR_PREFERENCES_SUB_Overlap "РџСЂРµРїРѕРєСЂРёРІР°РЅРµ РЅР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ"
+#define MSGTR_PREFERENCES_Font "РЁСЂРёС„С‚:"
+#define MSGTR_PREFERENCES_FontFactor "Р”РµР±РµР»РёРЅР° РЅР° СЃСЏРЅРєР°С‚Р° РЅР° С€СЂРёС„С‚Р°:"
+#define MSGTR_PREFERENCES_PostProcess "Р Р°Р·СЂРµС€Р°РІР°РЅРµ РЅР° РґРѕРїСЉР»РЅРёС‚РµР»РЅР° РѕР±СЂР°Р±РѕС‚РєР°"
+#define MSGTR_PREFERENCES_AutoQuality "РђРІС‚РѕРјР°С‚РёС‡РµРЅ РєРѕРЅС‚СЂРѕР» РЅР° РєР°С‡РµСЃС‚РІРѕС‚Рѕ: "
+#define MSGTR_PREFERENCES_NI "Р Р°Р·С‡РёС‚Р°РЅРµ РЅР° non-interleaved AVI С„РѕСЂРјР°С‚"
+#define MSGTR_PREFERENCES_IDX "РџРѕСЃС‚СЂРѕСЏРІР°РЅРµ РЅР° РёРЅРґРµРєСЃРЅР°С‚Р° С‚Р°Р±Р»РёС†Р° РЅР°РЅРѕРІРѕ, РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚"
+#define MSGTR_PREFERENCES_VideoCodecFamily "Р¤Р°РјРёР»РёСЏ РІРёРґРµРѕ РєРѕРґРµС†Рё:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "Р¤Р°РјРёР»РёСЏ Р°СѓРґРёРѕ РєРѕРґРµС†Рё:"
+#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD СЃС‚РµРїРµРЅ"
+#define MSGTR_PREFERENCES_FRAME_Subtitle "РЎСѓР±С‚РёС‚СЂРё"
+#define MSGTR_PREFERENCES_FRAME_Font "РЁСЂРёС„С‚"
+#define MSGTR_PREFERENCES_FRAME_PostProcess "Р”РѕРїСЉР»РЅРёС‚РµР»РЅР° РѕР±СЂР°Р±РѕС‚РєР°"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "РљРѕРґРµРє & СЂР°Р·РїСЂРµРґРµР»РёС‚РµР»"
+#define MSGTR_PREFERENCES_FRAME_Cache "РљРµС€РёСЂР°РЅРµ"
+#define MSGTR_PREFERENCES_Audio_Device "РЈСЃС‚СЂРѕР№СЃС‚РІРѕ:"
+#define MSGTR_PREFERENCES_Audio_Mixer "РЎРјРµСЃРёС‚РµР»:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "РљР°РЅР°Р» РЅР° СЃРјРµСЃРёС‚РµР»СЏ:"
+#define MSGTR_PREFERENCES_Message "РќРµ Р·Р°Р±СЂР°РІСЏР№С‚Рµ, РґР° СЂРµСЃС‚Р°СЂС‚РёСЂР°С‚Рµ РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµС‚Рѕ Р·Р° РґР° РІР»СЏР·Р°С‚ РІ СЃРёР»Р° РЅСЏРєРѕРё РѕРїС†РёРё!"
+#define MSGTR_PREFERENCES_DXR3_VENC "Р’РёРґРµРѕ РµРЅРєРѕРґРµСЂ:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "РР·РїРѕР»Р·РІР°РЅРµ РЅР° LAVC (FFmpeg)"
+#define MSGTR_PREFERENCES_DXR3_FAME "РР·РїРѕР»Р·РІР°РЅРµ РЅР° FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
-#define MSGTR_PREFERENCES_FontEncoding2 "Западноевропейски Езици (ISO-8859-1)"
-#define MSGTR_PREFERENCES_FontEncoding3 "Западноевропейски Езици със Euro (ISO-8859-15)"
-#define MSGTR_PREFERENCES_FontEncoding4 "Славянски/Централноевропейски Езици (ISO-8859-2)"
-#define MSGTR_PREFERENCES_FontEncoding5 "Есперанто, Галски, Малтийски, Турски (ISO-8859-3)"
-#define MSGTR_PREFERENCES_FontEncoding6 "Стар Балтийски (ISO-8859-4)"
-#define MSGTR_PREFERENCES_FontEncoding7 "Кирилица (ISO-8859-5)"
-#define MSGTR_PREFERENCES_FontEncoding8 "Арабски (ISO-8859-6)"
-#define MSGTR_PREFERENCES_FontEncoding9 "Съвременен Гръцки (ISO-8859-7)"
-#define MSGTR_PREFERENCES_FontEncoding10 "Турски (ISO-8859-9)"
-#define MSGTR_PREFERENCES_FontEncoding11 "Балтийски (ISO-8859-13)"
-#define MSGTR_PREFERENCES_FontEncoding12 "Келтски (ISO-8859-14)"
+#define MSGTR_PREFERENCES_FontEncoding2 "Р—Р°РїР°РґРЅРѕРµРІСЂРѕРїРµР№СЃРєРё Р•Р·РёС†Рё (ISO-8859-1)"
+#define MSGTR_PREFERENCES_FontEncoding3 "Р—Р°РїР°РґРЅРѕРµРІСЂРѕРїРµР№СЃРєРё Р•Р·РёС†Рё СЃСЉСЃ Euro (ISO-8859-15)"
+#define MSGTR_PREFERENCES_FontEncoding4 "РЎР»Р°РІСЏРЅСЃРєРё/Р¦РµРЅС‚СЂР°Р»РЅРѕРµРІСЂРѕРїРµР№СЃРєРё Р•Р·РёС†Рё (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding5 "Р•СЃРїРµСЂР°РЅС‚Рѕ, Р“Р°Р»СЃРєРё, РњР°Р»С‚РёР№СЃРєРё, РўСѓСЂСЃРєРё (ISO-8859-3)"
+#define MSGTR_PREFERENCES_FontEncoding6 "РЎС‚Р°СЂ Р‘Р°Р»С‚РёР№СЃРєРё (ISO-8859-4)"
+#define MSGTR_PREFERENCES_FontEncoding7 "РљРёСЂРёР»РёС†Р° (ISO-8859-5)"
+#define MSGTR_PREFERENCES_FontEncoding8 "РђСЂР°Р±СЃРєРё (ISO-8859-6)"
+#define MSGTR_PREFERENCES_FontEncoding9 "РЎСЉРІСЂРµРјРµРЅРµРЅ Р“СЂСЉС†РєРё (ISO-8859-7)"
+#define MSGTR_PREFERENCES_FontEncoding10 "РўСѓСЂСЃРєРё (ISO-8859-9)"
+#define MSGTR_PREFERENCES_FontEncoding11 "Р‘Р°Р»С‚РёР№СЃРєРё (ISO-8859-13)"
+#define MSGTR_PREFERENCES_FontEncoding12 "РљРµР»С‚СЃРєРё (ISO-8859-14)"
 #define MSGTR_PREFERENCES_FontEncoding13 "Hebrew charsets (ISO-8859-8)"
-#define MSGTR_PREFERENCES_FontEncoding14 "Руски (KOI8-R)"
-#define MSGTR_PREFERENCES_FontEncoding15 "Украински, Беларуски (KOI8-U/RU)"
-#define MSGTR_PREFERENCES_FontEncoding16 "Опростен Китайски (CP936)"
-#define MSGTR_PREFERENCES_FontEncoding17 "Традиционен Китайски (BIG5)"
-#define MSGTR_PREFERENCES_FontEncoding18 "Японски (SHIFT-JIS)"
-#define MSGTR_PREFERENCES_FontEncoding19 "Kорейски (CP949)"
+#define MSGTR_PREFERENCES_FontEncoding14 "Р СѓСЃРєРё (KOI8-R)"
+#define MSGTR_PREFERENCES_FontEncoding15 "РЈРєСЂР°РёРЅСЃРєРё, Р‘РµР»Р°СЂСѓСЃРєРё (KOI8-U/RU)"
+#define MSGTR_PREFERENCES_FontEncoding16 "РћРїСЂРѕСЃС‚РµРЅ РљРёС‚Р°Р№СЃРєРё (CP936)"
+#define MSGTR_PREFERENCES_FontEncoding17 "РўСЂР°РґРёС†РёРѕРЅРµРЅ РљРёС‚Р°Р№СЃРєРё (BIG5)"
+#define MSGTR_PREFERENCES_FontEncoding18 "РЇРїРѕРЅСЃРєРё (SHIFT-JIS)"
+#define MSGTR_PREFERENCES_FontEncoding19 "KРѕСЂРµР№СЃРєРё (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
-#define MSGTR_PREFERENCES_FontEncoding21 "Кирилица Windows (CP1251)"
-#define MSGTR_PREFERENCES_FontEncoding22 "Славянски/Централноевропейски Windows (CP1250)"
-#define MSGTR_PREFERENCES_FontNoAutoScale "Без автоматично мащабиране"
-#define MSGTR_PREFERENCES_FontPropWidth "Пропорционално на широчината на филма"
-#define MSGTR_PREFERENCES_FontPropHeight "Пропорционално на височината на филма"
-#define MSGTR_PREFERENCES_FontPropDiagonal "Пропорционално на дължината на диагонала"
-#define MSGTR_PREFERENCES_FontEncoding "Кодировка:"
-#define MSGTR_PREFERENCES_FontBlur "Размазване:"
-#define MSGTR_PREFERENCES_FontOutLine "Удебеляване:"
-#define MSGTR_PREFERENCES_FontTextScale "Мащаб на текста:"
-#define MSGTR_PREFERENCES_FontOSDScale "Мащаб на OSD:"
-#define MSGTR_PREFERENCES_Cache "Кеширане"
-#define MSGTR_PREFERENCES_CacheSize "Размер на кеша: "
-#define MSGTR_PREFERENCES_LoadFullscreen "Стартиране на цял екран"
-#define MSGTR_PREFERENCES_SaveWinPos "Запаметяване на местоположението на прозореца"
-#define MSGTR_PREFERENCES_XSCREENSAVER "Изключване на XScreenSaver"
-#define MSGTR_PREFERENCES_PlayBar "Лента за превъртане"
-#define MSGTR_PREFERENCES_AutoSync "Автоматична синхронизация"
-#define MSGTR_PREFERENCES_AutoSyncValue "Степен на синхронизацията: "
-#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM устройство:"
-#define MSGTR_PREFERENCES_DVDDevice "DVD устройство:"
-#define MSGTR_PREFERENCES_FPS "Кадри в секунда:"
-#define MSGTR_PREFERENCES_ShowVideoWindow "Показване на видео прозореца при неактивност"
+#define MSGTR_PREFERENCES_FontEncoding21 "РљРёСЂРёР»РёС†Р° Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "РЎР»Р°РІСЏРЅСЃРєРё/Р¦РµРЅС‚СЂР°Р»РЅРѕРµРІСЂРѕРїРµР№СЃРєРё Windows (CP1250)"
+#define MSGTR_PREFERENCES_FontNoAutoScale "Р‘РµР· Р°РІС‚РѕРјР°С‚РёС‡РЅРѕ РјР°С‰Р°Р±РёСЂР°РЅРµ"
+#define MSGTR_PREFERENCES_FontPropWidth "РџСЂРѕРїРѕСЂС†РёРѕРЅР°Р»РЅРѕ РЅР° С€РёСЂРѕС‡РёРЅР°С‚Р° РЅР° С„РёР»РјР°"
+#define MSGTR_PREFERENCES_FontPropHeight "РџСЂРѕРїРѕСЂС†РёРѕРЅР°Р»РЅРѕ РЅР° РІРёСЃРѕС‡РёРЅР°С‚Р° РЅР° С„РёР»РјР°"
+#define MSGTR_PREFERENCES_FontPropDiagonal "РџСЂРѕРїРѕСЂС†РёРѕРЅР°Р»РЅРѕ РЅР° РґСЉР»Р¶РёРЅР°С‚Р° РЅР° РґРёР°РіРѕРЅР°Р»Р°"
+#define MSGTR_PREFERENCES_FontEncoding "РљРѕРґРёСЂРѕРІРєР°:"
+#define MSGTR_PREFERENCES_FontBlur "Р Р°Р·РјР°Р·РІР°РЅРµ:"
+#define MSGTR_PREFERENCES_FontOutLine "РЈРґРµР±РµР»СЏРІР°РЅРµ:"
+#define MSGTR_PREFERENCES_FontTextScale "РњР°С‰Р°Р± РЅР° С‚РµРєСЃС‚Р°:"
+#define MSGTR_PREFERENCES_FontOSDScale "РњР°С‰Р°Р± РЅР° OSD:"
+#define MSGTR_PREFERENCES_Cache "РљРµС€РёСЂР°РЅРµ"
+#define MSGTR_PREFERENCES_CacheSize "Р Р°Р·РјРµСЂ РЅР° РєРµС€Р°: "
+#define MSGTR_PREFERENCES_LoadFullscreen "РЎС‚Р°СЂС‚РёСЂР°РЅРµ РЅР° С†СЏР» РµРєСЂР°РЅ"
+#define MSGTR_PREFERENCES_SaveWinPos "Р—Р°РїР°РјРµС‚СЏРІР°РЅРµ РЅР° РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёРµС‚Рѕ РЅР° РїСЂРѕР·РѕСЂРµС†Р°"
+#define MSGTR_PREFERENCES_XSCREENSAVER "РР·РєР»СЋС‡РІР°РЅРµ РЅР° XScreenSaver"
+#define MSGTR_PREFERENCES_PlayBar "Р›РµРЅС‚Р° Р·Р° РїСЂРµРІСЉСЂС‚Р°РЅРµ"
+#define MSGTR_PREFERENCES_AutoSync "РђРІС‚РѕРјР°С‚РёС‡РЅР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ"
+#define MSGTR_PREFERENCES_AutoSyncValue "РЎС‚РµРїРµРЅ РЅР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏС‚Р°: "
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM СѓСЃС‚СЂРѕР№СЃС‚РІРѕ:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD СѓСЃС‚СЂРѕР№СЃС‚РІРѕ:"
+#define MSGTR_PREFERENCES_FPS "РљР°РґСЂРё РІ СЃРµРєСѓРЅРґР°:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "РџРѕРєР°Р·РІР°РЅРµ РЅР° РІРёРґРµРѕ РїСЂРѕР·РѕСЂРµС†Р° РїСЂРё РЅРµР°РєС‚РёРІРЅРѕСЃС‚"
 
-#define MSGTR_ABOUT_UHU "Разработката на графичния интерфейс се спонсорира от UHU Linux\n"
+#define MSGTR_ABOUT_UHU "Р Р°Р·СЂР°Р±РѕС‚РєР°С‚Р° РЅР° РіСЂР°С„РёС‡РЅРёСЏ РёРЅС‚РµСЂС„РµР№СЃ СЃРµ СЃРїРѕРЅСЃРѕСЂРёСЂР° РѕС‚ UHU Linux\n"
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "Фатална грешка!"
-#define MSGTR_MSGBOX_LABEL_Error "Грешка!"
-#define MSGTR_MSGBOX_LABEL_Warning "Внимание!"
+#define MSGTR_MSGBOX_LABEL_FatalError "Р¤Р°С‚Р°Р»РЅР° РіСЂРµС€РєР°!"
+#define MSGTR_MSGBOX_LABEL_Error "Р“СЂРµС€РєР°!"
+#define MSGTR_MSGBOX_LABEL_Warning "Р’РЅРёРјР°РЅРёРµ!"
 
 // bitmap.c
 
-#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] недостатъчно памет за изображението\n"
-#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] недостатъчно памет за изображението\n"
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] РЅРµРґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚ Р·Р° РёР·РѕР±СЂР°Р¶РµРЅРёРµС‚Рѕ\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] РЅРµРґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚ Р·Р° РёР·РѕР±СЂР°Р¶РµРЅРёРµС‚Рѕ\n"
 
 // cfg.c
 
-#define MSGTR_ConfigFileReadError "[cfg] грешка при четене на конфигурационния файл ...\n"
-#define MSGTR_UnableToSaveOption "Не може да се запамети опцията '%s'.\n"
+#define MSGTR_ConfigFileReadError "[cfg] РіСЂРµС€РєР° РїСЂРё С‡РµС‚РµРЅРµ РЅР° РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРёСЏ С„Р°Р№Р» ...\n"
+#define MSGTR_UnableToSaveOption "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РїР°РјРµС‚Рё РѕРїС†РёСЏС‚Р° '%s'.\n"
 
 // interface.c
 
-#define MSGTR_DeletingSubtitles "[GUI] Изтриване на субтитрите.\n"
-#define MSGTR_LoadingSubtitles "[GUI] Зареждане на субтитрите: %s\n"
-#define MSGTR_AddingVideoFilter "[GUI] Добавяне на видео филтър: %s\n"
-#define MSGTR_RemovingVideoFilter "[GUI] Премахване на видео филтър: %s\n"
+#define MSGTR_DeletingSubtitles "[GUI] РР·С‚СЂРёРІР°РЅРµ РЅР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ.\n"
+#define MSGTR_LoadingSubtitles "[GUI] Р—Р°СЂРµР¶РґР°РЅРµ РЅР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] Р”РѕР±Р°РІСЏРЅРµ РЅР° РІРёРґРµРѕ С„РёР»С‚СЉСЂ: %s\n"
+#define MSGTR_RemovingVideoFilter "[GUI] РџСЂРµРјР°С…РІР°РЅРµ РЅР° РІРёРґРµРѕ С„РёР»С‚СЉСЂ: %s\n"
 
 // mw.c
 
-#define MSGTR_NotAFile "Това не прилича на файл: %s !\n"
+#define MSGTR_NotAFile "РўРѕРІР° РЅРµ РїСЂРёР»РёС‡Р° РЅР° С„Р°Р№Р»: %s !\n"
 
 // ws.c
 
-#define MSGTR_WS_CouldNotOpenDisplay "[ws] Не може да бъде отворен DISPLAY.\n"
-#define MSGTR_WS_RemoteDisplay "[ws] Отдалечен дисплей, изключване на  XMITSHM.\n"
-#define MSGTR_WS_NoXshm "[ws] За съжаление вашата система не поддържа разширението на X за споделена памет.\n"
-#define MSGTR_WS_NoXshape "[ws] За съжаление вашата система не поддържа разширението XShape.\n"
-#define MSGTR_WS_ColorDepthTooLow "[ws] Твърде ниска дълбочина на цветовете.\n"
-#define MSGTR_WS_TooManyOpenWindows "[ws] Твърде много отворени прозорци.\n"
-#define MSGTR_WS_ShmError "[ws] грешка в разширението за споделена памет\n"
-#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Няма достатъчно памет за draw buffer.\n"
-#define MSGTR_WS_DpmsUnavailable "DPMS не е достъпен?\n"
-#define MSGTR_WS_DpmsNotEnabled "DPMS не може да бъде включен.\n"
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ DISPLAY.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] РћС‚РґР°Р»РµС‡РµРЅ РґРёСЃРїР»РµР№, РёР·РєР»СЋС‡РІР°РЅРµ РЅР°  XMITSHM.\n"
+#define MSGTR_WS_NoXshm "[ws] Р—Р° СЃСЉР¶Р°Р»РµРЅРёРµ РІР°С€Р°С‚Р° СЃРёСЃС‚РµРјР° РЅРµ РїРѕРґРґСЉСЂР¶Р° СЂР°Р·С€РёСЂРµРЅРёРµС‚Рѕ РЅР° X Р·Р° СЃРїРѕРґРµР»РµРЅР° РїР°РјРµС‚.\n"
+#define MSGTR_WS_NoXshape "[ws] Р—Р° СЃСЉР¶Р°Р»РµРЅРёРµ РІР°С€Р°С‚Р° СЃРёСЃС‚РµРјР° РЅРµ РїРѕРґРґСЉСЂР¶Р° СЂР°Р·С€РёСЂРµРЅРёРµС‚Рѕ XShape.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] РўРІСЉСЂРґРµ РЅРёСЃРєР° РґСЉР»Р±РѕС‡РёРЅР° РЅР° С†РІРµС‚РѕРІРµС‚Рµ.\n"
+#define MSGTR_WS_TooManyOpenWindows "[ws] РўРІСЉСЂРґРµ РјРЅРѕРіРѕ РѕС‚РІРѕСЂРµРЅРё РїСЂРѕР·РѕСЂС†Рё.\n"
+#define MSGTR_WS_ShmError "[ws] РіСЂРµС€РєР° РІ СЂР°Р·С€РёСЂРµРЅРёРµС‚Рѕ Р·Р° СЃРїРѕРґРµР»РµРЅР° РїР°РјРµС‚\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] РќСЏРјР° РґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚ Р·Р° draw buffer.\n"
+#define MSGTR_WS_DpmsUnavailable "DPMS РЅРµ Рµ РґРѕСЃС‚СЉРїРµРЅ?\n"
+#define MSGTR_WS_DpmsNotEnabled "DPMS РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РІРєР»СЋС‡РµРЅ.\n"
 
 // wsxdnd.c
 
-#define MSGTR_WS_NotAFile "Това не прилича на файл...\n"
-#define MSGTR_WS_DDNothing "D&D: Не е върнат резултат!\n"
+#define MSGTR_WS_NotAFile "РўРѕРІР° РЅРµ РїСЂРёР»РёС‡Р° РЅР° С„Р°Р№Р»...\n"
+#define MSGTR_WS_DDNothing "D&D: РќРµ Рµ РІСЉСЂРЅР°С‚ СЂРµР·СѓР»С‚Р°С‚!\n"
 
 #endif
 
 // ======================= VO Video Output drivers ========================
 
-#define MSGTR_VOincompCodec "Избраното изходно видео устройство е несъвместимо с този кодек.\n"
-#define MSGTR_VO_GenericError "Tази грешка е възникнала"
-#define MSGTR_VO_UnableToAccess "Достъпът е невъзможен"
-#define MSGTR_VO_ExistsButNoDirectory "вече съществува, но не е директория."
-#define MSGTR_VO_DirExistsButNotWritable "Директорията съществува, но не е разрешен запис."
-#define MSGTR_VO_DirExistsAndIsWritable "Директорията съществува и е разрешена за запис."
-#define MSGTR_VO_CantCreateDirectory "Директорията не може да бъде създадена."
-#define MSGTR_VO_CantCreateFile "Файлът не може да бъде създаден."
-#define MSGTR_VO_DirectoryCreateSuccess "Директорията е успешно създадена."
-#define MSGTR_VO_ParsingSuboptions "Обработка на подопциите."
-#define MSGTR_VO_SuboptionsParsedOK "Завърши обработката на подопциите."
-#define MSGTR_VO_ValueOutOfRange "Стойността е извън допустимите граници"
-#define MSGTR_VO_NoValueSpecified "Не е указана стойност."
-#define MSGTR_VO_UnknownSuboptions "Неизвестна подопция(и)"
+#define MSGTR_VOincompCodec "РР·Р±СЂР°РЅРѕС‚Рѕ РёР·С…РѕРґРЅРѕ РІРёРґРµРѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ Рµ РЅРµСЃСЉРІРјРµСЃС‚РёРјРѕ СЃ С‚РѕР·Рё РєРѕРґРµРє.\n"
+#define MSGTR_VO_GenericError "TР°Р·Рё РіСЂРµС€РєР° Рµ РІСЉР·РЅРёРєРЅР°Р»Р°"
+#define MSGTR_VO_UnableToAccess "Р”РѕСЃС‚СЉРїСЉС‚ Рµ РЅРµРІСЉР·РјРѕР¶РµРЅ"
+#define MSGTR_VO_ExistsButNoDirectory "РІРµС‡Рµ СЃСЉС‰РµСЃС‚РІСѓРІР°, РЅРѕ РЅРµ Рµ РґРёСЂРµРєС‚РѕСЂРёСЏ."
+#define MSGTR_VO_DirExistsButNotWritable "Р”РёСЂРµРєС‚РѕСЂРёСЏС‚Р° СЃСЉС‰РµСЃС‚РІСѓРІР°, РЅРѕ РЅРµ Рµ СЂР°Р·СЂРµС€РµРЅ Р·Р°РїРёСЃ."
+#define MSGTR_VO_DirExistsAndIsWritable "Р”РёСЂРµРєС‚РѕСЂРёСЏС‚Р° СЃСЉС‰РµСЃС‚РІСѓРІР° Рё Рµ СЂР°Р·СЂРµС€РµРЅР° Р·Р° Р·Р°РїРёСЃ."
+#define MSGTR_VO_CantCreateDirectory "Р”РёСЂРµРєС‚РѕСЂРёСЏС‚Р° РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ СЃСЉР·РґР°РґРµРЅР°."
+#define MSGTR_VO_CantCreateFile "Р¤Р°Р№Р»СЉС‚ РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ СЃСЉР·РґР°РґРµРЅ."
+#define MSGTR_VO_DirectoryCreateSuccess "Р”РёСЂРµРєС‚РѕСЂРёСЏС‚Р° Рµ СѓСЃРїРµС€РЅРѕ СЃСЉР·РґР°РґРµРЅР°."
+#define MSGTR_VO_ParsingSuboptions "РћР±СЂР°Р±РѕС‚РєР° РЅР° РїРѕРґРѕРїС†РёРёС‚Рµ."
+#define MSGTR_VO_SuboptionsParsedOK "Р—Р°РІСЉСЂС€Рё РѕР±СЂР°Р±РѕС‚РєР°С‚Р° РЅР° РїРѕРґРѕРїС†РёРёС‚Рµ."
+#define MSGTR_VO_ValueOutOfRange "РЎС‚РѕР№РЅРѕСЃС‚С‚Р° Рµ РёР·РІСЉРЅ РґРѕРїСѓСЃС‚РёРјРёС‚Рµ РіСЂР°РЅРёС†Рё"
+#define MSGTR_VO_NoValueSpecified "РќРµ Рµ СѓРєР°Р·Р°РЅР° СЃС‚РѕР№РЅРѕСЃС‚."
+#define MSGTR_VO_UnknownSuboptions "РќРµРёР·РІРµСЃС‚РЅР° РїРѕРґРѕРїС†РёСЏ(Рё)"
 
 // vo_aa.c
 
-#define MSGTR_VO_AA_HelpHeader "\n\nТова са подопциите на aalib vo_aa:\n"
-#define MSGTR_VO_AA_AdditionalOptions "Допълнителни опции предвидени от vo_aa:\n" \
-"  help        показва това съобщение\n" \
-"  osdcolor    задава цвят за osd\n  subcolor    задава цвета на субтитрите\n" \
-"        параметрите за цвят са:\n           0 : нормален\n" \
-"           1 : dim\n           2 : удебелен\n           3 : удебелен шрифт\n" \
-"           4 : обърнат\n           5 : специален\n\n\n" 
+#define MSGTR_VO_AA_HelpHeader "\n\nРўРѕРІР° СЃР° РїРѕРґРѕРїС†РёРёС‚Рµ РЅР° aalib vo_aa:\n"
+#define MSGTR_VO_AA_AdditionalOptions "Р”РѕРїСЉР»РЅРёС‚РµР»РЅРё РѕРїС†РёРё РїСЂРµРґРІРёРґРµРЅРё РѕС‚ vo_aa:\n" \
+"  help        РїРѕРєР°Р·РІР° С‚РѕРІР° СЃСЉРѕР±С‰РµРЅРёРµ\n" \
+"  osdcolor    Р·Р°РґР°РІР° С†РІСЏС‚ Р·Р° osd\n  subcolor    Р·Р°РґР°РІР° С†РІРµС‚Р° РЅР° СЃСѓР±С‚РёС‚СЂРёС‚Рµ\n" \
+"        РїР°СЂР°РјРµС‚СЂРёС‚Рµ Р·Р° С†РІСЏС‚ СЃР°:\n           0 : РЅРѕСЂРјР°Р»РµРЅ\n" \
+"           1 : dim\n           2 : СѓРґРµР±РµР»РµРЅ\n           3 : СѓРґРµР±РµР»РµРЅ С€СЂРёС„С‚\n" \
+"           4 : РѕР±СЉСЂРЅР°С‚\n           5 : СЃРїРµС†РёР°Р»РµРЅ\n\n\n" 
 
 
 // vo_jpeg.c
-#define MSGTR_VO_JPEG_ProgressiveJPEG "Включен е progressive JPEG формат."
-#define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG форматът е изключен."
-#define MSGTR_VO_JPEG_BaselineJPEG "Включен е baseline JPEG формат."
-#define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline JPEG форматът е изключен."
+#define MSGTR_VO_JPEG_ProgressiveJPEG "Р’РєР»СЋС‡РµРЅ Рµ progressive JPEG С„РѕСЂРјР°С‚."
+#define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG С„РѕСЂРјР°С‚СЉС‚ Рµ РёР·РєР»СЋС‡РµРЅ."
+#define MSGTR_VO_JPEG_BaselineJPEG "Р’РєР»СЋС‡РµРЅ Рµ baseline JPEG С„РѕСЂРјР°С‚."
+#define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline JPEG С„РѕСЂРјР°С‚СЉС‚ Рµ РёР·РєР»СЋС‡РµРЅ."
 
 // vo_pnm.c
-#define MSGTR_VO_PNM_ASCIIMode "Включен е ASCII режим."
-#define MSGTR_VO_PNM_RawMode "Включен е \"суров\" режим."
-#define MSGTR_VO_PNM_PPMType "Ще записва в PPM файлове."
-#define MSGTR_VO_PNM_PGMType "Ще записва в PGM файлове."
-#define MSGTR_VO_PNM_PGMYUVType "Ще записва в PGMYUV файлове."
+#define MSGTR_VO_PNM_ASCIIMode "Р’РєР»СЋС‡РµРЅ Рµ ASCII СЂРµР¶РёРј."
+#define MSGTR_VO_PNM_RawMode "Р’РєР»СЋС‡РµРЅ Рµ \"СЃСѓСЂРѕРІ\" СЂРµР¶РёРј."
+#define MSGTR_VO_PNM_PPMType "Р©Рµ Р·Р°РїРёСЃРІР° РІ PPM С„Р°Р№Р»РѕРІРµ."
+#define MSGTR_VO_PNM_PGMType "Р©Рµ Р·Р°РїРёСЃРІР° РІ PGM С„Р°Р№Р»РѕРІРµ."
+#define MSGTR_VO_PNM_PGMYUVType "Р©Рµ Р·Р°РїРёСЃРІР° РІ PGMYUV С„Р°Р№Р»РѕРІРµ."
 
 // vo_yuv4mpeg.c
-#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "Режимът interlaced изисква височината на образа да е кратна на  4."
-#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Не може да се задели буфер за редовете за interlaced режим."
-#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Входния формат не е RGB, не могат да се отделят цветовите полета!"
-#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Широчината на образа трябва да е кратна на 2."
-#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Няма достатъчно памет за RGB кадров буфер."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Не е получена памет или файлов манипулатор за запис \"%s\"!"
-#define MSGTR_VO_YUV4MPEG_OutFileWriteError "Грешка при извеждане на изображението!"
-#define MSGTR_VO_YUV4MPEG_UnknownSubDev "Неизвестно подустройство: %s"
-#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Използване на interlaced изходен режим, от горе на долу."
-#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Използване на interlaced изходен режим, от долу на горе."
-#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Използва се (подразбиращ се) прогресивен режим"
+#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "Р РµР¶РёРјСЉС‚ interlaced РёР·РёСЃРєРІР° РІРёСЃРѕС‡РёРЅР°С‚Р° РЅР° РѕР±СЂР°Р·Р° РґР° Рµ РєСЂР°С‚РЅР° РЅР°  4."
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РґРµР»Рё Р±СѓС„РµСЂ Р·Р° СЂРµРґРѕРІРµС‚Рµ Р·Р° interlaced СЂРµР¶РёРј."
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Р’С…РѕРґРЅРёСЏ С„РѕСЂРјР°С‚ РЅРµ Рµ RGB, РЅРµ РјРѕРіР°С‚ РґР° СЃРµ РѕС‚РґРµР»СЏС‚ С†РІРµС‚РѕРІРёС‚Рµ РїРѕР»РµС‚Р°!"
+#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "РЁРёСЂРѕС‡РёРЅР°С‚Р° РЅР° РѕР±СЂР°Р·Р° С‚СЂСЏР±РІР° РґР° Рµ РєСЂР°С‚РЅР° РЅР° 2."
+#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "РќСЏРјР° РґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РїР°РјРµС‚ Р·Р° RGB РєР°РґСЂРѕРІ Р±СѓС„РµСЂ."
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "РќРµ Рµ РїРѕР»СѓС‡РµРЅР° РїР°РјРµС‚ РёР»Рё С„Р°Р№Р»РѕРІ РјР°РЅРёРїСѓР»Р°С‚РѕСЂ Р·Р° Р·Р°РїРёСЃ \"%s\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileWriteError "Р“СЂРµС€РєР° РїСЂРё РёР·РІРµР¶РґР°РЅРµ РЅР° РёР·РѕР±СЂР°Р¶РµРЅРёРµС‚Рѕ!"
+#define MSGTR_VO_YUV4MPEG_UnknownSubDev "РќРµРёР·РІРµСЃС‚РЅРѕ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІРѕ: %s"
+#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "РР·РїРѕР»Р·РІР°РЅРµ РЅР° interlaced РёР·С…РѕРґРµРЅ СЂРµР¶РёРј, РѕС‚ РіРѕСЂРµ РЅР° РґРѕР»Сѓ."
+#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "РР·РїРѕР»Р·РІР°РЅРµ РЅР° interlaced РёР·С…РѕРґРµРЅ СЂРµР¶РёРј, РѕС‚ РґРѕР»Сѓ РЅР° РіРѕСЂРµ."
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "РР·РїРѕР»Р·РІР° СЃРµ (РїРѕРґСЂР°Р·Р±РёСЂР°С‰ СЃРµ) РїСЂРѕРіСЂРµСЃРёРІРµРЅ СЂРµР¶РёРј"
 
 // Old vo drivers that have been replaced
 
-#define MSGTR_VO_PGM_HasBeenReplaced "pgm видео драйвера е заменен от -vo pnm:pgmyuv.\n"
-#define MSGTR_VO_MD5_HasBeenReplaced "md5 видео драйвера е заменен от -vo md5sum.\n"
+#define MSGTR_VO_PGM_HasBeenReplaced "pgm РІРёРґРµРѕ РґСЂР°Р№РІРµСЂР° Рµ Р·Р°РјРµРЅРµРЅ РѕС‚ -vo pnm:pgmyuv.\n"
+#define MSGTR_VO_MD5_HasBeenReplaced "md5 РІРёРґРµРѕ РґСЂР°Р№РІРµСЂР° Рµ Р·Р°РјРµРЅРµРЅ РѕС‚ -vo md5sum.\n"
 
 // ======================= AO Audio Output drivers ========================
 
 // libao2
 
 // audio_out.c
-#define MSGTR_AO_ALSA9_1x_Removed "audio_out: модулите alsa9 и alsa1x са отстранени, използвайте -ao alsa .\n"
+#define MSGTR_AO_ALSA9_1x_Removed "audio_out: РјРѕРґСѓР»РёС‚Рµ alsa9 Рё alsa1x СЃР° РѕС‚СЃС‚СЂР°РЅРµРЅРё, РёР·РїРѕР»Р·РІР°Р№С‚Рµ -ao alsa .\n"
 
 // ao_oss.c
-#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Не може да отвори устройство смесител %s: %s\n"
-#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup:\nСмесителят на звуковата карта няма канал '%s', използва се подразбиращ се.\n"
-#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Аудио устройство %s не може да бъде отворено: %s\n"
-#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Не може да бъде създаден файлов дескриптор: %s\n"
-//#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Не може да се зададе за устройство %s формат AC3, опит с S16...\n"
-#define MSGTR_AO_OSS_CantSet "[AO OSS] Аудио устройство %s не може да бъде настроено за %s извеждане, проба с %s...\n"
-#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Не може да настрои звуковата карта за %d канала.\n"
-#define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: драйверът не поддържа SNDCTL_DSP_GETOSPACE :-(\n"
-#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Вашият аудио драйвер НЕ поддържа функцията select()  ***\n Рекомпилирайте MPlayer с #undef HAVE_AUDIO_SELECT в config.h !\n\n"
-#define MSGTR_AO_OSS_CantReopen "[AO OSS] Фатална грешка:\n *** НЕ МОЖЕ ДА ПРЕ-ОТВОРИ/РЕСТАРТИРА АУДИО УСТРОЙСТВОТО *** %s\n"
+#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: РќРµ РјРѕР¶Рµ РґР° РѕС‚РІРѕСЂРё СѓСЃС‚СЂРѕР№СЃС‚РІРѕ СЃРјРµСЃРёС‚РµР» %s: %s\n"
+#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup:\nРЎРјРµСЃРёС‚РµР»СЏС‚ РЅР° Р·РІСѓРєРѕРІР°С‚Р° РєР°СЂС‚Р° РЅСЏРјР° РєР°РЅР°Р» '%s', РёР·РїРѕР»Р·РІР° СЃРµ РїРѕРґСЂР°Р·Р±РёСЂР°С‰ СЃРµ.\n"
+#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: РђСѓРґРёРѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ %s РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅРѕ: %s\n"
+#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ СЃСЉР·РґР°РґРµРЅ С„Р°Р№Р»РѕРІ РґРµСЃРєСЂРёРїС‚РѕСЂ: %s\n"
+//#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] РќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РґР°РґРµ Р·Р° СѓСЃС‚СЂРѕР№СЃС‚РІРѕ %s С„РѕСЂРјР°С‚ AC3, РѕРїРёС‚ СЃ S16...\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] РђСѓРґРёРѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ %s РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РЅР°СЃС‚СЂРѕРµРЅРѕ Р·Р° %s РёР·РІРµР¶РґР°РЅРµ, РїСЂРѕР±Р° СЃ %s...\n"
+#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: РќРµ РјРѕР¶Рµ РґР° РЅР°СЃС‚СЂРѕРё Р·РІСѓРєРѕРІР°С‚Р° РєР°СЂС‚Р° Р·Р° %d РєР°РЅР°Р»Р°.\n"
+#define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: РґСЂР°Р№РІРµСЂСЉС‚ РЅРµ РїРѕРґРґСЉСЂР¶Р° SNDCTL_DSP_GETOSPACE :-(\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Р’Р°С€РёСЏС‚ Р°СѓРґРёРѕ РґСЂР°Р№РІРµСЂ РќР• РїРѕРґРґСЉСЂР¶Р° С„СѓРЅРєС†РёСЏС‚Р° select()  ***\n Р РµРєРѕРјРїРёР»РёСЂР°Р№С‚Рµ MPlayer СЃ #undef HAVE_AUDIO_SELECT РІ config.h !\n\n"
+#define MSGTR_AO_OSS_CantReopen "[AO OSS] Р¤Р°С‚Р°Р»РЅР° РіСЂРµС€РєР°:\n *** РќР• РњРћР–Р• Р”Рђ РџР Р•-РћРўР’РћР Р/Р Р•РЎРўРђР РўРР Рђ РђРЈР”РРћ РЈРЎРўР РћР™РЎРўР’РћРўРћ *** %s\n"
 
 // ao_arts.c
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
-#define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Установена е връзка със аудио сървъра.\n"
-#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Потокът не може да бъде отворен.\n"
-#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] Потокът е отворен.\n"
-#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] размер на буфера: %d\n"
+#define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] РЈСЃС‚Р°РЅРѕРІРµРЅР° Рµ РІСЂСЉР·РєР° СЃСЉСЃ Р°СѓРґРёРѕ СЃСЉСЂРІСЉСЂР°.\n"
+#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] РџРѕС‚РѕРєСЉС‚ РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ.\n"
+#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] РџРѕС‚РѕРєСЉС‚ Рµ РѕС‚РІРѕСЂРµРЅ.\n"
+#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] СЂР°Р·РјРµСЂ РЅР° Р±СѓС„РµСЂР°: %d\n"
 
 // ao_dxr2.c
-#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Силата на звука не може да бъде сменена на %d.\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz не се поддържат, опитайте \"-aop list=resample\"\n"
+#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] РЎРёР»Р°С‚Р° РЅР° Р·РІСѓРєР° РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ СЃРјРµРЅРµРЅР° РЅР° %d.\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz РЅРµ СЃРµ РїРѕРґРґСЉСЂР¶Р°С‚, РѕРїРёС‚Р°Р№С‚Рµ \"-aop list=resample\"\n"
 
 // ao_esd.c
-#define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound се провали: %s\n"
-#define MSGTR_AO_ESD_LatencyInfo "[AO ESD] закъснение: [сървър: %0.2fс, мрежа: %0.2fс] (настройка %0.2fс)\n"
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] Не може да бъде отворен esd поток за възпроизвеждане: %s\n"
+#define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound СЃРµ РїСЂРѕРІР°Р»Рё: %s\n"
+#define MSGTR_AO_ESD_LatencyInfo "[AO ESD] Р·Р°РєСЉСЃРЅРµРЅРёРµ: [СЃСЉСЂРІСЉСЂ: %0.2fСЃ, РјСЂРµР¶Р°: %0.2fСЃ] (РЅР°СЃС‚СЂРѕР№РєР° %0.2fСЃ)\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ esd РїРѕС‚РѕРє Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
 
 // ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB audio set mixer се провали: %s\n"
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz не се поддържат, опитайте с resample...\n"
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB audio set mixer СЃРµ РїСЂРѕРІР°Р»Рё: %s\n"
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz РЅРµ СЃРµ РїРѕРґРґСЉСЂР¶Р°С‚, РѕРїРёС‚Р°Р№С‚Рµ СЃ resample...\n"
 
 // ao_null.c
 // This one desn't even  have any mp_msg nor printf's?? [CHECK]
 
 // ao_pcm.c
-#define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Честота: %iHz Канали: %s Формат %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: най-бързо извличане се постига с -vc dummy -vo null\nPCM: Info: за да запишете WAVE файлове ползвайте -ao pcm:waveheader (подразбира се).\n"
-#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] %s не може да се отвори за запис!\n"
+#define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Р§РµСЃС‚РѕС‚Р°: %iHz РљР°РЅР°Р»Рё: %s Р¤РѕСЂРјР°С‚ %s\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: РЅР°Р№-Р±СЉСЂР·Рѕ РёР·РІР»РёС‡Р°РЅРµ СЃРµ РїРѕСЃС‚РёРіР° СЃ -vc dummy -vo null\nPCM: Info: Р·Р° РґР° Р·Р°РїРёС€РµС‚Рµ WAVE С„Р°Р№Р»РѕРІРµ РїРѕР»Р·РІР°Р№С‚Рµ -ao pcm:waveheader (РїРѕРґСЂР°Р·Р±РёСЂР° СЃРµ).\n"
+#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] %s РЅРµ РјРѕР¶Рµ РґР° СЃРµ РѕС‚РІРѕСЂРё Р·Р° Р·Р°РїРёСЃ!\n"
 
 // ao_sdl.c
-#define MSGTR_AO_SDL_INFO "[AO SDL] Честота: %iHz Канали: %s Формат %s\n"
-#define MSGTR_AO_SDL_DriverInfo "[AO SDL] използва се %s аудио драйвер.\n"
-#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Неподдържан аудио формат: 0x%x.\n"
-#define MSGTR_AO_SDL_CantInit "[AO SDL] Инициализацията на SDL Аудио се провали: %s\n"
-#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Аудиото не може да се отвори: %s\n"
+#define MSGTR_AO_SDL_INFO "[AO SDL] Р§РµСЃС‚РѕС‚Р°: %iHz РљР°РЅР°Р»Рё: %s Р¤РѕСЂРјР°С‚ %s\n"
+#define MSGTR_AO_SDL_DriverInfo "[AO SDL] РёР·РїРѕР»Р·РІР° СЃРµ %s Р°СѓРґРёРѕ РґСЂР°Р№РІРµСЂ.\n"
+#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] РќРµРїРѕРґРґСЉСЂР¶Р°РЅ Р°СѓРґРёРѕ С„РѕСЂРјР°С‚: 0x%x.\n"
+#define MSGTR_AO_SDL_CantInit "[AO SDL] РРЅРёС†РёР°Р»РёР·Р°С†РёСЏС‚Р° РЅР° SDL РђСѓРґРёРѕ СЃРµ РїСЂРѕРІР°Р»Рё: %s\n"
+#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] РђСѓРґРёРѕС‚Рѕ РЅРµ РјРѕР¶Рµ РґР° СЃРµ РѕС‚РІРѕСЂРё: %s\n"
 
 // ao_sgi.c
-#define MSGTR_AO_SGI_INFO "[AO SGI] контрол.\n"
-#define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Честота: %iHz Канали: %s Формат %s\n"
-#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: невалидно устройство.\n"
-#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: setparams се провали: %s\nНе може да се зададе разчитаната честота.\n"
-#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE не се възприема от посоченото устройство.\n"
-#define MSGTR_AO_SGI_CantGetParms "[AO SGI] init: getparams се провали: %s\n"
-#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: честотата на дискретизация е %lf (разчитаната честота е %lf)\n"
+#define MSGTR_AO_SGI_INFO "[AO SGI] РєРѕРЅС‚СЂРѕР».\n"
+#define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Р§РµСЃС‚РѕС‚Р°: %iHz РљР°РЅР°Р»Рё: %s Р¤РѕСЂРјР°С‚ %s\n"
+#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: РЅРµРІР°Р»РёРґРЅРѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ.\n"
+#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: setparams СЃРµ РїСЂРѕРІР°Р»Рё: %s\nРќРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°РґР°РґРµ СЂР°Р·С‡РёС‚Р°РЅР°С‚Р° С‡РµСЃС‚РѕС‚Р°.\n"
+#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE РЅРµ СЃРµ РІСЉР·РїСЂРёРµРјР° РѕС‚ РїРѕСЃРѕС‡РµРЅРѕС‚Рѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ.\n"
+#define MSGTR_AO_SGI_CantGetParms "[AO SGI] init: getparams СЃРµ РїСЂРѕРІР°Р»Рё: %s\n"
+#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: С‡РµСЃС‚РѕС‚Р°С‚Р° РЅР° РґРёСЃРєСЂРµС‚РёР·Р°С†РёСЏ Рµ %lf (СЂР°Р·С‡РёС‚Р°РЅР°С‚Р° С‡РµСЃС‚РѕС‚Р° Рµ %lf)\n"
 #define MSGTR_AO_SGI_InitConfigError "[AO SGI] init: %s\n"
-#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: Не може да бъде отворен аудио канал: %s\n"
+#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅ Р°СѓРґРёРѕ РєР°РЅР°Р»: %s\n"
 #define MSGTR_AO_SGI_Uninit "[AO SGI] uninit: ...\n"
 #define MSGTR_AO_SGI_Reset "[AO SGI] reset: ...\n"
 #define MSGTR_AO_SGI_PauseInfo "[AO SGI] audio_pause: ...\n"
 #define MSGTR_AO_SGI_ResumeInfo "[AO SGI] audio_resume: ...\n"
 
 // ao_sun.c
-#define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO се провали.\n"
-#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: провал на записа."
-#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Не може да бъде отворено устройство %s, %s  -> без звук.\n"
-#define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: вашата звукова карта не поддържа %d канал, %s, %d Hz честота.\n"
-#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Вашият аудио драйвер НЕ поддържа функцията select()  ***\nРекомпилирайте MPlayer с #undef HAVE_AUDIO_SELECT в config.h !\n\n"
-#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]Фатална грешка:\n *** АУДИО УСТРОЙСТВОТО (%s) НЕ МОЖЕ ДА БЪДЕ ПРЕ-ОТВОРЕНО/РЕСТАРТИРАНО ***\n"
+#define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO СЃРµ РїСЂРѕРІР°Р»Рё.\n"
+#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: РїСЂРѕРІР°Р» РЅР° Р·Р°РїРёСЃР°."
+#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] РќРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РІРѕСЂРµРЅРѕ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ %s, %s  -> Р±РµР· Р·РІСѓРє.\n"
+#define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: РІР°С€Р°С‚Р° Р·РІСѓРєРѕРІР° РєР°СЂС‚Р° РЅРµ РїРѕРґРґСЉСЂР¶Р° %d РєР°РЅР°Р», %s, %d Hz С‡РµСЃС‚РѕС‚Р°.\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Р’Р°С€РёСЏС‚ Р°СѓРґРёРѕ РґСЂР°Р№РІРµСЂ РќР• РїРѕРґРґСЉСЂР¶Р° С„СѓРЅРєС†РёСЏС‚Р° select()  ***\nР РµРєРѕРјРїРёР»РёСЂР°Р№С‚Рµ MPlayer СЃ #undef HAVE_AUDIO_SELECT РІ config.h !\n\n"
+#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]Р¤Р°С‚Р°Р»РЅР° РіСЂРµС€РєР°:\n *** РђРЈР”РРћ РЈРЎРўР РћР™РЎРўР’РћРўРћ (%s) РќР• РњРћР–Р• Р”Рђ Р‘РЄР”Р• РџР Р•-РћРўР’РћР Р•РќРћ/Р Р•РЎРўРђР РўРР РђРќРћ ***\n"
 
 // ao_alsa5.c
-#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: заявен формат: %d Hz, %d канала, %s\n"
-#define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: не са открити звукови карти.\n"
-#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: заявен е невалиден формат (%s) - отхвърлен.\n"
-#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: грешка при отваряне за възпроизвеждане: %s\n"
-#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: pcm info грешка: %s\n"
-#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d звукови карти са открити, ползва се: %s\n"
-#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: pcm channel info грешка: %s\n"
-#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: грешка при настройване на параметрите: %s\n"
-#define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: грешка при настройка на канал: %s\n"
-#define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: грешка при подготовка на канал: %s\n"
-#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: грешка при изчистване потока за възпроизвеждане: %s\n"
-#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: грешка при възстановяване на буферите за възпроизвеждане: %s\n"
-#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: грешка при затваряне на pcm: %s\n"
-#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: грешка при изчистване на потока за възпроизвеждане: %s\n"
-#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: грешка при възстановяване на буферите за възпроизвеждане: %s\n"
-#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: грешка при подготовка на канал: %s\n"
-#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: грешка при изчистване на потока за възпроизвеждане: %s\n"
-#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: грешка при възстановяване на буферите за възпроизвеждане: %s\n"
-#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: грешка при подготовка на канал: %s\n"
-#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: претоварване на alsa, рестартиране на потока.\n"
-#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: грешка при подготовка за възпроизвеждане: %s\n"
-#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: грешка при запис след рестартиране: %s - отказ от операцията.\n"
-#define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: грешка на изхода: %s\n"
+#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: Р·Р°СЏРІРµРЅ С„РѕСЂРјР°С‚: %d Hz, %d РєР°РЅР°Р»Р°, %s\n"
+#define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: РЅРµ СЃР° РѕС‚РєСЂРёС‚Рё Р·РІСѓРєРѕРІРё РєР°СЂС‚Рё.\n"
+#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: Р·Р°СЏРІРµРЅ Рµ РЅРµРІР°Р»РёРґРµРЅ С„РѕСЂРјР°С‚ (%s) - РѕС‚С…РІСЉСЂР»РµРЅ.\n"
+#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: РіСЂРµС€РєР° РїСЂРё РѕС‚РІР°СЂСЏРЅРµ Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
+#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: pcm info РіСЂРµС€РєР°: %s\n"
+#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d Р·РІСѓРєРѕРІРё РєР°СЂС‚Рё СЃР° РѕС‚РєСЂРёС‚Рё, РїРѕР»Р·РІР° СЃРµ: %s\n"
+#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: pcm channel info РіСЂРµС€РєР°: %s\n"
+#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: РіСЂРµС€РєР° РїСЂРё РЅР°СЃС‚СЂРѕР№РІР°РЅРµ РЅР° РїР°СЂР°РјРµС‚СЂРёС‚Рµ: %s\n"
+#define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: РіСЂРµС€РєР° РїСЂРё РЅР°СЃС‚СЂРѕР№РєР° РЅР° РєР°РЅР°Р»: %s\n"
+#define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: РіСЂРµС€РєР° РїСЂРё РїРѕРґРіРѕС‚РѕРІРєР° РЅР° РєР°РЅР°Р»: %s\n"
+#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: РіСЂРµС€РєР° РїСЂРё РёР·С‡РёСЃС‚РІР°РЅРµ РїРѕС‚РѕРєР° Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
+#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: РіСЂРµС€РєР° РїСЂРё РІСЉР·СЃС‚Р°РЅРѕРІСЏРІР°РЅРµ РЅР° Р±СѓС„РµСЂРёС‚Рµ Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
+#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: РіСЂРµС€РєР° РїСЂРё Р·Р°С‚РІР°СЂСЏРЅРµ РЅР° pcm: %s\n"
+#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: РіСЂРµС€РєР° РїСЂРё РёР·С‡РёСЃС‚РІР°РЅРµ РЅР° РїРѕС‚РѕРєР° Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
+#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: РіСЂРµС€РєР° РїСЂРё РІСЉР·СЃС‚Р°РЅРѕРІСЏРІР°РЅРµ РЅР° Р±СѓС„РµСЂРёС‚Рµ Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
+#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: РіСЂРµС€РєР° РїСЂРё РїРѕРґРіРѕС‚РѕРІРєР° РЅР° РєР°РЅР°Р»: %s\n"
+#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: РіСЂРµС€РєР° РїСЂРё РёР·С‡РёСЃС‚РІР°РЅРµ РЅР° РїРѕС‚РѕРєР° Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
+#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: РіСЂРµС€РєР° РїСЂРё РІСЉР·СЃС‚Р°РЅРѕРІСЏРІР°РЅРµ РЅР° Р±СѓС„РµСЂРёС‚Рµ Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
+#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: РіСЂРµС€РєР° РїСЂРё РїРѕРґРіРѕС‚РѕРІРєР° РЅР° РєР°РЅР°Р»: %s\n"
+#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: РїСЂРµС‚РѕРІР°СЂРІР°РЅРµ РЅР° alsa, СЂРµСЃС‚Р°СЂС‚РёСЂР°РЅРµ РЅР° РїРѕС‚РѕРєР°.\n"
+#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: РіСЂРµС€РєР° РїСЂРё РїРѕРґРіРѕС‚РѕРІРєР° Р·Р° РІСЉР·РїСЂРѕРёР·РІРµР¶РґР°РЅРµ: %s\n"
+#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: РіСЂРµС€РєР° РїСЂРё Р·Р°РїРёСЃ СЃР»РµРґ СЂРµСЃС‚Р°СЂС‚РёСЂР°РЅРµ: %s - РѕС‚РєР°Р· РѕС‚ РѕРїРµСЂР°С†РёСЏС‚Р°.\n"
+#define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: РіСЂРµС€РєР° РЅР° РёР·С…РѕРґР°: %s\n"
 
 // ao_plugin.c
 
-#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] невалиден плъгин: %s\n"
+#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] РЅРµРІР°Р»РёРґРµРЅ РїР»СЉРіРёРЅ: %s\n"
 
 // ======================= AF Audio Filters ================================
 
@@ -1032,17 +1032,17 @@ static char help_text[]=
 
 // af_ladspa.c
 
-#define MSGTR_AF_LADSPA_AvailableLabels "достъпни етикети в"
-#define MSGTR_AF_LADSPA_WarnNoInputs "ВНИМАНИЕ! Този LADSPA плъгин не приема аудио.\n  Пристигащият аудио сигнал ще бъде загубен."
-#define MSGTR_AF_LADSPA_ErrMultiChannel "Многоканални (>2) плъгини не се поддържат (все още).\n  Използвайте само моно и стерео плъгини."
-#define MSGTR_AF_LADSPA_ErrNoOutputs "Този LADSPA плъгин не извежда звук."
-#define MSGTR_AF_LADSPA_ErrInOutDiff "Броя на аудио входовете на този LADSPA плъгин се различава от броя на аудио изходите."
-#define MSGTR_AF_LADSPA_ErrFailedToLoad "не може да се зареди"
-#define MSGTR_AF_LADSPA_ErrNoDescriptor "Функцията ladspa_descriptor() не може да бъде открита в указания библиотечен файл."
-#define MSGTR_AF_LADSPA_ErrLabelNotFound "Етикета не може да бъде намерен в библиотеката."
-#define MSGTR_AF_LADSPA_ErrNoSuboptions "Не са указани подопции"
-#define MSGTR_AF_LADSPA_ErrNoLibFile "Не е указан файл с библиотека"
-#define MSGTR_AF_LADSPA_ErrNoLabel "Не е указан етикет на филтър"
-#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Не са указани достатъчно контроли от командния ред"
-#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Input control #%d е под долната граница от %0.4f.\n"
-#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Input control #%d е над горната граница от %0.4f.\n"
+#define MSGTR_AF_LADSPA_AvailableLabels "РґРѕСЃС‚СЉРїРЅРё РµС‚РёРєРµС‚Рё РІ"
+#define MSGTR_AF_LADSPA_WarnNoInputs "Р’РќРРњРђРќРР•! РўРѕР·Рё LADSPA РїР»СЉРіРёРЅ РЅРµ РїСЂРёРµРјР° Р°СѓРґРёРѕ.\n  РџСЂРёСЃС‚РёРіР°С‰РёСЏС‚ Р°СѓРґРёРѕ СЃРёРіРЅР°Р» С‰Рµ Р±СЉРґРµ Р·Р°РіСѓР±РµРЅ."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "РњРЅРѕРіРѕРєР°РЅР°Р»РЅРё (>2) РїР»СЉРіРёРЅРё РЅРµ СЃРµ РїРѕРґРґСЉСЂР¶Р°С‚ (РІСЃРµ РѕС‰Рµ).\n  РР·РїРѕР»Р·РІР°Р№С‚Рµ СЃР°РјРѕ РјРѕРЅРѕ Рё СЃС‚РµСЂРµРѕ РїР»СЉРіРёРЅРё."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "РўРѕР·Рё LADSPA РїР»СЉРіРёРЅ РЅРµ РёР·РІРµР¶РґР° Р·РІСѓРє."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "Р‘СЂРѕСЏ РЅР° Р°СѓРґРёРѕ РІС…РѕРґРѕРІРµС‚Рµ РЅР° С‚РѕР·Рё LADSPA РїР»СЉРіРёРЅ СЃРµ СЂР°Р·Р»РёС‡Р°РІР° РѕС‚ Р±СЂРѕСЏ РЅР° Р°СѓРґРёРѕ РёР·С…РѕРґРёС‚Рµ."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "РЅРµ РјРѕР¶Рµ РґР° СЃРµ Р·Р°СЂРµРґРё"
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "Р¤СѓРЅРєС†РёСЏС‚Р° ladspa_descriptor() РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РѕС‚РєСЂРёС‚Р° РІ СѓРєР°Р·Р°РЅРёСЏ Р±РёР±Р»РёРѕС‚РµС‡РµРЅ С„Р°Р№Р»."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "Р•С‚РёРєРµС‚Р° РЅРµ РјРѕР¶Рµ РґР° Р±СЉРґРµ РЅР°РјРµСЂРµРЅ РІ Р±РёР±Р»РёРѕС‚РµРєР°С‚Р°."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "РќРµ СЃР° СѓРєР°Р·Р°РЅРё РїРѕРґРѕРїС†РёРё"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "РќРµ Рµ СѓРєР°Р·Р°РЅ С„Р°Р№Р» СЃ Р±РёР±Р»РёРѕС‚РµРєР°"
+#define MSGTR_AF_LADSPA_ErrNoLabel "РќРµ Рµ СѓРєР°Р·Р°РЅ РµС‚РёРєРµС‚ РЅР° С„РёР»С‚СЉСЂ"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "РќРµ СЃР° СѓРєР°Р·Р°РЅРё РґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РєРѕРЅС‚СЂРѕР»Рё РѕС‚ РєРѕРјР°РЅРґРЅРёСЏ СЂРµРґ"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Input control #%d Рµ РїРѕРґ РґРѕР»РЅР°С‚Р° РіСЂР°РЅРёС†Р° РѕС‚ %0.4f.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Input control #%d Рµ РЅР°Рґ РіРѕСЂРЅР°С‚Р° РіСЂР°РЅРёС†Р° РѕС‚ %0.4f.\n"
