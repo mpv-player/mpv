@@ -77,7 +77,7 @@ License:    GNU General Public License
 Name:       dvbstream
 Version:    0.4.3-pre3 (cvs checkout)
 Homepage:   http://sourceforge.net/projects/dvbtools/
-Directory:  stream
+Directory:  stream/dvbin.h stream/rtp.[ch] stream/stream_dvb.c
 License:    GNU General Public License
 
 Name:       librtsp
