@@ -619,8 +619,8 @@ $ ./configure --charset=noconv
   позволяющие воспроизводить форматы, для которых пока нет родной поддержки.
   Поместите их куда-нибудь в пути или укажите
   <filename>configure</filename> опцию
-  <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
-  (или <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>, но
+  <option>--codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
+  (или <option>--codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>, но
   только под <application>Cygwin</application>). 
   У нас были сообщения о том,
   что Real DLL должны быть доступны пользователю, запускающему

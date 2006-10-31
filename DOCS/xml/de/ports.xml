@@ -605,9 +605,9 @@ Segmentation fault</screen>
       zu Verfügung, die das Abspielen von Formaten zu ermöglichen, für die es noch
       keinen nativen Support gibt.
       Leg die Codecs irgendwo in deinem Pfad ab oder übergib
-      <option>--with-codecsdir=<replaceable>c:/pfad/zu/deinen/codecs</replaceable></option>
+      <option>--codecsdir=<replaceable>c:/pfad/zu/deinen/codecs</replaceable></option>
       (alternativ nur auf <application>Cygwin</application>
-      <option>--with-codecsdir=<replaceable>/pfad/zu/deinen/codecs</replaceable></option>)
+      <option>--codecsdir=<replaceable>/pfad/zu/deinen/codecs</replaceable></option>)
       an <filename>configure</filename>.
       Wir bekamen einige Berichte, dass Real-DLLs beschreibbar sein müssen, um <application>MPlayer</application>
       starten zu können, aber nur auf manchen Systemen (NT4).

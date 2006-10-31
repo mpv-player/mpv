@@ -611,9 +611,9 @@ $ ./configure --charset=noconv
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">download stránce</ulink>,
   abyste mohli přehrávat formáty, pro které zatím není nativní podpora.
   Umístěte kodeky někde do cesty (path), nebo přidejte
-  <option>--with-codecsdir=<replaceable>c:/cesta/ke/kodekům</replaceable></option>
+  <option>--codecsdir=<replaceable>c:/cesta/ke/kodekům</replaceable></option>
   (případně
-  <option>--with-codecsdir=<replaceable>/cesta/ke/kodekům</replaceable></option>
+  <option>--codecsdir=<replaceable>/cesta/ke/kodekům</replaceable></option>
   používate-li <application>Cygwin</application>) do <filename>configure</filename>.
   Máme několik zpráv, že Real DLL musí mít práva zápisu pro uživatele, který
   pouští <application>MPlayer</application>, ale pouze na některých systémech (NT4).

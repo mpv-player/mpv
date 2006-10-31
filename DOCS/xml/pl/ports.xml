@@ -609,9 +609,9 @@ Oznacza to, że <emphasis role="bold">AIX 5.2 i 5.3 nie potrafią aktualnie uży
   Pozwolą Ci one na odtwarzanie formatów, które nie są jeszcze bezpośrednio obsługiwane w
   <application>MPlayerze</application>. Umieść je, gdzieś w swojej ścieżce (w katalogu podanym w
   zmiennej PATH - przyp. tłumacza) lub przekaż opcję
-  <option>--with-codecsdir=<replaceable>c:/ścieżka/do/Twoich/kodeków</replaceable></option>
+  <option>--codecsdir=<replaceable>c:/ścieżka/do/Twoich/kodeków</replaceable></option>
   (lub, tylko w środowkisku Cygwin,
-  <option>--with-codecsdir=<replaceable>/ścieżka/do/Twoich/kodeków</replaceable></option>)
+  <option>--codecsdir=<replaceable>/ścieżka/do/Twoich/kodeków</replaceable></option>)
   do skryptu <filename>configure</filename>.
   Mieliśmy doniesienia, że biblioteki Real, muszą być zapisywalne dla użytkownika, który
   uruchamia <application>MPlayera</application>, ale tylko na niektórych systemach (NT4).

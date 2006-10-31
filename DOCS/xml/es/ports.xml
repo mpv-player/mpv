@@ -316,9 +316,9 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 
 <para>PUede usar codecs Win32 y Real Win32 (los Real de Linux no) si lo desea. Ponga
   los codecs en algún lugar de su ruta/path o
-  pase la opción <option>--with-codecsdir=<replaceable>c:/ruta/a/sus/codecs</replaceable></option>
+  pase la opción <option>--codecsdir=<replaceable>c:/ruta/a/sus/codecs</replaceable></option>
   (alternativamente
-  <option>--with-codecsdir=<replaceable>/ruta/a/sus/codecs</replaceable></option> solo en Cygwin) a
+  <option>--codecsdir=<replaceable>/ruta/a/sus/codecs</replaceable></option> solo en Cygwin) a
   <filename>configure</filename>. Tenemos informes de que las DLLs de Real
   deben tener permisos de escritura para el usuario que usa
   <application>MPlayer</application>, pero solo en algunos sistemas.

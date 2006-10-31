@@ -603,9 +603,9 @@ $ ./configure --charset=noconv
   melyek segítségével azokat a formátumokat is lejátszhatod, amikhez még
   nincs natív támogatás.
   Tedd be a codec-eket valahova az elérési útvonaladba vagy add meg a
-  <option>--with-codecsdir=<replaceable>c:/ut/a/codecjeidhez</replaceable></option>
+  <option>--codecsdir=<replaceable>c:/ut/a/codecjeidhez</replaceable></option>
   (alternatívaként
-  <option>--with-codecsdir=<replaceable>/ut/a/codecjeidhez</replaceable></option>
+  <option>--codecsdir=<replaceable>/ut/a/codecjeidhez</replaceable></option>
   csak <application>Cygwin</application> alatt) kapcsolóval a <filename>configure</filename>-nak.
   Kaptunk olyan visszajelzéseket, hogy a Real DLL-eknek írhatóaknak kell lenniük az
   <application>MPlayer</application>t futtató felhasználó által, de csak bizonyos

@@ -640,9 +640,9 @@ Ajoutez <option>-fs</option> pour le mode plein écran.
    <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>
    to allow playing formats for which there is no native support yet.
    Put the codecs somewhere in your path or pass
-   <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
+   <option>--codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
    (alternatively
-   <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>
+   <option>--codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>
    only on <application>Cygwin</application>) to <filename>configure</filename>.
    We have had some reports that Real DLLs need to be writable by the user
    running <application>MPlayer</application>, but only on some systems (NT4).
@@ -655,9 +655,9 @@ Il y a des paquetages de codec spécial pour Windows disponible sur notre
 pour permettre de jouer les formats qui ne sont pas encore nativement
 supportés.
 Placez les codecs quelque part dans votre patch ou passez
-<option>--with-codecsdir=<replaceable>c:/chemin/de/vos/codecs</replaceable></option>
+<option>--codecsdir=<replaceable>c:/chemin/de/vos/codecs</replaceable></option>
 (éventuellement
-<option>--with-codecsdir=<replaceable>/chemin/de/vos/codecs</replaceable></option>
+<option>--codecsdir=<replaceable>/chemin/de/vos/codecs</replaceable></option>
 uniquement sous <application>Cygwin</application>) à <filename>configure</filename>.
 Nous avons eu quelques retours indiquant que les DLLs Real doivent être
 accessibles en écriture pour l'utilisateur ayant lancé
