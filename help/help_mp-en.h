@@ -1067,7 +1067,7 @@ static char help_text[]=
 
 // ao_oss.c
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Can't open mixer device %s: %s\n"
-#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Audio card mixer does not have channel '%s' using default.\n"
+#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Audio card mixer does not have channel '%s', using default.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Can't open audio device %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Can't make file descriptor blocking: %s\n"
 #define MSGTR_AO_OSS_CantSet "[AO OSS] Can't set audio device %s to %s output, trying %s...\n"
