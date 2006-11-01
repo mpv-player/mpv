@@ -270,10 +270,10 @@ Codecs:
   --enable-jpeg		 enable jpeg input/output support [autodetect]
   --enable-libcdio	 enable external libcdio support [autodetect]
   --enable-liblzo	 enable external liblzo support [autodetect]
-  --disable-win32        disable Win32 DLL support [autodetect]
-  --disable-qtx          disable Quicktime codecs [autodetect]
-  --disable-xanim        disable XAnim DLL support [autodetect]
-  --disable-real         disable RealPlayer DLL support [autodetect]
+  --disable-win32        disable Win32 DLL support [enabled]
+  --disable-qtx          disable QuickTime codecs [enabled]
+  --disable-xanim        disable XAnim codecs support [enabled]
+  --disable-real         disable RealPlayer codecs support [enabled]
   --disable-xvid         disable XviD codec [autodetect]
   --disable-x264         disable H.264 encoder [autodetect]
   --disable-nut          disable libnut demuxer [autodetect]
@@ -2224,7 +2224,6 @@ test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
 test -z "$_mandir" && _mandir="$_prefix/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir" && _libdir="$_prefix/lib"
-test -z "$_codecsdir" && _codecsdir="$_libdir/codecs"
 
 if x86 ; then
   # Checking assembler (_as) compatibility...
@@ -5970,59 +5969,49 @@ fi
 echores "$_ladspa"
 
 
-
-if x86 && not qnx; then
-
-if test "$_win32" = auto ; then
-    if test -z "$_win32codecsdir" ; then
-      for I in "$_codecsdir" "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/codecs /usr/lib/codecs /usr/local/lib/win32 /usr/lib/win32 ; do
-        if test -d "$I" ; then
-          _win32codecsdir="$I"
-          break;
-        fi;
-      done
-    fi
-  # Fall back on default directory.
-  if test -z "$_win32codecsdir" ; then
-    _win32codecsdir="$_codecsdir"
-    mingw32 && _win32codecsdir="codecs"
-  fi
+if test -z "$_codecsdir" ; then
+  for dir in "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/codecs \
+             /usr/lib/codecs /usr/local/lib/win32 /usr/lib/win32 ; do
+    if test -d "$dir" ; then
+      _codecsdir="$dir"
+      break;
+    fi;
+  done
 fi
+# Fall back on default directory.
+if test -z "$_codecsdir" ; then
+  _codecsdir="$_libdir/codecs"
+  mingw32 && _codecsdir="codecs"
+fi
+
 
 echocheck "Win32 codec DLL support"
 if test "$_win32" = auto ; then
   _win32=no
-  test -n "$_win32codecsdir" && _win32=yes
+  if x86 && not qnx; then
+    test -z "$_win32codecsdir" && _win32codecsdir=$_codecsdir
+    _win32=yes
+  fi
 fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
   _res_comment="using $_win32codecsdir"
-else
-  _def_win32='#undef USE_WIN32DLL'
-  _nocodecmodules="win32 $_nocodecmodules"
-fi
-echores "$_win32"
-
-if test "$_win32" != no ; then
-  _def_win32_loader='#undef WIN32_LOADER'
-  echocheck "Win32 loader support"
   _ld_win32='loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
   _dep_win32='loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
-  _codecmodules="win32 $_codecmodules"
-  if openbsd ; then
-    x86 && _ld_win32="$_ld_win32 -li386"
-  fi
+  openbsd && x86 && _ld_win32="$_ld_win32 -li386"
   if not win32 ; then
     _def_win32_loader='#define WIN32_LOADER 1'
   else
     _ld_win32libs="$_ld_win32libs -ladvapi32 -lole32"
     _res_comment="using native windows"
   fi
-  echores "$_win32"
+  _codecmodules="win32 $_codecmodules"
+else
+  _def_win32='#undef USE_WIN32DLL'
+  _def_win32_loader='#undef WIN32_LOADER'
+  _nocodecmodules="win32 $_nocodecmodules"
 fi
-
-fi #if x86 && not qnx
-
+echores "$_win32"
 
 
 echocheck "XAnim DLL"
@@ -6030,20 +6019,8 @@ if test "$_xanim" = auto ; then
   _xanim=no
   _res_comment="dynamic loader support needed"
   if test "$_dl" = yes ; then
-    _res_comment="no suitable directory found - see DOCS/HTML/$_doc_lang/codecs.html"
-    if test -z "$_xanimcodecsdir" ; then
-	for I in "$_codecsdir" "$_libdir/codecs" /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim $XANIM_MOD_DIR ; do
-          if test -d "$I" ; then
-            _xanimcodecsdir="$I"
-            break;
-          fi;
-        done
-    fi
-    # Fall back on default directory.
-    if test -z "$_xanimcodecsdir" ; then
-      _xanimcodecsdir="$_codecsdir"
-    fi
-    test "$_xanimcodecsdir" && _xanim=yes
+    test -z "$_xanimcodecsdir" && _xanimcodecsdir=$_codecsdir
+    _xanim=yes
   fi
 fi
 if test "$_xanim" = yes ; then
@@ -6058,34 +6035,15 @@ else
 fi
 echores "$_xanim"
 
+
 echocheck "RealPlayer DLL"
 if test "$_real" = auto ; then
   _real=no
   _res_comment="dynamic loader support needed"
-  if test "$_dl" = yes || test "$_win32" = yes ; then
-#  if test "$_dl" = yes  ; then
-    _res_comment="tested only on Linux/FreeBSD/NetBSD/Cygwin/MinGW/Darwin"
-    if linux || freebsd || netbsd || win32 || darwin ; then
-      _res_comment="no suitable directory found - see DOCS/HTML/$_doc_lang/codecs.html"
-      if test -z "$_realcodecsdir" ; then
-	for I in "$_codecsdir" "$_libdir/codecs" "$_libdir/real" /usr/lib/real \
-	  /usr/lib/RealPlayer{9,8,}/Codecs /usr/local/RealPlayer{9,8,}/Codecs \
-	  /usr/local/lib/RealPlayer{9,8,}/Codecs /opt/RealPlayer{9,8,}/{Real/,}Codecs \
-	  {~,}/Applications/RealOne\ Player.app/Contents/MacOS/Library/Codecs \
-	  "$_win32codecsdir"; do
-          if test -d "$I" ; then
-            _realcodecsdir="$I"
-            break
-          fi
-        done
-      fi
-      # Fall back on default directory.
-      if test -z "$_realcodecsdir" ; then
-        _realcodecsdir="$_codecsdir"
-        mingw32 && _realcodecsdir="codecs"
-      fi
-      test "$_realcodecsdir" && _real=yes
-    fi
+  if test "$_dl" = yes || test "$_win32" = yes &&
+     (linux || freebsd || netbsd || win32 || darwin) ; then
+    test -z "$_realcodecsdir" && _realcodecsdir="$_codecsdir"
+    _real=yes
   fi
 fi
 if test "$_real" = yes ; then
