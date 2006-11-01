@@ -477,8 +477,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
         vf->priv->mpeg2= mpi->qscale_type;
         if(mpi->pict_type != 3 && mpi->qscale && !vf->priv->qp){
             if(!vf->priv->non_b_qp)
-                vf->priv->non_b_qp= malloc(mpi->qstride * mpi->h);
-            memcpy(vf->priv->non_b_qp, mpi->qscale, mpi->qstride * mpi->h);
+                vf->priv->non_b_qp= malloc(mpi->qstride * ((mpi->h + 15) >> 4));
+            memcpy(vf->priv->non_b_qp, mpi->qscale, mpi->qstride * ((mpi->h + 15) >> 4));
         }
 	if(vf->priv->log2_count || !(mpi->flags&MP_IMGFLAG_DIRECT)){
             char *qp_tab= vf->priv->non_b_qp;
