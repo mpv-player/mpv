@@ -5286,7 +5286,10 @@ if test "$_cdparanoia" = auto ; then
 #include <cdda_interface.h>
 #include <cdda_paranoia.h>
 // This need a better test. How ?
-int main(void) { return 1; }
+int main(void) {
+    void *test = cdda_verbose_set;
+    return !test;
+}
 EOF
     _cdparanoia=no
     for _inc_tmp in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
@@ -5312,8 +5315,9 @@ if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
 #include <cdio/paranoia.h>
 int main()
 {
+    void *test = cdda_verbose_set;
     printf("%s\n", CDIO_VERSION);
-    return 0;
+    return !test;
     
 }
 EOF
