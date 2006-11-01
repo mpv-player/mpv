@@ -12,7 +12,7 @@
 #include "cpudetect.h"
 #include "mangle.h"
 
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#ifdef ARCH_X86
 #define CAN_COMPILE_X86_ASM
 #endif
 
@@ -123,7 +123,7 @@ void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_yv12_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_yv12_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86) || defined(ARCH_X86_64)
+#elif defined(ARCH_X86)
 		vo_draw_alpha_yv12_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_yv12_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -153,7 +153,7 @@ void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_yuy2_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_yuy2_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86) || defined(ARCH_X86_64)
+#elif defined(ARCH_X86)
 		vo_draw_alpha_yuy2_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_yuy2_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -183,7 +183,7 @@ void vo_draw_alpha_uyvy(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_uyvy_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_uyvy_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86) || defined(ARCH_X86_64)
+#elif defined(ARCH_X86)
 		vo_draw_alpha_uyvy_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_uyvy_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -213,7 +213,7 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
 		vo_draw_alpha_rgb24_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_rgb24_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86) || defined(ARCH_X86_64)
+#elif defined(ARCH_X86)
 		vo_draw_alpha_rgb24_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_rgb24_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -243,7 +243,7 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 		vo_draw_alpha_rgb32_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_rgb32_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86) || defined(ARCH_X86_64)
+#elif defined(ARCH_X86)
 		vo_draw_alpha_rgb32_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_rgb32_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -288,7 +288,7 @@ void vo_draw_alpha_init(void){
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit 3DNow) Optimized OnScreenDisplay\n");
 #elif defined (HAVE_MMX)
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX Optimized OnScreenDisplay\n");
-#elif defined(ARCH_X86) || defined(ARCH_X86_64)
+#elif defined(ARCH_X86)
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using X86 Optimized OnScreenDisplay\n");
 #else
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using Unoptimized OnScreenDisplay\n");

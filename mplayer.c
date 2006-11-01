@@ -2838,7 +2838,7 @@ struct {double pts; vo_functions_t *vo;} vf_vo_data;
   mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2006 MPlayer Team\n");
   /* Test for CPU capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#ifdef ARCH_X86
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
       gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
@@ -2867,7 +2867,7 @@ struct {double pts; vo_functions_t *vo;} vf_vo_data;
 #endif
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
 #endif /* RUNTIME_CPUDETECT */
-#endif /* defined(ARCH_X86) || defined(ARCH_X86_64) */
+#endif /* ARCH_X86 */
 
 #if defined(WIN32) && defined(USE_WIN32DLL)
   set_path_env();

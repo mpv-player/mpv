@@ -17,7 +17,7 @@
 //Feel free to fine-tune the above 2, it might be possible to get some speedup with them :)
 
 //#define STATISTICS
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#ifdef ARCH_X86
 #define CAN_COMPILE_X86_ASM
 #endif
 
