@@ -1,7 +1,7 @@
 // Translated by:  Michał "Miśkieusz" Bolek <miskieusz@gmail.com>
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 20586
+// Synced with help_mp-en.h r20586
 
 // ========================= MPlayer help ===========================
 
