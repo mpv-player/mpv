@@ -53,29 +53,30 @@ Additionally, the SS variable should be set to either very low or very high
 values to produce a better groff HTML output (Due to a bug of groff2html?).
 A setting of 4 should look readable. Here's an overview again:
 
-  - groff:    groff is the "official" tool to convert man pages.
-              To get good results you need a recent version (1.18.2).
-              groff -mman -Thtml mplayer.1 > mplayer.1.html
-              groff -mman -Tlatin1 -rLL=78n mplayer.1 | col -bx > mplayer.1.txt
-              The groff man page lists other output formats to use with -T.
+  - groff:
+    groff is the "official" tool to convert man pages. To get good results you
+    need a recent version (1.18.2).
+    groff -mman -Thtml mplayer.1 > mplayer.1.html
+    groff -mman -Tlatin1 -rLL=78n mplayer.1 | col -bx > mplayer.1.txt
+    The groff man page lists other output formats to use with -T.
 
-              Unfortunately groff is not able to handle UTF-8 input as of
-              version 1.19.2. groff-utf8 is a wrapper that works around these
-              deficiencies:
-                http://www.haible.de/bruno/packages-groff-utf8.html
+    Unfortunately groff is not able to handle UTF-8 input as of version 1.19.2.
+    groff-utf8 is a wrapper that works around these deficiencies:
+      http://www.haible.de/bruno/packages-groff-utf8.html
 
-  - man2html: You can view it through a CGI script:
-              http://localhost/cgi-bin/man2html?mplayer
-              The output is unusable as the script doesn't seem to support
-              the macro definitions. Maybe manually changing all leads to
-              acceptable results.
+  - man2html:
+    You can view it through a CGI script:
+    http://localhost/cgi-bin/man2html?mplayer
+    The output is unusable as the script doesn't seem to support the macro
+    definitions. Maybe manually changing all leads to acceptable results.
 
-  - rman:     rman -f html mplayer.1 > man_page.rman.html
-              The output is ugly as rman doesn't understand many of the
-              macros used.
+  - rman:
+    rman -f html mplayer.1 > man_page.rman.html
+    The output is ugly as rman doesn't understand many of the macros used.
 
-  - troffcvt: troff2html -man mplayer.1 > man_page.tcvt.html
-              The (good) output is similar to groff but simplified...
+  - troffcvt:
+    troff2html -man mplayer.1 > man_page.tcvt.html
+    The (good) output is similar to groff but simplified...
 
 
 
