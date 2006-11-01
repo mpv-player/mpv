@@ -59,6 +59,11 @@ A setting of 4 should look readable. Here's an overview again:
               groff -mman -Tlatin1 -rLL=78n mplayer.1 | col -bx > mplayer.1.txt
               The groff man page lists other output formats to use with -T.
 
+              Unfortunately groff is not able to handle UTF-8 input as of
+              version 1.19.2. groff-utf8 is a wrapper that works around these
+              deficiencies:
+                http://www.haible.de/bruno/packages-groff-utf8.html
+
   - man2html: You can view it through a CGI script:
               http://localhost/cgi-bin/man2html?mplayer
               The output is unusable as the script doesn't seem to support
