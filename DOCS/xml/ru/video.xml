@@ -2314,8 +2314,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 <title>Кабель для G400</title>
 <para>
 Четвертый контакт CRTC2 коннектора - это композитный видео сигнал. Земля - шестой,
-<!-- FIXME i dont know how to insert proper symbols for BalAzs RAcz in vim -->
-седьмой и восьмой контакты. (информация получена от BalАzs RАcz)
+седьмой и восьмой контакты. (информация получена от Balázs Rácz)
 </para>
 </formalpara>
 
@@ -2324,8 +2323,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 <para>
 Первый контакт CRTC2 коннектора - это композитный видео сигнал. Земля - пятый,
 шестой, седьмой и пятнадцатый (5, 6, 7, 15) контакты.
-<!-- FIXME i dont know how to insert proper symbols for BalAzs Kerekes in vim -->
-(информация получена от BalАzs Kerekes)
+(информация получена от Balázs Kerekes)
 </para>
 </formalpara>
 </sect2>
