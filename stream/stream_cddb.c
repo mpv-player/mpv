@@ -62,13 +62,14 @@ stream_t* open_cdda(char *dev, char *track);
 static cd_toc_t cdtoc[100];
 static int cdtoc_last_track;
 
-#if defined(__linux__) || defined(__bsdi__)
 int 
 read_toc(const char *dev) {
+	int first, last;
+	int i;
+#if defined(__linux__) || defined(__bsdi__)
 	int drive;
 	struct cdrom_tochdr tochdr;
 	struct cdrom_tocentry tocentry;
-	int i;
 
 	drive = open(dev, O_RDONLY | O_NONBLOCK);
 	if( drive<0 ) {
@@ -76,6 +77,7 @@ read_toc(const char *dev) {
 	}
 	
 	ioctl(drive, CDROMREADTOCHDR, &tochdr);
+	first = tochdr.cdth_trk0 - 1; last = tochdr.cdth_trk1;
 	for (i = tochdr.cdth_trk0; i <= tochdr.cdth_trk1; i++) {
 		tocentry.cdte_track = i;
 		tocentry.cdte_format = CDROM_MSF;
@@ -83,8 +85,6 @@ read_toc(const char *dev) {
 		cdtoc[i-1].min = tocentry.cdte_addr.msf.minute;
 		cdtoc[i-1].sec = tocentry.cdte_addr.msf.second;
 		cdtoc[i-1].frame = tocentry.cdte_addr.msf.frame;
-		cdtoc[i-1].frame += cdtoc[i-1].min*60*75;
-		cdtoc[i-1].frame += cdtoc[i-1].sec*75;
 	}
 	tocentry.cdte_track = 0xAA;
 	tocentry.cdte_format = CDROM_MSF;
@@ -92,20 +92,13 @@ read_toc(const char *dev) {
 	cdtoc[tochdr.cdth_trk1].min = tocentry.cdte_addr.msf.minute;
 	cdtoc[tochdr.cdth_trk1].sec = tocentry.cdte_addr.msf.second;
 	cdtoc[tochdr.cdth_trk1].frame = tocentry.cdte_addr.msf.frame;
-	cdtoc[tochdr.cdth_trk1].frame += cdtoc[tochdr.cdth_trk1].min*60*75;
-	cdtoc[tochdr.cdth_trk1].frame += cdtoc[tochdr.cdth_trk1].sec*75;
 	close(drive);
-	return tochdr.cdth_trk1;
-}
 
 #elif defined(WIN32)
-int
-read_toc(const char *dev) {
         HANDLE drive;
         DWORD r;
         CDROM_TOC toc;
         char device[10];
-        int i;
 
         sprintf(device, "\\\\.\\%s", dev);
         drive = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
@@ -115,29 +108,21 @@ read_toc(const char *dev) {
                 return 0;
         }
 
+        first = toc.FirstTrack - 1; last = toc.LastTrack;
         for (i = toc.FirstTrack; i <= toc.LastTrack; i++) {
 		cdtoc[i-1].min = toc.TrackData[i - 1].Address[1];
 		cdtoc[i-1].sec = toc.TrackData[i - 1].Address[2];
 		cdtoc[i-1].frame = toc.TrackData[i - 1].Address[3];
-		cdtoc[i-1].frame += cdtoc[i-1].min*60*75;
-		cdtoc[i-1].frame += cdtoc[i-1].sec*75;
         }
         cdtoc[toc.LastTrack].min = toc.TrackData[toc.LastTrack].Address[1];
         cdtoc[toc.LastTrack].sec = toc.TrackData[toc.LastTrack].Address[2];
         cdtoc[toc.LastTrack].frame = toc.TrackData[toc.LastTrack].Address[3];
-        cdtoc[toc.LastTrack].frame += cdtoc[toc.LastTrack].min*60*75;
-        cdtoc[toc.LastTrack].frame += cdtoc[toc.LastTrack].sec*75;
         CloseHandle(drive);
-        return toc.LastTrack;
-}
 
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
-int 
-read_toc(const char *dev) {
 	int drive;
 	struct ioc_toc_header tochdr;
 	struct ioc_read_toc_single_entry tocentry;
-	int i;
 
 	drive = open(dev, O_RDONLY | O_NONBLOCK);
 	if( drive<0 ) {
@@ -145,6 +130,7 @@ read_toc(const char *dev) {
 	}
 
 	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
+	first = tochdr.starting_track; last = tochdr.ending_track;
 	for (i = tochdr.starting_track; i <= tochdr.ending_track; i++) {
 		tocentry.track = i;
 		tocentry.address_format = CD_MSF_FORMAT;
@@ -152,8 +138,6 @@ read_toc(const char *dev) {
 		cdtoc[i-1].min = tocentry.entry.addr.msf.minute;
 		cdtoc[i-1].sec = tocentry.entry.addr.msf.second;
 		cdtoc[i-1].frame = tocentry.entry.addr.msf.frame;
-		cdtoc[i-1].frame += cdtoc[i-1].min*60*75;
-		cdtoc[i-1].frame += cdtoc[i-1].sec*75;
 	}
 	tocentry.track = 0xAA;
 	tocentry.address_format = CD_MSF_FORMAT;
@@ -161,19 +145,12 @@ read_toc(const char *dev) {
 	cdtoc[tochdr.ending_track].min = tocentry.entry.addr.msf.minute;
 	cdtoc[tochdr.ending_track].sec = tocentry.entry.addr.msf.second;
 	cdtoc[tochdr.ending_track].frame = tocentry.entry.addr.msf.frame;
-	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].min*60*75;
-	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].sec*75;
 	close(drive);
-	return tochdr.ending_track;
-}
 
 #elif defined(__NetBSD__) || defined(__OpenBSD__)
-int
-read_toc(const char *dev) {
 	int drive;
 	struct ioc_toc_header tochdr;
 	struct ioc_read_toc_entry tocentry;
-	int i;
 	struct cd_toc_entry toc_buffer;
 
 	drive = open(dev, O_RDONLY | O_NONBLOCK);
@@ -182,6 +159,7 @@ read_toc(const char *dev) {
 	}
 
 	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
+	first = tochdr.starting_track - 1; last = tochdr.ending_track;
 	for (i = tochdr.starting_track; i <= tochdr.ending_track; i++) {
 		tocentry.starting_track = i;
 		tocentry.address_format = CD_MSF_FORMAT;
@@ -191,8 +169,6 @@ read_toc(const char *dev) {
 		cdtoc[i-1].min = toc_buffer.addr.msf.minute;
 		cdtoc[i-1].sec = toc_buffer.addr.msf.second;
 		cdtoc[i-1].frame = toc_buffer.addr.msf.frame;
-		cdtoc[i-1].frame += cdtoc[i-1].min*60*75;
-		cdtoc[i-1].frame += cdtoc[i-1].sec*75;
 	}
 	tocentry.starting_track = 0xAA;
 	tocentry.address_format = CD_MSF_FORMAT;
@@ -200,12 +176,12 @@ read_toc(const char *dev) {
 	cdtoc[tochdr.ending_track].min = toc_buffer.addr.msf.minute;
 	cdtoc[tochdr.ending_track].sec = toc_buffer.addr.msf.second;
 	cdtoc[tochdr.ending_track].frame = toc_buffer.addr.msf.frame;
-	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].min*60*75;
-	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].sec*75;
 	close(drive);
-	return tochdr.ending_track;
-}
 #endif
+	for (i = first; i <= last; i++)
+	  cdtoc[i].frame += (cdtoc[i].min * 60 + cdtoc[i].sec) * 75;
+	return last;
+}
 
 /** 
 \brief Reads TOC from CD in the given device and prints the number of tracks
