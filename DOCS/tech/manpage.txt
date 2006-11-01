@@ -57,7 +57,7 @@ A setting of 4 should look readable. Here's an overview again:
     groff is the "official" tool to convert man pages. To get good results you
     need a recent version (1.18.2).
     groff -mman -Thtml mplayer.1 > mplayer.1.html
-    groff -mman -Tlatin1 -rLL=78n mplayer.1 | col -bx > mplayer.1.txt
+    groff -mman -Tlatin1 -rLL=78n mplayer.1 | col -bxp > mplayer.1.txt
     The groff man page lists other output formats to use with -T.
 
     Unfortunately groff is not able to handle UTF-8 input as of version 1.19.2.
