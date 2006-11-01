@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20054 -->
+<!-- synced with r20572 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -1404,6 +1404,16 @@ BES (BackEnd scalers) или OV (Video Overlays). Он не предоставл
   <option>-vo fbdev</option>. Карты nVidia, тем не менее, способны выводить
   полностью графическое видео в настоящей текстовой консоли. Смотрите раздел
   <link linkend="vidix-nvidia">nvidia_vid</link> для более подробной информации.
+  Чтобы избавиться от такста на полях и мерцающего курсора попробуйте нечто подобное
+  </simpara>
+
+  <screen>setterm -cursor off > /dev/tty9</screen>
+
+  <simpara>
+  (предполагая, что <systemitem>tty9</systemitem> ранее не использовался) и затем переключитесь
+  на <systemitem>tty9</systemitem>.
+  С другой стороны, <option>-colorkey 0</option> должна дать вам видео, работающее "на фоне",
+  однако правильность работы этого зависит от функцинальности colorkey.
   </simpara></listitem>
 <listitem><simpara>
   Вы можете использовать подустройство VIDIX, примененное к различным
@@ -2304,6 +2314,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 <title>Кабель для G400</title>
 <para>
 Четвертый контакт CRTC2 коннектора - это композитный видео сигнал. Земля - шестой,
+<!-- FIXME i dont know how to insert proper symbols for BalAzs RAcz in vim -->
 седьмой и восьмой контакты. (информация получена от BalАzs RАcz)
 </para>
 </formalpara>
@@ -2313,6 +2324,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 <para>
 Первый контакт CRTC2 коннектора - это композитный видео сигнал. Земля - пятый,
 шестой, седьмой и пятнадцатый (5, 6, 7, 15) контакты.
+<!-- FIXME i dont know how to insert proper symbols for BalAzs Kerekes in vim -->
 (информация получена от BalАzs Kerekes)
 </para>
 </formalpara>
