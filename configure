@@ -882,8 +882,10 @@ fi
 
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  _def_arch="#define ARCH_X86 1"
-  _target_arch="TARGET_ARCH_X86 = yes"
+  _def_arch_x86="#define ARCH_X86 1"
+  _target_arch_x86="TARGET_ARCH_X86 = yes"
+  _def_arch="#define ARCH_X86_32 1"
+  _target_arch="TARGET_ARCH_X86_32 = yes"
 
 
   case "$pvendor" in
@@ -1105,6 +1107,8 @@ EOF
   x86_64|amd64)
     _def_arch='#define ARCH_X86_64 1'
     _target_arch='TARGET_ARCH_X86_64 = yes'
+    _def_arch_x86="#define ARCH_X86 1"
+    _target_arch_x86="TARGET_ARCH_X86 = yes"
     iproc='x86_64'
 
     # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
@@ -7628,6 +7632,7 @@ RADIO_CAPTURE=$_radio_capture
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
+$_target_arch_x86
 $_confwin32
 TARGET_CPU=$iproc
 TARGET_MMX = $_mmx
@@ -8090,6 +8095,7 @@ $_def_pvr
 $_def_words_endian
 
 $_def_arch
+$_def_arch_x86
 
 /* For the PPC.  G5 has the dcbzl when in 64bit mode but G4s and earlier do not
    have the instruction. */
