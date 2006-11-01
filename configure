@@ -5288,7 +5288,7 @@ if test "$_cdparanoia" = auto ; then
 // This need a better test. How ?
 int main(void) {
     void *test = cdda_verbose_set;
-    return !test;
+    return test == (void *)1;
 }
 EOF
     _cdparanoia=no
@@ -5317,7 +5317,7 @@ int main()
 {
     void *test = cdda_verbose_set;
     printf("%s\n", CDIO_VERSION);
-    return !test;
+    return test == (void *)1;
     
 }
 EOF
