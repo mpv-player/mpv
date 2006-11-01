@@ -31,7 +31,7 @@
 
 #include "libvo/fastmemcpy.h"
 
-#ifdef ARCH_X86
+#ifdef ARCH_X86_32
 #define CAN_COMPILE_X86_ASM
 #endif
 

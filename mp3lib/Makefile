@@ -7,7 +7,7 @@ endif
 CFLAGS  = -I.. $(OPTFLAGS)
 
 SRCS = sr1.c
-ifeq ($(TARGET_ARCH_X86),yes)
+ifeq ($(TARGET_ARCH_X86_32),yes)
 SRCS += decode_i586.c
 ifeq ($(TARGET_MMX),yes)
 SRCS += decode_MMX.c dct64_MMX.c tabinit_MMX.c
