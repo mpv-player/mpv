@@ -5307,7 +5307,6 @@ echores "$_cdparanoia"
 
 echocheck "libcdio"
 if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
-    if $_pkg_config --exists libcdio ; then
         cat > $TMPC << EOF
 #include <stdio.h>
 #include <cdio/version.h>
@@ -5322,20 +5321,21 @@ int main()
 }
 EOF
         _libcdio=no
-    for _inc_tmp in "" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
-        cc_check `$_pkg_config --cflags --libs libcdio_paranoia` $_inc_tmp $_ld_lm \
-          && tmp_run && _libcdio=yes && _inc_extra="$_inc_extra $_inc_tmp" && break
+    for _ld_tmp in "-lcdio_cdda -lcdio" "-lcdio_cdda -lcdio -lwinmm" ; do
+        cc_check $_inc_tmp $_ld_tmp $_ld_lm \
+          && _libcdio=yes && _ld_libcdio="$_ld_tmp" && break
     done
-    else
-        _libcdio=no
+    if test "$_libcdio" = no && $_pkg_config --exists libcdio ; then
+      _inc_tmp=`$_pkg_config --cflags libcdio_paranoia`;
+      _ld_tmp=`$_pkg_config --libs libcdio_paranoia`;
+      cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes \
+        && _ld_libcdio="$_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp" && break
     fi
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _cdda='yes'
     _def_libcdio='#define HAVE_LIBCDIO'
     _def_havelibcdio='yes'
-    _inc_extra="$_inc_extra `$_pkg_config --cflags libcdio`"
-    _ld_libcdio=`$_pkg_config --libs libcdio_paranoia`
 else
     if test "$_cdparanoia" = yes ; then
        _res_comment="using cdparanoia"
