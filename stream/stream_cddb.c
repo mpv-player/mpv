@@ -89,19 +89,20 @@ read_toc(const char *dev) {
         CloseHandle(drive);
 
 #else
-#if defined(__linux__) || defined(__bsdi__)
 	int drive;
-	struct cdrom_tochdr tochdr;
-	struct cdrom_tocentry tocentry;
-
 	drive = open(dev, O_RDONLY | O_NONBLOCK);
 	if( drive<0 ) {
 		return drive;
 	}
 	
+#if defined(__linux__) || defined(__bsdi__)
+	{
+	struct cdrom_tochdr tochdr;
 	ioctl(drive, CDROMREADTOCHDR, &tochdr);
 	first = tochdr.cdth_trk0 - 1; last = tochdr.cdth_trk1;
+	}
 	for (i = first; i <= last; i++) {
+		struct cdrom_tocentry tocentry;
 		tocentry.cdte_track = (i == last) ? 0xAA : i;
 		tocentry.cdte_format = CDROM_MSF;
 		ioctl(drive, CDROMREADTOCENTRY, &tocentry);
@@ -109,21 +110,14 @@ read_toc(const char *dev) {
 		cdtoc[i].sec = tocentry.cdte_addr.msf.second;
 		cdtoc[i].frame = tocentry.cdte_addr.msf.frame;
 	}
-	close(drive);
-
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
-	int drive;
+	{
 	struct ioc_toc_header tochdr;
-	struct ioc_read_toc_single_entry tocentry;
-
-	drive = open(dev, O_RDONLY | O_NONBLOCK);
-	if( drive<0 ) {
-		return drive;
-	}
-
 	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
 	first = tochdr.starting_track; last = tochdr.ending_track;
+	}
 	for (i = first; i <= last; i++) {
+		struct ioc_read_toc_single_entry tocentry;
 		tocentry.track = (i == last) ? 0xAA : i;
 		tocentry.address_format = CD_MSF_FORMAT;
 		ioctl(drive, CDIOREADTOCENTRY, &tocentry);
@@ -131,22 +125,15 @@ read_toc(const char *dev) {
 		cdtoc[i].sec = tocentry.entry.addr.msf.second;
 		cdtoc[i].frame = tocentry.entry.addr.msf.frame;
 	}
-	close(drive);
-
 #elif defined(__NetBSD__) || defined(__OpenBSD__)
-	int drive;
+	{
 	struct ioc_toc_header tochdr;
-	struct ioc_read_toc_entry tocentry;
-	struct cd_toc_entry toc_buffer;
-
-	drive = open(dev, O_RDONLY | O_NONBLOCK);
-	if( drive<0 ) {
-		return drive;
-	}
-
 	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
 	first = tochdr.starting_track - 1; last = tochdr.ending_track;
+	}
 	for (i = first; i <= last; i++) {
+		struct ioc_read_toc_entry tocentry;
+		struct cd_toc_entry toc_buffer;
 		tocentry.starting_track = (i == last) ? 0xAA : i;
 		tocentry.address_format = CD_MSF_FORMAT;
 		tocentry.data = &toc_buffer;
@@ -156,8 +143,8 @@ read_toc(const char *dev) {
 		cdtoc[i].sec = toc_buffer.addr.msf.second;
 		cdtoc[i].frame = toc_buffer.addr.msf.frame;
 	}
-	close(drive);
 #endif
+	close(drive);
 #endif
 	for (i = first; i <= last; i++)
 	  cdtoc[i].frame += (cdtoc[i].min * 60 + cdtoc[i].sec) * 75;
