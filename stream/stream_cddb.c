@@ -116,14 +116,12 @@ read_toc(const char *dev) {
         }
 
         for (i = toc.FirstTrack; i <= toc.LastTrack; i++) {
-                toc.FirstTrack = i;
 		cdtoc[i-1].min = toc.TrackData[i - 1].Address[1];
 		cdtoc[i-1].sec = toc.TrackData[i - 1].Address[2];
 		cdtoc[i-1].frame = toc.TrackData[i - 1].Address[3];
 		cdtoc[i-1].frame += cdtoc[i-1].min*60*75;
 		cdtoc[i-1].frame += cdtoc[i-1].sec*75;
         }
-        toc.FirstTrack = 0xAA;
         cdtoc[toc.LastTrack].min = toc.TrackData[toc.LastTrack].Address[1];
         cdtoc[toc.LastTrack].sec = toc.TrackData[toc.LastTrack].Address[2];
         cdtoc[toc.LastTrack].frame = toc.TrackData[toc.LastTrack].Address[3];
