@@ -66,6 +66,29 @@ int
 read_toc(const char *dev) {
 	int first, last;
 	int i;
+#ifdef WIN32
+        HANDLE drive;
+        DWORD r;
+        CDROM_TOC toc;
+        char device[10];
+
+        sprintf(device, "\\\\.\\%s", dev);
+        drive = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+
+        if(!DeviceIoControl(drive, IOCTL_CDROM_READ_TOC, NULL, 0, &toc, sizeof(CDROM_TOC), &r, 0)) {
+                mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadTOC);
+                return 0;
+        }
+
+        first = toc.FirstTrack - 1; last = toc.LastTrack;
+        for (i = first; i <= last; i++) {
+		cdtoc[i].min = toc.TrackData[i].Address[1];
+		cdtoc[i].sec = toc.TrackData[i].Address[2];
+		cdtoc[i].frame = toc.TrackData[i].Address[3];
+        }
+        CloseHandle(drive);
+
+#else
 #if defined(__linux__) || defined(__bsdi__)
 	int drive;
 	struct cdrom_tochdr tochdr;
@@ -87,28 +110,6 @@ read_toc(const char *dev) {
 		cdtoc[i].frame = tocentry.cdte_addr.msf.frame;
 	}
 	close(drive);
-
-#elif defined(WIN32)
-        HANDLE drive;
-        DWORD r;
-        CDROM_TOC toc;
-        char device[10];
-
-        sprintf(device, "\\\\.\\%s", dev);
-        drive = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
-
-        if(!DeviceIoControl(drive, IOCTL_CDROM_READ_TOC, NULL, 0, &toc, sizeof(CDROM_TOC), &r, 0)) {
-                mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadTOC);
-                return 0;
-        }
-
-        first = toc.FirstTrack - 1; last = toc.LastTrack;
-        for (i = first; i <= last; i++) {
-		cdtoc[i].min = toc.TrackData[i].Address[1];
-		cdtoc[i].sec = toc.TrackData[i].Address[2];
-		cdtoc[i].frame = toc.TrackData[i].Address[3];
-        }
-        CloseHandle(drive);
 
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
 	int drive;
@@ -156,6 +157,7 @@ read_toc(const char *dev) {
 		cdtoc[i].frame = toc_buffer.addr.msf.frame;
 	}
 	close(drive);
+#endif
 #endif
 	for (i = first; i <= last; i++)
 	  cdtoc[i].frame += (cdtoc[i].min * 60 + cdtoc[i].sec) * 75;
