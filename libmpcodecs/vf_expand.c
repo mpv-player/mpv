@@ -184,11 +184,12 @@ static int config(struct vf_instance_s* vf,
         else if( vf->priv->exp_h<height ) vf->priv->exp_h=height;
 #endif
     if (vf->priv->aspect) {
-        vf->priv->aspect *= ((double)width/height) / ((double)d_width/d_height);
-        if (vf->priv->exp_h < vf->priv->exp_w / vf->priv->aspect) {
-            vf->priv->exp_h = vf->priv->exp_w / vf->priv->aspect + 0.5;
+        float adjusted_aspect = vf->priv->aspect;
+        adjusted_aspect *= ((double)width/height) / ((double)d_width/d_height);
+        if (vf->priv->exp_h < vf->priv->exp_w / adjusted_aspect) {
+            vf->priv->exp_h = vf->priv->exp_w / adjusted_aspect + 0.5;
         } else {
-            vf->priv->exp_w = vf->priv->exp_h * vf->priv->aspect + 0.5;
+            vf->priv->exp_w = vf->priv->exp_h * adjusted_aspect + 0.5;
         }
     }
     if (vf->priv->round > 1) { // round up.
