@@ -79,6 +79,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		case VK_DOWN:    mplayer_put_key(KEY_DOWN);      break;
 		case VK_TAB:     mplayer_put_key(KEY_TAB);       break;
 		case VK_CONTROL: mplayer_put_key(KEY_CTRL);      break;
+		case VK_BACK:    mplayer_put_key(KEY_BS);        break;
 		case VK_DELETE:  mplayer_put_key(KEY_DELETE);    break;
 		case VK_INSERT:  mplayer_put_key(KEY_INSERT);    break;
 		case VK_HOME:    mplayer_put_key(KEY_HOME);      break;
