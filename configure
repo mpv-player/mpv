@@ -5326,7 +5326,7 @@ EOF
         _libcdio=no
     for _ld_tmp in "" "-lwinmm" ; do
         _ld_tmp="-lcdio_cdda -lcdio -lcdio_paranoia $_ld_tmp"
-        cc_check $_inc_tmp $_ld_tmp $_ld_lm \
+        cc_check $_ld_tmp $_ld_lm \
           && _libcdio=yes && _ld_libcdio="$_ld_tmp" && break
     done
     if test "$_libcdio" = no && $_pkg_config --exists libcdio ; then
