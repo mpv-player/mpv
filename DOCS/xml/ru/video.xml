@@ -2314,7 +2314,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 <title>Кабель для G400</title>
 <para>
 Четвертый контакт CRTC2 коннектора - это композитный видео сигнал. Земля - шестой,
-седьмой и восьмой контакты. (информация получена от Balázs Rácz)
+седьмой и восьмой контакты. (информация получена от Bal&#225;zs R&#225;cz)
 </para>
 </formalpara>
 
@@ -2323,7 +2323,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 <para>
 Первый контакт CRTC2 коннектора - это композитный видео сигнал. Земля - пятый,
 шестой, седьмой и пятнадцатый (5, 6, 7, 15) контакты.
-(информация получена от Balázs Kerekes)
+(информация получена от Bal&#225;zs Kerekes)
 </para>
 </formalpara>
 </sect2>
