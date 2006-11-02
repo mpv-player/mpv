@@ -1,370 +1,370 @@
-// Translated by:  Daniel BeÚa, benad (at) centrum.cz
+// Translated by:  Daniel Be≈àa, benad (at) centrum.cz
 // last sync on 2006-04-28 with 1.249
 // but not compleated
 
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-// Preklad do slovenËiny 
+// Preklad do slovenƒçiny 
 
 static char help_text[]=
-"Pouæitie:   mplayer [prepÌnaËe] [url|cesta/]menos˙boru\n"
+"Pou≈æitie:   mplayer [prep√≠naƒçe] [url|cesta/]menos√∫boru\n"
 "\n"
-"Z·kladnÈ prepÌnaËe: (Kompletn˝ zoznam n·jdete v man str·nke)\n"
-" -vo <drv[:dev]> v˝ber v˝stup. video ovl·daËa&zariadenia (-vo help pre zoznam)\n"
-" -ao <drv[:dev]> v˝ber v˝stup. audio ovl·daËa&zariadenia (-ao help pre zoznam)\n"
+"Z√°kladn√© prep√≠naƒçe: (Kompletn√Ω zoznam n√°jdete v man str√°nke)\n"
+" -vo <drv[:dev]> v√Ωber v√Ωstup. video ovl√°daƒça&zariadenia (-vo help pre zoznam)\n"
+" -ao <drv[:dev]> v√Ωber v√Ωstup. audio ovl√°daƒça&zariadenia (-ao help pre zoznam)\n"
 #ifdef HAVE_VCD
-" vcd://<trackno>  prehraª VCD (video cd) stopu zo zariadenia namiesto zo s˙boru\n"
+" vcd://<trackno>  prehra≈• VCD (video cd) stopu zo zariadenia namiesto zo s√∫boru\n"
 #endif
 #ifdef USE_DVDREAD
-" dvd://<titleno>  prehraª DVD titul/stopu zo zariadenia (mechaniky) namiesto s˙boru\n"
-" -alang/-slang   vybraª jazyk DVD zvuku/titulkov(pomocou 2-miest. kÛdu krajiny)\n"
+" dvd://<titleno>  prehra≈• DVD titul/stopu zo zariadenia (mechaniky) namiesto s√∫boru\n"
+" -alang/-slang   vybra≈• jazyk DVD zvuku/titulkov(pomocou 2-miest. k√≥du krajiny)\n"
 #endif
-" -ss <timepos>   posun na pozÌciu (sekundy alebo hh:mm:ss)\n"
-" -nosound        prehr·vaª bez zvuku\n"
-" -fs             voµby pre cel˙ obrazovku (alebo -vm -zoom, detaily viÔ. man str·nku)\n"
-" -x <x> -y <y>   zv‰Ëπenie obrazu na rozmer <x>*<y> (pokiaµ to vie -vo ovl·daË!)\n"
-" -sub <file>     voµba s˙boru s titulkami (viÔ tieæ -subfps, -subdelay)\n"
-" -playlist <file> urËenie s˙boru so zoznamom prehr·van˝ch s˙borov\n"
-" -vid x -aid y   v˝ber ËÌsla video (x) a audio (y) pr˙du pre prehr·vanie\n"
-" -fps x -srate y voµba pre zmenu video (x fps) a audio (y Hz) frekvencie\n"
-" -pp <quality>   aktiv·cia postprocesing filtra (0-4 pre DivX, 0-63 pre mpegy)\n"
-" -framedrop      povoliª zahadzovanie snÌmkov (pre pomalÈ stroje)\n"
+" -ss <timepos>   posun na poz√≠ciu (sekundy alebo hh:mm:ss)\n"
+" -nosound        prehr√°va≈• bez zvuku\n"
+" -fs             voƒæby pre cel√∫ obrazovku (alebo -vm -zoom, detaily viƒè. man str√°nku)\n"
+" -x <x> -y <y>   zv√§ƒç≈°enie obrazu na rozmer <x>*<y> (pokiaƒæ to vie -vo ovl√°daƒç!)\n"
+" -sub <file>     voƒæba s√∫boru s titulkami (viƒè tie≈æ -subfps, -subdelay)\n"
+" -playlist <file> urƒçenie s√∫boru so zoznamom prehr√°van√Ωch s√∫borov\n"
+" -vid x -aid y   v√Ωber ƒç√≠sla video (x) a audio (y) pr√∫du pre prehr√°vanie\n"
+" -fps x -srate y voƒæba pre zmenu video (x fps) a audio (y Hz) frekvencie\n"
+" -pp <quality>   aktiv√°cia postprocesing filtra (0-4 pre DivX, 0-63 pre mpegy)\n"
+" -framedrop      povoli≈• zahadzovanie sn√≠mkov (pre pomal√© stroje)\n"
 "\n"
-"Z·kl. kl·vesy:   (pre kompl. pozrite aj man str·nku a input.conf)\n"
+"Z√°kl. kl√°vesy:   (pre kompl. pozrite aj man str√°nku a input.conf)\n"
 " <-  alebo  ->   posun vzad/vpred o 10 sekund\n"
-" hore / dole     posun vzad/vpred o  1 min˙tu\n"
-" pgup alebo pgdown  posun vzad/vpred o 10 min˙t\n"
-" < alebo >       posun vzad/vpred v zozname prehr·van˝ch s˙borov\n"
-" p al. medzernÌk pauza (pokraËovanie stlaËenÌm kl·vesy)\n"
-" q alebo ESC     koniec prehr·vania a ukonËenie programu\n"
-" + alebo -       upraviª spozdenie zvuku v krokoch +/- 0.1 sekundy\n"
-" o               cyklick· zmena reæimu OSD:  niË / pozÌcia / pozÌcia+Ëas\n"
-" * alebo /       pridaª alebo ubraª hlasitosª (stlaËenÌm 'm' v˝ber master/pcm)\n"
-" z alebo x       upraviª spozdenie titulkov v krokoch +/- 0.1 sekundy\n"
-" r alebo t       upraviª pozÌciu titulkov hore/dole, pozrite tieæ -vf!\n"
+" hore / dole     posun vzad/vpred o  1 min√∫tu\n"
+" pgup alebo pgdown  posun vzad/vpred o 10 min√∫t\n"
+" < alebo >       posun vzad/vpred v zozname prehr√°van√Ωch s√∫borov\n"
+" p al. medzern√≠k pauza (pokraƒçovanie stlaƒçen√≠m kl√°vesy)\n"
+" q alebo ESC     koniec prehr√°vania a ukonƒçenie programu\n"
+" + alebo -       upravi≈• spozdenie zvuku v krokoch +/- 0.1 sekundy\n"
+" o               cyklick√° zmena re≈æimu OSD:  niƒç / poz√≠cia / poz√≠cia+ƒças\n"
+" * alebo /       prida≈• alebo ubra≈• hlasitos≈• (stlaƒçen√≠m 'm' v√Ωber master/pcm)\n"
+" z alebo x       upravi≈• spozdenie titulkov v krokoch +/- 0.1 sekundy\n"
+" r alebo t       upravi≈• poz√≠ciu titulkov hore/dole, pozrite tie≈æ -vf!\n"
 "\n"
-" * * * * PRE»ÕTAJTE SI MAN STR¡NKU PRE DETAILY (œAL©IE VO•BY A KL¡VESY)! * * * *\n"
+" * * * * PREƒå√çTAJTE SI MAN STR√ÅNKU PRE DETAILY (ƒéAL≈†IE VOƒΩBY A KL√ÅVESY)! * * * *\n"
 "\n";
 #endif
 
-#define MSGTR_SamplesWanted "Potrebujeme vzorky tohto form·tu, aby sme zlepπili podporu. ProsÌm kontaktujte v˝voj·rov.\n"
+#define MSGTR_SamplesWanted "Potrebujeme vzorky tohto form√°tu, aby sme zlep≈°ili podporu. Pros√≠m kontaktujte v√Ωvoj√°rov.\n"
 
 // ========================= MPlayer messages ===========================
 // mplayer.c:
 
-#define MSGTR_Exiting "\nKonËÌm...\n"
-#define MSGTR_ExitingHow "\nKonËÌm... (%s)\n"
+#define MSGTR_Exiting "\nKonƒç√≠m...\n"
+#define MSGTR_ExitingHow "\nKonƒç√≠m... (%s)\n"
 #define MSGTR_Exit_quit "Koniec"
-#define MSGTR_Exit_eof "Koniec s˙boru"
-#define MSGTR_Exit_error "Z·vaæn· chyba"
-#define MSGTR_IntBySignal "\nMPlayer preruπen˝ sign·lom %d v module: %s \n"
-#define MSGTR_NoHomeDir "NemÙæem najsª dom·ci (HOME) adres·r\n"
-#define MSGTR_GetpathProblem "get_path(\"config\") problÈm\n"
-#define MSGTR_CreatingCfgFile "Vytv·ram konfiguraËn˝ s˙bor: %s\n"
-#define MSGTR_CopyCodecsConf "(copy/ln etc/codecs.conf (zo zdrojov˝ch kÛdov MPlayeru) do ~/.mplayer/codecs.conf)\n"
-#define MSGTR_BuiltinCodecsConf "PouæÌvam vstavanÈ defaultne codecs.conf\n"
-#define MSGTR_CantLoadFont "NemÙæem naËÌtaª font: %s\n"
-#define MSGTR_CantLoadSub "NemÙæem naËÌtaª titulky: %s\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: poæadovan˝ pr˙d ch˝ba!\n"
-#define MSGTR_CantOpenDumpfile "Nejde otvoriª s˙bor pre dump!!!\n"
-#define MSGTR_CoreDumped "jadro vypÌsanÈ :)\n"
-#define MSGTR_FPSnotspecified "V hlaviËke s˙boru nie je udanÈ (alebo je zlÈ) FPS! Pouæite voµbu -fps!\n"
-#define MSGTR_TryForceAudioFmtStr "Pok˙πam sa vyn˙tiª rodinu audiokodeku %s...\n"
-#define MSGTR_CantFindAudioCodec "NemÙæem n·jsª kodek pre audio form·t 0x%X!\n"
-#define MSGTR_RTFMCodecs "PreËÌtajte si DOCS/HTML/en/codecs.html!\n"
-#define MSGTR_TryForceVideoFmtStr "Pok˙πam se vn˙tiª rodinu videokodeku %s...\n"
-#define MSGTR_CantFindVideoCodec "NemÙæem najsª kodek pre video form·t 0x%X!\n"
-#define MSGTR_CannotInitVO "FATAL: NemÙæem inicializovaª video driver!\n"
-#define MSGTR_CannotInitAO "nemÙæem otvoriª/inicializovaª audio driver -> TICHO\n"
-#define MSGTR_StartPlaying "ZaËÌnam prehr·vaª...\n"
+#define MSGTR_Exit_eof "Koniec s√∫boru"
+#define MSGTR_Exit_error "Z√°va≈æn√° chyba"
+#define MSGTR_IntBySignal "\nMPlayer preru≈°en√Ω sign√°lom %d v module: %s \n"
+#define MSGTR_NoHomeDir "Nem√¥≈æem najs≈• dom√°ci (HOME) adres√°r\n"
+#define MSGTR_GetpathProblem "get_path(\"config\") probl√©m\n"
+#define MSGTR_CreatingCfgFile "Vytv√°ram konfiguraƒçn√Ω s√∫bor: %s\n"
+#define MSGTR_CopyCodecsConf "(copy/ln etc/codecs.conf (zo zdrojov√Ωch k√≥dov MPlayeru) do ~/.mplayer/codecs.conf)\n"
+#define MSGTR_BuiltinCodecsConf "Pou≈æ√≠vam vstavan√© defaultne codecs.conf\n"
+#define MSGTR_CantLoadFont "Nem√¥≈æem naƒç√≠ta≈• font: %s\n"
+#define MSGTR_CantLoadSub "Nem√¥≈æem naƒç√≠ta≈• titulky: %s\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: po≈æadovan√Ω pr√∫d ch√Ωba!\n"
+#define MSGTR_CantOpenDumpfile "Nejde otvori≈• s√∫bor pre dump!!!\n"
+#define MSGTR_CoreDumped "jadro vyp√≠san√© :)\n"
+#define MSGTR_FPSnotspecified "V hlaviƒçke s√∫boru nie je udan√© (alebo je zl√©) FPS! Pou≈æite voƒæbu -fps!\n"
+#define MSGTR_TryForceAudioFmtStr "Pok√∫≈°am sa vyn√∫ti≈• rodinu audiokodeku %s...\n"
+#define MSGTR_CantFindAudioCodec "Nem√¥≈æem n√°js≈• kodek pre audio form√°t 0x%X!\n"
+#define MSGTR_RTFMCodecs "Preƒç√≠tajte si DOCS/HTML/en/codecs.html!\n"
+#define MSGTR_TryForceVideoFmtStr "Pok√∫≈°am se vn√∫ti≈• rodinu videokodeku %s...\n"
+#define MSGTR_CantFindVideoCodec "Nem√¥≈æem najs≈• kodek pre video form√°t 0x%X!\n"
+#define MSGTR_CannotInitVO "FATAL: Nem√¥≈æem inicializova≈• video driver!\n"
+#define MSGTR_CannotInitAO "nem√¥≈æem otvori≈•/inicializova≈• audio driver -> TICHO\n"
+#define MSGTR_StartPlaying "Zaƒç√≠nam prehr√°va≈•...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ***********************************************************\n"\
-"         ****  Na prehratie tohoto je v·π systÈm prÌliπ POMAL›!  ****\n"\
+"         ****  Na prehratie tohoto je v√°≈° syst√©m pr√≠li≈° POMAL√ù!  ****\n"\
 "         ***********************************************************\n"\
-"!!! MoænÈ prÌËiny, problÈmy a rieπenia:\n"\
-"- NejËastejπie: nespr·vny/chybn˝ _zvukov˝_ ovl·daË.\n"\
-"  - Sk˙ste -ao sdl alebo pouæite OSS emul·ciu ALSA.\n"\
-"  - Experimentujte s rÙznymi hodnotami -autosync, 30 je dobr˝ zaËiatok.\n"\
-"- Pomal˝ video v˝stup\n"\
-"  - Sk˙ste in˝ -vo ovl·daË (pre zoznam: -vo help) alebo sk˙ste -framedrop!\n"\
-"- Pomal˝ CPU\n"\
-"  - Nesk˙πajte prehr·vaª veµkÈ dvd/divx na pomalom cpu! Sk˙ste lavdopts,\n"\
+"!!! Mo≈æn√© pr√≠ƒçiny, probl√©my a rie≈°enia:\n"\
+"- Nejƒçastej≈°ie: nespr√°vny/chybn√Ω _zvukov√Ω_ ovl√°daƒç.\n"\
+"  - Sk√∫ste -ao sdl alebo pou≈æite OSS emul√°ciu ALSA.\n"\
+"  - Experimentujte s r√¥znymi hodnotami -autosync, 30 je dobr√Ω zaƒçiatok.\n"\
+"- Pomal√Ω video v√Ωstup\n"\
+"  - Sk√∫ste in√Ω -vo ovl√°daƒç (pre zoznam: -vo help) alebo sk√∫ste -framedrop!\n"\
+"- Pomal√Ω CPU\n"\
+"  - Nesk√∫≈°ajte prehr√°va≈• veƒæk√© dvd/divx na pomalom cpu! Sk√∫ste lavdopts,\n"\
 "    napr. -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
-"- Poπkoden˝ s˙bor\n"\
-"  - Sk˙ste rÙzne kombin·cie t˝chto volieb -nobps -ni -forceidx -mc 0.\n"\
-"- PomalÈ mÈdium (NFS/SMB, DVD, VCD...)\n"\
-"  - Sk˙ste -cache 8192.\n"\
-"- PouæÌvate -cache na prehr·vanie non-interleaved s˙boru?\n"\
-"  - Sk˙ste -nocache.\n"\
-"PreËÌtajte si DOCS/HTML/en/video.html s˙ tam tipy na vyladenie/zr˝chlenie.\n"\
-"Ak niË z tohto nepomohlo, preËÌtajte si DOCS/HTML/en/bugreports.html.\n\n"
+"- Po≈°koden√Ω s√∫bor\n"\
+"  - Sk√∫ste r√¥zne kombin√°cie t√Ωchto volieb -nobps -ni -forceidx -mc 0.\n"\
+"- Pomal√© m√©dium (NFS/SMB, DVD, VCD...)\n"\
+"  - Sk√∫ste -cache 8192.\n"\
+"- Pou≈æ√≠vate -cache na prehr√°vanie non-interleaved s√∫boru?\n"\
+"  - Sk√∫ste -nocache.\n"\
+"Preƒç√≠tajte si DOCS/HTML/en/video.html s√∫ tam tipy na vyladenie/zr√Ωchlenie.\n"\
+"Ak niƒç z tohto nepomohlo, preƒç√≠tajte si DOCS/HTML/en/bugreports.html.\n\n"
 
-#define MSGTR_NoGui "MPlayer bol zostaven˝ BEZ podpory GUI!\n"
-#define MSGTR_GuiNeedsX "MPlayer GUI vyæaduje X11!\n"
-#define MSGTR_Playing "Prehr·vam %s\n"
+#define MSGTR_NoGui "MPlayer bol zostaven√Ω BEZ podpory GUI!\n"
+#define MSGTR_GuiNeedsX "MPlayer GUI vy≈æaduje X11!\n"
+#define MSGTR_Playing "Prehr√°vam %s\n"
 #define MSGTR_NoSound "Audio: bez zvuku!!!\n"
-#define MSGTR_FPSforced "FPS vn˙tenÈ na hodnotu %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "SkompilovnÈ s RUNTIME CPU Detection - varovanie, nie je to optim·lne! Na zÌskanie max. v˝konu, rekompilujte mplayer zo zdrojakov s --disable-runtime-cpudetection\n"
-#define MSGTR_CompiledWithCPUExtensions "SkompilovanÈ pre x86 CPU s rozπÌreniami:"
-#define MSGTR_AvailableVideoOutputDrivers "DostupnÈ video v˝stupnÈ ovl·daËe:\n"
-#define MSGTR_AvailableAudioOutputDrivers "DostupnÈ audio v˝stupnÈ ovl·daËe:\n"
-#define MSGTR_AvailableAudioCodecs "DostupnÈ audio kodeky:\n"
-#define MSGTR_AvailableVideoCodecs "DostupnÈ video kodeky:\n"
-#define MSGTR_AvailableAudioFm "DostupnÈ (vkompilovanÈ) audio rodiny kodekov/ovl·daËe:\n"
-#define MSGTR_AvailableVideoFm "DostupnÈ (vkompilovanÈ) video rodiny kodekov/ovl·daËe:\n"
-#define MSGTR_AvailableFsType "DostupnÈ zmeny plnoobrazovkov˝ch mÛdov:\n"
-#define MSGTR_UsingRTCTiming "PouæÌvam LinuxovÈ hardvÈrovÈ RTC Ëasovanie (%ldHz)\n"
-#define MSGTR_CannotReadVideoProperties "Video: nemÙæem ËÌtaª vlastnosti\n"
-#define MSGTR_NoStreamFound "Nen·jden˝ pr˙d\n"
-#define MSGTR_ErrorInitializingVODevice "Chyba pri otv·ranÌ/inicializ·cii vybran˝ch video_out (-vo) zariadenÌ!\n"
-#define MSGTR_ForcedVideoCodec "Vn˙ten˝ video kodek: %s\n"
-#define MSGTR_ForcedAudioCodec "Vn˙ten˝ video kodek: %s\n"
-#define MSGTR_Video_NoVideo "Video: æiadne video!!!\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: NemÙæem inicializovaª video filtre (-vf) alebo video v˝stup (-vo)!\n"
+#define MSGTR_FPSforced "FPS vn√∫ten√© na hodnotu %5.3f  (ftime: %5.3f)\n"
+#define MSGTR_CompiledWithRuntimeDetection "Skompilovn√© s RUNTIME CPU Detection - varovanie, nie je to optim√°lne! Na z√≠skanie max. v√Ωkonu, rekompilujte mplayer zo zdrojakov s --disable-runtime-cpudetection\n"
+#define MSGTR_CompiledWithCPUExtensions "Skompilovan√© pre x86 CPU s roz≈°√≠reniami:"
+#define MSGTR_AvailableVideoOutputDrivers "Dostupn√© video v√Ωstupn√© ovl√°daƒçe:\n"
+#define MSGTR_AvailableAudioOutputDrivers "Dostupn√© audio v√Ωstupn√© ovl√°daƒçe:\n"
+#define MSGTR_AvailableAudioCodecs "Dostupn√© audio kodeky:\n"
+#define MSGTR_AvailableVideoCodecs "Dostupn√© video kodeky:\n"
+#define MSGTR_AvailableAudioFm "Dostupn√© (vkompilovan√©) audio rodiny kodekov/ovl√°daƒçe:\n"
+#define MSGTR_AvailableVideoFm "Dostupn√© (vkompilovan√©) video rodiny kodekov/ovl√°daƒçe:\n"
+#define MSGTR_AvailableFsType "Dostupn√© zmeny plnoobrazovkov√Ωch m√≥dov:\n"
+#define MSGTR_UsingRTCTiming "Pou≈æ√≠vam Linuxov√© hardv√©rov√© RTC ƒçasovanie (%ldHz)\n"
+#define MSGTR_CannotReadVideoProperties "Video: nem√¥≈æem ƒç√≠ta≈• vlastnosti\n"
+#define MSGTR_NoStreamFound "Nen√°jden√Ω pr√∫d\n"
+#define MSGTR_ErrorInitializingVODevice "Chyba pri otv√°ran√≠/inicializ√°cii vybran√Ωch video_out (-vo) zariaden√≠!\n"
+#define MSGTR_ForcedVideoCodec "Vn√∫ten√Ω video kodek: %s\n"
+#define MSGTR_ForcedAudioCodec "Vn√∫ten√Ω video kodek: %s\n"
+#define MSGTR_Video_NoVideo "Video: ≈æiadne video!!!\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATAL: Nem√¥≈æem inicializova≈• video filtre (-vf) alebo video v√Ωstup (-vo)!\n"
 #define MSGTR_Paused "\n  =====  PAUZA  =====\r"
-#define MSGTR_PlaylistLoadUnable "\nNemÙæem naËÌtaª playlist %s\n"
+#define MSGTR_PlaylistLoadUnable "\nNem√¥≈æem naƒç√≠ta≈• playlist %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer zhavaroval na 'Illegal Instruction'.\n"\
-"  MÙæe to byª chyba v naπom novom kÛde na detekciu procesora...\n"\
-"  ProsÌm preËÌtajte si DOCS/HTML/en/bugreports.html.\n"
+"  M√¥≈æe to by≈• chyba v na≈°om novom k√≥de na detekciu procesora...\n"\
+"  Pros√≠m preƒç√≠tajte si DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer zhavaroval na 'Illegal Instruction'.\n"\
-"  ObyËajne sa to st·va, keÔ ho pouæÌvate na inom procesore ako pre ktor˝ bol\n"\
-"  skompilovan˝/optimalizovan˝.\n"\
+"  Obyƒçajne sa to st√°va, keƒè ho pou≈æ√≠vate na inom procesore ako pre ktor√Ω bol\n"\
+"  skompilovan√Ω/optimalizovan√Ω.\n"\
 "  Skontrolujte si to!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- MPlayer zhavaroval nespr·vnym pouæitÌm CPU/FPU/RAM.\n"\
+"- MPlayer zhavaroval nespr√°vnym pou≈æit√≠m CPU/FPU/RAM.\n"\
 "  Prekompilujte MPlayer s --enable-debug a urobte 'gdb' backtrace a\n"\
 "  disassemblujte. Pre detaily, pozrite DOCS/HTML/en/bugreports_what.html#bugreports_crash.b.\n"
 #define MSGTR_Exit_SIGCRASH \
-"- MPlayer zhavaroval. To sa nemalo staª.\n"\
-"  MÙæe to byª chyba v MPlayer kÛde _alebo_ vo VaπÌch ovl·daËoch _alebo_ gcc\n"\
-"  verzii. Ak si myslÌte, æe je to chyba MPlayeru, prosÌm preËÌtajte si DOCS/HTML/en/bugreports.html\n"\
-"  a postupujte podµa inπtrukcii. NemÙæeme V·m pomÙcª, pokiaµ neposkytnete\n"\
-"  tieto inform·cie pri ohlasovanÌ moænej chyby.\n"
-#define MSGTR_LoadingConfig "»Ìtam konfigur·ciu '%s'\n"
-#define MSGTR_AddedSubtitleFile "SUB: pridan˝ s˙bor titulkov (%d): %s\n"
-#define MSGTR_RemovedSubtitleFile "SUB: odobrat˝ s˙bor titulkov (%d): %s\n"
-#define MSGTR_ErrorOpeningOutputFile "Chyba pri otv·ranÌ s˙boru [%s] pre z·pis!\n"
-#define MSGTR_CommandLine "PrÌkazov˝ riadok:"
-#define MSGTR_RTCDeviceNotOpenable "Nepodarilo sa otvoriª %s: %s (malo by to byª ËitateµnÈ pre pouæÌvateµa.)\n"
-#define MSGTR_LinuxRTCInitErrorIrqpSet "Chyba pri inicializ·cii Linuxov˝ch RTC v ioctl (rtc_irqp_set %lu): %s\n"
-#define MSGTR_IncreaseRTCMaxUserFreq "Sk˙ste pridaª \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" do πtartovacÌch skriptov v·πho systÈmu.\n"
-#define MSGTR_LinuxRTCInitErrorPieOn "Chyba pri inicializ·cii Linuxov˝ch RTC v ioctl (rtc_pie_on): %s\n"
-#define MSGTR_UsingTimingType "PouæÌvam %s Ëasovanie.\n"
-#define MSGTR_NoIdleAndGui "Voµba -idle sa ned· pouæiª pre GMPlayer.\n"
-#define MSGTR_MenuInitialized "Menu inicializovanÈ: %s\n"
-#define MSGTR_MenuInitFailed "Zlyhala inicializ·cia menu.\n"
-#define MSGTR_Getch2InitializedTwice "VAROVANIE: getch2_init je volan· dvakr·t!\n"
-#define MSGTR_DumpstreamFdUnavailable "NemÙæem uloæiª (dump) tento pr˙d - nie je dostupn˝ æiaden deskriptor s˙boru.\n"
+"- MPlayer zhavaroval. To sa nemalo sta≈•.\n"\
+"  M√¥≈æe to by≈• chyba v MPlayer k√≥de _alebo_ vo Va≈°√≠ch ovl√°daƒçoch _alebo_ gcc\n"\
+"  verzii. Ak si mysl√≠te, ≈æe je to chyba MPlayeru, pros√≠m preƒç√≠tajte si DOCS/HTML/en/bugreports.html\n"\
+"  a postupujte podƒæa in≈°trukcii. Nem√¥≈æeme V√°m pom√¥c≈•, pokiaƒæ neposkytnete\n"\
+"  tieto inform√°cie pri ohlasovan√≠ mo≈ænej chyby.\n"
+#define MSGTR_LoadingConfig "ƒå√≠tam konfigur√°ciu '%s'\n"
+#define MSGTR_AddedSubtitleFile "SUB: pridan√Ω s√∫bor titulkov (%d): %s\n"
+#define MSGTR_RemovedSubtitleFile "SUB: odobrat√Ω s√∫bor titulkov (%d): %s\n"
+#define MSGTR_ErrorOpeningOutputFile "Chyba pri otv√°ran√≠ s√∫boru [%s] pre z√°pis!\n"
+#define MSGTR_CommandLine "Pr√≠kazov√Ω riadok:"
+#define MSGTR_RTCDeviceNotOpenable "Nepodarilo sa otvori≈• %s: %s (malo by to by≈• ƒçitateƒæn√© pre pou≈æ√≠vateƒæa.)\n"
+#define MSGTR_LinuxRTCInitErrorIrqpSet "Chyba pri inicializ√°cii Linuxov√Ωch RTC v ioctl (rtc_irqp_set %lu): %s\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "Sk√∫ste prida≈• \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" do ≈°tartovac√≠ch skriptov v√°≈°ho syst√©mu.\n"
+#define MSGTR_LinuxRTCInitErrorPieOn "Chyba pri inicializ√°cii Linuxov√Ωch RTC v ioctl (rtc_pie_on): %s\n"
+#define MSGTR_UsingTimingType "Pou≈æ√≠vam %s ƒçasovanie.\n"
+#define MSGTR_NoIdleAndGui "Voƒæba -idle sa ned√° pou≈æi≈• pre GMPlayer.\n"
+#define MSGTR_MenuInitialized "Menu inicializovan√©: %s\n"
+#define MSGTR_MenuInitFailed "Zlyhala inicializ√°cia menu.\n"
+#define MSGTR_Getch2InitializedTwice "VAROVANIE: getch2_init je volan√° dvakr√°t!\n"
+#define MSGTR_DumpstreamFdUnavailable "Nem√¥≈æem ulo≈æi≈• (dump) tento pr√∫d - nie je dostupn√Ω ≈æiaden deskriptor s√∫boru.\n"
 #define MSGTR_FallingBackOnPlaylist "Ustupujem od pokusu o spracovanie playlistu %s...\n"
-#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "NemÙæem otvoriª video filter libmenu s koreÚov˝m menu %s.\n"
-#define MSGTR_AudioFilterChainPreinitError "Chyba pri predinicializ·cii reªazca audio filtrov!\n"
-#define MSGTR_LinuxRTCReadError "Chyba pri ËÌtanÌ z Linuxov˝ch RTC: %s\n"
-#define MSGTR_SoftsleepUnderflow "Pozor! PodteËenie softsleep!\n"
-#define MSGTR_DvdnavNullEvent "DVDNAV udalosª NULL?!\n"
-#define MSGTR_DvdnavHighlightEventBroken "DVDNAV udalosª: VadnÈ zv˝raznenie udalostÌ\n"
-#define MSGTR_DvdnavEvent "DVDNAV udalosª: %s\n"
-#define MSGTR_DvdnavHighlightHide "DVDNAV udalosª: skryª zv˝raznenie\n"
-#define MSGTR_DvdnavStillFrame "######################################## DVDNAV udalosª: StojacÌ snÌmok: %d sec(s)\n"
-#define MSGTR_DvdnavNavStop "DVDNAV udalosª: Nav Stop\n"
-#define MSGTR_DvdnavNavNOP "DVDNAV udalosª: Nav NOP\n"
-#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV udalosª: Zmena Nav SPU pr˙du: fyz: %d/%d/%d logicky: %d\n"
-#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV udalosª: Zmena Nav SPU pr˙du: fyz: %d logicky: %d\n"
-#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV udalosª: Zmena Nav Audio pr˙du: fyz: %d logicky: %d\n"
-#define MSGTR_DvdnavNavVTSChange "DVDNAV udalosª: Zmena Nav VTS\n"
-#define MSGTR_DvdnavNavCellChange "DVDNAV udalosª: Zmena Nav bunky \n"
-#define MSGTR_DvdnavNavSpuClutChange "DVDNAV udalosª: Zmena Nav SPU CLUT\n"
-#define MSGTR_DvdnavNavSeekDone "DVDNAV udalosª: PrevÌjanie Nav dokonËenÈ\n"
+#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Nem√¥≈æem otvori≈• video filter libmenu s kore≈àov√Ωm menu %s.\n"
+#define MSGTR_AudioFilterChainPreinitError "Chyba pri predinicializ√°cii re≈•azca audio filtrov!\n"
+#define MSGTR_LinuxRTCReadError "Chyba pri ƒç√≠tan√≠ z Linuxov√Ωch RTC: %s\n"
+#define MSGTR_SoftsleepUnderflow "Pozor! Podteƒçenie softsleep!\n"
+#define MSGTR_DvdnavNullEvent "DVDNAV udalos≈• NULL?!\n"
+#define MSGTR_DvdnavHighlightEventBroken "DVDNAV udalos≈•: Vadn√© zv√Ωraznenie udalost√≠\n"
+#define MSGTR_DvdnavEvent "DVDNAV udalos≈•: %s\n"
+#define MSGTR_DvdnavHighlightHide "DVDNAV udalos≈•: skry≈• zv√Ωraznenie\n"
+#define MSGTR_DvdnavStillFrame "######################################## DVDNAV udalos≈•: Stojac√≠ sn√≠mok: %d sec(s)\n"
+#define MSGTR_DvdnavNavStop "DVDNAV udalos≈•: Nav Stop\n"
+#define MSGTR_DvdnavNavNOP "DVDNAV udalos≈•: Nav NOP\n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV udalos≈•: Zmena Nav SPU pr√∫du: fyz: %d/%d/%d logicky: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV udalos≈•: Zmena Nav SPU pr√∫du: fyz: %d logicky: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV udalos≈•: Zmena Nav Audio pr√∫du: fyz: %d logicky: %d\n"
+#define MSGTR_DvdnavNavVTSChange "DVDNAV udalos≈•: Zmena Nav VTS\n"
+#define MSGTR_DvdnavNavCellChange "DVDNAV udalos≈•: Zmena Nav bunky \n"
+#define MSGTR_DvdnavNavSpuClutChange "DVDNAV udalos≈•: Zmena Nav SPU CLUT\n"
+#define MSGTR_DvdnavNavSeekDone "DVDNAV udalos≈•: Prev√≠janie Nav dokonƒçen√©\n"
 #define MSGTR_MenuCall "Volanie menu\n"
 
-#define MSGTR_EdlOutOfMem "Ned· sa alokovaª dostatok pam‰te pre EDL d·ta.\n"
-#define MSGTR_EdlRecordsNo "»Ìtam %d EDL akcie.\n"
-#define MSGTR_EdlQueueEmpty "Vπetky EDL akcie boly uæ vykonanÈ.\n"
-#define MSGTR_EdlCantOpenForWrite "Ned· sa otvoriª EDL s˙bor [%s] pre z·pis.\n"
-#define MSGTR_EdlCantOpenForRead "Ned· sa otvoriª EDL s˙bor [%s] na ËÌtanie.\n"
-#define MSGTR_EdlNOsh_video "EDL sa ned· pouæiª bez videa, vypÌnam.\n"
+#define MSGTR_EdlOutOfMem "Ned√° sa alokova≈• dostatok pam√§te pre EDL d√°ta.\n"
+#define MSGTR_EdlRecordsNo "ƒå√≠tam %d EDL akcie.\n"
+#define MSGTR_EdlQueueEmpty "V≈°etky EDL akcie boly u≈æ vykonan√©.\n"
+#define MSGTR_EdlCantOpenForWrite "Ned√° sa otvori≈• EDL s√∫bor [%s] pre z√°pis.\n"
+#define MSGTR_EdlCantOpenForRead "Ned√° sa otvori≈• EDL s√∫bor [%s] na ƒç√≠tanie.\n"
+#define MSGTR_EdlNOsh_video "EDL sa ned√° pou≈æi≈• bez videa, vyp√≠nam.\n"
 #define MSGTR_EdlNOValidLine "Chyba EDL na riadku: %s\n"
-#define MSGTR_EdlBadlyFormattedLine "Zle form·tovan˝ EDL riadok [%d] Zahadzujem.\n"
-#define MSGTR_EdlBadLineOverlap "Posledn· stop znaËka bola [%f]; ÔalπÌ πtart je "\
-"[%f]. Z·znamy musia byª chronologicky, a nesm˙ sa prekr˝vaª. Zahadzujem.\n"
-#define MSGTR_EdlBadLineBadStop "»asov· znaËka stop m· byª za znaËkou start.\n"
+#define MSGTR_EdlBadlyFormattedLine "Zle form√°tovan√Ω EDL riadok [%d] Zahadzujem.\n"
+#define MSGTR_EdlBadLineOverlap "Posledn√° stop znaƒçka bola [%f]; ƒèal≈°√≠ ≈°tart je "\
+"[%f]. Z√°znamy musia by≈• chronologicky, a nesm√∫ sa prekr√Ωva≈•. Zahadzujem.\n"
+#define MSGTR_EdlBadLineBadStop "ƒåasov√° znaƒçka stop m√° by≈• za znaƒçkou start.\n"
 
 // mplayer.c OSD
 
-#define MSGTR_OSDenabled "zapnutÈ"
-#define MSGTR_OSDdisabled "vypnutÈ"
-#define MSGTR_OSDChannel "Kan·l: %s"
+#define MSGTR_OSDenabled "zapnut√©"
+#define MSGTR_OSDdisabled "vypnut√©"
+#define MSGTR_OSDChannel "Kan√°l: %s"
 #define MSGTR_OSDSubDelay "Zpozdenie tit: %d ms"
-#define MSGTR_OSDSpeed "R˝chlosª: x %6.2f"
+#define MSGTR_OSDSpeed "R√Ωchlos≈•: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
 
 // property values
-#define MSGTR_Enabled "zapnutÈ"
-#define MSGTR_EnabledEdl "zapnutÈ (edl)"
-#define MSGTR_Disabled "vypnutÈ"
+#define MSGTR_Enabled "zapnut√©"
+#define MSGTR_EnabledEdl "zapnut√© (edl)"
+#define MSGTR_Disabled "vypnut√©"
 #define MSGTR_HardFrameDrop "hard"
-#define MSGTR_Unknown "nezn·me"
+#define MSGTR_Unknown "nezn√°me"
 #define MSGTR_Bottom "dole"
 #define MSGTR_Center "stred"
 #define MSGTR_Top "hore"
 
 // osd bar names
-#define MSGTR_Volume "Hlasitosª"
+#define MSGTR_Volume "Hlasitos≈•"
 #define MSGTR_Panscan "Panscan"
 #define MSGTR_Gamma "Gama"
 #define MSGTR_Brightness "Jas"
 #define MSGTR_Contrast "Kontrast"
-#define MSGTR_Saturation "S˝tosª"
-#define MSGTR_Hue "TÛn"
+#define MSGTR_Saturation "S√Ωtos≈•"
+#define MSGTR_Hue "T√≥n"
 
 // property state
 #define MSGTR_MuteStatus "Utlmenie zvuku: %s"
 #define MSGTR_AVDelayStatus "A-V odchylka: %s"
-#define MSGTR_OnTopStatus "Vædy navrchu: %s"
-#define MSGTR_RootwinStatus "HlavnÈ okno: %s"
-#define MSGTR_BorderStatus "OhraniËenie: %s"
-#define MSGTR_FramedroppingStatus "Zahadzovanie snÌmkov: %s"
+#define MSGTR_OnTopStatus "V≈ædy navrchu: %s"
+#define MSGTR_RootwinStatus "Hlavn√© okno: %s"
+#define MSGTR_BorderStatus "Ohraniƒçenie: %s"
+#define MSGTR_FramedroppingStatus "Zahadzovanie sn√≠mkov: %s"
 #define MSGTR_VSyncStatus "VSync: %s"
 #define MSGTR_SubSelectStatus "Titulky: %s"
-#define MSGTR_SubPosStatus "PozÌcia tit.: %s/100"
+#define MSGTR_SubPosStatus "Poz√≠cia tit.: %s/100"
 #define MSGTR_SubAlignStatus "Zarovnanie tit.: %s"
 #define MSGTR_SubDelayStatus "Spozdenie tit.: %s"
 #define MSGTR_SubVisibleStatus "Zobr. titulkov: %s"
-#define MSGTR_SubForcedOnlyStatus "Iba vyn˙tenÈ tit.: %s"
+#define MSGTR_SubForcedOnlyStatus "Iba vyn√∫ten√© tit.: %s"
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControlFile "PouæÌvam pass3 ovl·dacÌ s˙bor: %s\n"
-#define MSGTR_MissingFilename "\nCh˝baj˙ce meno s˙boru.\n\n"
-#define MSGTR_CannotOpenFile_Device "NemÙæem otvoriª s˙bor/zariadenie\n"
-#define MSGTR_CannotOpenDemuxer "NemÙæem otvoriª demuxer\n"
-#define MSGTR_NoAudioEncoderSelected "\nNevybran˝ encoder (-oac)! Vyberte jeden alebo -nosound. Pouæitie -oac help!\n"
-#define MSGTR_NoVideoEncoderSelected "\nNevybran˝ encoder (-ovc)! Vyberte jeden, pouæitie -ovc help!\n"
-#define MSGTR_CannotOpenOutputFile "NemÙæem otvoriª s˙bor '%s'\n"
-#define MSGTR_EncoderOpenFailed "Zlyhalo spustenie enkÛderu\n"
-#define MSGTR_MencoderWrongFormatAVI "\nVAROVANIE: FORM¡T V›STUPN…HO S⁄BORU JE _AVI_. viz -of help.\n"
-#define MSGTR_MencoderWrongFormatMPG "\nVAROVANIE: FORM¡T V›STUPN…HO S⁄BORU JE _MPEG_. viz -of help.\n"
-#define MSGTR_MissingOutputFilename "Nebol nastaven˝ v˝stupn˝ s˙bor, preπtudujte si volbu -o"
-#define MSGTR_ForcingOutputFourcc "Vnucujem v˝stupn˝ form·t (fourcc) na %x [%.4s]\n"
-#define MSGTR_ForcingOutputAudiofmtTag "Vynucujem znaËku v˝stupnÈho zvukovÈho form·tu 0x%x\n"
-#define MSGTR_DuplicateFrames "\nduplikujem %d snÌmkov!!!    \n"
-#define MSGTR_SkipFrame "\npreskoËiª snÌmok!!!    \n"
-#define MSGTR_ResolutionDoesntMatch "\nNov˝ video s˙bor m· inÈ rozliπenÌ alebo farebn˝ priestor ako jeho predchodca.\n"
-#define MSGTR_FrameCopyFileMismatch "\nVπetky video soubory musÌ mÌt shodnÈ fps, rozliπenÌ a kodek pro -ovc copy.\n"
-#define MSGTR_AudioCopyFileMismatch "\nVπetky s˙bory musÌ pouæÌvaª identick˝ audio kÛdek a form·t pro -oac copy.\n"
-#define MSGTR_NoAudioFileMismatch "\nNemÙæete mixovaª iba video s audio a video s˙bormi. Sk˙ste -nosound.\n"
-#define MSGTR_NoSpeedWithFrameCopy "VAROVANIE: -speed nem· zaruËen˙ funkËnosª s -oac copy!\n"\
-"V˝sledny s˙bor mÙæe byª vadn˝!\n"
-#define MSGTR_ErrorWritingFile "%s: chyba pri z·pise s˙boru.\n"
-#define MSGTR_RecommendedVideoBitrate "Odpor˙Ëan˝ d·tov˝ tok videa pre CD %s: %d\n"
-#define MSGTR_VideoStreamResult "\nVideo pr˙d: %8.3f kbit/s  (%d B/s)  velkosª: %"PRIu64" bytov  %5.3f sekund  %d snÌmkov\n"
-#define MSGTR_AudioStreamResult "\nAudio pr˙d: %8.3f kbit/s  (%d B/s)  velkosª: %"PRIu64" bytov  %5.3f sekund\n"
-#define MSGTR_OpenedStream "˙spech: form·t: %d  d·ta: 0x%X - 0x%x\n"
-#define MSGTR_VCodecFramecopy "videokÛdek: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "audiokÛdek: framecopy (form·t=%x kan·lov=%d frekvencia=%d bitov=%d B/s=%d vzorka-%d)\n"
-#define MSGTR_CBRPCMAudioSelected "zvolen˝ CBR PCM zvuk\n"
-#define MSGTR_MP3AudioSelected "zvolen˝ MP3 zvuk\n"
-#define MSGTR_CannotAllocateBytes "Ned· sa alokovaª %d bajtov\n"
+#define MSGTR_UsingPass3ControlFile "Pou≈æ√≠vam pass3 ovl√°dac√≠ s√∫bor: %s\n"
+#define MSGTR_MissingFilename "\nCh√Ωbaj√∫ce meno s√∫boru.\n\n"
+#define MSGTR_CannotOpenFile_Device "Nem√¥≈æem otvori≈• s√∫bor/zariadenie\n"
+#define MSGTR_CannotOpenDemuxer "Nem√¥≈æem otvori≈• demuxer\n"
+#define MSGTR_NoAudioEncoderSelected "\nNevybran√Ω encoder (-oac)! Vyberte jeden alebo -nosound. Pou≈æitie -oac help!\n"
+#define MSGTR_NoVideoEncoderSelected "\nNevybran√Ω encoder (-ovc)! Vyberte jeden, pou≈æitie -ovc help!\n"
+#define MSGTR_CannotOpenOutputFile "Nem√¥≈æem otvori≈• s√∫bor '%s'\n"
+#define MSGTR_EncoderOpenFailed "Zlyhalo spustenie enk√≥deru\n"
+#define MSGTR_MencoderWrongFormatAVI "\nVAROVANIE: FORM√ÅT V√ùSTUPN√âHO S√öBORU JE _AVI_. viz -of help.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nVAROVANIE: FORM√ÅT V√ùSTUPN√âHO S√öBORU JE _MPEG_. viz -of help.\n"
+#define MSGTR_MissingOutputFilename "Nebol nastaven√Ω v√Ωstupn√Ω s√∫bor, pre≈°tudujte si volbu -o"
+#define MSGTR_ForcingOutputFourcc "Vnucujem v√Ωstupn√Ω form√°t (fourcc) na %x [%.4s]\n"
+#define MSGTR_ForcingOutputAudiofmtTag "Vynucujem znaƒçku v√Ωstupn√©ho zvukov√©ho form√°tu 0x%x\n"
+#define MSGTR_DuplicateFrames "\nduplikujem %d sn√≠mkov!!!    \n"
+#define MSGTR_SkipFrame "\npreskoƒçi≈• sn√≠mok!!!    \n"
+#define MSGTR_ResolutionDoesntMatch "\nNov√Ω video s√∫bor m√° in√© rozli≈°en√≠ alebo farebn√Ω priestor ako jeho predchodca.\n"
+#define MSGTR_FrameCopyFileMismatch "\nV≈°etky video soubory mus√≠ m√≠t shodn√© fps, rozli≈°en√≠ a kodek pro -ovc copy.\n"
+#define MSGTR_AudioCopyFileMismatch "\nV≈°etky s√∫bory mus√≠ pou≈æ√≠va≈• identick√Ω audio k√≥dek a form√°t pro -oac copy.\n"
+#define MSGTR_NoAudioFileMismatch "\nNem√¥≈æete mixova≈• iba video s audio a video s√∫bormi. Sk√∫ste -nosound.\n"
+#define MSGTR_NoSpeedWithFrameCopy "VAROVANIE: -speed nem√° zaruƒçen√∫ funkƒçnos≈• s -oac copy!\n"\
+"V√Ωsledny s√∫bor m√¥≈æe by≈• vadn√Ω!\n"
+#define MSGTR_ErrorWritingFile "%s: chyba pri z√°pise s√∫boru.\n"
+#define MSGTR_RecommendedVideoBitrate "Odpor√∫ƒçan√Ω d√°tov√Ω tok videa pre CD %s: %d\n"
+#define MSGTR_VideoStreamResult "\nVideo pr√∫d: %8.3f kbit/s  (%d B/s)  velkos≈•: %"PRIu64" bytov  %5.3f sekund  %d sn√≠mkov\n"
+#define MSGTR_AudioStreamResult "\nAudio pr√∫d: %8.3f kbit/s  (%d B/s)  velkos≈•: %"PRIu64" bytov  %5.3f sekund\n"
+#define MSGTR_OpenedStream "√∫spech: form√°t: %d  d√°ta: 0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "videok√≥dek: framecopy (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "audiok√≥dek: framecopy (form√°t=%x kan√°lov=%d frekvencia=%d bitov=%d B/s=%d vzorka-%d)\n"
+#define MSGTR_CBRPCMAudioSelected "zvolen√Ω CBR PCM zvuk\n"
+#define MSGTR_MP3AudioSelected "zvolen√Ω MP3 zvuk\n"
+#define MSGTR_CannotAllocateBytes "Ned√° sa alokova≈• %d bajtov\n"
 #define MSGTR_SettingAudioDelay "Nastavujem spozdenie zvuku na %5.3f\n"
-#define MSGTR_SettingVideoDelay "Nastavujem spozdÏnie videa na %5.3fs\n"
-#define MSGTR_SettingAudioInputGain "Nastavujem predzosilnenie zvukovÈho vstupu na %f\n"
+#define MSGTR_SettingVideoDelay "Nastavujem spozdƒõnie videa na %5.3fs\n"
+#define MSGTR_SettingAudioInputGain "Nastavujem predzosilnenie zvukov√©ho vstupu na %f\n"
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n"
-#define MSGTR_LimitingAudioPreload "Obmedzujem prednaËÌtanie zvuku na 0.4s\n"
-#define MSGTR_IncreasingAudioDensity "Zvyπujem hustotu audia na 4\n"
-#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Vnucujem prednaËÌtanie zvuku na 0, max korekciu pts na 0\n"
+#define MSGTR_LimitingAudioPreload "Obmedzujem prednaƒç√≠tanie zvuku na 0.4s\n"
+#define MSGTR_IncreasingAudioDensity "Zvy≈°ujem hustotu audia na 4\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Vnucujem prednaƒç√≠tanie zvuku na 0, max korekciu pts na 0\n"
 #define MSGTR_CBRAudioByterate "\n\nCBR zvuk: %d bajtov/s, %d bajtov/blok\n"
 #define MSGTR_LameVersion "LAME verzia %s (%s)\n\n"
-#define MSGTR_InvalidBitrateForLamePreset "Chyba: ©pecifikovan˝ d·tov˝ tok je mimo rozsah pre tento preset.\n"\
+#define MSGTR_InvalidBitrateForLamePreset "Chyba: ≈†pecifikovan√Ω d√°tov√Ω tok je mimo rozsah pre tento preset.\n"\
 "\n"\
-"Pokiaµ pouæÌvate tento reæim, musÌte zadat hodnotu od \"8\" do \"320\".\n"\
+"Pokiaƒæ pou≈æ√≠vate tento re≈æim, mus√≠te zadat hodnotu od \"8\" do \"320\".\n"\
 "\n"\
-"Dalπie inform·cie viz: \"-lameopts preset=help\"\n"
-#define MSGTR_InvalidLamePresetOptions "Chyba: Nezadali ste platn˝ profil a/alebo voµby s presetom.\n"\
+"Dal≈°ie inform√°cie viz: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Chyba: Nezadali ste platn√Ω profil a/alebo voƒæby s presetom.\n"\
 "\n"\
-"DostupnÈ profily s˙:\n"\
+"Dostupn√© profily s√∫:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
 "                 insane\n"\
-"   <cbr> (ABR Mode) - Implikuje reæim ABR. Pre jeho pouæitie,\n"\
-"                      jednoduche zadejte d·tov˝ tok. NaprÌklad:\n"\
+"   <cbr> (ABR Mode) - Implikuje re≈æim ABR. Pre jeho pou≈æitie,\n"\
+"                      jednoduche zadejte d√°tov√Ω tok. Napr√≠klad:\n"\
 "                      \"preset=185\" aktivuje tento preset\n"\
-"                      a pouæije priemern˝ d·tov˝ tok 185 kbps.\n"\
+"                      a pou≈æije priemern√Ω d√°tov√Ω tok 185 kbps.\n"\
 "\n"\
-"    Niekolko prÌkladov:\n"\
+"    Niekolko pr√≠kladov:\n"\
 "\n"\
 "    \"-lameopts fast:preset=standard  \"\n"\
 " or \"-lameopts  cbr:preset=192       \"\n"\
 " or \"-lameopts      preset=172       \"\n"\
 " or \"-lameopts      preset=extreme   \"\n"\
 "\n"\
-"Dalπie inform·cie viz: \"-lameopts preset=help\"\n"
+"Dal≈°ie inform√°cie viz: \"-lameopts preset=help\"\n"
 #define MSGTR_LamePresetsLongInfo "\n"\
-"Preset prepÌnaËe s˙ navrhnutÈ tak, aby poskytovaly Ëo najvyππiu moæn˙ kvalitu.\n"\
+"Preset prep√≠naƒçe s√∫ navrhnut√© tak, aby poskytovaly ƒço najvy≈°≈°iu mo≈æn√∫ kvalitu.\n"\
 "\n"\
-"V‰Ëπina z nich bola testovan· a vyladen· pomocou dÙkladn˝ch zdvojen˝ch slep˝ch\n"\
-"posluchov˝ch testov, za ˙Ëelom dosiahnutia a overenia tohto ciela.\n"\
+"V√§ƒç≈°ina z nich bola testovan√° a vyladen√° pomocou d√¥kladn√Ωch zdvojen√Ωch slep√Ωch\n"\
+"posluchov√Ωch testov, za √∫ƒçelom dosiahnutia a overenia tohto ciela.\n"\
 "\n"\
-"Nastavenia s˙ neust·le aktualizovanÈ v s˙lade s najnovπÌm v˝vojom\n"\
-"a mali by poskytovaª prakticky najvyππiu moæn˙ kvalitu, ak· je v s˙Ëasnosti \n"\
-"s kÛdekom LAME dosaæiteµn·.\n"\
+"Nastavenia s√∫ neust√°le aktualizovan√© v s√∫lade s najnov≈°√≠m v√Ωvojom\n"\
+"a mali by poskytova≈• prakticky najvy≈°≈°iu mo≈æn√∫ kvalitu, ak√° je v s√∫ƒçasnosti \n"\
+"s k√≥dekom LAME dosa≈æiteƒæn√°.\n"\
 "\n"\
-"Aktiv·cia presetov:\n"\
+"Aktiv√°cia presetov:\n"\
 "\n"\
-"   Pre reæimy VBR (vo vπeobecnosti najvyππia kvalita):\n"\
+"   Pre re≈æimy VBR (vo v≈°eobecnosti najvy≈°≈°ia kvalita):\n"\
 "\n"\
-"     \"preset=standard\" Tento preset by mal b˝ª jasnou voµbou\n"\
-"                             pre v‰Ëπinu ludÌ a hudobn˝ch æ·nrov a m·\n"\
-"                             uæ vysok˙ kvalitu.\n"\
+"     \"preset=standard\" Tento preset by mal b√Ω≈• jasnou voƒæbou\n"\
+"                             pre v√§ƒç≈°inu lud√≠ a hudobn√Ωch ≈æ√°nrov a m√°\n"\
+"                             u≈æ vysok√∫ kvalitu.\n"\
 "\n"\
-"     \"preset=extreme\" Pokiaµ m·te v˝nimoËne dobr˝ sluch a zodpovedaj˙ce\n"\
-"                             vybavenie, tento preset vo vπeob. poskytuje\n"\
-"                             miernÏ vyππÌ kvalitu ako reæim \"standard\".\n"\
+"     \"preset=extreme\" Pokiaƒæ m√°te v√Ωnimoƒçne dobr√Ω sluch a zodpovedaj√∫ce\n"\
+"                             vybavenie, tento preset vo v≈°eob. poskytuje\n"\
+"                             miernƒõ vy≈°≈°√≠ kvalitu ako re≈æim \"standard\".\n"\
 "\n"\
-"   Pre CBR 320kbps (najvyππia moæn· kvalita ze vπetk˝ch presetov):\n"\
+"   Pre CBR 320kbps (najvy≈°≈°ia mo≈æn√° kvalita ze v≈°etk√Ωch presetov):\n"\
 "\n"\
-"     \"preset=insane\"  Tento preset je pre v‰Ëπinu ludÌ a situ·cii\n"\
-"                             predimenzovan˝, ale pokiaµ vyæadujete\n"\
-"                             absolutne najvyππiu kvalitu bez ohµadu na\n"\
-"                             velkosª s˙boru, je toto vaπa voµba.\n"\
+"     \"preset=insane\"  Tento preset je pre v√§ƒç≈°inu lud√≠ a situ√°cii\n"\
+"                             predimenzovan√Ω, ale pokiaƒæ vy≈æadujete\n"\
+"                             absolutne najvy≈°≈°iu kvalitu bez ohƒæadu na\n"\
+"                             velkos≈• s√∫boru, je toto va≈°a voƒæba.\n"\
 "\n"\
-"   Pre reæimy ABR (vysok· kvalita pri danom d·tovÈm toku, ale nie tak ako VBR):\n"\
+"   Pre re≈æimy ABR (vysok√° kvalita pri danom d√°tov√©m toku, ale nie tak ako VBR):\n"\
 "\n"\
-"     \"preset=<kbps>\"  PouæitÌm tohoto presetu obvykle dosiahnete dobr˙\n"\
-"                             kvalitu pri danom d·tovÈm toku. V z·vislosti\n"\
-"                             na zadanom toku tento preset odvodÌ optim·lne\n"\
-"                             nastavenie pre dan˙ situ·ciu.\n"\
-"                             Hoci tento prÌstup funguje, nie je ani zÔaleka\n"\
-"                             tak flexibiln˝ ako VBR, a obvykle nedosahuje\n"\
-"                             ˙rovne kvality ako VBR na vyππÌch d·tov˝ch tokoch.\n"\
+"     \"preset=<kbps>\"  Pou≈æit√≠m tohoto presetu obvykle dosiahnete dobr√∫\n"\
+"                             kvalitu pri danom d√°tov√©m toku. V z√°vislosti\n"\
+"                             na zadanom toku tento preset odvod√≠ optim√°lne\n"\
+"                             nastavenie pre dan√∫ situ√°ciu.\n"\
+"                             Hoci tento pr√≠stup funguje, nie je ani zƒèaleka\n"\
+"                             tak flexibiln√Ω ako VBR, a obvykle nedosahuje\n"\
+"                             √∫rovne kvality ako VBR na vy≈°≈°√≠ch d√°tov√Ωch tokoch.\n"\
 "\n"\
-"Pre zodpovedaj˙ce profily s˙ k dispozÌcii tieæ nasleduj˙ce voµby:\n"\
+"Pre zodpovedaj√∫ce profily s√∫ k dispoz√≠cii tie≈æ nasleduj√∫ce voƒæby:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
 "                 insane\n"\
-"   <cbr> (ABR reæim) - Implikuje reæim ABR. Pre jeho pouæitie\n"\
-"                      jednoducho zadajte d·tov˝ tok. NaprÌklad:\n"\
+"   <cbr> (ABR re≈æim) - Implikuje re≈æim ABR. Pre jeho pou≈æitie\n"\
+"                      jednoducho zadajte d√°tov√Ω tok. Napr√≠klad:\n"\
 "                      \"preset=185\" aktivuje tento preset\n"\
-"                      a pouæije priemern˝ d·tov˝ tok 185 kbps.\n"\
+"                      a pou≈æije priemern√Ω d√°tov√Ω tok 185 kbps.\n"\
 "\n"\
-"   \"fast\" - V danom profile aktivuje nov˙ r˝chlu VBR kompresiu.\n"\
-"            Nev˝hodou je obvykle mierne vyππÌ d·tov˝ tok ako v norm·lnom\n"\
-"            reæime a tieæ mÙæe dÙjsª k miernemu poklesu kvality.\n"\
-"   Varovanie:v aktu·lnej verzi mÙæe nastavenie \"fast\" viesª k prÌliπ\n"\
-"            vysokÈmu d·tovÈmu toku v porovnanÌ s norm·lnym nastavenÌm.\n"\
+"   \"fast\" - V danom profile aktivuje nov√∫ r√Ωchlu VBR kompresiu.\n"\
+"            Nev√Ωhodou je obvykle mierne vy≈°≈°√≠ d√°tov√Ω tok ako v norm√°lnom\n"\
+"            re≈æime a tie≈æ m√¥≈æe d√¥js≈• k miernemu poklesu kvality.\n"\
+"   Varovanie:v aktu√°lnej verzi m√¥≈æe nastavenie \"fast\" vies≈• k pr√≠li≈°\n"\
+"            vysok√©mu d√°tov√©mu toku v porovnan√≠ s norm√°lnym nastaven√≠m.\n"\
 "\n"\
-"   \"cbr\"  - Pokiaµ pouæijete reæim ABR (viz vyππie) s v˝znamn˝m\n"\
-"            d·tov˝m tokom, napr. 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
-"            mÙæete pouæÌª voµbu \"cbr\" k vn˙teniu kÛdov·nia v reæime CBR\n"\
-"            (konπtantn˝ tok) namiesto πtandardnÌho ABR reæimu. ABR poskytuje\n"\
-"            lepπiu kvalitu, ale CBR mÙæe byª uæitoËn˝ v situ·ciach ako je\n"\
-"            vysielanie mp3 pr˙du po internete.\n"\
+"   \"cbr\"  - Pokiaƒæ pou≈æijete re≈æim ABR (viz vy≈°≈°ie) s v√Ωznamn√Ωm\n"\
+"            d√°tov√Ωm tokom, napr. 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"            m√¥≈æete pou≈æ√≠≈• voƒæbu \"cbr\" k vn√∫teniu k√≥dov√°nia v re≈æime CBR\n"\
+"            (kon≈°tantn√Ω tok) namiesto ≈°tandardn√≠ho ABR re≈æimu. ABR poskytuje\n"\
+"            lep≈°iu kvalitu, ale CBR m√¥≈æe by≈• u≈æitoƒçn√Ω v situ√°ciach ako je\n"\
+"            vysielanie mp3 pr√∫du po internete.\n"\
 "\n"\
-"    NaprÌklad:\n"\
+"    Napr√≠klad:\n"\
 "\n"\
 "      \"-lameopts fast:preset=standard  \"\n"\
 " alebo \"-lameopts  cbr:preset=192       \"\n"\
@@ -372,51 +372,51 @@ static char help_text[]=
 " alebo \"-lameopts      preset=extreme   \"\n"\
 "\n"\
 "\n"\
-"Pre ABR reæim je k dispozÌcii niekolko skratiek:\n"\
+"Pre ABR re≈æim je k dispoz√≠cii niekolko skratiek:\n"\
 "phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_LameCantInit "Ned· sa nastaviª voµba pre LAME, overte d·tov˝_tok/vzorkovaciu_frekv.,"\
-"niektorÈ veµmi nÌzke d·tovÈ toky (<32) vyæaduj˙ niæπiu vzorkovaciu frekv. (napr. -srate 8000)."\
-"Pokud vπetko ostanÈ zlyh·, zk˙ste prednastavenia (presets)."
-#define MSGTR_ConfigFileError "chyba konfiguraËnÈho s˙boru"
-#define MSGTR_ErrorParsingCommandLine "chyba pri spracov·vanÌ prÌkazovÈho riadku"
-#define MSGTR_VideoStreamRequired "Video pr˙d je povinn˝!\n"
-#define MSGTR_ForcingInputFPS "vstupnÈ fps bude interpretovanÈ ako %5.2f\n"
-#define MSGTR_RawvideoDoesNotSupportAudio "V˝stupn˝ form·t s˙boru RAWVIDEO nepodporuje zvuk - vypÌnam ho\n"
-#define MSGTR_DemuxerDoesntSupportNosound "Tento demuxer zatiaµ nepodporuje -nosound.\n"
-#define MSGTR_MemAllocFailed "Alok·cia pam‰te zlyhala\n"
-#define MSGTR_NoMatchingFilter "Nemoæem n·jsª zodpovedaj˙ci filter/ao form·t!\n"
-#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, moæno je vadn˝ prekladaË C?\n"
-#define MSGTR_NoLavcAudioCodecName "Audio LAVC, ch˝ba meno kÛdeku!\n"
-#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, nemÙæem n·jsª enkÛder pre kÛdek %s\n"
-#define MSGTR_CouldntAllocateLavcContext "Audio LAVC, nemÙæem alokovaª kontext!\n"
-#define MSGTR_CouldntOpenCodec "Ned· sa otvoriª kÛdek %s, br=%d\n"
-#define MSGTR_CantCopyAudioFormat "Audio form·t 0x%x je nekompatibiln˝ s '-oac copy', sk˙ste prosÌm '-oac pcm',\n alebo pouæite '-fafmttag' pre jeho prepÌsanie.\n"
+#define MSGTR_LameCantInit "Ned√° sa nastavi≈• voƒæba pre LAME, overte d√°tov√Ω_tok/vzorkovaciu_frekv.,"\
+"niektor√© veƒæmi n√≠zke d√°tov√© toky (<32) vy≈æaduj√∫ ni≈æ≈°iu vzorkovaciu frekv. (napr. -srate 8000)."\
+"Pokud v≈°etko ostan√© zlyh√°, zk√∫ste prednastavenia (presets)."
+#define MSGTR_ConfigFileError "chyba konfiguraƒçn√©ho s√∫boru"
+#define MSGTR_ErrorParsingCommandLine "chyba pri spracov√°van√≠ pr√≠kazov√©ho riadku"
+#define MSGTR_VideoStreamRequired "Video pr√∫d je povinn√Ω!\n"
+#define MSGTR_ForcingInputFPS "vstupn√© fps bude interpretovan√© ako %5.2f\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "V√Ωstupn√Ω form√°t s√∫boru RAWVIDEO nepodporuje zvuk - vyp√≠nam ho\n"
+#define MSGTR_DemuxerDoesntSupportNosound "Tento demuxer zatiaƒæ nepodporuje -nosound.\n"
+#define MSGTR_MemAllocFailed "Alok√°cia pam√§te zlyhala\n"
+#define MSGTR_NoMatchingFilter "Nemo≈æem n√°js≈• zodpovedaj√∫ci filter/ao form√°t!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, mo≈æno je vadn√Ω prekladaƒç C?\n"
+#define MSGTR_NoLavcAudioCodecName "Audio LAVC, ch√Ωba meno k√≥deku!\n"
+#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, nem√¥≈æem n√°js≈• enk√≥der pre k√≥dek %s\n"
+#define MSGTR_CouldntAllocateLavcContext "Audio LAVC, nem√¥≈æem alokova≈• kontext!\n"
+#define MSGTR_CouldntOpenCodec "Ned√° sa otvori≈• k√≥dek %s, br=%d\n"
+#define MSGTR_CantCopyAudioFormat "Audio form√°t 0x%x je nekompatibiln√Ω s '-oac copy', sk√∫ste pros√≠m '-oac pcm',\n alebo pou≈æite '-fafmttag' pre jeho prep√≠sanie.\n"
 
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
-" vbr=<0-4>     metÛda variabilnej bit. r˝chlosti \n"\
-"                0: cbr (konπtantn· bit.r˝chlosª)\n"\
+" vbr=<0-4>     met√≥da variabilnej bit. r√Ωchlosti \n"\
+"                0: cbr (kon≈°tantn√° bit.r√Ωchlos≈•)\n"\
 "                1: mt (Mark Taylor VBR alg.)\n"\
 "                2: rh(Robert Hegemann VBR alg. - default)\n"\
-"                3: abr (priemern· bit.r˝chlosª)\n"\
+"                3: abr (priemern√° bit.r√Ωchlos≈•)\n"\
 "                4: mtrh (Mark Taylor Robert Hegemann VBR alg.)\n"\
 "\n"\
-" abr           priemern· bit. r˝chlosª\n"\
+" abr           priemern√° bit. r√Ωchlos≈•\n"\
 "\n"\
-" cbr           konπtantn· bit. r˝chlosª\n"\
-"               Vn˙ti tieæ CBR mÛd na podsekvenci·ch ABR mÛdov\n"\
+" cbr           kon≈°tantn√° bit. r√Ωchlos≈•\n"\
+"               Vn√∫ti tie≈æ CBR m√≥d na podsekvenci√°ch ABR m√≥dov\n"\
 "\n"\
-" br=<0-1024>   πpecifikovaª bit. r˝chlosª v kBit (platÌ iba pre CBR a ABR)\n"\
+" br=<0-1024>   ≈°pecifikova≈• bit. r√Ωchlos≈• v kBit (plat√≠ iba pre CBR a ABR)\n"\
 "\n"\
-" q=<0-9>       kvalita (0-najvyππia, 9-najniæπia) (iba pre VBR)\n"\
+" q=<0-9>       kvalita (0-najvy≈°≈°ia, 9-najni≈æ≈°ia) (iba pre VBR)\n"\
 "\n"\
-" aq=<0-9>      algoritmick· kvalita (0-najlep./najpomalπia, 9-najhorπia/najr˝chl.)\n"\
+" aq=<0-9>      algoritmick√° kvalita (0-najlep./najpomal≈°ia, 9-najhor≈°ia/najr√Ωchl.)\n"\
 "\n"\
-" ratio=<1-100> kompresn˝ pomer\n"\
+" ratio=<1-100> kompresn√Ω pomer\n"\
 "\n"\
 " vol=<0-10>    nastavenie audio zosilnenia\n"\
 "\n"\
@@ -431,350 +431,350 @@ static char help_text[]=
 "                1: all\n"\
 "                2: adjust\n"\
 "\n"\
-" fast          prepn˙ª na r˝chlejπie kÛdovanie na podsekvenci·ch VBR mÛdov,\n"\
-"               mierne niæπia kvalita and vyππia bit. r˝chlosª.\n"\
+" fast          prepn√∫≈• na r√Ωchlej≈°ie k√≥dovanie na podsekvenci√°ch VBR m√≥dov,\n"\
+"               mierne ni≈æ≈°ia kvalita and vy≈°≈°ia bit. r√Ωchlos≈•.\n"\
 "\n"\
-" preset=<value> umoæÚuje najvyππie moænÈ nastavenie kvality.\n"\
-"                 medium: VBR  kÛdovanie,  dobr· kvalita\n"\
-"                 (150-180 kbps rozp‰tie bit. r˝chlosti)\n"\
-"                 standard:  VBR kÛdovanie, vysok· kvalita\n"\
-"                 (170-210 kbps rozp‰tie bit. r˝chlosti)\n"\
-"                 extreme: VBR kÛdovanie, velmi vysok· kvalita\n"\
-"                 (200-240 kbps rozp‰tie bit. r˝chlosti)\n"\
-"                 insane:  CBR  kÛdovanie, najvyππie nastavenie kvality\n"\
-"                 (320 kbps bit. r˝chlosª)\n"\
-"                 <8-320>: ABR kÛdovanie na zadanej kbps bit. r˝chlosti.\n\n"
+" preset=<value> umo≈æ≈àuje najvy≈°≈°ie mo≈æn√© nastavenie kvality.\n"\
+"                 medium: VBR  k√≥dovanie,  dobr√° kvalita\n"\
+"                 (150-180 kbps rozp√§tie bit. r√Ωchlosti)\n"\
+"                 standard:  VBR k√≥dovanie, vysok√° kvalita\n"\
+"                 (170-210 kbps rozp√§tie bit. r√Ωchlosti)\n"\
+"                 extreme: VBR k√≥dovanie, velmi vysok√° kvalita\n"\
+"                 (200-240 kbps rozp√§tie bit. r√Ωchlosti)\n"\
+"                 insane:  CBR  k√≥dovanie, najvy≈°≈°ie nastavenie kvality\n"\
+"                 (320 kbps bit. r√Ωchlos≈•)\n"\
+"                 <8-320>: ABR k√≥dovanie na zadanej kbps bit. r√Ωchlosti.\n\n"
 
 //codec-cfg.c:
-#define MSGTR_DuplicateFourcc "zdvojenÈ FourCC"
-#define MSGTR_TooManyFourccs "prÌliπ vela FourCCs/form·tov..."
+#define MSGTR_DuplicateFourcc "zdvojen√© FourCC"
+#define MSGTR_TooManyFourccs "pr√≠li≈° vela FourCCs/form√°tov..."
 #define MSGTR_ParseError "chyba spracovania (parse)"
-#define MSGTR_ParseErrorFIDNotNumber "chyba spracovania (parse) (ID form·tu nie je ËÌslo?)"
-#define MSGTR_ParseErrorFIDAliasNotNumber "chyba spracovania (parse) (alias ID form·tu nie je ËÌslo?)"
-#define MSGTR_DuplicateFID "duplik·tne format ID"
-#define MSGTR_TooManyOut "prÌliπ mnoho v˝stupu..."
-#define MSGTR_InvalidCodecName "\nmeno kÛdeku(%s) nie je platnÈ!\n"
-#define MSGTR_CodecLacksFourcc "\nmeno kÛdeku(%s) nem· FourCC/form·t!\n"
-#define MSGTR_CodecLacksDriver "\nmeno kÛdeku(%s) nem· ovl·daË!\n"
-#define MSGTR_CodecNeedsDLL "\nkÛdek(%s) vyæaduje 'dll'!\n"
-#define MSGTR_CodecNeedsOutfmt "\nkÛdek(%s) vyæaduje 'outfmt'!\n"
-#define MSGTR_CantAllocateComment "Ned· sa alokovaª pam‰ª pre pozn·mku. "
+#define MSGTR_ParseErrorFIDNotNumber "chyba spracovania (parse) (ID form√°tu nie je ƒç√≠slo?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "chyba spracovania (parse) (alias ID form√°tu nie je ƒç√≠slo?)"
+#define MSGTR_DuplicateFID "duplik√°tne format ID"
+#define MSGTR_TooManyOut "pr√≠li≈° mnoho v√Ωstupu..."
+#define MSGTR_InvalidCodecName "\nmeno k√≥deku(%s) nie je platn√©!\n"
+#define MSGTR_CodecLacksFourcc "\nmeno k√≥deku(%s) nem√° FourCC/form√°t!\n"
+#define MSGTR_CodecLacksDriver "\nmeno k√≥deku(%s) nem√° ovl√°daƒç!\n"
+#define MSGTR_CodecNeedsDLL "\nk√≥dek(%s) vy≈æaduje 'dll'!\n"
+#define MSGTR_CodecNeedsOutfmt "\nk√≥dek(%s) vy≈æaduje 'outfmt'!\n"
+#define MSGTR_CantAllocateComment "Ned√° sa alokova≈• pam√§≈• pre pozn√°mku. "
 #define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
-#define MSGTR_ReadingFile "»Ìtam %s: "
-#define MSGTR_CantOpenFileError "Ned· sa otvoriª '%s': %s\n"
-#define MSGTR_CantGetMemoryForLine "Nejde zÌskaª pam‰ª pre 'line': %s\n"
-#define MSGTR_CantReallocCodecsp "Ned· sa realokovaª '*codecsp': %s\n"
-#define MSGTR_CodecNameNotUnique " Meno kÛdeku '%s' nie je jedineËnÈ."
-#define MSGTR_CantStrdupName "Ned· sa spraviª strdup -> 'name': %s\n"
-#define MSGTR_CantStrdupInfo "Ned· sa spraviª strdup -> 'info': %s\n"
-#define MSGTR_CantStrdupDriver "Ned· sa spraviª strdup -> 'driver': %s\n"
-#define MSGTR_CantStrdupDLL "Ned· sa spraviª strdup -> 'dll': %s"
+#define MSGTR_ReadingFile "ƒå√≠tam %s: "
+#define MSGTR_CantOpenFileError "Ned√° sa otvori≈• '%s': %s\n"
+#define MSGTR_CantGetMemoryForLine "Nejde z√≠ska≈• pam√§≈• pre 'line': %s\n"
+#define MSGTR_CantReallocCodecsp "Ned√° sa realokova≈• '*codecsp': %s\n"
+#define MSGTR_CodecNameNotUnique " Meno k√≥deku '%s' nie je jedineƒçn√©."
+#define MSGTR_CantStrdupName "Ned√° sa spravi≈• strdup -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "Ned√° sa spravi≈• strdup -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "Ned√° sa spravi≈• strdup -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "Ned√° sa spravi≈• strdup -> 'dll': %s"
 #define MSGTR_AudioVideoCodecTotals "%d audio & %d video codecs\n"
-#define MSGTR_CodecDefinitionIncorrect "KÛdek nie je definovan˝ korektne."
-#define MSGTR_OutdatedCodecsConf "S˙bor codecs.conf je prÌliπ star˝ a nekompatibiln˝ s touto verziou MPlayer-u!"
+#define MSGTR_CodecDefinitionIncorrect "K√≥dek nie je definovan√Ω korektne."
+#define MSGTR_OutdatedCodecsConf "S√∫bor codecs.conf je pr√≠li≈° star√Ω a nekompatibiln√Ω s touto verziou MPlayer-u!"
 
 // divx4_vbr.c:
-#define MSGTR_OutOfMemory "nedostatok pam‰te"
-#define MSGTR_OverridingTooLowBitrate "Zadan˝ d·tov˝ tok je prÌliπ nÌzky pre tento klip.\n"\
-"Minim·lny moæn˝ d·tov˝ tok pre tento klip je %.0f kbps. Prepisujem\n"\
-"pouæÌvateµom nastaven˙ hodnotu.\n"
+#define MSGTR_OutOfMemory "nedostatok pam√§te"
+#define MSGTR_OverridingTooLowBitrate "Zadan√Ω d√°tov√Ω tok je pr√≠li≈° n√≠zky pre tento klip.\n"\
+"Minim√°lny mo≈æn√Ω d√°tov√Ω tok pre tento klip je %.0f kbps. Prepisujem\n"\
+"pou≈æ√≠vateƒæom nastaven√∫ hodnotu.\n"
 
 // fifo.c
-#define MSGTR_CannotMakePipe "Ned· sa vytvoriª PIPE!\n"
+#define MSGTR_CannotMakePipe "Ned√° sa vytvori≈• PIPE!\n"
 
 // m_config.c
-#define MSGTR_SaveSlotTooOld "PrÌliπ star˝ save slot n·jden˝ z lvl %d: %d !!!\n"
-#define MSGTR_InvalidCfgfileOption "Voµba %s sa ned· pouæiª v konfiguraËnom s˙bore.\n"
-#define MSGTR_InvalidCmdlineOption "Voµba %s sa ned· pouæiª z prÌkazovÈho riadku.\n"
-#define MSGTR_InvalidSuboption "Chyba: voµba '%s' nem· æiadnu podvoµbu '%s'.\n"
-#define MSGTR_MissingSuboptionParameter "Chyba: podvoµba '%s' voµby '%s' musÌ maª parameter!\n"
-#define MSGTR_MissingOptionParameter "Chyba: voµba '%s' musÌ maª parameter!\n"
-#define MSGTR_OptionListHeader "\n N·zov                Typ             Min        Max      Glob·l  CL    Konfig\n\n"
+#define MSGTR_SaveSlotTooOld "Pr√≠li≈° star√Ω save slot n√°jden√Ω z lvl %d: %d !!!\n"
+#define MSGTR_InvalidCfgfileOption "Voƒæba %s sa ned√° pou≈æi≈• v konfiguraƒçnom s√∫bore.\n"
+#define MSGTR_InvalidCmdlineOption "Voƒæba %s sa ned√° pou≈æi≈• z pr√≠kazov√©ho riadku.\n"
+#define MSGTR_InvalidSuboption "Chyba: voƒæba '%s' nem√° ≈æiadnu podvoƒæbu '%s'.\n"
+#define MSGTR_MissingSuboptionParameter "Chyba: podvoƒæba '%s' voƒæby '%s' mus√≠ ma≈• parameter!\n"
+#define MSGTR_MissingOptionParameter "Chyba: voƒæba '%s' mus√≠ ma≈• parameter!\n"
+#define MSGTR_OptionListHeader "\n N√°zov                Typ             Min        Max      Glob√°l  CL    Konfig\n\n"
 #define MSGTR_TotalOptions "\nCelkovo: %d volieb\n"
-#define MSGTR_ProfileInclusionTooDeep "VAROVANIE: PrÌliπ hlbokÈ vnorovanie profilov.\n"
-#define MSGTR_NoProfileDefined "Æiadny profil nebol definovan˝.\n"
-#define MSGTR_AvailableProfiles "DostupnÈ profily:\n"
-#define MSGTR_UnknownProfile "Nezn·my profil '%s'.\n"
+#define MSGTR_ProfileInclusionTooDeep "VAROVANIE: Pr√≠li≈° hlbok√© vnorovanie profilov.\n"
+#define MSGTR_NoProfileDefined "≈Ωiadny profil nebol definovan√Ω.\n"
+#define MSGTR_AvailableProfiles "Dostupn√© profily:\n"
+#define MSGTR_UnknownProfile "Nezn√°my profil '%s'.\n"
 #define MSGTR_Profile "Profil %s: %s\n"
 
 // m_property.c
 #define MSGTR_PropertyListHeader "\n Meno                 Typ             Min        Max\n\n"
-#define MSGTR_TotalProperties "\nCelkovo: %d vlastnostÌ\n"
+#define MSGTR_TotalProperties "\nCelkovo: %d vlastnost√≠\n"
 
 // open.c, stream.c:
-#define MSGTR_CdDevNotfound "CD-ROM zariadenie '%s' nen·jdenÈ!\n"
-#define MSGTR_ErrTrackSelect "Chyba pri v˝bere VCD stopy!"
-#define MSGTR_ReadSTDIN "»Ìtam z stdin...\n"
-#define MSGTR_UnableOpenURL "Nejde otvoriª URL: %s\n"
-#define MSGTR_ConnToServer "Pripojen˝ k servru: %s\n"
-#define MSGTR_FileNotFound "S˙bor nen·jden˝: '%s'\n"
+#define MSGTR_CdDevNotfound "CD-ROM zariadenie '%s' nen√°jden√©!\n"
+#define MSGTR_ErrTrackSelect "Chyba pri v√Ωbere VCD stopy!"
+#define MSGTR_ReadSTDIN "ƒå√≠tam z stdin...\n"
+#define MSGTR_UnableOpenURL "Nejde otvori≈• URL: %s\n"
+#define MSGTR_ConnToServer "Pripojen√Ω k servru: %s\n"
+#define MSGTR_FileNotFound "S√∫bor nen√°jden√Ω: '%s'\n"
 
-#define MSGTR_SMBInitError "NemÙæem inicializovaª kniænicu libsmbclient: %d\n"
-#define MSGTR_SMBFileNotFound "NemÙæem otvoriª z LAN: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer mebol skompilovan˝ s podporou ËÌtania z SMB\n"
+#define MSGTR_SMBInitError "Nem√¥≈æem inicializova≈• kni≈ænicu libsmbclient: %d\n"
+#define MSGTR_SMBFileNotFound "Nem√¥≈æem otvori≈• z LAN: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer mebol skompilovan√Ω s podporou ƒç√≠tania z SMB\n"
 
-#define MSGTR_CantOpenDVD "Nejde otvoriª DVD zariadenie: %s\n"
-#define MSGTR_NoDVDSupport "MPlayer bol skompilovan˝ bez podpory DVD, koniec\n"
+#define MSGTR_CantOpenDVD "Nejde otvori≈• DVD zariadenie: %s\n"
+#define MSGTR_NoDVDSupport "MPlayer bol skompilovan√Ω bez podpory DVD, koniec\n"
 #define MSGTR_DVDnumTitles "Na tomto DVD je %d titulov.\n"
-#define MSGTR_DVDinvalidTitle "NeplatnÈ ËÌslo DVD titulu: %d\n"
+#define MSGTR_DVDinvalidTitle "Neplatn√© ƒç√≠slo DVD titulu: %d\n"
 #define MSGTR_DVDnumChapters "Na tomto DVD je %d kapitol.\n"
-#define MSGTR_DVDinvalidChapter "NeplatnÈ ËÌslo kapitoly DVD: %d\n"
-#define MSGTR_DVDinvalidChapterRange "Nespr·vnÏ nastaven˝ rozsah kapitol %s\n"
-#define MSGTR_DVDinvalidLastChapter "NeplatnÈ ËÌslo poslednej DVD kapitoly: %d\n"
-#define MSGTR_DVDnumAngles "Na tomto DVD je %d uhlov pohµadov.\n"
-#define MSGTR_DVDinvalidAngle "NeplatnÈ ËÌslo uhlu pohµadu DVD: %d\n"
-#define MSGTR_DVDnoIFO "NemÙæem otvoriª s˙bor IFO pre DVD titul %d.\n"
-#define MSGTR_DVDnoVMG "Ned· sa otvoriª VMG info!\n"
-#define MSGTR_DVDnoVOBs "NemÙæem otvoriª VOB s˙bor (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDnoMatchingAudio "DVD zvuk v poæadovanom jazyku nebyl n·jden˝!\n"
-#define MSGTR_DVDaudioChannel "Zvolen˝ DVD zvukov˝ kan·l: %d jazyk: %c%c\n"
-#define MSGTR_DVDnoMatchingSubtitle "DVD titulky v poæadovanom jazyku neboli n·jdenÈ!\n"
-#define MSGTR_DVDsubtitleChannel "Zvolen˝ DVD titulkov˝ kan·l: %d jazyk: %c%c\n"
+#define MSGTR_DVDinvalidChapter "Neplatn√© ƒç√≠slo kapitoly DVD: %d\n"
+#define MSGTR_DVDinvalidChapterRange "Nespr√°vnƒõ nastaven√Ω rozsah kapitol %s\n"
+#define MSGTR_DVDinvalidLastChapter "Neplatn√© ƒç√≠slo poslednej DVD kapitoly: %d\n"
+#define MSGTR_DVDnumAngles "Na tomto DVD je %d uhlov pohƒæadov.\n"
+#define MSGTR_DVDinvalidAngle "Neplatn√© ƒç√≠slo uhlu pohƒæadu DVD: %d\n"
+#define MSGTR_DVDnoIFO "Nem√¥≈æem otvori≈• s√∫bor IFO pre DVD titul %d.\n"
+#define MSGTR_DVDnoVMG "Ned√° sa otvori≈• VMG info!\n"
+#define MSGTR_DVDnoVOBs "Nem√¥≈æem otvori≈• VOB s√∫bor (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoMatchingAudio "DVD zvuk v po≈æadovanom jazyku nebyl n√°jden√Ω!\n"
+#define MSGTR_DVDaudioChannel "Zvolen√Ω DVD zvukov√Ω kan√°l: %d jazyk: %c%c\n"
+#define MSGTR_DVDnoMatchingSubtitle "DVD titulky v po≈æadovanom jazyku neboli n√°jden√©!\n"
+#define MSGTR_DVDsubtitleChannel "Zvolen√Ω DVD titulkov√Ω kan√°l: %d jazyk: %c%c\n"
 
 // muxer.c, muxer_*.c:
-#define MSGTR_TooManyStreams "PrÌliπ veµa pr˙dov!"
-#define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer podporuje iba jeden audio pr˙d!\n"
-#define MSGTR_IgnoringVideoStream "Ignorujem video pr˙d!\n"
-#define MSGTR_UnknownStreamType "Varovanie! nezn·my typ pr˙du: %d\n"
-#define MSGTR_WarningLenIsntDivisible "Varovanie! dÂæka nie je deliteµn· velkosªou vzorky!\n"
-#define MSGTR_MuxbufMallocErr "Ned· sa alokovaª pam‰ª pre frame buffer muxeru!\n"
-#define MSGTR_MuxbufReallocErr "Ned· sa realokovaª pam‰ª pre frame buffer muxeru!\n"
-#define MSGTR_MuxbufSending "Frame buffer muxeru posiela %d snÌmkov do muxeru.\n"
+#define MSGTR_TooManyStreams "Pr√≠li≈° veƒæa pr√∫dov!"
+#define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer podporuje iba jeden audio pr√∫d!\n"
+#define MSGTR_IgnoringVideoStream "Ignorujem video pr√∫d!\n"
+#define MSGTR_UnknownStreamType "Varovanie! nezn√°my typ pr√∫du: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Varovanie! dƒ∫≈æka nie je deliteƒæn√° velkos≈•ou vzorky!\n"
+#define MSGTR_MuxbufMallocErr "Ned√° sa alokova≈• pam√§≈• pre frame buffer muxeru!\n"
+#define MSGTR_MuxbufReallocErr "Ned√° sa realokova≈• pam√§≈• pre frame buffer muxeru!\n"
+#define MSGTR_MuxbufSending "Frame buffer muxeru posiela %d sn√≠mkov do muxeru.\n"
 #define MSGTR_WritingHeader "Zapisujem header...\n"
 #define MSGTR_WritingTrailer "Zapisujem index...\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "Upozornenie! HlaviËka audio pr˙du %d predefinovan·!\n"
-#define MSGTR_VideoStreamRedefined "Upozornenie! HlaviËka video pr˙du %d predefinovan·!\n"
-#define MSGTR_TooManyAudioInBuffer "\nDEMUXER: PrÌliπ mnoho (%d v %d bajtoch) audio paketov v bufferi!\n"
-#define MSGTR_TooManyVideoInBuffer "\nDEMUXER: PrÌliπ mnoho (%d v %d bajtoch) video paketov v bufferi!\n"
-#define MSGTR_MaybeNI "(moæno prehr·vate neprekladan˝ pr˙d/s˙bor alebo kodek zlyhal)\n" \
-		      "Pre .AVI s˙bory sk˙ste vyn˙tiª neprekladan˝ mÛd voµbou -ni\n"
-#define MSGTR_SwitchToNi "\nDetekovan˝ zle prekladan˝ .AVI - prepnite -ni mÛd!\n"
-#define MSGTR_Detected_XXX_FileFormat "Detekovan˝ %s form·t s˙boru!\n"
-#define MSGTR_DetectedAudiofile "Detekovan˝ audio s˙bor!\n"
-#define MSGTR_NotSystemStream "Nie je to MPEG System Stream form·t... (moæno Transport Stream?)\n"
-#define MSGTR_InvalidMPEGES "Neplatn˝ MPEG-ES pr˙d??? kontaktujte autora, moæno je to chyba (bug) :(\n"
-#define MSGTR_FormatNotRecognized "========== Æiaµ, tento form·t s˙boru nie je rozpoznan˝/podporovan˝ =======\n"\
-				  "==== Pokiaµ je tento s˙bor AVI, ASF alebo MPEG pr˙d, kontaktujte autora! ====\n"
-#define MSGTR_MissingVideoStream "Æiadny video pr˙d nen·jden˝!\n"
-#define MSGTR_MissingAudioStream "Æiadny audio pr˙d nen·jden˝...  -> bez zvuku\n"
-#define MSGTR_MissingVideoStreamBug "Ch˝baj˙ci video pr˙d!? Kontaktujte autora, moæno to je chyba (bug) :(\n"
+#define MSGTR_AudioStreamRedefined "Upozornenie! Hlaviƒçka audio pr√∫du %d predefinovan√°!\n"
+#define MSGTR_VideoStreamRedefined "Upozornenie! Hlaviƒçka video pr√∫du %d predefinovan√°!\n"
+#define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Pr√≠li≈° mnoho (%d v %d bajtoch) audio paketov v bufferi!\n"
+#define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Pr√≠li≈° mnoho (%d v %d bajtoch) video paketov v bufferi!\n"
+#define MSGTR_MaybeNI "(mo≈æno prehr√°vate neprekladan√Ω pr√∫d/s√∫bor alebo kodek zlyhal)\n" \
+		      "Pre .AVI s√∫bory sk√∫ste vyn√∫ti≈• neprekladan√Ω m√≥d voƒæbou -ni\n"
+#define MSGTR_SwitchToNi "\nDetekovan√Ω zle prekladan√Ω .AVI - prepnite -ni m√≥d!\n"
+#define MSGTR_Detected_XXX_FileFormat "Detekovan√Ω %s form√°t s√∫boru!\n"
+#define MSGTR_DetectedAudiofile "Detekovan√Ω audio s√∫bor!\n"
+#define MSGTR_NotSystemStream "Nie je to MPEG System Stream form√°t... (mo≈æno Transport Stream?)\n"
+#define MSGTR_InvalidMPEGES "Neplatn√Ω MPEG-ES pr√∫d??? kontaktujte autora, mo≈æno je to chyba (bug) :(\n"
+#define MSGTR_FormatNotRecognized "========== ≈Ωiaƒæ, tento form√°t s√∫boru nie je rozpoznan√Ω/podporovan√Ω =======\n"\
+				  "==== Pokiaƒæ je tento s√∫bor AVI, ASF alebo MPEG pr√∫d, kontaktujte autora! ====\n"
+#define MSGTR_MissingVideoStream "≈Ωiadny video pr√∫d nen√°jden√Ω!\n"
+#define MSGTR_MissingAudioStream "≈Ωiadny audio pr√∫d nen√°jden√Ω...  -> bez zvuku\n"
+#define MSGTR_MissingVideoStreamBug "Ch√Ωbaj√∫ci video pr√∫d!? Kontaktujte autora, mo≈æno to je chyba (bug) :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "demux: s˙bor neobsahuje vybran˝ audio alebo video pr˙d\n"
+#define MSGTR_DoesntContainSelectedStream "demux: s√∫bor neobsahuje vybran√Ω audio alebo video pr√∫d\n"
 
-#define MSGTR_NI_Forced "Vn˙ten˝"
-#define MSGTR_NI_Detected "Detekovan˝"
-#define MSGTR_NI_Message "%s NEPREKLADAN› form·t s˙boru AVI!\n"
+#define MSGTR_NI_Forced "Vn√∫ten√Ω"
+#define MSGTR_NI_Detected "Detekovan√Ω"
+#define MSGTR_NI_Message "%s NEPREKLADAN√ù form√°t s√∫boru AVI!\n"
 
-#define MSGTR_UsingNINI "PouæÌvam NEPREKLADAN› poπkoden˝ form·t s˙boru AVI!\n" 
-#define MSGTR_CouldntDetFNo "NemÙæem urËiª poËet snÌmkov (pre absol˙tny posun)  \n"
-#define MSGTR_CantSeekRawAVI "NemÙæem sa pos˙vaª v surov˝ch (raw) .AVI pr˙doch! (Potrebujem index, zkuste pouæÌª voµbu -idx!)  \n"
-#define MSGTR_CantSeekFile "NemÙæem sa pos˙vaª v tomto s˙bore!  \n"
+#define MSGTR_UsingNINI "Pou≈æ√≠vam NEPREKLADAN√ù po≈°koden√Ω form√°t s√∫boru AVI!\n" 
+#define MSGTR_CouldntDetFNo "Nem√¥≈æem urƒçi≈• poƒçet sn√≠mkov (pre absol√∫tny posun)  \n"
+#define MSGTR_CantSeekRawAVI "Nem√¥≈æem sa pos√∫va≈• v surov√Ωch (raw) .AVI pr√∫doch! (Potrebujem index, zkuste pou≈æ√≠≈• voƒæbu -idx!)  \n"
+#define MSGTR_CantSeekFile "Nem√¥≈æem sa pos√∫va≈• v tomto s√∫bore!  \n"
 
-#define MSGTR_EncryptedVOB "©ifrovan˝ s˙bor VOB! PreËÌtajte si DOCS/HTML/en/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "≈†ifrovan√Ω s√∫bor VOB! Preƒç√≠tajte si DOCS/HTML/en/cd-dvd.html.\n"
 
-#define MSGTR_MOVcomprhdr "MOV: KomprimovanÈ hlaviËky nie s˙ (eπte) podporovanÈ!\n"
-#define MSGTR_MOVvariableFourCC "MOV: Upozornenie! premenn· FOURCC detekovan·!?\n"
-#define MSGTR_MOVtooManyTrk "MOV: Upozornenie! PrÌliπ veµa stÙp!"
-#define MSGTR_FoundAudioStream "==> N·jden˝ audio pr˙d: %d\n"
-#define MSGTR_FoundVideoStream "==> N·jden˝ video pr˙d: %d\n"
-#define MSGTR_DetectedTV "TV detekovan˝! ;-)\n"
-#define MSGTR_ErrorOpeningOGGDemuxer "NemÙæem otvoriª ogg demuxer\n"
-#define MSGTR_ASFSearchingForAudioStream "ASF: Hµad·m audio pr˙d (id:%d)\n"
-#define MSGTR_CannotOpenAudioStream "NemÙæem otvoriª audio pr˙d: %s\n"
-#define MSGTR_CannotOpenSubtitlesStream "NemÙæem otvoriª pr˙d titulkov: %s\n"
-#define MSGTR_OpeningAudioDemuxerFailed "NemÙæem otvoriª audio demuxer: %s\n"
-#define MSGTR_OpeningSubtitlesDemuxerFailed "NemÙæem otvoriª demuxer titulkov: %s\n"
-#define MSGTR_TVInputNotSeekable "v TV vstupe nie je moænÈ sa pohybovaª! (moæno posun bude na zmenu kan·lov ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s uæ prÌtomnÈ!\n"
-#define MSGTR_ClipInfo "Inform·cie o klipe: \n"
+#define MSGTR_MOVcomprhdr "MOV: Komprimovan√© hlaviƒçky nie s√∫ (e≈°te) podporovan√©!\n"
+#define MSGTR_MOVvariableFourCC "MOV: Upozornenie! premenn√° FOURCC detekovan√°!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: Upozornenie! Pr√≠li≈° veƒæa st√¥p!"
+#define MSGTR_FoundAudioStream "==> N√°jden√Ω audio pr√∫d: %d\n"
+#define MSGTR_FoundVideoStream "==> N√°jden√Ω video pr√∫d: %d\n"
+#define MSGTR_DetectedTV "TV detekovan√Ω! ;-)\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "Nem√¥≈æem otvori≈• ogg demuxer\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: Hƒæad√°m audio pr√∫d (id:%d)\n"
+#define MSGTR_CannotOpenAudioStream "Nem√¥≈æem otvori≈• audio pr√∫d: %s\n"
+#define MSGTR_CannotOpenSubtitlesStream "Nem√¥≈æem otvori≈• pr√∫d titulkov: %s\n"
+#define MSGTR_OpeningAudioDemuxerFailed "Nem√¥≈æem otvori≈• audio demuxer: %s\n"
+#define MSGTR_OpeningSubtitlesDemuxerFailed "Nem√¥≈æem otvori≈• demuxer titulkov: %s\n"
+#define MSGTR_TVInputNotSeekable "v TV vstupe nie je mo≈æn√© sa pohybova≈•! (mo≈æno posun bude na zmenu kan√°lov ;)\n"
+#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s u≈æ pr√≠tomn√©!\n"
+#define MSGTR_ClipInfo "Inform√°cie o klipe: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: detekovan˝ 30000/1001 fps NTSC, prepÌnam frekvenciu snÌmkov.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: detekovan˝ 24000/1001 fps progresÌvny NTSC, prepÌnam frekvenciu snÌmkov.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: detekovan√Ω 30000/1001 fps NTSC, prep√≠nam frekvenciu sn√≠mkov.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: detekovan√Ω 24000/1001 fps progres√≠vny NTSC, prep√≠nam frekvenciu sn√≠mkov.\n"
 
 #define MSGTR_CacheFill "\rNaplnenie cache: %5.2f%% (%"PRId64" bajtov)   "
-#define MSGTR_NoBindFound "TlaËidlo '%s' nem· priraden˙ æiadnu funkciu."
+#define MSGTR_NoBindFound "Tlaƒçidlo '%s' nem√° priraden√∫ ≈æiadnu funkciu."
 #define MSGTR_FailedToOpen "Zlyhalo otvorenie %s\n"
 
 // dec_video.c & dec_audio.c:
-#define MSGTR_CantOpenCodec "nemÙæem otvoriª kodek\n"
-#define MSGTR_CantCloseCodec "nemÙæem uzavieª kodek\n"
+#define MSGTR_CantOpenCodec "nem√¥≈æem otvori≈• kodek\n"
+#define MSGTR_CantCloseCodec "nem√¥≈æem uzavie≈• kodek\n"
 
-#define MSGTR_MissingDLLcodec "CHYBA: NemÙæem otvoriª potrebn˝ DirectShow kodek: %s\n"
-#define MSGTR_ACMiniterror "NemÙæem naËÌtaª/inicializovaª Win32/ACM AUDIO kodek (ch˝baj˙ci s˙bor DLL?)\n"
-#define MSGTR_MissingLAVCcodec "NemÙæem najsª kodek '%s' v libavcodec...\n"
+#define MSGTR_MissingDLLcodec "CHYBA: Nem√¥≈æem otvori≈• potrebn√Ω DirectShow kodek: %s\n"
+#define MSGTR_ACMiniterror "Nem√¥≈æem naƒç√≠ta≈•/inicializova≈• Win32/ACM AUDIO kodek (ch√Ωbaj√∫ci s√∫bor DLL?)\n"
+#define MSGTR_MissingLAVCcodec "Nem√¥≈æem najs≈• kodek '%s' v libavcodec...\n"
 
-#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF - koniec s˙boru v priebehu vyhµad·vania hlaviËky sekvencie\n"
-#define MSGTR_CannotReadMpegSequHdr "FATAL: NemÙæem preËÌtaª hlaviËku sekvencie!\n"
-#define MSGTR_CannotReadMpegSequHdrEx "FATAL: NemÙæem preËÌtaª rozπÌrenie hlaviËky sekvencie!\n"
-#define MSGTR_BadMpegSequHdr "MPEG: Zl· hlaviËka sekvencie!\n"
-#define MSGTR_BadMpegSequHdrEx "MPEG: ZlÈ rozπÌrenie hlaviËky sekvencie!\n"
+#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF - koniec s√∫boru v priebehu vyhƒæad√°vania hlaviƒçky sekvencie\n"
+#define MSGTR_CannotReadMpegSequHdr "FATAL: Nem√¥≈æem preƒç√≠ta≈• hlaviƒçku sekvencie!\n"
+#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Nem√¥≈æem preƒç√≠ta≈• roz≈°√≠renie hlaviƒçky sekvencie!\n"
+#define MSGTR_BadMpegSequHdr "MPEG: Zl√° hlaviƒçka sekvencie!\n"
+#define MSGTR_BadMpegSequHdrEx "MPEG: Zl√© roz≈°√≠renie hlaviƒçky sekvencie!\n"
 
-#define MSGTR_ShMemAllocFail "NemÙæem alokovaª zdieµan˙ pam‰ª\n"
-#define MSGTR_CantAllocAudioBuf "NemÙæem alokovaª pam‰ª pre v˝stupn˝ audio buffer\n"
+#define MSGTR_ShMemAllocFail "Nem√¥≈æem alokova≈• zdieƒæan√∫ pam√§≈•\n"
+#define MSGTR_CantAllocAudioBuf "Nem√¥≈æem alokova≈• pam√§≈• pre v√Ωstupn√Ω audio buffer\n"
 
-#define MSGTR_UnknownAudio "Nezn·my/ch˝baj˙ci audio form·t -> bez zvuku\n"
+#define MSGTR_UnknownAudio "Nezn√°my/ch√Ωbaj√∫ci audio form√°t -> bez zvuku\n"
 
-#define MSGTR_UsingExternalPP "[PP] PouæÌvam extern˝ postprocessing filter, max q = %d\n"
-#define MSGTR_UsingCodecPP "[PP] PoæÌvam postprocessing z kodeku, max q = %d\n"
-#define MSGTR_VideoAttributeNotSupportedByVO_VD "Video atrib˙t '%s' nie je podporovan˝ v˝berom vo & vd! \n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "Poæadovan· rodina video kodekov [%s] (vfm=%s) nie je dostupn· (zapnite ju pri kompil·cii!)\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "Poæadovan· rodina audio kodekov [%s] (afm=%s) nie je dostupn· (zapnite ju pri kompil·cii!)\n"
-#define MSGTR_OpeningVideoDecoder "Otv·ram video dekÛder: [%s] %s\n"
-#define MSGTR_SelectedVideoCodec "Zvolen˝ video kÛdek: [%s] vfm: %s (%s)\n"
-#define MSGTR_OpeningAudioDecoder "Otv·ram audio dekÛder: [%s] %s\n"
-#define MSGTR_SelectedAudioCodec "Zvolen˝ audio kÛdek: [%s] afm: %s (%s)\n"
-#define MSGTR_BuildingAudioFilterChain "Vytv·ram reªazec audio filterov pre %dHz/%dch/%s -> %dHz/%dch/%s...\n"
-#define MSGTR_UninitVideoStr "odinicializovaª video: %s  \n"
-#define MSGTR_UninitAudioStr "odinicializovaª audio: %s  \n"
+#define MSGTR_UsingExternalPP "[PP] Pou≈æ√≠vam extern√Ω postprocessing filter, max q = %d\n"
+#define MSGTR_UsingCodecPP "[PP] Po≈æ√≠vam postprocessing z kodeku, max q = %d\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Video atrib√∫t '%s' nie je podporovan√Ω v√Ωberom vo & vd! \n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Po≈æadovan√° rodina video kodekov [%s] (vfm=%s) nie je dostupn√° (zapnite ju pri kompil√°cii!)\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Po≈æadovan√° rodina audio kodekov [%s] (afm=%s) nie je dostupn√° (zapnite ju pri kompil√°cii!)\n"
+#define MSGTR_OpeningVideoDecoder "Otv√°ram video dek√≥der: [%s] %s\n"
+#define MSGTR_SelectedVideoCodec "Zvolen√Ω video k√≥dek: [%s] vfm: %s (%s)\n"
+#define MSGTR_OpeningAudioDecoder "Otv√°ram audio dek√≥der: [%s] %s\n"
+#define MSGTR_SelectedAudioCodec "Zvolen√Ω audio k√≥dek: [%s] afm: %s (%s)\n"
+#define MSGTR_BuildingAudioFilterChain "Vytv√°ram re≈•azec audio filterov pre %dHz/%dch/%s -> %dHz/%dch/%s...\n"
+#define MSGTR_UninitVideoStr "odinicializova≈• video: %s  \n"
+#define MSGTR_UninitAudioStr "odinicializova≈• audio: %s  \n"
 #define MSGTR_VDecoderInitFailed "VDecoder init zlyhal :(\n"
 #define MSGTR_ADecoderInitFailed "ADecoder init zlyhal :(\n"
 #define MSGTR_ADecoderPreinitFailed "ADecoder preinit zlyhal :(\n"
-#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Alokujem %d bytov pre vstupn˝ buffer\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Alokujem %d + %d = %d bytov pre v˝stupn˝ buffer\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Alokujem %d bytov pre vstupn√Ω buffer\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Alokujem %d + %d = %d bytov pre v√Ωstupn√Ω buffer\n"
 			 
 // LIRC:
-#define MSGTR_SettingUpLIRC "ZapÌnam podporu LIRC...\n"
-#define MSGTR_LIRCdisabled "Nebudete mÙcª pouæÌvaª diaµkov˝ ovl·daË.\n"
+#define MSGTR_SettingUpLIRC "Zap√≠nam podporu LIRC...\n"
+#define MSGTR_LIRCdisabled "Nebudete m√¥c≈• pou≈æ√≠va≈• diaƒækov√Ω ovl√°daƒç.\n"
 #define MSGTR_LIRCopenfailed "Zlyhal pokus o otvorenie podpory LIRC!\n"
-#define MSGTR_LIRCcfgerr "Zlyhalo ËÌtanie konfiguraËnÈho s˙boru LIRC %s!\n"
+#define MSGTR_LIRCcfgerr "Zlyhalo ƒç√≠tanie konfiguraƒçn√©ho s√∫boru LIRC %s!\n"
 
 // vf.c
-#define MSGTR_CouldNotFindVideoFilter "NemÙæem n·jsª video filter '%s'\n"
-#define MSGTR_CouldNotOpenVideoFilter "NemÙæem otvoriª video filter '%s'\n"
-#define MSGTR_OpeningVideoFilter "Otv·ram video filter: "
-#define MSGTR_CannotFindColorspace "NemÙæem n·jsª beæn˝ priestor farieb, ani vloæenÌm 'scale' :(\n"
+#define MSGTR_CouldNotFindVideoFilter "Nem√¥≈æem n√°js≈• video filter '%s'\n"
+#define MSGTR_CouldNotOpenVideoFilter "Nem√¥≈æem otvori≈• video filter '%s'\n"
+#define MSGTR_OpeningVideoFilter "Otv√°ram video filter: "
+#define MSGTR_CannotFindColorspace "Nem√¥≈æem n√°js≈• be≈æn√Ω priestor farieb, ani vlo≈æen√≠m 'scale' :(\n"
 
 // vd.c
-#define MSGTR_CodecDidNotSet "VDec: kodek nenastavil sh->disp_w a sh->disp_h, sk˙πam to obÌsª!\n"
-#define MSGTR_VoConfigRequest "VDec: vo konfiguraËn· poæiadavka - %d x %d (preferovan˝ csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "NemÙæem n·jsª zhodn˝ priestor farieb - sk˙πam znova s -vf scale...\n"
-#define MSGTR_MovieAspectIsSet "Movie-Aspect je %.2f:1 - menÌm rozmery na spr·vne.\n"
-#define MSGTR_MovieAspectUndefined "Movie-Aspect je nedefinovn˝ - nemenia sa rozmery.\n"
+#define MSGTR_CodecDidNotSet "VDec: kodek nenastavil sh->disp_w a sh->disp_h, sk√∫≈°am to ob√≠s≈•!\n"
+#define MSGTR_VoConfigRequest "VDec: vo konfiguraƒçn√° po≈æiadavka - %d x %d (preferovan√Ω csp: %s)\n"
+#define MSGTR_CouldNotFindColorspace "Nem√¥≈æem n√°js≈• zhodn√Ω priestor farieb - sk√∫≈°am znova s -vf scale...\n"
+#define MSGTR_MovieAspectIsSet "Movie-Aspect je %.2f:1 - men√≠m rozmery na spr√°vne.\n"
+#define MSGTR_MovieAspectUndefined "Movie-Aspect je nedefinovn√Ω - nemenia sa rozmery.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Potrebujete aktualizovaª alebo nainπtalovaª bin·rne kÛdeky.\nChodte na http://www.mplayerhq.hu/dload.html\n"
-#define MSGTR_DShowInitOK "INFO: Inicializ·cia Win32/DShow videokÛdeku OK.\n"
-#define MSGTR_DMOInitOK "INFO: Inicializ·cia Win32/DMO videokÛdeku OK.\n"
+#define MSGTR_DownloadCodecPackage "Potrebujete aktualizova≈• alebo nain≈°talova≈• bin√°rne k√≥deky.\nChodte na http://www.mplayerhq.hu/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Inicializ√°cia Win32/DShow videok√≥deku OK.\n"
+#define MSGTR_DMOInitOK "INFO: Inicializ√°cia Win32/DMO videok√≥deku OK.\n"
 
 // x11_common.c
-#define MSGTR_EwmhFullscreenStateFailed "\nX11: NemÙæem poslaª udalosª EWMH fullscreen!\n"
-#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Ned· sa n·jsª XScreenSaveru.\n"
-#define MSGTR_SelectedVideoMode "XF86VM: Zvolen˝ videoreæim %dx%d pre obraz velkosti %dx%d.\n"
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Nem√¥≈æem posla≈• udalos≈• EWMH fullscreen!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Ned√° sa n√°js≈• XScreenSaveru.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: Zvolen√Ω videore≈æim %dx%d pre obraz velkosti %dx%d.\n"
 
-#define MSGTR_InsertingAfVolume "[Mixer] HardvÈrov˝ mixÈr nie je k dispozicÌ, vklad·m filter pre hlasitosª.\n"
-#define MSGTR_NoVolume "[Mixer] Ovl·danie hlasitosti nie je dostupnÈ.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] Hardv√©rov√Ω mix√©r nie je k dispozic√≠, vklad√°m filter pre hlasitos≈•.\n"
+#define MSGTR_NoVolume "[Mixer] Ovl√°danie hlasitosti nie je dostupn√©.\n"
 
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "O aplik·cii"
-#define MSGTR_FileSelect "Vybraª s˙bor..."
-#define MSGTR_SubtitleSelect "Vybraª titulky..."
-#define MSGTR_OtherSelect "Vybraª..."
-#define MSGTR_AudioFileSelect "Vybraª extern˝ audio kan·l..."
-#define MSGTR_FontSelect "Vybraª font..."
+#define MSGTR_About "O aplik√°cii"
+#define MSGTR_FileSelect "Vybra≈• s√∫bor..."
+#define MSGTR_SubtitleSelect "Vybra≈• titulky..."
+#define MSGTR_OtherSelect "Vybra≈•..."
+#define MSGTR_AudioFileSelect "Vybra≈• extern√Ω audio kan√°l..."
+#define MSGTR_FontSelect "Vybra≈• font..."
 // Note: If you change MSGTR_PlayList please see if it still fits MSGTR_MENU_PlayList
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Equalizer"
-#define MSGTR_ConfigureEqualizer "Konfigurovaª Equalizer"
-#define MSGTR_SkinBrowser "PrehliadaË tÈm"
-#define MSGTR_Network "SieªovÈ prehr·vanie (streaming)..."
+#define MSGTR_ConfigureEqualizer "Konfigurova≈• Equalizer"
+#define MSGTR_SkinBrowser "Prehliadaƒç t√©m"
+#define MSGTR_Network "Sie≈•ov√© prehr√°vanie (streaming)..."
 // Note: If you change MSGTR_Preferences please see if it still fits MSGTR_MENU_Preferences
 #define MSGTR_Preferences "Preferencie"
-#define MSGTR_AudioPreferences "Konfiguracia ovladaËa zvuku"
-#define MSGTR_NoMediaOpened "NiË nie je otvorenÈ"
+#define MSGTR_AudioPreferences "Konfiguracia ovladaƒça zvuku"
+#define MSGTR_NoMediaOpened "Niƒç nie je otvoren√©"
 #define MSGTR_VCDTrack "VCD stopa %d"
-#define MSGTR_NoChapter "Æiadna kapitola"
+#define MSGTR_NoChapter "≈Ωiadna kapitola"
 #define MSGTR_Chapter "Kapitola %d"
-#define MSGTR_NoFileLoaded "Nenahran˝ æiaden s˙bor"
+#define MSGTR_NoFileLoaded "Nenahran√Ω ≈æiaden s√∫bor"
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
-#define MSGTR_Cancel "Zruπiª"
-#define MSGTR_Add "Pridaª"
-#define MSGTR_Remove "Odobraª"
-#define MSGTR_Clear "VyËistiª"
-#define MSGTR_Config "Konfigur·cia"
-#define MSGTR_ConfigDriver "Konfigurovaª ovl·daË"
-#define MSGTR_Browse "Prehliadaª"
+#define MSGTR_Cancel "Zru≈°i≈•"
+#define MSGTR_Add "Prida≈•"
+#define MSGTR_Remove "Odobra≈•"
+#define MSGTR_Clear "Vyƒçisti≈•"
+#define MSGTR_Config "Konfigur√°cia"
+#define MSGTR_ConfigDriver "Konfigurova≈• ovl√°daƒç"
+#define MSGTR_Browse "Prehliada≈•"
 
 // --- error messages ---
-#define MSGTR_NEMDB "Æiaµ, nedostatok pam‰te pre buffer na kreslenie."
-#define MSGTR_NEMFMR "Æiaµ, nedostatok pam‰te pre vytv·ranie menu."
-#define MSGTR_IDFGCVD "Æiaµ, nemÙæem n·jsª gui kompatibiln˝ ovl·daË video v˝stupu."
-#define MSGTR_NEEDLAVCFAME "Æiaµ, nemÙæete prehr·vaª nie mpeg s˙bory s DXR3/H+ zariadenÌm bez prekÛdovania.\nProsÌm zapnite lavc alebo fame v DXR3/H+ konfig. okne."
-#define MSGTR_UNKNOWNWINDOWTYPE "Nezn·my typ okna n·jden˝ ..."
+#define MSGTR_NEMDB "≈Ωiaƒæ, nedostatok pam√§te pre buffer na kreslenie."
+#define MSGTR_NEMFMR "≈Ωiaƒæ, nedostatok pam√§te pre vytv√°ranie menu."
+#define MSGTR_IDFGCVD "≈Ωiaƒæ, nem√¥≈æem n√°js≈• gui kompatibiln√Ω ovl√°daƒç video v√Ωstupu."
+#define MSGTR_NEEDLAVCFAME "≈Ωiaƒæ, nem√¥≈æete prehr√°va≈• nie mpeg s√∫bory s DXR3/H+ zariaden√≠m bez prek√≥dovania.\nPros√≠m zapnite lavc alebo fame v DXR3/H+ konfig. okne."
+#define MSGTR_UNKNOWNWINDOWTYPE "Nezn√°my typ okna n√°jden√Ω ..."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[tÈmy] chyba v konfig. s˙bore tÈm %d: %s"
-#define MSGTR_SKIN_WARNING1 "[tÈmy] varovanie v konfig. s˙bore tÈm na riadku %d: widget najden˝ ale pred  \"section\" nen·jden˝ (%s)"
-#define MSGTR_SKIN_WARNING2 "[tÈmy] varovanie v konfig. s˙bore tÈm na riadku %d: widget najden˝ ale pred \"subsection\" nen·jden˝ (%s)"
-#define MSGTR_SKIN_WARNING3 "[tÈmy] varovanie v konfig. s˙bore tÈm na riadku %d: t·to subsekcia nie je podporovan· t˝mto widget (%s)"
-#define MSGTR_SKIN_SkinFileNotFound "[skin] s˙bor ( %s ) nen·jden˝.\n"
-#define MSGTR_SKIN_SkinFileNotReadable "[skin] s˙bor ( %s ) sa ned· preËÌtaª.\n"
-#define MSGTR_SKIN_BITMAP_16bit  "bitmapa s hÂbkou 16 bit a menej je nepodporovan· (%s).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "s˙bor nen·jden˝ (%s)\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "chyba ËÌtania BMP (%s)\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "chyba ËÌtania TGA (%s)\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "chyba ËÌtania PNG (%s)\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "form·t RLE packed TGA nepodporovan˝ (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "nezn·my typ s˙boru (%s)\n"
+#define MSGTR_SKIN_ERRORMESSAGE "[t√©my] chyba v konfig. s√∫bore t√©m %d: %s"
+#define MSGTR_SKIN_WARNING1 "[t√©my] varovanie v konfig. s√∫bore t√©m na riadku %d: widget najden√Ω ale pred  \"section\" nen√°jden√Ω (%s)"
+#define MSGTR_SKIN_WARNING2 "[t√©my] varovanie v konfig. s√∫bore t√©m na riadku %d: widget najden√Ω ale pred \"subsection\" nen√°jden√Ω (%s)"
+#define MSGTR_SKIN_WARNING3 "[t√©my] varovanie v konfig. s√∫bore t√©m na riadku %d: t√°to subsekcia nie je podporovan√° t√Ωmto widget (%s)"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] s√∫bor ( %s ) nen√°jden√Ω.\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[skin] s√∫bor ( %s ) sa ned√° preƒç√≠ta≈•.\n"
+#define MSGTR_SKIN_BITMAP_16bit  "bitmapa s hƒ∫bkou 16 bit a menej je nepodporovan√° (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "s√∫bor nen√°jden√Ω (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "chyba ƒç√≠tania BMP (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "chyba ƒç√≠tania TGA (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "chyba ƒç√≠tania PNG (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "form√°t RLE packed TGA nepodporovan√Ω (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "nezn√°my typ s√∫boru (%s)\n"
 #define MSGTR_SKIN_BITMAP_ConversionError "chyba konverzie z 24 bit do 32 bit (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownMessage "nezn·ma spr·va: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "nedostatok pam‰te\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "prÌliπ mnoho fontov deklarovan˝ch\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "s˙bor fontov nen·jden˝\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "s˙bor obrazov fontu nen·jden˝\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "neexistuj˙ci identifik·tor fontu (%s)\n"
-#define MSGTR_SKIN_UnknownParameter "nezn·my parameter (%s)\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "TÈma nen·jden· (%s).\n"
-#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Vybran· tÈma ( %s ) nen·jden·, sk˙πam 'prednastaven˙'...\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Chyba pri ËÌtanÌ konfiguraËnÈho s˙boru tÈm (%s).\n"
-#define MSGTR_SKIN_LABEL "TÈmy:"
+#define MSGTR_SKIN_BITMAP_UnknownMessage "nezn√°ma spr√°va: %s\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "nedostatok pam√§te\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "pr√≠li≈° mnoho fontov deklarovan√Ωch\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "s√∫bor fontov nen√°jden√Ω\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "s√∫bor obrazov fontu nen√°jden√Ω\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "neexistuj√∫ci identifik√°tor fontu (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "nezn√°my parameter (%s)\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "T√©ma nen√°jden√° (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Vybran√° t√©ma ( %s ) nen√°jden√°, sk√∫≈°am 'prednastaven√∫'...\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Chyba pri ƒç√≠tan√≠ konfiguraƒçn√©ho s√∫boru t√©m (%s).\n"
+#define MSGTR_SKIN_LABEL "T√©my:"
 
 // --- gtk menus
-#define MSGTR_MENU_AboutMPlayer "O aplik·cii MPlayer"
-#define MSGTR_MENU_Open "Otvoriª..."
-#define MSGTR_MENU_PlayFile "Prehraª s˙bor..."
-#define MSGTR_MENU_PlayVCD "Prehraª VCD..."
-#define MSGTR_MENU_PlayDVD "Prehraª DVD..."
-#define MSGTR_MENU_PlayURL "Prehraª URL..."
-#define MSGTR_MENU_LoadSubtitle "NaËÌtaª titulky..."
-#define MSGTR_MENU_DropSubtitle "Zahodiª titulky..."
-#define MSGTR_MENU_LoadExternAudioFile "NaËÌtaª extern˝ audio s˙bor..."
-#define MSGTR_MENU_Playing "Prehr·vam"
-#define MSGTR_MENU_Play "Prehraª"
+#define MSGTR_MENU_AboutMPlayer "O aplik√°cii MPlayer"
+#define MSGTR_MENU_Open "Otvori≈•..."
+#define MSGTR_MENU_PlayFile "Prehra≈• s√∫bor..."
+#define MSGTR_MENU_PlayVCD "Prehra≈• VCD..."
+#define MSGTR_MENU_PlayDVD "Prehra≈• DVD..."
+#define MSGTR_MENU_PlayURL "Prehra≈• URL..."
+#define MSGTR_MENU_LoadSubtitle "Naƒç√≠ta≈• titulky..."
+#define MSGTR_MENU_DropSubtitle "Zahodi≈• titulky..."
+#define MSGTR_MENU_LoadExternAudioFile "Naƒç√≠ta≈• extern√Ω audio s√∫bor..."
+#define MSGTR_MENU_Playing "Prehr√°vam"
+#define MSGTR_MENU_Play "Prehra≈•"
 #define MSGTR_MENU_Pause "Pauza"
-#define MSGTR_MENU_Stop "Zastaviª"
-#define MSGTR_MENU_NextStream "œalπÌ pr˙d"
-#define MSGTR_MENU_PrevStream "Predch·dzaj˙ci pr˙d"
-#define MSGTR_MENU_Size "Veµkosª"
-#define MSGTR_MENU_HalfSize   "PoloviËn· velikosª"
-#define MSGTR_MENU_NormalSize "Norm·lna veµkosª"
-#define MSGTR_MENU_DoubleSize "Dvojn·sobn· veµkosª"
-#define MSGTR_MENU_FullScreen "Cel· obrazovka"
+#define MSGTR_MENU_Stop "Zastavi≈•"
+#define MSGTR_MENU_NextStream "ƒéal≈°√≠ pr√∫d"
+#define MSGTR_MENU_PrevStream "Predch√°dzaj√∫ci pr√∫d"
+#define MSGTR_MENU_Size "Veƒækos≈•"
+#define MSGTR_MENU_HalfSize   "Poloviƒçn√° velikos≈•"
+#define MSGTR_MENU_NormalSize "Norm√°lna veƒækos≈•"
+#define MSGTR_MENU_DoubleSize "Dvojn√°sobn√° veƒækos≈•"
+#define MSGTR_MENU_FullScreen "Cel√° obrazovka"
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "Prehraª disk..."
-#define MSGTR_MENU_ShowDVDMenu "Zobraziª DVD menu"
+#define MSGTR_MENU_PlayDisc "Prehra≈• disk..."
+#define MSGTR_MENU_ShowDVDMenu "Zobrazi≈• DVD menu"
 #define MSGTR_MENU_Titles "Tituly"
 #define MSGTR_MENU_Title "Titul %2d"
-#define MSGTR_MENU_None "(niË)"
+#define MSGTR_MENU_None "(niƒç)"
 #define MSGTR_MENU_Chapters "Kapitoly"
 #define MSGTR_MENU_Chapter "Kapitola %2d"
 #define MSGTR_MENU_AudioLanguages "Jazyk zvuku"
 #define MSGTR_MENU_SubtitleLanguages "Jazyk titulkov"
 #define MSGTR_MENU_PlayList "Playlist"
-#define MSGTR_MENU_SkinBrowser "PrehliadaË tÈm"
+#define MSGTR_MENU_SkinBrowser "Prehliadaƒç t√©m"
 #define MSGTR_MENU_Preferences MSGTR_Preferences
 #define MSGTR_MENU_Exit "Koniec..."
-#define MSGTR_MENU_Mute "Stlmiª zvuk"
-#define MSGTR_MENU_Original "Origin·l"
-#define MSGTR_MENU_AspectRatio "Pomer str·n obrazu"
+#define MSGTR_MENU_Mute "Stlmi≈• zvuk"
+#define MSGTR_MENU_Original "Origin√°l"
+#define MSGTR_MENU_AspectRatio "Pomer str√°n obrazu"
 #define MSGTR_MENU_AudioTrack "Audio stopa"
 #define MSGTR_MENU_Track "Stopa %d"
 #define MSGTR_MENU_VideoTrack "Video stopa"
@@ -787,86 +787,86 @@ static char help_text[]=
 #define MSGTR_EQU_Video "Video"
 #define MSGTR_EQU_Contrast "Kontrast: "
 #define MSGTR_EQU_Brightness "Jas: "
-#define MSGTR_EQU_Hue "OdtieÚ: "
-#define MSGTR_EQU_Saturation "Nas˝tenie: "
-#define MSGTR_EQU_Front_Left "Predn˝ •av˝"
-#define MSGTR_EQU_Front_Right "Predn˝ Prav˝"
-#define MSGTR_EQU_Back_Left "Zadn˝ •av˝"
-#define MSGTR_EQU_Back_Right "Zadn˝ Prav˝"
-#define MSGTR_EQU_Center "Stredn˝"
-#define MSGTR_EQU_Bass "Basov˝"
-#define MSGTR_EQU_All "Vπetko"
-#define MSGTR_EQU_Channel1 "Kan·l 1:"
-#define MSGTR_EQU_Channel2 "Kan·l 2:"
-#define MSGTR_EQU_Channel3 "Kan·l 3:"
-#define MSGTR_EQU_Channel4 "Kan·l 4:"
-#define MSGTR_EQU_Channel5 "Kan·l 5:"
-#define MSGTR_EQU_Channel6 "Kan·l 6:"
+#define MSGTR_EQU_Hue "Odtie≈à: "
+#define MSGTR_EQU_Saturation "Nas√Ωtenie: "
+#define MSGTR_EQU_Front_Left "Predn√Ω ƒΩav√Ω"
+#define MSGTR_EQU_Front_Right "Predn√Ω Prav√Ω"
+#define MSGTR_EQU_Back_Left "Zadn√Ω ƒΩav√Ω"
+#define MSGTR_EQU_Back_Right "Zadn√Ω Prav√Ω"
+#define MSGTR_EQU_Center "Stredn√Ω"
+#define MSGTR_EQU_Bass "Basov√Ω"
+#define MSGTR_EQU_All "V≈°etko"
+#define MSGTR_EQU_Channel1 "Kan√°l 1:"
+#define MSGTR_EQU_Channel2 "Kan√°l 2:"
+#define MSGTR_EQU_Channel3 "Kan√°l 3:"
+#define MSGTR_EQU_Channel4 "Kan√°l 4:"
+#define MSGTR_EQU_Channel5 "Kan√°l 5:"
+#define MSGTR_EQU_Channel6 "Kan√°l 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Cesta"
-#define MSGTR_PLAYLIST_Selected "VybranÈ s˙bory"
-#define MSGTR_PLAYLIST_Files "S˙bory"
-#define MSGTR_PLAYLIST_DirectoryTree "Adres·rov˝ strom"
+#define MSGTR_PLAYLIST_Selected "Vybran√© s√∫bory"
+#define MSGTR_PLAYLIST_Files "S√∫bory"
+#define MSGTR_PLAYLIST_DirectoryTree "Adres√°rov√Ω strom"
 
 // --- preferences
 #define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
 #define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
 #define MSGTR_PREFERENCES_SubtitleOSD "Titulky a OSD"
-#define MSGTR_PREFERENCES_Codecs "KÛdeky a demuxer"
-// Pozn·mka: Pokiaµ zmenÌte MSGTR_PREFERENCES_Misc, uistite sa prosÌm, æe vyhovuje aj pre MSGTR_PREFERENCES_FRAME_Misc
-#define MSGTR_PREFERENCES_Misc "RÙzne"
+#define MSGTR_PREFERENCES_Codecs "K√≥deky a demuxer"
+// Pozn√°mka: Pokiaƒæ zmen√≠te MSGTR_PREFERENCES_Misc, uistite sa pros√≠m, ≈æe vyhovuje aj pre MSGTR_PREFERENCES_FRAME_Misc
+#define MSGTR_PREFERENCES_Misc "R√¥zne"
 
-#define MSGTR_PREFERENCES_None "NiË"
-#define MSGTR_PREFERENCES_DriverDefault "v˝chodzie nastavenie"
-#define MSGTR_PREFERENCES_AvailableDrivers "DostupnÈ ovl·daËe:"
-#define MSGTR_PREFERENCES_DoNotPlaySound "Nehraª zvuk"
-#define MSGTR_PREFERENCES_NormalizeSound "Normalizovaª zvuk"
-#define MSGTR_PREFERENCES_EnableEqualizer "Zapn˙ª equalizer"
-#define MSGTR_PREFERENCES_SoftwareMixer "Aktivovaª softvÈrov˝ mixÈr"
-#define MSGTR_PREFERENCES_ExtraStereo "Zapn˙ª extra stereo"
+#define MSGTR_PREFERENCES_None "Niƒç"
+#define MSGTR_PREFERENCES_DriverDefault "v√Ωchodzie nastavenie"
+#define MSGTR_PREFERENCES_AvailableDrivers "Dostupn√© ovl√°daƒçe:"
+#define MSGTR_PREFERENCES_DoNotPlaySound "Nehra≈• zvuk"
+#define MSGTR_PREFERENCES_NormalizeSound "Normalizova≈• zvuk"
+#define MSGTR_PREFERENCES_EnableEqualizer "Zapn√∫≈• equalizer"
+#define MSGTR_PREFERENCES_SoftwareMixer "Aktivova≈• softv√©rov√Ω mix√©r"
+#define MSGTR_PREFERENCES_ExtraStereo "Zapn√∫≈• extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Koeficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audio oneskorenie"
-#define MSGTR_PREFERENCES_DoubleBuffer "Zapn˙ª dvojt˝ buffering"
-#define MSGTR_PREFERENCES_DirectRender "Zapn˙ª direct rendering"
-#define MSGTR_PREFERENCES_FrameDrop "Povoliª zahadzovanie r·mcov"
-#define MSGTR_PREFERENCES_HFrameDrop "Povoliª TVRD… zahadzovanie r·mcov (nebezpeËnÈ)"
-#define MSGTR_PREFERENCES_Flip "prehodiª obraz horn· strana-dole"
+#define MSGTR_PREFERENCES_DoubleBuffer "Zapn√∫≈• dvojt√Ω buffering"
+#define MSGTR_PREFERENCES_DirectRender "Zapn√∫≈• direct rendering"
+#define MSGTR_PREFERENCES_FrameDrop "Povoli≈• zahadzovanie r√°mcov"
+#define MSGTR_PREFERENCES_HFrameDrop "Povoli≈• TVRD√â zahadzovanie r√°mcov (nebezpeƒçn√©)"
+#define MSGTR_PREFERENCES_Flip "prehodi≈• obraz horn√° strana-dole"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_OSDTimer "»as a indik·tor"
-#define MSGTR_PREFERENCES_OSDProgress "Iba ukazovateµ priebehu a nastavenie"
-#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "»as, percent· and celkov˝ Ëas"
+#define MSGTR_PREFERENCES_OSDTimer "ƒåas a indik√°tor"
+#define MSGTR_PREFERENCES_OSDProgress "Iba ukazovateƒæ priebehu a nastavenie"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "ƒåas, percent√° and celkov√Ω ƒças"
 #define MSGTR_PREFERENCES_Subtitle "Titulky:"
 #define MSGTR_PREFERENCES_SUB_Delay "Oneskorenie: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
-#define MSGTR_PREFERENCES_SUB_POS "PozÌcia: "
-#define MSGTR_PREFERENCES_SUB_AutoLoad "Zak·zaª automatickÈ nahr·vanie titulkov"
+#define MSGTR_PREFERENCES_SUB_POS "Poz√≠cia: "
+#define MSGTR_PREFERENCES_SUB_AutoLoad "Zak√°za≈• automatick√© nahr√°vanie titulkov"
 #define MSGTR_PREFERENCES_SUB_Unicode "Titulky v Unicode"
-#define MSGTR_PREFERENCES_SUB_MPSUB "Konvertovaª danÈ titulky do MPlayer form·tu"
-#define MSGTR_PREFERENCES_SUB_SRT "Konvertovaª danÈ titulky do Ëasovo-urËenÈho SubViewer (SRT) form·tu"
-#define MSGTR_PREFERENCES_SUB_Overlap "Zapn˙ª prekr˝vanie titulkov"
+#define MSGTR_PREFERENCES_SUB_MPSUB "Konvertova≈• dan√© titulky do MPlayer form√°tu"
+#define MSGTR_PREFERENCES_SUB_SRT "Konvertova≈• dan√© titulky do ƒçasovo-urƒçen√©ho SubViewer (SRT) form√°tu"
+#define MSGTR_PREFERENCES_SUB_Overlap "Zapn√∫≈• prekr√Ωvanie titulkov"
 #define MSGTR_PREFERENCES_Font "Font:"
 #define MSGTR_PREFERENCES_FontFactor "Font faktor:"
-#define MSGTR_PREFERENCES_PostProcess "Zapn˙ª postprocess"
-#define MSGTR_PREFERENCES_AutoQuality "Automatick· qualita: "
-#define MSGTR_PREFERENCES_NI "Pouæiª neprekladan˝ AVI parser"
-#define MSGTR_PREFERENCES_IDX "Obnoviª index tabulku, ak je potrebnÈ"
+#define MSGTR_PREFERENCES_PostProcess "Zapn√∫≈• postprocess"
+#define MSGTR_PREFERENCES_AutoQuality "Automatick√° qualita: "
+#define MSGTR_PREFERENCES_NI "Pou≈æi≈• neprekladan√Ω AVI parser"
+#define MSGTR_PREFERENCES_IDX "Obnovi≈• index tabulku, ak je potrebn√©"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Rodina video kodekov:"
 #define MSGTR_PREFERENCES_AudioCodecFamily "Rodina audeo kodekov:"
-#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD ˙roveÚ"
+#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD √∫rove≈à"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Titulky"
 #define MSGTR_PREFERENCES_FRAME_Font "Font"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocess"
-#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "KÛdek & demuxer"
-#define MSGTR_PREFERENCES_FRAME_Cache "Vyrovn·vacia pam‰ª"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "K√≥dek & demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "Vyrovn√°vacia pam√§≈•"
 #define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
 #define MSGTR_PREFERENCES_Audio_Device "Zariadenie:"
-#define MSGTR_PREFERENCES_Audio_Mixer "MixÈr:"
-#define MSGTR_PREFERENCES_Audio_MixerChannel "Kan·l mixÈru:"
-#define MSGTR_PREFERENCES_Message "ProsÌm pam‰tajte, nietorÈ voµby potrebuj˙ reπtart prehr·vania!"
-#define MSGTR_PREFERENCES_DXR3_VENC "Video kÛder:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "Pouæiª LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Pouæiª FAME"
+#define MSGTR_PREFERENCES_Audio_Mixer "Mix√©r:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Kan√°l mix√©ru:"
+#define MSGTR_PREFERENCES_Message "Pros√≠m pam√§tajte, nietor√© voƒæby potrebuj√∫ re≈°tart prehr√°vania!"
+#define MSGTR_PREFERENCES_DXR3_VENC "Video k√≥der:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "Pou≈æi≈• LAVC (FFmpeg)"
+#define MSGTR_PREFERENCES_DXR3_FAME "Pou≈æi≈• FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Western European Languages with Euro (ISO-8859-15)"
@@ -889,38 +889,38 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
-#define MSGTR_PREFERENCES_FontNoAutoScale "Nemeniª rozmery"
-#define MSGTR_PREFERENCES_FontPropWidth "Proporcion·lne k πÌrke obrazu"
-#define MSGTR_PREFERENCES_FontPropHeight "Proporcion·lne k v˝πke obrazu"
-#define MSGTR_PREFERENCES_FontPropDiagonal "Proporcion·lne k diagon·le obrazu"
-#define MSGTR_PREFERENCES_FontEncoding "KÛdovanie:"
+#define MSGTR_PREFERENCES_FontNoAutoScale "Nemeni≈• rozmery"
+#define MSGTR_PREFERENCES_FontPropWidth "Proporcion√°lne k ≈°√≠rke obrazu"
+#define MSGTR_PREFERENCES_FontPropHeight "Proporcion√°lne k v√Ω≈°ke obrazu"
+#define MSGTR_PREFERENCES_FontPropDiagonal "Proporcion√°lne k diagon√°le obrazu"
+#define MSGTR_PREFERENCES_FontEncoding "K√≥dovanie:"
 #define MSGTR_PREFERENCES_FontBlur "Rozmazanie:"
 #define MSGTR_PREFERENCES_FontOutLine "Obrys:"
 #define MSGTR_PREFERENCES_FontTextScale "Mierka textu:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD mierka:"
-#define MSGTR_PREFERENCES_Cache "Vyrovn·vacia pam‰ª zap./vyp."
-#define MSGTR_PREFERENCES_CacheSize "Veµkosª vyr. pam‰te: "
-#define MSGTR_PREFERENCES_LoadFullscreen "Naπtartovaª v reæime celej obrazovky"
-#define MSGTR_PREFERENCES_SaveWinPos "Uloæiª pozÌciu okna"
-#define MSGTR_PREFERENCES_XSCREENSAVER "Zastaviª XScreenSaver"
-#define MSGTR_PREFERENCES_PlayBar "Zapn˙ª playbar"
-#define MSGTR_PREFERENCES_AutoSync "Automatick· synchroniz·cia zap./vyp."
-#define MSGTR_PREFERENCES_AutoSyncValue "Automatick· synchroniz·cia: "
+#define MSGTR_PREFERENCES_Cache "Vyrovn√°vacia pam√§≈• zap./vyp."
+#define MSGTR_PREFERENCES_CacheSize "Veƒækos≈• vyr. pam√§te: "
+#define MSGTR_PREFERENCES_LoadFullscreen "Na≈°tartova≈• v re≈æime celej obrazovky"
+#define MSGTR_PREFERENCES_SaveWinPos "Ulo≈æi≈• poz√≠ciu okna"
+#define MSGTR_PREFERENCES_XSCREENSAVER "Zastavi≈• XScreenSaver"
+#define MSGTR_PREFERENCES_PlayBar "Zapn√∫≈• playbar"
+#define MSGTR_PREFERENCES_AutoSync "Automatick√° synchroniz√°cia zap./vyp."
+#define MSGTR_PREFERENCES_AutoSyncValue "Automatick√° synchroniz√°cia: "
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM zariadenie:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD zariadenie:"
-#define MSGTR_PREFERENCES_FPS "SnÌmkov· r˝chlosª (FPS):"
-#define MSGTR_PREFERENCES_ShowVideoWindow "Uk·zaª video okno pri neaktivite"
-#define MSGTR_PREFERENCES_ArtsBroken "Novπie verze aRts s˙ nekompatibilnÈ "\
-           "s GTK 1.x a zhavaruj˙ GMPlayer!"
+#define MSGTR_PREFERENCES_FPS "Sn√≠mkov√° r√Ωchlos≈• (FPS):"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Uk√°za≈• video okno pri neaktivite"
+#define MSGTR_PREFERENCES_ArtsBroken "Nov≈°ie verze aRts s√∫ nekompatibiln√© "\
+           "s GTK 1.x a zhavaruj√∫ GMPlayer!"
 
-#define MSGTR_ABOUT_UHU "v˝voj GUI sponzoroval UHU Linux\n"
-#define MSGTR_ABOUT_Contributors "P¯ispievatelia kÛdu a dokumentacie\n"
-#define MSGTR_ABOUT_Codecs_libs_contributions "KÛdeky a kniænice tretÌch str·n\n"
+#define MSGTR_ABOUT_UHU "v√Ωvoj GUI sponzoroval UHU Linux\n"
+#define MSGTR_ABOUT_Contributors "P≈ôispievatelia k√≥du a dokumentacie\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "K√≥deky a kni≈ænice tret√≠ch str√°n\n"
 #define MSGTR_ABOUT_Translations "Preklady\n"
-#define MSGTR_ABOUT_Skins "TÈmy\n"
+#define MSGTR_ABOUT_Skins "T√©my\n"
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "Fat·lna chyba!"
+#define MSGTR_MSGBOX_LABEL_FatalError "Fat√°lna chyba!"
 #define MSGTR_MSGBOX_LABEL_Error "Chyba!"
 #define MSGTR_MSGBOX_LABEL_Warning "Upozornenie!"
 
