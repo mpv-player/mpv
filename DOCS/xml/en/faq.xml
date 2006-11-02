@@ -790,8 +790,8 @@ I can't watch any recent DVDs from Sony Pictures/BMG.
 This is normal; you've been ripped off and sold an intentionally defective disk.
 The only way to play these DVDs is to circumvent the bad blocks of the disk
 by using DVDnav instead of mpdvdkit2.
-You can do so by compiling MPlayer with DVDnav support and then replacing
-dvd:// by dvdnav:// on the command line.
+You can do so by compiling <application>MPlayer</application> with DVDnav
+support and then replacing dvd:// by dvdnav:// on the command line.
 DVDnav is so far mutually exclusive with mpdvdkit2, so make sure you pass
 <option>--disable-mpdvdkit</option> to the configure script.
 </para></answer>
