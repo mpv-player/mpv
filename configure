@@ -5333,7 +5333,7 @@ EOF
       _inc_tmp=`$_pkg_config --cflags libcdio_paranoia`;
       _ld_tmp=`$_pkg_config --libs libcdio_paranoia`;
       cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes \
-        && _ld_libcdio="$_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp" && break
+        && _ld_libcdio="$_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp"
     fi
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
