@@ -211,6 +211,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 	    if(!mpi_new) return 0; // VO ERROR!!!!!!!!
 	    mpeg2_set_buf(mpeg2dec, mpi_new->planes, mpi_new);
+	    mpi_new->stride[0] = info->sequence->width;
+	    mpi_new->stride[1] = info->sequence->chroma_width;
+	    mpi_new->stride[2] = info->sequence->chroma_width;
 	    if (info->current_picture->flags&PIC_FLAG_TOP_FIELD_FIRST)
 		mpi_new->fields |= MP_IMGFIELD_TOP_FIRST;
 	    else mpi_new->fields &= ~MP_IMGFIELD_TOP_FIRST;
