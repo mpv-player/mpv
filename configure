@@ -5329,7 +5329,7 @@ EOF
         cc_check $_ld_tmp $_ld_lm \
           && _libcdio=yes && _ld_libcdio="$_ld_tmp" && break
     done
-    if test "$_libcdio" = no && $_pkg_config --exists libcdio ; then
+    if test "$_libcdio" = no && $_pkg_config --exists libcdio_paranoia ; then
       _inc_tmp=`$_pkg_config --cflags libcdio_paranoia`;
       _ld_tmp=`$_pkg_config --libs libcdio_paranoia`;
       cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes \
