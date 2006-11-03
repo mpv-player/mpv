@@ -120,8 +120,8 @@ line with the <option>-dvd-device</option> option.
 <para>
 <application>MPlayer</application> uses <systemitem>libdvdread</systemitem> and
 <systemitem>libdvdcss</systemitem> for DVD playback and decryption. These two
-libraries are contained in the <filename class="directory">libmpdvdkit2</filename>
-subdirectory of the <application>MPlayer</application> source tree, you do not have
+libraries are contained in the
+<application>MPlayer</application> source tree, you do not have
 to install them separately. You can also use system-wide versions of the two
 libraries, but this solution is not recommended, as it can result in bugs,
 library incompatibilities and slower speed.
@@ -155,8 +155,8 @@ content.
 DVD support needs raw sector-based access to the device. Unfortunately you must
 (under Linux) be root to get the sector address of a file. That's why we don't
 use the kernel's filesystem driver at all, instead we reimplement it in
-userspace. <systemitem>libdvdread</systemitem> 0.9.x and
-<systemitem>libmpdvdkit</systemitem> do this. The kernel UDF filesystem driver
+userspace. <systemitem>libdvdread</systemitem> 0.9.x does this.
+The kernel UDF filesystem driver
 is not needed as they already have their own builtin UDF filesystem driver.
 Also the DVD does not have to be mounted as only the raw sector-based access is
 used.
