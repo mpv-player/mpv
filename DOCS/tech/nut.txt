@@ -116,6 +116,54 @@ t (v coded universal timestamp)
 Bitstream syntax:
 =================
 
+file:
+    file_id_string
+    while(!eof){
+        if(next_byte == 'N'){
+            packet_header
+            switch(startcode){
+                case      main_startcode:  main_header; break;
+                case    stream_startcode:stream_header; break;
+                case      info_startcode:  info_packet; break;
+                case     index_startcode:        index; break;
+                case syncpoint_startcode:    syncpoint; break;
+            }
+            packet_footer
+        }else
+            frame
+    }
+
+the structure of a undamaged file should look like the following, but
+demuxers should be flexible and be able to deal with damaged headers so the
+above is a better loop in practice (not to mention its simpler)
+note, demuxers MUST be able to deal with new and unknown headers
+
+file:
+    file_id_string
+    while(!eof){
+        packet_header, main_header, packet_footer
+        reserved_headers
+        for(i=0; i<stream_count; i++){
+            packet_header, stream_header, packet_footer
+            reserved_headers
+        }
+        while(next_code == info_startcode){
+            packet_header, info_packet, packet_footer
+            reserved_headers
+        }
+        if(next_code == index_startcode){
+            packet_header, index_packet, packet_footer
+        }
+        if (!eof) while(next_code != main_startcode){
+            if(next_code == syncpoint_startcode){
+                packet_header, syncpoint, packet_footer
+            }
+            frame
+            reserved_headers
+        }
+    }
+
+
 Common elements:
 ----------------
 
@@ -318,53 +366,6 @@ syncpoint:
     back_ptr_div16                      v
 
             Complete definition:
-
-file:
-    file_id_string
-    while(!eof){
-        if(next_byte == 'N'){
-            packet_header
-            switch(startcode){
-                case      main_startcode:  main_header; break;
-                case    stream_startcode:stream_header; break;
-                case      info_startcode:  info_packet; break;
-                case     index_startcode:        index; break;
-                case syncpoint_startcode:    syncpoint; break;
-            }
-            packet_footer
-        }else
-            frame
-    }
-
-the structure of a undamaged file should look like the following, but
-demuxers should be flexible and be able to deal with damaged headers so the
-above is a better loop in practice (not to mention its simpler)
-note, demuxers MUST be able to deal with new and unknown headers
-
-file:
-    file_id_string
-    while(!eof){
-        packet_header, main_header, packet_footer
-        reserved_headers
-        for(i=0; i<stream_count; i++){
-            packet_header, stream_header, packet_footer
-            reserved_headers
-        }
-        while(next_code == info_startcode){
-            packet_header, info_packet, packet_footer
-            reserved_headers
-        }
-        if(next_code == index_startcode){
-            packet_header, index_packet, packet_footer
-        }
-        if (!eof) while(next_code != main_startcode){
-            if(next_code == syncpoint_startcode){
-                packet_header, syncpoint, packet_footer
-            }
-            frame
-            reserved_headers
-        }
-    }
 
 
 Tag description:
