@@ -612,6 +612,7 @@ m_option_t msgl_config[]={
 	{ "muxer", &mp_msg_levels[MSGT_MUXER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "osd-menu", &mp_msg_levels[MSGT_OSD_MENU], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "ass", &mp_msg_levels[MSGT_ASS], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
         {"help", "Available msg modules:\n"
         "   global     - common player errors/information\n"
         "   cplayer    - console player (mplayer.c)\n"
@@ -655,6 +656,7 @@ m_option_t msgl_config[]={
         "   netst      - Netstream\n"
         "   muxer      - muxer layer\n"
         "   identify   - identify output\n"
+        "   ass        - libass messages\n"
         "\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
       	{NULL, NULL, 0, 0, 0, 0, NULL}
 

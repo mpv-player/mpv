@@ -78,7 +78,7 @@ int ass_new_face(FT_Library library, void* fontconfig_priv, face_desc_t* desc, /
 		}
 
 	if (face_cache_size == MAX_FACE_CACHE_SIZE) {
-		mp_msg(MSGT_GLOBAL, MSGL_FATAL, "Too many fonts\n");
+		mp_msg(MSGT_ASS, MSGL_FATAL, "Too many fonts\n");
 		return 1;
 	}
 
@@ -87,7 +87,7 @@ int ass_new_face(FT_Library library, void* fontconfig_priv, face_desc_t* desc, /
 	error = FT_New_Face(library, path, index, face);
 	if (error) {
 		if (!no_more_font_messages)
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "Error opening font: %s, %d\n", path, index);
+			mp_msg(MSGT_ASS, MSGL_WARN, "Error opening font: %s, %d\n", path, index);
 		no_more_font_messages = 1;
 		return 1;
 	}

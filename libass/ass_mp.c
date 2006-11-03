@@ -176,7 +176,7 @@ int ass_process_subtitle(ass_track_t* track, subtitle* sub)
 		return -1;
 	}
 
-	mp_msg(MSGT_GLOBAL, MSGL_V, "plaintext event at %" PRId64 ", +%" PRId64 ": %s  \n",
+	mp_msg(MSGT_ASS, MSGL_V, "plaintext event at %" PRId64 ", +%" PRId64 ": %s  \n",
 			(int64_t)event->Start, (int64_t)event->Duration, event->Text);
 	
 	return eid;

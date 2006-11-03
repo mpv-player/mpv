@@ -205,7 +205,7 @@ static void ass_lazy_track_init(void)
 	if (track->PlayResX && track->PlayResY)
 		return;
 	if (!track->PlayResX && !track->PlayResY) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Neither PlayResX nor PlayResY defined. Assuming 384x288.  \n");
+		mp_msg(MSGT_ASS, MSGL_WARN, "Neither PlayResX nor PlayResY defined. Assuming 384x288.  \n");
 		track->PlayResX = 384;
 		track->PlayResY = 288;
 	} else {
@@ -213,10 +213,10 @@ static void ass_lazy_track_init(void)
 			frame_context.orig_height / frame_context.width;
 		if (!track->PlayResY) {
 			track->PlayResY = track->PlayResX / orig_aspect + .5;
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "PlayResY undefined, setting %d  \n", track->PlayResY);
+			mp_msg(MSGT_ASS, MSGL_WARN, "PlayResY undefined, setting %d  \n", track->PlayResY);
 		} else if (!track->PlayResX) {
 			track->PlayResX = track->PlayResY * orig_aspect + .5;
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "PlayResX undefined, setting %d  \n", track->PlayResX);
+			mp_msg(MSGT_ASS, MSGL_WARN, "PlayResX undefined, setting %d  \n", track->PlayResX);
 		}
 	}
 }
@@ -233,7 +233,7 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 
 	error = FT_Init_FreeType( &ft );
 	if ( error ) { 
-		mp_msg(MSGT_GLOBAL, MSGL_FATAL, "FT_Init_FreeType failed\n");
+		mp_msg(MSGT_ASS, MSGL_FATAL, "FT_Init_FreeType failed\n");
 		goto ass_init_exit;
 	}
 
@@ -255,8 +255,8 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 	text_info.glyphs = calloc(MAX_GLYPHS, sizeof(glyph_info_t));
 	
 ass_init_exit:
-	if (priv) mp_msg(MSGT_GLOBAL, MSGL_INFO, "[ass] Init\n");
-	else mp_msg(MSGT_GLOBAL, MSGL_ERR, "[ass] Init failed\n");
+	if (priv) mp_msg(MSGT_ASS, MSGL_INFO, "[ass] Init\n");
+	else mp_msg(MSGT_ASS, MSGL_ERR, "[ass] Init failed\n");
 
 	return priv;
 }
@@ -333,22 +333,22 @@ static ass_image_t** render_glyph(bitmap_t* bm, int dst_x, int dst_y, uint32_t c
 	
 	tmp = dst_x - clip_x0;
 	if (tmp < 0) {
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "clip left\n");
+		mp_msg(MSGT_ASS, MSGL_DBG2, "clip left\n");
 		b_x0 = - tmp;
 	}
 	tmp = dst_y - clip_y0;
 	if (tmp < 0) {
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "clip top\n");
+		mp_msg(MSGT_ASS, MSGL_DBG2, "clip top\n");
 		b_y0 = - tmp;
 	}
 	tmp = clip_x1 - dst_x - bm->w;
 	if (tmp < 0) {
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "clip right\n");
+		mp_msg(MSGT_ASS, MSGL_DBG2, "clip right\n");
 		b_x1 = bm->w + tmp;
 	}
 	tmp = clip_y1 - dst_y - bm->h;
 	if (tmp < 0) {
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "clip bottom\n");
+		mp_msg(MSGT_ASS, MSGL_DBG2, "clip bottom\n");
 		b_y1 = bm->h + tmp;
 	}
 	
@@ -623,7 +623,7 @@ static void change_border(double border)
 			error = FT_Stroker_New( render_context.face->memory, &render_context.stroker );
 #endif
 			if (error) {
-				mp_msg(MSGT_GLOBAL, MSGL_V, "failed to get stroker\n");
+				mp_msg(MSGT_ASS, MSGL_V, "failed to get stroker\n");
 				render_context.stroker = 0;
 			}
 		}
@@ -771,12 +771,12 @@ static char* parse_tag(char* p, double pwr) {
 			t1 = strtoll(p, &p, 10);
 			skip(',');
 			t2 = strtoll(p, &p, 10);
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "movement6: (%d, %d) -> (%d, %d), (%" PRId64 " .. %" PRId64 ")\n", 
+			mp_msg(MSGT_ASS, MSGL_DBG2, "movement6: (%d, %d) -> (%d, %d), (%" PRId64 " .. %" PRId64 ")\n", 
 				x1, y1, x2, y2, (int64_t)t1, (int64_t)t2);
 		} else {
 			t1 = 0;
 			t2 = render_context.event->Duration;
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "movement: (%d, %d) -> (%d, %d)\n", x1, y1, x2, y2);
+			mp_msg(MSGT_ASS, MSGL_DBG2, "movement: (%d, %d) -> (%d, %d)\n", x1, y1, x2, y2);
 		}
 		skip(')');
 		delta_t = t2 - t1;
@@ -795,12 +795,12 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "frx") || mystrcmp(&p, "fry")) {
 		double val;
 		mystrtod(&p, &val);
-		mp_msg(MSGT_GLOBAL, MSGL_V, "frx/fry unimplemented \n");
+		mp_msg(MSGT_ASS, MSGL_V, "frx/fry unimplemented \n");
 	} else if (mystrcmp(&p, "frz") || mystrcmp(&p, "fr")) {
 		double angle;
 		double val;
 		mystrtod(&p, &val);
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "setting rotation to %.2f\n", val * pwr);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "setting rotation to %.2f\n", val * pwr);
 		angle = M_PI * val / 180;
 		render_context.rotation = angle * pwr;
 	} else if (mystrcmp(&p, "fn")) {
@@ -831,11 +831,11 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "an")) {
 		int val = strtol(p, &p, 10);
 		int v = (val - 1) / 3; // 0, 1 or 2 for vertical alignment
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "an %d\n", val);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "an %d\n", val);
 		if (v != 0) v = 3 - v;
 		val = ((val - 1) % 3) + 1; // horizontal alignment
 		val += v*4;
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "align %d\n", val);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "align %d\n", val);
 		render_context.alignment = val;
 	} else if (mystrcmp(&p, "a")) {
 		int val = strtol(p, &p, 10);
@@ -847,7 +847,7 @@ static char* parse_tag(char* p, double pwr) {
 		skip(',');
 		v2 = strtol(p, &p, 10);
 		skip(')');
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "pos(%d, %d)\n", v1, v2);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "pos(%d, %d)\n", v1, v2);
 		render_context.evt_type = EVENT_POSITIONED;
 		render_context.detect_collisions = 0;
 		render_context.pos_x = v1;
@@ -893,7 +893,7 @@ static char* parse_tag(char* p, double pwr) {
 		skip(',');
 		v2 = strtol(p, &p, 10);
 		skip(')');
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "org(%d, %d)\n", v1, v2);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "org(%d, %d)\n", v1, v2);
 		//				render_context.evt_type = EVENT_POSITIONED;
 		render_context.org_x = v1;
 		render_context.org_y = v2;
@@ -960,7 +960,7 @@ static char* parse_tag(char* p, double pwr) {
 		uint32_t val;
 		if (!strtocolor(&p, &val))
 			val = render_context.style->PrimaryColour;
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "color: %X\n", val);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "color: %X\n", val);
 		change_color(&render_context.c[0], val, pwr);
 	} else if ((*p >= '1') && (*p <= '4') && (++p) && (mystrcmp(&p, "c") || mystrcmp(&p, "a"))) {
 		char n = *(p-2);
@@ -979,9 +979,9 @@ static char* parse_tag(char* p, double pwr) {
 		switch (cmd) {
 			case 'c': change_color(render_context.c + cidx, val, pwr); break;
 			case 'a': change_alpha(render_context.c + cidx, val >> 24, pwr); break;
-			default: mp_msg(MSGT_GLOBAL, MSGL_WARN, "Bad command: %c%c\n", n, cmd); break;
+			default: mp_msg(MSGT_ASS, MSGL_WARN, "Bad command: %c%c\n", n, cmd); break;
 		}
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "single c/a at %f: %c%c = %X   \n", pwr, n, cmd, render_context.c[cidx]);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "single c/a at %f: %c%c = %X   \n", pwr, n, cmd, render_context.c[cidx]);
 	} else if (mystrcmp(&p, "r")) {
 		reset_render_context();
 	} else if (mystrcmp(&p, "be")) {
@@ -1058,7 +1058,7 @@ static unsigned get_next_char(char** str)
 				} else
 					break;
 			} else if (*p != '\\')
-				mp_msg(MSGT_GLOBAL, MSGL_V, "Unable to parse: \"%s\" \n", p);
+				mp_msg(MSGT_ASS, MSGL_V, "Unable to parse: \"%s\" \n", p);
 			if (*p == 0)
 				break;
 		}
@@ -1100,7 +1100,7 @@ static void apply_transition_effects(ass_event_t* event)
 	if (strncmp(event->Effect, "Banner;", 7) == 0) {
 		int delay;
 		if (cnt < 1) {
-			mp_msg(MSGT_GLOBAL, MSGL_V, "Error parsing effect: %s \n", event->Effect);
+			mp_msg(MSGT_ASS, MSGL_V, "Error parsing effect: %s \n", event->Effect);
 			return;
 		}
 		if (cnt >= 2 && v[1] == 0) // right-to-left
@@ -1120,7 +1120,7 @@ static void apply_transition_effects(ass_event_t* event)
 	} else if (strncmp(event->Effect, "Scroll down;", 12) == 0) {
 		render_context.scroll_direction = SCROLL_TB;
 	} else {
-		mp_msg(MSGT_GLOBAL, MSGL_V, "Unknown transition effect: %s \n", event->Effect);
+		mp_msg(MSGT_ASS, MSGL_V, "Unknown transition effect: %s \n", event->Effect);
 		return;
 	}
 	// parse scroll up/down parameters
@@ -1128,7 +1128,7 @@ static void apply_transition_effects(ass_event_t* event)
 		int delay;
 		int y0, y1;
 		if (cnt < 3) {
-			mp_msg(MSGT_GLOBAL, MSGL_V, "Error parsing effect: %s \n", event->Effect);
+			mp_msg(MSGT_ASS, MSGL_V, "Error parsing effect: %s \n", event->Effect);
 			return;
 		}
 		delay = v[2];
@@ -1254,11 +1254,11 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 	}
 
 	// not found, get a new outline glyph from face
-//	mp_msg(MSGT_GLOBAL, MSGL_INFO, "miss, index = %d, symbol = %c, adv = (%d, %d)\n", index, symbol, advance->x, advance->y);
+//	mp_msg(MSGT_ASS, MSGL_INFO, "miss, index = %d, symbol = %c, adv = (%d, %d)\n", index, symbol, advance->x, advance->y);
 	
 	error = FT_Load_Glyph(render_context.face, index, FT_LOAD_NO_BITMAP );
 	if (error) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Error loading glyph\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, "Error loading glyph\n");
 		return error;
 	}
 	
@@ -1273,7 +1273,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 #endif
 	error = FT_Get_Glyph(render_context.face->glyph, &(info->glyph));
 	if (error) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Error getting glyph\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, "Error getting glyph\n");
 		return error;
 	}
 
@@ -1284,7 +1284,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 		info->outline_glyph = info->glyph;
 		error = FT_Glyph_Stroke( &(info->outline_glyph), render_context.stroker, 0 ); // don't destroy original
 		if (error) {
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "FT_Glyph_Stroke error %d \n", error);
+			mp_msg(MSGT_ASS, MSGL_WARN, "FT_Glyph_Stroke error %d \n", error);
 		}
 	} else {
 		info->outline_glyph = 0;
@@ -1361,7 +1361,7 @@ static void wrap_lines_smart(int max_text_width)
 		if (cur->symbol == '\n') {
 			break_type = 2;
 			break_at = i;
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "forced line break at %d\n", break_at);
+			mp_msg(MSGT_ASS, MSGL_DBG2, "forced line break at %d\n", break_at);
 		}
 		
 		if (len >= max_text_width) {
@@ -1371,8 +1371,8 @@ static void wrap_lines_smart(int max_text_width)
 				break_at = i - 1;
 			if (break_at == -1)
 				break_at = 0;
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "overfill at %d\n", i);
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "line break at %d\n", break_at);
+			mp_msg(MSGT_ASS, MSGL_DBG2, "overfill at %d\n", i);
+			mp_msg(MSGT_ASS, MSGL_DBG2, "line break at %d\n", break_at);
 		}
 
 		if (break_at != -1) {
@@ -1451,7 +1451,7 @@ static void wrap_lines_smart(int max_text_width)
 			cur_line ++;
 			pen_shift_x = - cur->pos.x;
 			pen_shift_y += (height >> 6) + global_settings->line_spacing;
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "shifting from %d to %d by (%d, %d)\n", i, text_info.length - 1, pen_shift_x, pen_shift_y);
+			mp_msg(MSGT_ASS, MSGL_DBG2, "shifting from %d to %d by (%d, %d)\n", i, text_info.length - 1, pen_shift_x, pen_shift_y);
 		}
 		cur->pos.x += pen_shift_x;
 		cur->pos.y += pen_shift_y;
@@ -1508,7 +1508,7 @@ static void process_karaoke_effects(void)
 					dt /= (tm_end - tm_start);
 					x = x_start + (x_end - x_start) * dt;
 				} else {
-					mp_msg(MSGT_GLOBAL, MSGL_ERR, "Unknown effect type (internal error)  \n");
+					mp_msg(MSGT_ASS, MSGL_ERR, "Unknown effect type (internal error)  \n");
 					continue;
 				}
 
@@ -1601,11 +1601,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	int device_x = 0, device_y = 0;
 
 	if (event->Style >= frame_context.track->n_styles) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "No style found!\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, "No style found!\n");
 		return 1;
 	}
 	if (!event->Text) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Empty event!\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, "Empty event!\n");
 		return 1;
 	}
 
@@ -1635,7 +1635,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		use_kerning = FT_HAS_KERNING(render_context.face);
 
 		if (text_info.length >= MAX_GLYPHS) {
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "\nMAX_GLYPHS reached: event %d, start = %llu, duration = %llu\n Text = %s\n", 
+			mp_msg(MSGT_ASS, MSGL_WARN, "\nMAX_GLYPHS reached: event %d, start = %llu, duration = %llu\n Text = %s\n", 
 					(int)(event - frame_context.track->events), event->Start, event->Duration, event->Text);
 			break;
 		}
@@ -1796,7 +1796,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		} else { // subtitle
 			int scr_y;
 			if (valign != VALIGN_SUB)
-				mp_msg(MSGT_GLOBAL, MSGL_V, "Invalid valign, supposing 0 (subtitle)\n");
+				mp_msg(MSGT_ASS, MSGL_V, "Invalid valign, supposing 0 (subtitle)\n");
 			scr_y = y2scr_sub(frame_context.track->PlayResY - MarginV);
 			device_y = scr_y;
 			device_y -= (text_info.height >> 6);
@@ -1813,7 +1813,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	if (render_context.evt_type == EVENT_POSITIONED) {
 		int base_x = 0;
 		int base_y = 0;
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "positioned event at %d, %d\n", render_context.pos_x, render_context.pos_y);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "positioned event at %d, %d\n", render_context.pos_x, render_context.pos_y);
 		get_base_point(bbox, alignment, &base_x, &base_y);
 		device_x = x2scr(render_context.pos_x) - base_x;
 		device_y = y2scr(render_context.pos_y) - base_y;
@@ -2146,7 +2146,7 @@ static void fix_collisions(event_images_t* imgs, int cnt)
 			s.a = priv->top;
 			s.b = priv->top + priv->height;
 			if (priv->height != imgs[i].height) { // no, it's not
-				mp_msg(MSGT_GLOBAL, MSGL_WARN, "Achtung! Event height has changed!  \n");
+				mp_msg(MSGT_ASS, MSGL_WARN, "Achtung! Event height has changed!  \n");
 				priv->top = 0;
 				priv->height = 0;
 			}
@@ -2212,7 +2212,7 @@ ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long lon
 				rc = ass_render_event(event, eimg + cnt);
 				if (!rc) ++cnt;
 			} else {
-				mp_msg(MSGT_GLOBAL, MSGL_WARN, "Too many simultaneous events  \n");
+				mp_msg(MSGT_ASS, MSGL_WARN, "Too many simultaneous events  \n");
 				break;
 			}
 		}

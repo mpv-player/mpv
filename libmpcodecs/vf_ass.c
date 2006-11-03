@@ -113,7 +113,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
 
 	if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
 			!(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
-		mp_msg(MSGT_VFILTER, MSGL_INFO, MSGTR_MPCODECS_FullDRNotPossible);
+		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_MPCODECS_FullDRNotPossible);
 		return;
 	}
 
@@ -162,7 +162,7 @@ static int prepare_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
 	if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 		vf->dmpi = mpi->priv;
-		if (!vf->dmpi) { mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_FunWhydowegetNULL); return 0; }
+		if (!vf->dmpi) { mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_MPCODECS_FunWhydowegetNULL); return 0; }
 		mpi->priv = NULL;
 		// we've used DR, so we're ready...
 		if (ass_top_margin)
@@ -390,7 +390,7 @@ static int open(vf_instance_t *vf, char* args)
 	}
 	
 	if (vf->priv->auto_insert)
-		mp_msg(MSGT_VFILTER, MSGL_INFO, "[ass] auto-open\n");
+		mp_msg(MSGT_ASS, MSGL_INFO, "[ass] auto-open\n");
 	
 	vf->config = config;
 	vf->query_format = query_format;
