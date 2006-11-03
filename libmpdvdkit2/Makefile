@@ -52,7 +52,6 @@ endif
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 all: $(LIB).a
-default: $(LIB).a
 
 $(LIB).a: $(OBJS)
 	$(AR) rc $(LIB).a $(OBJS)
