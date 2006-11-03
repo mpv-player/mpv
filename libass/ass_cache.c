@@ -57,6 +57,24 @@ static int font_compare(face_desc_t* a, face_desc_t* b) {
 }
 
 /**
+ * Select Microfost Unicode CharMap, if the font has one.
+ * Otherwise, let FreeType decide.
+ */
+static void charmap_magic(FT_Face face)
+{
+	int i;
+	for (i = 0; i < face->num_charmaps; ++i) {
+		FT_CharMap cmap = face->charmaps[i];
+		unsigned pid = cmap->platform_id;
+		unsigned eid = cmap->encoding_id;
+		if (pid == 3 /*microsoft*/ && (eid == 1 /*unicode bmp*/ || eid == 10 /*full unicode*/)) {
+			FT_Set_Charmap(face, cmap);
+			break;
+		}
+	}
+}
+
+/**
  * \brief Get a face object, either from cache or created through FreeType+FontConfig.
  * \param library FreeType library object
  * \param fontconfig_priv fontconfig private data
@@ -91,6 +109,8 @@ int ass_new_face(FT_Library library, void* fontconfig_priv, face_desc_t* desc, /
 		no_more_font_messages = 1;
 		return 1;
 	}
+
+	charmap_magic(*face);
 	
 	item = face_cache + face_cache_size;
 	item->path = strdup(path);
