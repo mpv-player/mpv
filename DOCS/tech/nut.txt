@@ -42,11 +42,15 @@ MUST    the specific part must be done to conform to this standard
 SHOULD  it is recommended to be done that way, but not strictly required
 
 keyframe
-    a frame which can be decoded correctly on its own (=without using
-    information from any other frames)
-    if no such frames exist in a codec (for example due to use of overlapped
-    transforms like the MDCT in an audio codec) then a keyframe shall be any
-    frame from which onward all frames can be decoded correctly
+    The nth frame is a keyframe if and only if frames n, n+1, ... in 
+    presentation order (that are all frames with a pts >= frame[n].pts) can
+    be decoded successfully without reference to frames prior n in storeage
+    order (that are all frames with a dts < frame[n].dts)
+    if no such frames exist (for example due to use of overlapped transforms
+    like the MDCT in an audio codec) then the definition shall be extended
+    by droping n out of the set of frames which must be decodable, if this
+    is still insufficient then n+1 shall be droped, and so on until there is
+    a keyframe
     (FIXME maybe move somewhere else?)
 
 
