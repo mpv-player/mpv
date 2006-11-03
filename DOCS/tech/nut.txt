@@ -41,6 +41,13 @@ Definitions:
 MUST    the specific part must be done to conform to this standard
 SHOULD  it is recommended to be done that way, but not strictly required
 
+keyframe
+    a frame which can be decoded correctly on its own (=without using
+    information from any other frames)
+    if no such frames exist in a codec (for example due to use of overlapped
+    transforms like the MDCT in an audio codec) then a keyframe shall be any
+    frame from which onward all frames can be decoded correctly
+    (FIXME maybe move somewhere else?)
 
 
 Syntax:
