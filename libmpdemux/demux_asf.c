@@ -569,6 +569,11 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
             sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
             //sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms  - now set when reading asf header
             //sh_video->i_bps=10*asf->packetsize; // FIXME!
+
+            if (asf->asf_is_dvr_ms) {
+                sh_video->bih->biWidth = 0;
+                sh_video->bih->biHeight = 0;
+            }
         }
     }
 
