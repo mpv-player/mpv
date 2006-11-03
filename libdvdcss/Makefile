@@ -3,34 +3,37 @@ ifneq ($(wildcard ../config.mak),)
 include ../config.mak
 endif
 
-SRCS = dvd_input.c \
-       dvd_reader.c \
-       dvd_udf.c \
-       ifo_print.c \
-       ifo_read.c \
-       nav_print.c \
-       nav_read.c \
-       md5.c \
-
-#bsdi_ioctl.c
+SRCS = css.c \
+       device.c \
+       error.c \
+       ioctl.c \
+       libdvdcss.c \
+       #bsdi_ioctl \
 
 OBJS = $(SRCS:.c=.o)
 
-LIB=libmpdvdkit
+LIB=libdvdcss
 
 .SUFFIXES: .c .o
 
 ifeq ($(OPTFLAGS),)
 OPTFLAGS = -mcpu=pentium -march=pentium -O4
-else
-OPTFLAGS += -DHAVE_MPLAYER
 endif
 
 #	 \ -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 
 # -funroll-loops  removed, triggered gcc 3.0.4 (3.x?) bug
-CFLAGS= -I../libdvdcss -I.. $(OPTFLAGS) -D__USE_UNIX98 -D_GNU_SOURCE \
-	-DHAVE_DVDCSS_DVDCSS_H -DSTDC_HEADERS -DHAVE_LIMITS_H \
+CFLAGS= -I.. $(OPTFLAGS) -D__USE_UNIX98 -D_GNU_SOURCE \
+	-DHAVE_LIMITS_H -DHAVE_ERRNO_H -DHAVE_INTTYPES_H -DHAVE_UNISTD_H \
+	-DVERSION=\"1.2.9\"
+
+ifeq ($(TARGET_OS),CYGWIN)
+CFLAGS+=-DSYS_CYGWIN -DWIN32
+endif
+
+ifeq ($(TARGET_OS),Darwin)
+CFLAGS+=-D__DARWIN__
+endif
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<

@@ -51,7 +51,7 @@ License:    GNU General Public License
 Name:       libdvdcss
 Version:    Subversion r202 (post 1.2.9 release)
 Homepage:   http://developers.videolan.org/libdvdcss/
-Directory:  libmpdvdkit2
+Directory:  libdvdcss
 Copyright:  1998-2006 VideoLAN
 License:    GNU General Public License
 

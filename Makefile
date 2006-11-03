@@ -116,6 +116,7 @@ PARTS += libfame
 endif
 ifeq ($(DVDKIT2),yes)
 PARTS += libmpdvdkit2
+PARTS += libdvdcss
 endif
 ifeq ($(GUI),yes)
 PARTS += Gui
@@ -175,6 +176,8 @@ endif
 ifeq ($(DVDKIT2),yes)
 COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
 COMMON_LIBS += libmpdvdkit2/libmpdvdkit.a
+COMMON_DEPS += libdvdcss/libdvdcss.a
+COMMON_LIBS += libdvdcss/libdvdcss.a
 endif
 ifeq ($(CONFIG_ASS),yes)
 COMMON_DEPS += libass/libass.a
@@ -206,6 +209,9 @@ libaf/libaf.a:
 
 libmpdvdkit2/libmpdvdkit.a:
 	$(MAKE) -C libmpdvdkit2
+
+libdvdcss/libdvdcss.a:
+	$(MAKE) -C libdvdcss
 
 loader/libloader.a:
 	$(MAKE) -C loader
@@ -476,6 +482,7 @@ input/libinput.a: .norecurse $(wildcard input/*.[ch])
 libmenu/libmenu.a: .norecurse $(wildcard libmenu/*.[ch])
 libaf/libaf.a: .norecurse $(wildcard libaf/*.[ch])
 libmpdvdkit2/libmpdvdkit.a: .norecurse $(wildcard libmpdvdkit2/*.[ch])
+libdvdcss/libdvdcss.a: .norecurse $(wildcard libdvdcss/*.[ch])
 
 libmpdemux/libmpdemux.a: .norecurse $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])
 stream/stream.a: .norecurse $(wildcard stream/*.[ch] stream/*/*.[ch])
