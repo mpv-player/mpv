@@ -12,8 +12,6 @@ SRCS = dvd_input.c \
        nav_read.c \
        md5.c \
 
-#bsdi_ioctl.c
-
 OBJS = $(SRCS:.c=.o)
 
 LIB=libmpdvdkit
