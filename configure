@@ -241,7 +241,7 @@ Optional features:
   --enable-live          enable LIVE555 Streaming Media support [autodetect]
   --disable-dvdnav       disable libdvdnav support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
-  --disable-mpdvdkit     Disable mpdvdkit2 support [autodetect]
+  --disable-dvdread-internal  Disable internal libdvdread support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --disable-bitmap-font  Disable bitmap font support [enable]
   --disable-freetype     Disable freetype2 font rendering support [autodetect]
@@ -1641,11 +1641,10 @@ _faad_fixed=no
 _faac=auto
 _ladspa=auto
 _xmms=no
-_have_dvd=no
 _dvdnav=auto
 _dvdnavconfig=dvdnav-config
 _dvdread=auto
-_mpdvdkit=auto
+_dvdread_internal=auto
 _xanim=auto
 _real=auto
 _live=auto
@@ -1878,8 +1877,8 @@ for ac_option do
   --disable-xmms)	_xmms=no	;;
   --enable-dvdread)	_dvdread=yes	;;
   --disable-dvdread)	_dvdread=no	;;
-  --enable-mpdvdkit)	_mpdvdkit=yes	;;
-  --disable-mpdvdkit)	_mpdvdkit=no	;;
+  --enable-dvdread-internal)	_dvdread_internal=yes	;;
+  --disable-dvdread-internal)	_dvdread_internal=no	;;
   --enable-dvdnav)	_dvdnav=yes	;;
   --disable-dvdnav)	_dvdnav=no	;;
   --enable-xanim)	_xanim=yes	;;
@@ -5185,8 +5184,8 @@ if test "$_dvdnav" = yes ; then
   _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
   _inputmodules="dvdnav $_inputmodules"
   
-  #disable mpdvdkit and dvdread checks: dvdread will be enabled using dvdnav's version of dvdread
-  _mpdvdkit=no
+  #disable dvdread checks: dvdread will be enabled using dvdnav's version of dvdread
+  _dvdread_internal=no
   _dvdread=yes
 else
   _def_dvdnav='#undef USE_DVDNAV'
@@ -5194,47 +5193,22 @@ else
 fi
 echores "$_dvdnav"
 
-echocheck "DVD support (libmpdvdkit2)"
-if test "$_mpdvdkit" = auto ; then
- _mpdvdkit=no
- if linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux; then
-  _mpdvdkit=yes
- fi
-fi
-if test "$_mpdvdkit" = yes ; then
-  if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || test "$_hpux_scsi_h" = yes || darwin || win32 ; then
-    _inputmodules="mpdvdkit2 $_inputmodules"
-    _dvdread=libmpdvdkit2
-  else
-    _noinputmodules="mpdvdkit2 $_noinputmodules"
-  fi
-  _def_dvd_linux='#undef HAVE_LINUX_DVD_STRUCT'
-  _def_dvd_bsd='#undef HAVE_BSD_DVD_STRUCT'
-  _dev_dvd_openbsd='#undef HAVE_OPENBSD_DVD_STRUCT'
-  _def_dvd_darwin='#undef DARWIN_DVD_IOCTL'
-  if linux || netbsd || openbsd || bsdos ; then
-    _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
-    if openbsd ; then
-      _dev_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
-    fi
-  else
-    if freebsd ; then
-     _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
-    else
-      if darwin ; then
-       _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
-       _macosx_frameworks="$_macosx_frameworks -framework IOKit"
-      fi
-    fi
-  fi
-else
-  _noinputmodules="mpdvdkit2 $_noinputmodules"
-fi
-echores "$_mpdvdkit"
 
-echocheck "DVD support (libdvdread)"
-if test "$_dvdread" = auto ; then
-  cat > $TMPC << EOF
+echocheck "dvdread"
+if test "$_dvdread_internal" = auto ; then
+  _dvdread_internal=no
+  if linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux && \
+      test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
+      test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || \
+      test "$_hpux_scsi_h" = yes || darwin || win32 ; then
+    _dvdread_internal=yes
+    _dvdread=yes
+    _res_comment="internal"
+  fi
+elif test "$_dvdread" = auto ; then
+  _dvdread=no
+  if test "$_dl" = yes; then
+    cat > $TMPC << EOF
 #include <inttypes.h>
 #include <dvdread/dvd_reader.h>
 #include <dvdread/ifo_types.h>
@@ -5242,45 +5216,36 @@ if test "$_dvdread" = auto ; then
 #include <dvdread/nav_read.h>
 int main(void) { return 0; }
 EOF
-  _dvdread=no
-  if test "$_dl" = yes; then
-   cc_check  \
-     -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -ldvdread $_ld_dl && \
-     _dvdread=yes
+    cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
+      -ldvdread $_ld_dl && _dvdread=yes && _res_comment="external"
   fi
 fi
-_def_mpdvdkit="#undef USE_MPDVDKIT"
-case "$_dvdread" in
-  yes)
-	_largefiles=yes
-	_def_dvdread='#define USE_DVDREAD 1'
-        if test "$_dvdnav" != yes ; then
-          _ld_dvdread='-ldvdread'
-        fi
-	_inputmodules="dvdread $_inputmodules"
-	_have_dvd=yes
-	;;
-  no)
-	_def_dvdread='#undef USE_DVDREAD'
-	_noinputmodules="dvdread $_noinputmodules"
-	;;
-  libmpdvdkit2)
-	_largefiles=yes
-	_def_dvdread='#define USE_DVDREAD 1'
-	_noinputmodules="dvdread $_noinputmodules"
-	_def_mpdvdkit="#define USE_MPDVDKIT 2"
-	_have_dvd=yes
-	_dvdread=no
-	_res_comment="disabled by libmpdvdkit2"
-	;;
-esac
-echores "$_dvdread"
 
-if test "$_have_dvd" = yes ; then
-  _def_have_dvd='#define HAVE_DVD 1'
+if test "$_dvdread_internal" = yes; then
+  _def_dvdread_internal="#define USE_DVDREAD_INTERNAL 1"
+  _def_dvdread='#define USE_DVDREAD 1'
+  _inputmodules="dvdread $_noinputmodules"
+  _largefiles=yes
+  if linux || netbsd || openbsd || bsdos ; then
+    _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
+    openbsd && _dev_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
+  elif freebsd ; then
+    _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
+  elif darwin ; then
+    _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
+    _macosx_frameworks="$_macosx_frameworks -framework IOKit"
+  fi
+elif test "$_dvdread" = yes; then
+  _def_dvdread='#define USE_DVDREAD 1'
+  _inputmodules="dvdread $_inputmodules"
+  _largefiles=yes
+  test "$_dvdnav" != yes && _ld_dvdread='-ldvdread'
 else
-  _def_have_dvd='#undef HAVE_DVD'
+  _def_dvdread_internal="#undef USE_DVDREAD_INTERNAL"
+  _def_dvdread='#undef USE_DVDREAD'
+  _noinputmodules="dvdread $_noinputmodules"
 fi
+echores "$_dvdread"
 
 
 echocheck "cdparanoia"
@@ -7523,9 +7488,8 @@ TV_V4L2 = $_tv_v4l2
 TV_BSDBT848 = $_tv_bsdbt848
 PVR = $_pvr
 VCD = $_vcd
-HAVE_DVD = $_have_dvd
 DVDREAD = $_dvdread
-DVDKIT2 = $_mpdvdkit
+DVDREAD_INTERNAL = $_dvdread_internal
 DVDNAV = $_dvdnav
 WIN32DLL = $_win32
 W32_DEP = $_dep_win32
@@ -7687,10 +7651,10 @@ $_def_libcdio
 /* Indicates that Ogle's libdvdread is available for DVD playback */
 $_def_dvdread
 
-/* Indicates that dvdread is from libmpdvdkit */
-$_def_mpdvdkit
+/* Indicates that dvdread is internal */
+$_def_dvdread_internal
 
-/* Additional options for libmpdvdkit*/
+/* Additional options for libdvdread/libdvdcss */
 $_def_dvd
 $_def_cdrom
 $_def_cdio
@@ -7703,7 +7667,6 @@ $_def_dvd_darwin
 $_def_sol_scsi_h
 $_def_hpux_scsi_h
 $_def_stddef
-$_def_have_dvd
 
 /* Common data directory (for fonts, etc) */
 #define MPLAYER_DATADIR "$_datadir"

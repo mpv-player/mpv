@@ -742,7 +742,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       if(vts_file->vts_pgcit) {
         int i;
         for(i=0;i<8;i++)
-#ifdef USE_MPDVDKIT
+#ifdef USE_DVDREAD_INTERNAL
           if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i].present) {
 #else
           if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i] & 0x8000) {
@@ -759,7 +759,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
             }
 
             d->audio_streams[d->nr_of_channels].language=language;
-#ifdef USE_MPDVDKIT
+#ifdef USE_DVDREAD_INTERNAL
             d->audio_streams[d->nr_of_channels].id=vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i].s_audio;
 #else
             d->audio_streams[d->nr_of_channels].id=vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i] >> 8 & 7;
@@ -810,7 +810,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
       d->nr_of_subtitles=0;
       for(i=0;i<32;i++)
-#ifdef USE_MPDVDKIT
+#ifdef USE_DVDREAD_INTERNAL
       if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].present) {
 #else
       if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] & 0x80000000) {
@@ -830,13 +830,13 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         d->subtitles[ d->nr_of_subtitles ].language=language;
         d->subtitles[ d->nr_of_subtitles ].id=d->nr_of_subtitles;
         if(video->display_aspect_ratio == 0) /* 4:3 */
-#ifdef USE_MPDVDKIT
+#ifdef USE_DVDREAD_INTERNAL
           d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].s_4p3;
 #else
           d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] >> 24 & 31;
 #endif
         else if(video->display_aspect_ratio == 3) /* 16:9 */
-#ifdef USE_MPDVDKIT
+#ifdef USE_DVDREAD_INTERNAL
           d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].s_lbox;
 #else
           d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] >> 8 & 31;

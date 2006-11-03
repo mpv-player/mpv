@@ -114,7 +114,7 @@ endif
 ifeq ($(FAME),yes)
 PARTS += libfame
 endif
-ifeq ($(DVDKIT2),yes)
+ifeq ($(DVDREAD_INTERNAL),yes)
 PARTS += libdvdread
 PARTS += libdvdcss
 endif
@@ -173,7 +173,7 @@ endif
 ifeq ($(FAME),yes)
 COMMON_DEPS += libfame/libfame.a
 endif
-ifeq ($(DVDKIT2),yes)
+ifeq ($(DVDREAD_INTERNAL),yes)
 COMMON_DEPS += libdvdread/libdvdread.a
 COMMON_LIBS += libdvdread/libdvdread.a
 COMMON_DEPS += libdvdcss/libdvdcss.a

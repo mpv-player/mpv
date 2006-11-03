@@ -25,7 +25,7 @@ SRCS += stream.c \
         stream_mf.c \
         stream_null.c \
 
-ifeq ($(HAVE_DVD),yes)
+ifeq ($(DVDREAD),yes)
 SRCS += stream_dvd.c
 endif
 ifeq ($(DVDNAV),yes)

@@ -1,7 +1,7 @@
 
 #ifdef USE_DVDREAD
 
-#ifdef USE_MPDVDKIT
+#ifdef USE_DVDREAD_INTERNAL
 #include "libdvdread/dvd_reader.h"
 #include "libdvdread/ifo_types.h"
 #include "libdvdread/ifo_read.h"
