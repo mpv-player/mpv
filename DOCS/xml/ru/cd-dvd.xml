@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r20637 -->
 <chapter id="cd-dvd">
 <title>Использование CD/DVD</title>
 
@@ -108,8 +108,7 @@
 <para>
 <application>MPlayer</application> использует библиотеки <systemitem>libdvdread
 </systemitem> и <systemitem>libdvdcss</systemitem> для воспроизведения и расшифровки DVD.
-Эти две библиотеки содержатся в подкаталоге
-<filename class="directory">libmpdvdkit2</filename> дерева исходного кода
+Эти две библиотеки содержатся в дереве исходного кода
 <application>MPlayer</application>'а, так что отдельно устанавливать их не нужно.
 Вы также можете использовать уже установленные в системе версии библиотек, но это
 <emphasis role="bold">не рекомендуется</emphasis>, так как может приводить к
@@ -146,8 +145,8 @@
 (под Linux) Вы должны быть root'ом, чтобы получить секторный адрес файла.
 Вот почему мы вообще не используем драйвер файловой системы из ядра, а
 переписали его для выполнения в пользовательсмком пространстве.
-<systemitem>libdvdread</systemitem> 0.9.x и <systemitem>
-libmpdvdkit</systemitem> так и делают. Драйвер UDF
+<systemitem>libdvdread</systemitem> 0.9.x 
+так и делает. Драйвер UDF
 файловой системы не нужен, поскольку соответствующие драйвера встроены в эти библиотеки. 
 DVD также не обязан быть смонтированным, поскольку используется
 только прямой посекторный доступ.
