@@ -38,4 +38,4 @@
 #endif /* HAVE_MPLAYER */
 
 /* Version number of package */
-#define VERSION "1.2.3"
+#define VERSION "1.2.9"
