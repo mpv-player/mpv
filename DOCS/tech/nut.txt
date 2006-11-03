@@ -198,7 +198,7 @@ reserved_headers
 
         Headers:
 
-main header:
+main_header:
     version                             v
     stream_count                        v
     max_distance                        v
