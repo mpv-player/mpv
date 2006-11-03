@@ -51,6 +51,11 @@ keyframe
     by droping n out of the set of frames which must be decodable, if this
     is still insufficient then n+1 shall be droped, and so on until there is
     a keyframe
+    every frame which is marked as a keyframe MUST be a keyframe according to
+    the defintion above, a muxer MUST mark every frame it knows is a keyframe
+    as such, a muxer SHOULD NOT analyze future frames to determine the
+    keyframe status of the current frame but instead just set the frame as
+    non keyframe
     (FIXME maybe move somewhere else?)
 
 
