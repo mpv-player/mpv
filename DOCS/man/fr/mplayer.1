@@ -773,6 +773,18 @@ xvidix, xover, xv (voir \-vo xv:ck), xvmc (voir \-vo xv:ck) et directx
 uniquement.
 .
 .TP
+.B \-correct-pts (expérimental)
+Bascule MPlayer dans un mode expérimental où les timestamps des trames vidéos
+sont calculées différemment, et où les filtres qui ajoutent des trames ou modifient
+les timestamps sont supportés.
+Les timestamps plus précises se ressentent par exemple lorsque vous regardez avec
+l'option \-ass une vidéo dont les sous-titres sont synchronisés avec un changement
+de scène.
+Sans l'option \-correct-pts le timing des sous-titres est typiquement décalé de
+quelques trames.
+Cette option ne fonctionne pas bien avec certains démultiplexeurs et certains codecs.
+.
+.TP
 .B \-crash-debug (CODE DE DÉBOGAGE)
 Attache gdb automatiquement lors d'un crash ou d'un SIGTRAP.
 N'est géré que si MPlayer a été compilé avec l'option de
@@ -1211,7 +1223,7 @@ Surround
 .PD 1
 .
 .TP
-.B \-chapter <id chapitre>[\-<id fin chapitre>]
+.B \-chapter <id chapitre>[\-<id fin chapitre>] (dvd:// et dvdnav:// uniquement)
 Indique à quel chapitre commencer la lecture.
 Vous pouvez également indiquer à quel chapitre arrêter la lecture
 (par défaut\ : 1).
@@ -10375,7 +10387,7 @@ Si LADSPA_PATH est définie, le fichier correspondant est recherché.
 Si elle n'est pas définie, vous devez donner le chemin absolu.
 FIXME: Ceci est une redite de la section LADSPA.
 .
-.SS libmpdvdkit2:
+.SS libdvdcss:
 .
 .TP
 .B DVDCSS_CACHE
