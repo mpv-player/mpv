@@ -805,7 +805,7 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 	assert(codepage);
 
 	{
-		char* cp_tmp = codepage;
+		char* cp_tmp = codepage ? strdup(codepage) : 0;
 #ifdef HAVE_ENCA
 		char enca_lang[3], enca_fallback[100];
 		if (sscanf(codepage, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
