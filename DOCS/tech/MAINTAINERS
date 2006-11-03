@@ -93,7 +93,8 @@ Imported libs/projects:
     * loader: Alex Beregszaszi
     * liba52: None
     * libmpeg2: None
-    * libmpdvdkit2: None
+    * libdvdcss: Diego Biurrun
+    * libdvdread: Diego Biurrun
     * libfaad2: None
     * realrtsp: Roberto Togni
     * librtsp: Benjamin Zores
