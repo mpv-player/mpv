@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20535
+.\" In sync with r20639
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -773,10 +773,15 @@ svga, vesa, winvidix, xmga, xvidix, xover, xv (siehe \-vo xv:ck), xvmc
 .
 .TP
 .B \-correct-pts (experimentell)
-Lässt mplayer in einen experimentellen Modus wechseln, in dem anstelle des
-Quellvideos die Filter über den Präsentationszeitstempel von Videoframes
-entscheiden.
-Von den meisten Filtern nicht unterstützt.
+Lässt mplayer in einen experimentellen Modus wechseln, in dem Zeitstempel für
+Videoframes anders berechnet werden und in dem Filter, die neue Frames
+hinzufügen oder Zeitstempel verändern, unterstützt werden.
+Die genaueren Zeitstempel können beispielsweise sichtbar sein bei der
+Wiedergabe von Untertiteln mit der Option \-ass, wenn die Untertitel zu
+Szenenwechseln geschehen.
+Ohne \-correct-pts wird das Timing für Untertitel normalerweise um ein paar
+Frames verschoben sein.
+Diese Option funktioniert mit einigen Demuxern und Codecs nicht richtig.
 .
 .TP
 .B \-crash-debug (DEBUG-CODE)
@@ -10347,7 +10352,7 @@ Falls LADSPA_PATH gesetzt ist, wird dort der angegebenen Datei gesucht.
 Ansonsten muss ein vollständiger Pfadname angegeben werden.
 FIXME: Dies wird auch in der ladspa-Sektion erwähnt.
 .
-.SS libmpdvdkit2:
+.SS libdvdcss:
 .
 .TP
 .B DVDCSS_CACHE
