@@ -863,9 +863,12 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 #endif // ICONV
 
 /**
- * \brief read file contents into newly allocated buffer, recoding to utf-8
+ * \brief read file contents into newly allocated buffer
+ * \param fname file name
+ * \param bufsize out: file size
+ * \return pointer to file contents. Caller is responsible for its deallocation.
  */
-static char* read_file(char* fname, char* codepage)
+static char* read_file(char* fname, size_t *bufsize)
 {
 	int res;
 	long sz;
@@ -911,33 +914,20 @@ static char* read_file(char* fname, char* codepage)
 	buf[sz] = '\0';
 	fclose(fp);
 	
-#ifdef USE_ICONV
-	if (codepage) {
-		char* tmpbuf = sub_recode(buf, sz, codepage);
-		free(buf);
-		buf = tmpbuf;
-	}
-#endif
+	if (bufsize)
+		*bufsize = sz;
 	return buf;
 }
 
-/**
- * \brief Read subtitles from file.
- * \param fname file name
- * \return newly allocated track
-*/ 
-ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage)
+/*
+ * \param buf pointer to subtitle text in utf-8
+ */
+static ass_track_t* parse_memory(ass_library_t* library, char* buf)
 {
-	char* buf;
 	ass_track_t* track;
 	int i;
 	
-	buf = read_file(fname, codepage);
-	if (!buf)
-		return 0;
-	
 	track = ass_new_track(library);
-	track->name = strdup(fname);
 	
 	// process header
 	process_text(track, buf);
@@ -950,14 +940,82 @@ ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage)
 	if (track->parser_priv->fontname)
 		decode_font(track);
 
-	free(buf);
-
 	if (track->track_type == TRACK_TYPE_UNKNOWN) {
 		ass_free_track(track);
 		return 0;
 	}
 
 	process_force_style(track);
+
+	return track;
+}
+
+/**
+ * \brief Read subtitles from memory.
+ * \param library libass library object
+ * \param buf pointer to subtitles text
+ * \param bufsize size of buffer
+ * \param codepage recode buffer contents from given codepage
+ * \return newly allocated track
+*/ 
+ass_track_t* ass_read_memory(ass_library_t* library, char* buf, size_t bufsize, char* codepage)
+{
+	ass_track_t* track;
+	int need_free = 0;
+	
+	if (!buf)
+		return 0;
+	
+#ifdef USE_ICONV
+	if (codepage)
+		buf = sub_recode(buf, bufsize, codepage);
+	if (!buf)
+		return 0;
+	else
+		need_free = 1;
+#endif
+	track = parse_memory(library, buf);
+	if (need_free)
+		free(buf);
+	if (!track)
+		return 0;
+
+	mp_msg(MSGT_GLOBAL, MSGL_INFO, "LIBASS: added subtitle file: <memory> (%d styles, %d events)\n", track->n_styles, track->n_events);
+	return track;
+}
+
+/**
+ * \brief Read subtitles from file.
+ * \param library libass library object
+ * \param fname file name
+ * \param codepage recode buffer contents from given codepage
+ * \return newly allocated track
+*/ 
+ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage)
+{
+	char* buf;
+	ass_track_t* track;
+	size_t bufsize;
+	int i;
+	
+	buf = read_file(fname, &bufsize);
+	if (!buf)
+		return 0;
+#ifdef USE_ICONV
+	if (codepage) {
+		 char* tmpbuf = sub_recode(buf, bufsize, codepage);
+		 free(buf);
+		 buf = tmpbuf;
+	}
+	if (!buf)
+		return 0;
+#endif
+	track = parse_memory(library, buf);
+	free(buf);
+	if (!track)
+		return 0;
+	
+	track->name = strdup(fname);
 
 	mp_msg(MSGT_GLOBAL, MSGL_INFO, "LIBASS: added subtitle file: %s (%d styles, %d events)\n", fname, track->n_styles, track->n_events);
 	
@@ -972,10 +1030,21 @@ int ass_read_styles(ass_track_t* track, char* fname, char* codepage)
 {
 	char* buf;
 	parser_state_t old_state;
+	size_t sz;
 
-	buf = read_file(fname, codepage);
+	buf = read_file(fname, &sz);
 	if (!buf)
 		return 1;
+#ifdef USE_ICONV
+	if (codepage) {
+		unsigned char* tmpbuf;
+		tmpbuf = sub_recode(buf, sz, codepage);
+		free(buf);
+		buf = tmpbuf;
+	}
+	if (!buf)
+		return 0;
+#endif
 
 	old_state = track->parser_priv->state;
 	track->parser_priv->state = PST_STYLES;
