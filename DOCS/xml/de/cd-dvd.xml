@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20442 -->
+<!-- synced with r20637 -->
 <chapter id="cd-dvd">
   <title>CD/DVD Nutzung</title>
 
@@ -128,9 +128,8 @@
         <application>MPlayer</application> verwendet <systemitem>libdvdread</systemitem> und
         <systemitem>libdvdcss</systemitem> zur DVD-Wiedergabe und -Entschlüsselung.
         Diese beiden Bibliotheken sind im Unterverzeichnis
-        <filename class="directory">libmpdvdkit2</filename> des
-        <application>MPlayer</application>-Quelltextbaums.
-        Du brauchst sie nicht separat zu installieren. Du kannst auch systemweite
+        <application>MPlayer</application>-Quelltextbaum,
+        du brauchst sie nicht separat zu installieren. Du kannst auch systemweite
         Versionen der beiden Bibliotheken verwenden, diese wird jedoch
         <emphasis role="bold">nicht</emphasis> empfohlen, da dies zu Bugs,
         Bibliotheksinkompatibilitäten und geringerer Geschwindigkeit führen kann.
@@ -169,8 +168,7 @@
       Laufwerk. Leider musst du (unter Linux) root sein, um die Sektoraddresse einer
       Datei zu erhalten. Das ist der Grund, warum wir nicht den Dateisystemtreiber
       des Kernels nutzen sondern es im Userspace reimplementiert haben.
-      <systemitem>libdvdread</systemitem> 0.9.x und
-      <systemitem>libmpdvdkit</systemitem> tun dies.
+      <systemitem>libdvdread</systemitem> 0.9.x tut dies.
       Der UDF-Dateisystemtreiber des Kernels wird nicht benötigt, da sie bereits
       einen eigenen eingebauten UDF-Dateisystem-Treiber haben.
       Ebenso muss die DVD nicht gemountet werden, da der direkte Sektor-basierte Zugriff

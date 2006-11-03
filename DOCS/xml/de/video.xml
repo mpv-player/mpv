@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r20054 -->
+<!-- in sync with r20572 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -1489,6 +1489,16 @@ make<!--
   auf einer echten Text-Konsole auszugeben. Im Abschnitt
   <link linkend="vidix-nvidia">nvidia_vid</link> wirst du mehr Informationen
   dazu finden.
+  Um Text an den Rändern und den blinkenden Cursor loszuwerden,
+  probiere etwas wie den folgenden Befehl:
+</simpara>
+<screen>setterm -cursor off > /dev/tty9</screen>
+<simpara>
+  (welcher davon ausgeht, dass <systemitem>tty9</systemitem> bis dahin ungenutzt ist).
+  Wechsle dann zu <systemitem>tty9</systemitem>.
+  Andererseits sollte dir <option>-colorkey 0</option> ein Video liefern, das
+  im "Hintergrund" läuft; das hängt jedoch davon ab, dass die colorkey-Funktionalität
+  korrekt funktioniert.
   </simpara></listitem>
 <listitem><simpara>
   Du kannst auch das VIDIX-Untergerät verwenden, das bei vielen

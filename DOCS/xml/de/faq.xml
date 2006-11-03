@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20304 -->
+<!-- synced with r20614 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -994,7 +994,7 @@ Starte Wiedergabe...<!--
             Das ist normal; du bist betrogen worden, dir ist eine absichtlich fehlerhafte Scheibe verkauft worden.
             Die einzige Möglichkeite, diese DVDs anzuschauen, ist, die fehlerhaften Blöcke dieser Disc zu umgeben,
             indem du DVDnav anstelle von mpdvdkit2 verwendest.
-            Dies kannst du erreichen, indem du MPlayer mit DVDnav-Unterstützung compilierst und dann auf der
+            Dies kannst du erreichen, indem du <application>MPlayer</application> mit DVDnav-Unterstützung compilierst und dann auf der
             Kommandozeile dvd:// durch dvdnav:// ersetzst.
             DVDnav schließt bisher die Verwendung von mpdvdkit2 aus, stelle daher sicher, dass du dem configure-Skript
             <option>--disable-mpdvdkit</option> übergibst.
