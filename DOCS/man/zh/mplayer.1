@@ -1,9 +1,11 @@
 .\" Partial sync with en/mplayer.1 r20535
-.\" up to line 2772 (.SH "VIDEO OUTPUT DRIVERS ...
+.\" up to line 2772 (.SH "VIDEO OUTPUT DRIVERS ...)
+.\" and bottom sections ("... VARIABLES" "FILES" ""EXAMPLES ..." "BUGS ...").
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; palytree in parent list; colorkey; 
 .\"   wrapper script ... shellescapes; keyframe;
 .\"   encoding audio rate; \&; alphamap; 
+.\"   aligned buffers; instancenumber; 
 .\" 
 .\" MPlayer (C) 2000-2006 MPlayer 团队
 .\" 本(英文)手册页由 Gabucino, Diego Biurrun, Jonas Jermann 编写
@@ -2774,7 +2776,7 @@ ggi 和 gl2 的都支持此功能。
 语法是:
 .
 .TP
-.\" The below is only synced with r9821 (except section "BUGS" and "AUTHORS")
+.\" The below is only synced with r9821 (except sections from "... VARIABLES" to bottom)
 .B \-vo <驱动1[:设备],驱动2,...[,]>
 设置可用的视频输出驱动的优先级列表(可以加上设备).
 \'设备'也用于SDL和GGI, 那里它表示子驱动
@@ -4565,113 +4567,441 @@ B帧和非B帧之间的量化偏移, 100=1.00 (默认值=100)
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Files
+.\" 环境变量
 .\" --------------------------------------------------------------------------
 .
-.SH 文件
+.SH "ENVIRONMENT VARIABLES (环境变量)"
+.
+有环境变量用于控制 MPlayer 和 MEncoder 的行为。
+.
 .TP
-/etc/\:mplayer/\:mplayer.conf
-系统范围的设置
+.B MPLAYER_CHARSET (也请参见 \-msgcharset)
+转换控制台的消息显示为指定字符集 (默认值是自动检测: autodetect)。
+值 "noconv" 表示不要转换。
+.
 .TP
-~/.mplayer/\:config
-用户设置
+.B MPLAYER_HOME
+MPlayer 寻找设置的目录。
+.
 .TP
-~/.mplayer/\:input.conf
-输入绑定(完整按键列表参见'\-input keylist'的输出)
+.B MPLAYER_VERBOSE (也请参见 \-v 和 \-msglevel)
+对所有的消息模块设置初始冗赘级别 (默认值是: 0)。
+负的值结果是越少的消息而正的值会越多。
+.
+.SS libaf:
+.
 .TP
-~/.mplayer/\:gui.conf
-GUI配置文件
+.B LADSPA_PATH
+如果设置了 LADSPA_PATH, 它会寻找指定的文件。
+如果没设置, 你就必须提供完整的路径名。
+FIXME: 这也在 ladspa 一节有提到.
+.
+.SS libmpdvdkit2:
+.
 .TP
-~/.mplayer/\:gui.pl
-GUI播放列表
+.B DVDCSS_CACHE
+指定目录以储存标题的钥匙值。
+这会加速 DVD 在缓存中的译码过程。
+如果 DVDCSS_CACHE 目录不存在就创建它, 
+并创建以 DVD 标题或生产日期为名称的子目录。
+如果 DVDCSS_CACHE 没设置或是空的, libdvdcss 会使用默认值为 
+Unix 的 "${HOME}/.dvdcss/" 或 
+Win32 的 "C:\\Documents and Settings\\$USER\\Application Data\\dvdcss\\"。
+特殊值 "off" 停用缓存。
+.
 .TP
-~/.mplayer/\:font/
-字体目录(里面必须有一个font.desc文件和.RAW后缀的文件)
-.TP
-~/.mplayer/\:DVDkeys/
-破解的CSS密钥
+.B DVDCSS_METHOD
+设置 libdvdcss 用于解读加密盘片的认证和解密方法。
+可以是 title(标题), key(钥匙) 或 disc(盘片) 的其中之一。
 .PD 0
-.TP
-字幕文件按以下顺序搜索(比如播放/mnt/\:movie/\:movie.avi文件):
 .RSs
-/mnt/\:cdrom/\:movie.sub
-.br
-~/.mplayer/\:sub/\:movie.sub
-.br
-~/.mplayer/\:default.sub
+.IPs "key\ \ "
+是默认方法。
+libdvdcss 会使用一套计算过的播放器密钥,尝试取得盘片的钥匙。
+如果驱动器不认识播放器的任何钥匙就会失败。
+.IPs "disc\ "
+是钥匙方法失败的备用方法。
+代之使用播放器钥匙, libdvdcss 会使用蛮横暴力的算法破解盘片钥匙。
+此过程需要 CPU 高强度运行和 64 MB 内存以储存临时的数据。
+.IPs title
+是所有其它方法的备用方法。
+它不依靠与 DVD 设备交换钥匙, 而是使用一种密码机(crypto)攻击法来猜测标题钥匙。
+此失败的情况极少, 因为盘片上没有足够的加密数据来低档统计攻击法, 
+但是另一方面这是仅有的方法来破译储存在硬盘上的 DVD, 
+和 RPC2 设备上不同地区码的 DVD。
 .RE
 .PD 1
-
-
+.
+.TP
+.B DVDCSS_RAW_DEVICE
+指定使用的原始设备。
+确切的用法依赖于你的操作系统, 例如 Linux 工具建立的原始设备是 raw(8)。
+请注意在大多数操作系统上, 使用原始设备需要高度对齐的缓冲(aligned buffers): 
+Linux 需要 2048 字节(等于 DVD 扇区大小)的对齐。
+.
+.TP
+.B DVDCSS_VERBOSE
+设置 libdvdcss 冗赘级别。
+.PD 0
+.RSs
+.IPs 0
+一点都不输出消息。
+.IPs 1
+输出错误消息到 stderr。
+.IPs 2
+输出错误和调试消息到 stderr。
+.RE
+.PD 1
+.
+.TP
+.B DVDREAD_NOKEYS
+启动时跳过访问所有的钥匙。
+目前停用。
+.
+.TP
+.B HOME
+FIXME: 待解释。
+.
+.SS libao2:
+.
+.TP
+.B AO_SUN_DISABLE_SAMPLE_TIMING
+FIXME: 待解释。
+.
+.TP
+.B AUDIODEV
+FIXME: 待解释。
+.
+.TP
+.B AUDIOSERVER
+指定 nas 音频输出驱动应该去连接的和传输的
+网络音频系统(Network Audio System)服务器。
+如果没设置, 就使用 DISPLAY。
+传输可以是 tcp 和 unix 其中之一。
+语法是 tcp/<某主机>:<某端口>, <某主机>:<实例号> 或 [unix]:<实例号>。
+NAS 基端口是 8000 而 <实例号> 在其之上再增加。
+.sp 1
+.RS
+.I 示例:
+.RE
+.PD 0
+.RSs
+.IPs AUDIOSERVER=somehost:0
+连接到 NAS 服务器, 某主机上使用默认的端口和传输协议。
+.IPs AUDIOSERVER=tcp/somehost:8000
+连接到 NAS 服务器, 某主机上监听 TCP 端口8000。
+.IPs AUDIOSERVER=(unix)?:0
+连接到 NAS 服务器, 本地主机上的实例 0 使用 unix 域套接口。
+.RE
+.PD 1
+.
+.TP
+.B DISPLAY
+FIXME: 待解释。
+.
+.SS vidix:
+.
+.TP
+.B VIDIX_CRT
+FIXME: 待解释。
+.
+.SS osdep:
+.
+.TP
+.B TERM
+FIXME: 待解释。
+.
+.SS libvo:
+.
+.TP
+.B DISPLAY
+FIXME: 待解释。
+.
+.TP
+.B FRAMEBUFFER
+FIXME: 待解释。
+.
+.TP
+.B HOME
+FIXME: 待解释。
+.
+.SS libmpdemux:
+.
+.TP
+.B HOME
+FIXME: 待解释。
+.
+.TP
+.B HOMEPATH
+FIXME: 待解释。
+.
+.TP
+.B http_proxy
+FIXME: 待解释。
+.
+.TP
+.B LOGNAME
+FIXME: 待解释。
+.
+.TP
+.B USERPROFILE
+FIXME: 待解释。
+.
+.SS libmpcodecs:
+.
+.TP
+.B XANIM_MOD_DIR
+FIXME: 待解释。
+.
+.SS GUI:
+.
+.TP
+.B CHARSET
+FIXME: 待解释。
+.
+.TP
+.B DISPLAY
+FIXME: 待解释。
+.
+.TP
+.B HOME
+FIXME: 待解释。
+.
+.SS libavformat:
+.
+.TP
+.B AUDIO_FLIP_LEFT
+FIXME: 待解释。
+.
+.TP
+.B BKTR_DEV
+FIXME: 待解释。
+.
+.TP
+.B BKTR_FORMAT
+FIXME: 待解释。
+.
+.TP
+.B BKTR_FREQUENCY
+FIXME: 待解释。
+.
+.TP
+.B http_proxy
+FIXME: 待解释。
+.
+.TP
+.B no_proxy
+FIXME: 待解释。
+.
+.
+.
 .\" --------------------------------------------------------------------------
-.\" Examples
+.\" 文件
 .\" --------------------------------------------------------------------------
 .
-.SH 示例
+.SH "FILES (文件)"
+.
 .TP
-.B 快速DVD播放
-mplayer \dvd://1
+/usr/\:local/\:etc/\:mplayer/\:mplayer.conf
+MPlayer 范围的设置
+.
 .TP
-.B 播放日文对话和英文字幕
-mplayer \dvd://1 \-alang ja \-slang en
+/usr/\:local/\:etc/\:mplayer/\:mencoder.conf
+MEncoder 范围的设置
+.
 .TP
-.B 只播放5, 6, 7场景
-mplayer \dvd://1 \-chapter 5\-7
+~/.mplayer/\:config
+MPlayer 用户设置
+.
 .TP
-.B 多视角DVD播放
-mplayer \dvd://1 \-dvdangle 2
+~/.mplayer/\:mencoder.conf
+MEncoder 用户设置
+.
 .TP
-.B 从其它DVD设备播放
-mplayer \dvd://1 \-dvd\-device /dev/\:dvd2
+~/.mplayer/\:input.conf
+输入绑定 (按键的完整列表请参见 '\-input keylist' 的输出)
+.
 .TP
-.B 老师DVD(VOB)播放
-mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
+~/.mplayer/\:gui.conf
+GUI 配置文件
+.
 .TP
-.B HTTP流
-mplayer http://mplayer.hq/\:example.avi
+~/.mplayer/\:gui.pl
+GUI 播放列表
+.
 .TP
-.B RTSP流
-mplayer rtsp://server.example.com/\:streamName
+~/.mplayer/\:font/
+字体目录 (里面必须有一个 font.desc 文件和带 .RAW 后缀的文件。)
+.
 .TP
-.B 把字幕转换为MPsub(转换到./\:dump.mpsub)
+~/.mplayer/\:DVDkeys/
+缓存的 CSS 钥匙
+.
+.TP
+假如播放文件是 /path/\:to/\:movie.avi, MPlayer 按以下顺序搜索字幕文件:
+.RS
+/path/\:to/\:movie.sub
+.br
+~/.mplayer/\:sub/\:movie.sub
+.RE
+.PD 1
+.
+.
+.\" --------------------------------------------------------------------------
+.\" 示例
+.\" --------------------------------------------------------------------------
+.
+.SH "EXAMPLES OF MPLAYER USAGE (MPLAYER 用法示例)"
+.
+.PP
+.B 快速上手播放 DVD:
+.nf
+mplayer dvd://1
+.fi
+.
+.PP
+.B 播放日文对话和英文字幕:
+.nf
+mplayer dvd://1 \-alang ja \-slang en
+.fi
+.
+.PP
+.B 只播放第 5, 6, 7 场景:
+.nf
+mplayer dvd://1 \-chapter 5-7
+.fi
+.
+.PP
+.B 只播放第 5, 6, 7 标题:
+.nf
+mplayer dvd://5-7
+.fi
+.
+.PP
+.B 播放多视角 DVD:
+.nf
+mplayer dvd://1 \-dvdangle 2
+.fi
+.
+.PP
+.B 从不同的 DVD 设备播放:
+.nf
+mplayer dvd://1 \-dvd-device /dev/\:dvd2
+.fi
+.
+.PP
+.B 从目录中的 VOB 文件播放 DVD 视频:
+.nf
+mplayer dvd://1 \-dvd-device /path/\:to/\:directory/
+.fi
+.
+.PP
+.B 复制 DVD 标题到硬盘, 保存文件名为 "title1.vob":
+.nf
+mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
+.fi
+.
+.PP
+.B 播放 HTTP 流:
+.nf
+mplayer http://mplayer.hq/example.avi
+.fi
+.
+.PP
+.B 播放 RTSP 流:
+.nf
+mplayer rtsp://server.example.com/streamName
+.fi
+.
+.PP
+.B 转换字幕为 MPsub 格式:
+.nf
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
-.TP
-.B 从标准的V4L输入
-mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
-\-vo xv
-.TP
-.B 编码DVD节目#2中选择的场景
-mencoder \dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
-.TP
-.B 编码DVD节目#2, 缩放到640x480
-mencoder \dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
-.TP
-.B 编码DVD节目#2, 缩放到512xHHH(保持长宽比)
-mencoder \dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
-\-ovc divx4
-.TP
-.B 同上, 但使用libavcodec族, MPEG4(Divx5)压缩
-mencoder \dvd://2 \-o title2.avi \-ovc lavc
-\-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
-.TP
-.B 同上, 但使用libavcodec族, MJPEG压缩
-mencoder \dvd://2 \-o titel2.avi \-ovc lavc
-\-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
-.TP
-.B 编码当前目录下的所有*.jpg文件
-mencoder \\*.jpg \-mf on:fps=25 \-o output.avi \-ovc divx4
-.TP
-.B 从电视调谐器编码
-mencoder \-tv on:driver=v4l:width=640:height=480 \-o tv.avi \-ovc rawrgb
-.TP
-.B 从管道编码
-rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24
-\-\- \-
-.TP
-.B 编码多个*.vob文件
-cat *.vob | mencoder <选项> \-
-
-
+.fi
+.
+.PP
+.B 转换字幕为 MPsub 格式但不播放:
+.nf
+mplayer /dev/\:zero \-rawvideo pal:fps=xx \-demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
+.fi
+.
+.PP
+.B 从标准的 V4L 输入:
+.nf
+mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
+.fi
+.
+.PP
+.B 回放 Zoran 卡 (旧方法, 废弃):
+.nf
+mplayer \-vo zr \-vf scale=352:288 file.avi
+.fi
+.
+.PP
+.B 回放 Zoran 卡 (新方法):
+.nf
+mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
+.fi
+.
+.PP
+.B 只用两个扬声器播放 6-通道 AAC 文件:
+.nf
+mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
+.fi
+.br
+你可能想用 pan 值播放片断 (例如用放大值) 以增加音量或者避免剪切。
+.
+.SH "EXAMPLES OF MENCODER USAGE (MENCODER 用法示例)"
+.
+.PP
+.B 编码 DVD 标题 #2 中选择的场景:
+.nf
+mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
+.
+.PP
+.B 编码 DVD 标题 #2, 缩放到 640x480:
+.nf
+mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
+.
+.PP
+.B 编码 DVD 标题 #2, 缩放到 512xHHH (保持宽高比):
+.nf
+mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
+.
+.PP
+.B 同上, 但使用比特率 1800kbit 和优化的 macroblocks:
+.nf
+mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
+.fi
+.
+.PP
+.B 同上, 但使用 MJPEG 压缩:
+.nf
+mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800
+.fi
+.
+.PP
+.B 编码当前目录下的所有 *.jpg 文件:
+.nf
+mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
+.
+.PP
+.B 从电视调谐器编码 (指定格式用 \-vf format):
+.nf
+mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
+.fi
+.
+.PP
+.B 从管道编码:
+.nf
+rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
+.fi
+.
+.
 .\" --------------------------------------------------------------------------
 .\" 错误, 作者, 标准声明
 .\" --------------------------------------------------------------------------
