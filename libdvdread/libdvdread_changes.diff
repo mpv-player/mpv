@@ -330,8 +330,8 @@ diff -Naur dvdread.orig/ifo_print.c dvdread/ifo_print.c
      }
 
 diff -Naur dvdread.orig/ifo_print.h dvdread/ifo_print.h
---- dvdread/ifo_print.h 2002-08-15 22:13:21.000000000 +0200
-+++ /home/diego/src/mplayer/vanilla/libmpdvdkit2/ifo_print.h    2005-12-29 13:13:21.000000000 +0100
+--- dvdread.orig/ifo_print.h 2002-08-15 22:13:21.000000000 +0200
++++ dvdread/ifo_print.h    2005-12-29 13:13:21.000000000 +0100
 @@ -20,8 +24,8 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */

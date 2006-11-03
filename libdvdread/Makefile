@@ -14,7 +14,7 @@ SRCS = dvd_input.c \
 
 OBJS = $(SRCS:.c=.o)
 
-LIB=libmpdvdkit
+LIB=libdvdread
 
 .SUFFIXES: .c .o
 

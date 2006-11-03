@@ -2,10 +2,10 @@
 #ifdef USE_DVDREAD
 
 #ifdef USE_MPDVDKIT
-#include "libmpdvdkit2/dvd_reader.h"
-#include "libmpdvdkit2/ifo_types.h"
-#include "libmpdvdkit2/ifo_read.h"
-#include "libmpdvdkit2/nav_read.h"
+#include "libdvdread/dvd_reader.h"
+#include "libdvdread/ifo_types.h"
+#include "libdvdread/ifo_read.h"
+#include "libdvdread/nav_read.h"
 #elif defined(USE_DVDNAV)
 #include <dvd_reader.h>
 #include <ifo_types.h>
