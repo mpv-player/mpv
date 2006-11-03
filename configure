@@ -7151,8 +7151,6 @@ if test "$_charset" = "noconv" ; then
   _charset=""
 elif test -z "$_charset" ; then
   if test "$_gtk1" = yes ; then
-    _charset=`cat ${_mp_help}.charset`
-  else
     _charset="UTF-8"
   fi
 fi
@@ -7162,18 +7160,18 @@ else
   _def_charset="#undef MSG_CHARSET"
 fi
 
-if test "$_charset" = `cat ${_mp_help}.charset` ; then
+if test "$_charset" = "UTF-8" ; then
   # hack to disable conversion in the Makefile
   _charset=""
 fi
 
 if test "$_charset" ; then
 echocheck "iconv program"
-iconv -f `cat ${_mp_help}.charset` -t $_charset ${_mp_help} > /dev/null 2>> "$TMPLOG"
+iconv -f UTF-8 -t $_charset ${_mp_help} > /dev/null 2>> "$TMPLOG"
 if test "$?" -ne 0 ; then
   echores "no"
     echo "No working iconv program found, use "
-    echo "--charset=`cat ${_mp_help}.charset` to continue anyway."
+    echo "--charset=UTF-8 to continue anyway."
     echo "If you also have problems with iconv library functions use --charset=noconv."
     echo "Messages in the GTK-2 interface will be broken then."
     exit 1

@@ -443,7 +443,7 @@ help_mp.h: help/help_mp-en.h $(HELP_FILE)
 ifeq ($(CHARSET),)
 	@echo '#include "$(HELP_FILE)"' >> help_mp.h
 else
-	iconv -f `cat $(HELP_FILE).charset` -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
+	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
 endif
 
 ifneq ($(HELP_FILE),help/help_mp-en.h)
