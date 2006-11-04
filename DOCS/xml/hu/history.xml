@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20085 -->
 <appendix id="history">
-<title>Történelem</title>
+<title>TĂśrtĂŠnelem</title>
  
 <blockquote><para>
-Egy éve kezdődött... Nagyon sok lejátszót kiprobáltam Linux alatt
+Egy ĂŠve kezdĹdĂśtt... Nagyon sok lejĂĄtszĂłt kiprobĂĄltam Linux alatt
 (<application>mtv</application>, <application>xmps</application>,
 <application>dvdview</application>, <application>livid/oms</application>,
 <application>videolan</application>, <application>xine</application>,
 <application>xanim</application>, <application>avifile</application>,
-<application>xmmp</application>), de mind ugyanazokkal a problémákkal küzdött.
-Többnyire a különleges file-okkal, vagy a hang/kép szinkronnal. Legtöbbjük
-képtelen mind MPEG-1, MPEG-2 és AVI (DivX) lejátszására. Sokuknak gondjuk van
-a képminőséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
+<application>xmmp</application>), de mind ugyanazokkal a problĂŠmĂĄkkal kĂźzdĂśtt.
+TĂśbbnyire a kĂźlĂśnleges file-okkal, vagy a hang/kĂŠp szinkronnal. LegtĂśbbjĂźk
+kĂŠptelen mind MPEG-1, MPEG-2 ĂŠs AVI (DivX) lejĂĄtszĂĄsĂĄra. Sokuknak gondjuk van
+a kĂŠpminĹsĂŠggel, vagy a sebessĂŠggel is. ElhatĂĄroztam, hogy (ĂĄt)Ă­rok egyet...
 </para></blockquote><para>A'rpi, 2001</para>
 
 <para>
@@ -20,92 +20,92 @@ a képminőséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.1-v0.3</emphasis>: 2000. szeptember 22-25.
   </para>
-  <para>Az első probálkozás, fél óra alatt összerakva! A libmpeg3-at
-  használtam a <ulink url="http://www.heroinewarrior.com"/>-ról egészen a 0.3-as
-  verzióig, de minőségi és sebességi problémák voltak vele.
+  <para>Az elsĹ probĂĄlkozĂĄs, fĂŠl Ăłra alatt Ăśsszerakva! A libmpeg3-at
+  hasznĂĄltam a <ulink url="http://www.heroinewarrior.com"/>-rĂłl egĂŠszen a 0.3-as
+  verziĂłig, de minĹsĂŠgi ĂŠs sebessĂŠgi problĂŠmĂĄk voltak vele.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87</emphasis>: 2000. szeptember 28.-október 20.
-  </para><para>Az MPEG codec helyáre a DVDview-et (Dirk Farin) tettem, nagyszerű
-  dolog volt, de lassú és C++-ban készült (Árpi útálja a C++-t!!!)
+  <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87</emphasis>: 2000. szeptember 28.-oktĂłber 20.
+  </para><para>Az MPEG codec helyĂĄre a DVDview-et (Dirk Farin) tettem, nagyszerĹą
+  dolog volt, de lassĂş ĂŠs C++-ban kĂŠszĂźlt (Ărpi ĂştĂĄlja a C++-t!!!)
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: 2000. október 21.-november 2.
-  </para><para>Az MPEG codec itt az Aaron Holtzman és Michel Lespinasse
-  által készített libmpeg2 (mpeg2dec). Nagyon jó, optimalizált, gyors C kód,
-  tökéletes képminőség és 100%-osan megfelel a szabványnak.
+  <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: 2000. oktĂłber 21.-november 2.
+  </para><para>Az MPEG codec itt az Aaron Holtzman ĂŠs Michel Lespinasse
+  ĂĄltal kĂŠszĂ­tett libmpeg2 (mpeg2dec). Nagyon jĂł, optimalizĂĄlt, gyors C kĂłd,
+  tĂśkĂŠletes kĂŠpminĹsĂŠg ĂŠs 100%-osan megfelel a szabvĂĄnynak.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.3-v0.9</emphasis>: 2000. november 18.-december 4.
-  </para><para>Egyvelege két programnak: mpeg12play v0.95pre6 és az új, egyszerű
-  AVI lejtászómnak ('avip'), ami az avifile Win32 DLL loaderén alapszik.
+  </para><para>Egyvelege kĂŠt programnak: mpeg12play v0.95pre6 ĂŠs az Ăşj, egyszerĹą
+  AVI lejtĂĄszĂłmnak ('avip'), ami az avifile Win32 DLL loaderĂŠn alapszik.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> v0.10</emphasis>: 2001. január 1.
-  </para><para>MPEG és AVI lejátszó egyetlen programban!
+  <emphasis role="bold"><application>MPlayer</application> v0.10</emphasis>: 2001. januĂĄr 1.
+  </para><para>MPEG ĂŠs AVI lejĂĄtszĂł egyetlen programban!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.11pre sorozat</emphasis>:
-  </para><para>Néhány új fejlesztővel a csapatban, innentől az
+  </para><para>NĂŠhĂĄny Ăşj fejlesztĹvel a csapatban, innentĹl az
   <application>MPlayer</application> csapatmunka!
-  ASF támogatás megjelenése és OpenDivX
-  (lásd <ulink url="http://www.projectmayo.com"/>) kódolás/dekódolás.
+  ASF tĂĄmogatĂĄs megjelenĂŠse ĂŠs OpenDivX
+  (lĂĄsd <ulink url="http://www.projectmayo.com"/>) kĂłdolĂĄs/dekĂłdolĂĄs.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> v0.17a "The IdegCounter"</emphasis> 2001. április 27.
-  </para><para>A 0.11pre sorozat végső verziója, 4 hónapnyi kökemény fejlesztés
-  után! Probáld ki és ess ámulatba! Ezernyi új dolog... és persze a régi kód
-  feljavítva, bugok eltávolítva, stb.
+  <emphasis role="bold"><application>MPlayer</application> v0.17a "The IdegCounter"</emphasis> 2001. ĂĄprilis 27.
+  </para><para>A 0.11pre sorozat vĂŠgsĹ verziĂłja, 4 hĂłnapnyi kĂśkemĂŠny fejlesztĂŠs
+  utĂĄn! ProbĂĄld ki ĂŠs ess ĂĄmulatba! Ezernyi Ăşj dolog... ĂŠs persze a rĂŠgi kĂłd
+  feljavĂ­tva, bugok eltĂĄvolĂ­tva, stb.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.18 "The BugCounter"</emphasis> 2001. július 9.
-  </para><para>2 hónap telt el a 0.17 óta, és itt az újabb release... Teljes
-  ASF támogatás, még több felirat formátum, libao megjelenése (mint libvo, csak
-  ez audio-ra), és még stabilabb, mint valaha, satöbbi! Kötelező darab!
+  <emphasis role="bold"><application>MPlayer</application> 0.18 "The BugCounter"</emphasis> 2001. jĂşlius 9.
+  </para><para>2 hĂłnap telt el a 0.17 Ăłta, ĂŠs itt az Ăşjabb release... Teljes
+  ASF tĂĄmogatĂĄs, mĂŠg tĂśbb felirat formĂĄtum, libao megjelenĂŠse (mint libvo, csak
+  ez audio-ra), ĂŠs mĂŠg stabilabb, mint valaha, satĂśbbi! KĂśtelezĹ darab!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.50 "The Faszom(C)ounter"</emphasis> 2001. október 8.
-  </para><para>Hmm. Újra release. Néhény tonna új funkció, béta verzióju GUI,
-  hibajavítások, új vo és ao meghajtók, Linuxon kívül sok más támogatott rendszer,
-  nyílt forráskódú DivX kodek, és még rengeteg más. Probáld ki!
+  <emphasis role="bold"><application>MPlayer</application> 0.50 "The Faszom(C)ounter"</emphasis> 2001. oktĂłber 8.
+  </para><para>Hmm. Ăjra release. NĂŠhĂŠny tonna Ăşj funkciĂł, bĂŠta verziĂłju GUI,
+  hibajavĂ­tĂĄsok, Ăşj vo ĂŠs ao meghajtĂłk, Linuxon kĂ­vĂźl sok mĂĄs tĂĄmogatott rendszer,
+  nyĂ­lt forrĂĄskĂłdĂş DivX kodek, ĂŠs mĂŠg rengeteg mĂĄs. ProbĂĄld ki!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.60 "The RTFMCounter"</emphasis> 2002. január 3.
-  </para><para>MOV/VIVO/RM/FLI/NUV formátumok támogatása, natív CRAM, Cinepak, ADPCM
-  codec-ek, XANim bináris codec-einek támogatása; DVD feliratok, az MEncoder első
-  verziója, grabbelés TV-ről, cache, liba52, rengeteg javítás.
+  <emphasis role="bold"><application>MPlayer</application> 0.60 "The RTFMCounter"</emphasis> 2002. januĂĄr 3.
+  </para><para>MOV/VIVO/RM/FLI/NUV formĂĄtumok tĂĄmogatĂĄsa, natĂ­v CRAM, Cinepak, ADPCM
+  codec-ek, XANim binĂĄris codec-einek tĂĄmogatĂĄsa; DVD feliratok, az MEncoder elsĹ
+  verziĂłja, grabbelĂŠs TV-rĹl, cache, liba52, rengeteg javĂ­tĂĄs.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90pre10 "The BirthdayCounter"</emphasis> 2002. november 11.
-  </para><para>Bár ez nem egy release, azért megemlítem, tekintve, hogy pont az
-  <application>MPlayer</application> 2 éves évfordulóján jött ki. Boldog 
-  születésnapot, <application>MPlayer</application>!
+  </para><para>BĂĄr ez nem egy release, azĂŠrt megemlĂ­tem, tekintve, hogy pont az
+  <application>MPlayer</application> 2 ĂŠves ĂŠvfordulĂłjĂĄn jĂśtt ki. Boldog 
+  szĂźletĂŠsnapot, <application>MPlayer</application>!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90rc1 "The CodecCounter"</emphasis> 2002. december 7.
-  </para><para>Megintcsak nem release, de most, hogy bekerült a Sorenson 3 (QuickTime)
-  és Windows Media 9 támogatás, az <application>MPlayer</application> a világ első
-  lejátszója mely egyszerre támogatja az összes videoformátumot!
+  </para><para>Megintcsak nem release, de most, hogy bekerĂźlt a Sorenson 3 (QuickTime)
+  ĂŠs Windows Media 9 tĂĄmogatĂĄs, az <application>MPlayer</application> a vilĂĄg elsĹ
+  lejĂĄtszĂłja mely egyszerre tĂĄmogatja az Ăśsszes videoformĂĄtumot!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.90 "The CounterCounter"</emphasis> 2003. április 6.
-  </para><para>Több mint 1 év után megint úgy döntöttünk, hogy a kód stabilítása megfelel
-  egy release-hez. Sajnálatos módon viszont még a verziószámot is elfelejtettük átírni
-  rc5-ről, és egyéb idegesítő hibákra is fény derült.
+  <emphasis role="bold"><application>MPlayer</application> 0.90 "The CounterCounter"</emphasis> 2003. ĂĄprilis 6.
+  </para><para>TĂśbb mint 1 ĂŠv utĂĄn megint Ăşgy dĂśntĂśttĂźnk, hogy a kĂłd stabilĂ­tĂĄsa megfelel
+  egy release-hez. SajnĂĄlatos mĂłdon viszont mĂŠg a verziĂłszĂĄmot is elfelejtettĂźk ĂĄtĂ­rni
+  rc5-rĹl, ĂŠs egyĂŠb idegesĂ­tĹ hibĂĄkra is fĂŠny derĂźlt.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis> 2003. augusztus 13.
-  </para><para>A fent említett és számos más hiba is kijavításra került. Ez a legújabb
-  stabil kiadás.
+  </para><para>A fent emlĂ­tett ĂŠs szĂĄmos mĂĄs hiba is kijavĂ­tĂĄsra kerĂźlt. Ez a legĂşjabb
+  stabil kiadĂĄs.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 1.0pre1 "Development on the beach"</emphasis> 2003. szeptember 1.
-  </para><para>Habár ez sem stabil kiadas, azért említeném meg, mert ez az első
-  tagja az <application>MPlayer</application> 1.0-ás sorozatának. A kiadás hivatott
-  a <emphasis>nagy hibavadászatot</emphasis> elősegíteni. Ez egy nagy előrelépés.
+  </para><para>HabĂĄr ez sem stabil kiadas, azĂŠrt emlĂ­tenĂŠm meg, mert ez az elsĹ
+  tagja az <application>MPlayer</application> 1.0-ĂĄs sorozatĂĄnak. A kiadĂĄs hivatott
+  a <emphasis>nagy hibavadĂĄszatot</emphasis> elĹsegĂ­teni. Ez egy nagy elĹrelĂŠpĂŠs.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis> dátum ismeretlen
+  <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis> dĂĄtum ismeretlen
   </para></listitem>
 </itemizedlist>
 </para>

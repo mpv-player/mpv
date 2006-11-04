@@ -1,199 +1,199 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20412 -->
 <chapter id="install">
-<title>Telepítés</title>
+<title>TelepĂ­tĂŠs</title>
 
 <para>
-Egy rövid telepítési leírást találsz a <filename>README</filename> fájlban.
-Kérlek először azt olvasd el, és utána gyere vissza ide, hogy megtudd a
-részleteket!
+Egy rĂśvid telepĂ­tĂŠsi leĂ­rĂĄst talĂĄlsz a <filename>README</filename> fĂĄjlban.
+KĂŠrlek elĹszĂśr azt olvasd el, ĂŠs utĂĄna gyere vissza ide, hogy megtudd a
+rĂŠszleteket!
 </para>
 
 <para>
-Ebben a fejezetben megpróbállak végigvezetni az <application>MPlayer</application>
-fordításának és beállításának menetén. Nem egyszerű, de nem is észveszejtően
-nehéz. Ha nálad máshogy viselkednek a dolgok, mint ahogy itt le van írva,
-nézd végig ezt a dokumentációt és (remélhetőleg) megtalálod a választ. Ha
-linkeket látsz, kövesd őket és olvasd el figyelmesen a tartalmukat. Időbe
-fog kerülni, de MEGÉRI.
+Ebben a fejezetben megprĂłbĂĄllak vĂŠgigvezetni az <application>MPlayer</application>
+fordĂ­tĂĄsĂĄnak ĂŠs beĂĄllĂ­tĂĄsĂĄnak menetĂŠn. Nem egyszerĹą, de nem is ĂŠszveszejtĹen
+nehĂŠz. Ha nĂĄlad mĂĄshogy viselkednek a dolgok, mint ahogy itt le van Ă­rva,
+nĂŠzd vĂŠgig ezt a dokumentĂĄciĂłt ĂŠs (remĂŠlhetĹleg) megtalĂĄlod a vĂĄlaszt. Ha
+linkeket lĂĄtsz, kĂśvesd Ĺket ĂŠs olvasd el figyelmesen a tartalmukat. IdĹbe
+fog kerĂźlni, de MEGĂRI.
 </para>
 
 <para>
-Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
+Nem ĂĄrt, ha vmi Ăşjabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
 </para>
 
 
 <sect1 id="softreq">
-<title>Szoftver követelmények</title>
+<title>Szoftver kĂśvetelmĂŠnyek</title>
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - A javasolt verzió a <emphasis role="bold">2.11.x</emphasis>.
-  Ez a program felelős az MMX/ 3DNow!/stb utasítások generálásáért,
-  így nagyon fontos!
+  <emphasis role="bold">binutils</emphasis> - A javasolt verziĂł a <emphasis role="bold">2.11.x</emphasis>.
+  Ez a program felelĹs az MMX/ 3DNow!/stb utasĂ­tĂĄsok generĂĄlĂĄsĂĄĂŠrt,
+  Ă­gy nagyon fontos!
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - A javasolt verziók a <emphasis role="bold">2.95</emphasis>
-  és 3.3+. A 2.96 és 3.0.x hibás kódot generálnak, valamint a 3.1-nek és a 3.2-nek is
-  vannak problémái. PowerPC-n használj 4.x+ verziót.
+  <emphasis role="bold">gcc</emphasis> - A javasolt verziĂłk a <emphasis role="bold">2.95</emphasis>
+  ĂŠs 3.3+. A 2.96 ĂŠs 3.0.x hibĂĄs kĂłdot generĂĄlnak, valamint a 3.1-nek ĂŠs a 3.2-nek is
+  vannak problĂŠmĂĄi. PowerPC-n hasznĂĄlj 4.x+ verziĂłt.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - A javasolt verzió <emphasis role="bold">mindig a
-  legújabb</emphasis> (4.3). Mindenki ezt akarja, mivel a 4.0.2-es XFree86-tól benne van az
-  <link linkend="xv">XVideo</link> kiterjesztés (néhol <emphasis role="bold">Xv</emphasis>-ként
-  hivatkoznak rá), ami szükséges a hardveres YUV gyorsítás engedélyezéséhez (gyors képmegjelenítés)
-  azokon a kártyákon, amik támogatják.
-  Győződj meg róla, hogy a <emphasis role="bold">fejlesztői csomagja</emphasis> is telepítve van,
-  különben nem fog működni.
-  Néhány videó kártyához nem kell XFree86. A listát lásd lejjebb.
+  <emphasis role="bold">XFree86</emphasis> - A javasolt verziĂł <emphasis role="bold">mindig a
+  legĂşjabb</emphasis> (4.3). Mindenki ezt akarja, mivel a 4.0.2-es XFree86-tĂłl benne van az
+  <link linkend="xv">XVideo</link> kiterjesztĂŠs (nĂŠhol <emphasis role="bold">Xv</emphasis>-kĂŠnt
+  hivatkoznak rĂĄ), ami szĂźksĂŠges a hardveres YUV gyorsĂ­tĂĄs engedĂŠlyezĂŠsĂŠhez (gyors kĂŠpmegjelenĂ­tĂŠs)
+  azokon a kĂĄrtyĂĄkon, amik tĂĄmogatjĂĄk.
+  GyĹzĹdj meg rĂłla, hogy a <emphasis role="bold">fejlesztĹi csomagja</emphasis> is telepĂ­tve van,
+  kĂźlĂśnben nem fog mĹąkĂśdni.
+  NĂŠhĂĄny videĂł kĂĄrtyĂĄhoz nem kell XFree86. A listĂĄt lĂĄsd lejjebb.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - A javasolt verzió
-  <emphasis role="bold">mindig a legújabb</emphasis> (legalább 3.79.x-es). Ez
-  legtöbbször nem olyan fontos.
+  <emphasis role="bold">make</emphasis> - A javasolt verziĂł
+  <emphasis role="bold">mindig a legĂşjabb</emphasis> (legalĂĄbb 3.79.x-es). Ez
+  legtĂśbbszĂśr nem olyan fontos.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">FreeType</emphasis> 2.0.9 vagy későbbi szükséges,
-  hogy legyen betűtípus az OSD-nek és a feliratoknak.
+  <emphasis role="bold">FreeType</emphasis> 2.0.9 vagy kĂŠsĹbbi szĂźksĂŠges,
+  hogy legyen betĹątĂ­pus az OSD-nek ĂŠs a feliratoknak.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">SDL</emphasis> - nem feltétlenül szükséges, de segíthet
-  pár esetben (hibás audió, videó kártya, ami késik az xv vezérlővel).
-  Mindig használd a legújabbat (1.2.x-től kezdve).
+  <emphasis role="bold">SDL</emphasis> - nem feltĂŠtlenĂźl szĂźksĂŠges, de segĂ­thet
+  pĂĄr esetben (hibĂĄs audiĂł, videĂł kĂĄrtya, ami kĂŠsik az xv vezĂŠrlĹvel).
+  Mindig hasznĂĄld a legĂşjabbat (1.2.x-tĹl kezdve).
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - választható JPEG dekódoló, az <option>-mf</option>
-  kapcsoló használja és néhány QT MOV fájl. Hasznos mind az <application>MPlayer</application>,
-  mind a <application>MEncoder</application> szempontjából, ha jpeg fájlokkal akarsz dolgozni.
+  <emphasis role="bold">libjpeg</emphasis> - vĂĄlaszthatĂł JPEG dekĂłdolĂł, az <option>-mf</option>
+  kapcsolĂł hasznĂĄlja ĂŠs nĂŠhĂĄny QT MOV fĂĄjl. Hasznos mind az <application>MPlayer</application>,
+  mind a <application>MEncoder</application> szempontjĂĄbĂłl, ha jpeg fĂĄjlokkal akarsz dolgozni.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - szükséges és az alapértelmezett (M)PNG dekóder. Kell a
-  GUI-hoz is. Használja az <application>MPlayer</application> és a <application>MEncoder</application>
+  <emphasis role="bold">libpng</emphasis> - szĂźksĂŠges ĂŠs az alapĂŠrtelmezett (M)PNG dekĂłder. Kell a
+  GUI-hoz is. HasznĂĄlja az <application>MPlayer</application> ĂŠs a <application>MEncoder</application>
   is.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">lame</emphasis> - javasolt, szükséges MP3 audió <application>MEncoder</application>rel
-  történő kódolásához, az ajánlott verzió <emphasis>mindig a legújabb</emphasis> (de legalább 3.90).
+  <emphasis role="bold">lame</emphasis> - javasolt, szĂźksĂŠges MP3 audiĂł <application>MEncoder</application>rel
+  tĂśrtĂŠnĹ kĂłdolĂĄsĂĄhoz, az ajĂĄnlott verziĂł <emphasis>mindig a legĂşjabb</emphasis> (de legalĂĄbb 3.90).
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">zlib</emphasis> - javasolt, szükséges a tömörített MOV fejlécekhez és a
-  PNG támogatáshoz.
+  <emphasis role="bold">zlib</emphasis> - javasolt, szĂźksĂŠges a tĂśmĂśrĂ­tett MOV fejlĂŠcekhez ĂŠs a
+  PNG tĂĄmogatĂĄshoz.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libogg</emphasis> - választható, szükséges az OGG formátumú fájlok lejátszásához.
+  <emphasis role="bold">libogg</emphasis> - vĂĄlaszthatĂł, szĂźksĂŠges az OGG formĂĄtumĂş fĂĄjlok lejĂĄtszĂĄsĂĄhoz.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libvorbis</emphasis> - választható, szükséges az OGG Vorbis audiók lejátszásához.
+  <emphasis role="bold">libvorbis</emphasis> - vĂĄlaszthatĂł, szĂźksĂŠges az OGG Vorbis audiĂłk lejĂĄtszĂĄsĂĄhoz.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
-  - választható, szükséges az RTSP/RTP folyamok lejátszásához.
+  - vĂĄlaszthatĂł, szĂźksĂŠges az RTSP/RTP folyamok lejĂĄtszĂĄsĂĄhoz.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> - választható, elérhető itt:
-  <ulink url="http://www.directfb.org"/>. Legalább 0.9.13-as szükséges.
+  <emphasis role="bold">directfb</emphasis> - vĂĄlaszthatĂł, elĂŠrhetĹ itt:
+  <ulink url="http://www.directfb.org"/>. LegalĂĄbb 0.9.13-as szĂźksĂŠges.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">cdparanoia</emphasis> - választható, szükséges a CDDA támogatáshoz
+  <emphasis role="bold">cdparanoia</emphasis> - vĂĄlaszthatĂł, szĂźksĂŠges a CDDA tĂĄmogatĂĄshoz
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libxmms</emphasis> - választható, XMMS input plugin támogatáshoz kell.
-  Legalább 1.2.7-es szükséges.
+  <emphasis role="bold">libxmms</emphasis> - vĂĄlaszthatĂł, XMMS input plugin tĂĄmogatĂĄshoz kell.
+  LegalĂĄbb 1.2.7-es szĂźksĂŠges.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libsmb</emphasis> - választható, Samba támogatáshoz kell.
+  <emphasis role="bold">libsmb</emphasis> - vĂĄlaszthatĂł, Samba tĂĄmogatĂĄshoz kell.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">ALSA</emphasis> - választható, az ALSA audió kimenet
-  támogatásához. Legalább 0.9.0rc4 szükséges.
+  <emphasis role="bold">ALSA</emphasis> - vĂĄlaszthatĂł, az ALSA audiĂł kimenet
+  tĂĄmogatĂĄsĂĄhoz. LegalĂĄbb 0.9.0rc4 szĂźksĂŠges.
   </para></listitem>
 </itemizedlist>
 </sect1>
 
 
 <sect1 id="video-cards">
-<title>Videó kártyák</title>
+<title>VideĂł kĂĄrtyĂĄk</title>
 
 <para>
-Két nagy típusa van a videó kártyáknak. Az egyik (az újabbak) tudják a
-<emphasis role="bold">hardveres méretezést és YUV gyorsítást</emphasis>,
-a másik nem.
+KĂŠt nagy tĂ­pusa van a videĂł kĂĄrtyĂĄknak. Az egyik (az Ăşjabbak) tudjĂĄk a
+<emphasis role="bold">hardveres mĂŠretezĂŠst ĂŠs YUV gyorsĂ­tĂĄst</emphasis>,
+a mĂĄsik nem.
 </para>
 
 
 <sect2 id="yuv-cards">
-<title>YUV kártyák</title>
+<title>YUV kĂĄrtyĂĄk</title>
 
 <para>
-A képet bármilyen méretben meg tudják jeleníteni és átméretezni (nagyítani),
-ami belefér a memóriájukba, <emphasis role="bold">kevés CPU használattal</emphasis>
-(még nagyításnál is), így a teljes képernyős vetítés szép és nagyon gyors.
+A kĂŠpet bĂĄrmilyen mĂŠretben meg tudjĂĄk jelenĂ­teni ĂŠs ĂĄtmĂŠretezni (nagyĂ­tani),
+ami belefĂŠr a memĂłriĂĄjukba, <emphasis role="bold">kevĂŠs CPU hasznĂĄlattal</emphasis>
+(mĂŠg nagyĂ­tĂĄsnĂĄl is), Ă­gy a teljes kĂŠpernyĹs vetĂ­tĂŠs szĂŠp ĂŠs nagyon gyors.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Matrox G200/G400/G450/G550 kártyák</emphasis>: bár van
-  <link linkend="vidix">Vidix vezérlő</link> hozzájuk, inkább az mgs_vid
-  modult használd, sokkal jobban működik.
-  Nézd meg az <link linkend="mga_vid">mga_vid</link> részt a telepítéséhez
-  és használatához! Fontos, hogy az ott leírtakat az <application>MPlayer</application>
-  fordítása <emphasis>előtt</emphasis> végezd el, különben nem lesz beépített
-  mga_vid támogatásod. Szintén nézd meg a <link linkend="tvout-mga-g400">Matrox TV-kimenet</link>
-  részt! <emphasis role="bold"> Ha nem használsz Linux-ot</emphasis>, csak a
-  VIDIX vezérlőben bízhatsz: olvasd el a <link linkend="vidix">VIDIX</link> részt.
+  <emphasis role="bold">Matrox G200/G400/G450/G550 kĂĄrtyĂĄk</emphasis>: bĂĄr van
+  <link linkend="vidix">Vidix vezĂŠrlĹ</link> hozzĂĄjuk, inkĂĄbb az mgs_vid
+  modult hasznĂĄld, sokkal jobban mĹąkĂśdik.
+  NĂŠzd meg az <link linkend="mga_vid">mga_vid</link> rĂŠszt a telepĂ­tĂŠsĂŠhez
+  ĂŠs hasznĂĄlatĂĄhoz! Fontos, hogy az ott leĂ­rtakat az <application>MPlayer</application>
+  fordĂ­tĂĄsa <emphasis>elĹtt</emphasis> vĂŠgezd el, kĂźlĂśnben nem lesz beĂŠpĂ­tett
+  mga_vid tĂĄmogatĂĄsod. SzintĂŠn nĂŠzd meg a <link linkend="tvout-mga-g400">Matrox TV-kimenet</link>
+  rĂŠszt! <emphasis role="bold"> Ha nem hasznĂĄlsz Linux-ot</emphasis>, csak a
+  VIDIX vezĂŠrlĹben bĂ­zhatsz: olvasd el a <link linkend="vidix">VIDIX</link> rĂŠszt.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">3Dfx Voodoo3/Banshee kártyák</emphasis>: nézd meg a
-  <link linkend="tdfxfb">tdfxfb</link> részt, ha nagy sebességnövekedést akarsz
-  elérni! Fontos, hogy az ott leírtakat az <application>MPlayer</application>
-  fordítása <emphasis role="bold">előtt</emphasis> végezd el, különben nem lesz
-  beépített 3Dfx támogatásod.
-  Ha X-et használsz, legalább <emphasis role="bold">4.2.0</emphasis>-est
-  használj, mert a 3dfx Xv vezérlő a 4.1.0 és korábbi verziókban hibás volt.
+  <emphasis role="bold">3Dfx Voodoo3/Banshee kĂĄrtyĂĄk</emphasis>: nĂŠzd meg a
+  <link linkend="tdfxfb">tdfxfb</link> rĂŠszt, ha nagy sebessĂŠgnĂśvekedĂŠst akarsz
+  elĂŠrni! Fontos, hogy az ott leĂ­rtakat az <application>MPlayer</application>
+  fordĂ­tĂĄsa <emphasis role="bold">elĹtt</emphasis> vĂŠgezd el, kĂźlĂśnben nem lesz
+  beĂŠpĂ­tett 3Dfx tĂĄmogatĂĄsod.
+  Ha X-et hasznĂĄlsz, legalĂĄbb <emphasis role="bold">4.2.0</emphasis>-est
+  hasznĂĄlj, mert a 3dfx Xv vezĂŠrlĹ a 4.1.0 ĂŠs korĂĄbbi verziĂłkban hibĂĄs volt.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">ATI kártyák</emphasis>: <link linkend="vidix">VIDIX</link>
-  vezérlő elérhető a következő kártyákhoz:
+  <emphasis role="bold">ATI kĂĄrtyĂĄk</emphasis>: <link linkend="vidix">VIDIX</link>
+  vezĂŠrlĹ elĂŠrhetĹ a kĂśvetkezĹ kĂĄrtyĂĄkhoz:
   <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
-  Nézd meg a TV-out dokumentáció <link linkend="tvout-ati">ATI kártyákra</link>
-  vonatkozó részét, hogy megtudd a kártyád TV-kimenete támogatott-e a
+  NĂŠzd meg a TV-out dokumentĂĄciĂł <link linkend="tvout-ati">ATI kĂĄrtyĂĄkra</link>
+  vonatkozĂł rĂŠszĂŠt, hogy megtudd a kĂĄrtyĂĄd TV-kimenete tĂĄmogatott-e a
   Linux/<application>MPlayer</application> alatt!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">S3 kártyák</emphasis>: a Savage és Virge/DX chip-eknek van
-  hardveres gyorsításuk. Használj olyan friss XFree86-ot, amilyet csak tudsz, a régebbi
-  vezérlők hibásak. A Savage chip-eknek problémáik vannak a YV12 megjelenítéssel, lásd
-  az <link linkend="s3">S3 Xv</link> részt a részletekért. Régebbi, Trio kártyákban nincs
-  vagy lassú a hardveres támogatás.
+  <emphasis role="bold">S3 kĂĄrtyĂĄk</emphasis>: a Savage ĂŠs Virge/DX chip-eknek van
+  hardveres gyorsĂ­tĂĄsuk. HasznĂĄlj olyan friss XFree86-ot, amilyet csak tudsz, a rĂŠgebbi
+  vezĂŠrlĹk hibĂĄsak. A Savage chip-eknek problĂŠmĂĄik vannak a YV12 megjelenĂ­tĂŠssel, lĂĄsd
+  az <link linkend="s3">S3 Xv</link> rĂŠszt a rĂŠszletekĂŠrt. RĂŠgebbi, Trio kĂĄrtyĂĄkban nincs
+  vagy lassĂş a hardveres tĂĄmogatĂĄs.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">nVidia kártyák</emphasis>: talán jó választás a videó lejátszáshoz,
-  talán nem. Ha nincs GeForce2 (vagy újabb) kártyád, valószínűleg nem fog menni hiba nélkül.
-  <emphasis role="bold">Az XFree86 beépített nVidia vezérlője nem minden kártyán támogatja a
-  hardveres YUV gyorsítást.</emphasis> Le kell töltened az nVidia zárt forrású vezérlőjét az
-  <ulink url="http://nvidia.com">nVidia.com</ulink>-ról.
-  Nézd meg az <link linkend="nvidia">nVidia Xv vezérlő</link> fejezetet bővebb információkért!
-  Szintén nézd meg az <link linkend="tvout-nvidia">nVidia TV-kimenet</link> részt ha TV-t is
-  akarsz használni.
+  <emphasis role="bold">nVidia kĂĄrtyĂĄk</emphasis>: talĂĄn jĂł vĂĄlasztĂĄs a videĂł lejĂĄtszĂĄshoz,
+  talĂĄn nem. Ha nincs GeForce2 (vagy Ăşjabb) kĂĄrtyĂĄd, valĂłszĂ­nĹąleg nem fog menni hiba nĂŠlkĂźl.
+  <emphasis role="bold">Az XFree86 beĂŠpĂ­tett nVidia vezĂŠrlĹje nem minden kĂĄrtyĂĄn tĂĄmogatja a
+  hardveres YUV gyorsĂ­tĂĄst.</emphasis> Le kell tĂśltened az nVidia zĂĄrt forrĂĄsĂş vezĂŠrlĹjĂŠt az
+  <ulink url="http://nvidia.com">nVidia.com</ulink>-rĂłl.
+  NĂŠzd meg az <link linkend="nvidia">nVidia Xv vezĂŠrlĹ</link> fejezetet bĹvebb informĂĄciĂłkĂŠrt!
+  SzintĂŠn nĂŠzd meg az <link linkend="tvout-nvidia">nVidia TV-kimenet</link> rĂŠszt ha TV-t is
+  akarsz hasznĂĄlni.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">3DLabs GLINT R3 és Permedia3</emphasis>: VIDIX vezérlő van
-  hozzá (pm3_vid). Kérlek olvasd el a <link linkend="vidix">VIDIX</link> fejezetet
-  bővebb infókért!
+  <emphasis role="bold">3DLabs GLINT R3 ĂŠs Permedia3</emphasis>: VIDIX vezĂŠrlĹ van
+  hozzĂĄ (pm3_vid). KĂŠrlek olvasd el a <link linkend="vidix">VIDIX</link> fejezetet
+  bĹvebb infĂłkĂŠrt!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Egyéb kártyák</emphasis>: nincs a fentiekben?
+  <emphasis role="bold">EgyĂŠb kĂĄrtyĂĄk</emphasis>: nincs a fentiekben?
   <itemizedlist>
   <listitem><simpara>
-    Próbáld ki, hogy az XFree86 vezérlő (és a kártyád) támogatja-e a hardveres
-    gyorsítást! Lásd az <link linkend="xv">Xv</link> fejezetet a részletekért!
+    PrĂłbĂĄld ki, hogy az XFree86 vezĂŠrlĹ (ĂŠs a kĂĄrtyĂĄd) tĂĄmogatja-e a hardveres
+    gyorsĂ­tĂĄst! LĂĄsd az <link linkend="xv">Xv</link> fejezetet a rĂŠszletekĂŠrt!
     </simpara></listitem>
   <listitem><simpara>
-    Ha nem, akkor a kártyád videós tulajdonságai nem támogatottak az operációs rendszered
-    alatt. :( Ha a hardveres méretezés működik Windows alatt, az nem jelenti azt, hogy
-    Linux vagy más operációs rendszer alatt is fog menni, ez a vezérlőtől függ.
-    A legtöbb gyártó sem Linuxos vezérlőt nem ad ki, sem a chip-jei specifikációját -
-    így hát peched van, ha az ő kártyájukat használod.
-    Lásd <xref linkend="non-yuv-cards"/>.
+    Ha nem, akkor a kĂĄrtyĂĄd videĂłs tulajdonsĂĄgai nem tĂĄmogatottak az operĂĄciĂłs rendszered
+    alatt. :( Ha a hardveres mĂŠretezĂŠs mĹąkĂśdik Windows alatt, az nem jelenti azt, hogy
+    Linux vagy mĂĄs operĂĄciĂłs rendszer alatt is fog menni, ez a vezĂŠrlĹtĹl fĂźgg.
+    A legtĂśbb gyĂĄrtĂł sem Linuxos vezĂŠrlĹt nem ad ki, sem a chip-jei specifikĂĄciĂłjĂĄt -
+    Ă­gy hĂĄt peched van, ha az Ĺ kĂĄrtyĂĄjukat hasznĂĄlod.
+    LĂĄsd <xref linkend="non-yuv-cards"/>.
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
@@ -202,24 +202,24 @@ ami belefér a memóriájukba, <emphasis role="bold">kevés CPU használattal</emphas
 </sect2>
 
 
-<sect2 id="non-yuv-cards" xreflabel="Nem YUV-os kártyák">
-<title>Nem YUV-os kártyák</title>
+<sect2 id="non-yuv-cards" xreflabel="Nem YUV-os kĂĄrtyĂĄk">
+<title>Nem YUV-os kĂĄrtyĂĄk</title>
 
 <para>
-A teljes képernyős lejátszás vagy a <emphasis role="bold">szoftveres méretezés</emphasis>
-engedélyezésével (használd a <option>-zoom</option> vagy a <option>-vf</option> kapcsolót,
-de figyelmeztetlek: lassú lesz), vagy egy kisebb, pl. 352x288-as felbontásra való átváltással
-lehetséges. Ha nincs YUV gyorsításod, az utóbbi módszer javasolt.
-A videó mód váltást a <option>-vm</option> kapcsolóval engedélyezheted, mely a következő
-vezérlőkkel működik:
+A teljes kĂŠpernyĹs lejĂĄtszĂĄs vagy a <emphasis role="bold">szoftveres mĂŠretezĂŠs</emphasis>
+engedĂŠlyezĂŠsĂŠvel (hasznĂĄld a <option>-zoom</option> vagy a <option>-vf</option> kapcsolĂłt,
+de figyelmeztetlek: lassĂş lesz), vagy egy kisebb, pl. 352x288-as felbontĂĄsra valĂł ĂĄtvĂĄltĂĄssal
+lehetsĂŠges. Ha nincs YUV gyorsĂ­tĂĄsod, az utĂłbbi mĂłdszer javasolt.
+A videĂł mĂłd vĂĄltĂĄst a <option>-vm</option> kapcsolĂłval engedĂŠlyezheted, mely a kĂśvetkezĹ
+vezĂŠrlĹkkel mĹąkĂśdik:
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">használsz</emphasis> XFree86-t: részleteket lásd a <link linkend="dga">DGA vezérlőről</link>
-  és az <link linkend="x11">X11 vezérlőről</link> szóló fejezetekben. A DGA a javasolt! Megpróbálhatod
-  a DGA-t SDL-en keresztül is, van amikor az a jobb.
+  <emphasis role="bold">hasznĂĄlsz</emphasis> XFree86-t: rĂŠszleteket lĂĄsd a <link linkend="dga">DGA vezĂŠrlĹrĹl</link>
+  ĂŠs az <link linkend="x11">X11 vezĂŠrlĹrĹl</link> szĂłlĂł fejezetekben. A DGA a javasolt! MegprĂłbĂĄlhatod
+  a DGA-t SDL-en keresztĂźl is, van amikor az a jobb.
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">nem használsz</emphasis> XFree86-t: próbáld ezeket a vezérlőket ebben a sorrendben
+  <emphasis role="bold">nem hasznĂĄlsz</emphasis> XFree86-t: prĂłbĂĄld ezeket a vezĂŠrlĹket ebben a sorrendben
   <link linkend="vesa">vesa</link>,
   <link linkend="fbdev">fbdev</link>,
   <link linkend="svgalib">svgalib</link>,
@@ -230,31 +230,31 @@ vezérlőkkel működik:
 </sect2>
 
 <!-- FIXME: find a more logical organization for this section -->
-<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic kártyák">
-<title>Cirrus-Logic kártyák</title>
+<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic kĂĄrtyĂĄk">
+<title>Cirrus-Logic kĂĄrtyĂĄk</title>
 <itemizedlist>
 <listitem><para>
-  GD 7548: alaplapi vezérlő, Compaq Armada 41xx notebook sorozatban tesztelve.
+  GD 7548: alaplapi vezĂŠrlĹ, Compaq Armada 41xx notebook sorozatban tesztelve.
   <itemizedlist>
   <listitem><simpara>
-    XFree86 3: 8/16bpp módban működik. Bár a vezérlő borzasztóan lassú
-    és hibás 800x600@16bpp-ben. <emphasis role="bold">Javasolt: 640x480@16bpp</emphasis>
+    XFree86 3: 8/16bpp mĂłdban mĹąkĂśdik. BĂĄr a vezĂŠrlĹ borzasztĂłan lassĂş
+    ĂŠs hibĂĄs 800x600@16bpp-ben. <emphasis role="bold">Javasolt: 640x480@16bpp</emphasis>
    </simpara></listitem>
   <listitem><simpara>
-    XFree86 4: az Xserver kifagy rögtön indítás után, ha a gyorsítás nincs kikapcsolva,
-    de akkor meg az egész cucc lassabb lesz, mint az XFree86 3. Nincs XVideo.
+    XFree86 4: az Xserver kifagy rĂśgtĂśn indĂ­tĂĄs utĂĄn, ha a gyorsĂ­tĂĄs nincs kikapcsolva,
+    de akkor meg az egĂŠsz cucc lassabb lesz, mint az XFree86 3. Nincs XVideo.
    </simpara></listitem>
   <listitem><simpara>
-    FBdev: a framebuffer-t a <systemitem>clgenfb</systemitem> kernel vezérlővel tudod
-    bekapcsolni, de nekem csak 8bpp-ben működött, így használhatatlan.
-    A clgenfb forrását ki kell egészíteni a 7548 ID-vel fordítás előtt.
+    FBdev: a framebuffer-t a <systemitem>clgenfb</systemitem> kernel vezĂŠrlĹvel tudod
+    bekapcsolni, de nekem csak 8bpp-ben mĹąkĂśdĂśtt, Ă­gy hasznĂĄlhatatlan.
+    A clgenfb forrĂĄsĂĄt ki kell egĂŠszĂ­teni a 7548 ID-vel fordĂ­tĂĄs elĹtt.
    </simpara></listitem>
   <listitem><simpara>
-    VESA: a kártya csak a VBE 1.2-t ismeri, így a VESA kimenet nem használható. UniVBE-vel
-    sem lehet megkerülni.
+    VESA: a kĂĄrtya csak a VBE 1.2-t ismeri, Ă­gy a VESA kimenet nem hasznĂĄlhatĂł. UniVBE-vel
+    sem lehet megkerĂźlni.
   </simpara></listitem>
   <listitem><simpara>
-    SVGAlib: régebbi Cirrus chip-nek ismeri fel. Használható de lassú a <option>-bpp 8</option> kapcsolóval.
+    SVGAlib: rĂŠgebbi Cirrus chip-nek ismeri fel. HasznĂĄlhatĂł de lassĂş a <option>-bpp 8</option> kapcsolĂłval.
   </simpara></listitem>
 </itemizedlist>
 </para></listitem>
@@ -264,59 +264,59 @@ vezérlőkkel működik:
 
 
 <sect1 id="sound-cards">
-<title>Hangkártyák</title>
+<title>HangkĂĄrtyĂĄk</title>
 
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">Soundblaster Live!</emphasis>: ezzel a kártyával 4 vagy 6
-  (<emphasis role="bold">5.1</emphasis>) csatornás AC3 dekódolást használhatsz a 2 helyett. Olvasd el a
-  <link linkend="swac3">szoftveres AC3 dekódolás</link>ról szóló fejezetet! Hardveres AC3
-  használathoz ALSA 0.9-et <emphasis role="bold">kell</emphasis> használnod OSS emulációval!
+  <emphasis role="bold">Soundblaster Live!</emphasis>: ezzel a kĂĄrtyĂĄval 4 vagy 6
+  (<emphasis role="bold">5.1</emphasis>) csatornĂĄs AC3 dekĂłdolĂĄst hasznĂĄlhatsz a 2 helyett. Olvasd el a
+  <link linkend="swac3">szoftveres AC3 dekĂłdolĂĄs</link>rĂłl szĂłlĂł fejezetet! Hardveres AC3
+  hasznĂĄlathoz ALSA 0.9-et <emphasis role="bold">kell</emphasis> hasznĂĄlnod OSS emulĂĄciĂłval!
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">C-Media S/PDIF kimenettel</emphasis>: hardveres AC3
-  áteresztés lehetséges ezeken a kártyákon, lásd a
-  <link linkend="hwac3">hardveres AC3 dekódolás</link> fejezetet!
+  ĂĄteresztĂŠs lehetsĂŠges ezeken a kĂĄrtyĂĄkon, lĂĄsd a
+  <link linkend="hwac3">hardveres AC3 dekĂłdolĂĄs</link> fejezetet!
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">Más kártyák</emphasis> tulajdonságait nem támogatja az
-  <application>MPlayer</application>. <emphasis role="bold">Nagyon ajánlott, hogy elolvasd
-  a <link linkend="audio">hangkártyákról</link> szóló részt!</emphasis>
+  <emphasis role="bold">MĂĄs kĂĄrtyĂĄk</emphasis> tulajdonsĂĄgait nem tĂĄmogatja az
+  <application>MPlayer</application>. <emphasis role="bold">Nagyon ajĂĄnlott, hogy elolvasd
+  a <link linkend="audio">hangkĂĄrtyĂĄkrĂłl</link> szĂłlĂł rĂŠszt!</emphasis>
   </simpara></listitem>
 </itemizedlist>
 </sect1>
 
 
 <sect1 id="features">
-<title>Jellemzők</title>
+<title>JellemzĹk</title>
 
 <itemizedlist>
 <listitem><para>
-  Döntsd el, hogy szükséged van-e GUI-ra. Ha igen, akkor nézd meg a <link linkend="gui">GUI</link>
-  fejezetet a fordítás előtt!
+  DĂśntsd el, hogy szĂźksĂŠged van-e GUI-ra. Ha igen, akkor nĂŠzd meg a <link linkend="gui">GUI</link>
+  fejezetet a fordĂ­tĂĄs elĹtt!
   </para></listitem>
 <listitem><para>
-  Ha telepíteni akarod a <application>MEncoder</application>t is (a nagyszerű, mindent
-  tudó kódolónkat), nézd meg a <link linkend="mencoder"><application>MEncoder</application></link> részt!
+  Ha telepĂ­teni akarod a <application>MEncoder</application>t is (a nagyszerĹą, mindent
+  tudĂł kĂłdolĂłnkat), nĂŠzd meg a <link linkend="mencoder"><application>MEncoder</application></link> rĂŠszt!
   </para></listitem>
 <listitem><para>
-  Ha V4L kompatibilis <emphasis role="bold">TV tuner</emphasis> kártyád van,
-  és nézni/grabbelni vagy kódolni szeretnél filmeket az <application>MPlayer</application>rel,
+  Ha V4L kompatibilis <emphasis role="bold">TV tuner</emphasis> kĂĄrtyĂĄd van,
+  ĂŠs nĂŠzni/grabbelni vagy kĂłdolni szeretnĂŠl filmeket az <application>MPlayer</application>rel,
   olvasd el a <link linkend="tv-input">TV bemenet</link> fejezetet.
   </para></listitem>
 <listitem><para>
-  Ha van V4L kompatibilis <emphasis role="bold">rádió tuner</emphasis> kártyád
-  és <application>MPlayer</application>rel szeretnél hallgatni vagy lementeni,
-  olvasd el a <link linkend="radio">rádió</link> részt.
+  Ha van V4L kompatibilis <emphasis role="bold">rĂĄdiĂł tuner</emphasis> kĂĄrtyĂĄd
+  ĂŠs <application>MPlayer</application>rel szeretnĂŠl hallgatni vagy lementeni,
+  olvasd el a <link linkend="radio">rĂĄdiĂł</link> rĂŠszt.
   </para></listitem>
 <listitem><para>
-  Roppant jól sikerült <emphasis role="bold">OSD Menü</emphasis> támogatás vár használatra.
-  Lásd az <link linkend="subosd">OSD menü</link> fejezetet!
+  Roppant jĂłl sikerĂźlt <emphasis role="bold">OSD MenĂź</emphasis> tĂĄmogatĂĄs vĂĄr hasznĂĄlatra.
+  LĂĄsd az <link linkend="subosd">OSD menĂź</link> fejezetet!
   </para></listitem>
 </itemizedlist>
 
 <para>
-Mindezek után fordítsd le az <application>MPlayer</application>t:
+Mindezek utĂĄn fordĂ­tsd le az <application>MPlayer</application>t:
 <screen>
 ./configure
 make
@@ -324,53 +324,53 @@ make install</screen>
 </para>
 
 <para>
-Ezek után az <application>MPlayer</application> máris használatra kész. A
-<filename class="directory">$PREFIX/share/mplayer</filename> könyvtárban van
-a <filename>codecs.conf</filename> fájl, ami a codec-eket és azok tulajdonságait
-írja le a programnak. Ez a fájl csak akkor kell, ha meg akarod változtatni a
-képességeit, egyébként nem, mert a binárisban van egy másolat róla. Ellenőrizd le,
-hogy van-e <filename>codecs.conf</filename> nevű fájlod a home könyvtáradban
-(<filename>~/.mplayer/codecs.conf</filename>), melyet régebbi
-<application>MPlayer</application> verziók hagyhattak ott, és ha van, töröld le!
+Ezek utĂĄn az <application>MPlayer</application> mĂĄris hasznĂĄlatra kĂŠsz. A
+<filename class="directory">$PREFIX/share/mplayer</filename> kĂśnyvtĂĄrban van
+a <filename>codecs.conf</filename> fĂĄjl, ami a codec-eket ĂŠs azok tulajdonsĂĄgait
+Ă­rja le a programnak. Ez a fĂĄjl csak akkor kell, ha meg akarod vĂĄltoztatni a
+kĂŠpessĂŠgeit, egyĂŠbkĂŠnt nem, mert a binĂĄrisban van egy mĂĄsolat rĂłla. EllenĹrizd le,
+hogy van-e <filename>codecs.conf</filename> nevĹą fĂĄjlod a home kĂśnyvtĂĄradban
+(<filename>~/.mplayer/codecs.conf</filename>), melyet rĂŠgebbi
+<application>MPlayer</application> verziĂłk hagyhattak ott, ĂŠs ha van, tĂśrĂśld le!
 </para>
 
 <para>
-Vedd figyelembe, hogy ha van egy <filename>codecs.conf</filename> fájlod a
-<filename>~/.mplayer/</filename> könyvtárban, a beépített és a fő
-<filename>codecs.conf</filename> teljesen figyelmen kívül lesz hagyva.
-Ne használd ezt, hacsak nem akarsz trükközni az <application>MPlayer</application>rel,
-mivel ez sok problémát okozhat. Ha meg akarod változtatni a codec-ek keresési sorrendjét,
-használd a <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
-vagy <option>-afm</option> kapcsolókat akár a parancssorban akár a konfigurációs fájlban
-(lásd man oldal).
+Vedd figyelembe, hogy ha van egy <filename>codecs.conf</filename> fĂĄjlod a
+<filename>~/.mplayer/</filename> kĂśnyvtĂĄrban, a beĂŠpĂ­tett ĂŠs a fĹ
+<filename>codecs.conf</filename> teljesen figyelmen kĂ­vĂźl lesz hagyva.
+Ne hasznĂĄld ezt, hacsak nem akarsz trĂźkkĂśzni az <application>MPlayer</application>rel,
+mivel ez sok problĂŠmĂĄt okozhat. Ha meg akarod vĂĄltoztatni a codec-ek keresĂŠsi sorrendjĂŠt,
+hasznĂĄld a <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
+vagy <option>-afm</option> kapcsolĂłkat akĂĄr a parancssorban akĂĄr a konfigurĂĄciĂłs fĂĄjlban
+(lĂĄsd man oldal).
 </para>
 
 
 <para>
-A Debian használók .deb csomagot is készíthetnek maguknak, roppant egyszerűen.
+A Debian hasznĂĄlĂłk .deb csomagot is kĂŠszĂ­thetnek maguknak, roppant egyszerĹąen.
 Csak futtasd a
 <screen>fakeroot debian/rules binary</screen>
-parancsot az <application>MPlayer</application> főkönyvtárában. Lásd a
-<link linkend="debian">Debian csomagolás</link> fejezetet bővebb információkért!
+parancsot az <application>MPlayer</application> fĹkĂśnyvtĂĄrĂĄban. LĂĄsd a
+<link linkend="debian">Debian csomagolĂĄs</link> fejezetet bĹvebb informĂĄciĂłkĂŠrt!
 </para>
 
 <para>
-<emphasis role="bold">Mindig nézd végig a <filename>./configure</filename>
-kimenetét</emphasis>, és a <filename>configure.log</filename> fájl, melyek
-információkat tartalmaznak arról, hogy mi is lesz lefordítva és mi nem.
-Szintén tanácsos megnézni a <filename>config.h</filename> és
-<filename>config.mak</filename> fájlokat. Ha van olyan telepített függvénykönyvtárad,
-amit a <filename>./configure</filename> mégsem talált meg, ellenőrizd, hogy a
-megfelelő fejléc fájlok (általában a -dev csomagokban vannak) is elérhetőek-e, és
-egyező verziójúak. A <filename>configure.log</filename> fájl legtöbbször megmondja,
-hogy mi hiányzik.
+<emphasis role="bold">Mindig nĂŠzd vĂŠgig a <filename>./configure</filename>
+kimenetĂŠt</emphasis>, ĂŠs a <filename>configure.log</filename> fĂĄjl, melyek
+informĂĄciĂłkat tartalmaznak arrĂłl, hogy mi is lesz lefordĂ­tva ĂŠs mi nem.
+SzintĂŠn tanĂĄcsos megnĂŠzni a <filename>config.h</filename> ĂŠs
+<filename>config.mak</filename> fĂĄjlokat. Ha van olyan telepĂ­tett fĂźggvĂŠnykĂśnyvtĂĄrad,
+amit a <filename>./configure</filename> mĂŠgsem talĂĄlt meg, ellenĹrizd, hogy a
+megfelelĹ fejlĂŠc fĂĄjlok (ĂĄltalĂĄban a -dev csomagokban vannak) is elĂŠrhetĹek-e, ĂŠs
+egyezĹ verziĂłjĂşak. A <filename>configure.log</filename> fĂĄjl legtĂśbbszĂśr megmondja,
+hogy mi hiĂĄnyzik.
 </para>
 
 <para>
-Bár nem kötelező, de a betűtípusoknak telepítve kell lenniük, hogy az OSD és a
-feliratozás működjön. A javasolt eljárás, hogy telepíted a TTF betűkészletet,
-majd megmondod az <application>MPlayer</application>nek, hogy használja azt.
-Lásd a <link linkend="subosd">Feliratok és az OSD</link> részt bővebben.
+BĂĄr nem kĂśtelezĹ, de a betĹątĂ­pusoknak telepĂ­tve kell lenniĂźk, hogy az OSD ĂŠs a
+feliratozĂĄs mĹąkĂśdjĂśn. A javasolt eljĂĄrĂĄs, hogy telepĂ­ted a TTF betĹąkĂŠszletet,
+majd megmondod az <application>MPlayer</application>nek, hogy hasznĂĄlja azt.
+LĂĄsd a <link linkend="subosd">Feliratok ĂŠs az OSD</link> rĂŠszt bĹvebben.
 </para>
 
 </sect1>
@@ -382,158 +382,158 @@ Lásd a <link linkend="subosd">Feliratok és az OSD</link> részt bővebben.
 
 <para>
 A GUI-hoz GTK 1.2.x vagy GTK 2.0 kell (nem teljesen GTK-s, de a panelek igen).
-A skinek sPNG formátumúak, így telepített GTK, <systemitem class="library">libpng</systemitem>
-(és a fejlesztői cuccok, amik általában <systemitem class="library">gtk-dev</systemitem>
-és <systemitem class="library">libpng-dev</systemitem> néven futnak) szükséges.
-A <filename>./configure</filename>-nak az <option>--enable-gui</option> kapcsoló
-megadásával írhatod elő, hogy GUI-t is készítsen. Ezután ha a GUI-s változatot
-akarod futtatni, akkor a <command>gmplayer</command> binárist kell elindítanod.
+A skinek sPNG formĂĄtumĂşak, Ă­gy telepĂ­tett GTK, <systemitem class="library">libpng</systemitem>
+(ĂŠs a fejlesztĹi cuccok, amik ĂĄltalĂĄban <systemitem class="library">gtk-dev</systemitem>
+ĂŠs <systemitem class="library">libpng-dev</systemitem> nĂŠven futnak) szĂźksĂŠges.
+A <filename>./configure</filename>-nak az <option>--enable-gui</option> kapcsolĂł
+megadĂĄsĂĄval Ă­rhatod elĹ, hogy GUI-t is kĂŠszĂ­tsen. EzutĂĄn ha a GUI-s vĂĄltozatot
+akarod futtatni, akkor a <command>gmplayer</command> binĂĄrist kell elindĂ­tanod.
 </para>
 
 <para>
-Jelenleg a <option>-gui</option> opció technikai okokból nem használható a
+Jelenleg a <option>-gui</option> opciĂł technikai okokbĂłl nem hasznĂĄlhatĂł a
 parancssorban.
 </para>
 
 <para>
-Mivel az <application>MPlayer</application> nem rendelkezik beépített skin-nel,
-le kell töltened őket, ha a GUI-t használni akarod. Lásd a <ulink
-url="http://www.mplayerhq.hu/dload.html">letöltési oldalt</ulink>.
-Ajánlott egy rendszerszinten elérhető könyvtárba tenni őket (<filename
+Mivel az <application>MPlayer</application> nem rendelkezik beĂŠpĂ­tett skin-nel,
+le kell tĂśltened Ĺket, ha a GUI-t hasznĂĄlni akarod. LĂĄsd a <ulink
+url="http://www.mplayerhq.hu/dload.html">letĂśltĂŠsi oldalt</ulink>.
+AjĂĄnlott egy rendszerszinten elĂŠrhetĹ kĂśnyvtĂĄrba tenni Ĺket (<filename
 class="directory">$PREFIX/share/mplayer/skins</filename>), vagy a <filename
 class="directory">$HOME/.mplayer/skins</filename>-be.
-Az <application>MPlayer</application> ezekben a könyvtárakban
-keres egy <filename class="directory">default</filename> nevű alkönyvtárat, amelyben
-az alapértelmezett skin van. Megadhatsz más könyvtárat is a
-<option>-skin <replaceable>newskin</replaceable></option> kapcsolóval vagy a
-<literal>skin=newskin</literal> sorral a konfigurációs fájlban, és ekkor a
-<filename class="directory">*/skins/newskin</filename> könyvtárban lévő skin lesz
-használatban.
+Az <application>MPlayer</application> ezekben a kĂśnyvtĂĄrakban
+keres egy <filename class="directory">default</filename> nevĹą alkĂśnyvtĂĄrat, amelyben
+az alapĂŠrtelmezett skin van. Megadhatsz mĂĄs kĂśnyvtĂĄrat is a
+<option>-skin <replaceable>newskin</replaceable></option> kapcsolĂłval vagy a
+<literal>skin=newskin</literal> sorral a konfigurĂĄciĂłs fĂĄjlban, ĂŠs ekkor a
+<filename class="directory">*/skins/newskin</filename> kĂśnyvtĂĄrban lĂŠvĹ skin lesz
+hasznĂĄlatban.
 </para>
 </sect1>
 
 <!-- ********** -->
 
 <sect1 id="fonts-osd">
-<title>Betűtípusok és OSD</title>
+<title>BetĹątĂ­pusok ĂŠs OSD</title>
 
 <para>
 Meg kell mondanod az <application>MPlayer</application>nek, hogy melyik
-betűtípust szeretnéd használni az OSD-hez és a feliratokhoz. Bármilyen
-TrueType betűtípus vagy speciális bittérképes betű működni fog.
-Azonban ajánlott a TrueType használata, mivel sokkal jobban néz ki,
-megfelelően méretezhető a film méretéhez és jobban együttműködik a
-különböző kódolásokkal.
+betĹątĂ­pust szeretnĂŠd hasznĂĄlni az OSD-hez ĂŠs a feliratokhoz. BĂĄrmilyen
+TrueType betĹątĂ­pus vagy speciĂĄlis bittĂŠrkĂŠpes betĹą mĹąkĂśdni fog.
+Azonban ajĂĄnlott a TrueType hasznĂĄlata, mivel sokkal jobban nĂŠz ki,
+megfelelĹen mĂŠretezhetĹ a film mĂŠretĂŠhez ĂŠs jobban egyĂźttmĹąkĂśdik a
+kĂźlĂśnbĂśzĹ kĂłdolĂĄsokkal.
 </para>
 
 
 <sect2 id="truetype-fonts">
-<title>TrueType betűk</title>
+<title>TrueType betĹąk</title>
 
 <para>
-A TrueType betűtípusok kétféle módon használhatóak. Az egyik a
-<option>-font</option> opcióval egy TrueType betűtípus fájl megadása
-a parancssorban. Ez az opció jó eséllyel pályázik arra, hogy bekerüljön
-a konfigurációs fájlodba (lásd a man oldalt a részletekért).
-A másik, hogy készítesz egy <filename>subfont.ttf</filename> nevű symlink-et
-a választott betűtípus fájlhoz. Vagy
+A TrueType betĹątĂ­pusok kĂŠtfĂŠle mĂłdon hasznĂĄlhatĂłak. Az egyik a
+<option>-font</option> opciĂłval egy TrueType betĹątĂ­pus fĂĄjl megadĂĄsa
+a parancssorban. Ez az opciĂł jĂł esĂŠllyel pĂĄlyĂĄzik arra, hogy bekerĂźljĂśn
+a konfigurĂĄciĂłs fĂĄjlodba (lĂĄsd a man oldalt a rĂŠszletekĂŠrt).
+A mĂĄsik, hogy kĂŠszĂ­tesz egy <filename>subfont.ttf</filename> nevĹą symlink-et
+a vĂĄlasztott betĹątĂ­pus fĂĄjlhoz. Vagy
 <screen>ln -s <replaceable>/eleresi/ut/pelda_betu.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
-külön minden egyes felhasználóhoz, vagy az egész rendszerre vonatkozóan:
+kĂźlĂśn minden egyes felhasznĂĄlĂłhoz, vagy az egĂŠsz rendszerre vonatkozĂłan:
 <screen>ln -s <replaceable>/eleresi/ut/pelda_betu.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
 </para>
 
 <para>
 Ha az <application>MPlayer</application> <systemitem class="library">fontconfig</systemitem>
-támogatással lett lefordítva, a fenti módszerek nem fognak működni,
-helyettük a <option>-font</option> egy <systemitem class="library">fontconfig</systemitem>
-betűtípus nevet vár és alapértelmezetté teszi a sans-serif betűt.
-Például:
+tĂĄmogatĂĄssal lett lefordĂ­tva, a fenti mĂłdszerek nem fognak mĹąkĂśdni,
+helyettĂźk a <option>-font</option> egy <systemitem class="library">fontconfig</systemitem>
+betĹątĂ­pus nevet vĂĄr ĂŠs alapĂŠrtelmezettĂŠ teszi a sans-serif betĹąt.
+PĂŠldĂĄul:
 
 <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
 
 <para>
-A <systemitem class="library">fontconfig</systemitem> által ismert
-betűtípusok listáját az <command>fc-list</command> paranccsal nézheted meg.
+A <systemitem class="library">fontconfig</systemitem> ĂĄltal ismert
+betĹątĂ­pusok listĂĄjĂĄt az <command>fc-list</command> paranccsal nĂŠzheted meg.
 </para>
 </sect2>
 
 
 <sect2 id="bitmap-fonts">
-<title>bittérképes betűk</title>
+<title>bittĂŠrkĂŠpes betĹąk</title>
 
 <para>
-Ha valamilyen okból kifolyólag bittérképes betűtípusokat szeretnél vagy kell
-használnod, tölts le egy készletet a weboldalunkról. Választhatsz a különböző
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO betűk</ulink>
-és néhány
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">felhasználói készlet</ulink>
-közül, különböző kódolásokban.
+Ha valamilyen okbĂłl kifolyĂłlag bittĂŠrkĂŠpes betĹątĂ­pusokat szeretnĂŠl vagy kell
+hasznĂĄlnod, tĂślts le egy kĂŠszletet a weboldalunkrĂłl. VĂĄlaszthatsz a kĂźlĂśnbĂśzĹ
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO betĹąk</ulink>
+ĂŠs nĂŠhĂĄny
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">felhasznĂĄlĂłi kĂŠszlet</ulink>
+kĂśzĂźl, kĂźlĂśnbĂśzĹ kĂłdolĂĄsokban.
 </para>
 
 <para>
-Csomagold ki a letöltött fájlokat a
+Csomagold ki a letĂśltĂśtt fĂĄjlokat a
 <filename class="directory">~/.mplayer</filename> vagy a
-<filename class="directory">$PREFIX/share/mplayer</filename> könyvtárba.
-Ezután nevezd át vagy készíts egy symlink-et valamelyik kicsomagolt könyvtárra
-<filename class="directory">font</filename> néven, például:
+<filename class="directory">$PREFIX/share/mplayer</filename> kĂśnyvtĂĄrba.
+EzutĂĄn nevezd ĂĄt vagy kĂŠszĂ­ts egy symlink-et valamelyik kicsomagolt kĂśnyvtĂĄrra
+<filename class="directory">font</filename> nĂŠven, pĂŠldĂĄul:
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
 <screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
 </para>
 
 <para>
-A betűtípusoknak rendelkezniük kell egy megfelelő <filename>font.desc</filename>
-fájllal, ami leképezi a unicode betűpozíciókat az aktuális felirat szöveg
-kódlapjára. A másik megoldás UTF-8 kódolású feliratok használata és a
-<option>-utf8</option> kapcsoló megadása vagy add meg a felirat
-fájl neveként ugyan azt a nevet, mint a videó fájlé, de <filename>.utf</filename>
-kiterjesztéssel és tedd a videóval azonos könyvtárba.
+A betĹątĂ­pusoknak rendelkezniĂźk kell egy megfelelĹ <filename>font.desc</filename>
+fĂĄjllal, ami lekĂŠpezi a unicode betĹąpozĂ­ciĂłkat az aktuĂĄlis felirat szĂśveg
+kĂłdlapjĂĄra. A mĂĄsik megoldĂĄs UTF-8 kĂłdolĂĄsĂş feliratok hasznĂĄlata ĂŠs a
+<option>-utf8</option> kapcsolĂł megadĂĄsa vagy add meg a felirat
+fĂĄjl nevekĂŠnt ugyan azt a nevet, mint a videĂł fĂĄjlĂŠ, de <filename>.utf</filename>
+kiterjesztĂŠssel ĂŠs tedd a videĂłval azonos kĂśnyvtĂĄrba.
 </para>
 
 </sect2>
 
 
 <sect2 id="osdmenu">
-<title>OSD menü</title>
+<title>OSD menĂź</title>
 
 <para>
-Az <application>MPlayer</application>nek az OSD Menüje teljesen igényre szabható.
+Az <application>MPlayer</application>nek az OSD MenĂźje teljesen igĂŠnyre szabhatĂł.
 </para>
 
 <note><simpara>
-a Tulajdonságok menü még NINCS KIFEJLESZTVE!
+a TulajdonsĂĄgok menĂź mĂŠg NINCS KIFEJLESZTVE!
 </simpara></note>
 
 <orderedlist>
-<title>Telepítés</title>
+<title>TelepĂ­tĂŠs</title>
 <listitem><simpara>
-  fordítsd le az <application>MPlayer</application>t a <filename>./configure</filename>-nak
-  az <option>--enable-menu</option> kapcsoló megadásával
+  fordĂ­tsd le az <application>MPlayer</application>t a <filename>./configure</filename>-nak
+  az <option>--enable-menu</option> kapcsolĂł megadĂĄsĂĄval
   </simpara></listitem>
 <listitem><simpara>
-  bizonyosodj meg róla, hogy van telepített OSD betűkészleted
+  bizonyosodj meg rĂłla, hogy van telepĂ­tett OSD betĹąkĂŠszleted
   </simpara></listitem>
 <listitem><simpara>
-  másold át az <filename>etc/menu.conf</filename> fájlt a
-  <filename class="directory">.mplayer</filename> könyvtárba
+  mĂĄsold ĂĄt az <filename>etc/menu.conf</filename> fĂĄjlt a
+  <filename class="directory">.mplayer</filename> kĂśnyvtĂĄrba
   </simpara></listitem>
 <listitem><simpara>
-  másold át az <filename>etc/input.conf</filename> fájlt a
-  <filename class="directory">.mplayer</filename> könyvtárba, vagy egy
-  rendszerszinten elérhető <application>MPlayer</application> konfigurációs
-  könyvtárba (alapértelmezett: <filename class="directory">/usr/local/etc/mplayer</filename>)
+  mĂĄsold ĂĄt az <filename>etc/input.conf</filename> fĂĄjlt a
+  <filename class="directory">.mplayer</filename> kĂśnyvtĂĄrba, vagy egy
+  rendszerszinten elĂŠrhetĹ <application>MPlayer</application> konfigurĂĄciĂłs
+  kĂśnyvtĂĄrba (alapĂŠrtelmezett: <filename class="directory">/usr/local/etc/mplayer</filename>)
   </simpara></listitem>
 <listitem><simpara>
-  ellenőrizd le és írd át az <filename>input.conf</filename> fájlt a menüben
-  történő mozgáshoz használt billentyűk engedélyezéséhez
-  (ott le van írva).
+  ellenĹrizd le ĂŠs Ă­rd ĂĄt az <filename>input.conf</filename> fĂĄjlt a menĂźben
+  tĂśrtĂŠnĹ mozgĂĄshoz hasznĂĄlt billentyĹąk engedĂŠlyezĂŠsĂŠhez
+  (ott le van Ă­rva).
   </simpara></listitem>
 <listitem><para>
-  indítsd el az <application>MPlayer</application>t az alábbi példa alapján:
+  indĂ­tsd el az <application>MPlayer</application>t az alĂĄbbi pĂŠlda alapjĂĄn:
   <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
   </para></listitem>
 <listitem><simpara>
-  nyomd meg valamelyik menü gombot, amit megadtál
+  nyomd meg valamelyik menĂź gombot, amit megadtĂĄl
   </simpara></listitem>
 </orderedlist>
 
@@ -545,42 +545,42 @@ a Tulajdonságok menü még NINCS KIFEJLESZTVE!
 <sect1 id="rtc">
 <title>RTC</title>
 <para>
-Három fajta időzítési eljárás van az <application>MPlayer</application>ben.
+HĂĄrom fajta idĹzĂ­tĂŠsi eljĂĄrĂĄs van az <application>MPlayer</application>ben.
 
 <itemizedlist>
 <listitem><simpara>
-<emphasis role="bold">A régi módszer használatához</emphasis> nem kell tenned
-  semmit. Ez az <systemitem>usleep()</systemitem> függvényt használja az
-  A/V szinkronizáláshoz, +/- 10ms-es pontossággal. Van amikor ennél is pontosabb
-  szinkronizálás szükséges.
+<emphasis role="bold">A rĂŠgi mĂłdszer hasznĂĄlatĂĄhoz</emphasis> nem kell tenned
+  semmit. Ez az <systemitem>usleep()</systemitem> fĂźggvĂŠnyt hasznĂĄlja az
+  A/V szinkronizĂĄlĂĄshoz, +/- 10ms-es pontossĂĄggal. Van amikor ennĂŠl is pontosabb
+  szinkronizĂĄlĂĄs szĂźksĂŠges.
   </simpara></listitem>
 <listitem><para>
-<emphasis role="bold">Az új időzítő</emphasis> kód az RTC-t (RealTime Clock)
-  használja, mert ennek pontos, 1 ms-es időzítői vannak. A <option>-rtc</option>
-  kapcsoló engedélyezi, de megfelelően beállított kernel kell hozzá.
-  Ha 2.4.19pre8 vagy későbbi kernelt használsz, beállíthatod a maximum
-  RTC frekvenciát a sima felhasználóknak a <systemitem class="systemname">/proc
-  </systemitem> fájlrendszer segítségével. Használd az alábbi két parancs
-  valamelyikét az RTC normál felhasználók számára történő engedélyezéséhez:
+<emphasis role="bold">Az Ăşj idĹzĂ­tĹ</emphasis> kĂłd az RTC-t (RealTime Clock)
+  hasznĂĄlja, mert ennek pontos, 1 ms-es idĹzĂ­tĹi vannak. A <option>-rtc</option>
+  kapcsolĂł engedĂŠlyezi, de megfelelĹen beĂĄllĂ­tott kernel kell hozzĂĄ.
+  Ha 2.4.19pre8 vagy kĂŠsĹbbi kernelt hasznĂĄlsz, beĂĄllĂ­thatod a maximum
+  RTC frekvenciĂĄt a sima felhasznĂĄlĂłknak a <systemitem class="systemname">/proc
+  </systemitem> fĂĄjlrendszer segĂ­tsĂŠgĂŠvel. HasznĂĄld az alĂĄbbi kĂŠt parancs
+  valamelyikĂŠt az RTC normĂĄl felhasznĂĄlĂłk szĂĄmĂĄra tĂśrtĂŠnĹ engedĂŠlyezĂŠsĂŠhez:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
   <screen>sysctl dev/rtc/max-user-freq=1024</screen>
-  Ezt a beállítást állandósíthatod az utóbbi <filename>/etc/sysctl.conf</filename> fájba
-  történő írásával.
+  Ezt a beĂĄllĂ­tĂĄst ĂĄllandĂłsĂ­thatod az utĂłbbi <filename>/etc/sysctl.conf</filename> fĂĄjba
+  tĂśrtĂŠnĹ Ă­rĂĄsĂĄval.
   </para>
   <para>
-   Az új időzítő eredményét a státusz sorban láthatod.
-   Néhány sebesség-léptetéses (speedstep) CPU-val rendelkező
-   notebook BIOS-ának energia takarékossági funkciói rosszul működnek együtt az
-   RTC-vel. Elromolhat az audió és a videó szinkronizációja. Úgy tűnik, ha bedugod
-   a hálózati csatlakozót, mielőtt bekapcsolnád a notebookot, az segít.
-   Néhány hardver összeállításban (ALi1541-es alaplapokkal használt nem DMA-s DVD
-   meghajtók esetén erősítették meg) az RTC időzítő használata kihagyásokat okoz
-   lejátszás közben. Ebben az esetben a harmadik módszer használata javasolt.
+   Az Ăşj idĹzĂ­tĹ eredmĂŠnyĂŠt a stĂĄtusz sorban lĂĄthatod.
+   NĂŠhĂĄny sebessĂŠg-lĂŠptetĂŠses (speedstep) CPU-val rendelkezĹ
+   notebook BIOS-ĂĄnak energia takarĂŠkossĂĄgi funkciĂłi rosszul mĹąkĂśdnek egyĂźtt az
+   RTC-vel. Elromolhat az audiĂł ĂŠs a videĂł szinkronizĂĄciĂłja. Ăgy tĹąnik, ha bedugod
+   a hĂĄlĂłzati csatlakozĂłt, mielĹtt bekapcsolnĂĄd a notebookot, az segĂ­t.
+   NĂŠhĂĄny hardver ĂśsszeĂĄllĂ­tĂĄsban (ALi1541-es alaplapokkal hasznĂĄlt nem DMA-s DVD
+   meghajtĂłk esetĂŠn erĹsĂ­tettĂŠk meg) az RTC idĹzĂ­tĹ hasznĂĄlata kihagyĂĄsokat okoz
+   lejĂĄtszĂĄs kĂśzben. Ebben az esetben a harmadik mĂłdszer hasznĂĄlata javasolt.
   </para></listitem>
 <listitem><simpara>
-  <emphasis role="bold">A harmadik időzítő kód</emphasis> a <option>-softsleep</option>
-  kapcsolóval kapcsolható be. Az RTC hatékonyságával rendelkezik, de nem használja
-  azt. Másrészről viszont jobban eszi a procit.
+  <emphasis role="bold">A harmadik idĹzĂ­tĹ kĂłd</emphasis> a <option>-softsleep</option>
+  kapcsolĂłval kapcsolhatĂł be. Az RTC hatĂŠkonysĂĄgĂĄval rendelkezik, de nem hasznĂĄlja
+  azt. MĂĄsrĂŠszrĹl viszont jobban eszi a procit.
   </simpara></listitem>
 </itemizedlist>
 </para>

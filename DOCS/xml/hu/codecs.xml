@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20361 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
 <sect1 id="video-codecs">
-<title>Videó codec-ek</title>
+<title>VideĂł codec-ek</title>
 
 <para>
-A <ulink url="../../codecs-status.html">codec státusz táblázat</ulink>
-tartalmazza az összes támogatott codec-et, napi frissítéssel.
-Néhány MPlayerrel használható bináris codec elérhető a weboldalunk
-<ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">letöltési részében</ulink>.
+A <ulink url="../../codecs-status.html">codec stĂĄtusz tĂĄblĂĄzat</ulink>
+tartalmazza az Ăśsszes tĂĄmogatott codec-et, napi frissĂ­tĂŠssel.
+NĂŠhĂĄny MPlayerrel hasznĂĄlhatĂł binĂĄris codec elĂŠrhetĹ a weboldalunk
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">letĂśltĂŠsi rĂŠszĂŠben</ulink>.
 </para>
 
 <para>
@@ -19,60 +19,60 @@ A legfontosabb dolgok:
 
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) és
-  <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) videó
+  <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) ĂŠs
+  <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) videĂł
   </simpara></listitem>
 <listitem><simpara>
-  natív dekódolók <emphasis role="bold">az összes DivX variánshoz,
-  3ivX-hez, M$ MPEG-4</emphasis> v1, v2 és más MPEG4 variánsokhoz
+  natĂ­v dekĂłdolĂłk <emphasis role="bold">az Ăśsszes DivX variĂĄnshoz,
+  3ivX-hez, M$ MPEG-4</emphasis> v1, v2 ĂŠs mĂĄs MPEG4 variĂĄnsokhoz
   </simpara></listitem>
 <listitem><simpara>
-  natív dekódoló <emphasis role="bold">Windows Media Video 7/8</emphasis>
-  (<emphasis role="bold">WMV1/WMV2</emphasis>), és Win32 DLL dekódoló
-  a <emphasis role="bold">Windows Media Video 9</emphasis> formátumhoz
-  (<emphasis role="bold">WMV3</emphasis>), mindkettőt a <filename>.wmv</filename>
-  fájloknál használjuk
+  natĂ­v dekĂłdolĂł <emphasis role="bold">Windows Media Video 7/8</emphasis>
+  (<emphasis role="bold">WMV1/WMV2</emphasis>), ĂŠs Win32 DLL dekĂłdolĂł
+  a <emphasis role="bold">Windows Media Video 9</emphasis> formĂĄtumhoz
+  (<emphasis role="bold">WMV3</emphasis>), mindkettĹt a <filename>.wmv</filename>
+  fĂĄjloknĂĄl hasznĂĄljuk
   </simpara></listitem>
 <listitem><simpara>
-  natív <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> dekódoló
+  natĂ­v <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> dekĂłdolĂł
   </simpara></listitem>
 <listitem><simpara>
-  natív <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> dekódoló
+  natĂ­v <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> dekĂłdolĂł
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">3ivx</emphasis> v1, v2 dekódoló
+  <emphasis role="bold">3ivx</emphasis> v1, v2 dekĂłdolĂł
   </simpara></listitem>
 <listitem><simpara>
-  Cinepak és <emphasis role="bold">Intel Indeo</emphasis> codec (3.1,3.2,4.1,5.0)
+  Cinepak ĂŠs <emphasis role="bold">Intel Indeo</emphasis> codec (3.1,3.2,4.1,5.0)
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 és más hardveres
-  formátumok
+  <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 ĂŠs mĂĄs hardveres
+  formĂĄtumok
   </simpara></listitem>
 <listitem><simpara>
-  VIVO 1.0, 2.0, I263 és egyéb <emphasis role="bold">H.263(+)</emphasis> variánsok
+  VIVO 1.0, 2.0, I263 ĂŠs egyĂŠb <emphasis role="bold">H.263(+)</emphasis> variĂĄnsok
   </simpara></listitem>
 <listitem><simpara>
   FLI/FLC
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> a
-  <systemitem class="library">libavcodec</systemitem>-ből és
+  <systemitem class="library">libavcodec</systemitem>-bĹl ĂŠs
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> codec a RealPlayer
-  könyvtárak felhasználásával
+  kĂśnyvtĂĄrak felhasznĂĄlĂĄsĂĄval
   </simpara></listitem>
 <listitem><simpara>
-  natív dekódoló HuffYUV-hoz
+  natĂ­v dekĂłdolĂł HuffYUV-hoz
   </simpara></listitem>
 <listitem><simpara>
-  különböző régi, egyszerű, RLE-szerű formátum
+  kĂźlĂśnbĂśzĹ rĂŠgi, egyszerĹą, RLE-szerĹą formĂĄtum
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-Ha van olyan Win32 codec-ed, ami nincs a listában és még nem támogatott,
-olvasd el a <link linkend="codec-importing">codec importálás HOGYAN</link>-t
-és segítsd a munkánkat.
+Ha van olyan Win32 codec-ed, ami nincs a listĂĄban ĂŠs mĂŠg nem tĂĄmogatott,
+olvasd el a <link linkend="codec-importing">codec importĂĄlĂĄs HOGYAN</link>-t
+ĂŠs segĂ­tsd a munkĂĄnkat.
 </para>
 
 
@@ -81,25 +81,25 @@ olvasd el a <link linkend="codec-importing">codec importálás HOGYAN</link>-t
 
 <para>
 Az <ulink url="http://ffmpeg.org">FFmpeg</ulink> tartalmazza
-a <systemitem class="library">libavcodec</systemitem>-et, a vezető
-nyílt forráskódú videó és audió codec függvénykönyvtárat. Képes
-a legtöbb multimédiás formátum dekódolására, általában az alternatíváknál
-gyorsabban, valamint egyre több formátumot támogat. Ez az alapértelmezett
-dekódoló az <application>MPlayer</application> által támogatott codec-ek
-nagy részénél. A kódolás szintén lehetséges pár formátumba, melyeket
-támogat is a <application>MEncoder</application>.
+a <systemitem class="library">libavcodec</systemitem>-et, a vezetĹ
+nyĂ­lt forrĂĄskĂłdĂş videĂł ĂŠs audiĂł codec fĂźggvĂŠnykĂśnyvtĂĄrat. KĂŠpes
+a legtĂśbb multimĂŠdiĂĄs formĂĄtum dekĂłdolĂĄsĂĄra, ĂĄltalĂĄban az alternatĂ­vĂĄknĂĄl
+gyorsabban, valamint egyre tĂśbb formĂĄtumot tĂĄmogat. Ez az alapĂŠrtelmezett
+dekĂłdolĂł az <application>MPlayer</application> ĂĄltal tĂĄmogatott codec-ek
+nagy rĂŠszĂŠnĂŠl. A kĂłdolĂĄs szintĂŠn lehetsĂŠges pĂĄr formĂĄtumba, melyeket
+tĂĄmogat is a <application>MEncoder</application>.
 </para>
 
 <para>
-Az összes támogatott codec listájáért látogasd meg az FFmpeg weboldalát.
-Támogatott <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">videó</ulink>
-és <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audió</ulink> codec-ek.
+Az Ăśsszes tĂĄmogatott codec listĂĄjĂĄĂŠrt lĂĄtogasd meg az FFmpeg weboldalĂĄt.
+TĂĄmogatott <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">videĂł</ulink>
+ĂŠs <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audiĂł</ulink> codec-ek.
 </para>
 
 <para>
 Az <application>MPlayer</application> tartalmazza a
 <systemitem class="library">libavcodec</systemitem>-et.
-Csak futtasd a <filename>configure</filename>-t és fordíts.
+Csak futtasd a <filename>configure</filename>-t ĂŠs fordĂ­ts.
 </para>
 
 </sect2>
@@ -110,37 +110,37 @@ Csak futtasd a <filename>configure</filename>-t és fordíts.
 
 <para>
 Az <ulink url="http://www.xvid.org">XviD</ulink> egy szabad szoftveres MPEG-4
-ASP kompatibilis videó codec, ami tud két lépésben kódolni és teljes MPEG-4
-ASP támogatás van benne, ezáltal sokkal hatékonyabb, mint a jólismert DivX codec.
-Nagyon jó videó minőséget kínál és a CPU optimalizációknak hála a legtöbb
-modern processzoron a teljesítménye is jó.
+ASP kompatibilis videĂł codec, ami tud kĂŠt lĂŠpĂŠsben kĂłdolni ĂŠs teljes MPEG-4
+ASP tĂĄmogatĂĄs van benne, ezĂĄltal sokkal hatĂŠkonyabb, mint a jĂłlismert DivX codec.
+Nagyon jĂł videĂł minĹsĂŠget kĂ­nĂĄl ĂŠs a CPU optimalizĂĄciĂłknak hĂĄla a legtĂśbb
+modern processzoron a teljesĂ­tmĂŠnye is jĂł.
 </para>
 <para>
-Az OpenDivX codec forkolt fejlesztésként indult annak idején.
-A fork akkor történt, amikor a ProjectMayo az OpenDivX-et zárt forráskódúvá
-tette DivX4 néven, felbosszantva így a nem-ProjectMayo-s fejlesztőket,
-akik az OpenDivX-en dolgoztak, s akik így elindították az XviD-et. Így mindkét
-projektnek azonosak a gyökereik.
+Az OpenDivX codec forkolt fejlesztĂŠskĂŠnt indult annak idejĂŠn.
+A fork akkor tĂśrtĂŠnt, amikor a ProjectMayo az OpenDivX-et zĂĄrt forrĂĄskĂłdĂşvĂĄ
+tette DivX4 nĂŠven, felbosszantva Ă­gy a nem-ProjectMayo-s fejlesztĹket,
+akik az OpenDivX-en dolgoztak, s akik Ă­gy elindĂ­tottĂĄk az XviD-et. Ăgy mindkĂŠt
+projektnek azonosak a gyĂśkereik.
 </para>
 
 <para>
-Jegyezd meg, hogy az XviD nem szükséges az XviD-es videók dekódolásához.
-A <systemitem class="library">libavcodec</systemitem> az alapértelmezett,
-mivel jobb a sebessége.
+Jegyezd meg, hogy az XviD nem szĂźksĂŠges az XviD-es videĂłk dekĂłdolĂĄsĂĄhoz.
+A <systemitem class="library">libavcodec</systemitem> az alapĂŠrtelmezett,
+mivel jobb a sebessĂŠge.
 </para>
 
 <procedure>
-<title>Az <systemitem class="library">XviD</systemitem> telepítése</title>
+<title>Az <systemitem class="library">XviD</systemitem> telepĂ­tĂŠse</title>
 <para>
-  Mint a legtöbb nyílt forráskódú program, ez is két formában érhető el:
-  <ulink url="http://www.xvid.org/downloads.html">hivatalos kiadás</ulink>
-  és a CVS verzió.
-  A CVS verzió általában elég stabil a használathoz, mivel legtöbbször csak
-  a kiadásokban benne lévő hibák javításait tartalmazza.
-  Itt van lépésről lépésre, hogy mit kell tenned, ha az <systemitem class="library">XviD</systemitem>
-  CVS-t használni akarod a <application>MEncoder</application>rel (szükséged
+  Mint a legtĂśbb nyĂ­lt forrĂĄskĂłdĂş program, ez is kĂŠt formĂĄban ĂŠrhetĹ el:
+  <ulink url="http://www.xvid.org/downloads.html">hivatalos kiadĂĄs</ulink>
+  ĂŠs a CVS verziĂł.
+  A CVS verziĂł ĂĄltalĂĄban elĂŠg stabil a hasznĂĄlathoz, mivel legtĂśbbszĂśr csak
+  a kiadĂĄsokban benne lĂŠvĹ hibĂĄk javĂ­tĂĄsait tartalmazza.
+  Itt van lĂŠpĂŠsrĹl lĂŠpĂŠsre, hogy mit kell tenned, ha az <systemitem class="library">XviD</systemitem>
+  CVS-t hasznĂĄlni akarod a <application>MEncoder</application>rel (szĂźksĂŠged
   lesz az <application>autoconf</application> 2.50-re, az <application>automake</application>-re
-  és a <application>libtool</application>-ra):
+  ĂŠs a <application>libtool</application>-ra):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
@@ -156,22 +156,22 @@ mivel jobb a sebessége.
   </para></step>
 <step><para>
   <screen>./configure</screen>
-  Meg kell adnod pár kapcsolót (tanulmányozd a
-  <command>./configure --help</command> kimenetét).
+  Meg kell adnod pĂĄr kapcsolĂłt (tanulmĂĄnyozd a
+  <command>./configure --help</command> kimenetĂŠt).
   </para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
   </para></step>
 <step><para>
-  Ha megadtad a <option>--enable-divxcompat</option> kapcsolót,
-  másold át a <filename>../../src/divx4.h</filename> fájlt a
-  <filename class="directory">/usr/local/include/</filename>könyvtárba.
+  Ha megadtad a <option>--enable-divxcompat</option> kapcsolĂłt,
+  mĂĄsold ĂĄt a <filename>../../src/divx4.h</filename> fĂĄjlt a
+  <filename class="directory">/usr/local/include/</filename>kĂśnyvtĂĄrba.
   </para></step>
 <step><para>
-  Fordítsd újra az <application>MPlayer</application>t a
+  FordĂ­tsd Ăşjra az <application>MPlayer</application>t a
   <option>--with-xvidlibdir=<replaceable>/eleresi/ut/</replaceable>libxvidcore.a</option>
   <option>--with-xvidincdir=<replaceable>/eleresi/ut/</replaceable>xvid.h</option>
-  kapcsolókkal.
+  kapcsolĂłkkal.
   </para></step>
 </procedure>
 </sect2>
@@ -184,35 +184,35 @@ mivel jobb a sebessége.
 <title>Mi az az x264?</title>
 <para>
   Az <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
-  egy függvénykönyvtár
-  a H.264 videó folyamok létrehozásához.
-  Még nincs kész 100%-ig, de valamilyen szinten már támogatja a
-  H.264 legtöbb minőségjavító tulajdonságát.
-  Van számos fejlett tulajdonság a H.264 specifikációjában, aminek
-  semmi köze a videó minőségéhez; ezek többsége még nincs implementálva
+  egy fĂźggvĂŠnykĂśnyvtĂĄr
+  a H.264 videĂł folyamok lĂŠtrehozĂĄsĂĄhoz.
+  MĂŠg nincs kĂŠsz 100%-ig, de valamilyen szinten mĂĄr tĂĄmogatja a
+  H.264 legtĂśbb minĹsĂŠgjavĂ­tĂł tulajdonsĂĄgĂĄt.
+  Van szĂĄmos fejlett tulajdonsĂĄg a H.264 specifikĂĄciĂłjĂĄban, aminek
+  semmi kĂśze a videĂł minĹsĂŠgĂŠhez; ezek tĂśbbsĂŠge mĂŠg nincs implementĂĄlva
   az <systemitem class="library">x264</systemitem>-ben.
 </para>
 
 <itemizedlist>
-<title>Kódoló tulajdonságai</title>
+<title>KĂłdolĂł tulajdonsĂĄgai</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
-  <listitem><para>Többszörös hivatkozás</para></listitem>
-  <listitem><para>Intra: az összes makroblokk típus (16x16, 8x8 és 4x4
-    az összes előrejelzéssel)</para></listitem>
-  <listitem><para>Inter P: az összes elosztás (16x16-tól le
+  <listitem><para>TĂśbbszĂśrĂśs hivatkozĂĄs</para></listitem>
+  <listitem><para>Intra: az Ăśsszes makroblokk tĂ­pus (16x16, 8x8 ĂŠs 4x4
+    az Ăśsszes elĹrejelzĂŠssel)</para></listitem>
+  <listitem><para>Inter P: az Ăśsszes elosztĂĄs (16x16-tĂłl le
     4x4-ig)</para></listitem>
-  <listitem><para>Inter B: elosztás 16x16-tól le 8x8-ig
-    (beleértve a SKIP/DIRECT-et)</para></listitem>
-  <listitem><para>Rátavezérlés: konstans kvantáló, konstans bitráta,
-    egy vagy többlépéses ABR, opcionális VBV</para></listitem>
-  <listitem><para>Jelenet vágás detektálása</para></listitem>
-  <listitem><para>Adaptív B-kocka elhelyezés</para></listitem>
-  <listitem><para>B-kocka mint referencia / önkényes képkocka
+  <listitem><para>Inter B: elosztĂĄs 16x16-tĂłl le 8x8-ig
+    (beleĂŠrtve a SKIP/DIRECT-et)</para></listitem>
+  <listitem><para>RĂĄtavezĂŠrlĂŠs: konstans kvantĂĄlĂł, konstans bitrĂĄta,
+    egy vagy tĂśbblĂŠpĂŠses ABR, opcionĂĄlis VBV</para></listitem>
+  <listitem><para>Jelenet vĂĄgĂĄs detektĂĄlĂĄsa</para></listitem>
+  <listitem><para>AdaptĂ­v B-kocka elhelyezĂŠs</para></listitem>
+  <listitem><para>B-kocka mint referencia / ĂśnkĂŠnyes kĂŠpkocka
     sorrend</para></listitem>
-  <listitem><para>8x8 és 4x4 adaptív térbeli transzformáció</para></listitem>
-  <listitem><para>Veszteségmentes mód</para></listitem>
-  <listitem><para>Egyedi kvantálási matricák</para></listitem>
-  <listitem><para>Több szelet párhuzamos kódolása</para></listitem>
+  <listitem><para>8x8 ĂŠs 4x4 adaptĂ­v tĂŠrbeli transzformĂĄciĂł</para></listitem>
+  <listitem><para>VesztesĂŠgmentes mĂłd</para></listitem>
+  <listitem><para>Egyedi kvantĂĄlĂĄsi matricĂĄk</para></listitem>
+  <listitem><para>TĂśbb szelet pĂĄrhuzamos kĂłdolĂĄsa</para></listitem>
 </itemizedlist>
 
 </sect3>
@@ -220,100 +220,100 @@ mivel jobb a sebessége.
 <sect3 id="codec-h264-whatis">
 <title>Mi az a H.264?</title>
 <para>
-  A H.264 az ITU és az MPEG által közösen fejlesztett új digitális
-  videó codec egyik neve.
-  Hivatkoznak rá még olyan kellemetlen neveken is, mint
+  A H.264 az ITU ĂŠs az MPEG ĂĄltal kĂśzĂśsen fejlesztett Ăşj digitĂĄlis
+  videĂł codec egyik neve.
+  Hivatkoznak rĂĄ mĂŠg olyan kellemetlen neveken is, mint
   "ISO/IEC 14496-10" vagy "MPEG-4 Part 10".
-  Legtöbbször "MPEG-4 AVC" vagy csak "AVC" néven szerepel.
+  LegtĂśbbszĂśr "MPEG-4 AVC" vagy csak "AVC" nĂŠven szerepel.
 </para>
 <para>
-  Bárhogy is nevezed, a H.264 megéri, hogy kipróbáld, mert általában
-  eléri az MPEG-4 ASP minőségét 5%-30%-kal kisebb bitrátával.
-  A valódi eredmények mind a forrás anyagtól, mind a kódolótól
-  függnek.
-  A H.264 előnyei nem jönnek ingyen: a H.264 folyamok dekódolásának
-  elég meredek a CPU és memória igénye.
-  Például egy 1733 Mhz-es Athlon-on egy DVD felbontású 1500kbps-es H.264
-  videó kb. 35% CPU-t használ a dekódoláshoz.
-  Összehasonlításként egy DVD felbontású 1500kbps-es MPEG-4 ASP folyamnak
-  10% körüli CPU kell.
-  Ez azt jelenti, hogy a nagy-felbontású folyamok dekódolása szinte
-  szóba se jön a legtöbb felhasználónál.
-  Azt is jelenti, hogy egy tisztességes DVD rip néha akadhat a 2.0
-  Ghz-nél lassabb processzorokon, és így tovább.
+  BĂĄrhogy is nevezed, a H.264 megĂŠri, hogy kiprĂłbĂĄld, mert ĂĄltalĂĄban
+  elĂŠri az MPEG-4 ASP minĹsĂŠgĂŠt 5%-30%-kal kisebb bitrĂĄtĂĄval.
+  A valĂłdi eredmĂŠnyek mind a forrĂĄs anyagtĂłl, mind a kĂłdolĂłtĂłl
+  fĂźggnek.
+  A H.264 elĹnyei nem jĂśnnek ingyen: a H.264 folyamok dekĂłdolĂĄsĂĄnak
+  elĂŠg meredek a CPU ĂŠs memĂłria igĂŠnye.
+  PĂŠldĂĄul egy 1733 Mhz-es Athlon-on egy DVD felbontĂĄsĂş 1500kbps-es H.264
+  videĂł kb. 35% CPU-t hasznĂĄl a dekĂłdolĂĄshoz.
+  ĂsszehasonlĂ­tĂĄskĂŠnt egy DVD felbontĂĄsĂş 1500kbps-es MPEG-4 ASP folyamnak
+  10% kĂśrĂźli CPU kell.
+  Ez azt jelenti, hogy a nagy-felbontĂĄsĂş folyamok dekĂłdolĂĄsa szinte
+  szĂłba se jĂśn a legtĂśbb felhasznĂĄlĂłnĂĄl.
+  Azt is jelenti, hogy egy tisztessĂŠges DVD rip nĂŠha akadhat a 2.0
+  Ghz-nĂŠl lassabb processzorokon, ĂŠs Ă­gy tovĂĄbb.
 </para>
 <para>
   Az <systemitem class="library">x264</systemitem>-mal
-  a kódolási szükségletek nem sokkal rosszabbak, mint amit az
-  MPEG-4 ASP-nél megszoktál.
-  Például egy 1733 Mhz-es Athlon-on egy tipikus DVD kódolás 5-15
+  a kĂłdolĂĄsi szĂźksĂŠgletek nem sokkal rosszabbak, mint amit az
+  MPEG-4 ASP-nĂŠl megszoktĂĄl.
+  PĂŠldĂĄul egy 1733 Mhz-es Athlon-on egy tipikus DVD kĂłdolĂĄs 5-15
   fps-sel fut.
 </para>
 <para>
-  Ennek a dokumentumnak nem célja a H.264 részletes leírása, ha
-  érdekel egy rövid áttekintés, akkor olvasd el a
+  Ennek a dokumentumnak nem cĂŠlja a H.264 rĂŠszletes leĂ­rĂĄsa, ha
+  ĂŠrdekel egy rĂśvid ĂĄttekintĂŠs, akkor olvasd el a
   <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>
-  című írást.
+  cĂ­mĹą Ă­rĂĄst.
 </para>
 </sect3>
 
 <sect3 id="codec-x264-playback">
-<title>Hogyan tudok lejátszani H.264 videókat az <application>MPlayer</application>rel?</title>
+<title>Hogyan tudok lejĂĄtszani H.264 videĂłkat az <application>MPlayer</application>rel?</title>
 <para>
   Az <application>MPlayer</application> a
   <systemitem class="library">libavcodec</systemitem> H.264
-  dekódolóját használja.
-  A <systemitem class="library">libavcodec</systemitem> már 2004.
-  júliusa óta tartalmaz egy minimálisan használható H.264 dekódolást,
-  de azóta több fontos változás és fejlesztés történt, mind a
-  támogatott funkcionalitások, mind a CPU felhasználás szempontjából.
-  Csak a biztonság kedvéért érdemes mindig a legfrissebb Subversion
-  kódot használni.
+  dekĂłdolĂłjĂĄt hasznĂĄlja.
+  A <systemitem class="library">libavcodec</systemitem> mĂĄr 2004.
+  jĂşliusa Ăłta tartalmaz egy minimĂĄlisan hasznĂĄlhatĂł H.264 dekĂłdolĂĄst,
+  de azĂłta tĂśbb fontos vĂĄltozĂĄs ĂŠs fejlesztĂŠs tĂśrtĂŠnt, mind a
+  tĂĄmogatott funkcionalitĂĄsok, mind a CPU felhasznĂĄlĂĄs szempontjĂĄbĂłl.
+  Csak a biztonsĂĄg kedvĂŠĂŠrt ĂŠrdemes mindig a legfrissebb Subversion
+  kĂłdot hasznĂĄlni.
 </para>
 <para>
-  Ha gyors és könnyen emészthető formában szeretnél információkat
-  arról, hogy milyen új változások történtek a
+  Ha gyors ĂŠs kĂśnnyen emĂŠszthetĹ formĂĄban szeretnĂŠl informĂĄciĂłkat
+  arrĂłl, hogy milyen Ăşj vĂĄltozĂĄsok tĂśrtĂŠntek a
   <systemitem class="library">libavcodec</systemitem>
-  H.264 dekódolójában, tartsd figyelemmel az
-  <ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">FFmpeg Subversion fájának web-es felületét</ulink>.
+  H.264 dekĂłdolĂłjĂĄban, tartsd figyelemmel az
+  <ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">FFmpeg Subversion fĂĄjĂĄnak web-es felĂźletĂŠt</ulink>.
 </para>
 </sect3>
 
 <sect3 id="codec-x264-encode">
-<title>Hogyan tudok a <application>MEncoder</application>rel és az <systemitem class="library">x264</systemitem>-gyel videót kódolni?</title>
+<title>Hogyan tudok a <application>MEncoder</application>rel ĂŠs az <systemitem class="library">x264</systemitem>-gyel videĂłt kĂłdolni?</title>
 <para>
-  Ha van feltelepítve subversion kliensed, a legújabb x264
-  forrást letöltheted ezzel a paranccsal:
+  Ha van feltelepĂ­tve subversion kliensed, a legĂşjabb x264
+  forrĂĄst letĂśltheted ezzel a paranccsal:
   <screen>
     svn co svn://svn.videolan.org/x264/trunk x264<!--
   --></screen>
-  Az <application>MPlayer</application> forrás mindig frissül, ha
-  egy <systemitem class="library">x264</systemitem> API változás
-  jelenik meg, így javasolt az <application>MPlayer</application>
-  Subversion verziójának használata.
-  Talán ez a szituáció változni fog ha egy
-  <systemitem class="library">x264</systemitem> "kiadás" megjelenik.
+  Az <application>MPlayer</application> forrĂĄs mindig frissĂźl, ha
+  egy <systemitem class="library">x264</systemitem> API vĂĄltozĂĄs
+  jelenik meg, Ă­gy javasolt az <application>MPlayer</application>
+  Subversion verziĂłjĂĄnak hasznĂĄlata.
+  TalĂĄn ez a szituĂĄciĂł vĂĄltozni fog ha egy
+  <systemitem class="library">x264</systemitem> "kiadĂĄs" megjelenik.
   Addig az <systemitem class="library">x264</systemitem> nagyon
-  instabilként kezelendő, figyelembe véve, hogy a programozási felülete
-  is változik.
+  instabilkĂŠnt kezelendĹ, figyelembe vĂŠve, hogy a programozĂĄsi felĂźlete
+  is vĂĄltozik.
 </para>
 <para>
-  Az <systemitem class="library">x264</systemitem> a szabványos módon
-  fordítható le és telepíthető:
+  Az <systemitem class="library">x264</systemitem> a szabvĂĄnyos mĂłdon
+  fordĂ­thatĂł le ĂŠs telepĂ­thetĹ:
   <screen>
     ./configure &amp;&amp; make &amp;&amp; sudo make install<!--
   --></screen>
-  Ez telepíti a libx264.a-t a /usr/local/lib könyvtárba és az x264.h-t
+  Ez telepĂ­ti a libx264.a-t a /usr/local/lib kĂśnyvtĂĄrba ĂŠs az x264.h-t
   beleteszi a /usr/local/include-ba.
 
-  Miután az <systemitem class="library">x264</systemitem> függvénykönyvtár
-  és a fejléc fájl a megfelelő helyre került, az
-  <application>MPlayer</application> fordítása
-  <systemitem class="library">x264</systemitem> támogatással már egyszerű.
-  csak futtasd a szabványos parancsokat:
+  MiutĂĄn az <systemitem class="library">x264</systemitem> fĂźggvĂŠnykĂśnyvtĂĄr
+  ĂŠs a fejlĂŠc fĂĄjl a megfelelĹ helyre kerĂźlt, az
+  <application>MPlayer</application> fordĂ­tĂĄsa
+  <systemitem class="library">x264</systemitem> tĂĄmogatĂĄssal mĂĄr egyszerĹą.
+  csak futtasd a szabvĂĄnyos parancsokat:
   <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-  A configure script automatikusan detektálja, hogy elget teszel az
-  <systemitem class="library">x264</systemitem> követelményeinek.
+  A configure script automatikusan detektĂĄlja, hogy elget teszel az
+  <systemitem class="library">x264</systemitem> kĂśvetelmĂŠnyeinek.
 </para>
 </sect3>
 </sect2>
@@ -322,135 +322,135 @@ mivel jobb a sebessége.
 <!-- ********** -->
 
 <sect1 id="audio-codecs">
-<title>Audió codec-ek</title>
+<title>AudiĂł codec-ek</title>
 
 <itemizedlist>
-<title>A legfontosabb audió codec-ek:</title>
+<title>A legfontosabb audiĂł codec-ek:</title>
 <listitem><simpara>
-  MPEG layer 1/2/3 (MP1/2/3) audió (<emphasis role="bold">natív</emphasis>
-  kód, MMX/SSE/3DNow! optimalizációval)
+  MPEG layer 1/2/3 (MP1/2/3) audiĂł (<emphasis role="bold">natĂ­v</emphasis>
+  kĂłd, MMX/SSE/3DNow! optimalizĂĄciĂłval)
   </simpara></listitem>
 <listitem><simpara>
-  Windows Media Audio 7 és 8 (ismert mint WMAv1 és WMAv2) (<emphasis role="bold">natív</emphasis> kód,
+  Windows Media Audio 7 ĂŠs 8 (ismert mint WMAv1 ĂŠs WMAv2) (<emphasis role="bold">natĂ­v</emphasis> kĂłd,
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>-kel)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (DMO DLL-lel)
   </simpara></listitem>
 <listitem><simpara>
-  AC3 Dolby audió (<emphasis role="bold">natív</emphasis> kód,
-  MMX/SSE/3DNow! optimalizációval)
+  AC3 Dolby audiĂł (<emphasis role="bold">natĂ­v</emphasis> kĂłd,
+  MMX/SSE/3DNow! optimalizĂĄciĂłval)
   </simpara></listitem>
 <listitem><simpara>
-  hangkártyán áteresztő AC3
+  hangkĂĄrtyĂĄn ĂĄteresztĹ AC3
   </simpara></listitem>
 <listitem><simpara>
   AAC
   </simpara></listitem>
 <listitem><simpara>
-  Ogg Vorbis audió codec (<emphasis role="bold">natív</emphasis> függvénykönyvtár)
+  Ogg Vorbis audiĂł codec (<emphasis role="bold">natĂ­v</emphasis> fĂźggvĂŠnykĂśnyvtĂĄr)
   </simpara></listitem>
 <listitem><simpara>
-  RealAudio: DNET (alacsony bitrátájú AC3), Cook, Sipro és ATRAC3
+  RealAudio: DNET (alacsony bitrĂĄtĂĄjĂş AC3), Cook, Sipro ĂŠs ATRAC3
   </simpara></listitem>
 <listitem><simpara>
-  QuickTime: Qualcomm és QDesign audió codec-ek
+  QuickTime: Qualcomm ĂŠs QDesign audiĂł codec-ek
   </simpara></listitem>
 <listitem><simpara>
-  VIVO audió (g723, Vivo Siren)
+  VIVO audiĂł (g723, Vivo Siren)
   </simpara></listitem>
 <listitem><simpara>
-  Voxware audió (DirectShow DLL használatával)
+  Voxware audiĂł (DirectShow DLL hasznĂĄlatĂĄval)
   </simpara></listitem>
 <listitem><simpara>
-  alaw és ulaw, számos gsm, adpcm és pcm formátum és más, egyszerű, régi
-  audió codec
+  alaw ĂŠs ulaw, szĂĄmos gsm, adpcm ĂŠs pcm formĂĄtum ĂŠs mĂĄs, egyszerĹą, rĂŠgi
+  audiĂł codec
   </simpara></listitem>
 <listitem><simpara>
-  Adaptive Multi-Rate (AMR) beszéd codec
+  Adaptive Multi-Rate (AMR) beszĂŠd codec
   </simpara></listitem>
 </itemizedlist>
 
 
 <sect2 id="swac3">
-<title>Szoftveres AC3 dekódolás</title>
+<title>Szoftveres AC3 dekĂłdolĂĄs</title>
 
 <para>
-Ez az alapértelmezésben használt dekódoló az AC3 audiójú fájlokhoz.
+Ez az alapĂŠrtelmezĂŠsben hasznĂĄlt dekĂłdolĂł az AC3 audiĂłjĂş fĂĄjlokhoz.
 </para>
 
 <para>
-Az AC3 dekódoló 2, 4 vagy 6 csatornás hangkimenet keverést tud csinálni.
-Ha 6 hangszóróra van beállítva, ez a dekódoló külön kimenetet biztosít hang
-vezérlő összes AC3 csatornájának, létrehozva így a teljes "surround
-sound" hatást, a hwac3 codec-hez szükséges külső AC3 dekódoló nélkül.
+Az AC3 dekĂłdolĂł 2, 4 vagy 6 csatornĂĄs hangkimenet keverĂŠst tud csinĂĄlni.
+Ha 6 hangszĂłrĂłra van beĂĄllĂ­tva, ez a dekĂłdolĂł kĂźlĂśn kimenetet biztosĂ­t hang
+vezĂŠrlĹ Ăśsszes AC3 csatornĂĄjĂĄnak, lĂŠtrehozva Ă­gy a teljes "surround
+sound" hatĂĄst, a hwac3 codec-hez szĂźksĂŠges kĂźlsĹ AC3 dekĂłdolĂł nĂŠlkĂźl.
 </para>
 
 <para>
-Használd a <option>-channels</option> kapcsolót a kimeneti csatornák számának
-megadásához. A <option>-channels 2</option> sztereo downmix-et produkál. Egy 4
-csatornás downmixhez (bal elülső, jobb elülső, bal Surround és jobb Surround
-kimenet) használd a <option>-channels 4</option> kapcsolót. Ebben az esetben,
-bármelyik középső csatorna egyenlően lesz elkeverve az elülső csatornákhoz.
-A <option>-channels 6</option> kapcsoló minden AC3 csatornát úgy ad ki, ahogy
-azok kódolva lettek - bal, jobb, bal Surround, jobb Surround, Center és LFE
+HasznĂĄld a <option>-channels</option> kapcsolĂłt a kimeneti csatornĂĄk szĂĄmĂĄnak
+megadĂĄsĂĄhoz. A <option>-channels 2</option> sztereo downmix-et produkĂĄl. Egy 4
+csatornĂĄs downmixhez (bal elĂźlsĹ, jobb elĂźlsĹ, bal Surround ĂŠs jobb Surround
+kimenet) hasznĂĄld a <option>-channels 4</option> kapcsolĂłt. Ebben az esetben,
+bĂĄrmelyik kĂśzĂŠpsĹ csatorna egyenlĹen lesz elkeverve az elĂźlsĹ csatornĂĄkhoz.
+A <option>-channels 6</option> kapcsolĂł minden AC3 csatornĂĄt Ăşgy ad ki, ahogy
+azok kĂłdolva lettek - bal, jobb, bal Surround, jobb Surround, Center ĂŠs LFE
 sorrendben.
 </para>
 
 <para>
-A csatornák alapértelmezett száma 2.
+A csatornĂĄk alapĂŠrtelmezett szĂĄma 2.
 </para>
 
 <para>
-2-nél több kimeneti csatorna használatához OSS-t kell használnod, és egy olyan
-hangkártyával kell rendelkezned, ami támogatja a megfelelő számú kimeneti
-csatornát az SNDCTL_DSP_CHANNELS ioctl-en keresztül. Például az emu10k1
-2001. augusztus vagy későbbi verziói megfelelő vezérlők (a Soundblaster Live!
-kártyák használják, de az ALSA CVS is valószínűleg működik).
+2-nĂŠl tĂśbb kimeneti csatorna hasznĂĄlatĂĄhoz OSS-t kell hasznĂĄlnod, ĂŠs egy olyan
+hangkĂĄrtyĂĄval kell rendelkezned, ami tĂĄmogatja a megfelelĹ szĂĄmĂş kimeneti
+csatornĂĄt az SNDCTL_DSP_CHANNELS ioctl-en keresztĂźl. PĂŠldĂĄul az emu10k1
+2001. augusztus vagy kĂŠsĹbbi verziĂłi megfelelĹ vezĂŠrlĹk (a Soundblaster Live!
+kĂĄrtyĂĄk hasznĂĄljĂĄk, de az ALSA CVS is valĂłszĂ­nĹąleg mĹąkĂśdik).
 </para>
 </sect2>
 
 
 <sect2 id="hwac3">
-<title>Hardveres AC3 dekódolás</title>
+<title>Hardveres AC3 dekĂłdolĂĄs</title>
 <para>
-AC3-at támogató hangkártyára lesz szükséges, digitális kimenettel (S/PDIF). A
-kártya vezérlőjének megfelelően támogatnia kell az AFMT_AC3 formátumot
-(a C-Media támogatja). Csatlakoztasd az AC3 dekódolódat az S/PDIF kimenethez és
-használd a <option>-ac hwac3</option> kapcsolót. Még kisérleti kód, de működik
-C-Media kártyákon és Soundblaster Live! + ALSA (de OSS-en nem) vezérlővel,
-valamint DXR3/Hollywood+ MPEG dekódoló kártyákon.
+AC3-at tĂĄmogatĂł hangkĂĄrtyĂĄra lesz szĂźksĂŠges, digitĂĄlis kimenettel (S/PDIF). A
+kĂĄrtya vezĂŠrlĹjĂŠnek megfelelĹen tĂĄmogatnia kell az AFMT_AC3 formĂĄtumot
+(a C-Media tĂĄmogatja). Csatlakoztasd az AC3 dekĂłdolĂłdat az S/PDIF kimenethez ĂŠs
+hasznĂĄld a <option>-ac hwac3</option> kapcsolĂłt. MĂŠg kisĂŠrleti kĂłd, de mĹąkĂśdik
+C-Media kĂĄrtyĂĄkon ĂŠs Soundblaster Live! + ALSA (de OSS-en nem) vezĂŠrlĹvel,
+valamint DXR3/Hollywood+ MPEG dekĂłdolĂł kĂĄrtyĂĄkon.
 </para>
 </sect2>
 
 
 <sect2 id="libmad">
-<title>libmad támogatás</title>
+<title>libmad tĂĄmogatĂĄs</title>
 
 <para>
-A <ulink url="http://www.underbit.com/products/mad/">libmad</ulink> egy többplatformos,
-csak egész (belső 24bit-es PCM) alapú MPEG audió dekódoló függvénykönyvtár.
-Nem kezeli jól a sérült fájlokat, és néha problémái vannak a kereséssel, de
-jobb a teljesítménye FPU nélküli rendszereken 
-(mint pl. az <link linkend="arm">ARM</link>), mint az mp3lib-é.
+A <ulink url="http://www.underbit.com/products/mad/">libmad</ulink> egy tĂśbbplatformos,
+csak egĂŠsz (belsĹ 24bit-es PCM) alapĂş MPEG audiĂł dekĂłdolĂł fĂźggvĂŠnykĂśnyvtĂĄr.
+Nem kezeli jĂłl a sĂŠrĂźlt fĂĄjlokat, ĂŠs nĂŠha problĂŠmĂĄi vannak a keresĂŠssel, de
+jobb a teljesĂ­tmĂŠnye FPU nĂŠlkĂźli rendszereken 
+(mint pl. az <link linkend="arm">ARM</link>), mint az mp3lib-ĂŠ.
 </para>
 
 <para>
-Ha van megfelelő libmad telepítve, a <filename>configure</filename>
-automatikusan észleli és beépíti a támogatást az MPEG audió
-<systemitem class="library">libmad</systemitem>-on keresztüli dekódolásához.
+Ha van megfelelĹ libmad telepĂ­tve, a <filename>configure</filename>
+automatikusan ĂŠszleli ĂŠs beĂŠpĂ­ti a tĂĄmogatĂĄst az MPEG audiĂł
+<systemitem class="library">libmad</systemitem>-on keresztĂźli dekĂłdolĂĄsĂĄhoz.
 </para>
 </sect2>
 
 <sect2 id="hwmpa">
-<title>Hardveres MPEG audió codec</title>
+<title>Hardveres MPEG audiĂł codec</title>
 
 <para>
-Ez a codec (a -ac hwmpa kapcsolóval választhatod ki) az MPEG audió csomagokat
-átadja a hardveres dekódolóknak, mint amilyenek például a jól felszerelt DVB
-kártyákon és DXR2 adaptereken vannak.
-Ne használd másik audió kimeneti eszközzel együtt (mint az OSS vagy ALSA),
-ami nem képes dekódolni (csak zajt fogsz hallanis).
+Ez a codec (a -ac hwmpa kapcsolĂłval vĂĄlaszthatod ki) az MPEG audiĂł csomagokat
+ĂĄtadja a hardveres dekĂłdolĂłknak, mint amilyenek pĂŠldĂĄul a jĂłl felszerelt DVB
+kĂĄrtyĂĄkon ĂŠs DXR2 adaptereken vannak.
+Ne hasznĂĄld mĂĄsik audiĂł kimeneti eszkĂśzzel egyĂźtt (mint az OSS vagy ALSA),
+ami nem kĂŠpes dekĂłdolni (csak zajt fogsz hallanis).
 </para>
 </sect2>
 
@@ -458,19 +458,19 @@ ami nem képes dekódolni (csak zajt fogsz hallanis).
 <sect2 id="aac">
 <title>AAC codec</title>
 <para>
-Az AAC (Advanced Audio Coding) egy audió codec, amit néha MOV és MP4 fájlokban
-található. Egy FAAD nevű, nyílt forráskódú dekódoló elérhető a
-<ulink url="http://www.audiocoding.com"/> címen.
-Az <application>MPlayer</application> tartalmazza a libfaad 2.1 béta CVS kódját,
-nem szükséges külön beszerezni.
+Az AAC (Advanced Audio Coding) egy audiĂł codec, amit nĂŠha MOV ĂŠs MP4 fĂĄjlokban
+talĂĄlhatĂł. Egy FAAD nevĹą, nyĂ­lt forrĂĄskĂłdĂş dekĂłdolĂł elĂŠrhetĹ a
+<ulink url="http://www.audiocoding.com"/> cĂ­men.
+Az <application>MPlayer</application> tartalmazza a libfaad 2.1 bĂŠta CVS kĂłdjĂĄt,
+nem szĂźksĂŠges kĂźlĂśn beszerezni.
 </para>
 
 <para>
-Ha gcc 3.2-t használsz, ami nem tudja lefordítani a belső FAAD forrásunkat vagy valami
-más okból a külső függvénykönyvtárat szeretnéd használni, töltsd le a
-<ulink url="http://www.audiocoding.com/modules/mydownloads/">letöltési oldalról</ulink>
-és add meg a <option>--enable-faad-external</option> kapcsolót a <filename>configure</filename>-nak.
-Nem kell a teljes faad2 az AAC fájlok dekódolásához, a libfaad elég. Így készítsd el:
+Ha gcc 3.2-t hasznĂĄlsz, ami nem tudja lefordĂ­tani a belsĹ FAAD forrĂĄsunkat vagy valami
+mĂĄs okbĂłl a kĂźlsĹ fĂźggvĂŠnykĂśnyvtĂĄrat szeretnĂŠd hasznĂĄlni, tĂśltsd le a
+<ulink url="http://www.audiocoding.com/modules/mydownloads/">letĂśltĂŠsi oldalrĂłl</ulink>
+ĂŠs add meg a <option>--enable-faad-external</option> kapcsolĂłt a <filename>configure</filename>-nak.
+Nem kell a teljes faad2 az AAC fĂĄjlok dekĂłdolĂĄsĂĄhoz, a libfaad elĂŠg. Ăgy kĂŠszĂ­tsd el:
 <screen>
 cd faad2/
 sh bootstrap
@@ -479,29 +479,29 @@ cd libfaad
 make
 make install
 </screen>
-Binárisok nem tölthetőek le az audiocoding.com-ról, de (apt-)get-tel feltelepítheted
-Debian csomagokból <ulink url="http://www.debian-multimedia.org/">Christian Marillat weboldaláról</ulink>,
-vagy Mandrake/Mandriva RPM-ből a <ulink url="http://plf.zarb.org">P.L.F</ulink>-ről, RedHat RPM-ből
-pedig a <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>-tól.
+BinĂĄrisok nem tĂślthetĹek le az audiocoding.com-rĂłl, de (apt-)get-tel feltelepĂ­theted
+Debian csomagokbĂłl <ulink url="http://www.debian-multimedia.org/">Christian Marillat weboldalĂĄrĂłl</ulink>,
+vagy Mandrake/Mandriva RPM-bĹl a <ulink url="http://plf.zarb.org">P.L.F</ulink>-rĹl, RedHat RPM-bĹl
+pedig a <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>-tĂłl.
 </para>
 </sect2>
 
 <sect2 id="amr">
 <title>AMR codec-ek</title>
 <para>
-Az Adaptive Multi-Rate beszéd codec-et harmadik generációs (3G) mobiltelefonokban
-használják.
-A referencia implementáció elérhető
-<ulink url="http://www.3gpp.org">A 3. Generációs Együttműködés Projekt</ulink>
-oldalán (személyes felhasználásra ingyenes).
+Az Adaptive Multi-Rate beszĂŠd codec-et harmadik generĂĄciĂłs (3G) mobiltelefonokban
+hasznĂĄljĂĄk.
+A referencia implementĂĄciĂł elĂŠrhetĹ
+<ulink url="http://www.3gpp.org">A 3. GenerĂĄciĂłs EgyĂźttmĹąkĂśdĂŠs Projekt</ulink>
+oldalĂĄn (szemĂŠlyes felhasznĂĄlĂĄsra ingyenes).
 </para>
 <para>
-A támogatás engedélyezéséhez töltsd le az
+A tĂĄmogatĂĄs engedĂŠlyezĂŠsĂŠhez tĂśltsd le az
 <ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
-és
+ĂŠs
 <ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
-codec-ek forrását, tedd be abba a könyvtárba, ahol az
-<application>MPlayer</application> forrása van és futtasd az alábbi parancsokat:
+codec-ek forrĂĄsĂĄt, tedd be abba a kĂśnyvtĂĄrba, ahol az
+<application>MPlayer</application> forrĂĄsa van ĂŠs futtasd az alĂĄbbi parancsokat:
 <screen>
 unzip 26104-610.zip
 unzip 26104-610_ANSI_C_source_code.zip
@@ -510,8 +510,8 @@ unzip 26204-600.zip
 unzip 26204-600_ANSI-C_source_code.zip
 mv c-code libavcodec/amrwb_float
 </screen>
-Ezután kövesd a szokásos <application>MPlayer</application>
-<link linkend="features">fordítási lépéseket</link>.
+EzutĂĄn kĂśvesd a szokĂĄsos <application>MPlayer</application>
+<link linkend="features">fordĂ­tĂĄsi lĂŠpĂŠseket</link>.
 </para>
 </sect2>
 
@@ -520,7 +520,7 @@ Ezután kövesd a szokásos <application>MPlayer</application>
 <!-- ********** -->
 
 <sect1 id="codec-importing">
-<title>Win32 codec importálási HOGYAN</title>
+<title>Win32 codec importĂĄlĂĄsi HOGYAN</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
 
@@ -528,40 +528,40 @@ Ezután kövesd a szokásos <application>MPlayer</application>
 <title>VFW codec-ek</title>
 
 <para>
-A VFW (Video for Windows) egy régi Videó API Windowshoz. A codecjei
-<filename>.DLL</filename> vagy (ritkán) <filename>.DRV</filename> kiterjesztésűek
-voltak. Ha az <application>MPlayer</application>nek nem sikerül lejátszani az AVI
-fájlodat egy ilyesmi üzenettel:
+A VFW (Video for Windows) egy rĂŠgi VideĂł API Windowshoz. A codecjei
+<filename>.DLL</filename> vagy (ritkĂĄn) <filename>.DRV</filename> kiterjesztĂŠsĹąek
+voltak. Ha az <application>MPlayer</application>nek nem sikerĂźl lejĂĄtszani az AVI
+fĂĄjlodat egy ilyesmi Ăźzenettel:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
 </para>
 
 <para>
-Ez azt jelenti, hogy az AVI fájlod egy olyan codec-kel lett elkódolva, aminek
+Ez azt jelenti, hogy az AVI fĂĄjlod egy olyan codec-kel lett elkĂłdolva, aminek
 HFYU a fourcc-je (HFYU = HuffYUV codec, DIV3 = DivX Low Motion, stb.). Most, hogy
-már tudod ezt, meg kell keresned, melyik DLL-t tölti be a Windows ennek a fájlnak
-a lejátszásához. A mi esetünkben, a <filename>system.ini</filename> tartalmazza
-ezt az információt ebben a sorban:
+mĂĄr tudod ezt, meg kell keresned, melyik DLL-t tĂślti be a Windows ennek a fĂĄjlnak
+a lejĂĄtszĂĄsĂĄhoz. A mi esetĂźnkben, a <filename>system.ini</filename> tartalmazza
+ezt az informĂĄciĂłt ebben a sorban:
 <programlisting>VIDC.HFYU=huffyuv.dll</programlisting>
 </para>
 
 <para>
-Szükséged lesz a <filename>huffyuv.dll</filename> fájlra. Figyelj rá, hogy az
+SzĂźksĂŠged lesz a <filename>huffyuv.dll</filename> fĂĄjlra. Figyelj rĂĄ, hogy az
 audio codec-ek MSACM prefix-szel vannak megadva:
 <programlisting>msacm.l3acm=L3codeca.acm</programlisting>
 </para>
 
 <para>
-Ez az MP3 codec. Most már minden szükséges információval rendelkezel
-(fourcc, codec fájl, példa AVI), küldd be a codec támogatási kérésedet egy
-levélben és töltsd fel ezket a fájlokat az FTP-re:
+Ez az MP3 codec. Most mĂĄr minden szĂźksĂŠges informĂĄciĂłval rendelkezel
+(fourcc, codec fĂĄjl, pĂŠlda AVI), kĂźldd be a codec tĂĄmogatĂĄsi kĂŠrĂŠsedet egy
+levĂŠlben ĂŠs tĂśltsd fel ezket a fĂĄjlokat az FTP-re:
 <systemitem role="url">
 ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecneve]/
 </systemitem>
 </para>
 
-<note><para>Windows NT/2000/XP alatt a regisztrációs adatbázisban keresd ezeket
-az információkat, pl. keress rá a &quot;VIDC.HFYU&quot;-ra. Hogy ezt hogy tudod
-megcsinálni, nézd meg a régi DirectShow módszert lejebb.
+<note><para>Windows NT/2000/XP alatt a regisztrĂĄciĂłs adatbĂĄzisban keresd ezeket
+az informĂĄciĂłkat, pl. keress rĂĄ a &quot;VIDC.HFYU&quot;-ra. Hogy ezt hogy tudod
+megcsinĂĄlni, nĂŠzd meg a rĂŠgi DirectShow mĂłdszert lejebb.
 </para></note>
 </sect2>
 
@@ -570,101 +570,101 @@ megcsinálni, nézd meg a régi DirectShow módszert lejebb.
 <title>DirectShow codec-ek</title>
 
 <para>
-A DirectShow egy újabb Videó API, ami még rosszabb, mint az elődje.
+A DirectShow egy Ăşjabb VideĂł API, ami mĂŠg rosszabb, mint az elĹdje.
 A dolgok nehezebben mennek a DirectShow-val, mivel
 <itemizedlist>
 <listitem><simpara>
-  a <filename>system.ini</filename> nem tartalmazza a megfelelő információkat,
-  azok a regisztrációs adatbázisban vannak és
+  a <filename>system.ini</filename> nem tartalmazza a megfelelĹ informĂĄciĂłkat,
+  azok a regisztrĂĄciĂłs adatbĂĄzisban vannak ĂŠs
   </simpara></listitem>
 <listitem><simpara>
-  szükségünk van a codec GUID-jére.
+  szĂźksĂŠgĂźnk van a codec GUID-jĂŠre.
   </simpara></listitem>
 </itemizedlist>
 </para>
 
 <procedure>
-<title>Új módszer:</title>
+<title>Ăj mĂłdszer:</title>
 <para>
-A <application>Microsoft GraphEdit</application> használatával (gyors)
+A <application>Microsoft GraphEdit</application> hasznĂĄlatĂĄval (gyors)
 </para>
 <step><para>
-  Szedd le a <application>GraphEdit</application>-et a DirectX SDK-ból vagy a
-  <ulink url="http://doom9.net">doom9</ulink>-ről.
+  Szedd le a <application>GraphEdit</application>-et a DirectX SDK-bĂłl vagy a
+  <ulink url="http://doom9.net">doom9</ulink>-rĹl.
   </para></step>
 <step><para>
-  Indítsd el a <command>graphedit.exe</command>-t.
+  IndĂ­tsd el a <command>graphedit.exe</command>-t.
   </para></step>
 <step><para>
-  A menüben válaszd ki a Graph -> Insert Filters menüpontot.
+  A menĂźben vĂĄlaszd ki a Graph -> Insert Filters menĂźpontot.
   </para></step>
 <step><para>
   Nyisd ki a <systemitem>DirectShow Filters</systemitem> elemeit.
   </para></step>
 <step><para>
-  Válaszd ki a megfelelő codec nevet és nyisd ki.
+  VĂĄlaszd ki a megfelelĹ codec nevet ĂŠs nyisd ki.
   </para></step>
 <step><para>
-  A <systemitem>DisplayName</systemitem> bejegyzésben nézd meg a francia
-  zárójelek között lévő karakterláncot és írd le (öt vonallal elválasztott
+  A <systemitem>DisplayName</systemitem> bejegyzĂŠsben nĂŠzd meg a francia
+  zĂĄrĂłjelek kĂśzĂśtt lĂŠvĹ karakterlĂĄncot ĂŠs Ă­rd le (Ăśt vonallal elvĂĄlasztott
   blokk, a GUID).
   </para></step>
 <step><para>
-  A codec bináris a <systemitem>Filename</systemitem> bejegyzésben megadott
-  fájl.
+  A codec binĂĄris a <systemitem>Filename</systemitem> bejegyzĂŠsben megadott
+  fĂĄjl.
   </para></step>
 </procedure>
 
 <note>
 <para>
-Ha nincs <systemitem>Filename</systemitem> és a
+Ha nincs <systemitem>Filename</systemitem> ĂŠs a
 <systemitem>DisplayName</systemitem> olyasmit tartalmaz, hogy
 <systemitem>device:dmo</systemitem>, akkor ez egy DMO-Codec.
 </para>
 </note>
 
 <procedure>
-<title>Régi módszer:</title>
+<title>RĂŠgi mĂłdszer:</title>
 <para>
-Végy egy nagy levegőt és kezdj keresni a regisztrációs adatbázisban...
+VĂŠgy egy nagy levegĹt ĂŠs kezdj keresni a regisztrĂĄciĂłs adatbĂĄzisban...
 </para>
 <step><para>
-  indítsd el a <command>regedit</command>-et.
+  indĂ­tsd el a <command>regedit</command>-et.
   </para></step>
 <step><para>
-  Nyomd meg a <keycap>Ctrl</keycap>+<keycap>F</keycap>, kapcsold ki az első
-  két kijelölő dobozd és engedélyezd a harmadikat. Írd be a codec fourcc-jét (pl.
+  Nyomd meg a <keycap>Ctrl</keycap>+<keycap>F</keycap>, kapcsold ki az elsĹ
+  kĂŠt kijelĂślĹ dobozd ĂŠs engedĂŠlyezd a harmadikat. Ărd be a codec fourcc-jĂŠt (pl.
   <userinput>TM20</userinput>).
   </para></step>
 <step><para>
-  Egy mezőt kell látnod, ami az elérési utat és a fájl nevét tartalmazza (pl.
+  Egy mezĹt kell lĂĄtnod, ami az elĂŠrĂŠsi utat ĂŠs a fĂĄjl nevĂŠt tartalmazza (pl.
   <filename>C:\WINDOWS\SYSTEM\TM20DEC.AX</filename>).
   </para></step>
 <step><para>
-  Most, hogy megvan a fájl, a GUID-t kell megkeresni. Próbáld újra a keresést, de
-  most a codec nevére keress, ne a fourcc-re. A nevét a Media Player kiírja a
-  fájl lejátszása közben, ha megnézed a
+  Most, hogy megvan a fĂĄjl, a GUID-t kell megkeresni. PrĂłbĂĄld Ăşjra a keresĂŠst, de
+  most a codec nevĂŠre keress, ne a fourcc-re. A nevĂŠt a Media Player kiĂ­rja a
+  fĂĄjl lejĂĄtszĂĄsa kĂśzben, ha megnĂŠzed a
   <guimenu>File</guimenu> -&gt; <guisubmenu>Properties</guisubmenu> -&gt;
-  <guimenuitem>Advanced</guimenuitem> fület.
-  Ha mégsem, akkor így jártál. Próbáld meg kitalálni (pl. keress rá a TrueMotion-ra).
+  <guimenuitem>Advanced</guimenuitem> fĂźlet.
+  Ha mĂŠgsem, akkor Ă­gy jĂĄrtĂĄl. PrĂłbĂĄld meg kitalĂĄlni (pl. keress rĂĄ a TrueMotion-ra).
   </para></step>
 <step><para>
-  Ha megvan a GUID, látnod kell egy <guilabel>FriendlyName</guilabel> és egy
-  <guilabel>CLSID</guilabel> mezőt. Írd le a 16 bájtos CLSID-t, ez
+  Ha megvan a GUID, lĂĄtnod kell egy <guilabel>FriendlyName</guilabel> ĂŠs egy
+  <guilabel>CLSID</guilabel> mezĹt. Ărd le a 16 bĂĄjtos CLSID-t, ez
   a GUID, ami kell.
   </para></step>
 </procedure>
 
 <note>
 <para>
-Ha nem sikerült a keresés, próbáld meg bekapcsolni az összes kijelölő dobozt. Ekkor
-kaphatsz hamis találatokat, de talán szerencséd lesz...
+Ha nem sikerĂźlt a keresĂŠs, prĂłbĂĄld meg bekapcsolni az Ăśsszes kijelĂślĹ dobozt. Ekkor
+kaphatsz hamis talĂĄlatokat, de talĂĄn szerencsĂŠd lesz...
 </para>
 </note>
 
 <para>
-Most, hogy már megvan minden szükséges információ (fourcc, GUID, codec fájl,
-példa AVI), küldd el a codec támogatási kérelmedet levélben és töltsd fel a fájlokat
+Most, hogy mĂĄr megvan minden szĂźksĂŠges informĂĄciĂł (fourcc, GUID, codec fĂĄjl,
+pĂŠlda AVI), kĂźldd el a codec tĂĄmogatĂĄsi kĂŠrelmedet levĂŠlben ĂŠs tĂśltsd fel a fĂĄjlokat
 az FTP-re:
 <systemitem
 role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecneve]/
@@ -672,9 +672,9 @@ role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecneve]/
 </para>
 
 <para>
-Ha saját magad szeretnél beépíteni egy codec-et, olvasd el a
+Ha sajĂĄt magad szeretnĂŠl beĂŠpĂ­teni egy codec-et, olvasd el a
 <ulink url="http://www.mplayerhq.hu/MPlayer/DOCS/tech/codecs.conf.txt">DOCS/tech/codecs.conf.txt</ulink>
-fájlt.
+fĂĄjlt.
 </para>
 
 </sect2>

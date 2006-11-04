@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20085 -->
 
 <bookinfo id="toc">
@@ -37,142 +37,142 @@
 
 
 <preface id="howtoread">
-<title>Hogyan olvasd ezt a dokumentációt</title>
+<title>Hogyan olvasd ezt a dokumentĂĄciĂłt</title>
 
 <para>
-Ha ez az első találkozásod az <application>MPlayer</application>-rel, olvass
-el mindent innentől egészen a <link linkend="install">Telepítés fejezet</link>
-végéig, közben kövesed a
-linkeket. Ha van kérdésed, keress rá a <link linkend="toc">tartalomjegyzékben</link>,
-olvasd el a <xref linkend="faq"/>-t, vagy greppelj a file-okban. A legtöbb
-kérdésre fogsz választ találni, amire pedig nem, az nagy valószínűséggel már
-megválaszolásra került valamelyik
-<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">levelezési listán</ulink>.
+Ha ez az elsĹ talĂĄlkozĂĄsod az <application>MPlayer</application>-rel, olvass
+el mindent innentĹl egĂŠszen a <link linkend="install">TelepĂ­tĂŠs fejezet</link>
+vĂŠgĂŠig, kĂśzben kĂśvesed a
+linkeket. Ha van kĂŠrdĂŠsed, keress rĂĄ a <link linkend="toc">tartalomjegyzĂŠkben</link>,
+olvasd el a <xref linkend="faq"/>-t, vagy greppelj a file-okban. A legtĂśbb
+kĂŠrdĂŠsre fogsz vĂĄlaszt talĂĄlni, amire pedig nem, az nagy valĂłszĂ­nĹąsĂŠggel mĂĄr
+megvĂĄlaszolĂĄsra kerĂźlt valamelyik
+<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">levelezĂŠsi listĂĄn</ulink>.
 <!-- FIXME: This refers to nonexistent links
-Nézd meg az
+NĂŠzd meg az
 <ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archivumot</ulink>,
-mert rengeteg értékes információt tartalmaz.
+mert rengeteg ĂŠrtĂŠkes informĂĄciĂłt tartalmaz.
 -->
 </para>
 </preface>
 
 <chapter id="intro">
-<title>Bevezetés</title>
+<title>BevezetĂŠs</title>
 
 <para>
-Az <application>MPlayer</application> egy Linuxon működő videolejátszó (fut
-számos más Unix-on és akár <emphasis role="bold">nem-x86</emphasis> processzorokon
-is, lásd <xref linkend="ports"/>). Le tudja játszani a legtöbb MPEG, VOB, AVI,
+Az <application>MPlayer</application> egy Linuxon mĹąkĂśdĹ videolejĂĄtszĂł (fut
+szĂĄmos mĂĄs Unix-on ĂŠs akĂĄr <emphasis role="bold">nem-x86</emphasis> processzorokon
+is, lĂĄsd <xref linkend="ports"/>). Le tudja jĂĄtszani a legtĂśbb MPEG, VOB, AVI,
 OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
-PVA, és Matroska file-t, és ezekhez felsorakoztat jónéhány natív, XAnim, RealPlayer
-és Win32 DLL codecet. Nézhetsz vele 
+PVA, ĂŠs Matroska file-t, ĂŠs ezekhez felsorakoztat jĂłnĂŠhĂĄny natĂ­v, XAnim, RealPlayer
+ĂŠs Win32 DLL codecet. NĂŠzhetsz vele 
 <emphasis role="bold">VideoCD-t, SVCD-t, DVD-t, 3ivx, RealMedia, Sorenson, Theora</emphasis>
-és <emphasis role="bold">MPEG-4 (DivX)</emphasis> filmet is. Az <application>MPlayer</application>
-másik nagy előnye a megjelenítési módok széles választékában rejlik.
-Működik X11, Xv, DGA, OpenGL, SVGAlib,
-fbdev, AAlib, libcaca, DirectFB, sőt SDL-lel vagy GGI-vel is (beleértve ezáltal
-az SDL/GGI drivereit is), és néhány alacsonyszintű kártyaspecifikus vezérlő
-(Matrox, 3dfx, Radeon, Mach64, Permedia3) is használható!
-Legtöbbjük támogat szoftveres vagy hardveres nagyítást, így a teljesképernyős
-mód is elérhető. Az <application>MPlayer</application> támogat továbbá hardveres
-MPEG kártyákkal történő dekódolást/megjelenítést, így például a 
-<link linkend="dvb">DVB</link> és <link linkend="dxr3">DXR3/Hollywood+</link>
-kártyákon!
-És még nem is szóltam a szép, élsímított, árnyékolt feliratozásról
-(<emphasis role="bold">14 támogatott típus!</emphasis>), ami támogat
-európai/ISO-88592-1,2 (magyar, angol, cseh, stb), cirill és koreai fontokat,
+ĂŠs <emphasis role="bold">MPEG-4 (DivX)</emphasis> filmet is. Az <application>MPlayer</application>
+mĂĄsik nagy elĹnye a megjelenĂ­tĂŠsi mĂłdok szĂŠles vĂĄlasztĂŠkĂĄban rejlik.
+MĹąkĂśdik X11, Xv, DGA, OpenGL, SVGAlib,
+fbdev, AAlib, libcaca, DirectFB, sĹt SDL-lel vagy GGI-vel is (beleĂŠrtve ezĂĄltal
+az SDL/GGI drivereit is), ĂŠs nĂŠhĂĄny alacsonyszintĹą kĂĄrtyaspecifikus vezĂŠrlĹ
+(Matrox, 3dfx, Radeon, Mach64, Permedia3) is hasznĂĄlhatĂł!
+LegtĂśbbjĂźk tĂĄmogat szoftveres vagy hardveres nagyĂ­tĂĄst, Ă­gy a teljeskĂŠpernyĹs
+mĂłd is elĂŠrhetĹ. Az <application>MPlayer</application> tĂĄmogat tovĂĄbbĂĄ hardveres
+MPEG kĂĄrtyĂĄkkal tĂśrtĂŠnĹ dekĂłdolĂĄst/megjelenĂ­tĂŠst, Ă­gy pĂŠldĂĄul a 
+<link linkend="dvb">DVB</link> ĂŠs <link linkend="dxr3">DXR3/Hollywood+</link>
+kĂĄrtyĂĄkon!
+Ăs mĂŠg nem is szĂłltam a szĂŠp, ĂŠlsĂ­mĂ­tott, ĂĄrnyĂŠkolt feliratozĂĄsrĂłl
+(<emphasis role="bold">14 tĂĄmogatott tĂ­pus!</emphasis>), ami tĂĄmogat
+eurĂłpai/ISO-88592-1,2 (magyar, angol, cseh, stb), cirill ĂŠs koreai fontokat,
 valamint OSD-t!
 </para>
 
 <para>
-A lejátszó sziklaszilárdan játszik le hibás MPEG file-okat (hasznos néhány
-VCD-nél), és minden olyan hibás AVI-t, amit a csodás Windows Media Player nem.
-Még az index chunk nélküli AVI-k is lejátszhatók, sőt az indexet ideiglenesen
-fel is lehet építeni az <option>-idx</option> opcióval (vagy véglegesen a
-<application>MEncoder</application>rel), így tekerni is lehet bennük! Amint
-az látszik, a stabilitás és a minőség a legfontosabb szempontok, de a sebesség
-terén sem szenved hátrányt. Valamint rendelkezik egy szűrő rendszerrel is a
-videó-audió szerkesztéshez.
+A lejĂĄtszĂł sziklaszilĂĄrdan jĂĄtszik le hibĂĄs MPEG file-okat (hasznos nĂŠhĂĄny
+VCD-nĂŠl), ĂŠs minden olyan hibĂĄs AVI-t, amit a csodĂĄs Windows Media Player nem.
+MĂŠg az index chunk nĂŠlkĂźli AVI-k is lejĂĄtszhatĂłk, sĹt az indexet ideiglenesen
+fel is lehet ĂŠpĂ­teni az <option>-idx</option> opciĂłval (vagy vĂŠglegesen a
+<application>MEncoder</application>rel), Ă­gy tekerni is lehet bennĂźk! Amint
+az lĂĄtszik, a stabilitĂĄs ĂŠs a minĹsĂŠg a legfontosabb szempontok, de a sebessĂŠg
+terĂŠn sem szenved hĂĄtrĂĄnyt. Valamint rendelkezik egy szĹąrĹ rendszerrel is a
+videĂł-audiĂł szerkesztĂŠshez.
 </para>
 
 <para>
 Az <application>MEncoder</application> (<application>MPlayer's</application> Movie
-Encoder) egy egyszerű film kódoló, az <application>MPlayer</application> által
-ismert formátumok
+Encoder) egy egyszerĹą film kĂłdolĂł, az <application>MPlayer</application> ĂĄltal
+ismert formĂĄtumok
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
-más, az <application>MPlayer</application>rel is lejátszható formátumokba való
-átalakításra. Sokféle codec-kel tud kódolni, például <emphasis role="bold">MPEG-4 (DivX4)</emphasis>-gyel
-(egy vagy két menetes), a <systemitem class="library">libavcodec</systemitem>-et
-alkotó codec-ekkel, audiót tekintve pedig
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> a választék.
+mĂĄs, az <application>MPlayer</application>rel is lejĂĄtszhatĂł formĂĄtumokba valĂł
+ĂĄtalakĂ­tĂĄsra. SokfĂŠle codec-kel tud kĂłdolni, pĂŠldĂĄul <emphasis role="bold">MPEG-4 (DivX4)</emphasis>-gyel
+(egy vagy kĂŠt menetes), a <systemitem class="library">libavcodec</systemitem>-et
+alkotĂł codec-ekkel, audiĂłt tekintve pedig
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> a vĂĄlasztĂŠk.
 </para>
 
 
 <itemizedlist>
-<title>Az <application>MEncoder</application> előnyei</title>
+<title>Az <application>MEncoder</application> elĹnyei</title>
 <listitem><simpara>
-  Az <application>MPlayer</application> által támogatott összes formátumból lehet
-  kódolni
+  Az <application>MPlayer</application> ĂĄltal tĂĄmogatott Ăśsszes formĂĄtumbĂłl lehet
+  kĂłdolni
   </simpara></listitem>
 <listitem><simpara>
   Az FFmpeg <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-  által támogatott összes formátumba tud tömöríteni
+  ĂĄltal tĂĄmogatott Ăśsszes formĂĄtumba tud tĂśmĂśrĂ­teni
   </simpara></listitem>
 <listitem><simpara>
-  Videó grabbelés <emphasis role="bold">V4L kompatibilis TV tunerekről</emphasis>
+  VideĂł grabbelĂŠs <emphasis role="bold">V4L kompatibilis TV tunerekrĹl</emphasis>
   </simpara></listitem>
 <listitem><simpara>
-  Helyes index-szel rendelkező AVI fájlok kódolása/multiplexelése
+  Helyes index-szel rendelkezĹ AVI fĂĄjlok kĂłdolĂĄsa/multiplexelĂŠse
   </simpara></listitem>
 <listitem><simpara>
-  Opcionálisan külső audio stream használata
+  OpcionĂĄlisan kĂźlsĹ audio stream hasznĂĄlata
   </simpara></listitem>
 <listitem><simpara>
-  1, 2 vagy 3 menetes kódolás
+  1, 2 vagy 3 menetes kĂłdolĂĄs
   </simpara></listitem>
 <listitem><para>
-  <emphasis role="bold">VBR</emphasis> MP3 audió
+  <emphasis role="bold">VBR</emphasis> MP3 audiĂł
   <important><simpara>
-  a VBR-es MP3-akat nem minden Windows rendszerre elérhető lejátszó kezeli helyesen!
+  a VBR-es MP3-akat nem minden Windows rendszerre elĂŠrhetĹ lejĂĄtszĂł kezeli helyesen!
   </simpara></important>
   </para></listitem>
 <listitem><simpara>
-  PCM audió
+  PCM audiĂł
 3  </simpara></listitem>
 <listitem><simpara>
-  Stream másolás
+  Stream mĂĄsolĂĄs
   </simpara></listitem>
 <listitem><simpara>
-  Bemeneti file A/V szinkronizálása (PTS-alapú, az <option>-mc 0</option> opcióval kikapcsolható)
+  Bemeneti file A/V szinkronizĂĄlĂĄsa (PTS-alapĂş, az <option>-mc 0</option> opciĂłval kikapcsolhatĂł)
   </simpara></listitem>
 <listitem><simpara>
-  fps javítás az <option>-ofps</option> opcióval (hasznos ha 30000/1001 fps-es
-  VOB-ot kódolsz 24000/1001 fps-es AVI-ba)
+  fps javĂ­tĂĄs az <option>-ofps</option> opciĂłval (hasznos ha 30000/1001 fps-es
+  VOB-ot kĂłdolsz 24000/1001 fps-es AVI-ba)
   </simpara></listitem>
 <listitem><simpara>
-  Roppant jó szűrő rendszer használata (crop, expand, flip, postprocess, rotate, scale,
-  RGB/YUV konverzió)
+  Roppant jĂł szĹąrĹ rendszer hasznĂĄlata (crop, expand, flip, postprocess, rotate, scale,
+  RGB/YUV konverziĂł)
   </simpara></listitem>
 <listitem><simpara>
-  A kimeneti fájlba bele tudja kódolni mind a DVD/VOBsub, mind a szöveges feliratokat
+  A kimeneti fĂĄjlba bele tudja kĂłdolni mind a DVD/VOBsub, mind a szĂśveges feliratokat
   </simpara></listitem>
 <listitem><simpara>
-  DVD feliratok külső VOBsub fájlba történő rippelése
+  DVD feliratok kĂźlsĹ VOBsub fĂĄjlba tĂśrtĂŠnĹ rippelĂŠse
   </simpara></listitem>
 </itemizedlist>
 
 <itemizedlist>
-<title>Tervezett funkciók</title>
+<title>Tervezett funkciĂłk</title>
 <listitem><simpara>
-  Még szélesebb skálája a be- és kimeneti formátumoknak és a codec-eknek
-  (VOB fájlok készítése DivX4/Indeo5/VIVO streammel :).
+  MĂŠg szĂŠlesebb skĂĄlĂĄja a be- ĂŠs kimeneti formĂĄtumoknak ĂŠs a codec-eknek
+  (VOB fĂĄjlok kĂŠszĂ­tĂŠse DivX4/Indeo5/VIVO streammel :).
   </simpara></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->
 <para>
-Az <application>MPlayer</application> és <application>MEncoder</application>
-a GNU General Public License v2 értelmében terjeszthető.
+Az <application>MPlayer</application> ĂŠs <application>MEncoder</application>
+a GNU General Public License v2 ĂŠrtelmĂŠben terjeszthetĹ.
 </para>
 
 </chapter>

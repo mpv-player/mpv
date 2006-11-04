@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r17322 -->
 <chapter id="tv">
 <title>TV</title>
@@ -7,146 +7,146 @@
 <title>TV bemenet</title>
 
 <para>
-Ez a rész arról szól, hogy hogyan lehet <emphasis role="bold">adást nézni/lementeni
-V4L kompatibilis TV tunerrel</emphasis>. Lásd a man oldalt a TV-s kapcsolók és
-a vezérlő billentyűk listájáért.
+Ez a rĂŠsz arrĂłl szĂłl, hogy hogyan lehet <emphasis role="bold">adĂĄst nĂŠzni/lementeni
+V4L kompatibilis TV tunerrel</emphasis>. LĂĄsd a man oldalt a TV-s kapcsolĂłk ĂŠs
+a vezĂŠrlĹ billentyĹąk listĂĄjĂĄĂŠrt.
 </para>
 
 
 <sect2 id="tv-compilation">
-<title>Fordítás</title>
+<title>FordĂ­tĂĄs</title>
 
 <procedure>
 <step><para>
-  Először is újra fordítanod kell. A <filename>./configure</filename>
-  automatikusan megtalálja a v4l dolgok kernel fejléceit és a
-  <filename>/dev/video*</filename> bejegyzéseket. Ha léteznek, a TV támogatás
-  be lesz építve (lásd a <filename>./configure</filename> kimenetét).
+  ElĹszĂśr is Ăşjra fordĂ­tanod kell. A <filename>./configure</filename>
+  automatikusan megtalĂĄlja a v4l dolgok kernel fejlĂŠceit ĂŠs a
+  <filename>/dev/video*</filename> bejegyzĂŠseket. Ha lĂŠteznek, a TV tĂĄmogatĂĄs
+  be lesz ĂŠpĂ­tve (lĂĄsd a <filename>./configure</filename> kimenetĂŠt).
   </para></step>
 <step><para>
-  Győződj meg róla, hogy a tunered működik másik Linuxos TV szoftverrel is,
-  például a <application>XawTV</application>-vel.
+  GyĹzĹdj meg rĂłla, hogy a tunered mĹąkĂśdik mĂĄsik Linuxos TV szoftverrel is,
+  pĂŠldĂĄul a <application>XawTV</application>-vel.
   </para></step>
 </procedure>
 </sect2>
 
 <sect2 id="tv-tips">
-<title>Használati tippek</title>
+<title>HasznĂĄlati tippek</title>
 <para>
-A kapcsolók teljes listája a man oldalon található.
-Itt csak pár tippet említünk meg:
+A kapcsolĂłk teljes listĂĄja a man oldalon talĂĄlhatĂł.
+Itt csak pĂĄr tippet emlĂ­tĂźnk meg:
 </para>
 <itemizedlist>
 <listitem>
 <para>
-Használd a <option>channels</option> kapcsolót. Például:
+HasznĂĄld a <option>channels</option> kapcsolĂłt. PĂŠldĂĄul:
 <screen>-tv channels=26-MTV1,23-TV2</screen>
-Magyarázat: ha ezt a kapcsolót használod, akkor csak a 26-os és a 23-as csatorna
-lesz használható, és szép OSD szöveg lesz csatorna váltáskor, mely a csatorna nevét
-jelzi ki. A csatorna nevében lévő szóközöket a &quot;_&quot; karakterrel kell kicserélni.
+MagyarĂĄzat: ha ezt a kapcsolĂłt hasznĂĄlod, akkor csak a 26-os ĂŠs a 23-as csatorna
+lesz hasznĂĄlhatĂł, ĂŠs szĂŠp OSD szĂśveg lesz csatorna vĂĄltĂĄskor, mely a csatorna nevĂŠt
+jelzi ki. A csatorna nevĂŠben lĂŠvĹ szĂłkĂśzĂśket a &quot;_&quot; karakterrel kell kicserĂŠlni.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Válassz valamilyen értelmes képméretet. A kp méreteinek oszthatónak kell lennie 16-tal.
+VĂĄlassz valamilyen ĂŠrtelmes kĂŠpmĂŠretet. A kp mĂŠreteinek oszthatĂłnak kell lennie 16-tal.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Ha videót mentesz el úgy, hogy a függőleges felbontás nagyobb, mint a teljes
-felbontás fele (pl. 288 a PAL-nál és 240 az NTSC-nél), akkor a kapott 'képkockák'
-tényleg átlapolt mezőpárok lesznek.
-Attól függően, hogy mit akarsz csinálni a videóval, hagyhatod ebben a formában,
-veszteséges deinterlacing-et hajthatsz végre vagy szétszedheted a párokat
-egyedi mezőkre.
+Ha videĂłt mentesz el Ăşgy, hogy a fĂźggĹleges felbontĂĄs nagyobb, mint a teljes
+felbontĂĄs fele (pl. 288 a PAL-nĂĄl ĂŠs 240 az NTSC-nĂŠl), akkor a kapott 'kĂŠpkockĂĄk'
+tĂŠnyleg ĂĄtlapolt mezĹpĂĄrok lesznek.
+AttĂłl fĂźggĹen, hogy mit akarsz csinĂĄlni a videĂłval, hagyhatod ebben a formĂĄban,
+vesztesĂŠges deinterlacing-et hajthatsz vĂŠgre vagy szĂŠtszedheted a pĂĄrokat
+egyedi mezĹkre.
 </para>
 <para>
-Különben a filmed torzul a gyors mozgású jelenetek alatt és a bitráta vezérlő
-is valószínűleg képtelen lesz az előírt bitráta megtartására, ahogy az
-interlacing változások nagy mennyiségű adatot eredményeznek és így nagy
-sávszélességet vesznek el. A deinterlacing-et bekapcsolhatod a
-<option>-vf pp=DEINT_TYPE</option> kapcsolóval. Általában a
-<option>pp=lb</option> jó, de ez az egyéni beállításokon is múlik. A többi
-deinterlacing algoritmust lásd a manuálban és próbálgasd ki őket.
-</para>
-</listitem>
-
-<listitem>
-<para>
-Vágd le a felesleges helyet. Ha videót mentesz, a sarki arénák teljesen
-feketék és némi zajt tartalmaznak. Ezek szintén nagy sávszélességet foglalnak
-el feleslegesen. Pontosabban nem maguk a fekete területek, hanem az éles
-átmenetek a fekete és a világosabb videó kép között, de ez most nem fontos
-igazából. Mielőtt elindítanád a mentést, állítsd be a <option>crop</option>
-kapcsoló argumentumait, így a széleknél lévő vackok le lesznek vágva.
-És ne feledd a képméreteket ésszerű keretek között tartani.
+KĂźlĂśnben a filmed torzul a gyors mozgĂĄsĂş jelenetek alatt ĂŠs a bitrĂĄta vezĂŠrlĹ
+is valĂłszĂ­nĹąleg kĂŠptelen lesz az elĹĂ­rt bitrĂĄta megtartĂĄsĂĄra, ahogy az
+interlacing vĂĄltozĂĄsok nagy mennyisĂŠgĹą adatot eredmĂŠnyeznek ĂŠs Ă­gy nagy
+sĂĄvszĂŠlessĂŠget vesznek el. A deinterlacing-et bekapcsolhatod a
+<option>-vf pp=DEINT_TYPE</option> kapcsolĂłval. ĂltalĂĄban a
+<option>pp=lb</option> jĂł, de ez az egyĂŠni beĂĄllĂ­tĂĄsokon is mĂşlik. A tĂśbbi
+deinterlacing algoritmust lĂĄsd a manuĂĄlban ĂŠs prĂłbĂĄlgasd ki Ĺket.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Figyelj a CPU terhelésre. Legtöbbször átlépi a 90%-os határt. Ha nagy mentési
-buffered van, a <application>MEncoder</application> túlél egy esetleges túlterhelést
-pár másodpercig, de semmi több. Jobb kikapcsolni a 3D OpenGL képernyővédőket
-és a hasonló dolgokat.
+VĂĄgd le a felesleges helyet. Ha videĂłt mentesz, a sarki arĂŠnĂĄk teljesen
+feketĂŠk ĂŠs nĂŠmi zajt tartalmaznak. Ezek szintĂŠn nagy sĂĄvszĂŠlessĂŠget foglalnak
+el feleslegesen. Pontosabban nem maguk a fekete terĂźletek, hanem az ĂŠles
+ĂĄtmenetek a fekete ĂŠs a vilĂĄgosabb videĂł kĂŠp kĂśzĂśtt, de ez most nem fontos
+igazĂĄbĂłl. MielĹtt elindĂ­tanĂĄd a mentĂŠst, ĂĄllĂ­tsd be a <option>crop</option>
+kapcsolĂł argumentumait, Ă­gy a szĂŠleknĂŠl lĂŠvĹ vackok le lesznek vĂĄgva.
+Ăs ne feledd a kĂŠpmĂŠreteket ĂŠsszerĹą keretek kĂśzĂśtt tartani.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Ne szórakozz a rendszer órával. A <application>MEncoder</application> a
-rendszer órát használja az A/V szinkronhoz. Ha átállítod a rendszer órát (különösen
-vissza az időben), a <application>MEncoder</application> összezavarodik és
-képkockákat veszítesz. Ez egy fontos dolog, ha hálózathoz kapcsolódsz és futtatsz
-valamilyen idő szinkronizációs szoftvert, mint pl. NTP. Ki kell kapcsolnod az
-NTP-t a mentési folyamat alatt, ha megbízható mentést akarsz.
+Figyelj a CPU terhelĂŠsre. LegtĂśbbszĂśr ĂĄtlĂŠpi a 90%-os hatĂĄrt. Ha nagy mentĂŠsi
+buffered van, a <application>MEncoder</application> tĂşlĂŠl egy esetleges tĂşlterhelĂŠst
+pĂĄr mĂĄsodpercig, de semmi tĂśbb. Jobb kikapcsolni a 3D OpenGL kĂŠpernyĹvĂŠdĹket
+ĂŠs a hasonlĂł dolgokat.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Ne változtasd meg az <option>outfmt</option>-t, hacsak vagy biztos benne, hogy mit
-csinálsz, vagy a kártyád/vezérlőd tényleg nem támogatja az alapértelmezést
-(YV12 színtér). A <application>MPlayer</application>/<application>MEncoder</application>
-régebbi verzióiban szükséges volt a kimeneti formátum megadása. Ez a jelenlegi
-kiadásban már javítva lett és az <option>outfmt</option> már nem szükséges, az
-alapértelmezés megfelel a legtöbb esetben. Például ha videót mentesz DivX-be
-a <systemitem class="library">libavcodec</systemitem> használatával és megadod
-az <option>outfmt=RGB24</option>-t a mentett kép minőségének növelése érdekében,
-a mentett kép igazából később lesz visszakonvertálva YV12-be így az egyetlen,
-amit elérsz, az erőteljes CPU használat.
+Ne szĂłrakozz a rendszer ĂłrĂĄval. A <application>MEncoder</application> a
+rendszer ĂłrĂĄt hasznĂĄlja az A/V szinkronhoz. Ha ĂĄtĂĄllĂ­tod a rendszer ĂłrĂĄt (kĂźlĂśnĂśsen
+vissza az idĹben), a <application>MEncoder</application> Ăśsszezavarodik ĂŠs
+kĂŠpkockĂĄkat veszĂ­tesz. Ez egy fontos dolog, ha hĂĄlĂłzathoz kapcsolĂłdsz ĂŠs futtatsz
+valamilyen idĹ szinkronizĂĄciĂłs szoftvert, mint pl. NTP. Ki kell kapcsolnod az
+NTP-t a mentĂŠsi folyamat alatt, ha megbĂ­zhatĂł mentĂŠst akarsz.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Az I420 színtér megadásához (<option>outfmt=i420</option>) meg kell adnod egy
-<option>-vc rawi420</option> kapcsolót is, mivel fourcc ütközés van egy Intel Indeo
-videó codec-kel.
+Ne vĂĄltoztasd meg az <option>outfmt</option>-t, hacsak vagy biztos benne, hogy mit
+csinĂĄlsz, vagy a kĂĄrtyĂĄd/vezĂŠrlĹd tĂŠnyleg nem tĂĄmogatja az alapĂŠrtelmezĂŠst
+(YV12 szĂ­ntĂŠr). A <application>MPlayer</application>/<application>MEncoder</application>
+rĂŠgebbi verziĂłiban szĂźksĂŠges volt a kimeneti formĂĄtum megadĂĄsa. Ez a jelenlegi
+kiadĂĄsban mĂĄr javĂ­tva lett ĂŠs az <option>outfmt</option> mĂĄr nem szĂźksĂŠges, az
+alapĂŠrtelmezĂŠs megfelel a legtĂśbb esetben. PĂŠldĂĄul ha videĂłt mentesz DivX-be
+a <systemitem class="library">libavcodec</systemitem> hasznĂĄlatĂĄval ĂŠs megadod
+az <option>outfmt=RGB24</option>-t a mentett kĂŠp minĹsĂŠgĂŠnek nĂśvelĂŠse ĂŠrdekĂŠben,
+a mentett kĂŠp igazĂĄbĂłl kĂŠsĹbb lesz visszakonvertĂĄlva YV12-be Ă­gy az egyetlen,
+amit elĂŠrsz, az erĹteljes CPU hasznĂĄlat.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Rengeteg módon menthetsz el audiót. A hangot grabbelheted a hang kártyáddal is
-egy a videó kártya és a line-in között lévő külső kábelen keresztül, vagy a
-bt878-as chip-be beépített ADC segítségével. A második esetben be kell töltened
-a <emphasis role="bold">btaudio</emphasis> vezérlőt. Olvasd el a
-<filename>linux/Documentation/sound/btaudio</filename> fájlt (a kernel fájában,
-nem az <application>MPlayer</application>ében) némi leírásért ezen vezérlő
-használatával kapcsolatban.
+Az I420 szĂ­ntĂŠr megadĂĄsĂĄhoz (<option>outfmt=i420</option>) meg kell adnod egy
+<option>-vc rawi420</option> kapcsolĂłt is, mivel fourcc ĂźtkĂśzĂŠs van egy Intel Indeo
+videĂł codec-kel.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Ha a <application>MEncoder</application> nem tudja megnyitni az audió eszközt,
-győződj meg róla, hogy tényleg elérhető-e. Gond lehet a hang szerverekkel, mint
-pl. aRts (KDE) vagy ESD (GNOME). ha full duplex hang kártyád van (majdnem
-az összes hangkártya tudja már ezt manapság), és KDE-t használsz, próbáld
-meg bekapcsolni a "full duplex" opciót a hangkártya tulajdonságok menüben.
+Rengeteg mĂłdon menthetsz el audiĂłt. A hangot grabbelheted a hang kĂĄrtyĂĄddal is
+egy a videĂł kĂĄrtya ĂŠs a line-in kĂśzĂśtt lĂŠvĹ kĂźlsĹ kĂĄbelen keresztĂźl, vagy a
+bt878-as chip-be beĂŠpĂ­tett ADC segĂ­tsĂŠgĂŠvel. A mĂĄsodik esetben be kell tĂśltened
+a <emphasis role="bold">btaudio</emphasis> vezĂŠrlĹt. Olvasd el a
+<filename>linux/Documentation/sound/btaudio</filename> fĂĄjlt (a kernel fĂĄjĂĄban,
+nem az <application>MPlayer</application>ĂŠben) nĂŠmi leĂ­rĂĄsĂŠrt ezen vezĂŠrlĹ
+hasznĂĄlatĂĄval kapcsolatban.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Ha a <application>MEncoder</application> nem tudja megnyitni az audiĂł eszkĂśzt,
+gyĹzĹdj meg rĂłla, hogy tĂŠnyleg elĂŠrhetĹ-e. Gond lehet a hang szerverekkel, mint
+pl. aRts (KDE) vagy ESD (GNOME). ha full duplex hang kĂĄrtyĂĄd van (majdnem
+az Ăśsszes hangkĂĄrtya tudja mĂĄr ezt manapsĂĄg), ĂŠs KDE-t hasznĂĄlsz, prĂłbĂĄld
+meg bekapcsolni a "full duplex" opciĂłt a hangkĂĄrtya tulajdonsĂĄgok menĂźben.
 </para>
 </listitem>
 </itemizedlist>
@@ -154,7 +154,7 @@ meg bekapcsolni a "full duplex" opciót a hangkártya tulajdonságok menüben.
 
 
 <sect2 id="tv-examples">
-<title>Példák</title>
+<title>PĂŠldĂĄk</title>
 
 <informalexample>
 <para>
@@ -167,7 +167,7 @@ mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://<!--
 
 <informalexample>
 <para>
-Bemenet standard V4L-ről:
+Bemenet standard V4L-rĹl:
 <screen>
 mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://<!--
 --></screen>
@@ -176,11 +176,11 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
 
 <informalexample>
 <para>
-Egy sokkal mesterkéltebb példa. Ezzel a <application>MEncoder</application>
-elmenti a teljes PAL képet, levágja a széleket és deinterlace-eli a képet
-a linear blend algoritmus segítségével. Az audió 65 kbps-es állandó bitrátával
-kerül tömörítésre, a LAME codec felhasználásával. Ez a beállítás megfelelő a
-filmek elmentéséhez.
+Egy sokkal mesterkĂŠltebb pĂŠlda. Ezzel a <application>MEncoder</application>
+elmenti a teljes PAL kĂŠpet, levĂĄgja a szĂŠleket ĂŠs deinterlace-eli a kĂŠpet
+a linear blend algoritmus segĂ­tsĂŠgĂŠvel. Az audiĂł 65 kbps-es ĂĄllandĂł bitrĂĄtĂĄval
+kerĂźl tĂśmĂśrĂ­tĂŠsre, a LAME codec felhasznĂĄlĂĄsĂĄval. Ez a beĂĄllĂ­tĂĄs megfelelĹ a
+filmek elmentĂŠsĂŠhez.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
@@ -203,10 +203,10 @@ capturing long TV series, where the video quality isn't so important.
      -oac mp3lame -lameopts cbr:br=48 \
      -vf crop=720:540:24:18,pp=lb,scale=384:288 -sws 1 -o <replaceable>output.avi</replaceable> tv://
 </screen>
-Meg lehet adni kisebb képméretet is a <option>-tv</option> kapcsolónál és ki lehet
-hagyni a szoftveres méretezést, de ez a megközelítés a lehető legtöbb információt
-használja fel és egy kicsit ellenállóbb a zajokkal szemben. A bt8x8 chip-ek a
-pixel átlagolást csak vízszintesen tudják hardveres korlátok miatt.
+Meg lehet adni kisebb kĂŠpmĂŠretet is a <option>-tv</option> kapcsolĂłnĂĄl ĂŠs ki lehet
+hagyni a szoftveres mĂŠretezĂŠst, de ez a megkĂśzelĂ­tĂŠs a lehetĹ legtĂśbb informĂĄciĂłt
+hasznĂĄlja fel ĂŠs egy kicsit ellenĂĄllĂłbb a zajokkal szemben. A bt8x8 chip-ek a
+pixel ĂĄtlagolĂĄst csak vĂ­zszintesen tudjĂĄk hardveres korlĂĄtok miatt.
 </para>
 </informalexample>
 </sect2>

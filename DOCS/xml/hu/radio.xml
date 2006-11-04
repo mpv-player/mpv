@@ -1,69 +1,69 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20051 -->
 <chapter id="radio">
-<title>Rádió</title>
+<title>RĂĄdiĂł</title>
 
 <sect1 id="radio-input" xreflabel="Radio input">
-<title>Radió bemenet</title>
+<title>RadiĂł bemenet</title>
 
 <para>
-Ez a fejezet arról szól, hogyan engedélyezheted a V4L-kompatibilis
-rádió tuner-ről történő rádió hallgatást. Lásd a man oldalt a
-rádiós opciók és a billentyűzeten keresztüli vezérlés leírásához.
+Ez a fejezet arrĂłl szĂłl, hogyan engedĂŠlyezheted a V4L-kompatibilis
+rĂĄdiĂł tuner-rĹl tĂśrtĂŠnĹ rĂĄdiĂł hallgatĂĄst. LĂĄsd a man oldalt a
+rĂĄdiĂłs opciĂłk ĂŠs a billentyĹązeten keresztĂźli vezĂŠrlĂŠs leĂ­rĂĄsĂĄhoz.
 </para>
 
 
 <sect2 id="radio-compilation">
-<title>Fordítás</title>
+<title>FordĂ­tĂĄs</title>
 
 <procedure>
 <step><para>
-  Először újra kell fordítanod az MPlayer-t a <filename>./configure</filename>
-  <option>--enable-radio</option> és (ha menteni is szeretnél)
-  <option>--enable-radio-capture</option> opcióival.
+  ElĹszĂśr Ăşjra kell fordĂ­tanod az MPlayer-t a <filename>./configure</filename>
+  <option>--enable-radio</option> ĂŠs (ha menteni is szeretnĂŠl)
+  <option>--enable-radio-capture</option> opciĂłival.
   </para></step>
 <step><para>
-  Győződj meg róla, hogy a tuner-ed működik más Linux-os rádiós
+  GyĹzĹdj meg rĂłla, hogy a tuner-ed mĹąkĂśdik mĂĄs Linux-os rĂĄdiĂłs
   programmal, mint pl. a <application>XawTV</application>.
   </para></step>
 </procedure>
 </sect2>
 
 <sect2 id="radio-tips">
-<title>Használati tippel</title>
+<title>HasznĂĄlati tippel</title>
 <para>
-Az összes használható opcióhoz nézd meg a man oldalt.
-Következzék pár tipp:
+Az Ăśsszes hasznĂĄlhatĂł opciĂłhoz nĂŠzd meg a man oldalt.
+KĂśvetkezzĂŠk pĂĄr tipp:
 </para>
 <itemizedlist>
 <listitem>
 <para>
-Használd a <option>channels</option> opciót. Egy példa:
+HasznĂĄld a <option>channels</option> opciĂłt. Egy pĂŠlda:
 <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
-Magyarázat: Ezzel az opcióval csak a 104.4 és 103.9 rádió adók
-használhatóak. Egy szép OSD szöveg fog megjelenni csatorna váltásnál,
-kiírva a csatorna nevét. A csatorna nevében szereplő szóközöket
-&quot;_&quot; karakterrel kell helyettesíteni.
+MagyarĂĄzat: Ezzel az opciĂłval csak a 104.4 ĂŠs 103.9 rĂĄdiĂł adĂłk
+hasznĂĄlhatĂłak. Egy szĂŠp OSD szĂśveg fog megjelenni csatorna vĂĄltĂĄsnĂĄl,
+kiĂ­rva a csatorna nevĂŠt. A csatorna nevĂŠben szereplĹ szĂłkĂśzĂśket
+&quot;_&quot; karakterrel kell helyettesĂ­teni.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Több lehetőség is adott az audió elmentésére. Menthetsz a hangkártyád segítségével
-is, egy videó kártyát és a line-in-t összekötő külső kábellel, vagy az saa7134
-chip-be beépített ADC segítségével. Ez utóbbi esetben be kell töltened az
+TĂśbb lehetĹsĂŠg is adott az audiĂł elmentĂŠsĂŠre. Menthetsz a hangkĂĄrtyĂĄd segĂ­tsĂŠgĂŠvel
+is, egy videĂł kĂĄrtyĂĄt ĂŠs a line-in-t ĂśsszekĂśtĹ kĂźlsĹ kĂĄbellel, vagy az saa7134
+chip-be beĂŠpĂ­tett ADC segĂ­tsĂŠgĂŠvel. Ez utĂłbbi esetben be kell tĂśltened az
 <systemitem>saa7134-alsa</systemitem> vagy az <systemitem>saa7134-oss</systemitem>
-vezérlőt.
+vezĂŠrlĹt.
 </para>
 </listitem>
 
 <listitem>
 <para>
-A <application>MEncoder</application> nem használható az audió elmentésére,
-mert videó folyamra van szüksége. Így vagy az <application>arecord</application>
-használhatod az ALSA projektből vagy a <option>-ao pcm:file=file.wav</option>
-opciót. Ez utóbbi esetben nem fogsz hallani semmilyen hangot (hacsak nem használsz
-egy line-in kábelt és nem kapcsolod ki a line-in némítást).
+A <application>MEncoder</application> nem hasznĂĄlhatĂł az audiĂł elmentĂŠsĂŠre,
+mert videĂł folyamra van szĂźksĂŠge. Ăgy vagy az <application>arecord</application>
+hasznĂĄlhatod az ALSA projektbĹl vagy a <option>-ao pcm:file=file.wav</option>
+opciĂłt. Ez utĂłbbi esetben nem fogsz hallani semmilyen hangot (hacsak nem hasznĂĄlsz
+egy line-in kĂĄbelt ĂŠs nem kapcsolod ki a line-in nĂŠmĂ­tĂĄst).
 </para>
 </listitem>
 </itemizedlist>
@@ -71,12 +71,12 @@ egy line-in kábelt és nem kapcsolod ki a line-in némítást).
 
 
 <sect2 id="radio-examples">
-<title>Példák</title>
+<title>PĂŠldĂĄk</title>
 
 
 <informalexample>
 <para>
-Bemenet szabványos V4L-ről (line-in kábellel, mentés kikapcsolva):
+Bemenet szabvĂĄnyos V4L-rĹl (line-in kĂĄbellel, mentĂŠs kikapcsolva):
 <screen>
 mplayer radio://104.4
 </screen>
@@ -85,8 +85,8 @@ mplayer radio://104.4
 
 <informalexample>
 <para>
-Bemenet szabványos V4L-ről (line-in kábellel, mentés kikapcsolva,
-V4Lv1 interfész):
+Bemenet szabvĂĄnyos V4L-rĹl (line-in kĂĄbellel, mentĂŠs kikapcsolva,
+V4Lv1 interfĂŠsz):
 <screen>
 mplayer -radio driver=v4l radio://104.4
 </screen>
@@ -95,7 +95,7 @@ mplayer -radio driver=v4l radio://104.4
 
 <informalexample>
 <para>
-A csatorna listán második csatorna lejátszása:
+A csatorna listĂĄn mĂĄsodik csatorna lejĂĄtszĂĄsa:
 <screen>
 mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
 </screen>
@@ -104,15 +104,15 @@ mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
 
 <informalexample>
 <para>
-Hang átadása a PCI buszon a rádió kártya belső ADC-jéből.
-Ebben a példában a tuner második hangkártyaként szerepel
-(ALSA device hw:1,0). Az saa7134-alapú kártyákhoz vagy az
-saa7134-alsa vagy az saa7134-oss modult be kell tölteni.
+Hang ĂĄtadĂĄsa a PCI buszon a rĂĄdiĂł kĂĄrtya belsĹ ADC-jĂŠbĹl.
+Ebben a pĂŠldĂĄban a tuner mĂĄsodik hangkĂĄrtyakĂŠnt szerepel
+(ALSA device hw:1,0). Az saa7134-alapĂş kĂĄrtyĂĄkhoz vagy az
+saa7134-alsa vagy az saa7134-oss modult be kell tĂślteni.
 <screen>
 mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm radio://2/capture
 </screen>
-<note><para>Ha ALSA eszköz neveket használsz, a kettőspontokat egyenlőség
-jelekkel kell helyettesíteni, a periódusokat vesszők választják el.
+<note><para>Ha ALSA eszkĂśz neveket hasznĂĄlsz, a kettĹspontokat egyenlĹsĂŠg
+jelekkel kell helyettesĂ­teni, a periĂłdusokat vesszĹk vĂĄlasztjĂĄk el.
 </para></note>
 </para>
 </informalexample>

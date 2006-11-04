@@ -1,55 +1,55 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r17322 -->
 <chapter id="audio">
-<title>Audió kimeneti eszközök</title>
+<title>AudiĂł kimeneti eszkĂśzĂśk</title>
 <sect1 id="sync">
-<title>Audió/Videó szinkronizáció</title>
+<title>AudiĂł/VideĂł szinkronizĂĄciĂł</title>
 
 <para>
-A Linux hangkártya vezérlői kompatibilítási problémákkal küzdenek. Ez azért van,
-mert az <application>MPlayer</application> a <emphasis>megfelelően</emphasis>
-kódolt hang vezérlők egy beépített tulajdonságát használja, ami engedélyezi nekik
-az audió/videó szinkron javítását. Sajnálatos módon néhány vezérlő szerzői
-nem gondoskodnak ezen tulajdonság kódolásáról, mivel nem szükséges az MP3-ak
-és a hangeffektek lejátszásához.
+A Linux hangkĂĄrtya vezĂŠrlĹi kompatibilĂ­tĂĄsi problĂŠmĂĄkkal kĂźzdenek. Ez azĂŠrt van,
+mert az <application>MPlayer</application> a <emphasis>megfelelĹen</emphasis>
+kĂłdolt hang vezĂŠrlĹk egy beĂŠpĂ­tett tulajdonsĂĄgĂĄt hasznĂĄlja, ami engedĂŠlyezi nekik
+az audiĂł/videĂł szinkron javĂ­tĂĄsĂĄt. SajnĂĄlatos mĂłdon nĂŠhĂĄny vezĂŠrlĹ szerzĹi
+nem gondoskodnak ezen tulajdonsĂĄg kĂłdolĂĄsĂĄrĂłl, mivel nem szĂźksĂŠges az MP3-ak
+ĂŠs a hangeffektek lejĂĄtszĂĄsĂĄhoz.
 </para>
 
 <para>
-Más média lejátszók, mint pl. az <ulink url="http://avifile.sf.net">aviplay</ulink>
-vagy a <ulink url="http://xinehq.de">xine</ulink> valószínűleg
-kapásból működnek ezekkel a vezérlőkkel, mert egy "egyszerű" módszert
-használnak belső időzítéssel. A mérések azt mutatják, hogy az ő
-módszereik nem olyan hatékonyak, mint az <application>MPlayer</application>é.
+MĂĄs mĂŠdia lejĂĄtszĂłk, mint pl. az <ulink url="http://avifile.sf.net">aviplay</ulink>
+vagy a <ulink url="http://xinehq.de">xine</ulink> valĂłszĂ­nĹąleg
+kapĂĄsbĂłl mĹąkĂśdnek ezekkel a vezĂŠrlĹkkel, mert egy "egyszerĹą" mĂłdszert
+hasznĂĄlnak belsĹ idĹzĂ­tĂŠssel. A mĂŠrĂŠsek azt mutatjĂĄk, hogy az Ĺ
+mĂłdszereik nem olyan hatĂŠkonyak, mint az <application>MPlayer</application>ĂŠ.
 </para>
 
 <para>
-Az <application>MPlayer</application>t egy megfelelően megírt audió vezérlővel
-használva soha nem fog A/V deszinkronizáció bekövetkezni az audióban, csak
-nagyon rosszul elkészített fájlok esetén (lásd a man oldalt a megkerüléshez).
+Az <application>MPlayer</application>t egy megfelelĹen megĂ­rt audiĂł vezĂŠrlĹvel
+hasznĂĄlva soha nem fog A/V deszinkronizĂĄciĂł bekĂśvetkezni az audiĂłban, csak
+nagyon rosszul elkĂŠszĂ­tett fĂĄjlok esetĂŠn (lĂĄsd a man oldalt a megkerĂźlĂŠshez).
 </para>
 
 <para>
-Ha neked rossz audió vezérlőd van, próbáld ki a <option>-autosync</option>
-kapcsolót, megszünteti a problémáidat. Lásd a man oldalt a bővebb információkért.
+Ha neked rossz audiĂł vezĂŠrlĹd van, prĂłbĂĄld ki a <option>-autosync</option>
+kapcsolĂłt, megszĂźnteti a problĂŠmĂĄidat. LĂĄsd a man oldalt a bĹvebb informĂĄciĂłkĂŠrt.
 </para>
 </sect1>
 
 <sect1 id="troubleshooting">
-<title>Problémamegoldás</title>
+<title>ProblĂŠmamegoldĂĄs</title>
 
-<para>Néhány megjegyzés:</para>
+<para>NĂŠhĂĄny megjegyzĂŠs:</para>
 <para>
-  Ha 0.5-ös ALSA-d van, akkor majdnem mindig a <option>-ao alsa5</option>-öt kell
-  használnod, mivel az ALSA 0.5-nek hibás az OSS emulációs kódja,
-  és <emphasis role="bold">össze fogja omlasztani az <application>MPlayer</application>t</emphasis>
-  egy ehhez hasonló üzenettel:
+  Ha 0.5-Ăśs ALSA-d van, akkor majdnem mindig a <option>-ao alsa5</option>-Ăśt kell
+  hasznĂĄlnod, mivel az ALSA 0.5-nek hibĂĄs az OSS emulĂĄciĂłs kĂłdja,
+  ĂŠs <emphasis role="bold">Ăśssze fogja omlasztani az <application>MPlayer</application>t</emphasis>
+  egy ehhez hasonlĂł Ăźzenettel:
   <screen>
 DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
 --></screen>
 </para>
 <para>
-  Ha a hang kattog CD-ROM-ról történő lejátszás közben, kapcsold be az IRQ
-  unmasking-ot, amint az a <link linkend="drives">CD-ROM</link> részben le van írva.
+  Ha a hang kattog CD-ROM-rĂłl tĂśrtĂŠnĹ lejĂĄtszĂĄs kĂśzben, kapcsold be az IRQ
+  unmasking-ot, amint az a <link linkend="drives">CD-ROM</link> rĂŠszben le van Ă­rva.
 </para>
 </sect1>
 

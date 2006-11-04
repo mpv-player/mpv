@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20054 -->
 <chapter id="video">
-<title>Videó kimeneti eszközök</title>
+<title>VideĂł kimeneti eszkĂśzĂśk</title>
 
 <sect1 id="mtrr">
-<title>Az MTRR beállítása</title>
+<title>Az MTRR beĂĄllĂ­tĂĄsa</title>
 
 <para>
-NAGYON javasoljuk, hogy ellenőrizd le, hogy az MTRR regiszterek
-megfelelően be vannak-e állítva, mert hatalmas teljesítményjavulást
+NAGYON javasoljuk, hogy ellenĹrizd le, hogy az MTRR regiszterek
+megfelelĹen be vannak-e ĂĄllĂ­tva, mert hatalmas teljesĂ­tmĂŠnyjavulĂĄst
 hozhatnak.
 </para>
 
 <para>
-Írd be: <command>cat /proc/mtrr</command>:
+Ărd be: <command>cat /proc/mtrr</command>:
 <screen>
 <prompt>--($:~)--</prompt> cat /proc/mtrr
 reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9
@@ -22,25 +22,25 @@ reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<!--
 </para>
 
 <para>
-Ez jó, mutatja a 16 MB memóriával rendelkező Matrox G400-as kártyámat.
-Ezt XFree 4.x.x-ből csináltam, ami automatikusan beállítja az MTRR
+Ez jĂł, mutatja a 16 MB memĂłriĂĄval rendelkezĹ Matrox G400-as kĂĄrtyĂĄmat.
+Ezt XFree 4.x.x-bĹl csinĂĄltam, ami automatikusan beĂĄllĂ­tja az MTRR
 regisztereket.
 </para>
 
 <para>
-Ha semmi sem működik, kézzel kell beállítanod. Először meg kell találnod
-a bázis címet. 3 módszer van a megtalálására:
+Ha semmi sem mĹąkĂśdik, kĂŠzzel kell beĂĄllĂ­tanod. ElĹszĂśr meg kell talĂĄlnod
+a bĂĄzis cĂ­met. 3 mĂłdszer van a megtalĂĄlĂĄsĂĄra:
 
 <orderedlist>
 <listitem><para>
-  az X11 indulási üzeneteiből, például:
+  az X11 indulĂĄsi ĂźzeneteibĹl, pĂŠldĂĄul:
   <screen>
 (--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
 (--) SVGA: Linear framebuffer at 0xD8000000<!--
 --></screen>
   </para></listitem>
 <listitem><para>
-  a <filename>/proc/pci</filename> fájlból (használd az <command>lspci -v</command>
+  a <filename>/proc/pci</filename> fĂĄjlbĂłl (hasznĂĄld az <command>lspci -v</command>
   parancsot):
   <screen>
 01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
@@ -48,15 +48,15 @@ Memory at d8000000 (32-bit, prefetchable)
   </screen>
   </para></listitem>
 <listitem><para>
-  az mga_vid kernel vezérlő üzeneteiből (használd a <command>dmesg</command>-et):
+  az mga_vid kernel vezĂŠrlĹ ĂźzeneteibĹl (hasznĂĄld a <command>dmesg</command>-et):
   <screen>mga_mem_base = d8000000</screen>
   </para></listitem>
 </orderedlist>
 </para>
 
 <para>
-Ezután keresd meg a memória méretét. Ez nagyon egyszerű, csak számold át
-a videó RAM méretét hexadecimálisra, vagy használd ezt a táblázatot:
+EzutĂĄn keresd meg a memĂłria mĂŠretĂŠt. Ez nagyon egyszerĹą, csak szĂĄmold ĂĄt
+a videĂł RAM mĂŠretĂŠt hexadecimĂĄlisra, vagy hasznĂĄld ezt a tĂĄblĂĄzatot:
 <informaltable frame="none">
 <tgroup cols="2">
 <tbody>
@@ -72,9 +72,9 @@ a videó RAM méretét hexadecimálisra, vagy használd ezt a táblázatot:
 </para>
 
 <para>
-Már tudjuk a bázis címet és a memória méretét, hát állítsuk be az
+MĂĄr tudjuk a bĂĄzis cĂ­met ĂŠs a memĂłria mĂŠretĂŠt, hĂĄt ĂĄllĂ­tsuk be az
 MTRR regisztereket!
-Például a fenti Matrox kártyánál (<literal>base=0xd8000000</literal>)
+PĂŠldĂĄul a fenti Matrox kĂĄrtyĂĄnĂĄl (<literal>base=0xd8000000</literal>)
 32MB RAM-mal (<literal>size=0x2000000</literal>) csak futtasd ezt:
 <screen>
 echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
@@ -82,49 +82,49 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
 </para>
 
 <para>
-Nem minden CPU-ban van MTRR. Például a régebbi K6-2 (266MHz körül,
+Nem minden CPU-ban van MTRR. PĂŠldĂĄul a rĂŠgebbi K6-2 (266MHz kĂśrĂźl,
 stepping 0) CPU-kban nincs MTRR, de a stepping 12-ben van
-(futtasd le a <command>cat /proc/cpuinfo</command> parancsot az ellenőrzéshez).
+(futtasd le a <command>cat /proc/cpuinfo</command> parancsot az ellenĹrzĂŠshez).
 </para>
 </sect1>
 
 <sect1 id="output-trad">
-<title>Videó kimenet tradícionális videó kártyákhoz</title>
+<title>VideĂł kimenet tradĂ­cionĂĄlis videĂł kĂĄrtyĂĄkhoz</title>
 <sect2 id="xv">
 <title>Xv</title>
 
 <para>
-XFree86 4.0.2 vagy újabb alatt használhatod a kártyád YUV rutinjait
-az XVideo kiterjesztés használatával. Ez az, amit a '<option>-vo xv</option>'
-kapcsoló használ. Ez a vezérlő támogatja a
-fényerősség/kontraszt/árnyalat/stb. állítását (hacsak nem a régi, lassú
-DirectShow DivX codec-et használod, ami mindenhol támogatja), lásd a man oldalt.
+XFree86 4.0.2 vagy Ăşjabb alatt hasznĂĄlhatod a kĂĄrtyĂĄd YUV rutinjait
+az XVideo kiterjesztĂŠs hasznĂĄlatĂĄval. Ez az, amit a '<option>-vo xv</option>'
+kapcsolĂł hasznĂĄl. Ez a vezĂŠrlĹ tĂĄmogatja a
+fĂŠnyerĹssĂŠg/kontraszt/ĂĄrnyalat/stb. ĂĄllĂ­tĂĄsĂĄt (hacsak nem a rĂŠgi, lassĂş
+DirectShow DivX codec-et hasznĂĄlod, ami mindenhol tĂĄmogatja), lĂĄsd a man oldalt.
 </para>
 
 <para>
-A beüzemeléséhez ellenőrizd a következőket:
+A beĂźzemelĂŠsĂŠhez ellenĹrizd a kĂśvetkezĹket:
 
 <orderedlist>
 <listitem><para>
-  XFree86 4.0.2 vagy újabbat kell használnod (korábbi verziókban nincs XVideo)
+  XFree86 4.0.2 vagy Ăşjabbat kell hasznĂĄlnod (korĂĄbbi verziĂłkban nincs XVideo)
   </para></listitem>
 <listitem><para>
-  A kártyádnak támogatnia kell a hardveres gyorsítást (a modern kártyák tudják)
+  A kĂĄrtyĂĄdnak tĂĄmogatnia kell a hardveres gyorsĂ­tĂĄst (a modern kĂĄrtyĂĄk tudjĂĄk)
   </para></listitem>
 <listitem><para>
-  Az X-nek írnia kell az XVideo kiegészítés betöltését valahogy így:
+  Az X-nek Ă­rnia kell az XVideo kiegĂŠszĂ­tĂŠs betĂśltĂŠsĂŠt valahogy Ă­gy:
   <programlisting>(II) Loading extension XVideo</programlisting>
-  a <filename>/var/log/XFree86.0.log</filename> fájlban.
+  a <filename>/var/log/XFree86.0.log</filename> fĂĄjlban.
   <note><para>
-   Ez csak az XFree86 kiegészítését tölti be. Egy jó telepítésben ez mindig betöltődik,
-   de ez nem jelenti azt, hogy a <emphasis role="bold">kártya</emphasis> XVideo
-   támogatása is be van töltve!
+   Ez csak az XFree86 kiegĂŠszĂ­tĂŠsĂŠt tĂślti be. Egy jĂł telepĂ­tĂŠsben ez mindig betĂśltĹdik,
+   de ez nem jelenti azt, hogy a <emphasis role="bold">kĂĄrtya</emphasis> XVideo
+   tĂĄmogatĂĄsa is be van tĂśltve!
   </para></note>
   </para></listitem>
 <listitem><para>
-  A kártyádnak van Xv támogatása Linux alatt. Ennek az ellenőrzéséhez add ki az
-  <command>xvinfo</command> parancsot, ez része az XFree86 disztribúciónak. Egy
-  hosszú szöveget kell kiírnia, valami ilyesmit:
+  A kĂĄrtyĂĄdnak van Xv tĂĄmogatĂĄsa Linux alatt. Ennek az ellenĹrzĂŠsĂŠhez add ki az
+  <command>xvinfo</command> parancsot, ez rĂŠsze az XFree86 disztribĂşciĂłnak. Egy
+  hosszĂş szĂśveget kell kiĂ­rnia, valami ilyesmit:
   <screen>
 X-Video Extension version 2.2
 screen #0
@@ -150,13 +150,13 @@ screen #0
         type: YUV (planar)
 (...stb...)<!--
 --></screen>
-  Támogatnia kell a tömörített YUY2 és a YV12 planar pixel formátumokat, hogy az
-  <application>MPlayer</application> használni tudja.
+  TĂĄmogatnia kell a tĂśmĂśrĂ­tett YUY2 ĂŠs a YV12 planar pixel formĂĄtumokat, hogy az
+  <application>MPlayer</application> hasznĂĄlni tudja.
   </para></listitem>
 <listitem><para>
-  És végül, nézd meg, hogy az <application>MPlayer</application> 'xv' támogatással
-  lett-e fordítva. Írd be ezt: <command>mplayer -vo help | grep xv </command>.
-  Ha az 'xv' támogatás be van építve, egy ehhez hasonló sornak szerepelnie kell:
+  Ăs vĂŠgĂźl, nĂŠzd meg, hogy az <application>MPlayer</application> 'xv' tĂĄmogatĂĄssal
+  lett-e fordĂ­tva. Ărd be ezt: <command>mplayer -vo help | grep xv </command>.
+  Ha az 'xv' tĂĄmogatĂĄs be van ĂŠpĂ­tve, egy ehhez hasonlĂł sornak szerepelnie kell:
   <screen>
   xv      X11/Xv<!--
   --></screen>
@@ -165,120 +165,120 @@ screen #0
 </para>
 
 <sect3 id="tdfx">
-<title>3dfx kártyák</title>
+<title>3dfx kĂĄrtyĂĄk</title>
 
 <para>
-A régebbi 3dfx vezérlőknek tudvalevőleg problémáik vannak az XVideo gyorsítással,
-nem támogatják sem a YUY2-t sem a YV12-t, és így tovább. Nézd meg, hogy 4.2.0 vagy
-újabb XFree86-tal rendelkezel-e, ez rendben működik YV12-vel és YUY2-vel. A korábbi
-verziók, beleértve a 4.1.0-t, <emphasis role="bold">összeomlanak az YV12-vel</emphasis>.
-Ha különös effekteket tapasztalsz a <option>-vo xv</option> használatakor,
-próbáld ki az SDL-t (ebben is van XVideo) és nézd meg, hogy ez segít-e. Lásd az
-<link linkend="sdl">SDL</link> fejezetet a részletekért.
+A rĂŠgebbi 3dfx vezĂŠrlĹknek tudvalevĹleg problĂŠmĂĄik vannak az XVideo gyorsĂ­tĂĄssal,
+nem tĂĄmogatjĂĄk sem a YUY2-t sem a YV12-t, ĂŠs Ă­gy tovĂĄbb. NĂŠzd meg, hogy 4.2.0 vagy
+Ăşjabb XFree86-tal rendelkezel-e, ez rendben mĹąkĂśdik YV12-vel ĂŠs YUY2-vel. A korĂĄbbi
+verziĂłk, beleĂŠrtve a 4.1.0-t, <emphasis role="bold">Ăśsszeomlanak az YV12-vel</emphasis>.
+Ha kĂźlĂśnĂśs effekteket tapasztalsz a <option>-vo xv</option> hasznĂĄlatakor,
+prĂłbĂĄld ki az SDL-t (ebben is van XVideo) ĂŠs nĂŠzd meg, hogy ez segĂ­t-e. LĂĄsd az
+<link linkend="sdl">SDL</link> fejezetet a rĂŠszletekĂŠrt.
 </para>
 
 <para>
-<emphasis role="bold">VAGY</emphasis>, próbáld ki az ÚJ
-<option>-vo tdfxfb</option> vezérlőt! Lásd a <link linkend="tdfxfb">tdfxfb</link>
-részt.
+<emphasis role="bold">VAGY</emphasis>, prĂłbĂĄld ki az ĂJ
+<option>-vo tdfxfb</option> vezĂŠrlĹt! LĂĄsd a <link linkend="tdfxfb">tdfxfb</link>
+rĂŠszt.
 </para>
 </sect3>
 
 
 <sect3 id="s3">
-<title>S3 kártyák</title>
+<title>S3 kĂĄrtyĂĄk</title>
 
 <para>
-Az S3 Savage3D nem működik megfelelően, de a Savage4 igen 4.0.3 vagy újabb XFree86
-használata mellett (képhibák esetén próbáld 16bpp-vel). Ami az S3 Virge-eket illeti:
-van xv támogatás, de maga a kártya túl lassú, így jobb, ha eladod.
+Az S3 Savage3D nem mĹąkĂśdik megfelelĹen, de a Savage4 igen 4.0.3 vagy Ăşjabb XFree86
+hasznĂĄlata mellett (kĂŠphibĂĄk esetĂŠn prĂłbĂĄld 16bpp-vel). Ami az S3 Virge-eket illeti:
+van xv tĂĄmogatĂĄs, de maga a kĂĄrtya tĂşl lassĂş, Ă­gy jobb, ha eladod.
 </para>
 <para>
-Már van natív framebuffer vezérlő az S3 Virge kártyákhoz, hasonlóan a tdfxfb-hez.
-Állítsd be a framebuffer-ed (pl. add hozzá a
-"<option>vga=792 video=vesa:mtrr</option>" opciót a kerneledhez) és használd
-a <option>-vo s3fb</option> opciót (<option>-vf yuy2</option> és <option>-dr</option>
-szintén segíthet).
+MĂĄr van natĂ­v framebuffer vezĂŠrlĹ az S3 Virge kĂĄrtyĂĄkhoz, hasonlĂłan a tdfxfb-hez.
+ĂllĂ­tsd be a framebuffer-ed (pl. add hozzĂĄ a
+"<option>vga=792 video=vesa:mtrr</option>" opciĂłt a kerneledhez) ĂŠs hasznĂĄld
+a <option>-vo s3fb</option> opciĂłt (<option>-vf yuy2</option> ĂŠs <option>-dr</option>
+szintĂŠn segĂ­thet).
 </para>
 
 <note>
 <para>
-Jelenleg nem tisztázott, hogy mely Savage modellekből hiányzik a YV12 támogatás, és
-konvertál a vezérlő (lassú). Ha a kártyára gyanakodsz, szerezz be egy újabb vezérlőt,
-vagy udvariasan kérj az MPlayer-users levelezési listán egy MMX/3DNow! támogatású vezérlőt.
+Jelenleg nem tisztĂĄzott, hogy mely Savage modellekbĹl hiĂĄnyzik a YV12 tĂĄmogatĂĄs, ĂŠs
+konvertĂĄl a vezĂŠrlĹ (lassĂş). Ha a kĂĄrtyĂĄra gyanakodsz, szerezz be egy Ăşjabb vezĂŠrlĹt,
+vagy udvariasan kĂŠrj az MPlayer-users levelezĂŠsi listĂĄn egy MMX/3DNow! tĂĄmogatĂĄsĂş vezĂŠrlĹt.
 </para>
 </note>
 </sect3>
 
 
 <sect3 id="nvidia">
-<title>nVidia kártyák</title>
+<title>nVidia kĂĄrtyĂĄk</title>
 
 <para>
-Az nVidia nem mindig a legjobb választás Linux alatt... Az XFree86
-nyílt forráskódú vezérlője támogatja a legtöbb kártyát, de a legtöbb esetben a
-bináris, zárt forrású nVidia vezérlőt kell használnod, ami elérhető
-az <ulink url="http://www.nvidia.com/object/linux.html">nVidia weboldalán</ulink>.
-Erre a vezérlőre mindenképpen szükséged lesz, ha 3D gyorsítást akarsz.
+Az nVidia nem mindig a legjobb vĂĄlasztĂĄs Linux alatt... Az XFree86
+nyĂ­lt forrĂĄskĂłdĂş vezĂŠrlĹje tĂĄmogatja a legtĂśbb kĂĄrtyĂĄt, de a legtĂśbb esetben a
+binĂĄris, zĂĄrt forrĂĄsĂş nVidia vezĂŠrlĹt kell hasznĂĄlnod, ami elĂŠrhetĹ
+az <ulink url="http://www.nvidia.com/object/linux.html">nVidia weboldalĂĄn</ulink>.
+Erre a vezĂŠrlĹre mindenkĂŠppen szĂźksĂŠged lesz, ha 3D gyorsĂ­tĂĄst akarsz.
 </para>
 
 <para>
-A Riva128 kártyákkal nincs XVideo támogatás az XFree86 nVidia vezérlőjével :(
+A Riva128 kĂĄrtyĂĄkkal nincs XVideo tĂĄmogatĂĄs az XFree86 nVidia vezĂŠrlĹjĂŠvel :(
 Panaszkodj az nVidia-nak.
 </para>
 
 <para>
-Habár az <application>MPlayer</application> a legtöbb nVidia kártyához
-rendelkezik <link linkend="vidix">VIDIX</link> vezérlővel. Jelenleg még
-béta állapotú, és van pár bökkenője. További információkért lásd az
-<link linkend="vidix-nvidia">nVidia VIDIX</link> részt.
+HabĂĄr az <application>MPlayer</application> a legtĂśbb nVidia kĂĄrtyĂĄhoz
+rendelkezik <link linkend="vidix">VIDIX</link> vezĂŠrlĹvel. Jelenleg mĂŠg
+bĂŠta ĂĄllapotĂş, ĂŠs van pĂĄr bĂśkkenĹje. TovĂĄbbi informĂĄciĂłkĂŠrt lĂĄsd az
+<link linkend="vidix-nvidia">nVidia VIDIX</link> rĂŠszt.
 </para>
 </sect3>
 
 
 <sect3 id="ati">
-<title>ATI kártyák</title>
+<title>ATI kĂĄrtyĂĄk</title>
 
 <para>
-A <ulink url="http://gatos.sf.net">GATOS vezérlő</ulink> (amit
-használnod illene, hacsak nem Rage128 vagy Radeon kártyád van) alapértelmezésként
-engedélyezi a VSYNC-et. Ez azt jelenti, hogy a dekódolási sebesség (!) a
-monitor frissítési rátájához van szinkronizálva. Ha a lejátszás lassúnak
-tűnik, próbáld meg valahogy kikapcsolni a VSYNC-et vagy állítsd be a
-frissítést n*(film fps értéke) Hz-re.
+A <ulink url="http://gatos.sf.net">GATOS vezĂŠrlĹ</ulink> (amit
+hasznĂĄlnod illene, hacsak nem Rage128 vagy Radeon kĂĄrtyĂĄd van) alapĂŠrtelmezĂŠskĂŠnt
+engedĂŠlyezi a VSYNC-et. Ez azt jelenti, hogy a dekĂłdolĂĄsi sebessĂŠg (!) a
+monitor frissĂ­tĂŠsi rĂĄtĂĄjĂĄhoz van szinkronizĂĄlva. Ha a lejĂĄtszĂĄs lassĂşnak
+tĹąnik, prĂłbĂĄld meg valahogy kikapcsolni a VSYNC-et vagy ĂĄllĂ­tsd be a
+frissĂ­tĂŠst n*(film fps ĂŠrtĂŠke) Hz-re.
 </para>
 
 <para>
-A Radeon VE - ha X kell, használj XFree 4.2.0-t vagy újabbat ehhez a kártyához.
-Nincs TV kimenet támogatás. Természetesen az <application>MPlayer</application>rel
-simán is <emphasis role="bold">gyorsított</emphasis> megjelenítést kapsz,
-<emphasis role="bold">TV kimenettel</emphasis> vagy anélkül, és így sem
-függvénykönyvtárra sem X-re nincs szükség.
-Olvasd el a <link linkend="vidix">VIDIX</link> részt.
+A Radeon VE - ha X kell, hasznĂĄlj XFree 4.2.0-t vagy Ăşjabbat ehhez a kĂĄrtyĂĄhoz.
+Nincs TV kimenet tĂĄmogatĂĄs. TermĂŠszetesen az <application>MPlayer</application>rel
+simĂĄn is <emphasis role="bold">gyorsĂ­tott</emphasis> megjelenĂ­tĂŠst kapsz,
+<emphasis role="bold">TV kimenettel</emphasis> vagy anĂŠlkĂźl, ĂŠs Ă­gy sem
+fĂźggvĂŠnykĂśnyvtĂĄrra sem X-re nincs szĂźksĂŠg.
+Olvasd el a <link linkend="vidix">VIDIX</link> rĂŠszt.
 </para>
 </sect3>
 
 
 <sect3 id="neomagic">
-<title>NeoMagic kártyák</title>
+<title>NeoMagic kĂĄrtyĂĄk</title>
 
 <para>
-Ilyen kártyák általában laptopokban találhatóak. XFree86 4.3.0 vagy
-újabbat kell használnod, vagy Stefan Seyfried
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">Xv-t támogató vezérlőjét</ulink>.
-Csak válaszd ki az te XFree86-odhoz illő verziót.
+Ilyen kĂĄrtyĂĄk ĂĄltalĂĄban laptopokban talĂĄlhatĂłak. XFree86 4.3.0 vagy
+Ăşjabbat kell hasznĂĄlnod, vagy Stefan Seyfried
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">Xv-t tĂĄmogatĂł vezĂŠrlĹjĂŠt</ulink>.
+Csak vĂĄlaszd ki az te XFree86-odhoz illĹ verziĂłt.
 </para>
 
 <para>
-Az XFree86 4.3.0-ban van Xv támogatás, Bohdan Horst pedig küldött egy kis
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">javítást</ulink>
-az XFree86 forrásához, ami a framebuffer műveleteket felgyorsítja (XVideo-t is)
-akár négyszeresére is. A javítás belekerült az XFree86 CVS-ébe és a 4.3.0 utáni
-következő kiadásban is benne lesz.
+Az XFree86 4.3.0-ban van Xv tĂĄmogatĂĄs, Bohdan Horst pedig kĂźldĂśtt egy kis
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">javĂ­tĂĄst</ulink>
+az XFree86 forrĂĄsĂĄhoz, ami a framebuffer mĹąveleteket felgyorsĂ­tja (XVideo-t is)
+akĂĄr nĂŠgyszeresĂŠre is. A javĂ­tĂĄs belekerĂźlt az XFree86 CVS-ĂŠbe ĂŠs a 4.3.0 utĂĄni
+kĂśvetkezĹ kiadĂĄsban is benne lesz.
 </para>
 
 <para>
-A DVD méretű tartalmak lejátszásához az XF86Config-odat módosítanod kell:
+A DVD mĂŠretĹą tartalmak lejĂĄtszĂĄsĂĄhoz az XF86Config-odat mĂłdosĂ­tanod kell:
 <programlisting>
 Section "Device"
     [...]
@@ -292,27 +292,27 @@ EndSection<!--
 
 
 <sect3 id="trident">
-<title>Trident kártyák</title>
+<title>Trident kĂĄrtyĂĄk</title>
 <para>
-Ha az Xv-t Trident kártyával akarod használni, feltéve hogy nem megy 4.1.0-val,
-telepítsd fel az XFree 4.2.0-t. A 4.2.0-ban teljes képernyős Xv támogatás van
-a Cyberblade XP kártyával.
+Ha az Xv-t Trident kĂĄrtyĂĄval akarod hasznĂĄlni, feltĂŠve hogy nem megy 4.1.0-val,
+telepĂ­tsd fel az XFree 4.2.0-t. A 4.2.0-ban teljes kĂŠpernyĹs Xv tĂĄmogatĂĄs van
+a Cyberblade XP kĂĄrtyĂĄval.
 </para>
 
 <para>
-Alternatívaként az <application>MPlayer</application> is tartalmaz egy
-<link linkend="vidix">VIDIX</link> vezérlőt a Cyberblade/i1 kártyához.
+AlternatĂ­vakĂŠnt az <application>MPlayer</application> is tartalmaz egy
+<link linkend="vidix">VIDIX</link> vezĂŠrlĹt a Cyberblade/i1 kĂĄrtyĂĄhoz.
 </para>
 
 </sect3>
 
 
 <sect3 id="kyro">
-<title>Kyro/PowerVR kártyák</title>
+<title>Kyro/PowerVR kĂĄrtyĂĄk</title>
 <para>
-Ha az Xv-t Kyro alapú kártyával akarod használni (például Hercules
-Prophet 4000XT-vel), akkor le kell töltened a vezérlőt a
-<ulink url="http://www.powervr.com/">PowerVR oldaláról</ulink>
+Ha az Xv-t Kyro alapĂş kĂĄrtyĂĄval akarod hasznĂĄlni (pĂŠldĂĄul Hercules
+Prophet 4000XT-vel), akkor le kell tĂśltened a vezĂŠrlĹt a
+<ulink url="http://www.powervr.com/">PowerVR oldalĂĄrĂłl</ulink>
 </para>
 </sect3>
 </sect2>
@@ -323,11 +323,11 @@ Prophet 4000XT-vel), akkor le kell töltened a vezérlőt a
 <title>DGA</title>
 
 <formalpara>
-<title>BEVEZETÉS</title>
+<title>BEVEZETĂS</title>
 <para>
-Ez a dokumentum megpróbálja pár szóban elmagyarázni, hogy mi is az a DGA
-tulajdonképpen és mit tehet a DGA vezérlő az <application>MPlayer</application>nek
-(és mit nem).
+Ez a dokumentum megprĂłbĂĄlja pĂĄr szĂłban elmagyarĂĄzni, hogy mi is az a DGA
+tulajdonkĂŠppen ĂŠs mit tehet a DGA vezĂŠrlĹ az <application>MPlayer</application>nek
+(ĂŠs mit nem).
 </para>
 </formalpara>
 
@@ -335,66 +335,66 @@ tulajdonképpen és mit tehet a DGA vezérlő az <application>MPlayer</application>n
 <title>MI AZ A DGA</title>
 <para>
 A <acronym>DGA</acronym> a <emphasis>Direct Graphics Access</emphasis>
-rövidítése és azt jelenti, hogy egy program az X szerver megkerülésével
-direkt eléréssel módosíthatja a framebuffer memóriát. Gyakorlatilag ez úgy
-történik, hogy a framebuffer memória a processzed memória tartományába
-kerül leképezésre. Ezt a kernel csak superuser jogokkal engedélyezi. Vagy
-<systemitem class="username">root</systemitem> néven történő bejelentkezéssel
-vagy az <application>MPlayer</application> futtatható állományának SUID
-bitjének beállításával juthatsz ilyen jogokhoz. (<emphasis role="bold">nem
+rĂśvidĂ­tĂŠse ĂŠs azt jelenti, hogy egy program az X szerver megkerĂźlĂŠsĂŠvel
+direkt elĂŠrĂŠssel mĂłdosĂ­thatja a framebuffer memĂłriĂĄt. Gyakorlatilag ez Ăşgy
+tĂśrtĂŠnik, hogy a framebuffer memĂłria a processzed memĂłria tartomĂĄnyĂĄba
+kerĂźl lekĂŠpezĂŠsre. Ezt a kernel csak superuser jogokkal engedĂŠlyezi. Vagy
+<systemitem class="username">root</systemitem> nĂŠven tĂśrtĂŠnĹ bejelentkezĂŠssel
+vagy az <application>MPlayer</application> futtathatĂł ĂĄllomĂĄnyĂĄnak SUID
+bitjĂŠnek beĂĄllĂ­tĂĄsĂĄval juthatsz ilyen jogokhoz. (<emphasis role="bold">nem
 javasoljuk</emphasis>).
 </para>
 </formalpara>
 <para>
-Két verziója van a DGA-nak: a DGA1 az XFree 3.x.x-ban volt használatos, a DGA2
-az XFree 4.0.1-ben került bevezetésre.
+KĂŠt verziĂłja van a DGA-nak: a DGA1 az XFree 3.x.x-ban volt hasznĂĄlatos, a DGA2
+az XFree 4.0.1-ben kerĂźlt bevezetĂŠsre.
 </para>
 
 <para>
-A DGA1 csak direkt framebuffer elérést biztosít a fent leírt módszerrel. A
-videó jel felbontásának megváltoztatásához az XVidMode kiterjesztést kell
-használnod.
+A DGA1 csak direkt framebuffer elĂŠrĂŠst biztosĂ­t a fent leĂ­rt mĂłdszerrel. A
+videĂł jel felbontĂĄsĂĄnak megvĂĄltoztatĂĄsĂĄhoz az XVidMode kiterjesztĂŠst kell
+hasznĂĄlnod.
 </para>
 
 <para>
-A DGA2 már tartalmazza az XVidMode kiterjesztés képességeit és a képernyő
-színmélységét is engedi változtatni. Így alaphelyzetben 32 bites színmélységben
-futtatott X szervert átállíthatsz 15 bites mélységre és vissza.
+A DGA2 mĂĄr tartalmazza az XVidMode kiterjesztĂŠs kĂŠpessĂŠgeit ĂŠs a kĂŠpernyĹ
+szĂ­nmĂŠlysĂŠgĂŠt is engedi vĂĄltoztatni. Ăgy alaphelyzetben 32 bites szĂ­nmĂŠlysĂŠgben
+futtatott X szervert ĂĄtĂĄllĂ­thatsz 15 bites mĂŠlysĂŠgre ĂŠs vissza.
 </para>
 
 <para>
-Ennek ellenére a DGA-nak van néhány hátránya. Úgy tűnik ez az általad használt
-grafikus chip-től függ és az ezen chip-et irányító vezérlő X szerverben való
-megvalósításától. Így nem minden rendszeren működik...
+Ennek ellenĂŠre a DGA-nak van nĂŠhĂĄny hĂĄtrĂĄnya. Ăgy tĹąnik ez az ĂĄltalad hasznĂĄlt
+grafikus chip-tĹl fĂźgg ĂŠs az ezen chip-et irĂĄnyĂ­tĂł vezĂŠrlĹ X szerverben valĂł
+megvalĂłsĂ­tĂĄsĂĄtĂłl. Ăgy nem minden rendszeren mĹąkĂśdik...
 </para>
 
 <formalpara>
-<title>DGA TÁMOGATÁS TELEPÍTÉSE AZ MPLAYERHEZ</title>
+<title>DGA TĂMOGATĂS TELEPĂTĂSE AZ MPLAYERHEZ</title>
 
 <para>
-Először győződj meg, hogy az X betölti a DGA kiterjesztést: lásd
-a <filename>/var/log/XFree86.0.log</filename> fájlt:
+ElĹszĂśr gyĹzĹdj meg, hogy az X betĂślti a DGA kiterjesztĂŠst: lĂĄsd
+a <filename>/var/log/XFree86.0.log</filename> fĂĄjlt:
 
 <programlisting>(II) Loading extension XFree86-DGA</programlisting>
 
-XFree86 4.0.x vagy újabb <emphasis role="bold">nagyon javasolt</emphasis>!
-Az <application>MPlayer</application> DGA vezérlőjét a
-<filename>./configure</filename> automatikusan megtalálja, de elő is írhatod
-a használatát a <option>--enable-dga</option> kapcsolóval.
+XFree86 4.0.x vagy Ăşjabb <emphasis role="bold">nagyon javasolt</emphasis>!
+Az <application>MPlayer</application> DGA vezĂŠrlĹjĂŠt a
+<filename>./configure</filename> automatikusan megtalĂĄlja, de elĹ is Ă­rhatod
+a hasznĂĄlatĂĄt a <option>--enable-dga</option> kapcsolĂłval.
 </para>
 </formalpara>
 
 <para>
-Ha a vezérlő nem tud kisebb felbontásra váltani, kísérletezz a
-<option>-vm</option> (csak X 3.3.x esetén), <option>-fs</option>,
-<option>-bpp</option>, <option>-zoom</option> kapcsolókkal a filmnek
-legmegfelelőbb videó mód megtalálásához. Még nincs konverter :(
+Ha a vezĂŠrlĹ nem tud kisebb felbontĂĄsra vĂĄltani, kĂ­sĂŠrletezz a
+<option>-vm</option> (csak X 3.3.x esetĂŠn), <option>-fs</option>,
+<option>-bpp</option>, <option>-zoom</option> kapcsolĂłkkal a filmnek
+legmegfelelĹbb videĂł mĂłd megtalĂĄlĂĄsĂĄhoz. MĂŠg nincs konverter :(
 </para>
 
 <para>
-Lépj be <systemitem class="username">root</systemitem>ként. A DGA-hoz root
-elérés kell, hogy közvetlenül tudjon írni a videó memóriába. Ha felhasználóként
-akarod futtatni, telepítsd az <application>MPlayer</application>t SUID root-tal:
+LĂŠpj be <systemitem class="username">root</systemitem>kĂŠnt. A DGA-hoz root
+elĂŠrĂŠs kell, hogy kĂśzvetlenĂźl tudjon Ă­rni a videĂł memĂłriĂĄba. Ha felhasznĂĄlĂłkĂŠnt
+akarod futtatni, telepĂ­tsd az <application>MPlayer</application>t SUID root-tal:
 
 <screen>
 chown root <replaceable>/usr/local/bin/mplayer</replaceable>
@@ -402,48 +402,48 @@ chmod 750 <replaceable>/usr/local/bin/mplayer</replaceable>
 chmod +s <replaceable>/usr/local/bin/mplayer</replaceable>
 </screen>
 
-Így már egyszerű felhasználók esetében is működik.
+Ăgy mĂĄr egyszerĹą felhasznĂĄlĂłk esetĂŠben is mĹąkĂśdik.
 </para>
 
 <caution>
-<title>Biztonsági kockázat</title>
+<title>BiztonsĂĄgi kockĂĄzat</title>
 <para>
-Ez <emphasis role="bold">nagy</emphasis> biztonsági kockázatot jelent!
-<emphasis role="bold">Soha</emphasis> ne csináld ezt meg egy szerveren vagy egy
-olyan számítógépen amihez mások is hozzáférnek, mert root jogokat szerezhetnek
+Ez <emphasis role="bold">nagy</emphasis> biztonsĂĄgi kockĂĄzatot jelent!
+<emphasis role="bold">Soha</emphasis> ne csinĂĄld ezt meg egy szerveren vagy egy
+olyan szĂĄmĂ­tĂłgĂŠpen amihez mĂĄsok is hozzĂĄfĂŠrnek, mert root jogokat szerezhetnek
 a SUID root-os <application>MPlayer</application>rel.
 </para>
 </caution>
 
 <para>
-Használd a <option>-vo dga</option> kapcsolót, és már megy is! (reméljük:)
-Kipróbálhatod a <option>-vo sdl:driver=dga</option> kapcsolót is, hogy működik-e!
+HasznĂĄld a <option>-vo dga</option> kapcsolĂłt, ĂŠs mĂĄr megy is! (remĂŠljĂźk:)
+KiprĂłbĂĄlhatod a <option>-vo sdl:driver=dga</option> kapcsolĂłt is, hogy mĹąkĂśdik-e!
 Sokkal gyorsabb!
 </para>
 
 
 <formalpara id="dga-modelines">
-<title>FELBONTÁS VÁLTÁS</title>
+<title>FELBONTĂS VĂLTĂS</title>
 
 <para>
-A DGA vezérlő lehetővé teszi a kimeneti jel felbontásának megváltoztatását.
-Ezzel elkerülhető a (lassú) szoftveres méretezés és ugyanakkor teljes képernyős
-képet biztosít. Ideális helyzetben pontosan a videó adat felbontására vált
-(kivéve az aspect arányt), de az X szerver csak a
+A DGA vezĂŠrlĹ lehetĹvĂŠ teszi a kimeneti jel felbontĂĄsĂĄnak megvĂĄltoztatĂĄsĂĄt.
+Ezzel elkerĂźlhetĹ a (lassĂş) szoftveres mĂŠretezĂŠs ĂŠs ugyanakkor teljes kĂŠpernyĹs
+kĂŠpet biztosĂ­t. IdeĂĄlis helyzetben pontosan a videĂł adat felbontĂĄsĂĄra vĂĄlt
+(kivĂŠve az aspect arĂĄnyt), de az X szerver csak a
 <filename>/etc/X11/XF86Config</filename>
-(<filename>/etc/X11/XF86Config-4</filename> XFree 4.X.X esetén)
-fájlban előírt felbontásokra enged váltani.
-Ezeket modline-oknak nevezik és a videó hardvered tulajdonságain múlik.
-Az X szerver átnézi ezt a konfigurációs fájlt indításkor és letiltja a
-hardverednek nem megfelelőeket.
-Az X11 log fájlból kiderítheted, hogy mely módok engedélyezettek. Megtalálhatóak
-a <filename>/var/log/XFree86.0.log</filename> fájlban.
+(<filename>/etc/X11/XF86Config-4</filename> XFree 4.X.X esetĂŠn)
+fĂĄjlban elĹĂ­rt felbontĂĄsokra enged vĂĄltani.
+Ezeket modline-oknak nevezik ĂŠs a videĂł hardvered tulajdonsĂĄgain mĂşlik.
+Az X szerver ĂĄtnĂŠzi ezt a konfigurĂĄciĂłs fĂĄjlt indĂ­tĂĄskor ĂŠs letiltja a
+hardverednek nem megfelelĹeket.
+Az X11 log fĂĄjlbĂłl kiderĂ­theted, hogy mely mĂłdok engedĂŠlyezettek. MegtalĂĄlhatĂłak
+a <filename>/var/log/XFree86.0.log</filename> fĂĄjlban.
 </para>
 </formalpara>
 
 <para>
-Ezek a bejegyzések tudvalevőleg működnek Riva128 chip-en, az nv.o X szerver
-vezérlő modul használatával.
+Ezek a bejegyzĂŠsek tudvalevĹleg mĹąkĂśdnek Riva128 chip-en, az nv.o X szerver
+vezĂŠrlĹ modul hasznĂĄlatĂĄval.
 </para>
 
 
@@ -464,140 +464,140 @@ EndSection
 <formalpara>
 <title>DGA &amp; MPLAYER</title>
 <para>
-A DGA két helyen használható az <application>MPlayer</application>ben: Az SDL
-vezérlőnek előírhatod a használatát (<option>-vo sdl:driver=dga</option>) és
-a DGA vezérlőben (<option>-vo dga</option>). A fent említettek vonatkoznak mind
-a kettőre; a következő részben leírom, hogyan működik az <application>MPlayer</application>
-DGA vezérlője.
+A DGA kĂŠt helyen hasznĂĄlhatĂł az <application>MPlayer</application>ben: Az SDL
+vezĂŠrlĹnek elĹĂ­rhatod a hasznĂĄlatĂĄt (<option>-vo sdl:driver=dga</option>) ĂŠs
+a DGA vezĂŠrlĹben (<option>-vo dga</option>). A fent emlĂ­tettek vonatkoznak mind
+a kettĹre; a kĂśvetkezĹ rĂŠszben leĂ­rom, hogyan mĹąkĂśdik az <application>MPlayer</application>
+DGA vezĂŠrlĹje.
 </para>
 </formalpara>
 
 
 <formalpara>
-<title>TULAJDONSÁGOK</title>
+<title>TULAJDONSĂGOK</title>
 
 <para>
-A DGA vezérlő használatát a <option>-vo dga</option> kapcsoló parancssorban
-történő megadásával írhatod elő. Alapértelmezésként az videó eredeti
-felbontásához legközelebb álló felbontásra vált. Szándékosan figyelmen kívül
-hagyja a <option>-vm</option> és <option>-fs</option> kapcsolókat
-(videó mód váltás engedélyezése és teljes képernyő) - mindig a lehető legtöbbet
-megpróbálja elfedni a képernyődből a videó mód váltásával, így megspórolja a
-képméretezéshez szükséges plusz CPU ciklusokat. Ha nem tetszik az általa
-választott mód, kényszerítheted, hogy az általad megadott felbontáshoz
-legközelebbit keresse meg az <option>-x</option> és <option>-y</option> kapcsolókkal.
-A <option>-v</option> kapcsoló beírásának hatására a DGA vezérlő sok egyéb
-mellett kilistázza az aktuális <filename>XF86Config</filename> fájl által
-támogatott összes felbontást. DGA2 használata esetén előírhatod a színmélységet
-is a <option>-bpp</option> kapcsolóval. Az érvényes színmélységek 15, 16, 24 és 32.
-A hardvereden múlik, hogy ezek a színmélységek alapból támogatottak-e vagy
-(valószínűleg lassú) konverziót kell végezni.
+A DGA vezĂŠrlĹ hasznĂĄlatĂĄt a <option>-vo dga</option> kapcsolĂł parancssorban
+tĂśrtĂŠnĹ megadĂĄsĂĄval Ă­rhatod elĹ. AlapĂŠrtelmezĂŠskĂŠnt az videĂł eredeti
+felbontĂĄsĂĄhoz legkĂśzelebb ĂĄllĂł felbontĂĄsra vĂĄlt. SzĂĄndĂŠkosan figyelmen kĂ­vĂźl
+hagyja a <option>-vm</option> ĂŠs <option>-fs</option> kapcsolĂłkat
+(videĂł mĂłd vĂĄltĂĄs engedĂŠlyezĂŠse ĂŠs teljes kĂŠpernyĹ) - mindig a lehetĹ legtĂśbbet
+megprĂłbĂĄlja elfedni a kĂŠpernyĹdbĹl a videĂł mĂłd vĂĄltĂĄsĂĄval, Ă­gy megspĂłrolja a
+kĂŠpmĂŠretezĂŠshez szĂźksĂŠges plusz CPU ciklusokat. Ha nem tetszik az ĂĄltala
+vĂĄlasztott mĂłd, kĂŠnyszerĂ­theted, hogy az ĂĄltalad megadott felbontĂĄshoz
+legkĂśzelebbit keresse meg az <option>-x</option> ĂŠs <option>-y</option> kapcsolĂłkkal.
+A <option>-v</option> kapcsolĂł beĂ­rĂĄsĂĄnak hatĂĄsĂĄra a DGA vezĂŠrlĹ sok egyĂŠb
+mellett kilistĂĄzza az aktuĂĄlis <filename>XF86Config</filename> fĂĄjl ĂĄltal
+tĂĄmogatott Ăśsszes felbontĂĄst. DGA2 hasznĂĄlata esetĂŠn elĹĂ­rhatod a szĂ­nmĂŠlysĂŠget
+is a <option>-bpp</option> kapcsolĂłval. Az ĂŠrvĂŠnyes szĂ­nmĂŠlysĂŠgek 15, 16, 24 ĂŠs 32.
+A hardvereden mĂşlik, hogy ezek a szĂ­nmĂŠlysĂŠgek alapbĂłl tĂĄmogatottak-e vagy
+(valĂłszĂ­nĹąleg lassĂş) konverziĂłt kell vĂŠgezni.
 </para>
 </formalpara>
 <para>
-Ha vagy olyan szerencsés, hogy elegendő memóriád van az egész, nem képernyőn
-lévő kép bemásolásához, a DGA vezérlő dupla bufferelést fog használni, ami
-egyenletesebb film lejátszást eredményez. Kiírja, hogy a dupla bufferelés
-engedélyezett-e vagy sem.
+Ha vagy olyan szerencsĂŠs, hogy elegendĹ memĂłriĂĄd van az egĂŠsz, nem kĂŠpernyĹn
+lĂŠvĹ kĂŠp bemĂĄsolĂĄsĂĄhoz, a DGA vezĂŠrlĹ dupla bufferelĂŠst fog hasznĂĄlni, ami
+egyenletesebb film lejĂĄtszĂĄst eredmĂŠnyez. KiĂ­rja, hogy a dupla bufferelĂŠs
+engedĂŠlyezett-e vagy sem.
 </para>
 
 <para>
-A dupla bufferelés azt jelenti,h ogy a videód következő képkockája a memória
-egy nem megjelenített részére másolódik, amíg az aktuális képkocka van a
-képernyőn. Ha kész a következő képkocka, a grafikus chip megkapja az új kép
-memóriabeli helyét, és egyszerűen onnan megjeleníti a képet. Eközben a másik
-buffer ismét feltöltődik új videó adattal.
+A dupla bufferelĂŠs azt jelenti,h ogy a videĂłd kĂśvetkezĹ kĂŠpkockĂĄja a memĂłria
+egy nem megjelenĂ­tett rĂŠszĂŠre mĂĄsolĂłdik, amĂ­g az aktuĂĄlis kĂŠpkocka van a
+kĂŠpernyĹn. Ha kĂŠsz a kĂśvetkezĹ kĂŠpkocka, a grafikus chip megkapja az Ăşj kĂŠp
+memĂłriabeli helyĂŠt, ĂŠs egyszerĹąen onnan megjelenĂ­ti a kĂŠpet. EkĂśzben a mĂĄsik
+buffer ismĂŠt feltĂśltĹdik Ăşj videĂł adattal.
 </para>
 
 <para>
-A dupla bufferelés bekapcsolható a <option>-double</option> kapcsolóval, vagy
-letiltható a <option>-nodouble</option>-lal. A jelenlegi alapértelmezett
-beállítás szerint le van tiltva a dupla bufferelés. DGA vezérlő használata
-esetén az onscreen display (OSD) csak akkor működik, ha a dupla bufferelés
-engedélyezve van. Azonban a dupla bufferelés nagy sebességcsökkenéssel járhat
-(az én K6-II+ 525 gépemen további 20% CPU idő!) a hardvered DGA implementációjától
-függően.
+A dupla bufferelĂŠs bekapcsolhatĂł a <option>-double</option> kapcsolĂłval, vagy
+letilthatĂł a <option>-nodouble</option>-lal. A jelenlegi alapĂŠrtelmezett
+beĂĄllĂ­tĂĄs szerint le van tiltva a dupla bufferelĂŠs. DGA vezĂŠrlĹ hasznĂĄlata
+esetĂŠn az onscreen display (OSD) csak akkor mĹąkĂśdik, ha a dupla bufferelĂŠs
+engedĂŠlyezve van. Azonban a dupla bufferelĂŠs nagy sebessĂŠgcsĂśkkenĂŠssel jĂĄrhat
+(az ĂŠn K6-II+ 525 gĂŠpemen tovĂĄbbi 20% CPU idĹ!) a hardvered DGA implementĂĄciĂłjĂĄtĂłl
+fĂźggĹen.
 </para>
 
 
 <formalpara>
-<title>SEBESSÉGI ADATOK</title>
+<title>SEBESSĂGI ADATOK</title>
 
 <para>
-Általánosságban a DGA framebuffer elérésének legalább olyan gyorsnak
-kell lennie, mint az X11-es vezérlőnek a teljes képernyős képhez szükséges
-kiegészítők használatával. Az <application>MPlayer</application> által kiírt
-százalékos sebesség értékeket azonban fenntartással kezeld, mert például az
-X11-es vezérlő esetén nem tartalmazzák azt az időt, ami az X szervernek kell
-a kirajzoláshoz. Hurkold rá a terminált egy soros vonalra és indítsd el a
-<command>top</command> programot, akkor megtudod mi is történik valójában a
+ĂltalĂĄnossĂĄgban a DGA framebuffer elĂŠrĂŠsĂŠnek legalĂĄbb olyan gyorsnak
+kell lennie, mint az X11-es vezĂŠrlĹnek a teljes kĂŠpernyĹs kĂŠphez szĂźksĂŠges
+kiegĂŠszĂ­tĹk hasznĂĄlatĂĄval. Az <application>MPlayer</application> ĂĄltal kiĂ­rt
+szĂĄzalĂŠkos sebessĂŠg ĂŠrtĂŠkeket azonban fenntartĂĄssal kezeld, mert pĂŠldĂĄul az
+X11-es vezĂŠrlĹ esetĂŠn nem tartalmazzĂĄk azt az idĹt, ami az X szervernek kell
+a kirajzolĂĄshoz. Hurkold rĂĄ a terminĂĄlt egy soros vonalra ĂŠs indĂ­tsd el a
+<command>top</command> programot, akkor megtudod mi is tĂśrtĂŠnik valĂłjĂĄban a
 dobozodban.
 </para>
 </formalpara>
 
 <para>
-Kijelenthetjük, hogy a DGA gyorsítása a 'normális' X11-es használathoz képest
-erőteljesen függ a grafikus kártyádtól és hogy a hozzá tartozó X szerver modul
-mennyire optimalizált.
+KijelenthetjĂźk, hogy a DGA gyorsĂ­tĂĄsa a 'normĂĄlis' X11-es hasznĂĄlathoz kĂŠpest
+erĹteljesen fĂźgg a grafikus kĂĄrtyĂĄdtĂłl ĂŠs hogy a hozzĂĄ tartozĂł X szerver modul
+mennyire optimalizĂĄlt.
 </para>
 
 <para>
-Ha lassú rendszered van, jobb ha 15 vagy 16 bites színmélységet használsz,
-mivel ezek fele akkora memória sávszélességet igényelnek, mint a 32 bites
-megjelenítés.
+Ha lassĂş rendszered van, jobb ha 15 vagy 16 bites szĂ­nmĂŠlysĂŠget hasznĂĄlsz,
+mivel ezek fele akkora memĂłria sĂĄvszĂŠlessĂŠget igĂŠnyelnek, mint a 32 bites
+megjelenĂ­tĂŠs.
 </para>
 
 <para>
-A 24 bites színmélység használata is jó ötlet, ha a kártyád natívan támogatja a
-32 bites mélységet, mivel ez is 25%-kal kevesebb adatátvitelt jelent a 32/32
-módhoz képest.
+A 24 bites szĂ­nmĂŠlysĂŠg hasznĂĄlata is jĂł Ăśtlet, ha a kĂĄrtyĂĄd natĂ­van tĂĄmogatja a
+32 bites mĂŠlysĂŠget, mivel ez is 25%-kal kevesebb adatĂĄtvitelt jelent a 32/32
+mĂłdhoz kĂŠpest.
 </para>
 
 <para>
-Láttam pár AVI fájlt 266-os Pentium MMX-en lejátszva. Az AMD K6-2 CPU-k is
-működnek 400 MHZ vagy afölött.
+LĂĄttam pĂĄr AVI fĂĄjlt 266-os Pentium MMX-en lejĂĄtszva. Az AMD K6-2 CPU-k is
+mĹąkĂśdnek 400 MHZ vagy afĂślĂśtt.
 </para>
 
 
 <formalpara>
-<title>ISMERT HIBÁK</title>
+<title>ISMERT HIBĂK</title>
 
 <para>
-Nos, az XFree néhány fejlesztője szerint a DGA egy szörnyeteg. Ők azt mondják,
-jobb ha nem használod. Az implementációja nem mindig tökéletes az XFree-hez
-tartozó chipset vezérlőkkel.
+Nos, az XFree nĂŠhĂĄny fejlesztĹje szerint a DGA egy szĂśrnyeteg. Ĺk azt mondjĂĄk,
+jobb ha nem hasznĂĄlod. Az implementĂĄciĂłja nem mindig tĂśkĂŠletes az XFree-hez
+tartozĂł chipset vezĂŠrlĹkkel.
 </para>
 </formalpara>
 
 <itemizedlist>
 <listitem><simpara>
-  Az XFree 4.0.3 és az <filename>nv.o</filename> esetén van egy hiba, ami
-  érdekes színeket eredményez.
+  Az XFree 4.0.3 ĂŠs az <filename>nv.o</filename> esetĂŠn van egy hiba, ami
+  ĂŠrdekes szĂ­neket eredmĂŠnyez.
   </simpara></listitem>
 <listitem><simpara>
-  ATI vezérlő esetén egynél többször kell visszaváltani a módot a DGA-s
-  lejátszás után.
+  ATI vezĂŠrlĹ esetĂŠn egynĂŠl tĂśbbszĂśr kell visszavĂĄltani a mĂłdot a DGA-s
+  lejĂĄtszĂĄs utĂĄn.
   </simpara></listitem>
 <listitem><simpara>
-  Néhány vezérlő egyszerűen képtelen visszaváltani normál felbontásra
-  (használd a <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> és
+  NĂŠhĂĄny vezĂŠrlĹ egyszerĹąen kĂŠptelen visszavĂĄltani normĂĄl felbontĂĄsra
+  (hasznĂĄld a <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> ĂŠs
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
-  kombinációkat a kézi váltáshoz).
+  kombinĂĄciĂłkat a kĂŠzi vĂĄltĂĄshoz).
   </simpara></listitem>
 <listitem><simpara>
-  Néhány vezérlő egyszerűen rossz színeket jelenít meg.
+  NĂŠhĂĄny vezĂŠrlĹ egyszerĹąen rossz szĂ­neket jelenĂ­t meg.
   </simpara></listitem>
 <listitem><simpara>
-  Néhány vezérlő hamis adatot ad a processz címterébe bemappolt memória méretéről,
-  így a vo_dga nem használ dupla bufferelést (SIS?).
+  NĂŠhĂĄny vezĂŠrlĹ hamis adatot ad a processz cĂ­mterĂŠbe bemappolt memĂłria mĂŠretĂŠrĹl,
+  Ă­gy a vo_dga nem hasznĂĄl dupla bufferelĂŠst (SIS?).
   </simpara></listitem>
 <listitem><simpara>
-  Néhány vezérlő egy használható módot sem jelez. Ebben az esetben a
-  DGA vezérlő összeomlik és azt írja, hogy 100000x100000-es értelmetlen mód
-  vagy valami hasonló.
+  NĂŠhĂĄny vezĂŠrlĹ egy hasznĂĄlhatĂł mĂłdot sem jelez. Ebben az esetben a
+  DGA vezĂŠrlĹ Ăśsszeomlik ĂŠs azt Ă­rja, hogy 100000x100000-es ĂŠrtelmetlen mĂłd
+  vagy valami hasonlĂł.
   </simpara></listitem>
 <listitem><simpara>
-  Az OSD csak engedélyezett dupla buffereléssel működik (különben villog).
+  Az OSD csak engedĂŠlyezett dupla bufferelĂŠssel mĹąkĂśdik (kĂźlĂśnben villog).
   </simpara></listitem>
 </itemizedlist>
 
@@ -610,31 +610,31 @@ tartozó chipset vezérlőkkel.
 <title>SDL</title>
 
 <para>
-Az <acronym>SDL</acronym> (Simple Directmedia Layer) tulajdonképpen egy
-egységesített videó/audió interfész. Az ezt használó programok csak az
-SDL-ről tudnak, arról nem, az hogy milyen videó és audió vezérlőt használ.
-Például egy SDL-t használó Doom port futhat svgalib, aalib, X, fbdev és
-még más vezérlők segítségével, de neked csak (például) a videó vezérlőt kell
-megadnod az <envar>SDL_VIDEODRIVER</envar> környezeti változóval. Legalábbis
-elméletben.
+Az <acronym>SDL</acronym> (Simple Directmedia Layer) tulajdonkĂŠppen egy
+egysĂŠgesĂ­tett videĂł/audiĂł interfĂŠsz. Az ezt hasznĂĄlĂł programok csak az
+SDL-rĹl tudnak, arrĂłl nem, az hogy milyen videĂł ĂŠs audiĂł vezĂŠrlĹt hasznĂĄl.
+PĂŠldĂĄul egy SDL-t hasznĂĄlĂł Doom port futhat svgalib, aalib, X, fbdev ĂŠs
+mĂŠg mĂĄs vezĂŠrlĹk segĂ­tsĂŠgĂŠvel, de neked csak (pĂŠldĂĄul) a videĂł vezĂŠrlĹt kell
+megadnod az <envar>SDL_VIDEODRIVER</envar> kĂśrnyezeti vĂĄltozĂłval. LegalĂĄbbis
+elmĂŠletben.
 </para>
 
 <para>
-Az <application>MPlayer</application>rel mi az X11 vezérlő szoftveres
-képméretező képességét használtuk XVideo-t nem támogató kártyák/vezérlők
-esetén, amíg el nem készült a mi saját (gyorsabb, szebb) szoftveres méretezőnk.
-Használtuk az aalib kimeneti képességét is, de most már abból is van saját,
-ami sokkal komfortosabb. A DGA módja jobb volt a mienkénél, legalábbis a
-közelmúltig. Vágod? :)
+Az <application>MPlayer</application>rel mi az X11 vezĂŠrlĹ szoftveres
+kĂŠpmĂŠretezĹ kĂŠpessĂŠgĂŠt hasznĂĄltuk XVideo-t nem tĂĄmogatĂł kĂĄrtyĂĄk/vezĂŠrlĹk
+esetĂŠn, amĂ­g el nem kĂŠszĂźlt a mi sajĂĄt (gyorsabb, szebb) szoftveres mĂŠretezĹnk.
+HasznĂĄltuk az aalib kimeneti kĂŠpessĂŠgĂŠt is, de most mĂĄr abbĂłl is van sajĂĄt,
+ami sokkal komfortosabb. A DGA mĂłdja jobb volt a mienkĂŠnĂŠl, legalĂĄbbis a
+kĂśzelmĂşltig. VĂĄgod? :)
 </para>
 
 <para>
-Segít pár hibás vezérlő/kártya esetén is, ha a videó szaggatott (nem lassú
-rendszer miatt) vagy az audió késett.
+SegĂ­t pĂĄr hibĂĄs vezĂŠrlĹ/kĂĄrtya esetĂŠn is, ha a videĂł szaggatott (nem lassĂş
+rendszer miatt) vagy az audiĂł kĂŠsett.
 </para>
 
 <para>
-Az SDL videó kimenet támogatja a feliratok megjelenítését a film alatt, a
+Az SDL videĂł kimenet tĂĄmogatja a feliratok megjelenĂ­tĂŠsĂŠt a film alatt, a
 (ha van) fekete soron.
 </para>
 
@@ -645,74 +645,74 @@ Az SDL videó kimenet támogatja a feliratok megjelenítését a film alatt, a
 <title>SVGAlib</title>
 
 <formalpara>
-<title>TELEPÍTÉS</title>
+<title>TELEPĂTĂS</title>
 <para>
-Telepítened kell az svgalib-et és a fejlesztői csomagjait ahhoz, hogy az
-<application>MPlayer</application> elkészítse az SVGAlib vezérlőjét (automatikusan
-felismeri, de lehet kényszeríteni is rá) és ne felejtsd el átírni a
-<filename>/etc/vga/libvga.config</filename> fájlt, hogy megfeleljen a kártyádnak
-és a monitorodnak.
+TelepĂ­tened kell az svgalib-et ĂŠs a fejlesztĹi csomagjait ahhoz, hogy az
+<application>MPlayer</application> elkĂŠszĂ­tse az SVGAlib vezĂŠrlĹjĂŠt (automatikusan
+felismeri, de lehet kĂŠnyszerĂ­teni is rĂĄ) ĂŠs ne felejtsd el ĂĄtĂ­rni a
+<filename>/etc/vga/libvga.config</filename> fĂĄjlt, hogy megfeleljen a kĂĄrtyĂĄdnak
+ĂŠs a monitorodnak.
 </para>
 </formalpara>
 
 <note>
 <para>
-Ne használd a <option>-fs</option> kapcsolót, mert bekapcsolja a szoftveres
-méretezést és lassú. Ha tényleg szükség van rá, használd a
-<option>-sws 4</option> kapcsolót, ami rossz minőséget ad, de valamivel gyorsabb.
+Ne hasznĂĄld a <option>-fs</option> kapcsolĂłt, mert bekapcsolja a szoftveres
+mĂŠretezĂŠst ĂŠs lassĂş. Ha tĂŠnyleg szĂźksĂŠg van rĂĄ, hasznĂĄld a
+<option>-sws 4</option> kapcsolĂłt, ami rossz minĹsĂŠget ad, de valamivel gyorsabb.
 </para>
 </note>
 
-<formalpara><title>EGA (4BPP) TÁMOGATÁS</title>
+<formalpara><title>EGA (4BPP) TĂMOGATĂS</title>
 <para>
-Az SVGAlib tartalmazza az EGAlib-et és az <application>MPlayer</application> így
-képes bármely film 16 színben történő megjelenítésére, lehetővé téve az alábbi
-beállítások használatát:
+Az SVGAlib tartalmazza az EGAlib-et ĂŠs az <application>MPlayer</application> Ă­gy
+kĂŠpes bĂĄrmely film 16 szĂ­nben tĂśrtĂŠnĹ megjelenĂ­tĂŠsĂŠre, lehetĹvĂŠ tĂŠve az alĂĄbbi
+beĂĄllĂ­tĂĄsok hasznĂĄlatĂĄt:
 </para>
 </formalpara>
 
 <itemizedlist>
 <listitem><simpara>
-  EGA kártya EGA monitorral: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
+  EGA kĂĄrtya EGA monitorral: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
   </simpara></listitem>
 <listitem><simpara>
-  EGA kártya CGA monitorral: 320x200x4bpp, 640x200x4bpp
+  EGA kĂĄrtya CGA monitorral: 320x200x4bpp, 640x200x4bpp
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-A bpp (bit per pixel) értéket kézzel kell 4-re állítanod:
+A bpp (bit per pixel) ĂŠrtĂŠket kĂŠzzel kell 4-re ĂĄllĂ­tanod:
 <option>-bpp 4</option>
 </para>
 
 <para>
-A filmet valószínűleg át kell méretezni, hogy megfeleljen az EGA módnak:
+A filmet valĂłszĂ­nĹąleg ĂĄt kell mĂŠretezni, hogy megfeleljen az EGA mĂłdnak:
 <screen>-vf scale=640:350</screen>
 or
 <screen>-vf scale=320:200</screen>
 </para>
 
 <para>
-Ehhez gyors, de rossz minőséget produkáló méretező rutin kell:
+Ehhez gyors, de rossz minĹsĂŠget produkĂĄlĂł mĂŠretezĹ rutin kell:
 <screen>-sws 4</screen>
 </para>
 
 <para>
-Talán az automatikus arány-javítást kikapcsolhatod:
+TalĂĄn az automatikus arĂĄny-javĂ­tĂĄst kikapcsolhatod:
 <screen>-noaspect</screen>
 </para>
 
 <note><para>
-A kísérleteimből úgy tűnik, a legjobb képminőség EGA monitorokon
-a világosság enyhe csökkentésével állítható elő:
-<option>-vf eq=-20:0</option>. Nálam szükséges volt az audió mintavételi
-ráta csökkentése is, mert a hang szétesett 44kHz-en:
+A kĂ­sĂŠrleteimbĹl Ăşgy tĹąnik, a legjobb kĂŠpminĹsĂŠg EGA monitorokon
+a vilĂĄgossĂĄg enyhe csĂśkkentĂŠsĂŠvel ĂĄllĂ­thatĂł elĹ:
+<option>-vf eq=-20:0</option>. NĂĄlam szĂźksĂŠges volt az audiĂł mintavĂŠteli
+rĂĄta csĂśkkentĂŠse is, mert a hang szĂŠtesett 44kHz-en:
 <option>-srate 22050</option>.
 </para></note>
 
 <para>
-Csak az <option>expand</option> szűrő segítségével tudod bekapcsolni a
-feliratokat és az OSD-t, lásd a man oldalt a megfelelő paraméterekért.
+Csak az <option>expand</option> szĹąrĹ segĂ­tsĂŠgĂŠvel tudod bekapcsolni a
+feliratokat ĂŠs az OSD-t, lĂĄsd a man oldalt a megfelelĹ paramĂŠterekĂŠrt.
 </para>
 </sect2>
 
@@ -721,41 +721,41 @@ feliratokat és az OSD-t, lásd a man oldalt a megfelelő paraméterekért.
 <title>Framebuffer kimenet (FBdev)</title>
 
 <para>
-Az FBdev elkészítése automatikusan kiválasztódik a
-<filename>./configure</filename> során. Olvasd el a framebuffer dokumentációt
-a kernel forrásban (<filename>Documentation/fb/*</filename>) a bővebb
-információkért.
+Az FBdev elkĂŠszĂ­tĂŠse automatikusan kivĂĄlasztĂłdik a
+<filename>./configure</filename> sorĂĄn. Olvasd el a framebuffer dokumentĂĄciĂłt
+a kernel forrĂĄsban (<filename>Documentation/fb/*</filename>) a bĹvebb
+informĂĄciĂłkĂŠrt.
 </para>
 
 <para>
-Ha a kártyád nem támogatja a VBE 2.0 szabványt (régebbi ISA/PCI kártyák, mint
-például az S3 Trio64), csak a VBE 1.2-t (vagy régebbit?): Nos, a VESAfb még
-elérhető, de be kell töltened a SciTech Display Doctor-t (egykori UniVBE),
-mielőtt betöltenéd a Linuxot. Használj DOS boot lemezt vagy valamit. És ne
-felejtsd el regisztrálni az UniVBE-det! ;))
+Ha a kĂĄrtyĂĄd nem tĂĄmogatja a VBE 2.0 szabvĂĄnyt (rĂŠgebbi ISA/PCI kĂĄrtyĂĄk, mint
+pĂŠldĂĄul az S3 Trio64), csak a VBE 1.2-t (vagy rĂŠgebbit?): Nos, a VESAfb mĂŠg
+elĂŠrhetĹ, de be kell tĂśltened a SciTech Display Doctor-t (egykori UniVBE),
+mielĹtt betĂśltenĂŠd a Linuxot. HasznĂĄlj DOS boot lemezt vagy valamit. Ăs ne
+felejtsd el regisztrĂĄlni az UniVBE-det! ;))
 </para>
 
 <para>
-Az FBdev kimenetnek a fentiek mellett van néhány paramétere is:
+Az FBdev kimenetnek a fentiek mellett van nĂŠhĂĄny paramĂŠtere is:
 </para>
 
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
   <listitem><simpara>
-    megadhatod a használni kívánt framebuffer eszközt (alapértelmezett: <filename>/dev/fb0</filename>)
+    megadhatod a hasznĂĄlni kĂ­vĂĄnt framebuffer eszkĂśzt (alapĂŠrtelmezett: <filename>/dev/fb0</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
   <listitem><simpara>
-    használni kívánt mód neve (a <filename>/etc/fb.modes</filename> fájlnak megfelelően)
+    hasznĂĄlni kĂ­vĂĄnt mĂłd neve (a <filename>/etc/fb.modes</filename> fĂĄjlnak megfelelĹen)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
   <listitem><simpara>
-    módokat tartalmazó konfigurációs fájl (alapértelmezett: <filename>/etc/fb.modes</filename>)
+    mĂłdokat tartalmazĂł konfigurĂĄciĂłs fĂĄjl (alapĂŠrtelmezett: <filename>/etc/fb.modes</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -763,14 +763,14 @@ Az FBdev kimenetnek a fentiek mellett van néhány paramétere is:
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
   <listitem><simpara>
-    <emphasis role="bold">fontos</emphasis> értékek, lásd
+    <emphasis role="bold">fontos</emphasis> ĂŠrtĂŠkek, lĂĄsd
     <filename>example.conf</filename>
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-Ha egy különleges módra akarsz váltani, akkor így használd:
+Ha egy kĂźlĂśnleges mĂłdra akarsz vĂĄltani, akkor Ă­gy hasznĂĄld:
 <screen>
 mplayer -vm -fbmode <replaceable>mod_neve</replaceable> <replaceable>fajlnev</replaceable>
 </screen>
@@ -778,26 +778,26 @@ mplayer -vm -fbmode <replaceable>mod_neve</replaceable> <replaceable>fajlnev</re
 
 <itemizedlist>
 <listitem><para>
-  Magában a <option>-vm</option> kiválasztja a legmegfelelőbb módot a
-  <filename>/etc/fb.modes</filename> fájlból. Használható együtt a
-  <option>-x</option> és <option>-y</option> kapcsolókkal is. A
-  <option>-flip</option> kapcsoló csak akkor támogatott, ha a film pixel
-  formátuma megfelel a videó mód pixel formátumának. Figyelj a bpp
-  értékére, az fbdev vezérlő az aktuálisat próbálja meg használni, vagy
-  ha megadsz valamit a <option>-bpp</option> kapcsolóval, akkor azt.
+  MagĂĄban a <option>-vm</option> kivĂĄlasztja a legmegfelelĹbb mĂłdot a
+  <filename>/etc/fb.modes</filename> fĂĄjlbĂłl. HasznĂĄlhatĂł egyĂźtt a
+  <option>-x</option> ĂŠs <option>-y</option> kapcsolĂłkkal is. A
+  <option>-flip</option> kapcsolĂł csak akkor tĂĄmogatott, ha a film pixel
+  formĂĄtuma megfelel a videĂł mĂłd pixel formĂĄtumĂĄnak. Figyelj a bpp
+  ĂŠrtĂŠkĂŠre, az fbdev vezĂŠrlĹ az aktuĂĄlisat prĂłbĂĄlja meg hasznĂĄlni, vagy
+  ha megadsz valamit a <option>-bpp</option> kapcsolĂłval, akkor azt.
   </para></listitem>
 <listitem><para>
-  A <option>-zoom</option> kapcsoló nem támogatott (használd a <option>-vf scale</option>-t).
-  Nem használhatsz 8bpp (vagy kevesebb) módokat.
+  A <option>-zoom</option> kapcsolĂł nem tĂĄmogatott (hasznĂĄld a <option>-vf scale</option>-t).
+  Nem hasznĂĄlhatsz 8bpp (vagy kevesebb) mĂłdokat.
   </para></listitem>
 <listitem><para>
-  Valószínűleg el szeretnéd tüntetni a kurzort:
+  ValĂłszĂ­nĹąleg el szeretnĂŠd tĂźntetni a kurzort:
   <screen>echo -e '\033[?25l'</screen>
   vagy
   <screen>setterm -cursor off</screen>
-  és a képernyővédőt:
+  ĂŠs a kĂŠpernyĹvĂŠdĹt:
   <screen>setterm -blank 0</screen>
-  Kurzor visszakapcsolása:
+  Kurzor visszakapcsolĂĄsa:
   <screen>echo -e '\033[?25h'</screen>
   vagy
   <screen>setterm -cursor on</screen>
@@ -806,9 +806,9 @@ mplayer -vm -fbmode <replaceable>mod_neve</replaceable> <replaceable>fajlnev</re
 
 <note>
 <para>
-Az FBdev videó mód váltása <emphasis>nem működik</emphasis> a VESA
-framebufferrel és ne is kérd, hogy működjön, mivel ez nem az
-<application>MPlayer</application> korlátja.
+Az FBdev videĂł mĂłd vĂĄltĂĄsa <emphasis>nem mĹąkĂśdik</emphasis> a VESA
+framebufferrel ĂŠs ne is kĂŠrd, hogy mĹąkĂśdjĂśn, mivel ez nem az
+<application>MPlayer</application> korlĂĄtja.
 </para>
 </note>
 </sect2>
@@ -818,86 +818,86 @@ framebufferrel és ne is kérd, hogy működjön, mivel ez nem az
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
-Ez a rész a Matrox G200/G400/G450/G550 BES (Back-End Scaler) támogatásról
-szól, az <systemitem>mga_vid</systemitem> kernel vezérlőről.
-Van benne hardveres VSYNC támogatás tripla buffereléssel. Működik mind
+Ez a rĂŠsz a Matrox G200/G400/G450/G550 BES (Back-End Scaler) tĂĄmogatĂĄsrĂłl
+szĂłl, az <systemitem>mga_vid</systemitem> kernel vezĂŠrlĹrĹl.
+Van benne hardveres VSYNC tĂĄmogatĂĄs tripla bufferelĂŠssel. MĹąkĂśdik mind
 framebufferes konzolon, mind X alatt.
 </para>
 
 <warning>
 <para>
 Mindez csak Linux alatt! Nem-Linux (FreeBSD-n tesztelve) rendszereken a
-<link linkend="vidix">VIDIX</link>-et használhatod helyette!
+<link linkend="vidix">VIDIX</link>-et hasznĂĄlhatod helyette!
 </para>
 </warning>
 
 <procedure>
-<title>Telepítés:</title>
+<title>TelepĂ­tĂŠs:</title>
 <step><para>
-  A használatához először <filename>mga_vid.o</filename>-t kell forgatnod:
+  A hasznĂĄlatĂĄhoz elĹszĂśr <filename>mga_vid.o</filename>-t kell forgatnod:
   <screen>
 cd drivers
 make<!--
 --></screen>
   </para></step>
 <step><para>
-  Majd hozd létre a <filename>/dev/mga_vid</filename> eszközt:
+  Majd hozd lĂŠtre a <filename>/dev/mga_vid</filename> eszkĂśzt:
   <screen>mknod /dev/mga_vid c 178 0</screen>
-  és töltsd be a vezérlőt
+  ĂŠs tĂśltsd be a vezĂŠrlĹt
   <screen>insmod mga_vid.o</screen>
   </para></step>
 <step><para>
-  Ellenőrizd a memória méret detektálását a <command>dmesg</command>
-  parancs segítségével. Ha hibásan írja, használd a
-  <option>mga_ram_size</option> kapcsolót
-  (előtte <command>rmmod mga_vid</command>),
-  a kártya memóriájának MB-ban történő megadásához:
+  EllenĹrizd a memĂłria mĂŠret detektĂĄlĂĄsĂĄt a <command>dmesg</command>
+  parancs segĂ­tsĂŠgĂŠvel. Ha hibĂĄsan Ă­rja, hasznĂĄld a
+  <option>mga_ram_size</option> kapcsolĂłt
+  (elĹtte <command>rmmod mga_vid</command>),
+  a kĂĄrtya memĂłriĂĄjĂĄnak MB-ban tĂśrtĂŠnĹ megadĂĄsĂĄhoz:
   <screen>insmod mga_vid.o mga_ram_size=16</screen>
   </para></step>
 <step><para>
-  Az automatikus betöltéshez/törléshez először írd be ezt a sort a
-  <filename>/etc/modules.conf</filename> fájlod végére:
+  Az automatikus betĂśltĂŠshez/tĂśrlĂŠshez elĹszĂśr Ă­rd be ezt a sort a
+  <filename>/etc/modules.conf</filename> fĂĄjlod vĂŠgĂŠre:
 
   <programlisting>alias char-major-178 mga_vid</programlisting>
 
-  Majd másold be a <filename>mga_vid.o</filename> modult a megfelelő
+  Majd mĂĄsold be a <filename>mga_vid.o</filename> modult a megfelelĹ
   helyre a <filename>/lib/modules/<replaceable>kernel
-  verzió</replaceable>/<replaceable>valahol</replaceable></filename> könyvtárba.
+  verziĂł</replaceable>/<replaceable>valahol</replaceable></filename> kĂśnyvtĂĄrba.
   </para><para>
-  Ezután futtasd le a
+  EzutĂĄn futtasd le a
   <screen>depmod -a</screen>
   parancsot.
   </para></step>
 <step><para>
-  Ezekután le kell fordítanod (újra) az <application>MPlayer</application>t, a
-  <filename>./configure</filename> meg fogja találni a
-  <filename>/dev/mga_vid</filename>-et és elkészíti az 'mga' vezérlőt. Az
-  <application>MPlayer</application>ben a <option>-vo mga</option> kapcsolóval
-  használhatod, ha matroxfb konzolod van vagy a <option>-vo xmga</option>-val
+  EzekutĂĄn le kell fordĂ­tanod (Ăşjra) az <application>MPlayer</application>t, a
+  <filename>./configure</filename> meg fogja talĂĄlni a
+  <filename>/dev/mga_vid</filename>-et ĂŠs elkĂŠszĂ­ti az 'mga' vezĂŠrlĹt. Az
+  <application>MPlayer</application>ben a <option>-vo mga</option> kapcsolĂłval
+  hasznĂĄlhatod, ha matroxfb konzolod van vagy a <option>-vo xmga</option>-val
   XFree86 3.x.x vagy 4.x.x alatt.
   </para></step>
 </procedure>
 
 <para>
-Az mga_vid vezérlő együttműködik az Xv-vel.
+Az mga_vid vezĂŠrlĹ egyĂźttmĹąkĂśdik az Xv-vel.
 </para>
 
 <para>
-A <filename>/dev/mga_vid</filename> eszköz fájlt megnézheted némi infóért
-például a
+A <filename>/dev/mga_vid</filename> eszkĂśz fĂĄjlt megnĂŠzheted nĂŠmi infĂłĂŠrt
+pĂŠldĂĄul a
 <screen>cat /dev/mga_vid</screen>
-segítségével és beállíthatod a fényerősséget:
+segĂ­tsĂŠgĂŠvel ĂŠs beĂĄllĂ­thatod a fĂŠnyerĹssĂŠget:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
 </sect2>
 
 
 <sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
-<title>3Dfx YUV támogatás</title>
+<title>3Dfx YUV tĂĄmogatĂĄs</title>
 <para>
-Ez a vezérlő a kernel tdfx framebuffer vezérlőjét használja a filmek
-YUV gyorsításával történő lejátszásához. Kell hozzá egy kernel tdfxfb
-támogatással, és egy újrafordítás a
+Ez a vezĂŠrlĹ a kernel tdfx framebuffer vezĂŠrlĹjĂŠt hasznĂĄlja a filmek
+YUV gyorsĂ­tĂĄsĂĄval tĂśrtĂŠnĹ lejĂĄtszĂĄsĂĄhoz. Kell hozzĂĄ egy kernel tdfxfb
+tĂĄmogatĂĄssal, ĂŠs egy ĂşjrafordĂ­tĂĄs a
 <screen>./configure --enable-tdfxfb</screen>
 paranccsal.
 </para>
@@ -908,30 +908,30 @@ paranccsal.
 <title>OpenGL kimenet</title>
 
 <para>
-Az <application>MPlayer</application> támogatja a filmek OpenGL-lel történő
-megjelenítését is, de ha a platformod/vezérlőd támogatja az Xv-t, inkább azt
-használd PC-n Linux-szal, az OpenGL teljesítménye észrevehetően gyengébb. Ha
-Xv támogatás nélküli X11-ed van, az OpenGL jó alternatíva lehet.
+Az <application>MPlayer</application> tĂĄmogatja a filmek OpenGL-lel tĂśrtĂŠnĹ
+megjelenĂ­tĂŠsĂŠt is, de ha a platformod/vezĂŠrlĹd tĂĄmogatja az Xv-t, inkĂĄbb azt
+hasznĂĄld PC-n Linux-szal, az OpenGL teljesĂ­tmĂŠnye ĂŠszrevehetĹen gyengĂŠbb. Ha
+Xv tĂĄmogatĂĄs nĂŠlkĂźli X11-ed van, az OpenGL jĂł alternatĂ­va lehet.
 </para>
 
 <para>
-Sajnos nem minden vezérlő támogatja ezt a tulajdonságot. A Utah-GLX vezérlők
-(az XFree86 3.3.6-hoz) minden kártya esetén támogatják.
-Lásd a <ulink url="http://utah-glx.sf.net"/> oldalt a részletes telepítési
-leíráshoz.
+Sajnos nem minden vezĂŠrlĹ tĂĄmogatja ezt a tulajdonsĂĄgot. A Utah-GLX vezĂŠrlĹk
+(az XFree86 3.3.6-hoz) minden kĂĄrtya esetĂŠn tĂĄmogatjĂĄk.
+LĂĄsd a <ulink url="http://utah-glx.sf.net"/> oldalt a rĂŠszletes telepĂ­tĂŠsi
+leĂ­rĂĄshoz.
 </para>
 
 <para>
-Az XFree86(DRI) 4.0.3 vagy későbbi támogatja az OpenGL-t Matrox és Radeon
-kártyákkal, a 4.2.0 vagy későbbi Rage128-cal.
-Lásd a <ulink url="http://dri.sf.net"/> oldalt a letöltéshez és a telepítési
-utasításokért.
+Az XFree86(DRI) 4.0.3 vagy kĂŠsĹbbi tĂĄmogatja az OpenGL-t Matrox ĂŠs Radeon
+kĂĄrtyĂĄkkal, a 4.2.0 vagy kĂŠsĹbbi Rage128-cal.
+LĂĄsd a <ulink url="http://dri.sf.net"/> oldalt a letĂśltĂŠshez ĂŠs a telepĂ­tĂŠsi
+utasĂ­tĂĄsokĂŠrt.
 </para>
 
 <para>
-Egy felhasználónk tanácsa: a GL videó kimenetet függőlegesen szinkronizált
-TV kimenet előállításához is felhasználhatod. Csak be kell állítanod egy
-környezeti változót (legalábbis az nVidia-n):
+Egy felhasznĂĄlĂłnk tanĂĄcsa: a GL videĂł kimenetet fĂźggĹlegesen szinkronizĂĄlt
+TV kimenet elĹĂĄllĂ­tĂĄsĂĄhoz is felhasznĂĄlhatod. Csak be kell ĂĄllĂ­tanod egy
+kĂśrnyezeti vĂĄltozĂłt (legalĂĄbbis az nVidia-n):
 </para>
 
 <para>
@@ -942,90 +942,90 @@ környezeti változót (legalábbis az nVidia-n):
 
 
 <sect2 id="aalib">
-<title>AAlib - szöveges módú megjelenítés</title>
+<title>AAlib - szĂśveges mĂłdĂş megjelenĂ­tĂŠs</title>
 
 <para>
-Az AAlib egy függvény könyvtár grafika karakteres módban történő megjelenítéséhez,
-egy nagyszerű ASCII renderelő segítségével. Már jelenleg is <emphasis>rengeteg</emphasis>
-program támogatja, például a Doom, Quake, stb. Az <application>MPlayer</application>ben
-is van egy roppant jól használható vezérlő hozzá. Ha a <filename>./configure</filename>
-talál telepített aalib-et, az aalib libvo vezérlő alapértelmezett lesz.
+Az AAlib egy fĂźggvĂŠny kĂśnyvtĂĄr grafika karakteres mĂłdban tĂśrtĂŠnĹ megjelenĂ­tĂŠsĂŠhez,
+egy nagyszerĹą ASCII renderelĹ segĂ­tsĂŠgĂŠvel. MĂĄr jelenleg is <emphasis>rengeteg</emphasis>
+program tĂĄmogatja, pĂŠldĂĄul a Doom, Quake, stb. Az <application>MPlayer</application>ben
+is van egy roppant jĂłl hasznĂĄlhatĂł vezĂŠrlĹ hozzĂĄ. Ha a <filename>./configure</filename>
+talĂĄl telepĂ­tett aalib-et, az aalib libvo vezĂŠrlĹ alapĂŠrtelmezett lesz.
 </para>
 
 <para>
-Pár billentyű segítségével állíthatod a renderelési opciókat az AA Ablakban:
+PĂĄr billentyĹą segĂ­tsĂŠgĂŠvel ĂĄllĂ­thatod a renderelĂŠsi opciĂłkat az AA Ablakban:
 </para>
 
 <informaltable>
 <tgroup cols="2">
 <thead>
-  <row><entry>Gomb</entry><entry>Művelet</entry></row>
+  <row><entry>Gomb</entry><entry>MĹąvelet</entry></row>
 </thead>
 <tbody>
 <row><entry><keycap>1</keycap></entry><entry>
-  kontraszt csökkentése
+  kontraszt csĂśkkentĂŠse
   </entry></row>
 <row><entry><keycap>2</keycap></entry><entry>
-  kontraszt növelése
+  kontraszt nĂśvelĂŠse
   </entry></row>
 <row><entry><keycap>3</keycap></entry><entry>
-  fényerő csökkentése
+  fĂŠnyerĹ csĂśkkentĂŠse
   </entry></row>
 <row><entry><keycap>4</keycap></entry><entry>
-  fényerő növelése
+  fĂŠnyerĹ nĂśvelĂŠse
   </entry></row>
 <row><entry><keycap>5</keycap></entry><entry>
-  gyors renderelés be/kikapcsolása
+  gyors renderelĂŠs be/kikapcsolĂĄsa
   </entry></row>
 <row><entry><keycap>6</keycap></entry><entry>
-  dithering módjának beállítása (nincs, hiba eloszlás, Floyd Steinberg)
+  dithering mĂłdjĂĄnak beĂĄllĂ­tĂĄsa (nincs, hiba eloszlĂĄs, Floyd Steinberg)
   </entry></row>
 <row><entry><keycap>7</keycap></entry><entry>
-  kép megfordítása
+  kĂŠp megfordĂ­tĂĄsa
   </entry></row>
 <row><entry><keycap>8</keycap></entry><entry>
-  váltás az aa és az <application>MPlayer</application> vezérlése között
+  vĂĄltĂĄs az aa ĂŠs az <application>MPlayer</application> vezĂŠrlĂŠse kĂśzĂśtt
   </entry></row>
 </tbody>
 </tgroup>
 </informaltable>
 
 <variablelist>
-<title>A következő parancssori kapcsolókat használhatod:</title>
+<title>A kĂśvetkezĹ parancssori kapcsolĂłkat hasznĂĄlhatod:</title>
 <varlistentry>
   <term><option>-aaosdcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    OSD színének megváltoztatása
+    OSD szĂ­nĂŠnek megvĂĄltoztatĂĄsa
     </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aasubcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    Felirat színének megváltoztatása
+    Felirat szĂ­nĂŠnek megvĂĄltoztatĂĄsa
     </para><para>
     ahol a <replaceable>V</replaceable> lehet:
-    <literal>0</literal> (normális),
-    <literal>1</literal> (sötét),
+    <literal>0</literal> (normĂĄlis),
+    <literal>1</literal> (sĂśtĂŠt),
     <literal>2</literal> (vastag),
-    <literal>3</literal> (félkövér betű),
-    <literal>4</literal> (ellentétes),
-    <literal>5</literal> (speciális).
+    <literal>3</literal> (fĂŠlkĂśvĂŠr betĹą),
+    <literal>4</literal> (ellentĂŠtes),
+    <literal>5</literal> (speciĂĄlis).
     </para></listitem>
 </varlistentry>
 </variablelist>
 
 <variablelist>
-<title>Maga az AAlib számtalan lehetőséget biztosít. Itt van pár fontosabb:</title>
+<title>Maga az AAlib szĂĄmtalan lehetĹsĂŠget biztosĂ­t. Itt van pĂĄr fontosabb:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
   <listitem><simpara>
-    Beállítja a javasolt aa vezérlőt (X11, curses, Linux).
+    BeĂĄllĂ­tja a javasolt aa vezĂŠrlĹt (X11, curses, Linux).
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
   <listitem><simpara>
-    Mind a 256 karakter használata.
+    Mind a 256 karakter hasznĂĄlata.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -1037,127 +1037,127 @@ Pár billentyű segítségével állíthatod a renderelési opciókat az AA Ablakban:
 <varlistentry>
   <term><option>-aahelp</option></term>
   <listitem><simpara>
-    Kiírja az összes aalib kapcsolót.
+    KiĂ­rja az Ăśsszes aalib kapcsolĂłt.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <note>
 <para>
-A renderelés nagyon CPU igényes, különösen ha AA-on-X-et
-(aalib használata X alatt) használsz, a legalacsonyabb a standard,
-nem framebuffer-es konzolon. Használd az SVGATextMode-ot a nagy
-felbontás beállításához, és élvezd! (másodlagos Hercules kártyák a
-sirályak :)) (de SZVSZ használhatod a
-<option>-vf 1bpp</option> kapcsolót is a hgafb-en megjelenő grafikához :)
+A renderelĂŠs nagyon CPU igĂŠnyes, kĂźlĂśnĂśsen ha AA-on-X-et
+(aalib hasznĂĄlata X alatt) hasznĂĄlsz, a legalacsonyabb a standard,
+nem framebuffer-es konzolon. HasznĂĄld az SVGATextMode-ot a nagy
+felbontĂĄs beĂĄllĂ­tĂĄsĂĄhoz, ĂŠs ĂŠlvezd! (mĂĄsodlagos Hercules kĂĄrtyĂĄk a
+sirĂĄlyak :)) (de SZVSZ hasznĂĄlhatod a
+<option>-vf 1bpp</option> kapcsolĂłt is a hgafb-en megjelenĹ grafikĂĄhoz :)
 </para>
 </note>
 
 <para>
-A <option>-framedrop</option> kapcsoló használatát javasoljuk, ha nem
-elég gyors a géped az összes képkocka rendeléséhez!
+A <option>-framedrop</option> kapcsolĂł hasznĂĄlatĂĄt javasoljuk, ha nem
+elĂŠg gyors a gĂŠped az Ăśsszes kĂŠpkocka rendelĂŠsĂŠhez!
 </para>
 
 <para>
-Terminálon lejátszva jobb sebességet és minőséget kapsz a Linux vezérlővel,
-mint a curses-szal (<option>-aadriver linux</option>). De ehhez írási joggal
+TerminĂĄlon lejĂĄtszva jobb sebessĂŠget ĂŠs minĹsĂŠget kapsz a Linux vezĂŠrlĹvel,
+mint a curses-szal (<option>-aadriver linux</option>). De ehhez Ă­rĂĄsi joggal
 kell rendelkezned a <filename>/dev/vcsa<replaceable>&lt;terminal&gt;</replaceable></filename>
-fájlhoz! Ezt az aalib nem ismeri fel magától, de a vo_aa megpróbálja
-megtalálni a legjobb módot.
-Lásd a <ulink url="http://aa-project.sf.net/tune"/> oldalt a további
-tuningolási dolgokhoz.
+fĂĄjlhoz! Ezt az aalib nem ismeri fel magĂĄtĂłl, de a vo_aa megprĂłbĂĄlja
+megtalĂĄlni a legjobb mĂłdot.
+LĂĄsd a <ulink url="http://aa-project.sf.net/tune"/> oldalt a tovĂĄbbi
+tuningolĂĄsi dolgokhoz.
 </para>
 </sect2>
 
 
 <sect2 id="caca">
-<title><systemitem class="library">libcaca</systemitem> - Színes ASCII Art függvénykönyvtár</title>
+<title><systemitem class="library">libcaca</systemitem> - SzĂ­nes ASCII Art fĂźggvĂŠnykĂśnyvtĂĄr</title>
 
 <para>
 A <ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
-függvénykönyvtár egy grafikus könyvtár, ami szöveget jelenít meg pixelek helyett, így
-működik régebbi videó kártyákkal vagy szöveges terminálokon is. Hasonló a népszerű
-<systemitem class="library">AAlib</systemitem> könyvtárhoz.
-A <systemitem class="library">libcaca</systemitem>-nak egy terminál kell a működéshez, így
-bármilyen Unix rendszeren (beleértve a Mac OS X-et) működik, vagy a
+fĂźggvĂŠnykĂśnyvtĂĄr egy grafikus kĂśnyvtĂĄr, ami szĂśveget jelenĂ­t meg pixelek helyett, Ă­gy
+mĹąkĂśdik rĂŠgebbi videĂł kĂĄrtyĂĄkkal vagy szĂśveges terminĂĄlokon is. HasonlĂł a nĂŠpszerĹą
+<systemitem class="library">AAlib</systemitem> kĂśnyvtĂĄrhoz.
+A <systemitem class="library">libcaca</systemitem>-nak egy terminĂĄl kell a mĹąkĂśdĂŠshez, Ă­gy
+bĂĄrmilyen Unix rendszeren (beleĂŠrtve a Mac OS X-et) mĹąkĂśdik, vagy a
 <systemitem class="library">slang</systemitem> vagy az
 <systemitem class="library">ncurses</systemitem> vagy DOS alatt a
 <systemitem class="library">conio.h</systemitem> illetve Windows rendszereken
-akár a <systemitem class="library">slang</systemitem> vagy az
-<systemitem class="library">ncurses</systemitem> (Cygwin emuláción keresztül) vagy
-a <systemitem class="library">conio.h</systemitem> könyvtárak használatával. Ha
+akĂĄr a <systemitem class="library">slang</systemitem> vagy az
+<systemitem class="library">ncurses</systemitem> (Cygwin emulĂĄciĂłn keresztĂźl) vagy
+a <systemitem class="library">conio.h</systemitem> kĂśnyvtĂĄrak hasznĂĄlatĂĄval. Ha
 a <filename>./configure</filename>
-megtalálja a <systemitem class="library">libcaca</systemitem>-t, a caca libvo vezérlő
-elkészül.
+megtalĂĄlja a <systemitem class="library">libcaca</systemitem>-t, a caca libvo vezĂŠrlĹ
+elkĂŠszĂźl.
 </para>
 
 <itemizedlist>
-<title>A különbség az <systemitem class="library">AAlib</systemitem>-hez képest
-  a következőek:</title>
+<title>A kĂźlĂśnbsĂŠg az <systemitem class="library">AAlib</systemitem>-hez kĂŠpest
+  a kĂśvetkezĹek:</title>
 <listitem><simpara>
-   16 elérhető szín a karakter kimenetre (256 színű párok)
+   16 elĂŠrhetĹ szĂ­n a karakter kimenetre (256 szĂ­nĹą pĂĄrok)
   </simpara></listitem>
 <listitem><simpara>
-   színes kép dithering
+   szĂ­nes kĂŠp dithering
   </simpara></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>De a <systemitem class="library">libcaca</systemitem>-nak megvan az
-  alábbi korlátja:</title>
+  alĂĄbbi korlĂĄtja:</title>
 <listitem><simpara>
-   nincs fényerő, kontraszt és gamma támogatás
+   nincs fĂŠnyerĹ, kontraszt ĂŠs gamma tĂĄmogatĂĄs
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-Pár billentyűvel szabályozhatod a caca ablakban a renderelés opcióit:
+PĂĄr billentyĹąvel szabĂĄlyozhatod a caca ablakban a renderelĂŠs opciĂłit:
 </para>
 
 <informaltable>
 <tgroup cols="2">
 <thead>
-  <row><entry>Gomb</entry><entry>Művelet</entry></row>
+  <row><entry>Gomb</entry><entry>MĹąvelet</entry></row>
 </thead>
 <tbody>
 <row><entry><keycap>d</keycap></entry><entry>
-  Váltás a <systemitem class="library">libcaca</systemitem> dithering metódusai között.
+  VĂĄltĂĄs a <systemitem class="library">libcaca</systemitem> dithering metĂłdusai kĂśzĂśtt.
   </entry></row>
 <row><entry><keycap>a</keycap></entry><entry>
-  A <systemitem class="library">libcaca</systemitem> antialiasing ki-/bekapcsolása.
+  A <systemitem class="library">libcaca</systemitem> antialiasing ki-/bekapcsolĂĄsa.
   </entry></row>
 <row><entry><keycap>b</keycap></entry><entry>
-  A <systemitem class="library">libcaca</systemitem> háttérbe küldése.
+  A <systemitem class="library">libcaca</systemitem> hĂĄttĂŠrbe kĂźldĂŠse.
   </entry></row>
 </tbody>
 </tgroup>
 </informaltable>
 
 <variablelist>
-<title>A <systemitem class="library">libcaca</systemitem> figyel pár környezeti változót is:</title>
+<title>A <systemitem class="library">libcaca</systemitem> figyel pĂĄr kĂśrnyezeti vĂĄltozĂłt is:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
   <listitem><simpara>
-    Állítsd be a javasolt caca vezérlőt, pl. ncurses, slang, x11.
+    ĂllĂ­tsd be a javasolt caca vezĂŠrlĹt, pl. ncurses, slang, x11.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (csak X11)</option></term>
   <listitem><simpara>
-    Megadja a sorok és oszlopok számát, pl. 128x50.
+    Megadja a sorok ĂŠs oszlopok szĂĄmĂĄt, pl. 128x50.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (csak X11)</option></term>
   <listitem><simpara>
-    Megadja a használni kívánt betűtípust, pl. fixed, nexus.
+    Megadja a hasznĂĄlni kĂ­vĂĄnt betĹątĂ­pust, pl. fixed, nexus.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-Használd a <option>-framedrop</option> kapcsolót ha a számítógéped nem elég
-gyors az összes képkocka rendeléséhez.
+HasznĂĄld a <option>-framedrop</option> kapcsolĂłt ha a szĂĄmĂ­tĂłgĂŠped nem elĂŠg
+gyors az Ăśsszes kĂŠpkocka rendelĂŠsĂŠhez.
 </para>
 
 </sect2>
@@ -1167,133 +1167,133 @@ gyors az összes képkocka rendeléséhez.
 <title>VESA - kimenet a VESA BIOS-hoz</title>
 
 <para>
-Ezt a vezérlőt egy <emphasis role="bold">általános vezérlőként</emphasis>
-terveztük meg és vezettük be bármilyen, VESA VBE 2.0 kompatibilis BIOS-szal
-rendelkező monitorkártya esetében. A másik előnye ennek a vezérlőnek, hogy
-megpróbálja használni a TV kimenetet.
-<citetitle>VESA BIOS EXTENSION (VBE) Version 3.0 Dátum: 1998. szeptember 16.
-</citetitle> (70. oldal) ezt írja:
+Ezt a vezĂŠrlĹt egy <emphasis role="bold">ĂĄltalĂĄnos vezĂŠrlĹkĂŠnt</emphasis>
+terveztĂźk meg ĂŠs vezettĂźk be bĂĄrmilyen, VESA VBE 2.0 kompatibilis BIOS-szal
+rendelkezĹ monitorkĂĄrtya esetĂŠben. A mĂĄsik elĹnye ennek a vezĂŠrlĹnek, hogy
+megprĂłbĂĄlja hasznĂĄlni a TV kimenetet.
+<citetitle>VESA BIOS EXTENSION (VBE) Version 3.0 DĂĄtum: 1998. szeptember 16.
+</citetitle> (70. oldal) ezt Ă­rja:
 </para>
 
 <blockquote>
-<formalpara><title>Duál-Vezérlős Tervezés</title>
+<formalpara><title>DuĂĄl-VezĂŠrlĹs TervezĂŠs</title>
 <para>
-A VBE 3.0 támogatja a duál-vezérlős tervezést, feltételezve hogy általában
-mindkét vezérlőt ugyanaz az OEM biztosítja, egy BIOS ROM vezérlésével
-ugyan azon a grafikus kártyán, lehetséges az alkalmazás számára elrejteni
-azt a tényt, hogy valójában két vezérlő van jelen. Ez ugyan megakadályozza
-a vezérlők egyidejűleg történő egyedi használatát, azonban lehetővé teszi
-a VBE 3.0 előtt kiadott alkalmazások normális működését. A 00h VBE funció
-(Vezérlő információkkal tér vissza) a két vezérlő kombinált információit
-adja vissza, beleértve a használható módok kombinált listáját. Ha az
-alkalmazás kiválaszt egy módot, a megfelelő vezérlő aktiválódik. Az összes
-többi VBE funkció ezután az aktív vezérlővel dolgozik.
+A VBE 3.0 tĂĄmogatja a duĂĄl-vezĂŠrlĹs tervezĂŠst, feltĂŠtelezve hogy ĂĄltalĂĄban
+mindkĂŠt vezĂŠrlĹt ugyanaz az OEM biztosĂ­tja, egy BIOS ROM vezĂŠrlĂŠsĂŠvel
+ugyan azon a grafikus kĂĄrtyĂĄn, lehetsĂŠges az alkalmazĂĄs szĂĄmĂĄra elrejteni
+azt a tĂŠnyt, hogy valĂłjĂĄban kĂŠt vezĂŠrlĹ van jelen. Ez ugyan megakadĂĄlyozza
+a vezĂŠrlĹk egyidejĹąleg tĂśrtĂŠnĹ egyedi hasznĂĄlatĂĄt, azonban lehetĹvĂŠ teszi
+a VBE 3.0 elĹtt kiadott alkalmazĂĄsok normĂĄlis mĹąkĂśdĂŠsĂŠt. A 00h VBE funciĂł
+(VezĂŠrlĹ informĂĄciĂłkkal tĂŠr vissza) a kĂŠt vezĂŠrlĹ kombinĂĄlt informĂĄciĂłit
+adja vissza, beleĂŠrtve a hasznĂĄlhatĂł mĂłdok kombinĂĄlt listĂĄjĂĄt. Ha az
+alkalmazĂĄs kivĂĄlaszt egy mĂłdot, a megfelelĹ vezĂŠrlĹ aktivĂĄlĂłdik. Az Ăśsszes
+tĂśbbi VBE funkciĂł ezutĂĄn az aktĂ­v vezĂŠrlĹvel dolgozik.
 </para>
 </formalpara>
 </blockquote>
 
 <para>
-Így van esélyed a TV kimenet használatára ezzel a vezérlővel.
-(Gondolom a TV-out legtöbbször legalább egyedülálló fej vagy egyedüli kimenet.)
+Ăgy van esĂŠlyed a TV kimenet hasznĂĄlatĂĄra ezzel a vezĂŠrlĹvel.
+(Gondolom a TV-out legtĂśbbszĂśr legalĂĄbb egyedĂźlĂĄllĂł fej vagy egyedĂźli kimenet.)
 </para>
 
 <itemizedlist spacing="compact">
-<title>ELŐNYÖK</title>
+<title>ELĹNYĂK</title>
 <listitem><simpara>
-  Van esélyed a film nézésre akkor is <emphasis role="bold">ha a Linux nem ismeri</emphasis>
-  a videó hardveredet.
+  Van esĂŠlyed a film nĂŠzĂŠsre akkor is <emphasis role="bold">ha a Linux nem ismeri</emphasis>
+  a videĂł hardveredet.
   </simpara></listitem>
 <listitem><simpara>
-  Nem kell telepítened semmiféle grafikus dolgot a Linuxodra (mint pl. X11 (AKA XFree86),
-  fbdev és így tovább). Ez a vezérlő fut <emphasis role="bold">szöveges-módban</emphasis>.
+  Nem kell telepĂ­tened semmifĂŠle grafikus dolgot a Linuxodra (mint pl. X11 (AKA XFree86),
+  fbdev ĂŠs Ă­gy tovĂĄbb). Ez a vezĂŠrlĹ fut <emphasis role="bold">szĂśveges-mĂłdban</emphasis>.
   </simpara></listitem>
 <listitem><simpara>
-  Jó eséllyel <emphasis role="bold">működő TV-kimenetet</emphasis> kapsz.
-  (Legalábbis az ATI kártyákon).
+  JĂł esĂŠllyel <emphasis role="bold">mĹąkĂśdĹ TV-kimenetet</emphasis> kapsz.
+  (LegalĂĄbbis az ATI kĂĄrtyĂĄkon).
   </simpara></listitem>
 <listitem><simpara>
-  Ez a vezérlő meghívja az <function>int 10h</function> kezelőt így nem
-  emulátor - <emphasis role="bold">igazi</emphasis> dolgokat hív az
-  <emphasis>igazi</emphasis> BIOS-ban <emphasis>valós-módban</emphasis>
-  (valójában vm86 módban).
+  Ez a vezĂŠrlĹ meghĂ­vja az <function>int 10h</function> kezelĹt Ă­gy nem
+  emulĂĄtor - <emphasis role="bold">igazi</emphasis> dolgokat hĂ­v az
+  <emphasis>igazi</emphasis> BIOS-ban <emphasis>valĂłs-mĂłdban</emphasis>
+  (valĂłjĂĄban vm86 mĂłdban).
   </simpara></listitem>
 <listitem><simpara>
-  Használhatod a VIDIX-et vele, így gyorsított videó megjelenítést kapsz
-  <emphasis role="bold">és</emphasis> TV kimenetet egy időben!
-  (Javasolt az ATI kártyákhoz.)
+  HasznĂĄlhatod a VIDIX-et vele, Ă­gy gyorsĂ­tott videĂł megjelenĂ­tĂŠst kapsz
+  <emphasis role="bold">ĂŠs</emphasis> TV kimenetet egy idĹben!
+  (Javasolt az ATI kĂĄrtyĂĄkhoz.)
   </simpara></listitem>
 <listitem><simpara>
-  Ha VESA VBE 3.0+-od van, és megadtad a
+  Ha VESA VBE 3.0+-od van, ĂŠs megadtad a
   <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option>-ot valahol
-  (konfigurációs fájlban vagy paranccsorban), a lehető legjobb frissítési rátát kapod.
-  (Általános Időzítő Formulát használva). Ezen képesség engedélyezéséhez meg kell adnod
-  a monitorod <emphasis role="bold">összes</emphasis> opcióját.
+  (konfigurĂĄciĂłs fĂĄjlban vagy paranccsorban), a lehetĹ legjobb frissĂ­tĂŠsi rĂĄtĂĄt kapod.
+  (ĂltalĂĄnos IdĹzĂ­tĹ FormulĂĄt hasznĂĄlva). Ezen kĂŠpessĂŠg engedĂŠlyezĂŠsĂŠhez meg kell adnod
+  a monitorod <emphasis role="bold">Ăśsszes</emphasis> opciĂłjĂĄt.
   </simpara></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
-<title>HÁTRÁNYOK</title>
+<title>HĂTRĂNYOK</title>
 <listitem><simpara>
-   Csak <emphasis role="bold">x86 rendszereken</emphasis> működik.
+   Csak <emphasis role="bold">x86 rendszereken</emphasis> mĹąkĂśdik.
   </simpara></listitem>
 <listitem><simpara>
-  Csak a <systemitem class="username">root</systemitem> használhatja.
+  Csak a <systemitem class="username">root</systemitem> hasznĂĄlhatja.
   </simpara></listitem>
 <listitem><simpara>
-  Jelenleg csak <emphasis role="bold">Linux</emphasis> alatt elérhető.
+  Jelenleg csak <emphasis role="bold">Linux</emphasis> alatt elĂŠrhetĹ.
   </simpara></listitem>
 </itemizedlist>
 
 <important>
 <para>
-Ne használd ezt a vezérlőt <emphasis role="bold">GCC 2.96</emphasis>-tal!
+Ne hasznĂĄld ezt a vezĂŠrlĹt <emphasis role="bold">GCC 2.96</emphasis>-tal!
 Nem fog menni!
 </para>
 </important>
 
 <variablelist>
-<title>A VESA PARANCSSORI KAPCSOLÓI</title>
+<title>A VESA PARANCSSORI KAPCSOLĂI</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
   <listitem><simpara>
-    jelenleg felismert: <literal>dga</literal> a dga mód használatához és
-    <literal>nodga</literal> a dga mód letiltásához. A dga módban engedélyezheted
-    a dupla bufferelést a <option>-double</option> kapcsolóval. Megjegyzés: ezen
-    paraméterek elhagyásával engedélyezed a dga mód <emphasis role="bold">automatikus
-    detektálását</emphasis>.
+    jelenleg felismert: <literal>dga</literal> a dga mĂłd hasznĂĄlatĂĄhoz ĂŠs
+    <literal>nodga</literal> a dga mĂłd letiltĂĄsĂĄhoz. A dga mĂłdban engedĂŠlyezheted
+    a dupla bufferelĂŠst a <option>-double</option> kapcsolĂłval. MegjegyzĂŠs: ezen
+    paramĂŠterek elhagyĂĄsĂĄval engedĂŠlyezed a dga mĂłd <emphasis role="bold">automatikus
+    detektĂĄlĂĄsĂĄt</emphasis>.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
-<title>ISMERT PROBLÉMÁK ÉS MEGOLDÁSAIK</title>
+<title>ISMERT PROBLĂMĂK ĂS MEGOLDĂSAIK</title>
 <listitem><simpara>
-  Ha telepítettél <emphasis role="bold">NLS</emphasis> betűtípust a Linux rendszeredre
-  és VESA vezérlőt használsz szöveges-módban, akkor az <application>MPlayer</application>ből
-  való kilépés után a <emphasis role="bold">ROM betűtípusa</emphasis> lesz betöltve a nemzeti
+  Ha telepĂ­tettĂŠl <emphasis role="bold">NLS</emphasis> betĹątĂ­pust a Linux rendszeredre
+  ĂŠs VESA vezĂŠrlĹt hasznĂĄlsz szĂśveges-mĂłdban, akkor az <application>MPlayer</application>bĹl
+  valĂł kilĂŠpĂŠs utĂĄn a <emphasis role="bold">ROM betĹątĂ­pusa</emphasis> lesz betĂśltve a nemzeti
   helyett.
-  A nemzeti betűkészletet újra betöltheted pl. a Mandrake/Mandriva disztribúcióban
-  található <command>setsysfont</command> nevű segédprogram használatával.
-  (<emphasis role="bold">Tanács</emphasis>: Ugyan ez a segédprogram használható az
-  fbdev honosítására is).
+  A nemzeti betĹąkĂŠszletet Ăşjra betĂśltheted pl. a Mandrake/Mandriva disztribĂşciĂłban
+  talĂĄlhatĂł <command>setsysfont</command> nevĹą segĂŠdprogram hasznĂĄlatĂĄval.
+  (<emphasis role="bold">TanĂĄcs</emphasis>: Ugyan ez a segĂŠdprogram hasznĂĄlhatĂł az
+  fbdev honosĂ­tĂĄsĂĄra is).
   </simpara></listitem>
 <listitem><simpara>
   Some <emphasis role="bold">Linux graphics drivers</emphasis> don't update
   active <emphasis role="bold">BIOS mode</emphasis> in DOS memory.
-  Tehát ha ilyen problémáid vannak - mindig csak <emphasis role="bold">szöveges módban</emphasis>
-  használd a VESA vezérlőt. Különben a szöveges mód (#03) aktiválódik mindenképp
-  és újra kell indítanod a számítógépedet.
+  TehĂĄt ha ilyen problĂŠmĂĄid vannak - mindig csak <emphasis role="bold">szĂśveges mĂłdban</emphasis>
+  hasznĂĄld a VESA vezĂŠrlĹt. KĂźlĂśnben a szĂśveges mĂłd (#03) aktivĂĄlĂłdik mindenkĂŠpp
+  ĂŠs Ăşjra kell indĂ­tanod a szĂĄmĂ­tĂłgĂŠpedet.
   </simpara></listitem>
 <listitem><simpara>
-  Gyakran a VESA vezérlő bezárása után <emphasis role="bold">fekete</emphasis>
-  képernyőt kapsz. Hogy visszaállítsd a képernyődet az eredeti állapotába - egyszerűen csak
-  válts át másik konzolra (az <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap> gombok
-  megnyomásával) majd válts vissza ugyanígy.
+  Gyakran a VESA vezĂŠrlĹ bezĂĄrĂĄsa utĂĄn <emphasis role="bold">fekete</emphasis>
+  kĂŠpernyĹt kapsz. Hogy visszaĂĄllĂ­tsd a kĂŠpernyĹdet az eredeti ĂĄllapotĂĄba - egyszerĹąen csak
+  vĂĄlts ĂĄt mĂĄsik konzolra (az <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap> gombok
+  megnyomĂĄsĂĄval) majd vĂĄlts vissza ugyanĂ­gy.
   </simpara></listitem>
 <listitem><simpara>
-  A <emphasis role="bold">működő TV kimenethez</emphasis> be kell dugnod a
-  TV-csatlakozót mielőtt betöltene a PC-d, mivel a videó BIOS csak egyszer,
-  a POST eljárás során inicializálja magát.
+  A <emphasis role="bold">mĹąkĂśdĹ TV kimenethez</emphasis> be kell dugnod a
+  TV-csatlakozĂłt mielĹtt betĂśltene a PC-d, mivel a videĂł BIOS csak egyszer,
+  a POST eljĂĄrĂĄs sorĂĄn inicializĂĄlja magĂĄt.
   </simpara></listitem>
 </itemizedlist>
 </sect2>
@@ -1303,38 +1303,38 @@ Nem fog menni!
 <title>X11</title>
 
 <para>
-Ha lehet, kerüld el! Az X11-es kimenetnek (megosztott memória kiterjesztést használnak),
-nincs semmilyen hardveres támogatásuk. Tudja ugyan (MMX/3DNow/SSE által gyorsítva, de
-így is lassan) a szoftveres méretezést, használhatod a <option>-fs -zoom</option>
-kapcsolókat. A legtöbb hardverben benne van a hardveres méretezés támogatása, használd
-a <option>-vo xv</option> kimenetet hozzá vagy a <option>-vo xmga</option>-t a Matrox
-kártyákhoz.
+Ha lehet, kerĂźld el! Az X11-es kimenetnek (megosztott memĂłria kiterjesztĂŠst hasznĂĄlnak),
+nincs semmilyen hardveres tĂĄmogatĂĄsuk. Tudja ugyan (MMX/3DNow/SSE ĂĄltal gyorsĂ­tva, de
+Ă­gy is lassan) a szoftveres mĂŠretezĂŠst, hasznĂĄlhatod a <option>-fs -zoom</option>
+kapcsolĂłkat. A legtĂśbb hardverben benne van a hardveres mĂŠretezĂŠs tĂĄmogatĂĄsa, hasznĂĄld
+a <option>-vo xv</option> kimenetet hozzĂĄ vagy a <option>-vo xmga</option>-t a Matrox
+kĂĄrtyĂĄkhoz.
 </para>
 
 <para>
-A probléma az, hogy a legtöbb kártya vezérlője nem támogatja a hardveres
-gyorsítást a második fejen/TV-n. Ezekben az esetekben zöld/kék színű
-ablakot látsz a film helyett. Az ilyen esetekben jön jól ez a vezérlő,
-de erős CPU-val kell rendelkezned a szoftveres méretezés használatához.
-Ne használd az SDL vezérlő szoftveres kimenetét+méretezőjét, annak még
-rosszabb a képminősége!
+A problĂŠma az, hogy a legtĂśbb kĂĄrtya vezĂŠrlĹje nem tĂĄmogatja a hardveres
+gyorsĂ­tĂĄst a mĂĄsodik fejen/TV-n. Ezekben az esetekben zĂśld/kĂŠk szĂ­nĹą
+ablakot lĂĄtsz a film helyett. Az ilyen esetekben jĂśn jĂłl ez a vezĂŠrlĹ,
+de erĹs CPU-val kell rendelkezned a szoftveres mĂŠretezĂŠs hasznĂĄlatĂĄhoz.
+Ne hasznĂĄld az SDL vezĂŠrlĹ szoftveres kimenetĂŠt+mĂŠretezĹjĂŠt, annak mĂŠg
+rosszabb a kĂŠpminĹsĂŠge!
 </para>
 
 <para>
-A szoftveres méretezés nagyon lassú, jobb, ha megpróbálsz videó módot váltani
-inkább. Az egyszerűbb. Lásd a <link linkend="dga-modelines">DGA rész
-modeline-jait</link>, és írd be őket az <filename>XF86Config</filename>
-fájlba.
+A szoftveres mĂŠretezĂŠs nagyon lassĂş, jobb, ha megprĂłbĂĄlsz videĂł mĂłdot vĂĄltani
+inkĂĄbb. Az egyszerĹąbb. LĂĄsd a <link linkend="dga-modelines">DGA rĂŠsz
+modeline-jait</link>, ĂŠs Ă­rd be Ĺket az <filename>XF86Config</filename>
+fĂĄjlba.
 
 <itemizedlist spacing="compact">
 <listitem><simpara>
-  Ha XFree86 4.x.x-ed van: használd a <option>-vm</option> kapcsolót. Ez átvált
-  egy olyan felbontásra, amin elfér a film. Ha mégsem:
+  Ha XFree86 4.x.x-ed van: hasznĂĄld a <option>-vm</option> kapcsolĂłt. Ez ĂĄtvĂĄlt
+  egy olyan felbontĂĄsra, amin elfĂŠr a film. Ha mĂŠgsem:
   </simpara></listitem>
 <listitem><simpara>
-  XFree86 3.x.x-szel: körkörösen végigmehetsz az elérhető felbontásokon a
+  XFree86 3.x.x-szel: kĂśrkĂśrĂśsen vĂŠgigmehetsz az elĂŠrhetĹ felbontĂĄsokon a
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plusz</keycap>
-  és
+  ĂŠs
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>minusz</keycap>
   gombokkal.
   </simpara></listitem>
@@ -1342,9 +1342,9 @@ fájlba.
 </para>
 
 <para>
-Ha nem találod a beszúrt módokat, nézd át az XFree86 kimenetét. Néhány
-vezérlő nem tud alacsony pixelclock-ot használni, ami szükséges az alacsony
-felbontású videó módokhoz.
+Ha nem talĂĄlod a beszĂşrt mĂłdokat, nĂŠzd ĂĄt az XFree86 kimenetĂŠt. NĂŠhĂĄny
+vezĂŠrlĹ nem tud alacsony pixelclock-ot hasznĂĄlni, ami szĂźksĂŠges az alacsony
+felbontĂĄsĂş videĂł mĂłdokhoz.
 </para>
 </sect2>
 
@@ -1353,214 +1353,214 @@ felbontású videó módokhoz.
 <title>VIDIX</title>
 
 <formalpara>
-<title>BEVEZETÉS</title>
+<title>BEVEZETĂS</title>
 <para>
 A <acronym>VIDIX</acronym> a <emphasis role="bold">VID</emphasis>eo
 <emphasis role="bold">I</emphasis>nterface for *ni<emphasis role="bold">X</emphasis>
-rövidítése. A VIDIX-et egy felhasználói térben használható vezérlőként tervezték és
-mutatták be, mely olyan videó teljesítményt nyújt, mint az mga_vid a Matrox kártyákon.
-Ráadásul könnyen portolható.
+rĂśvidĂ­tĂŠse. A VIDIX-et egy felhasznĂĄlĂłi tĂŠrben hasznĂĄlhatĂł vezĂŠrlĹkĂŠnt terveztĂŠk ĂŠs
+mutattĂĄk be, mely olyan videĂł teljesĂ­tmĂŠnyt nyĂşjt, mint az mga_vid a Matrox kĂĄrtyĂĄkon.
+RĂĄadĂĄsul kĂśnnyen portolhatĂł.
 </para>
 </formalpara>
 <para>
-Ezt az interfészt úgy tervezték meg, hogy illeszkedjen a már létező videó
-gyorsító interfészekhez (mga_vid, rage128_vid, radeon_vid, pm3_vid) egy állandó
-sémával. Magas szintű interfészt biztosít a BES (BackEnd Scalers) néven ismert
-chip-ekhez vagy az OV-hoz (Video Overlays). Nem nyújt a grafikus szerverekhez
-hasonló alacsony szintű interfészt. (Nem akarok versenyezni a z X11 csapattal a
-grafikus mód váltásban). Pl. ezen interfész fő célja a videó lejátszás sebességének
-maximalizálása.
+Ezt az interfĂŠszt Ăşgy terveztĂŠk meg, hogy illeszkedjen a mĂĄr lĂŠtezĹ videĂł
+gyorsĂ­tĂł interfĂŠszekhez (mga_vid, rage128_vid, radeon_vid, pm3_vid) egy ĂĄllandĂł
+sĂŠmĂĄval. Magas szintĹą interfĂŠszt biztosĂ­t a BES (BackEnd Scalers) nĂŠven ismert
+chip-ekhez vagy az OV-hoz (Video Overlays). Nem nyĂşjt a grafikus szerverekhez
+hasonlĂł alacsony szintĹą interfĂŠszt. (Nem akarok versenyezni a z X11 csapattal a
+grafikus mĂłd vĂĄltĂĄsban). Pl. ezen interfĂŠsz fĹ cĂŠlja a videĂł lejĂĄtszĂĄs sebessĂŠgĂŠnek
+maximalizĂĄlĂĄsa.
 </para>
 
 <itemizedlist spacing="compact">
-<title>HASZNÁLAT</title>
+<title>HASZNĂLAT</title>
 <listitem><simpara>
-  Használhatsz egyedülálló videó kimeneti vezérlőt: <option>-vo xvidix</option>.
-  Ez a vezérlő a VIDIX-es technológia X11-es front end-je. X szerver kell hozzá
-  és csak X szerverrel működik. Jegyezd meg, hogy mivel közvetlenül éri el a hardvert
-  az X vezérlő megkerülésével, a grafikus kártya memóriájában lévő pixmap-ok sérülhetnek.
-  Ezt elkerülheted az X által használt videó memória korlátozásával, amit az XF86Config
-  "VideoRam" opciójával adhatsz meg az eszköz részben. Ajánlott ezt a kártyádon lévő
-  memória mínusz 4 MB-ra állítani. Ha kevesebb, mint 8 MB videó ram-od van, akkor
-  ehelyett használhatod az "XaaNoPixmapCache" opciót a képernyő részben.
+  HasznĂĄlhatsz egyedĂźlĂĄllĂł videĂł kimeneti vezĂŠrlĹt: <option>-vo xvidix</option>.
+  Ez a vezĂŠrlĹ a VIDIX-es technolĂłgia X11-es front end-je. X szerver kell hozzĂĄ
+  ĂŠs csak X szerverrel mĹąkĂśdik. Jegyezd meg, hogy mivel kĂśzvetlenĂźl ĂŠri el a hardvert
+  az X vezĂŠrlĹ megkerĂźlĂŠsĂŠvel, a grafikus kĂĄrtya memĂłriĂĄjĂĄban lĂŠvĹ pixmap-ok sĂŠrĂźlhetnek.
+  Ezt elkerĂźlheted az X ĂĄltal hasznĂĄlt videĂł memĂłria korlĂĄtozĂĄsĂĄval, amit az XF86Config
+  "VideoRam" opciĂłjĂĄval adhatsz meg az eszkĂśz rĂŠszben. AjĂĄnlott ezt a kĂĄrtyĂĄdon lĂŠvĹ
+  memĂłria mĂ­nusz 4 MB-ra ĂĄllĂ­tani. Ha kevesebb, mint 8 MB videĂł ram-od van, akkor
+  ehelyett hasznĂĄlhatod az "XaaNoPixmapCache" opciĂłt a kĂŠpernyĹ rĂŠszben.
   </simpara></listitem>
 <listitem><simpara>
-  Van egy konzolos VIDIX vezérlő: <option>-vo cvidix</option>.
-  Ehhez egy működő és inicializált frambuffer kell a legtöbb kártyánál (vagy különben
-  csak összeszemeteled a képernyőd), és hasonló eredményt kapsz, mint a
-  <option>-vo mga</option> vagy <option>-vo fbdev</option> kapcsolókkal. Az nVidia
-  kártyák azonban képesek tényleges grafikus kimenetre igazi szöveges konzolon.
-  Lásd az <link linkend="vidix-nvidia">nvidia_vid</link> részt a további információkért.
+  Van egy konzolos VIDIX vezĂŠrlĹ: <option>-vo cvidix</option>.
+  Ehhez egy mĹąkĂśdĹ ĂŠs inicializĂĄlt frambuffer kell a legtĂśbb kĂĄrtyĂĄnĂĄl (vagy kĂźlĂśnben
+  csak Ăśsszeszemeteled a kĂŠpernyĹd), ĂŠs hasonlĂł eredmĂŠnyt kapsz, mint a
+  <option>-vo mga</option> vagy <option>-vo fbdev</option> kapcsolĂłkkal. Az nVidia
+  kĂĄrtyĂĄk azonban kĂŠpesek tĂŠnyleges grafikus kimenetre igazi szĂśveges konzolon.
+  LĂĄsd az <link linkend="vidix-nvidia">nvidia_vid</link> rĂŠszt a tovĂĄbbi informĂĄciĂłkĂŠrt.
   </simpara></listitem>
 <listitem><simpara>
-  Használhatod a VIDIX aleszközt, ami számos videó kimeneti vezérlővel együtt használható,
-  például: <option>-vo vesa:vidix</option>
-  (<emphasis role="bold">csak Linux</emphasis>) és
+  HasznĂĄlhatod a VIDIX aleszkĂśzt, ami szĂĄmos videĂł kimeneti vezĂŠrlĹvel egyĂźtt hasznĂĄlhatĂł,
+  pĂŠldĂĄul: <option>-vo vesa:vidix</option>
+  (<emphasis role="bold">csak Linux</emphasis>) ĂŠs
   <option>-vo fbdev:vidix</option>.
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-Igazából nem számít, hogy melyik videó kimeneti vezérlőt használod együtt a
+IgazĂĄbĂłl nem szĂĄmĂ­t, hogy melyik videĂł kimeneti vezĂŠrlĹt hasznĂĄlod egyĂźtt a
 <emphasis role="bold">VIDIX</emphasis>-szel.
 </para>
 
 <itemizedlist spacing="compact">
-<title>KÖVETELMÉNYEK</title>
+<title>KĂVETELMĂNYEK</title>
 <listitem><simpara>
-  A videó kártyának grafikus módban kell lennie (kivéve az nVidia kártyákat a
-  <option>-vo cvidix</option> kimeneti vezérlővel).
+  A videĂł kĂĄrtyĂĄnak grafikus mĂłdban kell lennie (kivĂŠve az nVidia kĂĄrtyĂĄkat a
+  <option>-vo cvidix</option> kimeneti vezĂŠrlĹvel).
   </simpara></listitem>
 <listitem><simpara>
-  Az <application>MPlayer</application> videó kimeneti vezérlőnek tudnia kell
-  aktiválni a videó módot és információkat kell tudnia átadni a VIDIX aleszköznek
-  a szerver videó karakterisztikájáról.
+  Az <application>MPlayer</application> videĂł kimeneti vezĂŠrlĹnek tudnia kell
+  aktivĂĄlni a videĂł mĂłdot ĂŠs informĂĄciĂłkat kell tudnia ĂĄtadni a VIDIX aleszkĂśznek
+  a szerver videĂł karakterisztikĂĄjĂĄrĂłl.
   </simpara></listitem>
 </itemizedlist>
 
 <formalpara>
-<title>HASZNÁLATI MÓDOK</title>
+<title>HASZNĂLATI MĂDOK</title>
 <para>
-Ha a VIDIX-et <emphasis role="bold">aleszközként</emphasis> használod (<option>-vo
-vesa:vidix</option>), akkor a videó mód konfigurációt a videó kimeneti vezérlő
-(röviden <emphasis role="bold">vo_server</emphasis>) végzi. Ezért az
-<application>MPlayer</application> parancssorában ugyan azokat a kulcsokat
-használhatod, mint a vo_server-rel. Ráadásul ismeri a <option>-double</option>
-kulcsot mint globálisan látható paramétert. (Javaslom ezen kulcs VIDIX-szel
-történő használatát legalább az ATI kártyával). Ami a <option>-vo xvidix</option>-et
-illeti, most csak a következő kapcsolókat ismeri: <option>-fs -zoom -x -y -double</option>.
+Ha a VIDIX-et <emphasis role="bold">aleszkĂśzkĂŠnt</emphasis> hasznĂĄlod (<option>-vo
+vesa:vidix</option>), akkor a videĂł mĂłd konfigurĂĄciĂłt a videĂł kimeneti vezĂŠrlĹ
+(rĂśviden <emphasis role="bold">vo_server</emphasis>) vĂŠgzi. EzĂŠrt az
+<application>MPlayer</application> parancssorĂĄban ugyan azokat a kulcsokat
+hasznĂĄlhatod, mint a vo_server-rel. RĂĄadĂĄsul ismeri a <option>-double</option>
+kulcsot mint globĂĄlisan lĂĄthatĂł paramĂŠtert. (Javaslom ezen kulcs VIDIX-szel
+tĂśrtĂŠnĹ hasznĂĄlatĂĄt legalĂĄbb az ATI kĂĄrtyĂĄval). Ami a <option>-vo xvidix</option>-et
+illeti, most csak a kĂśvetkezĹ kapcsolĂłkat ismeri: <option>-fs -zoom -x -y -double</option>.
 </para>
 </formalpara>
 <para>
-A parancssorban harmadik alkapcsolóként megadhatod közvetlenül a VIDIX vezérlőjét:
+A parancssorban harmadik alkapcsolĂłkĂŠnt megadhatod kĂśzvetlenĂźl a VIDIX vezĂŠrlĹjĂŠt:
 
 <screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>file.avi</replaceable></screen>
 or
 <screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>file.avi</replaceable></screen>
 
-De ez veszélyes, inkább ne használd. Ebben az esetben a megadott vezérlő
-lesz kényszerítve, így az eredmény megjósolhatatlan
-(<emphasis role="bold">lefagyaszthatja</emphasis> a számítógéped). CSAK akkor
-csinálj ilyet, ha teljesen biztos vagy benne, hogy működik és az
+De ez veszĂŠlyes, inkĂĄbb ne hasznĂĄld. Ebben az esetben a megadott vezĂŠrlĹ
+lesz kĂŠnyszerĂ­tve, Ă­gy az eredmĂŠny megjĂłsolhatatlan
+(<emphasis role="bold">lefagyaszthatja</emphasis> a szĂĄmĂ­tĂłgĂŠped). CSAK akkor
+csinĂĄlj ilyet, ha teljesen biztos vagy benne, hogy mĹąkĂśdik ĂŠs az
 <application>MPlayer</application> nem teszi meg automatikusan. Ez esetben
-kérjük jelezd ezt a fejlesztőknek is. A helyes módszer a VIDIX argumentumok
-nélküli használata, és így az automatikus detektálás engedélyezése.
+kĂŠrjĂźk jelezd ezt a fejlesztĹknek is. A helyes mĂłdszer a VIDIX argumentumok
+nĂŠlkĂźli hasznĂĄlata, ĂŠs Ă­gy az automatikus detektĂĄlĂĄs engedĂŠlyezĂŠse.
 </para>
 
 <para>
-Mivel a VIDIX-nek direkt hardver elérés kell, futtathatod root-ként vagy
-beállíthatod a SUID bit-et az <application>MPlayer</application> binárisán
-(<emphasis role="bold">Figyelem: Ez biztonsági kockázatot jelent!</emphasis>).
-Alternatívaként használhatsz egy speciális kernel modult, így:
+Mivel a VIDIX-nek direkt hardver elĂŠrĂŠs kell, futtathatod root-kĂŠnt vagy
+beĂĄllĂ­thatod a SUID bit-et az <application>MPlayer</application> binĂĄrisĂĄn
+(<emphasis role="bold">Figyelem: Ez biztonsĂĄgi kockĂĄzatot jelent!</emphasis>).
+AlternatĂ­vakĂŠnt hasznĂĄlhatsz egy speciĂĄlis kernel modult, Ă­gy:
 </para>
 
 <procedure>
 <step><para>
-  Töltsd le az svgalib (pl. 1.9.17-es) <ulink url="http://www.arava.co.il/matan/svgalib/">fejlesztői verzióját</ulink>,
+  TĂśltsd le az svgalib (pl. 1.9.17-es) <ulink url="http://www.arava.co.il/matan/svgalib/">fejlesztĹi verziĂłjĂĄt</ulink>,
   <emphasis role="bold">VAGY</emphasis>
-  az Alex által speciálisan az <application>MPlayer</application>rel történő
-  használatra készítettet (a lefordításához nem kell az svgalib forrás)
+  az Alex ĂĄltal speciĂĄlisan az <application>MPlayer</application>rel tĂśrtĂŠnĹ
+  hasznĂĄlatra kĂŠszĂ­tettet (a lefordĂ­tĂĄsĂĄhoz nem kell az svgalib forrĂĄs)
   <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">innen</ulink>.
   </para></step>
 <step><para>
-  Fordítsd le a modult az <filename class="directory">svgalib_helper</filename>
-  könyvtárban (az <filename class="directory">svgalib-1.9.17/kernel/</filename>
-  könyvtáron belül található, ha az svgalib oldaláról töltötted le a forrást) és
+  FordĂ­tsd le a modult az <filename class="directory">svgalib_helper</filename>
+  kĂśnyvtĂĄrban (az <filename class="directory">svgalib-1.9.17/kernel/</filename>
+  kĂśnyvtĂĄron belĂźl talĂĄlhatĂł, ha az svgalib oldalĂĄrĂłl tĂśltĂśtted le a forrĂĄst) ĂŠs
   insmod-old.
   </para></step>
 <step><para>
-  A <filename class="directory">/dev</filename> könyvtárban a megfelelő eszközök
-  létrehozásához add ki a <screen>make device</screen> parancsot az <filename class="directory">svgalib_helper</filename>
-  könyvtárban rootként.
+  A <filename class="directory">/dev</filename> kĂśnyvtĂĄrban a megfelelĹ eszkĂśzĂśk
+  lĂŠtrehozĂĄsĂĄhoz add ki a <screen>make device</screen> parancsot az <filename class="directory">svgalib_helper</filename>
+  kĂśnyvtĂĄrban rootkĂŠnt.
   </para></step>
 <step><para>
-  Mozgasd át az <filename class="directory">svgalib_helper</filename> könyvtárat az
+  Mozgasd ĂĄt az <filename class="directory">svgalib_helper</filename> kĂśnyvtĂĄrat az
   <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>-be.
   </para></step>
 <step><para>
-  Szükséges, ha a forrást az svgalib oldaláról szerezted be: töröld a megjegyzést az
-  "svgalib_helper"-t tartalmazó CFLAGS sor elől a
+  SzĂźksĂŠges, ha a forrĂĄst az svgalib oldalĂĄrĂłl szerezted be: tĂśrĂśld a megjegyzĂŠst az
+  "svgalib_helper"-t tartalmazĂł CFLAGS sor elĹl a
   <filename class="directory">libdha/Makefile</filename>-ban.
   </para></step>
 <step><para>
-  Fordítsd újra és telepítsd a libdha-t.
+  FordĂ­tsd Ăşjra ĂŠs telepĂ­tsd a libdha-t.
   </para></step>
 </procedure>
 
 <sect3 id="vidix-ati">
-<title>ATI kártyák</title>
+<title>ATI kĂĄrtyĂĄk</title>
 <para>
-Jelenleg a legtöbb ATI kártya natívan támogatott, a Mach64-től a
-legújabb Radeonokig.
+Jelenleg a legtĂśbb ATI kĂĄrtya natĂ­van tĂĄmogatott, a Mach64-tĹl a
+legĂşjabb Radeonokig.
 </para>
 
 <para>
-Két lefordított bináris van: <filename>radeon_vid</filename> a Radeonhoz és
-<filename>rage128_vid</filename> a Rage 128 kártyákhoz. Előírhatsz egyet vagy
-hagyhatod a VIDIX rendszernek automatikusan kipróbálni az összes elérhető vezérlőt.
+KĂŠt lefordĂ­tott binĂĄris van: <filename>radeon_vid</filename> a Radeonhoz ĂŠs
+<filename>rage128_vid</filename> a Rage 128 kĂĄrtyĂĄkhoz. ElĹĂ­rhatsz egyet vagy
+hagyhatod a VIDIX rendszernek automatikusan kiprĂłbĂĄlni az Ăśsszes elĂŠrhetĹ vezĂŠrlĹt.
 </para>
 </sect3>
 
 <sect3 id="vidix-mga">
-<title>Matrox kártyák</title>
+<title>Matrox kĂĄrtyĂĄk</title>
 <para>
-A Matrox G200, G400, G450 és G550 működik a jelentések szerint.
+A Matrox G200, G400, G450 ĂŠs G550 mĹąkĂśdik a jelentĂŠsek szerint.
 </para>
 
 <para>
-A vezérlő támogatja a videó equalizereket és majdnem olyan gyors, mint a
+A vezĂŠrlĹ tĂĄmogatja a videĂł equalizereket ĂŠs majdnem olyan gyors, mint a
 <link linkend="mga_vid">Matrox framebuffer</link>.
 </para>
 </sect3>
 
 <sect3 id="vidix-trident">
-<title>Trident kártyák</title>
+<title>Trident kĂĄrtyĂĄk</title>
 <para>
-Van egy vezérlő a Trident Cyberblade/i1 chipset-hez, ami
-a VIA Epia alaplapokon található.
+Van egy vezĂŠrlĹ a Trident Cyberblade/i1 chipset-hez, ami
+a VIA Epia alaplapokon talĂĄlhatĂł.
 </para>
 
 <para>
-A vezérlőt
+A vezĂŠrlĹt
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>
-írta és tartja karban.
+Ă­rta ĂŠs tartja karban.
 </para>
 </sect3>
 
 <sect3 id="vidix-3dlabs">
-<title>3DLabs kártyák</title>
+<title>3DLabs kĂĄrtyĂĄk</title>
 <para>
-Habár van vezérlő a 3DLabs GLINT R3 és Permedia3 chip-ekhez, senki sem
-tesztelte le, így örömmel fogadjuk a jelentéseket.
+HabĂĄr van vezĂŠrlĹ a 3DLabs GLINT R3 ĂŠs Permedia3 chip-ekhez, senki sem
+tesztelte le, Ă­gy ĂśrĂśmmel fogadjuk a jelentĂŠseket.
 </para>
 </sect3>
 
 <sect3 id="vidix-nvidia">
-<title>nVidia kártya</title>
+<title>nVidia kĂĄrtya</title>
 
 <para>
-  Egy egyedülálló tulajdonsága az nvidia_vid vezérlőnek a
-  <emphasis role="bold">sima, egyszerű, csak szöveges konzolon</emphasis> történő
-  videó megjelenítés - framebuffer vagy X varázslag és egyebek nélkül. Ehhez a
-  <option>cvidix</option> videó kimenetet kell használni, amint az itt látható:
+  Egy egyedĂźlĂĄllĂł tulajdonsĂĄga az nvidia_vid vezĂŠrlĹnek a
+  <emphasis role="bold">sima, egyszerĹą, csak szĂśveges konzolon</emphasis> tĂśrtĂŠnĹ
+  videĂł megjelenĂ­tĂŠs - framebuffer vagy X varĂĄzslag ĂŠs egyebek nĂŠlkĂźl. Ehhez a
+  <option>cvidix</option> videĂł kimenetet kell hasznĂĄlni, amint az itt lĂĄthatĂł:
   <screen>mplayer -vo cvidix <replaceable>pelda.avi</replaceable></screen>
 </para>
 
 </sect3>
 
 <sect3 id="vidix-sis">
-<title>SiS kártyák</title>
+<title>SiS kĂĄrtyĂĄk</title>
 <para>
-Ez nagyon kísérleti kód, csakúgy mint az nvidia_vid.
+Ez nagyon kĂ­sĂŠrleti kĂłd, csakĂşgy mint az nvidia_vid.
 </para>
 
 <para>
-Tesztelték SiS 650/651/740-en (a leggyakrabban használt SiS chipset verziók
+TeszteltĂŠk SiS 650/651/740-en (a leggyakrabban hasznĂĄlt SiS chipset verziĂłk
 a "Shuttle XPC" dobozokban).
 </para>
 
 <para>
-Várjuk a visszajelzéseket!
+VĂĄrjuk a visszajelzĂŠseket!
 </para>
 </sect3>
 </sect2>
@@ -1568,88 +1568,88 @@ Várjuk a visszajelzéseket!
 <sect2 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
-&quot;A DirectFB egy grafikus függvénykönyvtár, amit a beágyazott rendszereket szem előtt
-tartva terveztek meg. Maximális hardver gyorsítási teljesítményt ad minimális erőforrás
-felhasználással és terheléssel.&quot; - idézet a <ulink url="http://www.directfb.org"/> oldalról
+&quot;A DirectFB egy grafikus fĂźggvĂŠnykĂśnyvtĂĄr, amit a beĂĄgyazott rendszereket szem elĹtt
+tartva terveztek meg. MaximĂĄlis hardver gyorsĂ­tĂĄsi teljesĂ­tmĂŠnyt ad minimĂĄlis erĹforrĂĄs
+felhasznĂĄlĂĄssal ĂŠs terhelĂŠssel.&quot; - idĂŠzet a <ulink url="http://www.directfb.org"/> oldalrĂłl
 </para></blockquote>
 
-<para>Ki fogom hagyni a DirectFB tulajdonságokat ebből a fejezetből.</para>
+<para>Ki fogom hagyni a DirectFB tulajdonsĂĄgokat ebbĹl a fejezetbĹl.</para>
 
 <para>
-Mivel az <application>MPlayer</application> nem támogatott, mint &quot;video
-provider&quot; a DirectFB-ben, ez a kimeneti vezérlő engedélyezi a videó lejátszást
-DirectFB-n keresztül. Természetesen gyorsított lesz, az én Matrox G400-amon a DirectFB
-sebessége majdnem megegyezik az XVideo-éval.
+Mivel az <application>MPlayer</application> nem tĂĄmogatott, mint &quot;video
+provider&quot; a DirectFB-ben, ez a kimeneti vezĂŠrlĹ engedĂŠlyezi a videĂł lejĂĄtszĂĄst
+DirectFB-n keresztĂźl. TermĂŠszetesen gyorsĂ­tott lesz, az ĂŠn Matrox G400-amon a DirectFB
+sebessĂŠge majdnem megegyezik az XVideo-ĂŠval.
 </para>
 
 <para>
-Mindig próbáld meg a DirectFB legújabb verzióját használni. Megadhatsz
-DirectFB opciókat a parancssorban a <option>-dfbopts</option> kapcsoló használatával.
-A réteg választás egy aleszköz módszerével történhet, pl.: <option>-vo directfb:2</option>
-(-1-es réteg az alapértelmezett: automatikus keresés)
+Mindig prĂłbĂĄld meg a DirectFB legĂşjabb verziĂłjĂĄt hasznĂĄlni. Megadhatsz
+DirectFB opciĂłkat a parancssorban a <option>-dfbopts</option> kapcsolĂł hasznĂĄlatĂĄval.
+A rĂŠteg vĂĄlasztĂĄs egy aleszkĂśz mĂłdszerĂŠvel tĂśrtĂŠnhet, pl.: <option>-vo directfb:2</option>
+(-1-es rĂŠteg az alapĂŠrtelmezett: automatikus keresĂŠs)
 </para>
 </sect2>
 
 <sect2 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
-Kérjük olvasd el a <link linkend="directfb">fő DirectFB</link> részt az általános
-információkért.
+KĂŠrjĂźk olvasd el a <link linkend="directfb">fĹ DirectFB</link> rĂŠszt az ĂĄltalĂĄnos
+informĂĄciĂłkĂŠrt.
 </para>
 
 <para>
-Ez a videó kimeneti vezérlő engedélyezi a CRTC2-t (a második fejen) a Matrox
-G400/G450/G550 kártyákon, a videót az első fejtől
-<emphasis role="bold">függetlenül</emphasis> jelenítve meg.
+Ez a videĂł kimeneti vezĂŠrlĹ engedĂŠlyezi a CRTC2-t (a mĂĄsodik fejen) a Matrox
+G400/G450/G550 kĂĄrtyĂĄkon, a videĂłt az elsĹ fejtĹl
+<emphasis role="bold">fĂźggetlenĂźl</emphasis> jelenĂ­tve meg.
 </para>
 
 <para>
 Ville Syrjala-nak van egy
 <ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">README</ulink>-je
-és egy
+ĂŠs egy
 <ulink url="http://www.sci.fi/~syrjala/directfb/matrox-tv-out-howto">HOWTO</ulink>-ja
-a weboldalán, ami leírja, hogy hogyan hozhatod működésbe a DirectFB TV kimenetet a Matrox kártyákon.
+a weboldalĂĄn, ami leĂ­rja, hogy hogyan hozhatod mĹąkĂśdĂŠsbe a DirectFB TV kimenetet a Matrox kĂĄrtyĂĄkon.
 </para>
 
 <note><para>
-Az első DirectFB verzió, amit működésre tudtunk bírni a
-0.9.17 volt (hibás, kell hozzá az a <systemitem>surfacemanager</systemitem>
-javítás a fenti URL-ről). A CRTC2 kód portolását az
-<link linkend="mga_vid">mga_vid</link>-be évekig terveztük, a
-<ulink url="../../tech/patches.txt">javításokat</ulink> szívesen fogadjuk.
+Az elsĹ DirectFB verziĂł, amit mĹąkĂśdĂŠsre tudtunk bĂ­rni a
+0.9.17 volt (hibĂĄs, kell hozzĂĄ az a <systemitem>surfacemanager</systemitem>
+javĂ­tĂĄs a fenti URL-rĹl). A CRTC2 kĂłd portolĂĄsĂĄt az
+<link linkend="mga_vid">mga_vid</link>-be ĂŠvekig terveztĂźk, a
+<ulink url="../../tech/patches.txt">javĂ­tĂĄsokat</ulink> szĂ­vesen fogadjuk.
 </para></note>
 </sect2>
 </sect1>
 
 <sect1 id="mpeg_decoders">
-<title>MPEG dekóderek</title>
+<title>MPEG dekĂłderek</title>
 
 <sect2 id="dvb">
-<title>DVB kimenet és bemenet</title>
+<title>DVB kimenet ĂŠs bemenet</title>
 <para>
-Az <application>MPlayer</application> támogatja a Siemens DVB chipset-tel szerelt
-kártyákat olyan gyártóktól, mint a Siemens, Technotrend, Galaxis vagy a Hauppauge. A
-legújabb DVB vezérlők elérhetőek a <ulink url="http://www.linuxtv.org">Linux TV oldalról</ulink>.
-Ha szoftveres átkódolást akarsz csinálni, legalább egy 1GHz-es CPU-ra lesz szükséged.
+Az <application>MPlayer</application> tĂĄmogatja a Siemens DVB chipset-tel szerelt
+kĂĄrtyĂĄkat olyan gyĂĄrtĂłktĂłl, mint a Siemens, Technotrend, Galaxis vagy a Hauppauge. A
+legĂşjabb DVB vezĂŠrlĹk elĂŠrhetĹek a <ulink url="http://www.linuxtv.org">Linux TV oldalrĂłl</ulink>.
+Ha szoftveres ĂĄtkĂłdolĂĄst akarsz csinĂĄlni, legalĂĄbb egy 1GHz-es CPU-ra lesz szĂźksĂŠged.
 </para>
 
 <para>
-A configure megtalálja a DVB kártyádat. Ha mégsem, kényszerítheted:
+A configure megtalĂĄlja a DVB kĂĄrtyĂĄdat. Ha mĂŠgsem, kĂŠnyszerĂ­theted:
 </para>
 
 <para><screen>./configure --enable-dvb</screen></para>
 
-<para>Ha ost fejléc fájlaid vannak egy nem szabványos elérési útvonalon, add meg:</para>
+<para>Ha ost fejlĂŠc fĂĄjlaid vannak egy nem szabvĂĄnyos elĂŠrĂŠsi Ăştvonalon, add meg:</para>
 
-<para><screen>./configure --with-extraincdir=<replaceable>DVB forrás könyvtár</replaceable>/ost/include
+<para><screen>./configure --with-extraincdir=<replaceable>DVB forrĂĄs kĂśnyvtĂĄr</replaceable>/ost/include
 </screen></para>
 
-<para>Majd fordíts és telepíts, mint rendesen.</para>
+<para>Majd fordĂ­ts ĂŠs telepĂ­ts, mint rendesen.</para>
 
 <formalpara>
-<title>HASZNÁLAT</title>
+<title>HASZNĂLAT</title>
 <para>
-A hardveres dekódolás (szabványos MPEG-1/2 fájlok lejátszása) elvégezhető ezzel a paranccsal:
+A hardveres dekĂłdolĂĄs (szabvĂĄnyos MPEG-1/2 fĂĄjlok lejĂĄtszĂĄsa) elvĂŠgezhetĹ ezzel a paranccsal:
 </para>
 </formalpara>
 
@@ -1658,8 +1658,8 @@ A hardveres dekódolás (szabványos MPEG-1/2 fájlok lejátszása) elvégezhető ezzel 
 </para>
 
 <para>
-A Szoftveres dekódolás vagy átkódolás különböző formátumokról MPEG-1-re egy ehhez hasonló
-paranccsal érhető el:
+A Szoftveres dekĂłdolĂĄs vagy ĂĄtkĂłdolĂĄs kĂźlĂśnbĂśzĹ formĂĄtumokrĂłl MPEG-1-re egy ehhez hasonlĂł
+paranccsal ĂŠrhetĹ el:
 </para>
 <para><screen>
 mplayer -ao mpegpes -vo mpegpes <replaceable>yourfile.ext</replaceable>
@@ -1667,20 +1667,20 @@ mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>yourfile.ext</replaceabl
 </screen></para>
 
 <para>
-Figyelj rá, hogy a DVB kártyák PAL esetén csak a 288-as és 576-os, NTSC esetén a 240-es és 480-as
-magasságokat ismerik. <emphasis role="bold">Muszáj</emphasis> átméretezned más magassághoz a
-<option>scale=szélesség:magasság</option> kapcsolóval és a kívánt szélesség és magasság
-megadásával a <option>-vf</option> kapcsolónál. A DVB kártyák számos szélességet elfogadnak,
-mint például 720, 704, 640, 512, 480, 352 stb. és hardveres méretezést alkalmaznak vízszintes
-irányban, így a legtöbb esetben nem kell vízszintesen méretezned. Egy 512x384 (4:3 arányú)
+Figyelj rĂĄ, hogy a DVB kĂĄrtyĂĄk PAL esetĂŠn csak a 288-as ĂŠs 576-os, NTSC esetĂŠn a 240-es ĂŠs 480-as
+magassĂĄgokat ismerik. <emphasis role="bold">MuszĂĄj</emphasis> ĂĄtmĂŠretezned mĂĄs magassĂĄghoz a
+<option>scale=szĂŠlessĂŠg:magassĂĄg</option> kapcsolĂłval ĂŠs a kĂ­vĂĄnt szĂŠlessĂŠg ĂŠs magassĂĄg
+megadĂĄsĂĄval a <option>-vf</option> kapcsolĂłnĂĄl. A DVB kĂĄrtyĂĄk szĂĄmos szĂŠlessĂŠget elfogadnak,
+mint pĂŠldĂĄul 720, 704, 640, 512, 480, 352 stb. ĂŠs hardveres mĂŠretezĂŠst alkalmaznak vĂ­zszintes
+irĂĄnyban, Ă­gy a legtĂśbb esetben nem kell vĂ­zszintesen mĂŠretezned. Egy 512x384 (4:3 arĂĄnyĂş)
 MPEG-4 (DivX)-hez:
 </para>
 
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen></para>
 
-<para>Ha szélesvásznú filmed van és nem akarod átméretezni teljes magasságúra,
-használhatod az <option>expand=w:h</option> szűrőt a fekete sávok hozzáadásához. Egy
-640x384 MPEG-4 (DivX) megnézésénél:
+<para>Ha szĂŠlesvĂĄsznĂş filmed van ĂŠs nem akarod ĂĄtmĂŠretezni teljes magassĂĄgĂşra,
+hasznĂĄlhatod az <option>expand=w:h</option> szĹąrĹt a fekete sĂĄvok hozzĂĄadĂĄsĂĄhoz. Egy
+640x384 MPEG-4 (DivX) megnĂŠzĂŠsĂŠnĂŠl:
 </para>
 
 <para>
@@ -1689,7 +1689,7 @@ használhatod az <option>expand=w:h</option> szűrőt a fekete sávok hozzáadásához.
 </para>
 
 <para>
-Ha a CPU-d túl lassú a teljes méretű 720x576 MPEG-4 (DivX)-hez, próbáld meg leméretezni:
+Ha a CPU-d tĂşl lassĂş a teljes mĂŠretĹą 720x576 MPEG-4 (DivX)-hez, prĂłbĂĄld meg lemĂŠretezni:
 </para>
 
 <para>
@@ -1697,7 +1697,7 @@ Ha a CPU-d túl lassú a teljes méretű 720x576 MPEG-4 (DivX)-hez, próbáld meg lemé
 </screen>
 </para>
 
-<para>Ha a sebesség nem javul, próbáld meg a függőleges leméretezést is:</para>
+<para>Ha a sebessĂŠg nem javul, prĂłbĂĄld meg a fĂźggĹleges lemĂŠretezĂŠst is:</para>
 
 <para>
 <screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 <replaceable>file.avi</replaceable>
@@ -1705,25 +1705,25 @@ Ha a CPU-d túl lassú a teljes méretű 720x576 MPEG-4 (DivX)-hez, próbáld meg lemé
 </para>
 
 <para>
-Az OSD és a feliratokhoz használd az expand szűrő OSD tulajdonságát. Így, az
-<option>expand=w:h</option> vagy <option>expand=w:h:x:y</option> helyett írj
-<option>expand=w:h:x:y:1</option>-et (az ötödik paraméter, a <option>:1</option>
-a végén engedélyezi az OSD render-elést). A képet egy kicsit feljebb szeretnéd
-vinnni valószínűleg, hogy nagyobb hely maradjon a feliratoknak. Vagy akár a
-feliratokat is felviheted, ha a TV képernyőjén kívülre esnek, használd a
-<option>-subpos &lt;0-100&gt;</option> kapcsolót ennek beállításához
-(a <option>-subpos 80</option> egy jó választás).
+Az OSD ĂŠs a feliratokhoz hasznĂĄld az expand szĹąrĹ OSD tulajdonsĂĄgĂĄt. Ăgy, az
+<option>expand=w:h</option> vagy <option>expand=w:h:x:y</option> helyett Ă­rj
+<option>expand=w:h:x:y:1</option>-et (az ĂśtĂśdik paramĂŠter, a <option>:1</option>
+a vĂŠgĂŠn engedĂŠlyezi az OSD render-elĂŠst). A kĂŠpet egy kicsit feljebb szeretnĂŠd
+vinnni valĂłszĂ­nĹąleg, hogy nagyobb hely maradjon a feliratoknak. Vagy akĂĄr a
+feliratokat is felviheted, ha a TV kĂŠpernyĹjĂŠn kĂ­vĂźlre esnek, hasznĂĄld a
+<option>-subpos &lt;0-100&gt;</option> kapcsolĂłt ennek beĂĄllĂ­tĂĄsĂĄhoz
+(a <option>-subpos 80</option> egy jĂł vĂĄlasztĂĄs).
 </para>
 
 <para>
-A nem-25fps-es filmek PAL TV-n vagy lassú CPU-n való lejátszásához még add hozzá a
-<option>-framedrop</option> kapcsolót.
+A nem-25fps-es filmek PAL TV-n vagy lassĂş CPU-n valĂł lejĂĄtszĂĄsĂĄhoz mĂŠg add hozzĂĄ a
+<option>-framedrop</option> kapcsolĂłt.
 </para>
 
 <para>
-Az MPEG-4 (DivX) fájlok méretarányának megtartásához és az optimális méretezési
-paraméterekhez (hardveres vízszintes és szoftveres függőleges méretezés a helyes
-méretarány megtartásával) használd az új dvbscale szűrőt:
+Az MPEG-4 (DivX) fĂĄjlok mĂŠretarĂĄnyĂĄnak megtartĂĄsĂĄhoz ĂŠs az optimĂĄlis mĂŠretezĂŠsi
+paramĂŠterekhez (hardveres vĂ­zszintes ĂŠs szoftveres fĂźggĹleges mĂŠretezĂŠs a helyes
+mĂŠretarĂĄny megtartĂĄsĂĄval) hasznĂĄld az Ăşj dvbscale szĹąrĹt:
 </para>
 
 <para><screen>
@@ -1733,68 +1733,68 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <formalpara>
 <title>Digital TV (DVB bemeneti modul)</title>
-<para>A DVB kártyád segítségével digitalis TV-t is nézhetsz.</para>
+<para>A DVB kĂĄrtyĂĄd segĂ­tsĂŠgĂŠvel digitalis TV-t is nĂŠzhetsz.</para>
 </formalpara>
 
 <para>
-  A <command>scan</command> és <command>szap/tzap/czap/azap</command> programoknak
-  telepítve kell lenniük; mind benne vannak a drivers csomagban.
+  A <command>scan</command> ĂŠs <command>szap/tzap/czap/azap</command> programoknak
+  telepĂ­tve kell lenniĂźk; mind benne vannak a drivers csomagban.
 </para>
 
 <para>
-  Ellenőrizd, hogy a vezérlőid megfelelően működnek egy olyan programmal, mint a
+  EllenĹrizd, hogy a vezĂŠrlĹid megfelelĹen mĹąkĂśdnek egy olyan programmal, mint a
   <ulink url="http://sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
   (ez a DVB bemeneti modul alapja).
 </para>
 
 <para>
-  Most már fordíthatsz egy <filename>~/.mplayer/channels.conf</filename>
-  fájlt, a <command>szap/tzap/czap/azap</command> által elfogadott szintaktikával, vagy
-  engeded a <command>scan</command>nek, hogy elkészítse neked.
+  Most mĂĄr fordĂ­thatsz egy <filename>~/.mplayer/channels.conf</filename>
+  fĂĄjlt, a <command>szap/tzap/czap/azap</command> ĂĄltal elfogadott szintaktikĂĄval, vagy
+  engeded a <command>scan</command>nek, hogy elkĂŠszĂ­tse neked.
 </para>
 
 <para>
-  Ha több típusú kártyád van (pl. műholdas, földi, kábel és ATSC), a csatorna
-  fájlokat elmentheted
+  Ha tĂśbb tĂ­pusĂş kĂĄrtyĂĄd van (pl. mĹąholdas, fĂśldi, kĂĄbel ĂŠs ATSC), a csatorna
+  fĂĄjlokat elmentheted
   <filename>~/.mplayer/channels.conf.sat</filename>,
   <filename>~/.mplayer/channels.conf.ter</filename>,
   <filename>~/.mplayer/channels.conf.cbl</filename>,
-  és <filename>~/.mplayer/channels.conf.atsc</filename> néven,
-  így az <application>MPlayer</application>nek implicit javaslod ezen
-  fájlok használatát a <filename>~/.mplayer/channels.conf</filename> helyett
-  és csak azt kell megadnod, hogy melyik kártyát akarod használni.
+  ĂŠs <filename>~/.mplayer/channels.conf.atsc</filename> nĂŠven,
+  Ă­gy az <application>MPlayer</application>nek implicit javaslod ezen
+  fĂĄjlok hasznĂĄlatĂĄt a <filename>~/.mplayer/channels.conf</filename> helyett
+  ĂŠs csak azt kell megadnod, hogy melyik kĂĄrtyĂĄt akarod hasznĂĄlni.
 </para>
 
 <para>
-  Győződj meg róla, hogy <emphasis>csak</emphasis> Free to Air
-  csatornák vannak a <filename>channels.conf</filename> fájlodban, vagy
-  az <application>MPlayer</application> a következő nézhetőig ugrik,
-  de ez sokáig tart, ha egymás után sok kódolt csatorna van.
+  GyĹzĹdj meg rĂłla, hogy <emphasis>csak</emphasis> Free to Air
+  csatornĂĄk vannak a <filename>channels.conf</filename> fĂĄjlodban, vagy
+  az <application>MPlayer</application> a kĂśvetkezĹ nĂŠzhetĹig ugrik,
+  de ez sokĂĄig tart, ha egymĂĄs utĂĄn sok kĂłdolt csatorna van.
 </para>
 
 <para>
-  Az audió és a videó mezőkidben használhatsz kiterjesztett szintaxist:
-  <option>...:pid[+pid]:...</option> (egyenként maximálisan 6 pid);
+  Az audiĂł ĂŠs a videĂł mezĹkidben hasznĂĄlhatsz kiterjesztett szintaxist:
+  <option>...:pid[+pid]:...</option> (egyenkĂŠnt maximĂĄlisan 6 pid);
   ebben az esetben az <application>MPlayer</application> beleveszi a
-  stream-be az összes jelzett pid-et, plusz a pid 0-t (ami a PAT-ot
-  tartalmazza). Javasolt a PMT pid bevétele minden sorba a megfelelő
-  csatornáknál (ha tudod).
-  Egyéb lehetőségek: televideo pid, második audió sáv, stb.
+  stream-be az Ăśsszes jelzett pid-et, plusz a pid 0-t (ami a PAT-ot
+  tartalmazza). Javasolt a PMT pid bevĂŠtele minden sorba a megfelelĹ
+  csatornĂĄknĂĄl (ha tudod).
+  EgyĂŠb lehetĹsĂŠgek: televideo pid, mĂĄsodik audiĂł sĂĄv, stb.
 </para>
 
 <para>
   Ha az <application>MPlayer</application> rendszeren panaszkodik
-  <screen>"Túl sok videó/audió csomag a bufferben"</screen>
+  <screen>"TĂşl sok videĂł/audiĂł csomag a bufferben"</screen>
   <screen>"Too many video/audio packets in the buffer")</screen>
-  üzenettel vagy az audió és videó közötti szinkronizáció
-  növekvő eltérését tapasztalod, próbáld meg használni a libavformat-ban
-  lévő MPEG-TS demuxer-t a
+  Ăźzenettel vagy az audiĂł ĂŠs videĂł kĂśzĂśtti szinkronizĂĄciĂł
+  nĂśvekvĹ eltĂŠrĂŠsĂŠt tapasztalod, prĂłbĂĄld meg hasznĂĄlni a libavformat-ban
+  lĂŠvĹ MPEG-TS demuxer-t a
   <option>-demuxer lavf -lavfdopts probesize=128</option>
-  opció parancssorhoz történő hozzáadásával.
+  opciĂł parancssorhoz tĂśrtĂŠnĹ hozzĂĄadĂĄsĂĄval.
 </para>
 
 <para>
-  A csatornák beállításainak kilistázásához futtast ezt:
+  A csatornĂĄk beĂĄllĂ­tĂĄsainak kilistĂĄzĂĄsĂĄhoz futtast ezt:
 </para>
 
 <screen>
@@ -1802,7 +1802,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Ha egy adott csatornát akarsz nézni, mint pl. az R1-et, írd be:
+  Ha egy adott csatornĂĄt akarsz nĂŠzni, mint pl. az R1-et, Ă­rd be:
 </para>
 
 <screen>
@@ -1810,8 +1810,8 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Ha egynél több kártyád van, meg kell adnod a kártya számát is,
-  ahol a csatorna látható (pl. 2) az alábbi szintaxissal:
+  Ha egynĂŠl tĂśbb kĂĄrtyĂĄd van, meg kell adnod a kĂĄrtya szĂĄmĂĄt is,
+  ahol a csatorna lĂĄthatĂł (pl. 2) az alĂĄbbi szintaxissal:
 </para>
 
 <screen>
@@ -1819,24 +1819,24 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  A csatornaváltáshoz nyomd meg a <keycap>h</keycap> (következő) vagy a
-  <keycap>k</keycap> (előző) gombot vagy használd az
-  <link linkend="osdmenu">OSD menü</link>t.
+  A csatornavĂĄltĂĄshoz nyomd meg a <keycap>h</keycap> (kĂśvetkezĹ) vagy a
+  <keycap>k</keycap> (elĹzĹ) gombot vagy hasznĂĄld az
+  <link linkend="osdmenu">OSD menĂź</link>t.
 </para>
 
 <para>
-  Ha a <filename>~/.mplayer/menu.conf</filename> fájlod tartalmazza a
-  <literal>&lt;dvbsel&gt;</literal> bejegyzést, úgy, mint az
-  <filename>etc/dvb-menu.conf</filename> példafájl (ezt felhasználhatod a
-  <filename>~/.mplayer/menu.conf</filename> fájl felülírásához), a fő menüben
-  egy al-menü bejegyzést láthatsz, aminek a segítségével választhatsz a
-  <filename>channels.conf</filename>-ban előre beállított csatornák közül,
-  melyet az elérhető kártyák listája követhet, ha egynél több
-  <application>MPlayer</application> által használható kártya van.
+  Ha a <filename>~/.mplayer/menu.conf</filename> fĂĄjlod tartalmazza a
+  <literal>&lt;dvbsel&gt;</literal> bejegyzĂŠst, Ăşgy, mint az
+  <filename>etc/dvb-menu.conf</filename> pĂŠldafĂĄjl (ezt felhasznĂĄlhatod a
+  <filename>~/.mplayer/menu.conf</filename> fĂĄjl felĂźlĂ­rĂĄsĂĄhoz), a fĹ menĂźben
+  egy al-menĂź bejegyzĂŠst lĂĄthatsz, aminek a segĂ­tsĂŠgĂŠvel vĂĄlaszthatsz a
+  <filename>channels.conf</filename>-ban elĹre beĂĄllĂ­tott csatornĂĄk kĂśzĂźl,
+  melyet az elĂŠrhetĹ kĂĄrtyĂĄk listĂĄja kĂśvethet, ha egynĂŠl tĂśbb
+  <application>MPlayer</application> ĂĄltal hasznĂĄlhatĂł kĂĄrtya van.
 </para>
 
 <para>
-  Ha el akarod menteni a programot a lemezre, használhatod az alábbi parancsot:
+  Ha el akarod menteni a programot a lemezre, hasznĂĄlhatod az alĂĄbbi parancsot:
 </para>
 
 <screen>
@@ -1844,8 +1844,8 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Ha inkább másik formátumban akarsz rögzíteni (újrakódolni), kiadhatsz egy
-  ehhez hasonló parancsot:
+  Ha inkĂĄbb mĂĄsik formĂĄtumban akarsz rĂśgzĂ­teni (ĂşjrakĂłdolni), kiadhatsz egy
+  ehhez hasonlĂł parancsot:
 </para>
 
 <screen>
@@ -1853,129 +1853,129 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Olvasd el a man oldalt a kapcsolók listájához, amiket megadhatsz a DVB bemeneti modulnak.
+  Olvasd el a man oldalt a kapcsolĂłk listĂĄjĂĄhoz, amiket megadhatsz a DVB bemeneti modulnak.
 </para>
 
 <formalpara>
-<title>A JÖVŐ</title>
+<title>A JĂVĹ</title>
 <para>
-Ha kérdésed van vagy további bejelentésekről szeretnél tudomást szerezni és
-részt venni a beszélgetéseinkben, csatlakozz az
+Ha kĂŠrdĂŠsed van vagy tovĂĄbbi bejelentĂŠsekrĹl szeretnĂŠl tudomĂĄst szerezni ĂŠs
+rĂŠszt venni a beszĂŠlgetĂŠseinkben, csatlakozz az
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
-levelezési listához. Kérjük vedd figyelembe, hogy a lista nyelve az angol.
+levelezĂŠsi listĂĄhoz. KĂŠrjĂźk vedd figyelembe, hogy a lista nyelve az angol.
 </para>
 </formalpara>
 
 <para>
-A jövőben tervezzük a DVB kártyák által biztosított natív OSD használatát az
-OSD menü és a feliratok megjelenítéséhez, valamint a nem-25fps-es filmek sokkal
-folyékonyabb lejátszását és a valós idejű átkódolást MPEG-2 és MPEG-4
-között (részleges kitömörítés).
+A jĂśvĹben tervezzĂźk a DVB kĂĄrtyĂĄk ĂĄltal biztosĂ­tott natĂ­v OSD hasznĂĄlatĂĄt az
+OSD menĂź ĂŠs a feliratok megjelenĂ­tĂŠsĂŠhez, valamint a nem-25fps-es filmek sokkal
+folyĂŠkonyabb lejĂĄtszĂĄsĂĄt ĂŠs a valĂłs idejĹą ĂĄtkĂłdolĂĄst MPEG-2 ĂŠs MPEG-4
+kĂśzĂśtt (rĂŠszleges kitĂśmĂśrĂ­tĂŠs).
 </para>
 </sect2>
 
 <sect2 id="dxr2">
 <title>DXR2</title>
-<para>Az <application>MPlayer</application> támogatja a hardveresen gyorsított
-lejátszást a Creative DXR2 kártyával.</para>
+<para>Az <application>MPlayer</application> tĂĄmogatja a hardveresen gyorsĂ­tott
+lejĂĄtszĂĄst a Creative DXR2 kĂĄrtyĂĄval.</para>
 <para>
-Mindenek előtt megfelelően telepített DXR2 vezérlő kell. A vezérlőt és
-a telepítési útmutatót megtalálhatod a 
-<ulink url="http://dxr2.sf.net/">DXR2 Resource Center</ulink> oldalán.
+Mindenek elĹtt megfelelĹen telepĂ­tett DXR2 vezĂŠrlĹ kell. A vezĂŠrlĹt ĂŠs
+a telepĂ­tĂŠsi ĂştmutatĂłt megtalĂĄlhatod a 
+<ulink url="http://dxr2.sf.net/">DXR2 Resource Center</ulink> oldalĂĄn.
 </para>
 
 <variablelist>
-<title>HASZNÁLAT</title>
+<title>HASZNĂLAT</title>
 <varlistentry>
 <term><option>-vo dxr2</option></term>
-<listitem><para>TV kimenet engedélyezése.</para></listitem>
+<listitem><para>TV kimenet engedĂŠlyezĂŠse.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vo dxr2:x11</option> vagy <option>-vo dxr2:xv</option></term>
-<listitem><para>Átlapolásos kimenet bekapcsolása X11-en.</para></listitem>
+<listitem><para>ĂtlapolĂĄsos kimenet bekapcsolĂĄsa X11-en.</para></listitem>
 </varlistentry>
 
 <varlistentry>
-<term><option>-dxr2 &lt;opció1:opció2:...&gt;</option></term>
-<listitem><para>Ezzel a kapcsolóval a DXR2 vezérlő irányítható.</para></listitem>
+<term><option>-dxr2 &lt;opciĂł1:opciĂł2:...&gt;</option></term>
+<listitem><para>Ezzel a kapcsolĂłval a DXR2 vezĂŠrlĹ irĂĄnyĂ­thatĂł.</para></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-A DXR2-n használt átlapolásos chipset elég rossz minőségű, de az alapértelmezett
-beállítások mindenkinél működnek. Az OSD használható az átlapolással
-(nem TV-n) a színkulcsban történi kirajzolással. Az alapértelmezett színkulcs
-beállításokkal változó eredményeket kaphatsz, valószínűleg látni fogod a színkulcsot
-a karakterek körül vagy más egyéb érdekes effektet. De ha megfelelően beállítod
-a színkulcsot, elfogadható eredményt kapsz.
+A DXR2-n hasznĂĄlt ĂĄtlapolĂĄsos chipset elĂŠg rossz minĹsĂŠgĹą, de az alapĂŠrtelmezett
+beĂĄllĂ­tĂĄsok mindenkinĂŠl mĹąkĂśdnek. Az OSD hasznĂĄlhatĂł az ĂĄtlapolĂĄssal
+(nem TV-n) a szĂ­nkulcsban tĂśrtĂŠni kirajzolĂĄssal. Az alapĂŠrtelmezett szĂ­nkulcs
+beĂĄllĂ­tĂĄsokkal vĂĄltozĂł eredmĂŠnyeket kaphatsz, valĂłszĂ­nĹąleg lĂĄtni fogod a szĂ­nkulcsot
+a karakterek kĂśrĂźl vagy mĂĄs egyĂŠb ĂŠrdekes effektet. De ha megfelelĹen beĂĄllĂ­tod
+a szĂ­nkulcsot, elfogadhatĂł eredmĂŠnyt kapsz.
 </para>
 
-<para>Kérjük nézd meg a man oldalt a használható kapcsolókhoz.</para>
+<para>KĂŠrjĂźk nĂŠzd meg a man oldalt a hasznĂĄlhatĂł kapcsolĂłkhoz.</para>
 </sect2>
 
 <sect2 id="dxr3">
 <title>DXR3/Hollywood+</title>
 <para>
-Az <application>MPlayer</application> támogatja a hardveresen gyorsított lejátszást
-a Creative DXR3 és Sigma Designs Hollywood Plus kártyákkal. Ezek a kártyák
-a Sigma Designs em8300 MPEG dekódoló chip-jét használják.
+Az <application>MPlayer</application> tĂĄmogatja a hardveresen gyorsĂ­tott lejĂĄtszĂĄst
+a Creative DXR3 ĂŠs Sigma Designs Hollywood Plus kĂĄrtyĂĄkkal. Ezek a kĂĄrtyĂĄk
+a Sigma Designs em8300 MPEG dekĂłdolĂł chip-jĂŠt hasznĂĄljĂĄk.
 </para>
 
 <para>
-Mindenek előtt megfelelően telepített DXR3/H+ vezérlő kell, 0.12.0 verziójú
-vagy régebbi. A vezérlőket és a telepítési utasításokat megtalálhatod a
+Mindenek elĹtt megfelelĹen telepĂ­tett DXR3/H+ vezĂŠrlĹ kell, 0.12.0 verziĂłjĂş
+vagy rĂŠgebbi. A vezĂŠrlĹket ĂŠs a telepĂ­tĂŠsi utasĂ­tĂĄsokat megtalĂĄlhatod a
 <ulink url="http://dxr3.sf.net/">DXR3 &amp; Hollywood Plus for Linux</ulink>
-oldalon. A <filename>configure</filename>nak automatikusan meg kell találnia
-a kártyádat, és a fordításnak hiba nélkül le kell futnia.
+oldalon. A <filename>configure</filename>nak automatikusan meg kell talĂĄlnia
+a kĂĄrtyĂĄdat, ĂŠs a fordĂ­tĂĄsnak hiba nĂŠlkĂźl le kell futnia.
 </para>
 
 <!-- FIXME: find a more clear presentation -->
 <variablelist>
-<title>HASZNÁLAT</title>
+<title>HASZNĂLAT</title>
 <varlistentry>
-<term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>eszköz</replaceable></option></term>
+<term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>eszkĂśz</replaceable></option></term>
 <listitem><para>
-Az <option>overlay</option> az átlapolást aktiválja a TVOut helyett. A helyes
-működéshez megfelelően beállított overlay setup kell. A legegyszerűbb út
-az átlapolás beállításához először az autocal majd az mplayer futtatása
-dxr3 kimenettel és az átlapolás bekapcsolása nélkül futtasd a dxr3view-t. A
-dxr3view-ban állíthatsz az átlapolási beállításokon és láthatod az effekteket
-valós időben, talán ezt a funkciót az <application>MPlayer</application> GUI
-is támogatni fogja a jövőben. Ha az átlapolás megfelelően be lett állítva,
-többet nem kell használnod a dxr3view-t. A <option>prebuf</option> bekapcsolja az
-előbufferelést. Az előbufferelés az em8300 chip egy olyan képessége, mellyel
-egynél több képkockát tud megtartani egy időben. Ez azt jelenti, hogy ha
-előbuffereléssel futtatod az <application>MPlayer</application>t, az megpróbálja
-folyamatosan tele tartani a videó buffert adatokkal. Ha lassú gépen vagy, az
-<application>MPlayer</application> közel vagy pontosan 100% CPU kihasználtságot
-fog okozni. Ez különösen gyakori ha egyszerű MPEG streamet játszasz le (pl. DVD-k,
+Az <option>overlay</option> az ĂĄtlapolĂĄst aktivĂĄlja a TVOut helyett. A helyes
+mĹąkĂśdĂŠshez megfelelĹen beĂĄllĂ­tott overlay setup kell. A legegyszerĹąbb Ăşt
+az ĂĄtlapolĂĄs beĂĄllĂ­tĂĄsĂĄhoz elĹszĂśr az autocal majd az mplayer futtatĂĄsa
+dxr3 kimenettel ĂŠs az ĂĄtlapolĂĄs bekapcsolĂĄsa nĂŠlkĂźl futtasd a dxr3view-t. A
+dxr3view-ban ĂĄllĂ­thatsz az ĂĄtlapolĂĄsi beĂĄllĂ­tĂĄsokon ĂŠs lĂĄthatod az effekteket
+valĂłs idĹben, talĂĄn ezt a funkciĂłt az <application>MPlayer</application> GUI
+is tĂĄmogatni fogja a jĂśvĹben. Ha az ĂĄtlapolĂĄs megfelelĹen be lett ĂĄllĂ­tva,
+tĂśbbet nem kell hasznĂĄlnod a dxr3view-t. A <option>prebuf</option> bekapcsolja az
+elĹbufferelĂŠst. Az elĹbufferelĂŠs az em8300 chip egy olyan kĂŠpessĂŠge, mellyel
+egynĂŠl tĂśbb kĂŠpkockĂĄt tud megtartani egy idĹben. Ez azt jelenti, hogy ha
+elĹbufferelĂŠssel futtatod az <application>MPlayer</application>t, az megprĂłbĂĄlja
+folyamatosan tele tartani a videĂł buffert adatokkal. Ha lassĂş gĂŠpen vagy, az
+<application>MPlayer</application> kĂśzel vagy pontosan 100% CPU kihasznĂĄltsĂĄgot
+fog okozni. Ez kĂźlĂśnĂśsen gyakori ha egyszerĹą MPEG streamet jĂĄtszasz le (pl. DVD-k,
 SVCD-k, stb.), mivel ekkor az <application>MPlayer</application>nek nem kell
-újrakódolnia MPEG-be, és nagyon gyorsan tölti a buffert.
-Az előbuffereléssel a videó lejátszás <emphasis role="bold">sokkal</emphasis>
-kevésbé érzékeny az többi program CPU foglalására, nem fog képkockát eldobni,
-hacsak az alkalmazások nem foglalják túl hosszú ideig a CPU-t. Ha előbufferelés
-nélkül futtatod, az em8300 sokkal érzékenyebb a CPU terhelésre, így nagyon
-javasolt, hogy használd az <application>MPlayer</application>
-<option>-framedrop</option> kapcsolóját a további szinkronvesztés elkerüléséhez.
-A <option>sync</option> bekapcsolja az új szinkron-motort. Ez jelenleg még
-egy tesztelés alatt lévő képesség. A bekapcsolt szinkron tulajdonsággal az
-em8300 belső órája folyamatosan figyelve lesz, és ha eltér az
-<application>MPlayer</application> órájától, resetel, ezzel az em8300-t az összes
-hátralévő képkocka eldobására kényszeríti.
-A <option>norm=x</option> beállítja a DXR3 kártya TV normáját külső segédeszköz,
-pl. em8300setup nélkül. A helyes norma értékek: 5 = NTSC, 4 = PAL-60, 3 = PAL.
-Speciális norma a 2 (auto-beállítás PAL/PAL-60 használatával) és az 1
-(auto-beállítás PAL/NTSC használatával) mivel ezek a film képkocka rátájának
-segítségével állapítják meg a normát. A norm = 0 (alapértelmezett) nem változtat
-a jelenlegi normán.
-<option><replaceable>eszköz</replaceable></option> = a használni kívánt eszköz
-száma több em8300 kártya esetén.
-Ezen opciók bármelyike elhagyható.
-<option>:prebuf:sync</option> látszólag nagyszerűen működik MPEG-4 (DivX) filmek
-lejátszásakor. Többen problémákról számoltak be MPEG-1/2 fájlok lejátszásakor
-bekapcsolt prebuf esetén. Először mindenféle opció nélkül nézd meg, majd ha
-szinkron vagy DVD felirat problémáid vannak, adj egy esélyt a
+ĂşjrakĂłdolnia MPEG-be, ĂŠs nagyon gyorsan tĂślti a buffert.
+Az elĹbufferelĂŠssel a videĂł lejĂĄtszĂĄs <emphasis role="bold">sokkal</emphasis>
+kevĂŠsbĂŠ ĂŠrzĂŠkeny az tĂśbbi program CPU foglalĂĄsĂĄra, nem fog kĂŠpkockĂĄt eldobni,
+hacsak az alkalmazĂĄsok nem foglaljĂĄk tĂşl hosszĂş ideig a CPU-t. Ha elĹbufferelĂŠs
+nĂŠlkĂźl futtatod, az em8300 sokkal ĂŠrzĂŠkenyebb a CPU terhelĂŠsre, Ă­gy nagyon
+javasolt, hogy hasznĂĄld az <application>MPlayer</application>
+<option>-framedrop</option> kapcsolĂłjĂĄt a tovĂĄbbi szinkronvesztĂŠs elkerĂźlĂŠsĂŠhez.
+A <option>sync</option> bekapcsolja az Ăşj szinkron-motort. Ez jelenleg mĂŠg
+egy tesztelĂŠs alatt lĂŠvĹ kĂŠpessĂŠg. A bekapcsolt szinkron tulajdonsĂĄggal az
+em8300 belsĹ ĂłrĂĄja folyamatosan figyelve lesz, ĂŠs ha eltĂŠr az
+<application>MPlayer</application> ĂłrĂĄjĂĄtĂłl, resetel, ezzel az em8300-t az Ăśsszes
+hĂĄtralĂŠvĹ kĂŠpkocka eldobĂĄsĂĄra kĂŠnyszerĂ­ti.
+A <option>norm=x</option> beĂĄllĂ­tja a DXR3 kĂĄrtya TV normĂĄjĂĄt kĂźlsĹ segĂŠdeszkĂśz,
+pl. em8300setup nĂŠlkĂźl. A helyes norma ĂŠrtĂŠkek: 5 = NTSC, 4 = PAL-60, 3 = PAL.
+SpeciĂĄlis norma a 2 (auto-beĂĄllĂ­tĂĄs PAL/PAL-60 hasznĂĄlatĂĄval) ĂŠs az 1
+(auto-beĂĄllĂ­tĂĄs PAL/NTSC hasznĂĄlatĂĄval) mivel ezek a film kĂŠpkocka rĂĄtĂĄjĂĄnak
+segĂ­tsĂŠgĂŠvel ĂĄllapĂ­tjĂĄk meg a normĂĄt. A norm = 0 (alapĂŠrtelmezett) nem vĂĄltoztat
+a jelenlegi normĂĄn.
+<option><replaceable>eszkĂśz</replaceable></option> = a hasznĂĄlni kĂ­vĂĄnt eszkĂśz
+szĂĄma tĂśbb em8300 kĂĄrtya esetĂŠn.
+Ezen opciĂłk bĂĄrmelyike elhagyhatĂł.
+<option>:prebuf:sync</option> lĂĄtszĂłlag nagyszerĹąen mĹąkĂśdik MPEG-4 (DivX) filmek
+lejĂĄtszĂĄsakor. TĂśbben problĂŠmĂĄkrĂłl szĂĄmoltak be MPEG-1/2 fĂĄjlok lejĂĄtszĂĄsakor
+bekapcsolt prebuf esetĂŠn. ElĹszĂśr mindenfĂŠle opciĂł nĂŠlkĂźl nĂŠzd meg, majd ha
+szinkron vagy DVD felirat problĂŠmĂĄid vannak, adj egy esĂŠlyt a
 <option>:sync</option>-nek.
 </para></listitem>
 </varlistentry>
@@ -1983,63 +1983,63 @@ szinkron vagy DVD felirat problémáid vannak, adj egy esélyt a
 <varlistentry>
 <term><option>-ao oss:/dev/em8300_ma-<replaceable>X</replaceable></option></term>
 <listitem><para>
-Audió kimenethez, ahol az <replaceable>X</replaceable> az eszköz száma (0 ha egy kártya).
+AudiĂł kimenethez, ahol az <replaceable>X</replaceable> az eszkĂśz szĂĄma (0 ha egy kĂĄrtya).
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-af resample=<replaceable>xxxxx</replaceable></option></term>
 <listitem><para>
-A em8300 nem tud lejátszani 44100Hz-nél alacsonyabb mintavételű hangot. Ha a
-mintavételi ráta 44100Hz alatt van, válassz 44100Hz-et vagy 48000Hz-et, attól
-függően, hogy melyik van közelebb. Pl. ha egy film 22050Hz-et használ, válaszd
-a 44100Hz-et, mivel 44100 / 2 = 22050, ha 24000Hz-et, válaszd a 48000Hz-et, mert
-48000 / 2 = 24000 és így tovább.
-Ez nem működik digitális audió kimenettel (<option>-ac hwac3</option>).
+A em8300 nem tud lejĂĄtszani 44100Hz-nĂŠl alacsonyabb mintavĂŠtelĹą hangot. Ha a
+mintavĂŠteli rĂĄta 44100Hz alatt van, vĂĄlassz 44100Hz-et vagy 48000Hz-et, attĂłl
+fĂźggĹen, hogy melyik van kĂśzelebb. Pl. ha egy film 22050Hz-et hasznĂĄl, vĂĄlaszd
+a 44100Hz-et, mivel 44100 / 2 = 22050, ha 24000Hz-et, vĂĄlaszd a 48000Hz-et, mert
+48000 / 2 = 24000 ĂŠs Ă­gy tovĂĄbb.
+Ez nem mĹąkĂśdik digitĂĄlis audiĂł kimenettel (<option>-ac hwac3</option>).
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
-Nem-MPEG tartalom em8300-on történő nézéséhez (pl. MPEG-4 (DivX) vagy RealVideo)
-meg kell adnod egy MPEG-1 videó szűrőt, mint pl. a
+Nem-MPEG tartalom em8300-on tĂśrtĂŠnĹ nĂŠzĂŠsĂŠhez (pl. MPEG-4 (DivX) vagy RealVideo)
+meg kell adnod egy MPEG-1 videĂł szĹąrĹt, mint pl. a
 <systemitem class="library">libavcodec</systemitem> (lavc) vagy a
 <systemitem class="library">libfame</systemitem> (fame). Jelenleg
-a lavc gyorsabb is és jobb képminőséget is ad, javaslom, hogy ezt
-használd, hacsak nincs problémád vele. Lásd a man oldalt a további
-infókért a <option>-vf lavc/fame</option> kapcsolóról.
-A lavc használata nagyon javasolt. Jelenleg nem lehet az em8300 fps értékét
-módosítani, ami azt jelenti, hogy fixen 30000/1001 fps. Emiatt javasolt a
-<option>-vf lavc=<replaceable>minőség</replaceable>:25</option> kapcsoló
-használata, különösen ha előbufferelést használsz. Hogy miért 25 és nem
-30000/1001? Nos, a dolog úgy áll, hogy ha 30000/1001-et használsz, a kép kicsit
-ugrálós lesz. Ennek az okát nem tudjuk. Ha beállítod valahova 25 és 27
-közé, a kép stabillá válik. Jelenleg mást nem tehetünk, elfogadjuk ezt
-tényként.
+a lavc gyorsabb is ĂŠs jobb kĂŠpminĹsĂŠget is ad, javaslom, hogy ezt
+hasznĂĄld, hacsak nincs problĂŠmĂĄd vele. LĂĄsd a man oldalt a tovĂĄbbi
+infĂłkĂŠrt a <option>-vf lavc/fame</option> kapcsolĂłrĂłl.
+A lavc hasznĂĄlata nagyon javasolt. Jelenleg nem lehet az em8300 fps ĂŠrtĂŠkĂŠt
+mĂłdosĂ­tani, ami azt jelenti, hogy fixen 30000/1001 fps. Emiatt javasolt a
+<option>-vf lavc=<replaceable>minĹsĂŠg</replaceable>:25</option> kapcsolĂł
+hasznĂĄlata, kĂźlĂśnĂśsen ha elĹbufferelĂŠst hasznĂĄlsz. Hogy miĂŠrt 25 ĂŠs nem
+30000/1001? Nos, a dolog Ăşgy ĂĄll, hogy ha 30000/1001-et hasznĂĄlsz, a kĂŠp kicsit
+ugrĂĄlĂłs lesz. Ennek az okĂĄt nem tudjuk. Ha beĂĄllĂ­tod valahova 25 ĂŠs 27
+kĂśzĂŠ, a kĂŠp stabillĂĄ vĂĄlik. Jelenleg mĂĄst nem tehetĂźnk, elfogadjuk ezt
+tĂŠnykĂŠnt.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vf expand=-1:-1:-1:-1:1</option></term>
 <listitem><para>
-Habár a DXR3 vezérlő tud némi OSD-t tenni az MPEG-1/2/4 videóra,
-sokkal rosszabb minősége van, mint az <application>MPlayer</application>
-tradícionális OSD-jének és számos frissítési problémája is van. A fenti
-parancssor először is átkonvertálja a bemeneti videót MPEG-4-be (ez szükséges,
-bocs), majd alkalmazza rá az expand szűrőt, ami nem terjeszt ki semmit
-(-1: alapértelmezett), de a normális OSD-t teszi a képre (ezt csinálja az
-"1" a végén).
+HabĂĄr a DXR3 vezĂŠrlĹ tud nĂŠmi OSD-t tenni az MPEG-1/2/4 videĂłra,
+sokkal rosszabb minĹsĂŠge van, mint az <application>MPlayer</application>
+tradĂ­cionĂĄlis OSD-jĂŠnek ĂŠs szĂĄmos frissĂ­tĂŠsi problĂŠmĂĄja is van. A fenti
+parancssor elĹszĂśr is ĂĄtkonvertĂĄlja a bemeneti videĂłt MPEG-4-be (ez szĂźksĂŠges,
+bocs), majd alkalmazza rĂĄ az expand szĹąrĹt, ami nem terjeszt ki semmit
+(-1: alapĂŠrtelmezett), de a normĂĄlis OSD-t teszi a kĂŠpre (ezt csinĂĄlja az
+"1" a vĂŠgĂŠn).
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-ac hwac3</option></term>
 <listitem><para>
-A em8300 támogatja az AC3 audió lejátszását (térhatású hang) a kártya
-digitális audió kimenetén keresztül. Lásd a <option>-ao oss</option>
-kapcsolót fent, a DXR3 kimenetének meghatározására használható a
-hangkártya helyett.
+A em8300 tĂĄmogatja az AC3 audiĂł lejĂĄtszĂĄsĂĄt (tĂŠrhatĂĄsĂş hang) a kĂĄrtya
+digitĂĄlis audiĂł kimenetĂŠn keresztĂźl. LĂĄsd a <option>-ao oss</option>
+kapcsolĂłt fent, a DXR3 kimenetĂŠnek meghatĂĄrozĂĄsĂĄra hasznĂĄlhatĂł a
+hangkĂĄrtya helyett.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -2048,48 +2048,48 @@ hangkártya helyett.
 </sect1>
 
 <sect1 id="other">
-<title>Egyéb vizualizációs hardverek</title>
+<title>EgyĂŠb vizualizĂĄciĂłs hardverek</title>
 
 <sect2 id="zr">
 <title>Zr</title>
 
 <para>
-Ez egy képernyő-vezérlő (<option>-vo zr</option>) számos MJPEG
-mentő/lejátszó kártyához (DC10+ és Buz-zal tesztelve, és működnie kell
-LML33, a DC10 esetén is). A vezérlő úgy működik, hogy kódolja a képkockát
-JPEG-be majd kiküldi a kártyára. A JPEG kódoláshoz a
-<systemitem class="library">libavcodec</systemitem>-et használja, ami
-ezért szükséges hozzá. Egy speciális <emphasis>cinerama</emphasis> móddal
-igazi nagyképernyőn nézhetsz filmeket, feltéve, hogy két felvevőd és két
-MJPEG kártyád van. A felbontástól és a minőségi beállításoktól függően ez
-a vezérlő rengeteg CPU erőt igényel, ne felejtsd el megadni a
-<option>-framedrop</option> kapcsolót, ha lassú a géped.
-Megjegyzés: Az én AMD K6-2 350MHz-es gépem (<option>-framedrop</option>-pal)
-eléggé elfogadható volt VCD méretű anyag nézésekor és
-leméretezett filmnél.
+Ez egy kĂŠpernyĹ-vezĂŠrlĹ (<option>-vo zr</option>) szĂĄmos MJPEG
+mentĹ/lejĂĄtszĂł kĂĄrtyĂĄhoz (DC10+ ĂŠs Buz-zal tesztelve, ĂŠs mĹąkĂśdnie kell
+LML33, a DC10 esetĂŠn is). A vezĂŠrlĹ Ăşgy mĹąkĂśdik, hogy kĂłdolja a kĂŠpkockĂĄt
+JPEG-be majd kikĂźldi a kĂĄrtyĂĄra. A JPEG kĂłdolĂĄshoz a
+<systemitem class="library">libavcodec</systemitem>-et hasznĂĄlja, ami
+ezĂŠrt szĂźksĂŠges hozzĂĄ. Egy speciĂĄlis <emphasis>cinerama</emphasis> mĂłddal
+igazi nagykĂŠpernyĹn nĂŠzhetsz filmeket, feltĂŠve, hogy kĂŠt felvevĹd ĂŠs kĂŠt
+MJPEG kĂĄrtyĂĄd van. A felbontĂĄstĂłl ĂŠs a minĹsĂŠgi beĂĄllĂ­tĂĄsoktĂłl fĂźggĹen ez
+a vezĂŠrlĹ rengeteg CPU erĹt igĂŠnyel, ne felejtsd el megadni a
+<option>-framedrop</option> kapcsolĂłt, ha lassĂş a gĂŠped.
+MegjegyzĂŠs: Az ĂŠn AMD K6-2 350MHz-es gĂŠpem (<option>-framedrop</option>-pal)
+elĂŠggĂŠ elfogadhatĂł volt VCD mĂŠretĹą anyag nĂŠzĂŠsekor ĂŠs
+lemĂŠretezett filmnĂŠl.
 </para>
 
 <para>
-Ez a vezérlő a <ulink url="http://mjpeg.sf.net"/> címen található kernel
-vezérlővel társalog, így először ezt kell beizzítanod. Az MJPEG kártya
-jelenléte automatikusan detektálva lesz a
-<filename>configure</filename> script által, ha ez nem sikerül, kényszerítsd
-a detektálásra a <screen>./configure --enable-zr</screen> kapcsolóval.
+Ez a vezĂŠrlĹ a <ulink url="http://mjpeg.sf.net"/> cĂ­men talĂĄlhatĂł kernel
+vezĂŠrlĹvel tĂĄrsalog, Ă­gy elĹszĂśr ezt kell beizzĂ­tanod. Az MJPEG kĂĄrtya
+jelenlĂŠte automatikusan detektĂĄlva lesz a
+<filename>configure</filename> script ĂĄltal, ha ez nem sikerĂźl, kĂŠnyszerĂ­tsd
+a detektĂĄlĂĄsra a <screen>./configure --enable-zr</screen> kapcsolĂłval.
 </para>
 <para>
-A kimenet számos kapcsolóval szabályozható, a kapcsolók hosszú leírással
-megtalálhatóak a man oldalon, egy rövidebb listát a
+A kimenet szĂĄmos kapcsolĂłval szabĂĄlyozhatĂł, a kapcsolĂłk hosszĂş leĂ­rĂĄssal
+megtalĂĄlhatĂłak a man oldalon, egy rĂśvidebb listĂĄt a
 <screen>mplayer -zrhelp</screen>
-parancs lefuttatásával kaphatsz.
+parancs lefuttatĂĄsĂĄval kaphatsz.
 </para>
 
 <para>
-Az olyan dolgokat, mint méretezés és OSD (on screen display) ez a vezérlő
-nem kezeli, de megoldhatóak videó szűrőkkel. Például tegyük fel, hogy van
-egy filmed 512x272-es felbontással és teljes képernyőn akarod nézni a
-DC10+-eden. Három lehetőséged van, méretezned kell a filmet 768, 384 vagy
-192-es szélességre. Teljesítmény és minőségi okokból én a 384x204-re való
-méretezést választanám, gyors bilineáris szoftveres méretező használatával.
+Az olyan dolgokat, mint mĂŠretezĂŠs ĂŠs OSD (on screen display) ez a vezĂŠrlĹ
+nem kezeli, de megoldhatĂłak videĂł szĹąrĹkkel. PĂŠldĂĄul tegyĂźk fel, hogy van
+egy filmed 512x272-es felbontĂĄssal ĂŠs teljes kĂŠpernyĹn akarod nĂŠzni a
+DC10+-eden. HĂĄrom lehetĹsĂŠged van, mĂŠretezned kell a filmet 768, 384 vagy
+192-es szĂŠlessĂŠgre. TeljesĂ­tmĂŠny ĂŠs minĹsĂŠgi okokbĂłl ĂŠn a 384x204-re valĂł
+mĂŠretezĂŠst vĂĄlasztanĂĄm, gyors bilineĂĄris szoftveres mĂŠretezĹ hasznĂĄlatĂĄval.
 A parancssor:
 <screen>
 mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>movie.avi</replaceable>
@@ -2097,31 +2097,31 @@ mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>movie.avi</replaceable>
 </para>
 
 <para>
-A levágás a <option>crop</option> szűrő segítségével valósítható meg és
-magával a vezérlővel. Feltéve, hogy a film túl széles a megjelenítéshez
-a Buz-odon és hogy a <option>-zrcrop</option>-ot akarod használni a film
-szűkítéséhez, a következő parancs a te barátod:
+A levĂĄgĂĄs a <option>crop</option> szĹąrĹ segĂ­tsĂŠgĂŠvel valĂłsĂ­thatĂł meg ĂŠs
+magĂĄval a vezĂŠrlĹvel. FeltĂŠve, hogy a film tĂşl szĂŠles a megjelenĂ­tĂŠshez
+a Buz-odon ĂŠs hogy a <option>-zrcrop</option>-ot akarod hasznĂĄlni a film
+szĹąkĂ­tĂŠsĂŠhez, a kĂśvetkezĹ parancs a te barĂĄtod:
 <screen>
 mplayer -vo zr -zrcrop 720x320+80+0 <replaceable>benhur.avi</replaceable>
 </screen>
 </para>
 
 <para>
-Ha használni akarod a <option>crop</option> szűrőt, ez kell:
+Ha hasznĂĄlni akarod a <option>crop</option> szĹąrĹt, ez kell:
 <screen>
 mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
 </screen>
 </para>
 
 <para>
-Extra esetben a <option>-zrcrop</option> meghívja a <emphasis>cinerama</emphasis>
-módot, pl. a filmet több TV vagy beamer között sugározhatod egy nagyobb kép
-létrehozásához. Feltéve, hogy két beamer-ed van. A bal oldali a Buz-odhoz
+Extra esetben a <option>-zrcrop</option> meghĂ­vja a <emphasis>cinerama</emphasis>
+mĂłdot, pl. a filmet tĂśbb TV vagy beamer kĂśzĂśtt sugĂĄrozhatod egy nagyobb kĂŠp
+lĂŠtrehozĂĄsĂĄhoz. FeltĂŠve, hogy kĂŠt beamer-ed van. A bal oldali a Buz-odhoz
 csatlakozik a <filename>/dev/video1</filename>-en, a jobb oldali a DC10+-odhoz
-a <filename>/dev/video0</filename>-án. A film felbontása 704x288. Továbbá
-tegyük fel azt is, hogy a jobb beamer-t fekete-fehéren szeretnéd, a balnak
-pedig 10-es minőségű JPEG képeket kell adnia. Ekkor a következő parancsot kell
-használnod:
+a <filename>/dev/video0</filename>-ĂĄn. A film felbontĂĄsa 704x288. TovĂĄbbĂĄ
+tegyĂźk fel azt is, hogy a jobb beamer-t fekete-fehĂŠren szeretnĂŠd, a balnak
+pedig 10-es minĹsĂŠgĹą JPEG kĂŠpeket kell adnia. Ekkor a kĂśvetkezĹ parancsot kell
+hasznĂĄlnod:
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
           -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
@@ -2130,50 +2130,50 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
 </para>
 
 <para>
-Láthatod, hogy a második <option>-zrcrop</option> előtt feltűnő opciók csak
-a DC10+-re, a második <option>-zrcrop</option> után lévők csak a Buz-ra
-vonatkoznak. A <emphasis>cinerama</emphasis>-ban használható MJPEG kártyák
-maximális száma négy, így egy 2x2-es vidi-falat építhetsz.
+LĂĄthatod, hogy a mĂĄsodik <option>-zrcrop</option> elĹtt feltĹąnĹ opciĂłk csak
+a DC10+-re, a mĂĄsodik <option>-zrcrop</option> utĂĄn lĂŠvĹk csak a Buz-ra
+vonatkoznak. A <emphasis>cinerama</emphasis>-ban hasznĂĄlhatĂł MJPEG kĂĄrtyĂĄk
+maximĂĄlis szĂĄma nĂŠgy, Ă­gy egy 2x2-es vidi-falat ĂŠpĂ­thetsz.
 </para>
 
 <para>
-Végül egy fontos megjegyzés: Ne indítsd el vagy állítsd meg a XawTV-t a lejátszó
-eszközön a lejátszás alatt, ez összeomlasztja a számítógépedet. Legjobb
-<emphasis role="bold">ELŐSZÖR</emphasis> elindítani a XawTV-t, <emphasis role="bold">EZUTÁN</emphasis>
-elindítani az <application>MPlayer</application>t, várni, míg az <application>MPlayer</application>
-végez, és <emphasis role="bold">EZUTÁN</emphasis> megállítani a XawTV-t.
+VĂŠgĂźl egy fontos megjegyzĂŠs: Ne indĂ­tsd el vagy ĂĄllĂ­tsd meg a XawTV-t a lejĂĄtszĂł
+eszkĂśzĂśn a lejĂĄtszĂĄs alatt, ez Ăśsszeomlasztja a szĂĄmĂ­tĂłgĂŠpedet. Legjobb
+<emphasis role="bold">ELĹSZĂR</emphasis> elindĂ­tani a XawTV-t, <emphasis role="bold">EZUTĂN</emphasis>
+elindĂ­tani az <application>MPlayer</application>t, vĂĄrni, mĂ­g az <application>MPlayer</application>
+vĂŠgez, ĂŠs <emphasis role="bold">EZUTĂN</emphasis> megĂĄllĂ­tani a XawTV-t.
 </para>
 </sect2>
 
 <sect2 id="blinkenlights">
 <title>Blinkenlights</title>
 <para>
-Ez a vezérlő képes a lejátszásra a Blinkenlights UDP protokol felhasználásával.
+Ez a vezĂŠrlĹ kĂŠpes a lejĂĄtszĂĄsra a Blinkenlights UDP protokol felhasznĂĄlĂĄsĂĄval.
 Ha nem tudod, hogy mi az a <ulink url="http://www.blinkenlights.de/">Blinkenlights</ulink>,
-vagy az utóda az <ulink url="http://www.blinkenlights.de/arcade/">Arcade</ulink>,
-nézz utána. Habár ez a legutoljára használt videó kimeneti vezérlő, kétségkívül ez
-a legjobb, amit az <application>MPlayer</application> nyújtani tud. Csak nézz meg
-pár <ulink url="http://www.blinkenlights.de/video.en.html">Blinkenlights dokumentációs
-videót</ulink>.
-Az Arcade videóban láthatod a Blinkenlights kimeneti vezérlőt akcióban a
+vagy az utĂłda az <ulink url="http://www.blinkenlights.de/arcade/">Arcade</ulink>,
+nĂŠzz utĂĄna. HabĂĄr ez a legutoljĂĄra hasznĂĄlt videĂł kimeneti vezĂŠrlĹ, kĂŠtsĂŠgkĂ­vĂźl ez
+a legjobb, amit az <application>MPlayer</application> nyĂşjtani tud. Csak nĂŠzz meg
+pĂĄr <ulink url="http://www.blinkenlights.de/video.en.html">Blinkenlights dokumentĂĄciĂłs
+videĂłt</ulink>.
+Az Arcade videĂłban lĂĄthatod a Blinkenlights kimeneti vezĂŠrlĹt akciĂłban a
 00:07:50-en.
 </para>
 </sect2>
 </sect1>
 
 <sect1 id="tvout">
-<title>TV-kimenet támogatás</title>
+<title>TV-kimenet tĂĄmogatĂĄs</title>
 
 <sect2 id="tvout-mga-g400">
-<title>Matrox G400 kártyák</title>
+<title>Matrox G400 kĂĄrtyĂĄk</title>
 
 <para>
-Linux alatt két módon bírhatod működésre a G400 TV kimenetét:
+Linux alatt kĂŠt mĂłdon bĂ­rhatod mĹąkĂśdĂŠsre a G400 TV kimenetĂŠt:
 </para>
 
 <important>
 <para>
-a Matrox G450/G550 TV-kimenet utasításaiért lásd a következő részt!
+a Matrox G450/G550 TV-kimenet utasĂ­tĂĄsaiĂŠrt lĂĄsd a kĂśvetkezĹ rĂŠszt!
 </para>
 </important>
 
@@ -2181,67 +2181,67 @@ a Matrox G450/G550 TV-kimenet utasításaiért lásd a következő részt!
 <varlistentry>
   <term>XFree86</term>
   <listitem><para>
-    A vezérlő és a HAL modul használatával, mely elérhető a <ulink
-    url="http://www.matrox.com">Matrox oldalán</ulink>. Ezzel X-et kapsz a TV-n.
+    A vezĂŠrlĹ ĂŠs a HAL modul hasznĂĄlatĂĄval, mely elĂŠrhetĹ a <ulink
+    url="http://www.matrox.com">Matrox oldalĂĄn</ulink>. Ezzel X-et kapsz a TV-n.
     </para><para>
-    <emphasis role="bold">Ez a módszer nem nyújt gyorsított lejátszást</emphasis>
-    Windows alatt! A második fejnek csak YUV framebuffer-e van, a <emphasis>BES</emphasis>
-    (Back End Scaler, a YUV méretező a G200/G400/G450/G550 kártyákon) nem
-    működik rajta! A Windows-os vezérlők ezt valahogy megkerülik, talán 3D motort
-    használnak a nagyításhoz és a YUV framebuffer-t a nagyított képek
-    megjelenítéséhez. Ha tényleg X-et akarsz használni, válaszd a <option>-vo x11 -fs
-    -zoom</option> kapcsolókat, de <emphasis role="bold">LASSÚ</emphasis> lesz,
-    és <emphasis role="bold">Macrovision</emphasis> másolásvédelem van rajta
+    <emphasis role="bold">Ez a mĂłdszer nem nyĂşjt gyorsĂ­tott lejĂĄtszĂĄst</emphasis>
+    Windows alatt! A mĂĄsodik fejnek csak YUV framebuffer-e van, a <emphasis>BES</emphasis>
+    (Back End Scaler, a YUV mĂŠretezĹ a G200/G400/G450/G550 kĂĄrtyĂĄkon) nem
+    mĹąkĂśdik rajta! A Windows-os vezĂŠrlĹk ezt valahogy megkerĂźlik, talĂĄn 3D motort
+    hasznĂĄlnak a nagyĂ­tĂĄshoz ĂŠs a YUV framebuffer-t a nagyĂ­tott kĂŠpek
+    megjelenĂ­tĂŠsĂŠhez. Ha tĂŠnyleg X-et akarsz hasznĂĄlni, vĂĄlaszd a <option>-vo x11 -fs
+    -zoom</option> kapcsolĂłkat, de <emphasis role="bold">LASSĂ</emphasis> lesz,
+    ĂŠs <emphasis role="bold">Macrovision</emphasis> mĂĄsolĂĄsvĂŠdelem van rajta
     (ezzel a <ulink url="http://avifile.sf.net/mgamacro.pl">perl script</ulink>-tel
-    "megkerülheted" a Macrovisiont).
+    "megkerĂźlheted" a Macrovisiont).
     </para></listitem>
 </varlistentry>
 <varlistentry>
   <term>Framebuffer</term>
   <listitem><para>
-    A 2.4-es kernelekben lévő <emphasis role="bold">matroxfb modulok</emphasis>
-    használatával. A 2.2-es kernel-ekben nincs TVout tulajdonság hozzájuk, így
-    használhatatlanok erre. Engedélyezned kell az ÖSSZES matroxfb-specifikus
-    tulajdonságot a fordítás alatt (kivéve a MultiHead-et) és
-    <emphasis role="bold">modulokba</emphasis> kell fordítanod!
-    Az engedélyezett I2C-re is szükséged lesz.
+    A 2.4-es kernelekben lĂŠvĹ <emphasis role="bold">matroxfb modulok</emphasis>
+    hasznĂĄlatĂĄval. A 2.2-es kernel-ekben nincs TVout tulajdonsĂĄg hozzĂĄjuk, Ă­gy
+    hasznĂĄlhatatlanok erre. EngedĂŠlyezned kell az ĂSSZES matroxfb-specifikus
+    tulajdonsĂĄgot a fordĂ­tĂĄs alatt (kivĂŠve a MultiHead-et) ĂŠs
+    <emphasis role="bold">modulokba</emphasis> kell fordĂ­tanod!
+    Az engedĂŠlyezett I2C-re is szĂźksĂŠged lesz.
     </para>
 
     <procedure>
     <step><para>
-      Lépj be a <filename class="directory">TVout</filename>-ba és írd be:
-      <command>./compile.sh</command>. Telepítsd a
+      LĂŠpj be a <filename class="directory">TVout</filename>-ba ĂŠs Ă­rd be:
+      <command>./compile.sh</command>. TelepĂ­tsd a
       <filename>TVout/matroxset/matroxset</filename>-et
-      valahova a <envar>PATH</envar>-odon belülre.
+      valahova a <envar>PATH</envar>-odon belĂźlre.
       </para></step>
     <step><para>
-      Ha nincs telepítve <command>fbset</command>-ed, tedd a
+      Ha nincs telepĂ­tve <command>fbset</command>-ed, tedd a
       <filename>TVout/fbset/fbset</filename>-et
       valahova a <envar>PATH</envar>-odba.
       </para></step>
     <step><para>
-      Ha nincs <command>con2fb</command>-ed telepítve, tedd a
+      Ha nincs <command>con2fb</command>-ed telepĂ­tve, tedd a
       <filename>TVout/con2fb/con2fb</filename>-t
       valahova a <envar>PATH</envar>-odba.
       </para></step>
     <step><para>
-      Majd lépj be a <filename class="directory">TVout/</filename> könyvtárba
-      az <application>MPlayer</application> forrásában és futtasd le a
-      <filename>./modules</filename>-t root-ként. A szöveges módú konzolod
-      átvált framebuffer módba (nincs visszaút!).
+      Majd lĂŠpj be a <filename class="directory">TVout/</filename> kĂśnyvtĂĄrba
+      az <application>MPlayer</application> forrĂĄsĂĄban ĂŠs futtasd le a
+      <filename>./modules</filename>-t root-kĂŠnt. A szĂśveges mĂłdĂş konzolod
+      ĂĄtvĂĄlt framebuffer mĂłdba (nincs visszaĂşt!).
       </para></step>
     <step><para>
-      Ezután ÍRD ÁT és futtasd a <filename>./matroxtv</filename> script-et. Ez
-      egy roppant egyszerű menüt kínál neked. Nyomd meg a <keycap>2</keycap>-est
-      és az <keycap>Enter</keycap>-t. Most már ugyan azt a képet kell látnod
-      a monitorodon és a TV-n. ha a TV (PAL alapértelmezettként)
-      képén furcsa csíkok vannak, a script nem tudta beállítani jól a
-      felbontást (640x512-ra alapesetben). Próbálj meg másik felbontást
-      a menüből és/vagy kísérletezz az fbset-tel.
+      EzutĂĄn ĂRD ĂT ĂŠs futtasd a <filename>./matroxtv</filename> script-et. Ez
+      egy roppant egyszerĹą menĂźt kĂ­nĂĄl neked. Nyomd meg a <keycap>2</keycap>-est
+      ĂŠs az <keycap>Enter</keycap>-t. Most mĂĄr ugyan azt a kĂŠpet kell lĂĄtnod
+      a monitorodon ĂŠs a TV-n. ha a TV (PAL alapĂŠrtelmezettkĂŠnt)
+      kĂŠpĂŠn furcsa csĂ­kok vannak, a script nem tudta beĂĄllĂ­tani jĂłl a
+      felbontĂĄst (640x512-ra alapesetben). PrĂłbĂĄlj meg mĂĄsik felbontĂĄst
+      a menĂźbĹl ĂŠs/vagy kĂ­sĂŠrletezz az fbset-tel.
       </para></step>
     <step><para>
-      Yoh. A következő dolog, hogy a kurzort eltűntesd a tty1-ről (vagy akármiről)
-      és kikapcsold a képernyő törlést. Futtasd le a következő parancsokat:
+      Yoh. A kĂśvetkezĹ dolog, hogy a kurzort eltĹąntesd a tty1-rĹl (vagy akĂĄrmirĹl)
+      ĂŠs kikapcsold a kĂŠpernyĹ tĂśrlĂŠst. Futtasd le a kĂśvetkezĹ parancsokat:
 
       <screen>
 echo -e '\033[?25l'
@@ -2253,24 +2253,24 @@ setterm -cursor off
 setterm -blank 0<!--
    --></screen>
 
-      A fentieket valószínűleg beleírod egy script-be, egy képernyő törléssel együtt.
-      A kurzor visszakapcsolása:
+      A fentieket valĂłszĂ­nĹąleg beleĂ­rod egy script-be, egy kĂŠpernyĹ tĂśrlĂŠssel egyĂźtt.
+      A kurzor visszakapcsolĂĄsa:
       <screen>echo -e '\033[?25h'</screen> vagy
       <screen>setterm -cursor on</screen>
       </para></step>
     <step><para>
-      Yeah sirály. Indítsd el a film lejátszást:
+      Yeah sirĂĄly. IndĂ­tsd el a film lejĂĄtszĂĄst:
       <screen>
 mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable><!--
    --></screen>
 
-      (Ha X-et használsz, most válts át matroxfb-re, például a
+      (Ha X-et hasznĂĄlsz, most vĂĄlts ĂĄt matroxfb-re, pĂŠldĂĄul a
       <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>F1</keycap> gombokkal.)
-      Változtasd meg a <literal>640</literal>-et és az <literal>512</literal>-t,
-      ha másra állítottad a felbontást...
+      VĂĄltoztasd meg a <literal>640</literal>-et ĂŠs az <literal>512</literal>-t,
+      ha mĂĄsra ĂĄllĂ­tottad a felbontĂĄst...
       </para></step>
     <step><para>
-      <emphasis role="bold">Élvezd az ultra-gyors ultra-különleges Matrox TV
+      <emphasis role="bold">Ălvezd az ultra-gyors ultra-kĂźlĂśnleges Matrox TV
       kimenetet (jobb mint az Xv)!</emphasis>
       </para></step>
     </procedure>
@@ -2279,101 +2279,101 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 </variablelist>
 
 <formalpara>
-<title>Matrox TV-kimeneti kábel készítése</title>
+<title>Matrox TV-kimeneti kĂĄbel kĂŠszĂ­tĂŠse</title>
 <para>
-Senki sem vállal ezért semmilyen felelősséget, sem garanciát bármilyen,
-ezen leírásból származó kárért.
+Senki sem vĂĄllal ezĂŠrt semmilyen felelĹssĂŠget, sem garanciĂĄt bĂĄrmilyen,
+ezen leĂ­rĂĄsbĂłl szĂĄrmazĂł kĂĄrĂŠrt.
 </para>
 </formalpara>
 
 <formalpara>
-<title>Kábel a G400-hoz</title>
+<title>KĂĄbel a G400-hoz</title>
 <para>
-A CRTC2 csatlakozójának negyedik pin-je a kompozit videó jel. A
-földelés a hatodik, hetedik és nyolcadik pin. (az infót Rácz Balázs
+A CRTC2 csatlakozĂłjĂĄnak negyedik pin-je a kompozit videĂł jel. A
+fĂśldelĂŠs a hatodik, hetedik ĂŠs nyolcadik pin. (az infĂłt RĂĄcz BalĂĄzs
 adta)
 </para>
 </formalpara>
 
 <formalpara>
-<title>Kábel a G450-hez</title>
+<title>KĂĄbel a G450-hez</title>
 <para>
-A CRTC2 csatlakozójának első pin-je a kompozit videó jel. A
-földelés az ötödik, hatodik, hetedik és tizenötödik (5, 6, 7, 15)
-pin. (az infót Kerekes Balázs adta)
+A CRTC2 csatlakozĂłjĂĄnak elsĹ pin-je a kompozit videĂł jel. A
+fĂśldelĂŠs az ĂśtĂśdik, hatodik, hetedik ĂŠs tizenĂśtĂśdik (5, 6, 7, 15)
+pin. (az infĂłt Kerekes BalĂĄzs adta)
 </para>
 </formalpara>
 </sect2>
 
 <sect2 id="tv-out_matrox_g450">
-<title>Matrox G450/G550 kártyák</title>
+<title>Matrox G450/G550 kĂĄrtyĂĄk</title>
 <para>
-A TV kimenet támogatása ezeken a kártyákon csak nemrég jelent meg, és még
-nincs a a fő kernelben. Jelenleg az <emphasis role="bold">mga_vid</emphasis>
-modul nem használható AFAIK, mert a G450/G550-es vezérlő csak egy konfigurációban
-működik: az első CRTC chip (a sokkal több képességgel) az első képernyőn
-(a monitoron) és a második CRTC (nincs <emphasis role="bold">BES</emphasis> - a
-BES magyarázatához lásd a G400-as részt fent) TV-n. Így csak az
+A TV kimenet tĂĄmogatĂĄsa ezeken a kĂĄrtyĂĄkon csak nemrĂŠg jelent meg, ĂŠs mĂŠg
+nincs a a fĹ kernelben. Jelenleg az <emphasis role="bold">mga_vid</emphasis>
+modul nem hasznĂĄlhatĂł AFAIK, mert a G450/G550-es vezĂŠrlĹ csak egy konfigurĂĄciĂłban
+mĹąkĂśdik: az elsĹ CRTC chip (a sokkal tĂśbb kĂŠpessĂŠggel) az elsĹ kĂŠpernyĹn
+(a monitoron) ĂŠs a mĂĄsodik CRTC (nincs <emphasis role="bold">BES</emphasis> - a
+BES magyarĂĄzatĂĄhoz lĂĄsd a G400-as rĂŠszt fent) TV-n. Ăgy csak az
 <application>MPlayer</application> <emphasis>fbdev</emphasis> kimeneti
-vezérlőjét használhatod jelenleg.
+vezĂŠrlĹjĂŠt hasznĂĄlhatod jelenleg.
 </para>
 
 <para>
-Az első CRTC nem irányítható át a második fejre jelenleg. A matroxfb kernel
-vezérlő szerzője - Petr Vandrovec - talán készít támogatást ehhez, az
-első CRTC kimenetét egyszerre mindkét fejen megjelenítve, mint ahogy most is
-javasolt a G400-on, lásd a fenti részt.
+Az elsĹ CRTC nem irĂĄnyĂ­thatĂł ĂĄt a mĂĄsodik fejre jelenleg. A matroxfb kernel
+vezĂŠrlĹ szerzĹje - Petr Vandrovec - talĂĄn kĂŠszĂ­t tĂĄmogatĂĄst ehhez, az
+elsĹ CRTC kimenetĂŠt egyszerre mindkĂŠt fejen megjelenĂ­tve, mint ahogy most is
+javasolt a G400-on, lĂĄsd a fenti rĂŠszt.
 </para>
 
 <para>
-A szükséges kernel javítás és a bővebb HOWTO letölthető:
+A szĂźksĂŠges kernel javĂ­tĂĄs ĂŠs a bĹvebb HOWTO letĂślthetĹ:
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
 </sect2>
 
 
 <sect2 id="tvout-ati">
-<title>ATI kártyák</title>
+<title>ATI kĂĄrtyĂĄk</title>
 
 <formalpara>
-<title>BEVEZETÉS</title>
+<title>BEVEZETĂS</title>
 <para>
-Jelenleg az ATI nem akarja támogatni semelyik TV-out chip-jét sem Linux alatt,
-a licenszelt Macrovision technológiájuk miatt.
+Jelenleg az ATI nem akarja tĂĄmogatni semelyik TV-out chip-jĂŠt sem Linux alatt,
+a licenszelt Macrovision technolĂłgiĂĄjuk miatt.
 </para>
 </formalpara>
 
 <itemizedlist>
-<title>ATI KÁRTYÁK TV-KIMENETÉNEK ÁLLAPOTA LINUXON</title>
+<title>ATI KĂRTYĂK TV-KIMENETĂNEK ĂLLAPOTA LINUXON</title>
 <listitem><simpara>
   <emphasis role="bold">ATI Mach64</emphasis>:
-  támogatja a <ulink url="http://gatos.sf.net">GATOS</ulink>.
+  tĂĄmogatja a <ulink url="http://gatos.sf.net">GATOS</ulink>.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
-  támogatja a <ulink url="http://gatos.sf.net">GATOS</ulink>.
+  tĂĄmogatja a <ulink url="http://gatos.sf.net">GATOS</ulink>.
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">Radeon</emphasis> és <emphasis role="bold">Rage128</emphasis>:
-  támogatja az <application>MPlayer</application>!
-  Lásd a <link linkend="vesa">VESA vezérlő</link> és
-  a <link linkend="vidix">VIDIX</link> részt.
+  <emphasis role="bold">Radeon</emphasis> ĂŠs <emphasis role="bold">Rage128</emphasis>:
+  tĂĄmogatja az <application>MPlayer</application>!
+  LĂĄsd a <link linkend="vesa">VESA vezĂŠrlĹ</link> ĂŠs
+  a <link linkend="vidix">VIDIX</link> rĂŠszt.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
-  támogatja az <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
+  tĂĄmogatja az <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-Egyéb kártyák esetében lásd a <link linkend="vesa">VESA</link> vezérlőt,
-VIDIX nélkül. Bár ehhez erős CPU kell.
+EgyĂŠb kĂĄrtyĂĄk esetĂŠben lĂĄsd a <link linkend="vesa">VESA</link> vezĂŠrlĹt,
+VIDIX nĂŠlkĂźl. BĂĄr ehhez erĹs CPU kell.
 </para>
 
 <para>
 Az egyeten dolog, amit tenned kell - <emphasis role="bold">Be kell dugnod a
-TV csatlakozóját, mielőtt bekapcsolnád a PC-t</emphasis> mivel a videó BIOS
-csak egyszer, a POST folyamat során inicializálja magát.
+TV csatlakozĂłjĂĄt, mielĹtt bekapcsolnĂĄd a PC-t</emphasis> mivel a videĂł BIOS
+csak egyszer, a POST folyamat sorĂĄn inicializĂĄlja magĂĄt.
 </para>
 </sect2>
 
@@ -2381,15 +2381,15 @@ csak egyszer, a POST folyamat során inicializálja magát.
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
-Először le KELL töltened a zárt-forrású vezérlőt az <ulink url="http://nvidia.com"/>-ról.
-Nem írom le a telepítés és a konfiguráció lépéseit, mert ez nem tartozik ezen
-dokumentáció céljához.
+ElĹszĂśr le KELL tĂśltened a zĂĄrt-forrĂĄsĂş vezĂŠrlĹt az <ulink url="http://nvidia.com"/>-rĂłl.
+Nem Ă­rom le a telepĂ­tĂŠs ĂŠs a konfigurĂĄciĂł lĂŠpĂŠseit, mert ez nem tartozik ezen
+dokumentĂĄciĂł cĂŠljĂĄhoz.
 </para>
 
 <para>
-Miután az XFree86, az XVideo és a 3D gyorsítás is megfelelően működik, írd
-át a kártya Device részét az <filename>XF86Config</filename> fájlban, a
-következő példának megfelelően (a te kártyádhoz/TV-dhez igazítva):
+MiutĂĄn az XFree86, az XVideo ĂŠs a 3D gyorsĂ­tĂĄs is megfelelĹen mĹąkĂśdik, Ă­rd
+ĂĄt a kĂĄrtya Device rĂŠszĂŠt az <filename>XF86Config</filename> fĂĄjlban, a
+kĂśvetkezĹ pĂŠldĂĄnak megfelelĹen (a te kĂĄrtyĂĄdhoz/TV-dhez igazĂ­tva):
 
 <programlisting>
 Section "Device"
@@ -2412,59 +2412,59 @@ EndSection
 </para>
 
 <para>
-Természetesen a legfontosabb a TwinView rész.
+TermĂŠszetesen a legfontosabb a TwinView rĂŠsz.
 </para>
 </sect2>
 
 <sect2 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
-A NeoMagic chip számos laptop-ban megtalálható, pár közülük egy egyszerű
-analóg TV kódolóval van felszerelve, mások sokkal fejlettebbel rendelkeznek.
+A NeoMagic chip szĂĄmos laptop-ban megtalĂĄlhatĂł, pĂĄr kĂśzĂźlĂźk egy egyszerĹą
+analĂłg TV kĂłdolĂłval van felszerelve, mĂĄsok sokkal fejlettebbel rendelkeznek.
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Analóg kódoló chip</emphasis>:
-  A visszajelzések szerint megbízható TV kimenet a <option>-vo fbdev</option>
-  vagy <option>-vo fbdev2</option> kapcsolókkal érhető el.
-  Kernelbe forgatott vesafb szükséges és a következő paramétereket
-  kell megadni a kernel parancssorában:
+  <emphasis role="bold">AnalĂłg kĂłdolĂł chip</emphasis>:
+  A visszajelzĂŠsek szerint megbĂ­zhatĂł TV kimenet a <option>-vo fbdev</option>
+  vagy <option>-vo fbdev2</option> kapcsolĂłkkal ĂŠrhetĹ el.
+  Kernelbe forgatott vesafb szĂźksĂŠges ĂŠs a kĂśvetkezĹ paramĂŠtereket
+  kell megadni a kernel parancssorĂĄban:
   <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
-  Ajánlott elindítani az <application>X</application>-et, majd átváltani
-  konzol módba pl. a <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>-gyel.
-  Ha nem sikerül elindítani az <application>X</application>-et az
-  <application>MPlayer</application> konzolból történő elindítása előtt,
-  a videó lassú és zavaros lesz (a magyarázatokat szívesen fogadjuk).
-  Jelentkezz be a konzolodra majd add ki a következő parancsot:
+  AjĂĄnlott elindĂ­tani az <application>X</application>-et, majd ĂĄtvĂĄltani
+  konzol mĂłdba pl. a <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>-gyel.
+  Ha nem sikerĂźl elindĂ­tani az <application>X</application>-et az
+  <application>MPlayer</application> konzolbĂłl tĂśrtĂŠnĹ elindĂ­tĂĄsa elĹtt,
+  a videĂł lassĂş ĂŠs zavaros lesz (a magyarĂĄzatokat szĂ­vesen fogadjuk).
+  Jelentkezz be a konzolodra majd add ki a kĂśvetkezĹ parancsot:
 
   <screen>clear; mplayer -vo fbdev -zoom -cache 8192 dvd://</screen>
 
-  Ezután a filmet konzol módban, kb. a laptop LCD képernyőjének felét
-  kitöltve kell látnod.
-  A TV-re váltáshoz nyomd meg az <keycap>Fn</keycap>+<keycap>F5</keycap>-öt
-  háromszor. Tesztelve Tecra 8000-en, 2.6.15 kernel vesafb-vel, ALSA v1.0.10-en.
+  EzutĂĄn a filmet konzol mĂłdban, kb. a laptop LCD kĂŠpernyĹjĂŠnek felĂŠt
+  kitĂśltve kell lĂĄtnod.
+  A TV-re vĂĄltĂĄshoz nyomd meg az <keycap>Fn</keycap>+<keycap>F5</keycap>-Ăśt
+  hĂĄromszor. Tesztelve Tecra 8000-en, 2.6.15 kernel vesafb-vel, ALSA v1.0.10-en.
   </para></listitem>
 <listitem><simpara>
-  <emphasis role="bold">Chrontel 70xx kódoló chip</emphasis>:
-  Az IBM Thinkpad 390E és talán más Thinkpad-okban és notebook-okban található.
+  <emphasis role="bold">Chrontel 70xx kĂłdolĂł chip</emphasis>:
+  Az IBM Thinkpad 390E ĂŠs talĂĄn mĂĄs Thinkpad-okban ĂŠs notebook-okban talĂĄlhatĂł.
   </simpara><simpara>
-  A <option>-vo vesa:neotv_pal</option>-t kell használnod a PAL-hoz vagy
+  A <option>-vo vesa:neotv_pal</option>-t kell hasznĂĄlnod a PAL-hoz vagy
   a <option>-vo vesa:neotv_ntsc</option>-t az NTSC-hez.
-  TV kimenetet biztosít az alábbi 16 bpp és 8 bpp módokban:
+  TV kimenetet biztosĂ­t az alĂĄbbi 16 bpp ĂŠs 8 bpp mĂłdokban:
   </simpara>
   <itemizedlist>
-    <listitem><simpara>NTSC 320x240, 640x480 és talán 800x600 is.</simpara></listitem>
+    <listitem><simpara>NTSC 320x240, 640x480 ĂŠs talĂĄn 800x600 is.</simpara></listitem>
     <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.  </simpara></listitem>
   </itemizedlist>
-  <simpara>Az 512x384-es módot nem támogatja a BIOS. Át kell méretezned a képet
-  egy másik felbontásra a TV kimenet aktiválásához. Ha egy képet látsz a
-  képernyőn 640x480-ban vagy 800x600-ban, de semmit 320x240-ben vagy kisebb
-  felbontáson, ki kell cserélned két táblázatot a <filename>vbelib.c</filename>
-  fájlban. Lásd a vbeSetTV függvényeket a részletekért. Kérlek keresd meg a szerzőt
+  <simpara>Az 512x384-es mĂłdot nem tĂĄmogatja a BIOS. Ăt kell mĂŠretezned a kĂŠpet
+  egy mĂĄsik felbontĂĄsra a TV kimenet aktivĂĄlĂĄsĂĄhoz. Ha egy kĂŠpet lĂĄtsz a
+  kĂŠpernyĹn 640x480-ban vagy 800x600-ban, de semmit 320x240-ben vagy kisebb
+  felbontĂĄson, ki kell cserĂŠlned kĂŠt tĂĄblĂĄzatot a <filename>vbelib.c</filename>
+  fĂĄjlban. LĂĄsd a vbeSetTV fĂźggvĂŠnyeket a rĂŠszletekĂŠrt. KĂŠrlek keresd meg a szerzĹt
   ebben az esetben.
   </simpara>
   <simpara>
-  Ismert dolgok: Csak VESA, semmilyen más beállítás, pl. fényesség, kontraszt,
-  blacklevel, flickfilter nincs implementálva.
+  Ismert dolgok: Csak VESA, semmilyen mĂĄs beĂĄllĂ­tĂĄs, pl. fĂŠnyessĂŠg, kontraszt,
+  blacklevel, flickfilter nincs implementĂĄlva.
   </simpara>
 </listitem>
 </itemizedlist>
