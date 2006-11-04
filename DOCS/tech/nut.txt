@@ -843,7 +843,7 @@ If a demuxer has seen several info packets with the same chapter_id and
 stream_id then it MUST ignore all but the one with the highest position in
 the file
 
-demxuxers SHOULD not search the whole file for info packets
+demxuxers SHOULD NOT search the whole file for info packets
 
 demuxer (non-normative):
 ------------------------
