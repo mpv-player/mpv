@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with  r20614  -->
+<!-- synced with  r20658  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -147,7 +147,6 @@ Configure завершается с указанным сообщением, и 
 </para></answer>
 </qandaentry>
 
-
 <qandaentry>
 <question><para>
 Сборка в Mac OS 10.3 приводит к нескольким ошибкам линковки</para></question>
@@ -183,8 +182,8 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 (Это можно проверить, запустив <systemitem>otool -l</systemitem>).
 </para></answer>
 </qandaentry>
-
 </qandadiv>
+
 
 <qandadiv id="faq-general">
 <title>Общие вопросы</title>
@@ -368,6 +367,7 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-playback">
 <title>Проблемы воспроизведения</title>
 
@@ -402,6 +402,7 @@ mplayer -vf expand=0:-100:0:0 -slang de dvd://1
 </screen>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Как выбрать дорожки звука/субтитров в DVD, OGM, Matroska или NUT файле?
@@ -573,6 +574,7 @@ PRELINK_OPTS="-mR --no-exec-shield"
 </para></answer>
 </qandaentry>
 </qandadiv>
+
 
 <qandadiv id="faq-driver">
 <title>Проблемы драйверов вывода аудио/видео (ao/vo)</title>
@@ -757,8 +759,10 @@ aRts блокирует звуковое устройство. Либо подо
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-dvd">
 <title>Воспроизведение DVD</title>
+
 <qandaentry>
 <question><para>
 Как насчет DVD навигации/Меню?
@@ -860,6 +864,7 @@ mplayer dvd://1 -dvd-device <replaceable>/путь/к/каталогу</replacea
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-features">
 <title>Просьбы о новых возможностях</title>
 <qandaentry>
@@ -886,6 +891,7 @@ mplayer dvd://1 -dvd-device <replaceable>/путь/к/каталогу</replacea
 </para></answer>
 </qandaentry>
 </qandadiv>
+
 
 <qandadiv id="faq-encoding">
 <title>Кодирование</title>
@@ -1098,7 +1104,6 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 </para></answer>
 </qandaentry>
 
-
 <qandaentry>
 <question><para>
 Как поместить субтитры в выходной файл?
@@ -1135,7 +1140,6 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 Почему сторонние проигрыватели не могут воспроизвести MPEG-4 файлы, 
 сжатые <application>MEncoder</application>'ом версий старше 1.0pre7?
 </para></question>
-
 <answer><para>
 <systemitem class="library">libavcodec</systemitem>, родная библиотека 
 кодирования MPEG-4, обычно поставляемая с <application>MEncoder</application>,
@@ -1199,8 +1203,8 @@ MPlayer не хочет...
 <filename>TOOLS/README</filename> содержит документацию.
 </para></answer>
 </qandaentry>
-
 </qandadiv>
+
 </qandaset>
 
 </chapter>
