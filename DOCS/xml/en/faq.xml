@@ -69,8 +69,10 @@ job, so why change? Besides, we dislike the auto* tools, just like
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-compilation-installation">
 <title>Compilation and installation</title>
+
 <qandaentry>
 <question><para>
 Compilation fails with an error and <application>gcc</application> bails out
@@ -149,7 +151,6 @@ can be a problem on Mandrake systems).
 </para></answer>
 </qandaentry>
 
-
 <qandaentry>
 <question><para>
 Building on Mac OS 10.3 leads to several link errors</para></question>
@@ -191,8 +192,8 @@ are resolved at run-time.
 (You can verify this using <systemitem>otool -l</systemitem>).
 </para></answer>
 </qandaentry>
-
 </qandadiv>
+
 
 <qandadiv id="faq-general">
 <title>General questions</title>
@@ -376,6 +377,7 @@ Use:
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-playback">
 <title>Playback problems</title>
 
@@ -411,6 +413,7 @@ mplayer -vf expand=0:-100:0:0 -slang de dvd://1
 </screen>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 How can I select audio/subtitle tracks from a DVD, OGM, Matroska or NUT file?
@@ -584,6 +587,7 @@ Try <option>-nocache</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
+
 
 <qandadiv id="faq-driver">
 <title>Video/audio driver problems (vo/ao)</title>
@@ -764,8 +768,10 @@ How can I get rid of A/V desynchronization while seeking through RealMedia strea
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-dvd">
 <title>DVD playback</title>
+
 <qandaentry>
 <question><para>
 What about DVD navigation/menus?
@@ -869,8 +875,10 @@ mplayer dvd://1 -dvd-device <replaceable>/path/to/directory</replaceable>
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-features">
 <title>Feature requests</title>
+
 <qandaentry>
 <question><para>
 If <application>MPlayer</application> is paused and I try to seek or press any key at all,
@@ -896,8 +904,10 @@ Stepping backwards is unlikely to be implemented anytime soon.
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-encoding">
 <title>Encoding</title>
+
 <qandaentry>
 <question><para>
 How can I encode?
@@ -1111,7 +1121,6 @@ have to set it by hand with the <option>-ofps</option> option.
 </para></answer>
 </qandaentry>
 
-
 <qandaentry>
 <question><para>
 How can I put subtitles in the output file?
@@ -1147,7 +1156,6 @@ above command.
 Why do third-party players fail to play MPEG-4 movies encoded by
 <application>MEncoder</application> versions later than 1.0pre7?
 </para></question>
-
 <answer><para>
 <systemitem class="library">libavcodec</systemitem>, the native MPEG-4
 encoding library usually shipped with <application>MEncoder</application>,
@@ -1211,8 +1219,8 @@ subdirectory for a collection of random scripts and hacks.
 <filename>TOOLS/README</filename> contains documentation.
 </para></answer>
 </qandaentry>
-
 </qandadiv>
+
 </qandaset>
 
 </chapter>
