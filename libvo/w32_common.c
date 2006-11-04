@@ -30,7 +30,6 @@ uint32_t o_dheight;
 
 static HINSTANCE hInstance;
 HWND vo_window = 0;
-static int cursor = 1;
 static int event_flags;
 static int mon_cnt;
 
@@ -240,16 +239,10 @@ static int createRenderingContext(void) {
     if (vo_fs || vo_ontop) layer = HWND_TOPMOST;
     if (vo_fs) {
 	changeMode();
-	if (cursor) {
 	    ShowCursor(0);
-	    cursor = 0;
-	}
     } else {
 	resetMode();
-	if (!cursor) {
 	    ShowCursor(1);
-	    cursor = 1;
-	}
     }
     updateScreenProperties();
     ShowWindow(vo_window, SW_HIDE);
