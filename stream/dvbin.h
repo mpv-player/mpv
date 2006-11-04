@@ -100,9 +100,9 @@ typedef struct {
 	int tuner_type;
 	int is_on;
 	stream_t *stream;
-	char new_tuning[256], prev_tuning[256];
 	int retry;
 	int timeout;
+	int last_freq;
 } dvb_priv_t;
 
 
