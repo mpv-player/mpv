@@ -4,7 +4,7 @@
 **  This file is part of MPlayer, see http://mplayerhq.hu/ for info.  
 **
 **  (c) 2003 Martin Olschewski <olschewski@zpr.uni-koeln.de>
-**  (c) 2003 Jindrich Makovicka <makovick@kmlinux.fjfi.cvut.cz>
+**  (c) 2003 Jindrich Makovicka <makovick@gmail.com>
 **  
 **  File licensed under the GPL, see http://www.fsf.org/ for more info.
 **

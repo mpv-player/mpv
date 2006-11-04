@@ -5,7 +5,7 @@
  * Artur Zaprzala <zybi@fanthom.irc.pl>
  *
  * ported inside mplayer by Jindrich Makovicka 
- * <makovick@kmlinux.fjfi.cvut.cz>
+ * <makovick@gmail.com>
  *
  */
 
