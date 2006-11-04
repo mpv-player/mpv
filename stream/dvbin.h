@@ -67,7 +67,6 @@ typedef struct {
 	fe_hierarchy_t			hier;
 } dvb_channel_t;
 
-
 typedef struct {
 	uint16_t NUM_CHANNELS;
 	uint16_t current;
@@ -87,16 +86,15 @@ typedef struct {
 	void *priv;
 } dvb_config_t;
 
-
 typedef struct {
 	int card;
-    int fe_fd;
-    int sec_fd;
-    int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
-    int dvr_fd;
+	int fe_fd;
+	int sec_fd;
+	int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
+	int dvr_fd;
 
-    dvb_config_t *config;
-    dvb_channels_list *list;
+	dvb_config_t *config;
+	dvb_channels_list *list;
 	int tuner_type;
 	int is_on;
 	stream_t *stream;
