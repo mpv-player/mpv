@@ -39,6 +39,7 @@
 #include "ass_library.h"
 
 #include "libvo/sub.h" // for utf8_get_char
+#include "libavutil/common.h"
 
 #define MAX_GLYPHS 1000
 #define MAX_LINES 100
@@ -1495,8 +1496,12 @@ static void process_karaoke_effects(void)
 				tm_start = timing + s1->effect_skip_timing;
 				tm_end = tm_start + s1->effect_timing;
 				timing = tm_end;
-				x_start = s1->bbox.xMin + s1->pos.x;
-				x_end = e1->bbox.xMax + e1->pos.x;
+				x_start = 1000000;
+				x_end = -1000000;
+				for (cur2 = s1; cur2 <= e1; ++cur2) {
+					x_start = FFMIN(x_start, cur2->bbox.xMin + cur2->pos.x);
+					x_end = FFMAX(x_end, cur2->bbox.xMax + cur2->pos.x);
+				}
 
 				dt = (tm_current - tm_start);
 				if ((s1->effect_type == EF_KARAOKE) || (s1->effect_type == EF_KARAOKE_KO)) {
