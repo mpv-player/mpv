@@ -1569,9 +1569,18 @@ do {								\
 
 #define NEXT_MACROBLOCK							\
 do {									\
-    if(decoder->quant_store)                                            \
+    if(decoder->quant_store) {                                          \
+       if (decoder->picture_structure == TOP_FIELD)                     \
+        decoder->quant_store[2*decoder->quant_stride*(decoder->v_offset>>4) \
+                    +(decoder->offset>>4)] = decoder->quantizer_scale;  \
+       else if (decoder->picture_structure == BOTTOM_FIELD)             \
+        decoder->quant_store[2*decoder->quant_stride*(decoder->v_offset>>4) \
+	            + decoder->quant_stride                             \
+                    +(decoder->offset>>4)] = decoder->quantizer_scale;  \
+       else                                                             \
         decoder->quant_store[decoder->quant_stride*(decoder->v_offset>>4) \
                     +(decoder->offset>>4)] = decoder->quantizer_scale;  \
+    }                                                                   \
     decoder->offset += 16;						\
     if (decoder->offset == decoder->width) {				\
 	do { /* just so we can use the break statement */		\
