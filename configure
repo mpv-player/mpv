@@ -5403,16 +5403,16 @@ int main()
     
 }
 EOF
-  _fontconfig=yes
-  if cc_check -lfontconfig ; then
-    _ld_fontconfig="-lfontconfig"
-  elif cc_check -lfontconfig -lexpat -lfreetype ; then
-    _ld_fontconfig="-lfontconfig -lexpat -lfreetype"
-  elif cc_check `$_pkg_config --silence-errors --cflags --libs fontconfig` ; then
-    _inc_extra="$_inc_extra `$_pkg_config --cflags fontconfig`"
-    _ld_fontconfig=`$_pkg_config --libs fontconfig`
-  else
-    _fontconfig=no
+  _fontconfig=no
+  for _ld_tmp in "" "-lexpat -lfreetype" "-lexpat -lfreetype -lz" ; do
+    _ld_tmp="-lfontconfig $_ld_tmp"
+    cc_check $_ld_tmp && _fontconfig=yes && _ld_fontconfig="$_ld_tmp" && break
+  done
+  if test "$_fontconfig" = no && $_pkg_config --exists fontconfig ; then
+    _inc_tmp=`$_pkg_config --cflags fontconfig`
+    _ld_tmp=`$_pkg_config --libs fontconfig`
+    cc_check $_inc_tmp $_ld_tmp && _fontconfig=yes \
+      && _ld_fontconfig="$_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp"
   fi
 fi
 if test "$_fontconfig" = yes ; then
