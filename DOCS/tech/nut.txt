@@ -1,5 +1,5 @@
 ==================================
-NUT Open Container Format 20060713
+NUT Open Container Format 20061104
 ==================================
 
 
@@ -358,7 +358,8 @@ index:
 
 info_packet:
     stream_id_plus1                     v
-    chapter_id                          v
+    chapter_id                          s (Note due to a typo this was v
+                                           until 2006-11-04)
     chapter_start                       t
     chapter_len                         v
     count                               v
