@@ -4811,6 +4811,17 @@ static int WINAPI expPropVariantClear(void *pvar)
     return 1;
 }
 
+// This define is fake, the real thing is a struct
+#define LPDEVMODEA void*
+// Dummy implementation, always return 1
+// Required for frapsvid.dll 2.8.1, return value does not matter
+static WIN_BOOL WINAPI expEnumDisplaySettingsA(LPCSTR name ,DWORD n,
+    LPDEVMODEA devmode)
+{
+    dbgprintf("EnumDisplaySettingsA (dummy) => 1\n");
+    return 1;
+}
+
 struct exports
 {
     char name[64];
@@ -5110,6 +5121,7 @@ struct exports exp_user32[]={
     FF(DialogBoxParamA, -1)
     FF(RegisterClipboardFormatA, -1)
     FF(CharNextA, -1)
+    FF(EnumDisplaySettingsA, -1)
 };
 struct exports exp_advapi32[]={
     FF(RegCloseKey, -1)
