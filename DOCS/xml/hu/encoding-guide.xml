@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20408 -->
+<!-- synced with r20551 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1522,11 +1522,11 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   elkódolja a <replaceable>destination_sound.wav</replaceable>-ot az 1-es
   kódolási minsőséggel, ami nagyjából megfelel 80Kb/s-nak és annak a minimum
   minőségnek, amit legalább használnod kell, ha érdekel a minőség.
-  Kérlek jegyezd meg, hogy a MEncoder jelenleg nem tud Ogg Vorbis sávokat
-  belekeverni a kimeneti fájlba, mert csak AVI és MPEG konténereket támogat
-  kimenetként és mindkettőnél audió/videó lejátszási szinkronizációs problémákat
-  okozhat néhány lejátszóval, ha az AVI fájl VBR-es audió stream-et tartalmaz,
-  mint pl. a Vorbis.
+  Kérlek jegyezd meg, hogy a <application>MEncoder</application> jelenleg nem
+  tud Ogg Vorbis sávokat belekeverni a kimeneti fájlba, mert csak AVI és MPEG
+  konténereket támogat kimenetként és mindkettőnél audió/videó lejátszási
+  szinkronizációs problémákat okozhat néhány lejátszóval, ha az AVI fájl VBR-es
+  audió stream-et tartalmaz, mint pl. a Vorbis.
   De ne aggódj, ez a dokumentáció megmutatja, hogy hogy tudod
   ezt megcsinálni egyéb programokkal.
 </para>
@@ -1552,7 +1552,7 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
 </para>
 
 <para>
-  A MEncoderben kísérleti jelleggel van
+  A <application>MEncoder</application>ben kísérleti jelleggel van
   <systemitem class="library">libavformat</systemitem> támogatás, ami
   az FFmpeg projektből egy függvénykönyvtár, ami számos konténer keverését és
   demux-álását támogatja.
@@ -4060,7 +4060,7 @@ Egy példa VP3 tömörítéssel:
 
 
 <sect1 id="menc-feat-vcd-dvd">
-<title>MEncoder használata VCD/SVCD/DVD-kompatibilis fájlok készítéséhez.</title>
+<title>A <application>MEncoder</application> használata VCD/SVCD/DVD-kompatibilis fájlok készítéséhez.</title>
 
 <sect2 id="menc-feat-vcd-dvd-constraints">
 <title>Formátum korlátok</title>

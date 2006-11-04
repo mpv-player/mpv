@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20304 -->
+<!-- synced with r20658 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -68,8 +68,10 @@ mint ahogy <ulink url="http://freshmeat.net/articles/view/889/">mások sem</ulin
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-compilation-installation">
 <title>Fordítás és telepítés</title>
+
 <qandaentry>
 <question><para>
 A fordítás leáll hibaüzenettel és a <application>gcc</application> valami
@@ -139,15 +141,14 @@ panaszkodik. Nem értem, <emphasis>van</emphasis> telepítve X11-em!?
 </para></question>
 <answer><para>
 ... de nincsenek telepítve az X11 fejlesztői csomagjai. Vagy rosszul vannak fent.
-<filename>XFree86-devel*</filename> a nevük Red Hat alatt és
-<filename>xlibs-dev</filename> Debian Woody ill. <filename>libx11-dev</filename>
-Debian Sarge alatt. Nézd meg azt is, hogy
+<filename>XFree86-devel*</filename> a nevük Red Hat alatt,
+<filename>xlibs-dev</filename> Debian Woody és
+<filename>libx11-dev</filename> Debian Sarge alatt. Nézd meg azt is, hogy
 a <filename class="directory">/usr/X11</filename> és a
 <filename class="directory">/usr/include/X11</filename> szimbolikus linkek
 léteznek-e (ez Mandrake rendszereken lehet probléma).
 </para></answer>
 </qandaentry>
-
 
 <qandaentry>
 <question><para>
@@ -190,8 +191,8 @@ melyek futási időben kerülnek feloldásra.
 (Ezt leellenőrizheted a <systemitem>otool -l</systemitem> használatával).
 </para></answer>
 </qandaentry>
-
 </qandadiv>
+
 
 <qandadiv id="faq-general">
 <title>Általános kérdések</title>
@@ -373,6 +374,7 @@ Hogy tudom az <application>MPlayer</application> a háttérben futtatni?
 </para></answer>
 </qandaentry>
 </qandadiv>
+
 
 <qandadiv id="faq-playback">
 <title>Lejátszási problémák</title>
@@ -582,6 +584,7 @@ Próbáld meg a <option>-nocache</option> kapcsolót.
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-driver">
 <title>Videó/audió vezérlő problémák (vo/ao)</title>
 
@@ -763,8 +766,10 @@ A <option>-mc 0.1</option> segíthet.
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-dvd">
 <title>DVD lejátszás</title>
+
 <qandaentry>
 <question><para>
 Mi van a DVD navigációval/menükkel?
@@ -788,8 +793,8 @@ Nem tudok egyetlen újabb DVD-t sem megnézni a Sony Pictures/BMG-től.
 Ez normális; átvertek, egy szándékosan elrontott lemezt adtak el neked.
 Az egyetlen módszer ezen DVD-k lejátszására a hibás blokkok kikerülése
 az mpdvdkit2 helyett a DVDnav használatával.
-Ezt úgy teheted meg, hogy az MPlayert DVDnav támogatással fordítod le, majd
-a parancssori dvd:// dvdnav://-ra cseréled.
+Ezt úgy teheted meg, hogy az <application>MPlayer</application> DVDnav
+támogatással fordítod le, majd a parancssori dvd:// dvdnav://-ra cseréled.
 A DVDnav nagyon nagy mértékben kizárja az mpdvdkit2-et, győződj meg róla, hogy
 a <option>--disable-mpdvdkit</option> opciót megadtad a configure-nak.
 </para></answer>
@@ -867,8 +872,10 @@ mplayer dvd://1 -dvd-device <replaceable>/eleresi/ut/a/konyvtarhoz</replaceable>
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-features">
 <title>Speciális kérések</title>
+
 <qandaentry>
 <question><para>
 Ha az <application>MPlayer</application>t megállítom és megpróbálok ugrani
@@ -894,8 +901,10 @@ A visszafelé lépés valószínűleg nem lesz mostanában megvalósítva.
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-encoding">
 <title>Elkódolás</title>
+
 <qandaentry>
 <question><para>
 Hogy tudok kódolni?
@@ -1109,7 +1118,6 @@ kell megadnod a <option>-ofps</option> kapcsoló segítségével.
 </para></answer>
 </qandaentry>
 
-
 <qandaentry>
 <question><para>
 Hogy tudok feliratot tenni a kimeneti fájlba?
@@ -1145,7 +1153,6 @@ parancsban.
 Miért nem tudom lejátszani más programmal a <application>MEncoder</application>
 1.0pre7 és későbbi verzióival kódolt MPEG-4 filmeket?
 </para></question>
-
 <answer><para>
 A <systemitem class="library">libavcodec</systemitem>, a natív MPEG-4
 kódoló függvény könyvtár, ami általában a <application>MEncoder</application>rel
@@ -1209,8 +1216,8 @@ alkönyvtárba, mindenféle scriptek és hack-ok gyűjteményét találod ott.
 A <filename>TOOLS/README</filename> tartalmazza a dokumentációt.
 </para></answer>
 </qandaentry>
-
 </qandadiv>
+
 </qandaset>
 
 </chapter>

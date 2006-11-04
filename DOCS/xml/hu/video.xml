@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20054 -->
+<!-- synced with r20572 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1391,6 +1391,16 @@ maximalizálása.
   <option>-vo mga</option> vagy <option>-vo fbdev</option> kapcsolókkal. Az nVidia
   kártyák azonban képesek tényleges grafikus kimenetre igazi szöveges konzolon.
   Lásd az <link linkend="vidix-nvidia">nvidia_vid</link> részt a további információkért.
+  Hogy megszabadulj a határoló szövegektől és a villogó kurzortól, próbálj ki valami ilyesmit:
+  </simpara>
+
+  <screen>setterm -cursor off > /dev/tty9</screen>
+
+  <simpara>
+  (feltéve, hogy a <systemitem>tty9</systemitem> eddig nem volt használva) és ezután
+  válts a <systemitem>tty9</systemitem>-re.
+  Másrész a <option>-colorkey 0</option>-t ajánlott megadni egy "háttérben" futó
+  videónál, mivel a helyes működése a colorkey funkcionalításától függ.
   </simpara></listitem>
 <listitem><simpara>
   Használhatod a VIDIX aleszközt, ami számos videó kimeneti vezérlővel együtt használható,

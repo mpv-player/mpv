@@ -1,4 +1,4 @@
-.\" Synced with r20445
+.\" Synced with r20664
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -739,9 +739,13 @@ meghajtók támogatják.
 .
 .TP
 .B \-correct-pts (kísérleti)
-Átváltja az MPlayert egy kísérleti módba, melyben a videó szûrõk állapítják
-meg a videó kockák prezentációs idõbélyegét a videó forrás helyett.
-A legtöbb szûrõ nem támogatja.
+Átváltja az MPlayert egy kísérleti módba, melyben a videó kockák idõbélyege
+másképp lesz kiszámítva és támogatottak lesznek azok a szûrõk, melyek új kockákat
+szúrnak be vagy a meglévõek idõbélyegét módosítják.
+A sokkal pontosabb idõbélyegek láthatóak például a fejezetváltásokhoz
+igazított feliratok esetén a \-ass opció használatával.
+A \-correct-pts nélkül a felirat idõzítés elcsúszik néhány kockával.
+Ez az opció nem mûködik jól néhány demuxer-rel és codec-kel.
 .
 .TP
 .B \-crash-debug (DEBUG KÓD)
@@ -2448,6 +2452,10 @@ NAS-on keresztüli audió kimenet
 natív Mac OS X audió kimeneti vezérlõ
 .
 .TP
+.B openal
+kísérleti, nem befejezett (lemixel mono-ra) OpenAL audió kimeneti vezérlõ
+.
+.TP
 .B sgi (csak SGI)
 natív SGI audió kimeneti vezérlõ
 .PD 0
@@ -3301,6 +3309,7 @@ Ha engedélyezed, sokkal inkább a másik kimeneti videó vezérlõre hasonlít,
 ami jobb fix méretû betûtípusoknál.
 Letiltva sokkal jobban néznek ki FreeType betûtípusokkal és a határokat
 használja teljes képernyõs módban.
+Nem mûködik jól ass feliratokkal (lásd \-ass).
 .IPs osdcolor=<0xRRGGBB>
 OSD színe (alapértelmezett: 0xffffff, ez megfelel a fehérnek).
 .IPs (no)aspect
@@ -6529,7 +6538,15 @@ színteret, így nyugodtan beleírható a konfigurációs fájlba.
 .B "ass\ \ \ \ "
 Az SSA/ASS felirat renderelõt a videó szûrõ lánc egy meghatározott pontjára teszi.
 Csak a \-ass kapcsolóval együtt hasznos.
+.sp 1
+.I PÉLDA:
+.PD 0
+.RSs
+.IPs "\-vf ass,screenshot"
+Az SSA/ASS renderelést a "screenshot" szûrõ elé teszi.
+Az így készített képernyõ mentéseken rajt lesz a felirat is.
 .RE
+.PD 1
 .
 .TP
 .B blackframe[=mennyiség:küszöb]
@@ -9829,7 +9846,7 @@ Ha a LADSPA_PATH be van állítva, keresi a megadott fájlt.
 Ha nincs beállítva, egy teljes elérési utat kell megadnod.
 FIXME: Ez meg van említve a ladspa részben is.
 .
-.SS libmpdvdkit2:
+.SS libdvdcss:
 .
 .TP
 .B DVDCSS_CACHE

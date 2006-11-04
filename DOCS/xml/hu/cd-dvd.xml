@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20442 -->
+<!-- synced with r20637 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -120,8 +120,7 @@ eszközt a parancssorban a <option>-dvd-device</option> kapcsolóval.
 <para>
 Az <application>MPlayer</application> fel tudja használni a <systemitem>libdvdread</systemitem>-ot
 és a <systemitem>libdvdcss</systemitem>-t is a DVD-k lejátszásához és dekódolásához.
-Ez a két függvénykönyvtár a <filename class="directory">libmpdvdkit2</filename>
-alkönyvtárban található az <application>MPlayer</application> forrás fájában,
+Ez a két függvénykönyvtár megtalálható az <application>MPlayer</application> forrás fájában,
 nem kell őket külön telepítened. Használhatod a két függvénykönyvtár rendszer-szintű
 verzióját is, de ez <emphasis role="bold">nem</emphasis> javasolt, mivel hibák forrása
 lehet, a függvénykönyvtárak közötti inkompatibilítást és sebességcsökkenést okozhat.
@@ -154,8 +153,8 @@ használnak mindenhol, így a lemezen nyers szektor címzést kell használni a 
 A DVD támogatás nyers szektor-alapú elérést igényel az eszközhöz. Sajnos (Linux
 alatt) root-nak kell lenned, hogy megkapd egy fájl szektor címét. Emiatt egyáltalán
 nem használjuk a kernel fájlrendszer vezérlőjét, inkább felhasználói szinten
-(userspace) oldottuk meg. A <systemitem>libdvdread</systemitem> 0.9.x és a
-<systemitem>libmpdvdkit</systemitem> teszi ezt lehetővé. A kernel UDF fájlrendszer
+(userspace) oldottuk meg. A <systemitem>libdvdread</systemitem> 0.9.x teszi ezt
+lehetővé. A kernel UDF fájlrendszer
 vezérlője nem kell, mivel saját beépített UDF fájlrendszer vezérlőjük van.
 Sőt, még mountolni sem kell a DVD-t, mivel csak nyers szektor-alapú címzést
 használnak.
