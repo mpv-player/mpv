@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20614 -->
+<!-- synced with r20658 -->
 <!-- Opiekun: Frogu -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
@@ -421,6 +421,7 @@ mplayer -vf expand=0:-100:0:0 -slang pl dvd://1
 </screen>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Jak mogę określić ścieżkę audio/napisów z pliku OGM, Matroska, NUT lub DVD?
@@ -1185,7 +1186,6 @@ na swój ulubiony koder audio.
 Dlaczego zewnętrzne odtwarzacze nieodtwarzają filmów MPEG-4 zakodowanych
 <application>MEncoderem</application> w wersji nowszej niż 1.0pre7?
 </para></question>
-
 <answer><para>
 <systemitem class="library">libavcodec</systemitem>, natywna biblioteka
 kodowania MPEG-4 zwykle dostarczana z <application>MEncoderem</application>
