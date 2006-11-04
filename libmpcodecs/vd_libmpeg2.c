@@ -221,6 +221,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		mpi_new->fields |= MP_IMGFIELD_REPEAT_FIRST;
 	    else mpi_new->fields &= ~MP_IMGFIELD_REPEAT_FIRST;
 	    mpi_new->fields |= MP_IMGFIELD_ORDERED;
+            if (!(info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME))
+                mpi_new->fields |= MP_IMGFIELD_INTERLACED;
 
 #ifdef MPEG12_POSTPROC
 	    mpi_new->qstride=info->sequence->width>>4;
