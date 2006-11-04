@@ -107,7 +107,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	    
 	// width never changes, always try full DR
 	mpi->priv = vf->dmpi = vf_get_image(vf->next, mpi->imgfmt,
-			mpi->type, mpi->flags, 
+			mpi->type, mpi->flags | MP_IMGFLAG_READABLE, 
 			vf->priv->outw,
 			vf->priv->outh);
 
@@ -176,7 +176,7 @@ static int prepare_image(struct vf_instance_s* vf, mp_image_t *mpi)
 
 	// hope we'll get DR buffer:
 	vf->dmpi = vf_get_image(vf->next, vf->priv->outfmt,
-			MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+			MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_READABLE,
 			vf->priv->outw, vf->priv->outh);
 
 	// copy mpi->dmpi...
