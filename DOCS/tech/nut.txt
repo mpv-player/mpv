@@ -7,6 +7,15 @@ NUT Open Container Format 20060713
 Intro:
 ======
 
+NUT is a Free multimedia container format for storeage of audio, video,
+subtitles and related user defined streams, it provides exact timestamps for
+synchronization and seeking, is simple, has low overhead and can recover
+in case of errors in the stream
+
+other common multimedia container formats are AVI, OGG, Matroska, MP4, MOV
+ASF, MPEG-PS, MPEG-TS
+
+
 Features / goals:
     (supported by the format, not necessarily by a specific implementation)
 
