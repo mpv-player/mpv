@@ -140,8 +140,8 @@ have X11 installed!?
 </para></question>
 <answer><para>
 ... but you don't have the X11 development package installed. Or not correctly.
-It's called <filename>XFree86-devel*</filename> under Red Hat, and
-<filename>xlibs-dev</filename> under Debian Woody,
+It's called <filename>XFree86-devel*</filename> under Red Hat,
+<filename>xlibs-dev</filename> under Debian Woody and
 <filename>libx11-dev</filename> under Debian Sarge. Also check if the
 <filename class="directory">/usr/X11</filename> and
 <filename class="directory">/usr/include/X11</filename> symlinks exist (this
