@@ -261,6 +261,11 @@ static int createRenderingContext(void) {
         vo_dheight = prev_height;
         vo_dx = prev_x;
         vo_dy = prev_y;
+        // HACK around what probably is a windows focus bug:
+        // when pressing 'f' on the console, then 'f' again to
+        // return to windowed mode, any input into the video
+        // window is lost forever.
+        SetFocus(vo_window);
     }
     r.left = vo_dx;
     r.right = r.left + vo_dwidth;
