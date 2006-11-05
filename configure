@@ -1997,12 +1997,11 @@ for ac_option do
   --enable-s3fb)	_s3fb=yes	;;
   --disable-s3fb)	_s3fb=no	;;
   --enable-tdfxfb)	_tdfxfb=yes	;;
+  --disable-tdfxfb)	_tdfxfb=no	;;
   --disable-tdfxvid)	_tdfxvid=no	;;
   --enable-tdfxvid)	_tdfxvid=yes	;;
   --disable-tga)	_tga=no	  	;;
   --enable-tga)		_tga=yes	;;
-  --enable-tdfxfb)	_tdfxfb=yes	;;
-  --disable-tdfxfb)	_tdfxfb=no	;;
   --enable-directfb)	_directfb=yes	;;
   --disable-directfb)	_directfb=no	;;
   --enable-zr)		_zr=yes		;;
@@ -3730,7 +3729,7 @@ else
   _def_tdfxvid='#undef HAVE_TDFX_VID'
   _novomodules="tdfx_vid $_novomodules"
 fi
-echores "$_tdfxfb"
+echores "$_tdfxvid"
 
 echocheck "tga"
 if test "$_tga" = yes ; then
