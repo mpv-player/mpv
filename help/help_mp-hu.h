@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r20355 (2006. 10. 22.)
+// Sync'ed with help_mp-en.h r20586 (2006. 11. 05.)
 
 // ========================= MPlayer help ===========================
 
@@ -857,6 +857,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_MPSUB "A film feliratának konvertálása MPlayer felirat formátumba"
 #define MSGTR_PREFERENCES_SUB_SRT "A film feliratának konvertálása SubViewer (SRT) formátumba"
 #define MSGTR_PREFERENCES_SUB_Overlap "Felirat átlapolás"
+#define MSGTR_PREFERENCES_SUB_USE_ASS "SSA/ASS felirat renderelés"
+#define MSGTR_PREFERENCES_SUB_ASS_USE_MARGINS "Margók használata"
+#define MSGTR_PREFERENCES_SUB_ASS_TOP_MARGIN "Fent: "
+#define MSGTR_PREFERENCES_SUB_ASS_BOTTOM_MARGIN "Lent: "
 #define MSGTR_PREFERENCES_Font "Betűk:"
 #define MSGTR_PREFERENCES_FontFactor "Betű együttható:"
 #define MSGTR_PREFERENCES_PostProcess "Képjavítás"
