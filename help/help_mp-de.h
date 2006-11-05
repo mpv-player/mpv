@@ -90,7 +90,8 @@ static char help_text[]=
 "Mögliche Gründe, Probleme, Workarounds: \n"\
 "- Häufigste Ursache: defekter/fehlerhafter _Audio_treiber.\n"\
 "  - Versuche -ao sdl oder die OSS-Emulation von ALSA.\n"\
-"  - Experimentiere mit verschiedenen Werten für -autosync, 30 ist ein guter Startwert."\
+"  - Experimentiere mit verschiedenen Werten für -autosync, 30 ist ein guter"\
+"    Startwert.\n"\
 "- Langsame Videoausgabe\n"\
 "  - Versuche einen anderen -vo Treiber (-vo help für eine Liste)\n"\
 "    oder probiere -framedrop!\n"\
