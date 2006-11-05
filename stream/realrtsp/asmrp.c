@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "mp_msg.h"
 
 /*
 #define LOG
