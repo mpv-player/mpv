@@ -417,13 +417,13 @@ static int asmrp_operand (asmrp_t *p) {
     asmrp_get_sym (p);
     
     if (p->sym != ASMRP_SYM_ID) {
-      printf ("error: identifier expected.\n");
+      mp_msg(MSGT_STREAM, MSGL_ERR, "error: identifier expected.\n");
       break;
     }
 
     i = asmrp_find_id (p, p->str);
     if (i<0) {
-      printf ("error: unknown identifier %s\n", p->str);
+      mp_msg(MSGT_STREAM, MSGL_ERR, "error: unknown identifier %s\n", p->str);
     }
     ret = p->sym_tab[i].v;
 
@@ -442,7 +442,7 @@ static int asmrp_operand (asmrp_t *p) {
     ret = asmrp_condition (p);
 
     if (p->sym != ASMRP_SYM_RPAREN) {
-      printf ("error: ) expected.\n");
+      mp_msg(MSGT_STREAM, MSGL_ERR, "error: ) expected.\n");
       break;
     }
 
@@ -450,7 +450,7 @@ static int asmrp_operand (asmrp_t *p) {
     break;
 
   default:
-    printf ("syntax error, $ number or ( expected\n");
+    mp_msg(MSGT_STREAM, MSGL_ERR, "syntax error, $ number or ( expected\n");
   }
 
 #ifdef LOG
@@ -558,20 +558,20 @@ static void asmrp_assignment (asmrp_t *p) {
   }
 
   if (p->sym != ASMRP_SYM_ID) {
-    printf ("error: identifier expected\n");
+    mp_msg(MSGT_STREAM, MSGL_ERR, "error: identifier expected\n");
     return;
   }
   asmrp_get_sym (p);
 
   if (p->sym != ASMRP_SYM_EQUALS) {
-    printf ("error: = expected\n");
+    mp_msg(MSGT_STREAM, MSGL_ERR, "error: = expected\n");
     return;
   }
   asmrp_get_sym (p);
 
   if ( (p->sym != ASMRP_SYM_NUM) && (p->sym != ASMRP_SYM_STRING) 
        && (p->sym != ASMRP_SYM_ID)) {
-    printf ("error: number or string expected\n");
+    mp_msg(MSGT_STREAM, MSGL_ERR, "error: number or string expected\n");
     return;
   }
   asmrp_get_sym (p);
@@ -619,7 +619,7 @@ static int asmrp_rule (asmrp_t *p) {
 #endif
 
   if (p->sym != ASMRP_SYM_SEMICOLON) {
-    printf ("semicolon expected.\n");
+    mp_msg(MSGT_STREAM, MSGL_ERR, "semicolon expected.\n");
     return ret;
   }
 
