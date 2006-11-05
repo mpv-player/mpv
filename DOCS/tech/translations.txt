@@ -79,6 +79,10 @@ to the file header, replacing XXX with the revision of help_mp-en.h that your
 translation is in sync with. This way we can easily tell if the translation
 is up to date or not.
 
+Please note that help_mp files as well as the xml documentation are
+UTF-8-encoded. You will break console messages and html pages if your editor
+uses a different encoding!
+
 Translations are for documentation what porting is for code. Many more eyes
 see it and get to find mistakes. If you stumble over mistakes, inaccuracies,
 clumsy wording, spelling/grammar errors or if you notice that something is
