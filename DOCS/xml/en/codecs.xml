@@ -93,9 +93,10 @@ supported in <application>MEncoder</application>.
 </para>
 
 <para>
-For a complete list of supported codecs please visit the FFmpeg homepage.
-Supported <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
-and <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> codecs.
+For a complete list of supported 
+<ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
+and <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>
+codecs please visit the FFmpeg homepage.
 </para>
 
 <para>
