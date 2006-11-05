@@ -3725,11 +3725,12 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
       else
         {
           mkv_index_t *index = NULL;
+          int seek_id = (demuxer->video->id < 0) ? demuxer->audio->id : demuxer->video->id;  
 
           /* let's find the entry in the indexes with the smallest */
           /* difference to the wanted timecode. */
           for (i=0; i < mkv_d->num_indexes; i++)
-            if (mkv_d->indexes[i].tnum == demuxer->video->id)
+            if (mkv_d->indexes[i].tnum == seek_id)
               {
                 diff = target_timecode + mkv_d->first_tc -
                        (int64_t) mkv_d->indexes[i].timecode * mkv_d->tc_scale / 1000000.0;
