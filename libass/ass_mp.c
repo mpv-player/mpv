@@ -211,12 +211,14 @@ ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double 
 char *get_path(char *);
 
 void ass_configure(ass_renderer_t* priv, int w, int h) {
-	char *dir, *path, *family;
 	ass_set_frame_size(priv, w, h);
 	ass_set_margins(priv, ass_top_margin, ass_bottom_margin, 0, 0);
 	ass_set_use_margins(priv, ass_use_margins);
 	ass_set_font_scale(priv, ass_font_scale);
+}
 
+void ass_configure_fonts(ass_renderer_t* priv) {
+	char *dir, *path, *family;
 	dir = get_path("fonts");
 	if (!font_fontconfig && font_name) path = strdup(font_name);
 	else path = get_path("subfont.ttf");

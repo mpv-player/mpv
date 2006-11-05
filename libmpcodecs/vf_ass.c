@@ -350,7 +350,9 @@ static int control(vf_instance_t *vf, int request, void *data)
 	switch (request) {
 	case VFCTRL_INIT_EOSD:
 		vf->priv->ass_priv = ass_renderer_init((ass_library_t*)data);
-		return vf->priv->ass_priv ? CONTROL_TRUE : CONTROL_FALSE;
+		if (!vf->priv->ass_priv) return CONTROL_FALSE;
+		ass_configure_fonts(vf->priv->ass_priv);
+		return CONTROL_TRUE;
 	case VFCTRL_DRAW_EOSD:
 		if (vf->priv->ass_priv) return CONTROL_TRUE;
 		break;

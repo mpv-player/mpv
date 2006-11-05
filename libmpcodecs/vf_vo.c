@@ -109,6 +109,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
     {
         vf->priv->ass_priv = ass_renderer_init((ass_library_t*)data);
         if (!vf->priv->ass_priv) return CONTROL_FALSE;
+        ass_configure_fonts(vf->priv->ass_priv);
         return CONTROL_TRUE;
     }
     case VFCTRL_DRAW_EOSD:
