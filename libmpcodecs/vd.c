@@ -140,13 +140,9 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     int palette=0;
     int vocfg_flags=0;
 
-    if(!sh->disp_w || !sh->disp_h)
-        mp_msg(MSGT_DECVIDEO,MSGL_WARN, MSGTR_CodecDidNotSet);
-    /* XXX: HACK, if sh->disp_* aren't set,
-     * but we have w and h, set them :: atmos */
-    if(!sh->disp_w && w)
+    if(w)
         sh->disp_w=w;
-    if(!sh->disp_h && h)
+    if(h)
         sh->disp_h=h;
 
     if(!sh->disp_w || !sh->disp_h)
