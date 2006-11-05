@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r20586
+// Synced with help_mp-en.h: r20712
 
 // ========================= MPlayer help ===========================
 
@@ -561,7 +561,11 @@ static char help_text[]=
 #define MSGTR_TooManyVideoInBuffer "\nСлишком много (%d в %d байтах) видеопакетов в буфере!\n"
 #define MSGTR_MaybeNI "Возможно Вы проигрываете 'неслоёный' поток/файл или неудачный кодек?\n" \
                       "Для AVI файлов попробуйте форсировать 'неслоёный' режим опцией -ni.\n"
+#define MSGTR_WorkAroundBlockAlignHeaderBug "AVI: Обход бага CBR-MP3 nBlockAlign заголовка!\n"
 #define MSGTR_SwitchToNi "\nОбнаружен плохо 'слоёный' AVI файл - переключаюсь в -ni режим...\n"
+#define MSGTR_InvalidAudioStreamNosound "AVI: неверный ID аудио потока: %d - игнорирование (без звука)\n"
+#define MSGTR_InvalidAudioStreamUsingDefault "AVI: неверный ID видео потока: %d - игнорирование (используется значение по-умолчанию)\n"
+#define MSGTR_ON2AviFormat "ON2 AVI формат"
 #define MSGTR_Detected_XXX_FileFormat "Обнаружен %s формат файла!\n"
 #define MSGTR_DetectedAudiofile "Обнаружен аудиофайл.\n"
 #define MSGTR_NotSystemStream "Не MPEG System Stream формат... (возможно, Transport Stream?)\n"
@@ -1485,6 +1489,29 @@ static char help_text[]=
 // demux_demuxers.c
 
 #define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "ошибка заполнения_буфера: плохой демультиплексор: не vd, ad или sd.\n"
+
+// demux_mkv.c
+#define MSGTR_MPDEMUX_MKV_ZlibInitializationFailed "[mkv] ошибка инициализации zlib.\n"
+#define MSGTR_MPDEMUX_MKV_ZlibDecompressionFailed "[mkv] ошибка zlib распаковки.\n"
+#define MSGTR_MPDEMUX_MKV_LzoInitializationFailed "[mkv] ошибка инициализации lzo.\n"
+#define MSGTR_MPDEMUX_MKV_LzoDecompressionFailed "[mkv] ошибка lzo распаковки.\n"
+#define MSGTR_MPDEMUX_MKV_TrackEncrypted "[mkv] Дорожка номер %u зашифрована, а расшифровка еще не \n[mkv] реализована. Пропуск дорожки.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownContentEncoding "[mkv] Неизвестный тип шифрования содержимого для дорожки %u. Пропуск дорожки.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownCompression "[mkv] Дорожка %u сжата неизвестным/неподдерживаемым \n[mkv] алгоритмом (%u). Пропуск дорожки.\n"
+#define MSGTR_MPDEMUX_MKV_ZlibCompressionUnsupported "[mkv] Доржка %u сжата zlib, нр mplayer скомпилирован \n[mkv] без поддердки сжатия zlib. Пропуск дорожки.\n"
+#define MSGTR_MPDEMUX_MKV_TrackIDName "[mkv] ID дорожки %u: %s (%s) \"%s\", %s\n"
+#define MSGTR_MPDEMUX_MKV_TrackID "[mkv] ID дорожки %u: %s (%s), %s\n"
+#define MSGTR_MPDEMUX_MKV_UnknownCodecID "[mkv] Неизвестный/неподдерживаемый CodecID (%s) или отсутствующие/плохие\n[mkv] данные CodecPrivate (дорожка %u).\n"
+#define MSGTR_MPDEMUX_MKV_FlacTrackDoesNotContainValidHeaders "[mkv] Дорожка FLAC не содержит правильных заголовков.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownAudioCodec "[mkv] Неизвестный/неподдерживаемый ID аудио кодека '%s' для дорожки %u или отсутствующие/неверные\n[mkv] частные данные кодека.\n"
+#define MSGTR_MPDEMUX_MKV_SubtitleTypeNotSupported "[mkv] Тип субтитров '%s' не поддердивается.\n"
+#define MSGTR_MPDEMUX_MKV_WillPlayVideoTrack "[mkv] Будет воспроизвоиться дорожка %u.\n"
+#define MSGTR_MPDEMUX_MKV_NoVideoTrackFound "[mkv] Не найдена/не требуется видео дорожка.\n"
+#define MSGTR_MPDEMUX_MKV_NoAudioTrackFound "[mkv] Не найдена/не требуется аудио дорожка.\n"
+#define MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack "[mkv] Будет отображаться дорожка субтитров %u.\n"
+#define MSGTR_MPDEMUX_MKV_NoBlockDurationForSubtitleTrackFound "[mkv] Внимание: Для субтитров не найдено BlockDuration.\n"
+#define MSGTR_MPDEMUX_MKV_TooManySublines "[mkv] Внимание: слишком много строк для рендеринга, пропущены.\n"
+#define MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst "\n[mkv] Внимание: слишком много строк для рендеринга, пропущены все кроме первой %i.\n"
 
 // demux_nuv.c
 
