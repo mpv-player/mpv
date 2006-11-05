@@ -397,13 +397,13 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
   <listitem><para>Inter B: podziały od 16x16 do 8x8
     (włączając SKIP/DIRECT)</para></listitem>
   <listitem><para>Kontrola tempa: stały kwantyzator, stały bitrate,
-	pojedyncze albo wieloprzebiegowe ABR</para></listitem>
+    pojedyncze albo wieloprzebiegowe ABR</para></listitem>
   <listitem><para>Wykrywanie zmian scen</para></listitem>
   <listitem><para>Adaptatywne umieszczanie klatek B</para></listitem>
   <listitem><para>Referencyjne ramki / dowolna kolejność
-	ramek</para></listitem>
+    ramek</para></listitem>
   <listitem><para>adaptywna transformacja przestrzenna
-	8x8 i 4x4</para></listitem>
+    8x8 i 4x4</para></listitem>
   <listitem><para>tryb bezstratny</para></listitem>
   <listitem><para>Własne matryce kwantyzacji</para></listitem>
   <listitem><para>Równoległe kodowanie wielu fragmentów</para></listitem>
@@ -552,7 +552,7 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
   audio
   </simpara></listitem>
  <listitem><simpara>
-	kodeki mowy Adaptive Multi-Rate (AMR)
+    kodeki mowy Adaptive Multi-Rate (AMR)
  </simpara></listitem>
 </itemizedlist>
 
@@ -629,16 +629,16 @@ Aby włączyć obsługę biblioteki, podczas kompilacji użyj opcji
 </sect2>
 
 <sect2 id="hwmpa">
-	<title>sprzętowy kodek MPEG audio</title>
-	
-	<para>
-		Ten kodek (wybierany poprzez -ac hwmpa) przepuszcza pakiety
-		MPEG audio do sprzętowego dekodera takiego, jak ten, który można
-		znaleźć w pełni wyposażonych kartach DVB i adapterach DXR2.
-		Nie używaj ich w połączeniu z żadnymi innymi wyjściowymi
-		urządzeniami audo (np. OSS i ALSA), bo nie będzie to działało
-		(będziesz słyszeć tylko szum).
-	</para>
+<title>sprzętowy kodek MPEG audio</title>
+
+<para>
+Ten kodek (wybierany poprzez -ac hwmpa) przepuszcza pakiety
+MPEG audio do sprzętowego dekodera takiego, jak ten, który można
+znaleźć w pełni wyposażonych kartach DVB i adapterach DXR2.
+Nie używaj ich w połączeniu z żadnymi innymi wyjściowymi
+urządzeniami audo (np. OSS i ALSA), bo nie będzie to działało
+(będziesz słyszeć tylko szum).
+</para>
 </sect2>
 
 <sect2 id="vivo-audio">
@@ -734,33 +734,31 @@ a RedHatowe RPM-y z
 </sect2>
 
 <sect2 id="amr">
-	<title>kodeki AMR</title>
-	<para>
-		kodeki mowy Adaptive Multi-Rate są używane w telefonii komórkowej
-		trzeciej generacji (3G).
-		Opis implementacji udostępniany jest przez
-		<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
-		(za darmo dla osób prywatnych).
-		</para>
-	<para>
-		Żeby uaktywnić obsługę kodeków, pobierz źródła kodeków
-		<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">
-			AMR-NB</ulink> i
-		<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">
-			AMR-WB</ulink>,
-		umieść je w katalogu do którego rozpakowałeś źródła
-		<application>MPlayera</application> i wpisz następujące komendy:
-		<screen>
-			unzip 26104-610.zip
-			unzip 26104-610_ANSI_C_source_code.zip
-			mv c-code libavcodec/amr_float
-			unzip 26204-600.zip
-			unzip 26204-600_ANSI-C_source_code.zip
-			mv c-code libavcodec/amrwb_float
-			</screen>
-			Gdy już to zrobisz, kontynuuj <link linkend="features">budowanie</link>
-			<application>MPlayera</application> tak, jak zwykle.
-		</para>
+<title>kodeki AMR</title>
+<para>
+kodeki mowy Adaptive Multi-Rate są używane w telefonii komórkowej
+trzeciej generacji (3G).
+Opis implementacji udostępniany jest przez
+<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+(za darmo dla osób prywatnych).
+</para>
+<para>
+Żeby uaktywnić obsługę kodeków, pobierz źródła kodeków
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip"> AMR-NB</ulink> i
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip"> AMR-WB</ulink>,
+umieść je w katalogu do którego rozpakowałeś źródła
+<application>MPlayera</application> i wpisz następujące komendy:
+<screen>
+unzip 26104-610.zip
+unzip 26104-610_ANSI_C_source_code.zip
+mv c-code libavcodec/amr_float
+unzip 26204-600.zip
+unzip 26204-600_ANSI-C_source_code.zip
+mv c-code libavcodec/amrwb_float
+</screen>
+Gdy już to zrobisz, kontynuuj <link linkend="features">budowanie</link>
+<application>MPlayera</application> tak, jak zwykle.
+</para>
 </sect2>
 
 </sect1>
