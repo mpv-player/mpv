@@ -54,7 +54,7 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
 	    // workaround old mencoder's bug:
 	    if(sh->audio.dwSampleSize==1 && sh->audio.dwScale==1 &&
 	       (sh->wf->nBlockAlign==1152 || sh->wf->nBlockAlign==576)){
-		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_WorkaroundingnBlockAlignHeaderBug);
+		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MSGTR_WorkAroundBlockAlignHeaderBug);
 		priv->audio_block_size=1;
 	    }
 	  }
