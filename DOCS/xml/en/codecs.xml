@@ -285,9 +285,7 @@ default as it offers better speed.
 <para>
   If you have the subversion client installed, the latest x264
   sources can be gotten with this command:
-  <screen>
-    svn co svn://svn.videolan.org/x264/trunk x264<!--
-  --></screen>
+  <screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
   <application>MPlayer</application> sources are updated whenever
   an <systemitem class="library">x264</systemitem> API change
   occurs, so it is always suggested to use
@@ -301,9 +299,7 @@ default as it offers better speed.
 <para>
   <systemitem class="library">x264</systemitem> is built and
   installed in the standard way:
-  <screen>
-    ./configure &amp;&amp; make &amp;&amp; sudo make install<!--
-  --></screen>
+  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
   This installs libx264.a in /usr/local/lib and x264.h is placed in
   /usr/local/include.
 
