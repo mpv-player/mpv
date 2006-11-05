@@ -447,7 +447,7 @@ will notice and support for MPEG audio decoding via
 <title>Hardware MPEG audio codec</title>
 
 <para>
-This codec (selected by -ac hwmpa) passes through MPEG audio packets 
+This codec (selected by <option>-ac hwmpa</option>) passes through MPEG audio packets 
 to hardware decoders, such as the ones found in full-featured DVB cards 
 and DXR2 adapters.
 Don't use it in combination with any other audio output device
