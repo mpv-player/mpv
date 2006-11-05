@@ -85,7 +85,7 @@ and help us add support for it.
 <systemitem class="library">libavcodec</systemitem>, the leading
 open source video and audio codec library. It is capable
 of decoding most multimedia formats, usually at higher speeds
-than the alternatives. and aims to add support for
+than the alternatives, and aims to add support for
 the rest of them eventually. It is the default decoder for
 the majority of codecs that <application>MPlayer</application>
 supports. Encoding is also possible for some formats and
