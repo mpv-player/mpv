@@ -178,10 +178,10 @@ default as it offers better speed.
 
 
 <sect2 id="codec-x264">
-<title>x264</title>
+<title><systemitem class="library">x264</systemitem></title>
 
 <sect3 id="codec-x264-whatis">
-<title>What is x264?</title>
+<title>What is <systemitem class="library">x264</systemitem>?</title>
 <para>
   <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
   is a library for
@@ -426,18 +426,19 @@ MPEG decoder cards.
 
 
 <sect2 id="libmad">
-<title>libmad support</title>
+<title><systemitem class="library">libmad</systemitem> support</title>
 
 <para>
-<ulink url="http://www.underbit.com/products/mad/">libmad</ulink> is a multiplatform,
-integer (internally 24bit PCM) only
+<ulink url="http://www.underbit.com/products/mad/"><systemitem class="library">libmad</systemitem></ulink>
+is a multiplatform, integer (internally 24bit PCM) only
 MPEG audio decoding library. It does not handle broken files well, and it
 sometimes has problems with seeking, but it may perform better on FPU-less
-(such as <link linkend="arm">ARM</link>) platform than mp3lib.
+(such as <link linkend="arm">ARM</link>) platform than <systemitem class="library">mp3lib</systemitem>.
 </para>
 
 <para>
-If you have a proper installation of libmad, <filename>configure</filename>
+If you have a proper installation of <systemitem class="library">libmad</systemitem>,
+<filename>configure</filename>
 will notice and support for MPEG audio decoding via
 <systemitem class="library">libmad</systemitem> will be built automatically.
 </para>
