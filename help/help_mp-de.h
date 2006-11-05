@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r20586
+// In sync with r20706
 
 // ========================= MPlayer help ===========================
 
@@ -1484,6 +1484,29 @@ static char help_text[]=
 // demux_demuxers.c
 
 #define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer-Fehler: schlechter Demuxer: weder vd noch ad oder sd.\n"
+
+// demux_mkv.c
+#define MSGTR_MPDEMUX_MKV_ZlibInitializationFailed "[mkv] Initialisierung von zlib fehlgeschlagen.\n"
+#define MSGTR_MPDEMUX_MKV_ZlibDecompressionFailed "[mkv] Dekomprimierung mit zlib fehlgeschlagen.\n"
+#define MSGTR_MPDEMUX_MKV_LzoInitializationFailed "[mkv] Initialisierung von lzo fehlgeschlagen..\n"
+#define MSGTR_MPDEMUX_MKV_LzoDecompressionFailed "[mkv] Dekomprimierung mit lzo fehlgeschlagen.\n"
+#define MSGTR_MPDEMUX_MKV_TrackEncrypted "[mkv] Track Nummer %u wurde verschlüsselt, und Entschlüsselung wurde noch\n[mkv] nicht implementiert. Überspringe Track.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownContentEncoding "[mkv] Unbekannter Encoding-Typ des Inhalts von Track %u. Überspringe Track.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownCompression "[mkv] Track %u wurde mit einem unbekannten oder nicht unterstützten\n[mkv] Kompressionsalgorithmus (%u) komprimiert. Überspringe Track.\n"
+#define MSGTR_MPDEMUX_MKV_ZlibCompressionUnsupported "[mkv] Track %u wurde mit zlib komprimiert, mplayer wurde jedoch ohne\n[mkv] Unterstützung für Komprimierung mit zlib compiliert. Überspringe Track.\n"
+#define MSGTR_MPDEMUX_MKV_TrackIDName "[mkv] Track-ID %u: %s (%s) \"%s\", %s\n"
+#define MSGTR_MPDEMUX_MKV_TrackID "[mkv] Track-ID %u: %s (%s), %s\n"
+#define MSGTR_MPDEMUX_MKV_UnknownCodecID "[mkv] Unbekannte/nicht unterstützte CodecID (%s) oder fehlende/fehlerhafte\n[mkv] CodecPrivate-Daten (Track %u).\n"
+#define MSGTR_MPDEMUX_MKV_FlacTrackDoesNotContainValidHeaders "[mkv] FLAC-Track enthält keine gültigen Header.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownAudioCodec "[mkv]  Unbekannte/nicht unterstützte Audiocodec-ID ID '%s' für Track %u\n[mkv] oder fehlende/fehlerhafte private codec Daten.\n"
+#define MSGTR_MPDEMUX_MKV_SubtitleTypeNotSupported "[mkv] Untertitel-Typ '%s' wird nicht unterstützt.\n"
+#define MSGTR_MPDEMUX_MKV_WillPlayVideoTrack "[mkv] Werde Video-Track %u abspielen.\n"
+#define MSGTR_MPDEMUX_MKV_NoVideoTrackFound "[mkv] Kein Video-Track gefunden/gewünscht.\n"
+#define MSGTR_MPDEMUX_MKV_NoAudioTrackFound "[mkv] Kein Audio-Track gefunden/gewünscht.\n"
+#define MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack "[mkv] Werde Untertitel-Track %u anzeigen.\n"
+#define MSGTR_MPDEMUX_MKV_NoBlockDurationForSubtitleTrackFound "[mkv] Warnung: BlockDuration für Untertitel-Track nicht gefunden.\n"
+#define MSGTR_MPDEMUX_MKV_TooManySublines "[mkv] Warnung: Zu viele anzuzeigende Sublines, überspringe.\n"
+#define MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst "\n[mkv] Warnung: Zu viele anzuzeigende Sublines, überspringe nach den ersten %i.\n"
 
 // demux_nuv.c
 
