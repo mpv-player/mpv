@@ -20,6 +20,9 @@
 #include "matroska.h"
 #include "bswap.h"
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 #include "subreader.h"
 #include "libvo/sub.h"
 
@@ -593,7 +596,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
           if (inflateInit (&zstream) != Z_OK)
             {
               mp_msg (MSGT_DEMUX, MSGL_WARN,
-                      "[mkv] zlib initialization failed.\n");
+                      MSGTR_MPDEMUX_MKV_ZlibInitializationFailed);
               return modified;
             }
           zstream.next_in = (Bytef *) src;
@@ -610,7 +613,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
             if (result != Z_OK && result != Z_STREAM_END)
               {
                 mp_msg (MSGT_DEMUX, MSGL_WARN,
-                        "[mkv] zlib decompression failed.\n");
+                        MSGTR_MPDEMUX_MKV_ZlibDecompressionFailed);
                 free(*dest);
                 *dest = NULL;
                 inflateEnd (&zstream);
@@ -632,7 +635,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
           if (lzo_init () != LZO_E_OK)
             {
               mp_msg (MSGT_DEMUX, MSGL_WARN,
-                      "[mkv] lzo initialization failed.\n");
+                      MSGTR_MPDEMUX_MKV_LzoInitializationFailed);
               return modified;
             }
 
@@ -646,7 +649,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
               if (result != LZO_E_OUTPUT_OVERRUN)
                 {
                   mp_msg (MSGT_DEMUX, MSGL_WARN,
-                          "[mkv] lzo decompression failed.\n");
+                          MSGTR_MPDEMUX_MKV_LzoDecompressionFailed);
                   return modified;
                 }
               mp_msg (MSGT_DEMUX, MSGL_DBG2,
@@ -818,32 +821,25 @@ demux_mkv_read_trackencodings (demuxer_t *demuxer, mkv_track_t *track)
                       if (e.type == 1)
                         {
                           mp_msg(MSGT_DEMUX, MSGL_WARN,
-                                 "[mkv] Track number %u has been encrypted "
-                                 "and decryption has not yet been implemented."
-                                 " Skipping track.\n", track->tnum);
+                                 MSGTR_MPDEMUX_MKV_TrackEncrypted, track->tnum);
                         }
                       else if (e.type != 0)
                         {
                           mp_msg(MSGT_DEMUX, MSGL_WARN,
-                                 "[mkv] Unknown content encoding type for "
-                                 "track %u. Skipping track.\n", track->tnum);
+                                 MSGTR_MPDEMUX_MKV_UnknownContentEncoding, track->tnum);
                         }
 
                       if (e.comp_algo != 0 && e.comp_algo != 2)
                         {
                           mp_msg (MSGT_DEMUX, MSGL_WARN,
-                                  "[mkv] Track %u has been compressed with an "
-                                  "unknown/unsupported compression algorithm "
-                                  "(%u). Skipping track.\n",
+                                  MSGTR_MPDEMUX_MKV_UnknownCompression,
                                   track->tnum, e.comp_algo);
                         }
 #ifndef HAVE_ZLIB
                       else if (e.comp_algo == 0)
                         {
                           mp_msg (MSGT_DEMUX, MSGL_WARN,
-                                  "Track %u was compressed with zlib but "
-                                  "mplayer has not been compiled with support "
-                                  "for zlib compression. Skipping track.\n",
+                                  MSGTR_MPDEMUX_MKV_ZlibCompressionUnsupported,
                                   track->tnum);
                         }
 #endif
@@ -1799,10 +1795,10 @@ display_create_tracks (demuxer_t *demuxer)
           break;
         }
       if (mkv_d->tracks[i]->name)
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: %s (%s) \"%s\", %s\n",
+        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_TrackIDName,
              mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id, mkv_d->tracks[i]->name, str);
       else
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: %s (%s), %s\n",
+        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_TrackID,
              mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id, str);
     }
 }
@@ -1953,8 +1949,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
         }
       else
         {
-          mp_msg (MSGT_DEMUX,MSGL_WARN,"[mkv] Unknown/unsupported CodecID "
-                  "(%s) or missing/bad CodecPrivate data (track %u).\n",
+          mp_msg (MSGT_DEMUX,MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownCodecID,
                   track->codec_id, track->tnum);
           free(bih);
           return 1;
@@ -2062,8 +2057,8 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
         {
           if (track->private_data == NULL || track->private_size == 0)
             {
-              mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] FLAC track does not "
-                      "contain valid headers.\n");
+              mp_msg (MSGT_DEMUX, MSGL_WARN,
+                      MSGTR_MPDEMUX_MKV_FlacTrackDoesNotContainValidHeaders);
               return 1;
             }
           track->a_formattag = mmioFOURCC ('f', 'L', 'a', 'C');
@@ -2083,9 +2078,8 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
         }
       else
         {
-          mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported audio "
-                  "codec ID '%s' for track %u or missing/faulty private "
-                  "codec data.\n", track->codec_id, track->tnum);
+          mp_msg (MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownAudioCodec,
+                  track->codec_id, track->tnum);
           free_sh_audio(demuxer, track->tnum);
           return 1;
         }
@@ -2422,8 +2416,8 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
     }
   else
     {
-      mp_msg (MSGT_DEMUX, MSGL_ERR, "[mkv] Subtitle type '%s' is not "
-              "supported.\n", track->codec_id);
+      mp_msg (MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_MKV_SubtitleTypeNotSupported,
+              track->codec_id);
       return 1;
     }
 
@@ -2595,13 +2589,13 @@ demux_mkv_open (demuxer_t *demuxer)
   if (track && demuxer->v_streams[track->tnum])
               {
                 mp_msg (MSGT_DEMUX, MSGL_INFO,
-                        "[mkv] Will play video track %u\n", track->tnum);
+                        MSGTR_MPDEMUX_MKV_WillPlayVideoTrack, track->tnum);
                 demuxer->video->id = track->tnum;
                 demuxer->video->sh = demuxer->v_streams[track->tnum];
               }
   else
     {
-      mp_msg (MSGT_DEMUX, MSGL_INFO, "[mkv] No video track found/wanted.\n");
+      mp_msg (MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_NoVideoTrackFound);
       demuxer->video->id = -2;
     }
 
@@ -2639,7 +2633,7 @@ demux_mkv_open (demuxer_t *demuxer)
                                          MATROSKA_TRACK_AUDIO);
   else
     {
-      mp_msg (MSGT_DEMUX, MSGL_INFO, "[mkv] No audio track found/wanted.\n");
+      mp_msg (MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_NoAudioTrackFound);
       demuxer->audio->id = -2;
     }
 
@@ -2680,7 +2674,7 @@ demux_mkv_open (demuxer_t *demuxer)
   if (track && !demux_mkv_open_sub (demuxer, track))
           {
             mp_msg (MSGT_DEMUX, MSGL_INFO,
-                    "[mkv] Will display subtitle track %u\n", track->tnum);
+                    MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack, track->tnum);
 	    dvdsub_id = demux_mkv_reverse_id(mkv_d, track->tnum, MATROSKA_TRACK_SUBTITLE);
             demuxer->sub->id = track->tnum;
           }
@@ -2868,8 +2862,8 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
 
   if (block_duration == 0)
     {
-      mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Warning: No BlockDuration "
-              "for subtitle track found.\n");
+      mp_msg (MSGT_DEMUX, MSGL_WARN,
+              MSGTR_MPDEMUX_MKV_NoBlockDurationForSubtitleTrackFound);
       return;
     }
 
@@ -2893,8 +2887,8 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
 
   if (mkv_d->subs.lines > SUB_MAX_TEXT - 2)
     {
-      mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Warning: too many sublines "
-              "to render, skipping\n");
+      mp_msg (MSGT_DEMUX, MSGL_WARN,
+              MSGTR_MPDEMUX_MKV_TooManySublines);
       return;
     }
   ptr2 = mkv_d->subs.text[mkv_d->subs.lines];
@@ -2933,8 +2927,8 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
               *ptr2 = '\0';
               if (mkv_d->subs.lines >= SUB_MAX_TEXT)
                 {
-                  mp_msg (MSGT_DEMUX, MSGL_WARN, "\n[mkv] Warning: too many "
-                          "sublines to render, skipping after first %i\n",
+                  mp_msg (MSGT_DEMUX, MSGL_WARN,
+                          MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst,
                           SUB_MAX_TEXT);
                   mkv_d->subs.lines--;
                   ptr1=block+size;
@@ -2962,8 +2956,8 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
                     = timecode + block_duration;
                   if (mkv_d->subs.lines >= SUB_MAX_TEXT)
                     {
-                      mp_msg (MSGT_DEMUX, MSGL_WARN, "\n[mkv] Warning: too many "
-                              "sublines to render, skipping after first %i\n",
+                      mp_msg (MSGT_DEMUX, MSGL_WARN,
+                              MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst,
                               SUB_MAX_TEXT);
                       mkv_d->subs.lines--;
                       ptr1=block+size;
