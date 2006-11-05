@@ -2590,7 +2590,7 @@ _mp_help="help/help_mp-${_language}.h"
 test -f $_mp_help || die "$_mp_help not found"
 for lang in $LANGUAGES ; do
   if test -f "DOCS/man/$lang/mplayer.1" ; then
-    MAN_LANG="$MAN_LANG $lang"
+    MAN_LANG="$lang $MAN_LANG"
   fi
 done
 _doc_lang=$_language
