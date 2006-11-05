@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r20682 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -84,8 +84,7 @@
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> содержит
 <systemitem class="library">libavcodec</systemitem> - ведущую библиотеку аудио
 и видео кодеков с открытым исходным кодом. Она способна декодировать 
-большинство мультимедиа форматов, обычно быстрее альтернатив, and aim support for the rest
-of them eventually. Это декодер по-умолчанию для большинства кодеков, поддерживаемых 
+большинство мультимедиа форматов, обычно быстрее альтернатив, и приодически добавляется поддержка оставшихся. Это декодер по-умолчанию для большинства кодеков, поддерживаемых 
 <application>MPlayer</application>. Кодирование также возможно для некоторых форматов и
 поддерживается в <application>Mencoder</application>.
 </para>
