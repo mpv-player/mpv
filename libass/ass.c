@@ -996,7 +996,6 @@ ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage)
 	char* buf;
 	ass_track_t* track;
 	size_t bufsize;
-	int i;
 	
 	buf = read_file(fname, &bufsize);
 	if (!buf)
@@ -1037,7 +1036,7 @@ int ass_read_styles(ass_track_t* track, char* fname, char* codepage)
 		return 1;
 #ifdef USE_ICONV
 	if (codepage) {
-		unsigned char* tmpbuf;
+		char* tmpbuf;
 		tmpbuf = sub_recode(buf, sz, codepage);
 		free(buf);
 		buf = tmpbuf;
