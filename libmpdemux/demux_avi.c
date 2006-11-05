@@ -54,7 +54,7 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
 	    // workaround old mencoder's bug:
 	    if(sh->audio.dwSampleSize==1 && sh->audio.dwScale==1 &&
 	       (sh->wf->nBlockAlign==1152 || sh->wf->nBlockAlign==576)){
-		mp_msg(MSGT_DEMUX,MSGL_WARN,"AVI: Workarounding CBR-MP3 nBlockAlign header bug!\n");
+		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_WorkaroundingnBlockAlignHeaderBug);
 		priv->audio_block_size=1;
 	    }
 	  }
@@ -410,11 +410,11 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
   read_avi_header(demuxer,(demuxer->stream->flags & STREAM_SEEK_BW)?index_mode:-2);
   
   if(demuxer->audio->id>=0 && !demuxer->a_streams[demuxer->audio->id]){
-      mp_msg(MSGT_DEMUX,MSGL_WARN,"AVI: invalid audio stream ID: %d - ignoring (nosound)\n",demuxer->audio->id);
+      mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_InvalidAudioStreamNosound,demuxer->audio->id);
       demuxer->audio->id=-2; // disabled
   }
   if(demuxer->video->id>=0 && !demuxer->v_streams[demuxer->video->id]){
-      mp_msg(MSGT_DEMUX,MSGL_WARN,"AVI: invalid video stream ID: %d - ignoring (using default)\n",demuxer->video->id);
+      mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_InvalidAudioStreamUsingDefault,demuxer->video->id);
       demuxer->video->id=-1; // autodetect
   }
   
@@ -789,7 +789,7 @@ static int avi_check_file(demuxer_t *demuxer)
     if(id==formtypeAVI)
       return DEMUXER_TYPE_AVI;
     if(id==mmioFOURCC('O','N','2','f')){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"ON2 AVI format");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_ON2AviFormat);
       return DEMUXER_TYPE_AVI;
     }
   }

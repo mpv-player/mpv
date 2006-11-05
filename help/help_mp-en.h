@@ -566,7 +566,11 @@ static char help_text[]=
 #define MSGTR_TooManyVideoInBuffer "\nToo many video packets in the buffer: (%d in %d bytes).\n"
 #define MSGTR_MaybeNI "Maybe you are playing a non-interleaved stream/file or the codec failed?\n" \
 		      "For AVI files, try to force non-interleaved mode with the -ni option.\n"
+#define MSGTR_WorkaroundingnBlockAlignHeaderBug "AVI: Workarounding CBR-MP3 nBlockAlign header bug!\n"
 #define MSGTR_SwitchToNi "\nBadly interleaved AVI file detected - switching to -ni mode...\n"
+#define MSGTR_InvalidAudioStreamNosound "AVI: invalid audio stream ID: %d - ignoring (nosound)\n"
+#define MSGTR_InvalidAudioStreamUsingDefault "AVI: invalid video stream ID: %d - ignoring (using default)\n"
+#define MSGTR_ON2AviFormat "ON2 AVI format"
 #define MSGTR_Detected_XXX_FileFormat "%s file format detected.\n"
 #define MSGTR_DetectedAudiofile "Audio file detected.\n"
 #define MSGTR_NotSystemStream "Not MPEG System Stream format... (maybe Transport Stream?)\n"
