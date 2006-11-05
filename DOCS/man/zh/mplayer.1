@@ -1,8 +1,8 @@
-.\" Partial sync with en/mplayer.1 r20535
-.\" up to line 2772 (.SH "VIDEO OUTPUT DRIVERS ...)
-.\" and bottom sections ("... VARIABLES" "FILES" ""EXAMPLES ..." "BUGS ...").
+.\" Partial sync with en/mplayer.1 r20684
+.\" Only mid part unfinished (3 filters' sections and 2 mencoder's sections),
+.\"   also see line 3633.
 .\" Reminder of hard terms which need better/final solution later: 
-.\"   /capture; palytree in parent list; colorkey; 
+.\"   /capture; palytree in parent list; colorkey; retrace; desync; downmix;
 .\"   wrapper script ... shellescapes; keyframe;
 .\"   encoding audio rate; \&; alphamap; 
 .\"   aligned buffers; instancenumber; 
@@ -708,9 +708,11 @@ xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 .
 .TP
 .B \-correct-pts (试验)
-切换 mplayer 到试验模式。
-视频过滤器决定视频帧的演示时戳而不是视频源。
-大多数过滤器还不支持。
+切换 MPlayer 到试验模式, 
+其中视频帧的时戳计算不同, 且支持视频过滤器添加新的帧或修改已有的时戳。
+可以看到更精确的时戳, 例如通过 \-ass 选项修改播放字幕与镜头同步。
+没有 \-correct-pts, 字幕同步典型地会被某些帧关闭。
+此选项不能与某些分路器和编解码器一起正常工作。
 .
 .TP
 .B \-crash-debug (调试代码)
@@ -1873,7 +1875,7 @@ MPlayer 运行在 verbose (\-v) 模式时, 打印可用的字幕标识。
 .B \-slang <语言代号[,语言代号,...]> (也请参见 \-sid)
 指定使用字幕语言的优先级列表。
 不同的容器格式使用不同的语言代号。DVDs 使用 ISO 639-1 的
-两字符语言代号, Matroska 使用 uses ISO 639-2 的
+两字符语言代号, Matroska 使用 ISO 639-2 的
 三字符语言代号, 而 OGM 使用自由格式标识符。
 MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 .sp 1
@@ -2276,6 +2278,10 @@ OSS 音频输出驱动
 原生 Mac OS X 音频输出驱动
 .
 .TP
+.B openal
+试验性的, 未完成的 (会低端混音成单声道) OpenAL 音频输出驱动
+.
+.TP
 .B sgi (仅用于 SGI)
 原生 SGI 音频输出驱动
 .PD 0
@@ -2559,7 +2565,8 @@ VESA 帧缓冲不支持改变模式。
 x 和 y 代表从屏幕左上角到显示图像左上角的距离(以像素为单位)。
 不过如果在参数值后有百分号记号, 参数值就变为该方向上的屏幕尺寸的百分数。
 它也支持标准 X11 的 \-geometry 选项格式。
-如果使用 \-wid 选项指定了外部窗口, 那么 x 和 y 坐标是相对于窗口而不是屏幕的左上角。
+如果使用 \-wid 选项指定了外部窗口, 
+那么 x 和 y 坐标是相对于窗口而不是屏幕的左上角。
 .br
 .I 注意:
 此选项仅被 x11, xmga, xv, xvmc, xvidix, 
@@ -2776,85 +2783,862 @@ ggi 和 gl2 的都支持此功能。
 语法是:
 .
 .TP
-.\" The below is only synced with r9821 (except sections from "... VARIABLES" to bottom)
-.B \-vo <驱动1[:设备],驱动2,...[,]>
-设置可用的视频输出驱动的优先级列表(可以加上设备).
-\'设备'也用于SDL和GGI, 那里它表示子驱动
-.
+.B \-vo <驱动1[:子选项1[=参数值]:...],驱动2,...[,]>
+指定使用视频输出驱动的优先级列表。
+.PP
+如果列表尾有',' MPlayer 使用没有列出的驱动作为后备。
+子选项是可选的, 大多数省略。
+.br
 .I 注意:
-.br
-要获得完整的可用驱动列表, 参考\-vo help.
-.br
-如果列表结尾有一个',' 它将可以使用没有列出的驱动作为后备
-.
+已编译进的视频输出驱动参见于 \-vo help 的列表。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
 .IPs "\-vo xmga,xv,"
-先尝试Matrox内核驱动, 然后Xv驱动, 然后其它
+尝试使用 Matrox X11 驱动, 然后是 Xv 驱动, 再后是其他的。
+.IPs "\-vo directx:noaccel"
+使用加速特性关闭的 DirectX 驱动。
+.RE
+.PD 1
+.sp 1
+可用的视频输出驱动有:
+.
+.TP
+.B xv (仅用于 X11)
+使用 XFree86 4.x 的 XVideo 扩展来启用硬件加速回放。
+如果你不能使用硬件指定的驱动, 这或许是最好的选项。
+有关用了什么 colorkey 以及如何绘制的信息, 请运行 MPlayer
+的 \-v 选项并注意开头有标签 [xv common] 的行。
+.PD 0
+.RSs
+.IPs port=<数值>
+选择指定的 XVideo 端口。
+.IPs ck=<cur|use|set>
+选择用了 colorkey 的源 (默认值是: cur)。
+.RSss
+.IPs cur
+默认采用 Xv 中目前设置的 colorkey。
+.IPs use
+使用但不从 MPlayer (用 \-colorkey 选项来修改)来设置 colorkey。
+.IPs set
+同 use 一样但设置已提供的 colorkey。
+.RE
+.IPs ck-method=<man|bg|auto>
+设置 colorkey 绘制方法 (默认值是: man)。
+.RSss
+.IPs man
+手动绘制 colorkey (减少某些情况下的闪烁)。
+.IPs bg
+设置 colorkey 作为窗口背景。
+.IPs auto
+让 Xv 绘制 colorkey。
+.RE
+.RE
+.PD 1
+.
+.TP
+.B x11 (仅用于 X11)
+每当 X11 出场时, 共享内存的视频输出驱动虽没有硬件加速也能工作。
+.
+.TP
+.B xover (仅用于 X11)
+添加 X11 支持所有基于视频输出驱动的重叠。
+目前仅被 tdfx_vid 支持。
+.PD 0
+.RSs
+.IPs <vo_驱动>
+选择此驱动作为源使用重叠在 X11 上面。
+.RE
+.PD 1
+.
+.TP
+.B xvmc (仅用于 X11 的 \-vc ffmpeg12mc)
+视频输出驱动使用 XFree86 4.x 的 XvMC(X 视频运动补偿) 扩展
+以加速 MPEG-1/2 和 VCR2 的解码。
+.PD 0
+.RSs
+.IPs port=<数值>
+选择指定的 XVideo 端口。
+.IPs (no)benchmark
+停用图像显示。
+对于适当的驱动基准测试是必要的, 因为只会改变监视器 retrace 的图像缓冲 (nVidia)。
+默认是不停用图像显示 (nobenchmark)。
+.IPs (no)bobdeint
+非常简单的去交错。
+可能没有 \-vf tfields=1 好, 但是是 xvmc 仅有的去交错 (默认值是: nobobdeint)。
+.IPs (no)queue
+显示帧排队, 以允许视频硬件更多的并行工作。
+可能增加微小的 (不令人注意的) 常量去 A/V 同步(desync) (默认值是: noqueue)。
+.IPs (no)sleep
+当等待完成渲染时, 使用睡眠功能(不推荐 Linux 使用) (默认值是: nosleep)。
+.IPs ck=cur|use|set
+同 \-vo xv:ck 一样 (参见 \-vo xv)。
+.IPs ck-method=man|bg|auto
+同 \-vo xv:ck-method 一样 (参见 \-vo xv)。
+.RE
+.PD 1
+.
+.TP
+.B dga (仅用于 X11)
+通过 XFree86 Direct Graphics Access 扩展播放视频。
+考虑废弃。
+.
+.TP
+.B sdl (仅用于 SDL)
+高级平台独立的 SDL(简单 Directmedia 层) 库视频输出驱动。
+既然 SDL 使用自己的 X11 层, MPlayer X11 选项对 SDL 没有影响。
+.PD 0
+.RSs
+.IPs driver=<驱动>
+显式选择 SDL 驱动。
+.IPs (no)forcexv
+通过 sdl 视频输出驱动使用 XVideo (默认值是: forcexv)。
+.IPs (no)hwaccel
+使用硬件加速的缩放 (默认值是: hwaccel)。
+.RE
+.PD 1
+.
+.TP
+.B "vidix\ \ "
+VIDIX (VIDeo Interface for *niX) 是不同显卡的视频加速特性的接口。
+非常快速的卡视频输出驱动支持它。
+.PD 0
+.RSs
+.IPs <子设备>
+显式选择 VIDIX 子设备驱动。
+可用的子设备有 cyberblade_vid.so, mach64_vid.so,
+mga_crtc2_vid.so, mga_vid.so, nvidia_vid.so, pm3_vid.so,
+radeon_vid.so, rage128_vid.so, sis_vid.so 和 unichrome_vid.so。
+.RE
+.PD 1
+.
+.TP
+.B xvidix (仅用于 X11 )
+VIDIX 的 X11 前台
+.PD 0
+.RSs
+.IPs <子设备>
+同 vidix 一样
+.RE
+.PD 1
+.
+.TP
+.B "cvidix\ "
+通用的平台独立的 VIDIX 前台, 甚至能用 nVidia 卡运行在文本控制台。
+.PD 0
+.RSs
+.IPs <子设备>
+同 vidix 一样
+.RE
+.PD 1
+.
+.TP
+.B winvidix (仅用于 Windows)
+VIDIX 的 Windows 前台
+.PD 0
+.RSs
+.IPs <子设备>
+同 vidix 一样
+.RE
+.PD 1
+.
+.TP
+.B directx (仅用于 Windows)
+使用 DirectX 接口的视频输出驱动。
+.PD 0
+.RSs
+.IPs noaccel
+关闭硬件加速。
+如果显示有问题, 尝试此选项。
+.RE
+.PD 1
+.
+.TP
+.B quartz (仅用于 Mac OS X)
+Mac OS X Quartz 视频输出驱动。
+在某些情况下, 锁定打包 YUV 输出格式如 \& \-vf format=yuy2 可能更有效。
+.PD 0
+.RSs
+.IPs device_id=<数值>
+选择全屏显示设备。
+.IPs fs_res=<宽>:<高>
+指定全屏解析度 (对慢系统有用)。
+.RE
+.PD 1
+.
+.TP
+.B macosx (Mac OS X 10.4 或 10.3.9 的 QuickTime 7)
+Mac OS X CoreVideo 视频输出驱动
+.PD 0
+.RSs
+.IPs device_id=<数值>
+选择全屏显示设备。
+.RE
+.PD 1
+.
+.TP
+.B fbdev (仅用于 Linux)
+使用内核帧缓冲播放视频。
+.PD 0
+.RSs
+.IPs <设备>
+显式选择 fbdev 设备名 (如 /dev/\:fb0), 或者如果设备名以 'vidix' 开始
+选择 VIDIX 子设备名 (如 sis 驱动的 'vidixsis_vid')。
+.RE
+.PD 1
+.
+.TP
+.B fbdev2 (仅用于 Linux)
+使用内核帧缓冲播放视频, 另一种实现。
+.PD 0
+.RSs
+.IPs <设备>
+显式选择 fbdev 设备名 (默认值是: /dev/\:fb0)。
+.RE
+.PD 1
+.
+.TP
+.B "vesa\ \ \ "
+非常通用的视频输出驱动, 应该能用于任何的 VESA VBE 2.0 兼容卡。
+.PD 0
+.RSs
+.IPs "dga\ \ "
+打开 DGA 模式。
+.IPs nodga
+关闭 DGA 模式。
+.IPs neotv_pal
+激活 NeoMagic 电视输出并设置成 PAL 制式。
+.IPs neotv_ntsc
+激活 NeoMagic 电视输出并设置成 NTSC 制式。
+.IPs vidix
+使用 VIDIX 驱动
+.IPs "lvo:\ \ \ "
+激活 Linux 视频重叠在 VESA 模式上面。
+.RE
+.PD 1
+.
+.TP
+.B "svga\ \ \ "
+使用 SVGA 库播放视频。
+.PD 0
+.RSs
+.IPs "<视频模式>"
+指定使用的视频模式。
+此模式以 <宽>x<高>x<颜色> 格式给出, 如 640x480x16M 或图形模式数字, 如 84。
+.IPs bbosd
+绘制 OSD 到(较慢)影片下方的黑条。
+.IPs native
+只使用原生的绘制功能。
+避免直接渲染, OSD 和硬件加速。
+.IPs retrace
+强制帧打开垂直 retrace。
+只与 \-double 合用有用。
+同 \-vsync 选项的效果一样。
+.IPs "sq\ \ \ "
+尝试选择方像素视频模式。
+.IPs vidix
+使用 VIDIX 的 svga。
+.RE
+.PD 1
+.
+.TP
+.B "gl\ \ \ \ \ "
+OpenGL 视频输出驱动, 简版。
+视频尺寸一定小于 OpenGL 实现的最大纹理尺寸。
+瞄准能与甚至最基本的 OpenGL 实现一起工作, 
+但也利用较新的扩展, 允许支持更多的色彩空间和直接渲染。
+既然能对高清晰度提供
+.B 大
+的提速, 请使用 \-dr 如果你的 OpenGL 实现能一同工作。
+此代码执行极少的检测, 所以如果某个特性不工作, 
+可能是因为你的卡或 OpenGL 实现不支持, 尽管连任何错误消息都没给你。
+使用 glxinfo 或类似的工具以显示支持的 OpenGL 扩展。
+.PD 0
+.RSs
+.IPs (no)manyfmts
+启用支持更多的 (RGB 和 BGR) 颜色格式 (默认是: 启用)。
+需要 OpenGL 的版本 >= 1.2。
+.IPs slice-height=<0\-...>
+完整拷贝到纹理的行数 (默认值是: 4).
+0 表示整个图像。
 .br
-.IPs "\-vo sdl:aalib"
-设置SDL子驱动
+.I 注意:
+如果使用了 YUV 色彩空间 (参见 yuv 子选项), 有如下特别的规则:
+.RSss
+如果解码器使用了片断渲染 (参见 \-noslices), 此设置没效果, 
+使用解码器提供的片断大小。
+.br
+如果解码器没使用片断渲染, 默认值是 16。
+.RE
+.IPs (no)osd
+启用或停用通过 OpenGL 支持的 OSD 渲染 (默认是: 启用)。
+此选项供测试; 停用 OSD 用 \-osdlevel 0。
+.IPs (no)scaled-osd
+当窗口大小改变时, 改变 OSD 的行为方式 (默认是: 停用)。
+启用时, 行为就像其他的视频输出驱动, 对固定大小的字体更好。
+停用时似乎对 FreeType 更有利并使用全屏模式的边框。
+不能与 ass 字幕 (参见 \-ass)一起工作。
+.IPs osdcolor=<0xRRGGBB>
+OSD 颜色 (默认值是: 0xffffff, 对应白色)。
+.IPs (no)aspect
+启用或停用支持宽高比缩放和 pan-and-scan (默认是: 启用)。
+停用可能会提高速度。
+.IPs rectangle=<0,1,2>
+选择矩形纹理保存视频内存的方法, 但常常会更慢 (默认值是: 0)。
+.RSss
+0: 使用 power-of-two 纹理 (默认)。
+.br
+1: 使用 GL_ARB_texture_rectangle 扩展。
+.br
+2: 使用 GL_ARB_texture_non_power_of_two 扩展。
+在某些情况下仅软件支持所以非常慢。
+.RE
+.IPs (no)glfinish
+交换缓冲前调用 glFinish()。
+更慢但在某些情况下有更加正确的输出 (默认是: 停用)。
+.IPs swapinterval=<n>
+两缓冲交换的最小间隔, 对已显示的帧计时 (默认值是: 1)。
+1 等价于启用 VSYNC, 0 等价于停用 VSYNC。
+系统对小于 0 的值忽略保持自己的默认值。
+此限制帧率到 (水平刷新率 / n)。
+需要 GLX_SGI_swap_control 的支持。
+某些(大多数/所有?)实现仅工作于全屏模式。
+.IPs yuv=<n>
+选择 YUV 到 RGB 转换的类型。
+.RSss
+0: 使用软件转换 (默认)。
+兼容于所有的 OpenGL 版本。
+提供亮度, 对比度和饱和度控制。
+.br
+1: 使用寄存器组合。
+这里使用 nVidia 专用的扩展 (GL_NV_register_combiners)。
+至少需要三个纹理单位。提供饱和度和色调的控制。
+此方法快速但不精确。
+.br
+2: 使用片断程序。
+需要 GL_ARB_fragment_program 扩展和至少三个纹理单位。
+提供亮度, 对比度, 饱和度和色调控制。
+.br
+3: 使用片断程序, 用到 POW 指令。
+需要 GL_ARB_fragment_program 扩展和至少三个纹理单位。
+提供亮度, 对比度, 饱和度, 色调和 gamma 控制。
+对红, 绿和蓝色, Gamma 也能被独立设置。
+方法 4 通常更快。
+.br
+4: 使用片断程序及附加的查询。
+需要 GL_ARB_fragment_program 扩展和至少四个纹理单位。
+提供亮度, 对比度, 饱和度, 色调和 gamma 控制。
+对红, 绿和蓝色, Gamma 也能被独立设置。
+.br
+5: 使用 ATI-specific method (供较旧的卡)。
+这里使用 ATI 专用的扩展 (GL_ATI_fragment_shader - 不是 
+GL_ARB_fragment_shader!)。至少需要三个纹理单位。提供饱和度和色调的控制。
+此方法快速但不精确。
+.br
+6: 使用 3D 纹理通过查询做转换。
+需要 GL_ARB_fragment_program 扩展和至少四个纹理单位。
+既然使用一个纹理和边框像素, 在某些(所有?) ATI 卡上 (软件模拟) 极其慢。
+提供亮度, 对比度, 饱和度, 色调和 gamma 控制。
+对红, 绿和蓝色, Gamma 也能被独立设置。
+速度比其他方法更多地依赖于 GPU 内存带宽。
+.RE
+.IPs lscale=<n>
+选择缩放功能供调节发光性。
+仅对 yuv 模式 2, 3, 4 和 6 有效。
+.RSss
+0: 使用简单线性过滤 (默认)。
+.br
+1: 使用双立体过滤 (较好的质量)。
+需要一个额外的纹理单位。
+至少在全屏模式, 较旧的卡不能处理色度。
+.RE
+.IPs cscale=<n>
+选择缩放功能供调节色度.
+详情参见 lscale。
+.IPs customprog=<文件名>
+从 <文件名> 装载定制的片断程序。
+示例参见 TOOLS/edgedect.fp。
+.IPs customtex=<文件名>
+从 <文件名> 装载定制的 "gamma ramp" 纹理。
+能用于与 yuv=4 或 customprog 选项的组合。
+.IPs (no)customtlin
+如果启用(默认), 使用 GL_LINEAR 插值, 否则使用 GL_NEAREST 用于 customtex 纹理。
+.IPs (no)customtrect
+如果启用, 使用 texture_rectangle 用于 customtex 纹理。默认是停用。
+.REss
+.RE
+.PD 1
+.
+.TP
+.B "gl2\ \ \ \ "
+OpenGL 视频输出驱动, 第二代。
+支持 OSD 和大于最大纹理尺寸的视频。
+.PD 0
+.RSs
+.IPs (no)glfinish
+同 gl 一样 (默认是: 启用)
+.IPs yuv=<n>
+选择 YUV 到 RGB 转换的类型。
+如果设置不同于 0 的其它值 OSD 被停用, 而亮度, 对比度和 
+gamma 的设置只能是通过全局的 X 服务器的设置才有效。
+其它的值的意思同 \-vo gl 一样。
+.REss
+.
+.TP
+.B "null\ \ \ "
+不产生视频输出。
+对基准测试有用。
+.
+.TP
+.B "aa\ \ \ \ \ "
+ASCII art 视频输出驱动工作于文字控制台。
+执行 
+.I mplayer \-vo aa:help
+, 你能得到可用子选项的列表和解释。
+.
+.TP
+.B "caca\ \ \ "
+彩色 ASCII art 视频输出驱动工作于文字控制台。
+.
+.TP
+.B "bl\ \ \ \ \ "
+使用 Blinkenlights UDP 协议回放视频。
+此驱动高度特定于硬件。
+.PD 0
+.RSs
+.IPs <子设备>
+显式选择 Blinkenlights 子设备。
+这多少有点像 arcade:host=localhost:2323 或 hdl:file=文件名1,file=文件名2。
+你必须指定一个子设备。
+.RE
+.PD 1
+.
+.TP
+.B "ggi\ \ \ \ "
+GGI 图形系统视频输出驱动
+.PD 0
+.RSs
+.IPs <驱动>
+显式选择 GGI 驱动。
+替换任何的 ',' 为 '.'.
+.RE
+.PD 1
+.
+.TP
+.B directfb
+使用 DirectFB 库播放视频 。
+.PD 0
+.RSs
+.IPs (no)input
+使用 DirectFB 替代 MPlayer 键盘码 (默认是: 启用)。
+.IPs buffermode=single|double|triple
+如果想避免撕裂问题, 双倍和三倍缓冲是最好的结果。
+三倍缓冲比双倍缓冲更有效, 因为它等待垂直 retrace 时不限制 MPlayer。
+单一缓冲应避免 (默认是: 单一)。
+.IPs fieldparity=top|bottom
+为交错帧控制输出次序 (默认是: 停用)。
+有效值 top = 先顶域, bottom = 先底域。
+此选项对逐行(像大多数 MPEG)影片不影响。
+如果观看交错影片时遇到撕裂问题或动作不顺昌, 需启用此选项。
+.IPs layer=N
+锁定回放的层标识 N (默认值是: -1 - 自动)。
+.IPs dfbopts=<list>
+指定 DirectFB 参数列表。
+.RE
+.PD 1
+.
+.TP
+.B "dfbmga\ "
+Matrox G400/\:G450/\:G550 专用的视频输出驱动
+使用 DirectFB 库以利用特别的硬件特性。
+启用 CRTC2 (第二头), 独立于第一头显示视频。
+.PD 0
+.RSs
+.IPs (no)input
+同 directfb 一样 (默认是: 停用)
+.IPs buffermode=single|double|triple
+同 directfb  一样(默认是: triple)
+.IPs fieldparity=top|bottom
+同 directfb 一样
+.IPs (no)bes
+启用 Matrox BES(后台缩放) (默认是: 停用)。
+因为图像插值过程在硬件里完成, 结果是非常好的速度和输出质量。但仅工作于主头。
+.IPs (no)spic
+利用 Matrox 子图像层显示 OSD (默认是: 启用)。
+.IPs (no)crtc2
+用第二头打开电视输出 (默认是: 启用)。
+输出质量出奇的好, 因为这是交错图像对每个奇/\:偶域有恰当的同步。
+.IPs tvnorm=pal|ntsc|auto
+设置 Matrox 卡的电视制式不需要改变 /etc/\:directfbrc (默认是: 停用)。
+有效的制式是 pal = PAL, ntsc = NTSC。
+特别的制式是 auto (auto-仅仅使用 PAL/\:NTSC), 
+因为是通过察看影片的帧率决定使用什么制式。
+.RE
+.PD 1
+.
+.TP
+.B mga (仅用于 Linux )
+Matrox 专用的视频输出驱动通过内核模式利用 Gxxx 卡的 YUV 后台缩放器。
+如果有 Matrox 卡, 这是最快的选项。
+.PD 0
+.RSs
+.IPs <设备名>
+显式选择 Matrox 设备名 (默认值是: /dev/\:mga_vid)。
+.RE
+.PD 1
+.
+.TP
+.B xmga (仅用于 Linux, X11)
+mga 视频输出驱动, 运行在 X11 窗口。
+.PD 0
+.RSs
+.IPs <设备名>
+显式选择 Matrox 设备名 (默认值是: /dev/\:mga_vid)。
+.RE
+.PD 1
+.
+.TP
+.B "syncfb\ "
+SyncFB 内核模式的视频输出驱动, 提供 Matrox Gxxx 卡特殊的硬件特性, 
+像硬件去交错, 缩放和同步视频输出到监视器的垂直 retrace。
+.
+.TP
+.B 3dfx (仅用于 Linux)
+3dfx 专用的视频输出驱动。
+此驱动在 X11 上面直接使用 3dfx 硬件。
+只支持 16 bpp。
+FIXME: 对于 3dfx, tdfxfb 和 tdfx_vid 之间的差别是否行?
+.
+.TP
+.B tdfxfb (仅用于 Linux)
+此驱动雇佣 tdfx 帧缓冲驱动使用 3dfx 卡的 YUV 加速播放影片。
+FIXME: 对于 3dfx, tdfxfb 和 tdfx_vid 之间的差别是否行?
+.PD 0
+.RSs
+.IPs <设备名>
+显式选择 fbdev 设备名 (默认值是: /dev/\:fb0)。
+.RE
+.PD 1
+.
+.TP
+.B tdfx_vid (仅用于 Linux)
+3dfx 专用的视频输出驱动。
+此驱动直接使用 tdfx_vid 内核模式。
+FIXME: 对于 3dfx, tdfxfb 和 tdfx_vid 之间的差别是否行?
+.PD 0
+.RSs
+.IPs <设备名>
+显式选择设备名 (默认值是: /dev/\:tdfx_vid)。
+.RE
+.PD 1
+.
+.TP
+.B dxr2 (也请参见 \-dxr2) (仅用于 DXR2)
+Creative DXR2 专用的视频输出驱动。
+.PD 0
+.RSs
+.IPs <vo_driver>
+输出视频子驱动用作重叠 (x11, xv)。
+.RE
+.PD 1
+.
+.TP
+.B dxr3 (仅用于 DXR3)
+Sigma Designs em8300 MPEG 解码器芯片 (Creative DXR3, Sigma Designs
+Hollywood Plus) 专用的视频输出驱动。
+也请参见 lavc 视频过滤器。
+.PD 0
+.RSs
+.IPs overlay
+激活重叠代替电视输出。
+.IPs prebuf
+打开预缓冲。
+.IPs "sync\ "
+将打开新的 sync-engine。
+.IPs norm=<制式>
+指定电视制式。
+.RSss
+0: 不改变目前制式 (默认)。
+.br
+1: 使用 PAL/\:NTSC 自动调节。
+.br
+2: 使用 PAL/\:PAL-60 自动调节。
+.br
+3: PAL
+.br
+4: PAL-60
+.br
+5: NTSC
+.REss
+.IPs <0\-3>
+如果有多于一个 em8300 卡, 指定设备号。
+.RE
+.PD 1
+.
+.TP
+.B ivtv (IVTV 仅适用于 )
+Conexant CX23415 (iCompression iTVC15) 或 Conexant CX23416 (iCompression
+iTVC16) MPEG 解码器芯片 (Hauppauge WinTV PVR-150/250/350/500)
+专用的视频输出驱动供电视输出。
+也请参见 lavc 视频过滤器。
+.PD 0
+.RSs
+.IPs device
+显式选择 MPEG 解码器设备名 (默认值是: /dev/video16)。
+.IPs output
+显式选择电视输出用于视频信号。
+.RE
+.PD 1
+.
+.TP
+.B mpegpes (仅用于 DVB)
+视频输出驱动用于 DVB 卡写输出到一个 MPEG-PES 文件, 如果没有安装 DVB 卡。
+.PD 0
+.RSs
+.IPs card=<1\-4>
+如果有多于一个 DVB 输出卡, 指定设备号 (仅适用于 V3 API, 比如 1.x.y 驱动系列)。
+.IPs <文件名>
+输出文件名 (默认值是: ./grab.mpg)
+.RE
+.PD 1
+.
+.TP
+.B zr (也请参见 \-zr* 和 \-zrhelp)
+一些 MJPEG 捕捉/\:回放卡的视频输出驱动。
+.
+.TP
+.B zr2 (也请参见 zrmjpeg 视频 过滤器)
+一些 MJPEG 捕捉/\:回放卡的视频输出驱动, 第二代。
+.PD 0
+.RSs
+.IPs dev=<设备>
+指定视频设备。
+.IPs norm=<PAL|NTSC|SECAM|auto>
+指定视频制式 (默认是: auto)。
+.IPs (no)prebuf
+激活或撤销预缓冲, 还没被支持。
+.RE
+.PD 1
+.
+.TP
+.B "md5sum\ "
+计算每帧的 MD5 和并写入文件。
+支持 RGB24 和 YV12 色彩空间。
+对调试有用。
+.PD 0
+.RSs
+.IPs outfile=<参数值>
+指定输出文件名 (默认值是: ./md5sums)。
+.RE
+.PD 1
+.
+.TP
+.B yuv4mpeg
+变换视频流为无压缩 YUV 4:2:0 图像序列并储存到文件 (默认值是: ./stream.yuv)。
+格式与 mjpegtools 所用的一样, 
+所以如果想要用 mjpegtools 套装软件处理视频, 这就有用。
+它支持 YV12, RGB (24 bpp) 和 BGR (24 bpp) 格式。
+能与 \-fixed-vo 选项组合来连接具有相同维数和 fps 值的文件。
+.PD 0
+.RSs
+.IPs interlaced
+作为交错帧写输出, 先顶域。
+.IPs interlaced_bf
+作为交错帧写输出, 先底域。
+.IPs file=<文件名>
+写输出到 <文件名> 代替默认的 stream.yuv。
+.REss
+.PD 1
+.RS
+.sp 1
+.I 注意:
+如果你不指定任何选项, 输出的是逐行的(比如没有交错的)。
+.RE
+.
+.TP
+.B "gif89a\ "
+输出每帧到当前目录的单个动画 GIF 文件。
+仅支持 24 bpp 的 RGB 格式并转换输出为 256 色。
+.PD 0
+.RSs
+.IPs <fps>
+指定浮点数帧率 (默认值是: 5.0)。
+.IPs <文件名>
+指定输出文件名 (默认值是: ./out.gif)。
+.REss
+.PD 1
+.RS
+.sp 1
+.I 注意:
+你必须在指定文件名之前指定帧率, 否则帧率成为文件名的一部分。
+.sp 1
+.I 示例:
+.RE
+.PD 0
+.RSs
+mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
+.RE
+.PD 1
+.
+.TP
+.B "jpeg\ \ \ "
+输出每帧到当前目录的 JPEG 文件。
+每帧以前面 0 填充引导的帧号作为文件名。
+.PD 0
+.RSs
+.IPs [no]progressive
+指定标准的或逐行的 JPEG (默认是: noprogressive)。
+.IPs [no]baseline
+指定是否使用基线 (默认是: baseline)。
+.IPs optimize=<0\-100>
+优化因子 (默认值是: 100)
+.IPs smooth=<0\-100>
+平滑因子 (默认值是: 0)
+.IPs quality=<0\-100>
+质量因子 (默认值是: 75)
+.IPs outdir=<dirname>
+指定保存 JPEG 文件的目录 (默认值是: ./)。
+.IPs subdirs=<前缀>
+创建编号的子目录保存文件, 用指定的前缀而不是用当前的目录。
+.IPs maxfiles=<参数值> (仅用于 subdirs)
+用于在每个子目录保存文件的最大编号。
+必须大于或等于 1 (默认值是: 1000)。
+.RE
+.PD 1
+.
+.TP
+.B "pnm\ \ \ \ "
+输出每帧到当前目录的 PNM 文件。
+每帧以前面 0 填充引导的帧号作为文件名。
+它在 raw 和 ASCII 模式下支持 PPM, PGM 和 PGMYUV 文件。
+也请参见 pnm(5), ppm(5) 和 pgm(5)。
+.PD 0
+.RSs
+.IPs "ppm\ \ "
+写 PPM 文件 (默认)。
+.IPs "pgm\ \ "
+写 PGM 文件。
+.IPs pgmyuv
+写 PGMYUV 文件。
+PGMYUV 像 PGM, 但也包含 U 和 V 平面, 添加在图像的底部。
+.IPs "raw\ \ "
+在 raw 模式下写 PNM 文件 (默认)。
+.IPs ascii
+在 ASCII 模式下写 PNM 文件。
+.IPs outdir=<目录名>
+指定目录保存 PNM 文件 (默认值是: ./)。
+.IPs subdirs=<前缀>
+创建编号的子目录保存文件, 用指定的前缀而不是用当前的目录。
+.IPs maxfiles=<参数值> (仅用于 subdirs)
+用于在每个子目录保存文件的最大编号。
+必须大于或等于 1 (默认值是: 1000)。
+.RE
+.PD 1
+.
+.TP
+.B "png\ \ \ \ "
+输出每帧到当前目录的 PNG 文件。
+每帧以前面 0 填充引导的帧号作为文件名。
+支持 24 bpp 的 RGB 和 BGR 格式。
+.PD 0
+.RSs
+.IPs z=<0-9>
+指定压缩级别。
+0 没压缩, 9 最强压缩。
+.RE
+.PD 1
+.
+.TP
+.B "tga\ \ \ \ "
+输出每帧到当前目录的 Targa 文件。
+每帧以前面 0 填充引导的帧号作为文件名。
+此视频输出驱动的目的是拥有一个简单无损失的图像绘制器且不需要任何外部库。
+支持 15, 24 和 32 bpp 的 BGR[A] 色彩格式。
+你能锁定一个特殊的格式带视频格式过滤器。
+.sp 1
+.I 示例:
+.RE
+.PD 0
+.RSs
+mplayer video.nut \-vf format=bgr15 \-vo tga
 .RE
 .PD 1
 .
 .
 .
-.SH "解码/滤镜选项"
+.SH "DECODING/FILTERING OPTIONS (解码/过滤器选项)"
+.
 .TP
-.B \-ac <[-]编解码器1,[-]编解码器2,...[,]>
-设置可用编解码器的优先级列表, 按照它们在codecs.conf中的编解码器名称.
-在名称前加'-'表示忽略该编解码器.
-
+.B \-ac <[-|+]编解码器1,[-|+]编解码器2,...[,]>
+指定使用音频编解码器的优先级列表, 按照它们在 codecs.conf 中的编解码器名称。
+编解码器名称前使用 '-' 表示忽略它。
+编解码器名称前使用 '+' 表示锁定它, 这有可能会崩溃!
+如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
+.br
 .I 注意:
-.br
-全部可用编解码器的完整列表参见\-ac help的输出.
-.br
-如果列表结尾有一个',' 将可以使用没有列出的编解码器作为后备.
-
+可用的编解码器参见 \-ac help 的列表。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
 .IPs "\-ac mp3acm"
-指定使用l3codeca.acm MP3编解码器
+锁定 l3codeca.acm MP3 编解码器。
 .IPs "\-ac mad,"
-先尝试libmad, 其它作为后备
+先尝试 libmad, 其它作为后备。
 .IPs "\-ac hwac3,a52,"
-先尝试硬件AC3输出, 然后是软件AC3编解码器, 最后是其它
+先尝试硬件 AC3 通透, 然后是软件 AC3, 最后是其它。
+.IPs "\-ac hwdts,"
+先尝试硬件 DTS 通透, 然后是其它。
 .IPs "\-ac -ffmp3,"
-尝试除了FFmpeg的MP3解码器之外的所有解码器
+跳过 FFmpeg 的 MP3 编解码器。
 .RE
 .PD 1
 .
 .TP
-.B \-af-adv <force=(0\-3):list=(filters)> (参见\-af选项)
-设置高级音频滤镜选项:
-.
+.B \-af-adv <force=(0\-7):list=(filters)> (也请参见 \-af)
+指定高级音频过滤器选项:
 .RSs
-.IPs force=<0-3>
-将插入音频滤镜的方式指定为下面之一:
+.IPs force=<0\-7>
+锁定音频过滤器的插入为下面其中之一:
 .RSss
-0: 完全自动插入滤镜(默认)
+0: 使用完全自动的过滤器插入。
 .br
-1: 速度优化
+1: 精度优化 (默认)。
 .br
-2: 精度优化
+2: 速度优化。
+.I 警告:
+某些音频过滤器特性可能默默地消失, 且音质可能下降。
 .br
-3: 关闭自动插入
+3: 使用无自动的过滤器插入且无优化。
+.I 警告:
+使用此设定可能使 MPlayer 崩溃。
+.br
+4: 根据 0 以上的, 使用自动的过滤器插入,
+但尽可能使用浮点处理。
+.br
+5: 根据 1 以上的, 使用自动的过滤器插入,
+但尽可能使用浮点处理。
+.br
+6: 根据 2 以上的, 使用自动的过滤器插入,
+但尽可能使用浮点处理。
+.br
+7: 根据 3 以上的, 使用自动的过滤器插入,
+但尽可能使用浮点处理。
 .REss
-.IPs list=<滤镜>
-与\-af相同(参见\-af选项).
+.IPs list=<过滤器列表>
+同 \-af 一样。
 .RE
 .
+.\" The below is only synced with r9821 (except sections from "... VARIABLES" to bottom)
 .TP
 .B \-afm <驱动1,驱动2,...>
 设置可用的音频驱动优先级列表, 按照它们在codecs.conf中的驱动名称.
 当都不可用是使用默认后备驱动.
-
-.I 注意:
 .br
+.I 注意:
 全部可用编解码器的完整列表参见\-afm help的输出.
-
+.sp 1
 .I 示例:
 .PD 0
 .RSs
@@ -4596,7 +5380,7 @@ MPlayer 寻找设置的目录。
 如果没设置, 你就必须提供完整的路径名。
 FIXME: 这也在 ladspa 一节有提到.
 .
-.SS libmpdvdkit2:
+.SS libdvdcss:
 .
 .TP
 .B DVDCSS_CACHE
