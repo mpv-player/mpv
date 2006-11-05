@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20682 -->
+<!-- synced with r20705 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -92,15 +92,16 @@
 </para>
 
 <para>
-Полный список доступных кодеков доступен на странице FFmpeg.
-Поддерживаемые <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">видео</ulink>
-и <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">аудио</ulink> кодеки.
+Полный список поддерживаемых
+<ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">видео</ulink>
+и <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">аудио</ulink> кодеков 
+доступен на домашней странице FFmpeg.
 </para>
 
 <para>
 <application>MPlayer</application> 
 содержит <systemitem class="library">libavcodec</systemitem>. 
-Просто запустите <filename>configure</filename> и компилируйте как обычно.
+Просто запустите <filename>./configure</filename> и компилируйте как обычно.
 </para>
 
 </sect2>
@@ -180,10 +181,10 @@
 
 
 <sect2 id="codec-x264">
-<title>x264</title>
+<title><systemitem class="library">x264</systemitem></title>
 
 <sect3 id="codec-x264-whatis">
-<title>Что такое x264?</title>
+<title>Что такое <systemitem class="library">x264</systemitem>?</title>
 <para>
   <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink> - 
   это библиотека для создания
@@ -279,9 +280,7 @@
 <para>
   Если у вас установлен клиент subversion, последнюю версию x264 
   можно загрузить следующей командой:
-  <screen>
-    svn co svn://svn.videolan.org/x264/trunk x264<!--
---></screen>
+  <screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
   Исходный код <application>MPlayer</application> обновляется 
   всякий раз при изменении API <systemitem class="library">x264</systemitem>, 
   так что предлагается использовать Subversion версию
@@ -295,16 +294,14 @@
 <para>
   <systemitem class="library">x264</systemitem> собирается и устанавливается
   как обычно:
-  <screen>
-    ./configure &amp;&amp; make &amp;&amp; sudo make install
-  </screen>
+  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
   Это установит libx264.a в /usr/local/lib, а x264.h - в /usr/local/include.
   Сборка <application>MPlayer</application> при установленных в стандартные
   каталоги библиотеке и заголовочном файле <systemitem class="library">x264</systemitem>
   очень проста.
   Просто запустите станартное:
   <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-  Скрипт configure сам определит, выполнены ли необходимые требования для
+  Скрипт <filename>./configure</filename> сам определит, выполнены ли необходимые требования для
   <systemitem class="library">x264</systemitem>.
 </para>
 </sect3>
@@ -417,19 +414,21 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйве
 
 
 <sect2 id="libmad">
-<title>Поддержка libmad</title>
+<title>Поддержка <systemitem class="library">libmad</systemitem></title>
 
 <para>
-<ulink url="http://mad.sourceforge.net">libmad</ulink> - это многоплатформенная,
+<ulink url="http://mad.sourceforge.net"><systemitem
+class="library">libmad</systemitem></ulink> - это многоплатформенная,
 целочисленная (внутренне 24'битный PCM)
 библиотека декодирования MPEG аудио. Она не очень хорошо обрабатывает битые
 файлы и иногда у неё бывают проблемы с перемещением по файлу, но она 
-может быть производительнее mp3lib на платформах без FPU
+может быть производительнее <systemitem class="library">mp3lib</systemitem> на платформах без FPU
 (таких как <link linkend="arm">ARM</link>).
 </para>
 
 <para>
-Если libmad у вас установлена, <filename>configure</filename> сообщит об этом,
+Если <systemitem class="library">libmad</systemitem> у вас установлена, 
+<filename>./configure</filename> сообщит об этом,
 и поддержка декодирования MPEG аудио с помощью <systemitem class="library">libmad</systemitem>
 будет включена автоматически.
 </para>
@@ -440,7 +439,7 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйве
 <title>Аппаратный MPEG аудио кодек</title>
 
 <para>
-Этот кодек (выбираемый по -ac hwmpa) передает все аудио пакеты MPEG аппаратным
+Этот кодек (выбираемый по <option>-ac hwmpa</option>) передает все аудио пакеты MPEG аппаратным
 декодерам, таким как установленные в полнофункциональных DVB картах и DXR2 адаптерах.
 Не используйте его с другими драйверами вывода звука (такими как OSS и ALSA), которые
 не способны аппаратно декодировать (вы усышите только белый шум).
@@ -461,7 +460,7 @@ AAC (Advanced Audio Coding) - это кодек, иногда обнаружив
 Если Вы используете gcc 3.2, который не может скомпилировать встроенный FAAD,
 или просто хотите использовать внешнюю библиотеку, скачаете её с 
 <ulink url="http://www.audiocoding.com/download.php">страницы загрузок</ulink>
-и укажите <filename>configure</filename> <option>--enable-faad-external</option>.
+и укажите <filename>./configure</filename> <option>--enable-faad-external</option>.
 Вам не нужен весь faad2, чтобы декодировать AAC файлы, достаточно libfaad.
 Вот как Вы можете её собрать:
 <screen>
@@ -527,9 +526,6 @@ VFW (Video for Windows[Видео для Windows]) - это старые Вид�
 Если <application>MPlayer</application> не может проигрывать Ваш
 AVI с такого рода сообщением:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
-</para>
-
-<para>
 Это значит, что Ваш AVI закодирован кодеком с fourcc HFYU
 (HFYU = HuffYUV кодек, DIV3 = DivX Low Motion, и т.п.). Теперь, когда Вы это
 знаете, Вы должны найти DLL, которую Windows загружает для проигрывания этого
@@ -549,7 +545,7 @@ AVI с такого рода сообщением:
 кодеком, пример AVI), представьте на рассмотрение запрос о поддержке Вашего
 кодека по почте и загрузите эти файлы на FTP сайт:
 <systemitem role="url">
-ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</replaceable>/
 </systemitem>
 </para>
 
@@ -660,7 +656,7 @@ DirectShow - это более новый Video API, которые даже х�
 пример AVI), представьте на рассмотрение запрос о поддержке Вашего кодека по
 почте и загрузите эти файлы на FTP сайт:
 <systemitem
-role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
+role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</replaceable>/
 </systemitem>
 </para>
 <para>
