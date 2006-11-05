@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r20440
+// In sync with r20586
 
 // ========================= MPlayer help ===========================
 
