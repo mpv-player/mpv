@@ -537,9 +537,6 @@ the <filename>.DLL</filename> or (rarely) <filename>.DRV</filename>
 extension.  If <application>MPlayer</application> fails at playing your AVI
 with this kind of message:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
-</para>
-
-<para>
 It means your AVI is encoded with a codec which has the HFYU fourcc (HFYU =
 HuffYUV codec, DIV3 = DivX Low Motion, etc.). Now that you know this, you
 have to find out which DLL Windows loads in order to play this file. In our
