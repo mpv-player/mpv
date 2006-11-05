@@ -2761,7 +2761,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Nous sommes maintenant prêts à faire l'encodage deux passes. Première passe:
 
   <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
--lvcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
+-lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
   La seconde passe est la même, si ce n'est que nous spécifions <option>vpass=2</option>:
