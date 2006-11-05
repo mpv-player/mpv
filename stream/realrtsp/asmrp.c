@@ -418,7 +418,7 @@ static int asmrp_operand (asmrp_t *p) {
     
     if (p->sym != ASMRP_SYM_ID) {
       printf ("error: identifier expected.\n");
-      abort();
+      break;
     }
 
     i = asmrp_find_id (p, p->str);
@@ -443,7 +443,7 @@ static int asmrp_operand (asmrp_t *p) {
 
     if (p->sym != ASMRP_SYM_RPAREN) {
       printf ("error: ) expected.\n");
-      abort();
+      break;
     }
 
     asmrp_get_sym (p);
@@ -451,7 +451,6 @@ static int asmrp_operand (asmrp_t *p) {
 
   default:
     printf ("syntax error, $ number or ( expected\n");
-    abort();
   }
 
 #ifdef LOG
@@ -460,6 +459,7 @@ static int asmrp_operand (asmrp_t *p) {
   
   return ret;
 }
+
 
 static int asmrp_comp_expression (asmrp_t *p) {
 
@@ -559,20 +559,20 @@ static void asmrp_assignment (asmrp_t *p) {
 
   if (p->sym != ASMRP_SYM_ID) {
     printf ("error: identifier expected\n");
-    abort ();
+    return;
   }
   asmrp_get_sym (p);
 
   if (p->sym != ASMRP_SYM_EQUALS) {
     printf ("error: = expected\n");
-    abort ();
+    return;
   }
   asmrp_get_sym (p);
 
   if ( (p->sym != ASMRP_SYM_NUM) && (p->sym != ASMRP_SYM_STRING) 
        && (p->sym != ASMRP_SYM_ID)) {
     printf ("error: number or string expected\n");
-    abort ();
+    return;
   }
   asmrp_get_sym (p);
 
@@ -620,7 +620,7 @@ static int asmrp_rule (asmrp_t *p) {
 
   if (p->sym != ASMRP_SYM_SEMICOLON) {
     printf ("semicolon expected.\n");
-    abort ();
+    return ret;
   }
 
   asmrp_get_sym (p);
