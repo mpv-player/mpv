@@ -66,7 +66,8 @@ void ass_set_style_overrides(ass_library_t* priv, char** list)
 
 	for (p = list, cnt = 0; *p; ++p, ++cnt) {}
 
-	priv->style_overrides = malloc(cnt * sizeof(char*));
+	priv->style_overrides = malloc((cnt + 1) * sizeof(char*));
 	for (p = list, q = priv->style_overrides; *p; ++p, ++q)
 		*q = strdup(*p);
+	priv->style_overrides[cnt] = NULL;
 }
