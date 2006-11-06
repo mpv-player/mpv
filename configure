@@ -382,8 +382,7 @@ Miscellaneous options:
   --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
-  --enable-static        build a statically linked binary. Set further linking
-                         options with --enable-static="-lslang -lncurses"
+  --enable-static        build a statically linked binary
   --charset=charset      convert the console messages to this character set
   --language=list        a white space or comma separated list of languages for
                          translated man pages, the first language is used for
@@ -498,9 +497,6 @@ for ac_option do
     ;;
   --disable-static)
     _ld_static=''
-    ;;
-  --enable-static=*)
-    _ld_static="-static `echo $ac_option | cut -d '=' -f 2`"
     ;;
   --with-extraincdir=*)
     _inc_extra=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
