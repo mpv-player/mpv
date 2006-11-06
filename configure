@@ -5929,7 +5929,7 @@ if test -z "$_codecsdir" ; then
 fi
 
 
-echocheck "Win32 codec DLL support"
+echocheck "Win32 codecs"
 if test "$_win32" = auto ; then
   _win32=no
   if x86 && not qnx; then
@@ -5958,7 +5958,7 @@ fi
 echores "$_win32"
 
 
-echocheck "XAnim DLL"
+echocheck "XAnim codecs"
 if test "$_xanim" = auto ; then
   _xanim=no
   _res_comment="dynamic loader support needed"
@@ -5980,7 +5980,7 @@ fi
 echores "$_xanim"
 
 
-echocheck "RealPlayer DLL"
+echocheck "RealPlayer codecs"
 if test "$_real" = auto ; then
   _real=no
   _res_comment="dynamic loader support needed"
