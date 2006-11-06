@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r20304  -->
+<!-- Synced with r20614  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -809,8 +809,8 @@ Nepřehraji žádná současná DVD od Sony Pictures/BMG.
 To je normální; byli jste podfouknuti a prodali vám uměle defektní disk.
 Jediný způsob, jak přehrávat tato DVD je obcházet špatné bloky na disku
 použitím DVDnav místo mpdvdkit2.
-Toho lze dosáhnout kompilací MPlayeru s podporou DVDnav a následně
-záměnou dvd:// za dvdnav:// na příkazovém řádku.
+Toho lze dosáhnout kompilací <application>MPlayer</application>u s podporou
+DVDnav a následně záměnou dvd:// za dvdnav:// na příkazovém řádku.
 DVDnav se zatím vzájemně vylučuje s mpdvdkit2, takže musíte configure skriptu
 předat volbu <option>--disable-mpdvdkit</option>.
 </para></answer>

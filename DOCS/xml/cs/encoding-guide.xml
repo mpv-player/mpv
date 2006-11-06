@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20408 -->
+<!-- synced with r20551 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -1456,7 +1456,7 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
   místech.
   Dokud <application>MEncoder</application> sleduje zvuk při enkódování
   videa, může provádět toto zahazování/duplikování (což je obvykle OK,
-  jelikož nastává při černé obrazovce/změně scény, ale pokud
+  jelikož nastává při černé obrazovce/změně scény), ale pokud
   <application>MEncoder</application> nevidí zvuk, zpracuje snímky jak jsou
   a ty pak nepasují na konečnou zvukovou stopu když například spojíte svou
   video a zvukovou stopu do Matroska souboru.
@@ -3972,7 +3972,7 @@ Příklad s VP3 komresí:
 
 
 <sect1 id="menc-feat-vcd-dvd">
-<title>Použití MEncoder k vytváření VCD/SVCD/DVD-kompatibilních souborů.</title>
+<title>Použití <application>MEncoder</application>u k vytváření VCD/SVCD/DVD-kompatibilních souborů.</title>
 
 <sect2 id="menc-feat-vcd-dvd-constraints">
 <title>Omezení Formátů</title>

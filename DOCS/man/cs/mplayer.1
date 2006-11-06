@@ -1,4 +1,4 @@
-.\" Synced with r20445
+.\" Synced with r20621
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Tuto man stránku napsali/píší Gabucino, Diego Biurrun, Jonas Jermann
 .\" Překlad (translation): Jiří Heryán
@@ -745,9 +745,13 @@ xvidix, xover, xv (viz \-vo xv:ck), xvmc (viz \-vo xv:ck) a directx.
 .
 .TP
 .B \-correct-pts (experimentální)
-Přepne MPlayer do experimentálního režimu, kde video filtry rozhodují
-o časové značce přehrávání, místo video zdroje.
-Nepodporováno větřinou filtrů.
+Přepne MPlayer do experimentálního režimu, ve kterém jsou časové značky
+video snímků počítány odlišně a jsou podporovány filtry, které přidávají nové
+snímky, nebo mění časové značky stávajících.
+Přesnější časování může být viditelné například při přehrávání titulků časovaných
+na změnu scény pomocí volby \-ass.
+Bez \-correct-pts bude časování titulků obvykle mimo o několik snímků.
+Tato volba nepracuje správně s některými demuxery a kodeky.
 .
 .TP
 .B \-crash-debug (DEBUG KÓD)
@@ -3289,6 +3293,7 @@ Pokud volbu zapnete, chová se OSD více jako v jiných video rozhraních, což
 je lepší pro fonty s pevnou výškou.
 Je-li volba vypnuta, vypadá lépe s\ FreeType fonty a používá okraje
 v\ celoobrazovkovém režimu.
+Nepracuje správně s ass titulky (viz volbu \-ass).
 .IPs osdcolor=<0xRRGGBB>
 Barva OSD (výchozí: 0xffffff, odpovídá bílé).
 .IPs (no)aspect
@@ -6475,7 +6480,15 @@ Do pracovního adresáře budou ukládány soubory pojmenované 'shotNNNN.png',
 kdy za NNNN bude použito první volné číslo - žádné soubory nebudou přepsány.
 Filtr nemá žádné nároky pokud není používán a přijímá libovolný barevný
 prostor, takže jej bezpečně můžete přidat do konfiguračního souboru.
+.sp 1
+.I PŘÍKLAD:
+.PD 0
+.RSs
+.IPs "\-vf ass,screenshot"
+Přesune renderování SSA/ASS před filtr screenshot.
+Takto sejmuté snímky obrazu budou obsahovat i titulky.
 .RE
+.PD 1
 .
 .TP
 .B "ass\ \ \ \ "

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r20054 -->
+<!-- Synced with r20572 -->
 <chapter id="video">
 <title>Výstupní video zařízení/rozhraní</title>
 
@@ -1384,6 +1384,16 @@ tohoto rozhraní je maximalizace rychlosti přehrávání videa.
   <option>-vo mga</option> nebo <option>-vo fbdev</option>. nVidia karty však
   jsou schopny zobrazit plně grafické video na reálné textové konzoli. Viz
   sekci <link linkend="vidix-nvidia">nvidia_vid</link> pro více informací.
+  Abyste se zbavili textu na okrajích a blikajícího kursoru, zkuste něco jako
+  </simpara>
+
+  <screen>setterm -cursor off > /dev/tty9</screen>
+
+  <simpara>
+  (předpokládáme, že <systemitem>tty9</systemitem> není dosud používaná) a pak
+  se přepneme do <systemitem>tty9</systemitem>.
+  Na druhou stranu volba <option>-colorkey 0</option> by měla poskytnout
+  video běžící na "pozadí", zprávná funkce však závisí na funkčnosti colorkey.
   </simpara></listitem>
 <listitem><simpara>
   Můžete použít VIDIXové podzařízení, které bylo zabudováno do několika video
