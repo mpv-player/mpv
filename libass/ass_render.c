@@ -492,43 +492,24 @@ static int y2scr_sub(int y) {
 		return y * frame_context.orig_height / frame_context.track->PlayResY + global_settings->top_margin;
 }
 
-static void vmirror_bbox(FT_BBox* orig, FT_BBox* pbbox) {
-	pbbox->xMin = orig->xMin;
-	pbbox->xMax = orig->xMax;
-	pbbox->yMin = - orig->yMax;
-	pbbox->yMax = - orig->yMin;
-}
-
 static void compute_string_bbox( text_info_t* info, FT_BBox *abbox ) {
 	FT_BBox bbox;
-	int n;
+	int i;
 	
-	/* initialize string bbox to "empty" values */
-	bbox.xMin = bbox.yMin = 32000;
-	bbox.xMax = bbox.yMax = -32000;
-	
-	/* for each glyph image, compute its bounding box, */
-	/* translate it, and grow the string bbox */
-	for ( n = 0; n < info->length; n++ ) {
-		FT_BBox glyph_bbox;
-		vmirror_bbox( &(info->glyphs[n].bbox), &glyph_bbox );
-		glyph_bbox.xMin += info->glyphs[n].pos.x;
-		glyph_bbox.xMax += info->glyphs[n].pos.x;
-		glyph_bbox.yMin += info->glyphs[n].pos.y;
-		glyph_bbox.yMax += info->glyphs[n].pos.y;
-		if ( glyph_bbox.xMin < bbox.xMin ) bbox.xMin = glyph_bbox.xMin;
-		if ( glyph_bbox.yMin < bbox.yMin ) bbox.yMin = glyph_bbox.yMin;
-		if ( glyph_bbox.xMax > bbox.xMax ) bbox.xMax = glyph_bbox.xMax;
-		if ( glyph_bbox.yMax > bbox.yMax ) bbox.yMax = glyph_bbox.yMax;
-	}
-	
-	/* check that we really grew the string bbox */
-	if ( bbox.xMin > bbox.xMax ) {
-		bbox.xMin = 0;
-		bbox.yMin = 0;
-		bbox.xMax = 0;
-		bbox.yMax = 0;
-	}
+	if (text_info.length > 0) {
+		bbox.xMin = 32000;
+		bbox.xMax = -32000;
+		bbox.yMin = - (text_info.lines[0].asc >> 6) + text_info.glyphs[0].pos.y;
+		bbox.yMax = ((text_info.height - text_info.lines[0].asc) >> 6) + text_info.glyphs[0].pos.y;
+
+		for (i = 0; i < text_info.length; ++i) {
+			int s = text_info.glyphs[i].pos.x;
+			int e = s + (text_info.glyphs[i].advance.x >> 6);
+			bbox.xMin = FFMIN(bbox.xMin, s);
+			bbox.xMax = FFMAX(bbox.xMax, e);
+		}
+	} else
+		bbox.xMin = bbox.xMax = bbox.yMin = bbox.yMax = 0;
 
 	/* return string bbox */
 	*abbox = bbox;
@@ -1774,8 +1755,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	
 	// determing text bounding box
 	compute_string_bbox(&text_info, &bbox);
-	bbox.yMin = - (text_info.lines[0].asc >> 6);
-	bbox.yMax = (text_info.height - text_info.lines[0].asc) >> 6;
 	
 	// determine device coordinates for text
 	
