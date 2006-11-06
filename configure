@@ -274,7 +274,7 @@ Codecs:
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
   --disable-xvid            disable XviD [autodetect]
-  --disable-x264            disable H.264 [autodetect]
+  --disable-x264            disable x264 [autodetect]
   --disable-nut             disable libnut [autodetect]
   --disable-libavutil       disable libavutil [autodetect]
   --disable-libavcodec      disable libavcodec [autodetect]
