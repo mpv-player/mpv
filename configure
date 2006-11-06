@@ -391,9 +391,6 @@ Miscellaneous options:
                          \$LINGUAS is also honored) [en]
                          (Available: $LANGUAGES all)
   --with-install=PATH    path to a custom install program
-  --install-path=PATH    path to a custom install program
-                         this option is obsolete and will be removed soon,
-                         use --with-install instead.
   --enable-color-console enable color console output [disable]
 
 Advanced options:
@@ -525,9 +522,6 @@ for ac_option do
     ;;
   --disable-cross-compile)
     _cross_compile=no
-    ;;
-  --install-path=*)
-    _install=`echo $ac_option | cut -d '=' -f 2 | sed 's/\/$//'`"/install"
     ;;
   --with-install=*)
     _install=`echo $ac_option | cut -d '=' -f 2 `
@@ -1738,7 +1732,6 @@ for ac_option do
   --disable-runtime-cpudetection) ;;
   --enable-cross-compile) ;;
   --disable-cross-compile) ;;
-  --install-path=*) ;;
   --with-install=*) ;;
   --enable-profile) ;;
   --disable-profile) ;;
