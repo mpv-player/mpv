@@ -111,9 +111,6 @@ endif
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
-ifeq ($(FAME),yes)
-PARTS += libfame
-endif
 ifeq ($(DVDREAD_INTERNAL),yes)
 PARTS += libdvdread
 PARTS += libdvdcss
@@ -170,9 +167,6 @@ endif
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
 endif
-ifeq ($(FAME),yes)
-COMMON_DEPS += libfame/libfame.a
-endif
 ifeq ($(DVDREAD_INTERNAL),yes)
 COMMON_DEPS += libdvdread/libdvdread.a
 COMMON_LIBS += libdvdread/libdvdread.a
@@ -215,9 +209,6 @@ libdvdcss/libdvdcss.a:
 
 loader/libloader.a:
 	$(MAKE) -C loader
-
-libfame/libfame.a:
-	$(MAKE) -C libfame
 
 libass/libass.a:
 	$(MAKE) -C libass

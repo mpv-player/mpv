@@ -375,7 +375,6 @@ static char help_text[]=
 #define MSGTR_NEMDB "죄송합니다. 그리기 버퍼를 위한 충분한 메모리가 없습니다."
 #define MSGTR_NEMFMR "죄송합니다. 메뉴 렌더링을 위한 충분한 메모리가 없습니다."
 #define MSGTR_IDFGCVD "죄송합니다. GUI 호환 비디오 출력 드라이버를 찾지 못했습니다."
-#define MSGTR_NEEDLAVCFAME "죄송합니다. MPEG가 아닌 파일을 DXR3/H+ 장치로 재생하려면 다시 인코딩해야만 합니다.\nDXR3/H+ 설정 대화상자에서 lavc나 frame이 가능하도록 하세요."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[스킨] 스킨 설정파일의 %d번째 줄에 오류가 있습니다.: %s" 
@@ -516,7 +515,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "선택사항들을 적용하려면 재생기를 다시 시작해야 합니다!"
 #define MSGTR_PREFERENCES_DXR3_VENC "비디오 인코더:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "LAVC 사용 (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "FAME 사용"
 #define MSGTR_PREFERENCES_FontEncoding1 "유니코드"
 #define MSGTR_PREFERENCES_FontEncoding2 "서유럽어 (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Euro 포함 서유럽어 (ISO-8859-15)"

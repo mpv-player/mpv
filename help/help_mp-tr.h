@@ -714,7 +714,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Üzgünüm, tampon için yeterli hafıza yok."
 #define MSGTR_NEMFMR "Üzgünüm, menü oluşturmak için yeterli hafıza yok."
 #define MSGTR_IDFGCVD "Üzgünüm, KGA ile uyumlu video çıkış sürücüsü bulunamadı."
-#define MSGTR_NEEDLAVCFAME "Üzgünüm, MPEG olmayan dosyaları DXR3/H+ aygıtınızla oynatamazsınız. \nLütfen DXR3/H+ ayarlarından lavc veya fame seçeneğini etkinleştirin."
+#define MSGTR_NEEDLAVC "Üzgünüm, MPEG olmayan dosyaları DXR3/H+ aygıtınızla oynatamazsınız. \nLütfen DXR3/H+ ayarlarından lavc seçeneğini etkinleştirin."
 #define MSGTR_UNKNOWNWINDOWTYPE "Bilinmeyen pencere türü bulundu..."
 
 // --- skin loader error messages
@@ -874,7 +874,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Yaptığınız değişiklikleri etkinleştirmek için lütfen Mplayer'ı yeniden başlatmayı unutmayınız."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video kodlayıcı:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "LAVC kullan (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "FAME kullan"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Batı Avrupa Dilleri (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Batı Avrupa Dilleri ve Euro(ISO-8859-15)"
@@ -1557,9 +1556,6 @@ static char help_text[]=
 #define MSGTR_MPCODECS_FullDRNotPossible "Tam DR olanaksız, yerine SLICES seçeneğini deneyiniz!\n"
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "UYARI! Sonraki filtre SLICES desteklemiyor,   sig11 için hazırlayınız...\n"
 #define MSGTR_MPCODECS_FunWhydowegetNULL "Neden NULL ulaşıyoruz??\n"
-
-// libmpcodecs/vf_fame.c
-#define MSGTR_MPCODECS_FatalCantOpenlibFAME "HATA: libFAME açılamıyor!\n"
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s sonraki filtre/vo tarafından desteklenmiyor :(\n"

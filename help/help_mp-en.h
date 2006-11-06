@@ -723,7 +723,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Sorry, not enough memory to draw buffer."
 #define MSGTR_NEMFMR "Sorry, not enough memory for menu rendering."
 #define MSGTR_IDFGCVD "Sorry, I did not find a GUI-compatible video output driver."
-#define MSGTR_NEEDLAVCFAME "Sorry, you cannot play non-MPEG files with your DXR3/H+ device without reencoding.\nPlease enable lavc or fame in the DXR3/H+ configuration box."
+#define MSGTR_NEEDLAVC "Sorry, you cannot play non-MPEG files with your DXR3/H+ device without reencoding.\nPlease enable lavc in the DXR3/H+ configuration box."
 #define MSGTR_UNKNOWNWINDOWTYPE "Unknown window type found ..."
 
 // --- skin loader error messages
@@ -887,7 +887,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Please remember that you need to restart playback for some options to take effect!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Use LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Use FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Western European Languages with Euro (ISO-8859-15)"
@@ -1593,9 +1592,6 @@ static char help_text[]=
 #define MSGTR_MPCODECS_FullDRNotPossible "Full DR not possible, trying SLICES instead!\n"
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "WARNING! Next filter doesn't support SLICES, get ready for sig11...\n"
 #define MSGTR_MPCODECS_FunWhydowegetNULL "Why do we get NULL??\n"
-
-// libmpcodecs/vf_fame.c
-#define MSGTR_MPCODECS_FatalCantOpenlibFAME "FATAL: Cannot open libFAME!\n"
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s not supported by next filter/vo :(\n"

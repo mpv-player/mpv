@@ -613,7 +613,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Tyvärr, inte tillräckligt minne för ritbuffert."
 #define MSGTR_NEMFMR "Tyvärr, inte tillräckligt minne för menyrendering."
 #define MSGTR_IDFGCVD "Tyvärr, jag hittade inte en GUI-kompatibel video-ut-drivrutin."
-#define MSGTR_NEEDLAVCFAME "Tyvärr, du kan inte spela icke-MPEG-filer med ditt DXR3/H+-enhet utan omkodning.\nVar god aktivera lavc eller fame i 'DXR3/H+'-konfigurationsboxen."
+#define MSGTR_NEEDLAVC "Tyvärr, du kan inte spela icke-MPEG-filer med ditt DXR3/H+-enhet utan omkodning.\nVar god aktivera lavc i 'DXR3/H+'-konfigurationsboxen."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] fel i skinkonfigureringsfil på rad %d: %s"
@@ -761,7 +761,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Var god komihåg att du måste starta om uppspelning för att vissa ändringar ska ta effekt!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Videoencoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "ANvänd LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Använd FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Västeuropeiska språk (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Västeuropeiska språk med Euro (ISO-8859-15)"

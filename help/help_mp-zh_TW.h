@@ -382,7 +382,6 @@ static char help_text[]=
 #define MSGTR_NEMDB "很抱歉，繪圖援衝區沒有足夠記憶。"
 #define MSGTR_NEMFMR "很抱歉，目錄顯示沒有足夠記憶。"
 #define MSGTR_IDFGCVD "很抱歉，找不到一個 GUI 兼容的視訊輸出驅動程式。"
-#define MSGTR_NEEDLAVCFAME "很抱歉，無法用你的 DXR3/H+ 裝置來播放未重新編碼的非 MPEG 檔。\n請使用於 DXR3/H+ 設定格之 lavc 或 fame。"
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] 於 skin 設定檔 %d: %s 行出錯"
@@ -525,7 +524,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "請記得某些選項要重新播放才會生效﹗"
 #define MSGTR_PREFERENCES_DXR3_VENC "視訊 encoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "使用 LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "使用 FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "統一碼"
 #define MSGTR_PREFERENCES_FontEncoding2 "西歐語系 (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "西歐語系包含歐羅符號 (ISO-8859-15)"

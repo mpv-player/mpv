@@ -713,7 +713,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Za mało pamięci by wyrysować bufor."
 #define MSGTR_NEMFMR "Za mało pamięci na renderowanie menu."
 #define MSGTR_IDFGCVD "Brak sterownika video zgodnego z GUI."
-#define MSGTR_NEEDLAVCFAME "Niestety, nie można odtwarzać plików innych niż MPEG przy użyciu urządzenia DXR3/H+ bez kowersji.\nProszę włączyć lavc lub fame w polu sterowania DXR3/H+."
+#define MSGTR_NEEDLAVC "Niestety, nie można odtwarzać plików innych niż MPEG przy użyciu urządzenia DXR3/H+ bez kowersji.\nProszę włączyć lavc w polu sterowania DXR3/H+."
 #define MSGTR_UNKNOWNWINDOWTYPE "Okno nieznanego typu ..."
 
 // --- skin loader error messages
@@ -877,7 +877,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Pamiętaj, że niektóre opcje działają dopiero po zrestartowaniu odtwarzania!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Koder video:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Użyj LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Użyj FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Języki zachodnioeuropejskie (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Języki zachodnioeuropejskie z Euro (ISO-8859-15)"
@@ -1562,9 +1561,6 @@ static char help_text[]=
 #define MSGTR_MPCODECS_FullDRNotPossible "Pełny DR niemożliwy, próbuję SLICES(części) zamiast!\n"
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "UWAGA! Następny filtr nie obsługuje SLICES, przygotuj się na sig11...\n"
 #define MSGTR_MPCODECS_FunWhydowegetNULL "Dlaczego dostaliśmy NULL??\n"
-
-// libmpcodecs/vf_fame.c
-#define MSGTR_MPCODECS_FatalCantOpenlibFAME "Błąd krytyczny!: Nie mogę otworzyć libFAME!\n"
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s nie jest obsługiwane przez następny filtr/vo:(\n"

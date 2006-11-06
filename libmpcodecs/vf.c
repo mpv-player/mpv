@@ -30,7 +30,6 @@ extern vf_info_t vf_info_crop;
 extern vf_info_t vf_info_expand;
 extern vf_info_t vf_info_pp;
 extern vf_info_t vf_info_scale;
-extern vf_info_t vf_info_fame;
 extern vf_info_t vf_info_format;
 extern vf_info_t vf_info_noformat;
 extern vf_info_t vf_info_yuy2;
@@ -114,9 +113,6 @@ static vf_info_t* filter_list[]={
     &vf_info_scale,
 //    &vf_info_osd,
     &vf_info_vo,
-#ifdef USE_LIBFAME
-    &vf_info_fame,
-#endif
     &vf_info_format,
     &vf_info_noformat,
     &vf_info_yuy2,

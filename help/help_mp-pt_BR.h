@@ -374,7 +374,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Desculpe, sem memória suficiente para desenhar o buffer."
 #define MSGTR_NEMFMR "Desculpe, sem memória suficiente para rendenizar o menu."
 #define MSGTR_IDFGCVD "Desculpe, eu não encontrei um driver saída de vídeo compatível com GUI."
-#define MSGTR_NEEDLAVCFAME "Desculpe, você não pode reproduzir arquivos não-MPEG com o seu dispositivo DXR3/H+ sem recodificar.\nPor favor habilite lavc ou fame na configuração do DXR3/H+."
+#define MSGTR_NEEDLAVC "Desculpe, você não pode reproduzir arquivos não-MPEG com o seu dispositivo DXR3/H+ sem recodificar.\nPor favor habilite lavc na configuração do DXR3/H+."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] erro no arquivo de configuração do skin na linha %d: %s"
@@ -515,7 +515,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Por favor lembre que você precisa reiniciar a reprodução para algumas opções fazerem efeito!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Codificador de video:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Usar LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Usar FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Línguas Européias Ocidentais (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Línguas Européias Ocidentais com Euro (ISO-8859-15)"

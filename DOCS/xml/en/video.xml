@@ -2000,16 +2000,13 @@ This does not work with digital audio output (<option>-ac hwac3</option>).
 </varlistentry>
 
 <varlistentry>
-<term><option>-vf lavc/fame</option></term>
+<term><option>-vf lavc</option></term>
 <listitem><para>
 To watch non-MPEG content on the em8300 (i.e. MPEG-4 (DivX) or RealVideo)
 you have to specify an MPEG-1 video filter such as
-<systemitem class="library">libavcodec</systemitem> (lavc) or
-<systemitem class="library">libfame</systemitem> (fame). At
-the moment lavc is both faster and gives better image quality, it is suggested
-that you use that unless you have problems with it. See the man page for further
-info about <option>-vf lavc/fame</option>.
-Using lavc is highly recommended. Currently there is no way of setting the fps
+<systemitem class="library">libavcodec</systemitem> (lavc).
+See the man page for further info about <option>-vf lavc</option>.
+Currently there is no way of setting the fps
 of the em8300 which means that it is fixed to 30000/1001 fps. Because of this it is
 highly recommended that you use <option>-vf lavc=<replaceable>quality</replaceable>:25</option>
 especially if you are using prebuffering. Then why 25 and not 30000/1001? Well, the

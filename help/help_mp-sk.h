@@ -706,7 +706,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Žiaľ, nedostatok pamäte pre buffer na kreslenie."
 #define MSGTR_NEMFMR "Žiaľ, nedostatok pamäte pre vytváranie menu."
 #define MSGTR_IDFGCVD "Žiaľ, nemôžem nájsť gui kompatibilný ovládač video výstupu."
-#define MSGTR_NEEDLAVCFAME "Žiaľ, nemôžete prehrávať nie mpeg súbory s DXR3/H+ zariadením bez prekódovania.\nProsím zapnite lavc alebo fame v DXR3/H+ konfig. okne."
+#define MSGTR_NEEDLAVC "Žiaľ, nemôžete prehrávať nie mpeg súbory s DXR3/H+ zariadením bez prekódovania.\nProsím zapnite lavc v DXR3/H+ konfig. okne."
 #define MSGTR_UNKNOWNWINDOWTYPE "Neznámy typ okna nájdený ..."
 
 // --- skin loader error messages
@@ -866,7 +866,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Prosím pamätajte, nietoré voľby potrebujú reštart prehrávania!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video kóder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Použiť LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Použiť FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Western European Languages with Euro (ISO-8859-15)"

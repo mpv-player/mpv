@@ -326,8 +326,8 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMFMR "Scuze, nu am memorie destulã pentru afiºarea meniului."
 #define MSGTR_IDFGCVD "Scuze, nu am gãsit un driver video compatibil cu GUI."
-#define MSGTR_NEEDLAVCFAME "Scuze, nu poþi afiºa fiºiere ne-MPEG cu dispozitivul DXR3/H+ fãrã recodare.\n"\
-"Activeazã 'lavc' sau 'fame' în cãsuþa de configurare pentru DXR3/H+."
+#define MSGTR_NEEDLAVC "Scuze, nu poþi afiºa fiºiere ne-MPEG cu dispozitivul DXR3/H+ fãrã recodare.\n"\
+"Activeazã 'lavc' în cãsuþa de configurare pentru DXR3/H+."
 
 // --- skin loader error messages
 
@@ -444,7 +444,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Nu uita cã rularea trebuie repornitã pentru ca unele opþiuni sã-ºi facã efectul!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Encoder video:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Foloseºte LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Foloseºte FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 
 // lang 

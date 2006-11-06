@@ -250,10 +250,6 @@ NATIVE_SRCS=native/minilzo.c \
             native/RTjpegN.c \
             native/xa_gsm.c \
 
-ifeq ($(FAME),yes)
-VFILTER_SRCS += vf_fame.c
-endif
-
 ifeq ($(ZORAN),yes)
 VFILTER_SRCS += vf_zrmjpeg.c
 endif

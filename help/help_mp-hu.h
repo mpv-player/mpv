@@ -718,7 +718,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Nincs elég memória a rajzoló bufferhez."
 #define MSGTR_NEMFMR "Nincs elég memória a menü rendereléséhez."
 #define MSGTR_IDFGCVD "Nem találtam GUI-kompatibilis videó meghajtót."
-#define MSGTR_NEEDLAVCFAME "Nem MPEG fájl lejátszása nem lehetséges a DXR3/H+ hardverrel újrakódolás nélkül.\nKapcsold be a lavc vagy fame opciót a DXR3/H+ konfigurációs panelen."
+#define MSGTR_NEEDLAVC "Nem MPEG fájl lejátszása nem lehetséges a DXR3/H+ hardverrel újrakódolás nélkül.\nKapcsold be a lavc opciót a DXR3/H+ konfigurációs panelen."
 #define MSGTR_UNKNOWNWINDOWTYPE "Ismeretlen ablak típust találtam ..."
 
 // --- skin loader error messages
@@ -882,7 +882,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Kérlek emlékezz, néhány opció igényli a lejátszás újraindítását."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video kódoló:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "LAVC használata (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "FAME használata"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Nyugat-Európai karakterkészlet (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Nyugat-Európai karakterkészlet euróval (ISO-8859-15)"
@@ -1565,9 +1564,6 @@ static char help_text[]=
 #define MSGTR_MPCODECS_FullDRNotPossible "A teljes DR nem lehetséges, inkább SLICES-t próbálok helyette!\n"
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "FIGYELEM! A következő szűrő nem támogatja a SLICES-t, készülj a sig11-re...\n"
 #define MSGTR_MPCODECS_FunWhydowegetNULL "Miért kaptunk itt NULL-t??\n"
-
-// libmpcodecs/vf_fame.c
-#define MSGTR_MPCODECS_FatalCantOpenlibFAME "VÉGZETES: A libFAME nem nyitható meg!\n"
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s nem támogatott a következő szűrőben/vo-ban :(\n"

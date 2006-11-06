@@ -372,7 +372,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Се извинуваме, немате доволно меморија за графичкиот бафер."
 #define MSGTR_NEMFMR "Се извинуваме, немате доволно меморија за обојување на менито."
 #define MSGTR_IDFGCVD "Се извинуваме, не е пронајден компитабилен драјвер на излезното видео за графички интерфејс."
-#define MSGTR_NEEDLAVCFAME "Се извинуваме, не можете да пуштате датотеки кои што не се MPEG со вашиот DXR3/H+ уред без реенкодирање.\nВе молиме овозможете lavc или fame во DXR3/H+ кутијата за конфигурирање."
+#define MSGTR_NEEDLAVC "Се извинуваме, не можете да пуштате датотеки кои што не се MPEG со вашиот DXR3/H+ уред без реенкодирање.\nВе молиме овозможете lavc во DXR3/H+ кутијата за конфигурирање."
 
 // --- пораки со грешка при вчитување на скинови
 #define MSGTR_SKIN_ERRORMESSAGE "[скин] грешка во конфигурационата датотека за скинови, линија %d: %s"
@@ -513,7 +513,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Ве молиме запомтете дека треба да го рестартирате плејбекот за да можат некои опции да проработат!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Видео енкодер:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Користи LAVC (ffmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Користи FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Повеќе-коден"
 #define MSGTR_PREFERENCES_FontEncoding2 "Западно-европски јазици (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Западно-европски јазици со Евро (ISO-8859-15)"

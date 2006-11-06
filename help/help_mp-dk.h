@@ -369,7 +369,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Desværre, ikke nok ram til at vise bufferen."
 #define MSGTR_NEMFMR "Desværre, ikke nok ram til at vise menuen."
 #define MSGTR_IDFGCVD "Desværre, kunne ikke finde GUI kompabitel video driver."
-#define MSGTR_NEEDLAVCFAME "For at afspille ikke-mpeg filer med dit DXR3/H+ skal du kode filmen igen.\nVenligst aktiver lavc eller fame i DXR3/H+ configboxen."
+#define MSGTR_NEEDLAVC "For at afspille ikke-mpeg filer med dit DXR3/H+ skal du kode filmen igen.\nVenligst aktiver lavc i DXR3/H+ configboxen."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[tema] fejl i konfigurationsfilen til temaet på linje %d: %s" 
@@ -514,7 +514,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Husk, nogle funktioner kræver at MPlayer bliver genstartet for at de virker."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video enkoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Brug LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Brug FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Vesteuropæriske sprog (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Vesteuropæriske sprog med euro (ISO-8859-15)"

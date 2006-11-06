@@ -711,7 +711,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Bohužel není dostatek paměti pro vykreslovací mezipaměť."
 #define MSGTR_NEMFMR "Bohužel není dostatek paměti pro vykreslení menu."
 #define MSGTR_IDFGCVD "Bohužel nebyl nalezen video ovladač kompatibilní s GUI."
-#define MSGTR_NEEDLAVCFAME "Bohužel nelze přehrávat ne-MPEG s kartou DXR3/H+ bez přeenkódování.\nProsím, zapněte lavc nebo fame v konfiguraci DXR3/H+."
+#define MSGTR_NEEDLAVC "Bohužel nelze přehrávat ne-MPEG s kartou DXR3/H+ bez přeenkódování.\nProsím, zapněte lavc v konfiguraci DXR3/H+."
 #define MSGTR_UNKNOWNWINDOWTYPE "Nalezen neznámý typ okna ..."
 
 // --- skin loader error messages
@@ -875,7 +875,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Pozor, některá nastavení potřebují pro svou funkci restartovat přehrávání!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video enkodér:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Použít LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Použít FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Západoevropské jazyky (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Západoevropské jazyky s Eurem (ISO-8859-15)"
@@ -1558,9 +1557,6 @@ static char help_text[]=
 #define MSGTR_MPCODECS_FullDRNotPossible "Plný DR není možný, zkouším místo něj SLICES!\n"
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "Varování! Další filtr nepodporuje SLICES, očekávejte sig11...\n"
 #define MSGTR_MPCODECS_FunWhydowegetNULL "Proč jsme dostali NULL??\n"
-
-// libmpcodecs/vf_fame.c
-#define MSGTR_MPCODECS_FatalCantOpenlibFAME "Fatální chyba: Nelze otevřít libFAME!\n"
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s není dalším filtrem/vo podporován :(\n"

@@ -718,7 +718,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Извините, не хватает памяти для буфера прорисовки."
 #define MSGTR_NEMFMR "Извините, не хватает памяти для отображения меню."
 #define MSGTR_IDFGCVD "Извините, не нашёл совместимый с GUI драйвер видео вывода."
-#define MSGTR_NEEDLAVCFAME "Извините, Вы не можете проигрывать не-MPEG файлы на Вашем DXR3/H+ устройстве\nбез перекодирования. Пожалуйста, включите lavc или fame при конфигурации DXR3/H+."
+#define MSGTR_NEEDLAVC "Извините, Вы не можете проигрывать не-MPEG файлы на Вашем DXR3/H+ устройстве\nбез перекодирования. Пожалуйста, включите lavc при конфигурации DXR3/H+."
 #define MSGTR_UNKNOWNWINDOWTYPE "Найден неизвестный тип окна..."
 
 // --- skin loader error messages
@@ -882,7 +882,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Пожалуйста, запомните, что Вам нужно перезапустить проигрывание,\nчтобы некоторые изменения вступили в силу!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Видео кодировщик:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Использовать LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Использовать FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Уникод"
 #define MSGTR_PREFERENCES_FontEncoding2 "Западноевропейские языки (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Западноевропейские языки с Евро (ISO-8859-15)"
@@ -1630,9 +1629,6 @@ static char help_text[]=
 #define MSGTR_MPCODECS_FullDRNotPossible "Полный DR невозможен, пробую SLICES взамен!\n"
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "ПРЕДУПРЕЖДЕНИЕ! Следующий фильтр не поддерживает SLICES,\nприготовьтесь к ошибке сегментации памяти (sig11)...\n"
 #define MSGTR_MPCODECS_FunWhydowegetNULL "Почемы мы получили NULL??\n"
-
-// libmpcodecs/vf_fame.c
-#define MSGTR_MPCODECS_FatalCantOpenlibFAME "ФАТАЛЬНАЯ ОШИБКА: Не могу открыть libFAME!\n"
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s не поддерживается следующим фильтром/видеовыводом :(\n"

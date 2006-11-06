@@ -732,12 +732,9 @@ int guiGetEvent( int type,char * arg )
 #ifdef USE_LIBAVCODEC
 	 && !gtkVopLAVC
 #endif
-#ifdef USE_LIBFAME
-	 && !gtkVopFAME 
-#endif
 	 )
 	 {
-	  gtkMessageBox( GTK_MB_FATAL,MSGTR_NEEDLAVCFAME );
+	  gtkMessageBox( GTK_MB_FATAL,MSGTR_NEEDLAVC );
 	  guiIntfStruct.Playing=0;
 	  return True;
 	 }
@@ -823,18 +820,12 @@ int guiGetEvent( int type,char * arg )
 #ifdef USE_LIBAVCODEC
 	remove_vop( "lavc" );
 #endif
-#ifdef USE_LIBFAME
-	remove_vop( "fame" );
-#endif
 	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) )
 	 {
 	  if ( ( guiIntfStruct.StreamType != STREAMTYPE_DVD)&&( guiIntfStruct.StreamType != STREAMTYPE_VCD ) )
 	   {
 #ifdef USE_LIBAVCODEC
 	    if ( gtkVopLAVC ) add_vop( "lavc" );
-#endif
-#ifdef USE_LIBFAME
-	    if ( gtkVopFAME ) add_vop( "fame" );
 #endif
 	   }
 	 }

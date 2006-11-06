@@ -711,7 +711,6 @@ static char help_text[]=
 #define MSGTR_NEMDB "抱歉, 没有足够的内存用于绘制缓冲。"
 #define MSGTR_NEMFMR "抱歉, 没有足够的内存用于菜单渲染。"
 #define MSGTR_IDFGCVD "抱歉, 未找到 GUI-兼容的视频输出驱动。"
-#define MSGTR_NEEDLAVCFAME "抱歉, 不经过重新编码你不能用 DXR3/H+ 设备播放非 MPEG 文件。\n请在 DXR3/H+ 配置中启用 lavc 或者 fame。"
 #define MSGTR_UNKNOWNWINDOWTYPE "发现未知窗口类型 ..."
 
 // --- skin loader error messages
@@ -875,7 +874,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "请注意, 有些功能只有重新播放后能生效。"
 #define MSGTR_PREFERENCES_DXR3_VENC "视频编码器:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "使用 LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "使用 FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "西欧(ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "西欧(ISO-8859-15)"
@@ -1558,9 +1556,6 @@ static char help_text[]=
 #define MSGTR_MPCODECS_FullDRNotPossible "无法完全使用 DR, 尝试使用 SLICES!\n"
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "警告! 下一个滤镜不支持 SLICES, 等着 sig11...\n"
 #define MSGTR_MPCODECS_FunWhydowegetNULL "为什么我们得到了 NULL??\n"
-
-// libmpcodecs/vf_fame.c
-#define MSGTR_MPCODECS_FatalCantOpenlibFAME "致命错误: 不能打开 libFAME!\n"
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "下一个滤镜/视频输出不支持 %s :(\n"

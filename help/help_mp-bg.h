@@ -613,7 +613,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "За съжаление, няма достатъчно памет за draw buffer."
 #define MSGTR_NEMFMR "За съжаление, няма достатъчно памет за менюто."
 #define MSGTR_IDFGCVD "За съжаление, няма съвместим с GUI видео драйвер."
-#define MSGTR_NEEDLAVCFAME "За съжаление, не можете да възпроизвеждате различни от MPEG\nфайлове с вашето DXR3/H+ устройство без прекодиране.\nМоля разрешете lavc или fame в полето за конфигурация на DXR3/H+ ."
+#define MSGTR_NEEDLAVC "За съжаление, не можете да възпроизвеждате различни от MPEG\nфайлове с вашето DXR3/H+ устройство без прекодиране.\nМоля разрешете lavc в полето за конфигурация на DXR3/H+ ."
 #define MSGTR_UNKNOWNWINDOWTYPE "Неизвестен тип на прозорец ..."
 
 // --- skin loader error messages
@@ -767,7 +767,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Не забравяйте, да рестартирате възпроизвеждането за да влязат в сила някои опции!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Видео енкодер:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Използване на LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Използване на FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Западноевропейски Езици (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Западноевропейски Езици със Euro (ISO-8859-15)"

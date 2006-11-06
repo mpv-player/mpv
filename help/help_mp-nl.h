@@ -596,7 +596,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Sorry, niet genoeg geheugen voor tekenbuffer."
 #define MSGTR_NEMFMR "Sorry, niet genoeg geheugen voor menu rendering."
 #define MSGTR_IDFGCVD "Sorry, kon geen GUI compatibele video uitvoer driver vinden."
-#define MSGTR_NEEDLAVCFAME "Sorry, je kan geen niet-MPEG bestanden met je DXR3/H+ apparaat aspelen zonder het bestand te herencoderen.\nActiveer lavc of fame in het DXR3/H+ configuratiescherm."
+#define MSGTR_NEEDLAVC "Sorry, je kan geen niet-MPEG bestanden met je DXR3/H+ apparaat aspelen zonder het bestand te herencoderen.\nActiveer lavc in het DXR3/H+ configuratiescherm."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] fout in skin configuratie bestand op regel %d: %s"
@@ -743,7 +743,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Denk eraan, dat sommige functies het afspelen herstarten."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Gebruik LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Gebruik FAME" 
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "West Europese talen (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "West Europese talen with Euro (ISO-8859-15)"

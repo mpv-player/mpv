@@ -286,7 +286,6 @@ Codecs:
   --disable-libpostproc_so  disable shared libpostproc [autodetect]
   --disable-libavcodec_mpegaudio_hp disable high precision audio decoding
                                     in libavcodec [enabled]
-  --enable-libfame          enable libfame realtime encoder [autodetect]
   --disable-tremor-internal disable internal Tremor [enabled]
   --enable-tremor-low       enable lower accuracy internal Tremor [disabled]
   --enable-tremor-external  enable external Tremor [autodetect]
@@ -1564,7 +1563,6 @@ _libavformat_so=auto
 _libpostproc=auto
 _libpostproc_so=auto
 _libavcodec_mpegaudio_hp=yes
-_libfame=auto
 _mencoder=yes
 _x11=auto
 _xshape=auto
@@ -1959,8 +1957,6 @@ for ac_option do
   --enable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=yes	;;
   --disable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=no	;;
 
-  --enable-libfame)	_libfame=yes	;;
-  --disable-libfame)	_libfame=no	;;
   --enable-lirc)	_lirc=yes	;;
   --disable-lirc)	_lirc=no	;;
   --enable-lircc)	_lircc=yes	;;
@@ -4740,30 +4736,6 @@ fi
 echores "$_ivtv"
 
 
-echocheck "libfame"
-if test "$_libfame" = auto ; then
-  _libfame=no
-  test "$_dxr2" = yes && _libfame=auto
-  test "$_dxr3" = yes && _libfame=auto
-  test "$_dvb"  = yes && _libfame=auto
-fi
-if test "$_libfame" = auto ; then
-  _libfame=no
-  if test -d libfame && test -f libfame/fame.h ; then
-    # disable libfame on Cygwin as porting makes no sense
-    cygwin || _libfame=yes
-  else
-    _res_comment="no libfame dir"
-  fi
-fi
-echores "$_libfame"
-
-_def_libfame='#undef USE_LIBFAME'
-if test "$_libfame" = yes ; then
-  _def_libfame='#define USE_LIBFAME 1'
-  _ld_libfame='libfame/libfame.a'
-fi
-
 
 #########
 # AUDIO #
@@ -7423,7 +7395,7 @@ EXTRA_LIB = $_ld_extra $_ld_live $_ld_vstream $_ld_network $_ld_enca \
   $_ld_static $_ld_zlib $_ld_termcap $_ld_lirc $_ld_lircc $_ld_win32 \
   $_ld_win32libs $_ld_lm $_ld_libC $_ld_fribidi $_ld_smb $_ld_gif \
   $_ld_libcdio $_ld_dvdread $_ld_dvdnav $_macosx_frameworks $_ld_cdparanoia \
-  $_ld_libfame $_ld_xvid $_ld_x264 $_ld_mp3lame $_ld_libdts $_ld_mad \
+  $_ld_xvid $_ld_x264 $_ld_mp3lame $_ld_libdts $_ld_mad \
   $_ld_vorbis $_ld_libdv $_ld_theora $_ld_faad $_ld_speex $_xmms_lib \
   $_toolame_lib $_twolame_lib $_ld_faac $_ld_musepack $_ld_liblzo $_ld_png \
   $_ld_jpeg $_ld_alsa $_ld_nut $_ld_arch $_ld_iconv $_ld_mlib
@@ -7486,7 +7458,6 @@ CONFIG_LIBAVFORMAT_SO = $_libavformat_so
 CONFIG_LIBPOSTPROC = $_libpostproc
 CONFIG_LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
-FAME = $_libfame
 LIBDV = $_libdv
 XVID = $_xvid
 XVID4 = $_xvid4
@@ -7908,9 +7879,6 @@ $_def_mp3lib
 $_def_liba52
 $_def_libdts
 $_def_libmpeg2
-
-/* Use libfame encoder filter */
-$_def_libfame
 
 /* XAnim DLL support */
 $_def_xanim

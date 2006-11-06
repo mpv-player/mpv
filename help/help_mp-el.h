@@ -381,7 +381,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Λυπάμαι, δεν υπάρχει αρκετή μνήμη για εγγραφή  στον buffer."
 #define MSGTR_NEMFMR "Λυπάμαι, δεν υπάρχει αρκετή μνήμη για την εμφάνιση του μενού."
 #define MSGTR_IDFGCVD "Λυπάμαι, δεν βρέθηκε οδηγός εξόδου βίντεο που να είναι συμβατός με το GUI."
-#define MSGTR_NEEDLAVCFAME "Λυπάμαι, δεν μπορείτε να αναπαράγετε αρχεία που δεν είναι mpeg με τη συσκευή DXR3/H+ χωρίς επανακωδικοποίηση.\n Παρακαλώ ενεργοποιήστε lavc ή fame στο DXR3/H+ κουτί-διαλόγου."
+#define MSGTR_NEEDLAVC "Λυπάμαι, δεν μπορείτε να αναπαράγετε αρχεία που δεν είναι mpeg με τη συσκευή DXR3/H+ χωρίς επανακωδικοποίηση.\n Παρακαλώ ενεργοποιήστε lavc στο DXR3/H+ κουτί-διαλόγου."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] σφάλμα στο αρχείο προτιμήσεων του skin στη γραμμή %d: %s"
@@ -524,7 +524,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Προσοχή, μερικές λειτουργίες χρειάζονται επανεκκίνιση αναπαραγωγής."
 #define MSGTR_PREFERENCES_DXR3_VENC "Κωδικοποιητής βίντεο:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Χρήση του LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Χρήση του FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Δυτικές Ευρωπαϊκές γλώσσες (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Δυτικές Ευρωπαϊκές γλώσσες με Ευρώ (ISO-8859-15)"

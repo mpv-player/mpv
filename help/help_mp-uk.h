@@ -360,7 +360,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Вибачте, не вистачає пам'яті для відмальовування буферу."
 #define MSGTR_NEMFMR "Вибачте, не вистачає пам'яті для відображення меню."
 #define MSGTR_IDFGCVD "Вибачте, не знайдено відповідного до GUI вихідного відео драйверу."
-#define MSGTR_NEEDLAVCFAME "Вибачте, ви не можете грати не-MPEG файли на вашому DXR3/H+ пристрої без перекодування.\nБудь ласка, ввімкніть lavc або fame в панелі конфігурування DXR3/H+."
+#define MSGTR_NEEDLAVC "Вибачте, ви не можете грати не-MPEG файли на вашому DXR3/H+ пристрої без перекодування.\nБудь ласка, ввімкніть lavc в панелі конфігурування DXR3/H+."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[жупан] помилка у файлі конфігурації жупана, рядок %d  : %s" 
@@ -501,7 +501,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Message "Не забудьте, що вам треба перезапустити програвання для набуття чинності деяких параметрів!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Відео кодек:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Використовувати LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Використовувати FAME"
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Western European Languages with Euro (ISO-8859-15)"

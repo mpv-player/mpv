@@ -428,7 +428,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Cache "キャッシュ"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video エンコーダ:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "LAVC (FFmpeg)使用"
-#define MSGTR_PREFERENCES_DXR3_FAME "FAME 使用"
 #define MSGTR_PREFERENCES_FontEncoding1 "ユニコード"
 #define MSGTR_PREFERENCES_FontEncoding "エンコーディング:"
 #define MSGTR_PREFERENCES_Cache "キャッシュ on/off"
