@@ -3,13 +3,12 @@ Type: boolean
 Default: true
 Description: Upgrade existing system?
  It looks like you've configured MPlayer already. If you'd like to
- configure it with this program, I'll have to delete the old
- configuration /etc/mplayer/mplayer.conf.  Do you want to continue
- configuration with this program?  If you say "Yes", I'll go ahead and
- delete your old configuration and you can create it anew with this
- program.  If you say "No" I'm going to exit now since you don't want
- me to replace your existing files.  If you change your mind later,
- you can run 'dpkg-reconfigure mplayer'.
+ configure it with this program, the old configuration
+ /etc/mplayer/mplayer.conf will be deleted.  Do you want to continue
+ configuration with this program?  If you say "Yes", your old
+ configuration will be deleted and you can create it anew with this
+ program.  If you say "No" your existing files will be kept.  If you
+ change your mind later, you can run 'dpkg-reconfigure mplayer'.
 
 Template: mplayer/ttfont
 Type: select
