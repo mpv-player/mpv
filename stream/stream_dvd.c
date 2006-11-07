@@ -517,6 +517,89 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
     return chapter;
 }
 
+static double dvd_get_current_time(stream_t *stream, int cell)
+{
+    int i, tm;
+    dvd_priv_t *d = stream->priv;
+
+    tm=0;
+    if(!cell) cell=d->cur_cell;
+    for(i=0; i<d->cur_cell; i++) {
+        if(d->cur_pgc->cell_playback[i].block_type == BLOCK_TYPE_ANGLE_BLOCK &&
+           d->cur_pgc->cell_playback[i].block_mode != BLOCK_MODE_FIRST_CELL
+        )
+          continue;
+        tm += d->cell_times_table[i];
+    }
+    tm += dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
+
+    return (double)tm/1000.0;
+}
+
+static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec)
+{
+    unsigned int i, j, k, timeunit, ac_time, tmap_sector=0, cell_sector=0, vobu_sector=0;
+    int t=0, t2=0;
+    double tm, duration;
+    off_t pos = -1;
+    dvd_priv_t *d = stream->priv;
+    vts_tmapt_t *vts_tmapt = vts_file->vts_tmapt;
+
+    if(!vts_file->vts_tmapt || sec < 0)
+        return 0;
+
+    duration = (double) mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1) / 1000.0f;
+    if(sec > duration)
+      return 0;
+
+    i=d->cur_pgc_idx;
+    timeunit = vts_tmapt->tmap[i].tmu;
+    for(j = 0; j < vts_tmapt->tmap[i].nr_of_entries; j++) {
+      ac_time = timeunit * (j + 1);
+      if(ac_time >= sec)
+        break;
+      tmap_sector = vts_tmapt->tmap[i].map_ent[j] & 0x7fffffff;
+    }
+    //search enclosing cell
+    for(i=0; i<d->cur_pgc->nr_of_cells; i++) {
+      if(tmap_sector >= d->cur_pgc->cell_playback[i].first_sector && tmap_sector <= d->cur_pgc->cell_playback[i].last_sector) {
+        cell_sector = d->cur_pgc->cell_playback[i].first_sector;
+        break;
+      }
+    }
+
+    pos = ((off_t)cell_sector)<<11;
+    stream_seek(stream, pos);
+    do {
+      stream_skip(stream, 2048);
+      t = dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
+    } while(!t);
+    tm = dvd_get_current_time(stream, 0);
+
+    pos = ((off_t)tmap_sector)<<11;
+    stream_seek(stream, pos);
+    //now get current time in terms of the cell+cell time offset
+    memset(&d->dsi_pack.dsi_gi.c_eltm, 0, sizeof(dvd_time_t));
+    while(tm <= sec) {
+        if(!stream_skip(stream, 2048))
+          break;
+        tm = dvd_get_current_time(stream, 0);
+    };
+    tmap_sector = stream->pos >> 11;
+
+    //search closest VOBU sector
+    k=(vts_file->vts_vobu_admap->last_byte + 1 - VOBU_ADMAP_SIZE)/4; //entries in the vobu admap
+    for(i=1; i<k; i++) {
+      if(vts_file->vts_vobu_admap->vobu_start_sectors[i] > tmap_sector)
+        break;
+    }
+    vobu_sector = vts_file->vts_vobu_admap->vobu_start_sectors[i-1];
+    pos = ((off_t)vobu_sector) << 11;
+    stream_seek(stream, pos);
+
+    return 1;
+}
+
 static int control(stream_t *stream,int cmd,void* arg) 
 {
     dvd_priv_t *d = stream->priv;
@@ -545,6 +628,23 @@ static int control(stream_t *stream,int cmd,void* arg)
             *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title-1, d->cur_cell);
             return 1;
         }
+        case STREAM_CTRL_GET_CURRENT_TIME:
+        {
+            double tm = dvd_get_current_time(stream, 0);
+            if(tm != -1) {
+              tm *= 1000.0f;
+              *((unsigned int *)arg) = (unsigned int) tm;
+              return 1;
+            }
+            break;
+        }
+        case STREAM_CTRL_SEEK_TO_TIME:
+        {
+            dvd_priv_t *d = stream->priv;
+            if(dvd_seek_to_time(stream, d->vts_file, *((double*)arg)))
+              return 1;
+            break;
+        }
     }
     return STREAM_UNSUPORTED;
 }
@@ -553,6 +653,7 @@ static int control(stream_t *stream,int cmd,void* arg)
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
+  int k;
 
   filename = strdup(stream->url);
   mp_msg(MSGT_OPEN,MSGL_V,"URL: %s\n", filename);
@@ -857,6 +958,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      */
     pgc_id = vts_file->vts_ptt_srpt->title[ttn].ptt[dvd_chapter].pgcn; // local
     pgn  = vts_file->vts_ptt_srpt->title[ttn].ptt[dvd_chapter].pgn;  // local
+    d->cur_pgc_idx = pgc_id-1;
     d->cur_pgc = vts_file->vts_pgcit->pgci_srp[pgc_id-1].pgc;
     d->cur_cell = d->cur_pgc->program_map[pgn-1] - 1; // start playback here
     d->packs_left=-1;      // for Navi stuff
@@ -873,6 +975,13 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     d->cur_pack = d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
     d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;
     mp_msg(MSGT_DVD,MSGL_V, "DVD start cell: %d  pack: 0x%X-0x%X  \n",d->cur_cell,d->cur_pack,d->cell_last_pack);
+
+    //assign cell_times_table
+    d->cell_times_table = malloc(sizeof(unsigned int) * d->cur_pgc->nr_of_cells);
+    if(d->cell_times_table == NULL)
+      return STREAM_UNSUPORTED;
+    for(k=0; k<d->cur_pgc->nr_of_cells; k++)
+      d->cell_times_table[k] = dvdtimetomsec(&d->cur_pgc->cell_playback[k].playback_time);
 
     // ... (unimplemented)
     //    return NULL;

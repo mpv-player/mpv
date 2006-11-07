@@ -32,10 +32,12 @@ typedef struct {
   int last_cell;
   int cur_pack;
   int cell_last_pack;
+  int cur_pgc_idx;
 // Navi:
   int packs_left;
   dsi_t dsi_pack;
   int angle_seek;
+  unsigned int *cell_times_table;
 // audio datas
   int nr_of_channels;
   stream_language_t audio_streams[32];
