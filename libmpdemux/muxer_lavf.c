@@ -83,7 +83,7 @@ static int mp_close(URLContext *h)
 
 static int mp_read(URLContext *h, unsigned char *buf, int size)
 {
-	fprintf(stderr, "READ %d\n", size);
+	mp_msg(MSGT_MUXER, MSGL_WARN, "READ %d\n", size);
 	return -1;
 }
 
@@ -96,7 +96,7 @@ static int mp_write(URLContext *h, unsigned char *buf, int size)
 static offset_t mp_seek(URLContext *h, offset_t pos, int whence)
 {
 	muxer_t *muxer = (muxer_t*)h->priv_data;
-	fprintf(stderr, "SEEK %"PRIu64"\n", (int64_t)pos);
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "SEEK %"PRIu64"\n", (int64_t)pos);
 	return fseeko(muxer->file, pos, whence);
 }
 
