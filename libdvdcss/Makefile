@@ -20,7 +20,6 @@ ifeq ($(OPTFLAGS),)
 OPTFLAGS = -mcpu=pentium -march=pentium -O4
 endif
 
-# -funroll-loops  removed, triggered gcc 3.0.4 (3.x?) bug
 CFLAGS= -I.. $(OPTFLAGS) -D__USE_UNIX98 -D_GNU_SOURCE \
 	-DHAVE_LIMITS_H -DHAVE_ERRNO_H -DHAVE_INTTYPES_H -DHAVE_UNISTD_H \
 	-D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DVERSION=\"1.2.9\"
