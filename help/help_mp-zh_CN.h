@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r20440
+// Synced with help_mp-en.h r20739
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; pass 3; section/subsection;  XScreenSaver; keycolor;  
@@ -558,7 +558,11 @@ static char help_text[]=
 #define MSGTR_TooManyVideoInBuffer "\n缓冲中视频包太多(%d in %d 字节)。\n"
 #define MSGTR_MaybeNI "(也许你播放了一个非交错的流/文件或者是编解码失败)?\n" \
 		      "对于 AVI 文件, 尝试用 -ni 选项锁定非交错模式。\n"
+#define MSGTR_WorkAroundBlockAlignHeaderBug "AVI: 绕过 CBR-MP3 nBlockAlign 头部错误!\n"
 #define MSGTR_SwitchToNi "\n检测到糟糕的交错格式的 AVI 文件 - 切换到 -ni 模式...\n"
+#define MSGTR_InvalidAudioStreamNosound "AVI: 无效的音频流 ID: %d - 忽略 (nosound)\n"
+#define MSGTR_InvalidAudioStreamUsingDefault "AVI: 无效的视频流 ID: %d - 忽略 (使用默认值)\n"
+#define MSGTR_ON2AviFormat "ON2 AVI 格式"
 #define MSGTR_Detected_XXX_FileFormat "检测到 %s 文件格式。\n"
 #define MSGTR_DetectedAudiofile "检测到音频文件。\n"
 #define MSGTR_NotSystemStream "非 MPEG 系统的流格式... (可能是输送流?)\n"
@@ -711,6 +715,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "抱歉, 没有足够的内存用于绘制缓冲。"
 #define MSGTR_NEMFMR "抱歉, 没有足够的内存用于菜单渲染。"
 #define MSGTR_IDFGCVD "抱歉, 未找到 GUI-兼容的视频输出驱动。"
+#define MSGTR_NEEDLAVC "抱歉, 不能用没有重编码的 DXR3/H+ 设备播放 non-MPEG 文件\n请启用 DXR3/H+ 配置盒中的 lavc。"
 #define MSGTR_UNKNOWNWINDOWTYPE "发现未知窗口类型 ..."
 
 // --- skin loader error messages
@@ -1438,6 +1443,29 @@ static char help_text[]=
 // demux_demuxers.c
 
 #define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer 错误: 分路器错误: 不是 vd, ad 或 sd。\n"
+
+// demux_mkv.c
+#define MSGTR_MPDEMUX_MKV_ZlibInitializationFailed "[mkv] zlib 初始化失败。\n"
+#define MSGTR_MPDEMUX_MKV_ZlibDecompressionFailed "[mkv] zlib 解压失败。\n"
+#define MSGTR_MPDEMUX_MKV_LzoInitializationFailed "[mkv] lzo 初始化失败。\n"
+#define MSGTR_MPDEMUX_MKV_LzoDecompressionFailed "[mkv] lzo 解压失败。\n"
+#define MSGTR_MPDEMUX_MKV_TrackEncrypted "[mkv] 轨迹号 %u 已加密但解密还没\n[mkv] 实现。跳过轨迹。\n"
+#define MSGTR_MPDEMUX_MKV_UnknownContentEncoding "[mkv] 轨迹 %u 的内容编码类型未知。跳过轨迹。\n"
+#define MSGTR_MPDEMUX_MKV_UnknownCompression "[mkv] 轨迹 %u 已压缩, 用了未知的/不支持的压缩\n[mkv] 算法(%u)。跳过轨迹。\n"
+#define MSGTR_MPDEMUX_MKV_ZlibCompressionUnsupported "[mkv] 轨迹 %u 已用 zlib 压缩但 mplayer 还没编译成\n[mkv] 支持 zlib 压缩。跳过轨迹。\n"
+#define MSGTR_MPDEMUX_MKV_TrackIDName "[mkv] 轨迹 ID %u: %s (%s) \"%s\", %s\n"
+#define MSGTR_MPDEMUX_MKV_TrackID "[mkv] 轨迹 ID %u: %s (%s), %s\n"
+#define MSGTR_MPDEMUX_MKV_UnknownCodecID "[mkv] 未知的/不支持的 CodecID (%s) 或者缺少的/坏的 CodecPrivate\n[mkv] 数据(轨迹 %u)。\n"
+#define MSGTR_MPDEMUX_MKV_FlacTrackDoesNotContainValidHeaders "[mkv] FLAC 轨迹没含有效的头部。\n"
+#define MSGTR_MPDEMUX_MKV_UnknownAudioCodec "[mkv] 未知的/不支持的音频编解码器 ID '%s' 对于轨迹 %u 或者缺少的/有缺点的\n[mkv] 编解码器私有数据。\n"
+#define MSGTR_MPDEMUX_MKV_SubtitleTypeNotSupported "[mkv] 不支持字幕类型 '%s'。\n"
+#define MSGTR_MPDEMUX_MKV_WillPlayVideoTrack "[mkv] 将播放视频轨迹 %u。\n"
+#define MSGTR_MPDEMUX_MKV_NoVideoTrackFound "[mkv] 没有找到/所要的视频轨迹。\n"
+#define MSGTR_MPDEMUX_MKV_NoAudioTrackFound "[mkv] 没有找到/所要的音频轨迹。\n"
+#define MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack "[mkv] 将播放字幕轨迹 %u。\n"
+#define MSGTR_MPDEMUX_MKV_NoBlockDurationForSubtitleTrackFound "[mkv] 警告: 对于所找到的字幕轨迹没有 BlockDuration。\n"
+#define MSGTR_MPDEMUX_MKV_TooManySublines "[mkv] Warning: 太多的字幕要渲染, 跳过。\n"
+#define MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst "\n[mkv] 警告: 太多的字幕要渲染, %i 以后跳过。n"
 
 // demux_nuv.c
 
