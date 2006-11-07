@@ -1660,6 +1660,8 @@ demux_mkv_read_seekhead (demuxer_t *demuxer)
 
   mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing seek head ] ---------\n");
   length = ebml_read_length (s, NULL);
+  /* off now holds the position of the next element after the seek head. */
+  off = stream_tell (s) + length;
   while (length > 0 && !res)
     {
 
@@ -1747,6 +1749,13 @@ demux_mkv_read_seekhead (demuxer_t *demuxer)
 
       stream_seek (s, saved_pos);
     }
+  if (res)
+    {
+      /* If there was an error then try to skip this seek head. */
+      if (stream_seek (s, off))
+        res = 0;
+    }
+  else
   if (length > 0)
      stream_seek (s, stream_tell (s) + length);
   mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing seek head ] ---------\n");
