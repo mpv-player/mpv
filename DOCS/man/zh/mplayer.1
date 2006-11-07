@@ -1,9 +1,9 @@
-.\" Partial sync with en/mplayer.1 r20684
-.\" Only mid part unfinished (3 filters' sections and 2 mencoder's sections),
-.\"   also see line 3633.
+.\" Partial sync with en/mplayer.1 r20739
+.\" Only 3 sections unfinished (i.e. "AUDIO/VEDIO FILTERS" and "GENERAL ENCODING..."),
+.\"   also see line 4070.
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; palytree in parent list; colorkey; retrace; desync; downmix;
-.\"   wrapper script ... shellescapes; keyframe;
+.\"   wrapper script ... shellescapes; keyframe; deblock; dering;
 .\"   encoding audio rate; \&; alphamap; 
 .\"   aligned buffers; instancenumber; 
 .\" 
@@ -622,8 +622,8 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .TP
 .B "\-quiet\ "
 使得控制台消息少输出; 特别地, 阻止状态行
-(如\& A:   0.7 V:   0.6 A-V:  0.068 ...)的显示。
-对慢机器或者不能正确处理回车符(如\& \\r)的旧机器特别有用。
+(即 A:   0.7 V:   0.6 A-V:  0.068 ...)的显示。
+对慢机器或者不能正确处理回车符(即 \\r)的旧机器特别有用。
 .
 .TP
 .B \-priority <优先> (仅适用于 Windows)
@@ -1202,12 +1202,12 @@ HTTP 请求时发送 cookies。
 .TP
 .B \-forceidx
 强制索引重建。
-对索引损坏的文件(A/V 不同步等等)有用。
+对索引受损的文件(A/V 不同步等等)有用。
 这使得不可能搜索的文件启用搜索。
 你能使用 MEncoder 永久性地修复索引 (请参见文档)。
 .br
 .I 注意:
-此选项仅对原本支持搜索的媒体有效 (如: 没有标准输入, 管道, 等)。
+此选项仅对原本支持搜索的媒体有效 (即不能是: 标准输入, 管道, 等)。
 .
 .TP
 .B \-fps <浮点数>
@@ -1231,7 +1231,7 @@ HTTP 请求时发送 cookies。
 对于损坏的/\:不完整的下载, 或制作低劣的文件有用。
 .br
 .I 注意:
-此选项仅对原本支持搜索的媒体有效 (如 \& 没有标准输入, 管道, 等)。
+此选项仅对原本支持搜索的媒体有效 (即不能是: 标准输入, 管道, 等)。
 .
 .TP
 .B \-ipv4-only-proxy (仅适用于网络)
@@ -2083,7 +2083,7 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 指定字幕文件的帧率(默认值是: 电影的帧率)。
 .br
 .I 注意:
-仅用于基于帧的字幕文件, 比如 MicroDVD 格式。
+仅用于基于帧的字幕文件, 即 MicroDVD 格式。
 .
 .TP
 .B \-subpos <0\-100> (用于 \-vf expand) (仅用于 OSD)
@@ -2116,7 +2116,7 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 .TP
 .B \-vobsub <无后缀名的 VOBsub 文件名>
 指定用于字幕显示的 VOBsub 文件。
-不得不是无后缀名的完整路径名, 例如没有".idx", ".ifo" 及 ".sub"。
+不得不是无后缀名的完整路径名, 即没有".idx", ".ifo" 及 ".sub"。
 .
 .TP
 .B \-vobsubid <0\-31>
@@ -2152,7 +2152,7 @@ SOUND_DEVICE_NAMES。
 .br
 .I 注意:
 ALSA 混音通道名称后面跟的数字必须用 <名称,数字> 格式指定, 
-例如 alsamixer 的通道标为 'PCM 1' 的必须转换为
+即 alsamixer 中通道标为 'PCM 1' 的必须转换为
 .BR PCM,1 。
 .
 .TP
@@ -3453,7 +3453,7 @@ iTVC16) MPEG 解码器芯片 (Hauppauge WinTV PVR-150/250/350/500)
 .RS
 .sp 1
 .I 注意:
-如果你不指定任何选项, 输出的是逐行的(比如没有交错的)。
+如果你不指定任何选项, 输出的是逐行的(即没有交错的)。
 .RE
 .
 .TP
@@ -3571,13 +3571,13 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .
 .TP
 .B \-ac <[-|+]编解码器1,[-|+]编解码器2,...[,]>
-指定使用音频编解码器的优先级列表, 按照它们在 codecs.conf 中的编解码器名称。
+按照在 codecs.conf 中音频编解码器的名称, 指定使用它们的优先级列表。
 编解码器名称前使用 '-' 表示忽略它。
 编解码器名称前使用 '+' 表示锁定它, 这有可能会崩溃!
 如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
 .br
 .I 注意:
-可用的编解码器参见 \-ac help 的列表。
+可用的编解码器的完整列表请参见 \-ac help。
 .sp 1
 .I 示例:
 .PD 0
@@ -3630,163 +3630,275 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 同 \-af 一样。
 .RE
 .
-.\" The below is only synced with r9821 (except sections from "... VARIABLES" to bottom)
 .TP
 .B \-afm <驱动1,驱动2,...>
-设置可用的音频驱动优先级列表, 按照它们在codecs.conf中的驱动名称.
-当都不可用是使用默认后备驱动.
+按照在 codecs.conf 中音频编解码器族的名称, 指定使用它们的优先级列表。
+如果给定的编解码器族没一个能工作, 使用默认的后备编解码器族。
+如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
 .br
 .I 注意:
-全部可用编解码器的完整列表参见\-afm help的输出.
+可用的编解码器族的完整列表请参见 \-afm help。
 .sp 1
 .I 示例:
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-先尝试FFmpeg的libavcodec(mp1/\:2/\:3)编解码器
+先尝试 FFmpeg 的 libavcodec 编解码器。
 .IPs "\-afm acm,dshow"
-先尝试Win32编解码器
+先尝试 Win32 编解码器。
 .RE
 .PD 1
 .
 .TP
-.B \-aspect <比率>
-设置电影的长宽比. MPEG文件会自动检测, 但大多数AVI文件不会.
-
+.B \-aspect <高宽比> (也请参见 \-zoom)
+重载影片的高宽比, 万一播放中的文件的高宽比信息不正确或缺少。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
-\-aspect 4:3或\-aspect 1.3333
+\-aspect 4:3  或 \-aspect 1.3333
 .br
-\-aspect 16:9或\-aspect 1.7777
+\-aspect 16:9 或 \-aspect 1.7777
 .RE
 .PD 1
-.
-.TP
-.B \-flip
-上下翻转图像.
-.TP
-.B \-lavdopts <选项1:选项2:...> (调试代码)
-如果使用libavcodec解码, 你可以在这里设置参数.
-
-.I 示例:
-.PD 0
-.RSs
-\-lavdopts bug=1
-.RE
-.PD 1
-
-.RS
-.I 注意:
-.br
-只要加上你想要启用的项目的参数即可.
-.br
-可用选项有:
-.RE
-.
-.RSs
-.IPs ec
-错误隐藏:
-.RSss
-1: 对损坏的MB使用强柔化马赛克滤镜
-.br
-2: MV重复搜索(很慢)
-.br
-3: 所有(默认)
-.REss
-.IPs er=<参数>
-错误恢复:
-.RSss
-.br
-0: 禁用
-.br
-1: 小心 (用于损坏的编码器)
-.br
-2: 正常 (默认) (用于正常的编码器)
-.br
-3: 扩张性的 (更多检查但可能即使对有效比特流也导致问题)
-.br
-4: 非常扩张性的
-.REss
-.IPs bug=<参数>
-手工绕过编码器bug:
-.RSss
-0: 无
-.br
-1: 自动检测bugs (默认)
-.br
-2 (msmpeg4v3): 由老式lavc生成的msmpeg4v3文件(不自动检测)
-.br
-4 (mpeg4): xvid交错bug(如果fourcc==XVIX会自动检测)
-.br
-8 (mpeg4): UMP4(如果fourcc==UMP4会自动检测)
-.br
-16 (mpeg4): padding bug(自动检测)
-.br
-32 (mpeg4): 非法vlc bug(每个fourcc都自动检测)
-.br
-64 (mpeg4): XVID和DIVX qpel的bug(每个fourcc/版本都自动检测)
-.br
-128 (mpeg4): 老的标准的qpel(每个fourcc/版本都自动检测)
-.br
-256 (mpeg4): 另一个qpel的bug(每个fourcc/版本都自动检测)
-.br
-512 (mpeg4): direct-qpel-blocksize的bug(每个fourcc/版本都自动检测)
-.br
-1024 (mpeg4): edge padding的bug(每个fourcc/版本都自动检测)
-.REss
-.IPs idct=<0\-99>
-(参见lavcopts)
-想要最好的解码质量应该在编码和解码时使用相同的idct算法.
-不过这可能会牺牲一些精确性.
-.IPs gray
-只解码灰度图像(比彩色解码快一点)
-.RE
 .
 .TP
 .B \-noaspect
-禁用电影长宽比自动尝试.
+停用影片高宽比的自动补偿。
+.
+.TP
+.B "\-flip \ "
+上下翻转图像。
+.
+.TP
+.B \-lavdopts <选项1:选项2:...> (调试代码)
+指定 libavcodec 解码参数。
+用逗号分隔多重选项。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
+.RE
+.PD 1
+.sp 1
+.RS
+可用的选项有:
+.RE
+.RSs
+.IPs bitexact
+对所有的解码步骤只用 bit-exact 算法 (用于编解码测试)。
+.IPs bug=<参数值>
+手工绕过编码器错误:
+.RSss
+0: 无
+.br
+1: 自动检测错误 (默认)
+.br
+2 (msmpeg4v3): 老式 lavc 生成的 msmpeg4v3 文件 (不自动检测)
+.br
+4 (mpeg4): XviD 交错错误 (如果 fourcc==XVIX, 会自动检测)
+.br
+8 (mpeg4): UMP4 (如果 fourcc==UMP4, 会自动检测)
+.br
+16 (mpeg4): 填补错误 (自动检测)
+.br
+32 (mpeg4): 非法 vlc 错误 (每个 fourcc 都自动检测)
+.br
+64 (mpeg4): XviD 或 DivX qpel 错误 (每个 fourcc/\:版本都自动检测)
+.br
+128 (mpeg4): 旧标准的 qpel (每个 fourcc/\:版本都自动检测)
+.br
+256 (mpeg4): 另一个 qpel 错误 (每个 fourcc/\:版本都自动检测)
+.br
+512 (mpeg4): direct-qpel-blocksize 错误 (每个 fourcc/\:版本都自动检测)
+.br
+1024 (mpeg4): 边沿填补错误 (每个 fourcc/\:版本都自动检测)
+.REss
+.IPs debug=<参数值>
+显示调试信息。
+.RSss
+.br
+0: 停用
+.br
+1: 图像信息
+.br
+2: 率控制
+.br
+4: 比特流
+.br
+8: 宏块(MB)类型
+.br
+16: 每块的量子化参数(QP)
+.br
+32: 运动矢量
+.br
+0x0040: 运动矢量可视化 (使用 \-noslices)
+.br
+0x0080: 宏块(MB)跳略
+.br
+0x0100: 启动码
+.br
+0x0200: PTS
+.br
+0x0400: 错误恢复力(resilience)
+.br
+0x0800: 内存管理控制操作(H.264)
+.br
+0x1000: 错误
+.br
+0x2000: 可视化量子化参数(QP), QP 值越低着色越绿。
+.br
+0x4000: 可视化块型。
+.REss
+.IPs ec=<参数值>
+设置错误隐藏策略。
+.RSss
+1: 对受损的宏块使用强去块(deblock)过滤器。
+.br
+2: 往返式运动矢量(MV)搜寻 (慢)
+.br
+3: 全部 (默认)
+.REss
+.IPs er=<参数值>
+设置错误恢复力策略。
+.RSss
+.br
+0: 停用
+.br
+1: 谨慎的 (应该能用于破编码器。)
+.br
+2: 正常的 (默认) (用于正常的编码器。)
+.br
+3: 挑衅的 (更多检查, 但是连有效的比特流也可能导致问题。)
+.br
+4: 非常挑衅的
+.REss
+.IPs "fast (仅用于 MPEG-2)"
+启用优化, 不遵从产品说明书, 且有导致问题的潜在可能性, 像较简单的去量子化, 
+假定使用默认的量子化矩阵, 假定 YUV 4:2:0 且跳过一些检测受损比特流的检查。
+.IPs "gray\ "
+只灰度图像解码 (比彩色解码快一点)
+.IPs "idct=<0\-99> (参见 \-lavcopts)"
+为了最佳的解码品质, 使用与编码和解码时相同的 IDCT 算法。
+不过这可能会牺牲一些精确性。
+.IPs lowres=<数值>[,<宽度>]
+以较低的解析度解码。
+低解析度解码还不被所有的边界码器支持, 且常常导致难看的图像。
+这不是有错误, 只是一个副作用, 全解析度时不解码。
+.RSss
+.br
+0: 停用
+.br
+1: 1/2 解析度
+.br
+2: 1/4 解析度
+.br
+3: 1/8 解析度
+.REss
+.RS
+如果 <宽度> 指定了, 就使用了低解析度解码, 
+只要视频的宽度宽过(is major than)或等于 <宽度>。
+.RE
+.IPs "sb=<数值> (仅用于 MPEG-2)"
+跳过宏块底部的制定行数。
+.IPs "st=<数值> (仅用于 MPEG-2)"
+跳过宏块顶部的制定行数。
+.IPs skiploopfilter=<跳略值> (仅用于 H.264)
+在 H.264 解码期间跳过循环过滤器(亦称为"去块")。
+既然被过滤的帧被当作解码依赖帧的引用, 在品质上
+这比不进行去块步骤, 如不对 MPEG-2 视频去块, 效果更差。
+但是至少对高比特流的 HDTV 提供了大的提速且不损失视觉品质。
+.sp 1
+<跳略值> 可以是以下的值之一:
+.RSss
+.br
+none: 从不跳过。
+.br
+default: 跳过无用的处理步骤 (如 AVI 中的 0 大小的包)。
+.br
+nonref: 跳过没被引用的帧 (即不用于解码其它的帧, 错误不能"兴旺")。
+.br
+bidir: 跳过 B-帧。
+.br
+nonkey: 跳过所有的帧除了 keyframes。
+.br
+all: 跳过所有的帧。
+.REss
+.IPs skipidct=<跳略值> (仅用于 MPEG1/2)
+跳过 IDCT 步骤。
+在几乎所有的情况下此步骤使得品质降级许多 
+(可用的跳略值请参见 skiploopfilter)。
+.IPs skipframe=<跳略值>
+完全跳过解码帧。
+大的提速, 但是有痉挛的动作或有时糟糕的图像 
+(可用的跳略值请参见 skiploopfilter)。
+.IPs threads=<1\-8>
+用于解码的线程数 (默认值是: 1)
+.IPs vismv=<参数值>
+可视化运动矢量。
+.RSss
+.br
+0: 停用
+.br
+1: 可视化 P-帧的前瞻运动矢量。
+.br
+2: 可视化 B-帧的前瞻运动矢量。
+.br
+4: 可视化 B-帧的后瞻运动矢量。
+.REss
+.IPs vstats
+打印一些统计量并保存到 ./vstats_*.log。
+.RE
+.
 .TP
 .B \-noslices
-禁用把视频分隔成16像素高的条/\:带绘制的方式, 而是一次绘制整个帧.
-可能更快或更慢, 取决于显卡/\:缓存.
-它只对libmpeg2和libavcodec编解码器有效
+停用 16-像素高的片/\:条方式绘制视频, 而是一次绘制整个帧。
+可能更快或更慢, 取决于显卡和可用的缓存。
+它只对 libmpeg2 和 libavcodec 编解码器有效。
 .
 .TP
 .B \-nosound
-不播放/\:编码声音.
+不播放/\:编码声音。
+对基准测试有用。
+.
 .TP
-.B \-pp <质量> (参见\-vf pp选项!)
-设置DLL的后期处理级别.
-这个选项不能用于MPlayer的后期处理滤镜,
-但可以用于有内部后期处理例程的Win32 DirectShow DLL.
-
-\-pp的参数范围依编解码器不同, 大部分为0\-6,
-0=禁用 6=最慢/\:最好.
+.B \-novideo
+不播放/\:编码视频。
+但在许多情况下不工作, 请使用 \-vc null \-vo null 替代。
+.
 .TP
-.B \-pphelp (参见\-vf pp选项)
-列出可用后期处理滤镜和他们的使用方法简介.
+.B \-pp <品质> (也请参见 \-vf pp)
+设置 DLL 的后期处理级别。
+仅可以用于有内部后期处理例程的 Win32 DirectShow DLL。
+此选项不再对 \-vf pp 有用。
+\-pp 参数值的有效范围依编解码器不同而不同, 大部分为 
+0\-6, 其中 0=禁用 6=最慢/\:最好。
+.
 .TP
-.B \-ssf <mode>
-设置SwScaler参数.
-
-.I 示例
+.B \-pphelp (也请参见 \-vf pp)
+显示可用的后期处理滤镜及其用法的简介。
+.
+.TP
+.B \-ssf <模式>
+指定软件缩放参数。
+.sp 1
+.I 示例:
 .PD 0
 .RSs
 \-vf scale \-ssf lgb=3.0
 .RE
 .PD 1
-
 .PD 0
 .RSs
 .IPs lgb=<0\-100>
-高斯模糊滤镜(亮度)
+高斯柔化过滤器 (亮度)
 .IPs cgb=<0\-100>
-高斯模糊滤镜(色度)
-.IPs ls=<0\-100>
-锐化滤镜(亮度)
-.IPs cs=<0\-100>
-锐化滤镜(色度)
+高斯柔化过滤器 (色度)
+.IPs ls=<-100\-100>
+锐化过滤器 (亮度)
+.IPs cs=<-100\-100>
+锐化过滤器 (色度)
 .IPs chs=<h>
 水平色度偏移
 .IPs cvs=<v>
@@ -3796,8 +3908,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .
 .TP
 .B \-stereo <模式>
-选择MP2/\:MP3立体声输出模式.
-
+选择 MP2/\:MP3 立体声输出的类型。
 .PD 0
 .RSs
 .IPs 0
@@ -3810,32 +3921,28 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .PD 1
 .
 .TP
-.B \-sws <软件缩放类型> (参见\-vf scale选项)
-这个选项用来设置\-zoom选项使用的软件缩放的质量(还有速度, 相对的).
-用于x11或其它没有硬件加速的视频输出.
+.B \-sws <软件缩放类型> (也请参见 \-vf scale 和 \-zoom)
+指定软件缩放算法用于 \-zoom 选项。
+这对缺少硬件加速, 如 x11 的视频输出驱动不影响。
+.sp 1
 可用选项有:
-
-.I 注意:
-.br
-对于\-sws\ 2和7, 可以用\-vf scale的缩放参数(p)来设置锐化(0(柔化) \- 100(锐化)),
-对于\-sws 9, 这个参数设置滤镜长度参数(1 \- 10).
-
+.sp 1
 .PD 0
 .RSs
 .IPs 0
-快速二次线性(默认)
+快速二次线性
 .IPs 1
-二次线性
+快速二次线性
 .IPs 2
-二次立方(质量很好)
+二次立方 (品质好) (默认是)
 .IPs 3
 实验中
 .IPs 4
-最短距离 (bad quality)
+最短距离 (品质差)
 .IPs 5
-区域
+area
 .IPs 6
-亮度二次立方/\:色度二次线性
+亮度二次立方/色度二次线性
 .IPs 7
 高斯
 .IPs 8
@@ -3843,34 +3950,190 @@ sincR
 .IPs 9
 lanczos
 .IPs 10
-双三次样条曲线
+自然二次立方样条曲线
 .RE
 .PD 1
+.sp 1
+.RS
+.I 注意:
+有些 \-sws 选项可调。
+视频缩放过滤器的描述有更多的信息。
+.RE
 .
 .TP
-.B \-vc <[-]编解码器1,[-]编解码器2,...[,]>
-设置可用编解码器的优先级列表, 按照它们在codecs.conf中的编解码器名称.
-在名称前加'-'表示忽略该编解码器.
-
+.B \-vc <[-|+]编解码器1,[-|+]编解码器2,...[,]>
+按照在 codecs.conf 中视频编解码器的名称, 指定使用它们的优先级列表。
+编解码器名称前使用 '-' 表示忽略它。
+编解码器名称前使用 '+' 表示锁定它, 这有可能会崩溃!
+如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
+.br
 .I 注意:
-.br
-全部可用编解码器的完整列表参见\-vc help的输出.
-.br
-如果列表结尾有一个',' 将可以使用没有列出的编解码器作为后备.
-
+可用的编解码器的完整列表请参见 \-vc help。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
 .IPs "\-vc divx"
-指定使用Win32/\:VFW DivX编解码器, 没有后备
-.IPs "\-vc divx4,"
-先尝试divx4linux编解码器, 然后使用后备
+锁定 Win32/\:VfW DivX 编解码器, 无后备。
 .IPs "\-vc -divxds,-divx,"
-尝试除了Win32 DivX编解码器之外的编解码器
+跳过 Win32 DivX 编解码器。
 .IPs "\-vc ffmpeg12,mpeg12,"
-尝试libavcodec的MPEG1/\:2编解码器, 然后尝试libmpeg2, 然后其它
+先尝试 libavcodec 的 MPEG-1/2 编解码器, 其次是 libmpeg2, 然后是其它的。
 .RE
 .PD 1
+.
+.TP
+.B \-vfm <驱动1,驱动1,...>
+按照在 codecs.conf 中视频编解码器族的名称, 指定使用它们的优先级列表。
+如果给定的编解码器族没一个能工作, 使用默认的后备编解码器族。
+如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
+.br
+.I 注意:
+可用的编解码器族的完整列表请参见 \-vfm help。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+.IPs "\-vfm ffmpeg,dshow,vfw"
+先尝试 libavcodec, 其次是 Directshow, 然后 VfW 编解码器, 
+最后如果它们都不工作使用其它后备的。
+.IPs "\-vfm xanim"
+先尝试 XAnim 编解码器。
+.RE
+.PD 1
+.
+.TP
+.B \-x <x> (也请参见 \-zoom) (仅用于 MPlayer)
+缩放图像到宽度 <x> (如果软件/\:硬件缩放可用)。
+停用高宽比计算。
+.
+.TP
+.B \-xvidopts <选项1:选项2:...>
+指定使用XviD解码时的附加参数。
+.br
+.I 注意:
+既然 libavcodec 快过 XviD 你可能想使用 
+libavcodec 后期处理过滤器 (\-vf pp) 和解码器 (\-vfm ffmpeg) 来替换。
+.sp 1
+XviD 的内部后期处理过滤器有:
+.PD 0
+.RSs
+.IPs deblock-chroma (也请参见 \-vf pp)
+色度去块(deblock)过滤器
+.IPs deblock-luma (也请参见 \-vf pp)
+亮度去块(deblock)过滤器
+.IPs dering-luma (也请参见 \-vf pp)
+亮度去环(deringing)过滤器
+.IPs dering-chroma (也请参见 \-vf pp)
+色度去环(deringing)过滤器
+.IPs filmeffect (也请参见 \-vf noise)
+在视频中添加人工的胶片纹理。
+可能提高了视觉品质, 虽然降低了真实的品质。
+.RE
+.sp 1
+.RS
+渲染方法:
+.RE
+.PD 0
+.RSs
+.IPs "dr2\ \ "
+激活直接渲染的方法 2。
+.IPs nodr2
+撤销直接渲染的方法 2。
+.RE
+.PD 1
+.
+.TP
+.B \-xy <参数值> (也请参见 \-zoom)
+.PD 0
+.RSs
+.IPs 参数值<=8
+按因子 <参数值> 缩放图像。
+.IPs 参数值>8
+设置图像宽度为参数值, 并计算图像高度以保持高宽比。
+.RE
+.PD 1
+.
+.TP
+.B \-y <y> (也请参见 \-zoom) (仅用于 MPlayer)
+缩放图像到高度 <y> (如果软件/\:硬件缩放可用)。
+停用高宽比计算。
+.
+.TP
+.B "\-zoom\ \ "
+在可能的情况下允许使用软件缩放。
+不支持硬件缩放的输出驱动(像 x11, fbdev)因为性能缘故而被 MPlayer 默认停用缩放, 
+但现在允许软件缩放。
+.
+.
+.
+.\" Only three sections of all below are synced with r9821 
+.\" (i.e. "AUDIO/VEDIO FILTERS" and "GENERAL ENCODING...").
+.SH "AUDIO FILTERS (音频过滤器)"
+音频过滤器允许你修改音频流及其属性。
+语法是:
+.
+.TP
+.B \-af <过滤器1[=参数1:参数2:...],过滤器2,...>
+建立音频过滤器链。
+.br
+可用的过滤器有:
+.
+.RSs
+.IPs resample[=srate[:sloppy][:type]]
+将音频流的采样率变为整数值srate(Hz). 它只支持16 bit低位在前格式.
+.IPs channels[=nch]
+将声道变为nch个输出声道. 如果输出声道数比输入声道数多时,
+将插入空声道(但在将单声道混合为立体声时, 会把单声道复制到两个输出声道).
+如果输出声道数比输入声道数少, 多余的声道会被去掉.
+.IPs format[=bps,f]
+选择插件层输出格式为f, 样本比特率为bps.
+选项bps是一个整数表示每个样本的字节数. 格式f是下面几个字符串的连接:
+.br
+alaw, mulaw或imaadpcm
+.br
+float或int
+.br
+unsigned或signed
+.br
+le或be(低位或高位在前)
+.br
+.IPs "volume[=v:sc]"
+选择输出音量级别.这个选项是不可重入的, 所以对每个音频流只能使用一次.
+.RSss
+v: 对流中所有声道的增益, 以dB为单位.
+增益可以从-200dB到+40dB(-200dB完全静音completely而+40dB等于放大1000倍).
+.br
+sc: 启用软修饰.
+.REss
+.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
+任意混合声道, 细节参见DOCS/sound.html.
+.RSss
+n: 输出声道数(1 - 6).
+.br
+lij: 输出声道i中混合多少输入声道j的成分.
+.REss
+.IPs "sub[=fc:ch]"
+增加副低音声道.
+.RSss
+fc: 低通滤波器的剪除频率(20Hz to 300Hz)默认值为60Hz.
+.br
+ch: 副声道的声道号.
+.REss
+.IPs "surround[=d]"
+矩阵编码的环绕音效解码器, 能用于许多2声道文件.
+.RSss
+d: 以毫秒为单位的后部扬声器的延迟时间(0ms到1000ms), 默认值为15ms.
+.REss
+.IPs delay[=ch1:ch2:...]
+延迟声音的输出. 以百万分之一秒为单位设置每个声道的延迟(0到1000之间的浮点数).
+.RE
+.
+.
+.
+.SH "VIDEO FILTERS (视频过滤器)"
+视频过滤器允许你修改视频流及其属性。
+语法是:
 .
 .TP
 .B \-vf <...,滤镜3[=选项],滤镜2,滤镜1>
@@ -4019,7 +4282,6 @@ y: 不进行色度处理(只进行亮度处理).
 产生各种设置样式.
 .IPs lavc[=quality:fps]
 用于DVB/\:DXR3的通过libavcodec进行YV12到MPEG1的快速转换.
-比\-vf=fame速度更快质量更好.
 .RSss
 quality:
     1 \- 31 固定qscale
@@ -4027,8 +4289,6 @@ quality:
 .br
 fps: 指定输出帧速率(浮点数) (默认值: 0, 基于高度的自动检测)
 .REss
-.IPs fame
-用于DVB/\:DXR3的YV12到MPEG1的快速转换.
 .IPs dvbscale[=aspect]
 使用DVB卡的最佳缩放, X轴以硬件缩放而Y轴用软件缩放以保持长宽比.
 .RSss
@@ -4275,262 +4535,225 @@ clear: 传送前清楚帧缓冲.
 .REss
 .RE
 .
-.TP
-.B \-vfm <驱动1,驱动2,...>
-设置可用的视频驱动优先级列表, 按照它们在codecs.conf中的驱动名称.
-当都不可用是使用默认后备驱动.
-
-.I 注意:
-.br
-如果编译了libdivxdecore支持,则odivx和divx4会包含同一个DivX4编解码器,
-但用不同的API调用它. 他们的区别和什么情况下应该使用哪一个,
-参考文档的DivX4部分.
-.br
-全部可用编解码器的完整列表参见\-vfm help的输出.
-
-.I 示例:
-.PD 0
-.RSs
-.IPs "\-vfm ffmpeg,dshow,vfw"
-先尝试libavcodec, 然后是Directshow, 然后是VFW,
-如果都不行就使用其它后备编解码器.
-.IPs "\-vfm xanim"
-先尝试XAnim编解码器
-.RE
-.PD 1
+.
+.
+.SH "GENERAL ENCODING OPTIONS (一般编码选项) (仅用于 MENCODER)"
 .
 .TP
-.B \-x <x> (仅用于MPLAYER)
-把图像缩放到宽度x(如果软件/\:硬件缩放可用).
-禁用长宽比计算.
-.TP
-.B \-xvidopts <选项1:选项2:...>
-设置使用XviD解码时的附加参数.
-
-.PD 0
-.RSs
-.IPs dr2
-激活直接渲染模式2.
-.IPs nodr2
-关闭直接渲染模式2.
-.RE
-.PD 1
+.B \-audio-delay <任何浮点数>
+通过设置头部的延迟域, 延迟音频或视频 (默认值是: 0.0)。
+这并不延迟编码时的任何流, 但播放器会察看延迟域并作相应的补偿。
+正值延迟音频, 而负值延迟视频。
+注意这同 \-delay 选项正相反。
+例如, 如果用 \-delay 0.2 视频播放正确, 你也可以
+用 MEncoder 的 \-audio-delay -0.2 纠正视频。
+.sp 1
+目前, 此选项只与默认的合路器 (\-of avi) 一起工作。
+如果你使用不同的合路器, 你就必须使用 \-delay 来代替。
 .
-.TP
-.B \-xy <x>
-.PD 0
-.RSs
-.IPs "x<=8"
-按因子<x>缩放图像.
-.IPs "x>8\ "
-把图像宽度设为<x>并计算图像高度以保持长宽比.
-.RE
-.PD 1
-.
-.TP
-.B \-y <y> (仅用于MPLAYER)
-把图像缩放到高度y(如果软件/\:硬件缩放可用).
-禁用长宽比计算
-.
-.TP
-.B \-zoom
-在可能的情况下使用软件缩放.
-可以用来指定\-vf scale进行缩放.
-
-.I 注意:
-.br
-如果没有\-zoom选项\-vf scale将忽略\-x / \-y / \-xy / \-fs / \-aspect等选项.
-.
-.
-.
-.SH "AUDIO FILTERS"
-Audio filters allow you to modify the audio stream and its properties.
-The syntax is:
-.
-.TP
-.B \-af <滤镜1[=选项],滤镜2,...>
-激活一个逗号分隔的带参数的音频滤镜列表.
-.br
-可用滤镜有:
-.
-.RSs
-.IPs resample[=srate[:sloppy][:type]]
-将音频流的采样率变为整数值srate(Hz). 它只支持16 bit低位在前格式.
-.IPs channels[=nch]
-将声道变为nch个输出声道. 如果输出声道数比输入声道数多时,
-将插入空声道(但在将单声道混合为立体声时, 会把单声道复制到两个输出声道).
-如果输出声道数比输入声道数少, 多余的声道会被去掉.
-.IPs format[=bps,f]
-选择插件层输出格式为f, 样本比特率为bps.
-选项bps是一个整数表示每个样本的字节数. 格式f是下面几个字符串的连接:
-.br
-alaw, mulaw或imaadpcm
-.br
-float或int
-.br
-unsigned或signed
-.br
-le或be(低位或高位在前)
-.br
-.IPs "volume[=v:sc]"
-选择输出音量级别.这个选项是不可重入的, 所以对每个音频流只能使用一次.
-.RSss
-v: 对流中所有声道的增益, 以dB为单位.
-增益可以从-200dB到+40dB(-200dB完全静音completely而+40dB等于放大1000倍).
-.br
-sc: 启用软修饰.
-.REss
-.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
-任意混合声道, 细节参见DOCS/sound.html.
-.RSss
-n: 输出声道数(1 - 6).
-.br
-lij: 输出声道i中混合多少输入声道j的成分.
-.REss
-.IPs "sub[=fc:ch]"
-增加副低音声道.
-.RSss
-fc: 低通滤波器的剪除频率(20Hz to 300Hz)默认值为60Hz.
-.br
-ch: 副声道的声道号.
-.REss
-.IPs "surround[=d]"
-矩阵编码的环绕音效解码器, 能用于许多2声道文件.
-.RSss
-d: 以毫秒为单位的后部扬声器的延迟时间(0ms到1000ms), 默认值为15ms.
-.REss
-.IPs delay[=ch1:ch2:...]
-延迟声音的输出. 以百万分之一秒为单位设置每个声道的延迟(0到1000之间的浮点数).
-.RE
-.
-.
-.
-.SH "编码选项 (仅用于MENCODER)"
 .TP
 .B \-audio-density <1\-50>
-每秒的音频块数(默认是两个0.5秒的长音频块).
-
-.I 注意:
+每秒的音频块数 (默认值是 2, 指两个 0.5 秒的长音频块)。
 .br
-仅用于CBR, VBR将忽略它因为它把每个包放在一个新块中.
-.TP
-.B \-audio-delay <0.0\-...>
-设置文件头中的音频延迟域. 默认值为0.0, 负数不能正常工作.
-这不是在编码的时候延迟音频, 而是播放器会把它作为默认的音频延迟,
-你可以不必用\-delay选项.
+.I 注意:
+仅用于 CBR, VBR 忽略它因为它把每个包放在一个新块中。
+.
 .TP
 .B \-audio-preload <0.0\-2.0>
-设置音频缓冲间隔(默认值: 0.5秒).
-.TP
-.B \-divx4opts <选项1:选项2:...>
-当用DivX4编码时, 你可以由此设置参数.
-.br
-可用选项有:
-.
-.RSs
-.IPs help
-获得帮助
-.IPs br=<参数>
-设置比特率以
-.RSss
-kbit<4\-16000>或者
-.br
-bit<16001\-24000000>为单位
-.REss
-.IPs key=<参数>
-最大关键帧间隔(以帧为单位)
-.IPs deinterlace
-启用逐行扫描(别用它, DivX4很buggy)
-.IPs q=<1\-5>
-质量(1\-最快, 5\-最好)
-.IPs min_quant=<1\-31>
-最小量化值
-.IPs max_quant=<1\-31>
-最大量化值
-.IPs rc_period=<参数>
-速率控制周期
-.IPs rc_reaction_period=<参数>
-速率控制反应周期
-.IPs rc_reaction_ratio=<参数>
-速率控制反应率
-.IPs crispness=<0\-100>
-设置生硬/\:平滑
-.IPs pass=<1\-2>
-用这个选项你可以编码2 pass的DivX4文件.
-先用pass=1编码, 然后以同样的参数, 用pass=2编码.
-.IPs vbrpass=<0\-2>
-代替pass参数并使用XviD VBR代替DivX4 VBR.
-可用选项有:
-.
-.RSss
-0: 1 pass编码编码(相当于命令行中间没有pass的情况)
-.br
-1: 分析2 pass编码的(第一次)pass. 产生的AVI文件可以导入到/dev/null.
-.br
-2: 2 pass编码的最终(第二次)pass.
-.REss
-.RE
+设置音频缓冲间隔 (默认值: 0.5秒)。
 .
 .TP
-.B \-endpos <[[时:]分:]秒[.毫秒]|大小[b|kb|mb]> (参见\-ss和\-sb选项)
-在给定时间或者字节位置结束编码.
-可以用很多方式设置:
-
-.I NOTE:
-.br
-字节位置是不精确的, 因为它只能停在一个帧上.
-
+.B \-fafmttag <格式>
+能用于重载输出文件的音频格式标签。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
-.IPs "\-endpos 56"
-在56秒时结束
-.IPs "\-endpos 01:10:00"
-只编码1小时10分钟
-.IPs "\-endpos 100mb"
-只编码100MBytes
+.IPs "\-fafmttag 0x55"
+有个输出文件含有 0x55 (mp3) 作为音频格式标签。
 .RE
 .PD 1
 .
 .TP
 .B \-ffourcc <fourcc>
-可以用来替代输出文件的视频fourcc.
-
+能用于重载输出文件的视频 fourcc。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
-.IPs "-ffourcc div3"
-将输出文件的视频fourcc设置为'div3'.
+.IPs "\-ffourcc div3"
+有个输出文件含有 'div3' 作为视频 fourcc。
 .RE
 .PD 1
 .
 .TP
-.B \-include <配置文件>
-设置默认配置文件之外的附加设置文件.
-.TP
-.B \-info <选项1:选项2:...> (仅用于AVI)
-设置输出AVI文件的文件信息头.
-.br
-可用选项有:
+.B \-force-avi-aspect <0.2\-3.0>
+重载储存在 AVI OpenDML vprp 头部的高宽比。
+用于改变 '\-ovc copy' 的高宽比。
 .
+.TP
+.B \-frameno-file <文件名> (不推荐)
+指定 framenumber mappings 的音频文件名, 创建于
+特殊 3 pass 编码模式中的第一个(仅用于音频) pass。
+.br
+.I 注意:
+使用此模式很可能使得 A-V 不同步。
+不要使用, 仅用于保持向后兼容, 将来的版本中很可能被去除。
+.
+.TP
+.B \-hr-edl-seek
+使用更简明, 但更慢的方法跳过区域。
+标上跳过的区域不再被搜寻, 代之的是所有的帧被解码, 但是仅用于必要的帧被加码。
+这允许从非 keyframe 边界处启动。
+.br
+.I 注意:
+不保证能与 '\-ovc copy' 一起正常工作。
+.
+.TP
+.B \-info <选项1:选项2:...> (仅用于 AVI)
+指定输出 AVI 文件的文件信息头。
+.sp 1
+可用的选项有:
 .RSs
-.IPs help
-显示以下信息
-.IPs name=<参数>
-设置文件内容的标题
-.IPs artist=<参数>
-文件原始内容的作者或艺术家
-.IPs genre=<参数>
+.IPs "help\ "
+显示描述说明。
+.IPs name=<value>
+作品标题
+.IPs artist=<value>
+作品作者或艺术家
+.IPs genre=<value>
 原始作品分类
-.IPs subject=<参数>
-文件内容
-.IPs copyright=<参数>
-文件版权信息
-.IPs srcform=<参数>
-被数字化的素材的原始形式
-.IPs comment=<参数>
-对于文件或文件内容的评论
+.IPs subject=<value>
+作品内容
+.IPs copyright=<value>
+版权信息
+.IPs srcform=<value>
+数码材料的原始格式
+.IPs comment=<value>
+作品的一般评价
 .RE
+.
+.TP
+.B \-noautoexpand
+不自动把扩充过滤器插入到 MEncoder 过滤器链。
+当硬件编码影片的子标题时, 控制在过滤器链子标题的何处渲染, 对这样的控制有用。
+.
+.TP
+.B \-noencodedups
+不要在复制时企图编码复制帧; 一直以输出零字节(Zero-byte)帧表示复制。
+无论如何使用零字节帧帧, 除非装载了能做编码复制工作的过滤器或编解码器。
+目前只有 harddup 是这样的过滤器。
+.
+.TP
+.B \-noodml (仅用于 \-of avi)
+不写 AVI 文件 >1GB 的 OpenDML 索引。
+.
+.TP
+.B \-noskip
+不跳帧。
+.
+.TP
+.B \-o <文件名>
+输出到给定的文件名。
+.br
+如果你想用缺省的输出文件名, 你可以把此选项放在 MEncoder 的配置文件里。
+.
+.TP
+.B \-oac <编解码器名称>
+用给定的音频编解码器编码 (没有默认的设置)。
+.br
+.I 注意:
+用 \-oac help 显示可用的音频编解码器列表。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+.IPs "\-oac copy"
+不编码, 仅仅流拷贝
+.IPs "\-oac pcm"
+编码到无压缩的 PCM。
+.IPs "\-oac mp3lame"
+编码到 MP3 (使用 LAME)。
+.IPs "\-oac lavc"
+用 libavcodec 编解码器编码。
+.RE
+.PD 1
+.
+.TP
+.B \-of <格式> (BETA 代码!)
+编码到指定的容器格式 (默认值是: AVI)。
+.br
+.I 注意:
+用 \-of help 显示可用的容器格式列表。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+.IPs "\-of avi"
+编码到 AVI。
+.IPs "\-of mpeg"
+编码到 MPEG (也请参见 \-mpegopts)。
+.IPs "\-of lavf"
+用 libavformat 合路器编码 (也请参见 \-lavfopts)。
+.IPs "\-of rawvideo"
+原始(raw)视频流 (不用合路 \- 仅一个视频流)
+.IPs "\-of rawaudio"
+原始(raw)音频流 (不用合路 \- 仅一个音频流)
+.RE
+.PD 1
+.
+.TP
+.B \-ofps <帧速率>
+指定输出文件将使用与源不同的帧(速)率(fps)。
+对于可变帧速率 (ASF, 某些 MOV) 或逐行的 (30000/1001 fps 电视电影的 MPEG) 文件
+必须设置帧速率。
+.
+.TP
+.B \-ovc <编解码器>
+用给定的视频编解码器编码 (没有默认的设置)。
+.br
+.I 注意:
+用 \-ovc help 显示可用的视频编解码器列表。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+.IPs "\-ovc copy"
+不编码, 仅仅流拷贝
+.IPs "\-ovc raw"
+编码到随意的无压缩的格式 (使用 '\-vf format' 来选择)。
+.IPs "\-ovc lavc"
+用 libavcodec 编解码器编码。
+.RE
+.PD 1
+.
+.TP
+.B \-passlogfile <文件名>
+用 2 pass 编码模式时, 
+转储第一次 pass 的信息到 <文件名> 中而不是默认的 divx2pass.log。
+.
+.TP
+.B \-skiplimit <参数值>
+指定在编码一个帧后可跳的最大帧数 (用 \-noskiplimit 设置不限数)。
+.
+.TP
+.B \-vobsubout <基本名>
+指定 the basename for 输出 .idx 和 .sub 文件的基础名。
+这会关闭编码电影的字幕渲染而把它导入到 VOBsub 字幕文件中。
+.
+.TP
+.B \-vobsuboutid <语言标识>
+用两字母语言标识指定字幕。这可以替代 DVD 或 .ifo 文件中读取的值。
+.
+.TP
+.B \-vobsuboutindex <索引>
+指定输出文件中字幕的索引号 (默认值是: 0)。
+.
+.
+.
+.SH "CODEC SPECIFIC ENCODING OPTIONS (编解码器的编码选项) (仅用于 MENCODER)"
+You can 指定 codec specific encoding parameters using the following
+syntax:
 .
 .TP
 .B \-lameopts <选项1:选项2:...>
@@ -5144,103 +5367,6 @@ h263量化默认值: -64
       mpeg MMX量化不能处理负的乖离率(设置vfdct=1或2)
 .RE
 .
-.TP
-.B \-noskip
-不跳帧.
-.TP
-.B \-o <文件名>
-输出为给定文件名, 而不是默认的'test.avi'.
-.TP
-.B \-oac <编解码器名>
-使用给定的音频编解码器编码.
-可用编解码器的列表参见\-oac help的输出.
-(没有默认设置)
-
-.I 示例:
-.PD 0
-.RSs
-.IPs "-oac copy"
-不编码, 只进行流复制
-.IPs "-oac pcm"
-编码为未压缩的PCM
-.IPs "-oac mp3lame"
-编码为MP3(使用Lame)
-.RE
-.PD 1
-.
-.TP
-.B \-of <格式> (BETA代码!)
-编码到设置的格式.
-可用格式的列表参见\-of help的输出.
-
-.I 示例:
-.PD 0
-.RSs
-.IPs "-of avi"
-编码为avi(默认值)
-.IPs "-of mpeg"
-编码为mpeg
-.RE
-.PD 1
-.
-.TP
-.B \-ofps <帧速率>
-输出文件将使用跟源不同的帧速率. 对于可变帧速率(asf,
-有些mov)或渐进(29.97fps的telecined mpeg)的文件必须设置帧速率.
-.TP
-.B \-ovc <编解码器>
-使用给定的视频编解码器编码.
-可用编解码器的列表参见\-ovc help的输出.
-(没有默认设置)
-
-.I 示例:
-.PD 0
-.RSs
-.IPs "\-ovc copy"
-不编码, 只进行流复制
-.IPs "\-ovc divx4"
-编码为DivX4/\:DivX5
-.IPs "\-ovc rawrgb"
-编码为未压缩的RGB24
-.IPs "\-ovc lavc"
-使用一个libavcodec编解码器编码
-.RE
-.PD 1
-.
-.TP
-.B \-passlogfile <文件名>
-用2 pass模式编码时,
-MEncoder把第一次pass的信息复制到指定文件中而不是默认的divx2pass.log.
-.TP
-.B \-skiplimit <参数>
-在一个帧后可跳的最大帧数(用\-noskiplimit设置不限数).
-.TP
-.B \-v, \-\-verbose
-增加冗余级别(\-v越多标识冗余越多).
-
-.PD 0
-.RSs
-.IPs 0
-只有一些信息输出(默认值)
-.IPs 1
-一些基本的调试信息, avi文件头, 函数值(初始化调试)
-.IPs 2
-显示avi索引, 块输入, 更多调试信息(播放器调试)
-.IPs 3
-显示输入分析器的所有信息(分析器调试)
-.RE
-.PD 1
-.
-.TP
-.B \-vobsubout <基本名>
-设置输出的.idx和.sub文件的基本名.
-这会关闭编码电影的字幕渲染而把它导入到Vobsub字幕文件中.
-.TP
-.B \-vobsuboutindex <索引>
-设置输出文件中字幕的索引号. (默认值: 0)
-.TP
-.B \-vobsuboutid <语言标识>
-设置字幕的两字母语言标识. 这可以替代DVD或.ifo文件中读取的值.
 .TP
 .B \-xvidencopts <选项1:选项2:...>
 如果使用XviD编码, 你可以由此设置它的参数.
