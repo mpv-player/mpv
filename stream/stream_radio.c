@@ -1011,7 +1011,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     stream->close=close_s;
     stream->fill_buffer=fill_buffer_s;
 
-    priv->radio_fd = open(radio_param_device, O_RDWR);
+    priv->radio_fd = open(radio_param_device, O_RDONLY);
     if (priv->radio_fd < 0) {
         mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_UnableOpenDevice,
             radio_param_device, strerror(errno));
