@@ -77,6 +77,7 @@
 #define DEMUXER_CTRL_GET_TIME_LENGTH 10
 #define DEMUXER_CTRL_GET_PERCENT_POS 11
 #define DEMUXER_CTRL_SWITCH_AUDIO 12
+#define DEMUXER_CTRL_RESYNC 13
 
 // Holds one packet/frame/whatever
 typedef struct demux_packet_st {
