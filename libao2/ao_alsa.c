@@ -527,7 +527,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if ((err = snd_pcm_nonblock(alsa_handler, 0)) < 0) {
          mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: error set block-mode %s\n", snd_strerror(err));
       } else {
-	mp_msg(MSGT_AO,MSGL_V,"alsa-init: pcm opend in blocking mode\n");
+	mp_msg(MSGT_AO,MSGL_V,"alsa-init: pcm opened in blocking mode\n");
       }
 
       snd_pcm_hw_params_alloca(&alsa_hwparams);
