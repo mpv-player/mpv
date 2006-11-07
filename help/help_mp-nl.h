@@ -408,7 +408,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "De codec is niet correct gedefinieerd."
 #define MSGTR_OutdatedCodecsConf "Dit codecs.conf bestand is te oud en incompatibel met deze versie van MPlayer!"
 
-// divx4_vbr.c:
 #define MSGTR_CannotMakePipe "Kan geen PIPE aanmaken!\n"
 #define MSGTR_SaveSlotTooOld "Een te oud save slot voor lvl %d gevonden: %d !!!\n"
 #define MSGTR_InvalidCfgfileOption "De %s optie kan niet gebruikt worden in het configuratie bestand.\n"
