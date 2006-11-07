@@ -592,7 +592,7 @@ static int libc_seek( dvdcss_t dvdcss, int i_blocks )
     }
 
     i_seek = (off_t)i_blocks * (off_t)DVDCSS_BLOCK_SIZE;
-    i_seek = lseek64( dvdcss->i_read_fd, i_seek, SEEK_SET );
+    i_seek = lseek( dvdcss->i_read_fd, i_seek, SEEK_SET );
 
     if( i_seek < 0 )
     {

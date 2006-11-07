@@ -52,7 +52,7 @@
 
 /* several type definitions */
 #   if defined( __MINGW32__ )
-#       define lseek64 _lseeki64
+#       define lseek _lseeki64
 #       if !defined( _OFF_T_ )
 typedef long long _off_t;
 typedef _off_t off_t;
@@ -63,6 +63,7 @@ typedef _off_t off_t;
 #   endif
 
 #   if defined( _MSC_VER )
+#       define lseek _lseeki64
 #       if !defined( _OFF_T_DEFINED )
 typedef __int64 off_t;
 #           define _OFF_T_DEFINED
@@ -75,10 +76,6 @@ typedef __int64 off_t;
 #   ifndef snprintf
 #       define snprintf _snprintf  /* snprintf not defined in mingw32 (bug?) */
 #   endif
-
-#else
-
-#   define lseek64 lseek
 
 #endif
 
