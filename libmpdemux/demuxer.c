@@ -1023,6 +1023,23 @@ double demuxer_get_time_length(demuxer_t *demuxer){
     return get_time_ans;
 }
 
+/**
+ * \brief demuxer_get_current_time() returns the time of the current play in three possible ways:
+ *        either when the stream reader satisfies STREAM_CTRL_GET_CURRENT_TIME (e.g. dvd)
+ *        or using sh_video->pts when the former method fails
+ *        0 otherwise
+ * \return the current play time
+ */
+int demuxer_get_current_time(demuxer_t *demuxer){
+    double get_time_ans = 0;
+    unsigned tm;
+    sh_video_t *sh_video = demuxer->video->sh;
+    if(stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&tm)!=STREAM_UNSUPORTED) {
+        get_time_ans = (double) tm / 1000.0f;
+    } else if(sh_video) get_time_ans = sh_video->pts;
+    return (int) get_time_ans;
+}
+
 int demuxer_get_percent_pos(demuxer_t *demuxer){     
     int ans = 0;
     int res = demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans);
