@@ -5175,7 +5175,7 @@ fi
 if test "$_dvdread_internal" = yes; then
   _def_dvdread_internal="#define USE_DVDREAD_INTERNAL 1"
   _def_dvdread='#define USE_DVDREAD 1'
-  _inputmodules="dvdread $_noinputmodules"
+  _inputmodules="dvdread $_inputmodules"
   _largefiles=yes
   if linux || netbsd || openbsd || bsdos ; then
     _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
