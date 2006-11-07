@@ -1677,7 +1677,7 @@ _largefiles=no
 #_language=en
 _shm=auto
 _linux_devfs=no
-#_charset=utf8
+_charset="UTF-8"
 _dynamic_plugins=no
 _crash_debug=no
 _sighandler=yes
@@ -7065,10 +7065,6 @@ fi #if test "$_gui"
 
 if test "$_charset" = "noconv" ; then
   _charset=""
-elif test -z "$_charset" ; then
-  if test "$_gtk1" = yes ; then
-    _charset="UTF-8"
-  fi
 fi
 if test "$_charset" ; then
   _def_charset="#define MSG_CHARSET \"$_charset\""
