@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r20707
+.\" synced with r20739
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -2217,8 +2217,7 @@ OSD и очищать ее (по-умолчанию: ^[[A\\r^[[K).
 .TP
 .B \-vobsub <VOBsub файл без расширения>
 Указывает VOBsub файл, используемый для субтитров.
-Должен быть полным путем без расширения, т.е.\& без
-'.idx', '.ifo' или '.sub'.
+Должен быть полным путем без расширения, т.е.\& без '.idx', '.ifo' или '.sub'.
 .
 .TP
 .B \-vobsubid <0\-31>
@@ -5435,7 +5434,6 @@ You should see a red, green and blue stripe from top to bottom.
 .TP
 .B lavc[=quality:fps]
 Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3/\:IVTV.
-Faster and of better quality than \-vf fame.
 .RSs
 .IPs <quality>
 .RSss
@@ -5446,10 +5444,6 @@ Faster and of better quality than \-vf fame.
 .IPs <fps>
 force output fps (float value) (default: 0, autodetect based on height)
 .RE
-.
-.TP
-.B "fame\ \ \ "
-Fast software YV12 to MPEG-1 conversion with libfame for use with DVB/\:DXR3/\:IVTV.
 .
 .TP
 .B dvbscale[=aspect]
