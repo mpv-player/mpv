@@ -33,8 +33,14 @@
 #ifdef USE_LIBAVFORMAT_SO
 #include <ffmpeg/avformat.h>
 #include <ffmpeg/opt.h>
+typedef struct CodecTag {
+    int id;
+    unsigned int tag;
+    unsigned int invalid_asf : 1;
+} CodecTag;
 #else
 #include "avformat.h"
+#include "riff.h"
 #include "avi.h"
 #include "opt.h"
 #endif
@@ -64,6 +70,18 @@ extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 int64_t ff_gcd(int64_t a, int64_t b);
+
+const CodecTag mp_wav_tags[] = {
+    { CODEC_ID_ADPCM_4XM, MKTAG('4', 'X', 'M', 'A')},
+    { CODEC_ID_PCM_S24BE, MKTAG('i', 'n', '2', '4')},
+    { CODEC_ID_PCM_S8,    MKTAG('t', 'w', 'o', 's')},
+    { 0, 0 },
+};
+
+const CodecTag mp_bmp_tags[] = {
+    { CODEC_ID_XAN_WC3, MKTAG('W', 'C', '3', 'V')},
+    { 0, 0 },
+};
 
 static int mp_open(URLContext *h, const char *filename, int flags){
     return 0;
@@ -213,6 +231,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             priv->audio_streams++;
             if(!codec->codec_tag)
                 codec->codec_tag= codec_get_wav_tag(codec->codec_id);
+            if(!codec->codec_tag)
+                codec->codec_tag= codec_get_tag(mp_wav_tags, codec->codec_id);
             wf->wFormatTag= codec->codec_tag;
             wf->nChannels= codec->channels;
             wf->nSamplesPerSec= codec->sample_rate;
@@ -279,6 +299,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 	    priv->video_streams++;
             if(!codec->codec_tag)
                 codec->codec_tag= codec_get_bmp_tag(codec->codec_id);
+            if(!codec->codec_tag)
+                codec->codec_tag= codec_get_tag(mp_bmp_tags, codec->codec_id);
             bih->biSize= sizeof(BITMAPINFOHEADER) + codec->extradata_size;
             bih->biWidth= codec->width;
             bih->biHeight= codec->height;
