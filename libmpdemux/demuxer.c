@@ -881,6 +881,8 @@ int demux_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flag
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
     sh_video_t *sh_video=d_video->sh;
+    unsigned int tmp = 0;
+    double pts;
 
 if(!demuxer->seekable){
     if(demuxer->file_format==DEMUXER_TYPE_AVI)
@@ -909,6 +911,27 @@ if(!demuxer->seekable){
     if(sh_video) sh_video->timer=0; // !!!!!!
 #endif
 
+    if(flags & 1)  // absolute seek
+      pts = 0.0f;
+    else {
+      if(stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &tmp) == STREAM_UNSUPORTED)
+        goto dmx_seek;
+      pts = (double)tmp / 1000.0f;
+    }
+
+    if(flags & 2) {  // percent seek
+      if(stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &tmp) == STREAM_UNSUPORTED)
+        goto dmx_seek;
+      pts += (double)tmp / 1000.0f * rel_seek_secs;
+    } else
+      pts += rel_seek_secs;
+
+    if(stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, &pts) != STREAM_UNSUPORTED) {
+      demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
+      return 1;
+    }
+
+dmx_seek:
 if (demuxer->desc->seek)
     demuxer->desc->seek(demuxer,rel_seek_secs,audio_delay,flags);
 
