@@ -24,11 +24,10 @@ else
 OPTFLAGS += -DHAVE_MPLAYER
 endif
 
-#	 \ -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
-
 # -funroll-loops  removed, triggered gcc 3.0.4 (3.x?) bug
 CFLAGS= -I../libdvdcss -I.. $(OPTFLAGS) -D__USE_UNIX98 -D_GNU_SOURCE \
 	-DHAVE_DVDCSS_DVDCSS_H -DSTDC_HEADERS -DHAVE_LIMITS_H \
+	-D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
