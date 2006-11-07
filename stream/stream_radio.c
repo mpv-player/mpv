@@ -113,6 +113,7 @@ typedef struct radio_priv_s {
     radio_channels_t*   radio_channel_list;
     radio_channels_t*   radio_channel_current;
     int                 driver;
+    int                 old_snd_volume;
 #ifdef USE_RADIO_CAPTURE
     volatile int        do_capture;        ///< is capture enabled
     audio_in_t          audio_in;
@@ -1020,6 +1021,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_RadioDevice, priv->radio_fd,radio_param_device);
     fcntl(priv->radio_fd, F_SETFD, FD_CLOEXEC);
 
+    get_volume(priv, &priv->old_snd_volume);
     set_volume(priv,0);
 
     if (init_frac(priv)!=STREAM_OK){
@@ -1093,6 +1095,7 @@ static void close_s(struct stream_st * stream){
     priv->radio_channel_current=NULL;
     priv->radio_channel_list=NULL;
 
+    set_volume(priv, priv->old_snd_volume);
     if (priv->radio_fd>0){
         close(priv->radio_fd);
     }
