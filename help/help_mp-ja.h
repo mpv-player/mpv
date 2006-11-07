@@ -208,8 +208,6 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Cannot seek in raw AVI streams. (Indexが必要です, -idx を試して下さい.)\n"
 #define MSGTR_CantSeekFile "このファイルはシークすることが出来ません.\n"
 
-#define MSGTR_EncryptedVOB "暗号化されたVOB(Encrypted VOB)ファイルです。DOCS/HTML/en/cd-dvd.html を御覧下さい.\n"
-
 #define MSGTR_MOVcomprhdr "MOV: 圧縮されたヘッダ(Compressed headers)をサポートするには ZLIB が必要です\n"
 #define MSGTR_MOVvariableFourCC "MOV: 警告: Variable FOURCC detected!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: 警告: too many tracks"
@@ -223,7 +221,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "audio demuxerを開くこと開くことが出来ません: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "subtitle demuxerを開くことが出来ません: %s\n"
 #define MSGTR_TVInputNotSeekable "TV入力はシークすることは出来ません(シークは恐らくチャンネル選択に相当するのでは? ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer 情報 %s already present!\n"
 #define MSGTR_ClipInfo "クリップ情報:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC コンテンツ検出, フレームレート変更中.\n"
@@ -263,7 +260,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "LIRC サポートをセッティング中...\n"
-#define MSGTR_LIRCdisabled "リモートコントロールを使用することは出来ません.\n"
 #define MSGTR_LIRCopenfailed "LIRC サポートを開く事に失敗.\n"
 #define MSGTR_LIRCcfgerr "LIRC 設定ファイル %s を開くことに失敗しました.\n"
 

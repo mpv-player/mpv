@@ -276,7 +276,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Kan ikke åbne lyddemuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Kunne ikke åbne undertekstsdemuxer: %s\n"
 #define MSGTR_TVInputNotSeekable "TV input er ikke søgbart! (Kunne være du skulle skifte kanal ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s findes allerede!\n"
 #define MSGTR_ClipInfo "Klip info: \n"
 
 
@@ -316,7 +315,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Sætter LIRC understøttelse op...\n"
-#define MSGTR_LIRCdisabled "Du vil ikke være i stand til at bruge din fjernbetjening\n"
 #define MSGTR_LIRCopenfailed "Ingen lirc understøttelse fundet!\n"
 #define MSGTR_LIRCcfgerr "Kunne ikke læse LIRC konfigurationsfil %s!\n"
 

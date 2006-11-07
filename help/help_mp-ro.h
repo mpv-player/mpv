@@ -240,8 +240,6 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nu pot derula în stream-uri AVI pure. (E nevoie de index, încearcã cu opþiunea '-idx'.)\n"
 #define MSGTR_CantSeekFile "Nu pot derula în acest fiºier.\n"
 
-#define MSGTR_EncryptedVOB "Fiºier VOB criptat! Citeºte DOCS/HTML/en/dvd.html.\n" // lang
-
 #define MSGTR_MOVcomprhdr "MOV: Pentru a folosi headere compresate e nevoie de ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: ATENTIE: Am detectat FOURCC variabil!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: ATENTIE: prea multe piste"
@@ -281,7 +279,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Pregãtesc folosirea LIRC...\n"
-#define MSGTR_LIRCdisabled "Nu-þi vei putea folosi telecomanda.\n"
 #define MSGTR_LIRCopenfailed "Nu am reuºit sã activez LIRC.\n"
 #define MSGTR_LIRCcfgerr "Nu am putut citi fiºierul de configurare LIRC %s.\n"
 

@@ -421,12 +421,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Кодекът не е дефиниран коректно."
 #define MSGTR_OutdatedCodecsConf "Tози codecs.conf е твърде стар и несъвместим с тази версия на MPlayer!"
 
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "недостатъчно памет"
-#define MSGTR_OverridingTooLowBitrate "Указаният битрейт е недостатъчен за този клип.\n"\
-"Минималният допустим битрейт за този клип е %.0f КБита/с. Указаната стойност\n"\
-"се отменя.\n"
-
 // fifo.c
 #define MSGTR_CannotMakePipe "Не може да се създаде програмен канал (PIPE)!\n"
 
@@ -491,8 +485,6 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Не могат да се превъртат сурови AVI потоци. (Изисква се индекс, опитайте с -idx .)\n"
 #define MSGTR_CantSeekFile "Този файл не може да се превърта.\n"
 
-#define MSGTR_EncryptedVOB "Криптиран VOB файл! Прочетете DOCS/HTML/en/dvd.html.\n"
-
 #define MSGTR_MOVcomprhdr "MOV: Поддръжката на компресирани хедъри изисква ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: ВНИМАНИЕ: Открит е променлив FOURCC код!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: ВНИМАНИЕ: твърде много пътечки"
@@ -506,7 +498,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Не може да бъде отворен аудио разпределител: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Не може да бъде отворен разпределител на субтитри: %s\n"
 #define MSGTR_TVInputNotSeekable "Телевизията не може да се превърта! (Могат да се превключват евентуално каналите ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Информацията за разпределител %s е вече налична !\n"
 #define MSGTR_ClipInfo "Информация за клипа:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC съдържание, превключване на кадровата честота.\n"
@@ -548,7 +539,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Установяване на LIRC поддръжка...\n"
-#define MSGTR_LIRCdisabled "Няма да можете да ползвате дистанционното управление.\n"
 #define MSGTR_LIRCopenfailed "Няма да има LIRC поддръжка.\n"
 #define MSGTR_LIRCcfgerr "Конфигурационният файл за LIRC %s не може да бъде прочетен.\n"
 

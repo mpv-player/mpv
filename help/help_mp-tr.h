@@ -477,12 +477,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Kodek doğru şekilde tanımlanmamış."
 #define MSGTR_OutdatedCodecsConf "Bu codecs.conf dosyası çok eski ve bu Mplayer sürümü ile bağdaşmıyor."
 
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "yetersiz bellek"
-#define MSGTR_OverridingTooLowBitrate "Belirlenen bit oranı bu klip için çok düşük.\n"\
-"Bu klip için en az olası bit oranı %.0f kbps. Kullanıcı tanımlı değer\n"\
-"atlanıyor. \n"
-
 // fifo.c
 #define MSGTR_CannotMakePipe "PIPE yapılamıyor!\n"
 
@@ -596,7 +590,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Ses ayrıştırıcısı açılamadı: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Altyazı ayrıştırıcısı açılamadı: %s\n"
 #define MSGTR_TVInputNotSeekable "TV girdisi aranabilir değil! (Muhtemelen arama kanal değiştirmek için yapılacak ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "%s ayrıştırıcı bilgisi önceden sunulmuş!\n"
 #define MSGTR_ClipInfo "Klip bilgisi: \n"
 
 #define MSGTR_LeaveTelecineMode "\nBulunan içerik demux_mpg: 30000/1001fps NTSC, kare oranı değiştiriliyor.\n"

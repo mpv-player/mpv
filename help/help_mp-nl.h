@@ -409,10 +409,6 @@ static char help_text[]=
 #define MSGTR_OutdatedCodecsConf "Dit codecs.conf bestand is te oud en incompatibel met deze versie van MPlayer!"
 
 // divx4_vbr.c:
-#define MSGTR_OutOfMemory "Geen geheugen meer"
-#define MSGTR_OverridingTooLowBitrate "De opgegeven bitrate is te laag voor deze clip.\n"\
-"De minimum bitrate is %.0f kbps. De opgegeven bitrate \n"\
-"wordt genegeerd.\n"
 #define MSGTR_CannotMakePipe "Kan geen PIPE aanmaken!\n"
 #define MSGTR_SaveSlotTooOld "Een te oud save slot voor lvl %d gevonden: %d !!!\n"
 #define MSGTR_InvalidCfgfileOption "De %s optie kan niet gebruikt worden in het configuratie bestand.\n"
@@ -474,8 +470,6 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Kan niet in raw .AVI streams verplaatsen! (index nodig, probeer met de -idx optie!)  \n"
 #define MSGTR_CantSeekFile "Kan niet verplaatsen in dit bestand!  \n"
 
-#define MSGTR_EncryptedVOB "Ge-encrypteerd VOB bestand! Lees DOCS/HTML/en/dvd.html voor meer informatie.\n"
-
 #define MSGTR_MOVcomprhdr "MOV: Gecomprimeerde headers (nog) niet ondersteund!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Waarschuwing! variabele FOURCC gedetecteerd!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Waarschuwing! te veel tracks!"
@@ -489,7 +483,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Kan audio demuxer niet openen: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Openen van de ondertiteling demuxer is mislukt: %s\n"
 #define MSGTR_TVInputNotSeekable "TV invoer is niet doorzoekbaar! (Waarschijnlijk zal zoeken de kanalen veranderen ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s reeds aanwezig!\n"
 #define MSGTR_ClipInfo "Clip info: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC data gevonden, framerate wordt aangepast.\n"
@@ -531,7 +524,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Bezig met configuratie van lirc ondersteuning...\n"
-#define MSGTR_LIRCdisabled "Je zal je afstandsbediening niet kunnen gebruiken\n"
 #define MSGTR_LIRCopenfailed "Laden van lirc ondersteuning mislukt!\n"
 #define MSGTR_LIRCcfgerr "Lezen van LIRC config bestand mislukt %s!\n"
 

@@ -262,8 +262,6 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Не може да бара во редовите на AVI стримовите. (Потребен е индекс, обидете се со -idx префрлување.)\n"
 #define MSGTR_CantSeekFile "Не може да бара во оваа датотека.\n"
 
-#define MSGTR_EncryptedVOB "Криптирана VOB датотека! Прочитајте DOCS/HTML/en/dvd.html.\n"
-
 #define MSGTR_MOVcomprhdr "MOV: За подршка на компресирани хедери потребно е ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: ПРЕДУПРЕДУВАЊЕ: Откриено е променливо FOURCC!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: ПРЕДУПРЕДУВАЊЕ: премногу траки"
@@ -277,7 +275,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Не успеа да се отвори аудио демуксерот: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Не успеа да се отвори демуксерот за преводи: %s\n"
 #define MSGTR_TVInputNotSeekable "Влезот за ТВ не е за барање! (Барањето веројатно е за менување на канали ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Информации за демуксерот %s се веќе присутни!\n"
 #define MSGTR_ClipInfo "Информации за клипот:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Пронајдена е NTSC содржина од 30fps, се менува фрејмратата.\n"
@@ -319,7 +316,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Се подесува LIRC подршката...\n"
-#define MSGTR_LIRCdisabled "Нема да можете да го користите вашиот далечински управувач.\n"
 #define MSGTR_LIRCopenfailed "Не успеа да се отвори LIRC подршката.\n"
 #define MSGTR_LIRCcfgerr "Не успеа да се прочита LIRC конфигурационата датотека %s.\n"
 

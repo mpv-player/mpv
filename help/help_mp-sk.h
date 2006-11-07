@@ -473,12 +473,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Kódek nie je definovaný korektne."
 #define MSGTR_OutdatedCodecsConf "Súbor codecs.conf je príliš starý a nekompatibilný s touto verziou MPlayer-u!"
 
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "nedostatok pamäte"
-#define MSGTR_OverridingTooLowBitrate "Zadaný dátový tok je príliš nízky pre tento klip.\n"\
-"Minimálny možný dátový tok pre tento klip je %.0f kbps. Prepisujem\n"\
-"používateľom nastavenú hodnotu.\n"
-
 // fifo.c
 #define MSGTR_CannotMakePipe "Nedá sa vytvoriť PIPE!\n"
 
@@ -572,8 +566,6 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nemôžem sa posúvať v surových (raw) .AVI prúdoch! (Potrebujem index, zkuste použíť voľbu -idx!)  \n"
 #define MSGTR_CantSeekFile "Nemôžem sa posúvať v tomto súbore!  \n"
 
-#define MSGTR_EncryptedVOB "Šifrovaný súbor VOB! Prečítajte si DOCS/HTML/en/cd-dvd.html.\n"
-
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavičky nie sú (ešte) podporované!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Upozornenie! premenná FOURCC detekovaná!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Upozornenie! Príliš veľa stôp!"
@@ -587,7 +579,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Nemôžem otvoriť audio demuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Nemôžem otvoriť demuxer titulkov: %s\n"
 #define MSGTR_TVInputNotSeekable "v TV vstupe nie je možné sa pohybovať! (možno posun bude na zmenu kanálov ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s už prítomné!\n"
 #define MSGTR_ClipInfo "Informácie o klipe: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: detekovaný 30000/1001 fps NTSC, prepínam frekvenciu snímkov.\n"
@@ -636,7 +627,6 @@ static char help_text[]=
 			 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Zapínam podporu LIRC...\n"
-#define MSGTR_LIRCdisabled "Nebudete môcť používať diaľkový ovládač.\n"
 #define MSGTR_LIRCopenfailed "Zlyhal pokus o otvorenie podpory LIRC!\n"
 #define MSGTR_LIRCcfgerr "Zlyhalo čítanie konfiguračného súboru LIRC %s!\n"
 

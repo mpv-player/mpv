@@ -281,7 +281,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Falha ao abrir demuxer de audio: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Falha ao abrir demuxer de legendas: %s\n"
 #define MSGTR_TVInputNotSeekable "Entrada de TV não aceita busca! (Provavelmente a busca será pra mudar de canal ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Informação %s do demuxer já presente!\n"
 #define MSGTR_ClipInfo "Informações do clip:\n"
 
 
@@ -321,7 +320,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Configurando o suporte a lirc...\n"
-#define MSGTR_LIRCdisabled "Não será possível utilizar o seu controle remoto\n"
 #define MSGTR_LIRCopenfailed "Falha na abertura do suporte a lirc!\n"
 #define MSGTR_LIRCcfgerr "Falha ao ler o arquivo de configuração do LIRC %s.\n"
 

@@ -263,8 +263,6 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "無法在不完整的 AVI 串流中作搜尋。(需要索引，試用 -idx 選項。)\n"
 #define MSGTR_CantSeekFile "無法在這檔案中作搜尋。\n"
 
-#define MSGTR_EncryptedVOB "已加密的 VOB 檔﹗請參閱 DOCS/zh/cd-dvd.html。\n"
-
 #define MSGTR_MOVcomprhdr "MOV: 壓縮的標頭的支援需要ZLIB﹗\n"
 #define MSGTR_MOVvariableFourCC "MOV: 警告: 偵測到變動的 FOURCC!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: 警告: 有太多的音軌"
@@ -278,7 +276,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "無法成功開啟音效 demuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "無法成功開啟字幕 demuxer: %s\n"
 #define MSGTR_TVInputNotSeekable "TV 輸入不能搜索﹗(搜索可能是用來轉換頻道 ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "已經有 demuxer 資訊 %s﹗\n"
 #define MSGTR_ClipInfo "片段資料:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 偵測到30fps的NTSC內容，改變幀速率。\n"
@@ -320,7 +317,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "正在設定 LIRC 支援...\n"
-#define MSGTR_LIRCdisabled "將無法使用閣下之遙控器。\n"
 #define MSGTR_LIRCopenfailed "無法開啟 LIRC 支援。\n"
 #define MSGTR_LIRCcfgerr "讀取 LIRC 設定檔 %s 失敗。\n"
 

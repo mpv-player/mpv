@@ -239,7 +239,7 @@ static char help_text[]=
 
 // mencoder.c
 
-#define MSGTR_UsingPass3ControllFile "Utilisation du fichier de contrôle de la passe 3: %s\n"
+#define MSGTR_UsingPass3ControlFile "Utilisation du fichier de contrôle de la passe 3: %s\n"
 #define MSGTR_MissingFilename "\nNom de fichier manquant.\n\n"
 #define MSGTR_CannotOpenFile_Device "Impossible d'ouvrir le fichier/périph.\n"
 #define MSGTR_CannotOpenDemuxer "Impossible d'ouvrir le démuxeur.\n"
@@ -384,7 +384,6 @@ static char help_text[]=
 #define MSGTR_LameCantInit "Ne peux pas régler les options de LAME, vérifiez dans bitrate/samplerate,"\
 "certains bitrates très bas (<32) requièrent des taux d'échantillonages plus bas (i.e. -srate 8000)."\
 "Si rien ne marche, essayez un pré-réglage (preset)."
-#define MSGTR_ConfigfileError "Erreur du fichier de configuration"
 #define MSGTR_ErrorParsingCommandLine "Erreur en parsant la ligne de commande"
 #define MSGTR_VideoStreamRequired "La présence d'un flux vidéo est obligatoire !\n"
 #define MSGTR_ForcingInputFPS "Le fps d'entrée sera plutôt interprété comme %5.2f\n"
@@ -477,12 +476,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Le codec n'est pas défini correctement."
 #define MSGTR_OutdatedCodecsConf "Ce fichier codecs.conf est trop vieux et est incompatible avec cette version de MPlayer !"
 
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "plus de mémoire libre"
-#define MSGTR_OverridingTooLowBitrate "Le débit binaire demandé est trop bas pour ce clip.\n"\
-"Le débit binaire minimum pour ce clip est %.0f kbps.\n"\
-"Les valeurs demandées par l'utilisateur vont être ignorées.\n"
-
 // fifo.c
 #define MSGTR_CannotMakePipe "Ne peut créer de canal de communication (pipe) !\n"
 
@@ -495,7 +488,6 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Erreur: l'option '%s' doit avoir un paramètre!\n"
 #define MSGTR_OptionListHeader "\n Nom                  Type            Min        Max      Global  CL    Cfg\n\n"
 #define MSGTR_TotalOptions "\nTotal: %d options\n"
-#define MSGTR_TooDeepProfileInclusion "ATTENTION: inclusion de profils trop imbriquée.\n"
 #define MSGTR_NoProfileDefined "Aucun profil n'a été défini.\n"
 #define MSGTR_AvailableProfiles "Profils disponibles:\n"
 #define MSGTR_UnknownProfile "Profil inconnu '%s'.\n"
@@ -574,7 +566,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Impossible de déterminer le nombre d'images (pour recherche absolue)\n"
 #define MSGTR_CantSeekRawAVI "Impossible de chercher dans un flux AVI brut ! (Index requis, essayez l'option -idx.)\n"
 #define MSGTR_CantSeekFile "Impossible de chercher dans ce fichier.\n"
-#define MSGTR_EncryptedVOB "Fichier VOB chiffré! Veuillez lire DOCS/HTML/fr/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Le support d'entêtes compressées nécessite ZLIB !\n"
 #define MSGTR_MOVvariableFourCC "MOV: ATTENTION: FOURCC Variable détecté !?\n"
@@ -589,7 +580,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Echec à l'ouverture du demuxer audio: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Echec à l'ouverture du demuxer de sous-titres: %s\n"
 #define MSGTR_TVInputNotSeekable "Impossible de rechercher sur l'entrée TV ! (cette opération correspondra sûrement à un changement de chaines ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Info du demuxer %s déjà présente!\n"
 #define MSGTR_ClipInfo "Information sur le clip: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: contenu NTSC 30000/1001fps détecté, ajustement du débit.\n"
@@ -634,7 +624,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Mise en place du support LIRC...\n"
-#define MSGTR_LIRCdisabled "Vous ne pourrez pas utiliser votre télécommande\n"
 #define MSGTR_LIRCopenfailed "Impossible d'activer le support LIRC.\n"
 #define MSGTR_LIRCcfgerr "Impossible de lire le fichier de config de LIRC %s.\n"
 
@@ -718,7 +707,6 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "erreur de lecture PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "tga compacté en RLE non supporté (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "format de fichier inconnu (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "erreur de conversion de 24 bit en 32 bit (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "message inconnu: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "pas assez de mémoire\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "trop de polices déclarées.\n"
@@ -813,7 +801,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Pilotes disponibles:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Ne pas jouer le son"
 #define MSGTR_PREFERENCES_NormalizeSound "Normaliser le son"
-#define MSGTR_PREFERENCES_EnEqualizer "Activer l'équaliseur"
 #define MSGTR_PREFERENCES_SoftwareMixer "Activer mixeur logiciel"
 #define MSGTR_PREFERENCES_ExtraStereo "Activer stéréo supplémentaire"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"

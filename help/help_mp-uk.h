@@ -266,7 +266,6 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Не вдалося відкрити аудіо demuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Не вдалося відкрити demuxer субтитрів: %s\n"
 #define MSGTR_TVInputNotSeekable "TV input is not seekable! (Seeking will probably be for changing channels ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Інформація демуксера %s вже присутня!\n"
 #define MSGTR_ClipInfo "Інформація кліпу:\n"
 
 
@@ -306,7 +305,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Встановлення підтримки lirc...\n"
-#define MSGTR_LIRCdisabled "Ви не зможете використовувати ваше віддалене керування\n"
 #define MSGTR_LIRCopenfailed "Невдале відкриття підтримки lirc!\n"
 #define MSGTR_LIRCcfgerr "Невдале читання файлу конфігурації LIRC %s!\n"
 

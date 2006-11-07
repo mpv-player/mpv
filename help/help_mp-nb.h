@@ -162,7 +162,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Setter opp lirc støtte...\n"
-#define MSGTR_LIRCdisabled "Du vil ikke kunne bruke fjernkontrollen din\n"
 #define MSGTR_LIRCopenfailed "Feil under åpning av lirc!\n"
 #define MSGTR_LIRCcfgerr "Feil under lesing av lirc konfigurasjonsfil %s!\n"
 
