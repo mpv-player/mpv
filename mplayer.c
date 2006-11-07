@@ -1477,7 +1477,7 @@ static void update_osd_msg(void) {
             int len = demuxer_get_time_length(demuxer);
             int percentage = -1;
             char percentage_text[10];
-            int pts = sh_video->pts;
+            int pts = demuxer_get_current_time(demuxer);
             
             if (osd_show_percentage)
                 percentage = demuxer_get_percent_pos(demuxer);
