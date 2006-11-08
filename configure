@@ -6393,7 +6393,7 @@ int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
   _ld_xvid="$_ld_xvid -lxvidcore"
   _xvid3=no
-  cc_check $_ld_xvid $_ld_lm && _xvid3=yes
+  cc_check $_ld_xvid -lxvidcore $_ld_lm && _xvid3=yes
 fi
 
 if test "$_xvid3" = yes ; then
@@ -6402,6 +6402,7 @@ if test "$_xvid3" = yes ; then
 else
   _def_xvid3='#undef HAVE_XVID3'
   _nocodecmodules="xvid3 $_nocodecmodules"
+  _ld_xvid=""
 fi
 echores "$_xvid3"
 
@@ -6425,6 +6426,7 @@ if test "$_xvid" = yes ; then
 else
   _def_xvid='#undef HAVE_XVID4'
   _nocodecmodules="xvid $_nocodecmodules"
+  _ld_xvid=""
 fi
 echores "$_xvid"
 
