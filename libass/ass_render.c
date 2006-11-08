@@ -2123,7 +2123,7 @@ static void fix_collisions(event_images_t* imgs, int cnt)
 	// fill used[] with fixed events
 	for (i = 0; i < cnt; ++i) {
 		render_priv_t* priv;
-		if (!imgs[i].detect_collisions) break;
+		if (!imgs[i].detect_collisions) continue;
 		priv = get_render_priv(imgs[i].event);
 		if (priv->height > 0) { // it's a fixed event
 			segment_t s;
@@ -2152,7 +2152,7 @@ static void fix_collisions(event_images_t* imgs, int cnt)
 	// try to fit other events in free spaces
 	for (i = 0; i < cnt; ++i) {
 		render_priv_t* priv;
-		if (!imgs[i].detect_collisions) break;
+		if (!imgs[i].detect_collisions) continue;
 		priv = get_render_priv(imgs[i].event);
 		if (priv->height == 0) { // not a fixed event
 			int shift;
