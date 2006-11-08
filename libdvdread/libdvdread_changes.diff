@@ -155,20 +155,6 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  
  struct dvd_reader_s {
      /* Basic information. */
-@@ -194,6 +210,13 @@
- }
- 
- 
-+#ifndef HAVE_MPLAYER
-+ #include "get_path.c"
-+#else
-+ extern char * get_path( const char * filename );
-+#endif
-+
-+//extern char * dvdcss_cache_dir;
- 
- /**
-  * Open a DVD image or block device file.
 @@ -278,11 +301,16 @@
     Darwin  /dev/rdisk0,  it needs to be the raw device
     BSD/OS  /dev/sr0c (if not mounted) or /dev/rsr0c ('c' any letter will do) */

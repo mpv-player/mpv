@@ -20,8 +20,6 @@ LIB=libdvdread
 
 ifeq ($(OPTFLAGS),)
 OPTFLAGS = -mcpu=pentium -march=pentium -O4
-else
-OPTFLAGS += -DHAVE_MPLAYER
 endif
 
 CFLAGS= -I../libdvdcss -I.. $(OPTFLAGS) -D__USE_UNIX98 -D_GNU_SOURCE \
