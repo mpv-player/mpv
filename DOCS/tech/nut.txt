@@ -588,12 +588,22 @@ last_pts
     frame then the syncpoint timestamp is used, see global_key_pts
 
 stream_id[frame_code]
+    if FLAG_STREAM_ID is not set then this is the stream number for the
+    frame following this frame_code
+    if FLAG_STREAM_ID is set then this value has no meaning
     MUST be <250
 
 data_size_mul[frame_code]
+    if FLAG_SIZE_MSB is set then data_size_msb which is stored after the
+    frame code is multiplied with it and forms the more significant part
+    of the size of the following frame
+    if FLAG_SIZE_MSB is not set then this field has no meaning
     MUST be <16384
 
 data_size_lsb[frame_code]
+    the less significant part of the size of the following frame
+    this added together with data_size_mul*data_size_msb is the size of
+    the following frame
     MUST be <16384
 
 pts_delta[frame_code]
@@ -606,6 +616,7 @@ reserved_count[frame_code]
     MUST be <256
 
 data_size
+    the size of the following frame
     data_size= data_size_lsb + data_size_msb*data_size_mul;
 
 coded_pts
