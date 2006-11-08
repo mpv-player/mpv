@@ -112,6 +112,8 @@ typedef struct radio_priv_s {
     int                 frac;              ///< fraction value (see comment to init_frac)
     radio_channels_t*   radio_channel_list;
     radio_channels_t*   radio_channel_current;
+    float rangelow;                        ///< lowest tunable frequency in MHz
+    float rangehigh;                       ///< highest tunable frequency in MHz
     int                 driver;
     int                 old_snd_volume;
 #ifdef USE_RADIO_CAPTURE
@@ -186,7 +188,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
 
             priv->radio_channel_current->freq=atof(tmp);
 
-            if (priv->radio_channel_current->freq == 0)
+            if ((priv->radio_channel_current->freq>priv->rangehigh)||(priv->radio_channel_current->freq<priv->rangelow))
                 mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_WrongFreqForChannel,
                     priv->radio_channel_current->name);
 
@@ -272,6 +274,10 @@ static int init_frac_v4l2(radio_priv_t* priv){
         priv->frac=16;
         mp_msg(MSGT_RADIO,MSGL_DBG2,MSGTR_RADIO_TunerCapLowNo,priv->frac);
     }
+
+    priv->rangelow=((float)tuner.rangelow)/priv->frac;
+    priv->rangehigh=((float)tuner.rangehigh)/priv->frac;
+    mp_msg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_FreqRange,priv->rangelow,priv->rangehigh);
     return STREAM_OK;
 }
 
@@ -415,6 +421,11 @@ static int init_frac_v4l(radio_priv_t* priv){
         priv->frac=16;
         mp_msg(MSGT_RADIO,MSGL_DBG2,MSGTR_RADIO_TunerCapLowNo,priv->frac);
     }
+
+    priv->rangelow=((float)tuner.rangelow)/priv->frac;
+    priv->rangehigh=((float)tuner.rangehigh)/priv->frac;
+    mp_msg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_FreqRange,priv->rangelow,priv->rangehigh);
+
     return STREAM_OK;
 }
 
@@ -524,6 +535,10 @@ static inline int init_frac(radio_priv_t* priv){
     return STREAM_ERROR;
 }
 static inline int set_frequency(radio_priv_t* priv,float frequency){ 
+    if ((frequency<priv->rangelow)||(frequency>priv->rangehigh)){
+        mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_WrongFreq,frequency);
+        return STREAM_ERROR;
+    }
     switch(priv->driver){
 #ifdef HAVE_RADIO_V4L
         case RADIO_DRIVER_V4L:
@@ -1034,7 +1049,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         return STREAM_ERROR;
     }
 
-    if (frequency==0){
+    if ((frequency<priv->rangelow)||(frequency>priv->rangehigh)){
         mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_WrongFreq,frequency);
         close_s(stream);
         return STREAM_ERROR;
