@@ -75,6 +75,9 @@ const CodecTag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_4XM, MKTAG('4', 'X', 'M', 'A')},
     { CODEC_ID_PCM_S24BE, MKTAG('i', 'n', '2', '4')},
     { CODEC_ID_PCM_S8,    MKTAG('t', 'w', 'o', 's')},
+    { CODEC_ID_WAVPACK,   MKTAG('W', 'V', 'P', 'K')},
+    { CODEC_ID_TTA,       MKTAG('T', 'T', 'A', '1')},
+    { CODEC_ID_SHORTEN,   MKTAG('s', 'h', 'r', 'n')},
     { 0, 0 },
 };
 
