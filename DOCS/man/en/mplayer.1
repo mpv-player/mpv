@@ -7129,13 +7129,34 @@ the future, msmpeg4 cannot be fixed as it does not support that.)
 .
 .TP
 .B lmin=<0.01\-255.0>
-Minimum Lagrange multiplier for ratecontrol, you probably want it to be
-equal to or lower than vqmin (default: 2.0).
+Minimum frame-level Lagrange multiplier for ratecontrol (default: 2.0).
+Lavc will rarely use quantizers below the value of lmin.
+Lowering lmin will make lavc more likely to choose lower quantizers for
+some frames, but not lower than the value of vqmin.
+Likewise, raising lmin will make lavc less likely to choose low
+quantizers, even if vqmin would have allowed them.
+You probably want to set lmin approximately equal to vqmin.
+When adaptive quantization is in use, changing lmin/lmax may have less
+of an effect; see mblmin/mblmax.
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
 maximum Lagrange multiplier for ratecontrol (default: 31.0)
+.RE
+.
+.TP
+.B mblmin=<0.01\-255.0>
+Minimum macroblock-level Lagrange multiplier for ratecontrol
+(default:2.0).
+This parameter affects adaptive quantization options like qprd,
+lumi_mask, etc..
+.RE
+.
+.TP
+.B mblmax=<0.01\-255.0>
+Maximum macroblock-level Lagrange multiplier for ratecontrol
+(default: 31.0).
 .RE
 .
 .TP
