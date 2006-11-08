@@ -37,6 +37,7 @@
 #include "bitstream.h"
 #include "tables.h"
 #include "mm_accel.h"
+#include "libavutil/avutil.h"
 
 #ifdef HAVE_MEMALIGN
 /* some systems have memalign() but no declaration for it */
@@ -63,16 +64,10 @@ a52_state_t * a52_init (uint32_t mm_accel)
     if (state == NULL)
 	return NULL;
 
-    state->samples = memalign (16, 256 * 12 * sizeof (sample_t));
 #if defined(__MINGW32__) && defined(HAVE_SSE) 
-    for(i=0;i<10;i++){
-      if((int)state->samples%16){
-        sample_t* samplestmp=malloc(256 * 12 * sizeof (sample_t));   
-        free(state->samples);
-        state->samples = samplestmp;    
-      }
-      else break;
-    }
+    state->samples = av_malloc(256 * 12 * sizeof (sample_t));
+#else
+    state->samples = memalign (16, 256 * 12 * sizeof (sample_t));
 #endif
     if(((int)state->samples%16) && (mm_accel&MM_ACCEL_X86_SSE)){
       mm_accel &=~MM_ACCEL_X86_SSE;
@@ -915,6 +910,10 @@ int a52_block (a52_state_t * state)
 
 void a52_free (a52_state_t * state)
 {
-    free (state->samples);
+#if defined(__MINGW32__) && defined(HAVE_SSE)
+    av_free (state->samples);
+#else
+     free (state->samples);
+#endif
     free (state);
 }
