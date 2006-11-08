@@ -644,6 +644,11 @@ lsb_pts
     all pts's of keyframes of a single stream MUST be monotone
 
 dts
+    decoding timestamp
+    the dts of a frame is the timestamp of the first sample which is
+    output by a decoder when it is feeded with the frame, note that the
+    data output is not neccesarily what is coded in the frame, but may
+    be data from previous frames
     dts is calculated by using a decode_delay+1 sized buffer for each
     stream, into which the current pts is inserted and the element with
     the smallest value is removed, this is then the current dts
@@ -654,6 +659,7 @@ dts
     frames are NOT exempt from this rule)
 
 width/height
+    width and height of the video in pixels
     MUST be set to the coded width/height, MUST NOT be 0
 
 sample_width/sample_height (aspect ratio)
