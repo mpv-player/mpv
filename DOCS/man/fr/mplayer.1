@@ -1677,6 +1677,7 @@ radio.
 Pour écouter la radio avec MPlayer, utilisez une URL de
 type 'radio://<fréquence>' (si l'option 'channels' n'est pas donnée),
 ou 'radio://<numéro de canal>' (si l'option 'channels' est donnée).
+Pour voir la plage de fréquence autorisée, lancez MPlayer avec l'option '\-v'.
 Pour commencer l'enregistrement, faites 'radio://<fréquence ou canal>/capture'.
 Si le mot-clef capture n'est pas donné vous pouvez uniquement écouter
 la radio par la sortie line-in.
@@ -7518,14 +7519,38 @@ dans le futur, msmpeg4 ne peut être corrigé car il ne gère pas cela).
 .
 .TP
 .B lmin=<0.01\-255.0>
-Multiplicateur de Lagrange minimum pour le contrôleur de débit, qu'il est
-conseillé d'avoir égal ou inférieur à vqmin. (par défaut\ : 2.0)
+Multiplicateur de Lagrange minimum (au niveau trame) pour le contrôleur
+de débit, (par défaut\ : 2.0).
+Libavcodec n'utilisera que rarement des quantum inférieurs à la valeur de lmin.
+Baiser lmin augmente la tendence de libavcodec à choisir des quantums plus
+petits pour certaines trames, mais jamais plus petit que la valeur de vqmin.
+De la même façon, augmenter lmin diminue la tendence de libavcodec à choisir
+des quantum plus petits, même si vqmin l'aurait permis.
+Il est conseillé de garder lmin à peu près égal à vqmin.
+Quand la quantification adaptative est utilisée, changer lmin/lmax a moins
+d'effet (voir mblmin/mblmax).
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
 Multiplicateur de Lagrange maximum pour le contrôleur de débit.
 (par défault: 31.0)
+.RE
+.
+.TP
+.B mblmin=<0.01\-255.0>
+Multiplicateur de Lagrange minimum (au niveau macro-bloc) pour le contrôleur
+de débit, (par défaut\ : 2.0).
+Cette option affecte les options de quantification adaptatives comme qprd,
+lumi_mask, etc..
+.RE
+.
+.TP
+.B mblmax=<0.01\-255.0>
+Multiplicateur de Lagrange maximum (au niveau macro-bloc) pour le contrôleur
+de débit, (par défaut\ : 31.0).
+Cette option affecte les options de quantification adaptatives comme qprd,
+lumi_mask, etc..
 .RE
 .
 .TP
