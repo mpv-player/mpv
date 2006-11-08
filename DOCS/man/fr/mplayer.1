@@ -1,4 +1,4 @@
-.\" synced with r20375
+.\" synced with r20774
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -10254,7 +10254,10 @@ Sera mis à jour si nécessaire dans le cas où 'format=mpeg1' ou 'mpeg2'.
 .
 .TP
 .B "tsaf\ \ \ "
-Place des markes d'horodatage (timestamps) dans chaque trame, si possible.
+Place des marques d'horodatage (timestamps) dans chaque trame, si possible;
+recommandé lorsque format=dvd.
+Si dvdauthor indique un message du type "..audio sector out of range...",
+c'est que vous devez activer cette option.
 .
 .TP
 .B init_vpts=<100\-700>
@@ -10366,8 +10369,9 @@ Sony Digital Video container
 .PD 1
 .TP
 .B i_certify_that_my_video_stream_does_not_use_b_frames
-MEncoder ne peut pas assigner les timestamps correctes quand il y a des
-trames-B dans le flux vidéo, ce qui donne des encodes incorrects.
+MEncoder ne peut pas assigner les marques d'horodatage (timestamps) correctes
+quand il y a des trames-B dans le flux vidéo, ce qui donne des encodes
+dont l'audio et la vidéo sont désynchronisés.
 .
 .TP
 .B muxrate=<débit>
