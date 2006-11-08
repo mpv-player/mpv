@@ -3,6 +3,10 @@
  *               Björn Englund <d4bjorn@dtek.chalmers.se>, 
  *               Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
+ * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
+ * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
+ * $Id$
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
