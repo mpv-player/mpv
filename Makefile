@@ -323,7 +323,7 @@ osdep/mplayer-rc.o: osdep/mplayer.rc
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) -I. -DCODECS2HTML codec-cfg.c -o $@
 
-codecs.conf.h: codec-cfg etc/codecs.conf
+codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
 
 codec-cfg.o: codecs.conf.h
