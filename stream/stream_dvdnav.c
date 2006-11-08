@@ -87,11 +87,11 @@ static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   {
     int len, event;
     char buf[2048];
-    
+
     dvdnav_get_next_block(dvdnav_priv->dvdnav,buf,&event,&len);
     dvdnav_sector_search(dvdnav_priv->dvdnav, 0, SEEK_SET);
   }
-  
+
   /* turn off dvdnav caching */
   dvdnav_set_readahead_flag(dvdnav_priv->dvdnav, 0);
   if(dvdnav_set_PGC_positioning_flag(dvdnav_priv->dvdnav, 1) != DVDNAV_STATUS_OK)
@@ -127,24 +127,23 @@ static int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, i
     *len=-1;
   }
   else if (event!=DVDNAV_BLOCK_OK) {
-
     // need to handle certain events internally (like skipping stills)
     switch (event) {
-    case DVDNAV_STILL_FRAME: {
-      dvdnav_still_event_t *still_event = (dvdnav_still_event_t*)(buf);
-      //if (dvdnav_priv->started) dvd_nav_still=1;
-      //else
-        dvdnav_still_skip(dvdnav_priv->dvdnav); // don't let dvdnav stall on this image
+      case DVDNAV_STILL_FRAME: {
+        dvdnav_still_event_t *still_event = (dvdnav_still_event_t*)(buf);
+        //if (dvdnav_priv->started) dvd_nav_still=1;
+        //else
+          dvdnav_still_skip(dvdnav_priv->dvdnav); // don't let dvdnav stall on this image
 
-      break;
-    }
-    case DVDNAV_CELL_CHANGE: {
+        break;
+      }
+      case DVDNAV_CELL_CHANGE: {
         dvdnav_cell_change_event_t *ev =  (dvdnav_cell_change_event_t*)buf;
         if(ev->pgc_length)
           dvdnav_priv->duration = ev->pgc_length/90;
         break;
-    }
-    case DVDNAV_WAIT:
+      }
+      case DVDNAV_WAIT:
         dvdnav_wait_skip(dvdnav_priv->dvdnav);
         break;
     }
@@ -168,24 +167,24 @@ static void update_title_len(stream_t *stream) {
     stream->end_pos = 0;
   }
 }
-  
+
 
 static int seek(stream_t *s, off_t newpos) {
-uint32_t pos = 0, len = 0, sector = 0;
-dvdnav_priv_t *priv = s->priv;
+  uint32_t pos = 0, len = 0, sector = 0;
+  dvdnav_priv_t *priv = s->priv;
 
-    if(s->end_pos && newpos > s->end_pos) 
-       newpos = s->end_pos;
-    sector = newpos / 2048ULL;
-    if(dvdnav_sector_search(priv->dvdnav, (uint64_t) sector, SEEK_SET) != DVDNAV_STATUS_OK)
-      goto fail;
+  if(s->end_pos && newpos > s->end_pos) 
+     newpos = s->end_pos;
+  sector = newpos / 2048ULL;
+  if(dvdnav_sector_search(priv->dvdnav, (uint64_t) sector, SEEK_SET) != DVDNAV_STATUS_OK)
+    goto fail;
 
-    s->pos = newpos;
-  
+  s->pos = newpos;
+
   return 1;
-  
+
 fail:
-    mp_msg(MSGT_STREAM,MSGL_INFO,"dvdnav_stream, seeking to %"PRIu64" failed: %s\n", newpos, dvdnav_err_to_string(priv->dvdnav));
+  mp_msg(MSGT_STREAM,MSGL_INFO,"dvdnav_stream, seeking to %"PRIu64" failed: %s\n", newpos, dvdnav_err_to_string(priv->dvdnav));
 
   return 1;
 }
@@ -201,40 +200,41 @@ static void stream_dvdnav_close(stream_t *s) {
 static int fill_buffer(stream_t *s, char *but, int len)
 {
     int event;
+
     dvdnav_priv_t* dvdnav_priv=s->priv;
     len=0;
     if(!s->end_pos)
       update_title_len(s);
     while(!len) /* grab all event until DVDNAV_BLOCK_OK (len=2048), DVDNAV_STOP or DVDNAV_STILL_FRAME */
     {
-        if(-1==(event=dvdnav_stream_read(dvdnav_priv, s->buffer, &len)) || len==-1)
-        {
-            mp_msg(MSGT_CPLAYER,MSGL_ERR, "DVDNAV stream read error!\n");
-            return 0;
+      if(-1==(event=dvdnav_stream_read(dvdnav_priv, s->buffer, &len)) || len==-1)
+      {
+        mp_msg(MSGT_CPLAYER,MSGL_ERR, "DVDNAV stream read error!\n");
+        return 0;
+      }
+      switch (event) {
+        case DVDNAV_STOP: return len;
+        case DVDNAV_BLOCK_OK: return len;
+        case DVDNAV_VTS_CHANGE: {
+          int tit = 0, part = 0;
+          s->end_pos = 0;
+          update_title_len(s);
+          if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
+            mp_msg(MSGT_CPLAYER,MSGL_V, "\r\nDVDNAV, NEW TITLE %d\r\n", tit);
+            if(dvdnav_priv->title > 0 && tit != dvdnav_priv->title)
+              return 0;
+          }
+          break;
         }
-        switch (event) {
-            case DVDNAV_STOP: return len;
-	    case DVDNAV_BLOCK_OK: return len;
-            case DVDNAV_VTS_CHANGE: {
-                int tit = 0, part = 0;
-                s->end_pos = 0;
-                update_title_len(s);
-                if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
-                  mp_msg(MSGT_CPLAYER,MSGL_V, "\r\nDVDNAV, NEW TITLE %d\r\n", tit);
-                  if(dvdnav_priv->title > 0 && tit != dvdnav_priv->title)
-                    return 0;
-                }
-                break;
+        case DVDNAV_CELL_CHANGE: {
+          if(dvdnav_priv->title > 0 && dvd_last_chapter > 0) {
+            int tit=0, part=0;
+            if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > dvd_last_chapter)
+              return 0;
             }
-            case DVDNAV_CELL_CHANGE: {
-                if(dvdnav_priv->title > 0 && dvd_last_chapter > 0) {
-                  int tit=0, part=0;
-                  if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > dvd_last_chapter)
-                      return 0;
-                  }
-            }
-            break;
         }
+        break;
+      }
   }
   mp_msg(MSGT_STREAM,MSGL_DBG2,"DVDNAV fill_buffer len: %d\n",len);
   return len;
@@ -276,11 +276,12 @@ static int control(stream_t *stream, int cmd, void* arg) {
     }
     case STREAM_CTRL_GET_TIME_LENGTH:
     {
-        if(dvdnav_priv->duration)
-        {
-          *((unsigned int *)arg) = dvdnav_priv->duration;
-          return 1;
-        }
+      if(dvdnav_priv->duration)
+      {
+        *((unsigned int *)arg) = dvdnav_priv->duration;
+        return 1;
+      }
+      break;
     }
   }
 
@@ -304,20 +305,20 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
 
   if(p->track > 0) {
-  if(dvd_chapter > 0 && dvd_last_chapter > 0 && dvd_chapter > dvd_last_chapter) {
-    mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, invalid chapter range: %d > %d\n", dvd_chapter, dvd_last_chapter);
-    return STREAM_UNSUPORTED;
-  }
-  dvdnav_priv->title = p->track;
-  if(dvdnav_title_play(dvdnav_priv->dvdnav, p->track) != DVDNAV_STATUS_OK) {
-    mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, couldn't select title %d, error '%s'\n", p->track, dvdnav_err_to_string(dvdnav_priv->dvdnav));
-    return STREAM_UNSUPORTED;
-  }
-  if(dvd_chapter > 0)
-    dvdnav_part_play(dvdnav_priv->dvdnav, p->track, dvd_chapter);
+    if(dvd_chapter > 0 && dvd_last_chapter > 0 && dvd_chapter > dvd_last_chapter) {
+      mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, invalid chapter range: %d > %d\n", dvd_chapter, dvd_last_chapter);
+      return STREAM_UNSUPORTED;
+    }
+    dvdnav_priv->title = p->track;
+    if(dvdnav_title_play(dvdnav_priv->dvdnav, p->track) != DVDNAV_STATUS_OK) {
+      mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, couldn't select title %d, error '%s'\n", p->track, dvdnav_err_to_string(dvdnav_priv->dvdnav));
+      return STREAM_UNSUPORTED;
+    }
+    if(dvd_chapter > 0)
+      dvdnav_part_play(dvdnav_priv->dvdnav, p->track, dvd_chapter);
   } else if(p->track == -1)
-      dvdnav_menu_call(dvdnav_priv->dvdnav, DVD_MENU_Root);
-    else {
+    dvdnav_menu_call(dvdnav_priv->dvdnav, DVD_MENU_Root);
+  else {
     mp_msg(MSGT_OPEN,MSGL_INFO,"dvdnav_stream, you didn't specify a track number (as in dvdnav://1), playing whole disc\n");
     dvdnav_menu_call(dvdnav_priv->dvdnav, DVD_MENU_Title);
   }
@@ -337,7 +338,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   update_title_len(stream);
   if(!stream->pos)
     mp_msg(MSGT_OPEN,MSGL_ERR, "INIT ERROR: %d, couldn't get init pos %s\r\n", status, dvdnav_err_to_string(dvdnav_priv->dvdnav));
-  
+
   mp_msg(MSGT_OPEN,MSGL_INFO, "Remember to disable MPlayer's cache when playing dvdnav:// streams (adding -nocache to your command line)\r\n");
 
   return STREAM_OK;
@@ -406,7 +407,7 @@ int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
   }
 
   if(status == DVDNAV_STATUS_OK)
-      dvdnav_get_current_highlight(nav, button);
+    dvdnav_get_current_highlight(nav, button);
 
   return reset;
 }
