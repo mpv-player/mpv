@@ -6438,18 +6438,6 @@ EOF
   echores "$_lavc_xvid"
 fi
 
-_xvidcompat=no
-_def_decore_xvid='#undef DECORE_XVID'
-_def_encore_xvid='#undef ENCORE_XVID'
-if test "$_xvid" = yes ; then
-  echocheck "DivX4 compatibility in XviD"
-  cat > $TMPC << EOF
-#include <divx4.h>
-int main(void) { (void) decore(0, 0, 0, 0); return 0; }
-EOF
-  cc_check $_ld_lm "$_ld_xvid" && _xvidcompat=yes
-  echores "$_xvidcompat"
-fi
 
 echocheck "x264"
 if test "$_x264" = auto ; then
