@@ -835,8 +835,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 				next_url = http_get_field( http_hdr, "Location" );
 				if( next_url!=NULL ) {
 					closesocket( fd );
-					url_free( url );
-					stream->streaming_ctrl->url = url = url_new( next_url );
+					stream->streaming_ctrl->url = url_redirect( &url, next_url );
 					http_free( http_hdr );
 					redirect = 1;	
 				}

@@ -19,6 +19,25 @@
 #define SIZE_MAX ((size_t)-1)
 #endif
 
+URL_t *url_redirect(URL_t **url, const char *redir) {
+  URL_t *u = *url;
+  URL_t *res;
+  if (!strchr(redir, '/')) {
+    char *tmp;
+    char *newurl = malloc(strlen(u->url) + strlen(redir) + 1);
+    strcpy(newurl, u->url);
+    tmp = strrchr(newurl, '/');
+    if (tmp) tmp[1] = 0;
+    strcat(newurl, redir);
+    res = url_new(newurl);
+    free(newurl);
+  } else
+    res = url_new(redir);
+  url_free(u);
+  *url = res;
+  return res;
+}
+
 URL_t*
 url_new(const char* url) {
 	int pos1, pos2,v6addr = 0;

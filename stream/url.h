@@ -19,6 +19,7 @@ typedef struct {
 	char *password;
 } URL_t;
 
+URL_t *url_redirect(URL_t **url, const char *redir);
 URL_t* url_new(const char* url);
 void   url_free(URL_t* url);
 
