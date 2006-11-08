@@ -51,6 +51,8 @@ MUST    the specific part must be done to conform to this standard
 SHOULD  it is recommended to be done that way, but not strictly required
 
 keyframe
+    A keyframe is a frame from which you can start decoding, a more
+    exact definition is below
     The nth frame is a keyframe if and only if frames n, n+1, ... in 
     presentation order (that are all frames with a pts >= frame[n].pts) can
     be decoded successfully without reference to frames prior n in storeage
