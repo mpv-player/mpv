@@ -443,7 +443,8 @@ int af_init(af_stream_t* s)
     }
     
     // Check output format fix if not OK
-    if(s->output.format && s->last->data->format != s->output.format){
+    if(s->output.format != AF_FORMAT_UNKNOWN &&
+		s->last->data->format != s->output.format){
       if(strcmp(s->last->info->name,"format"))
 	af = af_append(s,s->last,"format");
       else
@@ -460,7 +461,8 @@ int af_init(af_stream_t* s)
     if(AF_OK != af_reinit(s,s->first))
       return -1;
 
-    if (!s->output.format) s->output.format = s->last->data->format;
+    if (s->output.format == AF_FORMAT_UNKNOWN)
+	s->output.format = s->last->data->format;
     if (!s->output.nch) s->output.nch = s->last->data->nch;
     if (!s->output.rate) s->output.rate = s->last->data->rate;
     if((s->last->data->format != s->output.format) || 
