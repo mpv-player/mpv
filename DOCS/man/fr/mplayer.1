@@ -2584,6 +2584,10 @@ sortie audio par NAS
 .TP
 .B macosx (Mac OS X uniquement)
 pilote de sortie audio natif de Mac OS X
+.TP
+.B openal
+pilote de sortie audio OpenAL expérimental et non terminé (mixe
+vers un son mono)
 .
 .TP
 .B sgi (SGI uniquement)
@@ -3469,6 +3473,7 @@ Lorsqu'il est activé, il se comporte comme les autres pilotes de sortie
 vidéo, ce qui est mieux pour les polices de caractères à taille fixe.
 En le désactivant, le résultat est plus esthétique avec les polices FreeType,
 et en mode plein-écran, s'affichera dans les bandes noires.
+Ne fonctionne pas bien avec les sous-titres ass (voir \-ass).
 .IPs osdcolor=<0xRRGGBB>
 Couleur de l'OSD (par défaut\ : 0xffffff, correspond à blanc).
 .IPs (no)aspect
@@ -6867,7 +6872,15 @@ défaut dans votre fichier de configuration.
 Déplace le rendu des sous-titres SSA/ASS à une position arbitraire dans
 la chaîne de filtrage.
 Utile uniquement pour l'option \-ass.
+.sp 1
+.I EXEMPLE:
+.PD 0
+.RSs
+.IPs "\-vf ass,screenshot"
+Déplace le rendu SSA/ASS devant le filtre screenshot.
+Les captures d'écran prises de cette façon contiendront les sous-titres.
 .RE
+.PD 1
 .
 .TP
 .B blackframe[=quantité:seuil]
