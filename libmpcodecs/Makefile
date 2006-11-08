@@ -106,10 +106,9 @@ VIDEO_SRCS+=vd_theora.c
 endif
 ifeq ($(XVID4),yes)
 VIDEO_SRCS+=vd_xvid4.c
-else
-  ifeq ($(XVID),yes)
-  VIDEO_SRCS+=vd_xvid.c
-  endif
+endif
+ifeq ($(XVID3),yes)
+VIDEO_SRCS+=vd_xvid.c
 endif
 ifeq ($(ZORAN),yes)
 VIDEO_SRCS+=vd_zrmjpeg.c
@@ -235,10 +234,9 @@ ENCODER_SRCS+=ve_libdv.c
 endif
 ifeq ($(XVID4),yes)
 ENCODER_SRCS+=ve_xvid4.c
-else
-  ifeq ($(XVID),yes)
-  ENCODER_SRCS+=ve_xvid.c
-  endif
+endif
+ifeq ($(XVID3),yes)
+ENCODER_SRCS+=ve_xvid.c
 endif
 ifeq ($(X264),yes)
 ENCODER_SRCS+=ve_x264.c

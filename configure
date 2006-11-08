@@ -273,7 +273,8 @@ Codecs:
   --disable-qtx             disable QuickTime codecs support [enabled]
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
-  --disable-xvid            disable XviD [autodetect]
+  --disable-xvid4           disable XviD 4 [autodetect]
+  --disable-xvid3           disable XviD 3 [autodetect]
   --disable-x264            disable x264 [autodetect]
   --disable-nut             disable libnut [autodetect]
   --disable-libavutil       disable libavutil [autodetect]
@@ -1656,7 +1657,8 @@ _smbsupport=auto
 _vidix_internal=auto
 _vidix_external=auto
 _joystick=no
-_xvid=auto
+_xvid3=auto
+_xvid4=auto
 _x264=auto
 _nut=auto
 _lirc=auto
@@ -1916,8 +1918,10 @@ for ac_option do
   --disable-vidix-external)	_vidix_external=no	;;
   --enable-joystick)	_joystick=yes	;;
   --disable-joystick)	_joystick=no	;;
-  --enable-xvid)	_xvid=yes	;;
-  --disable-xvid)	_xvid=no	;;
+  --enable-xvid3)	_xvid3=yes	;;
+  --disable-xvid3)	_xvid3=no	;;
+  --enable-xvid4)	_xvid4=yes	;;
+  --disable-xvid4)	_xvid4=no	;;
   --enable-x264)        _x264=yes       ;;
   --disable-x264)       _x264=no        ;;
   --enable-nut)		_nut=yes	;;
@@ -6380,47 +6384,47 @@ else
 fi
 echores "$_bl"
 
-echocheck "XviD"
+echocheck "XviD 3"
+  if test "$_xvid3" = auto ; then
 cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
 _ld_xvid="$_ld_xvid -lxvidcore"
-_xvid4=no
-if test "$_xvid" != no && cc_check $_ld_xvid $_ld_lm ; then
-  _xvid=yes
+  _xvid3=no
+  cc_check $_ld_xvid $_ld_lm && _xvid3=yes
+fi
+
+if test "$_xvid3" = yes ; then
   _def_xvid3='#define HAVE_XVID3 1'
-  _def_xvid4='#undef HAVE_XVID4'
-  _codecmodules="xvid $_codecmodules"
+  _codecmodules="xvid3 $_codecmodules"
 else
-cat > $TMPC << EOF
+  _def_xvid3='#undef HAVE_XVID3'
+  _nocodecmodules="xvid3 $_nocodecmodules"
+fi
+echores "$_xvid3"
+
+echocheck "XviD 4"
+if test "$_xvid4" = auto ; then
+  _xvid4=no
+  _ld_xvid="$_ld_xvid -lxvidcore $_ld_lm"
+  cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_global(0, 0, 0, 0); return 0; }
 EOF
-  if test "$_xvid" != no ;then 
-    if cc_check $_ld_xvid $_ld_lm ; then 
-    _xvid4=yes 
-    elif cc_check $_ld_xvid $_ld_lm $_ld_pthread ; then
-    _xvid4=yes;
-    _ld_xvid="$_ld_xvid $_ld_pthread"
-    fi
-  fi
+  for _ld_tmp in "$_ld_xvid" "$_ld_xvid $_ld_pthread" ; do
+    cc_check $_ld_tmp && _ld_xvid="$_ld_tmp" && _xvid4=yes && break
+  done
+fi
   
   if test "$_xvid4" = yes ; then
-    _xvid=yes
-    _xvid4=yes
-    _def_xvid3='#undef HAVE_XVID3'
     _def_xvid4='#define HAVE_XVID4 1'
-    _codecmodules="xvid $_codecmodules"
+    _codecmodules="xvid4 $_codecmodules"
   else
-    _xvid=no
-    _ld_xvid=''
-    _def_xvid3='#undef HAVE_XVID3'
     _def_xvid4='#undef HAVE_XVID4'
-    _nocodecmodules="xvid $_nocodecmodules"
+    _nocodecmodules="xvid4 $_nocodecmodules"
   fi
-fi
-echores "$_xvid"
+echores "$_xvid4"
 
 if test "$_xvid4" = yes ; then
   echocheck "XviD two pass plugin"
@@ -7436,7 +7440,7 @@ CONFIG_LIBPOSTPROC = $_libpostproc
 CONFIG_LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
 LIBDV = $_libdv
-XVID = $_xvid
+XVID3 = $_xvid3
 XVID4 = $_xvid4
 X264 = $_x264
 LIBNUT = $_nut
