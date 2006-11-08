@@ -1157,6 +1157,62 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] воспроизведение alsa: ошибка записи после сброса: %s - безнадёжно.\n"
 #define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] воспроизведение alsa: ошибка вывода: %s\n"
 
+// ao_alsa.c
+#define MSGTR_AO_ALSA_InvalidMixerIndexDefaultingToZero "[AO_ALSA] Неверный индекс микшера. Возврат к 0.\n"
+#define MSGTR_AO_ALSA_MixerOpenError "[AO_ALSA] Ошибка открытия микшера: %s\n"
+#define MSGTR_AO_ALSA_MixerAttachError "[AO_ALSA] Ошибка присоединения %s к микшеру: %s\n"
+#define MSGTR_AO_ALSA_MixerRegisterError "[AO_ALSA] Ошибка регистрации микшера: %s\n"
+#define MSGTR_AO_ALSA_MixerLoadError "[AO_ALSA] Ошибка загрузки микшера: %s\n"
+#define MSGTR_AO_ALSA_UnableToFindSimpleControl "[AO_ALSA] Невозможно найти простой элмент управления '%s',%i.\n"
+#define MSGTR_AO_ALSA_ErrorSettingLeftChannel "[AO_ALSA] Ошибка установки левого канала, %s\n"
+#define MSGTR_AO_ALSA_ErrorSettingRightChannel "[AO_ALSA] Ошибка установки правого канала, %s\n"
+#define MSGTR_AO_ALSA_CommandlineHelp "\n[AO_ALSA] подсказка командной строки -ao alsa:\n"\
+"[AO_ALSA] Пример: mplayer -ao alsa:device=hw=0.3\n"\
+"[AO_ALSA]   Устанавливает четвертое устройство первой карты.\n\n"\
+"[AO_ALSA] Опции:\n"\
+"[AO_ALSA]   noblock\n"\
+"[AO_ALSA]     Открывает устройство в неблокирующем режиме.\n"\
+"[AO_ALSA]   device=<имя-устройства>\n"\
+"[AO_ALSA]     Устанавливает устройство (замените , на . и : на =)\n"
+#define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] Количество каналов %d не поддерживается.\n"
+#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Невозможно прочитать конфигурацию ALSA: %s\n"
+#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] Невозможно скопировать конфигурацию: %s\n"
+#define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] Ошибка открытия в неблокирующем режиме, попытка открыть в режиме блокирования.\n"
+#define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Ошибка начала воспроизведения: %s\n"
+#define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Ошибка установки блокирующего режима: %s.\n"
+#define MSGTR_AO_ALSA_UnableToGetInitialParameters "[AO_ALSA] Невозможно получить начальные параметры: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetAccessType "[AO_ALSA] Невозможно установить тип доступа: %s\n"
+#define MSGTR_AO_ALSA_FormatNotSupportedByHardware "[AO_ALSA] Формат %s не поддерживается оборудованием, пробуем значение по-умолчанию.\n"
+#define MSGTR_AO_ALSA_UnableToSetFormat "[AO_ALSA] Невозможно установить формат: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetChannels "[AO_ALSA] Невозможно установить количество каналов: %s\n"
+#define MSGTR_AO_ALSA_UnableToDisableResampling "[AO_ALSA] Невозможно отключить ресэмплинг: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSamplerate2 "[AO_ALSA] Невозможно установить частоту дискретизации-2: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetBufferTimeNear "[AO_ALSA] Невозможно установить примерное время буфера: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodTime "[AO_ALSA] Невозможно установить время периода: %s\n"
+#define MSGTR_AO_ALSA_BufferTimePeriodTime "[AO_ALSA] время_буфера: %d, время_периода :%d\n"
+#define MSGTR_AO_ALSA_UnableToGetPeriodSize "[AO ALSA] Невозможно получить время периода: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodSize "[AO ALSA] Невозможно установить размер периода(%ld): %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriods "[AO_ALSA] Невозможно установить периоды: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetHwParameters "[AO_ALSA] Невозможно установить hw-параметры: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBufferSize "[AO_ALSA] Невозможно получить размер буфера: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetSwParameters "[AO_ALSA] Невозможно получить sw-параметры: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSwParameters "[AO_ALSA] Невозможно установить sw-параметры: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBoundary "[AO_ALSA] Невозможно получить границу: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStartThreshold "[AO_ALSA] Невозможно установить порог запуска: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStopThreshold "[AO_ALSA] Невозможно установить порог останова: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSilenceSize "[AO_ALSA] Невозможно установить величину тишины: %s\n"
+#define MSGTR_AO_ALSA_PcmCloseError "[AO_ALSA] ошибка pcm close: %s\n"
+#define MSGTR_AO_ALSA_NoHandlerDefined "[AO_ALSA] Не определен обработчик!\n"
+#define MSGTR_AO_ALSA_PcmPrepareError "[AO_ALSA] ошибка pcm prepare: %s\n"
+#define MSGTR_AO_ALSA_PcmPauseError "[AO_ALSA] ошибка pcm pause: %s\n"
+#define MSGTR_AO_ALSA_PcmDropError "[AO_ALSA] ошибка pcm drop: %s\n"
+#define MSGTR_AO_ALSA_PcmResumeError "[AO_ALSA] ошибка pcm resume: %s\n"
+#define MSGTR_AO_ALSA_DeviceConfigurationError "[AO_ALSA] Ошибка настройки устройства."
+#define MSGTR_AO_ALSA_PcmInSuspendModeTryingResume "[AO_ALSA] Pcm в ждущем вежиме, попытка продолжить.\n"
+#define MSGTR_AO_ALSA_WriteError "[AO_ALSA] ошибка записи: %s\n"
+#define MSGTR_AO_ALSA_TryingToResetSoundcard "[AO_ALSA] попытка сбросить звуковую карту.\n"
+#define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] Невозможно получить pcm статус: %s\n"
+
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO ПЛАГИН] неверный плагин: %s\n"
@@ -1185,6 +1241,7 @@ static char help_text[]=
 // stream/stream_radio.c
 
 #define MSGTR_RADIO_ChannelNamesDetected "[radio] Обнаружены имена радиостанций.\n"
+#define MSGTR_RADIO_FreqRange "[radio] Допустимый диапазон частот: %.2f-%.2f МГц\n"
 #define MSGTR_RADIO_WrongFreqForChannel "[radio] Неверная частота для станции %s\n"
 #define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Неверный номер станции: %.2f\n"
 #define MSGTR_RADIO_WrongChannelNumberInt "[radio] Неверный номер станции: %d\n"
@@ -1311,7 +1368,7 @@ static char help_text[]=
 
 // asfheader.c
 
-#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "ФАТАЛЬНАЯ ОШИБКА: оазмер заголовка более 1 MB (%d)!\nПожалуйста, обратитесь к разработчикам MPlayer и загрузите/отошлите этот файл.\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "ФАТАЛЬНАЯ ОШИБКА: размер заголовка более 1 MB (%d)!\nПожалуйста, обратитесь к разработчикам MPlayer и загрузите/отошлите этот файл.\n"
 #define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Не могу выделить %d байт(а/ов) для заголовка.\n"
 #define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "EOF при чтении заголовка ASF, испорченный/неполный файл?\n"
 #define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR, вероятно, будет работать только с libavformat,\nпопробуйте -demuxer 35, если у Вас есть проблемы\n"
@@ -1664,6 +1721,10 @@ static char help_text[]=
 #define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Инициализировано: %p.\n"
 #define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Неизвестное субустройство: %s.\n"
 
+// libvo/aspect.c
+#define MSGTR_LIBVO_ASPECT_NoSuitableNewResFound "[ASPECT] Предупреждение: Не найдено подходящего разрешения!\n"
+#define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] Ошибка: Не найден размер, умещающийся в это разрешение!\n"
+
 // libvo/vo_dxr3.c
 
 #define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Не могу загрузить новую палитру SPU!\n"
@@ -1879,3 +1940,16 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] Вызван draw_frame()!!!!!!\n"
+#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] Разделяемая память не поддерживается\nВозврат к обычному Xv.\n"
+#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] Извините, Xv не поддерживается этой версией/драйвером X11\n[VO_XV] ******** Попробуйте -vo x11  или  -vo sdl  *********\n"
+#define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed  "[VO_XV] Ошибка XvQueryAdaptors.\n"
+#define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] Неверный параметр port, переопределение параметром port 0.\n"
+#define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] Невозможно захватить порт %i.\n"
+#define MSGTR_LIBVO_XV_CouldNotFindFreePort "[VO_XV] Невозможно найти свободный Xvideo порт - возможно другое приложение\n"\
+"[VO_XV] уже его использует. Закройте все программы видео, и попытайтесь снова. Если это\n"\
+"[VO_XV] не помогает, смотрите другие (не-xv) драйверы в выводе 'mplayer -vo help'.\n"
+#define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] Похоже, ваша карта не имеет поддержки Xvideo.\n"\
+"[VO_XV] Запустите 'xvinfo', чтобы проверить поддержку Xv и прочтите \n"\
+"[VO_XV] DOCS/HTML/ru/video.html#xv!\n"\
+"[VO_XV] Другие (не-xv) драйверы ищите в выводе 'mplayer -vo help'.\n"\
+"[VO_XV] Попробуйте -vo x11.\n"
