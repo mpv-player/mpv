@@ -294,6 +294,21 @@ II. POLICY / RULES:
     maintainers will review and commit your stuff.
 
 
+12. Always send a patch to the mplayer-dev-eng mailing list before committing
+    if you suspect that the change is going to be controversial. Based on past
+    experience, these changes are likely to be controversial:
+     - feature removal, even if obsolete
+     - changes to "special" output messages (like the "Core dumped ;)" message)
+     - verbosity changes from default (info) level
+     - changes to "historical" parts of docs and webpages
+     - use of internal or external libraries
+
+
+13. Try to keep important discussions and requests (also) on the
+    mplayer-dev-eng mailing list, so that all developers can benefit from them.
+    IRC is good for quick discussions, but nobody is there 24/7.
+
+
 Also read DOCS/tech/patches.txt !!!!
 
 We think our rules are not too hard. If you have comments, contact us.
