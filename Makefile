@@ -128,9 +128,9 @@ ifeq ($(TREMOR_INTERNAL),yes)
 PARTS += tremor
 endif
 
-ALL_PRG = $(PRG)
+ALL_PRG = mplayer$(EXESUF)
 ifeq ($(MENCODER),yes)
-ALL_PRG += $(PRG_MENCODER)
+ALL_PRG += mencoder$(EXESUF)
 endif
 
 COMMON_DEPS = $(W32_DEP) \
@@ -305,30 +305,30 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(VO_LIBS) \
                $(AO_LIBS) \
 
-$(PRG):	$(MPLAYER_DEP)
-	$(CC) -o $(PRG) $(OBJS_MPLAYER) $(LIBS_MPLAYER)
+mplayer$(EXESUF): $(MPLAYER_DEP)
+	$(CC) -o $@ $(OBJS_MPLAYER) $(LIBS_MPLAYER)
 
 ifeq ($(MENCODER),yes)
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(MP3LAME_LIB) \
                 $(COMMON_LIBS) \
 
-$(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)
+mencoder$(EXESUF): $(MENCODER_DEP)
+	$(CC) -o $@ $(OBJS_MENCODER) $(LIBS_MENCODER)
 endif
 
 osdep/mplayer-rc.o: osdep/mplayer.rc
 	windres -o $@ osdep/mplayer.rc
 
-codec-cfg: codec-cfg.c codec-cfg.h help_mp.h
+codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) -I. -DCODECS2HTML codec-cfg.c -o $@
 
 codecs.conf.h: codec-cfg etc/codecs.conf
-	./codec-cfg ./etc/codecs.conf > $@
+	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
 
 codec-cfg.o: codecs.conf.h
 
-codecs2html: mp_msg.o
+codecs2html$(EXESUF): mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c mp_msg.o -o $@
 
 install: $(ALL_PRG)
@@ -337,9 +337,10 @@ ifeq ($(VIDIX),yes)
 	$(MAKE) -C vidix install
 endif
 	$(INSTALL) -d $(BINDIR)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG) $(BINDIR)/$(PRG)
+	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) \
+		$(BINDIR)/mplayer$(EXESUF)
 ifeq ($(GUI),yes)
-	-ln -sf $(PRG) $(BINDIR)/gmplayer
+	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
 endif
 	$(INSTALL) -d $(MANDIR)/man1
 	for i in $(MAN_LANG); do \
@@ -351,7 +352,8 @@ endif
 		fi ; \
 	done
 ifeq ($(MENCODER),yes)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
+	$(INSTALL) -m 755 $(INSTALLSTRIP) mencoder$(EXESUF) \
+		$(BINDIR)/mencoder$(EXESUF)
 	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
 			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
@@ -375,8 +377,9 @@ endif
 	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 
 uninstall:
-	-rm -f $(BINDIR)/$(PRG) $(BINDIR)/gmplayer $(MANDIR)/man1/mplayer.1
-	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(MANDIR)/man1/mencoder.1
+	-rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
+	-rm -f $(BINDIR)/mencoder$(EXESUF)
+	-rm -f $(MANDIR)/man1/mencoder.1 $(MANDIR)/man1/mplayer.1
 	-rm -f $(prefix)/share/pixmaps/mplayer.xpm
 	-rm -f $(prefix)/share/applications/mplayer.desktop
 	for l in $(MAN_LANG); do \
@@ -400,7 +403,8 @@ clean: dirclean
 
 distclean: dirclean doxygen_clean
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
-	-rm -f *~ $(PRG) $(PRG_MENCODER) codec-cfg codecs2html codecs.conf.h \
+	-rm -f *~ mplayer$(EXESUF) mencoder$(EXESUF) \
+	  codec-cfg$(EXESUF) codecs2html$(EXESUF) codecs.conf.h \
           .depend configure.log config.mak config.h help_mp.h version.h
 
 strip:

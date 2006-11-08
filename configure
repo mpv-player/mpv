@@ -2200,6 +2200,10 @@ test -z "$_mandir" && _mandir="$_prefix/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir" && _libdir="$_prefix/lib"
 
+# For lack of a better place to put platform-specific stuff ..
+win32 && _exesuf=".exe"
+
+
 if x86 ; then
   # Checking assembler (_as) compatibility...
   # Added workaround for older as that reads from stdin by default - atmos
@@ -2440,16 +2444,6 @@ if test "$_vidix_internal" = auto ; then
   beos && _vidix_internal=no
   darwin && _vidix_internal=no
 fi
-
-echocheck "MPlayer binary name"
-if win32 ; then
-  _prg="mplayer.exe"
-  _prg_mencoder="mencoder.exe"
-else
-  _prg="mplayer"
-  _prg_mencoder="mencoder"
-fi
-echores $_prg
 
 
 # On QNX we must link to libph - Gabucino
@@ -7356,8 +7350,7 @@ STRIPBINARIES = $_stripbinaries
 CHARSET = $_charset
 HELP_FILE = $_mp_help
 
-PRG = $_prg
-PRG_MENCODER = $_prg_mencoder
+EXESUF = $_exesuf
 
 MPLAYER_NETWORK = $_network
 FTP = $_ftp
