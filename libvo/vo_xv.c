@@ -180,7 +180,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if ((max_width != 0 && max_height != 0) &&
         (image_width > max_width || image_height > max_height))
     {
-        mp_msg( MSGT_VO, MSGL_ERR, "[xv] " MSGTR_VO_XV_ImagedimTooHigh,
+        mp_msg( MSGT_VO, MSGL_ERR, MSGTR_VO_XV_ImagedimTooHigh,
                 image_width, image_height, max_width, max_height);
         return -1;
     }
@@ -488,7 +488,7 @@ static void allocate_xvimage(int foo)
     {
         Shmem_Flag = 0;
         mp_msg(MSGT_VO, MSGL_INFO,
-               "Shared memory not supported\nReverting to normal Xv\n");
+               MSGTR_LIBVO_XV_SharedMemoryNotSupported);
     }
     if (Shmem_Flag)
     {
@@ -844,9 +844,7 @@ static int preinit(const char *arg)
     if (Success != XvQueryExtension(mDisplay, &ver, &rel, &req, &ev, &err))
     {
         mp_msg(MSGT_VO, MSGL_ERR,
-               "Sorry, Xv not supported by this X11 version/driver\n");
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "******** Try with  -vo x11  or  -vo sdl  *********\n");
+               MSGTR_LIBVO_XV_XvNotSupportedByX11);
         return -1;
     }
 
@@ -855,7 +853,7 @@ static int preinit(const char *arg)
         XvQueryAdaptors(mDisplay, DefaultRootWindow(mDisplay), &adaptors,
                         &ai))
     {
-        mp_msg(MSGT_VO, MSGL_ERR, "Xv: XvQueryAdaptors failed\n");
+        mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_XvQueryAdaptorsFailed);
         return -1;
     }
 
@@ -886,7 +884,7 @@ static int preinit(const char *arg)
         } else
         {
             mp_msg(MSGT_VO, MSGL_WARN,
-                   "Xv: Invalid port parameter, overriding with port 0\n");
+                   MSGTR_LIBVO_XV_InvalidPortParameter);
             xv_port = 0;
         }
     }
@@ -904,7 +902,7 @@ static int preinit(const char *arg)
                 } else
                 {
                     mp_msg(MSGT_VO, MSGL_WARN,
-                           "Xv: could not grab port %i\n", (int) xv_p);
+                           MSGTR_LIBVO_XV_CouldNotGrabPort, (int) xv_p);
                     ++busy_ports;
                 }
         }
@@ -913,14 +911,10 @@ static int preinit(const char *arg)
     {
         if (busy_ports)
             mp_msg(MSGT_VO, MSGL_ERR,
-                   "Could not find free Xvideo port - maybe another process is already using it.\n"
-                   "Close all video applications, and try again. If that does not help,\n"
-                   "see 'mplayer -vo help' for other (non-xv) video out drivers.\n");
+                   MSGTR_LIBVO_XV_CouldNotFindFreePort);
         else
             mp_msg(MSGT_VO, MSGL_ERR,
-                   "It seems there is no Xvideo support for your video card available.\n"
-                   "Run 'xvinfo' to verify its Xv support and read DOCS/HTML/en/video.html#xv!\n"
-                   "See 'mplayer -vo help' for other (non-xv) video out drivers. Try -vo x11\n");
+                   MSGTR_LIBVO_XV_NoXvideoSupport);
         return -1;
     }
 

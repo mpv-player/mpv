@@ -1683,6 +1683,10 @@ static char help_text[]=
 #define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Initialized: %p.\n"
 #define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Unknown subdevice: %s.\n"
 
+// libvo/aspect.c
+#define MSGTR_LIBVO_ASPECT_NoSuitableNewResFound "[ASPECT] Warning: No suitable new res found!\n"
+#define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] Error: No new size found that fits into res!\n"
+
 // libvo/vo_dxr3.c
 
 #define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Unable to load new SPU palette!\n"
@@ -1898,6 +1902,19 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() called!!!!!!\n"
+#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] Shared memory not supported\nReverting to normal Xv.\n"
+#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] Sorry, Xv not supported by this X11 version/driver\n[VO_XV] ******** Try with  -vo x11  or  -vo sdl  *********\n"
+#define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed  "[VO_XV] XvQueryAdaptors failed.\n"
+#define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] Invalid port parameter, overriding with port 0.\n"
+#define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] Could not grab port %i.\n"
+#define MSGTR_LIBVO_XV_CouldNotFindFreePort "[VO_XV] Could not find free Xvideo port - maybe another process is already\n"\
+"[VO_XV] using it. Close all video applications, and try again. If that does\n"\
+"[VO_XV] not help, see 'mplayer -vo help' for other (non-xv) video out drivers.\n"
+#define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] It seems there is no Xvideo support for your video card available.\n"\
+"[VO_XV] Run 'xvinfo' to verify its Xv support and read\n"\
+"[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
+"[VO_XV] See 'mplayer -vo help' for other (non-xv) video out drivers.\n"\
+"[VO_XV] Try -vo x11.\n"
 
 // stream/stream_radio.c
 
