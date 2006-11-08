@@ -63,7 +63,7 @@ static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   if (!filename)
     return NULL;
 
-  if (!(dvdnav_priv=calloc(1,sizeof(*dvdnav_priv))))
+  if (!(dvdnav_priv=calloc(1,sizeof(dvdnav_priv_t))))
     return NULL;
 
   if (!(dvdnav_priv->filename=strdup(filename))) {
