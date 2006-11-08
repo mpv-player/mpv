@@ -19,6 +19,7 @@
 extern char *dvd_device;
 extern int dvd_chapter;
 extern int dvd_last_chapter;
+extern int dvd_angle;
 extern char *audio_lang, *dvdsub_lang;
 
 static struct stream_priv_s {
@@ -320,6 +321,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_OPEN,MSGL_INFO,"dvdnav_stream, you didn't specify a track number (as in dvdnav://1), playing whole disc\n");
     dvdnav_menu_call(dvdnav_priv->dvdnav, DVD_MENU_Title);
   }
+  if(dvd_angle > 1)
+    dvdnav_angle_change(dvdnav_priv->dvdnav, dvd_angle);
 
   stream->sector_size = 2048;
   stream->flags = STREAM_READ | STREAM_SEEK;
