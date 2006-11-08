@@ -23,6 +23,7 @@
 #include "subopt-helper.h"
 #include "mixer.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API
@@ -85,10 +86,10 @@ static void alsa_error_handler(const char *file, int line, const char *function,
   tmp[sizeof tmp - 1] = '\0';
 
   if (err)
-    mp_msg(MSGT_AO, MSGL_ERR, "alsa-lib: %s:%i:(%s) %s: %s\n",
+    mp_msg(MSGT_AO, MSGL_ERR, "[AO_ALSA] alsa-lib: %s:%i:(%s) %s: %s\n",
 	   file, line, function, tmp, snd_strerror(err));
   else
-    mp_msg(MSGT_AO, MSGL_ERR, "alsa-lib: %s:%i:(%s) %s\n",
+    mp_msg(MSGT_AO, MSGL_ERR, "[AO_ALSA] alsa-lib: %s:%i:(%s) %s\n",
 	   file, line, function, tmp);
 }
 
@@ -127,7 +128,7 @@ static int control(int cmd, void *arg)
 
 		if (*test_mix_index){
 		  mp_msg(MSGT_AO,MSGL_ERR,
-		    "alsa-control: invalid mixer index. Defaulting to 0\n");
+		    MSGTR_AO_ALSA_InvalidMixerIndexDefaultingToZero);
 		  mix_index = 0 ;
 		}
 	 }
@@ -150,32 +151,32 @@ static int control(int cmd, void *arg)
       }
 
       if ((err = snd_mixer_open(&handle, 0)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: mixer open error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_MixerOpenError, snd_strerror(err));
 	return CONTROL_ERROR;
       }
 
       if ((err = snd_mixer_attach(handle, card)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: mixer attach %s error: %s\n", 
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_MixerAttachError, 
 	       card, snd_strerror(err));
 	snd_mixer_close(handle);
 	return CONTROL_ERROR;
       }
 
       if ((err = snd_mixer_selem_register(handle, NULL, NULL)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: mixer register error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_MixerRegisterError, snd_strerror(err));
 	snd_mixer_close(handle);
 	return CONTROL_ERROR;
       }
       err = snd_mixer_load(handle);
       if (err < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: mixer load error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_MixerLoadError, snd_strerror(err));
 	snd_mixer_close(handle);
 	return CONTROL_ERROR;
       }
 
       elem = snd_mixer_find_selem(handle, sid);
       if (!elem) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: unable to find simple control '%s',%i\n",
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToFindSimpleControl,
 	       snd_mixer_selem_id_get_name(sid), snd_mixer_selem_id_get_index(sid));
 	snd_mixer_close(handle);
 	return CONTROL_ERROR;
@@ -190,7 +191,7 @@ static int control(int cmd, void *arg)
 
 	//setting channels
 	if ((err = snd_mixer_selem_set_playback_volume(elem, 0, set_vol)) < 0) {
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: error setting left channel, %s\n", 
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_ErrorSettingLeftChannel, 
 		 snd_strerror(err));
 	  return CONTROL_ERROR;
 	}
@@ -199,7 +200,7 @@ static int control(int cmd, void *arg)
 	set_vol = vol->right / f_multi + pmin + 0.5;
 
 	if ((err = snd_mixer_selem_set_playback_volume(elem, 1, set_vol)) < 0) {
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: error setting right channel, %s\n", 
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_ErrorSettingRightChannel, 
 		 snd_strerror(err));
 	  return CONTROL_ERROR;
 	}
@@ -247,14 +248,7 @@ static void parse_device (char *dest, const char *src, int len)
 static void print_help (void)
 {
   mp_msg (MSGT_AO, MSGL_FATAL,
-           "\n-ao alsa commandline help:\n"
-           "Example: mplayer -ao alsa:device=hw=0.3\n"
-           "  sets first card fourth hardware device\n"
-           "\nOptions:\n"
-           "  noblock\n"
-           "    Opens device in non-blocking mode\n"
-           "  device=<device-name>\n"
-           "    Sets device (change , to . and : to =)\n");
+           MSGTR_AO_ALSA_CommandlineHelp);
 }
 
 static int str_maxlen(strarg_t *str) {
@@ -440,7 +434,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  break;
 	default:
 	  device.str = "default";
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: %d channels are not supported\n",channels);
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_ChannelsNotSupported,channels);
         }
     device.len = strlen(device.str);
     if (subopt_parse(ao_subdevice, subopts) != 0) {
@@ -497,11 +491,11 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if (!alsa_handler) {
       if ((err = snd_config_update()) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: cannot read ALSA configuration: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_CannotReadAlsaConfiguration, snd_strerror(err));
 	return 0;
       }
       if ((err = snd_config_copy(&my_config, snd_config)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: cannot copy configuration: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_CannotCopyConfiguration, snd_strerror(err));
 	return 0;
       }
       if (format == AF_FORMAT_AC3)
@@ -511,21 +505,21 @@ static int init(int rate_hz, int channels, int format, int flags)
 				    SND_PCM_STREAM_PLAYBACK, open_mode, my_config)) < 0)
 	{
 	  if (err != -EBUSY && ao_noblock) {
-	    mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: open in nonblock-mode failed, trying to open in block-mode\n");
+	    mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_OpenInNonblockModeFailed);
 	    if ((err = snd_pcm_open_lconf(&alsa_handler, alsa_device,
 					  SND_PCM_STREAM_PLAYBACK, 0, my_config)) < 0) {
-	      mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: playback open error: %s\n", snd_strerror(err));
+	      mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PlaybackOpenError, snd_strerror(err));
 	      return(0);
 	    }
 	  } else {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: playback open error: %s\n", snd_strerror(err));
+	    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PlaybackOpenError, snd_strerror(err));
 	    return(0);
 	  }
 	}
       snd_config_delete(my_config);
 
       if ((err = snd_pcm_nonblock(alsa_handler, 0)) < 0) {
-         mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: error set block-mode %s\n", snd_strerror(err));
+         mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_ErrorSetBlockMode, snd_strerror(err));
       } else {
 	mp_msg(MSGT_AO,MSGL_V,"alsa-init: pcm opened in blocking mode\n");
       }
@@ -536,7 +530,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       // setting hw-parameters
       if ((err = snd_pcm_hw_params_any(alsa_handler, alsa_hwparams)) < 0)
 	{
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get initial parameters: %s\n",
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToGetInitialParameters,
 		 snd_strerror(err));
 	  return(0);
 	}
@@ -544,7 +538,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,
 					 SND_PCM_ACCESS_RW_INTERLEAVED);
       if (err < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set access type: %s\n", 
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetAccessType, 
 	       snd_strerror(err));
 	return (0);
       }
@@ -555,7 +549,7 @@ static int init(int rate_hz, int channels, int format, int flags)
                                              alsa_format)) < 0)
       {
          mp_msg(MSGT_AO,MSGL_INFO,
-		"alsa-init: format %s are not supported by hardware, trying default\n", af_fmt2str_short(format));
+		MSGTR_AO_ALSA_FormatNotSupportedByHardware, af_fmt2str_short(format));
          alsa_format = SND_PCM_FORMAT_S16_LE;
          ao_data.format = AF_FORMAT_S16_LE;
       }
@@ -563,7 +557,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if ((err = snd_pcm_hw_params_set_format(alsa_handler, alsa_hwparams,
 					      alsa_format)) < 0)
 	{
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set format: %s\n",
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetFormat,
 		 snd_strerror(err));
 	  return(0);
 	}
@@ -571,7 +565,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if ((err = snd_pcm_hw_params_set_channels_near(alsa_handler, alsa_hwparams,
 						     &ao_data.channels)) < 0)
 	{
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set channels: %s\n",
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetChannels,
 		 snd_strerror(err));
 	  return(0);
 	}
@@ -582,7 +576,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if ((err = snd_pcm_hw_params_set_rate_resample(alsa_handler, alsa_hwparams,
 						     0)) < 0)
 	{
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to disable resampling: %s\n",
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToDisableResampling,
 		 snd_strerror(err));
 	  return(0);
 	}
@@ -591,7 +585,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, 
 						 &ao_data.samplerate, NULL)) < 0) 
         {
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set samplerate-2: %s\n",
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetSamplerate2,
 		 snd_strerror(err));
 	  return(0);
         }
@@ -608,7 +602,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams, 
 							  &alsa_buffer_time, NULL)) < 0)
 	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set buffer time near: %s\n",
+	    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetBufferTimeNear,
 		   snd_strerror(err));
 	    return(0);
 	  } else
@@ -618,11 +612,11 @@ static int init(int rate_hz, int channels, int format, int flags)
 							  &alsa_period_time, NULL)) < 0)
 	  /* original: alsa_buffer_time/ao_data.bps */
 	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set period time: %s\n",
+	    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetPeriodTime,
 		   snd_strerror(err));
 	    return 0;
 	  }
-	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: buffer_time: %d, period_time :%d\n",
+	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_BufferTimePeriodTime,
 	       alsa_buffer_time, err);
       } 
 #endif//end SET_BUFFERTIME
@@ -633,7 +627,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	if ((err = snd_pcm_hw_params_set_period_size_near(alsa_handler, alsa_hwparams, 
 							  &chunk_size, NULL)) < 0)
 	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set periodsize(%ld): %s\n",
+	    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetPeriodSize,
 			    chunk_size, snd_strerror(err));
 	    return 0;
 	  }
@@ -642,7 +636,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	}
 	if ((err = snd_pcm_hw_params_set_periods_near(alsa_handler, alsa_hwparams,
 						      &alsa_fragcount, NULL)) < 0) {
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set periods: %s\n", 
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetPeriods, 
 		 snd_strerror(err));
 	  return 0;
 	}
@@ -655,7 +649,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       /* finally install hardware parameters */
       if ((err = snd_pcm_hw_params(alsa_handler, alsa_hwparams)) < 0)
 	{
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set hw-parameters: %s\n",
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetHwParameters,
 		 snd_strerror(err));
 	  return 0;
 	}
@@ -665,7 +659,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       // gets buffersize for control
       if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize)) < 0)
 	{
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get buffersize: %s\n", snd_strerror(err));
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToGetBufferSize, snd_strerror(err));
 	  return 0;
 	}
       else {
@@ -674,7 +668,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       }
 
       if ((err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get period size: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToGetPeriodSize, snd_strerror(err));
 	return 0;
       } else {
 	mp_msg(MSGT_AO,MSGL_V,"alsa-init: got period size %li\n", chunk_size);
@@ -683,13 +677,13 @@ static int init(int rate_hz, int channels, int format, int flags)
 
       /* setting software parameters */
       if ((err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get sw-parameters: %s\n",
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToGetSwParameters,
 	       snd_strerror(err));
 	return 0;
       }
 #if SND_LIB_VERSION >= 0x000901
       if ((err = snd_pcm_sw_params_get_boundary(alsa_swparams, &boundary)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get boundary: %s\n",
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToGetBoundary,
 	       snd_strerror(err));
 	return 0;
       }
@@ -698,26 +692,26 @@ static int init(int rate_hz, int channels, int format, int flags)
 #endif
       /* start playing when one period has been written */
       if ((err = snd_pcm_sw_params_set_start_threshold(alsa_handler, alsa_swparams, chunk_size)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set start threshold: %s\n",
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetStartThreshold,
 	       snd_strerror(err));
 	return 0;
       }
       /* disable underrun reporting */
       if ((err = snd_pcm_sw_params_set_stop_threshold(alsa_handler, alsa_swparams, boundary)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set stop threshold: %s\n",
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetStopThreshold,
 	       snd_strerror(err));
 	return 0;
       }
 #if SND_LIB_VERSION >= 0x000901
       /* play silence when there is an underrun */
       if ((err = snd_pcm_sw_params_set_silence_size(alsa_handler, alsa_swparams, boundary)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set silence size: %s\n",
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetSilenceSize,
 	       snd_strerror(err));
 	return 0;
       }
 #endif
       if ((err = snd_pcm_sw_params(alsa_handler, alsa_swparams)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set sw-parameters: %s\n",
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToGetSwParameters,
 	       snd_strerror(err));
 	return 0;
       }
@@ -745,7 +739,7 @@ static void uninit(int immed)
 
     if ((err = snd_pcm_close(alsa_handler)) < 0)
       {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-uninit: pcm close error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmCloseError, snd_strerror(err));
 	return;
       }
     else {
@@ -754,7 +748,7 @@ static void uninit(int immed)
     }
   }
   else {
-    mp_msg(MSGT_AO,MSGL_ERR,"alsa-uninit: no handler defined!\n");
+    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_NoHandlerDefined);
   }
 }
 
@@ -765,14 +759,14 @@ static void audio_pause(void)
     if (alsa_can_pause) {
         if ((err = snd_pcm_pause(alsa_handler, 1)) < 0)
         {
-            mp_msg(MSGT_AO,MSGL_ERR,"alsa-pause: pcm pause error: %s\n", snd_strerror(err));
+            mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmPauseError, snd_strerror(err));
             return;
         }
           mp_msg(MSGT_AO,MSGL_V,"alsa-pause: pause supported by hardware\n");
     } else {
         if ((err = snd_pcm_drop(alsa_handler)) < 0)
         {
-            mp_msg(MSGT_AO,MSGL_ERR,"alsa-pause: pcm drop error: %s\n", snd_strerror(err));
+            mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmDropError, snd_strerror(err));
             return;
         }
     }
@@ -785,14 +779,14 @@ static void audio_resume(void)
     if (alsa_can_pause) {
         if ((err = snd_pcm_pause(alsa_handler, 0)) < 0)
         {
-            mp_msg(MSGT_AO,MSGL_ERR,"alsa-resume: pcm resume error: %s\n", snd_strerror(err));
+            mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmResumeError, snd_strerror(err));
             return;
         }
           mp_msg(MSGT_AO,MSGL_V,"alsa-resume: resume supported by hardware\n");
     } else {
         if ((err = snd_pcm_prepare(alsa_handler)) < 0)
         {
-           mp_msg(MSGT_AO,MSGL_ERR,"alsa-resume: pcm prepare error: %s\n", snd_strerror(err));
+           mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmPrepareError, snd_strerror(err));
             return;
         }
     }
@@ -805,12 +799,12 @@ static void reset(void)
 
     if ((err = snd_pcm_drop(alsa_handler)) < 0)
     {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-reset: pcm drop error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmPrepareError, snd_strerror(err));
 	return;
     }
     if ((err = snd_pcm_prepare(alsa_handler)) < 0)
     {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-reset: pcm prepare error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmPrepareError, snd_strerror(err));
 	return;
     }
     return;
@@ -831,7 +825,7 @@ static int play(void* data, int len, int flags)
   //mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: frames=%i, len=%i\n",num_frames,len);
 
   if (!alsa_handler) {
-    mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: device configuration error");
+    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_DeviceConfigurationError);
     return 0;
   }
 
@@ -846,15 +840,15 @@ static int play(void* data, int len, int flags)
 	res = 0;
       }
       else if (res == -ESTRPIPE) {	/* suspend */
-	mp_msg(MSGT_AO,MSGL_INFO,"alsa-play: pcm in suspend mode. trying to resume\n");
+	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_PcmInSuspendModeTryingResume);
 	while ((res = snd_pcm_resume(alsa_handler)) == -EAGAIN)
 	  sleep(1);
       }
       if (res < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: write error: %s\n", snd_strerror(res));
-	mp_msg(MSGT_AO,MSGL_INFO,"alsa-play: trying to reset soundcard\n");
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_WriteError, snd_strerror(res));
+	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_TryingToResetSoundcard);
 	if ((res = snd_pcm_prepare(alsa_handler)) < 0) {
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: pcm prepare error: %s\n", snd_strerror(res));
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmPrepareError, snd_strerror(res));
 	  return(0);
 	  break;
 	}
@@ -874,7 +868,7 @@ static int get_space(void)
     
     if ((ret = snd_pcm_status(alsa_handler, status)) < 0)
     {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-space: cannot get pcm status: %s\n", snd_strerror(ret));
+	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_CannotGetPcmStatus, snd_strerror(ret));
 	return(0);
     }
     

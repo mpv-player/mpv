@@ -1163,6 +1163,62 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: write error after reset: %s - giving up.\n"
 #define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: output error: %s\n"
 
+// ao_alsa.c
+#define MSGTR_AO_ALSA_InvalidMixerIndexDefaultingToZero "[AO_ALSA] Invalid mixer index. Defaulting to 0.\n"
+#define MSGTR_AO_ALSA_MixerOpenError "[AO_ALSA] Mixer open error: %s\n"
+#define MSGTR_AO_ALSA_MixerAttachError "[AO_ALSA] Mixer attach %s error: %s\n"
+#define MSGTR_AO_ALSA_MixerRegisterError "[AO_ALSA] Mixer register error: %s\n"
+#define MSGTR_AO_ALSA_MixerLoadError "[AO_ALSA] Mixer load error: %s\n"
+#define MSGTR_AO_ALSA_UnableToFindSimpleControl "[AO_ALSA] Unable to find simple control '%s',%i.\n"
+#define MSGTR_AO_ALSA_ErrorSettingLeftChannel "[AO_ALSA] Error setting left channel, %s\n"
+#define MSGTR_AO_ALSA_ErrorSettingRightChannel "[AO_ALSA] Error setting right channel, %s\n"
+#define MSGTR_AO_ALSA_CommandlineHelp "\n[AO_ALSA] -ao alsa commandline help:\n"\
+"[AO_ALSA] Example: mplayer -ao alsa:device=hw=0.3\n"\
+"[AO_ALSA]   Sets first card fourth hardware device.\n\n"\
+"[AO_ALSA] Options:\n"\
+"[AO_ALSA]   noblock\n"\
+"[AO_ALSA]     Opens device in non-blocking mode.\n"\
+"[AO_ALSA]   device=<device-name>\n"\
+"[AO_ALSA]     Sets device (change , to . and : to =)\n"
+#define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d channels are not supported.\n"
+#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Cannot read ALSA configuration: %s\n"
+#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] Cannot copy configuration: %s\n"
+#define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] Open in nonblock-mode failed, trying to open in block-mode.\n"
+#define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Playback open error: %s\n"
+#define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Error setting block-mode %s.\n"
+#define MSGTR_AO_ALSA_UnableToGetInitialParameters "[AO_ALSA] Unable to get initial parameters: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetAccessType "[AO_ALSA] Unable to set access type: %s\n"
+#define MSGTR_AO_ALSA_FormatNotSupportedByHardware "[AO_ALSA] Format %s is not supported by hardware, trying default.\n"
+#define MSGTR_AO_ALSA_UnableToSetFormat "[AO_ALSA] Unable to set format: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetChannels "[AO_ALSA] Unable to set channels: %s\n"
+#define MSGTR_AO_ALSA_UnableToDisableResampling "[AO_ALSA] Unable to disable resampling: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSamplerate2 "[AO_ALSA] Unable to set samplerate-2: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetBufferTimeNear "[AO_ALSA] Unable to set buffer time near: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodTime "[AO_ALSA] Unable to set period time: %s\n"
+#define MSGTR_AO_ALSA_BufferTimePeriodTime "[AO_ALSA] buffer_time: %d, period_time :%d\n"
+#define MSGTR_AO_ALSA_UnableToGetPeriodSize "[AO ALSA] Unable to get period size: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodSize "[AO ALSA] Unable to set period size(%ld): %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriods "[AO_ALSA] Unable to set periods: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetHwParameters "[AO_ALSA] Unable to set hw-parameters: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBufferSize "[AO_ALSA] Unable to get buffersize: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetSwParameters "[AO_ALSA] Unable to get sw-parameters: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSwParameters "[AO_ALSA] Unable to set sw-parameters: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBoundary "[AO_ALSA] Unable to get boundary: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStartThreshold "[AO_ALSA] Unable to set start threshold: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStopThreshold "[AO_ALSA] Unable to set stop threshold: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSilenceSize "[AO_ALSA] Unable to set silence size: %s\n"
+#define MSGTR_AO_ALSA_PcmCloseError "[AO_ALSA] pcm close error: %s\n"
+#define MSGTR_AO_ALSA_NoHandlerDefined "[AO_ALSA] No handler defined!\n"
+#define MSGTR_AO_ALSA_PcmPrepareError "[AO_ALSA] pcm prepare error: %s\n"
+#define MSGTR_AO_ALSA_PcmPauseError "[AO_ALSA] pcm pause error: %s\n"
+#define MSGTR_AO_ALSA_PcmDropError "[AO_ALSA] pcm drop error: %s\n"
+#define MSGTR_AO_ALSA_PcmResumeError "[AO_ALSA] pcm resume error: %s\n"
+#define MSGTR_AO_ALSA_DeviceConfigurationError "[AO_ALSA] Device configuration error."
+#define MSGTR_AO_ALSA_PcmInSuspendModeTryingResume "[AO_ALSA] Pcm in suspend mode, trying to resume.\n"
+#define MSGTR_AO_ALSA_WriteError "[AO_ALSA] Write error: %s\n"
+#define MSGTR_AO_ALSA_TryingToResetSoundcard "[AO_ALSA] Trying to reset soundcard.\n"
+#define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] Cannot get pcm status: %s\n"
+
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] invalid plugin: %s\n"
