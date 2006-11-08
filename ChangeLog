@@ -7,6 +7,7 @@ MPlayer (1.0)
 
     Streaming:
     * authentication for Real RTSP streams
+    * near-precise seeking in dvd://
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
