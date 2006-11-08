@@ -548,7 +548,11 @@ codec_specific_data
     (with 00 00 01 prefixes)
 
 frame_code
-    the meaning of this byte is stored in the main header
+    frame_code is a 8bit field which exists before every frame, it can
+    store part of the size of the frame, the stream number, the timestamp
+    and some flags amongth other things, what is not directly stored
+    in it but is needed is stored in various fields immedeatly after it
+    the values stored in it can be found in the main header
     the value 78 ('N') is forbidden to ensure that the byte is always
     different from the first byte of any startcode
     a muxer SHOULD mark 0x00 and 0xFF as invalid to improve error
