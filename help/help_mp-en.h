@@ -1919,7 +1919,7 @@ static char help_text[]=
 // stream/stream_radio.c
 
 #define MSGTR_RADIO_ChannelNamesDetected "[radio] Radio channel names detected.\n"
-#define MSGTR_RADIO_FreqRange "[radio] Allowed frequency range is %.2f-%.2f MHz\n"
+#define MSGTR_RADIO_FreqRange "[radio] Allowed frequency range is %.2f-%.2f MHz.\n"
 #define MSGTR_RADIO_WrongFreqForChannel "[radio] Wrong frequency for channel %s\n"
 #define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Wrong channel number: %.2f\n"
 #define MSGTR_RADIO_WrongChannelNumberInt "[radio] Wrong channel number: %d\n"
