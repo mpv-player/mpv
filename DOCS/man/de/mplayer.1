@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20639
+.\" In sync with r20773
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -2556,6 +2556,11 @@ Audioausgabe über NAS
 .TP
 .B macosx (nur bei Mac OS X)
 Nativer Mac OS X-Audioausgabetreiber.
+.
+.TP
+.B openal
+Experimenteller und unvollständiger (Downmix zu Mono)
+OpenAL-Audioausgabetreiber
 .
 .TP
 .B sgi (nur bei SGI)
@@ -5737,7 +5742,6 @@ Du solltest einen roten, grünen und blauen Streifen von oben nach unten sehen.
 .B lavc[=Qualität:fps]
 Schnelle Softwarekonvertierung von YV12 nach MPEG-1 mit libavcodec
 für die Benutzung mit DVB/\:DXR3/\:IVTV.
-Schneller und von besserer Qualität als mit \-vf fame.
 .RSs
 .IPs <Qualität>
 .RSss
@@ -5749,11 +5753,6 @@ Schneller und von besserer Qualität als mit \-vf fame.
 Erzwinge Ausgabe-fps (Fließkommawert) (Standard: 0, automatische
 Erkennung basierend auf Höhe)
 .RE
-.
-.TP
-.B "fame\ \ \ "
-Schnelle Softwarekonvertierung mit libfame für die Benutzung mit
-DVB/\:DXR3/\:IVTV.
 .
 .TP
 .B dvbscale[=Aspekt]
@@ -7468,14 +7467,38 @@ korrigiert werden, da es dies nicht unterstützt.)
 .
 .TP
 .B lmin=<0.01\-255.0>
-Minimaler Lagrange-Multiplikator für die Bitratenkontrolle.
-Du möchtest
-wahrscheinlich einen Wert, der kleiner oder gleich vqmin ist (Standard: 2.0).
+Minimaler Frame-Level basierter Lagrange-Multiplikator für die
+Bitratenkontrolle (Standard: 2.0).
+Lavc wird Quantisierungparameter, die unter dem Wert für lmin liegen, kaum
+verwenden.
+Ein niedriger Wert für lmin bewirkt, dass lavc für manche Frames eher
+niedrigere Quantisierungsparameter verwendet, jedoch nicht niedriger als der
+angegebene Wert für vqmin.
+Entsprechend wird ein größerer Wert für lmin bewirken, dass lavc niedrige
+Quantisierungsparameter eher nicht verwendet, auch wenn vqmin diese erlaubt
+hätte.
+Vermutlich willst du lmin ungefähr gleich vqmin setzen.
+Wenn adaptive Quantisierung verwendet wird, wirkt sich die Änderung von
+lmin/lmax weniger stark aus; siehe mblmin/mblmax.
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
 Maximaler Lagrange-Multiplikator für die Bitratenkontrolle (Standard: 31.0)
+.RE
+.
+.TP
+.B mblmin=<0.01\-255.0>
+Minimaler Macroblock-Level basierter Lagrange-Multiplikator für die
+Bitratenkontrolle (Standard: 2.0).
+Dieser Parameter wirkt sich auf Optionen für die adaptive Quantisierung wie
+qprd, lumi_mask, usw aus.
+.RE
+.
+.TP
+.B mblmax=<0.01\-255.0>
+Maximaler Macroblock-Level basierter Lagrange-Multiplikator für die
+Bitratenkontrolle (Standard: 31.0).
 .RE
 .
 .TP
@@ -10129,7 +10152,10 @@ Wird nach Bedarf aktualisiert, im Falle 'format=mpeg1' oder 'mpeg2'.
 .
 .TP
 .B "tsaf\ \ \ "
-Setzt Zeitstempel (timestamps) bei allen Frames, wenn möglich.
+Setzt Zeitstempel (timestamps) bei allen Frames, wenn möglich; empfohlen bei
+format=dvd.
+Wenn sich dvdauthor beschwert mit einer Meldung wie "..audio sector out of
+range...", hast du diese Option vermutlich nicht aktiviert.
 .
 .TP
 .B init_vpts=<100\-700>
