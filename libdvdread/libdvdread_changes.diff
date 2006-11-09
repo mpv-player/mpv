@@ -1,16 +1,7 @@
 diff -Naur dvdread.orig/bswap.h dvdread/bswap.h
 --- dvdread.orig/bswap.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/bswap.h	2005-06-23 00:19:10.000000000 +0200
-@@ -20,8 +24,6 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-  */
- 
--#include <config.h>
--
- #if defined(WORDS_BIGENDIAN)
- /* All bigendian systems are fine, just ignore the swaps. */  
- #define B2N_16(x) (void)(x)
-@@ -59,13 +61,57 @@
+@@ -59,13 +63,57 @@
  #define B2N_32(x) x = be32toh(x)
  #define B2N_64(x) x = be64toh(x)
  
