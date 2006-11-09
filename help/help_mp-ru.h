@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r20739
+// Synced with help_mp-en.h: r20817
 
 // ========================= MPlayer help ===========================
 
@@ -1241,7 +1241,7 @@ static char help_text[]=
 // stream/stream_radio.c
 
 #define MSGTR_RADIO_ChannelNamesDetected "[radio] Обнаружены имена радиостанций.\n"
-#define MSGTR_RADIO_FreqRange "[radio] Допустимый диапазон частот: %.2f-%.2f МГц\n"
+#define MSGTR_RADIO_FreqRange "[radio] Допустимый диапазон частот: %.2f-%.2f МГц.\n"
 #define MSGTR_RADIO_WrongFreqForChannel "[radio] Неверная частота для станции %s\n"
 #define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Неверный номер станции: %.2f\n"
 #define MSGTR_RADIO_WrongChannelNumberInt "[radio] Неверный номер станции: %d\n"
