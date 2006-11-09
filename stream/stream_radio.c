@@ -532,11 +532,13 @@ static inline int set_frequency(radio_priv_t* priv,float frequency){
         case RADIO_DRIVER_V4L:
             if(set_frequency_v4l(priv,frequency)!=STREAM_OK)
                 return STREAM_ERROR;
+            break;
 #endif
 #ifdef HAVE_RADIO_V4L2
         case RADIO_DRIVER_V4L2:
             if(set_frequency_v4l2(priv,frequency)!=STREAM_OK)
                 return STREAM_ERROR;
+            break;     
 #endif
         default:
             mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_DriverUnknownId,priv->driver);
