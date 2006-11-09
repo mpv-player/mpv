@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20361 -->
+<!-- synced with r20705 -->
 <chapter id="codecs">
   <title>Codecs</title>
 
@@ -89,14 +89,15 @@
       </para>
 
     <para>
-      Für eine vollständige Liste unterstützter Codecs besuche bitte die FFmpeg Homepage.
-      Unterstützte <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">Video-</ulink>
-      und <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">Audio</ulink>codecs.
+      Für eine vollständige Liste unterstützter 
+      <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">Video-</ulink>
+      und <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">Audio</ulink>codecs
+      besuche bitte die FFmpeg-Homepage.
     </para>
 
     <para>
       <application>MPlayer</application> enthält <systemitem class="library">libavcodec</systemitem>.
-      Es genügt, <filename>configure</filename> laufen zu lassen und zu compilieren.
+      Es genügt, <filename>./configure</filename> laufen zu lassen und zu compilieren.
     </para>
 
   </sect2>
@@ -173,10 +174,10 @@
 
 
   <sect2 id="codec-x264">
-    <title>x264</title>
+    <title><systemitem class="library">x264</systemitem></title>
 
     <sect3 id="codec-x264-whatis">
-      <title>Was ist x264?</title>
+      <title>Was ist <systemitem class="library">x264?</systemitem></title>
       <para>
         <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
         ist eine Bibliothek für die
@@ -301,7 +302,7 @@
         mit <systemitem class="library">x264</systemitem>-Unterstützung zu bauen.
         Führe die Standardformel aus:
         <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-        Das configure-Script wird automatisch erkennen, dass du die Bedingungen
+        Das <filename>./configure</filename>-Script wird automatisch erkennen, dass du die Bedingungen
         für <systemitem class="library">x264</systemitem> erfüllst.
       </para>
     </sect3>
@@ -415,19 +416,20 @@
 
 
   <sect2 id="libmad">
-    <title>Unterstützung für libmad</title>
+    <title>Unterstützung für <systemitem class="library">libmad</systemitem></title>
 
     <para>
-      <ulink url="http://www.underbit.com/products/mad/">libmad</ulink> ist
+      <ulink url="http://www.underbit.com/products/mad/"><systemitem class="library">libmad</systemitem></ulink> ist
       eine Integer-MPEG-Audiodecoder-Bibliothek für mehrere Plattformen, die intern mit
       24-bittigem PCM arbeitet. Sie funktioniert nicht sehr gut mit beschädigten
       Dateien und hat manchmal Probleme mit Sprüngen (seeks), kann aber auf
       Platformen ohne FPU (z.B. <link linkend="arm">ARM</link>) schneller
-      sein als mp3lib.
+      sein als <systemitem class="library">mp3lib</systemitem>.
     </para>
 
     <para>
-      Wenn libman bei dir korrekt installiert ist, wird <filename>configure</filename>
+      Wenn <systemitem class="library">libmad</systemitem> bei dir korrekt installiert ist, wird
+      <filename>./configure</filename>
       dies bemerken, und Unterstützung für MPEG-Audiodecodierung via
       <systemitem class="library">libmad</systemitem> wird automatisch eingebaut.
     </para>
@@ -463,7 +465,7 @@
       die Bibliothek von der
       <ulink url="http://www.audiocoding.com/modules/mydownloads/">Download Seite</ulink>
       heruntergeladen und installiert werden. Anschließend muss die Option
-      <option>--enable-faad-external</option> an <filename>configure</filename>
+      <option>--enable-faad-external</option> an <filename>./configure</filename>
       übergeben werden, damit die externe Bibliothek erkannt wird.
       Es ist lediglich erforderlich, vorher libfaad zu installieren, und zwar so:
       <screen>
@@ -530,9 +532,6 @@ mv c-code libavcodec/amrwb_float<!--
       Wenn <application>MPlayer</application> bei der Wiedergabe deines AVIs fehlschlägt
       mit einer Meldung wie:
       <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
-    </para>
-
-    <para>
       ..bedeutet dies, dass dein AVI mit einem Codec encodiert ist, der den fourcc HFYU
       (HFYU = HuffYUV-Codec, DIV3 = DivX Low Motion, etc.) hat. Da du dies jetzt weißt,
       musst du herausfinden, welche DLL Windows lädt, um diese Datei abzuspielen. In
@@ -552,7 +551,7 @@ mv c-code libavcodec/amrwb_float<!--
       (fourcc, Codecdatei, Beispiel-AVI), gib eine Anfrage für Codecunterstützung per
       Mail auf, und lade diese Dateien auf den FTP-Server hoch:
       <systemitem role="url">
-        ftp://upload.mplayerhq.hu/MPlayer/incoming/[Codecname]/
+        ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;Codecname&gt;</replaceable>/
       </systemitem>
     </para>
 
@@ -665,7 +664,7 @@ mv c-code libavcodec/amrwb_float<!--
       gib eine Anfrage für Codecunterstützung per Mail auf, und lade diese Dateien
       auf den FTP-Server hoch:
       <systemitem role="url">
-        ftp://upload.mplayerhq.hu/MPlayer/incoming/[Codecname]/
+        ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&gt;Codecname&gt;</replaceable>/
       </systemitem>
     </para>
 

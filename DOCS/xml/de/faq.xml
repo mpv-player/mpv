@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20614 -->
+<!-- synced with r20658 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -22,6 +22,7 @@
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -38,6 +39,7 @@
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -51,6 +53,7 @@
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -71,6 +74,7 @@
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -86,6 +90,7 @@
         </answer>
       </qandaentry>
     </qandadiv>
+
 
     <qandadiv id="faq-compilation-installation">
       <title>Compilierung und Installation</title>
@@ -111,6 +116,7 @@
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -125,6 +131,7 @@
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -138,6 +145,7 @@
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -154,6 +162,7 @@
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -167,6 +176,7 @@
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -187,6 +197,7 @@
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -237,7 +248,6 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
           </para>
         </answer>
       </qandaentry>
-
     </qandadiv>
 
     <qandadiv id="faq-general">
@@ -258,6 +268,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -272,6 +283,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -289,6 +301,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -304,6 +317,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -325,6 +339,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -396,6 +411,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -411,6 +427,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -429,6 +446,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -446,6 +464,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -467,6 +486,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -481,6 +501,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
         </answer>
       </qandaentry>
     </qandadiv>
+
 
     <qandadiv id="faq-playback">
       <title>Probleme bei der Wiedergabe</title>
@@ -507,6 +528,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -547,6 +569,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -559,6 +582,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -574,6 +598,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -592,6 +617,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -658,6 +684,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para></answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -674,6 +701,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -689,6 +717,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -708,6 +737,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -725,6 +755,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -741,6 +772,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </answer>
       </qandaentry>
     </qandadiv>
+
 
     <qandadiv id="faq-driver">
       <title>Video-/Audiotreiberprobleme (vo/ao)</title>
@@ -764,6 +796,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -789,6 +822,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -804,6 +838,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -821,6 +856,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -837,6 +873,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -850,6 +887,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -877,6 +915,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -896,6 +935,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -911,6 +951,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -949,6 +990,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -962,6 +1004,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
     </qandadiv>
+
 
     <qandadiv id="faq-dvd">
       <title>DVD-Wiedergabe</title>
@@ -983,6 +1026,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1002,6 +1046,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1015,6 +1060,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1027,6 +1073,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1042,6 +1089,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1056,6 +1104,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1068,6 +1117,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1084,6 +1134,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1099,6 +1150,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
     </qandadiv>
+
 
     <qandadiv id="faq-features">
       <title>Feature-Anfragen</title>
@@ -1117,6 +1169,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1133,6 +1186,7 @@ Starte Wiedergabe...<!--
       </qandaentry>
     </qandadiv>
 
+
     <qandadiv id="faq-encoding">
       <title>Encodierung</title>
       <qandaentry>
@@ -1147,6 +1201,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1166,6 +1221,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1180,6 +1236,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1199,6 +1256,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1222,6 +1280,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1241,6 +1300,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1257,7 +1317,8 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
-      <qandaentry>
+
+     <qandaentry>
         <question>
           <para>
             Wie kann ich ein Backup machen und eine VOB-Datei mit kaputtem Anfang encodieren?
@@ -1281,6 +1342,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1293,6 +1355,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1307,6 +1370,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1319,6 +1383,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1359,6 +1424,7 @@ Starte Wiedergabe...<!--
             </para></answer>
         </qandaentry>
 
+
         <qandaentry>
           <question>
             <para>
@@ -1372,6 +1438,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1387,6 +1454,7 @@ Starte Wiedergabe...<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1400,6 +1468,7 @@ Starte Wiedergabe...<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1423,6 +1492,7 @@ rm encode<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1460,6 +1530,7 @@ rm encode<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1473,6 +1544,7 @@ rm encode<!--
           </para>
         </answer>
       </qandaentry>
+
 
       <qandaentry>
         <question>
@@ -1489,6 +1561,7 @@ rm encode<!--
         </answer>
       </qandaentry>
 
+
       <qandaentry>
         <question>
           <para>
@@ -1503,6 +1576,7 @@ rm encode<!--
           </para>
         </answer>
       </qandaentry>
+
 
     </qandadiv>
   </qandaset>

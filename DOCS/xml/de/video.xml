@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r20572 -->
+<!-- in sync with r20739 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -2191,16 +2191,12 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </varlistentry>
 
 <varlistentry>
-<term><option>-vf lavc/fame</option></term>
+<term><option>-vf lavc</option></term>
 <listitem><para>
   Wenn du Nicht-MPEG-Filme mit dem em8300 ansehen möchtest (z.B.
   DivX oder RealVideo), dann musst du einen MPEG1-Videofilter wie
-  <systemitem class="library">libavcodec</systemitem> (lavc) oder
-  <systemitem class="library">libfame</systemitem> (fame) verwenden.
-  Momentan ist lavc sowohl schneller als auch qualitativ besser,
-  sodass die Empfehlung lavc lautet. Schau in der Manpage nach.
-  Dort stehen weitere Informationen zu <option>-vf lavc/fame</option>.
-  Die Benutzung von lavc wird empfohlen. Momentan gibt es keine
+  <systemitem class="library">libavcodec</systemitem> (lavc) verwenden.
+  Momentan gibt es keine
   Möglichkeit, die Anzahl der Bilder pro Sekunde des em8300 zu setzen,
   was bedeutet, dass sie fest bei 29.97 liegt. Aus diesem Grund solltest du
   <option>-vf lavc=<replaceable>quality</replaceable>:25</option> verwenden,

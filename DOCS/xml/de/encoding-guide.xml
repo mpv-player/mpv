@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- In sync with r20500 -->
+<!-- In sync with r20683 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -4689,13 +4689,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       </para>
 
       <para>
-        DVD:
-        <screen>-of mpeg -mpegopts format=dvd</screen>
+        DVD (mit Zeitstempeln für jeden Frame, wenn möglich):
+        <screen>-of mpeg -mpegopts format=dvd:tsaf</screen>
       </para>
 
       <para>
         DVD mit NTSC-Pullup:
-        <screen>-of mpeg -mpegopts format=dvd:telecine -ofps 24000/1001</screen>
+        <screen>-of mpeg -mpegopts format=dvd:tsaf:telecine -ofps 24000/1001</screen>
         Dies erlaubt 24000/1001 fps progressive-Inhalt bei 30000/1001
         fps encodiert zu werden, wobei die DVD-Konformität erhalten bleibt.
       </para>
@@ -5000,7 +5000,7 @@ vqmin=1:lmin=1:dc=10</screen>
       <sect3 id="menc-feat-vcd-dvd-all-pal-dvd">
         <title>PAL DVD</title>
         <para>
-<screen>mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:576,\
+<screen>mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:576,\
 harddup -srate 48000 -af lavcresample=48000 -lavcopts vcodec=mpeg2video:\
 vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=15:acodec=ac3:\
 abitrate=192:aspect=16/9 -ofps 25 \
@@ -5011,7 +5011,7 @@ abitrate=192:aspect=16/9 -ofps 25 \
       <sect3 id="menc-feat-vcd-dvd-all-ntsc-dvd">
         <title>NTSC DVD</title>
         <para>
-<screen>mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:480,\
+<screen>mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:480,\
   harddup -srate 48000 -af lavcresample=48000 -lavcopts vcodec=mpeg2video:\
   vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=18:acodec=ac3:\
   abitrate=192:aspect=16/9 -ofps 30000/1001 \
@@ -5024,7 +5024,7 @@ abitrate=192:aspect=16/9 -ofps 25 \
         <para>
           Hat die Quelle bereits AC3-Audio, nimm -oac copy anstatt es
           erneut zu encodieren.
-<screen>mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:576,\
+<screen>mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:576,\
   harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
   vbitrate=5000:keyint=15:aspect=16/9 -ofps 25 \
   -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable></screen>
@@ -5035,7 +5035,7 @@ abitrate=192:aspect=16/9 -ofps 25 \
         <title>NTSC AVI mit AC3-Ton nach DVD</title>
         <para>
           Hat die Quelle bereits AC3-Audio und ist NTSC @ 24000/1001 fps:
-<screen>mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:telecine \
+<screen>mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
   -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\
   vrc_maxrate=9800:vbitrate=5000:keyint=15:aspect=16/9 -ofps 24000/1001 \
   -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable></screen>
