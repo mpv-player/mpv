@@ -241,6 +241,7 @@ Optional features:
   --disable-dvdnav       disable libdvdnav [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
   --disable-dvdread-internal  disable internal libdvdread [autodetect]
+  --disable-libdvdcss-internal  disable internal libdvdcss [autodetect]
   --disable-cdparanoia   disable cdparanoia [autodetect]
   --disable-bitmap-font  disable bitmap font support [enable]
   --disable-freetype     disable FreeType 2 font rendering [autodetect]
@@ -1626,6 +1627,7 @@ _dvdnav=auto
 _dvdnavconfig=dvdnav-config
 _dvdread=auto
 _dvdread_internal=auto
+_libdvdcss_internal=auto
 _xanim=auto
 _real=auto
 _live=auto
@@ -1860,6 +1862,8 @@ for ac_option do
   --disable-dvdread)	_dvdread=no	;;
   --enable-dvdread-internal)	_dvdread_internal=yes	;;
   --disable-dvdread-internal)	_dvdread_internal=no	;;
+  --enable-libdvdcss-internal)	_libdvdcss_internal=yes	;;
+  --disable-libdvdcss-internal)	_libdvdcss_internal=no	;;
   --enable-dvdnav)	_dvdnav=yes	;;
   --disable-dvdnav)	_dvdnav=no	;;
   --enable-xanim)	_xanim=yes	;;
@@ -5197,6 +5201,19 @@ fi
 echores "$_dvdread"
 
 
+echocheck "internal libdvdcss"
+if test "$_libdvdcss_internal" = auto ; then
+  _libdvdcss_internal=no
+  test "$_dvdread_internal" = yes && _libdvdcss_internal=yes
+fi
+if test "$_libdvdcss_internal" = yes ; then
+  _inputmodules="libdvdcss $_inputmodules"
+else
+  _noinputmodules="libdvdcss $_noinputmodules"
+fi
+echores "$_libdvdcss_internal"
+
+
 echocheck "cdparanoia"
 if test "$_cdparanoia" = auto ; then
     cat > $TMPC <<EOF
@@ -7426,6 +7443,7 @@ PVR = $_pvr
 VCD = $_vcd
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
+DVDCSS_INTERNAL = $_libdvdcss_internal
 DVDNAV = $_dvdnav
 WIN32DLL = $_win32
 W32_DEP = $_dep_win32
