@@ -4,7 +4,8 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r20706
+// In sync with r20817
+// FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
 
@@ -578,7 +579,11 @@ static char help_text[]=
 "Vielleicht spielst du eine(n) nicht-interleaved Stream/Datei, oder der \n"\
 "Codec funktioniert nicht. Versuche bei AVI-Dateien, den nicht-interleaved \n"\
 "Modus mit der Option -ni zu erzwingen.\n"
+#define MSGTR_WorkAroundBlockAlignHeaderBug "AVI: Umgehe CBR-MP3 nBlockAlign-Header Bug!\n"
 #define MSGTR_SwitchToNi "\nSchlecht interleavte AVI-Datei erkannt, wechsele in den -ni Modus!\n"
+#define MSGTR_InvalidAudioStreamNosound "AVI: Ungültige Audiostream-ID: %d - ignoriert (nosound)\n"
+#define MSGTR_InvalidAudioStreamUsingDefault "AVI: Ungültige Videostream-ID: %d - ignoriert (verwende Standard)\n"
+#define MSGTR_ON2AviFormat "ON2 AVI-Format"
 #define MSGTR_Detected_XXX_FileFormat "%s-Dateiformat erkannt!\n"
 #define MSGTR_DetectedAudiofile "Audiodatei erkannt!\n"
 #define MSGTR_NotSystemStream "Kein MPEG System Stream... (vielleicht ein Transport Stream?)\n"
@@ -1191,6 +1196,62 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: Schreibfehler nach Rücksetzen: %s - gebe auf.\n"
 #define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: Ausgabefehler: %s\n"
 
+// ao_alsa.c
+#define MSGTR_AO_ALSA_InvalidMixerIndexDefaultingToZero "[AO_ALSA] Ungültiger Mixerindex. Verwende Standardwert 0.\n"
+#define MSGTR_AO_ALSA_MixerOpenError "[AO_ALSA] Fehler beim Öffnen des Mixers: %s\n"
+#define MSGTR_AO_ALSA_MixerAttachError "[AO_ALSA] Fehler beim Einfügen von %s: %s\n"
+#define MSGTR_AO_ALSA_MixerRegisterError "[AO_ALSA] Fehler bei der Registrierung des Mixers: %s\n"
+#define MSGTR_AO_ALSA_MixerLoadError "[AO_ALSA] Fehler beim Laden des Mixers: %s\n"
+#define MSGTR_AO_ALSA_UnableToFindSimpleControl "[AO_ALSA] Konnte einfache Steuerung '%s',%i nicht finden.\n"
+#define MSGTR_AO_ALSA_ErrorSettingLeftChannel "[AO_ALSA] Fehler beim Setzen des linken Kanals, %s\n"
+#define MSGTR_AO_ALSA_ErrorSettingRightChannel "[AO_ALSA] Fehler beim Setzen des rechten Kanals, %s\n"
+#define MSGTR_AO_ALSA_CommandlineHelp "\n[AO_ALSA] Kommandozeilenhilfe für -ao alsa:\n"\
+"[AO_ALSA] Beispiel: mplayer -ao alsa:device=hw=0.3\n"\
+"[AO_ALSA]   Setzt das vierte Hardwaregerät der ersten Karte.\n\n"\
+"[AO_ALSA] Optionen:\n"\
+"[AO_ALSA]   noblock\n"\
+"[AO_ALSA]     Öffnet Gerät im non-blocking-Modus.\n"\
+"[AO_ALSA]   device=<Gerätname>\n"\
+"[AO_ALSA]     Setzt Gerät (ändere , zu . und : zu =)\n"
+#define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] Keine Unterstützung für %d Kanäle.\n"
+#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Kann ALSA-Konfiguration nicht lesen: %s\n"
+#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] Kann Konfiguration nicht kopieren: %s\n"
+#define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] Öffnen im nonblock-Modus fehlgeschlagen, versuche im block-Modus zu öffnen.\n"
+#define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Fehler beim Öffnen der Wiedergabe: %s\n"
+#define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Fehler beim Setzen des block-Modus %s.\n"
+#define MSGTR_AO_ALSA_UnableToGetInitialParameters "[AO_ALSA] Kann Startparameter nicht ermitteln: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetAccessType "[AO_ALSA] Kann Zugriffstyp nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_FormatNotSupportedByHardware "[AO_ALSA] Format %s wird von der Hardware nicht unterstütz, versuche Standard.\n"
+#define MSGTR_AO_ALSA_UnableToSetFormat "[AO_ALSA] Kann Format nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetChannels "[AO_ALSA] Kann Kanäle nicht ermitteln: %s\n"
+#define MSGTR_AO_ALSA_UnableToDisableResampling "[AO_ALSA] Kann Resampling nicht deaktivieren: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSamplerate2 "[AO_ALSA] Kann samplerate-2 nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetBufferTimeNear "[AO_ALSA] Kann Puffer-Zeit in Nähe von %s nicht setzen.\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodTime "[AO_ALSA] Kann Periodenzeit nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_BufferTimePeriodTime "[AO_ALSA] Pufferzeit: %d, Periodenzeit: %d\n"
+#define MSGTR_AO_ALSA_UnableToGetPeriodSize "[AO ALSA] Kann Periodenzeit nicht ermitteln: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodSize "[AO ALSA] Kann Periodenzeit (%ld) nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriods "[AO_ALSA] Kann Perioden nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetHwParameters "[AO_ALSA] Kann Hardwareparameter nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBufferSize "[AO_ALSA] Kann Puffergröße nicht ermitteln: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetSwParameters "[AO_ALSA] Kann Softwareparameter nicht ermitteln: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSwParameters "[AO_ALSA] Kann Softwareparameter nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBoundary "[AO_ALSA] Kann Begrenzungen nicht ermitteln: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStartThreshold "[AO_ALSA] Kann Startschwellenwert nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStopThreshold "[AO_ALSA] Kann Stoppschwellenwert nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSilenceSize "[AO_ALSA] Kann Größe für silence nicht setzen: %s\n"
+#define MSGTR_AO_ALSA_PcmCloseError "[AO_ALSA] Fehler beim Schließen von pcm: %s\n"
+#define MSGTR_AO_ALSA_NoHandlerDefined "[AO_ALSA] Kein Handler definiert!\n"
+#define MSGTR_AO_ALSA_PcmPrepareError "[AO_ALSA] Fehler beim Vorbereiten von pcm: %s\n"
+#define MSGTR_AO_ALSA_PcmPauseError "[AO_ALSA] Fehler beim Pausieren von pcm: %s\n"
+#define MSGTR_AO_ALSA_PcmDropError "[AO_ALSA] Fehler beim Dropping von pcm: %s\n"
+#define MSGTR_AO_ALSA_PcmResumeError "[AO_ALSA] Fehler beim Wiederherstellen von pcm: %s\n"
+#define MSGTR_AO_ALSA_DeviceConfigurationError "[AO_ALSA] Fehler bei der Konfiguration des Geräts."
+#define MSGTR_AO_ALSA_PcmInSuspendModeTryingResume "[AO_ALSA] Pcm in Suspend-Modus, versuche Wiederherstellung.\n"
+#define MSGTR_AO_ALSA_WriteError "[AO_ALSA] Schreibfehler: %s\n"
+#define MSGTR_AO_ALSA_TryingToResetSoundcard "[AO_ALSA] Versuche Reset der Soundkarte.\n"
+#define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] Kann pcm-Status nicht ermitteln: %s\n"
+
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] ungültiges Plugin: %s\n"
@@ -1661,6 +1722,10 @@ static char help_text[]=
 #define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Initialisiert: %p.\n"
 #define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Unbekanntes Subgerät: %s.\n"
 
+// libvo/aspect.c
+#define MSGTR_LIBVO_ASPECT_NoSuitableNewResFound "[ASPECT] Warnung: Keine passende neue Auflösung gefunden!\n"
+#define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] Fehler: Keine neue Größe gefunden, die in die Auflösung passt!\n"
+
 // libvo/vo_dxr3.c
 
 #define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Kann neue SPU-Palette nicht laden!\n"
@@ -1896,10 +1961,25 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() aufgerufen!!!!!!\n"
+#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] Shared Memory nicht unterstützt\nGreife auf normalen Xv zurück.\n"
+#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] Sorry, Xv von dieser X11-Version/diesem Treiber nicht unterstützt\n[VO_XV] *********** Probiere mit  -vo x11  oder  -vo sdl  ***************\n"
+#define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed "[VO_XV] XvQueryAdaptors fehlgeschlagen.\n"
+#define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] Ungültiger Port-Parameter, überschreibe mit Port 0.\n"
+#define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] Konnte Port %i nicht ergreifen.\n"
+#define MSGTR_LIBVO_XV_CouldNotFindFreePort "[VO_XV] Konnte keinen freien Xvideo-Port finden - vielleicht verwendet ihn\n"\
+"[VO_XV] schon ein anderer Prozess. Schließe alle Video-Applikationen und\n"\
+"[VO_XV] versuche es erneut. Wenn das nicht hilft, siehe 'mplayer -vo help'\n"\
+"[VO_XV] für andere (nicht-xv) Videoausgabetreiber.\n"
+#define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] Es scheint keine Xvideo-Unterstützung für deine Grafikkarte verfügbar\n"\
+"[VO_XV] zu sein. Starte 'xvinfo', um Xv-Support zu verifizieren, und lies"\
+"[VO_XV] DOCS/HTML/de/video.html#xv!\n"\
+"[VO_XV] Siehe 'mplayer -vo help' für andere (nicht-xv) Videoausgabetreiber.\n"\
+"[VO_XV] Probiere -vo x11.\n"
 
 // stream/stream_radio.c
 
 #define MSGTR_RADIO_ChannelNamesDetected "[Radio] Radiokanalnamen erkannt.\n"
+#define MSGTR_RADIO_FreqRange "[Radio] Erlaubter Frequenzbereich ist %.2f-%.2f MHz.\n"
 #define MSGTR_RADIO_WrongFreqForChannel "[Radio] Falsche Frequenz für Kanal %s\n"
 #define MSGTR_RADIO_WrongChannelNumberFloat "[Radio] Falsche Kanalnummer: %.2f\n"
 #define MSGTR_RADIO_WrongChannelNumberInt "[Radio] Falsche Kanalnummer: %d\n"
