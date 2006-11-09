@@ -689,7 +689,8 @@ got_audio:
 		for (i = 0; i < sub_packets; i++) {
 		    demux_packet_t *dp = new_demux_packet(sub_packet_lengths[i]);
 		    stream_read(demuxer->stream, dp->buffer, sub_packet_lengths[i]);
-		    dp->pts = (priv->a_pts == timestamp) ? 0 : (timestamp / 1000.0f);
+		    if (priv->a_pts != timestamp)
+			dp->pts = timestamp / 1000.0f;
 		    priv->a_pts = timestamp;
 		    dp->pos = demuxer->filepos;
 		    ds_add_packet(ds, dp);
@@ -746,7 +747,7 @@ got_audio:
                     break;
             }
             priv->audio_need_keyframe = 0;
-            priv->audio_timestamp[priv->sub_packet_cnt] = (priv->a_pts==timestamp) ? 0 : (timestamp/1000.0f);
+            priv->audio_timestamp[priv->sub_packet_cnt] = (priv->a_pts==timestamp) ? (correct_pts ? MP_NOPTS_VALUE : 0) : (timestamp/1000.0f);
             priv->a_pts = timestamp;
             if (priv->sub_packet_cnt == 0)
                 priv->audio_filepos = demuxer->filepos;
@@ -761,7 +762,8 @@ got_audio:
                     dp = new_demux_packet(apk_usize);
                     memcpy(dp->buffer, priv->audio_buf + x * apk_usize, apk_usize);
                     /* Put timestamp only on packets that correspond to original audio packets in file */
-                    dp->pts = (x * apk_usize % w) ? 0 : priv->audio_timestamp[x * apk_usize / w];
+		    if (x * apk_usize % w == 0)
+			dp->pts = priv->audio_timestamp[x * apk_usize / w];
                     dp->pos = priv->audio_filepos; // all equal
                     dp->flags = x ? 0 : 0x10; // Mark first packet as keyframe
                     ds_add_packet(ds, dp);
@@ -803,10 +805,9 @@ got_audio:
 	    }
 #endif
 	    if (priv->audio_need_keyframe == 1) {
-	    	dp->pts = 0;
 		priv->audio_need_keyframe = 0;
-	    }else 
-	        dp->pts = (priv->a_pts==timestamp) ? 0 : (timestamp/1000.0f);
+	    } else if(priv->a_pts != timestamp)
+	        dp->pts = timestamp/1000.0;
 	    priv->a_pts=timestamp;
 	    dp->pos = demuxer->filepos;
 	    dp->flags = (flags & 0x2) ? 0x10 : 0;
@@ -931,8 +932,8 @@ got_video:
 				priv->kf_base = 0;
 				priv->kf_pts = dp_hdr->timestamp;
 				priv->video_after_seek = 0;
-			} else 
-			dp->pts=(dp_hdr->len<3)?0:
+			} else if (dp_hdr->len >= 3)
+			    dp->pts =
 			    real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 			ds_add_packet(ds,dp);
 			ds->asf_packet=NULL;
@@ -968,8 +969,8 @@ got_video:
 				    priv->kf_base = 0;
 				    priv->kf_pts = dp_hdr->timestamp;
 				    priv->video_after_seek = 0;
-			    } else 
-			    dp->pts=(dp_hdr->len<3)?0:
+			    } else if (dp_hdr->len >= 3)
+				dp->pts =
 				real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 			    ds_add_packet(ds,dp);
 			    ds->asf_packet=NULL;
@@ -989,7 +990,6 @@ got_video:
 		// create new packet!
 		dp = new_demux_packet(sizeof(dp_hdr_t)+vpkg_length+8*(1+2*(vpkg_header&0x3F)));
 	    	// the timestamp seems to be in milliseconds
-		dp->pts = 0; // timestamp/1000.0f; //timestamp=0;
                 dp->pos = demuxer->filepos;
                 dp->flags = (flags & 0x2) ? 0x10 : 0;
 		ds->asf_seq = vpkg_seqnum;
@@ -1025,8 +1025,8 @@ got_video:
 			priv->kf_base = 0;
 			priv->kf_pts = dp_hdr->timestamp;
 			priv->video_after_seek = 0;
-		} else 
-		dp->pts=(dp_hdr->len<3)?0:
+		} else if (dp_hdr->len >= 3)
+		    dp->pts =
 		    real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 		ds_add_packet(ds,dp);
 
