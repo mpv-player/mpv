@@ -56,7 +56,7 @@ static char help_text[]=
 #define MSGTR_Exit_quit "離開"
 #define MSGTR_Exit_eof "檔案末端"
 #define MSGTR_Exit_error "致命錯誤"
-#define MSGTR_IntBySignal "\nMPlayer 被 %s 模組中的 %d 訊號 中斷\n"
+//#define MSGTR_IntBySignal "\nMPlayer 被 %s 模組中的 %d 訊號 中斷\n"  // wrong order of format identifiers breaks compilation
 #define MSGTR_NoHomeDir "無法找到 HOME 目錄\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") 問題\n"
 #define MSGTR_CreatingCfgFile "建立 config 檔: %s\n"
