@@ -207,7 +207,8 @@ static int fill_buffer(stream_t *s, char *but, int len)
       update_title_len(s);
     while(!len) /* grab all event until DVDNAV_BLOCK_OK (len=2048), DVDNAV_STOP or DVDNAV_STILL_FRAME */
     {
-      if(-1==(event=dvdnav_stream_read(priv, s->buffer, &len)) || len==-1)
+      event=dvdnav_stream_read(priv, s->buffer, &len);
+      if(event==-1 || len==-1)
       {
         mp_msg(MSGT_CPLAYER,MSGL_ERR, "DVDNAV stream read error!\n");
         return 0;
