@@ -298,12 +298,6 @@ static int set_frequency_v4l2(radio_priv_t* priv,float frequency){
         frequency,strerror(errno));
         return  STREAM_ERROR;
     }
-#ifdef USE_RADIO_CAPTURE
-    if(clear_buffer(priv)!=STREAM_OK){
-        mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_ClearBufferFailed,strerror(errno));
-        return  STREAM_ERROR;
-    }
-#endif
     return STREAM_OK;
 }
 
@@ -441,12 +435,6 @@ static int set_frequency_v4l(radio_priv_t* priv,float frequency){
         mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_SetFreqFailed,freq,frequency,strerror(errno));
         return  STREAM_ERROR;
     }
-#ifdef USE_RADIO_CAPTURE
-    if(clear_buffer(priv)!=STREAM_OK){
-        mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_ClearBufferFailed,strerror(errno));
-        return  STREAM_ERROR;
-    }
-#endif
     return STREAM_OK;
 }
 /*****************************************************************
@@ -542,15 +530,25 @@ static inline int set_frequency(radio_priv_t* priv,float frequency){
     switch(priv->driver){
 #ifdef HAVE_RADIO_V4L
         case RADIO_DRIVER_V4L:
-            return set_frequency_v4l(priv,frequency);
+            if(set_frequency_v4l(priv,frequency)!=STREAM_OK)
+                return STREAM_ERROR;
 #endif
 #ifdef HAVE_RADIO_V4L2
         case RADIO_DRIVER_V4L2:
-            return set_frequency_v4l2(priv,frequency);
+            if(set_frequency_v4l2(priv,frequency)!=STREAM_OK)
+                return STREAM_ERROR;
 #endif
+        default:
+            mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_DriverUnknownId,priv->driver);
+            return STREAM_ERROR;
     }
-    mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_DriverUnknownId,priv->driver);
-    return STREAM_ERROR;
+#ifdef USE_RADIO_CAPTURE
+    if(clear_buffer(priv)!=STREAM_OK){
+        mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_ClearBufferFailed,strerror(errno));
+        return  STREAM_ERROR;
+    }
+#endif
+   return STREAM_OK;
 }
 static inline int get_frequency(radio_priv_t* priv,float* frequency){ 
     switch(priv->driver){
@@ -1110,8 +1108,8 @@ static void close_s(struct stream_st * stream){
     priv->radio_channel_current=NULL;
     priv->radio_channel_list=NULL;
 
-    set_volume(priv, priv->old_snd_volume);
     if (priv->radio_fd>0){
+        set_volume(priv, priv->old_snd_volume);
         close(priv->radio_fd);
     }
 
