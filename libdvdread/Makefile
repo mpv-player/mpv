@@ -18,10 +18,6 @@ LIB=libdvdread
 
 .SUFFIXES: .c .o
 
-ifeq ($(OPTFLAGS),)
-OPTFLAGS = -mcpu=pentium -march=pentium -O4
-endif
-
 CFLAGS= -I../libdvdcss -I.. $(OPTFLAGS) -D__USE_UNIX98 -D_GNU_SOURCE \
 	-DHAVE_DVDCSS_DVDCSS_H -DSTDC_HEADERS -DHAVE_LIMITS_H \
 	-D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
