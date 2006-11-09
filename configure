@@ -5816,13 +5816,19 @@ EOF
 fi
 if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
-  _def_lavc_faac="#define CONFIG_FAAC 1"
+  if echo $_libavencoders | grep -q faac ; then
+    _lavc_faac=yes
+    _def_lavc_faac="#define CONFIG_FAAC 1"
+  else
+    _lavc_faac=no
+    _def_lavc_faac="#undef CONFIG_FAAC"
+  fi
   _codecmodules="faac $_codecmodules"
 else
   _def_faac="#undef HAVE_FAAC"
   _nocodecmodules="faac $_nocodecmodules"
 fi
-echores "$_faac"
+echores "$_faac (in libavcodec: $_lavc_faac)"
 
 
 echocheck "FAAD2 (AAC) support"
@@ -6487,16 +6493,23 @@ fi
 if test "$_x264" = yes ; then
   _x264=yes
   _def_x264='#define HAVE_X264 1'
-  _def_lavc_x264='#define CONFIG_X264 1'
   _codecmodules="x264 $_codecmodules"
+  if echo $_libavencoders | grep -q x264 ; then
+    _lavc_x264=yes
+    _def_lavc_x264='#define CONFIG_X264 1'
+  else
+    _lavc_x264=no
+    _def_lavc_x264='#undef CONFIG_X264'
+  fi
 else
   _x264=no
   _ld_x264=''
+  _lavc_x264=no
   _def_x264='#undef HAVE_X264'
   _def_lavc_x264='#undef CONFIG_X264'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
-echores "$_x264"
+echores "$_x264 (in libavcodec: $_lavc_x264)"
 
 
 echocheck "nut"
@@ -7397,17 +7410,25 @@ EXTRA_LIB = $_ld_extra $_ld_live $_ld_vstream $_ld_network $_ld_enca \
   $_ld_static $_ld_zlib $_ld_termcap $_ld_lirc $_ld_lircc $_ld_win32 \
   $_ld_win32libs $_ld_lm $_ld_libC $_ld_fribidi $_ld_smb $_ld_gif \
   $_ld_libcdio $_ld_dvdread $_ld_dvdnav $_macosx_frameworks $_ld_cdparanoia \
-  $_ld_xvid $_ld_x264 $_ld_mp3lame $_ld_libdts $_ld_mad \
+  $_ld_xvid $_ld_libdts $_ld_mad \
   $_ld_vorbis $_ld_libdv $_ld_theora $_ld_faad $_ld_speex $_xmms_lib \
-  $_toolame_lib $_twolame_lib $_ld_faac $_ld_musepack $_ld_liblzo $_ld_png \
+  $_ld_musepack $_ld_liblzo $_ld_png \
   $_ld_jpeg $_ld_alsa $_ld_nut $_ld_arch $_ld_iconv $_ld_mlib
 VO_LIBS = $_ld_aa $_ld_sdl $_ld_ggi $_ld_svga $_ld_directfb $_ld_caca \
   $_ld_vesa $_ld_vidix_external $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm \
   $_ld_xinerama $_ld_x11 $_ld_sock
 AO_LIBS = $_ld_arts $_ld_esd $_ld_jack $_ld_openal $_ld_nas $_ld_sgiaudio \
   $_ld_polyp
-ENCORE_LIB = $_ld_mp3lame
-LAVC_MP3LAME = $_lavc_mp3lame
+EXTRA_LIB_MENCODER = $_ld_mp3lame $_ld_x264 $_toolame_lib $_twolame_lib $_ld_faac
+ifeq ($_lavc_faac,yes)
+EXTRA_LIB += $_ld_faac
+endif
+ifeq ($_lavc_mp3lame,yes)
+EXTRA_LIB += $_ld_mp3lame
+endif
+ifeq ($_lavc_x264,yes)
+EXTRA_LIB += $_ld_x264
+endif
 FREETYPE_LIB = $_ld_freetype
 FONTCONFIG_LIB = $_ld_fontconfig
 GTK_LIBS = $_ld_static $_ld_gtk $_ld_glib

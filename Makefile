@@ -310,7 +310,7 @@ mplayer$(EXESUF): $(MPLAYER_DEP)
 
 ifeq ($(MENCODER),yes)
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
-                $(MP3LAME_LIB) \
+                $(EXTRA_LIB_MENCODER) \
                 $(COMMON_LIBS) \
 
 mencoder$(EXESUF): $(MENCODER_DEP)
