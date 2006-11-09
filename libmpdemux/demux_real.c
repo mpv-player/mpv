@@ -690,7 +690,7 @@ got_audio:
 		    demux_packet_t *dp = new_demux_packet(sub_packet_lengths[i]);
 		    stream_read(demuxer->stream, dp->buffer, sub_packet_lengths[i]);
 		    if (priv->a_pts != timestamp)
-			dp->pts = timestamp / 1000.0f;
+			dp->pts = timestamp / 1000.0;
 		    priv->a_pts = timestamp;
 		    dp->pos = demuxer->filepos;
 		    ds_add_packet(ds, dp);
@@ -747,7 +747,7 @@ got_audio:
                     break;
             }
             priv->audio_need_keyframe = 0;
-            priv->audio_timestamp[priv->sub_packet_cnt] = (priv->a_pts==timestamp) ? (correct_pts ? MP_NOPTS_VALUE : 0) : (timestamp/1000.0f);
+            priv->audio_timestamp[priv->sub_packet_cnt] = (priv->a_pts==timestamp) ? (correct_pts ? MP_NOPTS_VALUE : 0) : (timestamp/1000.0);
             priv->a_pts = timestamp;
             if (priv->sub_packet_cnt == 0)
                 priv->audio_filepos = demuxer->filepos;
