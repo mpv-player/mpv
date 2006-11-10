@@ -4,13 +4,13 @@ include ../config.mak
 DEFINES=-DMPLAYER -D__WINE__ #-Ddbg_printf=__vprintf \
 	#-DTRACE=__vprintf # -DDETAILED_OUT
 
-ifeq ($(TARGET_WIN32),yes)
-LIB_OBJECTS= driver.o afl.o vfl.o
-else
-LIB_OBJECTS= ldt_keeper.o pe_image.o module.o ext.o win32.o \
-             driver.o pe_resource.o resource.o registry.o \
-             elfdll.o afl.o vfl.o wrapper.o
+SRCS= driver.c afl.c vfl.c
+ifneq ($(TARGET_WIN32),yes)
+SRCS+= ldt_keeper.c pe_image.c module.c ext.c win32.c \
+       pe_resource.c resource.c registry.c elfdll.c wrapper.S
 endif
+
+OBJS = $(SRCS:.c=.o)
 
 # gcc-3.0 produces buggy code for acmStreamOpen() with
 # "-O3 -fomit-frame-pointer" or "-O2 -fomit-frame-pointer
@@ -33,12 +33,12 @@ distclean: clean
 .c.o:
 	$(CC) $(CFLAGS) $(DEFINES) -c $<
 
-libloader.a:  $(LIB_OBJECTS) stubs.s
+libloader.a:  $(OBJS) stubs.s
 	$(CC) -c ./stubs.s -o stubs.o
 ifeq ($(TARGET_OS),OpenBSD)
 	./loader_objfix.sh
 endif
-	$(AR) -r libloader.a $(LIB_OBJECTS) stubs.o
+	$(AR) -r libloader.a $(OBJS) stubs.o
 	$(RANLIB) libloader.a
 
 dep:
