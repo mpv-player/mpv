@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r20739
+// Synced with help_mp-en.h r20817
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; pass 3; section/subsection;  XScreenSaver; keycolor;  
@@ -1155,6 +1155,62 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-播放: 重启后写错误: %s - 放弃。\n"
 #define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-播放: 输出错误: %s\n"
 
+// ao_alsa.c
+#define MSGTR_AO_ALSA_InvalidMixerIndexDefaultingToZero "[AO_ALSA] 无效的混音索引。取默认值 0。\n"
+#define MSGTR_AO_ALSA_MixerOpenError "[AO_ALSA] 混音打开错误: %s\n"
+#define MSGTR_AO_ALSA_MixerAttachError "[AO_ALSA] 混音接上 %s 错误: %s\n"
+#define MSGTR_AO_ALSA_MixerRegisterError "[AO_ALSA] 混音注册错误: %s\n"
+#define MSGTR_AO_ALSA_MixerLoadError "[AO_ALSA] 混音装载错误: %s\n"
+#define MSGTR_AO_ALSA_UnableToFindSimpleControl "[AO_ALSA] 无法找到控制 '%s',%i。\n"
+#define MSGTR_AO_ALSA_ErrorSettingLeftChannel "[AO_ALSA] 错误设置左声道, %s\n"
+#define MSGTR_AO_ALSA_ErrorSettingRightChannel "[AO_ALSA] 错误设置右声道, %s\n"
+#define MSGTR_AO_ALSA_CommandlineHelp "\n[AO_ALSA] -ao alsa 命令行帮助:\n"\
+"[AO_ALSA] 示例: mplayer -ao alsa:device=hw=0.3\n"\
+"[AO_ALSA]   设置第一卡第四硬件设备。\n\n"\
+"[AO_ALSA] 选项:\n"\
+"[AO_ALSA]   noblock\n"\
+"[AO_ALSA]     以 non-blocking 模式打开设备。\n"\
+"[AO_ALSA]   device=<device-name>\n"\
+"[AO_ALSA]     设置设备 (change , to . and : to =)\n"
+#define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d 声道不被支持。\n"
+#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] 不能读取 ALSA 配置: %s\n"
+#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] 不能拷贝配置: %s\n"
+#define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] 打开 nonblock-模式 失败, 试着打开 block-模式。\n"
+#define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] 回放打开错误: %s\n"
+#define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] 错误设置 block-模式 %s。\n"
+#define MSGTR_AO_ALSA_UnableToGetInitialParameters "[AO_ALSA] 无法得到初始参数: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetAccessType "[AO_ALSA] 无法设置访问类型: %s\n"
+#define MSGTR_AO_ALSA_FormatNotSupportedByHardware "[AO_ALSA] 格式 %s 不被硬件支持, 试试默认的。\n"
+#define MSGTR_AO_ALSA_UnableToSetFormat "[AO_ALSA] 无法设置格式: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetChannels "[AO_ALSA] 无法设置声道: %s\n"
+#define MSGTR_AO_ALSA_UnableToDisableResampling "[AO_ALSA] 无法停用再抽样: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSamplerate2 "[AO_ALSA] 无法设置 采样率-2: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetBufferTimeNear "[AO_ALSA] 无法设置缓冲时间约: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodTime "[AO_ALSA] 无法设置区段时间: %s\n"
+#define MSGTR_AO_ALSA_BufferTimePeriodTime "[AO_ALSA] buffer_time: %d, period_time :%d\n"
+#define MSGTR_AO_ALSA_UnableToGetPeriodSize "[AO ALSA] 无法取得区段大小: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodSize "[AO ALSA] 无法设置区段大小(%ld): %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriods "[AO_ALSA] 无法设置区段: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetHwParameters "[AO_ALSA] 无法设置 hw-parameters: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBufferSize "[AO_ALSA] 无法取得缓冲大小: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetSwParameters "[AO_ALSA] 无法取得 sw-parameters: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSwParameters "[AO_ALSA] 无法设置 sw-parameters: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBoundary "[AO_ALSA] 无法取得边界: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStartThreshold "[AO_ALSA] 无法设置开始点: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStopThreshold "[AO_ALSA] 无法设置停止点: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSilenceSize "[AO_ALSA] 无法设置安静大小: %s\n"
+#define MSGTR_AO_ALSA_PcmCloseError "[AO_ALSA] pcm 关闭错误: %s\n"
+#define MSGTR_AO_ALSA_NoHandlerDefined "[AO_ALSA] 没定义处理器!\n"
+#define MSGTR_AO_ALSA_PcmPrepareError "[AO_ALSA] pcm 准备错误: %s\n"
+#define MSGTR_AO_ALSA_PcmPauseError "[AO_ALSA] pcm 暂停错误: %s\n"
+#define MSGTR_AO_ALSA_PcmDropError "[AO_ALSA] pcm 丢弃错误: %s\n"
+#define MSGTR_AO_ALSA_PcmResumeError "[AO_ALSA] pcm 恢复错误: %s\n"
+#define MSGTR_AO_ALSA_DeviceConfigurationError "[AO_ALSA] 设备配置错误。"
+#define MSGTR_AO_ALSA_PcmInSuspendModeTryingResume "[AO_ALSA] Pcm 在挂机模式, 试着恢复。\n"
+#define MSGTR_AO_ALSA_WriteError "[AO_ALSA] 写错误: %s\n"
+#define MSGTR_AO_ALSA_TryingToResetSoundcard "[AO_ALSA] 试着重置声卡。\n"
+#define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] 不能取得 pcm 状态: %s\n"
+
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] 无效插件: %s\n"
@@ -1619,6 +1675,10 @@ static char help_text[]=
 #define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] 初始化: %p。\n"
 #define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] 未知子设备: %s。\n"
 
+// libvo/aspect.c
+#define MSGTR_LIBVO_ASPECT_NoSuitableNewResFound "[ASPECT] 警告: 无法找到新的合适的分辨率!\n"
+#define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] 错误: 无法找到适合分辨率的新尺寸!\n"
+
 // libvo/vo_dxr3.c
 
 #define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] 无法载入新的 SPU 调色板!\n"
@@ -1834,10 +1894,24 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] 调用 draw_frame()!!!!!!\n"
+#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] 不支持共享内存\n回复到正常 Xv。\n"
+#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] 对不起, 此 X11 版本/驱动不支持 Xv\n[VO_XV] ******** 试试使用  -vo x11  或  -vo sdl  *********\n"
+#define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed  "[VO_XV] XvQueryAdaptors 失败.\n"
+#define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] 无效端口参数, 端口 0 重载。\n"
+#define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] 不能抓取端口 %i.\n"
+#define MSGTR_LIBVO_XV_CouldNotFindFreePort "[VO_XV] 未找到空闲 Xvideo 端口 - 或许另一过程已\n"\
+"[VO_XV] 在使用。请关闭所有的应用程序再试。如果那样做\n"\
+"[VO_XV] 没用, 请参见 'mplayer -vo help' 找其它 (非-xv) 视频输出驱动。\n"
+#define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] 好像不存在 Xvideo 支持你可用的显卡。\n"\
+"[VO_XV] 运行 'xvinfo' 证实有 Xv 的支持并阅读\n"\
+"[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
+"[VO_XV] 请参见 'mplayer -vo help' 找其它 (非-xv) 视频输出驱动。\n"\
+"[VO_XV] 试试 -vo x11.\n"
 
 // stream/stream_radio.c
 
 #define MSGTR_RADIO_ChannelNamesDetected "[radio] 检测到广播通道名。\n"
+#define MSGTR_RADIO_FreqRange "[radio] 允许的频率范围是 %.2f-%.2f MHz。\n"
 #define MSGTR_RADIO_WrongFreqForChannel "[radio] 错误的通道频率 %s\n"
 #define MSGTR_RADIO_WrongChannelNumberFloat "[radio] 错误的通道号: %.2f\n"
 #define MSGTR_RADIO_WrongChannelNumberInt "[radio] 错误的通道号: %d\n"
