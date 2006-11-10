@@ -401,6 +401,8 @@ Tag description:
 
 file_id_string
     "nut/multimedia container\0"
+    the very first thing in every nut file, usefull for identifying nut
+    files
 
 *_startcode
     all startcodes start with 'N'
@@ -423,9 +425,15 @@ info_startcode
 version
     NUT version. The current value is 3. All lower values are pre-freeze
 
+stream_count
+    number of streams in this file
+
 forward_ptr
     size of the packet data (exactly the distance from the first byte
     after the packet_header to the first byte of the next packet)
+    every nut packet contains a forward_ptr immedeatly after its startcode
+    with the exception of frame_code based packets, the forward pointer
+    can be used to skip over the packet without decoding its contents
 
 max_distance
     max distance between startcodes. If p1 and p2 are the byte
