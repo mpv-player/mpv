@@ -76,7 +76,7 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 	int ret;
 	int i;
 
-	if ((ret = nut_read_headers(nut, &s))) {
+	if ((ret = nut_read_headers(nut, &s, NULL))) {
 		if (ret < 0) mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
 		                                           nut_error(-ret));
 		nut_demuxer_uninit(nut);
