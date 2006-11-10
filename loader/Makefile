@@ -35,9 +35,6 @@ distclean: clean
 
 libloader.a:  $(OBJS) stubs.s
 	$(CC) -c ./stubs.s -o stubs.o
-ifeq ($(TARGET_OS),OpenBSD)
-	./loader_objfix.sh
-endif
 	$(AR) -r libloader.a $(OBJS) stubs.o
 	$(RANLIB) libloader.a
 
