@@ -517,6 +517,31 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
     return chapter;
 }
 
+static void list_chapters(pgc_t *pgc)
+{
+    unsigned int i, cell;
+    unsigned int t=0, t2=0;
+
+    if(pgc->nr_of_programs < 2)
+       return;
+
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "CHAPTERS: ");
+    for(i=0; i<pgc->nr_of_programs-1; i++)
+    {
+        cell = pgc->program_map[i]; //here the cell is 1-based
+        t2 = t/1000;
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d,", t2/3600, (t2/60)%60, t2%60);
+        while(cell < pgc->program_map[i+1]) {
+            if(!(pgc->cell_playback[cell-1].block_type == BLOCK_TYPE_ANGLE_BLOCK &&
+                 pgc->cell_playback[cell-1].block_mode != BLOCK_MODE_FIRST_CELL)
+            )
+                t += dvdtimetomsec(&pgc->cell_playback[cell-1].playback_time);
+            cell++;
+        }
+    }
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "\n");
+}
+
 static double dvd_get_current_time(stream_t *stream, int cell)
 {
     int i, tm;
@@ -982,6 +1007,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       return STREAM_UNSUPORTED;
     for(k=0; k<d->cur_pgc->nr_of_cells; k++)
       d->cell_times_table[k] = dvdtimetomsec(&d->cur_pgc->cell_playback[k].playback_time);
+    list_chapters(d->cur_pgc);
 
     // ... (unimplemented)
     //    return NULL;
