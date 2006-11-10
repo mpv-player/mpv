@@ -251,9 +251,13 @@ parse_pls(play_tree_parser_t* p) {
   play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying Winamp playlist...\n");
-  if (!(line = play_tree_parser_get_line(p)))
+  while((line = play_tree_parser_get_line(p))) {
+    strstrip(line);
+    if(strlen(line))
+      break;
+  }
+  if (!line)
     return NULL;
-  strstrip(line);
   if(strcasecmp(line,"[playlist]"))
     return NULL;
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected Winamp playlist format\n");
