@@ -428,6 +428,10 @@ version
 stream_count
     number of streams in this file
 
+time_base_count
+    number of different time bases in this file
+    this MUST NOT be 0
+
 forward_ptr
     size of the packet data (exactly the distance from the first byte
     after the packet_header to the first byte of the next packet)
