@@ -11,6 +11,7 @@ SRCS+= ldt_keeper.c pe_image.c module.c ext.c win32.c \
 endif
 
 OBJS = $(SRCS:.c=.o)
+OBJS := $(OBJS:.S=.o)
 
 # gcc-3.0 produces buggy code for acmStreamOpen() with
 # "-O3 -fomit-frame-pointer" or "-O2 -fomit-frame-pointer
