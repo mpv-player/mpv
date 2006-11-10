@@ -20,9 +20,8 @@ endif
 # -fno-omit-frame-pointer works around this gcc-3.0 bug.  gcc-2.95.2 is OK.
 # Note: -D_FILE_OFFSET_BITS=32 is required to disable using mmap64(),
 # as it's broken in glibc 2.1.2 (bad header) and 2.1.3 (bad code)
-WARN_FLAGS = 
-CFLAGS=-I. -I.. $(OPTFLAGS) -U_FILE_OFFSET_BITS $(WARN_FLAGS) -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
-#CFLAGS=-I. -I.. -O $(WARN_FLAGS) -g #-fno-omit-frame-pointer
+CFLAGS=-I. -I.. $(OPTFLAGS) -U_FILE_OFFSET_BITS -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
+#CFLAGS=-I. -I.. -O -g #-fno-omit-frame-pointer
 
 all: libloader.a
 
