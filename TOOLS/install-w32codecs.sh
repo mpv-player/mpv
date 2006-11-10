@@ -158,20 +158,20 @@ case "$1" in
     ;;
 
   uninstall)
-    cd $DIR/
+    cd $CODECDIR/
     rm -rf mplayer_binary_codecs
     #FIXME we need a better clean system
     if which symlinks > /dev/null ; then
       symlinks -d .
     else
-      echo "please install the package 'symlinks' and run 'symlinks -d $DIR' "
+      echo "please install the package 'symlinks' and run 'symlinks -d $CODECDIR' "
     fi
     echo "Uninstalled Succesfully!"
     ;;
 
   *)
     echo "Usage: {install|uninstall}"
-    echo "This program will install binary codecs for mplayer"
+    echo "This program will install binary codecs for MPlayer."
     exit 1
     ;;
 
