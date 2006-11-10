@@ -396,11 +396,6 @@ execute the <command>gmplayer</command> binary.
 </para>
 
 <para>
-Currently you can't use the <option>-gui</option> option on the command
-line, due to technical reasons.
-</para>
-
-<para>
 As <application>MPlayer</application> doesn't have a skin included, you
 have to download them if you want to use the GUI. See the <ulink
 url="http://www.mplayerhq.hu/dload.html">download page</ulink>.
