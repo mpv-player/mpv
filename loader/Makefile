@@ -38,5 +38,12 @@ libloader.a:  $(OBJS) stubs.s
 	$(AR) -r libloader.a $(OBJS) stubs.o
 	$(RANLIB) libloader.a
 
-dep:
-	echo "dependency not required/supported"
+dep depend:
+	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+
+#
+# include dependency files if they exist
+#
+ifneq ($(wildcard .depend),)
+include .depend
+endif
