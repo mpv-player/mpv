@@ -504,7 +504,7 @@ time_base_nom / time_base_denom = time_base
     There SHOULD NOT be more timebases than streams.
 
 time_base_id
-    id to time_base table
+    index into the time_base table
 
 convert_ts
     To switch from 2 different timebases, the following calculation is
