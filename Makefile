@@ -118,7 +118,7 @@ endif
 ifeq ($(GUI),yes)
 PARTS += Gui
 endif
-ifneq ($(W32_LIB),)
+ifeq ($(WIN32DLL),yes)
 PARTS += loader loader/dshow loader/dmo
 endif
 ifeq ($(LIBMENU),yes)
