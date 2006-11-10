@@ -2344,7 +2344,7 @@ OSD и очищать ее (по-умолчанию: ^[[A\\r^[[K).
 .
 .TP
 .B sdl (только SDL)
-Драйвер вывода звука высокоуровневой платформо-мезависимой библиотеки
+Драйвер вывода звука высокоуровневой платформенно-мезависимой библиотеки
  SDL (Simple Directmedia Layer) 
 .PD 0
 .RSs
@@ -2923,636 +2923,675 @@ quartz, ggi и gl2.
 .
 .
 .
-.SH "VIDEO OUTPUT DRIVERS (MPLAYER ONLY)"
-Video output drivers are interfaces to different video output facilities.
-The syntax is:
+.SH "ДРАЙВЕРЫ ВЫВОДА ВИДЕО (ТОЛЬКО MPLAYER)"
+Драйверы вывода видео - это интерфейсы к различным средствам вывода видео.
+Синтаксис:
 .
 .TP
-.B \-vo <driver1[:suboption1[=value]:...],driver2,...[,]>
-Specify a priority list of video output drivers to be used.
+.B \-vo <драйвер1[:подопция1[=значение]:...],драйвер2,...[,]>
+Указывает список используемых драйверов в порядке приоритетности.
 .PP
-If the list has a trailing ',' MPlayer will fall back on drivers not
-contained in the list.
-Suboptions are optional and can mostly be omitted.
+Если список содержит завершающую ',', то MPlayer в случае проблем будет
+использовать драйверы, не содержащиеся в списке.
+Подопции необязательны и в большинстве опций могут быть опущены.
 .br
-.I NOTE:
-See \-vo help for a list of compiled-in video output drivers.
+.I ЗАМЕЧАНИЕ:
+Полный список скомпилированных драйверов вывода видео можно получить 
+опцией \-vo help.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-vo xmga,xv,"
-Try the Matrox X11 driver, then the Xv driver, then others.
+Пробует X11 Matrox драйвер, затем Xv драйвер, затем остальные.
 .IPs "\-vo directx:noaccel"
-Uses the DirectX driver with acceleration features turned off.
+Использует DirectX драйвер без ускорения.
 .RE
 .PD 1
 .sp 1
-Available video output drivers are:
+Допустимые драйверы:
 .
 .TP
-.B xv (X11 only)
-Uses the XVideo extension of XFree86 4.x to enable hardware
-accelerated playback.
-If you cannot use a hardware specific driver, this is probably
-the best option.
-For information about what colorkey is used and how it is drawn run MPlayer
-with \-v option and look out for the lines tagged with [xv common] at the
-beginning.
+.B xv (только X11 only)
+Использует XVideo расширение XFree86 4.x для задействования аппаратно
+ускоренного воспроизведения.
+Если вы не можете использовать специальный драйвер для вашего 
+оборудования, то выбор этого, возможно, будет лучшим решением.
+Чтобы узнать информацию об используемом цветовом ключе и способе его отображения,
+запустите MPlayer с опцией \-v и обратите внимание на строки, помеченные 
+[xv common] в начале.
 .PD 0
 .RSs
-.IPs port=<number>
-Select a specific XVideo port.
+.IPs port=<число>
+Выбирает указанный XVideo порт.
 .IPs ck=<cur|use|set>
-Select the source from which the colorkey is taken (default: cur).
+Выбирает источник, из которого берется цветовой ключ (по-умолчанию: cur).
 .RSss
 .IPs cur
-The default takes the colorkey currently set in Xv.
+Значение по-умолчанию цветового ключа берется из текущих установок Xv.
 .IPs use
-Use but do not set the colorkey from MPlayer (use \-colorkey option to change
-it).
+Указывает использовать, но не устанавливать цветовой ключ MPlayer
+(используйте опцию \-colorkey для его изменения).
 .IPs set
-Same as use but also sets the supplied colorkey.
+То же, что и предыдущее, но также устанавливает указанный цветовой ключ.
 .RE
 .IPs ck-method=<man|bg|auto>
-Sets the colorkey drawing method (default: man).
+Устанавливает метод отрисовки цветового ключа (по-умолчанию: man).
 .RSss
 .IPs man
-Draw the colorkey manually (reduces flicker in some cases).
+Указывает рисовать цветовой ключ самостоятельно (уменьшает мерцание в некоторых случаях).
 .IPs bg
-Set the colorkey as window background.
+Устанавливает цветовой ключ в качестве фона окна.
 .IPs auto
-Let Xv draw the colorkey.
+Предоставляет Xv отрисовывать цветовой ключ.
 .RE
 .RE
 .PD 1
 .
 .TP
-.B x11 (X11 only)
-Shared memory video output driver without hardware acceleration that
-works whenever X11 is present.
+.B x11 (только X11)
+Драйвер вывода видео с разделением памяти без аппаратного ускорения,
+работает везде, где есть X11.
 .
 .TP
-.B xover (X11 only)
-Adds X11 support to all overlay based video output drivers.
-Currently only supported by tdfx_vid.
+.B xover (только X11)
+Добавляет поддержку X11 ко всем драйверам, основанным на оверлее.
+В данный момент поддерживается только драйвером tdfx_vid.
 .PD 0
 .RSs
 .IPs <vo_driver>
-Select the driver to use as source to overlay on top of X11.
+Выбирает драйвер, используемый в качестве источника к оверлею 
+поверх X11.
 .RE
 .PD 1
 .
 .TP
-.B xvmc (X11 with \-vc ffmpeg12mc only)
-Video output driver that uses the XvMC (X Video Motion Compensation)
-extension of XFree86 4.x to speed up MPEG-1/2 and VCR2 decoding.
+.B xvmc (только X11 с \-vc ffmpeg12mc)
+Драйвер, использующий расширение XvMC (X Video Motion Compensation)
+XFree86 4.x для ускорения декодирования MPEG-1/2 и VCR2.
 .PD 0
 .RSs
-.IPs port=<number>
-Select a specific XVideo port.
+.IPs port=<число>
+Выбирает указанный XVideo порт.
 .IPs (no)benchmark
-Disables image display.
-Necessary for proper benchmarking of drivers that change
-image buffers on monitor retrace only (nVidia).
-Default is not to disable image display (nobenchmark).
+Отключает показ изображения.
+Необходимо для правильного теста производительности 
+драйверов, изменяющих буферы изображения только 
+.\" FIXME правильно ли переведено  monitor retrace ?
+между циклами обновления изображения на мониторе (nVidia).
+По-умолчанию, отображение экрана не отключается (nobenchmark).
 .IPs (no)bobdeint
-Very simple deinterlacer.
-Might not look better than \-vf tfields=1,
-but it is the only deinterlacer for xvmc (default: nobobdeint).
+Очень простой деинтерлейсер.
+Может быть не лучше, чем \-vf tfields=1, но это
+единственный деинтерлейсер для xvmc (по-умолчанию: nobobdeint).
 .IPs (no)queue
-Queue frames for display to allow more parallel work of the video hardware.
-May add a small (not noticeable) constant A/V desync (default: noqueue).
+Помещает кадры для отображения в очередь, чтобы сильнее распараллелить
+работу видео оборудования.
+Может добавить маленькую (незначительную) постоянную A/V рассинхронизацию
+(по-умолчанию: noqueue).
 .IPs (no)sleep
-Use sleep function while waiting for rendering to finish
-(not recommended on Linux) (default: nosleep).
+Указывает использовать функцию sleep для ожидания конца рендеринга
+(не рекомендуется в Linux) (по-умолчанию: nosleep).
 .IPs ck=cur|use|set
-Same as \-vo xv:ck (see \-vo xv).
+То же, что и \-vo xv:ck (смотрите \-vo xv).
 .IPs ck-method=man|bg|auto
-Same as \-vo xv:ck-method (see \-vo xv).
+То же, что и \-vo xv:ck-method (смотрите \-vo xv).
 .RE
 .PD 1
 .
 .TP
-.B dga (X11 only)
-Play video through the XFree86 Direct Graphics Access extension.
-Considered obsolete.
+.B dga (только X11)
+Воспроизводит видео через XFree86 расширение Direct Graphics Access.
+Считается устаревшим.
 .
 .TP
-.B sdl (SDL only)
-Highly platform independent SDL (Simple Directmedia Layer) library
-video output driver.
-Since SDL uses its own X11 layer, MPlayer X11 options do not have
-any effect on SDL.
+.B sdl (только SDL)
+Драйвер вывода видео с помощью высокоуровневой, платформенно-независимой
+библиотеки SDL (Simple Directmedia Layer).
+Поскольку SDL использует свой собственный слой X11, X11 опции MPlayer 
+не будут иметь никакого эффекта на SDL.
 .PD 0
 .RSs
-.IPs driver=<driver>
-Explicitly choose the SDL driver to use.
+.IPs driver=<драйвер>
+Явно выбирает используемый SDL драйвер.
 .IPs (no)forcexv
-Use XVideo through the sdl video output driver (default: forcexv).
+Указывает использовать XVideo через видео драйвер sdl (по-умолчанию: forcexv).
 .IPs (no)hwaccel
-Use hardware accelerated scaler (default: hwaccel).
+.\" FIXME scaler
+Указывает использовать аппаратно ускоренное масштабирование (по-умолчанию: hwaccel).
 .RE
 .PD 1
 .
 .TP
 .B "vidix\ \ "
-VIDIX (VIDeo Interface for *niX) is an interface to the
-video acceleration features of different graphics cards.
-Very fast video output driver on cards that support it.
+VIDIX (VIDeo Interface for *niX, видео интерфейс для *nix) - это интерфейс 
+к возможностям ускорения видео различных графических карт.
+Очень быстрый драйвер вывода видео для карт, его поддерживающих.
 .PD 0
 .RSs
-.IPs <subdevice>
-Explicitly choose the VIDIX subdevice driver to use.
-Available subdevice drivers are cyberblade_vid.so, mach64_vid.so,
+.IPs <подустройство>
+.\" FIXME "подустройства"
+Явно выбирает используемый драйвер подустройства VIDIX.
+Доступные драйверы подустройств: cyberblade_vid.so, mach64_vid.so,
 mga_crtc2_vid.so, mga_vid.so, nvidia_vid.so, pm3_vid.so,
-radeon_vid.so, rage128_vid.so, sis_vid.so and unichrome_vid.so.
+radeon_vid.so, rage128_vid.so, sis_vid.so и unichrome_vid.so.
 .RE
 .PD 1
 .
 .TP
-.B xvidix (X11 only)
-X11 frontend for VIDIX
+.B xvidix (только X11 only)
+X11 фронтенд для VIDIX
 .PD 0
 .RSs
-.IPs <subdevice>
-same as vidix
+.IPs <подустройство>
+То же, что и для vidix
 .RE
 .PD 1
 .
 .TP
 .B "cvidix\ "
-Generic and platform independent VIDIX frontend, can even run in a
-text console with nVidia cards.
+Универсальный и платформенно-независимый VIDIX фронтенд, с картами nVidia может работать 
+даже в текстовой консоли.
 .PD 0
 .RSs
-.IPs <subdevice>
-same as vidix
+.IPs <подустройство>
+То же, что и для vidix
 .RE
 .PD 1
 .
 .TP
-.B winvidix (Windows only)
-Windows frontend for VIDIX
+.B winvidix (только Windows)
+Windows фронтенд для VIDIX
 .PD 0
 .RSs
-.IPs <subdevice>
-same as vidix
+.IPs <подустройство>
+То же, что и для vidix
 .RE
 .PD 1
 .
 .TP
 .B directx (Windows only)
-Video output driver that uses the DirectX interface.
+Драйвер вывода видео, использующий DirectX интерфейс.
 .PD 0
 .RSs
 .IPs noaccel
-Turns off hardware acceleration.
-Try this option if you have display problems.
+Отключает аппаратное ускорение.
+Попробуйте эту опцию, если у вас проблемы с отображением.
 .RE
 .PD 1
 .
 .TP
-.B quartz (Mac OS X only)
-Mac OS X Quartz video output driver.
-Under some circumstances, it might be more efficient to force a
-packed YUV output format, with e.g.\& \-vf format=yuy2.
+.B quartz (только Mac OS X)
+Драйвер вывода видео Mac OS X Quartz.
+В некоторых случаях, форсирование пакованного выходного формата YUV с, 
+например, \-vf format=yuy2, может быть более эффективным.
 .PD 0
 .RSs
-.IPs device_id=<number>
-Choose the display device to use in fullscreen.
-.IPs fs_res=<width>:<height>
-Specify the fullscreen resolution (useful on slow systems).
+.IPs device_id=<число>
+Выбирает устройство отображения для использования в полноэкранном режиме.
+.IPs fs_res=<ширина>:<высота>
+Указывает полноэкранное разрешение (полезно на медленных системах).
 .RE
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 or 10.3.9 with QuickTime 7)
-Mac OS X CoreVideo video output driver
+.B macosx (Mac OS X 10.4 или 10.3.9 с QuickTime 7)
+Драйвер вывода видео Mac OS X CoreVideo.
 .PD 0
 .RSs
-.IPs device_id=<number>
-Choose the display device to use in fullscreen.
+.IPs device_id=<число>
+Выбирает устройство отображения для использования в полноэкранном режиме.
 .RE
 .PD 1
 .
 .TP
-.B fbdev (Linux only)
-Uses the kernel framebuffer to play video.
+.B fbdev (только Linux)
+Использует фреймбуфер ядра для воспроизведения видео.
 .PD 0
 .RSs
-.IPs <device>
-Explicitly choose the fbdev device name to use (e.g.\& /dev/\:fb0) or the
-name of the VIDIX subdevice if the device name starts with 'vidix'
-(e.g.\& 'vidixsis_vid' for the sis driver).
+.IPs <устройство>
+Явно указывает имя используемого fbdev устройства (например /dev/\:fb0) или
+имя подустройства VIDIX, если имя устройства начинается с 'vidix'
+(например 'vidixsis_vid для драйвера sis).
 .RE
 .PD 1
 .
 .TP
-.B fbdev2 (Linux only)
-Uses the kernel framebuffer to play video,
-alternative implementation.
+.B fbdev2 (только Linux)
+Использует фреймбуфер ядра для воспроизведения видео, альтернативная
+реализация.
 .PD 0
 .RSs
-.IPs <device>
-Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
+.IPs <устройство>
+Явно указывает имя используемого fbdev устройства (по-умолчанию: /dev/\:fb0).
 .RE
 .PD 1
 .
 .TP
 .B "vesa\ \ \ "
-Very general video output driver that should work on any VESA VBE 2.0
-compatible card.
+Весьма универсальный драйвер, который должен работать на любой VESA VBE 2.0
+совместимой карте.
 .PD 0
 .RSs
 .IPs "dga\ \ "
-Turns on DGA mode.
+Включает режим DGA.
 .IPs nodga
-Turns off DGA mode.
+Выключает режим DGA.
 .IPs neotv_pal
-Activate the NeoMagic TV out and set it to PAL norm.
+Активирует NeoMagic TV выход и устанавливает стандарт в PAL.
 .IPs neotv_ntsc
-Activate the NeoMagic TV out and set it to NTSC norm.
+Активирует NeoMagic TV выход и устанавливает стандарт в NTSC.
 .IPs vidix
-Use the VIDIX driver.
+Указывает использовать VIDIX драйвер.
 .IPs "lvo:\ \ \ "
-Activate the Linux Video Overlay on top of VESA mode.
+Активирует видео оверлей Linux поверх VESA режима.
 .RE
 .PD 1
 .
 .TP
 .B "svga\ \ \ "
-Play video using the SVGA library.
+Воспроизводит видео, используя библиотеку SVGA.
 .PD 0
 .RSs
-.IPs "<video mode>"
-Specify video mode to use.
-The mode can be given in a <width>x<height>x<colors> format,
-e.g.\& 640x480x16M or be a graphics mode number, e.g.\& 84.
+.IPs "<видео режим>"
+Указывает используемый видео режим.
+Режим может быть задан в форме <ширина>x<высота>x<цветов>,
+например 640x480x16M или номером графического режима, например 84.
 .IPs bbosd
-Draw OSD into black bands below the movie (slower).
+Выводит OSD на черных полях под изображением (медленнее).
 .IPs native
-Use only native drawing functions.
-This avoids direct rendering, OSD and hardware acceleration.
+Указывает использовать только 'нативные' функции.
+Это отключает прямой рендеринг, OSD и аппаратное ускорение.
 .IPs retrace
-Force frame switch on vertical retrace.
-Usable only with \-double.
-It has the same effect as the \-vsync option.
+.\" FIXME как коротко перевести vertical retrace? Существующий перевод 
+.\" не совсем верный (и звучит ужасно).
+Форсирует переключение кадров между циклами 
+вертикальной развертки.
+Может использоваться только с \-double.
+Имеет тот же эффект, что и опция \-vsync.
 .IPs "sq\ \ \ "
-Try to select a video mode with square pixels.
+Пытается выбрать видео режим с квадратными пикселами.
 .IPs vidix
-Use svga with VIDIX.
+Указывает использовать svga с VIDIX.
 .RE
 .PD 1
 .
 .TP
 .B "gl\ \ \ \ \ "
-OpenGL video output driver, simple version.
-Video size must be smaller than
-the maximum texture size of your OpenGL implementation.
-Intended to work even with the most basic OpenGL implementations,
-but also makes use of newer extensions, which allow support for more
-colorspaces and direct rendering.
-Please use \-dr if it works with your OpenGL implementation,
-since for higher resolutions this provides a
-.B big
-speedup.
-The code performs very few checks, so if a feature does not work, this
-might be because it is not supported by your card/OpenGL implementation
-even if you do not get any error message.
-Use glxinfo or a similar tool to display the supported OpenGL extensions.
+OpenGL драйвер вывода видео, простая версия.
+Размер видео должен быть меньше максимального размера 
+текстуры в вашей реализации OpenGL.
+Предполагается, что будет работать даже с самыми простыми
+реализациями OpenGL, но также может использовать новые 
+расширения, позволяющие поддерживать большее количество 
+цветовых пространств и прямой рендеринг.
+Пожалуйста, используйте \-dr, если это работает с вашей 
+реализацией OpenGL, поскольку для больших разрешений 
+это 
+.B значительно 
+увеличивает скорость.
+Код выполняет очень малое количество проверок, так что, если что-то не
+работает, это может быть вызвано отсутствием поддержки в вашей
+карте/OpenGL реализации, даже если вы не получаете никаких сообщений об
+ошибках. Используйте glxinfo или аналогичный инструмент, чтобы увидеть
+поддерживаемые расширения OpenGL.
 .PD 0
 .RSs
 .IPs (no)manyfmts
-Enables support for more (RGB and BGR) color formats (default: enabled).
-Needs OpenGL version >= 1.2.
+Включает поддержку большего количества форматов цветов (RGB и BGR) (по-умолчанию: включено).
+Требует OpenGL версии >= 1.2.
 .IPs slice-height=<0\-...>
-Number of lines copied to texture in one piece (default: 4).
-0 for whole image.
+Количество строк, копируемых в текстуру одним целым (по-умолчанию: 4).
+0 для всего изображения.
 .br
-.I NOTE:
-If YUV colorspace is used (see yuv suboption), special rules apply:
+.I ЗАМЕЧАНИЕ:
+Если используется пространство цветов YUV (смотрите подопцию yuv), применяются 
+особые правила:
 .RSss
-If the decoder uses slice rendering (see \-noslices), this setting
-has no effect, the size of the slices as provided by the decoder is used.
+Если декодер использует рендеринг по слоям (смотрите \-noslices), эта опция не 
+имеет эффекта, размеры слоев указываются используемым декодером.
 .br
-If the decoder does not use slice rendering, the default is 16.
+Если декодер не использует рендеринг по слоям, то значением по-умолчанию
+является 16.
 .RE
 .IPs (no)osd
-Enable or disable support for OSD rendering via OpenGL (default: enabled).
-This option is for testing; to disable the OSD use \-osdlevel 0 instead.
+Включает или выключает поддержку рендеринга OSD при помощи OpenGL 
+(по-умолчанию: включено). Эта опция используется для тестирования;
+для отключения OSD используйте вместо нее \-osdlevel 0.
 .IPs (no)scaled-osd
-Changes the way the OSD behaves when the size of the
-window changes (default: disabled).
-When enabled behaves more like the other video output drivers,
-which is better for fixed-size fonts.
-Disabled looks much better with FreeType fonts and uses the
-borders in fullscreen mode.
-Does not work correctly with ass subtitles (see \-ass).
+Изменяет реакцию OSD на изменение размера окна (по-умолчанию: отключено).
+.\" FIXME is translation correct ?
+.\" When enabled behaves more like the other video output drivers,
+.\" which is better for fixed-size fonts.
+.\" Disabled looks much better with FreeType fonts and uses the
+.\" borders in fullscreen mode.
+Когда включено, поведение такое же как и с остальными драйверами вывода
+видео, что лучше для шрифтов фиксированного размера.
+Когда отключено, то выглядит намного лучше со шрифтами TrueType и
+использует границы в полноэкранном режиме.
+С ass субтитрами (смотрите \-ass) работает некорректно.
 .IPs osdcolor=<0xRRGGBB>
-Color for OSD (default: 0xffffff, corresponds to white).
+Цвет для OSD (по-умолчанию: 0xffffff, соответствует белому цвету).
 .IPs (no)aspect
-Enable or disable aspect scaling and pan-and-scan support (default: enabled).
-Disabling might increase speed.
+Включает или выключает масштабирование с сохранением пропорций и поддержку
+pan-and-scan (по-умолчанию: включено).
+Отключение может немного увеличить скорость.
 .IPs rectangle=<0,1,2>
-Select usage of rectangular textures which saves video RAM, but often is
-slower (default: 0).
+Выбирает использование прямоугольныйх текстур, что экономит видеопамять, но
+зачастую работает медленнее (по-умолчанию: 0).
 .RSss
-0: Use power-of-two textures (default).
+0: Указывает использовать текстуры power-of-two (по-умолчанию).
 .br
-1: Use the GL_ARB_texture_rectangle extension.
+1: Указывает использовать расширение GL_ARB_texture_rectangle.
 .br
-2: Use the GL_ARB_texture_non_power_of_two extension.
-In some cases only supported in software and thus very slow.
+2: Указывает использовать расширение GL_ARB_texture_non_power_of_two.
+В некоторых случаях поддерживается только программно и, поэтому, очень медленно.
 .RE
 .IPs (no)glfinish
-Call glFinish() before swapping buffers.
-Slower but in some cases more correct output (default: disabled).
+Вызывает glFinish() перед сменой буферов.
+Медленнее, но в некоторых случаях дает более правильный результат (по-умолчанию: отключено).
 .IPs swapinterval=<n>
-Minimum interval between two buffer swaps, counted in
-displayed frames (default: 1).
-1 is equivalent to enabling VSYNC, 0 to disabling VSYNC.
-Values below 0 will leave it at the system default.
-This limits the framerate to (horizontal refresh rate / n).
-Requires GLX_SGI_swap_control support to work.
-With some (most/all?) implementations this only works in fullscreen mode.
+Минимальный интервал между сменами буферов, посчитанный в отображаемых
+кадрах (по-умолчанию: 1).
+1 эквивалентно включению VSYNC, 0 - отключению VSYNC.
+Значения меньше 0 оставят его равным системному значению по-умолчанию.
+Это ограничивает частоту кадров значением (частота горизонтальной развертки / n).
+Для работы требуется поддержка GLX_SGI_swap_control.
+С некоторыми (многими/всеми?) реализациями работает только в полноэкранном режиме.
 .IPs yuv=<n>
-Select the type of YUV to RGB conversion.
+Указывает тип преобразования YUV в RGB.
 .RSss
-0: Use software conversion (default).
-Compatible with all OpenGL versions.
-Provides brightness, contrast and saturation control.
+0: Используется программное преобразование (по-умолчанию).
+Совместимо со всеми версиями OpenGL.
+Предоставляет возможность управления яркостью, контрастностью и насыщенностью.
 .br
-1: Use register combiners.
-This uses an nVidia-specific extension (GL_NV_register_combiners).
-At least three texture units are needed.
-Provides saturation and hue control.
-This method is fast but inexact.
+.\" FIXME register combiners - блоки объединения регистров
+1: Используются блоки объединения регистров
+Используется nVidia-специфичное расширение (GL_NV_register_combiners).
+Требуются, как минимум, три текстуры.
+Предоставляет возможность управления насыщенностью и цветностью.
+Это быстрый, но не точный метод.
 .br
-2: Use a fragment program.
-Needs the GL_ARB_fragment_program extension and at least three texture units.
-Provides brightness, contrast, saturation and hue control.
+.\" FIXME fragment program - программа фрагментации
+2: Используется программа фрагментации.
+Требуется расширение GL_ARB_fragment_program и, как минимум, три текстуры.
+Предоставляет возможность управления яркостью, контрастностью,
+насыщенностью и цветностью.
 .br
-3: Use a fragment program using the POW instruction.
-Needs the GL_ARB_fragment_program extension and at least three texture units.
-Provides brightness, contrast, saturation, hue and gamma control.
-Gamma can also be set independently for red, green and blue.
-Method 4 is usually faster.
+.\" FIXME fragment program - программа фрагментации
+3: Используется программа фрагментации, используя POW инструкции.
+Требуется расширение GL_ARB_fragment_program и, как минимум, три текстуры.
+Предоставляет возможность управления яркостью, контрастностью,
+насыщенностью, цветностью и гаммой.
+Гамма может быть независимо установлена для красного, зеленого и синего цветов.
+Метод 4, как правило, быстрее.
 .br
-4: Use a fragment program with additional lookup.
-Needs the GL_ARB_fragment_program extension and at least four texture units.
-Provides brightness, contrast, saturation, hue and gamma control.
-Gamma can also be set independently for red, green and blue.
+.\" FIXME fragment program - программа фрагментации
+4: Используется программа фрагментации с дополнительный поиском.
+Требуется расширение GL_ARB_fragment_program и, как минимум, 
+четыре текстуры.
+Предоставляет возможность управления яркостью, контрастностью, насыщенностью, 
+цветностью, и гаммой.
+Гамма может быть независимо установлена для красного, зеленого и синего цветов.
 .br
-5: Use ATI-specific method (for older cards).
-This uses an ATI-specific extension (GL_ATI_fragment_shader - not
-GL_ARB_fragment_shader!).
-At least three texture units are needed.
-Provides saturation and hue control.
-This method is fast but inexact.
+5: Используется ATI-специфичный метод (для старых карт).
+при этом используется ATI-специфичное расширение 
+(GL_ATI_fragment_shader - не GL_ARB_fragment_shader!).
+Необходимы, как минимум, три текстуры.
+Предоставляет возможность управления насыщенностью и цветностью.
+Это быстрый, но не точный метод.
 .br
-6: Use a 3D texture to do conversion via lookup.
-Needs the GL_ARB_fragment_program extension and at least four texture units.
-Extremely slow (software emulation) on some (all?) ATI cards since it uses
-a texture with border pixels.
-Provides brightness, contrast, saturation, hue and gamma control.
-Gamma can also be set independently for red, green and blue.
-Speed depends more on GPU memory bandwidth than other methods.
+6: Используется 3D текстура для преобразования через поиск.
+Требуется расширение GL_ARB_fragment_program и, как минимум, четыре тестуры.
+Ужасно медленный (программная эмуляция) на некоторых (всех?) картах ATI,
+поскольку использует текстуру с пограничными пикселами.
+Предоставляет возможность управления яркостью, контрастностью, насыщенностью, 
+цветностью, и гаммой.
+Гамма может быть независимо установлена для красного, зеленого и синего цветов.
+Скорость зависит от пропускной способности памяти GPU значительно сильнее, чем
+в остальных методах.
 .RE
 .IPs lscale=<n>
-Select the scaling function to use for luminance scaling.
-Only valid for yuv modes 2, 3, 4 and 6.
+Выбирает функцию для масштабирования яркостность составляющей.
+Допустимо только для 2, 3, 4 и 6 режимов yuv.
 .RSss
-0: Use simple linear filtering (default).
+0: Используется простая линейная фильтрация (по-умолчанию).
 .br
-1: Use bicubic filtering (better quality).
-Needs one additional texture unit.
-Older cards will not be able to handle this for chroma at least in fullscreen mode.
+1: Используется бикубическая фильтрация (повышенное качество).
+Требует одну дополнительную текстуру.
+Старые карты не смогут обработать с ее помощью цветовую составляющую, как минимум,
+в полноэкранном режиме.
 .RE
 .IPs cscale=<n>
-Select the scaling function to use for chrominance scaling.
-For details see lscale.
-.IPs customprog=<filename>
-Load a custom fragment program from <filename>.
-See TOOLS/edgedect.fp for an example.
-.IPs customtex=<filename>
-Load a custom "gamma ramp" texture from <filename>.
-This can be used in combination with yuv=4 or with the customprog option.
+Выбирает функцию для масштабирования цветовой составляющей.
+Подробности смотрите в lscale.
+.IPs customprog=<файл>
+.\" FIXME fragment program - программа фрагментации
+Загружает нестандартную программу фрагментации из файла <файл>.
+пример смотрите в TOOLS/edgedect.fp.
+.IPs customtex=<файл>
+Загружает нестандартную "gamma ramp" текстуру из  файла <файл>.
+Может использоваться совместно с yuv=4 или с опцией customprog.
 .IPs (no)customtlin
-If enabled (default) use GL_LINEAR interpolation, otherwise use GL_NEAREST
-for customtex texture.
+Если включено (по-умолчанию), для customtex текстуры используется GL_LINEAR 
+интерполяция, иначе - GL_NEAREST.
 .IPs (no)customtrect
-If enabled, use texture_rectangle for customtex texture.
-Default is disabled.
+Если включено, используется texture_rectangle для customtex текстуры.
+По-умолчанию отключено.
 .REss
 .RE
 .PD 1
 .
 .TP
 .B "gl2\ \ \ \ "
-OpenGL video output driver, second generation.
-Supports OSD and videos larger than the maximum texture size.
+OpenGL драйвер вывода, второе поколение.
+Поддерживает OSD и видео с размером больше допустимого для текстуры.
 .PD 0
 .RSs
 .IPs (no)glfinish
-same as gl (default: enabled)
+То же, что и для gl (по-умолчанию: включено)
 .IPs yuv=<n>
-Select the type of YUV to RGB conversion.
-If set to anything except 0 OSD will be disabled and brightness, contrast and
-gamma setting is only available via the global X server settings.
-Apart from this the values have the same meaning as for \-vo gl.
+Указывает тип преобразования YUV в RGB.
+Если установлено во что-либо, отличное от 0, то OSD выводиться не будет и
+регулировки яркости, контрастности и гаммы будут доступны только через 
+глобальные настройки X сервера.
+В остальном значения те же, что и для \-vo gl.
 .REss
 .
 .TP
 .B "null\ \ \ "
-Produces no video output.
-Useful for benchmarking.
+Вы выводит никакого видео,
+полезен для тестов производительности.
 .
 .TP
 .B "aa\ \ \ \ \ "
-ASCII art video output driver that works on a text console.
-You can get a list and an explanation of available suboptions executing
+Драйвер вывода ASCII art, работающий в текстовой консоли.
+Вы можете получить список и описание доступных подопций запустив 
 .I mplayer \-vo aa:help
 .
 .TP
 .B "caca\ \ \ "
-Color ASCII art video output driver that works on a text console.
+Драйвер вывода видео Color ASCII art, выботающий в текстовой консоли.
 .
 .TP
 .B "bl\ \ \ \ \ "
-Video playback using the Blinkenlights UDP protocol.
-This driver is highly hardware specific.
+Воспроизведение видео с использованием Blinkenlights UDP протокола.
+Драйвер очень сильно аппаратно зависим.
 .PD 0
 .RSs
-.IPs <subdevice>
-Explicitly choose the Blinkenlights subdevice driver to use.
-It is something like arcade:host=localhost:2323 or
+.IPs <подустройство>
+Явно указывает драйвер используемого подустройства Blinkenlights.
+Он выглядит как arcade:host=localhost:2323 или
 hdl:file=name1,file=name2.
-You must specify a subdevice.
+Вы обязательно должны указать подустройство.
 .RE
 .PD 1
 .
 .TP
 .B "ggi\ \ \ \ "
-GGI graphics system video output driver
+Драйвер вывода видео графической системы GGI
 .PD 0
 .RSs
-.IPs <driver>
-Explicitly choose the GGI driver to use.
-Replace any ',' that would appear in the driver string by a '.'.
+.IPs <драйвер>
+Явно указывает используемый GGI драйвер.
+Замените любые ',', которые могут появиться в строке драйвера, на '.'.
 .RE
 .PD 1
 .
 .TP
 .B directfb
-Play video using the DirectFB library.
+Воспроизводит видео, используя библиотеку DirectFB.
 .PD 0
 .RSs
 .IPs (no)input
-Use the DirectFB instead of the MPlayer keyboard code (default: enabled).
+Указывает использовать коды клавиш DirectFB вместо кодов MPlayer (по-умолчанию: включено).
 .IPs buffermode=single|double|triple
-Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficient than double buffering as it does
-not block MPlayer while waiting for the vertical retrace.
-Single buffering should be avoided (default: single).
+Двойная и тройная буферизация дает лучшие результаты, если вы хотите 
+.\" FIXME tearing - мерцание
+избежать мерцания. Тройная буферизация эффективнее двойной, поскольку
+.\" FIXME: vertical retrace
+она не блокирует MPlayer во время ожидания цикла обновления экрана монитора.
+Одиночной буферизации стоит избегать (по-умолчанию: single).
 .IPs fieldparity=top|bottom
-Control the output order for interlaced frames (default: disabled).
-Valid values are top = top fields first, bottom = bottom fields first.
-This option does not have any effect on progressive film material
-like most MPEG movies are.
-You need to enable this option if you have tearing issues or unsmooth
-motions watching interlaced film material.
+Управляет порядком вывода чередующихся полей (по-умолчанию: отключено).
+Допустимые значения: top = верхнее поле первое, bottom = нижнее поле первое.
+Это опция никак не влияет на прогрессивное видео, каковым являются большинство 
+.\" FIXME tearing - мерцание
+MPEG фильмов, потребуется ее установить, если во время просмотра черезстрочного
+материала появляется мерцание или эффект гребенки при движении.
 .IPs layer=N
-Will force layer with ID N for playback (default: -1 - auto).
-.IPs dfbopts=<list>
-Specify a parameter list for DirectFB.
+Форсирует для отображения слой с ID N (по-умолчанию: -1 - авто).
+.IPs dfbopts=<список>
+Указывает список параметров для DirectFB.
 .RE
 .PD 1
 .
 .TP
 .B "dfbmga\ "
-Matrox G400/\:G450/\:G550 specific video output driver that uses the
-DirectFB library to make use of special hardware features.
-Enables CRTC2 (second head), displaying video independently of the first head.
+Драйвер вывода видео для Matrox G400/\:G450/\:G550, использующий 
+библиотеку DirectFB для задействования особых возможностей оборудования.
+Задействует CRTC2 (вторую "голову"), отображая видео независимо от первой "головы".
 .PD 0
 .RSs
 .IPs (no)input
-same as directfb (default: disabled)
+То же, что и для directfb (по-умолчанию: отключено)
 .IPs buffermode=single|double|triple
-same as directfb (default: triple)
+То же, что и для directfb (по-умолчанию: triple)
 .IPs fieldparity=top|bottom
-same as directfb
+То же, что и для directfb
 .IPs (no)bes
-Enable the use of the Matrox BES (backend scaler) (default: disabled).
-Gives very good results concerning speed and output quality as interpolated
-picture processing is done in hardware.
-Works only on the primary head.
+Задействует использование Matrox BES (модуля масштабирования) (по-умолчанию: отключено).
+Дает отличный результат по скорости и качеству изображения, поскольку 
+интерполяция производится аппаратно. Работает только на главной "голове".
 .IPs (no)spic
-Make use of the Matrox sub picture layer to display the OSD (default: enabled).
+.\" FIXME correct translation of sub picture layer
+Задействует использование специального слоя [sub picture layer] для отображения 
+OSD (по-умолчанию: отключено).
 .IPs (no)crtc2
-Turn on TV-out on the second head (default: enabled).
-The output quality is amazing as it is a full interlaced picture
-with proper sync to every odd/\:even field.
+Включает TV-выход на второй "голове" (по-умолчанию: включено).
+Качество вывода удивительное, т.к. это полностью черезстрочное
+изображение с правильной синхронизацией каждого четнымого/\:нечетного поля.
 .IPs tvnorm=pal|ntsc|auto
-Will set the TV norm of the Matrox card without the need
-for modifying /etc/\:directfbrc (default: disabled).
-Valid norms are pal = PAL, ntsc = NTSC.
-Special norm is auto (auto-adjust using PAL/\:NTSC) because it decides
-which norm to use by looking at the framerate of the movie.
+Установит TV стандарт Matrox карты без необходимости 
+изменения /etc/\:directfbrc (по-умолчанию: отключено).
+Допустимые стандарты: pal = PAL, ntsc = NTSC.
+auto - особый стандарт (автоопределение использования PAL/\:NTSC), потому что 
+он определяет используемый стандарт по частоте кадров фильма.
 .RE
 .PD 1
 .
 .TP
-.B mga (Linux only)
-Matrox specific video output driver that makes use of the YUV back
-end scaler on Gxxx cards through a kernel module.
-If you have a Matrox card, this is the fastest option.
+.B mga (только Linux)
+Драйвер вывода видео для Matrox, использующий модуль YUV масштабирования
+на Gxxx картах через драйвер ядра.
+Если у вас карта Matrox, то это самый быстрый вариант.
 .PD 0
 .RSs
-.IPs <device>
-Explicitly choose the Matrox device name to use (default: /dev/\:mga_vid).
+.IPs <устройство>
+Явно указывает имя используемого Matrox устройства (по-цмолчанию: /dev/\:mga_vid).
 .RE
 .PD 1
 .
 .TP
-.B xmga (Linux, X11 only)
-The mga video output driver, running in an X11 window.
+.B xmga (только Linux, X11)
+Драйвер вывода видео mga, работающий в окне X11.
 .PD 0
 .RSs
-.IPs <device>
-Explicitly choose the Matrox device name to use (default: /dev/\:mga_vid).
+.IPs <устройство>
+Явно указывает имя используемого Matrox устройства (по-цмолчанию: /dev/\:mga_vid).
 .RE
 .PD 1
 .
 .TP
 .B "syncfb\ "
-Video output driver for the SyncFB kernel module, which provides
-special hardware features of Matrox Gxxx cards like hardware
-deinterlacing, scaling and synchronizing your video output to
-the vertical retrace of your monitor.
+Драйвер вывода видео для SyncFB модуля ядра, предоставляющего
+особые возможности Matrox Gxxx Карт, такие как аппаратные деинтерлейс,
+масштабирование и синхронизация видео с частотой вертикальной развертки 
+вашего монитора.
 .
 .TP
-.B 3dfx (Linux only)
-3dfx specific video output driver.
-This driver directly uses the 3dfx hardware on top of X11.
-Only 16 bpp are supported.
-FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
+.B 3dfx (только Linux)
+Драйвер вывода для 3dfx.
+Этот драйвер работает напрямую c 3dfx оборудованием поверх X11.
+Поддерживается только 16 bpp.
+FIXME: Правильно ли указаны отличия 3dfx, tdfxfb и tdfx_vid?
 .
 .TP
 .B tdfxfb (Linux only)
-This driver employs the tdfx framebuffer driver to play movies with
-YUV acceleration on 3dfx cards.
-FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
+Этот драйвер работает с tdfx драйвером фреймбуфера для воспроизведения
+фильмов с YUV ускорением на 3dfx картах.
+FIXME: Правильно ли указаны отличия 3dfx, tdfxfb и tdfx_vid?
 .PD 0
 .RSs
-.IPs <device>
-Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
+.IPs <устройство>
+Явно указывает используемое fbdev устройство (по-умолчанию: /dev/\:fb0).
 .RE
 .PD 1
 .
 .TP
-.B tdfx_vid (Linux only)
-3dfx specific video output driver.
-This driver directly uses the tdfx_vid kernel module.
-FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
+.B tdfx_vid (только Linux)
+Драйвер вывода видео для 3dfx.
+Этот драйвер напрямую использует драйвер ядра tdfx_vid.
+FIXME: Правильно ли указаны отличия 3dfx, tdfxfb и tdfx_vid?
 .PD 0
 .RSs
 .IPs <device>
-Explicitly choose the device name to use (default: /dev/\:tdfx_vid).
+Явно указывает имя используемого устройства (по-умолчанию: /dev/\:tdfx_vid).
 .RE
 .PD 1
 .
 .TP
-.B dxr2 (also see \-dxr2) (DXR2 only)
-Creative DXR2 specific video output driver.
+.B dxr2 (смотрите также \-dxr2) (только DXR2)
+Драйвер вывода видео Creative DXR2.
 .PD 0
 .RSs
 .IPs <vo_driver>
-Output video subdriver to use as overlay (x11, xv).
+Поддрайвер вывода видео, для использования в качестве оверлея (x11, xv).
 .RE
 .PD 1
 .
 .TP
-.B dxr3 (DXR3 only)
-Sigma Designs em8300 MPEG decoder chip (Creative DXR3, Sigma Designs
-Hollywood Plus) specific video output driver.
-Also see the lavc video filter.
+.B dxr3 (только DXR3)
+Драйвер выода видео чипов MPEG декодирования 
+Sigma Designs em8300 (Creative DXR3, Sigma Designs
+Hollywood Plus).
+Смотрите также видео фильтр lavc.
 .PD 0
 .RSs
 .IPs overlay
-Activates the overlay instead of TVOut.
+Активирует оверлей вместо TV вывода.
 .IPs prebuf
-Turns on prebuffering.
+Включает пребуферинг.
 .IPs "sync\ "
-Will turn on the new sync-engine.
-.IPs norm=<norm>
-Specifies the TV norm.
+Задействует новую систему синхронизации.
+.IPs norm=<стандарт>
+Указывает TV стандарт.
 .RSss
-0: Does not change current norm (default).
+0: Не изменяет текущий стандарт (по-умолчанию).
 .br
-1: Auto-adjust using PAL/\:NTSC.
+1: Автоопределение использования PAL/\:NTSC.
 .br
-2: Auto-adjust using PAL/\:PAL-60.
+2: Автоопределение использования PAL/\:PAL-60.
 .br
 3: PAL
 .br
@@ -3561,116 +3600,117 @@ Specifies the TV norm.
 5: NTSC
 .REss
 .IPs <0\-3>
-Specifies the device number to use if you have more than one em8300 card.
+Указывает номер используемого устройства, если у вас установлено более одной
+em8300 карты.
 .RE
 .PD 1
 .
 .TP
-.B ivtv (IVTV only)
-Conexant CX23415 (iCompression iTVC15) or Conexant CX23416 (iCompression
-iTVC16) MPEG decoder chip (Hauppauge WinTV PVR-150/250/350/500)
-specific video output driver for TV-Out.
-Also see the lavc video filter.
+.B ivtv (только IVTV)
+Драйвер вывода через TV-Выход карт MPEG декодирования, основанных на для чипах 
+Conexant CX23415 (iCompression iTVC15) или Conexant CX23416 (iCompression
+iTVC16),  (Hauppauge WinTV PVR-150/250/350/500).
+Смотрите также видео фильтр lavc.
 .PD 0
 .RSs
 .IPs device
-Explicitly choose the MPEG decoder device name to use (default: /dev/video16).
+Явно указывает имя устройства используемого MPEG декодера (по-умолчанию: /dev/video16).
 .IPs output
-Explicitly choose the TV-Out output to be used for the video signal.
+Увно указывает используемый для видеосигнала TV-Выход.
 .RE
 .PD 1
 .
 .TP
-.B mpegpes (DVB only)
-Video output driver for DVB cards that writes the output to an MPEG-PES file
-if no DVB card is installed.
+.B mpegpes (только DVB)
+Драйвер вывода видео DVB карт, записывающий вывод в MPEG-PES файл, если
+нет установленных DVB карт.
 .PD 0
 .RSs
 .IPs card=<1\-4>
-Specifies the device number to use if you have more than one DVB output card
-(V3 API only, such as 1.x.y series drivers).
-.IPs <filename>
-output filename (default: ./grab.mpg)
+Указывает номер используемого устройства, если у вас более одной карты
+(поддерживается только V3 API, такое как в драйверах 1.x.y серии).
+.IPs <файл>
+Файл для вывода (по-умолчанию: ./grab.mpg)
 .RE
 .PD 1
 .
 .TP
-.B zr (also see \-zr* and \-zrhelp)
-Video output driver for a number of MJPEG capture/\:playback cards.
+.B zr (смотрите также \-zr* и \-zrhelp)
+Драйвер вывода видео для некоторых MJPEG карт завата/\:воспроизведения.
 .
 .TP
-.B zr2 (also see the zrmjpeg video filter)
-Video output driver for a number of MJPEG capture/\:playback cards,
-second generation.
+.B zr2 (смотрите также видео фильтр zrmjpeg)
+Драйвер вывода видео для некоторых MJPEG карт завата/\:воспроизведения,
+второе поколение.
 .PD 0
 .RSs
-.IPs dev=<device>
-Specifies the video device to use.
+.IPs dev=<устройство>
+Указывает используемое устройство.
 .IPs norm=<PAL|NTSC|SECAM|auto>
-Specifies the video norm to use (default: auto).
+Указывает используемый видео стандарт (по-умолчанию: авто).
 .IPs (no)prebuf
-(De)Activate prebuffering, not yet supported.
+(Де)Активирует пребуферинг, пока не поддерживается.
 .RE
 .PD 1
 .
 .TP
 .B "md5sum\ "
-Calculate MD5 sums of each frame and write them to a file.
-Supports RGB24 and YV12 colorspaces.
-Useful for debugging.
+Рассчитывает MD5 сумму каждого кадра и записывает ее в файл.
+Поддерживаются цветовые пространства RGB24 и YV12.
+Полезно для отладки.
 .PD 0
 .RSs
-.IPs outfile=<value>
-Specify the output filename (default: ./md5sums).
+.IPs outfile=<значение>
+Указывает имя файла для вывода (по-умолчанию: ./md5sums).
 .RE
 .PD 1
 .
 .TP
 .B yuv4mpeg
-Transforms the video stream into a sequence of uncompressed YUV 4:2:0
-images and stores it in a file (default: ./stream.yuv).
-The format is the same as the one employed by mjpegtools, so this is
-useful if you want to process the video with the mjpegtools suite.
-It supports the YV12, RGB (24 bpp) and BGR (24 bpp) format.
-You can combine it with the \-fixed-vo option to concatenate files
-with the same dimensions and fps value.
+Преобразует видео поток в последовательность несжатых YUV 4:2:0
+изображений и сохраняет ее в файл (по-умолчанию: ./stream.yuv).
+Формат такой же, как и в mjpegtools, так что это полезно для
+обработки видео комплектом mjpegtools.
+Поддерживаются YV12, RGB (24 bpp) и BGR (24 bpp) форматы.
+Вы можете указывать ее совместно с опцией \-fixed-vo для
+объединения файлов с одинаковыми разрешениями и частотой кадров.
 .PD 0
 .RSs
 .IPs interlaced
-Write the output as interlaced frames, top field first.
+Зыписывает кадры в файл как черезстрочные с первым верхним полем.
 .IPs interlaced_bf
-Write the output as interlaced frames, bottom field first.
-.IPs file=<filename>
-Write the output to <filename> instead of the default stream.yuv.
+Зыписывает кадры в файл как черезстрочные с первым нижним полем.
+.IPs file=<файл>
+Записывает вывод в <файл> вместо стандартного stream.yuv.
 .REss
 .PD 1
 .RS
 .sp 1
-.I NOTE:
-If you do not specify any option the output is progressive
-(i.e.\& not interlaced).
+.I ЗАМЕЧАНИЕ:
+Если вы не указываете никаких опций, то вывод будет прогрессивным
+(т.е. нечерезстрочным).
 .RE
 .
 .TP
 .B "gif89a\ "
-Output each frame into a single animated GIF file in the current directory.
-It supports only RGB format with 24 bpp and the output is converted to 256
-colors.
+Выводит кадры в один анимированный GIF в текущем каталоге.
+Поддерживается только формат RGB с глубиной цвета  24 бит, результат также
+будет преобразован в 256 цветный.
 .PD 0
 .RSs
 .IPs <fps>
-Float value to specify framerate (default: 5.0).
-.IPs <filename>
-Specify the output filename (default: ./out.gif).
+Вещественное число, указывающее частоту кадров (по-умолчанию: 5.0).
+.IPs <файл>
+Указывает имя файла для вывода (по-умолчанию: ./out.gif).
 .REss
 .PD 1
 .RS
 .sp 1
-.I NOTE:
-You must specify the framerate before the filename or the framerate will
-be part of the filename.
+.I ЗАМЕЧАНИЕ:
+Вы должны указать частоту кадров до имени, иначе это значение будет
+частью имени файла.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .PD 0
 .RSs
@@ -3680,85 +3720,86 @@ mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
 .
 .TP
 .B "jpeg\ \ \ "
-Output each frame into a JPEG file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
+Выводит каждый кадр в JPEG файл в текущем каталоге.
+В качестве имени файла выступает номер кадра с лидирующими нулями.
 .PD 0
 .RSs
 .IPs [no]progressive
-Specify standard or progressive JPEG (default: noprogressive).
+Указывает создавать обычный или прогрессивный JPEG (по-умолчанию: обычный).
 .IPs [no]baseline
-Specify use of baseline or not (default: baseline).
+Указывает использовать базовую линию [baseline] или нет (по-умолчанию: использовать).
 .IPs optimize=<0\-100>
-optimization factor (default: 100)
+Степень оптимизации (по-умолчанию: 100)
 .IPs smooth=<0\-100>
-smooth factor (default: 0)
+Степень размытия (по-умолчанию: 0)
 .IPs quality=<0\-100>
-quality factor (default: 75)
-.IPs outdir=<dirname>
-Specify the directory to save the JPEG files to (default: ./).
-.IPs subdirs=<prefix>
-Create numbered subdirectories with the specified prefix to
-save the files in instead of the current directory.
+Уровень качества (default: 75)
+.IPs outdir=<каталог>
+Указывает каталог для вывода JPEG файлов (по-умолчанию: ./).
+.IPs subdirs=<префикс>
+Вместо использования текущего каталога создает нумерованные подкаталоги 
+с указанным префиксом для сохранения файлов.
 .IPs maxfiles=<value> (subdirs only)
-Maximum number of files to be saved per subdirectory.
-Must be equal to or larger than 1 (default: 1000).
+Максимальное количество файлов, сохраняемых в подкаталоге.
+Должно быть больше или равно 1 (по-умолчанию: 1000).
 .RE
 .PD 1
 .
 .TP
 .B "pnm\ \ \ \ "
-Output each frame into a PNM file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
-It supports PPM, PGM and PGMYUV files in both raw and ASCII mode.
-Also see pnm(5), ppm(5) and pgm(5).
+Выводит каждый кадр в PNM файл в текущем каталоге.
+В качестве имени файла выступает номер кадра с лидирующими нулями.
+Поддерживаются файлы PPM, PGM и PGMYUV, как в raw, так и в ASCII режиме.
+Смотрите также pnm(5), ppm(5) и pgm(5).
 .PD 0
 .RSs
 .IPs "ppm\ \ "
-Write PPM files (default).
+Записывает PPM файлы (по-умолчанию).
 .IPs "pgm\ \ "
-Write PGM files.
+Записывает PGM файлы.
 .IPs pgmyuv
-Write PGMYUV files.
-PGMYUV is like PGM, but it also contains the U and V plane, appended at the
-bottom of the picture.
+Выводит PGMYUV файлы.
+PGMYUV похож на PGM, но дополнительно содержит U и V компоненты, 
+присоединенные к нижней части картинки.
+.
 .IPs "raw\ \ "
-Write PNM files in raw mode (default).
+Записывает PNM файлы в raw режиме (по-умолчанию).
 .IPs ascii
-Write PNM files in ASCII mode.
-.IPs outdir=<dirname>
-Specify the directory to save the PNM files to (default: ./).
-.IPs subdirs=<prefix>
-Create numbered subdirectories with the specified prefix to
-save the files in instead of the current directory.
-.IPs maxfiles=<value> (subdirs only)
-Maximum number of files to be saved per subdirectory.
-Must be equal to or larger than 1 (default: 1000).
+Записывает PNM файлы в ASCII режиме.
+.IPs outdir=<каталог>
+Указывает каталог для сохранения PNM файлов (по-умолчанию: ./).
+.IPs subdirs=<префикс>
+Вместо использования текущего каталога создает нумерованные подкаталоги 
+с указанным префиксом для сохранения файлов.
+.IPs maxfiles=<число> (только subdirs)
+Максимальное количество файлов, сохраняемых в подкаталоге.
+Должно быть больше или равно 1 (по-умолчанию: 1000).
 .RE
 .PD 1
 .
 .TP
 .B "png\ \ \ \ "
-Output each frame into a PNG file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
-24bpp RGB and BGR formats are supported.
+Выводит каждый кадр в PNG файл в текущем каталоге.
+Название файла формируется из номера кадра, дополненного слева нолями.
+Поддерживаются 24bpp RGB и BGR форматы.
 .PD 0
 .RSs
 .IPs z=<0-9>
-Specifies the compression level.
-0 is no compression, 9 is maximum compression.
+Указываеть степень сжатия.
+0 - без сжатия, 9 - максимальное сжатие.
 .RE
 .PD 1
 .
 .TP
 .B "tga\ \ \ \ "
-Output each frame into a Targa file in the current directory.
-Each file takes the frame number padded with leading zeros as name.
-The purpose of this video output driver is to have a simple lossless
-image writer to use without any external library.
-It supports the BGR[A] color format, with 15, 24 and 32 bpp.
-You can force a particular format with the format video filter.
+Выводит каждый кадр в файл Targa в текущем каталоге.
+В качестве имени файла выступает номер кадра с лидирующими нулями.
+Назначение этого драйвера  - сохранить кадры без потери качества, 
+не используя сторонних библиотек. 
+Он поддерживает BGR[A] формат с глубиной цвета 15, 24 или 32.
+Вы можете выбрать специфичный формат с помощью видео фильтра format.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .PD 0
 .RSs
