@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r20412 -->
+<!-- in sync with r20834 -->
 
 <chapter id="install">
   <title>Installation</title>
@@ -494,11 +494,6 @@ make install</screen>
       installiert sein. Du kannst die GUI durch Angabe von <option>--enable-gui</option>
       während <filename>./configure</filename> aktivieren. Dann musst du, um den
       GUI-Modus zu aktivieren, die Binärdatei <command>gmplayer</command> starten.
-    </para>
-
-    <para>
-      Aus technischen Gründen kannst du die Option <option>-gui</option> nicht auf
-      der Kommandozeile verwenden.
     </para>
 
     <para>
