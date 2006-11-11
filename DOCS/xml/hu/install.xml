@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r20834 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -388,11 +388,6 @@ A skinek sPNG formátumúak, így telepített GTK, <systemitem class="library">l
 A <filename>./configure</filename>-nak az <option>--enable-gui</option> kapcsoló
 megadásával írhatod elő, hogy GUI-t is készítsen. Ezután ha a GUI-s változatot
 akarod futtatni, akkor a <command>gmplayer</command> binárist kell elindítanod.
-</para>
-
-<para>
-Jelenleg a <option>-gui</option> opció technikai okokból nem használható a
-parancssorban.
 </para>
 
 <para>

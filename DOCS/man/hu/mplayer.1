@@ -1,4 +1,4 @@
-.\" Synced with r20690
+.\" Synced with r20774
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -1611,6 +1611,7 @@ Ezek az opciók a rádió adás rögzítõ modul különbözõ paramétereit állítják be.
 MPlayerrel történõ rádióhallgatáshoz használd a 'radio://<frekvencia>'
 (ha a channels opció nincs megadva) vagy a 'radio://<csatorna_szám>'
 (ha a channels meg vannak adva) formát film URL-ként.
+Az engedélyezett frekvencia tartományt az MPlayer '\-v' kapcsolója írja ki.
 A rögzítõ alrendszer elindításához használd
 a 'radio://<frekvencia vagy csatorna>/capture' formát.
 Ha a capture kulcsszó nincs megadva, csak a line-in kábelen keresztül
@@ -5502,7 +5503,6 @@ Egy vörös, zöld és kék csíkot kell látnod fentrõl lefelé.
 .TP
 .B lavc[=minõség:fps]
 Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/\:IVTV-hez.
-Gyorsabb és jobb minõséget ad, mint a \-vf fame.
 .RSs
 .IPs <minõség>
 .RSss
@@ -5514,10 +5514,6 @@ Gyorsabb és jobb minõséget ad, mint a \-vf fame.
 kimeneti fps kényszerítése (lebegõpontos érték) (alapértelmezett: 0, automatikus
 detektálás a magasság alapján)
 .RE
-.
-.TP
-.B "fame\ \ \ "
-Gyors szoftveres YV12-MPEG-1 konverzió libfame-mel DVB/\:DXR3/\:IVTV-hez.
 .
 .TP
 .B dvbscale[=arány]
@@ -7146,13 +7142,35 @@ az msmpeg4 nem javítható, mivel az nem támogatja ezt.)
 .
 .TP
 .B lmin=<0.01\-255.0>
-Minimális Lagrange szorzó a ratecontrol-hoz, valószínûleg azt szeretnéd,
-hogy egyenlõ vagy alacsonyabb legyen, mint a vqmin (alapértelmezett: 2.0).
+Minimális keret szintû Lagrange szorzó a ratecontrol-hoz. (alapértelmezett: 2.0).
+A Lavc nagyon ritkán fog a lmin értékénél kisebb kvantálót használni.
+A lmin értékét csökkentve a a lavc nagyobb valószínûséggel fog alacsony
+kvantálót választani néhány kockához, de a vqmin értékénél nem kisebbet.
+Ugyan így, a lmin növelésének hatására a lavc kisebb valószínûséggel
+választ alacsony kvantálót, akkor is, ha a vqmin engedné ezt.
+Ajánlott a lmin értékét nagyjából a vqmin-nel azonos értékre
+beállítani.
+Ha adaptív kvantálást használsz, a lmin/lmax módosításának kisebb
+lesz a hatása; lásd mblmin/mblmax.
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
 maximális Lagrange szorzó a ratecontrol-hoz (alapértelmezett: 31.0)
+.RE
+.
+.TP
+.B mblmin=<0.01\-255.0>
+Minimális makroblokk-szintû Lagrange szorzó a ratecontrol-hoz
+(alapértelmezett: 2.0).
+Ez a paraméter az adaptív kvantálási opciókat érinti, mint pl. a
+qprd, lumi_mask, stb..
+.RE
+.
+.TP
+.B mblmax=<0.01\-255.0>
+Maximális makroblokk-szintû Lagrange szorzó a ratecontrol-hoz
+(alapértelmezett: 31.0).
 .RE
 .
 .TP

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20682 -->
+<!-- synced with r20705 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -91,15 +91,16 @@ támogat is a <application>MEncoder</application>.
 </para>
 
 <para>
-Az összes támogatott codec listájáért látogasd meg az FFmpeg weboldalát.
-Támogatott <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">videó</ulink>
-és <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audió</ulink> codec-ek.
+Az összes támogatott
+<ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">videó</ulink>
+és <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audió</ulink>
+codec-ek listájáért látogasd meg az FFmpeg weboldalát.
 </para>
 
 <para>
 Az <application>MPlayer</application> tartalmazza a
 <systemitem class="library">libavcodec</systemitem>-et.
-Csak futtasd a <filename>configure</filename>-t és fordíts.
+Csak futtasd a <filename>./configure</filename>-t és fordíts.
 </para>
 
 </sect2>
@@ -178,14 +179,13 @@ mivel jobb a sebessége.
 
 
 <sect2 id="codec-x264">
-<title>x264</title>
+<title><systemitem class="library">x264</systemitem></title>
 
 <sect3 id="codec-x264-whatis">
-<title>Mi az az x264?</title>
+<title>Mi az az <systemitem class="library">x264</systemitem>?</title>
 <para>
   Az <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
-  egy függvénykönyvtár
-  a H.264 videó folyamok létrehozásához.
+  egy függvénykönyvtár a H.264 videó folyamok létrehozásához.
   Még nincs kész 100%-ig, de valamilyen szinten már támogatja a
   H.264 legtöbb minőségjavító tulajdonságát.
   Van számos fejlett tulajdonság a H.264 specifikációjában, aminek
@@ -284,9 +284,7 @@ mivel jobb a sebessége.
 <para>
   Ha van feltelepítve subversion kliensed, a legújabb x264
   forrást letöltheted ezzel a paranccsal:
-  <screen>
-    svn co svn://svn.videolan.org/x264/trunk x264<!--
-  --></screen>
+  <screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
   Az <application>MPlayer</application> forrás mindig frissül, ha
   egy <systemitem class="library">x264</systemitem> API változás
   jelenik meg, így javasolt az <application>MPlayer</application>
@@ -300,9 +298,7 @@ mivel jobb a sebessége.
 <para>
   Az <systemitem class="library">x264</systemitem> a szabványos módon
   fordítható le és telepíthető:
-  <screen>
-    ./configure &amp;&amp; make &amp;&amp; sudo make install<!--
-  --></screen>
+  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
   Ez telepíti a libx264.a-t a /usr/local/lib könyvtárba és az x264.h-t
   beleteszi a /usr/local/include-ba.
 
@@ -312,8 +308,8 @@ mivel jobb a sebessége.
   <systemitem class="library">x264</systemitem> támogatással már egyszerű.
   csak futtasd a szabványos parancsokat:
   <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-  A configure script automatikusan detektálja, hogy elget teszel az
-  <systemitem class="library">x264</systemitem> követelményeinek.
+  A <filename>./configure</filename> script automatikusan detektálja, hogy
+  eleget teszel az <systemitem class="library">x264</systemitem> követelményeinek.
 </para>
 </sect3>
 </sect2>
@@ -425,20 +421,21 @@ valamint DXR3/Hollywood+ MPEG dekódoló kártyákon.
 
 
 <sect2 id="libmad">
-<title>libmad támogatás</title>
+<title><systemitem class="library">libmad</systemitem> támogatás</title>
 
 <para>
-A <ulink url="http://www.underbit.com/products/mad/">libmad</ulink> egy többplatformos,
-csak egész (belső 24bit-es PCM) alapú MPEG audió dekódoló függvénykönyvtár.
-Nem kezeli jól a sérült fájlokat, és néha problémái vannak a kereséssel, de
-jobb a teljesítménye FPU nélküli rendszereken 
+A <ulink url="http://www.underbit.com/products/mad/"><systemitem class="library">libmad</systemitem></ulink>
+egy többplatformos, csak egész (belső 24bit-es PCM) alapú MPEG audió dekódoló
+függvénykönyvtár. Nem kezeli jól a sérült fájlokat, és néha problémái vannak
+a kereséssel, de jobb a teljesítménye FPU nélküli rendszereken 
 (mint pl. az <link linkend="arm">ARM</link>), mint az mp3lib-é.
 </para>
 
 <para>
-Ha van megfelelő libmad telepítve, a <filename>configure</filename>
-automatikusan észleli és beépíti a támogatást az MPEG audió
-<systemitem class="library">libmad</systemitem>-on keresztüli dekódolásához.
+Ha van megfelelő <systemitem class="library">libmad</systemitem> telepítve,
+a <filename>./configure</filename> automatikusan észleli és beépíti a támogatást
+az MPEG audió <systemitem class="library">libmad</systemitem>-on keresztüli
+dekódolásához.
 </para>
 </sect2>
 
@@ -446,7 +443,7 @@ automatikusan észleli és beépíti a támogatást az MPEG audió
 <title>Hardveres MPEG audió codec</title>
 
 <para>
-Ez a codec (a -ac hwmpa kapcsolóval választhatod ki) az MPEG audió csomagokat
+Ez a codec (a <option>-ac hwmpa</option> kapcsolóval választhatod ki) az MPEG audió csomagokat
 átadja a hardveres dekódolóknak, mint amilyenek például a jól felszerelt DVB
 kártyákon és DXR2 adaptereken vannak.
 Ne használd másik audió kimeneti eszközzel együtt (mint az OSS vagy ALSA),
@@ -469,7 +466,7 @@ nem szükséges külön beszerezni.
 Ha gcc 3.2-t használsz, ami nem tudja lefordítani a belső FAAD forrásunkat vagy valami
 más okból a külső függvénykönyvtárat szeretnéd használni, töltsd le a
 <ulink url="http://www.audiocoding.com/modules/mydownloads/">letöltési oldalról</ulink>
-és add meg a <option>--enable-faad-external</option> kapcsolót a <filename>configure</filename>-nak.
+és add meg a <option>--enable-faad-external</option> kapcsolót a <filename>./configure</filename>-nak.
 Nem kell a teljes faad2 az AAC fájlok dekódolásához, a libfaad elég. Így készítsd el:
 <screen>
 cd faad2/
@@ -533,9 +530,6 @@ A VFW (Video for Windows) egy régi Videó API Windowshoz. A codecjei
 voltak. Ha az <application>MPlayer</application>nek nem sikerül lejátszani az AVI
 fájlodat egy ilyesmi üzenettel:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
-</para>
-
-<para>
 Ez azt jelenti, hogy az AVI fájlod egy olyan codec-kel lett elkódolva, aminek
 HFYU a fourcc-je (HFYU = HuffYUV codec, DIV3 = DivX Low Motion, stb.). Most, hogy
 már tudod ezt, meg kell keresned, melyik DLL-t tölti be a Windows ennek a fájlnak
@@ -555,7 +549,7 @@ Ez az MP3 codec. Most már minden szükséges információval rendelkezel
 (fourcc, codec fájl, példa AVI), küldd be a codec támogatási kérésedet egy
 levélben és töltsd fel ezket a fájlokat az FTP-re:
 <systemitem role="url">
-ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecneve]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</replaceable>/
 </systemitem>
 </para>
 
@@ -667,7 +661,7 @@ Most, hogy már megvan minden szükséges információ (fourcc, GUID, codec fáj
 példa AVI), küldd el a codec támogatási kérelmedet levélben és töltsd fel a fájlokat
 az FTP-re:
 <systemitem
-role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecneve]/
+role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</replaceable>/
 </systemitem>
 </para>
 

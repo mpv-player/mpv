@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20572 -->
+<!-- synced with r20739 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -2010,16 +2010,13 @@ Ez nem működik digitális audió kimenettel (<option>-ac hwac3</option>).
 </varlistentry>
 
 <varlistentry>
-<term><option>-vf lavc/fame</option></term>
+<term><option>-vf lavc</option></term>
 <listitem><para>
 Nem-MPEG tartalom em8300-on történő nézéséhez (pl. MPEG-4 (DivX) vagy RealVideo)
 meg kell adnod egy MPEG-1 videó szűrőt, mint pl. a
-<systemitem class="library">libavcodec</systemitem> (lavc) vagy a
-<systemitem class="library">libfame</systemitem> (fame). Jelenleg
-a lavc gyorsabb is és jobb képminőséget is ad, javaslom, hogy ezt
-használd, hacsak nincs problémád vele. Lásd a man oldalt a további
-infókért a <option>-vf lavc/fame</option> kapcsolóról.
-A lavc használata nagyon javasolt. Jelenleg nem lehet az em8300 fps értékét
+<systemitem class="library">libavcodec</systemitem> (lavc).
+Lásd a man oldalt a további infókért a <option>-vf lavc</option> kapcsolóról.
+Jelenleg nem lehet az em8300 fps értékét
 módosítani, ami azt jelenti, hogy fixen 30000/1001 fps. Emiatt javasolt a
 <option>-vf lavc=<replaceable>minőség</replaceable>:25</option> kapcsoló
 használata, különösen ha előbufferelést használsz. Hogy miért 25 és nem
