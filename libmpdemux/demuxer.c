@@ -1110,6 +1110,8 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
             ds_free_packs(demuxer->sub);
 
         ris = stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
+        if(ris != STREAM_UNSUPORTED)
+            demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
         if(sh_video) {
             ds_fill_buffer(demuxer->video);
             resync_video_stream(sh_video);
