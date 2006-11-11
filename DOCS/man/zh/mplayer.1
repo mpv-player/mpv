@@ -1,4 +1,4 @@
-.\" Partial sync with en/mplayer.1 r20739
+.\" Partial sync with en/mplayer.1 r20774
 .\" Encoding: utf-8
 .\" Only 3 sections unfinished (i.e. "AUDIO/VEDIO FILTERS" and "GENERAL ENCODING..."),
 .\"   also see line 4070.
@@ -260,7 +260,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .IPs "y 和 g"
 在字幕列表中步进/步退。
 .IPs "F\ \ \ \ "
-切换显示"锁定的字幕"。
+切换显示 "锁定的字幕"。
 .IPs "a\ \ \ \ "
 切换对齐字幕: 上 / 中 / 下。
 .IPs "x 和 z"
@@ -442,7 +442,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .\" --------------------------------------------------------------------------
 .
 .SH "USAGE (用法)"
-每个 'flag' 选项有个相反的 'noflag' 选项对应, 例如\& 选项\-fs 反的是 \-nofs。
+每个 "flag" 选项有个相反的 "noflag" 选项对应, 如: 选项 \-fs 相反的是 \-nofs。
 .PP
 如果某选项标为: (仅用于 XXX), 就仅适用于与选项 XXX 联合使用或者已编译进 XXX。
 .PP
@@ -469,21 +469,21 @@ mplayer \-ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .
 .SH "CONFIGURATION FILES (配置文件)"
 你可以把所有选项放在配置文件中, 每次 MPlayer/MEncoder 运行时都会读取它们。
-系统范围的配置文件 'mplayer.conf' 位于你的配置目录
-(例如\& /etc/\:mplayer 或者 /usr/\:local/\:etc/\:mplayer)中, 
-用户指定的配置文件是 '~/\:.mplayer/\:config'。
-MEncoder 的配置文件是 'mencoder.conf' 位于你的配置目录
-(例如\& /etc/\:mplayer 或者 /usr/\:local/\:etc/\:mplayer)中, 
-用户指定的配置文件是 '~/\:.mplayer/\:mencoder.conf'。
+系统范围的配置文件 "mplayer.conf" 位于你的配置目录
+(例如: /etc/\:mplayer 或者 /usr/\:local/\:etc/\:mplayer)中, 
+用户指定的配置文件是 "~/\:.mplayer/\:config"。
+MEncoder 的配置文件是 "mencoder.conf" 位于你的配置目录
+(例如: /etc/\:mplayer 或者 /usr/\:local/\:etc/\:mplayer)中, 
+用户指定的配置文件是 "~/\:.mplayer/\:mencoder.conf"。
 用户指定的选项优先于系统范围的选项, 而命令行选项优先于以上两者。
-配置文件的语法是 'option=<值>', 任何 '#' 后面的都认为是注释。
-启用没有参数值的选项可以把参数设为 'yes' 或者 '1' 或者 'true', 
-而如果要停用就把它们设置为 'no' 或者'0' 或者 'false'。
+配置文件的语法是 "option=<值>", 任何 "#" 后面的都认为是注释。
+启用没有参数值的选项可以把参数设为 "yes" 或者 "1" 或者 "true", 
+而如果要停用就把它们设置为 "no" 或者 "0" 或者 "false"。
 甚至子选项也可以如此设定选项。
 .PP
 你也可以为特定文件写配置文件。
-如果你希望一个特定文件 'movie.avi' 有个配置文件, 就新建文件, 
-名为 'movie.avi.conf', 写上该特定文件的选项并放在目录 ~/.mplayer/ 下。
+如果你希望一个特定文件 "movie.avi" 有个配置文件, 就新建文件, 
+名为 "movie.avi.conf", 写上该特定文件的选项并放在目录 ~/.mplayer/ 下。
 你也可以把配置文件放在与播放该特定文件时该特定文件相同的目录之下, 
 只要你(要么在命令行或者在全局配置文件中)给定 \-use-filedir-conf 选项。
 .PP
@@ -532,11 +532,11 @@ spuaa=20
 .
 .SH "PROFILES (配置轮廓)"
 为了方便操作不同的配置文件, 可以在配置文件中定义配置轮廓。
-配置轮廓以放在方括号中的名称开始, 如\& '[my-profile]'。
+配置轮廓以放在方括号中的名称开始, 如: "[my-profile]"。
 所有跟随的选项成为配置轮廓的一部分。
 描述(通过 \-profile help 显示)定义于 profile-desc 选项。
 要结束该配置轮廓, 使用别的名称开始即可
-或使用配置轮廓名称 'default' 继续正常的选项。
+或使用配置轮廓名称 "default" 继续正常的选项。
 .fi
 .PP
 .I "MENCODER 配置轮廓示例:"
@@ -576,7 +576,7 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .B \-msgcharset <字符集>
 转换控制台消息为指定的字符集(默认是自动侦测: autodetect)。
 文字的字符集编码用选项 \-\-charset 指定配置。
-设置为 "noconv" 以停用转换 (为了如\& iconv 问题)。
+设置为 "noconv" 以停用转换 (为了如: iconv 问题)。
 .br
 .I 注意:
 选项在命令行解析完成后生效。
@@ -585,8 +585,8 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .TP
 .B \-msglevel <all=<级别>:<模块>=<级别>:...>
 直接对各个模块控制冗赘度。
-此 'all' 模块改变所有模块(虽然没有在命令行中显式指定)的冗赘级别。
-查看所有模块的列表请参见于 '\-msglevel help'。
+此 "all" 模块改变所有模块(虽然没有在命令行中显式指定)的冗赘级别。
+查看所有模块的列表请参见于 "\-msglevel help"。
 .br
 .I 注意:
 消息是在命令行解析之前打印的, 仅受到能应用于所有模块的
@@ -723,7 +723,7 @@ xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 .TP
 .B \-edlout <文件名>
 新建文件并写入 EDL(编辑决定列表) 记录。
-回放时, 用户击 'i' 键标记跳过块的开始结束处。
+回放时, 用户击 "i" 键标记跳过块的开始结束处。
 这提供了用户一个以后能精调 EDL (记录)项的开始点。
 详情请参见 http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:edl.html。
 .
@@ -800,7 +800,7 @@ wrapper(封套) 脚本 TOOLS/\:midentify 能抑制 MPlayer 的其它输出
 .br
 .I 注意:
 当给定文件是 FIFO 时 MPlayer 打开两个端头, 这样你就可以做
-几次 'echo "seek 10" > mp_pipe' 而管道仍保持有效。
+几次 ‘echo "seek 10" > mp_pipe’ 而管道仍保持有效。
 .RE
 .PD 1
 .
@@ -809,7 +809,7 @@ wrapper(封套) 脚本 TOOLS/\:midentify 能抑制 MPlayer 的其它输出
 指定 FIFO 大小供缓冲按键事件(默认: 10)。
 n 大小的 FIFO 能容纳 (n-1) 缓冲事件。
 如果太小会丢失一些事件
-(导致 "stuck mouse buttons (鼠标键卡住)" 或类似效果)。
+(导致 "鼠标键卡住" 或类似效果)。
 如果太大, MPlayer 处理缓冲的事件时可能看上去挂住了。
 为得到同以前一样的行为效果而引入此选项,
 对 Linux 设置为 2 或对 Windows 为 1024。
@@ -980,7 +980,7 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 .TP
 .B \-audio-demuxer <[+]名称> (仅用于 \-audiofile)
 锁定用于 \-audiofile 的音频分路器类型。
-在名称前使用 '+' 锁定类型, 跳过某些核查!
+在名称前使用 "+" 锁定类型, 跳过某些核查!
 按照 \-audio-demuxer help 打印出来的指定分路器类型。
 为了向后兼容, 也接受定义在 libmpdemux/\:demuxer.h 的分路器标识。
 \-audio-demuxer audio 或 \-audio-demuxer 17 锁定 MP3。
@@ -1115,7 +1115,7 @@ HTTP 请求时发送 cookies。
 .TP
 .B \-demuxer <[+]类型名>
 锁定分路器类型。
-在名称前使用 '+' 锁定类型, 跳过某些核查!
+在名称前使用 "+" 锁定类型, 跳过某些核查!
 按照 \-demuxer help 打印出来的指定分路器类型。
 为了向后兼容, 也接受定义在 libmpdemux/\:demuxer.h 的分路器标识。
 \-demuxer audio 或 \-demuxer 17 锁定 MP3。
@@ -1164,7 +1164,7 @@ HTTP 请求时发送 cookies。
 .TP
 .B \-dvd\-device <设备路径> (仅用于 DVD)
 指定 DVD 设备(默认是: /dev/\:dvd)。
-你也可以指定目录, 其中包含以前直接从 DVD 拷贝(比如用 \& vobcopy)的文件。
+你也可以指定目录, 其中包含以前直接从 DVD 拷贝(比如用 vobcopy)的文件。
 首先注意使用 \-dumpstream 通常是更好的拷贝 DVD 的方法(请参见示例)。
 .
 .TP
@@ -1310,7 +1310,7 @@ Hauppauge WinTV PVR\-150/250/350/500 和所有基于 IVTV 的卡
 是众所周知的 PVR 捕捉卡。
 小心只有 Linux 2.6.18 及以上的内核能通过 V4L2 层处理 MPEG 流。
 对于 MPEG 流硬件捕捉卡并使用 MPlayer/MEncoder 来观看电影的, 
-使用 'pvr://' 作为 URL 地址。
+使用 "pvr://" 作为 URL 地址。
 .sp 1
 可用选项有:
 .RSs
@@ -1334,7 +1334,7 @@ Hauppauge WinTV PVR\-150/250/350/500 和所有基于 IVTV 的卡
 指定音频编码比特率(以 kbps 为单位) (默认是: 384)。
 .IPs amode=<参数值>
 指定音频编码模式。
-可用的预设值是 'stereo', 'joint_stereo', 'dual' 和 'mono' (默认是: stereo)。
+可用的预设值是 "stereo", "joint_stereo", "dual" 和 "mono" (默认是: stereo)。
 .IPs vbitrate=<参数值>
 指定平均编码视频比特率(以 Mbps 为单位) (默认是: 6)。
 .IPs vmode=<参数值>
@@ -1505,6 +1505,7 @@ dvd:   DVD compatible stream (DVD 可兼容流)
 这些选项设置广播捕捉模块的各种属性。
 为了用 MPlayer 收听广播, (如果没有给定频道, )使用 "radio://<频率>"
  或者(如果给定频道, )使用 "radio://<频道号>" 作为 URL 地址。
+通过运行 MPlayer 的 "\-v" 你能看到允许的频率范围。
 要启动抓取子系统, 使用 "radio://<频率或频道>/capture"。
 如果 capture 关键词没给, 你只可以用 line-in (线路输入) 电缆收听广播。
 由于同步问题, 不推荐用 capture 收听, 此过程不舒服。
@@ -1531,7 +1532,7 @@ radio://1, radio://104.4, radio_set_channel 1
 从中捕捉声音的设备名称。
 没有名称的话就会停用 capture, 哪怕 URL 中出现捕捉关键字。
 对于 ALSA 设备使用格式 hw=<卡>.<设备>。
-如果设备名称包含一个 '=', 此模块就会使用 ALSA 去捕捉, 否则使用 OSS。
+如果设备名称包含一个 "=", 此模块就会使用 ALSA 去捕捉, 否则使用 OSS。
 .IPs arate=<参数值> (配合启用广播 capture)
 每秒采样率 (默认值是: 44100)。
 .br
@@ -1560,7 +1561,7 @@ radio://1, radio://104.4, radio_set_channel 1
 .IPs input=<参数值>
 指定输入 (默认值是: 0 (TV), 参见控制台输出的可用输入列表）。
 .IPs freq=<参数值>
-指定调谐器的频率(例如\& 511.250)。
+指定调谐器的频率(例如: 511.250)。
 与频道参数不兼容.
 .IPs outfmt=<参数值>
 指定调谐器的输出格式, 用 V4L 驱动支持的预设置(yv12, rgb32, rgb24, 
@@ -1592,7 +1593,7 @@ tv_last_channel 会有用于遥控(参见 LIRC)。
 与频率参数不兼容。
 .br
 .I 注意:
-频道号就将是"频道"列表上从1开始计数的位置。
+频道号就将是 "频道" 列表上从1开始计数的位置。
 .br
 .I 示例:
 tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
@@ -1622,7 +1623,7 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .IPs adevice=<参数值>
 设置音频设备。
 <参数值> 必须是 /dev/\:xxx 用于 OSS 而硬件标识用于 ALSA。
-硬件标识用于 ALSA 时, 你务必要用 '.' 代替 ':'。
+硬件标识用于 ALSA 时, 你务必要用 "." 代替 ":"。
 .IPs audioid=<参数值>
 选择捕捉卡的音频输出, 如果它有不止一个的话。
 .IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
@@ -1951,7 +1952,7 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 .TP
 .B \-sub-demuxer <[+]名称> (仅用于 \-subfile) (BETA 代码)
 锁定 \-subfile 的字幕分路器类型。
-在名称前使用 '+' 锁定类型, 跳过某些核查!
+在名称前使用 "+" 锁定类型, 跳过某些核查!
 按照 \-demuxer help 打印出来的指定分路器类型。
 为了向后兼容, 也接受定义在 libmpdemux/\:demuxer.h 的分路器标识。
 .
@@ -2064,7 +2065,7 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 .TP
 .B \-subfont-encoding <参数值> (仅用于 FreeType)
 设置字幕编码。
-当设为"unicode"时, 字体文件中的所有字模都会被渲染
+当设为 "unicode" 时, 字体文件中的所有字模都会被渲染
 并使用 unicode 编码(默认值是: unicode)。
 .
 .TP
@@ -2117,7 +2118,7 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 .TP
 .B \-vobsub <无后缀名的 VOBsub 文件名>
 指定用于字幕显示的 VOBsub 文件。
-不得不是无后缀名的完整路径名, 即没有".idx", ".ifo" 及 ".sub"。
+不得不是无后缀名的完整路径名, 即没有 ".idx", ".ifo" 及 ".sub"。
 .
 .TP
 .B \-vobsubid <0\-31>
@@ -2153,7 +2154,7 @@ SOUND_DEVICE_NAMES。
 .br
 .I 注意:
 ALSA 混音通道名称后面跟的数字必须用 <名称,数字> 格式指定, 
-即 alsamixer 中通道标为 'PCM 1' 的必须转换为
+即 alsamixer 中通道标为 "PCM 1" 的必须转换为
 .BR PCM,1 。
 .
 .TP
@@ -2180,7 +2181,7 @@ ALSA 混音通道名称后面跟的数字必须用 <名称,数字> 格式指定,
 .B \-ao <驱动1[:子选项1[=参数值]:...],驱动2,...[,]>
 指定使用音频输出驱动的优先级列表。
 .PP
-如果列表尾有',' MPlayer 使用没有列出的驱动作为后备。
+如果列表尾有 "," MPlayer 使用没有列出的驱动作为后备。
 子选项是可选的, 大多数省略。
 .br
 .I 注意:
@@ -2207,7 +2208,7 @@ ALSA 0.9/1.x 音频输出驱动
 设置 noblock-模式。
 .IPs device=<设备>
 设置设备名称。
-在 ALSA 设备名称中替换 ',' 为 '.', ':' 为 '='。
+在 ALSA 设备名称中替换 "," 为 ".", ":" 为 "="。
 对于通过 S/PDIF 输出的 hwac3, 使用 "iec958" 或 "spdif" 设备, 
 除非你真的知道如何正确设置。
 .RE
@@ -2289,7 +2290,7 @@ OSS 音频输出驱动
 .RSs
 .IPs "<输出设备名>"
 显式选择音频输出设备/\:接口 (默认是: system-wide default)。
-例如, 'Analog Out' 或 'Digital Out'。
+例如: "Analog Out" 或 "Digital Out"。
 .RE
 .PD 1
 .
@@ -2357,8 +2358,8 @@ DVB 卡音频输出驱动输出到 MPEG-PES 文件如果没安装 DVB 卡。
 如果没指定声波头, 默认是 audiodump.pcm。
 .IPs "fast\ "
 尝试比实时更快地转储。
-确保输出不被截掉 (通常有"缓冲中视频包太多" 消息)。
-你得到消息"你的系统太“慢”了, 播放不了!" 是正常的。
+确保输出不被截掉 (通常有 "缓冲中视频包太多" 消息)。
+你得到消息 "你的系统太“慢”了, 播放不了!" 是正常的。
 .RE
 .PD 1
 .
@@ -2520,7 +2521,7 @@ VESA 帧缓冲不支持改变模式。
 .TP
 .B \-fstype <类型1,类型2,...> (仅用于 X11)
 指定使用全屏模式的优先级列表。
-你可以用前缀 '\-' 取消模式。
+你可以用前缀 "\-" 取消模式。
 如果你遇到像全屏窗口被其他窗口遮住问题, 试试不同的顺序。
 .br
 .I 注意:
@@ -2725,7 +2726,7 @@ ggi 和 gl2 的都支持此功能。
 .TP
 .B \-zrbw (仅用于 \-vo zr)
 黑白显示。
-用于优化性能, 此选项可以与 '\-lavdopts gray' 组合使用。
+用于优化性能, 此选项可以与 "\-lavdopts gray" 组合使用。
 .
 .TP
 .B \-zrcrop <[宽]x[高]+[x 偏移]+[y 偏移]> (仅用于 \-vo zr)
@@ -2787,7 +2788,7 @@ ggi 和 gl2 的都支持此功能。
 .B \-vo <驱动1[:子选项1[=参数值]:...],驱动2,...[,]>
 指定使用视频输出驱动的优先级列表。
 .PP
-如果列表尾有',' MPlayer 使用没有列出的驱动作为后备。
+如果列表尾有 "," MPlayer 使用没有列出的驱动作为后备。
 子选项是可选的, 大多数省略。
 .br
 .I 注意:
@@ -2958,13 +2959,13 @@ VIDIX 的 Windows 前台
 .TP
 .B quartz (仅用于 Mac OS X)
 Mac OS X Quartz 视频输出驱动。
-在某些情况下, 锁定打包 YUV 输出格式如 \& \-vf format=yuy2 可能更有效。
+在某些情况下, 锁定打包 YUV 输出格式, 如: \-vf format=yuy2, 可能更有效。
 .PD 0
 .RSs
 .IPs device_id=<数值>
 选择全屏显示设备。
 .IPs fs_res=<宽>:<高>
-指定全屏解析度 (对慢系统有用)。
+指定全屏分辨率 (对慢系统有用)。
 .RE
 .PD 1
 .
@@ -2984,8 +2985,8 @@ Mac OS X CoreVideo 视频输出驱动
 .PD 0
 .RSs
 .IPs <设备>
-显式选择 fbdev 设备名 (如 /dev/\:fb0), 或者如果设备名以 'vidix' 开始
-选择 VIDIX 子设备名 (如 sis 驱动的 'vidixsis_vid')。
+显式选择 fbdev 设备名 (如 /dev/\:fb0), 或者如果设备名以 "vidix" 开始
+选择 VIDIX 子设备名 (如: sis 驱动的 "vidixsis_vid")。
 .RE
 .PD 1
 .
@@ -3222,7 +3223,7 @@ GGI 图形系统视频输出驱动
 .RSs
 .IPs <驱动>
 显式选择 GGI 驱动。
-替换任何的 ',' 为 '.'.
+替换任何的 "," 为 "."。
 .RE
 .PD 1
 .
@@ -3573,9 +3574,9 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .TP
 .B \-ac <[-|+]编解码器1,[-|+]编解码器2,...[,]>
 按照在 codecs.conf 中音频编解码器的名称, 指定使用它们的优先级列表。
-编解码器名称前使用 '-' 表示忽略它。
-编解码器名称前使用 '+' 表示锁定它, 这有可能会崩溃!
-如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
+编解码器名称前使用 "-" 表示忽略它。
+编解码器名称前使用 "+" 表示锁定它, 这有可能会崩溃!
+如果列表尾有 "," MPlayer 使用没有列出的编解码器作为后备。
 .br
 .I 注意:
 可用的编解码器的完整列表请参见 \-ac help。
@@ -3635,7 +3636,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .B \-afm <驱动1,驱动2,...>
 按照在 codecs.conf 中音频编解码器族的名称, 指定使用它们的优先级列表。
 如果给定的编解码器族没一个能工作, 使用默认的后备编解码器族。
-如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
+如果列表尾有 "," MPlayer 使用没有列出的编解码器作为后备。
 .br
 .I 注意:
 可用的编解码器族的完整列表请参见 \-afm help。
@@ -3784,21 +3785,21 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 为了最佳的解码品质, 使用与编码和解码时相同的 IDCT 算法。
 不过这可能会牺牲一些精确性。
 .IPs lowres=<数值>[,<宽度>]
-以较低的解析度解码。
-低解析度解码还不被所有的边界码器支持, 且常常导致难看的图像。
-这不是有错误, 只是一个副作用, 全解析度时不解码。
+以较低的分辨率解码。
+低分辨率解码还不被所有的边界码器支持, 且常常导致难看的图像。
+这不是有错误, 只是一个副作用, 全分辨率时不解码。
 .RSss
 .br
 0: 停用
 .br
-1: 1/2 解析度
+1: 1/2 分辨率
 .br
-2: 1/4 解析度
+2: 1/4 分辨率
 .br
-3: 1/8 解析度
+3: 1/8 分辨率
 .REss
 .RS
-如果 <宽度> 指定了, 就使用了低解析度解码, 
+如果 <宽度> 指定了, 就使用了低分辨率解码, 
 只要视频的宽度宽过(is major than)或等于 <宽度>。
 .RE
 .IPs "sb=<数值> (仅用于 MPEG-2)"
@@ -3806,7 +3807,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .IPs "st=<数值> (仅用于 MPEG-2)"
 跳过宏块顶部的制定行数。
 .IPs skiploopfilter=<跳略值> (仅用于 H.264)
-在 H.264 解码期间跳过循环过滤器(亦称为"去块")。
+在 H.264 解码期间跳过循环过滤器(亦称为 "去块")。
 既然被过滤的帧被当作解码依赖帧的引用, 在品质上
 这比不进行去块步骤, 如不对 MPEG-2 视频去块, 效果更差。
 但是至少对高比特流的 HDTV 提供了大的提速且不损失视觉品质。
@@ -3816,9 +3817,9 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .br
 none: 从不跳过。
 .br
-default: 跳过无用的处理步骤 (如 AVI 中的 0 大小的包)。
+default: 跳过无用的处理步骤 (如: AVI 中的 0 大小的包)。
 .br
-nonref: 跳过没被引用的帧 (即不用于解码其它的帧, 错误不能"兴旺")。
+nonref: 跳过没被引用的帧 (即, 不用于解码其它的帧, 错误不能 "兴旺")。
 .br
 bidir: 跳过 B-帧。
 .br
@@ -3964,9 +3965,9 @@ lanczos
 .TP
 .B \-vc <[-|+]编解码器1,[-|+]编解码器2,...[,]>
 按照在 codecs.conf 中视频编解码器的名称, 指定使用它们的优先级列表。
-编解码器名称前使用 '-' 表示忽略它。
-编解码器名称前使用 '+' 表示锁定它, 这有可能会崩溃!
-如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
+编解码器名称前使用 "-" 表示忽略它。
+编解码器名称前使用 "+" 表示锁定它, 这有可能会崩溃!
+如果列表尾有 "," MPlayer 使用没有列出的编解码器作为后备。
 .br
 .I 注意:
 可用的编解码器的完整列表请参见 \-vc help。
@@ -3987,7 +3988,7 @@ lanczos
 .B \-vfm <驱动1,驱动1,...>
 按照在 codecs.conf 中视频编解码器族的名称, 指定使用它们的优先级列表。
 如果给定的编解码器族没一个能工作, 使用默认的后备编解码器族。
-如果列表尾有',' MPlayer 使用没有列出的编解码器作为后备。
+如果列表尾有 "," MPlayer 使用没有列出的编解码器作为后备。
 .br
 .I 注意:
 可用的编解码器族的完整列表请参见 \-vfm help。
@@ -4583,14 +4584,14 @@ clear: 传送前清楚帧缓冲.
 .PD 0
 .RSs
 .IPs "\-ffourcc div3"
-有个输出文件含有 'div3' 作为视频 fourcc。
+有个输出文件含有 "div3" 作为视频 fourcc。
 .RE
 .PD 1
 .
 .TP
 .B \-force-avi-aspect <0.2\-3.0>
 重载储存在 AVI OpenDML vprp 头部的高宽比。
-用于改变 '\-ovc copy' 的高宽比。
+用于改变 "\-ovc copy" 的高宽比。
 .
 .TP
 .B \-frameno-file <文件名> (不推荐)
@@ -4608,7 +4609,7 @@ clear: 传送前清楚帧缓冲.
 这允许从非 keyframe 边界处启动。
 .br
 .I 注意:
-不保证能与 '\-ovc copy' 一起正常工作。
+不保证能与 "\-ovc copy" 一起正常工作。
 .
 .TP
 .B \-info <选项1:选项2:...> (仅用于 AVI)
@@ -4722,7 +4723,7 @@ clear: 传送前清楚帧缓冲.
 .IPs "\-ovc copy"
 不编码, 仅仅流拷贝
 .IPs "\-ovc raw"
-编码到随意的无压缩的格式 (使用 '\-vf format' 来选择)。
+编码到随意的无压缩的格式 (使用 "\-vf format" 来选择)。
 .IPs "\-ovc lavc"
 用 libavcodec 编解码器编码。
 .RE
@@ -5730,7 +5731,7 @@ MEncoder 用户设置
 .
 .TP
 ~/.mplayer/\:input.conf
-输入绑定 (按键的完整列表请参见 '\-input keylist' 的输出)
+输入绑定 (按键的完整列表请参见 "\-input keylist" 的输出)
 .
 .TP
 ~/.mplayer/\:gui.conf
@@ -5932,7 +5933,7 @@ rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \
 MPlayer 最初由 Arpad Gereoffy 制作。
 其它许多贡献者的部分清单, 请参见 AUTHORS(作者) 文件。
 .PP
-MPlayer 是 (C) 2000\-2006 The MPlayer Team (MPlayer 团队)所有
+MPlayer 是 (C) 2000\-2006 The MPlayer Team (MPlayer 团队) 所有
 .PP
 本(英文)手册页主要由 Gabucino, Jonas Jermann 和 Diego Biurrun 编写, 
 由 Diego Biurrun 维护。
