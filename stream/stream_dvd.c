@@ -27,6 +27,7 @@
 
 #include "stream_dvd.h"
 
+extern int stream_cache_size;
 /// We keep these 2 for the gui atm, but they will be removed.
 extern int dvd_title;
 extern int dvd_chapter;
@@ -643,19 +644,24 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_SEEK_TO_CHAPTER:
         {
-            int r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title-1, *((unsigned int *)arg));
+            int r;
+            if(stream_cache_size > 0) return STREAM_UNSUPORTED;
+            r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title-1, *((unsigned int *)arg));
             if(! r) return STREAM_UNSUPORTED;
 
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_CHAPTER:
         {
+            if(stream_cache_size > 0) return STREAM_UNSUPORTED;
             *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title-1, d->cur_cell);
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_TIME:
         {
-            double tm = dvd_get_current_time(stream, 0);
+            double tm;
+            if(stream_cache_size > 0) return STREAM_UNSUPORTED;
+            tm = dvd_get_current_time(stream, 0);
             if(tm != -1) {
               tm *= 1000.0f;
               *((unsigned int *)arg) = (unsigned int) tm;
@@ -666,6 +672,7 @@ static int control(stream_t *stream,int cmd,void* arg)
         case STREAM_CTRL_SEEK_TO_TIME:
         {
             dvd_priv_t *d = stream->priv;
+            if(stream_cache_size > 0) return STREAM_UNSUPORTED;
             if(dvd_seek_to_time(stream, d->vts_file, *((double*)arg)))
               return 1;
             break;
