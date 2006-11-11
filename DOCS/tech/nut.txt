@@ -505,7 +505,7 @@ time_base_nom / time_base_denom = time_base
 
 time_base_id
     index into the time_base table
-    MUST by < time_base_count
+    MUST be < time_base_count
 
 convert_ts
     To switch from 2 different timebases, the following calculation is
