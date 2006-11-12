@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20739 -->
+<!-- synced with r20873 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -169,9 +169,9 @@ screen #0
 
 <para>
 A régebbi 3dfx vezérlőknek tudvalevőleg problémáik vannak az XVideo gyorsítással,
-nem támogatják sem a YUY2-t sem a YV12-t, és így tovább. Nézd meg, hogy 4.2.0 vagy
-újabb XFree86-tal rendelkezel-e, ez rendben működik YV12-vel és YUY2-vel. A korábbi
-verziók, beleértve a 4.1.0-t, <emphasis role="bold">összeomlanak az YV12-vel</emphasis>.
+nem támogatják a YUY2 és YV12 színtereket. Nézd meg, hogy 4.2.0 vagy
+újabb XFree86-tal rendelkezel-e, ez jól kezeli a YV12-őt és a YUY2-őt, míg a
+korábbi verziók beleértve a 4.1.0-t is, <emphasis role="bold">összeomlanak az YV12-vel</emphasis>.
 Ha különös effekteket tapasztalsz a <option>-vo xv</option> használatakor,
 próbáld ki az SDL-t (ebben is van XVideo) és nézd meg, hogy ez segít-e. Lásd az
 <link linkend="sdl">SDL</link> fejezetet a részletekért.
@@ -196,7 +196,7 @@ van xv támogatás, de maga a kártya túl lassú, így jobb, ha eladod.
 <para>
 Már van natív framebuffer vezérlő az S3 Virge kártyákhoz, hasonlóan a tdfxfb-hez.
 Állítsd be a framebuffer-ed (pl. add hozzá a
-"<option>vga=792 video=vesa:mtrr</option>" opciót a kerneledhez) és használd
+"<option>vga=792 video=vesa:mtrr</option>" opciót a kernel parancssorához) és használd
 a <option>-vo s3fb</option> opciót (<option>-vf yuy2</option> és <option>-dr</option>
 szintén segíthet).
 </para>
@@ -935,7 +935,7 @@ környezeti változót (legalábbis az nVidia-n):
 </para>
 
 <para>
-<command>export $__GL_SYNC_TO_VBLANK=1</command>
+<command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
 
 </sect2>

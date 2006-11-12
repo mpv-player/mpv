@@ -1,7 +1,8 @@
-.\" Synced with r20774
+.\" Synced with r20872
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
+.\" Encoding/kódolás: iso-8859-2
 .
 .\" --------------------------------------------------------------------------
 .\" Makró definíciók
@@ -32,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 10. 15." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 11. 13." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1204,7 +1205,8 @@ A \-demuxer audio vagy \-demuxer 17 az MP3 demuxert kényszeríti.
 .TP
 .B \-dumpaudio (csak MPlayer)
 Nyers, tömörített audio stream kiírása a ./stream.dump fájlba (MPEG/\:AC3-nál
-hasznos). Ha egynél több \-dumpaudio, \-dumpvideo, \-dumpstream kapcsolót adsz
+hasznos, egyébként a legtöbb esetben lejátszhatatlan fájlt eredményez).
+Ha egynél több \-dumpaudio, \-dumpvideo, \-dumpstream kapcsolót adsz
 meg a parancssorban, csak az utolsó fog mûködni.
 .
 .TP

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20834 -->
+<!-- synced with r20870 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -33,9 +33,9 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   így nagyon fontos!
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - A javasolt verziók a <emphasis role="bold">2.95</emphasis>
-  és 3.3+. A 2.96 és 3.0.x hibás kódot generálnak, valamint a 3.1-nek és a 3.2-nek is
-  vannak problémái. PowerPC-n használj 4.x+ verziót.
+  <emphasis role="bold">gcc</emphasis> - A javasolt verziók a 2.95
+  és 3.4+. A 2.96 és 3.0.x tudvalevőleg hibás kódot generálnak, a 3.1-nek és a 3.2-nek is
+  vannak problémái, a 3.3-nak kisebb hibái. PowerPC-n használj 4.x+ verziót.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - A javasolt verzió <emphasis role="bold">mindig a
