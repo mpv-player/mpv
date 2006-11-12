@@ -3545,7 +3545,8 @@ if darwin; then
 echocheck "Mac OS X APIs"
 if test "$_macosx" = auto ; then
     productName=`/usr/bin/sw_vers -productName`
-    if test "$productName" = "Mac OS X" ; then
+    if test "$productName" = "Mac OS X" ||
+       test "$productName" = "Mac OS X Server" ; then
         _macosx=yes
     else
 	_macosx=no
