@@ -33,8 +33,8 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> - Recommended versions are 2.95
-  and 3.3+. 2.96 and 3.0.x are known to generate faulty code, 3.1 and
-  3.2 also had problems. On PowerPC, use 4.x+.
+  and 3.4+. 2.96 and 3.0.x are known to generate faulty code, 3.1 and
+  3.2 also had problems, 3.3 some minor ones.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - Recommended version is <emphasis role="bold">always the
