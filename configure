@@ -7888,10 +7888,15 @@ $_def_amr_wb
 
 /* Use specific parts from FFmpeg. */
 `echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+`echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define ENABLE_/;s/$/ 1/'`
 `echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+`echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define ENABLE_/;s/$/ 1/'`
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+`echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define ENABLE_/;s/$/ 1/'`
 `echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+`echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define ENABLE_/;s/$/ 1/'`
 `echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+`echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define ENABLE_/;s/$/ 1/'`
 $_def_lavc_faac
 $_def_lavc_xvid
 $_def_lavc_mp3lame
