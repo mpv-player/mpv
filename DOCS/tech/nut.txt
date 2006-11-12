@@ -670,6 +670,8 @@ dts
     Pts of all frames in all streams MUST be bigger or equal to dts of all
     previous frames in all streams, compared in common timebase. (EOR
     frames are NOT exempt from this rule)
+    Dts of all frames MUST be bigger or equal to dts of all previous frames
+    in the same stream
 
 width/height
     width and height of the video in pixels
