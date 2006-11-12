@@ -279,7 +279,7 @@ static int control(stream_t *stream, int cmd, void* arg) {
     {
       if(priv->duration)
       {
-        *((unsigned int *)arg) = priv->duration;
+        *((double *)arg) = (double)priv->duration / 1000.0;
         return 1;
       }
       break;

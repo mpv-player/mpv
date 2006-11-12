@@ -881,7 +881,7 @@ int demux_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flag
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
     sh_video_t *sh_video=d_video->sh;
-    unsigned int tmp = 0;
+    double tmp = 0;
     double pts;
 
 if(!demuxer->seekable){
@@ -916,13 +916,13 @@ if(!demuxer->seekable){
     else {
       if(stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &tmp) == STREAM_UNSUPORTED)
         goto dmx_seek;
-      pts = (double)tmp / 1000.0f;
+      pts = tmp;
     }
 
     if(flags & 2) {  // percent seek
       if(stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &tmp) == STREAM_UNSUPORTED)
         goto dmx_seek;
-      pts += (double)tmp / 1000.0f * rel_seek_secs;
+      pts += tmp * rel_seek_secs;
     } else
       pts += rel_seek_secs;
 
@@ -1032,10 +1032,10 @@ double demuxer_get_time_length(demuxer_t *demuxer){
  */
 int demuxer_get_current_time(demuxer_t *demuxer){
     double get_time_ans = 0;
-    unsigned tm;
+    double tm;
     sh_video_t *sh_video = demuxer->video->sh;
     if(stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&tm)!=STREAM_UNSUPORTED) {
-        get_time_ans = (double) tm / 1000.0f;
+        get_time_ans = tm;
     } else if(sh_video) get_time_ans = sh_video->pts;
     return (int) get_time_ans;
 }

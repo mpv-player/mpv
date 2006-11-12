@@ -633,7 +633,7 @@ static int control(stream_t *stream,int cmd,void* arg)
     {
         case STREAM_CTRL_GET_TIME_LENGTH:
         {
-            *((unsigned int *)arg) = mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1);
+            *((double *)arg) = (double) mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1)/1000.0;
             return 1;
         }
         case STREAM_CTRL_GET_NUM_CHAPTERS:
@@ -663,8 +663,7 @@ static int control(stream_t *stream,int cmd,void* arg)
             if(stream_cache_size > 0) return STREAM_UNSUPORTED;
             tm = dvd_get_current_time(stream, 0);
             if(tm != -1) {
-              tm *= 1000.0f;
-              *((unsigned int *)arg) = (unsigned int) tm;
+              *((double *)arg) = tm;
               return 1;
             }
             break;
