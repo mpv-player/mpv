@@ -166,9 +166,9 @@ screen #0
 
 <para>
 Older 3dfx drivers were known to have problems with XVideo acceleration, it
-didn't support either YUY2 or YV12, and so. Verify that you have XFree86
-version 4.2.0 or greater, it works OK with YV12 and YUY2. Previous
-versions, including 4.1.0, <emphasis role="bold">crashes with YV12</emphasis>.
+didn't support YUY2 or YV12 colorspaces. Verify that you have XFree86
+version 4.2.0 or later, it can handle YV12 and YUY2 while previous
+versions, including 4.1.0, <emphasis role="bold">crash with YV12</emphasis>.
 If you experience strange effects using <option>-vo xv</option>, try SDL
 (it has XVideo, too) and see if it helps. Check the
 <link linkend="sdl">SDL</link> section for details.
@@ -193,7 +193,7 @@ xv support, but the card itself is very slow, so you better sell it.
 <para>
 There is now a native framebuffer driver for S3 Virge cards similiar to 
 tdfxfb. Set up your framebuffer (e.g. append
-"<option>vga=792 video=vesa:mtrr</option>" to your kernel) and use
+"<option>vga=792 video=vesa:mtrr</option>" to your kernel comand line) and use
 <option>-vo s3fb</option> (<option>-vf yuy2</option> and <option>-dr</option>
 will also help).
 </para>
@@ -928,7 +928,7 @@ least on nVidia):
 </para>
 
 <para>
-<command>export $__GL_SYNC_TO_VBLANK=1</command>
+<command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
 
 </sect2>
@@ -1528,7 +1528,7 @@ can be found on VIA Epia motherboards.
 
 <para>
 The driver was written and is maintained by
-<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>
+<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>.
 </para>
 </sect3>
 
