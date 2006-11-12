@@ -11,7 +11,7 @@
 #define USE_LIBNUT
 #ifdef USE_LIBNUT
 
-#include "nut.h"
+#include <nut.h>
 
 typedef struct {
 	int last_pts; // FIXME
