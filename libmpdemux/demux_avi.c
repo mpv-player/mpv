@@ -466,7 +466,6 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 	return NULL;
       }
       if(a_pos==-1){
-        mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI_NI: " MSGTR_MissingAudioStream);
         d_audio->sh=sh_audio=NULL;
       } else {
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
