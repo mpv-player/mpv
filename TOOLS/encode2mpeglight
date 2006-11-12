@@ -1,30 +1,30 @@
 #!/bin/bash
 #
-# Version:          0.5.5
+# Version:          0.6.2
 #
 # Licence:          GPL
 #
 # 2004-05-22        Giacomo Comes <encode2mpeg at users.sourceforge.net>
-# 2006-01-14                      <encode2mpeg at katamail.com>
+# 2006-11-06                      <encode2mpeg at email.it>
 #
-# Pourpose:         Convert anything MPlayer can play to AVI/VCD/SVCD/DVD mpeg
+# Purpose:          Convert anything MPlayer can play to AVI/VCD/SVCD/DVD MPEG
 #
-#   This program is free software; you can redistribute it and/or modify
+#   encode2mpeglight is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation; either version 2 of the License.
 
-#   This program is distributed in the hope that it will be useful,
+#   encode2mpeglight is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
 
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
+#   along with encode2mpeglight; if not, write to the Free Software
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
 ###############################################################################
-#   encode2mpeglight is a program that can create VCD/SVCD/DVD mpegs
+#   encode2mpeglight is a program that can create VCD/SVCD/DVD MPEGs
 #   and eventually extract VobSub subtitles from a DVD using only
 #   MEncoder/MPlayer.
 #
@@ -43,8 +43,8 @@
 #   and more, consider to use the full release (http://encode2mpeg.sf.net)
 #
 #   encode2mpeglight is mainly tested with the stable release of MPlayer,
-#   I try to make it work with CVS too, but due to the "instable" nature of
-#   CVS, bugs may suddenly appear. If you find any, please report it to me.
+#   I try to make it work with SVN too, but due to the "unstable" nature of
+#   SVN, bugs may suddenly appear. If you find any, please report them to me.
 ###############################################################################
 
 ###############################################################################
@@ -68,8 +68,8 @@ OptionsText () {
 ###############################################################################
 ModeText () {
     echo
-    echo -e "$PROGNAME defaults to encode2mpeg's Mpeg Mode, the others mode are not"
-    echo -e "available"
+    echo "$PROGNAME defaults to encode2mpeg's MPEG Mode, the other modes are not"
+    echo "available."
 }
 ###############################################################################
 usage () {
@@ -92,20 +92,26 @@ shortusage () {
 }
 ###############################################################################
 mp_identify () {
-    mplayer -identify -vo null -ao null -nocache "$@" -frames 0 2>/dev/null
+    mplayer -msglevel identify=6 -vo md5sum:outfile=/dev/null -ao null -nocache -frames 0 "$@" 2>/dev/null
+}
+###############################################################################
+id_find () {
+    local ID=$1
+    shift
+    mp_identify "$@" | awk -v id=$ID -F= '$1==id{t=$2}END{print t}'
 }
 ###############################################################################
 get_aspect () {
-    mplayer -vo null -ao null -nocache -frames 4 "$@" 2>/dev/null | sed '/^Movie-Aspect is/!d;s/.*Movie-Aspect is //;s/:.*//'
+    mplayer -vc -mpegpes, -vo null -ao null -nocache -frames 4 "$@" 2>/dev/null | sed '/^Movie-Aspect is/!d;s/.*Movie-Aspect is //;s/:.*//'
 }
 ###############################################################################
 mlistopt () {
     mplayer -list-options 2>&1 | awk '$1=="Name"{m=1}{if(m&&$1!="Name"&&$1!=""&&$1!="Total:")print "\""$1"\""}'
 }
 ###############################################################################
-pre_log () {
+do_log () {
     echo "$1"
-    WARN="$WARN${WARN:+\n}$1"
+    ((LG)) && echo "$1" >>"$output".log || WARN="$WARN${WARN:+\n}$1"
 }
 ###############################################################################
 isarg () {
@@ -133,7 +139,7 @@ pr_time () {
 get_abr () {
     local INFO ABR
     INFO=$(mp_identify "${MPLAYEROPT[@]}" ${dvddev:+-dvd-device "$dvddev"} "$@" | grep '^ID_')
-    ABR=$(echo "$INFO" | grep '^ID_AUDIO_BITRATE' | cut -f2 -d=)
+    ABR=$(echo "$INFO" | grep '^ID_AUDIO_BITRATE' | tail -1 | cut -f2 -d=)
     case $(echo "$INFO" | grep '^ID_AUDIO_CODEC' | cut -f2 -d=) in
         dvdpcm) abr=$((abr+ABR/1024)) ;;
         *)      abr=$((abr+ABR/1000)) ;;
@@ -164,12 +170,12 @@ show_html () {
     elif [[ $1 && ! -d $INSTDOCDIR/html && ! -d $SRCDOCDIR/html ]]; then
         HTML="http://encode2mpeg.sourceforge.net/html/$1"
     fi
-    LIST=(mozilla firefox)
+    LIST=(mozilla seamonkey firefox)
     [[ ${HTML:0:1} = / ]] && PREFIX=file:// || PREFIX=
     for ((i=0;i<${#LIST[*]};i++)); do
         type ${LIST[i]} &>/dev/null && ${LIST[i]} -remote 'openURL('"$PREFIX$HTML"',new-tab)' 2>/dev/null && return
     done
-    LIST=(mozilla firefox opera konqueror epiphany galeon)
+    LIST=(mozilla firefox seamonkey opera konqueror epiphany galeon)
     if [[ $BROWSER ]]; then
         type "$BROWSER" &>/dev/null && LIST=("$BROWSER") || echo "++ WARN: default browser '$BROWSER' not found, using builtin browser list"
     fi
@@ -187,9 +193,9 @@ show_html () {
 }
 
 ###############################################################################
-#### variables initialization
+#### variable initialization
 ###############################################################################
-abr=;asr=;vbr=;vfr=;videonorm=;frameformat=;output=;audioformat=;mp1=;mp2=;mp3=;ac3=;dts=;lpcm=;normalize=;volume=;multiaudio=;mpegchannels=;quiet=;resume=;blank=;encode=;ofps=;mono=;usesbr=;sbr=;clear=;keep=;frames=;avisplit=;channels=;vcustom=;acustom=;cpu=;interlaced=;mpegaspect=;intra_matrix=;inter_matrix=;fixavi=;mpeg=;crop=;audioid=;dvdaudiolang=;bframes=;firstchap=;lastchap=;dvdtrack=;addchapter=;cdi=;mpegfixaspect=;nowait=;vf=;frameres=;trick=;autocrop=;ac=;afm=;cache=;removecache=;turbo=;dvddev=;srate=;endpos=;fourcc=;menu=;menubg=;dvdtitle=;rotate=;menuvtsbg=;autosync=;telecine=;AFMT=;telesrc=;vcodec=;vrfyumnt=;burniso=;verify=;fixasync=;removedir=;MPGRES=;GOP=;TXTSUBOPT=;usespeed=;testmca=;chconf=;noodml=;pictsrc=;slideaudio=;audioonly=;norc=
+abr=;asr=;vbr=;vfr=;videonorm=;frameformat=;output=;audioformat=;mp1=;mp2=;mp3=;ac3=;dts=;lpcm=;aac=;normalize=;volume=;multiaudio=;mpegchannels=;quiet=;resume=;blank=;encode=;ofps=;mono=;usesbr=;sbr=;clear=;keep=;frames=;avisplit=;channels=;vcustom=;acustom=;cpu=;interlaced=;mpegaspect=;intra_matrix=;inter_matrix=;fixavi=;mpeg=;crop=;audioid=;dvdaudiolang=;bframes=;firstchap=;lastchap=;dvdtrack=;addchapter=;cdi=;mpegfixaspect=;nowait=;vf=;frameres=;trick=;autocrop=;afm=;cache=;removecache=;turbo=;dvddev=;srate=;endpos=;fourcc=;menu=;menubg=;dvdtitle=;rotate=;menuvtsbg=;autosync=;telecine=;AFMT=;telesrc=;vcodec=;vrfyumnt=;burniso=;verify=;fixasync=;removedir=;MPGRES=;GOP=;TXTSUBOPT=;usespeed=;testmca=;chconf=;noodml=;pictsrc=;slideaudio=;audioonly=;norc=;rawsub=;vobsubsrc=;af=;lavf=;subrender=;harddup=;overburn=
 unset encsid encsdx encsla addsub addsdx addsla savecache txtsub txtsubopts
 zoom=0
 scale=1
@@ -238,6 +244,8 @@ DEBUG=0
 LAVC=
 WARN=
 LOG=
+LG=0
+SVN=0
 MAXFIX=20
 timelen=0
 ocrsub=0
@@ -282,7 +290,7 @@ if [[ -s ~/.encode2mpegrc ]]; then
         [[ ${CMD[i]} = -norc ]] && norc=1 && break
     done
     if [[ ! $norc ]] && ! awk '{if($1~"^#")exit 1}' ~/.encode2mpegrc ; then
-        WARN="$WARN${WARN:+\n}++ WARN: [$PROGNAME] ~/.encode2mpegrc appears to contain comments, ignoring it"
+        do_log "++ WARN: [$PROGNAME] ~/.encode2mpegrc appears to contain comments, ignoring it" >/dev/null
         norc=1
     fi
     [[ ! $norc ]] && set -- $(<~/.encode2mpegrc) "$@"
@@ -406,7 +414,9 @@ while (($#)) ; do
             shift
             ;;
         -n|-video-norm) #<n|p|s>
-            #-set the video norm of the VCD/SVCD/DVD
+            # set the video norm of the VCD/SVCD/DVD; NTSC is USA standard,
+            # PAL is European standard and SECAM is French standard; concerning
+            #-VCD/SVCD/DVD encoding, SECAM is equivalent to PAL
             case $2 in
                 n|N|ntsc|NTSC)   videonorm=n ;;
                 p|P|pal|PAL)     videonorm=p ;;
@@ -536,7 +546,7 @@ while (($#)) ; do
             shift
             ;;
         -mpegchannels) #<1-6>
-            # number of channels of the mpeg audio stream, 1-6 for ac3 and lpcm;
+            # number of channels of the MPEG audio stream, 1-6 for ac3 and lpcm;
             # 1-2 for mp1, mp2 and mp3; 3-6 for mp2 Multichannel Audio; for the
             #-avi audio stream use MPlayer's option -channels
             mpegchannels=2
@@ -557,9 +567,9 @@ while (($#)) ; do
             shift
             ;;
         -noscale) #
-            # encode2mpeg automatically scales the video according to the mpeg 
-            # profile chosen, this option disable this feature; used mainly
-            #-for debug purpose
+            # encode2mpeg automatically scales the video according to the MPEG
+            # profile chosen, this option disables this feature; used mainly
+            # for debug purposes.
             [[ $2 = doc || $2 = help ]] && isarg $1 $2 direct
             scale=
             ;;
@@ -569,7 +579,7 @@ while (($#)) ; do
             YUVSCALEROPT="$YUVSCALEROPT -O MONOCHROME"
             ;;
         -split) #<n>
-            #-split the resulting mpeg stream in <n> MB chunks.
+            #-split the resulting MPEG stream in <n> MB chunks.
             split=$2
             isarg $1 "$2" direct
             shift
@@ -586,17 +596,18 @@ while (($#)) ; do
             #   5 libavcodec/mp3
             #   6 libavcodec/ac3    for m=[2-4] and i>1 turbo is on
             #   7 toolame/mp2
+            #   8 libfaac/aac
             #-  with n=[3-7] b specify the audio bit rate
             encode=5:3:2
-            echo "$2" | grep -qE '^[0-7]:[0-4]:[1-9](,[0-9]+)?$' && encode=$2
+            echo "$2" | grep -qE '^[0-8]:[0-4]:[1-9](,[0-9]+)?$' && encode=$2
             isarg $1 "$2" $([[ $mpeg ]] && echo mpeg || echo Avi)
             shift
             ;;
         -telecinesrc) #
-            # if you use -encode n:0:i in Mpeg Mode, encode2mpeg needs to know
-            # if the source NTSC mpeg is telecined, otherwise the stream copy may
+            # if you use -encode n:0:i in MPEG Mode, encode2mpeg needs to know
+            # if the source NTSC MPEG is telecined, otherwise the stream copy may
             # not work properly; normally encode2mpeg is able to detect telecined
-            # sources, but, if the source mpeg is mixed, part not telecined and
+            # sources, but, if the source MPEG is mixed, part not telecined and
             # part telecined, encode2mpeg may fail to detect it. In such case,
             #-you can use this option to specify a telecined source.
             [[ $2 = doc || $2 = help ]] && isarg $1 $2 mpeg
@@ -613,7 +624,7 @@ while (($#)) ; do
             # increase the encoding speed of 25-50% (with -encode n:1:1); the
             # output video stream will be bigger and can have poor quality; this
             # option is mainly intented for testing, but it can be used if you
-            #-want to create more quickly an mpeg4/avi or a DVD
+            #-want to create more quickly an MPEG-4/AVI or a DVD.
             [[ $2 = doc || $2 = help ]] && isarg $1 $2 Avi
             hispeed=1
             ;;
@@ -632,7 +643,8 @@ while (($#)) ; do
             shift
             ;;
         -acustom) #<mp3lame options>
-            #-specify a custom set of lame options, use with -encode 2:m:i
+            # specify a custom set of lame options (with -encode 2:m:i) or faac
+            #-options (with -encode 8:m:i)
             acustom=$2
             isarg $1 "$2" Avi
             shift
@@ -695,8 +707,8 @@ while (($#)) ; do
             # fps to use when creating video from pictures, default is 1; if
             # there is a audio file associated with a picture, the duration of
             #-the audio file is used
-            slidefps=$(awk -v a=$2 'BEGIN{printf("%.3f",1/a)}')
             isarg $1 "$2" images
+            slidefps=$(awk -v a=$2 'BEGIN{printf("%.3f",1/a)}')
             shift
             ;;
         -slideaudio) #<audio file>
@@ -717,7 +729,7 @@ while (($#)) ; do
             # submitting a bug report, use this option and compress and send the
             #-log file and the debug file
             [[ $2 = doc || $2 = help ]] && isarg $1 $2
-            ((DEBUG)) && DEBUG=2 || DEBUG=1
+            echo "$2" | grep -q '^[0-7]$' && DEBUG=$2 && shift || DEBUG=3
             ;;
         (-frames)
             frames=$2
@@ -749,6 +761,11 @@ while (($#)) ; do
             isarg $1 $2
             shift
             ;;
+        (-af)
+            af="-af $2"
+            isarg $1 $2
+            shift
+            ;;
         (-dvd-device)
             dvddev=$2
             isarg $1 $2
@@ -762,6 +779,12 @@ while (($#)) ; do
             PICTSRC=( ${1#mf://} )
             IFS=$a
             srate=48000
+            ;;
+        (-sub)
+            [[ ! -f $2 ]] && echo "**ERROR: [$PROGNAME] subtitle file '$2' not found" && exit 1
+            MPLAYEROPT=( "${MPLAYEROPT[@]}" $1 "$2" )
+            subrender=1
+            shift
             ;;
         (-mpeg|-mpegonly|-nosplit) ;;
         *)
@@ -781,19 +804,46 @@ while (($#)) ; do
     shift
 done
 
-[[ -s ~/.encode2mpegrc && ! $norc ]] && pre_log "   INFO: [$PROGNAME] using .encode2mpegrc settings: '$(<~/.encode2mpegrc)'"
+[[ -s ~/.encode2mpegrc && ! $norc ]] && do_log "   INFO: [$PROGNAME] using .encode2mpegrc settings: '$(<~/.encode2mpegrc)'"
+if [[ $subrender || $harddup ]]; then
+    if [[ $vf ]]; then
+        vf=$vf${subrender:+,expand=::::1}
+        [[ $harddup ]] && ! echo $vf | grep -q harddup && vf=$vf,harddup
+        for ((a=0;a<${#MPLAYEROPT[*]};a++)); do
+            [[ ${MPLAYEROPT[a]} = -vf ]] && MPLAYEROPT[a+1]=${vf#-vf }
+        done
+    else
+        vf="-vf ${subrender:+expand=::::1}${harddup:+${subrender:+,}harddup}"
+        MPLAYEROPT=( "${MPLAYEROPT[@]}" $vf )
+    fi
+fi
 
 ###############################################################################
-#### redirect stdout and stderr to the debug file
+#### debug part
 ###############################################################################
 if ((DEBUG)); then
+    if ((DEBUG & 1)); then
+        #### redirect stdout and stderr to the debug file
     exec 3>&1
     rm -f "$output".debug.fifo
     mkfifo "$output".debug.fifo
     tee "$output".debug <"$output".debug.fifo >&3 &
     PROCTEE=$!
     exec &>"$output".debug.fifo
-    ((DEBUG==2)) && set -x
+        trap 'rm "$output".debug.fifo' 0
+    fi
+    if ((DEBUG & 2)); then
+        #### catch mplayer/mencoder errors
+        mplayer () {
+            command mplayer "$@"
+            ret=$? ; (( ret )) && error_line "$FUNCNAME $*" || true
+        }
+        mencoder () {
+            command mencoder "$@"
+            ret=$? ; (( ret )) && error_line "$FUNCNAME $*" || true
+        }
+    fi
+    ((DEBUG & 4)) && set -x
 fi
 
 ###############################################################################
@@ -801,17 +851,25 @@ fi
 ###############################################################################
 #### mplayer/mencoder
 for a in mplayer mencoder ; do
-    type $a &>/dev/null || ! echo "**ERROR: [$PROGNAME] $a missing, install $(echo ${a:0:2} | tr '[:lower:]' '[:upper:]')${a:2}" || exit 1
+    type -f $a &>/dev/null || ! echo "**ERROR: [$PROGNAME] $a missing, install $(echo ${a:0:2} | tr '[:lower:]' '[:upper:]')${a:2}" || exit 1
 done
 #### output stream name check
 [[ ! $output ]] && echo "**ERROR: [$PROGNAME] name of the output stream missing (-o name)" && exit 1
 #### unspecified video norm
-[[ ! $videonorm && step -gt 1 && ! ( $mpeg && ${encode%,*} == ?:0:? && ! $menu ) ]] && \
+[[ ! $videonorm && step -gt 1 && ! ( $mpeg && ${encode%,*} == ?:0:? && ! $menu ) && ${#TITLESET[*]} -eq 0 ]] && \
   echo "**ERROR: [$PROGNAME] you must specify a video norm (-n n|p|s)" && exit 1
+#### libfaac check
+if [[ ${encode%,*} == 8:?:? ]]; then
+    ! mencoder -oac help 2>/dev/null | grep -q faac && echo "**ERROR: [$PROGNAME] missing libfaac support in mencoder [-encode 8:m:i]" && exit 1
+fi
+#### mpeg4
+if [[ $vcodec = mpeg4 ]]; then
+    [[ $pictsrc && $step -gt 1 && $mpeg ]] && echo "**ERROR: [$PROGNAME] -vcodec mpeg4, -mpeg and mf://file are not compatible" && exit 1
+fi
 #### pictsrc
 if [[ $pictsrc ]]; then
     [[ $slideaudio != /dev/null && ${encode%,*} == 0:?:? && $mpeg ]] && \
-      echo "**ERROR: [$PROGNAME] -encode 0:m:i is not compatible with mf:// in Mpeg Mode" && exit 1
+      echo "**ERROR: [$PROGNAME] -encode 0:m:i is not compatible with mf:// in MPEG Mode" && exit 1
     [[ $audioonly ]] && echo "**ERROR: [$PROGNAME] -audioonly does not work with mf://" && exit 1
 fi
 #### -encode 1:m:i is not allowed
@@ -822,9 +880,11 @@ fi
 ###############################################################################
 #### missing toolame support
 if [[ ${encode%,*} == 7:?:? ]]; then
-    if ! mencoder -oac help 2>/dev/null | grep -q toolame ; then
+    if ! mencoder -oac help 2>/dev/null | grep -q t[wo]olame ; then
         encode=4:${encode#?:}
-        pre_log "++ WARN: [$PROGNAME] missing toolame support in mencoder, setting -encode $encode"
+        do_log "++ WARN: [$PROGNAME] missing toolame support in mencoder, setting -encode $encode"
+    else
+        mencoder -oac help 2>/dev/null | grep -q toolame && TOOLAME=toolame || TOOLAME=twolame
     fi
 fi
 
@@ -842,8 +902,9 @@ if [[ $encode ]]; then
         2|3|5) AFMT=mp3 ;;
         4|7)   AFMT=mp2 ;;
         6)     AFMT=ac3 ;;
+        8)     AFMT=aac ;;
     esac
-    [[ $AFMT ]] && eval : ${audioformat:-\${$AFMT:=copy}}
+    [[ $AFMT ]] && eval : ${audioformat:-\${$AFMT:=copy\}}
 fi
 : ${frameformat:=VCD}
 : ${audioformat:=${AFMT:-mp2}}
@@ -852,6 +913,7 @@ fi
 : ${mp3:=lame}
 : ${ac3:=mencoder}
 : ${dts:=copy}
+: ${aac:=faac}
 case $audioformat in
     mp1)
         case ${mpegchannels:-2} in
@@ -882,6 +944,7 @@ case $audioformat in
             6) : ${abr:=448} ;;
         esac
         ;;
+    aac) : ${abr:=$((${mpegchannels:-2}*48))} ;;
     #### mplex fails with asr != 48000 for lpcm
     lpcm) : ${asr:=48000} ${abr:=$((asr*16*${mpegchannels:-2}/1024))} ;;
 esac
@@ -892,7 +955,7 @@ if [[ ${encode%,*} == 0:?:? && ${!audioformat} = copy ]]; then
     fi
 fi
 [[ $mpeg && ${encode%,*} == ?:0:? ]] && \
-  vbr=$(($(mp_identify "${MPLAYEROPT[@]}" ${dvddev:+-dvd-device "$dvddev"} "$@" | grep '^ID_VIDEO_BITRATE' | cut -f2 -d=)/1000))
+  vbr=$(($(id_find ID_VIDEO_BITRATE "${MPLAYEROPT[@]}" ${dvddev:+-dvd-device "$dvddev"} "$@")/1000))
 case $frameformat in
     DVD) : ${asr:=48000} ;;
     *)   : ${asr:=44100} ;;
@@ -902,12 +965,11 @@ case $videonorm in
         : ${vfr:=3}
         ;;
     n)
-        #FIXME remove the encode 3 check once the mpeg muxer is fixed
-        [[ $frameformat != VCD && ! $vfr && $hispeed -eq 0 && ! $testmca && ${encode%,*} != ?:3:? ]] && vfr=1 && telecine=1
+        [[ $frameformat != VCD && ! $vfr && $hispeed -eq 0 && ! $testmca ]] && vfr=1 && telecine=1
         : ${vfr:=4}
         ;;
 esac
-[[ $encode ]] && : ${vfr:=2}
+[[ $encode && ${encode%,*} != ?:0:? ]] && : ${vfr:=2}
 if [[ ! $ofps ]]; then
     case $vfr in
         1) ofps=24000/1001 ;;
@@ -945,9 +1007,9 @@ fi
 ###############################################################################
 #### -ao pcm arguments
 ###############################################################################
-PCM=(pcm:waveheader:file="$output".wav)
-PCMTMP=(pcm:waveheader:file="$output".tmp)
-PCMNOWYUV=(pcm:nowaveheader:file=/dev/fd/4)
+PCMWAV=(pcm:waveheader:fast:file=%$((${#output}+4))%"$output".wav)
+PCMTMP=(pcm:waveheader:fast:file=%$((${#output}+4))%"$output".tmp)
+PCMNOWYUV=(pcm:nowaveheader:fast:file=/dev/fd/4)
 
 [[ $dvddev ]] && MPLAYEROPT=( "${MPLAYEROPT[@]}" -dvd-device "$dvddev" )
 
@@ -966,10 +1028,10 @@ MPLAYERINFO=( "${MPLAYEROPT[@]}" )
 #### mf:// case
 if [[ $pictsrc ]]; then
     if [[ $slideaudio && $slideaudio != /dev/null ]]; then
-        [[ $(mp_identify "$slideaudio" | grep ID_AUDIO_RATE | cut -f2 -d=) != $asr ]] && SRATE="-srate $asr -af-adv force=1" || SRATE=
+        [[ $(id_find ID_AUDIO_RATE "$slideaudio") != $asr ]] && SRATE="-srate $asr -af-adv force=1" || SRATE=
         CLEAN[${#CLEAN[*]}]="$output".wav
-        mplayer "$slideaudio" $SRATE -vo null -vc dummy -ao "${PCM[@]}" $VOL $ac $afm ${mpegchannels:+-channels $mpegchannels -af channels=$mpegchannels}
-        MPLAYEROPT=( "${MPLAYEROPT[@]}" -fps 1/$(mp_identify "$output".wav | sed -n '/^ID_LENGTH=/s/.*=//p') -audiofile "$output".wav )
+        mplayer "$slideaudio" $SRATE -vo null -vc dummy -ao "${PCMWAV[@]}" $afm ${mpegchannels:+-channels $mpegchannels -af channels=$mpegchannels}
+        MPLAYEROPT=( "${MPLAYEROPT[@]}" -fps 1/$(id_find ID_LENGTH "$output".wav) -audiofile "$output".wav )
     else
         if [[ $slideaudio == /dev/null ]]; then
             MPLAYEROPT=( "${MPLAYEROPT[@]}" -fps $slidefps )
@@ -983,14 +1045,14 @@ fi
 #### MENCODERARG is used for mencoding, vobsub dumping
 MENCODERARG=( "${MPLAYEROPT[@]}" ${frames:+-frames $frames} )
 
-MENCODERARG=( "${MENCODERARG[@]}" "${MENCODEROPT[@]}" ${endpos:+-endpos $endpos} )
+MENCODERARG=( "${MENCODERARG[@]}" "${MENCODEROPT[@]}" ${endpos:+-endpos $endpos} ${ofps:+-ofps $ofps} )
 if [[ $mpeg && $mpegchannels ]]; then
     MENCODERARG=( "${MENCODERARG[@]}" -channels $mpegchannels )
-else
-    MENCODERARG=( "${MENCODERARG[@]}" ${channels:+-channels $channels} )
+    af=$(echo "${af:--af }${af:+,}" | sed 's/channels=[^,]*,//')channels=$mpegchannels
+elif [[ $channels ]]; then
+    MENCODERARG=( "${MENCODERARG[@]}" -channels $channels )
+    af=$(echo "${af:--af }${af:+,}" | sed 's/channels=[^,]*,//')channels=$channels
 fi
-#### if video copy then no ofps
-[[ ${encode%,*} != ?:0:? ]] && MENCODERARG=( "${MENCODERARG[@]}" ${ofps:+-ofps $ofps} )
 
 YUVSCALEROPT="-v 1 -n $videonorm ${scale:+-O $frameformat} $YUVSCALEROPT"
 
@@ -1075,18 +1137,27 @@ esac
 if [[ $encode ]]; then
     OPTIONS="-noskiplimit -sws $((hispeed?1:7))"
     if [[ $mpeg ]]; then
-        # mencoder can put in the mpeg container:
+        # mencoder can put in the MPEG container:
         # video: mpeg1, mpeg2, mpeg4
         # audio: mp1, mp2, mp3, ac3, aac (not yet: lpcm, dts)
         [[ ${encode%,*} != ?:0:? ]] && : ${mpegaspect:=2}
         #MUX="-mpegopts ${mpegaspect:+vaspect=${ASPECT[mpegaspect]}:}:vbitrate=${vbr}"
-        MUX="-mpegopts ${mpegaspect:+vaspect=${ASPECT[mpegaspect]}:}"
-        MUX2="${telecine:+:telecine}"
+        MUX="-mpegopts "
+        if [[ $telecine ]]; then
+            if [[ $vcodec = mpeg2video || ! $vcodec && $frameformat != VCD ]]; then
+                if [[ $vfr == [12] ]]; then
+                    [[ $videonorm = n ]] && MUX2=":telecine" || MUX2=":film2pal"
+                else
+                    do_log "++ WARN: [$PROGNAME] telecine only works with 24000/1001 or 24 fps, disabling it"
+                fi
+            else
+                do_log "++ WARN: [$PROGNAME] telecine only works for MPEG-2, disabling it"
+            fi
+        fi
         case $frameformat in
             VCD)  MUX="${MUX}format=xvcd"  LAVC="vcodec=${vcodec:-mpeg1video}${LAVC:-:vrc_buf_size=327:vrc_minrate=${vbr}:vrc_maxrate=${vbr}}" ;;
             SVCD) if [[ $trick ]]; then MUX="${MUX}format=xvcd" ; else 
-                  MUX="${MUX}format=xsvcd" ; fi ; 
-                                           LAVC="vcodec=${vcodec:-mpeg2video}:vrc_buf_size=917" ;;
+                  MUX="${MUX}format=xsvcd" ; fi ; LAVC="vcodec=${vcodec:-mpeg2video}:vrc_buf_size=917" ;;
             DVD)  MUX="${MUX}format=dvd"   LAVC="vcodec=${vcodec:-mpeg2video}:vrc_buf_size=1835" ;;
         esac
         case $vfr in
@@ -1096,8 +1167,8 @@ if [[ $encode ]]; then
         esac
         [[ $frameformat = VCD && ! $bframes ]] && LAVC="$LAVC:vmax_b_frames=2"
         [[ $mpegmbr ]] && [[ $mpegmbr -lt $vbr ]] && mpegmbr=$vbr
-        #### -a 1 really means aspect undefined (do not scale), not aspect 1:1
-        [[ $vcodec != mpeg4 || $mpegaspect != 1 ]] && LAVC="${LAVC}:aspect=${ASPECT[mpegaspect]}"
+        #### -a 1 is SAR=1 (do not scale), not DAR=1
+        [[ $mpegaspect != 1 ]] && LAVC="${LAVC}:aspect=${ASPECT[mpegaspect]}"
         LAVC="${LAVC}${mpegmbr:+:vrc_maxrate=$mpegmbr}${inter_matrix:+:inter_matrix=${inter_matrix}}${intra_matrix:+:intra_matrix=${intra_matrix}}"
         OF="-of mpeg"
         NOSKIP=-noskip
@@ -1138,12 +1209,14 @@ if [[ $encode ]]; then
         4:?:?) AUDIOPASS="-oac lavc -lavcopts acodec=mp2:abitrate=$abr" ;;
         5:?:?) AUDIOPASS="-oac lavc -lavcopts acodec=mp3:abitrate=$abr" ;;
         6:?:?) AUDIOPASS="-oac lavc -lavcopts acodec=ac3:abitrate=$abr" ;;
-        7:?:?) AUDIOPASS="-oac toolame -toolameopts br=$abr" ;;
+        7:?:?) AUDIOPASS="-oac $TOOLAME -${TOOLAME}opts br=$abr" ;;
+        8:?:?) AUDIOPASS="-oac faac -faacopts ${acustom:-br=$abr}" ;;
         3:?:?,*) AUDIOPASS="-oac mp3lame -lameopts preset=${encode#*,}" ;;
         4:?:?,*) AUDIOPASS="-oac lavc -lavcopts acodec=mp2:abitrate=${encode#*,}" ;;
         5:?:?,*) AUDIOPASS="-oac lavc -lavcopts acodec=mp3:abitrate=${encode#*,}" ;;
         6:?:?,*) AUDIOPASS="-oac lavc -lavcopts acodec=ac3:abitrate=${encode#*,}" ;;
-        7:?:?,*) AUDIOPASS="-oac toolame -toolameopts br=${encode#*,}" ;;
+        7:?:?,*) AUDIOPASS="-oac $TOOLAME -${TOOLAME}opts br=${encode#*,}" ;;
+        8:?:?,*) AUDIOPASS="-oac faac -faacopts ${acustom:-br=${encode#*,}}" ;;
     esac
     encode=${encode%,*}
     case $encode in
@@ -1155,7 +1228,7 @@ if [[ $encode ]]; then
     esac
     ((turbo)) && turbo=:turbo || turbo=
     PASS=${encode##*:}
-    [[ $normalize && $encode != 0:?:? ]] && AUDIOPASS="-af volnorm $AUDIOPASS"
+    [[ $normalize && $encode != 0:?:? ]] && af=${af:--af }${af:+,}volnorm
 fi
 
 
@@ -1191,9 +1264,8 @@ file_size () { #fsize,fint,ffrac,fpre
     fint=$fsize
     ffrac=0
     while ((fint>=1024)) ; do
-        ((fint/1024 < 1024)) && fint=$((fint+51))
+        ((fint/1024 < 1024)) && ffrac=$((( fint+=51 )%1024))
         i=$((++i))
-        ffrac=$((fint%1024))
         fint=$((fint/1024))
     done
     ffrac=$((ffrac*10/1024))
@@ -1206,14 +1278,15 @@ show_file_info () {
 }
 ###############################################################################
 show_finalvideo_info () {
-    local codec TYPE i VIDEO OUT ASPECT
+    local codec TYPE i VIDEO OUT ASPECT CH FAAC SUBST
+    SUBST=
     VIDEO="$(mplayer -nocache -frames 0 -vo null -nosound "$2" 2>/dev/null | grep "^VIDEO:")"
     if [[ ! $VIDEO ]]; then
-        # mpegs with mpeg4 video do not show all the video informations in one line,
+        # MPEGs with MPEG-4 video do not show all the video informations in one line,
         # assebmling the informations (kbps is missing):
         OUT="$(mplayer -nocache -frames 1 -vo null -nosound -v "$2" 2>/dev/null)"
         if echo "$OUT" | grep -q '^\[V].*fourcc:0x10000004' ; then
-            VIDEO="VIDEO:  MPEG4  $(echo "$OUT" | awk '$1=="VO:"&&$2=="[null]"{print $3}')"
+            VIDEO="VIDEO:  MPEG-4  $(echo "$OUT" | awk '$1=="VO:"&&$2=="[null]"{print $3}')"
             ASPECT=$(echo "$OUT" | awk '$1=="Movie-Aspect"{print $3}')
             case $ASPECT in
                 undefined) VIDEO="$VIDEO  (aspect 1)" ;;
@@ -1229,9 +1302,26 @@ show_finalvideo_info () {
     #### removed -vc dummy
     for i in $(mplayer -vo null -ao null -nocache -frames 1 -v "$2" 2>/dev/null | awk '/==> Found audio str/{print $NF}' | sort -n) ; do
         echo -n "   $1: AUDIO[$i]: " >>"$output".log
-        codec=$(mplayer -ac mp3, -nocache -frames 0 -v -ao null -vo null "$2" -aid $i 2>/dev/null | sed '/Selected audio codec:/!d;s/[^(]*(//;s/).*//;s/.* //')
+        codec=$(mplayer -ac mp3, -nocache -frames 0 -v -ao null -vo null "$2" -aid $i 2>/dev/null | \
+          sed '/Selected audio codec:/!d;s/[^(]*(//;s/).*//;s/AAC.*/& AAC/;s/.* //')
+        #### AAC info are insufficient/incorrect
+        if [[ $codec = AAC ]]; then
+            CH=$(mplayer -nocache -frames 0 -v -ao null -vo null "$2" -aid $i 2>/dev/null | awk '/FAAD: Negotiated samplerate:/{print $NF}')
+            if type &>/dev/null faad ; then
+                mplayer -dumpaudio -dumpfile "$output".audio -aid $i "$2" 2>/dev/null
+                FAAC=$(faad -i "$output".audio 2>&1 | tail -2 | head -n 1)
+                #ADTS, 4.087 sec, 103 kbps, 44100 Hz
+                rm -f "$output".audio
+                SUBST="s/AAC.*/AAC:$(echo "$FAAC" | sed 's/.*,\([^,]*Hz\).*/\1/'), "
+                SUBST="${SUBST}$CH ch, $(echo "$FAAC" | sed 's/,.*//'),"
+                SUBST="${SUBST}$(echo "$FAAC" | sed 's/.*,\([^,]*kbps\).*/\1/')"
+                SUBST="${SUBST}/;"
+            else
+                SUBST="s/2 ch,/$CH ch,/;"
+            fi
+        fi
         mplayer -ac mp3, -nocache -frames 0 -v -ao null -vo null "$2" -aid $i 2>/dev/null | sed '/^Opening audio decode/,/^AUDIO:/!d;s/\r//g' | \
-          grep -e '^AC3:' -e '^MPEG' -e '^AUDIO:' | sed 's/AUDIO/'"$codec"'/;q' >>"$output".log
+          grep -e '^AC3:' -e '^MPEG' -e '^AUDIO:' | sed 's/AUDIO/'"$codec"'/;'"$SUBST"'q' >>"$output".log
     done
     TYPE=$1
     shift
@@ -1247,6 +1337,8 @@ video_duration () {
 job_exit () {
     EXIT=$?
         status_bit mpg || [[ ! -f ${output}.mpg && ! -f ${output}01.mpg ]] || show_finalvideo_info  "MPEG" "${output}"*.mpg
+        [[ $usesbr ]] && ((DEBUG && usesbr>6)) && awk -v u=$usesbr -v f=$fsize \
+          'BEGIN{b=u*1024*1024;printf("--DEBUG: [usesbr] target: %dMB (%d bytes), error: %f%%\n",u,b,(b-f)*100/b)}' >>"$output".log
     sec=$(($(pr_time)-STARTTIME))
     echo " JOBEND: $output $(pr_date) ($((sec/3600))h$((sec/60%60))m$((sec%60))s)" >>"$output".log
     rm -f "${CLEAN[@]}" psnr_??????.log
@@ -1259,13 +1351,18 @@ job_exit () {
     ((DEBUG)) && rm -f "$output".debug.fifo && kill $PROCTEE
 }
 ###############################################################################
-mplayer_log () {
-    tee -a /dev/stderr | sed 's/.*\r//' | \
-      awk '/^PSNR:|^M[EP][ln]|^There are |^\[open]|^==> |^Recommended video bitrate/{sub(/^/,"   INFO: ['"$1"'] ");print}' >>"$output".log
+me_log () {
+    rm -f "$output".fifo
+    mkfifo "$output".fifo
+    tee -a /dev/stderr <"$output".fifo | sed 's/.*\r//' | \
+      awk '/^PSNR:|^M[EP][ln]|^There are |^\[open]|^audio stream:|^number of|^subtitle|^==> |^Recommended video bitrate/{sub(/^/,"   INFO: [mencoder] ");
+        print}' >>"$output".log &
 }
 ###############################################################################
-mp_single_log () {
-    tee -a /dev/stderr | sed 's/.*\r//;/'"$2"'/!d;s/^/   INFO: ['$1'] /' >>"$output".log
+me_bit_log () {
+    rm -f "$output".fifo
+    mkfifo "$output".fifo
+    tee -a /dev/stderr <"$output".fifo | sed 's/.*\r//;/^Recommended video bitrate/!d;s/^/   INFO: [mencoder] /' >>"$output".log &
 }
 ###############################################################################
 check_abr () {
@@ -1365,12 +1462,40 @@ debug_line () {
     echo "--DEBUG: [$PROGNAME] $2($1) $(eval echo $(sed -n $1p "$PROGFILE" | sed 's/ |.*//;s/.>.*//;s/</\\\</'))" >>"$output".log
 }
 ###############################################################################
+error_line () {
+    echo "--DEBUG: [$PROGNAME] $1"
+    echo "**ERROR: [$PROGNAME] there has been an error during the execution of the previous line, this should not happen"
+    echo "possible causes:"
+    echo "  0) missing or misspelled input stream"
+    echo "  1) the input stream is corrupted"
+    echo "       -> try a different input stream"
+    echo "  2) one of the options used has triggered a bug present only on your combination of architecture/compiler/distribution"
+    echo "       -> try to recompile MPlayer with a different compiler version or try another distribution"
+    if ((SVN)); then
+        echo "  3) one of the options used is not valid or is buggy for your SVN/unsupported version of MPlayer/MEncoder"
+        echo "       -> check MPlayer's man page and/or try a supported release of MPlayer"
+    fi
+    echo
+    echo "submit a bugreport if you think this is a bug in $PROGNAME"
+    exit $ret
+}
+###############################################################################
 check_mencoder_abr () {
     local codec lib ASR
-    codec=([4]=mp2 mp3 ac3 mp2)
-    lib=([4]=libavcodec libavcodec libavcodec libtoolame)
+    codec=([4]=mp2 mp3 ac3 mp2 aac)
+    lib=([4]=libavcodec libavcodec libavcodec lib${TOOLAME} libfaac)
     ASR=${encode%%:*}
     check_abr ${codec[ASR]} $1 $2 || ! echo "**ERROR: [$PROGNAME] ${lib[ASR]} does not support $2 kbps / $1 Hz for ${codec[ASR]}" || exit 1
+}
+###############################################################################
+is_film2pal () {
+    local a
+    a=$(mplayer -nocache "$@" -vo null -nosound -benchmark -frames 60 -noquiet 2>/dev/null | tr '\015' '\012' | tail | \
+      awk -F/ '$1~/^V:/{s=$1;t=$2}END{match(s,/ [0-9]+$/);n=substr(s,RSTART+1);match(t,/[0-9]+ /);m=substr(t,1,RLENGTH-1);r=n/m;if(r>1.02)print "24"}')
+    [[ $a ]] && a=$(mplayer -nocache "$@" -vo null -nosound -benchmark -frames 1500 -noquiet 2>/dev/null | tr '\015' '\012' | tail | \
+      awk -F/ '$1~/^V:/{s=$1;t=$2}END{match(s,/ [0-9]+$/);n=substr(s,RSTART+1);match(t,/[0-9]+ /);m=substr(t,1,RLENGTH-1);r=n/m;
+      if(r>1.042)print "24000/1001fps";if(r<1.042&&r>1.041)print "24fps"}')
+    echo "$a"
 }
 
 ###############################################################################
@@ -1380,20 +1505,30 @@ check_mencoder_abr () {
 #### libtoolame asr/abr
 #### libmp3lame asr
 #### no check is done on the other channel in case of multiaudio
-if [[ $encode == [2-7]:?:? ]]; then
+if [[ $encode == [2-8]:?:? ]]; then
     if [[ $srate ]]; then
         r=$srate
     else
-        r=$(mp_identify "${MPLAYERINFO[@]}" | sed -n '/^ID_AUDIO_RATE=/s/.*=//p')
+        r=$(id_find ID_AUDIO_RATE "${MPLAYERINFO[@]}")
+        if [[ ! $r ]]; then
+            do_log "++ WARN: [$PROGNAME] failure to detect the audio sample rate of the input stream"
+            [[ ! $multiaudio && ! $audioid ]] && do_log "++ WARN: [$PROGNAME] if your source video does not have audio use -encode 0:${encode#*:}" || \
+              do_log "++ WARN: [$PROGNAME] probably is incorrect the audio stream selected with -${audioid:+aid}${multiaudio:+multiaudio}"
+        fi
         if [[ $mpeg && ! $usespeed ]]; then
             case $frameformat in
-                *VCD) ((r != 44100)) && pre_log "++ WARN: [$PROGNAME] $frameformat standard requires 44100kHz audio, add -srate 44100" ;;
-                DVD)  ((r != 48000)) && pre_log "++ WARN: [$PROGNAME] $frameformat standard requires 48000kHz audio, add -srate 48000" ;;
+                *VCD) ((r != 44100)) && do_log "++ WARN: [$PROGNAME] $frameformat standard requires 44100kHz audio, add -srate 44100" ;;
+                DVD)  ((r != 48000)) && do_log "++ WARN: [$PROGNAME] $frameformat standard requires 48000kHz audio, add -srate 48000" ;;
             esac
         fi
     fi
     if [[ $encode == [4-7]:?:? ]]; then
-        check_mencoder_abr $r ${AUDIOPASS##*=}
+        check_mencoder_abr "$r" ${AUDIOPASS##*=}
+    elif [[ $encode == 8:?:? ]]; then
+        case $r in
+            8000|11025|12000|16000|22050|24000|32000|44100|48000|64000|88200|96000) : ;;
+            *) echo "**ERROR: [$PROGNAME] libfaac does not support $r Hz sample rate" ; exit 1 ;;
+        esac
     else
         case $r in
             8000|11025|12000|16000|22050|24000|32000|44100|48000) : ;;
@@ -1401,12 +1536,12 @@ if [[ $encode == [2-7]:?:? ]]; then
         esac
     fi
 fi
-#### copy of non mpeg audio in a VCD
+#### copy of non-MPEG audio in a VCD
 if [[ $step -gt 1 && $frameformat = VCD && $encode == 0:?:? && ( $mpeg || ${!audioformat} = copy ) && ! $testmca && ! $pictsrc ]]; then
-    a=$(mp_identify "${MPLAYERINFO[@]}" | sed -n '/^ID_AUDIO_CODEC=/s/.*=//p')
+    a=$(id_find ID_AUDIO_CODEC "${MPLAYERINFO[@]}")
     [[ $a != mp3 ]] && echo "**ERROR: [$PROGNAME] you cannot copy $a audio in a $frameformat" && exit 1
 fi
-#### mpegchannels > 2 only with ac3
+#### mpegchannels > 2 only with ac3 and aac
 [[ $mpeg && ${mpegchannels:-2} -gt 2 && $encode == [2-57]:?:? ]] && CODEC=([2]=mp3 mp3 mp2 mp3 [7]=mp2) && \
   echo "**ERROR: [$PROGNAME] audio codec ${CODEC[${encode%%:*}]} selected with -encode $encode do not support more than 2 audio channels" && exit 1
 ###############################################################################
@@ -1416,6 +1551,7 @@ trap 'job_exit' 0
 CLEAN[${#CLEAN[*]}]="$output".fifo
 
 skip=0
+LG=1
 
 ###############################################################################
 #### start the log file
@@ -1432,7 +1568,7 @@ if [[ ! $resume ]] ; then
           echo -n "Titleset Mode"
       else
           if [[ $mpeg ]]; then
-              [[ $testmca ]] && echo -n "Testmca Mode" || echo -n "Mpeg Mode"
+              [[ $testmca ]] && echo -n "Testmca Mode" || echo -n "MPEG Mode"
           fi
       fi
       echo "${cpu:+ (cpu=$cpu)}"
@@ -1450,32 +1586,23 @@ fi
 #### volume and audio copy
 if [[ $volume ]]; then
     [[ $encode == 0:?:? && ( ${!audioformat} = copy || $step -eq 1 || $mpeg ) || ${!audioformat} = copy && ! $encode ]] && \
-      echo "++ WARN: [$PROGNAME] you cannot modify the volume of the output audio stream if you are making a copy the input audio stream" | \
-      tee -a "$output".log
+      do_log "++ WARN: [$PROGNAME] you cannot modify the volume of the output audio stream if you are making a copy the input audio stream"
 fi
 #### cpu and bframes
 if [[ $cpu && $bframes ]]; then
-    ((bframes)) && echo "++ WARN: [$PROGNAME] with bframes>0 the encoding will be faster with cpu=1" | tee -a "$output".log
+    ((bframes)) && do_log "++ WARN: [$PROGNAME] with bframes>0 the encoding will be faster with cpu=1"
 fi
 #### -usespeed
 if [[ $usespeed && ( $encode == 0:?:? || $encode == ?:0:? ) ]]; then 
-    echo -en "++ WARN: [$PROGNAME] -usespeed may not work if you do not encode both audio and video.\nPress return to proceed" | tee -a "$output".log && read
+    do_log "++ WARN: [$PROGNAME] -usespeed may not work if you do not encode both audio and video." && echo -n "Press return to proceed" && read
 fi
 #### total br
 [[ $encode != ?:0:? ]] && ((step>1&&abr*audiostream*1024/1000+vbr>MAXBR)) && \
-  echo "++ WARN: [$PROGNAME] total video+audio bitrate ($vbr+$((abr*audiostream*1024/1000))kbps) exceed $frameformat specifications (${MAXBR}kbps)" | \
-  tee -a "$output".log
+  do_log "++ WARN: [$PROGNAME] total video+audio bitrate ($vbr+$((abr*audiostream*1024/1000))kbps) exceed $frameformat specifications (${MAXBR}kbps)"
 #### -slideaudio/single picture
 if [[ $slideaudio && $slideaudio != /dev/null && $pictsrc ]]; then
     ((${#PICTSRC[*]}!=1||$(ls ${PICTSRC[0]} | wc -l)!=1)) && \
-      echo "++ WARN: [$PROGNAME] you should use only one source image if you use the option -slideaudio" | tee -a "$output".log
-fi
-#FIXME remove once the mpeg muxer is fixed
-#### NTSC telecined with B-frames
-if [[ $mpeg && $telecine && $videonorm = n && ( $frameformat = DVD || $frameformat = SVCD ) && ( $bframes -gt 0 || ! $bframes && $encode == ?:3:? ) ]]; then
-    echo "++ WARN: [$PROGNAME] mpeg telecined and with B-frames are not created correctly by mencoder, do not use telecine or do not use B-frames" | \
-      tee -a "$output".log
-    echo -n "Press return to proceed" && read
+      do_log "++ WARN: [$PROGNAME] you should use only one source image if you use the option -slideaudio"
 fi
 
 ###############################################################################
@@ -1509,11 +1636,12 @@ fi
       txt=${txt:+(custom ${txt} options)}
       echo $txt
   fi
-  [[ ! $resume ]] && { [[ $audioonly ]] && mp_identify "$audioonly" || mp_identify "${MPLAYERINFO[@]}" ; } | sed -n '/^ID_/s/^/   INFO: [identify] /p' | uniq
+  [[ ! $resume ]] && { [[ $audioonly ]] && mp_identify "$audioonly" || mp_identify "${MPLAYERINFO[@]}" -frames 1 ; } | \
+    sed -n '/^ID_/s/^/   INFO: [identify] /p' | uniq
   VARS=(${encode:+MENCODERARG} MPLAYERYUVOPT)
   VARS=(${encode:+MENCODERARG})
   for ((i=0;i<${#VARS[*]};i++)) ; do
-      s="INFO: [${VARS[i]}] \${${VARS[i]}[*]}"
+      s="INFO: \[${VARS[i]}] \${${VARS[i]}[*]}"
       eval echo "\ \ \ $s"
   done
 } >>"$output".log
@@ -1529,10 +1657,15 @@ fi
 ###############################################################################
 #### put the volume in DB
 ###############################################################################
-[[ $volume ]] && volume="-af volume=$(awk -v a=$volume 'BEGIN{if(a>0) print 20*log(a)/log(10) ; else print 0}')"
+if [[ $volume ]]; then
+    volume=$(awk -v a=$volume 'BEGIN{if(a>0) print 20*log(a)/log(10) ; else print 0}')
+    af=${af:--af }${af:+,}volume=$volume
+fi
+
+[[ ${mver:0:5} = 1.0rc ]] || SVN=1
 
 ###############################################################################
-#### NTSC telecined mpeg copy/speed encoding change
+#### telecined (NTSC/PAL) MPEG copy/speed encoding change
 ###############################################################################
 if [[ $mpeg && ( $encode == ?:0:? || $usespeed ) || $usespeed && ! $encode && $step -gt 1 ]]; then
     FPS=($(grep ID_VIDEO_FPS "$output".log | cut -f2 -d=) [1]=23.976 24.000 25.000 29.970 30.000 50.000 59.940 60.000)
@@ -1540,19 +1673,23 @@ if [[ $mpeg && ( $encode == ?:0:? || $usespeed ) || $usespeed && ! $encode && $s
         a=$(awk -v a=${FPS[0]} -v b=${FPS[i]} 'BEGIN{if (sqrt((a-b)*(a-b))<.02) print b}')
         if [[ $a ]]; then
             if [[ ${FPS[0]} != ${FPS[i]} ]]; then
-                echo "++ WARN: [$PROGNAME] input video frame rate is not exactly ${FPS[i]}fps" | tee -a "$output".log
+                do_log "++ WARN: [$PROGNAME] input video frame rate is not exactly ${FPS[i]}fps"
                 FPS[0]=${FPS[i]}
             fi
             FPS[10]=$i
             break
         fi
     done
-    [[ $usespeed && $i -eq 9 ]] && \
-      echo "++ WARN: [$PROGNAME] input video frame rate is not a valid NTSC/PAL value; disabling -usespeed" | tee -a "$output".log && usespeed=
+    [[ $usespeed && $i -eq 9 ]] && do_log "++ WARN: [$PROGNAME] input video frame rate is not a valid NTSC/PAL value; disabling -usespeed" && usespeed=
     
     if [[ ${FPS[0]} = ${FPS[4]} || ${FPS[0]} = ${FPS[5]} ]]; then
         FPS[9]=$(mplayer -nocache -quiet "${MPLAYERINFO[@]}" -vo null -nosound -benchmark -frames 60 2>/dev/null | awk '/^demux_mpg:/{print $2}')
         [[ ${FPS[9]} = 24fps || ${FPS[9]} = 24000/1001fps ]] && FPS[10]=$((FPS[10]-3))
+    elif [[ ${FPS[0]} = ${FPS[3]} ]]; then
+        FPS[9]=$(is_film2pal "${MPLAYERINFO[@]}")
+        if [[ ${FPS[9]} ]]; then
+            [[ ${FPS[9]} = 24fps ]] && FPS[10]=2 || FPS[10]=1
+        fi
     fi
     if [[ $usespeed ]]; then
         if ((vfr!=${FPS[10]})); then
@@ -1569,15 +1706,16 @@ if [[ $mpeg && ( $encode == ?:0:? || $usespeed ) || $usespeed && ! $encode && $s
             fi
             MENCODERARG=( -speed $a -srate $asr -af-adv force=1 "${MENCODERARG[@]}" )
             MPLAYERYUVOPT=("${MPLAYERYUVOPT[@]}" -speed $a )
-            echo "   INFO: [usespeed] using speed factor $a" | tee -a "$output".log
+            do_log "   INFO: [usespeed] using speed factor $a"
         fi
-    elif [[ ${FPS[0]} = ${FPS[4]} || ${FPS[0]} = ${FPS[5]} ]]; then
+    elif [[ ${FPS[0]} = ${FPS[4]} || ${FPS[0]} = ${FPS[5]} || ${FPS[0]} = ${FPS[3]} ]]; then
         if [[ ${FPS[9]} = 24fps || ${FPS[9]} = 24000/1001fps || $telesrc ]]; then
             { echo -n "   INFO: [$PROGNAME] "
               [[ ${FPS[9]} = 24fps || ${FPS[9]} = 24000/1001fps ]] && echo -n "detected" || echo -n "user selected"
+              [[ ${FPS[0]} = ${FPS[3]} ]] && echo -n " PAL" || echo -n " NTSC"
               echo " telecined source" 
             } | tee -a "$output".log
-            MENCODERARG=( "${MENCODERARG[@]}" -ofps 24000/1001 -mc 0 )
+            [[ ${FPS[10]} = 1 ]] && MENCODERARG=( "${MENCODERARG[@]}" -ofps 24000/1001 -mc 0 ) || MENCODERARG=( "${MENCODERARG[@]}" -ofps 24 -mc 0 )
         fi
     fi
 fi
@@ -1592,8 +1730,8 @@ if [[ $mpegfixaspect && $step -gt 1 ]]; then
     [[ $mpegaspect == 1 ]] && b=$(awk -v a=$H_RES -v b=$V_RES 'BEGIN{printf("%f",a/b)}') || b=${ASPECT[${mpegaspect:-2}]}
     vfilter=$(awk -v a=$a -v A=$b -v W=$H_RES -v H=$V_RES -v crop=$mpegfixaspect -v i=${interlaced:-0} -v r=$rotate -v o=$overscan -v logfile="$(echo "$output" | sed 's/\\/\\\\/g')".log 'BEGIN{
       ko=(1-o/100)
-      if(a==1.78)a=16/9
-      if(a==1.33)a=4/3
+      if(a==1.78||a==1.74)a=16/9
+      if(a==1.33||a==1.30)a=4/3
       if(A=="4/3")A=4/3
       if(A=="16/9")A=16/9
       if(r!=""){
@@ -1639,6 +1777,15 @@ if [[ $mpegfixaspect && $step -gt 1 ]]; then
 fi
 
 ###############################################################################
+#### warn for aspect ratio
+###############################################################################
+if [[ ( $mpeg && $encode != ?:0:? || ! $mpeg && $step -gt 1 ) && ! $mpegfixaspect && ${#TITLESET[*]} -eq 0 && ! $testmca ]]; then
+    a=$(get_aspect "${MPLAYERINFO[@]}")
+    [[ ${mpegaspect:-2} = 2 && $a != 1.33 && $a != 1.30 || ${mpegaspect:-2} = 3 && $a != 1.78 && $a != 1.74 || ${mpegaspect:-2} = 4 && $a != 2.21 ]] && \
+      do_log "++ WARN: [$PROGNAME] selected aspect ratio [${ASPECT[${mpegaspect:-2}]}] and source aspect ratio [$a] are different"
+fi
+
+###############################################################################
 #### dvd vobsub
 ###############################################################################
 #### function to select the vobsub to extract
@@ -1646,7 +1793,7 @@ next_vobsub_idx () {
     if ((${#SID[*]})); then
         if ((idx < ${#encsid[*]})); then
             SID=(-sid ${encsid[idx]} -vobsuboutindex ${encsdx[idx]} ${encsla:+-vobsuboutid ${encsla[idx]}} -vobsubout "$output")
-            echo "   INFO: [$PROGNAME] dumping subtitle ${encsid[idx]} to vobsub ${encsdx[idx]}${encsla:+ (${encsla[idx]})}" | tee -a "$output".log
+            do_log "   INFO: [$PROGNAME] dumping subtitle ${encsid[idx]} to vobsub ${encsdx[idx]}${encsla:+ (${encsla[idx]})}"
             idx=$((idx+1))
         else
             unset SID
@@ -1668,25 +1815,28 @@ status_bit sub || unset SID
 #### test condition "extra"
 ###############################################################################
 IDACOD=$(grep "ID_AUDIO_CODEC" "$output".log | tail -1 | cut -f2 -d=)
-[[ $mpeg && ! $pictsrc && ( $encode == 1:?:? || $multiaudio || $encode == 0:?:? && $IDACOD != mp3 && $IDACOD != a52 ) ]] && extra=1 || extra=
-[[ $extra ]] && echo "**ERROR: [$PROGNAME] output stream: unsupported audio codec $IDACOD" | tee -a "$output".log && exit 1
+[[ $IDACOD = hwdts ]] && echo "**ERROR: [$PROGNAME] dts audio support missing in MPlayer" && \
+  echo "**ERROR: add dts support (libdts-0.0.2.tar.gz) or select a non dts stream" && \
+  echo "**ERROR: example:  -aid 128 (ac3), -aid 160 (lpcm), -aid 0 (mpeg)" && exit 1
+[[ $mpeg && ! $pictsrc && ( $encode == 1:?:? || $multiaudio || $encode == 0:?:? && $IDACOD != mp3 && $IDACOD != a52 && $IDACOD != faad ) ]] && extra=1 || \
+  extra=
+[[ $extra ]] && do_log "**ERROR: [$PROGNAME] output stream: unsupported audio codec $IDACOD" && exit 1
 
 CLEAN[${#CLEAN[*]}]="$output".tmp
 
 ###############################################################################
-#### avi/mpeg section
+#### AVI/MPEG section
 ###############################################################################
 if [[ $encode ]]; then
     if status_bit avi ; then
         find_sbr () {
             local kv k ka
-            if [[ $mpeg ]]; then
-                kv=9888 ; k=33 ; ka=996
-            fi
+            sleep 2
+            [[ $mpeg ]] && kv=9888 k=33 ka=1015 || kv=10000 k=0 ka=1011
             if ((usesbr<=6)); then
                 sbr=$(awk '/for '"${SBR[usesbr-1]}"'MB CD/{print $NF}' <"$output".log)
                 [[ $sbr ]] && ((sbr<vbitrate)) && VIDEOPASS=${VIDEOPASS/vbitrate=$vbitrate:/vbitrate=$sbr:} && \
-                  echo "   INFO: [mencoder] using vbitrate=$sbr" | tee -a "$output".log
+                  do_log "   INFO: [mencoder] using vbitrate=$sbr"
             else
                 #### usesbr is in MB
                 #### remind: 650-800,650-1400,800-1400
@@ -1697,49 +1847,52 @@ if [[ $encode ]]; then
                 [[ ${sbr[2]} && ${sbr[3]} ]] && \
                   sbr[4]=$(((((usesbr*kv/10000-k)-(audiosize*ka/1000))*(sbr[3]-sbr[2])+sbr[1]*sbr[2]-sbr[0]*sbr[3])/(sbr[1]-sbr[0])))
                 [[ ${sbr[4]} ]] && ((sbr[4]<vbitrate && sbr[4]>0)) && VIDEOPASS=${VIDEOPASS/vbitrate=$vbitrate:/vbitrate=${sbr[4]}:} && \
-                  echo "   INFO: [mencoder] using vbitrate=${sbr[4]}" | tee -a "$output".log
+                  do_log "   INFO: [mencoder] using vbitrate=${sbr[4]}"
             fi
         }
         AID=
+        if [[ ! $extra ]]; then
+            RAWVIDEO=( -o "$output".$SUF )
+        fi
         #### start mencoder
         PLOG=( -passlogfile "$output".avi2pass.log )
+        MSG=( -msglevel open=6:demuxer=6:demux=6 )
         rm -f frameno.avi
-        if ((PASS==1)); then
+        [[ $encode == 0:?:? && ! $extra ]] && F= || F=$af
             if [[ $usesbr && ! $extra ]]; then
-                mencoder $OPTIONS        -ovc frameno -o /dev/null    "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS 2>&1 | \
-                  mp_single_log mencoder '^Recommended video bitrate'
+            ((DEBUG)) && debug_line $((LINENO+2)) "usesbr "
+            me_bit_log
+            mencoder         $OPTIONS -ovc frameno         -o /dev/null       "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $F       &>"$output".fifo
                 find_sbr
                 next_vobsub_idx
             fi
-            ((DEBUG)) && debug_line $((LINENO+1)) "PASS 1/$PASS"
-            mencoder     $OPTIONS $VIDEOPASS        -o "$output".$SUF "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $volume -v | mplayer_log mencoder
+        if ((PASS==1)); then
+            ((DEBUG)) && debug_line $((LINENO+2)) "PASS 1/$PASS"
+            me_log
+            mencoder         $OPTIONS $VIDEOPASS           "${RAWVIDEO[@]}"   "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $F "${MSG[@]}" >"$output".fifo
             next_vobsub_idx
         else
             #### N pass
-            if [[ $usesbr && ! $extra ]]; then
-                mencoder     $OPTIONS -ovc frameno               -o /dev/null    "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS 2>&1 | \
-                  mp_single_log mencoder '^Recommended video bitrate'
-                find_sbr
-                next_vobsub_idx
-            fi
             CLEAN[${#CLEAN[*]}]="$output".avi2pass.log
             ((DEBUG)) && debug_line $((LINENO+1)) "PASS 1/$PASS"
-            mencoder         $OPTIONS ${VIDEOPASS}:vpass=1$turbo -o /dev/null    "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $volume "${PLOG[@]}"
+            mencoder         $OPTIONS ${VIDEOPASS}:vpass=1$turbo -o /dev/null "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $F "${PLOG[@]}"
             next_vobsub_idx
             if ((PASS==2)); then
-                ((DEBUG)) && debug_line $((LINENO+1)) "PASS 2/$PASS"
-                mencoder     $OPTIONS ${VIDEOPASS}:vpass=2     -o "$output".$SUF "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $volume "${PLOG[@]}" -v | \
-                  mplayer_log mencoder
+                ((DEBUG)) && debug_line $((LINENO+2)) "PASS 2/$PASS"
+                me_log
+                mencoder     $OPTIONS ${VIDEOPASS}:vpass=2 "${RAWVIDEO[@]}"   "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $F "${PLOG[@]}" "${MSG[@]}" \
+                  >"$output".fifo
                 next_vobsub_idx
             else
                 for ((a=2;a<PASS;a++)); do
                     ((DEBUG)) && debug_line $((LINENO+1)) "PASS $a/$PASS"
-                    mencoder $OPTIONS ${VIDEOPASS}:vpass=3       -o /dev/null    "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $volume "${PLOG[@]}"
+                    mencoder $OPTIONS ${VIDEOPASS}:vpass=3 -o /dev/null       "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $F "${PLOG[@]}"
                     next_vobsub_idx
                 done
-                ((DEBUG)) && debug_line $((LINENO+1)) "PASS $PASS/$PASS"
-                mencoder     $OPTIONS ${VIDEOPASS}:vpass=3     -o "$output".$SUF "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $volume "${PLOG[@]}" -v | \
-                  mplayer_log mencoder
+                ((DEBUG)) && debug_line $((LINENO+2)) "PASS $PASS/$PASS"
+                me_log
+                mencoder     $OPTIONS ${VIDEOPASS}:vpass=3 "${RAWVIDEO[@]}"   "${SID[@]}" "${MENCODERARG[@]}" $AID $AUDIOPASS $F "${PLOG[@]}" "${MSG[@]}" \
+                  >"$output".fifo
                 next_vobsub_idx
             fi
         fi
@@ -1799,18 +1952,14 @@ if [[ $mpeg && $fast ]]; then
             mv "$output".$SUF "$output".mpg
         fi
     fi
-    #FIXME remove once the mpeg muxer is fixed
-    #### NTSC dvd warn
-    [[ $videonorm = n && $frameformat = DVD ]] && \
-      echo "++ WARN: [$PROGNAME] mencoder does not multiplex correctly NTSC mpeg, you may want to use encode2mpeg instead" | tee -a "$output".log
 fi
 
 ###############################################################################
-#### split the mpeg stream (for Mpeg Mode)
+#### split the MPEG stream (for MPEG Mode)
 ###############################################################################
 if status_bit spl ; then
-    #### split for Mpeg Mode (mpeg4 codec not supported)
-    #### mencoder does not support split as it does mpeg2enc/mplex
+    #### split for MPEG Mode (MPEG-4 codec not supported)
+    #### MEncoder does not support split as does mpeg2enc/mplex
     #### this solution is slow, but it seems quite accurate
     if [[ $mpeg && $split && $vcodec != mpeg4 ]]; then
         [[ ! $fast ]] && mv "$output"01.mpg "$output".mpg
@@ -1828,7 +1977,7 @@ if status_bit spl ; then
                 if ((i<chunks-1)); then
                     n=$(mplayer "$output".mpg  -vf framestep=I -vo null -nosound -benchmark 2>/dev/null -sb $(((i+1)*split*1024*1024)) -frames 30 | \
                       tr '\015' '\012' | awk '{if($1=="I!"){print t;exit};t=$2}')
-                    n=$(awk '/^'"$n"'/{print $2-1;exit}' "$output".framelist) #should be -2
+                    n=$(awk '/^'"$n"'/{print $2-1;exit}' <"$output".framelist) #should be -2
                 else
                     n=
                 fi
