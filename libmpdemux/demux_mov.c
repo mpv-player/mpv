@@ -32,6 +32,9 @@
 
 #include "bswap.h"
 
+#include "libvo/sub.h"
+extern subtitle *vo_sub;
+
 #include "qtpalette.h"
 #include "parse_mp4.h" // .MP4 specific stuff
 
@@ -290,6 +293,7 @@ void mov_build_index(mov_track_t* trak,int timescale){
 }
 
 #define MOV_MAX_TRACKS 256
+#define MOV_MAX_SUBLEN 1024
 
 typedef struct {
     off_t moov_start;
@@ -300,6 +304,9 @@ typedef struct {
     mov_track_t* tracks[MOV_MAX_TRACKS];
     int timescale; // movie timescale
     int duration;  // movie duration (in movie timescale units)
+    subtitle subs;
+    char subtext[MOV_MAX_SUBLEN + 1];
+    int current_sub;
 } mov_priv_t;
 
 #define MOV_FOURCC(a,b,c,d) ((a<<24)|(b<<16)|(c<<8)|(d))
@@ -312,6 +319,7 @@ static int mov_check_file(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_V,"Checking for MOV\n");
     
     memset(priv,0,sizeof(mov_priv_t));
+    priv->current_sub = -1;
     
     while(1){
 	int i;
@@ -1285,6 +1293,11 @@ quit_vorbis_block:
 		break;
 	    }
 	    case MOV_TRAK_GENERIC:
+		if (trak->fourcc == mmioFOURCC('m','p','4','s') ||
+		    trak->fourcc == mmioFOURCC('t','e','x','t')) {
+			sh_sub_t *sh = new_sh_sub(demuxer, priv->track_db);
+			sh->type = (trak->fourcc == mmioFOURCC('m','p','4','s')) ? 'v' : 't';
+		} else
 		mp_msg(MSGT_DEMUX, MSGL_V, "Generic track - not completely understood! (id: %d)\n",
 		    trak->id);
 		/* XXX: Also this contains the FLASH data */
@@ -1918,6 +1931,15 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	    demuxer->video->id=-2;
 	}
     }
+    if(demuxer->sub->id>=0){
+	sh_video_t* sh=demuxer->s_streams[demuxer->sub->id];
+	if(sh){
+	    demuxer->sub->sh=sh; sh->ds=demuxer->sub;
+	} else {
+	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected video stream (%d) does not exists\n",demuxer->video->id);
+	    demuxer->sub->id=-2;
+	}
+    }
 
     if(demuxer->video->id<0 && demuxer->audio->id<0) {
         /* No AV streams found. Try to find an MPEG stream. */
@@ -2114,6 +2136,41 @@ if(trak->pos==0 && trak->stream_header_len>0){
     ds_read_packet(ds,demuxer->stream,x,pts,pos,0);
     
     ++trak->pos;
+
+    if (demuxer->sub->id >= 0) {
+      int samplenr = 0;
+      trak = priv->tracks[demuxer->sub->id];
+      while (samplenr < trak->samples_size) {
+        double subpts = (double)trak->samples[samplenr].pts / (double)trak->timescale;
+        if (subpts >= pts) break;
+        samplenr++;
+      }
+      samplenr--;
+      if (samplenr < 0)
+        vo_sub = NULL;
+      else if (samplenr != priv->current_sub) {
+        sh_sub_t *sh = demuxer->sub->sh;
+        off_t pos = trak->samples[samplenr].pos;
+        int len = trak->samples[samplenr].size;
+        double subpts = (double)trak->samples[samplenr].pts / (double)trak->timescale;
+        stream_seek(demuxer->stream, pos);
+        if (sh->type == 'v')
+          ds_read_packet(demuxer->sub, demuxer->stream, len, subpts, pos, 0);
+        else {
+          stream_skip(demuxer->stream, 2); // size
+          len -= 2;
+          if (len < 0) len = 0;
+          if (len > MOV_MAX_SUBLEN) len = MOV_MAX_SUBLEN;
+          stream_read(demuxer->stream, priv->subtext, len);
+          priv->subtext[len] = 0;
+          priv->subs.lines = 1;
+          priv->subs.text[0] = &priv->subtext;
+          vo_sub = &priv->subs;
+        }
+        priv->current_sub = samplenr;
+      }
+      vo_osd_changed (OSDTYPE_SUBTITLE);
+    }
 
     return 1;
     
