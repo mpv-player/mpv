@@ -236,10 +236,10 @@ Lancez juste <filename>configure</filename> et compilez.
 </sect2>
 
 <sect2 id="xvid">
-<title>XviD</title>
+<title>Xvid</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> est un logiciel gratuit
+<ulink url="http://www.xvid.org">Xvid</ulink> est un logiciel gratuit
 de codec video conforme au MPEG-4 ASP, qui possède des dispositifs
 d'encodage en 2 passes et un support complet du MPEG-4 ASP, rendant la chose
 beaucoup plus efficace que le bien connu codec DivX.
@@ -255,13 +255,13 @@ Les deux projets ont donc la même origine.
 </para>
 
 <para>
-Notez qu'XviD n'est pas nécessaire pour décoder des vidéos encodée par XviD.
+Notez qu'Xvid n'est pas nécessaire pour décoder des vidéos encodée par Xvid.
 <systemitem class="library">libavcodec</systemitem> est utilisé par défaut et
 offre une vitesse supérieure.
 </para>
 
 <procedure>
-<title><systemitem class="library">XviD</systemitem> Installation</title>
+<title><systemitem class="library">Xvid</systemitem> Installation</title>
 <para>
   Comme la plupart des logiciels open source, il est disponible en deux parfums:
   <ulink url="http://www.xvid.org/downloads.html">versions officiel</ulink>
@@ -269,7 +269,7 @@ offre une vitesse supérieure.
   La version CVS est actuellement assez stable pour être utilisée, et bénéficie des
   corrections de bogues existant des versions "officielles".
   Voici qui doit être fait pour faire fonctionner la version CVS de
-  <systemitem class="library">XviD</systemitem>
+  <systemitem class="library">Xvid</systemitem>
   avec <application>MEncoder</application> (vous avez besoin au minimum de
   <application>autoconf</application> 2.50,
   <application>automake</application> et <application>libtool</application>):

@@ -284,7 +284,7 @@
 <para>
   La plupart des codecs qui supportent la compression ABR supportent seulement deux
   passages alors que d'autres comme le <systemitem class="library">x264</systemitem>,
-  le <systemitem class="library">XviD</systemitem> et le
+  le <systemitem class="library">Xvid</systemitem> et le
   <systemitem   class="library">libavcodec</systemitem> supportent le multipasse
   ce qui améliore légèrement la qualité à chaque passe même si ces améliorations
   ne sont plus visibles ou mesurables après environ la quatrième passe.
@@ -1034,7 +1034,7 @@
   du film.
   Une manière d'augmenter le CQ, c'est de réduire la résolution du film puisque le
   débit est calculé en fonction de la taille finale désirée et la longueur du film qui sont constant.
-  Avec les codecs ASP MPEG-4 comme le <systemitem class="library">XviD</systemitem> ou le
+  Avec les codecs ASP MPEG-4 comme le <systemitem class="library">Xvid</systemitem> ou le
   <systemitem class="library">libavcodec</systemitem>, un CQ en dessous de 0,18 donne
   généralement une image type mosaïque car il n'y pas assez de bits pour coder
   les informations de chaque macrobloc (le MPEG-4, comme les autres codecs, groupe
@@ -1045,7 +1045,7 @@
   standard.
   Des options d'encodage plus avancées telles que celles listées ici pour le
   <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="library">libavcodec</systemitem></link> et le
-  <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>
+  <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">Xvid</systemitem></link>
   devraient permettre d'obtenir la même qualité avec un CQ se situant entre
   0,18 et 0,20 pour une copie sur 1 CD et 0,24 à 0,26 pour une copie sur 2 CDs.
   Avec les codecs ASP MPEG-4 comme le <systemitem class="library">x264</systemitem>,
@@ -1319,7 +1319,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   si vous choisissez un codec MPEG-4 AVC comme le
   <systemitem class="library">x264</systemitem> au lieu de codecs MPEG-4 ASP
   tels que le <systemitem class="library">libavcodec</systemitem> MPEG-4 ou le
-  <systemitem class="library">XviD</systemitem>.
+  <systemitem class="library">Xvid</systemitem>.
   (Les développeurs de codec peuvent être intéressés par la lecture de l'avis
   de Michael Niedermayer's sur
   "<ulink url="http://guru.multimedia.cx/?p=10">why MPEG4-ASP sucks</ulink>".)
@@ -1345,7 +1345,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Ainsi, la plupart ne supportent que le MPEG-1 (comme les VCD, XVCD et KVCD),
   le MPEG-2 (comme les DVD, SVCD and KVCD) et le MPEG-4 ASP (comme les
   DivX, LMP4 <systemitem class="library">libavcodec</systemitem> et
-  <systemitem class="library">XviD</systemitem>)
+  <systemitem class="library">Xvid</systemitem>)
   (attention: toutes les fonctionnalités MPEG-4 ASP ne sont généralement
   pas supportées).
   Référez-vous aux spécifications techniques de votre lecteur (si elles
@@ -1356,7 +1356,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   <emphasis role="bold">La meilleure qualité par temps d'encodage</emphasis>:
   Les codecs qui sont sortis depuis un certain temps (comme l'encodeur MPEG-4
   de <systemitem class="library">libavcodec</systemitem> et
-  <systemitem class="library">XviD</systemitem>) sont habituellement
+  <systemitem class="library">Xvid</systemitem>) sont habituellement
   largement optimisés avec toutes sortes d'algorithmes astucieux et des
   routines optimiées en assembleur SIMD.
   C'est pourquoi ils tendent à fournir la meilleure qualité par temps
@@ -1377,7 +1377,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   le permet  mais les gains en temps sont limités et cela procure une
   légère baisse de qualité d'image
   L'encodage multi-threadé du codec
-  <systemitem class="library">XviD</systemitem>, activé par l'option
+  <systemitem class="library">Xvid</systemitem>, activé par l'option
   <option>threads</option>, peut être utilisé pour améliorer la vitesse
   d'encodage &mdash; de typiquement 40-60% &mdash; avec très peu voire aucune
   détérioration de l'image.
@@ -1391,7 +1391,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Là les choses deviennent presqu'irrationnel: pour la même raison pour
   laquelle certains s'accrochaient encore à DivX&nbsp;3 alors que d'autres
   codecs plus modernes faisaient des merveilles depuis des années,
-  certaines personnes préfèrent <systemitem class="library">XviD</systemitem>
+  certaines personnes préfèrent <systemitem class="library">Xvid</systemitem>
   ou le codec MPEG-4 de <systemitem class="library">libavcodec</systemitem>
   par rapport à <systemitem class="library">x264</systemitem>.
 </para>
@@ -2282,7 +2282,7 @@ Vous pouvez encoder vers les codecs suivant (la liste suivante est plus ou moins
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO standard MPEG-4 (DivX, compatible XviD)
+  ISO standard MPEG-4 (DivX, compatible Xvid)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   pre-standard MPEG-4 variant par MS, v3 (AKA DivX3)
@@ -2815,9 +2815,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 
 <sect1 id="menc-feat-xvid">
-<title>Encodage avec le codec <systemitem class="library">XviD</systemitem></title>
+<title>Encodage avec le codec <systemitem class="library">Xvid</systemitem></title>
 <para>
- <systemitem class="library">XviD</systemitem> est une bibliothèque libre pour
+ <systemitem class="library">Xvid</systemitem> est une bibliothèque libre pour
  encoder les flux vidéo MPEG-4 ASP.
  Avant de commencer à encoder, vous avez besoin de <link linkend="xvid">
  paramétrer <application>MEncoder</application> pour qu'il la supporte.</link>.
@@ -2834,19 +2834,19 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Quelles options devrais-je utiliser pour avoir les meilleurs résultats?</title>
 
 <para>
- Commencez par passer en revue la section <systemitem class="library">XviD</systemitem>
+ Commencez par passer en revue la section <systemitem class="library">Xvid</systemitem>
  de la page man de <application>MPlayer</application>.
  Cette section est prévue pour être un supplément de la page man.
 </para>
 <para>
- Les paramètrages par défaut de XviD donnent déjà un bon compromis entre
+ Les paramètrages par défaut de Xvid donnent déjà un bon compromis entre
  vitesse et qualité, vous pouvez donc sans risque vous en contenter
  si la section suivante vous laisse perplexe.
 </para>
 </sect2>
 
 <sect2 id="menc-feat-xvid-encoding-options">
-<title>Options d'encodage de <systemitem class="library">XviD</systemitem></title>
+<title>Options d'encodage de <systemitem class="library">Xvid</systemitem></title>
 
 <itemizedlist>
 <listitem><para>
@@ -2996,7 +2996,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
     significativement (ainsi que le décodage).
     Par conséquent, vous devriez seulement l'employer si vous avez
     réglé <option>vhq</option> au maximum.
-    Le GMC de <systemitem class="library">XviD</systemitem> est plus sophistiqué
+    Le GMC de <systemitem class="library">Xvid</systemitem> est plus sophistiqué
     que celui de DivX, mais il est seulement supporté par quelques lecteurs.
 </para></listitem>
 
@@ -3006,9 +3006,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <sect2 id="menc-feat-xvid-encoding-profiles">
 <title>Profils d'encodage</title>
 <para>
-  XviD supporte des profils d'encodage via l'option <option>profile</option>,
+  Xvid supporte des profils d'encodage via l'option <option>profile</option>,
   ce qui est utilisé pour imposer des restrictions sur les propriétés du flux
-  vidéo XviD pour qu'il puisse être relu sur tout ce qui supporte le profil
+  vidéo Xvid pour qu'il puisse être relu sur tout ce qui supporte le profil
   choisi.
   Les restrictions sont en rapport avec les résolutions, les débits et certaines
   fonctionnalités MPEG-4.

@@ -1052,7 +1052,7 @@ très basic, alorsque DX50 et XVID tout deux signifie MPEG-4 complèt (ASP).
 Donc, si vous changez le FourCC à DIVX, de mauvais logiciels ou lecteurs hardware
 peuvent cafouiller sur quelques fonctionalités avançées que
 <systemitem class="library">libavcodec</systemitem> supporte, mais que DivX
-ne supporte pas; d'autre part <systemitem class="library">XviD</systemitem> est plus proche
+ne supporte pas; d'autre part <systemitem class="library">Xvid</systemitem> est plus proche
 de <systemitem class="library">libavcodec</systemitem> en terme de
 fonctionalitiés, et il est supporté par tous les lecteurs digne de ce nom.
 </para></answer>

@@ -93,7 +93,7 @@ Vidéo</entry><entry>Description</entry></row>
 </row>
 <row>
 <entry>xvid</entry>
-<entry>Le XviD, un codec ASP MPEG-4 (Advanced Simple
+<entry>Le Xvid, un codec ASP MPEG-4 (Advanced Simple
 Profile)</entry>
 </row>
 <row>
@@ -587,7 +587,7 @@ des PNGs, il utilisera <systemitem class="library">libpng</systemitem>).
 <application>MEncoder</application> envoie alors l'image
 décodée au
 compresseur
-vidéo choisi (DivX4, XviD, ffmpeg msmpeg4, etc.).
+vidéo choisi (DivX4, Xvid, ffmpeg msmpeg4, etc.).
 </para></listitem>
 </orderedlist>
 
