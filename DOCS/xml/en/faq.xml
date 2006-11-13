@@ -1181,7 +1181,7 @@ MPEG-4 codec, whereas DX50 and XVID both mean full MPEG-4 (ASP).
 Therefore, if you change the FourCC to DIVX, some bad software or
 hardware players may choke on some advanced features that
 <systemitem class="library">libavcodec</systemitem> supports, but DivX
-doesn't; on the other hand <systemitem class="library">XviD</systemitem>
+doesn't; on the other hand <systemitem class="library">Xvid</systemitem>
 is closer to <systemitem class="library">libavcodec</systemitem> in
 terms of functionality, and is supported by all decent players.
 </para></answer>

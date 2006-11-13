@@ -109,10 +109,10 @@ Just run <filename>./configure</filename> and compile.
 
 
 <sect2 id="xvid">
-<title>XviD</title>
+<title>Xvid</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> is a free software MPEG-4 ASP
+<ulink url="http://www.xvid.org">Xvid</ulink> is a free software MPEG-4 ASP
 compliant video codec, which features two pass encoding and full MPEG-4 ASP
 support, making it a lot more efficient than the well-known DivX codec.
 It yields very good video quality and good performance due to CPU
@@ -122,24 +122,24 @@ optimizations for most modern processors.
 It began as a forked development of the OpenDivX codec.
 This happened when ProjectMayo changed OpenDivX to closed source
 DivX4, and the non-ProjectMayo people working on OpenDivX got angry,
-then started XviD. So both projects have the same origin.
+then started Xvid. So both projects have the same origin.
 </para>
 
 <para>
-Note that XviD is not necessary to decode XviD-encoded video.
+Note that Xvid is not necessary to decode Xvid-encoded video.
 <systemitem class="library">libavcodec</systemitem> is used by
 default as it offers better speed.
 </para>
 
 <procedure>
-<title>Installing <systemitem class="library">XviD</systemitem></title>
+<title>Installing <systemitem class="library">Xvid</systemitem></title>
 <para>
   Like most open source software, it is available in two flavors:
   <ulink url="http://www.xvid.org/downloads.html">official releases</ulink>
   and the CVS version.
   The CVS version is usually stable enough to use, as most of the time it
   features fixes for bugs that exist in releases.
-  Here is what to do to make <systemitem class="library">XviD</systemitem>
+  Here is what to do to make <systemitem class="library">Xvid</systemitem>
   CVS work with <application>MEncoder</application> (you need at least
   <application>autoconf</application> 2.50,
   <application>automake</application> and <application>libtool</application>):

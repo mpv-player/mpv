@@ -84,7 +84,7 @@ Video codecs:
   </row>
   <row>
     <entry>xvid</entry>
-    <entry>XviD, MPEG-4 Advanced Simple Profile (ASP) codec</entry>
+    <entry>Xvid, MPEG-4 Advanced Simple Profile (ASP) codec</entry>
   </row>
   <row>
     <entry>x264</entry>
@@ -524,7 +524,7 @@ or more JPEG, PNG or TGA files. With simple framecopy it can create MJPEG
   </para></listitem>
 <listitem><para>
   <application>MEncoder</application> then feeds the decoded image to the
-  chosen video compressor (DivX4, XviD, FFmpeg msmpeg4, etc.).
+  chosen video compressor (DivX4, Xvid, FFmpeg msmpeg4, etc.).
   </para></listitem>
 </orderedlist>
 
