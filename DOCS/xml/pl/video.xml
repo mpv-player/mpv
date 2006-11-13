@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r19081 -->
+<!-- partial sync with r20879 -->
 <!-- Opiekun: Frogu -->
 <chapter id="video">
 <title>Urządzenia wyjścia video</title>
@@ -8,7 +9,7 @@
 <title>Ustawianie MTRR</title>
 
 <para>
-Jest WYSOCE wskazane, aby sprawdzić, czy rejestry MTRR są ustawione prawidłowo,
+Jest WYSOCE wskazane sprawdzenie, czy rejestry MTRR są ustawione prawidłowo,
 ponieważ mogą dać duży wzrost wydajności.
 </para>
 
@@ -39,12 +40,11 @@ Przede wszystkim musisz znaleźć adres bazowy. Możesz to zrobić na 3 sposoby:
 --></screen>
 </para></listitem>
 <listitem><para>
-  z <filename>/proc/pci</filename> (użyj polecenia <command>lspci -v</command>
-  ):
+  z <filename>/proc/pci</filename> (użyj polecenia <command>lspci -v</command>):
   <screen>
 01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
-Memory at d8000000 (32-bit, prefetchable)
-  </screen>
+Memory at d8000000 (32-bit, prefetchable)<!--
+  --></screen>
 </para></listitem>
 <listitem><para>
   z komunikatów sterownika mga_vid w jądrze (użyj <command>dmesg</command>):
@@ -55,7 +55,7 @@ Memory at d8000000 (32-bit, prefetchable)
 
 <para>
 Znajdźmy teraz rozmiar pamięci. Jest to bardzo łatwe, po prostu zamień
-rozmiar RAMu na karcie graficznej na system szestnastkowy lub użyj
+rozmiar RAMu na karcie graficznej na system szesnastkowy lub użyj
 tej tabelki:
 <informaltable frame="none">
 <tgroup cols="2">
@@ -76,18 +76,19 @@ Znasz już adres bazowy i rozmiar pamięci. Ustawmy więc rejestry MTRR!
 Na przykład dla powyższej karty Matrox (<literal>base=0xd8000000</literal>)
 z 32MB RAMu (<literal>size=0x2000000</literal>) po prostu wykonaj:
 <screen>
-echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</screen>
+echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr</screen>
 </para>
 
 <para>
 Nie wszystkie procesory obsługują MTRR. Na przykład starsze K6-2
-(jakieś 266MHz, stepping 0) nie obsługują MTRR, ale stepping 12 już tak.
-(<command>cat /proc/cpuinfo </command> aby sprawdzić).
+(jakieś 266MHz, stepping 0) nie obsługują MTRR, ale stepping 12 już tak
+(wykonaj <command>cat /proc/cpuinfo</command> aby sprawdzić).
 </para>
 </sect1>
 
 <sect1 id="output-trad">
 <title>Wyjścia video dla tradycyjnych kart graficznych</title>
+
 <sect2 id="xv">
 <title>Xv</title>
 
@@ -107,12 +108,12 @@ Aby to zadziałało upewnij się, że:
   Masz XFree86 4.0.2 lub nowsze (starsze nie mają XVideo)
 </para></listitem>
 <listitem><para>
-  Twoja karta obsługuje przyśpieszanie sprzętowe (współczesne karty to mają)
+  Twoja karta obsługuje przyśpieszanie sprzętowe (współczesne karty to robią)
 </para></listitem>
 <listitem><para>
   X ładuje rozszerzenie XVideo, zwykle wygląda to tak:
   <programlisting>(II) Loading extension XVideo</programlisting>
-  w logu <filename>/var/log/XFree86.0.log</filename>
+  w <filename>/var/log/XFree86.0.log</filename>
   <note><para>
    To ładuje tylko rozszerzenie XFree86. W dobrej instalacji
    jest to zawsze włączone i nie oznacza to że obsługa XVideo w
@@ -163,14 +164,17 @@ screen #0
 </orderedlist>
 </para>
 
+
 <sect3 id="tdfx">
 <title>Karty 3dfx</title>
 
 <para>
 Starsze sterowniki 3dfx znane były z tego, że miały problemy z akceleracją
-XVideo. Nie obsługiwały ani YUY2, ani YV12. Sprawdź czy masz XFree86 w wersji
-4.2.0 lub nowszej. Działają one dobrze z YV12 i YUY2. Poprzednie wersje z 4.1.0
-włącznie <emphasis role="bold">wywalały się na YV12</emphasis>.
+XVideo.
+Nie obsługiwały ani przestrzeni kolorów YUY2, ani YV12. Sprawdź czy masz
+XFree86 w wersji 4.2.0 lub nowszej, działają one dobrze z YV12 i YUY2.
+Poprzednie wersje, z 4.1.0 włącznie,
+<emphasis role="bold">wywalały się na YV12</emphasis>.
 Jeżeli napotkasz na dziwne działanie używając <option>-vo xv</option>,
 spróbuj SDL (także ma XVideo) i zobacz, czy to pomaga.
 Dokładniejsze instrukcje są w sekcji <link linkend="sdl">SDL</link>.
@@ -183,6 +187,7 @@ Zajrzyj do sekcji <link linkend="tdfxfb">tdfxfb</link>
 </para>
 </sect3>
 
+
 <sect3 id="s3">
 <title>Karty S3</title>
 
@@ -193,12 +198,13 @@ na 16bpp).
 Jeżeli chodzi o S3 Virge: obsługuje ona Xv, ale jest bardzo wolna,
 więc najlepiej ją sprzedaj.
 </para>
+
 <para>
-	Teraz dostępny jest natywny sterownik bufora ramek (framebuffer) dla
-	kart S3 Virge, podobny do tdfxfb. Ustaw swój bufor ramek (np. dodaj
-	"<option>vga=792 video=vesa:mtrr</option>" do swojego kernela)
-	i używaj <option>-vo s3fb</option> (<option>-vf yuy2</option>
-	i <option>-dr</option> także mogą okazać się przydatne).
+Teraz dostępny jest natywny sterownik bufora ramek (framebuffer) dla
+kart S3 Virge, podobny do tdfxfb. Ustaw swój bufor ramek (np. dodaj
+"<option>vga=792 video=vesa:mtrr</option>" do parametrów swojego kernela)
+i używaj <option>-vo s3fb</option> (<option>-vf yuy2</option>
+i <option>-dr</option> także mogą okazać się przydatne).
 </para>
 
 <note>
@@ -234,7 +240,7 @@ Zażalenia składaj do nVidii.
 Jednakże <application>MPlayer</application> zawiera sterownik
 <link linkend="vidix">VIDIX</link> obsługujący większość kart nVidia.
 Obecnie znajduje się w stadium beta i ma pewne ograniczenia.
-Więcej informacji znajdziesz w sekcji <link linkend="vidix-nvidia">nVidia</link>.
+Więcej informacji znajdziesz w sekcji <link linkend="vidix-nvidia">nVidia VIDIX</link>.
 </para>
 </sect3>
 
@@ -246,7 +252,7 @@ Więcej informacji znajdziesz w sekcji <link linkend="vidix-nvidia">nVidia</link
 <ulink url="http://gatos.sf.net">Sterowniki GATOS</ulink>
 (których powinieneś używać, chyba że masz Rage128 lub Radeon)
 mają standardowo włączone VSYNC. Znaczy to, że szybkość dekodowania (!)
-jest zsynchronizowana z (pionową) częstotliwością odświeżania obrazu.
+jest zsynchronizowana z częstotliwością odświeżania obrazu.
 Jeżeli odtwarzanie wydaje Ci się powolne,
 spróbuj w jakiś sposób wyłączyć VSYNC,
 lub ustaw częstotliwość odświeżania na n*(fps filmu) Hz.
@@ -300,8 +306,9 @@ EndSection<!--
 
 <sect3 id="trident">
 <title>Karty Trident</title>
+
 <para>
-Jeżeli chcesz używać Xv z kartą Trident (zakładając, że nie działa z 4.1.0),
+Jeżeli chcesz używać Xv z kartą Trident, to jeśli nie działa z 4.1.0,
 zainstaluj XFree 4.2.0. 4.2.0 obsługuje pełnoekranowe Xv
 w karcie Cyberblade XP.
 </para>
@@ -310,17 +317,16 @@ w karcie Cyberblade XP.
 Alternatywą jest sterownik <link linkend="vidix">VIDIX</link> dla
 karty Cyberblade/i1.
 </para>
-
-
 </sect3>
 
 
 <sect3 id="kyro">
 <title>Karty Kyro/PowerVR</title>
+
 <para>
 Jeżeli chcesz używać Xv z kartą opartą na Kyro
 (na przykład Hercules Prophet 4000XT), powinieneś ściągnąć sterowniki ze
-<ulink url="http://www.powervr.com/">strony PowerVR</ulink>
+<ulink url="http://www.powervr.com/">strony PowerVR</ulink>.
 </para>
 </sect3>
 </sect2>
@@ -344,10 +350,10 @@ i co może zrobić sterownik do <application>MPlayera</application>
 <para>
 <acronym>DGA</acronym> to skrót od <emphasis>Direct Graphics Access
 (Bezpośredni Dostęp do Grafiki)</emphasis> i jest dla programu sposobem
-ominięcia X serwera i bezpośrednią modyfikację pamięci bufora ramki
+ominięcia serwera X i bezpośrednią modyfikację pamięci bufora ramki
 (framebuffer). Technicznie mówiąc, działa to w ten sposób,
 że pamięć bufora ramki mapowana jest na zakres pamięci Twojego procesu.
-Jest to dozwolone tylko i wyłącznie gdy masz prawa administratora (superuser).
+Jądro pozwala na to tylko gdy masz prawa administratora (superuser).
 Możesz je uzyskać logując się jako
 <systemitem class="username">root</systemitem> lub ustawiając bit SUID
 na pliku wykonywalnym <application>MPlayera</application>
@@ -368,13 +374,13 @@ rozszerzeniu XVidMode.
 
 <para>
 DGA2 łączy cechy rozszerzenia XVidMode z możliwością zmiany głębi wyświetlania,
-więc możesz mając uruchomiony X serwer w 32 bitowej głębi przełączać się na
+więc możesz mając uruchomiony serwer X w 32 bitowej głębi przełączać się na
 15 bitów i vice versa.
 </para>
 
 <para>
 Jednakże DGA ma pewne wady. Jest poniekąd zależne od układu graficznego
-jakiego używasz, a także od implementacji sterownika video (w X serwerze)
+jakiego używasz, a także od implementacji sterownika video (w serwerze X)
 sterującego układem. Nie działa to więc na każdym systemie...
 </para>
 
@@ -404,7 +410,7 @@ Na razie nie ma żadnego konwertera :(
 
 <para>
 Stań się użytkownikiem <systemitem class="username">root</systemitem>.
-DGA wymaga praw roota, aby móc zapisywać bezpośrednio do pamięci video.
+DGA wymaga praw superużytkownika, aby móc zapisywać bezpośrednio do pamięci video.
 Jeżeli chcesz posługiwać się DGA jako zwykły użytkownik, zainstaluj
 <application>MPlayera</application> w trybie SUID root:
 
@@ -443,12 +449,12 @@ Eliminuje to potrzebę (wolnego) programowego skalowania i
 równocześnie zapewnia wyświetlanie pełnoekranowe.
 W warunkach idealnych rozdzielczość zostałaby zmieniona na dokładnie taką samą
 (z zachowaniem formatu obrazu) jak dane video,
-ale X serwer pozwala stosować tylko tryby predefiniowane w
+ale serwer X pozwala stosować tylko tryby predefiniowane w
 <filename>/etc/X11/XF86Config</filename>
 (<filename>/etc/X11/XF86Config-4</filename> dla XFree 4.X.X).
 Są one definiowane przez tak zwane "modelines" (wiersze trybów) i zależą od
 możliwości Twojego sprzętu.
-X serwer skanuje przy starcie ten plik konfiguracyjny
+serwer X skanuje przy starcie ten plik konfiguracyjny
 i wyłącza tryby nie pasujące do Twojego sprzętu. Aby się dowiedzieć,
 które tryby przetrwały ten proces sprawdź plik
 <filename>/var/log/XFree86.0.log</filename>.
@@ -457,7 +463,7 @@ które tryby przetrwały ten proces sprawdź plik
 
 <para>
 Te wpisy działają z układem Riva128, przy użyciu modułu sterownika nv.o
-(moduł X serwera):
+(moduł serwera X):
 </para>
 
 
@@ -496,11 +502,10 @@ Sterownik DGA wywoływany jest poprzez podanie <option>-vo dga</option>
 w wierszu poleceń.
 Standardowym zachowaniem jest zmiana rozdzielczości na jak najbardziej
 pasującą do obrazu.
-Ignorowane są opcje <option>-vm</option> i <option>-fs</option>
-(zmiana trybu wyświetlania oraz wyświetlanie pełnoekranowe).
-Sterownik zawsze próbuje pokryć jak największą powierzchnię ekranu poprzez
-zmianę trybu wyświetlania, dzięki temu nie marnuje mocy procesora
-na skalowanie obrazu.
+Świadomie ignorowane są opcje <option>-vm</option> i <option>-fs</option>
+(zmiana trybu wyświetlania oraz wyświetlanie pełnoekranowe) - sterownik zawsze
+próbuje pokryć jak największą powierzchnię ekranu poprzez zmianę trybu
+wyświetlania, dzięki temu nie marnuje mocy procesora na skalowanie obrazu.
 Jeżeli nie podoba Ci się dobrany tryb, możesz sam go określić,
 korzystając z opcji <option>-x</option> oraz <option>-y</option>.
 Jeżeli podasz opcję <option>-v</option>,
@@ -512,9 +517,9 @@ używając opcji <option>-bpp</option>.
 Prawidłowymi głębiami są 15, 16, 34 i 32.
 Od Twojego sprzętu zależy, czy są one obsługiwane natywnie, czy też dokonywana
 jest konwersja (możliwe, że powolna).
-
 </para>
 </formalpara>
+
 <para>
 Jeżeli jesteś takim szczęśliwcem, że masz wystarczająco dużo pamięci
 pozaekranowej (offscreen memory) aby zmieścił się tam cały obraz,
@@ -557,7 +562,7 @@ z dodatkową korzyścią uzyskania pełnoekranowego obrazu.
 Procentowe wartości szybkości wyświetlane przez
 <application>MPlayera</application> należy interpretować ostrożnie.
 Na przykład przy korzystaniu ze sterownika X11 nie jest uwzględniany czas
-potrzebny dla X serwera na rysowanie.
+potrzebny serwerowi X na rysowanie.
 Podłącz terminal do portu szeregowego swojego komputera i uruchom
 <command>top</command> aby zobaczyć co się na prawdę dzieje w Twoim komputerze.
 </para>
@@ -567,7 +572,7 @@ Podłącz terminal do portu szeregowego swojego komputera i uruchom
 Generalnie przyśpieszenie przy używaniu DGA w stosunku do
 &quot;normalnego&quot;
 używania X11 bardzo zależy od Twojej karty graficznej i od tego, jak dobrze
-zoptymalizowany jest moduł do X serwera.
+zoptymalizowany jest moduł do serwera X.
 </para>
 
 <para>
@@ -577,7 +582,7 @@ w porównaniu do głębi 32 bitowej.
 </para>
 
 <para>
-Używanie 24 bitowej głębi jest dobrym pomysłem, jeżeli
+Używanie 24 bitowej głębi jest dobrym pomysłem, nawet jeśli
 Twoja karta natywnie obsługuje tylko 32 bitową głębię, ponieważ 24 bitowa
 głębia przesyła 25% mniej danych w porównaniu do w pełni 32 bitowego trybu.
 </para>
@@ -601,13 +606,13 @@ jest bezbłędna dla każdego sterownika XFree.
 <itemizedlist>
 <listitem><simpara>
   Istnieje błąd związany z XFree 4.0.3 i sterownikiem <filename>nv.o</filename>
-  objawiający się dziwnymi kolorami
+  objawiający się dziwnymi kolorami.
 </simpara></listitem>
 <listitem><simpara>
   Sterowniki ATI wymagają wielokrotnego przełączania trybu po użyciu DGA.
 </simpara></listitem>
 <listitem><simpara>
-  Niektóre sterowniki po prostu nie wracają do normalnej rozdzielczości(użyj
+  Niektóre sterowniki po prostu nie wracają do normalnej rozdzielczości (użyj
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> oraz
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   aby przełączać się ręcznie).
@@ -618,7 +623,7 @@ jest bezbłędna dla każdego sterownika XFree.
 <listitem><simpara>
   Niektóre sterowniki kłamią na temat rozmiaru pamięci,
   którą mapują na przestrzeń adresową procesu.
-  Poprzez to vo_dga nie będzie używać podwójnego buforowania (SIS?).
+  Przez to vo_dga nie będzie używać podwójnego buforowania (SIS?).
 </simpara></listitem>
 <listitem><simpara>
   Niektóre sterowniki nie zwracają żadnego poprawnego trybu.
@@ -669,68 +674,9 @@ odtwarzanie kuleje (nie z powodu wolnego systemu) lub gdy dźwięk jest opóźni
 Wyjście video SDL obsługuje wyświetlanie napisów pod filmem, na czarnym pasku
 (jeżeli obecny).
 </para>
-
-<variablelist>
-<title>Istnieje wiele opcji wiersza poleceń dla SDL</title>
-<varlistentry>
-  <term><option>-vo sdl:driver=<replaceable>nazwa</replaceable></option></term>
-  <listitem><simpara>
-    określa sterownik video, którego ma użyć SDL (np. <literal>aalib</literal>,
-    <literal>dga</literal>, <literal>x11</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-ao sdl:driver=<replaceable>nazwa</replaceable></option></term>
-  <listitem><simpara>
-    określa sterownik audio, którego ma użyć SDL (np. <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>artsc</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-noxv</option></term>
-  <listitem><simpara>
-    wyłącza sprzętowe przyśpieszanie XVideo
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-forcexv</option></term>
-  <listitem><simpara>
-    próbuje wymusić przyśpieszanie XVideo
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<table>
-<title>Klawiszologia tylko dla SDL</title>
-<tgroup cols="2">
-<thead>
-<row><entry>Klawisz</entry><entry>Akcja</entry></row>
-</thead>
-<tbody>
-<row><entry><keycap>c</keycap></entry><entry>
-  poruszanie się pomiędzy dostępnymi trybami pełnoekranowymi
-</entry></row>
-<row><entry><keycap>n</keycap></entry><entry>
-  powraca do normalnego trybu
-</entry></row>
-</tbody>
-</tgroup>
-</table>
-
-<itemizedlist>
-<title>Znane błędy:</title>
-<listitem><simpara>
-  Klawisze wciśnięte pod konsolowym sterownikiem sdl:driver=aalib są powtarzane
-  w nieskończoność. (użyj <option>-vo aa</option>!).
-  To jest błąd w SDL. Nie mam na to wpływu (testowane z SDL 1.2.1).
-</simpara></listitem>
-<listitem><simpara>
-  NIE UŻYWAJ SDL z GUI (Graficznym Interfejsem Użytkownika)!
-  Nie będzie działało tak, jak powinno.
-</simpara></listitem>
-</itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="svgalib">
 <title>SVGAlib</title>
@@ -738,7 +684,7 @@ Wyjście video SDL obsługuje wyświetlanie napisów pod filmem, na czarnym pask
 <formalpara>
 <title>INSTALACJA</title>
 <para>
-Będziesz musiał zainstalować pakiety svgalib i svgalib-devel, aby
+Będziesz musiał zainstalować svgalib i jej pakiet rozwojowy, aby
 <application>MPlayer</application> zbudował swój własny sterownik
 SVGAlib (automatycznie wykrywane, lecz można wymusić).
 Nie zapomnij przerobić <filename>/etc/vga/libvga.config</filename>, tak aby
@@ -755,11 +701,12 @@ która produkuje obraz złej jakości, ale jest nieco szybsza.
 </para>
 </note>
 
-<formalpara><title>OBSŁUGA EGA (4BPP)</title>
+<formalpara>
+<title>OBSŁUGA EGA (4BPP)</title>
 <para>
 SVGAlib zawiera EGAlib i <application>MPlayer</application>
 może wyświetlać każdy film w 16 kolorach.
-Używalne jest to w następujących zestawieniach:
+Użyteczne jest to w następujących zestawieniach:
 </para>
 </formalpara>
 
@@ -773,7 +720,7 @@ Używalne jest to w następujących zestawieniach:
 </itemizedlist>
 
 <para>
-bpp (bity na piksel) musi być ustawione ręcznie na 4: <option>-bpp 4</option>
+bpp (bity na piksel) musi być ręcznie ustawione na 4: <option>-bpp 4</option>
 </para>
 
 <para>
@@ -784,7 +731,7 @@ lub
 </para>
 
 <para>
-Aby to osiągnąć, musimy sięgnąć po szybką, lecz złej jakości metodę skalowania:
+Aby to osiągnąć, musimy sięgnąć po metodę skalowania szybką, lecz złej jakości:
 <screen>-sws 4</screen>
 </para>
 
@@ -801,11 +748,12 @@ próbkowania, ponieważ dźwięk 44kHz był popsuty: <option>-srate 22050</optio
 </para></note>
 
 <para>
-OSD i napisy możesz wyłączyć tylko przy pomocy filtru
+OSD i napisy możesz włączyć tylko przy pomocy filtru
 <option>expand</option>. Dokładne parametry znajdziesz na stronie man.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="fbdev">
 <title>Wyjście bufora ramki (FBdev)</title>
@@ -903,6 +851,7 @@ i nie proś o to, ponieważ nie jest to ograniczenie
 </note>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="mga_vid">
 <title>Bufor ramki Matrox (mga_vid)</title>
@@ -918,7 +867,7 @@ Działa na konsoli framebuffer oraz w X.
 <warning>
 <para>
 Tylko dla Linuksa! Na systemach nie-Linuksowych (testowane na FreeBSD) używaj
-<link linkend="vidix">VIDIX</link> zamiast tego!
+zamiast tego <link linkend="vidix">VIDIX</link>!
 </para>
 </warning>
 
@@ -943,7 +892,7 @@ make<!--
   Jeżeli zwracana wartość jest zła użyj opcji:
   <option>mga_ram_size</option>
   (najpierw <command>rmmod mga_vid</command>),
-  określ rozmiar pamięci na karcie (w MB):
+  podaj rozmiar pamięci na karcie (w MB):
   <screen>insmod mga_vid.o mga_ram_size=16</screen>
 </para></step>
 <step><para>
@@ -977,11 +926,12 @@ Sterownik mga_vid współpracuje z Xv.
 Plik urządzenia (device file) <filename>/dev/mga_vid</filename>
 może być odczytywany aby uzyskać pewne informacje,
 na przykład poprzez <screen>cat /dev/mga_vid</screen>
-i może być modyfikowany w celu zmiany jasności:
+i można do niego pisać, by zmienić jasność:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>Obsługa 3dfx YUV</title>
@@ -993,6 +943,7 @@ także musiał odpowiednio skompilować <application>MPlayera</application>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="opengl">
 <title>Wyjście OpenGL</title>
@@ -1008,14 +959,14 @@ Jeżeli masz implementację X11 bez obsługi Xv, OpenGL jest sensowną alternaty
 <para>
 Niestety nie wszystkie sterowniki to obsługują.
 Sterowniki Utah-GLX (dla XFree86 3.3.6) obsługują to w każdej karcie.
-Szczegóły odnośnie instalacji dostępne są na stronie
+Szczegóły ich instalacji dostępne są na stronie
 <ulink url="http://utah-glx.sf.net"/>.
 </para>
 
 <para>
 XFree86(DRI) 4.0.3 i nowsze obsługują OpenGL w kartach Matrox i Radeon,
 4.2.0 i nowsze obsługują Rage128. Na <ulink url="http://dri.sf.net"/>
-znajdziesz instrukcję ściągania (download) i instalacji.
+znajdziesz instrukcję ściągania i instalacji.
 </para>
 
 <para>
@@ -1025,11 +976,11 @@ zmienną środowiskową (przynajmniej dla nVidia):
 </para>
 
 <para>
-<command>export $__GL_SYNC_TO_VBLANK=1</command>
+<command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="aalib">
 <title>AAlib - wyświetlanie w trybie tekstowym</title>
@@ -1162,6 +1113,8 @@ jest tam więcej informacji o dostrajaniu.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="caca">
 <title><systemitem class="library">libcaca</systemitem> - Color ASCII Art library (biblioteka kolorowego ASCII-Art)</title>
 
@@ -1254,8 +1207,9 @@ Aby zmienić opcje renderowania, możesz użyć następujących klawiszy w oknie
 Jeżeli Twój komputer nie jest wystarczająco szybki, aby renderować
 wszystkie ramki, użyj opcji <option>-framedrop</option>.
 </para>
-
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="vesa">
 <title>VESA - wyjście na VESA BIOS</title>
@@ -1270,13 +1224,14 @@ która ma BIOS zgodny z VESA VBE 2.0. Inną zaletą tego sterownika jest to,
 </para>
 
 <blockquote>
-<formalpara><title>Podwójne kontrolery (Dual-Controller Designs)</title>
+<formalpara>
+<title>Podwójne kontrolery (Dual-Controller Designs)</title>
 <para>
 VBE 3.0 obsługuje podwójne kontrolery zakładając, że zwykle obydwa kontrolery
-są dostarczane przez tego samego OEM, pod kontrolą pojedynczego BIOS ROMu
+są dostarczane przez tego samego OEM, pod kontrolą pojedynczego ROM BIOSu
 na karcie graficznej. Jest możliwe ukrycie przed aplikacją,
 że obecne są dwa kontrolery. Ograniczeniem tego jest brak możliwości
-równoczesnego używania niezależnych kontrolerów, ale umożliwia aplikacjom
+równoczesnego używania niezależnych kontrolerów, ale pozwala aplikacjom
 wypuszczonym przed VBE 3.0 na normalne działanie.
 Funkcja VBE 00h (zwróć informację o kontrolerze) zwraca połączone
 informacje o obydwóch kontrolerach, włącznie z połączoną listą
@@ -1403,6 +1358,7 @@ Nie będzie działać!
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="x11">
 <title>X11</title>
@@ -1440,9 +1396,9 @@ i wstaw je do swojego <filename>XF86Config</filename>.
 <listitem><simpara>
   W XFree86 3.x.x: musisz poruszać się po dostępnych rozdzielczościach
   poprzez kombinacje klawiszy
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
+  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap>
   oraz
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>.
+  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>.
 </simpara></listitem>
 </itemizedlist>
 </para>
@@ -1455,6 +1411,7 @@ o niskiej rozdzielczości.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="vidix">
 <title>VIDIX</title>
@@ -1492,7 +1449,7 @@ głównym celem tego interfejsu jest maksymalizacja szybkości odtwarzania video
   Możesz używać samodzielnego sterownika wyjścia video:
   <option>-vo xvidix</option>. Ten sterownik został stworzony jako
   interfejs X11
-  dla technologii VIDIX. Wymaga X serwera i może pracować tylko pod nim.
+  dla technologii VIDIX. Wymaga serwera X i może pracować tylko pod nim.
   Zwróć uwagę na to, że stosowany jest bezpośredni dostęp do sprzętu
   i omijany jest sterownik X, pixmapy przechowywane (cached) w pamięci karty
   mogą zostać uszkodzone. Możesz temu zapobiec ograniczając ilość używanej przez
@@ -1509,6 +1466,17 @@ głównym celem tego interfejsu jest maksymalizacja szybkości odtwarzania video
   są zdolne do wyświetlania w pełni graficznego obrazu w konsoli całkowicie
   tekstowej. Więcej informacji znajdziesz w sekcji
   <link linkend="vidix-nvidia">nvidia_vid</link>.
+  Żeby pozbyć się tekstu na ramkach i mrugającego kursora, wypróbuj coś w rodzaju
+  </simpara>
+
+  <screen>setterm -cursor off > /dev/tty9</screen>
+
+  <simpara>
+  (zakładając, że do tej pory nie używałeś <systemitem>tty9</systemitem>)
+  a potem przełącz się na <systemitem>tty9</systemitem>.
+  Z drugiej strony, <option>-colorkey 0</option> powinno dać video odtwarzające
+  się "w tle", chociaż działanie tego zależy od prawidłowego funkcjonowania
+  koloru kluczowego.
 </simpara></listitem>
 <listitem><simpara>
   Możesz użyć podurządzenia (subdevice) VIDIX, które zostało dodane
@@ -1556,14 +1524,9 @@ opcje <option>-fs -zoom -x -y -double</option>.
 <para>
 Możesz także określić sterownik VIDIX jako trzeci podargument w wierszu poleceń:
 
-<screen>
-mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>plik.avi</replaceable>
-</screen>
+<screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>plik.avi</replaceable></screen>
 lub
-<screen>
-mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>plik.avi
-</replaceable>
-</screen>
+<screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>plik.avi</replaceable></screen>
 
 Ale jest to niebezpieczne i nie powinieneś tego robić.
 W tym przypadku podany sterownik zostanie wymuszony i rezultat może być
@@ -1613,8 +1576,10 @@ Alternatywnie możesz używać specjalnego modułu jądra, takiego jak ten:
 </para></step>
 </procedure>
 
+
 <sect3 id="vidix-ati">
 <title>Karty ATI</title>
+
 <para>
 Obecnie większość kart ATI jest obsługiwana natywnie,
 od Mach64 do najnowszych Radeonów.
@@ -1628,8 +1593,10 @@ dostępnych sterowników.
 </para>
 </sect3>
 
+
 <sect3 id="vidix-mga">
 <title>Karty Matrox</title>
+
 <para>
 Matrox G200, G400, G450 i G550 zgłoszono jako działające.
 </para>
@@ -1640,8 +1607,10 @@ szybki jak <link linkend="mga_vid">bufor ramki Matrox</link>
 </para>
 </sect3>
 
+
 <sect3 id="vidix-trident">
 <title>Karty Trident</title>
+
 <para>
 Jest dostępny sterownik dla układu Trident Cyberblade/i1, który można znaleźć
 na płytach głównych VIA Epia.
@@ -1649,17 +1618,20 @@ na płytach głównych VIA Epia.
 
 <para>
 Sterownik ten został napisany przez (i jest pod opieką)
-<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastaira M. Robinsona</ulink>
+<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastaira M. Robinsona</ulink>.
 </para>
 </sect3>
 
+
 <sect3 id="vidix-3dlabs">
 <title>Karty 3DLabs</title>
+
 <para>
 Chociaż istnieje sterownik dla układów 3DLabs GLINT R3 oraz Permedia3,
-to nikt go nie testował (sprawozdania są mile widziane)
+to nikt go nie testował (sprawozdania są mile widziane).
 </para>
 </sect3>
+
 
 <sect3 id="vidix-nvidia">
 <title>Karty nVidia</title>
@@ -1672,18 +1644,19 @@ W tym celu będziemy musieli użyć wyjścia video <option>cvidix</option>, jak
 w pokazuje poniższy przykład:
   <screen>mplayer -vo cvidix <replaceable>przyklad.avi</replaceable></screen>
 </para>
-
 </sect3>
+
 
 <sect3 id="vidix-sis">
 <title>Karty SiS</title>
+
 <para>
-Jest to kod wysoce eksperymentalny. (Tak jak nvidia_vid).
+Jest to kod wysoce eksperymentalny, tak jak nvidia_vid.
 </para>
 
 <para>
 Przetestowano go na SiS 650/651/740 (najczęściej używane układy w
-minimalistycznych pecetach-kostkach &quot;Shuttle XPC&quot; z płytami
+minimalistycznych pecetach &quot;Shuttle XPC&quot; z płytami
 SiS).
 </para>
 
@@ -1693,10 +1666,11 @@ Czekamy na raporty!
 </sect3>
 </sect2>
 
-
+<!-- ********** -->
 
 <sect2 id="directfb">
 <title>DirectFB</title>
+
 <blockquote><para>
 &quot;DirectFB jest biblioteką graficzną, która była tworzona z myślą o
 systemach typu embedded.
@@ -1723,10 +1697,13 @@ Przykład: <option>-vo directfb:2</option> (standardową jest warstwa -1 : autod
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
+
 <para>
-Przeczytaj proszę główną sekcję <link linkend="directfb">DirectFB</link>,
+Przeczytaj proszę <link linkend="directfb">główną sekcję DirectFB</link>,
 znajdziesz tam ogólne informacje.
 </para>
 
@@ -1757,11 +1734,17 @@ Mile widziane są
 </sect2>
 </sect1>
 
+
+<!-- Synced 'till here -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="mpeg_decoders">
 <title>Dekodery MPEG</title>
 
 <sect2 id="dvb">
 <title>Wejście i wyjście DVB</title>
+
 <para>
 <application>MPlayer</application> obsługuje karty z układem Siemens DVB,
 od producentów takich, jak: Siemens, Technotrend, Galaxis czy Hauppauge.
@@ -2004,8 +1987,11 @@ rzeczywistym MPEG-2 i MPEG-4
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="dxr2">
 <title>DXR2</title>
+
 <para><application>MPlayer</application> obsługuje sprzętowo przyśpieszane
 odtwarzanie przy użyciu karty DXR2.</para>
 <para>
@@ -2046,8 +2032,11 @@ akceptowalne wyniki.
 <para>Listę dostępnych opcji znajdziesz na stronie man.</para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="dxr3">
 <title>DXR3/Hollywood+</title>
+
 <para>
 <application>MPlayer</application> obsługuje sprzętowo przyśpieszane
 odtwarzanie na kartach Creative DXR3 oraz Sigma Designs Hollywood Plus.
@@ -2182,6 +2171,10 @@ użyta aby określić wyjście DXR3 zamiast tego z karty dźwiękowej.
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="other">
 <title>Inny sprzęt do wizualizacji</title>
 
@@ -2280,8 +2273,11 @@ poczekać, aż <application>MPlayer</application> zakończy działanie i
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="blinkenlights">
 <title>Blinkenlights</title>
+
 <para>
 Ten sterownik zdolny jest do odtwarzanie używając protokołu UDP Blinkenlights
 (mrugające światła - przyp. tłum.). Jeżeli nie wiesz, czym jest
@@ -2296,6 +2292,10 @@ Blinkenlights w akcji w 00:07:50.
 </para>
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="tvout">
 <title>Obsługa wyjścia TV</title>
@@ -2445,8 +2445,11 @@ przez Balázs Kerekes)
 </formalpara>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="tv-out_matrox_g450">
 <title>Karty Matrox G450/G550</title>
+
 <para>
 Obsługa wyjścia TV dla tych kart została dodana dopiero niedawno i nie
 należy jeszcze do głównego drzewa jądra. <!--mainstream kernel-->. Z tego, co
@@ -2471,6 +2474,7 @@ Potrzebną łatkę na jądro i dokładne HOWTO można ściągnąć z
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="tvout-ati">
 <title>karty ATI</title>
@@ -2518,16 +2522,21 @@ POST.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="tvout-voodoo">
 <title>Voodoo 3</title>
+
 <para>
 Sprawdź <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">ten URL</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
+
 <para>
 Najpierw MUSISZ ściągnąć sterowniki o zamkniętych źródłach z
 <ulink url="http://nvidia.com"/>. Nie będę tutaj opisywał procesu instalacji i
@@ -2563,8 +2572,11 @@ Oczywiście najważniejsza jest część TwinView.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="tvout-neomagic">
 <title>NeoMagic</title>
+
 <para>
 Układ NeoMagic można znaleźć w rożnych laptopach, niektóre wyposażone są w
 prosty analogowy koder TV, inne mają bardziej zaawansowaną wersję.
@@ -2592,7 +2604,8 @@ prosty analogowy koder TV, inne mają bardziej zaawansowaną wersję.
   Przetestowane na Tecra 800, jądro 2.6.15 z vesafb, ALSA v1.0.10.
 </para></listitem>
   
-  <listitem><simpara>
+<listitem>
+  <simpara>
   <emphasis role="bold">Układ kodujący Chrontel 70xx</emphasis>:
   Obecny w IBM thinkpad 390E, a możliwe, że także w innych Thinkpadach lub notebookach.
   </simpara><simpara>
