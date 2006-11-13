@@ -22,7 +22,7 @@ reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<!--
 
 <para>
 It's right, shows my Matrox G400 with 16MB memory. I did this from
-XFree 4.x.x , which sets up MTRR registers automatically.
+XFree 4.x.x, which sets up MTRR registers automatically.
 </para>
 
 <para>
@@ -42,8 +42,8 @@ base address. You have 3 ways to find it:
   command):
   <screen>
 01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
-Memory at d8000000 (32-bit, prefetchable)
-  </screen>
+Memory at d8000000 (32-bit, prefetchable)<!--
+  --></screen>
 </para></listitem>
 <listitem><para>
   from mga_vid kernel driver messages (use <command>dmesg</command>):
@@ -74,7 +74,7 @@ You know base address and memory size, let's setup MTRR registers!
 For example, for the Matrox card above (<literal>base=0xd8000000</literal>)
 with 32MB ram (<literal>size=0x2000000</literal>) just execute:
 <screen>
-echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
+echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr
 </screen>
 </para>
 
@@ -98,8 +98,8 @@ stepping 0) CPUs don't have MTRRs, but stepping 12 does
 <para>
 Under XFree86 4.0.2 or newer, you can use your card's hardware YUV routines
 using the XVideo extension. This is what the option
-'<option>-vo xv</option>' uses. Also, this driver supports adjusting
-brightness/contrast/hue/etc (unless you use the old, slow DirectShow DivX
+<option>-vo xv</option> uses. Also, this driver supports adjusting
+brightness/contrast/hue/etc. (unless you use the old, slow DirectShow DivX
 codec, which supports it everywhere), see the man page.
 </para>
 
@@ -552,7 +552,7 @@ only half the memory bandwidth of a 32 bit display.
 </para>
 
 <para>
-Using a depth of 24 bit is even a good idea if your card natively just supports
+Using a depth of 24 bit is a good idea even if your card natively just supports
 32 bit depth since it transfers 25% less data compared to the 32/32 mode.
 </para>
 
@@ -1343,9 +1343,9 @@ modelines</link>, and insert them into your <filename>XF86Config</filename>.
 <listitem><simpara>
   With XFree86 3.x.x: you have to cycle through available resolutions
   with the
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
+  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap>
   and
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>
+  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   keys.
 </simpara></listitem>
 </itemizedlist>
@@ -1715,7 +1715,7 @@ Note that DVB cards only support heights 288 and 576 for PAL or 240 and 480 for
 NTSC. You <emphasis role="bold">must</emphasis> rescale for other heights by adding
 <option>scale=width:height</option> with the width and height you want to the
 <option>-vf</option> option. DVB cards accept various widths, like 720, 704,
-640, 512, 480, 352 etc and do hardware scaling in horizontal direction, so you
+640, 512, 480, 352 etc. and do hardware scaling in horizontal direction, so you
 do not need to scale horizontally in most cases. For a 512x384 (aspect 4:3)
 MPEG-4 (DivX) try:
 </para>
