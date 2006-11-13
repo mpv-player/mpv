@@ -1766,6 +1766,8 @@ static int
 demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid);
 static int
 demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid);
+static int
+demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid);
 
 static void
 display_create_tracks (demuxer_t *demuxer)
@@ -1796,7 +1798,7 @@ display_create_tracks (demuxer_t *demuxer)
           break;
         case MATROSKA_TRACK_SUBTITLE:
           type = "subtitles";
-          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
+          demux_mkv_open_sub(demuxer, mkv_d->tracks[i], sid);
           if (mkv_d->tracks[i]->name)
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_NAME=%s\n", sid, mkv_d->tracks[i]->name);
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, mkv_d->tracks[i]->language);
@@ -2408,18 +2410,18 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
 #endif
 
 static int
-demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
+demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
 {
   if (track->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN)
     {
+      sh_sub_t *sh = new_sh_sub_sid(demuxer, track->tnum, sid);
       if ((track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB) ||
           (track->subtitle_type == MATROSKA_SUBTYPE_SSA))
         {
           if (track->private_data != NULL)
             {
-              demuxer->sub->sh = malloc(sizeof(sh_sub_t));
-              if (demuxer->sub->sh != NULL)
-                memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(sh_sub_t));
+              if (sh)
+                memcpy(sh, &track->sh_sub, sizeof(sh_sub_t));
             }
         }
     }
@@ -2680,7 +2682,7 @@ demux_mkv_open (demuxer_t *demuxer)
     track = demux_mkv_find_track_by_language (mkv_d, dvdsub_lang,
                                               MATROSKA_TRACK_SUBTITLE);
 
-  if (track && !demux_mkv_open_sub (demuxer, track))
+  if (track)
           {
             mp_msg (MSGT_DEMUX, MSGL_INFO,
                     MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack, track->tnum);

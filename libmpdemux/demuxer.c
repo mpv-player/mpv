@@ -201,6 +201,23 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char
   return d;
 }
 
+sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid) {
+  if (id > MAX_S_STREAMS - 1 || id < 0) {
+    mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested sub stream id overflow (%d > %d)\n",
+           id, MAX_S_STREAMS);
+    return NULL;
+  }
+  if (demuxer->s_streams[id])
+    mp_msg(MSGT_DEMUXER, MSGL_WARN, "Sub stream %i redefined\n", id);
+  else {
+    sh_sub_t *sh = calloc(1, sizeof(sh_sub_t));
+    demuxer->s_streams[id] = sh;
+    sh->sid = sid;
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
+  }
+  return demuxer->s_streams[id];
+}
+
 sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
     if(id > MAX_A_STREAMS-1 || id < 0)
     {

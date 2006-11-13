@@ -128,6 +128,7 @@ typedef struct demuxer_info_st {
 } demuxer_info_t;
 
 typedef struct {
+  int sid;
   char type;                    // t = text, v = VobSub, a = SSA/ASS
   int has_palette;              // If we have a valid palette
   unsigned int palette[16];     // for VobSubs
@@ -142,6 +143,7 @@ typedef struct {
 
 #define MAX_A_STREAMS 256
 #define MAX_V_STREAMS 256
+#define MAX_S_STREAMS 32
 
 struct demuxer_st;
 
@@ -199,7 +201,7 @@ typedef struct demuxer_st {
   // stream headers:
   void* a_streams[MAX_A_STREAMS]; // audio streams (sh_audio_t)
   void* v_streams[MAX_V_STREAMS]; // video sterams (sh_video_t)
-  char s_streams[32];   // dvd subtitles (flag)
+  void *s_streams[MAX_S_STREAMS];   // dvd subtitles (flag)
 
   demux_chapter_t* chapters;
   int num_chapters;
