@@ -22,7 +22,7 @@ reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<!--
 
 <para>
 Здесь все верно, показана моя Matrox G400 с 16Мб памяти. Я выполнил это из-под
-XFree 4.x.x , который автоматически устанавливает регистры MTRR.
+XFree 4.x.x, который автоматически устанавливает регистры MTRR.
 </para>
 
 <para>
@@ -35,19 +35,19 @@ XFree 4.x.x , который автоматически устанавливае
   <screen>
 (--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
 (--) SVGA: Linear framebuffer at 0xD8000000<!--
---></screen>
-  </para></listitem>
+  --></screen>
+</para></listitem>
 <listitem><para>
   из <filename>/proc/pci</filename> (используйте команду <command>lspci -v</command>):
   <screen>
 01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
-Memory at d8000000 (32-bit, prefetchable)
-  </screen>
-  </para></listitem>
+Memory at d8000000 (32-bit, prefetchable)<!--
+  --></screen>
+</para></listitem>
 <listitem><para>
   из сообщений драйвера ядра mga_vid (используйте <command>dmesg</command>):
   <screen>mga_mem_base = d8000000</screen>
-  </para></listitem>
+</para></listitem>
 </orderedlist>
 </para>
 
@@ -73,7 +73,7 @@ Memory at d8000000 (32-bit, prefetchable)
 Например, для вышеуказанной карты Matrox (<literal>base=0xd8000000</literal>)
 с 32Мб памяти (<literal>size=0x2000000</literal>) просто выполните:
 <screen>
-echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
+echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr
 </screen>
 </para>
 
@@ -84,15 +84,20 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
 </para>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="output-trad">
 <title>Видео вывод для традиционных видео карт</title>
+
 <sect2 id="xv">
 <title>Xv</title>
 
 <para>
 Под XFree86 4.0.2 или новее, вы можете использовать функции работы с YUV[YUV routines] 
 вашей видеокарты, используя расширение XVideo, то, которое используется при указании опциии
-'<option>-vo xv</option>'. 
+<option>-vo xv</option>. 
 <!-- FIXME
 Also, this driver supports adjusting
 brightness/contrast/hue/etc (unless you use the old, slow DirectShow DivX
@@ -110,10 +115,10 @@ DivX кодека DirectShow, который везде это поддержи�
 <orderedlist>
 <listitem><para>
   Требуется использовать XFree86 4.0.2 или новее (предыдущие версии не меют XVideo)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Ваша карта действительно поддерживает аппаратное ускорение (современные - да)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   X загружают расширение XVideo, это похоже на:
   <programlisting>(II) Loading extension XVideo</programlisting>
@@ -123,7 +128,7 @@ DivX кодека DirectShow, который везде это поддержи�
    всегда, это не означает, что загружена <emphasis role="bold">аппаратная</emphasis>
    поддержка XVideo.
   </para></note>
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Ваша карта имеет поддержку Xv для inux. Чтобы это проверить, запустите 
   <command>xvinfo</command>, являющуюся частью дистрибутива XFree86. Она должна 
@@ -155,7 +160,7 @@ screen #0
 --></screen>
   Карта должна поддерживать YUY2 пакованные и YUV12 планарные[planar] форматы
   пикселов, чтобы быть полезной в <application>MPlayer</application>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   И, наконец, проверьте, что <application>MPlayer</application> собран с
   поддержкой 'xv'. Выполните <command>mplayer -vo help | grep xv </command>.
@@ -163,17 +168,18 @@ screen #0
   <screen>
   xv      X11/Xv<!--
   --></screen>
-  </para></listitem>
+</para></listitem>
 </orderedlist>
 </para>
+
 
 <sect3 id="tdfx">
 <title>3dfx карты</title>
 
 <para>
 Хорошо известно, что старые 3dfx драйвера имеют проблемы с ускорением XVideo, они не 
-поддерживают ни YUY2 ни YV12, и т.п. Проверьте, что у вас XFree86 версии
-4.2.0 или новее, он хорошо работает с YV12 и YUY2. Предыдущие версии, 
+поддерживают ни YUY2 ни YV12, ни т.п. Проверьте, что у вас XFree86 версии
+4.2.0 или новее, он может работать с YV12 и YUY2, в то время как предыдущие версии, 
 включая 4.1.0, <emphasis role="bold">с YV12 приводят к краху</emphasis>.
 
 Если вы столкнулись со странными эффектами при использовании <option>-vo xv</option>, 
@@ -197,6 +203,7 @@ S3 Savage3D, должны прекрасно работать, но для Savag
 она поддерживает xv, но карта сама по себе слишком медленная, так что лучше будет ее 
 продать.
 </para>
+
 <para>
 Существует родной драйвер фреймбуфера для карт S3 Virge, аналогичный 
 tdfxfb. Настройте ваш фреймбуфер (например, укажите ядру
@@ -297,6 +304,7 @@ EndSection<!--
 
 <sect3 id="trident">
 <title>Trident карты</title>
+
 <para>
 Если хотите использовать Xv с картой Trident, учитывая, что они не работают с
 4.1.0, установите XFree 4.2.0.
@@ -307,12 +315,12 @@ EndSection<!--
 Другой вариант: <application>MPlayer</application> имеет 
 <link linkend="vidix">VIDIX</link> драйвер для карт Cyberblade/i1.
 </para>
-
 </sect3>
 
 
 <sect3 id="kyro">
 <title>Kyro/PowerVR карты</title>
+
 <para>
 Если хотите использовать Xv с картами на базе Kyro (например,
 Hercules Prophet 4000XT), следует скачать драйверы с
@@ -553,7 +561,7 @@ DGA запускается указанием <option>-vo dga</option> в ком
 </para>
 
 <para>
-Даже использование глубины 24 бита - хорошая идея, если ваша карта
+Использование глубины 24 бита - хорошая идея, даже если ваша карта
 аппаратно поддерживает только 32 бита, поскольку передается на 25%
 меньше данных по сравнению с режимом 32/32.
 </para>
@@ -579,34 +587,34 @@ AMD K6-2 CPU может работать начиная с 400 МГц и выш�
 <listitem><simpara>
   С XFree 4.0.3 и <filename>nv.o</filename> существует ошибка приводящая 
   к странным цветам.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   ATI драйвер требует  неоднократного переключения режима после
   завершения использования DGA.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Некоторые драйвера просто не в состоянии переключиться обратно в
   нормальный режим (используйте 
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> и
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   для нормального переключения).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Некоторые драйвера просто отображают странные цвета.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Некоторые драйвера неверно сообщают о количестве памяти, которое они отобразли в
   адресное простарство процесса, так что vo_dga не будет использовать
   двойную буферизацию (SIS?).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Некоторые драйвера, похоже, не могут сообщить  даже об одном верном режиме.
   В этом случае DGA рухнет, сообщая о невероятном режиме 
   100000x100000 или о чем-нибудь похожем.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   OSD работает только с задействованным двойным буфером (иначе он моргает).
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 </sect2>
@@ -650,9 +658,9 @@ SDL'вских X11 драйверов, пока не написали наш с�
 <para>
 SDL видео вывод поддерживает отображения субтитров внизу, на черной полосе (если она есть).
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="svgalib">
 <title>SVGAlib</title>
@@ -676,7 +684,8 @@ SDL видео вывод поддерживает отображения суб
 </para>
 </note>
 
-<formalpara><title>ПОДДЕРЖКА EGA (4BPP)</title>
+<formalpara>
+<title>ПОДДЕРЖКА EGA (4BPP)</title>
 <para>
 SVGAlib включает в себя EGAlib, и <application>MPlayer</application> имеет
 возможность выводить любой фильм в 16-ти цветах. Используется в таких вариантах:
@@ -686,10 +695,10 @@ SVGAlib включает в себя EGAlib, и <application>MPlayer</applicatio
 <itemizedlist>
 <listitem><simpara>
   EGA карта с EGA монитором: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   EGA карта с CGA монитором: 320x200x4bpp, 640x200x4bpp
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <para>
@@ -728,6 +737,7 @@ or
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="fbdev">
 <title>Вывод во фреймбуфер (FBdev)</title>
@@ -757,19 +767,19 @@ or
   <listitem><simpara>
     указывает какой устройство фреймбуфера использовать  
     (по-умолчанию: <filename>/dev/fb0</filename>)
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
   <listitem><simpara>
     название используемого режима (в соответствии с <filename>/etc/fb.modes</filename>)
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
   <listitem><simpara>
     конфигурационный файл с режимами (по-умолчанию: <filename>/etc/fb.modes</filename>)
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
@@ -778,7 +788,7 @@ or
   <listitem><simpara>
     <emphasis role="bold">важные</emphasis> знаячения, смотрите
     <filename>example.conf</filename>
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 </variablelist>
 
@@ -797,11 +807,11 @@ mplayer -vm -fbmode <replaceable>название_режима</replaceable> <re
   <option>-flip</option> поддерживается, только если формат точки фильма совпадает с 
   форматом точки видеорежима. Обратите внимание на значение bpp, fbdev пытается
   использовать текущий или указанный вами опцией <option>-bpp</option>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Опция <option>-zoom</option> не поддерживается (используйте <option>-vf scale</option>).
   Вы не можете использовать режимы с 8bpp (или меньше).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Вы, возможно, захотите отключить курсор:
   <screen>echo -e '\033[?25l'</screen>
@@ -813,7 +823,7 @@ mplayer -vm -fbmode <replaceable>название_режима</replaceable> <re
   <screen>echo -e '\033[?25h'</screen>
   или
   <screen>setterm -cursor on</screen>
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <note>
@@ -824,6 +834,7 @@ mplayer -vm -fbmode <replaceable>название_режима</replaceable> <re
 </note>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="mga_vid">
 <title>Matrox фреймбуфер (mga_vid)</title>
@@ -850,13 +861,13 @@ mplayer -vm -fbmode <replaceable>название_режима</replaceable> <re
 cd drivers
 make<!--
 --></screen>
-  </para></step>
+</para></step>
 <step><para>
   Затем создайте устройство <filename>/dev/mga_vid</filename>:
   <screen>mknod /dev/mga_vid c 178 0</screen>
   и загрузите драйвер:
   <screen>insmod mga_vid.o</screen>
-  </para></step>
+</para></step>
 <step><para>
   Вам следует проверить определение размера памяти, используя
   команду <command>dmesg</command>. Если он неверен, укажите опцию
@@ -864,7 +875,7 @@ make<!--
   (но сначала <command>rmmod mga_vid</command>),
   указав размер памяти в Мб:
   <screen>insmod mga_vid.o mga_ram_size=16</screen>
-  </para></step>
+</para></step>
 <step><para>
   чтобы в случае необходимости загружать его автоматической, сначала добавьте 
   следующую строку в конец файла <filename>/etc/modules.conf</filename>:
@@ -876,7 +887,7 @@ make<!--
   </para><para>
   Затем запустите 
   <screen>depmod -a</screen>
-  </para></step>
+</para></step>
 <step><para>
   Теперь надо (пере)скомпилировать <application>MPlayer</application>,
   <filename>./configure</filename> определит
@@ -884,7 +895,7 @@ make<!--
   Использование его в <application>MPlayer</application> осуществляется 
   опцией <option>-vo mga</option>, если используете консоль matroxfb, или
   опцией <option>-vo xmga</option> из-под XFree86 3.x.x или 4.x.x.
-  </para></step>
+</para></step>
 </procedure>
 
 <para>
@@ -900,6 +911,7 @@ make<!--
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>Поддержка 3Dfx YUV</title>
@@ -910,6 +922,7 @@ make<!--
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="opengl">
 <title>OpenGL вывод</title>
@@ -940,11 +953,12 @@ XFree86(DRI) 4.0.3 или новее поддерживает OpenGL с карт
 </para>
 
 <para>
-<command>export $__GL_SYNC_TO_VBLANK=1</command>
+<command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
 
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="aalib">
 <title>AAlib - отображение в текстовом режиме</title>
@@ -969,28 +983,28 @@ ASCII рендерер[renderer]. Существует <emphasis>множест�
 <tbody>
 <row><entry><keycap>1</keycap></entry><entry>
   уменьшить контрастность
-  </entry></row>
+</entry></row>
 <row><entry><keycap>2</keycap></entry><entry>
   увеличить контрастность
-  </entry></row>
+</entry></row>
 <row><entry><keycap>3</keycap></entry><entry>
   уменьшить яркость
-  </entry></row>
+</entry></row>
 <row><entry><keycap>4</keycap></entry><entry>
   увеличить яркость
-  </entry></row>
+</entry></row>
 <row><entry><keycap>5</keycap></entry><entry>
   включение/отключение быстрого рендеринга
-  </entry></row>
+</entry></row>
 <row><entry><keycap>6</keycap></entry><entry>
   установка режима зашумления[dithering] (отсутствие, распределение ошибки[error distribution], Floyd Steinberg)
-  </entry></row>
+</entry></row>
 <row><entry><keycap>7</keycap></entry><entry>
   инвертировать изображение
-  </entry></row>
+</entry></row>
 <row><entry><keycap>8</keycap></entry><entry>
   переключение между управлением aa и <application>MPlayer</application>
-  </entry></row>
+</entry></row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -1001,7 +1015,7 @@ ASCII рендерер[renderer]. Существует <emphasis>множест�
   <term><option>-aaosdcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
     Смена цвета OSD
-    </para></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aasubcolor=<replaceable>V</replaceable></option></term>
@@ -1015,7 +1029,7 @@ ASCII рендерер[renderer]. Существует <emphasis>множест�
     <literal>3</literal> (жирный шрифт),
     <literal>4</literal> (реверсный[reverse]),
     <literal>5</literal> (специальный).
-    </para></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1025,25 +1039,25 @@ ASCII рендерер[renderer]. Существует <emphasis>множест�
   <term><option>-aadriver</option></term>
   <listitem><simpara>
     Установить рекомендуемый aa драйвер (X11, curses, Linux).
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
   <listitem><simpara>
     Использовать все 256 символов.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
   <listitem><simpara>
     Использовать восьмибитную ASCII.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
   <listitem><simpara>
     Выводит все опции  aalib.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1074,6 +1088,7 @@ rock] :) ), но, IMHO, вы можете использовать опцию  <
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="caca">
 <title><systemitem class="library">libcaca</systemitem> - Цветная ASCII Art библиотека</title>
@@ -1100,10 +1115,10 @@ rock] :) ), но, IMHO, вы можете использовать опцию  <
 <title>Отличия от <systemitem class="library">AAlib</systemitem> следующие:</title>
 <listitem><simpara>
    16 доступных цветов для вывода символов (256 цветовых пар)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
    зашумление[dithering] цветного изображения
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <itemizedlist>
@@ -1111,7 +1126,7 @@ rock] :) ), но, IMHO, вы можете использовать опцию  <
 ограничения:</title>
 <listitem><simpara>
    нет поддержки яркости, контрастности, гаммы
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <para>
@@ -1127,13 +1142,13 @@ rock] :) ), но, IMHO, вы можете использовать опцию  <
 <tbody>
 <row><entry><keycap>d</keycap></entry><entry>
   Перключение методов зашумления[dithering] <systemitem class="library">libcaca</systemitem>.
-  </entry></row>
+</entry></row>
 <row><entry><keycap>a</keycap></entry><entry>
   Перекллючение сглаживания[antialiasing] <systemitem class="library">libcaca</systemitem>.
-  </entry></row>
+</entry></row>
 <row><entry><keycap>b</keycap></entry><entry>
   Переключение фона <systemitem class="library">libcaca</systemitem>.
-  </entry></row>
+</entry></row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -1145,19 +1160,19 @@ rock] :) ), но, IMHO, вы можете использовать опцию  <
   <term><option>CACA_DRIVER</option></term>
   <listitem><simpara>
     Установить рекомендуемый caca драйвер, например ncurses, slang, x11.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (только X11)</option></term>
   <listitem><simpara>
     Указывает количество строк и стольбцов, например, 128x50.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (только X11)</option></term>
   <listitem><simpara>
     Указывает используемый шрифт, например, fixed, nexus.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1168,6 +1183,7 @@ rock] :) ), но, IMHO, вы можете использовать опцию  <
 
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="vesa">
 <title>VESA - вывод в VESA BIOS</title>
@@ -1209,27 +1225,27 @@ BIOS ROM на той же карте, то возможно скрыть от п
 <listitem><simpara>
   У вас есть шанс смотреть фильмы, <emphasis role="bold">даже если Linux
   не знает</emphasis> ваше видео оборудование.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Вам не требуется устанавливать в Linux ничего, относящегося к графике 
   (вроде X11 (он же XFree86), fbdev и т.п.). Этот драйвер может запускаться
   из <emphasis role="bold">текстового режима</emphasis>.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   У вас есть шанс получить <emphasis role="bold">работающий TV-выход</emphasis>.
   (Это известно как минимум для ATI карт).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Этот драйвер вызывает обработчик <function>int 10h</function>, так что это
   не эмуляция - он вызывает <emphasis role="bold">реальные</emphasis> 
   вещи <emphasis>реального</emphasis> BIOS в <emphasis>реальном режиме</emphasis>
   (на самом деле vm86 режим).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   С ним вы можете использовать VIDIX, получая ускоренное отображение видео,
   <emphasis role="bold">и</emphasis> TV вывод одновременно!
   (Рекомендуется для ATI карт.)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Если у вас есть VESA VBE 3.0+, и вы где-то указали 
   <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option>
@@ -1237,20 +1253,20 @@ BIOS ROM на той же карте, то возможно скрыть от п
   частоту обновления. (Используя General Timing Formula). Чтобы задействовать 
   эту возможность, вы должны указать <emphasis role="bold">все</emphasis> опции
   вашего монитора.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
 <title>НЕДОСТАТКИ</title>
 <listitem><simpara>
    Это работает только на <emphasis role="bold">x86 системах</emphasis>.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Может использваться только пользователем <systemitem class="username">root</systemitem>.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   В данный момент доступно только для <emphasis role="bold">Linux</emphasis>.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <important>
@@ -1270,7 +1286,7 @@ BIOS ROM на той же карте, то возможно скрыть от п
     двойную буферизацию опцией <option>-double</option>. Замечание: вы можете 
     опустить эти параметры для <emphasis role="bold">автоопределения</emphasis>
     режтма dga.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1285,29 +1301,30 @@ BIOS ROM на той же карте, то возможно скрыть от п
   <command>setsysfont</command> из дистрибутива Mandrake/Mandriva, например.
   (<emphasis role="bold">Подсказка</emphasis>: Та же утилита используется для
   локализации fbdev).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Некоторые <emphasis role="bold">графические драйверы Linux</emphasis> не обновляют 
   активный <emphasis role="bold">BIOS режим</emphasis> в DOS памяти.
   Таким образом, если у вас подобная проблема - всегда используете VESA драйвер 
   только из <emphasis role="bold">текстового режима</emphasis>. Иначе в любом случае будет
   активирован текстовый режим (#03) и вам придется перезагружать компьютер..
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Часто после завершения работы  VESA драйвера вы получаете 
   <emphasis role="bold">черный</emphasis> экран. Чтобы вернуться в обычный режим 
   просто переключитесь на другую консоль 
   (нажав <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>) затем переключитесь
   обратно тем же способом.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Для получения <emphasis role="bold">работающего TV выхода</emphasis> необходимо,
   чтобы TV разъем был подключен до включения вашего PC, т.к. видео BIOS
   инициализирует себя только один раз во время POST процедуры.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="x11">
 <title>X11</title>
@@ -1338,14 +1355,14 @@ BIOS ROM на той же карте, то возможно скрыть от п
 <listitem><simpara>
   Если у вас XFree86 4.x.x: используйте <option>-vm</option> опцию. Она
   переключится в режим с подходящим разрешением. Если нет:
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   C XFree86 3.x.x: циклически переключайтесь между разными разрешениями с помощью
   клавиш
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>плюч</keycap>
+  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Доп. клавиша плюс</keycap>
   and
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>минус</keycap>.
-  </simpara></listitem>
+  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Доп. клавиша минус</keycap>.
+</simpara></listitem>
 </itemizedlist>
 </para>
 
@@ -1356,6 +1373,7 @@ BIOS ROM на той же карте, то возможно скрыть от п
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="vidix">
 <title>VIDIX</title>
@@ -1395,8 +1413,9 @@ BES (BackEnd scalers) или OV (Video Overlays). Он не предоставл
   параметр в количество установленной видеопамяти минус 4Мб. Если у вас меньше
   8Мб видеопамяти, вместо этого можно использовать опцию "XaaNoPixmapCache" в
   разделе экранов.
-  </simpara></listitem>
-<listitem><simpara>
+</simpara></listitem>
+<listitem>
+  <simpara>
   Существует консольный VIDIX драйвер: <option>-vo cvidix</option>.
   Для большинства карт требуется работающий и инициализированный фреймбуфер 
   (в противном случае просто испортите изображение на экране),
@@ -1414,13 +1433,14 @@ BES (BackEnd scalers) или OV (Video Overlays). Он не предоставл
   на <systemitem>tty9</systemitem>.
   С другой стороны, <option>-colorkey 0</option> должна дать вам видео, работающее "на фоне",
   однако правильность работы этого зависит от функцинальности colorkey.
-  </simpara></listitem>
+  </simpara>
+</listitem>
 <listitem><simpara>
   Вы можете использовать подустройство VIDIX, примененное к различным
   драйверам видео вывода, например: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">только Linux</emphasis>) и
   <option>-vo fbdev:vidix</option>.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <para>
@@ -1433,11 +1453,11 @@ BES (BackEnd scalers) или OV (Video Overlays). Он не предоставл
 <listitem><simpara>
   Видеокарта должна находиться в графическом режиме (кроме карт nVidia с
   драйвером <option>-vo cvidix</option>).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Драйвер вывода видео <application>MPlayer</application> должен знать 
   текущий видеорежим и быть способным сообщить VIDIX некоторые видео характеристики сервера.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <formalpara>
@@ -1453,14 +1473,12 @@ vo_server. Дополнительно он понимает ключ <option>-do
 <option>-fs -zoom -x -y -double</option>.
 </para>
 </formalpara>
-<para>
-Вы можете напрямую указать  VIDIX драйвер третьим параметром к командной строке
-:
 
+<para>
+Вы можете напрямую указать  VIDIX драйвер третьим параметром к командной строке:
 <screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>file.avi</replaceable></screen>
 или
 <screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>file.avi</replaceable></screen>
-
 Но это опасно, и вам не следует этого делать. В этом случае принудительно 
 запускается указанный драйвер и результат может быть непредсказуемым
 (он может <emphasis role="bold">подвесить</emphasis> ваш компьютер). 
@@ -1486,34 +1504,36 @@ VIDIX без аргументов для задействования автоо
   версию, созданную Alex специально для использования с <application>MPlayer</application>
   (она не требует наличия исходников svgalib для компиляции)
   <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">отсюда</ulink>.
-  </para></step>
+</para></step>
 <step><para>
   Скомпилируйте модуль в каталоге <filename class="directory">svgalib_helper</filename>
   (он может быть найден внутри каталога 
   <filename class="directory">svgalib-1.9.17/kernel/</filename>, если вы скачали исходники
   с сайта svgalib) и выполните insmod для него.
-  </para></step>
+</para></step>
 <step><para>
   Для создания необходимых устройств в каталоге <filename class="directory">/dev</filename>,
   выполните от имени root команду <screen>make device</screen> в 
   <filename class="directory">svgalib_helper</filename>.
-  </para></step>
+</para></step>
 <step><para>
   Переместите каталог <filename class="directory">svgalib_helper</filename> в
   <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
-  </para></step>
+</para></step>
 <step><para>
   Требуется, если вы скачали исходники с сайта svgalib: Удалите комментарий перед строкой
   CFLAGS, содержаший строку "svgalib_helper" в файле
   <filename class="directory">libdha/Makefile</filename>.
-  </para></step>
+</para></step>
 <step><para>
   Перекомпилируйте и установите libdha.
   </para></step>
 </procedure>
 
+
 <sect3 id="vidix-ati">
 <title>ATI карты</title>
+
 <para>
 В даный момент для большинства карт ATI, начиная от Mach64 и заканчивая последними
 Radeon, имеется встроенная поддержка.
@@ -1527,8 +1547,10 @@ Radeon и <filename>rage128_vid</filename> для карт Rage 128. Вы мож
 </para>
 </sect3>
 
+
 <sect3 id="vidix-mga">
 <title>Matrox карты</title>
+
 <para>
 Сообщалось, что работают Matrox G200, G400, G450 и G550.
 </para>
@@ -1540,8 +1562,10 @@ Radeon и <filename>rage128_vid</filename> для карт Rage 128. Вы мож
 </para>
 </sect3>
 
+
 <sect3 id="vidix-trident">
 <title>Trident карты</title>
+
 <para>
 Существует драйвер для чипсета Trident Cyberblade/i1, который можно найти
 на материнских платах VIA Epia.
@@ -1549,17 +1573,20 @@ Radeon и <filename>rage128_vid</filename> для карт Rage 128. Вы мож
 
 <para>
 Драйвер написан и поддерживается 
-<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>
+<ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>.
 </para>
 </sect3>
 
+
 <sect3 id="vidix-3dlabs">
 <title>3DLabs карты</title>
+
 <para>
 Хотя драйвер для чипов 3DLabs GLINT R3 и Permedia3 существует, никто его не
 тестировал, так что отчеты приветствуются.
 </para>
 </sect3>
+
 
 <sect3 id="vidix-nvidia">
 <title>nVidia карты</title>
@@ -1571,11 +1598,12 @@ Radeon и <filename>rage128_vid</filename> для карт Rage 128. Вы мож
   драйвер вывода видео <option>cvidix</option>, как показывет следующий пример:
   <screen>mplayer -vo cvidix <replaceable>example.avi</replaceable></screen>
 </para>
-
 </sect3>
+
 
 <sect3 id="vidix-sis">
 <title>SiS карты</title>
+
 <para>
 Это, как и nvidia_vid, весьма экспериментальный код.
 </para>
@@ -1591,8 +1619,11 @@ SiS версиях байрбонов[barebones] "Shuttle XPC")
 </sect3>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="directfb">
 <title>DirectFB</title>
+
 <blockquote><para>
 &quot;DirectFB - это графическая библиотека, которая была разработана с учетом 
 особенностей встроенных систем. Она предоставляет максимум производительности
@@ -1616,6 +1647,8 @@ DirectFB в командной строке, при помощи <option>-dfbopt
 (по-умолчанию -1: автоопределение)
 </para>
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
@@ -1647,11 +1680,16 @@ Ville Syrjala имеет
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="mpeg_decoders">
 <title>MPEG декодеры</title>
 
 <sect2 id="dvb">
 <title>DVB ввод и вывод</title>
+
 <para>
 <application>MPlayer</application> поддерживает карты с чипсетом Siemens DVB и
 таких производителей, как Siemens, Technotrend, Galaxis или Hauppauge. 
@@ -1901,8 +1939,11 @@ MPEG-2 и MPEG-4 (частичная декомпрессия).
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="dxr2">
 <title>DXR2</title>
+
 <para><application>MPlayer</application> поддерживает аппаратное ускорение воспроизведения
 с картами Creative DXR2.
 </para>
@@ -1941,6 +1982,8 @@ MPEG-2 и MPEG-4 (частичная декомпрессия).
 
 <para>Смотрите страницу man руководства для списка доступных опций.</para>
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="dxr3">
 <title>DXR3/Hollywood+</title>
@@ -2071,6 +2114,10 @@ em8300 поддерживает воспроизведение звука AC3 (�
 
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="other">
 <title>Другое оборужование вывода видео</title>
 
@@ -2168,6 +2215,8 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="blinkenlights">
 <title>Blinkenlights[Мерцающие огни?]</title>
 <para>
@@ -2182,6 +2231,10 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
 </para>
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="tvout">
 <title>Поддержка TV-выхода</title>
@@ -2216,11 +2269,12 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
     и будет иметь включенную защиту от копирования <emphasis role="bold">Macrovision</emphasis> 
     (можно "обойти" Macrovision используя этот 
     <ulink url="http://avifile.sf.net/mgamacro.pl">скрипт на perl</ulink>).
-    </para></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term>Framebuffer</term>
-  <listitem><para>
+  <listitem>
+    <para>
     Используя <emphasis role="bold">модули matroxfb</emphasis> в 2.4 ядрах.
     2.2 ядра не имеют в этих модулях возможности работы с TVout, так что для нашего 
     дела непригодны. Вы должны включить ВСЕ matroxfb-относящиеся возможности во время компиляции
@@ -2234,23 +2288,23 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
       <command>./compile.sh</command>. Установите 
       <filename>TVout/matroxset/matroxset</filename>
       куда-нидудь в ваши <envar>PATH</envar>.
-      </para></step>
+    </para></step>
     <step><para>
       Если вы еще не имеете установленного <command>fbset</command>, поместите
       <filename>TVout/fbset/fbset</filename>
       куда-нибуть в ваши <envar>PATH</envar>.
-      </para></step>
+    </para></step>
     <step><para>
       Еслы <command>con2fb</command> у вас еще не установлен, поместите 
       <filename>TVout/con2fb/con2fb</filename>
       куда-нибуть в ваши <envar>PATH</envar>.
-      </para></step>
+    </para></step>
     <step><para>
       Затем войдите в каталог <filename class="directory">TVout/</filename>
       в исходниках <application>MPlayer</application>, и запустите 
       <filename>./modules</filename> от имени root. Ваша консоль из текстового режима
       переключится в режим фреймбуфера (обратно не получится!).
-      </para></step>
+    </para></step>
     <step><para>
       Затем, ОТРЕДАКТИРУЙТЕ и запустите скрипт <filename>./matroxtv</filename>. 
       Он покажет вам очень простое меню. Нажмите <keycap>2</keycap> и
@@ -2259,7 +2313,7 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
       странные полосы, значит скрипт не смог корректно установить разрешение
       (на 640x512 по-умолчанию). Попробуйте другие разрешения из меню
       и/или поэкспериментируйте с fbset.
-      </para></step>
+    </para></step>
     <step><para>
       Йоу. Следующая задача - убрать курсор с tty1 (или где он есть), и выключить
       гашение экрана. Запустите следующие команды:
@@ -2277,7 +2331,7 @@ setterm -blank 0<!--
       Чтобы вернуть курсор назад
       <screen>echo -e '\033[?25h'</screen> или
       <screen>setterm -cursor on</screen>
-      </para></step>
+    </para></step>
     <step><para>
       Готово. Запускайте воспроизведение
       <screen>
@@ -2292,7 +2346,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
     <step><para>
       <emphasis role="bold">Наслаждайтесь супер-быстрым, супер-навороченным выводом Matrox TV
       (лучше чем Xv)!</emphasis>
-      </para></step>
+    </para></step>
     </procedure>
   </listitem>
 </varlistentry>
@@ -2325,6 +2379,8 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 </formalpara>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="tv-out_matrox_g450">
 <title>Matrox G450/G550 карты</title>
 <para>
@@ -2351,6 +2407,7 @@ AFAIK, поскольку дрйвер G450/G550 работает только �
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="tvout-ati">
 <title>ATI карты</title>
@@ -2368,21 +2425,21 @@ AFAIK, поскольку дрйвер G450/G550 работает только �
 <listitem><simpara>
   <emphasis role="bold">ATI Mach64</emphasis>:
   поддерживается <ulink url="http://gatos.sf.net">GATOS</ulink>.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
   поддерживается <ulink url="http://gatos.sf.net">GATOS</ulink>.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Radeon</emphasis> и <emphasis role="bold">Rage128</emphasis>:
   поддерживается <application>MPlayer</application>!
   Смотрите разделы <link linkend="vesa">VESA драйвер</link> и
   <link linkend="vidix">VIDIX</link>.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
   поддерживается <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <para>
@@ -2397,6 +2454,7 @@ VIDIX. Конечно, требуется мощный CPU.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
@@ -2436,6 +2494,8 @@ EndSection
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
@@ -2462,8 +2522,9 @@ EndSection
   примерно половину LCD экрана вашего ноутбука.
   Для переключения в TV нажмите <keycap>Fn</keycap>+<keycap>F5</keycap> три раза.
   Тестировался на Tecra 8000, 2.6.15 ядре с vesafb, ALSA v1.0.10.
-  </para></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem>
+  <simpara>
   <emphasis role="bold">Chrontel 70xx чип кодирования</emphasis>:
   Найден на IBM Thinkpad 390E и, возможно, других Thinkpad или ноутбуках.
   </simpara><simpara>

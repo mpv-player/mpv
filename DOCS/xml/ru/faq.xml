@@ -1165,7 +1165,7 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 программные или аппаратные проигрыватели могут быть в шоке от дополнительных
 возможностей, которые 
 <systemitem class="library">libavcodec</systemitem> поддерживает , а DivX - нет;
-с другой стороны <systemitem class="library">XviD</systemitem>
+с другой стороны <systemitem class="library">Xvid</systemitem>
 по функциональности ближе к <systemitem class="library">libavcodec</systemitem>
 и подерживается практически любыми приличными проигрывателями.
 </para></answer>

@@ -86,7 +86,7 @@
   </row>
   <row>
     <entry>xvid</entry>
-    <entry>XviD, MPEG-4 Advanced Simple Profile (ASP) кодек</entry>
+    <entry>Xvid, MPEG-4 Advanced Simple Profile (ASP) кодек</entry>
   </row>
   <row>
     <entry>x264</entry>
@@ -511,7 +511,7 @@ JPEG, PNG или TGA файлов. Простым копированием ка�
   </para></listitem>
 <listitem><para>
   <application>MEncoder</application> затем скармливает декодированное изображение выбранному
-  видео компрессору (DivX4, XviD, FFmpeg msmpeg4, и .т.д).
+  видео компрессору (DivX4, Xvid, FFmpeg msmpeg4, и .т.д).
   </para></listitem>
 </orderedlist>
 

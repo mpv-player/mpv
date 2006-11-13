@@ -108,10 +108,10 @@
 
 
 <sect2 id="xvid">
-<title>XviD</title>
+<title>Xvid</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> свободный, MPEG-4 ASP совместимый
+<ulink url="http://www.xvid.org">Xvid</ulink> свободный, MPEG-4 ASP совместимый
 видео кодек, особенностями которого являются двухпроходное кодирование и
 полная поддержка MPEG-4 ASP, делающая его намного более эеффективным, чем
 хорошо известный DivX. Он предоставляет видео отменного качества и хорошую
@@ -122,17 +122,17 @@
 Он начался как ответвление OpenDivX кодека. Это произошло, когда ProjectMayo 
 сделал исходный код OpenDivX
 закрытым DivX4, и разработчики OpenDivX не из ProjectMayo
-разозлились, и взялись за XviD. Поэтому у обоих проектов общие корни.
+разозлились, и взялись за Xvid. Поэтому у обоих проектов общие корни.
 </para>
 
 <para>
-Имейте в виду, что XviD не нужен для декодирования XviD-кодированного видео.
+Имейте в виду, что Xvid не нужен для декодирования Xvid-кодированного видео.
 <systemitem class="library">libavcodec</systemitem> используется по-умолчанию,
 т.к. обеспечивает более высокую скорость.
 </para>
 
 <procedure>
-<title>Установка <systemitem class="library">XviD</systemitem></title>
+<title>Установка <systemitem class="library">Xvid</systemitem></title>
 
 <para>
   Как и большинство ПО с открытым исходным кодом, он доступен как в виде 
@@ -141,7 +141,7 @@
   Как правило, CVS версия достаточно стабильна для использования, т.к. в большинстве
   случаев ее особенностью является отсутствие ошибок, присутствующих в релизах.
   Далее описывается как заставить  работать
-  <systemitem class="library">XviD</systemitem> CVS с <application>MEncoder</application>'ом
+  <systemitem class="library">Xvid</systemitem> CVS с <application>MEncoder</application>'ом
   (необходимы, как минимум,
   <application>autoconf</application> 2.50,
   <application>automake</application> и <application>libtool</application>):

@@ -323,7 +323,7 @@
   Большинство кодеков, поддерживающих ABR кодирование, поддерживают
   только двупроходный режим, в то время как некоторые другие, такие
   как <systemitem class="library">x264</systemitem>,
-  <systemitem class="library">XviD</systemitem>
+  <systemitem class="library">Xvid</systemitem>
   и <systemitem class="library">libavcodec</systemitem> поддерживают
   многопроходность, несколько улучшающую качество на каждом проходе,
   однако, это улучшение не измеримо и не заметно после 4-го прохода
@@ -1142,7 +1142,7 @@
   CQ зависит от битпотока, эффективности видеокодека и разрешения фильма.
   Обычно, в целях увеличеиня CQ, Вам нужно будет уменьшить размер
   фильма при постоянном битпотоке, заданном размере и длине фильма.
-  С MPEG-4 ASP кодеками, такими как <systemitem class="library">XviD</systemitem>
+  С MPEG-4 ASP кодеками, такими как <systemitem class="library">Xvid</systemitem>
   и <systemitem class="library">libavcodec</systemitem>, CQ 
   меньше 0.18 обычно приводит к изображению с большим числом
   сегментов "квадратиками", из-за недостаточного числа битов для
@@ -1156,7 +1156,7 @@
   Более продвинутые опции кодирования, такие как указанные для
   <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="library">libavcodec</systemitem></link>
   и
-<link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>
+<link linkend="menc-feat-xvid-example-settings"><systemitem class="library">Xvid</systemitem></link>
   должны сделать возможным получение того же качества с CQ в диапазоне
   от 0.18 до 0.20 для рипа на 1 CD и 0.24-0.26 для рипа на 2 CD.
   Используя MPEG-4 ASP кодеки, такие как 
@@ -1469,7 +1469,7 @@
     <systemitem class="library">x264</systemitem>)
     вместо таких MPEG-4 ASP кодеков, как
     <systemitem class="library">libavcodec</systemitem> MPEG-4 или
-    <systemitem class="library">XviD</systemitem>.
+    <systemitem class="library">Xvid</systemitem>.
     (Опытные разработчики кодеков могут быть заинтересованы в 
     ознакомлении с точкой зрения Михаэля Найдермауэра (Michael
     Niedermayer)
@@ -1498,7 +1498,7 @@
     VCD, XVCD и KVCD), MPEG-2 (например, DVD, SVCD и KVCD) и MPEG-4 
     ASP (например, DivX,
     <systemitem class="library">libavcodec</systemitem> LMP4 и
-    <systemitem class="library">XviD</systemitem>)
+    <systemitem class="library">Xvid</systemitem>)
     (Осторожно: обычно поддерживаются не все возможности MPEG-4 ASP).
     Пожалуйста, обратитесь к технической спецификации Вашего плеера
     (если она доступна) или к гугл (google) для детальной информации.
@@ -1508,7 +1508,7 @@
   <emphasis role="bold">Лучшее соотношение качества и времени кодирования</emphasis>:
     Кодеки, уже использующиеся определённое время (например,
     <systemitem class="library">libavcodec</systemitem> MPEG-4 и
-    <systemitem class="library">XviD</systemitem>) обычно сильно 
+    <systemitem class="library">Xvid</systemitem>) обычно сильно 
     оптимизированы всевозможными остроумными алгоритмами и 
     ассемблерным SIMD кодом. Поэтому они обладают тенденцией
     достижения лучшего соотношения качества к времени кодирования.
@@ -1528,7 +1528,7 @@
     <systemitem class="library">libavcodec</systemitem> MPEG-4 позволяет
     это, но выигрыш в скорости ограничен и есть небольшой отрицательный
     эффект для качества картинки.
-    Многопоточное кодирование <systemitem class="library">XviD</systemitem>,
+    Многопоточное кодирование <systemitem class="library">Xvid</systemitem>,
     включаемое опцией <option>threads</option>, может использоваться для 
     ускорения кодирования (на примерно 40-60% в типичных случаях)
     с небольшим ухудшением картинки или вообще без него.
@@ -1543,7 +1543,7 @@
     Здесь всё становится почти неразумным: из-за тех же причин, по 
     которым одни придерживаются DivX&nbsp;3 в течении лет, в то время
     как новые кодеки уже творят чудеса, другие люди предпочитают
-    <systemitem class="library">XviD</systemitem> или
+    <systemitem class="library">Xvid</systemitem> или
     <systemitem class="library">libavcodec</systemitem> MPEG-4
     использованиию <systemitem class="library">x264</systemitem>.
   </para>
@@ -2527,7 +2527,7 @@ You can encode to the following codecs (more or less up to date):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO standard MPEG-4 (DivX, XviD compatible)
+  ISO standard MPEG-4 (DivX, Xvid compatible)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   pre-standard MPEG-4 variant by MS, v3 (AKA DivX3)
@@ -3057,10 +3057,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 
 <sect1 id="menc-feat-xvid">
-<title>Encoding with the <systemitem class="library">XviD</systemitem>
+<title>Encoding with the <systemitem class="library">Xvid</systemitem>
 codec</title>
 <para>
- <systemitem class="library">XviD</systemitem> is a free library for
+ <systemitem class="library">Xvid</systemitem> is a free library for
  encoding MPEG-4 ASP video streams.
  Before starting to encode, you need to <link linkend="xvid">
  set up <application>MEncoder</application> to support it</link>.
@@ -3079,19 +3079,19 @@ codec</title>
 
 <para>
  Please begin by reviewing the
- <systemitem class="library">XviD</systemitem> section of
+ <systemitem class="library">Xvid</systemitem> section of
  <application>MPlayer</application>'s man page.
  This section is intended to be a supplement to the man page.
 </para>
 <para>
- The XviD default settings are already a good tradeoff between
+ The Xvid default settings are already a good tradeoff between
  speed and quality, therefore you can safely stick to them if
  the following section puzzles you.
 </para>
 </sect2>
 
 <sect2 id="menc-feat-xvid-encoding-options">
-<title>Encoding options of <systemitem class="library">XviD</systemitem></title>
+<title>Encoding options of <systemitem class="library">Xvid</systemitem></title>
 
 <itemizedlist>
 <listitem><para>
@@ -3249,7 +3249,7 @@ codec</title>
     encoding (as well as decoding).
     Therefore, you should only use it when you have turned
     <option>vhq</option> to the maximum.
-    <systemitem class="library">XviD</systemitem>'s GMC is more
+    <systemitem class="library">Xvid</systemitem>'s GMC is more
     sophisticated than DivX's, but is only supported by few
     standalone players.
 </para></listitem>
@@ -3260,8 +3260,8 @@ codec</title>
 <sect2 id="menc-feat-xvid-encoding-profiles">
 <title>Encoding profiles</title>
 <para>
-  XviD supports encoding profiles through the <option>profile</option> option,
-  which are used to impose restrictions on the properties of the XviD video
+  Xvid supports encoding profiles through the <option>profile</option> option,
+  which are used to impose restrictions on the properties of the Xvid video
   stream such that it will be playable on anything which supports the
   chosen profile.
   The restrictions relate to resolutions, bitrates and certain MPEG-4
