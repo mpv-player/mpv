@@ -328,7 +328,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Кодекот не ги подеси sh->disp_w и sh->disp_h, се обидува да заобиколи.\n"
 #define MSGTR_VoConfigRequest "VDec: се бара vo конфигурирање - %d x %d (преферирано csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Не може да се пронајде соодветен простор за боја - се обидува повторно со -vop scale...\n"
+#define MSGTR_CouldNotFindColorspace "Не може да се пронајде соодветен простор за боја - се обидува повторно со -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Аспектот на Филмот е %.2f:1 - се преместува на точниот аспект на филмот.\n"
 #define MSGTR_MovieAspectUndefined "Аспектот на филмот не е дефиниран - не е применето преместување.\n"
 

@@ -271,7 +271,6 @@ static char help_text[]=
 
 // vd.c
 #define MSGTR_VoConfigRequest "VDec: 映像出力設定 - %d x %d (preferred csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "一致するカラースペースが見付かりません - '-vop'をつけて試みて下さい...\n"
 
 // ====================== GUI messages/buttons ========================
 
