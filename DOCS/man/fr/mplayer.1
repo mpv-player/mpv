@@ -1,4 +1,4 @@
-.\" synced with r20774
+.\" synced with r20876
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -180,7 +180,7 @@ DVD (SPU streams, VobSub et Closed Captions).
 (MPlayer's Movie Encoder) est un simple encodeur de vidéos, conçu pour encoder
 des vidéos jouables par MPlayer (voir ci-dessus) dans d'autres formats jouables
 par MPlayer (voir ci-dessous).
-Il encode en MPEG-4 (DivX/XviD), un des codecs libavcodec, et en
+Il encode en MPEG-4 (DivX/Xvid), un des codecs libavcodec, et en
 PCM/\:MP3/\:VBRMP3 audio en 1, 2 ou 3 passes.
 Il permet également de copier des flux de données (stream), possède un
 puissant système de plugins (découpage, expansion, retournement, postprocess,
@@ -1272,7 +1272,8 @@ démultiplexeur MP3.
 .TP
 .B \-dumpaudio (MPlayer uniquement)
 Décharge le flux audio brut dans ./stream.dump (utile avec
-mpeg/\:ac3).
+mpeg/\:ac3), dans la plupart des autres cas, le fichier résultant ne
+sera pas lisible).
 Si vous spécifiez plus qu'une des options \-dumpaudio, \-dumpvideo,
 \-dumpstream, seule la dernière de la ligne de commande sera prise en
 compte.
@@ -4516,13 +4517,13 @@ Désactive les calculs de rapport hauteur/\:largeur.
 .
 .TP
 .B \-xvidopts <option1:option2:...>
-Définit des paramètres additionnels de décodage avec XviD.
+Définit des paramètres additionnels de décodage avec Xvid.
 .br NOTE\ :
-Étant donné que libavcodec est plus rapide qu'XviD, peut-être aurez-vous
+Étant donné que libavcodec est plus rapide qu'Xvid, peut-être aurez-vous
 besoin d'utiliser les filtres de post-traitement de libavcodec (\-vf pp)
 et le décodeur (\-vfm ffmpeg) à la place.
 .sp 1
-Les filtres de post-traitement d'XviD\ :
+Les filtres de post-traitement d'Xvid\ :
 .PD 0
 .RSs
 .IPs deblock-chroma
@@ -4534,7 +4535,7 @@ filtre de deringing luma
 .IPs dering-chroma (voir aussi \-vf pp)
 filtre de deringing chroma
 .IPs filmeffect (voir aussi \-vf noise)
-Active le filtre d'ajout artificiel de grain d'XviD.
+Active le filtre d'ajout artificiel de grain d'Xvid.
 Peut accroître la qualité subjective, mais dans l'absolu dégrade l'image.
 .RE
 .sp 1
@@ -7932,8 +7933,8 @@ d'effet que si vrc_strategy est à 0.
 .IPs 0
 Utilise le ratecontrol interne de lavc (par défaut).
 .IPs 1
-Utlise le ratecontrol d'XviD (expérimental; nécessite que MEncoder
-soit compilé par le support d'XviD 1.1 ou supérieur).
+Utlise le ratecontrol d'Xvid (expérimental; nécessite que MEncoder
+soit compilé par le support d'Xvid 1.1 ou supérieur).
 .RE
 .PD 1
 .
@@ -8910,7 +8911,7 @@ et le PSNR des trames générées.
 Fixe le débit binaire (bitrate) à utiliser en koctets/\:seconde si <16000 ou
 en bits/\:seconde
 si >16000.
-Si <valeur> est un nombre négatif, XviD l'interprètera comme la taille
+Si <valeur> est un nombre négatif, Xvid l'interprètera comme la taille
 visée de la vidéo (défaut\ : 687 kbits/s).
 .
 .TP
@@ -8975,7 +8976,7 @@ Utilise 4 vecteurs de mouvement par macro-bloc.
 Peut améliorer la compressibilité mais ralenti l'encodage.
 .br
 .I ATTENTION\ :
-Cette option n'existe plus séparément avec XviD 1.0.x, mais est activée
+Cette option n'existe plus séparément avec Xvid 1.0.x, mais est activée
 automatiquement quand me_quality > 4.
 .
 .TP
@@ -8989,7 +8990,7 @@ débit binaire constant sur cet ensemble de trames.
 Un encodage à débit binaire vraiment constant est très difficile à réaliser.
 En fonction du type de scène, le débit binaire peut fortement varier et peut
 être difficile à prédire.
-C'est pourquoi XviD essaye plutôt de garantir ce débit binaire sur <valeur>
+C'est pourquoi Xvid essaye plutôt de garantir ce débit binaire sur <valeur>
 nombre de trames.
 .
 .TP
@@ -9005,7 +9006,7 @@ mode deux passes\ : quantum min & max pour trames-I/P
 (par défaut\ : 2\-31/2\-31)
 .br
 .I ATTENTION\ :
-À partir de XviD-1.0.x, cette option est remplacée par les
+À partir de Xvid-1.0.x, cette option est remplacée par les
 options [min|max]_[i|p|b]quant.
 .
 .TP
@@ -9030,7 +9031,7 @@ image où les macro-blocs se verront moins.
 Si vous utilisez vos propres matrices de quantification, vous devez
 utiliser MPEG.
 .I ATTENTION\ :
-À partir de XviD-1.0.x, cette option est remplacée par l'option
+À partir de Xvid-1.0.x, cette option est remplacée par l'option
 quant_type.
 .
 .TP
@@ -9039,11 +9040,11 @@ Décide trame par trame d'utiliser ou non les quantum MPEG ou H.263.
 .br
 .I ATTENTION\ :
 Cette option génèrera un flux vidéo incompatible avec la norme MPEG-4.
-Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec libavcodec ou XviD.
+Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec libavcodec ou Xvid.
 (mode 2passes uniquement)
 .br
 .I ATTENTION\ :
-Cette option n'existe plus à partir de XviD-1.0.x.
+Cette option n'existe plus à partir de Xvid-1.0.x.
 .
 .TP
 .B keyframe_boost=<0\-1000> (mode deux passes uniquement)
@@ -9074,12 +9075,12 @@ Génère des trames-B compatibles DivX5 (par défaut\ : on).
 Ceci ne semble nécessaire qu'avec de vieilles versions du décodeur de DivX.
 .br
 .I ATTENTION\ :
-À partir de XviD-1.0.x, cette option est remplacée par l'option
+À partir de Xvid-1.0.x, cette option est remplacée par l'option
 closed_gop.
 .
 .TP
 .B (no)grayscale
-Indique à XviD de ne pas enregistrer l'information de chroma pour que la
+Indique à Xvid de ne pas enregistrer l'information de chroma pour que la
 vidéo produite ne soit qu'en noir & blanc.
 Notez que cela ne changera en rien le temps de compression, cela évitera juste
 d'avoir l'information de chroma présente dans le fichier vidéo.
@@ -9093,7 +9094,7 @@ fichier de contrôle 2passes.)
 .PP
 .sp 1
 Les options suivantes ne sont disponibles que dans les dernières versions
-stables 1.0.x de XviD (api4).
+stables 1.0.x de Xvid (api4).
 .
 .TP
 .B (no)packed
@@ -9108,7 +9109,7 @@ précisément ce que vous faites.
 .br
 .I ATTENTION\ :
 Ceci engendrera un flux de bits illégal vis à vis de la norme MPEG-4,
-et NE SERA PAS décodable par les décodeurs excepté DivX/\:libavcodec/\:XviD.
+et NE SERA PAS décodable par les décodeurs excepté DivX/\:libavcodec/\:Xvid.
 .br
 .I ATTENTION\ :
 Ceci ajoutera également une fausse version de divx dans le fichier donc
@@ -9140,7 +9141,7 @@ qualité visuelle.
 .
 .TP
 .B (no)closed_gop
-Cette option demande à XviD de fermer chaque GOP (Group Of Pictures\ :
+Cette option demande à Xvid de fermer chaque GOP (Group Of Pictures\ :
 Groupe D'Images encadrées par deux trames-I), ce qui signifie que chaque
 GOP sera indépendant des GOP suivants.
 Ceci implique que la dernière trame du GOP est soit une trame-P ou une
@@ -9175,7 +9176,7 @@ forcément celle dont le PSNR est le plus élevé).
 .
 .TP
 .B (no)gmc
-Active la Compensation de Mouvement Globale, ce qui permet à XviD d'engendrer
+Active la Compensation de Mouvement Globale, ce qui permet à Xvid d'engendrer
 des trames spéciales (trames GMC), particulièrement adaptées aux mouvements
 de travelling/\:zoom/\:rotation.
 L'efficacité de cette option en terme d'économie de bits est très dépendante
@@ -9193,7 +9194,7 @@ Aussi, dans un contexte d'encodage temps réel, pensez à cette option
 .
 .TP
 .B (no)cartoon
-Ceci est un mode spécial d'XviD permettant de mieux tenir compte des grands
+Ceci est un mode spécial d'Xvid permettant de mieux tenir compte des grands
 à-plats de couleur que l'on trouve typiquement dans les dessins animés.
 .
 .TP
@@ -9231,7 +9232,7 @@ en prenant en compte les blocs voisins (par défaut\: activé).
 L'algorithme de recherche de mouvement s'efforce de trouver un vecteur de
 mouvement qui minimise la différence entre la trame de référence et la trame
 encodée.
-Cette option permet à XviD de faire aussi sa recherche dans le domaine
+Cette option permet à Xvid de faire aussi sa recherche dans le domaine
 fréquentiel (DCT), pour obtenir non seulement un vecteur de mouvement qui
 minimise la différence spatiale du vecteur de mouvement mais aussi la
 longueur du bloc.
@@ -9301,7 +9302,7 @@ xvid4conf.
 .
 .TP
 .B curve_compression_high=<0\-100>
-Cette option permet à XviD de voler un certain pourcentage de bits aux
+Cette option permet à Xvid de voler un certain pourcentage de bits aux
 scènes mouvementées pour les remettre dans le "pool" de bits.
 Vous pouvez par exemple agir sur cette option si vous avez un film
 dont les scènes mouvementées monopolisent tellement de bits que les scènes
@@ -9309,7 +9310,7 @@ moins rapides en souffrent (par défaut\ : 0).
 .
 .TP
 .B curve_compression_low=<0\-100>
-Cette option permet à XviD de donner un certain pourcentage de bits en
+Cette option permet à Xvid de donner un certain pourcentage de bits en
 plus aux scènes lentes, en prenant quelques bits tout au long du film.
 Vous pouvez agir sur cette option si vous avez quelques scènes lentes qui
 sont encore "blocky" (de gros blocs apparaissent sur l'image)
@@ -9356,9 +9357,9 @@ La plupart des utilisateurs indiquent la taille visée de leur vidéo
 sans tenir compte de l'overhead du conteneur vidéo.
 Ce petit, mais à peu près constant overhead peut faire excéder la taille
 du fichier généré.
-XviD permet aux utilisateurs de donner le l'overhead par trame de
+Xvid permet aux utilisateurs de donner le l'overhead par trame de
 leur conteneur (donner une moyenne par trame).
-0 a un sens particulier, il laisse XviD prendre la valeur par défaut.
+0 a un sens particulier, il laisse Xvid prendre la valeur par défaut.
 (par défaut\ : 24 \- l'overhead moyen d'AVI).
 .
 .TP
@@ -9409,7 +9410,7 @@ Profil DivX NTSC pour la TV HD
 .I NOTE\ :
 Ces profils devraient être utilisés en conjonction du \-ffourcc approprié.
 En général, DX50 convient, étant donné que certains lecteurs ne reconnaissent
-pas XviD mais reconnaissent DivX.
+pas Xvid mais reconnaissent DivX.
 .RE
 .
 .TP
@@ -9482,7 +9483,7 @@ vidéo générée est fidèle à l'originale.
 .
 .PP
 .sp 1
-L'option suivante n'est disponible que dans les versions 1.1.x de XviD.
+L'option suivante n'est disponible que dans les versions 1.1.x de Xvid.
 .
 .TP
 .B bvhq=<0|1>
@@ -9494,7 +9495,7 @@ significatif sur le temps de calcul (par défaut\: 1).
 .
 .PP
 .sp 1
-L'option suivante n'est disponible que dans la version CVS de XviD.
+L'option suivante n'est disponible que dans la version CVS de Xvid.
 .
 .TP
 .B threads=<0\-n>
