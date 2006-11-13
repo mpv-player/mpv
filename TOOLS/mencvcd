@@ -295,7 +295,7 @@ while [ "$1"x != "x" ]; do
         ratio=$2
         shift 1
         ;;
-      -sid) # mplayer option: have to set vop expand, too!!!
+      -sid) # mplayer option: have to set vf expand, too!!!
         sub="-vf pp,expand=-1:-1:-1:-1:1 -sid $2"
         shift 1
         ;;

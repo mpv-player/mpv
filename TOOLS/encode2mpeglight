@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Version:          0.6.2
+# Version:          0.6.3
 #
 # Licence:          GPL
 #
@@ -279,7 +279,6 @@ CMD=( "$@" )
 MOPT=( $(mlistopt | grep -v -e : -e '*') 
        $(mlistopt | sed -n '/:/s/:.*/"/p' | uniq) 
        $(mplayer -vfhelp 2>&1 | awk '/vf-/{printf("\"%s\"\n",$1)}') 
-       $(mplayer -vophelp 2>&1 | awk '/vop-/{printf("\"%s\"\n",$1)}') 
        $(mplayer -zrhelp 2>/dev/null | awk '$1~/^-zr/{printf("\"%s\"\n",substr($1,2))}') )
 
 ###############################################################################
