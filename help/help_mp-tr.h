@@ -1565,7 +1565,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] mga_video sürücünüzün sürümü bu MPlayer sürümüyle bağdaşmıyor!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d arabellek kullanılıyor.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Açılamadı: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] kaynak çözünürlüğün en azιndan bir boyutu 1023x1023'ten daha büyükütür. Yazılımla düzteliniz ya da -lavopts lowres=1 kulanınız\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] kaynak çözünürlüğün en azιndan bir boyutu 1023x1023'ten daha büyükütür. Yazılımla düzteliniz ya da -lavdopts lowres=1 kulanınız\n"
 
 // libvo/vesa_lvo.c
 
