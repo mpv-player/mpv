@@ -906,12 +906,14 @@ static char* parse_tag(char* p, double pwr) {
 		t1 = v1;
 		t2 = v2;
 		delta_t = v2 - v1;
+		if (v3 < 0.)
+			v3 = 0.;
 		t = frame_context.time - render_context.event->Start; // FIXME: move to render_context
 		if (t < t1)
 			k = 0.;
 		else if (t > t2)
 			k = 1.;
-		else k = ((double)(t - t1)) / delta_t;
+		else k = pow(((double)(t - t1)) / delta_t, v3);
 		while (*p == '\\')
 			p = parse_tag(p, k); // maybe k*pwr ? no, specs forbid nested \t's 
 		skip_all(')'); // FIXME: better skip(')'), but much more tags support required
