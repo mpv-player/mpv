@@ -219,7 +219,7 @@ static bitmap_t* fix_outline_and_shadow(bitmap_t* bm_g, bitmap_t* bm_o)
 			unsigned char c_g, c_o;
 			c_g = g[x];
 			c_o = o[x];
-			o[x] = (c_o > c_g) ? c_o - c_g : 0;
+			o[x] = (c_o > c_g) ? c_o : 0;
 			s[x] = (c_o < 0xFF - c_g) ? c_o + c_g : 0xFF;
 		}
 		g += bm_g->w;
