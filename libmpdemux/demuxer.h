@@ -127,20 +127,6 @@ typedef struct demuxer_info_st {
   char *copyright;
 } demuxer_info_t;
 
-typedef struct {
-  int sid;
-  char type;                    // t = text, v = VobSub, a = SSA/ASS
-  int has_palette;              // If we have a valid palette
-  unsigned int palette[16];     // for VobSubs
-  int width, height;            // for VobSubs
-  int custom_colors;
-  unsigned int colors[4];
-  int forced_subs_only;
-#ifdef USE_ASS
-  ass_track_t* ass_track;  // for SSA/ASS streams (type == 'a')
-#endif
-} sh_sub_t;
-
 #define MAX_A_STREAMS 256
 #define MAX_V_STREAMS 256
 #define MAX_S_STREAMS 32
