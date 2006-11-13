@@ -68,6 +68,11 @@ keyframe
     keyframe status of the current frame but instead just set the frame as
     non keyframe
     (FIXME maybe move somewhere else?)
+pts
+    presentation time of the first frame/sample that is completed by decoding
+    the coded frame.
+dts
+    of a frame is the time when it is input into the decoder
 
 
 Syntax:
@@ -542,10 +547,13 @@ msb_pts_shift
     MUST be <16
 
 decode_delay
-    maximum time between input and output for a codec, used to generate
-    dts from pts
-    is set to 0 for streams without B-frames, and set to 1 for streams with
-    B-frames, may be larger for future codecs
+    size of the reordering buffer used to convert pts to dts
+    codecs which dont support b frames normaly use 0
+    mpeg1/mpeg2 style codecs with b frames use 1
+    h264 style b pyramid uses 2
+    h264 and future codecs might need values >2
+    audio codecs generally use 0 (we arent aware of any which doesnt
+    but its theoretically possible that one exists which needs it >0)
     decode_delay MUST NOT be set higher than necessary for a codec.
 
 stream_flags
