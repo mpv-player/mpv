@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r20774
+.\" synced with r20876
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -176,7 +176,7 @@ DVD субтитры (SPU streams, VOBsub и Closed Captions).
 (MPlayer Media Encoder, Кодировщик Фильмов MPlayer) это простой кодировщик фильмов, разработанный 
 для кодирования фильмой, проигрываемых MPlayer'ом (смотри выше) в другие форматы, 
 поддерживаемые MPlayer'ом (смотри ниже).
-Он кодирует в MPEG-4 (DivX/XviD), любой из libavcodec кодеков и
+Он кодирует в MPEG-4 (DivX/Xvid), любой из libavcodec кодеков и
 PCM/\:MP3/\:VBRMP3 звук в 1, 2 или 3 прохода.
 Кроме того, он имеет возможности копирования потоков, можную систему фильтров (обрезка,
 растяжение, зеркальное отражение, постобработка, поворот, масштабирование, шум, RGB/\:YUV преобразование) 
@@ -1151,7 +1151,8 @@ libmpdemux/\:demuxer.h.
 .
 .TP
 .B \-dumpaudio (только MPlayer)
-Сохранает сырой сжатый аудио поток в ./stream.dump (полезно с MPEG/\:AC3).
+Сохранает сырой сжатый аудио поток в ./stream.dump (полезно с MPEG/\:AC3,
+в большинстве остальных случаев полученный файл проигрываться не будет).
 Если вы укажете в командной строке более одной опции из \-dumpaudio, \-dumpvideo, 
 \-dumpstream, будет использоваться только последняя.
 .
@@ -3943,7 +3944,7 @@ Manually work around encoder bugs.
 .br
 2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetection)
 .br
-4 (mpeg4): XviD interlacing bug (autodetected if fourcc==XVIX)
+4 (mpeg4): Xvid interlacing bug (autodetected if fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (autodetected if fourcc==UMP4)
 .br
@@ -3951,7 +3952,7 @@ Manually work around encoder bugs.
 .br
 32 (mpeg4): illegal vlc bug (autodetected per fourcc)
 .br
-64 (mpeg4): XviD and DivX qpel bug (autodetected per fourcc/\:version)
+64 (mpeg4): Xvid and DivX qpel bug (autodetected per fourcc/\:version)
 .br
 128 (mpeg4): old standard qpel (autodetected per fourcc/\:version)
 .br
@@ -4264,13 +4265,13 @@ Disables aspect calculations.
 .
 .TP
 .B \-xvidopts <option1:option2:...>
-Specify additional parameters when decoding with XviD.
+Specify additional parameters when decoding with Xvid.
 .br
 .I NOTE:
-Since libavcodec is faster than XviD you might want to use the libavcodec
+Since libavcodec is faster than Xvid you might want to use the libavcodec
 postprocessing filter (\-vf pp) and decoder (\-vfm ffmpeg) instead.
 .sp 1
-XviD's internal postprocessing filters:
+Xvid's internal postprocessing filters:
 .PD 0
 .RSs
 .IPs deblock-chroma (also see \-vf pp)
@@ -7491,8 +7492,8 @@ if vrc_strategy is not set to 0.
 .IPs 0
 Use internal lavc ratecontrol (default).
 .IPs 1
-Use XviD ratecontrol (experimental; requires MEncoder to be compiled
-with support for XviD 1.1 or higher).
+Use Xvid ratecontrol (experimental; requires MEncoder to be compiled
+with support for Xvid 1.1 or higher).
 .RE
 .PD 1
 .
@@ -8432,7 +8433,7 @@ frame type and PSNR a little bit more.
 .B bitrate=<value> (CBR or two pass mode)
 Sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
 if >16000.
-If <value> is negative, XviD will use its absolute value as the target size
+If <value> is negative, Xvid will use its absolute value as the target size
 (in kBytes) of the video and compute the associated bitrate automagically
 (default: 687 kbits/s).
 .
@@ -8494,7 +8495,7 @@ Use 4 motion vectors per macroblock.
 This might give better compression, but slows down encoding.
 .br
 .I WARNING:
-As of XviD-1.0.x, this option is no longer available separately, and its
+As of Xvid-1.0.x, this option is no longer available separately, and its
 functionality is included in the me_quality option.
 When me_quality > 4, 4mv is activated.
 .
@@ -8508,9 +8509,9 @@ to obtain a constant bitrate over an averaging range of frames.
 .B rc_averaging_period=<value>
 Real CBR is hard to achieve.
 Depending on the video material, bitrate can be variable, and hard to predict.
-Therefore XviD uses an averaging period for which it guarantees a given
+Therefore Xvid uses an averaging period for which it guarantees a given
 amount of bits (minus a small variation).
-This settings expresses the "number of frames" for which XviD averages
+This settings expresses the "number of frames" for which Xvid averages
 bitrate and tries to achieve CBR.
 .
 .TP
@@ -8524,7 +8525,7 @@ CBR mode: min & max quantizer for all frames (default: 2\-31)
 two pass mode: min & max quantizer for I/P-frames (default: 2\-31/\:2\-31)
 .br
 .I WARNING:
-As of XviD-1.0.x, this option is replaced by the
+As of Xvid-1.0.x, this option is replaced by the
 [min|max]_[i|p|b]quant options.
 .
 .TP
@@ -8543,7 +8544,7 @@ For low bitrates, the smoothing of H.263 will give you less block noise.
 When using custom matrices, MPEG must be used.
 .br
 .I WARNING:
-As of XviD-1.0.x, this option is replaced by the quant_type option.
+As of Xvid-1.0.x, this option is replaced by the quant_type option.
 .
 .TP
 .B mod_quant
@@ -8552,10 +8553,10 @@ Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis
 .br
 .I WARNING:
 This will generate an illegal bitstream, and most likely not be decodable
-by any MPEG-4 decoder besides libavcodec or XviD.
+by any MPEG-4 decoder besides libavcodec or Xvid.
 .br
 .I WARNING:
-As of XviD-1.0.x, this option is no longer available.
+As of Xvid-1.0.x, this option is no longer available.
 .
 .TP
 .B keyframe_boost=<0\-1000> (two pass mode only)
@@ -8588,11 +8589,11 @@ Generate DivX5 compatible B-frames (default: on).
 This seems to be mandatory only for old versions of DivX's decoder.
 .br
 .I WARNING:
-As of XviD-1.0.x, this option is replaced by the closed_gop option.
+As of Xvid-1.0.x, this option is replaced by the closed_gop option.
 .
 .TP
 .B (no)grayscale
-Make XviD discard chroma planes so the encoded video is grayscale only.
+Make Xvid discard chroma planes so the encoded video is grayscale only.
 Note that this does not speed up encoding, it just prevents chroma data
 from being written in the last stage of encoding.
 .
@@ -8605,7 +8606,7 @@ file.)
 .PP
 .sp 1
 The following options are only available with the latest stable
-releases of XviD 1.0.x (api4).
+releases of Xvid 1.0.x (api4).
 .
 .TP
 .B (no)packed
@@ -8618,7 +8619,7 @@ you are doing.
 .br
 .I WARNING:
 This will generate an illegal bitstream, and will not be
-decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:XviD.
+decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:Xvid.
 .br
 .I WARNING:
 This will also store a fake DivX version in the file so the bug
@@ -8647,7 +8648,7 @@ aggressive production of B-frames may cause worse visual quality.
 .
 .TP
 .B (no)closed_gop
-This option tells XviD to close every GOP (Group Of Pictures bounded
+This option tells Xvid to close every GOP (Group Of Pictures bounded
 by two I-frames), which makes GOPs independent from each other.
 This just implies that the last frame of the GOP is either a P-frame or a
 N-frame but not a B-frame.
@@ -8680,7 +8681,7 @@ is worth activating.
 .
 .TP
 .B (no)gmc
-Enable Global Motion Compensation, which makes XviD generate special
+Enable Global Motion Compensation, which makes Xvid generate special
 frames (GMC-frames) which are well suited for Pan/\:Zoom/\:Rotating images.
 Whether or not the use of this option will save bits is highly
 dependent on the source material.
@@ -8697,7 +8698,7 @@ quality at fixed bitrate) at a lesser cost than with VHQ (default: on).
 .TP
 .B (no)cartoon
 Activate this if your encoded sequence is an anime/\:cartoon.
-It modifies some XviD internal thresholds so XviD takes better decisions on
+It modifies some Xvid internal thresholds so Xvid takes better decisions on
 frame types and motion vectors for flat looking cartoons.
 .
 .TP
@@ -8739,7 +8740,7 @@ neighbor blocks (default: on).
 The motion search algorithm is based on a search in the usual color domain
 and tries to find a motion vector that minimizes the difference between the
 reference frame and the encoded frame.
-With this setting activated, XviD will also use the frequency domain (DCT)
+With this setting activated, Xvid will also use the frequency domain (DCT)
 to search for a motion vector that minimizes not only the spatial
 difference but also the encoding length of the block.
 Fastest to slowest:
@@ -8805,7 +8806,7 @@ You can build such a file with xvid4conf's matrix editor.
 .
 .TP
 .B curve_compression_high=<0\-100>
-This setting allows XviD to take a certain percentage of bits away from
+This setting allows Xvid to take a certain percentage of bits away from
 high bitrate scenes and give them back to the bit reservoir.
 You could also use this if you have a clip with so many bits allocated
 to high-bitrate scenes that the low(er)-bitrate scenes start to look bad
@@ -8813,7 +8814,7 @@ to high-bitrate scenes that the low(er)-bitrate scenes start to look bad
 .
 .TP
 .B curve_compression_low=<0\-100>
-This setting allows XviD to give a certain percentage of extra bits to the
+This setting allows Xvid to give a certain percentage of extra bits to the
 low bitrate scenes, taking a few bits from the entire clip.
 This might come in handy if you have a few low-bitrate scenes that are
 still blocky (default: 0).
@@ -8860,9 +8861,9 @@ Most of the time users express their target bitrate for video w/o taking
 care of the video container overhead.
 This small but (mostly) constant overhead can cause the target file size
 to be exceeded.
-XviD allows users to set the amount of overhead per frame the
+Xvid allows users to set the amount of overhead per frame the
 container generates (give only an average per frame).
-0 has a special meaning, it lets XviD use its own default values
+0 has a special meaning, it lets Xvid use its own default values
 (default: 24 \- AVI average overhead).
 .
 .TP
@@ -8912,7 +8913,7 @@ DXN HDTV profile
 .RS
 .I NOTE:
 These profiles should be used in conjunction with an appropriate \-ffourcc.
-Generally DX50 is applicable, as some players do not recognize XviD but
+Generally DX50 is applicable, as some players do not recognize Xvid but
 most recognize DivX.
 .RE
 .
@@ -8982,7 +8983,7 @@ Returned values are in dB (decibel), the higher the better.
 .
 .PP
 .sp 1
-The following option is only available in XviD 1.1.x.
+The following option is only available in Xvid 1.1.x.
 .
 .TP
 .B bvhq=<0|1>
@@ -8994,7 +8995,7 @@ performance penalty (default: 1).
 .
 .PP
 .sp 1
-The following option is only available in the CVS version of XviD.
+The following option is only available in the CVS version of Xvid.
 .
 .TP
 .B threads=<0\-n>
