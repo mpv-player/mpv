@@ -231,6 +231,7 @@ static int asf_init_audio_stream(demuxer_t *demuxer,struct asf_priv* asf, sh_aud
 
 int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   int hdr_len = asf->header.objh.size - sizeof(asf->header);
+  int hdr_skip = 0;
   char *hdr = NULL;
   char guid_buffer[16];
   int pos, start = stream_tell(demuxer->stream);
@@ -251,9 +252,10 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   }
     
   if (hdr_len > 1024 * 1024) {
-    mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB,
+    mp_msg(MSGT_HEADER, MSGL_ERR, MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB,
 			hdr_len);
-    return 0;
+    hdr_skip = hdr_len - 1024 * 1024;
+    hdr_len = 1024 * 1024;
   }
   hdr = malloc(hdr_len);
   if (!hdr) {
@@ -262,6 +264,8 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
     return 0;
   }
   stream_read(demuxer->stream, hdr, hdr_len);
+  if (hdr_skip)
+    stream_skip(demuxer->stream, hdr_skip);
   if (stream_eof(demuxer->stream)) {
     mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader);
     goto err_out;
