@@ -95,6 +95,8 @@ typedef struct {
 sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid);
 #define new_sh_video(d, i) new_sh_video_vid(d, i, i)
 sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid);
+#define new_sh_sub(d, i) new_sh_sub_sid(d, i, i)
+sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid);
 void free_sh_audio(demuxer_t *demuxer, int id);
 void free_sh_video(sh_video_t *sh);
 
