@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20658 -->
+<!-- synced with r20876 -->
 <!-- Opiekun: Frogu -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
@@ -1210,7 +1210,7 @@ kodekiem MPEG-4, a DX50 i XVID oba oznaczają pełne MPEG-4 (ASP). Dlatego
 gdy ustawisz FourCC na DIVX, pewne programy lub sprzętowe odtwarzacze mogą
 się dławić na niektórych zaawansowanych funkcjach, które obsługuje
 <systemitem class="library">libavcodec</systemitem>, a DivX nie; z drugiej
-strony <systemitem class="library">XviD</systemitem> jest bliższy
+strony <systemitem class="library">Xvid</systemitem> jest bliższy
 funkjonalnością <systemitem class="library">libavacodec</systemitem>,
 a jest obsługiwany przez wszystkie sensowne odtwarzacze.
 </para></answer>

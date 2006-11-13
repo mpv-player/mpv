@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20705 -->
+<!-- synced with r20876 -->
 <!-- Opiekun: Boski -->
 <chapter id="codecs">
 <title>Obsługiwane kodeki</title>
@@ -108,10 +108,10 @@ Po prostu uruchom <filename>./configure</filename> i kompiluj.
 
 
 <sect2 id="xvid">
-<title>XviD</title>
+<title>Xvid</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> jest wolnym, kompatybilnym
+<ulink url="http://www.xvid.org">Xvid</ulink> jest wolnym, kompatybilnym
 z MPEG-4 ASP, kodekiem video z możliwościami kodowania dwuprzebiegowego
 i pełną obsługą MPEG-4 ASP, dlatego jest dużo bardziej efektywny niż dobrze
 znany kodek DivX.
@@ -122,25 +122,25 @@ większości nowoczesnych procesorów.
 Zaczął się jako odłam kodeka OpenDivX.
 Stało się to gdy ProjectMajo zmienił OpenDivX na zamknięte DivX4.
 W rezultacie tej decyzji rozeźleni ludzie spoza ProjectMayo,
-którzy pracowali nad OpenDivX, rozpoczęli projekt XviD. Tak więc oba projekty
+którzy pracowali nad OpenDivX, rozpoczęli projekt Xvid. Tak więc oba projekty
 mają to samo pochodzenie.
 </para>
 
 <para>
-Zauważ, że XviD nie jest konieczny do odtwarzania video zakodowanego przy
-pomocy XviD. Domyślnie używana jest biblioteka
+Zauważ, że Xvid nie jest konieczny do odtwarzania video zakodowanego przy
+pomocy Xvid. Domyślnie używana jest biblioteka
 <systemitem class="library">libavcodec</systemitem>, bo jest szybsza.
 </para>
 
 <procedure>
-<title>Instalacja <systemitem class="library">XviD</systemitem></title>
+<title>Instalacja <systemitem class="library">Xvid</systemitem></title>
 <para>
   Jak większość otwartego oporgramowania dostępny jest w dwóch wersjach:
   <ulink url="http://www.xvid.org/downloads.html">oficjalnych wydań</ulink>
   i wersji CVS.
   Wersja CVS jest zazwyczaj wystarczająco stablina by jej używać, jako że
   zazwyczaj ma poprawki do błędów występujących w wydaniach.
-  Tak należy nakłonić <systemitem class="library">XviD</systemitem> CVS do
+  Tak należy nakłonić <systemitem class="library">Xvid</systemitem> CVS do
   pracy z <application>MEncoderem</application> (będziesz potrzebował
   przenajmniej <application>autoconf</application> 2.50,
   <application>automake</application> i <application>libtool</application>):
