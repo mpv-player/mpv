@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r20739 -->
+<!-- in sync with r20873 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -183,10 +183,10 @@ screen #0
 
 <para>
   Ältere 3dfx-Treiber hatten bekanntermaßen Probleme mit der
-  XVideo-Beschleuningung, die entweder YUY2 oder YV12 nicht unterstützte.
+  XVideo-Beschleuningung, die weder YUY2 noch YV12 unterstützte.
   Stelle sicher, dass du XFree86 Version 4.2.0 oder neuer verwendest, da diese
-  Versionen mit YV12 und YUY2 keine Probleme haben. Vorherige Versionen, auch
-  4.1.0, sind <emphasis role="bold">bei Verwendung von YV12 abgestürzt</emphasis>.
+  Versionen mit YV12 und YUY2 keine Probleme haben, während frühere Versionen, auch
+  4.1.0, <emphasis role="bold">bei YV12 abgestürzen</emphasis>.
   Wenn du merkwürdige Effekte bei der Verwendung von <option>-vo xv</option>
   bemerkst, dann probier aus, ob mit SDL, das ebenfalls XVideo nutzen kann,
   diese Effekte verschwinden. In der <link linkend="sdl">SDL</link> stehen
@@ -214,7 +214,7 @@ screen #0
 <para>
   Es gibt inzwischen einen nativen Framebuffer-Treiber für S3 Virge-Karten, ähnlich
   tdfxfb. Mache die Einstellungen (hänge z.B.
-  "<option>vga=792 video=vesa:mtrr</option>" an den Kernel an) und benutze
+  "<option>vga=792 video=vesa:mtrr</option>" an die Kernelkommandozeile an) und benutze
   <option>-vo s3fb</option> (<option>-vf yuy2</option> und <option>-dr</option>
   helfen auch).
 </para>
@@ -999,7 +999,7 @@ make<!--
 </para>
 
 <para>
-<command>export $__GL_SYNC_TO_VBLANK=1</command>
+<command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
 
 </sect2>
@@ -1643,9 +1643,8 @@ make<!--
 </para>
 
 <para>
-  Der Treiber wurde von
-  <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>
-  geschrieben und weiterentwickelt.
+  Der Treiber wurde geschrieben und wird weiterentwickelt von
+  <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>.
 </para>
 </sect3>
 

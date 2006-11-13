@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20658 -->
+<!-- synced with r20876 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -1523,7 +1523,7 @@ rm encode<!--
             oder Hardware-Player bei manchen fortgeschrittenen Features, die
             <systemitem class="library">libavcodec</systemitem> unterstützt, DivX aber nicht,
             ins Stocken geraten; andererseits liegt
-            <systemitem class="library">XviD</systemitem> im Sinne der Funktionalität näher an
+            <systemitem class="library">Xvid</systemitem> im Sinne der Funktionalität näher an
             <systemitem class="library">libavcodec</systemitem> und wird von allen anständigen
             Playern unterstützt.
           </para>

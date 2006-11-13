@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r20834 -->
+<!-- in sync with r20870 -->
 
 <chapter id="install">
   <title>Installation</title>
@@ -39,8 +39,8 @@
       <listitem>
         <para>
           <emphasis role="bold">gcc</emphasis> - Empfohlene Versionen sind 2.95
-          und 3.3+. 2.96 und 3.0.x generieren bekannterweise fehlerhaften Code, 3.1 und
-          3.2 hatten auch Probleme. Benutze auf PowerPC-Architektur 4.x+.
+          und 3.4+. 2.96 und 3.0.x generieren bekannterweise fehlerhaften Code, 3.1 und
+          3.2 hatten auch Probleme, 3.3 ein paar kleinere. Benutze auf PowerPC-Architektur 4.x+.
         </para>
       </listitem>
       <listitem>

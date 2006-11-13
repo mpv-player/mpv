@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20705 -->
+<!-- synced with r20876 -->
 <chapter id="codecs">
   <title>Codecs</title>
 
@@ -104,10 +104,10 @@
 
 
   <sect2 id="xvid">
-    <title>XviD</title>
+    <title>Xvid</title>
 
     <para>
-      <ulink url="http://www.xvid.org">XviD</ulink> ist ein freier MPEG-4 ASP konformer
+      <ulink url="http://www.xvid.org">Xvid</ulink> ist ein freier MPEG-4 ASP konformer
       Videocodec, der Encodierung in zwei Durchläufen und das ganze MPEG-4 ASP Spektrum
       unterstützt, was ihn wesentlich effizienter als den gut bekannten DivX-Codec macht.
       Er erreicht sehr gute Qualität und dank CPU-Optimierungen für die meisten modernen
@@ -117,24 +117,24 @@
       Es begann als Fork der Entwicklung des OpenDivX-Codecs.
       Dies geschah, als ProjectMayo OpenDivX zu Closed Source DivX4
       machte und die Leute, die an OpenDivX arbeiteten aber nicht zu ProjectMayo gehörten,
-      verärgerte. Diese riefen dann XviD ins Leben. Beide Projekte haben daher denselben Ursprung.
+      verärgerte. Diese riefen dann Xvid ins Leben. Beide Projekte haben daher denselben Ursprung.
     </para>
 
     <para>
-      Beachte, dass XviD nicht benötigt wird, um mit XviD encodiertes Video zu decodieren.
+      Beachte, dass Xvid nicht benötigt wird, um mit Xvid encodiertes Video zu decodieren.
       In der Standardkonfiguration wird dafür <systemitem class="library">libavcodec</systemitem>
       benutzt, da er höhere Geschwindigkeit bietet.
     </para>
 
     <procedure>
-      <title>Installation von <systemitem class="library">XviD</systemitem></title>
+      <title>Installation von <systemitem class="library">Xvid</systemitem></title>
       <para>
         Wie die meiste Open-Source-Software gibt es zwei verfügbare Varianten:
         <ulink url="http://www.xvid.org/downloads.html">offizielle Releases</ulink>
         und die CVS-Version.
         Die CVS-Version ist für die Benutzung normalerweise stabil genug, da es meistens
         Fehlerbehebungen für Bugs enthält, die im Release vorhanden sind.
-        Hier also, was du zu tun hast, um <systemitem class="library">XviD</systemitem>
+        Hier also, was du zu tun hast, um <systemitem class="library">Xvid</systemitem>
         vom CVS mit <application>MEncoder</application> ans Laufen zu bringen
         (du benötigst mindestens <application>autoconf</application> 2.50,
         <application>automake</application> und <application>libtool</application>):

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r20043 -->
+<!-- in sync with r20876 -->
 <chapter id="mencoder">
 <title>Allgemeiner Gebrauch von <application>MEncoder</application></title>
 
@@ -89,7 +89,7 @@ Video-Codecs:
   </row>
   <row>
     <entry>xvid</entry>
-    <entry>XviD, MPEG-4 Advanced Simple Profile (ASP) Codec</entry>
+    <entry>Xvid, MPEG-4 Advanced Simple Profile (ASP) Codec</entry>
   </row>
   <row>
     <entry>x264</entry>
@@ -542,7 +542,7 @@ mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc la
   </para></listitem>
 <listitem><para>
   <application>MEncoder</application> führt dann das decodierte Bild dem
-  gewählten Video-Kompressor zu (DivX4, XviD, FFmpeg msmpeg4, etc).
+  gewählten Video-Kompressor zu (DivX4, Xvid, FFmpeg msmpeg4, etc).
   </para></listitem>
 </orderedlist>
 
