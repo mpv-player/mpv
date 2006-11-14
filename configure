@@ -2900,7 +2900,7 @@ if test "$_memalign" = yes ; then
 else
  _def_memalign='#undef HAVE_MEMALIGN'
  _def_map_memalign='#define memalign(a,b) malloc(b)'
- not darwin && _def_memalign_hack='#define MEMALIGN_HACK 1'
+ not darwin && _def_memalign_hack='#define CONFIG_MEMALIGN_HACK 1'
 fi
 echores "$_memalign"
 
