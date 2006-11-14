@@ -69,7 +69,8 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 			.file_pos = stream_tell(demuxer->stream),
 		},
 		.alloc = { .malloc = NULL },
-		.read_index = index_mode
+		.read_index = index_mode,
+		.cache_syncpoints = 1,
 	};
 	nut_priv_t * priv = demuxer->priv;
 	nut_context_t * nut = priv->nut = nut_demuxer_init(&dopts);
