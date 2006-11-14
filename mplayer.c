@@ -4366,6 +4366,9 @@ if(!sh_video) {
     if(use_gui) guiEventHandling();
 #endif
 
+    current_module="vo_check_events";
+    if (vo_config_count) video_out->check_events();
+
     current_module="calc_sleep_time";
 
 #if 0
@@ -4452,9 +4455,6 @@ if(time_frame>0.001 && !(vo_flags&256))
     time_frame = timing_sleep(time_frame);
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
-
-        current_module="vo_check_events";
-	if(vo_config_count) video_out->check_events();
 
         current_module="flip_page";
         if (!frame_time_remaining) {
