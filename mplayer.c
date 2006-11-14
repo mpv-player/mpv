@@ -2875,7 +2875,7 @@ static void adjust_sync_and_print_status(int between_frames, float timing_error)
 	else
 	    a_pts = playing_audio_pts(sh_audio, d_audio, audio_out);
 
-	v_pts = sh_video ? sh_video->pts : d_video->pts;
+	v_pts = sh_video->pts;
 
 	{
 	    static int drop_message=0;
