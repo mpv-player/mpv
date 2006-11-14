@@ -2760,6 +2760,7 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
     double pts;
 
     while (1) {
+	void *decoded_frame;
 	current_module = "decode video";
 	// XXX Time used in this call is not counted in any performance
 	// timer now, OSD is not updated correctly for filter-added frames
@@ -2778,7 +2779,7 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	if (pts == MP_NOPTS_VALUE)
 	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts value from demuxer MISSING\n");
 	current_module = "decode video";
-	void *decoded_frame = decode_video(sh_video, start, in_size, 0, pts);
+	decoded_frame = decode_video(sh_video, start, in_size, 0, pts);
 	if (decoded_frame) {
 	    update_osd_msg();
 	    if (filter_video(sh_video, decoded_frame, sh_video->pts))
@@ -3009,9 +3010,9 @@ int fill_audio_out_buffers(void)
 
 int sleep_until_update(float *time_frame, float *aq_sleep_time)
 {
+    int frame_time_remaining = 0;
     current_module="calc_sleep_time";
 
-    int frame_time_remaining = 0;
     *time_frame -= GetRelativeTime(); // reset timer
 
     if (sh_audio && !d_audio->eof) {
@@ -4342,6 +4343,7 @@ if(!sh_video) {
     blit_frame = 0; // Don't blit if we hit EOF
     if (!correct_pts) while(1)
     {   unsigned char* start=NULL;
+	void *decoded_frame;
 	int in_size;
 	// get it!
 	current_module="video_read_frame";
@@ -4373,7 +4375,7 @@ if(!sh_video) {
 	current_module="decode_video";
 //	printf("Decode! %p  %d  \n",start,in_size);
 	update_osd_msg();
-	void *decoded_frame = decode_video(sh_video,start,in_size,drop_frame, sh_video->pts);
+	decoded_frame = decode_video(sh_video,start,in_size,drop_frame, sh_video->pts);
 	blit_frame = (decoded_frame && filter_video(sh_video, decoded_frame,
 						    sh_video->pts));
 	break;
