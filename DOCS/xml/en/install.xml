@@ -85,9 +85,6 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <emphasis role="bold">libogg</emphasis> - optional, needed for playing OGG file format.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libvorbis</emphasis> - optional, needed for playing OGG Vorbis audio.
-  </para></listitem>
-<listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - optional, needed for playing RTSP/RTP streams.
   </para></listitem>
@@ -103,7 +100,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   support. At least 1.2.7 is required.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libsmb</emphasis> - optional, for Samba support.
+  <emphasis role="bold">libsmb</emphasis> - optional, for smb networking support
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - optional, for ALSA audio output
