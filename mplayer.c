@@ -2916,6 +2916,80 @@ static void adjust_sync_and_print_status(int between_frames, float timing_error)
     }
 }
 
+int fill_audio_out_buffers(void)
+{
+    unsigned int t;
+    double tt;
+    int playsize;
+    int playflags=0;
+    int audio_eof=0;
+
+    current_module="play_audio";
+
+    while (1) {
+	ao_data.pts = ((sh_video?sh_video->timer:0)+sh_audio->delay)*90000.0;
+	playsize = audio_out->get_space();
+
+	// handle audio-only case:
+	if (playsize < ao_data.outburst && !sh_video) {
+	    // this is where mplayer sleeps during audio-only playback
+	    // to avoid 100% CPU use
+	    usec_sleep(10000); // Wait a tick before retry
+	    continue;
+	}
+
+	if (playsize > MAX_OUTBURST)
+	    playsize = MAX_OUTBURST;
+
+	// Fill buffer if needed:
+	current_module="decode_audio";
+	t = GetTimer();
+	while (sh_audio->a_out_buffer_len < playsize) {
+	    int buflen = sh_audio->a_out_buffer_len;
+	    int ret = decode_audio(sh_audio, &sh_audio->a_out_buffer[buflen],
+				   playsize - buflen, // min bytes
+				   sh_audio->a_out_buffer_size - buflen // max
+				   );
+	    if (ret <= 0) { // EOF?
+		if (d_audio->eof) {
+		    audio_eof = 1;
+		    if (sh_audio->a_out_buffer_len == 0)
+			return 0;
+		}
+		break;
+	    }
+	    sh_audio->a_out_buffer_len += ret;
+	}
+	t = GetTimer() - t;
+	tt = t*0.000001f; audio_time_usage+=tt;
+	if (playsize > sh_audio->a_out_buffer_len) {
+	    playsize = sh_audio->a_out_buffer_len;
+	    if (audio_eof)
+		playflags |= AOPLAY_FINAL_CHUNK;
+	}
+	if (!playsize)
+	    break;
+
+	// play audio:  
+	current_module="play_audio";
+	playsize = audio_out->play(sh_audio->a_out_buffer, playsize, playflags);
+
+	if (playsize > 0) {
+	    sh_audio->a_out_buffer_len -= playsize;
+	    memmove(sh_audio->a_out_buffer, &sh_audio->a_out_buffer[playsize],
+		    sh_audio->a_out_buffer_len);
+	    sh_audio->delay += playback_speed*playsize/(double)ao_data.bps;
+	}
+	else if (audio_eof && audio_out->get_delay() < .04) {
+	    // Sanity check to avoid hanging in case current ao doesn't output
+	    // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
+	    mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");
+	    sh_audio->a_out_buffer_len = 0;
+	}
+	break;
+    }
+    return 1;
+}
 
 int main(int argc,char* argv[]){
 
@@ -4167,70 +4241,12 @@ if(!sh_audio && d_audio->sh) {
 
 /*========================== PLAY AUDIO ============================*/
 
-while(sh_audio){
-  unsigned int t;
-  double tt;
-  int playsize;
-  int playflags=0;
-  int audio_eof=0;
-
-  current_module="play_audio";
-  
-  ao_data.pts=((sh_video?sh_video->timer:0)+sh_audio->delay)*90000.0;
-  playsize=audio_out->get_space();
-  
-  // handle audio-only case:
-  if(playsize < ao_data.outburst &&
-      !sh_video) {  // buffer is full, do not block here!!!
-    usec_sleep(10000); // Wait a tick before retry
-    continue;
-  }
-  
-  if(playsize>MAX_OUTBURST) playsize=MAX_OUTBURST; // we shouldn't exceed it!
-
-  // Fill buffer if needed:
-  current_module="decode_audio";   // Enter AUDIO decoder module
-  t=GetTimer();
-  while (sh_audio->a_out_buffer_len < playsize) {
-    int ret=decode_audio(sh_audio,&sh_audio->a_out_buffer[sh_audio->a_out_buffer_len],
-        playsize-sh_audio->a_out_buffer_len,sh_audio->a_out_buffer_size-sh_audio->a_out_buffer_len);
-    if(ret<=0) { // EOF?
-      if (d_audio->eof) {
-	audio_eof = 1;
-	if (!sh_video && sh_audio->a_out_buffer_len == 0)
+if (sh_audio)
+    if (!fill_audio_out_buffers())
+	// at eof, all audio at least written to ao
+	if (!sh_video)
 	    eof = PT_NEXT_ENTRY;
-      }
-      break;
-    }
-    sh_audio->a_out_buffer_len+=ret;
-  }
-  t=GetTimer()-t;
-  tt = t*0.000001f; audio_time_usage+=tt;
-  if (playsize > sh_audio->a_out_buffer_len) {
-      playsize = sh_audio->a_out_buffer_len;
-      if (audio_eof)
-	  playflags |= AOPLAY_FINAL_CHUNK;
-  }
-  if (!playsize)
-      break;
 
-  // play audio:  
-  current_module="play_audio";
-  playsize = audio_out->play(sh_audio->a_out_buffer, playsize, playflags);
-
-  if(playsize>0){
-      sh_audio->a_out_buffer_len-=playsize;
-      memmove(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[playsize],sh_audio->a_out_buffer_len);
-      sh_audio->delay+=playback_speed*playsize/(double)ao_data.bps;
-  }
-  else if (audio_eof && audio_out->get_delay() < .04) {
-      // Sanity check to avoid hanging in case current ao doesn't output
-      // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
-      mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");
-      sh_audio->a_out_buffer_len = 0;
-  }
-  break;
-} // while(sh_audio)
 
 if(!sh_video) {
   // handle audio-only case:
