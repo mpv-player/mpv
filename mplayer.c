@@ -2923,23 +2923,30 @@ int fill_audio_out_buffers(void)
     int playsize;
     int playflags=0;
     int audio_eof=0;
+    int bytes_to_write;
 
     current_module="play_audio";
 
     while (1) {
+	// all the current uses of ao_data.pts seem to be in aos that handle
+	// sync completely wrong; there should be no need to use ao_data.pts
+	// in get_space()
 	ao_data.pts = ((sh_video?sh_video->timer:0)+sh_audio->delay)*90000.0;
-	playsize = audio_out->get_space();
+	bytes_to_write = audio_out->get_space();
+	if (sh_video || bytes_to_write >= ao_data.outburst)
+	    break;
 
 	// handle audio-only case:
-	if (playsize < ao_data.outburst && !sh_video) {
-	    // this is where mplayer sleeps during audio-only playback
-	    // to avoid 100% CPU use
-	    usec_sleep(10000); // Wait a tick before retry
-	    continue;
-	}
+	// this is where mplayer sleeps during audio-only playback
+	// to avoid 100% CPU use
+	usec_sleep(10000); // Wait a tick before retry
+    }
 
+    while (bytes_to_write) {
+	playsize = bytes_to_write;
 	if (playsize > MAX_OUTBURST)
 	    playsize = MAX_OUTBURST;
+	bytes_to_write -= playsize;
 
 	// Fill buffer if needed:
 	current_module="decode_audio";
@@ -2972,6 +2979,11 @@ int fill_audio_out_buffers(void)
 
 	// play audio:  
 	current_module="play_audio";
+
+	// Is this pts value actually useful for the aos that access it?
+	// They're obviously badly broken in the way they handle av sync;
+	// would not having access to this make them more broken?
+	ao_data.pts = ((sh_video?sh_video->timer:0)+sh_audio->delay)*90000.0;
 	playsize = audio_out->play(sh_audio->a_out_buffer, playsize, playflags);
 
 	if (playsize > 0) {
@@ -2986,7 +2998,6 @@ int fill_audio_out_buffers(void)
 	    mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");
 	    sh_audio->a_out_buffer_len = 0;
 	}
-	break;
     }
     return 1;
 }
