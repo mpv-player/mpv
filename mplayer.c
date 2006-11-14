@@ -2804,6 +2804,119 @@ static void rescale_input_coordinates(int ix, int iy, double *dx, double *dy) {
         *dx, *dy, vo_screenwidth, vo_screenheight,  vo_dwidth, vo_dheight, vo_fs);
 }
 
+#ifdef HAVE_RTC
+    int rtc_fd = -1;
+#endif
+
+static float timing_sleep(float time_frame)
+{
+#ifdef HAVE_RTC
+    if (rtc_fd >= 0){
+	// -------- RTC -----------
+	current_module="sleep_rtc";
+        while (time_frame > 0.000) {
+	    unsigned long rtc_ts;
+	    if (read(rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
+		mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_LinuxRTCReadError, strerror(errno));
+    	    time_frame -= GetRelativeTime();
+	}
+    } else
+#endif
+#ifdef SYS_DARWIN
+	{
+	    current_module = "sleep_darwin";
+	    while (time_frame > 0.005) {
+		usec_sleep(1000000*time_frame);
+		time_frame -= GetRelativeTime();
+	    }
+	}
+#else
+    {
+	// assume kernel HZ=100 for softsleep, works with larger HZ but with
+	// unnecessarily high CPU usage
+	float margin = softsleep ? 0.011 : 0;
+	current_module = "sleep_timer";
+	while (time_frame > margin) {
+	    usec_sleep(1000000 * (time_frame - margin));
+	    time_frame -= GetRelativeTime();
+	}
+	if (softsleep){
+	    current_module = "sleep_soft";
+	    if (time_frame < 0)
+		mp_msg(MSGT_AVSYNC, MSGL_WARN, MSGTR_SoftsleepUnderflow);
+	    while (time_frame > 0)
+		time_frame-=GetRelativeTime(); // burn the CPU
+	}
+    }
+#endif /* SYS_DARWIN */
+    return time_frame;
+}
+
+static void adjust_sync_and_print_status(int between_frames, float timing_error)
+{
+    current_module="av_sync";
+
+    if(sh_audio){
+	double a_pts, v_pts;
+
+	if (autosync)
+	    /*
+	     * If autosync is enabled, the value for delay must be calculated
+	     * a bit differently.  It is set only to the difference between
+	     * the audio and video timers.  Any attempt to include the real
+	     * or corrected delay causes the pts_correction code below to
+	     * try to correct for the changes in delay which autosync is
+	     * trying to measure.  This keeps the two from competing, but still
+	     * allows the code to correct for PTS drift *only*.  (Using a delay
+	     * value here, even a "corrected" one, would be incompatible with
+	     * autosync mode.)
+	     */
+	    a_pts = written_audio_pts(sh_audio, d_audio) - sh_audio->delay;
+	else
+	    a_pts = playing_audio_pts(sh_audio, d_audio, audio_out);
+
+	v_pts = sh_video ? sh_video->pts : d_video->pts;
+
+	{
+	    static int drop_message=0;
+	    double AV_delay = a_pts - audio_delay - v_pts;
+	    double x;
+	    if (AV_delay>0.5 && drop_frame_cnt>50 && drop_message==0){
+		++drop_message;
+		mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
+	    }
+	    if (autosync)
+		x = AV_delay*0.1f;
+	    else
+		/* Do not correct target time for the next frame if this frame
+		 * was late not because of wrong target time but because the
+		 * target time could not be met */
+		x = (AV_delay + timing_error * playback_speed) * 0.1f;
+	    if (x < -max_pts_correction)
+		x = -max_pts_correction;
+	    else if (x> max_pts_correction)
+		x = max_pts_correction;
+	    if (default_max_pts_correction >= 0)
+		max_pts_correction = default_max_pts_correction;
+	    else
+		max_pts_correction = sh_video->frametime*0.10; // +-10% of time
+	    if (!between_frames) {
+		sh_audio->delay+=x;
+		c_total+=x;
+	    }
+	    if(!quiet)
+		print_status(a_pts - audio_delay, AV_delay, c_total);
+	}
+    
+    } else {
+	// No audio:
+    
+	if (!quiet)
+	    print_status(0, 0, 0);
+    }
+}
+
+
 int main(int argc,char* argv[]){
 
 
@@ -2812,10 +2925,6 @@ char * mem_ptr;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 
 // movie info:
-
-#ifdef HAVE_RTC
-int rtc_fd=-1;
-#endif
 
 /* Flag indicating whether MPlayer should exit without playing anything. */
 int opt_exit = 0;
@@ -4312,49 +4421,8 @@ if(!sh_video) {
 time_frame/=playback_speed;
 
 // flag 256 means: libvo driver does its timing (dvb card)
-if(time_frame>0.001 && !(vo_flags&256)){
-
-#ifdef HAVE_RTC
-    if(rtc_fd>=0){
-	// -------- RTC -----------
-	current_module="sleep_rtc";
-        while (time_frame > 0.000) {
-	    unsigned long rtc_ts;
-	    if (read (rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
-		    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_LinuxRTCReadError, strerror(errno));
-    	    time_frame-=GetRelativeTime();
-	}
-    } else
-#endif
-#ifdef SYS_DARWIN
-    {
-		current_module="sleep_darwin";
-        while(time_frame>0.005) {
-			usec_sleep(1000000*time_frame);
-			time_frame-=GetRelativeTime();
-        }
-	}
-#else
-    {
-	// -------- TIMER + SOFTSLEEP -----------
-	// assume kernel HZ=100 for softsleep, works with larger HZ but with
-	// unnecessarily high CPU usage
-	float margin = softsleep ? 0.011 : 0;
-	current_module="sleep_timer";
-	while (time_frame > margin) {
-	    usec_sleep(1000000 * (time_frame - margin));
-	    time_frame -= GetRelativeTime();
-	}
-	if(softsleep){
-	    current_module="sleep_soft";
-	    if(time_frame<0) mp_msg(MSGT_AVSYNC, MSGL_WARN, MSGTR_SoftsleepUnderflow);
-	    while(time_frame>0) time_frame-=GetRelativeTime(); // burn the CPU
-	}
-    }
-#endif /* SYS_DARWIN */
-}
-
-//if(!frame_time_remaining){	// should we display the frame now?
+if(time_frame>0.001 && !(vo_flags&256))
+    time_frame = timing_sleep(time_frame);
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
 
@@ -4403,62 +4471,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
         }
 //====================== A-V TIMESTAMP CORRECTION: =========================
 
-  current_module="av_sync";
-
-  if(sh_audio){
-    double a_pts, v_pts;
-
-    if (autosync)
-      /*
-       * If autosync is enabled, the value for delay must be calculated
-       * a bit differently.  It is set only to the difference between
-       * the audio and video timers.  Any attempt to include the real
-       * or corrected delay causes the pts_correction code below to
-       * try to correct for the changes in delay which autosync is
-       * trying to measure.  This keeps the two from competing, but still
-       * allows the code to correct for PTS drift *only*.  (Using a delay
-       * value here, even a "corrected" one, would be incompatible with
-       * autosync mode.)
-       */
-	a_pts = written_audio_pts(sh_audio, d_audio) - sh_audio->delay;
-    else
-	a_pts = playing_audio_pts(sh_audio, d_audio, audio_out);
-
-    v_pts=sh_video ? sh_video->pts : d_video->pts;
-
-      {
-	static int drop_message=0;
-	double AV_delay = a_pts - audio_delay - v_pts;
-	double x;
-	if(AV_delay>0.5 && drop_frame_cnt>50 && drop_message==0){
-	  ++drop_message;
-	  mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
-	}
-	if (autosync)
-	    x = AV_delay*0.1f;
-	else
-	    /* Do not correct target time for the next frame if this frame
-	     * was late not because of wrong target time but because the
-	     * target time could not be met */
-	    x = (AV_delay + time_frame * playback_speed) * 0.1f;
-        if(x<-max_pts_correction) x=-max_pts_correction; else
-        if(x> max_pts_correction) x= max_pts_correction;
-        if(default_max_pts_correction>=0)
-          max_pts_correction=default_max_pts_correction;
-        else
-          max_pts_correction=sh_video->frametime*0.10; // +-10% of time
-	if(!frame_time_remaining){ sh_audio->delay+=x; c_total+=x;} // correction
-        if(!quiet)
-          print_status(a_pts - audio_delay, AV_delay, c_total);
-      }
-    
-  } else {
-    // No audio:
-    
-    if(!quiet)
-      print_status(0, 0, 0);
-
-  }
+  adjust_sync_and_print_status(frame_time_remaining, time_frame);
 
 //============================ Auto QUALITY ============================
 
