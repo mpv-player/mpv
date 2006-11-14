@@ -4460,10 +4460,6 @@ if(time_frame>0.001 && !(vo_flags&256))
 	   double tt;
 
 	   if(vo_config_count) video_out->flip_page();
-	   if (play_n_frames >= 0) {
-	     --play_n_frames;
-	     if (play_n_frames <= 0) eof = PT_NEXT_ENTRY;
-	   }
 
 //        usec_sleep(50000); // test only!
 	   t2=GetTimer()-t2;
@@ -4494,6 +4490,12 @@ if(auto_quality>0){
 //  printf("total: %8.6f  sleep: %8.6f  q: %d\n",(0.000001f*aq_total_time),aq_sleep_time,output_quality);
   set_video_quality(sh_video,output_quality);
 }
+
+ if (play_n_frames >= 0 && !frame_time_remaining && blit_frame) {
+     --play_n_frames;
+     if (play_n_frames <= 0) eof = PT_NEXT_ENTRY;
+ }
+
 
 // FIXME: add size based support for -endpos
  if (end_at.type == END_AT_TIME &&
