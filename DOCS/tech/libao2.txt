@@ -23,16 +23,23 @@ static void reset();
 
 static int get_space();
   Returns how many bytes can be written into the audio buffer without
-  blocking (making caller process wait). If the buffer is (nearly) full,
-  has to return 0!
-  If it never gives 0, MPlayer won't work!
+  blocking (making caller process wait). MPlayer occasionally checks the
+  remaining space and tries to fill the buffer with play() if there's free
+  space. The buffer size used should be sane; a buffer that is too small
+  could run empty before MPlayer tries filling it again (normally once per
+  video frame), a buffer that is too big would force MPlayer decode the file
+  far ahead trying to find enough audio data to fill it.
 
 static int play(void* data,int len,int flags);
   Plays a bit of audio, which is received throught the "data" memory area, with
-  a size of "len". The "flags" isn't used yet. It has to copy the data, because
-  they can be overwritten after the call is made. Doesn't really have to use
-  all the bytes, it has to give back how many have been used (copied to
-  buffer).
+  a size of "len". It has to copy the data, because they can be overwritten
+  after the call is made. Doesn't have to use all the bytes; it has to
+  return the number of bytes used used (copied to buffer). If
+  flags|AOPLAY_FINAL_CHUNK is true then this is the last audio in the file.
+  The purpose of this flag is to tell aos that round down the audio played
+  from "len" to a multiple of some chunksize that this "len" should not be
+  rounded down to 0 or the data will never be played (as MPlayer will never
+  call play() with a larger len).
 
 static float get_delay(); 
   Returns how long time it will take to play the data currently in the
@@ -40,58 +47,10 @@ static float get_delay();
   on this! In the worst case, return the maximum delay.
 
 !!! Because the video is synchronized to the audio (card), it's very important
-!!! that the get_space and get_delay functions are correctly implemented!
+!!! that the get_delay function is correctly implemented!
 
-6.a audio plugins
-  Audio plugins are used for processing the audio data before it
-  reaches the soundcard driver. A plugin can change the following 
-  aspects of the audio data stream:
-  1. Sample format
-  2. Sample rate
-  3. Number of channels
-  4. The data itself (i.e. filtering and other sound effects)
-  5. The delay (almost all plugins does this)
-  The plugin interface is implemented as a pseudo device driver with
-  the catchy name "plugin". The plugins are executed sequentially
-  ordered by the "-aop list=plugin1,plugin2,..." command line switch.
-  To add plugins add an entry in audio_plugin.h the makefile and
-  create a source file named "pl_whatever.c". Input parameters are
-  added to audio_plugin.h and to cfg-mplayer.h. A good starting point
-  for writing plugins is pl_delay.c. Below is a description of what
-  the functions does:
-    
-static int control(int cmd, int arg);
-  This is for reading/setting plugin-specific and other special
-  parameters and can be used for keyboard input for example. All
-  plugins must respond to cmd=AOCONTROL_PLUGIN_SET_LEN which is part
-  of the initialization of the plugin. When this command is received
-  the parameter pl_delay.len will contain the maximum size of data the
-  plugin can produce. This can be used for calculating and allocating
-  buffer space for the plugin. Before the function exits the parameter
-  pl_delay.len must be set to the maximum data size the plugin can
-  receive. Return CONTROL_OK for success and CONTROL_ERROR for fail,
-  other control codes are found in audio_out.h.
+static void audio_pause(void);
+  Pause playing but do not delete buffered data if possible.
 
-static int init();
-  This function is for initializing the plugin, it is called once
-  before the playing is started. In this function the plugin can read
-  AND write to the ao_plugin_data struct to determine and set input
-  and output parameters. It is important to write to the
-  ao_plugin_data.sz_mult and ao_plugin_data.delay_fix parameters if
-  the plugin changes the data size or adds delay. Return 0 for fail
-  and 1 for success.
-
-static void uninit()
-  Called before mplayer exits. Used for deallocating dynamic buffers.
-
-static void reset()
-  Called during reset can be used to empty buffers. MPlayer calls this
-  function when pause is pressed.
-
-static int play() 
-  Called for every block of audio data sent through the plugin. This
-  function should be optimized for speed. The incoming data is found
-  in ao_plugin_data.data having length ao_plugin_data.len. These two
-  parameters should be changed by the plugin. Return 1 for success and
-  0 for fail.
-
+static void audio_resume(void);
+  Continue playing after audio_pause().  
