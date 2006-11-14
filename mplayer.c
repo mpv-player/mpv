@@ -4637,6 +4637,13 @@ if(step_sec>0) {
                    cmd->args[0].v.s,cmd->args[1].v.s);
         
     } break;
+    case MP_CMD_STEP_PROPERTY: {
+        m_option_t* prop = mp_property_find(cmd->args[0].v.s);
+        float arg = cmd->args[1].v.f;
+        if(!prop) mp_msg(MSGT_CPLAYER,MSGL_WARN, "Unknown property: '%s'\n",cmd->args[0].v.s);
+        else if(m_property_do(prop,M_PROPERTY_STEP_UP, arg ? &arg : NULL) <= 0)
+            mp_msg(MSGT_CPLAYER,MSGL_WARN, "Failed to increment property '%s' by %f.\n",cmd->args[0].v.s, arg);
+    } break;
     case MP_CMD_GET_PROPERTY: {
         m_option_t* prop;
         void* val;
