@@ -4454,18 +4454,12 @@ if(time_frame>0.001 && !(vo_flags&256))
 //====================== FLIP PAGE (VIDEO BLT): =========================
 
         current_module="flip_page";
-        if (!frame_time_remaining) {
-         if(blit_frame){
+        if (!frame_time_remaining && blit_frame) {
 	   unsigned int t2=GetTimer();
-	   double tt;
 
 	   if(vo_config_count) video_out->flip_page();
 
-//        usec_sleep(50000); // test only!
-	   t2=GetTimer()-t2;
-	   tt = t2*0.000001f;
-	   vout_time_usage+=tt;
-	 }
+	   vout_time_usage += (GetTimer() - t2) * 0.000001;
         }
 //====================== A-V TIMESTAMP CORRECTION: =========================
 
