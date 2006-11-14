@@ -4423,6 +4423,13 @@ if(!sh_video) {
     current_module="vo_check_events";
     if (vo_config_count) video_out->check_events();
 
+#ifdef HAVE_X11
+    if (stop_xscreensaver) {
+	current_module = "stop_xscreensaver";
+	xscreensaver_heartbeat();
+    }
+#endif
+
     frame_time_remaining = sleep_until_update(&time_frame, &aq_sleep_time);
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
@@ -5421,14 +5428,6 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
   }
 #endif
 
-#ifdef HAVE_X11
-if (stop_xscreensaver && sh_video) {
-  current_module="stop_xscreensaver";
-  xscreensaver_heartbeat();
-  current_module=NULL;
-}
-#endif
-  
   // DVD sub:
 if(vo_config_count && vo_spudec) {
   unsigned char* packet=NULL;
