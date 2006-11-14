@@ -3002,6 +3002,63 @@ int fill_audio_out_buffers(void)
     return 1;
 }
 
+int sleep_until_update(float *time_frame, float *aq_sleep_time)
+{
+    current_module="calc_sleep_time";
+
+    int frame_time_remaining = 0;
+    *time_frame -= GetRelativeTime(); // reset timer
+
+    if (sh_audio && !d_audio->eof) {
+	float delay = audio_out->get_delay();
+	mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", delay);
+
+	if (autosync) {
+	    /*
+	     * Adjust this raw delay value by calculating the expected
+	     * delay for this frame and generating a new value which is
+	     * weighted between the two.  The higher autosync is, the
+	     * closer to the delay value gets to that which "-nosound"
+	     * would have used, and the longer it will take for A/V
+	     * sync to settle at the right value (but it eventually will.)
+	     * This settling time is very short for values below 100.
+	     */
+	    float predicted = sh_audio->delay / playback_speed + *time_frame;
+	    float difference = delay - predicted;
+	    delay = predicted + difference / (float)autosync;
+	}
+
+	*time_frame = delay - sh_audio->delay / playback_speed;
+
+	// delay = amount of audio buffered in soundcard/driver
+	if (delay > 0.25) delay=0.25; else
+	if (delay < 0.10) delay=0.10;
+	if (*time_frame > delay*0.6) {
+	    // sleep time too big - may cause audio drops (buffer underrun)
+	    frame_time_remaining = 1;
+	    *time_frame = delay*0.5;
+	}
+    } else {
+	// If we're lagging more than 200 ms behind the right playback rate,
+	// don't try to "catch up".
+	// If benchmark is set always output frames as fast as possible
+	// without sleeping.
+	if (*time_frame < -0.2 || benchmark)
+	    *time_frame = 0;
+    }
+
+    *aq_sleep_time += *time_frame;
+
+
+    //============================== SLEEP: ===================================
+
+    // flag 256 means: libvo driver does its timing (dvb card)
+    if (*time_frame > 0.001 && !(vo_flags&256))
+	*time_frame = timing_sleep(*time_frame);
+    return frame_time_remaining;
+}
+
+
 int main(int argc,char* argv[]){
 
 
@@ -4291,7 +4348,7 @@ if(!sh_video) {
 	if(in_size>max_framesize) max_framesize=in_size; // stats
 	sh_video->timer+=frame_time;
 	if(sh_audio) sh_audio->delay-=frame_time;
-	time_frame+=frame_time;  // for nosound
+	time_frame += frame_time / playback_speed;  // for nosound
 	// video_read_frame can change fps (e.g. for ASF video)
 	vo_fps = sh_video->fps;
 	// check for frame-drop:
@@ -4335,7 +4392,7 @@ if(!sh_video) {
 	frame_time = sh_video->pts - last_pts;
 	last_pts = sh_video->pts;
 	sh_video->timer += frame_time;
-	time_frame += frame_time;  // for nosound
+	time_frame += frame_time / playback_speed;  // for nosound
 	if(sh_audio)
 	    sh_audio->delay -= frame_time;
 	blit_frame = 1;
@@ -4366,90 +4423,7 @@ if(!sh_video) {
     current_module="vo_check_events";
     if (vo_config_count) video_out->check_events();
 
-    current_module="calc_sleep_time";
-
-#if 0
-{	// debug frame dropping code
-	  float delay=audio_out->get_delay();
-	  mp_msg(MSGT_AVSYNC,MSGL_V,"\r[V] %5.3f [A] %5.3f => {%5.3f}  (%5.3f) [%d]   \n",
-	      sh_video->timer,sh_audio->timer-delay,
-	      sh_video->timer-(sh_audio->timer-delay),
-	      delay,drop_frame);
-}
-#endif
-
-    if(drop_frame && !frame_time_remaining && !autosync){
-      /*
-       * Note: time_frame should not be forced to 0 in autosync mode.
-       * It is used as a cumulative counter to predict and correct the
-       * delay measurements from the audio driver.  time_frame is already
-       * < 0, so the "time to sleep" code does not actually sleep.  Also,
-       * blit_frame is already 0 because drop_frame was true when
-       * decode_video was called (which causes it to set blit_frame to 0.)
-       * When autosync==0, the default behavior is still completely unchanged.
-       */
-
-      time_frame=0;	// don't sleep!
-      blit_frame=0;	// don't display!
-      
-    } else {
-
-      // It's time to sleep...
-      
-      frame_time_remaining=0;
-      time_frame-=GetRelativeTime(); // reset timer
-
-      if(sh_audio && !d_audio->eof){
-	  float delay=playback_speed*audio_out->get_delay();
-	  mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%f\n",delay);
-
-	  if (autosync){
-	    /*
-	     * Adjust this raw delay value by calculating the expected
-	     * delay for this frame and generating a new value which is
-	     * weighted between the two.  The higher autosync is, the
-	     * closer to the delay value gets to that which "-nosound"
-	     * would have used, and the longer it will take for A/V
-	     * sync to settle at the right value (but it eventually will.)
-	     * This settling time is very short for values below 100.
-	     */
-	    float predicted = sh_audio->delay+time_frame;
-	    float difference = delay - predicted;
-	    delay = predicted + difference / (float)autosync;
-	  }
-
-          time_frame=delay-sh_audio->delay;
-
-	// delay = amount of audio buffered in soundcard/driver
-	if(delay>0.25) delay=0.25; else
-	if(delay<0.10) delay=0.10;
-	if(time_frame>delay*0.6){
-	    // sleep time too big - may cause audio drops (buffer underrun)
-	    frame_time_remaining=1;
-	    time_frame=delay*0.5;
-	}
-
-      } else {
-
-          // NOSOUND:
-          if( (time_frame<-3*frame_time || time_frame>3*frame_time) || benchmark)
-	      time_frame=0;
-	  
-      }
-
-//      if(mp_msg_test(MSGT_CPLAYER,MSGL_DBG2)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,sh_audio->timer,sh_video->timer);
-
-      aq_sleep_time+=time_frame;
-
-    }	// !drop_frame
-    
-//============================== SLEEP: ===================================
-
-time_frame/=playback_speed;
-
-// flag 256 means: libvo driver does its timing (dvb card)
-if(time_frame>0.001 && !(vo_flags&256))
-    time_frame = timing_sleep(time_frame);
+    frame_time_remaining = sleep_until_update(&time_frame, &aq_sleep_time);
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
 
