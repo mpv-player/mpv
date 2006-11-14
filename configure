@@ -6519,7 +6519,7 @@ if test "$_nut" = auto ; then
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include <nut.h>
+#include <libnut.h>
 int main(void) { (void)nut_error(0); return 0; }
 EOF
   _ld_nut="-lnut"
