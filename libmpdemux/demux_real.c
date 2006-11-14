@@ -1514,9 +1514,9 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    mp_msg(MSGT_DEMUX,MSGL_V,"video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
 
 		    /* emulate BITMAPINFOHEADER */
-		    sh->bih = malloc(sizeof(BITMAPINFOHEADER)+16);
-		    memset(sh->bih, 0, sizeof(BITMAPINFOHEADER)+16);
-	    	    sh->bih->biSize = 48;
+		    sh->bih = malloc(sizeof(BITMAPINFOHEADER));
+		    memset(sh->bih, 0, sizeof(BITMAPINFOHEADER));
+	    	    sh->bih->biSize = sizeof(BITMAPINFOHEADER);
 		    sh->disp_w = sh->bih->biWidth = stream_read_word(demuxer->stream);
 		    sh->disp_h = sh->bih->biHeight = stream_read_word(demuxer->stream);
 		    sh->bih->biPlanes = 1;
@@ -1548,57 +1548,19 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    }
 		    stream_skip(demuxer->stream, 2);
 		    
-		    // read codec sub-format (to make difference between low and high rate codec)
-		    ((unsigned int*)(sh->bih+1))[0]=stream_read_dword(demuxer->stream);
-
-		    /* h263 hack */
-		    tmp = stream_read_dword(demuxer->stream);
-		    ((unsigned int*)(sh->bih+1))[1]=tmp;
-		    mp_msg(MSGT_DEMUX,MSGL_V,"H.263 ID: %x\n", tmp);
-		    switch (tmp)
 		    {
-			case 0x10000000:
-			    /* sub id: 0 */
-			    /* codec id: rv10 */
-			    break;
-			case 0x10003000:
-			case 0x10003001:
-			    /* sub id: 3 */
-			    /* codec id: rv10 */
-			    sh->bih->biCompression = sh->format = mmioFOURCC('R', 'V', '1', '3');
-			    break;
-			case 0x20001000:
-			case 0x20100001:
-			case 0x20200002:
-			    /* codec id: rv20 */
-			    break;
-			case 0x30202002:
-			    /* codec id: rv30 */
-			    break;
-			case 0x40000000:
-			    /* codec id: rv40 */
-			    break;
-			default:
-			    /* codec id: none */
-			    mp_msg(MSGT_DEMUX,MSGL_V,"unknown id: %x\n", tmp);
-		    }
-
-		    if((sh->format<=0x30335652) && (tmp>=0x20200002)){
-			    // read data for the cmsg24[] (see vd_realvid.c)
+			    // read and store codec extradata
 			    unsigned int cnt = codec_data_size - (stream_tell(demuxer->stream) - codec_pos);
-			    if (cnt < 2) {
-			        mp_msg(MSGT_DEMUX, MSGL_ERR,"realvid: cmsg24 data too short (size %u)\n", cnt);
+			    if (cnt > 0x7fffffff - sizeof(BITMAPINFOHEADER)) {
+			        mp_msg(MSGT_DEMUX, MSGL_ERR,"Extradata too big (%u)\n", cnt);
 			    } else  {
-			        int ii;
-			        if (cnt > 8) {
-			            mp_msg(MSGT_DEMUX, MSGL_WARN,"realvid: cmsg24 data too big, please report (size %u)\n", cnt);
-			            cnt = 8;
-			        }
-			        for (ii = 0; ii < cnt; ii++)
-			            ((unsigned char*)(sh->bih+1))[8+ii]=(unsigned short)stream_read_char(demuxer->stream);
+				sh->bih = realloc(sh->bih, sizeof(BITMAPINFOHEADER) + cnt);
 			        sh->bih->biSize += cnt;
+				stream_read(demuxer->stream, ((unsigned char*)(sh->bih+1)), cnt);
 			    }
 		    } 
+		    if(sh->format == 0x30315652 && ((unsigned char*)(sh->bih+1))[6] == 0x30)
+			    sh->bih->biCompression = sh->format = mmioFOURCC('R', 'V', '1', '3');
 		    
 		    /* Select video stream with highest bitrate if multirate file*/
 		    if (priv->is_multirate && ((demuxer->video->id == -1) ||

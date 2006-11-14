@@ -1869,12 +1869,14 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
           unsigned char *dst, *src;
           real_video_props_t *rvp;
           uint32_t type2;
+          unsigned int cnt;
 
           rvp = (real_video_props_t *) track->private_data;
           src = (unsigned char *) (rvp + 1);
 
-          bih = realloc(bih, sizeof (BITMAPINFOHEADER)+12);
-          bih->biSize = 48;
+          cnt = track->private_size - sizeof (real_video_props_t);
+          bih = realloc(bih, sizeof (BITMAPINFOHEADER)+8+cnt);
+          bih->biSize = 48+cnt;
           bih->biPlanes = 1;
           type2 = be2me_32 (rvp->type2);
           if (type2 == 0x10003000 || type2 == 0x10003001)
@@ -1882,17 +1884,9 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
           else
             bih->biCompression=mmioFOURCC('R','V',track->codec_id[9],'0');
           dst = (unsigned char *) (bih + 1);
-          ((unsigned int *) dst)[0] = be2me_32 (rvp->type1);
-          ((unsigned int *) dst)[1] = type2;
-
-          if (bih->biCompression <= 0x30335652 && type2 >= 0x20200002)
-            {
-              /* read secondary WxH for the cmsg24[] (see vd_realvid.c) */
-              ((unsigned short *)(bih+1))[4] = 4 * (unsigned short) src[0];
-              ((unsigned short *)(bih+1))[5] = 4 * (unsigned short) src[1];
-            }
-          else
-            memset(&dst[8], 0, 4);
+          ((unsigned int *) dst)[0] = rvp->type1;
+          ((unsigned int *) dst)[1] = rvp->type2;
+          stream_read(demuxer->stream, dst+8, cnt);
           track->realmedia = 1;
 
 #ifdef USE_QTX_CODECS

@@ -354,21 +354,20 @@ static int init(sh_video_t *sh){
     case mmioFOURCC('R', 'V', '2', '0'):
     case mmioFOURCC('R', 'V', '3', '0'):
     case mmioFOURCC('R', 'V', '4', '0'):
-        avctx->extradata_size= 8;
-        avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-        if(sh->bih->biSize!=sizeof(*sh->bih)+8){
+        if(sh->bih->biSize<sizeof(*sh->bih)+8){
             /* only 1 packet per frame & sub_id from fourcc */
+            avctx->extradata_size= 8;
+            avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
 	    ((uint32_t*)avctx->extradata)[0] = 0;
-	    avctx->sub_id=
 	    ((uint32_t*)avctx->extradata)[1] =
         	(sh->format == mmioFOURCC('R', 'V', '1', '3')) ? 0x10003001 : 0x10000000;
         } else {
 	    /* has extra slice header (demux_rm or rm->avi streamcopy) */
-	    unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
-	    ((uint32_t*)avctx->extradata)[0] = be2me_32(extrahdr[0]);
-	    avctx->sub_id= extrahdr[1];
-	    ((uint32_t*)avctx->extradata)[1] = be2me_32(extrahdr[1]);
+	    avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+	    avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+	    memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
 	}
+	avctx->sub_id= be2me_32(avctx->extradata+4);
 
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
         break;
@@ -748,7 +747,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
        || sh->format == mmioFOURCC('R', 'V', '2', '0')
        || sh->format == mmioFOURCC('R', 'V', '3', '0')
        || sh->format == mmioFOURCC('R', 'V', '4', '0'))
-    if(sh->bih->biSize==sizeof(*sh->bih)+8){
+    if(sh->bih->biSize>=sizeof(*sh->bih)+8){
         int i;
         dp_hdr_t *hdr= (dp_hdr_t*)data;
 

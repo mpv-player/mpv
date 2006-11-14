@@ -210,12 +210,17 @@ static int init(sh_video_t *sh){
 	char *path;
 	int result;
 	// we export codec id and sub-id from demuxer in bitmapinfohdr:
-	unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
-	struct rv_init_t init_data={
-		11, sh->disp_w, sh->disp_h,0,0,extrahdr[0],
-		1,extrahdr[1]}; // rv30
+	unsigned char* extrahdr=(unsigned char*)(sh->bih+1);
+	unsigned int extrahdr_size = sh->bih->biSize - sizeof(BITMAPINFOHEADER);
+	struct rv_init_t init_data;
 
-	mp_msg(MSGT_DECVIDEO,MSGL_V,"realvideo codec id: 0x%08X  sub-id: 0x%08X\n",extrahdr[1],extrahdr[0]);
+	if(extrahdr_size < 8) {
+	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"realvideo: extradata too small (%u)\n", sh->bih->biSize - sizeof(BITMAPINFOHEADER));
+	    return 0;
+	}
+	init_data = (struct rv_init_t){11, sh->disp_w, sh->disp_h, 0, 0, be2me_32(((unsigned int*)extrahdr)[0]), 1, be2me_32(((unsigned int*)extrahdr)[1])}; // rv30
+
+	mp_msg(MSGT_DECVIDEO,MSGL_V,"realvideo codec id: 0x%08X  sub-id: 0x%08X\n",be2me_32(((unsigned int*)extrahdr)[1]),be2me_32(((unsigned int*)extrahdr)[0]));
 
 	path = malloc(strlen(REALCODEC_PATH)+strlen(sh->codec->dll)+2);
 	if (!path) return 0;
@@ -251,13 +256,21 @@ static int init(sh_video_t *sh){
 	    return 0;
 	}
 	// setup rv30 codec (codec sub-type and image dimensions):
-	if((sh->format<=0x30335652) && (extrahdr[1]>=0x20200002)){
-	    // We could read nonsense data while filling this, but input is big enough so no sig11
-	    uint32_t cmsg24[10]={sh->disp_w,sh->disp_h,((unsigned char *)extrahdr)[8]*4,((unsigned char *)extrahdr)[9]*4,
-	                        ((unsigned char *)extrahdr)[10]*4,((unsigned char *)extrahdr)[11]*4,
-	                        ((unsigned char *)extrahdr)[12]*4,((unsigned char *)extrahdr)[13]*4,
-	                        ((unsigned char *)extrahdr)[14]*4,((unsigned char *)extrahdr)[15]*4};
-	    cmsg_data_t cmsg_data={0x24,1+((extrahdr[0]>>16)&7), &cmsg24[0]};
+	if((sh->format<=0x30335652) && (be2me_32(((unsigned int*)extrahdr)[1])>=0x20200002)){
+	    int i, cmsg_cnt;
+	    uint32_t cmsg24[16]={sh->disp_w,sh->disp_h};
+	    cmsg_data_t cmsg_data={0x24,1+(extrahdr[1]&7), &cmsg24[0]};
+
+	    mp_msg(MSGT_DECVIDEO,MSGL_V,"realvideo: using cmsg24 with %u elements.\n",extrahdr[1]&7);
+	    cmsg_cnt = (extrahdr[1]&7)*2;
+	    if (extrahdr_size-8 < cmsg_cnt) {
+	        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"realvideo: not enough extradata (%u) to make %u cmsg24 elements.\n",extrahdr_size-8,extrahdr[1]&7);
+	        cmsg_cnt = extrahdr_size-8;
+	    }
+	    for (i = 0; i < cmsg_cnt; i++)
+	        cmsg24[2+i] = extrahdr[8+i]*4;
+	    if (extrahdr_size-8 > cmsg_cnt)
+	        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"realvideo: %u bytes of unknown extradata remaining.\n",extrahdr_size-8-cmsg_cnt);
 
 #ifdef USE_WIN32DLL
 	    if (dll_type == 1)
