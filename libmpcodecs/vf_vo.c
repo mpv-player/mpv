@@ -21,18 +21,14 @@ extern ass_track_t* ass_track;
 extern int sub_visibility;
 extern float sub_delay;
 
-typedef struct vf_vo_data_s {
+struct vf_priv_s {
     double pts;
     vo_functions_t *vo;
-} vf_vo_data_t;
-
-struct vf_priv_s {
-    vf_vo_data_t* vf_vo_data;
 #ifdef USE_ASS
     ass_renderer_t* ass_priv;
 #endif
 };
-#define video_out (vf->priv->vf_vo_data->vo)
+#define video_out (vf->priv->vo)
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt); /* forward declaration */
 
@@ -115,7 +111,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
     case VFCTRL_DRAW_EOSD:
     {
         ass_image_t* images = 0;
-        double pts = vf->priv->vf_vo_data->pts;
+        double pts = vf->priv->pts;
         if (!vo_config_count || !vf->priv->ass_priv) return CONTROL_FALSE;
         if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE)) {
             mp_eosd_res_t res;
@@ -130,6 +126,11 @@ static int control(struct vf_instance_s* vf, int request, void* data)
         return (video_out->control(VOCTRL_DRAW_EOSD, images) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
     }
 #endif
+    case VFCTRL_GET_PTS:
+    {
+	*(double *)data = vf->priv->pts;
+	return CONTROL_TRUE;
+    }
     }
     // return video_out->control(request,data);
     return CONTROL_UNKNOWN;
@@ -154,7 +155,7 @@ static int put_image(struct vf_instance_s* vf,
         mp_image_t *mpi, double pts){
   if(!vo_config_count) return 0; // vo not configured?
   // record pts (potentially modified by filters) for main loop
-  vf->priv->vf_vo_data->pts = pts;
+  vf->priv->pts = pts;
   // first check, maybe the vo/vf plugin implements draw_image using mpi:
   if(video_out->control(VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return 1; // done.
   // nope, fallback to old draw_frame/draw_slice:
@@ -203,7 +204,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->start_slice=start_slice;
     vf->uninit=uninit;
     vf->priv=calloc(1, sizeof(struct vf_priv_s));
-    vf->priv->vf_vo_data=(vf_vo_data_t*)args;
+    vf->priv->vo = (vo_functions_t *)args;
     if(!video_out) return 0; // no vo ?
 //    if(video_out->preinit(args)) return 0; // preinit failed
     return 1;

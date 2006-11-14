@@ -3084,8 +3084,6 @@ char *tmp;
 
 int gui_no_filename=0;
 
-struct {double pts; vo_functions_t *vo;} vf_vo_data;
-
   srand((int) time(NULL)); 
 
   InitTimer();
@@ -4107,10 +4105,9 @@ sh_video->video_out=video_out;
 inited_flags|=INITED_VO;
 }
 
-vf_vo_data.vo = video_out;
 current_module="init_video_filters";
 {
-  char* vf_arg[] = { "_oldargs_", (char*)&vf_vo_data , NULL };
+  char* vf_arg[] = { "_oldargs_", (char*)video_out , NULL };
   sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",vf_arg);
 }
 #ifdef HAVE_MENU
@@ -4385,7 +4382,8 @@ if(!sh_video) {
 	    eof = 1;
 	    break;
 	}
-	sh_video->pts = vf_vo_data.pts;
+	((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
+					      VFCTRL_GET_PTS, &sh_video->pts);
 	if (sh_video->pts == MP_NOPTS_VALUE) {
 	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts after filters MISSING\n");
 	    sh_video->pts = last_pts;

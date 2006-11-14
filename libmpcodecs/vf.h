@@ -79,6 +79,7 @@ typedef struct vf_seteq_s
 #define VFCTRL_SCREENSHOT      14 /* Make a screenshot */
 #define VFCTRL_INIT_EOSD       15 /* Select EOSD renderer */
 #define VFCTRL_DRAW_EOSD       16 /* Render EOSD */
+#define VFCTRL_GET_PTS         17 /* Return last pts value that reached vf_vo*/
 
 #include "vfcap.h"
 
