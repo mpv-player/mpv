@@ -37,7 +37,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądr
   Wiadomo, że 2.96 i 3.0.x generują wadliwy kod, 3.1 i 3.2 również miały problemy,
   3.3 niewielkie.
   Na PowerPC używaj 4.x+.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - sugerowaną wersją jest <emphasis role="bold">
   zawsze najnowsza</emphasis> (4.3). Przeważnie każdy tego chce, ponieważ zaczynając
@@ -48,68 +48,68 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądr
   Upewnij się, że są zainstalowane również <emphasis role="bold">pakiety rozwojowe</emphasis>,
   w przeciwnym wypadku nie zadziała.
   W przypadku niektórych kart nie potrzebujesz XFree86. Zobacz listę poniżej.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">make</emphasis> - sugerowaną wersją jest
   <emphasis role="bold">zawsze najnowsza</emphasis> (przynajmniej 3.79.x). W większości
   wypadków nie jest to jednak ważne.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> 2.0.9 lub wyższa jest wymagana
   jeśli chcesz mieć czcionkę do OSD i napisów.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">SDL</emphasis> - nie jest konieczne, ale może pomóc w niektórych
   wypadkach (wadliwy dźwięk, karty graficzne, które mają dziwne opóźnienia ze sterownikiem Xv).
   Zawsze używaj najnowszego (zaczynając od 1.2.x).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - opcjonalny dekoder JPEG, używany
   przez opcję <option>-mf</option> i niektóre pliki QT MOV. Użyteczny zarówno dla
   <application>MPlayera</application>, jak i <application>MEncodera</application>,
   jeżeli zamierzasz pracować z plikami jpeg.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - domyślny i zalecany dekoder (M)PNG.
   Wymagany przez GUI. Użyteczny zarówno dla <application>MPlayera</application> jak
   i <application>MEncodera</application>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - zalecana, wymagana do zakodowania dźwięku
   MP3 przez <application>MEncodera</application>, sugerowaną wersją jest
   <emphasis>zawsze najnowsza</emphasis> (przynajmniej 3.90).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - zalecana, wymagana dla skompresowanych
   nagłówków MOV i obsługi PNG.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libogg</emphasis> - opcjonalna, wymagana do odtwarzania
   plików zapisanych w formacie OGG.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - opcjonalna, wymagana do odtwarzania strumieni RTSP/RTP.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - opcjonalna, do pobrania z
   <ulink url="http://www.directfb.org"/>. Wymagana jest co najmniej
   wersja 0.9.13.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - opcjonalna, do obsługi CDDA.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libxmms</emphasis> - opcjonalna, do obsługi wtyczek wejściowych
   XMMS. Wymagana jest przynajmniej wersja 1.2.7.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - opcjonalna, do obsługi sieci przez smb.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - opcjonalna, do obsługi wyjścia dźwięku
   przez ALSA. Wymagana jest przynajmniej wersja 0.9.0rc4.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 </sect1>
 
@@ -144,7 +144,7 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   rozdział <link linkend="tvout-mga-g400">Matrox TV-out</link>.
   <emphasis role="bold"> Jeżeli nie korzystasz z Linuksa</emphasis>, jedyną możliwością
   jest dla Ciebie sterownik VIDIX: przeczytaj rozdział <link linkend="vidix">VIDIX</link>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Karty 3Dfx Voodoo3/Banshee</emphasis>: przeczytaj rozdział
   poświęcony <link linkend="tdfxfb">tdfxfb</link>, żeby dowiedzieć się, jak uzyskać znaczny
@@ -154,7 +154,7 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   Jeżeli korzystasz z Xów, używaj przynajmniej wersji
   <emphasis role="bold">4.2.0</emphasis>, ponieważ sterownik Xv dla 3dfx był uszkodzony
   w wersji 4.1.0 i wcześniejszych.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Karty ATI</emphasis>: sterownik <link linkend="vidix">VIDIX</link>
   obsługuje następujące karty:
@@ -162,14 +162,14 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   Przeczytaj również rozdział <link linkend="tvout-ati">karty ATI</link>
   dokumentacji wyjścia TV, aby dowiedzieć się czy wyjście TV Twojej karty jest
   obsługiwane przez  Linuksa/<application>MPlayera</application>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Karty S3</emphasis>: układy graficzne Savage i Virge/DX mają
   sprzętową akcelerację. Używaj jak najnowszej wersji XFree86, starsze sterowniki mają
   liczne błędy. Układy Savage mają problemy z obrazem YV12, więcej szczegółów
   znajdziesz w rozdziale <link linkend="s3">S3 Xv</link>.
   Starsze karty Trio maja wolną akcelerację sprzętową lub nie mają jej wcale.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Karty nVidia</emphasis>: mogą lub nie mogą być dobrym
   wyborem do odtwarzania filmów. Jeżeli nie masz karty GeForce2 (lub nowszej),
@@ -180,20 +180,20 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   linkend="nvidia">sterowniki nVidia Xv</link>, a dowiesz się więcej. Sprawdź również
   rozdział <link linkend="tvout-nvidia">nVidia TV-out</link>,
   jeśli chcesz używać TV.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">3DLabs GLINT R3 and Permedia3</emphasis>: dostępny jest
   sterownik VIDIX (pm3_vid).
   Bardziej szczegółowe informacje znajdziesz w rozdziale
   <link linkend="vidix">VIDIX</link>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Inne karty</emphasis>: żadna z powyższych?
   <itemizedlist>
   <listitem><simpara>
     Sprawdź, czy sterownik XFree86 (i Twoja karta) obsługują sprzętową akcelerację.
     Więcej informacji znajdziesz w rozdziale <link linkend="xv">Xv</link>.
-    </simpara></listitem>
+  </simpara></listitem>
   <listitem><simpara>
     Jeżeli nie, oznacza to, że możliwości Twojej karty nie są obsługiwane
     przez Twój system operacyjny :( Jeżeli sprzętowe skalowanie działa pod
@@ -202,9 +202,9 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
     dla Linuksa, ani nie publikuje specyfikacji swoich układów graficznych -
     więc masz pecha, jeśli używasz ich kart.
     Przeczytaj <xref linkend="non-yuv-cards"/>.
-    </simpara></listitem>
+  </simpara></listitem>
   </itemizedlist>
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 </sect2>
@@ -227,7 +227,7 @@ działa ona z następującymi sterownikami:
   w rozdziale <link linkend="dga">sterownik DGA</link> i
   <link linkend="x11">sterownik X11</link>. DGA jest zalecany! Spróbuj również
   DGA przez SDL, czasami jest to lepsze rozwiązanie.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">nie używasz</emphasis> XFree86: wypróbuj te sterowniki
   w podanej kolejności:
@@ -235,7 +235,7 @@ działa ona z następującymi sterownikami:
   <link linkend="fbdev">fbdev</link>,
   <link linkend="svgalib">svgalib</link>,
   <link linkend="aalib">aalib</link>.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 </para>
 </sect2>
@@ -251,17 +251,17 @@ działa ona z następującymi sterownikami:
   <listitem><simpara>
     XFree86 3: działa w trybach 8/16bpp. Jednak dla 800x600@16bpp sterownik jest bardzo wolny
     i nie działa prawidłowo. <emphasis role="bold">Zalecane: 640x480@16bpp</emphasis>
-   </simpara></listitem>
+  </simpara></listitem>
   <listitem><simpara>
     XFree86 4: Xserver przestaje odpowiadać krótko po starcie, chyba że
     akceleracja jest wyłączona, jednak wszystko działa wolniej niż na XFree86 3. Brak
     obsługi XVideo.
-   </simpara></listitem>
+  </simpara></listitem>
   <listitem><simpara>
     FBdev: framebuffer może być włączony poprzez sterownik <systemitem>clgenfb</systemitem>
     znajdujący się w jądrze, jednak u mnie działał tylko w 8bpp, a więc jest bezużyteczny.
     Źródło clgenfb musi być rozszerzone o ID 7548 przed kompilacją.
-   </simpara></listitem>
+  </simpara></listitem>
   <listitem><simpara>
     VESA: karta spełnia tylko standard VBE 1.2, więc nie możesz użyć wyjścia VESA.
     Nie możesz zastosować obejścia przez UniVBE.
@@ -270,7 +270,7 @@ działa ona z następującymi sterownikami:
     SVGAlib: wykrywa starszy układ Cirrusa. Działa, chociaż powoli, z
     <option>-bpp 8</option>.
   </simpara></listitem>
-</itemizedlist>
+  </itemizedlist>
 </para></listitem>
 </itemizedlist>
 </sect2>
@@ -287,17 +287,17 @@ działa ona z następującymi sterownikami:
   Przeczytaj rozdział <link linkend="swac3">Programowe dekodowanie AC3</link>. Dla
   sprzętowej obróbki AC3 <emphasis role="bold">musisz</emphasis> użyć ALSA 0.9
   z emulacją OSS!
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">C-Media z wyjściem S/PDIF</emphasis>: Możliwa jest sprzętowa
   obróbka AC3 z tymi kartami, przeczytaj rozdział
   <link linkend="hwac3">Sprzętowe dekodowanie AC3</link>.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Możliwości <emphasis role="bold">innych kart</emphasis> nie są obsługiwane przez
   <application>MPlayera</application>. <emphasis role="bold">Zalecamy, abyś przeczytał
   sekcję <link linkend="audio">karty dźwiękowe</link>!</emphasis>
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 </sect1>
 
@@ -308,26 +308,26 @@ działa ona z następującymi sterownikami:
 <listitem><para>
   Zdecyduj czy potrzebujesz GUI. Jeśli tak, przeczytaj rozdział
   <link linkend="gui">GUI</link> przed kompilacją.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Jeżeli chcesz zainstalować <application>MEncodera</application> (naszego
   wspaniałego enkodera do wszelkich celów), przeczytaj sekcję <link linkend="mencoder">
   <application>MEncoder</application></link>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Jeżeli masz <emphasis role="bold">tuner TV</emphasis> kompatybilny z V4L i
   chcesz oglądać/przechwytywać i kodować filmy przy pomocy <application>MPlayera</application>,
   przeczytaj rozdział <link linkend="tv-input">wejście TV</link>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Jeżeli masz <emphasis role="bold">tuner radiowy</emphasis> kompatybilny z V4L i
   chcesz słuchać i zapisywać dźwięk przy pomocy <application>MPlayera</application>,
   przeczytaj rozdział <link linkend="radio">radio</link>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Dostępne jest miłe, gotowe do użycia <emphasis role="bold">Menu OSD</emphasis>.
   Przeczytaj rozdział <link linkend="subosd">menu OSD</link>.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -527,31 +527,31 @@ Menu Ustawienia nie jest jeszcze ZAIMPLEMENTOWANE!
 <listitem><simpara>
  skompiluj <application>MPlayera</application> z opcją <option>--enable-menu</option>
   dla skryptu <filename>./configure</filename>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   upewnij się, że masz zainstalowaną czcionkę OSD
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   skopiuj plik <filename>etc/menu.conf</filename> do Twojego katalogu
   <filename class="directory">.mplayer</filename>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   skopiuj plik <filename>etc/input.conf</filename> do Twojego katalogu
   <filename class="directory">.mplayer</filename> lub do ogólnosystemowego
   katalogu z konfiguracją <application>MPlayera</application> (domyślnie:
   <filename class="directory">/usr/local/etc/mplayer</filename>)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   sprawdź i ewentualnie przerób plik <filename>input.conf</filename>, aby określić funkcje klawiszy
   (wszystko jest tam opisane).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><para>
   uruchom <application>MPlayera</application> przykładową komendą:
   <screen>$ mplayer -menu <replaceable>plik.avi</replaceable></screen>
-  </para></listitem>
+</para></listitem>
 <listitem><simpara>
   wciśnij dowolny klawisz, który wcześniej zdefiniowałeś
-  </simpara></listitem>
+</simpara></listitem>
 </orderedlist>
 
 </sect2>
@@ -570,7 +570,7 @@ Istnieją trzy metody synchronizacji w <application>MPlayerze</application>.
   robić nic. Używa ona <systemitem>usleep()</systemitem>, aby poprawnie
   zsynchronizować A/V z dokładnością +/- 10ms. Czasami jednak synchronizacja
   musi być jeszcze dokładniejsza.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><para>
   Kod <emphasis role="bold">nowego zegara</emphasis> korzysta do tego celu
   z RTC (RealTime Clock), ponieważ jest on dokładny co do 1ms.
@@ -595,12 +595,12 @@ Istnieją trzy metody synchronizacji w <application>MPlayerze</application>.
    W niektórych zestawieniach sprzętowych (sprawdzone przy używaniu DVD bez
    obsługi DMA na płycie ALi1541) korzystanie z RTC wywołuje skokowe odtwarzanie.
    Zaleca się skorzystanie w tych przypadkach z trzeciej metody.
-  </para></listitem>
+</para></listitem>
 <listitem><simpara>
   <emphasis role="bold">Trzeci kod zegara</emphasis> włączany jest opcją
   <option>-softsleep</option>. Ma dokładność RTC, ale z niego nie korzysta.
   Wymaga jednak większej mocy obliczeniowej procesora.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 </para>
 </sect1>
