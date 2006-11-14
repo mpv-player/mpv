@@ -1322,8 +1322,9 @@ case VCODEC_FRAMENO:
     break;
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
-    blit_frame=decode_video(sh_video,frame_data.start,frame_data.in_size,
+    {void *decoded_frame = decode_video(sh_video,frame_data.start,frame_data.in_size,
       skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), MP_NOPTS_VALUE);
+    blit_frame = decoded_frame && filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE);}
     
     if (sh_video->vf_inited < 0) mencoder_exit(1, NULL);
     
@@ -1696,7 +1697,9 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
 
         if (vfilter) {
             int softskip = (vfilter->control(vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) == CONTROL_TRUE);
-            decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip, MP_NOPTS_VALUE);
+            void *decoded_frame = decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip, MP_NOPTS_VALUE);
+	    if (decoded_frame)
+		filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE);
         }
 
         if (print_info) mp_msg(MSGT_MENCODER, MSGL_STATUS,
