@@ -3077,7 +3077,7 @@ static float real_fix_timestamp(mkv_track_t *track, unsigned char *s,
     if (pict_type <= 1) {
       // I frame, sync timestamps:
       track->rv_kf_base = timestamp - kf;
-      mp_msg(MSGT_DEMUX, MSGL_V, "\nTS: base=%08X\n", track->rv_kf_base);
+      mp_msg(MSGT_DEMUX, MSGL_DBG2, "\nTS: base=%08X\n", track->rv_kf_base);
       kf = timestamp;
     } else {
       // P/B frame, merge timestamps:
@@ -3094,7 +3094,7 @@ static float real_fix_timestamp(mkv_track_t *track, unsigned char *s,
       kf = track->rv_kf_pts;
       track->rv_kf_pts = tmp;
     }
-    mp_msg(MSGT_DEMUX, MSGL_V, "\nTS: %08X -> %08X (%04X) %d %02X %02X %02X "
+    mp_msg(MSGT_DEMUX, MSGL_DBG2, "\nTS: %08X -> %08X (%04X) %d %02X %02X %02X "
            "%02X %5d\n", timestamp, kf, orig_kf, pict_type, s[0], s[1], s[2],
            s[3], kf - (int)(1000.0 * track->rv_pts));
   }
