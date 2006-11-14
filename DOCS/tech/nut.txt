@@ -187,11 +187,15 @@ file:
             packet_header, index_packet, packet_footer
         }
         if (!eof) while(next_code != main_startcode){
-            if(next_code == syncpoint_startcode){
-                packet_header, syncpoint, packet_footer
-            }
-            frame
+            packet_header, syncpoint, packet_footer
+            do{
+                frame
+            }while(next_code == framecode);
             reserved_headers
+            while(next_code == info_startcode){
+                packet_header, info_packet, packet_footer
+                reserved_headers
+            }
         }
     }
 
@@ -883,8 +887,14 @@ file as well.
 Info:
 -----
 
-If a info packet is stored anywhere then a muxer MUST also store an identical
+All info packets stored after a main header set MUST also have an identical
 info packet after every main-stream-header set
+
+All info packets not stored after a main header set MUST have
+chapter_id!=0 .
+
+Info packets SHOULD be written after main header sets in non realtime
+streams.
 
 If a demuxer has seen several info packets with the same chapter_id and
 stream_id then it MUST ignore all but the one with the highest position in
