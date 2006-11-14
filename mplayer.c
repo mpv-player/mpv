@@ -4458,11 +4458,6 @@ if(time_frame>0.001 && !(vo_flags&256))
 
         current_module="flip_page";
         if (!frame_time_remaining) {
-
-         // FIXME: add size based support for -endpos
-         if ( end_at.type == END_AT_TIME && end_at.pos < sh_video->pts )
-              eof = PT_NEXT_ENTRY;
-
          if(blit_frame){
 	   unsigned int t2=GetTimer();
 	   double tt;
@@ -4512,6 +4507,11 @@ if(auto_quality>0){
 //  printf("total: %8.6f  sleep: %8.6f  q: %d\n",(0.000001f*aq_total_time),aq_sleep_time,output_quality);
   set_video_quality(sh_video,output_quality);
 }
+
+// FIXME: add size based support for -endpos
+ if (end_at.type == END_AT_TIME &&
+         !frame_time_remaining && end_at.pos <= sh_video->pts)
+     eof = PT_NEXT_ENTRY;
 
 } // end if(sh_video)
 
