@@ -4153,11 +4153,8 @@ double last_pts = MP_NOPTS_VALUE;
 int grab_frames=0;
 int drop_frame=0;     // current dropping status
 int dropped_frames=0; // how many frames dropped since last non-dropped frame
-int too_slow_frame_cnt=0;
-int too_fast_frame_cnt=0;
 // for auto-quality:
 double vdecode_time;
-unsigned int lastframeout_ts=0;
 /*float time_frame_corr_avg=0;*/ /* unused */
 
 float next_frame_time=0;
@@ -4461,16 +4458,6 @@ if(time_frame>0.001 && !(vo_flags&256))
          if(blit_frame){
 	   unsigned int t2=GetTimer();
 	   double tt;
-	   float j;
-#define	FRAME_LAG_WARN	0.2
-	   j = ((float)t2 - lastframeout_ts) / 1000000;
-	   lastframeout_ts = GetTimer();
-	   if (j < frame_time + frame_time * -FRAME_LAG_WARN)
-		too_fast_frame_cnt++;
-		/* printf ("PANIC: too fast frame (%.3f)!\n", j); */
-	   else if (j > frame_time + frame_time * FRAME_LAG_WARN)
-		too_slow_frame_cnt++;
-		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
 
 	   if(vo_config_count) video_out->flip_page();
 	   if (play_n_frames >= 0) {
@@ -5379,8 +5366,6 @@ if(rel_seek_secs || abs_seek_pos){
 	osd_visible=(GetTimerMS() + 1000) | 1; // to revert to PLAY pointer after 1 sec
 	audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 	drop_frame_cnt=0;
-	too_slow_frame_cnt=0;
-	too_fast_frame_cnt=0;
 
         if(vo_spudec) spudec_reset(vo_spudec);
       }
