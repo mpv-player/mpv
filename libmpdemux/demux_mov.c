@@ -1932,9 +1932,9 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	}
     }
     if(demuxer->sub->id>=0){
-	sh_video_t* sh=demuxer->s_streams[demuxer->sub->id];
+	sh_sub_t* sh=demuxer->s_streams[demuxer->sub->id];
 	if(sh){
-	    demuxer->sub->sh=sh; sh->ds=demuxer->sub;
+	    demuxer->sub->sh=sh;
 	} else {
 	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected video stream (%d) does not exists\n",demuxer->video->id);
 	    demuxer->sub->id=-2;
