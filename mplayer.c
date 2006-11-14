@@ -4631,7 +4631,7 @@ if(step_sec>0) {
     } break;
     case MP_CMD_SET_PROPERTY: {
         m_option_t* prop = mp_property_find(cmd->args[0].v.s);
-        if(!prop) mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unkown property: '%s'\n",cmd->args[0].v.s);
+        if(!prop) mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unknown property: '%s'\n",cmd->args[0].v.s);
         else if(m_property_parse(prop,cmd->args[1].v.s) <= 0)
             mp_msg(MSGT_CPLAYER,MSGL_WARN,"Failed to set property '%s' to '%s'.\n",
                    cmd->args[0].v.s,cmd->args[1].v.s);
@@ -4642,7 +4642,7 @@ if(step_sec>0) {
         void* val;
         prop = mp_property_find(cmd->args[0].v.s);
         if(!prop) {
-            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unkown property: '%s'\n",cmd->args[0].v.s);
+            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unknown property: '%s'\n",cmd->args[0].v.s);
             break;
         }
         /* Use m_option_print directly to get easily parseable values. */
