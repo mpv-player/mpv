@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20870 -->
+<!-- synced with r20933 -->
 <!-- Opiekun: brak (poprzednio Paszczi) -->
 <chapter id="install">
 <title>Instalacja</title>
@@ -88,10 +88,6 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądr
   plików zapisanych w formacie OGG.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libvorbis</emphasis> - opcjonalna, wymagana do odtwarzania
-  dźwięku OGG Vorbis.
-  </para></listitem>
-<listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - opcjonalna, wymagana do odtwarzania strumieni RTSP/RTP.
   </para></listitem>
@@ -108,7 +104,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądr
   XMMS. Wymagana jest przynajmniej wersja 1.2.7.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libsmb</emphasis> - opcjonalna, do obsługi Samby.
+  <emphasis role="bold">libsmb</emphasis> - opcjonalna, do obsługi sieci przez smb.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - opcjonalna, do obsługi wyjścia dźwięku
