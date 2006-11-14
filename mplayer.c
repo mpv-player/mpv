@@ -4487,14 +4487,7 @@ if(time_frame>0.001 && !(vo_flags&256))
 	   t2=GetTimer()-t2;
 	   tt = t2*0.000001f;
 	   vout_time_usage+=tt;
-	 } else {
-             /*
-	     Well, no blitting is needed, but some devices (such as yuv4mpeg)
-             must output frames otherwise A/V desync will occur. -- Alvieboy
-	     */
-	    if (vo_config_count)
-		video_out->control(VOCTRL_DUPLICATE_FRAME, NULL);
-         }
+	 }
         }
 //====================== A-V TIMESTAMP CORRECTION: =========================
 
