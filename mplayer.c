@@ -4215,9 +4215,6 @@ double last_pts = MP_NOPTS_VALUE;
 int grab_frames=0;
 int drop_frame=0;     // current dropping status
 int dropped_frames=0; // how many frames dropped since last non-dropped frame
-// for auto-quality:
-double vdecode_time;
-/*float time_frame_corr_avg=0;*/ /* unused */
 
 float next_frame_time=0;
 int frame_time_remaining=0; // flag
@@ -4343,7 +4340,6 @@ if(!sh_video) {
   if(!frame_time_remaining){
     //--------------------  Decode a frame: -----------------------
     blit_frame = 0; // Don't blit if we hit EOF
-    vdecode_time=video_time_usage;
     if (!correct_pts) while(1)
     {   unsigned char* start=NULL;
 	int in_size;
@@ -4408,7 +4404,6 @@ if(!sh_video) {
 	break;
     }
 	
-    vdecode_time=video_time_usage-vdecode_time;
     //------------------------ frame decoded. --------------------
 
     mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
