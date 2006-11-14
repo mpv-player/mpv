@@ -24,8 +24,8 @@
 #else
 	{"cache", "MPlayer was compiled without cache2 support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
-	{"vcd", "-vcd N is deprecated, use vcd://N instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
-	{"cuefile", "-cuefile is deprecated, use cue://filename:N where N is the track number.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"vcd", "-vcd N has been removed, use vcd://N instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
+	{"cuefile", "-cuefile has been removed, use cue://filename:N where N is the track number.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #if defined(USE_DVDREAD) || defined(USE_DVDNAV)
 	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
@@ -33,7 +33,7 @@
 	{"dvd-device", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef USE_DVDREAD
-	{"dvd", "-dvd N is deprecated, use dvd://N instead.\n" , CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"dvd", "-dvd N has been removed, use dvd://N instead.\n" , CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 	{"chapter", dvd_parse_chapter_range, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
 #else
@@ -70,11 +70,11 @@
 #endif
 
 #ifdef STREAMING_LIVE555
-        {"sdp", "-sdp is obsolete, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+        {"sdp", "-sdp has been removed, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
         {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
-	{"rtsp-stream-over-tcp", "RTSP support requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"rtsp-stream-over-tcp", "-rtsp-stream-over-tcp requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef MPLAYER_NETWORK
         {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},	
@@ -405,7 +405,7 @@ m_option_t radioopts_conf[]={
 
 #ifdef USE_TV
 m_option_t tvopts_conf[]={
-	{"on", "-tv on is deprecated, use tv:// instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"on", "-tv on has been removed, use tv:// instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"immediatemode", &tv_param_immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
 	{"noaudio", &tv_param_noaudio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"audiorate", &tv_param_audiorate, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -548,7 +548,7 @@ extern m_obj_settings_t* vf_settings;
 extern m_obj_list_t vf_obj_list;
 
 m_option_t mfopts_conf[]={
-        {"on", "-mf on is deprecated, use mf:// instead.\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
+        {"on", "-mf on has been removed, use mf:// instead.\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
         {"w", &mf_w, CONF_TYPE_INT, 0, 0, 0, NULL},
         {"h", &mf_h, CONF_TYPE_INT, 0, 0, 0, NULL},
         {"fps", &mf_fps, CONF_TYPE_FLOAT, 0, 0, 0, NULL},
