@@ -202,7 +202,8 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 		ds = demuxer->video;
 	}
 	else {
-		ret = nut_skip_packet(nut, &pd.len);
+		uint8_t buf[pd.len];
+		ret = nut_read_frame(nut, &pd.len, buf);
 		if (ret < 0) {
 			mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
 			                               nut_error(-ret));
