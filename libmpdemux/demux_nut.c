@@ -275,9 +275,8 @@ static int demux_control_nut(demuxer_t * demuxer, int cmd, void * arg) {
 }
 
 static void demux_close_nut(demuxer_t *demuxer) {
-	nut_context_t * nut = ((nut_priv_t*)demuxer->priv)->nut;
-	nut_demuxer_uninit(nut);
-	free(((nut_priv_t*)demuxer->priv)->s);
+	nut_priv_t * priv = demuxer->priv;
+	nut_demuxer_uninit(priv->nut);
 	free(demuxer->priv);
 	demuxer->priv = NULL;
 }
