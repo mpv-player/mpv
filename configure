@@ -6555,12 +6555,12 @@ EOF
     _ld_mp3lame="-lmp3lame $_ld_vorbis"
     cat > $TMPC << EOF
 #include <lame/lame.h>
-int main(void) { int p = STANDARD_FAST; return 0; }
+int main(void) { lame_set_preset(NULL, STANDARD_FAST); return 0; }
 EOF
     cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset="#define HAVE_MP3LAME_PRESET"
     cat > $TMPC << EOF
 #include <lame/lame.h>
-int main(void) { int p = MEDIUM_FAST; return 0; }
+int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
     cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
     echo $_libavencoders | grep -q mp3lame && _lavc_mp3lame=yes || _lavc_mp3lame=no
