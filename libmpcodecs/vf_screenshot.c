@@ -139,7 +139,7 @@ static void scale_image(struct vf_priv_s* priv, mp_image_t *mpi)
 
     dst[0] = priv->buffer;
     dst[1] = dst[2] = 0;
-    sws_scale_ordered(priv->ctx, mpi->planes, mpi->stride, 0, mpi->height, dst, dst_stride);
+    sws_scale_ordered(priv->ctx, mpi->planes, mpi->stride, 0, priv->dh, dst, dst_stride);
 }
 
 static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
