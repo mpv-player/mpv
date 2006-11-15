@@ -8,6 +8,9 @@
      Set parameters
      ************** -->
 
+  <xsl:param name="chunker.output.encoding" select="'utf-8'"/>
+  <xsl:output encoding="utf-8"/>
+
   <xsl:param name="toc.section.depth" select="'4'"/>
 
   <xsl:param name="html.stylesheet" select="'default.css'"/>

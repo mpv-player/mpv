@@ -5,7 +5,7 @@
 USE_SYMLINKS = yes
 
 # Dependency information.
-$(HTMLDIR)/index.html: $(wildcard *.xml) html-common.xsl
-$(HTMLFILE): $(wildcard *.xml) html-common.xsl
+$(HTMLDIR)/index.html: $(wildcard *.xml)
+$(HTMLFILE): $(wildcard *.xml)
 
 include ../Makefile.inc
