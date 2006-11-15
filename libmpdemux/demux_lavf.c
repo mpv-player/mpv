@@ -73,6 +73,7 @@ int64_t ff_gcd(int64_t a, int64_t b);
 
 const CodecTag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_4XM, MKTAG('4', 'X', 'M', 'A')},
+    { CODEC_ID_ADPCM_IMA_WS,  MKTAG('A', 'I', 'W', 'S')},
     { CODEC_ID_PCM_S24BE, MKTAG('i', 'n', '2', '4')},
     { CODEC_ID_PCM_S8,    MKTAG('t', 'w', 'o', 's')},
     { CODEC_ID_WAVPACK,   MKTAG('W', 'V', 'P', 'K')},
