@@ -101,7 +101,8 @@
 Требуется минимум 1.2.7.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libsmb</emphasis> - необязательно, для поддержки Samba.
+  <emphasis role="bold">libsmb</emphasis> - необязательно, для поддержки
+  сетевого протокола smb.
   </para></listitem>
 <listitem><para>
  <emphasis role="bold">ALSA</emphasis> - необязательно, для поддержки вывода звука через ALSA
