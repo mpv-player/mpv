@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r20873 -->
+<!-- in sync with r20879 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -78,7 +78,7 @@ Memory at d8000000 (32-bit, prefetchable)<!--
   (<literal>base=0xd8000000</literal>) mit 32MB RAM (<literal>size=0x2000000</literal>)
   führst du einfach folgendes aus:
 <screen>
-echo &quot;base=0xd8000000 size=0x2000000 type=write-combining&quot; &gt;| /proc/mtrr
+echo &quot;base=0xd8000000 size=0x2000000 type=write-combining&quot; &gt; /proc/mtrr
 </screen>
 </para>
 
@@ -98,7 +98,7 @@ echo &quot;base=0xd8000000 size=0x2000000 type=write-combining&quot; &gt;| /proc
   Mit XFree86 4.0.2 oder neueren Versionen kannst du die Hardware-YUV-Routinen
   deiner Grafikkarte mit Hilfe der XVideo-Erweiterungen benutzen. Das ist die
   Technik, die <option>-vo xv</option> benutzt. Dieser Treiber unterstützt
-  darüber hinaus die Anpassung von Helligkeit/Kontrast/Sättigung etc
+  darüber hinaus die Anpassung von Helligkeit/Kontrast/Sättigung etc.
   (es sei denn, du benutzt den alten und langsamen DirectShow DivX-Codec,
   welcher diese Anpassungen unabhängig vom Videoausgabetreiber unterstützt).
   Schau in der Manpage nach.
@@ -1419,9 +1419,9 @@ make<!--
 </simpara></listitem>
 <listitem><simpara>
   Unter XFree86 3.x.x musst du mit
-  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
+  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap>
   und
-  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>
+  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   die Auflösung ändern.
 </simpara></listitem>
 </itemizedlist>
@@ -2121,7 +2121,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   in diesem Modus versucht, den Puffer ständig mit Daten gefüllt zu halten.
   Wenn du einen langsamen Rechner hast, dann wird <application>MPlayer</application>
   wahrscheinlich die meiste Zeit über knapp oder genau 100% der CPU-Zeit belegen.
-  Das ist vor allem dann der Fall, wenn du echte MPEG-Streams (z.B. DVDs, SVCDs etc)
+  Das ist vor allem dann der Fall, wenn du echte MPEG-Streams (z.B. DVDs, SVCDs etc.)
   abspielst, da <application>MPlayer</application> nicht nach MPEG encodieren muss
   und den Puffer sehr schnell wird füllen können.
 </para>
