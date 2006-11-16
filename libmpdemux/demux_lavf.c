@@ -74,6 +74,7 @@ int64_t ff_gcd(int64_t a, int64_t b);
 const CodecTag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_4XM,     MKTAG('4', 'X', 'M', 'A')},
     { CODEC_ID_ADPCM_IMA_WS,  MKTAG('A', 'I', 'W', 'S')},
+    { CODEC_ID_DSICINAUDIO,   MKTAG('D', 'C', 'I', 'A')},
     { CODEC_ID_INTERPLAY_DPCM,MKTAG('I', 'N', 'P', 'A')},
     { CODEC_ID_PCM_S24BE,     MKTAG('i', 'n', '2', '4')},
     { CODEC_ID_PCM_S8,        MKTAG('t', 'w', 'o', 's')},
@@ -84,6 +85,7 @@ const CodecTag mp_wav_tags[] = {
 };
 
 const CodecTag mp_bmp_tags[] = {
+    { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
     { CODEC_ID_TIERTEXSEQVIDEO,   MKTAG('T', 'S', 'E', 'Q')},
     { CODEC_ID_VMDVIDEO,          MKTAG('V', 'M', 'D', 'V')},
     { CODEC_ID_XAN_WC3,           MKTAG('W', 'C', '3', 'V')},
