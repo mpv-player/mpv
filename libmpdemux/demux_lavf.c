@@ -72,17 +72,17 @@ extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 int64_t ff_gcd(int64_t a, int64_t b);
 
 const CodecTag mp_wav_tags[] = {
-    { CODEC_ID_ADPCM_4XM,     MKTAG('4', 'X', 'M', 'A')},
-    { CODEC_ID_ADPCM_IMA_WS,  MKTAG('A', 'I', 'W', 'S')},
-    { CODEC_ID_DSICINAUDIO,   MKTAG('D', 'C', 'I', 'A')},
-    { CODEC_ID_ADPCM_EA,      MKTAG('A', 'D', 'E', 'A')},
-    { CODEC_ID_INTERPLAY_DPCM,MKTAG('I', 'N', 'P', 'A')},
-    { CODEC_ID_PCM_S24BE,     MKTAG('i', 'n', '2', '4')},
-    { CODEC_ID_PCM_S8,        MKTAG('t', 'w', 'o', 's')},
-    { CODEC_ID_ROQ_DPCM,      MKTAG('R', 'o', 'Q', 'A')},
-    { CODEC_ID_SHORTEN,       MKTAG('s', 'h', 'r', 'n')},
-    { CODEC_ID_TTA,           MKTAG('T', 'T', 'A', '1')},
-    { CODEC_ID_WAVPACK,       MKTAG('W', 'V', 'P', 'K')},
+    { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
+    { CODEC_ID_ADPCM_EA,          MKTAG('A', 'D', 'E', 'A')},
+    { CODEC_ID_ADPCM_IMA_WS,      MKTAG('A', 'I', 'W', 'S')},
+    { CODEC_ID_DSICINAUDIO,       MKTAG('D', 'C', 'I', 'A')},
+    { CODEC_ID_INTERPLAY_DPCM,    MKTAG('I', 'N', 'P', 'A')},
+    { CODEC_ID_PCM_S24BE,         MKTAG('i', 'n', '2', '4')},
+    { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
+    { CODEC_ID_ROQ_DPCM,          MKTAG('R', 'o', 'Q', 'A')},
+    { CODEC_ID_SHORTEN,           MKTAG('s', 'h', 'r', 'n')},
+    { CODEC_ID_TTA,               MKTAG('T', 'T', 'A', '1')},
+    { CODEC_ID_WAVPACK,           MKTAG('W', 'V', 'P', 'K')},
     { 0, 0 },
 };
 
