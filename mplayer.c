@@ -1842,6 +1842,52 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
           }
         }
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", audio_id);
+        break;
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+
+    return 1;
+}
+
+static int reinit_video_chain(void);
+/// Selected video id (RW)
+static int mp_property_video(m_option_t* prop,int action,void* arg) {
+    int current_id = -1;
+
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_GET:
+        if(!arg) return 0;
+        *(int*)arg = video_id;
+        return 1;
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+
+        if (video_id < 0)
+            *(char**)arg = strdup(MSGTR_Disabled);
+        else {
+            char lang[40] = MSGTR_Unknown;
+            *(char**)arg = malloc(64);
+            snprintf(*(char**)arg, 64, "(%d)", video_id, lang);
+        }
+        return 1;
+
+    case M_PROPERTY_STEP_UP:
+        current_id = demuxer->video->id;
+        video_id = demuxer_switch_video(demuxer, -1);
+        if(video_id > -1 && demuxer->video->id != current_id) {
+          sh_video_t *sh2;
+          uninit_player(INITED_VCODEC | (fixed_vo ? 0 : INITED_VO));
+          sh2 = demuxer->v_streams[demuxer->video->id];
+          if(sh2) {
+            sh2->ds = demuxer->video;
+            sh_video = sh2;
+            reinit_video_chain();
+          }
+        }
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_TRACK=%d\n", video_id);
 
         break;
     default:
@@ -2458,6 +2504,8 @@ static m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
+    { "switch_video", mp_property_video, CONF_TYPE_INT,
+      -1, -1, 0, NULL },
 
     // Subs
     { "sub", mp_property_sub, CONF_TYPE_INT,
