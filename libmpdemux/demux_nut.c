@@ -79,8 +79,7 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 	int i;
 
 	if ((ret = nut_read_headers(nut, &s, NULL))) {
-		if (ret < 0) mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
-		                                           nut_error(-ret));
+		mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n", nut_error(ret));
 		nut_demuxer_uninit(nut);
 		free(priv);
 		return NULL;
@@ -183,11 +182,12 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	if (stream_eof(demuxer->stream)) return 0;
 
 	ret = nut_read_next_packet(nut, &pd);
-	if (ret < 0) {
-		mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
-		                               nut_error(-ret));
+	if (ret) {
+		if (ret != NUT_ERR_EOF)
+			mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
+			                               nut_error(ret));
+		return 0; // fatal error
 	}
-	if (ret) return 0; // fatal error
 
 	pts = (double)pd.pts * priv->s[pd.stream].time_base.nom /
 	                       priv->s[pd.stream].time_base.den;
@@ -204,11 +204,11 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	else {
 		uint8_t buf[pd.len];
 		ret = nut_read_frame(nut, &pd.len, buf);
-		if (ret < 0) {
+		if (ret) {
 			mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
-			                               nut_error(-ret));
+			                               nut_error(ret));
+			return 0; // fatal error
 		}
-		if (ret) return 0; // fatal error
 		return 1;
 	}
 
@@ -222,11 +222,11 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	dp->flags= (pd.flags & NUT_FLAG_KEY) ? 0x10 : 0;
 
 	ret = nut_read_frame(nut, &pd.len, dp->buffer);
-	if (ret < 0) {
+	if (ret) {
 		mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
-		                               nut_error(-ret));
+		                               nut_error(ret));
+		return 0; // fatal error
 	}
-	if (ret) return 0; // fatal error
 
 	ds_add_packet(ds, dp); // append packet to DS stream
 	return 1;
