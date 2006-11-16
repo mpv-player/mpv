@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r19081 -->
-<!-- partial sync with r20879 -->
+<!-- synced with r20879 -->
 <!-- Opiekun: Frogu -->
 <chapter id="video">
 <title>Urządzenia wyjścia video</title>
@@ -1735,7 +1734,6 @@ Mile widziane są
 </sect1>
 
 
-<!-- Synced 'till here -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
@@ -1751,7 +1749,7 @@ od producentów takich, jak: Siemens, Technotrend, Galaxis czy Hauppauge.
 Najnowsze sterowniki DVB są dostępne na
 <ulink url="http://www.linuxtv.org">stronie Linux TV</ulink>.
 Jeżeli chcesz programowego transkodowania, powinieneś dysponować procesorem
-o zegarem co najmniej 1GHz.
+z zegarem co najmniej 1GHz.
 </para>
 
 <para>
@@ -1790,13 +1788,13 @@ mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>twójplik.roz</replaceab
 <para>
 Zauważ, że karty DVB obsługują tylko rozdzielczość pionową równą 288 i 576 dla
 PAL oraz 240 i 480 dla NTSC.
-<emphasis role="bold">Musisz</emphasis> przeskalować obraz, dodając opcję
+<emphasis role="bold">Musisz</emphasis> przeskalować obraz, dodając
 <option>scale=szerokość:wysokość</option>,
-gdzie szerokość i wysokość są takie jak dla opcji <option>-vf</option>.
+z wybraną wysokością i szerokością do opcji <option>-vf</option>.
 Karty DVB akceptują różne szerokości, takie jak 720, 704, 640, 512, 480, 352
-itp i dokonują sprzętowego skalowania w kierunku horyzontalnym,
+itp. i dokonują sprzętowego skalowania w kierunku horyzontalnym,
 więc w większości przypadków nie musisz skalować horyzontalnie.
-Dla MPEG-4 (DivX) 512x384 (format 4:3) wypróbuj:
+Dla MPEG-4 (DivX) 512x384 (proporcje 4:3) wypróbuj:
 </para>
 
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen></para>
@@ -1866,7 +1864,7 @@ dla TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 
 <para>
-  Teraz powinieneś skompilować plik <filename>~/.mplayer/channels.conf</filename>
+  Teraz powinieneś ułożyć plik <filename>~/.mplayer/channels.conf</filename>
   zgodnie ze składnią akceptowaną przez <command>szap/tzap/czap/azap</command>
   lub kazać <command>scan</command> zrobić to za Ciebie.
 </para>
@@ -1902,6 +1900,16 @@ dla TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 
 <para>
+  Jeśli <application>MPlayer</application> często uskarża się na
+  <screen>Too many video/audio packets in the buffer</screen> 
+  (za dużo pakietów video/audio w buforze) albo jeśli zauważysz rosnący brak
+  synchronizacji między audio a video spróbuj użyć demuksera MPEG-TS
+  z libavformat, dodając 
+  <option>-demuxer lavf -lavfdopts probesize=128</option>
+  do wiersza poleceń.
+</para>
+
+<para>
   Aby wyświetlić pierwszy z kanałów obecnych na Twojej liście, uruchom
 </para>
 
@@ -1919,7 +1927,7 @@ dla TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Jeżeli masz więcej niż jedną kartę, będziesz musiał określić numer
-  karty, na której jest widoczny kanał (np. 2), kożystając z następującej
+  karty, na której jest widoczny kanał (np. 2), korzystając z następującej
   składni:
 </para>
 
@@ -1929,18 +1937,18 @@ dla TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Aby przełączać kanały używaj klawiszy <keycap>h</keycap> (następny) oraz
-  <keycap>k</keycap> (poprzedni) lub skorzystaj z menu OSD (wymaga działającego
-  <link linkend="subosd">podsystemu OSD</link>).
+  <keycap>k</keycap> (poprzedni) lub skorzystaj z
+  <link linkend="osdmenu">menu OSD</link>).
 </para>
 
 <para>
   Jeżeli Twój <filename>~/.mplayer/menu.conf</filename> zawiera wpis
   <literal>&lt;dvbsel&gt;</literal>, taki jak ten w przykładowym pliku
-  <filename>etc/dvb-menu.conf</filename> (którego możesz użyć do nadpisania
+  <filename>etc/dvb-menu.conf</filename> (którym możesz nadpisać
   <filename>~/.mplayer/menu.conf</filename>), w menu głównym pokaże się
   podmenu, które zezwoli Ci na wybór jednego kanału z obecnych w Twoim
   <filename>channels.conf</filename>, możliwe, że poprzedzone menu z listą
-  dostępnych kart, jeżeli więcej niż jedna jest używalna z
+  dostępnych kart, jeżeli więcej niż jedna nadaje się do użytku
   <application>MPlayerem</application>.
 </para>
 
@@ -1980,7 +1988,7 @@ Proszę pamiętaj, że językiem listy jest angielski.
 
 <para>
 W przyszłości możesz się spodziewać zdolności wyświetlania OSD i napisów
-przy użyciu natywnej cechy OSD kart DVB, a także bardziej płynnego
+przy użyciu wbudowanej obsługi OSD przez karty DVB, a także bardziej płynnego
 odtwarzania filmów innych niż 25fps oraz transkodowania w czasie
 rzeczywistym MPEG-2 i MPEG-4
 (częściowa dekompresja).
@@ -2126,19 +2134,16 @@ wyjściem audio (<option>-ac hwac3</option>).
 </varlistentry>
 
 <varlistentry>
-<term><option>-vf lavc/fame</option></term>
+<term><option>-vf lavc</option></term>
 <listitem><para>
 Aby oglądać zawartość nie-MPEG na em8300 (np. MPEG-4 (DivX) lub RealVideo)
 będziesz musiał określić filtr video MPEG-1 taki jak
-<systemitem class="library">libavcodec</systemitem> (lavc) lub
-<systemitem class="library">libfame</systemitem> (fame).
-W tej chwili lavc jest szybszy i daje lepszą jakość obrazu. Sugerowane jest
-użycie właśnie jego, chyba że masz z nim problemy. Spójrz na stronę man, aby
-uzyskać więcej informacji o <option>-vf lavc/fame</option>. Używanie lavc jest
-wysoce zalecane. Obecnie nie istnieje sposób ustawienia współczynnika fps dla
+<systemitem class="library">libavcodec</systemitem> (lavc).
+Spójrz na stronę man, aby uzyskać więcej informacji o <option>-vf lavc</option>.
+Obecnie nie istnieje sposób ustawienia współczynnika fps dla
 em8300, co oznacza, że jest on zablokowany na 30000/1001fps. Z tego powodu jest
 bardzo wskazane abyś używał
-<option>-vf lavc=<replaceable>quality</replaceable>:25</option>. Szczególnie
+<option>-vf lavc=<replaceable>quality</replaceable>:25</option>, szczególnie
 jeżeli używasz buforowania z wyprzedzeniem. Dlaczego 25 a nie 30000/1001? Cóż,
 przy 30000/1001 odtwarzanie staje się nieco skokowe. Powód tego nie jest nam znany.
 Jeżeli ustawisz fps pomiędzy 25 a 27 obraz stanie się stabilny. W chwili obecnej
@@ -2258,14 +2263,14 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
 
 <para>
 Jak pewnie zauważyłeś, opcje przed drugim <option>-zrcrop</option> odnoszą się
-tylko do DC10+, a opcje po drogim <option>-zrcrop</option> odnoszą się do Buz.
+tylko do DC10+, a opcje po drugim <option>-zrcrop</option> odnoszą się do Buz.
 Ilość kart uczestniczących w <emphasis>cinerama</emphasis> ograniczona jest do
 czterech, więc możesz zbudować ekran (ścianę video:) 2x2.
 </para>
 
 <para>
 Na koniec - ważna uwaga: Nie włączaj ani nie wyłączaj XawTV na urządzeniu
-odtwarzającym - zawiesisz swój komputer. Można natomiast
+odtwarzającym w trakcie odtwarzania - zawiesisz swój komputer. Można natomiast
 <emphasis role="bold">NAJPIERW</emphasis> włączyć XawTV,
 <emphasis role="bold">NASTĘPNIE</emphasis> włączyć <application>MPlayera</application>,
 poczekać, aż <application>MPlayer</application> zakończy działanie i
@@ -2359,7 +2364,7 @@ instrukcje dla Matrox G450/G550 znajdują się w następnej sekcji!
     </para></step>
     <step><para>
       Jeżeli nie masz zainstalowanego <command>con2fb</command>, umieść
-      <filename>TVout/con2fb/con2fb</filename>gdzieś w
+      <filename>TVout/con2fb/con2fb</filename> gdzieś w
       swojej zmiennej <envar>PATH</envar>.
     </para></step>
     <step><para>
@@ -2421,7 +2426,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>nazwa_pliku</replacea
 <formalpara>
 <title>Konstruowanie kabla TV-out do Matroksów</title>
 <para>
-Nikt nie bierze na siebie ŻADNEJ odpowiedzialności za zniszczenia spowodowane tą
+Nikt nie bierze na siebie żadnej odpowiedzialności za zniszczenia spowodowane tą
 dokumentacją.
 </para>
 </formalpara>
@@ -2429,8 +2434,8 @@ dokumentacją.
 <formalpara>
 <title>Kabel dla G400</title>
 <para>
-W złączu CRTC2 na czwartej nóżce (pin) jest sygnał composite video. Ziemia
-(uziemienie) jest na szóstej, siódmej i ósmej nóżce. (info dostarczone przez
+W złączu CRTC2 na czwartej nóżce (pin) jest sygnał composite video.
+Uziemienie jest na szóstej, siódmej i ósmej nóżce. (info dostarczone przez
 Balázs Rácz)
 </para>
 </formalpara>
@@ -2457,7 +2462,7 @@ wiem, moduł <emphasis role="bold">mga_vid</emphasis> nie może być obecnie uż
 ponieważ sterownik G450/G550 pracuje tylko w jednej konfiguracji: pierwszy układ
 CRTC (z wieloma możliwościami) na pierwszym ekranie (monitor) i drugi CRTC (bez
 <emphasis role="bold">BES</emphasis> - po objaśnienia do BES sięgnij do sekcji
-wyżej) na TV. W chwili obecnej możesz więc używać tylko sterownika wyjścia
+G400 wyżej) na TV. W chwili obecnej możesz więc używać tylko sterownika wyjścia
 <emphasis>fbdev</emphasis> <application>MPlayera</application>.
 </para>
 
@@ -2465,7 +2470,7 @@ wyżej) na TV. W chwili obecnej możesz więc używać tylko sterownika wyjścia
 Obecnie pierwszy CRTC nie może być przekierowany na drugie wyjście. Autor
 sterownika jądra matroxfb - Petr Vandrovec - być może zrobi obsługę tego poprzez
 wyświetlanie wyjścia z pierwszego CRTC na obydwa złącza jednocześnie, jak to
-jest w tej chwili zalecane dla G400 (-> sekcja wyżej).
+jest w tej chwili zalecane dla G400, patrz sekcja wyżej.
 </para>
 
 <para>
@@ -2488,7 +2493,7 @@ ich licencjonowanej technologii Macrovision.
 </formalpara>
 
 <itemizedlist>
-<title>STATUS KART ATI Z TV-OUT POD LINUKSEM</title>
+<title>STAN KART ATI Z TV-OUT POD LINUKSEM</title>
 <listitem><simpara>
   <emphasis role="bold">ATI Mach64</emphasis>:
   obsługiwane przez <ulink url="http://gatos.sf.net">GATOS</ulink>.
@@ -2519,16 +2524,6 @@ Jedyna rzecz, którą musisz zrobić to:
 <emphasis role="bold">Mieć podłączony odbiornik TV przez uruchomieniem swojego
 PC</emphasis>, ponieważ video BIOS inicjalizuje się tylko podczas procedury
 POST.
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="tvout-voodoo">
-<title>Voodoo 3</title>
-
-<para>
-Sprawdź <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">ten URL</ulink>.
 </para>
 </sect2>
 
@@ -2610,8 +2605,8 @@ prosty analogowy koder TV, inne mają bardziej zaawansowaną wersję.
   Obecny w IBM thinkpad 390E, a możliwe, że także w innych Thinkpadach lub notebookach.
   </simpara><simpara>
   Dla trybu PAL musisz użyć <option>-vo vesa:neotv_pal</option>.
-  Dla truby NTSC - <option>-vo vesa:neotv_ntsc</option>.
-  Zapewni to funkcję wyjścia TV w następujących trybach 16 bpp i 8 bpp:
+  Dla trybu NTSC - <option>-vo vesa:neotv_ntsc</option>.
+  Zapewni to funkcjonowanie wyjścia TV w następujących trybach 16 bpp i 8 bpp:
   </simpara>
   <itemizedlist>
     <listitem><simpara>NTSC 320x240, 640x480, być może także 800x600.</simpara></listitem>
@@ -2622,12 +2617,12 @@ prosty analogowy koder TV, inne mają bardziej zaawansowaną wersję.
   na ekranie w rozdzielczości 640x480 lub 800x600, lecz nie w 320x240, lub
   w innych mniejszych rozdzielczościach, to musisz zamienić dwie tabele
   w <filename>vbelib.c</filename>.
-  Więcej sczegółów znajdziesz w kodzie funkcji vbeSetTV. W tym przypadku
+  Więcej szczegółów znajdziesz w kodzie funkcji vbeSetTV. W tym przypadku
   skontaktuj się z autorem.
   </simpara>
   <simpara>
-  Znane problemy: Tylko VESA, nie zaimplementowane ustawienia obrazu poza
-  jasnością, kontrastem, poziomem czerni (blacklevel) i filtrem migotania
+  Znane problemy: Tylko VESA, nie są zaimplementowane ustawienia obrazu takie
+  jak jasność, kontrast, poziom czerni (blacklevel) i filtr migotania
   (flickfilter).
   </simpara>
 </listitem>
