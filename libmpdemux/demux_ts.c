@@ -3209,6 +3209,8 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 
 			if(sh_a)
 			{
+				if(demuxer->audio->id != priv->ts.streams[i].id)
+					reset_fifos(priv, 1, 0, 0);
 				demuxer->audio->id = priv->ts.streams[i].id;
 				demuxer->audio->sh = sh_a;
 				ds_free_packs(demuxer->audio);
