@@ -30,7 +30,6 @@ Documentation:
     * MPlayer: Diego Biurrun
     * MEncoder: Guillaume Poirier
     * man page: Diego Biurrun
-    * console messages: Reynaldo H. Verdejo Pinochet
     * translation coordination: Sebastian Krämer
     * input layer, LIRC, slave mode docs: Alban Bedel
     * tech/* docs: None
