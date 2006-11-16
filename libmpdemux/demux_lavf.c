@@ -85,6 +85,7 @@ const CodecTag mp_wav_tags[] = {
 const CodecTag mp_bmp_tags[] = {
     { CODEC_ID_XAN_WC3, MKTAG('W', 'C', '3', 'V')},
     { CODEC_ID_TIERTEXSEQVIDEO,   MKTAG('T', 'S', 'E', 'Q')},
+    { CODEC_ID_VMDVIDEO,   MKTAG('V', 'M', 'D', 'V')},
     { 0, 0 },
 };
 
