@@ -3064,6 +3064,102 @@ int sleep_until_update(float *time_frame, float *aq_sleep_time)
     return frame_time_remaining;
 }
 
+static int reinit_video_chain(void) {
+    //================== Init VIDEO (codec & libvo) ==========================
+    if(!fixed_vo || !(inited_flags&INITED_VO)){
+    current_module="preinit_libvo";
+
+    //shouldn't we set dvideo->id=-2 when we fail?
+    vo_config_count=0;
+    //if((video_out->preinit(vo_subdevice))!=0){
+    if(!(video_out=init_best_video_out(video_driver_list))){
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
+      return 0;
+    }
+    sh_video->video_out=video_out;
+    inited_flags|=INITED_VO;
+  }
+
+  current_module="init_video_filters";
+  {
+    char* vf_arg[] = { "_oldargs_", (char*)video_out , NULL };
+    sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",vf_arg);
+  }
+#ifdef HAVE_MENU
+  if(use_menu) {
+    char* vf_arg[] = { "_oldargs_", menu_root, NULL };
+    vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",vf_arg);
+    if(!vf_menu) {
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantOpenLibmenuFilterWithThisRootMenu,menu_root);
+      use_menu = 0;
+    }
+  }
+  if(vf_menu)
+    sh_video->vfilter=(void*)vf_menu;
+#endif
+
+#ifdef USE_ASS
+  if(ass_enabled) {
+    int i;
+    int insert = 1;
+    if (vf_settings)
+      for (i = 0; vf_settings[i].name; ++i)
+        if (strcmp(vf_settings[i].name, "ass") == 0) {
+          insert = 0;
+          break;
+        }
+    if (insert) {
+      extern vf_info_t vf_info_ass;
+      vf_info_t* libass_vfs[] = {&vf_info_ass, NULL};
+      char* vf_arg[] = {"auto", "1", NULL};
+      vf_instance_t* vf_ass = vf_open_plugin(libass_vfs,sh_video->vfilter,"ass",vf_arg);
+      if (vf_ass)
+        sh_video->vfilter=(void*)vf_ass;
+      else
+        mp_msg(MSGT_CPLAYER,MSGL_ERR, "ASS: cannot add video filter\n");
+    }
+  }
+#endif
+
+  sh_video->vfilter=(void*)append_filters(sh_video->vfilter);
+
+#ifdef USE_ASS
+  if (ass_enabled)
+    ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
+#endif
+
+  current_module="init_video_codec";
+
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+  init_best_video_codec(sh_video,video_codec_list,video_fm_list);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+
+  if(!sh_video->inited){
+    if(!fixed_vo) uninit_player(INITED_VO);
+    sh_video = d_video->sh = NULL;
+    return 0;
+  }
+
+  inited_flags|=INITED_VCODEC;
+
+  if (sh_video->codec)
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
+
+  if(auto_quality>0){
+    // Auto quality option enabled
+    output_quality=get_video_quality_max(sh_video);
+    if(auto_quality>output_quality) auto_quality=output_quality;
+    else output_quality=auto_quality;
+    mp_msg(MSGT_CPLAYER,MSGL_V,"AutoQ: setting quality to %d.\n",output_quality);
+    set_video_quality(sh_video,output_quality);
+  }
+
+  // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
+
+  current_module="init_vo";
+
+  return 1;
+}
 
 int main(int argc,char* argv[]){
 
@@ -4091,96 +4187,13 @@ if (global_sub_size) {
 
 if(!sh_video) goto main; // audio-only
 
-//================== Init VIDEO (codec & libvo) ==========================
-if(!fixed_vo || !(inited_flags&INITED_VO)){
-current_module="preinit_libvo";
-
-vo_config_count=0;
-//if((video_out->preinit(vo_subdevice))!=0){
-if(!(video_out=init_best_video_out(video_driver_list))){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
-    goto goto_next_file; // exit_player(MSGTR_Exit_error);
-}
-sh_video->video_out=video_out;
-inited_flags|=INITED_VO;
-}
-
-current_module="init_video_filters";
-{
-  char* vf_arg[] = { "_oldargs_", (char*)video_out , NULL };
-  sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",vf_arg);
-}
-#ifdef HAVE_MENU
-if(use_menu) {
-  char* vf_arg[] = { "_oldargs_", menu_root, NULL };
-  vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",vf_arg);
-  if(!vf_menu) {
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantOpenLibmenuFilterWithThisRootMenu,menu_root);
-    use_menu = 0;
-  }
-}
-if(vf_menu)
-  sh_video->vfilter=(void*)vf_menu;
-#endif
-#ifdef USE_ASS
-if(ass_enabled) {
-  int i;
-  int insert = 1;
-  if (vf_settings)
-    for (i = 0; vf_settings[i].name; ++i)
-      if (strcmp(vf_settings[i].name, "ass") == 0) {
-        insert = 0;
-        break;
-      }
-  if (insert) {
-    extern vf_info_t vf_info_ass;
-    vf_info_t* libass_vfs[] = {&vf_info_ass, NULL};
-    char* vf_arg[] = {"auto", "1", NULL};
-    vf_instance_t* vf_ass = vf_open_plugin(libass_vfs,sh_video->vfilter,"ass",vf_arg);
-    if (vf_ass)
-      sh_video->vfilter=(void*)vf_ass;
-    else
-      mp_msg(MSGT_CPLAYER,MSGL_ERR, "ASS: cannot add video filter\n");
-  }
-}
-#endif
-sh_video->vfilter=(void*)append_filters(sh_video->vfilter);
-
-#ifdef USE_ASS
-if (ass_enabled)
-  ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
-#endif
-
-current_module="init_video_codec";
-
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-init_best_video_codec(sh_video,video_codec_list,video_fm_list);
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-
-if(!sh_video->inited){
-    if(!fixed_vo) uninit_player(INITED_VO);
+if(!reinit_video_chain()) {
+  if(!video_out) goto goto_next_file;
+  if(!sh_video->inited){
     if(!sh_audio) goto goto_next_file;
-    sh_video = d_video->sh = NULL;
     goto main; // exit_player(MSGTR_Exit_error);
+  }
 }
-
-inited_flags|=INITED_VCODEC;
-
-if (sh_video->codec)
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
-
-if(auto_quality>0){
-    // Auto quality option enabled
-    output_quality=get_video_quality_max(sh_video);
-    if(auto_quality>output_quality) auto_quality=output_quality;
-    else output_quality=auto_quality;
-    mp_msg(MSGT_CPLAYER,MSGL_V,"AutoQ: setting quality to %d.\n",output_quality);
-    set_video_quality(sh_video,output_quality);
-}
-
-// ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
-
-current_module="init_vo";
 
    if(vo_flags & 0x08 && vo_spudec)
       spudec_set_hw_spu(vo_spudec,video_out);
