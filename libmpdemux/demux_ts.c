@@ -231,6 +231,7 @@ typedef struct {
 	uint32_t vbitrate;
 	int keep_broken;
 	int last_aid;
+	int last_vid;
 	char packet[TS_FEC_PACKET_SIZE];
 	TS_stream_info vstr, astr;
 } ts_priv_t;
@@ -934,6 +935,12 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	{
 		ES_stream_t *es = priv->ts.pids[params.vpid];
 		sh_video = new_sh_video_vid(demuxer, 0, es->pid);
+		priv->ts.streams[params.vpid].id = 0;
+		priv->ts.streams[params.vpid].sh = sh_video;
+		priv->ts.streams[params.vpid].type = TYPE_VIDEO;
+		priv->last_vid = 0;
+		demuxer->video->id = 0;
+
 		if(params.vtype == VIDEO_AVC && es->extradata && es->extradata_len)
 		{
 			int w = 0, h = 0;
@@ -2707,12 +2714,28 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				}
 			}
 
+			if((IS_VIDEO(tss->type) || IS_VIDEO(tss->subtype)) && is_start && !priv->ts.streams[pid].sh && priv->last_vid+1 < MAX_V_STREAMS)
+			{
+				sh_video_t *sh = new_sh_video_vid(demuxer, priv->last_vid+1, pid);
+				if(sh)
+				{
+					sh->format = IS_VIDEO(tss->type) ? tss->type : tss->subtype;
+					sh->ds = demuxer->video;
+
+					priv->last_vid++;
+					priv->ts.streams[pid].id = priv->last_vid;
+					priv->ts.streams[pid].sh = sh;
+					priv->ts.streams[pid].type = TYPE_VIDEO;
+					mp_msg(MSGT_DEMUX, MSGL_V, "\r\nADDED VIDEO PID %d, type: %x stream n. %d\r\n", pid, sh->format, priv->last_vid);
+				}
+			}
+
 			if((pid == demuxer->sub->id))	//or the lang is right
 			{
 				pid_type = SPU_DVD;
 			}
 
-			if(is_video && (demuxer->video->id == tss->pid))
+			if(is_video && (demuxer->video->id == priv->ts.streams[pid].id))
 			{
 				ds = demuxer->video;
 
@@ -3196,6 +3219,57 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 			return DEMUXER_CTRL_OK;
 		}
 		
+		case DEMUXER_CTRL_SWITCH_VIDEO:
+		{
+			sh_video_t *sh_video = demuxer->video->sh;
+			sh_video_t *sh_v = NULL;
+			int i, n;
+			if(!sh_video)
+				return DEMUXER_CTRL_NOTIMPL;
+			
+			n = *((int*)arg);
+			if(n < 0)
+			{
+				for(i = 0; i < 8192; i++)
+				{
+					if(priv->ts.streams[i].id == demuxer->video->id && priv->ts.streams[i].type == TYPE_VIDEO)
+						break;
+				}
+
+				while(!sh_v)
+				{
+					i = (i+1) % 8192;
+					if(priv->ts.streams[i].id == demuxer->video->id)	//we made a complete loop
+						break;
+					if(priv->ts.streams[i].type == TYPE_VIDEO)
+						sh_v = (sh_video_t*)priv->ts.streams[i].sh;
+				}
+			}
+			else if(n <= priv->last_vid)
+			{
+				for(i = 0; i < 8192; i++)
+				{
+					if(priv->ts.streams[i].id == n && priv->ts.streams[i].type == TYPE_VIDEO)
+					{
+						sh_v = (sh_video_t*)priv->ts.streams[i].sh;
+						break;
+					}
+				}
+			}
+
+			if(sh_v)
+			{
+				if(demuxer->video->id != priv->ts.streams[i].id)
+					reset_fifos(priv, 0, 1, 0);
+				demuxer->video->id = priv->ts.streams[i].id;
+				demuxer->video->sh = sh_v;
+				ds_free_packs(demuxer->video);
+				mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndemux_ts, switched to video pid %d, id: %d, sh: %p\r\n", i, demuxer->video->id, sh_v);
+			}
+
+			*((int*)arg) = demuxer->video->id;
+			return DEMUXER_CTRL_OK;
+		}
 
 		default:
 			return DEMUXER_CTRL_NOTIMPL;
