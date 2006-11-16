@@ -3191,8 +3191,8 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 					i = (i+1) % 8192;
 					if(priv->ts.streams[i].type == TYPE_AUDIO)
 					{
-					if(priv->ts.streams[i].id == demuxer->audio->id)	//we made a complete loop
-						break;
+						if(priv->ts.streams[i].id == demuxer->audio->id)	//we made a complete loop
+							break;
 						sh_a = (sh_audio_t*)priv->ts.streams[i].sh;
 					}
 				}
@@ -3245,8 +3245,8 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 					i = (i+1) % 8192;
 					if(priv->ts.streams[i].type == TYPE_VIDEO)
 					{
-					if(priv->ts.streams[i].id == demuxer->video->id)	//we made a complete loop
-						break;
+						if(priv->ts.streams[i].id == demuxer->video->id)	//we made a complete loop
+							break;
 						sh_v = (sh_video_t*)priv->ts.streams[i].sh;
 					}
 				}
