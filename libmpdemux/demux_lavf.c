@@ -79,6 +79,7 @@ const CodecTag mp_wav_tags[] = {
     { CODEC_ID_INTERPLAY_DPCM,MKTAG('I', 'N', 'P', 'A')},
     { CODEC_ID_PCM_S24BE,     MKTAG('i', 'n', '2', '4')},
     { CODEC_ID_PCM_S8,        MKTAG('t', 'w', 'o', 's')},
+    { CODEC_ID_ROQ_DPCM,      MKTAG('R', 'o', 'Q', 'A')},
     { CODEC_ID_SHORTEN,       MKTAG('s', 'h', 'r', 'n')},
     { CODEC_ID_TTA,           MKTAG('T', 'T', 'A', '1')},
     { CODEC_ID_WAVPACK,       MKTAG('W', 'V', 'P', 'K')},
@@ -87,6 +88,7 @@ const CodecTag mp_wav_tags[] = {
 
 const CodecTag mp_bmp_tags[] = {
     { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
+    { CODEC_ID_ROQ,               MKTAG('R', 'o', 'Q', 'V')},
     { CODEC_ID_TIERTEXSEQVIDEO,   MKTAG('T', 'S', 'E', 'Q')},
     { CODEC_ID_VMDVIDEO,          MKTAG('V', 'M', 'D', 'V')},
     { CODEC_ID_XAN_WC3,           MKTAG('W', 'C', '3', 'V')},
