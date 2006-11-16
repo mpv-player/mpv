@@ -1079,6 +1079,13 @@ int demuxer_switch_audio(demuxer_t *demuxer, int index){
     return index;
 }
 
+int demuxer_switch_video(demuxer_t *demuxer, int index){
+    int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index);
+    if (res == DEMUXER_CTRL_NOTIMPL)
+      index = demuxer->video->id;
+    return index;
+}
+
 int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end){
     if (demuxer->chapters == NULL)
         demuxer->chapters = malloc (32*sizeof(*demuxer->chapters));

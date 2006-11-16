@@ -78,6 +78,7 @@
 #define DEMUXER_CTRL_GET_PERCENT_POS 11
 #define DEMUXER_CTRL_SWITCH_AUDIO 12
 #define DEMUXER_CTRL_RESYNC 13
+#define DEMUXER_CTRL_SWITCH_VIDEO 14
 
 // Holds one packet/frame/whatever
 typedef struct demux_packet_st {
@@ -365,6 +366,7 @@ extern int demuxer_get_current_time(demuxer_t *demuxer);
 extern double demuxer_get_time_length(demuxer_t *demuxer);
 extern int demuxer_get_percent_pos(demuxer_t *demuxer);
 extern int demuxer_switch_audio(demuxer_t *demuxer, int index);
+extern int demuxer_switch_video(demuxer_t *demuxer, int index);
 
 extern int demuxer_type_by_filename(char* filename);
 
