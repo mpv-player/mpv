@@ -1934,16 +1934,16 @@ static int mp_property_deinterlace(m_option_t* prop,int action,void* arg) {
     switch(action) {
     case M_PROPERTY_GET:
         if(!arg) return M_PROPERTY_ERROR;
-        vf->control(sh_video->vfilter, VFCTRL_GET_DEINTERLACE, arg);
+        vf->control(vf, VFCTRL_GET_DEINTERLACE, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,*(int*)arg);
-        vf->control(sh_video->vfilter, VFCTRL_SET_DEINTERLACE, arg);
+        vf->control(vf, VFCTRL_SET_DEINTERLACE, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        vf->control(sh_video->vfilter, VFCTRL_SET_DEINTERLACE, &toggle);
+        vf->control(vf, VFCTRL_SET_DEINTERLACE, &toggle);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
