@@ -80,6 +80,8 @@ typedef struct vf_seteq_s
 #define VFCTRL_INIT_EOSD       15 /* Select EOSD renderer */
 #define VFCTRL_DRAW_EOSD       16 /* Render EOSD */
 #define VFCTRL_GET_PTS         17 /* Return last pts value that reached vf_vo*/
+#define VFCTRL_SET_DEINTERLACE 18 /* Set deinterlacing status */
+#define VFCTRL_GET_DEINTERLACE 19 /* Get deinterlacing status */
 
 #include "vfcap.h"
 

@@ -371,6 +371,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { '7', 0 }, "saturation -1" },
   { { '8', 0 }, "saturation 1" },
   { { 'd', 0 }, "frame_drop" },
+  { { 'D', 0 }, "step_property deinterlace" },
   { { 'r', 0 }, "sub_pos -1" },
   { { 't', 0 }, "sub_pos +1" },
   { { 'a', 0 }, "sub_alignment" },

@@ -1926,6 +1926,29 @@ static int mp_property_fullscreen(m_option_t* prop,int action,void* arg) {
     }
 }
 
+static int mp_property_deinterlace(m_option_t* prop,int action,void* arg) {
+    int toggle = -1;
+    vf_instance_t *vf;
+    if (!sh_video || !sh_video->vfilter) return M_PROPERTY_UNAVAILABLE;
+    vf = sh_video->vfilter;
+    switch(action) {
+    case M_PROPERTY_GET:
+        if(!arg) return M_PROPERTY_ERROR;
+        vf->control(sh_video->vfilter, VFCTRL_GET_DEINTERLACE, arg);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+        if(!arg) return M_PROPERTY_ERROR;
+        M_PROPERTY_CLAMP(prop,*(int*)arg);
+        vf->control(sh_video->vfilter, VFCTRL_SET_DEINTERLACE, arg);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        vf->control(sh_video->vfilter, VFCTRL_SET_DEINTERLACE, &toggle);
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 /// Panscan (RW)
 static int mp_property_panscan(m_option_t* prop,int action,void* arg) {
 
@@ -2469,6 +2492,8 @@ static m_option_t mp_properties[] = {
 
     // Video
     { "fullscreen", mp_property_fullscreen, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+    { "deinterlace", mp_property_deinterlace, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
     { "ontop", mp_property_ontop, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },

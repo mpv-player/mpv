@@ -65,6 +65,9 @@ typedef struct {
   int mt, mb, ml, mr; // borders (top, bottom, left, right)
 } mp_eosd_res_t;
 
+#define VOCTRL_SET_DEINTERLACE 30
+#define VOCTRL_GET_DEINTERLACE 31
+
 // Vo can be used by xover
 #define VOCTRL_XOVERLAY_SUPPORT 22
 

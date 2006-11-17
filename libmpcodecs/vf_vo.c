@@ -76,6 +76,18 @@ static int config(struct vf_instance_s* vf,
 static int control(struct vf_instance_s* vf, int request, void* data)
 {
     switch(request){
+    case VFCTRL_GET_DEINTERLACE:
+    {
+        if(!video_out) return CONTROL_FALSE; // vo not configured?
+        return(video_out->control(VOCTRL_GET_DEINTERLACE, data)
+                == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
+    }
+    case VFCTRL_SET_DEINTERLACE:
+    {
+        if(!video_out) return CONTROL_FALSE; // vo not configured?
+        return(video_out->control(VOCTRL_SET_DEINTERLACE, data)
+                == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
+    }
 #ifdef USE_OSD
     case VFCTRL_DRAW_OSD:
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
