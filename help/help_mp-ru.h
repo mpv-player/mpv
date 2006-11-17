@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r20817
+// Synced with help_mp-en.h: r20972
 
 // ========================= MPlayer help ===========================
 
@@ -203,6 +203,7 @@ static char help_text[]=
 #define MSGTR_OSDenabled "включено"
 #define MSGTR_OSDdisabled "выключено"
 #define MSGTR_OSDAudio "Аудио: %s"
+#define MSGTR_OSDVideo "Видео: %s"
 #define MSGTR_OSDChannel "Канал: %s"
 #define MSGTR_OSDSubDelay "Задержка субтитров: %d мс"
 #define MSGTR_OSDSpeed "Скорость: x %6.2f"
