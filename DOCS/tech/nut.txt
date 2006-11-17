@@ -72,7 +72,8 @@ pts
     presentation time of the first frame/sample that is completed by decoding
     the coded frame.
 dts
-    of a frame is the time when it is input into the decoder
+    of a frame is the time when it is input into a synchronous 1-in-1-out
+    decoder
 
 
 Syntax:
