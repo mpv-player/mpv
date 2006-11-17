@@ -807,6 +807,21 @@ static int init_audio(radio_priv_t *priv)
  for call from mplayer.c
 --------------------------------------------------------------------------*/
 /*****************************************************************
+ * \brief public wrapper for get_frequency
+ * \parameter frequency pointer to float, which will contain frequency in MHz
+ * \return 1 if success,0 - otherwise
+ */
+int radio_get_freq(struct stream_st *stream, float* frequency){
+    radio_priv_t* priv=(radio_priv_t*)stream->priv;
+
+    if (!frequency)
+	return 0;
+    if (get_frequency(priv,frequency)!=STREAM_OK){
+        return 0;
+    }
+    return 1;
+}
+/*****************************************************************
  * \brief public wrapper for set_frequency
  * \parameter frequency frequency in MHz
  * \return 1 if success,0 - otherwise
