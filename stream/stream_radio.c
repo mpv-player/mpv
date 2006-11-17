@@ -820,7 +820,7 @@ int radio_set_freq(struct stream_st *stream, float frequency){
     if (get_frequency(priv,&frequency)!=STREAM_OK){
         return 0;
     }
-    mp_msg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_CurrentFreq,frequency);
+    mp_msg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_CurrentFreq,frequency);
     return 1;
 }
 
