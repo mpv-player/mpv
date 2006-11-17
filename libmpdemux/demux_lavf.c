@@ -88,6 +88,7 @@ const CodecTag mp_wav_tags[] = {
 
 const CodecTag mp_bmp_tags[] = {
     { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
+    { CODEC_ID_FLIC,              MKTAG('F', 'L', 'I', 'C')},
     { CODEC_ID_ROQ,               MKTAG('R', 'o', 'Q', 'V')},
     { CODEC_ID_TIERTEXSEQVIDEO,   MKTAG('T', 'S', 'E', 'Q')},
     { CODEC_ID_VMDVIDEO,          MKTAG('V', 'M', 'D', 'V')},
