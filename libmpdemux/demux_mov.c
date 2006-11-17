@@ -562,6 +562,20 @@ unsigned int store_ughvlc(unsigned char *s, unsigned int v){
   return n;
 }
 
+static void init_vobsub(sh_sub_t *sh, mov_track_t *trak) {
+  int i;
+  uint8_t *pal = trak->stdata;
+  sh->type = 'v';
+  if (trak->stdata_len < 106)
+    return;
+  sh->has_palette = 1;
+  pal += 42;
+  for (i = 0; i < 16; i++) {
+    sh->palette[i] = BE_32(pal);
+    pal += 4;
+  }
+}
+
 static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
                            off_t pos, off_t len, mov_track_t* trak);
 
@@ -1297,7 +1311,10 @@ quit_vorbis_block:
 		    trak->fourcc == mmioFOURCC('t','x','3','g') ||
 		    trak->fourcc == mmioFOURCC('t','e','x','t')) {
 			sh_sub_t *sh = new_sh_sub(demuxer, priv->track_db);
-			sh->type = (trak->fourcc == mmioFOURCC('m','p','4','s')) ? 'v' : 't';
+			if (trak->fourcc == mmioFOURCC('m','p','4','s'))
+				init_vobsub(sh, trak);
+			else
+				sh->type = 't';
 		} else
 		mp_msg(MSGT_DEMUX, MSGL_V, "Generic track - not completely understood! (id: %d)\n",
 		    trak->id);
