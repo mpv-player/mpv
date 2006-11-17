@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r20817
+// In sync with r20972
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -91,7 +91,7 @@ static char help_text[]=
 "Mögliche Gründe, Probleme, Workarounds: \n"\
 "- Häufigste Ursache: defekter/fehlerhafter _Audio_treiber.\n"\
 "  - Versuche -ao sdl oder die OSS-Emulation von ALSA.\n"\
-"  - Experimentiere mit verschiedenen Werten für -autosync, 30 ist ein guter"\
+"  - Experimentiere mit verschiedenen Werten für -autosync, 30 ist ein guter\n"\
 "    Startwert.\n"\
 "- Langsame Videoausgabe\n"\
 "  - Versuche einen anderen -vo Treiber (-vo help für eine Liste)\n"\
@@ -213,6 +213,7 @@ static char help_text[]=
 #define MSGTR_OSDenabled "aktiviert"
 #define MSGTR_OSDdisabled "deaktiviert"
 #define MSGTR_OSDAudio "Ton: %s"
+#define MSGTR_OSDVideo "Video: %s"
 #define MSGTR_OSDChannel "Kanal: %s"
 #define MSGTR_OSDSubDelay "Untertitelverzögerung: %dms"
 #define MSGTR_OSDSpeed "Geschwindigkeit: x %6.2f"
