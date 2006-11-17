@@ -920,9 +920,19 @@ start demuxing from the previous syncpoint
 
 Note, more complicated seeking methods exist which are capable of quickly
 seeking to the optimal point in the presence of an index even if only a
-subset of all streams are active but a muxer SHOULD place syncpoints,
-and keyframes if it can affect the placement of keyframes so that simple
-low complexity seeking works with fine granularity
+subset of all streams is active
+
+A muxer SHOULD place syncpoints so that that simple low complexity seeking
+works with fine granularity, that is syncpoints should be placed prior
+to keyframes instead of non keyframes and with high enough frequency 
+(once per second unless there are no keyframes between this and the previous
+syncpoint)
+
+encoders SHOULD place keyframes so that the number of points where all
+streams have a keyframe at the same time is maximized, this ensures that
+seeking (complicated or not) does not need to demux and decode significant
+amounts of data to reach a point where a presentable frame for each stream
+is available after seeking
 
 
 Semantic requirements:
