@@ -4152,8 +4152,12 @@ if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
 }
 
 if (vo_spudec==NULL) {
+  sh_sub_t *sh = (sh_sub_t *)d_dvdsub->sh;
+  unsigned int *palette = NULL;
+  if (sh && sh->has_palette)
+    palette = sh->palette;
   current_module="spudec_init_normal";
-  vo_spudec=spudec_new_scaled(NULL, sh_video->disp_w, sh_video->disp_h);
+  vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
   spudec_set_font_factor(vo_spudec,font_factor);
 }
 
