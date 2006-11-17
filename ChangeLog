@@ -2,12 +2,35 @@ MPlayer (1.0)
 
   rc2
 
+    DOCS:
+    * Russian man page translation started
+    * console messages and XML documentation converted to UTF-8
+    * Chinese man page updated
+
     Decoders:
     * Intel Music Coder audio decoding via lavc
+    * Fraps v2/v4 video decoding via lavc
+    * fringe codecs: 4XM audio, Electronic Arts ADPCM audio, Delphine CIN audio
+      and video, Interplay DPCM audio, Sierra VMD video, Tiertex SEQ video,
+      Westwood IMA ADPCM audio via lavc
 
     Streaming:
     * authentication for Real RTSP streams
     * near-precise seeking in dvd://
+
+    FFmpeg/libavcodec:
+    * Intel Music coder audio decoder
+    * Fraps v2/v4 video decoder
+    * H.264 decoding speedup
+
+    Filters:
+    * obsolete fame filter removed
+
+    Ports:
+    * further Intel Mac fixes
+
+    Others:
+    * libdvdcss updated to Subversion HEAD, now same as upstream version
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
