@@ -1537,18 +1537,18 @@ static int mp_property_osdlevel(m_option_t* prop,int action,void* arg) {
 static int mp_property_playback_speed(m_option_t* prop,int action,void* arg) {
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,*(float*)arg);
         playback_speed = *(float*)arg;
         build_afilter_chain(sh_audio, &ao_data);
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         playback_speed += (arg ? *(float*)arg : 0.1) *
             (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
         M_PROPERTY_CLAMP(prop,playback_speed);
         build_afilter_chain(sh_audio, &ao_data);
-        return 1;
+        return M_PROPERTY_OK;
     }
     return m_property_float_range(prop,action,arg,&playback_speed);
 }
@@ -1634,7 +1634,7 @@ static int mp_property_length(m_option_t* prop,int action,void* arg) {
     
     switch(action) {
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         else {
             int h, m, s = len;
             h = s/3600;
@@ -1645,7 +1645,7 @@ static int mp_property_length(m_option_t* prop,int action,void* arg) {
             if(h > 0) sprintf(*(char**)arg,"%d:%02d:%02d",h,m,s);
             else if(m > 0) sprintf(*(char**)arg,"%d:%02d",m,s);
             else sprintf(*(char**)arg,"%d",s);
-            return 1;
+            return M_PROPERTY_OK;
         }
         break;
     }
@@ -1665,12 +1665,12 @@ static int mp_property_volume(m_option_t* prop,int action,void* arg) {
     
     switch(action) {
     case M_PROPERTY_GET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         mixer_getbothvolume(&mixer,arg);
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:{
         float vol;
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         mixer_getbothvolume(&mixer,&vol);
         return m_property_float_range(prop,action,arg,&vol);
     }        
@@ -1687,22 +1687,22 @@ static int mp_property_volume(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
    case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,*(float*)arg);
         mixer_setvolume(&mixer,*(float*)arg,*(float*)arg);
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
         if(arg && *(float*)arg <= 0)
             mixer_decvolume(&mixer);
         else
             mixer_incvolume(&mixer);
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_STEP_DOWN:
         if(arg && *(float*)arg <= 0)
             mixer_incvolume(&mixer);
         else
             mixer_decvolume(&mixer);
-        return 1;
+        return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -1715,22 +1715,22 @@ static int mp_property_mute(m_option_t* prop,int action,void* arg) {
     switch(action) {
     case M_PROPERTY_SET:
         if(edl_muted) return M_PROPERTY_DISABLED;
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         if((!!*(int*)arg) != mixer.muted)
             mixer_mute(&mixer);
         user_muted = mixer.muted;
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         if(edl_muted) return M_PROPERTY_DISABLED;
         mixer_mute(&mixer);
         user_muted = mixer.muted;
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         if(edl_muted) {
             *(char**)arg = strdup(MSGTR_EnabledEdl);
-            return 1;
+            return M_PROPERTY_OK;
         }
     default:
         return m_property_flag(prop,action,arg,&mixer.muted);
@@ -1745,13 +1745,13 @@ static int mp_property_audio_delay(m_option_t* prop,int action,void* arg) {
     case M_PROPERTY_SET:
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         else {
             float delay = audio_delay;
             m_property_delay(prop,action,arg,&audio_delay);
             if(sh_audio) sh_audio->delay -= audio_delay-delay;
         }
-        return 1;
+        return M_PROPERTY_OK;
     default:
         return m_property_delay(prop,action,arg,&audio_delay);
     }
@@ -1780,7 +1780,7 @@ static int mp_property_channels(m_option_t* prop,int action,void* arg) {
     if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
     switch(action) {
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         switch(sh_audio->channels) {
         case 1: *(char**)arg = strdup("mono"); break;
         case 2: *(char**)arg = strdup("stereo"); break;
@@ -1788,7 +1788,7 @@ static int mp_property_channels(m_option_t* prop,int action,void* arg) {
             *(char**)arg = malloc(32);
             sprintf(*(char**)arg,"%d channels",sh_audio->channels);
         }
-        return 1;
+        return M_PROPERTY_OK;
     }
     return m_property_int_ro(prop,action,arg,sh_audio->channels);
 }
@@ -1801,11 +1801,11 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_GET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         *(int*)arg = audio_id;
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
 
         if (audio_id < 0)
             *(char**)arg = strdup(MSGTR_Disabled);
@@ -1826,7 +1826,7 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
             *(char**)arg = malloc(64);
             snprintf(*(char**)arg, 64, "(%d) %s", audio_id, lang);
         }
-        return 1;
+        return M_PROPERTY_OK;
 
     case M_PROPERTY_STEP_UP:
         current_id = demuxer->audio->id;
@@ -1842,12 +1842,11 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
           }
         }
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", audio_id);
-        break;
+        return M_PROPERTY_OK;
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-    return 1;
 }
 
 static int reinit_video_chain(void);
@@ -1859,11 +1858,11 @@ static int mp_property_video(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_GET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         *(int*)arg = video_id;
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
 
         if (video_id < 0)
             *(char**)arg = strdup(MSGTR_Disabled);
@@ -1872,7 +1871,7 @@ static int mp_property_video(m_option_t* prop,int action,void* arg) {
             *(char**)arg = malloc(64);
             snprintf(*(char**)arg, 64, "(%d)", video_id, lang);
         }
-        return 1;
+        return M_PROPERTY_OK;
 
     case M_PROPERTY_STEP_UP:
         current_id = demuxer->video->id;
@@ -1888,13 +1887,11 @@ static int mp_property_video(m_option_t* prop,int action,void* arg) {
           }
         }
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_TRACK=%d\n", video_id);
+        return M_PROPERTY_OK;
 
-        break;
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
-
-    return 1;
 }
 
 ///@}
@@ -1910,9 +1907,9 @@ static int mp_property_fullscreen(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,*(int*)arg);
-        if(vo_fs == !!*(int*)arg) return 1;
+        if(vo_fs == !!*(int*)arg) return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
 #ifdef HAVE_NEW_GUI
@@ -1920,7 +1917,7 @@ static int mp_property_fullscreen(m_option_t* prop,int action,void* arg) {
         else
 #endif
         if(vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
-        return 1;
+        return M_PROPERTY_OK;
     default:
         return m_property_flag(prop,action,arg,&vo_fs);
     }
@@ -1957,11 +1954,11 @@ static int mp_property_panscan(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,*(float*)arg);
         vo_panscan = *(float*)arg;
         video_out->control(VOCTRL_SET_PANSCAN,NULL);
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         vo_panscan += (arg ? *(float*)arg : 0.1) *
@@ -1969,7 +1966,7 @@ static int mp_property_panscan(m_option_t* prop,int action,void* arg) {
         if(vo_panscan > 1) vo_panscan = 1;
         else if(vo_panscan < 0) vo_panscan = 0;
         video_out->control(VOCTRL_SET_PANSCAN,NULL);
-        return 1;
+        return M_PROPERTY_OK;
     default:
         return m_property_float_range(prop,action,arg,&vo_panscan);
     }
@@ -1985,13 +1982,13 @@ static int mp_property_vo_flag(m_option_t* prop,int action,void* arg,
 
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,*(int*)arg);
-        if(*vo_var == !!*(int*)arg) return 1;
+        if(*vo_var == !!*(int*)arg) return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         if(vo_config_count) video_out->control(vo_ctrl, 0);
-        return 1;
+        return M_PROPERTY_OK;
     default:
         return m_property_flag(prop,action,arg,vo_var);
     }
@@ -2019,10 +2016,10 @@ static int mp_property_framedropping(m_option_t* prop,int action,void* arg) {
     
     switch(action) {
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         *(char**)arg = strdup(frame_dropping == 1 ? MSGTR_Enabled :
                               (frame_dropping == 2 ? MSGTR_HardFrameDrop  : MSGTR_Disabled));
-        return 1;
+        return M_PROPERTY_OK;
     default:
         return m_property_choice(prop,action,arg,&frame_dropping);
     }
@@ -2041,14 +2038,14 @@ static int mp_property_gamma(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,*(int*)arg);
         *gamma = *(int*)arg;
         r = set_video_colors(sh_video, prop->name, *gamma);
         if(r <= 0) break;
         return r;
     case M_PROPERTY_GET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         r = get_video_colors (sh_video, prop->name, arg);
         if(r <= 0) break;
         return r;
@@ -2130,7 +2127,7 @@ static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         vo_osd_changed(OSDTYPE_SUBTITLE);
@@ -2151,11 +2148,11 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_GET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         *(int*)arg = global_sub_pos;
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         *(char**)arg = malloc(64);
         (*(char**)arg)[63] = 0;
         sub_name = 0;
@@ -2178,14 +2175,14 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
                      set_of_sub_pos + 1,
                      strlen(tmp) < 20 ? "" : "...",
                      strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
-            return 1;
+            return M_PROPERTY_OK;
         }
 #endif
         if (demuxer->type == DEMUXER_TYPE_MATROSKA && dvdsub_id >= 0) {
             char lang[40] = MSGTR_Unknown;
             demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
             snprintf(*(char**)arg, 63, "(%d) %s", dvdsub_id, lang);
-            return 1;
+            return M_PROPERTY_OK;
         }
 #ifdef HAVE_OGGVORBIS
         if (demuxer->type == DEMUXER_TYPE_OGG && d_dvdsub && dvdsub_id >= 0) {
@@ -2193,7 +2190,7 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             if (!lang) lang = MSGTR_Unknown;
             snprintf(*(char**)arg, 63, "(%d) %s",
                      dvdsub_id, lang);
-            return 1;
+            return M_PROPERTY_OK;
         }
 #endif
         if (vo_vobsub && vobsub_id >= 0) {
@@ -2201,7 +2198,7 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
             snprintf(*(char**)arg, 63, "(%d) %s",
                      vobsub_id, language ? language : MSGTR_Unknown);
-            return 1;
+            return M_PROPERTY_OK;
         }
 #ifdef USE_DVDREAD
         if (vo_spudec && dvdsub_id >= 0) {
@@ -2212,14 +2209,14 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
                 lang[2] = 0;
             snprintf(*(char**)arg, 63, "(%d) %s",
                      dvdsub_id, lang);
-            return 1;
+            return M_PROPERTY_OK;
         }
 #endif
         snprintf(*(char**)arg, 63, MSGTR_Disabled);
-        return 1;
+        return M_PROPERTY_OK;
 
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         if(*(int*)arg < -1) *(int*)arg = -1;
         else if(*(int*)arg >= global_sub_size) *(int*)arg = global_sub_size-1;
         global_sub_pos = *(int*)arg;
@@ -2333,7 +2330,7 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
     }
 #endif
 
-    return 1;
+    return M_PROPERTY_OK;
 }
 
 /// Subtitle delay (RW)
@@ -2352,12 +2349,12 @@ static int mp_property_sub_alignment(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,sub_alignment);
         *(char**)arg = strdup(name[sub_alignment]);
-        return 1;
+        return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         vo_osd_changed(OSDTYPE_SUBTITLE);
@@ -2376,7 +2373,7 @@ static int mp_property_sub_visibility(m_option_t* prop,int action,void* arg) {
     
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         vo_osd_changed(OSDTYPE_SUBTITLE);
@@ -2395,12 +2392,12 @@ static int mp_property_sub_forced_only(m_option_t* prop,int action,void* arg) {
 
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         m_property_flag(prop,action,arg,&forced_subs_only);
         spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
-        return 1;
+        return M_PROPERTY_OK;
     default:
         return m_property_flag(prop,action,arg,&forced_subs_only);
     }
@@ -2423,7 +2420,7 @@ static int mp_property_tv_color(m_option_t* prop,int action,void* arg) {
     
     switch(action) {
     case M_PROPERTY_SET:
-        if(!arg) return 0;
+        if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop,*(int*)arg);
         return tv_set_color_options(tvh,(int)prop->priv,*(int*)arg);
     case M_PROPERTY_GET:
@@ -2431,13 +2428,13 @@ static int mp_property_tv_color(m_option_t* prop,int action,void* arg) {
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         if((r = tv_get_color_options(tvh,(int)prop->priv,&val)) >= 0) {
-            if(!r) return 0;
+            if(!r) return M_PROPERTY_ERROR;
             val += (arg ? *(int*)arg : 1) *
                 (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
             M_PROPERTY_CLAMP(prop,val);
             return tv_set_color_options(tvh,(int)prop->priv,val);
         }
-        return 0;
+        return M_PROPERTY_ERROR;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
