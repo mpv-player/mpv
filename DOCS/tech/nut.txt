@@ -901,6 +901,29 @@ backup headers starting at offset 2^x; for each x players SHOULD end their
 search at a particular offset when any startcode is found (including syncpoint)
 
 
+Seeking without an index (non-normative):
+-----------------------------------------
+A. backward seeking
+    1. perform a binary search on the syncpoint timestamps finding the one
+    which is largest and <= the target timestamp
+B. forward seeking
+    1a. perform a binary search on the syncpoint timestamps finding the one
+    which is smallest and >= the target timestamp
+    1b. perform a binary search on the syncpoint back pointers finding the
+    smallest one which has a back ptr >= the position of what was found in 1.
+2. follow the back pointer to the correspoding syncpoint
+
+Seeking with an index (non-normative):
+--------------------------------------
+The demuxer only has to find the appropriate keyframe in the index and
+start demuxing from the previous syncpoint
+
+Note, more complicated seeking methods exist which are capable of quickly
+seeking to the optimal point in the presence of an index even if only a
+subset of all streams are active but a muxer SHOULD place syncpoints,
+and keyframes if it can affect the placement of keyframes so that simple
+low complexity seeking works with fine granularity
+
 
 Semantic requirements:
 ======================
