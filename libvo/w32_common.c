@@ -239,10 +239,10 @@ static int createRenderingContext(void) {
     if (vo_fs || vo_ontop) layer = HWND_TOPMOST;
     if (vo_fs) {
 	changeMode();
-	    ShowCursor(0);
+	while (ShowCursor(0) >= 0) /**/ ;
     } else {
 	resetMode();
-	    ShowCursor(1);
+	while (ShowCursor(1) < 0) /**/ ;
     }
     updateScreenProperties();
     ShowWindow(vo_window, SW_HIDE);
