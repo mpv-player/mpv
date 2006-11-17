@@ -251,8 +251,7 @@ static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_dela
 		                       priv->s[0].time_base.den;
 
 	ret = nut_seek(nut, time_pos, nutflags, tmp);
-	if (ret < 0)
-		mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n", nut_error(-ret));
+	if (ret) mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n", nut_error(ret));
 	if (sh_audio) resync_audio_stream(sh_audio);
 }
 
