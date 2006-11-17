@@ -22,9 +22,12 @@ MPlayer (1.0)
     * Intel Music coder audio decoder
     * Fraps v2/v4 video decoder
     * H.264 decoding speedup
+    * Native NUT demuxer updated to spec
+    * NUT muxing and demuxing support via libnut
 
     Filters:
     * obsolete fame filter removed
+    * vf_geq speed-ups
 
     Ports:
     * further Intel Mac fixes
