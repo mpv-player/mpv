@@ -1294,6 +1294,7 @@ quit_vorbis_block:
 	    }
 	    case MOV_TRAK_GENERIC:
 		if (trak->fourcc == mmioFOURCC('m','p','4','s') ||
+		    trak->fourcc == mmioFOURCC('t','x','3','g') ||
 		    trak->fourcc == mmioFOURCC('t','e','x','t')) {
 			sh_sub_t *sh = new_sh_sub(demuxer, priv->track_db);
 			sh->type = (trak->fourcc == mmioFOURCC('m','p','4','s')) ? 'v' : 't';
