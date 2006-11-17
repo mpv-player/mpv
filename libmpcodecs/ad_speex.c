@@ -1,6 +1,6 @@
 /**
  * Speex decoder by Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
- * License: GPL
+ * License: GPL v2 or later
  * This code may be be relicensed under the terms of the GNU LGPL when it
  * becomes part of the FFmpeg project (ffmpeg.org)
  */

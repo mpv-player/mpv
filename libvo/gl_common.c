@@ -4,7 +4,7 @@
  *
  * Common OpenGL routines.
  * Copyleft (C) Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>, 2005
- * Licensend under the GNU GPL v2.
+ * Licensend under the GNU GPL v2 or later.
  * Special thanks go to the xine team and Matthias Hopf, whose video_out_opengl.c
  * gave me lots of good ideas.
  */
