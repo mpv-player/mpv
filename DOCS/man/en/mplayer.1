@@ -8496,6 +8496,100 @@ Precision is gained at the expense of CPU time so decrease this setting if
 you need realtime encoding.
 .
 .TP
+.B (no)qpel
+MPEG-4 uses a half pixel precision for its motion search by default.
+The standard proposes a mode where encoders are allowed to use quarter
+pixel precision.
+This option usually results in a sharper image.
+Unfortunately it has a great impact on bitrate and sometimes the
+higher bitrate use will prevent it from giving a better image
+quality at a fixed bitrate.
+It is better to test with and without this option and see whether it
+is worth activating.
+.
+.TP
+.B (no)gmc
+Enable Global Motion Compensation, which makes Xvid generate special
+frames (GMC-frames) which are well suited for Pan/\:Zoom/\:Rotating images.
+Whether or not the use of this option will save bits is highly
+dependent on the source material.
+.
+.TP
+.B (no)trellis
+Trellis Quantization is a kind of adaptive quantization method that
+saves bits by modifying quantized coefficients to make them more
+compressible by the entropy encoder.
+Its impact on quality is good, and if VHQ uses too much CPU for you,
+this setting can be a good alternative to save a few bits (and gain
+quality at fixed bitrate) at a lesser cost than with VHQ (default: on).
+.
+.TP
+.B (no)cartoon
+Activate this if your encoded sequence is an anime/\:cartoon.
+It modifies some Xvid internal thresholds so Xvid takes better decisions on
+frame types and motion vectors for flat looking cartoons.
+.
+.TP
+.B (no)chroma_me
+The usual motion estimation algorithm uses only the luminance information to
+find the best motion vector.
+However for some video material, using the chroma planes can help find
+better vectors.
+This setting toggles the use of chroma planes for motion estimation
+(default: on).
+.
+.TP
+.B (no)chroma_opt
+Enable a chroma optimizer prefilter.
+It will do some extra magic on color information to minimize the
+stepped-stairs effect on edges.
+It will improve quality at the cost of encoding speed.
+It reduces PSNR by nature, as the mathematical deviation to the original
+picture will get bigger, but the subjective image quality will raise.
+Since it works with color information, you might want to turn it off when
+encoding in grayscale.
+.
+.TP
+.B (no)hq_ac
+Activates high-quality prediction of AC coefficients for intra frames from
+neighbor blocks (default: on).
+.
+.TP
+.B vhq=<0\-4>
+The motion search algorithm is based on a search in the usual color domain
+and tries to find a motion vector that minimizes the difference between the
+reference frame and the encoded frame.
+With this setting activated, Xvid will also use the frequency domain (DCT)
+to search for a motion vector that minimizes not only the spatial
+difference but also the encoding length of the block.
+Fastest to slowest:
+.PD 0
+.RSs
+.IPs 0
+off
+.IPs 1
+mode decision (inter/\:intra MB) (default)
+.IPs 2
+limited search
+.IPs 3
+medium search
+.IPs 4
+wide search
+.RE
+.PD 1
+.
+.TP
+.B (no)lumi_mask
+Adaptive quantization allows the macroblock quantizers to vary inside
+each frame.
+This is a 'psychosensory' setting that is supposed to make use of the
+fact that the human eye tends to notice fewer details in very bright
+and very dark parts of the picture.
+It compresses those areas more strongly than medium ones, which will
+save bits that can be spent again on other frames, raising overall
+subjective quality and possibly reducing PSNR.
+.
+.TP
 .B (no)interlacing
 Encode the fields of interlaced video material.
 Turn this option on for interlaced content.
@@ -8659,100 +8753,6 @@ On playback, when reaching an n-vop the previous frame will be displayed.
 .I WARNING:
 Playing with this setting may result in a jerky video, so use it at your
 own risks!
-.
-.TP
-.B (no)qpel
-MPEG-4 uses a half pixel precision for its motion search by default.
-The standard proposes a mode where encoders are allowed to use quarter
-pixel precision.
-This option usually results in a sharper image.
-Unfortunately it has a great impact on bitrate and sometimes the
-higher bitrate use will prevent it from giving a better image
-quality at a fixed bitrate.
-It is better to test with and without this option and see whether it
-is worth activating.
-.
-.TP
-.B (no)gmc
-Enable Global Motion Compensation, which makes Xvid generate special
-frames (GMC-frames) which are well suited for Pan/\:Zoom/\:Rotating images.
-Whether or not the use of this option will save bits is highly
-dependent on the source material.
-.
-.TP
-.B (no)trellis
-Trellis Quantization is a kind of adaptive quantization method that
-saves bits by modifying quantized coefficients to make them more
-compressible by the entropy encoder.
-Its impact on quality is good, and if VHQ uses too much CPU for you,
-this setting can be a good alternative to save a few bits (and gain
-quality at fixed bitrate) at a lesser cost than with VHQ (default: on).
-.
-.TP
-.B (no)cartoon
-Activate this if your encoded sequence is an anime/\:cartoon.
-It modifies some Xvid internal thresholds so Xvid takes better decisions on
-frame types and motion vectors for flat looking cartoons.
-.
-.TP
-.B (no)chroma_me
-The usual motion estimation algorithm uses only the luminance information to
-find the best motion vector.
-However for some video material, using the chroma planes can help find
-better vectors.
-This setting toggles the use of chroma planes for motion estimation
-(default: on).
-.
-.TP
-.B (no)chroma_opt
-Enable a chroma optimizer prefilter.
-It will do some extra magic on color information to minimize the
-stepped-stairs effect on edges.
-It will improve quality at the cost of encoding speed.
-It reduces PSNR by nature, as the mathematical deviation to the original
-picture will get bigger, but the subjective image quality will raise.
-Since it works with color information, you might want to turn it off when
-encoding in grayscale.
-.
-.TP
-.B (no)hq_ac
-Activates high-quality prediction of AC coefficients for intra frames from
-neighbor blocks (default: on).
-.
-.TP
-.B vhq=<0\-4>
-The motion search algorithm is based on a search in the usual color domain
-and tries to find a motion vector that minimizes the difference between the
-reference frame and the encoded frame.
-With this setting activated, Xvid will also use the frequency domain (DCT)
-to search for a motion vector that minimizes not only the spatial
-difference but also the encoding length of the block.
-Fastest to slowest:
-.PD 0
-.RSs
-.IPs 0
-off
-.IPs 1
-mode decision (inter/\:intra MB) (default)
-.IPs 2
-limited search
-.IPs 3
-medium search
-.IPs 4
-wide search
-.RE
-.PD 1
-.
-.TP
-.B (no)lumi_mask
-Adaptive quantization allows the macroblock quantizers to vary inside
-each frame.
-This is a 'psychosensory' setting that is supposed to make use of the
-fact that the human eye tends to notice fewer details in very bright
-and very dark parts of the picture.
-It compresses those areas more strongly than medium ones, which will
-save bits that can be spent again on other frames, raising overall
-subjective quality and possibly reducing PSNR.
 .
 .TP
 .B quant_intra_matrix=<filename>
