@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21011
+.\" In sync with r21015
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -8916,6 +8916,112 @@ Die Präzision wird auf Kosten der CPU-Zeit erreicht; benutze also niedrigere
 Werte, falls du Encodierung in Echtzeit brauchst.
 .
 .TP
+.B (no)qpel
+MPEG-4 benutzt normalerweise eine Präzision halber Pixel für die
+Bewegungsabschätzung.
+Der Standard schlägt einen Modus vor, in dem es Encodern erlaubt ist, eine
+Präzision von einem viertel Pixel zu verwenden.
+Dies führt gewöhnlicherweise zu einem schärferen Bild.
+Nachteilig ist, dass dies einen großen Einfluss auf die Bitrate hat, und
+manchmal verhindert dies auch ein besseres Bild bei fester Bitrate.
+Es ist besser, durch Tests im Einzelfall zu entscheiden, ob es sich lohnt,
+diese Option zu aktivieren.
+.
+.TP
+.B (no)gmc
+Aktiviert Globale Bewegungskompensation (Global Motion Compensation), welche
+Xvid spezielle Frames (GMC-Frames) generieren lässt, die sich gut für
+Pan/\:Zoom/\:Drehung von Bildern eignen.
+Ob das Benutzen dieser Option Bits einspart, hängt sehr vom Quellmaterial ab.
+.
+.TP
+.B (no)trellis
+Die Trellis-Quantisierung ist eine Art adaptive Quantisierungsmethode, die Bits
+einspart, indem sie die Quantisierungskoeffizienten so verändert, dass sie vom
+Entropie-Encoder stärker komprimiert werden können.
+Der Einfluss auf die Qualität ist gut, und falls VHQ für dich zu viel
+CPU-Leistung braucht, kann diese Option eine gute Möglichkeit sein, mit
+weniger Aufwand als bei VHQ ein paar Bits einzusparen (und bei fester Bitrate
+die Qualität zu erhöhen) (Standard: aktiviert).
+.
+.TP
+.B (no)cartoon
+Aktiviere diese Option, wenn die zu encodierende Sequenz ein Anime/\:Cartoon
+ist.
+Sie modifiziert ein paar Xvid-interne Schwellenwerte, so dass Xvid bei
+Frametypen und Motion-Vectors für flach aussehende Cartoons bessere
+Entscheidungen trifft.
+.
+.TP
+.B (no)chroma_me
+Normalerweise benutzt der Algorithmus für die Bewegungsabschätzung nur
+Helligkeitsinformationen, um den besten Motion-Vector zu finden.
+Für manches Videomaterial jedoch kann die Benutzung der Chrominanzebenen
+helfen, bessere Resultate zu finden.
+Diese Einstellung (de)aktiviert die Benutzung der Chrominanzebenen für die
+Bewegungsabschätzung (Standard: aktiviert).
+.
+.TP
+.B (no)chroma_opt
+Aktiviert einen Vorfilter für die Farbtonoptimierung.
+Er wird ein paar Tricks auf die Farbinformationen anwenden, um Kammeffekte an
+Kanten zu minimieren.
+Er wird die Qualität auf Kosten der Zeit für die Encodierung verbessern.
+Naturgemäß verringert er den PSNR-Wert, da die mathematische Abweichung zum
+Originalbild größer wird, aber der subjektive Eindruck wird besser sein.
+Da er Farbinformationen benutzt, solltest du ihn bei Encodierung im
+Schwarz/weiß-Modus abschalten.
+.
+.TP
+.B (no)hq_ac
+Aktiviert die 'High Quality AC coefficient prediction', also die Vorhersage
+von Koeffizienten für Intra-Frames von benachbarten Blöcken (Standard:
+aktiviert).
+.
+.TP
+.B vhq=<0\-4>
+Der Algorithmus für die Bewegungsabschätzung basiert auf der Suche im
+normalen Farbraum und versucht, einen Motion-Vector zu finden, der die
+Differenz zwischen dem ursprünglichen und dem encodierten Frame minimiert.
+Ist diese Option aktiviert, benutzt Xvid außerdem den Frequenzbereich
+(frequency domain, DCT), um nach einem Motion-Vector zu suchen, der nicht nur
+den Unterschied in einem bestimmten Gebiet, sondern außerdem die encodierte
+Länge eines Blocks minimiert.
+Vom schnellsten zum langsamsten:
+.PD 0
+.RSs
+.IPs 0
+aus
+.IPs 1
+Entscheidung des Modus (Inter-/\:Intra-Macro-Block) (Standard)
+.IPs 2
+begrenzte Suche
+.IPs 3
+mittlere Suche
+.IPs 4
+ausgiebige Suche
+.RE
+.PD 1
+.
+.TP
+.B (no)lumi_mask
+Adaptive Quantisierung erlaubt den Quantisierungsparametern der Macro-Blöcke,
+sich innerhalb eines Frames zu unterscheiden.
+Dies ist eine 'psychosensorische' Einstellung, die die Tatsache nutzen soll,
+dass das menschliche Auge dazu neigt, in sehr hellen und sehr dunklen Teilen
+eines Bildes weniger Details zu erkennen.
+Sie komprimiert diese Bereiche stärke als mittlere, was Bits einspart, die
+dafür für andere Frames benutzt werden können, so wird die subjektive Qualität
+im Ganzen erhöht, der PSNR-Wert dabei jedoch möglicherweise reduziert.
+.
+.TP
+.B (no)grayscale
+Sorgt dafür, dass Xvid die Chrominanzebenen verwirft, so dass das encodierte
+Video schwarz/weiß wird.
+Beachte, dass dies den Encodierungsvorgang nicht beschleunigt, es werden in
+der letzten Stufe der Encodierung einfach keine Farbdaten geschrieben.
+.
+.TP
 .B (no)interlacing
 Encodiert die Felder von interlaced Videomaterial.
 Schalte diese Option bei interlaced Inhalten ein.
@@ -9040,19 +9146,6 @@ Dies wird außerdem eine vorgetäuschte DivX-Version in der Datei speichern,
 welche die Fehlerkorrekturmechanismen mancher Decoder verwirren kann.
 .
 .TP
-.B (no)grayscale
-Sorgt dafür, dass Xvid die Chrominanzebenen verwirft, so dass das encodierte
-Video schwarz/weiß wird.
-Beachte, dass dies den Encodierungsvorgang nicht beschleunigt, es werden in
-der letzten Stufe der Encodierung einfach keine Farbdaten geschrieben.
-.
-.TP
-.B "debug\ \ "
-Speichert Statistiken für jeden einzelnen Frame in ./\:xvid.dbg.
-(Dies ist nicht das Logfile des Modus mit zwei Durchläufen.)
-.RE
-.
-.TP
 .B max_bframes=<0\-4>
 Maximale Anzahl der B-Frames, die zwischen Intra- und P-Frames gesetzt wird
 (Standard: 2).
@@ -9090,105 +9183,6 @@ Bei der Wiedergabe wird bei Erreichen eines n-vop der vorige Frame dargestellt.
 .I WARNUNG:
 Rumspielen mit dieser Einstellung kann zu ruckelnden Videos führen, benutze
 sie also auf eigenes Risiko!
-.
-.TP
-.B (no)qpel
-MPEG-4 benutzt normalerweise eine Präzision halber Pixel für die
-Bewegungsabschätzung.
-Der Standard schlägt einen Modus vor, in dem es Encodern erlaubt ist, eine
-Präzision von einem viertel Pixel zu verwenden.
-Dies führt gewöhnlicherweise zu einem schärferen Bild.
-Nachteilig ist, dass dies einen großen Einfluss auf die Bitrate hat, und
-manchmal verhindert dies auch ein besseres Bild bei fester Bitrate.
-Es ist besser, durch Tests im Einzelfall zu entscheiden, ob es sich lohnt,
-diese Option zu aktivieren.
-.
-.TP
-.B (no)gmc
-Aktiviert Globale Bewegungskompensation (Global Motion Compensation), welche
-Xvid spezielle Frames (GMC-Frames) generieren lässt, die sich gut für
-Pan/\:Zoom/\:Drehung von Bildern eignen.
-Ob das Benutzen dieser Option Bits einspart, hängt sehr vom Quellmaterial ab.
-.
-.TP
-.B (no)trellis
-Die Trellis-Quantisierung ist eine Art adaptive Quantisierungsmethode, die Bits
-einspart, indem sie die Quantisierungskoeffizienten so verändert, dass sie vom
-Entropie-Encoder stärker komprimiert werden können.
-Der Einfluss auf die Qualität ist gut, und falls VHQ für dich zu viel
-CPU-Leistung braucht, kann diese Option eine gute Möglichkeit sein, mit
-weniger Aufwand als bei VHQ ein paar Bits einzusparen (und bei fester Bitrate
-die Qualität zu erhöhen) (Standard: aktiviert).
-.
-.TP
-.B (no)cartoon
-Aktiviere diese Option, wenn die zu encodierende Sequenz ein Anime/\:Cartoon
-ist.
-Sie modifiziert ein paar Xvid-interne Schwellenwerte, so dass Xvid bei
-Frametypen und Motion-Vectors für flach aussehende Cartoons bessere
-Entscheidungen trifft.
-.
-.TP
-.B (no)chroma_me
-Normalerweise benutzt der Algorithmus für die Bewegungsabschätzung nur
-Helligkeitsinformationen, um den besten Motion-Vector zu finden.
-Für manches Videomaterial jedoch kann die Benutzung der Chrominanzebenen
-helfen, bessere Resultate zu finden.
-Diese Einstellung (de)aktiviert die Benutzung der Chrominanzebenen für die
-Bewegungsabschätzung (Standard: aktiviert).
-.
-.TP
-.B (no)chroma_opt
-Aktiviert einen Vorfilter für die Farbtonoptimierung.
-Er wird ein paar Tricks auf die Farbinformationen anwenden, um Kammeffekte an
-Kanten zu minimieren.
-Er wird die Qualität auf Kosten der Zeit für die Encodierung verbessern.
-Naturgemäß verringert er den PSNR-Wert, da die mathematische Abweichung zum
-Originalbild größer wird, aber der subjektive Eindruck wird besser sein.
-Da er Farbinformationen benutzt, solltest du ihn bei Encodierung im
-Schwarz/weiß-Modus abschalten.
-.
-.TP
-.B (no)hq_ac
-Aktiviert die 'High Quality AC coefficient prediction', also die Vorhersage
-von Koeffizienten für Intra-Frames von benachbarten Blöcken (Standard:
-aktiviert).
-.
-.TP
-.B vhq=<0\-4>
-Der Algorithmus für die Bewegungsabschätzung basiert auf der Suche im
-normalen Farbraum und versucht, einen Motion-Vector zu finden, der die
-Differenz zwischen dem ursprünglichen und dem encodierten Frame minimiert.
-Ist diese Option aktiviert, benutzt Xvid außerdem den Frequenzbereich
-(frequency domain, DCT), um nach einem Motion-Vector zu suchen, der nicht nur
-den Unterschied in einem bestimmten Gebiet, sondern außerdem die encodierte
-Länge eines Blocks minimiert.
-Vom schnellsten zum langsamsten:
-.PD 0
-.RSs
-.IPs 0
-aus
-.IPs 1
-Entscheidung des Modus (Inter-/\:Intra-Macro-Block) (Standard)
-.IPs 2
-begrenzte Suche
-.IPs 3
-mittlere Suche
-.IPs 4
-ausgiebige Suche
-.RE
-.PD 1
-.
-.TP
-.B (no)lumi_mask
-Adaptive Quantisierung erlaubt den Quantisierungsparametern der Macro-Blöcke,
-sich innerhalb eines Frames zu unterscheiden.
-Dies ist eine 'psychosensorische' Einstellung, die die Tatsache nutzen soll,
-dass das menschliche Auge dazu neigt, in sehr hellen und sehr dunklen Teilen
-eines Bildes weniger Details zu erkennen.
-Sie komprimiert diese Bereiche stärke als mittlere, was Bits einspart, die
-dafür für andere Frames benutzt werden können, so wird die subjektive Qualität
-im Ganzen erhöht, der PSNR-Wert dabei jedoch möglicherweise reduziert.
 .
 .TP
 .B quant_intra_matrix=<Dateiname>
@@ -9384,6 +9378,12 @@ Encodieren aus und speichere ihn für jeden einzelnen Frame in einer Datei der
 Form 'psnr_hhmmss.log' im aktuellen Verzeichnis.
 Die gelieferten Werte haben die Einheit dB (Dezibel), je höher desto besser.
 .
+.TP
+.B "debug\ \ "
+Speichert Statistiken für jeden einzelnen Frame in ./\:xvid.dbg.
+(Dies ist nicht das Logfile des Modus mit zwei Durchläufen.)
+.RE
+.
 .PP
 .sp 1
 Die folgende Option ist nur bei Xvid 1.1.x verfügbar.
@@ -9398,7 +9398,7 @@ Performance-Einbußen auftreten (Standard: 1).
 .
 .PP
 .sp 1
-Die folgende Option ist nur in der CVS-Version von Xvid verfügbar.
+Die folgende Option ist nur bei Xvid 1.2.x verfügbar.
 .
 .TP
 .B threads=<0\-n>
