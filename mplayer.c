@@ -1904,6 +1904,28 @@ static int mp_property_video(m_option_t* prop,int action,void* arg) {
     }
 }
 
+static int mp_property_program(m_option_t* prop,int action,void* arg) {
+    demux_program_t prog;
+
+    switch(action) {
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_SET:
+        if(action==M_PROPERTY_SET && arg)
+            prog.progid = *((int*)arg);
+        else
+            prog.progid = -1;
+        if(demux_control(demuxer, DEMUXER_CTRL_IDENTIFY_PROGRAM, &prog) == DEMUXER_CTRL_NOTIMPL)
+            return M_PROPERTY_ERROR;
+
+        mp_property_do("switch_audio", M_PROPERTY_SET, &prog.aid);
+        mp_property_do("switch_video", M_PROPERTY_SET, &prog.vid);
+        return M_PROPERTY_OK;
+
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+}
+
 ///@}
 
 /// \defgroup VideoProperties Video properties
@@ -2540,6 +2562,8 @@ static m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "switch_video", mp_property_video, CONF_TYPE_INT,
       -1, -1, 0, NULL },
+    { "switch_program", mp_property_program, CONF_TYPE_INT,
+      CONF_RANGE, -1, 65535, NULL },
 
     // Subs
     { "sub", mp_property_sub, CONF_TYPE_INT,
