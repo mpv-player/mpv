@@ -3163,6 +3163,24 @@ static int ts_check_file_dmx(demuxer_t *demuxer)
     return ts_check_file(demuxer) ? DEMUXER_TYPE_MPEG_TS : 0;
 }
 
+static int is_usable_program(ts_priv_t *priv, pmt_t *pmt)
+{
+	int j;
+
+	for(j = 0; j < pmt->es_cnt; j++)
+	{
+		if(priv->ts.pids[pmt->es[j].pid] == NULL || priv->ts.streams[pmt->es[j].pid].sh == NULL)
+			continue;
+		if(
+			priv->ts.streams[pmt->es[j].pid].type == TYPE_VIDEO ||
+			priv->ts.streams[pmt->es[j].pid].type == TYPE_AUDIO
+		)
+			return 1;
+	}
+
+	return 0;
+}
+
 static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 {
 	ts_priv_t* priv = (ts_priv_t *)demuxer->priv;
@@ -3274,6 +3292,73 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 			}
 
 			*((int*)arg) = demuxer->video->id;
+			return DEMUXER_CTRL_OK;
+		}
+
+		case DEMUXER_CTRL_IDENTIFY_PROGRAM:		//returns in prog->{aid,vid} the new ids that comprise a program
+		{
+			int i, j, cnt=0;
+			int vid_done=0, aid_done=0;
+			pmt_t *pmt = NULL;
+			demux_program_t *prog = arg;
+
+			if(priv->pmt_cnt < 2)
+				return DEMUXER_CTRL_NOTIMPL;
+
+			if(prog->progid == -1)
+			{
+				int cur_pmt_idx = 0;
+
+				for(i = 0; i < priv->pmt_cnt; i++)
+					if(priv->pmt[i].progid == priv->prog)
+					{
+						cur_pmt_idx = i;
+						break;
+					}
+
+				i = (cur_pmt_idx + 1) % priv->pmt_cnt;
+				while(i != cur_pmt_idx)
+				{
+					pmt = &priv->pmt[i];
+					cnt = is_usable_program(priv, pmt);
+					if(cnt)
+						break;
+					i = (i + 1) % priv->pmt_cnt;
+				}
+			}
+			else
+			{
+				for(i = 0; i < priv->pmt_cnt; i++)
+					if(priv->pmt[i].progid == prog->progid)
+					{
+						pmt = &priv->pmt[i]; //required program
+						cnt = is_usable_program(priv, pmt);
+					}
+			}
+
+			if(!cnt)
+				return DEMUXER_CTRL_NOTIMPL;
+
+			//finally some food
+			prog->aid = prog->vid = -2;	//no audio and no video by default
+			for(j = 0; j < pmt->es_cnt; j++)
+			{
+				if(priv->ts.pids[pmt->es[j].pid] == NULL || priv->ts.streams[pmt->es[j].pid].sh == NULL)
+					continue;
+
+				if(!vid_done && priv->ts.streams[pmt->es[j].pid].type == TYPE_VIDEO)
+				{
+					vid_done = 1;
+					prog->vid = priv->ts.streams[pmt->es[j].pid].id;
+				}
+				else if(!aid_done && priv->ts.streams[pmt->es[j].pid].type == TYPE_AUDIO)
+				{
+					aid_done = 1;
+					prog->aid = priv->ts.streams[pmt->es[j].pid].id;
+				}
+			}
+
+			priv->prog = prog->progid = pmt->progid;
 			return DEMUXER_CTRL_OK;
 		}
 
