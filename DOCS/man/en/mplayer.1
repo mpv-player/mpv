@@ -8715,12 +8715,6 @@ This will also store a fake DivX version in the file so the bug
 autodetection of some decoders might be confused.
 .
 .TP
-.B "debug\ \ "
-Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
-file.)
-.RE
-.
-.TP
 .B max_bframes=<0\-4>
 Maximum number of B-frames to put between I/P-frames (default: 2).
 .
@@ -8941,6 +8935,12 @@ and store the per frame PSNR in a file with a name like 'psnr_hhmmss.log' in
 the current directory.
 Returned values are in dB (decibel), the higher the better.
 .
+.TP
+.B "debug\ \ "
+Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
+file.)
+.RE
+.
 .PP
 .sp 1
 The following option is only available in Xvid 1.1.x.
@@ -8955,7 +8955,7 @@ performance penalty (default: 1).
 .
 .PP
 .sp 1
-The following option is only available in the CVS version of Xvid.
+The following option is only available in the 1.2.x version of Xvid.
 .
 .TP
 .B threads=<0\-n>
