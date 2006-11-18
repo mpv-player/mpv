@@ -1420,7 +1420,7 @@ static mp_osd_msg_t* get_osd_msg(void) {
  *
  */
 
-void set_osd_bar(int type,const char* name,double min,double max,double val) {
+static void set_osd_bar(int type,const char* name,double min,double max,double val) {
     
     if(osd_level < 1) return;
     
@@ -2992,7 +2992,7 @@ static void adjust_sync_and_print_status(int between_frames, float timing_error)
     }
 }
 
-int fill_audio_out_buffers(void)
+static int fill_audio_out_buffers(void)
 {
     unsigned int t;
     double tt;
@@ -3078,7 +3078,7 @@ int fill_audio_out_buffers(void)
     return 1;
 }
 
-int sleep_until_update(float *time_frame, float *aq_sleep_time)
+static int sleep_until_update(float *time_frame, float *aq_sleep_time)
 {
     int frame_time_remaining = 0;
     current_module="calc_sleep_time";
