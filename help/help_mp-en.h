@@ -1960,4 +1960,5 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Unknown driver name: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Using V4Lv2 radio interface.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Using V4Lv1 radio interface.\n"
+#define MSGTR_RADIO_DriverBSDBT848 "[radio] Using *BSD BT848 radio interface.\n"
 

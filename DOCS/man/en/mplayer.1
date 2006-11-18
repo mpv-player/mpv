@@ -1616,12 +1616,16 @@ problems, which makes this process uncomfortable.
 Available options are:
 .RSs
 .IPs device=<value>
-Radio device to use (default: /dev/radio0).
+Radio device to use (default: /dev/radio0 for Linux and /dev/tuner0 for *BSD).
 .IPs driver=<value>
 Radio driver to use (default: v4l2 if available, otherwise v4l).
 Currently, v4l and v4l2 drivers are supported.
 .IPs volume=<0..100>
 sound volume for radio device (default 100)
+.IPs freq_min=<value> (*BSD BT848 only)
+minimum allowed frequency (default: 87.50)
+.IPs freq_max=<value> (*BSD BT848 only)
+maximum allowed frequency (default: 108.00)
 .IPs channels=<frequency>\-<name>,<frequency>\-<name>,...
 Set channel list.
 Use _ for spaces in names (or play with quoting ;-).

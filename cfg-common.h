@@ -394,6 +394,10 @@ extern char* edl_output_filename;
 m_option_t radioopts_conf[]={
     {"device", &radio_param_device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"driver", &radio_param_driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+#ifdef RADIO_BSDBT848_HDR
+    {"freq_min", &radio_param_freq_min, CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
+    {"freq_max", &radio_param_freq_max, CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
+#endif
     {"channels", &radio_param_channels, CONF_TYPE_STRING_LIST, 0, 0 ,0, NULL},
     {"volume", &radio_param_volume, CONF_TYPE_INT, CONF_RANGE, 0 ,100, NULL},
     {"adevice", &radio_param_adevice, CONF_TYPE_STRING, 0, 0 ,0, NULL},

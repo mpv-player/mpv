@@ -228,6 +228,7 @@ Optional features:
   --enable-radio         enable radio interface [disable]
   --enable-radio-capture enable radio capture (through PCI/line-in) [disable]
   --disable-radio-v4l2   disable Video4Linux2 radio interface [autodetect]
+  --disable-radio-bsdbt848   disable BSD BT848 radio interface [autodetect]
   --disable-tv           disable TV interface (TV/DVB grabbers) [enable]
   --disable-tv-v4l1      disable Video4Linux TV interface [autodetect]
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
@@ -1647,6 +1648,7 @@ _radio=no
 _radio_capture=no
 _radio_v4l=auto
 _radio_v4l2=auto
+_radio_bsdbt848=auto
 _tv=yes
 _tv_v4l1=auto
 _tv_v4l2=auto
@@ -1904,6 +1906,8 @@ for ac_option do
   --disable-radio-v4l)	_radio_v4l=no	;;
   --enable-radio-v4l2)	_radio_v4l2=yes	;;
   --disable-radio-v4l2)	_radio_v4l2=no	;;
+  --enable-radio-bsdbt848)	_radio_bsdbt848=yes	;;
+  --disable-radio-bsdbt848)	_radio_bsdbt848=no	;;
   --enable-pvr)  	_pvr=yes	;;
   --disable-pvr)	_pvr=no 	;;
   --enable-fastmemcpy)	_fastmemcpy=yes	;;
@@ -6723,8 +6727,31 @@ else
 fi
 echores "$_radio_v4l"
 
-if test "$_radio_v4l" = no && test "$_radio_v4l2" = no && test "$_radio" = yes ; then
-    die "Radio driver requires V4L or V4L2!"
+if bsd && test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
+echocheck "*BSD BrookTree 848 Radio interface header"
+  for file in "dev/ic/bt8xx.h" \
+              "machine/ioctl_bt848.h" \
+              "dev/bktr/ioctl_bt848.h" \
+              "dev/video/bktr/ioctl_bt848.h" ; do
+    cat > $TMPC <<EOF
+#include <sys/types.h>
+#include <$file>
+int main(void) { return 0; }
+EOF
+    cc_check && _radio_bsdbt848_hdr=$file
+  done
+echores "$_radio_bsdbt848_hdr"
+fi #if bsd && radio && radio_bsdbt848
+
+if test -n "$_radio_bsdbt848_hdr"  ; then
+  _def_radio_bsdbt848="#define RADIO_BSDBT848_HDR <$_radio_bsdbt848_hdr>"
+else
+  _def_radio_bsdbt848='#undef RADIO_BSDBT848_HDR '
+fi
+
+if test "$_radio_v4l" = no && test "$_radio_v4l2" = no && \
+   test -z "$_radio_bsdbt848_hdr" && test "$_radio" = yes ; then
+    die "Radio driver requires BSD BT848,  V4L or V4L2!"
 fi
 
 echocheck "Video 4 Linux 2 MPEG PVR interface"
@@ -7953,6 +7980,9 @@ $_def_radio_v4l
 
 /* Enable Video 4 Linux 2 Radio interface support */
 $_def_radio_v4l2
+
+/* Enable *BSD BrookTree Radio interface support */
+$_def_radio_bsdbt848
 
 /* Enable Video 4 Linux 2 MPEG PVR support */
 $_def_pvr

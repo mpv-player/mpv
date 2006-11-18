@@ -7,6 +7,10 @@
 
 extern char *radio_param_device;
 extern char *radio_param_driver;
+#ifdef RADIO_BSDBT848_HDR
+extern float radio_param_freq_min;
+extern float radio_param_freq_max;
+#endif
 extern char **radio_param_channels;
 extern int radio_param_volume;
 extern char* radio_param_adevice;
