@@ -1734,7 +1734,7 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
 </para>
 
 <para>
-  Když se podíváme na jednotlivé snímky vzniklé z videa o 60000/10001 půlsnímcích
+  Když se podíváme na jednotlivé snímky vzniklé z videa o 60000/1001 půlsnímcích
   za sekundu, telecinovaného nebo ne, je zřetelně vidět toto prokládání jakmile
   je zde nějaký pohyb, jelikož jeden půlsnímek (řekněme liché řádky)
   reprezentuje časový okamžik o 1/(60000/1001) sekundy pozdější než ten druhý.

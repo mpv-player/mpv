@@ -1956,7 +1956,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
       </para>
 
       <para>
-        Wenn man das aus 60000/10001 Feldern pro Sekunde geformten Einzelframes
+        Wenn man das aus 60000/1001 Feldern pro Sekunde geformten Einzelframes
         erzeugte Video betrachtet, ist telecined oder anderenfalls Interlacing
         klar sichtbar woimmer Bewegung auftritt, da ein Feld (sagen wir, die
         geradzahlig nummerierten Zeilen) einen Moment zur Zeit 1/(60000/1001) Sekunden

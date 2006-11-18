@@ -1825,7 +1825,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
 </para>
 
 <para>
-  When looking at individual frames formed from 60000/10001 fields per
+  When looking at individual frames formed from 60000/1001 fields per
   second video, telecined or otherwise, interlacing is clearly visible
   wherever there is any motion, because one field (say, the
   even-numbered lines) represents a moment in time 1/(60000/1001)

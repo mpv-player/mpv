@@ -1747,7 +1747,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 
 <para>
   Quand on regarde les images formées individuellement à partir de la vidéo en
-  60000/10001 trames par seconde, téléciné ou autre, l'entrelacement est
+  60000/1001 trames par seconde, téléciné ou autre, l'entrelacement est
   clairement visible et ce, qu'il y ait un mouvement ou non car l'une des trames (disons
   les lignes impaires) représente un moment dans le temps 1/(60000/1001) seconde
   plus tard que les autres. Regarder une vidéo entrelacée sur un ordinateur semble
