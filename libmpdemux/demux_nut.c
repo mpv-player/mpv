@@ -260,8 +260,10 @@ static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_dela
 		                       priv->s[0].time_base.den;
 
 	while ((ret = nut_seek(nut, time_pos, nutflags, tmp)) == NUT_ERR_EAGAIN);
+	priv->last_pts = -1;
 	if (ret) mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n", nut_error(ret));
 	if (sh_audio) resync_audio_stream(sh_audio);
+	demuxer->filepos = stream_tell(demuxer->stream);
 }
 
 static int demux_control_nut(demuxer_t * demuxer, int cmd, void * arg) {
@@ -273,7 +275,7 @@ static int demux_control_nut(demuxer_t * demuxer, int cmd, void * arg) {
 				        priv->s[0].time_base.den;
 			return DEMUXER_CTRL_OK;
 		case DEMUXER_CTRL_GET_PERCENT_POS:
-			if (priv->s[0].max_pts == 0)
+			if (priv->s[0].max_pts == 0 || priv->last_pts == -1)
 				return DEMUXER_CTRL_DONTKNOW;
 			*((int *)arg) = priv->last_pts * 100 /
 			                (double)priv->s[0].max_pts;
