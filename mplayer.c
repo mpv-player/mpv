@@ -1934,7 +1934,7 @@ static int mp_property_fullscreen(m_option_t* prop,int action,void* arg) {
 }
 
 static int mp_property_deinterlace(m_option_t* prop,int action,void* arg) {
-    int toggle = -1;
+    int deinterlace;
     vf_instance_t *vf;
     if (!sh_video || !sh_video->vfilter) return M_PROPERTY_UNAVAILABLE;
     vf = sh_video->vfilter;
@@ -1950,7 +1950,9 @@ static int mp_property_deinterlace(m_option_t* prop,int action,void* arg) {
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        vf->control(vf, VFCTRL_SET_DEINTERLACE, &toggle);
+        vf->control(vf, VFCTRL_GET_DEINTERLACE, &deinterlace);
+        deinterlace = !deinterlace;
+        vf->control(vf, VFCTRL_SET_DEINTERLACE, &deinterlace);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
