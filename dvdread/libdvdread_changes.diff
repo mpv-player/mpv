@@ -64,15 +64,6 @@ diff -Naur dvdread.orig/.cvsignore dvdread/.cvsignore
 diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
 --- dvdread.orig/dvd_input.c	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/dvd_input.c	2005-06-23 00:30:23.000000000 +0200
-@@ -37,7 +41,7 @@
- 
- #ifdef HAVE_DVDCSS_DVDCSS_H
- /* linking to libdvdcss */
--#include <dvdcss/dvdcss.h>
-+#include "dvdcss/dvdcss.h"
- #define DVDcss_open(a) dvdcss_open((char*)(a))
- #define DVDcss_close   dvdcss_close
- #define DVDcss_seek    dvdcss_seek
 @@ -74,7 +78,7 @@
    dvd_input_t dev;
      
@@ -306,20 +297,6 @@ diff -Naur dvdread.orig/ifo_print.c dvdread/ifo_print.c
  	     i, pgc->subp_control[i]);
      }
 
-diff -Naur dvdread.orig/ifo_print.h dvdread/ifo_print.h
---- dvdread.orig/ifo_print.h 2002-08-15 22:13:21.000000000 +0200
-+++ dvdread/ifo_print.h    2005-12-29 13:13:21.000000000 +0100
-@@ -20,8 +24,8 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-  */
- 
--#include <dvdread/ifo_types.h>
--#include <dvdread/dvd_reader.h>
-+#include "ifo_types.h"
-+#include "dvd_reader.h"
- 
- #ifdef __cplusplus
- extern "C" {
 diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
 --- dvdread.orig/ifo_read.c	30 Jun 2005 22:48:26 -0000	1.4
 +++ dvdread/ifo_read.c	3 Oct 2005 14:29:01 -0000	1.5
@@ -645,32 +622,9 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
      return 0;
    }
 
-diff -Naur dvdread.orig/ifo_read.h dvdread/ifo_read.h
---- dvdread.orig/ifo_read.h	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/ifo_read.h	2005-06-23 00:19:10.000000000 +0200
-@@ -20,8 +24,8 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-  */
- 
--#include <dvdread/ifo_types.h>
--#include <dvdread/dvd_reader.h>
-+#include "ifo_types.h"
-+#include "dvd_reader.h"
- 
- #ifdef __cplusplus
- extern "C" {
 diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
 --- dvdread.orig/ifo_types.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/ifo_types.h	2005-06-23 00:19:10.000000000 +0200
-@@ -21,7 +25,7 @@
-  */
- 
- #include <inttypes.h>
--#include <dvdread/dvd_reader.h>
-+#include "dvd_reader.h"
- 
- 
- #undef ATTRIBUTE_PACKED
 @@ -394,6 +398,55 @@
  } ATTRIBUTE_PACKED user_ops_t;
  
@@ -738,41 +692,3 @@ diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
    uint16_t next_pgc_nr;
    uint16_t prev_pgc_nr;
    uint16_t goup_pgc_nr;
-diff -Naur dvdread.orig/nav_print.c dvdread/nav_print.c
-diff -Naur dvdread.orig/nav_print.h dvdread/nav_print.h
---- dvdread.orig/nav_print.h	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/nav_print.h	2005-06-23 00:19:10.000000000 +0200
-@@ -20,7 +24,7 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-  */
- 
--#include <dvdread/nav_types.h>
-+#include "nav_types.h"
- 
- /**
-  * Pretty printing of the NAV packets, PCI and DSI structs.
-diff -Naur dvdread.orig/nav_read.c dvdread/nav_read.c
-diff -Naur dvdread.orig/nav_read.h dvdread/nav_read.h
---- dvdread.orig/nav_read.h	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/nav_read.h	2005-06-23 00:19:10.000000000 +0200
-@@ -19,7 +23,7 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-  */
- 
--#include <dvdread/nav_types.h>
-+#include "nav_types.h"
- 
- /**
-  * Parsing of NAV data, PCI and DSI parts.
-diff -Naur dvdread.orig/nav_types.h dvdread/nav_types.h
---- dvdread.orig/nav_types.h	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/nav_types.h	2005-06-23 00:19:10.000000000 +0200
-@@ -30,7 +34,7 @@
-  */
- 
- #include <inttypes.h>
--#include <dvdread/ifo_types.h> /* only dvd_time_t, vm_cmd_t and user_ops_t */
-+#include "ifo_types.h" /* only dvd_time_t, vm_cmd_t and user_ops_t */
- 
- 
- #undef ATTRIBUTE_PACKED

@@ -4,10 +4,6 @@
 /*
  * Copyright (C) 2000, 2001, 2002 Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
- * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
- *
  * The data structures in this file should represent the layout of the
  * pci and dsi packets as they are stored in the stream.  Information
  * found by reading the source to VOBDUMP is the base for the structure
@@ -34,7 +30,7 @@
  */
 
 #include <inttypes.h>
-#include "ifo_types.h" /* only dvd_time_t, vm_cmd_t and user_ops_t */
+#include <dvdread/ifo_types.h> /* only dvd_time_t, vm_cmd_t and user_ops_t */
 
 
 #undef ATTRIBUTE_PACKED

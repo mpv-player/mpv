@@ -5,10 +5,6 @@
  * Copyright (C) 2000, 2001 Björn Englund <d4bjorn@dtek.chalmers.se>,
  *                          Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
- * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -24,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "ifo_types.h"
-#include "dvd_reader.h"
+#include <dvdread/ifo_types.h>
+#include <dvdread/dvd_reader.h>
 
 #ifdef __cplusplus
 extern "C" {
