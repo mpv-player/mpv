@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20408 -->
+<!-- synced with r20876 -->
 <chapter id="encoding-guide">
 <title>L'encodage avec <application>MEncoder</application></title>
 
@@ -1474,9 +1474,9 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   façon de les corriger est de supprimer ou de rajouter des trames.
   Tant que <application>MEncoder</application> voit la piste son pendant qu'il
   encode la vidéo, il peut faire ces suppressions/rajouts (ce qui fonctionne habituellement
-  car cela se produit lors de changements de scènes avec fondu au noir) mais si
+  car cela se produit lorsque l'image est totalement noire ou lors de changement de scènes) mais si
   <application>MEncoder</application> ne voit pas la piste son, il encodera
-  toutes les trames telles quelles et elles ne correspondront pas au le fichier
+  toutes les trames telles quelles et elles ne correspondront pas au fichier
   audio final, quand, par exemple, vous multiplexerez la piste vidéo et la piste
   son dans un fichier Matroska.
 </para>
@@ -4011,7 +4011,7 @@ Exemple de compression VP3:
 </sect1>
 
 <sect1 id="menc-feat-vcd-dvd">
-<title>Utiliser MEncoder pour créer des fichiers compatibles VCD/SVCD/DVD.</title>
+<title>Utiliser <application>MEncoder</application> pour créer des fichiers compatibles VCD/SVCD/DVD.</title>
 
 <sect2 id="menc-feat-vcd-dvd-constraints">
 <title>Contraintes de Format</title>
@@ -4220,16 +4220,16 @@ Exemple de compression VP3:
 </para>
 
 <para>
-  DVD:
+  DVD(avec estampille temporelle sur chaque image si possible):
   <screen>
-  -of mpeg -mpegopts format=dvd
+  -of mpeg -mpegopts format=dvd:tsaf
   </screen>
 </para>
 
 <para>
   DVD avec pullup NTSC:
   <screen>
-  -of mpeg -mpegopts format=dvd:telecine -ofps 24000/1001
+  -of mpeg -mpegopts format=dvd:tsaf:telecine -ofps 24000/1001
   </screen>
   Ceci permet au contenu progressif à 24000/1001 images par secondes d'être encodé à
   30000/1001 images par secondes tout en restant avec le format DVD.
@@ -4568,7 +4568,7 @@ Exemple de compression VP3:
 <para>
   Si la source a déjà l'audio en AC3, utilisez <option>-oac copy</option> au lieu de la réencoder.
   <screen>
-  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:576,\
+  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:576,\
   harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
   vbitrate=5000:keyint=15:aspect=16/9 -ofps 25 \
   -o <replaceable>film.mpg</replaceable> <replaceable>film.avi</replaceable>
@@ -4581,7 +4581,7 @@ Exemple de compression VP3:
 <para>
   Si la source a déjà l'audio en AC3, et est en NTSC @ 24000/1001 fps:
   <screen>
-  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:telecine \
+  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
   -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\
   vrc_maxrate=9800:vbitrate=5000:keyint=15:aspect=16/9 -ofps 24000/1001 \
   -o <replaceable>film.mpg</replaceable> <replaceable>film.avi</replaceable>
