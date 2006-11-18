@@ -23,8 +23,15 @@ static size_t mp_read(void * h, size_t len, uint8_t * buf) {
 	stream_t * stream = (stream_t*)h;
 
 	if(stream_eof(stream)) return 0;
+	//len = MIN(len, 5);
 
 	return stream_read(stream, buf, len);
+}
+
+static int mp_eof(void * h) {
+	stream_t * stream = (stream_t*)h;
+	if(stream_eof(stream)) return 1;
+	return 0;
 }
 
 static off_t mp_seek(void * h, long long pos, int whence) {
@@ -64,7 +71,7 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 			.priv = demuxer->stream,
 			.seek = mp_seek,
 			.read = mp_read,
-			.eof = NULL,
+			.eof = mp_eof,
 			.file_pos = stream_tell(demuxer->stream),
 		},
 		.alloc = { .malloc = NULL },
@@ -77,7 +84,8 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 	int ret;
 	int i;
 
-	if ((ret = nut_read_headers(nut, &s, NULL))) {
+	while ((ret = nut_read_headers(nut, &s, NULL)) == NUT_ERR_EAGAIN);
+	if (ret) {
 		mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n", nut_error(ret));
 		nut_demuxer_uninit(nut);
 		free(priv);
@@ -180,7 +188,7 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	demuxer->filepos = stream_tell(demuxer->stream);
 	if (stream_eof(demuxer->stream)) return 0;
 
-	ret = nut_read_next_packet(nut, &pd);
+	while ((ret = nut_read_next_packet(nut, &pd)) == NUT_ERR_EAGAIN);
 	if (ret) {
 		if (ret != NUT_ERR_EOF)
 			mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
@@ -202,7 +210,7 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	}
 	else {
 		uint8_t buf[pd.len];
-		ret = nut_read_frame(nut, &pd.len, buf);
+		while ((ret = nut_read_frame(nut, &pd.len, buf)) == NUT_ERR_EAGAIN);
 		if (ret) {
 			mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
 			                               nut_error(ret));
@@ -220,7 +228,9 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	dp->pos = demuxer->filepos;
 	dp->flags= (pd.flags & NUT_FLAG_KEY) ? 0x10 : 0;
 
-	ret = nut_read_frame(nut, &pd.len, dp->buffer);
+	{int len = pd.len;
+	while ((ret = nut_read_frame(nut, &len, dp->buffer + pd.len-len)) == NUT_ERR_EAGAIN);
+	}
 	if (ret) {
 		mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
 		                               nut_error(ret));
@@ -249,7 +259,7 @@ static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_dela
 		               (double)priv->s[0].time_base.nom /
 		                       priv->s[0].time_base.den;
 
-	ret = nut_seek(nut, time_pos, nutflags, tmp);
+	while ((ret = nut_seek(nut, time_pos, nutflags, tmp)) == NUT_ERR_EAGAIN);
 	if (ret) mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n", nut_error(ret));
 	if (sh_audio) resync_audio_stream(sh_audio);
 }
