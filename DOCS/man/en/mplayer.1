@@ -8590,6 +8590,12 @@ save bits that can be spent again on other frames, raising overall
 subjective quality and possibly reducing PSNR.
 .
 .TP
+.B (no)grayscale
+Make Xvid discard chroma planes so the encoded video is grayscale only.
+Note that this does not speed up encoding, it just prevents chroma data
+from being written in the last stage of encoding.
+.
+.TP
 .B (no)interlacing
 Encode the fields of interlaced video material.
 Turn this option on for interlaced content.
@@ -8707,12 +8713,6 @@ decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:Xvid.
 .I WARNING:
 This will also store a fake DivX version in the file so the bug
 autodetection of some decoders might be confused.
-.
-.TP
-.B (no)grayscale
-Make Xvid discard chroma planes so the encoded video is grayscale only.
-Note that this does not speed up encoding, it just prevents chroma data
-from being written in the last stage of encoding.
 .
 .TP
 .B "debug\ \ "
