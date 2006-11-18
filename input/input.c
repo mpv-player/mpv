@@ -380,6 +380,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'F', 0 }, "forced_subs_only" },
   { { '#', 0 }, "switch_audio" },
   { { '_', 0 }, "step_property switch_video" },
+  { { KEY_TAB, 0 }, "step_property switch_program" },
   { { 'i', 0 }, "edl_mark" },
 #ifdef USE_TV
   { { 'h', 0 }, "tv_step_channel 1" },
