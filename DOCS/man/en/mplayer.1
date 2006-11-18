@@ -8503,16 +8503,6 @@ Should you rescale the video, you would need an interlace-aware resizer,
 which you can activate with \-vf scale=<width>:<height>:1.
 .
 .TP
-.B "4mv\ \ \ \ "
-Use 4 motion vectors per macroblock.
-This might give better compression, but slows down encoding.
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is no longer available separately, and its
-functionality is included in the me_quality option.
-When me_quality > 4, 4mv is activated.
-.
-.TP
 .B rc_reaction_delay_factor=<value>
 This parameter controls the number of frames the CBR rate controller
 will wait before reacting to bitrate changes and compensating for them
@@ -8558,18 +8548,6 @@ When using custom matrices, MPEG must be used.
 .br
 .I WARNING:
 As of Xvid-1.0.x, this option is replaced by the quant_type option.
-.
-.TP
-.B mod_quant
-Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis
-(two pass mode only).
-.br
-.I WARNING:
-This will generate an illegal bitstream, and most likely not be decodable
-by any MPEG-4 decoder besides libavcodec or Xvid.
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is no longer available.
 .
 .TP
 .B keyframe_boost=<0\-1000> (two pass mode only)
