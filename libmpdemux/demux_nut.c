@@ -48,7 +48,6 @@ static off_t mp_seek(void * h, long long pos, int whence) {
 
 static int nut_check_file(demuxer_t * demuxer) {
 	uint8_t buf[ID_LENGTH];
-	nut_priv_t * priv = demuxer->priv = calloc(1, sizeof(nut_priv_t));
 
 	if (stream_read(demuxer->stream, buf, ID_LENGTH) != ID_LENGTH) return 0;
 
@@ -72,7 +71,7 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 		.read_index = index_mode,
 		.cache_syncpoints = 1,
 	};
-	nut_priv_t * priv = demuxer->priv;
+	nut_priv_t * priv = demuxer->priv = calloc(1, sizeof(nut_priv_t));
 	nut_context_t * nut = priv->nut = nut_demuxer_init(&dopts);
 	nut_stream_header_t * s;
 	int ret;
@@ -276,6 +275,7 @@ static int demux_control_nut(demuxer_t * demuxer, int cmd, void * arg) {
 
 static void demux_close_nut(demuxer_t *demuxer) {
 	nut_priv_t * priv = demuxer->priv;
+	if (!priv) return;
 	nut_demuxer_uninit(priv->nut);
 	free(demuxer->priv);
 	demuxer->priv = NULL;
