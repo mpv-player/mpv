@@ -4263,7 +4263,7 @@ if(!sh_video) goto main; // audio-only
 
 if(!reinit_video_chain()) {
   if(!video_out) goto goto_next_file;
-  if(!sh_video->inited){
+  if(!sh_video || !sh_video->inited){
     if(!sh_audio) goto goto_next_file;
     goto main; // exit_player(MSGTR_Exit_error);
   }
