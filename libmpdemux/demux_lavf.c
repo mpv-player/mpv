@@ -83,6 +83,7 @@ const CodecTag mp_wav_tags[] = {
     { CODEC_ID_SHORTEN,           MKTAG('s', 'h', 'r', 'n')},
     { CODEC_ID_TTA,               MKTAG('T', 'T', 'A', '1')},
     { CODEC_ID_WAVPACK,           MKTAG('W', 'V', 'P', 'K')},
+    { CODEC_ID_XAN_DPCM,          MKTAG('A', 'x', 'a', 'n')},
     { 0, 0 },
 };
 
