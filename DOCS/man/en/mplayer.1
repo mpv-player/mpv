@@ -8681,6 +8681,27 @@ The last I-frame will get treated normally
 (default: 30).
 .
 .TP
+.B max_bframes=<0\-4>
+Maximum number of B-frames to put between I/P-frames (default: 2).
+.
+.TP
+.B bquant_ratio=<0\-1000>
+quantizer ratio between B- and non-B-frames, 150=1.50 (default: 150)
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+quantizer offset between B- and non-B-frames, 100=1.00 (default: 100)
+.
+.TP
+.B bf_threshold=<-255\-255>
+This setting allows you to specify what priority to place on the use of
+B-frames.
+The higher the value, the higher the probability of B-frames being used
+(default: 0).
+Do not forget that B-frames usually have a higher quantizer, and therefore
+aggressive production of B-frames may cause worse visual quality.
+.
+.TP
 .B (no)closed_gop
 This option tells Xvid to close every GOP (Group Of Pictures bounded
 by two I-frames), which makes GOPs independent from each other.
@@ -8704,27 +8725,6 @@ decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:Xvid.
 .I WARNING:
 This will also store a fake DivX version in the file so the bug
 autodetection of some decoders might be confused.
-.
-.TP
-.B max_bframes=<0\-4>
-Maximum number of B-frames to put between I/P-frames (default: 2).
-.
-.TP
-.B bquant_ratio=<0\-1000>
-quantizer ratio between B- and non-B-frames, 150=1.50 (default: 150)
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-quantizer offset between B- and non-B-frames, 100=1.00 (default: 100)
-.
-.TP
-.B bf_threshold=<-255\-255>
-This setting allows you to specify what priority to place on the use of
-B-frames.
-The higher the value, the higher the probability of B-frames being used
-(default: 0).
-Do not forget that B-frames usually have a higher quantizer, and therefore
-aggressive production of B-frames may cause worse visual quality.
 .
 .TP
 .B frame_drop_ratio=<0\-100> (max_bframes=0 only)
