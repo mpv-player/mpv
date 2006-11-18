@@ -8605,25 +8605,6 @@ Should you rescale the video, you would need an interlace-aware resizer,
 which you can activate with \-vf scale=<width>:<height>:1.
 .
 .TP
-.B rc_reaction_delay_factor=<value>
-This parameter controls the number of frames the CBR rate controller
-will wait before reacting to bitrate changes and compensating for them
-to obtain a constant bitrate over an averaging range of frames.
-.
-.TP
-.B rc_averaging_period=<value>
-Real CBR is hard to achieve.
-Depending on the video material, bitrate can be variable, and hard to predict.
-Therefore Xvid uses an averaging period for which it guarantees a given
-amount of bits (minus a small variation).
-This settings expresses the "number of frames" for which Xvid averages
-bitrate and tries to achieve CBR.
-.
-.TP
-.B rc_buffer=<value>
-size of the rate control buffer
-.
-.TP
 .B min_iquant=<0\-31>
 minimum I-frame quantizer (default: 2)
 .
@@ -8757,6 +8738,25 @@ On playback, when reaching an n-vop the previous frame will be displayed.
 .I WARNING:
 Playing with this setting may result in a jerky video, so use it at your
 own risks!
+.
+.TP
+.B rc_reaction_delay_factor=<value>
+This parameter controls the number of frames the CBR rate controller
+will wait before reacting to bitrate changes and compensating for them
+to obtain a constant bitrate over an averaging range of frames.
+.
+.TP
+.B rc_averaging_period=<value>
+Real CBR is hard to achieve.
+Depending on the video material, bitrate can be variable, and hard to predict.
+Therefore Xvid uses an averaging period for which it guarantees a given
+amount of bits (minus a small variation).
+This settings expresses the "number of frames" for which Xvid averages
+bitrate and tries to achieve CBR.
+.
+.TP
+.B rc_buffer=<value>
+size of the rate control buffer
 .
 .TP
 .B curve_compression_high=<0\-100>
