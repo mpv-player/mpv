@@ -1795,7 +1795,7 @@ static int mp_property_channels(m_option_t* prop,int action,void* arg) {
 
 /// Selected audio id (RW)
 static int mp_property_audio(m_option_t* prop,int action,void* arg) {
-    int current_id = -1;
+    int current_id = -1, tmp;
 
     if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
 
@@ -1829,8 +1829,13 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
         return M_PROPERTY_OK;
 
     case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_SET:
+        if(action==M_PROPERTY_SET && arg)
+            tmp = *((int*)arg);
+        else
+            tmp = -1;
         current_id = demuxer->audio->id;
-        audio_id = demuxer_switch_audio(demuxer, -1);
+        audio_id = demuxer_switch_audio(demuxer, tmp);
         if(audio_id > -1 && demuxer->audio->id != current_id) {
           sh_audio_t *sh2;
           uninit_player(INITED_AO | INITED_ACODEC);
@@ -1852,7 +1857,7 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
 static int reinit_video_chain(void);
 /// Selected video id (RW)
 static int mp_property_video(m_option_t* prop,int action,void* arg) {
-    int current_id = -1;
+    int current_id = -1, tmp;
 
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
 
@@ -1874,8 +1879,13 @@ static int mp_property_video(m_option_t* prop,int action,void* arg) {
         return M_PROPERTY_OK;
 
     case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_SET:
         current_id = demuxer->video->id;
-        video_id = demuxer_switch_video(demuxer, -1);
+        if(action==M_PROPERTY_SET && arg)
+            tmp = *((int*)arg);
+        else
+            tmp = -1;
+        video_id = demuxer_switch_video(demuxer, tmp);
         if(video_id > -1 && demuxer->video->id != current_id) {
           sh_video_t *sh2;
           uninit_player(INITED_VCODEC | (fixed_vo ? 0 : INITED_VO));
