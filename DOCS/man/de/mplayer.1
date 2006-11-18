@@ -182,7 +182,7 @@ PJS und unser eigenes: MPsub) unterstützt, ebenso wie DVD-Untertitel
 (MPlayer's Movie Encoder) ist ein einfacher Movie-Encoder, der so entworfen
 wurde, dass er alle von MPlayer abspielbaren Filme (siehe oben) in andere
 von MPlayer abspielbare Formate (siehe unten) umwandeln kann.
-Er encodiert nach MPEG-4 (DivX/XviD), jeden der libavcodec-Codecs und Audio
+Er encodiert nach MPEG-4 (DivX/Xvid), jeden der libavcodec-Codecs und Audio
 nach PCM/\:MP3/\:VBRMP3, das ganze in 1, 2 oder 3 Durchgängen.
 Des weiteren kann er Streams kopieren und verfügt über ein mächtiges
 Filtersystem (Entfernen (cropping) und Hinzufügen (expanding) von Rändern,
@@ -4153,7 +4153,7 @@ Umgehe Fehler (Bugs) des Encoders manuell.
 2 (msmpeg4v3): manche ältere, von lavc generierte msmpeg4v3-Dateien (keine
 automatische Erkennung)
 .br
-4 (mpeg4): XviD-Interlacing-Bug (automatisch erkannt bei fourcc==XVIX)
+4 (mpeg4): Xvid-Interlacing-Bug (automatisch erkannt bei fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (automatisch erkannt bei fourcc==UMP4)
 .br
@@ -4161,7 +4161,7 @@ automatische Erkennung)
 .br
 32 (mpeg4): ungültiger vlc-Bug (automatisch erkannt durch fourcc)
 .br
-64 (mpeg4): qpel-Bug bei XviD und DivX (automatisch erkannt durch
+64 (mpeg4): qpel-Bug bei Xvid und DivX (automatisch erkannt durch
 fourcc/\:Version)
 .br
 128 (mpeg4): alter qpel-Standard-Bug (automatisch erkannt durch
@@ -4496,14 +4496,14 @@ Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
 .
 .TP
 .B \-xvidopts <Option1:Option2:...>
-Gibt zusätzliche Parameter für die Decodierung mit XviD an.
+Gibt zusätzliche Parameter für die Decodierung mit Xvid an.
 .br
 .I ANMERKUNG:
-Da libavcodec schneller als XviD ist, könntest du in Betracht ziehen, den
+Da libavcodec schneller als Xvid ist, könntest du in Betracht ziehen, den
 Nachbearbeitungsfilter (\-vf pp) und Decoder (\-vfm ffmpeg) von libavcodec zu
 benutzen.
 .sp 1
-XviD's interne Nachbearbeitungsfilter:
+Xvid's interne Nachbearbeitungsfilter:
 .PD 0
 .RSs
 .IPs deblock-chroma (siehe auch \-vf pp)
@@ -7874,8 +7874,8 @@ wirksam sind, wenn vrc_strategy nicht auf 0 gesetzt ist.
 .IPs 0
 Benutze die interne lavc-Bitratenkontrolle (Standard).
 .IPs 1
-Benutze die XviD-Bitratenkontrolle (experimentell; MEncoder muss mit
-Unterstützung für XviD 1.1 oder höher kompiliert worden sein).
+Benutze die Xvid-Bitratenkontrolle (experimentell; MEncoder muss mit
+Unterstützung für Xvid 1.1 oder höher kompiliert worden sein).
 .RE
 .PD 1
 .
@@ -8865,7 +8865,7 @@ und PSNR-Wert einzelner Frames ein wenig mehr verändern.
 .B bitrate=<Wert> (nur bei CBR oder im Modus mit zwei Durchläufen)
 Setzt die zu benutzende Bitrate in kBits/\:Sekunde, wenn der Wert < 16000 ist,
 oder in Bits/\:Sekunde, wenn der Wert > 16000 ist.
-Ist <Wert> negativ, so benutzt XviD dessen absoluten Wert als Zielgröße des
+Ist <Wert> negativ, so benutzt Xvid dessen absoluten Wert als Zielgröße des
 Videos (in kBytes) und berechnet die zugehörige Bitrate automagisch.
 (Standard: 687 kBits/s)
 .
@@ -8937,9 +8937,9 @@ konstante Bitrate zu erhalten.
 Eine wirklich konstante Bitrate ist nur schwer zu erreichen.
 Abhängig vom Videomaterial kann die Bitrate variabel und schwer vorauszusagen
 sein.
-Daher benutzt der XviD-Encoder einen durchschnittlichen Zeitraum, für den er
+Daher benutzt der Xvid-Encoder einen durchschnittlichen Zeitraum, für den er
 eine gegebene Anzahl Bits garantiert (minus einer kleinen Schwankung).
-Diese Option setzt die Anzahl der Frames, über denen XviD die Bitrate mittelt,
+Diese Option setzt die Anzahl der Frames, über denen Xvid die Bitrate mittelt,
 um eine konstante Bitrate zu erreichen.
 .
 .TP
@@ -9013,7 +9013,7 @@ Der letzte Intra-Frame wird normal behandelt (Standard: 30).
 .
 .TP
 .B (no)closed_gop
-Diese Option weist XviD an, jede GOP (Group Of Pictures, Gruppe von Bildern,
+Diese Option weist Xvid an, jede GOP (Group Of Pictures, Gruppe von Bildern,
 die von zwei I-Frames begrenzt sind) zu schließen, was die GOPs unabhängig
 voneinander macht.
 Dies bedeutet lediglich, dass der letzte Frame einer GOP entweder ein P- oder
@@ -9033,7 +9033,7 @@ aktiviere sie nur, wenn du genau weißt, was du tust.
 .br
 .I WARNUNG:
 Dies erzeugt einen ungültigen Bitstream, der höchstwahrscheinlich von keinem
-ISO-MPEG-4-Decoder außer DivX/\:libavcodec/\:XviD dekodiert werden kann.
+ISO-MPEG-4-Decoder außer DivX/\:libavcodec/\:Xvid dekodiert werden kann.
 .br
 .I WARNUNG:
 Dies wird außerdem eine vorgetäuschte DivX-Version in der Datei speichern,
@@ -9041,7 +9041,7 @@ welche die Fehlerkorrekturmechanismen mancher Decoder verwirren kann.
 .
 .TP
 .B (no)grayscale
-Sorgt dafür, dass XviD die Chrominanzebenen verwirft, so dass das encodierte
+Sorgt dafür, dass Xvid die Chrominanzebenen verwirft, so dass das encodierte
 Video schwarz/weiß wird.
 Beachte, dass dies den Encodierungsvorgang nicht beschleunigt, es werden in
 der letzten Stufe der Encodierung einfach keine Farbdaten geschrieben.
@@ -9106,7 +9106,7 @@ diese Option zu aktivieren.
 .TP
 .B (no)gmc
 Aktiviert Globale Bewegungskompensation (Global Motion Compensation), welche
-XviD spezielle Frames (GMC-Frames) generieren lässt, die sich gut für
+Xvid spezielle Frames (GMC-Frames) generieren lässt, die sich gut für
 Pan/\:Zoom/\:Drehung von Bildern eignen.
 Ob das Benutzen dieser Option Bits einspart, hängt sehr vom Quellmaterial ab.
 .
@@ -9124,7 +9124,7 @@ die Qualität zu erhöhen) (Standard: aktiviert).
 .B (no)cartoon
 Aktiviere diese Option, wenn die zu encodierende Sequenz ein Anime/\:Cartoon
 ist.
-Sie modifiziert ein paar XviD-interne Schwellenwerte, so dass XviD bei
+Sie modifiziert ein paar Xvid-interne Schwellenwerte, so dass Xvid bei
 Frametypen und Motion-Vectors für flach aussehende Cartoons bessere
 Entscheidungen trifft.
 .
@@ -9159,7 +9159,7 @@ aktiviert).
 Der Algorithmus für die Bewegungsabschätzung basiert auf der Suche im
 normalen Farbraum und versucht, einen Motion-Vector zu finden, der die
 Differenz zwischen dem ursprünglichen und dem encodierten Frame minimiert.
-Ist diese Option aktiviert, benutzt XviD außerdem den Frequenzbereich
+Ist diese Option aktiviert, benutzt Xvid außerdem den Frequenzbereich
 (frequency domain, DCT), um nach einem Motion-Vector zu suchen, der nicht nur
 den Unterschied in einem bestimmten Gebiet, sondern außerdem die encodierte
 Länge eines Blocks minimiert.
@@ -9202,7 +9202,7 @@ Du kannst eine solche mit dem Matrixeditor von xvid4conf erstellen.
 .
 .TP
 .B curve_compression_high=<0\-100>
-Diese Einstellung erlaubt XviD, einen gewissen Teil der Bits weg von Szenen
+Diese Einstellung erlaubt Xvid, einen gewissen Teil der Bits weg von Szenen
 mit hohen Bitraten zu nehmen und dem allgemeinen Vorrat für Bits hinzuzufügen.
 Du kannst diese Option benutzen, falls du einen Film mit so vielen schnell
 bewegten Szenen hast, dass die Szenen mit geringeren Bitraten anfangen,
@@ -9210,7 +9210,7 @@ schlecht auszusehen (Standard: 0).
 .
 .TP
 .B curve_compression_low=<0\-100>
-Diese Einstellung erlaubt XviD, einen gewissen Teil der allgemein verfügbaren
+Diese Einstellung erlaubt Xvid, einen gewissen Teil der allgemein verfügbaren
 Bits den Szenen zuzuteilen, die mit niedrigeren Bitraten codiert
 werden, wobei dafür dem ganzen Video ein paar Bits weggenommen werden.
 Die kann sich nützlich erweisen, wenn du ein paar Szenen mit eigentlich
@@ -9261,9 +9261,9 @@ Meistens geben Benutzer die Zielbitrate für ein Video an, ohne dabei den
 Overhead des Videocontainers zu beachten.
 Dieser kleine aber (meistens) konstante Overhead kann dazu führen, dass die
 gewünschte Dateigröße überschritten wird.
-XviD erlaubt Benutzern, den Anteil des Overheads anzugeben, der pro Frame
+Xvid erlaubt Benutzern, den Anteil des Overheads anzugeben, der pro Frame
 erzeugt wird (gib nur einen Durchschnittswert pro Frame an).
-0 hat eine spezielle Bedeutung, sie lässt XviD eigene Standardwerte
+0 hat eine spezielle Bedeutung, sie lässt Xvid eigene Standardwerte
 wählen (Standard: 24 \- durchschnittlicher Overhead für AVIs).
 .
 .TP
@@ -9314,7 +9314,7 @@ DXN-HDTV-Profil
 .I ANMERKUNG:
 Diese Profile sollten in Verbindung mit einem entsprechenden \-ffourcc benutzt
 werden.
-Generell anwendbar ist DX50, da manche Geräte XviD nicht, die meisten aber
+Generell anwendbar ist DX50, da manche Geräte Xvid nicht, die meisten aber
 DivX erkennen.
 .RE
 .
@@ -9386,7 +9386,7 @@ Die gelieferten Werte haben die Einheit dB (Dezibel), je höher desto besser.
 .
 .PP
 .sp 1
-Die folgende Option ist nur bei XviD 1.1.x verfügbar.
+Die folgende Option ist nur bei Xvid 1.1.x verfügbar.
 .
 .TP
 .B bvhq=<0|1>
@@ -9398,7 +9398,7 @@ Performance-Einbußen auftreten (Standard: 1).
 .
 .PP
 .sp 1
-Die folgende Option ist nur in der CVS-Version von XviD verfügbar.
+Die folgende Option ist nur in der CVS-Version von Xvid verfügbar.
 .
 .TP
 .B threads=<0\-n>
