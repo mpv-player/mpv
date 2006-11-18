@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21003
+.\" In sync with r21005
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -289,7 +289,9 @@ Beginne/beende die Aufnahme von Schnappschüssen.
 .IPs "I\ \ \ \ "
 Zeige den Dateinamen im OSD.
 .IPs "! und @"
-Spult zum Anfang des vorigen/nächsten Kapitels
+Spult zum Anfang des vorigen/nächsten Kapitels.
+.IPs "D (nur bei \-vo xvmc)"
+Aktiviere/deaktiviere Deinterlacer.
 .RE
 .PD 1
 .PP
@@ -8945,16 +8947,28 @@ um eine konstante Bitrate zu erreichen.
 Größe des Bitratenkontrollpuffers
 .
 .TP
-.B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-CBR-Modus: minimaler und maximaler Quantisierungsparameter für alle Frames
-(Standard: 2\-31)
-.br
-Modus mit zwei Durchläufen: minimaler und maximaler Quantisierungsparameter für
-Intra-/P-Frames (Standard: 2\-31/\:2\-31)
-.br
-.I WARNUNG:
-Seit Version 1.0.x von XviD ist diese Option ersetzt durch die
-Optionen [min|max]_[i|p|b]quant.
+.B min_iquant=<0\-31>
+minimaler Wert für den Quantisierungsparameter für Intra-Frames (Standard: 2)
+.
+.TP
+.B max_iquant=<0\-31>
+maximaler Wert für den Quantisierungsparameter für Intra-Frames (Standard: 2)
+.
+.TP
+.B min_pquant=<0\-31>
+minimaler Wert für den Quantisierungsparameter für P-Frames (Standard: 2)
+.
+.TP
+.B max_pquant=<0\-31>
+maximaler Wert für den Quantisierungsparameter für P-Frames (Standard: 31)
+.
+.TP
+.B min_bquant=<0\-31>
+minimaler Wert für den Quantisierungsparameter für B-Frames (Standard: 2)
+.
+.TP
+.B max_bquant=<0\-31>
+minimaler Wert für den Quantisierungsparameter für B-Frames (Standard: 31)
 .
 .TP
 .B min_key_interval=<Wert> (nur im Modus mit zwei Durchläufen)
@@ -9200,30 +9214,6 @@ eines Bildes weniger Details zu erkennen.
 Sie komprimiert diese Bereiche stärke als mittlere, was Bits einspart, die
 dafür für andere Frames benutzt werden können, so wird die subjektive Qualität
 im Ganzen erhöht, der PSNR-Wert dabei jedoch möglicherweise reduziert.
-.
-.TP
-.B min_iquant=<0\-31>
-minimaler Wert für den Quantisierungsparameter für Intra-Frames (Standard: 2)
-.
-.TP
-.B max_iquant=<0\-31>
-maximaler Wert für den Quantisierungsparameter für Intra-Frames (Standard: 2)
-.
-.TP
-.B min_pquant=<0\-31>
-minimaler Wert für den Quantisierungsparameter für P-Frames (Standard: 2)
-.
-.TP
-.B max_pquant=<0\-31>
-maximaler Wert für den Quantisierungsparameter für P-Frames (Standard: 31)
-.
-.TP
-.B min_bquant=<0\-31>
-minimaler Wert für den Quantisierungsparameter für B-Frames (Standard: 2)
-.
-.TP
-.B max_bquant=<0\-31>
-minimaler Wert für den Quantisierungsparameter für B-Frames (Standard: 31)
 .
 .TP
 .B quant_intra_matrix=<Dateiname>
