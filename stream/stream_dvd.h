@@ -2,10 +2,10 @@
 #ifdef USE_DVDREAD
 
 #ifdef USE_DVDREAD_INTERNAL
-#include "libdvdread/dvd_reader.h"
-#include "libdvdread/ifo_types.h"
-#include "libdvdread/ifo_read.h"
-#include "libdvdread/nav_read.h"
+#include "dvdread/dvd_reader.h"
+#include "dvdread/ifo_types.h"
+#include "dvdread/ifo_read.h"
+#include "dvdread/nav_read.h"
 #elif defined(USE_DVDNAV)
 #include <dvd_reader.h>
 #include <ifo_types.h>

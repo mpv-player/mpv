@@ -112,7 +112,7 @@ ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
 ifeq ($(DVDREAD_INTERNAL),yes)
-PARTS += libdvdread
+PARTS += dvdread
 PARTS += libdvdcss
 endif
 ifeq ($(GUI),yes)
@@ -168,8 +168,8 @@ ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
 endif
 ifeq ($(DVDREAD_INTERNAL),yes)
-COMMON_DEPS += libdvdread/libdvdread.a
-COMMON_LIBS += libdvdread/libdvdread.a
+COMMON_DEPS += dvdread/libdvdread.a
+COMMON_LIBS += dvdread/libdvdread.a
 COMMON_DEPS += libdvdcss/libdvdcss.a
 COMMON_LIBS += libdvdcss/libdvdcss.a
 endif
@@ -201,8 +201,8 @@ all:	$(ALL_PRG)
 libaf/libaf.a:
 	$(MAKE) -C libaf
 
-libdvdread/libdvdread.a:
-	$(MAKE) -C libdvdread
+dvdread/libdvdread.a:
+	$(MAKE) -C dvdread
 
 libdvdcss/libdvdcss.a:
 	$(MAKE) -C libdvdcss
@@ -476,7 +476,7 @@ input/libinput.a: .norecurse $(wildcard input/*.[ch])
 
 libmenu/libmenu.a: .norecurse $(wildcard libmenu/*.[ch])
 libaf/libaf.a: .norecurse $(wildcard libaf/*.[ch])
-libdvdread/libdvdread.a: .norecurse $(wildcard libdvdread/*.[ch])
+dvdread/libdvdread.a: .norecurse $(wildcard dvdread/*.[ch])
 libdvdcss/libdvdcss.a: .norecurse $(wildcard libdvdcss/*.[ch])
 
 libmpdemux/libmpdemux.a: .norecurse $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])

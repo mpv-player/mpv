@@ -20,7 +20,7 @@ all: netstream
 # it does not work with either GUI, LIVE555 or libavformat enabled
 DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
 	$(MPROOT)/stream/stream.a \
-	$(MPROOT)/libdvdread/libdvdread.a \
+	$(MPROOT)/dvdread/libdvdread.a \
 	$(MPROOT)/libmpcodecs/native/minilzo.o \
 	$(MPROOT)/libvo/aclib.o \
 	$(MPROOT)/libmpcodecs/img_format.o \
