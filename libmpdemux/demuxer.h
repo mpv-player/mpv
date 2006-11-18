@@ -79,6 +79,7 @@
 #define DEMUXER_CTRL_SWITCH_AUDIO 12
 #define DEMUXER_CTRL_RESYNC 13
 #define DEMUXER_CTRL_SWITCH_VIDEO 14
+#define DEMUXER_CTRL_IDENTIFY_PROGRAM 15
 
 // Holds one packet/frame/whatever
 typedef struct demux_packet_st {
@@ -196,6 +197,11 @@ typedef struct demuxer_st {
   void* priv;  // fileformat-dependent data
   char** info;
 } demuxer_t;
+
+typedef struct {
+  int progid;        //program id
+  int aid, vid, sid; //audio, video and subtitle id
+} demux_program_t;
 
 inline static demux_packet_t* new_demux_packet(int len){
   demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
