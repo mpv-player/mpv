@@ -173,6 +173,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	if(s->xq[i])
 	  free(s->xq[i]);
       free(s->xq);
+      s->xq = NULL;
     }
 
     if(AF_DETACH == (rv = set_types(af,n)))
