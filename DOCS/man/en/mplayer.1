@@ -8556,14 +8556,13 @@ minimum interval between keyframes (default: 0)
 maximum interval between keyframes (default: 10*fps)
 .
 .TP
-.B mpeg_quant
-Use MPEG quantizers instead of H.263.
+.B quant_type=<h263|mpeg>
+Sets the type of quantizer to use.
 For high bitrates, you will find that MPEG quantization preserves more detail.
 For low bitrates, the smoothing of H.263 will give you less block noise.
-When using custom matrices, MPEG must be used.
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is replaced by the quant_type option.
+When using custom matrices, MPEG quantization
+.B must
+be used.
 .
 .TP
 .B keyframe_boost=<0\-1000> (two pass mode only)
@@ -8707,15 +8706,6 @@ quality at fixed bitrate) at a lesser cost than with VHQ (default: on).
 Activate this if your encoded sequence is an anime/\:cartoon.
 It modifies some Xvid internal thresholds so Xvid takes better decisions on
 frame types and motion vectors for flat looking cartoons.
-.
-.TP
-.B quant_type=<h263|mpeg>
-Sets the type of quantizer to use.
-For high bitrates, you will find that MPEG quantization preserves more detail.
-For low bitrates, the smoothing of H.263 will give you less block noise.
-When using custom matrices, MPEG quantization
-.B must
-be used.
 .
 .TP
 .B (no)chroma_me
