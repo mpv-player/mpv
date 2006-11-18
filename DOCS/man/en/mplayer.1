@@ -8522,14 +8522,28 @@ bitrate and tries to achieve CBR.
 size of the rate control buffer
 .
 .TP
-.B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-CBR mode: min & max quantizer for all frames (default: 2\-31)
-.br
-two pass mode: min & max quantizer for I/P-frames (default: 2\-31/\:2\-31)
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is replaced by the
-[min|max]_[i|p|b]quant options.
+.B min_iquant=<0\-31>
+minimum I-frame quantizer (default: 2)
+.
+.TP
+.B max_iquant=<0\-31>
+maximum I-frame quantizer (default: 31)
+.
+.TP
+.B min_pquant=<0\-31>
+minimum P-frame quantizer (default: 2)
+.
+.TP
+.B max_pquant=<0\-31>
+maximum P-frame quantizer (default: 31)
+.
+.TP
+.B min_bquant=<0\-31>
+minimum B-frame quantizer (default: 2)
+.
+.TP
+.B max_bquant=<0\-31>
+maximum B-frame quantizer (default: 31)
 .
 .TP
 .B min_key_interval=<value> (two pass only)
@@ -8760,30 +8774,6 @@ and very dark parts of the picture.
 It compresses those areas more strongly than medium ones, which will
 save bits that can be spent again on other frames, raising overall
 subjective quality and possibly reducing PSNR.
-.
-.TP
-.B min_iquant=<0\-31>
-minimum I-frame quantizer (default: 2)
-.
-.TP
-.B max_iquant=<0\-31>
-maximum I-frame quantizer (default: 31)
-.
-.TP
-.B min_pquant=<0\-31>
-minimum P-frame quantizer (default: 2)
-.
-.TP
-.B max_pquant=<0\-31>
-maximum P-frame quantizer (default: 31)
-.
-.TP
-.B min_bquant=<0\-31>
-minimum B-frame quantizer (default: 2)
-.
-.TP
-.B max_bquant=<0\-31>
-maximum B-frame quantizer (default: 31)
 .
 .TP
 .B quant_intra_matrix=<filename>
