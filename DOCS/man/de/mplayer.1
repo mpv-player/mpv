@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r20900
+.\" In sync with r21003
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1709,13 +1709,18 @@ Synchronisationsproblemen, was diesen Prozess unkomfortabel macht.
 Verfügbare Optionen sind folgende:
 .RSs
 .IPs device=<Wert>
-Radiogerät, das verwendet werden soll (Standard: /dev/radio0).
+Radiogerät, das verwendet werden soll (Standard: /dev/radio0 für Linux und
+/dev/tuner0 für *BSD).
 .IPs driver=<Wert>
 Radiotreiber, der verwendet werden soll (Standard: v4l2 wenn verfügbar, v4l
 sonst).
 Momentan werden die Treiber v4l und v4l2 unterstützt.
 .IPs volume=<0..100>
-Tonlautstärke für das Radiogerät (Standard: 100)
+Lautstärke für das Radiogerät (Standard: 100)
+.IPs freq_min=<Wert> (nut bei *BSD BT848)
+minimal erlaubte Frequenz (Standard: 87.50)
+.IPs freq_max=<Wert> (nur bei *BSD BT848)
+maximal erlaubte Frequenz (Standard: 108.00)
 .IPs channels=<Frequenz>\-<Name>,<Frequenz>\-<Name>,...
 Setzt die Liste der Kanäle.
 Benutze _ für Leerzeichen in Namen (oder spiele mit der Quotierung ;-).
@@ -8919,16 +8924,6 @@ interlaced Material bemerkt; du kannst einen solchen mit \-vf
 scale=<Breite>:<Höhe>:1 aktivieren.
 .
 .TP
-.B "4mv\ \ \ \ "
-Benutzt vier Motion-Vectors pro Makroblock, was eine bessere Kompression
-auf Kosten der Encodiergeschwindigkeit bringen kann.
-.br
-.I WARNUNG:
-Seit Version 1.0.x von XviD ist diese Option nicht mehr separat verfügbar,
-die Funktionalität wurde in die Option me_quality integriert.
-Bei me_quality > 4 wird 4mv aktiviert.
-.
-.TP
 .B rc_reaction_delay_factor=<Wert>
 Dieser Parameter kontrolliert die Anzahl der Frames, die die
 CBR-Bitratenkontrolle wartet, bevor sie auf Änderungen der Bitrate reagiert
@@ -8980,18 +8975,6 @@ Bei der Benutzung eigener Matrizen muss die MPEG-Quantisierung benutzt werden.
 .br
 .I WARNUNG:
 Seit XviD 1.0.x ist diese Option durch die Option quant_type ersetzt.
-.
-.TP
-.B mod_quant
-Entscheide für jedes Bild, ob MPEG- oder H.263-Quantisierung zu verwenden
-ist (nur im two-pass-Modus).
-.br
-.I WARNUNG:
-Dies erzeugt einen unerlaubten Bitstream, der höchstwahrscheinlich von keinem
-Decoder außer libavcodec oder XviD dekodiert werden kann.
-.br
-.I WARNUNG:
-Seit Version 1.0.x von XviD ist diese Version nicht länger verfügbar.
 .
 .TP
 .B keyframe_boost=<0\-1000> (nur im Modus mit zwei Durchläufen)

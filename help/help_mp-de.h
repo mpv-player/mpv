@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r20972
+// In sync with r21001
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -2020,4 +2020,5 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverUnknownStr "[Radio] Unbekannter Treibername: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[Radio] Benutze V4Lv2-Radioschnittstelle.\n"
 #define MSGTR_RADIO_DriverV4L "[Radio] Benutze V4Lv1-Radioschnittstelle.\n"
+#define MSGTR_RADIO_DriverBSDBT848 "[Radio] Benutze *BSD BT848-Radioschnittstelle.\n"
 
