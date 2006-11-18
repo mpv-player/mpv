@@ -275,7 +275,6 @@ Codecs:
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
   --disable-xvid            disable XviD [autodetect]
-  --disable-xvid3           disable XviD 3 [autodetect]
   --disable-x264            disable x264 [autodetect]
   --disable-nut             disable libnut [autodetect]
   --disable-libavutil       disable libavutil [autodetect]
@@ -1659,7 +1658,6 @@ _smbsupport=auto
 _vidix_internal=auto
 _vidix_external=auto
 _joystick=no
-_xvid3=auto
 _xvid=auto
 _x264=auto
 _nut=auto
@@ -1922,8 +1920,6 @@ for ac_option do
   --disable-vidix-external)	_vidix_external=no	;;
   --enable-joystick)	_joystick=yes	;;
   --disable-joystick)	_joystick=no	;;
-  --enable-xvid3)	_xvid3=yes	;;
-  --disable-xvid3)	_xvid3=no	;;
   --enable-xvid)	_xvid=yes	;;
   --disable-xvid)	_xvid=no	;;
   --enable-x264)        _x264=yes       ;;
@@ -6409,28 +6405,6 @@ fi
 echores "$_bl"
 
 
-echocheck "XviD 3"
-  if test "$_xvid3" = auto ; then
-  cat > $TMPC << EOF
-#include <xvid.h>
-int main(void) { xvid_init(0, 0, 0, 0); return 0; }
-EOF
-  _ld_xvid="$_ld_xvid -lxvidcore"
-  _xvid3=no
-  cc_check $_ld_xvid -lxvidcore $_ld_lm && _xvid3=yes
-fi
-
-if test "$_xvid3" = yes ; then
-  _def_xvid3='#define HAVE_XVID3 1'
-  _codecmodules="xvid3 $_codecmodules"
-else
-  _def_xvid3='#undef HAVE_XVID3'
-  _nocodecmodules="xvid3 $_nocodecmodules"
-  _ld_xvid=""
-fi
-echores "$_xvid3"
-
-
 echocheck "XviD"
 if test "$_xvid" = auto ; then
   _xvid=no
@@ -7484,7 +7458,6 @@ CONFIG_LIBPOSTPROC = $_libpostproc
 CONFIG_LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
 LIBDV = $_libdv
-XVID3 = $_xvid3
 XVID4 = $_xvid
 X264 = $_x264
 LIBNUT = $_nut
@@ -7653,7 +7626,6 @@ $_def_stddef
 #define USE_STREAM_CACHE 1
 
 /* Define if you are using XviD library */
-$_def_xvid3
 $_def_xvid
 
 /* Define if you are using the X.264 library */
