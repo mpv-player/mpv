@@ -8665,6 +8665,16 @@ When using custom matrices, MPEG quantization
 be used.
 .
 .TP
+.B quant_intra_matrix=<filename>
+Load a custom intra matrix file.
+You can build such a file with xvid4conf's matrix editor.
+.
+.TP
+.B quant_inter_matrix=<filename>
+Load a custom inter matrix file.
+You can build such a file with xvid4conf's matrix editor.
+.
+.TP
 .B keyframe_boost=<0\-1000> (two pass mode only)
 Shift some bits from the pool for other frame types to intra frames,
 thus improving keyframe quality.
@@ -8747,16 +8757,6 @@ On playback, when reaching an n-vop the previous frame will be displayed.
 .I WARNING:
 Playing with this setting may result in a jerky video, so use it at your
 own risks!
-.
-.TP
-.B quant_intra_matrix=<filename>
-Load a custom intra matrix file.
-You can build such a file with xvid4conf's matrix editor.
-.
-.TP
-.B quant_inter_matrix=<filename>
-Load a custom inter matrix file.
-You can build such a file with xvid4conf's matrix editor.
 .
 .TP
 .B curve_compression_high=<0\-100>
