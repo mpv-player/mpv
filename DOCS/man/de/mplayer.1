@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21015
+.\" In sync with r21026
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -252,8 +252,12 @@ Verringert/\:erhöht die Lautstärke.
 Verringert/\:erhöht die Lautstärke.
 .IPs "m\ \ \ \ "
 Ton-Stummschaltung.
+.IPs "_ (nur bei MPEG-TS)"
+Wechselt zwischen den verfügbaren Videospuren.
 .IPs "# (nur bei MPEG und Matroska)"
 Wechselt zwischen den verfügbaren Audiospuren.
+.IPs "TAB (nur bei MPEG-TS)"
+Wechselt zwischen den verfügbaren MPEG-Programmen.
 .IPs "f\ \ \ \ "
 Ändert Vollbild-Wiedergabe (ein/\:aus, siehe auch \-fs).
 .IPs "T\ \ \ \ "
@@ -269,7 +273,7 @@ Wechselt zwischen verschiedenen Framedropping-Einstellungen:  keine /
 Display / überspringe Decodierung (siehe auch \-framedrop und \-hardframedrop).
 .IPs "v\ \ \ \ "
 Ändert Sichtbarkeit der Untertitel (aus/\:ein).
-.IPs "b / j"
+.IPs "j\ \ \ \ "
 Wechselt durch die verfügbaren Untertitel.
 .IPs "F\ \ \ \ "
 Ändert die Anzeige der "erzwungenen Untertitel".
@@ -9032,27 +9036,6 @@ interlaced Material bemerkt; du kannst einen solchen mit \-vf
 scale=<Breite>:<Höhe>:1 aktivieren.
 .
 .TP
-.B rc_reaction_delay_factor=<Wert>
-Dieser Parameter kontrolliert die Anzahl der Frames, die die
-CBR-Bitratenkontrolle wartet, bevor sie auf Änderungen der Bitrate reagiert
-und sie anpasst, um in einer durchschnittlich großen Spanne von Frames eine
-konstante Bitrate zu erhalten.
-.
-.TP
-.B rc_averaging_period=<Wert>
-Eine wirklich konstante Bitrate ist nur schwer zu erreichen.
-Abhängig vom Videomaterial kann die Bitrate variabel und schwer vorauszusagen
-sein.
-Daher benutzt der Xvid-Encoder einen durchschnittlichen Zeitraum, für den er
-eine gegebene Anzahl Bits garantiert (minus einer kleinen Schwankung).
-Diese Option setzt die Anzahl der Frames, über denen Xvid die Bitrate mittelt,
-um eine konstante Bitrate zu erreichen.
-.
-.TP
-.B rc_buffer=<Wert>
-Größe des Bitratenkontrollpuffers
-.
-.TP
 .B min_iquant=<0\-31>
 minimaler Wert für den Quantisierungsparameter für Intra-Frames (Standard: 2)
 .
@@ -9096,6 +9079,16 @@ Bei der Benutzung eigener Matrizen
 die MPEG-Quantisierung benutzt werden.
 .
 .TP
+.B quant_intra_matrix=<Dateiname>
+Lädt eine Datei mit einer eigenen Intra-Matrix.
+Du kannst eine solche mit dem Matrixeditor von xvid4conf erstellen.
+.
+.TP
+.B quant_inter_matrix=<Dateiname>
+Lädt eine Datei mit einer eigenen Inter-Matrix.
+Du kannst eine solche mit dem Matrixeditor von xvid4conf erstellen.
+.
+.TP
 .B keyframe_boost=<0\-1000> (nur im Modus mit zwei Durchläufen)
 Diese Option verlagert einige Bits aus dem Vorrat anderer Frametypen zu
 Intra-Frames, so dass die Qualität von Keyframes verbessert wird.
@@ -9116,6 +9109,31 @@ Keyframes anzupassen, die du für zu nah hintereinander zum ersten hältst.
 kfthreshold setzt den Bereich, in dem Keyframes reduziert werden, und
 kfreduction bestimmt die Reduktion der Bitrate, die angewendet wird.
 Der letzte Intra-Frame wird normal behandelt (Standard: 30).
+.
+.TP
+.B max_bframes=<0\-4>
+Maximale Anzahl der B-Frames, die zwischen Intra- und P-Frames gesetzt wird
+(Standard: 2).
+.
+.TP
+.B bquant_ratio=<0\-1000>
+Verhältnis von B-Frames zu nicht-B-Frames bei der Quantisierung, 150=1.50
+(Standard: 150).
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+Offset von B-Frames zu nicht-B-Frames bei der Quantisierung, 100=1.00
+(Standard: 100).
+.
+.TP
+.B bf_threshold=<-255\-255>
+Diese Option erlaubt dir, die Priorität für die Benutzung von B-Frames
+anzugeben.
+Je höher der Wert, desto wahrscheinlicher wird ein B-Frame benutzt (Standard:
+0).
+Vergiss nicht, dass B-Frames normalerweise einen höheren
+Quantisierungsparameter benutzen, daher kann aggressives Erzeugen von B-Frames
+zu schlechterer visueller Qualität führen.
 .
 .TP
 .B (no)closed_gop
@@ -9146,31 +9164,6 @@ Dies wird außerdem eine vorgetäuschte DivX-Version in der Datei speichern,
 welche die Fehlerkorrekturmechanismen mancher Decoder verwirren kann.
 .
 .TP
-.B max_bframes=<0\-4>
-Maximale Anzahl der B-Frames, die zwischen Intra- und P-Frames gesetzt wird
-(Standard: 2).
-.
-.TP
-.B bquant_ratio=<0\-1000>
-Verhältnis von B-Frames zu nicht-B-Frames bei der Quantisierung, 150=1.50
-(Standard: 150).
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-Offset von B-Frames zu nicht-B-Frames bei der Quantisierung, 100=1.00
-(Standard: 100).
-.
-.TP
-.B bf_threshold=<-255\-255>
-Diese Option erlaubt dir, die Priorität für die Benutzung von B-Frames
-anzugeben.
-Je höher der Wert, desto wahrscheinlicher wird ein B-Frame benutzt (Standard:
-0).
-Vergiss nicht, dass B-Frames normalerweise einen höheren
-Quantisierungsparameter benutzen, daher kann aggressives Erzeugen von B-Frames
-zu schlechterer visueller Qualität führen.
-.
-.TP
 .B frame_drop_ratio=<0\-100> (nur bei max_bframes=0)
 Diese Einstellung erlaubt die Erstellung von Videostreams mit variabler
 Framerate.
@@ -9185,14 +9178,25 @@ Rumspielen mit dieser Einstellung kann zu ruckelnden Videos führen, benutze
 sie also auf eigenes Risiko!
 .
 .TP
-.B quant_intra_matrix=<Dateiname>
-Lädt eine Datei mit einer eigenen Intra-Matrix.
-Du kannst eine solche mit dem Matrixeditor von xvid4conf erstellen.
+.B rc_reaction_delay_factor=<Wert>
+Dieser Parameter kontrolliert die Anzahl der Frames, die die
+CBR-Bitratenkontrolle wartet, bevor sie auf Änderungen der Bitrate reagiert
+und sie anpasst, um in einer durchschnittlich großen Spanne von Frames eine
+konstante Bitrate zu erhalten.
 .
 .TP
-.B quant_inter_matrix=<Dateiname>
-Lädt eine Datei mit einer eigenen Inter-Matrix.
-Du kannst eine solche mit dem Matrixeditor von xvid4conf erstellen.
+.B rc_averaging_period=<Wert>
+Eine wirklich konstante Bitrate ist nur schwer zu erreichen.
+Abhängig vom Videomaterial kann die Bitrate variabel und schwer vorauszusagen
+sein.
+Daher benutzt der Xvid-Encoder einen durchschnittlichen Zeitraum, für den er
+eine gegebene Anzahl Bits garantiert (minus einer kleinen Schwankung).
+Diese Option setzt die Anzahl der Frames, über denen Xvid die Bitrate mittelt,
+um eine konstante Bitrate zu erreichen.
+.
+.TP
+.B rc_buffer=<Wert>
+Größe des Bitratenkontrollpuffers
 .
 .TP
 .B curve_compression_high=<0\-100>
