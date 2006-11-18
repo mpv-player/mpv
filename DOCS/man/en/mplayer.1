@@ -8598,23 +8598,6 @@ N-frame but not a B-frame.
 It is usually a good idea to turn this option on (default: on).
 .
 .TP
-.B (no)grayscale
-Make Xvid discard chroma planes so the encoded video is grayscale only.
-Note that this does not speed up encoding, it just prevents chroma data
-from being written in the last stage of encoding.
-.
-.TP
-.B "debug\ \ "
-Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
-file.)
-.RE
-.
-.PP
-.sp 1
-The following options are only available with the latest stable
-releases of Xvid 1.0.x (api4).
-.
-.TP
 .B (no)packed
 This option is meant to solve frame-order issues when encoding to
 container formats like AVI that cannot cope with out-of-order frames.
@@ -8630,6 +8613,18 @@ decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:Xvid.
 .I WARNING:
 This will also store a fake DivX version in the file so the bug
 autodetection of some decoders might be confused.
+.
+.TP
+.B (no)grayscale
+Make Xvid discard chroma planes so the encoded video is grayscale only.
+Note that this does not speed up encoding, it just prevents chroma data
+from being written in the last stage of encoding.
+.
+.TP
+.B "debug\ \ "
+Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
+file.)
+.RE
 .
 .TP
 .B max_bframes=<0\-4>
