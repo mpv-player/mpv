@@ -8590,12 +8590,12 @@ The last I-frame will get treated normally
 (default: 30).
 .
 .TP
-.B divx5bvop
-Generate DivX5 compatible B-frames (default: on).
-This seems to be mandatory only for old versions of DivX's decoder.
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is replaced by the closed_gop option.
+.B (no)closed_gop
+This option tells Xvid to close every GOP (Group Of Pictures bounded
+by two I-frames), which makes GOPs independent from each other.
+This just implies that the last frame of the GOP is either a P-frame or a
+N-frame but not a B-frame.
+It is usually a good idea to turn this option on (default: on).
 .
 .TP
 .B (no)grayscale
@@ -8651,14 +8651,6 @@ The higher the value, the higher the probability of B-frames being used
 (default: 0).
 Do not forget that B-frames usually have a higher quantizer, and therefore
 aggressive production of B-frames may cause worse visual quality.
-.
-.TP
-.B (no)closed_gop
-This option tells Xvid to close every GOP (Group Of Pictures bounded
-by two I-frames), which makes GOPs independent from each other.
-This just implies that the last frame of the GOP is either a P-frame or a
-N-frame but not a B-frame.
-It is usually a good idea to turn this option on (default: on).
 .
 .TP
 .B frame_drop_ratio=<0\-100> (max_bframes=0 only)
