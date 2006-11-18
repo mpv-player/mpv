@@ -4822,20 +4822,20 @@ if(step_sec>0) {
     case MP_CMD_SPEED_INCR : {
       float v = cmd->args[0].v.f;
       playback_speed += v;
-      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
       build_afilter_chain(sh_audio, &ao_data);
+      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
     } break;
     case MP_CMD_SPEED_MULT : {
       float v = cmd->args[0].v.f;
       playback_speed *= v;
-      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
       build_afilter_chain(sh_audio, &ao_data);
+      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
     } break;
     case MP_CMD_SPEED_SET : {
       float v = cmd->args[0].v.f;
       playback_speed = v;
-      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
       build_afilter_chain(sh_audio, &ao_data);
+      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
     } break;
     case MP_CMD_FRAME_STEP :
     case MP_CMD_PAUSE : {
