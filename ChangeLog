@@ -13,6 +13,10 @@ MPlayer (1.0)
     * fringe codecs: 4XM audio, Electronic Arts ADPCM audio, Delphine CIN audio
       and video, Interplay DPCM audio, Sierra VMD video, Tiertex SEQ video,
       Westwood IMA ADPCM audio via lavc
+    Demuxers:
+    * implemented switch_video and switch_program consistently with switch_audio
+      (default keys are "_" and TAB, respectively). For the time being this functionality
+      is only available in TS streams handled by demux_ts.c (not lavf).
 
     Streaming:
     * authentication for Real RTSP streams
