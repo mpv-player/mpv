@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r20969
+.\" synced with r21026
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -245,6 +245,8 @@ MPlayer имеет полность настраиваемый, основанный на командах, слой управления, к
 Циклически переключает доступные видео дорожки.
 .IPs "# (только для MPEG и Matroska)"
 Циклически переключает доступные аудио дорожки.
+.IPs "TAB (только MPEG-TS)"
+Циклически переключает доступные программы.
 .IPs "f\ \ \ \ "
 Включает полноэкранный режим (смотрите также \-fs).
 .IPs "T\ \ \ \ "
@@ -258,7 +260,7 @@ MPlayer имеет полность настраиваемый, основанный на командах, слой управления, к
 (смотрите \-framedrop и \-hardframedrop).
 .IPs "v\ \ \ \ "
 Изменяет видимость субтитров.
-.IPs "b / j"
+.IPs "j\ \ \ \ "
 Циклически  меняет доступные субтитры.
 .IPs "y и g"
 Перемещение вперед/назад по списку субтитров.
@@ -278,6 +280,8 @@ MPlayer имеет полность настраиваемый, основанный на командах, слой управления, к
 Показывет имя файла на OSD.
 .IPs "! и @"
 Перейти к началу предыдущего/следующего эпизода.
+.IPs "D (только \-vo xvmc)"
+Активирует/деактивирует деинтерлейсер.
 .RE
 .PD 1
 .PP
@@ -1430,12 +1434,16 @@ dvd:   DVD совместимый
 Доступные опции:
 .RSs
 .IPs device=<значение>
-Уиспользуемое устройство радио (по-умолчанию: /dev/radio0).
+Используемое устройство радио (по-умолчанию: /dev/radio0 для Linux и /dev/tuner0 для *BSD).
 .IPs driver=<значение>
 Используемый радио драйвер (пл-умолчанию: v4l2 если доступно, иначе v4l).
 В данный момент поддерживаются драйверы v4l и v4l2.
 .IPs volume=<0..100>
 Уровень звука для радио (по-умолчанию: 100)
+.IPs freq_min=<значение> (только *BSD BT848)
+Минимальная допустимая частота (по-молчанию: 87.50)
+.IPs freq_max=<значение> (только *BSD BT848)
+Максимальная допустимая частота (по-умолчанию: 108.00)
 .IPs channels=<frequency>\-<name>,<frequency>\-<name>,...
 Устанавливает список каналов.
 Используйте _ вместо пробелов в именах (или играйтесь с экранированием ;-).
@@ -8483,193 +8491,6 @@ Precision is gained at the expense of CPU time so decrease this setting if
 you need realtime encoding.
 .
 .TP
-.B (no)interlacing
-Encode the fields of interlaced video material.
-Turn this option on for interlaced content.
-.br
-.I NOTE:
-Should you rescale the video, you would need an interlace-aware resizer,
-which you can activate with \-vf scale=<width>:<height>:1.
-.
-.TP
-.B "4mv\ \ \ \ "
-Use 4 motion vectors per macroblock.
-This might give better compression, but slows down encoding.
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is no longer available separately, and its
-functionality is included in the me_quality option.
-When me_quality > 4, 4mv is activated.
-.
-.TP
-.B rc_reaction_delay_factor=<value>
-This parameter controls the number of frames the CBR rate controller
-will wait before reacting to bitrate changes and compensating for them
-to obtain a constant bitrate over an averaging range of frames.
-.
-.TP
-.B rc_averaging_period=<value>
-Real CBR is hard to achieve.
-Depending on the video material, bitrate can be variable, and hard to predict.
-Therefore Xvid uses an averaging period for which it guarantees a given
-amount of bits (minus a small variation).
-This settings expresses the "number of frames" for which Xvid averages
-bitrate and tries to achieve CBR.
-.
-.TP
-.B rc_buffer=<value>
-size of the rate control buffer
-.
-.TP
-.B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-CBR mode: min & max quantizer for all frames (default: 2\-31)
-.br
-two pass mode: min & max quantizer for I/P-frames (default: 2\-31/\:2\-31)
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is replaced by the
-[min|max]_[i|p|b]quant options.
-.
-.TP
-.B min_key_interval=<value> (two pass only)
-minimum interval between keyframes (default: 0)
-.
-.TP
-.B max_key_interval=<value>
-maximum interval between keyframes (default: 10*fps)
-.
-.TP
-.B mpeg_quant
-Use MPEG quantizers instead of H.263.
-For high bitrates, you will find that MPEG quantization preserves more detail.
-For low bitrates, the smoothing of H.263 will give you less block noise.
-When using custom matrices, MPEG must be used.
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is replaced by the quant_type option.
-.
-.TP
-.B mod_quant
-Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis
-(two pass mode only).
-.br
-.I WARNING:
-This will generate an illegal bitstream, and most likely not be decodable
-by any MPEG-4 decoder besides libavcodec or Xvid.
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is no longer available.
-.
-.TP
-.B keyframe_boost=<0\-1000> (two pass mode only)
-Shift some bits from the pool for other frame types to intra frames,
-thus improving keyframe quality.
-This amount is an extra percentage, so a value of 10 will give
-your keyframes 10% more bits than normal
-(default: 0).
-.
-.TP
-.B kfthreshold=<value> (two pass mode only)
-Works together with kfreduction.
-Determines the minimum distance below which you consider that
-two frames are considered consecutive and treated differently
-according to kfreduction
-(default: 10).
-.
-.TP
-.B kfreduction=<0\-100> (two pass mode only)
-The above two settings can be used to adjust the size of keyframes that
-you consider too close to the first (in a row).
-kfthreshold sets the range in which keyframes are reduced, and
-kfreduction determines the bitrate reduction they get.
-The last I-frame will get treated normally
-(default: 30).
-.
-.TP
-.B divx5bvop
-Generate DivX5 compatible B-frames (default: on).
-This seems to be mandatory only for old versions of DivX's decoder.
-.br
-.I WARNING:
-As of Xvid-1.0.x, this option is replaced by the closed_gop option.
-.
-.TP
-.B (no)grayscale
-Make Xvid discard chroma planes so the encoded video is grayscale only.
-Note that this does not speed up encoding, it just prevents chroma data
-from being written in the last stage of encoding.
-.
-.TP
-.B "debug\ \ "
-Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
-file.)
-.RE
-.
-.PP
-.sp 1
-The following options are only available with the latest stable
-releases of Xvid 1.0.x (api4).
-.
-.TP
-.B (no)packed
-This option is meant to solve frame-order issues when encoding to
-container formats like AVI that cannot cope with out-of-order frames.
-In practice, most decoders (both software and hardware) are able to deal
-with frame-order themselves, and may get confused when this option is
-turned on, so you can safely leave if off, unless you really know what
-you are doing.
-.br
-.I WARNING:
-This will generate an illegal bitstream, and will not be
-decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:Xvid.
-.br
-.I WARNING:
-This will also store a fake DivX version in the file so the bug
-autodetection of some decoders might be confused.
-.
-.TP
-.B max_bframes=<0\-4>
-Maximum number of B-frames to put between I/P-frames (default: 2).
-.
-.TP
-.B bquant_ratio=<0\-1000>
-quantizer ratio between B- and non-B-frames, 150=1.50 (default: 150)
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-quantizer offset between B- and non-B-frames, 100=1.00 (default: 100)
-.
-.TP
-.B bf_threshold=<-255\-255>
-This setting allows you to specify what priority to place on the use of
-B-frames.
-The higher the value, the higher the probability of B-frames being used
-(default: 0).
-Do not forget that B-frames usually have a higher quantizer, and therefore
-aggressive production of B-frames may cause worse visual quality.
-.
-.TP
-.B (no)closed_gop
-This option tells Xvid to close every GOP (Group Of Pictures bounded
-by two I-frames), which makes GOPs independent from each other.
-This just implies that the last frame of the GOP is either a P-frame or a
-N-frame but not a B-frame.
-It is usually a good idea to turn this option on (default: on).
-.
-.TP
-.B frame_drop_ratio=<0\-100> (max_bframes=0 only)
-This setting allows the creation of variable framerate video streams.
-The value of the setting specifies a threshold under which, if the
-difference of the following frame to the previous frame is below or equal
-to this threshold, a frame gets not coded (a so called n-vop is placed
-in the stream).
-On playback, when reaching an n-vop the previous frame will be displayed.
-.br
-.I WARNING:
-Playing with this setting may result in a jerky video, so use it at your
-own risks!
-.
-.TP
 .B (no)qpel
 MPEG-4 uses a half pixel precision for its motion search by default.
 The standard proposes a mode where encoders are allowed to use quarter
@@ -8702,15 +8523,6 @@ quality at fixed bitrate) at a lesser cost than with VHQ (default: on).
 Activate this if your encoded sequence is an anime/\:cartoon.
 It modifies some Xvid internal thresholds so Xvid takes better decisions on
 frame types and motion vectors for flat looking cartoons.
-.
-.TP
-.B quant_type=<h263|mpeg>
-Sets the type of quantizer to use.
-For high bitrates, you will find that MPEG quantization preserves more detail.
-For low bitrates, the smoothing of H.263 will give you less block noise.
-When using custom matrices, MPEG quantization
-.B must
-be used.
 .
 .TP
 .B (no)chroma_me
@@ -8773,6 +8585,21 @@ save bits that can be spent again on other frames, raising overall
 subjective quality and possibly reducing PSNR.
 .
 .TP
+.B (no)grayscale
+Make Xvid discard chroma planes so the encoded video is grayscale only.
+Note that this does not speed up encoding, it just prevents chroma data
+from being written in the last stage of encoding.
+.
+.TP
+.B (no)interlacing
+Encode the fields of interlaced video material.
+Turn this option on for interlaced content.
+.br
+.I NOTE:
+Should you rescale the video, you would need an interlace-aware resizer,
+which you can activate with \-vf scale=<width>:<height>:1.
+.
+.TP
 .B min_iquant=<0\-31>
 minimum I-frame quantizer (default: 2)
 .
@@ -8797,6 +8624,23 @@ minimum B-frame quantizer (default: 2)
 maximum B-frame quantizer (default: 31)
 .
 .TP
+.B min_key_interval=<value> (two pass only)
+minimum interval between keyframes (default: 0)
+.
+.TP
+.B max_key_interval=<value>
+maximum interval between keyframes (default: 10*fps)
+.
+.TP
+.B quant_type=<h263|mpeg>
+Sets the type of quantizer to use.
+For high bitrates, you will find that MPEG quantization preserves more detail.
+For low bitrates, the smoothing of H.263 will give you less block noise.
+When using custom matrices, MPEG quantization
+.B must
+be used.
+.
+.TP
 .B quant_intra_matrix=<filename>
 Load a custom intra matrix file.
 You can build such a file with xvid4conf's matrix editor.
@@ -8805,6 +8649,109 @@ You can build such a file with xvid4conf's matrix editor.
 .B quant_inter_matrix=<filename>
 Load a custom inter matrix file.
 You can build such a file with xvid4conf's matrix editor.
+.
+.TP
+.B keyframe_boost=<0\-1000> (two pass mode only)
+Shift some bits from the pool for other frame types to intra frames,
+thus improving keyframe quality.
+This amount is an extra percentage, so a value of 10 will give
+your keyframes 10% more bits than normal
+(default: 0).
+.
+.TP
+.B kfthreshold=<value> (two pass mode only)
+Works together with kfreduction.
+Determines the minimum distance below which you consider that
+two frames are considered consecutive and treated differently
+according to kfreduction
+(default: 10).
+.
+.TP
+.B kfreduction=<0\-100> (two pass mode only)
+The above two settings can be used to adjust the size of keyframes that
+you consider too close to the first (in a row).
+kfthreshold sets the range in which keyframes are reduced, and
+kfreduction determines the bitrate reduction they get.
+The last I-frame will get treated normally
+(default: 30).
+.
+.TP
+.B max_bframes=<0\-4>
+Maximum number of B-frames to put between I/P-frames (default: 2).
+.
+.TP
+.B bquant_ratio=<0\-1000>
+quantizer ratio between B- and non-B-frames, 150=1.50 (default: 150)
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+quantizer offset between B- and non-B-frames, 100=1.00 (default: 100)
+.
+.TP
+.B bf_threshold=<-255\-255>
+This setting allows you to specify what priority to place on the use of
+B-frames.
+The higher the value, the higher the probability of B-frames being used
+(default: 0).
+Do not forget that B-frames usually have a higher quantizer, and therefore
+aggressive production of B-frames may cause worse visual quality.
+.
+.TP
+.B (no)closed_gop
+This option tells Xvid to close every GOP (Group Of Pictures bounded
+by two I-frames), which makes GOPs independent from each other.
+This just implies that the last frame of the GOP is either a P-frame or a
+N-frame but not a B-frame.
+It is usually a good idea to turn this option on (default: on).
+.
+.TP
+.B (no)packed
+This option is meant to solve frame-order issues when encoding to
+container formats like AVI that cannot cope with out-of-order frames.
+In practice, most decoders (both software and hardware) are able to deal
+with frame-order themselves, and may get confused when this option is
+turned on, so you can safely leave if off, unless you really know what
+you are doing.
+.br
+.I WARNING:
+This will generate an illegal bitstream, and will not be
+decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:Xvid.
+.br
+.I WARNING:
+This will also store a fake DivX version in the file so the bug
+autodetection of some decoders might be confused.
+.
+.TP
+.B frame_drop_ratio=<0\-100> (max_bframes=0 only)
+This setting allows the creation of variable framerate video streams.
+The value of the setting specifies a threshold under which, if the
+difference of the following frame to the previous frame is below or equal
+to this threshold, a frame gets not coded (a so called n-vop is placed
+in the stream).
+On playback, when reaching an n-vop the previous frame will be displayed.
+.br
+.I WARNING:
+Playing with this setting may result in a jerky video, so use it at your
+own risks!
+.
+.TP
+.B rc_reaction_delay_factor=<value>
+This parameter controls the number of frames the CBR rate controller
+will wait before reacting to bitrate changes and compensating for them
+to obtain a constant bitrate over an averaging range of frames.
+.
+.TP
+.B rc_averaging_period=<value>
+Real CBR is hard to achieve.
+Depending on the video material, bitrate can be variable, and hard to predict.
+Therefore Xvid uses an averaging period for which it guarantees a given
+amount of bits (minus a small variation).
+This settings expresses the "number of frames" for which Xvid averages
+bitrate and tries to achieve CBR.
+.
+.TP
+.B rc_buffer=<value>
+size of the rate control buffer
 .
 .TP
 .B curve_compression_high=<0\-100>
@@ -8983,6 +8930,12 @@ and store the per frame PSNR in a file with a name like 'psnr_hhmmss.log' in
 the current directory.
 Returned values are in dB (decibel), the higher the better.
 .
+.TP
+.B "debug\ \ "
+Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
+file.)
+.RE
+.
 .PP
 .sp 1
 The following option is only available in Xvid 1.1.x.
@@ -8997,7 +8950,7 @@ performance penalty (default: 1).
 .
 .PP
 .sp 1
-The following option is only available in the CVS version of Xvid.
+The following option is only available in the 1.2.x version of Xvid.
 .
 .TP
 .B threads=<0\-n>
