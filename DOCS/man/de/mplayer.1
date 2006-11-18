@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21005
+.\" In sync with r21011
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -8979,16 +8979,15 @@ minimale Anzahl Frames zwischen zwei Keyframes (Standard: 0)
 maximale Anzahl Frames zwischen zwei Keyframes (Standard: 10*fps)
 .
 .TP
-.B mpeg_quant
-Benutze die MPEG-Quantisierungsparameter anstelle von H.263.
+.B quant_type=<h263|mpeg>
+Bestimmt die zu benutzende Quantisierungsmethode.
 Bei hohen Bitraten wirst du meinen, dass die MPEG-Quantisierung mehr Details
 behält.
 Bei niedrigen Bitraten wird die Glättung von H.263 weniger Blockartefakte
 liefern.
-Bei der Benutzung eigener Matrizen muss die MPEG-Quantisierung benutzt werden.
-.br
-.I WARNUNG:
-Seit XviD 1.0.x ist diese Option durch die Option quant_type ersetzt.
+Bei der Benutzung eigener Matrizen
+.B muss
+die MPEG-Quantisierung benutzt werden.
 .
 .TP
 .B keyframe_boost=<0\-1000> (nur im Modus mit zwei Durchläufen)
@@ -9013,30 +9012,14 @@ kfreduction bestimmt die Reduktion der Bitrate, die angewendet wird.
 Der letzte Intra-Frame wird normal behandelt (Standard: 30).
 .
 .TP
-.B divx5bvop
-Generiere DivX5-kompatible B-Frames (Standard: aktiviert).
-Dies scheint nur für alte Versionen des DivX-Decoders notwendig zu sein.
-.br
-.I WARNUNG:
-Seit XviD 1.0.x ist diese Option durch die Option closed_gop ersetzt.
-.
-.TP
-.B (no)grayscale
-Sorge dafür, dass XviD die Chrominanzebenen verwirft, so dass das encodierte
-Video schwarz/weiß wird.
-Beachte, dass dies den Encodierungsvorgang nicht beschleunigt, es werden in
-der letzten Stufe der Encodierung einfach keine Farbdaten geschrieben.
-.
-.TP
-.B "debug\ \ "
-Speichert Statistiken für jeden einzelnen Frame in ./\:xvid.dbg.
-(Dies ist nicht das Logfile des Modus mit zwei Durchläufen.)
-.RE
-.
-.PP
-.sp 1
-Die folgenden Optionen sind nur für die neuesten stabilen Versionen von XviD
-1.0.x (api4) verfügbar.
+.B (no)closed_gop
+Diese Option weist XviD an, jede GOP (Group Of Pictures, Gruppe von Bildern,
+die von zwei I-Frames begrenzt sind) zu schließen, was die GOPs unabhängig
+voneinander macht.
+Dies bedeutet lediglich, dass der letzte Frame einer GOP entweder ein P- oder
+ein N-Frame ist, nicht aber ein B-Frame.
+Es ist normalerweise sinnvoll, diese Option zu aktivieren (Standard:
+aktiviert).
 .
 .TP
 .B (no)packed
@@ -9055,6 +9038,19 @@ ISO-MPEG-4-Decoder außer DivX/\:libavcodec/\:XviD dekodiert werden kann.
 .I WARNUNG:
 Dies wird außerdem eine vorgetäuschte DivX-Version in der Datei speichern,
 welche die Fehlerkorrekturmechanismen mancher Decoder verwirren kann.
+.
+.TP
+.B (no)grayscale
+Sorgt dafür, dass XviD die Chrominanzebenen verwirft, so dass das encodierte
+Video schwarz/weiß wird.
+Beachte, dass dies den Encodierungsvorgang nicht beschleunigt, es werden in
+der letzten Stufe der Encodierung einfach keine Farbdaten geschrieben.
+.
+.TP
+.B "debug\ \ "
+Speichert Statistiken für jeden einzelnen Frame in ./\:xvid.dbg.
+(Dies ist nicht das Logfile des Modus mit zwei Durchläufen.)
+.RE
 .
 .TP
 .B max_bframes=<0\-4>
@@ -9080,16 +9076,6 @@ Je höher der Wert, desto wahrscheinlicher wird ein B-Frame benutzt (Standard:
 Vergiss nicht, dass B-Frames normalerweise einen höheren
 Quantisierungsparameter benutzen, daher kann aggressives Erzeugen von B-Frames
 zu schlechterer visueller Qualität führen.
-.
-.TP
-.B (no)closed_gop
-Diese Option weist XviD an, jede GOP (Group Of Pictures, Gruppe von Bildern,
-die von zwei I-Frames begrenzt sind) zu schließen, was die GOPs unabhängig
-voneinander macht.
-Dies bedeutet lediglich, dass der letzte Frame einer GOP entweder ein P- oder
-ein N-Frame ist, nicht aber ein B-Frame.
-Es ist normalerweise sinnvoll, diese Option zu aktivieren (Standard:
-aktiviert).
 .
 .TP
 .B frame_drop_ratio=<0\-100> (nur bei max_bframes=0)
@@ -9141,17 +9127,6 @@ ist.
 Sie modifiziert ein paar XviD-interne Schwellenwerte, so dass XviD bei
 Frametypen und Motion-Vectors für flach aussehende Cartoons bessere
 Entscheidungen trifft.
-.
-.TP
-.B quant_type=<h263|mpeg>
-Bestimmt die zu benutzende Quantisierungsmethode.
-Bei hohen Bitraten wirst du meinen, dass die MPEG-Quantisierung mehr Details
-behält.
-Bei niedrigen Bitraten wird die Glättung von H.263 weniger Blockartefakte
-liefern.
-Bei der Benutzung eigener Matrizen
-.B muss
-die MPEG-Quantisierung benutzt werden.
 .
 .TP
 .B (no)chroma_me
