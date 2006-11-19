@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20183 -->
+<!-- synced with r20933 -->
 
 <chapter id="install">
 <title>Installation</title>
@@ -34,9 +34,9 @@ recommandés.
   il est donc très important.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - les versions conseillées sont les versions 2.95 et 3.3+. 
+  <emphasis role="bold">gcc</emphasis> - les versions conseillées sont les versions 2.95 et 3.4+. 
   Les versions 2.96 et 3.0.x sont connues pour générer du code incorrect. Des problèmes ont également
-  étés rencontré avec les versions 3.1 et 3.2. Sur des plateformes PowerPC, utilisez GCC 4.x+.
+  étés rencontré avec les versions 3.1 et 3.2. Sur des plateformes PowerPC, utilisez GCC 4.x.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - version conseillée :
@@ -87,9 +87,6 @@ recommandés.
   <emphasis role="bold">libogg</emphasis> - optionnel, requis pour lire les fichiers au format OGG.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libvorbis</emphasis> - optionnel, requis pour lire du OGG Vorbis audio.
-  </para></listitem>
-<listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - optionnel, requis pour lire des flux RTSP/RTP.
   </para></listitem>
@@ -105,22 +102,11 @@ recommandés.
   d'entrée de XMMS. Une version supérieure ou égale à 1.2.7 est requise.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libsmb</emphasis> - optionnel, pour le support Samba.
+  <emphasis role="bold">libsmb</emphasis> - optionnel, pour le support réseau smb.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - optionnel, pour le support de sortie audio ALSA.
   La version 0.9.0rc4 est le minimal requis.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">bio2jack</emphasis> - optionnel, pour le support de la
-  sortie audio JACK, requis seulement au moment de la compilation. Vous pouvez
-  l'obtenir depuis
-  <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Il n'a pas
-  d'options d'installation donc vous devez placer manuellement le fichier
-  <filename>libbio2jack.a</filename> quelque part dans votre chemin de librairies
-  (par ex. <filename>/usr/local/lib</filename>) ou utiliser l'option
-  <option>--with-bio2jack=DIR</option> pour dire à
-  <filename>./configure</filename> où se trouve le fichier.
   </para></listitem>
 </itemizedlist>
 </sect1>
@@ -402,11 +388,6 @@ le binaire <command>gmplayer</command>.
 </para>
 
 <para>
-Actuellement vous ne pouvez pas utiliser l'option <option>-gui</option> en ligne de commande,
-ceci pour des raisons techniques.
-</para>
-
-<para>
 <application>MPlayer</application> n'ayant pas de skin par défaut, vous
 devrez la télécharger si vous voulez utiliser la GUI. Voir la <ulink url="http://www.mplayerhq.hu/dload.html">page des téléchargements</ulink>.
 Elles pourront se placer dans le répertoire commun 
@@ -456,14 +437,15 @@ La compilation de <application>MPlayer</application> avec le support pour
 <systemitem class="library">fontconfig</systemitem> rend les méthodes ci-dessus inopérantes.
 En effet, <application>MPlayer</application> s'attend à ce que <option>-font</option> soit
 suivi d'un nom de police compatible avec <systemitem class="library">fontconfig</systemitem>.
-Pour obtenir la liste des polices compatibles avec <systemitem class="library">fontconfig</systemitem>, 
-executez <command>fc-list</command> dans la console.
 Un exemple:
 <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
 
+<para>
+Pour obtenir la liste des polices compatibles avec <systemitem class="library">fontconfig</systemitem>, 
+executez <command>fc-list</command> dans la console.
+</para>
 </sect2>
-
 
 <sect2 id="bitmap-fonts">
 <title>Polices Bitmap</title>
@@ -490,10 +472,10 @@ le sous-repertoire
 <para>
 Les polices doivent disposer d'un fichier <filename>font.desc</filename>
 associant les positions des caractères unicode à l'encodage (NdT: code page) utilisé par le sous-titre.
-Les autres solutions sont d'encoder les sous-titres en UTF-8 et
-d'utiliser l'option <option>-utf8</option> ou de nommer les fichiers contenant les
-sous-titres <filename>&lt;nom_de_la_video&gt;.utf</filename> et de les placer
-dans le répertoire de la vidéo.
+Une autre solution est d'encoder les sous-titres en UTF-8 et
+d'utiliser l'option <option>-utf8</option> ou de donner au fichier sous-titre
+le même nom qu'au fichier video avec une extension <filename>.utf</filename> et de le placer
+dans le même répertoire que la vidéo.
 </para>
 </sect2>
 
