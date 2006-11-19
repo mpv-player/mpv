@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20870 -->
+<!-- synced with r20933 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -83,9 +83,6 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   <emphasis role="bold">libogg</emphasis> - választható, szükséges az OGG formátumú fájlok lejátszásához.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libvorbis</emphasis> - választható, szükséges az OGG Vorbis audiók lejátszásához.
-  </para></listitem>
-<listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - választható, szükséges az RTSP/RTP folyamok lejátszásához.
   </para></listitem>
@@ -101,7 +98,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   Legalább 1.2.7-es szükséges.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libsmb</emphasis> - választható, Samba támogatáshoz kell.
+  <emphasis role="bold">libsmb</emphasis> - választható, smb hálózat támogatásához kell.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - választható, az ALSA audió kimenet

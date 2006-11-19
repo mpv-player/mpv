@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20658 -->
+<!-- synced with r20876 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1178,7 +1178,7 @@ nagyon alap MPEG-4 codec, míg a DX50 és XVID mindkettő teljes MPEG-4
 Ezért ha DIVX-re változtatod a FourCC-t, néhány rossz program vagy
 hardveres lejátszó agyoncsaphatja a <systemitem class="library">libavcodec</systemitem>
 pár fejlett tulajdonságát, amiket egyébként támogat, de a DivX nem;
-másrészt az <systemitem class="library">XviD</systemitem>
+másrészt az <systemitem class="library">Xvid</systemitem>
 közelebb áll a <systemitem class="library">libavcodec</systemitem>-hez
 funkcionalitásában és minden illedelmes lejátszó támogatja.
 </para></answer>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r20876 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -86,7 +86,7 @@ Videó codec-ek:
   </row>
   <row>
     <entry>xvid</entry>
-    <entry>XviD, MPEG-4 Advanced Simple Profile (ASP) codec</entry>
+    <entry>Xvid, MPEG-4 Advanced Simple Profile (ASP) codec</entry>
   </row>
   <row>
     <entry>x264</entry>
@@ -522,7 +522,7 @@ MPNG (Motion PNG) vagy MTGA (Motion TGA) fájlokat tud létrehozni.
   </para></listitem>
 <listitem><para>
   Ezután a <application>MEncoder</application> a dekódolt képeket a kiválasztott
-  videó tömörítőnek adja át (DivX4, XviD, FFmpeg msmpeg4, stb.).
+  videó tömörítőnek adja át (DivX4, Xvid, FFmpeg msmpeg4, stb.).
   </para></listitem>
 </orderedlist>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20705 -->
+<!-- synced with r20876 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -107,10 +107,10 @@ Csak futtasd a <filename>./configure</filename>-t és fordíts.
 
 
 <sect2 id="xvid">
-<title>XviD</title>
+<title>Xvid</title>
 
 <para>
-Az <ulink url="http://www.xvid.org">XviD</ulink> egy szabad szoftveres MPEG-4
+Az <ulink url="http://www.xvid.org">Xvid</ulink> egy szabad szoftveres MPEG-4
 ASP kompatibilis videó codec, ami tud két lépésben kódolni és teljes MPEG-4
 ASP támogatás van benne, ezáltal sokkal hatékonyabb, mint a jólismert DivX codec.
 Nagyon jó videó minőséget kínál és a CPU optimalizációknak hála a legtöbb
@@ -120,25 +120,25 @@ modern processzoron a teljesítménye is jó.
 Az OpenDivX codec forkolt fejlesztésként indult annak idején.
 A fork akkor történt, amikor a ProjectMayo az OpenDivX-et zárt forráskódúvá
 tette DivX4 néven, felbosszantva így a nem-ProjectMayo-s fejlesztőket,
-akik az OpenDivX-en dolgoztak, s akik így elindították az XviD-et. Így mindkét
+akik az OpenDivX-en dolgoztak, s akik így elindították az Xvid-et. Így mindkét
 projektnek azonosak a gyökereik.
 </para>
 
 <para>
-Jegyezd meg, hogy az XviD nem szükséges az XviD-es videók dekódolásához.
+Jegyezd meg, hogy az Xvid nem szükséges az Xvid-es videók dekódolásához.
 A <systemitem class="library">libavcodec</systemitem> az alapértelmezett,
 mivel jobb a sebessége.
 </para>
 
 <procedure>
-<title>Az <systemitem class="library">XviD</systemitem> telepítése</title>
+<title>Az <systemitem class="library">Xvid</systemitem> telepítése</title>
 <para>
   Mint a legtöbb nyílt forráskódú program, ez is két formában érhető el:
   <ulink url="http://www.xvid.org/downloads.html">hivatalos kiadás</ulink>
   és a CVS verzió.
   A CVS verzió általában elég stabil a használathoz, mivel legtöbbször csak
   a kiadásokban benne lévő hibák javításait tartalmazza.
-  Itt van lépésről lépésre, hogy mit kell tenned, ha az <systemitem class="library">XviD</systemitem>
+  Itt van lépésről lépésre, hogy mit kell tenned, ha az <systemitem class="library">Xvid</systemitem>
   CVS-t használni akarod a <application>MEncoder</application>rel (szükséged
   lesz az <application>autoconf</application> 2.50-re, az <application>automake</application>-re
   és a <application>libtool</application>-ra):

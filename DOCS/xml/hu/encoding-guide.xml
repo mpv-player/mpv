@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20683 -->
+<!-- synced with r21034 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -299,7 +299,7 @@
 <para>
   A legtöbb ABR kódolást támogató codec csak a két lépéses kódolást
   támogatja, míg néhány másik, mint pl. az <systemitem class="library">x264</systemitem>,
-  az <systemitem class="library">XviD</systemitem> és a
+  az <systemitem class="library">Xvid</systemitem> és a
   <systemitem class="library">libavcodec</systemitem> támogatják
   a többmenetest, ami kissé javít a minőségen minden lépésben,
   bár ez a javulás nem mérhető és nem is észrevehető a 4. lépés után.
@@ -1057,7 +1057,7 @@
   A CQ függ a bitrátától, a videó codec hatékonyságától és a film felbontásától.
   Ha növelni akarod a CQ-t, általában leméretezést kell végezned a filmen,
   mivel a bitráta a cél méret és a film hosszából számítódik, ami konstans.
-  Az MPEG-4 ASP codec-ekkel, mint pl. az <systemitem class="library">XviD</systemitem>
+  Az MPEG-4 ASP codec-ekkel, mint pl. az <systemitem class="library">Xvid</systemitem>
   és a <systemitem class="library">libavcodec</systemitem>, egy 0,18 alatti
   CQ általában nagyon kockás képet eredményez, mert nincs
   elég bit minden egyes makroblokk információinak eltárolásához. (Az MPEG4,
@@ -1066,7 +1066,7 @@
   Ezért ésszerű a CQ-t a 0,20-0,22-es tartományból választani 1 CD-s rip
   esetén, és 0,26-0,28-ból a 2 CD-snél a szabványos kódolási opciókkal.
   A <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="library">libavcodec</systemitem></link>-hez
-  és az <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>-hez
+  és az <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">Xvid</systemitem></link>-hez
   itt felsoroltaknál fejlettebb kódolási opciók segítségével lehetséges
   ugyan ilyen minőség elérése 0,18-0,20-as CQ mellett egy 1 CD-s rip
   esetén és 0,24-0,26-ossal 2 CD-s rip-nél.
@@ -1346,7 +1346,7 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   akár MPEG-4 AVC codec-et választasz, mint például az
   <systemitem class="library">x264</systemitem>, akár egy MPEG-4 ASP
   codec-et, mint pl. a <systemitem class="library">libavcodec</systemitem>
-  MPEG-4 vagy az <systemitem class="library">XviD</systemitem>.
+  MPEG-4 vagy az <systemitem class="library">Xvid</systemitem>.
   (A haladóbb codec fejlesztőket talán érdekelheti Michael Niedermayer
   véleménye, a
   "<ulink url="http://guru.multimedia.cx/?p=10">miért utáljuk az MPEG4-et</ulink>".)
@@ -1371,7 +1371,7 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   Ennek eredménye, hogy a legtöbb csak MPEG-1 (mint a VCD, XVCD és KVCD),
   MPEG-2 (mint a DVD, SVCD és KVCD) és MPEG-4 ASP (mint a DivX, a
   <systemitem class="library">libavcodec</systemitem> LMP4-e és az
-  <systemitem class="library">XviD</systemitem>) lejátszására képes
+  <systemitem class="library">Xvid</systemitem>) lejátszására képes
   (Vigyázz: Legtöbbször nem ismerik az MPEG-4 ASP összes képességét).
   Nézd meg a lejátszód technikai specifikációját (ha van) vagy google-ozz
   körbe további információért.
@@ -1381,7 +1381,7 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   <emphasis role="bold">Legjobb minőség kontra kódolási idő</emphasis>:
   A már jó ideje létező codec-ek (mint pl. a
   <systemitem class="library">libavcodec</systemitem> MPEG-4-e és az
-  <systemitem class="library">XviD</systemitem>) általában nagyon jól
+  <systemitem class="library">Xvid</systemitem>) általában nagyon jól
   optimalizáltak mindenféle okos algoritmussal és SIMD assembly kóddal.
   Ezért a legjobb minőség per kódolási idő arány felé tartanak.
   Azonban van néhány nagyon fejlett opció, amit ha engedélyezel, nagyon
@@ -1399,7 +1399,7 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   A <systemitem class="library">libavcodec</systemitem> MPEG-4 tudja
   ezt, de a sebességnövekedés eléggé korlátolt és egy kis negatív hatása
   van a képminőségre.
-  Az <systemitem class="library">XviD</systemitem> több-szálas kódolása,
+  Az <systemitem class="library">Xvid</systemitem> több-szálas kódolása,
   melyet a <option>threads</option> opció kapcsol be, használható a
   kódolási sebesség &mdash; átlagban kb. 40-60%-os &mdash; növelésére,
   nagyon csekély vagy semmilyen képromlással.
@@ -1414,7 +1414,7 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   <emphasis role="bold">Egyéni igények</emphasis>:
   Itt válik a dolog a legirrálisabbá: ugyan azért, amiért sokan leragadtak
   a DivX&nbsp;3-nál évekig, miközben az új codec-ek már csodákat műveltek,
-  néhányan az <systemitem class="library">XviD</systemitem>-et vagy a
+  néhányan az <systemitem class="library">Xvid</systemitem>-et vagy a
   <systemitem class="library">libavcodec</systemitem> MPEG-4-ét részesítik
   előnyben az <systemitem class="library">x264</systemitem>-hez képest.
   </para>
@@ -1786,7 +1786,7 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
 </para>
 
 <para>
-  Ha megnézed az egyes képkockákat az 60000/1001 mező per másodperces videóban,
+  Ha megnézed az egyes képkockákat a 60000/1001 mező per másodperces videóban,
   telecine-lt vagy sem, az átlapolás tisztán látható bármilyen mozgásnál, mert
   az egyik mező (mondjuk a páros sorszámú sorok) időben 1/(60000/1001)
   másodperccel későbbi történést reprezentál, mint a másik. Átlapolt videó
@@ -2339,7 +2339,7 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO szabvány MPEG-4 (DivX, XviD kompatibilis)
+  ISO szabvány MPEG-4 (DivX, Xvid kompatibilis)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   Szabvány előtti MPEG-4 variáns az MS-től, v3 (AKA DivX3)
@@ -2863,10 +2863,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 
 <sect1 id="menc-feat-xvid">
-<title>Kódolás az <systemitem class="library">XviD</systemitem>
+<title>Kódolás az <systemitem class="library">Xvid</systemitem>
 codec-kal</title>
 <para>
- Az <systemitem class="library">XviD</systemitem> egy szabad függvénykönyvtár
+ Az <systemitem class="library">Xvid</systemitem> egy szabad függvénykönyvtár
  MPEG-4 ASP videó stream-ek elkódolásához.
  A kódolás megkezdése előtt <link linkend="xvid">be kell állítanod
  a <application>MEncoder</application>ben a támogatását</link>.
@@ -2884,18 +2884,18 @@ codec-kal</title>
 
 <para>
  Kezdésként nézd át az <application>MPlayer</application> man oldalának
- <systemitem class="library">XviD</systemitem> részét!
+ <systemitem class="library">Xvid</systemitem> részét!
  Ez a rész csak a man oldal kiegészítéseként használható.
 </para>
 <para>
- Az XviD alapértelmezett beállításai egyensúlyt teremtenek a sebesség és
+ Az Xvid alapértelmezett beállításai egyensúlyt teremtenek a sebesség és
  a minőség között, így nyugodtan használhatod azokat, ha a következő rész
  túl zavarosnak tűnik.
 </para>
 </sect2>
 
 <sect2 id="menc-feat-xvid-encoding-options">
-<title>Az <systemitem class="library">XviD</systemitem> kódolási opciói</title>
+<title>Az <systemitem class="library">Xvid</systemitem> kódolási opciói</title>
 
 <itemizedlist>
 <listitem><para>
@@ -3049,7 +3049,7 @@ codec-kal</title>
     kódolást (és a dekódolást is).
     Ezért csak akkor ajánlott használnod, ha a <option>vhq</option>
     a maximumra állítottad.
-    Az <systemitem class="library">XviD</systemitem> GMC-je sokkal
+    Az <systemitem class="library">Xvid</systemitem> GMC-je sokkal
     kifinomultabb, mint a DivX-é, de csak kevés lejátszó támogatja.
 </para></listitem>
 
@@ -3059,7 +3059,7 @@ codec-kal</title>
 <sect2 id="menc-feat-xvid-encoding-profiles">
 <title>Kódolási profilok</title>
 <para>
-  Az XviD támogatja a kódolási profilokat a <option>profile</option> opción
+  Az Xvid támogatja a kódolási profilokat a <option>profile</option> opción
   keresztül, amivel az XVid videó folyam tulajdonságaiban olyan megszorításokat
   lehet előírni, amikkel az lejátszható marad az összes eszközön, ami támogatja
   a választott profilt.

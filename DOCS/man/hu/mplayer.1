@@ -1,4 +1,4 @@
-.\" Synced with r20872
+.\" Synced with r21026
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 11. 13." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 11. 19." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -177,7 +177,7 @@ egyetemben.
 (MPlayer's Movie Encoder) egy egyszerû film kódoló, amit az
 MPlayer által lejátszható filmek (lásd fent) más, MPlayer által támogatott
 formátumba történõ átalakítására terveztünk (lásd lejebb).
-MPEG-4-be (DivX/XviD) kódol, a libavcodec valamelyik codec-jével és
+MPEG-4-be (DivX/Xvid) kódol, a libavcodec valamelyik codec-jével és
 PCM/\:MP3/\:VBRMP3 audióval 1, 2 vagy 3 lépésben.
 Továbbá képes stream-et másolni, hatékony szûrõ rendszere van (vágás,
 nagyítás, tükrözés, utófeldolgozás, forgatás, méretezés, zajszûrés,
@@ -241,8 +241,12 @@ Hangerõ csökkentése/\:növelése.
 Hangerõ csökkentése/\:növelése.
 .IPs "m\ \ \ \ "
 Hang elnémítása.
+.IPs "_ (csak MPEG-TS)"
+Váltás az elérhetõ videó sávok között.
 .IPs "# (csak MPEG és Matroska)"
 Váltás az elérhetõ audió sávok között.
+.IPs "TAB (csak MPEG-TS)"
+Váltás az elérhetõ programok között.
 .IPs "f\ \ \ \ "
 Teljes képernyõs lejátszás (lásd a \-fs\-t).
 .IPs "T\ \ \ \ "
@@ -256,7 +260,7 @@ Váltás a Képkocka eldobási módok között: nincs / megjelenítés kihagyása / dekódo
 (lásd a \-framedrop és \-hardframedrop kapcsolókat).
 .IPs "v\ \ \ \ "
 Feliratok láthatóságának ki-/bekapcsolása.
-.IPs "b / j"
+.IPs "j\ \ \ \ "
 Lépegetés az elérhetõ feliratok között.
 .IPs "y és g"
 Elõre/hátra lépés a felirat listában.
@@ -278,6 +282,8 @@ Képernyõmentések készítésének elindítása/leállítása.
 Fájlnév megjelenítése az OSD-n.
 .IPs "! és @"
 Ugrás az elõzõ/következõ fejezet elejére.
+.IPs "D (csak \-vo xvmc mellett)"
+Deinterlacer aktiválása/deaktiválása.
 .RE
 .PD 1
 .PP
@@ -1624,12 +1630,16 @@ miatt, ami élvezhetetlenné teszi az adést.
 A használható opciók:
 .RSs
 .IPs device=<érték>
-A használandó rádiós eszköz (alapértelmezett: /dev/radio0).
+A használandó rádiós eszköz (alapértelmezett: /dev/radio0 Linux alatt és /dev/tuner0 *BSD alatt).
 .IPs driver=<érték>
 A használandó rádió vezérlõ (alapértelmezett: v4l2 ha van, különben v4l).
 Jelenleg a v4l és v4l2 vezérlõk támogatottak.
 .IPs volume=<0..100>
 A rádiós eszköz hangereje (alapértelmezett: 100)
+.IPs freq_min=<érték> (csak *BSD BT848)
+minimálisan engedélyezett frekvencia (alapértelmezett: 87.50)
+.IPs freq_max=<érték> (csak *BSD BT848)
+maximálisan engedélyezett frekvencia (alapértelmezett: 108.00)
 .IPs channels=<frekvencia>\-<név>,<frekvencia>\-<név>,...
 Beállítja a csatorna listát.
 Használj _ jelent a szóköz helyett a nevekben (vagy idézõjeleket ;-).
@@ -3975,7 +3985,7 @@ A kódoló hibáinak kézi megkerülése.
 .br
 2 (msmpeg4v3): néhány régi lavc-vel generált msmpeg4v3 fájl (nincs automatikus detektálás)
 .br
-4 (mpeg4): XviD átlapolási hiba (automatikusan megtalálva, ha a fourcc==XVIX)
+4 (mpeg4): Xvid átlapolási hiba (automatikusan megtalálva, ha a fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (automatikusan megtalálva ha a fourcc==UMP4)
 .br
@@ -3983,7 +3993,7 @@ A kódoló hibáinak kézi megkerülése.
 .br
 32 (mpeg4): illegális vlc hiba (automatikusan megtalálva fourcc alapján)
 .br
-64 (mpeg4): XviD és DivX qpel hiba (automatikusan megtalálva fourcc/\:version alapján)
+64 (mpeg4): Xvid és DivX qpel hiba (automatikusan megtalálva fourcc/\:version alapján)
 .br
 128 (mpeg4): régi szabványos qpel (automatikusan megtalálva fourcc/\:version alapján)
 .br
@@ -4296,13 +4306,13 @@ Letiltja a képarány számításokat.
 .
 .TP
 .B \-xvidopts <opció1:opció2:...>
-További paraméterek megadását biztosítja XViD-del történõ dekódolásnál.
+További paraméterek megadását biztosítja Xvid-del történõ dekódolásnál.
 .br
 .I MEGJEGYZÉS:
-Mivel a libavcodec gyorsabb, mint az XviD, valószínûleg jobb a libavcodec
+Mivel a libavcodec gyorsabb, mint az Xvid, valószínûleg jobb a libavcodec
 utófeldolgozó szûrõjét (\-vf pp) és dekóderét (\-vfm ffmpeg) használni.
 .sp 1
-XviD belsõ utófeldolgozó szûrõi:
+Xvid belsõ utófeldolgozó szûrõi:
 .PD 0
 .RSs
 .IPs deblock-chroma (lásd még \-vf pp)
@@ -5027,7 +5037,7 @@ Felbontás helyett egy aránynak megfelelõen nagyít (alapértelmezett: 0).
 .I PÉLDA:
 .PD 0
 .RSs
-.IP expand=800::::4/3
+.IP expand=800:::::4/3
 800x600-ra nagyít, hacsak a forrás nem nagyobb felbontású, mert akkor
 a 4/3-as aránynak megfelelõen nagyít.
 .RE
@@ -7513,7 +7523,7 @@ ha a vrc_strategy nem 0-ra van állítva.
 .IPs 0
 A lavc belsõ ratecontrol-ját használja (alapértelmezett).
 .IPs 1
-Az XviD ratecontrol-ját használja (kísérleti; XViD 1.1 vagy újabb
+Az Xvid ratecontrol-ját használja (kísérleti; Xvid 1.1 vagy újabb
 támogatásával fordított MEncoder kell hozzá).
 .RE
 .PD 1
@@ -8454,7 +8464,7 @@ megváltoztatja az egyéni kocka típusokat és PSNR-eket.
 .B bitrate=<érték> (CBR vagy két lépéses mód)
 Megadja a használandó bitrátát kbit/\:másodperc-ben ha <16000 vagy bit/\:másodpercben
 ha >16000.
-Ha az <érték> negatív, az XviD az abszolút értékét fogja használni a videó cél
+Ha az <érték> negatív, az Xvid az abszolút értékét fogja használni a videó cél
 méreteként (kbájtban) és automatikusan kiszámítja a megfelelõ bitrátát
 (alapértelmezett: 687 kbits/s).
 .
@@ -8502,188 +8512,6 @@ A precizitást a CPU idõben kell megfizetni, ezért csökkentsd ezt a beállítást,
 ha valós idõben akarsz kódolni.
 .
 .TP
-.B (no)interlacing
-Az átlapolt videó anyag mezõinek kódolása.
-Kapcsold be egy átlapolt tartalomhoz.
-.br
-.I MEGJEGYZÉS:
-Ha át kell méretezned a videót, egy átlapolást figyelmbe vevõ méretezõt
-kell használnod, amit a \-vf scale=<width>:<height>:1 opcióval aktiválhatsz.
-.
-.TP
-.B "4mv\ \ \ \ "
-4 mozgás vektor használata makroblokkonként.
-Jobb tömörítést ad, de lelassítja a kódolást.
-.br
-.I FIGYELMEZTETÉS:
-A XviD-1.0.x-tõl ez az opció nem elérhetõ külön, a funkcionalítása bekerült a
-me_quality opcióba.
-Ha a me_quality > 4, a 4mv aktiválva lesz.
-.
-.TP
-.B rc_reaction_delay_factor=<érték>
-Ez a paraméter szabályozza, hogy a CBR rate controller hány képkockát várjon,
-mielõtt reagálna a bitráta változásra és kompenzálná a konstans bitráta
-megtartásához a kockák egy átlagos tartományán.
-.
-.TP
-.B rc_averaging_period=<érték>
-Az igazi CBR-t nagyon nehéz elérni.
-A videó anyagtól függõen a bitráta változhat és ezt nehéz elõre megjósolni.
-Ezért az XviD egy átlagoló periódust használ, ami alatt garantálja a megadott
-bitmennyiséget (minusz egy kis variáció).
-Ez a beállítás megadja a "kockák számát", amikre vonatkoztatva az XviD 
-átlagol és megpróbálja elérni a CBR-t.
-.
-.TP
-.B rc_buffer=<érték>
-a rate control bufferjének mérete
-.
-.TP
-.B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-CBR mód: min & max kvantáló minden képkockához (alapértelmezett: 2\-31)
-.br
-két lépéses mód: min & max kvantáló az I/P-kockákhoz (alapértelmezett: 2\-31/\:2\-31)
-.br
-.I FIGYELMEZTETÉS:
-Az XviD-1.0.x-tõl ezt az opciót felváltották a [min|max]_[i|p|b]quant opciók.
-.
-.TP
-.B min_key_interval=<érték> (csak két lépéses)
-minimális idõköz a kulcskockák között (alapértelmezett: 0)
-.
-.TP
-.B max_key_interval=<érték>
-maximális idõköz a kulcskockák között (alapértelmezett: 10*fps)
-.
-.TP
-.B mpeg_quant
-MPEG kvantálók használata a H.263 helyett.
-Nagyobb bitrátáknál úgy tûnik, hogy az MPEG kvantálás jobban megõrzi a részleteket.
-Alacsony bitrátáknál a H.263simítása csökkenti a blokk zajt.
-Ha saját matricákat használsz, az MPEG-et kell használni.
-.br
-.I FIGYELMEZTETÉS:
-Az XviD-1.0.x-tõl ezt az opciót a quant_type opció váltotta fel.
-.
-.TP
-.B mod_quant
-Megadja, hogy MPEG vagy H.263 kvantálás legyen-e alkalmazva kockánkénti alapon
-(csak két lépéses mód).
-.br
-.I FIGYELMEZTETÉS:
-Ez hibát bitfolyamot fog generálni és legvalószívûbb, hogy semmilyen MPEG-4
-dekódoló által nem lehet majd visszakódolni, kivéve a libavcodec-et vagy az XviD-et.
-.br
-.I FIGYELMEZTETÉS:
-Az XviD-1.0.x-tõl ez az opció nem elérhetõ.
-.
-.TP
-.B keyframe_boost=<0\-1000> (csak két lépéses módban)
-A más kocka típusok közös tulajdonából néhány bitet az intra kockáknak ad,
-így növelve a kulcskockák minõségét.
-Ez a mennyiség az extra százaléka, így a 10-es érték a kulcskockáidnak
-10%-kal több bitet ad, mint alapesetben (alapértelmezett: 0).
-.
-.TP
-.B kfthreshold=<érték> (csak két lépéses módban)
-A kfreduction-nal együtt mûködik.
-Megadja a minimális távolságot, ami alatt két egymás utáni kockát
-egymást követõnek tekint és különbözõen kezeli õket a kfreduction-nek
-megfelelõen (alapértelmezett: 10).
-.
-.TP
-.B kfreduction=<0\-100> (csak két lépéses módban)
-A fenti két beállítás használható a kulcs képkocka méretének beállításához,
-amit már elég közelinek tartasz ahhoz, hogy az elsõ legyen (a sorban).
-A kfthreshold beállítja a tartományt, amiben a kulcs képkockák csökkennek
-és a kfreduction szabályozza a bitráta csökkentést, ami jut rájuk.
-Az utolsó I-kocka normálisként lesz kezelve (alapértelmezett: 30).
-.
-.TP
-.B divx5bvop
-DivX5 kompatibilis B-kockák generálása (alapértelmezett: be).
-Ez csak a DivX dekódolók régebbi verzióinál szükséges.
-.br
-.I FIGYELMEZTETÉS:
-Az XviD-1.0.x-tõl ezt az opciót a closed_gop opció váltotta fel.
-.
-.TP
-.B (no)grayscale
-Az XviD figyelmen kívül hagyja a színtelítettségi síkot, így a kódolt videó
-szürkeárnyalatos lesz. Vedd figyelembe, hogy ez nem gyorsítja fel a
-kódolást, csak megakadályozza, hogy a színtelítettségi adatok kiíródjanak
-a kódolás utolsó szakaszában.
-.
-.TP
-.B "debug\ \ "
-Kockánkénti statisztikát ment el a ./xvid.dbg fájlba. (Ez nem a két lépéses
-control fájl.)
-.RE
-.
-.PP
-.sp 1
-A következõ opciók csak az XviD 1.0.x (api4) legújabb stabil kiadásaiban
-érhetõek el.
-.
-.TP
-.B (no)packed
-Ez az opció a kocka-sorrendbeli gondokat oldja meg konténer formátumokba,
-pl. AVI-ba történõ kódoláskor, ami nem tud megbírkózni a nem sorrendben
-lévõ kockákkal. A gyakorlatban a legtöbb dekódoló (mind szoftveres, mind
-hardveres) saját maga is tudja kezelni a kocka-sorrendet és összezavarodhat,
-ha ez az opció be van kapcsolva, így nyugodtan kikapcsolva hagyhatod,
-kivéve ha pontosan tudod, hogy mit csinálsz.
-.br
-.I FIGYELMEZTETÉS:
-Ez egy hibás bitfolyamot fog generálni, amit nem lehet lejátszani az
-ISO-MPEG-4 dekódolókkal, kivéve a DivX/\:libavcodec/\:XviD-et.
-.br
-.I FIGYELMEZTETÉS:
-Ez egy hamis DivX verziót is eltárol a fájlban, így néjány dekódoló
-automatikus hibafelismerése összezavarodhat.
-.
-.TP
-.B max_bframes=<0\-4>
-Az I/P-kockák közé teendõ B-kockák maximális száma (alapértelmezett: 2).
-.
-.TP
-.B bquant_ratio=<0\-1000>
-kvantáló ráta a B- és nem-B-kockák között, 150=1.50 (alapértelmezett: 150)
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-kvantáló eltolás a B- és nem-B-kockák között, 100=1.00 (alapértelmezett: 100)
-.
-.TP
-.B bf_threshold=<-255\-255>
-Ezzel az opcióval megadhatod a B-kockák használatának priorítását.
-A nagyobb érték a B-kocka felhasználásának nagyobb valószínûségét jelenti
-(alapértelmezett: 0).
-Ne felejtsd el, hogy a B-kockák általában nagyobb kvantálóval rendelkeznek,
-ezért a B-kockák túlzott használata csökkenti a vizuális minõséget.
-.
-.TP
-.B (no)closed_gop
-Ez az opció megmondja az XviD-nek, hogy zárja le az összes GOP-ot
-(Group Of Pictures, Képek Csoportja, melyeket két I-kocka határol), ami által
-a GOP-ok függetlenek lesznek egymástól. Ez magában foglalja azt, hogy a GOP
-utolsó kockája vagy egy P-kocka vagy egy N-kocka, de nem B-kocka.
-Általában jó ötlet bekapcsolni ezt az opciót (alapértelmezett: be).
-.
-.TP
-.B frame_drop_ratio=<0\-100> (csak max_bframes=0)
-Ez az opció megengedi a változó framerátájú videó folyamok készítését.
-Az érték egy küszöböt jelöl, ami mellett ha a különbség az elõzõ és a
-következõ kocka között kisebb vagy egyenlõ vele, a kocka nem lesz elkódolva
-(egy úgynevezett n-vop kerül a folyamba).
-Lejátszáskor az n-vop helyett az elõzõ kocka jelenik meg.
-.br
-.I FIGYELMEZTETÉS:
-Ezzel a beállítással történõ lejátszás szaggatott videót eredményezhet,
-tehát csak a saját felelõsségedre használd!
-.
-.TP
 .B (no)qpel
 Az MPEG-4 fél pixel-es precíziót használ a mozgáskereséshez alapértelmezésben.
 A szabvány javasol egy módot, ahol a kódoló használhatja a negyed
@@ -8697,7 +8525,7 @@ eldöntöd, hogy megéri-e bekapcsolni.
 .
 .TP
 .B (no)gmc
-Bekapcsolja a Global Motion Compensation-t, aminek a hatására az XviD
+Bekapcsolja a Global Motion Compensation-t, aminek a hatására az Xvid
 speciális kockákat (GMC-kockákat) fog generálni, ami nagyon megfelelõ a
 Pan-nelt/\:Nagyított/\:Forgatott képekhez.
 Az, hogy ez az opció spórol-e biteket vagy sem, nagyban függ a forrás anyagtól.
@@ -8714,17 +8542,8 @@ nyeréséhez fix bitrátánál) kisebb áldozattal, mint a VHQ (alapértelmezett: be).
 .TP
 .B (no)cartoon
 Akkor kapcsold be ezt, ha a kódolt sorozatod anime/\:rajzfilm.
-Módosít néhány XviD belsõ küszöbértéket, így az XviD jobb döntéseket hoz
+Módosít néhány Xvid belsõ küszöbértéket, így az Xvid jobb döntéseket hoz
 a kocka típusoknál és a mozgásvektoroknál az egyszerû kinézetû rajzfilmeknél.
-.
-.TP
-.B quant_type=<h263|mpeg>
-A használni kívánt kvantáló típusát állítja be.
-Nagy bitrátánál úgy tûnik, hogy az MPEG kvantáló több részletet õriz meg.
-Alacsony bitrátánál a H.263 simítása kevesebb blokk zajt ad.
-Ha saját matricákat használsz, az MPEG kvantálást
-.B kell
-használni.
 .
 .TP
 .B (no)chroma_me
@@ -8756,7 +8575,7 @@ blokkokból az intra kockákhoz (alapértelmezett: be).
 A mozgás keresõ algoritmus az általános szín tartományokban keres és megpróbálja
 megtalálni azt a mozgásvektort, ami minimalizálja a különbséget a referencia
 kocka és a kódolt kocka között.
-Ha ez a beállítás aktív, az XviD a frekvencia tartományokat (DCT) is használni
+Ha ez a beállítás aktív, az Xvid a frekvencia tartományokat (DCT) is használni
 fogja a mozgásvektorokhoz, ami nem csak a térbeli különbséget minimalizálja,
 hanem a blokk kódolási hosszát is.
 Gyorsabbtól a lassabbig:
@@ -8787,6 +8606,22 @@ ment meg, melyek más kockákban felhasználhatóak lesznek, növelve az
 össz szubjektív minõséget és valószínûleg csökkentve a PSNR-t.
 .
 .TP
+.B (no)grayscale
+Az Xvid figyelmen kívül hagyja a színtelítettségi síkot, így a kódolt videó
+szürkeárnyalatos lesz. Vedd figyelembe, hogy ez nem gyorsítja fel a
+kódolást, csak megakadályozza, hogy a színtelítettségi adatok kiíródjanak
+a kódolás utolsó szakaszában.
+.
+.TP
+.B (no)interlacing
+Az átlapolt videó anyag mezõinek kódolása.
+Kapcsold be egy átlapolt tartalomhoz.
+.br
+.I MEGJEGYZÉS:
+Ha át kell méretezned a videót, egy átlapolást figyelmbe vevõ méretezõt
+kell használnod, amit a \-vf scale=<width>:<height>:1 opcióval aktiválhatsz.
+.
+.TP
 .B min_iquant=<0\-31>
 minimális I-kocka kvantáló (alapértelmezett: 2)
 .
@@ -8811,6 +8646,23 @@ minimális B-kocka kvantáló (alapértelmezett: 2)
 maximális B-kocka kvantáló (alapértelmezett: 31)
 .
 .TP
+.B min_key_interval=<érték> (csak két lépéses)
+minimális idõköz a kulcskockák között (alapértelmezett: 0)
+.
+.TP
+.B max_key_interval=<érték>
+maximális idõköz a kulcskockák között (alapértelmezett: 10*fps)
+.
+.TP
+.B quant_type=<h263|mpeg>
+Beállítja a használni kívánt kvantáló típusát.
+Nagyobb bitrátáknál úgy tûnik, hogy az MPEG kvantálás jobban megõrzi a részleteket.
+Alacsony bitrátáknál a H.263 simítása csökkenti a blokk zajt.
+Ha saját matricákat használsz, az MPEG kvantálást
+.b kell
+használni.
+.
+.TP
 .B quant_intra_matrix=<fájlnév>
 Betölti a saját intra mátrixot tartalmazó fájlt.
 Ilyen fájlt az xvid4conf mátrix szerkesztõjével készíthetsz.
@@ -8821,8 +8673,106 @@ Betölti a saját inter mátrixot tartalmazó fájlt.
 Ilyen fájlt az xvid4conf mátrix szerkesztõjével készíthetsz.
 .
 .TP
+.B keyframe_boost=<0\-1000> (csak két lépéses módban)
+A más kocka típusok közös tulajdonából néhány bitet az intra kockáknak ad,
+így növelve a kulcskockák minõségét.
+Ez a mennyiség az extra százaléka, így a 10-es érték a kulcskockáidnak
+10%-kal több bitet ad, mint alapesetben (alapértelmezett: 0).
+.
+.TP
+.B kfthreshold=<érték> (csak két lépéses módban)
+A kfreduction-nal együtt mûködik.
+Megadja a minimális távolságot, ami alatt két egymás utáni kockát
+egymást követõnek tekint és különbözõen kezeli õket a kfreduction-nek
+megfelelõen (alapértelmezett: 10).
+.
+.TP
+.B kfreduction=<0\-100> (csak két lépéses módban)
+A fenti két beállítás használható a kulcs képkocka méretének beállításához,
+amit már elég közelinek tartasz ahhoz, hogy az elsõ legyen (a sorban).
+A kfthreshold beállítja a tartományt, amiben a kulcs képkockák csökkennek
+és a kfreduction szabályozza a bitráta csökkentést, ami jut rájuk.
+Az utolsó I-kocka normálisként lesz kezelve (alapértelmezett: 30).
+.
+.TP
+.B max_bframes=<0\-4>
+Az I/P-kockák közé teendõ B-kockák maximális száma (alapértelmezett: 2).
+.
+.TP
+.B bquant_ratio=<0\-1000>
+kvantáló ráta a B- és nem-B-kockák között, 150=1.50 (alapértelmezett: 150)
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+kvantáló eltolás a B- és nem-B-kockák között, 100=1.00 (alapértelmezett: 100)
+.
+.TP
+.B bf_threshold=<-255\-255>
+Ezzel az opcióval megadhatod a B-kockák használatának priorítását.
+A nagyobb érték a B-kocka felhasználásának nagyobb valószínûségét jelenti
+(alapértelmezett: 0).
+Ne felejtsd el, hogy a B-kockák általában nagyobb kvantálóval rendelkeznek,
+ezért a B-kockák túlzott használata csökkenti a vizuális minõséget.
+.
+.TP
+.B (no)closed_gop
+Ez az opció megmondja az Xvid-nek, hogy zárja le az összes GOP-ot
+(Group Of Pictures, Képek Csoportja, melyeket két I-kocka határol), ami által
+a GOP-ok függetlenek lesznek egymástól. Ez magában foglalja azt, hogy a GOP
+utolsó kockája vagy egy P-kocka vagy egy N-kocka, de nem B-kocka.
+Általában jó ötlet bekapcsolni ezt az opciót (alapértelmezett: be).
+.
+.TP
+.B (no)packed
+Ez az opció a kocka-sorrendbeli gondokat oldja meg konténer formátumokba,
+pl. AVI-ba történõ kódoláskor, ami nem tud megbírkózni a nem sorrendben
+lévõ kockákkal. A gyakorlatban a legtöbb dekódoló (mind szoftveres, mind
+hardveres) saját maga is tudja kezelni a kocka-sorrendet és összezavarodhat,
+ha ez az opció be van kapcsolva, így nyugodtan kikapcsolva hagyhatod,
+kivéve ha pontosan tudod, hogy mit csinálsz.
+.br
+.I FIGYELMEZTETÉS:
+Ez egy hibás bitfolyamot fog generálni, amit nem lehet lejátszani az
+ISO-MPEG-4 dekódolókkal, kivéve a DivX/\:libavcodec/\:Xvid-et.
+.br
+.I FIGYELMEZTETÉS:
+Ez egy hamis DivX verziót is eltárol a fájlban, így néjány dekódoló
+automatikus hibafelismerése összezavarodhat.
+.
+.TP
+.B frame_drop_ratio=<0\-100> (csak max_bframes=0)
+Ez az opció megengedi a változó framerátájú videó folyamok készítését.
+Az érték egy küszöböt jelöl, ami mellett ha a különbség az elõzõ és a
+következõ kocka között kisebb vagy egyenlõ vele, a kocka nem lesz elkódolva
+(egy úgynevezett n-vop kerül a folyamba).
+Lejátszáskor az n-vop helyett az elõzõ kocka jelenik meg.
+.br
+.I FIGYELMEZTETÉS:
+Ezzel a beállítással történõ lejátszás szaggatott videót eredményezhet,
+tehát csak a saját felelõsségedre használd!
+.
+.TP
+.B rc_reaction_delay_factor=<érték>
+Ez a paraméter szabályozza, hogy a CBR rate controller hány képkockát várjon,
+mielõtt reagálna a bitráta változásra és kompenzálná a konstans bitráta
+megtartásához a kockák egy átlagos tartományán.
+.
+.TP
+.B rc_averaging_period=<érték>
+Az igazi CBR-t nagyon nehéz elérni.
+A videó anyagtól függõen a bitráta változhat és ezt nehéz elõre megjósolni.
+Ezért az Xvid egy átlagoló periódust használ, ami alatt garantálja a megadott
+bitmennyiséget (minusz egy kis variáció).
+Ez a beállítás megadja a "kockák számát", amikre vonatkoztatva az Xvid 
+átlagol és megpróbálja elérni a CBR-t.
+.
+.TP
+.B rc_buffer=<érték>
+a rate control bufferjének mérete
+.
+.TP
 .B curve_compression_high=<0\-100>
-Ez a beállítás megengedi az XviD-nek a bitek bizonyos százalékának
+Ez a beállítás megengedi az Xvid-nek a bitek bizonyos százalékának
 elvételét a nagy bitrátájú jelenetektõl és visszateszi a nagy közös
 tartályba.
 Akkor is hasznos lehet, ha egy olyan klipped van, amiben már olyan
@@ -8831,7 +8781,7 @@ bitrátájú részek már rosszul kezdenek kinézni (alapértelmezett: 0).
 .
 .TP
 .B curve_compression_low=<0\-100>
-Ez a beállítás megengedi az XviD-nek, hogy az extra bitek bizonyos
+Ez a beállítás megengedi az Xvid-nek, hogy az extra bitek bizonyos
 százalékát az alacsony bitrátájú fejezeteknek adja, elvéve pár bitet
 a teljes klipptõl. Hasznos lehet, ha van pár alacsony bitrátájú
 jeleneted, ami még mindig blokkos (alapértelmezett: 0).
@@ -8876,9 +8826,9 @@ Legtöbbször a felhasználók úgy jelölik meg a videójuk cél bitrátáját, hogy
 nem veszik figyelembe a videó konténerének többletét.
 Ez a kicsi de (legtöbbször) konstant többlet azt okozhatja, hogy a célzott
 fájlméret át lesz lépve.
-Az XviD megengedi a felhasználóknak, hogy beállítsák a többlet kockánkénti
+Az Xvid megengedi a felhasználóknak, hogy beállítsák a többlet kockánkénti
 méretét, amit a konténer generál (csak egy kockánkénti átlagot adva).
-A 0-nak speciális jelentése van, ez engedi az XviD-nek a saját alapértelmezett
+A 0-nak speciális jelentése van, ez engedi az Xvid-nek a saját alapértelmezett
 értékeit használni (alapértelmezett: 24 \- AVI átlagos többlet).
 .
 .TP
@@ -8929,7 +8879,7 @@ DXN HDTV profil
 .I MEGJEGYZÉS:
 Ezeket a profilokat a megfelelõ \-ffourcc mellett ajánlott használni.
 Általában a DX50 a használatos, mivel néhány lejátszó nem ismeri fel az
-XviD-et, de a legtöbb felismeri a DivX-et.
+Xvid-et, de a legtöbb felismeri a DivX-et.
 .RE
 .
 .TP
@@ -8995,9 +8945,15 @@ Kiírja a PSNR-t (peak signal to noise ratio) a teljes videóra a kódolás után
 fájlnévvel az aktuális könyvtárba.
 A visszatérési érték dB-ben (decibel) értendõ, a nagyobb a jobb.
 .
+.TP
+.B "debug\ \ "
+Kockánkénti statisztikát ment el a ./xvid.dbg fájlba. (Ez nem a két lépéses
+control fájl.)
+.RE
+.
 .PP
 .sp 1
-A következõ opció csak az XviD 1.1.x változatában létezik.
+A következõ opció csak az Xvid 1.1.x változatában létezik.
 .
 .TP
 .B bvhq=<0|1>
@@ -9009,7 +8965,7 @@ teljesítménybeli veszteséget (alapértelmezett: 1).
 .
 .PP
 .sp 1
-A következõ opció csak az XViD CVS változatában létezik.
+A következõ opció csak az Xvid 1.2.x változatában létezik.
 .
 .TP
 .B threads=<0\-n>
