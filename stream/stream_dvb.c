@@ -135,6 +135,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 	char line[CHANNEL_LINE_LEN], *colon;
 
 	int fields, cnt, pcnt, k;
+	int has8192;
 	dvb_channel_t *ptr, *tmp, chn;
 	char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256];
 	const char *cbl_conf = "%d:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
@@ -259,9 +260,25 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 		if((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
 			continue;
 
-
+		has8192 = 0;
+		for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
+		{
+			if(ptr->pids[cnt] == 8192)
+			{
+				has8192 = 1;
+				break;
+			}
+		}
+		if(has8192)
+		{
+			ptr->pids[0] = 8192;
+			ptr->pids_cnt = 1;
+		}
+		else
+		{
 		ptr->pids[ptr->pids_cnt] = 0;	//PID 0 is the PAT
 		ptr->pids_cnt++;
+		}
 		mp_msg(MSGT_DEMUX, MSGL_V, " PIDS: ");
 		for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
 			mp_msg(MSGT_DEMUX, MSGL_V, " %d ", ptr->pids[cnt]);
