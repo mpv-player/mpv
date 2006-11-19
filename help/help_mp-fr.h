@@ -1528,7 +1528,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MKV_NoVideoTrackFound "[mkv] Pas de piste vidéo trouvée/voulue.\n"
 #define MSGTR_MPDEMUX_MKV_NoAudioTrackFound "[mkv] Pas de piste audio trouvée/voulue.\n"
 #define MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack "[mkv] Affichera piste sous-titre %u.\n"
-#define MSGTR_MPDEMUX_MKV_NoBlockDurationForSubtitleTrackFound "[mkv] Attention : aucun "BlockDuration" pour piste sous-titre trouvé.\n"
+#define MSGTR_MPDEMUX_MKV_NoBlockDurationForSubtitleTrackFound "[mkv] Attention : aucun \"BlockDuration\" pour piste sous-titre trouvé.\n"
 #define MSGTR_MPDEMUX_MKV_TooManySublines "[mkv] Attention : trop de \"sublines\" à restituer, passe.\n"
 #define MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst "\n[mkv] Attention : trop de \"sublines\" à restituer, passe après premier %i.\n"
 
