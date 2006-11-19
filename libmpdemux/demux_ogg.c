@@ -538,7 +538,7 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
     vorbis_info_clear(&vi);
   }
   if (os->text) {
-    if (id == demux_ogg_sub_id(d->sub->id)) // don't want to add subtitles to the demuxer for now
+    if (id == demux_ogg_sub_id(d, d->sub->id)) // don't want to add subtitles to the demuxer for now
       demux_ogg_add_sub(os,pack);
     return 0;
   }
