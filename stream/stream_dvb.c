@@ -276,8 +276,8 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 		}
 		else
 		{
-		ptr->pids[ptr->pids_cnt] = 0;	//PID 0 is the PAT
-		ptr->pids_cnt++;
+			ptr->pids[ptr->pids_cnt] = 0;	//PID 0 is the PAT
+			ptr->pids_cnt++;
 		}
 		mp_msg(MSGT_DEMUX, MSGL_V, " PIDS: ");
 		for(cnt = 0; cnt < ptr->pids_cnt; cnt++)
