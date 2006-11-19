@@ -27,7 +27,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "mp_msg.h"
+#include "mputils.h"
 #include "ass_fontconfig.h"
 
 #ifdef HAVE_FONTCONFIG

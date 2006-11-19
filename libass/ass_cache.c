@@ -26,7 +26,7 @@
 
 #include <assert.h>
 
-#include "mp_msg.h"
+#include "mputils.h"
 #include "ass_fontconfig.h"
 #include "ass_bitmap.h"
 #include "ass_cache.h"

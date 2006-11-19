@@ -30,19 +30,14 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-#ifdef HAVE_ENCA
-#include "subreader.h" // for guess_buffer_cp
-#endif
-
 #ifdef USE_ICONV
 #include <iconv.h>
 #endif
 
-#include "mp_msg.h"
 #include "ass.h"
 #include "ass_utils.h"
 #include "ass_library.h"
-#include "libvo/sub.h" // for utf8_get_char
+#include "mputils.h"
 
 typedef enum {PST_UNKNOWN = 0, PST_INFO, PST_STYLES, PST_EVENTS, PST_FONTS} parser_state_t;
 

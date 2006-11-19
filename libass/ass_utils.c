@@ -25,7 +25,7 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include "mp_msg.h"
+#include "mputils.h"
 #include "ass_utils.h"
 
 int mystrtoi(char** p, int base, int* res)

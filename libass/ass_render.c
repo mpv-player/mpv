@@ -29,7 +29,7 @@
 #include FT_GLYPH_H
 #include FT_SYNTHESIS_H
 
-#include "mp_msg.h"
+#include "mputils.h"
 
 #include "ass.h"
 #include "ass_bitmap.h"
@@ -37,9 +37,6 @@
 #include "ass_utils.h"
 #include "ass_fontconfig.h"
 #include "ass_library.h"
-
-#include "libvo/sub.h" // for utf8_get_char
-#include "libavutil/common.h"
 
 #define MAX_GLYPHS 1000
 #define MAX_LINES 100

@@ -25,8 +25,7 @@
 #include <ft2build.h>
 #include FT_GLYPH_H
 
-#include "mp_msg.h"
-#include "libvo/font_load.h" // for blur()
+#include "mputils.h"
 #include "ass_bitmap.h"
 
 struct ass_synth_priv_s {
