@@ -344,7 +344,7 @@ int suboverlap_enabled = 1;
 sub_data* set_of_subtitles[MAX_SUBTITLE_FILES];
 int set_of_sub_size = 0;
 int set_of_sub_pos = -1;
-float sub_last_pts = -303;
+double sub_last_pts = -303;
 #endif
 int global_sub_size = 0; // this encompasses all subtitle sources
 int global_sub_pos = -1; // this encompasses all subtitle sources
@@ -2867,6 +2867,73 @@ static double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 	audio_out->get_delay();
 }
 
+static void update_subtitles(void)
+{
+#ifdef USE_SUB
+    // find sub
+    if (subdata) {
+	double pts = sh_video->pts;
+	if (sub_fps==0) sub_fps = sh_video->fps;
+	current_module = "find_sub";
+	if (pts > sub_last_pts || pts < sub_last_pts-1.0) {
+	    find_sub(subdata, (pts+sub_delay) *
+		     (subdata->sub_uses_time ? 100. : sub_fps)); 
+	    if (vo_sub) vo_sub_last = vo_sub;
+	    // FIXME! frame counter...
+	    sub_last_pts = pts;
+	}
+    }
+#endif
+
+    // DVD sub:
+    if (vo_config_count && vo_spudec) {
+	unsigned char* packet=NULL;
+	int len, timestamp;
+	current_module = "spudec";
+	spudec_heartbeat(vo_spudec, 90000*sh_video->timer);
+	/* Get a sub packet from the DVD or a vobsub and make a timestamp
+	 * relative to sh_video->timer */
+	while(1) {
+	    // Vobsub
+	    len = 0;
+	    if (vo_vobsub) {
+		if (sh_video->pts+sub_delay >= 0) {
+		    len = vobsub_get_packet(vo_vobsub, sh_video->pts+sub_delay,
+					    (void**)&packet, &timestamp);
+		    if (len > 0) {
+			timestamp -= (sh_video->pts + sub_delay - sh_video->timer)*90000;
+			mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,sh_video->pts,sh_video->timer,timestamp / 90000.0,timestamp);
+		    }
+		}
+	    } else {
+		// DVD sub
+		len = ds_get_packet_sub(d_dvdsub, (unsigned char**)&packet);
+		if (len > 0) {
+		    // XXX This is wrong, sh_video->pts can be arbitrarily
+		    // much behind demuxing position. Unfortunately using
+		    // d_video->pts which would have been the simplest
+		    // improvement doesn't work because mpeg specific hacks
+		    // in video.c set d_video->pts to 0.
+		    float x = d_dvdsub->pts - sh_video->pts;
+		    if (x > -20 && x < 20) // prevent missing subs on pts reset
+			timestamp = 90000*(sh_video->timer + d_dvdsub->pts
+					   + sub_delay - sh_video->pts);
+		    else timestamp = 90000*(sh_video->timer + sub_delay);
+		    mp_dbg(MSGT_CPLAYER, MSGL_V, "\rDVD sub: len=%d  "
+			   "v_pts=%5.3f  s_pts=%5.3f  ts=%d \n", len,
+			   sh_video->pts, d_dvdsub->pts, timestamp);
+		}
+	    }
+	    if (len<=0 || !packet) break;
+	    if (timestamp >= 0)
+		spudec_assemble(vo_spudec, packet, len, timestamp);
+	}
+
+	if (spudec_changed(vo_spudec))
+	    vo_osd_changed(OSDTYPE_SPU);
+    }
+    current_module=NULL;
+}
 
 static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 {
@@ -2897,7 +2964,9 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	current_module = "decode video";
 	decoded_frame = decode_video(sh_video, start, in_size, 0, pts);
 	if (decoded_frame) {
+	    update_subtitles();
 	    update_osd_msg();
+	    current_module = "filter video";
 	    if (filter_video(sh_video, decoded_frame, sh_video->pts))
 		break;
 	}
@@ -4500,10 +4569,12 @@ if(!sh_video) {
 	    ++total_frame_cnt;
 	}
 	// decode:
-	current_module="decode_video";
 //	printf("Decode! %p  %d  \n",start,in_size);
+	update_subtitles();
 	update_osd_msg();
+	current_module = "decode_video";
 	decoded_frame = decode_video(sh_video,start,in_size,drop_frame, sh_video->pts);
+	current_module = "filter video";
 	blit_frame = (decoded_frame && filter_video(sh_video, decoded_frame,
 						    sh_video->pts));
 	break;
@@ -5553,68 +5624,6 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
       }
 #endif /* HAVE_NEW_GUI */
 
-
-//================= Update OSD ====================
-  
-#ifdef USE_SUB
-  // find sub
-  if(subdata &&  sh_video && sh_video->pts>0){
-      float pts=sh_video->pts;
-      if(sub_fps==0) sub_fps=sh_video->fps;
-      current_module="find_sub";
-      if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
-         find_sub(subdata, (pts+sub_delay) * 
-				 (subdata->sub_uses_time ? 100. : sub_fps)); 
-	 if (vo_sub) vo_sub_last = vo_sub;
-	 // FIXME! frame counter...
-         sub_last_pts = pts;
-      }
-      current_module=NULL;
-  }
-#endif
-
-  // DVD sub:
-if(vo_config_count && vo_spudec) {
-  unsigned char* packet=NULL;
-  int len,timestamp;
-  current_module="spudec";
-  spudec_heartbeat(vo_spudec,90000*sh_video->timer);
-  /* Get a sub packet from the DVD or a vobsub and make a timestamp
-     relative to sh_video->timer */
-  while(1) {
-    // Vobsub
-    len = 0;
-    if(vo_vobsub) {
-      if(sh_video->pts+sub_delay>=0) {
-	// The + next_frame_time is there because we'll display the sub at the next frame
-	len = vobsub_get_packet(vo_vobsub,sh_video->pts+sub_delay+next_frame_time,(void**)&packet,&timestamp);
-	if(len > 0) {
-	  timestamp -= (sh_video->pts + sub_delay - sh_video->timer)*90000;
-	  mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,sh_video->pts,sh_video->timer,timestamp / 90000.0,timestamp);
-	}
-      }
-    } else {
-      // DVD sub
-      len = ds_get_packet_sub(d_dvdsub,(unsigned char**)&packet);
-      if(len > 0) {
-	float x = d_dvdsub->pts - sh_video->pts;
-	if (x < -10 || x > 10) // prevent missing subs on pts reset
-	  timestamp = 90000*(sh_video->timer + d_dvdsub->pts + sub_delay - sh_video->pts);
-	else timestamp = 90000*(sh_video->timer + sub_delay);
-	mp_dbg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  ts=%d \n",len,sh_video->pts,d_dvdsub->pts,timestamp);
-      }
-    }
-      if(len<=0 || !packet) break;
-      if(timestamp < 0) timestamp = 0;
-      else spudec_assemble(vo_spudec,packet,len,timestamp);
-  }
-  
-  /* detect wether the sub has changed or not */
-  if(spudec_changed(vo_spudec))
-    vo_osd_changed(OSDTYPE_SPU);
-  current_module=NULL;
-}
-  
 } // while(!eof)
 
 mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
