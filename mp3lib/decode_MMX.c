@@ -48,7 +48,6 @@ unsigned long __attribute__((aligned(16))) costab_mmx[] =
 	1060439283,
 };
 
-#ifndef SYS_DARWIN
 static int temp; // buggy gcc 3.x fails if this is moved into the function :(
 void synth_1to1_MMX_s(real *bandPtr, int channel, short *samples,
                       short *buffs, int *bo)
@@ -92,7 +91,7 @@ __asm __volatile(
 	"pushl %%ecx\n\t"
 	"leal "MANGLE(mp3lib_decwins)"(%%ebx,%%ebx,1), %%edx\n\t"
 	"shrl $1, %%ecx\n\t"
-".balign 16\n\t"
+ASMALIGN(4)
 ".L03:\n\t"
         "movq  (%%edx),%%mm0\n\t"
         "movq  64(%%edx),%%mm4\n\t"
@@ -170,7 +169,7 @@ __asm __volatile(
 ".next_loop:\n\t"
         "subl $64,%%esi\n\t"
         "movl $7,%%ecx\n\t"
-".balign 16\n\t"
+ASMALIGN(4)
 ".L04:\n\t"
         "movq  (%%edx),%%mm0\n\t"
         "movq  64(%%edx),%%mm4\n\t"
@@ -247,4 +246,3 @@ __asm __volatile(
 	:"m"(bandPtr),"m"(channel),"m"(samples),"m"(buffs),"m"(bo), "m"(temp)
 	:"memory","%edi","%esi","%ebx","%esp");
 }
-#endif /* SYS_DARWIN */
