@@ -2175,6 +2175,8 @@ if(trak->pos==0 && trak->stream_header_len>0){
         if (sh->type == 'v')
           ds_read_packet(demuxer->sub, demuxer->stream, len, subpts, pos, 0);
         else {
+          int i;
+          char *line = priv->subtext;
           stream_skip(demuxer->stream, 2); // size
           len -= 2;
           if (len < 0) len = 0;
@@ -2183,6 +2185,11 @@ if(trak->pos==0 && trak->stream_header_len>0){
           priv->subtext[len] = 0;
           priv->subs.lines = 1;
           priv->subs.text[0] = &priv->subtext;
+          while ((line = strchr(line, '\n'))) {
+            *line++ = 0;
+            priv->subs.text[priv->subs.lines] = line;
+            priv->subs.lines++;
+          }
           vo_sub = &priv->subs;
         }
         priv->current_sub = samplenr;
