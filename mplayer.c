@@ -5025,6 +5025,11 @@ if(step_sec>0) {
       if (demuxer->stream->type==  STREAMTYPE_RADIO)
         radio_set_freq(demuxer->stream, cmd->args[0].v.f);
     } break;
+    case MP_CMD_RADIO_STEP_FREQ :
+      if (demuxer->stream->type == STREAMTYPE_RADIO){
+        radio_step_freq(demuxer->stream, cmd->args[0].v.f);
+      }
+    break;
 #endif
 #ifdef USE_TV
     case MP_CMD_TV_SET_FREQ :  {

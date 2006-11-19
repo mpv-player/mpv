@@ -22,6 +22,7 @@ int radio_get_freq(struct stream_st *stream, float* freq);
 char* radio_get_channel_name(struct stream_st *stream);
 int radio_set_channel(struct stream_st *stream, char *channel);
 int radio_step_channel(struct stream_st *stream, int direction);
+int radio_step_freq(struct stream_st *stream, float step_interval);
 
 #endif
 

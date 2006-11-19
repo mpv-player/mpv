@@ -981,6 +981,27 @@ int radio_set_freq(struct stream_st *stream, float frequency){
 }
 
 /*****************************************************************
+ * \brief tune current frequency by step_interval value
+ * \parameter step_interval increment value
+ * \return 1 if success,0 - otherwise
+ *
+ */
+int radio_step_freq(struct stream_st *stream, float step_interval){
+    float frequency;
+    radio_priv_t* priv=(radio_priv_t*)stream->priv;
+    
+    if (get_frequency(priv,&frequency)!=STREAM_OK)
+        return 0;
+    
+    frequency+=step_interval;
+    if (frequency>priv->rangehigh)
+        frequency=priv->rangehigh;
+    if (frequency<priv->rangelow)
+        frequency=priv->rangelow;
+
+    return radio_set_freq(stream,frequency);
+}
+/*****************************************************************
  * \brief step channel up or down
  * \parameter direction RADIO_CHANNEL_LOWER - go to prev channel,RADIO_CHANNEL_HIGHER - to next
  * \return 1 if success,0 - otherwise
