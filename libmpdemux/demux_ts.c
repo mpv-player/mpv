@@ -3188,18 +3188,33 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 	switch(cmd)
 	{
 		case DEMUXER_CTRL_SWITCH_AUDIO:
+		case DEMUXER_CTRL_SWITCH_VIDEO:
 		{
-			sh_audio_t *sh_a = NULL;
+			void *sh = NULL;
 			int i, n;
+			int reftype, areset = 0, vreset = 0;
+			demux_stream_t *ds;
 			
+			if(cmd == DEMUXER_CTRL_SWITCH_VIDEO)
+			{
+				reftype = TYPE_VIDEO;
+				ds = demuxer->video;
+				vreset  = 1;
+			}
+			else
+			{
+				reftype = TYPE_AUDIO;
+				ds = demuxer->audio;
+				areset = 1;
+			}
 			n = *((int*)arg);
 			if(n == -2)
 			{
-				reset_fifos(priv, 1, 0, 0);
-				demuxer->audio->id = -2;
-				demuxer->audio->sh = NULL;
-				ds_free_packs(demuxer->audio);
-				*((int*)arg) = demuxer->audio->id;
+				reset_fifos(priv, areset, vreset, 0);
+				ds->id = -2;
+				ds->sh = NULL;
+				ds_free_packs(ds);
+				*((int*)arg) = ds->id;
 				return DEMUXER_CTRL_OK;
 			}
 
@@ -3207,18 +3222,18 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 			{
 				for(i = 0; i < 8192; i++)
 				{
-					if(priv->ts.streams[i].id == demuxer->audio->id && priv->ts.streams[i].type == TYPE_AUDIO)
+					if(priv->ts.streams[i].id == ds->id && priv->ts.streams[i].type == reftype)
 						break;
 				}
 
-				while(!sh_a)
+				while(!sh)
 				{
 					i = (i+1) % 8192;
-					if(priv->ts.streams[i].type == TYPE_AUDIO)
+					if(priv->ts.streams[i].type == reftype)
 					{
-						if(priv->ts.streams[i].id == demuxer->audio->id)	//we made a complete loop
+						if(priv->ts.streams[i].id == ds->id)	//we made a complete loop
 							break;
-						sh_a = (sh_audio_t*)priv->ts.streams[i].sh;
+						sh = priv->ts.streams[i].sh;
 					}
 				}
 			}
@@ -3226,86 +3241,25 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 			{
 				for(i = 0; i < 8192; i++)
 				{
-					if(priv->ts.streams[i].id == n && priv->ts.streams[i].type == TYPE_AUDIO)
+					if(priv->ts.streams[i].id == n && priv->ts.streams[i].type == reftype)
 					{
-						sh_a = (sh_audio_t*)priv->ts.streams[i].sh;
+						sh = priv->ts.streams[i].sh;
 						break;
 					}
 				}
 			}
 
-			if(sh_a)
+			if(sh)
 			{
-				if(demuxer->audio->id != priv->ts.streams[i].id)
-					reset_fifos(priv, 1, 0, 0);
-				demuxer->audio->id = priv->ts.streams[i].id;
-				demuxer->audio->sh = sh_a;
-				ds_free_packs(demuxer->audio);
-				mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndemux_ts, switched to audio pid %d, id: %d, sh: %p\r\n", i, demuxer->audio->id, sh_a);
+				if(ds->id != priv->ts.streams[i].id)
+					reset_fifos(priv, areset, vreset, 0);
+				ds->id = priv->ts.streams[i].id;
+				ds->sh = sh;
+				ds_free_packs(ds);
+				mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndemux_ts, switched to audio pid %d, id: %d, sh: %p\r\n", i, ds->id, sh);
 			}
 
-			*((int*)arg) = demuxer->audio->id;
-			return DEMUXER_CTRL_OK;
-		}
-		
-		case DEMUXER_CTRL_SWITCH_VIDEO:
-		{
-			sh_video_t *sh_v = NULL;
-			int i, n;
-			
-			n = *((int*)arg);
-			if(n == -2)
-			{
-				reset_fifos(priv, 0, 1, 0);
-				demuxer->video->id = -2;
-				demuxer->video->sh = NULL;
-				ds_free_packs(demuxer->video);
-				*((int*)arg) = demuxer->video->id;
-				return DEMUXER_CTRL_OK;
-			}
-
-			if(n < 0)
-			{
-				for(i = 0; i < 8192; i++)
-				{
-					if(priv->ts.streams[i].id == demuxer->video->id && priv->ts.streams[i].type == TYPE_VIDEO)
-						break;
-				}
-
-				while(!sh_v)
-				{
-					i = (i+1) % 8192;
-					if(priv->ts.streams[i].type == TYPE_VIDEO)
-					{
-						if(priv->ts.streams[i].id == demuxer->video->id)	//we made a complete loop
-							break;
-						sh_v = (sh_video_t*)priv->ts.streams[i].sh;
-					}
-				}
-			}
-			else if(n <= priv->last_vid)
-			{
-				for(i = 0; i < 8192; i++)
-				{
-					if(priv->ts.streams[i].id == n && priv->ts.streams[i].type == TYPE_VIDEO)
-					{
-						sh_v = (sh_video_t*)priv->ts.streams[i].sh;
-						break;
-					}
-				}
-			}
-
-			if(sh_v)
-			{
-				if(demuxer->video->id != priv->ts.streams[i].id)
-					reset_fifos(priv, 0, 1, 0);
-				demuxer->video->id = priv->ts.streams[i].id;
-				demuxer->video->sh = sh_v;
-				ds_free_packs(demuxer->video);
-				mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndemux_ts, switched to video pid %d, id: %d, sh: %p\r\n", i, demuxer->video->id, sh_v);
-			}
-
-			*((int*)arg) = demuxer->video->id;
+			*((int*)arg) = ds->id;
 			return DEMUXER_CTRL_OK;
 		}
 
