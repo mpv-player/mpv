@@ -7371,7 +7371,6 @@ HOST_CC = $_host_cc
 AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
-# FIXME: Should only be _inc_extra eventually.
 EXTRA_INC = $_inc_extra
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
