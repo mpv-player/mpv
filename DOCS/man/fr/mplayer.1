@@ -1,4 +1,4 @@
-.\" synced with r21004
+.\" synced with r21026
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -258,6 +258,9 @@ Coupe le son (mute).
 Alterne entre les pistes vidéos disponibles.
 .IPs "# (MPEG et Matroska uniquement)"
 Alterne entre les pistes audio disponibles.
+.IPs "TAB (MPEG-TS uniquement)"
+Alterne entre les différents programmes disponibles.
+Cycle through the available programs.
 .IPs "f\ \ \ \ "
 Bascule en plein-écran.
 .IPs "T\ \ \ \ "
@@ -294,6 +297,8 @@ Amorce/arrête la capture d'écran.
 Affiche le nom de fichier dans l'OSD.
 .IPs "! and @"
 Saute au début du chapitre précédant/suivant.
+.IPs "D (\-vo xvmc uniquement)"
+Active/désactive le désentrelacement.
 .RE
 .PD 1
 .PP
@@ -8967,219 +8972,6 @@ long; aussi, si vous devez faire un encodage en temps réel, agissez sur ce
 paramètre.
 .
 .TP
-.B (no)interlacing
-Active la gestion des vidéos entrelacées.
-L'encodage se fera en tenant compte des champs de la vidéo entrelacée.
-.br
-.I NOTE\ :
-Si vous redimmensionnez la vidéo, vous devriez utiliser un filtre de
-redimentionnement adapté à ce genre de vidéo, ce qui se fait avec
-\-vf scale=<largeur>:<hauteur>:1.
-.
-.TP
-.B "4mv\ \ \ \ "
-Utilise 4 vecteurs de mouvement par macro-bloc.
-Peut améliorer la compressibilité mais ralenti l'encodage.
-.br
-.I ATTENTION\ :
-Cette option n'existe plus séparément avec Xvid 1.0.x, mais est activée
-automatiquement quand me_quality > 4.
-.
-.TP
-.B rc_reaction_delay_factor=<valeur>
-Définit avec quelle rapidité le contrôleur de débit binaire CBR réagira à un
-changement de débit binaire et s'efforcera de le compenser pour obtenir un
-débit binaire constant sur cet ensemble de trames.
-.
-.TP
-.B rc_averaging_period=<valeur>
-Un encodage à débit binaire vraiment constant est très difficile à réaliser.
-En fonction du type de scène, le débit binaire peut fortement varier et peut
-être difficile à prédire.
-C'est pourquoi Xvid essaye plutôt de garantir ce débit binaire sur <valeur>
-nombre de trames.
-.
-.TP
-.B rc_buffer=<valeur>
-Taille du tampon de contrôle du débit.
-.
-.TP
-.B min_iquant=<0\-31>
-quantum minimum pour les trames-I (par défaut\ : 2)
-.
-.TP
-.B max_iquant=<0\-31>
-quantum maximum pour les trames-I (par défaut\ : 31)
-.
-.TP
-.B min_pquant=<0\-31>
-quantum minimum pour les trames-P (par défaut\ : 2)
-.
-.TP
-.B max_pquant=<0\-31>
-quantum maximum pour les trames-P (par défaut\ : 31)
-.
-.TP
-.B min_bquant=<0\-31>
-quantum minimum pour les trames-B (par défaut\ : 2)
-.
-.TP
-.B max_bquant=<0\-31>
-quantum maximum pour les trames-B (par défaut\ : 31)
-.
-.TP
-.B min_key_interval=<valeur> (mode deux passes uniquement)
-Intervalle minimum entre les trames-clés.
-S'exprime en tant que gain en pourcentage, pour lequel la
-valeur 10 donnera au trames-clé 10% de plus de bits que
-la normale
-(par défaut\ : 0).
-.
-.TP
-.B max_key_interval=<valeur>
-intervalle maximum entre les trames-clés (par défaut\ : 10*fps)
-.
-.TP
-.B mpeg_quant
-Utilise les quantum MPEG au lieu de H.263.
-À débit binaire plutôt élevé (> 950kb), les quantum MPEG ont tendance à
-conserver plus de détails.
-À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
-image où les macro-blocs se verront moins.
-Si vous utilisez vos propres matrices de quantification, vous devez
-utiliser MPEG.
-.I ATTENTION\ :
-À partir de Xvid-1.0.x, cette option est remplacée par l'option
-quant_type.
-.
-.TP
-.B mod_quant
-Décide trame par trame d'utiliser ou non les quantum MPEG ou H.263.
-.br
-.I ATTENTION\ :
-Cette option génèrera un flux vidéo incompatible avec la norme MPEG-4.
-Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec libavcodec ou Xvid.
-(mode 2passes uniquement)
-.br
-.I ATTENTION\ :
-Cette option n'existe plus à partir de Xvid-1.0.x.
-.
-.TP
-.B keyframe_boost=<0\-1000> (mode deux passes uniquement)
-Emprunte des bits depuis les autres "pools" de trames vers les trames-clés
-pour augmenter la qualité des trames-clés
-(défaut\ : 0).
-.
-.TP
-.B kfthreshold=<valeur> (mode deux passes uniquement)
-S'utilise de pair avec kfreduction.
-Définit la distance minimale en dessous de laquelle vous considérez
-que deux trames-clés sont vues comme consécutives et traitées
-différemment en fonction de kfreduction
-(défaut\ : 0).
-.
-.TP
-.B kfreduction=<0\-100> (mode 2passes uniquement)
-Les deux options ci-dessus contrôlent la taille des trames-clés qui vous
-semblent trop proches l'une de l'autre.
-kfthreshold contrôle la réduction de la distance inter trames-clés et
-kfreduction contrôle leur réduction de débit binaire.
-La dernière trame-clé est traitée normalement.
-(défaut\ : 0)
-.
-.TP
-.B divx5bvop
-Génère des trames-B compatibles DivX5 (par défaut\ : on).
-Ceci ne semble nécessaire qu'avec de vieilles versions du décodeur de DivX.
-.br
-.I ATTENTION\ :
-À partir de Xvid-1.0.x, cette option est remplacée par l'option
-closed_gop.
-.
-.TP
-.B (no)grayscale
-Indique à Xvid de ne pas enregistrer l'information de chroma pour que la
-vidéo produite ne soit qu'en noir & blanc.
-Notez que cela ne changera en rien le temps de compression, cela évitera juste
-d'avoir l'information de chroma présente dans le fichier vidéo.
-.
-.TP
-.B "debug\ \ "
-Sauve les statistiques par trames dans ./xvid.dbg. (Ce n'est pas le
-fichier de contrôle 2passes.)
-.RE
-.
-.PP
-.sp 1
-Les options suivantes ne sont disponibles que dans les dernières versions
-stables 1.0.x de Xvid (api4).
-.
-.TP
-.B (no)packed
-Cette option a pour but de résoudre les problèmes de l'ordre des trames
-lorsque l'encodage est fait vers un container comme AVI qui ne gère pas
-les trames dans le désordre.
-En pratique, la plupart des décodeurs (autant logiciels que matériels)
-sont capables de gérer les trames dans le désordre eux-même, et peuvent
-même être gênés lorsque cette option est activée, c'est pourquoi vous
-pouvez sans problème laisser cette option désactivée, à moins de savoir
-précisément ce que vous faites.
-.br
-.I ATTENTION\ :
-Ceci engendrera un flux de bits illégal vis à vis de la norme MPEG-4,
-et NE SERA PAS décodable par les décodeurs excepté DivX/\:libavcodec/\:Xvid.
-.br
-.I ATTENTION\ :
-Ceci ajoutera également une fausse version de divx dans le fichier donc
-l'autodétection de bogues risque de ne pas fonctionner.
-.
-.TP
-.B max_bframes=<0\-4>
-Nombre maximum de trames-B à insérer entre les trames-I/P
-(par défaut\ : 2).
-.
-.TP
-.B bquant_ratio=<0\-1000>
-rapport de quantum entre les trames-B et non-B, 150=1.50
-(par défaut\ : 150)
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-offset de quantum entre les trames-B et non-B, 100=1.00
-(par défaut\ : 100)
-.
-.TP
-.B bf_threshold=<-255\-255>
-Cette option permet de changer la probabilité qu'une trame soit une trame-B.
-Plus la valeur est haute, plus la probabilité que la trame générée soit
-une trame-B est forte (par défaut\ : 0).
-Gardez à l'esprit que les trames-B ont généralement un quanta plus
-élevé, ainsi une production excessive de trames-B peut dégrader la
-qualité visuelle.
-.
-.TP
-.B (no)closed_gop
-Cette option demande à Xvid de fermer chaque GOP (Group Of Pictures\ :
-Groupe D'Images encadrées par deux trames-I), ce qui signifie que chaque
-GOP sera indépendant des GOP suivants.
-Ceci implique que la dernière trame du GOP est soit une trame-P ou une
-trame-N, mais pas une trame-B.
-Il est plutôt recommandé d'activer cette option (par défaut\ : activé).
-.
-.TP
-.B frame_drop_ratio=<0\-100> (max_bframes=0 uniquement)
-Cette option vous permet de créer les flux vidéo à débit de trame variable.
-Le paramètre définit un seuil en dessous duquel, si la différence
-entre la trame précédente et la suivante est plus grande ou égale à ce
-seuil, la trame n'est pas codée (une trame appelée n-vop se sera juste
-présente dans le flux).
-Lors de la lecture, la n-vop sera jouée en affichant la trame précédente.
-.br
-.I ATTENTION\ :
-Une mauvaise utilisation de cette option peut produire des vidéos de très
-mauvaise qualité, soyez prévenus\ !
-.
-.TP
 .B (no)qpel
 MPEG-4 recherche par défaut les mouvements avec une précision d'un demi-pixel.
 Il est néanmoins possible de faire une recherche avec une précision d'un
@@ -9214,17 +9006,6 @@ Aussi, dans un contexte d'encodage temps réel, pensez à cette option
 .B (no)cartoon
 Ceci est un mode spécial d'Xvid permettant de mieux tenir compte des grands
 à-plats de couleur que l'on trouve typiquement dans les dessins animés.
-.
-.TP
-.B quant_type=<h263|mpeg>
-Définit le type de quantum à utiliser.
-À débit binaire plutôt élevé (> 950kb), les quantum MPEG ont tendance à
-conserver plus de détails.
-À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
-image où les macro-blocs se verront moins.
-Si vous utilisez vos propres matrices de quantification, vous 
-.B devez
-utiliser la quantification MPEG.
 .
 .TP
 .B (no)chroma_me
@@ -9283,6 +9064,70 @@ intermédiaires, économisant ainsi des bits pouvant être redistribués
 de la vidéo, tout en dégradant probablement un peu le PSNR.
 .
 .TP
+.B (no)grayscale
+Indique à Xvid de ne pas enregistrer l'information de chroma pour que la
+vidéo produite ne soit qu'en noir & blanc.
+Notez que cela ne changera en rien le temps de compression, cela évitera juste
+d'avoir l'information de chroma présente dans le fichier vidéo.
+.
+.TP
+.B (no)interlacing
+Active la gestion des vidéos entrelacées.
+L'encodage se fera en tenant compte des champs de la vidéo entrelacée.
+.br
+.I NOTE\ :
+Si vous redimmensionnez la vidéo, vous devriez utiliser un filtre de
+redimentionnement adapté à ce genre de vidéo, ce qui se fait avec
+\-vf scale=<largeur>:<hauteur>:1.
+.
+.TP
+.B min_iquant=<0\-31>
+quantum minimum pour les trames-I (par défaut\ : 2)
+.
+.TP
+.B max_iquant=<0\-31>
+quantum maximum pour les trames-I (par défaut\ : 31)
+.
+.TP
+.B min_pquant=<0\-31>
+quantum minimum pour les trames-P (par défaut\ : 2)
+.
+.TP
+.B max_pquant=<0\-31>
+quantum maximum pour les trames-P (par défaut\ : 31)
+.
+.TP
+.B min_bquant=<0\-31>
+quantum minimum pour les trames-B (par défaut\ : 2)
+.
+.TP
+.B max_bquant=<0\-31>
+quantum maximum pour les trames-B (par défaut\ : 31)
+.
+.TP
+.B min_key_interval=<valeur> (mode deux passes uniquement)
+Intervalle minimum entre les trames-clés.
+S'exprime en tant que gain en pourcentage, pour lequel la
+valeur 10 donnera au trames-clé 10% de plus de bits que
+la normale
+(par défaut\ : 0).
+.
+.TP
+.B max_key_interval=<valeur>
+intervalle maximum entre les trames-clés (par défaut\ : 10*fps)
+.
+.TP
+.B quant_type=<h263|mpeg>
+Définit le type de quantum à utiliser.
+À débit binaire plutôt élevé (> 950kb), les quantum MPEG ont tendance à
+conserver plus de détails.
+À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
+image où les macro-blocs se verront moins.
+Si vous utilisez vos propres matrices de quantification, vous 
+.B devez
+utiliser la quantification MPEG.
+.
+.TP
 .B quant_intra_matrix=<nom_fichier>
 Charge une matrice intra personnalisée.
 Vous pouvez construire de tels fichiers avec l'éditeur de matrices de
@@ -9293,6 +9138,112 @@ xvid4conf.
 Charge une matrice inter personnalisée.
 Vous pouvez construire de tels fichiers avec l'éditeur de matrices de
 xvid4conf.
+.
+.TP
+.B keyframe_boost=<0\-1000> (mode deux passes uniquement)
+Emprunte des bits depuis les autres "pools" de trames vers les trames-clés
+pour augmenter la qualité des trames-clés
+(défaut\ : 0).
+.
+.TP
+.B kfthreshold=<valeur> (mode deux passes uniquement)
+S'utilise de pair avec kfreduction.
+Définit la distance minimale en dessous de laquelle vous considérez
+que deux trames-clés sont vues comme consécutives et traitées
+différemment en fonction de kfreduction
+(défaut\ : 0).
+.
+.TP
+.B kfreduction=<0\-100> (mode 2passes uniquement)
+Les deux options ci-dessus contrôlent la taille des trames-clés qui vous
+semblent trop proches l'une de l'autre.
+kfthreshold contrôle la réduction de la distance inter trames-clés et
+kfreduction contrôle leur réduction de débit binaire.
+La dernière trame-clé est traitée normalement.
+(défaut\ : 0)
+.
+.TP
+.B max_bframes=<0\-4>
+Nombre maximum de trames-B à insérer entre les trames-I/P
+(par défaut\ : 2).
+.
+.TP
+.B bquant_ratio=<0\-1000>
+rapport de quantum entre les trames-B et non-B, 150=1.50
+(par défaut\ : 150)
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+offset de quantum entre les trames-B et non-B, 100=1.00
+(par défaut\ : 100)
+.
+.TP
+.B bf_threshold=<-255\-255>
+Cette option permet de changer la probabilité qu'une trame soit une trame-B.
+Plus la valeur est haute, plus la probabilité que la trame générée soit
+une trame-B est forte (par défaut\ : 0).
+Gardez à l'esprit que les trames-B ont généralement un quanta plus
+élevé, ainsi une production excessive de trames-B peut dégrader la
+qualité visuelle.
+.
+.TP
+.B (no)closed_gop
+Cette option demande à Xvid de fermer chaque GOP (Group Of Pictures\ :
+Groupe D'Images encadrées par deux trames-I), ce qui signifie que chaque
+GOP sera indépendant des GOP suivants.
+Ceci implique que la dernière trame du GOP est soit une trame-P ou une
+trame-N, mais pas une trame-B.
+Il est plutôt recommandé d'activer cette option (par défaut\ : activé).
+.
+.TP
+.B (no)packed
+Cette option a pour but de résoudre les problèmes de l'ordre des trames
+lorsque l'encodage est fait vers un container comme AVI qui ne gère pas
+les trames dans le désordre.
+En pratique, la plupart des décodeurs (autant logiciels que matériels)
+sont capables de gérer les trames dans le désordre eux-même, et peuvent
+même être gênés lorsque cette option est activée, c'est pourquoi vous
+pouvez sans problème laisser cette option désactivée, à moins de savoir
+précisément ce que vous faites.
+.br
+.I ATTENTION\ :
+Ceci engendrera un flux de bits illégal vis à vis de la norme MPEG-4,
+et NE SERA PAS décodable par les décodeurs excepté DivX/\:libavcodec/\:Xvid.
+.br
+.I ATTENTION\ :
+Ceci ajoutera également une fausse version de divx dans le fichier donc
+l'autodétection de bogues risque de ne pas fonctionner.
+.
+.TP
+.B frame_drop_ratio=<0\-100> (max_bframes=0 uniquement)
+Cette option vous permet de créer les flux vidéo à débit de trame variable.
+Le paramètre définit un seuil en dessous duquel, si la différence
+entre la trame précédente et la suivante est plus grande ou égale à ce
+seuil, la trame n'est pas codée (une trame appelée n-vop se sera juste
+présente dans le flux).
+Lors de la lecture, la n-vop sera jouée en affichant la trame précédente.
+.br
+.I ATTENTION\ :
+Une mauvaise utilisation de cette option peut produire des vidéos de très
+mauvaise qualité, soyez prévenus\ !
+.
+.TP
+.B rc_reaction_delay_factor=<valeur>
+Définit avec quelle rapidité le contrôleur de débit binaire CBR réagira à un
+changement de débit binaire et s'efforcera de le compenser pour obtenir un
+débit binaire constant sur cet ensemble de trames.
+.
+.TP
+.B rc_averaging_period=<valeur>
+Un encodage à débit binaire vraiment constant est très difficile à réaliser.
+En fonction du type de scène, le débit binaire peut fortement varier et peut
+être difficile à prédire.
+C'est pourquoi Xvid essaye plutôt de garantir ce débit binaire sur <valeur>
+nombre de trames.
+.
+.TP
+.B rc_buffer=<valeur>
+Taille du tampon de contrôle du débit.
 .
 .TP
 .B curve_compression_high=<0\-100>
@@ -9475,6 +9426,11 @@ dans un fichier portant un nom tel que 'psnr_hhmmss.log'.
 Les valeurs renvoyées sont en dB (décibel), plus elles sont hautes, plus la
 vidéo générée est fidèle à l'originale.
 .
+.TP
+.B "debug\ \ "
+Sauve les statistiques par trames dans ./xvid.dbg. (Ce n'est pas le
+fichier de contrôle 2passes.)
+.
 .PP
 .sp 1
 L'option suivante n'est disponible que dans les versions 1.1.x de Xvid.
@@ -9489,7 +9445,7 @@ significatif sur le temps de calcul (par défaut\: 1).
 .
 .PP
 .sp 1
-L'option suivante n'est disponible que dans la version CVS de Xvid.
+L'option suivante n'est disponible que dans la version 1.2.x de Xvid.
 .
 .TP
 .B threads=<0\-n>
