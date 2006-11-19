@@ -1,11 +1,11 @@
-// Synced with help_mp-en.h r20817
+// Synced with help_mp-en.h r21001
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
-//   NAV; pass 3; section/subsection;  XScreenSaver; keycolor;  
+//   NAV; section/subsection;  XScreenSaver; keycolor;  
 //   AGP move failed on Y plane;  
 //   profile? demuxer? drain? flush? 
 // 
-// Translated by Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2@yahoo.com>
+// Translated by Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2 AT yahoo.com>
 // (Translator before 2006-04-24)
 // Emfox Zhou <EmfoxZhou@gmail.com>
 // (Translator before 2005-10-12)
@@ -210,6 +210,7 @@ static char help_text[]=
 #define MSGTR_OSDenabled "已启用"
 #define MSGTR_OSDdisabled "已停用"
 #define MSGTR_OSDAudio "音频: %s"
+#define MSGTR_OSDVideo "视频: %s"
 #define MSGTR_OSDChannel "频道: %s"
 #define MSGTR_OSDSubDelay "字幕延迟: %d 毫秒"
 #define MSGTR_OSDSpeed "速度: x %6.2f"
@@ -1951,4 +1952,5 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverUnknownStr "[radio] 未知驱动名: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] 使用 V4Lv2 广播接口。\n"
 #define MSGTR_RADIO_DriverV4L "[radio] 使用 V4Lv1 广播接口。\n"
+#define MSGTR_RADIO_DriverBSDBT848 "[radio] 使用 *BSD BT848 广播接口。\n"
 
