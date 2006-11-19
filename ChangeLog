@@ -12,7 +12,8 @@ MPlayer (1.0)
     * Fraps v2/v4 video decoding via lavc
     * fringe codecs: 4XM audio, Electronic Arts ADPCM audio, Delphine CIN audio
       and video, Interplay DPCM audio, Sierra VMD video, Tiertex SEQ video,
-      Westwood IMA ADPCM audio via lavc
+      Westwood IMA ADPCM audio, XAN wc3 video, Id CIN video, Interplay video,
+      XAN ADPCM audio via lavc
     Demuxers:
     * implemented switch_video and switch_program consistently with switch_audio
       (default keys are "_" and TAB, respectively). For the time being this functionality
@@ -38,6 +39,9 @@ MPlayer (1.0)
 
     Others:
     * libdvdcss updated to Subversion HEAD, now same as upstream version
+    * libmpdvdkit split into libdvdread and libdvdcss
+    * obsolete XviD 3 support removed
+    * video stream switching
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
