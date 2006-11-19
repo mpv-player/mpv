@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--synced with r17707 -->
+<!--synced with r20876 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -25,7 +25,7 @@ Comment puis-je traduire <application>MPlayer</application> dans une nouvelle la
 <answer><para>
 Lisez le <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
 il devrait tout expliquer. Vous pouvez obtenir de l'aide supplémentaire sur la liste de diffusion
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -45,12 +45,12 @@ matériels et logiciels. Ils nous aident à améliorer continuellement <applicat
 Comment puis-je devenir un développeur <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Nous accueillons toujours des codeurs et des &quot;documenteurs&quot;. Lisez la
+Les codeurs et les &quot;documenteurs&quot; sont toujours les bienvenus. Lisez la
 <ulink url="../../tech/">documentation technique</ulink>
 pour avoir un premier aperçu. Ensuite vous devriez vous inscrire à la liste de diffusion
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 et commencer à coder. Si vous souhaitez apporter votre aide à la documentation, joignez la
-liste de diffusion <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
+liste de diffusion <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -136,7 +136,7 @@ J'ai <emphasis>VRAIMENT</emphasis> installé X11 !?
 </para></question>
 <answer><para>
 ... mais vous n'avez pas installé les paquets X11 de développement. Ou pas correctement. Ils
-s'appellent <filename>XFree86-devel*</filename> sous Red Hat,
+s'appellent <filename>XFree86-devel*</filename> sous Red Hat
 <filename>xlibs-dev</filename> sous Debian Woody, et
 <filename>libx11-dev</filename> sous Debian Sarge. Vérifiez également que les liens symboliques
 <filename class="directory">/usr/X11</filename> et
@@ -144,6 +144,48 @@ s'appellent <filename>XFree86-devel*</filename> sous Red Hat,
 problème sur les systèmes Mandrake).
 </para></answer>
 </qandaentry>
+
+<qandaentry>
+<question><para>
+Compiler sous Mac OS 10.3 donne plusieurs erreurs de lien</para></question>
+<answer><para>
+Les erreurs de lien que vous avez ressemblent très probablement à ça:
+<screen>
+ld: Undefined symbols:
+_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
+_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
+</screen>
+Ce problème est le résultat des développeurs Apple utilisant 10.4 pour compiler
+leurs logiciels et distribuant les fichiers binaires aux utilisateurs de 10.3
+à travers Software Update.
+Les symboles non définis sont définis dans Mac OS 10.4, mais pas dans 10.3.
+Une solution pourrait être de repasser à la version 7.0.1 ou plus prédécente de Quicktime.
+
+Il existe une meilleure solution:
+</para><para>
+téléchargez une <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">copie plus ancienne du Frameworks</ulink>.
+Cela vous donnera un fichier compressé qui contient le Framework
+QuickTime 7.0.1 et un Framework QuartzCore 10.3.9.
+</para><para>
+Décompressez les fichiers autrepart que sur votre System folder.
+(i.e. n'installez pas ce frameworks dans votre répertoire
+<filename class="directory">/System/Library/Frameworks</filename>!
+Cette ancienne copie n'est là que pour contourner leproblème des erreurs de lien!)
+<screen>
+gunzip &lt; CompatFrameworks.tgz | tar xvf -
+</screen>
+Dans config.mak, vous devez rajouter
+<systemitem>-F/path/to/where/you/extracted</systemitem>
+à la variable <systemitem>OPTFLAGS</systemitem>.
+Si vous utilisez <application>X-Code</application>, il vous suffit de sélectionner ces
+frameworks au lieu de ceux du système.
+</para><para>
+Le fichier binaire <application>MPlayer</application> résultant utilisera en fait
+le framework qui est installé sur votre système au travers de liens dynamiques résolus lors de l'exécution.
+(Vous pouvez le vérifier en utilisant <systemitem>otool -l</systemitem>).
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 
 <qandadiv id="faq-general">
@@ -155,7 +197,7 @@ Y-a-t'il des listes de diffusion pour <application>MPlayer</application> ?
 </para></question>
 <answer><para>
 Oui. Voir la section
-<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">listes de diffusion</ulink>
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">listes de diffusion</ulink>
 sur notre page web.
 </para></answer>
 </qandaentry>
@@ -188,7 +230,7 @@ Quand je démarre la lecture, j'obtiens ce message mais tout semble se dérouler
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-Vous avez besoin des droits root ou un noyau configuré spécialement pour utiliser le nouveau
+Vous avez besoin d'un noyau configuré spécialement pour utiliser le
 code de timing. Pour les détails voir la section <link linkend="rtc">RTC</link> de la documentation.
 </para></answer>
 </qandaentry>
@@ -272,7 +314,7 @@ Il y a des messages d'erreur à propos d'un fichier non-trouvé <filename>/usr/l
 </para></question>
 <answer><para>
 Téléchargez et installez les codecs binaires depuis notre
-<ulink url="http://www.mplayerhq.hu/design7/codecs.html">page des codecs</ulink>.
+<ulink url="http://www.mplayerhq.hu/design7/dload.html">page des codecs</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -504,7 +546,7 @@ lors de la lecture de fichiers sur mon portable.
 C'est un effet de la gestion/économie d'énergie de votre portable
 (BIOS, pas le noyau). Branchez l'alimentation secteur
 <emphasis role="bold">avant</emphasis> d'allumer votre portable. Vous pouvez aussi
-voir si <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
+voir si <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
 (une interface SpeedStep pour Linux) vous aide.
 </para></answer>
 </qandaentry>
@@ -740,6 +782,21 @@ vous devrez l'implémenter vous-même, mais soyez conscient que ce sera très du
 
 <qandaentry>
 <question><para>
+Je ne peux pas regarder les DVDs récents de Sony Pictures/BMG.
+</para></question>
+<answer><para>
+C'est normal, vous vous êtes fait avoir, vous avez acheté un disque intentionellement défectueux.
+La seule façon de lire ces DVDs est de contourner les mauvais blocs du disque
+en utilisant DVDnav au lieu de mpdvdkit2.
+Vous pouvez le faire en compilant <application>MPlayer</application> avec le support de DVDnav
+et en remplaçant dvd:// par dvdnav:// dans la ligne de commande.
+DVDnav et mpdvdkit2 étant mutuellement exclusifs, assurez-vous de passer
+l'option <option>--disable-mpdvdkit</option> au script de configuration.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Et à propos des sous-titres? Est-ce que MPlayer peut les afficher ?
 </para></question>
 <answer><para>
@@ -933,14 +990,37 @@ Bien sûr cela ne peut pas réparer les possibles bogues présents dans les flux
 
 <qandaentry>
 <question><para>
-Comment puis-je réparer le rapport d'aspect d'un fichier AVI?
+Comment puis-je réparer le format de l'image d'un fichier AVI?
 </para></question>
 <answer><para>
-Vous pouvez faire cela et on remercie l'option <option>-force-avi-aspect</option>
-de <application>MEncoder</application>, ce qui prend le pas sur l'aspect stocké
+Vous pouvez faire cela grâce à l'option <option>-force-avi-aspect</option>
+de <application>MEncoder</application>, ce qui prend le pas sur le format d'image stocké
 dans l'option vprp de l'en-tête du AVI OpenDML. Par exemple:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable> -force-avi-aspect 4/3
+mencoder <replaceable>entrée.avi</replaceable> -ovc copy -oac copy -o <replaceable>sortie.avi</replaceable> -force-avi-aspect 4/3
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Comment puis-je sauvegarder et encoder un fichier VOB avec un début défectueux?
+</para></question>
+<answer><para>
+Le principal problème quand vous voulez encoder un fichier VOB corrompu
+<footnote id='fn-corrupted-files-or-copy-protection'><para>
+D'une certaine manière, certaines formes de protection contre la copie utilisées dans les DVDs peuvent
+être assimilée à du contenu corrompu.
+</para></footnote>
+est qu'il sera difficile d'obtenir un encodage avec une parfaite synchronisation audio/video.
+une solution est de supprimer la partie corrompue et de n'encoder que la partie saine.
+Premièrement, vous avez besoin de trouver où commence la partie propre:
+<screen>
+mplayer <replaceable>entrée.vob</replaceable> -sb <replaceable>nb_d_octets_à_passer</replaceable>
+</screen>
+Puis vous pouvez créer un nouveau fichier qui contient juste la partie saine:
+<screen>
+dd if=<replaceable>entrée.vob</replaceable> of=<replaceable>sortie_coupée.vob</replaceable> skip=1 ibs=<replaceable>nb_d_octets_à_passer</replaceable>
 </screen>
 </para></answer>
 </qandaentry>
@@ -974,20 +1054,57 @@ Non, VFAT ne supporte pas les fichiers plus gros que 2Go.
 
 <qandaentry>
 <question><para>
-Pourquoi le bitrate affiché par <application>MEncoder</application> est négatif?
+Quel est le sens des nombres sur la ligne de status pendantl'encodage?
 </para></question>
 <answer><para>
-Parce que le bitrate avec lequel vous avez encodé l'audio est trop grand pour faire tenir le film sur un CD. Vérifiez que libmp3lame est installé correctement.
+Exemple:
+<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+<variablelist>
+<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
+<listitem><para>position temporelle dans le flux encodé</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>6612f</systemitem></term>
+<listitem><para>number d'images encoded</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>( 2%)</systemitem></term>
+<listitem><para>pourcentage du flux d'entrée encodé</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>7.12fps</systemitem></term>
+<listitem><para>vitesse d'encodage en images par seconde</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
+<listitem><para>estimation du temps d'encodage restant</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>2856mb</systemitem></term>
+<listitem><para>estimation de la taille finale de l'encodage</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
+<listitem><para>décalage actuel entre les flux audio et video</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>[2126:192]</systemitem></term>
+<listitem>
+<para>débit video moyen (en Mo/s) and débit audio moyen (in Mo/s)</para></listitem>
+</varlistentry>
+</variablelist>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Je ne peux pas convertir un fichier ASF en AVI/MPEG-4 (DivX) car il utilise 1000 fps?
+Pourquoi le débit recommendé par <application>MEncoder</application> est négatif?
 </para></question>
 <answer><para>
-Vous devrez fixer le débit à la main avec l'option <option>-ofps</option>,
-depuis que ASF utilise un débit variable alors que AVI en utilise un fixe.
+Parce que le débit avec lequel vous avez encodé l'audio est trop grand pour faire tenir le film sur un CD. Vérifiez que libmp3lame est installé correctement.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Je ne peux pas convertir un fichier ASF en AVI/MPEG-4 (DivX) car il utilise 1000 images par secondes?
+</para></question>
+<answer><para>
+Vous devrez fixer le nombre d'images par seconde à la main avec l'option <option>-ofps</option>
+puisque ASF utilise un nombre d'images par seconde variable alors que AVI en utilise un fixe.
 </para></answer>
 </qandaentry>
 
