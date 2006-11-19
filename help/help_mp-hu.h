@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r20817 (2006. 11. 11.)
+// Sync'ed with help_mp-en.h r21001 (2006. 11. 19.)
 
 // ========================= MPlayer help ===========================
 
@@ -207,6 +207,7 @@ static char help_text[]=
 #define MSGTR_OSDenabled "bekapcsolva"
 #define MSGTR_OSDdisabled "kikapcsolva"
 #define MSGTR_OSDAudio "Audió: %s"
+#define MSGTR_OSDVideo "Videó: %s"
 #define MSGTR_OSDChannel "Csatorna: %s"
 #define MSGTR_OSDSubDelay "Felirat késés: %d ms"
 #define MSGTR_OSDSpeed "Sebesség: x %6.2f"
@@ -1958,4 +1959,5 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Ismeretlen vezérlő név: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] V4Lv2 rádió interfész használata.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] V4Lv1 rádió interfész használata.\n"
+#define MSGTR_RADIO_DriverBSDBT848 "[radio] *BSD BT848 rádió interfész használata.\n"
 
