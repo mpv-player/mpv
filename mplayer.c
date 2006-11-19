@@ -4236,8 +4236,7 @@ demux_info_print(demuxer);
 
 //================== Read SUBTITLES (DVD & TEXT) ==========================
 if(vo_spudec==NULL && sh_video &&
-     (stream->type==STREAMTYPE_DVD || demuxer->type==DEMUXER_TYPE_MATROSKA ||
-      d_dvdsub->id >= 0)){
+     (stream->type==STREAMTYPE_DVD || d_dvdsub->id >= 0)){
 
 if (spudec_ifo) {
   unsigned int palette[16], width, height;
