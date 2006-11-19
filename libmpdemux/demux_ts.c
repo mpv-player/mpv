@@ -3189,13 +3189,20 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 	{
 		case DEMUXER_CTRL_SWITCH_AUDIO:
 		{
-			sh_audio_t *sh_audio = demuxer->audio->sh;
 			sh_audio_t *sh_a = NULL;
 			int i, n;
-			if(!sh_audio)
-				return DEMUXER_CTRL_NOTIMPL;
 			
 			n = *((int*)arg);
+			if(n == -2)
+			{
+				reset_fifos(priv, 1, 0, 0);
+				demuxer->audio->id = -2;
+				demuxer->audio->sh = NULL;
+				ds_free_packs(demuxer->audio);
+				*((int*)arg) = demuxer->audio->id;
+				return DEMUXER_CTRL_OK;
+			}
+
 			if(n < 0)
 			{
 				for(i = 0; i < 8192; i++)
@@ -3243,13 +3250,20 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 		
 		case DEMUXER_CTRL_SWITCH_VIDEO:
 		{
-			sh_video_t *sh_video = demuxer->video->sh;
 			sh_video_t *sh_v = NULL;
 			int i, n;
-			if(!sh_video)
-				return DEMUXER_CTRL_NOTIMPL;
 			
 			n = *((int*)arg);
+			if(n == -2)
+			{
+				reset_fifos(priv, 0, 1, 0);
+				demuxer->video->id = -2;
+				demuxer->video->sh = NULL;
+				ds_free_packs(demuxer->video);
+				*((int*)arg) = demuxer->video->id;
+				return DEMUXER_CTRL_OK;
+			}
+
 			if(n < 0)
 			{
 				for(i = 0; i < 8192; i++)
