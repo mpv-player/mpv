@@ -31,11 +31,6 @@
 
 #include "libvo/fastmemcpy.h"
 
-// Can't compile MMX assembly on Darwin
-#ifdef SYS_DARWIN
-#undef HAVE_MMX
-#endif /* SYS_DARWIN */
-
 #ifdef ARCH_X86_32
 #define CAN_COMPILE_X86_ASM
 #endif

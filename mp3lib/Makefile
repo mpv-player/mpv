@@ -9,16 +9,8 @@ CFLAGS  = -I.. $(OPTFLAGS)
 SRCS = sr1.c
 ifeq ($(TARGET_ARCH_X86_32),yes)
 SRCS += decode_i586.c
-# Darwin can't compile tabinit_MMX.c. However, we need costab_mmx from
-# decode_mmx.c for dct64_sse.c.
-ifeq ($(TARGET_OS),Darwin)
-ifeq ($(TARGET_MMX),yes)
-SRCS += decode_MMX.c
-endif
-else
 ifeq ($(TARGET_MMX),yes)
 SRCS += decode_MMX.c dct64_MMX.c tabinit_MMX.c
-endif
 endif
 ifeq ($(TARGET_3DNOW),yes)
 SRCS += dct36_3dnow.c dct64_3dnow.c
