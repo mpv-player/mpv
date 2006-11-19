@@ -1874,7 +1874,7 @@ static int mp_property_video(m_option_t* prop,int action,void* arg) {
         else {
             char lang[40] = MSGTR_Unknown;
             *(char**)arg = malloc(64);
-            snprintf(*(char**)arg, 64, "(%d)", video_id, lang);
+            snprintf(*(char**)arg, 64, "(%d) %s", video_id, lang);
         }
         return M_PROPERTY_OK;
 
