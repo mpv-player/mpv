@@ -2005,7 +2005,7 @@ ISO 639-2 трехбуквенные, в то время как OGM  использует идентификатор
 .IPs 3
 билинейное (быстрое и не очень плохое, по-умолчанию)
 .IPs 4
-используется гауссово размытие swscaler'a (выглядит очень хорошо)
+используется гауссово размытие программного модуля масштабирования (выглядит очень хорошо)
 .RE
 .PD 1
 .
@@ -2889,7 +2889,7 @@ quartz, ggi и gl2.
 .TP
 .B \-zrfd (только \-vo zr)
 Принудительное прореживание: Прореживание, указаное опциями \-zrhdec 
-и \-zrvdec, применяется, только если аппаратный scaler может растянуть 
+и \-zrvdec, применяется, только если аппаратный модуль масштабирования может растянуть 
 изображение до его исходного размера.
 Используйте эту опцию, чтобы форсировать прореживание.
 .
@@ -2897,7 +2897,7 @@ quartz, ggi и gl2.
 .B \-zrhdec <1|2|4> (только \-vo zr)
 Горизонтальное прореживание: Запрашивает драйвер отправлять только 
 каждый 2-ю или 4-ю строку/\:пиксел исходного изображения MJPEG карте и 
-использовать scaler MJPEG карты для растягивания изображения до 
+использовать модуль масштабирования MJPEG карты для растягивания изображения до 
 исходного размера.
 .
 .TP
@@ -2919,7 +2919,7 @@ quartz, ggi и gl2.
 .B \-zrvdec <1|2|4> (только \-vo zr)
 Вертикальное прореживание: Запрашивает драйвер отправлять только 
 каждую 2-ю или 4-ю строку/\:пиксел исходного изображения MJPEG карте и 
-использовать scaler MJPEG карты для растягивания изображения до 
+использовать модуль масштабирования MJPEG карты для растягивания изображения до 
 исходного размера.
 .
 .TP
@@ -3068,7 +3068,6 @@ XFree86 4.x для ускорения декодирования MPEG-1/2 и VCR2.
 .IPs (no)forcexv
 Указывает использовать XVideo через видео драйвер sdl (по-умолчанию: forcexv).
 .IPs (no)hwaccel
-.\" FIXME scaler
 Указывает использовать аппаратно ускоренное масштабирование (по-умолчанию: hwaccel).
 .RE
 .PD 1
@@ -3820,97 +3819,99 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .
 .
 .
-.SH "DECODING/FILTERING OPTIONS"
+.SH "ОПЦИИ ДЕКОДИРОВАНИЯ/ФИЛЬТРАЦИИ"
 .
 .TP
-.B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
-Specify a priority list of audio codecs to be used, according to their codec
-name in codecs.conf.
-Use a '-' before the codec name to omit it.
-Use a '+' before the codec name to force it, this will likely crash!
-If the list has a trailing ',' MPlayer will fall back on codecs not
-contained in the list.
+.B \-ac <[-|+]кодек1,[-|+]кодек2,...[,]>
+Указывает список используемых аудио кодеков в порядке приоритета, кодек
+указывается по его наименованию из codecs.conf.
+Для пропуска кодека указывайте '-' перед его именем.
+Для форсирования кодека указывайтее '+' перед его именем, 
+но скорее всего это приведет к краху!
+Если список содержит ',' в конце, то MPlayer в случае проблем будет использовать
+кодек не из списка.
 .br
-.I NOTE:
-See \-ac help for a full list of available codecs.
+.I ЗАМЕЧАНИЕ:
+Полный список доступных кодеков выводится опцией \-ac help.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-ac mp3acm"
-Force the l3codeca.acm MP3 codec.
+Форсирует использование MP3 кодека l3codeca.acm.
 .IPs "\-ac mad,"
-Try libmad first, then fall back on others.
+Сначала пробуется libmad, если не получилось - остальные.
 .IPs "\-ac hwac3,a52,"
-Try hardware AC3 passthrough, software AC3, then others.
+Пробуется AC3 транзит, программный AC4, затем - остальные.
 .IPs "\-ac hwdts,"
-Try hardware DTS passthrough, then fall back on others.
+Пробуется аппаратный DTS транзит, если не получилось - остальные.
 .IPs "\-ac -ffmp3,"
-Skip FFmpeg's MP3 decoder.
+Пропускает использование FFmpeg MP3 декодера.
 .RE
 .PD 1
 .
 .TP
-.B \-af-adv <force=(0\-7):list=(filters)> (also see \-af)
-Specify advanced audio filter options:
+.B \-af-adv <force=(0\-7):list=(фильтры)> (смотрите также \-af)
+Указывает дополнительные опции аудио фильтра:
 .RSs
 .IPs force=<0\-7>
-Forces the insertion of audio filters to one of the following:
+Форсирует алгоритм вставки аудио фильтров в соответствии с одним из инжемеречисленного:
 .RSss
-0: Use completely automatic filter insertion.
+0: Используется полностью автоматическая вставка.
 .br
-1: Optimize for accuracy (default).
+1: Оптимизируется по точности (по-умолчанию).
 .br
-2: Optimize for speed.
-.I Warning:
-Some features in the audio filters may silently fail,
-and the sound quality may drop.
+2: Оптимизируется по скорости.
+.I Внимание:
+Некоторые возможности аудио фильтров могут молча отказать,
+и качество звука ухудшится.
 .br
-3: Use no automatic insertion of filters and no optimization.
-.I Warning:
-It may be possible to crash MPlayer using this setting.
+3: Не использовать ни автоматическую вставку фильтров, ни оптимизацию.
+.I внимание:
+Использование этой опции может привести к краху MPlayer.
 .br
-4: Use automatic insertion of filters according to 0 above,
-but use floating point processing when possible.
+4: Использовать автоматическую вставку как в 0, но 
+по возможности использовать операции с плавающей точкой.
 .br
-5: Use automatic insertion of filters according to 1 above,
-but use floating point processing when possible.
+5: Использовать автоматическую вставку как в 1, но 
+по возможности использовать операции с плавающей точкой.
 .br
-6: Use automatic insertion of filters according to 2 above,
-but use floating point processing when possible.
+6: Использовать автоматическую вставку как в 2, но 
+по возможности использовать операции с плавающей точкой.
 .br
-7: Use no automatic insertion of filters according to 3 above,
-and use floating point processing when possible.
+7: Не использовать автоматическую вставку фильтров как и в 3,
+и по возможности использовать операции с плавающей точкой.
 .REss
-.IPs list=<filters>
-Same as \-af.
+.IPs list=<фильтры>
+То же, что и \-af.
 .RE
 .
 .TP
-.B \-afm <driver1,driver2,...>
-Specify a priority list of audio codec families to be used, according
-to their codec name in codecs.conf.
-Falls back on the default codecs if none of the given codec families work.
+.B \-afm <драйвер1,драйвер2,...>
+Указывает список используемых семейств аудио кодеков в порядке приоритета, 
+имена указываются из codecs.conf.
+Возвращается к использованию кодеков по-умолчанию, если не работает ни одно 
+семейство из указанных.
 .br
-.I NOTE:
-See \-afm help for a full list of available codec families.
+.I ЗАМЕЧАНИЕ:
+Список доступных семейств кодеков можно посмотреть при помощи \-afm help.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-Try FFmpeg's libavcodec codecs first.
+Сначала попытаться использовать libavcodec кодеки FFmpeg.
 .IPs "\-afm acm,dshow"
-Try Win32 codecs first.
+Сначала попытаться использовать Win32 кодеки.
 .RE
 .PD 1
 .
 .TP
-.B \-aspect <ratio> (also see \-zoom)
-Override movie aspect ratio, in case aspect information is
-incorrect or missing in the file being played.
+.B \-aspect <коэффициент> (смотрите также \-zoom)
+Переопределяет коэффициент пропорции фильма для случая, когда информация о
+пропорциях неверна или отсутствует в воспроизводимом файле.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 \-aspect 4:3  or \-aspect 1.3333
@@ -3921,18 +3922,18 @@ incorrect or missing in the file being played.
 .
 .TP
 .B \-noaspect
-Disable automatic movie aspect ratio compensation.
+Отключает автоматическую компенсацию коэффициента пропорций фильма.
 .
 .TP
 .B "\-flip \ "
-Flip image upside-down.
+Зеркально отражает изображение сверху-вниз.
 .
 .TP
-.B \-lavdopts <option1:option2:...> (DEBUG CODE)
-Specify libavcodec decoding parameters.
-Separate multiple options with a colon.
+.B \-lavdopts <опция1:опция2:...> (КОД ОТЛАДКИ)
+Указывает параметры декодирования libavcodec.
+Опции друг от друга отделяйте двоеточиями.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 \-lavdopts gray:skiploopfilter=all:skipframe=nonref
@@ -3940,214 +3941,225 @@ Separate multiple options with a colon.
 .PD 1
 .sp 1
 .RS
-Available options are:
+Доступные опции:
 .RE
 .RSs
 .IPs bitexact
-Only use bit-exact algorithms in all decoding steps (for codec testing).
-.IPs bug=<value>
-Manually work around encoder bugs.
+Указывает использовать только побитово точные алгоритмы на всех этапах
+декодирования (для тестирования кодека).
+.IPs bug=<значение>
+Указывает самостоятельно обходить ошибки кодера.
 .RSss
-0: nothing
+0: ничего
 .br
-1: autodetect bugs (default)
+1: автоматически определять баги(ошибки) (по-умолчанию)
 .br
-2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetection)
+2 (msmpeg4v3): некоторые старые msmpeg4v3 файлы, созданные lavc (не определяются автоматически)
 .br
-4 (mpeg4): Xvid interlacing bug (autodetected if fourcc==XVIX)
+4 (mpeg4): баг интерлейсинга Xvid (определяется автоматически, если fourcc==XVIX)
 .br
-8 (mpeg4): UMP4 (autodetected if fourcc==UMP4)
+8 (mpeg4): UMP4 (определяется автоматически, если fourcc==UMP4)
 .br
-16 (mpeg4): padding bug (autodetected)
+.\" FIXME padding - заполнение
+16 (mpeg4): баг заполнения (определяется автоматически)
 .br
-32 (mpeg4): illegal vlc bug (autodetected per fourcc)
+.\" FIXME is translation corrent? "illegal vlc bug"
+32 (mpeg4): баг нелегального vlc (определяется автоматически по fourcc)
 .br
-64 (mpeg4): Xvid and DivX qpel bug (autodetected per fourcc/\:version)
+64 (mpeg4): баг qpel у Xvid и DivX (определяется автоматически по fourcc/\:версии)
 .br
-128 (mpeg4): old standard qpel (autodetected per fourcc/\:version)
+128 (mpeg4): старый стандарт qpel (определяется по fourcc/\:версии)
 .br
-256 (mpeg4): another qpel bug (autodetected per fourcc/\:version)
+256 (mpeg4): еще один баг qpel (определяется автоматически по fourcc/\:верси)
 .br
-512 (mpeg4): direct-qpel-blocksize bug (autodetected per fourcc/\:version)
+512 (mpeg4): баг direct-qpel-blocksize (определяется автоматически по fourcc/\:версии)
 .br
-1024 (mpeg4): edge padding bug (autodetected per fourcc/\:version)
+1024 (mpeg4): баг заполнения кромки (определяется автоматически по fourcc/\:версии)
 .REss
-.IPs debug=<value>
-Display debugging information.
+.IPs debug=<значение>
+Отображать отладочную информацию.
 .RSss
 .br
-0: disabled
+0: отключено
 .br
-1: picture info
+1: информация об изображении
 .br
-2: rate control
+2: управление скоростью
 .br
-4: bitstream
+4: битпоток
 .br
-8: macroblock (MB) type
+8: тип макроблока (MB)
 .br
-16: per-block quantization parameter (QP)
+16: поблочный[per-block] параметр квантизации  (QP)
 .br
-32: motion vector
+32: вектор движения
 .br
-0x0040: motion vector visualization (use \-noslices)
+0x0040: визуализация вектора движения (используйте \-noslices)
 .br
-0x0080: macroblock (MB) skip
+0x0080: пропуск макроблока (MB)
 .br
-0x0100: startcode
+0x0100: стартовый код
 .br
 0x0200: PTS
 .br
-0x0400: error resilience
+.\" FIXME is translation correct? "error resilience"
+0x0400: упругость ошибки[error resilience]
 .br
-0x0800: memory management control operations (H.264)
+.\" FIXME is translation correct? "memory management control operations"
+0x0800: операции контроля над управлением памятью  (H.264)
 .br
-0x1000: bugs
+0x1000: ошибки
 .br
-0x2000: Visualize quantization parameter (QP), lower QP are tinted greener.
+0x2000: Визуализировать параметр квантизации (QP), меньший QP - более светлый зеленый.
 .br
-0x4000: Visualize block types.
+0x4000: визуализировать типы блоков.
 .REss
-.IPs ec=<value>
-Set error concealment strategy.
+.IPs ec=<значение>
+Устанавливает стратегию маскировки ошибок.
 .RSss
-1: Use strong deblock filter for damaged MBs.
+1: Используется сильный deblock фильтр для поврежденных MB.
 .br
-2: iterative motion vector (MV) search (slow)
+2: Итеративный поиск вектора движения (MV) (медленно)
 .br
-3: all (default)
+3: Все (по-умолчанию)
 .REss
-.IPs er=<value>
-Set error resilience strategy.
+.IPs er=<значение>
+.\" FIXME is translation correct? "error resilience"
+Устанавливает стратегию упругости[error resilience] ошибки.
 .RSss
 .br
-0: disabled
+0: отключено
 .br
-1: careful (Should work with broken encoders.)
+1: аккуратная (Должно работать с испорченными кодерами.)
 .br
-2: normal (default) (Works with compliant encoders.)
+2: обычная (по-умолчанию) (Работает с совместимыми кодерами.)
 .br
-3: aggressive (More checks, but might cause problems even for valid bitstreams.)
+3: агрессивная (Больше проверок, но могут быть проблемы даже с правильными битовыми потоками.)
 .br
-4: very aggressive
+4: очень агрессивная
 .REss
-.IPs "fast (MPEG-2 only)"
-Enable optimizations which do not comply to the specification and might
-potentially cause problems, like simpler dequantization, assuming use
-of the default quantization matrix, assuming YUV 4:2:0 and skipping a few
-checks to detect damaged bitstreams.
+.IPs "fast (только MPEG-2)"
+.\" FIXME is translation correct?
+.\" Enable optimizations which do not comply to the specification and might
+.\" potentially cause problems, like simpler dequantization, assuming use
+.\" of the default quantization matrix, assuming YUV 4:2:0 and skipping a few
+.\" checks to detect damaged bitstreams.
+Включает оптимизации, которые не подчиняются спецификации и, потенциально, 
+могут быть причиной проблем, такие как упрощенная деквантизация[dequantization],
+предполагающая использование стандартной матрицы квантизации, YUV 4:2:0 и
+пропускающая некоторые проверки поврежденности витового потока.
 .IPs "gray\ "
-grayscale only decoding (a bit faster than with color)
-.IPs "idct=<0\-99> (see \-lavcopts)"
-For best decoding quality use the same IDCT algorithm for decoding and encoding.
-This may come at a price in accuracy, though.
-.IPs lowres=<number>[,<w>]
-Decode at lower resolutions.
-Low resolution decoding is not supported by all codecs, and it will
-often result in ugly artifacts.
-This is not a bug, but a side effect of not decoding at full resolution.
+декодирование только в оттенках серого (немного быстрее, чем с цветом)
+.IPs "idct=<0\-99> (смотрите \-lavcopts)"
+Для лучшего качества декодирования используйте один и тот же IDCT алгоритм для
+кодирования и декодирования. Хотя это может даться ценой точности.
+.IPs lowres=<число>[,<w>]
+Декодирование с меньшим разрешением. Это поддерживаетя не всеми кодеками, и
+часто приводит к ужасным артефактам.
+Это не баг, а побочный эффект декодирования не в полном разрешении.
 .RSss
 .br
-0: disabled
+0: отключено
 .br
-1: 1/2 resolution
+1: 1/2 оригинала
 .br
-2: 1/4 resolution
+2: 1/4 оригинала
 .br
-3: 1/8 resolution
+3: 1/8 оригинала
 .REss
 .RS
-If <w> is specified lowres decoding will be used only if the width of the
-video is major than or equal to <w>.
+Если указано <w>, кодирование в меньшем разрешении будет использоваться только в том случаем,
+если ширина видео больше или равна <w>.
 .RE
-.IPs "sb=<number> (MPEG-2 only)"
-Skip the given number of macroblock rows at the bottom.
-.IPs "st=<number> (MPEG-2 only)"
-Skip the given number of macroblock rows at the top.
-.IPs skiploopfilter=<skipvalue> (H.264 only)
-Skips the loop filter (AKA deblocking) during H.264 decoding.
-Since the filtered frame is supposed to be used as reference
-for decoding dependent frames this has a worse effect on quality
-than not doing deblocking on e.g.\& MPEG-2 video.
-But at least for high bitrate HDTV this provides a big speedup with
-no visible quality loss.
+.IPs "sb=<количество> (только MPEG-2)"
+Пропускает указанное количество строк макроблоков в нижней части.
+.IPs "st=<количество> (MPEG-2 only)"
+Пропускает указанное количество строк макроблоков в верхней части.
+.IPs skiploopfilter=<skipvalue> (только H.264)
+Пропускает фильтр loop (он же deblocking) во время декодирования H.264.
+Поскольку фильтрованный кадр предполагается использовать в качестве ссылки
+для декодирования зависимых кадров, то качество, например у MPEG-2, будет хуже, чем если бы 
+deblocking не производился вовсе. Но, как минимум для HDTV с высоким битпотоком, это дает
+значительное повышение производительности без видимой потери качества.
 .sp 1
-<skipvalue> can be either one of the following:
+<skipvalue> может быть одним из нижеперечисленных:
 .RSss
 .br
-none: Never skip.
+none: Никогда не пропускать.
 .br
-default: Skip useless processing steps (e.g.\& 0 size packets in AVI).
+default: Пропускать бесполезные этапы обработки (например пакеты нулевого размера в AVI).
 .br
-nonref: Skip frames that are not referenced (i.e.\& not used for
-decoding other frames, the error cannot "build up").
+nonref: пропускать кадры, на которые нет ссылок (т.е.\& не использующиеся для декодирования
+.\" FIXME is translation correct? the error cannot "build up"
+других кадров, ошибка просто невозножна).
 .br
-bidir: Skip B-Frames.
+bidir: Пропускать B-кадры.
 .br
-nonkey: Skip all frames except keyframes.
+nonkey: Пропускать все кадры, кроме ключевых.
 .br
-all: Skip all frames.
+all: Пропускать все кадры.
 .REss
-.IPs skipidct=<skipvalue> (MPEG1/2 only)
-Skips the IDCT step.
-This degrades quality a lot of in almost all cases
-(see skiploopfilter for available skip values).
+.IPs skipidct=<skipvalue> (только MPEG1/2)
+Пропускает этап IDCT.
+Это значительно ухудшает качество практически во всех случаях
+(допустимые значения skipvalue смотрите в описании опции skiploopfilter).
 .IPs skipframe=<skipvalue>
 Skips decoding of frames completely.
-Big speedup, but jerky motion and sometimes bad artifacts
-(see skiploopfilter for available skip values).
+Полностью пропускает декодирование кадров.
+Дает большой прирост скорости, но прерывистое изображение и иногда артефакты.
+(допустимые значения skipvalue смотрите в описании опции skiploopfilter).
 .IPs threads=<1\-8>
-number of threads to use for decoding (default: 1)
-.IPs vismv=<value>
-Visualize motion vectors.
+количество потоков, использующихся для декодирования (по-умолчанию: 1)
+.IPs vismv=<значение>
+Указывает визуализировать векторы движения.
 .RSss
 .br
-0: disabled
+0: Отключено.
 .br
-1: Visualize forward predicted MVs of P-frames.
+1: Визуализировать векторы P-кадров, предсказанные вперед.
 .br
-2: Visualize forward predicted MVs of B-frames.
+2: Визуализировать векторы B-кадров, предсказанные вперед.
 .br
-4: Visualize backward predicted MVs of B-frames.
+4: Визуализировать аекторы B-кадров, предсказанные назад.
 .REss
 .IPs vstats
-Prints some statistics and stores them in ./vstats_*.log.
+Выводит некоторую статистику и сохраняет ее в ./vstats_*.log.
 .RE
 .
 .TP
 .B \-noslices
-Disable drawing video by 16-pixel height slices/\:bands, instead draws the
-whole frame in a single run.
-May be faster or slower, depending on video card and available cache.
-It has effect only with libmpeg2 and libavcodec codecs.
+Отключает отрисовку видео слоями/\:полосами по 16-пикселов высотой, вместо отрисовки
+целого кадра за один проход. 
+Может быть быстрее или медленне, в зависимости от видео карты и доступного кэша.
+Полезно только с кодеками libmpeg2 и libavcodec.
 .
 .TP
 .B \-nosound
-Do not play/\:encode sound.
-Useful for benchmarking.
+Указывает не воспроизводить/\:кодировать звук.
+Полезно для определения производительности.
 .
 .TP
 .B \-novideo
-Do not play/\:encode video.
-In many cases this will not work, use \-vc null \-vo null instead.
+Указывает не воспроизводить/\:кодиовать видео.
+Во многих случаях это не работает, вместо нее используйте \-vc null \-vo null.
 .
 .TP
-.B \-pp <quality> (also see \-vf pp)
-Set the DLL postprocess level.
-This option is no longer usable with \-vf pp.
-It only works with Win32 DirectShow DLLs with internal postprocessing routines.
-The valid range of \-pp values varies by codec, it is mostly
-0\-6, where 0=disable, 6=slowest/\:best.
+.B \-pp <качество> (смотрите также \-vf pp)
+Устанавливает уровень построцессинга DLL.
+Эта опция больше не пригодна для работы с \-vf pp.
+Она работает только  с Win32 DirectShow DLL, имеющими встроенные процедуры построцессинга.
+Допустимый диапазон значений \-pp зависит от кодека, как правило это 0\-6, где 0=отключено, 
+6=наимедленный/\:лучший.
 .
 .TP
-.B \-pphelp (also see \-vf pp)
-Show a summary about the available postprocess filters and their usage.
+.B \-pphelp (смотрите также \-vf pp)
+Показывает краткую помощь по доступным фильтрам построцессинга и их испольованию.
 .
 .TP
-.B \-ssf <mode>
-Specifies software scaler parameters.
+.B \-ssf <режим>
+Указывает параметры программного модуля масштабирования.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 \-vf scale \-ssf lgb=3.0
@@ -4156,181 +4168,187 @@ Specifies software scaler parameters.
 .PD 0
 .RSs
 .IPs lgb=<0\-100>
-gaussian blur filter (luma)
+фильтр гауссового размытия (яркостная составляющая[luma])
 .IPs cgb=<0\-100>
-gaussian blur filter (chroma)
+фильтр гауссового размытия  (хроматическая составляющая[chroma])
 .IPs ls=<-100\-100>
-sharpen filter (luma)
+sharpen фильтр (яркостная составляющая[luma])
 .IPs cs=<-100\-100>
-sharpen filter (chroma)
+sharpen фильтр (хроматическая составляющая[chroma])
 .IPs chs=<h>
-chroma horizontal shifting
+горизонтальный сдвиг хроматической составляющей[chroma].
 .IPs cvs=<v>
-chroma vertical shifting
+вертикальный сдвиг хроматической составляющей[chroma].
 .RE
 .PD 1
 .
 .TP
-.B \-stereo <mode>
-Select type of MP2/\:MP3 stereo output.
+.B \-stereo <режим>
+Выбирает тип стерео вывода MP2/\:MP3.
 .PD 0
 .RSs
 .IPs 0
-stereo
+стерео
 .IPs 1
-left channel
+левый канал
 .IPs 2
-right channel
+правый канал
 .RE
 .PD 1
 .
 .TP
-.B \-sws <software scaler type> (also see \-vf scale and \-zoom)
-Specify the software scaler algorithm to be used with the \-zoom option.
-This affects video output drivers which lack hardware acceleration, e.g.\& x11.
+.B \-sws <тип программного модуля масштабирования> (смотрите также \-vf scale и \-zoom)
+Указывает используемый опцией \-zoom алгоритм программного масштабирования.
+Она влияет на драйвера вывода видео, не способные аппаратно масштабировать, например x11.
 .sp 1
-Available types are:
+Доступные типы:
 .sp 1
 .PD 0
 .RSs
 .IPs 0
-fast bilinear
+быстрый билинейный
 .IPs 1
-bilinear
+билинейный
 .IPs 2
-bicubic (good quality) (default)
+бикубический (хорошее качество) (по-умолчанию)
 .IPs 3
-experimental
+экспериментальный
 .IPs 4
-nearest neighbor (bad quality)
+ближайший сосед (плохое качество)
 .IPs 5
 area
 .IPs 6
-luma bicubic / chroma bilinear
+бикубичекий для яркостной[luma] / билинейный для хроматической[chroma] составляющей
 .IPs 7
-gauss
+гауссовый
 .IPs 8
 sincR
 .IPs 9
 lanczos
 .IPs 10
-natural bicubic spline
+натуральный бикубический сплайн[natural bicubic spline]
 .RE
 .PD 1
 .sp 1
 .RS
-.I NOTE:
-Some \-sws options are tunable.
-The description of the scale video filter has further information.
+.I ЗАМЕЧАНИЕ:
+Некоторые \-sws опции можно настраивать.
+Подробная информация есть в описании видео фильтра scale.
 .RE
 .
 .TP
-.B \-vc <[-|+]codec1,[-|+]codec2,...[,]>
-Specify a priority list of video codecs to be used, according to their codec
-name in codecs.conf.
-Use a '-' before the codec name to omit it.
-Use a '+' before the codec name to force it, this will likely crash!
-If the list has a trailing ',' MPlayer will fall back on codecs not
-contained in the list.
+.B \-vc <[-|+]кодек1,[-|+]кодек2,...[,]>
+Указывает список используемых кодеков в порядке приоритета, кодек указывается по его
+наименованию из codecs.conf.
+Для пропуска кодека указывайте '-' перед его именем.
+Для форсирования использования кодека указывайтее '+' перед его именем, 
+скорее всего это приведет к краху!
+Если список содержит ',' в конце, то MPlayer в случае проблем будет использовать
+кодек не из списка.
 .br
-.I NOTE:
-See \-vc help for a full list of available codecs.
+.I ЗАМЕЧАНИЕ:
+Полный список доступных кодеков выводится опцией \-vc help.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-vc divx"
-Force Win32/\:VfW DivX codec, no fallback.
+Попытаться использовать только кодек Win32/\:VfW DivX, без запасного варианта.
 .IPs "\-vc -divxds,-divx,"
-Skip Win32 DivX codecs.
+Пропустить Win32 DivX кодеки.
 .IPs "\-vc ffmpeg12,mpeg12,"
-Try libavcodec's MPEG-1/2 codec, then libmpeg2, then others.
+Попытаться использовать MPEG-1/2 из libavcodec, затем libmpeg2, затем остальные.
 .RE
 .PD 1
 .
 .TP
-.B \-vfm <driver1,driver2,...>
-Specify a priority list of video codec families to be used, according
-to their names in codecs.conf.
-Falls back on the default codecs if none of the given codec families work.
+.B \-vfm <драйвер1,драйвер2,...>
+Указывает список используемый семейств аудио кодеков в порядке приоритета, 
+имена указываются из codecs.conf.
+Возвращается к использованию кодеков по-умолчанию, если не работает ни одно 
+семейство из указанных.
 .br
-.I NOTE:
-See \-vfm help for a full list of available codec families.
+.I ЗАМЕЧАНИЕ:
+Список доступных семейств кодеков можно посмотреть при помощи \-vfm help.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-vfm ffmpeg,dshow,vfw"
-Try the libavcodec, then Directshow, then VfW codecs and fall back
-on others, if they do not work.
+Попытаться использовать libavcodec, затем Directshow, затем VfW кодеки, затем остальные,
+если ни один не работает.
 .IPs "\-vfm xanim"
-Try XAnim codecs first.
+Попытаться использовать сначала XAnim кодеки.
 .RE
 .PD 1
 .
 .TP
-.B \-x <x> (also see \-zoom) (MPlayer only)
-Scale image to width <x> (if software/\:hardware scaling is available).
-Disables aspect calculations.
+.B \-x <x> (смотрите также \-zoom) (только MPlayer)
+Масштабирует изображение до ширины <x> (если доступно 
+программное/\:аппаратное масштабирование).
+Отключает расчет пропорций.
 .
 .TP
-.B \-xvidopts <option1:option2:...>
-Specify additional parameters when decoding with Xvid.
+.B \-xvidopts <опция1:опция2:...>
+Указывает дополнительные параметры при декодировании с Xvid.
 .br
-.I NOTE:
-Since libavcodec is faster than Xvid you might want to use the libavcodec
-postprocessing filter (\-vf pp) and decoder (\-vfm ffmpeg) instead.
+.I ЗАМЕЧАНИЕ:
+Поскольку libavcodec быстрее, чем Xvid, вы, возможно, захотите использовать вместо него
+фильтр постпроцессинга (\-vf pp) и декодер (\-vfm ffmpeg) из libavcodec.
 .sp 1
-Xvid's internal postprocessing filters:
+Встроенные фильтры построцессинга Xvid:
 .PD 0
 .RSs
-.IPs deblock-chroma (also see \-vf pp)
-chroma deblock filter
-.IPs deblock-luma (also see \-vf pp)
-luma deblock filter
-.IPs dering-luma (also see \-vf pp)
-luma deringing filter
-.IPs dering-chroma (also see \-vf pp)
-chroma deringing filter
-.IPs filmeffect (also see \-vf noise)
-Adds artificial film grain to the video.
-May increase perceived quality, while lowering true quality.
+.IPs deblock-chroma (смотрите также \-vf pp)
+deblock фильтр хроматической[chroma] составляющей
+.IPs deblock-luma (смотрите также \-vf pp)
+deblock фильтр яркостной[luma] составляющей
+.IPs dering-luma (смотрите также \-vf pp)
+deringing фильтр яркостной[luma] составляющей
+.IPs dering-chroma (смотрите также \-vf pp)
+deringing фильтр хроматической[chroma] составляющей
+.IPs filmeffect (смотрите также \-vf noise)
+Добавляет эффект старинного фильма.
+Может увеличить воспринимаемое качество, на самом деле ухудшая настоящее.
 .RE
 .sp 1
 .RS
-rendering methods:
+методы рендеринга:
 .RE
 .PD 0
 .RSs
 .IPs "dr2\ \ "
-Activate direct rendering method 2.
+Активирует метод 2 прямого рендеринга.
 .IPs nodr2
-Deactivate direct rendering method 2.
+Деактивирует метод 2 прямого рендеринга.
 .RE
 .PD 1
 .
 .TP
-.B \-xy <value> (also see \-zoom)
+.B \-xy <значение> (смотрите также \-zoom)
 .PD 0
 .RSs
-.IPs value<=8
-Scale image by factor <value>.
-.IPs value>8
-Set width to value and calculate height to keep correct aspect ratio.
+.IPs значение<=8
+Масштабировать изображение в <значение> раз.
+.IPs значение>8
+Установить ширину, равную значению и рассчитать высоту для сохранения
+правильного коэффициента пропорций.
 .RE
 .PD 1
 .
 .TP
-.B \-y <y> (also see \-zoom) (MPlayer only)
-Scale image to height <y> (if software/\:hardware scaling is available).
-Disables aspect calculations.
+.B \-y <y> (смотрите также \-zoom) (только MPlayer)
+Масштабирует изображение до высоты <y> (если доступно 
+программное/\:аппаратное масштабирование).
+Отключает расчет пропорций.
 .
 .TP
 .B "\-zoom\ \ "
-Allow software scaling, where available.
-This will allow scaling with output drivers (like x11, fbdev) that
-do not support hardware scaling where MPlayer disables scaling by
-default for performance reasons.
+Разрешает использовать программное масштабирование, где это возможно.
+Это позволит выполнять его с драйверами вывода,
+не поддерживающими аппаратное масштабирование (такими как x11, fbdev),
+там, где по-умолчанию MPlayer отключает масштабирование для
+увеличения производительности.
 .
 .
 .
