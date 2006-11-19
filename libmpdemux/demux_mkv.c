@@ -3864,26 +3864,6 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
     }
 }
 
-/** \brief Return the number of subtitle tracks in the file.
-
-  \param demuxer The demuxer for which the number of subtitle tracks
-  should be returned.
-*/
-int
-demux_mkv_num_subs (demuxer_t *demuxer)
-{
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  int i, num;
-
-  num = 0;
-  for (i = 0; i < mkv_d->num_tracks; i++)
-    if ((mkv_d->tracks[i]->type == MATROSKA_TRACK_SUBTITLE) &&
-        (mkv_d->tracks[i]->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN))
-      num++;
-
-  return num;
-}
-
 /** \brief Change the current subtitle track and return its ID.
 
   Changes the current subtitle track. If the new subtitle track is a

@@ -488,7 +488,7 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
       // check for -slang if subs are uninitialized yet
       if (os->text && d->sub->id < 0 && demux_ogg_check_lang(val, dvdsub_lang))
       {
-	d->sub->id = id;
+	d->sub->id = index;
 	dvdsub_id = index;
         mp_msg(MSGT_DEMUX, MSGL_V, "Ogg demuxer: Displaying subtitle stream id %d which matched -slang %s\n", id, val);
       }
@@ -538,7 +538,7 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
     vorbis_info_clear(&vi);
   }
   if (os->text) {
-    if (id == d->sub->id) // don't want to add subtitles to the demuxer for now
+    if (id == demux_ogg_sub_id(d->sub->id)) // don't want to add subtitles to the demuxer for now
       demux_ogg_add_sub(os,pack);
     return 0;
   }
@@ -717,16 +717,6 @@ extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 /* defined in demux_mov.c */
 extern unsigned int store_ughvlc(unsigned char *s, unsigned int v);
-
-/** \brief Return the number of subtitle tracks in the file.
-
-  \param demuxer The demuxer for which the number of subtitle tracks
-  should be returned.
-*/
-int demux_ogg_num_subs(demuxer_t *demuxer) {
-  ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)demuxer->priv;
-  return ogg_d->n_text;
-}
 
 /** \brief Change the current subtitle stream and return its ID.
 

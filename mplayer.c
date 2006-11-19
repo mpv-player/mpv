@@ -2246,6 +2246,10 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             return M_PROPERTY_OK;
         }
 #endif
+        if (dvdsub_id >= 0) {
+            snprintf(*(char**)arg, 63, "(%d) %s", dvdsub_id, MSGTR_Unknown);
+            return M_PROPERTY_OK;
+        }
         snprintf(*(char**)arg, 63, MSGTR_Disabled);
         return M_PROPERTY_OK;
 
@@ -2316,10 +2320,16 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
                 spudec_reset(vo_spudec);
             }
 #endif
-#ifdef HAVE_OGGVORBIS
-            if (demuxer->type == DEMUXER_TYPE_OGG)
-                d_dvdsub->id = demux_ogg_sub_id(demuxer, dvdsub_id);
-#endif
+            if (stream->type != STREAMTYPE_DVD) {
+              int i = 0;
+              for (d_dvdsub->id = 0; d_dvdsub->id < MAX_S_STREAMS; d_dvdsub->id++) {
+                if (demuxer->s_streams[d_dvdsub->id]) {
+                  if (i == dvdsub_id) break;
+                  i++;
+                }
+              }
+              d_dvdsub->sh = demuxer->s_streams[d_dvdsub->id];
+            }
             if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
                 d_dvdsub->id = demux_mkv_change_subs(demuxer, dvdsub_id);
 #ifdef USE_ASS
@@ -4043,18 +4053,14 @@ if(!demuxer)
 }
 inited_flags|=INITED_DEMUXER;
 
-if (demuxer->type==DEMUXER_TYPE_MATROSKA) {
+if (stream->type != STREAMTYPE_DVD) {
+  int i;
   // setup global sub numbering
   global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
-  global_sub_size += demux_mkv_num_subs(demuxer);
+  for (i = 0; i < MAX_S_STREAMS; i++)
+    if (demuxer->s_streams[i])
+      global_sub_size++;
 }
-#ifdef HAVE_OGGVORBIS
-if (demuxer->type==DEMUXER_TYPE_OGG) {
-  // setup global sub numbering
-  global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
-  global_sub_size += demux_ogg_num_subs(demuxer);
-}
-#endif
 
 current_module="demux_open2";
 
