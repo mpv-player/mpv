@@ -124,7 +124,7 @@ m_config_push(m_config_t* config) {
       continue;
     if(co->opt->flags & (M_OPT_GLOBAL|M_OPT_NOSAVE))
       continue;
-    if((co->opt->flags & M_OPT_OLD) && !(co->flags && M_CFG_OPT_SET))
+    if((co->opt->flags & M_OPT_OLD) && !(co->flags & M_CFG_OPT_SET))
       continue;
     if(co->flags & M_CFG_OPT_ALIAS)
       continue;
