@@ -1797,14 +1797,14 @@ static int mp_property_channels(m_option_t* prop,int action,void* arg) {
 static int mp_property_audio(m_option_t* prop,int action,void* arg) {
     int current_id = -1, tmp;
 
-    if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
-
     switch(action) {
     case M_PROPERTY_GET:
+        if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
         if(!arg) return M_PROPERTY_ERROR;
         *(int*)arg = audio_id;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
+        if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
         if(!arg) return M_PROPERTY_ERROR;
 
         if (audio_id < 0)
@@ -1836,9 +1836,10 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
             tmp = -1;
         current_id = demuxer->audio->id;
         audio_id = demuxer_switch_audio(demuxer, tmp);
+        if(audio_id == -2 || (audio_id > -1 && demuxer->audio->id != current_id && current_id != -2))
+          uninit_player(INITED_AO | INITED_ACODEC);
         if(audio_id > -1 && demuxer->audio->id != current_id) {
           sh_audio_t *sh2;
-          uninit_player(INITED_AO | INITED_ACODEC);
           sh2 = demuxer->a_streams[demuxer->audio->id];
           if(sh2) {
             sh2->ds = demuxer->audio;
@@ -1859,14 +1860,14 @@ static int reinit_video_chain(void);
 static int mp_property_video(m_option_t* prop,int action,void* arg) {
     int current_id = -1, tmp;
 
-    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
-
     switch(action) {
     case M_PROPERTY_GET:
+        if(!sh_video) return M_PROPERTY_UNAVAILABLE;
         if(!arg) return M_PROPERTY_ERROR;
         *(int*)arg = video_id;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
+        if(!sh_video) return M_PROPERTY_UNAVAILABLE;
         if(!arg) return M_PROPERTY_ERROR;
 
         if (video_id < 0)
@@ -1886,9 +1887,10 @@ static int mp_property_video(m_option_t* prop,int action,void* arg) {
         else
             tmp = -1;
         video_id = demuxer_switch_video(demuxer, tmp);
+        if(video_id == -2 || (video_id > -1 && demuxer->video->id != current_id && current_id != -2))
+          uninit_player(INITED_VCODEC | (fixed_vo && video_id != -2 ? 0 : INITED_VO));
         if(video_id > -1 && demuxer->video->id != current_id) {
           sh_video_t *sh2;
-          uninit_player(INITED_VCODEC | (fixed_vo ? 0 : INITED_VO));
           sh2 = demuxer->v_streams[demuxer->video->id];
           if(sh2) {
             sh2->ds = demuxer->video;
