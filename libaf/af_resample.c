@@ -220,6 +220,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       int j;
       s->up = af->data->rate/d;	
       s->dn = n->rate/d;
+      s->wi = 0;
+      s->i = 0;
       
       // Calculate cuttof frequency for filter
       fc = 1/(float)(max(s->up,s->dn));
