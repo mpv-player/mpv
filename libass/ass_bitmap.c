@@ -163,14 +163,14 @@ static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 
 	error = FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 0);
 	if (error) {
-		mp_msg(MSGT_ASS, MSGL_WARN, "FT_Glyph_To_Bitmap error %d \n", error);
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_To_BitmapError, error);
 		return 0;
 	}
 
 	bg = (FT_BitmapGlyph)glyph;
 	bit = &(bg->bitmap);
 	if (bit->pixel_mode != FT_PIXEL_MODE_GRAY) {
-		mp_msg(MSGT_ASS, MSGL_WARN, "Unsupported pixel mode: %d\n", (int)(bit->pixel_mode));
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UnsupportedPixelMode, (int)(bit->pixel_mode));
 		FT_Done_Glyph(glyph);
 		return 0;
 	}

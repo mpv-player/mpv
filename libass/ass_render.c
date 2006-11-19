@@ -203,7 +203,7 @@ static void ass_lazy_track_init(void)
 	if (track->PlayResX && track->PlayResY)
 		return;
 	if (!track->PlayResX && !track->PlayResY) {
-		mp_msg(MSGT_ASS, MSGL_WARN, "Neither PlayResX nor PlayResY defined. Assuming 384x288.  \n");
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined);
 		track->PlayResX = 384;
 		track->PlayResY = 288;
 	} else {
@@ -211,10 +211,10 @@ static void ass_lazy_track_init(void)
 			frame_context.orig_height / frame_context.width;
 		if (!track->PlayResY) {
 			track->PlayResY = track->PlayResX / orig_aspect + .5;
-			mp_msg(MSGT_ASS, MSGL_WARN, "PlayResY undefined, setting %d  \n", track->PlayResY);
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_PlayResYUndefinedSettingY, track->PlayResY);
 		} else if (!track->PlayResX) {
 			track->PlayResX = track->PlayResY * orig_aspect + .5;
-			mp_msg(MSGT_ASS, MSGL_WARN, "PlayResX undefined, setting %d  \n", track->PlayResX);
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_PlayResXUndefinedSettingX, track->PlayResX);
 		}
 	}
 }
@@ -231,7 +231,7 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 
 	error = FT_Init_FreeType( &ft );
 	if ( error ) { 
-		mp_msg(MSGT_ASS, MSGL_FATAL, "FT_Init_FreeType failed\n");
+		mp_msg(MSGT_ASS, MSGL_FATAL, MSGTR_LIBASS_FT_Init_FreeTypeFailed);
 		goto ass_init_exit;
 	}
 
@@ -253,8 +253,8 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 	text_info.glyphs = calloc(MAX_GLYPHS, sizeof(glyph_info_t));
 	
 ass_init_exit:
-	if (priv) mp_msg(MSGT_ASS, MSGL_INFO, "[ass] Init\n");
-	else mp_msg(MSGT_ASS, MSGL_ERR, "[ass] Init failed\n");
+	if (priv) mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_Init);
+	else mp_msg(MSGT_ASS, MSGL_ERR, MSGTR_LIBASS_InitFailed);
 
 	return priv;
 }
@@ -960,7 +960,7 @@ static char* parse_tag(char* p, double pwr) {
 		switch (cmd) {
 			case 'c': change_color(render_context.c + cidx, val, pwr); break;
 			case 'a': change_alpha(render_context.c + cidx, val >> 24, pwr); break;
-			default: mp_msg(MSGT_ASS, MSGL_WARN, "Bad command: %c%c\n", n, cmd); break;
+			default: mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_BadCommand, n, cmd); break;
 		}
 		mp_msg(MSGT_ASS, MSGL_DBG2, "single c/a at %f: %c%c = %X   \n", pwr, n, cmd, render_context.c[cidx]);
 	} else if (mystrcmp(&p, "r")) {
@@ -1239,7 +1239,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 	
 	error = FT_Load_Glyph(render_context.face, index, FT_LOAD_NO_BITMAP );
 	if (error) {
-		mp_msg(MSGT_ASS, MSGL_WARN, "Error loading glyph\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return error;
 	}
 	
@@ -1254,7 +1254,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 #endif
 	error = FT_Get_Glyph(render_context.face->glyph, &(info->glyph));
 	if (error) {
-		mp_msg(MSGT_ASS, MSGL_WARN, "Error getting glyph\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return error;
 	}
 
@@ -1265,7 +1265,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 		info->outline_glyph = info->glyph;
 		error = FT_Glyph_Stroke( &(info->outline_glyph), render_context.stroker, 0 ); // don't destroy original
 		if (error) {
-			mp_msg(MSGT_ASS, MSGL_WARN, "FT_Glyph_Stroke error %d \n", error);
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_Stroke_Error, error);
 		}
 	} else {
 		info->outline_glyph = 0;
@@ -1493,7 +1493,7 @@ static void process_karaoke_effects(void)
 					dt /= (tm_end - tm_start);
 					x = x_start + (x_end - x_start) * dt;
 				} else {
-					mp_msg(MSGT_ASS, MSGL_ERR, "Unknown effect type (internal error)  \n");
+					mp_msg(MSGT_ASS, MSGL_ERR, MSGTR_LIBASS_UnknownEffectType_InternalError);
 					continue;
 				}
 
@@ -1586,11 +1586,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	int device_x = 0, device_y = 0;
 
 	if (event->Style >= frame_context.track->n_styles) {
-		mp_msg(MSGT_ASS, MSGL_WARN, "No style found!\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_NoStyleFound);
 		return 1;
 	}
 	if (!event->Text) {
-		mp_msg(MSGT_ASS, MSGL_WARN, "Empty event!\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_EmptyEvent);
 		return 1;
 	}
 
@@ -1620,7 +1620,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		use_kerning = FT_HAS_KERNING(render_context.face);
 
 		if (text_info.length >= MAX_GLYPHS) {
-			mp_msg(MSGT_ASS, MSGL_WARN, "\nMAX_GLYPHS reached: event %d, start = %llu, duration = %llu\n Text = %s\n", 
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_MAX_GLYPHS_Reached, 
 					(int)(event - frame_context.track->events), event->Start, event->Duration, event->Text);
 			break;
 		}
@@ -2129,7 +2129,7 @@ static void fix_collisions(event_images_t* imgs, int cnt)
 			s.a = priv->top;
 			s.b = priv->top + priv->height;
 			if (priv->height != imgs[i].height) { // no, it's not
-				mp_msg(MSGT_ASS, MSGL_WARN, "Achtung! Event height has changed!  \n");
+				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_EventHeightHasChanged);
 				priv->top = 0;
 				priv->height = 0;
 			}
@@ -2195,7 +2195,7 @@ ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long lon
 				rc = ass_render_event(event, eimg + cnt);
 				if (!rc) ++cnt;
 			} else {
-				mp_msg(MSGT_ASS, MSGL_WARN, "Too many simultaneous events  \n");
+				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_TooManySimultaneousEvents);
 				break;
 			}
 		}

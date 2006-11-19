@@ -101,7 +101,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 		return 0;
 
 	if (strcasecmp((const char*)val_s, family) != 0)
-		mp_msg(MSGT_ASS, MSGL_WARN, "fontconfig: selected font family is not the requested one: '%s' != '%s'\n",
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
 				(const char*)val_s, family);
 
 	result = FcPatternGetString(rpat, FC_FILE, 0, &val_s);
@@ -128,20 +128,20 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 	if (!res && priv->family_default) {
 		res = _select_font(priv, priv->family_default, bold, italic, index);
 		if (res && !no_more_font_messages)
-			mp_msg(MSGT_ASS, MSGL_WARN, "fontconfig_select: using default font family: (%s, %d, %d) -> %s, %d\n", 
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFontFamily, 
 					family, bold, italic, res, *index);
 	}
 	if (!res && priv->path_default) {
 		res = priv->path_default;
 		*index = priv->index_default;
 		if (!no_more_font_messages)
-			mp_msg(MSGT_ASS, MSGL_WARN, "fontconfig_select: using default font: (%s, %d, %d) -> %s, %d\n",
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFont, 
 					family, bold, italic, res, *index);
 	}
 	if (!res) {
 		res = _select_font(priv, "Arial", bold, italic, index);
 		if (res && !no_more_font_messages)
-			mp_msg(MSGT_ASS, MSGL_WARN, "fontconfig_select: using 'Arial' font family: (%s, %d, %d) -> %s, %d\n",
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingArialFontFamily, 
 					family, bold, italic, res, *index);
 	}
 	if (res)
@@ -168,17 +168,16 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 
 	priv->config = FcConfigGetCurrent();
 	if (!priv->config) {
-		mp_msg(MSGT_ASS, MSGL_FATAL, "FcInitLoadConfigAndFonts failed\n");
+		mp_msg(MSGT_ASS, MSGL_FATAL, MSGTR_LIBASS_FcInitLoadConfigAndFontsFailed);
 		return 0;
 	}
 
 	if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
 	{
-		mp_msg(MSGT_ASS, MSGL_INFO, "[ass] Updating font cache\n");
+		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_UpdatingFontCache);
 		if (FcGetVersion() >= 20390 && FcGetVersion() < 20400)
 			mp_msg(MSGT_ASS, MSGL_WARN,
-			       "[ass] beta versions of fontconfig are not supported\n"
-			       "      update before reporting any bugs\n");
+			       MSGTR_LIBASS_BetaVersionsOfFontconfigAreNotSupported);
 		// FontConfig >= 2.4.0 updates cache automatically in FcConfigAppFontAddDir()
 		if (FcGetVersion() < 20390) {
 			FcFontSet* fcs;
@@ -187,19 +186,19 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 			fss = FcStrSetCreate();
 			rc = FcStrSetAdd(fss, (const FcChar8*)dir);
 			if (!rc) {
-				mp_msg(MSGT_ASS, MSGL_WARN, "FcStrSetAdd failed\n");
+				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcStrSetAddFailed);
 				goto ErrorFontCache;
 			}
 
 			rc = FcDirScan(fcs, fss, NULL, FcConfigGetBlanks(priv->config), (const FcChar8 *)dir, FcFalse);
 			if (!rc) {
-				mp_msg(MSGT_ASS, MSGL_WARN, "FcDirScan failed\n");
+				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcDirScanFailed);
 				goto ErrorFontCache;
 			}
 
 			rc = FcDirSave(fcs, fss, (const FcChar8 *)dir);
 			if (!rc) {
-				mp_msg(MSGT_ASS, MSGL_WARN, "FcDirSave failed\n");
+				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcDirSave);
 				goto ErrorFontCache;
 			}
 		ErrorFontCache:
@@ -209,7 +208,7 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 
 	rc = FcConfigAppFontAddDir(priv->config, (const FcChar8*)dir);
 	if (!rc) {
-		mp_msg(MSGT_ASS, MSGL_WARN, "FcConfigAppFontAddDir failed\n");
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcConfigAppFontAddDirFailed);
 	}
 
 	priv->family_default = family ? strdup(family) : 0;
@@ -236,7 +235,7 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 {
 	fc_instance_t* priv;
 
-	mp_msg(MSGT_ASS, MSGL_WARN, "Fontconfig disabled, only default font will be used\n");
+	mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed);
 	
 	priv = calloc(1, sizeof(fc_instance_t));
 	
