@@ -1,4 +1,4 @@
-.\" synced with r20969
+.\" synced with r21004
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -272,7 +272,7 @@ alterne entre les modes de sauts de trame: aucun / saut d'affichage / saut de
 décodage (voir \-framedrop et \-hardframedrop)
 .IPs "v\ \ \ \ "
 Bascule l'affichage des sous-titres.
-.IPs ""b / j"\ \ \ "
+.IPs "j\ \ \ \ "
 Alterne entre les différents sous-titres disponibles.
 .IPs "y et g"
 Choisit le sous-titre après/avant dans la liste des sous-titres.
@@ -1691,13 +1691,17 @@ problèmes de synchronisation, ce qui rend l'écoute désagréable.
 Les options disponibles sont:
 .RSs
 .IPs device=<valeur>
-Le périphérique radio à utiliser (par défaut\ : /dev/radio0).
+Le périphérique radio à utiliser (par défaut\ : /dev/radio0 sous Linux et
+/dev/tuner0 sous *BSD).
 .IPs driver=<valeur>
 Le pilote radio à utiliser (par défaut\ : v4l2 si disponible,
 v4l sinon).
 .IPs volume=<0..100>
 volume du périphérique radio (par défaut\ : 100)
-sound volume for radio device (default 100)
+.IPs freq_min=<valeur> (*BSD BT848 uniquement)
+fréquence minimale autorisée (par défaut\ : 87.50)
+.IPs freq_max=<valeur> (*BSD BT848 uniquement)
+fréquence maximale autorisée (default: 108.00)
 .IPs channels=<fréquence>\-<nom>,<fréquence>\-<nom>,...
 Défini la liste des canaux.
 Utilisez _ pour les espaces (ou jouez avec les guillements).
@@ -9000,16 +9004,28 @@ nombre de trames.
 Taille du tampon de contrôle du débit.
 .
 .TP
-.B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-mode CBR\ : quantum min & max pour toutes les trames
-(par défaut\ : 2\-31)
-.br
-mode deux passes\ : quantum min & max pour trames-I/P
-(par défaut\ : 2\-31/2\-31)
-.br
-.I ATTENTION\ :
-À partir de Xvid-1.0.x, cette option est remplacée par les
-options [min|max]_[i|p|b]quant.
+.B min_iquant=<0\-31>
+quantum minimum pour les trames-I (par défaut\ : 2)
+.
+.TP
+.B max_iquant=<0\-31>
+quantum maximum pour les trames-I (par défaut\ : 31)
+.
+.TP
+.B min_pquant=<0\-31>
+quantum minimum pour les trames-P (par défaut\ : 2)
+.
+.TP
+.B max_pquant=<0\-31>
+quantum maximum pour les trames-P (par défaut\ : 31)
+.
+.TP
+.B min_bquant=<0\-31>
+quantum minimum pour les trames-B (par défaut\ : 2)
+.
+.TP
+.B max_bquant=<0\-31>
+quantum maximum pour les trames-B (par défaut\ : 31)
 .
 .TP
 .B min_key_interval=<valeur> (mode deux passes uniquement)
@@ -9265,30 +9281,6 @@ Ces zones seront alors compressées plus fortement que les zones
 intermédiaires, économisant ainsi des bits pouvant être redistribués
 à d'autres trames, augmentant ainsi la qualité subjective globale
 de la vidéo, tout en dégradant probablement un peu le PSNR.
-.
-.TP
-.B min_iquant=<0\-31>
-quantum minimum pour les trames-I (par défaut\ : 2)
-.
-.TP
-.B max_iquant=<0\-31>
-quantum maximum pour les trames-I (par défaut\ : 31)
-.
-.TP
-.B min_pquant=<0\-31>
-quantum minimum pour les trames-P (par défaut\ : 2)
-.
-.TP
-.B max_pquant=<0\-31>
-quantum maximum pour les trames-P (par défaut\ : 31)
-.
-.TP
-.B min_bquant=<0\-31>
-quantum minimum pour les trames-B (par défaut\ : 2)
-.
-.TP
-.B max_bquant=<0\-31>
-quantum maximum pour les trames-B (par défaut\ : 31)
 .
 .TP
 .B quant_intra_matrix=<nom_fichier>
