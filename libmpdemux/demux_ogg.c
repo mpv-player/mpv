@@ -1146,10 +1146,10 @@ int demux_ogg_open(demuxer_t* demuxer) {
           mp_msg(MSGT_DEMUX, MSGL_INFO, "[Ogg] stream %d: subtitles (SRT-like text subtitles), -sid %d\n", ogg_d->num_sub, ogg_d->n_text);
 	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
 	  ogg_d->subs[ogg_d->num_sub].text = 1;
-	  mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", ogg_d->n_text);
           ogg_d->subs[ogg_d->num_sub].id = ogg_d->n_text;
           if (demuxer->sub->id == ogg_d->n_text)
             text_id = ogg_d->num_sub;
+          new_sh_sub(demuxer, ogg_d->n_text);
           ogg_d->n_text++;
           ogg_d->text_ids = (int *)realloc(ogg_d->text_ids, sizeof(int) * ogg_d->n_text);
           ogg_d->text_ids[ogg_d->n_text - 1] = ogg_d->num_sub;
