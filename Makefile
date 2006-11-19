@@ -113,6 +113,8 @@ PARTS += libdha vidix
 endif
 ifeq ($(DVDREAD_INTERNAL),yes)
 PARTS += dvdread
+endif
+ifeq ($(DVDCSS_INTERNAL),yes)
 PARTS += libdvdcss
 endif
 ifeq ($(GUI),yes)
@@ -170,6 +172,8 @@ endif
 ifeq ($(DVDREAD_INTERNAL),yes)
 COMMON_DEPS += dvdread/libdvdread.a
 COMMON_LIBS += dvdread/libdvdread.a
+endif
+ifeq ($(DVDCSS_INTERNAL),yes)
 COMMON_DEPS += libdvdcss/libdvdcss.a
 COMMON_LIBS += libdvdcss/libdvdcss.a
 endif
