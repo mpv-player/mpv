@@ -486,7 +486,7 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
 	ogg_d->text_langs[index] = strdup(val);
       }
       // check for -slang if subs are uninitialized yet
-      if (os->text && d->sub->id == -1 && demux_ogg_check_lang(val, dvdsub_lang))
+      if (os->text && d->sub->id < 0 && demux_ogg_check_lang(val, dvdsub_lang))
       {
 	d->sub->id = id;
 	dvdsub_id = index;
