@@ -3180,7 +3180,7 @@ static int reinit_video_chain(void) {
     //if((video_out->preinit(vo_subdevice))!=0){
     if(!(video_out=init_best_video_out(video_driver_list))){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
-      return 0;
+      goto err_out;
     }
     sh_video->video_out=video_out;
     inited_flags|=INITED_VO;
@@ -3242,8 +3242,7 @@ static int reinit_video_chain(void) {
 
   if(!sh_video->inited){
     if(!fixed_vo) uninit_player(INITED_VO);
-    sh_video = d_video->sh = NULL;
-    return 0;
+    goto err_out;
   }
 
   inited_flags|=INITED_VCODEC;
@@ -3265,6 +3264,10 @@ static int reinit_video_chain(void) {
   current_module="init_vo";
 
   return 1;
+
+err_out:
+  sh_video = d_video->sh = NULL;
+  return 0;
 }
 
 int main(int argc,char* argv[]){
@@ -4298,7 +4301,7 @@ if (global_sub_size) {
 if(!sh_video) goto main; // audio-only
 
 if(!reinit_video_chain()) {
-  if(!sh_video || !sh_video->inited){
+  if(!sh_video){
     if(!sh_audio) goto goto_next_file;
     goto main; // exit_player(MSGTR_Exit_error);
   }
