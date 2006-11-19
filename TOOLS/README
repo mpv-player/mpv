@@ -8,8 +8,20 @@ In this directory you can find some nice scripts and code that makes
 using MPlayer and MEncoder easier, for example scripts for DVD track
 encoding in three pass mode or creating SVCDs from a movie.
 
-FIXME: Document all the stuff in the subdirectories.
+FIXME: Document all the stuff in the subdirectories:
 
+mpfc
+benchmark
+bmovl-test
+mwallp
+subfont-c
+GL-test
+TVout
+TVout/matroxset
+TVout/con2fb
+benchmark-gab
+netstream
+realcodecs
 
 
 MPlayer scripts in the TOOLS dir
@@ -44,9 +56,9 @@ Description:  Example how to output video on multiple windows in sync. Might
               the video arbitrarily.
 
 Usage:        mplmult.sh <n> <options>
-              n        number of MPlayer instances that display the video
-              options  any options you would pass to MPlayer, more than
-                       one file will usually not work
+              n        Number of MPlayer instances that display the video.
+              options  Any options you would pass to MPlayer, more than
+                       one file will usually not work.
 
 
 subsearch.sh
@@ -182,7 +194,7 @@ Usage:        aconvert <"input file"> <"output file"> <"options">
               -oac lavc -lavcopts acodec=mp3:abitrate=192
 
 Note:         The script is probably bash dependent and it's just a quick
-              hack, feel free to improve it (or much better: fix mencoder ;).
+              hack, feel free to improve it (or much better: fix MEncoder ;).
 
 
 
@@ -190,7 +202,7 @@ qepdvcd.sh
 
 Author:       Reynaldo H. Verdejo Pinochet
 
-Description:  anything supported to VCD/SVCD PAL/NTSC converter
+Description:  converter from any supported format to VCD/SVCD PAL/NTSC
 
 Usage:        qepdvcd.sh file <options>
               Run with no arguments to see the list of options.
@@ -204,7 +216,7 @@ encode2mpeglight
 
 Author:       Giacomo Comes
 
-Description:  Convert anything MPlayer can play to VCD/SVCD/DVD mpeg
+Description:  Convert anything MPlayer can play to VCD/SVCD/DVD MPEG.
 
 Usage:        encode2mpeglight -o <NAME> -n <NORM> [options] <source>
               For help and documentation run:
@@ -353,7 +365,7 @@ Usage:        psnr-video.sh <file1> <file2> [<frames>] [<options1>] [<options2>]
 Note:         This script relies on the the tool "pnmpsnr" for the
               frame-by-frame PSNR calculation.
               Be aware that psnr-video.sh needs a lot of temporary space
-              inside /temp/.
+              in /tmp/.
 
 
 asfinfo
@@ -401,7 +413,7 @@ Description:  Check the source tree for anomalies.
 
 Usage:        checktree.sh -help
 
-Note:         This script is meant for developers to check the current (CVS)
+Note:         This script is meant for developers to check the current
               source tree and/or the patches they are working on.
 
 
@@ -572,9 +584,9 @@ avisubdump.c
 
 Author:       Tobias Diedrich
 
-Description:  Dumps vobsub soft subtitles streams embedded in avi files.
+Description:  Dumps vobsub soft subtitles streams embedded in AVI files.
 
-Usage:        avisubdump <avi>
+Usage:        avisubdump <movie.avi>
 
 
 
