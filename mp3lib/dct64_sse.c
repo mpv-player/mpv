@@ -298,6 +298,13 @@ void dct64_sse(real *a,real *b,real *c)
        To do saturation efficiently in x86 we can use fist(t)(p),
        pf2iw, or packssdw. We use fist(p) here.
     */
+
+#ifdef SYS_DARWIN
+#define FFREEP "fstp %%st(0)\n\t"
+#else
+#define FFREEP "ffreep %%st(0)\n\t"
+#endif /* SYS_DARWIN */
+
     asm(
         "flds       %0\n\t"
         "flds     (%2)\n\t"
@@ -426,7 +433,7 @@ void dct64_sse(real *a,real *b,real *c)
         "fist  480(%4)\n\t"
         "fadds  92(%1)\n\t"
         "fistp 416(%4)\n\t"
-        "ffreep %%st(0)\n\t"
+        FFREEP
         :
         :"m"(costab_mmx[30]), "r"(b1), "r"(b2), "r"(a), "r"(b)
         :"memory"

@@ -19,6 +19,11 @@
 
 #include "config.h"
 
+/* Can't compile MMX assembly on Darwin */
+#ifdef SYS_DARWIN
+#undef HAVE_MMX
+#endif /* SYS_DARWIN */
+
 #if 0
  /* old WRITE_SAMPLE */
    /* is portable */
