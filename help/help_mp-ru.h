@@ -605,9 +605,9 @@ static char help_text[]=
 #define MSGTR_ClipInfo "Информация о клипе:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: обнаружено 30 кадров/сек NTSC содержимое, переключаю частоту кадров.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: обнаружено 24 кадра/сек поступательное [progressive] NTSC содержимое,\nпереключаю частоту кадров.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: обнаружено 24 кадра/сек NTSC содержимое с построчной развёрткой,\nпереключаю частоту кадров.\n"
 
-#define MSGTR_CacheFill "\rЗаполнение кэша: %5.2f%% (%"PRId64" байт(а/ов))   "
+#define MSGTR_CacheFill "\rЗаполнение кэша: %5.2f%% (%"PRId64" байт(а))   "
 #define MSGTR_NoBindFound "Не найдена привязка к клавише '%s'."
 #define MSGTR_FailedToOpen "Не могу открыть %s.\n"
 
@@ -1022,17 +1022,17 @@ static char help_text[]=
 #define MSGTR_VO_PNM_PGMYUVType "Будут записаны PGMYUV файлы."
 
 // vo_yuv4mpeg.c
-#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "Для чередующегося режима необходимо, чтобы высота изображения делилась на 4."
-#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Не могу выделить память для линейного буфера в чередующемся режиме."
-#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Вход не RGB, не могу разделить хроматичные данные по полям!"
+#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "Для режима c чересстрочной развёрткой необходимо, чтобы высота изображения\nделилась на 4."
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Не могу выделить память для линейного буфера в режиме чересстрочной развёртки."
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Вход не RGB, не могу разделить данные хромы по полям!"
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Ширина изображения должна делиться на 2."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Недостаточно памяти для размещения фреймбуфера RGB."
 #define MSGTR_VO_YUV4MPEG_OutFileOpenError "Не могу выделить память или файловый описатель для записи \"%s\"!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "Ошибка записи изображения в вывод!"
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "Неизвестное субустройство: %s"
-#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Использую чередующийся режим вывода, верхнее поле первое."
-#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Использую чередующийся режим вывода, нижнее поле первое."
-#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Использую (по умолчанию) поступательный режим кадров."
+#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Использую режим вывода с чересстрочной развёрткой, верхнее поле первое."
+#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Использую режим вывода с чересстрочной развёрткой, нижнее поле первое."
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Использую (по умолчанию) режим построчной развёртки кадров."
 
 // sub.c
 #define MSGTR_VO_SUB_Seekbar "Навигация"
