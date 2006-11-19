@@ -97,7 +97,7 @@ void make_decode_tables_MMX(long scaleval)
 	"jmp .L00\n\t"
 ".L04:\n\t"
 	::"g"(intwinbase_MMX),"m"(mp3lib_decwin[0]),"m"(scaleval),"m"(intwinbase_step)
-	:"memory","%ebx","%esi","%edi");
+	:"memory","%eax","%ebx","%ecx","%edx","%esi","%edi");
 intwinbase_step=2;
   __asm __volatile(
 	"xorl %%ecx,%%ecx\n\t"
@@ -156,5 +156,5 @@ intwinbase_step=2;
 	"jmp .L05\n\t"
 ".L13:\n\t"
 	::"g"(intwinbase_MMX),"m"(mp3lib_decwins[0]),"m"(scaleval),"m"(intwinbase_step)
-	:"memory","%ebx","%esi","%edi");
+	:"memory","%eax","%ebx","%ecx","%edx","%esi","%edi");
 }
