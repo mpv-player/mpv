@@ -3555,7 +3555,7 @@ int main(void) {
 }
 EOF
   if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then 
-    _macosx_frameworks="-framework Carbon -framework QuickTime -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
+    _ld_extra="$_ld_extra -framework Carbon -framework QuickTime -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
     _def_macosx='#define MACOSX 1'
     _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
@@ -3575,7 +3575,7 @@ EOF
 	if cc_check -framework Carbon -framework QuartzCore -framework OpenGL; then
 		_vosrc="$_vosrc vo_macosx.m"
 		_vomodules="macosx $_vomodules"
-		_macosx_frameworks="$_macosx_frameworks -framework Cocoa -framework QuartzCore -framework OpenGL"
+		_ld_extra="$_ld_extra -framework Cocoa -framework QuartzCore -framework OpenGL"
 		_def_macosx_corevideo='#define MACOSX_COREVIDEO 1'
 		_macosx_corevideo=yes
 	else
@@ -5120,7 +5120,7 @@ fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
   _def_dvdnav='#define USE_DVDNAV 1'
-  _ld_dvdnav=`$_dvdnavconfig --libs`
+  _ld_extra="$_ld_extra $_dvdnavconfig --libs"
   _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
   _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
   _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
@@ -5175,13 +5175,13 @@ if test "$_dvdread_internal" = yes; then
     _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
   elif darwin ; then
     _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
-    _macosx_frameworks="$_macosx_frameworks -framework IOKit"
+    _ld_extra="$_ld_extra -framework IOKit"
   fi
 elif test "$_dvdread" = yes; then
   _def_dvdread='#define USE_DVDREAD 1'
   _inputmodules="dvdread $_inputmodules"
   _largefiles=yes
-  test "$_dvdnav" != yes && _ld_dvdread='-ldvdread'
+  test "$_dvdnav" != yes && _ld_extra="$_ld_extra -ldvdread"
 else
   _def_dvdread_internal="#undef USE_DVDREAD_INTERNAL"
   _def_dvdread='#undef USE_DVDREAD'
@@ -7396,7 +7396,6 @@ EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra \
   $_ld_static $_ld_win32 \
   $_ld_win32libs $_ld_lm $_ld_gif \
-  $_ld_dvdread $_ld_dvdnav $_macosx_frameworks \
   $_ld_xvid \
   $_ld_vorbis $_ld_theora $_xmms_lib \
   $_ld_arch
