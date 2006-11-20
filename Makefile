@@ -85,20 +85,11 @@ LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(EXTRA_LIB_MENCODER) \
                 $(COMMON_LIBS) \
 
-COMMON_DEPS = $(W32_DEP) \
-              $(AV_DEP) \
-              libmpdemux/libmpdemux.a \
-              stream/stream.a \
-              libmpcodecs/libmpcodecs.a \
-              osdep/libosdep.a \
-              libswscale/libswscale.a \
-              libaf/libaf.a \
-
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 
-MPLAYER_DEPS  = $(OBJS_MPLAYER) $(COMMON_DEPS)
-MENCODER_DEPS = $(OBJS_MENCODER) $(COMMON_DEPS) libmpcodecs/libmpencoders.a
+MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(LIBS_MPLAYER)  $(COMMON_LIBS)
+MENCODER_DEPS = $(OBJS_MENCODER) $(LIBS_MENCODER) $(COMMON_LIBS)
 
 PARTS = libmpdemux \
         stream \
@@ -118,47 +109,38 @@ ifeq ($(WIN32DLL),yes)
 PARTS += loader loader/dshow loader/dmo
 endif
 ifeq ($(MP3LIB),yes)
-COMMON_DEPS += mp3lib/libMP3.a
 COMMON_LIBS += mp3lib/libMP3.a
 PARTS += mp3lib
 endif
 ifeq ($(LIBA52),yes)
-COMMON_DEPS += liba52/liba52.a
 COMMON_LIBS += liba52/liba52.a
 PARTS += liba52
 endif
 ifeq ($(LIBMPEG2),yes)
-COMMON_DEPS += libmpeg2/libmpeg2.a
 COMMON_LIBS += libmpeg2/libmpeg2.a
 PARTS += libmpeg2
 endif
 ifeq ($(FAAD_INTERNAL),yes)
-COMMON_DEPS += libfaad2/libfaad2.a
 COMMON_LIBS += libfaad2/libfaad2.a
 PARTS += libfaad2
 endif
 ifeq ($(TREMOR_INTERNAL),yes)
-COMMON_DEPS += tremor/libvorbisidec.a
 COMMON_LIBS += tremor/libvorbisidec.a
 PARTS += tremor
 endif
 ifeq ($(VIDIX),yes)
-MPLAYER_DEPS += libdha/libdha.so vidix/libvidix.a
-VO_LIBS += vidix/libvidix.a
+VO_LIBS += libdha/libdha.so vidix/libvidix.a
 PARTS += libdha vidix
 endif
 ifeq ($(DVDREAD_INTERNAL),yes)
-COMMON_DEPS += dvdread/libdvdread.a
 COMMON_LIBS += dvdread/libdvdread.a
 PARTS += dvdread
 endif
 ifeq ($(DVDCSS_INTERNAL),yes)
-COMMON_DEPS += libdvdcss/libdvdcss.a
 COMMON_LIBS += libdvdcss/libdvdcss.a
 PARTS += libdvdcss
 endif
 ifeq ($(CONFIG_ASS),yes)
-COMMON_DEPS += libass/libass.a
 COMMON_LIBS += libass/libass.a
 PARTS += libass
 endif
@@ -169,12 +151,10 @@ SRCS_MENCODER += libvo/font_load_ft.c
 COMMON_LIBS += $(FREETYPE_LIB)
 endif
 ifeq ($(GUI),yes)
-MPLAYER_DEPS += Gui/libgui.a
 LIBS_MPLAYER += Gui/libgui.a $(GTK_LIBS)
 PARTS += Gui
 endif
 ifeq ($(LIBMENU),yes)
-MPLAYER_DEPS += libmenu/libmenu.a
 LIBS_MPLAYER += libmenu/libmenu.a
 PARTS += libmenu
 endif
@@ -188,8 +168,6 @@ ALL_PRG += mencoder$(EXESUF)
 endif
 
 .SUFFIXES: .cc .c .o
-
-#.PHONY: $(COMMON_DEPS)
 
 all:	$(ALL_PRG)
 

@@ -5922,7 +5922,6 @@ if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
   _res_comment="using $_win32codecsdir"
   _ld_win32='loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
-  _dep_win32='loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
   openbsd && x86 && _ld_win32="$_ld_win32 -li386"
   if not win32 ; then
     _def_win32_loader='#define WIN32_LOADER 1'
@@ -6208,11 +6207,9 @@ if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_lavc_dsputil='#define USE_LIBAVCODEC_DSPUTIL'
   _ld_libavcodec='libavcodec/libavcodec.a'
-  _dep_libavcodec='libavcodec/libavcodec.a'
   _codecmodules="libavcodec $_codecmodules"
   if test "$_libavutil" = yes; then
     _ld_libavutil='libavutil/libavutil.a'
-    _dep_libavutil='libavutil/libavutil.a'
   fi
 elif test "$_libavcodec_so" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
@@ -6229,7 +6226,6 @@ _def_libavformat_win32='#undef CONFIG_WIN32'
 if test "$_libavformat" = yes ; then
   _def_libavformat='#define USE_LIBAVFORMAT 1'
   _ld_libavformat='libavformat/libavformat.a'
-  _dep_libavformat='libavformat/libavformat.a'
   if win32 ; then
     _def_libavformat_win32='#define CONFIG_WIN32 1'
   fi
@@ -6248,7 +6244,6 @@ _def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
 if test "$_libpostproc" = yes ; then
   _def_libpostproc='#define USE_LIBPOSTPROC 1'
   _ld_libpostproc='libpostproc/libpostproc.a'
-  _dep_libpostproc='libpostproc/libpostproc.a'
 else
   if test "$_libpostproc_so" = yes ; then
     _def_libpostproc_so='#define USE_LIBPOSTPROC_SO 1'
@@ -7452,11 +7447,9 @@ DVDREAD_INTERNAL = $_dvdread_internal
 DVDCSS_INTERNAL = $_libdvdcss_internal
 DVDNAV = $_dvdnav
 WIN32DLL = $_win32
-W32_DEP = $_dep_win32
 QTX_CODECS = $_qtx
 REAL_CODECS = $_real
 XANIM_CODECS = $_xanim
-AV_DEP = $_dep_libavformat $_dep_libavcodec $_dep_libavutil $_dep_libpostproc
 AV_LIB = $_ld_libavformat  $_ld_libavcodec  $_ld_libavutil  $_ld_libpostproc
 CONFIG_LIBAVUTIL = $_libavutil
 CONFIG_LIBAVUTIL_SO = $_libavutil_so
