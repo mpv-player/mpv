@@ -2080,37 +2080,28 @@ static void shift_event(event_images_t* ei, int shift)
 static int fit_segment(segment_t* s, segment_t* fixed, int* cnt, int dir)
 {
 	int i;
-	int shift;
-
-	if (*cnt == 0) {
-		*cnt = 1;
-		fixed[0].a = s->a;
-		fixed[0].b = s->b;
-		return 0;
-	}
+	int shift = 0;
 
 	if (dir == 1) { // move down
-		if (s->b <= fixed[0].a) // all ok
-			return 0;
 		for (i = 0; i < *cnt; ++i) {
+			if (s->b + shift <= fixed[i].a || s->a + shift >= fixed[i].b)
+				continue;
 			shift = fixed[i].b - s->a;
-			if (i == *cnt - 1 || fixed[i+1].a >= shift + s->b) { // here is a good place
-				fixed[i].b += s->b - s->a;
-				return shift;
-			}
 		}
 	} else { // dir == -1, move up
-		if (s->a >= fixed[*cnt-1].b) // all ok
-			return 0;
 		for (i = *cnt-1; i >= 0; --i) {
+			if (s->b + shift <= fixed[i].a || s->a + shift >= fixed[i].b)
+				continue;
 			shift = fixed[i].a - s->b;
-			if (i == 0 || fixed[i-1].b <= shift + s->a) { // here is a good place
-				fixed[i].a -= s->b - s->a;
-				return shift;
-			}
 		}
 	}
-	assert(0); // unreachable
+
+	fixed[*cnt].a = s->a + shift;
+	fixed[*cnt].b = s->b + shift;
+	(*cnt)++;
+	qsort(fixed, *cnt, sizeof(segment_t), cmp_segment);
+	
+	return shift;
 }
 
 static void fix_collisions(event_images_t* imgs, int cnt)
