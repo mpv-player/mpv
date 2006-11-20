@@ -100,8 +100,8 @@ COMMON_DEPS = $(W32_DEP) \
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 
-MPLAYER_DEP  = $(OBJS_MPLAYER) $(COMMON_DEPS)
-MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS) libmpcodecs/libmpencoders.a
+MPLAYER_DEPS  = $(OBJS_MPLAYER) $(COMMON_DEPS)
+MENCODER_DEPS = $(OBJS_MENCODER) $(COMMON_DEPS) libmpcodecs/libmpencoders.a
 
 PARTS = libmpdemux \
         stream \
@@ -177,7 +177,7 @@ LIBS_MPLAYER += Gui/libgui.a $(GTK_LIBS)
 PARTS += Gui
 endif
 ifeq ($(LIBMENU),yes)
-MPLAYER_DEP += libmenu/libmenu.a
+MPLAYER_DEPS += libmenu/libmenu.a
 LIBS_MPLAYER += libmenu/libmenu.a
 PARTS += libmenu
 endif
@@ -283,10 +283,10 @@ input/libinput.a:
 libmenu/libmenu.a:
 	$(MAKE) -C libmenu
 
-mplayer$(EXESUF): $(MPLAYER_DEP)
+mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $(OBJS_MPLAYER) $(LIBS_MPLAYER)
 
-mencoder$(EXESUF): $(MENCODER_DEP)
+mencoder$(EXESUF): $(MENCODER_DEPS)
 	$(CC) -o $@ $(OBJS_MENCODER) $(LIBS_MENCODER)
 
 osdep/mplayer-rc.o: osdep/mplayer.rc
@@ -419,7 +419,7 @@ endif
 mplayer.o mencoder.o vobsub.o: version.h
 
 # temporary measure to make sure help_mp.h is built. we desperately need correct deps!
-$(MPLAYER_DEP) $(MENCODER_DEP): help_mp.h
+$(MPLAYER_DEPS) $(MENCODER_DEPS): help_mp.h
 
 #
 # the following lines provide _partial_ dependency information
