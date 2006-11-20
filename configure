@@ -423,8 +423,6 @@ multiple paths separated by ':'):
   --with-extralibdir=DIR      extra linker search paths in DIR (*)
   --with-x11libdir=DIR        X library files in DIR (*)
   --with-livelibdir=DIR       LIVE555 Streaming Media in DIR
-  --with-xmmsplugindir=DIR    XMMS plugins in DIR
-  --with-xmmslibdir=DIR       libxmms.so.1 in DIR
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
   --with-freetype-config=PATH path to freetype-config
@@ -2080,14 +2078,6 @@ for ac_option do
     ;;
   --with-livelibdir=*)
     _livelibdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-
-  --with-xmmslibdir=*)
-    _xmmslibdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-    
-  --with-xmmsplugindir=*)
-    _xmmsplugindir=`echo $ac_option | cut -d '=' -f 2`
     ;;
 
   --enable-crash-debug)
@@ -6859,21 +6849,12 @@ echores "$_sortsub"
 
 echocheck "XMMS inputplugin support"
 if test "$_xmms" = yes ; then
-
   if ( xmms-config --version ) >/dev/null 2>&1 ; then
-    if test -z "$_xmmsplugindir" ; then
       _xmmsplugindir=`xmms-config --input-plugin-dir`
-    fi
-    if test -z "$_xmmslibdir" ; then
       _xmmslibdir=`xmms-config --exec-prefix`/lib
-    fi
   else
-    if test -z "$_xmmsplugindir" ; then
       _xmmsplugindir=/usr/lib/xmms/Input
-    fi
-    if test -z "$_xmmslibdir" ; then
       _xmmslibdir=/usr/lib
-    fi
   fi
 
   _def_xmms='#define HAVE_XMMS 1'
