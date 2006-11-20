@@ -77,8 +77,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
                input/libinput.a \
-               $(MENU_LIBS) \
-               $(GUI_LIBS) \
                $(COMMON_LIBS) \
                $(VO_LIBS) \
                $(AO_LIBS) \
@@ -175,12 +173,12 @@ COMMON_LIBS += $(FREETYPE_LIB)
 endif
 ifeq ($(GUI),yes)
 COMMON_DEPS += Gui/libgui.a
-GUI_LIBS = Gui/libgui.a $(GTK_LIBS)
+LIBS_MPLAYER += Gui/libgui.a $(GTK_LIBS)
 PARTS += Gui
 endif
 ifeq ($(LIBMENU),yes)
 MPLAYER_DEP += libmenu/libmenu.a
-MENU_LIBS = libmenu/libmenu.a
+LIBS_MPLAYER += libmenu/libmenu.a
 PARTS += libmenu
 endif
 ifeq ($(TARGET_WIN32),yes)
