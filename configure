@@ -5120,7 +5120,7 @@ fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
   _def_dvdnav='#define USE_DVDNAV 1'
-  _ld_extra="$_ld_extra $_dvdnavconfig --libs"
+  _ld_extra="$_ld_extra `$_dvdnavconfig --libs`"
   _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
   _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
   _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
