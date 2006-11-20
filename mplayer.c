@@ -3331,6 +3331,10 @@ static int reinit_video_chain(void) {
   if (sh_video->codec)
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
 
+  sh_video->last_pts = MP_NOPTS_VALUE;
+  sh_video->num_buffered_pts = 0;
+  sh_video->next_frame_time = 0;
+
   if(auto_quality>0){
     // Auto quality option enabled
     output_quality=get_video_quality_max(sh_video);
@@ -3350,6 +3354,82 @@ err_out:
   sh_video = d_video->sh = NULL;
   return 0;
 }
+
+static double update_video(int *blit_frame)
+{
+    //--------------------  Decode a frame: -----------------------
+    double frame_time;
+    *blit_frame = 0; // Don't blit if we hit EOF
+    if (!correct_pts) {
+	unsigned char* start=NULL;
+	void *decoded_frame;
+	int drop_frame=0;
+	int in_size;
+
+	current_module = "video_read_frame";
+	frame_time = sh_video->next_frame_time;
+	in_size = video_read_frame(sh_video, &sh_video->next_frame_time,
+				   &start, force_fps);
+	if (in_size < 0)
+	    return -1;
+	if (in_size > max_framesize)
+	    max_framesize = in_size; // stats
+	sh_video->timer += frame_time;
+	if (sh_audio)
+	    sh_audio->delay -= frame_time;
+	// video_read_frame can change fps (e.g. for ASF video)
+	vo_fps = sh_video->fps;
+	// check for frame-drop:
+	current_module = "check_framedrop";
+	if (sh_audio && !d_audio->eof) {
+	    static int dropped_frames;
+	    float delay = playback_speed*audio_out->get_delay();
+	    float d = delay-sh_audio->delay;
+	    // we should avoid dropping too many frames in sequence unless we
+	    // are too late. and we allow 100ms A-V delay here:
+	    if (d < -dropped_frames*frame_time-0.100 &&
+				osd_function != OSD_PAUSE) {
+		drop_frame = frame_dropping;
+		++drop_frame_cnt;
+		++dropped_frames;
+	    } else
+		drop_frame = dropped_frames = 0;
+	    ++total_frame_cnt;
+	}
+	update_subtitles();
+	update_osd_msg();
+	current_module = "decode_video";
+	decoded_frame = decode_video(sh_video, start, in_size, drop_frame,
+				     sh_video->pts);
+	current_module = "filter_video";
+	*blit_frame = (decoded_frame && filter_video(sh_video, decoded_frame,
+						    sh_video->pts));
+    }
+    else {
+	if (!generate_video_frame(sh_video, d_video))
+	    return -1;
+	((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
+					    VFCTRL_GET_PTS, &sh_video->pts);
+	if (sh_video->pts == MP_NOPTS_VALUE) {
+	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts after filters MISSING\n");
+	    sh_video->pts = sh_video->last_pts;
+	}
+	if (sh_video->last_pts == MP_NOPTS_VALUE)
+	    sh_video->last_pts= sh_video->pts;
+	else if (sh_video->last_pts >= sh_video->pts) {
+	    sh_video->last_pts = sh_video->pts;
+	    mp_msg(MSGT_CPLAYER, MSGL_WARN, "pts value <= previous");
+	}
+	frame_time = sh_video->pts - sh_video->last_pts;
+	sh_video->last_pts = sh_video->pts;
+	sh_video->timer += frame_time;
+	if(sh_audio)
+	    sh_audio->delay -= frame_time;
+	*blit_frame = 1;
+    }
+    return frame_time;
+}
+
 
 int main(int argc,char* argv[]){
 
@@ -4410,12 +4490,8 @@ fflush(stdout);
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
 //float num_frames=0;      // number of frames played
-double last_pts = MP_NOPTS_VALUE;
 int grab_frames=0;
-int drop_frame=0;     // current dropping status
-int dropped_frames=0; // how many frames dropped since last non-dropped frame
 
-float next_frame_time=0;
 int frame_time_remaining=0; // flag
 int blit_frame=0;
 int was_paused=0;
@@ -4531,91 +4607,20 @@ if(!sh_video) {
 
 /*========================== PLAY VIDEO ============================*/
 
-  float frame_time=next_frame_time;
-
   vo_pts=sh_video->timer*90000.0;
   vo_fps=sh_video->fps;
 
-  if(!frame_time_remaining){
-    //--------------------  Decode a frame: -----------------------
-    blit_frame = 0; // Don't blit if we hit EOF
-    if (!correct_pts) while(1)
-    {   unsigned char* start=NULL;
-	void *decoded_frame;
-	int in_size;
-	// get it!
-	current_module="video_read_frame";
-        in_size=video_read_frame(sh_video,&next_frame_time,&start,force_fps);
-	if(in_size<0){ eof=1; break; }
-	if(in_size>max_framesize) max_framesize=in_size; // stats
-	sh_video->timer+=frame_time;
-	if(sh_audio) sh_audio->delay-=frame_time;
-	time_frame += frame_time / playback_speed;  // for nosound
-	// video_read_frame can change fps (e.g. for ASF video)
-	vo_fps = sh_video->fps;
-	// check for frame-drop:
-	current_module="check_framedrop";
-	if(sh_audio && !d_audio->eof){
-	    float delay=playback_speed*audio_out->get_delay();
-	    float d=delay-sh_audio->delay;
-	    // we should avoid dropping too many frames in sequence unless we
-	    // are too late. and we allow 100ms A-V delay here:
-	    if(d<-dropped_frames*frame_time-0.100 && osd_function != OSD_PAUSE){
-		drop_frame=frame_dropping;
-		++drop_frame_cnt;
-		++dropped_frames;
-	    } else {
-		drop_frame=dropped_frames=0;
-	    }
-	    ++total_frame_cnt;
-	}
-	// decode:
-//	printf("Decode! %p  %d  \n",start,in_size);
-	update_subtitles();
-	update_osd_msg();
-	current_module = "decode_video";
-	decoded_frame = decode_video(sh_video,start,in_size,drop_frame, sh_video->pts);
-	current_module = "filter video";
-	blit_frame = (decoded_frame && filter_video(sh_video, decoded_frame,
-						    sh_video->pts));
-	break;
-    }
-    else while (1) {
-	if (!generate_video_frame(sh_video, d_video)) {
-	    eof = 1;
-	    break;
-	}
-	((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
-					      VFCTRL_GET_PTS, &sh_video->pts);
-	if (sh_video->pts == MP_NOPTS_VALUE) {
-	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts after filters MISSING\n");
-	    sh_video->pts = last_pts;
-	}
-	if (last_pts == MP_NOPTS_VALUE)
-	    last_pts = sh_video->pts;
-	else if (last_pts >= sh_video->pts) {
-	    last_pts = sh_video->pts;
-	    mp_msg(MSGT_CPLAYER, MSGL_WARN, "pts value <= previous");
-	}
-	frame_time = sh_video->pts - last_pts;
-	last_pts = sh_video->pts;
-	sh_video->timer += frame_time;
-	time_frame += frame_time / playback_speed;  // for nosound
-	if(sh_audio)
-	    sh_audio->delay -= frame_time;
-	blit_frame = 1;
-	break;
-    }
-	
-    //------------------------ frame decoded. --------------------
-
-    mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
-
-    if(sh_video->vf_inited<0){
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_NotInitializeVOPorVO);
-	eof=1; goto goto_next_file;
-    }
-
+  if (!frame_time_remaining) {
+      double frame_time = update_video(&blit_frame);
+      mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
+      if (sh_video->vf_inited < 0) {
+	  mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NotInitializeVOPorVO);
+	  eof = 1; goto goto_next_file;
+      }
+      if (frame_time < 0)
+	  eof = 1;
+      else
+	  time_frame += frame_time / playback_speed;  // for nosound
   }
 
 // ==========================================================================
@@ -5541,7 +5546,7 @@ if(rel_seek_secs || abs_seek_pos){
          resync_video_stream(sh_video);
          if(vo_config_count) video_out->control(VOCTRL_RESET,NULL);
 	 sh_video->num_buffered_pts = 0;
-	 last_pts = MP_NOPTS_VALUE;
+	 sh_video->last_pts = MP_NOPTS_VALUE;
       }
       
       if(sh_audio){

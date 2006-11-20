@@ -66,6 +66,8 @@ typedef struct {
   // timing (mostly for mpeg):
   double pts;     // predicted/interpolated PTS of the current frame
   double i_pts;   // PTS for the _next_ I/P frame
+  float next_frame_time;
+  double last_pts;
   double buffered_pts[20];
   int num_buffered_pts;
   // output format: (set by demuxer)
