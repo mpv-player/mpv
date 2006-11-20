@@ -67,10 +67,6 @@ SRCS_MPLAYER = mplayer.c \
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
-ifeq ($(VIDIX),yes)
-VO_LIBS += vidix/libvidix.a
-endif
-
 COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
@@ -95,39 +91,8 @@ PARTS = libmpdemux \
         libvo \
         libaf \
 
-ifeq ($(MP3LIB),yes)
-PARTS += mp3lib
-endif
-ifeq ($(LIBA52),yes)
-PARTS += liba52
-endif
-ifeq ($(LIBMPEG2),yes)
-PARTS += libmpeg2
-endif
-ifeq ($(FAAD_INTERNAL),yes)
-COMMON_LIBS += libfaad2/libfaad2.a 
-PARTS += libfaad2
-endif
-ifeq ($(VIDIX),yes)
-PARTS += libdha vidix
-endif
-ifeq ($(DVDREAD_INTERNAL),yes)
-PARTS += dvdread
-endif
-ifeq ($(DVDCSS_INTERNAL),yes)
-PARTS += libdvdcss
-endif
-ifeq ($(GUI),yes)
-PARTS += Gui
-endif
 ifeq ($(WIN32DLL),yes)
 PARTS += loader loader/dshow loader/dmo
-endif
-ifeq ($(LIBMENU),yes)
-PARTS += libmenu
-endif
-ifeq ($(TREMOR_INTERNAL),yes)
-PARTS += tremor
 endif
 
 ALL_PRG = mplayer$(EXESUF)
@@ -150,32 +115,42 @@ COMMON_DEPS = $(W32_DEP) \
 ifeq ($(MP3LIB),yes)
 COMMON_DEPS += mp3lib/libMP3.a
 COMMON_LIBS += mp3lib/libMP3.a
+PARTS += mp3lib
 endif
 ifeq ($(LIBA52),yes)
 COMMON_DEPS += liba52/liba52.a
 COMMON_LIBS += liba52/liba52.a
+PARTS += liba52
 endif
 ifeq ($(LIBMPEG2),yes)
 COMMON_DEPS += libmpeg2/libmpeg2.a
 COMMON_LIBS += libmpeg2/libmpeg2.a
+PARTS += libmpeg2
 endif
 ifeq ($(FAAD_INTERNAL),yes)
 COMMON_DEPS += libfaad2/libfaad2.a
+COMMON_LIBS += libfaad2/libfaad2.a
+PARTS += libfaad2
 endif
 ifeq ($(TREMOR_INTERNAL),yes)
 COMMON_DEPS += tremor/libvorbisidec.a
 COMMON_LIBS += tremor/libvorbisidec.a
+PARTS += tremor
 endif
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
+VO_LIBS += vidix/libvidix.a
+PARTS += libdha vidix
 endif
 ifeq ($(DVDREAD_INTERNAL),yes)
 COMMON_DEPS += dvdread/libdvdread.a
 COMMON_LIBS += dvdread/libdvdread.a
+PARTS += dvdread
 endif
 ifeq ($(DVDCSS_INTERNAL),yes)
 COMMON_DEPS += libdvdcss/libdvdcss.a
 COMMON_LIBS += libdvdcss/libdvdcss.a
+PARTS += libdvdcss
 endif
 ifeq ($(CONFIG_ASS),yes)
 COMMON_DEPS += libass/libass.a
@@ -191,6 +166,7 @@ endif
 ifeq ($(GUI),yes)
 COMMON_DEPS += Gui/libgui.a
 GUI_LIBS = Gui/libgui.a $(GTK_LIBS)
+PARTS += Gui
 endif
 
 .SUFFIXES: .cc .c .o
