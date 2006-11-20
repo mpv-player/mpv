@@ -421,15 +421,12 @@ multiple paths separated by ':'):
   --with-extraincdir=DIR      extra header search paths in DIR (*)
   --with-extralibdir=DIR      extra linker search paths in DIR (*)
   --with-x11libdir=DIR        X library files in DIR (*)
-  --with-mliblibdir=DIR       libmlib (mediaLib) in DIR (Solaris only)
   --with-xvidlibdir=DIR       libxvidcore (XviD) in DIR  (*)
   --with-x264libdir=DIR       libx264 in DIR
-  --with-libdtslibdir=DIR     libdts in DIR  (*)
   --with-livelibdir=DIR       LIVE555 Streaming Media in DIR
   --with-toolamelibdir=DIR    Toolame in DIR
   --with-xmmsplugindir=DIR    XMMS plugins in DIR
   --with-xmmslibdir=DIR       libxmms.so.1 in DIR
-  --with-cdparanoialibdir=DIR cdparanoia libraries (libcdda_*) in DIR (*)
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
   --with-freetype-config=PATH path to freetype-config
@@ -658,9 +655,7 @@ if darwin; then
 fi
 
 if aix ; then
-  _ld_libC="-lC"
-else
-  _ld_libC=""
+  _ld_extra="$_ld_extra -lC"
 fi
 
 # Check how to call 'head' and 'tail'. Newer versions spit out warnings
@@ -2141,14 +2136,8 @@ for ac_option do
   --with-xvidlibdir=*)
     _ld_xvid=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
-  --with-libdtslibdir=*)
-    _ld_libdts=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
   --with-x264libdir=*)
     _ld_x264=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
-  --with-mliblibdir=*)
-    _ld_mlib=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -2167,9 +2156,6 @@ for ac_option do
     ;;
   --with-dvdnav-config=*)
     _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-cdparanoialibdir=*)
-    _ld_cdparanoia=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-toolamelibdir=*)
     _ld_toolame=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
@@ -3070,7 +3056,8 @@ int main(void) {
 EOF
   _iconv=no
   for _ld_tmp in "" "-liconv" "-liconv $_ld_dl" ; do
-    cc_check $_ld_lm $_ld_tmp && _ld_iconv="$_ld_tmp" && _iconv=yes && break
+    cc_check $_ld_lm $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" && \
+      _iconv=yes && break
   done
 fi
 if test "$_iconv" = yes ; then
@@ -3249,12 +3236,13 @@ int main(void) { tgetent(); return 0; }
 EOF
   _termcap=no
   for _ld_tmp in "-lncurses" "-ltinfo" "-ltermcap"; do
-    cc_check $_ld_tmp && _ld_termcap="$_ld_tmp" && _termcap=yes && break
+    cc_check $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+      && _termcap=yes && break
   done
 fi
 if test "$_termcap" = yes ; then
   _def_termcap='#define USE_TERMCAP 1'
-  _res_comment="using $_ld_termcap"
+  _res_comment="using $_ld_tmp"
 else
   _def_termcap='#undef USE_TERMCAP'
 fi
@@ -3638,7 +3626,7 @@ fi
 
 echocheck "Samba support (libsmbclient)"
 if test "$_smbsupport" = yes; then
-	_ld_smb="-lsmbclient"
+  _ld_extra="$_ld_extra -lsmbclient"
 fi
 if test "$_smbsupport" = auto; then
     _smbsupport=no
@@ -3647,7 +3635,8 @@ if test "$_smbsupport" = auto; then
 int main(void) { smbc_opendir("smb://"); return 0; }
 EOF
   for _ld_tmp in "-lsmbclient" "-lsmbclient $_ld_dl" "-lsmbclient $_ld_dl -lnsl" "-lsmbclient $_ld_dl -lssl -lnsl" ; do
-    cc_check $_ld_tmp && _ld_smb="$_ld_tmp" && _smbsupport=yes && break
+    cc_check $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" && \
+      _smbsupport=yes && break
   done
 fi
 
@@ -4372,7 +4361,7 @@ fi
 echores "$_png"
 if test "$_png" = yes ; then
   _def_png='#define HAVE_PNG 1'
-  _ld_png='-lpng -lz'
+  _ld_extra="$_ld_extra -lpng -lz"
   _vosrc="$_vosrc vo_png.c"
   _vomodules="png $_vomodules"
 else
@@ -4405,7 +4394,7 @@ if test "$_jpeg" = yes ; then
   _def_jpeg='#define HAVE_JPEG 1'
   _vosrc="$_vosrc vo_jpeg.c"
   _vomodules="jpeg $_vomodules"
-  _ld_jpeg="-ljpeg"
+  _ld_extra="$_ld_extra -ljpeg"
 else
   _def_jpeg='#undef HAVE_JPEG'
   _novomodules="jpeg $_novomodules"
@@ -5027,7 +5016,7 @@ if test "$_alsaver" ; then
     _alsa=no
     _res_comment="unknown version"
   fi
-  _ld_alsa="-lasound $_ld_dl $_ld_pthread"
+  _ld_extra="$_ld_extra -lasound $_ld_dl $_ld_pthread"
 else
   _noaomodules="alsa $_noaomodules"
 fi
@@ -5063,11 +5052,10 @@ if test "$_mlib" = auto ; then
 #include <mlib.h>
 int main(void) { mlib_VideoColorYUV2ABGR420(0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  cc_check $_ld_mlib -lmlib && _mlib=yes
+  cc_check -lmlib && _mlib=yes
 fi
 if test "$_mlib" = yes ; then
   _def_mlib='#define HAVE_MLIB 1'
-  _ld_mlib="$_ld_mlib `echo $_ld_mlib | sed s/^-L/-R/` -lmlib"
 else
   _def_mlib='#undef HAVE_MLIB'
 fi
@@ -5228,14 +5216,14 @@ int main(void) {
 EOF
     _cdparanoia=no
     for _inc_tmp in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
-      cc_check $_inc_tmp $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm && \
+      cc_check $_inc_tmp -lcdda_interface -lcdda_paranoia $_ld_lm && \
         _cdparanoia=yes && _inc_extra="$_inc_extra $_inc_tmp" && break
     done
 fi
 if test "$_cdparanoia" = yes ; then
     _cdda='yes'
-    _ld_cdparanoia="$_ld_cdparanoia -lcdda_interface -lcdda_paranoia"
-    openbsd && _ld_cdparanoia="$_ld_cdparanoia -lutil"
+    _ld_extra="$_ld_extra -lcdda_interface -lcdda_paranoia"
+    openbsd && _ld_extra="$_ld_extra -lutil"
 fi
 echores "$_cdparanoia"
 
@@ -5259,13 +5247,13 @@ EOF
     for _ld_tmp in "" "-lwinmm" ; do
         _ld_tmp="-lcdio_cdda -lcdio -lcdio_paranoia $_ld_tmp"
         cc_check $_ld_tmp $_ld_lm \
-          && _libcdio=yes && _ld_libcdio="$_ld_tmp" && break
+          && _libcdio=yes && _ld_extra="$_ld_extra $_ld_tmp" && break
     done
     if test "$_libcdio" = no && $_pkg_config --exists libcdio_paranoia ; then
       _inc_tmp=`$_pkg_config --cflags libcdio_paranoia`
       _ld_tmp=`$_pkg_config --libs libcdio_paranoia`
       cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes \
-        && _ld_libcdio="$_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp"
+        && _ld_extra="$_ld_extra $_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp"
     fi
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
@@ -5446,7 +5434,7 @@ fi
 if test "$_fribidi" = yes ; then
     _def_fribidi='#define USE_FRIBIDI'
     _inc_extra="$_inc_extra `$_fribidiconfig --cflags`"
-    _ld_fribidi=`$_fribidiconfig --libs`
+    _ld_extra="$_ld_extra `$_fribidiconfig --libs`
 else
     _def_fribidi='#undef USE_FRIBIDI'
 fi
@@ -5470,7 +5458,7 @@ EOF
 fi
     if test "$_enca" = yes ; then
 	_def_enca='#define HAVE_ENCA 1'
-	_ld_enca='-lenca'
+	_ld_extra="$_ld_extra -lenca"
     else
 	_def_enca='#undef HAVE_ENCA'
     fi
@@ -5486,7 +5474,7 @@ _zlib=no
 cc_check -lz && _zlib=yes
 if test "$_zlib" = yes ; then
   _def_zlib='#define HAVE_ZLIB 1'
-  _ld_zlib='-lz'
+  _ld_extra="$_ld_extra -lz"
 else
   _def_zlib='#undef HAVE_ZLIB'
 fi
@@ -5528,7 +5516,7 @@ EOF
 fi
 if test "$_liblzo" = yes ; then
   _def_liblzo='#define USE_LIBLZO 1'
-  _ld_liblzo='-llzo'
+  _ld_extra="$_ld_extra -llzo"
   _codecmodules="liblzo $_codecmodules"
 else
   _def_liblzo='#undef USE_LIBLZO'
@@ -5548,7 +5536,7 @@ EOF
 fi
 if test "$_mad" = yes ; then
   _def_mad='#define USE_LIBMAD 1'
-  _ld_mad='-lmad'
+  _ld_extra="$_ld_extra -lmad"
   _codecmodules="libmad $_codecmodules"
 else
   _def_mad='#undef USE_LIBMAD'
@@ -5661,7 +5649,7 @@ EOF
 fi
 if test "$_speex" = yes ; then
   _def_speex='#define HAVE_SPEEX 1'
-  _ld_speex='-lspeex'
+  _ld_extra="$_ld_extra -lspeex"
   _codecmodules="speex $_codecmodules"
 else
   _def_speex='#undef HAVE_SPEEX'
@@ -5756,11 +5744,11 @@ if test "$_libdts" = auto ; then
 #include <dts.h>
 int main(void) { dts_init (0); return 0; }
 EOF
-  cc_check $_ld_libdts -ldts $_ld_lm && _libdts=yes
+  cc_check -ldts $_ld_lm && _libdts=yes
 fi
 if test "$_libdts" = yes ; then
   _def_libdts='#define CONFIG_DTS 1'
-  _ld_libdts="$_ld_libdts -ldts"
+  _ld_extra="$_ld_extra -ldts"
   _codecmodules="libdts $_codecmodules"
 else
   _def_libdts='#undef CONFIG_DTS'
@@ -5794,7 +5782,7 @@ EOF
 fi
 if test "$_musepack" = yes ; then
   _def_musepack='#define HAVE_MUSEPACK 1'
-  _ld_musepack='-lmpcdec'
+  _ld_extra="$_ld_extra -lmpcdec"
   _codecmodules="musepack $_codecmodules"
 else
   _def_musepack='#undef HAVE_MUSEPACK'
@@ -5848,7 +5836,6 @@ if test "$_faad_internal" = auto ; then
     _faad_internal=yes
   fi
 elif test "$_faad_internal" = no && test "$_faad_external" = auto ; then
-  _ld_faad='-lfaad'
   _faad_external=no
   cat > $TMPC << EOF
 #include <faad.h>
@@ -5857,7 +5844,7 @@ elif test "$_faad_internal" = no && test "$_faad_external" = auto ; then
 #endif
 int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); faacDecInit(0, 0, 0, 0, 0); return 0; }
 EOF
-  cc_check $_ld_faad $_ld_lm && _faad_external=yes
+  cc_check -lfaad $_ld_lm && _faad_external=yes
 fi
 
 if test "$_faad_internal" = yes ; then
@@ -5867,6 +5854,7 @@ if test "$_faad_internal" = yes ; then
   test "$_faad_fixed" = yes && _res_comment="internal fixed-point"
 elif test "$_faad_external" = yes ; then
   _faad=yes
+  _ld_extra="$_ld_extra -lfaad"
 else
   _def_faad_internal="#undef USE_FAAD_INTERNAL"
   _faad=no
@@ -5878,7 +5866,6 @@ if test "$_faad" = yes ; then
 else
   _def_faad='#undef HAVE_FAAD'
   _nocodecmodules="faad2 $_nocodecmodules"
-  _ld_faad=
 fi
 echores "$_faad"
 
@@ -6020,7 +6007,7 @@ fi
 if test "$_live" = yes && test "$_network" = yes ; then
   _res_comment="using $_livelibdir"
   _def_live='#define STREAMING_LIVE555 1'
-  _ld_live="$_livelibdir/liveMedia/libliveMedia.a \
+  _ld_extra="$_ld_extra $_livelibdir/liveMedia/libliveMedia.a \
            $_livelibdir/groupsock/libgroupsock.a \
            $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
            $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a \
@@ -6034,7 +6021,7 @@ elif test "$_live_dist" = yes && test "$_network" = yes ; then
   _res_comment="using distribution version"
   _live="yes"
   _def_live='#define STREAMING_LIVE555 1'
-  _ld_live="-lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
+  _ld_extra="$_ld_extra -lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
   _inc_extra="$_inc_extra -I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
              -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  _inputmodules="live555 $_inputmodules"
@@ -6363,7 +6350,7 @@ EOF
 fi
 if test "$_libdv" = yes ; then
   _def_libdv='#define HAVE_LIBDV095 1'
-  _ld_libdv="-ldv"
+  _ld_extra="$_ld_extra -ldv"
   _codecmodules="libdv $_codecmodules"
 else
   _def_libdv='#undef HAVE_LIBDV095'
@@ -6500,15 +6487,14 @@ if test "$_nut" = auto ; then
 #include <libnut.h>
 int main(void) { (void)nut_error(0); return 0; }
 EOF
-  _ld_nut="-lnut"
   _nut=no
-   cc_check $_ld_nut && _nut=yes
+   cc_check -lnut && _nut=yes
 fi
 
 if test "$_nut" = yes ; then
   _def_nut='#define HAVE_LIBNUT 1'
+  _ld_extra="$_ld_extra -lnut"
 else
-  _ld_nut=''
   _def_nut='#undef HAVE_LIBNUT'
 fi
 echores "$_nut"
@@ -6791,7 +6777,7 @@ echocheck "network"
 # FIXME network check
 if test "$_network" = yes ; then
   _def_network='#define MPLAYER_NETWORK 1'
-  _ld_network="$_ld_sock"
+  _ld_extra="_ld_extra $_ld_sock"
   _inputmodules="network $_inputmodules"
 else
   _noinputmodules="network $_noinputmodules"
@@ -6823,7 +6809,7 @@ fi
 if test "$_vstream" = yes ; then
   _def_vstream='#define HAVE_VSTREAM 1'
   _inputmodules="vstream $_inputmodules"
-  _ld_vstream='-lvstream-client'
+  _ld_extra="$_ld_extra -lvstream-client"
 else
   _noinputmodules="vstream $_noinputmodules"
   _def_vstream='#undef HAVE_VSTREAM'
@@ -7295,7 +7281,7 @@ EOF
 fi
 if test "$_lirc" = yes ; then
   _def_lirc='#define HAVE_LIRC 1'
-  _ld_lirc='-llirc_client'
+  _ld_extra="$_ld_extra -llirc_client"
 else
   _def_lirc='#undef HAVE_LIRC'
 fi
@@ -7312,7 +7298,7 @@ EOF
 fi
 if test "$_lircc" = yes ; then
   _def_lircc='#define HAVE_LIRCC 1'
-  _ld_lircc='-llircc'
+  _ld_extra="$_ld_extra -llircc"
 else
   _def_lircc='#undef HAVE_LIRCC'
 fi
@@ -7407,14 +7393,13 @@ JPEG = $_jpeg
 GIF = $_gif
 
 EXTRALIBS = $_extra_libs
-EXTRA_LIB = $_ld_extra $_ld_live $_ld_vstream $_ld_network $_ld_enca \
-  $_ld_static $_ld_zlib $_ld_termcap $_ld_lirc $_ld_lircc $_ld_win32 \
-  $_ld_win32libs $_ld_lm $_ld_libC $_ld_fribidi $_ld_smb $_ld_gif \
-  $_ld_libcdio $_ld_dvdread $_ld_dvdnav $_macosx_frameworks $_ld_cdparanoia \
-  $_ld_xvid $_ld_libdts $_ld_mad \
-  $_ld_vorbis $_ld_libdv $_ld_theora $_ld_faad $_ld_speex $_xmms_lib \
-  $_ld_musepack $_ld_liblzo $_ld_png \
-  $_ld_jpeg $_ld_alsa $_ld_nut $_ld_arch $_ld_iconv $_ld_mlib
+EXTRA_LIB = $_ld_extra \
+  $_ld_static $_ld_win32 \
+  $_ld_win32libs $_ld_lm $_ld_gif \
+  $_ld_dvdread $_ld_dvdnav $_macosx_frameworks \
+  $_ld_xvid \
+  $_ld_vorbis $_ld_theora $_xmms_lib \
+  $_ld_arch
 VO_LIBS = $_ld_aa $_ld_sdl $_ld_ggi $_ld_svga $_ld_directfb $_ld_caca \
   $_ld_vesa $_ld_vidix_external $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm \
   $_ld_xinerama $_ld_x11 $_ld_sock
