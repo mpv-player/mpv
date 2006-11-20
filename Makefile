@@ -106,6 +106,7 @@ PARTS = libmpdemux \
         libaf \
 
 ifeq ($(WIN32DLL),yes)
+COMMON_LIBS += loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a
 PARTS += loader loader/dshow loader/dmo
 endif
 ifeq ($(MP3LIB),yes)
