@@ -391,10 +391,8 @@ uninstall:
 	          $(MANDIR)/$$l/man1/gmplayer.1 ; \
 	  fi ; \
 	done
-ifeq ($(VIDIX),yes)
 	$(MAKE) -C libdha uninstall
 	$(MAKE) -C vidix uninstall
-endif
 	@echo "Uninstall completed"
 
 dirclean:
