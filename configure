@@ -2161,9 +2161,6 @@ for ac_option do
   --with-dvdnav-config=*)
     _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-toolamelibdir=*)
-    _ld_toolame=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
   --prefix=*)
     _prefix=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -5555,7 +5552,7 @@ if test "$_toolame" = auto ; then
 int main(void) { toolame_init(); return 0; }
 EOF
   _toolame=no
-  cc_check $_ld_toolame -ltoolame $_ld_lm && _toolame=yes
+  cc_check -ltoolame $_ld_lm && _toolame=yes
 fi
 if test "$_toolame" = yes ; then
   _def_toolame='#define HAVE_TOOLAME 1'
