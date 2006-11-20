@@ -64,6 +64,7 @@ typedef struct lavf_priv_t{
     int video_streams;
     int64_t last_pts;
     int astreams[MAX_A_STREAMS];
+    int vstreams[MAX_V_STREAMS];
 }lavf_priv_t;
 
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
@@ -310,10 +311,16 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
                 st->discard= AVDISCARD_ALL;
             break;}
         case CODEC_TYPE_VIDEO:{
-            BITMAPINFOHEADER *bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
-            sh_video_t* sh_video=new_sh_video(demuxer, i);
+            sh_video_t* sh_video;
+            BITMAPINFOHEADER *bih;
+            if(priv->video_streams >= MAX_V_STREAMS)
+                break;
+            sh_video=new_sh_video(demuxer, i);
+            if(!sh_video) break;
+            priv->vstreams[priv->video_streams] = i;
+            priv->video_streams++;
+            bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
 
-	    priv->video_streams++;
             if(!codec->codec_tag)
                 codec->codec_tag= codec_get_bmp_tag(codec->codec_id);
             if(!codec->codec_tag)
@@ -477,16 +484,31 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	    *((int *)arg) = (int)((priv->last_pts - priv->avfc->start_time)*100 / priv->avfc->duration);
 	    return DEMUXER_CTRL_OK;
 	case DEMUXER_CTRL_SWITCH_AUDIO:
+	case DEMUXER_CTRL_SWITCH_VIDEO:
 	{
 	    int id = *((int*)arg);
 	    int newid = -2;
 	    int i, curridx = -2;
+	    int nstreams, *pstreams;
+	    demux_stream_t *ds;
 
-	    if(demuxer->audio->id == -2)
-	        return DEMUXER_CTRL_NOTIMPL;
-	    for(i = 0; i < priv->audio_streams; i++)
+	    if(cmd == DEMUXER_CTRL_SWITCH_VIDEO)
 	    {
-	        if(priv->astreams[i] == demuxer->audio->id) //current stream id
+	        ds = demuxer->video;
+	        nstreams = priv->video_streams;
+	        pstreams = priv->vstreams;
+	    }
+	    else
+	    {
+	        ds = demuxer->audio;
+	        nstreams = priv->audio_streams;
+	        pstreams = priv->astreams;
+	    }
+	    if(ds->id == -2)
+	        return DEMUXER_CTRL_NOTIMPL;
+	    for(i = 0; i < nstreams; i++)
+	    {
+	        if(pstreams[i] == ds->id) //current stream id
 	        {
 	            curridx = i;
 	            break;
@@ -495,14 +517,14 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 
 	    if(id < 0)
 	    {
-	        i = (curridx + 1) % priv->audio_streams;
-	        newid = priv->astreams[i];
+	        i = (curridx + 1) % nstreams;
+	        newid = pstreams[i];
 	    }
 	    else
 	    {
-	        for(i = 0; i < priv->audio_streams; i++)
+	        for(i = 0; i < nstreams; i++)
 	        {
-		    if(priv->astreams[i] == id)
+		    if(pstreams[i] == id)
 		    {
 		        newid = id;
 		        break;
@@ -513,9 +535,9 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	        return DEMUXER_CTRL_NOTIMPL;
 	    else
 	    {
-	        ds_free_packs(demuxer->audio);
-	        priv->avfc->streams[demuxer->audio->id]->discard = AVDISCARD_ALL;
-	        *((int*)arg) = demuxer->audio->id = newid;
+	        ds_free_packs(ds);
+	        priv->avfc->streams[ds->id]->discard = AVDISCARD_ALL;
+	        *((int*)arg) = ds->id = newid;
 	        priv->avfc->streams[newid]->discard = AVDISCARD_NONE;
 	        return DEMUXER_CTRL_OK;
 	    }
