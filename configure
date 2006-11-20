@@ -422,7 +422,6 @@ multiple paths separated by ':'):
   --with-extraincdir=DIR      extra header search paths in DIR (*)
   --with-extralibdir=DIR      extra linker search paths in DIR (*)
   --with-x11libdir=DIR        X library files in DIR (*)
-  --with-xvidlibdir=DIR       libxvidcore (XviD) in DIR  (*)
   --with-x264libdir=DIR       libx264 in DIR
   --with-livelibdir=DIR       LIVE555 Streaming Media in DIR
   --with-xmmsplugindir=DIR    XMMS plugins in DIR
@@ -2135,9 +2134,6 @@ for ac_option do
     ;;
   --with-xvmclib=*)
     _xvmclib=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-xvidlibdir=*)
-    _ld_xvid=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-x264libdir=*)
     _ld_x264=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
@@ -6394,13 +6390,12 @@ echores "$_bl"
 echocheck "XviD"
 if test "$_xvid" = auto ; then
   _xvid=no
-  _ld_xvid="$_ld_xvid -lxvidcore $_ld_lm"
   cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_global(0, 0, 0, 0); return 0; }
 EOF
-  for _ld_tmp in "$_ld_xvid" "$_ld_xvid $_ld_pthread" ; do
-    cc_check $_ld_tmp && _ld_xvid="$_ld_tmp" && _xvid=yes && break
+  for _ld_tmp in "-lxvidcore $_ld_lm" "-lxvidcore $_ld_lm $_ld_pthread" ; do
+    cc_check $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" && _xvid=yes && break
   done
 fi
   
@@ -6410,7 +6405,6 @@ if test "$_xvid" = yes ; then
 else
   _def_xvid='#undef HAVE_XVID4'
   _nocodecmodules="xvid $_nocodecmodules"
-  _ld_xvid=""
 fi
 echores "$_xvid"
 
@@ -6420,7 +6414,7 @@ if test "$_xvid" = yes ; then
 #include <xvid.h>
 int main(void) { xvid_plugin_2pass2_t s; s.vbv_size=0; return 0; }
 EOF
-  if cc_check $_ld_xvid $_ld_lb ; then
+  if cc_check ; then
     _lavc_xvid=yes
     _def_lavc_xvid='#define CONFIG_XVID 1'
   else
@@ -7391,7 +7385,6 @@ EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra \
   $_ld_static $_ld_win32 \
   $_ld_win32libs $_ld_lm $_ld_gif \
-  $_ld_xvid \
   $_ld_vorbis $_ld_theora $_xmms_lib \
   $_ld_arch
 VO_LIBS = $_ld_aa $_ld_sdl $_ld_ggi $_ld_svga $_ld_directfb $_ld_caca \
