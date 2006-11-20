@@ -146,7 +146,7 @@ COMMON_LIBS += tremor/libvorbisidec.a
 PARTS += tremor
 endif
 ifeq ($(VIDIX),yes)
-COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
+MPLAYER_DEPS += libdha/libdha.so vidix/libvidix.a
 VO_LIBS += vidix/libvidix.a
 PARTS += libdha vidix
 endif
