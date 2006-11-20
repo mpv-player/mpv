@@ -43,6 +43,14 @@ ifeq ($(UNRARLIB),yes)
 SRCS_COMMON += unrarlib.c
 endif
 
+SRCS_MPLAYER = mplayer.c \
+               m_property.c \
+               mp_msg.c \
+               $(SRCS_COMMON) \
+               mixer.c \
+               parser-mpcmd.c \
+               subopt-helper.c \
+
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
                 $(SRCS_COMMON) \
@@ -56,17 +64,6 @@ ifeq ($(BITMAP_FONT),yes)
 SRCS_MENCODER += libvo/font_load.c
 endif
 
-SRCS_MPLAYER = mplayer.c \
-               m_property.c \
-               mp_msg.c \
-               $(SRCS_COMMON) \
-               mixer.c \
-               parser-mpcmd.c \
-               subopt-helper.c \
-
-OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
-OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
-
 COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
@@ -76,6 +73,37 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(AV_LIB) \
               $(EXTRA_LIB)\
               $(EXTRALIBS) \
+
+LIBS_MPLAYER = libvo/libvo.a \
+               libao2/libao2.a \
+               input/libinput.a \
+               $(MENU_LIBS) \
+               $(GUI_LIBS) \
+               $(COMMON_LIBS) \
+               $(VO_LIBS) \
+               $(AO_LIBS) \
+
+LIBS_MENCODER = libmpcodecs/libmpencoders.a \
+                $(EXTRA_LIB_MENCODER) \
+                $(COMMON_LIBS) \
+
+COMMON_DEPS = $(W32_DEP) \
+              $(AV_DEP) \
+              libmpdemux/libmpdemux.a \
+              stream/stream.a \
+              libmpcodecs/libmpcodecs.a \
+              libao2/libao2.a \
+              osdep/libosdep.a \
+              libswscale/libswscale.a \
+              input/libinput.a \
+              libvo/libvo.a \
+              libaf/libaf.a \
+
+OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
+OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
+
+MPLAYER_DEP  = $(OBJS_MPLAYER) $(COMMON_DEPS)
+MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS) libmpcodecs/libmpencoders.a
 
 PARTS = libmpdemux \
         stream \
@@ -94,24 +122,6 @@ PARTS = libmpdemux \
 ifeq ($(WIN32DLL),yes)
 PARTS += loader loader/dshow loader/dmo
 endif
-
-ALL_PRG = mplayer$(EXESUF)
-ifeq ($(MENCODER),yes)
-ALL_PRG += mencoder$(EXESUF)
-endif
-
-COMMON_DEPS = $(W32_DEP) \
-              $(AV_DEP) \
-              libmpdemux/libmpdemux.a \
-              stream/stream.a \
-              libmpcodecs/libmpcodecs.a \
-              libao2/libao2.a \
-              osdep/libosdep.a \
-              libswscale/libswscale.a \
-              input/libinput.a \
-              libvo/libvo.a \
-              libaf/libaf.a \
-
 ifeq ($(MP3LIB),yes)
 COMMON_DEPS += mp3lib/libMP3.a
 COMMON_LIBS += mp3lib/libMP3.a
@@ -167,6 +177,19 @@ ifeq ($(GUI),yes)
 COMMON_DEPS += Gui/libgui.a
 GUI_LIBS = Gui/libgui.a $(GTK_LIBS)
 PARTS += Gui
+endif
+ifeq ($(LIBMENU),yes)
+MPLAYER_DEP += libmenu/libmenu.a
+MENU_LIBS = libmenu/libmenu.a
+PARTS += libmenu
+endif
+ifeq ($(TARGET_WIN32),yes)
+OBJS_MPLAYER += osdep/mplayer-rc.o
+endif
+
+ALL_PRG = mplayer$(EXESUF)
+ifeq ($(MENCODER),yes)
+ALL_PRG += mencoder$(EXESUF)
 endif
 
 .SUFFIXES: .cc .c .o
@@ -262,35 +285,8 @@ input/libinput.a:
 libmenu/libmenu.a:
 	$(MAKE) -C libmenu
 
-MPLAYER_DEP = $(OBJS_MPLAYER) $(COMMON_DEPS)
-
-ifeq ($(LIBMENU),yes)
-MPLAYER_DEP += libmenu/libmenu.a
-MENU_LIBS = libmenu/libmenu.a
-PARTS += libmenu
-endif
-
-MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS) libmpcodecs/libmpencoders.a
-
-ifeq ($(TARGET_WIN32),yes)
-OBJS_MPLAYER += osdep/mplayer-rc.o
-endif
-
-LIBS_MPLAYER = libvo/libvo.a \
-               libao2/libao2.a \
-               input/libinput.a \
-               $(MENU_LIBS) \
-               $(GUI_LIBS) \
-               $(COMMON_LIBS) \
-               $(VO_LIBS) \
-               $(AO_LIBS) \
-
 mplayer$(EXESUF): $(MPLAYER_DEP)
 	$(CC) -o $@ $(OBJS_MPLAYER) $(LIBS_MPLAYER)
-
-LIBS_MENCODER = libmpcodecs/libmpencoders.a \
-                $(EXTRA_LIB_MENCODER) \
-                $(COMMON_LIBS) \
 
 mencoder$(EXESUF): $(MENCODER_DEP)
 	$(CC) -o $@ $(OBJS_MENCODER) $(LIBS_MENCODER)
