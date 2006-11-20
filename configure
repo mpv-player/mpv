@@ -422,7 +422,6 @@ multiple paths separated by ':'):
   --with-extraincdir=DIR      extra header search paths in DIR (*)
   --with-extralibdir=DIR      extra linker search paths in DIR (*)
   --with-x11libdir=DIR        X library files in DIR (*)
-  --with-x264libdir=DIR       libx264 in DIR
   --with-livelibdir=DIR       LIVE555 Streaming Media in DIR
   --with-xmmsplugindir=DIR    XMMS plugins in DIR
   --with-xmmslibdir=DIR       libxmms.so.1 in DIR
@@ -2134,9 +2133,6 @@ for ac_option do
     ;;
   --with-xvmclib=*)
     _xvmclib=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-x264libdir=*)
-    _ld_x264=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -6435,14 +6431,10 @@ if test "$_x264" = auto ; then
 #endif
 int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
-  _ld_x264="$_ld_x264 -lx264 $_ld_pthread"
   _x264=no
-  if cc_check $_ld_x264 $_ld_lm ; then 
-    _x264=yes
-  elif  test "$_x11" = yes && cc_check $_ld_x264 $_ld_x11 $_ld_lm ; then
-    _x264=yes
-    _ld_x264="$_ld_x264 $_ld_x11"
-  fi
+  for _ld_tmp in "-lx264 $_ld_pthread" "-lx264 $_ld_pthread $_ld_x11 $_ld_lm" ; do
+    cc_check $_ld_tmp && _ld_x264="$_ld_tmp" && _x264=yes && break
+  done
 fi
 
 if test "$_x264" = yes ; then
@@ -6458,7 +6450,6 @@ if test "$_x264" = yes ; then
   fi
 else
   _x264=no
-  _ld_x264=''
   _lavc_x264=no
   _def_x264='#undef HAVE_X264'
   _def_lavc_x264='#undef CONFIG_X264'
