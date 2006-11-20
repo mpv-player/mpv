@@ -163,7 +163,9 @@ ifeq ($(TARGET_WIN32),yes)
 OBJS_MPLAYER += osdep/mplayer-rc.o
 endif
 
+ifeq ($(MPLAYER),yes)
 ALL_PRG = mplayer$(EXESUF)
+endif
 ifeq ($(MENCODER),yes)
 ALL_PRG += mencoder$(EXESUF)
 endif

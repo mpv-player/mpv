@@ -212,6 +212,7 @@ Installation directories:
 
 Optional features:
   --disable-mencoder     disable MEncoder (A/V encoder) compilation [enable]
+  --disable-mplayer      disable MPlayer compilation [enable]
   --enable-gui           enable GMPlayer compilation (GTK+ GUI) [disable]
   --enable-gtk1          force using GTK 1.2 for the GUI  [disable]
   --enable-largefiles    enable support for files > 2GB [disable]
@@ -1561,6 +1562,7 @@ _libpostproc=auto
 _libpostproc_so=auto
 _libavcodec_mpegaudio_hp=yes
 _mencoder=yes
+_mplayer=yes
 _x11=auto
 _xshape=auto
 _dga=auto	# 1 2 no auto
@@ -1735,6 +1737,8 @@ for ac_option do
   # Real 2nd pass
   --enable-mencoder)	_mencoder=yes	;;
   --disable-mencoder)	_mencoder=no	;;
+  --enable-mplayer)	_mplayer=yes	;;
+  --disable-mplayer)	_mplayer=no	;;
   --enable-dynamic-plugins) _dynamic_plugins=yes ;;
   --disable-dynamic-plugins) _dynamic_plugins=no ;;
   --enable-x11)		_x11=yes	;;
@@ -7465,6 +7469,7 @@ XVID4 = $_xvid
 X264 = $_x264
 LIBNUT = $_nut
 CONFIG_DTS = $_libdts
+MPLAYER = $_mplayer
 MENCODER = $_mencoder
 CDDA = $_cdda
 BITMAP_FONT = $_bitmap_font
