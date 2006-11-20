@@ -425,7 +425,6 @@ multiple paths separated by ':'):
   --with-xvidlibdir=DIR       libxvidcore (XviD) in DIR  (*)
   --with-x264libdir=DIR       libx264 in DIR
   --with-livelibdir=DIR       LIVE555 Streaming Media in DIR
-  --with-toolamelibdir=DIR    Toolame in DIR
   --with-xmmsplugindir=DIR    XMMS plugins in DIR
   --with-xmmslibdir=DIR       libxmms.so.1 in DIR
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
