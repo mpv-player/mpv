@@ -90,11 +90,8 @@ COMMON_DEPS = $(W32_DEP) \
               libmpdemux/libmpdemux.a \
               stream/stream.a \
               libmpcodecs/libmpcodecs.a \
-              libao2/libao2.a \
               osdep/libosdep.a \
               libswscale/libswscale.a \
-              input/libinput.a \
-              libvo/libvo.a \
               libaf/libaf.a \
 
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
