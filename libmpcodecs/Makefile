@@ -339,9 +339,7 @@ clean:
 distclean: clean
 	rm -f .depend
 
-dep:    depend
-
-depend:
+dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) $(SRCS2) 1>.depend
 
 #

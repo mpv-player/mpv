@@ -70,18 +70,14 @@ clean:
               wm/*.o wm/*~ \
               win32/*.o win32/*~ \
 
-#dep:	depend
-#
-#depend:
+#dep depend:
 #	makedepend -- $(CFLAGS) -- $(SRCS) &>/dev/null
 #
 
 distclean: clean
 	rm -f .depend
 
-dep:    depend
-
-depend:
+dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #

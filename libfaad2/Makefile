@@ -71,9 +71,7 @@ clean:
 distclean: clean
 	rm -f .depend test
 
-dep:    depend
-
-depend:
+dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #

@@ -31,11 +31,9 @@ distclean: clean
 	rm -f .depend test
 	$(MAKE) -C drivers distclean
 
-dep:    depend
-	$(MAKE) -C drivers dep
-
-depend:
+dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+	$(MAKE) -C drivers depend
 
 install:
 	$(MAKE) -C drivers install

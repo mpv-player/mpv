@@ -76,9 +76,7 @@ distclean: clean
 	rm -f .depend test
 	rm -f pci_dev_ids.c pci_ids.h pci_names.c pci_names.h pci_vendors.h pci.db
 
-dep:    depend
-
-depend: pci_names.c
+dep depend: pci_names.c
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 install:
