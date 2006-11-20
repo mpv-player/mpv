@@ -172,7 +172,7 @@ SRCS_MENCODER += libvo/font_load_ft.c
 COMMON_LIBS += $(FREETYPE_LIB)
 endif
 ifeq ($(GUI),yes)
-COMMON_DEPS += Gui/libgui.a
+MPLAYER_DEPS += Gui/libgui.a
 LIBS_MPLAYER += Gui/libgui.a $(GTK_LIBS)
 PARTS += Gui
 endif
