@@ -3237,7 +3237,7 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 					}
 				}
 			}
-			else if(n <= priv->last_aid)
+			else	//audio track <n>
 			{
 				for(i = 0; i < 8192; i++)
 				{
