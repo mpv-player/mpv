@@ -312,14 +312,12 @@ LIBS_MPLAYER = libvo/libvo.a \
 mplayer$(EXESUF): $(MPLAYER_DEP)
 	$(CC) -o $@ $(OBJS_MPLAYER) $(LIBS_MPLAYER)
 
-ifeq ($(MENCODER),yes)
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(EXTRA_LIB_MENCODER) \
                 $(COMMON_LIBS) \
 
 mencoder$(EXESUF): $(MENCODER_DEP)
 	$(CC) -o $@ $(OBJS_MENCODER) $(LIBS_MENCODER)
-endif
 
 osdep/mplayer-rc.o: osdep/mplayer.rc
 	windres -o $@ osdep/mplayer.rc
