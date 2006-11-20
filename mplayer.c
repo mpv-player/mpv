@@ -3430,6 +3430,71 @@ static double update_video(int *blit_frame)
     return frame_time;
 }
 
+void pause_loop(void)
+{
+    mp_cmd_t* cmd;
+    if (!quiet) {
+        // Small hack to display the pause message on the OSD line.
+        // The pause string is: "\n == PAUSE == \r" so we need to
+        // take the first and the last char out
+	if (use_term_osd) {
+	    char msg[128] = MSGTR_Paused;
+	    int mlen = strlen(msg);
+	    msg[mlen-1] = '\0';
+	    set_osd_msg(OSD_MSG_PAUSE, 1, 0, "%s", msg+1);
+	    update_osd_msg();
+	} else
+	    mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
+	fflush(stdout);
+    }
+#ifdef HAVE_NEW_GUI
+    if (use_gui)
+	guiGetEvent(guiCEvent, (char *)guiSetPause);
+#endif
+    if (video_out && sh_video && vo_config_count)
+	video_out->control(VOCTRL_PAUSE, NULL);
+
+    if (audio_out && sh_audio)
+	audio_out->pause();	// pause audio, keep data if possible
+
+    while ( (cmd = mp_input_get_cmd(20, 1, 1)) == NULL) {
+	if (sh_video && video_out && vo_config_count)
+	    video_out->check_events();
+#ifdef HAVE_NEW_GUI
+	if (use_gui) {
+	    guiEventHandling();
+	    guiGetEvent(guiReDraw, NULL);
+	    if (guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos))
+		break;
+	}
+#endif
+#ifdef HAVE_MENU
+	if (vf_menu)
+	    vf_menu_pause_update(vf_menu);
+#endif
+	usec_sleep(20000);
+    }
+    if (cmd && cmd->id == MP_CMD_PAUSE) {
+	cmd = mp_input_get_cmd(0,1,0);
+	mp_cmd_free(cmd);
+    }
+    osd_function=OSD_PLAY;
+    if (audio_out && sh_audio)
+        audio_out->resume();	// resume audio
+    if (video_out && sh_video && vo_config_count)
+        video_out->control(VOCTRL_RESUME, NULL);	// resume video
+    (void)GetRelativeTime();	// ignore time that passed during pause
+#ifdef HAVE_NEW_GUI
+    if (use_gui) {
+	if (guiIntfStruct.Playing == guiSetStop)
+	    eof = 1;
+	else
+	    guiGetEvent(guiCEvent, (char *)guiSetPlay);
+    }
+#endif
+}
+
 
 int main(int argc,char* argv[]){
 
@@ -4709,64 +4774,8 @@ if(auto_quality>0){
   }
 #endif
 
-  if(osd_function==OSD_PAUSE){
-    mp_cmd_t* cmd;
-      if(!quiet) {
-        // Small hack to display the pause message on the OSD line.
-        // The pause string is: "\n == PAUSE == \r" so we need to
-        // take the first and the last char out
-	if(use_term_osd) {
-	  char msg[128] = MSGTR_Paused;
-	  int mlen = strlen(msg);
-	  msg[mlen-1] = '\0';
-	  set_osd_msg(OSD_MSG_PAUSE,1,0,"%s",msg+1);
-	  update_osd_msg();
-	} else
-	  mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
-	fflush(stdout);
-      }
-#ifdef HAVE_NEW_GUI
-      if(use_gui) guiGetEvent( guiCEvent,(char *)guiSetPause );
-#endif
-      if (video_out && sh_video && vo_config_count)
-	 video_out->control(VOCTRL_PAUSE, NULL);
-
-      if (audio_out && sh_audio)
-         audio_out->pause();	// pause audio, keep data if possible
-
-      while( (cmd = mp_input_get_cmd(20,1,1)) == NULL) {
-	     if(sh_video && video_out && vo_config_count) video_out->check_events();
-#ifdef HAVE_NEW_GUI
-             if(use_gui){
-		guiEventHandling();
-		guiGetEvent( guiReDraw,NULL );
-		if(guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos)) break;
-             }
-#endif
-#ifdef HAVE_MENU
-	     if(vf_menu)
-	       vf_menu_pause_update(vf_menu);
-#endif
-             usec_sleep(20000);
-         }
-      if (cmd && cmd->id == MP_CMD_PAUSE) {
-      cmd = mp_input_get_cmd(0,1,0);
-      mp_cmd_free(cmd);
-      }
-         osd_function=OSD_PLAY;
-      if (audio_out && sh_audio)
-        audio_out->resume();	// resume audio
-      if (video_out && sh_video && vo_config_count)
-        video_out->control(VOCTRL_RESUME, NULL);	// resume video
-      (void)GetRelativeTime();	// keep TF around FT in next cycle
-#ifdef HAVE_NEW_GUI
-      if (use_gui) 
-       {
-        if ( guiIntfStruct.Playing == guiSetStop ) goto goto_next_file;
-        guiGetEvent( guiCEvent,(char *)guiSetPlay );
-       }
-#endif
+  if (osd_function == OSD_PAUSE) {
+      pause_loop();
       was_paused = 1;
   }
 
