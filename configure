@@ -5788,8 +5788,8 @@ if test "$_faac" = auto ; then
 int main(void) { unsigned long x, y; faacEncOpen(48000, 2, &x, &y); return 0; }
 EOF
   _faac=no
-  for _ld_tmp in "-lfaac" "-lfaac -lmp4v2 -lstdc++" ; do
-    cc_check -c -O4 $_ld_tmp $_ld_lm && _ld_faac="$_ld_tmp" && _faac=yes && break
+  for _ld_faac in "-lfaac" "-lfaac -lmp4v2 -lstdc++" ; do
+    cc_check -c -O4 $_ld_tmp $_ld_lm && _libs_mencoder="$_libs_mencoder $_ld_faac" && _faac=yes && break
   done
 fi
 if test "$_faac" = yes ; then
@@ -5797,6 +5797,7 @@ if test "$_faac" = yes ; then
   if echo $_libavencoders | grep -q faac ; then
     _lavc_faac=yes
     _def_lavc_faac="#define CONFIG_FAAC 1"
+    _libs_mplayer="$_libs_mplayer $_ld_faac"
   else
     _lavc_faac=no
     _def_lavc_faac="#undef CONFIG_FAAC"
@@ -6484,8 +6485,8 @@ EOF
   cc_check -lmp3lame $_ld_vorbis $_ld_lm && tmp_run && _mp3lame=yes
   if test "$_mp3lame" = yes ; then
     _def_mp3lame="#define HAVE_MP3LAME"
-    _def_lavc_mp3lame="#define CONFIG_MP3LAME 1"
     _ld_mp3lame="-lmp3lame $_ld_vorbis"
+    _libs_mencoder="$_libs_mencoder $_ld_mp3lame"
     cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, STANDARD_FAST); return 0; }
@@ -6496,7 +6497,14 @@ EOF
 int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
     cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
-    echo $_libavencoders | grep -q mp3lame && _lavc_mp3lame=yes || _lavc_mp3lame=no
+    if echo $_libavencoders | grep -q mp3lame ; then
+      _lavc_mp3lame=yes
+      _def_lavc_mp3lame="#define CONFIG_MP3LAME 1"
+      _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
+    else
+      _lavc_mp3lame=no
+      _def_lavc_mp3lame="#undef CONFIG_MP3LAME"
+    fi
   else
     _def_mp3lame='#undef HAVE_MP3LAME'
   fi
@@ -7359,13 +7367,7 @@ EXTRA_LIB = $_ld_extra \
   $_ld_vorbis $_ld_theora $_xmms_lib \
   $_ld_arch
 EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_x11 $_ld_sock $_ld_static $_ld_gtk $_ld_glib
-EXTRA_LIB_MENCODER = $_libs_mencoder $_ld_mp3lame $_ld_faac
-ifeq ($_lavc_faac,yes)
-EXTRA_LIB += $_ld_faac
-endif
-ifeq ($_lavc_mp3lame,yes)
-EXTRA_LIB += $_ld_mp3lame
-endif
+EXTRA_LIB_MENCODER = $_libs_mencoder
 FREETYPE_LIB = $_ld_freetype
 FONTCONFIG_LIB = $_ld_fontconfig
 
@@ -7449,9 +7451,10 @@ CONFIG_AMR_WB=$_amr_wb
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-CONFIG_FAAC=$_faac
+CONFIG_FAAC=$_lavc_faac
+CONFIG_MP3LAME=$_lavc_mp3lame
 CONFIG_XVID=$_lavc_xvid
-CONFIG_X264=$_x264
+CONFIG_X264=$_lavc_x264
 CONFIG_GPL=yes
 CONFIG_ENCODERS=$_mencoder
 CONFIG_MUXERS=$_mencoder
