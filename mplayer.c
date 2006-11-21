@@ -1031,6 +1031,51 @@ void update_set_of_subtitles(void)
 }
 #endif /* USE_SUB */
 
+void init_vo_spudec(void) {
+  if (vo_spudec)
+    spudec_free(vo_spudec);
+  inited_flags &= ~INITED_SPUDEC;
+  vo_spudec = NULL;
+  if (spudec_ifo) {
+    unsigned int palette[16], width, height;
+    current_module="spudec_init_vobsub";
+    if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
+      vo_spudec=spudec_new_scaled(palette, width, height);
+  }
+
+#ifdef USE_DVDREAD
+  if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
+    current_module="spudec_init_dvdread";
+    vo_spudec=spudec_new_scaled(((dvd_priv_t *)(stream->priv))->cur_pgc->palette,
+                                sh_video->disp_w, sh_video->disp_h);
+  }
+#endif
+
+  if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
+      (d_dvdsub->sh != NULL) && (((sh_sub_t *)d_dvdsub->sh)->type == 'v')) {
+    sh_sub_t *mkv_sh_sub = (sh_sub_t *)d_dvdsub->sh;
+    current_module = "spudec_init_matroska";
+    vo_spudec =
+      spudec_new_scaled_vobsub(mkv_sh_sub->palette, mkv_sh_sub->colors,
+                             mkv_sh_sub->custom_colors, mkv_sh_sub->width,
+                               mkv_sh_sub->height);
+    forced_subs_only = mkv_sh_sub->forced_subs_only;
+  }
+
+  if (vo_spudec==NULL) {
+    sh_sub_t *sh = (sh_sub_t *)d_dvdsub->sh;
+    unsigned int *palette = NULL;
+    if (sh && sh->has_palette)
+      palette = sh->palette;
+    current_module="spudec_init_normal";
+    vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
+    spudec_set_font_factor(vo_spudec,font_factor);
+  }
+
+  if (vo_spudec!=NULL)
+    inited_flags|=INITED_SPUDEC;
+}
+
 /*
  * In Mac OS X the SDL-lib is built upon Cocoa. The easiest way to
  * make it all work is to use the builtin SDL-bootstrap code, which 
@@ -4384,46 +4429,7 @@ demux_info_print(demuxer);
 //================== Read SUBTITLES (DVD & TEXT) ==========================
 if(vo_spudec==NULL && sh_video &&
      (stream->type==STREAMTYPE_DVD || d_dvdsub->id >= 0)){
-
-if (spudec_ifo) {
-  unsigned int palette[16], width, height;
-  current_module="spudec_init_vobsub";
-  if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
-    vo_spudec=spudec_new_scaled(palette, width, height);
-}
-
-#ifdef USE_DVDREAD
-if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
-  current_module="spudec_init_dvdread";
-  vo_spudec=spudec_new_scaled(((dvd_priv_t *)(stream->priv))->cur_pgc->palette,
-			    sh_video->disp_w, sh_video->disp_h);
-}
-#endif
-
-if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
-    (d_dvdsub->sh != NULL) && (((sh_sub_t *)d_dvdsub->sh)->type == 'v')) {
-  sh_sub_t *mkv_sh_sub = (sh_sub_t *)d_dvdsub->sh;
-  current_module = "spudec_init_matroska";
-  vo_spudec =
-    spudec_new_scaled_vobsub(mkv_sh_sub->palette, mkv_sh_sub->colors,
-                             mkv_sh_sub->custom_colors, mkv_sh_sub->width,
-                             mkv_sh_sub->height);
-  forced_subs_only = mkv_sh_sub->forced_subs_only;
-}
-
-if (vo_spudec==NULL) {
-  sh_sub_t *sh = (sh_sub_t *)d_dvdsub->sh;
-  unsigned int *palette = NULL;
-  if (sh && sh->has_palette)
-    palette = sh->palette;
-  current_module="spudec_init_normal";
-  vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
-  spudec_set_font_factor(vo_spudec,font_factor);
-}
-
-if (vo_spudec!=NULL)
-  inited_flags|=INITED_SPUDEC;
-
+  init_vo_spudec();
 }
 
 // Apply current settings for forced subs
