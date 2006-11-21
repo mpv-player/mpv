@@ -6,7 +6,6 @@
 
 include config.mak
 
-LIBAV_INC =
 ifeq ($(CONFIG_LIBAVUTIL),yes)
 LIBAV_INC += -I./libavutil
 endif
