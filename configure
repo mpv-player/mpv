@@ -59,9 +59,9 @@ compile_check() {
   echo >> "$TMPLOG"
   cat "$1" >> "$TMPLOG"
   echo >> "$TMPLOG"
-  echo "$_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra -o $TMPO $@" >> "$TMPLOG"
+  echo "$_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o $TMPO $@" >> "$TMPLOG"
   rm -f "$TMPO"
-  $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra -o "$TMPO" "$@" >> "$TMPLOG" 2>&1
+  $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o "$TMPO" "$@" >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
   echo "ldd $TMPO" >> "$TMPLOG"
