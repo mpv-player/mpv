@@ -10,16 +10,11 @@ details.
 </para>
 
 <para>
-In this section I'll try to guide you through the compiling and configuring
+In this section you will be guided through the compilation and configuration
 process of <application>MPlayer</application>. It's not easy, but it won't
-necessarily be hard. If you experience a different behavior than what I
-explain, please search through this documentation and you'll find your
-answers. If you see links, please follow them and read carefully what they
-contain. It will take some time, but it IS worth it.
-</para>
-
-<para>
-You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
+necessarily be hard. If you experience a behavior different from this
+description, please search through this documentation and you'll find your
+answers.
 </para>
 
 <sect1 id="softreq">
@@ -27,70 +22,51 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - Recommended version is <emphasis role="bold">2.11.x</emphasis>.
-  This program is responsible for generating MMX/ 3DNow!/etc instructions,
-  thus very important.
+  <emphasis role="bold">binutils</emphasis> - recommended version is
+  <emphasis role="bold">2.11.x</emphasis>.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - Recommended versions are 2.95
+  <emphasis role="bold">gcc</emphasis> - recommended versions are 2.95
   and 3.4+. 2.96 and 3.0.x are known to generate faulty code, 3.1 and
   3.2 also had problems, 3.3 some minor ones. On PowerPC, use 4.x.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - Recommended version is <emphasis role="bold">always the
-  newest</emphasis> (4.3). Normally, everyone wants this, as starting
-  with XFree86 4.0.2, it contains the <link linkend="xv">XVideo</link>
-  extension (somewhere referred to as <emphasis role="bold">Xv</emphasis>)
-  which is needed to enable the hardware YUV acceleration (fast image display)
-  on cards that support it.
-  Make sure its <emphasis role="bold">development package</emphasis> is installed,
+  <emphasis role="bold">Xorg/XFree86</emphasis> - recommended version is
+  4.3 or later. Make sure the
+  <emphasis role="bold">development packages</emphasis> are installed,
   too, otherwise it won't work.
-  For some video cards you don't need XFree86. See list below.
+  You don't absolutely need X, some video output drivers work without it.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - Recommended version is
-  <emphasis role="bold">always the newest</emphasis> (at least 3.79.x). This
-  usually isn't important.
+  <emphasis role="bold">make</emphasis> - recommended version is
+  3.79.x or later. To build the XML documentation you need 3.80.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> 2.0.9 or later is required
   to have a font for the OSD and subtitles.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">SDL</emphasis> - it's not mandatory, but can help in
-  some cases (bad audio, video cards that lag strangely with the xv driver).
-  Always use the newest (beginning from 1.2.x).
+  <emphasis role="bold">libjpeg</emphasis> - optional JPEG decoder,
+  required for the JPEG video output driver.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - optional JPEG decoder, used by the <option>-mf</option>
-  option and some QT MOV files.  Useful for both <application>MPlayer</application>
-  and <application>MEncoder</application> if
-  you plan to work with jpeg files.
+  <emphasis role="bold">libpng</emphasis> - optional (M)PNG decoder,
+  required for the GUI and the PNG video output driver.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - recommended and default (M)PNG decoder. Required for GUI.
-  Useful for both <application>MPlayer</application> and
-  <application>MEncoder</application>.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">lame</emphasis> - recommended, needed for encoding MP3 audio with
-  <application>MEncoder</application>, recommended version is
-  <emphasis>always the newest</emphasis> (at least 3.90).
+  <emphasis role="bold">lame</emphasis> - 3.90 or later is recommended,
+  necessary for encoding MP3 audio with <application>MEncoder</application>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - recommended, necessary for compressed
-  MOV header and PNG support.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">libogg</emphasis> - optional, needed for playing OGG file format.
+  MOV header and PNG support
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
-  - optional, needed for playing RTSP/RTP streams.
+  - optional, needed for some RTSP/RTP streams
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> - optional, from
-  <ulink url="http://www.directfb.org"/>. At least 0.9.13 is required.
+  <emphasis role="bold">directfb</emphasis> - optional, use 0.9.13 or later.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - optional, for CDDA support
