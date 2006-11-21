@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r21001
+// Synced with help_mp-en.h: r21082
 
 // ========================= MPlayer help ===========================
 
@@ -1283,6 +1283,65 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverV4L "[radio] Используется V4Lv1 радио интерфейс.\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Используется V4Lv2 радио интерфейс.\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[radio] Используется *BSD BT848 радио интерфейс.\n"
+
+// ================================== LIBASS ====================================
+
+// ass_bitmap.c
+#define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] Сбой FT_Glyph_To_Bitmap %d \n"
+#define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Неподдерживаемый режим пиксела: %d\n"
+
+// ass.c
+#define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Внимание: стиль '%s' не найден, использую '%s'\n"
+#define MSGTR_LIBASS_BadTimestamp "[ass] неверная временная метка\n"
+#define MSGTR_LIBASS_BadEncodedDataSize "[ass] неверный размер кодированный данных\n"
+#define MSGTR_LIBASS_FontLineTooLong "[ass] Линия шрифта слишком длинна: %d, %s\n"
+#define MSGTR_LIBASS_EventFormatHeaderMissing "[ass] Отстутствует заголовок формата событий\n"
+#define MSGTR_LIBASS_ErrorOpeningIconvDescriptor "[ass] ошибка открытия дескриптора iconv.\n"
+#define MSGTR_LIBASS_ErrorRecodingFile "[ass] ошибка записи файла.\n"
+#define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): сбой fopen\n"
+#define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): сбой fseek\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): Отклонение загрузки субтитров больше 10M\n"
+#define MSGTR_LIBASS_ReadFailed "Ошибка чтения, %d: %s\n"
+#define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Добавлен файл субтитров: <память> (стилей: %d, событий: %d)\n"
+#define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Добавлен файл субтитров: %s (стилей: %d, событий: %d)\n"
+#define MSGTR_LIBASS_FailedToCreateDirectory "[ass] Ошибка создания каталога %s\n"
+#define MSGTR_LIBASS_NotADirectory "[ass] Не каталог: %s\n"
+
+// ass_cache.c
+#define MSGTR_LIBASS_TooManyFonts "[ass] Слишком много шрифтов\n"
+#define MSGTR_LIBASS_ErrorOpeningFont "[ass] Ошибка открытия шрифта: %s, %d\n"
+
+// ass_fontconfig.c
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: Выбранный шрифт не совпадает с запрошенным: '%s' != '%s'\n"
+#define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Используется семейство шрифтов по-умолчанию: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Используется шрифт по-умолчанию: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: Используется семейство шрифтов 'Arial': (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_FcInitLoadConfigAndFontsFailed "[ass] Сбой FcInitLoadConfigAndFonts.\n"
+#define MSGTR_LIBASS_UpdatingFontCache "[ass] Обновление кеша шрифтов.\n"
+#define MSGTR_LIBASS_BetaVersionsOfFontconfigAreNotSupported "[ass] Бета версии fontconfig не поддерживаются.\n[ass] Обновитесь прежде чем отсылать отчеты о любых ошибках.\n"
+#define MSGTR_LIBASS_FcStrSetAddFailed "[ass] Сбой FcStrSetAdd.\n"
+#define MSGTR_LIBASS_FcDirScanFailed "[ass] Сбой FcDirScan.\n"
+#define MSGTR_LIBASS_FcDirSave "[ass] Сбой FcDirSave.\n"
+#define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] Сбой FcConfigAppFontAddDir\n"
+#define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig отключен, будет использоваться только шрифт по-умолчанию.\n"
+
+// ass_render.c
+#define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] Не определены ни PlayResX, ни PlayResY. Предполагаю 384x288.\n"
+#define MSGTR_LIBASS_PlayResYUndefinedSettingY "[ass] PlayResY неопределено, устанавливаю %d.\n"
+#define MSGTR_LIBASS_PlayResXUndefinedSettingX "[ass] PlayResX неопределено, устанавливаю %d.\n"
+#define MSGTR_LIBASS_FT_Init_FreeTypeFailed "[ass] Сбой FT_Init_FreeType.\n"
+#define MSGTR_LIBASS_Init "[ass] Инициализация.\n"
+#define MSGTR_LIBASS_InitFailed "[ass] Сбой инициализации.\n"
+#define MSGTR_LIBASS_BadCommand "[ass] Неверная команда: %c%c\n"
+//FIXME glyph
+#define MSGTR_LIBASS_ErrorLoadingGlyph  "[ass] Ошибка загрузки глифа [glyph].\n"
+#define MSGTR_LIBASS_FT_Glyph_Stroke_Error "[ass] Ошибка FT_Glyph_Stroke %d \n"
+#define MSGTR_LIBASS_UnknownEffectType_InternalError "[ass] Неизвестный тип эффекта (внутренняя ошибка)\n"
+#define MSGTR_LIBASS_NoStyleFound "[ass] Стили не найдены!\n"
+#define MSGTR_LIBASS_EmptyEvent "[ass] Пустое событие!\n"
+#define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] Достигнуто значение MAX_GLYPHS: событие %d, начало = %llu, длительность = %llu\n Текст = %s\n"
+#define MSGTR_LIBASS_EventHeightHasChanged "[ass] Внимание! Высота события изменилась!  \n"
+#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Слишком много одновременных событий!\n"
 
 // format.c
 
