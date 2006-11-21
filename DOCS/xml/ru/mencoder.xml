@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r21079 -->
 <chapter id="mencoder">
 <title>Основы использования <application>MEncoder</application></title>
 
@@ -404,6 +404,14 @@ mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcode
 <screen>
 mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>output.mpg</replaceable> -oac lavc -ovc lavc \
 -lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
+</screen>
+То же, но используя <systemitem class="library">libavformat</systemitem> MPEG
+<!-- FIXME muxer -->
+муксер[muxer]:
+<screen>
+mencoder <replaceable>input.avi</replaceable> -of lavf -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
+-ovc lavc -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0 \
+-o VCD.mpg -ofps 25 -vf scale=352:288,harddup -oac lavc -lavcopts acodec=mp2:abitrate=224
 </screen>
 </para>
 </informalexample>

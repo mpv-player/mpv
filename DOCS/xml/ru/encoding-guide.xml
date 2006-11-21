@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21034  -->
+<!-- synced with r21078  -->
 <!-- **Partially** translated -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
@@ -2234,16 +2234,20 @@
 <listitem><para>
   Use a deinterlacing filter before encoding. There are several of
   these filters available to choose from, each with its own advantages
-  and disadvantages. Consult <option>mplayer -pphelp</option> to see
-  what is available (grep for &quot;deint&quot;), and search the
+  and disadvantages. Consult <option>mplayer -pphelp</option> and
+  <option>mplayer -vf help</option> to see what is available
+  (grep for &quot;deint&quot;), read Michael's Niedermayer
+  <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing filters comparison</ulink>,
+  and search the
   <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
   MPlayer mailing lists</ulink> to find many discussions about the
-  various filters. Again, the framerate is not changing, so no
+  various filters.
+  Again, the framerate is not changing, so no
   <option>-ofps</option>. Also, deinterlacing should be done after
   cropping <link linkend="menc-feat-telecine-footnotes">[1]</link> and
   before scaling.
 
-  <screen>mencoder dvd://1 -oac copy -vf pp=lb -ovc lavc</screen>
+  <screen>mencoder dvd://1 -oac copy -vf yadif -ovc lavc</screen>
   </para></listitem>
 <listitem><para>
   Unfortunately, this option is buggy with
