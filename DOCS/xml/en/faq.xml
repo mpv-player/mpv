@@ -1095,7 +1095,7 @@ Example:
 </varlistentry>
 <varlistentry><term><systemitem>[2126:192]</systemitem></term>
 <listitem>
-<para>average video bitrate (in Mb/s) and average audio bitrate (in Mb/s)</para></listitem>
+<para>average video bitrate (in kb/s) and average audio bitrate (in kb/s)</para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
