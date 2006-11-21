@@ -150,11 +150,6 @@ ifeq ($(CONFIG_ASS),yes)
 COMMON_LIBS += libass/libass.a
 PARTS += libass
 endif
-# FontConfig and FreeType need to come after ASS to avoid link failures on MinGW
-COMMON_LIBS += $(FONTCONFIG_LIB)
-ifeq ($(FREETYPE),yes)
-COMMON_LIBS += $(FREETYPE_LIB)
-endif
 ifeq ($(GUI),yes)
 LIBS_MPLAYER += Gui/libgui.a
 PARTS += Gui

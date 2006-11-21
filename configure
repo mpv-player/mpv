@@ -7360,11 +7360,9 @@ EXTRA_LIB = $_ld_extra \
   $_ld_static \
   $_ld_lm $_ld_gif \
   $_ld_vorbis $_ld_theora $_xmms_lib \
-  $_ld_arch
+  $_ld_arch $_ld_freetype $_ld_fontconfig
 EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_x11 $_ld_sock $_ld_static $_ld_gtk $_ld_glib
 EXTRALIBS_MENCODER = $_libs_mencoder
-FREETYPE_LIB = $_ld_freetype
-FONTCONFIG_LIB = $_ld_fontconfig
 
 HAVE_MLIB = $_mlib
 HAVE_PTHREADS = $_pthreads
