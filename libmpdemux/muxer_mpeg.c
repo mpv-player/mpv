@@ -131,7 +131,7 @@ typedef struct {
 	sys_info_t sys_info;
 	psm_info_t psm_info;
 	uint16_t packet_size;
-	int is_dvd, is_xvcd, is_xsvcd, is_genmpeg1, is_genmpeg2, ts_allframes, has_video, has_audio;
+	int is_dvd, is_xvcd, is_xsvcd, is_genmpeg1, is_genmpeg2, rawpes, ts_allframes, has_video, has_audio;
 	int update_system_header, use_psm;
 	off_t headers_size, data_size;
 	uint64_t scr;
@@ -1018,7 +1018,9 @@ static int get_packet_stats(muxer_priv_t *priv, muxer_stream_t *s, pack_stats_t 
 	p->dts = p->pts = p->frame_pts = p->frame_dts = 0;
 	p->len = 0;
 
-	if(priv->mux == MUX_MPEG1)
+	if(priv->rawpes)
+		pack_hlen = 0;
+	else if(priv->mux == MUX_MPEG1)
 		pack_hlen = 12;
 	else
 		pack_hlen = 14;
@@ -1115,6 +1117,9 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 
 	if(!spriv->pack_offset)
 	{
+		if(priv->rawpes)
+			spriv->pack_offset = 0;
+		else
 		spriv->pack_offset = write_mpeg_pack_header(muxer, spriv->pack);
 		if(priv->update_system_header && (priv->is_genmpeg1 || priv->is_genmpeg2))
 		{
@@ -1133,7 +1138,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 		//search the pts. yes if either it's video && (I-frame or priv->ts_allframes) && framebuf[i].pos == 0
 		//or  it's audio && framebuf[i].pos == 0
 		//NB pts and dts can only be relative to the first frame beginning in this pack
-		if((priv->is_xsvcd || priv->is_xvcd) && spriv->size == 0)
+		if((priv->is_xsvcd || priv->is_xvcd || priv->rawpes) && spriv->size == 0)
 			spriv->buffer_size = 4*1024;
 
 		if(priv->is_dvd && s->type == MUXER_TYPE_VIDEO 
@@ -1209,7 +1214,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 		}
 	}
 
-	if((priv->is_xsvcd || priv->is_xvcd) && spriv->size == 0)
+	if((priv->is_xsvcd || priv->is_xvcd || priv->rawpes) && spriv->size == 0)
 		spriv->buffer_size = 0;
 
 	spriv->size += len;
@@ -1227,7 +1232,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 	if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
 		fix_a52_headers(s);
 	
-	if(spriv->pack_offset < priv->packet_size)	//here finalize is set
+	if(spriv->pack_offset < priv->packet_size && !priv->rawpes)	//here finalize is set
 	{
 		int diff = priv->packet_size - spriv->pack_offset;
 		write_pes_padding(&(spriv->pack[spriv->pack_offset]), diff);
@@ -2532,6 +2537,22 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 	priv->is_xvcd = 1;
 	priv->packet_size = 2324;
 	priv->muxrate = 75*2352;
+	priv->ts_allframes = 1;
+    }
+    else if(! strcasecmp(conf_mux, "pes1"))
+    {
+	priv->mux = MUX_MPEG1;
+	priv->rawpes = 1;
+	priv->packet_size = 2048;
+	priv->muxrate = 10080 * 125;
+	priv->ts_allframes = 1;
+    }
+    else if(! strcasecmp(conf_mux, "pes2"))
+    {
+	priv->mux = MUX_MPEG2;
+	priv->rawpes = 1;
+	priv->packet_size = 2048;
+	priv->muxrate = 10080 * 125;
 	priv->ts_allframes = 1;
     }
     else
