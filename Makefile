@@ -71,7 +71,7 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(COMMON_LIBS) \
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
-                $(EXTRA_LIB_MENCODER) \
+                $(EXTRALIBS_MENCODER) \
                 $(COMMON_LIBS) \
 
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
