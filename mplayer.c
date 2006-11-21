@@ -2379,32 +2379,15 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             }
             if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
                 d_dvdsub->id = demux_mkv_change_subs(demuxer, dvdsub_id);
+            }
+            if (d_dvdsub->sh && d_dvdsub->id >= 0) {
+                sh_sub_t *sh = d_dvdsub->sh;
+                if (sh->type == 'v')
+                    init_vo_spudec();
 #ifdef USE_ASS
-                if (ass_enabled && (d_dvdsub->id >= 0) &&
-                        (((sh_sub_t *)d_dvdsub->sh)->type == 'a')) {
-                    ass_track = ((sh_sub_t *)d_dvdsub->sh)->ass_track;
-                }
+                else if (ass_enabled && sh->type == 'a')
+                    ass_track = sh->ass_track;
 #endif
-                if (d_dvdsub->id >= 0 &&
-                    ((sh_sub_t *)d_dvdsub->sh)->type == 'v') {
-                    sh_sub_t *mkv_sh_sub = (sh_sub_t *)d_dvdsub->sh;
-                    if (vo_spudec != NULL)
-                        spudec_free(vo_spudec);
-                    vo_spudec =
-                        spudec_new_scaled_vobsub(mkv_sh_sub->has_palette ?
-                                                 mkv_sh_sub->palette :
-                                                 NULL, mkv_sh_sub->colors,
-                                                 mkv_sh_sub->custom_colors,
-                                                 mkv_sh_sub->width,
-                                                 mkv_sh_sub->height);
-                    if (!forced_subs_only)
-                        forced_subs_only = mkv_sh_sub->forced_subs_only;
-                    if (vo_spudec) {
-                        spudec_set_forced_subs_only(vo_spudec,
-                                                    forced_subs_only);
-                        inited_flags |= INITED_SPUDEC;
-                    }
-                }
             }
         }
     } else { // off
