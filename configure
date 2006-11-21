@@ -5903,8 +5903,7 @@ fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
   _res_comment="using $_win32codecsdir"
-  _ld_win32='loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
-  openbsd && x86 && _ld_win32="$_ld_win32 -li386"
+  openbsd && x86 && _ld_win32libs="$_ld_win32libs -li386"
   if not win32 ; then
     _def_win32_loader='#define WIN32_LOADER 1'
   else
@@ -7355,7 +7354,7 @@ GIF = $_gif
 
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra \
-  $_ld_static $_ld_win32 \
+  $_ld_static \
   $_ld_win32libs $_ld_lm $_ld_gif \
   $_ld_vorbis $_ld_theora $_xmms_lib \
   $_ld_arch
