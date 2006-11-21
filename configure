@@ -5006,7 +5006,7 @@ if test "$_alsaver" ; then
     _alsa=no
     _res_comment="unknown version"
   fi
-  _libs_mplayer="$_libs_mplayer -lasound $_ld_dl $_ld_pthread"
+  _ld_extra="$_ld_extra -lasound $_ld_dl $_ld_pthread"
 else
   _noaomodules="alsa $_noaomodules"
 fi
