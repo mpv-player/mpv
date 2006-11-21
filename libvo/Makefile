@@ -39,7 +39,7 @@ SRCS += vosub_vidix.c
 endif
 
 INCLUDE = -I. -I.. -I../osdep $(LIBAV_INC)
-CFLAGS  = $(INCLUDE) $(OPTFLAGS) -DMPG12PLAY
+CFLAGS  = $(INCLUDE) $(OPTFLAGS)
 
 #CFLAGS += -Wall
 
