@@ -423,8 +423,6 @@ multiple paths separated by ':'):
   --extra-libs-mencoder=FLAGS extra linker flags for MEncoder
   --with-extraincdir=DIR      extra header search paths in DIR (*)
   --with-extralibdir=DIR      extra linker search paths in DIR (*)
-  --with-x11libdir=DIR        X library files in DIR (*)
-  --with-livelibdir=DIR       LIVE555 Streaming Media in DIR
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
   --with-freetype-config=PATH path to freetype-config
@@ -2084,9 +2082,6 @@ for ac_option do
   --realcodecsdir=*)
     _realcodecsdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-livelibdir=*)
-    _livelibdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
 
   --enable-crash-debug)
     _crash_debug=yes
@@ -2126,9 +2121,6 @@ for ac_option do
   --enable-win32) _win32=yes ;;
   --disable-win32) _win32=no ;;
 
-  --with-x11libdir=*)
-    _ld_x11=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
   --with-xvmclib=*)
     _xvmclib=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -3798,11 +3790,12 @@ if test "$_x11" != no ; then
 #include <X11/Xutil.h>
 int main(void) { (void) XCreateWindow(0,0,0,0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  for I in $_ld_x11 "" -L/usr/X11R6/lib -L/usr/lib/X11R6 -L/usr/X11/lib \
+  for I in $_ld_extra "" -L/usr/X11R6/lib -L/usr/lib/X11R6 -L/usr/X11/lib \
            -L/usr/lib32 -L/usr/openwin/lib -L/usr/X11R6/lib64 -L/usr/lib ; do
-    _ld_x11="$I -lXext -lX11 $_ld_sock $_ld_pthread"
     if netbsd; then
-      _ld_x11="$_ld_x11 -Wl,-R`echo $I | sed s/^-L//`"
+      _libs_mplayer="$_libs_mplayer $I -lXext -lX11 $_ld_sock $_ld_pthread -Wl,-R`echo $I | sed s/^-L//`"
+    else
+      _libs_mplayer="$_libs_mplayer $I -lXext -lX11 $_ld_sock $_ld_pthread"
     fi
     cc_check $_ld_x11 && _x11=yes && break
   done
@@ -5983,8 +5976,8 @@ int main(void) {}
 EOF
 
   _live=no
-  for I in "$_livelibdir" "$_libdir/live" "/usr/lib/live" "/usr/local/live" "/usr/local/lib/live" ; do
-    cxx_check -I$I/liveMedia/include -I$I/UsageEnvironment/include -I$I/groupsock/include && _livelibdir=$I && _live=yes && break
+  for I in $_inc_extra "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
+    cxx_check $I/liveMedia/include $I/UsageEnvironment/include $I/groupsock/include && _livelibdir=$I && _live=yes && break
   done
   if test "$_live" != yes ; then
       if cxx_check -I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/groupsock; then
