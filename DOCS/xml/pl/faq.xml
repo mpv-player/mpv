@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r21152 -->
 <!-- Opiekun: Frogu -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
@@ -1121,7 +1121,7 @@ Przykład:
 </varlistentry>
 <varlistentry><term><systemitem>[2126:192]</systemitem></term>
 <listitem>
-<para>średni bitrate video (w Mb/s) i średni bitrate audio (w Mb/s)</para></listitem>
+<para>średni bitrate video (w kb/s) i średni bitrate audio (w kb/s)</para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
