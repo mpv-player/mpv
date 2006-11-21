@@ -165,7 +165,7 @@ LDFLAGS_MPLAYER = $(EXTRALIBS_MPLAYER) \
                   $(COMMON_LDFLAGS) \
 
 LDFLAGS_MENCODER = $(EXTRALIBS_MENCODER) \
-                   $(COMMON_LIBS) \
+                   $(COMMON_LDFLAGS) \
 
 ifeq ($(MPLAYER),yes)
 ALL_PRG = mplayer$(EXESUF)
