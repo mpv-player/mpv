@@ -6420,8 +6420,8 @@ if test "$_x264" = auto ; then
 int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
   _x264=no
-  for _ld_tmp in "-lx264 $_ld_pthread" "-lx264 $_ld_pthread $_ld_x11 $_ld_lm" ; do
-    cc_check $_ld_tmp && _libs_mencoder="$_libs_mencoder $_ld_tmp" && _x264=yes && break
+  for _ld_x264 in "-lx264 $_ld_pthread" "-lx264 $_ld_pthread $_ld_x11 $_ld_lm" ; do
+    cc_check $_ld_tmp && _libs_mencoder="$_libs_mencoder $_ld_x264" && _x264=yes && break
   done
 fi
 
@@ -6432,6 +6432,7 @@ if test "$_x264" = yes ; then
   if echo $_libavencoders | grep -q x264 ; then
     _lavc_x264=yes
     _def_lavc_x264='#define CONFIG_X264 1'
+    _libs_mplayer="$_libs_mplayer $_ld_x264"
   else
     _lavc_x264=no
     _def_lavc_x264='#undef CONFIG_X264'
@@ -7364,9 +7365,6 @@ EXTRA_LIB += $_ld_faac
 endif
 ifeq ($_lavc_mp3lame,yes)
 EXTRA_LIB += $_ld_mp3lame
-endif
-ifeq ($_lavc_x264,yes)
-EXTRA_LIB += $_ld_x264
 endif
 FREETYPE_LIB = $_ld_freetype
 FONTCONFIG_LIB = $_ld_fontconfig
