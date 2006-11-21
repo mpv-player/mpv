@@ -67,12 +67,8 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
                input/libinput.a \
-               $(EXTRALIBS_MPLAYER) \
-               $(COMMON_LIBS) \
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
-                $(EXTRALIBS_MENCODER) \
-                $(COMMON_LIBS) \
 
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
@@ -162,8 +158,14 @@ ifeq ($(TARGET_WIN32),yes)
 OBJS_MPLAYER += osdep/mplayer-rc.o
 endif
 
-COMMON_LIBS += $(EXTRA_LIB)\
-               $(EXTRALIBS) \
+COMMON_LDFLAGS += $(EXTRA_LIB)\
+                  $(EXTRALIBS) \
+
+LDFLAGS_MPLAYER = $(EXTRALIBS_MPLAYER) \
+                  $(COMMON_LDFLAGS) \
+
+LDFLAGS_MENCODER = $(EXTRALIBS_MENCODER) \
+                   $(COMMON_LIBS) \
 
 ifeq ($(MPLAYER),yes)
 ALL_PRG = mplayer$(EXESUF)
@@ -264,10 +266,10 @@ libmenu/libmenu.a:
 	$(MAKE) -C libmenu
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
-	$(CC) -o $@ $(OBJS_MPLAYER) $(LIBS_MPLAYER)
+	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
 
 mencoder$(EXESUF): $(MENCODER_DEPS)
-	$(CC) -o $@ $(OBJS_MENCODER) $(LIBS_MENCODER)
+	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
 
 osdep/mplayer-rc.o: osdep/mplayer.rc
 	windres -o $@ osdep/mplayer.rc
