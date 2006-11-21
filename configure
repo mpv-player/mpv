@@ -419,6 +419,8 @@ Hazardous options AKA "DO NOT REPORT ANY BUGS!"
 Use these options if autodetection fails (Options marked with (*) accept
 multiple paths separated by ':'):
   --extra-libs=FLAGS          extra linker flags
+  --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
+  --extra-libs-mencoder=FLAGS extra linker flags for MEncoder
   --with-extraincdir=DIR      extra header search paths in DIR (*)
   --with-extralibdir=DIR      extra linker search paths in DIR (*)
   --with-x11libdir=DIR        X library files in DIR (*)
@@ -500,6 +502,12 @@ for ac_option do
     ;;
   --extra-libs=*)
     _extra_libs=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --extra-libs-mplayer=*)
+    _libs_mplayer=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --extra-libs-mencoder=*)
+    _libs_mencoder=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --enable-runtime-cpudetection)
     _runtime_cpudetection=yes
@@ -3745,7 +3753,7 @@ if test "$_directfb" = yes ; then
   if test "$_dfb_version" -ge `dfb_version 0 9 13`; then
     _vosrc="$_vosrc vo_directfb2.c"
     _vomodules="directfb $_vomodules"
-    _ld_directfb='-ldirectfb'
+    _libs_mplayer="$_libs_mplayer -ldirectfb"
   else
     _novomodules="directfb $_novomodules"
   fi
@@ -3870,7 +3878,7 @@ fi
 
 if test "$_xv" = yes ; then
   _def_xv='#define HAVE_XV 1'
-  _ld_xv='-lXv'
+  _libs_mplayer="$_libs_mplayer -lXv"
   _vosrc="$_vosrc vo_xv.c"
   _vomodules="xv $_vomodules"
 else
@@ -3898,7 +3906,7 @@ EOF
 fi
 if test "$_xvmc" = yes ; then
   _def_xvmc='#define HAVE_XVMC 1'
-  _ld_xvmc="-lXvMC -l$_xvmclib"
+  _libs_mplayer="$_libs_mplayer -lXvMC -l$_xvmclib"
   _vosrc="$_vosrc vo_xvmc.c"
   _vomodules="xvmc $_vomodules"
   _res_comment="using $_xvmclib"
@@ -3922,7 +3930,7 @@ fi
 
 if test "$_xinerama" = yes ; then
   _def_xinerama='#define HAVE_XINERAMA 1'
-  _ld_xinerama='-lXinerama'
+  _libs_mplayer="$_libs_mplayer -lXinerama"
 else
   _def_xinerama='#undef HAVE_XINERAMA'
 fi
@@ -3946,7 +3954,7 @@ EOF
 fi
 if test "$_vm" = yes ; then
   _def_vm='#define HAVE_XF86VM 1'
-  _ld_vm='-lXxf86vm'
+  _libs_mplayer="$_libs_mplayer -lXxf86vm"
 else
   _def_vm='#undef HAVE_XF86VM'
 fi
@@ -3996,14 +4004,14 @@ _def_dga='#undef HAVE_DGA'
 _def_dga2='#undef HAVE_DGA2'
 if test "$_dga" = 1 ; then
   _def_dga='#define HAVE_DGA 1'
-  _ld_dga='-lXxf86dga'
+  _libs_mplayer="$_libs_mplayer -lXxf86dga"
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
   _res_comment="using DGA 1.0"
 elif test "$_dga" = 2 ; then
   _def_dga='#define HAVE_DGA 1'
   _def_dga2='#define HAVE_DGA2 1'
-  _ld_dga='-lXxf86dga'
+  _libs_mplayer="$_libs_mplayer -lXxf86dga"
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
   _res_comment="using DGA 2.0"
@@ -4016,7 +4024,7 @@ echores "$_dga"
 
 
 echocheck "OpenGL"
-#Note: this test is run even with --enable-gl since we autodetect $_ld_gl
+#Note: this test is run even with --enable-gl since we autodetect linker flags
 if (test "$_x11" = yes || win32 && test "$_macosx" = no) && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #include <GL/gl.h>
@@ -4025,14 +4033,14 @@ EOF
   _gl=no
   if cc_check $_ld_x11 -lGL $_ld_lm ; then
     _gl=yes
-    _ld_gl="-lGL $_ld_dl"
+    _libs_mplayer="$_libs_mplayer -lGL $_ld_dl"
   elif cc_check $_ld_x11 -lGL $_ld_lm $_ld_pthread ; then
     _gl=yes
-    _ld_gl="-lGL $_ld_pthread $_ld_dl"
+    _libs_mplayer="$_libs_mplayer -lGL $_ld_pthread $_ld_dl"
   elif cc_check -lopengl32 ; then
     _gl=yes
     _gl_win32=yes
-    _ld_gl="-lopengl32 -lgdi32"
+    _libs_mplayer="$_libs_mplayer -lopengl32 -lgdi32"
   fi
 else
   _gl=no
@@ -4109,7 +4117,7 @@ EOF
 fi
 if test "$_ggi" = yes ; then
   _def_ggi='#define HAVE_GGI 1'
-  _ld_ggi='-lggi'
+  _libs_mplayer="$_libs_mplayer -lggi"
   _vosrc="$_vosrc vo_ggi.c"
   _vomodules="ggi $_vomodules"
 else
@@ -4132,7 +4140,7 @@ fi
 # like --disable-ggi --enable-ggiwmh
 if test "$_ggi" = yes && test "$_ggiwmh" = yes ; then
   _def_ggiwmh='#define HAVE_GGIWMH 1'
-  _ld_ggi="$_ld_ggi -lggiwmh"
+  _libs_mplayer="$_libs_mplayer -lggiwmh"
 else
   _ggiwmh=no
   _def_ggiwmh='#undef HAVE_GGIWMH'
@@ -4157,13 +4165,13 @@ return 0; }
 EOF
   _aa=no
   for _ld_tmp in "-laa" "$_ld_x11 -laa" ; do
-    cc_check $_ld_tmp && _ld_aa=$_ld_tmp && _aa=yes && break
+    cc_check $_ld_tmp && _libs_mplayer="$_libs_mplayer $_ld_tmp" && _aa=yes && break
   done
 fi
 if test "$_aa" = yes ; then
   _def_aa='#define HAVE_AA 1'
   if cygwin ; then
-    _ld_aa=`aalib-config --libs | cut -d " " -f 2,5,6`
+    _libs_mplayer="$_libs_mplayer `aalib-config --libs | cut -d " " -f 2,5,6`"
   fi
   _vosrc="$_vosrc vo_aa.c"
   _vomodules="aa $_vomodules"
@@ -4191,7 +4199,7 @@ fi
 if test "$_caca" = yes ; then
   _def_caca='#define HAVE_CACA 1'
   _inc_extra="$_inc_extra `caca-config --cflags`"
-  _ld_caca=`caca-config --libs`
+  _libs_mplayer="$_libs_mplayer `caca-config --libs`"
   _vosrc="$_vosrc vo_caca.c"
   _vomodules="caca $_vomodules"
 else
@@ -4212,7 +4220,7 @@ EOF
 fi
 if test "$_svga" = yes ; then
   _def_svga='#define HAVE_SVGALIB 1'
-  _ld_svga="-lvga"
+  _libs_mplayer="$_libs_mplayer -lvga"
   _vosrc="$_vosrc vo_svga.c"
   _vomodules="svga $_vomodules"
 else
@@ -4498,7 +4506,7 @@ EOF
 fi
 if test "$_vesa" = yes ; then
   _def_vesa='#define HAVE_VESA 1'
-  _ld_vesa="-lvbe -llrmi"
+  _libs_mplayer="$_libs_mplayer -lvbe -llrmi"
   _vosrc="$_vosrc vo_vesa.c vesa_lvo.c gtf.c"
   _vomodules="vesa $_vomodules"
 else
@@ -4545,13 +4553,13 @@ fi
 if test "$_sdl" = yes ; then
   _def_sdl='#define HAVE_SDL 1'
   if cygwin ; then
-    _ld_sdl=`$_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/`
+    _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/`"
     _inc_extra="$_inc_extra `$_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/`"
   elif mingw32 ; then
-    _ld_sdl=`$_sdlconfig --libs | sed s/-mwindows//`
+    _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs | sed s/-mwindows//`"
     _inc_extra="$_inc_extra `$_sdlconfig --cflags | sed s/-Dmain=SDL_main//`"
   else
-    _ld_sdl=`$_sdlconfig --libs`
+    _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs`"
     _inc_extra="$_inc_extra `$_sdlconfig --cflags`"
   fi
   _vosrc="$_vosrc vo_sdl.c"
@@ -4581,7 +4589,7 @@ EOF
 fi
 if test "$_win32waveout" = yes ; then
   _def_win32waveout='#define HAVE_WIN32WAVEOUT 1'
-  _ld_win32libs="-lwinmm $_ld_win32libs"
+  _libs_mplayer="$_libs_mplayer -lwinmm"
   _aosrc="$_aosrc ao_win32.c"
   _aomodules="win32 $_aomodules"
 else
@@ -4603,7 +4611,7 @@ EOF
 fi
 if test "$_directx" = yes ; then
   _def_directx='#define HAVE_DIRECTX 1'
-  _ld_win32libs="-lgdi32 $_ld_win32libs"
+  _libs_mplayer="$_libs_mplayer -lgdi32"
   _vosrc="$_vosrc vo_directx.c"
   _vomodules="directx $_vomodules"
   _aosrc="$_aosrc ao_dsound.c"
@@ -4629,7 +4637,7 @@ EOF
 fi
 if test "$_nas" = yes ; then
   _def_nas='#define HAVE_NAS 1'
-  _ld_nas="-laudio -lXt $_ld_x11"
+  _libs_mplayer="$_libs_mplayer -laudio -lXt $_ld_x11"
   _aosrc="$_aosrc ao_nas.c"
   _aomodules="nas $_aomodules"
 else
@@ -4782,7 +4790,7 @@ if test "$_arts" = yes ; then
   _def_arts='#define USE_ARTS 1'
   _aosrc="$_aosrc ao_arts.c"
   _aomodules="arts $_aomodules"
-  _ld_arts=`artsc-config --libs`
+  _libs_mplayer="$_libs_mplayer `artsc-config --libs`"
   _inc_extra="$_inc_extra `artsc-config --cflags`"
 else
   _noaomodules="arts $_noaomodules"
@@ -4809,7 +4817,7 @@ if test "$_esd" = yes ; then
   _def_esd='#define USE_ESD 1'
   _aosrc="$_aosrc ao_esd.c"
   _aomodules="esd $_aomodules"
-  _ld_esd=`esd-config --libs`
+  _libs_mplayer="$_libs_mplayer `esd-config --libs`"
   _inc_extra="$_inc_extra `esd-config --cflags`"
 
   echocheck "esd_get_latency()"
@@ -4846,7 +4854,7 @@ if test "$_polyp" = yes ; then
   _def_polyp='#define USE_POLYP 1'
   _aosrc="$_aosrc ao_polyp.c"
   _aomodules="polyp $_aomodules"
-  _ld_polyp=`$_pkg_config --libs polyplib polyplib-error polyplib-mainloop`
+  _libs_mplayer="$_libs_mplayer `$_pkg_config --libs polyplib polyplib-error polyplib-mainloop`"
   _inc_extra="$_inc_extra `$_pkg_config --cflags polyplib polyplib-error polyplib-mainloop`"
 else
   _def_polyp='#undef USE_POLYP'
@@ -4863,9 +4871,9 @@ cat > $TMPC << EOF
 int main(void) { jack_client_new("test"); return 0; }
 EOF
   if cc_check -ljack ; then
-    _ld_jack="-ljack"
+    _libs_mplayer="$_libs_mplayer -ljack"
   elif cc_check `$_pkg_config --libs --cflags --silence-errors jack` ; then
-    _ld_jack="`$_pkg_config --libs jack`"
+    _libs_mplayer="$_libs_mplayer `$_pkg_config --libs jack`"
     _inc_extra="$_inc_extra "`$_pkg_config --cflags jack`""
   else
     _jack=no
@@ -4893,7 +4901,7 @@ int main(void) {
 }
 EOF
   if cc_check -lopenal ; then
-    _ld_openal="-lopenal"
+    _libs_mplayer="$_libs_mplayer -lopenal"
     _openal=yes
   fi
 fi
@@ -4998,7 +5006,7 @@ if test "$_alsaver" ; then
     _alsa=no
     _res_comment="unknown version"
   fi
-  _ld_extra="$_ld_extra -lasound $_ld_dl $_ld_pthread"
+  _libs_mplayer="$_libs_mplayer -lasound $_ld_dl $_ld_pthread"
 else
   _noaomodules="alsa $_noaomodules"
 fi
@@ -5058,7 +5066,7 @@ EOF
 fi
 if test "$_sgiaudio" = "yes" ; then
   _def_sgiaudio='#define USE_SGI_AUDIO 1'
-  _ld_sgiaudio='-laudio'
+  _libs_mplayer="$_libs_mplayer -laudio"
   _aosrc="$_aosrc ao_sgi.c"
   _aomodules="sgi $_aomodules"
 else
@@ -7011,7 +7019,7 @@ if test "$_gtk1" = yes ; then
 fi
 
 else #if not win32
-  _ld_win32libs="-lcomdlg32 -lcomctl32 -lshell32 -lkernel32 $_ld_win32libs"
+  _libs_mplayer="$_libs_mplayer -lcomdlg32 -lcomctl32 -lshell32 -lkernel32"
   _def_gui='#define HAVE_NEW_GUI 1'
   _def_gtk2_gui='#undef HAVE_GTK2_GUI'
 fi #if not win32
@@ -7186,7 +7194,7 @@ fi
 if test "$_vidix_internal" = yes ; then
   _def_vidix_pfx="#define MP_VIDIX_PFX \"$_libdir\" \"/mplayer/vidix/\" "
 elif test "$_vidix_external" = yes ; then
-  _ld_vidix_external="-lvidix"
+  _libs_mplayer="$_libs_mplayer -lvidix"
   _def_vidix_pfx='#define MP_VIDIX_PFX "" '
 fi
 
@@ -7199,7 +7207,7 @@ fi
 if test "$_vidix" = yes && win32; then
   _vosrc="$_vosrc vo_winvidix.c"
   _vomodules="winvidix $_vomodules"
-  _ld_win32libs="-lgdi32 $_ld_win32libs"
+  _libs_mplayer="$_libs_mplayer -lgdi32"
 else
   _novomodules="winvidix $_novomodules"
 fi
@@ -7347,15 +7355,11 @@ GIF = $_gif
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra \
   $_ld_static \
-  $_ld_win32libs $_ld_lm $_ld_gif \
+  $_ld_lm $_ld_gif \
   $_ld_vorbis $_ld_theora $_xmms_lib \
   $_ld_arch
-EXTRALIBS_MPLAYER = $_ld_aa $_ld_sdl $_ld_ggi $_ld_svga $_ld_directfb $_ld_caca \
-  $_ld_vesa $_ld_vidix_external $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm \
-  $_ld_xinerama $_ld_x11 $_ld_sock \
-  $_ld_arts $_ld_esd $_ld_jack $_ld_openal $_ld_nas $_ld_sgiaudio $_ld_polyp \
-  $_ld_static $_ld_gtk $_ld_glib
-EXTRA_LIB_MENCODER = $_ld_mp3lame $_ld_x264 $_toolame_lib $_twolame_lib $_ld_faac
+EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_x11 $_ld_sock $_ld_static $_ld_gtk $_ld_glib
+EXTRA_LIB_MENCODER = $_libs_mencoder $_ld_mp3lame $_ld_x264 $_toolame_lib $_twolame_lib $_ld_faac
 ifeq ($_lavc_faac,yes)
 EXTRA_LIB += $_ld_faac
 endif
