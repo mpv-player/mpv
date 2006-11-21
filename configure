@@ -4018,7 +4018,7 @@ echores "$_dga"
 
 echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect linker flags
-if (test "$_x11" = yes || win32 && test "$_macosx" = no) && test "$_gl" != no ; then
+if (test "$_x11" = yes || win32 && test "$_macosx" != yes) && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #include <GL/gl.h>
 int main(void) { return 0; }
