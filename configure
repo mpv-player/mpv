@@ -6415,7 +6415,7 @@ int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
   _x264=no
   for _ld_x264 in "-lx264 $_ld_pthread" "-lx264 $_ld_pthread $_ld_x11 $_ld_lm" ; do
-    cc_check $_ld_tmp && _libs_mencoder="$_libs_mencoder $_ld_x264" && _x264=yes && break
+    cc_check $_ld_x264 && _libs_mencoder="$_libs_mencoder $_ld_x264" && _x264=yes && break
   done
 fi
 
