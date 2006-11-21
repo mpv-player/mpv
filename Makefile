@@ -135,7 +135,7 @@ COMMON_LIBS += tremor/libvorbisidec.a
 PARTS += tremor
 endif
 ifeq ($(VIDIX),yes)
-LIBS_MPLAYER += libdha/libdha.so vidix/libvidix.a
+LIBS_MPLAYER += vidix/libvidix.a
 PARTS += libdha vidix
 endif
 ifeq ($(DVDREAD_INTERNAL),yes)
