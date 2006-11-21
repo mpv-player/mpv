@@ -5903,11 +5903,11 @@ fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
   _res_comment="using $_win32codecsdir"
-  openbsd && x86 && _ld_win32libs="$_ld_win32libs -li386"
+  openbsd && x86 && _ld_extra="$_ld_extra -li386"
   if not win32 ; then
     _def_win32_loader='#define WIN32_LOADER 1'
   else
-    _ld_win32libs="$_ld_win32libs -ladvapi32 -lole32"
+    _ld_extra="$_ld_extra -ladvapi32 -lole32"
     _res_comment="using native windows"
   fi
   _codecmodules="win32 $_codecmodules"
