@@ -31,7 +31,7 @@ URL_t *url_redirect(URL_t **url, const char *redir) {
       tmp = strstr(newurl, "://");
       if (tmp) tmp = strchr(tmp + 3, '/');
     } else
-    tmp = strrchr(newurl, '/');
+      tmp = strrchr(newurl, '/');
     if (tmp) tmp[1] = 0;
     strcat(newurl, redir);
     res = url_new(newurl);
