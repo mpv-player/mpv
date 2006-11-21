@@ -239,30 +239,6 @@ it works with the following drivers:
 </sect1>
 
 
-<sect1 id="sound-cards">
-<title>Sound cards</title>
-
-<itemizedlist>
-<listitem><simpara>
-  <emphasis role="bold">Soundblaster Live!</emphasis>: with this card you can use
-  4 or 6 (<emphasis role="bold">5.1</emphasis>) channels AC3 decoding instead of 2. Read the
-  <link linkend="swac3">Software AC3 decoding</link> section. For hardware AC3
-  passthrough you <emphasis role="bold">must</emphasis> use ALSA 0.9 with OSS emulation!
-  </simpara></listitem>
-<listitem><simpara>
-  <emphasis role="bold">C-Media with S/PDIF out</emphasis>: hardware AC3
-  passthrough is possible with these cards, see
-  <link linkend="hwac3">Hardware AC3 decoding</link> section.
-  </simpara></listitem>
-<listitem><simpara>
-  Features of <emphasis role="bold">other cards</emphasis> aren't supported by
-  <application>MPlayer</application>. <emphasis role="bold">It's very recommended
-  to read the <link linkend="audio">sound card</link> section!</emphasis>
-  </simpara></listitem>
-</itemizedlist>
-</sect1>
-
-
 <sect1 id="features">
 <title>Features</title>
 
