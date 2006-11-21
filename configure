@@ -7358,11 +7358,11 @@ EXTRA_LIB = $_ld_extra \
   $_ld_win32libs $_ld_lm $_ld_gif \
   $_ld_vorbis $_ld_theora $_xmms_lib \
   $_ld_arch
-VO_LIBS = $_ld_aa $_ld_sdl $_ld_ggi $_ld_svga $_ld_directfb $_ld_caca \
+EXTRALIBS_MPLAYER = $_ld_aa $_ld_sdl $_ld_ggi $_ld_svga $_ld_directfb $_ld_caca \
   $_ld_vesa $_ld_vidix_external $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm \
-  $_ld_xinerama $_ld_x11 $_ld_sock
-AO_LIBS = $_ld_arts $_ld_esd $_ld_jack $_ld_openal $_ld_nas $_ld_sgiaudio \
-  $_ld_polyp
+  $_ld_xinerama $_ld_x11 $_ld_sock \
+  $_ld_arts $_ld_esd $_ld_jack $_ld_openal $_ld_nas $_ld_sgiaudio $_ld_polyp \
+  $_ld_static $_ld_gtk $_ld_glib
 EXTRA_LIB_MENCODER = $_ld_mp3lame $_ld_x264 $_toolame_lib $_twolame_lib $_ld_faac
 ifeq ($_lavc_faac,yes)
 EXTRA_LIB += $_ld_faac
@@ -7375,7 +7375,6 @@ EXTRA_LIB += $_ld_x264
 endif
 FREETYPE_LIB = $_ld_freetype
 FONTCONFIG_LIB = $_ld_fontconfig
-GTK_LIBS = $_ld_static $_ld_gtk $_ld_glib
 
 HAVE_MLIB = $_mlib
 HAVE_PTHREADS = $_pthreads

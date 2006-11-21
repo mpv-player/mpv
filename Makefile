@@ -70,9 +70,8 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
                input/libinput.a \
+               $(EXTRALIBS_MPLAYER) \
                $(COMMON_LIBS) \
-               $(VO_LIBS) \
-               $(AO_LIBS) \
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(EXTRA_LIB_MENCODER) \
@@ -144,7 +143,7 @@ ifeq ($(FREETYPE),yes)
 COMMON_LIBS += $(FREETYPE_LIB)
 endif
 ifeq ($(GUI),yes)
-LIBS_MPLAYER += Gui/libgui.a $(GTK_LIBS)
+LIBS_MPLAYER += Gui/libgui.a
 PARTS += Gui
 endif
 ifeq ($(LIBMENU),yes)
