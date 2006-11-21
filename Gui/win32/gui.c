@@ -216,11 +216,9 @@ static void handlemsg(HWND hWnd, int msg)
             if(display_openfilewindow(gui, 0) && (msg == evLoadPlay))
                 handlemsg(hWnd, evDropFile);
             return;
-#ifdef USE_SUB
         case evLoadSubtitle:
             display_opensubtitlewindow(gui);
             break;
-#endif
         case evPreferences:
             display_prefswindow(gui);
             return;
@@ -979,11 +977,9 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                 case ID_MUTE:
                     mp_input_queue_cmd(mp_input_parse_cmd("mute"));
                     break;
-#ifdef USE_SUB
                 case IDSUBTITLE_OPEN:
                     display_opensubtitlewindow(gui);
                     break;
-#endif
                 case ID_PTRACK:
                     handlemsg(hWnd, evPrev);
                     break;
@@ -1186,9 +1182,7 @@ static void create_menu(gui_t *gui)
     AppendMenu(gui->menu, MF_SEPARATOR, 0, 0);
     AppendMenu(gui->menu, MF_STRING | MF_POPUP, (UINT) gui->diskmenu, "Play &CD/DVD/VCD/SVCD");
     AppendMenu(gui->menu, MF_SEPARATOR, 0, 0);
-#ifdef USE_SUB
     AppendMenu(gui->menu, MF_STRING, IDSUBTITLE_OPEN, "Open Subtitle");
-#endif
     AppendMenu(gui->menu, MF_STRING, ID_SKINBROWSER, "Skin Browser");
     AppendMenu(gui->menu, MF_SEPARATOR, 0, 0);
     AppendMenu(gui->menu, MF_STRING, ID_PREFS, "Preferences");
@@ -1214,9 +1208,7 @@ static void create_traymenu(gui_t *gui)
     AppendMenu(gui->traymenu, MF_SEPARATOR, 0, 0);
     AppendMenu(gui->traymenu, MF_STRING, ID_MUTE, "Toggle Mute");
     AppendMenu(gui->traymenu, MF_SEPARATOR, 0, 0);
-#ifdef USE_SUB
     AppendMenu(gui->traymenu, MF_STRING, IDSUBTITLE_OPEN, "Open Subtitle");
-#endif
     AppendMenu(gui->traymenu, MF_STRING, ID_PLAYLIST, "Playlist");
     AppendMenu(gui->traymenu, MF_SEPARATOR, 0, 0);
     AppendMenu(gui->traymenu, MF_STRING, ID_SHOWHIDE, "Show/Hide");

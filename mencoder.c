@@ -199,10 +199,8 @@ int   sub_auto = 0;
 int   subcc_enabled=0;
 int   suboverlap_enabled = 1;
 
-#ifdef USE_SUB
 static sub_data* subdata=NULL;
 float sub_last_pts = -303;
-#endif
 
 int auto_expand=1;
 int encode_duplicates=1;
@@ -649,7 +647,6 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf || playback_spee
     }
   }
 
-#ifdef USE_SUB
 // after reading video params we should load subtitles because
 // we know fps so now we can adjust subtitles time to ~6 seconds AST
 // check .sub
@@ -669,7 +666,6 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf || playback_spee
       free(tmp[i++]);
     free(tmp);
   }
-#endif	
 
 // set up video encoder:
 
@@ -1477,7 +1473,6 @@ if(sh_audio && !demuxer2){
     }
         fflush(stdout);
 
-#ifdef USE_SUB
   // find sub
   if(subdata && sh_video->pts>0){
       float pts=sh_video->pts;
@@ -1489,7 +1484,6 @@ if(sh_audio && !demuxer2){
          sub_last_pts = pts;
       }
   }
-#endif
 
 #ifdef USE_DVDREAD
 // DVD sub:

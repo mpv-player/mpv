@@ -750,12 +750,10 @@ int guiGetEvent(int type, char *arg)
                     if(fullscreen) guiSetEvent(evFullScreen);
                     PostMessage(mygui->mainwindow, WM_COMMAND, (WPARAM) IDFILE_OPEN, 0);
                     break;
-#ifdef USE_SUB
                 case MP_CMD_GUI_LOADSUBTITLE:
                     if(fullscreen) guiSetEvent(evFullScreen);
                     PostMessage(mygui->mainwindow, WM_COMMAND, (WPARAM) IDSUBTITLE_OPEN, 0);
                     break;
-#endif
                 default:
                     break;
             }

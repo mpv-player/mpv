@@ -111,8 +111,6 @@ extern void display_skinbrowser(gui_t *gui);
 extern void display_chapterselwindow(gui_t *gui);
 extern void display_eqwindow(gui_t *gui);
 extern void display_prefswindow(gui_t *gui);
-#ifdef USE_SUB
 extern void display_opensubtitlewindow(gui_t *gui);
-#endif
 
 #endif

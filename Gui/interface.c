@@ -380,9 +380,7 @@ void guiInit( void )
  if ( filename ) mplSetFileName( NULL,filename,STREAMTYPE_FILE );
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
  if ( subdata ) guiSetFilename( guiIntfStruct.Subtitlename, subdata->filename );
-#if defined( USE_OSD ) || defined( USE_SUB )
  guiLoadFont();
-#endif
 }
 
 void guiDone( void )
@@ -427,7 +425,6 @@ extern int              stream_dump_type;
 extern int  		vcd_track;
 extern m_obj_settings_t*vo_plugin_args;
 
-#if defined( USE_OSD ) || defined( USE_SUB )
 void guiLoadFont( void )
 {
 #ifdef HAVE_FREETYPE
@@ -469,9 +466,7 @@ void guiLoadFont( void )
    }
 #endif
 }
-#endif
 
-#ifdef USE_SUB
 extern mp_osd_obj_t* vo_osd_list;
 
 extern char **sub_name;
@@ -518,7 +513,6 @@ void guiLoadSubtitle( char * name )
  update_set_of_subtitles();
 
 }
-#endif
 
 static void add_vop( char * str )
 {
@@ -905,16 +899,12 @@ int guiGetEvent( int type,char * arg )
 	 }
 #endif
 // -- subtitle
-#ifdef USE_SUB
 	//subdata->filename=gstrdup( guiIntfStruct.Subtitlename );
 	stream_dump_type=0;
 	if ( gtkSubDumpMPSub ) stream_dump_type=4;
 	if ( gtkSubDumpSrt ) stream_dump_type=6;
 	gtkSubDumpMPSub=gtkSubDumpSrt=0;
-#endif
-#if defined( USE_OSD ) || defined( USE_SUB )
         guiLoadFont();
-#endif
 
 // --- misc		    
 	if ( gtkCacheOn ) stream_cache_size=gtkCacheSize;

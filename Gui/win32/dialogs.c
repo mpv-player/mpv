@@ -43,7 +43,6 @@ extern int get_video_colors(sh_video_t *sh_video, char *item, int *value);
 guiInterface_t guiIntfStruct;
 int addurl = 0;
 
-#ifdef USE_SUB
 extern mp_osd_obj_t* vo_osd_list;
 extern char **sub_name;
 
@@ -89,7 +88,6 @@ void guiLoadSubtitle(char *name)
     }
     update_set_of_subtitles();
 }
-#endif
 
 int display_openfilewindow(gui_t *gui, int add)
 {
@@ -156,7 +154,6 @@ int display_openfilewindow(gui_t *gui, int add)
     return result;
 }
 
-#ifdef USE_SUB
 void display_opensubtitlewindow(gui_t *gui)
 {
     OPENFILENAME subtitleopen;
@@ -183,7 +180,6 @@ void display_opensubtitlewindow(gui_t *gui)
     if(GetOpenFileName(&subtitleopen))
         guiLoadSubtitle(subtitlefile);
 }
-#endif
 
 void display_loadplaylistwindow(gui_t *gui)
 {

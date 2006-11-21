@@ -496,12 +496,10 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
 	  gfree( (void **)&guiIntfStruct.Subtitlename );
           fs_PersistantHistory( fsSelectedDirectory );      //totem, write into history
           break;
-#ifdef USE_SUB
    case fsSubtitleSelector:
           guiSetDF( guiIntfStruct.Subtitlename,fsSelectedDirectory,fsSelectedFile );
 	  guiLoadSubtitle( guiIntfStruct.Subtitlename );
           break;
-#endif
    case fsOtherSelector:
           guiSetDF( guiIntfStruct.Othername,fsSelectedDirectory,fsSelectedFile );
           break;
@@ -510,9 +508,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
           break;
    case fsFontSelector:
           guiSetDF( font_name,fsSelectedDirectory,fsSelectedFile );
-#if defined( USE_OSD ) || defined( USE_SUB )
 	  guiLoadFont();
-#endif
 	  if ( Preferences ) gtk_entry_set_text( GTK_ENTRY( prEFontName ),font_name );
 	  break;
   }

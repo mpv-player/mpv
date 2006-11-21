@@ -50,9 +50,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 
 #include "cfg-mplayer-def.h"
 
-#ifdef USE_SUB
 #include "subreader.h"
-#endif
 
 #include "libvo/video_out.h"
 
@@ -340,12 +338,12 @@ char *vobsub_name=NULL;
 /*DSP!!char *dsp=NULL;*/
 int   subcc_enabled=0;
 int suboverlap_enabled = 1;
-#ifdef USE_SUB
+
 sub_data* set_of_subtitles[MAX_SUBTITLE_FILES];
 int set_of_sub_size = 0;
 int set_of_sub_pos = -1;
 double sub_last_pts = -303;
-#endif
+
 int global_sub_size = 0; // this encompasses all subtitle sources
 int global_sub_pos = -1; // this encompasses all subtitle sources
 #define SUB_SOURCE_SUBS 0
@@ -963,8 +961,6 @@ int sub_source(void)
     return source;
 }
 
-#ifdef USE_SUB
-
 sub_data* subdata = NULL;
 static subtitle* vo_sub_last = NULL;
 
@@ -1029,7 +1025,6 @@ void update_set_of_subtitles(void)
         ++set_of_sub_size;
     }
 }
-#endif /* USE_SUB */
 
 void init_vo_spudec(void) {
   if (vo_spudec)
@@ -1259,7 +1254,6 @@ static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
   return result;
 }
 
-#ifdef USE_SUB
 /**
  * \brief Log the currently displayed subtitle to a file
  * 
@@ -1294,7 +1288,6 @@ static void log_sub(void){
     }
     fclose(f);
 }
-#endif /* USE_SUB */
 
 /// \defgroup OSDMsgStack OSD message stack
 ///
@@ -2203,7 +2196,6 @@ static int mp_property_aspect(m_option_t* prop,int action,void* arg) {
 
 /// Text subtitle position (RW)
 static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
-#ifdef USE_SUB
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
 
     switch(action) {
@@ -2215,9 +2207,6 @@ static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
     default:
         return m_property_int_range(prop,action,arg,&sub_pos);
     }
-#else
-    return M_PROPERTY_UNAVAILABLE;
-#endif
 }
 
 /// Selected subtitles (RW)
@@ -2237,15 +2226,12 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
         *(char**)arg = malloc(64);
         (*(char**)arg)[63] = 0;
         sub_name = 0;
-#ifdef USE_SUB
         if(subdata)
             sub_name = subdata->filename;
-#endif
 #ifdef USE_ASS
         if (ass_track && ass_track->name)
             sub_name = ass_track->name;
 #endif
-#if defined(USE_SUB) || defined(USE_ASS)
         if(sub_name) {
             char *tmp,*tmp2;
             tmp = sub_name;
@@ -2258,7 +2244,6 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
                      strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
             return M_PROPERTY_OK;
         }
-#endif
         if (demuxer->type == DEMUXER_TYPE_MATROSKA && dvdsub_id >= 0) {
             char lang[40] = MSGTR_Unknown;
             demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
@@ -2328,11 +2313,10 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
            global_sub_indices[SUB_SOURCE_DEMUX],
            global_sub_pos, source);
 
-#ifdef USE_SUB
     set_of_sub_pos = -1;
     subdata = NULL;
     vo_sub_last = vo_sub = NULL;
-#endif
+
     vobsub_id = -1;
     dvdsub_id = -1;
     if (d_dvdsub) {
@@ -2345,7 +2329,6 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
 
     if (source == SUB_SOURCE_VOBSUB) {
         vobsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_VOBSUB];
-#ifdef USE_SUB
     } else if (source == SUB_SOURCE_SUBS) {
         set_of_sub_pos = global_sub_pos - global_sub_indices[SUB_SOURCE_SUBS];
 #ifdef USE_ASS
@@ -2357,7 +2340,6 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             subdata = set_of_subtitles[set_of_sub_pos];
             vo_osd_changed(OSDTYPE_SUBTITLE);
         }
-#endif
     } else if (source == SUB_SOURCE_DEMUX) {
         dvdsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_DEMUX];
         if (d_dvdsub) {
@@ -2391,9 +2373,7 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             }
         }
     } else { // off
-#ifdef USE_SUB
         vo_osd_changed(OSDTYPE_SUBTITLE);
-#endif
         if(vo_spudec) vo_osd_changed(OSDTYPE_SPU);
     }
 #ifdef USE_DVDREAD
@@ -2415,7 +2395,6 @@ static int mp_property_sub_delay(m_option_t* prop,int action,void* arg) {
 
 /// Alignment of text subtitles (RW) 
 static int mp_property_sub_alignment(m_option_t* prop,int action,void* arg) {
-#ifdef USE_SUB
     char* name[] = { MSGTR_Top, MSGTR_Center, MSGTR_Bottom };
 
     if(!sh_video || global_sub_pos < 0 || sub_source() != SUB_SOURCE_SUBS)
@@ -2435,14 +2414,10 @@ static int mp_property_sub_alignment(m_option_t* prop,int action,void* arg) {
     default:
         return m_property_choice(prop,action,arg,&sub_alignment);
     }
-#else
-    return M_PROPERTY_UNAVAILABLE;
-#endif
 }
 
 /// Subtitle visibility (RW)
 static int mp_property_sub_visibility(m_option_t* prop,int action,void* arg) {
-#ifdef USE_SUB
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     
     switch(action) {
@@ -2455,9 +2430,6 @@ static int mp_property_sub_visibility(m_option_t* prop,int action,void* arg) {
     default:
         return m_property_flag(prop,action,arg,&sub_visibility);
     }
-#else
-    return M_PROPERTY_UNAVAILABLE;
-#endif
 }
 
 /// Show only forced subtitles (RW)
@@ -2899,7 +2871,6 @@ static double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 
 static void update_subtitles(void)
 {
-#ifdef USE_SUB
     // find sub
     if (subdata) {
 	double pts = sh_video->pts;
@@ -2913,7 +2884,6 @@ static void update_subtitles(void)
 	    sub_last_pts = pts;
 	}
     }
-#endif
 
     // DVD sub:
     if (vo_config_count && vo_spudec) {
@@ -4419,7 +4389,6 @@ if(vo_spudec==NULL && sh_video &&
 if (vo_spudec!=NULL)
   spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 
-#ifdef USE_SUB
 if(sh_video) {
 // after reading video params we should load subtitles because
 // we know fps so now we can adjust subtitle time to ~6 seconds AST
@@ -4446,7 +4415,6 @@ if(sh_video) {
       global_sub_size += set_of_sub_size;
   }
 }
-#endif /* USE_SUB */
 
 if (global_sub_size) {
   // find the best sub to use
@@ -4988,7 +4956,6 @@ if(step_sec>0) {
       brk_cmd = 1;
     } break;
     case MP_CMD_SUB_STEP : {
-#ifdef USE_SUB
     if (sh_video) {
       int movement = cmd->args[0].v.i;
       step_sub(subdata, sh_video->pts, movement);
@@ -4999,12 +4966,9 @@ if(step_sec>0) {
       set_osd_msg(OSD_MSG_SUB_DELAY,1,osd_duration,
                   MSGTR_OSDSubDelay, ROUND(sub_delay*1000));
     }
-#endif
     } break;
     case MP_CMD_SUB_LOG : {
-#ifdef USE_SUB
 	log_sub();
-#endif
     } break;
     case MP_CMD_OSD :  {
 	int v = cmd->args[0].v.i;
@@ -5203,7 +5167,6 @@ if(step_sec>0) {
 #endif /* USE_TV */
     case MP_CMD_SUB_LOAD:
     {
-#ifdef USE_SUB
       if (sh_video) {
         int n = set_of_sub_size;
         add_subtitles(cmd->args[0].v.s, sh_video->fps, 0);
@@ -5213,11 +5176,9 @@ if(step_sec>0) {
           ++global_sub_size;
         }
       }
-#endif
     } break;
     case MP_CMD_SUB_REMOVE:
     {
-#ifdef USE_SUB
       if (sh_video) {
         int v = cmd->args[0].v.i;
         sub_data *subd;
@@ -5263,15 +5224,12 @@ if(step_sec>0) {
           set_of_subtitles[set_of_sub_size] = NULL;
         }
       }
-#endif /* USE_SUB */
     } break;
     case MP_CMD_GET_SUB_VISIBILITY:
 	{
-#ifdef USE_SUB
 	if (sh_video) {
 		mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_SUB_VISIBILITY=%d\n", sub_visibility);
 	}
-#endif
 	} break;
     case MP_CMD_SCREENSHOT :
       if(vo_config_count){
@@ -5677,7 +5635,6 @@ if(benchmark){
 // time to uninit all, except global stuff:
 uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
 
-#ifdef USE_SUB  
   if ( set_of_sub_size > 0 ) 
    {
     current_module="sub_free";
@@ -5694,7 +5651,6 @@ uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
     subdata=NULL;
 #ifdef USE_ASS
     ass_track = NULL;
-#endif
 #endif
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {

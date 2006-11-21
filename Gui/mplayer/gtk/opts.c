@@ -400,18 +400,6 @@ void ShowPreferences( void )
   else gtk_entry_set_text( GTK_ENTRY( prECDRomDevice ),DEFAULT_CDROM_DEVICE );
 
 // -- disables
-#ifndef USE_SUB
- gtk_widget_set_sensitive( AConfig,FALSE );
- gtk_widget_set_sensitive( CBNoAutoSub,FALSE );
- gtk_widget_set_sensitive( CBSubOverlap,FALSE );
- gtk_widget_set_sensitive( CBSubUnicode,FALSE );
- gtk_widget_set_sensitive( CBDumpMPSub,FALSE );
- gtk_widget_set_sensitive( CBDumpSrt,FALSE );
- gtk_widget_set_sensitive( HSSubDelay,FALSE );
- gtk_widget_set_sensitive( HSSubPosition,FALSE );
- gtk_widget_set_sensitive( HSSubFPS,FALSE );
-#endif
-
 #ifndef USE_ASS
  gtk_widget_set_sensitive( CBUseASS,FALSE );
  gtk_widget_set_sensitive( CBASSUseMargins,FALSE );
@@ -424,12 +412,6 @@ void ShowPreferences( void )
  gtk_widget_set_sensitive( RBOSDTandP,FALSE );
  gtk_widget_set_sensitive( RBOSDIndicator,FALSE );
  gtk_widget_set_sensitive( RBOSDTPTT,FALSE );
-#endif
-
-#if !defined( USE_OSD ) && !defined( USE_SUB )
- gtk_widget_set_sensitive( HSFontFactor,FALSE );
- gtk_widget_set_sensitive( prEFontName,FALSE );
- gtk_widget_set_sensitive( BLoadFont,FALSE );
 #endif
 
 // -- signals
