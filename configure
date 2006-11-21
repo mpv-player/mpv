@@ -5545,7 +5545,7 @@ EOF
 fi
 if test "$_toolame" = yes ; then
   _def_toolame='#define HAVE_TOOLAME 1'
-  _toolame_lib="-ltoolame"
+  _libs_mencoder="$_libs_mencoder -ltoolame"
   _codecmodules="toolame $_codecmodules"
 else
   _def_toolame='#undef HAVE_TOOLAME'
@@ -5563,15 +5563,14 @@ if test "$_twolame" = auto ; then
 int main(void) { twolame_init(); return 0; }
 EOF
   _twolame=no
-  _twolame_lib="-ltwolame"
-  cc_check $_twolame_lib $_ld_lm && _twolame=yes
+  cc_check -ltwolame $_ld_lm && _twolame=yes
 fi
 if test "$_twolame" = yes ; then
   _def_twolame='#define HAVE_TWOLAME 1'
+  _libs_mencoder="$_libs_mencoder -ltwolame"
   _codecmodules="twolame $_codecmodules"
 else
   _def_twolame='#undef HAVE_TWOLAME'
-  _twolame_lib=""
   _nocodecmodules="twolame $_nocodecmodules"
 fi
 echores "$_twolame"
@@ -6422,7 +6421,7 @@ int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
   _x264=no
   for _ld_tmp in "-lx264 $_ld_pthread" "-lx264 $_ld_pthread $_ld_x11 $_ld_lm" ; do
-    cc_check $_ld_tmp && _ld_x264="$_ld_tmp" && _x264=yes && break
+    cc_check $_ld_tmp && _libs_mencoder="$_libs_mencoder $_ld_tmp" && _x264=yes && break
   done
 fi
 
@@ -7359,7 +7358,7 @@ EXTRA_LIB = $_ld_extra \
   $_ld_vorbis $_ld_theora $_xmms_lib \
   $_ld_arch
 EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_x11 $_ld_sock $_ld_static $_ld_gtk $_ld_glib
-EXTRA_LIB_MENCODER = $_libs_mencoder $_ld_mp3lame $_ld_x264 $_toolame_lib $_twolame_lib $_ld_faac
+EXTRA_LIB_MENCODER = $_libs_mencoder $_ld_mp3lame $_ld_faac
 ifeq ($_lavc_faac,yes)
 EXTRA_LIB += $_ld_faac
 endif
