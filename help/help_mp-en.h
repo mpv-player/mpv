@@ -2017,6 +2017,6 @@ static char help_text[]=
 #define MSGTR_LIBASS_NoStyleFound "[ass] No style found!\n"
 #define MSGTR_LIBASS_EmptyEvent "[ass] Empty event!\n"
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] MAX_GLYPHS reached: event %d, start = %llu, duration = %llu\n Text = %s\n"
-#define MSGTR_LIBASS_EventHeightHasChanged "[ass] Warnung! Event height has changed!  \n"
+#define MSGTR_LIBASS_EventHeightHasChanged "[ass] Warning! Event height has changed!  \n"
 #define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Too many simultaneous events!\n"
 
