@@ -53,21 +53,15 @@ SRCS_MPLAYER = mplayer.c \
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
                 $(SRCS_COMMON) \
-                libvo/aclib.c \
-                libvo/osd.c \
-                libvo/sub.c \
                 parser-mecmd.c \
                 xvid_vbr.c \
-
-ifeq ($(BITMAP_FONT),yes)
-SRCS_MENCODER += libvo/font_load.c
-endif
 
 COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
               stream/stream.a \
               libswscale/libswscale.a \
+              libvo/libosd.a \
               osdep/libosdep.a \
               $(AV_LIB) \
               $(EXTRA_LIB)\
@@ -147,7 +141,6 @@ endif
 # FontConfig and FreeType need to come after ASS to avoid link failures on MinGW
 COMMON_LIBS += $(FONTCONFIG_LIB)
 ifeq ($(FREETYPE),yes)
-SRCS_MENCODER += libvo/font_load_ft.c
 COMMON_LIBS += $(FREETYPE_LIB)
 endif
 ifeq ($(GUI),yes)
