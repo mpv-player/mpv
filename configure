@@ -6084,12 +6084,12 @@ int main(void) { ff_gcd(1,1); return 0; }
 EOF
   if $_pkg_config --exists libavutil ; then
     _inc_libavutil=`$_pkg_config --cflags libavutil`
-    _ld_libavutil=`$_pkg_config --libs libavutil`
-    cc_check $_inc_libavutil $_ld_libavutil && _libavutil_so=yes
+    _ld_tmp=`$_pkg_config --libs libavutil`
+    cc_check $_inc_libavutil $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+      && _libavutil_so=yes
   elif cc_check -lavutil $_ld_lm ; then
+    _ld_extra="$_ld_extra -lavutil"
     _libavutil_so=yes
-  fi
-  if test "$_libavutil_so" = yes ; then
     _res_comment="using libavutil.so, but static libavutil is recommended"
   fi
 fi
@@ -6115,12 +6115,12 @@ int main(void) {
 EOF
   if $_pkg_config --exists libavcodec ; then
     _inc_libavcodec=`$_pkg_config --cflags libavcodec`
-    _ld_libavcodec=`$_pkg_config --libs libavcodec`
-    cc_check $_inc_libavcodec $_ld_libavcodec && _libavcodec_so=yes
+    _ld_tmp=`$_pkg_config --libs libavcodec`
+    cc_check $_inc_libavcodec $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+      && _libavcodec_so=yes
   elif cc_check -lavcodec $_ld_lm ; then
+    _ld_extra="$_ld_extra -lavcodec"
     _libavcodec_so=yes
-  fi
-  if test "$_libavcodec_so" = yes ; then
     _res_comment="using libavcodec.so, but static libavcodec is recommended"
   fi
 fi
@@ -6138,12 +6138,12 @@ if test "$_libavformat_so" = auto ; then
 EOF
   if $_pkg_config --exists libavformat ; then
     _inc_libavformat=`$_pkg_config --cflags libavformat`
-    _ld_libavformat=`$_pkg_config --libs libavformat`
-    cc_check $_inc_libavformat $_ld_libavformat && _libavformat_so=yes
+    _ld_tmp=`$_pkg_config --libs libavformat`
+    cc_check $_inc_libavformat $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+      && _libavformat_so=yes
   elif cc_check $_ld_lm -lavformat ; then
-    _libavformat_so=yes  
-  fi
-  if test "$_libavformat_so" = yes ; then
+    _ld_extra="$_ld_extra -lavformat"
+    _libavformat_so=yes
     _res_comment="using libavformat.so, but static libavformat is recommended"
   fi
 fi
@@ -6163,6 +6163,7 @@ if test "$_libpostproc_so" = auto ; then
       return 0;}
 EOF
   if cc_check -lpostproc $_ld_lm ; then
+    _ld_extra="$_ld_extra -lpostproc"
     _libpostproc_so=yes
     _res_comment="using libpostproc.so, but static libpostproc is recommended"
   fi
@@ -6187,15 +6188,10 @@ fi
 if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_lavc_dsputil='#define USE_LIBAVCODEC_DSPUTIL'
-  _ld_libavcodec='libavcodec/libavcodec.a'
   _codecmodules="libavcodec $_codecmodules"
-  if test "$_libavutil" = yes; then
-    _ld_libavutil='libavutil/libavutil.a'
-  fi
 elif test "$_libavcodec_so" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_libavcodec_so='#define USE_LIBAVCODEC_SO 1'
-  test "$_ld_libavcodec" || _ld_libavcodec='-lavcodec'
   _codecmodules="libavcodec.so $_codecmodules"
 else
   _nocodecmodules="libavcodec $_nocodecmodules"
@@ -6206,14 +6202,12 @@ _def_libavformat_so='#undef USE_LIBAVFORMAT_SO'
 _def_libavformat_win32='#undef CONFIG_WIN32'
 if test "$_libavformat" = yes ; then
   _def_libavformat='#define USE_LIBAVFORMAT 1'
-  _ld_libavformat='libavformat/libavformat.a'
   if win32 ; then
     _def_libavformat_win32='#define CONFIG_WIN32 1'
   fi
 else
   if test "$_libavformat_so" = yes ; then
     _def_libavformat_so='#define USE_LIBAVFORMAT_SO 1'
-    test "$_ld_libavformat" || _ld_libavformat='-lavformat'
     if win32 ; then
       _def_libavformat_win32='#define CONFIG_WIN32 1'
     fi
@@ -6224,11 +6218,9 @@ _def_libpostproc='#undef USE_LIBPOSTPROC'
 _def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
 if test "$_libpostproc" = yes ; then
   _def_libpostproc='#define USE_LIBPOSTPROC 1'
-  _ld_libpostproc='libpostproc/libpostproc.a'
 else
   if test "$_libpostproc_so" = yes ; then
     _def_libpostproc_so='#define USE_LIBPOSTPROC_SO 1'
-    _ld_libpostproc='-lpostproc'
   fi
 fi
 
@@ -7413,7 +7405,6 @@ WIN32DLL = $_win32
 QTX_CODECS = $_qtx
 REAL_CODECS = $_real
 XANIM_CODECS = $_xanim
-AV_LIB = $_ld_libavformat  $_ld_libavcodec  $_ld_libavutil  $_ld_libpostproc
 CONFIG_LIBAVUTIL = $_libavutil
 CONFIG_LIBAVUTIL_SO = $_libavutil_so
 CONFIG_LIBAVCODEC = $_libavcodec

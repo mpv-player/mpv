@@ -63,9 +63,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libswscale/libswscale.a \
               libvo/libosd.a \
               osdep/libosdep.a \
-              $(AV_LIB) \
-              $(EXTRA_LIB)\
-              $(EXTRALIBS) \
 
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
@@ -97,6 +94,22 @@ PARTS = libmpdemux \
         libvo \
         libaf \
 
+ifeq ($(CONFIG_LIBAVFORMAT),yes)
+COMMON_LIBS += libavformat/libavformat.a
+PARTS += libavformat
+endif
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+COMMON_LIBS += libavcodec/libavcodec.a
+PARTS += libavcodec
+endif
+ifeq ($(CONFIG_LIBAVUTIL),yes)
+COMMON_LIBS += libavutil/libavutil.a
+PARTS += libavutil
+endif
+ifeq ($(CONFIG_LIBPOSTPROC),yes)
+COMMON_LIBS += libpostproc/libpostproc.a
+PARTS += libpostproc
+endif
 ifeq ($(WIN32DLL),yes)
 COMMON_LIBS += loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a
 PARTS += loader loader/dshow loader/dmo
@@ -153,6 +166,9 @@ endif
 ifeq ($(TARGET_WIN32),yes)
 OBJS_MPLAYER += osdep/mplayer-rc.o
 endif
+
+COMMON_LIBS += $(EXTRA_LIB)\
+               $(EXTRALIBS) \
 
 ifeq ($(MPLAYER),yes)
 ALL_PRG = mplayer$(EXESUF)
