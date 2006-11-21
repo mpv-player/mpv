@@ -22,10 +22,15 @@
 URL_t *url_redirect(URL_t **url, const char *redir) {
   URL_t *u = *url;
   URL_t *res;
-  if (!strchr(redir, '/')) {
+  if (!strchr(redir, '/') || *redir == '/') {
     char *tmp;
     char *newurl = malloc(strlen(u->url) + strlen(redir) + 1);
     strcpy(newurl, u->url);
+    if (*redir == '/') {
+      redir++;
+      tmp = strstr(newurl, "://");
+      if (tmp) tmp = strchr(tmp + 3, '/');
+    } else
     tmp = strrchr(newurl, '/');
     if (tmp) tmp[1] = 0;
     strcat(newurl, redir);
