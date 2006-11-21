@@ -15,7 +15,6 @@ SRCS=aclib.c \
      vo_yuv4mpeg.c \
      $(VO_SRCS) \
 
-LIBAV_INC =
 ifeq ($(CONFIG_LIBAVUTIL),yes)
 LIBAV_INC += -I../libavutil
 endif

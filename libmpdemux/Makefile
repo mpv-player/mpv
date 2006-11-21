@@ -79,7 +79,6 @@ MUXERS = muxer.c \
         muxer_rawaudio.c \
         muxer_rawvideo.c \
 
-LIBAV_INC =
 ifeq ($(CONFIG_LIBAVUTIL),yes)
 LIBAV_INC += -I../libavutil
 endif

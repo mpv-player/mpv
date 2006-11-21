@@ -267,7 +267,6 @@ ifeq ($(CONFIG_MP3LAME),yes)
 ENCODER_SRCS += ae_lame.c
 endif
 
-LIBAV_INC =
 ifeq ($(CONFIG_LIBAVUTIL),yes)
 LIBAV_INC += -I../libavutil
 endif

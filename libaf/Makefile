@@ -29,7 +29,6 @@ SRCS=af.c \
      window.c \
      $(AF_SRCS) \
 
-LIBAV_INC =
 ifeq ($(CONFIG_LIBAVUTIL),yes)
 LIBAV_INC += -I../libavutil
 endif
