@@ -3901,7 +3901,7 @@ int main(void) {
   return 0; }
 EOF
   for _ld_tmp in $_xvmclib XvMCNVIDIA XvMCW I810XvMC ; do
-    cc_check -lXvMC -l$_ld_tmp $_ld_xv $_ld_x11 && _xvmc=yes && _xvmclib="$_ld_tmp" && break
+    cc_check -lXvMC -l$_ld_tmp $_ld_x11 && _xvmc=yes && _xvmclib="$_ld_tmp" && break
   done
 fi
 if test "$_xvmc" = yes ; then
