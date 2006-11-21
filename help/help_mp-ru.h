@@ -604,8 +604,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoChanged "Информация демультиплексора %s изменена в %s\n"
 #define MSGTR_ClipInfo "Информация о клипе:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: обнаружено 30 кадров/сек NTSC содержимое, переключаю частоту кадров.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: обнаружено 24 кадра/сек NTSC содержимое с построчной развёрткой,\nпереключаю частоту кадров.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: обнаружено 30000/1001 кадров/сек NTSC содержимое, переключаю частоту кадров.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: обнаружено 24000/1001 кадра/сек NTSC содержимое с построчной развёрткой,\nпереключаю частоту кадров.\n"
 
 #define MSGTR_CacheFill "\rЗаполнение кэша: %5.2f%% (%"PRId64" байт(а))   "
 #define MSGTR_NoBindFound "Не найдена привязка к клавише '%s'."
