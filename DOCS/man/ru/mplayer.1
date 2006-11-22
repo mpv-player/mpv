@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r21026
+.\" synced with r21158
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -9632,8 +9632,11 @@ harddup and softskip video filters).
 .PD 1
 .
 .TP
-.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
-stream format (default: mpeg2)
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd | pes1 | pes2>
+stream format (default: mpeg2).
+pes1 and pes2 are very broken formats (no pack header and no padding),
+but VDR uses them; don't choose them unless you know exactly what you 
+are doing.
 .
 .TP
 .B size=<up to 65535>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20933 -->
+<!-- synced with r21155 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -29,69 +29,50 @@
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">binutils</emphasis> - рекомендуемая версия - это
-  <emphasis role="bold">2.11.x</emphasis> . Эта программа ответственна за
-  генерацию MMX/3DNow!/и т. п. инструкций, и поэтому очень важна.
-  </para></listitem>
+  <emphasis role="bold">2.11.x</emphasis>. 
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> - рекомендуемые версии:
   2.95 и 3.4+.  Известно, что 2.96 и 3.0.x генерируют испорченный код. 
   С 3.1 и 3.2 были проблемы, с 3.3. тоже были небольшие проблемы. На PowerPC используйте 4.x+.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - рекомендуемая версия - это <emphasis role="bold">всегда новейшая (4.3)</emphasis>.
-Обычно, все этого хотят, поскольку начиная с 4.0.2, XFree86 содержат
-<link linkend="xv">XVideo</link> расширение (иногда упоминаемое, как
-<emphasis role="bold">Xv</emphasis>) которое требуется для включения аппаратной YUV акселерации (быстрый
-вывод изображений на видеокартах, которые это поддерживают.</para>
-  <para>
-Будьте уверены, что <emphasis role="bold">пакет разработки</emphasis> также установлен, иначе это
-не будет работать.</para>
-  <para>
-Для некоторых видео карт, вам не нужен XFree86. Их список см. ниже.
+  <emphasis role="bold">XOrg/XFree86</emphasis> - рекомендуемая версия - 
+  4.3 или более поздняя.  Убедитесь, что также установлен
+  <emphasis role="bold">пакет разработки</emphasis>, иначе это не будет работать.
+  Вам необязательно иметь X, некоторые драйверы вывода видео работают и без него.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - рекомендуемая версия - это <emphasis role="bold">всегда новейшая</emphasis> (минимум
-3.79.x). Обычно это не очень важно.
+  <emphasis role="bold">make</emphasis> - рекомендуемая версия - 3.79.x или
+  более поздняя. Для сборки XML документации требуется 3.80.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - требуется версия 2.0.9 или новее, чтобы иметь 
   шрифт для OSD и  субтитров.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">SDL</emphasis> - это не обязательно, но может помочь в некоторых случаях
-(плохие аудио, видео карты, которые странно лагуют с xv драйвером).
-Всегда используйте новейшую версию (начиная с 1.2.x).
-  </para></listitem>
-<listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - необязательный декодер JPEG,
-  используемый -mf и некоторыми QT MOV файлами. Полезен для
-  <application>MPlayer</application>'а и <application>MEncoder</application>'а,
-  если Вы планируете работать с jpeg файлами.
+  требуется для драйвера вывода видео JPEG.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - рекомендуемый и используемый
-  по умолчанию (M)PNG декодер. Необходим для GUI.Полезен как для
-  <application>MPlayer'а</application>, так и для <application>MEncoder'а</application>.
+  <emphasis role="bold">libpng</emphasis> - необязательный (M)PNG декодер,
+  требуется для GUI и драйвера вывода видео PNG.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">lame</emphasis> - рекомендуется, необходимо для кодирования MP3 аудио c MEncoder,
-рекомендуемая версия - это <emphasis role="bold"> всегда новейшая</emphasis> (как минимум 3.90).
+  <emphasis role="bold">lame</emphasis> - рекомендуется 3.90 или новее,
+  необходимо для кодирования MP3 аудио c <application>MEncoder</application>,
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - рекомендуется, необходима для сжатых
   MOV заголовков и поддержки PNG.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libogg</emphasis> - необязательно, необходимо для проигрывания файлов формата OGG.
-  </para></listitem>
-<listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
-- необязательно, необходимо для проигрывания RTSP/RTP потоков.
+- необязательно, необходимо для некоторых RTSP/RTP потоков.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> - необязательно, на
-<ulink url="http://www.directfb.org">http://www.directfb.org</ulink>. 
-Требуется минимум 0.9.13.
+  <emphasis role="bold">directfb</emphasis> - необязательно, используйте 0.9.13
+  или новее.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - необязательно, для поддержки CDDA
@@ -108,184 +89,6 @@
  <emphasis role="bold">ALSA</emphasis> - необязательно, для поддержки вывода звука через ALSA
 Требуется минимум  0.9.0rc4.
   </para></listitem>
-</itemizedlist>
-</sect1>
-
-
-<sect1 id="video-cards">
-<title>Видео карты</title>
-
-<para>
-В целом, существуют два типа видео карт. Первый тип (новейшие карты) поддерживают
-<emphasis role="bold">аппаратное масштабирование и YUV акселерацию</emphasis>, другие карты - нет.
-</para>
-
-<sect2 id="yuv-cards">
-<title>YUV карты</title>
-
-<para>
-Они могут показывать и масштабировать изображение до любого размера, помещающегося
-в их память, с <emphasis role="bold">малой загрузкой CPU</emphasis> (даже при масштабировании), поэтому
-полноэкранный просмотр приятный и очень быстрый.
-
-<itemizedlist>
-<listitem><para>
-  <emphasis role="bold">Matrox G200/G400/G450/G550 карты</emphasis>: хотя
-<link linkend="vidix">Vidix драйвер</link> и существует, вместо него рекомендуется
-использовать модуль ядра mga_vid, поскольку он лучше работает. Пожалуйста,
-прочтите секцию <link linkend="mga_vid">mga_vid</link> о его установке и
-использовании. Важно проделать эти операции <emphasis>до</emphasis> компиляции <application>MPlayer'а</application>,
-иначе поддержка mga_vid не будет собрана. Также обратите внимание на секцию
-<link linkend="tvout-mga-g400">Matrox TV-вывод</link>.
-<emphasis role="bold">Если Вы не используете Linux</emphasis>, Ваша единственная возможность -
-использовать VIDIX драйвер: см. секцию <link linkend="vidix">VIDIX</link>.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">3Dfx Voodoo3/Banshee карты</emphasis>: читайте секцию
-<link linkend="tdfxfb">tdfxfb</link>, чтобы получить значительное ускорение.
-Важно проделать эти операции <emphasis>до</emphasis> компиляции MPlayer'а, иначе поддержка
-mga_vid не будет собрана. Если Вы используете X,
-используйте <emphasis role="bold">минимум 4.2.0</emphasis>, поскольку 3dfx Xv драйвер был сломан в 4.1.0
-и более ранних версиях.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">ATI карты</emphasis>: существует <link linkend="vidix">VIDIX</link> драйвер
-для следующих карт: <emphasis role="bold">Radeon, Rage128, Mach64</emphasis>
-(Rage XL/Mobility, Xpert98).Также см. секцию <link linkend="tvout-ati">
-ATI карт</link> в документации TV-вывода, чтобы узнать, поддерживается ли TV-out
-Вашей карты под Linux/<application>MPlayer</application>.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">S3 карты</emphasis>: у Savage и Virge/DX чипов есть аппаратная акселерация.
-Используйте наиболее свежую версию XFree86, старые драйвера содержат ошибки.
-У Savage чипов проблемы с выводом YV12, см. <link linkend="s3">S3 Xv</link>
-секцию для подробностей. У более старых Trio карт нет аппаратной поддержки,
-или она медленная.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">nVidia карты</emphasis>: может быть, а может и не быть хорошим выбором для просмотра
-фильмов. Если у Вас не GeForce2 (или более новая) карта, то маловероятно, что
-она будет работать без ошибок.
-<emphasis role="bold">Встроенные nVidia драйвера в XFree86 не поддерживают YUV акселерацию на всех
-nVidia картах.</emphasis> Вам необходимо скачать драйверы с закрытым исходным кодом
-с <ulink url="http://nvidia.com">nVidia.com</ulink>. См. секцию <link linkend="nvidia">nVidia Xv драйвера</link>
-для подробностей. Также посмотрите секцию <link linkend="tvout-nvidia">
-nVidia TV-выход</link>, если Вы хотите использовать TV.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">3DLabs GLINT R3 и Permedia3</emphasis>: существует VIDIX драйвер (pm3_vid).
-Для подробностей, см. секцию <link linkend="vidix">VIDIX</link>.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">Другие карты</emphasis>: Не упомянута выше?
-<itemizedlist>
-<listitem><simpara>
-  Проверьте, поддерживает ли XFree86 драйвер (и Ваша карта) аппаратную
-акселерацию. Подробности см. в секции <link linkend="xv">Xv</link>.
-  </simpara></listitem>
-<listitem><simpara>
-  Если нет, то возможности Вашей видеокарты не поддерживаются под Вашей
-операционной системой :(
-    Если аппаратная акселерация работает под Windows, это не значит, что
-	она будет работать под Linux или иной операционной системой: это зависит
-	от драйвера. Большинство производителей не делают Linux'овых драйверов
-	и не распространяют спецификации для их чипов, поэтому Вам не повезло,
-	что Вы используете их карты. См. <xref linkend="non-yuv-cards"/>.
-  </simpara></listitem>
-</itemizedlist>
-</para></listitem>
-</itemizedlist>
-</para>
-
-</sect2>
-
-
-<sect2 id="non-yuv-cards" xreflabel="Не-YUV карты">
-<title>Не-YUV карты</title>
-
-<para>
-Полноэкранное воспроизведение может быть достигнуто либо включением <emphasis role="bold">программного
-масштабирования</emphasis> (используйте <option>-zoom</option> или <option>-vf scale</option>
-опции, но я предупреждаю Вас: это медленно), или переключением в видео режим
-с меньшим разрешением, например 352x288. Если у Вас нет аппаратной YUV акселерации,
-этот метод предпочтителен. Изменение видео режима может быть включено использованием
-опции <option>-vm</option> и работает со следующими драйверами:
-<itemizedlist>
-<listitem><simpara>
-  <emphasis role="bold">используя</emphasis> XFree86: подробности см. в секциях
-<link linkend="dga">DGA драйвер</link> и
-<link linkend="x11">X11 драйвер</link>. Рекомендуется DGA !
-Также попробуйте использовать DGA через SDL, иногда это лучше.
-  </simpara></listitem>
-<listitem><simpara>
-  <emphasis role="bold">не используя</emphasis> XFree86: попробуйте драйвера в следующем порядке:
-<link linkend="vesa">vesa</link>,
-<link linkend="fbdev">fbdev</link>,
-<link linkend="svgalib">svgalib</link>,
-<link linkend="aalib">aalib</link>.
-  </simpara></listitem>
-</itemizedlist>
-</para>
-</sect2>
-
-<!-- FIXME: find a more logical organization for this section -->
-<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic карты">
-<title>Cirrus Logic карты</title>
-<itemizedlist>
-<listitem><para>
-  GD 7548: установлено на материнской плате и тестировалась в ноутбуках серии
-  Compaq Armada 41xx.
-  <itemizedlist>
-  <listitem><simpara>
-    XFree86 3: работает в 8/16bpp режимах. Хотя, драйвер очень медленный и
-    генерирует ошибки в режиме 800x600@16bpp.
-    <emphasis role="bold">Рекомендуется: 640x480@16bpp</emphasis>
-  </simpara></listitem>
-  <listitem><simpara>
-    XFree86 4: Xserver замораживается вскоре после старта, если акселерация
-    не отключена, но тогда все становится медленнее, чем под XFree86 3.
-    Нет XVideo.
-  </simpara></listitem>
-  <listitem><simpara>
-    FBdev: фреймбуфер[framebuffer - кадровый буфер] может быть включён <option>clgenfb</option>
-    драйвером в ядре, хотя для меня это работало только при 8bpp, и поэтому
-    непригодно. В исходный код до компиляции должен быть добавлен 7584 ID
-  </simpara></listitem>
-  <listitem><simpara>
-    VESA: карта совместима только с VBE 1.2, поэтому VESA вывод не может
-    использоваться. Не может быть обойдено с UniVBE.
-  </simpara></listitem>
-  <listitem><simpara>
-    SVGAlib: определяется как более старый Cirrus чип. Работает, но медленно с
-    <option>-bpp 8</option>.
-  </simpara></listitem>
-</itemizedlist>
-</para></listitem>
-</itemizedlist>
-</sect2>
-</sect1>
-
-
-<sect1 id="sound-cards">
-<title>Звуковые карты:</title>
-
-<itemizedlist>
-<listitem><simpara>
-  <emphasis role="bold">Soundblaster Live!</emphasis>: с этой картой Вы можете использовать 4 или 6 (<emphasis role="bold">5.1</emphasis>)
-  канальное AC3 декодирование, вместо 2. Читайте секцию
-  <link linkend="swac3">Программное AC3 декодирование</link>.
-  Для аппаратного пропуска AC3[hardware AC3 passthrough] Вы
-  <emphasis role="bold">должны</emphasis> использовать ALSA 0.9 с эмуляцией OSS!
-  </simpara></listitem>
-<listitem><simpara>
-  <emphasis role="bold">C-Media с S/PDIF выходом</emphasis>: аппаратная AC3 передача[passthrough] возможна
-  с этими картами, см. секцию <link linkend="hwac3">Аппаратное AC3
-  декодирование</link>.
-  </simpara></listitem>
-<listitem><simpara>
-  Возможности <emphasis role="bold">других карт</emphasis> не поддерживаются <application>MPlayer'ом</application>.
-  Очень рекомендуется прочитать секцию <link linkend="audio">звуковые карты</link>!
-  </simpara></listitem>
 </itemizedlist>
 </sect1>
 

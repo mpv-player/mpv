@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r21168 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -214,6 +214,7 @@
   <listitem><para>Режим кодирования без потерь</para></listitem>
   <listitem><para>Возможность задания пользовательских матриц квантования</para></listitem>
   <listitem><para>Параллельное кодирование разных блоков</para></listitem>
+  <listitem><para>Интерлейсинг</para></listitem>
 </itemizedlist>
 
 </sect3>

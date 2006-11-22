@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with  r20876  -->
+<!-- synced with  r21152  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -1078,7 +1078,7 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 <listitem><para>текушая задержка между аудио и видео потоками</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>[2156:192]</systemitem></term>
-<listitem><para>средний видео битпоток (в Мбит/с) и средний аудио битпоток (в Мбит/с)</para></listitem>
+<listitem><para>средний видео битпоток (в кбит/с) и средний аудио битпоток (в кбит/с)</para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
