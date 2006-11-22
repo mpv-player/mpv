@@ -513,7 +513,7 @@ if (frameno_filename) {
       if(strcasecmp(priority_presets_defs[i].name, proc_priority) == 0)
         break;
     }
-    mp_msg(MSGT_CPLAYER,MSGL_STATUS,"Setting process priority: %s\n",
+    mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_SettingProcessPriority,
 					priority_presets_defs[i].name);
     SetPriorityClass(GetCurrentProcess(), priority_presets_defs[i].prio);
   }
@@ -605,7 +605,7 @@ sh_video=d_video->sh;
       mencoder_exit(1,NULL);
   }
 
-  mp_msg(MSGT_MENCODER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
+  mp_msg(MSGT_MENCODER,MSGL_INFO, MSGTR_FilefmtFourccSizeFpsFtime,
    demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
   );
@@ -725,7 +725,7 @@ if(!muxer_f) {
 
 muxer=muxer_new_muxer(out_file_format,muxer_f);
 if(!muxer) {
-  mp_msg(MSGT_MENCODER, MSGL_FATAL, "Cannot initialize muxer.");
+  mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CannotInitializeMuxer);
   mencoder_exit(1,NULL);
 }
 #if 0
@@ -1536,9 +1536,9 @@ if (!interrupted && filelist[++curfile].name != 0) {
 /* Emit the remaining frames in the video system */
 /*TODO emit frmaes delayed by decoder lag*/
 if(sh_video && sh_video->vfilter){
-	mp_msg(MSGT_MENCODER, MSGL_INFO, "\nFlushing video frames\n");
+	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_FlushingVideoFrames);
 	if (!((vf_instance_t *)sh_video->vfilter)->fmt.have_configured)
-		mp_msg(MSGT_MENCODER, MSGL_WARN, "Filters have not been configured! Empty file?\n");
+		mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_FiltersHaveNotBeenConfiguredEmptyFile);
 	else
 		((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
     	                                              VFCTRL_FLUSH_FRAMES, 0);
@@ -1697,7 +1697,7 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
         }
 
         if (print_info) mp_msg(MSGT_MENCODER, MSGL_STATUS,
-               "EDL SKIP: Start: %.2f  End: %.2f   Current: V: %.2f  A: %.2f     \r",
+               MSGTR_EdlSkipStartEndCurrent,
                next_edl_record->start_sec, next_edl_record->stop_sec,
                sh_video->pts, a_pts);
     }

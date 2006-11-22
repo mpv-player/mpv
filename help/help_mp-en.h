@@ -273,9 +273,12 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "WARNING: -speed is not guaranteed to work correctly with -oac copy!\n"\
 "Your encode might be broken!\n"
 #define MSGTR_ErrorWritingFile "%s: Error writing file.\n"
+#define MSGTR_FlushingVideoFrames "\nFlushing video frames.\n"
+#define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "Filters have not been configured! Empty file?\n"
 #define MSGTR_RecommendedVideoBitrate "Recommended video bitrate for %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/s  (%d B/s)  size: %"PRIu64" bytes  %5.3f secs  %d frames\n"
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/s  (%d B/s)  size: %"PRIu64" bytes  %5.3f secs\n"
+#define MSGTR_EdlSkipStartEndCurrent "EDL SKIP: Start: %.2f  End: %.2f   Current: V: %.2f  A: %.2f     \r"
 #define MSGTR_OpenedStream "success: format: %d  data: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
@@ -578,6 +581,9 @@ static char help_text[]=
 #define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? Contact the author, it may be a bug :(\n"
 #define MSGTR_FormatNotRecognized "============ Sorry, this file format is not recognized/supported =============\n"\
 				  "=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n"
+#define MSGTR_SettingProcessPriority "Setting process priority: %s\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n"
+#define MSGTR_CannotInitializeMuxer "Cannot initialize muxer."
 #define MSGTR_MissingVideoStream "No video stream found.\n"
 #define MSGTR_MissingAudioStream "No audio stream found -> no sound.\n"
 #define MSGTR_MissingVideoStreamBug "Missing video stream!? Contact the author, it may be a bug :(\n"
