@@ -215,6 +215,7 @@ default as it offers better speed.
   <listitem><para>Lossless mode</para></listitem>
   <listitem><para>Custom quantization matrices</para></listitem>
   <listitem><para>Parallel encoding of multiple slices</para></listitem>
+  <listitem><para>Interlacing</para></listitem>
 </itemizedlist>
 
 </sect3>
