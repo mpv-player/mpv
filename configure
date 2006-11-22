@@ -5604,13 +5604,13 @@ elif test "$_tremor_external" = yes ; then
   _def_tremor='#define TREMOR 1'
   _codecmodules="tremor(external) $_codecmodules"
   _res_comment="external Tremor"
-  _ld_vorbis='-logg -lvorbisidec'
+  _ld_extra="$_ld_extra -logg -lvorbisidec"
 elif test "$_libvorbis" = yes ; then
   _vorbis=yes
   _def_vorbis='#define HAVE_OGGVORBIS 1'
   _codecmodules="libvorbis $_codecmodules"
   _res_comment="libvorbis"
-  _ld_vorbis='-lvorbis -logg'
+  _ld_extra="$_ld_extra -lvorbis -logg"
 else
   _vorbis=no
   _nocodecmodules="libvorbis $_nocodecmodules"
@@ -6479,10 +6479,10 @@ if test "$_mencoder" != no ; then
 int main(void) { lame_version_t lv; (void) lame_init(); get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor); return 0; }
 EOF
   # Note: libmp3lame usually depends on vorbis
-  cc_check -lmp3lame $_ld_vorbis $_ld_lm && tmp_run && _mp3lame=yes
+  cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
   if test "$_mp3lame" = yes ; then
     _def_mp3lame="#define HAVE_MP3LAME"
-    _ld_mp3lame="-lmp3lame $_ld_vorbis"
+    _ld_mp3lame=-lmp3lame
     _libs_mencoder="$_libs_mencoder $_ld_mp3lame"
     cat > $TMPC << EOF
 #include <lame/lame.h>
@@ -7358,7 +7358,7 @@ JPEG = $_jpeg
 GIF = $_gif
 
 EXTRALIBS = $_extra_libs
-EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm $_ld_vorbis $_ld_arch
+EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm $_ld_arch
 EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_sock $_ld_gtk $_ld_glib
 EXTRALIBS_MENCODER = $_libs_mencoder
 
