@@ -4415,8 +4415,8 @@ int main(void) {
   return 0;
 }
 EOF
-  for _ld_tmp in "-lungif" "-lungif $_ld_x11" "-lgif" "-lgif $_ld_x11" ; do
-    cc_check $_ld_tmp && tmp_run && _ld_gif="$_ld_tmp" && _gif=yes && break
+  for _ld_gif in "-lungif" "-lungif $_ld_x11" "-lgif" "-lgif $_ld_x11" ; do
+    cc_check $_ld_gif && tmp_run && _gif=yes && break
   done
 fi
 
@@ -4441,6 +4441,7 @@ if test "$_gif" = yes ; then
   _vomodules="gif89a $_vomodules"
   _res_comment="old version, some encoding functions disabled"
   _def_gif_4='#undef HAVE_GIF_4'
+  _ld_extra="$_ld_extra $_ld_gif"
 
   cat > $TMPC << EOF
 #include <signal.h>
@@ -5677,11 +5678,13 @@ int main(void)
 }
 EOF
   for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora"; do
-    cc_check $_ld_theora && _theora=yes && break
+    cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" \
+                         && theora=yes && break
   done
   if test "$_theora" = no && test "$_tremor_internal" = yes; then
     for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora"; do
-      cc_check -I. tremor/bitwise.c $_ld_theora && _theora=yes && break
+      cc_check -I. tremor/bitwise.c $_ld_theora \
+        && _ld_extra="$_ld_extra $_ld_theora" && theora=yes && break
     done
   fi
 fi
@@ -5694,7 +5697,6 @@ if test "$_theora" = yes ; then
 else
   _def_theora='#undef HAVE_OGGTHEORA'
   _nocodecmodules="libtheora $_nocodecmodules"
-  _ld_theora=""
 fi
 echores "$_theora"
 
@@ -7358,8 +7360,8 @@ GIF = $_gif
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra \
   $_ld_static \
-  $_ld_lm $_ld_gif \
-  $_ld_vorbis $_ld_theora $_xmms_lib \
+  $_ld_lm \
+  $_ld_vorbis $_xmms_lib \
   $_ld_arch
 EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_x11 $_ld_sock $_ld_static $_ld_gtk $_ld_glib
 EXTRALIBS_MENCODER = $_libs_mencoder
