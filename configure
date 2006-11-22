@@ -3790,14 +3790,15 @@ if test "$_x11" != no ; then
 #include <X11/Xutil.h>
 int main(void) { (void) XCreateWindow(0,0,0,0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  for I in $_ld_extra "" -L/usr/X11R6/lib -L/usr/lib/X11R6 -L/usr/X11/lib \
+  for I in "" -L/usr/X11R6/lib -L/usr/lib/X11R6 -L/usr/X11/lib \
            -L/usr/lib32 -L/usr/openwin/lib -L/usr/X11R6/lib64 -L/usr/lib ; do
     if netbsd; then
-      _libs_mplayer="$_libs_mplayer $I -lXext -lX11 $_ld_sock $_ld_pthread -Wl,-R`echo $I | sed s/^-L//`"
+      _ld_tmp="$I -lXext -lX11 $_ld_sock $_ld_pthread -Wl,-R`echo $I | sed s/^-L//`"
     else
-      _libs_mplayer="$_libs_mplayer $I -lXext -lX11 $_ld_sock $_ld_pthread"
+      _ld_tmp="$I -lXext -lX11 $_ld_sock $_ld_pthread"
     fi
-    cc_check $_ld_x11 && _x11=yes && break
+    cc_check $_ld_tmp && _libs_mplayer="$_libs_mplayer $_ld_tmp" \
+                      && _x11=yes && break
   done
 fi
 if test "$_x11" = yes ; then
@@ -3807,7 +3808,6 @@ if test "$_x11" = yes ; then
 else
   _x11=no
   _def_x11='#undef HAVE_X11'
-  _ld_x11=''
   _novomodules="x11 $_novomodules"
   _res_comment="check if the dev(el) packages are installed"
   # disable stuff that depends on X
@@ -3830,7 +3830,7 @@ int main(void) {
   (void) DPMSQueryExtension(0, 0, 0);
 }
 EOF
-  cc_check -lXdpms $_ld_x11 && _xdpms3=yes
+  cc_check -lXdpms && _xdpms3=yes
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/dpms.h>
@@ -3838,7 +3838,7 @@ int main(void) {
   (void) DPMSQueryExtension(0, 0, 0);
 }
 EOF
-  cc_check $_ld_x11 && _xdpms4=yes
+  cc_check && _xdpms4=yes
 fi
 if test "$_xdpms4" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
@@ -3846,7 +3846,7 @@ if test "$_xdpms4" = yes ; then
   echores "yes"
 elif test "$_xdpms3" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
-  _ld_x11="-lXdpms $_ld_x11"
+  _libs_mplayer="$_libs_mplayer -lXdpms"
   _res_comment="using Xdpms 3"
   echores "yes"
 else
@@ -3866,7 +3866,7 @@ int main(void) {
   return 0; }
 EOF
   _xv=no
-  cc_check -lXv $_ld_x11 && _xv=yes
+  cc_check -lXv && _xv=yes
 fi
 
 if test "$_xv" = yes ; then
@@ -3894,7 +3894,7 @@ int main(void) {
   return 0; }
 EOF
   for _ld_tmp in $_xvmclib XvMCNVIDIA XvMCW I810XvMC ; do
-    cc_check -lXvMC -l$_ld_tmp $_ld_x11 && _xvmc=yes && _xvmclib="$_ld_tmp" && break
+    cc_check -lXvMC -l$_ld_tmp && _xvmc=yes && _xvmclib="$_ld_tmp" && break
   done
 fi
 if test "$_xvmc" = yes ; then
@@ -3918,7 +3918,7 @@ if test "$_xinerama" = auto ; then
 int main(void) { (void) XineramaIsActive(0); return 0; }
 EOF
   _xinerama=no
-  cc_check -lXinerama $_ld_x11 && _xinerama=yes
+  cc_check -lXinerama && _xinerama=yes
 fi
 
 if test "$_xinerama" = yes ; then
@@ -3943,7 +3943,7 @@ if test "$_vm" = auto ; then
 int main(void) { (void) XF86VidModeQueryExtension(0, 0, 0); return 0; }
 EOF
   _vm=no
-  cc_check -lXxf86vm $_ld_x11 && _vm=yes
+  cc_check -lXxf86vm && _vm=yes
 fi
 if test "$_vm" = yes ; then
   _def_vm='#define HAVE_XF86VM 1'
@@ -3965,7 +3965,7 @@ if test "$_xf86keysym" = auto; then
 #include <X11/XF86keysym.h>
 int main(void) { return XF86XK_AudioPause; }
 EOF
-  cc_check $_ld_x11 && _xf86keysym=yes
+  cc_check && _xf86keysym=yes
 fi
 if test "$_xf86keysym" = yes ; then
   _def_xf86keysym='#define HAVE_XF86XK 1'
@@ -3983,14 +3983,14 @@ if test "$_dga" = auto ; then
 int main (void) { (void) XF86DGASetViewPort(0, 0, 0, 0); return 0; }
 EOF
   _dga=no
-  cc_check -lXxf86dga -lXxf86vm $_ld_x11 && _dga=1
+  cc_check -lXxf86dga -lXxf86vm && _dga=1
 
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
 int main (void) { (void) XDGASetViewport(0, 0, 0, 0, 0); return 0; }
 EOF
-  cc_check -lXxf86dga $_ld_x11 && _dga=2
+  cc_check -lXxf86dga && _dga=2
 fi
 
 _def_dga='#undef HAVE_DGA'
@@ -4024,10 +4024,10 @@ if (test "$_x11" = yes || win32 && test "$_macosx" != yes) && test "$_gl" != no 
 int main(void) { return 0; }
 EOF
   _gl=no
-  if cc_check $_ld_x11 -lGL $_ld_lm ; then
+  if cc_check -lGL $_ld_lm ; then
     _gl=yes
     _libs_mplayer="$_libs_mplayer -lGL $_ld_dl"
-  elif cc_check $_ld_x11 -lGL $_ld_lm $_ld_pthread ; then
+  elif cc_check -lGL $_ld_lm $_ld_pthread ; then
     _gl=yes
     _libs_mplayer="$_libs_mplayer -lGL $_ld_pthread $_ld_dl"
   elif cc_check -lopengl32 ; then
@@ -4157,7 +4157,7 @@ aa_autoinitkbd(c,0);
 return 0; }
 EOF
   _aa=no
-  for _ld_tmp in "-laa" "$_ld_x11 -laa" ; do
+  for _ld_tmp in "-laa" ; do
     cc_check $_ld_tmp && _libs_mplayer="$_libs_mplayer $_ld_tmp" && _aa=yes && break
   done
 fi
@@ -4415,7 +4415,7 @@ int main(void) {
   return 0;
 }
 EOF
-  for _ld_gif in "-lungif" "-lungif $_ld_x11" "-lgif" "-lgif $_ld_x11" ; do
+  for _ld_gif in "-lungif" "-lgif" ; do
     cc_check $_ld_gif && tmp_run && _gif=yes && break
   done
 fi
@@ -4627,11 +4627,11 @@ if test "$_nas" = auto ; then
 int main(void) { return 0; }
 EOF
   _nas=no
-  cc_check $_ld_lm -laudio -lXt $_ld_x11 && _nas=yes
+  cc_check $_ld_lm -laudio -lXt && _nas=yes
 fi
 if test "$_nas" = yes ; then
   _def_nas='#define HAVE_NAS 1'
-  _libs_mplayer="$_libs_mplayer -laudio -lXt $_ld_x11"
+  _libs_mplayer="$_libs_mplayer -laudio -lXt"
   _aosrc="$_aosrc ao_nas.c"
   _aomodules="nas $_aomodules"
 else
@@ -6418,7 +6418,7 @@ if test "$_x264" = auto ; then
 int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
   _x264=no
-  for _ld_x264 in "-lx264 $_ld_pthread" "-lx264 $_ld_pthread $_ld_x11 $_ld_lm" ; do
+  for _ld_x264 in "-lx264 $_ld_pthread" "-lx264 $_ld_pthread $_ld_lm" ; do
     cc_check $_ld_x264 && _libs_mencoder="$_libs_mencoder $_ld_x264" && _x264=yes && break
   done
 fi
@@ -6948,7 +6948,7 @@ int main(void) {
   return exitvar;
 }
 EOF
-    cc_check $_ld_x11 && _xshape=yes
+    cc_check && _xshape=yes
   fi
   if test "$_xshape" = yes ; then
     _def_xshape='#define HAVE_XSHAPE 1'
@@ -7363,7 +7363,7 @@ EXTRA_LIB = $_ld_extra \
   $_ld_lm \
   $_ld_vorbis $_xmms_lib \
   $_ld_arch
-EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_x11 $_ld_sock $_ld_static $_ld_gtk $_ld_glib
+EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_sock $_ld_static $_ld_gtk $_ld_glib
 EXTRALIBS_MENCODER = $_libs_mencoder
 
 HAVE_MLIB = $_mlib
