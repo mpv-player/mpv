@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r21082
+// Synced with help_mp-en.h: r21163
 
 // ========================= MPlayer help ===========================
 
@@ -268,9 +268,12 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "ПРЕДУПРЕЖДЕНИЕ: не гарантируется корректная работа -speed с -oac copy!\n"\
 "Ваше кодирование может быть испорчено!\n"
 #define MSGTR_ErrorWritingFile "%s: Ошибка при записи файла.\n"
+#define MSGTR_FlushingVideoFrames "\nСброс видео кадров.\n"
+#define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "Фильтры не настроены! Пустой файл?\n"
 #define MSGTR_RecommendedVideoBitrate "Рекомендуемый битпоток для %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nПоток видео: %8.3f кбит/с  (%d Б/с)  размер: %"PRIu64" байт(а/ов)  %5.3f сек.  %d кадр(а/ов)\n"
 #define MSGTR_AudioStreamResult "\nПоток аудио: %8.3f кбит/с  (%d Б/с)  размер: %"PRIu64" байт(а/ов)  %5.3f сек.\n"
+#define MSGTR_EdlSkipStartEndCurrent "EDL SKIP: Начало: %.2f  Конец: %.2f   Текущая: V: %.2f  A: %.2f     \r"
 #define MSGTR_OpenedStream "успех: формат: %d  данные: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "видеокодек: копирование кадров (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "аудиокодек: копирование кадров (формат=%x цепочек=%d скорость=%d битов=%d Б/с=%d образец=%d)\n"
@@ -573,6 +576,9 @@ static char help_text[]=
 #define MSGTR_InvalidMPEGES "Недопустимый MPEG-ES поток??? свяжитесь с автором, это может быть багом :(\n"
 #define MSGTR_FormatNotRecognized "======= Извините, формат этого файла не распознан/не поддерживается ==========\n"\
 				  "===== Если это AVI, ASF или MPEG поток, пожалуйста свяжитесь с автором! ======\n"
+#define MSGTR_SettingProcessPriority "Устанавливаю приоритет процесса: %s\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] формат:%d  fourcc:0x%X  размер:%dx%d  fps:%5.2f  ftime:=%6.4f\n"
+#define MSGTR_CannotInitializeMuxer "Невозможно инициализировать мультиплексор."
 #define MSGTR_MissingVideoStream "Видеопоток не найден!\n"
 #define MSGTR_MissingAudioStream "Аудиопоток не найден -> без звука\n"
 #define MSGTR_MissingVideoStreamBug "Видеопоток потерян!? свяжитесь с автором, это может быть багом :(\n"
@@ -662,6 +668,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Кодек не установил sh->disp_w и sh->disp_h, пытаюсь обойти.\n"
 #define MSGTR_VoConfigRequest "VDec: запрос vo config - %d x %d (предпочтимое цветовое пространство: %s)\n"
+#define MSGTR_UsingXAsOutputCspNoY "VDec: использую %s в качестве выходного csp (не %d)\n"
 #define MSGTR_CouldNotFindColorspace "Не могу найти подходящее цветовое пространство - попытаюсь с -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect - %.2f:1 - премасштабирую для коррекции соотношения сторон фильма.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect не определён - премасштабирование не применяется.\n"
