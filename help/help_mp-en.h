@@ -2000,7 +2000,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: Selected font family is not the requested one: '%s' != '%s'\n"
 #define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Using default font family: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Using default font: (%s, %d, %d) -> %s, %d\n"
-#define MSGTR_LIBASS_UsingArialFontFamily "[æss] fontconfig_select: Using 'Arial' font family: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: Using 'Arial' font family: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_FcInitLoadConfigAndFontsFailed "[ass] FcInitLoadConfigAndFonts failed.\n"
 #define MSGTR_LIBASS_UpdatingFontCache "[ass] Updating font cache.\n"
 #define MSGTR_LIBASS_BetaVersionsOfFontconfigAreNotSupported "[ass] Beta versions of fontconfig are not supported.\n[ass] Update before reporting any bugs.\n"
