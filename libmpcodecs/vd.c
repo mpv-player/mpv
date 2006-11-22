@@ -226,7 +226,7 @@ csp_again:
 	return 0;	// failed
     }
     out_fmt=sh->codec->outfmt[j];
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"VDec: using %s as output csp (no %d)\n",vo_format_name(out_fmt),j);
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_UsingXAsOutputCspNoY,vo_format_name(out_fmt),j);
     sh->outfmtidx=j;
     sh->vfilter=vf;
 
