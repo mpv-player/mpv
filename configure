@@ -6965,14 +6965,14 @@ if test "$_gtk1" = no ; then
   if $_pkg_config gtk+-2.0 --exists ; then
     _gtk=`$_pkg_config gtk+-2.0 --modversion 2>/dev/null`
     _inc_extra="$_inc_extra `$_pkg_config gtk+-2.0 --cflags 2>/dev/null`"
-    _ld_gtk=`$_pkg_config gtk+-2.0 --libs 2>/dev/null`
+    _libs_mplayer="$_libs_mplayer `$_pkg_config gtk+-2.0 --libs 2>/dev/null`"
     echores "$_gtk"
 
     # Check for GLIB2
     if $_pkg_config glib-2.0 --exists ; then
       echocheck "glib version"
       _glib=`$_pkg_config glib-2.0 --modversion 2>/dev/null`
-      _ld_glib=`$_pkg_config glib-2.0 --libs 2>/dev/null`
+      _libs_mplayer="$_libs_mplayer `$_pkg_config glib-2.0 --libs 2>/dev/null`"
       echores "$_glib"
 
       _def_gui='#define HAVE_NEW_GUI 1'
@@ -7001,7 +7001,7 @@ if test "$_gtk1" = yes ; then
   fi
   _gtk=`$_gtkconfig --version 2>&1`
   _inc_extra="$_inc_extra `$_gtkconfig --cflags 2>&1`"
-  _ld_gtk=`$_gtkconfig --libs 2>&1`
+  _libs_mplayer="$_libs_mplayer `$_gtkconfig --libs 2>&1`"
   echores "$_gtk (using $_gtkconfig)"
 
   # Check for GLIB
@@ -7016,7 +7016,7 @@ if test "$_gtk1" = yes ; then
     fi
   fi
   _glib=`$_glibconfig --version 2>&1`
-  _ld_glib=`$_glibconfig --libs 2>&1`
+  _libs_mplayer="$_libs_mplayer `$_glibconfig --libs 2>&1`"
   echores "$_glib (using $_glibconfig)"
 
   _def_gui='#define HAVE_NEW_GUI 1'
@@ -7359,7 +7359,7 @@ GIF = $_gif
 
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm $_ld_arch
-EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_sock $_ld_gtk $_ld_glib
+EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_sock
 EXTRALIBS_MENCODER = $_libs_mencoder
 
 HAVE_MLIB = $_mlib
