@@ -44,7 +44,7 @@ typedef struct vf_instance_s {
         unsigned char** src, int* stride, int w,int h, int x, int y);
     void (*uninit)(struct vf_instance_s* vf);
 
-    void (*continue_buffered_image)(struct vf_instance_s* vf);
+    int (*continue_buffered_image)(struct vf_instance_s* vf);
     // caps:
     unsigned int default_caps; // used by default query_format()
     unsigned int default_reqs; // used by default config()
