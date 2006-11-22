@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r21001
+// In sync with r21082
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -2021,4 +2021,62 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverV4L2 "[Radio] Benutze V4Lv2-Radioschnittstelle.\n"
 #define MSGTR_RADIO_DriverV4L "[Radio] Benutze V4Lv1-Radioschnittstelle.\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[Radio] Benutze *BSD BT848-Radioschnittstelle.\n"
+
+// ================================== LIBASS ====================================
+
+// ass_bitmap.c
+#define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] Fehler %d in FT_Glyph_To_Bitmap\n"
+#define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Nichtunterstützter Pixelmodus: %d\n"
+
+// ass.c
+#define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Warnung: kein Style mit Namen '%s' gefunden, verwende '%s'\n"
+#define MSGTR_LIBASS_BadTimestamp "[ass] schlechter Zeitstempel\n"
+#define MSGTR_LIBASS_BadEncodedDataSize "[ass] schlecht encodierte Datengröße\n"
+#define MSGTR_LIBASS_FontLineTooLong "[ass] Schriftzeile zu lang: %d, %s\n"
+#define MSGTR_LIBASS_EventFormatHeaderMissing "[ass] fehlender Ereignisformat-Header\n"
+#define MSGTR_LIBASS_ErrorOpeningIconvDescriptor "[ass] Fehler beim Öffnen des iconv-Deskriptors.\n"
+#define MSGTR_LIBASS_ErrorRecodingFile "[ass] Fehler bei Recodierung der Datei.\n"
+#define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): fopen fehlgeschlagen\n"
+#define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): fseek fehlgeschlagen\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): Laden von Untertiteln größer als 10M verweigert.\n"
+#define MSGTR_LIBASS_ReadFailed "Lesen fehlgeschlagen, %d: %s\n"
+#define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Hinzugefügte Untertiteldatei: <Speicher> (%d Styles, %d Ereignisse)\n"
+#define MSGTR_LIBASS_AddedSubtitleFileFname "[ass]  Hinzugefügte Untertiteldatei: %s (%d Styles, %d Ereignisse)\n"
+#define MSGTR_LIBASS_FailedToCreateDirectory "[ass] Fehler beim Erstellen des Verzeichnisses %s\n"
+#define MSGTR_LIBASS_NotADirectory "[ass] Kein Verzeichnis: %s\n"
+
+// // ass_cache.c
+#define MSGTR_LIBASS_TooManyFonts "[ass] Zu viele Schriften\n"
+#define MSGTR_LIBASS_ErrorOpeningFont "[ass] Fehler beim Öffnen der Schrift: %s, %d\n"
+
+// ass_fontconfig.c
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: Die gewählte Schriftfamilie ist nicht die angeforderte: '%s' != '%s'\n"
+#define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Verwende Standardschriftfamilie: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Verwende Standardschrift: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: Verwende 'Arial'-Schriftfamilie: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_FcInitLoadConfigAndFontsFailed "[ass] FcInitLoadConfigAndFonts fehlgeschlagen.\n"
+#define MSGTR_LIBASS_UpdatingFontCache "[ass] Aktualisiere Schriftzwischenspeicher.\n"
+#define MSGTR_LIBASS_BetaVersionsOfFontconfigAreNotSupported "[ass] Beta-Versionen von fontconfig werden nicht unterstützt.\n[ass] Bevor Du Bugs berichtest, mache ein Update.\n"
+#define MSGTR_LIBASS_FcStrSetAddFailed "[ass] FcStrSetAdd fehlgeschlagen.\n"
+#define MSGTR_LIBASS_FcDirScanFailed "[ass] FcDirScan fehlgeschlagen.\n"
+#define MSGTR_LIBASS_FcDirSave "[ass] FcDirSave fehlgeschlagen.\n"
+#define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] FcConfigAppFontAddDir fehlgeschlagen\n"
+#define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig deaktiviert, es wird nur die Standardschrift verwendet werden.\n"
+
+// ass_render.c
+#define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] Weder PlayResX noch PlayResY definiert. Nehme 384x288 an.\n"
+#define MSGTR_LIBASS_PlayResYUndefinedSettingY "[ass] PlayResY undefiniert, setze %d.\n"
+#define MSGTR_LIBASS_PlayResXUndefinedSettingX "[ass] PlayResX undefiniert, setze %d.\n"
+#define MSGTR_LIBASS_FT_Init_FreeTypeFailed "[ass] FT_Init_FreeType fehlgeschlagen.\n"
+#define MSGTR_LIBASS_Init "[ass] Initialisierung\n"
+#define MSGTR_LIBASS_InitFailed "[ass] Initialisierung fehlgeschlagen.\n"
+#define MSGTR_LIBASS_BadCommand "[ass] Schlechter Befehl: %c%c\n"
+#define MSGTR_LIBASS_ErrorLoadingGlyph  "[ass] Fehler beim Laden der Glyphe.\n"
+#define MSGTR_LIBASS_FT_Glyph_Stroke_Error "[ass] Fehler %d bei FT_Glyph_Stroke\n"
+#define MSGTR_LIBASS_UnknownEffectType_InternalError "[ass] Unbekannter Effekttyp (interner Fehler)\n"
+#define MSGTR_LIBASS_NoStyleFound "[ass] Kein Style gefunden!\n"
+#define MSGTR_LIBASS_EmptyEvent "[ass] Leeres Ereignis!\n"
+#define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] MAX_GLYPHS erreicht: Ereignis %d, Start = %llu, Dauer = %llu\n Text = %s\n"
+#define MSGTR_LIBASS_EventHeightHasChanged "[ass] Warnung! Ereignishöhe geändert!  \n"
+#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Zu viele simultane Ereignisse!\n"
 
