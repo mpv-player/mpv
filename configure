@@ -5315,7 +5315,7 @@ fi
 if test "$_freetype" = yes ; then
     _def_freetype='#define HAVE_FREETYPE'
     _inc_extra="$_inc_extra `$_freetypeconfig --cflags`"
-    _ld_freetype=`$_freetypeconfig --libs`
+    _ld_extra="$_ld_extra `$_freetypeconfig --libs`"
 else
     _def_freetype='#undef HAVE_FREETYPE'
 fi
@@ -5344,13 +5344,13 @@ EOF
   _fontconfig=no
   for _ld_tmp in "" "-lexpat -lfreetype" "-lexpat -lfreetype -lz" ; do
     _ld_tmp="-lfontconfig $_ld_tmp"
-    cc_check $_ld_tmp && _fontconfig=yes && _ld_fontconfig="$_ld_tmp" && break
+    cc_check $_ld_tmp && _fontconfig=yes && _ld_extra="$_ld_extra $_ld_tmp" && break
   done
   if test "$_fontconfig" = no && $_pkg_config --exists fontconfig ; then
     _inc_tmp=`$_pkg_config --cflags fontconfig`
     _ld_tmp=`$_pkg_config --libs fontconfig`
     cc_check $_inc_tmp $_ld_tmp && _fontconfig=yes \
-      && _ld_fontconfig="$_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp"
+      && _ld_extra="$_ld_extra $_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp"
   fi
 fi
 if test "$_fontconfig" = yes ; then
@@ -7360,7 +7360,7 @@ EXTRA_LIB = $_ld_extra \
   $_ld_static \
   $_ld_lm $_ld_gif \
   $_ld_vorbis $_ld_theora $_xmms_lib \
-  $_ld_arch $_ld_freetype $_ld_fontconfig
+  $_ld_arch
 EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_x11 $_ld_sock $_ld_static $_ld_gtk $_ld_glib
 EXTRALIBS_MENCODER = $_libs_mencoder
 
