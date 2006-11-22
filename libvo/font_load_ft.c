@@ -1150,7 +1150,6 @@ void load_font_ft(int width, int height)
 
     if (vo_font) free_font_desc(vo_font);
 
-#ifdef USE_OSD
 #ifdef HAVE_FONTCONFIG
     if (font_fontconfig)
     {
@@ -1176,5 +1175,4 @@ void load_font_ft(int width, int height)
     else
 #endif
     vo_font=read_font_desc_ft(font_name, width, height);
-#endif
 }

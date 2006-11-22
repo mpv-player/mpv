@@ -263,7 +263,6 @@ set_volume:
 //	 printf( "!!! v: %.2f b: %.2f -> %.2f x %.2f\n",guiIntfStruct.Volume,guiIntfStruct.Balance,l,r );
          mixer_setvolume( &mixer,l,r );
 	}
-#ifdef USE_OSD
 	if ( osd_level )
 	 {
 	  osd_visible=(GetTimerMS() + 1000) | 1;
@@ -271,7 +270,6 @@ set_volume:
 	  vo_osd_progbar_value=( ( guiIntfStruct.Volume ) * 256.0 ) / 100.0;
 	  vo_osd_changed( OSDTYPE_PROGBAR );
 	 }
-#endif
         break;
 
 

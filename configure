@@ -7531,8 +7531,6 @@ $_def_named_asm_args
 
 #define PREFIX "$_prefix"
 
-#define USE_OSD 1
-
 /* enable/disable SIGHANDLER */
 $_def_sighandler
 

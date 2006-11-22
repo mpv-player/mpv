@@ -88,12 +88,10 @@ static int control(struct vf_instance_s* vf, int request, void* data)
         return(video_out->control(VOCTRL_SET_DEINTERLACE, data)
                 == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
     }
-#ifdef USE_OSD
     case VFCTRL_DRAW_OSD:
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
 	video_out->draw_osd();
 	return CONTROL_TRUE;
-#endif
     case VFCTRL_FLIP_PAGE:
     {
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?

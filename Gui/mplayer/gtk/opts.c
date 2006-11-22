@@ -407,13 +407,6 @@ void ShowPreferences( void )
  gtk_widget_set_sensitive( SBASSBottomMargin,FALSE );
 #endif
 
-#ifndef USE_OSD
- gtk_widget_set_sensitive( RBOSDNone,FALSE );
- gtk_widget_set_sensitive( RBOSDTandP,FALSE );
- gtk_widget_set_sensitive( RBOSDIndicator,FALSE );
- gtk_widget_set_sensitive( RBOSDTPTT,FALSE );
-#endif
-
 // -- signals
  gtk_signal_connect( GTK_OBJECT( CBExtraStereo ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CBNormalize ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)1 );

@@ -1443,14 +1443,6 @@ static mp_osd_msg_t* get_osd_msg(void) {
     return NULL;
 }
 
-// Make a define to test if we are using the term OSD without having
-// to #ifdef USE_OSD all the time.
-#ifdef USE_OSD
-#define use_term_osd (term_osd && !sh_video)
-#else
-#define use_term_osd (term_osd)
-#endif
-
 /**
  * \brief Display the OSD bar.
  *
@@ -1462,7 +1454,6 @@ static void set_osd_bar(int type,const char* name,double min,double max,double v
     
     if(osd_level < 1) return;
     
-#ifdef USE_OSD
     if(sh_video) {
         osd_visible = (GetTimerMS() + 1000) | 1;
         vo_osd_progbar_type = type;
@@ -1470,7 +1461,6 @@ static void set_osd_bar(int type,const char* name,double min,double max,double v
         vo_osd_changed(OSDTYPE_PROGBAR);
         return;
     }
-#endif
     
     set_osd_msg(OSD_MSG_BAR,1,osd_duration,"%s: %d %%",
                 name,ROUND(100*(val-min)/(max-min)));
@@ -1491,24 +1481,19 @@ static void update_osd_msg(void) {
     static char osd_text[64] = "";
     static char osd_text_timer[64];
     
-#ifdef USE_OSD    
     // we need some mem for vo_osd_text
     vo_osd_text = (unsigned char*)osd_text;
-#endif
     
     // Look if we have a msg
     if((msg = get_osd_msg())) {
         if(strcmp(osd_text,msg->msg)) {
             strncpy((char*)osd_text, msg->msg, 63);
-#ifdef USE_OSD
             if(sh_video) vo_osd_changed(OSDTYPE_OSD); else 
-#endif
             if(term_osd) mp_msg(MSGT_CPLAYER,MSGL_STATUS,"%s%s\n",term_osd_esc,msg->msg);
         }
         return;
     }
         
-#ifdef USE_OSD
     if(sh_video) {
         // fallback on the timer
         if(osd_level>=2) {
@@ -1547,7 +1532,6 @@ static void update_osd_msg(void) {
         }
         return;
     }
-#endif
         
     // Clear the term osd line
     if(term_osd && osd_text[0]) {
@@ -3435,7 +3419,7 @@ void pause_loop(void)
         // Small hack to display the pause message on the OSD line.
         // The pause string is: "\n == PAUSE == \r" so we need to
         // take the first and the last char out
-	if (use_term_osd) {
+	if (term_osd && !sh_video) {
 	    char msg[128] = MSGTR_Paused;
 	    int mlen = strlen(msg);
 	    msg[mlen-1] = '\0';
@@ -3765,7 +3749,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 //------ load global data first ------
 
 // check font
-#ifdef USE_OSD
 #ifdef HAVE_FREETYPE
   init_freetype();
 #endif
@@ -3788,7 +3771,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #ifdef HAVE_FONTCONFIG
   }
 #endif
-#endif /* USE_OSD */
+
   vo_init_osd();
 
 #ifdef USE_ASS
@@ -4717,7 +4700,6 @@ if(auto_quality>0){
 
   current_module="pause";
 
-#ifdef USE_OSD
   if(osd_visible){
       // 36000000 means max timed visibility is 1 hour into the future, if
       // the difference is greater assume it's wrapped around from below 0
@@ -4729,7 +4711,6 @@ if(auto_quality>0){
 	   osd_function = OSD_PLAY;
     }
   }
-#endif
 
   if (osd_function == OSD_PAUSE) {
       pause_loop();
@@ -4972,7 +4953,7 @@ if(step_sec>0) {
     } break;
     case MP_CMD_OSD :  {
 	int v = cmd->args[0].v.i;
-	int max = use_term_osd ? MAX_TERM_OSD_LEVEL : MAX_OSD_LEVEL;
+	int max = (term_osd && !sh_video) ? MAX_TERM_OSD_LEVEL : MAX_OSD_LEVEL;
 	if(osd_level > max) osd_level = max;
 	if(v < 0)
 	  osd_level=(osd_level+1)%(max+1);

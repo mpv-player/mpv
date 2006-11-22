@@ -520,7 +520,6 @@ if (frameno_filename) {
 #endif	
 
 // check font
-#ifdef USE_OSD
 #ifdef HAVE_FREETYPE
   init_freetype();
 #endif
@@ -541,7 +540,6 @@ if (frameno_filename) {
 #endif
 #ifdef HAVE_FONTCONFIG
   }
-#endif
 #endif
 
   vo_init_osd();

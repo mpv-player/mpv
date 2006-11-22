@@ -52,9 +52,7 @@ extern int opt_screen_size_y;
 extern int fullscreen;
 extern int vidmode;
 
-#ifdef USE_OSD
 extern int osd_level;
-#endif
 
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
