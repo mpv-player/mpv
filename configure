@@ -5679,7 +5679,7 @@ int main(void)
 EOF
   for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora"; do
     cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" \
-                         && theora=yes && break
+                         && _theora=yes && break
   done
   if test "$_theora" = no && test "$_tremor_internal" = yes; then
     for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora"; do
