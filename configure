@@ -6863,9 +6863,9 @@ if test "$_xmms" = yes ; then
 
   _def_xmms='#define HAVE_XMMS 1'
   if darwin ; then
-     _xmms_lib="${_xmmslibdir}/libxmms.dylib"
+     _ld_extra="$_ld_extra ${_xmmslibdir}/libxmms.dylib"
   else
-     _xmms_lib="${_xmmslibdir}/libxmms.so.1 -export-dynamic"
+     _ld_extra="$_ld_extra ${_xmmslibdir}/libxmms.so.1 -export-dynamic"
   fi
 else
   _def_xmms='#undef HAVE_XMMS'
@@ -7358,7 +7358,7 @@ JPEG = $_jpeg
 GIF = $_gif
 
 EXTRALIBS = $_extra_libs
-EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm $_ld_vorbis $_xmms_lib $_ld_arch
+EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm $_ld_vorbis $_ld_arch
 EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_sock $_ld_gtk $_ld_glib
 EXTRALIBS_MENCODER = $_libs_mencoder
 
