@@ -218,7 +218,7 @@ static void copy_from_image(struct vf_instance_s* vf, int first_row, int last_ro
 	chroma_rows = (last_row - first_row) / 2;
 
 	for (pl = 1; pl < 3; ++pl) {
-		int dst_stride = vf->dmpi->stride[pl] * 2;
+		int dst_stride = vf->priv->outw;
 		int src_stride = vf->dmpi->stride[pl];
 		
 		unsigned char* src = vf->dmpi->planes[pl] + (first_row/2) * src_stride;
@@ -254,7 +254,7 @@ static void copy_to_image(struct vf_instance_s* vf)
 	int i, j, k;
 	for (pl = 1; pl < 3; ++pl) {
 		int dst_stride = vf->dmpi->stride[pl];
-		int src_stride = vf->dmpi->stride[pl] * 2;
+		int src_stride = vf->priv->outw;
 		
 		unsigned char* dst = vf->dmpi->planes[pl];
 		unsigned char* src = vf->priv->planes[pl];
@@ -291,8 +291,8 @@ static void my_draw_bitmap(struct vf_instance_s* vf, unsigned char* bitmap, int 
 
 	src = bitmap;
 	dsty = dmpi->planes[0] + dst_x + dst_y * dmpi->stride[0];
-	dstu = vf->priv->planes[1] + dst_x + dst_y * 2 * dmpi->chroma_width;
-	dstv = vf->priv->planes[2] + dst_x + dst_y * 2 * dmpi->chroma_width;
+	dstu = vf->priv->planes[1] + dst_x + dst_y * vf->priv->outw;
+	dstv = vf->priv->planes[2] + dst_x + dst_y * vf->priv->outw;
 	for (i = 0; i < bitmap_h; ++i) {
 		for (j = 0; j < bitmap_w; ++j) {
 			unsigned k = ((unsigned)src[j]) * opacity / 255;
@@ -302,8 +302,8 @@ static void my_draw_bitmap(struct vf_instance_s* vf, unsigned char* bitmap, int 
 		}
 		src += stride;
 		dsty += dmpi->stride[0];
-		dstu += 2 * dmpi->chroma_width;
-		dstv += 2 * dmpi->chroma_width;
+		dstu += vf->priv->outw;
+		dstv += vf->priv->outw;
 	} 
 }
 
