@@ -2384,16 +2384,16 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
 
       if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
         {
-      track->sh_sub.ass_track = ass_new_track(ass_library);
-      size = track->private_size;
-      m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
-      if (buffer && m)
-        {
-          free (track->private_data);
-          track->private_data = buffer;
-          track->private_size = size;
-        }
-      ass_process_codec_private(track->sh_sub.ass_track, track->private_data, track->private_size);
+          track->sh_sub.ass_track = ass_new_track(ass_library);
+          size = track->private_size;
+          m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
+          if (buffer && m)
+            {
+              free (track->private_data);
+              track->private_data = buffer;
+              track->private_size = size;
+            }
+          ass_process_codec_private(track->sh_sub.ass_track, track->private_data, track->private_size);
         }
       else
         {
