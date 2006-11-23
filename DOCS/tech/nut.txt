@@ -7,7 +7,7 @@ NUT Open Container Format 20061104
 Intro:
 ======
 
-NUT is a Free multimedia container format for storeage of audio, video,
+NUT is a Free multimedia container format for storage of audio, video,
 subtitles and related user defined streams, it provides exact timestamps for
 synchronization and seeking, is simple, has low overhead and can recover
 in case of errors in the stream
@@ -55,15 +55,15 @@ keyframe
     exact definition is below
     The nth frame is a keyframe if and only if frames n, n+1, ... in 
     presentation order (that are all frames with a pts >= frame[n].pts) can
-    be decoded successfully without reference to frames prior n in storeage
+    be decoded successfully without reference to frames prior n in storage
     order (that are all frames with a dts < frame[n].dts)
     if no such frames exist (for example due to use of overlapped transforms
     like the MDCT in an audio codec) then the definition shall be extended
-    by droping n out of the set of frames which must be decodable, if this
-    is still insufficient then n+1 shall be droped, and so on until there is
+    by dropping n out of the set of frames which must be decodable, if this
+    is still insufficient then n+1 shall be dropped, and so on until there is
     a keyframe
     every frame which is marked as a keyframe MUST be a keyframe according to
-    the defintion above, a muxer MUST mark every frame it knows is a keyframe
+    the definition above, a muxer MUST mark every frame it knows is a keyframe
     as such, a muxer SHOULD NOT analyze future frames to determine the
     keyframe status of the current frame but instead just set the frame as
     non keyframe
@@ -166,9 +166,9 @@ file:
             frame
     }
 
-the structure of a undamaged file should look like the following, but
+the structure of an undamaged file should look like the following, but
 demuxers should be flexible and be able to deal with damaged headers so the
-above is a better loop in practice (not to mention its simpler)
+above is a better loop in practice (not to mention it is simpler)
 note, demuxers MUST be able to deal with new and unknown headers
 
 file:
@@ -407,7 +407,7 @@ Tag description:
 
 file_id_string
     "nut/multimedia container\0"
-    the very first thing in every nut file, usefull for identifying nut
+    the very first thing in every nut file, useful for identifying nut
     files
 
 *_startcode
@@ -416,7 +416,7 @@ file_id_string
 main_startcode
     0x7A561F5F04ADULL + (((uint64_t)('N'<<8) + 'M')<<48)
 
-stream_starcode
+stream_startcode
     0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
 
 syncpoint_startcode
@@ -441,7 +441,7 @@ time_base_count
 forward_ptr
     size of the packet data (exactly the distance from the first byte
     after the packet_header to the first byte of the next packet)
-    every nut packet contains a forward_ptr immedeatly after its startcode
+    every nut packet contains a forward_ptr immediately after its startcode
     with the exception of frame_code based packets, the forward pointer
     can be used to skip over the packet without decoding its contents
 
@@ -467,7 +467,7 @@ max_distance
 
 
 max_pts_distance
-    max absoloute difference of pts of new frame from last_pts in the
+    max absolute difference of pts of new frame from last_pts in the
     timebase of the stream, without a checksum after the frameheader.
     A frame header MUST include a checksum if abs(pts-last_pts) is
     strictly greater than max_pts_distance.
@@ -482,7 +482,7 @@ stream_id
 stream_class
     0    video
     1    audio
-    2    subtiles
+    2    subtitles
     3    userdata
     Note: the remaining values are reserved and MUST NOT be used
           a demuxer MUST ignore streams with reserved classes
@@ -549,11 +549,11 @@ msb_pts_shift
 
 decode_delay
     size of the reordering buffer used to convert pts to dts
-    codecs which dont support b frames normaly use 0
+    codecs which don't support b frames normally use 0
     mpeg1/mpeg2 style codecs with b frames use 1
     h264 style b pyramid uses 2
     h264 and future codecs might need values >2
-    audio codecs generally use 0 (we arent aware of any which doesnt
+    audio codecs generally use 0 (we aren't aware of any which doesn't
     but its theoretically possible that one exists which needs it >0)
     decode_delay MUST NOT be set higher than necessary for a codec.
 
@@ -566,14 +566,14 @@ codec_specific_data
     if a codec has a global header it SHOULD be placed in here instead of
     at the start of every keyframe
     the exact format is specified in the codec spec
-    for H.264 the NAL units MUST be formated as in a bytestream 
+    for H.264 the NAL units MUST be formatted as in a bytestream 
     (with 00 00 01 prefixes)
 
 frame_code
     frame_code is a 8bit field which exists before every frame, it can
     store part of the size of the frame, the stream number, the timestamp
-    and some flags amongth other things, what is not directly stored
-    in it but is needed is stored in various fields immedeatly after it
+    and some flags amongst other things, what is not directly stored
+    in it but is needed is stored in various fields immediately after it
     the values stored in it can be found in the main header
     the value 78 ('N') is forbidden to ensure that the byte is always
     different from the first byte of any startcode
@@ -668,13 +668,13 @@ lsb_pts
 dts
     decoding timestamp
     the dts of a frame is the timestamp of the first sample which is
-    output by a decoder when it is feeded with the frame, note that the
-    data output is not neccesarily what is coded in the frame, but may
+    output by a decoder when it is fed with the frame, note that the
+    data output is not necessarily what is coded in the frame, but may
     be data from previous frames
     dts is calculated by using a decode_delay+1 sized buffer for each
     stream, into which the current pts is inserted and the element with
     the smallest value is removed, this is then the current dts
-    this buffer is initalized with decode_delay -1 elements
+    this buffer is initialized with decode_delay -1 elements
 
     Pts of all frames in all streams MUST be bigger or equal to dts of all
     previous frames in all streams, compared in common timebase. (EOR
@@ -710,7 +710,7 @@ checksum
     including the checksum itself (from first byte after the
     packet_header until last byte before the checksum).
     for frame headers the checksum contains the framecode byte and all
-    following bytes upto the checksum itself
+    following bytes up to the checksum itself
 
 header_checksum
     checksum over the startcode and forward pointer
@@ -741,7 +741,7 @@ max_pts
     The highest pts in the entire file
 
 syncpoint_pos_div16
-    offset from begginning of file to up to 15 bytes before the syncpoint
+    offset from beginning of file to up to 15 bytes before the syncpoint
     referred to in this index entry. Relative to position of last
     syncpoint.
 
@@ -821,7 +821,7 @@ info packet types
     "Keywords"
     "Language"
         ISO 639 and ISO 3166 for language/country code
-        something like "eng" (US english), can be 0 if unknown
+        something like "eng" (US English), can be 0 if unknown
         and "multi" if several languages
         see http://www.loc.gov/standards/iso639-2/englangn.html
         and http://www.din.de/gremien/nas/nabd/iso3166ma/codlstp1/en_listp1.html
@@ -891,7 +891,7 @@ If a demuxer has seen several info packets with the same chapter_id and
 stream_id then it MUST ignore all but the one with the highest position in
 the file
 
-demxuxers SHOULD NOT search the whole file for info packets
+demuxers SHOULD NOT search the whole file for info packets
 
 demuxer (non-normative):
 ------------------------
@@ -911,7 +911,7 @@ B. forward seeking
     which is smallest and >= the target timestamp
     1b. perform a binary search on the syncpoint back pointers finding the
     smallest one which has a back ptr >= the position of what was found in 1.
-2. follow the back pointer to the correspoding syncpoint
+2. follow the back pointer to the corresponding syncpoint
 
 Seeking with an index (non-normative):
 --------------------------------------
@@ -1002,7 +1002,7 @@ static inline int put_v(BufferContext *bc, uint64_t val){
 
     if(space_left(bc) < 9) return -1;
 
-    val &= 0x7FFFFFFFFFFFFFFFULL; // FIXME can only encode upto 63 bits currently
+    val &= 0x7FFFFFFFFFFFFFFFULL; // FIXME can only encode up to 63 bits currently
     for(i=7; ; i+=7){
         if(val>>i == 0) break;
     }
