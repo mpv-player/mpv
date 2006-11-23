@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r21152 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -1418,7 +1418,7 @@ Starte Wiedergabe...<!--
                 <listitem><para>momentane Verzögerung zwischen Audio- und Videostreams</para></listitem>
               </varlistentry>
               <varlistentry><term><systemitem>[2126:192]</systemitem></term>
-                <listitem><para>durchschnittliche Videobitrate (in Mb/s) und durchschnittliche Audiobitrate (in Mb/s)</para></listitem>
+                <listitem><para>durchschnittliche Videobitrate (in kb/s) und durchschnittliche Audiobitrate (in kb/s)</para></listitem>
                 </varlistentry>
               </variablelist>
             </para></answer>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r20933 -->
+<!-- in sync with r21155 -->
 
 <chapter id="install">
   <title>Installation</title>
@@ -11,13 +11,11 @@
   </para>
 
   <para>
-    In diesem Abschnitt werde ich versuchen, dich durch den Vorgang des
-    Compilierens und Konfigurierens von <application>MPlayer</application> zu
-    leiten. Es ist nicht leicht, muss aber nicht unbedingt schwierig sein. Wenn du
-    andere Erfahrungen machst als das, was ich erkläre, durchsuche bitte die
-    Dokumentation, und du wirst deine Antworten finden. Wenn du Links siehst, folge
-    ihnen und lies ihren Inhalt sorgfältig. Das wird etwas Zeit in Anspruch
-    nehmen, aber das IST es wert.
+    In diesem Abschnitt wirst du durch den Vorgang des
+    Compilierens und Konfigurierens von <application>MPlayer</application>
+    geleitet. Es ist nicht leicht, muss aber nicht unbedingt schwierig sein. Wenn du
+    Erfahrungen machst anders als das hier beschriebene, durchsuche bitte die
+    Dokumentation, und du wirst deine Antworten finden.
   </para>
 
   <para>
@@ -31,36 +29,31 @@
     <itemizedlist>
       <listitem>
         <para>
-          <emphasis role="bold">binutils</emphasis> - Empfohlene Version ist <emphasis role="bold">2.11.x</emphasis>.
-          Dieses Programm ist verantwortlich für die Generierung von Instruktionen für
-          MMX/3DNow!/usw. und daher sehr wichtig.
+          <emphasis role="bold">binutils</emphasis> - empfohlene Version ist
+          <emphasis role="bold">2.11.x</emphasis>.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">gcc</emphasis> - Empfohlene Versionen sind 2.95
+          <emphasis role="bold">gcc</emphasis> - empfohlene Versionen sind 2.95
           und 3.4+. 2.96 und 3.0.x generieren bekannterweise fehlerhaften Code, 3.1 und
           3.2 hatten auch Probleme, 3.3 ein paar kleinere. Benutze auf PowerPC-Architektur 4.x+.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">XFree86</emphasis> - Empfohlene Version ist
-          <emphasis role="bold">immer die neueste</emphasis> (4.3). Normalerweise
-          möchte das jeder. Mit XFree86 4.0.2 beginnend enthält es die
-          <link linkend="xv">XVideo</link>-Erweiterung (irgendwo als
-          <emphasis role="bold">Xv</emphasis> bezeichnet), die bei Karten, die dies unterstützen,
-          für die YUV-Hardwarebeschleunigung (schnelle Bilddarstellung) benötigt wird.
-          Stelle auch sicher, dass das <emphasis role="bold">Entwicklerpaket</emphasis>
+          <emphasis role="bold">Xorg/XFree86</emphasis> - empfohlene Version ist
+          4.3 oder neuer. Stelle auch sicher, dass die
+          <emphasis role="bold">Entwicklerpakete</emphasis>
           installiert ist, sonst wird es nicht funktionieren.
-          Bei manchen Grafikkarten benötigst du kein XFree86. Siehe Liste unten.
+          Du brauchst X nicht zwangsläufig, manche Videoausgabetreiber funktionieren auch ohne.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">make</emphasis> - Empfohlene Version ist
-          <emphasis role="bold">immer die neueste</emphasis> (mindestens 3.79.x). Dies
-          ist normalerweise nicht so wichtig.
+          <emphasis role="bold">make</emphasis> - empfohlene Version ist
+          3.79.x oder neuer.
+          Um die XML-Dokumentation zu erstellen, benötigst du 3.80.
         </para>
       </listitem>
       <listitem>
@@ -71,60 +64,37 @@
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">SDL</emphasis> - ist nicht zwingend notwendig, kann
-          in manchen Fällen aber helfen (schlechter Klang, Grafikkarten, die zusammen
-          mit dem xv-Treiber komischerweise hinterherhingen).
-          Benutze immer die neueste Version (beginnend bei 1.2.x).
+          <emphasis role="bold">libjpeg</emphasis> - optionaler JPEG-Decoder,
+          benötigt für den JPEG-Videoausgabetreiber.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">libjpeg</emphasis> - optionaler JPEG-Decoder, der
-          von der Option <option>-mf</option> und für mache QT MOV-Dateien verwendet
-          wird. Nützlich sowohl für <application>MPlayer</application> als auch
-          <application>MEncoder</application>, wenn du vorhast, mit JPEG-Dateien zu
-          arbeiten.
+          <emphasis role="bold">libpng</emphasis> - optionaler (M)PNG-Decoder.
+          Wird für die GUI und den PNG-Videoausgabetreiber benötigt.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">libpng</emphasis> - empfohlen und
-          Standard-(M)PNG-Decoder. Wird für die GUI benötigt.
-          Nützlich sowohl für <application>MPlayer</application> als auch
-          <application>MEncoder</application>.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="bold">lame</emphasis> - empfohlen, erforderlich für
-          Audioencodierung in das MP3-Format mit <application>MEncoder</application>,
-          empfohlene Version ist <emphasis>immer die neueste</emphasis> (mindestens
-          3.90).
+          <emphasis role="bold">lame</emphasis> - 3.90 oder neuer wird empfohlen,
+          erforderlich für die Audioencodierung mit <application>MEncoder</application>.
         </para>
       </listitem>
       <listitem>
         <para>
           <emphasis role="bold">zlib</emphasis> - empfohlen, benötigt für die
-          Unterstützung komprimierter MOV-Headern und PNG.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="bold">libogg</emphasis> - optional, erforderlich für die
-          Wiedergabe von Dateien im OGG-Format.
+          Unterstützung komprimierter MOV-Header und PNG.
         </para>
       </listitem>
       <listitem>
         <para>
           <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
-          - optional, benötigt für die Wiedergabe von RTSP/RTP-Streams.
+          - optional, benötigt für die Wiedergabe mancher RTSP/RTP-Streams.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">directfb</emphasis> - optional, von
-          <ulink url="http://www.directfb.org"/>. Version 0.9.13 ist mindestens
-          erforderlich.
+          <emphasis role="bold">directfb</emphasis> - optional, verwende 0.9.13 oder neuer.
         </para>
       </listitem>
       <listitem>
@@ -148,230 +118,6 @@
           <emphasis role="bold">ALSA</emphasis> - optional, für Unterstützung der
           Audioausgabe mit ALSA. Version 0.9.0rc4 ist mindestens erforderlich.
         </para>
-      </listitem>
-    </itemizedlist>
-  </sect1>
-
-
-  <sect1 id="video-cards">
-    <title>Grafikkarten</title>
-
-    <para>
-      Es gibt allgemein zwei Arten Grafikkarten. Die eine (die neueren Karten)
-      unterstützen <emphasis role="bold">Hardware-Skalierung und YUV-Beschleunigung</emphasis>,
-      die anderen nicht.
-    </para>
-
-
-    <sect2 id="yuv-cards">
-      <title>YUV-Karten</title>
-
-      <para>
-        Diese können das Bild in jeder Größe darstellen und auf jede Größe
-        skalieren (zoomen), die in ihren Speicher passt, und das mit
-        <emphasis role="bold">geringer CPU-Last</emphasis> (sogar beim Zoom), daher ist
-        die Vollbildwiedergabe nett und sehr schnell.
-
-        <itemizedlist>
-          <listitem>
-            <para>
-              <emphasis role="bold">Matrox G200/G400/G450/G550-Karten</emphasis>: Obwohl ein
-              <link linkend="vidix">Vidix-Treiber</link> zur Verfügung steht, wird empfohlen,
-              statt dessen das mga_vid-Modul zu verwenden, da es wesentlich besser funktioniert.
-              Siehe bitte den Abschnitt <link linkend="mga_vid">mga_vid</link> für dessen Installation
-              und den Umgang damit. Es ist wichtig, diese Schritte <emphasis>vor</emphasis> der Compilierung
-              von <application>MPlayer</application> durchzuführen, da sonst keine Unterstützung
-              für mga_vid eingebaut wird. Schaue dir auch den Abschnitt
-              <link linkend="tvout-mga-g400">Matrox TV-out</link> an.
-              <emphasis role="bold"> Wenn du nicht Linux benutzt</emphasis>, ist deine einzige
-              Möglichkeit der VIDIX-Treiber: Lies den Abschnitt <link linkend="vidix">VIDIX</link>.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              <emphasis role="bold">3Dfx Voodoo3/Banshee-Karten</emphasis>: Bitte siehe den Abschnitt
-              <link linkend="tdfxfb">tdfxfb</link>, um große Geschwindigkeitsvorteile zu nutzen.
-              Es ist wichtig, diese Schritte <emphasis>vor</emphasis> der Compilierung
-              von <application>MPlayer</application> durchzuführen, da sonst keine Unterstützung
-              für 3Dfx eingebaut wird.
-              Wenn du X benutzt, verwende mindestens <emphasis role="bold">4.2.0</emphasis>, da der
-              3dfx Xv-Treiber in der Version 4.1.0 und davor nicht funktioniert.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              <emphasis role="bold">ATI-Karten</emphasis>: Der <link linkend="vidix">VIDIX</link>-Treiber
-              wird für folgende Karten bereitgestellt:
-              <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
-              Siehe auch die Dokumentation des TV-out im Abschnitt <link linkend="tvout-ati">ATI-Karten</link>,
-              damit du weißt, ob das TV-out deiner Karte unter Linux mit
-              <application>MPlayer</application> unterstützt wird.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              <emphasis role="bold">S3-Karten</emphasis>: Die Savage- und Virge/DX-Chips verfügen
-              über Hardwarebeschleunigung. Benutze eine XFree86-Version, die so neu wir möglich ist,
-              ältere Treiber sind buggy. Savage-Chips haben Probleme mit YV12-Darstellung, siehe
-              Abschnitt <link linkend="s3">S3 Xv</link> für Details. Ältere Trio-Karten haben keine
-              oder nur langsame Hardwareunterstützung.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              <emphasis role="bold">nVidia-Karten</emphasis>: Können oder können keine gute Wahl sein
-              für die Videowiedergabe. Wenn du eine GeForce2-Karte hast (oder neuer), ist es nicht
-              wahrscheinlich, dass sie ohne Fehler funktioniert.
-              <emphasis role="bold">Der in XFree86 eingebaute nVidia-Treiber unterstützt nicht auf
-                allen Karten YUV-Hardwarebeschleunigung.</emphasis> Du musst die Closed-Source-Treiber von
-              <ulink url="http://nvidia.com">nVidia.com</ulink> herunterladen. Siehe Abschnitt
-              <link linkend="nvidia">nVidia Xv-Treiber</link> für Details. Bitte siehe auch Abschnitt
-              <link linkend="tvout-nvidia">nVidia TV-out</link>, wenn du einen Fernseher verwenden möchtest.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              <emphasis role="bold">3DLabs GLINT R3 und Permedia3</emphasis>: Ein VIDIX-Treiber wird
-              bereitgestellt (pm3_vid). Bitte siehe Abschnitt <link linkend="vidix">VIDIX</link> für Details.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              <emphasis role="bold">Andere Karten</emphasis>: keine der oben genannten?
-              <itemizedlist>
-                <listitem>
-                  <simpara>
-                    Probiere, ob der XFree86-Treiber (und deine Karte) Hardwarebeschleunigung unterstützen.
-                    Siehe Abschnitt <link linkend="xv">Xv</link> für Details.
-                  </simpara>
-                </listitem>
-                <listitem>
-                  <simpara>
-                    Sollten sie dies nicht tun, werden die Features unter deinem Betriebssystem nicht
-                    unterstützt :( Wenn Hardwarebeschleunigung unter Windows funktioniert, bedeutet
-                    dies nicht, dass sie unter Linux oder anderen Betriebssystemen funktioniert, das
-                    hängt von den Treibern ab. Die meisten Hersteller stellen weder Linuxtreiber her,
-                    noch veröffentlichen sie die Spezifikationen ihrer Chips - daher hast du Pech,
-                    wenn du ihre Karten benutzt.
-                    Siehe <xref linkend="non-yuv-cards"/>.
-                  </simpara>
-                </listitem>
-              </itemizedlist>
-            </para>
-          </listitem>
-        </itemizedlist>
-      </para>
-    </sect2>
-
-
-    <sect2 id="non-yuv-cards" xreflabel="Non-YUV cards">
-      <title>Nicht-YUV-Karten</title>
-
-      <para>
-        Vollbildwiedergabe kann erreicht werden, indem entweder
-        <emphasis role="bold">Softwareskalierung</emphasis> aktiviert wird
-        (benutz die Option <option>-zoom</option> oder <option>-vf</option>, aber ich warne dich,
-        die ist langsam), oder durch den Wechsel zu einem kleineren Videomodus wie zum Beispiel
-        352x288. Hast du keine YUV-Beschleunigung, wird letztere Methode empfohlen.
-        Der Wechsel des Videomodus kann durch die Option <option>-vm</option> aktiviert werden
-        und funktioniert mit folgenden Treibern:
-        <itemizedlist>
-          <listitem>
-            <simpara>
-              <emphasis role="bold">Benutzung von </emphasis> XFree86: Siehe Details in den Abschnitten
-              <link linkend="dga">DGA-Treiber</link> und <link linkend="x11">X11-Treiber</link>.
-              DGA wird empfohlen! Probiere auch DGA via SDL, das funktioniert manchmal besser.
-            </simpara>
-          </listitem>
-          <listitem>
-            <simpara>
-              <emphasis role="bold">Nicht-Benutzung von</emphasis> XFree86: Probiere die Treiber
-              in folgender Reihenfolge:
-              <link linkend="vesa">vesa</link>,
-              <link linkend="fbdev">fbdev</link>,
-              <link linkend="svgalib">svgalib</link>,
-              <link linkend="aalib">aalib</link>.
-            </simpara>
-          </listitem>
-        </itemizedlist>
-      </para>
-    </sect2>
-
-    <!-- FIXME: finde eine logisch sinnvollere Ordnung für diesen Abschnitt -->
-    <sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic-Karten">
-      <title>Cirrus-Logic-Karten</title>
-      <itemizedlist>
-        <listitem>
-          <para>
-            GD 7548: verfügbar on-board und getestet in der Compaq Armada 41xx Notebook-Serie.
-            <itemizedlist>
-              <listitem>
-                <simpara>
-                  XFree86 3: Funktioniert in 8/16bpp-Modi. Trotzdem, der Treiber ist übel langsam in
-                  800x600@16bpp. <emphasis role="bold">Empfohlen: 640x480@16bpp</emphasis>
-                </simpara>
-              </listitem>
-              <listitem>
-                <simpara>
-                  XFree86 4: Der Xserver friert kurz nach dem Start ein, wenn Beschleunigung nicht
-                  aktiviert ist, dann jedoch laufen die Dinge noch langsamer als mit XFree86 3.
-                  Kein XVideo.
-                </simpara>
-              </listitem>
-              <listitem>
-                <simpara>
-                  FBdev: Framebuffer kann mit dem <systemitem>clgenfb</systemitem>-Treiber im Kernel
-                  aktiviert werden, auch wenn er bei mir nur mit 8bpp funktioniert hat, daher
-                  unbrauchbar. Die clgenfb-Source musste um die 7548-ID vor der Compilierung
-                  erweitert werden.
-                </simpara>
-              </listitem>
-              <listitem>
-                <simpara>
-                  VESA: Die Karte ist nur VBE 1.2-fähig, daher kann VESA-Ausgabe nicht benutzt
-                  werden. Kann mit UniVBE nicht umgangen werden.
-                </simpara>
-              </listitem>
-              <listitem>
-                <simpara>
-                  SVGAlib: erkennt einen älteren Cirrus-Chip. Langsam, aber nutzbar mit der Option
-                  <option>-bpp 8</option>.
-                </simpara>
-              </listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </itemizedlist>
-    </sect2>
-  </sect1>
-
-
-  <sect1 id="sound-cards">
-    <title>Soundkarten</title>
-
-    <itemizedlist>
-      <listitem>
-        <simpara>
-          <emphasis role="bold">Soundblaster Live!</emphasis>: Mit dieser Karte kannst du
-          AC3-Decodierung mit 4 oder 6 (<emphasis role="bold">5.1</emphasis>) anstatt 2 Kanälen
-          verwenden. Lies den Abschnitt <link linkend="swac3">Software-AC3-Decodierung</link>.
-          Für Hardware-AC3-Passthrough <emphasis role="bold">musst</emphasis> du ALSA 0.9 mit
-          OSS-Emulation verwenden!
-        </simpara>
-      </listitem>
-      <listitem>
-        <simpara>
-          <emphasis role="bold">C-Media mit S/PDIF out</emphasis>: Hardware-AC3-Passthrough
-          ist mit diesen Karten möglich, siehe Abschnitt
-          <link linkend="hwac3">Hardware-AC3-Decodierung</link>.
-        </simpara>
-      </listitem>
-      <listitem>
-        <simpara>
-          Features <emphasis role="bold">anderer Karten</emphasis> werden von
-          <application>MPlayer</application> nicht unterstützt.
-          <emphasis role="bold">Es wird dringend empfohlen, die Sektion <link linkend="audio">Soundkarte</link> zu lesen!</emphasis>
-        </simpara>
       </listitem>
     </itemizedlist>
   </sect1>

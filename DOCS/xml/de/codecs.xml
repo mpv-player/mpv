@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r21168 -->
 <chapter id="codecs">
   <title>Codecs</title>
 
@@ -213,6 +213,7 @@
         <listitem><para>Verlustfreier Modus</para></listitem>
         <listitem><para>Benutzerdefinierte Quantisierungsmatrizen</para></listitem>
         <listitem><para>Parallele Encodierung mehrerer Scheiben</para></listitem>
+        <listitem><para>Interlacing</para></listitem>
       </itemizedlist>
 
     </sect3>

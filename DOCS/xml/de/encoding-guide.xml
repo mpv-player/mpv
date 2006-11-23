@@ -2249,16 +2249,19 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
             <para>
               Nutze einen Deinterlacing-Filter vor dem Encodieren. Es stehen verschiedene
               dieser Filter zur Auswahl, jeder mit seinen eigenen Vor-
-              und Nachteilen. Ziehe <option>mplayer -pphelp</option> zu Rate, um zu sehen, welche
-              verfügbar sind (suche nach &quot;deint&quot;) und durchsuche die
-              <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
-                MPlayer-Mailinglisten</ulink>, um Diskussionen über die zahlreichen Filter
-              zu finden. Nochmals, die Framerate wechselt nicht, also kein
+              und Nachteilen. Ziehe <option>mplayer -pphelp</option> und <option>mplayer -vf help</option>
+              zu Rate, um zu sehen, welche
+              verfügbar sind (suche nach &quot;deint&quot;), lies Michael Niedermayers
+              <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing-Filter-Vergleich</ulink>
+              und durchsuche die
+              <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">MPlayer-Mailinglisten</ulink>,
+              um Diskussionen über die zahlreichen Filter zu finden.
+              Nochmals, die Framerate ändert sich nicht, also kein
               <option>-ofps</option>. Deinterlacing sollte außerdem nach dem Zuschneiden
               (cropping) <link linkend="menc-feat-telecine-footnotes">[1]</link>
               und vor dem Skalieren angewandt werden.
 
-              <screen>mencoder dvd://1 -oac copy -vf pp=lb -ovc lavc</screen>
+              <screen>mencoder dvd://1 -oac copy -vf yadif -ovc lavc</screen>
             </para>
           </listitem>
           <listitem>
