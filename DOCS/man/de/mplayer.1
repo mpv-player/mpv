@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21026
+.\" In sync with r21158
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -10092,8 +10092,11 @@ harddup und softskip).
 .PD 1
 .
 .TP
-.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
-Streamformat (Standard: mpeg2)
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd | pes1 | pes2>
+Streamformat (default: mpeg2).
+pes1 und pes2 sind mangelhafte Formate (kein Paketheader und kein Padding),
+VDR verwendet sie jedoch; w‰hle diese nicht, wenn du nicht genau weiﬂt, was
+du tust.
 .
 .TP
 .B size=<bis zu 65535>
