@@ -18,6 +18,7 @@ clean:
 	rm -f *.o *.a *~
 
 distclean: clean
+	rm -f .depend
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
