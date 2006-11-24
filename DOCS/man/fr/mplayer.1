@@ -1,4 +1,4 @@
-.\" synced with r21026
+.\" synced with r21186
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -2044,7 +2044,7 @@ les sous-titres.
 phrases au lieu de la fin.
 .
 .TP
-.B \-font <chemin vers le fichier font.desc> (OSD uniquement)
+.B \-font <chemin vers le fichier font.desc>
 Recherche les polices OSD/\:SUB dans un répertoire particulier
 (par défaut pour les polices normales: ~/\:.mplayer/\:font/\:font.desc,
 pour les polices FreeType: ~/.mplayer/\:subfont.ttf).
@@ -2143,7 +2143,7 @@ Joue un fichier Matroska avec les sous-titres japonais.
 .PD 1
 .
 .TP
-.B \-spuaa <mode> (OSD uniquement)
+.B \-spuaa <mode>
 Mode d'anti-crénelage/\:redimmensionnement pour DVD/\:VobSub.
 Une valeur de 16 peut être ajouté à mode pour forcer le redimmensionnement
 même si la trame originale et la trame redimmensionnée correspondent déjà, par
@@ -2165,7 +2165,7 @@ utilise le flou gaussien swscaler (très joli)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2> (OSD uniquement)
+.B \-spualign <-1\-2>
 Définit l'alignement des sous-titres SPU (DVD/\:VobSub).
 .PD 0
 .RSs
@@ -2181,7 +2181,7 @@ Aligner en bas.
 .PD 1
 .
 .TP
-.B \-spugauss <0.0\-3.0> (OSD uniquement)
+.B \-spugauss <0.0\-3.0>
 Paramètre de Variance du gaussien utilisé par \-spuaa 4.
 L'accroître augmente le flou (par défaut\ : 1.0).
 .
@@ -2233,7 +2233,7 @@ Désactive tout post-traitement du texte après avoir chargé les sous-titres.
 Utilisé pour débogage.
 .
 .TP
-.B \-subalign <0\-2> (OSD uniquement)
+.B \-subalign <0\-2>
 Définit quel bord des sous-titres doit être aligné à la
 hauteur définie par \-subpos.
 .PD 0
@@ -2358,13 +2358,13 @@ Uniquement pour les fichiers de sous-titres basés sur des trames,
 comme le format MicroDVD.
 .
 .TP
-.B \-subpos <0\-100> (utile avec \-vf expand) (OSD uniquement)
+.B \-subpos <0\-100> (utile avec \-vf expand)
 Définit la position des sous-titres sur l'écran.
 Cette valeur est la position verticale des sous-titres en % de la hauteur
 de l'écran.
 .
 .TP
-.B \-subwidth <10\-100> (OSD uniquement)
+.B \-subwidth <10\-100>
 Définit la largeur maximum des sous-titres sur l'écran.
 Utile pour la sortie TV.
 La valeur est la largeur des sous-titres en % de la largeur de l'écran.
@@ -10190,8 +10190,12 @@ Des valeurs plus grandes demandent des tampons plus grands, et est
 découragé.
 .
 .TP
-.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
-le format de flux (par défaut\ : mpeg2)
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd | pes1 | pes2>
+le format de flux (par défaut\ : mpeg2).
+Les formats pes1 et pes2 sont vraiment barbares (pas d'en-tête pour
+les paquets et pas de "remplissage" (padding)), mais les VRD
+(enregistreur vidéo de salon) les utilisent\ ;
+ne les utilisez pas à moins que vous sachier vraiment ce que vous faites.
 .
 .TP
 .B size=<jusqu'à 65535>
