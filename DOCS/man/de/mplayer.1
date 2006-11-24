@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21158
+.\" In sync with r21186
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -932,19 +932,19 @@ Wiederholt die Wiedergabe <Anzahl> mal.
 0 bedeutet ständige Wiederholung.
 .
 .TP
-.B \-menu (nur bei OSD)
+.B \-menu
 Aktiviere das OSD-Menü.
 .
 .TP
-.B \-menu-cfg <Dateiname> (nur bei OSD)
+.B \-menu-cfg <Dateiname>
 Benutze eine andere menu.conf.
 .
 .TP
-.B \-menu-root <Wert> (nur bei OSD)
+.B \-menu-root <Wert>
 Gib das Hauptmenü an.
 .
 .TP
-.B \-menu-startup (nur bei OSD)
+.B \-menu-startup
 Zeige das Hauptmenü beim Start von MPlayer.
 .
 .TP
@@ -2021,7 +2021,7 @@ Diese Schriften können für das Rendern von SSA/ASS-Untertiteln verwendet werden
 (Option \-ass).
 .
 .TP
-.B \-ffactor <Nummer> (nur bei OSD)
+.B \-ffactor <Nummer>
 Resampling der Alpha-Matrix der Schrift.
 Mögliche Werte:
 .PD 0
@@ -2048,7 +2048,7 @@ Untertiteln.
 Benutze dies, falls Kommata in Untertiteln am Anfang eines Satzes anstatt am
 Ende angezeigt werden.
 .TP
-.B \-font <Pfad zur font.desc-Datei> (nur bei OSD)
+.B \-font <Pfad zur font.desc-Datei>
 Sucht nach den OSD-/\:Untertitelschriften in einem anderen Verzeichnis
 (Standard für normale Schriften: ~/\:.mplayer/\:font/\:font.desc,
 Standard für FreeType-Schriften: ~/.mplayer/\:subfont.ttf).
@@ -2149,7 +2149,7 @@ Spielt eine Matroskadatei mit japanischen Untertiteln ab.
 .PD 1
 .
 .TP
-.B \-spuaa <Modus> (nur bei OSD)
+.B \-spuaa <Modus>
 Antialiasing-/\:Skalierungsmodus für DVD/\:VOBsub.
 Ein Wert von 16 kann zu <Modus> hinzuaddiert werden, um die Skalierung auch
 dann zu erzwingen, wenn das Orignalbild und das skalierte Bild bereits die
@@ -2173,7 +2173,7 @@ benutzt Gaußsche Unschärfe des Softwareskalierers (sieht sehr gut aus)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2> (nur bei OSD)
+.B \-spualign <-1\-2>
 Gibt an, wie SPU-Untertitel (DVD/\:VOBsub) positioniert werden sollen.
 .PD 0
 .RSs
@@ -2189,7 +2189,7 @@ Positioniere unten.
 .PD 1
 .
 .TP
-.B \-spugauss <0.0\-3.0> (nur bei OSD)
+.B \-spugauss <0.0\-3.0>
 Varianzparameter des Gaußschen Weichzeichners bei Benutzung von \-spuaa 4.
 Höhere Werte stehen für stärkere Weichzeichnung (Standard: 1.0).
 .
@@ -2240,7 +2240,7 @@ Deaktiviert Text-Postprocessing jeder Art nach dem Laden der Untertitel.
 Wird für Debugging-Zwecke verwendet.
 .
 .TP
-.B \-subalign <0\-2> (nur bei OSD)
+.B \-subalign <0\-2>
 Gibt an, welche Kante der Untertitel an der von \-subpos angegebenen Höhe
 positioniert werden sollen.
 .PD 0
@@ -2363,12 +2363,12 @@ Funktioniert nur bei bildbasierten Untertitelformaten wie z.B.\& dem
 MicroDVD-Format.
 .
 .TP
-.B \-subpos <0\-100> (nützlich mit \-vf expand) (nur bei OSD)
+.B \-subpos <0\-100> (nützlich mit \-vf expand)
 Gibt die Position der Untertitel auf dem Bildschirm an.
 Der Wert gibt die vertikale Position der Untertitel in % der Anzeigehöhe an.
 .
 .TP
-.B \-subwidth <10\-100> (nur bei OSD)
+.B \-subwidth <10\-100>
 Gibt die maximale Breite der Untertitel an.
 Nützlich für Ausgabe auf dem Fernseher.
 Der Wert ist die Breite des Untertitels in %  der Bildschirmbreite.

@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r21082
+// In sync with r21162
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -278,9 +278,12 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "WARNUNG: Korrektes Funktionieren von -speed kann zusammen mit -oac copy nicht garantiert werden!\n"\
 "Das Ergebnis der Encodierung könnte defekt sein!\n"
 #define MSGTR_ErrorWritingFile "%s: Fehler beim Schreiben der Datei.\n"
+#define MSGTR_FlushingVideoFrames "\nVideoframes werden geleert.\n"
+#define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "Filter wurden nicht konfiguriert! Leere Datei?\n"
 #define MSGTR_RecommendedVideoBitrate "Empfohlene Videobitrate für %s CD(s): %d\n"
 #define MSGTR_VideoStreamResult "\nVideostream: %8.3f kbit/s  (%d B/s)  Größe: %"PRIu64" Bytes  %5.3f Sek.  %d Frames\n"
 #define MSGTR_AudioStreamResult "\nAudiostream: %8.3f kbit/s  (%d B/s)  Größe: %"PRIu64" Bytes  %5.3f Sek.\n"
+#define MSGTR_EdlSkipStartEndCurrent "EDL-SPRUNG: Beginn: %.2f  Ende: %.2f   Aktuell: V: %.2f  A: %.2f     \r"
 #define MSGTR_OpenedStream "Erfolg: Format: %d  Daten: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "Videocodec: Framecopy (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "Audiocodec: Framecopy (Format=%x chans=%d Rate=%d Bits=%d B/s=%d Sample-%d)\n"
@@ -593,6 +596,9 @@ static char help_text[]=
 "========== Sorry, dieses Dateiformat wird nicht erkannt/unterstützt ==========\n"\
 "============== Sollte dies ein AVI, ASF oder MPEG Stream sein, ===============\n"\
 "====================== dann kontaktiere bitte den Autor. =====================\n"
+#define MSGTR_SettingProcessPriority "Setze Prozesspriorität: %s\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] Dateiformat:%d  fourcc:0x%X  Größe:%dx%d  fps:%5.2f  ftime:=%6.4f\n"
+#define MSGTR_CannotInitializeMuxer "Cannot initialize muxer."
 #define MSGTR_MissingVideoStream "Kein Videostream gefunden.\n"
 #define MSGTR_MissingAudioStream "Kein Audiostream gefunden. -> kein Ton.\n"
 #define MSGTR_MissingVideoStreamBug "Fehlender Videostream!? Kontaktiere den Autor, dies könnte ein Bug sein :(\n"
@@ -682,6 +688,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Codec hat sh->disp_w und sh->disp_h nicht gesetzt!\nVersuche Problem zu umgehen..\n"
 #define MSGTR_VoConfigRequest "VDec: VO wird versucht, auf %d x %d (Bevorzugter Farbraum: %s) zu setzen.\n"
+#define MSGTR_UsingXAsOutputCspNoY "VDec: Verwende %s als Ausgabefarbraum (Nummer %d).\n"
 #define MSGTR_CouldNotFindColorspace "Konnte keinen passenden Farbraum finden - neuer Versuch mit '-vf scale'...\n"
 #define MSGTR_MovieAspectIsSet "Film-Aspekt ist %.2f:1 - Vorskalierung zur Korrektur der Seitenverhältnisse.\n"
 #define MSGTR_MovieAspectUndefined "Film-Aspekt ist undefiniert - keine Vorskalierung durchgeführt.\n"
