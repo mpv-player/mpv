@@ -1,10 +1,7 @@
 include ../config.mak
 
-# Generated automatically from Makefile.in by configure.
-DEFINES=-DMPLAYER -D__WINE__ #-Ddbg_printf=__vprintf \
-	#-DTRACE=__vprintf # -DDETAILED_OUT
-
-CFLAGS=-I. -I.. $(OPTFLAGS)
+CFLAGS=-I. -I.. -DMPLAYER -D__WINE__ $(OPTFLAGS)
+#CFLAGS+=-Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
 
 SRCS= driver.c afl.c vfl.c
 ifneq ($(TARGET_WIN32),yes)
@@ -23,7 +20,7 @@ clean:
 distclean: clean
 
 .c.o:
-	$(CC) $(CFLAGS) $(DEFINES) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 libloader.a:  $(OBJS) stubs.s
 	$(CC) -c ./stubs.s -o stubs.o
