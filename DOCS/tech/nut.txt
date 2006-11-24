@@ -568,6 +568,13 @@ codec_specific_data
     the exact format is specified in the codec spec
     for H.264 the NAL units MUST be formatted as in a bytestream 
     (with 00 00 01 prefixes)
+    codec_specific_data SHOULD contain exactly the essential global packets
+    needed to decode a stream, more specifically it SHOULD NOT contain packets
+    which contain only non essential metadata like author, title, ...
+    it also MUST NOT contain normal packets which cause the reference decoder
+    to generate any specific decoded samples
+    the encoder name and version, shall be considered essential as it is very
+    usefull to workaround possible encoder bugs
 
 frame_code
     frame_code is an 8-bit field which exists before every frame, it can
