@@ -747,6 +747,9 @@ Index tags:
 max_pts (t)
     The highest pts in the entire file
 
+syncpoints (v)
+    number of indexed syncpoints
+
 syncpoint_pos_div16 (v)
     offset from beginning of file to up to 15 bytes before the syncpoint
     referred to in this index entry. Relative to position of last
@@ -792,6 +795,9 @@ chapter_start (t)
 
 chapter_len (v)
     Length of chapter in same timebase of chapter_start.
+
+count (v)
+    number of name/value pairs in this info packet
 
 type
     for example: "UTF8" -> string or "JPEG" -> JPEG image
