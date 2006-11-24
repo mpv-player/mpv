@@ -263,7 +263,7 @@ ifeq ($(TWOLAME),yes)
 ENCODER_SRCS += ae_twolame.c
 endif
 
-ifeq ($(CONFIG_MP3LAME),yes)
+ifeq ($(MP3LAME),yes)
 ENCODER_SRCS += ae_lame.c
 endif
 

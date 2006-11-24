@@ -7339,7 +7339,7 @@ DVBIN = $_dvbin
 VIDIX = $_vidix_internal
 EXTERNAL_VIDIX = $_vidix_external
 CONFIG_PP = yes
-CONFIG_MP3LAME = $_mp3lame
+MP3LAME = $_mp3lame
 LIBMENU = $_menu
 
 MP3LIB = $_mp3lib
