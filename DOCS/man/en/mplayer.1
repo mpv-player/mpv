@@ -1919,7 +1919,7 @@ These fonts can be used for SSA/ASS subtitle
 rendering (\-ass option).
 .
 .TP
-.B \-ffactor <number> (OSD only)
+.B \-ffactor <number>
 Resample the font alphamap.
 Can be:
 .PD 0
@@ -1946,7 +1946,7 @@ Use this if commas in subtitles are shown at the start of a sentence
 instead of at the end.
 .
 .TP
-.B \-font <path to font.desc file> (OSD only)
+.B \-font <path to font.desc file>
 Search for the OSD/\:SUB fonts in an alternative directory (default for normal
 fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
 ~/.mplayer/\:subfont.ttf).
@@ -2041,7 +2041,7 @@ Plays a Matroska file with Japanese subtitles.
 .PD 1
 .
 .TP
-.B \-spuaa <mode> (OSD only)
+.B \-spuaa <mode>
 Antialiasing/\:scaling mode for DVD/\:VOBsub.
 A value of 16 may be added to <mode> in order to force scaling even
 when original and scaled frame size already match.
@@ -2063,7 +2063,7 @@ uses swscaler gaussian blur (looks very good)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2> (OSD only)
+.B \-spualign <-1\-2>
 Specify how SPU (DVD/\:VOBsub) subtitles should be aligned.
 .PD 0
 .RSs
@@ -2079,7 +2079,7 @@ Align at bottom.
 .PD 1
 .
 .TP
-.B \-spugauss <0.0\-3.0> (OSD only)
+.B \-spugauss <0.0\-3.0>
 Variance parameter of gaussian used by \-spuaa 4.
 Higher means more blur (default: 1.0).
 .
@@ -2129,7 +2129,7 @@ Disables any kind of text post processing done after loading the subtitles.
 Used for debug purposes.
 .
 .TP
-.B \-subalign <0\-2> (OSD only)
+.B \-subalign <0\-2>
 Specify which edge of the subtitles should be aligned at the height
 given by \-subpos.
 .PD 0
@@ -2248,12 +2248,12 @@ Specify the framerate of the subtitle file (default: movie fps).
 Only for frame-based subtitle files, i.e.\& MicroDVD format.
 .
 .TP
-.B \-subpos <0\-100> (useful with \-vf expand) (OSD only)
+.B \-subpos <0\-100> (useful with \-vf expand)
 Specify the position of subtitles on the screen.
 The value is the vertical position of the subtitle in % of the screen height.
 .
 .TP
-.B \-subwidth <10\-100> (OSD only)
+.B \-subwidth <10\-100>
 Specify the maximum width of subtitles on the screen.
 Useful for TV-out.
 The value is the width of the subtitle in % of the screen width.
