@@ -570,7 +570,7 @@ codec_specific_data
     (with 00 00 01 prefixes)
 
 frame_code
-    frame_code is a 8bit field which exists before every frame, it can
+    frame_code is an 8-bit field which exists before every frame, it can
     store part of the size of the frame, the stream number, the timestamp
     and some flags amongst other things, what is not directly stored
     in it but is needed is stored in various fields immediately after it
