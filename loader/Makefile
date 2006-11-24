@@ -6,11 +6,12 @@ CFLAGS=-I. -I.. -DMPLAYER -D__WINE__ $(OPTFLAGS)
 SRCS= driver.c afl.c vfl.c
 ifneq ($(TARGET_WIN32),yes)
 SRCS+= ldt_keeper.c pe_image.c module.c ext.c win32.c \
-       pe_resource.c resource.c registry.c elfdll.c wrapper.S
+       pe_resource.c resource.c registry.c elfdll.c wrapper.S stubs.s
 endif
 
 OBJS = $(SRCS:.c=.o)
 OBJS := $(OBJS:.S=.o)
+OBJS := $(OBJS:.s=.o)
 
 all: libloader.a
 
@@ -23,9 +24,8 @@ distclean: clean
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-libloader.a:  $(OBJS) stubs.s
-	$(CC) -c ./stubs.s -o stubs.o
-	$(AR) -r libloader.a $(OBJS) stubs.o
+libloader.a:  $(OBJS)
+	$(AR) -r libloader.a $(OBJS)
 	$(RANLIB) libloader.a
 
 dep depend:
