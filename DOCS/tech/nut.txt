@@ -410,42 +410,42 @@ file_id_string
     the very first thing in every nut file, useful for identifying nut
     files
 
-*_startcode
+*_startcode (f(64))
     all startcodes start with 'N'
 
-main_startcode
+main_startcode (f(64))
     0x7A561F5F04ADULL + (((uint64_t)('N'<<8) + 'M')<<48)
 
-stream_startcode
+stream_startcode (f(64))
     0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
 
-syncpoint_startcode
+syncpoint_startcode (f(64))
     0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
 
-index_startcode
+index_startcode (f(64))
     0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
 
-info_startcode
+info_startcode (f(64))
     0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
 
-version
+version (v)
     NUT version. The current value is 3. All lower values are pre-freeze
 
-stream_count
+stream_count (v)
     number of streams in this file
 
-time_base_count
+time_base_count (v)
     number of different time bases in this file
     this MUST NOT be 0
 
-forward_ptr
+forward_ptr (v)
     size of the packet data (exactly the distance from the first byte
     after the packet_header to the first byte of the next packet)
     every nut packet contains a forward_ptr immediately after its startcode
     with the exception of frame_code based packets, the forward pointer
     can be used to skip over the packet without decoding its contents
 
-max_distance
+max_distance (v)
     max distance between startcodes. If p1 and p2 are the byte
     positions of the first byte of two consecutive startcodes, then
     p2-p1 MUST be less than or equal to max_distance unless the entire
@@ -466,7 +466,7 @@ max_distance
     frameheader.
 
 
-max_pts_distance
+max_pts_distance (v)
     max absolute difference of pts of new frame from last_pts in the
     timebase of the stream, without a checksum after the frameheader.
     A frame header MUST include a checksum if abs(pts-last_pts) is
@@ -475,11 +475,11 @@ max_pts_distance
     on the same stream, as it is altered by syncpoint timestamps.
     SHOULD NOT be higher than 1/timebase
 
-stream_id
+stream_id (v)
     Stream identifier
     stream_id MUST be < stream_count
 
-stream_class
+stream_class (v)
     0    video
     1    audio
     2    subtitles
@@ -487,7 +487,7 @@ stream_class
     Note: the remaining values are reserved and MUST NOT be used
           a demuxer MUST ignore streams with reserved classes
 
-fourcc
+fourcc (vb)
     identification for the codec
     example: "H264"
     MUST contain 2 or 4 bytes, note, this might be increased in the future
@@ -495,7 +495,7 @@ fourcc
     the id values used are the same as in avi, so if a codec uses a specific
     fourcc in avi then the same fourcc MUST be used here
 
-time_base_nom / time_base_denom = time_base
+time_base_nom (v) / time_base_denom (v) = time_base
     the length of a timer tick in seconds, this MUST be equal to the 1/fps
     if FLAG_FIXED_FPS is set
     time_base_nom and time_base_denom MUST NOT be 0
@@ -509,7 +509,7 @@ time_base_nom / time_base_denom = time_base
     There MUST NOT be 2 identical timebases in a file.
     There SHOULD NOT be more timebases than streams.
 
-time_base_id
+time_base_id (v)
     index into the time_base table
     MUST be < time_base_count
 
@@ -543,11 +543,11 @@ compare_ts
     if (convert_ts(b, b_timebase, a_timebase) < a) return  1;
     return 0;
 
-msb_pts_shift
+msb_pts_shift (v)
     amount of bits in lsb_pts
     MUST be <16
 
-decode_delay
+decode_delay (v)
     size of the reordering buffer used to convert pts to dts
     codecs which don't support b frames normally use 0
     mpeg1/mpeg2 style codecs with b frames use 1
@@ -557,11 +557,11 @@ decode_delay
     but its theoretically possible that one exists which needs it >0)
     decode_delay MUST NOT be set higher than necessary for a codec.
 
-stream_flags
+stream_flags (v)
      Bit  Name            Description
        1  FLAG_FIXED_FPS  indicates that the fps is fixed
 
-codec_specific_data
+codec_specific_data (vb)
     private global data for a codec (could be huffman tables or ...)
     if a codec has a global header it SHOULD be placed in here instead of
     at the start of every keyframe
@@ -576,7 +576,7 @@ codec_specific_data
     the encoder name and version, shall be considered essential as it is very
     usefull to workaround possible encoder bugs
 
-frame_code
+frame_code (f(8))
     frame_code is an 8-bit field which exists before every frame, it can
     store part of the size of the frame, the stream number, the timestamp
     and some flags amongst other things, what is not directly stored
@@ -587,7 +587,7 @@ frame_code
     a muxer SHOULD mark 0x00 and 0xFF as invalid to improve error
     detection
 
-flags[frame_code], frame_flags
+flags[frame_code], frame_flags (v)
      Bit  Name             Description
        1  FLAG_KEY         if set, frame is keyframe
        2  FLAG_EOR         if set, stream has no relevance on
@@ -616,39 +616,39 @@ last_pts
     if there is no such frame between the last syncpoint and the current
     frame then the syncpoint timestamp is used, see global_key_pts
 
-stream_id[frame_code]
+stream_id[frame_code] (v)
     if FLAG_STREAM_ID is not set then this is the stream number for the
     frame following this frame_code
     if FLAG_STREAM_ID is set then this value has no meaning
     MUST be <250
 
-data_size_mul[frame_code]
+data_size_mul[frame_code] (v)
     if FLAG_SIZE_MSB is set then data_size_msb which is stored after the
     frame code is multiplied with it and forms the more significant part
     of the size of the following frame
     if FLAG_SIZE_MSB is not set then this field has no meaning
     MUST be <16384
 
-data_size_lsb[frame_code]
+data_size_lsb[frame_code] (v)
     the less significant part of the size of the following frame
     this added together with data_size_mul*data_size_msb is the size of
     the following frame
     MUST be <16384
 
-pts_delta[frame_code]
+pts_delta[frame_code] (s)
     MUST be <16384 and >-16384
     if FLAG_CODED_PTS is set in the flags of the current frame then this
     value MUST be ignored, if FLAG_CODED_PTS is not set then pts_delta is the
     difference between the current pts and last_pts
 
-reserved_count[frame_code]
+reserved_count[frame_code] (v)
     MUST be <256
 
 data_size
     the size of the following frame
     data_size= data_size_lsb + data_size_msb*data_size_mul;
 
-coded_pts
+coded_pts (v)
     if coded_pts < (1<<msb_pts_shift) then it is an lsb
     pts, otherwise it is a full pts + (1<<msb_pts_shift)
     lsb pts is converted to a full pts by:
@@ -689,29 +689,29 @@ dts
     Dts of all frames MUST be bigger or equal to dts of all previous frames
     in the same stream
 
-width/height
+width (v) / height (v)
     width and height of the video in pixels
     MUST be set to the coded width/height, MUST NOT be 0
 
-sample_width/sample_height (aspect ratio)
+sample_width (v) /sample_height (v) (aspect ratio)
     sample_width is the horizontal distance between samples
     sample_width and sample_height MUST be relatively prime if not zero
     both MUST be 0 if unknown otherwise both MUST be non zero
 
-colorspace_type
+colorspace_type (v)
      0    unknown
      1    ITU Rec 624 / ITU Rec 601 Y range: 16..235 Cb/Cr range: 16..240
      2    ITU Rec 709               Y range: 16..235 Cb/Cr range: 16..240
     17    ITU Rec 624 / ITU Rec 601 Y range:  0..255 Cb/Cr range:  0..255
     18    ITU Rec 709               Y range:  0..255 Cb/Cr range:  0..255
 
-samplerate_nom / samplerate_denom = samplerate
+samplerate_nom (v) / samplerate_denom (v) = samplerate
     the number of samples per second, MUST NOT be 0
 
 crc32 checksum
     Generator polynomial is 0x104C11DB7. Starting value is zero.
 
-checksum
+checksum (u(32))
     crc32 checksum
     checksum is calculated for the area pointed to by forward_ptr not
     including the checksum itself (from first byte after the
@@ -719,13 +719,13 @@ checksum
     for frame headers the checksum contains the framecode byte and all
     following bytes up to the checksum itself
 
-header_checksum
+header_checksum (u(32))
     checksum over the startcode and forward pointer
 
 Syncpoint tags:
 ---------------
 
-back_ptr_div16
+back_ptr_div16 (v)
     back_ptr = back_ptr_div16 * 16 + 15
     back_ptr must point to a position within 16 bytes of a syncpoint
     startcode. This syncpoint MUST be the closest syncpoint such that at
@@ -734,7 +734,7 @@ back_ptr_div16
 
     A stream where EOR is set is to be ignored for back_ptr.
 
-global_key_pts
+global_key_pts (t)
     After a syncpoint, last_pts of each stream is to be set to:
     last_pts[i] = convert_ts(global_key_pts, time_base[id], time_base[i])
 
@@ -744,10 +744,10 @@ global_key_pts
 Index tags:
 -----------
 
-max_pts
+max_pts (t)
     The highest pts in the entire file
 
-syncpoint_pos_div16
+syncpoint_pos_div16 (v)
     offset from beginning of file to up to 15 bytes before the syncpoint
     referred to in this index entry. Relative to position of last
     syncpoint.
@@ -764,7 +764,7 @@ eor_pts
     Coded only if EOR is set at the position of the syncpoint. The pts of
     that EOR. EOR is unset by the first keyframe after it.
 
-index_ptr
+index_ptr (u(64))
     Length in bytes of the entire index, from the first byte of the
     startcode until the last byte of the checksum.
     Note: A demuxer can use this to find the index when it is written at
@@ -775,11 +775,11 @@ index_ptr
 Info tags:
 ----------
 
-stream_id_plus1
+stream_id_plus1 (v)
     Stream this info packet applies to. If zero, packet applies to whole
     file.
 
-chapter_id
+chapter_id (s)
     Id of chapter this packet applies to. If zero, packet applies to whole
     file. Positive chapter_id's are real chapters and MUST NOT overlap.
     Negative chapter_id indicate a sub region of file and not a real
@@ -787,10 +787,10 @@ chapter_id
     chapter_id n MUST not be used unless there are at least n chapters in the
     file
 
-chapter_start
+chapter_start (t)
     timestamp of start of chapter
 
-chapter_len
+chapter_len (v)
     Length of chapter in same timebase of chapter_start.
 
 type
