@@ -589,17 +589,17 @@ frame_code (f(8))
 
 flags[frame_code], frame_flags (v)
      Bit  Name             Description
-       1  FLAG_KEY         if set, frame is keyframe
-       2  FLAG_EOR         if set, stream has no relevance on
+       0  FLAG_KEY         if set, frame is keyframe
+       1  FLAG_EOR         if set, stream has no relevance on
                            presentation. (EOR)
-       8  FLAG_CODED_PTS   if set, coded_pts is in the frame header
-      16  FLAG_STREAM_ID   if set, stream_id is coded in the frame header
-      32  FLAG_SIZE_MSB    if set, data_size_msb is at frame header,
+       3  FLAG_CODED_PTS   if set, coded_pts is in the frame header
+       4  FLAG_STREAM_ID   if set, stream_id is coded in the frame header
+       5  FLAG_SIZE_MSB    if set, data_size_msb is at frame header,
                            otherwise data_size_msb is 0
-      64  FLAG_CHECKSUM    if set then the frame header contains a checksum
-     128  FLAG_RESERVED    if set, reserved_count is coded in the frame header
-    4096  FLAG_CODED       if set, coded_flags are stored in the frame header.
-    8192  FLAG_INVALID     if set, frame_code is invalid.
+       6  FLAG_CHECKSUM    if set then the frame header contains a checksum
+       7  FLAG_RESERVED    if set, reserved_count is coded in the frame header
+      12  FLAG_CODED       if set, coded_flags are stored in the frame header.
+      13  FLAG_INVALID     if set, frame_code is invalid.
 
     EOR frames MUST be zero-length and must be set keyframe.
     All streams SHOULD end with EOR, where the pts of the EOR indicates the
