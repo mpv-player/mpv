@@ -2,9 +2,7 @@ include ../config.mak
 
 LIBNAME = libgui.a
 
-INCDIR  = -I. -I.. -I../loader -I./wm -I./skin
-
-CFLAGS = $(INCDIR) $(OPTFLAGS)
+CFLAGS = -I. -I.. -I../loader -I./wm -I./skin $(OPTFLAGS)
 #CFLAGS += -DDEBUG
 
 ifeq ($(TARGET_WIN32),yes)
@@ -55,7 +53,7 @@ OBJS = $(SRCS:.c=.o)
 
 $(LIBNAME): $(OBJS)
 	rm -f $(LIBNAME)
-	$(AR) rc $(LIBNAME) $(OBJS) $(MPLAYEROBJS)
+	$(AR) rc $(LIBNAME) $(OBJS)
 	$(RANLIB) $(LIBNAME)
 
 all:	$(LIBNAME)
