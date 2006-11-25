@@ -323,13 +323,13 @@ CFLAGS  = -I. -I.. \
 
 all:    $(LIBS)
 
-$(LIBNAME):     $(OBJS)
-	$(AR) r $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
+$(LIBNAME): $(OBJS)
+	$(AR) r $@ $^
+	$(RANLIB) $@
 
-$(LIBNAME2):     $(OBJS2)
-	$(AR) r $(LIBNAME2) $(OBJS2)
-	$(RANLIB) $(LIBNAME2)
+$(LIBNAME2): $(OBJS2)
+	$(AR) r $@ $^
+	$(RANLIB) $@
 
 clean:
 	rm -f *.o *.a *~
