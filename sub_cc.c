@@ -284,6 +284,8 @@ static void subcc_decode(void)
 
 void subcc_process_data(unsigned char *inputdata,unsigned int len)
 {
+	if (len > CC_INPUTBUFFER_SIZE)
+		return;
 	if(!subcc_enabled) return;
 	if(!inited) subcc_init();
 	
