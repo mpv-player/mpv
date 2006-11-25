@@ -14,7 +14,7 @@ CFLAGS  = $(OPTFLAGS)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-all:	$(SUBDIRS) $(LIBNAME) do_drivers
+all:	$(LIBNAME) do_drivers
 
 do_drivers:
 	$(MAKE) -C drivers

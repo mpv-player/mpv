@@ -62,7 +62,7 @@ clean:
 	rm -f *.o *.so *~
 
 distclean: clean
-	rm -f .depend test
+	rm -f .depend
 
 dep depend:
 # do nothing here
