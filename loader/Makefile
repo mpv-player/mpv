@@ -21,9 +21,6 @@ clean:
 distclean: clean
 	rm -f .depend
 
-.c.o:
-	$(CC) $(CFLAGS) -c $<
-
 libloader.a:  $(OBJS)
 	$(AR) -r libloader.a $(OBJS)
 	$(RANLIB) libloader.a
