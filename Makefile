@@ -107,8 +107,8 @@ COMMON_LIBS += libpostproc/libpostproc.a
 PARTS += libpostproc
 endif
 ifeq ($(WIN32DLL),yes)
-COMMON_LIBS += loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a
-PARTS += loader loader/dshow loader/dmo
+COMMON_LIBS += loader/libloader.a
+PARTS += loader
 endif
 ifeq ($(MP3LIB),yes)
 COMMON_LIBS += mp3lib/libMP3.a
@@ -204,12 +204,6 @@ stream/stream.a:
 
 libmpcodecs/libmpcodecs.a:
 	$(MAKE) -C libmpcodecs
-
-loader/dshow/libDS_Filter.a:
-	$(MAKE) -C loader/dshow
-
-loader/dmo/libDMO_Filter.a:
-	$(MAKE) -C loader/dmo
 
 libavutil/libavutil.a:
 	$(MAKE) -C libavutil LIBPREF=lib LIBSUF=.a
@@ -445,9 +439,6 @@ mp3lib/libMP3.a: .norecurse $(wildcard mp3lib/*.[ch])
 libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 
 loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
-loader/dmo/libDMO_Filter.a: .norecurse $(wildcard loader/dmo/*.[ch])
-loader/dshow/libDS_Filter.a: .norecurse $(wildcard loader/dshow/*.[ch])
-
 libdha/libdha.so: .norecurse $(wildcard libdha/*.[ch])
 vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
 Gui/libgui.a: .norecurse $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
