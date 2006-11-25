@@ -32,7 +32,6 @@ DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
 	$(MPROOT)/osdep/shmem.o \
 	$(MPROOT)/osdep/timer-*.o \
 	$(MPROOT)/osdep/strl.o \
-	$(COMMON_LIBS) \
 	-lm \
 
 ifeq ($(TARGET_WIN32),yes)
