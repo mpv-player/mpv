@@ -13,7 +13,6 @@ SRCS= shmem.c \
       swab.c \
       setenv.c \
       mmap_anon.c \
-      # timer.c \
 
 getch = getch2.c
 timer = timer-lx.c
@@ -40,11 +39,8 @@ SRCS += $(getch)
 OBJS=$(SRCS:.c=.o)
 
 CFLAGS  = -I. -I.. $(OPTFLAGS)
-# -I/usr/X11R6/include/
 
 .SUFFIXES: .c .o
-
-# .PHONY: all clean
 
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
