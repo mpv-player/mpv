@@ -38,9 +38,7 @@ SRCS_COMMON = asxparser.c \
               subreader.c \
               vobsub.c \
 
-ifeq ($(UNRARLIB),yes)
-SRCS_COMMON += unrarlib.c
-endif
+SRCS_COMMON-$(UNRARLIB) += unrarlib.c
 
 SRCS_MPLAYER = mplayer.c \
                m_property.c \
@@ -89,70 +87,38 @@ PARTS = libmpdemux \
         libvo \
         libaf \
 
-ifeq ($(CONFIG_LIBAVFORMAT),yes)
-COMMON_LIBS += libavformat/libavformat.a
-PARTS += libavformat
-endif
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-COMMON_LIBS += libavcodec/libavcodec.a
-PARTS += libavcodec
-endif
-ifeq ($(CONFIG_LIBAVUTIL),yes)
-COMMON_LIBS += libavutil/libavutil.a
-PARTS += libavutil
-endif
-ifeq ($(CONFIG_LIBPOSTPROC),yes)
-COMMON_LIBS += libpostproc/libpostproc.a
-PARTS += libpostproc
-endif
-ifeq ($(WIN32DLL),yes)
-COMMON_LIBS += loader/libloader.a
-PARTS += loader
-endif
-ifeq ($(MP3LIB),yes)
-COMMON_LIBS += mp3lib/libMP3.a
-PARTS += mp3lib
-endif
-ifeq ($(LIBA52),yes)
-COMMON_LIBS += liba52/liba52.a
-PARTS += liba52
-endif
-ifeq ($(LIBMPEG2),yes)
-COMMON_LIBS += libmpeg2/libmpeg2.a
-PARTS += libmpeg2
-endif
-ifeq ($(FAAD_INTERNAL),yes)
-COMMON_LIBS += libfaad2/libfaad2.a
-PARTS += libfaad2
-endif
-ifeq ($(TREMOR_INTERNAL),yes)
-COMMON_LIBS += tremor/libvorbisidec.a
-PARTS += tremor
-endif
-ifeq ($(VIDIX),yes)
-LIBS_MPLAYER += vidix/libvidix.a
-PARTS += libdha vidix
-endif
-ifeq ($(DVDREAD_INTERNAL),yes)
-COMMON_LIBS += dvdread/libdvdread.a
-PARTS += dvdread
-endif
-ifeq ($(DVDCSS_INTERNAL),yes)
-COMMON_LIBS += libdvdcss/libdvdcss.a
-PARTS += libdvdcss
-endif
-ifeq ($(CONFIG_ASS),yes)
-COMMON_LIBS += libass/libass.a
-PARTS += libass
-endif
-ifeq ($(GUI),yes)
-LIBS_MPLAYER += Gui/libgui.a
-PARTS += Gui
-endif
-ifeq ($(LIBMENU),yes)
-LIBS_MPLAYER += libmenu/libmenu.a
-PARTS += libmenu
-endif
+COMMON_LIBS-$(CONFIG_LIBAVFORMAT) += libavformat/libavformat.a
+PARTS-$(CONFIG_LIBAVFORMAT)       += libavformat
+COMMON_LIBS-$(CONFIG_LIBAVCODEC)  += libavcodec/libavcodec.a
+PARTS-$(CONFIG_LIBAVCODEC)        += libavcodec
+COMMON_LIBS-$(CONFIG_LIBAVUTIL)   += libavutil/libavutil.a
+PARTS-$(CONFIG_LIBAVUTIL)         += libavutil
+COMMON_LIBS-$(CONFIG_LIBPOSTPROC) += libpostproc/libpostproc.a
+PARTS-$(CONFIG_LIBPOSTPROC)       += libpostproc
+COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
+PARTS-$(WIN32DLL)                 += loader
+COMMON_LIBS-$(MP3LIB)             += mp3lib/libMP3.a
+PARTS-$(MP3LIB)                   += mp3lib
+COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
+PARTS-$(LIBA52)                   += liba52
+COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
+PARTS-$(LIBMPEG2)                 += libmpeg2
+COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
+PARTS-$(FAAD_INTERNAL)            += libfaad2
+COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
+PARTS-$(TREMOR_INTERNAL)          += tremor
+LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
+PARTS-$(VIDIX)                    += libdha vidix
+COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
+PARTS-$(DVDREAD_INTERNAL)         += dvdread
+COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
+PARTS-$(DVDCSS_INTERNAL)          += libdvdcss
+COMMON_LIBS-$(CONFIG_ASS)         += libass/libass.a
+PARTS-$(CONFIG_ASS)               += libass
+LIBS_MPLAYER-$(GUI)               += Gui/libgui.a
+PARTS-$(GUI)                      += Gui
+LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
+PARTS-$(LIBMENU)                  += libmenu
 
 COMMON_LIBS += osdep/libosdep.a
 
@@ -165,12 +131,16 @@ LDFLAGS_MPLAYER = $(EXTRALIBS_MPLAYER) \
 LDFLAGS_MENCODER = $(EXTRALIBS_MENCODER) \
                    $(COMMON_LDFLAGS) \
 
-ifeq ($(MPLAYER),yes)
-ALL_PRG = mplayer$(EXESUF)
-endif
-ifeq ($(MENCODER),yes)
-ALL_PRG += mencoder$(EXESUF)
-endif
+ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
+ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
+
+SRCS_COMMON  += $(SRCS_COMMON-yes)
+COMMON_LIBS  += $(COMMON_LIBS-yes)
+LIBS_MPLAYER += $(LIBS_MPLAYER-yes)
+OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
+PARTS        += $(PARTS-yes)
+ALL_PRG      += $(ALL_PRG-yes)
+
 
 .SUFFIXES: .cc .c .o
 
