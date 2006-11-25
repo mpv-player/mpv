@@ -15,15 +15,15 @@ OBJS := $(OBJS:.s=.o)
 
 all: libloader.a
 
+libloader.a:  $(OBJS)
+	$(AR) -r libloader.a $(OBJS)
+	$(RANLIB) libloader.a
+
 clean:
 	rm -f *.o *.a *~
 
 distclean: clean
 	rm -f .depend
-
-libloader.a:  $(OBJS)
-	$(AR) -r libloader.a $(OBJS)
-	$(RANLIB) libloader.a
 
 dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
