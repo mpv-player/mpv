@@ -16,8 +16,8 @@ OBJS := $(OBJS:.s=.o)
 all: libloader.a
 
 libloader.a:  $(OBJS)
-	$(AR) -r libloader.a $(OBJS)
-	$(RANLIB) libloader.a
+	$(AR) -r $@ $^
+	$(RANLIB) $@
 
 clean:
 	rm -f *.o *.a *~
