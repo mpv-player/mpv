@@ -46,7 +46,6 @@ static struct m_struct_st stream_opts = {
 };
 
 int dvd_nav_still=0;            /* are we on a still picture? */
-static dvdnav_highlight_event_t dvd_nav_hl;
 
 static int seek(stream_t *s, off_t newpos);
 
@@ -102,11 +101,12 @@ static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   return priv;
 }
 
-static void dvdnav_get_highlight (dvdnav_priv_t *priv, dvdnav_highlight_event_t *hlev, int display_mode) {
+static void dvdnav_get_highlight (dvdnav_priv_t *priv, int display_mode) {
   pci_t *pnavpci = NULL;
-  int btnum = -1;
+  dvdnav_highlight_event_t *hlev = &(priv->hlev);
+  int btnum;
 
-  if (!priv || !priv->dvdnav || !hlev)
+  if (!priv || !priv->dvdnav)
     return;
 
   pnavpci = dvdnav_get_current_nav_pci (priv->dvdnav);
@@ -168,7 +168,7 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
         break;
       }
       case DVDNAV_HIGHLIGHT: {
-        dvdnav_get_highlight (priv, &dvd_nav_hl, 1);
+        dvdnav_get_highlight (priv, 1);
         break;
       }
       case DVDNAV_CELL_CHANGE: {
@@ -256,7 +256,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
           update_title_len(s);
           if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
             mp_msg(MSGT_CPLAYER,MSGL_V, "\r\nDVDNAV, NEW TITLE %d\r\n", tit);
-            dvdnav_get_highlight (priv, &dvd_nav_hl, 0);
+            dvdnav_get_highlight (priv, 0);
             if(priv->title > 0 && tit != priv->title)
               return 0;
           }
@@ -496,11 +496,14 @@ int dvdnav_number_of_subs(stream_t *stream) {
   return n;
 }
 
-void mp_dvdnav_get_highlight (nav_highlight_t *hl) {
-  hl->sx = dvd_nav_hl.sx;
-  hl->sy = dvd_nav_hl.sy;
-  hl->ex = dvd_nav_hl.ex;
-  hl->ey = dvd_nav_hl.ey;
+void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
+  dvdnav_priv_t *priv = (dvdnav_priv_t *) stream->priv;
+  dvdnav_highlight_event_t hlev = priv->hlev;
+
+  hl->sx = hlev.sx;
+  hl->sy = hlev.sy;
+  hl->ex = hlev.ex;
+  hl->ey = hlev.ey;
 }
 
 stream_info_t stream_info_dvdnav = {

@@ -4729,10 +4729,9 @@ if(auto_quality>0){
 #ifdef USE_DVDNAV
  if (stream->type == STREAMTYPE_DVDNAV) {
    nav_highlight_t hl;
-
-   mp_dvdnav_get_highlight (&hl);
-   if (hl.sx != 0 && hl.sy != 0) /* highlighting on */
-     vo_osd_changed (OSDTYPE_DVDNAV);
+   mp_dvdnav_get_highlight (stream, &hl);
+   osd_set_nav_box (hl.sx, hl.sy, hl.ex, hl.ey);
+   vo_osd_changed (OSDTYPE_DVDNAV);
  }
 #endif
  

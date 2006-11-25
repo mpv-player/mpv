@@ -24,6 +24,7 @@ typedef struct {
   unsigned int     duration;            /* in milliseconds */
   int              mousex, mousey;
   int              title;
+  dvdnav_highlight_event_t hlev;
 } dvdnav_priv_t;
 
 
@@ -31,6 +32,6 @@ int dvdnav_number_of_subs(stream_t *stream);
 int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language);
 int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button);
 void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* button);
-void mp_dvdnav_get_highlight (nav_highlight_t *hl);
+void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl);
 
 #endif

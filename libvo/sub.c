@@ -74,6 +74,9 @@ int sub_visibility=1;
 int sub_bg_color=0; /* subtitles background color */
 int sub_bg_alpha=0;
 int sub_justify=0;
+#ifdef USE_DVDNAV
+static nav_highlight_t nav_hl;
+#endif
 
 // return the real height of a char:
 static inline int get_height(int c,int h){
@@ -199,15 +202,20 @@ inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
 }
 
 #ifdef USE_DVDNAV
+void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey) {
+  nav_hl.sx = sx;
+  nav_hl.sy = sy;
+  nav_hl.ex = ex;
+  nav_hl.ey = ey;
+}
+
 inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
-  nav_highlight_t hl;
   int len;
 
-  mp_dvdnav_get_highlight (&hl);
-  obj->bbox.x1 = obj->x = hl.sx;
-  obj->bbox.y1 = obj->y = hl.sy;
-  obj->bbox.x2 = hl.ex;
-  obj->bbox.y2 = hl.ey;
+  obj->bbox.x1 = obj->x = nav_hl.sx;
+  obj->bbox.y1 = obj->y = nav_hl.sy;
+  obj->bbox.x2 = nav_hl.ex;
+  obj->bbox.y2 = nav_hl.ey;
   
   alloc_buf (obj);
   len = obj->stride * (obj->bbox.y2 - obj->bbox.y1);
