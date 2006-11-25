@@ -98,9 +98,6 @@ else
 	-ldconfig
 endif
 
-#
-# include dependency files if they exist
-#
 ifneq ($(wildcard .depend),)
 include .depend
 endif
