@@ -111,22 +111,20 @@ static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   return priv;
 }
 
-static void dvdnav_get_highlight (dvdnav_priv_t *priv,
-                                  dvdnav_highlight_event_t *hlev,
-                                  int display_mode) {
+static void dvdnav_get_highlight (dvdnav_priv_t *priv, dvdnav_highlight_event_t *hlev, int display_mode) {
   pci_t *pnavpci = NULL;
   int btnum = -1;
-  
+
   if (!priv || !priv->dvdnav || !hlev)
     return;
 
   pnavpci = dvdnav_get_current_nav_pci (priv->dvdnav);
   if (!pnavpci)
     return;
-  
+
   dvdnav_get_current_highlight (priv->dvdnav, &(hlev->buttonN));
   hlev->display = display_mode; /* show */
-  
+
   if (hlev->buttonN > 0 && pnavpci->hli.hl_gi.btn_ns > 0 && hlev->display) {
     for (btnum = 0; btnum < pnavpci->hli.hl_gi.btn_ns; btnum++) {
       btni_t *btni = &(pnavpci->hli.btnit[btnum]);
