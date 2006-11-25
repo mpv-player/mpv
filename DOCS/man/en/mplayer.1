@@ -9418,11 +9418,21 @@ enabled during all mode decisions (slow, requires subq>=6)
 .B deadzone_inter=<0\-32>
 Set the size of the inter luma quantization deadzone for non-trellis
 quantization (default: 21).
+Lower values help preserving fine details and film grain (typically useful
+for high bitrate/quality encode), while higher values will help filter out
+these details to save bits that can be spent again on other macro-blocs
+and frames (typically useful for bitrate-starved encodes).
+It's recommended that you start by tweaking deadzone_inter before changing
+this parameter.
 .
 .TP
 .B deadzone_intra=<0\-32>
 Set the size of the intra luma quantization deadzone for non-trellis
 quantization (default: 11).
+This option has the same effect as deadzone_inter except that it affect
+intra frames.
+It's recommended that you start by tweaking this parameter before changing
+deadzone_inter.
 .
 .TP
 .B (no)fast_pskip
