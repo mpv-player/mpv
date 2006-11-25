@@ -153,9 +153,6 @@ ifeq ($(LIBMENU),yes)
 LIBS_MPLAYER += libmenu/libmenu.a
 PARTS += libmenu
 endif
-ifeq ($(TARGET_WIN32),yes)
-OBJS_MPLAYER += osdep/mplayer-rc.o
-endif
 
 COMMON_LIBS += osdep/libosdep.a
 
@@ -265,9 +262,6 @@ mplayer$(EXESUF): $(MPLAYER_DEPS)
 
 mencoder$(EXESUF): $(MENCODER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
-
-osdep/mplayer-rc.o: osdep/mplayer.rc
-	windres -o $@ osdep/mplayer.rc
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) -I. -DCODECS2HTML codec-cfg.c -o $@
