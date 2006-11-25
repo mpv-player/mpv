@@ -45,14 +45,6 @@ static struct m_struct_st stream_opts = {
   stream_opts_fields
 };
 
-int dvd_nav_skip_opening=0;     /* skip opening stalls? */
-int osd_show_dvd_nav_delay=0;   /* count down for dvd nav text on OSD */
-char dvd_nav_text[50];          /* for reporting stuff to OSD */
-int osd_show_dvd_nav_highlight; /* show highlight area */
-int osd_show_dvd_nav_sx;        /* start x .... */
-int osd_show_dvd_nav_ex;
-int osd_show_dvd_nav_sy;
-int osd_show_dvd_nav_ey;
 int dvd_nav_still=0;            /* are we on a still picture? */
 dvdnav_highlight_event_t dvd_nav_hl;
 int dvd_nav_hl_on = 0;

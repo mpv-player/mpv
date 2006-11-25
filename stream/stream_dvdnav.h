@@ -16,22 +16,11 @@ typedef struct {
   int              sleeping;            /* are we sleeping? */
   unsigned int     sleep_until;         /* timer */
   int              started;             /* Has mplayer initialization finished? */
-  unsigned char    prebuf[STREAM_BUFFER_SIZE]; /* prefill buffer */
-  int              prelen;              /* length of prefill buffer */
   unsigned int     duration;            /* in milliseconds */
   int              mousex, mousey;
   int              title;
 } dvdnav_priv_t;
 
-extern int dvd_nav_still;
-extern int dvd_nav_skip_opening;
-extern char dvd_nav_text[50];
-extern int osd_show_dvd_nav_delay;
-extern int osd_show_dvd_nav_highlight;
-extern int osd_show_dvd_nav_sx;
-extern int osd_show_dvd_nav_ex;
-extern int osd_show_dvd_nav_sy;
-extern int osd_show_dvd_nav_ey;
 
 int dvdnav_number_of_subs(stream_t *stream);
 int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language);
