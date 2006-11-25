@@ -11,6 +11,7 @@
 #include "libmpdemux/demuxer.h"
 #include "stream_dvdnav.h"
 #include "libvo/video_out.h"
+#include "libavutil/common.h"
 #include "spudec.h"
 #include "m_option.h"
 #include "m_struct.h"
@@ -53,6 +54,8 @@ int osd_show_dvd_nav_ex;
 int osd_show_dvd_nav_sy;
 int osd_show_dvd_nav_ey;
 int dvd_nav_still=0;            /* are we on a still picture? */
+dvdnav_highlight_event_t dvd_nav_hl;
+int dvd_nav_hl_on = 0;
 
 static int seek(stream_t *s, off_t newpos);
 
@@ -108,6 +111,46 @@ static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   return priv;
 }
 
+static void dvdnav_get_highlight (dvdnav_priv_t *priv,
+                                  dvdnav_highlight_event_t *hlev,
+                                  int display_mode) {
+  pci_t *pnavpci = NULL;
+  int btnum = -1;
+  
+  if (!priv || !priv->dvdnav || !hlev)
+    return;
+
+  pnavpci = dvdnav_get_current_nav_pci (priv->dvdnav);
+  if (!pnavpci)
+    return;
+  
+  dvdnav_get_current_highlight (priv->dvdnav, &(hlev->buttonN));
+  hlev->display = display_mode; /* show */
+  
+  if (hlev->buttonN > 0 && pnavpci->hli.hl_gi.btn_ns > 0 && hlev->display) {
+    for (btnum = 0; btnum < pnavpci->hli.hl_gi.btn_ns; btnum++) {
+      btni_t *btni = &(pnavpci->hli.btnit[btnum]);
+
+      if (hlev->buttonN == btnum + 1) {
+        hlev->sx = FFMIN (btni->x_start, btni->x_end);
+        hlev->ex = FFMAX (btni->x_start, btni->x_end);
+        hlev->sy = FFMIN (btni->y_start, btni->y_end);
+        hlev->ey = FFMAX (btni->y_start, btni->y_end);
+
+        hlev->palette = (btni->btn_coln == 0) ? 0 :
+          pnavpci->hli.btn_colit.btn_coli[btni->btn_coln - 1][0];
+        dvd_nav_hl_on = 1;
+        break;
+      }
+    }
+  } else { /* hide button or no button */
+    hlev->sx = hlev->ex = 0;
+    hlev->sy = hlev->ey = 0;
+    hlev->palette = hlev->buttonN = 0;
+    dvd_nav_hl_on = 0;
+  }
+}
+
 static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len) {
   int event = DVDNAV_NOP;
 
@@ -135,6 +178,10 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
         //else
           dvdnav_still_skip(priv->dvdnav); // don't let dvdnav stall on this image
 
+        break;
+      }
+      case DVDNAV_HIGHLIGHT: {
+        dvdnav_get_highlight (priv, &dvd_nav_hl, 1);
         break;
       }
       case DVDNAV_CELL_CHANGE: {
@@ -222,6 +269,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
           update_title_len(s);
           if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
             mp_msg(MSGT_CPLAYER,MSGL_V, "\r\nDVDNAV, NEW TITLE %d\r\n", tit);
+            dvdnav_get_highlight (priv, &dvd_nav_hl, 0);
             if(priv->title > 0 && tit != priv->title)
               return 0;
           }

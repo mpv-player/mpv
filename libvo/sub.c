@@ -8,6 +8,11 @@
 #include <malloc.h>
 #endif
 
+#ifdef USE_DVDNAV
+#include <dvdnav.h>
+#define OSD_NAV_BOX_ALPHA 0x7f
+#endif
+
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "video_out.h"
@@ -191,6 +196,24 @@ inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
           x+=vo_font->width[c]+vo_font->charspace;
         }
 }
+
+#ifdef USE_DVDNAV
+inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
+  extern dvdnav_highlight_event_t dvd_nav_hl;
+  int len;
+
+  obj->bbox.x1 = obj->x = dvd_nav_hl.sx;
+  obj->bbox.y1 = obj->y = dvd_nav_hl.sy;
+  obj->bbox.x2 = dvd_nav_hl.ex;
+  obj->bbox.y2 = dvd_nav_hl.ey;
+  
+  alloc_buf (obj);
+  len = obj->stride * (obj->bbox.y2 - obj->bbox.y1);
+  memset (obj->bitmap_buffer, OSD_NAV_BOX_ALPHA, len);
+  memset (obj->alpha_buffer, OSD_NAV_BOX_ALPHA, len);
+  obj->flags |= OSDFLAG_BBOX | OSDFLAG_VISIBLE | OSDFLAG_CHANGED;
+}
+#endif
 
 int vo_osd_progbar_type=-1;
 int vo_osd_progbar_value=100;   // 0..256
@@ -817,6 +840,11 @@ int vo_update_osd(int dxs,int dys){
         int vis=obj->flags&OSDFLAG_VISIBLE;
 	obj->flags&=~OSDFLAG_BBOX;
 	switch(obj->type){
+#ifdef USE_DVDNAV
+        case OSDTYPE_DVDNAV:
+           vo_update_nav(obj,dxs,dys);
+           break;
+#endif
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(obj,dxs,dys);
 	    break;
@@ -884,6 +912,9 @@ void vo_init_osd(void){
     new_osd_obj(OSDTYPE_SUBTITLE);
     new_osd_obj(OSDTYPE_PROGBAR);
     new_osd_obj(OSDTYPE_SPU);
+#ifdef USE_DVDNAV
+    new_osd_obj(OSDTYPE_DVDNAV);
+#endif
 #ifdef HAVE_FREETYPE
     force_load_font = 1;
 #endif
@@ -919,6 +950,9 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	case OSDTYPE_SPU:
 	    vo_draw_spudec_sub(obj, draw_alpha); // FIXME
 	    break;
+#ifdef USE_DVDNAV
+        case OSDTYPE_DVDNAV:
+#endif
 	case OSDTYPE_OSD:
 	case OSDTYPE_SUBTITLE:
 	case OSDTYPE_PROGBAR:

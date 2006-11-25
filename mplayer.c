@@ -4696,6 +4696,15 @@ if(auto_quality>0){
 
 } // end if(sh_video)
 
+#ifdef USE_DVDNAV
+ if (stream->type == STREAMTYPE_DVDNAV) {
+   extern int dvd_nav_hl_on;
+
+   if (dvd_nav_hl_on)
+     vo_osd_changed (OSDTYPE_DVDNAV);
+ }
+#endif
+ 
 //============================ Handle PAUSE ===============================
 
   current_module="pause";
