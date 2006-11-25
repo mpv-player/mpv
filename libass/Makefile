@@ -3,8 +3,6 @@ include ../config.mak
 
 LIBNAME=libass.a
 
-LIBS=$(LIBNAME)
-
 SRCS=ass.c ass_cache.c ass_fontconfig.c ass_render.c ass_utils.c ass_mp.c ass_bitmap.c ass_library.c
 
 OBJS=$(SRCS:.c=.o)
@@ -21,7 +19,7 @@ CFLAGS  = -I. -I.. \
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-all:    $(LIBS)
+all:    $(LIBNAME)
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
