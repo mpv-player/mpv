@@ -1423,6 +1423,16 @@ EOF
     _optimizing=''
     ;;
 
+  generic)
+    _def_arch='#define ARCH_GENERIC 1'
+    _target_arch='TARGET_ARCH_GENERIC = yes'
+    iproc=''
+    proc=''
+    _march=''
+    _mcpu=''
+    _optimizing=''
+    ;;
+
   *)
     echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
     echo "It seems nobody has ported MPlayer to your OS or CPU type yet."
