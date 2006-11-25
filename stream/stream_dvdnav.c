@@ -466,8 +466,10 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
 int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
   uint8_t format, lg, k;
-  uint16_t lang, lcode = (language[0] << 8) | (language[1]);
+  uint16_t lang, lcode;
 
+  while(language && strlen(language)>=2) {
+  lcode = (language[0] << 8) | (language[1]);
   for(k=0; k<32; k++) {
     lg = dvdnav_get_spu_logical_stream(priv->dvdnav, k);
     if(lg == 0xff) continue;
@@ -475,6 +477,9 @@ int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
     if(lang != 0xFFFF && lang == lcode) {
       return k;
     }
+  }
+  language += 2;
+  while(language[0]==',' || language[0]==' ') ++language;
   }
   return -1;
 }
