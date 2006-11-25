@@ -33,6 +33,8 @@ extern int osd_show_dvd_nav_ex;
 extern int osd_show_dvd_nav_sy;
 extern int osd_show_dvd_nav_ey;
 
+int dvdnav_number_of_subs(stream_t *stream);
+int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language);
 int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button);
 void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* button);
 
