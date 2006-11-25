@@ -1,7 +1,4 @@
-
-ifneq ($(wildcard ../config.mak),)
 include ../config.mak
-endif
 
 SRCS = dvd_input.c \
        dvd_reader.c \
