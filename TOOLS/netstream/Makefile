@@ -52,9 +52,6 @@ distclean: clean
 dep depend:
 	$(CC) -MM $(CFLAGS) test.c $(SRCS) 1>.depend
 
-#
-# include dependency files if they exist
-#
 ifneq ($(wildcard .depend),)
 include .depend
 endif
