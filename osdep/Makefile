@@ -49,8 +49,8 @@ mplayer-rc.o: mplayer.rc
 	windres -o $@ $<
 
 $(LIBNAME):     $(OBJS)
-	$(AR) r $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
+	$(AR) r $@ $^
+	$(RANLIB) $@
 
 all:    $(LIBNAME)
 
