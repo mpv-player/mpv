@@ -212,7 +212,7 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
 int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
                    FILE *f, int *width, int *height, int *maxval);
 void glUploadTex(GLenum target, GLenum format, GLenum type,
-                 const void *data, int stride,
+                 const void *dataptr, int stride,
                  int x, int y, int w, int h, int slice);
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,

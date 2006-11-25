@@ -473,7 +473,7 @@ int glFmt2bpp(GLenum format, GLenum type) {
  * \param target texture target, usually GL_TEXTURE_2D
  * \param format OpenGL format of data
  * \param type OpenGL type of data
- * \param data data to upload
+ * \param dataptr data to upload
  * \param stride data stride
  * \param x x offset in texture
  * \param y y offset in texture
@@ -483,8 +483,9 @@ int glFmt2bpp(GLenum format, GLenum type) {
  * \ingroup gltexture
  */
 void glUploadTex(GLenum target, GLenum format, GLenum type,
-                 const void *data, int stride,
+                 const void *dataptr, int stride,
                  int x, int y, int w, int h, int slice) {
+  const uint8_t *data = dataptr;
   int y_max = y + h;
   if (w <= 0 || h <= 0) return;
   if (slice <= 0)
