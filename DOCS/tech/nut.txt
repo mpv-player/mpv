@@ -575,6 +575,12 @@ codec_specific_data (vb)
     to generate any specific decoded samples
     the encoder name and version, shall be considered essential as it is very
     usefull to workaround possible encoder bugs
+    The global headers MUST consist of the normal
+    sequence of header packets required for codec initialization, in the
+    order defined in the codec spec. An implementation MAY strip metadata and
+    other redundant information not necessary for correct playback from the
+    global headers as long as no incorrect values are stored and as long as
+    the striped result is not less valid per codec spec as before striping
 
 frame_code (f(8))
     frame_code is an 8-bit field which exists before every frame, it can
