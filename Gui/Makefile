@@ -53,8 +53,6 @@ OBJS = $(SRCS:.c=.o)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-### TARGETS ###
-
 $(LIBNAME): $(OBJS)
 	rm -f $(LIBNAME)
 	$(AR) rc $(LIBNAME) $(OBJS) $(MPLAYEROBJS)
@@ -69,10 +67,6 @@ clean:
               skin/*.o skin/*~ \
               wm/*.o wm/*~ \
               win32/*.o win32/*~ \
-
-#dep depend:
-#	makedepend -- $(CFLAGS) -- $(SRCS) &>/dev/null
-#
 
 distclean: clean
 	rm -f .depend
