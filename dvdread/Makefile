@@ -14,7 +14,7 @@ SRCS = dvd_input.c \
 
 OBJS = $(SRCS:.c=.o)
 
-LIB=libdvdread
+LIBNAME = libdvdread.a
 
 .SUFFIXES: .c .o
 
@@ -28,11 +28,11 @@ endif
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-all: $(LIB).a
+all: $(LIBNAME)
 
-$(LIB).a: $(OBJS)
-	$(AR) rc $(LIB).a $(OBJS)
-	$(RANLIB) $(LIB).a
+$(LIBNAME): $(OBJS)
+	$(AR) rc $@ $^
+	$(RANLIB) $@
 
 clean:
 	rm -f *.o *.a *~ *.so
