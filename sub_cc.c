@@ -89,7 +89,7 @@ static void append_char(char c)
 	
 	if(c=='\n')
 	{
-		if(cursor_pos>0)
+		if(cursor_pos>0 && bb->lines < SUB_MAX_TEXT)
 			bb->lines++;cursor_pos=0;
 	}
 	else 
