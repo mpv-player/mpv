@@ -45,14 +45,14 @@ CFLAGS  = -I. -I.. $(OPTFLAGS)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
+all:    $(LIBNAME)
+
 mplayer-rc.o: mplayer.rc
 	windres -o $@ $<
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $@ $^
 	$(RANLIB) $@
-
-all:    $(LIBNAME)
 
 clean:
 	rm -f *.o *.a *~
