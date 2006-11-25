@@ -43,6 +43,7 @@ fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) -g $< -o fastmem2-k7$(EXESUF)  ../libvo/aclib.o -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
 	$(CC) $(CFLAGS) -g $< -o fastmem2-sse$(EXESUF) ../libvo/aclib.o -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
 
-clean:
+clean distclean:
 	rm -f $(OBJS)
 	rm -f fastmem-* fastmem2-*
+	rm -f cpuinfo$(EXESUF) fastmemcpybench
