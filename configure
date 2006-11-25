@@ -690,7 +690,7 @@ if test "$_gcc_check" = yes ; then
       cc_version="v. ?.??, bad"
       cc_verc_fail=yes
       ;;
-    8.0)
+    8.0|9.1)
       cc_version="$cc_version, ok"
       cc_verc_fail=no
       ;;
@@ -1537,13 +1537,19 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
   fi
   _stripbinaries=no
 elif test -z "$CFLAGS" ; then
+  if test "$cc_vendor" = "intel" ; then
+    CFLAGS="-O2 $_march $_mcpu $_pipe -fomit-frame-pointer"
+  else
     CFLAGS="-O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+  fi
 else
   _warn_CFLAGS=yes
 fi
 if test -n "$LDFLAGS" ; then
   _ld_extra="$_ld_extra $LDFLAGS"
   _warn_CFLAGS=yes
+elif test "$cc_vendor" = "intel" ; then
+  _ld_extra="$_ld_extra -i-static"
 fi
 if test -n "$CPPFLAGS" ; then
   _inc_extra="$_inc_extra $CPPFLAGS"
