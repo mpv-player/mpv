@@ -1050,6 +1050,13 @@ void init_vo_spudec(void) {
   }
 #endif
 
+#ifdef USE_DVDNAV
+  if (vo_spudec==NULL && stream->type==STREAMTYPE_DVDNAV) {
+    current_module="spudec_init_dvdnav";
+    vo_spudec=spudec_new_scaled(NULL, sh_video->disp_w, sh_video->disp_h);
+  }
+#endif
+
   if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
       (d_dvdsub->sh != NULL) && (((sh_sub_t *)d_dvdsub->sh)->type == 'v')) {
     sh_sub_t *mkv_sh_sub = (sh_sub_t *)d_dvdsub->sh;
@@ -2337,7 +2344,14 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
                 spudec_reset(vo_spudec);
             }
 #endif
-            if (stream->type != STREAMTYPE_DVD) {
+
+#ifdef USE_DVDNAV
+            if (vo_spudec && stream->type == STREAMTYPE_DVDNAV) {
+                d_dvdsub->id = dvdsub_id;
+                spudec_reset(vo_spudec);
+            }
+#endif
+            if (stream->type != STREAMTYPE_DVD && stream->type != STREAMTYPE_DVDNAV) {
               int i = 0;
               for (d_dvdsub->id = 0; d_dvdsub->id < MAX_S_STREAMS; d_dvdsub->id++) {
                 if (demuxer->s_streams[d_dvdsub->id]) {
@@ -2365,7 +2379,7 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
         if(vo_spudec) vo_osd_changed(OSDTYPE_SPU);
     }
 #ifdef USE_DVDREAD
-    if (vo_spudec && stream->type == STREAMTYPE_DVD && dvdsub_id < 0 && reset_spu) {
+    if (vo_spudec && (stream->type == STREAMTYPE_DVD || stream->type == STREAMTYPE_DVDNAV) && dvdsub_id < 0 && reset_spu) {
         dvdsub_id = -2;
         d_dvdsub->id = dvdsub_id;
         spudec_reset(vo_spudec);
@@ -4156,6 +4170,18 @@ if(stream->type==STREAMTYPE_DVD){
 }
 #endif
 
+#ifdef USE_DVDNAV
+if(stream->type==STREAMTYPE_DVDNAV){
+  current_module="dvdnav lang->id";
+  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=-1;
+  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvdnav_sid_from_lang(stream,dvdsub_lang);
+  // setup global sub numbering
+  global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
+  global_sub_size += dvdnav_number_of_subs(stream);
+  current_module=NULL;
+}
+#endif
+
 // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
 goto_enable_cache:
 if(stream_cache_size>0){
@@ -4254,7 +4280,7 @@ if(!demuxer)
 }
 inited_flags|=INITED_DEMUXER;
 
-if (stream->type != STREAMTYPE_DVD) {
+if (stream->type != STREAMTYPE_DVD && stream->type != STREAMTYPE_DVDNAV) {
   int i;
   // setup global sub numbering
   global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
@@ -4368,7 +4394,7 @@ demux_info_print(demuxer);
 
 //================== Read SUBTITLES (DVD & TEXT) ==========================
 if(vo_spudec==NULL && sh_video &&
-     (stream->type==STREAMTYPE_DVD || d_dvdsub->id >= 0)){
+     (stream->type==STREAMTYPE_DVD || stream->type == STREAMTYPE_DVDNAV || d_dvdsub->id >= 0)){
   init_vo_spudec();
 }
 
