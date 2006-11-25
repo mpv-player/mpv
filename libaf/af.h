@@ -10,6 +10,11 @@
 
 struct af_instance_s;
 
+// Number of channels
+#ifndef AF_NCH
+#define AF_NCH 6
+#endif
+
 // Audio data chunk
 typedef struct af_data_s
 {
