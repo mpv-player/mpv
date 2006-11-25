@@ -74,9 +74,6 @@ uninstall:
 	rm -f $(LIBDIR)/mplayer/vidix/*.so
 	-rmdir -p $(LIBDIR)/mplayer/vidix
 
-#
-# include dependency files if they exist
-#
 ifneq ($(wildcard .depend),)
 include .depend
 endif
