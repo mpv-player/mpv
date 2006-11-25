@@ -4,6 +4,11 @@ include ../config.mak
 LIBNAME = libvo.a
 LIBNAME2 = libosd.a
 
+LIBS =$(LIBNAME2)
+ifeq ($(MPLAYER),yes)
+LIBS+=$(LIBNAME)
+endif
+
 SRCS=aspect.c \
      geometry.c \
      spuenc.c \
@@ -56,7 +61,7 @@ CFLAGS  = $(INCLUDE) $(OPTFLAGS)
 .m.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-all:    $(LIBNAME) $(LIBNAME2)
+all:    $(LIBS)
 
 $(LIBNAME): $(OBJS)
 	$(AR) r $@ $^
