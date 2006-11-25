@@ -44,9 +44,6 @@ distclean: clean
 dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
-#
-# include dependency files if they exist
-#
 ifneq ($(wildcard .depend),)
 include .depend
 endif

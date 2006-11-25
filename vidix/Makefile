@@ -41,9 +41,6 @@ install:
 uninstall:
 	$(MAKE) -C drivers uninstall
 
-#
-# include dependency files if they exist
-#
 ifneq ($(wildcard .depend),)
 include .depend
 endif
