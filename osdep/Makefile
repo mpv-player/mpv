@@ -20,7 +20,7 @@ ifeq ($(MACOSX_FINDER_SUPPORT),yes)
 SRCS += macosx_finder_args.c
 endif
 ifeq ($(TARGET_WIN32),yes)
-SRCS += osdep/mplayer-rc.c
+SRCS += mplayer-rc.c
 endif
 ifeq ($(TARGET_OS),Darwin)
 timer = timer-darwin.c
