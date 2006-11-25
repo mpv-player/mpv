@@ -43,8 +43,7 @@ clean:
 
 distclean: clean
 	rm -f .depend
-	rm -f dshow/.depend dshow/test dshow/test.raw
-	rm -f dmo/.depend
+	rm -f dshow/test dshow/test.raw
 
 dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
