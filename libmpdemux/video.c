@@ -366,7 +366,7 @@ static void process_userdata(unsigned char* buf,int len){
     /* if the user data starts with "CC", assume it is a CC info packet */
     if(len>2 && buf[0]=='C' && buf[1]=='C'){
 //    	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"video.c: process_userdata() detected Closed Captions!\n");
-	if(subcc_enabled) subcc_process_data(buf+2,len-2);
+	subcc_process_data(buf+2,len-2);
     }
     if( len > 2 && buf[ 0 ] == 'T' && buf[ 1 ] == 'Y' )
     {

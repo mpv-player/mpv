@@ -26,8 +26,6 @@
 #include "libvo/sub.h"
 
 
-#define CC_INPUTBUFFER_SIZE 256
-
 #define CC_MAX_LINE_LENGTH 64
 
 static char chartbl[128];
@@ -38,8 +36,6 @@ static subtitle *fb,*bb;
 static unsigned int cursor_pos=0;
 
 static int inited=0;
-static unsigned char inputbuffer[CC_INPUTBUFFER_SIZE];
-static unsigned int inputlength;
 
 static void build_char_table(void)
 {
@@ -186,7 +182,7 @@ static void cc_decode_EIA608(unsigned short int data)
   lastcode=data;  
 }
 
-static void subcc_decode(void)
+static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
 {
   /* The first number may denote a channel number. I don't have the
    * EIA-708 standard, so it is hard to say.
@@ -284,13 +280,9 @@ static void subcc_decode(void)
 
 void subcc_process_data(unsigned char *inputdata,unsigned int len)
 {
-	if (len > CC_INPUTBUFFER_SIZE)
-		return;
 	if(!subcc_enabled) return;
 	if(!inited) subcc_init();
 	
-	memcpy(inputbuffer,inputdata,len);
-	inputlength=len;
-	subcc_decode();
+	subcc_decode(inputdata, len);
 }
 
