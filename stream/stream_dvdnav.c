@@ -46,8 +46,7 @@ static struct m_struct_st stream_opts = {
 };
 
 int dvd_nav_still=0;            /* are we on a still picture? */
-dvdnav_highlight_event_t dvd_nav_hl;
-int dvd_nav_hl_on = 0;
+static dvdnav_highlight_event_t dvd_nav_hl;
 
 static int seek(stream_t *s, off_t newpos);
 
@@ -129,7 +128,6 @@ static void dvdnav_get_highlight (dvdnav_priv_t *priv, dvdnav_highlight_event_t 
 
         hlev->palette = (btni->btn_coln == 0) ? 0 :
           pnavpci->hli.btn_colit.btn_coli[btni->btn_coln - 1][0];
-        dvd_nav_hl_on = 1;
         break;
       }
     }
@@ -137,7 +135,6 @@ static void dvdnav_get_highlight (dvdnav_priv_t *priv, dvdnav_highlight_event_t 
     hlev->sx = hlev->ex = 0;
     hlev->sy = hlev->ey = 0;
     hlev->palette = hlev->buttonN = 0;
-    dvd_nav_hl_on = 0;
   }
 }
 
@@ -494,6 +491,12 @@ int dvdnav_number_of_subs(stream_t *stream) {
   return n;
 }
 
+void mp_dvdnav_get_highlight (nav_highlight_t *hl) {
+  hl->sx = dvd_nav_hl.sx;
+  hl->sy = dvd_nav_hl.sy;
+  hl->ex = dvd_nav_hl.ex;
+  hl->ey = dvd_nav_hl.ey;
+}
 
 stream_info_t stream_info_dvdnav = {
   "DVDNAV stream",

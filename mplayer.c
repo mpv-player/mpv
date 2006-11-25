@@ -183,6 +183,10 @@ static int max_framesize=0;
 #include "stream/stream_dvd.h"
 #endif
 
+#ifdef USE_DVDNAV
+#include "stream/stream_dvdnav.h"
+#endif
+
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/mp_image.h"
@@ -4698,9 +4702,10 @@ if(auto_quality>0){
 
 #ifdef USE_DVDNAV
  if (stream->type == STREAMTYPE_DVDNAV) {
-   extern int dvd_nav_hl_on;
+   nav_highlight_t hl;
 
-   if (dvd_nav_hl_on)
+   mp_dvdnav_get_highlight (&hl);
+   if (hl.sx != 0 && hl.sy != 0) /* highlighting on */
      vo_osd_changed (OSDTYPE_DVDNAV);
  }
 #endif

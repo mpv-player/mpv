@@ -9,7 +9,8 @@
 #endif
 
 #ifdef USE_DVDNAV
-#include <dvdnav.h>
+#include "stream/stream.h"
+#include "stream/stream_dvdnav.h"
 #define OSD_NAV_BOX_ALPHA 0x7f
 #endif
 
@@ -199,13 +200,14 @@ inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
 
 #ifdef USE_DVDNAV
 inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
-  extern dvdnav_highlight_event_t dvd_nav_hl;
+  nav_highlight_t hl;
   int len;
 
-  obj->bbox.x1 = obj->x = dvd_nav_hl.sx;
-  obj->bbox.y1 = obj->y = dvd_nav_hl.sy;
-  obj->bbox.x2 = dvd_nav_hl.ex;
-  obj->bbox.y2 = dvd_nav_hl.ey;
+  mp_dvdnav_get_highlight (&hl);
+  obj->bbox.x1 = obj->x = hl.sx;
+  obj->bbox.y1 = obj->y = hl.sy;
+  obj->bbox.x2 = hl.ex;
+  obj->bbox.y2 = hl.ey;
   
   alloc_buf (obj);
   len = obj->stride * (obj->bbox.y2 - obj->bbox.y1);
