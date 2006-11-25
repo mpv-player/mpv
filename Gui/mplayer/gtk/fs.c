@@ -6,7 +6,7 @@
 #include <glob.h>
 #include <unistd.h>
 
-#include "../mplayer.h"
+#include "../gmplayer.h"
 
 #include "mplayer/pixmaps/up.xpm"
 #include "mplayer/pixmaps/dir.xpm"

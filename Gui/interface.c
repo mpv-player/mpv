@@ -12,7 +12,7 @@
 
 #include "mplayer/gtk/eq.h"
 #include "mplayer/widgets.h"
-#include "mplayer/mplayer.h"
+#include "mplayer/gmplayer.h"
 #include "mplayer/play.h"
 
 #include "mplayer.h"

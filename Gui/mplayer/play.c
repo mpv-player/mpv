@@ -22,7 +22,7 @@
 #include "interface.h"
 
 #include "widgets.h"
-#include "./mplayer.h"
+#include "gmplayer.h"
 #include "play.h"
 
 #include "skin/skin.h"

@@ -20,12 +20,12 @@
 #include "../stream/stream.h"
 #include "../mixer.h"
 #include "../libvo/sub.h"
-#include "../mplayer.h"
 
 #include "../libmpdemux/demuxer.h"
 #include "../libmpdemux/stheader.h"
 #include "../codec-cfg.h"
 
+#include "gmplayer.h"
 #include "play.h"
 #include "widgets.h"
 #include "common.h"
