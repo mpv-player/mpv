@@ -120,8 +120,6 @@ PARTS-$(GUI)                      += Gui
 LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
 PARTS-$(LIBMENU)                  += libmenu
 
-COMMON_LIBS += osdep/libosdep.a
-
 COMMON_LDFLAGS += $(EXTRA_LIB)\
                   $(EXTRALIBS) \
 
@@ -140,6 +138,8 @@ LIBS_MPLAYER += $(LIBS_MPLAYER-yes)
 OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
 PARTS        += $(PARTS-yes)
 ALL_PRG      += $(ALL_PRG-yes)
+
+COMMON_LIBS += osdep/libosdep.a
 
 
 .SUFFIXES: .cc .c .o
