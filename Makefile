@@ -62,7 +62,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               stream/stream.a \
               libswscale/libswscale.a \
               libvo/libosd.a \
-              osdep/libosdep.a \
 
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
@@ -157,6 +156,8 @@ endif
 ifeq ($(TARGET_WIN32),yes)
 OBJS_MPLAYER += osdep/mplayer-rc.o
 endif
+
+COMMON_LIBS += osdep/libosdep.a
 
 COMMON_LDFLAGS += $(EXTRA_LIB)\
                   $(EXTRALIBS) \

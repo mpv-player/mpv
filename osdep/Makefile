@@ -12,6 +12,7 @@ SRCS= shmem.c \
       fseeko.c \
       swab.c \
       setenv.c \
+      mmap_anon.c \
       # timer.c \
 
 getch = getch2.c
