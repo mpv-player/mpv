@@ -9,21 +9,19 @@ ifeq ($(MENCODER),yes)
 LIBS+=$(LIBNAME2)
 endif
 
-SRCS=ad_hwac3.c \
-               ad_hwmpa.c \
+SRCS = native/minilzo.c \
+       native/nuppelvideo.c \
+       native/RTjpegN.c \
+       native/xa_gsm.c \
+       img_format.c \
 
-ifeq ($(LIBA52),yes)
-SRCS+=ad_liba52.c
-endif
-ifeq ($(MP3LIB),yes)
-SRCS+=ad_mp3lib.c
-endif
-
-SRCS=dec_audio.c \
+SRCS += dec_audio.c \
            ad.c \
            ad_alaw.c \
                ad_dk3adpcm.c \
                ad_dvdpcm.c \
+               ad_hwac3.c \
+               ad_hwmpa.c \
                ad_imaadpcm.c \
                ad_msadpcm.c \
                ad_msgsm.c \
@@ -47,6 +45,9 @@ endif
 ifeq ($(FAAD),yes)
 SRCS += ad_faad.c
 endif
+ifeq ($(LIBA52),yes)
+SRCS+=ad_liba52.c
+endif
 ifeq ($(LIBDV),yes)
 SRCS+=ad_libdv.c
 endif
@@ -56,6 +57,9 @@ endif
 ifeq ($(LIBVORBIS),yes)
 SRCS+=ad_libvorbis.c
 endif
+ifeq ($(MP3LIB),yes)
+SRCS+=ad_mp3lib.c
+endif
 ifeq ($(MUSEPACK),yes)
 SRCS += ad_mpc.c
 endif
@@ -63,20 +67,14 @@ ifeq ($(SPEEX),yes)
 SRCS += ad_speex.c
 endif
 
-
-SRCS=vd_lzo.c \
-               vd_nuv.c \
-
-ifeq ($(LIBMPEG2),yes)
-SRCS+=vd_libmpeg2.c
-endif
-
 SRCS=dec_video.c \
            vd.c \
            vd_hmblck.c \
+           vd_lzo.c \
                vd_mpegpes.c \
                vd_mtga.c \
                vd_null.c \
+               vd_nuv.c \
                vd_raw.c \
                vd_sgi.c \
 
@@ -100,6 +98,9 @@ SRCS+=vd_xanim.c
 endif
 ifeq ($(LIBDV),yes)
 SRCS+=vd_libdv.c
+endif
+ifeq ($(LIBMPEG2),yes)
+SRCS+=vd_libmpeg2.c
 endif
 ifeq ($(LIBTHEORA),yes)
 SRCS+=vd_theora.c
@@ -271,12 +272,6 @@ ifeq ($(CONFIG_LIBAVCODEC),yes)
 LIBAV_INC += -I../libavcodec
 endif
 
-
-SRCS+=native/minilzo.c \
-            native/nuppelvideo.c \
-            native/RTjpegN.c \
-            native/xa_gsm.c \
-     img_format.c \
 
 OBJS=$(SRCS:.c=.o)
 
