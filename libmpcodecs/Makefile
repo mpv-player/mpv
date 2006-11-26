@@ -109,38 +109,29 @@ SRCS-$(CONFIG_LIBAVCODEC)     += vf_fspp.c \
                                  vf_qp.c \
                                  vf_spp.c \
                                  vf_uspp.c
-SRCS-$(CONFIG_LIBAVCODEC)     += vf_lavc.c vf_lavcdeint.c
-SRCS-$(CONFIG_LIBAVCODEC_SO)  += vf_lavc.c vf_lavcdeint.c
-SRCS-$(CONFIG_LIBAVCODEC)     += vd_ffmpeg.c
-SRCS-$(CONFIG_LIBAVCODEC_SO)  += vd_ffmpeg.c
-SRCS-$(CONFIG_LIBAVCODEC)     += ad_ffmpeg.c
-SRCS-$(CONFIG_LIBAVCODEC_SO)  += ad_ffmpeg.c
+SRCS-$(CONFIG_LIBAVCODEC)     += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
+SRCS-$(CONFIG_LIBAVCODEC_SO)  += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
 SRCS-$(CONFIG_LIBPOSTPROC)    += vf_pp.c
 SRCS-$(CONFIG_LIBPOSTPROC_SO) += vf_pp.c
 SRCS-$(FAAD)                  += ad_faad.c
 SRCS-$(JPEG)                  += vd_ijpg.c
 SRCS-$(LIBA52)                += ad_liba52.c
-SRCS-$(LIBDV)                 += ad_libdv.c
-SRCS-$(LIBDV)                 += vd_libdv.c
+SRCS-$(LIBDV)                 += ad_libdv.c vd_libdv.c
 SRCS-$(LIBMAD)                += ad_libmad.c
 SRCS-$(LIBMPEG2)              += vd_libmpeg2.c
 SRCS-$(LIBTHEORA)             += vd_theora.c
 SRCS-$(LIBVORBIS)             += ad_libvorbis.c
 SRCS-$(MP3LIB)                += ad_mp3lib.c
 SRCS-$(MUSEPACK)              += ad_mpc.c
-SRCS-$(PNG)                   += vf_screenshot.c
-SRCS-$(PNG)                   += vd_mpng.c
-SRCS-$(QTX_CODECS)            += ad_qtaudio.c
-SRCS-$(QTX_CODECS)            += vd_qtvideo.c
-SRCS-$(REAL_CODECS)           += ad_realaud.c
-SRCS-$(REAL_CODECS)           += vd_realvid.c
+SRCS-$(PNG)                   += vd_mpng.c vf_screenshot.c
+SRCS-$(QTX_CODECS)            += ad_qtaudio.c vd_qtvideo.c
+SRCS-$(REAL_CODECS)           += ad_realaud.c vd_realvid.c
 SRCS-$(SPEEX)                 += ad_speex.c
-SRCS-$(WIN32DLL)              += ad_acm.c ad_dmo.c ad_dshow.c ad_twin.c
-SRCS-$(WIN32DLL)              += vd_dmo.c vd_dshow.c vd_vfw.c vd_vfwex.c
+SRCS-$(WIN32DLL)              += ad_acm.c ad_dmo.c ad_dshow.c ad_twin.c \
+                                 vd_dmo.c vd_dshow.c vd_vfw.c vd_vfwex.c
 SRCS-$(XANIM_CODECS)          += vd_xanim.c
 SRCS-$(XVID4)                 += vd_xvid4.c
-SRCS-$(ZORAN)                 += vd_zrmjpeg.c
-SRCS-$(ZORAN)                 += vf_zrmjpeg.c
+SRCS-$(ZORAN)                 += vd_zrmjpeg.c vf_zrmjpeg.c
 
 
 ENCODER_SRCS=ae.c \
@@ -149,15 +140,13 @@ ENCODER_SRCS=ae.c \
              ve_nuv.c \
              ve_raw.c \
 
-ENCODER_SRCS-$(CONFIG_LIBAVCODEC)    += ve_lavc.c
-ENCODER_SRCS-$(CONFIG_LIBAVCODEC_SO) += ve_lavc.c
+ENCODER_SRCS-$(CONFIG_LIBAVCODEC)    += ae_lavc.c ve_lavc.c
+ENCODER_SRCS-$(CONFIG_LIBAVCODEC_SO) += ae_lavc.c ve_lavc.c
 ENCODER_SRCS-$(LIBDV)                += ve_libdv.c
 ENCODER_SRCS-$(QTX_CODECS)           += ve_qtvideo.c
 ENCODER_SRCS-$(WIN32DLL)             += ve_vfw.c
 ENCODER_SRCS-$(X264)                 += ve_x264.c
 ENCODER_SRCS-$(XVID4)                += ve_xvid4.c
-ENCODER_SRCS-$(CONFIG_LIBAVCODEC_SO) += ae_lavc.c
-ENCODER_SRCS-$(CONFIG_LIBAVCODEC)    += ae_lavc.c
 ENCODER_SRCS-$(FAAC)                 += ae_faac.c
 ENCODER_SRCS-$(TOOLAME)              += ae_toolame.c
 ENCODER_SRCS-$(TWOLAME)              += ae_twolame.c
