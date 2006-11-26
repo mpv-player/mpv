@@ -59,6 +59,12 @@ endif
 ifeq ($(LIBVORBIS),yes)
 AUDIO_SRCS+=ad_libvorbis.c
 endif
+ifeq ($(MUSEPACK),yes)
+AUDIO_SRCS += ad_mpc.c
+endif
+ifeq ($(SPEEX),yes)
+AUDIO_SRCS += ad_speex.c
+endif
 
 
 VIDEO_SRCS_LIB=vd_lzo.c \
@@ -109,6 +115,12 @@ VIDEO_SRCS+=vd_xvid4.c
 endif
 ifeq ($(ZORAN),yes)
 VIDEO_SRCS+=vd_zrmjpeg.c
+endif
+ifeq ($(PNG),yes)
+VIDEO_SRCS += vd_mpng.c
+endif
+ifeq ($(JPEG),yes)
+VIDEO_SRCS += vd_ijpg.c
 endif
 
 
@@ -194,7 +206,6 @@ endif
 ifeq ($(CONFIG_LIBPOSTPROC_SO),yes)
 VFILTER_SRCS += vf_pp.c
 endif
-
 ifeq ($(CONFIG_LIBAVCODEC),yes)
 VFILTER_SRCS += $(VFILTER_LAVC_SRCS)
 VFILTER_SRCS += $(VFILTER_LAVC_DSPUTIL_SRCS)
@@ -202,9 +213,14 @@ endif
 ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
 VFILTER_SRCS += $(VFILTER_LAVC_SRCS)
 endif
-
 ifeq ($(PNG),yes)
 VFILTER_SRCS += vf_screenshot.c
+endif
+ifeq ($(ZORAN),yes)
+VFILTER_SRCS += vf_zrmjpeg.c
+endif
+ifeq ($(CONFIG_ASS),yes)
+VFILTER_SRCS += vf_ass.c
 endif
 
 
@@ -235,35 +251,23 @@ endif
 ifeq ($(X264),yes)
 ENCODER_SRCS+=ve_x264.c
 endif
-
-
-NATIVE_SRCS=native/minilzo.c \
-            native/nuppelvideo.c \
-            native/RTjpegN.c \
-            native/xa_gsm.c \
-
-ifeq ($(ZORAN),yes)
-VFILTER_SRCS += vf_zrmjpeg.c
-endif
-
-ifeq ($(PNG),yes)
-VIDEO_SRCS += vd_mpng.c
-endif
-
-ifeq ($(JPEG),yes)
-VIDEO_SRCS += vd_ijpg.c
-endif
-
 ifeq ($(TOOLAME),yes)
 ENCODER_SRCS += ae_toolame.c
 endif
-
 ifeq ($(TWOLAME),yes)
 ENCODER_SRCS += ae_twolame.c
 endif
-
 ifeq ($(MP3LAME),yes)
 ENCODER_SRCS += ae_lame.c
+endif
+ifeq ($(FAAC),yes)
+ENCODER_SRCS += ae_faac.c
+endif
+ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
+ENCODER_SRCS += ae_lavc.c
+endif
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+ENCODER_SRCS += ae_lavc.c
 endif
 
 ifeq ($(CONFIG_LIBAVUTIL),yes)
@@ -271,27 +275,13 @@ LIBAV_INC += -I../libavutil
 endif
 ifeq ($(CONFIG_LIBAVCODEC),yes)
 LIBAV_INC += -I../libavcodec
-ENCODER_SRCS += ae_lavc.c
-endif
-ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-ENCODER_SRCS += ae_lavc.c
 endif
 
-ifeq ($(MUSEPACK),yes)
-AUDIO_SRCS += ad_mpc.c
-endif
 
-ifeq ($(SPEEX),yes)
-AUDIO_SRCS += ad_speex.c
-endif
-
-ifeq ($(FAAC),yes)
-ENCODER_SRCS += ae_faac.c
-endif
-
-ifeq ($(CONFIG_ASS),yes)
-VFILTER_SRCS += vf_ass.c
-endif
+NATIVE_SRCS=native/minilzo.c \
+            native/nuppelvideo.c \
+            native/RTjpegN.c \
+            native/xa_gsm.c \
 
 SRCS=$(AUDIO_SRCS) \
      $(VIDEO_SRCS) \
