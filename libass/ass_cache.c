@@ -37,8 +37,6 @@
 static ass_font_t* font_cache;
 static int font_cache_size;
 
-extern int no_more_font_messages;
-
 static int font_compare(ass_font_desc_t* a, ass_font_desc_t* b) {
 	if (strcmp(a->family, b->family) != 0)
 		return 0;

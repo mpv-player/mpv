@@ -43,8 +43,6 @@ struct fc_instance_s {
 	int index_default;
 };
 
-extern int no_more_font_messages;
-
 #ifdef HAVE_FONTCONFIG
 /**
  * \brief Low-level font selection.
@@ -127,20 +125,19 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 		res = _select_font(priv, family, bold, italic, index);
 	if (!res && priv->family_default) {
 		res = _select_font(priv, priv->family_default, bold, italic, index);
-		if (res && !no_more_font_messages)
+		if (res)
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFontFamily, 
 					family, bold, italic, res, *index);
 	}
 	if (!res && priv->path_default) {
 		res = priv->path_default;
 		*index = priv->index_default;
-		if (!no_more_font_messages)
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFont, 
-					family, bold, italic, res, *index);
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFont, 
+		       family, bold, italic, res, *index);
 	}
 	if (!res) {
 		res = _select_font(priv, "Arial", bold, italic, index);
-		if (res && !no_more_font_messages)
+		if (res)
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingArialFontFamily, 
 					family, bold, italic, res, *index);
 	}

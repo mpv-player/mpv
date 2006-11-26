@@ -30,8 +30,6 @@
 #include "ass_fontconfig.h"
 #include "mputils.h"
 
-extern int no_more_font_messages;
-
 /**
  * Select Microfost Unicode CharMap, if the font has one.
  * Otherwise, let FreeType decide.
@@ -61,9 +59,7 @@ int ass_font_init(FT_Library ftlibrary, void* fc_priv, ass_font_t* font, ass_fon
 	
 	error = FT_New_Face(ftlibrary, path, index, &face);
 	if (error) {
-		if (!no_more_font_messages)
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
-		no_more_font_messages = 1;
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
 		return 1;
 	}
 

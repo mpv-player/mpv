@@ -72,8 +72,6 @@ struct ass_renderer_s {
 	ass_image_t* images_root; // rendering result is stored here
 };
 
-int no_more_font_messages = 0;  // don't print font warnings
-
 typedef enum {EF_NONE = 0, EF_KARAOKE, EF_KARAOKE_KF, EF_KARAOKE_KO} effect_t;
 
 // describes a glyph
