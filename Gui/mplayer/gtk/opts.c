@@ -545,8 +545,8 @@ void prButton( GtkButton * button,gpointer user_data )
 #ifdef USE_ASS
 	gtkASS.enabled=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBUseASS ) );
 	gtkASS.use_margins=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBASSUseMargins ) );
-	gtkASS.top_margin=gtk_spin_button_get_value( GTK_SPIN_BUTTON( SBASSTopMargin ) );
-	gtkASS.bottom_margin=gtk_spin_button_get_value( GTK_SPIN_BUTTON( SBASSBottomMargin ) );
+	gtkASS.top_margin=gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( SBASSTopMargin ) );
+	gtkASS.bottom_margin=gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( SBASSBottomMargin ) );
 #endif
 	sub_delay=HSSubDelayadj->value;
 	sub_fps=HSSubFPSadj->value;
