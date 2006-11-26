@@ -196,12 +196,10 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 	return NULL;
 
     fs_seg=
-    ldt_fs->fs_seg = mmap_anon(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE, &ldt_fs->fd, 
-                0);
+    ldt_fs->fs_seg = mmap_anon(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE, 0);
     if (ldt_fs->fs_seg == (void*)-1)
     {
 	perror("ERROR: Couldn't allocate memory for fs segment");
-        close(ldt_fs->fd);
         free(ldt_fs);
 	return NULL;
     }
@@ -282,7 +280,5 @@ void Restore_LDT_Keeper(ldt_fs_t* ldt_fs)
 	free(ldt_fs->prev_struct);
     munmap((char*)ldt_fs->fs_seg, getpagesize());
     ldt_fs->fs_seg = 0;
-    if (ldt_fs->fd != -1)
-    close(ldt_fs->fd);
     free(ldt_fs);
 }

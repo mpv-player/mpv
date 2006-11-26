@@ -9,7 +9,6 @@ extern "C"
 typedef struct {
   void* fs_seg;
   char* prev_struct;
-  int fd;
 } ldt_fs_t;
 
 void Setup_FS_Segment(void);

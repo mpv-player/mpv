@@ -248,7 +248,7 @@ LPVOID FILE_dommap( int unix_handle, LPVOID start,
 
     if (unix_handle == -1)
     {
-        ret = mmap_anon( start, size_low, prot, flags, &fd, offset_low );
+        ret = mmap_anon( start, size_low, prot, flags, offset_low );
     }
     else 
     {
@@ -365,12 +365,10 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
 	mmap_access |=PROT_READ|PROT_WRITE;
 
     if(anon)
-        answer=mmap_anon(NULL, len, mmap_access, MAP_PRIVATE, &hFile, 0);
+        answer=mmap_anon(NULL, len, mmap_access, MAP_PRIVATE, 0);
     else
         answer=mmap(NULL, len, mmap_access, MAP_PRIVATE, hFile, 0);
 
-    if(anon && hFile != -1)
-        close(hFile);
     if(answer!=(LPVOID)-1)
     {
 	if(fm==0)
@@ -395,8 +393,6 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
 	    fm->name=NULL;
 	fm->mapping_size=len;
 
-	if(anon && hFile != -1)
-	    close(hFile);
 	return (HANDLE)answer;
     }
     return (HANDLE)0;
@@ -495,11 +491,9 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
     }
 
     answer=mmap_anon(address, size, PROT_READ | PROT_WRITE | PROT_EXEC,
-            MAP_PRIVATE, &fd, 0);
+            MAP_PRIVATE, 0);
 //    answer=FILE_dommap(-1, address, 0, size, 0, 0,
 //	PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE);
-    if (fd != -1)
-        close(fd);
 
     if (answer != (void *)-1 && address && answer != address) {
 	/* It is dangerous to try mmap() with MAP_FIXED since it does not

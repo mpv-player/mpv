@@ -31,7 +31,7 @@
  * \param zerofd 
  * \return a pointer to the mapped region upon successful completion, -1 otherwise.
  */
-void *mmap_anon(void *addr, size_t len, int prot, int flags, int *zerofd, off_t offset)
+void *mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)
 {
     int fd;
     void *result;
@@ -46,7 +46,6 @@ void *mmap_anon(void *addr, size_t len, int prot, int flags, int *zerofd, off_t 
 
 #ifdef MAP_ANONYMOUS
     /* BSD-style anonymous mapping */
-    fd = -1;
     result = mmap(addr, len, prot, flags | MAP_ANONYMOUS, -1, offset);
 #else
     /* SysV-style anonymous mapping */
@@ -57,10 +56,8 @@ void *mmap_anon(void *addr, size_t len, int prot, int flags, int *zerofd, off_t 
     }
 
     result = mmap(addr, len, prot, flags, fd, offset);
+    close(fd);
 #endif /* MAP_ANONYMOUS */
-
-    if (zerofd)
-        *zerofd = fd;
 
     return result;
 }
