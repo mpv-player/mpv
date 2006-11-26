@@ -192,7 +192,10 @@ libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
 
 libvo/libvo.a:
-	$(MAKE) -C libvo
+	$(MAKE) -C libvo libvo.a
+
+libvo/libosd.a:
+	$(MAKE) -C libvo libosd.a
 
 libao2/libao2.a:
 	$(MAKE) -C libao2
@@ -379,6 +382,7 @@ $(MPLAYER_DEPS) $(MENCODER_DEPS): help_mp.h
 .norecurse:
 
 libvo/libvo.a: .norecurse $(wildcard libvo/*.[ch])
+libvo/libosd.a: .norecurse $(wildcard libvo/*.[ch])
 libao2/libao2.a: .norecurse $(wildcard libao2/*.[ch])
 osdep/libosdep.a: .norecurse $(wildcard osdep/*.[ch])
 input/libinput.a: .norecurse $(wildcard input/*.[ch])
