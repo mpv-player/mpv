@@ -175,6 +175,15 @@ void mp_msp_av_log_callback(void* ptr, int level, const char* fmt, va_list vl)
     int mp_level;
     char buf[256];
 
+    switch(level){
+    case AV_LOG_DEBUG:  mp_level= MSGL_V   ; break;
+    case AV_LOG_INFO :  mp_level= MSGL_INFO; break;
+    case AV_LOG_ERROR:  mp_level= MSGL_ERR ; break;
+    default          :  mp_level= MSGL_ERR ; break;
+    }
+
+    if (!mp_msg_test(type, mp_level)) return;
+
     if(ptr){
         if(!strcmp(avc->class_name, "AVCodecContext")){
             AVCodecContext * s= ptr;
@@ -197,13 +206,6 @@ void mp_msp_av_log_callback(void* ptr, int level, const char* fmt, va_list vl)
                 type= MSGT_MUXER;
 #endif
         }
-    }
-
-    switch(level){
-    case AV_LOG_DEBUG:  mp_level= MSGL_V   ; break;
-    case AV_LOG_INFO :  mp_level= MSGL_INFO; break;
-    case AV_LOG_ERROR:  mp_level= MSGL_ERR ; break;
-    default          :  mp_level= MSGL_ERR ; break;
     }
 
     if(print_prefix && avc) {
