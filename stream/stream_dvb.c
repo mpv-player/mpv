@@ -666,7 +666,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	struct stream_priv_s* p = (struct stream_priv_s*)opts;
 	dvb_priv_t *priv;
 	char *progname;
-	int tuner_type = 0;
+	int tuner_type = 0, i;
 
 
 	if(mode != STREAM_READ)
@@ -688,13 +688,22 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	dvb_config->priv = priv;
 	priv->config = dvb_config;
 
-	if(p->card < 1 || p->card > priv->config->count)
+	priv->card = -1;
+	for(i=0; i<priv->config->count; i++)
+	{
+		if(priv->config->cards[i].devno+1 == p->card)
+		{
+			priv->card = i;
+			break;
+		}
+	}
+
+	if(priv->card == -1)
  	{
 		free(priv);
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n", p->card);
  		return STREAM_ERROR;
  	}
-	priv->card = p->card - 1;
 	priv->timeout = p->timeout;
 	
 	tuner_type = priv->config->cards[priv->card].type;
