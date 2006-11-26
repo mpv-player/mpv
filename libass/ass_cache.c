@@ -31,14 +31,6 @@
 #include "ass_bitmap.h"
 #include "ass_cache.h"
 
-
-typedef struct ass_font_s {
-	ass_font_desc_t desc;
-	char* path;
-	int index;
-	FT_Face face;
-} ass_font_t;
-
 #define MAX_FONT_CACHE_SIZE 100
 
 static ass_font_t* font_cache;

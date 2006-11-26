@@ -33,6 +33,13 @@ typedef struct ass_font_desc_s {
 	unsigned italic;
 } ass_font_desc_t;
 
+typedef struct ass_font_s {
+	ass_font_desc_t desc;
+	char* path;
+	int index;
+	FT_Face face;
+} ass_font_t;
+
 void ass_font_cache_init(void);
 int ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_desc_t* desc, /*out*/ FT_Face* face);
 void ass_font_cache_done(void);
