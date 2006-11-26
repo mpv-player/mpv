@@ -3,6 +3,10 @@
 #include <unistd.h>
 #include <inttypes.h>
 
+#ifdef MACOSX
+#include <QuickTime/QuickTimeComponents.h>
+#endif
+
 #include "config.h"
 #include "mp_msg.h"
 
@@ -13,10 +17,6 @@
 
 #ifdef WIN32_LOADER
 #include "ldt_keeper.h"
-#endif
-
-#ifdef MACOSX
-#include <QuickTime/QuickTimeComponents.h>
 #endif
 
 static ad_info_t info =  {
