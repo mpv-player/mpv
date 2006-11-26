@@ -100,15 +100,14 @@ SRCS += $(MUXERS)
 endif
 
 ifeq ($(STREAMING_LIVE555),yes)
-CPLUSPLUSSRCS = demux_rtp.cpp demux_rtp_codec.cpp
+SRCS += demux_rtp.cpp demux_rtp_codec.cpp
 endif
 
 OBJS	= $(SRCS:.c=.o)
-OBJS   += $(CPLUSPLUSSRCS:.cpp=.o)
+OBJS   += $(SRCS:.cpp=.o)
 INCLUDE = -I.. -I../stream -I../loader $(LIBAV_INC)
 CFLAGS  = $(INCLUDE) $(OPTFLAGS)
 CPLUSPLUSFLAGS  = $(CFLAGS) -D__STDC_LIMIT_MACROS
-CPLUSPLUS = $(CC)
 
 .SUFFIXES: .c .cpp .o
 
@@ -119,7 +118,7 @@ all:	$(LIBNAME)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 .cpp.o:
-	$(CPLUSPLUS) -c $(CPLUSPLUSFLAGS) -o $@ $<
+	$(CC) -c $(CPLUSPLUSFLAGS) -o $@ $<
 
 $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
