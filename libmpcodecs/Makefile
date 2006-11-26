@@ -256,7 +256,6 @@ endif
 
 ifeq ($(TOOLAME),yes)
 ENCODER_SRCS += ae_toolame.c
-EXTRA_INC += $(TOOLAME_EXTRAFLAGS)
 endif
 
 ifeq ($(TWOLAME),yes)
