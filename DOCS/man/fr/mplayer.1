@@ -1,4 +1,4 @@
-.\" synced with r21186
+.\" synced with r21255
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -9956,11 +9956,22 @@ subq>=6)
 .B deadzone_inter=<0\-32>
 Défini la taille de la zone morte de quantification luma inter pour
 la quantification non-tellis (par défaut\ : 21).
+Les valeurs plus faibles aident à la préservation des détails fins et du
+grain de film (typiquement utile pour les encodages haute qualité/débit),
+alors que les valeurs plus élevées aident à filter ces détails, économisant
+ainsi des bits pouvant être redistribués à d'autres macro-blocs et trames
+(typiquement utile pour les encodages à très bas débit).
+Il est recommandé que vous commenciez par ajustier deadzone_intra avant de
+toucher à ce paramètre.
 .
 .TP
 .B deadzone_intra=<0\-32>
 Défini la taille de la zone morte de quantification luma intra pour
 la quantification non-tellis (par défaut\ : 11).
+Cette option a le même effet que deadzone_inter à la différence près quelle
+s'applique aux trames inter.
+Il est recommandé que vous commenciez par ajustier ce paramètre avant de
+toucher à deadzone_inter.
 .
 .TP
 .B (no)fast_pskip
