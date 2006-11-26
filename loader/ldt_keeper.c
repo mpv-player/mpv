@@ -195,11 +195,6 @@ ldt_fs_t* Setup_LDT_Keeper(void)
     if (!ldt_fs)
 	return NULL;
 
-    ldt_fs->fd = open("/dev/zero", O_RDWR);
-    if(ldt_fs->fd<0){
-        perror( "Cannot open /dev/zero for READ+WRITE. Check permissions! error: ");
-	return NULL;
-    }
     fs_seg=
     ldt_fs->fs_seg = mmap_anon(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE, &ldt_fs->fd, 
                 0);
