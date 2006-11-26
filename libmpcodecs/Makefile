@@ -9,17 +9,19 @@ ifeq ($(MENCODER),yes)
 LIBS+=$(LIBNAME2)
 endif
 
-AUDIO_SRCS_LIB=ad_hwac3.c \
+SRCS=ad_hwac3.c \
                ad_hwmpa.c \
 
 ifeq ($(LIBA52),yes)
-AUDIO_SRCS_LIB+=ad_liba52.c
+SRCS+=ad_liba52.c
 endif
 ifeq ($(MP3LIB),yes)
-AUDIO_SRCS_LIB+=ad_mp3lib.c
+SRCS+=ad_mp3lib.c
 endif
 
-AUDIO_SRCS_NAT=ad_alaw.c \
+SRCS=dec_audio.c \
+           ad.c \
+           ad_alaw.c \
                ad_dk3adpcm.c \
                ad_dvdpcm.c \
                ad_imaadpcm.c \
@@ -27,104 +29,96 @@ AUDIO_SRCS_NAT=ad_alaw.c \
                ad_msgsm.c \
                ad_pcm.c \
 
-AUDIO_SRCS=dec_audio.c \
-           ad.c \
-           $(AUDIO_SRCS_LIB) \
-           $(AUDIO_SRCS_NAT) \
-
 ifeq ($(CONFIG_LIBAVCODEC),yes)
-AUDIO_SRCS+=ad_ffmpeg.c
+SRCS+=ad_ffmpeg.c
 endif
 ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-AUDIO_SRCS+=ad_ffmpeg.c
+SRCS+=ad_ffmpeg.c
 endif
 ifeq ($(WIN32DLL),yes)
-AUDIO_SRCS+=ad_acm.c ad_dmo.c ad_dshow.c ad_twin.c
+SRCS+=ad_acm.c ad_dmo.c ad_dshow.c ad_twin.c
 endif
 ifeq ($(QTX_CODECS),yes)
-AUDIO_SRCS+=ad_qtaudio.c
+SRCS+=ad_qtaudio.c
 endif
 ifeq ($(REAL_CODECS),yes)
-AUDIO_SRCS+=ad_realaud.c
+SRCS+=ad_realaud.c
 endif
 ifeq ($(FAAD),yes)
-AUDIO_SRCS += ad_faad.c
+SRCS += ad_faad.c
 endif
 ifeq ($(LIBDV),yes)
-AUDIO_SRCS+=ad_libdv.c
+SRCS+=ad_libdv.c
 endif
 ifeq ($(LIBMAD),yes)
-AUDIO_SRCS+=ad_libmad.c
+SRCS+=ad_libmad.c
 endif
 ifeq ($(LIBVORBIS),yes)
-AUDIO_SRCS+=ad_libvorbis.c
+SRCS+=ad_libvorbis.c
 endif
 ifeq ($(MUSEPACK),yes)
-AUDIO_SRCS += ad_mpc.c
+SRCS += ad_mpc.c
 endif
 ifeq ($(SPEEX),yes)
-AUDIO_SRCS += ad_speex.c
+SRCS += ad_speex.c
 endif
 
 
-VIDEO_SRCS_LIB=vd_lzo.c \
+SRCS=vd_lzo.c \
                vd_nuv.c \
 
 ifeq ($(LIBMPEG2),yes)
-VIDEO_SRCS_LIB+=vd_libmpeg2.c
+SRCS+=vd_libmpeg2.c
 endif
 
-VIDEO_SRCS_NAT=vd_hmblck.c \
+SRCS=dec_video.c \
+           vd.c \
+           vd_hmblck.c \
                vd_mpegpes.c \
                vd_mtga.c \
                vd_null.c \
                vd_raw.c \
                vd_sgi.c \
 
-VIDEO_SRCS=dec_video.c \
-           vd.c \
-           $(VIDEO_SRCS_NAT) \
-           $(VIDEO_SRCS_LIB) \
-
 ifeq ($(CONFIG_LIBAVCODEC),yes)
-VIDEO_SRCS+=vd_ffmpeg.c
+SRCS+=vd_ffmpeg.c
 endif
 ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-VIDEO_SRCS+=vd_ffmpeg.c
+SRCS+=vd_ffmpeg.c
 endif
 ifeq ($(WIN32DLL),yes)
-VIDEO_SRCS+=vd_dmo.c vd_dshow.c vd_vfw.c vd_vfwex.c
+SRCS+=vd_dmo.c vd_dshow.c vd_vfw.c vd_vfwex.c
 endif
 ifeq ($(QTX_CODECS),yes)
-VIDEO_SRCS+=vd_qtvideo.c
+SRCS+=vd_qtvideo.c
 endif
 ifeq ($(REAL_CODECS),yes)
-VIDEO_SRCS+=vd_realvid.c
+SRCS+=vd_realvid.c
 endif
 ifeq ($(XANIM_CODECS),yes)
-VIDEO_SRCS+=vd_xanim.c
+SRCS+=vd_xanim.c
 endif
 ifeq ($(LIBDV),yes)
-VIDEO_SRCS+=vd_libdv.c
+SRCS+=vd_libdv.c
 endif
 ifeq ($(LIBTHEORA),yes)
-VIDEO_SRCS+=vd_theora.c
+SRCS+=vd_theora.c
 endif
 ifeq ($(XVID4),yes)
-VIDEO_SRCS+=vd_xvid4.c
+SRCS+=vd_xvid4.c
 endif
 ifeq ($(ZORAN),yes)
-VIDEO_SRCS+=vd_zrmjpeg.c
+SRCS+=vd_zrmjpeg.c
 endif
 ifeq ($(PNG),yes)
-VIDEO_SRCS += vd_mpng.c
+SRCS += vd_mpng.c
 endif
 ifeq ($(JPEG),yes)
-VIDEO_SRCS += vd_ijpg.c
+SRCS += vd_ijpg.c
 endif
 
 
-VFILTER_SRCS=vf.c \
+SRCS=vf.c \
              pullup.c \
              vf_1bpp.c \
              vf_2xsai.c \
@@ -190,10 +184,10 @@ VFILTER_SRCS=vf.c \
              vf_yvu9.c \
              vf_yadif.c \
 
-VFILTER_LAVC_SRCS += vf_lavc.c \
+LAVC_SRCS += vf_lavc.c \
                      vf_lavcdeint.c \
 
-VFILTER_LAVC_DSPUTIL_SRCS += vf_uspp.c \
+LAVC_DSPUTIL_SRCS += vf_uspp.c \
                              vf_fspp.c \
                              vf_qp.c \
                              vf_geq.c \
@@ -201,26 +195,26 @@ VFILTER_LAVC_DSPUTIL_SRCS += vf_uspp.c \
                              vf_mcdeint.c \
 
 ifeq ($(CONFIG_LIBPOSTPROC),yes)
-VFILTER_SRCS += vf_pp.c
+SRCS += vf_pp.c
 endif
 ifeq ($(CONFIG_LIBPOSTPROC_SO),yes)
-VFILTER_SRCS += vf_pp.c
+SRCS += vf_pp.c
 endif
 ifeq ($(CONFIG_LIBAVCODEC),yes)
-VFILTER_SRCS += $(VFILTER_LAVC_SRCS)
-VFILTER_SRCS += $(VFILTER_LAVC_DSPUTIL_SRCS)
+SRCS += $(LAVC_SRCS)
+SRCS += $(LAVC_DSPUTIL_SRCS)
 endif
 ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-VFILTER_SRCS += $(VFILTER_LAVC_SRCS)
+SRCS += $(LAVC_SRCS)
 endif
 ifeq ($(PNG),yes)
-VFILTER_SRCS += vf_screenshot.c
+SRCS += vf_screenshot.c
 endif
 ifeq ($(ZORAN),yes)
-VFILTER_SRCS += vf_zrmjpeg.c
+SRCS += vf_zrmjpeg.c
 endif
 ifeq ($(CONFIG_ASS),yes)
-VFILTER_SRCS += vf_ass.c
+SRCS += vf_ass.c
 endif
 
 
@@ -278,15 +272,10 @@ LIBAV_INC += -I../libavcodec
 endif
 
 
-NATIVE_SRCS=native/minilzo.c \
+SRCS+=native/minilzo.c \
             native/nuppelvideo.c \
             native/RTjpegN.c \
             native/xa_gsm.c \
-
-SRCS=$(AUDIO_SRCS) \
-     $(VIDEO_SRCS) \
-     $(VFILTER_SRCS) \
-     $(NATIVE_SRCS) \
      img_format.c \
 
 OBJS=$(SRCS:.c=.o)
