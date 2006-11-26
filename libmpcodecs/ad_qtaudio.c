@@ -3,11 +3,12 @@
 #include <unistd.h>
 #include <inttypes.h>
 
+#include "config.h"
+
 #ifdef MACOSX
 #include <QuickTime/QuickTimeComponents.h>
 #endif
 
-#include "config.h"
 #include "mp_msg.h"
 
 #include "wine/windef.h"
