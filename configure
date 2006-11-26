@@ -5915,12 +5915,12 @@ echocheck "Win32 codecs"
 if test "$_win32" = auto ; then
   _win32=no
   if x86 && not qnx; then
-    test -z "$_win32codecsdir" && _win32codecsdir=$_codecsdir
     _win32=yes
   fi
 fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
+  test -z "$_win32codecsdir" && _win32codecsdir=$_codecsdir
   _res_comment="using $_win32codecsdir"
   openbsd && x86 && _ld_extra="$_ld_extra -li386"
   if not win32 ; then
