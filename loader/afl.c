@@ -23,6 +23,7 @@
   
 ***************************************************************************/
 #include "config.h"
+#include "debug.h"
 
 #include "wine/winbase.h"
 #include "wine/windef.h"

@@ -16,6 +16,7 @@
 //#define DEBUG_QTX_API
 
 #include "config.h"
+#include "debug.h"
 
 #include <assert.h>
 #include <errno.h>
