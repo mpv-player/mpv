@@ -7792,16 +7792,6 @@ $_def_macosx_corevideo
 /* Build our Win32-loader */
 $_def_win32_loader
 
-/* some definitions for the loader */
-#ifdef DEBUG
-#define TRACE printf
-#define dbg_printf printf
-#else
-#define TRACE(...)
-#define dbg_printf(...)
-#endif
-
-
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
 $_def_libavcodec_so
