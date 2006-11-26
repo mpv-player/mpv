@@ -369,7 +369,7 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
     else
         answer=mmap(NULL, len, mmap_access, MAP_PRIVATE, hFile, 0);
 
-    if(hFile != -1)
+    if(anon && hFile != -1)
         close(hFile);
     if(answer!=(LPVOID)-1)
     {
@@ -395,7 +395,7 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
 	    fm->name=NULL;
 	fm->mapping_size=len;
 
-	if(hFile != -1)
+	if(anon && hFile != -1)
 	    close(hFile);
 	return (HANDLE)answer;
     }
