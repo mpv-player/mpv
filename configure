@@ -5170,15 +5170,6 @@ if test "$_dvdread_internal" = yes; then
   _def_dvdread='#define USE_DVDREAD 1'
   _inputmodules="dvdread $_inputmodules"
   _largefiles=yes
-  if linux || netbsd || openbsd || bsdos ; then
-    _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
-    openbsd && _dev_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
-  elif freebsd ; then
-    _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
-  elif darwin ; then
-    _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
-    _ld_extra="$_ld_extra -framework IOKit"
-  fi
 elif test "$_dvdread" = yes; then
   _def_dvdread='#define USE_DVDREAD 1'
   _inputmodules="dvdread $_inputmodules"
@@ -5198,6 +5189,15 @@ if test "$_libdvdcss_internal" = auto ; then
   test "$_dvdread_internal" = yes && _libdvdcss_internal=yes
 fi
 if test "$_libdvdcss_internal" = yes ; then
+  if linux || netbsd || openbsd || bsdos ; then
+    _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
+    openbsd && _dev_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
+  elif freebsd ; then
+    _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
+  elif darwin ; then
+    _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
+    _ld_extra="$_ld_extra -framework IOKit"
+  fi
   _inputmodules="libdvdcss $_inputmodules"
 else
   _noinputmodules="libdvdcss $_noinputmodules"
