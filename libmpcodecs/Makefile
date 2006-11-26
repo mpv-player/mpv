@@ -27,45 +27,19 @@ SRCS += dec_audio.c \
                ad_msgsm.c \
                ad_pcm.c \
 
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-SRCS+=ad_ffmpeg.c
-endif
-ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-SRCS+=ad_ffmpeg.c
-endif
-ifeq ($(WIN32DLL),yes)
-SRCS+=ad_acm.c ad_dmo.c ad_dshow.c ad_twin.c
-endif
-ifeq ($(QTX_CODECS),yes)
-SRCS+=ad_qtaudio.c
-endif
-ifeq ($(REAL_CODECS),yes)
-SRCS+=ad_realaud.c
-endif
-ifeq ($(FAAD),yes)
-SRCS += ad_faad.c
-endif
-ifeq ($(LIBA52),yes)
-SRCS+=ad_liba52.c
-endif
-ifeq ($(LIBDV),yes)
-SRCS+=ad_libdv.c
-endif
-ifeq ($(LIBMAD),yes)
-SRCS+=ad_libmad.c
-endif
-ifeq ($(LIBVORBIS),yes)
-SRCS+=ad_libvorbis.c
-endif
-ifeq ($(MP3LIB),yes)
-SRCS+=ad_mp3lib.c
-endif
-ifeq ($(MUSEPACK),yes)
-SRCS += ad_mpc.c
-endif
-ifeq ($(SPEEX),yes)
-SRCS += ad_speex.c
-endif
+SRCS-$(CONFIG_LIBAVCODEC)    += ad_ffmpeg.c
+SRCS-$(CONFIG_LIBAVCODEC_SO) += ad_ffmpeg.c
+SRCS-$(FAAD)                 += ad_faad.c
+SRCS-$(LIBA52)               += ad_liba52.c
+SRCS-$(LIBDV)                += ad_libdv.c
+SRCS-$(LIBMAD)               += ad_libmad.c
+SRCS-$(LIBVORBIS)            += ad_libvorbis.c
+SRCS-$(MP3LIB)               += ad_mp3lib.c
+SRCS-$(MUSEPACK)             += ad_mpc.c
+SRCS-$(QTX_CODECS)           += ad_qtaudio.c
+SRCS-$(REAL_CODECS)          += ad_realaud.c
+SRCS-$(SPEEX)                += ad_speex.c
+SRCS-$(WIN32DLL)             += ad_acm.c ad_dmo.c ad_dshow.c ad_twin.c
 
 SRCS += dec_video.c \
            vd.c \
@@ -78,45 +52,19 @@ SRCS += dec_video.c \
                vd_raw.c \
                vd_sgi.c \
 
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-SRCS+=vd_ffmpeg.c
-endif
-ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-SRCS+=vd_ffmpeg.c
-endif
-ifeq ($(WIN32DLL),yes)
-SRCS+=vd_dmo.c vd_dshow.c vd_vfw.c vd_vfwex.c
-endif
-ifeq ($(QTX_CODECS),yes)
-SRCS+=vd_qtvideo.c
-endif
-ifeq ($(REAL_CODECS),yes)
-SRCS+=vd_realvid.c
-endif
-ifeq ($(XANIM_CODECS),yes)
-SRCS+=vd_xanim.c
-endif
-ifeq ($(LIBDV),yes)
-SRCS+=vd_libdv.c
-endif
-ifeq ($(LIBMPEG2),yes)
-SRCS+=vd_libmpeg2.c
-endif
-ifeq ($(LIBTHEORA),yes)
-SRCS+=vd_theora.c
-endif
-ifeq ($(XVID4),yes)
-SRCS+=vd_xvid4.c
-endif
-ifeq ($(ZORAN),yes)
-SRCS+=vd_zrmjpeg.c
-endif
-ifeq ($(PNG),yes)
-SRCS += vd_mpng.c
-endif
-ifeq ($(JPEG),yes)
-SRCS += vd_ijpg.c
-endif
+SRCS-$(CONFIG_LIBAVCODEC)    += vd_ffmpeg.c
+SRCS-$(CONFIG_LIBAVCODEC_SO) += vd_ffmpeg.c
+SRCS-$(JPEG)                 += vd_ijpg.c
+SRCS-$(LIBDV)                += vd_libdv.c
+SRCS-$(LIBMPEG2)             += vd_libmpeg2.c
+SRCS-$(LIBTHEORA)            += vd_theora.c
+SRCS-$(PNG)                  += vd_mpng.c
+SRCS-$(QTX_CODECS)           += vd_qtvideo.c
+SRCS-$(REAL_CODECS)          += vd_realvid.c
+SRCS-$(WIN32DLL)             += vd_dmo.c vd_dshow.c vd_vfw.c vd_vfwex.c
+SRCS-$(XANIM_CODECS)         += vd_xanim.c
+SRCS-$(XVID4)                += vd_xvid4.c
+SRCS-$(ZORAN)                += vd_zrmjpeg.c
 
 
 SRCS += vf.c \
@@ -195,28 +143,14 @@ LAVC_DSPUTIL_SRCS += vf_uspp.c \
                              vf_spp.c \
                              vf_mcdeint.c \
 
-ifeq ($(CONFIG_LIBPOSTPROC),yes)
-SRCS += vf_pp.c
-endif
-ifeq ($(CONFIG_LIBPOSTPROC_SO),yes)
-SRCS += vf_pp.c
-endif
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-SRCS += $(LAVC_SRCS)
-SRCS += $(LAVC_DSPUTIL_SRCS)
-endif
-ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-SRCS += $(LAVC_SRCS)
-endif
-ifeq ($(PNG),yes)
-SRCS += vf_screenshot.c
-endif
-ifeq ($(ZORAN),yes)
-SRCS += vf_zrmjpeg.c
-endif
-ifeq ($(CONFIG_ASS),yes)
-SRCS += vf_ass.c
-endif
+SRCS-$(CONFIG_ASS)            += vf_ass.c
+SRCS-$(CONFIG_LIBPOSTPROC)    += vf_pp.c
+SRCS-$(CONFIG_LIBPOSTPROC_SO) += vf_pp.c
+SRCS-$(CONFIG_LIBAVCODEC)     += $(LAVC_DSPUTIL_SRCS)
+SRCS-$(CONFIG_LIBAVCODEC)     += $(LAVC_SRCS)
+SRCS-$(CONFIG_LIBAVCODEC_SO)  += $(LAVC_SRCS)
+SRCS-$(PNG)                   += vf_screenshot.c
+SRCS-$(ZORAN)                 += vf_zrmjpeg.c
 
 
 ENCODER_SRCS=ae.c \
@@ -225,52 +159,28 @@ ENCODER_SRCS=ae.c \
              ve_nuv.c \
              ve_raw.c \
 
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-ENCODER_SRCS+=ve_lavc.c
-endif
-ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-ENCODER_SRCS+=ve_lavc.c
-endif
-ifeq ($(WIN32DLL),yes)
-ENCODER_SRCS+=ve_vfw.c
-endif
-ifeq ($(QTX_CODECS),yes)
-ENCODER_SRCS+=ve_qtvideo.c
-endif
-ifeq ($(LIBDV),yes)
-ENCODER_SRCS+=ve_libdv.c
-endif
-ifeq ($(XVID4),yes)
-ENCODER_SRCS+=ve_xvid4.c
-endif
-ifeq ($(X264),yes)
-ENCODER_SRCS+=ve_x264.c
-endif
-ifeq ($(TOOLAME),yes)
-ENCODER_SRCS += ae_toolame.c
-endif
-ifeq ($(TWOLAME),yes)
-ENCODER_SRCS += ae_twolame.c
-endif
-ifeq ($(MP3LAME),yes)
-ENCODER_SRCS += ae_lame.c
-endif
-ifeq ($(FAAC),yes)
-ENCODER_SRCS += ae_faac.c
-endif
-ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-ENCODER_SRCS += ae_lavc.c
-endif
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-ENCODER_SRCS += ae_lavc.c
-endif
+ENCODER_SRCS-$(CONFIG_LIBAVCODEC)    += ve_lavc.c
+ENCODER_SRCS-$(CONFIG_LIBAVCODEC_SO) += ve_lavc.c
+ENCODER_SRCS-$(LIBDV)                += ve_libdv.c
+ENCODER_SRCS-$(QTX_CODECS)           += ve_qtvideo.c
+ENCODER_SRCS-$(WIN32DLL)             += ve_vfw.c
+ENCODER_SRCS-$(X264)                 += ve_x264.c
+ENCODER_SRCS-$(XVID4)                += ve_xvid4.c
+ENCODER_SRCS-$(CONFIG_LIBAVCODEC_SO) += ae_lavc.c
+ENCODER_SRCS-$(CONFIG_LIBAVCODEC)    += ae_lavc.c
+ENCODER_SRCS-$(FAAC)                 += ae_faac.c
+ENCODER_SRCS-$(TOOLAME)              += ae_toolame.c
+ENCODER_SRCS-$(TWOLAME)              += ae_twolame.c
+ENCODER_SRCS-$(MP3LAME)              += ae_lame.c
 
-ifeq ($(CONFIG_LIBAVUTIL),yes)
-LIBAV_INC += -I../libavutil
-endif
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-LIBAV_INC += -I../libavcodec
-endif
+
+LIBAV_INC-$(CONFIG_LIBAVUTIL)  +=  -I../libavutil
+LIBAV_INC-$(CONFIG_LIBAVCODEC) +=  -I../libavcodec
+
+
+ENCODER_SRCS += $(ENCODER_SRCS-yes)
+SRCS         += $(SRCS-yes)
+LIBAV_INC    += $(LIBAV_INC-yes)
 
 
 OBJS=$(SRCS:.c=.o)

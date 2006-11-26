@@ -53,24 +53,15 @@ SRCS += demuxer.c \
         demux_y4m.c \
         demux_mkv.c ebml.c \
 
-ifeq ($(LIBNUT),yes)
-SRCS += demux_nut.c
-endif
-ifeq ($(LIBVORBIS),yes)
-SRCS += demux_ogg.c
-endif
-ifeq ($(LIBDV),yes)
-SRCS += demux_rawdv.c
-endif
-ifeq ($(GIF),yes)
-SRCS += demux_gif.c
-endif
-ifeq ($(XMMS_PLUGINS),yes)
-SRCS += demux_xmms.c
-endif
-ifeq ($(WIN32DLL),yes)
-SRCS += demux_avs.c
-endif
+SRCS-$(CONFIG_LIBAVFORMAT)      += demux_lavf.c
+SRCS-$(CONFIG_LIBAVFORMAT_SO)   += demux_lavf.c
+SRCS-$(GIF)                     += demux_gif.c
+SRCS-$(LIBDV)                   += demux_rawdv.c
+SRCS-$(LIBNUT)                  += demux_nut.c
+SRCS-$(LIBVORBIS)               += demux_ogg.c
+SRCS-$(STREAMING_LIVE555)       += demux_rtp.cpp demux_rtp_codec.cpp
+SRCS-$(WIN32DLL)                += demux_avs.c
+SRCS-$(XMMS_PLUGINS)            += demux_xmms.c
 
 # Muxers
 MUXERS = muxer.c \
@@ -79,31 +70,20 @@ MUXERS = muxer.c \
         muxer_rawaudio.c \
         muxer_rawvideo.c \
 
-ifeq ($(CONFIG_LIBAVUTIL),yes)
-LIBAV_INC += -I../libavutil
-endif
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-LIBAV_INC += -I../libavcodec
-endif
-ifeq ($(CONFIG_LIBAVFORMAT),yes)
-LIBAV_INC += -I../libavformat
-SRCS   += demux_lavf.c
-MUXERS += muxer_lavf.c
-endif
-ifeq ($(CONFIG_LIBAVFORMAT_SO),yes)
-SRCS   += demux_lavf.c
-MUXERS += muxer_lavf.c
-endif
+MUXERS-$(CONFIG_LIBAVFORMAT)    += muxer_lavf.c
+MUXERS-$(CONFIG_LIBAVFORMAT_SO) += muxer_lavf.c
 
-ifeq ($(MENCODER),yes)
-SRCS += $(MUXERS)
-endif
+SRCS-$(MENCODER) += $(MUXERS-yes)
 
-ifeq ($(STREAMING_LIVE555),yes)
-SRCS += demux_rtp.cpp demux_rtp_codec.cpp
-endif
+SRCS             += $(SRCS-yes)
 
-CFLAGS = -I../stream -I../loader $(LIBAV_INC)
+LIBAV_INC-$(CONFIG_LIBAVUTIL)   += -I../libavutil
+LIBAV_INC-$(CONFIG_LIBAVCODEC)  += -I../libavcodec
+LIBAV_INC-$(CONFIG_LIBAVFORMAT) += -I../libavformat
+
+LIBAV_INC += $(LIBAV_INC-yes)
+
+CFLAGS = -I.. -I../stream -I../loader $(LIBAV_INC)
 
 CPLUSPLUSFLAGS  = $(CFLAGS) -D__STDC_LIMIT_MACROS
 
