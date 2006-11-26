@@ -71,46 +71,45 @@ static void charmap_magic(FT_Face face)
  * \param library FreeType library object
  * \param fontconfig_priv fontconfig private data
  * \param desc required face description
- * \param face out: the face object
+ * \return new font struct
 */ 
-int ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_desc_t* desc, /*out*/ FT_Face* face)
+ass_font_t* ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_desc_t* desc)
 {
 	FT_Error error;
 	int i;
 	char* path;
 	int index;
 	ass_font_t* item;
+	FT_Face face;
 	
 	for (i=0; i<font_cache_size; ++i)
-		if (font_compare(desc, &(font_cache[i].desc))) {
-			*face = font_cache[i].face;
-			return 0;
-		}
+		if (font_compare(desc, &(font_cache[i].desc)))
+			return font_cache + i;
 
 	if (font_cache_size == MAX_FONT_CACHE_SIZE) {
 		mp_msg(MSGT_ASS, MSGL_FATAL, MSGTR_LIBASS_TooManyFonts);
-		return 1;
+		return 0;
 	}
 
 	path = fontconfig_select(fontconfig_priv, desc->family, desc->bold, desc->italic, &index);
 	
-	error = FT_New_Face(library, path, index, face);
+	error = FT_New_Face(library, path, index, &face);
 	if (error) {
 		if (!no_more_font_messages)
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
 		no_more_font_messages = 1;
-		return 1;
+		return 0;
 	}
 
-	charmap_magic(*face);
+	charmap_magic(face);
 	
 	item = font_cache + font_cache_size;
 	item->path = strdup(path);
 	item->index = index;
-	item->face = *face;
-	memcpy(&(item->desc), desc, sizeof(font_desc_t));
+	item->face = face;
+	memcpy(&(item->desc), desc, sizeof(ass_font_desc_t));
 	font_cache_size++;
-	return 0;
+	return item;
 }
 
 void ass_font_cache_init(void)

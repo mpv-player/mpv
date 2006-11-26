@@ -122,7 +122,7 @@ typedef struct render_context_s {
 	ass_event_t* event;
 	ass_style_t* style;
 	
-	FT_Face face;
+	ass_font_t* font;
 	char* font_path;
 	int font_size;
 	
@@ -536,7 +536,7 @@ static void change_font_size(int sz)
 	else if (size > frame_context.height * 2)
 		size = frame_context.height * 2;
 	
-	FT_Set_Pixel_Sizes(render_context.face, 0, size);
+	FT_Set_Pixel_Sizes(render_context.font->face, 0, size);
 
 	render_context.font_size = sz;
 }
@@ -546,7 +546,6 @@ static void change_font_size(int sz)
  */
 static void update_font(void)
 {
-	int error;
 	unsigned val;
 	ass_renderer_t* priv = frame_context.ass_priv;
 	ass_font_desc_t desc;
@@ -563,12 +562,9 @@ static void update_font(void)
 	else if (val == 1) val = 110; //italic
 	desc.italic = val;
 
-	error = ass_new_font(priv->ftlibrary, priv->fontconfig_priv, &desc, &(render_context.face));
-	if (error) {
-		render_context.face = 0;
-	}
+	render_context.font = ass_new_font(priv->ftlibrary, priv->fontconfig_priv, &desc);
 	
-	if (render_context.face)
+	if (render_context.font)
 		change_font_size(render_context.font_size);
 }
 
@@ -579,7 +575,7 @@ static void update_font(void)
 static void change_border(double border)
 {
 	int b;
-	if (!render_context.face) return;
+	if (!render_context.font) return;
 
 	if (border < 0) {
 		if (render_context.style->BorderStyle == 1) {
@@ -599,7 +595,7 @@ static void change_border(double border)
 #if (FREETYPE_MAJOR > 2) || ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR > 1))
 			error = FT_Stroker_New( ass_renderer->ftlibrary, &render_context.stroker );
 #else // < 2.2
-			error = FT_Stroker_New( render_context.face->memory, &render_context.stroker );
+			error = FT_Stroker_New( render_context.font->face->memory, &render_context.stroker );
 #endif
 			if (error) {
 				mp_msg(MSGT_ASS, MSGL_V, "failed to get stroker\n");
@@ -723,7 +719,7 @@ static char* parse_tag(char* p, double pwr) {
 			val = render_context.font_size * ( 1 - pwr ) + val * pwr;
 		else
 			val = render_context.style->FontSize;
-		if (render_context.face)
+		if (render_context.font)
 			change_font_size(val);
 	} else if (mystrcmp(&p, "bord")) {
 		double val;
@@ -1207,7 +1203,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 	glyph_hash_val_t* val;
 	glyph_hash_key_t* key = &(info->hash_key);
 	
-	key->face = render_context.face;
+	key->face = render_context.font->face;
 	key->size = render_context.font_size;
 	key->index = index;
 	key->outline = (render_context.border * 0xFFFF); // convert to 16.16
@@ -1237,7 +1233,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 	// not found, get a new outline glyph from face
 //	mp_msg(MSGT_ASS, MSGL_INFO, "miss, index = %d, symbol = %c, adv = (%d, %d)\n", index, symbol, advance->x, advance->y);
 	
-	error = FT_Load_Glyph(render_context.face, index, FT_LOAD_NO_BITMAP );
+	error = FT_Load_Glyph(render_context.font->face, index, FT_LOAD_NO_BITMAP );
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return error;
@@ -1247,12 +1243,12 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
     ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR >= 2)) || \
     ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR == 1) && (FREETYPE_PATCH >= 10))
 // FreeType >= 2.1.10 required
-	if (!(render_context.face->style_flags & FT_STYLE_FLAG_ITALIC) && 
+	if (!(render_context.font->face->style_flags & FT_STYLE_FLAG_ITALIC) && 
 			((render_context.italic == 1) || (render_context.italic > 55))) {
-		FT_GlyphSlot_Oblique(render_context.face->glyph);
+		FT_GlyphSlot_Oblique(render_context.font->face->glyph);
 	}
 #endif
-	error = FT_Get_Glyph(render_context.face->glyph, &(info->glyph));
+	error = FT_Get_Glyph(render_context.font->face->glyph, &(info->glyph));
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return error;
@@ -1609,7 +1605,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		code = get_next_char(&p);
 		
 		// face could have been changed in get_next_char
-		if (!render_context.face) {
+		if (!render_context.font) {
 			free_render_context();
 			return 1;
 		}
@@ -1617,7 +1613,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		if (code == 0)
 			break;
 
-		use_kerning = FT_HAS_KERNING(render_context.face);
+		use_kerning = FT_HAS_KERNING(render_context.font->face);
 
 		if (text_info.length >= MAX_GLYPHS) {
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_MAX_GLYPHS_Reached, 
@@ -1625,11 +1621,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			break;
 		}
 
-		glyph_index = FT_Get_Char_Index( render_context.face, code);
+		glyph_index = FT_Get_Char_Index( render_context.font->face, code);
 
 		if ( use_kerning && previous && glyph_index ) {
 			FT_Vector delta;
-			FT_Get_Kerning( render_context.face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
+			FT_Get_Kerning( render_context.font->face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
 			pen.x += delta.x * render_context.scale_x;
 			pen.y += delta.y * render_context.scale_y;
 		}
@@ -1645,9 +1641,9 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			matrix.yx = (FT_Fixed)( 0 * 0x10000L );
 			matrix.yy = (FT_Fixed)( render_context.scale_y * 0x10000L );
 
-			FT_Set_Transform( render_context.face, &matrix, &shift );
+			FT_Set_Transform( render_context.font->face, &matrix, &shift );
 		} else {
-			FT_Set_Transform(render_context.face, 0, &shift);
+			FT_Set_Transform(render_context.font->face, 0, &shift);
 		}
 		
 		error = get_glyph(glyph_index, code, text_info.glyphs + text_info.length, &shift);
@@ -1681,8 +1677,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].effect_type = render_context.effect_type;
 		text_info.glyphs[text_info.length].effect_timing = render_context.effect_timing;
 		text_info.glyphs[text_info.length].effect_skip_timing = render_context.effect_skip_timing;
-		text_info.glyphs[text_info.length].asc = get_face_ascender(render_context.face);
-		text_info.glyphs[text_info.length].desc = get_face_descender(render_context.face);
+		text_info.glyphs[text_info.length].asc = get_face_ascender(render_context.font->face);
+		text_info.glyphs[text_info.length].desc = get_face_descender(render_context.font->face);
 		text_info.glyphs[text_info.length].be = render_context.be;
 		text_info.glyphs[text_info.length].shadow = render_context.shadow;
 		text_info.glyphs[text_info.length].frz = render_context.rotation;
