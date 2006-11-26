@@ -101,20 +101,16 @@ SRCS = native/minilzo.c \
        vf_yuy2.c \
        vf_yvu9.c \
 
-
-LAVC_SRCS += vf_lavc.c vf_lavcdeint.c \
-
-LAVC_DSPUTIL_SRCS += vf_uspp.c \
-                     vf_fspp.c \
-                     vf_qp.c \
-                     vf_geq.c \
-                     vf_spp.c \
-                     vf_mcdeint.c \
-
 SRCS-$(CONFIG_ASS)            += vf_ass.c
-SRCS-$(CONFIG_LIBAVCODEC)     += $(LAVC_DSPUTIL_SRCS)
-SRCS-$(CONFIG_LIBAVCODEC)     += $(LAVC_SRCS)
-SRCS-$(CONFIG_LIBAVCODEC_SO)  += $(LAVC_SRCS)
+# These filters use private headers and do not work with shared libavcodec.
+SRCS-$(CONFIG_LIBAVCODEC)     += vf_fspp.c \
+                                 vf_geq.c \
+                                 vf_mcdeint.c \
+                                 vf_qp.c \
+                                 vf_spp.c \
+                                 vf_uspp.c
+SRCS-$(CONFIG_LIBAVCODEC)     += vf_lavc.c vf_lavcdeint.c
+SRCS-$(CONFIG_LIBAVCODEC_SO)  += vf_lavc.c vf_lavcdeint.c
 SRCS-$(CONFIG_LIBAVCODEC)     += vd_ffmpeg.c
 SRCS-$(CONFIG_LIBAVCODEC_SO)  += vd_ffmpeg.c
 SRCS-$(CONFIG_LIBAVCODEC)     += ad_ffmpeg.c
