@@ -67,7 +67,7 @@ ifeq ($(SPEEX),yes)
 SRCS += ad_speex.c
 endif
 
-SRCS=dec_video.c \
+SRCS += dec_video.c \
            vd.c \
            vd_hmblck.c \
            vd_lzo.c \
@@ -119,7 +119,7 @@ SRCS += vd_ijpg.c
 endif
 
 
-SRCS=vf.c \
+SRCS += vf.c \
              pullup.c \
              vf_1bpp.c \
              vf_2xsai.c \
