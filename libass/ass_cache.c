@@ -32,21 +32,21 @@
 #include "ass_cache.h"
 
 
-typedef struct face_cache_item_s {
-	face_desc_t desc;
+typedef struct ass_font_s {
+	ass_font_desc_t desc;
 	char* path;
 	int index;
 	FT_Face face;
-} face_cache_item_t;
+} ass_font_t;
 
-#define MAX_FACE_CACHE_SIZE 100
+#define MAX_FONT_CACHE_SIZE 100
 
-static face_cache_item_t* face_cache;
-static int face_cache_size;
+static ass_font_t* font_cache;
+static int font_cache_size;
 
 extern int no_more_font_messages;
 
-static int font_compare(face_desc_t* a, face_desc_t* b) {
+static int font_compare(ass_font_desc_t* a, ass_font_desc_t* b) {
 	if (strcmp(a->family, b->family) != 0)
 		return 0;
 	if (a->bold != b->bold)
@@ -81,21 +81,21 @@ static void charmap_magic(FT_Face face)
  * \param desc required face description
  * \param face out: the face object
 */ 
-int ass_new_face(FT_Library library, void* fontconfig_priv, face_desc_t* desc, /*out*/ FT_Face* face)
+int ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_desc_t* desc, /*out*/ FT_Face* face)
 {
 	FT_Error error;
 	int i;
 	char* path;
 	int index;
-	face_cache_item_t* item;
+	ass_font_t* item;
 	
-	for (i=0; i<face_cache_size; ++i)
-		if (font_compare(desc, &(face_cache[i].desc))) {
-			*face = face_cache[i].face;
+	for (i=0; i<font_cache_size; ++i)
+		if (font_compare(desc, &(font_cache[i].desc))) {
+			*face = font_cache[i].face;
 			return 0;
 		}
 
-	if (face_cache_size == MAX_FACE_CACHE_SIZE) {
+	if (font_cache_size == MAX_FONT_CACHE_SIZE) {
 		mp_msg(MSGT_ASS, MSGL_FATAL, MSGTR_LIBASS_TooManyFonts);
 		return 1;
 	}
@@ -112,32 +112,32 @@ int ass_new_face(FT_Library library, void* fontconfig_priv, face_desc_t* desc, /
 
 	charmap_magic(*face);
 	
-	item = face_cache + face_cache_size;
+	item = font_cache + font_cache_size;
 	item->path = strdup(path);
 	item->index = index;
 	item->face = *face;
-	memcpy(&(item->desc), desc, sizeof(face_desc_t));
-	face_cache_size++;
+	memcpy(&(item->desc), desc, sizeof(font_desc_t));
+	font_cache_size++;
 	return 0;
 }
 
-void ass_face_cache_init(void)
+void ass_font_cache_init(void)
 {
-	face_cache = calloc(MAX_FACE_CACHE_SIZE, sizeof(face_cache_item_t));
-	face_cache_size = 0;
+	font_cache = calloc(MAX_FONT_CACHE_SIZE, sizeof(ass_font_t));
+	font_cache_size = 0;
 }
 
-void ass_face_cache_done(void)
+void ass_font_cache_done(void)
 {
 	int i;
-	for (i = 0; i < face_cache_size; ++i) {
-		face_cache_item_t* item = face_cache + i;
+	for (i = 0; i < font_cache_size; ++i) {
+		ass_font_t* item = font_cache + i;
 		if (item->face) FT_Done_Face(item->face);
 		if (item->path) free(item->path);
 		// FIXME: free desc ?
 	}
-	free(face_cache);
-	face_cache_size = 0;
+	free(font_cache);
+	font_cache_size = 0;
 }
 
 //---------------------------------

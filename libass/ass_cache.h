@@ -27,15 +27,15 @@
 #include FT_GLYPH_H
 
 // font cache
-typedef struct face_desc_s {
+typedef struct ass_font_desc_s {
 	char* family;
 	unsigned bold;
 	unsigned italic;
-} face_desc_t;
+} ass_font_desc_t;
 
-void ass_face_cache_init(void);
-int ass_new_face(FT_Library library, void* fontconfig_priv, face_desc_t* desc, /*out*/ FT_Face* face);
-void ass_face_cache_done(void);
+void ass_font_cache_init(void);
+int ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_desc_t* desc, /*out*/ FT_Face* face);
+void ass_font_cache_done(void);
 
 
 // describes a glyph; glyphs with equivalents structs are considered identical

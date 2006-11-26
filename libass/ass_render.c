@@ -247,7 +247,7 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 	priv->ftlibrary = ft;
 	// images_root and related stuff is zero-filled in calloc
 	
-	ass_face_cache_init();
+	ass_font_cache_init();
 	ass_glyph_cache_init();
 
 	text_info.glyphs = calloc(MAX_GLYPHS, sizeof(glyph_info_t));
@@ -261,7 +261,7 @@ ass_init_exit:
 
 void ass_renderer_done(ass_renderer_t* priv)
 {
-	ass_face_cache_done();
+	ass_font_cache_done();
 	ass_glyph_cache_done();
 	if (render_context.stroker) {
 		FT_Stroker_Done(render_context.stroker);
@@ -549,7 +549,7 @@ static void update_font(void)
 	int error;
 	unsigned val;
 	ass_renderer_t* priv = frame_context.ass_priv;
-	face_desc_t desc;
+	ass_font_desc_t desc;
 	desc.family = strdup(render_context.family);
 
 	val = render_context.bold;
@@ -563,7 +563,7 @@ static void update_font(void)
 	else if (val == 1) val = 110; //italic
 	desc.italic = val;
 
-	error = ass_new_face(priv->ftlibrary, priv->fontconfig_priv, &desc, &(render_context.face));
+	error = ass_new_font(priv->ftlibrary, priv->fontconfig_priv, &desc, &(render_context.face));
 	if (error) {
 		render_context.face = 0;
 	}
