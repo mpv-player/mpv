@@ -38,6 +38,9 @@ typedef struct ass_font_s {
 	char* path;
 	int index;
 	FT_Face face;
+	FT_Matrix m; // current transformation
+	FT_Vector v; // current shift
+	int size;
 } ass_font_t;
 
 void ass_font_cache_init(void);

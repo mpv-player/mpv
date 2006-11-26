@@ -30,6 +30,7 @@
 #include "ass_fontconfig.h"
 #include "ass_bitmap.h"
 #include "ass_cache.h"
+#include "ass_font.h"
 
 #define MAX_FONT_CACHE_SIZE 100
 
@@ -49,24 +50,6 @@ static int font_compare(ass_font_desc_t* a, ass_font_desc_t* b) {
 }
 
 /**
- * Select Microfost Unicode CharMap, if the font has one.
- * Otherwise, let FreeType decide.
- */
-static void charmap_magic(FT_Face face)
-{
-	int i;
-	for (i = 0; i < face->num_charmaps; ++i) {
-		FT_CharMap cmap = face->charmaps[i];
-		unsigned pid = cmap->platform_id;
-		unsigned eid = cmap->encoding_id;
-		if (pid == 3 /*microsoft*/ && (eid == 1 /*unicode bmp*/ || eid == 10 /*full unicode*/)) {
-			FT_Set_Charmap(face, cmap);
-			break;
-		}
-	}
-}
-
-/**
  * \brief Get a face object, either from cache or created through FreeType+FontConfig.
  * \param library FreeType library object
  * \param fontconfig_priv fontconfig private data
@@ -75,12 +58,9 @@ static void charmap_magic(FT_Face face)
 */ 
 ass_font_t* ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_desc_t* desc)
 {
-	FT_Error error;
 	int i;
-	char* path;
-	int index;
 	ass_font_t* item;
-	FT_Face face;
+	int error;
 	
 	for (i=0; i<font_cache_size; ++i)
 		if (font_compare(desc, &(font_cache[i].desc)))
@@ -91,24 +71,12 @@ ass_font_t* ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_des
 		return 0;
 	}
 
-	path = fontconfig_select(fontconfig_priv, desc->family, desc->bold, desc->italic, &index);
-	
-	error = FT_New_Face(library, path, index, &face);
-	if (error) {
-		if (!no_more_font_messages)
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
-		no_more_font_messages = 1;
-		return 0;
-	}
-
-	charmap_magic(face);
-	
 	item = font_cache + font_cache_size;
-	item->path = strdup(path);
-	item->index = index;
-	item->face = face;
-	memcpy(&(item->desc), desc, sizeof(ass_font_desc_t));
+	error = ass_font_init(library, fontconfig_priv, item, desc);
+	if (error) // FIXME: mp_msg
+		return 0;
 	font_cache_size++;
+
 	return item;
 }
 
@@ -123,9 +91,7 @@ void ass_font_cache_done(void)
 	int i;
 	for (i = 0; i < font_cache_size; ++i) {
 		ass_font_t* item = font_cache + i;
-		if (item->face) FT_Done_Face(item->face);
-		if (item->path) free(item->path);
-		// FIXME: free desc ?
+		ass_font_free(item);
 	}
 	free(font_cache);
 	font_cache_size = 0;

@@ -11,6 +11,7 @@ SRCS = ass.c \
        ass_mp.c \
        ass_bitmap.c \
        ass_library.c \
+       ass_font.c \
 
 CFLAGS  = -I../libmpcodecs -D_GNU_SOURCE
 

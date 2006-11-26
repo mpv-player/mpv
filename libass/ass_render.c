@@ -37,6 +37,7 @@
 #include "ass_utils.h"
 #include "ass_fontconfig.h"
 #include "ass_library.h"
+#include "ass_font.h"
 
 #define MAX_GLYPHS 1000
 #define MAX_LINES 100
@@ -535,8 +536,8 @@ static void change_font_size(int sz)
 		size = 1;
 	else if (size > frame_context.height * 2)
 		size = frame_context.height * 2;
-	
-	FT_Set_Pixel_Sizes(render_context.font->face, 0, size);
+
+	ass_font_set_size(render_context.font, size);
 
 	render_context.font_size = sz;
 }
@@ -1232,27 +1233,10 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 
 	// not found, get a new outline glyph from face
 //	mp_msg(MSGT_ASS, MSGL_INFO, "miss, index = %d, symbol = %c, adv = (%d, %d)\n", index, symbol, advance->x, advance->y);
-	
-	error = FT_Load_Glyph(render_context.font->face, index, FT_LOAD_NO_BITMAP );
-	if (error) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
-		return error;
-	}
-	
-#if (FREETYPE_MAJOR > 2) || \
-    ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR >= 2)) || \
-    ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR == 1) && (FREETYPE_PATCH >= 10))
-// FreeType >= 2.1.10 required
-	if (!(render_context.font->face->style_flags & FT_STYLE_FLAG_ITALIC) && 
-			((render_context.italic == 1) || (render_context.italic > 55))) {
-		FT_GlyphSlot_Oblique(render_context.font->face->glyph);
-	}
-#endif
-	error = FT_Get_Glyph(render_context.font->face->glyph, &(info->glyph));
-	if (error) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
-		return error;
-	}
+
+	info->glyph = ass_font_get_glyph(frame_context.ass_priv->fontconfig_priv, render_context.font, symbol);
+	if (!info->glyph)
+		return 0;
 
 	info->advance.x = info->glyph->advance.x >> 10;
 	info->advance.y = info->glyph->advance.y >> 10;
@@ -1633,17 +1617,14 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		shift.x = pen.x & 63;
 		shift.y = pen.y & 63;
 
-		if ((render_context.scale_x != 1.) || (render_context.scale_y != 1.) ||
-				(frame_context.font_scale_x != 1.)) {
+		{
 			FT_Matrix matrix;
 			matrix.xx = (FT_Fixed)( render_context.scale_x * frame_context.font_scale_x * 0x10000L );
 			matrix.xy = (FT_Fixed)( 0 * 0x10000L );
 			matrix.yx = (FT_Fixed)( 0 * 0x10000L );
 			matrix.yy = (FT_Fixed)( render_context.scale_y * 0x10000L );
 
-			FT_Set_Transform( render_context.font->face, &matrix, &shift );
-		} else {
-			FT_Set_Transform(render_context.font->face, 0, &shift);
+			ass_font_set_transform(render_context.font, &matrix, &shift );
 		}
 		
 		error = get_glyph(glyph_index, code, text_info.glyphs + text_info.length, &shift);
