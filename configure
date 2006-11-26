@@ -2194,6 +2194,8 @@ test -z "$_libdir" && _libdir="$_prefix/lib"
 
 # For lack of a better place to put platform-specific stuff ..
 win32 && _exesuf=".exe"
+# -lwinmm is always needed for osdep/timer-win2.c
+win32 && _ld_extra="$_ld_extra -lwinmm"
 
 
 if x86 ; then
