@@ -2,6 +2,8 @@
  * \file mmap_anon.c
  * \brief Provide a compatible anonymous space mapping function
  */
+#include "config.h"
+#ifdef HAVE_SYS_MMAN_H
 
 #include <sys/mman.h>
 #include <stdio.h>
@@ -62,3 +64,4 @@ void *mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)
     return result;
 }
 
+#endif /* HAVE_SYS_MMAN_H */
