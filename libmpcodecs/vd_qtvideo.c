@@ -7,8 +7,7 @@
 #ifdef MACOSX
 #include <QuickTime/ImageCodec.h>
 #define dump_ImageDescription(x)
-#else
-#include "qtx/qtxsdk/components.h"
+#endif
 
 #include "wine/windef.h"
 
@@ -30,6 +29,9 @@ static vd_info_t info = {
 LIBVD_EXTERN(qtvideo)
 
 #include "bswap.h"
+
+#ifndef MACOSX
+#include "qtx/qtxsdk/components.h"
 
 HMODULE   WINAPI LoadLibraryA(LPCSTR);
 FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
