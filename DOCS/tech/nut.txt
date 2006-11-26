@@ -237,9 +237,9 @@ main_header:
     max_distance                        v
     time_base_count                     v
     for(i=0; i<time_base_count; i++)
-        time_base_nom                   v
+        time_base_num                   v
         time_base_denom                 v
-        time_base[i]= time_base_nom/time_base_denom
+        time_base[i]= time_base_num/time_base_denom
     tmp_pts=0
     tmp_mul=1
     tmp_stream=0
@@ -290,7 +290,7 @@ stream_header:
         sample_height                   v
         colorspace_type                 v
     }else if(stream_class == audio){
-        samplerate_nom                  v
+        samplerate_num                  v
         samplerate_denom                v
         channel_count                   v
     }
@@ -495,14 +495,14 @@ fourcc (vb)
     the id values used are the same as in avi, so if a codec uses a specific
     fourcc in avi then the same fourcc MUST be used here
 
-time_base_nom (v) / time_base_denom (v) = time_base
+time_base_num (v) / time_base_denom (v) = time_base
     the length of a timer tick in seconds, this MUST be equal to the 1/fps
     if FLAG_FIXED_FPS is set
-    time_base_nom and time_base_denom MUST NOT be 0
-    time_base_nom and time_base_denom MUST be relatively prime
+    time_base_num and time_base_denom MUST NOT be 0
+    time_base_num and time_base_denom MUST be relatively prime
     time_base_denom MUST be < 2^31
     examples:
-        fps       time_base_nom    time_base_denom
+        fps       time_base_num    time_base_denom
         30        1                30
         29.97     1001             30000
         23.976    1001             24000
@@ -517,10 +517,10 @@ convert_ts
     To switch from 2 different timebases, the following calculation is
     defined:
 
-    ln        = from_time_base_nom*to_time_base_denom
+    ln        = from_time_base_num*to_time_base_denom
     sn        = from_timestamp
     d1        = from_time_base_denom
-    d2        = to_time_base_nom
+    d2        = to_time_base_num
     timestamp = (ln/d1*sn + ln%d1*sn/d1)/d2
     Note: this calculation MUST be done with unsigned 64 bit integers, and
     is equivalent to (ln*sn)/(d1*d2) but this would require a 96bit integer
@@ -711,7 +711,7 @@ colorspace_type (v)
     17    ITU Rec 624 / ITU Rec 601 Y range:  0..255 Cb/Cr range:  0..255
     18    ITU Rec 709               Y range:  0..255 Cb/Cr range:  0..255
 
-samplerate_nom (v) / samplerate_denom (v) = samplerate
+samplerate_num (v) / samplerate_denom (v) = samplerate
     the number of samples per second, MUST NOT be 0
 
 crc32 checksum
