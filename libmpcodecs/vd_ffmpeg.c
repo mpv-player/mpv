@@ -212,7 +212,7 @@ void mp_msp_av_log_callback(void* ptr, int level, const char* fmt, va_list vl)
         mp_msg(type, mp_level, "[%s @ %p]", avc->item_name(ptr), avc);
     }
 
-    print_prefix= strstr(fmt, "\n") != NULL;
+    print_prefix= strchr(fmt, '\n') != NULL;
     vsnprintf(buf, sizeof(buf), fmt, vl);
     mp_msg(type, mp_level, buf);
 }
