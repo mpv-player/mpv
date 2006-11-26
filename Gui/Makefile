@@ -44,34 +44,12 @@ SRCS = wm/ws.c \
        mplayer/gtk/common.c \
 
 endif
-OBJS = $(SRCS:.c=.o)
 
-.SUFFIXES: .c .o
+include ../mpcommon.mak
 
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-$(LIBNAME): $(OBJS)
-	rm -f $(LIBNAME)
-	$(AR) rc $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
-
-all:	$(LIBNAME)
-
-clean:
-	rm -f *.o *.a *~ \
-              mplayer/*.o mplayer/*~ \
+clean::
+	rm -f mplayer/*.o mplayer/*~ \
               mplayer/gtk/*.o mplayer/gtk/*~ \
               skin/*.o skin/*~ \
               wm/*.o wm/*~ \
               win32/*.o win32/*~ \
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif

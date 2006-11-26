@@ -12,36 +12,6 @@ SRCS = ass.c \
        ass_bitmap.c \
        ass_library.c \
 
-OBJS=$(SRCS:.c=.o)
+CFLAGS  = -I../libmpcodecs -D_GNU_SOURCE
 
-CFLAGS  = -I. -I.. \
-          -I../libmpcodecs \
-          $(OPTFLAGS) \
-          -D_GNU_SOURCE \
-
-.SUFFIXES: .c .o
-
-# .PHONY: all clean
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-all:    $(LIBNAME)
-
-$(LIBNAME):     $(OBJS)
-	$(AR) r $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
-
-clean:
-	rm -f *.o *.a *~
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif
-
+include ../mpcommon.mak

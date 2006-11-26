@@ -1,6 +1,8 @@
 
 include ../config.mak
 
+LIBNAME = libMP3.a
+
 ifeq ($(TARGET_ARCH_SGI_MIPS),yes)
 OPTFLAGS := $(OPTFLAGS:-O4=-O0)
 endif
@@ -33,16 +35,7 @@ endif
 endif
 endif
 
-OBJS=$(SRCS:.c=.o)
-
-.SUFFIXES: .c .o
-
-# .PHONY: all clean
-
-all:	libMP3.a
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
+include ../mpcommon.mak
 
 decode_i586.o: decode_i586.c
 	$(CC) -c $(CFLAGS) -fomit-frame-pointer -o $@ $<
@@ -50,25 +43,11 @@ decode_i586.o: decode_i586.c
 .s.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-libMP3.a:	$(OBJS)
-	$(AR) r libMP3.a $(OBJS)
-	$(RANLIB) libMP3.a
-
 test1:	libMP3.a test.c
 	$(CC) $(CFLAGS) test.c ../libvo/aclib.c -o test1 -I.. ./libMP3.a ../mp_msg-mencoder.o ../cpudetect.o -lm
 
 test2:	libMP3.a test2.c
 	$(CC) $(CFLAGS) test2.c ../libvo/aclib.c -o test2 -I.. ./libMP3.a ../mp_msg-mencoder.o ../cpudetect.o -lm
 
-clean:
-	rm -f *~ *.o *.a test1 test2
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+distclean::
+	rm -f test1 test2

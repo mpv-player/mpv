@@ -36,33 +36,7 @@ endif
 SRCS += $(timer)
 SRCS += $(getch)
 
-OBJS=$(SRCS:.c=.o)
-
-CFLAGS  = -I. -I.. $(OPTFLAGS)
-
-.SUFFIXES: .c .o
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-all:    $(LIBNAME)
+include ../mpcommon.mak
 
 mplayer-rc.o: mplayer.rc
 	windres -o $@ $<
-
-$(LIBNAME):     $(OBJS)
-	$(AR) r $@ $^
-	$(RANLIB) $@
-
-clean:
-	rm -f *.o *.a *~
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif

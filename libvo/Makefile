@@ -46,40 +46,15 @@ ifeq ($(EXTERNAL_VIDIX),yes)
 SRCS += vosub_vidix.c
 endif
 
-INCLUDE = -I. -I.. -I../osdep $(LIBAV_INC)
-CFLAGS  = $(INCLUDE) $(OPTFLAGS)
+CFLAGS = -I.. -I../osdep $(LIBAV_INC)
 
-#CFLAGS += -Wall
-
-.SUFFIXES: .c .o .m
-
-# .PHONY: all clean
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
+include ../mpcommon.mak
 
 .m.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 all:    $(LIBS)
 
-$(LIBNAME): $(OBJS)
-	$(AR) r $@ $^
-	$(RANLIB) $@
-
 $(LIBNAME2): $(OBJS2)
 	$(AR) r $@ $^
 	$(RANLIB) $@
-
-clean:
-	rm -f *.o *.a *~
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif

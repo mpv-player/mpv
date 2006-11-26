@@ -42,9 +42,7 @@ SRCS    = bits.c \
           syntax.c \
           tns.c \
 
-OBJS	= $(SRCS:.c=.o)
-
-CFLAGS  = -I. $(OPTFLAGS) -D_GNU_SOURCE
+CFLAGS  = -D_GNU_SOURCE
 
 # The FIXED_POINT implementation of FAAD2 improves performance
 # on some platforms, especially for SBR files.
@@ -52,28 +50,4 @@ ifeq ($(FAAD_FIXED),yes)
 CFLAGS  += -DFIXED_POINT
 endif
 
-.SUFFIXES: .c .o
-
-# .PHONY: all clean
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-$(LIBNAME):	$(OBJS)
-	$(AR) r $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
-
-all:	$(LIBNAME)
-
-clean:
-	rm -f *.o *.a *~
-
-distclean: clean
-	rm -f .depend test
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+include ../mpcommon.mak

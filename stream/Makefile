@@ -130,35 +130,11 @@ SRCS += stream_dvb.c
 SRCS += dvb_tune.c
 endif
 
-OBJS	= $(SRCS:.c=.o)
-INCLUDE = -I.. -I../loader $(LIBAV_INC)
-CFLAGS  = $(INCLUDE) $(OPTFLAGS)
+CFLAGS = -I../loader $(LIBAV_INC)
 
-.SUFFIXES: .c .o
+include ../mpcommon.mak
 
-# .PHONY: all clean
-
-all:	$(LIBNAME)
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-$(LIBNAME):	$(OBJS)
-	$(AR) r $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
-
-clean:
-	rm -f *.o *.a *~ \
-	realrtsp/*.o realrtsp/*.a realrtsp/*~ \
+clean::
+	rm -f realrtsp/*.o realrtsp/*.a realrtsp/*~ \
 	librtsp/*.o librtsp/*.a librtsp/*~ \
 	freesdp/*.o freesdp/*.a freesdp/*~
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif

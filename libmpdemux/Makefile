@@ -103,36 +103,11 @@ ifeq ($(STREAMING_LIVE555),yes)
 SRCS += demux_rtp.cpp demux_rtp_codec.cpp
 endif
 
-OBJS	= $(SRCS:.c=.o)
-OBJS   += $(SRCS:.cpp=.o)
-INCLUDE = -I.. -I../stream -I../loader $(LIBAV_INC)
-CFLAGS  = $(INCLUDE) $(OPTFLAGS)
+CFLAGS = -I../stream -I../loader $(LIBAV_INC)
+
 CPLUSPLUSFLAGS  = $(CFLAGS) -D__STDC_LIMIT_MACROS
 
-.SUFFIXES: .c .cpp .o
-
-# .PHONY: all clean
-
-all:	$(LIBNAME)
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
 .cpp.o:
 	$(CC) -c $(CPLUSPLUSFLAGS) -o $@ $<
 
-$(LIBNAME):	$(OBJS)
-	$(AR) r $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
-
-clean:
-	rm -f *.o *.a *~
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+include ../mpcommon.mak

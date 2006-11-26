@@ -1,6 +1,8 @@
 include ../config.mak
 
-CFLAGS=-I. -I.. -Idshow -DMPLAYER -D__WINE__ -DNOAVIFILE_HEADERS $(OPTFLAGS)
+LIBNAME = libloader.a
+
+CFLAGS= -Idshow -DMPLAYER -D__WINE__ -DNOAVIFILE_HEADERS
 #CFLAGS+=-Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
 
 SRCS= driver.c afl.c vfl.c
@@ -23,31 +25,14 @@ SRCS+= dshow/DS_AudioDecoder.c \
        dmo/dmo.c  \
        dmo/dmo_guids.c \
 
-OBJS  = $(SRCS:.c=.o)
-OBJS := $(OBJS:.S=.o)
-OBJS := $(OBJS:.s=.o)
-
-all: libloader.a
-
-libloader.a:  $(OBJS)
-	$(AR) -r $@ $^
-	$(RANLIB) $@
+include ../mpcommon.mak
 
 dshow/test: libloader.a
 	$(CC) dshow/test.c $(CFLAGS) -o $@ $^ -lstdc++
 
-clean:
-	rm -f *.o *.a *~
+clean::
 	rm -f dshow/*.o dshow/*.a dshow/*~
 	rm -f dmo/*.o dmo/*.a dmo/*~
 
-distclean: clean
-	rm -f .depend
+distclean::
 	rm -f dshow/test dshow/test.raw
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif

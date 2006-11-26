@@ -40,36 +40,12 @@ ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
 SRCS+=af_lavcresample.c
 endif
 
-OBJS=$(SRCS:.c=.o)
-
-CFLAGS  = -I. -I.. $(LIBAV_INC) $(OPTFLAGS) -D_GNU_SOURCE
+CFLAGS  = -I.. $(LIBAV_INC) -D_GNU_SOURCE
 
 ifeq ($(TARGET_OS),MINGW32)
 CFLAGS += -D_IO_H_
 endif
 
-.SUFFIXES: .c .o
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-$(LIBNAME):     $(OBJS) Makefile
-	$(AR) r $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
-
 $(OBJS):af.h control.h dsp.h filter.h window.h af_mp.h
 
-all:    $(LIBNAME)
-
-clean:
-	rm -f *.o *.a *~
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+include ../mpcommon.mak

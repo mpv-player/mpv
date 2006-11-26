@@ -305,43 +305,22 @@ OBJS=$(SRCS:.c=.o)
 SRCS2=$(ENCODER_SRCS)
 OBJS2=$(SRCS2:.c=.o)
 
-CFLAGS  = -I. -I.. \
+CFLAGS  = -I.. \
           -Inative \
           -I../libmpdemux \
           -I../stream \
           -I../loader \
           $(LIBAV_INC) \
-          $(OPTFLAGS) \
           -D_GNU_SOURCE \
 
-.SUFFIXES: .c .o
-
-# .PHONY: all clean
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
+include ../mpcommon.mak
 
 all:    $(LIBS)
-
-$(LIBNAME): $(OBJS)
-	$(AR) r $@ $^
-	$(RANLIB) $@
 
 $(LIBNAME2): $(OBJS2)
 	$(AR) r $@ $^
 	$(RANLIB) $@
 
-clean:
-	rm -f *.o *.a *~
+clean::
 	rm -f native/*.o native/*.a native/*~
-
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) $(SRCS2) 1>.depend
-
-ifneq ($(wildcard .depend),)
-include .depend
-endif
 
