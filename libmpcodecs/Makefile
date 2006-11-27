@@ -131,37 +131,36 @@ SRCS-$(XVID4)                 += vd_xvid4.c
 SRCS-$(ZORAN)                 += vd_zrmjpeg.c vf_zrmjpeg.c
 
 
-ENCODER_SRCS=ae.c \
+SRCS2=ae.c \
              ae_pcm.c \
              ve.c \
              ve_nuv.c \
              ve_raw.c \
 
-ENCODER_SRCS-$(CONFIG_LIBAVCODEC)    += ae_lavc.c ve_lavc.c
-ENCODER_SRCS-$(CONFIG_LIBAVCODEC_SO) += ae_lavc.c ve_lavc.c
-ENCODER_SRCS-$(LIBDV)                += ve_libdv.c
-ENCODER_SRCS-$(QTX_CODECS)           += ve_qtvideo.c
-ENCODER_SRCS-$(WIN32DLL)             += ve_vfw.c
-ENCODER_SRCS-$(X264)                 += ve_x264.c
-ENCODER_SRCS-$(XVID4)                += ve_xvid4.c
-ENCODER_SRCS-$(FAAC)                 += ae_faac.c
-ENCODER_SRCS-$(TOOLAME)              += ae_toolame.c
-ENCODER_SRCS-$(TWOLAME)              += ae_twolame.c
-ENCODER_SRCS-$(MP3LAME)              += ae_lame.c
+SRCS2-$(CONFIG_LIBAVCODEC)    += ae_lavc.c ve_lavc.c
+SRCS2-$(CONFIG_LIBAVCODEC_SO) += ae_lavc.c ve_lavc.c
+SRCS2-$(LIBDV)                += ve_libdv.c
+SRCS2-$(QTX_CODECS)           += ve_qtvideo.c
+SRCS2-$(WIN32DLL)             += ve_vfw.c
+SRCS2-$(X264)                 += ve_x264.c
+SRCS2-$(XVID4)                += ve_xvid4.c
+SRCS2-$(FAAC)                 += ae_faac.c
+SRCS2-$(TOOLAME)              += ae_toolame.c
+SRCS2-$(TWOLAME)              += ae_twolame.c
+SRCS2-$(MP3LAME)              += ae_lame.c
 
 
 LIBAV_INC-$(CONFIG_LIBAVUTIL)  +=  -I../libavutil
 LIBAV_INC-$(CONFIG_LIBAVCODEC) +=  -I../libavcodec
 
 
-ENCODER_SRCS += $(ENCODER_SRCS-yes)
 SRCS         += $(SRCS-yes)
+SRCS2        += $(SRCS2-yes)
 LIBAV_INC    += $(LIBAV_INC-yes)
 
 
 OBJS=$(SRCS:.c=.o)
-
-OBJS2=$(ENCODER_SRCS:.c=.o)
+OBJS2=$(SRCS2:.c=.o)
 
 CFLAGS  = -I.. \
           -Inative \
