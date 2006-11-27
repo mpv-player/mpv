@@ -32,8 +32,8 @@ SRCS+= dshow/DS_AudioDecoder.c \
 
 include ../mpcommon.mak
 
-dshow/test: libloader.a
-	$(CC) dshow/test.c $(CFLAGS) -o $@ $^ -lstdc++
+dshow/test: dshow/test.c $(LIBNAME)
+	$(CC) $(CFLAGS) -o $@ $^ -lstdc++
 
 clean::
 	rm -f dshow/*.o dshow/*.a dshow/*~
