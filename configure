@@ -7378,7 +7378,7 @@ GIF = $_gif
 
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm $_ld_arch
-EXTRALIBS_MPLAYER = $_libs_mplayer $_ld_sock
+EXTRALIBS_MPLAYER = $_libs_mplayer
 EXTRALIBS_MENCODER = $_libs_mencoder
 
 HAVE_MLIB = $_mlib
