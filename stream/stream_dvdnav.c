@@ -250,9 +250,10 @@ static int fill_buffer(stream_t *s, char *but, int len)
         return 0;
       }
       switch (event) {
-        case DVDNAV_STOP: return len;
-        case DVDNAV_BLOCK_OK: return len;
-        case DVDNAV_NAV_PACKET: return len;
+        case DVDNAV_STOP:
+        case DVDNAV_BLOCK_OK:
+        case DVDNAV_NAV_PACKET:
+          return len;
         case DVDNAV_VTS_CHANGE: {
           int tit = 0, part = 0;
           s->end_pos = 0;
@@ -472,17 +473,17 @@ int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
   uint16_t lang, lcode;
 
   while(language && strlen(language)>=2) {
-  lcode = (language[0] << 8) | (language[1]);
-  for(k=0; k<32; k++) {
-    lg = dvdnav_get_spu_logical_stream(priv->dvdnav, k);
-    if(lg == 0xff) continue;
-    lang = dvdnav_spu_stream_to_lang(priv->dvdnav, lg);
-    if(lang != 0xFFFF && lang == lcode) {
-      return k;
+    lcode = (language[0] << 8) | (language[1]);
+    for(k=0; k<32; k++) {
+      lg = dvdnav_get_spu_logical_stream(priv->dvdnav, k);
+      if(lg == 0xff) continue;
+      lang = dvdnav_spu_stream_to_lang(priv->dvdnav, lg);
+      if(lang != 0xFFFF && lang == lcode) {
+        return k;
+      }
     }
-  }
-  language += 2;
-  while(language[0]==',' || language[0]==' ') ++language;
+    language += 2;
+    while(language[0]==',' || language[0]==' ') ++language;
   }
   return -1;
 }
