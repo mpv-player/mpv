@@ -29,16 +29,11 @@ SRCS=af.c \
      window.c \
      $(AF_SRCS) \
 
-ifeq ($(CONFIG_LIBAVUTIL),yes)
-LIBAV_INC += -I../libavutil
-endif
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-LIBAV_INC += -I../libavcodec
-SRCS+=af_lavcresample.c
-endif
-ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
-SRCS+=af_lavcresample.c
-endif
+SRCS-$(CONFIG_LIBAVCODEC)    += af_lavcresample.c
+SRCS-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
+
+LIBAV_INC-$(CONFIG_LIBAVUTIL)  += -I../libavutil
+LIBAV_INC-$(CONFIG_LIBAVCODEC) += -I../libavcodec
 
 CFLAGS  = -I.. $(LIBAV_INC) -D_GNU_SOURCE
 

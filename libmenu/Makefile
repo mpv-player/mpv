@@ -13,8 +13,6 @@ SRCS= menu.c \
       menu_console.c \
       menu_param.c \
 
-ifeq ($(DVBIN),yes)
-SRCS += menu_dvbin.c
-endif
+SRCS-$(DVBIN) += menu_dvbin.c
 
 include ../mpcommon.mak

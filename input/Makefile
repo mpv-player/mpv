@@ -4,11 +4,7 @@ include ../config.mak
 LIBNAME = libinput.a
 
 SRCS=input.c
-ifeq ($(JOYSTICK),yes)
-SRCS += joystick.c
-endif
-ifeq ($(LIRC),yes)
-SRCS += lirc.c
-endif
+SRCS-$(JOYSTICK) += joystick.c
+SRCS-$(LIRC)     += lirc.c
 
 include ../mpcommon.mak

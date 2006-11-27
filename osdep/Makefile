@@ -14,13 +14,12 @@ SRCS= shmem.c \
       setenv.c \
       mmap_anon.c \
 
+SRCS-$(MACOSX_FINDER_SUPPORT) += macosx_finder_args.c
+SRCS-$(TARGET_WIN32)          += mplayer-rc.c
+
 getch = getch2.c
 timer = timer-lx.c
-ifeq ($(MACOSX_FINDER_SUPPORT),yes)
-SRCS += macosx_finder_args.c
-endif
 ifeq ($(TARGET_WIN32),yes)
-SRCS += mplayer-rc.c
 timer = timer-win2.c
 endif
 ifeq ($(TARGET_OS),Darwin)

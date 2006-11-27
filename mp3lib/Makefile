@@ -10,18 +10,10 @@ endif
 SRCS = sr1.c
 ifeq ($(TARGET_ARCH_X86_32),yes)
 SRCS += decode_i586.c
-ifeq ($(TARGET_MMX),yes)
-SRCS += decode_MMX.c dct64_MMX.c tabinit_MMX.c
-endif
-ifeq ($(TARGET_3DNOW),yes)
-SRCS += dct36_3dnow.c dct64_3dnow.c
-endif
-ifeq ($(TARGET_3DNOWEX),yes)
-SRCS += dct36_k7.c dct64_k7.c
-endif
-ifeq ($(TARGET_SSE),yes)
-SRCS += dct64_sse.c
-endif
+SRCS-$(TARGET_MMX)     += decode_MMX.c dct64_MMX.c tabinit_MMX.c
+SRCS-$(TARGET_3DNOW)   += dct36_3dnow.c dct64_3dnow.c
+SRCS-$(TARGET_3DNOWEX) += dct36_k7.c dct64_k7.c
+SRCS-$(TARGET_SSE)     += dct64_sse.c
 endif
 ifeq ($(TARGET_ALTIVEC),yes)
 SRCS += dct64_altivec.c
