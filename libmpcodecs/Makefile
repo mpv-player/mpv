@@ -105,7 +105,8 @@ SRCS-$(CONFIG_LIBAVCODEC)     += vf_fspp.c \
                                  vf_mcdeint.c \
                                  vf_qp.c \
                                  vf_spp.c \
-                                 vf_uspp.c
+                                 vf_uspp.c \
+
 SRCS-$(CONFIG_LIBAVCODEC)     += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
 SRCS-$(CONFIG_LIBAVCODEC_SO)  += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
 SRCS-$(CONFIG_LIBPOSTPROC)    += vf_pp.c
