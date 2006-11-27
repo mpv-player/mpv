@@ -392,7 +392,7 @@ libaf/libaf.a: .norecurse $(wildcard libaf/*.[ch])
 dvdread/libdvdread.a: .norecurse $(wildcard dvdread/*.[ch])
 libdvdcss/libdvdcss.a: .norecurse $(wildcard libdvdcss/*.[ch])
 
-libmpdemux/libmpdemux.a: .norecurse $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])
+libmpdemux/libmpdemux.a: .norecurse $(wildcard libmpdemux/*.[ch])
 stream/stream.a: .norecurse $(wildcard stream/*.[ch] stream/*/*.[ch])
 libmpcodecs/libmpcodecs.a: .norecurse $(wildcard libmpcodecs/*.[ch]) $(wildcard libmpcodecs/native/*.[ch])
 libmpcodecs/libmpencoders.a: .norecurse $(wildcard libmpcodecs/*.[ch])
