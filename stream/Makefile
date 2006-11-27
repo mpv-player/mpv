@@ -3,28 +3,23 @@ LIBNAME = stream.a
 
 include ../config.mak
 
-# Core
 SRCS += open.c \
+        stream.c \
+        stream_cue.c \
+        stream_file.c \
+        stream_mf.c \
+        stream_null.c \
         url.c \
 
 ifeq ($(STREAM_CACHE),yes)
 SRCS += cache2.c
 endif
-
 ifeq ($(CDDA),yes)
 SRCS += stream_cdda.c cdinfo.c
   ifeq ($(MPLAYER_NETWORK),yes)
   SRCS += stream_cddb.c
   endif
 endif
-
-# Stream readers/writers
-SRCS += stream.c \
-        stream_cue.c \
-        stream_file.c \
-        stream_mf.c \
-        stream_null.c \
-
 ifeq ($(DVDREAD),yes)
 SRCS += stream_dvd.c
 endif
@@ -49,8 +44,6 @@ endif
 ifeq ($(VSTREAM),yes)
 SRCS += stream_vstream.c
 endif
-
-# TV in
 ifeq ($(TV),yes)
 SRCS += stream_tv.c tv.c frequencies.c tvi_dummy.c
 endif
@@ -77,8 +70,6 @@ ifeq ($(TV_V4L),yes)
   SRCS += ai_oss.c
   endif
 endif
-
-# Radio in
 ifeq ($(RADIO),yes)
 SRCS += stream_radio.c
 endif
@@ -94,13 +85,12 @@ SRCS += audio_in.c
   SRCS += ai_oss.c
   endif
 endif
-
 ifeq ($(MPLAYER_NETWORK),yes)
-SRCS += asf_streaming.c \
+SRCS += asf_mmst_streaming.c \
+        asf_streaming.c \
+        cookies.c \
         http.c \
         network.c \
-        cookies.c \
-        asf_mmst_streaming.c \
         pnm.c \
         rtp.c \
         udp.c \
@@ -108,26 +98,20 @@ SRCS += asf_streaming.c \
         stream_rtsp.c \
         stream_rtp.c \
         stream_udp.c \
-
-SRCS += realrtsp/asmrp.c \
+        freesdp/common.c \
+        freesdp/errorlist.c \
+        freesdp/parser.c \
+        librtsp/rtsp.c \
+        librtsp/rtsp_rtp.c \
+        librtsp/rtsp_session.c \
+        realrtsp/asmrp.c \
         realrtsp/real.c \
         realrtsp/rmff.c \
         realrtsp/sdpplin.c \
         realrtsp/xbuffer.c \
-
-SRCS += librtsp/rtsp.c \
-        librtsp/rtsp_rtp.c \
-        librtsp/rtsp_session.c \
-
-SRCS += freesdp/common.c \
-        freesdp/errorlist.c \
-        freesdp/parser.c \
-
 endif
-
 ifeq ($(DVBIN),yes)
-SRCS += stream_dvb.c
-SRCS += dvb_tune.c
+SRCS += dvb_tune.c stream_dvb.c
 endif
 
 CFLAGS = -I../loader
