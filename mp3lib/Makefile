@@ -6,7 +6,6 @@ LIBNAME = libMP3.a
 ifeq ($(TARGET_ARCH_SGI_MIPS),yes)
 OPTFLAGS := $(OPTFLAGS:-O4=-O0)
 endif
-CFLAGS  = -I.. $(OPTFLAGS)
 
 SRCS = sr1.c
 ifeq ($(TARGET_ARCH_X86_32),yes)
