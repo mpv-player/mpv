@@ -46,6 +46,4 @@ ifeq ($(TARGET_OS),MINGW32)
 CFLAGS += -D_IO_H_
 endif
 
-$(OBJS):af.h control.h dsp.h filter.h window.h af_mp.h
-
 include ../mpcommon.mak
