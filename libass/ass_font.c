@@ -75,6 +75,7 @@ int ass_font_init(FT_Library ftlibrary, void* fc_priv, ass_font_t* font, ass_fon
 	font->m.xx = font->m.yy = (FT_Fixed)0x10000L;
 	font->m.xy = font->m.yy = 0;
 	font->v.x = font->v.y = 0;
+	font->size = 0;
 
 	return 0;
 }
