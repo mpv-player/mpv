@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r21168 -->
 <!-- Opiekun: Boski -->
 <chapter id="codecs">
 <title>Obsługiwane kodeki</title>
@@ -215,6 +215,7 @@ pomocy Xvid. Domyślnie używana jest biblioteka
   <listitem><para>tryb bezstratny</para></listitem>
   <listitem><para>Własne matryce kwantyzacji</para></listitem>
   <listitem><para>Równoległe kodowanie wielu fragmentów</para></listitem>
+  <listitem><para>Przeplot</para></listitem>
 </itemizedlist>
 </sect3>
 
