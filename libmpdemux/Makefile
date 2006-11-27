@@ -1,7 +1,10 @@
 
-LIBNAME = libmpdemux.a
-
 include ../config.mak
+
+LIBNAME = libmpdemux.a
+ifeq ($(MENCODER),yes)
+LIBNAME2 = libmpmux.a
+endif
 
 # Headers and header-dumpers
 SRCS  = mp3_hdr.c \
@@ -63,18 +66,14 @@ SRCS-$(STREAMING_LIVE555)       += demux_rtp.cpp demux_rtp_codec.cpp
 SRCS-$(WIN32DLL)                += demux_avs.c
 SRCS-$(XMMS_PLUGINS)            += demux_xmms.c
 
-# Muxers
-MUXERS = muxer.c \
+SRCS2 = muxer.c \
         muxer_avi.c \
         muxer_mpeg.c \
         muxer_rawaudio.c \
         muxer_rawvideo.c \
 
-MUXERS-$(CONFIG_LIBAVFORMAT)    += muxer_lavf.c
-MUXERS-$(CONFIG_LIBAVFORMAT_SO) += muxer_lavf.c
-
-SRCS-$(MENCODER) += $(MUXERS)
-SRCS-$(MENCODER) += $(MUXERS-yes)
+SRCS2-$(CONFIG_LIBAVFORMAT)     += muxer_lavf.c
+SRCS2-$(CONFIG_LIBAVFORMAT_SO)  += muxer_lavf.c
 
 LIBAV_INC-$(CONFIG_LIBAVUTIL)   += -I../libavutil
 LIBAV_INC-$(CONFIG_LIBAVCODEC)  += -I../libavcodec

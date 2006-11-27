@@ -66,6 +66,7 @@ LIBS_MPLAYER = libvo/libvo.a \
                input/libinput.a \
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
+                libmpdemux/libmpmux.a \
 
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
@@ -165,7 +166,10 @@ libass/libass.a:
 	$(MAKE) -C libass
 
 libmpdemux/libmpdemux.a:
-	$(MAKE) -C libmpdemux
+	$(MAKE) -C libmpdemux libmpdemux.a
+
+libmpdemux/libmpmux.a:
+	$(MAKE) -C libmpdemux libmpmux.a
 
 stream/stream.a:
 	$(MAKE) -C stream
@@ -393,6 +397,7 @@ dvdread/libdvdread.a: .norecurse $(wildcard dvdread/*.[ch])
 libdvdcss/libdvdcss.a: .norecurse $(wildcard libdvdcss/*.[ch])
 
 libmpdemux/libmpdemux.a: .norecurse $(wildcard libmpdemux/*.[ch])
+libmpdemux/libmpmux.a: .norecurse $(wildcard libmpdemux/*.[ch])
 stream/stream.a: .norecurse $(wildcard stream/*.[ch] stream/*/*.[ch])
 libmpcodecs/libmpcodecs.a: .norecurse $(wildcard libmpcodecs/*.[ch]) $(wildcard libmpcodecs/native/*.[ch])
 libmpcodecs/libmpencoders.a: .norecurse $(wildcard libmpcodecs/*.[ch])
