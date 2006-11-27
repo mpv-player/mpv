@@ -496,6 +496,15 @@ static char help_text[]=
 // fifo.c
 #define MSGTR_CannotMakePipe "Cannot make PIPE!\n"
 
+// parser-mecmd.c, parser-mpcmd.c
+#define MSGTR_NoFileGivenOnCommandLine "'--' indicates no more options, but no filename was given on the command line.\n"
+#define MSGTR_TheLoopOptionMustBeAnInteger "The loop option must be an integer: %s\n"
+#define MSGTR_UnknownOptionOnCommandLine "Unknown option on the command line: -%s\n"
+#define MSGTR_ErrorParsingOptionOnCommandLine "Error parsing option on the command line: -%s\n"
+#define MSGTR_InvalidPlayEntry "Invalid play entry %s\n"
+#define MSGTR_NotAnMEncoderOption "-%s is not an MEncoder option\n"
+#define MSGTR_NoFileGiven "No file given\n"
+
 // m_config.c
 #define MSGTR_SaveSlotTooOld "Save slot found from lvl %d is too old: %d !!!\n"
 #define MSGTR_InvalidCfgfileOption "The %s option can't be used in a config file.\n"

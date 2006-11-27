@@ -14,6 +14,7 @@
 #endif
 
 #include "mp_msg.h"
+#include "help_mp.h"
 #include "m_option.h"
 #include "m_config.h"
 #include "playtree.h"
@@ -103,7 +104,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	no_more_opts = 1;
 	if (i+1 >= argc)
 	  {
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "'--' indicates no more options, but no filename was given on the command line.\n");
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_NoFileGivenOnCommandLine);
 	    goto err_out;
 	  }
 	continue;
@@ -150,7 +151,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  char* end = NULL;
 	  l = (i+1<argc) ? strtol(argv[i+1],&end,0) : 0;
 	  if(!end || *end != '\0') {
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "The loop option must be an integer: %s\n",argv[i+1]);
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_TheLoopOptionMustBeAnInteger, argv[i+1]);
 	    tmp = ERR_OUT_OF_RANGE;
 	  } else {
 	    play_tree_t* pt = last_entry ? last_entry : last_parent;
@@ -196,7 +197,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	      }
 	    } else {
 	      tmp = M_OPT_UNKNOWN;
-	      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Unknown option on the command line: -%s\n",opt);
+	      mp_msg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_UnknownOptionOnCommandLine, opt);
 	    }
 	  }
 	}
@@ -206,7 +207,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  tmp = M_OPT_EXIT - tmp;
 	} else
 	if (tmp < 0) {
-	  mp_msg(MSGT_CFGPARSER, MSGL_FATAL, "Error parsing option on the command line: -%s\n",opt);
+	  mp_msg(MSGT_CFGPARSER, MSGL_FATAL, MSGTR_ErrorParsingOptionOnCommandLine, opt);
 	  goto err_out;
 	}
 	i += tmp;
@@ -241,7 +242,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 		  last_entry = entry;
                  }
                } else {
-                 mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Invalid play entry %s\n",argv[i]);
+                 mp_msg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_InvalidPlayEntry, argv[i]);
                }
          
 	     } else { // dvd:// or dvd://x entry
