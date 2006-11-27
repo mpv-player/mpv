@@ -97,21 +97,21 @@ void ass_font_set_transform(ass_font_t* font, FT_Matrix* m, FT_Vector* v)
 	    font->v.x != v->x ||
 	    font->v.y != v->y
 	    ) {
-	font->m.xx = m->xx;
-	font->m.xy = m->xy;
-	font->m.yx = m->yx;
-	font->m.yy = m->yy;
-	font->v.x = v->x;
-	font->v.y = v->y;
-	FT_Set_Transform(font->face, &font->m, &font->v);
+		font->m.xx = m->xx;
+		font->m.xy = m->xy;
+		font->m.yx = m->yx;
+		font->m.yy = m->yy;
+		font->v.x = v->x;
+		font->v.y = v->y;
+		FT_Set_Transform(font->face, &font->m, &font->v);
 	}
 }
 
 void ass_font_set_size(ass_font_t* font, int size)
 {
 	if (font->size != size) {
-	font->size = size;
-	FT_Set_Pixel_Sizes(font->face, 0, size);
+		font->size = size;
+		FT_Set_Pixel_Sizes(font->face, 0, size);
 	}
 }
 
