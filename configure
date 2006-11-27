@@ -5226,6 +5226,7 @@ if test "$_cdparanoia" = yes ; then
     _cdda='yes'
     _ld_extra="$_ld_extra -lcdda_interface -lcdda_paranoia"
     openbsd && _ld_extra="$_ld_extra -lutil"
+    test $_network = yes && _cddb=yes
 fi
 echores "$_cdparanoia"
 
@@ -7434,6 +7435,7 @@ CONFIG_DTS = $_libdts
 MPLAYER = $_mplayer
 MENCODER = $_mencoder
 CDDA = $_cdda
+CDDB = $_cddb
 BITMAP_FONT = $_bitmap_font
 FREETYPE = $_freetype
 CONFIG_ASS = $_ass

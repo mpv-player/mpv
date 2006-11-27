@@ -12,6 +12,7 @@ SRCS += open.c \
         url.c \
 
 SRCS-$(CDDA)              += stream_cdda.c cdinfo.c
+SRCS-$(CDDB)              += stream_cddb.c
 SRCS-$(DVBIN)             += dvb_tune.c stream_dvb.c
 SRCS-$(DVDNAV)            += stream_dvdnav.c
 SRCS-$(DVDREAD)           += stream_dvd.c
@@ -55,9 +56,6 @@ SRCS-$(VCD)               += stream_vcd.c
 SRCS-$(VSTREAM)           += stream_vstream.c
 
 #FIXME: These should have variables assigned in configure.
-ifeq ($(CDDA),yes)
-SRCS-$(MPLAYER_NETWORK)   += stream_cddb.c
-endif
 ifeq ($(TV_V4L),yes)
 SRCS-$(ALSA1X)            += ai_alsa1x.c
 SRCS-$(ALSA9)             += ai_alsa.c
