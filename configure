@@ -2442,7 +2442,7 @@ fi
 
 # On QNX we must link to libph - Gabucino
 if qnx ; then
-  _ld_arch="$_ld_arch -lph"
+  _ld_extra="$_ld_extra -lph"
 fi
 
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
@@ -2499,7 +2499,7 @@ cat > $TMPC <<EOF
 int main(void) { return 0; }
 EOF
 if cc_check -lposix ; then
-  _ld_arch="$_ld_arch -lposix"
+  _ld_extra="$_ld_extra -lposix"
   echores "yes"
 else
   echores "no"
@@ -2629,7 +2629,7 @@ _kstat=no
 cc_check -lkstat && _kstat=yes
 if test "$_kstat" = yes ; then
   _def_kstat="#define HAVE_LIBKSTAT 1"
-  _ld_arch="-lkstat $_ld_arch"
+  _ld_extra="$_ld_extra -lkstat"
 else
   _def_kstat="#undef HAVE_LIBKSTAT"
 fi
@@ -2645,7 +2645,7 @@ EOF
 _posix4=no
 cc_check -lposix4 && _posix4=yes
 if test "$_posix4" = yes ; then
-  _ld_arch="-lposix4 $_ld_arch"
+  _ld_extra="$_ld_extra -lposix4"
 fi
 echores "$_posix4"
 
@@ -2684,7 +2684,7 @@ cat > $TMPC << EOF
 int main(void) { (void) nanosleep(0, 0); return 0; }
 EOF
 _nanosleep=no
-cc_check $_ld_arch && _nanosleep=yes
+cc_check && _nanosleep=yes
 if test "$_nanosleep" = yes ; then
   _def_nanosleep='#define HAVE_NANOSLEEP 1'
 else
@@ -4769,7 +4769,7 @@ EOF
        _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
      elif netbsd || openbsd ; then
        _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound"'
-       _ld_arch="$_ld_arch -lossaudio"
+       _ld_extra="$_ld_extra -lossaudio"
      else
        _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
      fi
@@ -7180,11 +7180,9 @@ if test "$_real" = yes || test "$_xanim" = yes && not win32 && not qnx && not da
   _ld_dl_dynamic='-rdynamic'
 fi
 
-_ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
-bsdos && _ld_arch="$_ld_arch -ldvd"
-if netbsd ; then
-  x86 && _ld_arch="$_ld_arch -li386"
-fi
+_ld_extra="$_ld_extra $_ld_pthread $_ld_dl $_ld_dl_dynamic"
+bsdos && _ld_extra="$_ld_extra -ldvd"
+netbsd && x86 && _ld_extra="$_ld_extra -li386"
 
 _def_debug='#undef MP_DEBUG'
 test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'
@@ -7377,7 +7375,7 @@ JPEG = $_jpeg
 GIF = $_gif
 
 EXTRALIBS = $_extra_libs
-EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm $_ld_arch
+EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
 EXTRALIBS_MPLAYER = $_libs_mplayer
 EXTRALIBS_MENCODER = $_libs_mencoder
 
