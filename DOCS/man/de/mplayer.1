@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21186
+.\" In sync with r21298
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -294,7 +294,7 @@ Beginne/beende die Aufnahme von Schnappschüssen.
 Zeige den Dateinamen im OSD.
 .IPs "! und @"
 Spult zum Anfang des vorigen/nächsten Kapitels.
-.IPs "D (nur bei \-vo xvmc)"
+.IPs "D (nur bei \-vo xvmc, \-vf yadif)"
 Aktiviere/deaktiviere Deinterlacer.
 .RE
 .PD 1
@@ -9887,11 +9887,22 @@ während allen Modus-Entscheidungen aktiviert (langsam, benötigt subq>=6)
 .B deadzone_inter=<0\-32>
 Setzt die Größe der Inter-Luma-Quantisierungs-Deadzone für
 nicht-Trellis-Quantisierung (Standard: 21).
+Niedrigere Werte helfen dabei, feine Details und Körnung zu bewahren
+(typischerweise nützlich bei Encodierungen mit hoher Bitrate/Qualität),
+während höhere Werte dabei helfen, diese Details herauszufiltern, um Bits zu
+sparen, die dafür auf andere Macroblöcke und Frames verwendet werden können
+(typischerweise nützlich bei Encodierungen mit mangelnder Bitrate).
+Es wird empfohlen, mit Feineinstellungen für deadzone_intra zu beginnen, bevor
+du diesen Parameter verwendest.
 .
 .TP
 .B deadzone_intra=<0\-32>
 Setzt die Größe der Intra-Luma-Quantisierungs-Deadzone für
 nicht-Trellis-Quantisierung (Standard: 11).
+Diese Option hat dieselbe Wirkung wie deadzone_inter, bezieht sich aber auf
+Intra-Frames.
+Es wird empfohlen, mit Feineinstellungen für diese Option zu beginnen, bevor
+du deadzone_inter änderst.
 .
 .TP
 .B (no)fast_pskip

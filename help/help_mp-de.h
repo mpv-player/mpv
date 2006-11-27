@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r21162
+// In sync with r21332
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -505,6 +505,15 @@ static char help_text[]=
 
 // fifo.c
 #define MSGTR_CannotMakePipe "Kann PIPE nicht anlegen!\n"
+
+// parser-mecmd.c, parser-mpcmd.c
+#define MSGTR_NoFileGivenOnCommandLine "'--' weist auf weitere Optionen hin, auf der Kommandozeile wurde aber kein\nDateiname angegeben.\n"
+#define MSGTR_TheLoopOptionMustBeAnInteger "Die loop-Option muss ein Integer sein: %s\n"
+#define MSGTR_UnknownOptionOnCommandLine "Unbekannte Option in der Kommandozeile: -%s\n"
+#define MSGTR_ErrorParsingOptionOnCommandLine "Fehler beim Einlesen der Kommandozeilenoption: -%s\n"
+#define MSGTR_InvalidPlayEntry "Ungültiger Eintrag %s\n"
+#define MSGTR_NotAnMEncoderOption "-%s ist keine MEncoder-Option\n"
+#define MSGTR_NoFileGiven "Keine Datei angegeben\n"
 
 // m_config.c
 #define MSGTR_SaveSlotTooOld "Von lvl gefundene Speicherstelle %d ist zu alt: %d !!!\n"
@@ -1983,6 +1992,10 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/de/video.html#xv!\n"\
 "[VO_XV] Siehe 'mplayer -vo help' für andere (nicht-xv) Videoausgabetreiber.\n"\
 "[VO_XV] Probiere -vo x11.\n"
+
+// loader/ldt_keeper.c
+
+#define MSGTR_LOADER_DYLD_Warning "WARNUNG: Versuche, DLL-Codecs zu verwenden, die Umgebungsvariable\n         DYLD_BIND_AT_LAUNCH ist aber nicht gesetzt. Dies führt wahrscheinlich\n         zu einem Absturz.\n"
 
 // stream/stream_radio.c
 
