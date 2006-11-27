@@ -28,9 +28,9 @@
 
 #include "mputils.h"
 #include "ass_fontconfig.h"
+#include "ass_font.h"
 #include "ass_bitmap.h"
 #include "ass_cache.h"
-#include "ass_font.h"
 
 #define MAX_FONT_CACHE_SIZE 100
 

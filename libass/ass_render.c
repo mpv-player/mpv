@@ -32,12 +32,12 @@
 #include "mputils.h"
 
 #include "ass.h"
+#include "ass_font.h"
 #include "ass_bitmap.h"
 #include "ass_cache.h"
 #include "ass_utils.h"
 #include "ass_fontconfig.h"
 #include "ass_library.h"
-#include "ass_font.h"
 
 #define MAX_GLYPHS 1000
 #define MAX_LINES 100
