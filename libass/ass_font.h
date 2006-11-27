@@ -29,7 +29,7 @@
 #include "ass_bitmap.h"
 #include "ass_cache.h"
 
-int ass_font_init(FT_Library ftlibrary, void* fc_priv, ass_font_t* font, ass_font_desc_t* desc);
+ass_font_t* ass_font_new(FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* desc);
 void ass_font_set_transform(ass_font_t* font, FT_Matrix* m, FT_Vector* v);
 void ass_font_set_size(ass_font_t* font, int size);
 FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch);

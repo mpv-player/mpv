@@ -44,7 +44,8 @@ typedef struct ass_font_s {
 } ass_font_t;
 
 void ass_font_cache_init(void);
-ass_font_t* ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_desc_t* desc);
+ass_font_t* ass_font_cache_find(ass_font_desc_t* desc);
+void ass_font_cache_add(ass_font_t* font);
 void ass_font_cache_done(void);
 
 

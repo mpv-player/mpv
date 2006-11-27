@@ -561,7 +561,7 @@ static void update_font(void)
 	else if (val == 1) val = 110; //italic
 	desc.italic = val;
 
-	render_context.font = ass_new_font(priv->ftlibrary, priv->fontconfig_priv, &desc);
+	render_context.font = ass_font_new(priv->ftlibrary, priv->fontconfig_priv, &desc);
 	
 	if (render_context.font)
 		change_font_size(render_context.font_size);

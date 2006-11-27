@@ -34,7 +34,7 @@
 
 #define MAX_FONT_CACHE_SIZE 100
 
-static ass_font_t* font_cache;
+static ass_font_t** font_cache;
 static int font_cache_size;
 
 static int font_compare(ass_font_desc_t* a, ass_font_desc_t* b) {
@@ -48,39 +48,40 @@ static int font_compare(ass_font_desc_t* a, ass_font_desc_t* b) {
 }
 
 /**
- * \brief Get a face object, either from cache or created through FreeType+FontConfig.
- * \param library FreeType library object
- * \param fontconfig_priv fontconfig private data
+ * \brief Get a face struct from cache.
  * \param desc required face description
- * \return new font struct
-*/ 
-ass_font_t* ass_new_font(FT_Library library, void* fontconfig_priv, ass_font_desc_t* desc)
+ * \return font struct
+*/
+ass_font_t* ass_font_cache_find(ass_font_desc_t* desc)
 {
 	int i;
-	ass_font_t* item;
-	int error;
 	
 	for (i=0; i<font_cache_size; ++i)
-		if (font_compare(desc, &(font_cache[i].desc)))
-			return font_cache + i;
+		if (font_compare(desc, &(font_cache[i]->desc)))
+			return font_cache[i];
 
+	return 0;
+}
+
+/**
+ * \brief Add a face struct to cache.
+ * \param font font struct
+*/
+void ass_font_cache_add(ass_font_t* font)
+{
 	if (font_cache_size == MAX_FONT_CACHE_SIZE) {
 		mp_msg(MSGT_ASS, MSGL_FATAL, MSGTR_LIBASS_TooManyFonts);
-		return 0;
+		// FIXME: possible memory leak
+		return;
 	}
 
-	item = font_cache + font_cache_size;
-	error = ass_font_init(library, fontconfig_priv, item, desc);
-	if (error) // FIXME: mp_msg
-		return 0;
+	font_cache[font_cache_size] = font;
 	font_cache_size++;
-
-	return item;
 }
 
 void ass_font_cache_init(void)
 {
-	font_cache = calloc(MAX_FONT_CACHE_SIZE, sizeof(ass_font_t));
+	font_cache = calloc(MAX_FONT_CACHE_SIZE, sizeof(ass_font_t*));
 	font_cache_size = 0;
 }
 
@@ -88,7 +89,7 @@ void ass_font_cache_done(void)
 {
 	int i;
 	for (i = 0; i < font_cache_size; ++i) {
-		ass_font_t* item = font_cache + i;
+		ass_font_t* item = font_cache[i];
 		ass_font_free(item);
 	}
 	free(font_cache);
