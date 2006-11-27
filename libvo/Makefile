@@ -18,33 +18,26 @@ SRCS=aspect.c \
      vo_yuv4mpeg.c \
      $(VO_SRCS) \
 
+SRCS-$(EXTERNAL_VIDIX) +=  vosub_vidix.c
+SRCS-$(VIDIX)          +=  vosub_vidix.c
+
 SRCS2 = aclib.c \
         osd.c \
         sub.c \
 
-ifeq ($(CONFIG_LIBAVUTIL),yes)
-LIBAV_INC += -I../libavutil
-endif
+SRCS2-$(BITMAP_FONT) +=  font_load.c
+SRCS2-$(FREETYPE)    +=  font_load_ft.c
 
 OBJS_TEMP=$(basename $(SRCS))
 OBJS=$(OBJS_TEMP:%=%.o)
 
 OBJS2=$(SRCS2:.c=.o)
 
-ifeq ($(BITMAP_FONT),yes)
-SRCS2 += font_load.c
-endif
-ifeq ($(FREETYPE),yes)
-SRCS2 += font_load_ft.c
-endif
+LIBAV_INC-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
 
-ifeq ($(VIDIX),yes)
-SRCS += vosub_vidix.c
-endif
-
-ifeq ($(EXTERNAL_VIDIX),yes)
-SRCS += vosub_vidix.c
-endif
+SRCS         += $(SRCS-yes)
+SRCS2        += $(SRCS2-yes)
+LIBAV_INC    += $(LIBAV_INC-yes)
 
 CFLAGS = -I.. -I../osdep $(LIBAV_INC)
 
