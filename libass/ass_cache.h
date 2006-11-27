@@ -26,23 +26,6 @@
 #include FT_STROKER_H
 #include FT_GLYPH_H
 
-// font cache
-typedef struct ass_font_desc_s {
-	char* family;
-	unsigned bold;
-	unsigned italic;
-} ass_font_desc_t;
-
-typedef struct ass_font_s {
-	ass_font_desc_t desc;
-	char* path;
-	int index;
-	FT_Face face;
-	FT_Matrix m; // current transformation
-	FT_Vector v; // current shift
-	int size;
-} ass_font_t;
-
 void ass_font_cache_init(void);
 ass_font_t* ass_font_cache_find(ass_font_desc_t* desc);
 void ass_font_cache_add(ass_font_t* font);

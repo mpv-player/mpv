@@ -27,6 +27,8 @@
 #include FT_GLYPH_H
 
 #include "ass_font.h"
+#include "ass_bitmap.h"
+#include "ass_cache.h"
 #include "ass_fontconfig.h"
 #include "mputils.h"
 
