@@ -23,14 +23,12 @@ ifeq ($(TARGET_SSE),yes)
 SRCS += dct64_sse.c
 endif
 endif
-ifeq ($(TARGET_ARCH_POWERPC),yes)
 ifeq ($(TARGET_ALTIVEC),yes)
 SRCS += dct64_altivec.c
 ifeq ($(TARGET_OS),Darwin)
 CFLAGS += -faltivec
 else
 CFLAGS += -maltivec -mabi=altivec
-endif
 endif
 endif
 
