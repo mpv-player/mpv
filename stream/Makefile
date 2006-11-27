@@ -41,11 +41,11 @@ ifeq ($(LIBSMBCLIENT),yes)
 SRCS += stream_smb.c
 endif
 ifeq ($(MPLAYER_NETWORK),yes)
-  SRCS += stream_netstream.c
+SRCS += stream_netstream.c
+endif
   ifeq ($(STREAMING_LIVE555),yes)
   SRCS += stream_livedotcom.c
   endif
-endif
 ifeq ($(VSTREAM),yes)
 SRCS += stream_vstream.c
 endif
@@ -53,15 +53,16 @@ endif
 # TV in
 ifeq ($(TV),yes)
 SRCS += stream_tv.c tv.c frequencies.c tvi_dummy.c
+endif
   ifeq ($(TV_BSDBT848),yes)
   SRCS += tvi_bsdbt848.c
   endif
   ifeq ($(TV_V4L2),yes)
   SRCS += tvi_v4l2.c audio_in.c
+  endif
     ifeq ($(PVR),yes)
     SRCS += stream_pvr.c
     endif
-  endif
   ifeq ($(TV_V4L1),yes)
   SRCS += tvi_v4l.c audio_in.c
   endif
@@ -76,11 +77,11 @@ SRCS += stream_tv.c tv.c frequencies.c tvi_dummy.c
      SRCS += ai_oss.c
     endif
   endif
-endif
 
 # Radio in
 ifeq ($(RADIO),yes)
 SRCS += stream_radio.c  
+endif
   ifeq ($(RADIO_CAPTURE),yes)
     SRCS += audio_in.c
     ifeq ($(ALSA1X),yes)
@@ -93,7 +94,6 @@ SRCS += stream_radio.c
      SRCS += ai_oss.c
     endif
  endif  
-endif
 
 ifeq ($(MPLAYER_NETWORK),yes)
 SRCS += asf_streaming.c \
