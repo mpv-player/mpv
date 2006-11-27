@@ -5316,7 +5316,6 @@ static void ext_stubs(void)
 
 //static void add_stub(int pos)
 
-extern int unk_exp1;
 static int pos=0;
 static char extcode[20000];// place for 200 unresolved exports
 static const char* called_unk = "Called unk_%s\n";
@@ -5325,11 +5324,6 @@ static void* add_stub(void)
 {
     // generated code in runtime!
     char* answ = (char*)extcode+pos*0x30;
-#if 0
-    memcpy(answ, &unk_exp1, 0x64);
-    *(int*)(answ+9)=pos;
-    *(int*)(answ+47)-=((int)answ-(int)&unk_exp1);
-#endif
     memcpy(answ, ext_stubs, 0x2f); // 0x2c is current size
     //answ[4] = 0xb8; // movl $0, eax  (0xb8 0x00000000)
     *((int*) (answ + 5)) = pos;
