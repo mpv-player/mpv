@@ -1936,7 +1936,7 @@ static char help_text[]=
 
 // loader/ldt_keeper.c
 
-#define MSGTR_LOADER_DYLD_Warning "WARNING: Attempting to use DLL codecs but environment variable DYLD_BIND_AT_LAUNCH not set.\nThis will likely crash.\n"
+#define MSGTR_LOADER_DYLD_Warning "WARNING: Attempting to use DLL codecs but environment variable\n         DYLD_BIND_AT_LAUNCH not set. This will likely crash.\n"
 
 // stream/stream_radio.c
 
