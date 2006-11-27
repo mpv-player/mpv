@@ -6,12 +6,9 @@
 
 include config.mak
 
-ifeq ($(CONFIG_LIBAVUTIL),yes)
-LIBAV_INC += -I./libavutil
-endif
-ifeq ($(CONFIG_LIBAVCODEC),yes)
-LIBAV_INC += -I./libavcodec
-endif
+LIBAV_INC-$(CONFIG_LIBAVUTIL)  += -I./libavutil
+LIBAV_INC-$(CONFIG_LIBAVCODEC) += -I./libavcodec
+LIBAV_INC                      += $(LIBAV_INC-yes)
 
 CFLAGS = $(OPTFLAGS) -I. $(LIBAV_INC)
 
