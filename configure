@@ -5226,7 +5226,7 @@ if test "$_cdparanoia" = yes ; then
     _cdda='yes'
     _ld_extra="$_ld_extra -lcdda_interface -lcdda_paranoia"
     openbsd && _ld_extra="$_ld_extra -lutil"
-    test $_network = yes && _cddb=yes
+    test $_network = yes && not darwin && _cddb=yes
 fi
 echores "$_cdparanoia"
 
