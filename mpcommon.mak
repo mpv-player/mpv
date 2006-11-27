@@ -1,6 +1,5 @@
 OBJS  = $(SRCS:.c=.o)
 OBJS := $(OBJS:.S=.o)
-OBJS := $(OBJS:.s=.o)
 OBJS := $(OBJS:.cpp=.o)
 
 CFLAGS += -I. -I.. $(OPTFLAGS)
