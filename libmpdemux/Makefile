@@ -73,6 +73,7 @@ MUXERS = muxer.c \
 MUXERS-$(CONFIG_LIBAVFORMAT)    += muxer_lavf.c
 MUXERS-$(CONFIG_LIBAVFORMAT_SO) += muxer_lavf.c
 
+SRCS-$(MENCODER) += $(MUXERS)
 SRCS-$(MENCODER) += $(MUXERS-yes)
 
 SRCS             += $(SRCS-yes)
