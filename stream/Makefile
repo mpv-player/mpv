@@ -130,7 +130,7 @@ SRCS += stream_dvb.c
 SRCS += dvb_tune.c
 endif
 
-CFLAGS = -I../loader $(LIBAV_INC)
+CFLAGS = -I../loader
 
 include ../mpcommon.mak
 
