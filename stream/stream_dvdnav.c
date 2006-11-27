@@ -159,6 +159,8 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
   else if (event!=DVDNAV_BLOCK_OK) {
     // need to handle certain events internally (like skipping stills)
     switch (event) {
+      case DVDNAV_NAV_PACKET:
+        return event;
       case DVDNAV_STILL_FRAME: {
         dvdnav_still_event_t *still_event = (dvdnav_still_event_t*)(buf);
         //if (priv->started) dvd_nav_still=1;
@@ -250,6 +252,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
       switch (event) {
         case DVDNAV_STOP: return len;
         case DVDNAV_BLOCK_OK: return len;
+        case DVDNAV_NAV_PACKET: return len;
         case DVDNAV_VTS_CHANGE: {
           int tit = 0, part = 0;
           s->end_pos = 0;
