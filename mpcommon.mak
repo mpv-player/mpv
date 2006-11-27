@@ -10,9 +10,15 @@ CFLAGS += -I. -I.. $(OPTFLAGS)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-all:    $(LIBNAME)
+LIBS = $(LIBNAME) $(LIBNAME2)
+
+all:    $(LIBS)
 
 $(LIBNAME): $(OBJS)
+	$(AR) r $@ $^
+	$(RANLIB) $@
+
+$(LIBNAME2): $(OBJS2)
 	$(AR) r $@ $^
 	$(RANLIB) $@
 

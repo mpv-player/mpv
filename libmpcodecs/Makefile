@@ -2,11 +2,8 @@
 include ../config.mak
 
 LIBNAME = libmpcodecs.a
-LIBNAME2 = libmpencoders.a
-
-LIBS =$(LIBNAME)
 ifeq ($(MENCODER),yes)
-LIBS+=$(LIBNAME2)
+LIBNAME2 = libmpencoders.a
 endif
 
 SRCS = native/minilzo.c \
@@ -175,12 +172,6 @@ CFLAGS  = -I.. \
           -D_GNU_SOURCE \
 
 include ../mpcommon.mak
-
-all:    $(LIBS)
-
-$(LIBNAME2): $(OBJS2)
-	$(AR) r $@ $^
-	$(RANLIB) $@
 
 clean::
 	rm -f native/*.o native/*.a native/*~

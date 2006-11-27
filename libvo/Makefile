@@ -1,12 +1,9 @@
 
 include ../config.mak
 
-LIBNAME = libvo.a
 LIBNAME2 = libosd.a
-
-LIBS =$(LIBNAME2)
 ifeq ($(MPLAYER),yes)
-LIBS+=$(LIBNAME)
+LIBNAME = libvo.a
 endif
 
 SRCS=aspect.c \
@@ -45,9 +42,3 @@ include ../mpcommon.mak
 
 .m.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
-
-all:    $(LIBS)
-
-$(LIBNAME2): $(OBJS2)
-	$(AR) r $@ $^
-	$(RANLIB) $@
