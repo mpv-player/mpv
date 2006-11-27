@@ -10,7 +10,9 @@
  */
 
 // define for quicktime calls debugging and/or MacOS-level emulation:
+#ifndef __APPLE__
 #define EMU_QTX_API
+#endif /* __APPLE__ */
 
 // define for quicktime debugging (verbose logging):
 //#define DEBUG_QTX_API

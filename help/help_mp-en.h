@@ -1924,6 +1924,11 @@ static char help_text[]=
 "[VO_XV] See 'mplayer -vo help' for other (non-xv) video out drivers.\n"\
 "[VO_XV] Try -vo x11.\n"
 
+
+// loader/ldt_keeper.c
+
+#define MSGTR_LOADER_DYLD_Warning "WARNING: Attempting to use DLL codecs but environment variable DYLD_BIND_AT_LAUNCH not set.\nThis will likely crash.\n"
+
 // stream/stream_radio.c
 
 #define MSGTR_RADIO_ChannelNamesDetected "[radio] Radio channel names detected.\n"

@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "osdep/mmap_anon.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #ifdef __linux__
 #include <asm/unistd.h>
 #include <asm/ldt.h>
@@ -103,8 +105,9 @@ struct modify_ldt_ldt_s {
 #define       LDT_SEL(idx) ((idx) << 3 | 1 << 2 | 3)
 
 /* i got this value from wine sources, it's the first free LDT entry */
-#if defined(__FreeBSD__) && defined(LDT_AUTO_ALLOC)
+#if (defined(__APPLE__) || defined(__FreeBSD__)) && defined(LDT_AUTO_ALLOC)
 #define       TEB_SEL_IDX     LDT_AUTO_ALLOC
+#define	      USE_LDT_AA
 #endif
 
 #ifndef       TEB_SEL_IDX
@@ -168,7 +171,7 @@ static int LDT_Modify( int func, struct modify_ldt_ldt_s *ptr,
 #endif
 #endif
 
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__APPLE__)
 static void LDT_EntryToBytes( unsigned long *buffer, const struct modify_ldt_ldt_s *content )
 {
     *buffer++ = ((content->base_addr & 0x0000ffff) << 16) |
@@ -195,6 +198,11 @@ ldt_fs_t* Setup_LDT_Keeper(void)
     if (!ldt_fs)
 	return NULL;
 
+#ifdef __APPLE__
+    if (getenv("DYLD_BIND_AT_LAUNCH") == NULL)
+        mp_msg(MSGT_LOADER, MSGL_WARN, MSGTR_LOADER_DYLD_Warning);
+#endif /* __APPLE__ */
+    
     fs_seg=
     ldt_fs->fs_seg = mmap_anon(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE, 0);
     if (ldt_fs->fs_seg == (void*)-1)
@@ -223,12 +231,12 @@ ldt_fs_t* Setup_LDT_Keeper(void)
     }
 #endif /*linux*/
 
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__APPLE__)
     {
         unsigned long d[2];
 
         LDT_EntryToBytes( d, &array );
-#if defined(__FreeBSD__) && defined(LDT_AUTO_ALLOC)
+#ifdef USE_LDT_AA
         ret = i386_set_ldt(LDT_AUTO_ALLOC, (union descriptor *)d, 1);
         array.entry_number = ret;
         fs_ldt = ret;
@@ -245,7 +253,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 #endif
         }
     }
-#endif  /* __NetBSD__ || __FreeBSD__ || __OpenBSD__ || __DragonFly__ */
+#endif  /* __NetBSD__ || __FreeBSD__ || __OpenBSD__ || __DragonFly__ || __APPLE__ */
 
 #if defined(__svr4__)
     {

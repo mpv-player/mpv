@@ -8,7 +8,12 @@ CFLAGS= -Idshow -DMPLAYER -D__WINE__ -DNOAVIFILE_HEADERS
 SRCS= driver.c afl.c vfl.c
 ifneq ($(TARGET_WIN32),yes)
 SRCS+= ldt_keeper.c pe_image.c module.c ext.c win32.c \
-       pe_resource.c resource.c registry.c elfdll.c wrapper.S stubs.s
+       pe_resource.c resource.c registry.c elfdll.c stubs.S
+endif
+
+# QTX emulation is not supported in Darwin
+ifneq ($(TARGET_OS),Darwin)
+SRCS+= wrapper.S
 endif
 
 SRCS+= dshow/DS_AudioDecoder.c \

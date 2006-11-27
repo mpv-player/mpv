@@ -1,8 +1,13 @@
+#if defined(__APPLE__) || defined(__OpenBSD__)
+# define SYM(x) _ ## x
+#else
+# define SYM(x) x
+#endif
 	.data
-.LC0:	.string	"Called unk_%s\n"
-       .balign 4
-.globl unk_exp1
-unk_exp1:
+.LC0:	.asciz	"Called unk_%s\n"
+       .p2align 4
+.globl SYM(unk_exp1)
+SYM(unk_exp1):
 	pushl %ebp
 	movl %esp,%ebp
 	subl $4,%esp
@@ -14,16 +19,16 @@ unk_exp1:
 	subl %eax,%edx
 	leal 0(,%edx,2),%eax
 	movl %eax,%edx
-	addl $export_names,%edx
+	addl $SYM(export_names),%edx
 	pushl %edx
 	pushl $.LC0
-	call printf
+	call SYM(printf)
 	addl $8,%esp
 	xorl %eax,%eax
 	leave
 	ret
-.globl exp_EH_prolog
-exp_EH_prolog:
+.globl SYM(exp_EH_prolog)
+SYM(exp_EH_prolog):
 	pushl $0xff
 	pushl %eax
 	pushl %fs:0

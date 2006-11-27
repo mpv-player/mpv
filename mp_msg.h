@@ -101,6 +101,8 @@ extern int verbose;
 
 #define MSGT_ASS 43 // libass messages
 
+#define MSGT_LOADER 44 // dll loader messages
+
 #define MSGT_MAX 64
 
 void mp_msg_init(void);

@@ -1,9 +1,9 @@
 #ifdef __WINE_PSHPACK_H
 #undef __WINE_PSHPACK_H
 
-#if defined(__GNUC__) || defined(__SUNPRO_C)
+#if (defined(__GNUC__) || defined(__SUNPRO_C)) && !defined(__APPLE__)
 #pragma pack()
-#elif defined(__SUNPRO_CC)
+#elif defined(__SUNPRO_CC) || defined(__APPLE__)
 #warning "Assumes default alignment is 4"
 #pragma pack(4)
 #elif !defined(RC_INVOKED)
