@@ -1,7 +1,12 @@
+SRCS         += $(SRCS-yes)
+SRCS2        += $(SRCS2-yes)
+LIBAV_INC    += $(LIBAV_INC-yes)
+
 OBJS  = $(SRCS:.c=.o)
 OBJS := $(OBJS:.S=.o)
 OBJS := $(OBJS:.cpp=.o)
 OBJS := $(OBJS:.m=.o)
+OBJS2 = $(SRCS2:.c=.o)
 
 CFLAGS += -I. -I.. $(OPTFLAGS)
 

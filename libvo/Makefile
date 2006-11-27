@@ -25,16 +25,7 @@ SRCS2 = aclib.c \
 SRCS2-$(BITMAP_FONT) +=  font_load.c
 SRCS2-$(FREETYPE)    +=  font_load_ft.c
 
-OBJS_TEMP=$(basename $(SRCS))
-OBJS=$(OBJS_TEMP:%=%.o)
-
-OBJS2=$(SRCS2:.c=.o)
-
 LIBAV_INC-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
-
-SRCS         += $(SRCS-yes)
-SRCS2        += $(SRCS2-yes)
-LIBAV_INC    += $(LIBAV_INC-yes)
 
 CFLAGS = -I.. -I../osdep $(LIBAV_INC)
 

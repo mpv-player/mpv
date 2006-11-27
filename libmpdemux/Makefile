@@ -76,13 +76,9 @@ MUXERS-$(CONFIG_LIBAVFORMAT_SO) += muxer_lavf.c
 SRCS-$(MENCODER) += $(MUXERS)
 SRCS-$(MENCODER) += $(MUXERS-yes)
 
-SRCS             += $(SRCS-yes)
-
 LIBAV_INC-$(CONFIG_LIBAVUTIL)   += -I../libavutil
 LIBAV_INC-$(CONFIG_LIBAVCODEC)  += -I../libavcodec
 LIBAV_INC-$(CONFIG_LIBAVFORMAT) += -I../libavformat
-
-LIBAV_INC += $(LIBAV_INC-yes)
 
 CFLAGS = -I.. -I../stream -I../loader $(LIBAV_INC)
 

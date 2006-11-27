@@ -154,14 +154,6 @@ LIBAV_INC-$(CONFIG_LIBAVUTIL)  +=  -I../libavutil
 LIBAV_INC-$(CONFIG_LIBAVCODEC) +=  -I../libavcodec
 
 
-SRCS         += $(SRCS-yes)
-SRCS2        += $(SRCS2-yes)
-LIBAV_INC    += $(LIBAV_INC-yes)
-
-
-OBJS=$(SRCS:.c=.o)
-OBJS2=$(SRCS2:.c=.o)
-
 CFLAGS  = -I.. \
           -Inative \
           -I../libmpdemux \
