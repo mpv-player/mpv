@@ -40,9 +40,6 @@ include ../mpcommon.mak
 decode_i586.o: decode_i586.c
 	$(CC) -c $(CFLAGS) -fomit-frame-pointer -o $@ $<
 
-.s.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
 test1:	libMP3.a test.c
 	$(CC) $(CFLAGS) test.c ../libvo/aclib.c -o test1 -I.. ./libMP3.a ../mp_msg-mencoder.o ../cpudetect.o -lm
 
