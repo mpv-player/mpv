@@ -21,11 +21,6 @@
 #ifndef __ASS_FONT_H__
 #define __ASS_FONT_H__
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_STROKER_H
-#include FT_GLYPH_H
-
 typedef struct ass_font_desc_s {
 	char* family;
 	unsigned bold;

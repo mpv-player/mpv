@@ -21,11 +21,6 @@
 #ifndef __ASS_CACHE_H__
 #define __ASS_CACHE_H__
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_STROKER_H
-#include FT_GLYPH_H
-
 void ass_font_cache_init(void);
 ass_font_t* ass_font_cache_find(ass_font_desc_t* desc);
 void ass_font_cache_add(ass_font_t* font);
