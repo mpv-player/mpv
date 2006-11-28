@@ -31,6 +31,7 @@ typedef struct ass_font_s {
 	ass_font_desc_t desc;
 	char* path;
 	int index;
+	FT_Library ftlibrary;
 	FT_Face face;
 	FT_Matrix m; // current transformation
 	FT_Vector v; // current shift

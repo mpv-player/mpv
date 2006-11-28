@@ -73,6 +73,7 @@ ass_font_t* ass_font_new(FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* d
 	charmap_magic(face);
 	
 	font = calloc(1, sizeof(ass_font_t));
+	font->ftlibrary = ftlibrary;
 	font->path = strdup(path);
 	font->index = index;
 	font->face = face;
