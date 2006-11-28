@@ -877,6 +877,8 @@ case "$host_arch" in
 	# K6 model 13 are the K6-2+ and K6-III+, only differing in cache size.
 	if test "$pmodel" -eq 9 -o "$pmodel" -eq 13; then
 		proc=k6-3
+	elif test "$pmodel" -eq 5 -o "$pmodel" -eq 10; then
+		proc=geode
 	elif test "$pmodel" -ge 8; then
 		proc=k6-2
 	elif test "$pmodel" -ge 6; then
@@ -918,7 +920,9 @@ case "$host_arch" in
 	fi
 	;;
     6) iproc=686
-	if test "$pmodel" -eq 9 -o "$pmodel" -ge 13; then
+	if test "$pmodel" -eq 15; then
+		proc=core2
+	elif test "$pmodel" -eq 9 -o "$pmodel" -ge 13; then
 		proc=pentium-m
 	elif test "$pmodel" -ge 7; then
 		proc=pentium3
@@ -1010,7 +1014,10 @@ EOF
     if test "$proc" = "prescott" ; then
       cc_check -march=$proc $cpuopt=$proc || proc=pentium4
     fi
-    if test "$proc" = "pentium4" || test "$proc" = "pentium-m" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon" || test "$proc" = "c3-2"; then
+    if test "$proc" = "core2" ; then
+      cc_check -march=$proc $cpuopt=$proc || proc=pentium-m
+    fi
+    if test "$proc" = "pentium4" || test "$proc" = "pentium-m" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon" || test "$proc" = "c3-2" || test "$proc" = "geode"; then
       cc_check -march=$proc $cpuopt=$proc  || proc=i686
     fi
     if test "$proc" = "i686" || test "$proc" = "pentium-mmx" || test "$proc" = "winchip-c6" || test "$proc" = "winchip2"; then
@@ -1101,9 +1108,14 @@ EOF
     AuthenticAMD)
       proc=k8;;
     GenuineIntel)
-      # 64-bit prescotts exist, but as far as GCC is concerned they have the
-      # same capabilities as a nocona.
-      proc=nocona;;
+      case "$pmodel" in
+      6) proc=core2;;
+      *)
+        # 64-bit prescotts exist, but as far as GCC is concerned they have the
+        # same capabilities as a nocona.
+        proc=nocona;;
+      esac
+      ;;
     *)
       proc=error;;
     esac
@@ -1125,6 +1137,9 @@ EOF
         cc_check -march=$proc $cpuopt=$proc || proc=error
       fi
       # --- Intel processors ---
+      if test "$proc" = "core2"; then
+        cc_check -march=$proc $cpuopt=$proc || proc=nocona
+      fi
       if test "$proc" = "nocona"; then
         cc_check -march=$proc $cpuopt=$proc || proc=pentium4
       fi
