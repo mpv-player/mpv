@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r21163
+// Synced with help_mp-en.h: r21332
 
 // ========================= MPlayer help ===========================
 
@@ -490,6 +490,15 @@ static char help_text[]=
 
 // fifo.c
 #define MSGTR_CannotMakePipe "Не могу создать канал!\n"
+
+// parser-mecmd.c, parser-mpcmd.c
+#define MSGTR_NoFileGivenOnCommandLine "'--' означает конец опций, но имя файла в командной строке не указано.\n"
+#define MSGTR_TheLoopOptionMustBeAnInteger "Опция loop должна быть целочисленной: %s\n"
+#define MSGTR_UnknownOptionOnCommandLine "Неизвестная опция командной строки: -%s\n"
+#define MSGTR_ErrorParsingOptionOnCommandLine "Ошибка анализа опции командной строки: -%s\n"
+#define MSGTR_InvalidPlayEntry "Неверный элемент воспроизведения %s\n"
+#define MSGTR_NotAnMEncoderOption "-%s не является опцией MEncoder\n"
+#define MSGTR_NoFileGiven "Не указан файл\n"
 
 // m_config.c
 #define MSGTR_SaveSlotTooOld "Найден слишком старый слот сохранения из lvl %d: %d !!!\n"
@@ -1245,6 +1254,11 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrNotEnoughControls "Недостаточно настроек указано в командной строке."
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Входной параметр #%d меньше нижней границы %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Входной параметр #%d больше верхней границы %0.4f.\n"
+
+
+// loader/ldt_keeper.c
+
+#define MSGTR_LOADER_DYLD_Warning "ВНИМАНИЕ: попытка использования DLL кодеков без установленной переменной \n         окружения DYLD_BIND_AT_LAUNCH. Это скорее всего приведет к краху.\n"
 
 // stream/stream_radio.c
 
