@@ -307,7 +307,8 @@ uninstall:
 	  fi ; \
 	done
 	$(MAKE) -C libdha uninstall
-	$(MAKE) -C vidix/drivers uninstall
+	rm -f $(LIBDIR)/mplayer/vidix/*.so
+	-rmdir -p $(LIBDIR)/mplayer/vidix
 	@echo "Uninstall completed"
 
 dirclean:
