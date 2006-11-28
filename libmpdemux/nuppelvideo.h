@@ -1,5 +1,7 @@
 /* nuppelvideo.h  rh */
 
+#include "libavutil/intfloat_readwrite.h"
+
 typedef struct  __attribute__((packed)) rtfileheader
 {
   char finfo[12];     // "NuppelVideo" + \0
@@ -125,8 +127,8 @@ typedef struct audbuffertype
     (h)->height = le2me_32((h)->height);			\
     (h)->desiredwidth = le2me_32((h)->desiredwidth);		\
     (h)->desiredheight = le2me_32((h)->desiredheight);		\
-    (h)->aspect = le2me_dbl((h)->aspect);			\
-    (h)->fps = le2me_dbl((h)->fps);				\
+    (h)->aspect = av_int2dbl(le2me_64(*(uint64_t *)&(h)->aspect));\
+    (h)->fps = av_int2dbl(le2me_64(*(uint64_t *)&(h)->fps));	\
     (h)->videoblocks = le2me_32((h)->videoblocks);		\
     (h)->audioblocks = le2me_32((h)->audioblocks);		\
     (h)->textsblocks = le2me_32((h)->textsblocks);		\
