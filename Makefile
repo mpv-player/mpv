@@ -251,7 +251,7 @@ codecs2html$(EXESUF): mp_msg.o
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
 	$(MAKE) -C libdha install
-	$(MAKE) -C vidix install
+	$(MAKE) -C vidix/drivers install
 endif
 	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) \
@@ -307,7 +307,7 @@ uninstall:
 	  fi ; \
 	done
 	$(MAKE) -C libdha uninstall
-	$(MAKE) -C vidix uninstall
+	$(MAKE) -C vidix/drivers uninstall
 	@echo "Uninstall completed"
 
 dirclean:

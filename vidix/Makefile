@@ -35,12 +35,6 @@ dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 	$(MAKE) -C drivers depend
 
-install:
-	$(MAKE) -C drivers install
-
-uninstall:
-	$(MAKE) -C drivers uninstall
-
 ifneq ($(wildcard .depend),)
 include .depend
 endif
