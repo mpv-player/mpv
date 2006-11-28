@@ -13,10 +13,6 @@
 #include <inttypes.h>
 #include <limits.h>
 
-#include "af.h"
-#include "bswap.h"
-#include "libvo/fastmemcpy.h"
-
 // Integer to float conversion through lrintf()
 #ifdef HAVE_LRINTF
 #include <math.h>
@@ -24,6 +20,10 @@ long int lrintf(float);
 #else
 #define lrintf(x) ((int)(x))
 #endif
+
+#include "af.h"
+#include "bswap.h"
+#include "libvo/fastmemcpy.h"
 
 /* Functions used by play to convert the input audio to the correct
    format */

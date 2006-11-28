@@ -22,6 +22,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef MACOSX
+#include <QuickTime/QuickTime.h>
+#include <QuickTime/ImageCompression.h>
+#include <QuickTime/ImageCodec.h>
+#else
+#include "loader/qtx/qtxsdk/components.h"
+#endif
+
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -37,14 +45,6 @@ extern subtitle *vo_sub;
 
 #include "qtpalette.h"
 #include "parse_mp4.h" // .MP4 specific stuff
-
-#ifdef MACOSX
-#include <QuickTime/QuickTime.h>
-#include <QuickTime/ImageCompression.h>
-#include <QuickTime/ImageCodec.h>
-#else
-#include "loader/qtx/qtxsdk/components.h"
-#endif
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
