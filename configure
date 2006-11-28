@@ -53,6 +53,9 @@
 LC_ALL=C
 export LC_ALL
 
+# Store the configure line that was used
+_configuration="$*"
+
 # Prefer these macros to full length text !
 # These macros only return an error code - NO display is done
 compile_check() {
@@ -7526,6 +7529,8 @@ cat > config.h << EOF
 /* Protect against multiple inclusion */
 #ifndef MPLAYER_CONFIG_H
 #define MPLAYER_CONFIG_H 1
+
+#define CONFIGURATION "$_configuration"
 
 /* use GNU internationalization */
 $_def_i18n

@@ -495,6 +495,8 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 		}
 	}
 }				
+ /* Display what configure line was used */
+ mp_msg(MSGT_MENCODER, MSGL_V, "Configuration: " CONFIGURATION "\n");
 
 
 if (frameno_filename) {

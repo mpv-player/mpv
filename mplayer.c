@@ -3757,6 +3757,9 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       } else gui_no_filename=1;
     }
 
+    /* Display what configure line was used */
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Configuration: " CONFIGURATION "\n");
+
     // Many users forget to include command line in bugreports...
     if( mp_msg_test(MSGT_CPLAYER,MSGL_V) ){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_CommandLine);
