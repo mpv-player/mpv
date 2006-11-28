@@ -171,13 +171,36 @@ int req=(inNumFrames)*ao->packetSize;
 }
 
 static int control(int cmd,void *arg){
+ao_control_vol_t *control_vol;
+OSStatus err;
+Float32 pan, vol;
 	switch (cmd) {
-	case AOCONTROL_SET_DEVICE:
-	case AOCONTROL_GET_DEVICE:
 	case AOCONTROL_GET_VOLUME:
+		control_vol = (ao_control_vol_t*)arg;
+		err = AudioUnitGetParameter(ao->theOutputUnit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, &vol);
+
+		if(err==0) {
+			// printf("GET VOL=%f\n", vol);
+			control_vol->left=control_vol->right=vol*100.0/4.0;
+			return CONTROL_TRUE;
+		}
+		else {
+			return CONTROL_FALSE;
+		}
+
 	case AOCONTROL_SET_VOLUME:
+		control_vol = (ao_control_vol_t*)arg;
+		
+		vol=(control_vol->left+control_vol->right)*4.0/200.0;
+		err = AudioUnitSetParameter(ao->theOutputUnit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, vol, 0);
+		if(err==0) {
+			// printf("SET VOL=%f\n", vol);
+			return CONTROL_TRUE;
+		}
+		else {
+			return CONTROL_FALSE;
+		}
 	  /* Everything is currently unimplemented */
-	  return CONTROL_FALSE;
 	default:
 	  return CONTROL_FALSE;
 	}
