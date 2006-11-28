@@ -6,27 +6,10 @@ ifeq ($(MENCODER),yes)
 LIBNAME2 = libmpmux.a
 endif
 
-# Headers and header-dumpers
-SRCS  = mp3_hdr.c \
-        mpeg_hdr.c \
-        asfheader.c \
+SRCS  = asfheader.c \
         aviheader.c \
         aviprint.c \
-
-# Core
-SRCS += extension.c \
-        video.c \
-
-# Miscellaneous
-SRCS += parse_es.c \
-        parse_mp4.c \
-        mpeg_packetizer.c \
-        yuv4mpeg.c \
-        yuv4mpeg_ratio.c \
-        mf.c \
-
-# Demuxers
-SRCS += demuxer.c \
+        demuxer.c \
         demux_aac.c \
         demux_asf.c \
         demux_audio.c \
@@ -36,6 +19,7 @@ SRCS += demuxer.c \
         demux_fli.c \
         demux_lmlm4.c \
         demux_mf.c \
+        demux_mkv.c ebml.c \
         demux_mov.c \
         demux_mpc.c \
         demux_mpg.c \
@@ -54,7 +38,16 @@ SRCS += demuxer.c \
         demux_viv.c \
         demux_vqf.c \
         demux_y4m.c \
-        demux_mkv.c ebml.c \
+        extension.c \
+        mf.c \
+        mp3_hdr.c \
+        mpeg_hdr.c \
+        mpeg_packetizer.c \
+        parse_es.c \
+        parse_mp4.c \
+        video.c \
+        yuv4mpeg.c \
+        yuv4mpeg_ratio.c \
 
 SRCS-$(CONFIG_LIBAVFORMAT)      += demux_lavf.c
 SRCS-$(CONFIG_LIBAVFORMAT_SO)   += demux_lavf.c
