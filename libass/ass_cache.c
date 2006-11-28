@@ -122,13 +122,13 @@ static int glyph_compare(glyph_hash_key_t* a, glyph_hash_key_t* b) {
 static unsigned glyph_hash(glyph_hash_key_t* key) {
 	unsigned val = 0;
 	unsigned i;
-	for (i = 0; i < sizeof(key->face); ++i)
-		val += *(unsigned char *)(&(key->face) + i);
+	for (i = 0; i < sizeof(key->font); ++i)
+		val += *(unsigned char *)(&(key->font) + i);
 	val <<= 21;
 	
 	if (key->bitmap)   val &= 0x80000000;
 	if (key->be) val &= 0x40000000;
-	val += key->index;
+	val += key->ch;
 	val += key->size << 8;
 	val += key->outline << 3;
 	val += key->advance.x << 10;

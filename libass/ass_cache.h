@@ -30,9 +30,9 @@ void ass_font_cache_done(void);
 // describes a glyph; glyphs with equivalents structs are considered identical
 typedef struct glyph_hash_key_s {
 	char bitmap; // bool : true = bitmap, false = outline
-	FT_Face face;
+	ass_font_t* font;
 	int size; // font size
-	int index; // glyph index in the face
+	uint32_t ch; // character code
 	unsigned outline; // border width, 16.16 fixed point value
 	int bold, italic;
 	char be; // blur edges

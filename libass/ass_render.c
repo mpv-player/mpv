@@ -1196,15 +1196,15 @@ static void free_render_context(void)
  * \param advance advance vector of the extracted glyph
  * \return 0 on success
  */
-static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advance)
+static int get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 {
 	int error;
 	glyph_hash_val_t* val;
 	glyph_hash_key_t* key = &(info->hash_key);
 	
-	key->face = render_context.font->face;
+	key->font = render_context.font;
 	key->size = render_context.font_size;
-	key->index = index;
+	key->ch = symbol;
 	key->outline = (render_context.border * 0xFFFF); // convert to 16.16
 	key->scale_x = (render_context.scale_x * 0xFFFF);
 	key->scale_y = (render_context.scale_y * 0xFFFF);
@@ -1625,7 +1625,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			ass_font_set_transform(render_context.font, &matrix, &shift );
 		}
 		
-		error = get_glyph(glyph_index, code, text_info.glyphs + text_info.length, &shift);
+		error = get_glyph(code, text_info.glyphs + text_info.length, &shift);
 
 		if (error) {
 			continue;
