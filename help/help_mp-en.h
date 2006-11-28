@@ -2041,3 +2041,6 @@ static char help_text[]=
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Warning! Event height has changed!  \n"
 #define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Too many simultaneous events!\n"
 
+// ass_font.c
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X not found, reselecting font for (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFound "[ass] Glyph 0x%X not found in font for (%s, %d, %d)\n"

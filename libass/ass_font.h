@@ -21,6 +21,10 @@
 #ifndef __ASS_FONT_H__
 #define __ASS_FONT_H__
 
+#ifdef HAVE_FONTCONFIG
+#include <fontconfig/fontconfig.h>
+#endif
+
 typedef struct ass_font_desc_s {
 	char* family;
 	unsigned bold;
@@ -36,6 +40,9 @@ typedef struct ass_font_s {
 	FT_Matrix m; // current transformation
 	FT_Vector v; // current shift
 	int size;
+#ifdef HAVE_FONTCONFIG
+	FcCharSet* charset;
+#endif
 } ass_font_t;
 
 ass_font_t* ass_font_new(FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* desc);

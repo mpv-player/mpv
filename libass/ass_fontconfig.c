@@ -53,7 +53,8 @@ struct fc_instance_s {
  * \param index out: font index inside a file
  * \return font file path
 */ 
-static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index)
+static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
+			  FcCharSet* charset)
 {
 	FcBool rc;
 	FcResult result;
@@ -61,6 +62,9 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	int val_i;
 	FcChar8* val_s;
 	FcBool val_b;
+	FcCharSet* val_cs;
+	FcFontSet* fset;
+	int curf, bestf, bestdiff = 0;
 	
 	*index = 0;
 
@@ -78,16 +82,43 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	rc = FcConfigSubstitute(priv->config, pat, FcMatchPattern);
 	if (!rc)
 		return 0;
-	
-	rpat = FcFontMatch(priv->config, pat, &result);
-	if (!rpat)
+
+	fset = FcFontSort(priv->config, pat, FcTrue, NULL, &result);
+
+	bestf = -1;
+	if (charset)
+		bestdiff = FcCharSetCount(charset) + 1;
+	for (curf = 0; curf < fset->nfont; ++curf) {
+		rpat = fset->fonts[curf];
+		
+		result = FcPatternGetBool(rpat, FC_OUTLINE, 0, &val_b);
+		if (result != FcResultMatch)
+			continue;
+		if (val_b != FcTrue)
+			continue;
+
+		if (charset) {
+			int diff;
+			result = FcPatternGetCharSet(rpat, FC_CHARSET, 0, &val_cs);
+			if (result != FcResultMatch)
+				continue;
+			diff = FcCharSetSubtractCount(charset, val_cs);
+			if (diff < bestdiff) {
+				bestdiff = diff;
+				bestf = curf;
+			}
+ 			if (diff == 0)
+				break;
+		} else {
+			bestf = curf;
+			break;
+		}
+	}
+
+	if (bestf < 0)
 		return 0;
-	
-	result = FcPatternGetBool(rpat, FC_OUTLINE, 0, &val_b);
-	if (result != FcResultMatch)
-		return 0;
-	if (val_b != FcTrue)
-		return 0;
+
+	rpat = fset->fonts[bestf];
 	
 	result = FcPatternGetInteger(rpat, FC_INDEX, 0, &val_i);
 	if (result != FcResultMatch)
@@ -118,13 +149,14 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
  * \param index out: font index inside a file
  * \return font file path
 */ 
-char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index)
+char* fontconfig_select_with_charset(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
+			FcCharSet* charset)
 {
 	char* res = 0;
 	if (family && *family)
-		res = _select_font(priv, family, bold, italic, index);
+		res = _select_font(priv, family, bold, italic, index, charset);
 	if (!res && priv->family_default) {
-		res = _select_font(priv, priv->family_default, bold, italic, index);
+		res = _select_font(priv, priv->family_default, bold, italic, index, charset);
 		if (res)
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFontFamily, 
 					family, bold, italic, res, *index);
@@ -136,7 +168,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 		       family, bold, italic, res, *index);
 	}
 	if (!res) {
-		res = _select_font(priv, "Arial", bold, italic, index);
+		res = _select_font(priv, "Arial", bold, italic, index, charset);
 		if (res)
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingArialFontFamily, 
 					family, bold, italic, res, *index);
@@ -145,6 +177,11 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 		mp_msg(MSGT_ASS, MSGL_V, "fontconfig_select: (%s, %d, %d) -> %s, %d\n", 
 				family, bold, italic, res, *index);
 	return res;
+}
+
+char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index)
+{
+	return fontconfig_select_with_charset(priv, family, bold, italic, index, 0);
 }
 
 /**

@@ -86,6 +86,10 @@ ass_font_t* ass_font_new(FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* d
 	font->v.x = font->v.y = 0;
 	font->size = 0;
 
+#ifdef HAVE_FONTCONFIG
+	font->charset = FcCharSetCreate();
+#endif
+
 	ass_font_cache_add(font);
 	
 	return font;
@@ -118,6 +122,40 @@ void ass_font_set_size(ass_font_t* font, int size)
 	}
 }
 
+#ifdef HAVE_FONTCONFIG
+static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font)
+{
+	char* path;
+	int index;
+	FT_Face face;
+	int error;
+	
+	path = fontconfig_select_with_charset(fontconfig_priv, font->desc.family, font->desc.bold,
+					      font->desc.italic, &index, font->charset);
+	if (strcasecmp(path, font->path) == 0 && index == font->index) {
+		free(path);
+		return;
+	}
+
+	error = FT_New_Face(font->ftlibrary, path, index, &face);
+	if (error) {
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
+		return;
+	}
+	charmap_magic(face);
+
+	if (font->face) FT_Done_Face(font->face);
+	free(font->path);
+
+	font->face = face;
+	font->path = strdup(path);
+	font->index = index;
+	
+	FT_Set_Transform(font->face, &font->m, &font->v);
+	FT_Set_Pixel_Sizes(font->face, 0, font->size);
+}
+#endif
+
 FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch)
 {
 	int error;
@@ -128,6 +166,20 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 		return 0;
 	
 	index = FT_Get_Char_Index(font->face, ch);
+#ifdef HAVE_FONTCONFIG
+	FcCharSetAddChar(font->charset, ch);
+	if (index == 0) {
+		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_GlyphNotFoundReselectingFont,
+		       ch, font->desc.family, font->desc.bold, font->desc.italic);
+		ass_font_reselect(fontconfig_priv, font);
+		index = FT_Get_Char_Index(font->face, ch);
+		if (index == 0) {
+			mp_msg(MSGT_ASS, MSGL_ERR, MSGTR_LIBASS_GlyphNotFound,
+			       ch, font->desc.family, font->desc.bold, font->desc.italic);
+		}
+	}
+#endif
+
 	error = FT_Load_Glyph(font->face, index, FT_LOAD_NO_BITMAP );
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
@@ -157,5 +209,8 @@ void ass_font_free(ass_font_t* font)
 	if (font->face) FT_Done_Face(font->face);
 	if (font->path) free(font->path);
 	if (font->desc.family) free(font->desc.family);
+#ifdef HAVE_FONTCONFIG
+	if (font->charset) FcCharSetDestroy(font->charset);
+#endif
 	free(font);
 }
