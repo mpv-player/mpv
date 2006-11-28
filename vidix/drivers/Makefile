@@ -67,10 +67,6 @@ distclean: clean
 dep depend:
 # do nothing here
 
-install:
-	mkdir -p $(LIBDIR)/mplayer/vidix
-	-install -m 755 $(INSTALLSTRIP) -p *.so $(LIBDIR)/mplayer/vidix
-
 ifneq ($(wildcard .depend),)
 include .depend
 endif

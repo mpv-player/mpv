@@ -251,7 +251,8 @@ codecs2html$(EXESUF): mp_msg.o
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
 	$(MAKE) -C libdha install
-	$(MAKE) -C vidix/drivers install
+	mkdir -p $(LIBDIR)/mplayer/vidix
+	-install -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
 endif
 	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) \
