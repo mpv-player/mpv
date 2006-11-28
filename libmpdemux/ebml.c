@@ -193,15 +193,6 @@ ebml_read_float (stream_t *s, uint64_t *length)
         break;
       }
 
-    case 10:
-      {
-        union {uint8_t data[10]; long double ld;} u;
-        if (stream_read (s, u.data, 10) != 10)
-          return EBML_FLOAT_INVALID;
-        value = be2me_ldbl(u.ld);
-        break;
-      }
-
     default:
       return EBML_FLOAT_INVALID;
     }
