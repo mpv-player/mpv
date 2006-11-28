@@ -21,6 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <inttypes.h>
+
+#include "config.h"
 
 #ifdef MACOSX
 #include <QuickTime/QuickTime.h>
@@ -30,7 +33,6 @@
 #include "loader/qtx/qtxsdk/components.h"
 #endif
 
-#include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
