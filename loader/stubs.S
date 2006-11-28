@@ -1,4 +1,4 @@
-#if defined(__APPLE__) || defined(__OpenBSD__)
+#if defined(__APPLE__)
 # define SYM(x) _ ## x
 #else
 # define SYM(x) x
