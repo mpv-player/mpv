@@ -112,6 +112,7 @@ demuxers:
     * demux_rtp* - Ross Finlayson
     * demux_mpg and demux_ts - Nico Sabbi
     * demux_mpc.c - Reimar Döffinger
+    * demux_nuv.c - Reimar Döffinger
 
 muxers:
     * muxer_lavf.c - Michael Niedermayer
