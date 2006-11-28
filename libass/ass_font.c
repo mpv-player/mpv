@@ -123,6 +123,9 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 	int error;
 	int index;
 	FT_Glyph glyph;
+
+	if (ch < 0x20)
+		return 0;
 	
 	index = FT_Get_Char_Index(font->face, ch);
 	error = FT_Load_Glyph(font->face, index, FT_LOAD_NO_BITMAP );
