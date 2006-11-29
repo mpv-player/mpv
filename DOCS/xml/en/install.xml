@@ -43,11 +43,11 @@ answers.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - optional,
-  required for font for the OSD and subtitles. At least 2.0.9 is required.
+  required to have a font for the OSD and subtitles. At least 2.0.9 is required.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - optional JPEG encoder,
-  required for the JPEG video output driver
+  <emphasis role="bold">libjpeg</emphasis> - optional JPEG en/decoder,
+  required for the JPEG video output driver and decoding MJPEG video
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - optional (M)PNG en/decoder,
