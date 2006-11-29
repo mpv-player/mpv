@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21374 -->
 <!-- Opiekun: Torinthiel -->
 
 <bookinfo id="toc">
@@ -47,7 +47,7 @@ Jeśli masz jeszcze jakieś pytania, wróć do <link linkend="toc">Spisu
 treści</link> i w nim poszukaj odpowiedniego tematu, przeczytaj
 <xref linkend="faq"/> albo spróbuj przegrepować zbiory. Odpowiedź na większość
 pytań powinna być zawarta w niniejszej dokumentacji, a pozostałe prawdopodobnie zostały
-już zadane na naszych <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">listach dyskusyjnych</ulink>.
+już zadane na naszych <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">listach dyskusyjnych</ulink>.
 <!-- TODO: Jak będzie przetłumaczona strona to zmienić link -->
 <!-- FIXME: Nieistniejące łącza
 Sprawdź <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">archiwa</ulink>,
