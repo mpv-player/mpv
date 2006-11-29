@@ -5272,67 +5272,30 @@ struct libs libraries[]={
 
 static void ext_stubs(void)
 {
-    // expects:
-    //  ax  position index
-    //  cx  address of printf function
-#if 1
-    __asm__ __volatile__
-	(
-         "push %%edx		\n\t"
-	 "movl $0xdeadbeef, %%eax \n\t"
-	 "movl $0xdeadbeef, %%edx \n\t"
-	 "shl $5, %%eax		\n\t"			// ax * 32
-	 "addl $0xdeadbeef, %%eax \n\t"			// overwrite export_names
-	 "pushl %%eax		\n\t"
-	 "pushl $0xdeadbeef   	\n\t"                   // overwrite called_unk
-	 "call *%%edx		\n\t"                   // printf (via dx)
-	 "addl $8, %%esp	\n\t"
-	 "xorl %%eax, %%eax	\n\t"
-	 "pop %%edx             \n\t"
-	 :
-	 :
-	 : "eax"
-	);
-#else
-    __asm__ __volatile__
-	(
-         "push %%edx		\n\t"
-	 "movl $0, %%eax	\n\t"
-	 "movl $0, %%edx	\n\t"
-	 "shl $5, %%eax		\n\t"			// ax * 32
-	 "addl %0, %%eax	\n\t"
-	 "pushl %%eax		\n\t"
-	 "pushl %1		\n\t"
-	 "call *%%edx		\n\t"                   // printf (via dx)
-	 "addl $8, %%esp	\n\t"
-	 "xorl %%eax, %%eax	\n\t"
-	 "pop %%edx		\n\t"
-	 ::"m"(*export_names), "m"(*called_unk)
-	: "memory", "edx", "eax"
-	);
-#endif
-
+    volatile int idx = 0xdeadabcd;
+    printf("Called unk_%s\n", export_names[idx]);
 }
 
 //static void add_stub(int pos)
 
 static int pos=0;
 static char extcode[20000];// place for 200 unresolved exports
-static const char* called_unk = "Called unk_%s\n";
 
 static void* add_stub(void)
 {
+    int i;
     // generated code in runtime!
     char* answ = (char*)extcode+pos*0x30;
     memcpy(answ, ext_stubs, 0x2f); // 0x2c is current size
-    //answ[4] = 0xb8; // movl $0, eax  (0xb8 0x00000000)
-    *((int*) (answ + 5)) = pos;
-    //answ[9] = 0xba; // movl $0, edx  (0xba 0x00000000)
-    *((long*) (answ + 10)) = (long)printf;
-    //answ[17] = 0x05; // addl $0, eax  (0x05 0x00000000)
-    *((long*) (answ + 18)) = (long)export_names;
-    //answ[23] = 0x68; // pushl $0  (0x68 0x00000000)
-    *((long*) (answ + 24)) = (long)called_unk;
+    for (i = 0; i < 0x30 - 3; i++) {
+      if (*(int*)(answ + i) == 0xdeadabcd)
+        break;
+    }
+    if (*(int*)(answ + i) != 0xdeadabcd) {
+      printf("magic code not found in ext_subs, expect crash\n");
+      return NULL;
+    }
+    *(int*)(answ + i) = pos;
     pos++;
     return (void*)answ;
 }
