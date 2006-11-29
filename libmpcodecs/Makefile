@@ -154,7 +154,7 @@ SRCS2-$(MP3LAME)              += ae_lame.c
 LIBAV_INC-$(CONFIG_LIBAVUTIL)  +=  -I../libavutil
 LIBAV_INC-$(CONFIG_LIBAVCODEC) +=  -I../libavcodec
 
-
+# -I.. to include ../liba52 before ../libavcodec/liba52.
 CFLAGS  = -I.. \
           -Inative \
           -I../libmpdemux \
