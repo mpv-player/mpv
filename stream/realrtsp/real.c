@@ -31,7 +31,8 @@
 #include <string.h>
 
 #include "../config.h"
-#include "../bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 #include "real.h"
 #include "asmrp.h"
 #include "sdpplin.h"

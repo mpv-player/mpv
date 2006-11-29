@@ -9,7 +9,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "bswap.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
 

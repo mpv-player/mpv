@@ -22,7 +22,8 @@ long int lrintf(float);
 #endif
 
 #include "af.h"
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 #include "libvo/fastmemcpy.h"
 
 /* Functions used by play to convert the input audio to the correct

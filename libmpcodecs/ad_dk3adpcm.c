@@ -16,7 +16,8 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 #include "ad_internal.h"
 
 static ad_info_t info = 

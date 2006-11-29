@@ -37,7 +37,7 @@ static sample_t a52_level = 1;
 float a52_drc_level = 1.0;
 static int a52_drc_action = DRC_NO_ACTION;
 
-#include "bswap.h"
+#include "libavutil/bswap.h"
 
 static ad_info_t info = 
 {

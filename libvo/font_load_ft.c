@@ -28,7 +28,8 @@
 #include <fontconfig/fontconfig.h>
 #endif
 
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 #include "font_load.h"
 #include "mp_msg.h"
 #include "mplayer.h"

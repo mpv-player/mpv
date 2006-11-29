@@ -11,7 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "mp_msg.h"
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"

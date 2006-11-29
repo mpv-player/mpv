@@ -10,7 +10,8 @@
 
 #include "config.h"
 #include "mp_msg.h"
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 
 #ifdef WIN32_LOADER 
 #include "ldt_keeper.h" 

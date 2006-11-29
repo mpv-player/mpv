@@ -24,7 +24,8 @@
 #include "../../libdha/pci_ids.h"
 #include "../../libdha/pci_names.h"
 #include "../../config.h"
-#include "../../bswap.h"
+#include "../../libavutil/common.h"
+#include "../../libavutil/bswap.h"
 
 
 pciinfo_t pci_info;

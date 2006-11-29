@@ -7,7 +7,8 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 
 #include "vd_internal.h"
 

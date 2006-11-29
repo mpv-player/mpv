@@ -11,7 +11,8 @@
 
 #include "stream.h"
 #include "ebml.h"
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 
 
 #ifndef SIZE_MAX

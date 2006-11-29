@@ -12,7 +12,6 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "bswap.h"
 #include "aviheader.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
