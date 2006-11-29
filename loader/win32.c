@@ -18,6 +18,7 @@ for DLL to know too much about its environment.
  */
 
 #include "config.h"
+#include "mangle.h"
 
 #ifdef MPLAYER
 #ifdef USE_QTX_CODECS
@@ -4587,8 +4588,25 @@ static INT WINAPI expMessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type
 
 /* these are needed for mss1 */
 
-/* defined in stubs.s */
-void exp_EH_prolog(void);
+/**
+ * \brief this symbol is defined within exp_EH_prolog_dummy
+ * \param dest jump target
+ */
+void exp_EH_prolog(void *dest);
+//! just a dummy function that acts a container for the asm section
+void exp_EH_prolog_dummy(void) {
+  asm volatile (
+// take care, this "function" may not change flags or
+// registers besides eax (which is also why we can't use
+// exp_EH_prolog_dummy directly)
+MANGLE(exp_EH_prolog)":    \n\t"
+    "pop   %eax            \n\t"
+    "push  %ebp            \n\t"
+    "mov   %esp, %ebp      \n\t"
+    "lea   -12(%esp), %esp \n\t"
+    "jmp   *%eax           \n\t"
+  );
+}
 
 #include <netinet/in.h>
 static WINAPI inline unsigned long int exphtonl(unsigned long int hostlong)
