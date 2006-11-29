@@ -5278,16 +5278,22 @@ static void ext_stubs(void)
 
 //static void add_stub(int pos)
 
+#define MAX_STUB_SIZE 0x60
+#define MAX_NUM_STUBS 200
 static int pos=0;
-static char extcode[20000];// place for 200 unresolved exports
+static char extcode[MAX_NUM_STUBS * MAX_STUB_SIZE];
 
 static void* add_stub(void)
 {
     int i;
     // generated code in runtime!
-    char* answ = (char*)extcode+pos*0x30;
-    memcpy(answ, ext_stubs, 0x2f); // 0x2c is current size
-    for (i = 0; i < 0x30 - 3; i++) {
+    char* answ = extcode + pos * MAX_STUB_SIZE;
+    if (pos >= MAX_NUM_STUBS) {
+      printf("too many stubs, expect crash\n");
+      return NULL;
+    }
+    memcpy(answ, ext_stubs, MAX_STUB_SIZE);
+    for (i = 0; i < MAX_STUB_SIZE - 3; i++) {
       if (*(int*)(answ + i) == 0xdeadabcd)
         break;
     }
