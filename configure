@@ -4586,7 +4586,7 @@ if test "$_sdl" = yes ; then
     _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/`"
     _inc_extra="$_inc_extra `$_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/`"
   elif mingw32 ; then
-    _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs | sed s/-mwindows//`"
+    _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs | sed -e s/-mwindows// -e s/-lmingw32//`"
     _inc_extra="$_inc_extra `$_sdlconfig --cflags | sed s/-Dmain=SDL_main//`"
   else
     _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs`"
