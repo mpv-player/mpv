@@ -5276,8 +5276,6 @@ static void ext_stubs(void)
     printf("Called unk_%s\n", export_names[idx]);
 }
 
-//static void add_stub(int pos)
-
 #define MAX_STUB_SIZE 0x60
 #define MAX_NUM_STUBS 200
 static int pos=0;
