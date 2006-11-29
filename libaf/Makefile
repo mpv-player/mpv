@@ -35,7 +35,7 @@ SRCS-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
 LIBAV_INC-$(CONFIG_LIBAVUTIL)  += -I../libavutil
 LIBAV_INC-$(CONFIG_LIBAVCODEC) += -I../libavcodec
 
-CFLAGS  = -I.. $(LIBAV_INC) -D_GNU_SOURCE
+CFLAGS  = $(LIBAV_INC) -D_GNU_SOURCE
 
 ifeq ($(TARGET_OS),MINGW32)
 CFLAGS += -D_IO_H_

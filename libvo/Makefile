@@ -27,7 +27,7 @@ SRCS2-$(FREETYPE)    +=  font_load_ft.c
 
 LIBAV_INC-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
 
-CFLAGS = -I.. -I../osdep $(LIBAV_INC)
+CFLAGS = -I../osdep $(LIBAV_INC)
 
 include ../mpcommon.mak
 

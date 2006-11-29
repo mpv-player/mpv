@@ -72,7 +72,7 @@ LIBAV_INC-$(CONFIG_LIBAVUTIL)   += -I../libavutil
 LIBAV_INC-$(CONFIG_LIBAVCODEC)  += -I../libavcodec
 LIBAV_INC-$(CONFIG_LIBAVFORMAT) += -I../libavformat
 
-CFLAGS = -I.. -I../stream -I../loader $(LIBAV_INC)
+CFLAGS = -I../stream -I../loader $(LIBAV_INC)
 
 CPLUSPLUSFLAGS  = $(CFLAGS) -D__STDC_LIMIT_MACROS
 
