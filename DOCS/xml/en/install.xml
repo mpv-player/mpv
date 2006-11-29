@@ -42,16 +42,16 @@ answers.
   3.79.x or later. To build the XML documentation you need 3.80.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">FreeType</emphasis> 2.0.9 or later is required
-  to have a font for the OSD and subtitles.
+  <emphasis role="bold">FreeType</emphasis> - optional,
+  required for font for the OSD and subtitles. At least 2.0.9 is required.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - optional JPEG decoder,
-  required for the JPEG video output driver.
+  <emphasis role="bold">libjpeg</emphasis> - optional JPEG encoder,
+  required for the JPEG video output driver
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - optional (M)PNG decoder,
-  required for the GUI and the PNG video output driver.
+  <emphasis role="bold">libpng</emphasis> - optional (M)PNG en/decoder,
+  required for the GUI and the PNG video output driver
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - 3.90 or later is recommended,
