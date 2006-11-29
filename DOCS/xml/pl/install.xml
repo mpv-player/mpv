@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20933 -->
+<!-- synced with r21372 -->
 <!-- Opiekun: brak (poprzednio Paszczi) -->
 <chapter id="install">
 <title>Instalacja</title>
@@ -11,16 +11,11 @@ po mrożące krew w żyłach szczegóły.
 </para>
 
 <para>
-W tym rozdziale postaram się przeprowadzić Cię przez kompilację
-i konfigurację <application>MPlayera</application>. Nie będzie to łatwe,
+W tym rozdziale zostaniesz przeprowadzony przez proces kompilacji
+i konfiguracji <application>MPlayera</application>. Nie będzie to łatwe,
 ale niekoniecznie też musi być trudne. Jeżeli zauważysz zachowanie inne niż
-to, które objaśniam, proszę poszukaj w dokumentacji, a na pewno znajdziesz
-odpowiedzi. Jeżeli widzisz linki, śledź je i czytaj uważnie ich zawartość.
-Zajmie to trochę czasu, ale z pewnością JEST tego warte.
-</para>
-
-<para>
-Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z serii 2.4.x.
+tutaj opisane, proszę poszukaj w dokumentacji, a na pewno znajdziesz
+odpowiedzi.
 </para>
 
 <sect1 id="softreq">
@@ -28,9 +23,8 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądr
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - zalecana jest wersja <emphasis role="bold">2.11.x</emphasis>.
-  Program ten odpowiedzialny jest za generowanie instrukcji MMX/ 3DNow!/itp.,
-  dlatego też jest bardzo ważny.
+  <emphasis role="bold">binutils</emphasis> - zalecana jest wersja
+  <emphasis role="bold">2.11.x</emphasis>.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> - zalecanymi wersjami są 2.95 i 3.4+.
@@ -39,62 +33,47 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądr
   Na PowerPC używaj 4.x+.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - sugerowaną wersją jest <emphasis role="bold">
-  zawsze najnowsza</emphasis> (4.3). Przeważnie każdy tego chce, ponieważ zaczynając
-  od XFree86 4.0.2, zawiera on rozszerzenie <link linkend="xv">XVideo</link>
-  (czasami również nazywane <emphasis role="bold">Xv</emphasis>),
-  które jest potrzebne do włączenia sprzętowej akceleracji YUV (szybkie wyświetlanie
-  obrazów) na kartach, które je obsługują.
+  <emphasis role="bold">XFree86</emphasis> - sugerowaną wersją jest
+  4.3 lub nowsza.
   Upewnij się, że są zainstalowane również <emphasis role="bold">pakiety rozwojowe</emphasis>,
   w przeciwnym wypadku nie zadziała.
-  W przypadku niektórych kart nie potrzebujesz XFree86. Zobacz listę poniżej.
+  X'y nie są absolutnie niezbędne,
+  niektóre sterowniki wyjścia video działają bez nich.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - sugerowaną wersją jest
-  <emphasis role="bold">zawsze najnowsza</emphasis> (przynajmniej 3.79.x). W większości
-  wypadków nie jest to jednak ważne.
+  <emphasis role="bold">make</emphasis> - sugerowaną wersją jest 3.79.x lub
+  nowsza. Żeby zbudować dokumentację XML potrzebujesz przynajmniej 3.80.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">FreeType</emphasis> - opcjonalna, wymagana do obsługi
+  czcionki do OSD i napisów. Wymagana jest przynajmniej wersja 2.0.9.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">FreeType</emphasis> 2.0.9 lub wyższa jest wymagana
-  jeśli chcesz mieć czcionkę do OSD i napisów.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">SDL</emphasis> - nie jest konieczne, ale może pomóc w niektórych
-  wypadkach (wadliwy dźwięk, karty graficzne, które mają dziwne opóźnienia ze sterownikiem Xv).
-  Zawsze używaj najnowszego (zaczynając od 1.2.x).
+  <emphasis role="bold">libjpeg</emphasis> - opcjonalny koder JPEG,
+  wymagany przez wyjście video JPEG
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - opcjonalny dekoder JPEG, używany
-  przez opcję <option>-mf</option> i niektóre pliki QT MOV. Użyteczny zarówno dla
-  <application>MPlayera</application>, jak i <application>MEncodera</application>,
-  jeżeli zamierzasz pracować z plikami jpeg.
+  <emphasis role="bold">libpng</emphasis> - domyślny i zalecany koder/dekoder (M)PNG,
+  wymagany przez GUI i wyjście video PNG
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - domyślny i zalecany dekoder (M)PNG.
-  Wymagany przez GUI. Użyteczny zarówno dla <application>MPlayera</application> jak
-  i <application>MEncodera</application>.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">lame</emphasis> - zalecana, wymagana do zakodowania dźwięku
-  MP3 przez <application>MEncodera</application>, sugerowaną wersją jest
-  <emphasis>zawsze najnowsza</emphasis> (przynajmniej 3.90).
+  <emphasis role="bold">lame</emphasis> - zalecana jest wersja 3.90 lub
+  późniejsza, wymagana do zakodowania dźwięku MP3 przez
+  <application>MEncodera</application>.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - zalecana, wymagana dla skompresowanych
   nagłówków MOV i obsługi PNG.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libogg</emphasis> - opcjonalna, wymagana do odtwarzania
-  plików zapisanych w formacie OGG.
-</para></listitem>
-<listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
-  - opcjonalna, wymagana do odtwarzania strumieni RTSP/RTP.
+  - opcjonalna, wymagana do odtwarzania niektórych strumieni RTSP/RTP.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> - opcjonalna, do pobrania z
-  <ulink url="http://www.directfb.org"/>. Wymagana jest co najmniej
-  wersja 0.9.13.
+  <emphasis role="bold">directfb</emphasis> - opcjonalna, używaj 0.9.13 lub
+  nowszej.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - opcjonalna, do obsługi CDDA.
@@ -114,192 +93,6 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądr
 </sect1>
 
 
-<sect1 id="video-cards">
-<title>Karty graficzne</title>
-
-<para>
-Są właściwie dwa rodzaje kart graficznych. Jeden (nowsze karty) ma obsługę
-<emphasis role="bold">sprzętowego skalowania i akceleracji YUV</emphasis>,
-pozostałe karty nie.
-</para>
-
-
-<sect2 id="yuv-cards">
-<title>Karty YUV</title>
-
-<para>
-Wyświetlają i skalują (zoom) obraz do jakiegokolwiek rozmiaru mieszczącego
-się w ich pamięci, z <emphasis role="bold">małym zużyciem mocy CPU</emphasis> (nawet przy
-zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
-
-<itemizedlist>
-<listitem><para>
-  <emphasis role="bold">Karty Matrox G200/G400/G450/G550</emphasis>: mimo, że
-  dostępny jest <link linkend="vidix">sterownik Vidix</link>, zalecane
-  jest używanie modułu mga_vid zamiast niego, ponieważ działa znacznie
-  lepiej. W rozdziale <link linkend="mga_vid">mga_vid</link> znajdziesz informacje
-  o sposobie jego instalacji i użycia. Ważne jest wykonanie tych kroków
-  <emphasis>przed</emphasis> kompilacją <application>MPlayera</application>,
-  w przeciwnym wypadku obsługa mga_vid nie zostanie wkompilowana. Sprawdź również
-  rozdział <link linkend="tvout-mga-g400">Matrox TV-out</link>.
-  <emphasis role="bold"> Jeżeli nie korzystasz z Linuksa</emphasis>, jedyną możliwością
-  jest dla Ciebie sterownik VIDIX: przeczytaj rozdział <link linkend="vidix">VIDIX</link>.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">Karty 3Dfx Voodoo3/Banshee</emphasis>: przeczytaj rozdział
-  poświęcony <link linkend="tdfxfb">tdfxfb</link>, żeby dowiedzieć się, jak uzyskać znaczny
-  wzrost prędkości. Ważne jest, abyś wykonał te kroki <emphasis role="bold">przed</emphasis>
-  kompilacją <application>MPlayera</application>, w przeciwnym wypadku obsługa
-  3Dfx nie będzie wkompilowana.
-  Jeżeli korzystasz z Xów, używaj przynajmniej wersji
-  <emphasis role="bold">4.2.0</emphasis>, ponieważ sterownik Xv dla 3dfx był uszkodzony
-  w wersji 4.1.0 i wcześniejszych.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">Karty ATI</emphasis>: sterownik <link linkend="vidix">VIDIX</link>
-  obsługuje następujące karty:
-  <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
-  Przeczytaj również rozdział <link linkend="tvout-ati">karty ATI</link>
-  dokumentacji wyjścia TV, aby dowiedzieć się czy wyjście TV Twojej karty jest
-  obsługiwane przez  Linuksa/<application>MPlayera</application>.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">Karty S3</emphasis>: układy graficzne Savage i Virge/DX mają
-  sprzętową akcelerację. Używaj jak najnowszej wersji XFree86, starsze sterowniki mają
-  liczne błędy. Układy Savage mają problemy z obrazem YV12, więcej szczegółów
-  znajdziesz w rozdziale <link linkend="s3">S3 Xv</link>.
-  Starsze karty Trio maja wolną akcelerację sprzętową lub nie mają jej wcale.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">Karty nVidia</emphasis>: mogą lub nie mogą być dobrym
-  wyborem do odtwarzania filmów. Jeżeli nie masz karty GeForce2 (lub nowszej),
-  nie spodziewaj się bezproblemowego działania. <emphasis role="bold">
-  Wbudowany w XFree86 sterownik nVidia nie obsługuje sprzętowej akceleracji
-  YUV na żadnej z kart.</emphasis> Musisz pobrać zamknięte sterowniki
-  nVidia z <ulink url="http://nvidia.com">nVidia.com</ulink>. Przeczytaj rozdział <link
-  linkend="nvidia">sterowniki nVidia Xv</link>, a dowiesz się więcej. Sprawdź również
-  rozdział <link linkend="tvout-nvidia">nVidia TV-out</link>,
-  jeśli chcesz używać TV.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">3DLabs GLINT R3 and Permedia3</emphasis>: dostępny jest
-  sterownik VIDIX (pm3_vid).
-  Bardziej szczegółowe informacje znajdziesz w rozdziale
-  <link linkend="vidix">VIDIX</link>.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">Inne karty</emphasis>: żadna z powyższych?
-  <itemizedlist>
-  <listitem><simpara>
-    Sprawdź, czy sterownik XFree86 (i Twoja karta) obsługują sprzętową akcelerację.
-    Więcej informacji znajdziesz w rozdziale <link linkend="xv">Xv</link>.
-  </simpara></listitem>
-  <listitem><simpara>
-    Jeżeli nie, oznacza to, że możliwości Twojej karty nie są obsługiwane
-    przez Twój system operacyjny :( Jeżeli sprzętowe skalowanie działa pod
-    Windowsem, nie oznacza to, że będzie działało pod Linuksem lub gdzie indziej,
-    zależy to od sterowników. Większość producentów, ani nie tworzy sterowników
-    dla Linuksa, ani nie publikuje specyfikacji swoich układów graficznych -
-    więc masz pecha, jeśli używasz ich kart.
-    Przeczytaj <xref linkend="non-yuv-cards"/>.
-  </simpara></listitem>
-  </itemizedlist>
-</para></listitem>
-</itemizedlist>
-</para>
-</sect2>
-
-
-<sect2 id="non-yuv-cards" xreflabel="Karty nieobsługujące YUV">
-<title>Karty nieobsługujące YUV</title>
-
-<para>
-Odtwarzanie pełnoekranowe może być uzyskane przez
-<emphasis role="bold">skalowanie programowe</emphasis>
-(użyj opcji  <option>-zoom</option> lub <option>-vf</option>,
-ale ostrzegam Cię: jest to wolne) lub przełączenie na niższą rozdzielczość,
-na przykład 352x288. Jeżeli nie masz akceleracji YUV, ta druga metoda jest zalecana.
-Przełączanie między trybami video umożliwia opcja <option>-vm</option> i
-działa ona z następującymi sterownikami:
-<itemizedlist>
-<listitem><simpara>
-  <emphasis role="bold">używasz</emphasis> XFree86: sprawdź szczegóły
-  w rozdziale <link linkend="dga">sterownik DGA</link> i
-  <link linkend="x11">sterownik X11</link>. DGA jest zalecany! Spróbuj również
-  DGA przez SDL, czasami jest to lepsze rozwiązanie.
-</simpara></listitem>
-<listitem><simpara>
-  <emphasis role="bold">nie używasz</emphasis> XFree86: wypróbuj te sterowniki
-  w podanej kolejności:
-  <link linkend="vesa">vesa</link>,
-  <link linkend="fbdev">fbdev</link>,
-  <link linkend="svgalib">svgalib</link>,
-  <link linkend="aalib">aalib</link>.
-</simpara></listitem>
-</itemizedlist>
-</para>
-</sect2>
-
-<!-- FIXME: find a more logical organization for this section -->
-<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
-<title>Karty Cirrus-Logic</title>
-<itemizedlist>
-<listitem><para>
-  GD 7548: zintegrowana z płytą główną i przetestowana na serii notebooków
-  Compaq Armada 41xx.
-  <itemizedlist>
-  <listitem><simpara>
-    XFree86 3: działa w trybach 8/16bpp. Jednak dla 800x600@16bpp sterownik jest bardzo wolny
-    i nie działa prawidłowo. <emphasis role="bold">Zalecane: 640x480@16bpp</emphasis>
-  </simpara></listitem>
-  <listitem><simpara>
-    XFree86 4: Xserver przestaje odpowiadać krótko po starcie, chyba że
-    akceleracja jest wyłączona, jednak wszystko działa wolniej niż na XFree86 3. Brak
-    obsługi XVideo.
-  </simpara></listitem>
-  <listitem><simpara>
-    FBdev: framebuffer może być włączony poprzez sterownik <systemitem>clgenfb</systemitem>
-    znajdujący się w jądrze, jednak u mnie działał tylko w 8bpp, a więc jest bezużyteczny.
-    Źródło clgenfb musi być rozszerzone o ID 7548 przed kompilacją.
-  </simpara></listitem>
-  <listitem><simpara>
-    VESA: karta spełnia tylko standard VBE 1.2, więc nie możesz użyć wyjścia VESA.
-    Nie możesz zastosować obejścia przez UniVBE.
-  </simpara></listitem>
-  <listitem><simpara>
-    SVGAlib: wykrywa starszy układ Cirrusa. Działa, chociaż powoli, z
-    <option>-bpp 8</option>.
-  </simpara></listitem>
-  </itemizedlist>
-</para></listitem>
-</itemizedlist>
-</sect2>
-</sect1>
-
-
-<sect1 id="sound-cards">
-<title>Karty dźwiękowe</title>
-
-<itemizedlist>
-<listitem><simpara>
-  <emphasis role="bold">Soundblaster Live!</emphasis>: z tą kartą możesz używać
-  4 lub 6 (<emphasis role="bold">5.1</emphasis>) kanałowego dekodowania AC3, zamiast 2.
-  Przeczytaj rozdział <link linkend="swac3">Programowe dekodowanie AC3</link>. Dla
-  sprzętowej obróbki AC3 <emphasis role="bold">musisz</emphasis> użyć ALSA 0.9
-  z emulacją OSS!
-</simpara></listitem>
-<listitem><simpara>
-  <emphasis role="bold">C-Media z wyjściem S/PDIF</emphasis>: Możliwa jest sprzętowa
-  obróbka AC3 z tymi kartami, przeczytaj rozdział
-  <link linkend="hwac3">Sprzętowe dekodowanie AC3</link>.
-</simpara></listitem>
-<listitem><simpara>
-  Możliwości <emphasis role="bold">innych kart</emphasis> nie są obsługiwane przez
-  <application>MPlayera</application>. <emphasis role="bold">Zalecamy, abyś przeczytał
-  sekcję <link linkend="audio">karty dźwiękowe</link>!</emphasis>
-</simpara></listitem>
-</itemizedlist>
-</sect1>
 
 <sect1 id="features">
 <title>Możliwości</title>
