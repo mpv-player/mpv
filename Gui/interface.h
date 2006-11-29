@@ -4,7 +4,6 @@
 
 #include "../config.h"
 #include "mplayer/play.h"
-#include "mplayer.h"
 #include "libvo/font_load.h"
 #include "cfg.h"
 
@@ -141,6 +140,8 @@ extern guiInterface_t guiIntfStruct;
 #define guiVCD		2
 #define guiFilenames	4
 #define guiALL		0xffffffff
+
+extern int use_gui;
 
 extern char *get_path(const char *filename); 
 

@@ -199,7 +199,7 @@ int   sub_auto = 0;
 int   subcc_enabled=0;
 int   suboverlap_enabled = 1;
 
-static sub_data* subdata=NULL;
+sub_data* subdata=NULL;
 float sub_last_pts = -303;
 
 int auto_expand=1;

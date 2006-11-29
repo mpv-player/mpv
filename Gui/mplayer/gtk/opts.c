@@ -12,6 +12,7 @@
 #include "../../mixer.h"
 #include "../../libao2/audio_out.h"
 #include "../../libvo/video_out.h"
+#include "../../mplayer.h"
 
 #include "../app.h"
 #include "../cfg.h"
