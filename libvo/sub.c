@@ -221,7 +221,9 @@ inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
   len = obj->stride * (obj->bbox.y2 - obj->bbox.y1);
   memset (obj->bitmap_buffer, OSD_NAV_BOX_ALPHA, len);
   memset (obj->alpha_buffer, OSD_NAV_BOX_ALPHA, len);
-  obj->flags |= OSDFLAG_BBOX | OSDFLAG_VISIBLE | OSDFLAG_CHANGED;
+  obj->flags |= OSDFLAG_BBOX | OSDFLAG_CHANGED;
+  if (obj->bbox.y2 > obj->bbox.y1 && obj->bbox.x2 > obj->bbox.x1)
+    obj->flags |= OSDFLAG_VISIBLE;
 }
 #endif
 
@@ -1003,7 +1005,9 @@ int vo_osd_check_range_update(int x1,int y1,int x2,int y2){
     while(obj){
 	if(obj->flags&OSDFLAG_VISIBLE){
 	    if(	(obj->bbox.x1<=x2 && obj->bbox.x2>=x1) &&
-		(obj->bbox.y1<=y2 && obj->bbox.y2>=y1) ) return 1;
+		(obj->bbox.y1<=y2 && obj->bbox.y2>=y1) &&
+		obj->bbox.y2 > obj->bbox.y1 && obj->bbox.x1 > obj->bbox.x2
+		) return 1;
 	}
 	obj=obj->next;
     }
