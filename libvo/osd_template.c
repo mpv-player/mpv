@@ -204,7 +204,7 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
     for(y=0;y<h;y++){
         register unsigned char *dst = dstbase;
         register int x;
-#ifdef ARCH_X86
+#if defined(ARCH_X86) && (!defined(ARCH_X86_64) || defined(HAVE_MMX))
 #ifdef HAVE_MMX
     asm volatile(
 	PREFETCHW" %0\n\t"
@@ -277,7 +277,7 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 	    dst += 3;
         }
 #endif /* !HAVE_MMX */
-#else /*non x86 arch*/
+#else /*non x86 arch or x86_64 with MMX disabled */
         for(x=0;x<w;x++){
             if(srca[x]){
 #ifdef FAST_OSD
@@ -324,7 +324,7 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
 #endif /* HAVE_MMX */
     for(y=0;y<h;y++){
         register int x;
-#ifdef ARCH_X86
+#if defined(ARCH_X86) && (!defined(ARCH_X86_64) || defined(HAVE_MMX))
 #ifdef HAVE_MMX
 #ifdef HAVE_3DNOW
     asm volatile(
@@ -443,7 +443,7 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
             }
         }
 #endif /* HAVE_MMX */
-#else /*non x86 arch*/
+#else /*non x86 arch or x86_64 with MMX disabled */
         for(x=0;x<w;x++){
             if(srca[x]){
 #ifdef FAST_OSD
