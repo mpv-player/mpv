@@ -2095,7 +2095,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   (grep for &quot;deint&quot;), read Michael's Niedermayer
   <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing filters comparison</ulink>,
   and search the
-  <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
   MPlayer mailing lists</ulink> to find many discussions about the
   various filters.
   Again, the framerate is not changing, so no
