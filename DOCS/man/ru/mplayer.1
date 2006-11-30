@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r21357
+.\" synced with r21399
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -9777,6 +9777,9 @@ Sony Digital Video container
 .B i_certify_that_my_video_stream_does_not_use_b_frames
 MEncoder cannot assign correct timestamps when there are
 B-frames in the video stream, resulting in broken encodes.
+If you wish to use the lavf muxer, you must not let the video codec use
+B-frames (see the relevant documentation of each codec) and you also
+must specify this option.
 .
 .TP
 .B muxrate=<rate>
