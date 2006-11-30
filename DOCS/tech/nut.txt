@@ -215,9 +215,7 @@ packet_header
         header_checksum                 u(32)
 
 packet_footer
-    reserved_bytes
     checksum                            u(32)
-    [Note: in index packet, reserved_bytes comes before index_ptr]
 
 reserved_headers
     while(next_byte == 'N' && next_code !=      main_startcode
@@ -226,6 +224,7 @@ reserved_headers
                            && next_code !=     index_startcode
                            && next_code != syncpoint_startcode){
         packet_header
+        reserved_bytes
         packet_footer
     }
 
@@ -272,6 +271,7 @@ main_header:
             reserved_count[i]= tmp_res;
         }
     }
+    reserved_bytes
 
 stream_header:
     stream_id                           v
@@ -294,6 +294,7 @@ stream_header:
         samplerate_denom                v
         channel_count                   v
     }
+    reserved_bytes
 
         Basic Packets:
 
@@ -394,10 +395,12 @@ info_packet:
             type= "v"
         }
     }
+    reserved_bytes
 
 syncpoint:
     global_key_pts                      t
     back_ptr_div16                      v
+    reserved_bytes
 
             Complete definition:
 
