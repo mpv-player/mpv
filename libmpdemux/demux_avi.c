@@ -499,12 +499,8 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       d_audio->sh=sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
-      sh_audio->format=sh_audio->wf->wFormatTag;
     }
   }
-  // calc. FPS:
-  sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
-  sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 
   // calculating audio/video bitrate:
   if(priv->idx_size>0){
@@ -546,7 +542,6 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
     if(sh_audio){
       if(sh_audio->wf->nAvgBytesPerSec && sh_audio->audio.dwSampleSize!=1){
         asize=(float)sh_audio->wf->nAvgBytesPerSec*sh_audio->audio.dwLength*sh_audio->audio.dwScale/sh_audio->audio.dwRate;
-        sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
       } else {
         asize=sh_audio->audio.dwLength;
         sh_audio->i_bps=(float)asize/(sh_video->frametime*priv->numberofframes);
@@ -556,11 +551,6 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%"PRId64" (%u)  audio size=%"PRId64"\n",vsize,priv->numberofframes,asize);
     sh_video->i_bps=(float)vsize/(sh_video->frametime*priv->numberofframes);
   }
-
-  if (sh_video)
-    sh_video->stream_delay = (float)sh_video->video.dwStart * sh_video->video.dwScale/sh_video->video.dwRate;
-  if (sh_audio)
-    sh_audio->stream_delay = (float)sh_audio->audio.dwStart * sh_audio->audio.dwScale/sh_audio->audio.dwRate;
 
   return demuxer;
   

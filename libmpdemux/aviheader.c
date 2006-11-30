@@ -195,10 +195,12 @@ while(1){
       if(h.fccType==streamtypeVIDEO){
         sh_video=new_sh_video(demuxer,stream_id);
         memcpy(&sh_video->video,&h,sizeof(h));
+        sh_video->stream_delay = (float)sh_video->video.dwStart * sh_video->video.dwScale/sh_video->video.dwRate;
       } else
       if(h.fccType==streamtypeAUDIO){
         sh_audio=new_sh_audio(demuxer,stream_id);
         memcpy(&sh_audio->audio,&h,sizeof(h));
+        sh_audio->stream_delay = (float)sh_audio->audio.dwStart * sh_audio->audio.dwScale/sh_audio->audio.dwRate;
       }
       last_fccType=h.fccType;
       if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_strh(&h,MSGL_V);
@@ -264,8 +266,8 @@ while(1){
 	    sh_video->bih->biSize=chunksize;
         if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_video->bih,MSGL_V);
         chunksize=0;
-//        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
-//        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
+        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 //        if(demuxer->video->id==-1) demuxer->video->id=stream_id;
         // IdxFix:
         idxfix_videostream=stream_id;
@@ -316,6 +318,8 @@ while(1){
 	    wf_size < sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize) {
 	    sh_audio->wf=realloc(sh_audio->wf, sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize);
 	}
+	sh_audio->format=sh_audio->wf->wFormatTag;
+	sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
         chunksize=0;
         if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf,MSGL_V);
 	++priv->audio_streams;
