@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21155 -->
+<!-- synced with r21395 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -47,15 +47,15 @@
   более поздняя. Для сборки XML документации требуется 3.80.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">FreeType</emphasis> - требуется версия 2.0.9 или новее, чтобы иметь 
-  шрифт для OSD и  субтитров.
+  <emphasis role="bold">FreeType</emphasis> - необязательна, нужна, чтобы
+  иметь шрифт для OSD и субтитров. Требуется, как минимум, версия 2.0.9.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - необязательный декодер JPEG,
-  требуется для драйвера вывода видео JPEG.
+  <emphasis role="bold">libjpeg</emphasis> - необязательный кодер/декодер JPEG,
+  требуется для драйвера вывода видео JPEG и декодирования MJPEG видео.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - необязательный (M)PNG декодер,
+  <emphasis role="bold">libpng</emphasis> - необязательный (M)PNG кодер/декодер,
   требуется для GUI и драйвера вывода видео PNG.
   </para></listitem>
 <listitem><para>

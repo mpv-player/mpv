@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21374 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -47,7 +47,7 @@
 прочтите <xref linkend="faq"/>, или попытайтесь про'grep'пить файлы.
 На большую часть вопросов Вы найдёте ответы здесь, а остальные, наверное, уже
 спрашивались в наших 
-<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">рассылках</ulink>. 
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">рассылках</ulink>. 
 <!-- FIXME: This refers to nonexistent links
 Проверьте
 <ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">по архивам</ulink>, в

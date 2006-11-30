@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21078  -->
+<!-- synced with r21376  -->
 <!-- **Partially** translated -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
@@ -2239,7 +2239,7 @@
   (grep for &quot;deint&quot;), read Michael's Niedermayer
   <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing filters comparison</ulink>,
   and search the
-  <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
   MPlayer mailing lists</ulink> to find many discussions about the
   various filters.
   Again, the framerate is not changing, so no
