@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r21332
+// Synced with help_mp-en.h: r21367
 
 // ========================= MPlayer help ===========================
 
@@ -1363,6 +1363,10 @@ static char help_text[]=
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] Достигнуто значение MAX_GLYPHS: событие %d, начало = %llu, длительность = %llu\n Текст = %s\n"
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Внимание! Высота события изменилась!  \n"
 #define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Слишком много одновременных событий!\n"
+
+// ass_font.c
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Глиф 0x%X не найден, выбираю шрифт заново для (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFound "[ass] В шрифте не найден глиф 0x%X для (%s, %d, %d)\n"
 
 // format.c
 
