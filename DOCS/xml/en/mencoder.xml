@@ -377,7 +377,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 <title>encode for PSP</title>
 <para>
 <screen>
-mencoder -ofps 30000/1001 -af resample=24000 -vf harddup -of lavf \
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
 -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
 -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
 <replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
@@ -425,7 +425,7 @@ Same, but using <systemitem class="library">libavformat</systemitem> MPEG muxer:
 mencoder <replaceable>input.avi</replaceable> -o <replaceable>VCD.mpg</replaceable> -ofps 25 -vf scale=352:288,harddup -of lavf \
     -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
     -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
-    -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0 \
+    -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0
 </screen>
 </para>
 </informalexample>
