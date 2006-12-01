@@ -39,7 +39,8 @@
 
 #include "fastmemcpy.h"
 #include "sub.h"
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "libavutil/bswap.h"
 #include "aspect.h"
 #include "vesa_lvo.h"
 #ifdef CONFIG_VIDIX
