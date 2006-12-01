@@ -413,7 +413,7 @@ static int control(uint32_t request, void *data, ...)
 */
 - (void)initMenu
 {
-	NSMenu *menu;
+	NSMenu *menu, *aspectMenu;
 	NSMenuItem *menuItem;
 	
 	[NSApp setMainMenu:[[NSMenu alloc] init]];
@@ -430,7 +430,6 @@ static int control(uint32_t request, void *data, ...)
 	kFullScreenCmd = menuItem;
 	menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [menu addItem:menuItem];
 	
-		NSMenu	*aspectMenu;
 		aspectMenu = [[NSMenu alloc] initWithTitle:@"Aspect Ratio"];
 		menuItem = [[NSMenuItem alloc] initWithTitle:@"Keep" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
 		if(vo_keepaspect) [menuItem setState:NSOnState];
@@ -666,6 +665,9 @@ static int control(uint32_t request, void *data, ...)
 */ 
 - (void) render
 {
+	int curTime;
+	static int lastTime;
+
 	glClear(GL_COLOR_BUFFER_BIT);	
 	
 	glEnable(CVOpenGLTextureGetTarget(texture));
@@ -721,8 +723,8 @@ static int control(uint32_t request, void *data, ...)
 	
 	//update activity every 30 seconds to prevent
 	//screensaver from starting up.
-	int curTime = TickCount()/60;
-	static int lastTime = 0;
+	curTime  = TickCount()/60;
+	lastTime = 0;
 		
 	if( ((curTime - lastTime) >= 30) || (lastTime == 0) )
 	{
