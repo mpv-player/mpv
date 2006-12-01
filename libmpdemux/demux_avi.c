@@ -767,7 +767,7 @@ static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 	    int audio = (cmd == DEMUXER_CTRL_SWITCH_AUDIO);
 	    demux_stream_t *ds = audio ? demuxer->audio : demuxer->video;
 	    void **streams = audio ? demuxer->a_streams : demuxer->v_streams;
-	    int maxid = FFMAX(99, audio ? MAX_A_STREAMS : MAX_V_STREAMS);
+	    int maxid = FFMIN(100, audio ? MAX_A_STREAMS : MAX_V_STREAMS);
 	    int chunkid;
 	    if (ds->id < -1)
 	      return DEMUXER_CTRL_NOTIMPL;
