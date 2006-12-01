@@ -6,11 +6,11 @@
 
 include config.mak
 
-LIBAV_INC-$(CONFIG_LIBAVUTIL)  += -I./libavutil
-LIBAV_INC-$(CONFIG_LIBAVCODEC) += -I./libavcodec
-LIBAV_INC                      += $(LIBAV_INC-yes)
+CFLAGS = $(OPTFLAGS) -I.
 
-CFLAGS = $(OPTFLAGS) -I. $(LIBAV_INC)
+CFLAGS-$(CONFIG_LIBAVUTIL)  += -I./libavutil
+CFLAGS-$(CONFIG_LIBAVCODEC) += -I./libavcodec
+CFLAGS                      += $(CFLAGS-yes)
 
 #CFLAGS += -Wall
 

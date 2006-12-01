@@ -151,17 +151,16 @@ SRCS2-$(TWOLAME)              += ae_twolame.c
 SRCS2-$(MP3LAME)              += ae_lame.c
 
 
-LIBAV_INC-$(CONFIG_LIBAVUTIL)  +=  -I../libavutil
-LIBAV_INC-$(CONFIG_LIBAVCODEC) +=  -I../libavcodec
-
 # -I.. to include ../liba52 before ../libavcodec/liba52.
 CFLAGS  = -I.. \
           -Inative \
           -I../libmpdemux \
           -I../stream \
           -I../loader \
-          $(LIBAV_INC) \
           -D_GNU_SOURCE \
+
+CFLAGS-$(CONFIG_LIBAVUTIL)    +=  -I../libavutil
+CFLAGS-$(CONFIG_LIBAVCODEC)   +=  -I../libavcodec
 
 include ../mpcommon.mak
 

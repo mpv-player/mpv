@@ -1,6 +1,6 @@
 SRCS         += $(SRCS-yes)
 SRCS2        += $(SRCS2-yes)
-LIBAV_INC    += $(LIBAV_INC-yes)
+CFLAGS       += $(CFLAGS-yes)
 
 OBJS  = $(addsuffix .o, $(basename $(SRCS)) )
 OBJS2 = $(addsuffix .o, $(basename $(SRCS2)) )

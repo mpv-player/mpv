@@ -68,11 +68,11 @@ SRCS2 = muxer.c \
 SRCS2-$(CONFIG_LIBAVFORMAT)     += muxer_lavf.c
 SRCS2-$(CONFIG_LIBAVFORMAT_SO)  += muxer_lavf.c
 
-LIBAV_INC-$(CONFIG_LIBAVUTIL)   += -I../libavutil
-LIBAV_INC-$(CONFIG_LIBAVCODEC)  += -I../libavcodec
-LIBAV_INC-$(CONFIG_LIBAVFORMAT) += -I../libavformat
+CFLAGS = -I../stream -I../loader
 
-CFLAGS = -I../stream -I../loader $(LIBAV_INC)
+CFLAGS-$(CONFIG_LIBAVUTIL)      += -I../libavutil
+CFLAGS-$(CONFIG_LIBAVCODEC)     += -I../libavcodec
+CFLAGS-$(CONFIG_LIBAVFORMAT)    += -I../libavformat
 
 CPLUSPLUSFLAGS  = $(CFLAGS) -D__STDC_LIMIT_MACROS
 
