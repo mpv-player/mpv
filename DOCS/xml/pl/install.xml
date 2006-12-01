@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21372 -->
+<!-- synced with r21395 -->
 <!-- Opiekun: brak (poprzednio Paszczi) -->
 <chapter id="install">
 <title>Instalacja</title>
@@ -45,14 +45,14 @@ odpowiedzi.
   nowsza. Żeby zbudować dokumentację XML potrzebujesz przynajmniej 3.80.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">FreeType</emphasis> - opcjonalna, wymagana do obsługi
-  czcionki do OSD i napisów. Wymagana jest przynajmniej wersja 2.0.9.
+  <emphasis role="bold">FreeType</emphasis> - opcjonalna, wymagana by mieć
+  czcionkę do OSD i napisów. Wymagana jest przynajmniej wersja 2.0.9.
 </para></listitem>
 <listitem><para>
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - opcjonalny koder JPEG,
-  wymagany przez wyjście video JPEG
+  <emphasis role="bold">libjpeg</emphasis> - opcjonalny koder/dekoder JPEG,
+  wymagany przez wyjście video JPEG i do dekodowania filmów MJPEG
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - domyślny i zalecany koder/dekoder (M)PNG,
