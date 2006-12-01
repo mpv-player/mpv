@@ -170,6 +170,21 @@
      mpeg2dec->fbuf[0] = &mpeg2dec->fbuf_alloc[0].fbuf;
      mpeg2dec->fbuf[1] = &mpeg2dec->fbuf_alloc[1].fbuf;
      mpeg2dec->fbuf[2] = &mpeg2dec->fbuf_alloc[2].fbuf;
+@@ -272,9 +272,11 @@
+     if (!(buffer[2] & 2))	/* missing marker_bit */
+ 	return 1;
+ 
+-    sequence->display_width = (buffer[1] << 6) | (buffer[2] >> 2);
+-    sequence->display_height =
+-	((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3);
++    if( (buffer[1] << 6) | (buffer[2] >> 2) )
++	sequence->display_width = (buffer[1] << 6) | (buffer[2] >> 2);
++    if( ((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3) )
++	sequence->display_height =
++	    ((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3);
+ 
+     return 0;
+ }
 @@ -551,6 +558,7 @@
  	if (!(mpeg2dec->sequence.flags & SEQ_FLAG_PROGRESSIVE_SEQUENCE)) {
  	    picture->nb_fields = (buffer[3] & 2) ? 3 : 2;
@@ -391,6 +406,15 @@
  
      decoder->quantizer_matrix[0] =
  	decoder->quantizer_prescale[0][quantizer_scale_code];
+@@ -1252,7 +1252,7 @@
+ 	      ref[0] + offset, decoder->stride, 16);			      \
+     table[4] (decoder->dest[1] + decoder->offset,			      \
+ 	      ref[1] + offset, decoder->stride, 16);			      \
+-    table[4] (decoder->dest[2] + (decoder->offset >> 1),		      \
++    table[4] (decoder->dest[2] + decoder->offset,			      \
+ 	      ref[2] + offset, decoder->stride, 16)
+ 
+ #define bit_buf (decoder->bitstream_buf)
 @@ -1568,6 +1569,18 @@
  
  #define NEXT_MACROBLOCK							\
