@@ -25,9 +25,9 @@ SRCS2 = aclib.c \
 SRCS2-$(BITMAP_FONT) +=  font_load.c
 SRCS2-$(FREETYPE)    +=  font_load_ft.c
 
-LIBAV_INC-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
+CFLAGS-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
 
-CFLAGS = -I../osdep $(LIBAV_INC)
+CFLAGS = -I../osdep
 
 include ../mpcommon.mak
 
