@@ -77,6 +77,8 @@ static uint32_t conf_vbitrate = 0;
 static int conf_init_vpts = 200, conf_init_apts = 200;
 static int conf_ts_allframes = 0;
 static int conf_init_adelay = 0;
+static int conf_abuf_size = 0;
+static int conf_vbuf_size = 0;
 static int conf_drop = 0;
 static int conf_telecine = 0;
 
@@ -193,6 +195,8 @@ m_option_t mpegopts_conf[] = {
 	{"init_vpts", &(conf_init_vpts), CONF_TYPE_INT, CONF_RANGE, 100, 700, NULL},		//2*frametime at 60fps
 	{"init_apts", &(conf_init_apts), CONF_TYPE_INT, CONF_RANGE, 100, 700, NULL},
 	{"vdelay", &conf_init_adelay, CONF_TYPE_INT, CONF_RANGE, 1, 32760, NULL},
+	{"vbuf_size", &conf_vbuf_size, CONF_TYPE_INT, CONF_RANGE, 40, 1024, NULL},
+	{"abuf_size", &conf_abuf_size, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
 	{"drop", &conf_drop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, PULLDOWN32, NULL},
@@ -386,11 +390,13 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
     spriv->id = 0xe0 + muxer->num_videos;
     s->ckid = be2me_32 (0x100 + spriv->id);
     if(priv->is_genmpeg1 || priv->is_genmpeg2) {
+      int v = (conf_vbuf_size ? conf_vbuf_size*1024 :
+        (s->h.dwSuggestedBufferSize ? s->h.dwSuggestedBufferSize : 46*1024));
       int n = priv->sys_info.cnt;
       
       priv->sys_info.streams[n].id = spriv->id;
       priv->sys_info.streams[n].type = 1;
-      priv->sys_info.streams[n].bufsize = (s->h.dwSuggestedBufferSize > 0 ? s->h.dwSuggestedBufferSize : 46*1024);
+      priv->sys_info.streams[n].bufsize = v;
       priv->sys_info.cnt++;
     }
     muxer->num_videos++;
@@ -421,11 +427,13 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
     spriv->id = 0xc0 + muxer->num_audios;
     s->ckid = be2me_32 (0x100 + spriv->id);
     if(priv->is_genmpeg1 || priv->is_genmpeg2) {
+      int a1 = (conf_abuf_size ? conf_abuf_size*1024 :
+        (s->h.dwSuggestedBufferSize ? s->h.dwSuggestedBufferSize : 4*1024));
       int n = priv->sys_info.cnt;
       
       priv->sys_info.streams[n].id = spriv->id;
       priv->sys_info.streams[n].type = 0;
-      priv->sys_info.streams[n].bufsize = (s->h.dwSuggestedBufferSize > 0 ? s->h.dwSuggestedBufferSize : 4*1024);
+      priv->sys_info.streams[n].bufsize = a1;
       priv->sys_info.cnt++;
     }
     if(priv->is_xvcd)
@@ -1133,11 +1141,18 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 
 	if(!spriv->pes_set)
 	{
+		int bufsize = 0;
 		//search the pts. yes if either it's video && (I-frame or priv->ts_allframes) && framebuf[i].pos == 0
 		//or  it's audio && framebuf[i].pos == 0
 		//NB pts and dts can only be relative to the first frame beginning in this pack
 		if((priv->is_xsvcd || priv->is_xvcd || priv->rawpes) && spriv->size == 0)
-			spriv->buffer_size = 4*1024;
+		{
+			if(s->type == MUXER_TYPE_VIDEO)
+				bufsize = (conf_vbuf_size ? conf_vbuf_size : (priv->is_xvcd ? 46 : 232));
+			else
+				bufsize = (conf_abuf_size ? conf_abuf_size : 4);
+			spriv->buffer_size = bufsize*1024;
+		}
 
 		if(priv->is_dvd && s->type == MUXER_TYPE_VIDEO 
 			&& spriv->framebuf[0].type==I_FRAME && spriv->framebuf[0].pos==0)
@@ -1510,7 +1525,7 @@ static int flush_buffers(muxer_t *muxer, int finalize)
 		}
 		
 		if((priv->is_xvcd || priv->is_xsvcd) && (vpriv->size == 0))
-			vpriv->buffer_size = (priv->is_xvcd ? 46 : 230)*1024;
+			vpriv->buffer_size = (conf_vbuf_size ? conf_vbuf_size : (priv->is_xvcd ? 46 : 230))*1024;
 			
 		i = 0;
 		skip_cnt = 0;
@@ -2267,13 +2282,17 @@ static void fix_parameters(muxer_stream_t *stream)
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
 		spriv->is_ready = 1;
+		if(conf_abuf_size)
+			spriv->max_buffer_size = conf_abuf_size*1024;
+		else
 		spriv->max_buffer_size = 4*1024;
 		if(stream->wf->wFormatTag == AUDIO_A52)
 		{
 			stream->ckid = be2me_32 (0x1bd);
 			if(priv->is_genmpeg1 || priv->is_genmpeg2)
-				fix_audio_sys_header(priv, spriv->id, 0xbd, 58*1024);	//only one audio at the moment
+				fix_audio_sys_header(priv, spriv->id, 0xbd, max(conf_abuf_size, 58)*1024);	//only one audio at the moment
 			spriv->id = 0xbd;
+			if(!conf_abuf_size)
 			spriv->max_buffer_size = 16*1024;
 		}
 		else if(stream->wf->wFormatTag == AUDIO_AAC1 || stream->wf->wFormatTag == AUDIO_AAC2)
@@ -2285,6 +2304,10 @@ static void fix_parameters(muxer_stream_t *stream)
 	}
 	else	//video
 	{
+		if(conf_vbuf_size)
+			spriv->max_buffer_size = conf_vbuf_size*1024;
+		else
+		{
 		if(priv->is_dvd)
 			spriv->max_buffer_size = 232*1024;
 		else if(priv->is_xsvcd)
@@ -2293,6 +2316,7 @@ static void fix_parameters(muxer_stream_t *stream)
 			spriv->max_buffer_size = 46*1024;
 		else
 			spriv->max_buffer_size = 232*1024;	//no profile => unconstrained :) FIXME!!!
+		}
 		
 		if(is_mpeg4(stream->bih->biCompression))
 			spriv->is_ready = 0;
@@ -2462,19 +2486,23 @@ static void setup_sys_params(muxer_priv_t *priv)
 {
 	if(priv->is_dvd)
 	{
+		int v = (conf_vbuf_size ? conf_vbuf_size : 232);
+		int a1 = (conf_abuf_size ? conf_abuf_size : 4);
+		int a2 = (conf_abuf_size>58 ? conf_abuf_size : 58);
+
 		priv->sys_info.cnt = 4;
 		
 		priv->sys_info.streams[0].id = 0xb9;
 		priv->sys_info.streams[0].type = 1;
-		priv->sys_info.streams[0].bufsize = 232*1024;
+		priv->sys_info.streams[0].bufsize = v*1024;
 			
 		priv->sys_info.streams[1].id = 0xb8;
 		priv->sys_info.streams[1].type = 0;
-		priv->sys_info.streams[1].bufsize = 4*1024;
+		priv->sys_info.streams[1].bufsize = a1*1024;
 		
 		priv->sys_info.streams[2].id = 0xbd;
 		priv->sys_info.streams[2].type = 1;
-		priv->sys_info.streams[2].bufsize = 58*1024;
+		priv->sys_info.streams[2].bufsize = a2*1024;
 		
 		priv->sys_info.streams[3].id = 0xbf;
 		priv->sys_info.streams[3].type = 1;
@@ -2482,15 +2510,18 @@ static void setup_sys_params(muxer_priv_t *priv)
 	}
 	else if(priv->is_xvcd || priv->is_xsvcd)
 	{
+		int v = (conf_vbuf_size ? conf_vbuf_size : (priv->is_xvcd ? 46: 230));
+		int a1 = (conf_abuf_size ? conf_abuf_size : 4);
+
 		priv->sys_info.cnt = 2;
 		
 		priv->sys_info.streams[0].id = 0xe0;
 		priv->sys_info.streams[0].type = 1;
-		priv->sys_info.streams[0].bufsize = (priv->is_xvcd ? 46: 230)*1024;
+		priv->sys_info.streams[0].bufsize = v*1024;
 			
 		priv->sys_info.streams[1].id = 0xc0;
 		priv->sys_info.streams[1].type = 0;
-		priv->sys_info.streams[1].bufsize = 4*1024;
+		priv->sys_info.streams[1].bufsize = a1*1024;
 	}
 	else
 		priv->sys_info.cnt = 0;
