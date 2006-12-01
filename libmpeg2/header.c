@@ -272,9 +272,11 @@ static int sequence_display_ext (mpeg2dec_t * mpeg2dec)
     if (!(buffer[2] & 2))	/* missing marker_bit */
 	return 1;
 
-    sequence->display_width = (buffer[1] << 6) | (buffer[2] >> 2);
-    sequence->display_height =
-	((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3);
+    if( (buffer[1] << 6) | (buffer[2] >> 2) )
+	sequence->display_width = (buffer[1] << 6) | (buffer[2] >> 2);
+    if( ((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3) )
+	sequence->display_height =
+	    ((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3);
 
     return 0;
 }
