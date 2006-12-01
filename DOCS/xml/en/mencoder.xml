@@ -37,11 +37,11 @@ Audio Codecs:
 <tbody>
   <row>
     <entry>mp3lame</entry>
-    <entry>Encode to VBR, ABR or CBR MP3 with LAME</entry>
+    <entry>encode to VBR, ABR or CBR MP3 with LAME</entry>
   </row>
   <row>
     <entry>lavc</entry>
-    <entry>Use one of <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem>'s audio codecs</link>
+    <entry>use one of <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem>'s audio codecs</link>
     </entry>
   </row>
   <row>
@@ -58,11 +58,11 @@ Audio Codecs:
   </row>
   <row>
     <entry>pcm</entry>
-    <entry>Uncompressed PCM audio</entry>
+    <entry>uncompressed PCM audio</entry>
   </row>
   <row>
     <entry>copy</entry>
-    <entry>Do not reencode, just copy compressed frames</entry>
+    <entry>do not reencode, just copy compressed frames</entry>
   </row>
 </tbody>
 </tgroup>
@@ -79,7 +79,7 @@ Video codecs:
 <tbody>
   <row>
     <entry>lavc</entry>
-    <entry>Use one of <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem>'s video codecs</link>
+    <entry>use one of <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem>'s video codecs</link>
     </entry>
   </row>
   <row>
@@ -96,15 +96,15 @@ Video codecs:
   </row>
   <row>
     <entry>raw</entry>
-    <entry>Uncompressed video frames</entry>
+    <entry>uncompressed video frames</entry>
   </row>
   <row>
     <entry>copy</entry>
-    <entry>Do not reencode, just copy compressed frames</entry>
+    <entry>do not reencode, just copy compressed frames</entry>
   </row>
   <row>
     <entry>frameno</entry>
-    <entry>Used for 3-pass encoding (not recommended)</entry>
+    <entry>used for 3-pass encoding (not recommended)</entry>
   </row>
 </tbody>
 </tgroup>
@@ -129,7 +129,7 @@ Container formats:
 <tbody>
   <row>
     <entry>lavf</entry>
-    <entry>One of the containers supported by
+    <entry>one of the containers supported by
     <systemitem class="library">libavformat</systemitem></entry>
   </row>
   <row>
