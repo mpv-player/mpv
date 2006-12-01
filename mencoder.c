@@ -48,6 +48,8 @@
 #include "m_config.h"
 #include "parser-mecmd.h"
 
+#include "get_path.c"
+
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
@@ -72,8 +74,6 @@
 #include "libvo/fastmemcpy.h"
 
 #include "osdep/timer.h"
-
-#include "get_path.c"
 
 #ifdef USE_DVDREAD
 #include "stream/stream_dvd.h"
