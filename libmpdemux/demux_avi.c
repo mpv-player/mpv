@@ -775,9 +775,13 @@ static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 	    if (*(int *)arg >= 0)
 	      ds->id = *(int *)arg;
 	    else {
+	      int id = ds->id;
 	      do {
-	        if (++ds->id >= maxid) ds->id = 0;
-	      } while (!streams[ds->id]);
+	        if (++id >= maxid) id = 0;
+	        if (id == ds->id) // no streams available
+	          return DEMUXER_CTRL_NOTIMPL;
+	      } while (!streams[id]);
+	      ds->id = id;
 	    }
 
 	    chunkid = (ds->id / 10 + '0') | (ds->id % 10 + '0') << 8;
