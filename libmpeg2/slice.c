@@ -1252,7 +1252,7 @@ static inline void slice_non_intra_DCT (mpeg2_decoder_t * const decoder,
 	      ref[0] + offset, decoder->stride, 16);			      \
     table[4] (decoder->dest[1] + decoder->offset,			      \
 	      ref[1] + offset, decoder->stride, 16);			      \
-    table[4] (decoder->dest[2] + (decoder->offset >> 1),		      \
+    table[4] (decoder->dest[2] + decoder->offset,			      \
 	      ref[2] + offset, decoder->stride, 16)
 
 #define bit_buf (decoder->bitstream_buf)
