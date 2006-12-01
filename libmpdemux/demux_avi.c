@@ -762,6 +762,31 @@ static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 	    if (sh_video->video.dwLength<=1) return DEMUXER_CTRL_GUESS;
 	    return DEMUXER_CTRL_OK;
 
+	case DEMUXER_CTRL_SWITCH_AUDIO:
+	case DEMUXER_CTRL_SWITCH_VIDEO: {
+	    int audio = (cmd == DEMUXER_CTRL_SWITCH_AUDIO);
+	    demux_stream_t *ds = audio ? demuxer->audio : demuxer->video;
+	    void **streams = audio ? demuxer->a_streams : demuxer->v_streams;
+	    int maxid = FFMAX(99, audio ? MAX_A_STREAMS : MAX_V_STREAMS);
+	    int chunkid;
+	    if (ds->id < -1)
+	      return DEMUXER_CTRL_NOTIMPL;
+
+	    if (*(int *)arg >= 0)
+	      ds->id = *(int *)arg;
+	    else {
+	      do {
+	        if (++ds->id >= maxid) ds->id = 0;
+	      } while (!streams[ds->id]);
+	    }
+
+	    chunkid = (ds->id / 10 + '0') | (ds->id % 10 + '0') << 8;
+	    ds->sh = NULL;
+	    demux_avi_select_stream(demuxer, chunkid);
+	    *(int *)arg = ds->id;
+	    return DEMUXER_CTRL_OK;
+	}
+
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }
