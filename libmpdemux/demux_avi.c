@@ -775,18 +775,19 @@ static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 	    if (*(int *)arg >= 0)
 	      ds->id = *(int *)arg;
 	    else {
-	      int id = ds->id;
-	      do {
-	        if (++id >= maxid) id = 0;
-	        if (id == ds->id) // no streams available
-	          return DEMUXER_CTRL_NOTIMPL;
-	      } while (!streams[id]);
-	      ds->id = id;
+	      int i;
+	      for (i = 0; i < maxid; i++) {
+	        if (++ds->id >= maxid) ds->id = 0;
+	        if (streams[ds->id]) break;
+	      }
 	    }
 
 	    chunkid = (ds->id / 10 + '0') | (ds->id % 10 + '0') << 8;
 	    ds->sh = NULL;
-	    demux_avi_select_stream(demuxer, chunkid);
+	    if (!streams[ds->id]) // stream not available
+	      ds->id = -1;
+	    else
+	      demux_avi_select_stream(demuxer, chunkid);
 	    *(int *)arg = ds->id;
 	    return DEMUXER_CTRL_OK;
 	}
