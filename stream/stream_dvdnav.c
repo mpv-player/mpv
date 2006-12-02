@@ -467,6 +467,12 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
   priv->mousey = y;
 }
 
+/**
+ * \brief dvdnav_sid_from_lang() returns the subtitle id corresponding to the language code 'lang'
+ * \param stream: - stream pointer
+ * \param lang: 2-characters language code[s], eventually separated by spaces of commas
+ * \return -1 on error, current subtitle id if successful
+ */
 int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
   uint8_t format, lg, k;
@@ -488,6 +494,11 @@ int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
   return -1;
 }
 
+/**
+ * \brief dvdnav_number_of_subs() returns the count of available subtitles
+ * \param stream: - stream pointer
+ * \return 0 on error, something meaningful otherwise
+ */
 int dvdnav_number_of_subs(stream_t *stream) {
   dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
   uint8_t lg, k, n=0;
