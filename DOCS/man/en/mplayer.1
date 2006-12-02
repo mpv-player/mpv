@@ -3224,10 +3224,8 @@ Very general video output driver that should work on any VESA VBE 2.0
 compatible card.
 .PD 0
 .RSs
-.IPs "dga\ \ "
-Turns on DGA mode.
-.IPs nodga
-Turns off DGA mode.
+.IPs (no)dga
+Turns DGA mode on or off (default: on).
 .IPs neotv_pal
 Activate the NeoMagic TV out and set it to PAL norm.
 .IPs neotv_ntsc
@@ -9627,7 +9625,7 @@ harddup and softskip video filters).
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd | pes1 | pes2>
 stream format (default: mpeg2).
 pes1 and pes2 are very broken formats (no pack header and no padding),
-but VDR uses them; don't choose them unless you know exactly what you 
+but VDR uses them; do not choose them unless you know exactly what you
 are doing.
 .
 .TP
