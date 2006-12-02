@@ -5966,11 +5966,11 @@ if test "$_xanim" = auto ; then
   _xanim=no
   _res_comment="dynamic loader support needed"
   if test "$_dl" = yes ; then
-    test -z "$_xanimcodecsdir" && _xanimcodecsdir=$_codecsdir
     _xanim=yes
   fi
 fi
 if test "$_xanim" = yes ; then
+  test -z "$_xanimcodecsdir" && _xanimcodecsdir=$_codecsdir
   _def_xanim='#define USE_XANIM 1'
   _def_xanim_path="#define XACODEC_PATH \"$_xanimcodecsdir\""
   _codecmodules="xanim $_codecmodules"
@@ -5989,11 +5989,11 @@ if test "$_real" = auto ; then
   _res_comment="dynamic loader support needed"
   if test "$_dl" = yes || test "$_win32" = yes &&
      (linux || freebsd || netbsd || win32 || darwin) ; then
-    test -z "$_realcodecsdir" && _realcodecsdir="$_codecsdir"
     _real=yes
   fi
 fi
 if test "$_real" = yes ; then
+  test -z "$_realcodecsdir" && _realcodecsdir="$_codecsdir"
   _def_real='#define USE_REALCODECS 1'
   _def_real_path="#define REALCODEC_PATH \"$_realcodecsdir\""
   _codecmodules="real $_codecmodules"
