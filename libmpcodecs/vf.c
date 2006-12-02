@@ -200,8 +200,6 @@ static vf_info_t* filter_list[]={
 
 // For the vf option
 m_obj_settings_t* vf_settings = NULL;
-// For the vop option
-m_obj_settings_t* vo_plugin_args = NULL;
 m_obj_list_t vf_obj_list = {
   (void**)filter_list,
   M_ST_OFF(vf_info_t,name),
@@ -699,7 +697,6 @@ vf_instance_t* append_filters(vf_instance_t* last){
   vf_instance_t* vf;
   int i; 
 
-  // -vf take precedence over -vop
   if(vf_settings) {
     // We want to add them in the 'right order'
     for(i = 0 ; vf_settings[i].name ; i++)
@@ -707,12 +704,6 @@ vf_instance_t* append_filters(vf_instance_t* last){
     for(i-- ; i >= 0 ; i--) {
       //printf("Open filter %s\n",vf_settings[i].name);
       vf = vf_open_filter(last,vf_settings[i].name,vf_settings[i].attribs);
-      if(vf) last=vf;
-    }
-  } else if(vo_plugin_args) {
-    for(i = 0 ; vo_plugin_args[i].name ; i++) {
-      vf = vf_open_filter(last,vo_plugin_args[i].name,
-			  vo_plugin_args[i].attribs);
       if(vf) last=vf;
     }
   }
@@ -735,13 +726,5 @@ void vf_uninit_filter_chain(vf_instance_t* vf){
 	vf_instance_t* next=vf->next;
 	vf_uninit_filter(vf);
 	vf=next;
-    }
-}
-
-void vf_list_plugins(void){
-    int i=0;
-    while(filter_list[i]){
-        mp_msg(MSGT_VFILTER,MSGL_INFO,"\t%-10s: %s\n",filter_list[i]->name,filter_list[i]->info);
-        i++;
     }
 }

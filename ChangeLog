@@ -42,6 +42,7 @@ MPlayer (1.0)
     * libdvdcss updated to Subversion HEAD, now same as upstream version
     * libmpdvdkit split into libdvdread and libdvdcss
     * obsolete XviD 3 support removed
+    * long-deprecated -vop option removed
     * video stream switching
 
 

@@ -114,8 +114,6 @@ void vf_next_draw_slice (struct vf_instance_s* vf, unsigned char** src, int* str
 
 vf_instance_t* append_filters(vf_instance_t* last);
 
-void vf_list_plugins(void);
-
 void vf_uninit_filter(vf_instance_t* vf);
 void vf_uninit_filter_chain(vf_instance_t* vf);
 

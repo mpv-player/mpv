@@ -197,7 +197,7 @@
 	{"af-adv", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"af", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
-	{"vop*", &vo_plugin_args, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0,&vf_obj_list },
+	{"vop", "-vop has been removed, use -vf instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
 	{"vf*", &vf_settings, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0, &vf_obj_list},
 	// select audio/video codec (by name) or codec family (by number):
 //	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 22, NULL}, // keep ranges in sync
@@ -555,8 +555,6 @@ m_option_t mfopts_conf[]={
         {"type", &mf_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
         {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-						
-extern m_obj_settings_t* vo_plugin_args;
 
 #include "libaf/af.h"
 extern af_cfg_t af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
