@@ -30,6 +30,7 @@
 #include "gui.h"
 #include "wincfg.h"
 #include "dialogs.h"
+#include "libvo/sub.h"
 
 WNDPROC OldUrlWndProc;
 LRESULT CALLBACK SubUrlWndProc(HWND, UINT, WPARAM, LPARAM);
