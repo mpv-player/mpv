@@ -4351,139 +4351,144 @@ deringing фильтр хроматической[chroma] составляющей
 .
 .
 .
-.SH "AUDIO FILTERS"
-Audio filters allow you to modify the audio stream and its properties.
-The syntax is:
+.SH "АУДИО ФИЛЬТРЫ"
+Аудио фильтры позволяют менять аудио поток и его свойства.
+Синтаксис такой:
 .
 .TP
-.B \-af <filter1[=parameter1:parameter2:...],filter2,...>
-Setup a chain of audio filters.
+.B \-af <фильтр1[=параметр1:параметр2:...],фильтр2,...>
+Устанавливает цепочку аудио фильтров.
 .PP
-.I NOTE:
-To get a full list of available audio filters, see \-af help.
+.I ЗАМЕЧАНИЕ:
+Полный список доступных аудио фильтров можно получить при помощи \-af help.
 .PP
-Available filters are:
+Доступные фильтры:
 .
 .TP
 .B resample[=srate[:sloppy[:type]]]
-Changes the sample rate of the audio stream.
-Can be used if you have a fixed frequency sound card or if you are
-stuck with an old sound card that is only capable of max 44.1kHz.
-This filter is automatically enabled if necessary.
-It only supports 16-bit integer and float in native-endian format as input.
+Меняет частоту дискретизации аудио потока.
+Может использоваться при наличии звуковой карты с фиксированной частотой
+или если вы привязаны к старой карте, поддерживающей максимально 44.1kГц.
+В случае необходимости фильтр включается автоматически.
+Он поддерживает только формат 16-бит integer и float с "родным" [native-endian] порядком  байт
+в качестве входных данных.
 .br
-.I NOTE:
-With MEncoder, you need to also use \-srate <srate>.
+.I ЗАМЕЧАНИЕ:
+С MEncoder, вам требуется также использовать \-srate <srate>.
 .PD 0
 .RSs
 .IPs <srate>
-output sample frequency in Hz.
-The valid range for this parameter is 8000 to 192000.
-If the input and output sample frequency are the same or if this
-parameter is omitted the filter is automatically unloaded.
-A high sample frequency normally improves the audio quality,
-especially when used in combination with other filters.
+Частота дискретизации на выходе в Гц.
+Допустимы значения от 8000 до 192000.
+Если частоты дискретизации данных на входе и выходе совпадают,
+или этот параметр опущен, фильтр автоматически выгружается.
+Высокая частота обычно улучшает качество звука, особенно
+при использовании в комбинации с другими фильтрами.
 .IPs <sloppy>
-Allow (1) or disallow (0) the output frequency to differ slightly
-from the frequency given by <srate> (default: 1).
-Can be used if the startup of the playback is extremely slow.
+Разрешает (1) или запрещает (0) частоте дискретизации на выходе 
+слегка отличаться от указанного значения <srate> (по-умолчанию: 1).
+Может использоваться, если воспроизведение запускается чрезвычайно медленно.
 .IPs <type>
-Selects which resampling method to use.
+Указывает используемый метод изменения частоты.
 .RSss
-0: linear interpolation (fast, poor quality especially when upsampling)
+0: линейная интерполяция (быстрый, плохое качество, особенно при увеличении частоты)
 .br
-1: polyphase filterbank and integer processing
+1: многофазный набор фильтров[polyphase filterbank] и целочисленная обработка
 .br
-2: polyphase filterbank and floating point processing (slow, best quality)
+2: многофазный набор фильтров[polyphase filterbank] и вещественная обработка (медленный, 
+наилучшее качество)
 .REss
 .PD 1
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .PD 0
 .RSs
 .IPs "mplayer \-af resample=44100:0:0"
-would set the output frequency of the resample filter to 44100Hz using
-exact output frequency scaling and linear interpolation.
+установит выходную частоту фильтра resample в 44100Гц, используя 
+точное совпадение выходной частоты и линейную интерполяцию.
 .RE
 .PD 1
 .
 .TP
 .B lavcresample[=srate[:length[:linear[:count[:cutoff]]]]]
-Changes the sample rate of the audio stream to an integer <srate> in Hz.
-It only supports the 16-bit native-endian format.
+.\" FIXME poor translation of entire block (with parameters)
+Устанавливает частоту дискретизации аудио потока в <srate>, указанную в Гц.
+Он поддерживает только формат 16-бит с "родным" [native-endian] порядком байт.
 .br
-.I NOTE:
-With MEncoder, you need to also use \-srate <srate>.
+.I ЗАМЕЧАНИЕ:
+С MEncoder, вам необходимо также использовать -srate <srate>.
 .PD 0
 .RSs
 .IPs <srate>
-the output sample rate
+выходная частота дискретизации
 .IPs <length>
-length of the filter with respect to the lower sampling rate (default: 16)
+длина фильтра относительно меньшей частоты дискретизации (по-умолчанию: 16)
 .IPs <linear>
-if 1 then filters will be linearly interpolated between polyphase entries
+если 1, то фильтры будут линейно интерполированы между многофазными элементами
 .IPs <count>
-log2 of the number of polyphase entries
+log2 от количества многофазных элементов
 (..., 10->1024, 11->2048, 12->4096, ...)
-(default: 10->1024)
+(по-умолчанию: 10->1024)
 .IPs <cutoff>
-cutoff frequency (0.0-1.0), default set depending upon filter length
+граничная частота (0.0-1.0), по-умолчанию устанавливается в зависимости от длины фильтра
 .RE
 .PD 1
 .
 .TP
-.B sweep[=speed]
-Produces a sine sweep.
+.B sweep[=скорость]
+Производит синусоидальный сигнал.
 .PD 0
 .RSs
 .IPs <0.0\-1.0>
-Sine function delta, use very low values to hear the sweep.
+Дельта синуса, используйте очень маленькие значения, чтобы услышать результат.
 .RE
 .PD 1
 .
 .TP
 .B sinesuppress[=freq:decay]
-Remove a sine at the specified frequency.
-Useful to get rid of the 50/60Hz noise on low quality audio equipment.
-It probably only works on mono input.
+Удаляет синусоиду указанной частоты.
+Полезен для удаления 50/60Гц шума на низкокачественном звуковом обородовании.
+Он, возможно, работает только с моно.
 .PD 0
 .RSs
 .IPs <freq>
-The frequency of the sine which should be removed (in Hz) (default: 50)
+Частота синусоиды (в Гц), которую следует удалить (по-умолчанию: 50)
 .IPs <decay>
-Controls the adaptivity (a larger value will make the filter adapt to
-amplitude and phase changes quicker, a smaller value will make the
-adaptation slower) (default: 0.0001).
-Reasonable values are around 0.001.
+Управляет гибкостью (большее значение позволит фильтру быстрее адаптироваться к
+изменению амплитуды и фазы, меньшее значение сделает адаптацию более
+медленной) (по-умолчанию: 0.0001).
+Разумны значения в районе 0.001.
 .RE
 .PD 1
 .
 .TP
-.B hrtf[=flag]
-Head-related transfer function: Converts multichannel audio to
-2 channel output for headphones, preserving the spatiality of the sound.
+.B hrtf[=флаг]
+Функция преобразования для наушников: Преобразует многоканальный звук в 2 канальный 
+вывод для наушников, сохраняя пространственность звука.
 .sp 1
 .PD 0
 .RS
-.IPs "Flag  Meaning"
-.IPs "m     matrix decoding of the rear channel"
-.IPs "s     2-channel matrix decoding"
-.IPs "0     no matrix decoding (default)"
+.\" FIXME matrix decoding = матричное декодирование
+.IPs "Флаг  Значение"
+.IPs "m     матричное декодирования переднего канала"
+.IPs "s     2-канальное матричное декодирование"
+.IPs "0     декодирование без матриц (по-умолчанию)"
 .RE
 .PD 1
 .
 .TP
 .B equalizer=[g1:g2:g3:...:g10]
-10 octave band graphic equalizer, implemented using 10 IIR band pass filters.
-This means that it works regardless of what type of audio is being played back.
-The center frequencies for the 10 bands are:
+.\" FIXME is translation correct? "10 IIR band pass filters"
+10 полосный графический эквалайзер, реализованный при помощи 10 IIR фильтров пропускания полосы.
+Это значит, что он работает независимо от типа воспроизводимого звука.
+Центральные частоты 10 полос:
 .sp 1
 .PD 0
 .RS
-.IPs "No. frequency"
+.IPs "Ном. частота"
 .IPs "0    31.25 Hz"
 .IPs "1    62.50 Hz"
 .IPs "2   125.00 Hz"
@@ -4498,396 +4503,402 @@ The center frequencies for the 10 bands are:
 .PD 1
 .sp 1
 .RS
-If the sample rate of the sound being played is lower than the center
-frequency for a frequency band, then that band will be disabled.
-A known bug with this filter is that the characteristics for the
-uppermost band are not completely symmetric if the sample
-rate is close to the center frequency of that band.
-This problem can be worked around by upsampling the sound
-using the resample filter before it reaches this filter.
+Если частота дискретизации воспроизводимого звука ниже центральной частоты
+полосы, то эта полоса будет отключена.
+Известный баг этого фильтра состоит в том, что характеристики для
+самой верхней полосы не полностью симметричны, если частота
+дискретизации близка к центральной частоте этой полосы.
+Проблему можно обойти, увеличив частоту дискретизации фильтром resample
+до того, как звук достигнет этого фильтра.
 .RE
 .PD 0
 .RSs
 .IPs <g1>:<g2>:<g3>:...:<g10>
-floating point numbers representing the gain in dB
-for each frequency band (-12\-12)
+Вещественные числа, представляющие собой усиление в дБ для каждой полосы (-12/12)
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .IPs "mplayer \-af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi"
-Would amplify the sound in the upper and lower frequency region
-while canceling it almost completely around 1kHz.
+Усилит звук в верхнем и нижнем частотном диапазоне, практически полностью 
+отбрасывая его в районе 1кГц.
 .RE
 .PD 1
 .
 .TP
-.B channels=nch[:nr:from1:to1:from2:to2:from3:to3:...]
-Can be used for adding, removing, routing and copying audio channels.
-If only <nch> is given the default routing is used, it works as
-follows: If the number of output channels is bigger than the number of
-input channels empty channels are inserted (except mixing from mono to
-stereo, then the mono channel is repeated in both of the output
-channels).
-If the number of output channels is smaller than the number
-of input channels the exceeding channels are truncated.
+.B channels=nch[:nr:из1:в1:из2:в2:из3:в3:...]
+Может использоваться для добавления, удаления, перенаправления и
+копирования аудио каналов.
+Если указано только <nch>, то используется перенаправление по-умолчанию,
+работающее следующим образом: Если выходных каналов больше, чем входных, 
+то вставляются пустые каналы (за исключением случая микширования из моно в стерео,
+в этом случае моно канал дублируется на оба выходных канала).
+Если количество выходных каналов меньше количества входных, то 
+лишние каналы отсекаются.
 .PD 0
 .RSs
 .IPs <nch>
-number of output channels (1\-6)
+количество каналов на выходе (1\-6)
 .IPs "<nr>\ "
-number of routes (1\-6)
+количество перенаправлений (1\-6)
 .IPs <from1:to1:from2:to2:from3:to3:...>
-Pairs of numbers between 0 and 5 that define where to route each channel.
+Пары чисел от 0 до 5, определяющие куда перенаправить каждый канал.
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .IPs "mplayer \-af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
-Would change the number of channels to 4 and set up 4 routes that
-swap channel 0 and channel 1 and leave channel 2 and 3 intact.
-Observe that if media containing two channels was played back, channels
-2 and 3 would contain silence but 0 and 1 would still be swapped.
+Устанавливает количество каналов равным 4, и настраивает 4
+маршрута, меняющих местами каналы 0 и 1, и оставляющих каналы 2 и 3 
+неизменными.
+Заметьте, что если медиа содержит два воспроизводящихся канала, каналы
+2 и 3 будут содержать тишину, но 1 и 0 все-таки пометяются местами.
 .IPs "mplayer \-af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
-Would change the number of channels to 6 and set up 4 routes
-that copy channel 0 to channels 0 to 3.
-Channel 4 and 5 will contain silence.
+Устанавливает количество каналов равным 6, и настраивает 4
+маршрута, копирующих канал 0 в 0 и 3. 
+Каналы 4 и 5 будут содержать тишину.
 .RE
 .PD 1
 .
 .TP
 .B format[=format] (also see \-format)
-Convert between different sample formats.
-Automatically enabled when needed by the sound card or another filter.
+конвертирует между различными форматамы сэмплов.
+Включается автоматически, когда это требуется для 
+звуковой карты или другого фильтра.
 .PD 0
 .RSs
 .IPs <format>
-Sets the desired format.
-The general form is 'sbe', where 's' denotes the sign (either 's' for signed
-or 'u' for unsigned), 'b' denotes the number of bits per sample (16, 24 or 32)
-and 'e' denotes the endianness ('le' means little-endian, 'be' big-endian
-and 'ne' the endianness of the computer MPlayer is running on).
-Valid values (amongst others) are: 's16le', 'u32be' and 'u24ne'.
-Exceptions to this rule that are also valid format specifiers: u8, s8,
-floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 and imaadpcm.
+Устанавливает желаемый формат.
+Указывается в форме 'sbe', где 's' означает знак ('s' для знакового, 'u' \- для
+беззнакового), 'b' означает количество бит на сэмпл (16,24 или 32) и 'e'
+означает порядок байт ('le' little-endian, 'be' big-endian, 'ne' - порядок байт 
+компьютера, на котором запущен MPlayer).
+Правильные значения (некоторые из возможных): 's16le', 'u32be' и 'u24ne'.
+Исключения из правила, также являющиеся верными идентификаторами формата:
+u8, s8, floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 и imaadpcm.
 .RE
 .PD 1
 .
 .TP
 .B volume[=v[:sc]]
-Implements software volume control.
-Use this filter with caution since it can reduce the signal
-to noise ratio of the sound.
-In most cases it is best to set the level for the PCM sound to max,
-leave this filter out and control the output level to your
-speakers with the master volume control of the mixer.
-In case your sound card has a digital PCM mixer instead of an analog
-one, and you hear distortion, use the MASTER mixer instead.
-If there is an external amplifier connected to the computer (this
-is almost always the case), the noise level can be minimized by
-adjusting the master level and the volume knob on the amplifier
-until the hissing noise in the background is gone.
+.\" FIXME check translation
+Реализует программное управление громкостью.
+Используйте этот фильтр с осторожностью, поскольку он
+способен снизить уровень сигнала до уровня простого шума.
+В большинстве случаев лучше всего установить уровень PCM звука на
+максимум, оставить в покое этот фильтр и управлять громкостью 
+выходящего на колонки сигнала при помощи регулятора канала master.
+В случае, когда ваша звуковая карта имеет цифровой PCM микшер вместо
+аналогового, и вы слишите искажение, используйте вместо него MASTER микшер.
+Если к компьютеру подключен внешний усилитель (что, как правило,
+и бывает в большинстве случаев), уровень шума можно минимизировать,
+регулируя на усилителе уровни громкости и канала master,
+пока фоновый шум полностью не исчезнет.
 .br
-This filter has a second feature: It measures the overall maximum
-sound level and prints out that level when MPlayer exits.
-This volume estimate can be used for setting the sound level in
-MEncoder such that the maximum dynamic range is utilized.
+Этот фильтр имеет дополнительную возможность: Он измеряет максимальный уровень звука
+и выводит его при выходе из MPlayer. Эта оценка может использоваться 
+для установления уровня громкости в MEncoder, так, чтобы использовался
+максимально возможный динамический диапазон.
 .br
-.I NOTE:
-This filter is not reentrant and can therefore only be enabled
-once for every audio stream.
+.I ЗАМЕЧАНИЕ:
+Этот фильтр не может использоваться повторно и, поэтому, может быть задействован
+только единожды для каждого аудио потока.
 .PD 0
 .RSs
 .IPs "<v>\ \ "
-Sets the desired gain in dB for all channels in the stream
-from -200dB to +60dB, where -200dB mutes the sound
-completely and +60dB equals a gain of 1000 (default: 0).
+Устанавливает желаемое усиление в дБ от -200дБ до +60дЬ для всех каналов в 
+потоке, где -200dB полностью отключает звук, а +60dB эквивалентно усилению в 
+1000 раз (по-умолчанию: 0).
 .IPs "<sc>\ "
-Turns soft clipping on (1) or off (0).
-Soft-clipping can make the sound more smooth if very
-high volume levels are used.
-Enable this option if the dynamic range of the
-loudspeakers is very low.
+Включает (1) или выключает (0) программное усечение.
+Программное усечение может сделать звук более ровным, если используются 
+очень большие уровни громкости. Используйте эту опцию, если динамический
+диапазон громкоговорителей очень мал.
 .br
-.I WARNING:
-This feature creates distortion and should be considered a last resort.
+.I ВНИМАНИЕ:
+Эта возможность создает искажения и должна использоваться только в крайних случаях.
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .IPs "mplayer \-af volume=10.1:0 media.avi"
-Would amplify the sound by 10.1dB and hard-clip if the
-sound level is too high.
+Усилит звук на 10.1дБ и аппаратно усечет слишком громкий звук.
 .RE
 .PD 1
 .
 .TP
 .B pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...]
-Mixes channels arbitrarily.
-Basically a combination of the volume and the channels filter
-that can be used to down-mix many channels to only a few,
-e.g.\& stereo to mono or vary the "width" of the center
-speaker in a surround sound system.
-This filter is hard to use, and will require some tinkering
-before the desired result is obtained.
-The number of options for this filter depends on
-the number of output channels.
-An example how to downmix a six-channel file to two channels with
-this filter can be found in the examples section near the end.
+Произвольно микширует каналы.
+В общем \- это комбинация фильтров volume и channels, которая
+может использоваться для сведения множества каналов в меньшее количество,
+например, стерео в моно или изменения "ширины" центральной колонки
+в системе окружающего звука.
+Этот фильтр труден для использования и потребуется нексолько попыток для
+получения желаемого результата.
+Количество опций для этого фильтра зависит от количества выходных каналов.
+Пример сведения шестиканального файла в два канала с помошью этого
+фильтра можно найти в разделе примеров далее.
 .PD 0
 .RSs
 .IPs "<n>\ \ "
-number of output channels (1\-6)
+Количество каналов на выходе (1\-6)
 .IPs <Lij>
-How much of input channel i is mixed into output channel j (0\-1).
-So in principle you first have n numbers saying what to do with the
-first input channel, then n numbers that act on the second input channel
-etc.
-If you do not specify any numbers for some input channels, 0 is assumed.
+Как много исходного сигнала i микшируется в выходной сигнал j (0\-1).
+Т.е.\& сначала указывается n чисел, говорящих что делать с 
+первым входным каналом, затем n чисел, действующих на второй канал и так далее.
+Если для некоторых входных каналов вы не указываете никакого числа, 
+то предполагается значение 0.
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .IPs "mplayer \-af pan=1:0.5:0.5 media.avi"
-Would down-mix from stereo to mono.
+Сведет звук из стерео в моно.
 .IPs "mplayer \-af pan=3:1:0:0.5:0:1:0.5 media.avi"
-Would give 3 channel output leaving channels 0 and 1 intact,
-and mix channels 0 and 1 into output channel 2 (which could
-be sent to a subwoofer for example).
+Даст 3 канала на выходе, оставляя каналы 0 и 1 неизменными
+и микшируя каналы 0 и 1 в выходной канал 2 (который может быть отправлен 
+на сабвуфер, например).
 .RE
 .PD 1
 .
 .TP
 .B sub[=fc:ch]
-Adds a subwoofer channel to the audio stream.
-The audio data used for creating the subwoofer channel is
-an average of the sound in channel 0 and channel 1.
-The resulting sound is then low-pass filtered by a 4th order
-Butterworth filter with a default cutoff frequency of 60Hz
-and added to a separate channel in the audio stream.
+Добавляет канал сабвуфера к аудио потоку.
+Аудиоданные, используемые для создания канала сабвуфера,
+являются средним значением звука в каналах 0 и 1.
+Высокие частоты получившегося звука затем отбрасываются
+пропусканием через Butterworth фильтр четвертого порядка 
+со значением предельной частоты по-умолчанию 60Гц, и 
+результат добавляется отдельным каналом к аудио потоку.
 .br
-.I Warning:
-Disable this filter when you are playing DVDs with Dolby
-Digital 5.1 sound, otherwise this filter will disrupt
-the sound to the subwoofer.
+.I Внимание:
+Отключайте этот фильтр при воспроизведении DVD c Dolby
+Digital 5.1 звуком, иначе этот фильтр испортит звук 
+на субвуфере.
 .PD 0
 .RSs
 .IPs "<fc>\ "
-cutoff frequency in Hz for the low-pass filter (20Hz to 300Hz) (default: 60Hz)
-For the best result try setting the cutoff frequency as low as possible.
-This will improve the stereo or surround sound experience.
+предельная частота в Гц для низкочастотного фильтра (от 20Гц до 300Гц) (по-умолчанию: 60Гц)
+Для получения лучшего результата, пробуйте установить частоту
+настолько низкой, насколько это возможно.
+Это улучшит восприятие стерео или окружающего звука.
 .IPs "<ch>\ "
-Determines the channel number in which to insert the sub-channel audio.
-Channel number can be between 0 and 5 (default: 5).
-Observe that the number of channels will automatically
-be increased to <ch> if necessary.
+Определяет номер канала, в который добавляется аудио для сабвуфера.
+номер канала может быть от 0 до 5 (по-умолчанию: 5).
+Заметьте, что при необходимости количество каналов будет автоматически
+увеличино до <ch>.
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .IPs "mplayer \-af sub=100:4 \-channels 5 media.avi"
-Would add a sub-woofer channel with a cutoff frequency of
-100Hz to output channel 4.
+Добавит канал сабвуфера с предельной частотой 100Гц в
+4 канал на выходе.
 .RE
 .PD 1
 .
 .TP
 .B "center\ "
-Creates a center channel from the front channels.
-May currently be low quality as it does not implement a
-high-pass filter for proper extraction yet, but averages and
-halves the channels instead.
+Создает центральный канал из передних каналов.
+В данный момент может быть низкокачественным, поскольку пока не
+реализует высокочастотный фильтр для правильного извлечения, а
+вместо этого берет половину усредненного значения каналов.
 .PD 0
 .RSs
 .IPs "<ch>\ "
-Determines the channel number in which to insert the center channel.
-Channel number can be between 0 and 5 (default: 5).
-Observe that the number of channels will automatically
-be increased to <ch> if necessary.
+Определяет номер канала, в который вставляется центральный.
+Номер канала должен быть от 0 до 5 (по-умолчанию: 5).
+Заметьте, что при необходимости количество каналов будет автоматически
+увеличино до <ch>.
 .RE
 .PD 1
 .
 .TP
-.B surround[=delay]
-Decoder for matrix encoded surround sound like Dolby Surround.
-Many files with 2 channel audio actually contain matrixed surround sound.
-Requires a sound card supporting at least 4 channels.
+.B surround[=задержка]
+.\" FIXME metrix encoded = матрично кодированного
+Декодер для матрично кодированного окружающего звука, такого как Dolby Surround.
+.\" FIXME matrixed = кодированный матрицей
+Множество файлов с 2 канальным звуком на самом деле содержат кодированный матрицей
+окружающий звук.
+Требует звуковую карту, поддерживающуя как минимум 4 канала.
 .PD 0
 .RSs
-.IPs <delay>
-delay time in ms for the rear speakers (0 to 1000) (default: 20)
-This delay should be set as follows: If d1 is the distance
-from the listening position to the front speakers and d2 is the distance
-from the listening position to the rear speakers, then the delay should
-be set to 15ms if d1 <= d2 and to 15 + 5*(d1-d2) if d1 > d2.
+.IPs <задержка>
+время задержки в мс для задних колонок (от 0 до 1000) (по-умолчанию: 20)
+Задержка устанавливается следующим образом: Если d1 \- расстояние от
+слушателя до передних колонок и d2 \- расстояние от слушателя до
+задних колонок, то задержку следует устанавливать в 15мс, если d1 <= d2 и
+в 15+5*(d2-d1), если d1 > d2.
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .IPs "mplayer \-af surround=15 \-channels 4 media.avi"
-Would add surround sound decoding with 15ms delay for the sound to the
-rear speakers.
+Добавит декодирование окружающего звука с 15мс задержкой для задних колонок.
 .RE
 .PD 1
 .
 .TP
 .B delay[=ch1:ch2:...]
-Delays the sound to the loudspeakers such that the sound from the
-different channels arrives at the listening position simultaneously.
-It is only useful if you have more than 2 loudspeakers.
+Задерживает звук для громкоговорителей так, чтобы звук разных каналов
+достигал слушателя одновременно. Полезен только если у вас
+более 2 громкоговорителей.
 .PD 0
 .RSs
 .IPs ch1,ch2,...
-The delay in ms that should be imposed on each channel
-(floating point number between 0 and 1000).
+Задержка в мс, которая должна вноситься в каждый канал
+(вещественное число от 0 до 1000).
 .RE
 .PD 1
 .sp 1
 .RS
-To calculate the required delay for the different channels do as follows:
+Для вычисления требуемой задержки для разных каналов проделайте следующее:
 .IP 1. 3
-Measure the distance to the loudspeakers in meters in relation
-to your listening position, giving you the distances s1 to s5
-(for a 5.1 system).
-There is no point in compensating for the subwoofer (you will not hear the
-difference anyway).
+Измерьте в метрах расстояие до громкоговорителей от позиции слушателя,
+получите значения s1 \- s5 расстояний (для 5.1. системы).
+компенсировать канал сабвуфера нет смысла
+(все равно вы не услишите разницу).
 .IP 2. 3
-Subtract the distances s1 to s5 from the maximum distance,
-i.e.\& s[i] = max(s) - s[i]; i = 1...5.
+Вычтите расстояния s1 \- s5 из максимального значения,
+т.е.\& s[i] = max(s) - s[i]; i = 1...5.
 .IP 3.
-Calculate the required delays in ms as d[i] = 1000*s[i]/342; i = 1...5.
+Вычислите требуемые задержки в мс по формуле d[i] = 1000*s[i]/342; i = 1...5.
 .RE
 .PD 0
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .IPs "mplayer \-af delay=10.5:10.5:0:0:7:0 media.avi"
-Would delay front left and right by 10.5ms, the two rear channels
-and the sub by 0ms and the center channel by 7ms.
+Будет задерживать передние левый и правый каналы на 10.5мс, два
+задних канала и сабвуфер на 0мс и центральный канал на 7мс.
 .RE
 .PD 1
 .
 .TP
 .B export[=mmapped_file[:nsamples]]
-Exports the incoming signal to other processes using memory mapping (mmap()).
-Memory mapped areas contain a header:
+Экспортирует входящий сигнал другим процессам, используя отображение памяти (mmap()).
+Области в отображаемой памяти содержат заголовок:
 .sp 1
 .nf
-int nch                      /*number of channels*/
-int size                     /*buffer size*/
-unsigned long long counter   /*Used to keep sync, updated every
-                               time new data is exported.*/
+int nch                      /*количество каналов*/
+int size                     /*размер буфера*/
+unsigned long long counter   /*Используется для сохранения синхронизациии, обновляется
+                               каждый раз при экспортировании данных.*/
 .fi
 .sp 1
-The rest is payload (non-interleaved) 16 bit data.
+Остальное \- полезные (нечередующиеся) 16 битные данные.
 .PD 0
 .RSs
 .IPs <mmapped_file>
-file to map data to (default: ~/.mplayer/\:mplayer-af_export)
+Файл, в который отображаются данные (по-умолчанию: ~/.mplayer/\:mplayer-af_export)
 .IPs <nsamples>
-number of samples per channel (default: 512)
+количество сэмплов на канал (по-умолчанию: 512)
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .IPs "mplayer \-af export=/tmp/mplayer-af_export:1024 media.avi"
-Would export 1024 samples per channel to '/tmp/mplayer-af_export'.
+Будет экспортировать 1024 сэмпла на канал в '/tmp/mplayer-af_export'.
 .RE
 .PD 1
 .
 .TP
 .B extrastereo[=mul]
-(Linearly) increases the difference between left and right channels
-which adds some sort of "live" effect to playback.
+(Линейно) увеличивает различия между левым и правым каналами, что
+добавляет некоторый "живой" эффект воспроизведению.
 .PD 0
 .RSs
 .IPs <mul>
-Sets the difference coefficient (default: 2.5).
-0.0 means mono sound (average of both channels), with 1.0 sound will be
-unchanged, with -1.0 left and right channels will be swapped.
+Устанавливает коэффициет различия (по-умолчанию: 2.5).
+0.0 означает моно звук (среднее обоих каналов), с 1.0 звук не
+изменится, с -1.0 левый и правый каналы поменяются местами.
 .RE
 .PD 1
 .
 .TP
-.B volnorm[=method:target]
-Maximizes the volume without distorting the sound.
+.B volnorm[=метод:цель]
+Максимизирует громкость без искажения звука.
 .PD 0
 .RSs
-.IPs <method>
-Sets the used method.
+.IPs <метод>
+Устанавливает используемый метод.
 .RSss
-1: Use a single sample to smooth the variations via the standard
-weighted mean over past samples (default).
+1: Испольуется единственный сэмпл для сглаживания отклонений посредством 
+стандартного средневзвешенного значения предыдущих семплов (по-умолчанию).
 .br
-2: Use several samples to smooth the variations via the standard
-weighted mean over past samples.
+2: Испольуется несколько сэмплов для сглаживания отклонений посредством 
+стандартноого средневзвешенного значения предыдущих семплов.
 .REss
-.IPs <target>
-Sets the target amplitude as a fraction of the maximum for the
-sample type (default: 0.25).
+.IPs <цель>
+Задает целевую амплитуду как долю от максимально возможного значения
+для сэмпла (по-умолчанию: 0.25).
 .RE
 .PD 1
 .
 .TP
-.B ladspa=file:label[:controls...]
-Load a LADSPA (Linux Audio Developer's Simple Plugin API) plugin.
-This filter is reentrant, so multiple LADSPA plugins can be used at once.
+.B ladspa=файл:метка[:параметры...]
+Загружает LADSPA (Linux Audio Developer's Simple Plugin API) плагин.
+Этот фильтр может использоваться повторно, так что одновременно
+может использоваться несколько LADSPA плагинов.
 .PD 0
 .RSs
-.IPs <file>
-Specifies the LADSPA plugin library file.
-If LADSPA_PATH is set, it searches for the specified file.
-If it is not set, you must supply a fully specified pathname.
-.IPs <label>
-Specifies the filter within the library.
-Some libraries contain only one filter, but others contain many of them.
-Entering 'help' here, will list all available filters within the specified
-library, which eliminates the use of 'listplugins' from the LADSPA SDK.
-.IPs <controls>
-Controls are zero or more floating point values that determine the
-behavior of the loaded plugin (for example delay, threshold or gain).
-In verbose mode (add \-v to the MPlayer command line), all available controls
-and their valid ranges are printed.
-This eliminates the use of 'analyseplugin' from the LADSPA SDK.
+.IPs <файл>
+Указывает файл библиотеки плагинов LADSPA.
+Если LADSPA_PATH установлена, указанный файл ищется там.
+Если она не установлена, вы должны указать полный путь к файлу.
+.IPs <метка>
+Указывает фильтр в библиотеке.
+Некоторые библиотеки содержат только один фильтр, но другие могут 
+содержать множество.
+Указав здесь 'help', вы получите вписок всех доступных фильтров в
+указанной библиотеке, что исключает необходимость 
+использования 'listplugins' из LADSPA SDK.
+.IPs <параметры>
+Параметры \- это ноль или более вещественных чисел, определяющих
+поведение загружаемого плагина (например, задержка, пороговое значение или
+усиление). 
+В подробном режиме (добавьте \-v в командную строку MPlayer) выводятся
+все доступные параметры и диапазоны их допустимых значений.
+Это исключает необходимость использования 'analyselugin' из LADSPA SDK.
 .RE
 .PD 1
 .
 .TP
 .B "comp\ \ \ "
-Compressor/expander filter usable for microphone input.
-Prevents artifacts on very loud sound and raises the volume on
-very low sound.
-This filter is untested, maybe even unusable.
+Фильтр сжатия/расширения, полезный для записи с микрофона.
+Предотвращает искажения при очень громком звуке и увеличивает 
+громкость при очень тихом.
+Фильтр не тестировался, возможно он даже не работает.
 .
 .TP
 .B "gate\ \ \ "
-Noise gate filter similar to the comp audio filter.
-This filter is untested, maybe even unusable.
+Фильтр удаления шума[noise gate], похожий на фильтр comp.
+Фильтр не тестировался, возможно он даже не работает.
 .
 .TP
 .B karaoke
-Simple voice removal filter exploiting the fact that voice is
-usually recorded with mono gear and later 'center' mixed onto
-the final audio stream.
-Beware that this filter will turn your signal into mono.
-Works well for 2 channel tracks; do not bother trying it
-on anything but 2 channel stereo.
+Простой фильтр удаления голоса, использующий тот факт, что 
+голос, как правило, записывается в моно, а затем 
+"центрально" микшируется в окончательный аудио поток.
+Заметьте, что этот фильтр переведет ваш сигнал в моно.
+Хорошо работает с 2 канальными дорожками; не трудитесь
+пробовать его на чем-то, отличном от 2 канального стерео.
 .
 .
 .
