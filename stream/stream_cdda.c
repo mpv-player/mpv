@@ -1,13 +1,13 @@
 #include "config.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "stream.h"
 #include "m_option.h"
 #include "m_struct.h"
 #include "libavutil/common.h"
 #include "libavutil/bswap.h"
-
-#include <stdio.h>
-#include <stdlib.h>
 #include "libmpdemux/demuxer.h"
 
 #include "cdd.h"
