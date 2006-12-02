@@ -423,7 +423,7 @@ extern vo_functions_t * video_out;
 extern int    		frame_dropping;
 extern int              stream_dump_type;
 extern int  		vcd_track;
-extern m_obj_settings_t*vo_plugin_args;
+extern m_obj_settings_t * vf_settings;
 
 void guiLoadFont( void )
 {
@@ -517,33 +517,33 @@ void guiLoadSubtitle( char * name )
 static void add_vf( char * str )
 {
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_AddingVideoFilter,str );
- if ( vo_plugin_args )
+ if ( vf_settings )
   {
    int i = 0;
-   while ( vo_plugin_args[i].name ) if ( !gstrcmp( vo_plugin_args[i++].name,str ) ) { i=-1; break; }
+   while ( vf_settings[i].name ) if ( !gstrcmp( vf_settings[i++].name,str ) ) { i=-1; break; }
    if ( i != -1 )
-     { vo_plugin_args=realloc( vo_plugin_args,( i + 2 ) * sizeof( m_obj_settings_t ) ); vo_plugin_args[i].name=strdup( str );vo_plugin_args[i].attribs = NULL; vo_plugin_args[i+1].name=NULL; }
-  } else { vo_plugin_args=malloc( 2 * sizeof(  m_obj_settings_t ) ); vo_plugin_args[0].name=strdup( str );vo_plugin_args[0].attribs = NULL; vo_plugin_args[1].name=NULL; }
+     { vf_settings=realloc( vf_settings,( i + 2 ) * sizeof( m_obj_settings_t ) ); vf_settings[i].name=strdup( str );vf_settings[i].attribs = NULL; vf_settings[i+1].name=NULL; }
+  } else { vf_settings=malloc( 2 * sizeof(  m_obj_settings_t ) ); vf_settings[0].name=strdup( str );vf_settings[0].attribs = NULL; vf_settings[1].name=NULL; }
 }
 
 static void remove_vf( char * str )
 {
  int n = 0;
 
- if ( !vo_plugin_args ) return;
+ if ( !vf_settings ) return;
 
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_RemovingVideoFilter,str );
 
- while ( vo_plugin_args[n++].name ); n--;
+ while ( vf_settings[n++].name ); n--;
  if ( n > -1 )
   {
    int i = 0,m = -1;
-   while ( vo_plugin_args[i].name ) if ( !gstrcmp( vo_plugin_args[i++].name,str ) ) { m=i - 1; break; }
+   while ( vf_settings[i].name ) if ( !gstrcmp( vf_settings[i++].name,str ) ) { m=i - 1; break; }
    i--;
    if ( m > -1 )
     {
-     if ( n == 1 ) { free( vo_plugin_args[0].name );free( vo_plugin_args[0].attribs ); free( vo_plugin_args ); vo_plugin_args=NULL; }
-     else { free( vo_plugin_args[i].name );free( vo_plugin_args[i].attribs ); memcpy( &vo_plugin_args[i],&vo_plugin_args[i + 1],( n - i ) * sizeof( m_obj_settings_t ) ); }
+     if ( n == 1 ) { free( vf_settings[0].name );free( vf_settings[0].attribs ); free( vf_settings ); vf_settings=NULL; }
+     else { free( vf_settings[i].name );free( vf_settings[i].attribs ); memcpy( &vf_settings[i],&vf_settings[i + 1],( n - i ) * sizeof( m_obj_settings_t ) ); }
     }
   }
 }
