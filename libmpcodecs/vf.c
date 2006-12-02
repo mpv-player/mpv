@@ -275,7 +275,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
   w2=(mp_imgflag&MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE)?((w+15)&(~15)):w;
   
   if(vf->put_image==vf_next_put_image){
-      // passthru mode, if the plugin uses the fallback/default put_image() code
+      // passthru mode, if the filter uses the fallback/default put_image() code
       return vf_get_image(vf->next,outfmt,mp_imgtype,mp_imgflag,w,h);
   }
   
