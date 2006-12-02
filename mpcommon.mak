@@ -7,11 +7,6 @@ OBJS2 = $(addsuffix .o, $(basename $(SRCS2)) )
 
 CFLAGS += -I. -I.. $(OPTFLAGS)
 
-.SUFFIXES: .c .o
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
 LIBS = $(LIBNAME) $(LIBNAME2)
 
 all:    $(LIBS)

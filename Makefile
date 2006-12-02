@@ -140,12 +140,7 @@ ALL_PRG      += $(ALL_PRG-yes)
 COMMON_LIBS += osdep/libosdep.a
 
 
-.SUFFIXES: .cc .c .o
-
 all:	$(ALL_PRG)
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
 
 libaf/libaf.a:
 	$(MAKE) -C libaf

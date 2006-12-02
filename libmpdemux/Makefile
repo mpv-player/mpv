@@ -76,7 +76,4 @@ CFLAGS-$(CONFIG_LIBAVFORMAT)    += -I../libavformat
 
 CXXFLAGS  = $(CFLAGS) -D__STDC_LIMIT_MACROS
 
-.cpp.o:
-	$(CC) -c $(CXXFLAGS) -o $@ $<
-
 include ../mpcommon.mak

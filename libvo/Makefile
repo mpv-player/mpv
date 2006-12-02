@@ -30,6 +30,3 @@ CFLAGS-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
 CFLAGS = -I../osdep
 
 include ../mpcommon.mak
-
-.m.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
