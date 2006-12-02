@@ -886,8 +886,8 @@ static char*
 mp_input_find_bind_for_key(mp_cmd_bind_t* binds, int n,int* keys) {
   int j;
 
+  if (n <= 0) return NULL;
   for(j = 0; binds[j].cmd != NULL; j++) {
-    if(n > 0) {
       int found = 1,s;
       for(s = 0; s < n && binds[j].input[s] != 0; s++) {
 	if(binds[j].input[s] != keys[s]) {
@@ -897,12 +897,6 @@ mp_input_find_bind_for_key(mp_cmd_bind_t* binds, int n,int* keys) {
       }
       if(found && binds[j].input[s] == 0 && s == n)
 	break;
-      else
-	continue;
-    } else if(n == 1){
-      if(binds[j].input[0] == keys[0] && binds[j].input[1] == 0)
-	break;
-    }
   }
   return binds[j].cmd;
 }
