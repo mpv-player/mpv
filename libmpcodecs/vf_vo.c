@@ -129,6 +129,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
             if (video_out->control(VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
                 ass_set_frame_size(vf->priv->ass_priv, res.w, res.h);
                 ass_set_margins(vf->priv->ass_priv, res.mt, res.mb, res.ml, res.mr);
+                ass_set_aspect_ratio(vf->priv->ass_priv, (double)res.w / res.h);
             }
 
             images = ass_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5);
