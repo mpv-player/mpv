@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r21168 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -213,6 +213,7 @@ mivel jobb a sebessége.
   <listitem><para>Veszteségmentes mód</para></listitem>
   <listitem><para>Egyedi kvantálási matricák</para></listitem>
   <listitem><para>Több szelet párhuzamos kódolása</para></listitem>
+  <listitem><para>Interlacing</para></listitem>
 </itemizedlist>
 
 </sect3>

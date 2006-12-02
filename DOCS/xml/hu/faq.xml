@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r21152 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1092,7 +1092,7 @@ Példa:
 </varlistentry>
 <varlistentry><term><systemitem>[2126:192]</systemitem></term>
 <listitem>
-<para>átlagos videó bitráta (Mb/s-ben) és átlagos audió bitráta (Mb/s-ben)</para></listitem>
+<para>átlagos videó bitráta (kb/s-ben) és átlagos audió bitráta (kb/s-ben)</para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>

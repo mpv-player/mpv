@@ -1,4 +1,4 @@
-.\" Synced with r21026
+.\" Synced with r21430
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -241,7 +241,7 @@ Hangerõ csökkentése/\:növelése.
 Hangerõ csökkentése/\:növelése.
 .IPs "m\ \ \ \ "
 Hang elnémítása.
-.IPs "_ (csak MPEG-TS)"
+.IPs "_ (csak MPEG-TS és libavformat mellett)"
 Váltás az elérhetõ videó sávok között.
 .IPs "# (csak MPEG és Matroska)"
 Váltás az elérhetõ audió sávok között.
@@ -282,7 +282,7 @@ Képernyõmentések készítésének elindítása/leállítása.
 Fájlnév megjelenítése az OSD-n.
 .IPs "! és @"
 Ugrás az elõzõ/következõ fejezet elejére.
-.IPs "D (csak \-vo xvmc mellett)"
+.IPs "D (csak \-vo xvmc, \-vf yadif mellett)"
 Deinterlacer aktiválása/deaktiválása.
 .RE
 .PD 1
@@ -1926,7 +1926,7 @@ Ezek a betûtípusok használhatóak az SSA/ASS feliratok
 rendereléséhez (-ass kapcsoló).
 .
 .TP
-.B \-ffactor <szám> (csak OSD)
+.B \-ffactor <szám>
 Font alphamap-jának megadása.
 Lehetséges értékek:
 .PD 0
@@ -1953,7 +1953,7 @@ Akkor használd, ha a feliratban lévõ vesszõk a mondat elején látszódnak
 és nem a végén.
 .
 .TP
-.B \-font <útvonal a font.desc fájlhoz> (csak OSD)
+.B \-font <útvonal a font.desc fájlhoz>
 Az OSD/\:SUB betûtipusok megadott könyvtárban történõ keresése
 (normál fontoknál alapértelmezett:
 ~/\:.mplayer/\:font/\:font.desc, FreeType fontokhoz: ~/.mplayer/\:subfont.ttf).
@@ -2049,7 +2049,7 @@ Egy Matroska fájlt játszik le japán felirattal.
 .PD 1
 .
 .TP
-.B \-spuaa <mód> (csak OSD)
+.B \-spuaa <mód>
 Antialiasing/\:méretezés módja DVD/\:VOBsub esetén.
 Ha a <mód> értékhez 16-ot hozzáadsz, akkor a méretezés akkor is megtörténik,
 ha az eredeti és az átméretezett képméret azonos.
@@ -2071,7 +2071,7 @@ swscaler gaussian blur-jának használata (nagyon szép)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2> (csak OSD)
+.B \-spualign <-1\-2>
 Megadja, hogy az SPU (DVD/\:VOBsub) feliratok hogyan legyenek helyezve.
 .PD 0
 .RSs
@@ -2087,7 +2087,7 @@ Alulra igazítás.
 .PD 1
 .
 .TP
-.B \-spugauss <0.0\-3.0> (csak OSD)
+.B \-spugauss <0.0\-3.0>
 A \-spuaa 4 által használt gaussian variancia paramétere.
 A magasabb érték több blur-t jelent (alapértelmezett: 1.0).
 .
@@ -2136,7 +2136,7 @@ Kikapcsol mindenféle szöveg utómunkálatot a felirat betöltése után.
 Hibakeresési célra használatos.
 .
 .TP
-.B \-subalign <0\-2> (OSD only)
+.B \-subalign <0\-2>
 Megadja, hogy a felirat melyik sarkát kell a \-subpos által megadott
 magassághoz igazítani.
 .PD 0
@@ -2256,13 +2256,13 @@ A felirat fájl framerátájának megadása (alapértelmezett: a film fps-e).
 Csak a képkocka alapú feliratoknál használható, pl.\& MicroDVD formátum.
 .
 .TP
-.B \-subpos <0\-100> (hasznos a \-vf expand opcióval) (csak OSD)
+.B \-subpos <0\-100> (hasznos a \-vf expand opcióval)
 A feliratok képernyõn elfoglalt helye.
 Az érték a képernyõ magasságának megadott százaléka, ahol a felirat
 legyen.
 .
 .TP
-.B \-subwidth <10\-100> (csak OSD)
+.B \-subwidth <10\-100>
 Megadja a feliratok maximális szélességét a képernyõn.
 Hasznos a TV kimenethez.
 Az érték a felirat szélessége százalékban, a képernyõ szélességéhez
@@ -8162,7 +8162,7 @@ Formához illeszkedõ (gyors) rombusz 3-as mérettel
 .IPs -2
 Formához illeszkedõ (gyors) rombusz 2-es mérettel
 .IPs -1
-kissé különleges: lassabb lehet és/vagy jobb, mint a dia=-2.
+egyenlõtlen multi-hexagon keresés (lassú)
 .IPs  1
 átlagos, méret=1 rombusz (alapértelmezett) =EPZS típusú rombusz
 .nf
@@ -9431,11 +9431,20 @@ minden mód döntésnél engedélyezi (lassú, subq>=6 szükséges)
 .B deadzone_inter=<0\-32>
 Beállítja az inter luma kvantálás holtterét a nem-rácsos kvantáláshoz
 (alapértelmezett: 21).
+A kisebb értékek segítenek az apró részletek megõrzéséban és a film javításában
+(általában nagy bitrátájú/jó minõségû kódolás mellett hasznos), míg a nagyobb
+értékek kiszûrik ezeket a részleteket, így biteket spórolnak meg, melyek más
+makroblokkokban és képkockákon felhasználhatóak (a bitrátával spóroló kódolásoknál
+jó).
+Inkább a deadzone_intra paraméteren változtass, mielõtt ehhez hozzányúlnál.
 .
 .TP
 .B deadzone_intra=<0\-32>
 Beállítja az intra luma kvantálás holtterét a nem-rácsos kvantáláshoz
 (alapértelmezett: 11).
+Ennek az opciónak ugyan az a hatása, mint a deadzone_inter-nek, kivéve, hogy az
+intra kockákat érinti.
+Inkább ezzen a paraméteren változtass, mielõtt a deadzone_inter-hez hozzányúlnál.
 .
 .TP
 .B (no)fast_pskip
@@ -9637,8 +9646,12 @@ harddup és softskip videó szûrõket).
 .PD 1
 .
 .TP
-.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
-folyam formátum (alapértelmezett: mpeg2)
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd | pes1 | pes2>
+folyam formátum (alapértelmezett: mpeg2).
+A pes1 és pes2 nagyon rossz formátumok (nincs pack fejléc és igazítás),
+de a VDR használja õket; ne válaszd ezeket, hacsak nem tudod pontosan,
+hogy mit csinálsz.
+
 .
 .TP
 .B size=<egészen 65535-ig>
@@ -9713,6 +9726,19 @@ mûködik, ha a kimeneti frameráta, melyet a \-ofps állít be, vagy 24000/1001
 vagy 24 fps.
 Bármelyik más frameráta inkompatibilis ezzel az opcióval.
 .
+.TP
+.B vbuf_size=<40\-1024>
+Beállítja a videó dekódoló bufferjének a méretét, kilobájtokban kifejezve.
+Csak akkor add meg, ha a videó folyam bitrátája túl nagy a kiválasztott
+formátumhoz és pontosan tudod, hogy mit csinálsz.
+A túl nagy érték lejátszhatatlan filmet eredményezhet, a lejátszó képességeitõl
+függõen.
+.
+.TP
+.B abuf_size=<4\-64>
+Beállítja az audió dekódoló bufferjének a méretét, kilobájtokban kifejezve.
+Ugyan az érvényes rá, mint a vbuf_size kapcsolóra.
+.
 .
 .SS FFmpeg libavformat demuxer-ek (\-lavfdopts)
 .
@@ -9770,6 +9796,9 @@ Sony Digital Video konténer
 .B i_certify_that_my_video_stream_does_not_use_b_frames
 A MEncoder nem tud megfelelõ idõbélyegeket elõállítani, ha
 B-kockák vannak a videó folyamban, hibás kódolást eredményezve.
+Ha a lavf muxer-t szeretnéd használni, nem szabad hagyni a videó codec-nek,
+hogy B-kockákat használjon (lásd az egyes codec-ek megfelelõ dokumentációját)
+és neked is meg kell adnod ezt az opciót.
 .
 .TP
 .B muxrate=<ráta>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20933 -->
+<!-- synced with r21395 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -10,12 +10,10 @@ részleteket!
 </para>
 
 <para>
-Ebben a fejezetben megpróbállak végigvezetni az <application>MPlayer</application>
+Ebben a fejezetben végigvezetünk az <application>MPlayer</application>
 fordításának és beállításának menetén. Nem egyszerű, de nem is észveszejtően
-nehéz. Ha nálad máshogy viselkednek a dolgok, mint ahogy itt le van írva,
-nézd végig ezt a dokumentációt és (remélhetőleg) megtalálod a választ. Ha
-linkeket látsz, kövesd őket és olvasd el figyelmesen a tartalmukat. Időbe
-fog kerülni, de MEGÉRI.
+nehéz. Ha ezen leírástól eltérő működést tapasztalsz, kérlek nézd végig ezt
+a dokumentációt és megtalálod a válaszokat.
 </para>
 
 <para>
@@ -28,67 +26,52 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - A javasolt verzió a <emphasis role="bold">2.11.x</emphasis>.
-  Ez a program felelős az MMX/ 3DNow!/stb utasítások generálásáért,
-  így nagyon fontos!
+  <emphasis role="bold">binutils</emphasis> - a javasolt verzió a
+  <emphasis role="bold">2.11.x</emphasis>.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - A javasolt verziók a 2.95
+  <emphasis role="bold">gcc</emphasis> - a javasolt verziók a 2.95
   és 3.4+. A 2.96 és 3.0.x tudvalevőleg hibás kódot generálnak, a 3.1-nek és a 3.2-nek is
   vannak problémái, a 3.3-nak kisebb hibái. PowerPC-n használj 4.x+ verziót.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - A javasolt verzió <emphasis role="bold">mindig a
-  legújabb</emphasis> (4.3). Mindenki ezt akarja, mivel a 4.0.2-es XFree86-tól benne van az
-  <link linkend="xv">XVideo</link> kiterjesztés (néhol <emphasis role="bold">Xv</emphasis>-ként
-  hivatkoznak rá), ami szükséges a hardveres YUV gyorsítás engedélyezéséhez (gyors képmegjelenítés)
-  azokon a kártyákon, amik támogatják.
-  Győződj meg róla, hogy a <emphasis role="bold">fejlesztői csomagja</emphasis> is telepítve van,
+  <emphasis role="bold">Xorg/XFree86</emphasis> - a javasolt verzió a
+  4.3 vagy későbbi. Győződj meg róla, hogy a
+  <emphasis role="bold">fejlesztői csomagok</emphasis> is telepítve vannak,
   különben nem fog működni.
-  Néhány videó kártyához nem kell XFree86. A listát lásd lejjebb.
+  Nem feltétlenül van szükséged az X-re, néhány videó kimeneti vezérlő működik nélküle is.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - A javasolt verzió
-  <emphasis role="bold">mindig a legújabb</emphasis> (legalább 3.79.x-es). Ez
-  legtöbbször nem olyan fontos.
+  <emphasis role="bold">make</emphasis> - a javasolt verzió
+  3.79.x vagy régebbi. Az XML dokumentáció elkészítéséhez 3.80-as kell.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> 2.0.9 vagy későbbi szükséges,
-  hogy legyen betűtípus az OSD-nek és a feliratoknak.
+  valamint egy betűtípus is az OSD-hez és a feliratokhoz.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">SDL</emphasis> - nem feltétlenül szükséges, de segíthet
-  pár esetben (hibás audió, videó kártya, ami késik az xv vezérlővel).
-  Mindig használd a legújabbat (1.2.x-től kezdve).
+  <emphasis role="bold">libjpeg</emphasis> - választható JPEG kódoló/dekódoló,
+  a JPEG videó kimeneti vezérlőhöz és az MJPEG videó dekódolóhoz szükséges.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - választható JPEG dekódoló, az <option>-mf</option>
-  kapcsoló használja és néhány QT MOV fájl. Hasznos mind az <application>MPlayer</application>,
-  mind a <application>MEncoder</application> szempontjából, ha jpeg fájlokkal akarsz dolgozni.
+  <emphasis role="bold">libpng</emphasis> - választható (M)PNG dekóder,
+  a GUI-hoz és a PNG videó kimeneti vezérlőhöz szükséges.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - szükséges és az alapértelmezett (M)PNG dekóder. Kell a
-  GUI-hoz is. Használja az <application>MPlayer</application> és a <application>MEncoder</application>
-  is.
+  <emphasis role="bold">lame</emphasis> - 3.90 vagy későbbi javasolt,
+  szükséges MP3 audió <application>MEncoder</application>rel
+  történő kódolásához.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">lame</emphasis> - javasolt, szükséges MP3 audió <application>MEncoder</application>rel
-  történő kódolásához, az ajánlott verzió <emphasis>mindig a legújabb</emphasis> (de legalább 3.90).
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">zlib</emphasis> - javasolt, szükséges a tömörített MOV fejlécekhez és a
-  PNG támogatáshoz.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">libogg</emphasis> - választható, szükséges az OGG formátumú fájlok lejátszásához.
+  <emphasis role="bold">zlib</emphasis> - javasolt, szükséges a tömörített
+  MOV fejlécekhez és a PNG támogatáshoz
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
-  - választható, szükséges az RTSP/RTP folyamok lejátszásához.
+  - választható, szükséges néhány RTSP/RTP folyamokhoz
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> - választható, elérhető itt:
-  <ulink url="http://www.directfb.org"/>. Legalább 0.9.13-as szükséges.
+  <emphasis role="bold">directfb</emphasis> - választható, 0.9.13 vagy későbbi kell.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - választható, szükséges a CDDA támogatáshoz
@@ -104,182 +87,6 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   <emphasis role="bold">ALSA</emphasis> - választható, az ALSA audió kimenet
   támogatásához. Legalább 0.9.0rc4 szükséges.
   </para></listitem>
-</itemizedlist>
-</sect1>
-
-
-<sect1 id="video-cards">
-<title>Videó kártyák</title>
-
-<para>
-Két nagy típusa van a videó kártyáknak. Az egyik (az újabbak) tudják a
-<emphasis role="bold">hardveres méretezést és YUV gyorsítást</emphasis>,
-a másik nem.
-</para>
-
-
-<sect2 id="yuv-cards">
-<title>YUV kártyák</title>
-
-<para>
-A képet bármilyen méretben meg tudják jeleníteni és átméretezni (nagyítani),
-ami belefér a memóriájukba, <emphasis role="bold">kevés CPU használattal</emphasis>
-(még nagyításnál is), így a teljes képernyős vetítés szép és nagyon gyors.
-
-<itemizedlist>
-<listitem><para>
-  <emphasis role="bold">Matrox G200/G400/G450/G550 kártyák</emphasis>: bár van
-  <link linkend="vidix">Vidix vezérlő</link> hozzájuk, inkább az mgs_vid
-  modult használd, sokkal jobban működik.
-  Nézd meg az <link linkend="mga_vid">mga_vid</link> részt a telepítéséhez
-  és használatához! Fontos, hogy az ott leírtakat az <application>MPlayer</application>
-  fordítása <emphasis>előtt</emphasis> végezd el, különben nem lesz beépített
-  mga_vid támogatásod. Szintén nézd meg a <link linkend="tvout-mga-g400">Matrox TV-kimenet</link>
-  részt! <emphasis role="bold"> Ha nem használsz Linux-ot</emphasis>, csak a
-  VIDIX vezérlőben bízhatsz: olvasd el a <link linkend="vidix">VIDIX</link> részt.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">3Dfx Voodoo3/Banshee kártyák</emphasis>: nézd meg a
-  <link linkend="tdfxfb">tdfxfb</link> részt, ha nagy sebességnövekedést akarsz
-  elérni! Fontos, hogy az ott leírtakat az <application>MPlayer</application>
-  fordítása <emphasis role="bold">előtt</emphasis> végezd el, különben nem lesz
-  beépített 3Dfx támogatásod.
-  Ha X-et használsz, legalább <emphasis role="bold">4.2.0</emphasis>-est
-  használj, mert a 3dfx Xv vezérlő a 4.1.0 és korábbi verziókban hibás volt.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">ATI kártyák</emphasis>: <link linkend="vidix">VIDIX</link>
-  vezérlő elérhető a következő kártyákhoz:
-  <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
-  Nézd meg a TV-out dokumentáció <link linkend="tvout-ati">ATI kártyákra</link>
-  vonatkozó részét, hogy megtudd a kártyád TV-kimenete támogatott-e a
-  Linux/<application>MPlayer</application> alatt!
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">S3 kártyák</emphasis>: a Savage és Virge/DX chip-eknek van
-  hardveres gyorsításuk. Használj olyan friss XFree86-ot, amilyet csak tudsz, a régebbi
-  vezérlők hibásak. A Savage chip-eknek problémáik vannak a YV12 megjelenítéssel, lásd
-  az <link linkend="s3">S3 Xv</link> részt a részletekért. Régebbi, Trio kártyákban nincs
-  vagy lassú a hardveres támogatás.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">nVidia kártyák</emphasis>: talán jó választás a videó lejátszáshoz,
-  talán nem. Ha nincs GeForce2 (vagy újabb) kártyád, valószínűleg nem fog menni hiba nélkül.
-  <emphasis role="bold">Az XFree86 beépített nVidia vezérlője nem minden kártyán támogatja a
-  hardveres YUV gyorsítást.</emphasis> Le kell töltened az nVidia zárt forrású vezérlőjét az
-  <ulink url="http://nvidia.com">nVidia.com</ulink>-ról.
-  Nézd meg az <link linkend="nvidia">nVidia Xv vezérlő</link> fejezetet bővebb információkért!
-  Szintén nézd meg az <link linkend="tvout-nvidia">nVidia TV-kimenet</link> részt ha TV-t is
-  akarsz használni.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">3DLabs GLINT R3 és Permedia3</emphasis>: VIDIX vezérlő van
-  hozzá (pm3_vid). Kérlek olvasd el a <link linkend="vidix">VIDIX</link> fejezetet
-  bővebb infókért!
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">Egyéb kártyák</emphasis>: nincs a fentiekben?
-  <itemizedlist>
-  <listitem><simpara>
-    Próbáld ki, hogy az XFree86 vezérlő (és a kártyád) támogatja-e a hardveres
-    gyorsítást! Lásd az <link linkend="xv">Xv</link> fejezetet a részletekért!
-    </simpara></listitem>
-  <listitem><simpara>
-    Ha nem, akkor a kártyád videós tulajdonságai nem támogatottak az operációs rendszered
-    alatt. :( Ha a hardveres méretezés működik Windows alatt, az nem jelenti azt, hogy
-    Linux vagy más operációs rendszer alatt is fog menni, ez a vezérlőtől függ.
-    A legtöbb gyártó sem Linuxos vezérlőt nem ad ki, sem a chip-jei specifikációját -
-    így hát peched van, ha az ő kártyájukat használod.
-    Lásd <xref linkend="non-yuv-cards"/>.
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-</itemizedlist>
-</para>
-</sect2>
-
-
-<sect2 id="non-yuv-cards" xreflabel="Nem YUV-os kártyák">
-<title>Nem YUV-os kártyák</title>
-
-<para>
-A teljes képernyős lejátszás vagy a <emphasis role="bold">szoftveres méretezés</emphasis>
-engedélyezésével (használd a <option>-zoom</option> vagy a <option>-vf</option> kapcsolót,
-de figyelmeztetlek: lassú lesz), vagy egy kisebb, pl. 352x288-as felbontásra való átváltással
-lehetséges. Ha nincs YUV gyorsításod, az utóbbi módszer javasolt.
-A videó mód váltást a <option>-vm</option> kapcsolóval engedélyezheted, mely a következő
-vezérlőkkel működik:
-<itemizedlist>
-<listitem><simpara>
-  <emphasis role="bold">használsz</emphasis> XFree86-t: részleteket lásd a <link linkend="dga">DGA vezérlőről</link>
-  és az <link linkend="x11">X11 vezérlőről</link> szóló fejezetekben. A DGA a javasolt! Megpróbálhatod
-  a DGA-t SDL-en keresztül is, van amikor az a jobb.
-  </simpara></listitem>
-<listitem><simpara>
-  <emphasis role="bold">nem használsz</emphasis> XFree86-t: próbáld ezeket a vezérlőket ebben a sorrendben
-  <link linkend="vesa">vesa</link>,
-  <link linkend="fbdev">fbdev</link>,
-  <link linkend="svgalib">svgalib</link>,
-  <link linkend="aalib">aalib</link>.
-  </simpara></listitem>
-</itemizedlist>
-</para>
-</sect2>
-
-<!-- FIXME: find a more logical organization for this section -->
-<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic kártyák">
-<title>Cirrus-Logic kártyák</title>
-<itemizedlist>
-<listitem><para>
-  GD 7548: alaplapi vezérlő, Compaq Armada 41xx notebook sorozatban tesztelve.
-  <itemizedlist>
-  <listitem><simpara>
-    XFree86 3: 8/16bpp módban működik. Bár a vezérlő borzasztóan lassú
-    és hibás 800x600@16bpp-ben. <emphasis role="bold">Javasolt: 640x480@16bpp</emphasis>
-   </simpara></listitem>
-  <listitem><simpara>
-    XFree86 4: az Xserver kifagy rögtön indítás után, ha a gyorsítás nincs kikapcsolva,
-    de akkor meg az egész cucc lassabb lesz, mint az XFree86 3. Nincs XVideo.
-   </simpara></listitem>
-  <listitem><simpara>
-    FBdev: a framebuffer-t a <systemitem>clgenfb</systemitem> kernel vezérlővel tudod
-    bekapcsolni, de nekem csak 8bpp-ben működött, így használhatatlan.
-    A clgenfb forrását ki kell egészíteni a 7548 ID-vel fordítás előtt.
-   </simpara></listitem>
-  <listitem><simpara>
-    VESA: a kártya csak a VBE 1.2-t ismeri, így a VESA kimenet nem használható. UniVBE-vel
-    sem lehet megkerülni.
-  </simpara></listitem>
-  <listitem><simpara>
-    SVGAlib: régebbi Cirrus chip-nek ismeri fel. Használható de lassú a <option>-bpp 8</option> kapcsolóval.
-  </simpara></listitem>
-</itemizedlist>
-</para></listitem>
-</itemizedlist>
-</sect2>
-</sect1>
-
-
-<sect1 id="sound-cards">
-<title>Hangkártyák</title>
-
-<itemizedlist>
-<listitem><simpara>
-  <emphasis role="bold">Soundblaster Live!</emphasis>: ezzel a kártyával 4 vagy 6
-  (<emphasis role="bold">5.1</emphasis>) csatornás AC3 dekódolást használhatsz a 2 helyett. Olvasd el a
-  <link linkend="swac3">szoftveres AC3 dekódolás</link>ról szóló fejezetet! Hardveres AC3
-  használathoz ALSA 0.9-et <emphasis role="bold">kell</emphasis> használnod OSS emulációval!
-  </simpara></listitem>
-<listitem><simpara>
-  <emphasis role="bold">C-Media S/PDIF kimenettel</emphasis>: hardveres AC3
-  áteresztés lehetséges ezeken a kártyákon, lásd a
-  <link linkend="hwac3">hardveres AC3 dekódolás</link> fejezetet!
-  </simpara></listitem>
-<listitem><simpara>
-  <emphasis role="bold">Más kártyák</emphasis> tulajdonságait nem támogatja az
-  <application>MPlayer</application>. <emphasis role="bold">Nagyon ajánlott, hogy elolvasd
-  a <link linkend="audio">hangkártyákról</link> szóló részt!</emphasis>
-  </simpara></listitem>
 </itemizedlist>
 </sect1>
 

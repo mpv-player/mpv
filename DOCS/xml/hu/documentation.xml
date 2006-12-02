@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21374 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -47,7 +47,7 @@ linkeket. Ha van kérdésed, keress rá a <link linkend="toc">tartalomjegyzékbe
 olvasd el a <xref linkend="faq"/>-t, vagy greppelj a file-okban. A legtöbb
 kérdésre fogsz választ találni, amire pedig nem, az nagy valószínűséggel már
 megválaszolásra került valamelyik
-<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">levelezési listán</ulink>.
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">levelezési listán</ulink>.
 <!-- FIXME: This refers to nonexistent links
 Nézd meg az
 <ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archivumot</ulink>,
