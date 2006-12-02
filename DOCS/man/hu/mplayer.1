@@ -1,4 +1,4 @@
-.\" Synced with r21430
+.\" Synced with r21446
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -243,7 +243,7 @@ Hangerõ csökkentése/\:növelése.
 Hang elnémítása.
 .IPs "_ (csak MPEG-TS és libavformat mellett)"
 Váltás az elérhetõ videó sávok között.
-.IPs "# (csak MPEG és Matroska)"
+.IPs "# (csak MPEG, Matroska, AVI és libavformat mellett)"
 Váltás az elérhetõ audió sávok között.
 .IPs "TAB (csak MPEG-TS)"
 Váltás az elérhetõ programok között.
@@ -4911,12 +4911,6 @@ A szintaxis:
 .B \-vf <szûrõ1[=paraméter1:paraméter2:...],szûrõ2,...>
 Megad egy videó szûrõ láncot.
 .
-.TP
-.B \-vop <...,szûrõ2[=paraméter1:paraméter2:...],szûrõ1> (IDEJÉTMÚLT)
-Beállítja a videó szûrõk listáját, amit
-.B fordított
-sorrendben kell végrehajtani.
-Elhagytuk a \-vf kedvéért.
 .PP
 Több paraméter opcionális és elhagyása esetén az alapértelmezett értéket veszi fel.
 Ha explicit elõ akarod írni az alapértelmezett paraméter használatát, írj be '-1'-et.
