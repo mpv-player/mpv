@@ -40,8 +40,6 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "bswap.h"
-
 #include "libvo/sub.h"
 extern subtitle *vo_sub;
 

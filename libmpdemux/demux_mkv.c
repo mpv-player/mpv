@@ -18,7 +18,6 @@
 #include "stheader.h"
 #include "ebml.h"
 #include "matroska.h"
-#include "bswap.h"
 
 #include "mp_msg.h"
 #include "help_mp.h"

@@ -30,8 +30,6 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "bswap.h"
-
 /*
  * #defines below taken from PVA spec (see URL above)
  */

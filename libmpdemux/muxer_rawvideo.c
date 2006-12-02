@@ -14,8 +14,6 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 
-#include "bswap.h"
-
 #include "muxer.h"
 
 static muxer_stream_t* rawvideofile_new_stream(muxer_t *muxer,int type){

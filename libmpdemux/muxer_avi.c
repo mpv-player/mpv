@@ -12,8 +12,6 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "bswap.h"
-
 #include "muxer.h"
 #include "aviheader.h"
 #include "ms_hdr.h"

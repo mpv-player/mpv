@@ -11,7 +11,6 @@
 #include "parse_es.h"
 #include "stheader.h"
 
-#include "bswap.h"
 #include "ms_hdr.h"
 
 typedef struct {

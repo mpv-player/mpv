@@ -31,7 +31,6 @@ Video codecs: (supported by RealPlayer8 for Linux)
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-#include "bswap.h"
 
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
