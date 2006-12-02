@@ -74,9 +74,9 @@ CFLAGS-$(CONFIG_LIBAVUTIL)      += -I../libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC)     += -I../libavcodec
 CFLAGS-$(CONFIG_LIBAVFORMAT)    += -I../libavformat
 
-CPLUSPLUSFLAGS  = $(CFLAGS) -D__STDC_LIMIT_MACROS
+CXXFLAGS  = $(CFLAGS) -D__STDC_LIMIT_MACROS
 
 .cpp.o:
-	$(CC) -c $(CPLUSPLUSFLAGS) -o $@ $<
+	$(CC) -c $(CXXFLAGS) -o $@ $<
 
 include ../mpcommon.mak
