@@ -480,7 +480,7 @@ void guiDone(void)
     cfg_write();
 }
 
-static void add_vop(char * str)
+static void add_vf(char * str)
 {
     mp_msg(MSGT_GPLAYER, MSGL_STATUS, MSGTR_AddingVideoFilter, str);
     if (vo_plugin_args)
@@ -509,7 +509,7 @@ static void add_vop(char * str)
     }
 }
 
-static void remove_vop(char * str)
+static void remove_vf(char * str)
 {
     int n = 0;
     if (!vo_plugin_args ) return;

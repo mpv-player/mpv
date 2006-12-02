@@ -514,7 +514,7 @@ void guiLoadSubtitle( char * name )
 
 }
 
-static void add_vop( char * str )
+static void add_vf( char * str )
 {
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_AddingVideoFilter,str );
  if ( vo_plugin_args )
@@ -526,7 +526,7 @@ static void add_vop( char * str )
   } else { vo_plugin_args=malloc( 2 * sizeof(  m_obj_settings_t ) ); vo_plugin_args[0].name=strdup( str );vo_plugin_args[0].attribs = NULL; vo_plugin_args[1].name=NULL; }
 }
 
-static void remove_vop( char * str )
+static void remove_vf( char * str )
 {
  int n = 0;
 
@@ -724,7 +724,7 @@ int guiGetEvent( int type,char * arg )
 #ifdef HAVE_DXR3
 	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS
 #ifdef USE_LIBAVCODEC
-	 && !gtkVopLAVC
+	 && !gtkVfLAVC
 #endif
 	 )
 	 {
@@ -812,21 +812,21 @@ int guiGetEvent( int type,char * arg )
 
 #ifdef HAVE_DXR3
 #ifdef USE_LIBAVCODEC
-	remove_vop( "lavc" );
+	remove_vf( "lavc" );
 #endif
 	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) )
 	 {
 	  if ( ( guiIntfStruct.StreamType != STREAMTYPE_DVD)&&( guiIntfStruct.StreamType != STREAMTYPE_VCD ) )
 	   {
 #ifdef USE_LIBAVCODEC
-	    if ( gtkVopLAVC ) add_vop( "lavc" );
+	    if ( gtkVfLAVC ) add_vf( "lavc" );
 #endif
 	   }
 	 }
 #endif
 // ---	 
-	if ( gtkVopPP ) add_vop( "pp" );
-	 else remove_vop( "pp" );
+	if ( gtkVfPP ) add_vf( "pp" );
+	 else remove_vf( "pp" );
 		 
 // --- audio opts
 //	if ( ao_plugin_cfg.plugin_list ) { free( ao_plugin_cfg.plugin_list ); ao_plugin_cfg.plugin_list=NULL; }

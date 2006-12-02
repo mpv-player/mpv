@@ -22,9 +22,9 @@
 
 int    gtkEnableAudioEqualizer = 0;
 
-int    gtkVopPP = 0;
+int    gtkVfPP = 0;
 #ifdef USE_LIBAVCODEC
- int    gtkVopLAVC = 0;
+ int    gtkVfLAVC = 0;
 #endif
 
 int    gtkAONorm = 0;
@@ -102,10 +102,10 @@ static m_option_t gui_opts[] =
  { "v_vfm",&video_fm_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
  { "a_afm",&audio_fm_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
 
- { "vf_pp",&gtkVopPP,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "vf_pp",&gtkVfPP,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_autoq",&auto_quality,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },
 #ifdef USE_LIBAVCODEC
- { "vf_lavc",&gtkVopLAVC,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "vf_lavc",&gtkVfLAVC,CONF_TYPE_FLAG,0,0,1,NULL },
 #endif
 
  { "ao_driver",&audio_driver_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },

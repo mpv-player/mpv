@@ -4,8 +4,8 @@
 
 extern int gtkEnableAudioEqualizer;
 
-extern int    gtkVopPP;
-extern int    gtkVopLAVC;
+extern int    gtkVfPP;
+extern int    gtkVfLAVC;
 
 extern int    gtkAONorm;
 extern int    gtkAOFakeSurround;
