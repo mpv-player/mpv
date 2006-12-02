@@ -8286,20 +8286,7 @@ if test "$_mtrr" = yes ; then
   echo
 fi
 
-if x86; then
-  if test "$_win32" = no ; then
-    if test "$_win32codecsdir" ; then
-      echo "Failed to find a Win32 codecs directory at $_win32codecsdir!"
-    else
-      echo "Failed to find a Win32 codecs directory! (default: /usr/local/lib/codecs/)"
-    fi
-    cat << EOF
-Create it and copy the DLL files there! You can download the codecs from our
-homepage at http://www.mplayerhq.hu/MPlayer/releases/codecs/
-
-EOF
-  fi
-else
+if not x86; then
   cat <<EOF
 NOTE: Win32 codec DLLs are not supported on your CPU ($host_arch) or your
 operating system ($system_name). You may encounter a few files that cannot
