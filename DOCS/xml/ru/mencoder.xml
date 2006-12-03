@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21394 -->
+<!-- synced with r21425 -->
 <chapter id="mencoder">
 <title>Основы использования <application>MEncoder</application></title>
 
@@ -243,9 +243,9 @@
   Создание видео Macromedia Flash, подходящего для воспроизведения в веб браузере плагином
   Macromedia Flash:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
--lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3 \
--srate 22050
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replaceable> -of lavf \
+    -oac mp3lame -lameopts abr:br=56 -srate 22050 -ovc lavc \
+    -lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3
 </screen>
 </para>
 </informalexample>
@@ -316,7 +316,8 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
 копированием звуковой дорожки.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy -o <replaceable>output.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
+    -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -328,8 +329,10 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy 
 звуковой дорожки в MP3. Будьте аккуратны, используя этот метод, так как в некоторых случаях
 это может привести к рассинхронизации аудио/видео.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o /dev/null
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>output.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
+    -oac mp3lame -lameopts vbr=3 -o /dev/null
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
+    -oac mp3lame -lameopts vbr=3 -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -366,9 +369,10 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
 <title>Кодирование для PSP</title>
 <para>
 <screen>
-mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
--af lavcresample=24000 -vf harddup -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
--ofps 30000/1001 input.video -o output.psp
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
+-oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+-lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+<replaceable>input.video</replaceable> -o <replaceable>output.psp</replacable>
 </screen>
   Заметьте, что можно задать заголовок видео опцией 
   <option>-info name=<replaceable>Заголовок_Фильма</replaceable></option>.
@@ -397,21 +401,25 @@ section.
 <para>
 Пример:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other_options</replaceable> -o <replaceable>output.mpg</replaceable>
+mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc -lavcopts
+vcodec=mpeg1video \
+    -oac copy <replaceable>other_options</replaceable> -o <replaceable>output.mpg</replaceable>
 </screen>
 Создается файл MPEG-1 пригодный для воспроизведения на системах с минимальной поддержкой
 мультимедиа, таких как только что установленные Windows:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>output.mpg</replaceable> -oac lavc -ovc lavc \
--lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
+mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 \
+    -o <replaceable>output.mpg</replaceable> -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
+    -lavcopts vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 То же, но используя <systemitem class="library">libavformat</systemitem> MPEG
 <!-- FIXME muxer -->
 муксер[muxer]:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -of lavf -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
--ovc lavc -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0 \
--o VCD.mpg -ofps 25 -vf scale=352:288,harddup -oac lavc -lavcopts acodec=mp2:abitrate=224
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>VCD.mpg</replaceable> -ofps 25 -vf scale=352:288,harddup -of lavf \
+    -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
+    -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
+    -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0
 </screen>
 </para>
 </informalexample>
@@ -451,7 +459,8 @@ mencoder <replaceable>input.avi</replaceable> -of lavf -lavfopts format=mpg:i_ce
 <para>
 Использование:
 <screen>
-mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -vf scale=640:480 -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell \
+    -vf scale=640:480 -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -494,7 +503,8 @@ mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:m
 <para>
 Пример:
 <screen>
-mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D \
+    -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 
@@ -532,7 +542,8 @@ The explanation of the <option>-mf</option> option is in the man page.
 <para>
 Создание файла MPEG-4 из всех JPEG файлов текущего каталога:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc \
+    -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -541,7 +552,8 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=m
 <para>
 Создание файла MPEG-4 из некоторых JPEG файлов текущего каталога:
 <screen>
-mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg \
+    -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -552,7 +564,7 @@ mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=6
 список файлов, используемых в качестве источника, по одному в строке):
 <screen>
 mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
--ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
+    -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -642,17 +654,20 @@ VOBsub. Они состоят из пары файлов, оканчивающи
 <example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
 <title>копирование двух субтитров из DVD при выполнении двухпроходного кодирования</title>
 <screen>
-rm subtitles.idx subtitles.sub
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
+rm <replaceable>subtitles.idx</replaceable> <replaceable>subtitles.sub</replaceable>
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
+    -vobsubout subtitles -vobsuboutindex 0 -sid 2
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
+    -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
 --></screen>
 </example>
 
 <example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Копирование французских субтитров из MPEG файла</title>
 <screen>
-rm subtitles.idx subtitles.sub
-mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1 -nosound -ovc copy
+rm <replaceable>subtitles.idx</repaceable> <replaceable>subtitles.sub</replaceable>
+mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 0 \
+    -vobsuboutid fr -sid 1 -nosound -ovc copy
 </screen>
 </example>
 
@@ -692,7 +707,8 @@ MPEG-4 имееть уникальную возможность: видео по
 
 <para>
 Использование:
-<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>output.avi</replaceable></screen>
+<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -vf crop=714:548:0:14 -oac copy -ovc lavc \
+    -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -o <replaceable>output.avi</replaceable></screen>
 </para>
 </sect1>
 
