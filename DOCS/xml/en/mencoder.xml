@@ -522,11 +522,11 @@ mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D \
 
 
 <sect1 id="menc-feat-enc-images">
-<title>Encoding from multiple input image files (JPEG, PNG, TGA, SGI)</title>
+<title>Encoding from multiple input image files (JPEG, PNG, TGA, etc.)</title>
 
 <para>
 <application>MEncoder</application> is capable of creating movies from one
-or more JPEG, PNG or TGA files. With simple framecopy it can create MJPEG
+or more JPEG, PNG, TGA, or other image files. With simple framecopy it can create MJPEG
 (Motion JPEG), MPNG (Motion PNG) or MTGA (Motion TGA) files.
 </para>
 
