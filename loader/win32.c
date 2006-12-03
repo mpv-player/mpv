@@ -5291,7 +5291,9 @@ struct libs libraries[]={
 static void ext_stubs(void)
 {
     volatile int idx = 0xdeadabcd;
-    printf("Called unk_%s\n", export_names[idx]);
+    // make sure gcc does not do eip-relative call or something like that
+    volatile void (*my_printf)(char *, char *) = (void *)0xdeadfbcd;
+    my_printf("Called unk_%s\n", export_names[idx]);
 }
 
 #define MAX_STUB_SIZE 0x60
@@ -5302,6 +5304,7 @@ static char extcode[MAX_NUM_STUBS * MAX_STUB_SIZE];
 static void* add_stub(void)
 {
     int i;
+    int found = 0;
     // generated code in runtime!
     char* answ = extcode + pos * MAX_STUB_SIZE;
     if (pos >= MAX_NUM_STUBS) {
@@ -5310,14 +5313,20 @@ static void* add_stub(void)
     }
     memcpy(answ, ext_stubs, MAX_STUB_SIZE);
     for (i = 0; i < MAX_STUB_SIZE - 3; i++) {
-      if (*(int*)(answ + i) == 0xdeadabcd)
-        break;
+      int *magic = (int *)(answ + i);
+      if (*magic == 0xdeadabcd) {
+        *magic = pos;
+        found |= 1;
+      }
+      if (*magic == 0xdeadfbcd) {
+        *magic = (intptr_t)printf;
+        found |= 2;
+      }
     }
-    if (*(int*)(answ + i) != 0xdeadabcd) {
+    if (found != 3) {
       printf("magic code not found in ext_subs, expect crash\n");
       return NULL;
     }
-    *(int*)(answ + i) = pos;
     pos++;
     return (void*)answ;
 }
