@@ -570,7 +570,7 @@ static int decode_font(ass_track_t* track)
 	assert(dsize <= size / 4 * 3 + 2);
 	
 	if (track->library->extract_fonts)
-		ass_process_font(track->library, track->parser_priv->fontname, (char*)buf, dsize);
+		ass_add_font(track->library, track->parser_priv->fontname, (char*)buf, dsize);
 
 error_decode_font:
 	if (buf) free(buf);
@@ -1083,12 +1083,12 @@ static char* validate_fname(char* name)
 }
 
 /**
- * \brief Process embedded matroska font. Saves it to ~/.mplayer/fonts.
+ * \brief Add a memory font.
  * \param name attachment name
  * \param data binary font data
  * \param data_size data size
 */ 
-void ass_process_font(ass_library_t* library, const char* name, char* data, int data_size)
+void ass_add_font(ass_library_t* library, const char* name, char* data, int data_size)
 {
 	char buf[1000];
 	FILE* fp = 0;
