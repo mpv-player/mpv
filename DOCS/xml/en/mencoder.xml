@@ -18,13 +18,13 @@ encoding with <application>MEncoder</application>.
 <title>Selecting codecs and container formats</title>
 
 <para>
-  Audio and video codecs for encoding are selected with the
-  <option>-oac</option> and <option>-ovc</option> options, respectively.
-  Type for instance:
-  <screen>mencoder -ovc help</screen>
-  to list all video codecs supported by the version of
-  <application>MEncoder</application> on your machine.
-  The following choices are available:
+Audio and video codecs for encoding are selected with the
+<option>-oac</option> and <option>-ovc</option> options, respectively.
+Type for instance:
+<screen>mencoder -ovc help</screen>
+to list all video codecs supported by the version of
+<application>MEncoder</application> on your machine.
+The following choices are available:
 </para>
 <para>
 Audio Codecs:
@@ -111,13 +111,13 @@ Video codecs:
 </informaltable>
 </para>
 <para>
-  Output container formats are selected with the <option>-of</option>
-  option.
-  Type:
-  <screen>mencoder -of help</screen>
-  to list all containers supported by the version of
-  <application>MEncoder</application> on your machine.
-  The following choices are available:
+Output container formats are selected with the <option>-of</option>
+option.
+Type:
+<screen>mencoder -of help</screen>
+to list all containers supported by the version of
+<application>MEncoder</application> on your machine.
+The following choices are available:
 </para>
 <para>
 Container formats:
@@ -151,25 +151,25 @@ Container formats:
 </tbody>
 </tgroup>
 </informaltable>
-  The AVI container is the native container format for
-  <application>MEncoder</application>, which means that it's the one that
-  is best handled, and the one for which <application>MEncoder</application>
-  was designed.
-  As noted above, other container formats are usable, but you may
-  experience problems when using them.
+The AVI container is the native container format for
+<application>MEncoder</application>, which means that it's the one that
+is best handled, and the one for which <application>MEncoder</application>
+was designed.
+As noted above, other container formats are usable, but you may
+experience problems when using them.
 </para>
 
 <para>
 <systemitem class="library">libavformat</systemitem> containers:
 </para>
 <para>
-  If you selected <systemitem class="library">libavformat</systemitem>
-  to do the muxing of the output file (by using the <option>-of lavf</option>),
-  the appropriate container format will be determined by the file extension
-  of the output file.
-  You may force a particular container format with
-  <systemitem class="library">libavformat</systemitem>'s
-  <option>format</option> option.
+If you selected <systemitem class="library">libavformat</systemitem>
+to do the muxing of the output file (by using the <option>-of lavf</option>),
+the appropriate container format will be determined by the file extension
+of the output file.
+You may force a particular container format with
+<systemitem class="library">libavformat</systemitem>'s
+<option>format</option> option.
 
 <informaltable frame="all">
 <tgroup cols="2">
@@ -228,22 +228,22 @@ Container formats:
 </tbody>
 </tgroup>
 </informaltable>
-  As you can see, <systemitem class="library">libavformat</systemitem>
-  allows <application>MEncoder</application> to mux into a considerable
-  variety of containers.
-  Unfortunately, as <application>MEncoder</application> was not designed
-  from the beginning to support container formats other than AVI,
-  your should really be paranoid about the resulting file.
-  Please check to be sure that the audio/video synchronization is OK
-  and that the file can be played correctly by players other than
-  <application>MPlayer</application>.
+As you can see, <systemitem class="library">libavformat</systemitem>
+allows <application>MEncoder</application> to mux into a considerable
+variety of containers.
+Unfortunately, as <application>MEncoder</application> was not designed
+from the beginning to support container formats other than AVI,
+your should really be paranoid about the resulting file.
+Please check to be sure that the audio/video synchronization is OK
+and that the file can be played correctly by players other than
+<application>MPlayer</application>.
 </para>
 
 <informalexample>
 <para>Example:</para>
 <para>
-  Creating a Macromedia Flash video suitable for playback in a web browser
-  with the Macromedia Flash plugin:
+Creating a Macromedia Flash video suitable for playback in a web browser
+with the Macromedia Flash plugin:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replaceable> -of lavf \
     -oac mp3lame -lameopts abr:br=56 -srate 22050 -ovc lavc \
@@ -259,41 +259,41 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
 <title>Selecting input file or device</title>
 
 <para>
-  <application>MEncoder</application> can encode from files or directly
-  from a DVD or VCD disc.
-  Simply include the filename on the command line to encode from a file,
-  or <option>dvd://</option><replaceable>titlenumber</replaceable> or
-  <option>vcd://</option><replaceable>tracknumber</replaceable> to encode
-  from a DVD title or VCD track.
-  If you have already copied a DVD to your hard drive (you can use a tool
-  such as <application>dvdbackup</application>, available on most systems),
-  and wish to encode from the copy, you should still use the
-  <option>dvd://</option> syntax, along with <option>-dvd-device</option>
-  followed by the path to the copied DVD root.
+<application>MEncoder</application> can encode from files or directly
+from a DVD or VCD disc.
+Simply include the filename on the command line to encode from a file,
+or <option>dvd://</option><replaceable>titlenumber</replaceable> or
+<option>vcd://</option><replaceable>tracknumber</replaceable> to encode
+from a DVD title or VCD track.
+If you have already copied a DVD to your hard drive (you can use a tool
+such as <application>dvdbackup</application>, available on most systems),
+and wish to encode from the copy, you should still use the
+<option>dvd://</option> syntax, along with <option>-dvd-device</option>
+followed by the path to the copied DVD root.
 
-  The <option>-dvd-device</option> and <option>-cdrom-device</option>
-  options can also be used to override the paths to the device nodes
-  for reading directly from disc, if the defaults of
-  <filename>/dev/dvd</filename> and <filename>/dev/cdrom</filename> do
-  not work on your system.
+The <option>-dvd-device</option> and <option>-cdrom-device</option>
+options can also be used to override the paths to the device nodes
+for reading directly from disc, if the defaults of
+<filename>/dev/dvd</filename> and <filename>/dev/cdrom</filename> do
+not work on your system.
 </para>
 <para>
-  When encoding from DVD, it is often desirable to select a chapter or
-  range of chapters to encode.
-  You can use the <option>-chapter</option> option for this purpose.
-  For example, <option>-chapter</option> <replaceable>1-4</replaceable>
-  will only encode chapters 1 through 4 from the DVD.
-  This is especially useful if you will be making a 1400 MB encode
-  targetted for two CDs, since you can ensure the split occurs exactly
-  at a chapter boundary rather than in the middle of a scene.
+When encoding from DVD, it is often desirable to select a chapter or
+range of chapters to encode.
+You can use the <option>-chapter</option> option for this purpose.
+For example, <option>-chapter</option> <replaceable>1-4</replaceable>
+will only encode chapters 1 through 4 from the DVD.
+This is especially useful if you will be making a 1400 MB encode
+targetted for two CDs, since you can ensure the split occurs exactly
+at a chapter boundary rather than in the middle of a scene.
 </para>
 <para>
-  If you have a supported TV capture card, you can also encode from the
-  TV-in device.
-  Use <option>tv://</option><replaceable>channelnumber</replaceable> as
-  the filename, and <option>-tv</option> to configure various capture
-  settings.
-  DVB input works similarly.
+If you have a supported TV capture card, you can also encode from the
+TV-in device.
+Use <option>tv://</option><replaceable>channelnumber</replaceable> as
+the filename, and <option>-tv</option> to configure various capture
+settings.
+DVB input works similarly.
 </para>
 </sect1>
 
@@ -349,10 +349,10 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 <title>Encoding to Sony PSP video format</title>
 
 <para>
-  <application>MEncoder</application> supports encoding to Sony PSP's video
-  format, but, depending on the revision of the PSP software, the constraints
-  may differ.
-  You should be safe if you respect the following constraints:
+<application>MEncoder</application> supports encoding to Sony PSP's video
+format, but, depending on the revision of the PSP software, the constraints
+may differ.
+You should be safe if you respect the following constraints:
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Bitrate</emphasis>: it should not exceed 1500kbps,
@@ -378,12 +378,12 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 <para>
 <screen>
 mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
--oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
--lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
-<replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
+    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+    -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+    <replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
 </screen>
-  Note that you can set the title of the video with
-  <option>-info name=<replaceable>MovieTitle</replaceable></option>.
+Note that you can set the title of the video with
+<option>-info name=<replaceable>MovieTitle</replaceable></option>.
 </para>
 </example>
 </sect1>
@@ -432,14 +432,14 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>VCD.mpg</replaceab
 
 <note><title>Hint:</title>
 <para>
-  If for some reason the video quality of the second pass did not
-  satisfy you, you may re-run your video encode with a different target
-  bitrate, provided that you saved the statistics file of the previous
-  pass.
-  This is possible because the statistics file's primary goal is to
-  record the complexity of each frame, which doesn't depend heavily on
-  bitrate. You should note, though, that you'll get the best results if
-  all passes are run with target bitrates that do not differ very much.
+If for some reason the video quality of the second pass did not
+satisfy you, you may re-run your video encode with a different target
+bitrate, provided that you saved the statistics file of the previous
+pass.
+This is possible because the statistics file's primary goal is to
+record the complexity of each frame, which doesn't depend heavily on
+bitrate. You should note, though, that you'll get the best results if
+all passes are run with target bitrates that do not differ very much.
 </para>
 </note>
 
@@ -490,24 +490,24 @@ them. This section is about <emphasis role="bold">copying</emphasis>.
   has no real life value at all. Rationally: video stream copying can be
   useful for example when only the audio stream has to be encoded (like,
   uncompressed PCM to MP3).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Audio stream</emphasis> (option <option>-oac copy</option>):
   straightforward. It is possible to take an external audio file (MP3,
   WAV) and mux it into the output stream. Use the
   <option>-audiofile <replaceable>filename</replaceable></option> option
   for this.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
-  Using <option>-oac copy</option> to copy from one container format to
-  another may require the use of <option>-fafmttag</option> to keep the
-  audio format tag of the original file.
-  For example, if you are converting an NSV file with AAC audio to an AVI
-  container, the audio format tag will be incorrect and it will have to
-  be changed. For a list of audio format tags, check
-  <filename>codecs.conf</filename>.
+Using <option>-oac copy</option> to copy from one container format to
+another may require the use of <option>-fafmttag</option> to keep the
+audio format tag of the original file.
+For example, if you are converting an NSV file with AAC audio to an AVI
+container, the audio format tag will be incorrect and it will have to
+be changed. For a list of audio format tags, check
+<filename>codecs.conf</filename>.
 </para>
 
 <para>
@@ -536,11 +536,11 @@ or more JPEG, PNG, TGA, or other image files. With simple framecopy it can creat
   <application>MEncoder</application> <emphasis>decodes</emphasis> the input image(s) with
   <systemitem class="library">libjpeg</systemitem> (when decoding PNGs, it
   will use <systemitem class="library">libpng</systemitem>).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <application>MEncoder</application> then feeds the decoded image to the
   chosen video compressor (DivX4, Xvid, FFmpeg msmpeg4, etc.).
-  </para></listitem>
+</para></listitem>
 </orderedlist>
 
 <formalpara>
@@ -607,7 +607,7 @@ Width must be integer multiple of 4, it is a limitation of the RAW RGB AVI forma
 Creating a Motion PNG (MPNG) file from all the PNG files in the current
 directory:
 <screen>
-mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>output.avi</replaceable> <!--
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>output.avi</replaceable><!--
 --></screen>
 </para>
 </informalexample>
