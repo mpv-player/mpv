@@ -945,7 +945,8 @@ mp_input_read_key_code(int time) {
 
   if(num_key_fd == 0)
   {
-    usec_sleep(time * 1000);
+    if (time)
+      usec_sleep(time * 1000);
     return MP_INPUT_NOTHING;
   }
 
@@ -1026,7 +1027,7 @@ if(n>0){
       key_fds[i].flags |= MP_FD_DEAD;
     }
   }
-  if (!did_sleep)
+  if (time && !did_sleep)
     usec_sleep(time * 1000);
   return MP_INPUT_NOTHING;
 }
