@@ -372,7 +372,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
 -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
 -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
-<replaceable>input.video</replaceable> -o <replaceable>output.psp</replacable>
+<replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
 </screen>
   Заметьте, что можно задать заголовок видео опцией 
   <option>-info name=<replaceable>Заголовок_Фильма</replaceable></option>.
@@ -664,7 +664,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 <example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Копирование французских субтитров из MPEG файла</title>
 <screen>
-rm <replaceable>subtitles.idx</repaceable> <replaceable>subtitles.sub</replaceable>
+rm <replaceable>subtitles.idx</replaceable> <replaceable>subtitles.sub</replaceable>
 mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 0 \
     -vobsuboutid fr -sid 1 -nosound -ovc copy
 </screen>
