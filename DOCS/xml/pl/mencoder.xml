@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21425 -->
+<!-- synced with r21462 -->
 <!-- Opiekun: Qba -->
 <chapter id="mencoder">
 <title>Podstawy używania <application>MEncodera</application></title>
@@ -516,11 +516,12 @@ mencoder <replaceable>wejście.nsv</replaceable> -oac copy -fafmttag 0x706D \
 
 
 <sect1 id="menc-feat-enc-images">
-<title>Kodowanie z wielu wejściowych plików obrazkowych (JPEG, PNG, TGA, SGI)</title>
+<title>Kodowanie z wielu wejściowych plików obrazkowych (JPEG, PNG, TGA itp.)</title>
 
 <para>
 <application>MEncoder</application> jest w stanie stworzyć film z jednego
-lub wielu plików JPEG, PNG lub TGA. Poprzez proste kopiowanie ramek może stworzyć pliki MJPEG
+lub wielu plików JPEG, PNG, TGA albo innych obrazków.
+Poprzez proste kopiowanie ramek może stworzyć pliki MJPEG
 (Motion (ruchomy - przypis tłumacza) JPEG), MPNG (Motion PNG) lub MTGA (Motion TGA).
 </para>
 
