@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include "libavutil/common.h"
+#include "libavutil/intreadwrite.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -19,8 +20,7 @@
 #ifdef ARCH_X86
 #define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))
 #else
-#define	ASF_LOAD_GUID_PREFIX(guid)	\
-	((guid)[3] << 24 | (guid)[2] << 16 | (guid)[1] << 8 | (guid)[0])
+#define	ASF_LOAD_GUID_PREFIX(guid)	LE_32(guid)
 #endif
 
 #define ASF_GUID_PREFIX_audio_stream	0xF8699E40
@@ -189,11 +189,11 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, dou
     // flags(4) (reliable,seekable,no_cleanpoints?,resend-live-cleanpoints, rest of bits reserved)
 
     buffer +=8+8+4+4+4+4+4+4+4+4;
-    this_stream_num=le2me_16(*(uint16_t*)buffer);buffer+=2;
+    this_stream_num=LE_16(buffer);buffer+=2;
 
     if (this_stream_num == stream_num) {
       buffer+=2; //skip stream-language-id-index
-      avg_ft = le2me_64(*(uint64_t*)buffer); // provided in 100ns units
+      avg_ft = LE_32(buffer) | (uint64_t)LE_32(buffer + 4) << 32; // provided in 100ns units
       *avg_frame_time = avg_ft/10000000.0f;
 
       // after this are values for stream-name-count and
@@ -463,14 +463,14 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
         uint32_t max_bitrate;
         char *ptr = &hdr[pos];
         mp_msg(MSGT_HEADER,MSGL_V,"============ ASF Stream group == START ===\n");
-        stream_count = le2me_16(*(uint16_t*)ptr);
+        stream_count = LE_16(ptr);
         ptr += sizeof(uint16_t);
         if (ptr > &hdr[hdr_len]) goto len_err_out;
         if(stream_count > 0)
               streams = malloc(2*stream_count*sizeof(uint32_t));
         mp_msg(MSGT_HEADER,MSGL_V," stream count=[0x%x][%u]\n", stream_count, stream_count );
         for( i=0 ; i<stream_count ; i++ ) {
-          stream_id = le2me_16(*(uint16_t*)ptr);
+          stream_id = LE_16(ptr);
           ptr += sizeof(uint16_t);
           if (ptr > &hdr[hdr_len]) goto len_err_out;
           memcpy(&max_bitrate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
