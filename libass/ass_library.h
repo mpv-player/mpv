@@ -21,10 +21,19 @@
 #ifndef __ASS_LIBRARY_H__
 #define __ASS_LIBRARY_H__
 
+typedef struct ass_fontdata_s {
+	char* name;
+	char* data;
+	int size;
+} ass_fontdata_t;
+
 struct ass_library_s {
 	char* fonts_dir;
 	int extract_fonts;
 	char** style_overrides;
+
+	ass_fontdata_t* fontdata;
+	int num_fontdata;
 };
 
 #endif

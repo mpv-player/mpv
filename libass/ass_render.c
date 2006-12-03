@@ -1928,7 +1928,7 @@ int ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* de
 
 	if (priv->fontconfig_priv)
 		fontconfig_done(priv->fontconfig_priv);
-	priv->fontconfig_priv = fontconfig_init(priv->library->fonts_dir, default_family, default_font);
+	priv->fontconfig_priv = fontconfig_init(priv->library, default_family, default_font);
 
 	return !!priv->fontconfig_priv;
 }

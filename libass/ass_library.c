@@ -71,3 +71,19 @@ void ass_set_style_overrides(ass_library_t* priv, char** list)
 		*q = strdup(*p);
 	priv->style_overrides[cnt] = NULL;
 }
+
+static void grow_array(void **array, int nelem, size_t elsize)
+{
+	if (!(nelem & 31))
+		*array = realloc(*array, (nelem + 32) * elsize);
+}
+
+void ass_add_font(ass_library_t* priv, char* name, char* data, int size)
+{
+	grow_array((void**)&priv->fontdata, priv->num_fontdata, sizeof(*priv->fontdata));
+	priv->fontdata[priv->num_fontdata].name = name;
+	priv->fontdata[priv->num_fontdata].data = data;
+	priv->fontdata[priv->num_fontdata].size = size;
+	priv->num_fontdata ++;
+}
+

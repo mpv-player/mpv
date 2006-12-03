@@ -28,6 +28,8 @@
 #include <sys/stat.h>
 
 #include "mputils.h"
+#include "ass.h"
+#include "ass_library.h"
 #include "ass_fontconfig.h"
 
 #ifdef HAVE_FONTCONFIG
@@ -184,6 +186,89 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 	return fontconfig_select_with_charset(priv, family, bold, italic, index, 0);
 }
 
+static char* validate_fname(char* name)
+{
+	char* fname;
+	char* p;
+	char* q;
+	unsigned code;
+	int sz = strlen(name);
+
+	q = fname = malloc(sz + 1);
+	p = name;
+	while (*p) {
+		code = utf8_get_char(&p);
+		if (code == 0)
+			break;
+		if (	(code > 0x7F) ||
+			(code == '\\') ||
+			(code == '/') ||
+			(code == ':') ||
+			(code == '*') ||
+			(code == '?') ||
+			(code == '<') ||
+			(code == '>') ||
+			(code == '|') ||
+			(code == 0))
+		{
+			*q++ = '_';
+		} else {
+			*q++ = code;
+		}
+		if (p - name > sz)
+			break;
+	}
+	*q = 0;
+	return fname;
+}
+
+/**
+ * \brief Process embedded matroska font. Saves it to ~/.mplayer/fonts.
+ * \param name attachment name
+ * \param data binary font data
+ * \param data_size data size
+*/ 
+static void process_fontdata(fc_instance_t* priv, ass_library_t* library, int idx)
+{
+	char buf[1000];
+	FILE* fp = 0;
+	int rc;
+	struct stat st;
+	char* fname;
+	const char* name = library->fontdata[idx].name;
+	const char* data = library->fontdata[idx].data;
+	int data_size = library->fontdata[idx].size;
+	const char* fonts_dir = library->fonts_dir;
+
+	if (!fonts_dir)
+		return;
+	rc = stat(fonts_dir, &st);
+	if (rc) {
+		int res;
+#ifndef __MINGW32__
+		res = mkdir(fonts_dir, 0700);
+#else
+		res = mkdir(fonts_dir);
+#endif
+		if (res) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FailedToCreateDirectory, fonts_dir);
+		}
+	} else if (!S_ISDIR(st.st_mode)) {
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_NotADirectory, fonts_dir);
+	}
+	
+	fname = validate_fname((char*)name);
+
+	snprintf(buf, 1000, "%s/%s", fonts_dir, fname);
+	free(fname);
+
+	fp = fopen(buf, "wb");
+	if (!fp) return;
+
+	fwrite(data, data_size, 1, fp);
+	fclose(fp);
+}
+
 /**
  * \brief Init fontconfig.
  * \param dir additional directoryu for fonts
@@ -191,11 +276,13 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
  * \param path default font path
  * \return pointer to fontconfig private data
 */ 
-fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* path)
+fc_instance_t* fontconfig_init(ass_library_t* library, const char* family, const char* path)
 {
 	int rc;
 	struct stat st;
 	fc_instance_t* priv = calloc(1, sizeof(fc_instance_t));
+	const char* dir = library->fonts_dir;
+	int i;
 	
 	rc = FcInit();
 	assert(rc);
@@ -205,6 +292,9 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 		mp_msg(MSGT_ASS, MSGL_FATAL, MSGTR_LIBASS_FcInitLoadConfigAndFontsFailed);
 		return 0;
 	}
+
+	for (i = 0; i < library->num_fontdata; ++i)
+		process_fontdata(priv, library, i);
 
 	if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
 	{
@@ -265,7 +355,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 	return priv->path_default;
 }
 
-fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* path)
+fc_instance_t* fontconfig_init(ass_library_t* library, const char* family, const char* path)
 {
 	fc_instance_t* priv;
 

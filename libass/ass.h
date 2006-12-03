@@ -182,7 +182,7 @@ int ass_read_styles(ass_track_t* track, char* fname, char* codepage);
  * \param data binary font data
  * \param data_size data size
 */
-void ass_add_font(ass_library_t* library, const char* name, char* data, int data_size);
+void ass_add_font(ass_library_t* library, char* name, char* data, int data_size);
 
 /**
  * \brief Calculates timeshift from now to the start of some other subtitle event, depending on movement parameter

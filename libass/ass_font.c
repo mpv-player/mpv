@@ -26,6 +26,8 @@
 #include FT_SYNTHESIS_H
 #include FT_GLYPH_H
 
+#include "ass.h"
+#include "ass_library.h"
 #include "ass_font.h"
 #include "ass_bitmap.h"
 #include "ass_cache.h"
