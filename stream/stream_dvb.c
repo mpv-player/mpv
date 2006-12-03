@@ -169,7 +169,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 		if((line[0] == '#') || (strlen(line) == 0))
 			continue;
 
-		colon = index(line, ':');
+		colon = strchr(line, ':');
 		if(colon)
 		{
 			k = colon - line;
