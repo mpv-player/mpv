@@ -583,8 +583,6 @@ error_decode_font:
 	return 0;
 }
 
-static char* validate_fname(char* name);
-
 static int process_fonts_line(ass_track_t* track, char *str)
 {
 	int len;
@@ -595,7 +593,7 @@ static int process_fonts_line(ass_track_t* track, char *str)
 		if (track->parser_priv->fontname) {
 			decode_font(track);
 		}
-		track->parser_priv->fontname = validate_fname(p);
+		track->parser_priv->fontname = strdup(p);
 		mp_msg(MSGT_ASS, MSGL_V, "fontname: %s\n", track->parser_priv->fontname);
 		return 0;
 	}
