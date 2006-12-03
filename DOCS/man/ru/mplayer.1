@@ -243,7 +243,7 @@ MPlayer имеет полность настраиваемый, основанный на командах, слой управления, к
 Выключает звук.
 .IPs "_ (только MPEG-TS и libavformat)"
 Циклически переключает доступные видео дорожки.
-.IPs "# (только для MPEG и Matroska)"
+.IPs "# (только MPEG, Matroska, AVI и libavformat)"
 Циклически переключает доступные аудио дорожки.
 .IPs "TAB (только MPEG-TS)"
 Циклически переключает доступные программы.
@@ -3183,10 +3183,8 @@ Windows фронтенд для VIDIX
 совместимой карте.
 .PD 0
 .RSs
-.IPs "dga\ \ "
-Включает режим DGA.
-.IPs nodga
-Выключает режим DGA.
+.IPs (no)dga
+Включает или выключает режим DGA (по-умолчанию: включено).
 .IPs neotv_pal
 Активирует NeoMagic TV выход и устанавливает стандарт в PAL.
 .IPs neotv_ntsc
@@ -3538,6 +3536,14 @@ auto - особый стандарт (автоопределение использования PAL/\:NTSC), потому что
 особые возможности Matrox Gxxx Карт, такие как аппаратные деинтерлейс,
 масштабирование и синхронизация видео с частотой вертикальной развертки 
 вашего монитора.
+.
+.TP
+.B s3fb (see also \-vf yuv2 and \-dr)
+Специальный драйвер вывода для S3 Virge.
+Этот драйвер поддерживает такие возможности карты, как работа с YUV,
+масштабирование, двойная буферизация и прямой рендеринг.
+Используйте \-vf yuy2 для получения аппаратно ускоренного yuv2
+рендеринга, который на этой карте значительно быстрее, чем yv12.
 .
 .TP
 .B 3dfx (только Linux)
@@ -4909,13 +4915,6 @@ The syntax is:
 .TP
 .B \-vf <filter1[=parameter1:parameter2:...],filter2,...>
 Setup a chain of video filters.
-.
-.TP
-.B \-vop <...,filter2[=parameter1:parameter2:...],filter1> (OBSOLETE)
-Setup a chain of video filters, to be applied in
-.B reverse
-order.
-Deprecated in favor of \-vf.
 .PP
 Many parameters are optional and set to default values if omitted.
 To explicitly use a default value set a parameter to '-1'.
@@ -9655,7 +9654,7 @@ harddup and softskip video filters).
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd | pes1 | pes2>
 stream format (default: mpeg2).
 pes1 and pes2 are very broken formats (no pack header and no padding),
-but VDR uses them; don't choose them unless you know exactly what you 
+but VDR uses them; do not choose them unless you know exactly what you
 are doing.
 .
 .TP
@@ -9729,6 +9728,19 @@ will make the video stream look like it was encoded at 25 fps.
 It only works with MPEG-2 video when the output framerate,
 converted with \-ofps, is either 24000/1001 or 24 fps.
 Any other framerate is incompatible with this option.
+.
+.TP
+.B vbuf_size=<40\-1024>
+Sets the size of the video decoder's buffer, expressed in kilobytes.
+Specify it only if the bitrate of the video stream is too high for
+the chosen format and if you know perfectly well what you are doing.
+A too high value may lead to an unplayable movie, depending on the player's
+capabilities.
+.
+.TP
+.B abuf_size=<4\-64>
+Sets the size of the audio decoder's buffer, expressed in kilobytes.
+The same principle as for vbuf_size applies.
 .
 .
 .SS FFmpeg libavformat demuxers (\-lavfdopts)
