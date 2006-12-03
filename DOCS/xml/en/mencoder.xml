@@ -14,6 +14,10 @@ for a wealth of discussions about all aspects of and problems related to
 encoding with <application>MEncoder</application>.
 </para>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-selecting-codec">
 <title>Selecting codecs and container formats</title>
 
@@ -26,9 +30,9 @@ to list all video codecs supported by the version of
 <application>MEncoder</application> on your machine.
 The following choices are available:
 </para>
+
 <para>
 Audio Codecs:
-
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
@@ -110,6 +114,7 @@ Video codecs:
 </tgroup>
 </informaltable>
 </para>
+
 <para>
 Output container formats are selected with the <option>-of</option>
 option.
@@ -119,6 +124,7 @@ to list all containers supported by the version of
 <application>MEncoder</application> on your machine.
 The following choices are available:
 </para>
+
 <para>
 Container formats:
 <informaltable frame="all">
@@ -162,6 +168,7 @@ experience problems when using them.
 <para>
 <systemitem class="library">libavformat</systemitem> containers:
 </para>
+
 <para>
 If you selected <systemitem class="library">libavformat</systemitem>
 to do the muxing of the output file (by using the <option>-of lavf</option>),
@@ -173,9 +180,10 @@ You may force a particular container format with
 
 <informaltable frame="all">
 <tgroup cols="2">
-<thead>
-<row><entry><systemitem class="library">libavformat</systemitem> container name</entry><entry>Description</entry></row>
-</thead>
+<thead><row>
+<entry><systemitem class="library">libavformat</systemitem> container name</entry>
+<entry>Description</entry>
+</row></thead>
 <tbody>
   <row>
     <entry>mpg</entry>
@@ -255,6 +263,9 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-selecting-input">
 <title>Selecting input file or device</title>
 
@@ -277,6 +288,7 @@ for reading directly from disc, if the defaults of
 <filename>/dev/dvd</filename> and <filename>/dev/cdrom</filename> do
 not work on your system.
 </para>
+
 <para>
 When encoding from DVD, it is often desirable to select a chapter or
 range of chapters to encode.
@@ -287,6 +299,7 @@ This is especially useful if you will be making a 1400 MB encode
 targetted for two CDs, since you can ensure the split occurs exactly
 at a chapter boundary rather than in the middle of a scene.
 </para>
+
 <para>
 If you have a supported TV capture card, you can also encode from the
 TV-in device.
@@ -296,6 +309,9 @@ settings.
 DVB input works similarly.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="menc-feat-mpeg4">
@@ -345,6 +361,9 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-handheld-psp">
 <title>Encoding to Sony PSP video format</title>
 
@@ -387,6 +406,9 @@ Note that you can set the title of the video with
 </para>
 </example>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="menc-feat-mpeg">
@@ -442,8 +464,11 @@ bitrate. You should note, though, that you'll get the best results if
 all passes are run with target bitrates that do not differ very much.
 </para>
 </note>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="menc-feat-rescale">
 <title>Rescaling movies</title>
@@ -470,6 +495,9 @@ mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:m
 </screen>
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="menc-feat-streamcopy">
@@ -517,8 +545,10 @@ mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D \
     -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="menc-feat-enc-images">
@@ -621,10 +651,12 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
 --></screen>
 </para>
 </informalexample>
-
 </para>
 </formalpara>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="menc-feat-extractsub">
@@ -684,8 +716,11 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
     -vobsuboutid fr -sid 1 -nosound -ovc copy
 </screen>
 </example>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="aspect">
 <title>Preserving aspect ratio</title>
