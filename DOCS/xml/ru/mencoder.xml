@@ -413,8 +413,7 @@ mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:ts
     -lavcopts vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 То же, но используя <systemitem class="library">libavformat</systemitem> MPEG
-<!-- FIXME muxer -->
-муксер[muxer]:
+мультиплексор:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -o <replaceable>VCD.mpg</replaceable> -ofps 25 -vf scale=352:288,harddup -of lavf \
     -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
