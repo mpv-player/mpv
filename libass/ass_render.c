@@ -561,7 +561,7 @@ static void update_font(void)
 	else if (val == 1) val = 110; //italic
 	desc.italic = val;
 
-	render_context.font = ass_font_new(priv->ftlibrary, priv->fontconfig_priv, &desc);
+	render_context.font = ass_font_new(priv->library, priv->ftlibrary, priv->fontconfig_priv, &desc);
 	
 	if (render_context.font)
 		change_font_size(render_context.font_size);
@@ -1928,7 +1928,7 @@ int ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* de
 
 	if (priv->fontconfig_priv)
 		fontconfig_done(priv->fontconfig_priv);
-	priv->fontconfig_priv = fontconfig_init(priv->library, default_family, default_font);
+	priv->fontconfig_priv = fontconfig_init(priv->library, priv->ftlibrary, default_family, default_font);
 
 	return !!priv->fontconfig_priv;
 }

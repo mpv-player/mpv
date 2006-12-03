@@ -2023,6 +2023,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_FcDirSave "[ass] FcDirSave failed.\n"
 #define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] FcConfigAppFontAddDir failed\n"
 #define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig disabled, only default font will be used.\n"
+#define MSGTR_LIBASS_FunctionCallFailed "[ass] %s failed\n"
 
 // ass_render.c
 #define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] Neither PlayResX nor PlayResY defined. Assuming 384x288.\n"
@@ -2044,3 +2045,4 @@ static char help_text[]=
 // ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X not found, reselecting font for (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] Glyph 0x%X not found in font for (%s, %d, %d)\n"
+#define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Error opening memory font: %s\n"

@@ -52,13 +52,23 @@ static void charmap_magic(FT_Face face)
 	}
 }
 
-ass_font_t* ass_font_new(FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* desc)
+static int find_font(ass_library_t* library, char* name)
+{
+	int i;
+	for (i = 0; i < library->num_fontdata; ++i)
+		if (strcasecmp(name, library->fontdata[i].name) == 0)
+			return i;
+	return -1;
+}
+
+ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* desc)
 {
 	char* path;
 	int index;
 	FT_Face face;
 	int error;
 	ass_font_t* font;
+	int mem_idx;
 
 	font = ass_font_cache_find(desc);
 	if (font)
@@ -66,10 +76,20 @@ ass_font_t* ass_font_new(FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* d
 	
 	path = fontconfig_select(fc_priv, desc->family, desc->bold, desc->italic, &index);
 	
+	mem_idx = find_font(library, path);
+	if (mem_idx >= 0) {
+		error = FT_New_Memory_Face(ftlibrary, library->fontdata[mem_idx].data,
+					   library->fontdata[mem_idx].size, 0, &face);
+		if (error) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, path);
+			return 0;
+		}
+	} else {
 	error = FT_New_Face(ftlibrary, path, index, &face);
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
 		return 0;
+	}
 	}
 
 	charmap_magic(face);

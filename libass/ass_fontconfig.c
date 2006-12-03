@@ -34,6 +34,7 @@
 
 #ifdef HAVE_FONTCONFIG
 #include <fontconfig/fontconfig.h>
+#include <fontconfig/fcfreetype.h>
 #endif
 
 struct fc_instance_s {
@@ -228,7 +229,7 @@ static char* validate_fname(char* name)
  * \param data binary font data
  * \param data_size data size
 */ 
-static void process_fontdata(fc_instance_t* priv, ass_library_t* library, int idx)
+static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Library ftlibrary, int idx)
 {
 	char buf[1000];
 	FILE* fp = 0;
@@ -239,7 +240,12 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, int id
 	const char* data = library->fontdata[idx].data;
 	int data_size = library->fontdata[idx].size;
 	const char* fonts_dir = library->fonts_dir;
+	FT_Face face;
+	FcPattern* pattern;
+	FcFontSet* fset;
+	FcBool res;
 
+#if (FC_VERSION < 20402)
 	if (!fonts_dir)
 		return;
 	rc = stat(fonts_dir, &st);
@@ -267,6 +273,38 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, int id
 
 	fwrite(data, data_size, 1, fp);
 	fclose(fp);
+
+#else // (FC_VERSION >= 20402)
+
+	rc = FT_New_Memory_Face(ftlibrary, data, data_size, 0, &face);
+	if (rc) {
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, name);
+		return;
+	}
+
+	pattern = FcFreeTypeQueryFace(face, name, 0, FcConfigGetBlanks(priv->config));
+	if (!pattern) {
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFreeTypeQueryFace");
+		FT_Done_Face(face);
+		return;
+	}
+
+	fset = FcConfigGetFonts(priv->config, FcSetSystem); // somehow it failes when asked for FcSetApplication
+	if (!fset) {
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcConfigGetFonts");
+		FT_Done_Face(face);
+		return;
+	}
+
+	res = FcFontSetAdd(fset, pattern);
+	if (!res) {
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFontSetAdd");
+		FT_Done_Face(face);
+		return;
+	}
+
+	FT_Done_Face(face);
+#endif
 }
 
 /**
@@ -276,7 +314,7 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, int id
  * \param path default font path
  * \return pointer to fontconfig private data
 */ 
-fc_instance_t* fontconfig_init(ass_library_t* library, const char* family, const char* path)
+fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path)
 {
 	int rc;
 	struct stat st;
@@ -294,7 +332,7 @@ fc_instance_t* fontconfig_init(ass_library_t* library, const char* family, const
 	}
 
 	for (i = 0; i < library->num_fontdata; ++i)
-		process_fontdata(priv, library, i);
+		process_fontdata(priv, library, ftlibrary, i);
 
 	if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
 	{
@@ -355,7 +393,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 	return priv->path_default;
 }
 
-fc_instance_t* fontconfig_init(ass_library_t* library, const char* family, const char* path)
+fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path)
 {
 	fc_instance_t* priv;
 
