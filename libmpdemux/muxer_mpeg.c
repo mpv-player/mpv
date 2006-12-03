@@ -1392,15 +1392,15 @@ static void update_scr(muxer_t *muxer)
 			priv->delta_scr = (uint64_t) (d * 27000000.0f);
 			mp_msg(MSGT_MUXER, MSGL_INFO, "\r\nBUFFER UNDEFLOW at stream %d, raising muxrate to %d kb/s, delta_scr: %llu\r\n", i, muxer->sysrate/125, priv->delta_scr);
 			spriv->track_bufsize = 0;
-	}
+		}
 
 		if(j > 0)
-	{
+		{
 			memmove(spriv->buffer_track, &(spriv->buffer_track[j]), (spriv->track_len - j) * sizeof(buffer_track_t));
 			spriv->track_pos -= j;
 			for(j = spriv->track_pos; j < spriv->track_len; j++)
 				spriv->buffer_track[j].size = 0;
-	}
+		}
 
 		if(spriv->framebuf_used && spriv->framebuf[0].dts < mindts)
 			mindts = spriv->framebuf[0].dts;
@@ -1491,9 +1491,7 @@ static int flush_buffers(muxer_t *muxer, int finalize)
 		duration = 0;
 		iduration = 0;
 		for(i = 0; i < n; i++)
-		{
 			iduration += vpriv->framebuf[i].idur;
-		}
 		duration = (double) (iduration / 27000000.0);
 		
 		if(as != NULL)
@@ -1516,7 +1514,7 @@ static int flush_buffers(muxer_t *muxer, int finalize)
 			init_delay = vpriv->framebuf[0].pts - vpriv->framebuf[0].dts;
 		
 			for(i = 0; i < apriv->framebuf_cnt; i++)
-		{
+			{
 				apriv->framebuf[i].pts += init_delay;
 				apriv->framebuf[i].dts += init_delay;
 			}
@@ -1586,8 +1584,8 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 		}
 		else
 		{
-		*fps_ptr = (*fps_ptr & 0xf0) | (fps + 3);
-		vpriv->nom_delta_pts = parse_fps((fps + 3) == FRAMERATE_2997 ? 30000.0/1001.0 : 30.0);
+			*fps_ptr = (*fps_ptr & 0xf0) | (fps + 3);
+			vpriv->nom_delta_pts = parse_fps((fps + 3) == FRAMERATE_2997 ? 30000.0/1001.0 : 30.0);
 		}
 	}
 	
@@ -1659,9 +1657,9 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	}
 	else
 	{
-	tff = (vpriv->trf & 0x2) ? 0x80 : 0;
-	rff = (vpriv->trf & 0x1) ? 0x2 : 0;
-	pce_ptr[3] = (pce_ptr[3] & 0x7d) | tff | rff;
+		tff = (vpriv->trf & 0x2) ? 0x80 : 0;
+		rff = (vpriv->trf & 0x1) ? 0x2 : 0;
+		pce_ptr[3] = (pce_ptr[3] & 0x7d) | tff | rff;
 	}
 	pce_ptr[4] |= 0x80;	//sets progressive frame
 	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTRF: %d, TFF: %d, RFF: %d, n: %d\n", vpriv->trf, tff >> 7, rff >> 1, n);
@@ -2334,12 +2332,12 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
   muxer_headers_t *spriv = (muxer_headers_t*) s->priv;
   float fps;
   uint32_t stream_format, nf;
- 
+
   if(s->buffer == NULL)
   	return;
   if(len == -1)
 	return;
-  
+
   if (s->type == MUXER_TYPE_VIDEO) { // try to recognize frame type...
 	fps = (float) s->h.dwRate/ (float) s->h.dwScale;
   	spriv->type = 1;
@@ -2419,7 +2417,7 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 		mp_msg(MSGT_MUXER, MSGL_INFO, "AINIT: %.3lf\r\n", (double) spriv->last_pts/27000000.0f);	
 	}
   }
-  
+
 
   if(spriv->psm_fixed == 0) {
   	add_to_psm(priv, spriv->id, stream_format);
@@ -2428,7 +2426,7 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 	if((priv->psm_streams_cnt == muxer->num_videos + muxer->num_audios) && priv->use_psm)
 		write_psm_block(muxer, muxer->file);
   }
-  
+
   flush_buffers(muxer, 0);
 }
 
