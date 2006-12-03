@@ -48,13 +48,11 @@ typedef struct transform_in_s {
 
 static unsigned long (*rvyuv_custom_message)(cmsg_data_t* ,void*);
 static unsigned long (*rvyuv_free)(void*);
-static unsigned long (*rvyuv_hive_message)(unsigned long,unsigned long);
 static unsigned long (*rvyuv_init)(void*, void*); // initdata,context
 static unsigned long (*rvyuv_transform)(char*, char*,transform_in_t*,unsigned int*,void*);
 #ifdef USE_WIN32DLL
 static unsigned long WINAPI (*wrvyuv_custom_message)(cmsg_data_t* ,void*);
 static unsigned long WINAPI (*wrvyuv_free)(void*);
-static unsigned long WINAPI (*wrvyuv_hive_message)(unsigned long,unsigned long);
 static unsigned long WINAPI (*wrvyuv_init)(void*, void*); // initdata,context
 static unsigned long WINAPI (*wrvyuv_transform)(char*, char*,transform_in_t*,unsigned int*,void*);
 #endif
@@ -111,13 +109,11 @@ static int load_syms_linux(char *path) {
 
 		rvyuv_custom_message = dlsym(handle, "RV20toYUV420CustomMessage");
 		rvyuv_free = dlsym(handle, "RV20toYUV420Free");
-		rvyuv_hive_message = dlsym(handle, "RV20toYUV420HiveMessage");
 		rvyuv_init = dlsym(handle, "RV20toYUV420Init");
 		rvyuv_transform = dlsym(handle, "RV20toYUV420Transform");
 
     if(rvyuv_custom_message &&
        rvyuv_free &&
-       rvyuv_hive_message &&
        rvyuv_init &&
        rvyuv_transform)
     {
@@ -127,13 +123,11 @@ static int load_syms_linux(char *path) {
 	
 		rvyuv_custom_message = dlsym(handle, "RV40toYUV420CustomMessage");
 		rvyuv_free = dlsym(handle, "RV40toYUV420Free");
-		rvyuv_hive_message = dlsym(handle, "RV40toYUV420HiveMessage");
 		rvyuv_init = dlsym(handle, "RV40toYUV420Init");
 		rvyuv_transform = dlsym(handle, "RV40toYUV420Transform");
 
     if(rvyuv_custom_message &&
        rvyuv_free &&
-       rvyuv_hive_message &&
        rvyuv_init &&
        rvyuv_transform)
     {
@@ -172,13 +166,11 @@ static int load_syms_windows(char *path) {
 
     wrvyuv_custom_message = GetProcAddress(handle, "RV20toYUV420CustomMessage");
     wrvyuv_free = GetProcAddress(handle, "RV20toYUV420Free");
-    wrvyuv_hive_message = GetProcAddress(handle, "RV20toYUV420HiveMessage");
     wrvyuv_init = GetProcAddress(handle, "RV20toYUV420Init");
     wrvyuv_transform = GetProcAddress(handle, "RV20toYUV420Transform");
 
     if(wrvyuv_custom_message &&
        wrvyuv_free &&
-       wrvyuv_hive_message &&
        wrvyuv_init &&
        wrvyuv_transform)
     {

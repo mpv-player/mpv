@@ -39,9 +39,7 @@ void *__ctype_b=NULL;
 
 static unsigned long (*raCloseCodec)(void*);
 static unsigned long (*raDecode)(void*, char*,unsigned long,char*,unsigned int*,long);
-static unsigned long (*raFlush)(unsigned long,unsigned long,unsigned long);
 static unsigned long (*raFreeDecoder)(void*);
-static void*         (*raGetFlavorProperty)(void*,unsigned long,unsigned long,int*);
 //static unsigned long (*raGetNumberOfFlavors2)(void);
 static unsigned long (*raInitDecoder)(void*, void*);
 static unsigned long (*raOpenCodec)(void*);
@@ -52,9 +50,7 @@ static void  (*raSetPwd)(char*,char*);
 #ifdef USE_WIN32DLL
 static unsigned long WINAPI (*wraCloseCodec)(void*);
 static unsigned long WINAPI (*wraDecode)(void*, char*,unsigned long,char*,unsigned int*,long);
-static unsigned long WINAPI (*wraFlush)(unsigned long,unsigned long,unsigned long);
 static unsigned long WINAPI (*wraFreeDecoder)(void*);
-static void*         WINAPI (*wraGetFlavorProperty)(void*,unsigned long,unsigned long,int*);
 static unsigned long WINAPI (*wraInitDecoder)(void*, void*);
 static unsigned long WINAPI (*wraOpenCodec)(void*);
 static unsigned long WINAPI (*wraOpenCodec2)(void*, void*);
@@ -129,9 +125,7 @@ static int load_syms_linux(char *path)
 
     raCloseCodec = dlsym(handle, "RACloseCodec");
     raDecode = dlsym(handle, "RADecode");
-    raFlush = dlsym(handle, "RAFlush");
     raFreeDecoder = dlsym(handle, "RAFreeDecoder");
-    raGetFlavorProperty = dlsym(handle, "RAGetFlavorProperty");
     raOpenCodec = dlsym(handle, "RAOpenCodec");
     raOpenCodec2 = dlsym(handle, "RAOpenCodec2");
     raInitDecoder = dlsym(handle, "RAInitDecoder");
@@ -139,8 +133,8 @@ static int load_syms_linux(char *path)
     raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
     raSetPwd = dlsym(handle, "RASetPwd"); // optional, used by SIPR
     
-    if (raCloseCodec && raDecode && /*raFlush && */raFreeDecoder &&
-	raGetFlavorProperty && (raOpenCodec||raOpenCodec2) && raSetFlavor &&
+    if (raCloseCodec && raDecode && raFreeDecoder &&
+	(raOpenCodec||raOpenCodec2) && raSetFlavor &&
 	/*raSetDLLAccessPath &&*/ raInitDecoder)
     {
 	rv_handle = handle;
@@ -179,9 +173,7 @@ static int load_syms_windows(char *path)
 
     wraCloseCodec = GetProcAddress(handle, "RACloseCodec");
     wraDecode = GetProcAddress(handle, "RADecode");
-    wraFlush = GetProcAddress(handle, "RAFlush");
     wraFreeDecoder = GetProcAddress(handle, "RAFreeDecoder");
-    wraGetFlavorProperty = GetProcAddress(handle, "RAGetFlavorProperty");
     wraOpenCodec = GetProcAddress(handle, "RAOpenCodec");
     wraOpenCodec2 = GetProcAddress(handle, "RAOpenCodec2");
     wraInitDecoder = GetProcAddress(handle, "RAInitDecoder");
@@ -189,8 +181,8 @@ static int load_syms_windows(char *path)
     wraSetDLLAccessPath = GetProcAddress(handle, "SetDLLAccessPath");
     wraSetPwd = GetProcAddress(handle, "RASetPwd"); // optional, used by SIPR
     
-    if (wraCloseCodec && wraDecode && /*wraFlush && */wraFreeDecoder &&
-	wraGetFlavorProperty && (wraOpenCodec || wraOpenCodec2) && wraSetFlavor &&
+    if (wraCloseCodec && wraDecode && wraFreeDecoder &&
+	(wraOpenCodec || wraOpenCodec2) && wraSetFlavor &&
 	/*wraSetDLLAccessPath &&*/ wraInitDecoder)
     {
 	rv_handle = handle;
