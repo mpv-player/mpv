@@ -70,6 +70,9 @@ for DLL to know too much about its environment.
 #include <kstat.h>
 #endif
 
+#include <sys/mman.h>
+#include "osdep/mmap_anon.h"
+
 #if HAVE_VSSCANF
 int vsscanf( const char *str, const char *format, va_list ap);
 #else
@@ -5299,14 +5302,18 @@ static void ext_stubs(void)
 #define MAX_STUB_SIZE 0x60
 #define MAX_NUM_STUBS 200
 static int pos=0;
-static char extcode[MAX_NUM_STUBS * MAX_STUB_SIZE];
+static char *extcode = NULL;
 
 static void* add_stub(void)
 {
     int i;
     int found = 0;
     // generated code in runtime!
-    char* answ = extcode + pos * MAX_STUB_SIZE;
+    char* answ;
+    if (!extcode)
+      extcode = mmap_anon(NULL, MAX_NUM_STUBS * MAX_STUB_SIZE,
+                  PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE, 0);
+    answ = extcode + pos * MAX_STUB_SIZE;
     if (pos >= MAX_NUM_STUBS) {
       printf("too many stubs, expect crash\n");
       return NULL;
