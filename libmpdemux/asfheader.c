@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "libavutil/common.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -60,21 +61,22 @@ const char asf_ext_stream_audio[16] = {0x9d, 0x8c, 0x17, 0x31,
 const char asf_ext_stream_header[16] = {0xCB, 0xA5, 0xE6, 0x14,
   0x72, 0xC6, 0x32, 0x43, 0x83, 0x99, 0xA9, 0x69, 0x52, 0x06, 0x5B, 0x5A};
 
+static char* get_ucs2str(const uint16_t* inbuf, uint16_t inlen)
+{
+  char* outbuf = calloc(inlen, 2);
+  char* q;
+  int i;
 
-// the variable string is modify in this function
-void pack_asf_string(char* string, int length) {
-  int i,j;
-  if( string==NULL ) return;
-  for( i=0, j=0; i<length && string[i]!='\0'; i+=2, j++) {
-    string[j]=string[i];
+  if (!outbuf) {
+    mp_msg(MSGT_HEADER, MSGL_ERR, MSGTR_MemAllocFailed);
+    return NULL;
   }
-  string[j]='\0';
-}
-
-// the variable string is modify in this function
-void print_asf_string(const char* name, char* string, int length) {
-  pack_asf_string(string, length);
-  mp_msg(MSGT_HEADER,MSGL_V,"%s%s\n", name, string);
+  q = outbuf;
+  for (i = 0; i < inlen / 2; i++) {
+    uint8_t tmp;
+    PUT_UTF8(le2me_16(inbuf[i]), tmp, *q++ = tmp;)
+  }
+  return outbuf;
 }
 
 static const char* asf_chunk_type(unsigned char* guid) {
@@ -391,61 +393,65 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   if (pos >= 0) {
         ASF_content_description_t *contenth = (ASF_content_description_t *)&hdr[pos];
         char *string=NULL;
+        uint16_t* wstring = NULL;
+        uint16_t len;
         pos += sizeof(ASF_content_description_t);
         if (pos > hdr_len) goto len_err_out;
 	le2me_ASF_content_description_t(contenth);
 	mp_msg(MSGT_HEADER,MSGL_V,"\n");
         // extract the title
-        if( contenth->title_size!=0 ) {
-          string = &hdr[pos];
-          pos += contenth->title_size;
+        if((len = contenth->title_size) != 0) {
+          wstring = (uint16_t*)&hdr[pos];
+          pos += len;
           if (pos > hdr_len) goto len_err_out;
-          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
-            print_asf_string(" Title: ", string, contenth->title_size);
-	  else
-	    pack_asf_string(string, contenth->title_size);
-	  demux_info_add(demuxer, "name", string);
+          if ((string = get_ucs2str(wstring, len))) {
+            mp_msg(MSGT_HEADER,MSGL_V," Title: %s\n", string);
+            demux_info_add(demuxer, "name", string);
+            free(string);
+          }
         }
         // extract the author 
-        if( contenth->author_size!=0 ) {
-          string = &hdr[pos];
-          pos += contenth->author_size;
+        if((len = contenth->author_size) != 0) {
+          wstring = (uint16_t*)&hdr[pos];
+          pos += len;
           if (pos > hdr_len) goto len_err_out;
-          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
-            print_asf_string(" Author: ", string, contenth->author_size);
-	  else
-	    pack_asf_string(string, contenth->author_size);
-	  demux_info_add(demuxer, "author", string);
+          if ((string = get_ucs2str(wstring, len))) {
+            mp_msg(MSGT_HEADER,MSGL_V," Author: %s\n", string);
+            demux_info_add(demuxer, "author", string);
+            free(string);
+          }
         }
         // extract the copyright
-        if( contenth->copyright_size!=0 ) {
-          string = &hdr[pos];
-          pos += contenth->copyright_size;
+        if((len = contenth->copyright_size) != 0) {
+          wstring = (uint16_t*)&hdr[pos];
+          pos += len;
           if (pos > hdr_len) goto len_err_out;
-          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
-            print_asf_string(" Copyright: ", string, contenth->copyright_size);
-	  else
-	    pack_asf_string(string, contenth->copyright_size);
-	  demux_info_add(demuxer, "copyright", string);
+          if ((string = get_ucs2str(wstring, len))) {
+            mp_msg(MSGT_HEADER,MSGL_V," Copyright: %s\n", string);
+            demux_info_add(demuxer, "copyright", string);
+            free(string);
+          }
         }
         // extract the comment
-        if( contenth->comment_size!=0 ) {
-          string = &hdr[pos];
-          pos += contenth->comment_size;
+        if((len = contenth->comment_size) != 0) {
+          wstring = (uint16_t*)&hdr[pos];
+          pos += len;
           if (pos > hdr_len) goto len_err_out;
-          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
-            print_asf_string(" Comment: ", string, contenth->comment_size);
-	  else
-	    pack_asf_string(string, contenth->comment_size);
-	  demux_info_add(demuxer, "comments", string);
+          if ((string = get_ucs2str(wstring, len))) {
+            mp_msg(MSGT_HEADER,MSGL_V," Comment: %s\n", string);
+            demux_info_add(demuxer, "comments", string);
+            free(string);
+          }
         }
         // extract the rating
-        if( contenth->rating_size!=0 ) {
-          string = &hdr[pos];
-          pos += contenth->rating_size;
+        if((len = contenth->rating_size) != 0) {
+          wstring = (uint16_t*)&hdr[pos];
+          pos += len;
           if (pos > hdr_len) goto len_err_out;
-          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
-            print_asf_string(" Rating: ", string, contenth->rating_size);
+          if ((string = get_ucs2str(wstring, len))) {
+            mp_msg(MSGT_HEADER,MSGL_V," Rating: %s\n", string);
+            free(string);
+          }
         }
 	mp_msg(MSGT_HEADER,MSGL_V,"\n");
   }
