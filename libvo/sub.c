@@ -1006,7 +1006,7 @@ int vo_osd_check_range_update(int x1,int y1,int x2,int y2){
 	if(obj->flags&OSDFLAG_VISIBLE){
 	    if(	(obj->bbox.x1<=x2 && obj->bbox.x2>=x1) &&
 		(obj->bbox.y1<=y2 && obj->bbox.y2>=y1) &&
-		obj->bbox.y2 > obj->bbox.y1 && obj->bbox.x1 > obj->bbox.x2
+		obj->bbox.y2 > obj->bbox.y1 && obj->bbox.x2 > obj->bbox.x1
 		) return 1;
 	}
 	obj=obj->next;
