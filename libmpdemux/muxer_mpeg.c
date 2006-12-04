@@ -169,7 +169,7 @@ typedef struct {
 	int max_tr;
 	uint8_t id, is_mpeg12, telecine;
 	uint64_t vframes;
-	uint64_t display_frame;
+	int64_t display_frame;
 	mp_mpeg_header_t picture;
 	int max_buffer_size;
 	buffer_track_t *buffer_track;
