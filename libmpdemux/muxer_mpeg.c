@@ -58,6 +58,8 @@
 static char ftypes[] = {'?', 'I', 'P', 'B'}; 
 #define FTYPE(x) (ftypes[(x)])
 
+#define MAX_PATTERN_LENGTH 2000000
+static unsigned char bff_mask[MAX_PATTERN_LENGTH];	//2 million frames are enough
 
 static const char *framerates[] = {
 	"unchanged", "23.976", "24", "25", "29.97", "30", "50", "59.94", "60"
@@ -81,6 +83,8 @@ static int conf_abuf_size = 0;
 static int conf_vbuf_size = 0;
 static int conf_drop = 0;
 static int conf_telecine = 0;
+static float conf_telecine_src = 0;
+static float conf_telecine_dest = 0;
 
 enum FRAME_TYPE {
 	I_FRAME = 1,
@@ -165,6 +169,7 @@ typedef struct {
 	int max_tr;
 	uint8_t id, is_mpeg12, telecine;
 	uint64_t vframes;
+	uint64_t display_frame;
 	uint8_t trf;
 	mp_mpeg_header_t picture;
 	int max_buffer_size;
@@ -180,6 +185,7 @@ typedef struct {
 
 #define PULLDOWN32 1
 #define TELECINE_FILM2PAL 2
+#define TELECINE_DGPULLDOWN 3
 
 m_option_t mpegopts_conf[] = {
 	{"format", &(conf_mux), CONF_TYPE_STRING, 0, 0 ,0, NULL},
@@ -201,6 +207,8 @@ m_option_t mpegopts_conf[] = {
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, PULLDOWN32, NULL},
 	{"film2pal", &conf_telecine, CONF_TYPE_FLAG, 0, 0, TELECINE_FILM2PAL, NULL},
+	{"tele_src", &(conf_telecine_src), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
+	{"tele_dest", &(conf_telecine_dest), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1559,7 +1567,7 @@ static inline uint64_t parse_fps(float fps)
 }
 
 
-static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_ptr, uint8_t *pce_ptr, int n)
+static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_ptr, uint8_t *pce_ptr, int n)
 {
 	uint8_t fps, tff, rff; 
 	int period; 
@@ -1571,7 +1579,7 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	if(fps_ptr != NULL)
 	{
 		fps = *fps_ptr & 0x0f;
-		if((!fps) || (fps > FRAMERATE_24))
+		if(((!fps) || (fps > FRAMERATE_24)) && vpriv->telecine != TELECINE_DGPULLDOWN)
 		{
 			mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR! FRAMERATE IS INVALID: %d, disabling telecining\n", (int) fps);
 			vpriv->telecine = 0;
@@ -1581,6 +1589,11 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 		{
 			*fps_ptr = (*fps_ptr & 0xf0) | FRAMERATE_25;
 			vpriv->nom_delta_pts = parse_fps(25.0);
+		}
+		else if(vpriv->telecine == TELECINE_DGPULLDOWN)
+		{
+			*fps_ptr = (*fps_ptr & 0xf0) | priv->vframerate;
+			vpriv->nom_delta_pts = parse_fps(conf_vframerate);
 		}
 		else
 		{
@@ -1655,6 +1668,10 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 		
 		pce_ptr[3] = (pce_ptr[3] & 0xfd) | rff;
 	}
+	else if(vpriv->telecine == TELECINE_DGPULLDOWN)
+	{
+		pce_ptr[3] = (pce_ptr[3] & 0xfd) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
+	}
 	else
 	{
 		tff = (vpriv->trf & 0x2) ? 0x80 : 0;
@@ -1664,7 +1681,7 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	pce_ptr[4] |= 0x80;	//sets progressive frame
 	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTRF: %d, TFF: %d, RFF: %d, n: %d\n", vpriv->trf, tff >> 7, rff >> 1, n);
 	
-	
+	vpriv->display_frame += n;
 	if(! vpriv->vframes)
 		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%s, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
 		framerates[(vpriv->telecine == TELECINE_FILM2PAL) ? FRAMERATE_25 : fps+3], tff >> 7, rff >> 1);
@@ -1804,7 +1821,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 				{
 					pce_ptr = &(s->buffer[ptr+4]);
 					if(spriv->telecine)
-						soft_telecine(spriv, fps_ptr, se_ptr, pce_ptr, frames_diff);
+						soft_telecine(priv, spriv, fps_ptr, se_ptr, pce_ptr, frames_diff);
 					spriv->picture.display_time = 100;
 					mp_header_process_extension(&(spriv->picture), &(s->buffer[ptr+4]));
 					if(spriv->picture.display_time >= 50 && spriv->picture.display_time <= 300) 
@@ -2525,6 +2542,29 @@ static void setup_sys_params(muxer_priv_t *priv)
 		priv->sys_info.cnt = 0;
 }
 
+/* excerpt from DGPulldown Copyright (C) 2005-2006, Donald Graft */
+static void generate_flags(int source, int target)
+{
+	unsigned int i, trfp;
+	uint64_t dfl,tfl;
+	
+	dfl = (target - source) << 1;
+	tfl = source >> 1;
+	
+	trfp = 0;
+	for(i = 0; i < MAX_PATTERN_LENGTH; i++)
+	{
+		tfl += dfl;
+		if(tfl >= source)
+		{
+			tfl -= source;
+			bff_mask[i] = trfp + 1;
+			trfp ^= 2;
+		}
+		else
+			bff_mask[i] = trfp;
+	}
+}
 
 int muxer_init_muxer_mpeg(muxer_t *muxer){
   muxer_priv_t *priv;
@@ -2623,6 +2663,23 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   {
   	mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR: options 'telecine' and 'vframerate' are mutually exclusive, vframerate disabled\n");
 	conf_vframerate = 0;
+  }
+
+  if(conf_telecine_src>0 && conf_telecine_dest>0 && conf_telecine_src < conf_telecine_dest)
+  {
+	int snum, sden, tnum, tden, sfps, tfps;
+	
+	sfps = (int) (conf_telecine_src * 1001 + 0.5);
+	tfps = (int) (conf_telecine_dest * 1001 + 0.5);
+	if(sfps % 2 || tfps % 2)
+	{
+		sfps *= 2;
+		tfps *= 2;
+	}
+	
+	generate_flags(sfps, tfps);
+	conf_telecine = TELECINE_DGPULLDOWN;
+	conf_vframerate = conf_telecine_dest;
   }
   
   if(conf_vframerate)
