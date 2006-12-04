@@ -52,7 +52,7 @@ that your patch will be included.
     in separate mails. Likewise, if your patch is very big, try splitting
     it into several self-contained pieces. Each part can then be reviewed
     and committed separately. Logical units should stay together, though,
-    e.g. do not send a patch for every file you change.
+    i.e. do not send a patch for every file or directory you change.
 
  9. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
     attachment with the subject line:
