@@ -3549,12 +3549,18 @@ deinterlacing, scaling and synchronizing your video output to
 the vertical retrace of your monitor.
 .
 .TP
-.B s3fb (see also \-vf yuv2 and \-dr)
+.B s3fb (Linux only) (see also \-vf yuv2 and \-dr)
 S3 Virge specific video output driver.
 This driver supports the card's YUV conversion and scaling, double
 buffering and direct rendering features.
 Use \-vf yuy2 to get hardware-accelerated yuy2 rendering, which is
 much faster than yv12 on this card.
+.PD 0
+.RSs
+.IPs <device>
+Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B 3dfx (Linux only)
