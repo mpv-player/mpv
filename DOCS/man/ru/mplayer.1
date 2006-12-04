@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r21452
+.\" synced with r21487
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -3538,12 +3538,18 @@ auto - особый стандарт (автоопределение использования PAL/\:NTSC), потому что
 вашего монитора.
 .
 .TP
-.B s3fb (see also \-vf yuv2 and \-dr)
+.B s3fb (только Linux) (see also \-vf yuv2 and \-dr)
 Специальный драйвер вывода для S3 Virge.
 Этот драйвер поддерживает такие возможности карты, как YUV преобразование,
 масштабирование, двойная буферизация и прямой рендеринг.
 Используйте \-vf yuy2 для получения аппаратно ускоренного yuv2
 рендеринга, который на этой карте значительно быстрее, чем yv12.
+.PD 0
+.RSs
+.IPs <устройство>
+Явно выбирает используемое fbdev устройство (по-умолчанию: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B 3dfx (только Linux)
@@ -5938,12 +5944,16 @@ Like ivtc, pullup is stateless in the sense that it does not lock onto
 a pattern to follow, but it instead looks forward to the following
 fields in order to identify matches and rebuild progressive frames.
 It is still under development, but believed to be quite accurate.
-The jl, jr, jt, and jb options set the amount of "junk" to ignore at
+.RSs
+.IPs "jl, jr, jt, and jb"
+These options set the amount of "junk" to ignore at
 the left, right, top, and bottom of the image, respectively.
 Left/\:right are in units of 8 pixels, while top/\:bottom are in units of
 2 lines.
 The default is 8 pixels on each side.
-Setting the sb (strict breaks) option to 1 will reduce the chances of
+.br
+.IPs "sb (strict breaks)"
+Setting this option to 1 will reduce the chances of
 pullup generating an occasional mismatched frame, but it may also
 cause an excessive number of frames to be dropped during high motion
 sequences.
@@ -5952,19 +5962,24 @@ easily.
 This may help processing of video where there is slight blurring
 between the fields, but may also cause there to be interlaced frames
 in the output.
-The mp (metric plane) option may be set to 1 or 2 to use a chroma
+.br
+.IPs "mp (metric plane)"
+This option may be set to 1 or 2 to use a chroma
 plane instead of the luma plane for doing pullup's computations.
 This may improve accuracy on very clean source material, but more
 likely will decrease accuracy, especially if there is chroma noise
 (rainbow effect) or any grayscale video.
 The main purpose of setting mp to a chroma plane is to reduce CPU load
 and make pullup usable in realtime on slow machines.
-.br
+.REss
+.RS
+.sp 1
 .I NOTE:
 Always follow pullup with the softskip filter when encoding to ensure
 that pullup is able to see each frame.
 Failure to do so will lead to incorrect output and will usually crash,
 due to design limitations in the codec/\:filter layer.
+.REss
 .
 .TP
 .B filmdint[=options]
@@ -9728,6 +9743,16 @@ will make the video stream look like it was encoded at 25 fps.
 It only works with MPEG-2 video when the output framerate,
 converted with \-ofps, is either 24000/1001 or 24 fps.
 Any other framerate is incompatible with this option.
+.
+.TP
+.B tele_src and tele_dest
+Enables arbitrary telecining using Donand Graft's DGPulldown code.
+You need to specify the original and the desired framerate and the
+muxer will make the video stream look like it was encoded at
+<tele_dest> frames per second.
+It only works with MPEG-2 video when the input framerate is smaller
+than the output framerate.
+Example of PAL to NTSC telecining: tele_src=25,tele_dest=30000/1001.
 .
 .TP
 .B vbuf_size=<40\-1024>
