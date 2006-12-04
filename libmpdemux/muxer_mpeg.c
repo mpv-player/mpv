@@ -1670,9 +1670,7 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 	}
 	else if(vpriv->telecine == TELECINE_DGPULLDOWN)
 	{
-		tff = (bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH] & 0x2) ? 0x80 : 0;
-		rff = (bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH] & 0x1) ? 0x02 : 0;
-		pce_ptr[3] = (pce_ptr[3] & 0xfd) | tff | rff;
+		pce_ptr[3] = (pce_ptr[3] & 0xfd) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
 	}
 	else
 	{
@@ -2549,6 +2547,7 @@ static void generate_flags(int source, int target)
 {
 	unsigned int i, trfp;
 	uint64_t dfl,tfl;
+	unsigned char ormask[4] = {0x0, 0x2, 0x80, 0x82};
 	
 	dfl = (target - source) << 1;
 	tfl = source >> 1;
@@ -2560,11 +2559,11 @@ static void generate_flags(int source, int target)
 		if(tfl >= source)
 		{
 			tfl -= source;
-			bff_mask[i] = trfp + 1;
+			bff_mask[i] = ormask[trfp + 1];
 			trfp ^= 2;
 		}
 		else
-			bff_mask[i] = trfp;
+			bff_mask[i] = ormask[trfp];
 	}
 }
 
