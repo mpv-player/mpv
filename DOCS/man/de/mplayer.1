@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21298
+.\" In sync with r21487
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -252,9 +252,9 @@ Verringert/\:erhöht die Lautstärke.
 Verringert/\:erhöht die Lautstärke.
 .IPs "m\ \ \ \ "
 Ton-Stummschaltung.
-.IPs "_ (nur bei MPEG-TS)"
+.IPs "_ (nur bei MPEG-TS und libavformat)"
 Wechselt zwischen den verfügbaren Videospuren.
-.IPs "# (nur bei MPEG und Matroska)"
+.IPs "# (nur bei MPEG, Matroska, AVI und libavformat)"
 Wechselt zwischen den verfügbaren Audiospuren.
 .IPs "TAB (nur bei MPEG-TS)"
 Wechselt zwischen den verfügbaren MPEG-Programmen.
@@ -3378,10 +3378,8 @@ Sehr genereller Videoausgabetreiber, der mit jeder VESA VBE 2.0-kompatiblen
 Karte funktionieren sollte.
 .PD 0
 .RSs
-.IPs "dga\ \ "
-Schaltet den DGA-Modus an.
-.IPs nodga
-Schaltet den DGA-Modus ab.
+.IPs (no)dga
+Schaltet den DGA-Modus ein oder aus (Standard: ein).
 .IPs neotv_pal
 Aktiviere die TV-Ausgabe von NeoMagic und setze die Norm auf PAL.
 .IPs neotv_ntsc
@@ -3727,6 +3725,20 @@ Videoausgabetreiber für das SyncFB-Kernelmodul, das spezielle
 Hardwareeigenschaften von Matrox Gxxx-Karten bereitstellt, wie
 Hardware-Deinterlacing, Skalierung und Synchronisation der Videoausgabe für
 das vertikale Retrace auf dem Monitor.
+.
+.TP
+.B s3fb (nur bei Linux) (siehe auch \-vf yuv2 und \-dr)
+S3 Virge-spezifischer Videoausgabetreiber.
+Dieser Treiber unterstützt die YUV-Konvertierung und -skalierung der Karte,
+doppelte Pufferung und direktes Rendern.
+Benutze \-vf yuy2 für hardwarebeschleunigtes yuy2-Rendering, welches bei
+dieser Karte wesentlich schneller ist.
+.PD 0
+.RSs
+.IPs <Gerät>
+Wähle das zu verwendende fbdev-Gerät explizit (Standard: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B 3dfx (nur bei Linux)
@@ -5136,13 +5148,6 @@ Die Syntax ist folgende:
 .TP
 .B \-vf <Filter1[=Parameter1:Parameter2:...],Filter2,...>
 Aktiviert eine Videofilterkette zusammen mit ihren Optionen.
-.
-.TP
-.B \-vop <...,Filter2[=Parameter1:Parameter2:...],Filter1> (VERALTET)
-Aktiviert eine Kette von Videofiltern zusammen mit ihren Optionen, die in
-.B umgekehrter
-Reihenfolge angewendet wird.
-Wurde ersetzt durch \-vf.
 .PP
 Viele Parameter sind optional und werden teilweise mit Standardwerten belegt,
 wenn sie weggelassen werden.
@@ -6197,12 +6202,16 @@ folgenden Muster sucht, sondern stattdessen nach vorne schaut, um Gegenstücke
 zu finden und progressive Frames zusammenzusetzen.
 Der Filter befindet sich noch in der Entwicklung, scheint aber akkurat zu
 arbeiten.
-Die Optionen jl, jr, jo und ju bestimmen die zu ignorierende Menge "Müll"
+.RSs
+.IPs "jl, jr, jt, und jb"
+Diese Optionen bestimmen die zu ignorierende Menge "Müll"
 links, rechts, oben und unten am Bildrand, respektive.
 Links/\:rechts sind in Einheiten von 8 Pixeln anzugeben, oben/\:unten in
 Einheiten von 2 Zeilen.
 Der Standardwert ist 8 Pixel an jeder Seite.
-Setzen der Option sb (strict breaks) auf 1 reduziert die Chancen von pullup,
+.br
+.IPs "sb (strict breaks)"
+Setzen dieser Option auf 1 reduziert die Chancen von pullup,
 gelegentlich einen falsch getroffenen Frame zu generieren.
 Es kann jedoch auch dazu führen, dass während schnellen bewegten Szenen eine
 exzessive Anzahl an Frames ausgelassen wird.
@@ -6211,7 +6220,9 @@ zuordnet.
 Dies kann helfen beim Verarbeiten von Videomaterial, das zwischen Feldern
 leicht verwischt ist, jedoch kann es auch zu interlaced Frames in der Ausgabe
 führen.
-Die Option mp (metric plane) kann auf 1 oder 2 gesetzt werden, um bei den
+.br
+.IPs "mp (metric plane)"
+Diese Option kann auf 1 oder 2 gesetzt werden, um bei den
 Berechnungen von pullup eine Chrominanzebene anstelle einer Helligkeitsebene
 zu verwenden.
 Dies kann die Genauigkeit bei sehr sauberem Quellmaterial verbessern,
@@ -6220,13 +6231,16 @@ Videomaterial in Graustufen handelt oder Regenbogeneffekte sichbar sind.
 Der vorwiegende Zweck vom Setzen von mp auf Chrominanzebene ist, die
 CPU-Auslastung zu verringern und pullup in Echtzeit oder auf langsamen
 Maschinen zu benutzen.
-.br
+.REss
+.RS
+.sp 1
 .I ANMERKUNG:
 Lasse beim Encodieren auf jede Anwendung von pullup den Filter softskip folgen.
 Dies stellt sicher, dass pullup jeden Frame betrachtet.
 Falls dies nicht geschieht, führt dies zu einer unkorrekten Ausgabe und wird
 auf Grund von Designbeschränkungen auf Codec-/\:Filterebene normalerweise
 abbrechen.
+.REss
 .
 .TP
 .B filmdint[=Optionen]
@@ -8547,7 +8561,7 @@ an das Muster anpassende (schnell) Raute der Größe 3
 .IPs -2
 an das Muster anpassende (schnell) Raute der Größe 2
 .IPs -1
-etwas speziell: Kann langsamer und/\:oder besser sein als dia=-2.
+ungerade Multi-Hexagon-Suche (langsam)
 .IPs  1
 Normale Raute der Größe 1 (Standard), entspricht einer Raute des Typs EPZS.
 .nf
@@ -10193,6 +10207,31 @@ Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe,
 konvertiert mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
 Jede andere Framerate ist mit dieser Option inkompatibel.
 .
+.TP
+.B tele_src und tele_dest
+Ermöglicht beliebiges Telecining durch Verwendung des DGPulldown-Codes von
+Donand Graft.
+Du musst die originale und die erwünschte Framerate angeben, der Muxer wird
+den Videostream dann so aussehen lassen, als wäre er mit <tele_dest> Frames
+pro Sekunde encodiert worden.
+Dies funktioniert bei MPEG-2 nur dann, wenn die Framerate der Eingabe kleiner
+ist als die der Ausgabe.
+Beispiel für Telecining von PAL zu NTSC: tele_src=25,tele_dest=30000/1001.
+.
+.TP
+.B vbuf_size=<40\-1024>
+Setzt die Größe des Puffers des Videodecoders in Kilobytes.
+Gib diese nur an, wenn die Bitrate des Videostreams zu groß für das gewählte
+Format ist und wenn du genau weißt, was du tust.
+Ein zu hoch gewählter Wert kann zu einem nicht abspielbaren Film führen,
+abhängig von den Fähigkeiten deines Players.
+.
+.TP
+.B abuf_size=<4\-64>
+Setzt die Größe des Puffers des Audiodecoders in Kilobytes.
+Es gilt das gleiche Prinzip wie für vbuf_size.
+.
+.
 .
 .SS FFmpeg-libavformat-Demuxer (\-lavfdopts)
 .
@@ -10251,6 +10290,9 @@ Sony Digital Video Container
 .B i_certify_that_my_video_stream_does_not_use_b_frames
 MEncoder kann Zeitstempel nicht korrekt zuweisen, wenn im Videostream B-Frames
 vorhanden sind, was zu kaputten Encodierungen führt.
+Wenn du den lavf-Muxer verwenden möchtest, darfst du den Videocodec keine
+B-Frames verwenden lassen (siehe entsprechende Dokumentation des jeweiligen
+Codecs), und du musst außerdem diese Option angeben.
 .
 .TP
 .B muxrate=<Rate>

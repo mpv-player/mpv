@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r21332
+// In sync with r21476
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -2083,6 +2083,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_FcDirSave "[ass] FcDirSave fehlgeschlagen.\n"
 #define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] FcConfigAppFontAddDir fehlgeschlagen\n"
 #define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig deaktiviert, es wird nur die Standardschrift verwendet werden.\n"
+#define MSGTR_LIBASS_FunctionCallFailed "[ass] %s fehlgeschlagen\n"
 
 // ass_render.c
 #define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] Weder PlayResX noch PlayResY definiert. Nehme 384x288 an.\n"
@@ -2100,4 +2101,9 @@ static char help_text[]=
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] MAX_GLYPHS erreicht: Ereignis %d, Start = %llu, Dauer = %llu\n Text = %s\n"
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Warnung! Ereignishöhe geändert!  \n"
 #define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Zu viele simultane Ereignisse!\n"
+
+// ass_font.c
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X nicht gefunden, wähle Schrift erneut für (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFound "[ass] Glyph 0x%X in Schrift für (%s, %d, %d) nicht gefunden\n"
+#define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Fehler beim Öffnen der Schrift im Speicher: %s\n"
 
