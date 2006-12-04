@@ -1579,27 +1579,8 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 	if(fps_ptr != NULL)
 	{
 		fps = *fps_ptr & 0x0f;
-		if(((!fps) || (fps > FRAMERATE_24)) && vpriv->telecine != TELECINE_DGPULLDOWN)
-		{
-			mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR! FRAMERATE IS INVALID: %d, disabling telecining\n", (int) fps);
-			vpriv->telecine = 0;
-			return 0;
-		}
-		if(vpriv->telecine == TELECINE_FILM2PAL)
-		{
-			*fps_ptr = (*fps_ptr & 0xf0) | FRAMERATE_25;
-			vpriv->nom_delta_pts = parse_fps(25.0);
-		}
-		else if(vpriv->telecine == TELECINE_DGPULLDOWN)
-		{
 			*fps_ptr = (*fps_ptr & 0xf0) | priv->vframerate;
 			vpriv->nom_delta_pts = parse_fps(conf_vframerate);
-		}
-		else
-		{
-			*fps_ptr = (*fps_ptr & 0xf0) | (fps + 3);
-			vpriv->nom_delta_pts = parse_fps((fps + 3) == FRAMERATE_2997 ? 30000.0/1001.0 : 30.0);
-		}
 	}
 	
 	//in pce_ptr starting from bit 0 bit 24 is tff, bit 30 is rff, 
@@ -1622,69 +1603,14 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 	while(n < 0) n+=period;
 	vpriv->trf = (vpriv->trf + n) % period;
 	
-	//sets curent tff/rff bits
-	if(vpriv->telecine == TELECINE_FILM2PAL)
-	{
-		//repeat 1 field every 12 frames
-		int rest1 = (vpriv->trf % period) == 11;
-		int rest2 = vpriv->vframes % 999;
-		
-		rff = 0;
-		if(rest1)
-			rff = 2;
-
-		if(vpriv->real_framerate == FRAMERATE_23976)
-		{
-			//we have to inverse the 1/1000 framedrop, repeating two fields in a sequence of 999 frames
-			//486 and 978 are ideal because they are halfway in the sequence 
-			//additionally x % 12 == 6 (halfway between two frames with rff set)
-			//and enough in advance to check if rest1 is valid too, 
-			//so we can delay the setting of rff to current_frame+3 with no risk to leave the 
-			//current sequence unpatched
-			if(rest2 == 486 || rest2 == 978)
-			{
-				if(rest1)
-				{
-					//delay the setting by 6 frames, so we don't have 2 consecutive rff
-					//and the transition will be smoother (halfway in the 12-frames sequence)
-					vpriv->delay_rff = 7;
-					mp_msg(MSGT_MUXER, MSGL_V, "\r\nDELAYED: %d\r\n", rest2);
-				}
-				else
-					rff = 2;
-			}
-	
-			if(!rest1 && vpriv->delay_rff)
-			{
-				vpriv->delay_rff--;
-				if(vpriv->delay_rff == 1)
-				{
-					rff = 2;
-					vpriv->delay_rff = 0;
-					mp_msg(MSGT_MUXER, MSGL_V, "\r\nRECOVERED: %d\r\n", rest2);
-				}
-			}
-		}
-		
-		pce_ptr[3] = (pce_ptr[3] & 0xfd) | rff;
-	}
-	else if(vpriv->telecine == TELECINE_DGPULLDOWN)
-	{
 		pce_ptr[3] = (pce_ptr[3] & 0xfd) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
-	}
-	else
-	{
-		tff = (vpriv->trf & 0x2) ? 0x80 : 0;
-		rff = (vpriv->trf & 0x1) ? 0x2 : 0;
-		pce_ptr[3] = (pce_ptr[3] & 0x7d) | tff | rff;
-	}
 	pce_ptr[4] |= 0x80;	//sets progressive frame
 	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTRF: %d, TFF: %d, RFF: %d, n: %d\n", vpriv->trf, tff >> 7, rff >> 1, n);
 	
 	vpriv->display_frame += n;
 	if(! vpriv->vframes)
-		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%s, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
-		framerates[(vpriv->telecine == TELECINE_FILM2PAL) ? FRAMERATE_25 : fps+3], tff >> 7, rff >> 1);
+		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%.3f, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
+		conf_vframerate, tff >> 7, rff >> 1);
 	
 	return 1;
 }
@@ -2664,6 +2590,19 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   {
   	mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR: options 'telecine' and 'vframerate' are mutually exclusive, vframerate disabled\n");
 	conf_vframerate = 0;
+  }
+
+  if(conf_telecine == TELECINE_FILM2PAL)
+  {
+	if(conf_telecine_src==0.0f) conf_telecine_src = 24000.0/1001.0;
+	conf_telecine_dest = 25;
+	conf_telecine = TELECINE_DGPULLDOWN;
+  }
+  else if(conf_telecine == PULLDOWN32)
+  {
+	if(conf_telecine_src==0.0f) conf_telecine_src = 24000.0/1001.0;
+	conf_telecine_dest = 30000.0/1001.0;
+	conf_telecine = TELECINE_DGPULLDOWN;
   }
 
   if(conf_telecine_src>0 && conf_telecine_dest>0 && conf_telecine_src < conf_telecine_dest)
