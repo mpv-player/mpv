@@ -1572,8 +1572,8 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 		return 0;
 	if(fps_ptr != NULL)
 	{
-			*fps_ptr = (*fps_ptr & 0xf0) | priv->vframerate;
-			vpriv->nom_delta_pts = parse_fps(conf_vframerate);
+		*fps_ptr = (*fps_ptr & 0xf0) | priv->vframerate;
+		vpriv->nom_delta_pts = parse_fps(conf_vframerate);
 	}
 	
 	//in pce_ptr starting from bit 0 bit 24 is tff, bit 30 is rff, 
@@ -1589,7 +1589,7 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 	if(se_ptr)
 		se_ptr[1] &= 0xf7;
 	
-		pce_ptr[3] = (pce_ptr[3] & 0xfd) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
+	pce_ptr[3] = (pce_ptr[3] & 0xfd) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
 	pce_ptr[4] |= 0x80;	//sets progressive frame
 	
 	vpriv->display_frame += n;
@@ -2483,9 +2483,9 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   if(priv == NULL)
   	return 0;
   priv->update_system_header = 1;
-  
+
   //calloc() already zero-ed all flags, so we assign only the ones we need
-  
+
   if(conf_mux != NULL) {
     if(! strcasecmp(conf_mux, "mpeg1"))
     {
@@ -2568,7 +2568,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 	else
 		mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR: unrecognized aspect %.3f\n", conf_vaspect);
   }
-  
+
   priv->vframerate = 0;		// no change
   if(conf_telecine && conf_vframerate > 0)
   {
@@ -2605,7 +2605,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 	conf_telecine = TELECINE_DGPULLDOWN;
 	conf_vframerate = conf_telecine_dest;
   }
-  
+
   if(conf_vframerate)
   {
 	int fps;
@@ -2641,13 +2641,13 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 			mp_msg(MSGT_MUXER, MSGL_ERR, "WRONG FPS: %d/1000, ignoring\n", fps);
 	}
   }
-  
+
   priv->vwidth = (uint16_t) conf_vwidth;
   priv->vheight = (uint16_t) conf_vheight;
   priv->panscan_width = (uint16_t) conf_panscan_width;
   priv->panscan_height = (uint16_t) conf_panscan_height;
   priv->vbitrate = ((conf_vbitrate) * 10) >> 2;	//*1000 / 400
-  
+
   if(priv->vaspect || priv->vframerate || priv->vwidth || priv->vheight || priv->vbitrate || priv->panscan_width || priv->panscan_height)
   {
   	priv->patch_seq = priv->vaspect || priv->vframerate || priv->vwidth || priv->vheight || priv->vbitrate;
@@ -2665,25 +2665,24 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 		mp_msg(MSGT_MUXER, MSGL_INFO, " bitrate to %u", conf_vbitrate);
 	mp_msg(MSGT_MUXER, MSGL_INFO, "\n");
   }
-  
+
   priv->has_video = priv->has_audio = 0;
-  
-  
+
   muxer->sysrate = priv->muxrate; 		// initial muxrate = constrained stream parameter
   priv->scr = muxer->file_end = 0;
-  
+
   if(conf_init_adelay)
   	priv->init_adelay = - (double) conf_init_adelay / (double) 1000.0;
-  
+
   priv->drop = conf_drop;
-  
+
   priv->buff = (uint8_t *) malloc(priv->packet_size);
   if((priv->buff == NULL))
   {
 	mp_msg(MSGT_MUXER, MSGL_ERR, "\nCouldn't allocate %d bytes, exit\n", priv->packet_size);
 	return 0;
   }
-  
+
   muxer->priv = (void *) priv;
   muxer->cont_new_stream = &mpegfile_new_stream;
   muxer->cont_write_chunk = &mpegfile_write_chunk;
