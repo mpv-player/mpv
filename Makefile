@@ -68,6 +68,9 @@ LIBS_MENCODER = libmpcodecs/libmpencoders.a \
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 
+# Having this in libosdep.a is not enough.
+OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
+
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(LIBS_MPLAYER)  $(COMMON_LIBS)
 MENCODER_DEPS = $(OBJS_MENCODER) $(LIBS_MENCODER) $(COMMON_LIBS)
 
@@ -218,6 +221,9 @@ Gui/libgui.a:
 	$(MAKE) -C Gui
 
 osdep/libosdep.a:
+	$(MAKE) -C osdep
+
+osdep/mplayer-rc.o:
 	$(MAKE) -C osdep
 
 input/libinput.a:

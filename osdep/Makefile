@@ -15,7 +15,6 @@ SRCS= shmem.c \
       mmap_anon.c \
 
 SRCS-$(MACOSX_FINDER_SUPPORT) += macosx_finder_args.c
-SRCS-$(TARGET_WIN32)          += mplayer-rc.c
 
 getch = getch2.c
 timer = timer-lx.c
