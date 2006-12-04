@@ -5250,7 +5250,6 @@ if test "$_cdparanoia" = yes ; then
     _cdda='yes'
     _ld_extra="$_ld_extra -lcdda_interface -lcdda_paranoia"
     openbsd && _ld_extra="$_ld_extra -lutil"
-    test $_cddb = auto && test $_network = yes && not darwin && _cddb=yes
 fi
 echores "$_cdparanoia"
 
@@ -5297,6 +5296,7 @@ fi
 echores "$_libcdio"
 
 if test "$_cdda" = yes ; then
+    test $_cddb = auto && test $_network = yes && not darwin && _cddb=yes
     _def_cdparanoia='#define HAVE_CDDA'
     _inputmodules="cdda $_inputmodules"
 else
