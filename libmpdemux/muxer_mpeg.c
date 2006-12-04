@@ -1670,7 +1670,9 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 	}
 	else if(vpriv->telecine == TELECINE_DGPULLDOWN)
 	{
-		pce_ptr[3] = (pce_ptr[3] & 0xfd) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
+		tff = (bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH] & 0x2) ? 0x80 : 0;
+		rff = (bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH] & 0x1) ? 0x02 : 0;
+		pce_ptr[3] = (pce_ptr[3] & 0xfd) | tff | rff;
 	}
 	else
 	{
