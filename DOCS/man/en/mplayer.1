@@ -9709,6 +9709,16 @@ converted with \-ofps, is either 24000/1001 or 24 fps.
 Any other framerate is incompatible with this option.
 .
 .TP
+.B tele_src and tele_dest
+Enables arbitrary telecining using Donand Graft's DGPulldown code.
+You need to specify the original and the desired framerate and the
+muxer will make the video stream look like it was encoded at
+<tele_dest> frames per second.
+It only works with MPEG-2 video when the input framerate is smaller
+than the output framerate.
+Example of PAL to NTSC telecining: tele_src=25,tele_dest=30000/1001.
+.
+.TP
 .B vbuf_size=<40\-1024>
 Sets the size of the video decoder's buffer, expressed in kilobytes.
 Specify it only if the bitrate of the video stream is too high for
