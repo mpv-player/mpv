@@ -7132,6 +7132,8 @@ if darwin ; then
   CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -DSYS_DARWIN -DCONFIG_DARWIN -shared-libgcc"  
   if x86 ; then
   CFLAGS="$CFLAGS -arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk"
+  else
+  CFLAGS="$CFLAGS -arch ppc -isysroot /Developer/SDKs/MacOSX10.3.9.sdk"
   fi
   if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
     CFLAGS="$CFLAGS -no-cpp-precomp"
