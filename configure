@@ -248,6 +248,7 @@ Optional features:
   --disable-dvdread-internal  disable internal libdvdread [autodetect]
   --disable-libdvdcss-internal  disable internal libdvdcss [autodetect]
   --disable-cdparanoia   disable cdparanoia [autodetect]
+  --disable-cddb         disable cddb [autodetect]
   --disable-bitmap-font  disable bitmap font support [enable]
   --disable-freetype     disable FreeType 2 font rendering [autodetect]
   --disable-fontconfig   disable fontconfig font lookup [autodetect]
@@ -1721,6 +1722,7 @@ _crash_debug=no
 _sighandler=yes
 _libdv=auto
 _cdparanoia=auto
+_cddb=auto
 _big_endian=auto
 _bitmap_font=yes
 _freetype=auto
@@ -2041,6 +2043,8 @@ for ac_option do
   --disable-linux-devfs)	_linux_devfs=no	;;
   --enable-cdparanoia)	_cdparanoia=yes	;;
   --disable-cdparanoia)	_cdparanoia=no	;;
+  --enable-cddb)	_cddb=yes	;;
+  --disable-cddb)	_cddb=no	;;
   --enable-big-endian)  _big_endian=yes ;;
   --disable-big-endian) _big_endian=no  ;;
   --enable-bitmap-font)    _bitmap_font=yes   ;;
@@ -5246,7 +5250,7 @@ if test "$_cdparanoia" = yes ; then
     _cdda='yes'
     _ld_extra="$_ld_extra -lcdda_interface -lcdda_paranoia"
     openbsd && _ld_extra="$_ld_extra -lutil"
-    test $_network = yes && not darwin && _cddb=yes
+    test $_cddb = auto && test $_network = yes && not darwin && _cddb=yes
 fi
 echores "$_cdparanoia"
 
@@ -5298,6 +5302,15 @@ if test "$_cdda" = yes ; then
 else
     _def_cdparanoia='#undef HAVE_CDDA'
     _noinputmodules="cdda $_noinputmodules"
+fi
+
+if test "$_cddb" = yes ; then
+    _def_cddb='#define HAVE_CDDB'
+    _inputmodules="cddb $_inputmodules"
+else
+    _cddb=no
+    _def_cddb='#undef HAVE_CDDB'
+    _noinputmodules="cddb $_noinputmodules"
 fi
 
 echocheck "bitmap font support"
@@ -8130,6 +8143,7 @@ $_def_use_aton
 
 /* enables / disables cdparanoia support */
 $_def_cdparanoia
+$_def_cddb
 
 /* enables / disables VIDIX usage */
 $_def_vidix
