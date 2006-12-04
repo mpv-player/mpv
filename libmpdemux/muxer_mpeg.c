@@ -170,7 +170,6 @@ typedef struct {
 	uint8_t id, is_mpeg12, telecine;
 	uint64_t vframes;
 	uint64_t display_frame;
-	uint8_t trf;
 	mp_mpeg_header_t picture;
 	int max_buffer_size;
 	buffer_track_t *buffer_track;
@@ -1569,16 +1568,10 @@ static inline uint64_t parse_fps(float fps)
 
 static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_ptr, uint8_t *pce_ptr, int n)
 {
-	uint8_t fps, tff, rff; 
-	int period; 
-	
 	if(! pce_ptr)
 		return 0;
-	fps = 0;
-	period = (vpriv->telecine == TELECINE_FILM2PAL) ? 12 : 4;
 	if(fps_ptr != NULL)
 	{
-		fps = *fps_ptr & 0x0f;
 			*fps_ptr = (*fps_ptr & 0xf0) | priv->vframerate;
 			vpriv->nom_delta_pts = parse_fps(conf_vframerate);
 	}
@@ -1596,21 +1589,12 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 	if(se_ptr)
 		se_ptr[1] &= 0xf7;
 	
-			
-	if(! vpriv->vframes)	//initial value of tff
-		vpriv->trf = (pce_ptr[3] >> 6) & 0x2;
-
-	while(n < 0) n+=period;
-	vpriv->trf = (vpriv->trf + n) % period;
-	
 		pce_ptr[3] = (pce_ptr[3] & 0xfd) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
 	pce_ptr[4] |= 0x80;	//sets progressive frame
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTRF: %d, TFF: %d, RFF: %d, n: %d\n", vpriv->trf, tff >> 7, rff >> 1, n);
 	
 	vpriv->display_frame += n;
 	if(! vpriv->vframes)
-		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%.3f, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
-		conf_vframerate, tff >> 7, rff >> 1);
+		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%.3f\n",conf_vframerate);
 	
 	return 1;
 }
