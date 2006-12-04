@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r21367
+// Synced with help_mp-en.h: r21476
 
 // ========================= MPlayer help ===========================
 
@@ -1345,6 +1345,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_FcDirSave "[ass] Сбой FcDirSave.\n"
 #define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] Сбой FcConfigAppFontAddDir\n"
 #define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig отключен, будет использоваться только шрифт по-умолчанию.\n"
+#define MSGTR_LIBASS_FunctionCallFailed "[ass] Сбой %s\n"
 
 // ass_render.c
 #define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] Не определены ни PlayResX, ни PlayResY. Предполагаю 384x288.\n"
@@ -1367,6 +1368,7 @@ static char help_text[]=
 // ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Глиф 0x%X не найден, выбираю шрифт заново для (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] В шрифте не найден глиф 0x%X для (%s, %d, %d)\n"
+#define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Ошибка открытия шрифта в памяти: %s\n"
 
 // format.c
 
