@@ -2601,9 +2601,17 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 		tfps *= 2;
 	}
 	
+	if(((tfps - sfps)>>1) > sfps)
+	{
+		mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR! Framerate increment must be <= 1.5, telecining disabled\n");
+		conf_telecine = 0;
+	}
+	else
+	{
 	generate_flags(sfps, tfps);
 	conf_telecine = TELECINE_DGPULLDOWN;
 	conf_vframerate = conf_telecine_dest;
+	}
   }
 
   if(conf_vframerate)
@@ -2638,7 +2646,12 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 			priv->vframerate = FRAMERATE_60;
 			break;
 		default:
+		{
 			mp_msg(MSGT_MUXER, MSGL_ERR, "WRONG FPS: %d/1000, ignoring\n", fps);
+			if(conf_telecine)
+				mp_msg(MSGT_MUXER, MSGL_ERR, "DISABLED TELECINING\n");
+			conf_telecine = 0;
+		}
 	}
   }
 
