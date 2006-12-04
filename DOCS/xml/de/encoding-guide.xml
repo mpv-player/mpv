@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- In sync with r21078 -->
+<!-- In sync with r21376 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -2254,7 +2254,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
               verfügbar sind (suche nach &quot;deint&quot;), lies Michael Niedermayers
               <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing-Filter-Vergleich</ulink>
               und durchsuche die
-              <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">MPlayer-Mailinglisten</ulink>,
+              <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">MPlayer-Mailinglisten</ulink>,
               um Diskussionen über die zahlreichen Filter zu finden.
               Nochmals, die Framerate ändert sich nicht, also kein
               <option>-ofps</option>. Deinterlacing sollte außerdem nach dem Zuschneiden

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21155 -->
+<!-- in sync with r21395 -->
 
 <chapter id="install">
   <title>Installation</title>
@@ -58,20 +58,20 @@
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">FreeType</emphasis> in der Version 2.0.9 oder neuer wird
-          benötigt, um Schriften für OSD und Untertitel zu erhalten.
+          <emphasis role="bold">FreeType</emphasis> optional,
+          wird benötigt, um Schriften für OSD und Untertitel zu erhalten. Es wird mindestens Version 2.0.9 benötigt.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">libjpeg</emphasis> - optionaler JPEG-Decoder,
-          benötigt für den JPEG-Videoausgabetreiber.
+          <emphasis role="bold">libjpeg</emphasis> - optionaler JPEG-En-/Decoder,
+          benötigt für den JPEG-Videoausgabetreiber und Decodierung von MJPEG-Video
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">libpng</emphasis> - optionaler (M)PNG-Decoder.
-          Wird für die GUI und den PNG-Videoausgabetreiber benötigt.
+          <emphasis role="bold">libpng</emphasis> - optionaler (M)PNG-En-/Decoder,
+          benötigt für die GUI und den PNG-Videoausgabetreiber
         </para>
       </listitem>
       <listitem>
