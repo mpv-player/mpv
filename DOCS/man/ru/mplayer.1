@@ -4914,637 +4914,671 @@ unsigned long long counter   /*Используется для сохранения синхронизациии, обнов
 .
 .
 .
-.SH "VIDEO FILTERS"
-Video filters allow you to modify the video stream and its properties.
-The syntax is:
+.SH "ВИДЕО ФИЛЬТРЫ"
+Видео фильтры возволяют изменять видео поток и его свойства.
+Синтаксис такой:
 .
 .TP
-.B \-vf <filter1[=parameter1:parameter2:...],filter2,...>
-Setup a chain of video filters.
+.B \-vf <фильтр1[=параметр1:параметр2:...],фильтр2,...>
+Устанавливает цепочку видео фильтров.
 .PP
-Many parameters are optional and set to default values if omitted.
-To explicitly use a default value set a parameter to '-1'.
-Parameters w:h means width x height in pixels, x:y means x;y position counted
-from the upper left corner of the bigger image.
+Многие параметры необязательны и устанавливают значения по-умолчанию, если опущены.
+Для явного использования значения по-умолчанию, установите значение, равное '-1'.
+Параметры w:h означают ширину и высоту в пикселах, x:y означает x;y позицию,
+считая от верхнего левого угла большего изображения.
 .br
-.I NOTE:
-To get a full list of available video filters, see \-vf help.
+.I ЗАМЕЧАНИЕ:
+Полный список доступных фильтров можно получить при помощи \-vf help.
 .sp 1
-Video filters are managed in lists.
-There are a few commands to manage the filter list.
+Видео фильтры управляются в списках.
+Вот несколько команд управления списком фильтров.
 .
 .TP
-.B \-vf-add <filter1[,filter2,...]>
-Appends the filters given as arguments to the filter list.
+.B \-vf-add <фильтр1[,фильтр2,...]>
+Добавляет указанные фильтры в конец списка.
 .
 .TP
-.B \-vf-pre <filter1[,filter2,...]>
-Prepends the filters given as arguments to the filter list.
+.B \-vf-pre <фильтр1[,фильтр2,...]>
+Добавляет указанные фильтры в начало списка.
 .
 .TP
-.B \-vf-del <index1[,index2,...]>
-Deletes the filters at the given indexes.
-Index numbers start at 0, negative numbers address the end of the
-list (-1 is the last).
+.B \-vf-del <индекс1[,индекс2,...]>
+Удаляет фильтры с указанным индексом.
+Индексы начинаются с 0, отрицательные числа означают отсчет от
+конца списка (-1 \- последний).
 .
 .TP
 .B \-vf-clr
-Completely empties the filter list.
+Полностью очищает список фильтров.
 .PP
-With filters that support it, you can access parameters by their name.
+Для тех фильтров, которые это поддерживают, вы можете получить доступ 
+к их параметрам по названиям, 
 .
 .TP
-.B \-vf <filter>=help
-Prints the parameter names and parameter value ranges for a particular
-filter.
+.B \-vf <фильтр>=help
+Выводит названия и допустимые значения параметров определенного фильтра.
 .
 .TP
-.B \-vf <filter=named_parameter1=value1[:named_parameter2=value2:...]>
-Sets a named parameter to the given value.
-Use on and off or yes and no to set flag parameters.
+.B \-vf <фильтр=назв_параметра1=знач1[:назв_параметра2=знач2:...]>
+Устанавливает значения параметрам, указанным по названию.
+Используйте on и off или yes и no для установки значений параметрам\-флагам.
 .PP
-Available filters are:
+Доступные фильтры:
 .
 .TP
 .B crop[=w:h:x:y]
-Crops the given part of the image and discards the rest.
-Useful to remove black bands from widescreen movies.
+Обрезает изображение до указанного размера, отбрасывая остальное.
+Полезно для удаления черных полос в широкоэкранных фильмах.
 .PD 0
 .RSs
 .IPs <w>,<h>
-Cropped width and height, defaults to original width and height.
+Размер обрезания, по-умолчанию равен исходной ширине и высоте.
 .IPs <x>,<y>
-Position of the cropped picture, defaults to center.
+Позиция обрезаемого изображения, по-умолчанию \- в центре.
 .RE
 .PD 1
 .
 .TP
-.B cropdetect[=limit:round]
-Calculates necessary cropping parameters and prints the recommended parameters
-to stdout.
+.B cropdetect[=предел:округление]
+Рассчитывает необходимые параметры обрезания и выводит рекомендуемые на
+стандартный вывод.
 .PD 0
 .RSs
-.IPs <limit>
-Threshold, which can be optionally specified from nothing (0) to
-everything (255) (default: 24).
+.IPs <предел>
+Порог, который опционально может быть установлен от ничего (0) до 
+все (255) (по-умолчанию: 24).
 .br
-.IPs <round>
-Value which the width/\:height should be divisible by (default: 16).
-The offset is automatically adjusted to center the video.
-Use 2 to get only even dimensions (needed for 4:2:2 video).
-16 is best when encoding to most video codecs.
+.IPs <округление>
+Значение, на которое должны делиться ширина/\:высота (по-умолчанию: 16).
+Смещение автоматически подстраивается для центрирования видео.
+Используйте 2 для получения только четных размеров (нужно для 4:2:2 видео),
+16 \- лучшее значение для большинства видео кодеков.
 .RE
 .PD 1
 .
 .TP
 .B rectangle[=w:h:x:y]
-The plugin responds to the input.conf directive 'change_rectangle'
-that takes two parameters.
+Плагин, реагирующий на директиву 'change_rectangle' файла input.conf,
+принимающую два параметра.
 .PD 0
 .RSs
 .IPs <w>,<h>
-width and height (default: -1, maximum possible width where boundaries
-are still visible.)
+ширина и высота (по-умолчанию: -1, максимально возможная ширна при которой еще
+видны границы.)
 .IPs <x>,<y>
-top left corner position (default: -1, uppermost leftmost)
+положение верхнего левого угла (по-умолчанию: -1, самое верхнее, самое левое положение)
 .RE
 .PD 1
 .
 .TP
 .B expand[=w:h:x:y:o:a:r]
-Expands (not scales) movie resolution to the given value and places the
-unscaled original at coordinates x, y.
-Can be used for placing subtitles/\:OSD in the resulting black bands.
+Расширяет (не масштабирует) разрешение фильма до указанного значения 
+и помещает немасштабированный оригинал в позицию x, y.
+Может использоваться для размещения субтитров/\:OSD на получающихся
+черых полосах.
 .RSs
 .IPs <w>,<h>
-Expanded width,height (default: original width,height).
-Negative values for w and h are treated as offsets to the original size.
+Ширина и высота до которой происходит расширение (по-умолчанию: изначальная 
+ширина,высота).
+Отрицательные значения для w и h расматриваются как отклонения от оригинального размера.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IP expand=0:-50:0:0
-Adds a 50 pixel border to the bottom of the picture.
+Добавляет 50 пиксельную полосу к нижней части изображения.
 .RE
 .PD 1
 .IPs <x>,<y>
-position of original image on the expanded image (default: center)
+положение исходного изображения на расширенном (по-умолчанию: центр)
 .IPs "<o>\ \ "
-OSD/\:subtitle rendering
+рендеринг OSD/\:субтитров
 .RSss
-0: disable (default)
+0: отключено (по-умолчанию)
 .br
-1: enable
+1: включено
 .REss
 .IPs "<a>\ \ "
-Expands to fit an aspect instead of a resolution (default: 0).
+Расширение, сохраняя пропорции вместо разрешения (по-умолчанию: 0).
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IP expand=800:::::4/3
-Expands to 800x600, unless the source is higher resolution, in which
-case it expands to fill a 4/3 aspect.
+Расширение до 800x600, за исключением случая, когда исходный материал имеет
+большее разрешение, в этом случае расширение до размера, сохраненяющего 4/3 пропорцию.
 .RE
 .PD 1
 .IPs "<r>\ \ "
-Rounds up to make both width and height divisible by <r> (default: 1).
+Округляет размер таким образом, чтобы и ширина, и высота делились на <r> (по-умолчанию: 1).
 .RE
 .
 .TP
-.B flip (also see \-flip)
-Flips the image upside down.
+.B flip (смотрите также \-flip)
+Зеркально отображает изображение сверху вниз.
 .
 .TP
 .B "mirror\ "
-Mirrors the image on the Y axis.
+Зеркально отражает изображение по оси Y.
 .
 .TP
 .B rotate[=<0\-7>]
-Rotates the image by 90 degrees and optionally flips it.
-For values between 4\-7 rotation is only done if the movie geometry is
-portrait and not landscape.
+Поворачивает изображение на 90 градусов и опционально зеркально его отражает.
+Для значений между 4\-7 поворот производится только в том случае, если 
+фильм имеет книжную, а не альбомную ориентацию.
 .RSs
 .IPs 0
-Rotate by 90 degrees clockwise and flip (default).
+Поворот на 90 градусов по часовой стрелке и отражение (по-умолчанию).
 .IPs 1
-Rotate by 90 degrees clockwise.
+Поворот на 90 градусов по часовой стрелке.
 .IPs 2
-Rotate by 90 degrees counterclockwise.
+Поворот на 90 градусов против часовой стрелки.
 .IPs 3
-Rotate by 90 degrees counterclockwise and flip.
+Поворот на 90 градусов против часовой стрелки и отражение.
 .RE
 .
 .TP
 .B scale[=w:h[:ilaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
-Scales the image with the software scaler (slow) and performs a YUV<\->RGB
-colorspace conversion (also see \-sws).
+Масштабирует изображение модулем программного масштабирования (медленно)
+и осуществляет YUV<\->RGB  преобразование пространства цветов (смотрите
+также \-sws).
 .RSs
 .IPs <w>,<h>
-scaled width/\:height (default: original width/\:height)
+ширина/\:высота после масштабирования (по-умолчанию: оригинальная ширина/\:высота)
 .br
-.I NOTE:
-If \-zoom is used, and underlying filters (including libvo) are
-incapable of scaling, it defaults to d_width/\:d_height!
+.I ЗАМЕЧАНМЕ:
+.\" FIXME what does mean d_width/\:d_height
+Если используется \-zoom, и лежащие с основе фильтры (включая libvo) неспособны 
+масштабировать, значение по умолчанию равно d_width/\:d_height!
 .RSss
- 0:   scaled d_width/\:d_height
+.\" FIXME what is  d_width/\:d_height
+ 0:   отмасштабированные d_width/\:d_height
 .br
--1:   original width/\:height
+-1:   оригинальные ширина/\:высота
 .br
--2:   Calculate w/h using the other dimension and the prescaled aspect ratio.
+.\" FIXME prescaled is untranslated
+-2:   Вычислить w/h, используя другую размерность и prescaled коэффициент пропорций.
 .br
--3:   Calculate w/h using the other dimension and the original aspect ratio.
+-3:   Вычислить w/h, используя другую размерность и оригинальный коэффициент пропорций.
 .br
--(n+8): Like -n above, but rounding the dimension to the closest multiple of 16.
+-(n+8): Как и -n выше, но округляя размеры до ближайшего кратного 16 значения.
 .REss
 .IPs <ilaced>
-Toggle interlaced scaling.
+Переключает черезстрочное масштабрование.
 .RSss
-0: off (default)
+0: выключено (по-умолчанию)
 .br
-1: on
+1: включено
 .REss
 .IPs <chr_drop>
-chroma skipping
+пропуск цветности 
 .RSss
-0: Use all available input lines for chroma.
+0: Использовать все доступные линии для цветности.
 .br
-1: Use only every 2. input line for chroma.
+1: Использовать каждую 2 входную линию для цветности.
 .br
-2: Use only every 4. input line for chroma.
+2: Использовать каждую 4 входную линию для цветности.
 .br
-3: Use only every 8. input line for chroma.
+3: Использовать каждую 8 входную линию для цветности.
 .REss
-.IPs "<par>[:<par2>] (also see \-sws)"
-Set some scaling parameters depending on the type of scaler selected
-with \-sws.
+.IPs "<par>[:<par2>] (смотрите также \-sws)"
+Устанавливает некоторые параметры масштабирования в зависимости от
+модуля масштабирования, выбранного с помощью \-sws.
 .RSss
-\-sws 2 (bicubic):  B (blurring) and C (ringing)
+.\" FIXME is translation correct (blurring and ringing)
+\-sws 2 (бикубический):  B (размытость) and C (ореол на границе цветов)
 .br
-0.00:0.60 default
+0.00:0.60 по-умолчанию
 .br
-0.00:0.75 VirtualDub's "precise bicubic"
+0.00:0.75 "точный бикубический" VirtualDub'а
 .br
-0.00:0.50 Catmull-Rom spline
+0.00:0.50 сплайн Catmull-Rom 
 .br
-0.33:0.33 Mitchell-Netravali spline
+0.33:0.33 сплайн Mitchell-Netravali
 .br
-1.00:0.00 cubic B-spline
+1.00:0.00 кубический B-сплайн
 .br
-\-sws 7 (gaussian): sharpness (0 (soft) \- 100 (sharp))
+.\" FIXME is translation correct sharpen,soft,sharp
+\-sws 7 (гауссово): резкость (0 (мягко) \- 100 (резко))
 .br
-\-sws 9 (lanczos):  filter length (1\-10)
+\-sws 9 (lanczos):  длина фильтра (1\-10)
 .REss
 .IPs <presize>
-Scale to preset sizes.
+Масштабирование до предустановленных размеров.
 .RSss
-qntsc:   352x240 (NTSC quarter screen)
+qntsc:   352x240 (экран в четверть NTSC)
 .br
-qpal:    352x288 (PAL quarter screen)
+qpal:    352x288 (экран в четверть PAL)
 .br
-ntsc:    720x480 (standard NTSC)
+ntsc:    720x480 (стандартный NTSC)
 .br
-pal:     720x576 (standard PAL)
+pal:     720x576 (стандартный PAL)
 .br
-sntsc:   640x480 (square pixel NTSC)
+sntsc:   640x480 (NTSC с квадратным пикселом)
 .br
-spal:    768x576 (square pixel PAL)
+spal:    768x576 (PAL с квадратным пикселом)
 .REss
 .IPs <noup>
-Disallow upscaling past the original dimensions.
+Предотвращает превышение оригинальных размерностей при растяжении.
 .RSss
-0: Allow upscaling (default).
+0: Растяжение разрешено (по-умолчанию).
 .br
-1: Disallow upscaling if one dimension exceeds its original value.
+1: Запрещает растяжение, если одна из размерностей превышает оригинальное значение.
 .br
-2: Disallow upscaling if both dimensions exceed their original values.
+2: Запрещает растяжение, если обе размерности превышают оригинальное значение.
 .REss
 .IPs <arnd>
-Accurate rounding for the vertical scaler, which may be faster
-or slower than the default rounding.
+Точное округление для модуля вертикального масштабирования, которое может быть 
+быстрее или медленнее чем обычное округление.
 .RSss
-0: Disable accurate rounding (default).
+0: Отключить точное окугление (по-умолчанию).
 .br
-1: Enable accurate rounding.
+1: Включить точное округление.
 .REss
 .RE
 .
 .TP
 .B dsize[=aspect|w:h:aspect-method:r]
-Changes the intended display size/\:aspect at an arbitrary point in the
-filter chain.
-Aspect can be given as a fraction (4/3) or floating point number
-(1.33).
-Alternatively, you may specify the exact display width and height
-desired.
-Note that this filter does
-.B not
-do any scaling itself; it just affects
-what later scalers (software or hardware) will do when auto-scaling to
-correct aspect.
+Изменяет размер/\:пропорции предполагаемого экрана в произвольной точке 
+цепочки фильтров. Пропорции могут быть заданы как дробью (4/3), так и
+вещественным числом (1.33). Альтернативно вы можете точно установить
+желаемую ширину и высоту экрана.
+Имейте в виду, что этот фильтр сам по себе 
+.B не 
+делает никакого масштабирования; он только влияет на то, что
+последующие модули масштабирования (программные или аппаратные) будут делать, когда
+осуществляют автоматическое масштабирование для сохранения верных пропорций.
 .RSs
 .IPs <w>,<h>
-New display width and height.
-Can also be these special values:
+Новые ширина и высота.
+Также могут быть указаны специальные значения:
 .RSss
- 0:   original display width and height
+ 0:   ширина и высота оригинального дисплея
 .br
--1:   original video width and height (default)
+-1:   ширина и высота оригинального видео (по-умолчанию)
 .br
--2:   Calculate w/h using the other dimension and the original display
-aspect ratio.
+-2:   Вычислить w/h, используя другую размерность и пропорции оригинального дисплея.
 .br
--3:   Calculate w/h using the other dimension and the original video
-aspect ratio.
+-3:   Вычислить w/h, используя другую размерность и пропорции оригинального видео.
 .REss
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IP dsize=800:-2
-Specifies a display resolution of 800x600 for a 4/3 aspect video, or
-800x450 for a 16/9 aspect video.
+Указывает разрешение экрана, равное 800x600 для 4/3 видео, или
+800x450 для 16/9 видео.
 .RE
 .IPs <aspect-method>
-Modifies width and height according to original aspect ratios.
+Изменяет ширину и высоту в соответствии с оригинальными пропорциями.
 .RSss
--1: Ignore original aspect ratio (default).
+-1: Игнорировать оригинальные пропорции (по-умолчанию).
 .br
- 0: Keep display aspect ratio by using <w> and <h> as maximum
-resolution.
+ 0: Оставить пропорции дисплея, используя <w> и <h> в качестве максимального
+ разрешения.
 .br
- 1: Keep display aspect ratio by using <w> and <h> as minimum
-resolution.
+ 1: Оставить пропорции дисплея, используя <w> и <h> в качестве минимального
+ разрешения.
 .br
- 2: Keep video aspect ratio by using <w> and <h> as maximum
-resolution.
+ 2: Оставить пропорции видео, используя <w> и <h> в качестве максимального
+ разрешения.
 .br
- 3: Keep video aspect ratio by using <w> and <h> as minimum
-resolution.
+ 3: Оставить пропорции видео, используя <w> и <h> в качестве минимального
+ разрешения.
 .REss
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IP dsize=800:600:0
-Specifies a display resolution of at most 800x600, or smaller, in order
-to keep aspect.
+Определяет разрешение дисплея равным максимум 800x600 или меньше при
+необходимости сохранить пропорции.
 .RE
 .PD 1
 .IPs "<r>\ \ "
-Rounds up to make both width and height divisible by <r> (default: 1).
+Округляет размер таким образом, чтобы и ширина и высота делились на <r> (по-умолчанию: 1).
 .RE
 .
 .TP
 .B "yuy2\ \ \ "
-Forces software YV12/\:I420/\:422P to YUY2 conversion.
-Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
+Принудительное использование программного 
+преобразования из YV12/\:I420/\:422P в YUY2.
+Полезно для видеокарт с медленной поддержкой YV12, но быстрой YUY2.
 .
 .TP
 .B "yvu9\ \ \ "
-Forces software YVU9 to YV12 colorspace conversion.
-Deprecated in favor of the software scaler.
+Принудительное использование программного 
+преобразования из YVU9 в YV12 пространство цветов.
+Устарело в связи с появленим модуля программного масштабирования.
 .
 .TP
 .B "yuvcsp\ "
-Clamps YUV color values to the CCIR 601 range without doing real conversion.
+Зажимает значения YUV цвета в диапазон CCIR 601 без реального преобразования.
 .
 .TP
 .B rgb2bgr[=swap]
-RGB 24/32 <\-> BGR 24/32 colorspace conversion.
+Преобразование пространства цветов RGB 24/32 <\-> BGR 24/32.
 .PD 0
 .RSs
 .IPs "swap\ "
-Also perform  R <-> B swapping.
+Также меняются местами R <-> B.
 .RE
 .PD 1
 .
 .TP
 .B palette
-RGB/BGR 8 \-> 15/16/24/32bpp colorspace conversion using palette.
+Преобразование пространства цветов RGB/BGR 8 \-> 15/16/24/32bpp 
+с использованием палитры.
 .
 .TP
 .B format[=fourcc]
-Restricts the colorspace for the next filter without doing any conversion.
-Use together with the scale filter for a real conversion.
+Ограничивает пространство цветов для следующего фильтра без осуществления
+какого-либо преобразования. Используйте совместно с фильтром scale
+для реального преобразования.
 .br
-.I NOTE:
-For a list of available formats see format=fmt=help.
+.I ЗАМЕЧАНИЕ:
+Список доступных форматов смотрите при помощи format=fmt=help.
 .PD 0
 .RSs
 .IPs <fourcc>
-format name like rgb15, bgr24, yv12, etc (default: yuy2)
+название формата, например rgb15, bgr24, yv12 и другие (по-умолчанию: yuy2)
 .RE
 .PD 1
 .
 .TP
 .B noformat[=fourcc]
-Restricts the colorspace for the next filter without doing any conversion.
-Unlike the format filter, this will allow any colorspace
-.B except
-the one you specify.
+Ограничивает пространство цветов для следующего фильтра без осуществления
+какого-либо преобразования. В отличие от фильтра format, он позволяет использовать
+любое пространство цветов
+.B кроме
+указанного вами.
 .br
-.I NOTE:
-For a list of available formats see noformat=fmt=help.
+.I ЗАМЕЧАНИЕ:
+Список доступных форматов смотрите при помощи noformat=fmt=help.
 .PD 0
 .RSs
 .IPs <fourcc>
-format name like rgb15, bgr24, yv12, etc (default: yv12)
+название формата, например rgb15, bgr24, yv12 и другие (по-умолчанию: yv12)
 .RE
 .PD 1
 .
 .TP
 .B pp[=filter1[:option1[:option2...]]/[-]filter2...] (also see \-pphelp)
-Enables the specified chain of postprocessing subfilters.
-Subfilters must be separated by '/' and can be disabled by
-prepending a '\-'.
-Each subfilter and some options have a short and a long name that can be
-used interchangeably, i.e.\& dr/dering are the same.
-All subfilters share common options to determine their scope:
+Задействует указанную цепочку подфильтров постобработки.
+Подфильтры должны быть отделены '/', и могут быть отключены указанием
+перед ними '\-'.
+Каждый подфильтр и некоторые опции имеют как короткое, так и длинное
+название, которые полностью взаимозаменяемы, т.е. dr/dering \- это
+одно и то же. 
+.\" FIXME is translation correct? scope = границы действия
+Все подфильтры имеют общие опции, определяющие границы действия:
 .PD 0
 .RSs
 .IPs a/autoq
-Automatically switch the subfilter off if the CPU is too slow.
+Автоматически отлючает подфильтр, если CPU слишком медленный.
 .IPs c/chrom
-Do chrominance filtering, too (default).
+Указывает осуществлять обработку в том числе и цветностной компоненты (по-умолчанию).
 .IPs y/nochrom
-Do luminance filtering only (no chrominance).
+Указывает осуществлять обработку только яркостной компоненты.
 .IPs n/noluma
-Do chrominance filtering only (no luminance).
+Указывает осуществлять обработку только цветностной компоненты (без яркостой).
 .RE
 .PD 1
 .sp 1
 .RS
 .br
-.I NOTE:
-\-pphelp shows a list of available subfilters.
+.I ЗАМЕЧАНИЕ:
+\-pphelp выводит список доступных подфильтров.
 .sp 1
-Available subfilters are
+Доступные подфильтры:
 .RE
 .RSs
 .IPs hb/hdeblock[:difference[:flatness]]
-horizontal deblocking filter
+фильтр горизонтального deblocking'а
 .RSss
-<difference>: Difference factor where higher values mean
-more deblocking (default: 32).
+<difference>: Фактор различия, где большие значения означают
+более сильный deblocking (по-умолчанию: 32).
 .br
-<flatness>: Flatness threshold where lower values mean
-more deblocking (default: 39).
+<flatness>: Порог толщины, где меньшие значения означают
+более сильный deblocking (по-умолчанию: 39).
 .REss
 .IPs vb/vdeblock[:difference[:flatness]]
-vertical deblocking filter
+фильтр вертикального deblocking'а
 .RSss
-<difference>: Difference factor where higher values mean
-more deblocking (default: 32).
+<difference>: Фактор различия, где большие значения означают
+более сильный deblocking (по-умолчанию: 32).
 .br
-<flatness>: Flatness threshold where lower values mean
-more deblocking (default: 39).
+<flatness>: Порог толщины, где меньшие значения означают
+более сильный deblocking (по-умолчанию: 39).
 .REss
 .IPs ha/hadeblock[:difference[:flatness]]
-accurate horizontal deblocking filter
+фильтр тщательного горизонтального deblocking'а
 .RSss
-<difference>: Difference factor where higher values mean
-more deblocking (default: 32).
+<difference>: Фактор различия, где большие значения означают
+более сильный deblocking (по-умолчанию: 32).
 .br
-<flatness>: Flatness threshold where lower values mean
-more deblocking (default: 39).
+<flatness>: Порог толщины, где меньшие значения означают
+более сильный deblocking (по-умолчанию: 39).
 .REss
 .IPs va/vadeblock[:difference[:flatness]]
-accurate vertical deblocking filter
+фильтр тщательного вертикального deblocking'а
 .RSss
-<difference>: Difference factor where higher values mean
-more deblocking (default: 32).
+<difference>: Фактор различия, где большие значения означают
+более сильный deblocking (по-умолчанию: 32).
 .br
-<flatness>: Flatness threshold where lower values mean
-more deblocking (default: 39).
+<flatness>: Порог толщины, где меньшие значения означают
+более сильный deblocking (по-умолчанию: 39).
 .REss
 .sp 1
-The horizontal and vertical deblocking filters share the
-difference and flatness values so you cannot set
-different horizontal and vertical thresholds.
+Фильтры горизонтального и вертикального deblocking'а 
+используют общие значения difference и flatness, так что
+вы не можете установить различные горизонтальные и вертикальные
+пороги.
 .sp 1
 .IPs h1/x1hdeblock
-experimental horizontal deblocking filter
+экспериментальный фильтр горизонтального deblocking'а
 .IPs v1/x1vdeblock
-experimental vertical deblocking filter
+экспериментальный фильтр вертикального deblocking'а
 .IPs dr/dering
-deringing filter
-.IPs tn/tmpnoise[:threshold1[:threshold2[:threshold3]]]
-temporal noise reducer
+фильтр удаления ореола на границе цветов
+.IPs tn/tmpnoise[:порог[:порог2[:порог3]]]
+временной фильтр шумоподавления
 .RSss
-<threshold1>: larger -> stronger filtering
+<порог1>: больше -> сильнее фильтрация
 .br
-<threshold2>: larger -> stronger filtering
+<порог2>: больше -> сильнее фильтрация
 .br
-<threshold3>: larger -> stronger filtering
+<порог3>: больше -> сильнее фильтрация
 .REss
 .IPs al/autolevels[:f/fullyrange]
-automatic brightness / contrast correction
+автоматическая коррекция яркости / контрастности
 .RSss
-f/fullyrange: Stretch luminance to (0\-255).
+f/fullyrange: Растягивает яркостную компоненту до (0\-255).
 .REss
 .IPs lb/linblenddeint
-Linear blend deinterlacing filter that deinterlaces the given block
-by filtering all lines with a (1 2 1) filter.
+Линейный фильтр деинтерсейсинга blend, устраняющий черезстрочность заданного
+блока фильтруя все линии фильтром (1 2 1).
 .IPs li/linipoldeint
-Linear interpolating deinterlacing filter that deinterlaces the given block
-by linearly interpolating every second line.
+Линейный фильтр деинтерлейсинга интерполяцией, устраняющий черезстрочность заданного 
+блока линейно интерполируя каждую вторую линию.
 .IPs ci/cubicipoldeint
-Cubic interpolating deinterlacing filter deinterlaces the given block
-by cubically interpolating every second line.
+Кубический фильтр деинтерлейсинга интерполяцией, устраняющий черезстрочность заданного 
+блока кубически интерполируя каждую вторую линию.
 .IPs md/mediandeint
-Median deinterlacing filter that deinterlaces the given block
-by applying a median filter to every second line.
+Фильтр деинтерлейсинга median, устраняющий черезстрочность заданного 
+блока, применяя фильтр median к каждой второй линии.
 .IPs fd/ffmpegdeint
-FFmpeg deinterlacing filter that deinterlaces the given block
-by filtering every second line with a (-1 4 2 4 -1) filter.
+Фильтр деинтерлейсинга FFmpeg, устраняющий черезстрочность заданного 
+блока фильтруя каждую вторую линии фильтром (-1 4 2 4 -1).
 .IPs l5/lowpass5
-Vertically applied FIR lowpass deinterlacing filter that deinterlaces
-the given block by filtering all lines with a (-1 2 6 2 -1) filter.
+Вертикально применяемый низкочастотный фильтр деинтерлейсинга FIR,
+устраняющий черезстрочность заданного, фильтруя все линии 
+фильтром (-1 2 6 2 -1).
 .IPs fq/forceQuant[:quantizer]
-Overrides the quantizer table from the input with the constant
-quantizer you specify.
+Переопределяет таблицу квантования источника указанным вами постоянным
+квантователем.
 .RSss
-<quantizer>: quantizer to use
+<quantizer>: используемый квантователь
 .REss
 .IPs de/default
-default pp filter combination (hb:a,vb:a,dr:a)
+комбинация pp фильтров по-умолчанию (hb:a,vb:a,dr:a)
 .IPs fa/fast
-fast pp filter combination (h1:a,v1:a,dr:a)
+быстрая комбинация pp фильтров (h1:a,v1:a,dr:a)
 .IPs "ac\ \ \ "
 high quality pp filter combination (ha:a:128:7,va:a,dr:a)
+высококачественная комбинация pp фильтров (ha:a:128:7,va:a,dr:a)
 .RE
 .RS
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .PD 0
 .RSs
 .IPs "\-vf pp=hb/vb/dr/al"
-horizontal and vertical deblocking, deringing and automatic
-brightness/\:contrast
+горизонтальный и вертикальный deblocking, устранение ореола и
+автоматическая коррекция яркости/\:контраста
 .IPs "\-vf pp=de/-al"
-default filters without brightness/\:contrast correction
+фильтры по-умолчанию без коррекции яркости/\:контраста
 .IPs "\-vf pp=default/tmpnoise:1:2:3"
-Enable default filters & temporal denoiser.
+.\" FIXME termporal denoiser = временное устранение шума
+Задействует фильтры по-умолчанию и временное устранение шума.
 .IPs "\-vf pp=hb:y/vb:a"
-Horizontal deblocking on luminance only, and switch vertical deblocking
-on or off automatically depending on available CPU time.
+Горизонтальный deblocking только для яркостной компоненты, и 
+автоматически включает или выключает вертикальный deblocking
+в зависимости от загруженности CPU.
 .RE
 .PD 1
 .
 .TP
-.B spp[=quality[:qp[:mode]]]
-Simple postprocessing filter that compresses and decompresses the
-image at several (or \- in the case of quality level 6 \- all)
-shifts and averages the results.
+.B spp[=качество[:qp[:режим]]]
+.\" FIXME is translation correct ?
+.\" Simple postprocessing filter that compresses and decompresses the
+.\" image at several (or \- in the case of quality level 6 \- all)
+.\" shifts and averages the results.
+Простой фильтр постобработки сжимающий и разжимающий изображение
+несколькими (или \- в случае качества 6 \- всеми) сдигами и
+усредняющий результаты.
 .RSs
-.IPs <quality>
-0\-6 (default: 3)
+.IPs <качество>
+0\-6 (по-умолчанию: 3)
 .IPs "<qp>\ "
-Force quantization parameter (default: 0, use QP from video).
-.IPs <mode>
-0: hard thresholding (default)
+Принудительно устанавливает параметр квантизации (по-умолчанию: 0, 
+используйет QP из видео).
+.IPs <режим>
+0: жесткое определение порога (по-умолчанию)
 .br
-1: soft thresholding (better deringing, but blurrier)
+1: мягкое определение порога (лучшее устранение ореола, но сильнее размытие)
 .br
-4: like 0, but also use B-frames' QP (may cause flicker)
+4: как 0, но также использует QP B-кадров (может привести к мерцанию)
 .br
-5: like 1, but also use B-frames' QP (may cause flicker)
+5: как 1, но также использует QP B-кадров (может привести к мерцанию)
 .RE
 .
 .TP
-.B uspp[=quality[:qp]]
-Ultra simple & slow postprocessing filter that compresses and
-decompresses the image at several (or \- in the case of quality
-level 8 \- all) shifts and averages the results.
-The way this differs from the behavior of spp is that uspp actually
-encodes & decodes each case with libavcodec Snow, whereas spp uses
-a simplified intra only 8x8 DCT similar to MJPEG.
+.B uspp[=качество[:qp]]
+.\" FIXME is translation correct?
+.\" Ultra simple & slow postprocessing filter that compresses and
+.\" decompresses the image at several (or \- in the case of quality
+.\" level 8 \- all) shifts and averages the results.
+Ультра простой & медленный фильтр постобработки, 
+сжимающий и разжимающий изображение
+несколькими (или \- в случае качества 8 \- всеми) сдигами и
+усредняющий результаты.
+Он отличается от spp тем, что uspp на самом деле в каждом
+случае кодирует & декодирует с помощью Snow из
+libavcodec, в то время как spp использует только 
+встроенный упрощенный 8x8 DCT, похожий на MJPEG.
 .RSs
-.IPs <quality>
-0\-8 (default: 3)
+.IPs <качество>
+0\-8 (по-умолчанию: 3)
 .IPs "<qp>\ "
-Force quantization parameter (default: 0, use QP from video).
+Принудительно устанавливает параметр квантизации (по-умолчанию: 0, 
+использует QP из видео).
 .RE
 .
 .TP
-.B fspp[=quality[:qp[:strength[:bframes]]]]
-faster version of the simple postprocessing filter
+.B fspp[=качество[:qp[:сила[:bframes]]]]
+более быстрая версия простого фильтра постобработки
 .RSs
-.IPs <quality>
-4\-5 (equivalent to spp; default: 4)
+.IPs <качество>
+4\-5 (тоже, что и у spp; по-умолчанию: 4)
 .IPs "<qp>\ "
-Force quantization parameter (default: 0, use QP from video).
+Принудительно устанавливает параметр квантизации (по-умолчанию: 0, 
+использует QP из видео).
 .IPs <-15\-32>
-Filter strength, lower values mean more details but also more artifacts,
-while higher values make the image smoother but also blurrier (default:
-0 \- PSNR optimal).
+Сила фильтра, меньшие значения означают большую детализацию, но также
+большее количество искажений, в то время как большие значения делают
+изображение более гладким, но размытым (по-умолчанию:
+0 \- PSNR оптимально).
 .IPs <bframes>
-0: do not use QP from B-frames (default)
+0: не использовать QP из B-кадров (по-умолчанию)
 .br
-1: use QP from B-frames too (may cause flicker)
+1: использовать QP из B-кадров тоже (может привести к мерцанию)
 .RE
 .
 .TP
-.B pp7[=qp[:mode]]
-Variant of the spp filter, similar to spp=6 with 7 point DCT where
-only the center sample is used after IDCT.
+.B pp7[=qp[:режим]]
+Вариант spp фильтра, похожий на spp=6 с 7 точечным DCT, где после
+IDCT используется только центральный образец.
 .RSs
 .IPs <qp>
-Force quantization parameter (default: 0, use QP from video).
-.IPs <mode>
-0: hard thresholding
+Принудительно устанавливает параметр квантизации (по-умолчанию: 0, 
+использует QP из видео).
+.IPs <режим>
+0: жесткое определение порога
 .br
-1: soft thresholding (better deringing, but blurrier)
+1: мягкое определение порога (лучшее устранение ореола, но сильнее размытие)
 .br
-2: medium thresholding (default, good results)
+2: среднее определение порога (по-умолчанию, лучшие результаты)
 .RE
 .
 .TP
-.B qp=equation
-quantization parameter (QP) change filter
+.B qp=выражение
+фильтр изменения параметра квантизации (QP) 
 .RSs
-.IPs <equation>
-some equation like "2+2*sin(PI*qp)"
+.IPs <выражение>
+некоторое выражение, вроде "2+2*sin(PI*qp)"
 .RE
 .
 .TP
 .B "test\ \ \ "
-Generate various test patterns.
+Генерирует различные тестовые шаблоны.
 .
 .TP
 .B rgbtest
-Generate an RGB test pattern useful for detecting RGB vs BGR issues.
-You should see a red, green and blue stripe from top to bottom.
+Генерирует шаблом тестирования RGB, полезный для определения проблем 
+с RGB и BGR.
+Вы должны видеть красные, зеленые и синие полосы от верха до низа.
 .
 .TP
-.B lavc[=quality:fps]
-Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3/\:IVTV.
+.B lavc[=качество:fps]
+Быстрое программное преобразование из YV12 в MPEG-1 с помощью libavcodec для
+использования с DVB/\:DXR3/\:IVTV.
 .RSs
-.IPs <quality>
+.IPs <качество>
 .RSss
-1\-31: fixed qscale
+1\-31: фиксированный qscale
 .br
-32\-:  fixed bitrate in kbits
+32\-:  фиксированный битпоток в килобитах
 .REss
 .IPs <fps>
-force output fps (float value) (default: 0, autodetect based on height)
+Принудительно устанавливает выходной fps (вещественное число) 
+(по-умолчанию: 0, определяется автоматически на основе высоты)
 .RE
 .
 .TP
-.B dvbscale[=aspect]
-Set up optimal scaling for DVB cards, scaling the x axis in hardware and
-calculating the y axis scaling in software to keep aspect.
-Only useful together with expand and scale.
+.B dvbscale[=пропорции]
+Устанавливает оптимальное мастшабирование для DVB карт, 
+аппаратное масштабирование по оси x и программный расчет масштаба по оси y 
+для сохранения пропорций. Имеет смысл только в комбинации с expand и scale.
 .RSs
-.IPs <aspect>
-Control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
-576*4/3=768), set it to 576*(16/9)=1024 for a 16:9 TV.
+.IPs <пропорции>
+Контролирует коэффициент пропорций, вычисляйте как DVB_HEIGHT*ASPECTRATIO (по-умолчанию:
+576*4/3=768), для 16:9 TV устанавливайте его в 576*(16/9)=1024.
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .PD 0
 .RSs
@@ -5555,215 +5589,232 @@ FIXME: Explain what this does.
 .
 .TP
 .B noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
-Adds noise.
+Добавляет шум.
 .PD 0
 .RSs
 .IPs <0\-100>
-luma noise
+шум в яркостной компоненте
 .IPs <0\-100>
-chroma noise
+шум в цветовой компоненте
 .IPs u
-uniform noise (gaussian otherwise)
+однообразный шум (другими словами гауссов)
 .IPs t
-temporal noise (noise pattern changes between frames)
+.\" FIXME termporal noise
+временной шум (образец шума меняется между кадрами)
 .IPs a
-averaged temporal noise (smoother, but a lot slower)
+.\" FIXME termporal noise
+усредненный временной шум (более гладко, но медленнее)
 .IPs h
-high quality (slightly better looking, slightly slower)
+высокое качество (немного лучше выглядит, немного медленнее)
 .IPs p
-mix random noise with a (semi)regular pattern
+смешивание случайных шумов с (почти)регулярным образцом
 .RE
 .PD 1
 .
 .TP
 .B denoise3d[=luma:chroma:time]
-This filter aims to reduce image noise producing smooth images and making still
-images really still (This should enhance compressibility.).
+Этот фильтр нацелен на уменьшение шума изображения, выдавая сглаженную
+картинку и делая неподвижные изображения действительно неподвижними
+(Это должно улучшить сжимаемость.).
 .PD 0
 .RSs
 .IPs <luma>
-spatial luma strength (default: 4)
+.\" FIXME spatial luma strength 
+Пространственная устойчивость яркостной компоненты (по-умолчанию: 4)
 .IPs <chroma>
-spatial chroma strength (default: 3)
+.\" FIXME spatial chroma strength 
+Пространственная устойчивость цветовой компоненты (по-умолчанию: 3)
 .IPs <time>
-temporal strength (default: 6)
+.\" FIXME temporal strength 
+Временная устойчивость (по-умолчанию: 6)
 .RE
 .PD 1
 .
 .TP
 .B hqdn3d[=luma:chroma:time]
-High precision/\:quality version of the denoise3d filter.
-Parameters and usage are the same.
+Высокоточная/\:качественная версия фильтра denoise3d.
+Параметры и использование такое же.
 .
 .TP
-.B eq[=brightness:contrast] (OBSOLETE)
-Software equalizer with interactive controls just like the hardware
-equalizer, for cards/\:drivers that do not support brightness and
-contrast controls in hardware.
-Might also be useful with MEncoder, either for fixing poorly captured
-movies, or for slightly reducing contrast to mask artifacts and get by
-with lower bitrates.
+.B eq[=яркость:контраст] (УСТАРЕЛО)
+Программный эквалайзер с интерактивным управлением, аналогичный аппаратному,
+для карт, не поддерживающих аппаратное управление яркостью и контрастом. 
+Может использоваться c MEncoder, либо для исправления плохо оцифрованных
+фильмов, либо небольшого уменьшения контраста для скрытия искажений и получения
+меньшего битпотока.
 .PD 0
 .RSs
 .IPs <-100\-100>
-initial brightness
+начальная яркость
 .IPs <-100\-100>
-initial contrast
+начальная контрастность
 .RE
 .PD 1
 .
 .TP
-.B eq2[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]
-Alternative software equalizer that uses lookup tables (very slow),
-allowing gamma correction in addition to simple brightness
-and contrast adjustment.
-Note that it uses the same MMX optimized code as \-vf eq if all
-gamma values are 1.0.
-The parameters are given as floating point values.
+.B eq2[=гамма:контрастность:яркость:насыщенность:rg:gg:bg:weight]
+Альтернативный программный эквалайзер, использующий таблицы поиска (очень медленный),
+дополнительно позволяющий делать коррекцию гаммы в дополнение к обычным
+яркости и контрастности.
+Имейте в виду, что он использует тот же MMX оптимизированный код, что 
+и \-vf, если все значения гаммы равны 1.0.
+Параметры указываются как вещественные числа.
 .PD 0
 .RSs
 .IPs <0.1\-10>
-initial gamma value (default: 1.0)
+начальное значение гаммы (по-умолчанию: 1.0)
 .IPs <-2\-2>
-initial contrast, where negative values result in a
+начальная контрастность, где отрицательные значения означают
+инвертированное изображение (по-умолчанию: 1.0)
 negative image (default: 1.0)
 .IPs <-1\-1>
-initial brightness (default: 0.0)
+начальная яркость (по-умолчанию: 0.0)
 .IPs <0\-3>
-initial saturation (default: 1.0)
+начальная насыщенность (по-умолчанию: 1.0)
 .IPs <0.1\-10>
-gamma value for the red component (default: 1.0)
+значение гаммы для красной компоненты (по-умолчанию: 1.0)
 .IPs <0.1\-10>
-gamma value for the green component (default: 1.0)
+значение гаммы для зеленой компоненты (по-умолчанию: 1.0)
 .IPs <0.1\-10>
-gamma value for the blue component (default: 1.0)
+значение гаммы для синей компоненты (по-умолчанию: 1.0)
 .IPs <0\-1>
-The weight parameter can be used to reduce the effect of a high gamma value on
-bright image areas, e.g.\& keep them from getting overamplified and just plain
-white.
-A value of 0.0 turns the gamma correction all the way down while 1.0 leaves it
-at its full strength (default: 1.0).
+Параметр weight может использоваться для уменьшения эффекта высоких значений
+гаммы на светлых областях изображения, т.е.\& предотращает их чрезмерное
+осветление и превращение в простой белый цвет.
+Значение 0.0 сводит гамма коррекцию на нет, в то время как 1.0 позволяет 
+действовать ей в полную силу (по-умолчанию: 1.0).
 .RE
 .PD 1
 .
 .TP
 .B hue[=hue:saturation]
-Software equalizer with interactive controls just like the hardware
-equalizer, for cards/\:drivers that do not support hue and
-saturation controls in hardware.
+Программный эквалайзер с интерактивным управлением, аналогичный аппаратному,
+для карт/\:драйверов, не поддерживающих аппаратное управление цветностью 
+и насыщенностью.
 .PD 0
 .RSs
 .IPs <-180\-180>
-initial hue (default: 0.0)
+началная цветность (по-умолчанию: 0.0)
 .IPs <-100\-100>
-initial saturation, where negative values result
-in a negative chroma (default: 1.0)
+начальная насыщенность, где отрицательные значения дадут в результате
+негативную цветностную компоненту (по-умолчанию: 1.0).
 .RE
 .PD 1
 .
 .TP
 .B halfpack[=f]
-Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
-keeping all chroma samples.
-Useful for output to low-resolution display devices when hardware downscaling
-is poor quality or is not available.
-Can also be used as a primitive luma-only deinterlacer with very low CPU
-usage.
+Преобразует планарный YUV 4:2:0 в упакованнй 4:2:2 половинной высоты, снижающий 
+частоту дискретизации [downsampling] яркостной компоненты, но сохраняющий все сэмплы цветностной.
+Полезно для вывода на экраны с низким разрешением, когда аппаратный модуль
+масштабирования [downscaling] плохого качества или недоступен.
+Также может использоваться как примитивный модуль деинтерлейсинга 
+только яркостной компоненты с очень маленькой нагрузкой на CPU.
 .PD 0
 .RSs
 .IPs "<f>\ \ "
-By default, halfpack averages pairs of lines when downsampling.
-Any value different from 0 or 1 gives the default (averaging) behavior.
+По-умолчанию, halfpack усредняет пары линий при уменьшении частоты дискретизации
+[downsampling]. Любые значение, отличные от 0 и 1 дают поведение по-умолчанию (усреднение).
 .RSss
-0: Only use even lines when downsampling.
+0: Использовать только четные линии при downsampling.
 .br
-1: Only use odd lines when downsampling.
+1: Использовать только нечетные линии при downsampling.
 .REss
 .RE
 .PD 1
 .
 .TP
-.B ilpack[=mode]
-When interlaced video is stored in YUV 4:2:0 formats, chroma
-interlacing does not line up properly due to vertical downsampling of
-the chroma channels.
-This filter packs the planar 4:2:0 data into YUY2 (4:2:2) format with
-the chroma lines in their proper locations, so that in any given
-scanline, the luma and chroma data both come from the same field.
+.B ilpack[=режим]
+Когда черезстрочное видео содержится в формате YUV 4:2:0, 
+.\" FIXME is translation correct ?
+.\" chroma
+.\" interlacing does not line up properly due to vertical downsampling of
+.\" the chroma channels.
+.\" This filter packs the planar 4:2:0 data into YUY2 (4:2:2) format with
+.\" the chroma lines in their proper locations, so that in any given
+.\" scanline, the luma and chroma data both come from the same field.
+интерлейсинг цветностной компоненты неправильно выстраивает линии по
+причине вертикального downsampling'а цветностных каналов.
+Этот фильтр упаковывает планарные 4:2:0 данные в YUY2 (4:2:2) формат с
+цветностными линиями на их правильных местах, так, что в любой
+строке растра [scanline] данные о яркости и цвете будут 
+браться из одного и того же поля.
+
 .PD 0
 .RSs
-.IPs <mode>
-Select the sampling mode.
+.IPs <режим>
+Выбирает режим выборки [sampling].
 .RSss
-0: nearest-neighbor sampling, fast but incorrect
+0: выборка `ближайший соседний` [nearest-neighbor sampling], быстрая, но неверная
 .br
-1: linear interpolation (default)
+1: линейная интерполяция (по-умолчанию)
 .REss
 .RE
 .PD 1
 .
 .TP
 .B harddup
-Only useful with MEncoder.
-If harddup is used when encoding, it will force duplicate frames to be
-encoded in the output.
-This uses slightly more space, but is necessary for output to MPEG
-files or if you plan to demux and remux the video stream after
-encoding.
-Should be placed at or near the end of the filter chain unless you
-have a good reason to do otherwise.
+.\" FIXME need better translation
+Имеет смысл только с MEncoder.
+Если при кодировании используется harddup, то дублирующиеся кадры
+будут принудительно кодироваться на выходе.
+Это использует чуть больше места, но необходимо для вывода в MPEG файлы, 
+или если вы после кодирования планируете демультиплексировать и 
+мультипликсировать поток.
+Его следует размещать в самом конце или почти в самом конце цепочки фильтров,
+если у вас не хорошей причины делать по-другому.
 .
 .TP
 .B softskip
-Only useful with MEncoder.
-Softskip moves the frame skipping (dropping) step of encoding from
-before the filter chain to some point during the filter chain.
-This allows filters which need to see all frames (inverse telecine,
-temporal denoising, etc.) to function properly.
-Should be placed after the filters which need to see all frames and
-before any subsequent filters that are CPU-intensive.
+Имеет смысл только с MEncoder.
+Softskip перемещает этап кодирования, пропускающий (отбрасывающий) кадры
+из места перед цепочкой фильтров в некоторую точку в пределах цепочки фильтров.
+Это позволяет правильно работать фильтрам, которым требуется видеть все
+кадры (обратный телесин, временной фильтр шумоподавления, и др.).
+Его следует размещать после фильтров, которым требуется видеть все кадры, и
+до последующих фильтров, интенсивно использующих CPU.
 .
 .TP
 .B decimate[=max:hi:lo:frac]
-Drops frames that do not differ greatly from the previous frame in
-order to reduce framerate.
-The main use of this filter is for very-low-bitrate encoding (e.g.\&
-streaming over dialup modem), but it could in theory be used for
-fixing movies that were inverse-telecined incorrectly.
+Выбрасывает кадры, не сильно отличающиеся от предыдущих, для понижения частоты кадров.
+Этот фильтр главным образом используется для кодирования с очень_низким_битпотоком
+(например, потоковое вещание через модем), но теоретически он может использоваться
+для исправления фильмов с неверно произведенным обратным телесином.
 .PD 0
 .RSs
 .IPs <max>
-Sets the maximum number of consecutive frames which can be
-dropped (if positive), or the minimum interval between
-dropped frames (if negative).
+Указывает максимальное количество подряд идущих кадров, которые могут быть 
+отброшены (если положительный), или минимальный интервал между выбрасываемыми 
+кадрами (если отрицательный).
 .IPs <hi>,<lo>,<frac>
-A frame is a candidate for dropping if no 8x8 region differs by more
-than a threshold of <hi>, and if not more than <frac> portion (1
-meaning the whole image) differs by more than a threshold of <lo>.
-Values of <hi> and <lo> are for 8x8 pixel blocks and represent actual
-pixel value differences, so a threshold of 64 corresponds to 1 unit of
-difference for each pixel, or the same spread out differently over the
-block.
+Кадр является кандидатом на удаление, если нет ни одной области 8x8,
+отличающейся более, чем на пороговое значение <hi>, и не более <frac>
+части (1 означает все изображение) отличается сильнее, чем на 
+пороговое значение <lo>.
+Значения <hi> и <lo> указываются для пиксельных блоков 8x8 и представляют
+собой различие в фактических значениях пикселов,
+так порог 64 соответствует 1 элементу с отклонением в каждом пикселе, 
+.\" FIXME untranslated
+or the same spread out differently over the block.
 .RE
 .PD 1
 .
 .TP
 .B dint[=sense:level]
-The drop-deinterlace (dint) filter detects and drops the first from a set
-of interlaced video frames.
+Фильтр деинтерлейсинга drop-deinterlace (dint), определяет и выбрасывает первый из набора
+черезстрочных видео кадров.
 .PD 0
 .RSs
 .IPs <0.0\-1.0>
-relative difference between neighboring pixels (default: 0.1)
+относительное различие между соседними пикселами (по-умолчанию: 0.1)
 .IPs <0.0\-1.0>
-What part of the image has to be detected as interlaced to
-drop the frame (default: 0.15).
+Какая часть изображения должна быть определена как черезстрочная, чтобы
+кадр был отброшен (по-умолчанию: 0.15).
 .RE
 .PD 1
 .
 .TP
-.B lavcdeint (OBSOLETE)
-FFmpeg deinterlacing filter, same as \-vf pp=fd
+.B lavcdeint (УСТАРЕЛО)
+Фильтр деинтерлейсинга FFmpeg, тот же, что и \-vf pp=fd
 .
 .TP
 .B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
@@ -5772,822 +5823,878 @@ Deinterlaces parts of a video if a configurable threshold is exceeded.
 .PD 0
 .RSs
 .IPs <0\-255>
-threshold (default: 10)
+порог (по-умолчанию: 10)
 .IPs <map>
 .RSss
-0: Ignore pixels exceeding the threshold (default).
+0: Игнорировать пикселы, превышающие порог (по-умолчанию).
 .br
-1: Paint pixels exceeding the threshold white.
+1: Рисовать пикселы, превышающие порог, белым цветом.
 .REss
 .IPs <order>
 .RSss
-0: Leave fields alone (default).
+0: Оставить поля как есть (по-умолчанию).
 .br
-1: Swap fields.
+1: Поменять местами поля.
 .REss
 .IPs <sharp>
 .RSss
-0: Disable additional sharpening (default).
+0: Отключить дополнительное увеличение резкости (по-умолчанию).
 .br
-1: Enable additional sharpening.
+1: Включить дополнительное увеличение резкости.
 .REss
 .IPs <twoway>
 .RSss
-0: Disable twoway sharpening (default).
+0: Отключить дуплексное [twoway] увеличение резкости (default).
 .br
-1: Enable twoway sharpening.
+1: Включить дуплексное [twoway] увеличение резкости.
 .REss
 .RE
 .PD 1
 .
 .TP
 .B unsharp[=l|cWxH:amount[:l|cWxH:amount]]
-unsharp mask / gaussian blur
+нерезкая маска  / гауссово размывание
 .RSs
 .IPs "l\ \ \ \ "
-Apply effect on luma component.
+Применить эффект к яркостной компоненте.
 .IPs "c\ \ \ \ "
-Apply effect on chroma components.
+Применить эффект к цветностной компоненте.
 .IPs <width>x<height>
-width and height of the matrix, odd sized in both directions
-(min = 3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
+ширина и высота матрицы, нечетного размера в обоих направлениях.
+(мин = 3x3, макс = 13x11 или 11x13, обычно что-то между 3x3 и 7x7)
 .IPs amount
-Relative amount of sharpness/\:blur to add to the image
-(a sane range should be -1.5\-1.5).
+Относительная величина резкости/\:размывания добавляемого изображению
+(разумный диапазон будет -1.5\-1.5).
 .RSss
-<0: blur
+<0: размытие
 .br
->0: sharpen
+>0: резкость
 .REss
 .RE
 .
 .TP
 .B "swapuv\ "
-Swap U & V plane.
+Меняет местами U и V проекции [planes].
 .
 .TP
 .B il[=d|i][s][:[d|i][s]]
-(De)interleaves lines.
-The goal of this filter is to add the ability to process interlaced images
-pre-field without deinterlacing them.
-You can filter your interlaced DVD and play it on a TV without breaking the
-interlacing.
-While deinterlacing (with the postprocessing filter) removes interlacing
-permanently (by smoothing, averaging, etc) deinterleaving splits the frame into
-2 fields (so called half pictures), so you can process (filter) them
-independently and then re-interleave them.
+.\" FIXME probably hard to translate interleave and interlace terms
+.\" FIXME need additional check of translation
+Разделяет(перемежает) [(de)nterleaves] строки.
+Цель этого фильтра \- добавить возможность обработки полей черезстрочных 
+изображений без удаления чередования.
+Вы можете обработать ваш черезстрочный DVD и воспроизвести его на TV без
+нарушения черезстрочности.
+В то время, как деинтерлейсинг (с помощью фильтра постобработки) навсегда удаляет
+черезстрочную развертку (сглаживанием, усреднением и так далее), разделение
+[deinterleaving] делит кадр на два поля (также называемые полукадрами), 
+позволяя вам обработать их (применить к ним фильтр) независимо, а затем 
+снова объединить.
 .PD 0
 .RSs
 .IPs d
-deinterleave (placing one above the other)
+разделение [deinterleave] (помещение одного за другим)
 .IPs i
-interleave
+перемежение [interleave]
+]
 .IPs s
-swap fields (exchange even & odd lines)
+поменять местами поля (поменять местами четные и нечетные строки)
 .RE
 .PD 1
 .
 .TP
 .B fil[=i|d]
-(De)interleaves lines.
-This filter is very similar to the il filter but much faster, the main
-disadvantage is that it does not always work.
-Especially if combined with other filters it may produce randomly messed
-up images, so be happy if it works but do not complain if it does not for
-your combination of filters.
+.\" FIXME probably hard to translate interleave and interlace terms
+.\" FIXME need additional check of translation
+Разделяет(перемежает) [(de)nterleaving] строки.
+Фильтр очень похож на il фильтр, но значительно быстрее, главный же его
+недостаток состоит в том, что он не всегда работает.
+Он может, особенно если комбинируется с другими фильтрами, 
+случайно перемешать изображения, так что радуйтесь, если он 
+работает, но не жалуйтесь, если с вашим набором фильтров это не так.
 .PD 0
 .RSs
 .IPs d
-Deinterleave fields, placing them side by side.
+Разделить поля, поместив их друг за другом.
 .IPs i
-Interleave fields again (reversing the effect of fil=d).
+Снова объединить поля (обратная к fil=d операция).
 .RE
 .PD 1
 .
 .TP
 .B field[=n]
-Extracts a single field from an interlaced image using stride arithmetic
-to avoid wasting CPU time.
-The optional argument n specifies whether to extract the even or the odd
-field (depending on whether n is even or odd).
+.\" FIXME is translation correct stride = итерационная
+Выделяет отдельное поле из черезстрочного изображения, используя 
+итерационную арифметику, чтобы не тратить время CPU попусту.
+Необязательный аргумент n указывает четные или нечетные 
+поля извлекаются (в зависимости от того, четное n или нечетное).
 .
 .TP
-.B detc[=var1=value1:var2=value2:...]
-Attempts to reverse the 'telecine' process to recover a clean,
-non-interlaced stream at film framerate.
-This was the first and most primitive inverse telecine filter to be
-added to MPlayer/\:MEncoder.
-It works by latching onto the telecine 3:2 pattern and following it as
-long as possible.
-This makes it suitable for perfectly-telecined material, even in the
-presence of a fair degree of noise, but it will fail in the presence
-of complex post-telecine edits.
-Development on this filter is no longer taking place, as ivtc, pullup,
-and filmdint are better for most applications.
-The following arguments (see syntax above) may be used to control
-detc's behavior:
+.B detc[=перем1=значение1:перем2=значение2:...]
+Пытается обратить 'телесин' обработку для восстановления
+чистого прогрессивного потока с частотой кадров фильма.
+Это первый и очень примитивный фильтр обратного телесина, 
+добавленный в MPlayer/\:MEncoder.
+Он работает, привязываясь к 3:2 шаблону телесина и следуя ему настолько долго,
+насколько это возможно.
+Это делает его применимым к качественно "телесиненному" 
+материалу, даже при наличии значительного уровня шума, но 
+он не справится, если проводилось сложное редактирование после 
+телесина.
+Разработка этого фильтра больше не ведется, поскольку ivtc, pullup
+и filmdint лучше в большинстве приложений.
+Следующие аргументы (синтаксис смотрите выше) могут использоваться для
+управления поведением фильтра detc:
 .RSs
 .IPs "<dr>\ "
-Set the frame dropping mode.
+Устанавливает режим отброса кадров.
 .RSss
-0: Do not drop frames to maintain fixed output framerate (default).
+0: Не отбрасывать кадры для сохранения постоянной частоты кадров на выходе (по-умолчанию).
 .br
-1: Always drop a frame when there have been no drops or telecine
-merges in the past 5 frames.
+1: Всегда пропускать кадр, когда кадры не выбрасывались и не было телесин слияний 
+последние 5 кадров.
 .br
-2: Always maintain exact 5:4 input to output frame ratio.
+2: Всегда сохранять отношение кадров на входе и выходе, равным точно 5:4.
 .br
-.I NOTE:
-Use mode 1 or 2 with MEncoder.
+.I ЗАМЕЧАНИЕ:
+С MEncoder используйте режим 1 или 2.
 .REss
 .IPs "<am>\ "
-Analysis mode.
+Режим анализа.
 .RSss
-0: Fixed pattern with initial frame number specified by <fr>.
+0: Фиксированный шаблон с начальным номером кадра, указанным параметром <fr>.
 .br
-1: aggressive search for telecine pattern (default)
+1: агрессивный поиск телесин шаблона (по-умолчанию)
 .REss
 .IPs "<fr>\ "
-Set initial frame number in sequence.
-0\-2 are the three clean progressive frames; 3 and 4 are the two
-interlaced frames.
-The default, -1, means 'not in telecine sequence'.
-The number specified here is the type for the imaginary previous
-frame before the movie starts.
+Устанавливает номер начального кадра в последовательности.
+0\-2 \- это три чистых прогрессивных кадра; 3 и 4 \- два черезстрочных кадра.
+По-умолчанию, -1, означает 'не в последивательности телесин'.
+Число указанное здесь \- это тип воображаемого кадра, предшествующего началу
+фильма.
 .IPs "<t0>, <t1>, <t2>, <t3>"
-Threshold values to be used in certain modes.
+Пороговые значения, используемые в некоторых режимах.
 .RE
 .
 .TP
 .B ivtc[=1]
-Experimental 'stateless' inverse telecine filter.
-Rather than trying to lock on to a pattern like the detc filter does,
-ivtc makes its decisions independently for each frame.
-This will give much better results for material that has undergone
-heavy editing after telecine was applied, but as a result it is not as
-forgiving of noisy input, for example TV capture.
-The optional parameter (ivtc=1) corresponds to the dr=1 option for the
-detc filter, and should be used with MEncoder but not with MPlayer.
-As with detc, you must specify the correct output framerate (\-ofps
-24000/1001) when using MEncoder.
-Further development on ivtc has stopped, as the pullup and filmdint
-filters appear to be much more accurate.
+Экспериментальный фильтр обратного телесина без сохранения состояния.
+Вместо того, чтобы привязываться к шаблону, как делает фильтр detc,
+ivtc принимает решение независимо для каждого кадра.
+Это дает намного лучшие результаты, для материала, подвергнутого
+тяжелому редактированию после применения телесина, но как результат
+он не настолько снисходителен к шуму в источнике, например при захвате с TV.
+Необязательный параметр (ivtc=1) соответствует опции dr=1 фильтра
+detc, и должен использоваться с MEncoder, но не с MPlayer.
+Как и с detc, вы должны указать правильную выходную частоту кадров
+(\-ofps 24000/1001), когда используете его с MEncoder.
+Дальнейшее развитие ivtc остановлено, поскольку pullup и filmdint
+фильтры являются значительно более точными.
 .
 .TP
 .B pullup[=jl:jr:jt:jb:sb:mp]
-Third-generation pulldown reversal (inverse telecine) filter,
-capable of handling mixed hard-telecine, 24000/1001 fps progressive, and 30000/1001
-fps progressive content.
-The pullup filter is designed to be much more robust than detc or
-ivtc, by taking advantage of future context in making its decisions.
-Like ivtc, pullup is stateless in the sense that it does not lock onto
-a pattern to follow, but it instead looks forward to the following
-fields in order to identify matches and rebuild progressive frames.
-It is still under development, but believed to be quite accurate.
+Фильтр обратного пулдауна [pulldown] (обратного телесина) третьего поколения,
+способный обрабатывать смешанный с жестким телесином [hard-telecine], 
+прогрессивный 24000/1001 fps и прогрессивный 30000/1001 fps контент.
+Фильтр pullup спроектирован быть более сильным, чем  detc или ivtc,
+за счет учета особенностей последующего содержимого в принятии 
+своих решений.
+Как и ivtv, pullup не зависит от состояния в том смысле, что при
+перемещении он не привязывается к шаблону, а вместо этого 
+смотрит вперед на последующие поля, чтобы определить совпадения и 
+построить прогрессивные кадры.
+Он все еще находится в разработке, но верится, что будет 
+весьма точным.
 .RSs
 .IPs "jl, jr, jt, and jb"
-These options set the amount of "junk" to ignore at
-the left, right, top, and bottom of the image, respectively.
-Left/\:right are in units of 8 pixels, while top/\:bottom are in units of
-2 lines.
-The default is 8 pixels on each side.
+Эти опции устанавливают величину игнорируемого "мусора" 
+слева, справа, сверху и снизу соответственно.
+Левое/\:правое указываются в элементах по 8 пикселов, в то время 
+как верхнее/\:нижнее в элементах по две строки.
+По умолчанию, 8 пикселов с каждой стороны.
 .br
-.IPs "sb (strict breaks)"
-Setting this option to 1 will reduce the chances of
-pullup generating an occasional mismatched frame, but it may also
-cause an excessive number of frames to be dropped during high motion
-sequences.
-Conversely, setting it to -1 will make pullup match fields more
-easily.
-This may help processing of video where there is slight blurring
-between the fields, but may also cause there to be interlaced frames
-in the output.
+.IPs "sb (строгие разрывы)"
+Установка этой опции в 1 уменьшит шансы pullup
+сгенерировать случайный несовпадающий кадр, но также может 
+привести к чрезмерному выбрасыванию кадров в сильно динамичных 
+сценах.
+И наоборот, при установке его в -1, pullup будет более мягко
+проверять поля на совпадение.
+Это может помочь обработке видео с легким размытием между полями, но
+также может привести к появлению черезстрочных кадров на выходе.
 .br
-.IPs "mp (metric plane)"
-This option may be set to 1 or 2 to use a chroma
-plane instead of the luma plane for doing pullup's computations.
-This may improve accuracy on very clean source material, but more
-likely will decrease accuracy, especially if there is chroma noise
-(rainbow effect) or any grayscale video.
-The main purpose of setting mp to a chroma plane is to reduce CPU load
-and make pullup usable in realtime on slow machines.
+.IPs "mp (метрическая плоскость)"
+Эта опция может быть выставлена в 1 или 2 для
+.\" FIXME chroma plane = цветностная компонента
+использования цветностной компоненты вместо яркостной в
+вычислениях pullup.
+Это может увеличить точность на очень чистом материале, но, вероятнее
+всего, уменьшит ее, особенно, если присутствует цветовой шум (эффект радуги) 
+или любое черно-белое видео.
+.\" FIXME chroma plane = цветностная компонента
+Главное назначение выбора цветностной компоненты - уменьшить загрузку CPU
+и сделать pullup доступным для использования в реальном времени на 
+медленных машинах.
 .REss
 .RS
 .sp 1
-.I NOTE:
-Always follow pullup with the softskip filter when encoding to ensure
-that pullup is able to see each frame.
-Failure to do so will lead to incorrect output and will usually crash,
-due to design limitations in the codec/\:filter layer.
+.I ЗАМЕЧАНИЕ:
+При кодировании всегда сопровождайте pullup последующим фильтром softskip,
+чтобы убедиться, что pullup будет способен видеть каждый кадр.
+Неследование этому правилу может повлечь за собой неверные данные на выходе
+и наверняка приведет к краху в силу ограничений дизайна слоя кодеков/\:фильтров.
 .REss
 .
 .TP
-.B filmdint[=options]
-Inverse telecine filter, similar to the pullup filter above.
-It is designed to handle any pulldown pattern, including mixed soft and
-hard telecine and limited support for movies that are slowed down or sped
-up from their original framerate for TV.
-Only the luma plane is used to find the frame breaks.
-If a field has no match, it is deinterlaced with simple linear
-approximation.
-If the source is MPEG-2, this must be the first filter to allow
-access to the field-flags set by the MPEG-2 decoder.
-Depending on the source MPEG, you may be fine ignoring this advice, as
-long as you do not see lots of "Bottom-first field" warnings.
-With no options it does normal inverse telecine, and should be used
-together with mencoder \-fps 30000/1001 \-ofps 24000/1001.
-When this filter is used with mplayer, it will result in an uneven
-framerate during playback, but it is still generally better than using
-pp=lb or no deinterlacing at all.
-Multiple options can be specified separated by /.
+.B filmdint[=опции]
+Фильтр обратного телесина, похожий на предыдущий фильтр pullup.
+Он разработан для обработки любых пулдаун шаблонов, включая 
+смешанные мягкий и жесткий телесин, и ограниченную поддержку 
+фильмов ускоренных или замедленных по сравнения с их оригинальной
+частотой кадров для TV.
+.\" FIXME luma plane = яркостная компонента
+Используется только яркостная компонента для определения границ кадров.
+Если поле не имеет совпадающих, оно преобразуется в кадр простой
+линейной апроксимацией.
+Если источником является MPEG-2, этот фильтр должен быть первым,
+чтобы иметь доступ к флагам полей, устанавливаемым 
+MPEG-2 декодером.
+В зависимости от исходного MPEG, вы можете спокойно игнорировать 
+это замечание, до тех пор, пока не видите множества
+предупреждений "Bottom-first field".
+Без указания опций фильтр делает обычный обратный телесин и
+может использоваться с MEncoder совместно с \-fps 30000/1001 \-ofps 24000/1001.
+Когда этот фильтр используется с MPlayer, он может стать причиной 
+непостоянной частоты кадров при воспроизведении, но как правило, это
+все же лучше использования pp=lb или отсутствия деинтерлейсинга вообще.
+Несколько опций могут быть отделены друг от друга символом /.
 .RSs
 .IPs crop=<w>:<h>:<x>:<y>
-Just like the crop filter, but faster, and works on mixed hard and soft
-telecined content as well as when y is not a multiple of 4.
-If x or y would require cropping fractional pixels from the chroma
-planes, the crop area is extended.
-This usually means that x and y must be even.
+То же самое, что и фильтр crop, но быстрее, и работает для контента со
+смешанным жестким и мягким телесином, а также в случае, когда y
+не кратно 4.
+Если для x или y требуется отсечение дробных пикселов в
+.\" FIXME chroma plane = цветностная компонента
+цветностной компонене, область отсечения увеличивается.
+Как правило, это означает, что x и y должны быть четными.
 .IPs io=<ifps>:<ofps>
-For each ifps input frames the filter will output ofps frames.
-The ratio of ifps/\:ofps should match the \-fps/\-ofps ratio.
-This could be used to filter movies that are broadcast on TV at a frame
-rate different from their original framerate.
+Для каждых ifps кадров на входе, фильтр выдаст ofps кадров на выходе.
+Значение ifps/\:ofps должно совпадать со значением \-fps/\-ofps.
+Может использоваться для обработки фильмов транслирующихся по TV
+с частотой кадров, отличной от оригинальной.
 .IPs luma_only=<n>
-If n is nonzero, the chroma plane is copied unchanged.
-This is useful for YV12 sampled TV, which discards one of the chroma
-fields.
+.\" FIXME chroma plane = цветностная компонента
+Если n не равно нулю, цветностная компонента копируется без изменений.
+.\" FIXME sampled 
+Полезно для YV12 семплированного [sampled] TV, отбрасывающего одно
+из цветностных полей.
 .IPs mmx2=<n>
-On x86, if n=1, use MMX2 optimized functions, if n=2, use 3DNow!
-optimized functions, otherwise, use plain C.
-If this option is not specified, MMX2 and 3DNow! are auto-detected, use
-this option to override auto-detection.
+На x86, если n=1, используются MMX2 оптимизированные фунции, если n=2, 
+используются  3DNow! оптимизированные функции, иначе используется 
+обычный C. Если опция не указана, MMX2 и 3DNow! определяются автоматически,
+используйте эту опцию для изменения автоматически определенного
+значения.
 .IPs fast=<n>
-The larger n will speed up the filter at the expense of accuracy.
-The default value is n=3.
-If n is odd, a frame immediately following a frame marked with the
-REPEAT_FIRST_FIELD MPEG flag is assumed to be progressive, thus filter
-will not spend any time on soft-telecined MPEG-2 content.
-This is the only effect of this flag if MMX2 or 3DNow! is available.
-Without MMX2 and 3DNow, if n=0 or 1, the same calculations will be used
-as with n=2 or 3.
-If n=2 or 3, the number of luma levels used to find the frame breaks is
-reduced from 256 to 128, which results in a faster filter without losing
-much accuracy.
-If n=4 or 5, a faster, but much less accurate metric will be used to
-find the frame breaks, which is more likely to misdetect high vertical
-detail as interlaced content.
+Большие значения ускорят работу фильтра ценой точности.
+Значением по-умолчанию является n=3.
+Если n нечетное, предполагается, что кадр, идущий непосредственно за 
+помеченным MPEG флагом REPEAT_FIRST_FIELD кадром, является 
+прогрессивным, таким образом фильтр вообще не тратит время на
+MPEG-2 содержимом с мягким телесином.
+Это единственный эффект этого флага, если доступно MMX2 или 3DNow!.
+Без MMX2 и 3DNow, если n=0 или 1, будут использоваться те же вычисления, что
+и с n=2 или 3.
+Если n=2 или 3, количество уровней яркостной компоненты, используемых для поиска
+границ кадров уменьшается с 256 до 128, что приводит к ускорению обработки без
+значительной потери точности.
+Если n=4 или 5, будет использоваться более быстрая, но менее точная метрика
+для поиска границ кадров, что, скорее всего, приведет к ошибочному определению
+содержимого с высокой вертикальной детализацией как черезстрочного.
 .IPs verbose=<n>
-If n is nonzero, print the detailed metrics for each frame.
-Useful for debugging.
+Если n не равно 0, выводит детальные метрики для каждого кадра.
+Полезно для отладки.
 .IPs dint_thres=<n>
-Deinterlace threshold.
-Used during de-interlacing of unmatched frames.
-Larger value means less deinterlacing, use n=256 to completely turn off
-deinterlacing.
-Default is n=8.
+Порог деинтерлейсинга.
+Используется для деинтерлейсинга несовпадающих кадров.
+Большее значение означает меньший деинтерлейсинг, используйте
+n=256 для еего полного отключения.
+По умолчанию, n=8.
 .IPs comb_thres=<n>
-Threshold for comparing a top and bottom fields.
-Defaults to 128.
+Порог для сравнения верхнего и нижнего полей.
+По-умолчанию, 128.
 .IPs diff_thres=<n>
-Threshold to detect temporal change of a field.
-Default is 128.
+Порог для определения временного изменения поля.
+По-умолчанию, 128.
 .IPs sad_thres=<n>
-Sum of Absolute Difference threshold, default is 64.
+.\" FIXME is translation correct?
+Порог Суммы Абсолютного Отклонения [Sum of Absolute Difference], по-умолчанию 64.
 .RE
 .
 .TP
 .B softpulldown
-This filter works only correct with MEncoder and acts on the MPEG-2 flags
-used for soft 3:2 pulldown (soft telecine).
-If you want to use the ivtc or detc filter on movies that are partly soft
-telecined, inserting this filter before them should make them more reliable.
+Этот фильтр корректно работает только с MEncoder и влияет на MPEG-2 флаги,
+использующиеся для мягкого 3:2 пулдауна (мягкого телесина).
+Если вы хотите использовать ivtc иди detc фильтр для фильма, к которому частично 
+применен мягкий телесин, вставка этого фильтра перед ними должна сделать
+результат более достоверным.
 .
 .TP
-.B divtc[=options]
+.B divtc[=опции]
 Inverse telecine for deinterlaced video.
-If 3:2-pulldown telecined video has lost one of the fields or is deinterlaced
-using a method that keeps one field and interpolates the other, the result is
-a juddering video that has every fourth frame duplicated.
-This filter is intended to find and drop those duplicates and restore the
-original film framerate.
-When using this filter, you must specify \-ofps that is 4/5 of
-the fps of the input file and place the softskip later in the
-filter chain to make sure that divtc sees all the frames.
-Two different modes are available:
-One pass mode is the default and is straightforward to use,
-but has the disadvantage that any changes in the telecine
-phase (lost frames or bad edits) cause momentary judder
-until the filter can resync again.
-Two pass mode avoids this by analyzing the whole video
-beforehand so it will have forward knowledge about the
-phase changes and can resync at the exact spot.
-These passes do
-.B not
-correspond to pass one and two of the encoding process.
-You must run an extra pass using divtc pass one before the
-actual encoding throwing the resulting video away.
-Use \-nosound \-ovc raw \-o /dev/null to avoid
-wasting CPU power for this pass.
-You may add something like crop=2:2:0:0 after divtc
-to speed things up even more.
-Then use divtc pass two for the actual encoding.
-If you use multiple encoder passes, use divtc
-pass two for all of them.
-The options are:
+обратный телесин для нечерезстрочного видео.
+Если видео с 3:2-пулдаун телесином потеряло одно из полей или над ним
+произведен деинтерлейсинг с использованием метода, сохраняющего одно 
+из полей и интерполирующего другое, в результате получится дрожащее видео,
+имеющее дублированный каждый четвертый кадр.
+Этот фильтр призван найти и отбросить эти дубликаты и восстановить 
+оригинальную частоту кадров фильма.
+Когда используете это фильтр, вы должны указать \-ofps равной 4/5 
+от fps исходного файла и поместить фильтр softskip позже в 
+цепочке фильтров, чтобы divtc гарантированно видел все кадры.
+Доступны два различных режима:
+Режимом по-умолчанию является однопроходный, он прост в использовании,
+но имеет недостаток, заключающийся в том, что любые изменения
+на этапе телесина (потерянные кадры или плохое редактирование) 
+тут же приводят к дрожанию, пока фильтр снова не синхронизируется.
+Двухпроходный режим позволяет избежать этого, предварительным анализируя
+весь фильм. Таким образом, он заранее знает об изменениях фазы и 
+может восстановить синхронизацию в том же месте.
+Эти проходы 
+.B не
+имеют никакого отношения к первому и второму проходу процесса кодирования.
+Вы должны сделать дополнительный проход, используя первый проход divtc
+до того, как начнется процесс кодирования, выдающий действительный результат.
+Используйте \-nosound \-ovc raw \-o /dev/null для избежания 
+ненужного расхода времени CPU на этом проходе.
+Вы можете даже больше увеличить скорость, добавив что-то вроде crop=2:2:0:0 после divtc.
+Затем используйте второй проход divtc для осуществления действительного кодирования.
+Если вы используете многопроходное кодирование, используйте второй проход divtc 
+на каждом проходе процесса кодирования.
+Список опций:
 .RSs
 .IPs pass=1|2
-Use two pass mode.
-.IPs file=<filename>
-Set the two pass log filename (default: "framediff.log").
-.IPs threshold=<value>
-Set the minimum strength the telecine pattern must have for the filter to
-believe in it (default: 0.5).
-This is used to avoid recognizing false pattern from the parts of the video
-that are very dark or very still.
-.IPs window=<numframes>
-Set the number of past frames to look at when searching for pattern
-(default: 30).
-Longer window improves the reliability of the pattern search, but shorter
-window improves the reaction time to the changes in the telecine phase.
-This only affects the one pass mode.
-The two pass mode currently uses fixed window that extends to both future
-and past.
+Использовать двухпроходный режим.
+.IPs file=<имя_файла>
+Указывает имя log файла для двухпроходного режима (по-умолчанию: "framediff.log").
+.IPs threshold=<значение>
+Указывает минимальную силу, которую должен иметь шаблон телесина, чтобы
+фильтр ему поверил (по-умолчанию: 0.5).
+Используется, чтобы избежать обнаружения неверного шаблона на очень
+темных или неподвижных частях видео.
+.IPs window=<количество_кадров>
+Указывает количество предыдущих кадров, в которых ищется шаблон 
+(по-умолчанию: 30).
+Более длинное окно увеличивает достоверность поиска шаблона, но
+более короткое улучшает время реакции на изменение фазы телесина.
+Влияет только на однопроходный режим.
+В данный момент двухпроходный режим использует окно фиксированного
+размера, распространяющееся одновременно и вперед, и назад.
 .IPs phase=0|1|2|3|4
-Sets the initial telecine phase for one pass mode (default: 0).
-The two pass mode can see the future, so it is able to use the correct
-phase from the beginning, but one pass mode can only guess.
-It catches the correct phase when it finds it, but this option can be used
-to fix the possible juddering at the beginning.
-The first pass of the two pass mode also uses this, so if you save the output
-from the first pass, you get constant phase result.
+.\" FIXME check translation
+Устанавливает начальную фазу телесина для однопроходного режима (по-умолчанию: 0).
+Двухпроходный режим может смотреть вперед, и, таким образом, может с самого начала 
+использовать правильную фазу, но однопроходный режим может ее только предположить.
+Он получает правильную фазу, лишь когда ее находит, но можно использовать эту опцию, чтобы 
+избежать дрожания в самом начале фильма.
+Первый проход тоже это использует, так что если вы сохраните его
+вывод, то в результате получите постоянную фазу.
 .IPs deghost=<value>
-Set the deghosting threshold (0\-255 for one pass mode, -255\-255 for two pass
-mode, default 0).
-If nonzero, deghosting mode is used.
-This is for video that has been deinterlaced by blending the fields
-together instead of dropping one of the fields.
-Deghosting amplifies any compression artifacts in the blended frames, so the
-parameter value is used as a threshold to exclude those pixels from
-deghosting that differ from the previous frame less than specified value.
-If two pass mode is used, then negative value can be used to make the
-filter analyze the whole video in the beginning of pass-2 to determine
-whether it needs deghosting or not and then select either zero or the
-absolute value of the parameter.
-Specify this option for pass-2, it makes no difference on pass-1.
+.\" FIXME deghosting, blending
+Устанавливает порог для deghosting (0\-255 для однопроходного режима, -255\-255 для
+двухпроходного, по-умолчанию 0).
+Если не равно нулю, используется режим deghosting.
+Применяется для видео, к которому был применен деинтерлейсинг,
+объединяющий [blending] поля вместе вместо отбрасывания одного из них.
+Deghosting усиливает любые артефакты сжатия в объединенных [blended] кадрах, 
+поэтому значение параметра используется как порог для исключения таких
+пикселов из процесса deghosting'а, которые отличаются от предыдущего кадра меньше,
+чем на указанное значение.
+Если используется двухпроходный режим, то можно использовать отрицательное 
+значение, чтобы фильтр проанализировал все видео в начала второго прохода
+для определения нужен режим deghosting или нет, а затем выбрал либо 0,
+либо абсолютное значение параметра.
+Указывайте эту опцию для второго прохода, она никак не влияет на первый проход.
 .RE
 .
 .TP
 .B phase[=t|b|p|a|u|T|B|A|U][:v]
-Delay interlaced video by one field time so that the field order
-changes.
-The intended use is to fix PAL movies that have been captured with the
-opposite field order to the film-to-video transfer.
-The options are:
+Задерживает воспроизведение черезстрочного видео на время 
+отображения одного поля, что приводит к смене порядка полей.
+Предполагается использовать для исправления PAL фильмов, захваченных
+с порядком полей, противоположным порядку, используемому при
+конвертировании фильма в видео.
+Список опций:
 .RSs
 .IPs t
-Capture field order top-first, transfer bottom-first.
-Filter will delay the bottom field.
+Порядок полей при захвате "верхнее первым", при конвертирвоании - 
+"нижнее первым".
+Фильтр задержит нижнее поле.
 .IPs b
-Capture bottom-first, transfer top-first.
-Filter will delay the top field.
+Порядок полей при захвате "нижнее первым", при конвертирвоании - 
+"верхнее первым".
+Фильтр задержит верхнее поле.
 .IPs p
-Capture and transfer with the same field order.
-This mode only exists for the documentation of the other options to refer to,
-but if you actually select it, the filter will faithfully do nothing ;-)
+Порядок полей при захвате и конвертировании совпадает.
+Этот режим существует только для того, чтобы на него можно было сослаться 
+и упростить документирование остальных опций. Если же вы действительно его 
+выберите, фильтр добросовестно ничего не будет делать ;-)
 .IPs a
-Capture field order determined automatically by field flags, transfer opposite.
-Filter selects among t and b modes on a frame by frame basis using field flags.
-If no field information is available, then this works just like u.
+Порядок полей при захвате определяется автоматически по флагам полей,
+порядок полей при конвертировании прямо противоположен.
+Фильтр выбирает между t и b для каждого кадра, используя
+флаги полей. Если информация о полях недоступна, то работает также как и с u.
 .IPs u
-Capture unknown or varying, transfer opposite.
-Filter selects among t and b on a frame by frame basis by analyzing the
-images and selecting the alternative that produces best match between the
-fields.
+Порядок полей при захвате неизвестен или меняется, порядок полей при
+конвертировании прямо противополоден.
+Фильтр выбирает между t и b для каждого кадра, анализируя 
+изображение и выбирая вариант, дающий лучшее совпадение между полями.
 .IPs T
-Capture top-first, transfer unknown or varying.
-Filter selects among t and p using image analysis.
+Порядок полей при захвате "верхнее первым", порядок полей при
+конвертировании неизвестен или меняется.
+Фильтр выбирает между t и p, используя анализ изображения.
 .IPs B
-Capture bottom-first, transfer unknown or varying.
-Filter selects among b and p using image analysis.
+Порядок полей при захвате "нижнее первым", порядок полей при
+конвертировании неизвестен или меняется.
+Фильтр выбирает между b и p, используя анализ изображения.
 .IPs A
-Capture determined by field flags, transfer unknown or varying.
-Filter selects among t, b and p using field flags and image analysis.
-If no field information is available, then this works just like U.
-This is the default mode.
+Порядок полей при захвате определяется по их флагам,
+порядок полей при конвертировании неизвестен или меняется.
+Фильтр выбирает между  t, b и p, исползуя флаги полей и анализ
+изображения. Если недоступна информация о полях, то 
+работает так же, как и с U. 
+Это режим по-умолчанию.
 .IPs U
-Both capture and transfer unknown or varying.
-Filter selects among t, b and p using image analysis only.
+Неизвестен или меняется порядок, использованный как при захвате, так и 
+при конвертировании.
+Фильтр выбирает между t, b и p, основываясь только на анализе изоюражения.
 .IPs v
-Verbose operation.
-Prints the selected mode for each frame and the average squared difference
-between fields for t, b, and p alternatives.
+Подробная операция.
+Выводит выбранный режим для каждого кадра и среднеквадратичное отклонение
+между полями для вариантов t, b и p.
 .RE
 .
 .TP
 .B telecine[=start]
-Apply 3:2 'telecine' process to increase framerate by 20%.
-This most likely will not work correctly with MPlayer, but it can
-be used with 'mencoder \-fps 30000/1001 \-ofps 30000/1001 \-vf telecine'.
-Both fps options are essential!
-(A/V sync will break if they are wrong.)
-The optional start parameter tells the filter where in the telecine
-pattern to start (0\-3).
+Применяет 3:2 телесин для увеличения частоты кадров на 20%.
+В большинтве случаев это работает неправильно при 
+использовании с MPlayer. Он может использоваться 
+с 'mencoder \-fps 30000/1001 \-ofps 30000/1001 \-vf telecine'.
+Значения обеих fps опций  очень важны!
+(Будет нарушена A/V синхронизация, если они неверны.)
+Необязательный параметр start указывает фильтру, где начинается
+шаблон телесина (0\-3).
 .
 .TP
 .B tinterlace[=mode]
-Temporal field interlacing \- merge pairs of frames into an interlaced
-frame, halving the framerate.
-Even frames are moved into the upper field, odd frames to the lower field.
-This can be used to fully reverse the effect of the tfields filter (in mode 0).
-Available modes are:
+.\" FIXME untranslated "temporal field"!
+Интерлейсинг temporal field \- объединяет пару кадров в черезстрочный кадр,
+уменьшая частоту кадров вдвое.
+Четные кадры перемещаются в верхнее поле, нечетные \- в нижнее.
+Может использоваться для полной отмены действия фильтра tfields (в режиме 0).
+Доступные опции:
 .PD 0
 .RSs
 .IPs 0
-Move odd frames into the upper field, even into the lower field, generating
-a full-height frame at half framerate.
+Четные кадры перемещать в верхнее поле, нечетные \- в нижнее, создавая 
+кадры половинной высоты с вдвое меньшей частотой кадров.
 .IPs 1
-Only output odd frames, even frames are dropped; height unchanged.
+Выводить только нечетные кадры, четные отбрасываются; высота не меняется.
 .IPs 2
-Only output even frames, odd frames are dropped; height unchanged.
+Выводить только четные кадры, нечетные отбрасываются; высота не меняется.
 .IPs 3
-Expand each frame to full height, but pad alternate lines with black;
-framerate unchanged.
+Расширять каждый кадр до полной высоты, но заливать недостающие строки черным,
+частота кадров не меняется.
 .IPs 4
-Interleave even lines from even frames with odd lines from odd frames.
-Generates full-height frame at half framerate.
+Чередовать четные строки четных кадров с нечетными строками нечетных кадров.
+Генерирует кадры полной высоты с вдвое меньшей частотой кадров.
 .RE
 .PD 1
 .
 .TP
-.B tfields[=mode[:field_dominance]]
-Temporal field separation \- split fields into frames, doubling the
-output framerate.
-Like the telecine filter, tfields will only work properly with
-MEncoder, and only if both \-fps and \-ofps are set to the
-desired (double) framerate!
+.B tfields[=режим[:порядок_полей]]
+.\" FIXME untranslated "temporal field separation"
+Temporal field separation \- разделяет поля на кадры, 
+удваивая выходную частоту кадров.
+Как и фильтр telecine, tfields будет корректно работать только с 
+MEncoder, и только если \-fps и \-ofps обе установлены в
+желаемую (удвоенную) частоту кадров!
 .PD 0
 .RSs
-.IPs <mode>
-0: Leave fields unchanged (will jump/\:flicker).
+.IPs <режим>
+0: Оставить поля неизменными (будет дергаться/\:мерцать).
 .br
-1: Interpolate missing lines. (The algorithm used might not be so good.)
+1: Интерполировать недостающие строки. (Используемый алгоритм может быть
+недостаточно хорошим.)
 .br
-2: Translate fields by 1/4 pixel with linear interpolation (no jump).
+.\" FIXME is translation correct?
+.\" Translate fields by 1/4 pixel with linear interpolation (no jump).
+2: Преобразовать поля 1/4 пиксела линейной интерполяцией (дергаться не будет).
 .br
-4: Translate fields by 1/4 pixel with 4tap filter (higher quality) (default).
-.IPs <field_dominance>
--1: auto (default)
-Only works if the decoder exports the appropriate information and
-no other filters which discard that information come before tfields
-in the filter chain, otherwise it falls back to 0 (top field first).
+.\" FIXME is translation correct?
+.\" Translate fields by 1/4 pixel with 4tap filter (higher quality) (default).
+4: Преобразовать поля 1/4 пиксела 4tap фильтром (лучше качество) (по-умолчанию).
+.IPs <порядок_полей>
+-1: авто (по-умолчанию)
+Работает, если декодер экспортирует соответствующую информацию, и
+в цепочке до tfields нет ни одного фильтра ее отбрасывающего, иначе 
+фильтр возвращается к использованию режима 0 (верхнее поле первое).
 .br
-0: top field first
+0: верхнее поле первое
 .br
-1: bottom field first
+1: нижнее поле первое
 .RE
 .PD 1
 .
 .TP
-.B yadif=[mode[:field_dominance]]
-Yet another deinterlacing filter
+.B yadif=[режим[:порядок_полей]]
+Еще один фильтр деинтерлейсинга
 .PD 0
 .RSs
-.IPs <mode>
-0: Output 1 frame for each frame.
+.IPs <режим>
+0: Выводит 1 кадр для каждого кадра.
 .br
-1: Output 1 frame for each field.
+1: Выводит 1 кадр для каждого поля.
 .br
-2: Like 0 but skips spatial interlacing check.
+.\" FIXME is translation correct ?
+2: Как 0, но пропускает пространственную проверку черезстрочности.
 .br
-3: Like 1 but skips spatial interlacing check.
-.IPs <field_dominance>
-Operates like tfields.
+.\" FIXME is translation correct ?
+3: Как 1, но пропускает пространственную проверку черезстрочности.
+.IPs <порядок_полей>
+Работает аналогично параметру в tfields.
 .RE
 .PD 1
 .
 .TP
-.B mcdeint=[mode[:parity[:qp]]]
-Motion compensating deinterlacer.
-It needs one field per frame as input and must thus be used together
-with tfields=1 or yadif=1/3 or equivalent.
+.B mcdeint=[режим[:четность[:qp]]]
+Компенсирующий движение деинтерлейсер.
+Он требует наличия одного поля в кадре, и, поэтому, должен использоваться
+вместе с tfields=1, yadif=1/3 или аналогичным фильтром.
 .PD 0
 .RSs
-.IPs <mode>
-0: fast
+.IPs <режим>
+0: быстрый
 .br
-1: medium
+1: средний
 .br
-2: slow, iterative motion estimation
+2: медленный, итеративная оценка движения
 .br
-3: extra slow, like 2 plus multiple reference frames
-.IPs <parity>
-0 or 1 selects which field to use (note: no autodetection yet!).
+.\" FIXME untranslated " multiple reference frames"!
+3: очень медленный, как 2 плюс multiple reference frames
+.IPs <четность>
+0 или 1 выбирает используемое поле (замечание: автоопределение пока не работает!).
 .IPs "<qp>\ "
-Higher values should result in a smoother motion vector
-field but less optimal individual vectors.
+Большие значения должны дать более гладкое поле вектора движения,
+но менее оптимальные отдельные векторы.
 .RE
 .PD 1
 .
 .TP
-.B boxblur=radius:power[:radius:power]
-box blur
+.B boxblur=радиус:сила[:радиус:сила]
+блоковое размытие
 .PD 0
 .RSs
-.IPs <radius>
-blur filter strength
+.IPs <радиус>
+сила фильтра blur
 .IPs <power>
-number of filter applications
+количество применений фильтра
 .RE
 .PD 1
 .
 .TP
-.B sab=radius:pf:colorDiff[:radius:pf:colorDiff]
-shape adaptive blur
+.B sab=радиус:pf:отличие_в_цвете[:радиус:pf:отличие_в_цвете]
+размытие по образу [shape adaptive blur]
 .PD 0
 .RSs
-.IPs <radius>
-blur filter strength (~0.1\-4.0) (slower if larger)
+.IPs <радиус>
+сила фильтра blur (~0.1\-4.0) (чем больше, тем медленне)
 .IPs "<pf>\ "
-prefilter strength (~0.1\-2.0)
-.IPs <colorDiff>
-maximum difference between pixels to still be considered (~0.1\-100.0)
+сила предварительного фильтра (~0.1\-2.0)
+.IPs <отличие_в_цвете>
+максимальное отличие между пикселами, все еще считающимися одинаковыми (~0.1\-100.0)
 .RE
 .PD 1
 .
 .TP
-.B smartblur=radius:strength:threshold[:radius:strength:threshold]
-smart blur
+.B smartblur=радиус:сила:порог[:радиус:сила:порог]
+умное рызмытие
 .PD 0
 .RSs
-.IPs <radius>
-blur filter strength (~0.1\-5.0) (slower if larger)
-.IPs <strength>
-blur (0.0\-1.0) or sharpen (-1.0\-0.0)
-.IPs <threshold>
-filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
+.IPs <радиус>
+сила фильтра blur (~0.1\-5.0) (чем больше, тем медленнее)
+.IPs <сила>
+размытие (0.0\-1.0) или резкость (-1.0\-0.0)
+.IPs <порог>
+.\" FIXME is translation correct flat aread = связные области
+обрабатывать все (0), обрабатывать связные области  (0\-30) или обрабатывать 
+края (-30\-0)
 .RE
 .PD 1
 .
 .TP
 .B perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
-Correct the perspective of movies not filmed perpendicular to the screen.
+Исправляет перспективу фильмов, снятых не перпендикулярно экрану.
 .PD 0
 .RSs
 .IPs <x0>,<y0>,...
-coordinates of the top left, top right, bottom left, bottom right corners
+координаты верхнего левого, верхнего правого, нижнего левого, нижнего правого
+углов
 .IPs "<t>\ \ "
-linear (0) or cubic resampling (1)
+линейный (0) или кубический (1) пересчет [resampling]
 .RE
 .PD 1
 .
 .TP
 .B "2xsai\ \ "
-Scale and smooth the image with the 2x scale and interpolate algorithm.
+Масштабирует изображение, увеличивая его вдвое и сглаживая интерполяцией.
 .
 .TP
 .B "1bpp\ \ \ "
-1bpp bitmap to YUV/\:BGR 8/\:15/\:16/\:32 conversion
+Преобразование 1bpp битовой карты в YUV/\:BGR 8/\:15/\:16/\:32
 .
 .TP
-.B down3dright[=lines]
-Reposition and resize stereoscopic images.
-Extracts both stereo fields and places them side by side, resizing
-them to maintain the original movie aspect.
+.B down3dright[=строк]
+Измеряет положение и размер стереоскопических изображений.
+Извлекает оба стерео поля и размещает их одно за другим, 
+изменяя их размер для сохранения пропорций оригинального фильма.
 .PD 0
 .RSs
-.IPs <lines>
-number of lines to select from the middle of the image (default: 12)
+.IPs <строк>
+число строк для выбора из середины изображения (по-умолчанию: 12)
 .RE
 .PD 1
 .
 .TP
-.B bmovl=hidden:opaque:fifo
-The bitmap overlay filter reads bitmaps from a FIFO and displays them
-on top of the movie, allowing some transformations on the image.
-Also see TOOLS/bmovl-test.c for a small bmovl test program.
+.B bmovl=видимость:прозрачность:fifo
+Фильтр bitmap оверлея читает bitmap данные из FIFO и отображает их
+поверх изображения, допуская некоторое его преобразование.
+Небольшую тестовую программу для bmovl смотрите в
+TOOLS/bmovl-test.c.
 .PD 0
 .RSs
-.IPs <hidden>
-Set the default value of the 'hidden' flag (0=visible, 1=hidden).
-.IPs <opaque>
-Set the default value of the 'opaque' flag (0=transparent, 1=opaque).
+.IPs <видимость>
+Устанавливает значение по-умолчанию для флага 'видимость' (0=видимый, 1=скрытый).
+.IPs <прозрачность>
+Устанавливает значение по-умолчанию для флага 'прозрачность' (0=прозрачный, 1=непрозрачный)
 .IPs <fifo>
-path/\:filename for the FIFO (named pipe connecting 'mplayer \-vf bmovl' to the
-controlling application)
+путь/\:файл для FIFO (именованный pipe, соединяющий 'mplayer \-vf bmovl' с
+контролирующим приложением)
 .RE
 .PD 1
 .sp 1
 .RS
-FIFO commands are:
+Команды FIFO:
 .RE
 .PD 0
 .RSs
-.IPs "RGBA32 width height xpos ypos alpha clear"
-followed by width*height*4 Bytes of raw RGBA32 data.
-.IPs "ABGR32 width height xpos ypos alpha clear"
-followed by width*height*4 Bytes of raw ABGR32 data.
-.IPs "RGB24 width height xpos ypos alpha clear"
-followed by width*height*3 Bytes of raw RGB24 data.
-.IPs "BGR24 width height xpos ypos alpha clear"
-followed by width*height*3 Bytes of raw BGR24 data.
-.IPs "ALPHA width height xpos ypos alpha"
-Change alpha transparency of the specified area.
-.IPs "CLEAR width height xpos ypos"
-Clear area.
+.IPs "RGBA32 ширина высота xпозиция yпозиция альфа очистка"
+с последующими ширина*высота*4 байтами сырых RGBA32 данных.
+.IPs "ABGR32 ширина высота xпозиция yпозиция альфа очистка"
+с последующими ширина*высота*4 байтами сырых ABGR32 данных.
+.IPs "RGB24 ширина высота xпозиция yпозиция альфа очистка"
+с последующими ширина*высота*3 байтами сырых RGB24 данных.
+.IPs "BGR24 ширина высота xпозиция yпозиция альфа очистка"
+с последующими ширина*высота*3 байтами сырых BGR24 данных.
+.IPs "ALPHA ширина высота xпозиция yпозиция альфа очистка"
+Изменяет альфа прозрачность указанной области.
+.IPs "CLEAR ширина высота xпозиция yпозиция"
+Очищает область.
 .IPs OPAQUE
-Disable all alpha transparency.
-Send "ALPHA 0 0 0 0 0" to enable it again.
+Полностью отключает альфа прозрачность.
+Отошлите "ALPHA 0 0 0 0 0", чтобы снова ее задействовать.
 .IPs "HIDE\ "
-Hide bitmap.
+Скрывает bitmap.
 .IPs "SHOW\ "
-Show bitmap.
+Показывает bitmap.
 .RE
 .PD 1
 .sp 1
 .RS
-Arguments are:
+Аргументы:
 .RE
 .PD 0
 .RSs
-.IPs "<width>, <height>"
-image/area size
-.IPs "<xpos>, <ypos>"
-Start blitting at position x/y.
-.IPs <alpha>
-Set alpha difference.
-If you set this to -255 you can then send a sequence of ALPHA-commands to set
-the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
+.IPs "<ширина>, <высота>"
+размер изображения/области
+.IPs "<xпозиция>, <yпозиция>"
+Начинает вывод с позиции x/y.
+.IPs <альфа>
+Устанавливает отклонение альфа.
+Если вы установите это значение в -255, то сможете затем послать последовательность 
+ALPHA-команд, чтобы установить область в -225, -200, -175 и так далее для
+красивого fade-in-эффекта [плавного проявления]! ;)
 .RSss
-0:    same as original
+0:    катое же, как и было
 .br
-255:  Make everything opaque.
+255:  Сделать все непрозрачным.
 .br
--255: Make everything transparent.
+-255: Сделать все прозрачным.
 .REss
-.IPs <clear>
-Clear the framebuffer before blitting.
+.IPs <очистить>
+Очищает фрейибуфер перед выводом.
 .RSss
-0: The image will just be blitted on top of the old one, so you do not need to
-send 1.8MB of RGBA32 data every time a small part of the screen is updated.
+0: Изображение будет выведено прямо поверх старого, так что вам не потребуется
+передавать 1.8MB RGBA32 данных каждый раз при обновлении небольшой части экрана.
 .br
-1: clear
+1: очистить
 .REss
 .RE
 .PD 1
 .
 .TP
 .B framestep=I|[i]step
-Renders only every nth frame or every intra frame (keyframe).
+Рендерит только каждый n-й кадр или каждый intra (ключевой) кадр.
 .sp 1
-If you call the filter with I (uppercase) as the parameter, then
-.B only
-keyframes are rendered.
-For DVDs it generally means one in every 15/12 frames (IBBPBBPBBPBBPBB),
-for AVI it means every scene change or every keyint value (see \-lavcopts
-keyint= value if you use MEncoder to encode the video).
+Если вызвать этот фильтр с I (в верхнем решистре) в качестве параметра, то 
+.B только
+ключевые кадры будут рендерится.
+Для DVD это, как правило, означает один из 15/12 кадров (IBBPBBPBBPBBPBB),
+для AVI это значит каждую смену сцены или значение keyint (смотрите значение
+\-lavcopts keyint= , если используете MEncoder для кодирования видео).
 .sp 1
-When a keyframe is found, an 'I!' string followed by a newline character is
-printed, leaving the current line of MPlayer/\:MEncoder output on the screen,
-because it contains the time (in seconds) and frame number of the keyframe
-(You can use this information to split the AVI.).
+Когда найден ключевой кадр, выодится 'I!' с последующим символом перевода строки,
+оставляя текущую строку вывода MPlayer/\:MEncoder видимой на экране, потому что
+она содержит время (в секундах) и комер ключевого кадра 
+(Вы можете использовать эту информацию для разрезания AVI.).
 .sp 1
-If you call the filter with a numeric parameter 'step' then only one in
-every 'step' frames is rendered.
+Если вызвать фильтр с числовым параметром 'step' то только каждый
+'step' кадр будет рендериться.
 .sp 1
-If you put an 'i' (lowercase) before the number then an 'I!' is printed
-(like the I parameter).
+Если перед числом указать 'i' (в нижнем регистре), то (как и с I параметром)
+будет выводиться 'I!'.
 .sp 1
-If you give only the i then nothing is done to the frames, only I! is
-printed.
+Если указать только i, то ничего, кроме вывода I!, делаться не будет.
 .
 .TP
 .B tile=xtiles:ytiles:output:start:delta
-Tile a series of images into a single, bigger image.
-If you omit a parameter or use a value less than 0, then the default
-value is used.
-You can also stop when you are satisfied (... \-vf tile=10:5 ...).
-It is probably a good idea to put the scale filter before the tile :-)
+Располагает мозаикой несколько изображений в одном большего размера.
+Если вы не указываете параметр или указываете значение меньше 0,
+будет использоваться значение по-умолчанию.
+Вы также можете остановиться, когда удовлетворены (... \-vf tile=10:5 ...).
+Возможно, поместить фильтр scale перед tile будет хорошей идеей :-)
 .sp 1
-The parameters are:
+Список параметров:
 .sp 1
 .PD 0
 .RSs
 .IPs <xtiles>
-number of tiles on the x axis (default: 5)
+количество элементов мозаики по оси x (по-умолчанию: 5)
 .IPs <ytiles>
-number of tiles on the y axis (default: 5)
+количество элементов мозаики по оси y (по-умолчанию: 5)
 .IPs <output>
-Render the tile when 'output' number of frames are reached, where 'output'
-should be a number less than xtile * ytile.
-Missing tiles are left blank.
-You could, for example, write an 8 * 7 tile every 50 frames to have one
-image every 2 seconds @ 25 fps.
+Рендерит мозаику, когда достигнуто количество кадров 'output', где 'output'
+должно быть числом, меньшим xtile * ytile.
+Недостающие элементы мозаики остаются пустыми.
+Вы можете, например, записывать мозаику 8 * 7 каждые 50 кадров, чтобы 
+получать одно изображение каждые 2 секунды при 25 fps.
 .IPs <start>
-outer border thickness in pixels (default: 2)
+толщина внешней границы в пикселах (по-умолчанию: 2)
 .IPs <delta>
-inner border thickness in pixels (default: 4)
+толщина внутренней границы в пикселах (по-умолчанию: 4)
 .RE
 .PD 1
 .
 .TP
 .B delogo[=x:y:w:h:t]
-Suppresses a TV station logo by a simple interpolation of the
-surrounding pixels.
-Just set a rectangle covering the logo and watch it disappear (and
-sometimes something even uglier appear \- your mileage may vary).
+Подавляет логотип TV канала простой интерполяцией окружающих пикселов.
+Просто задайте координаты прямоугольника, накрывающего логотип и 
+убедитесь, что он пропал (и появилось нечто даже более безобразное \-
+всякое случается)
 .PD 0
 .RSs
 .IPs <x>,<y>
-top left corner of the logo
+верхний левый угол логотипа
 .IPs <w>,<h>
-width and height of the cleared rectangle
+ширина и высота прямоугольника
 .IPs <t>
-Thickness of the fuzzy edge of the rectangle (added to w and h).
-When set to -1, a green rectangle is drawn on the screen to
-simplify finding the right x,y,w,h parameters.
+Толщина размытой границы прямоугольника (добавляется к w и h).
+Когда установлена в -1, на экран выводится зеленый прямоуголник для
+облегчения поиска правильных параметров x,y,w,h.
 .RE
 .PD 1
 .
 .TP
-.B remove-logo=/path/to/logo_bitmap_file_name.pgm
-Suppresses a TV station logo, using a PGM or PPM image
-file to determine which pixels comprise the logo.
-The width and height of the image file must match
-those of the video stream being processed.
-Uses the filter image and a circular blur
-algorithm to remove the logo.
+.B remove-logo=/путь/к/файлу_с_логотипом.pgm
+Подавляет логотип TV канала, используя PGM или PPM файл 
+изображения для определения пикселов, составляющих логотип.
+Ширина и высота изображения в файле и у обрабатываемого фильма 
+должны совпадать.
+Для подавления использует изображение\-фильтр и алгоритм кругового 
+размытия [circular blur].
 .RSs
-.IPs /path/to/logo_bitmap_file_name.pgm
-[path] + filename of the filter image.
+.IPs /путь/к/файлу_с_логотипом.pgm
+[путь] + имя файла с изображением\-фильтром.
 .RE
 .
 .TP
-.B zrmjpeg[=options]
-Software YV12 to MJPEG encoder for use with the zr2 video
-output device.
+.B zrmjpeg[=опции]
+Программный кодировщик YV12 в MJPEG для использования совместно с драйвером
+вывода видео zr2.
 .RSs
 .IPs maxheight=<h>|maxwidth=<w>
-These options set the maximum width and height the zr card
-can handle (the MPlayer filter layer currently cannot query those).
+Эти опции устанавливают максимальную шгирину и высоту которые может
+обрабатывать zr карта (на текущий момент уровень фильтров MPlayer не
+может их запрашивать).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
-Use these options to set maxwidth and maxheight automatically to the
-values known for card/\:mode combo.
-For example, valid options are: dc10-PAL and buz-NTSC (default: dc10+PAL)
+Используйте эти опции для автоматической установки maxwidth и maxheight 
+в значения, известные для комбинации карта/\:режим.
+Верные опции, например: dc10-PAL и buz-NTSC (по-умолчанию: dc10+PAL)
 .IPs color|bw
-Select color or black and white encoding.
-Black and white encoding is faster.
-Color is the default.
+Выбирает цветное или черно\-белое кодирование.
+Черно-белое работает быстрее.
+По-умолчанию \- цветное.
 .IPs hdec={1,2,4}
-Horizontal decimation 1, 2 or 4.
+Горизонтальное прореживание 1, 2 или 4.
 .IPs vdec={1,2,4}
-Vertical decimation 1, 2 or 4.
+Вертикальное прореживание 1, 2 или 4.
 .IPs quality=1\-20
-Set JPEG compression quality [BEST] 1 \- 20 [VERY BAD].
+Устанавливает качество JPEG сжатия [НАИЛУЧШЕЕ] 1 \- 20 [ОЧЕНЬ ПЛОХОЕ].
 .IPs fd|nofd
-By default, decimation is only performed if the Zoran hardware
-can upscale the resulting MJPEG images to the original size.
-The option fd instructs the filter to always perform the requested
-decimation (ugly).
+По-умолчанию, прореживание производится, только если оборудование Zoran
+может отмасштабировать получившиеся MJPEG изображения до оригинального
+размера. Опция fd указывает фильтру всегда производить
+запрошенное прореживание (безобразно).
 .RE
 .
 .TP
 .B screenshot
-Allows acquiring screenshots of the movie using slave mode
-commands that can be bound to keypresses.
-See the slave mode documentation and the INTERACTIVE CONTROL
-section for details.
-Files named 'shotNNNN.png' will be saved in the working directory,
-using the first available number - no files will be overwritten.
-The filter has no overhead when not used and accepts an arbitrary
-colorspace, so it is safe to add it to the configuration file.
+Позволяет захватывать скриншоты фильма, с помощью 
+команд подчиненного режима, которые можно привязать к
+комбинациям клавиш. Подробности смотрите в документации 
+по подчиненному режиму и разделе ИНТЕРАКТИВНОЕ УПРАВЛЕНИЕ.
+В текущий каталог будут записаны файлы 'shotNNNN.png', начиная с
+первого доступного номера - существующие файлы не перезаписываются.
+Фильтр не вносит накладных расходов, когда не используется, и работает с
+любым пространством цветов, так что его спокойно можно добавить в 
+файл конфигурации.
 .RE
 .
 .TP
 .B "ass\ \ \ \ "
-Moves SSA/ASS subtitle rendering to an arbitrary point in the filter chain.
-Only useful with the \-ass option.
+Помещает рендеринг SSA/ASS субтитров в указанную точку цепочки фильтров.
+Имеет смысл только с опцией \-ass.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-vf ass,screenshot"
-Moves SSA/ASS rendering before the screenshot filter.
-Screenshots taken this way will contain subtitles.
+Помещает рендеринг SSA/ASS перед фильтром screenshot.
+Скриншоты, получаемые таким способом, будут содержать субтитры.
 .RE
 .PD 1
 .
 .TP
-.B blackframe[=amount:threshold]
-Detect frames that are (almost) completely black.
-Can be useful to detect chapter transitions or commercials.
-Output lines consist of the frame number of the detected frame, the
-percentage of blackness, the frame type and the frame number of the last
-encountered keyframe.
+.B blackframe[=количество:порог]
+Находит (почти) полностью черные кадры.
+Может использоваться для определения переходов между главами или рекламы.
+Выводимые линии содержат номер найденного кадра, процент черноты,
+тип кадра и номер последнего встречавшегося ключевого кадра.
 .RSs
-.IPs <amount>
-Percentage of the pixels that have to be below the threshold (default: 98).
-.IPs <threshold>
-Threshold below which a pixel value is considered black (default: 32).
+.IPs <количество>
+Количество пикселов в процентах, значения которых должны быть ниже порогового 
+(по-умолчанию: 98).
+.IPs <порог>
+Порог, ниже которого значение пиксела считается черным (по-умолчанию: 32).
 .RE
 .
 .
