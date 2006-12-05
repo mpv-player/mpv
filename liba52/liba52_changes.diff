@@ -2389,9 +2389,9 @@
  
  uint32_t mm_accel (void);
  
---- liba52/parse.c	2006-06-12 15:05:07.000000000 +0200
-+++ liba52/parse.c	2006-06-12 14:51:33.000000000 +0200
-@@ -24,6 +28,7 @@
+--- liba52/parse.c	2006-12-05 08:08:01.000000000 +0100
++++ liba52/parse.c	2006-12-05 08:08:44.000000000 +0100
+@@ -28,6 +28,7 @@
  #include "config.h"
  
  #include <stdlib.h>
@@ -2399,11 +2399,12 @@
  #include <string.h>
  #include <inttypes.h>
  
-@@ -31,13 +36,11 @@
+@@ -35,13 +36,12 @@
  #include "a52_internal.h"
  #include "bitstream.h"
  #include "tables.h"
 +#include "mm_accel.h"
++#include "libavutil/avutil.h"
  
  #ifdef HAVE_MEMALIGN
  /* some systems have memalign() but no declaration for it */
@@ -2414,19 +2415,14 @@
  #endif
  
  typedef struct {
-@@ -61,6 +64,21 @@
+@@ -64,7 +64,16 @@
+     if (state == NULL)
  	return NULL;
  
-     state->samples = memalign (16, 256 * 12 * sizeof (sample_t));
 +#if defined(__MINGW32__) && defined(HAVE_SSE) 
-+    for(i=0;i<10;i++){
-+      if((int)state->samples%16){
-+        sample_t* samplestmp=malloc(256 * 12 * sizeof (sample_t));   
-+        free(state->samples);
-+        state->samples = samplestmp;    
-+      }
-+      else break;
-+    }
++    state->samples = av_malloc(256 * 12 * sizeof (sample_t));
++#else
+     state->samples = memalign (16, 256 * 12 * sizeof (sample_t));
 +#endif
 +    if(((int)state->samples%16) && (mm_accel&MM_ACCEL_X86_SSE)){
 +      mm_accel &=~MM_ACCEL_X86_SSE;
@@ -2436,7 +2432,7 @@
      if (state->samples == NULL) {
  	free (state);
  	return NULL;
-@@ -74,6 +92,7 @@
+@@ -78,6 +87,7 @@
      state->lfsr_state = 1;
  
      a52_imdct_init (mm_accel);
@@ -2444,7 +2440,7 @@
  
      return state;
  }
-@@ -141,7 +160,7 @@
+@@ -145,7 +155,7 @@
      state->acmod = acmod = buf[6] >> 5;
  
      a52_bitstream_set_ptr (state, buf + 6);
@@ -2453,7 +2449,7 @@
  
      if ((acmod == 2) && (bitstream_get (state, 2) == 2))	/* dsurmod */
  	acmod = A52_DOLBY;
-@@ -172,28 +191,28 @@
+@@ -176,28 +186,28 @@
  
      chaninfo = !acmod;
      do {
@@ -2490,7 +2486,7 @@
  	} while (addbsil--);
      }
  
-@@ -680,7 +699,7 @@
+@@ -684,7 +694,7 @@
  				 state->fbw_expbap[i].exp[0],
  				 state->fbw_expbap[i].exp + 1))
  		return 1;
@@ -2499,7 +2495,7 @@
  	}
      if (lfeexpstr != EXP_REUSE) {
  	do_bit_alloc |= 32;
-@@ -755,7 +774,7 @@
+@@ -759,7 +769,7 @@
      if (bitstream_get (state, 1)) {	/* skiple */
  	i = bitstream_get (state, 9);	/* skipl */
  	while (i--)
@@ -2508,3 +2504,15 @@
      }
  
      samples = state->samples;
+@@ -900,6 +910,10 @@
+ 
+ void a52_free (a52_state_t * state)
+ {
+-    free (state->samples);
++#if defined(__MINGW32__) && defined(HAVE_SSE)
++    av_free (state->samples);
++#else
++     free (state->samples);
++#endif
+     free (state);
+ }
