@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r21487
+.\" synced with r21506
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -9838,9 +9838,9 @@ This option will be ignored if used with the telecine option.
 .TP
 .B telecine
 Enables 3:2 pulldown soft telecine mode: The muxer will make the
-video stream look like it was encoded at 30000/1001 or 30 fps.
+video stream look like it was encoded at 30000/1001.
 It only works with MPEG-2 video when the output framerate,
-converted with \-ofps, is either 24000/1001 or 24 fps.
+eventually converted with \-ofps, is 24000/1001fps.
 Any other framerate is incompatible with this option.
 .
 .TP
@@ -9848,18 +9848,18 @@ Any other framerate is incompatible with this option.
 Enables FILM to PAL and NTSC to PAL soft telecine mode: The muxer
 will make the video stream look like it was encoded at 25 fps.
 It only works with MPEG-2 video when the output framerate,
-converted with \-ofps, is either 24000/1001 or 24 fps.
+eventually converted with \-ofps, is 24000/1001 fps.
 Any other framerate is incompatible with this option.
 .
 .TP
 .B tele_src and tele_dest
 Enables arbitrary telecining using Donand Graft's DGPulldown code.
-You need to specify the original and the desired framerate and the
+You need to specify the original and the desired framerate; the
 muxer will make the video stream look like it was encoded at
-<tele_dest> frames per second.
+<tele_dest> frames per second, replacing the nominal output framerate.
 It only works with MPEG-2 video when the input framerate is smaller
-than the output framerate.
-Example of PAL to NTSC telecining: tele_src=25,tele_dest=30000/1001.
+than the output framerate and the framerate increase is <= 1.5.
+Example of PAL to NTSC telecining: tele_src=25:tele_dest=30000/1001.
 .
 .TP
 .B vbuf_size=<40\-1024>
