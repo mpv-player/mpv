@@ -213,7 +213,8 @@ stream_t* open_stream_full(char* filename,int mode, char** options, int* file_fo
     for(j = 0 ; sinfo->protocols[j] ; j++) {
       l = strlen(sinfo->protocols[j]);
       // l == 0 => Don't do protocol matching (ie network and filenames)
-      if((l == 0) || ((strncmp(sinfo->protocols[j],filename,l) == 0) &&
+      if((l == 0 && !strstr(filename, "://")) ||
+         ((strncmp(sinfo->protocols[j],filename,l) == 0) &&
 		      (strncmp("://",filename+l,3) == 0))) {
 	*file_format = DEMUXER_TYPE_UNKNOWN;
 	s = open_stream_plugin(sinfo,filename,mode,options,file_format,&r);
