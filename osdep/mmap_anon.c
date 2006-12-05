@@ -5,10 +5,10 @@
 #include "config.h"
 #ifdef HAVE_SYS_MMAN_H
 
-#include <sys/mman.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/mman.h>
 
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 #define MAP_ANONYMOUS MAP_ANON
