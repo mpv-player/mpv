@@ -447,7 +447,8 @@
 
 <para>
   Most DVDs also have some degree of black borders at the edges. Leaving
-  these in place can hurt quality in several ways.
+  these in place will hurt quality <emphasis role="bold">a lot</emphasis>
+  in several ways.
 </para>
 
 <orderedlist>
