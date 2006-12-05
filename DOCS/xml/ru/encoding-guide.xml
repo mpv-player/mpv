@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21376  -->
+<!-- synced with r21508  -->
 <!-- **Partially** translated -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
@@ -472,8 +472,8 @@
 
 <para>
   У большинства DVD также есть определённое подобие чёрных полос на
-  краях. Если Вы их оставите, это может повредить качество несколькими
-  путями.
+  краях. Если Вы их оставите, это может <emphasis>сильно</emphasis>
+  повредить качество несколькими путями.
 </para>
 
 <orderedlist>
