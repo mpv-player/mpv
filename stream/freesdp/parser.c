@@ -36,6 +36,21 @@
 #include "parserpriv.h"
 
 /**
+ * \brief find the start of the next line
+ * \param c pointer to current position in string
+ * \return pointer to start of next line or NULL if illegal (i.e.
+ *         a '\r' is not followed by a '\n'
+ */
+static const char *next_line(const char *c) {
+  c += strcspn(c, "\n\r");
+  if (*c == 0) return c;
+  if (*c == '\r') c++;
+  if (*c == '\n')
+    return c + 1;
+  return NULL;
+}
+
+/**
  * Moves the <code>c<code> pointer up to the beginning of the next
  * line.
  *
@@ -43,22 +58,7 @@
  * @retval FSDPE_ILLEGAL_CHARACTER, when an illegal '\r' character
  * (not followed by a '\n') is found, returns
  */
-#define NEXT_LINE(c)                                                \
-{                                                                   \
- while ((*(c) != '\0') && (*(c) != '\r') && (*(c) != '\n')) {       \
-    (c)++;                                                          \
- }                                                                  \
- if (*(c) == '\n') {                                                \
-    (c)++;                                                          \
- } else if (*(c) == '\r') {                                         \
-    (c)++;                                                          \
-    if (*(c) == '\n') {                                             \
-       (c)++;                                                       \
-    } else {                                                        \
-       return FSDPE_ILLEGAL_CHARACTER;                              \
-   }                                                                \
- }                                                                  \
-}
+#define NEXT_LINE(c) do { if (!(c = next_line(c))) return FSDPE_ILLEGAL_CHARACTER; } while (0);
 
 fsdp_error_t
 fsdp_parse (const char *text_description, fsdp_description_t * dsc)
