@@ -6699,230 +6699,238 @@ ALPHA-команд, чтобы установить область в -225, -200, -175 и так далее для
 .
 .
 .
-.SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
+.SH "ОБЩИЕ ОПЦИИ КОДИРОВАНИЯ (ТОЛЬКО MENCODER)"
 .
 .TP
-.B \-audio-delay <any floating-point number>
-Delays either audio or video by setting a delay field in the header
-(default: 0.0).
-This does not delay either stream while encoding, but the player will
-see the delay field and compensate accordingly.
-Positive values delay the audio, and negative values delay the video.
-Note that this is the exact opposite of the \-delay option.
-For example, if a video plays correctly with \-delay 0.2, you can
-fix the video with MEncoder by using \-audio-delay -0.2.
+.B \-audio-delay <любое вещественное число>
+Задерживает либо видео, либо аудио, устанавливая поле delay в 
+заголовке (по-умолчанию: 0.0).
+При этом ни один из потоков не задерживается, но проигрыватель 
+заметит delay флаг и сделает соответствующую компенсацию.
+Положительные значения задерживают звук, отрицательные \- 
+видео. Заметьте, что эта опция в точности противоположна
+опции \-delay.
+Например, если видео воспроизводится правильно с \-delay 0.2, 
+вы можете исправить его в MEncoder, используя \-audio-delay -0.2.
 .sp 1
-Currently, this option only works with the default muxer (\-of avi).
-If you are using a different muxer, then you must use \-delay instead.
+На текущеий момент эта опция работает только со стандартным 
+мультиплексором (\-of avi). При использовании другого мультиплексора 
+вы должны использовать вместо нее \-delay.
 .
 .TP
 .B \-audio-density <1\-50>
-Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
+.\" FIXME is translation correct? chunks = блоки
+Количество аудио блоков [chunks] в секунду (по-умолчанию 2 для блоков длиной в 0.5сек).
 .br
-.I NOTE:
-CBR only, VBR ignores this as it puts each packet in a new chunk.
+.I ЗАМЕЧАНИЕ:
+Только CBR, VBR игнорирует эту опции, поскольку складывает каждый пакет в новый
+блок.
 .
 .TP
 .B \-audio-preload <0.0\-2.0>
-Sets up the audio buffering time interval (default: 0.5s).
+Устанавливает длительность периода буферизации аудио (по-умолчанию: 0.5сек).
 .
 .TP
 .B \-fafmttag <format>
-Can be used to override the audio format tag of the output file.
+Может использоваться для переопределения тэга аудио формата в выходном файле.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-fafmttag 0x55"
-Will have the output file contain 0x55 (mp3) as audio format tag.
+Выходной файл будет иметь тэг аудио формата 0x55 (mp3).
 .RE
 .PD 1
 .
 .TP
 .B \-ffourcc <fourcc>
-Can be used to override the video fourcc of the output file.
+Может использоваться для переопределения fourcc видео в выходном файле.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-ffourcc div3"
-Will have the output file contain 'div3' as video fourcc.
+Выходной файл будет иметь fourcc 'div3'.
 .RE
 .PD 1
 .
 .TP
 .B \-force-avi-aspect <0.2\-3.0>
-Override the aspect stored in the AVI OpenDML vprp header.
-This can be used to change the aspect ratio with '\-ovc copy'.
+Переопределяет пропорции, хранящиеся в AVI OpenDML vprp заголовке.
+Может использоваться с '\-ovc copy', для изменения коэффициента 
+пропорций.
 .
 .TP
-.B \-frameno-file <filename> (DEPRECATED)
-Specify the name of the audio file with framenumber mappings created in
-the first (audio only) pass of a special three pass encoding mode.
+.B \-frameno-file <имя_файла> (УСТАРЕЛО)
+Указывает название аудио файла с соответствием номеров кадров, 
+созданного при первом (только аудио) проходе специального 
+трехпроходного режима кодирования.
 .br
-.I NOTE:
-Using this mode will most likely give you A-V desync.
-Do not use it.
-It is kept for backwards compatibility only and will possibly
-be removed in a future version.
+.I ЗАМЕЧАНИЕ:
+Использование этого режима скорее всего приведет к A-V рассинхронизации.
+Не используйте его. Он оставлен только для обратной совместимости и
+в будущих версиях, возможно, будет удален.
 .
 .TP
 .B \-hr-edl-seek
-Use a more precise, but much slower method for skipping areas.
-Areas marked for skipping are not seeked over, instead all
-frames are decoded, but only the necessary frames are encoded.
-This allows starting at non-keyframe boundaries.
+Указывает использовать более точный, но значительно более медленный 
+метод пропуска областей. Области, помеченные для пропуска, в этом 
+случае не перематываются. Вместо этого декодируются все кадры, но 
+кодируются в выходной файл только требуемые.
+Это позволяет начинать не с ключевого кадра.
 .br
-.I NOTE:
-Not guaranteed to work right with '\-ovc copy'.
+.I ЗАМЕЧАНИЕ:
+Не гарантируется правильная работа с '\-ovc copy'.
 .
 .TP
-.B \-info <option1:option2:...> (AVI only)
-Specify the info header of the resulting AVI file.
+.B \-info <опция1:опция2:...> (только AVI)
+Указывает информационный заголовок для выходного AVI файла.
 .sp 1
-Available options are:
+Доступные опции:
 .RSs
 .IPs "help\ "
-Show this description.
-.IPs name=<value>
-title of the work
-.IPs artist=<value>
-artist or author of the work
-.IPs genre=<value>
-original work category
-.IPs subject=<value>
-contents of the work
-.IPs copyright=<value>
-copyright information
-.IPs srcform=<value>
-original format of the digitized material
+Показывает это описание.
+.IPs name=<значение>
+заголовок произведения
+.IPs artist=<значение>
+артист или автор произведения
+.IPs genre=<значение>
+жанр оригинального произведения
+.IPs subject=<значение>
+содержание произведения
+.IPs copyright=<значение>
+информация о копирайте
+.IPs srcform=<значение>
+оригинальный формат оцифрованного материала
 .IPs comment=<value>
-general comments about the work
+общие комментарии о произведении
 .RE
 .
 .TP
 .B \-noautoexpand
-Do not automatically insert the expand filter into the MEncoder filter chain.
-Useful to control at which point of the filter chain subtitles are rendered
-when hardcoding subtitles onto a movie.
+Указывает не вставлять автоматически фильтр expand в цепочку фильтров MEncoder.
+Полезно для контроля над местом рендеринга субтитров в цепочке фильтров,
+когда субтитры кодируются прямо в изображение.
 .
 .TP
 .B \-noencodedups
-Do not attempt to encode duplicate frames in duplicate; always output
-zero-byte frames to indicate duplicates.
-Zero-byte frames will be written anyway unless a filter or encoder
-capable of doing duplicate encoding is loaded.
-Currently the only such filter is harddup.
+Не пытаться кодировать дублирующиеся кадры как дублирующиеся: всегда
+выводить кадры нулевого размера для обозначения дубликатаов.
+Если не загружен фильтр или кодировщик, способный кодировать дубликаты,
+то в любом случае будут выводиться кадры нулевого размера. 
+На текущий момент единственным таким фильтром является harddup.
 .
 .TP
-.B \-noodml (\-of avi only)
-Do not write OpenDML index for AVI files >1GB.
+.B \-noodml (только \-of avi)
+Не записывать OpenDML индекс для AVI файлов >1ГБ.
 .
 .TP
 .B \-noskip
-Do not skip frames.
+Не пропускать кадры.
 .
 .TP
-.B \-o <filename>
-Outputs to the given filename.
+.B \-o <имя_файла>
+Выводить результат в указанный файл.
 .br
-If you want a default output filename, you can put this option in the
-MEncoder config file.
+Если вы хотите иметь имя, использующееся по-умолчанию, можете 
+указать эту опцию в файле конфигурации MEncoder.
 .
 .TP
-.B \-oac <codec name>
-Encode with the given audio codec (no default set).
+.B \-oac <название кодека>
+Указывает кодировать заданным аудио кодеком (нет значения по-умолчанию).
 .br
-.I NOTE:
-Use \-oac help to get a list of available audio codecs.
+.I ЗАМЕЧАНИЕ:
+Полный список доступных кодеков можно получить при помощи опции \-oac help.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-oac copy"
-no encoding, just streamcopy
+без кодирования, просто копирование потока
 .IPs "\-oac pcm"
-Encode to uncompressed PCM.
+Кодировать в несжатый PCM.
 .IPs "\-oac mp3lame"
-Encode to MP3 (using LAME).
+Кодировать в MP3 (используя LAME).
 .IPs "\-oac lavc"
-Encode with a libavcodec codec.
+Кодировать libavcodec кодеком.
 .RE
 .PD 1
 .
 .TP
-.B \-of <format> (BETA CODE!)
-Encode to the specified container format (default: AVI).
+.B \-of <format> (БЕТА КОД!)
+Кодировать в указанный формат (по-умолчанию: AVI).
 .br
-.I NOTE:
-Use \-of help to get a list of available container formats.
+.I ЗАМЕЧАНИЕ:
+Полный список доступных форматов можно получить при помощи опции \-of help.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-of avi"
-Encode to AVI.
+Кодировать в AVI.
 .IPs "\-of mpeg"
-Encode to MPEG (also see \-mpegopts).
+кодировать в MPEG (смотрите также \-mpegopts).
 .IPs "\-of lavf"
-Encode with libavformat muxers (also see \-lavfopts).
+Кодировать libavformat мультиплексорами  (смотрите также \-lavfopts).
 .IPs "\-of rawvideo"
-raw video stream (no muxing \- one video stream only)
+сырой видео поток (без мультиплексирования \- только один видео поток)
 .IPs "\-of rawaudio"
-raw audio stream (no muxing \- one audio stream only)
+сырой аудио поток (без мультиплексирования \- только один аудио поток)
 .RE
 .PD 1
 .
 .TP
 .B \-ofps <fps>
-Specify a frames per second (fps) value for the output file,
-which can be different from that of the source material.
-Must be set for variable fps (ASF, some MOV) and progressive
-(30000/1001 fps telecined MPEG) files.
+Указывает частоту кадров (fps) для выходного файла,
+которая может отличаться от таковой в исходном материале.
+Должна указываться для прогрессивных
+.\" FIXME telecined
+(30000/1001 fps телесиненных [telecined] MPEG) и
+файлов с переменной fps (ASF, некоторые MOV).
 .
 .TP
-.B \-ovc <codec name>
-Encode with the given video codec (no default set).
+.B \-ovc <название кодека>
+Указывает кодировать заданным видео кодеком (нет значения по-умолчанию).
 .br
-.I NOTE:
-Use \-ovc help to get a list of available video codecs.
+.I ЗАМЕЧАНИЕ:
+Полный список доступных кодеков можно получить при помощи опции \-ovc help.
 .sp 1
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs "\-ovc copy"
-no encoding, just streamcopy
+без кодирования, только копирование потока
 .IPs "\-ovc raw"
-Encode to an arbitrary uncompressed format (use '\-vf format' to select).
+Кодировать в произвольный несжатый формат (используйте '\-vf format' для выбора).
 .IPs "\-ovc lavc"
-Encode with a libavcodec codec.
+Кодировать libavcodec кодеком.
 .RE
 .PD 1
 .
 .TP
-.B \-passlogfile <filename>
-Dump first pass information to <filename> instead of the default divx2pass.log
-in two pass encoding mode.
+.B \-passlogfile <имя_файла>
+В духпроходном режиме сохраняет информацию первого прохода 
+в <имя_файла> вместо стандартного divx2pass.log.
 .
 .TP
-.B \-skiplimit <value>
-Specify the maximum number of frames that may be skipped after
-encoding one frame (\-noskiplimit for unlimited).
+.B \-skiplimit <значение>
+Указывает максимальное количество кадров, которые можно пропустить после
+кодирования одного (\-noskiplimit для бесконечного количества).
 .
 .TP
-.B \-vobsubout <basename>
-Specify the basename for the output .idx and .sub files.
-This turns off subtitle rendering in the encoded movie and diverts it to
-VOBsub subtitle files.
+.B \-vobsubout <базовое_имя>
+Указывает базовое имя для .idx и .sub выходных файлов.
+Эта опция отключает рендеринг субтитров в кодируемый фильм и перенаправляет
+их в VOBsub файлы субтитров.
 .
 .TP
-.B \-vobsuboutid <langid>
-Specify the language two letter code for the subtitles.
-This overrides what is read from the DVD or the .ifo file.
+.B \-vobsuboutid <ид_языка>
+Указывает двухбуквенный код языка для субтитров.
+Эта опция переопределяет значение, читаемое из DVD или .ifo файла.
 .
 .TP
-.B \-vobsuboutindex <index>
-Specify the index of the subtitles in the output files (default: 0).
+.B \-vobsuboutindex <индекс>
+Указывает индекс субтитров в выходных файлах (по-умолчанию: 0).
 .
 .
 .
