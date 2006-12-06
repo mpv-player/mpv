@@ -127,6 +127,8 @@ static void uninit(sh_video_t *sh)
 
    if (context)
    {
+      theora_info_clear(&context->inf);
+      theora_comment_clear(&context->cc);
       theora_clear (&context->st);
       free (context);
    }
