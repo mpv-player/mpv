@@ -242,6 +242,7 @@ static int init(sh_video_t *sh){
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
     if(!lavc_codec){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh->codec->dll);
+        uninit(sh);
 	return 0;
     }
 
@@ -406,6 +407,7 @@ static int init(sh_video_t *sh){
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
+        uninit(sh);
         return 0;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: libavcodec init OK!\n");
@@ -429,7 +431,7 @@ static void uninit(sh_video_t *sh){
             );
     }
 
-    if (avcodec_close(avctx) < 0)
+    if (avctx && avctx->codec && avcodec_close(avctx) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
 
     av_freep(&avctx->extradata);
