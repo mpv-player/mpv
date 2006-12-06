@@ -34,7 +34,11 @@ ass_library_t* ass_library_init(void)
 
 void ass_library_done(ass_library_t* priv)
 {
-	if (priv) free(priv);
+	if (priv) {
+		ass_set_fonts_dir(priv, NULL);
+		ass_set_style_overrides(priv, NULL);
+		free(priv);
+	}
 }
 
 void ass_set_fonts_dir(ass_library_t* priv, const char* fonts_dir)
