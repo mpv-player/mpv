@@ -1140,6 +1140,7 @@ void load_font_ft(int width, int height)
 {
 #ifdef HAVE_FONTCONFIG
     FcPattern *fc_pattern;
+    FcPattern *fc_pattern2;
     FcChar8 *s;
     FcBool scalable;
 #endif
@@ -1160,18 +1161,23 @@ void load_font_ft(int width, int height)
 	fc_pattern = FcNameParse(font_name);
 	FcConfigSubstitute(0, fc_pattern, FcMatchPattern);
 	FcDefaultSubstitute(fc_pattern);
+	fc_pattern2 = fc_pattern;
 	fc_pattern = FcFontMatch(0, fc_pattern, 0);
+	FcPatternDestroy(fc_pattern2);
 	FcPatternGetBool(fc_pattern, FC_SCALABLE, 0, &scalable);
 	if (scalable != FcTrue) {
+	    FcPatternDestroy(fc_pattern);
     	    fc_pattern = FcNameParse("sans-serif");
     	    FcConfigSubstitute(0, fc_pattern, FcMatchPattern);
     	    FcDefaultSubstitute(fc_pattern);
+	    fc_pattern2 = fc_pattern;
     	    fc_pattern = FcFontMatch(0, fc_pattern, 0);
+	    FcPatternDestroy(fc_pattern2);
 	}
 	// s doesn't need to be freed according to fontconfig docs
 	FcPatternGetString(fc_pattern, FC_FILE, 0, &s);
 	vo_font=read_font_desc_ft(s, width, height);
-	free(fc_pattern);
+	FcPatternDestroy(fc_pattern);
     }
     else
 #endif
