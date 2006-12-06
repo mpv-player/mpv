@@ -984,7 +984,7 @@ fsdp_parse_b (const char **p, fsdp_bw_modifier_t ** bw_modifiers,
   char fsdp_buf[MAXSHORTFIELDLEN];
   unsigned long int wuint;
   unsigned int i = 0;
-  char *lp = (char *) *p;
+  const char *lp = *p;
 
   /* count b= lines */
   while (!strncmp (lp, "b=", 2))
