@@ -994,6 +994,8 @@ int demux_ogg_open(demuxer_t* demuxer) {
 		   n_video - 1);
 	    if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_v->bih,MSGL_V);
 	}
+	theora_comment_clear(&cc);
+	theora_info_clear(&inf);
 #   endif /* HAVE_OGGTHEORA */
     } else if (pack.bytes >= 4 && !strncmp (&pack.packet[0], "fLaC", 4)) {
 	sh_a = new_sh_audio_aid(demuxer,ogg_d->num_sub, n_audio);
@@ -1621,6 +1623,8 @@ static void demux_close_ogg(demuxer_t* demuxer) {
       if (ogg_d->text_langs[i]) free(ogg_d->text_langs[i]);
     free(ogg_d->text_langs);
   }
+  vorbis_info_clear(&ogg_d->vi);
+  vorbis_comment_clear(&ogg_d->vc);
   free(ogg_d);
 }
 
