@@ -70,6 +70,7 @@ struct ass_renderer_s {
 	ass_synth_priv_t* synth_priv;
 
 	ass_image_t* images_root; // rendering result is stored here
+	ass_image_t* prev_images_root;
 };
 
 typedef enum {EF_NONE = 0, EF_KARAOKE, EF_KARAOKE_KF, EF_KARAOKE_KO} effect_t;
@@ -372,7 +373,7 @@ static ass_image_t** render_glyph(bitmap_t* bm, int dst_x, int dst_y, uint32_t c
 }
 
 /**
- * \brief Render text_info_t struct into ass_images_t list
+ * \brief Render text_info_t struct into ass_image_t list
  * Rasterize glyphs and put them in glyph cache.
  */
 static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
@@ -1864,10 +1865,25 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	return 0;
 }
 
+/**
+ * \brief deallocate image list
+ * \param img list pointer
+ */
+void ass_free_images(ass_image_t* img)
+{
+	while (img) {
+		ass_image_t* next = img->next;
+		free(img);
+		img = next;
+	}
+}
+
 static void ass_reconfigure(ass_renderer_t* priv)
 {
 	priv->render_id = ++last_render_id;
 	ass_glyph_cache_reset();
+	ass_free_images(priv->prev_images_root);
+	priv->prev_images_root = 0;
 }
 
 void ass_set_frame_size(ass_renderer_t* priv, int w, int h)
@@ -1938,8 +1954,6 @@ int ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* de
  */
 static int ass_start_frame(ass_renderer_t *priv, ass_track_t* track, long long now)
 {
-	ass_image_t* img;
-
 	ass_renderer = priv;
 	global_settings = &priv->settings;
 
@@ -1965,12 +1979,7 @@ static int ass_start_frame(ass_renderer_t *priv, ass_track_t* track, long long n
 	else
 		frame_context.font_scale_x = ((double)(frame_context.orig_width * track->PlayResY)) / (frame_context.orig_height * track->PlayResX);
 
-	img = priv->images_root;
-	while (img) {
-		ass_image_t* next = img->next;
-		free(img);
-		img = next;
-	}
+	priv->prev_images_root = priv->images_root;
 	priv->images_root = 0;
 
 	return 0;
@@ -2134,12 +2143,70 @@ static void fix_collisions(event_images_t* imgs, int cnt)
 }
 
 /**
+ * \brief compare two images
+ * \param i1 first image
+ * \param i2 second image
+ * \return 0 if identical, 1 if different positions, 2 if different content
+ */
+int ass_image_compare(ass_image_t *i1, ass_image_t *i2)
+{
+	if (i1->w != i2->w) return 2;
+	if (i1->h != i2->h) return 2;
+	if (i1->stride != i2->stride) return 2;
+	if (i1->color != i2->color) return 2;
+	if (i1->bitmap != i2->bitmap)
+		return 2;
+	if (i1->dst_x != i2->dst_x) return 1;
+	if (i1->dst_y != i2->dst_y) return 1;
+	return 0;
+}
+
+/**
+ * \brief compare current and previous image list
+ * \param priv library handle
+ * \return 0 if identical, 1 if different positions, 2 if different content
+ */
+int ass_detect_change(ass_renderer_t *priv)
+{
+	ass_image_t* img, *img2;
+	int diff;
+
+	img = priv->prev_images_root;
+	img2 = priv->images_root;
+	diff = 0;
+	while (img && diff < 2) {
+		ass_image_t* next, *next2;
+		next = img->next;
+		if (img2) {
+			int d = ass_image_compare(img, img2);
+			if (d > diff) diff = d;
+			next2 = img2->next;
+		} else {
+			// previous list is shorter
+			diff = 2;
+			break;
+		}
+		img = next;
+		img2 = next2;
+	}
+
+	// is the previous list longer?
+	if (img2)
+		diff = 2;
+
+	return diff;
+}
+
+/**
  * \brief render a frame
  * \param priv library handle
  * \param track track
  * \param now current video timestamp (ms)
+ * \param detect_change a value describing how the new images differ from the previous ones will be written here:
+ *        0 if identical, 1 if different positions, 2 if different content.
+ *        Can be NULL, in that case no detection is performed.
  */
-ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now)
+ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now, int* detect_change)
 {
 	int i, cnt, rc;
 	event_images_t eimg[MAX_EVENTS];
@@ -2189,7 +2256,14 @@ ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long lon
 			cur = cur->next;
 		}
 	}
+
+	if (detect_change)
+		*detect_change = ass_detect_change(priv);
 	
+	// free the previous image list
+	ass_free_images(priv->prev_images_root);
+	priv->prev_images_root = 0;
+
 	return ass_renderer->images_root;
 }
 

@@ -89,7 +89,7 @@ int  ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* d
  * \param track subtitle track
  * \param now video timestamp in milliseconds
  */
-ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now);
+ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now, int* detect_change);
 
 
 // The following functions operate on track objects and do not need an ass_renderer //

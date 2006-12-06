@@ -44,5 +44,10 @@ void ass_configure(ass_renderer_t* priv, int w, int h);
 void ass_configure_fonts(ass_renderer_t* priv);
 ass_library_t* ass_init();
 
+typedef struct {
+	ass_image_t* imgs;
+	int changed;
+} mp_eosd_images_t;
+
 #endif
 

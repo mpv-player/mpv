@@ -326,7 +326,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	ass_image_t* images = 0;
 	if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE))
-		images = ass_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5);
+		images = ass_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5, NULL);
 	
 	prepare_image(vf, mpi);
 	if (images) render_frame(vf, mpi, images);

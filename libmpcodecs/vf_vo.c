@@ -26,6 +26,7 @@ struct vf_priv_s {
     vo_functions_t *vo;
 #ifdef USE_ASS
     ass_renderer_t* ass_priv;
+    int prev_visibility;
 #endif
 };
 #define video_out (vf->priv->vo)
@@ -116,11 +117,12 @@ static int control(struct vf_instance_s* vf, int request, void* data)
         vf->priv->ass_priv = ass_renderer_init((ass_library_t*)data);
         if (!vf->priv->ass_priv) return CONTROL_FALSE;
         ass_configure_fonts(vf->priv->ass_priv);
+        vf->priv->prev_visibility = 0;
         return CONTROL_TRUE;
     }
     case VFCTRL_DRAW_EOSD:
     {
-        ass_image_t* images = 0;
+        mp_eosd_images_t images = {NULL, 2};
         double pts = vf->priv->pts;
         if (!vo_config_count || !vf->priv->ass_priv) return CONTROL_FALSE;
         if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE)) {
@@ -132,9 +134,14 @@ static int control(struct vf_instance_s* vf, int request, void* data)
                 ass_set_aspect_ratio(vf->priv->ass_priv, (double)res.w / res.h);
             }
 
-            images = ass_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5);
-        }
-        return (video_out->control(VOCTRL_DRAW_EOSD, images) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
+            images.imgs = ass_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5, &images.changed);
+            if (!vf->priv->prev_visibility)
+                images.changed = 2;
+            vf->priv->prev_visibility = 1;
+        } else
+            vf->priv->prev_visibility = 0;
+        vf->priv->prev_visibility = sub_visibility;
+        return (video_out->control(VOCTRL_DRAW_EOSD, &images) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
     }
 #endif
     case VFCTRL_GET_PTS:

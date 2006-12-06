@@ -17,6 +17,7 @@
 #include "Gui/interface.h"
 #endif
 #include "libass/ass.h"
+#include "libass/ass_mp.h"
 
 static vo_info_t info = 
 {
@@ -246,14 +247,21 @@ static void clearEOSD(void) {
  * \param img image list to create OSD from.
  *            A value of NULL has the same effect as clearEOSD()
  */
-static void genEOSD(ass_image_t *img) {
+static void genEOSD(mp_eosd_images_t *imgs) {
   int sx, sy;
   int tinytexcur = 0;
   int smalltexcur = 0;
   GLuint *curtex;
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
+  ass_image_t *img = imgs->imgs;
   ass_image_t *i;
   int cnt;
+
+  if (imgs->changed == 0) // there are elements, but they are unchanged
+      return;
+  if (img && imgs->changed == 1) // there are elements, but they just moved
+      goto skip_upload;
+
   clearEOSD();
   if (!img)
     return;
@@ -307,6 +315,7 @@ static void genEOSD(ass_image_t *img) {
                 x, y, i->w, i->h, 0);
   }
   eosdDispList = glGenLists(1);
+skip_upload:
   glNewList(eosdDispList, GL_COMPILE);
   tinytexcur = smalltexcur = 0;
   for (i = img, curtex = eosdtex; i; i = i->next) {
@@ -936,6 +945,8 @@ static int control(uint32_t request, void *data, ...)
   case VOCTRL_DRAW_IMAGE:
     return draw_image(data);
   case VOCTRL_DRAW_EOSD:
+    if (!data)
+      return VO_FALSE;
     genEOSD(data);
     return VO_TRUE;
   case VOCTRL_GET_EOSD_RES:
