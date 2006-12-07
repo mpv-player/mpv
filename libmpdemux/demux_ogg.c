@@ -109,6 +109,9 @@ typedef struct ogg_stream {
   int text;
   int id;
 
+  vorbis_info      vi;
+  int vi_inited;
+
   void *ogg_d;
 } ogg_stream_t;
 
@@ -129,9 +132,6 @@ typedef struct ogg_demuxer {
   int n_text;
   int *text_ids;
   char **text_langs;
-
-  vorbis_info      vi;
-  int vi_inited;
 } ogg_demuxer_t;
 
 #define NUM_VORBIS_HDR_PACKETS 3
@@ -328,13 +328,13 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
   if(os->vorbis) {
     if(*pack->packet & PACKET_TYPE_HEADER)
       os->hdr_packets++;
-    else if (ogg_d->vi_inited)
+    else if (os->vi_inited)
     {
        vorbis_info *vi;
        int32_t blocksize;
        
        // When we dump the audio, there is no vi, but we don't care of timestamp in this case
-       vi = &(ogg_d->vi);
+       vi = &(os->vi);
        blocksize = vorbis_packet_blocksize(vi,pack) / samplesize;
        // Calculate the timestamp if the packet don't have any
        if(pack->granulepos == -1) {
@@ -748,9 +748,10 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
   unsigned char *buf[3];
   unsigned char *ptr;
   unsigned int len;
+  ogg_stream_t *os = &od->subs[sh->ds->id];
   vorbis_comment vc;
 
-  vorbis_info_init(&od->vi);
+  vorbis_info_init(&os->vi);
   vorbis_comment_init(&vc);
   for(i = 0; i < 3; i++) {
     op[i].bytes = ds_get_packet(sh->ds, &(op[i].packet));
@@ -765,7 +766,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
     memcpy(buf[i], op[i].packet, op[i].bytes);
 
     op[i].b_o_s = (i==0);
-    ris = vorbis_synthesis_headerin(&(od->vi),&vc,&(op[i]));
+    ris = vorbis_synthesis_headerin(&(os->vi),&vc,&(op[i]));
     if(ris < 0) {
       init_error = 1;
       mp_msg(MSGT_DECAUDIO,MSGL_ERR,"DEMUX_OGG: header n. %d broken! len=%ld, code: %d\n", i, op[i].bytes, ris);
@@ -773,7 +774,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
   }
   vorbis_comment_clear(&vc);
   if(!init_error)
-    od->vi_inited = 1;
+    os->vi_inited = 1;
 
   len = op[0].bytes + op[1].bytes + op[2].bytes;
   sh->wf = calloc(1, sizeof(WAVEFORMATEX) + len + len/255 + 64);
@@ -1437,7 +1438,7 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
     /* demux_ogg_read_packet needs decoder context for Vorbis streams */
     if(((sh_audio_t*)demuxer->audio->sh)->format == FOURCC_VORBIS)
       context = ((sh_audio_t*)demuxer->audio->sh)->context;
-    vi = &(ogg_d->vi);
+    vi = &(os->vi);
     rate = (float)vi->rate;
     samplesize = ((sh_audio_t*)ds->sh)->samplesize;
   }
@@ -1585,6 +1586,7 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
 
 static void demux_close_ogg(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d = demuxer->priv;
+  ogg_stream_t* os = NULL;
   int i;
 
   if(!ogg_d)
@@ -1610,7 +1612,11 @@ static void demux_close_ogg(demuxer_t* demuxer) {
       if (ogg_d->text_langs[i]) free(ogg_d->text_langs[i]);
     free(ogg_d->text_langs);
   }
-  vorbis_info_clear(&ogg_d->vi);
+  if(demuxer->audio->id > -1) {
+    os = &ogg_d->subs[demuxer->audio->id];
+    if(os && os->vi_inited)
+      vorbis_info_clear(&os->vi);
+  }
   free(ogg_d);
 }
 
@@ -1624,7 +1630,7 @@ static int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
     rate = os->samplerate;
   } else {
     os = &ogg_d->subs[demuxer->audio->id];
-    rate = ogg_d->vi.rate;
+    rate = os->vi.rate;
   }
 
 
