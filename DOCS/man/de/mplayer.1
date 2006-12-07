@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21529
+.\" In sync with r21531
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -5750,6 +5750,30 @@ eine Gleichung wie "2+2*sin(PI*qp)"
 .RE
 .
 .TP
+.B geq=Gleichung
+generischer Gleichungsänderungsfilter
+.RSs
+.IPs <Gleichung>
+Irgendeine Gleichung, z.B.\& 'p(W-X\,Y)' zum horizontalen Spiegeln des Bildes.
+Du kannst Leerzeichen verwenden, um die Gleichung besser lesbar zu machen.
+Es gibt ein paar Konstanten, die in der Gleichung verwendet werden können:
+.RSss
+PI: die Zahl Pi
+.br
+E: die Zahl e
+.br
+X / Y: die Koordinaten des aktuellen Samples
+.br
+W / H: Breite und Höhe des Bildes
+.br
+SW / SH: Skalierung der Breite/Höhe abhängig von der momentan gefilterten
+Ebene, z.B.\& 1,1 und 0.5,0.5 für YUV 4:2:0.
+.br
+p(x,y): Gibt den Wert des Pixels an Position x/y der aktuellen Ebene zurück.
+.REss
+.RE
+.
+.TP
 .B "test\ \ \ "
 Generiere verschiedene Testmuster.
 .
@@ -10768,6 +10792,13 @@ pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
 Du könntest etwas mit den Werten für pan experimentieren (z.B.\& mit einem
 Wert multiplizieren), um die Lautstärke zu erhöhen oder Abschneiden von Sound
 zu vermeiden.
+.
+.PP
+.B Schachbrett-Invertierung mit dem geq-Filter:
+.nf
+mplayer \-vf geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+.fi
+.
 .
 .SH BEISPIELE ZUM GEBRAUCH VON MENCODER
 .
