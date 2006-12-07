@@ -33,20 +33,6 @@ extern int _ilog (unsigned int); /* defined in many places in theora/lib/ */
 
 #define BLOCK_SIZE 4096
 
-/// Vorbis decoder context : we need the vorbis_info for vorbis timestamping
-/// Shall we put this struct def in a common header ?
-typedef struct ov_struct_st {
-  vorbis_info      vi; /* struct that stores all the static vorbis bitstream
-			  settings */
-  vorbis_comment   vc; /* struct that stores all the bitstream user comments */
-  vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
-  vorbis_block     vb; /* local working space for packet->PCM decode */
-  float            rg_scale; /* replaygain scale */
-#ifdef TREMOR
-  int              rg_scale_int;
-#endif
-} ov_struct_t;
-
 /* Theora decoder context : we won't be able to interpret granule positions
  * without using theora_granule_time with the theora_state of the stream.
  * This is duplicated in `vd_theora.c'; put this in a common header?
