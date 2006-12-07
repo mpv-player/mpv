@@ -1,4 +1,4 @@
-.\" Synced with r20621
+.\" Synced with r21399
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Tuto man stránku napsali/píší Gabucino, Diego Biurrun, Jonas Jermann
 .\" Překlad (translation): Jiří Heryán
@@ -179,7 +179,7 @@ také DVD titulky (SPU proudy, VOBsub a Closed Captions).
 (MPlayerův filmový Enkodér) je jednoduchý filmový enkodér navržený pro převod
 MPlayerem přehratelných filmů (viz výš) do jiného formátu přehratelného
 MPlayerem (viz níž).
-Enkóduje video do MPEG-4 (DivX/XviD), některého z libavcodec kodeků a PCM/\:MP3/\:VBRMP3
+Enkóduje video do MPEG-4 (DivX/Xvid), některého z libavcodec kodeků a PCM/\:MP3/\:VBRMP3
 audio v 1, 2 nebo 3 průchodech.
 Dále umí kopírovat datový proud (stream copy) a má rozsáhlý systém filtrů (crop,
 expand, flip, postprocess, rotate, scale, noise, konverze RGB/\:YUV) a mnoho
@@ -246,8 +246,12 @@ Ztlumení/\:zesílení hlasitosti
 Ztlumení/\:zesílení hlasitosti
 .IPs "m\ \ \ \ "
 Vypnutí zvuku.
+.IPs "_ (pouze MPEG-TS a libavformat)"
+Cykluje dostupné video stopy.
 .IPs "# (pouze MPEG a Matroska)"
 Přepíná mezi dostupnými zvukovými stopami.
+.IPs "TAB (pouze MPEG-TS)"
+Cykluje dostupnými programy.
 .IPs "f\ \ \ \ "
 Přepínač na celou obrazovku a zpět (viz také volbu \-fs).
 .IPs "T\ \ \ \ "
@@ -262,7 +266,7 @@ Přepínač zahazování snímků:  nic / zruš zobrazení / zruš dekódování
 (viz volby \-framedrop a \-hardframedrop).
 .IPs "v\ \ \ \ "
 Přepínač viditelnosti titulků.
-.IPs "b / j"
+.IPs "j\ \ \ \ "
 Cykluje dostupné titulky.
 .IPs "y / g"
 Krok vpřed/zpět v titulcích.
@@ -284,6 +288,8 @@ Start/stop snímání screenshotů.
 Zobrazí jméno souboru na OSD.
 .IPs "! a @"
 Převine na začátek předchozí/následující kapitoly.
+.IPs "D (pouze \-vo xvmc, \-vf yadif)"
+Aktivuje/deaktivuje odstraňovač prokladu.
 .RE
 .PD 1
 .PP
@@ -1203,7 +1209,8 @@ Například \-demuxer audio nebo \-demuxer 17 vynutí MP3.
 .
 .TP
 .B \-dumpaudio (pouze MPlayer)
-Uloží surový komprimovaný audio proud do ./stream.dump (použitelné s MPEG/\:AC3).
+Uloží surový komprimovaný audio proud do ./stream.dump (použitelné s MPEG/\:AC3,
+ve většině ostatních případů nebude výsledný soubor přehratelný).
 Pokud na příkazovém řádku použijete více jednu z voleb \-dumpaudio, \-dumpvideo
 nebo \-dumpstream, použije se pouze ta poslední.
 .
@@ -1612,6 +1619,7 @@ Tato sada voleb nastavuje různé parametry modulu zachytávajícího rádio.
 Pro poslech rádia MPlayerem použijte 'radio://<frekvence>'
 (pokud není zadána volba channels) nebo 'radio://<číslo_kanálu>'
 (pokud byla zadána volba channels) jako URL filmu.
+Povolený kmitočtový rozsahu uvidíte spuštěním MPlayeru s '\-v'.
 Pro start zachytávání (záznamu) použijte 'radio://<frekvence nebo kanál>/capture'.
 Pokud klíčové slovo capture není zadáno, můžete poslouchat rádio pouze pomocí
 propojky s line-in.
@@ -1621,12 +1629,16 @@ což činí tento proces nepohodlným.
 Dostupné volby jsou:
 .RSs
 .IPs device=<hodnota>
-Radio zařízení k použití (výchozí: /dev/radio0).
+Radio zařízení k použití (výchozí: /dev/radio0 v Linuxu nebo /dev/tuner0 v *BSD).
 .IPs driver=<hodnota>
 Radio zařízení k použití (výchozí: v4l2 je-li, jinak v4l).
 Zatím jsou podporována rozhraní v4l a v4l2.
 .IPs volume=<0..100>
 hlasitost zvuku radio zařízení (výchozí 100)
+.IPs freq_min=<hodnota> (pouze *BSD BT848)
+minimální povolený kmitočet (výchozí: 87.50)
+.IPs freq_max=<hodnota> (pouze *BSD BT848)
+maximální povolený kmitočet (výchozí: 108.00)
 .IPs channels=<frekvence>\-<název>,<frekvence>\-<název>,...
 Nastaví seznam kanálů.
 Použijte _ místo mezer v názvech (nebo si pohrajte s uvozovkami ;-).
@@ -1914,7 +1926,7 @@ Tyto fonty mohou pak být použity pro SSA/ASS renderování
 titulků (volba \-ass).
 .
 .TP
-.B \-ffactor <číslo> (pouze OSD)
+.B \-ffactor <číslo>
 Převzorkování alfa mapy fontu.
 .sp 1
 Možnosti:
@@ -1941,7 +1953,7 @@ Změní FriBiDi posuzování o umísťování čárek v titulcích.
 Volbu použijte, pokud jsou čárky umístěny na začátku věty a ne na konci.
 .
 .TP
-.B \-font <cesta k souboru font.desc> (pouze OSD)
+.B \-font <cesta k souboru font.desc>
 Vyhledá fonty pro OSD/\:TITULKY v alternativním adresáři (výchozí pro normální
 fonty: ~/\:.mplayer/\:font/\:font.desc, výchozí pro FreeType fonty:
 ~/.mplayer/\:subfont.ttf).
@@ -2036,7 +2048,7 @@ Přehraje Matroska soubor s Japonskými titulky.
 .PD 1
 .
 .TP
-.B \-spuaa <režim> (pouze OSD)
+.B \-spuaa <režim>
 Režim škálování/\:vyhlazování pro DVD/\:VOBsub.
 K hodnotě <režim> můžete přičíst 16 když chcete vynutit škálování i když
 velikost originálního a škálovaného snímku souhlasí. Takto například
@@ -2059,7 +2071,7 @@ používá softwarové Gaussovo rozostření (vypadá skvěle)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2> (pouze OSD)
+.B \-spualign <-1\-2>
 Určí jak budou zarovnány SPU (DVD/\:VOBsub) titulky.
 .PD 0
 .RSs
@@ -2075,7 +2087,7 @@ Zarovnat na spodní okraj.
 .PD 1
 .
 .TP
-.B \-spugauss <0.0\-3.0> (pouze OSD)
+.B \-spugauss <0.0\-3.0>
 Parametr odchylka (variance) pro Gauss používaný volbou \-spuaa 4.
 Čím větší hodnota, tím větší rozostření (výchozí: 1.0).
 .
@@ -2124,7 +2136,7 @@ Zakáže veškeré úpravy titulků po jejich načtení.
 Používáno pro ladící účely.
 .
 .TP
-.B \-subalign <0\-2> (pouze OSD)
+.B \-subalign <0\-2>
 Určí který okraj titulků by měl být zarovnán na výšku zadanou
 pomocí \-subpos.
 .PD 0
@@ -2245,12 +2257,12 @@ výchozí: stejná rychlost fps jako má film.
 POUZE pro snímkově orientované SUB soubory, např.\& MicroDVD formát.
 .
 .TP
-.B \-subpos <0\-100> (použitelné s \-vf expand) (pouze OSD)
+.B \-subpos <0\-100> (použitelné s \-vf expand)
 Určuje pozici titulků na obrazovce.
 Hodnota vyjadřuje vertikální pozici titulku v % výšky obrazu.
 .
 .TP
-.B \-subwidth <10\-100> (pouze OSD)
+.B \-subwidth <10\-100>
 Nastavuje maximální šířku titulků na obrazovce.
 Použitelné pro TV-out.
 Hodnota vyjadřuje šířku titulků v % šířky obrazu.
@@ -2446,6 +2458,10 @@ Zvukový výstup přes NAS.
 .TP
 .B macosx (pouze Mac OS X)
 Nativní Mac OS X zvuk.
+.
+.TP
+.B openal
+Experimentální, nedokončené (mixáž na mono) OpenAL zvukové výstupní rozhraní.
 .
 .TP
 .B sgi (pouze SGI)
@@ -3951,7 +3967,7 @@ Manuální korekce chyb enkodéru.
 .br
 2 (msmpeg4v3): některé starým lavc generované msmpeg4v3 soubory (žádná auto-detekce)
 .br
-4 (mpeg4): XviD chyba prokládání (auto-detekováno pokud fourcc==XVIX)
+4 (mpeg4): Xvid chyba prokládání (auto-detekováno pokud fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (auto-detekována pokud fourcc==UMP4)
 .br
@@ -3959,7 +3975,7 @@ Manuální korekce chyb enkodéru.
 .br
 32 (mpeg4): chyba ilegální vlc (auto-detekována podle fourcc)
 .br
-64 (mpeg4): XviD a DivX chyba qpel (auto-detekována podle fourcc/\:verze)
+64 (mpeg4): Xvid a DivX chyba qpel (auto-detekována podle fourcc/\:verze)
 .br
 128 (mpeg4): stará standardní qpel (auto-detekována podle fourcc/\:verze)
 .br
@@ -4275,13 +4291,13 @@ Vypíná kalkulaci poměru stran.
 .
 .TP
 .B \-xvidopts <volba1:volba2:...>
-Nastaví doplňkové parametry pro dekódování s XviD.
+Nastaví doplňkové parametry pro dekódování s Xvid.
 .br
 .I POZNÁMKA:
-Protože je libavcodec rychlejší než XviD, doporučujeme použít postprocesní
+Protože je libavcodec rychlejší než Xvid, doporučujeme použít postprocesní
 filtr (\-vf pp) i dekodér (\-vfm ffmpeg) libavcodecu.
 .sp 1
-Interní postprocesní filtry XviDu:
+Interní postprocesní filtry Xvidu:
 .PD 0
 .RSs
 .IPs deblock-chroma (viz také volbu \-vf pp)
@@ -4998,7 +5014,7 @@ Expanduje tak aby odpovídal poměru stran, místo rozlišení (výchozí: 0).
 .I PŘÍKLAD:
 .PD 0
 .RSs
-.IP expand=800::::4/3
+.IP expand=800:::::4/3
 Expanduje na 800x600, pokud nemá zdroj vyšší rozlišení, v tom případě
 expanduje tak, aby dosáhl poměru stran 4/3.
 .RE
@@ -5471,7 +5487,6 @@ Budete vidět červený, zelený a modrý svislý pruh.
 .TP
 .B lavc[=quality:fps]
 Rychlá softwarová konverze YV12 do MPEG-1 pomocí libavcodec pro použití s DVB/\:DXR3/\:IVTV.
-Je rychlejší a má lepší kvalitu než \-vf fame.
 .RSs
 .IPs <quality>
 .RSss
@@ -5482,10 +5497,6 @@ Je rychlejší a má lepší kvalitu než \-vf fame.
 .IPs <fps>
 vynutí výstupní fps (desetinné číslo) (výchozí: 0, autodetekce založena na výšce)
 .RE
-.
-.TP
-.B "fame\ \ \ "
-Rychlá softwarová konverze YV12 do MPEG-1 pomocí libfame pro použití s DVB/\:DXR3/\:IVTV.
 .
 .TP
 .B dvbscale[=poměr_stran]
@@ -7096,13 +7107,34 @@ kvantizer na MB, msmpeg4 nemůže být takto opraven jelikož to nepodporuje.)
 .
 .TP
 .B lmin=<0.01\-255.0>
-Minimální Lagrangeův násobič pro regulátor datového toku, doporučujeme aby
-byl stejný nebo menší než vqmin (výchozí: 2.0).
+Minimální Lagrangeův násobič pro regulátor datového toku na úrovni snímku (výchzí: 2.0).
+Lavc zřídka použije quantizery pod hodnotou lmin.
+Snížením lmin přinutíte lavc pro některé snímky spíše volit nižší kvantizery,
+ale ne nižší než hodnota vqmin.
+Obdobně zvýšením lmin přinutí lavc více volit nízké kvantizery,
+dokonce i když by je vqmin povolila.
+Měli byste asi nastavit lmin přibližně stejně jako vqmin.
+Používáte-li adaptivní kvantizaci, změna lmin/lmax může mít menší
+efekt; viz mblmin/mblmax.
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
 maximální Lagrangeův násobič pro regulátor datového toku (výchozí: 31.0)
+.RE
+.
+.TP
+.B mblmin=<0.01\-255.0>
+Minimální Lagrangeův násobič pro řízení datového toku na úrovni makrobloku
+(výchozí:2.0).
+Tento parametr ovlivňuje adaptivní kvantizaci jako qprd,
+lumi_mask, atd...
+.RE
+.
+.TP
+.B mblmax=<0.01\-255.0>
+Maximální Lagrangeův násobič pro řízení datového toku na úrovni makrobloku
+(výchozí: 31.0).
 .RE
 .
 .TP
@@ -7439,8 +7471,8 @@ vrc_strategy nebude nastavena na 0.
 .IPs 0
 Použije interní lavc kontrolu toku (výchozí).
 .IPs 1
-Použije XviD kontrolu toku (experimentální; vyžaduje MEncoder skompilovaný s
-podporou XviD 1.1 nebo vyšším).
+Použije Xvid kontrolu toku (experimentální; vyžaduje MEncoder skompilovaný s
+podporou Xvid 1.1 nebo vyšším).
 .RE
 .PD 1
 .
@@ -8369,7 +8401,7 @@ PSNR jednotlivých snímků.
 .B bitrate=<hodnota> (CBR nebo dvouprůchodový režim)
 Nastaví požadovaný datový tok v kilobitech/\:sekundu jestliže <16000 nebo
 v bitech/\:sekundu jestliže >16000.
-Pokud je <hodnota> záporná, XviD použije její absolutní hodnotu jako požadovanou
+Pokud je <hodnota> záporná, Xvid použije její absolutní hodnotu jako požadovanou
 velikost (v kB) videa a spočítá datový tok automaticky
 (výchozí: 687 kbitů/s).
 .
@@ -8417,190 +8449,6 @@ Přesnost je vyvážena větší zátěží CPU, takže tuto hodnotu snižte, po
 enkódování v reálném čase.
 .
 .TP
-.B (no)interlacing
-Enkóduje půlsnímky prokládaného videa.
-Zapněte tuto volbu pro prokládaný obsah.
-.br
-.I POZNÁMKA:
-Měli byste přeškálovat video. protože budete potřebovat proklad respektující
-měnič velikosti, který můžete aktivovat pomocí \-vf scale=<width>:<height>:1.
-.
-.TP
-.B "4mv\ \ \ \ "
-Použije 4 vektory pohybu na makroblok.
-Může poskytnout lepší kompresi za cenu zpomalení enkódování.
-.br
-.I VAROVÁNÍ:
-Od verze XviD-1.0.x, není tato volba dostupná samostatně.
-Její funkce je zahrnuta ve volbě me_quality.
-Když je me_quality > 4, volba 4mv je aktivována.
-.
-.TP
-.B rc_reaction_delay_factor=<hodnota>
-Tento parametr ovládá počet snímků, které CBR regulátor datového toku počká než
-zareaguje na změny toku a vykompenzuje je tak, aby byl dosažen konstantní
-datový tok v rámci průměrovacího rozsahu snímků.
-.
-.TP
-.B rc_averaging_period=<hodnota>
-Skutečného CBR je těžké dosáhnout.
-V závislosti na video materiálu bude datový tok různý a těžko předvídatelný.
-Proto XviD používá průměrovací periodu pro kterou garantuje spotřebu daného
-počtu bitů (mínus malá odchylka).
-Toto nastavení vyjadřuje "počet snímků" pro který XviD průměruje datový tok
-a zkouší dosáhnout CBR.
-.
-.TP
-.B rc_buffer=<hodnota>
-velikost vyrovnávací paměti regulátoru datového toku
-.
-.TP
-.B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-CBR režim: min & max kvantizer pro všechny snímky (výchozí=2\-31)
-.br
-dvouprůchodový režim: min & max kvantizer pro I/P-snímky (výchozí: 2\-31/\:2\-31)
-.br
-.I VAROVÁNÍ:
-Od verze XviD-1.0.x, je tato volba nahrazena volbami
-[min|max]_[i|p|b]quant.
-.
-.TP
-.B min_key_interval=<hodnota> (pouze dvouprůchodový režim)
-minimální odstup mezi klíčovými snímky (výchozí: 0)
-.
-.TP
-.B max_key_interval=<hodnota>
-maximální odstup mezi klíčovými snímky (výchozí: 10*fps)
-.
-.TP
-.B mpeg_quant
-použít MPEG kvantizery namísto H.263.
-Při vyšších datových tocích vám MPEG kvantizace poskytne více detailů.
-Při nižších datových tocích zajistí vyhlazování z H.263 méně blokového šumu.
-Používáte-li uživatelské matice, musíte použít MPEG.
-.br
-.I VAROVÁNÍ:
-Od verze XviD-1.0.x, ji nahrazuje volba quant_type.
-.
-.TP
-.B mod_quant
-Rozhoduje se zda použít MPEG nebo H.263 kvantizery snímek od snímku
-(pouze dvouprůchodový režim).
-.br
-.I VAROVÁNÍ:
-Takto vyrobíte ilegální proud, a nejspíš nebude dekódovatelný
-žádným MPEG-4 dekodérem kromě libavcodec a XviD.
-.br
-.I VAROVÁNÍ:
-Od verze XviD-1.0.x není tato volba k dispozici.
-.
-.TP
-.B keyframe_boost=<0\-1000> (pouze dvouprůchodový režim)
-Přesune nějaké bity z prostoru vyhrazeného ostatním druhům snímků do intra
-snímků, což zlepší kvalitu klíčových snímků.
-Hodnota udává návdavek, takže hodnota 10 přidá oproti normálu o 10%
-více bitů vašim klíčovým snímkům
-(výchozí: 0).
-.
-.TP
-.B kfthreshold=<hodnota> (pouze dvouprůchodový režim)
-Pracuje spolu s kfreduction.
-Udává minimální vzdálenost pod kterou považujete dva snímky za
-posloupné a jsou posuzovány odlišně podle kfreduction
-(výchozí: 10).
-.
-.TP
-.B kfreduction=<0\-100> (pouze dvouprůchodový režim)
-Dvě výše uvedené volby mohou být použity k doladění velikosti klíčových snímků
-až k mezi kterou považujete za absolutní jedničku.
-kfthreshold nastavuje rozsah ve kterém jsou Klíčové snímky redukovány a
-kfreduction stanovuje okamžitou redukci datového toku.
-S posledním I-snímkem bude zacházeno normálně
-(výchozí: 30).
-.
-.TP
-.B divx5bvop
-Generuje B-snímky kompatibilní s DivX5 (výchozí: zapnuto).
-Zdá se že to je nutné pouze pro starý typ DivX dekodéru.
-.br
-.I VAROVÁNÍ:
-Od verze XviD-1.0.x,je tato volba nahrazena volbou closed_gop.
-.
-.TP
-.B (no)grayscale
-Nechá XviD zahodit barevnou informaci, takže enkódované video bude pouze černobílé.
-Poznamenejme, že toto nezrychlí enkódování, pouze zabrání, aby byla barvonosná data
-zapsána v poslední fázi enkódování.
-.
-.TP
-.B "debug\ \ "
-Ukládat snímkové statistiky v xvid.dbg.
-(Toto NENÍ ovládací soubor dvouprůchodového režimu.)
-.RE
-.
-.PP
-.sp 1
-Následující volby jsou k dispozici pouze s posledními stabilními
-verzemi XviD 1.0.x (api4).
-.
-.TP
-.B (no)packed
-Tato volba je určena pro nápravu potíží s pořadím snímků když enkódujete do
-kontejnerových formátů jako je AVI, které si neumí poradit se zpřeházenými
-snímky.
-V praxi je však většina dekodérů (jak softwarových, tak hardwarových) schopna
-poradit si s pořadím snímků samostatně a mohou být zapnutím této volby zmateny,
-takže ji můžete bezpečně nechat vypnutou, pokud opravdu nevíte co děláte.
-.br
-.I VAROVÁNÍ:
-takto vygenerujete ilegální bitový proud, který nebude dekódovatelný pomocí
-ISO-MPEG-4 dekodérů s výjimkou DivX/\:libavcodec/\:XviD.
-.br
-.I VAROVÁNÍ:
-Takto se rovněž zapíše falešná DivX verze do souboru, takže vadná autodetekce
-některých dekodérů dostane zabrat.
-.
-.TP
-.B max_bframes=<0\-4>
-Maximální počet B-snímků vložených mezi I/P-snímky (výchozí: 2)
-.
-.TP
-.B bquant_ratio=<0\-1000>
-rozsah kvantizeru mezi B- a ne B-snímky, 150=1.50 (výchozí: 150)
-.
-.TP
-.B bquant_offset=<-1000\-1000>
-přesah kvantizeru mezi B- a ne B-snímky, 100=1.00 (výchozí: 100)
-.
-.TP
-.B bf_threshold=<-255\-255>
-Toto nastavení umožní upřednostnit nebo ne, použití B-snímků.
-Čím vyšší hodnota, tím vyšší pravděpodobnost použití B-snímků
-(výchozí: 0).
-Nezapomínejme, že B-snímky obvykle mají vyšší kvantizer a proto
-agresivní používání B-snímků může zhoršit vizuální kvalitu.
-.
-.TP
-.B (no)closed_gop
-Tato volba nařídí XviD uzavřít každou "GOP" (Skupinu Obrázků ohraničenou dvěma
-I-snímky), což učiní tyto skupiny vzájemně nezávislými.
-Volba pouze zařídí, aby poslední snímek skupiny byl buď P-snímek nebo
-N-snímek, ale nikdy B-snímek.
-Obvykle je vhodné mít tuto volbu zapnutou (výchozí: zapnuto).
-.
-.TP
-.B frame_drop_ratio=<0\-100> (pouze max_bframes=0)
-Tento parametr umožňuje vytvářet video proudy s variabilním datovým tokem.
-Jeho hodnota nastavuje práh citlivosti na změny; pokud je rozdílnost současného
-a předchozího snímku menší nebo rovna tomuto prahu, snímek nebude kódován
-(místo něj je do proudu umístěn tzv. n-vop).
-Jestliže přehrávač narazí n-vop, zobrazí předchozí snímek.
-.br
-.I VAROVÁNÍ:
-Hrátky s tímto parametrem mohou vyústit v mizerné video, takže ji používejte
-jen na vlastní nebezpečí!
-.
-.TP
 .B (no)qpel
 Během vyhledávání pohybu používá jako výchozí MPEG-4 přesnost na půl pixelu.
 Standard nabízí režim, kde enkodéry mohou použít přesnost na čtvrt pixelu.
@@ -8613,7 +8461,7 @@ stojí za to.
 .
 .TP
 .B (no)gmc
-Zapne globální kompenzaci pohybu. To nechá XviD generovat speciální
+Zapne globální kompenzaci pohybu. To nechá Xvid generovat speciální
 snímky (GMC-snímky) které jsou vhodné pro Pan/\:Zoom/\:Rotating obrázky.
 Jestli aktivace této volby ušetří nějaké bity závisí na zdrojovém
 materiálu.
@@ -8630,17 +8478,8 @@ kvalitu při konstantním datovém toku) s nižší zátěží než VHQ (výchoz
 .TP
 .B (no)cartoon
 Tuto volbu aktivujte pokud kódujete animovaný film.
-Volba upraví některé interní XviD úrovně tak, aby se lépe rozhodoval nad
+Volba upraví některé interní Xvid úrovně tak, aby se lépe rozhodoval nad
 typy snímků a vektory pohybu v ploše vypadajících animovaných filmech.
-.
-.TP
-.B quant_type=<h263|mpeg>
-Nastaví typ kvantizeru k použití.
-Při vyšších datových tocích vám MPEG kvantizace poskytne více detailů.
-Při nižších datových tocích zajistí vyhlazování z H.263 méně blokového šumu.
-Používáte-li uživatelské matice,
-.B musíte
-použít MPEG kvantizaci.
 .
 .TP
 .B (no)chroma_me
@@ -8670,7 +8509,7 @@ z přilehlých bloků (výchozí: zapnuto).
 Algoritmus vyhledávání pohybu je založen na vyhledávání v obvyklé barevné oblasti
 a zkouší najít pohybový vektor, který minimalizuje rozdíl mezi referenčním snímkem
 a enkódovaným snímkem.
-Pokud aktivujete tuto volbu, XviD použije taky frekvenční oblast (DCT) k vyhledávání
+Pokud aktivujete tuto volbu, Xvid použije taky frekvenční oblast (DCT) k vyhledávání
 pohybového vektoru, který minimalizuje nejen prostorovou odlišnost, ale také
 délku enkódovaného bloku.
 Od nejrychlejšího k nejpomalejšímu:
@@ -8701,6 +8540,22 @@ využity v ostatních snímcích, což zvýší celkovou subjektivní kvalitu, a
 může snížit PSNR.
 .
 .TP
+.B (no)grayscale
+Přinutí Xvid zahodit barevnou informaci, takže enkódované video je pouze
+černobílé. Nijak to nezrychlí enkódování, pouze zabrání zapsání
+ barvonosných dat v posledním kroku enkódování.
+.
+.TP
+.B (no)interlacing
+Enkóduje půlsnimky prokládaného video materiálu.
+Zapněte tuto možnost pro prokládaný obsah.
+.br
+.I POZNÁMKA:
+Musíte-li škálovat video, měli byste použít měnič velikosti s podporou
+prokládaného obsahu, který můžete aktivovat pomocí
+ \-vf scale=<šířka>:<výška>:1.
+.
+.TP
 .B min_iquant=<0\-31>
 minimální kvantizer I-snímku (výchozí: 2)
 .
@@ -8725,6 +8580,23 @@ minimální kvantizer B-snímku (výchozí: 2)
 maximální kvantizer B-snímku (výchozí: 31)
 .
 .TP
+.B min_key_interval=<hodnota> (pouze 2 průchody)
+minimální interval mezi klíčovými snímky (výchozí: 0)
+.
+.TP
+.B max_key_interval=<hodnota>
+maximální interval mezi klíčovými snímky (výchozí: 10*fps)
+.
+.TP
+.B quant_type=<h263|mpeg>
+Nastavuje typ kvantizeru k použití.
+Při vyšších datových tocích zjistíte, že MPEG kvantozace zachová více detailů.
+Při nižších datových tocích poskytuje vyhlazování H.263 méně blokovacího šumu.
+Používáte-li uživatelské matice,
+.B musíte
+použít MPEG kvantizaci.
+.
+.TP
 .B quant_intra_matrix=<soubor>
 Načte uživatelský soubor s intra maticí.
 Takový soubor můžete vytvořit maticovým editorem z xvid4confu.
@@ -8735,8 +8607,108 @@ Načte uživatelský soubor s inter maticí.
 Takový soubor můžete vytvořit maticovým editorem z xvid4confu.
 .
 .TP
+.B keyframe_boost=<0\-1000> (pouze dvouprůchodový režim)
+Přesune nějaké bity z prostoru vyhrazeného ostatním druhům snímků do intra
+snímků, což zlepší kvalitu klíčových snímků.
+Hodnota udává návdavek, takže hodnota 10 přidá oproti normálu o 10%
+více bitů vašim klíčovým snímkům
+(výchozí: 0).
+.
+.TP
+.B kfthreshold=<hodnota> (pouze dvouprůchodový režim)
+Pracuje spolu s kfreduction.
+Udává minimální vzdálenost pod kterou považujete dva snímky za
+posloupné a jsou posuzovány odlišně podle kfreduction
+(výchozí: 10).
+.
+.TP
+.B kfreduction=<0\-100> (pouze dvouprůchodový režim)
+Dvě výše uvedené volby mohou být použity k doladění velikosti klíčových snímků,
+které považujete za příliž blízké prvnímu (v řadě).
+kfthreshold nastavuje rozsah, ve kterém jsou klíčové snímky redukovány a
+kfreduction určuje redukci datového toku, který dostanou.
+S posledním I-snímkem bude zacházeno normálně
+(výchozí: 30).
+.
+.TP
+.B max_bframes=<0\-4>
+Maximální počet B-snímků vložených mezi I/P-snímky (výchozí: 2)
+.
+.TP
+.B bquant_ratio=<0\-1000>
+quantizer ratio between B- and non-B-frames, 150=1.50 (default: 150)
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+odlišnost kvantizeru mezi B- a ne-B-snímky, 100=1.00 (výchozí: 100)
+.
+.TP
+.B bf_threshold=<-255\-255>
+Toto nastavení umožní stanovit prioritu použití B-snímků.
+Čím vyšší hodnota, tím vyšší pravděpodobnost použití B-snímků
+(výchozí: 0).
+Nezapomínejme, že B-snímky obvykle mají vyšší kvantizer a proto
+jejich nadužívání může zhoršit vizuální kvalitu.
+.
+.TP
+.B (no)closed_gop
+Tato volba nařídí Xvid uzavřít každou "GOP" (Skupinu Obrázků ohraničenou dvěma
+I-snímky), což učiní tyto skupiny vzájemně nezávislými.
+Volba pouze zařídí, aby poslední snímek skupiny byl buď P-snímek nebo
+N-snímek, ale nikdy B-snímek.
+Obvykle je vhodné mít tuto volbu zapnutou (výchozí: zapnuto).
+.
+.TP
+.B (no)packed
+Tato volba je určena pro nápravu potíží s pořadím snímků když enkódujete do
+nosných formátů jako je AVI, které si neumí poradit se zpřeházenými
+snímky.
+V praxi je však většina dekodérů (jak softwarových, tak hardwarových) schopna
+poradit si s pořadím snímků samostatně a mohou být zapnutím této volby zmateny,
+takže ji můžete bezpečně nechat vypnutou, pokud opravdu nevíte co děláte.
+.br
+.I VAROVÁNÍ:
+takto vygenerujete ilegální bitový proud, který nebude dekódovatelný pomocí
+ISO-MPEG-4 dekodérů s výjimkou DivX/\:libavcodec/\:Xvid.
+.br
+.I VAROVÁNÍ:
+Takto se rovněž zapíše falešná DivX verze do souboru, takže vadná autodetekce
+některých dekodérů dostane zabrat.
+.
+.TP
+.B frame_drop_ratio=<0\-100> (pouze max_bframes=0)
+Tento parametr umožňuje vytvářet video proudy s variabilním datovým tokem.
+Jeho hodnota nastavuje práh citlivosti na změny; pokud je rozdílnost současného
+a předchozího snímku menší nebo rovna tomuto prahu, snímek nebude kódován
+(místo něj je do proudu umístěn tzv. n-vop).
+Jestliže přehrávač narazí n-vop, zobrazí předchozí snímek.
+.br
+.I VAROVÁNÍ:
+Hrátky s tímto parametrem mohou vyústit v mizerné video, takže ji používejte
+jen na vlastní nebezpečí!
+.
+.TP
+.B rc_reaction_delay_factor=<hodnota>
+Tento parametr ovládá počet snímků, které CBR regulátor datového toku počká než
+zareaguje na změny toku a vykompenzuje je tak, aby byl dosažen konstantní
+datový tok v rámci průměrovacího rozsahu snímků.
+.
+.TP
+.B rc_averaging_period=<hodnota>
+Skutečného CBR je těžké dosáhnout.
+V závislosti na video materiálu bude datový tok různý a těžko předvídatelný.
+Proto Xvid používá průměrovací periodu pro kterou garantuje spotřebu daného
+počtu bitů (mínus malá odchylka).
+Toto nastavení vyjadřuje "počet snímků" pro který Xvid průměruje datový tok
+a zkouší dosáhnout CBR.
+.
+.TP
+.B rc_buffer=<hodnota>
+velikost vyrovnávací paměti regulátoru datového toku
+.
+.TP
 .B curve_compression_high=<0\-100>
-Toto nastavení umožní XviDu odebrat určité procento bitů z datově náročných
+Toto nastavení umožní Xvidu odebrat určité procento bitů z datově náročných
 scén a dát je zpět do bitového zásobníku.
 To využijete pokud máte klip s tak velkým množstvím bitů alokovaných pro
 scény s vysokým datovým tokem, že ty ostatní začínají vypadat špatně
@@ -8744,7 +8716,7 @@ scény s vysokým datovým tokem, že ty ostatní začínají vypadat špatně
 .
 .TP
 .B curve_compression_low=<0\-100>
-Toto nastavení umožní XviDu přidat určité procento navíc scénám s nízkým
+Toto nastavení umožní Xvidu přidat určité procento navíc scénám s nízkým
 datovým tokem tak, že odebere několik bitů z celého klipu.
 To přijde vhod, pokud máte jen několik 'pomalých' scén, které jsou stále
 čtverečkované (výchozí: 0).
@@ -8789,9 +8761,9 @@ Většinou uživatelé nastavují cílový datový tok videa bez zohlednění ve
 přidané nosičem (container).
 Toto malé a (většinou) stálé navýšení může způsobit překročení požadované
 velikosti souboru.
-XviD umožňuje uživateli nastavit velikost navýšení na snímek zabrané nosičem
+Xvid umožňuje uživateli nastavit velikost navýšení na snímek zabrané nosičem
 (zadává se průměr na snímek).
-0 má speciální význam, nechá XviD použít vlastní výchozí hodnotu
+0 má speciální význam, nechá Xvid použít vlastní výchozí hodnotu
 (výchozí: 24 \- průměrné navýšení pro AVI).
 .
 .TP
@@ -8841,7 +8813,7 @@ DXN HDTV profil
 .RS
 .I POZNÁMKA:
 Tyto profily by měly být používány v kombinaci s vhodným \-ffourcc.
-Obecně je použitelné DX50, jelikož některé přehrávače nerozpoznají XviD, ale
+Obecně je použitelné DX50, jelikož některé přehrávače nerozpoznají Xvid, ale
 většina rozpozná DivX.
 .RE
 .
@@ -8909,9 +8881,15 @@ uloží snímkové PSNR do souboru s názvem ve tvaru 'psnr_hhmmss.log' v aktuá
 adresáři.
 Vrácené hodnoty jsou v dB (decibel), čím vyšší tím lepší.
 .
+.TP
+.B "debug\ \ "
+Ukládá statistiky pro každý snímek v ./xvid.dbg. (Toto není řídící soubor
+dvouprůchodového režimu.)
+.RE
+.
 .PP
 .sp 1
-Následující volba je dostupná pouze v XviD 1.1.x.
+Následující volba je dostupná pouze v Xvid 1.1.x.
 .
 .TP
 .B bvhq=<0|1>
@@ -8923,7 +8901,7 @@ Takto dostaneme hezčí B-snímky s téměř nepostřehnutelným dopadem na rych
 .
 .PP
 .sp 1
-Následující volby je dostupná pouze v CVS verzi XviD.
+Následující volba je dostupná pouze v Xvid verzi 1.2.x.
 .
 .TP
 .B threads=<0\-n>
@@ -9384,11 +9362,21 @@ zapnuto při všech rozhodováních o režimech (pomalé, vyžaduje subq>=6)
 .B deadzone_inter=<0\-32>
 Nastaví velikost deadzone jasové kvantizace pro ne-trellisovu
 kvantizaci klíčových snímků (výchozí: 21).
+Nižší hodnoty pomáhají zachovat jemné detaily a zrnitost filmu (typicky
+využitelné pro vysoce kvalitní/datově náročné enkódy), zatímco vyšší hodnoty
+pomáhají odfiltrovat tyto detaily, aby se ušetřily bity, které se mohou využít
+pro jiné makrobloky a snímky (typicky využitelné pro enkódy s limitovanou velikostí).
+Doporučujeme, abyste začali s laděním deadzone_intra před změnou tohoto
+parametru.
 .
 .TP
 .B deadzone_intra=<0\-32>
 Nastaví velikost deadzone jasové kvantizace pro ne-trellisovu
 kvantizaci neklíčových snímků (výchozí: 11).
+Tato volba má stejný efekt jako deadzone_inter až na to, že  ovlivňuje klíčové
+snímky.
+Doporučujeme, abyste začali s laděním tohoto parametru před změnou
+deadzone_inter.
 .
 .TP
 .B (no)fast_pskip
@@ -9586,8 +9574,10 @@ harddup a softskip).
 .PD 1
 .
 .TP
-.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
-formát proudu (výchozí: mpeg2)
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd | pes1 | pes2>
+formát proudu (výchozí: mpeg2).
+pes1 a pes2 jsou velice vadné formáty (žádná pack hlavička a žádné vyplňování),
+ale VDR je používá; nevybírejte je, pokud přesně nevíte co děláte.
 .
 .TP
 .B size=<až do 65535>
@@ -9602,7 +9592,9 @@ Bude změněna podle potřeby v případě že 'format=mpeg1' nebo 'mpeg2'.
 .
 .TP
 .B "tsaf\ \ \ "
-Nastaví časovou značku v každém snímku, pokud je to možné.
+Nastaví časovou značku v každém snímku, pokud je to možné;
+doporučujeme při format=dvd. Pokud dvdauthor píše něco
+jako "..audio sector out of range...", nejspíš jste nezapnuli toto.
 .
 .TP
 .B init_vpts=<100\-700>
@@ -9718,6 +9710,9 @@ Sony Digital Video kontejner
 .B i_certify_that_my_video_stream_does_not_use_b_frames
 MEncoder neumí nastavit správné časové značky, pokud jsou ve videu
 B-snímky, což způsobí vydný výsledek.
+Pokud chcete využívat lavf muxer, nesmite video kodeku dovolit použití
+B-snímků (viz příslušnou dokumentaci jednotlivých kodeků) a také musíte
+zadat tuto volbu.
 .
 .TP
 .B muxrate=<tok>
@@ -9770,7 +9765,7 @@ Pokud je nastavena LADSPA_PATH, vyhledává uvedený soubor.
 Pokud ne, musíte zadat celé jméno i s cestou.
 DODĚLAT: Toto rovněž zmiňujeme v sekci ladspa.
 .
-.SS libmpdvdkit2:
+.SS libdvdcss:
 .
 .TP
 .B DVDCSS_CACHE
