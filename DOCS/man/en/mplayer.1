@@ -5489,6 +5489,30 @@ some equation like "2+2*sin(PI*qp)"
 .RE
 .
 .TP
+.B geq=equation
+generic equation change filter
+.RSs
+.IPs <equation>
+Some equation, e.g.\&  'p(W-X\,Y)' to flip the image horizontally.
+You can use whitespace to make the equation more readable.
+There are a couple of constants that can be used in the equation:
+.RSss
+PI: the number pi
+.br
+E: the number e
+.br
+X / Y: the coordinates of the current sample
+.br
+W / H: width and height of the image
+.br
+SW / SH: width/height scale depending on the currently filtered plane, e.g.\&
+1,1 and 0.5,0.5 for YUV 4:2:0.
+.br
+p(x,y): returns the value of the pixel at location x/y of the current plane.
+.REss
+.RE
+.
+.TP
 .B "test\ \ \ "
 Generate various test patterns.
 .
@@ -10228,6 +10252,13 @@ mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06
 .br
 You might want to play a bit with the pan values (e.g multiply with a value) to
 increase volume or avoid clipping.
+.
+.PP
+.B checkerboard invert with geq filter:
+.nf
+mplayer \-vf geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+.fi
+.
 .
 .SH EXAMPLES OF MENCODER USAGE
 .
