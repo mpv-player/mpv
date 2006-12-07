@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21487
+.\" In sync with r21506
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -10192,11 +10192,9 @@ wird.
 .TP
 .B telecine
 Aktiviert 3:2-Pulldown-Soft-telecine-Modus: Der Muxer wird dafür
-sorgen, dass der
-Videostream wie mit 30000/\:1001 oder 30 fps encodiert aussieht.
-Das funktioniert nur
-mit MPEG-2-Video, wenn die Framerate der Ausgabe, konvertiert
-mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
+sorgen, dass der Videostream wie mit 30000/\:1001 fps encodiert aussieht.
+Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe,
+mit \-ofps eventuell konvertiert, 24000/\:1001 fps beträgt.
 Jede andere Framerate ist mit dieser Option inkompatibel.
 .
 .TP
@@ -10204,19 +10202,19 @@ Jede andere Framerate ist mit dieser Option inkompatibel.
 Aktiviert FILM zu PAL und NTSC zu PAL Soft-telecine-Modus: Der Muxer wird dafür
 sorgen, dass der Videostream wie mit 25 fps encodiert aussieht.
 Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe,
-konvertiert mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
+eventuell konvertiert mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
 Jede andere Framerate ist mit dieser Option inkompatibel.
 .
 .TP
 .B tele_src und tele_dest
 Ermöglicht beliebiges Telecining durch Verwendung des DGPulldown-Codes von
 Donand Graft.
-Du musst die originale und die erwünschte Framerate angeben, der Muxer wird
+Du musst die originale und die erwünschte Framerate angeben; der Muxer wird
 den Videostream dann so aussehen lassen, als wäre er mit <tele_dest> Frames
-pro Sekunde encodiert worden.
+pro Sekunde encodiert worden, dabei wird die nominale Ausgabeframerate ersetzt.
 Dies funktioniert bei MPEG-2 nur dann, wenn die Framerate der Eingabe kleiner
-ist als die der Ausgabe.
-Beispiel für Telecining von PAL zu NTSC: tele_src=25,tele_dest=30000/1001.
+ist als die der Ausgabe und die Frameratenerhöhung <= 1.5 ist.
+Beispiel für Telecining von PAL zu NTSC: tele_src=25:tele_dest=30000/1001.
 .
 .TP
 .B vbuf_size=<40\-1024>
