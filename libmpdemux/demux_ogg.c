@@ -131,7 +131,6 @@ typedef struct ogg_demuxer {
   char **text_langs;
 
   vorbis_info      vi;
-  vorbis_comment   vc;
   int vi_inited;
 } ogg_demuxer_t;
 
@@ -749,9 +748,10 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
   unsigned char *buf[3];
   unsigned char *ptr;
   unsigned int len;
+  vorbis_comment vc;
 
   vorbis_info_init(&od->vi);
-  vorbis_comment_init(&od->vc);
+  vorbis_comment_init(&vc);
   for(i = 0; i < 3; i++) {
     op[i].bytes = ds_get_packet(sh->ds, &(op[i].packet));
     mp_msg(MSGT_DEMUX,MSGL_V, "fixup_vorbis_wf: i=%d, size=%ld\n", i, op[i].bytes);
@@ -765,12 +765,13 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
     memcpy(buf[i], op[i].packet, op[i].bytes);
 
     op[i].b_o_s = (i==0);
-    ris = vorbis_synthesis_headerin(&(od->vi),&(od->vc),&(op[i]));
+    ris = vorbis_synthesis_headerin(&(od->vi),&vc,&(op[i]));
     if(ris < 0) {
       init_error = 1;
       mp_msg(MSGT_DECAUDIO,MSGL_ERR,"DEMUX_OGG: header n. %d broken! len=%ld, code: %d\n", i, op[i].bytes, ris);
     }
   }
+  vorbis_comment_clear(&vc);
   if(!init_error)
     od->vi_inited = 1;
 
@@ -1610,7 +1611,6 @@ static void demux_close_ogg(demuxer_t* demuxer) {
     free(ogg_d->text_langs);
   }
   vorbis_info_clear(&ogg_d->vi);
-  vorbis_comment_clear(&ogg_d->vc);
   free(ogg_d);
 }
 
