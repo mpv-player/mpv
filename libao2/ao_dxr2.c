@@ -8,7 +8,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"

@@ -18,7 +18,7 @@
 
 #include "../../config.h"
 #include "../../libavutil/common.h"
-#include "../../libavutil/bswap.h"
+#include "../../mpbswap.h"
 #include "../../libdha/pci_ids.h"
 #include "../../libdha/pci_names.h"
 #include "../vidix.h"

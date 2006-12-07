@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 #include "subopt-helper.h"
 #include "libaf/af_format.h"
 #include "audio_out.h"

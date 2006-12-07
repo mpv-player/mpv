@@ -11,7 +11,7 @@
 #include "mp_msg.h"
 
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 #include "libvo/fastmemcpy.h"
 
 #include "vd_internal.h"

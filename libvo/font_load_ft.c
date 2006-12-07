@@ -29,7 +29,7 @@
 #endif
 
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 #include "font_load.h"
 #include "mp_msg.h"
 #include "mplayer.h"

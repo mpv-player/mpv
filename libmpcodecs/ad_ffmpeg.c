@@ -8,7 +8,7 @@
 
 #include "ad_internal.h"
 
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 
 static ad_info_t info = 
 {

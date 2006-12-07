@@ -32,7 +32,7 @@
 
 #include "../config.h"
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 #include "real.h"
 #include "asmrp.h"
 #include "sdpplin.h"

@@ -12,7 +12,7 @@
 #include "stream.h"
 #include "ebml.h"
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 #include "libavutil/intfloat_readwrite.h"
 
 

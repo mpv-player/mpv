@@ -61,7 +61,7 @@
 #include "m_option.h"
 #include "m_struct.h"
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 
 #include "netstream.h"
 #include "tcp.h"

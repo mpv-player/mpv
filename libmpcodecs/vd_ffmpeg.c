@@ -9,7 +9,7 @@
 
 #include "libavutil/common.h"
 #include "libavutil/intreadwrite.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 
 #include "vd_internal.h"
 

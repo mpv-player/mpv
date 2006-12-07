@@ -11,7 +11,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 
 #ifdef WIN32_LOADER 
 #include "ldt_keeper.h" 

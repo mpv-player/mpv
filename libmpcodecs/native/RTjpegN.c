@@ -32,7 +32,7 @@
 #endif
 
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 #include "RTjpegN.h"
 
 #ifdef MMX

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 
 #include "stream.h"
 #include "demuxer.h"

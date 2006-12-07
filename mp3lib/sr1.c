@@ -25,7 +25,7 @@
 #include "huffman.h"
 #include "mp3.h"
 #include "libavutil/common.h"
-#include "libavutil/bswap.h"
+#include "mpbswap.h"
 #include "cpudetect.h"
 //#include "liba52/mm_accel.h"
 #include "mp_msg.h"
