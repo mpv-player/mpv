@@ -224,7 +224,7 @@ osdep/libosdep.a:
 	$(MAKE) -C osdep
 
 osdep/mplayer-rc.o:
-	$(MAKE) -C osdep
+	$(MAKE) -C osdep mplayer-rc.o
 
 input/libinput.a:
 	$(MAKE) -C input
