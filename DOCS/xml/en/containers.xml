@@ -15,7 +15,8 @@ You see, a <emphasis role="bold">codec</emphasis> is not the same as a
 <emphasis role="bold">container format</emphasis>.
 Examples of video <emphasis role="bold">codecs</emphasis> are: MPEG-1, MPEG-2,
 MPEG-4 (DivX), Indeo5, 3ivx.
-Examples of container <emphasis role="bold">formats</emphasis> are: MPG, AVI, ASF.
+Examples of container <emphasis role="bold">formats</emphasis> are:
+MPG, AVI, ASF.
 </para>
 
 <para>
@@ -26,8 +27,12 @@ players will not play it, since they expect MPEG-1 video and MP2 audio (unlike
 does not have the necessary fields to describe its video and audio streams).
 Or you might put MPEG-1 video into an AVI file.
 <ulink url="http://ffmpeg.org/">FFmpeg</ulink> and
-<link linkend="mencoder"><application>MEncoder</application></link> can create these files.
+<link linkend="mencoder"><application>MEncoder</application></link>
+can create these files.
 </para>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="video-formats">
@@ -45,21 +50,21 @@ MPEG files come in different guises:
   MPG: This is the most <emphasis role="bold">basic</emphasis> form of the
   MPEG file formats. It contains MPEG-1 video, and MP2 (MPEG-1 layer 2) or
   rarely MP1 audio.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   DAT: This is the very same format as MPG with a different extension. It
   is used on <emphasis role="bold">Video CDs</emphasis>. Due to the way VCDs
   are created and Linux is designed, the DAT files cannot be played nor copied
   from VCDs as regular files. You have to use <option>vcd://</option>
   to play a Video CD.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   VOB: This is the MPEG file format on <emphasis role="bold">DVDs</emphasis>.
   It is the same as MPG, plus the capability to contain subtitles or non-MPEG
   (AC3) audio. It contains encoded MPEG-2 video and usually AC3 audio, but DTS,
   MP2 and uncompressed LPCM are allowed, too. <emphasis role="bold">Read the
   <link linkend="dvd">DVD</link> section</emphasis>!
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   TY: This is a TiVo MPEG stream. It contains MPEG PES data for audio and
   video streams, as well as extra information like closed captions. The
@@ -67,7 +72,7 @@ MPEG files come in different guises:
   TiVo. For more information on TiVo stream format, please refer to
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   the TyStudio page</ulink>.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <para>
@@ -87,15 +92,18 @@ option.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="avi">
 <title>AVI files</title>
 
 <para>
-Designed by Microsoft, <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
-is a widespread multipurpose format currently used mostly for MPEG-4 (DivX and DivX4)
-video. It has many known drawbacks and shortcomings (for example in streaming). It
-supports one video stream and 0 to 99 audio streams and can be as big as
+Designed by Microsoft,
+<emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
+is a widespread multipurpose format currently used mostly for MPEG-4 (DivX and
+DivX4) video. It has many known drawbacks and shortcomings (for example in
+streaming).
+It supports one video stream and 0 to 99 audio streams and can be as big as
 2GB, but there exists an extension allowing bigger files called
 <emphasis role="bold">OpenDML</emphasis>. Microsoft currently strongly
 discourages its use and encourages ASF/WMV. Not that anybody cares.
@@ -110,31 +118,30 @@ confusing headers. Unfortunately the only encoder currently capable of
 creating these files, <application>NanDub</application>, has this problem.
 </para>
 
-<note>
-<para>
+<note><para>
 DV cameras create raw DV streams that DV grabbing utilities convert to two
 different types of AVI files. The AVI will then contain either separate
 audio and video streams that <application>MPlayer</application> can play or
 the raw DV stream for which support is under development.
-</para>
-</note>
+</para></note>
 
 <para>
 There are two kinds of AVI files:
 <itemizedlist>
 <listitem><simpara>
   <emphasis role="bold">Interleaved:</emphasis> Audio and video content is
-  interleaved. This is the standard usage. Recommended and mostly used. Some tools
-  create interleaved AVIs with bad sync. <application>MPlayer</application>
-  detects these as interleaved, and this climaxes in loss of A/V sync,
-  probably at seeking.  These files should be played as non-interleaved
+  interleaved. This is the standard usage. Recommended and mostly used. Some
+  tools create interleaved AVIs with bad sync.
+  <application>MPlayer</application> detects these as interleaved, and this
+  climaxes in loss of A/V sync, probably at seeking.
+  These files should be played as non-interleaved
   (with the <option>-ni</option> option).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Non-interleaved:</emphasis> First comes the whole
   video stream, then the whole audio stream. It thus needs a lot of seeking,
   making playing from network or CD-ROM difficult.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 </para>
 
@@ -149,12 +156,13 @@ files:
   and <application>Windows Media Player</application>. Files with broken
   headers, and files created with VBR audio but not VBR-compliant encoder
   will result in A/V desync with this method (mostly at seeking).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">interleaving-based:</emphasis> It does not use the bitrate
-  value of the header, instead it uses the relative position of interleaved
-  audio and video chunks, making badly encoded files with VBR audio playable.
-  </simpara></listitem>
+  <emphasis role="bold">interleaving-based:</emphasis> It does not use the
+  bitrate value of the header, instead it uses the relative position of
+  interleaved audio and video chunks,
+  making badly encoded files with VBR audio playable.
+</simpara></listitem>
 </itemizedlist>
 </para>
 
@@ -169,13 +177,16 @@ There are only two known exceptions: <application>NanDub</application> and
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="asf-wmv">
 <title>ASF/WMV files</title>
+
 <para>
 ASF (Active Streaming Format) comes from Microsoft. They developed two
-variants of ASF, v1.0 and v2.0. v1.0 is used by their media tools (<application>Windows
-Media Player</application> and <application>Windows Media Encoder</application>)
+variants of ASF, v1.0 and v2.0. v1.0 is used by their media tools
+(<application>Windows Media Player</application> and
+<application>Windows Media Encoder</application>)
 and is very secret. v2.0 is published and patented :). Of course they differ,
 there is no compatibility at all (it is just another legal game).
 <application>MPlayer</application> supports only v1.0, as nobody has ever seen
@@ -184,6 +195,7 @@ v2.0 files :). Note that ASF files nowadays come with the extension
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="mov">
 <title>QuickTime/MOV files</title>
@@ -194,12 +206,12 @@ They usually have a <filename>.QT</filename> or <filename>.MOV</filename>
 extension. Note that since the MPEG-4 group chose QuickTime as the recommended
 file format for MPEG-4, their MOV files come with a <filename>.MPG</filename> or
 <filename>.MP4</filename> extension (Interestingly the video and audio
-streams in these files are real MPG and AAC files. You can even extract them with the
-<option>-dumpvideo</option> and <option>-dumpaudio</option> options.).
+streams in these files are real MPG and AAC files. You can even extract them
+with the <option>-dumpvideo</option> and <option>-dumpaudio</option> options.).
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="vivo">
 <title>VIVO files</title>
@@ -212,21 +224,24 @@ forget seeking!
 </para>
 
 <para>
-The video codec of VIVO/1.0 files is standard <emphasis role="bold">h.263</emphasis>.
+The video codec of VIVO/1.0 files is standard
+<emphasis role="bold">h.263</emphasis>.
 The video codec of VIVO/2.0 files is a modified, nonstandard
 <emphasis role="bold">h.263v2</emphasis>. The audio is the same, it may be
 <emphasis role="bold">g.723 (standard)</emphasis>, or
 <emphasis role="bold">Vivo Siren</emphasis>.
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="fli">
 <title>FLI files</title>
+
 <para>
 <emphasis role="bold">FLI</emphasis> is a very old file format used by
-Autodesk Animator, but it is a common file format for short animations on the net.
+Autodesk Animator, but it is a common file format for short animations on the
+net.
 <application>MPlayer</application> demuxes and decodes FLI movies and is
 even able to seek within them (useful when looping with the
 <option>-loop</option> option). FLI files do not have keyframes, so the
@@ -234,6 +249,7 @@ picture will be messy for a short time after seeking.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="realmedia">
 <title>RealMedia (RM) files</title>
@@ -244,24 +260,29 @@ Yes, <application>MPlayer</application> can read (demux) RealMedia
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nuppelvideo">
 <title>NuppelVideo files</title>
+
 <para>
 NuppelVideo
 is a TV grabber tool (AFAIK:). <application>MPlayer</application> can read
 its <filename>.NUV</filename> files (only NuppelVideo 5.0). Those files can
 contain uncompressed YV12, YV12+RTJpeg compressed, YV12 RTJpeg+lzo
 compressed, and YV12+lzo compressed frames.
-<application>MPlayer</application> decodes (and also <emphasis role="bold">encodes</emphasis>
+<application>MPlayer</application> decodes (and also
+<emphasis role="bold">encodes</emphasis>
 them with <application>MEncoder</application> to MPEG-4 (DivX)/etc!) them all.
 Seeking works.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="yuv4mpeg">
 <title>yuv4mpeg files</title>
+
 <para>
 <ulink url="http://mjpeg.sf.net">yuv4mpeg / yuv4mpeg2</ulink>
 is a file format used by the
@@ -271,28 +292,35 @@ The file format is really a sequence of uncompressed YUV 4:2:0 images.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="film">
 <title>FILM files</title>
+
 <para>
 This format is used on old Sega Saturn CD-ROM games.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="roq">
 <title>RoQ files</title>
+
 <para>
 RoQ files are multimedia files used in some ID games such as Quake III and
 Return to Castle Wolfenstein.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="ogg">
 <title>OGG/OGM files</title>
+
 <para>
-This is a new fileformat from <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
+This is a new fileformat from
+<ulink url="http://www.xiph.org">Xiphophorus</ulink>.
 It can contain any video or audio codec, CBR or VBR. You'll need
 <systemitem class="library">libogg</systemitem> and
 <systemitem class="library">libvorbis</systemitem> installed before
@@ -300,9 +328,11 @@ compiling <application>MPlayer</application> to be able to play it.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="sdp">
 <title>SDP files</title>
+
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> is an
 IETF standard format for describing video and/or audio RTP streams.
@@ -311,18 +341,23 @@ are required.)
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="pva">
 <title>PVA files</title>
+
 <para>
 PVA is an MPEG-like format used by DVB TV boards' software (e.g.:
-<application>MultiDec</application>, <application>WinTV</application> under Windows).
+<application>MultiDec</application>,
+<application>WinTV</application> under Windows).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nsv">
 <title>NSV files</title>
+
 <para>
 NSV (NullSoft Video) is the file format used by the
 <application>Winamp</application> player to stream audio and video.
@@ -337,18 +372,22 @@ unplayable anyway because they use VLB audio).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="matroska">
 <title>Matroska files</title>
+
 <para>
 Matroska is an open container format.
 Read more on the <ulink url="http://www.matroska.org/">official site</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nut">
 <title>NUT files</title>
+
 <para>
 NUT is the container format developed by <application>MPlayer</application> and
 <application>FFmpeg</application> folks. Both projects support it.
@@ -356,17 +395,20 @@ Read more on the <ulink url="http://www.nut.hu/">official site</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="gif">
 <title>GIF files</title>
+
 <para>
 The <emphasis role="bold">GIF</emphasis> format is a common format for web
-graphics. There are two versions of the GIF spec, GIF87a and GIF89a. The
-main difference is that GIF89a allows for animation. <application>MPlayer</application>
-supports both formats through use of <systemitem class="library">libungif</systemitem> or
+graphics. There are two versions of the GIF spec, GIF87a and GIF89a.
+The main difference is that GIF89a allows for animation.
+<application>MPlayer</application> supports both formats through use of
+<systemitem class="library">libungif</systemitem> or
 another libgif-compatible library. Non-animated GIFs will be displayed as
-single frame videos. (Use the <option>-loop</option> and <option>-fixed-vo</option>
-options to display these longer.)
+single frame videos. (Use the <option>-loop</option> and
+<option>-fixed-vo</option> options to display these longer.)
 </para>
 
 <para>
@@ -385,8 +427,8 @@ produce uncompressed frames to avoid patent issues with LZW compression.
 </para>
 
 <para>
-If your distribution does not come with <systemitem class="library">libungif</systemitem>,
-download a copy from the
+If your distribution does not come with
+<systemitem class="library">libungif</systemitem>, download a copy from the
 <ulink url="http://sourceforge.net/projects/libungif">libungif
 homepage</ulink>. For detailed technical information, have a look at the
 <ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a specification</ulink>.
@@ -394,7 +436,9 @@ homepage</ulink>. For detailed technical information, have a look at the
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="audio-formats">
 <title>Audio formats</title>
@@ -407,8 +451,11 @@ a recommended usage of <application>MPlayer</application>, you better use <ulink
 url="http://www.xmms.org">XMMS</ulink>.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="mp3">
 <title>MP3 files</title>
+
 <para>
 You may have problems playing certain MP3 files that
 <application>MPlayer</application> will misdetect as MPEGs and play
@@ -419,8 +466,11 @@ man page may help you in these cases.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="ogg-vorbis">
 <title>OGG/OGM files (Vorbis)</title>
+
 <para>
 Requires properly installed
 <systemitem class="library">libogg</systemitem> and
@@ -428,8 +478,11 @@ Requires properly installed
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="cdda">
 <title>CD audio</title>
+
 <para>
 <application>MPlayer</application> can use <application>cdparanoia</application>
 to play CDDA (Audio CD). The scope of this section does not contain enumerating
@@ -442,9 +495,12 @@ options to <application>cdparanoia</application>.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="xmms">
 <title>XMMS</title>
 <para>
+
 <application>MPlayer</application> can use <application>XMMS</application> input
 plugins to play many file formats. There are plugins for SNES game tunes, SID
 tunes (from Commodore 64), many Amiga formats, .xm, .it, VQF, musepack, Bonk,
@@ -454,10 +510,12 @@ shorten and many others. You can find them at the
 
 <para>
 For this feature you need to have <application>XMMS</application> and compile
-<application>MPlayer</application> with <filename>./configure --enable-xmms</filename>.
+<application>MPlayer</application> with
+<filename>./configure --enable-xmms</filename>.
 If that does not work, you might need to set the <application>XMMS</application>
-plugin and library path explicitly by way of the <option>--with-xmmsplugindir</option>
-and <option>--with-xmmslibdir</option> options.
+plugin and library path explicitly by way of the
+<option>--with-xmmsplugindir</option> and <option>--with-xmmslibdir</option>
+options.
 </para>
 </sect2>
 </sect1>

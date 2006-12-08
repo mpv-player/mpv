@@ -9,21 +9,18 @@
 <para>
 <application>MPlayer</application> utilizes a complex playtree. It consists
 of global options written as first, for example
-
 <screen>mplayer -vfm 5</screen>
-
 and options written after filenames, that apply only to the given
 filename/URL/whatever, for example:
-
-<screen>mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4</screen>
+<screen>
+mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4
+</screen>
 </para>
 
 <para>
 You can group filenames/URLs together using <literal>{</literal> and
 <literal>}</literal>. It is useful with option <option>-loop</option>:
-
 <screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
-
 The above command will play files in this order: 1, 1, 2, 1, 1, 2, 1, 1, 2.
 </para>
 
@@ -105,6 +102,12 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="subosd">
 <title>Subtitles and OSD</title>
 
@@ -112,33 +115,35 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 <application>MPlayer</application> can display subtitles along with movie files.
 Currently the following formats are supported:
 <itemizedlist>
-<listitem><para>VOBsub</para></listitem>
-<listitem><para>OGM</para></listitem>
-<listitem><para>CC (closed caption)</para></listitem>
-<listitem><para>MicroDVD</para></listitem>
-<listitem><para>SubRip</para></listitem>
-<listitem><para>SubViewer</para></listitem>
-<listitem><para>Sami</para></listitem>
-<listitem><para>VPlayer</para></listitem>
-<listitem><para>RT</para></listitem>
-<listitem><para>SSA</para></listitem>
-<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
-<listitem><para>MPsub</para></listitem>
-<listitem><para>AQTitle</para></listitem>
-<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
+  <listitem><para>VOBsub</para></listitem>
+  <listitem><para>OGM</para></listitem>
+  <listitem><para>CC (closed caption)</para></listitem>
+  <listitem><para>MicroDVD</para></listitem>
+  <listitem><para>SubRip</para></listitem>
+  <listitem><para>SubViewer</para></listitem>
+  <listitem><para>Sami</para></listitem>
+  <listitem><para>VPlayer</para></listitem>
+  <listitem><para>RT</para></listitem>
+  <listitem><para>SSA</para></listitem>
+  <listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
+  <listitem><para>MPsub</para></listitem>
+  <listitem><para>AQTitle</para></listitem>
+  <listitem><para>
+    <ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink>
+  </para></listitem>
 </itemizedlist>
 </para>
 
 <para>
-<application>MPlayer</application> can dump the previously listed subtitle formats
-(<emphasis role="bold">except the three first</emphasis>) into the following
-destination formats, with the given options:
+<application>MPlayer</application> can dump the previously listed subtitle
+formats (<emphasis role="bold">except the three first</emphasis>) into the
+following destination formats, with the given options:
 <itemizedlist>
-<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
-<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
-<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
-<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
-<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
+  <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
+  <listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
+  <listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
+  <listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
+  <listitem><para>Sami: <option>-dumpsami</option></para></listitem>
 </itemizedlist>
 </para>
 
@@ -154,9 +159,9 @@ The command line options differ slightly for the different formats:
 <formalpara>
 <title>VOBsub subtitles</title>
 <para>
-VOBsub subtitles consist of a big (some megabytes) <filename>.SUB</filename> file,
-and optional <filename>.IDX</filename> and/or <filename>.IFO</filename>
-files.  If you have files like
+VOBsub subtitles consist of a big (some megabytes) <filename>.SUB</filename>
+file, and optional <filename>.IDX</filename> and/or <filename>.IFO</filename>
+files. If you have files like
 <filename><replaceable>sample.sub</replaceable></filename>,
 <filename><replaceable>sample.ifo</replaceable></filename> (optional),
 <filename><replaceable>sample.idx</replaceable></filename> - you have to pass
@@ -166,9 +171,9 @@ files.  If you have files like
 <option>-sid</option> for DVDs, you can choose between subtitle tracks
 (languages) with it. In case that <option>-vobsubid</option> is omitted,
 <application>MPlayer</application> will try to use the languages given by the
-<option>-slang</option> option and fall back to the <systemitem>langidx</systemitem>
-in the <filename>.IDX</filename> file to set the subtitle language. If it fails,
-there will be no subtitles.
+<option>-slang</option> option and fall back to the
+<systemitem>langidx</systemitem> in the <filename>.IDX</filename> file to set
+the subtitle language. If it fails, there will be no subtitles.
 </para>
 </formalpara>
 
@@ -190,19 +195,19 @@ you have to pass the option <option>-sub
   <listitem><simpara>
     Delays subtitles by <option><replaceable>sec</replaceable></option> seconds.
     Can be negative. The value is added to movie's time position counter.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>RATE</replaceable></option></term>
   <listitem><simpara>
     Specify frame/sec rate of subtitle file (float number).
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
   <listitem><simpara>
     Specify the position of subtitles.
-    </simpara></listitem>
+  </simpara></listitem>
 </varlistentry>
 </variablelist>
 
@@ -217,13 +222,22 @@ you have to manually convert the subtitle file framerate.
 <application>MPlayer</application> can do this
 conversion for you:
 
-<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable></screen>
+<screen>
+mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> \
+    -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable>
+</screen>
 </para>
 
 <para>
 About DVD subtitles, read the <link linkend="dvd">DVD</link> section.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="control">
@@ -236,6 +250,7 @@ driven, control layer which lets you control
 control (using LIRC). See the man page for the complete list of keyboard controls.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="ctrl-cfg">
 <title>Controls configuration</title>
@@ -275,6 +290,7 @@ ENTER pt_step 1 1<!--
 </example>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="lirc">
 <title>Control from LIRC</title>
@@ -339,9 +355,11 @@ file.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="slave-mode">
 <title>Slave mode</title>
+
 <para>
 The slave mode allows you to build simple frontends to
 <application>MPlayer</application>. When run with the
@@ -352,6 +370,10 @@ The commands are documented in the
 </para>
 </sect2>
 </sect1>
+
+<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="streaming">
@@ -382,25 +404,32 @@ from the network:
 <screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
 
+<!-- ********** -->
+
 <sect2 id="streaming-save">
 <title>Saving streamed content</title>
+
 <para>
-  Once you succeed in making <application>MPlayer</application> play
-  your favorite internet stream, you can use the option
-  <option>-dumpstream</option> to save the stream into a file.
-  For example:
+Once you succeed in making <application>MPlayer</application> play
+your favorite internet stream, you can use the option
+<option>-dumpstream</option> to save the stream into a file.
+For example:
 <screen>
-  mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>stream.asf</replaceable>
+mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>stream.asf</replaceable>
 </screen>
-  will save the content streamed from
-  <replaceable>http://217.71.208.37:8006</replaceable> into
-  <replaceable>stream.asf</replaceable>.
-  This works with all protocols supported by
-  <application>MPlayer</application>, like MMS, RSTP, and so forth.
+will save the content streamed from
+<replaceable>http://217.71.208.37:8006</replaceable> into
+<replaceable>stream.asf</replaceable>.
+This works with all protocols supported by
+<application>MPlayer</application>, like MMS, RSTP, and so forth.
 </para>
 </sect2>
-
 </sect1>
+
+<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="mpst" xreflabel="Remote streams">
 <title>Remote streams</title>
@@ -415,8 +444,11 @@ implemented at the demuxer level. It is sad for MF but TV stream would anyway
 require an insane amount of bandwidth.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="compile_mpst_server">
 <title>Compiling the server</title>
+
 <para>
 After having compiled <application>MPlayer</application> go to the
 <filename>TOOLS/netstream</filename> directory and enter
@@ -427,8 +459,11 @@ to the right place on your system (usually
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="use_mpst">
 <title>Using remote streams</title>
+
 <para>
 First you have to start the server on the computer you intend to remotely
 access. Currently the server is very basic and does not have any commands
@@ -442,8 +477,8 @@ You can also access files on this server :
 mplayer -cache 5000 <replaceable>mpst://servername//usr/local/movies/lol.avi</replaceable>
 </screen>
 Note that paths which aren't starting with a / will be relative to
-the directory where the server is running. The <option>-cache</option> option is not
-needed but highly recommended.
+the directory where the server is running. The <option>-cache</option> option
+is not needed but highly recommended.
 </para>
 
 <para>
@@ -451,10 +486,12 @@ Be aware that currently the server is not secure at all. So do not complain
 about the numerous exploits which are possible through this. Instead send
 some (good) patch to make it better or start writing your own server.
 </para>
-
 </sect2>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="edl" xreflabel="Edit Decision Lists (EDL)">
 <title>Edit Decision Lists (EDL)</title>
@@ -477,8 +514,11 @@ The EDL file format is pretty bare-bones. There is one command per line that
 indicates what to do (skip/mute) and when to do it (using pts in seconds).
 </para>
 
+<!-- ********** -->
+
 <sect2 id="edl_using">
 <title>Using an EDL file</title>
+
 <para>
 Include the <option>-edl &lt;filename&gt;</option> flag when you run
 <application>MPlayer</application>, with the name of the EDL file you
@@ -486,13 +526,14 @@ want applied to the video.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="edl_making">
 <title>Making an EDL file</title>
+
 <para>
 The current EDL file format is:
-<programlisting>
-[begin second] [end second] [action]
-</programlisting>
+<programlisting>[begin second] [end second] [action]</programlisting>
 Where the seconds are floating-point numbers and the action is either
 <literal>0</literal> for skip or <literal>1</literal> for mute. Example:
 <programlisting>
@@ -507,15 +548,18 @@ reaches the times given in the file.
 </para>
 
 <para>
-To create an EDL file to work from, use the <option>-edlout &lt;filename&gt;</option>
-flag. During playback, just hit <keycap>i</keycap> to mark the beginning and 
-end of a skip block. A corresponding entry will be written to the file for
-that time. You can then go back and fine-tune the generated EDL file as well as
+To create an EDL file to work from, use the <option>-edlout
+&lt;filename&gt;</option> flag. During playback, just hit <keycap>i</keycap> to
+mark the beginning and end of a skip block.
+A corresponding entry will be written to the file for that time.
+You can then go back and fine-tune the generated EDL file as well as
 change the default operation which is to skip the block described by each line.
 </para>
 </sect2>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="advaudio" xreflabel="Advanced Audio">
@@ -526,23 +570,20 @@ change the default operation which is to skip the block described by each line.
 
 <sect3 id="advaudio-surround-DVD">
 <title>DVDs</title>
+
 <para>
 Most DVDs and many other files include surround sound.
 <application>MPlayer</application> supports surround playback but does not
 enable it by default because stereo equipment is by far more common. To play a
 file that has more than two channels of audio use <option>-channels</option>.
 For example, to play a DVD with 5.1 audio:
-
 <screen>mplayer dvd://1 -channels 6</screen>
-
 Note that despite the name "5.1" there are actually six discrete channels.
 If you have surround sound equipment it is safe to put the
 <option>channels</option> option in your <application>MPlayer</application>
 configuration file <filename>~/.mplayer/config</filename>. For example, to make
 quadraphonic playback the default, add this line:
-
 <programlisting>channels=4</programlisting>
-
 <application>MPlayer</application> will then output audio in four channels when
 all four channels are available.
 </para>
@@ -555,14 +596,11 @@ all four channels are available.
 <para>
 <application>MPlayer</application> does not duplicate any channels by default,
 and neither do most audio drivers. If you want to do that manually:
-
 <screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
-
 See the section on
 <link linkend="advaudio-channels-copying">channel copying</link> for an
 explanation.
 </para>
-
 </sect3>
 
 
@@ -586,13 +624,13 @@ your equipment supports.
 <itemizedlist>
 <title>To enable passthrough on the command line:</title>
 <listitem><para>
-For AC3 only, use <option>-ac hwac3</option>
+  For AC3 only, use <option>-ac hwac3</option>
 </para></listitem>
 <listitem><para>
-For DTS only, use <option>-ac hwdts</option>
+  For DTS only, use <option>-ac hwdts</option>
 </para></listitem>
 <listitem><para>
-For both AC3 and DTS, use <option>-afm hwac3</option>
+  For both AC3 and DTS, use <option>-afm hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -600,13 +638,13 @@ For both AC3 and DTS, use <option>-afm hwac3</option>
 <title>To enable passthrough in the <application>MPlayer</application>
 configuration file: </title>
 <listitem><para>
-For AC3 only, use <option>ac=hwac3,</option>
+  For AC3 only, use <option>ac=hwac3,</option>
 </para></listitem>
 <listitem><para>
-For DTS only, use <option>ac=hwdts,</option>
+  For DTS only, use <option>ac=hwdts,</option>
 </para></listitem>
 <listitem><para>
-For both AC3 and DTS, use <option>afm=hwac3</option>
+  For both AC3 and DTS, use <option>afm=hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -618,8 +656,8 @@ playing a file that does not have AC3 or DTS audio. <option>afm=hwac3</option>
 does not need a comma; <application>MPlayer</application> will fall back anyway
 when an audio family is specified.
 </para>
-
 </sect3>
+
 
 <sect3 id="hwmpa-surround-passthrough">
 <title>MPEG audio Passthrough</title>
@@ -639,12 +677,14 @@ To use this codec:
 </para>
 </sect3>
 
+
 <sect3 id="advaudio-surround-matrix">
 <title>Matrix-encoded audio</title>
 
 <para>
 <emphasis>***TODO***</emphasis>
 </para>
+
 <para>
 This section has yet to be written and cannot be completed until somebody
 provides sample files for us to test. If you have any matrix-encoded audio
@@ -653,6 +693,7 @@ please send a message to the
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>
 mailing list. Put "[matrix-encoded audio]" in the subject line.
 </para>
+
 <para>
 If no files or further information are forthcoming this section will be dropped.
 </para>
@@ -661,14 +702,13 @@ If no files or further information are forthcoming this section will be dropped.
 Good links:
 <itemizedlist>
 <listitem><para>
-<ulink url="http://electronics.howstuffworks.com/surround-sound5.htm">http://electronics.howstuffworks.com/surround-sound5.htm</ulink>
+  <ulink url="http://electronics.howstuffworks.com/surround-sound5.htm">http://electronics.howstuffworks.com/surround-sound5.htm</ulink>
 </para></listitem>
 <listitem><para>
-<ulink url="http://www.extremetech.com/article2/0,1697,1016875,00.asp">http://www.extremetech.com/article2/0,1697,1016875,00.asp</ulink>
+  <ulink url="http://www.extremetech.com/article2/0,1697,1016875,00.asp">http://www.extremetech.com/article2/0,1697,1016875,00.asp</ulink>
 </para></listitem>
 </itemizedlist>
 </para>
-
 </sect3>
 
 
@@ -695,9 +735,7 @@ trying out.
 
 <para>
 To play a DVD with HRTF:
-
 <screen>mplayer dvd://1 -channels 6 -af hrtf</screen>
-
 </para>
 
 <para>
@@ -705,11 +743,10 @@ To play a DVD with HRTF:
 <option>hrtf</option> requires 48 kHz audio. DVD audio is already 48 kHz, but if
 you have a file with a different sampling rate that you want to play using
 <option>hrtf</option> you must resample it:
-
-<screen>mplayer <replaceable>filename</replaceable> -channels 6 -af resample=48000,hrtf</screen>
-
+<screen>
+mplayer <replaceable>filename</replaceable> -channels 6 -af resample=48000,hrtf
+</screen>
 </para>
-
 </sect3>
 
 
@@ -721,11 +758,10 @@ If you do not hear any sound out of your surround channels, check your mixer
 settings with a mixer program such as <application>alsamixer</application>;
 audio outputs are often muted and set to zero volume by default.
 </para>
-
 </sect3>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="advaudio-channels">
 <title>Channel manipulation</title>
@@ -740,50 +776,49 @@ source matches. Channels are numbered starting with 0.
 
 <orderedlist spacing="compact">
 <title>mono</title>
-<listitem override="0"><simpara>center</simpara></listitem>
+  <listitem override="0"><simpara>center</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>stereo</title>
-<listitem override="0"><simpara>left</simpara></listitem>
-<listitem><simpara>right</simpara></listitem>
+  <listitem override="0"><simpara>left</simpara></listitem>
+  <listitem><simpara>right</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>quadraphonic</title>
-<listitem override="0"><simpara>left front</simpara></listitem>
-<listitem><simpara>right front</simpara></listitem>
-<listitem><simpara>left rear</simpara></listitem>
-<listitem><simpara>right rear</simpara></listitem>
+  <listitem override="0"><simpara>left front</simpara></listitem>
+  <listitem><simpara>right front</simpara></listitem>
+  <listitem><simpara>left rear</simpara></listitem>
+  <listitem><simpara>right rear</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 4.0</title>
-<listitem override="0"><simpara>left front</simpara></listitem>
-<listitem><simpara>right front</simpara></listitem>
-<listitem><simpara>center rear</simpara></listitem>
-<listitem><simpara>center front</simpara></listitem>
+  <listitem override="0"><simpara>left front</simpara></listitem>
+  <listitem><simpara>right front</simpara></listitem>
+  <listitem><simpara>center rear</simpara></listitem>
+  <listitem><simpara>center front</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.0</title>
-<listitem override="0"><simpara>left front</simpara></listitem>
-<listitem><simpara>right front</simpara></listitem>
-<listitem><simpara>left rear</simpara></listitem>
-<listitem><simpara>right rear</simpara></listitem>
-<listitem><simpara>center front</simpara></listitem>
+  <listitem override="0"><simpara>left front</simpara></listitem>
+  <listitem><simpara>right front</simpara></listitem>
+  <listitem><simpara>left rear</simpara></listitem>
+  <listitem><simpara>right rear</simpara></listitem>
+  <listitem><simpara>center front</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.1</title>
-<listitem override="0"><simpara>left front</simpara></listitem>
-<listitem><simpara>right front</simpara></listitem>
-<listitem><simpara>left rear</simpara></listitem>
-<listitem><simpara>right rear</simpara></listitem>
-<listitem><simpara>center front</simpara></listitem>
-<listitem><simpara>subwoofer</simpara></listitem>
+  <listitem override="0"><simpara>left front</simpara></listitem>
+  <listitem><simpara>right front</simpara></listitem>
+  <listitem><simpara>left rear</simpara></listitem>
+  <listitem><simpara>right rear</simpara></listitem>
+  <listitem><simpara>center front</simpara></listitem>
+  <listitem><simpara>subwoofer</simpara></listitem>
 </orderedlist>
-
 </para>
 
 <para>
@@ -800,7 +835,6 @@ The <option>channels</option> audio filter can be used to create or remove
 channels and is useful for controlling the number of channels sent to the sound
 card. See the following sections for more information on channel manipulation.
 </para>
-
 </sect3>
 
 
@@ -814,9 +848,7 @@ played through two speakers; unfortunately, most files with mono sound are
 actually encoded as stereo with one channel silent. The easiest and most
 foolproof way to make both speakers output the same audio is the
 <option>extrastereo</option> filter:
-
 <screen>mplayer <replaceable>filename</replaceable> -af extrastereo=0</screen>
-
 </para>
 
 <para>
@@ -826,11 +858,10 @@ volume decrease, but they are more complex and require different options
 depending on which channel to keep. If you really need to maintain the volume,
 it may be easier to experiment with the <option>volume</option> filter and find
 the right value. For example:
-
-<screen>mplayer <replaceable>filename</replaceable> -af extrastereo=0,volume=5</screen>
-
+<screen>
+mplayer <replaceable>filename</replaceable> -af extrastereo=0,volume=5
+</screen>
 </para>
-
 </sect3>
 
 
@@ -844,55 +875,53 @@ filter can be complicated and takes a little care.
 
 <orderedlist spacing="compact">
 <listitem><para>
-Decide how many output channels you need. This is the first suboption.
+  Decide how many output channels you need. This is the first suboption.
 </para></listitem>
 <listitem><para>
-Count how many channel moves you will do. This is the second suboption. Each
-channel can be moved to several different channels at the same time, but keep in
-mind that when a channel is moved (even if to only one destination) the source
-channel will be empty unless another channel is moved into it. To copy a
-channel, keeping the source the same, simply move the channel into both the
-destination and the source. For example:
-<programlisting>
+  Count how many channel moves you will do. This is the second suboption. Each
+  channel can be moved to several different channels at the same time, but keep
+  in mind that when a channel is moved (even if to only one destination) the
+  source channel will be empty unless another channel is moved into it. To copy
+  a channel, keeping the source the same, simply move the channel into both the
+  destination and the source. For example:
+  <programlisting>
 channel 2 --> channel 3
-channel 2 --> channel 2
-</programlisting>
+channel 2 --> channel 2<!--
+  --></programlisting>
 </para></listitem>
 <listitem><para>
-Write out the channel copies as pairs of suboptions. Note that the first channel
-is 0, the second is 1, etc. The order of these suboptions does not matter as
-long as they are properly grouped into
+  Write out the channel copies as pairs of suboptions. Note that the first
+  channel is 0, the second is 1, etc. The order of these suboptions does not
+  matter as long as they are properly grouped into
 <replaceable>source:destination</replaceable> pairs.
 </para></listitem>
 </orderedlist>
-
 </para>
 
-
 <bridgehead>Example: one channel in two speakers</bridgehead>
-
 <para>
 Here is an example of another way to play one channel in both speakers. Suppose
 for this example that the left channel should be played and the right channel
 discarded. Following the steps above:
 <orderedlist>
 <listitem><para>
-In order to provide an output channel for each of the two speakers, the first
-suboption must be "2".
+  In order to provide an output channel for each of the two speakers, the first
+  suboption must be "2".
 </para></listitem>
 <listitem><para>
-The left channel needs to be moved to the right channel, and also must be moved
-to itself so it won't be empty. This is a total of two moves, making the second
-suboption "2" as well.
+  The left channel needs to be moved to the right channel, and also must be
+  moved to itself so it won't be empty. This is a total of two moves, making
+  the second suboption "2" as well.
 </para></listitem>
 <listitem><para>
-To move the left channel (channel 0) into the right channel (channel 1), the
-suboption pair is "0:1", "0:0" moves the left channel onto itself.
+  To move the left channel (channel 0) into the right channel (channel 1), the
+  suboption pair is "0:1", "0:0" moves the left channel onto itself.
 </para></listitem>
 </orderedlist>
 Putting that all together gives:
-
-<screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
+<screen>
+mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0
+</screen>
 </para>
 
 <para>
@@ -903,13 +932,10 @@ is in the right channel. Also, it is more difficult to remember and type.
 </para>
 
 <bridgehead>Example: left channel in two speakers shortcut</bridgehead>
-
 <para>
 There is actually a much easier way to use the <option>channels</option> filter
 for playing the left channel in both speakers:
-
 <screen>mplayer <replaceable>filename</replaceable> -af channels=1</screen>
-
 The second channel is discarded and, with no further suboptions, the single
 remaining channel is left alone. Sound card drivers automatically play
 single-channel audio in both speakers. This only works when the desired channel
@@ -922,24 +948,24 @@ Another common operation is to duplicate the front channels and play them back
 on the rear speakers of a quadraphonic setup.
 <orderedlist>
 <listitem><para>
-There should be four output channels. The first suboption is "4".
+  There should be four output channels. The first suboption is "4".
 </para></listitem>
 <listitem><para>
-Each of the two front channels needs to be moved to the corresponding rear
-channel and also to itself. This is four moves, so the second suboption is "4".
+  Each of the two front channels needs to be moved to the corresponding rear
+  channel and also to itself. This is four moves, so the second suboption is "4".
 </para></listitem>
 <listitem><para>
-The left front (channel 0) needs to moved to the left rear (channel 2): "0:2".
-The left front also needs to be moved to itself: "0:0". The right front (channel
-1) is moved to the right rear (channel 3): "1:3", and also to itself: "1:1".
+  The left front (channel 0) needs to moved to the left rear (channel 2):
+  "0:2".  The left front also needs to be moved to itself: "0:0". The right
+  front (channel 1) is moved to the right rear (channel 3): "1:3", and also to
+  itself: "1:1".
 </para></listitem>
 </orderedlist>
 Combine all the suboptions to get:
-
-<screen>mplayer <replaceable>filename</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1</screen>
-
+<screen>
+mplayer <replaceable>filename</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1
+</screen>
 </para>
-
 </sect3>
 
 
@@ -952,73 +978,69 @@ This allows for everything the <option>channels</option> filter can do and
 more. Unfortunately, the suboptions are much more complicated.
 <orderedlist>
 <listitem><para>
-Decide how many channels to work with. You may need to specify this with
-<option>-channels</option> and/or <option>-af channels</option>. Later examples
-will show when to use which.
+  Decide how many channels to work with. You may need to specify this with
+  <option>-channels</option> and/or <option>-af channels</option>.
+  Later examples will show when to use which.
 </para></listitem>
 <listitem><para>
-Decide how many channels to feed into <option>pan</option> (further decoded
-channels are discarded). This is the first suboption, and it also controls how
-many channels to employ for output.
+  Decide how many channels to feed into <option>pan</option> (further decoded
+  channels are discarded). This is the first suboption, and it also controls how
+  many channels to employ for output.
 </para></listitem>
-<listitem><para>
-The remaining suboptions specify how much of each channel gets mixed into each
-other channel. This is the complicated part. To break the task down, split the
-suboptions into several sets, one set for each output channel. Each suboption
-within a set corresponds to an input channel. The number you specify will be the
-percentage of the input channel that gets mixed into the output channel.
-</para>
-<para>
-<option>pan</option> accepts values from 0 to 512, yielding 0% to 51200% of the
-original volume. Be careful when using values greater than 1. Not only can this
-give you very high volume, but if you exceed the sample range of your sound card
-you may hear painful pops and clicks. If you want you can follow
-<option>pan</option> with <option>,volume</option> to enable clipping, but it is
-best to keep the values of <option>pan</option> low enough that clipping is not
-necessary.
-</para></listitem>
+<listitem>
+  <para>
+  The remaining suboptions specify how much of each channel gets mixed into each
+  other channel. This is the complicated part. To break the task down, split the
+  suboptions into several sets, one set for each output channel. Each suboption
+  within a set corresponds to an input channel. The number you specify will be
+  the percentage of the input channel that gets mixed into the output channel.
+  </para>
+  <para>
+  <option>pan</option> accepts values from 0 to 512, yielding 0% to 51200% of
+  the original volume. Be careful when using values greater than 1. Not only
+  can this give you very high volume, but if you exceed the sample range of
+  your sound card you may hear painful pops and clicks. If you want you can
+  follow <option>pan</option> with <option>,volume</option> to enable clipping,
+  but it is best to keep the values of <option>pan</option> low enough that
+  clipping is not necessary.
+  </para>
+</listitem>
 </orderedlist>
 </para>
 
 <bridgehead>Example: one channel in two speakers</bridgehead>
-
 <para>
 Here is yet another example for playing the left channel in two speakers. Follow
 the steps above:
 <orderedlist>
 <listitem><para>
-<option>pan</option> should output two channels, so the first
-suboption is "2".
+  <option>pan</option> should output two channels, so the first
+  suboption is "2".
 </para></listitem>
 <listitem><para>
-Since we have two input channels, there will be two sets of suboptions.
-Since there are also two output channels,
-there will be two suboptions per set.
-The left channel from the file should go with full volume to
-the new left and the right channels.
-Thus the first set of suboptions is "1:1".
-The right channel should be discarded, so the second would be "0:0".
-Any 0 values at the end can be left out, but for ease of
-understanding we will keep them.
+  Since we have two input channels, there will be two sets of suboptions.
+  Since there are also two output channels,
+  there will be two suboptions per set.
+  The left channel from the file should go with full volume to
+  the new left and the right channels.
+  Thus the first set of suboptions is "1:1".
+  The right channel should be discarded, so the second would be "0:0".
+  Any 0 values at the end can be left out, but for ease of
+  understanding we will keep them.
 </para></listitem>
 </orderedlist>
 Putting those options together gives:
-
 <screen>mplayer <replaceable>filename</replaceable> -af pan=2:1:1:0:0</screen>
-
 If the right channel is desired instead of the left, the suboptions to
 <option>pan</option> will be "2:0:0:1:1".
 </para>
 
 
 <bridgehead>Example: left channel in two speakers shortcut</bridgehead>
-
 <para>
 As with <option>channels</option>, there is a shortcut that only works with the
 left channel:
-
 <screen>mplayer <replaceable>filename</replaceable> -af pan=1:1</screen>
-
 Since <option>pan</option> has only one channel of input (the other channel is
 discarded), there is only one set with one suboption, which specifies that the
 only channel gets 100% of itself.
@@ -1030,40 +1052,39 @@ only channel gets 100% of itself.
 downmixing. Here is a way to downmix PCM using <option>pan</option>:
 <orderedlist>
 <listitem><para>
-The number of output channels is 2, so the first suboption is "2".
+  The number of output channels is 2, so the first suboption is "2".
 </para></listitem>
 <listitem><para>
-With six input channels there will be six sets of options. Fortunately,
-since we only care about the output of the first two channels, we only need to
-make two sets; the remaining four sets can be omitted. Beware that not all
-multichannel audio files have the same channel order! This example
-demonstrates downmixing a file with the same channels as AC3 5.1:
-<programlisting>
+  With six input channels there will be six sets of options. Fortunately,
+  since we only care about the output of the first two channels, we only need to
+  make two sets; the remaining four sets can be omitted. Beware that not all
+  multichannel audio files have the same channel order! This example
+  demonstrates downmixing a file with the same channels as AC3 5.1:
+  <programlisting>
 0 - front left
 1 - front right
 2 - rear left
 3 - rear right
 4 - center front
-5 - subwoofer
-</programlisting>
-The first set of suboptions lists the percentages of the original volume, in
-order, which each output channel should receive from the
-front left channel: "1:0".
-The front right channel should go into the right output: "0:1".
-The same for the rear channels: "1:0" and "0:1".
-The center channel goes into both output channels with half volume:
-"0.5:0.5", and the subwoofer goes into both with full volume: "1:1".
+5 - subwoofer<!--
+  --></programlisting>
+  The first set of suboptions lists the percentages of the original volume, in
+  order, which each output channel should receive from the
+  front left channel: "1:0".
+  The front right channel should go into the right output: "0:1".
+  The same for the rear channels: "1:0" and "0:1".
+  The center channel goes into both output channels with half volume:
+  "0.5:0.5", and the subwoofer goes into both with full volume: "1:1".
 </para></listitem>
 </orderedlist>
 Put all that together, for:
-
-<screen>mplayer <replaceable>6-channel.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1</screen>
-
+<screen>
+mplayer <replaceable>6-channel.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1
+</screen>
 The percentages listed above are only a rough example. Feel free to tweak them.
 </para>
 
 <bridgehead>Example: Playing 5.1 audio on big speakers without a subwoofer</bridgehead>
-
 <para>
 If you have a huge pair of front speakers you may not want to waste any money on
 buying a subwoofer for a complete 5.1 sound system. If you use
@@ -1071,56 +1092,54 @@ buying a subwoofer for a complete 5.1 sound system. If you use
 the subwoofer channel is simply discarded. If you want to distribute the
 subwoofer channel yourself you need to downmix manually with
 <option>pan</option>:
-
 <orderedlist>
 <listitem><para>
-Since <option>pan</option> needs to examine all six channels, specify
-<option>-channels 6</option> so liba52 decodes them all.
+  Since <option>pan</option> needs to examine all six channels, specify
+  <option>-channels 6</option> so liba52 decodes them all.
 </para></listitem>
 <listitem><para>
-<option>pan</option> outputs to only five channels, the first suboption is 5.
+  <option>pan</option> outputs to only five channels, the first suboption is 5.
 </para></listitem>
 <listitem><para>
-Six input channels and five output channels means six sets of five suboptions.
+  Six input channels and five output channels means six sets of five suboptions.
   <itemizedlist spacing="compact">
   <listitem><simpara>
-  The left front channel only replicates onto itself:
-  "1:0:0:0:0"
+    The left front channel only replicates onto itself:
+    "1:0:0:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  Same for the right front channel:
-  "0:1:0:0:0"
+    Same for the right front channel:
+    "0:1:0:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  Same for the left rear channel:
-  "0:0:1:0:0"
+    Same for the left rear channel:
+    "0:0:1:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  And also the same for the right rear channel:
-  "0:0:0:1:0"
+    And also the same for the right rear channel:
+    "0:0:0:1:0"
   </simpara></listitem>
   <listitem><simpara>
-  Center front, too:
-  "0:0:0:0:1"
+    Center front, too:
+    "0:0:0:0:1"
   </simpara></listitem>
   <listitem><simpara>
-  And now we have to decide what to do with the subwoofer,
-  e.g. half into front right and front left:
-  "0.5:0.5:0:0:0"
+    And now we have to decide what to do with the subwoofer,
+    e.g. half into front right and front left:
+    "0.5:0.5:0:0:0"
   </simpara></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>
 Combine all those options to get:
-
-<screen>mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=5:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0.5:0.5:0:0:0</screen>
-
+<screen>
+mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=5:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0.5:0.5:0:0:0
+</screen>
 </para>
-
 </sect3>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="advaudio-volume">
 <title>Software Volume adjustment</title>
@@ -1134,11 +1153,10 @@ the volume adjustment keys (by default <keycap>9</keycap> and
 <keycap>0</keycap>) to reach much higher volume levels. Note that this does not
 bypass your sound card's mixer; <application>MPlayer</application> only
 amplifies the signal before sending it to your sound card.
-
 The following example is a good start:
-
-<screen>mplayer <replaceable>quiet-file</replaceable> -softvol -softvol-max 300</screen>
-
+<screen>
+mplayer <replaceable>quiet-file</replaceable> -softvol -softvol-max 300
+</screen>
 The <option>-softvol-max</option> option specifies the maximum allowable output
 volume as a percentage of the
 original volume. For example, <option>-softvol-max 200</option> would allow the
@@ -1156,20 +1174,15 @@ keys. Use a lower value with <option>-softvol-max</option> and/or specify
 The <option>-softvol</option> option works by controlling the
 <option>volume</option> audio filter. If you want to play a file at a certain
 volume from the beginning you can specify <option>volume</option> manually:
-
 <screen>mplayer <replaceable>quiet-file</replaceable> -af volume=10</screen>
-
 This will play the file with a ten decibel gain. Be careful when using the
 <option>volume</option> filter - you could easily hurt your ears if you use
 too high a value. Start low and work your way up gradually until you get a feel
 for how much adjustment is required. Also, if you specify excessively high
-values, <option>volume</option> may need to clip the signal to avoid sending your
-sound card data that is outside the allowable range; this will result in
+values, <option>volume</option> may need to clip the signal to avoid sending
+your sound card data that is outside the allowable range; this will result in
 distorted audio.
 </para>
-
 </sect2>
-
 </sect1>
-
 </chapter>

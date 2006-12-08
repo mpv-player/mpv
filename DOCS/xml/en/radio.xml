@@ -12,96 +12,80 @@ a V4L-compatible radio tuner. See the man page for a
 description of radio options and keyboard controls.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="radio-compilation">
 <title>Compilation</title>
 
 <procedure>
 <step><para>
-  First, you have to recompile MPlayer using <filename>./configure</filename> with
-  <option>--enable-radio</option> and (if you want capture support)
+  First, you have to recompile MPlayer using <filename>./configure</filename>
+  with <option>--enable-radio</option> and (if you want capture support)
   <option>--enable-radio-capture</option>.
-  </para></step>
+</para></step>
 <step><para>
   Make sure your tuner works with another radio software in Linux, for
   example <application>XawTV</application>.
-  </para></step>
+</para></step>
 </procedure>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="radio-tips">
 <title>Usage tips</title>
+
 <para>
 The full listing of the options is available in the manual page.
 Here are just a few tips:
-</para>
 <itemizedlist>
-<listitem>
-<para>
-Use the <option>channels</option> option. An example:
-<screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
-Explanation: With this option, only the 104.4 and 103.9 radio stations
-will be usable. There will be a nice OSD text upon channel switching,
-displaying the channel's name. Spaces in the channel name must be
-replaced by the &quot;_&quot; character.
-</para>
-</listitem>
-
-<listitem>
-<para>
-There are several ways of capturing audio. You can grab the sound either using
-your sound card via an external cable connection between video card and line-in,
-or using the built-in ADC in the saa7134 chip. In the latter case, you have to
-load the <systemitem>saa7134-alsa</systemitem> or
+<listitem><para>
+  Use the <option>channels</option> option. An example:
+  <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
+  Explanation: With this option, only the 104.4 and 103.9 radio stations
+  will be usable. There will be a nice OSD text upon channel switching,
+  displaying the channel's name. Spaces in the channel name must be
+  replaced by the &quot;_&quot; character.
+</para></listitem>
+<listitem><para>
+  There are several ways of capturing audio. You can grab the sound either using
+  your sound card via an external cable connection between video card and
+  line-in, or using the built-in ADC in the saa7134 chip. In the latter case,
+  you have to load the <systemitem>saa7134-alsa</systemitem> or
 <systemitem>saa7134-oss</systemitem> driver.
-</para>
-</listitem>
-
-<listitem>
-<para>
-<application>MEncoder</application> cannot be used for audio capture, because it
-requires a video stream to work. So your can either use
-<application>arecord</application> from ALSA project or
-use <option>-ao pcm:file=file.wav</option>. In the latter case you
-will not hear any sound (unless you are using a line-in cable and
-have switched line-in mute off).
-</para>
-</listitem>
+</para></listitem>
+<listitem><para>
+  <application>MEncoder</application> cannot be used for audio capture,
+  because it requires a video stream to work. So your can either use
+  <application>arecord</application> from ALSA project or
+  use <option>-ao pcm:file=file.wav</option>. In the latter case you
+  will not hear any sound (unless you are using a line-in cable and
+  have switched line-in mute off).
+</para></listitem>
 </itemizedlist>
+</para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="radio-examples">
 <title>Examples</title>
 
-
-<informalexample>
-<para>
+<informalexample><para>
 Input from standard V4L (using line-in cable, capture switched off):
-<screen>
-mplayer radio://104.4
-</screen>
-</para>
-</informalexample>
+<screen>mplayer radio://104.4</screen>
+</para></informalexample>
 
-<informalexample>
-<para>
+<informalexample><para>
 Input from standard V4L (using line-in cable, capture switched off,
 V4Lv1 interface):
-<screen>
-mplayer -radio driver=v4l radio://104.4
-</screen>
-</para>
-</informalexample>
+<screen>mplayer -radio driver=v4l radio://104.4</screen>
+</para></informalexample>
 
-<informalexample>
-<para>
+<informalexample><para>
 Playing second channel from channel list:
-<screen>
-mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
-</screen>
-</para>
-</informalexample>
+<screen>mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2</screen>
+</para></informalexample>
 
 <informalexample>
 <para>
@@ -110,7 +94,8 @@ In this example the tuner is used as a second sound card
 (ALSA device hw:1,0). For saa7134-based cards either the
 saa7134-alsa or saa7134-oss module must be loaded.
 <screen>
-mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm radio://2/capture
+mplayer -rawaudio rate=32000 radio://2/capture \
+    -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm
 </screen>
 <note><para>When using ALSA device names colons must be replaced
 by equal signs, commas by periods.

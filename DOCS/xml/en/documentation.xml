@@ -62,11 +62,12 @@ is a lot of valuable information to be found there.
 <para>
 <application>MPlayer</application> is a movie player for Linux (runs on
 many other Unices, and <emphasis role="bold">non-x86</emphasis> CPUs, see
-<xref linkend="ports"/>). It plays most MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV,
-QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska files, supported by
+<xref linkend="ports"/>).
+It plays most MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM,
+NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska files, supported by
 many native, XAnim, RealPlayer, and Win32 DLL codecs. You can watch
-<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>, and
-<emphasis role="bold">MPEG-4 (DivX)</emphasis> movies too. Another big
+<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
+and <emphasis role="bold">MPEG-4 (DivX)</emphasis> movies too. Another big
 feature of <application>MPlayer</application> is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, but you can use GGI and SDL (and this way all
@@ -76,7 +77,8 @@ scaling, so you can enjoy movies in fullscreen.
 <application>MPlayer</application> supports displaying through some
 hardware MPEG decoder boards, such as the <link linkend="dvb">DVB</link> and
 <link linkend="dxr3">DXR3/Hollywood+</link>. And what about the nice big
-antialiased shaded subtitles (<emphasis role="bold">14 supported types</emphasis>)
+antialiased shaded subtitles
+(<emphasis role="bold">14 supported types</emphasis>)
 with European/ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic, Korean
 fonts, and the onscreen display (OSD)?
 </para>
@@ -97,67 +99,67 @@ video and audio manipulation.
 Encoder) is a simple movie encoder, designed to encode
 <application>MPlayer</application>-playable movies
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
-to other <application>MPlayer</application>-playable formats (see below). It
-can encode with various codecs, like <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
+to other <application>MPlayer</application>-playable formats (see below).
+It can encode with various codecs, like
+<emphasis role="bold">MPEG-4 (DivX4)</emphasis>
 (one or two passes), <systemitem class="library">libavcodec</systemitem>,
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
 audio.
 </para>
-
 
 <itemizedlist>
 <title><application>MEncoder</application> features</title>
 <listitem><simpara>
   Encoding from the wide range of fileformats and decoders of
   <application>MPlayer</application>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Encoding to all the codecs of FFmpeg's
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Video encoding from <emphasis role="bold">V4L compatible TV tuners</emphasis>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Encoding/multiplexing to interleaved AVI files with proper index
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Creating files from external audio stream
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   1, 2 or 3 pass encoding
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 audio
   <important><simpara>
   VBR MP3 audio doesn't always play nicely on windows players!
   </simpara></important>
-  </para></listitem>
+</para></listitem>
 <listitem><simpara>
   PCM audio
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Stream copying
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Input A/V synchronizing (PTS-based, can be disabled with
   <option>-mc 0</option> option)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   fps correction with <option>-ofps</option> option (useful when encoding
   30000/1001 fps VOB to 24000/1001 fps AVI)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Using our very powerful filter system (crop, expand, flip, postprocess,
   rotate, scale, rgb/yuv conversion)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Can encode DVD/VOBsub <emphasis role="bold">AND</emphasis> text subtitles
   into the output file
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Can rip DVD subtitles to VOBsub format
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <itemizedlist>
@@ -165,7 +167,7 @@ audio.
 <listitem><simpara>
   Even wider variety of available en/decoding formats/codecs
   (creating VOB files with DivX4/Indeo5/VIVO streams :).
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->

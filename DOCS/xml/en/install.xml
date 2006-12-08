@@ -17,6 +17,10 @@ description, please search through this documentation and you'll find your
 answers.
 </para>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="softreq">
 <title>Software requirements</title>
 
@@ -29,61 +33,64 @@ answers.
   <emphasis role="bold">gcc</emphasis> - recommended versions are 2.95
   and 3.4+. 2.96 and 3.0.x are known to generate faulty code, 3.1 and
   3.2 also had problems, 3.3 some minor ones. On PowerPC, use 4.x.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Xorg/XFree86</emphasis> - recommended version is
   4.3 or later. Make sure the
   <emphasis role="bold">development packages</emphasis> are installed,
   too, otherwise it won't work.
   You don't absolutely need X, some video output drivers work without it.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">make</emphasis> - recommended version is
   3.79.x or later. To build the XML documentation you need 3.80.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - optional,
   required to have a font for the OSD and subtitles. At least 2.0.9 is required.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - optional JPEG en/decoder,
   required for the JPEG video output driver and decoding MJPEG video
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - optional (M)PNG en/decoder,
   required for the GUI and the PNG video output driver
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - 3.90 or later is recommended,
   necessary for encoding MP3 audio with <application>MEncoder</application>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - recommended, necessary for compressed
   MOV header and PNG support
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - optional, needed for some RTSP/RTP streams
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - optional, use 0.9.13 or later.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - optional, for CDDA support
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libxmms</emphasis> - optional, for XMMS input plugin
   support. At least 1.2.7 is required.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - optional, for smb networking support
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - optional, for ALSA audio output
   support. At least 0.9.0rc4 is required.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="features">
@@ -93,26 +100,28 @@ answers.
 <listitem><para>
   Decide if you need GUI. If you do, see the <link linkend="gui">GUI</link>
   section before compiling.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   If you want to install <application>MEncoder</application> (our great
   all-purpose encoder), see the
   <link linkend="mencoder"><application>MEncoder</application></link> section.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   If you have a V4L compatible <emphasis role="bold">TV tuner</emphasis> card,
-  and wish to watch/grab and encode movies with <application>MPlayer</application>,
+  and wish to watch/grab and encode movies with
+  <application>MPlayer</application>,
   read the <link linkend="tv-input">TV input</link> section.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
-  If you have a V4L compatible <emphasis role="bold">radio tuner</emphasis> card,
-  and wish to listen and capture sound with <application>MPlayer</application>,
+  If you have a V4L compatible <emphasis role="bold">radio tuner</emphasis>
+  card, and wish to listen and capture sound with
+  <application>MPlayer</application>,
   read the <link linkend="radio">radio</link> section.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   There is a neat <emphasis role="bold">OSD Menu</emphasis> support ready to be
   used. Check the <link linkend="subosd">OSD menu</link> section.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -120,7 +129,8 @@ Then build <application>MPlayer</application>:
 <screen>
 ./configure
 make
-make install</screen>
+make install
+</screen>
 </para>
 
 <para>
@@ -141,11 +151,10 @@ Note that if you have a <filename>codecs.conf</filename> in
 <filename>codecs.conf</filename> will be ignored completely.
 Do not do this unless you want to fiddle with <application>MPlayer</application>
 internals as this can can cause many problems. If you want to change the codecs
-search order, use the <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
-or <option>-afm</option> options either on the command line or in your
-config file (see the manual page).
+search order, use the <option>-vc</option>, <option>-ac</option>,
+<option>-vfm</option>, or <option>-afm</option> options either on the command
+line or in your config file (see the manual page).
 </para>
-
 
 <para>
 Debian users can build a .deb package for themselves, it's very simple.
@@ -173,18 +182,20 @@ and subtitle functionality. The recommended method is installing a TTF
 font file and telling <application>MPlayer</application> to use it.
 See the <link linkend="subosd">Subtitles and OSD</link> section for details.
 </para>
-
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="gui">
 <title>What about the GUI?</title>
 
 <para>
 The GUI needs GTK 1.2.x or GTK 2.0 (it isn't fully GTK, but the panels are).
-The skins are stored in PNG format, so GTK, <systemitem class="library">libpng</systemitem>
-(and their devel stuff, usually called <systemitem class="library">gtk-dev</systemitem>
+The skins are stored in PNG format, so GTK,
+<systemitem class="library">libpng</systemitem> (and their devel stuff, usually
+called <systemitem class="library">gtk-dev</systemitem>
 and <systemitem class="library">libpng-dev</systemitem>) has to be installed.
 You can build it by specifying <option>--enable-gui</option> during
 <filename>./configure</filename>. Then, to turn on GUI mode, you have to
@@ -207,7 +218,9 @@ directory.
 </para>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="fonts-osd">
 <title>Fonts and OSD</title>
@@ -220,6 +233,7 @@ can be properly scaled to the movie size and cope better with different
 encodings.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="truetype-fonts">
 <title>TrueType fonts</title>
@@ -253,6 +267,7 @@ use <command>fc-list</command>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bitmap-fonts">
 <title>bitmap fonts</title>
@@ -284,15 +299,16 @@ and use the <option>-utf8</option> option or give the subtitles
 file the same name as your video file with a <filename>.utf</filename>
 extension and have it in the same directory as the video file.
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="osdmenu">
 <title>OSD menu</title>
 
 <para>
-<application>MPlayer</application> has a completely user definiable OSD Menu interface.
+<application>MPlayer</application> has a completely user definiable
+OSD Menu interface.
 </para>
 
 <note><simpara>
@@ -302,56 +318,60 @@ the Preferences menu is currently UNIMPLEMENTED!
 <orderedlist>
 <title>Installation</title>
 <listitem><simpara>
-  compile <application>MPlayer</application> by passing the <option>--enable-menu</option>
-  to <filename>./configure</filename>
-  </simpara></listitem>
+  compile <application>MPlayer</application> by passing the
+  <option>--enable-menu</option> to <filename>./configure</filename>
+</simpara></listitem>
 <listitem><simpara>
   make sure you have an OSD font installed
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   copy <filename>etc/menu.conf</filename> to your
   <filename class="directory">.mplayer</filename> directory
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   copy <filename>etc/input.conf</filename> to your
-  <filename class="directory">.mplayer</filename> directory, or to the system-wide
-  <application>MPlayer</application> config dir (default:
+  <filename class="directory">.mplayer</filename> directory, or to the
+  system-wide <application>MPlayer</application> config dir (default:
   <filename class="directory">/usr/local/etc/mplayer</filename>)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   check and edit <filename>input.conf</filename> to enable menu movement keys
   (it is described there).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><para>
   start <application>MPlayer</application> by the following example:
   <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
   </para></listitem>
 <listitem><simpara>
   push any menu key you defined
-  </simpara></listitem>
+</simpara></listitem>
 </orderedlist>
-
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="rtc">
 <title>RTC</title>
+
 <para>
 There are three timing methods in <application>MPlayer</application>.
 
 <itemizedlist>
 <listitem><simpara>
-<emphasis role="bold">To use the old method</emphasis>, you don't have to do
+  <emphasis role="bold">To use the old method</emphasis>, you don't have to do
   anything. It uses <systemitem>usleep()</systemitem> to tune
   A/V sync, with +/- 10ms accuracy. However sometimes the sync has to be
   tuned even finer.
-  </simpara></listitem>
-<listitem><para>
-<emphasis role="bold">The new timer</emphasis> code uses the RTC (RealTime Clock)
-  for this task, because it has precise 1ms timers. The <option>-rtc</option>
-  option enables it, but a properly set up kernel is required.
+</simpara></listitem>
+<listitem>
+  <para>
+  <emphasis role="bold">The new timer</emphasis> code uses the RTC (RealTime
+  Clock) for this task, because it has precise 1ms timers.
+  The <option>-rtc</option> option enables it,
+  but a properly set up kernel is required.
   If you are running kernel 2.4.19pre8 or later you can adjust the maximum RTC
   frequency for normal users through the <systemitem class="systemname">/proc
   </systemitem> filesystem. Use one of the following two commands to
@@ -362,19 +382,20 @@ There are three timing methods in <application>MPlayer</application>.
   <filename>/etc/sysctl.conf</filename>.
   </para>
   <para>
-   You can see the new timer's efficiency in the status line.
-   The power management functions of some notebook BIOSes with speedstep CPUs
-   interact badly with RTC. Audio and video may get out of sync. Plugging the
-   external power connector in before you power up your notebook seems to help.
-   In some hardware combinations (confirmed during usage of non-DMA DVD drive
-   on an ALi1541 board) usage of the RTC timer causes skippy playback. It's
-   recommended to use the third method in these cases.
-  </para></listitem>
-<listitem><simpara>
+  You can see the new timer's efficiency in the status line.
+  The power management functions of some notebook BIOSes with speedstep CPUs
+  interact badly with RTC. Audio and video may get out of sync. Plugging the
+  external power connector in before you power up your notebook seems to help.
+  In some hardware combinations (confirmed during usage of non-DMA DVD drive
+  on an ALi1541 board) usage of the RTC timer causes skippy playback. It's
+  recommended to use the third method in these cases.
+  </para>
+</listitem>
+<listitem><para>
   <emphasis role="bold">The third timer code</emphasis> is turned on with the
   <option>-softsleep</option> option. It has the efficiency of the RTC, but it
   doesn't use RTC. On the other hand, it requires more CPU.
-  </simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 </sect1>

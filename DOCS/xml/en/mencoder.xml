@@ -39,35 +39,35 @@ Audio Codecs:
 <row><entry>Audio codec name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>mp3lame</entry>
-    <entry>encode to VBR, ABR or CBR MP3 with LAME</entry>
-  </row>
-  <row>
-    <entry>lavc</entry>
-    <entry>use one of <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem>'s audio codecs</link>
-    </entry>
-  </row>
-  <row>
-    <entry>faac</entry>
-    <entry>FAAC AAC audio encoder</entry>
-  </row>
-  <row>
-    <entry>toolame</entry>
-    <entry>MPEG Audio Layer 2 encoder</entry>
-  </row>
-  <row>
-    <entry>twolame</entry>
-    <entry>MPEG Audio Layer 2 encoder based on tooLAME</entry>
-  </row>
-  <row>
-    <entry>pcm</entry>
-    <entry>uncompressed PCM audio</entry>
-  </row>
-  <row>
-    <entry>copy</entry>
-    <entry>do not reencode, just copy compressed frames</entry>
-  </row>
+<row>
+  <entry>mp3lame</entry>
+  <entry>encode to VBR, ABR or CBR MP3 with LAME</entry>
+</row>
+<row>
+  <entry>lavc</entry>
+  <entry>use one of <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem>'s audio codecs</link>
+  </entry>
+</row>
+<row>
+  <entry>faac</entry>
+  <entry>FAAC AAC audio encoder</entry>
+</row>
+<row>
+  <entry>toolame</entry>
+  <entry>MPEG Audio Layer 2 encoder</entry>
+</row>
+<row>
+  <entry>twolame</entry>
+  <entry>MPEG Audio Layer 2 encoder based on tooLAME</entry>
+</row>
+<row>
+  <entry>pcm</entry>
+  <entry>uncompressed PCM audio</entry>
+</row>
+<row>
+  <entry>copy</entry>
+  <entry>do not reencode, just copy compressed frames</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -81,35 +81,35 @@ Video codecs:
 <row><entry>Video codec name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>lavc</entry>
-    <entry>use one of <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem>'s video codecs</link>
-    </entry>
-  </row>
-  <row>
-    <entry>xvid</entry>
-    <entry>Xvid, MPEG-4 Advanced Simple Profile (ASP) codec</entry>
-  </row>
-  <row>
-    <entry>x264</entry>
-    <entry>x264, MPEG-4 Advanced Video Coding (AVC), AKA H.264 codec</entry>
-  </row>
-  <row>
-    <entry>nuv</entry>
-    <entry>nuppel video, used by some realtime applications</entry>
-  </row>
-  <row>
-    <entry>raw</entry>
-    <entry>uncompressed video frames</entry>
-  </row>
-  <row>
-    <entry>copy</entry>
-    <entry>do not reencode, just copy compressed frames</entry>
-  </row>
-  <row>
-    <entry>frameno</entry>
-    <entry>used for 3-pass encoding (not recommended)</entry>
-  </row>
+<row>
+  <entry>lavc</entry>
+  <entry>use one of <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem>'s video codecs</link>
+  </entry>
+</row>
+<row>
+  <entry>xvid</entry>
+  <entry>Xvid, MPEG-4 Advanced Simple Profile (ASP) codec</entry>
+</row>
+<row>
+  <entry>x264</entry>
+  <entry>x264, MPEG-4 Advanced Video Coding (AVC), AKA H.264 codec</entry>
+</row>
+<row>
+  <entry>nuv</entry>
+  <entry>nuppel video, used by some realtime applications</entry>
+</row>
+<row>
+  <entry>raw</entry>
+  <entry>uncompressed video frames</entry>
+</row>
+<row>
+  <entry>copy</entry>
+  <entry>do not reencode, just copy compressed frames</entry>
+</row>
+<row>
+  <entry>frameno</entry>
+  <entry>used for 3-pass encoding (not recommended)</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -133,27 +133,27 @@ Container formats:
 <row><entry>Container format name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>lavf</entry>
-    <entry>one of the containers supported by
-    <systemitem class="library">libavformat</systemitem></entry>
-  </row>
-  <row>
-    <entry>avi</entry>
-    <entry>Audio-Video Interleaved</entry>
-  </row>
-  <row>
-    <entry>mpeg</entry>
-    <entry>MPEG-1 and MPEG-2 PS</entry>
-  </row>
-  <row>
-    <entry>rawvideo</entry>
-    <entry>raw video stream (no muxing - one video stream only)</entry>
-  </row>
-  <row>
-    <entry>rawaudio</entry>
-    <entry>raw audio stream (no muxing - one audio stream only)</entry>
-  </row>
+<row>
+  <entry>lavf</entry>
+  <entry>one of the containers supported by
+  <systemitem class="library">libavformat</systemitem></entry>
+</row>
+<row>
+  <entry>avi</entry>
+  <entry>Audio-Video Interleaved</entry>
+</row>
+<row>
+  <entry>mpeg</entry>
+  <entry>MPEG-1 and MPEG-2 PS</entry>
+</row>
+<row>
+  <entry>rawvideo</entry>
+  <entry>raw video stream (no muxing - one video stream only)</entry>
+</row>
+<row>
+  <entry>rawaudio</entry>
+  <entry>raw audio stream (no muxing - one audio stream only)</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -185,54 +185,54 @@ You may force a particular container format with
 <entry>Description</entry>
 </row></thead>
 <tbody>
-  <row>
-    <entry>mpg</entry>
-    <entry>MPEG-1 and MPEG-2 PS</entry>
-  </row>
-  <row>
-    <entry>asf</entry>
-    <entry>Advanced Streaming Format</entry>
-  </row>
-  <row>
-    <entry>avi</entry>
-    <entry>Audio-Video Interleaved</entry>
-  </row>
-  <row>
-    <entry>wav</entry>
-    <entry>Waveform Audio</entry>
-  </row>
-  <row>
-    <entry>swf</entry>
-    <entry>Macromedia Flash</entry>
-  </row>
-  <row>
-    <entry>flv</entry>
-    <entry>Macromedia Flash video</entry>
-  </row>
-  <row>
-    <entry>rm</entry>
-    <entry>RealMedia</entry>
-  </row>
-  <row>
-    <entry>au</entry>
-    <entry>SUN AU</entry>
-  </row>
-  <row>
-    <entry>nut</entry>
-    <entry>NUT open container (experimental and not yet spec-compliant)</entry>
-  </row>
-  <row>
-    <entry>mov</entry>
-    <entry>QuickTime</entry>
-  </row>
-  <row>
-    <entry>mp4</entry>
-    <entry>MPEG-4 format</entry>
-  </row>
-  <row>
-    <entry>dv</entry>
-    <entry>Sony Digital Video container</entry>
-  </row>
+<row>
+  <entry>mpg</entry>
+  <entry>MPEG-1 and MPEG-2 PS</entry>
+</row>
+<row>
+  <entry>asf</entry>
+  <entry>Advanced Streaming Format</entry>
+</row>
+<row>
+  <entry>avi</entry>
+  <entry>Audio-Video Interleaved</entry>
+</row>
+<row>
+  <entry>wav</entry>
+  <entry>Waveform Audio</entry>
+</row>
+<row>
+  <entry>swf</entry>
+  <entry>Macromedia Flash</entry>
+</row>
+<row>
+  <entry>flv</entry>
+  <entry>Macromedia Flash video</entry>
+</row>
+<row>
+  <entry>rm</entry>
+  <entry>RealMedia</entry>
+</row>
+<row>
+  <entry>au</entry>
+  <entry>SUN AU</entry>
+</row>
+<row>
+  <entry>nut</entry>
+  <entry>NUT open container (experimental and not yet spec-compliant)</entry>
+</row>
+<row>
+  <entry>mov</entry>
+  <entry>QuickTime</entry>
+</row>
+<row>
+  <entry>mp4</entry>
+  <entry>MPEG-4 format</entry>
+</row>
+<row>
+  <entry>dv</entry>
+  <entry>Sony Digital Video container</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -247,8 +247,8 @@ and that the file can be played correctly by players other than
 <application>MPlayer</application>.
 </para>
 
-<informalexample>
-<para>Example:</para>
+<example>
+<title>encode to Macromedia Flash format</title>
 <para>
 Creating a Macromedia Flash video suitable for playback in a web browser
 with the Macromedia Flash plugin:
@@ -258,7 +258,7 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
     -lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3
 </screen>
 </para>
-</informalexample>
+</example>
 
 </sect1>
 
@@ -318,11 +318,11 @@ DVB input works similarly.
 <title>Encoding two pass MPEG-4 (&quot;DivX&quot;)</title>
 
 <para>
-The name comes from the fact that this method encodes the file <emphasis>twice</emphasis>.
-The first encoding (dubbed pass) creates some temporary files
-(<filename>*.log</filename>) with a size of few megabytes, do not delete
-them yet (you can delete the AVI or rather just not create any video by
-redirecting it into <filename>/dev/null</filename>).
+The name comes from the fact that this method encodes the file
+<emphasis>twice</emphasis>.  The first encoding (dubbed pass) creates some
+temporary files (<filename>*.log</filename>) with a size of few megabytes, do
+not delete them yet (you can delete the AVI or rather just not create any video
+by redirecting it into <filename>/dev/null</filename>).
 In the second pass, the two pass output
 file is created, using the bitrate data from the temporary files. The
 resulting file will have much better image quality. If this is the first
@@ -556,16 +556,16 @@ mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D \
 
 <para>
 <application>MEncoder</application> is capable of creating movies from one
-or more JPEG, PNG, TGA, or other image files. With simple framecopy it can create MJPEG
-(Motion JPEG), MPNG (Motion PNG) or MTGA (Motion TGA) files.
+or more JPEG, PNG, TGA, or other image files. With simple framecopy it can
+create MJPEG (Motion JPEG), MPNG (Motion PNG) or MTGA (Motion TGA) files.
 </para>
 
 <orderedlist>
 <title>Explanation of the process:</title>
 <listitem><para>
-  <application>MEncoder</application> <emphasis>decodes</emphasis> the input image(s) with
-  <systemitem class="library">libjpeg</systemitem> (when decoding PNGs, it
-  will use <systemitem class="library">libpng</systemitem>).
+  <application>MEncoder</application> <emphasis>decodes</emphasis> the input
+  image(s) with <systemitem class="library">libjpeg</systemitem> (when decoding
+  PNGs, it will use <systemitem class="library">libpng</systemitem>).
 </para></listitem>
 <listitem><para>
   <application>MEncoder</application> then feeds the decoded image to the
@@ -600,8 +600,8 @@ mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=6
 
 <informalexample>
 <para>
-Creating an MPEG-4 file from explicit list of JPEG files (list.txt in current directory
-contains the list of files to use as source, one per line):
+Creating an MPEG-4 file from explicit list of JPEG files (list.txt in current
+directory contains the list of files to use as source, one per line):
 <screen>
 mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
     -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
@@ -629,7 +629,8 @@ mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <repla
 </informalexample>
 
 <note><para>
-Width must be integer multiple of 4, it is a limitation of the RAW RGB AVI format.
+Width must be integer multiple of 4, it is a limitation of the RAW RGB AVI
+format.
 </para></note>
 
 <informalexample>
@@ -737,9 +738,9 @@ way!
 
 <para>
 MPEG-4 has a unique feature: the video stream can contain its needed aspect
-ratio. Yes, just like MPEG-1/2 (DVD, SVCD) and H.263 files. Regretfully, there are
-few video players apart from <application>MPlayer</application> that support this
-MPEG-4 attribute.
+ratio. Yes, just like MPEG-1/2 (DVD, SVCD) and H.263 files. Regretfully, there
+are few video players apart from <application>MPlayer</application> that
+support this MPEG-4 attribute.
 </para>
 
 <para>

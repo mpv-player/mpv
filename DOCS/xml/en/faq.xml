@@ -69,6 +69,7 @@ job, so why change? Besides, we dislike the auto* tools, just like
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-compilation-installation">
 <title>Compilation and installation</title>
@@ -194,6 +195,7 @@ are resolved at run-time.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-general">
 <title>General questions</title>
@@ -211,11 +213,11 @@ of our homepage.
 
 <qandaentry>
 <question><para>
-I've found a nasty bug when I tried to play my favorite video! Who should I inform?
+I've found a nasty bug when I tried to play my favorite video!
+Who should I inform?
 </para></question>
 <answer><para>
-Please read the
-<link linkend="bugreports">bug reporting guidelines</link>
+Please read the <link linkend="bugreports">bug reporting guidelines</link>
 and follow the instructions.
 </para></answer>
 </qandaentry>
@@ -226,8 +228,9 @@ I have problems playing files with the ... codec. Can I use them?
 </para></question>
 <answer><para>
 Check the <ulink url="../../codecs-status.html">codec status</ulink>,
-if it doesn't contain your codec, read the <link linkend="codecs">codec documentation</link>,
-especially the <link linkend="codec-importing">codec importing HOWTO</link> and contact us.
+if it doesn't contain your codec, read the
+<link linkend="codecs">codec documentation</link>, especially the
+<link linkend="codec-importing">codec importing HOWTO</link> and contact us.
 </para></answer>
 </qandaentry>
 
@@ -237,8 +240,8 @@ When I start playing, I get this message but everything seems fine:
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-You need a specially set up kernel to use the RTC timing
-code. For details see the <link linkend="rtc">RTC</link> section of the documentation.
+You need a specially set up kernel to use the RTC timing code.
+For details see the <link linkend="rtc">RTC</link> section of the documentation.
 </para></answer>
 </qandaentry>
 
@@ -265,46 +268,66 @@ What is the meaning of the numbers on the status line?
 </para></question>
 <answer><para>
 Example:
-<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
+<screen>
+A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>A: 2.1</systemitem></term>
-<listitem><para>audio position in seconds</para></listitem>
+<varlistentry>
+  <term><systemitem>A: 2.1</systemitem></term>
+  <listitem><para>audio position in seconds</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>V: 2.2</systemitem></term>
-<listitem><para>video position in seconds</para></listitem>
+<varlistentry>
+  <term><systemitem>V: 2.2</systemitem></term>
+  <listitem><para>video position in seconds</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
-<listitem><para>audio-video difference in seconds (delay)</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V: -0.167</systemitem></term>
+  <listitem><para>audio-video difference in seconds (delay)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>ct: 0.042</systemitem></term>
-<listitem><para>total A-V sync correction done</para></listitem>
+<varlistentry>
+  <term><systemitem>ct: 0.042</systemitem></term>
+  <listitem><para>total A-V sync correction done</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>57/57</systemitem></term>
-<listitem><para>frames played/decoded (counting from last seek)</para></listitem>
+<varlistentry>
+  <term><systemitem>57/57</systemitem></term>
+  <listitem><para>
+  frames played/decoded (counting from last seek)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>41%</systemitem></term>
-<listitem><para>video codec CPU usage in percent
-  (for slice rendering and direct rendering this
-  includes video_out)</para></listitem>
+<varlistentry>
+  <term><systemitem>41%</systemitem></term>
+  <listitem><para>
+  video codec CPU usage in percent
+  (for slice rendering and direct rendering this includes video_out)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0%</systemitem></term>
-<listitem><para>video_out CPU usage</para></listitem>
+<varlistentry>
+  <term><systemitem>0%</systemitem></term>
+  <listitem><para>video_out CPU usage</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2.6%</systemitem></term>
-<listitem><para>audio codec CPU usage in percent</para></listitem>
+<varlistentry>
+  <term><systemitem>2.6%</systemitem></term>
+  <listitem><para>audio codec CPU usage in percent</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0</systemitem></term>
-<listitem><para>frames dropped to maintain A-V sync</para></listitem>
+<varlistentry>
+  <term><systemitem>0</systemitem></term>
+  <listitem><para>frames dropped to maintain A-V sync</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>4</systemitem></term>
-<listitem><para>current level of image postprocessing (when using
-<option>-autoq</option>)</para></listitem>
+<varlistentry>
+  <term><systemitem>4</systemitem></term>
+  <listitem><para>
+  current level of image postprocessing (when using <option>-autoq</option>)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>49%</systemitem></term>
-<listitem><para>current cache size used (around 50% is normal)</para></listitem>
+<varlistentry>
+  <term><systemitem>49%</systemitem></term>
+  <listitem><para>
+  current cache size used (around 50% is normal)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>1.00x</systemitem></term>
-<listitem><para>playback speed as a factor of original speed</para></listitem>
+<varlistentry>
+  <term><systemitem>1.00x</systemitem></term>
+  <listitem><para>playback speed as a factor of original speed</para></listitem>
 </varlistentry>
 </variablelist>
 Most of them are for debug purposes, use the <option>-quiet</option>
@@ -319,7 +342,8 @@ your usual video output driver.
 
 <qandaentry>
 <question><para>
-There are error messages about file not found <filename>/usr/local/lib/codecs/</filename> ...
+There are error messages about file not found
+<filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
 Download and install the binary codecs from our
@@ -345,8 +369,9 @@ Subtitles are very nice, the most beautiful I've ever seen, but they
 slow down playing! I know it's unlikely ...
 </para></question>
 <answer><para>
-After running <filename>./configure</filename>, edit <filename>config.h</filename>
-and replace <systemitem>#undef FAST_OSD</systemitem> with
+After running <filename>./configure</filename>,
+edit <filename>config.h</filename> and replace
+<systemitem>#undef FAST_OSD</systemitem> with
 <systemitem>#define FAST_OSD</systemitem>. Then recompile.
 </para></answer>
 </qandaentry>
@@ -372,11 +397,14 @@ How can I run <application>MPlayer</application> in the background?
 </para></question>
 <answer><para>
 Use:
-<screen>mplayer <replaceable>options</replaceable> <replaceable>filename</replaceable> &lt; /dev/null &amp;</screen>
+<screen>
+mplayer <replaceable>options</replaceable> <replaceable>filename</replaceable> &lt; /dev/null &amp;
+</screen>
 </para></answer>
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-playback">
 <title>Playback problems</title>
@@ -493,35 +521,32 @@ to play Windows Media 9 files.)
 <para>
 If you run into this problem you have two options:
 <itemizedlist>
-<listitem><para>Wait two weeks. It might start working again.</para></listitem>
-<listitem><para>Relink all the binaries on the system with different
-prelink options. Here are step by step instructions:</para>
-<para>
-<orderedlist>
-<listitem><para>Edit <filename>/etc/syconfig/prelink</filename> and change</para>
-<para>
-<programlisting>
-PRELINK_OPTS=-mR
-</programlisting>
-</para>
-<para>
-to
-<programlisting>
-PRELINK_OPTS="-mR --no-exec-shield"
-</programlisting>
-</para>
-</listitem>
-<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
-<listitem><para><command>/etc/cron.daily/prelink</command>
-(This relinks all the applications, and it takes
-quite a while.)</para></listitem>
-<listitem>
-<para><command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
-(This turns off exec-shield for the <application>MPlayer</application> binary.)
-</para>
-</listitem>
-</orderedlist>
-</para>
+<listitem><para>
+  Wait two weeks. It might start working again.
+</para></listitem>
+<listitem><para>
+  Relink all the binaries on the system with different
+  prelink options. Here are step by step instructions:
+  </para>
+  <procedure>
+  <step><para>
+	Edit <filename>/etc/syconfig/prelink</filename> and change
+	<programlisting>PRELINK_OPTS=-mR</programlisting> to
+	<programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
+  </para></step>
+  <step><para>
+    <command>touch /var/lib/misc/prelink.force</command>
+  </para></step>
+  <step><para><command>/etc/cron.daily/prelink</command>
+  (This relinks all the applications, and it takes
+  quite a while.)
+  </para></step>
+  <step><para>
+    <command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
+    (This turns off exec-shield for the
+	<application>MPlayer</application> binary.)
+  </para></step>
+  </procedure>
 </listitem>
 </itemizedlist>
 </para></answer>
@@ -541,8 +566,8 @@ it was compiled on or recompile with runtime CPU detection
 
 <qandaentry>
 <question><para>
-When I try to grab from my tuner, it works, but colors are strange. It's OK with other
-applications.
+When I try to grab from my tuner, it works, but colors are strange.
+It's OK with other applications.
 </para></question>
 <answer><para>
 Your card probably reports some colorspaces as supported when in fact
@@ -553,21 +578,25 @@ default YV12 (see the <link linkend="tv-input">TV</link> section).
 
 <qandaentry>
 <question><para>
-I get very strange percentage values (way too big) while playing files on my notebook.
+I get very strange percentage values (way too big)
+while playing files on my notebook.
 </para></question>
 <answer><para>
 It's an effect of the power management / power saving system of your notebook
 (BIOS, not kernel). Plug the external power connector in
-<emphasis role="bold">before</emphasis> you power on your notebook. You can also
-try whether <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
+<emphasis role="bold">before</emphasis> you power on your notebook. You can
+also try whether
+<ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
 (a SpeedStep interface for Linux) helps you.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-The audio/video gets totally out of sync when I run <application>MPlayer</application>
-as root on my notebook. It works normal when i run it as a user.
+The audio/video gets totally out of sync when I run
+<application>MPlayer</application> as
+<systemitem class="username">root</systemitem> on my notebook.
+It works normal when i run it as a user.
 </para></question>
 <answer><para>
 This is again a power management effect (see above). Plug the external power
@@ -588,6 +617,7 @@ Try <option>-nocache</option>.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-driver">
 <title>Video/audio driver problems (vo/ao)</title>
@@ -621,13 +651,11 @@ How can I solve my problem?
 <answer><para>
 Just change your video output device. Issue the following command to get
 a list of available video output drivers:
-<screen>
-mplayer -vo help
-</screen>
+<screen>mplayer -vo help</screen>
 After you've chosen the correct video output driver, add it to
 your configuration file. Add
 <programlisting>
- vo = <replaceable>selected_vo</replaceable>
+vo = <replaceable>selected_vo</replaceable>
 </programlisting>
 to <filename>~/.mplayer/config</filename> and/or
 <programlisting>
@@ -664,7 +692,8 @@ and upload the file to FTP.
 <qandaentry>
 <question><para>
 My computer plays MS DivX AVIs with resolutions ~ 640x300 and stereo MP3 sound
-too slow. When I use the <option>-nosound</option> option, everything is OK (but quiet).
+too slow.
+When I use the <option>-nosound</option> option, everything is OK (but quiet).
 </para></question>
 <answer><para>
 Your machine is too slow or your sound card driver is broken. Consult the
@@ -688,17 +717,18 @@ you have to use <option>-ao alsa:device=dmix</option>.
 <question><para>
 I have no sound when playing a video and get error messages similar to this one:
 <screen>
-    AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
-    audio_setup: Can't open audio device /dev/dsp: Device or resource busy
-    couldn't open/init audio device -> NOSOUND
-    Audio: no sound!!!
-    Start playing...
+AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+audio_setup: Can't open audio device /dev/dsp: Device or resource busy
+couldn't open/init audio device -> NOSOUND
+Audio: no sound!!!
+Start playing...
 </screen>
 </para></question>
 <answer><para>
 Are you running KDE or GNOME with the aRts or ESD sound daemon? Try disabling
-the sound daemon or use the <option>-ao arts</option> or <option>-ao esd</option>
-option to make <application>MPlayer</application> use aRts or ESD.
+the sound daemon or use the <option>-ao arts</option> or
+<option>-ao esd</option> option to make <application>MPlayer</application> use
+aRts or ESD.
 You might also be running ALSA without OSS emulation, try loading the ALSA OSS
 kernel modules or add <option>-ao alsa</option> to your command line to
 directly use the ALSA audio output driver.
@@ -722,7 +752,8 @@ another option is to start <application>MPlayer</application> with artsdsp.
 
 <qandaentry>
 <question><para>
-I have A/V sync problems. Some of my AVIs play fine, but some play with double speed!
+I have A/V sync problems.
+Some of my AVIs play fine, but some play with double speed!
 </para></question>
 <answer><para>
 You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and you
@@ -733,26 +764,29 @@ try to play a file which has 22050Hz audio. Try the
 
 <qandaentry>
 <question><para>
-When I play this movie I get video-audio desync and/or <application>MPlayer</application>
-crashes with the following message:
-<screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
+When I play this movie I get video-audio desync and/or
+<application>MPlayer</application> crashes with the following message:
+<screen>
+DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!
+</screen>
 </para></question>
 <answer><para>
 This can have multiple reasons.
 <itemizedlist>
 <listitem><para>
-Your CPU <emphasis>and/or</emphasis> video card <emphasis>and/or</emphasis>
-bus is too slow. <application>MPlayer</application> displays a message if
-this is the case (and the dropped frames counter goes up fast).
+  Your CPU <emphasis>and/or</emphasis> video card <emphasis>and/or</emphasis>
+  bus is too slow. <application>MPlayer</application> displays a message if
+  this is the case (and the dropped frames counter goes up fast).
 </para></listitem>
 <listitem><para>
-If it is an AVI, maybe it has bad interleaving, try the
-<option>-ni</option> to work around this.
-Or it may have a bad header, in this case <option>-nobps</option>
-and/or <option>-mc 0</option> can help.
+  If it is an AVI, maybe it has bad interleaving, try the
+  <option>-ni</option> to work around this.
+  Or it may have a bad header, in this case <option>-nobps</option>
+  and/or <option>-mc 0</option> can help.
 </para></listitem>
 <listitem><para>
-Your sound driver is buggy. See the <link linkend="audio">audio section</link>.
+  Your sound driver is buggy.
+  See the <link linkend="audio">audio section</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -760,7 +794,8 @@ Your sound driver is buggy. See the <link linkend="audio">audio section</link>.
 
 <qandaentry>
 <question><para>
-How can I get rid of A/V desynchronization while seeking through RealMedia streams?
+How can I get rid of A/V desynchronization
+while seeking through RealMedia streams?
 </para></question>
 <answer><para>
 <option>-mc 0.1</option> can help.
@@ -768,6 +803,7 @@ How can I get rid of A/V desynchronization while seeking through RealMedia strea
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-dvd">
 <title>DVD playback</title>
@@ -817,7 +853,8 @@ Yes. See the <link linkend="dvd">DVD chapter</link>.
 How can I set the region code of my DVD-drive? I don't have Windows!
 </para></question>
 <answer><para>
-Use the <ulink url="http://linvdr.org/projects/regionset/">regionset tool</ulink>.
+Use the
+<ulink url="http://linvdr.org/projects/regionset/">regionset tool</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -856,8 +893,8 @@ My DVD playback is sluggish!
 </para></question>
 <answer><para>
 Use the <option>-cache</option> option (described in the man page) and try
-enabling DMA for the DVD drive with the <command>hdparm</command> tool (described
-in the <link linkend="drives">CD chapter</link>).
+enabling DMA for the DVD drive with the <command>hdparm</command> tool
+(described in the <link linkend="drives">CD chapter</link>).
 </para></answer>
 </qandaentry>
 
@@ -881,9 +918,9 @@ mplayer dvd://1 -dvd-device <replaceable>/path/to/directory</replaceable>
 
 <qandaentry>
 <question><para>
-If <application>MPlayer</application> is paused and I try to seek or press any key at all,
-<application>MPlayer</application> ceases to be paused. I would like to be able
-to seek in the paused movie.
+If <application>MPlayer</application> is paused and I try to seek or press any
+key at all, <application>MPlayer</application> ceases to be paused.
+I would like to be able to seek in the paused movie.
 </para></question>
 <answer><para>
 This is very tricky to implement without losing A/V synchronization.
@@ -904,6 +941,7 @@ Stepping backwards is unlikely to be implemented anytime soon.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-encoding">
 <title>Encoding</title>
@@ -939,8 +977,9 @@ will dump the 5th title of the DVD into the file
 How can I create (S)VCDs automatically?
 </para></question>
 <answer><para>
-Try the <filename>mencvcd</filename> script from the <filename class="directory">TOOLS</filename>
-subdirectory. With it you can encode DVDs or other movies to VCD or SVCD format
+Try the <filename>mencvcd</filename> script from the
+<filename class="directory">TOOLS</filename> subdirectory.
+With it you can encode DVDs or other movies to VCD or SVCD format
 and even burn them directly to CD.
 </para></answer>
 </qandaentry>
@@ -1051,7 +1090,8 @@ You have to properly specify the <option>-sid</option> option.
 How can I encode only selected chapters from a DVD?
 </para></question>
 <answer><para>
-Use the <option>-chapter</option> option correctly, like: <option>-chapter 5-7</option>.
+Use the <option>-chapter</option> option correctly,
+like: <option>-chapter 5-7</option>.
 </para></answer>
 </qandaentry>
 
@@ -1066,36 +1106,48 @@ No, VFAT doesn't support 2GB+ files.
 
 <qandaentry>
 <question><para>
-What is the meaning of the numbers on the status line during the encoding process?
+What is the meaning of the numbers on the status line
+during the encoding process?
 </para></question>
 <answer><para>
 Example:
-<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+<screen>
+Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
-<listitem><para>time position in the encoded stream</para></listitem>
+  <varlistentry>
+  <term><systemitem>Pos: 264.5s</systemitem></term>
+  <listitem><para>time position in the encoded stream</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>6612f</systemitem></term>
-<listitem><para>number of video frames encoded</para></listitem>
+<varlistentry>
+  <term><systemitem>6612f</systemitem></term>
+  <listitem><para>number of video frames encoded</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>( 2%)</systemitem></term>
-<listitem><para>portion of the input stream encoded</para></listitem>
+<varlistentry>
+  <term><systemitem>( 2%)</systemitem></term>
+  <listitem><para>portion of the input stream encoded</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>7.12fps</systemitem></term>
-<listitem><para>encoding speed</para></listitem>
+<varlistentry>
+  <term><systemitem>7.12fps</systemitem></term>
+  <listitem><para>encoding speed</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
-<listitem><para>estimated remaining encoding time</para></listitem>
+<varlistentry>
+  <term><systemitem>Trem: 576min</systemitem></term>
+  <listitem><para>estimated remaining encoding time</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2856mb</systemitem></term>
-<listitem><para>estimated size of the final encode</para></listitem>
+<varlistentry>
+  <term><systemitem>2856mb</systemitem></term>
+  <listitem><para>estimated size of the final encode</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
-<listitem><para>current delay between audio and video streams</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V:0.065</systemitem></term>
+  <listitem><para>current delay between audio and video streams</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>[2126:192]</systemitem></term>
-<listitem>
-<para>average video bitrate (in kb/s) and average audio bitrate (in kb/s)</para></listitem>
+<varlistentry>
+  <term><systemitem>[2126:192]</systemitem></term>
+  <listitem><para>
+  average video bitrate (in kb/s) and average audio bitrate (in kb/s)
+  </para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
@@ -1103,7 +1155,8 @@ Example:
 
 <qandaentry>
 <question><para>
-Why is the recommended bitrate printed by <application>MEncoder</application> negative?
+Why is the recommended bitrate printed by <application>MEncoder</application>
+negative?
 </para></question>
 <answer><para>
 Because the bitrate you encoded the audio with is too large to fit the
@@ -1140,10 +1193,10 @@ It's not possible directly, but you can try this (note the
 <emphasis role="bold">&amp;</emphasis> at the end of
 <command>mplayer</command> command):
 <screen>
-    mkfifo encode
-    mplayer -ao pcm -aofile encode dvd://1 &amp;
-    lame <replaceable>your_opts</replaceable> encode music.mp3
-    rm encode
+mkfifo <replaceable>encode</replaceable>
+mplayer -ao pcm -aofile <replaceable>encode</replaceable> dvd://1 &amp;
+lame <replaceable>your_opts</replaceable> <replaceable>encode</replaceable> <replaceable>music.mp3</replaceable>
+rm <replaceable>encode</replaceable>
 </screen>
 This allows you to use any encoder, not only <application>LAME</application>,
 just replace <command>lame</command> with your favorite audio encoder in the
@@ -1173,7 +1226,7 @@ may override this behavior using <application>MEncoder</application>'s
 <option>-ffourcc</option> option.
 You may also change the FourCC of existing files in the same way:
 <screen>
-  mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
 </screen>
 Note that this will set the FourCC to XVID rather than DIVX.
 This is recommended as DIVX FourCC means DivX4, which is a very basic

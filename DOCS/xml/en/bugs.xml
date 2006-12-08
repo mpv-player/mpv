@@ -3,147 +3,184 @@
 <appendix id="bugs">
 <title>Known bugs</title>
 
-
 <sect1 id="bugs-special">
 <title>Special system/CPU-specific bugs/problems</title>
+
 <itemizedlist>
 <listitem>
-<para>SIGILL (signal 4) on P3 using 2.2.x kernels:</para>
-<para>Problem: kernel 2.2.x doesn't have proper (working) SSE support</para>
-<para>Solution: upgrade kernel to 2.4.x</para>
-<para>Workaround: <command>./configure --disable-sse</command></para>
+  <para>SIGILL (signal 4) on P3 using 2.2.x kernels:</para>
+  <para>Problem: kernel 2.2.x doesn't have proper (working) SSE support</para>
+  <para>Solution: upgrade kernel to 2.4.x</para>
+  <para>Workaround: <command>./configure --disable-sse</command></para>
 </listitem>
 
 <listitem>
-<para>General SIGILL (signal 4):</para>
-<para>Problem: you compiled and run <application>MPlayer</application> on
-different machines (for example compiled on P3 and running on Celeron)</para>
-<para>Solution: compile <application>MPlayer</application> on the same machine
-where you will use it!</para>
-<para>Workaround: You can forget all this by configuring with the
-<option>--enable-runtime-cpudetection</option> option or you can
-disable particular CPU instruction sets with more specific options (like
-<option>--disable-mmx</option>, <option>--disable-3dnow</option>, etc).
-</para>
+  <para>General SIGILL (signal 4):</para>
+  <para>
+  Problem: you compiled and run <application>MPlayer</application> on
+  different machines (for example compiled on P3 and running on Celeron)
+  </para>
+  <para>
+  Solution: compile <application>MPlayer</application> on the same machine
+  where you will use it!
+  </para>
+  <para>
+  Workaround: You can forget all this by configuring with the
+  <option>--enable-runtime-cpudetection</option> option or you can
+  disable particular CPU instruction sets with more specific options (like
+  <option>--disable-mmx</option>, <option>--disable-3dnow</option>, etc).
+  </para>
 </listitem>
 
 <listitem>
-<para>Crashes when dumping streams:</para>
-<para>Problem: core dump</para>
-<para>Solution: Don't panic. Make sure you know where your towel is.</para>
+  <para>Crashes when dumping streams:</para>
+  <para>Problem: core dump</para>
+  <para>Solution: Don't panic. Make sure you know where your towel is.</para>
 </listitem>
 </itemizedlist>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="bugs-audio">
 <title>Various A-V sync and other audio problems</title>
 
 <sect2 id="bugs-delay-all">
-<title>General audio delay or jerky sound (exists with all or many files)</title>
+<title>General audio delay or jerky sound
+  (exists with all or many files)</title>
+
 <itemizedlist>
 <listitem><para>
-most common: buggy audio driver! - try to use different drivers, try ALSA OSS
-emulation with <option>-ao oss</option>, also try <option>-ao sdl</option>,
-sometimes it helps. If your file plays fine with <option>-nosound</option>, then you can be sure
-it's sound card (driver) problem.
+  most common: buggy audio driver! - try to use different drivers, try ALSA OSS
+  emulation with <option>-ao oss</option>, also try <option>-ao sdl</option>,
+  sometimes it helps. If your file plays fine with <option>-nosound</option>,
+  then you can be sure it's sound card (driver) problem.
 </para></listitem>
 
 <listitem>
-<para>audio buffer problems (buffer size badly detected)</para>
-<para>Workaround: <application>MPlayer</application>'s <option>-abs</option> option</para>
+  <para>audio buffer problems (buffer size badly detected)</para>
+  <para>
+  Workaround: <application>MPlayer</application>'s <option>-abs</option> option
+  </para>
 </listitem>
 
 <listitem><para>
-samplerate problems - maybe your card doesn't support the samplerate used in your
-files - try the resampling filter (<option>-af resample=...</option>)
+  samplerate problems - maybe your card doesn't support the samplerate used in
+  your files - try the resampling filter (<option>-af resample=...</option>)
 </para></listitem>
 
 <listitem>
-<para>slow machine (CPU or VGA)</para>
-<para>try with <option>-vo null</option>, if it plays well, then you have slow
-VGA card/driver</para>
-<para>Workaround: buy a faster card or read this documentation about how to
-speed up</para>
-<para>Also try <option>-framedrop</option></para>
+  <para>slow machine (CPU or VGA)</para>
+  <para>
+  try with <option>-vo null</option>, if it plays well, then you have slow
+  VGA card/driver
+  </para>
+  <para>
+  Workaround: buy a faster card or read this documentation about how to speed up
+  </para>
+  <para>Also try <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-delay-specific">
 <title>Audio delay/de-sync specific to one or a few files</title>
+
 <itemizedlist>
 <listitem>
-<para>bad file</para>
-<para>
-Workaround:
+  <para>bad file</para>
+  <para>
+  Workaround:
   <itemizedlist>
   <listitem>
-    <para><option>-ni</option> or <option>-nobps</option> option (for
-    non-interleaved or bad files)</para>
+    <para>
+	<option>-ni</option> or <option>-nobps</option> option
+	(for non-interleaved or bad files)
+	</para>
     <para>and/or</para>
   </listitem>
   <listitem>
-    <para><option>-mc 0</option> (required for files with badly
-    interleaved VBR audio)</para>
+    <para>
+	<option>-mc 0</option>
+	(required for files with badly interleaved VBR audio)
+	</para>
     <para>and/or</para>
   </listitem>
   <listitem>
-    <para><option>-delay</option> or <keycap>+</keycap>/<keycap>-</keycap>
-    keys at runtime to adjust delay</para>
+    <para>
+	<option>-delay</option> or <keycap>+</keycap>/<keycap>-</keycap>
+    keys at runtime to adjust delay
+	</para>
   </listitem>
   </itemizedlist>
-If none of these help, please upload the file, we'll check (and fix).
+  If none of these help, please upload the file, we'll check (and fix).
 </para>
 </listitem>
 
 <listitem>
-<para>your sound card doesn't support 48kHz playback</para>
-<para>Workaround: buy a better sound card... or try to decrease fps by 10% (use
-<option>-fps 27</option> for a 30fps movie) or use the resample filter</para>
+  <para>your sound card doesn't support 48kHz playback</para>
+  <para>
+  Workaround: buy a better sound card... or try to decrease fps by 10%
+  (use <option>-fps 27</option> for a 30fps movie) or use the resample filter
+  </para>
 </listitem>
 
 <listitem>
-<para>slow machine (if A-V is not around 0, and the last number in the status
-line increasing)</para>
-<para>Workaround: <option>-framedrop</option></para>
+  <para>
+  slow machine (if A-V is not around 0,
+  and the last number in the status line increasing)
+  </para>
+  <para>Workaround: <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-nosound">
 <title>No sound at all</title>
+
 <itemizedlist>
 <listitem>
-<para>your file uses an unsupported audio codec</para>
-<para>Solution: read the documentation and help us adding support for it</para>
+  <para>your file uses an unsupported audio codec</para>
+  <para>
+  Solution: read the documentation and help us adding support for it
+  </para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-nopicture">
 <title>No picture at all (just plain grey/green window)</title>
+
 <itemizedlist>
 <listitem>
-<para>your file uses an unsupported video codec</para>
-<para>Solution: read the documentation and help us adding support for it</para>
+  <para>your file uses an unsupported video codec</para>
+  <para>
+  Solution: read the documentation and help us adding support for it
+  </para>
 </listitem>
 
 <listitem>
-<para>
-auto-selected codec can't decode the file, try to select another using
-<option>-vc</option> or <option>-vfm</option> options
-</para>
+  <para>
+  auto-selected codec can't decode the file, try to select another using
+  <option>-vc</option> or <option>-vfm</option> options
+  </para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-video">
 <title>Video-out problems</title>
+
 <para>
 First note that the options <option>-fs</option>, <option>-vm</option> and
 <option>-zoom</option> are not supported by all drivers. Plus, not all
@@ -154,18 +191,20 @@ drivers support scaling/zooming in hardware.
 <title>OSD/sub flickering</title>
 <para>
 <itemizedlist>
-<listitem><para>x11 driver: sorry, it can't be fixed now</para></listitem>
-<listitem><para>xv driver: use <option>-double</option> option</para></listitem>
+  <listitem><para>x11 driver: sorry, it can't be fixed now</para></listitem>
+  <listitem><para>xv driver: use <option>-double</option> option</para></listitem>
 </itemizedlist>
 </para>
 </formalpara>
 
 <formalpara>
-<title>Green image using mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<title>Green image using mga_vid
+  (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
 <para>
 <itemizedlist>
-<listitem><para>mga_vid misdetected your card's RAM amount, reload it using
-<option>mga_ram_size</option> option
+<listitem><para>
+  mga_vid misdetected your card's RAM amount, reload it using
+  <option>mga_ram_size</option> option.
 </para></listitem>
 </itemizedlist>
 </para>

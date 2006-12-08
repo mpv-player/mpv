@@ -35,23 +35,28 @@ information.
 </para>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="troubleshooting">
 <title>Troubleshooting</title>
 
 <para>Some notes:</para>
 
 <para>
-  If you have ALSA version 0.5, then you almost always have to use
-  <option>-ao alsa5</option>, since ALSA 0.5 has buggy OSS emulation code,
-  and will <emphasis role="bold">crash <application>MPlayer</application></emphasis>
-  with a message like this:
-  <screen>
-DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
---></screen>
+If you have ALSA version 0.5, then you almost always have to use
+<option>-ao alsa5</option>, since ALSA 0.5 has buggy OSS emulation code,
+and will <emphasis role="bold">crash <application>MPlayer</application></emphasis>
+with a message like this:
+<screen>
+DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!
+</screen>
 </para>
+
 <para>
-  If the sound clicks when playing from CD-ROM, turn on IRQ unmasking as
-  described in the <link linkend="drives">CD-ROM</link> section.
+If the sound clicks when playing from CD-ROM, turn on IRQ unmasking as
+described in the <link linkend="drives">CD-ROM</link> section.
 </para>
 </sect1>
 
