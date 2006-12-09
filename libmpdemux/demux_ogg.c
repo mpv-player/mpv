@@ -1612,7 +1612,7 @@ static void demux_close_ogg(demuxer_t* demuxer) {
       if (ogg_d->text_langs[i]) free(ogg_d->text_langs[i]);
     free(ogg_d->text_langs);
   }
-  if(demuxer->audio->id > -1) {
+  if(demuxer->audio->id > -1 && demuxer->audio->id < ogg_d->num_sub) {
     os = &ogg_d->subs[demuxer->audio->id];
     if(os && os->vi_inited)
       vorbis_info_clear(&os->vi);
