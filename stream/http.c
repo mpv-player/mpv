@@ -858,8 +858,8 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 err_out:
 	if (fd > 0) closesocket( fd );
 	res = -1;
-out:
 	http_free( http_hdr );
+out:
 	return res;
 }
 
