@@ -718,9 +718,10 @@ base64_encode(const void *enc, int encLen, char *out, int outMax) {
 }
 
 static int http_streaming_start(stream_t *stream, int* file_format) {
-	HTTP_header_t *http_hdr;
+	HTTP_header_t *http_hdr = NULL;
 	unsigned int i;
-	int fd=-1;
+	int fd = stream->fd;
+	int res = 0;
 	int redirect = 0;
 	int auth_retry=0;
 	int seekable=0;
@@ -730,16 +731,16 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 
 	do
 	{
+		if (fd > 0) closesocket(fd);
 		fd = http_send_request( url, 0 );
 		if( fd<0 ) {
-			return -1;
+			goto err_out;
 		}
 
+		http_free(http_hdr);
 		http_hdr = http_read_response( fd );
 		if( http_hdr==NULL ) {
-			closesocket( fd );
-			http_free( http_hdr );
-			return -1;
+			goto err_out;
 		}
 
 		stream->fd=fd;
@@ -784,23 +785,23 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 						*file_format = DEMUXER_TYPE_AAC;
 					else
 						*file_format = DEMUXER_TYPE_AUDIO;
-					return 0;
+					goto out;
 				}
 				case 400: // Server Full
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server is full, skipping!\n");
-					return -1;
+					goto err_out;
 				case 401: // Service Unavailable
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server return service unavailable, skipping!\n");
-					return -1;
+					goto err_out;
 				case 403: // Service Forbidden
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server return 'Service Forbidden'\n");
-					return -1;
+					goto err_out;
 				case 404: // Resource Not Found
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server couldn't find requested stream, skipping!\n");
-					return -1;
+					goto err_out;
 				default:
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: unhandled ICY-Errorcode, contact MPlayer developers!\n");
-					return -1;
+					goto err_out;
 			}
 		}
 
@@ -819,14 +820,16 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 					while(mime_type_table[i].mime_type != NULL) {
 						if( !strcasecmp( content_type, mime_type_table[i].mime_type ) ) {
 							*file_format = mime_type_table[i].demuxer_type;
-							return seekable;
+							res = seekable;
+							goto out;
 						}
 						i++;
 					}
 				}
 				// Not found in the mime type table, don't fail,
 				// we should try raw HTTP
-				return seekable;
+				res = seekable;
+				goto out;
 			// Redirect
 			case 301: // Permanently
 			case 302: // Temporarily
@@ -834,23 +837,29 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 				// TODO: RFC 2616, recommand to detect infinite redirection loops
 				next_url = http_get_field( http_hdr, "Location" );
 				if( next_url!=NULL ) {
-					closesocket( fd );
 					stream->streaming_ctrl->url = url_redirect( &url, next_url );
-					http_free( http_hdr );
 					redirect = 1;	
 				}
 				break;
 			case 401: // Authentication required
-				if( http_authenticate(http_hdr, url, &auth_retry)<0 ) return STREAM_UNSUPORTED;
+				if( http_authenticate(http_hdr, url, &auth_retry)<0 ) {
+					res = STREAM_UNSUPORTED;
+					goto err_out;
+				}
 				redirect = 1;
 				break;
 			default:
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"Server returned %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
-				return -1;
+				goto err_out;
 		}
 	} while( redirect );
 
-	return -1;
+err_out:
+	if (fd > 0) closesocket( fd );
+	res = -1;
+out:
+	http_free( http_hdr );
+	return res;
 }
 
 static int fixup_open(stream_t *stream,int seekable) {
