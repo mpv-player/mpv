@@ -200,7 +200,7 @@ m_option_t mpegopts_conf[] = {
 	{"init_vpts", &(conf_init_vpts), CONF_TYPE_INT, CONF_RANGE, 100, 700, NULL},		//2*frametime at 60fps
 	{"init_apts", &(conf_init_apts), CONF_TYPE_INT, CONF_RANGE, 100, 700, NULL},
 	{"vdelay", &conf_init_adelay, CONF_TYPE_INT, CONF_RANGE, 1, 32760, NULL},
-	{"vbuf_size", &conf_vbuf_size, CONF_TYPE_INT, CONF_RANGE, 40, 1024, NULL},
+	{"vbuf_size", &conf_vbuf_size, CONF_TYPE_INT, CONF_RANGE, 40, 1194, NULL},
 	{"abuf_size", &conf_abuf_size, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
 	{"drop", &conf_drop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
