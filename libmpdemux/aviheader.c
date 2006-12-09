@@ -13,9 +13,7 @@
 #include "stheader.h"
 
 #include "aviheader.h"
-
-#define MIN(a,b) (((a)<(b))?(a):(b))
-
+#include "libavutil/common.h"
 
 static MainAVIHeader avih;
 
@@ -181,16 +179,16 @@ while(1){
     case mmioFOURCC('I','D','I','T'): hdr="Digitization Time";break;
 
     case ckidAVIMAINHDR:          // read 'avih'
-      stream_read(demuxer->stream,(char*) &avih,MIN(size2,sizeof(avih)));
+      stream_read(demuxer->stream,(char*) &avih,FFMIN(size2,sizeof(avih)));
       le2me_MainAVIHeader(&avih); // swap to machine endian
-      chunksize-=MIN(size2,sizeof(avih));
+      chunksize-=FFMIN(size2,sizeof(avih));
       if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_avih(&avih,MSGL_V); // else print_avih_flags(&avih,MSGL_V);
       break;
     case ckidSTREAMHEADER: {      // read 'strh'
       AVIStreamHeader h;
-      stream_read(demuxer->stream,(char*) &h,MIN(size2,sizeof(h)));
+      stream_read(demuxer->stream,(char*) &h,FFMIN(size2,sizeof(h)));
       le2me_AVIStreamHeader(&h);  // swap to machine endian
-      chunksize-=MIN(size2,sizeof(h));
+      chunksize-=FFMIN(size2,sizeof(h));
       ++stream_id;
       if(h.fccType==streamtypeVIDEO){
         sh_video=new_sh_video(demuxer,stream_id);
@@ -710,7 +708,4 @@ skip_chunk:
   }
 }
 }
-
-#undef MIN
-
 
