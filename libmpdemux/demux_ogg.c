@@ -1614,7 +1614,7 @@ static void demux_close_ogg(demuxer_t* demuxer) {
   }
   if(demuxer->audio->id > -1 && demuxer->audio->id < ogg_d->num_sub) {
     os = &ogg_d->subs[demuxer->audio->id];
-    if(os && os->vi_inited)
+    if(os->vi_inited)
       vorbis_info_clear(&os->vi);
   }
   free(ogg_d);
