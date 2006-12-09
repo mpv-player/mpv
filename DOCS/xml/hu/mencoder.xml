@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21425 -->
+<!-- synced with r21466 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -16,21 +16,25 @@ történő kódolást több szempontból vizsgálják és kiemelik a problémák
 kapcsolatban.
 </para>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-selecting-codec">
 <title>Codec és konténer formátum kiválasztása</title>
 
 <para>
-  A kódoláshoz az audió és videó codec-ek a <option>-oac</option> és
-  <option>-ovc</option> opciókkal adható meg.
-  Gépeld be ezt a példát:
-  <screen>mencoder -ovc help</screen>
-  a gépeden lévő <application>MEncoder</application> által támogatott
-  videó codec-ek kilistázásához.
-  A következő választások érhetőek el:
+A kódoláshoz az audió és videó codec-ek a <option>-oac</option> és
+<option>-ovc</option> opciókkal adható meg.
+Gépeld be ezt a példát:
+<screen>mencoder -ovc help</screen>
+a gépeden lévő <application>MEncoder</application> által támogatott
+videó codec-ek kilistázásához.
+A következő választások érhetőek el:
 </para>
+
 <para>
 Audió codec-ek:
-
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
@@ -112,15 +116,17 @@ Videó codec-ek:
 </tgroup>
 </informaltable>
 </para>
+
 <para>
-  A kimeneti konténer formátumokat a <option>-of</option> kapcsolóval
-  választhatod ki.
-  Írd be:
-  <screen>mencoder -of help</screen>
-  a gépeden lévő <application>MEncoder</application> által támogatott konténerek
-  kilistázásához.
-  A következő választások érhetőek el:
+A kimeneti konténer formátumokat a <option>-of</option> kapcsolóval
+választhatod ki.
+Írd be:
+<screen>mencoder -of help</screen>
+a gépeden lévő <application>MEncoder</application> által támogatott konténerek
+kilistázásához.
+A következő választások érhetőek el:
 </para>
+
 <para>
 Konténer formátumok:
 <informaltable frame="all">
@@ -153,29 +159,31 @@ Konténer formátumok:
 </tbody>
 </tgroup>
 </informaltable>
-  Az AVI konténer a <application>MEncoder</application> natív konténer
-  formátuma, ami azt jelenti, hogy ezt kezeli a legjobban és hogy a
-  <application>MEncoder</application> ehhez lett tervezve.
-  Amint fentebb megemlítettük, más konténer formátumok is használhatóak, de
-  problémákba ütközhetsz a használatuk során.
+Az AVI konténer a <application>MEncoder</application> natív konténer
+formátuma, ami azt jelenti, hogy ezt kezeli a legjobban és hogy a
+<application>MEncoder</application> ehhez lett tervezve.
+Amint fentebb megemlítettük, más konténer formátumok is használhatóak, de
+problémákba ütközhetsz a használatuk során.
 </para>
 
 <para>
 <systemitem class="library">libavformat</systemitem> konténerek:
 </para>
+
 <para>
-  Ha a <systemitem class="library">libavformat</systemitem>-ot választottad
-  a kimeneti fájl keveréséhez (a <option>-of lavf</option> használatával),
-  a megfelelő konténer formátum a kimeneti fájl kiterjesztése alapján kerül
-  megállapításra.
-  Egy meghatározott konténer formátumot a <option>format</option> kapcsolóval
-  tudsz megadni a <systemitem class="library">libavformat</systemitem>-nek.
+Ha a <systemitem class="library">libavformat</systemitem>-ot választottad
+a kimeneti fájl keveréséhez (a <option>-of lavf</option> használatával),
+a megfelelő konténer formátum a kimeneti fájl kiterjesztése alapján kerül
+megállapításra.
+Egy meghatározott konténer formátumot a <option>format</option> kapcsolóval
+tudsz megadni a <systemitem class="library">libavformat</systemitem>-nek.
 
 <informaltable frame="all">
 <tgroup cols="2">
-<thead>
-<row><entry><systemitem class="library">libavformat</systemitem> konténer neve</entry><entry>Leírás</entry></row>
-</thead>
+<thead><row>
+<entry><systemitem class="library">libavformat</systemitem> konténer neve</entry>
+<entry>Leírás</entry>
+</row></thead>
 <tbody>
   <row>
     <entry>mpg</entry>
@@ -228,22 +236,22 @@ Konténer formátumok:
 </tbody>
 </tgroup>
 </informaltable>
-  Amint láthatod, a <systemitem class="library">libavformat</systemitem>
-  elég sok konténer formátumba engedélyezi a keverést a
-  <application>MEncoder</application>-nek.
-  Sajnos mivel a <application>MEncoder</application> nem úgy lett tervezve
-  a kezdetektől, hogy az AVI-tól különböző konténer formátumokat is támogassa,
-  izgulhatsz a kimeneti fájl miatt.
-  Kérjük ellenőrizd, hogy az audió/videó szinkron rendben van-e és hogy a
-  fájl lejátszható-e más lejátszókkal is az
-  <application>MPlayer</application>-en kívül.
+Amint láthatod, a <systemitem class="library">libavformat</systemitem>
+elég sok konténer formátumba engedélyezi a keverést a
+<application>MEncoder</application>-nek.
+Sajnos mivel a <application>MEncoder</application> nem úgy lett tervezve
+a kezdetektől, hogy az AVI-tól különböző konténer formátumokat is támogassa,
+izgulhatsz a kimeneti fájl miatt.
+Kérjük ellenőrizd, hogy az audió/videó szinkron rendben van-e és hogy a
+fájl lejátszható-e más lejátszókkal is az
+<application>MPlayer</application>-en kívül.
 </para>
 
 <informalexample>
 <para>Példa:</para>
 <para>
-  Egy Macromedia Flash videó létrehozása, mely lejátszható web böngészőben
-  a Macromedia Flash plugin-nel:
+Egy Macromedia Flash videó létrehozása, mely lejátszható web böngészőben
+a Macromedia Flash plugin-nel:
 <screen>
 mencoder <replaceable>bemenet.avi</replaceable> -o <replaceable>kimenet.flv</replaceable> -of lavf \
 	-oac mp3lame -lameopts abr:br=56 -srate 22050 -ovc lavc \
@@ -255,46 +263,54 @@ mencoder <replaceable>bemenet.avi</replaceable> -o <replaceable>kimenet.flv</rep
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-selecting-input">
 <title>Bemeneti fájl vagy eszköz kiválasztása</title>
 
 <para>
-  A <application>MEncoder</application> tud kódolni fájlokból vagy akár
-  direkt DVD vagy VCD lemezekről is.
-  A fájlból való kódoláshoz egyszerűen csak add meg a fájl nevét a parancssorban,
-  vagy a <option>dvd://</option><replaceable>részszám</replaceable> vagy
-  <option>vcd://</option><replaceable>sávszám</replaceable> eszközt a
-  DVD részről vagy VCD sávról történő kódoláshoz.
-  Ha egy DVD-t már átmásoltál a merevlemezedre (használhatod pl. a
-  <application>dvdbackup</application> ezsközt, mely a legtöbb rendszeren megvan),
-  és a másolatot akarod elkódolni, akkor is használnod kell a
-  <option>dvd://</option> szintaxist, a <option>-dvd-device</option>-szal együtt,
-  amit a lemásolt DVD gyökérkönyvtárának elérési útja követ.
+A <application>MEncoder</application> tud kódolni fájlokból vagy akár
+direkt DVD vagy VCD lemezekről is.
+A fájlból való kódoláshoz egyszerűen csak add meg a fájl nevét a parancssorban,
+vagy a <option>dvd://</option><replaceable>részszám</replaceable> vagy
+<option>vcd://</option><replaceable>sávszám</replaceable> eszközt a
+DVD részről vagy VCD sávról történő kódoláshoz.
+Ha egy DVD-t már átmásoltál a merevlemezedre (használhatod pl. a
+<application>dvdbackup</application> ezsközt, mely a legtöbb rendszeren megvan),
+és a másolatot akarod elkódolni, akkor is használnod kell a
+<option>dvd://</option> szintaxist, a <option>-dvd-device</option>-szal együtt,
+amit a lemásolt DVD gyökérkönyvtárának elérési útja követ.
 
-  A <option>-dvd-device</option> és <option>-cdrom-device</option>
-  kapcsolókkal felülbírálhatóak a direkt lemezolvasásnál használt eszközök
-  elérési útjái is, ha az alapértelmezett
-  <filename>/dev/dvd</filename> és <filename>/dev/cdrom</filename> nem
-  működnek a rendszereden.
+A <option>-dvd-device</option> és <option>-cdrom-device</option>
+kapcsolókkal felülbírálhatóak a direkt lemezolvasásnál használt eszközök
+elérési útjái is, ha az alapértelmezett
+<filename>/dev/dvd</filename> és <filename>/dev/cdrom</filename> nem
+működnek a rendszereden.
 </para>
+
 <para>
-  Ha DVD-ről kódolsz, gyakran kívánatos, hogy a kódolni kívánt fejezetet vagy
-  fejezetek tartományát is megadd.
-  Ehhez használhatod a <option>-chapter</option> kapcsolót.
-  Például a <option>-chapter</option> <replaceable>1-4</replaceable>
-  csak az 1-4 fejezeteket fogja elkódolni a DVD-ről.
-  Ez különösen hasznos, ha egy 1400 MB-os kódolást csinálsz két CD-re, mivel
-  meggyőződhetsz róla, hogy a vágás pontosan fejezet határnál lesz és nem
-  egy jelenet közepén.
+Ha DVD-ről kódolsz, gyakran kívánatos, hogy a kódolni kívánt fejezetet vagy
+fejezetek tartományát is megadd.
+Ehhez használhatod a <option>-chapter</option> kapcsolót.
+Például a <option>-chapter</option> <replaceable>1-4</replaceable>
+csak az 1-4 fejezeteket fogja elkódolni a DVD-ről.
+Ez különösen hasznos, ha egy 1400 MB-os kódolást csinálsz két CD-re, mivel
+meggyőződhetsz róla, hogy a vágás pontosan fejezet határnál lesz és nem
+egy jelenet közepén.
 </para>
+
 <para>
-  Ha van támogatott TV felvevő kártyád, tudsz kódolni a TV-in eszközről is.
-  Használd a <option>tv://</option><replaceable>csatornaszám</replaceable> eszközt
-  fájlnévként és a <option>-tv</option> kapcoslót a mentési beállítások
-  megadásához.
-  A DVB hasonlóképpen működik.
+Ha van támogatott TV felvevő kártyád, tudsz kódolni a TV-in eszközről is.
+Használd a <option>tv://</option><replaceable>csatornaszám</replaceable> eszközt
+fájlnévként és a <option>-tv</option> kapcoslót a mentési beállítások
+megadásához.
+A DVB hasonlóképpen működik.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="menc-feat-mpeg4">
@@ -342,14 +358,17 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-handheld-psp">
 <title>Kódolás Sony PSP videó formátumba</title>
 
 <para>
-  A <application>MEncoder</application> támogatja a Sony PSP videó formátumába
-  történő kódolást, de a PSP szoftverének változatától függően különböző 
-  korlátok vannak.
-  Nyugodt lehetsz, ha a következő korlátokat figyelembe veszed:
+A <application>MEncoder</application> támogatja a Sony PSP videó formátumába
+történő kódolást, de a PSP szoftverének változatától függően különböző 
+korlátok vannak.
+Nyugodt lehetsz, ha a következő korlátokat figyelembe veszed:
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Bitráta</emphasis>: nem lépheti át az 1500kbps-t,
@@ -375,15 +394,18 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 <para>
 <screen>
 mencoder -ofps 30000/1001 -af resample=24000 -vf harddup -of lavf \
--oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
--lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
-<replaceable>bemenet.video</replaceable> -o <replaceable>kimenet.psp</replaceable>
+	-oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+	-lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+	<replaceable>bemenet.video</replaceable> -o <replaceable>kimenet.psp</replaceable>
 </screen>
-  Note that you can set the title of the video with
-  <option>-info name=<replaceable>MovieTitle</replaceable></option>.
+Note that you can set the title of the video with
+<option>-info name=<replaceable>MovieTitle</replaceable></option>.
 </para>
 </example>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="menc-feat-mpeg">
@@ -430,18 +452,21 @@ mencoder <replaceable>bemenet.avi</replaceable> -o <replaceable>VCD.mpg</replace
 
 <note><title>Tanács:</title>
 <para>
-  Ha valamilyen okból kifolyólag a videó minőség a második lépésben nem
-  kielégítő, ajánlott újrafuttatnod a videó kódolásod egy másik cél
-  bitrátával, feltéve, hogy elmentetted az előző lépés statisztikát
-  tartalmazó fájlját.
-  Ez azért lehetséges, mert a statisztika fájl elsődleges célja minden
-  egyes képkocka komplexitásának feljegyzése, ami nem függ erőteljesen
-  a bitrátától. Azonban vedd figyelembe, hogy akkor kapod a legjobb
-  minőséget, ha a lépések cél bitrátája nem különbözik nagy mértékben.
+Ha valamilyen okból kifolyólag a videó minőség a második lépésben nem
+kielégítő, ajánlott újrafuttatnod a videó kódolásod egy másik cél
+bitrátával, feltéve, hogy elmentetted az előző lépés statisztikát
+tartalmazó fájlját.
+Ez azért lehetséges, mert a statisztika fájl elsődleges célja minden
+egyes képkocka komplexitásának feljegyzése, ami nem függ erőteljesen
+a bitrátától. Azonban vedd figyelembe, hogy akkor kapod a legjobb
+minőséget, ha a lépések cél bitrátája nem különbözik nagy mértékben.
 </para>
 </note>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="menc-feat-rescale">
 <title>Filmek átméretezése</title>
@@ -471,6 +496,9 @@ mencoder <replaceable>bemenet.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-streamcopy">
 <title>Stream másolás</title>
 
@@ -489,23 +517,23 @@ tudja őket. Ez a rész a <emphasis role="bold">másolásról</emphasis> szól.
   valószínűleg gyakorlati haszna nincs. Ésszerűbben: a videó stream másolása
   hasznos lehet például ha csak az audió stream-et kell kódolni (például
   tömörítetlen PCM-et MP3-ba).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Audió stream</emphasis> (<option>-oac copy</option> kapcsoló):
   őszintén szólva... Bele lehet mixelni egy külső audió fájlt (MP3, WAV) a
   kimeneti stream-be. Használd a
   <option>-audiofile <replaceable>fájlnév</replaceable></option> kapcsolót
   ehhez.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
-  A <option>-oac copy</option> használatával végrehajtott egyik konténer formátumból
-  másikba történő másoláshoz szükséges lehet a <option>-fafmttag</option> kapcsoló,
-  hogy megmaradjon az eredeti fájl audió formátum tag-je.
-  Például ha egy NSV fájl AAC audióval AVI konténerbe alakítasz át, az
-  audió formátum tag hibás lesz és meg kell változtatni. Az audió formátum tag-ek
-  listáját megtalálod a <filename>codecs.conf</filename> fájlban.
+A <option>-oac copy</option> használatával végrehajtott egyik konténer formátumból
+másikba történő másoláshoz szükséges lehet a <option>-fafmttag</option> kapcsoló,
+hogy megmaradjon az eredeti fájl audió formátum tag-je.
+Például ha egy NSV fájl AAC audióval AVI konténerbe alakítasz át, az
+audió formátum tag hibás lesz és meg kell változtatni. Az audió formátum tag-ek
+listáját megtalálod a <filename>codecs.conf</filename> fájlban.
 </para>
 
 <para>
@@ -515,16 +543,18 @@ mencoder <replaceable>bemenet.nsv</replaceable> -oac copy -fafmttag 0x706D \
 	-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
-
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-enc-images">
-<title>Kódolás több bemeneti képfájlból (JPEG, PNG, TGA, SGI)</title>
+<title>Kódolás több bemeneti képfájlból (JPEG, PNG, TGA, stb.)</title>
 
 <para>
-A <application>MEncoder</application> képes egy vagy több JPEG, PNG vagy TGA fájlból
-film létrehozására. Egy egyszerű framecopy-val MJPEG (Motion JPEG),
+A <application>MEncoder</application> képes egy vagy több JPEG, PNG, TGA vagy
+más képfájlból film létrehozására. Egy egyszerű framecopy-val MJPEG (Motion JPEG),
 MPNG (Motion PNG) vagy MTGA (Motion TGA) fájlokat tud létrehozni.
 </para>
 
@@ -534,11 +564,11 @@ MPNG (Motion PNG) vagy MTGA (Motion TGA) fájlokat tud létrehozni.
   A <application>MEncoder</application> <emphasis>dekódolja</emphasis> a bemeneti
   képe(ke)t a <systemitem class="library">libjpeg</systemitem>-gel (ha PNG-ket
   dekódol, akkor a <systemitem class="library">libpng</systemitem>-vel).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Ezután a <application>MEncoder</application> a dekódolt képeket a kiválasztott
   videó tömörítőnek adja át (DivX4, Xvid, FFmpeg msmpeg4, stb.).
-  </para></listitem>
+</para></listitem>
 </orderedlist>
 
 <formalpara>
@@ -604,7 +634,7 @@ A szélességnek 4 egész többszörösének kell lennie, ez a RAW RGB AVI form�
 <para>
 Egy Motion PNG (MPNG) fájl létrehozása az aktuális könyvtár PNG fájlaiból:
 <screen>
-mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>kimenet.avi</replaceable> <!--
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>kimenet.avi</replaceable><!--
 --></screen>
 </para>
 </informalexample>
@@ -617,10 +647,12 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
 --></screen>
 </para>
 </informalexample>
-
 </para>
 </formalpara>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="menc-feat-extractsub">
@@ -679,8 +711,11 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 	-vobsuboutid fr -sid 1 -nosound -ovc copy
 </screen>
 </example>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="aspect">
 <title>Képarány megtartása</title>

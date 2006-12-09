@@ -1,4 +1,4 @@
-.\" Synced with r21446
+.\" Synced with r21531
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -3236,10 +3236,8 @@ Nagyon általános kimeneti videó vezérlõ, aminek mûködnie kell bármilyen VESA VBE
 kompatibilis kártyán.
 .PD 0
 .RSs
-.IPs "dga\ \ "
-Bekapcsolja a DGA módot.
-.IPs nodga
-Kikapcsolja a DGA módot.
+.IPs (no)dga
+Ki vagy bekapcsolja a DGA módot (alapértelmezett: be).
 .IPs neotv_pal
 Aktiválja a NeoMagic TV kimenetet és beállítja PAL normára.
 .IPs neotv_ntsc
@@ -3574,6 +3572,20 @@ Kimeneti videó vezérlõ a SyncFB kernel modulhoz, ami a Matrox Gxxx
 kártyák speciális hardveres képességeinek használhatóságát biztosítja,
 mint pl. hardveres deinterlacing, méretezés és videó kimenet szinkronizálása
 a monitor függõleges visszatéréséhez.
+.
+.TP
+.B s3fb (csak Linux) (lásd még \-vf yuv2 és \-dr)
+S3 Virge specifikus videó kimeneti vezérlõ.
+Ez a vezérlõ támogatja a kártya YUV konverzióját és méretezését, a dupla
+bufferelést és a direkt renderelést.
+Használd a \-vf yuy2 kapcsolót a hardveres gyorsítású YUY2 rendereléshez,
+ami sokkal gyorsabb mint az YV12 ezen a kártyán.
+.PD 0
+.RSs
+.IPs <eszköz>
+Explicit kiválasztja a használandó fbdev eszköz nevét (alapértelmezett: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B 3dfx (csak Linux)
@@ -5498,6 +5510,30 @@ valamilyen egyenlet, pl. "2+2*sin(PI*qp)"
 .RE
 .
 .TP
+.B geq=egyenlet
+általános egyenlet választó szûrõ
+.RSs
+.IPs <egyenlet>
+Néhány egyenlet, pl.\&  'p(W-X\,Y)' vízszintesen tükrözik a képet.
+Használhatsz elválasztó karaktereket, hogy olvashatóbb legyen az egynelet.
+Van pár konstans, ami használható az egyenletben:
+.RSss
+PI: a pi szám
+.br
+E: az e szám
+.br
+X / Y: az aktuális minta koordinátái
+.br
+W / H: a kép szélessége és magassága
+.br
+SW / SH: szélesség/magasság méret a jelenleg szûrt síktól függõen, pl.\&
+1,1 és 0.5,0.5 a YUV 4:2:0-hoz.
+.br
+p(x,y): a jelenlegi síkon az x/y helyen lévõ pixel értékét adja vissza.
+REss
+.RE
+.
+.TP
 .B "test\ \ \ "
 Különbözõ teszt minták generálása.
 .
@@ -5929,11 +5965,16 @@ Mint az ivtc, a pullup is állapotmentes abban az értelemben, hogy nem
 kötõdik a minták követéséhez, ehelyett a következõ mezõket vizsgálja
 az összeillesztések azonosításához és a progresszív képkockák
 felépítéséhez. Még feljesztés alatt áll, de nagyon használhatónak
-tûnik. A jl, jr, jt és jb opciók a "szemét" mértékét, amit figyelmen
+tûnik.
+.RSs
+.IPs "jl, jr, jt, and jb"
+Ezek az értékek a "szemét" mértékét, amit figyelmen
 kívül kell hagyni a kép bal, jobb, felsõ és alsó részén.
 A bal/\:jobb egység 8 pixel-es, a felsõ/\:alsó egység 2 soros.
 Az alapértelmezett 8 pixel minden oldalon.
-Az sb (strict breaks) opció 1-re állítása csökkenti annak az esélyét,
+.br
+.IPs "sb (strict breaks)"
+Ezen opció 1-re állítása csökkenti annak az esélyét,
 hogy a pullup véletlenül hibás párosítású képkockát generáljon, de a
 gyors mozgású jeleneteknél túlzott mértékû képkocka eldobást is
 eredményezhet.
@@ -5942,7 +5983,9 @@ párosítja a mezõket.
 Ez segíti a videó utófeldolgozását azokon a helyeken, ahol kicsi
 elmosódás van a mezõk között, de átlapolt képkockák kimenetbe kerülését
 is okozhatja.
-Az mp (metric plane) opciót javasolt 1-re vagy 2-re állítani a
+.br
+.IPs "mp (metric plane)"
+Ezt az opciót javasolt 1-re vagy 2-re állítani a
 luma sík helyett a chroma sík használatához a pullup számításokban.
 Ez növeli a hatékonyságot a nagyon tiszta anyagokon, de sokkal inkább
 csökkenti, különösen ha chroma zaj van (szívárvány effektus) vagy
@@ -5950,12 +5993,15 @@ fekete-fehér a videó.
 A fõ oka az mp chroma síkra történõ állításának a CPU terhelés
 csökkentése és a pullup realtime valamint lassú gépeken történõ
 használata lehet.
-.br
+.REss
+.RS
+.sp 1
 .I MEGJEGYZÉS:
 A pullup-ot mindig kövesse egy softskip szûrõ kódolásnál, hogy biztos
 legyen, hogy a pullup minden képkockát lát.
 Ha ez elmarad, akkor a kimenet hibás lehet és általában össze is
 omlik, a codec/\:szûrõ réteg tervezésbeli korlátai miatt.
+.REss
 .
 .TP
 .B filmdint[=opciók]
@@ -9707,18 +9753,29 @@ Ez az opció figyelmen kívül lesz hagyva, ha a telecine opcióval használod.
 .TP
 .B telecine
 Engedélyezi a 3:2-es pulldown soft telecine módot: a muxer úgy trükköz a
-videó folyammal, hogy 30000/1001 vagy 30 fps-en kódoltnak tûnik; csak MPEG-2
-videóval mûködik, ha a kimeneti frameráta, melyet a \-ofps állít be, vagy
-24000/1001 vagy 24 fps.
+videó folyammal, hogy 30000/1001-en kódoltnak tûnik.
+Csak akkor mûködik MPEG-2 videóval, ha az \-ofps kapcsolóval beállított
+kimeneti frameráta 24000/1001 fps.
 Bármelyik más frameráta inkompatibilis ezzel az opcióval.
 .
 .TP
 .B film2pal
 Engedélyezi a FILM-PAL és NTSC-PAL soft telecine módot: a muxer úgy trükköz
-a videó folyammal, hogy 25 fps-en kódoltnak fog tûnni; csak MPEG-2 videóval
-mûködik, ha a kimeneti frameráta, melyet a \-ofps állít be, vagy 24000/1001
-vagy 24 fps.
+a videó folyammal, hogy 25 fps-en kódoltnak fog tûnni.
+Csak akkor mûködik MPEG-2 videóval, ha az \-ofps kapcsolóval beállított
+kimeneti frameráta 24000/1001 fps.
 Bármelyik más frameráta inkompatibilis ezzel az opcióval.
+.
+.TP
+.B tele_src és tele_dest
+Bekapcsolja az önkéntes telecine-lést Donand Graft's DGPulldown kódjának
+felhasználásával.
+Meg kell adnod az eredeti és a kívánt framerátát; a muxer a videó
+folyamot olyan kódolásúnak láttatja, mintha <tele_dest> kocka per másodperccel
+lett volna elkódolva, lecserélve a névleges kimeneti framerátát.
+Csak akkor mûködik az MPEG-2-vel, ha a bementi frameráta kisebb, mint a kimeneti
+és a frameráta növekedése <= 1.5.
+Példa PAL-ból NTSC-be történõ telecine-re: tele_src=25:tele_dest=30000/1001.
 .
 .TP
 .B vbuf_size=<40\-1024>
@@ -10214,6 +10271,13 @@ mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06
 .br
 Egy kicsit játszadoznod kell a pan értékekkel (pl. felszorozni az értékeket) a
 hangerõ növeléséhez vagy a kattogás elkerüléséhez.
+.
+.PP
+.B checkerboard invertálás geq szûrõvel:
+.nf
+mplayer \-vf geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+.fi
+.
 .
 .SH PÉLDÁK A MENCODER HASZNÁLATÁRA
 .

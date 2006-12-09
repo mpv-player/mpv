@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21376 -->
+<!-- synced with r21508 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -427,8 +427,8 @@
 </para>
 
 <para>
-  A legtöbb DVD-n van valamekkora fekete sáv a sarkokban. Ha ezeket
-  békén hagyod, akkor több módon is ronthatják a minőséget.
+  A legtöbb DVD-n van valamekkora fekete sáv a sarkokban. Ha ezeket békén hagyod,
+  akkor több módon is <emphasis role="bold">nagyon</emphasis> rontják a minőséget.
 </para>
 
 <orderedlist>
