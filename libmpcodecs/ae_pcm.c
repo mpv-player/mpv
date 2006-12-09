@@ -36,7 +36,7 @@ static int bind_pcm(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 
 static int encode_pcm(audio_encoder_t *encoder, uint8_t *dest, void *src, int nsamples, int max_size)
 {
-	max_size = min(nsamples, max_size);
+	max_size = FFMIN(nsamples, max_size);
 	memcpy(dest, src, max_size);
 	return max_size;
 }

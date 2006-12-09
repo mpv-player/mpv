@@ -96,7 +96,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 		if(start + len > sh->a_in_buffer_len)
 		{
 			int l;
-			l = min(sh->a_in_buffer_size - sh->a_in_buffer_len, start + len);
+			l = FFMIN(sh->a_in_buffer_size - sh->a_in_buffer_len, start + len);
 			l = demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len], l);
 			if(! l)
 				break;

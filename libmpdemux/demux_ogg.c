@@ -593,7 +593,7 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
   stream_seek(s,demuxer->movi_start);
   } else {
     //the 270000 are just a wild guess
-    stream_seek(s,max(ogg_d->pos,demuxer->movi_end-270000));
+    stream_seek(s,FFMAX(ogg_d->pos,demuxer->movi_end-270000));
   }
   ogg_sync_reset(sync);
 

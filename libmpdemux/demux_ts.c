@@ -1174,7 +1174,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 			
 			while(i < sl->ts_len)
 			{
-				m = min(8, sl->ts_len - i);
+				m = FFMIN(8, sl->ts_len - i);
 				v |= getbits(buf, n, m);
 				if(sl->ts_len - i > 8)
 					v <<= 8;
@@ -1193,7 +1193,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 		pl_size = 0;
 		while(i < sl->au_len)
 		{
-			m = min(8, sl->au_len - i);
+			m = FFMIN(8, sl->au_len - i);
 			pl_size |= getbits(buf, n, m);
 			if(sl->au_len - i > 8)
 				pl_size <<= 8;
@@ -1662,7 +1662,7 @@ static uint16_t get_mp4_desc_len(uint8_t *buf, int *len)
 	int i = 0, j, size = 0;
 	
 	mp_msg(MSGT_DEMUX, MSGL_DBG2, "PARSE_MP4_DESC_LEN(%d), bytes: ", *len);
-	j = min(*len, 4);
+	j = FFMIN(*len, 4);
 	while(i < j)
 	{
 		mp_msg(MSGT_DEMUX, MSGL_DBG2, " %x ", buf[i]);
@@ -2957,7 +2957,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			if(tss->payload_size > 0)
 			{
-				sz = min(tss->payload_size, buf_size);
+				sz = FFMIN(tss->payload_size, buf_size);
 				tss->payload_size -= sz;
 				es->size = sz;
 			}

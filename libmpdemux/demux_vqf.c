@@ -98,31 +98,31 @@ static demuxer_t* demux_open_vqf(demuxer_t* demuxer) {
         memcpy(sdata,&buf[i],slen); sdata[slen]=0; i+=slen;
         if(sid==mmioFOURCC('N','A','M','E'))
         {
-        memcpy(hi->Name,sdata,min(BUFSIZ,slen));
+        memcpy(hi->Name,sdata,FFMIN(BUFSIZ,slen));
         demux_info_add(demuxer,"Title",sdata);
         }
         else
         if(sid==mmioFOURCC('A','U','T','H'))
         {
-        memcpy(hi->Auth,sdata,min(BUFSIZ,slen));
+        memcpy(hi->Auth,sdata,FFMIN(BUFSIZ,slen));
         demux_info_add(demuxer,"Author",sdata);
         }
         else
         if(sid==mmioFOURCC('C','O','M','T'))
         {
-        memcpy(hi->Comt,sdata,min(BUFSIZ,slen));
+        memcpy(hi->Comt,sdata,FFMIN(BUFSIZ,slen));
         demux_info_add(demuxer,"Comment",sdata);
         }
         else
         if(sid==mmioFOURCC('(','c',')',' '))
         {
-        memcpy(hi->Cpyr,sdata,min(BUFSIZ,slen));
+        memcpy(hi->Cpyr,sdata,FFMIN(BUFSIZ,slen));
         demux_info_add(demuxer,"Copyright",sdata);
         }
         else
         if(sid==mmioFOURCC('F','I','L','E'))
         {
-        memcpy(hi->File,sdata,min(BUFSIZ,slen));
+        memcpy(hi->File,sdata,FFMIN(BUFSIZ,slen));
         }
         else
         if(sid==mmioFOURCC('A','L','B','M')) demux_info_add(demuxer,"Album",sdata);

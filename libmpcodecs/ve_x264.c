@@ -124,7 +124,7 @@ void x264enc_set_param(m_option_t* opt, char* arg)
         if(turbo == 1)
         {
             param.i_frame_reference = ( param.i_frame_reference + 1 ) >> 1;
-            param.analyse.i_subpel_refine = max( min( 3, param.analyse.i_subpel_refine - 1 ), 1 );
+            param.analyse.i_subpel_refine = FFMAX( FFMIN( 3, param.analyse.i_subpel_refine - 1 ), 1 );
             param.analyse.inter &= ( ~X264_ANALYSE_PSUB8x8 );
             param.analyse.inter &= ( ~X264_ANALYSE_BSUB16x16 );
             param.analyse.i_trellis = 0;

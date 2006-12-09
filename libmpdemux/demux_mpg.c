@@ -57,7 +57,7 @@ static int parse_psm(demuxer_t *demux, int len) {
   prog_len = stream_read_word(demux->stream);		//length of program descriptors
   stream_skip(demux->stream, prog_len);			//.. that we ignore
   es_map_len = stream_read_word(demux->stream);		//length of elementary streams map
-  es_map_len = min(es_map_len, len - prog_len - 8);	//sanity check
+  es_map_len = FFMIN(es_map_len, len - prog_len - 8);	//sanity check
   while(es_map_len > 0) {
     type = stream_read_char(demux->stream);
     id = stream_read_char(demux->stream);
@@ -91,7 +91,7 @@ static int parse_psm(demuxer_t *demux, int len) {
       mp_dbg(MSGT_DEMUX,MSGL_V, "PSM ES, id=0x%x, type=%x, stype: %x\n", id, type, priv->es_map[idoffset]);
     }
     plen = stream_read_word(demux->stream);		//length of elementary stream descriptors
-    plen = min(plen, es_map_len);			//sanity check
+    plen = FFMIN(plen, es_map_len);			//sanity check
     stream_skip(demux->stream, plen);			//skip descriptors for now
     es_map_len -= 4 + plen;
   }

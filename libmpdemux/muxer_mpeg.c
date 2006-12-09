@@ -936,7 +936,7 @@ static int calc_packet_len(muxer_stream_t *s, int psize, int finalize)
 	{
 		if(!frpos && len>0 && s->type == MUXER_TYPE_VIDEO && spriv->framebuf[n].type==I_FRAME)
 			return len;
-		m = min(spriv->framebuf[n].size - frpos, psize - len);
+		m = FFMIN(spriv->framebuf[n].size - frpos, psize - len);
 		len += m;
 		frpos += m;
 		if(frpos == spriv->framebuf[n].size)
@@ -997,8 +997,8 @@ static int find_packet_timestamps(muxer_priv_t *priv, muxer_stream_t *s, unsigne
 
 	if(i > -1)
 	{
-		dpts = max(spriv->last_saved_pts, spriv->framebuf[i].pts) - 
-			min(spriv->last_saved_pts, spriv->framebuf[i].pts) +
+		dpts = FFMAX(spriv->last_saved_pts, spriv->framebuf[i].pts) - 
+			FFMIN(spriv->last_saved_pts, spriv->framebuf[i].pts) +
 			spriv->framebuf[0].idur;
 
 		if(s->type != MUXER_TYPE_VIDEO)
@@ -1218,7 +1218,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 			update_demux_bufsize(spriv, frm->dts, frm->size, s->type);
 		}
 
-		m = min(frm->size - frm->pos, priv->packet_size - spriv->pack_offset);
+		m = FFMIN(frm->size - frm->pos, priv->packet_size - spriv->pack_offset);
 		memcpy(&(spriv->pack[spriv->pack_offset]), &(frm->buffer[frm->pos]), m);
 
 		len += m;
@@ -2215,7 +2215,7 @@ static void fix_parameters(muxer_stream_t *stream)
 		{
 			stream->ckid = be2me_32 (0x1bd);
 			if(priv->is_genmpeg1 || priv->is_genmpeg2)
-				fix_audio_sys_header(priv, spriv->id, 0xbd, max(conf_abuf_size, 58)*1024);	//only one audio at the moment
+				fix_audio_sys_header(priv, spriv->id, 0xbd, FFMAX(conf_abuf_size, 58)*1024);	//only one audio at the moment
 			spriv->id = 0xbd;
 			if(!conf_abuf_size)
 			spriv->max_buffer_size = 16*1024;

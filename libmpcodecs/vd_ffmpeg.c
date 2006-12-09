@@ -392,11 +392,11 @@ static int init(sh_video_t *sh){
         if (sh->bih->biSize-sizeof(BITMAPINFOHEADER))
             /* Palette size in biSize */
             memcpy(avctx->palctrl->palette, sh->bih+1,
-                   min(sh->bih->biSize-sizeof(BITMAPINFOHEADER), AVPALETTE_SIZE));
+                   FFMIN(sh->bih->biSize-sizeof(BITMAPINFOHEADER), AVPALETTE_SIZE));
         else
             /* Palette size in biClrUsed */
             memcpy(avctx->palctrl->palette, sh->bih+1,
-                   min(sh->bih->biClrUsed * 4, AVPALETTE_SIZE));
+                   FFMIN(sh->bih->biClrUsed * 4, AVPALETTE_SIZE));
 	}
 
     if(sh->bih)
