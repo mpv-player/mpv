@@ -1052,8 +1052,9 @@ void init_vo_spudec(void) {
 
 #ifdef USE_DVDNAV
   if (vo_spudec==NULL && stream->type==STREAMTYPE_DVDNAV) {
+    unsigned int *palette = mp_dvdnav_get_spu_clut(stream);
     current_module="spudec_init_dvdnav";
-    vo_spudec=spudec_new_scaled(NULL, sh_video->disp_w, sh_video->disp_h);
+    vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
   }
 #endif
 
