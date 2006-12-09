@@ -178,7 +178,7 @@ http_send_request( URL_t *url, off_t pos ) {
 	HTTP_header_t *http_hdr;
 	URL_t *server_url;
 	char str[256];
-	int fd;
+	int fd = -1;
 	int ret;
 	int proxy = 0;		// Boolean
 
@@ -245,6 +245,7 @@ http_send_request( URL_t *url, off_t pos ) {
 
 	return fd;
 err_out:
+	if (fd > 0) closesocket(fd);
 	http_free(http_hdr);
 	if (proxy && server_url)
 		url_free(server_url);
