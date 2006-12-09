@@ -731,6 +731,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 
 	do
 	{
+		redirect = 0;
 		if (fd > 0) closesocket(fd);
 		fd = http_send_request( url, 0 );
 		if( fd<0 ) {
