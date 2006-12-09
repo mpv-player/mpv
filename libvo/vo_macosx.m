@@ -327,7 +327,7 @@ static int control(uint32_t request, void *data, ...)
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
 		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); [mpGLView ontop]; return VO_TRUE;
 		case VOCTRL_ROOTWIN: vo_rootwin = (!(vo_rootwin)); [mpGLView rootwin]; return VO_TRUE;
-		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); [mpGLView fullscreen: YES]; return VO_TRUE;
+		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); [mpGLView fullscreen: NO]; return VO_TRUE;
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
 		case VOCTRL_SET_PANSCAN: [mpGLView panscan]; return VO_TRUE;
 	}
@@ -489,7 +489,7 @@ static int control(uint32_t request, void *data, ...)
 	if(sender == kHalfScreenCmd)
 	{
 		if(isFullscreen) {
-			vo_fs = (!(vo_fs)); [self fullscreen:YES];
+			vo_fs = (!(vo_fs)); [self fullscreen:NO];
 		}
 		
 		winSizeMult = 0.5;
@@ -501,7 +501,7 @@ static int control(uint32_t request, void *data, ...)
 	if(sender == kNormalScreenCmd)
 	{
 		if(isFullscreen) {
-			vo_fs = (!(vo_fs)); [self fullscreen:YES];
+			vo_fs = (!(vo_fs)); [self fullscreen:NO];
 		}
 		
 		winSizeMult = 1;
@@ -513,7 +513,7 @@ static int control(uint32_t request, void *data, ...)
 	if(sender == kDoubleScreenCmd)
 	{
 		if(isFullscreen) {
-			vo_fs = (!(vo_fs)); [self fullscreen:YES];
+			vo_fs = (!(vo_fs)); [self fullscreen:NO];
 		}
 		
 		winSizeMult = 2;
@@ -525,7 +525,7 @@ static int control(uint32_t request, void *data, ...)
 	if(sender == kFullScreenCmd)
 	{
 		vo_fs = (!(vo_fs));
-		[self fullscreen:YES];
+		[self fullscreen:NO];
 	}
 
 	if(sender == kKeepAspectCmd)
