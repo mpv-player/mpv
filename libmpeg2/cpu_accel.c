@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
+ * Modified for use with MPlayer, see libmpeg-0.4.1.diff for the exact changes.
  * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
  * $Id$
  */
@@ -50,7 +50,7 @@ static inline uint32_t arch_accel (void)
     int AMD;
     uint32_t caps;
 
-#if !defined(PIC) && !defined(__PIC__)
+#if defined(__x86_64__) || (!defined(PIC) && !defined(__PIC__))
 #define cpuid(op,eax,ebx,ecx,edx)	\
     __asm__ ("cpuid"			\
 	     : "=a" (eax),		\
@@ -59,12 +59,12 @@ static inline uint32_t arch_accel (void)
 	       "=d" (edx)		\
 	     : "a" (op)			\
 	     : "cc")
-#else	/* PIC version : save ebx */
+#else  /* PIC version : save ebx (not needed on x86_64) */
 #define cpuid(op,eax,ebx,ecx,edx)	\
-    __asm__ ("push %%ebx\n\t"		\
+    __asm__ ("pushl %%ebx\n\t"		\
 	     "cpuid\n\t"		\
 	     "movl %%ebx,%1\n\t"	\
-	     "pop %%ebx"		\
+	     "popl %%ebx"		\
 	     : "=a" (eax),		\
 	       "=r" (ebx),		\
 	       "=c" (ecx),		\
@@ -73,6 +73,7 @@ static inline uint32_t arch_accel (void)
 	     : "cc")
 #endif
 
+#ifndef __x86_64__ /* x86_64 supports the cpuid op */
     __asm__ ("pushf\n\t"
 	     "pushf\n\t"
 	     "pop %0\n\t"
@@ -90,6 +91,7 @@ static inline uint32_t arch_accel (void)
 
     if (eax == ebx)		/* no cpuid */
 	return 0;
+#endif
 
     cpuid (0x00000000, eax, ebx, ecx, edx);
     if (!eax)			/* vendor string only */
@@ -154,7 +156,7 @@ static RETSIGTYPE sigill_handler (int sig)
 }
 
 #ifdef ARCH_PPC
-static inline uint32_t arch_accel (void)
+static uint32_t arch_accel (void)
 {
     static RETSIGTYPE (* oldsig) (int);
 
@@ -184,7 +186,7 @@ static inline uint32_t arch_accel (void)
 #endif /* ARCH_PPC */
 
 #ifdef ARCH_SPARC
-static inline uint32_t arch_accel (void)
+static uint32_t arch_accel (void)
 {
     static RETSIGTYPE (* oldsig) (int);
 
@@ -220,7 +222,7 @@ static inline uint32_t arch_accel (void)
 #endif /* ARCH_PPC || ARCH_SPARC */
 
 #ifdef ARCH_ALPHA
-static inline uint32_t arch_accel (void)
+static uint32_t arch_accel (void)
 {
 #ifdef CAN_COMPILE_ALPHA_MVI
     uint64_t no_mvi;

@@ -170,21 +170,6 @@
      mpeg2dec->fbuf[0] = &mpeg2dec->fbuf_alloc[0].fbuf;
      mpeg2dec->fbuf[1] = &mpeg2dec->fbuf_alloc[1].fbuf;
      mpeg2dec->fbuf[2] = &mpeg2dec->fbuf_alloc[2].fbuf;
-@@ -272,9 +272,11 @@
-     if (!(buffer[2] & 2))	/* missing marker_bit */
- 	return 1;
- 
--    sequence->display_width = (buffer[1] << 6) | (buffer[2] >> 2);
--    sequence->display_height =
--	((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3);
-+    if( (buffer[1] << 6) | (buffer[2] >> 2) )
-+	sequence->display_width = (buffer[1] << 6) | (buffer[2] >> 2);
-+    if( ((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3) )
-+	sequence->display_height =
-+	    ((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3);
- 
-     return 0;
- }
 @@ -551,6 +558,7 @@
  	if (!(mpeg2dec->sequence.flags & SEQ_FLAG_PROGRESSIVE_SEQUENCE)) {
  	    picture->nb_fields = (buffer[3] & 2) ? 3 : 2;
@@ -203,24 +188,6 @@
  		    k * mpeg2dec->quantizer_matrix[index][j];
 --- libmpeg2/idct.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/idct.c	2006-06-16 20:12:50.000000000 +0200
-@@ -66,7 +70,7 @@
- } while (0)
- #endif
- 
--static void inline idct_row (int16_t * const block)
-+static inline void idct_row (int16_t * const block)
- {
-     int d0, d1, d2, d3;
-     int a0, a1, a2, a3, b0, b1, b2, b3;
-@@ -119,7 +123,7 @@
-     block[7] = (a0 - b0) >> 12;
- }
- 
--static void inline idct_col (int16_t * const block)
-+static inline void idct_col (int16_t * const block)
- {
-     int d0, d1, d2, d3;
-     int a0, a1, a2, a3, b0, b1, b2, b3;
 @@ -239,12 +239,15 @@
  
  void mpeg2_idct_init (uint32_t accel)
@@ -257,24 +224,6 @@
  	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
 --- libmpeg2/idct_alpha.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/idct_alpha.c	2006-06-16 20:12:50.000000000 +0200
-@@ -59,7 +63,7 @@
- } while (0)
- #endif
- 
--static void inline idct_row (int16_t * const block)
-+static inline void idct_row (int16_t * const block)
- {
-     uint64_t l, r;
-     int_fast32_t d0, d1, d2, d3;
-@@ -116,7 +120,7 @@
-     block[7] = (a0 - b0) >> 12;
- }
- 
--static void inline idct_col (int16_t * const block)
-+static inline void idct_col (int16_t * const block)
- {
-     int_fast32_t d0, d1, d2, d3;
-     int_fast32_t a0, a1, a2, a3, b0, b1, b2, b3;
 @@ -157,6 +161,7 @@
      block[8*7] = (a0 - b0) >> 17;
  }
@@ -324,8 +273,7 @@
 +#ifdef HAVE_MMX
 +    if (accel & MPEG2_ACCEL_X86_MMX)
  	mpeg2_mc = mpeg2_mc_mmx;
--    elseo
-+    else
+     else
  #endif
 -#ifdef ARCH_PPC
 +#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
@@ -406,15 +354,6 @@
  
      decoder->quantizer_matrix[0] =
  	decoder->quantizer_prescale[0][quantizer_scale_code];
-@@ -1252,7 +1252,7 @@
- 	      ref[0] + offset, decoder->stride, 16);			      \
-     table[4] (decoder->dest[1] + decoder->offset,			      \
- 	      ref[1] + offset, decoder->stride, 16);			      \
--    table[4] (decoder->dest[2] + (decoder->offset >> 1),		      \
-+    table[4] (decoder->dest[2] + decoder->offset,			      \
- 	      ref[2] + offset, decoder->stride, 16)
- 
- #define bit_buf (decoder->bitstream_buf)
 @@ -1568,6 +1569,18 @@
  
  #define NEXT_MACROBLOCK							\

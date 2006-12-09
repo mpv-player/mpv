@@ -41,7 +41,7 @@ typedef vector unsigned short vector_u16_t;
 typedef vector signed int vector_s32_t;
 typedef vector unsigned int vector_u32_t;
 
-#if defined( HAVE_ALTIVEC_H ) && !defined( __APPLE_ALTIVEC__ ) && (__GNUC__ * 100 + __GNUC_MINOR__ < 303)
+#if defined(HAVE_ALTIVEC_H) && (__GNUC__ * 100 + __GNUC_MINOR__ < 303)
 /* work around gcc <3.3 vec_mergel bug */
 static inline vector_s16_t my_vec_mergel (vector_s16_t const A,
 					  vector_s16_t const B)
@@ -56,10 +56,10 @@ static inline vector_s16_t my_vec_mergel (vector_s16_t const A,
 #define vec_mergel my_vec_mergel
 #endif
 
-#if defined( __APPLE_CC__ ) && defined( __APPLE_ALTIVEC__ ) /* apple */
-#define VEC_S16(a,b,c,d,e,f,g,h) (vector_s16_t) (a, b, c, d, e, f, g, h)
-#else			/* gnu */
+#ifdef HAVE_ALTIVEC_H	/* gnu */
 #define VEC_S16(a,b,c,d,e,f,g,h) {a, b, c, d, e, f, g, h}
+#else			/* apple */
+#define VEC_S16(a,b,c,d,e,f,g,h) (vector_s16_t) (a, b, c, d, e, f, g, h)
 #endif
 
 static const vector_s16_t constants ATTR_ALIGN(16) =
