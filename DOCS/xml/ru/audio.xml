@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21537 -->
 
 <chapter id="audio">
 <title>Устройства вывода звука</title>
@@ -30,11 +30,15 @@
 </para>
 
 <para>
-Если вам посчастливилось имет плохой звуковой драйвер, попробуйте опцию 
+Если вам посчастливилось иметь плохой звуковой драйвер, попробуйте опцию 
 <option>-autosync</option>, она может решить проблему. Смотрите страницу
 man руководства для подробной информации.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="troubleshooting">
 <title>Решение проблем</title>
@@ -42,17 +46,18 @@ man руководства для подробной информации.
 <para>Несколько замечаний:</para>
 
 <para>
-  Если у вас ALSA версии 0.5, то вы должны всегда использовать 
-  <option>-ao alsa5</option>, поскольку код эмуляции OSS в ALSA 0.5  имеет ошибки,
-  и приведет к <emphasis role="bold">краху <application>MPlayer</application></emphasis>
-  с сообщеним вроде этого:
-  <screen>
-DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
---></screen>
+Если у вас ALSA версии 0.5, то вы должны всегда использовать 
+<option>-ao alsa5</option>, поскольку код эмуляции OSS в ALSA 0.5  имеет ошибки,
+и приведет к <emphasis role="bold">краху <application>MPlayer</application></emphasis>
+с сообщеним вроде этого:
+<screen>
+DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!
+</screen>
 </para>
+
 <para>
-  Если слышны щелчки при проигрывании с CD-ROM, включите IRQ unmasking как
-  описано в секции <link linkend="drives">CD-ROM</link>.
+Если слышны щелчки при проигрывании с CD-ROM, включите IRQ unmasking, как
+описано в секции <link linkend="drives">CD-ROM</link>.
 </para>
 </sect1>
 

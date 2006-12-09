@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21466 -->
+<!-- synced with r21537 -->
 <chapter id="mencoder">
 <title>Основы использования <application>MEncoder</application></title>
 
@@ -38,38 +38,42 @@
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Название кодека</entry><entry>Описание</entry></row>
+<row>
+  <entry>Название кодека</entry>
+  <entry>Описание</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>mp3lame</entry>
-    <entry>Кодируйте в VBR, ABR или CBR MP3 с LAME</entry>
-  </row>
-  <row>
-    <entry>lavc</entry>
-    <entry>Используйте один из кодеков библиотеки <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem></link>
-    </entry>
-  </row>
-  <row>
-    <entry>faac</entry>
-    <entry>FAAC AAC аудио кодер</entry>
-  </row>
-  <row>
-    <entry>toolame</entry>
-    <entry>MPEG Audio Layer 2 кодер</entry>
-  </row>
-  <row>
-    <entry>twolame</entry>
-    <entry>MPEG Audio Layer 2 кодер, основанный на tooLAME</entry>
-  </row>
-  <row>
-    <entry>pcm</entry>
-    <entry>Несжатый PCM звук</entry>
-  </row>
-  <row>
-    <entry>copy</entry>
-    <entry>Не перекодировать, просто копировать сжатые кадры</entry>
-  </row>
+<row>
+  <entry>mp3lame</entry>
+  <entry>Кодируйте в VBR, ABR или CBR MP3 с LAME</entry>
+</row>
+<row>
+  <entry>lavc</entry>
+  <entry>
+  Используйте один из кодеков библиотеки 
+  <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem></link>
+  </entry>
+</row>
+<row>
+  <entry>faac</entry>
+  <entry>FAAC AAC аудио кодер</entry>
+</row>
+<row>
+  <entry>toolame</entry>
+  <entry>MPEG Audio Layer 2 кодер</entry>
+</row>
+<row>
+  <entry>twolame</entry>
+  <entry>MPEG Audio Layer 2 кодер, основанный на tooLAME</entry>
+</row>
+<row>
+  <entry>pcm</entry>
+  <entry>Несжатый PCM звук</entry>
+</row>
+<row>
+  <entry>copy</entry>
+  <entry>Не перекодировать, просто копировать сжатые кадры</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -83,35 +87,36 @@
 <row><entry>Название кодека</entry><entry>Описание</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>lavc</entry>
-    <entry>Используйте один из кодеков библиотеки <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem></link>
-    </entry>
-  </row>
-  <row>
-    <entry>xvid</entry>
-    <entry>Xvid, MPEG-4 Advanced Simple Profile (ASP) кодек</entry>
-  </row>
-  <row>
-    <entry>x264</entry>
-    <entry>x264, MPEG-4 Advanced Video Coding (AVC), AKA[он же] H.264 кодек</entry>
-  </row>
-  <row>
-    <entry>nuv</entry>
-    <entry>nuppel видео, используемое некоторыми приложениями реального времени</entry>
-  </row>
-  <row>
-    <entry>raw</entry>
-    <entry>Несжатые видео кадры</entry>
-  </row>
-  <row>
-    <entry>copy</entry>
-    <entry>Не перекодировать, просто скопировать сжатые кадры</entry>
-  </row>
-  <row>
-    <entry>frameno</entry>
-    <entry>Использовался для 3-х проходного кодирования (не рекомендуется)</entry>
-  </row>
+<row>
+  <entry>lavc</entry>
+  <entry>
+  Используйте один из кодеков библиотеки <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem></link>
+  </entry>
+</row>
+<row>
+  <entry>xvid</entry>
+  <entry>Xvid, MPEG-4 Advanced Simple Profile (ASP) кодек</entry>
+</row>
+<row>
+  <entry>x264</entry>
+  <entry>x264, MPEG-4 Advanced Video Coding (AVC), AKA[он же] H.264 кодек</entry>
+</row>
+<row>
+  <entry>nuv</entry>
+  <entry>nuppel видео, используемое некоторыми приложениями реального времени</entry>
+</row>
+<row>
+  <entry>raw</entry>
+  <entry>Несжатые видео кадры</entry>
+</row>
+<row>
+  <entry>copy</entry>
+  <entry>Не перекодировать, просто скопировать сжатые кадры</entry>
+</row>
+<row>
+  <entry>frameno</entry>
+  <entry>Использовался для 3-х проходного кодирования (не рекомендуется)</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -134,27 +139,27 @@
 <row><entry>Название формата</entry><entry>Описание</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>lavf</entry>
-    <entry>Один из форматов, поддерживаемых библиотекой 
-    <systemitem class="library">libavformat</systemitem></entry>
-  </row>
-  <row>
-    <entry>avi</entry>
-    <entry>'Слоеное' Аудио-Видео</entry>
-  </row>
-  <row>
-    <entry>mpeg</entry>
-    <entry>MPEG-1 и MPEG-2 PS</entry>
-  </row>
-  <row>
-    <entry>rawvideo</entry>
-    <entry>сырой видео поток (без уплотнения[no muxing] - только видео поток)</entry>
-  </row>
-  <row>
-    <entry>rawaudio</entry>
-    <entry>сырой аудио поток (без уплотнения[no muxing] - только аудио поток)</entry>
-  </row>
+<row>
+  <entry>lavf</entry>
+  <entry>Один из форматов, поддерживаемых библиотекой 
+  <systemitem class="library">libavformat</systemitem></entry>
+</row>
+<row>
+  <entry>avi</entry>
+  <entry>'Слоеное' Аудио-Видео</entry>
+</row>
+<row>
+  <entry>mpeg</entry>
+  <entry>MPEG-1 и MPEG-2 PS</entry>
+</row>
+<row>
+  <entry>rawvideo</entry>
+  <entry>сырой видео поток (без уплотнения[no muxing] - только видео поток)</entry>
+</row>
+<row>
+  <entry>rawaudio</entry>
+  <entry>сырой аудио поток (без уплотнения[no muxing] - только аудио поток)</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -183,54 +188,56 @@ AVI является родным форматом для  <application>MEncoder
 <entry>название формата <systemitem class="library">libavformat</systemitem></entry><entry>Описание</entry>
 </row></thead>
 <tbody>
-  <row>
-    <entry>mpg</entry>
-    <entry>MPEG-1 и MPEG-2 PS</entry>
-  </row>
-  <row>
-    <entry>asf</entry>
-    <entry>Advanced Streaming Format</entry>
-  </row>
-  <row>
-    <entry>avi</entry>
-    <entry>'Слоеное' Аудио-Видео</entry>
-  </row>
-  <row>
-    <entry>wav</entry>
-    <entry>Waveform Аудио</entry>
-  </row>
-  <row>
-    <entry>swf</entry>
-    <entry>Macromedia Flash</entry>
-  </row>
-  <row>
-    <entry>flv</entry>
-    <entry>Macromedia Flash видео</entry>
-  </row>
-  <row>
-    <entry>rm</entry>
-    <entry>RealMedia</entry>
-  </row>
-  <row>
-    <entry>au</entry>
-    <entry>SUN AU</entry>
-  </row>
-  <row>
-    <entry>nut</entry>
-    <entry>открытый формат NUT (экспериментальный и пока не полностью соответствующий спецификации)</entry>
-  </row>
-  <row>
-    <entry>mov</entry>
-    <entry>QuickTime</entry>
-  </row>
-  <row>
-    <entry>mp4</entry>
-    <entry>MPEG-4 формат</entry>
-  </row>
-  <row>
-    <entry>dv</entry>
-    <entry>Sony Digital Видео формат</entry>
-  </row>
+<row>
+  <entry>mpg</entry>
+  <entry>MPEG-1 и MPEG-2 PS</entry>
+</row>
+<row>
+  <entry>asf</entry>
+  <entry>Advanced Streaming Format</entry>
+</row>
+<row>
+  <entry>avi</entry>
+  <entry>'Слоеное' Аудио-Видео</entry>
+</row>
+<row>
+  <entry>wav</entry>
+  <entry>Waveform Аудио</entry>
+</row>
+<row>
+  <entry>swf</entry>
+  <entry>Macromedia Flash</entry>
+</row>
+<row>
+  <entry>flv</entry>
+  <entry>Macromedia Flash видео</entry>
+</row>
+<row>
+  <entry>rm</entry>
+  <entry>RealMedia</entry>
+</row>
+<row>
+  <entry>au</entry>
+  <entry>SUN AU</entry>
+</row>
+<row>
+  <entry>nut</entry>
+  <entry>
+  открытый формат NUT (экспериментальный и пока не полностью соответствующий спецификации)
+  </entry>
+</row>
+<row>
+  <entry>mov</entry>
+  <entry>QuickTime</entry>
+</row>
+<row>
+  <entry>mp4</entry>
+  <entry>MPEG-4 формат</entry>
+</row>
+<row>
+  <entry>dv</entry>
+  <entry>Sony Digital Видео формат</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -243,8 +250,8 @@ AVI является родным форматом для  <application>MEncoder
 файл воспроизводится не только в <application>MPlayer</application>.
 </para>
 
-<informalexample>
-<para>Пример:</para>
+<example>
+<title>Кодирование в формат Macromedia Flash</title>
 <para>
 Создание видео Macromedia Flash, подходящего для воспроизведения в веб браузере плагином
 Macromedia Flash:
@@ -254,7 +261,7 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
     -lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3
 </screen>
 </para>
-</informalexample>
+</example>
 
 </sect1>
 
@@ -313,7 +320,8 @@ DVD ролика или VCD дорожки.
 <title>Двухпроходное кодирование MPEG-4 (&quot;DivX&quot;)</title>
 
 <para>
-Название происходит из того факта, что кодирование файла производится <emphasis>дважды</emphasis>.
+Название происходит из того факта, что кодирование файла производится 
+<emphasis>дважды</emphasis>.
 Первое кодирование (дублирующий проход) создает несколько временных файлов 
 (<filename>*.log</filename>) размером в несколько мегабайт, не удаляйте их пока
 (вы можете удалить AVI или вообще не создавать видеофайл, перенаправив его 

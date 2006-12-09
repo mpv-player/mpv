@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21395 -->
+<!-- synced with r21537 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -23,6 +23,9 @@
 </para>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="softreq">
 <title>Требуемые программы:</title>
 
@@ -35,62 +38,65 @@
   <emphasis role="bold">gcc</emphasis> - рекомендуемые версии:
   2.95 и 3.4+.  Известно, что 2.96 и 3.0.x генерируют испорченный код. 
   С 3.1 и 3.2 были проблемы, с 3.3. тоже были небольшие проблемы. На PowerPC используйте 4.x+.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">XOrg/XFree86</emphasis> - рекомендуемая версия - 
   4.3 или более поздняя.  Убедитесь, что также установлен
   <emphasis role="bold">пакет разработки</emphasis>, иначе это не будет работать.
   Вам необязательно иметь X, некоторые драйверы вывода видео работают и без него.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">make</emphasis> - рекомендуемая версия - 3.79.x или
   более поздняя. Для сборки XML документации требуется 3.80.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - необязательна, нужна, чтобы
   иметь шрифт для OSD и субтитров. Требуется, как минимум, версия 2.0.9.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - необязательный кодер/декодер JPEG,
   требуется для драйвера вывода видео JPEG и декодирования MJPEG видео.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - необязательный (M)PNG кодер/декодер,
   требуется для GUI и драйвера вывода видео PNG.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - рекомендуется 3.90 или новее,
   необходимо для кодирования MP3 аудио c <application>MEncoder</application>,
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - рекомендуется, необходима для сжатых
   MOV заголовков и поддержки PNG.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
 - необязательно, необходимо для некоторых RTSP/RTP потоков.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - необязательно, используйте 0.9.13
   или новее.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - необязательно, для поддержки CDDA
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libxmms</emphasis> - необязательно, для поддержки входных плагинов XMMS.
 Требуется минимум 1.2.7.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - необязательно, для поддержки
   сетевого протокола smb.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
  <emphasis role="bold">ALSA</emphasis> - необязательно, для поддержки вывода звука через ALSA
 Требуется минимум  0.9.0rc4.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="features">
@@ -100,24 +106,25 @@
 <listitem><para>
   Решите, нужен ли Вам GUI. Если да, прочитайте до компиляции
   секцию <link linkend="gui">GUI</link>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Если Вы хотите установить <application>MEncoder</application> (наш великолепный многоцелевой кодировщик),
 читайте <link linkend="mencoder">секцию <application>MEncoder</application></link>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
-  Если у Вас есть V4L совместимый <emphasis role="bold">TV тюнер</emphasis>, и Вы хотите смотреть/захватывать
-и кодировать MPlayer'ом фильмы, читайте секцию <link linkend="tv-input">TV вход</link>.
-  </para></listitem>
+  Если у Вас есть V4L совместимый <emphasis role="bold">TV тюнер</emphasis>, и Вы хотите 
+  смотреть/захватывать и кодировать MPlayer'ом фильмы, читайте секцию 
+  <link linkend="tv-input">TV вход</link>.
+</para></listitem>
 <listitem><para>
   Если у вас есть V4L совместимый <emphasis role="bold">Radio тюнер</emphasis>,
   и вы хотите слушать/записывать MPlayer'ом радиопередачи, читайте секцию 
   <link linkend="radio">Радио</link>.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
-  Существует изящное <emphasis role="bold">OSD Меню</emphasis> готовое для использования. Проверьте секцию
-<link linkend="subosd">OSD Меню</link>.
-  </para></listitem>
+  Существует изящное <emphasis role="bold">OSD Меню</emphasis> готовое для использования. 
+  Проверьте секцию <link linkend="subosd">OSD Меню</link>.
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -125,7 +132,8 @@
 <screen>
 ./configure
 make
-make install</screen>
+make install
+</screen>
 </para>
 
 <para>
@@ -138,7 +146,6 @@ make install</screen>
 (<filename>~/.mplayer/codecs.conf</filename>) оставленный от предыдущих версий MPlayer'а,
 и удалите его.
 </para>
-
 
 <para>
 Обратите внимание на то, что если у Вас в <filename>~/.mplayer/</filename> есть 
@@ -181,33 +188,39 @@ make install</screen>
 
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="gui">
 <title>Как насчёт GUI?</title>
 
 <para>
-Для GUI требуется GTK 1.2.x или GTK 2.0 (он не целиком GTK'шный, но панельки - да). Шкуры хранятся
-в PNG формате, поэтому GTK, <systemitem class="library">libpng</systemitem> (и их части для разработчиков, обычно они
-называются <systemitem class="library">gtk-dev</systemitem> и <systemitem class="library">libpng-dev</systemitem>) должны быть установлены.
+Для GUI требуется GTK 1.2.x или GTK 2.0 (он не целиком GTK'шный, но панельки - да). Шкуры 
+хранятся в PNG формате, поэтому GTK, <systemitem class="library">libpng</systemitem> 
+(и их части для разработчиков, обычно они называются 
+<systemitem class="library">gtk-dev</systemitem> и 
+<systemitem class="library">libpng-dev</systemitem>) должны быть установлены.
 Вы можете собрать GUI, указав <option>--enable-gui</option> в <option>./configure</option>.
 Затем, чтобы использовать GUI, Вы должны запускать <command>gmplayer</command>.
 </para>
 
 <para>
-Поскольку <application>MPlayer</application> не содержит ни одной шкуры, Вы должны скачать их, если Вы
-хотите использовать GUI. См. 
+Поскольку <application>MPlayer</application> не содержит ни одной шкуры, Вы должны скачать 
+их, если Вы хотите использовать GUI. См. 
 <ulink url="http://www.mplayerhq.hu/dload.html">download page[страницу
 закачек]</ulink>. Они должны быть извлечены в системный каталог
 (<filename class="directory">$PREFIX/share/mplayer/skins</filename>), или в 
-<filename class="directory">$HOME/.mplayer/skins</filename>. По умолчанию, MPlayer ищет каталог <filename class="directory">default</filename>
+<filename class="directory">$HOME/.mplayer/skins</filename>. По умолчанию, MPlayer ищет 
+каталог <filename class="directory">default</filename>
 в этих каталогах, но вы можете использовать опцию <option>-skin <replaceable>newskin</replaceable></option>,
 или директиву конфигурационного файла <option>skin=newskin</option>, чтобы использовать
 шкуру из каталога <filename class="directory">*/skins/newskin</filename>.
 </para>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="fonts-osd">
@@ -219,6 +232,8 @@ make install</screen>
 рекомендуется использовать TrueType шрифты, поскольку они лучше выглядят, корректно 
 масштабируются до размера фильма, у лучше справляются с различными кодировками.
 </para>
+
+<!-- ********** -->
 
 <sect2 id="truetype-fonts">
 <title>TrueType шрифты</title>
@@ -250,6 +265,7 @@ make install</screen>
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bitmap-fonts">
 <title>Растровые шрифты</title>
@@ -277,9 +293,10 @@ make install</screen>
 кодированные в UTF-8 и использовать опцию <option>-utf8</option> или просто дать файлу
 с субтитрами такое же, как у видео файла, имя с расширением <filename>.utf</filename>, 
 положив его в один каталог с фильмом.
- </para>
+</para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="osdmenu">
 <title>OSD меню</title>
@@ -295,39 +312,40 @@ make install</screen>
 <orderedlist>
 <title>Установка</title>
 <listitem><simpara>
-  скомпилируйте <application>MPlayer</application>, указав <filename>
-  ./configure</filename> параметр <option>--enable-menu</option>
-  </simpara></listitem>
+  скомпилируйте <application>MPlayer</application>, указав 
+  <filename>./configure</filename> параметр <option>--enable-menu</option>
+</simpara></listitem>
 <listitem><simpara>
   убедитесь, что у Вас установлен OSD шрифт
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   скопируйте <filename>etc/menu.conf</filename> в Ваш каталог <filename
   class="directory">.mplayer</filename>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
-  скопируйте <filename>etc/input.conf</filename> в Ваш каталог <filename
-  class="directory">.mplayer</filename>, или в системный конфигурационный
+  скопируйте <filename>etc/input.conf</filename> в Ваш каталог 
+  <filename class="directory">.mplayer</filename>, или в системный конфигурационный
   каталог <application>MPlayer</application>'а (по умолчанию: 
   <filename class="directory">/usr/local/etc/mplayer</filename>)
-   </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   проверьте и отредактируйте <filename>input.conf</filename>, чтобы включить
   кнопки перемещения по меню (это здесь описано).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><para>
   запустите <application>MPlayer</application> как в следующем примере:
   <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
-  </para></listitem>
+</para></listitem>
 <listitem><simpara>
   нажмите любую меню-кнопку, которую Вы определили
-  </simpara></listitem>
+</simpara></listitem>
 </orderedlist>
-
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="rtc">
 <title>RTC</title>
@@ -336,13 +354,14 @@ make install</screen>
 
 <itemizedlist>
 <listitem><simpara>
-<emphasis role="bold">Чтобы использовать старый метод синхронизации</emphasis>,
+  <emphasis role="bold">Чтобы использовать старый метод синхронизации</emphasis>,
   Вам ничего не надо делать. Он использует <systemitem>usleep()</systemitem>,
   чтобы подстроить A/V синхронизацию, с точностью +/- 10ms. Однако, иногда
   требуется даже большая точность синхронизации.
-  </simpara></listitem>
-<listitem><para>
-<emphasis role="bold">Новый таймер</emphasis> использует RTC (Real Time
+</simpara></listitem>
+<listitem>
+  <para>
+  <emphasis role="bold">Новый таймер</emphasis> использует RTC (Real Time
   Clock[часы истинного времени]) для этой задачи потому, что это таймер
   точностью 1ms. Он включается опцией <option>-rtc</option>, но требует
   правильно настроенного ядра.
@@ -357,20 +376,21 @@ make install</screen>
   <filename>/etc/sysctl.conf</filename>.
   </para>
   <para>
-   Вы увидите эффективность нового кода таймера по строке состояния.
-   Функции управления потребляемой мощностью[power management] у некоторых
-   ноутбуковских BIOS'ов со speedstep-CPU плохо взаимодействуют с RTC. Аудио и
-   видео могут десинхронизироваться. Вероятно, если Вы вставите штекер внешнего
-   питания до включения ноутбука, то это поможет. В некоторых аппаратных
-   комбинациях (подтверждено при использовании не-DMA DVD драйва с материнской
-   платой ALi1541) использование RTC таймера приводит к "прыгающему"[skippy]
-   проигрыванию. В этом случае рекомендуется использовать третий метод.
-  </para></listitem>
-<listitem><simpara>
+  Вы увидите эффективность нового кода таймера по строке состояния.
+  Функции управления потребляемой мощностью[power management] у некоторых
+  ноутбуковских BIOS'ов со speedstep-CPU плохо взаимодействуют с RTC. Аудио и
+  видео могут десинхронизироваться. Вероятно, если Вы вставите штекер внешнего
+  питания до включения ноутбука, то это поможет. В некоторых аппаратных
+  комбинациях (подтверждено при использовании не-DMA DVD драйва с материнской
+  платой ALi1541) использование RTC таймера приводит к "прыгающему"[skippy]
+  проигрыванию. В этом случае рекомендуется использовать третий метод.
+  </para>
+</listitem>
+<listitem><para>
   <emphasis role="bold">Третий код таймера</emphasis> включается опцией
   <option>-softsleep</option>. У него эффективность RTC, но он не использует
   RTC. С другой стороны, он сильнее использует CPU.
-  </simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 </sect1>

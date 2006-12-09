@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21374 -->
+<!-- synced with r21537 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -114,56 +114,57 @@ windows media player. Даже AVI файлы без индекса являют
 <listitem><simpara>
   кодирование из широкого спектра форматов файлов и декодеров
   <application>MPlayer'а</application>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   кодирование во все кодеки FFmpeg'овской библиотеки
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   кодирование видео с <emphasis role="bold">V4L совместимых TV тюнеров
   </emphasis>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   кодирование/мультиплексирование в "слоёные"[interleaved] AVI файлы
   с соответствующим индексом
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   создание файлов с аудио потоком из внешнего файла
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   кодирование в 1, 2 или 3 прохода
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 аудио
   <important><simpara>
   VBR MP3 аудио не всегда хорошо проигрывается плеерами Windows!
   </simpara></important>
-  </para></listitem>
+</para></listitem>
 <listitem><simpara>
   PCM аудио
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   копирование потоков
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   входная A/V синхронизация (основана на PTS, может быть отключена с помощью
   ключа <option>-mc 0</option> )
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   коррекция FPS[кадров/сек] ключом <option>-ofps</option> (полезно при кодировании
   29.97fps VOB в 24fps AVI)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   использование нашей очень мощной системы плагинов (обрезание[crop],
-расширение[expand], отражение[flip], пост-обработка[postprocess],
-поворот[rotate], масштабирование[scale], rgb/yuv преобразования)
-  </simpara></listitem>
+  расширение[expand], отражение[flip], пост-обработка[postprocess],
+  поворот[rotate], масштабирование[scale], rgb/yuv преобразования)
+</simpara></listitem>
 <listitem><simpara>
-  может кодировать DVD/VOBsub <emphasis role="bold">И</emphasis> текстовые субтитры в один выходной файл
-  </simpara></listitem>
+  может кодировать DVD/VOBsub <emphasis role="bold">И</emphasis> текстовые субтитры 
+  в один выходной файл
+</simpara></listitem>
 <listitem><simpara>
   может извлекать DVD субтитры в VOBsub формат
-  </simpara></listitem>
+</simpara></listitem>
 
 </itemizedlist>
 
@@ -172,7 +173,7 @@ windows media player. Даже AVI файлы без индекса являют
 <listitem><simpara>
   ещё большее количество доступных форматов кодирования.декодирования
   (создание VOB файлов с DivX4/Indeo5/VIVO потоками :)
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->

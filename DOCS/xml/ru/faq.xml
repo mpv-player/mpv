@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with  r21152  -->
+<!-- synced with  r21537  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -67,6 +67,8 @@ auto* утилиты.
 </para></answer>
 </qandaentry>
 </qandadiv>
+
+<!-- ********** -->
 
 <qandadiv id="faq-compilation-installation">
 <title>Компиляция и установка</title>
@@ -184,6 +186,7 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-general">
 <title>Общие вопросы</title>
@@ -258,45 +261,69 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 </para></question>
 <answer><para>
 Пример:
-<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
+<screen>
+A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>A: 2.1</systemitem></term>
-<listitem><para>позиция аудио в секундах</para></listitem>
+<varlistentry>
+  <term><systemitem>A: 2.1</systemitem></term>
+  <listitem><para>позиция аудио в секундах</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>V: 2.2</systemitem></term>
-<listitem><para>позиция видео в секундах</para></listitem>
+<varlistentry>
+  <term><systemitem>V: 2.2</systemitem></term>
+  <listitem><para>позиция видео в секундах</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
-<listitem><para>сдвиг аудио-видео в секундах (задержка)</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V: -0.167</systemitem></term>
+  <listitem><para>сдвиг аудио-видео в секундах (задержка)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>ct: 0.042</systemitem></term>
-<listitem><para>сделано соррекций A-V синхронизации</para></listitem>
+<varlistentry>
+  <term><systemitem>ct: 0.042</systemitem></term>
+  <listitem><para>сделано соррекций A-V синхронизации</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>57/57</systemitem></term>
-<listitem><para>кадров проиграно/декодировано (считая от места последней перемотки)</para></listitem>
+<varlistentry>
+  <term><systemitem>57/57</systemitem></term>
+  <listitem><para>
+  кадров проиграно/декодировано (считая от места последней перемотки)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>41%</systemitem></term>
-<listitem><para>время CPU в процентах, используемое видео кодеком
-  (для поблочного и прямого рендеринга сюда включается и video_out)</para></listitem>
+<varlistentry>
+  <term><systemitem>41%</systemitem></term>
+  <listitem><para>
+  время CPU в процентах, используемое видео кодеком
+  (для поблочного и прямого рендеринга сюда включается и video_out)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0%</systemitem></term>
-<listitem><para>время CPU, используемое video_out</para></listitem>
+<varlistentry>
+  <term><systemitem>0%</systemitem></term>
+  <listitem><para>время CPU, используемое video_out</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2.6%</systemitem></term>
-<listitem><para>время CPU в процентах, исползуемое аудио кодеком</para></listitem>
+<varlistentry>
+  <term><systemitem>2.6%</systemitem></term>
+  <listitem><para>время CPU в процентах, исползуемое аудио кодеком</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0</systemitem></term>
-<listitem><para>выброшено кадров для сохранения синхронизации A-V</para></listitem>
+<varlistentry>
+  <term><systemitem>0</systemitem></term>
+  <listitem><para>выброшено кадров для сохранения синхронизации A-V</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>4</systemitem></term>
-<listitem><para>текущий уровень постпроцессинга (при использовании 
-<option>-autoq</option>)</para></listitem>
+<varlistentry>
+  <term><systemitem>4</systemitem></term>
+  <listitem><para>
+  текущий уровень постпроцессинга (при использовании 
+  <option>-autoq</option>)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>49%</systemitem></term>
-<listitem><para>текущий уровень использования кеша. (нормальное значение - около 50%)</para></listitem>
+<varlistentry>
+  <term><systemitem>49%</systemitem></term>
+  <listitem><para>
+  текущий уровень использования кеша. (нормальное значение - около 50%)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>1.00x</systemitem></term>
-<listitem><para>скорость воспроизведения (множитель от нормальной скорости)</para></listitem>
+<varlistentry>
+  <term><systemitem>1.00x</systemitem></term>
+  <listitem><para>
+  скорость воспроизведения (множитель от нормальной скорости)
+  </para></listitem>
 </varlistentry>
 </variablelist>
 Большинство из них используются для отладки, используйте опцию <option>-quiet</option>
@@ -309,7 +336,8 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 
 <qandaentry>
 <question><para>
-Появляется сообщение, что не найден файл <filename>/usr/local/lib/codecs/</filename> ...
+Появляется сообщение, что не найден файл 
+<filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
 Загрузите и установите бинарные кодеки с нашей 
@@ -335,7 +363,8 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 воспроизведение! Я знаю, это необычно...
 </para></question>
 <answer><para>
-После запуска <filename>./configure</filename>, отредактируйте <filename>config.h</filename>
+После запуска <filename>./configure</filename>, 
+отредактируйте <filename>config.h</filename>
 и замените <systemitem>#undef FAST_OSD</systemitem> на 
 <systemitem>#define FAST_OSD</systemitem>. Перекомпилируйте.
 </para></answer>
@@ -362,11 +391,14 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 </para></question>
 <answer><para>
 Используйте:
-<screen>mplayer <replaceable>опции</replaceable> <replaceable>имя_файла</replaceable> &lt; /dev/null &amp;</screen>
+<screen>
+mplayer <replaceable>опции</replaceable> <replaceable>имя_файла</replaceable> &lt; /dev/null &amp;
+</screen>
 </para></answer>
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-playback">
 <title>Проблемы воспроизведения</title>
@@ -478,34 +510,32 @@ Windows Media 9.)
 <para>
 Если столкнулись с этой проблемой, то у вас есть два варианта:
 <itemizedlist>
-<listitem><para>Подождать пару недель. Все может снова заработать.</para></listitem>
-<listitem><para>Слинковать все бинарники в системе с различными prelink опциями.
-Вот пошаговая инструкция:</para>
-<para>
-<orderedlist>
-<listitem><para>Отредактируйте <filename>/etc/syconfig/prelink</filename> и измените</para>
-<para>
-<programlisting>
-PRELINK_OPTS=-mR
-</programlisting>
-</para>
-<para>
-на
-<programlisting>
-PRELINK_OPTS="-mR --no-exec-shield"
-</programlisting>
-</para>
-</listitem>
-<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
-<listitem><para><command>/etc/cron.daily/prelink</command>
-(Это перелинкует все приложения, что может занять длительное время.)</para></listitem>
+<listitem><para>
+  Подождать пару недель. Все может снова заработать.
+</para></listitem>
 <listitem>
-<para><command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
-(Это отключит exec-shield для исполняемого файла <application>MPlayer</application>.)
-</para>
-</listitem>
-</orderedlist>
-</para>
+  <para>
+  Слинковать все бинарники в системе с различными prelink опциями.
+  Вот пошаговая инструкция:
+  </para>
+  <procedure>
+  <step><para>
+      Отредактируйте <filename>/etc/syconfig/prelink</filename> и измените
+      <programlisting>PRELINK_OPTS=-mR</programlisting> на
+      <programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
+  </para></step>
+  <step><para>
+      <command>touch /var/lib/misc/prelink.force</command>
+  </para></step>
+  <step><para>
+      <command>/etc/cron.daily/prelink</command>
+      (Это перелинкует все приложения, что может занять длительное время.)
+  </para></step>
+  <step><para>
+      <command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
+      (Это отключит exec-shield для исполняемого файла <application>MPlayer</application>.)
+  </para></step>
+  </procedure>
 </listitem>
 </itemizedlist>
 </para></answer>
@@ -575,6 +605,7 @@ PRELINK_OPTS="-mR --no-exec-shield"
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-driver">
 <title>Проблемы драйверов вывода аудио/видео (ao/vo)</title>
@@ -609,12 +640,10 @@ Error opening/initializing the selected video_out (-vo) device.
 <answer><para>
 Просто смените драйвер вывода видео. Введите следующую коданду для получения списка 
 доступных драйверов:
-<screen>
-mplayer -vo help
-</screen>
+<screen>mplayer -vo help</screen>
 Как только выберите правильный драйвер, добавьте его в файл конфигурации. Добавьте
 <programlisting>
- vo = <replaceable>выбранный_драйвер</replaceable>
+vo = <replaceable>выбранный_драйвер</replaceable>
 </programlisting>
 в <filename>~/.mplayer/config</filename> и/или
 <programlisting>
@@ -674,11 +703,11 @@ vo_driver = <replaceable>выбранный_драйвер</replaceable>
 <question><para>
 Нет звука при воспроизведении видео и появляется ошибка подобная этой:
 <screen>
-    AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
-    audio_setup: Can't open audio device /dev/dsp: Device or resource busy
-    couldn't open/init audio device -> NOSOUND
-    Audio: no sound!!!
-    Start playing...
+AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+audio_setup: Can't open audio device /dev/dsp: Device or resource busy
+couldn't open/init audio device -> NOSOUND
+Audio: no sound!!!
+Start playing...
 </screen>
 </para></question>
 <answer><para>
@@ -730,20 +759,20 @@ aRts блокирует звуковое устройство. Либо подо
 Причин может быть несколько.
 <itemizedlist>
 <listitem><para>
-Ваш CPU <emphasis>и/или</emphasis> видеокарта <emphasis>и/или</emphasis>
-шина слишком медленные. В этом случае <application>MPlayer</application> 
-выводит соответствующее сообщение (и количество выброшенных кадров быстро 
-увеличивается).
+  Ваш CPU <emphasis>и/или</emphasis> видеокарта <emphasis>и/или</emphasis>
+  шина слишком медленные. В этом случае <application>MPlayer</application> 
+  выводит соответствующее сообщение (и количество выброшенных кадров быстро 
+  увеличивается).
 </para></listitem>
 <listitem><para>
-Если это AVI, возможно, у него проблемы с чередованием звука/видео,
-попробуйте опцию <option>-ni</option> для обхода проблемы. Или файл имеет
-неверный заголовок. В этом случае могут помочь опции <option>-nobps</option>
-и/или <option>-mc 0</option>.
+  Если это AVI, возможно, у него проблемы с чередованием звука/видео,
+  попробуйте опцию <option>-ni</option> для обхода проблемы. Или файл имеет
+  неверный заголовок. В этом случае могут помочь опции <option>-nobps</option>
+  и/или <option>-mc 0</option>.
 </para></listitem>
 <listitem><para>
-У вас неверно работает звуковой драйвер. Смотрите 
-<link linkend="audio">аудио раздел</link>.
+  У вас неверно работает звуковой драйвер. Смотрите 
+  <link linkend="audio">аудио раздел</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -759,6 +788,7 @@ aRts блокирует звуковое устройство. Либо подо
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-dvd">
 <title>Воспроизведение DVD</title>
@@ -806,7 +836,8 @@ DVDnav пока что настолько несовместим с mpdvdkit, ч
 Как установить регион для DVD-привода? У меня нет Windows!
 </para></question>
 <answer><para>
-Воспользуйтесь <ulink url="http://linvdr.org/projects/regionset/">утилитой regionset</ulink>.
+Воспользуйтесь 
+<ulink url="http://linvdr.org/projects/regionset/">утилитой regionset</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -845,8 +876,8 @@ DVD не проигрываются, MPlayer зависает или вывод�
 </para></question>
 <answer><para>
 Используйте опцию <option>-cache</option> (описанную на странице man) и попробуйте
-включить DMA для DVD привода утилитой <command>hdparm</command> (описанной в 
-<link linkend="drives">разделе CD</link>).
+включить DMA для DVD привода утилитой <command>hdparm</command> 
+(описанной в <link linkend="drives">разделе CD</link>).
 </para></answer>
 </qandaentry>
 
@@ -864,6 +895,7 @@ mplayer dvd://1 -dvd-device <replaceable>/путь/к/каталогу</replacea
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-features">
 <title>Просьбы о новых возможностях</title>
@@ -892,6 +924,7 @@ mplayer dvd://1 -dvd-device <replaceable>/путь/к/каталогу</replacea
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-encoding">
 <title>Кодирование</title>
@@ -953,7 +986,8 @@ MPEG-2 файлы, которые можно использовать в кач�
 </para></question>
 <answer><para>
 MPEG файлы могут быть объединены в один, если сильно повезет.
-Для файлов AVI, можете воспользоваться встроеной возможностью <application>MEncoder</application>'а
+Для файлов AVI, можете воспользоваться встроеной возможностью 
+<application>MEncoder</application>'а
 работать с несколькими файлами сразу:
 <screen>
 mencoder -ovc copy -oac copy -o <replaceable>out.avi</replaceable> <replaceable>file1.avi</replaceable> <replaceable>file2.avi</replaceable>
@@ -1054,31 +1088,43 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 </para></question>
 <answer><para>
 Пример:
-<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb A-V:0.065 [2156:192]</screen>
+<screen>
+Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb A-V:0.065 [2156:192]
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
-<listitem><para>временная позиция в кодируемом потоке</para></listitem>
+<varlistentry>
+  <term><systemitem>Pos: 264.5s</systemitem></term>
+  <listitem><para>временная позиция в кодируемом потоке</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>6612f</systemitem></term>
-<listitem><para>количество закодированных кадров</para></listitem>
+<varlistentry>
+  <term><systemitem>6612f</systemitem></term>
+  <listitem><para>количество закодированных кадров</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2%</systemitem></term>
-<listitem><para>размер закодированной части входного потока</para></listitem>
+<varlistentry>
+  <term><systemitem>2%</systemitem></term>
+  <listitem><para>размер закодированной части входного потока</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>7.12fps</systemitem></term>
-<listitem><para>скорость кодирования</para></listitem>
+<varlistentry>
+  <term><systemitem>7.12fps</systemitem></term>
+  <listitem><para>скорость кодирования</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
-<listitem><para>оценка времени, оставшегося до конца кодирования</para></listitem>
+<varlistentry>
+  <term><systemitem>Trem: 576min</systemitem></term>
+  <listitem><para>оценка времени, оставшегося до конца кодирования</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2856mb</systemitem></term>
-<listitem><para>оценка окончательного размера перекодированного файла</para></listitem>
+<varlistentry>
+  <term><systemitem>2856mb</systemitem></term>
+  <listitem><para>оценка окончательного размера перекодированного файла</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
-<listitem><para>текушая задержка между аудио и видео потоками</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V:0.065</systemitem></term>
+  <listitem><para>текушая задержка между аудио и видео потоками</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>[2156:192]</systemitem></term>
-<listitem><para>средний видео битпоток (в кбит/с) и средний аудио битпоток (в кбит/с)</para></listitem>
+<varlistentry>
+  <term><systemitem>[2156:192]</systemitem></term>
+  <listitem><para>
+  средний видео битпоток (в кбит/с) и средний аудио битпоток (в кбит/с)
+  </para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
@@ -1124,10 +1170,10 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 <emphasis role="bold">&amp;</emphasis> в конце команды 
 <command>mplayer</command>):
 <screen>
-    mkfifo encode
-    mplayer -ao pcm -aofile encode dvd://1 &amp;
-    lame <replaceable>ваши_опции</replaceable> encode music.mp3
-    rm encode
+mkfifo encode
+mplayer -ao pcm -aofile <replaceable>encode</replaceable> dvd://1 &amp;
+lame <replaceable>ваши_опции</replaceable> <replaceable>encode</replaceable> <replaceable>music.mp3</replaceable>
+rm <replaceable>encode</replaceable>
 </screen>
 Это позволяет использовать любой кодер, не только 
 <application>LAME</application>,
@@ -1156,7 +1202,7 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 <option>-ffourcc</option>.
 Вы также можете сменить FourCC у существующего файла тем же способом:
 <screen>
-  mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
 </screen>
 Имейте ввиду, что этот пример устанавливает FourCC в XVID, а не DIVX.
 Это рекомендуется, т.к. DIVX FourCC означает DivX4, очень простой MPEG-4

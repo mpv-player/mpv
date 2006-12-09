@@ -1,151 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21537 -->
 <appendix id="bugs">
 <title>Известные проблемы</title>
-
 
 <sect1 id="bugs-special">
 <title>Особые системно/CPU-специфичные ошибки/проблемы</title>
 <itemizedlist>
 <listitem>
-<para>SIGILL (сигнал 4) на P3, используя 2.2.x ядра:</para>
-<para>Проблема: в ядрах 2.2.x нет надлежащей (работающей) поддержки SSE</para>
-<para>Решение: обновите ядро до версий 2.4.x</para>
-<para>Обход: <command>./configure --disable-sse</command></para>
+  <para>SIGILL (сигнал 4) на P3, используя 2.2.x ядра:</para>
+  <para>Проблема: в ядрах 2.2.x нет надлежащей (работающей) поддержки SSE</para>
+  <para>Решение: обновите ядро до версий 2.4.x</para>
+  <para>Обход: <command>./configure --disable-sse</command></para>
 </listitem>
 
 <listitem>
-<para>Повсеместный SIGILL (сигнал 4):</para>
-<para>Проблема: Вы скомпилировали и запустили <application>MPlayer</application> на разных машинах
-(например скомпилировали на P3 и запускаете на Celeron)</para>
-<para>Решение: скомпилируйте <application>MPlayer</application> на той же машине, 
-где Вы будете его использовать!</para>
-<para>Обход: Вы можете забыть обо всём этом, сконфигурировав <application>MPlayer</application>
-с опцией <option>--enable-runtime-cpudetection</option> или отключив отдельные наборы
-инструкций процессора с помощью более специфических опций, например, 
-<option>--disable-mmx</option>, <option>--disable-3dnow</option> и т.п..</para>
+  <para>Повсеместный SIGILL (сигнал 4):</para>
+  <para>
+  Проблема: Вы скомпилировали и запустили <application>MPlayer</application> на 
+  разных машинах (например скомпилировали на P3 и запускаете на Celeron)
+  </para>
+  <para>
+  Решение: скомпилируйте <application>MPlayer</application> на той же машине, 
+  где Вы будете его использовать!
+  </para>
+  <para>
+  Обход: Вы можете забыть обо всём этом, сконфигурировав <application>MPlayer</application>
+  с опцией <option>--enable-runtime-cpudetection</option> или отключив отдельные наборы
+  инструкций процессора с помощью более специфических опций, например, 
+  <option>--disable-mmx</option>, <option>--disable-3dnow</option> и т.п..
+  </para>
 </listitem>
 
 <listitem>
-<para>Фатальные ошибки при дампе потоков:</para>
-<para>Проблема: дамп ядра</para>
-<para>Решение: Не паникуйте. Убедитесь, что знаете где Ваше полотенце.</para>
+  <para>Фатальные ошибки при дампе потоков:</para>
+  <para>Проблема: дамп ядра</para>
+  <para>Решение: Не паникуйте. Убедитесь, что знаете где Ваше полотенце.</para>
 </listitem>
 </itemizedlist>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="bugs-audio">
 <title>Различные проблемы A-V синхронизации и прочие аудио проблемы</title>
 
 <sect2 id="bugs-delay-all">
-<title>Общая задержка аудио или прерывистый звук (существует со всеми или многими
-файлами)</title>
+<title>Общая задержка аудио или прерывистый звук 
+(существует со всеми или многими файлами)</title>
+
 <itemizedlist>
 <listitem><para>
-наиболее общее: плохой аудио драйвер! - попробуйте использовать другой драйвер,
-попробуйте ALSA OSS эмуляцию, используя <option>-ao oss</option>, также
-попробуйте <option>-ao sdl</option>, иногда это помогает. Если Ваш файл хорошо
-проигрывается с <option>-nosound</option>, Вы можете быть уверены: это проблема
-Вашей звуковой карты (драйвера).
+  наиболее общее: плохой аудио драйвер! - попробуйте использовать другой драйвер,
+  попробуйте ALSA OSS эмуляцию, используя <option>-ao oss</option>, также
+  попробуйте <option>-ao sdl</option>, иногда это помогает. Если Ваш файл хорошо
+  проигрывается с <option>-nosound</option>, Вы можете быть уверены: это проблема
+  Вашей звуковой карты (драйвера).
 </para></listitem>
 
 <listitem>
-<para>проблемы аудио буфера (размер буфера определяется неправильно)</para>
-<para>Обход: опция <application>MPlayer</application> <option>-abs</option></para>
+  <para>проблемы аудио буфера (размер буфера определяется неправильно)</para>
+  <para>
+  Обход: опция <application>MPlayer</application> <option>-abs</option>
+  </para>
 </listitem>
 
 <listitem><para>
-проблема частоты дискретизации - может быть Ваша карта не поддерживает частоту
-дискретизации, используемую в Ваших файлах - попробуйте фильтр для изменения
-частоты дискретизации (<option>-af resample=...</option>)
+  проблема частоты дискретизации - может быть Ваша карта не поддерживает частоту
+  дискретизации, используемую в Ваших файлах - попробуйте фильтр для изменения
+  частоты дискретизации (<option>-af resample=...</option>)
 </para></listitem>
 
 <listitem>
-<para>медленная машина (CPU или VGA)</para>
-<para>попробуйте с <option>-vo null</option>, если так проигрывается хорошо, то
-у Вас медленные VGA карта/драйвер</para>
-<para>Обход: купите более быструю карту или читайте документацию о том, как
-ускорить работу</para>
-<para>Также попробуйте <option>-framedrop</option></para>
+  <para>медленная машина (CPU или VGA)</para>
+  <para>
+  попробуйте с <option>-vo null</option>, если так проигрывается хорошо, то
+  у Вас медленные VGA карта/драйвер
+  </para>
+  <para>
+  Обход: купите более быструю карту или читайте документацию о том, как
+  ускорить работу
+  </para>
+  <para>Также попробуйте <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-delay-specific">
 <title>Аудио задержка/десинхронизация, специфичная для одного или нескольких
 файлов</title>
 <itemizedlist>
 <listitem>
-<para>плохой файл</para>
-<para>
-Обход:
+  <para>плохой файл</para>
+  <para>
+  Обход:
   <itemizedlist>
   <listitem>
-    <para>опции <option>-ni</option> или <option>-nobps</option> option (для
-    неслоёных или плохих файлов)</para>
+    <para>
+      опции <option>-ni</option> или <option>-nobps</option> option (для
+      неслоёных или плохих файлов)
+      </para>
     <para>и/или</para>
   </listitem>
 
   <listitem>
-    <para><option>-mc 0</option> (требуется для файлов с плохо слоёным VBR
-	аудио)</para>
+    <para>
+      <option>-mc 0</option>
+      (требуется для файлов с плохо слоёным VBR	аудио)
+      </para>
     <para>и/или</para>
   </listitem>
 
   <listitem>
-    <para><option>-delay</option> или кнопки <keycap>+</keycap>/<keycap>-</keycap>
-    во время выполнения для подстройки задержки</para>
+    <para>
+      <option>-delay</option> или кнопки <keycap>+</keycap>/<keycap>-</keycap>
+    во время выполнения для подстройки задержки
+      </para>
   </listitem>
   </itemizedlist>
-Если ничто из этого не помогает, пожалуйста, закачайте нам файл, мы выполним проверку (и внесём 
-исправления).
+  Если ничто из этого не помогает, пожалуйста, закачайте нам файл, мы выполним проверку 
+  (и внесём исправления).
 </para>
 </listitem>
 <listitem>
-<para>Ваша звуковая карта не поддерживает воспроизведение на 48 кГц </para>
-<para>Обход: купите лучшую звуковую карту... или попытайтесь уменьшить fps на
-10% (используйте <option>-fps 27</option> для 30 fps фильмов), или используйте
-фильтр для изменения частоты дискретизации</para>
+  <para>Ваша звуковая карта не поддерживает воспроизведение на 48 кГц </para>
+  <para>
+  Обход: купите лучшую звуковую карту... или попытайтесь уменьшить fps на
+  10% (используйте <option>-fps 27</option> для 30 fps фильмов), или используйте
+  фильтр для изменения частоты дискретизации
+  </para>
 </listitem>
 
 <listitem>
-<para>медленная машина (если A-V не около 0, и последнее число в строке статуса
-увеличивается)</para>
-<para>Обход: <option>-framedrop</option></para>
+  <para>
+  медленная машина (если A-V не около 0, и последнее число в строке статуса
+  увеличивается)
+  </para>
+  <para>Обход: <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-nosound">
 <title>Вообще нет звука</title>
 <itemizedlist>
 <listitem>
-<para>Ваш файл использует неподдерживаемый аудиокодек</para>
-<para>Решение: прочтите документацию и помогите нам добавить поддержку для него</para>
+  <para>Ваш файл использует неподдерживаемый аудиокодек</para>
+  <para>
+  Решение: прочтите документацию и помогите нам добавить поддержку для него
+  </para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-nopicture">
 <title>Вообще нет изображения (только простое серое/зелёное окно)</title>
 <itemizedlist>
 <listitem>
-<para>Ваш файл использует неподдерживаемый видеокодек</para>
-<para>Решение: прочтите документацию и помогите нам добавить поддержку для него</para>
+  <para>Ваш файл использует неподдерживаемый видеокодек</para>
+  <para>
+  Решение: прочтите документацию и помогите нам добавить поддержку для него
+  </para>
 </listitem>
 
 <listitem>
-<para>
-автоматически выбранный кодек не может декодировать файл, попробуйте выбрать
-другой, используя опции <option>-vc</option> или <option>-vfm</option>
-</para>
+  <para>
+  автоматически выбранный кодек не может декодировать файл, попробуйте выбрать
+  другой, используя опции <option>-vc</option> или <option>-vfm</option>
+  </para>
 </listitem>
 </itemizedlist>
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="bugs-video">
 <title>Проблемы вывода видео</title>
@@ -159,19 +193,20 @@
 <title>Мерцание OSD/субтитров</title>
 <para>
 <itemizedlist>
-<listitem><para>x11 драйвер: извините, он не может быть сейчас исправлен</para></listitem>
-<listitem><para>xv драйвер: используйте опцию <option>-double</option></para></listitem>
+  <listitem><para>x11 драйвер: извините, он не может быть сейчас исправлен</para></listitem>
+  <listitem><para>xv драйвер: используйте опцию <option>-double</option></para></listitem>
 </itemizedlist>
 </para>
 </formalpara>
 
 <formalpara>
-<title>зелёное изображение при использовании mga_vid (<option>-vo mga</option>
-/ <option>-vo xmga</option>)</title>
+<title>зелёное изображение при использовании mga_vid 
+  (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
 <para>
 <itemizedlist>
-<listitem><para>mga_vid неправильно определяет размер памяти на Вашей видео карте,
-перезагрузите модуль, используя опцию <option>mga_ram_size</option>
+<listitem><para>
+  mga_vid неправильно определяет размер памяти на Вашей видео карте,
+  перезагрузите модуль, используя опцию <option>mga_ram_size</option>
 </para></listitem>
 </itemizedlist>
 </para>
