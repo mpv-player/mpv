@@ -61,12 +61,11 @@ static void print_help(void) {
 
 static int init(int rate, int channels, int format, int flags) {
   float position[3] = {0, 0, 0};
-  float direction[6] = {0, 0, 1, 0, 1, 0};
+  float direction[6] = {0, 0, 1, 0, -1, 0};
   float sppos[6][3] = {
-    {-1, 0, 1}, {1, 0, 1},
-    {-1, 0, -1}, {1, 0, -1},
-    {0, 0, 0},
-    {0, 0, 0}
+    {-1, 0, 0.5}, {1, 0, 0.5},
+    {-1, 0,  -1}, {1, 0,  -1},
+    {0,  0,   1}, {0, 0, 0.1},
   };
   ALCdevice *dev = NULL;
   ALCcontext *ctx = NULL;
@@ -100,6 +99,8 @@ static int init(int rate, int channels, int format, int flags) {
     alSourcefv(sources[i], AL_POSITION, sppos[i]);
     alSource3f(sources[i], AL_VELOCITY, 0, 0, 0);
   }
+  if (channels == 1)
+    alSource3f(sources[0], AL_POSITION, 0, 0, 1);
   ao_data.channels = channels;
   alGetBufferi(buffers[0][0], AL_FREQUENCY, &bufrate);
   ao_data.samplerate = rate = bufrate;
