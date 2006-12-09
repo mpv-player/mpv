@@ -179,6 +179,11 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
           priv->duration = ev->pgc_length/90;
         break;
       }
+      case DVDNAV_SPU_CLUT_CHANGE: {
+        memcpy(priv->spu_clut, buf, 16*sizeof(unsigned int));
+        priv->spu_set = 1;
+        break;
+      }
       case DVDNAV_WAIT:
         dvdnav_wait_skip(priv->dvdnav);
         break;
@@ -509,6 +514,12 @@ int dvdnav_number_of_subs(stream_t *stream) {
     n++;
   }
   return n;
+}
+
+unsigned int *mp_dvdnav_get_spu_clut(stream_t *stream) {
+    dvdnav_priv_t *priv=(dvdnav_priv_t*)stream->priv;
+    if(!priv->spu_set) return NULL;
+    return priv->spu_clut;
 }
 
 void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
