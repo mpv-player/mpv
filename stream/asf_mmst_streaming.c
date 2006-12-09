@@ -626,7 +626,10 @@ int asf_mmst_streaming_start(stream_t *stream)
 
   asf_header_len = get_header (s, asf_header, stream->streaming_ctrl);
 //  mp_msg(MSGT_NETWORK,MSGL_INFO,"---------------------------------- asf_header %d\n",asf_header);
-  if (asf_header_len==0) return -1; //error reading header
+  if (asf_header_len==0) { //error reading header
+    closesocket(s);
+    return -1;
+  }
   packet_length = interp_header (asf_header, asf_header_len);
 
 
