@@ -69,7 +69,8 @@ static int init(int rate, int channels, int format, int flags) {
   };
   ALCdevice *dev = NULL;
   ALCcontext *ctx = NULL;
-  ALint bufrate;
+  ALCint freq = 0;
+  ALCint attribs[] = {ALC_FREQUENCY, rate, 0, 0};
   int i;
   opt_t subopts[] = {
     {NULL}
@@ -87,7 +88,7 @@ static int init(int rate, int channels, int format, int flags) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] could not open device\n");
     goto err_out;
   }
-  ctx = alcCreateContext(dev, NULL);
+  ctx = alcCreateContext(dev, &attribs);
   alcMakeContextCurrent(ctx);
   alListenerfv(AL_POSITION, position);
   alListenerfv(AL_ORIENTATION, direction);
@@ -102,8 +103,10 @@ static int init(int rate, int channels, int format, int flags) {
   if (channels == 1)
     alSource3f(sources[0], AL_POSITION, 0, 0, 1);
   ao_data.channels = channels;
-  alGetBufferi(buffers[0][0], AL_FREQUENCY, &bufrate);
-  ao_data.samplerate = rate = bufrate;
+  alcGetIntegerv(dev, ALC_FREQUENCY, 1, &freq);
+  if (alcGetError(dev) == ALC_NO_ERROR && freq)
+    rate = freq;
+  ao_data.samplerate = rate;
   ao_data.format = AF_FORMAT_S16_NE;
   ao_data.bps = channels * rate * 2;
   ao_data.buffersize = CHUNK_SIZE * NUM_BUF;
