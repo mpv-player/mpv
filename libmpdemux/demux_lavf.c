@@ -196,6 +196,10 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     register_protocol(&mp_protocol);
 
     avfc = av_alloc_format_context();
+
+    if (correct_pts)
+        avfc->flags |= AVFMT_FLAG_GENPTS;
+
     ap.prealloced_context = 1;
     if(opt_probesize) {
         double d = (double) opt_probesize;
