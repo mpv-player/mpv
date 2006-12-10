@@ -975,7 +975,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 #endif
 
         mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, d->nr_of_subtitles, tmp);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", d->subtitles[d->nr_of_subtitles].id);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", d->nr_of_subtitles);
         if(language && tmp[0])
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", d->nr_of_subtitles, tmp);
         d->nr_of_subtitles++;
