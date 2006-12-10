@@ -2240,6 +2240,19 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
                      strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
             return M_PROPERTY_OK;
         }
+
+#ifdef USE_DVDNAV
+        if(stream->type==STREAMTYPE_DVDNAV) {
+            if(vo_spudec && dvdsub_id >= 0) {
+                unsigned char lang[3];
+                if(dvdnav_lang_from_sid(stream, dvdsub_id, lang)) {
+                    snprintf(*(char**)arg, 63, "(%d) %s", dvdsub_id, lang);
+                    return M_PROPERTY_OK;
+                }
+            }
+        }
+#endif
+
         if (demuxer->type == DEMUXER_TYPE_MATROSKA && dvdsub_id >= 0) {
             char lang[40] = MSGTR_Unknown;
             demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
