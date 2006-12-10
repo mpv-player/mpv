@@ -199,6 +199,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     if (correct_pts)
         avfc->flags |= AVFMT_FLAG_GENPTS;
+    if (index_mode == 0)
+        avfc->flags |= AVFMT_FLAG_IGNIDX;
 
     ap.prealloced_context = 1;
     if(opt_probesize) {
