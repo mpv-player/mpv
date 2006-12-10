@@ -4929,17 +4929,22 @@ echocheck "OpenAL"
 if test "$_openal" = auto ; then
   _openal=no
 cat > $TMPC << EOF
+#ifdef OPENAL_AL_H
+#include <OpenAL/al.h>
+#else
 #include <AL/al.h>
+#endif
 int main(void) {
   alSourceQueueBuffers(0, 0, 0);
 //  alGetSourcei(0, AL_SAMPLE_OFFSET, 0);
   return 0;
 }
 EOF
-  if cc_check -lopenal ; then
-    _libs_mplayer="$_libs_mplayer -lopenal"
-    _openal=yes
-  fi
+  for I in "-lopenal" "-framework OpenAL" ; do
+    cc_check $I && _openal=yes && break
+    cc_check -DOPENAL_AL_H=1 $I && _def_openal_h='#define OPENAL_AL_H 1' && _openal=yes && break
+  done
+  test "$_openal" = yes && _libs_mplayer="$_libs_mplayer $I"
 fi
 if test "$_openal" = yes ; then
   _def_openal='#define USE_OPENAL 1'
@@ -7916,6 +7921,7 @@ $_def_esd_latency
 $_def_polyp
 $_def_jack
 $_def_openal
+$_def_openal_h
 $_def_sys_asoundlib_h
 $_def_alsa_asoundlib_h
 $_def_sunaudio

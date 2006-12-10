@@ -7,13 +7,19 @@
  * Copyleft 2006 by Reimar Döffinger (Reimar.Doeffinger@stud.uni-karlsruhe.de)
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
+#ifdef OPENAL_AL_H
+#include <OpenAL/alc.h>
+#include <OpenAL/al.h>
+#else
 #include <AL/alc.h>
 #include <AL/al.h>
+#endif
 
-#include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
