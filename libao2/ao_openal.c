@@ -88,7 +88,7 @@ static int init(int rate, int channels, int format, int flags) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] could not open device\n");
     goto err_out;
   }
-  ctx = alcCreateContext(dev, &attribs);
+  ctx = alcCreateContext(dev, attribs);
   alcMakeContextCurrent(ctx);
   alListenerfv(AL_POSITION, position);
   alListenerfv(AL_ORIENTATION, direction);
