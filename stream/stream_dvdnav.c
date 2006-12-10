@@ -500,6 +500,27 @@ int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
 }
 
 /**
+ * \brief dvdnav_lang_from_sid() assigns to buf the language corresponding to subtitle id 'sid'
+ * \param stream: - stream pointer
+ * \param sid: physical subtitle id
+ * \param buf: buffer to contain the 2-chars language string
+ * \return 0 on error, 1 if successful
+ */
+int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
+    uint8_t lg, k;
+    uint16_t lang;
+    dvdnav_priv_t *priv=(dvdnav_priv_t*)stream->priv;
+    if(sid < 0) return 0;
+    lg = dvdnav_get_spu_logical_stream(priv->dvdnav, sid);
+    lang = dvdnav_spu_stream_to_lang(priv->dvdnav, lg);
+    if(lang == 0xffff) return 0;
+    buf[0] = lang >> 8;
+    buf[1] = lang & 0xFF;
+    buf[2] = 0;
+    return 1;
+}
+
+/**
  * \brief dvdnav_number_of_subs() returns the count of available subtitles
  * \param stream: - stream pointer
  * \return 0 on error, something meaningful otherwise
