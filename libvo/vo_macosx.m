@@ -248,10 +248,13 @@ static void uninit(void)
 			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shmctl failed\n");
 	}
 
-	SetSystemUIMode( kUIModeNormal, 0);
-	CGDisplayShowCursor(kCGDirectMainDisplay);
-	
-	[autoreleasepool release];
+    SetSystemUIMode( kUIModeNormal, 0);
+    CGDisplayShowCursor(kCGDirectMainDisplay);
+    
+    if(mpGLView)
+    {
+        [autoreleasepool release];
+    }
 }
 
 static int preinit(const char *arg)
@@ -998,6 +1001,7 @@ static int control(uint32_t request, void *data, ...)
 
 - (void)windowWillClose:(NSNotification *)aNotification
 {
+    mpGLView = NULL;
 	mplayer_put_key(KEY_ESC);
 }
 @end
