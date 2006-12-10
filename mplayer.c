@@ -2276,7 +2276,7 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             return M_PROPERTY_OK;
         }
 #ifdef USE_DVDREAD
-        if (vo_spudec && dvdsub_id >= 0) {
+        if (vo_spudec && stream->type == STREAMTYPE_DVD && dvdsub_id >= 0) {
             char lang[3];
             int code = dvd_lang_from_sid(stream, dvdsub_id);
                 lang[0] = code >> 8;
