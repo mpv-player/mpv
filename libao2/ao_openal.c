@@ -51,6 +51,20 @@ static int16_t *tmpbuf;
 
 
 static int control(int cmd, void *arg) {
+  switch (cmd) {
+    case AOCONTROL_GET_VOLUME:
+    case AOCONTROL_SET_VOLUME: {
+      ALfloat volume;
+      ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+      if (cmd == AOCONTROL_SET_VOLUME) {
+        volume = (vol->left + vol->right) / 200.0;
+        alListenerf(AL_GAIN, volume);
+      }
+      alGetListenerf(AL_GAIN, &volume);
+      vol->left = vol->right = volume * 100;
+      return CONTROL_TRUE;
+    }
+  }
   return CONTROL_UNKNOWN;
 }
 
