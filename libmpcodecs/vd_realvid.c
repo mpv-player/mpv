@@ -60,6 +60,7 @@ static unsigned long WINAPI (*wrvyuv_transform)(char*, char*,transform_in_t*,uns
 static void *rv_handle=NULL;
 static int inited=0;
 static uint8_t *buffer = NULL;
+static int bufsz = 0;
 #ifdef USE_WIN32DLL
 static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
 #endif
@@ -300,6 +301,7 @@ static void uninit(sh_video_t *sh){
 	if (buffer)
 	    free(buffer);
 	buffer = NULL;
+	bufsz = 0;
 }
 
 // copypaste from demux_real.c - it should match to get it working!
@@ -330,9 +332,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 	if(len<=0 || flags&2) return NULL; // skipped frame || hardframedrop
 
-	if (!inited) {
+	if (bufsz < sh->disp_w*sh->disp_h*3/2) {
 	    if (buffer) free(buffer);
-	    buffer=malloc(sh->disp_w*sh->disp_h*3/2);
+	    bufsz = sh->disp_w*sh->disp_h*3/2;
+	    buffer=malloc(bufsz);
 	    if (!buffer) return 0;
 	}
 	
