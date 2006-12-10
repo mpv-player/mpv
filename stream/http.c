@@ -744,7 +744,6 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 			goto err_out;
 		}
 
-		stream->fd=fd;
 		if( mp_msg_test(MSGT_NETWORK,MSGL_V) ) {
 			http_debug_hdr( http_hdr );
 		}
@@ -857,9 +856,11 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 
 err_out:
 	if (fd > 0) closesocket( fd );
+	fd = -1;
 	res = -1;
 	http_free( http_hdr );
 out:
+	stream->fd = fd;
 	return res;
 }
 
