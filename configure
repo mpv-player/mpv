@@ -3815,8 +3815,6 @@ echocheck "X11 headers presence"
       break
     fi
   done
-  #FIXME: This is ugly as it can duplicate a -I parameter..
-  _inc_extra="$_inc_extra $_inc_x11"
   if test -z "$_inc_x11" ; then
     _x11=no
     _x11_headers="no"
@@ -3844,6 +3842,8 @@ EOF
   done
 fi
 if test "$_x11" = yes ; then
+  #FIXME: This is ugly as it can duplicate a -I parameter..
+  _inc_extra="$_inc_extra $_inc_x11"
   _def_x11='#define HAVE_X11 1'
   _vosrc="$_vosrc x11_common.c vo_x11.c vo_xover.c"
   _vomodules="x11 xover $_vomodules"
