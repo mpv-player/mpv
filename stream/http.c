@@ -842,10 +842,8 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 				}
 				break;
 			case 401: // Authentication required
-				if( http_authenticate(http_hdr, url, &auth_retry)<0 ) {
-					res = STREAM_UNSUPORTED;
+				if( http_authenticate(http_hdr, url, &auth_retry)<0 )
 					goto err_out;
-				}
 				redirect = 1;
 				break;
 			default:
@@ -857,7 +855,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 err_out:
 	if (fd > 0) closesocket( fd );
 	fd = -1;
-	res = -1;
+	res = STREAM_UNSUPORTED;
 	http_free( http_hdr );
 out:
 	stream->fd = fd;
