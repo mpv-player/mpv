@@ -717,6 +717,7 @@ base64_encode(const void *enc, int encLen, char *out, int outMax) {
 	return -1;
 }
 
+//! If this function succeeds you must closesocket stream->fd
 static int http_streaming_start(stream_t *stream, int* file_format) {
 	HTTP_header_t *http_hdr = NULL;
 	unsigned int i;
@@ -877,6 +878,9 @@ static int fixup_open(stream_t *stream,int seekable) {
 	if ((!is_icy && !is_ultravox) || scast_streaming_start(stream))
 	if(nop_streaming_start( stream )) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"nop_streaming_start failed\n");
+		if (stream->fd >= 0)
+			closesocket(stream->fd);
+		stream->fd = -1;
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
 		return STREAM_UNSUPORTED;
@@ -902,6 +906,9 @@ static int open_s1(stream_t *stream,int mode, void* opts, int* file_format) {
 	mp_msg(MSGT_OPEN, MSGL_V, "STREAM_HTTP(1), URL: %s\n", stream->url);
 	seekable = http_streaming_start(stream, file_format);
 	if((seekable < 0) || (*file_format == DEMUXER_TYPE_ASF)) {
+		if (stream->fd >= 0)
+			closesocket(stream->fd);
+		stream->fd = -1;
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
 		return STREAM_UNSUPORTED;
@@ -926,6 +933,9 @@ static int open_s2(stream_t *stream,int mode, void* opts, int* file_format) {
 	mp_msg(MSGT_OPEN, MSGL_V, "STREAM_HTTP(2), URL: %s\n", stream->url);
 	seekable = http_streaming_start(stream, file_format);
 	if(seekable < 0) {
+		if (stream->fd >= 0)
+			closesocket(stream->fd);
+		stream->fd = -1;
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
 		return STREAM_UNSUPORTED;
