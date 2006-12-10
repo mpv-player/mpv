@@ -59,6 +59,7 @@ static unsigned long WINAPI (*wrvyuv_transform)(char*, char*,transform_in_t*,uns
 
 static void *rv_handle=NULL;
 static int inited=0;
+static uint8_t *buffer = NULL;
 #ifdef USE_WIN32DLL
 static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
 #endif
@@ -296,6 +297,9 @@ static void uninit(sh_video_t *sh){
 #endif
 	rv_handle=NULL;
 	inited = 0;
+	if (buffer)
+	    free(buffer);
+	buffer = NULL;
 }
 
 // copypaste from demux_real.c - it should match to get it working!
@@ -313,7 +317,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	dp_hdr_t* dp_hdr=(dp_hdr_t*)data;
 	unsigned char* dp_data=((unsigned char*)data)+sizeof(dp_hdr_t);
 	uint32_t* extra=(uint32_t*)(((char*)data)+dp_hdr->chunktab);
-	unsigned char* buffer;
 
 	unsigned int transform_out[5];
 	transform_in_t transform_in={
@@ -327,12 +330,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 	if(len<=0 || flags&2) return NULL; // skipped frame || hardframedrop
 
-	if(inited){  // rv30 width/height not yet known
-	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
-		sh->disp_w, sh->disp_h);
-	if(!mpi) return NULL;
-	    buffer=mpi->planes[0];
-	} else {
+	if (!inited) {
+	    if (buffer) free(buffer);
 	    buffer=malloc(sh->disp_w*sh->disp_h*3/2);
 	    if (!buffer) return 0;
 	}
@@ -351,13 +350,21 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    sh->disp_w=transform_out[3];
 	    sh->disp_h=transform_out[4];
 	    if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
-	    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
-		    sh->disp_w, sh->disp_h);
-	    if(!mpi) return NULL;
-	    memcpy(mpi->planes[0],buffer,sh->disp_w*sh->disp_h*3/2);
-	    free(buffer);
 	    inited=1;
 	} 
+	    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
+		    sh->disp_w, sh->disp_h);
+	    if(!mpi) return NULL;
+	    mpi->planes[0] = buffer;
+	    mpi->stride[0] = sh->disp_w;
+	    mpi->planes[1] = buffer + sh->disp_w*sh->disp_h;
+	    mpi->stride[1] = sh->disp_w / 2;
+	    mpi->planes[2] = buffer + sh->disp_w*sh->disp_h*5/4;
+	    mpi->stride[2] = sh->disp_w / 2;
 
+	if(transform_out[0] &&
+	   (sh->disp_w != transform_out[3] || sh->disp_h != transform_out[4]))
+	    inited = 0;
+	
 	return (result?NULL:mpi);
 }
