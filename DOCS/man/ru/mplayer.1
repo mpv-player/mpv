@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r21531
+.\" synced with r21561
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -9896,12 +9896,13 @@ than the output framerate and the framerate increase is <= 1.5.
 Example of PAL to NTSC telecining: tele_src=25:tele_dest=30000/1001.
 .
 .TP
-.B vbuf_size=<40\-1024>
+.B vbuf_size=<40\-1194>
 Sets the size of the video decoder's buffer, expressed in kilobytes.
 Specify it only if the bitrate of the video stream is too high for
 the chosen format and if you know perfectly well what you are doing.
 A too high value may lead to an unplayable movie, depending on the player's
 capabilities.
+When muxing HDTV video a value of 400 should suffice.
 .
 .TP
 .B abuf_size=<4\-64>
