@@ -150,22 +150,22 @@ inline static void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)
     }
 }
 
-unsigned utf8_get_char(char **str) {
-  uint8_t *strp = (uint8_t *)*str;
+unsigned utf8_get_char(const char **str) {
+  const uint8_t *strp = (const uint8_t *)*str;
   unsigned c;
   GET_UTF8(c, *strp++, goto no_utf8;);
-  *str = (char *)strp;
+  *str = (const char *)strp;
   return c;
 
 no_utf8:
-  strp = (uint8_t *)*str;
+  strp = (const uint8_t *)*str;
   c = *strp++;
-  *str = (char *)strp;
+  *str = (const char *)strp;
   return c;
 }
 
 inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
-	unsigned char *cp=vo_osd_text;
+	const char *cp=vo_osd_text;
 	int x=20;
 	int h=0;
 	int font;

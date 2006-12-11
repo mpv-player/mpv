@@ -125,7 +125,7 @@ void free_osd_list(void);
 
 extern int vo_osd_changed_flag;
 
-unsigned utf8_get_char(char **str);
+unsigned utf8_get_char(const char **str);
 
 #ifdef USE_DVDNAV
 #include <inttypes.h>
