@@ -1,4 +1,4 @@
-.\" synced with r21506
+.\" synced with r21561
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -10313,10 +10313,10 @@ temps que l'option téléciné.
 .TP
 .B telecine
 Active le mode pulldown 3:2 logiciel\ : Le multiplexeur va faire comme
-si la vidéo avait été encodée à 30000/1001 ou 30 fps.
+si la vidéo avait été encodée à 30000/1001.
 Ne fonctionne qu'avec les vidéos MPEG-2 dont le nombre de trames par
-seconde, éventuellement convertit avec l'option \-ofps est
-24000/1001 ou 24 fps.
+seconde, éventuellement convertit avec l'option \-ofps, est
+24000/1001.
 Tout autre nombre de trames par seconde est incompatible avec cette
 option.
 .
@@ -10326,7 +10326,7 @@ Active le mode téléciné logiciel FILM vers PAL et NTSC vers PAL\ :
 Il va faire comme si la vidéo avait été encodée à 25 fps.
 Ne fonctionne qu'avec les vidéos MPEG-2 dont le nombre de trames par
 seconde, éventuellement convertit avec l'option \-ofps, est
-24000/1001 ou 24 fps.
+24000/1001.
 Tout autre nombre de trames par seconde est incompatible avec cette
 option.
 .
@@ -10340,23 +10340,25 @@ sorte que le flux vidéo soit comme si il avait été encodé à
 <tele_dest> images par secondes, en remplaçant la cadence de sortie
 nominale.
 Ceci ne fonctionne avec les vidéos MPEG-2 que quand la cadence de prise
-de vue de la source est plus faible que celle en sortie.
+de vue de la source est plus faible que celle en sortie, et que
+l'accélération de la cadence est <= 1.5.
 .sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
-.IPs "tele_src=25,tele_dest=30000/1001"
+.IPs "tele_src=25:tele_dest=30000/1001"
 Exemple de téléciné PAL vers NTSC.
 .RE
 .PD 1
 .
 .TP
-.B vbuf_size=<40\-1024>
+.B vbuf_size=<40\-1194>
 Défini la taille du tampon de décodage vidéo, exprimé en kilobits.
 À définir uniquement si le débit du flux vidéo est trop haut pour le
 format choisi, et que vous savez ce que vous faites.
 Une valeur trop haute peut produire des fichier illisibles, selon les
 capacités du lecteur.
+Pour multiplexer une vidéo HDTV, une valeur de 400 devrait suffire.
 .
 .TP
 .B abuf_size=<4\-64>
