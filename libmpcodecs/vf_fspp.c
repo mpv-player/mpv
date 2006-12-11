@@ -463,7 +463,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src,
 	es=width+8-x0; //  8, ...      
 	if (es>8)
 	    row_fdct_s(block+8*8, p->src + y*stride+8+x0 +2-(y&1), stride, (es-4)>>2);
-	column_fidct_s((int16_t*)(&p->threshold_mtx[0]), block, block3, es-0);
+	column_fidct_s((int16_t*)(&p->threshold_mtx[0]), block, block3, es&(~1));
 	row_idct_s(block3+0*8, p->temp + (y&15)*stride+x0+2-(y&1), stride, es>>2);
 	{const int y1=y-8+step;//l5-7  l4-6
 	    if (!(y1&7) && y1) {
