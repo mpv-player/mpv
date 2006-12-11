@@ -15,12 +15,16 @@ MPlayer (1.0)
       Westwood IMA ADPCM audio, XAN wc3 video, Id CIN video, Interplay video,
       XAN ADPCM audio, Westwood SND1 audio via lavc
     * libmpeg2 updated to 0.4.1
+    * fixed resolution switching with libmpeg2
+    * handle resolution switching for Real codecs
 
     Demuxers:
     * implemented switch_video and switch_program consistently with switch_audio
       (default keys are "_" and TAB, respectively). For the time being program
       switching is only available in TS streams handled by demux_ts.c (not
-      lavf), while video switching is also handled by demux_lavf.c.
+      lavf), while video switching is also handled by demux_lavf.c and
+      demux_avi.c.
+    * audio and video switching for AVI demuxer (video switching untested).
 
     Streaming:
     * authentication for Real RTSP streams
