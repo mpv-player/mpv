@@ -3839,7 +3839,7 @@ EOF
     else
       _ld_tmp="$I -lXext -lX11 $_ld_sock $_ld_pthread"
     fi
-    cc_check $_ld_tmp && _libs_mplayer="$_libs_mplayer $_ld_tmp" \
+    cc_check $_inc_x11 $_ld_tmp && _libs_mplayer="$_libs_mplayer $_ld_tmp" \
                       && _x11=yes && break
   done
 fi
