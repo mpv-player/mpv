@@ -1,4 +1,4 @@
-.\" synced with r21452
+.\" synced with r21486
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -6232,11 +6232,15 @@ Tout comme ivtc, pullup est sans état, dans le sens où il ne reste pas
 dans un seul mode, mais observe plutôt les champs à venir pour
 sélectionner le bon mode et reconstuire correctement les trames.
 Il est toujours en développement, mais est déjà très correct.
-Les paramètres jg, jd, jh et jb définissent la quantité d'informations à
-balancer respectivement à gauche, à droite, en haut et en bas de l'image.
+.RSs
+.IPs "jg, jd, jh et jb"
+Ces paramètres définissent la quantité d'informations "parasites" à
+éliminer respectivement à gauche, à droite, en haut et en bas de l'image.
 Gauche/\:droite sont donnés par colonnes de 8 pixels, tandis que le haut/\:bas
 sont donnés par paquet de 2 lignes.
-Mettre le paramètre cb (changement strict) à 1 réduira les chances que pullup
+.br
+.IPs "cs (changement strict)"
+Mettre ce paramètre à 1 réduira les chances que pullup
 reconstruise incorrectement une trame, mais peut aussi déboucher sur un saut
 trop important de trames lors de scènes avec beaucoup de mouvements.
 Réciproquement, le mettre à -1 fera que le pullup aura plus de facilité
@@ -6244,7 +6248,9 @@ Réciproquement, le mettre à -1 fera que le pullup aura plus de facilité
 Cela devrait aider au traitement de vidéos comportant un léger flou
 entre les champs, mais peut aussi faire que des trames entrelacées seront
 encore présentes en sortie.
-L'option mp (metric plane) peut être définie à 1 ou 2 pour que le chroma
+.br
+.IPs "mp (metric plane)"
+Cette option peut être définie à 1 ou 2 pour que le chroma
 soit utilisé au lieu du luma pour les calculs de pullup.
 Cela devrait améliorer la finesse de l'image sur des vidéos de très bonne
 qualité, mais a plus de chance de la diminuer, surtout si le chroma
@@ -6252,12 +6258,15 @@ est bruité (effet arc-en-ciel) ou que la vidéo est noir et blanc.
 L'intérêt d'agir sur mp pour que les calculs se fassent sur le chroma
 et de réduire l'utilisation du processeur pour que le pullup puisse se
 faire en temps réel sur une machine peu rapide.
-.br
+.REss
+.RS
+.sp 1
 .I NOTE\ :
 Faites toujours suivre pullup du filtre logiciel softskip lors d'un encodage
 pour s'assurer que pullup soit capable de voir toutes les trames.
 Sinon, le flux de sortie sera incorrect ou même plantera, pour des raisons
 de limitations de design de la couche codec/\:filtre.
+.REss
 .
 .TP
 .B filmdint[=options]
@@ -10288,6 +10297,25 @@ seconde, éventuellement convertit avec l'option \-ofps, est
 24000/1001 ou 24 fps.
 Tout autre nombre de trames par seconde est incompatible avec cette
 option.
+.
+.TP
+.B tele_src et tele_dest
+Active le mode téléciné arbitraire en utilisant le code DGPulldown
+de Donand Graft.
+Vous devez donner la cadence de prise de vue (framerate) de la
+source ainsi que la cadence désirée, et le multiplexeur fera en
+sorte que le flux vidéo soit comme si il avait été encodé à
+<tele_dest> images par secondes.
+Ceci ne fonctionne avec les vidéos MPEG-2 que quand la cadence de prise
+de vue de la source est plus faible que celle en sortie.
+.sp 1
+.I EXEMPLE:
+.PD 0
+.RSs
+.IPs "tele_src=25,tele_dest=30000/1001"
+Exemple de téléciné PAL vers NTSC.
+.RE
+.PD 1
 .
 .TP
 .B vbuf_size=<40\-1024>
