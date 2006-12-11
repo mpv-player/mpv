@@ -1,4 +1,4 @@
-.\" synced with r21486
+.\" synced with r21506
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -3762,12 +3762,19 @@ matériel, ou le redimensionnement et la synchronisation de votre sortie vidéo
 avec la fréquence de rafraichissement verticale de votre moniteur.
 .
 .TP
-.B s3fb (voir aussi \-vf yuv2 et \-dr)
+.B s3fb (Linux uniquement) (voir aussi \-vf yuv2 et \-dr)
 Pilote de sortie vidéo spécifique aux cartes S3 Virge.
 Ce pilote supporte les fonctionnalités de conversion YUV, mise à l'échelle,
 double tamponnage, et rendu direct que cette carte gère.
-Utilisez \-vf yuy2 pour activer le rendu yuy2 accéléré matériellement,
-qui est plus rapide que yv12 avec cette carte.
+Utilisez \-vf yuy2 pour activer le rendu YUV2 accéléré matériellement,
+qui est plus rapide que YV12 avec cette carte.
+.PD 0
+.RSs
+.IPs <périph>
+Choisit explicitement le périphérique fbdev à utiliser (par défaut\ :
+/dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B 3dfx (Linux uniquement)
@@ -5778,6 +5785,31 @@ filtre de changement des paramètres de quantification (QP)
 .RSs
 .IPs <equation>
 une équation comme "2+2*sin(PI*qp)"
+.RE
+.
+.TP
+.B geq=equation
+filtre générique programmable avec une équation
+.RSs
+.IPs <equation>
+Une équation, par ex.\& 'p(W-X\,Y)' pour retourner l'image horizontalement.
+Vous pouvez introduire des espaces pour rendre l'équation plus lisible.
+Un certain nombre de constantes pré-définies peuvent être utilisées dans
+l'équation\ :
+.RSss
+PI\ : le nombre pi.
+.br
+E\ : le nombre e
+.br
+X / Y\ : les coordonnées de l'échantillon courant
+.br
+W / H\ : la largeur et la hauteur de l'image
+.br
+SW / SH\ : échelle de la largeur/hauteur en fonction du plan filtré, par ex.\&
+1,1 et 0.5,0.5 pour YUV 4:2:0.
+.br
+p(x,y)\ : retourne la valeur du pixel de coordonnées (x,y) du plan courant.
+.REss
 .RE
 .
 .TP
@@ -10303,9 +10335,10 @@ option.
 Active le mode téléciné arbitraire en utilisant le code DGPulldown
 de Donand Graft.
 Vous devez donner la cadence de prise de vue (framerate) de la
-source ainsi que la cadence désirée, et le multiplexeur fera en
+source ainsi que la cadence désirée\ ; le multiplexeur fera en
 sorte que le flux vidéo soit comme si il avait été encodé à
-<tele_dest> images par secondes.
+<tele_dest> images par secondes, en remplaçant la cadence de sortie
+nominale.
 Ceci ne fonctionne avec les vidéos MPEG-2 que quand la cadence de prise
 de vue de la source est plus faible que celle en sortie.
 .sp 1
@@ -10780,6 +10813,12 @@ mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06
 .br
 Peut-être vous aurez à ajuster un peu la valeur de pan (par c-à-d la
 multiplier par une valeur) pour augementer le volume ou éviter l'écrêtage
+.
+.PP
+.B inverseur à damier avec le filtre geq\ :
+.nf
+mplayer \-vf geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+.fi
 .
 .SH EXEMPLES D'UTILISATIONS DE MENCODER
 .
