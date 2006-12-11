@@ -1764,6 +1764,8 @@ for ac_option do
   --with-extraincdir=*) ;;
   --with-extralibdir=*) ;;
   --extra-libs=*) ;;
+  --extra-libs-mplayer=*) ;;
+  --extra-libs-mencoder=*) ;;
   --enable-runtime-cpudetection) ;;
   --disable-runtime-cpudetection) ;;
   --enable-cross-compile) ;;
