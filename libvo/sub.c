@@ -383,7 +383,6 @@ subtitle* vo_sub=NULL;
 inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    unsigned char *t;
    int c,i,j,l,x,y,font,prevc,counter;
-   int len;
    int k;
    int lastStripPosition;
    int xsize;
@@ -417,9 +416,8 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	    xsize = -vo_font->charspace;
 	  l--;
 	  t=vo_sub->text[i++];	  
-	  len=strlen(t)-1;
 	    char_position = 0;
-	    char_seq = (int *) malloc((len + 1) * sizeof(int));
+	    char_seq = calloc(strlen(t), sizeof(int));
 
 	  prevc = -1;
 
