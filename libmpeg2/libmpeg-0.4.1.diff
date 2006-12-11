@@ -125,6 +125,33 @@
  static void state_restore_mmx (cpu_state_t * state)
  {
      emms ();
+@@ -48,18 +48,18 @@
+ #endif
+ 
+-#ifdef ARCH_PPC
++#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
+-#ifdef HAVE_ALTIVEC_H	/* gnu */
+-#define LI(a,b) "li " #a "," #b "\n\t"
+-#define STVX0(a,b,c) "stvx " #a ",0," #c "\n\t"
+-#define STVX(a,b,c) "stvx " #a "," #b "," #c "\n\t"
+-#define LVX0(a,b,c) "lvx " #a ",0," #c "\n\t"
+-#define LVX(a,b,c) "lvx " #a "," #b "," #c "\n\t"
+-#else			/* apple */
++#if defined( __APPLE_CC__ ) && defined( __APPLE_ALTIVEC__ )	/* apple */
+ #define LI(a,b) "li r" #a "," #b "\n\t"
+ #define STVX0(a,b,c) "stvx v" #a ",0,r" #c "\n\t"
+ #define STVX(a,b,c) "stvx v" #a ",r" #b ",r" #c "\n\t"
+ #define LVX0(a,b,c) "lvx v" #a ",0,r" #c "\n\t"
+ #define LVX(a,b,c) "lvx v" #a ",r" #b ",r" #c "\n\t"
++#else			/* gnu */
++#define LI(a,b) "li " #a "," #b "\n\t"
++#define STVX0(a,b,c) "stvx " #a ",0," #c "\n\t"
++#define STVX(a,b,c) "stvx " #a "," #b "," #c "\n\t"
++#define LVX0(a,b,c) "lvx " #a ",0," #c "\n\t"
++#define LVX(a,b,c) "lvx " #a "," #b "," #c "\n\t"
+ #endif
+ 
+ static void state_save_altivec (cpu_state_t * state)
 @@ -115,12 +119,12 @@
  
  void mpeg2_cpu_state_init (uint32_t accel)
@@ -384,3 +411,28 @@
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
  	mpeg2_idct_copy = mpeg2_idct_copy_altivec;
  	mpeg2_idct_add = mpeg2_idct_add_altivec;
+--- libmpeg2/idct_altivec.c	2004/08/02 11:26:43	12933
++++ libmpeg2/idct_altivec.c	2005/05/15 20:11:34	15484
+@@ -41,7 +41,7 @@
+ typedef vector signed int vector_s32_t;
+ typedef vector unsigned int vector_u32_t;
+ 
+-#if defined(HAVE_ALTIVEC_H) && (__GNUC__ * 100 + __GNUC_MINOR__ < 303)
++#if defined( HAVE_ALTIVEC_H ) && !defined( __APPLE_ALTIVEC__ ) && (__GNUC__ * 100 + __GNUC_MINOR__ < 303)
+ /* work around gcc <3.3 vec_mergel bug */
+ static inline vector_s16_t my_vec_mergel (vector_s16_t const A,
+ 					  vector_s16_t const B)
+@@ -56,10 +56,10 @@
+ #define vec_mergel my_vec_mergel
+ #endif
+ 
+-#ifdef HAVE_ALTIVEC_H	/* gnu */
+-#define VEC_S16(a,b,c,d,e,f,g,h) {a, b, c, d, e, f, g, h}
+-#else			/* apple */
++#if defined( __APPLE_CC__ ) && defined( __APPLE_ALTIVEC__ ) /* apple */
+ #define VEC_S16(a,b,c,d,e,f,g,h) (vector_s16_t) (a, b, c, d, e, f, g, h)
++#else			/* gnu */
++#define VEC_S16(a,b,c,d,e,f,g,h) {a, b, c, d, e, f, g, h}
+ #endif
+ 
+ static const vector_s16_t constants ATTR_ALIGN(16) =
