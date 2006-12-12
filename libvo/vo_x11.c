@@ -229,9 +229,10 @@ static void getMyXImage(void)
       shmemerror:
         Shmem_Flag = 0;
 #endif
-        myximage = XGetImage(mDisplay, vo_window, 0, 0,
-                             image_width, image_height, AllPlanes,
-                             ZPixmap);
+        myximage = XCreateImage(mDisplay, vinfo.visual, depth, ZPixmap,
+                             0, NULL, image_width, image_height, 8, 0);
+        myximage->data = malloc(myximage->bytes_per_line * image_height);
+        memset(myximage->data, 0, myximage->bytes_per_line * image_height);
         ImageData = myximage->data;
 #ifdef HAVE_SHM
     }
@@ -252,6 +253,7 @@ static void freeMyXImage(void)
         XDestroyImage(myximage);
     }
     myximage = NULL;
+    ImageData = NULL;
 }
 
 #ifdef WORDS_BIGENDIAN
