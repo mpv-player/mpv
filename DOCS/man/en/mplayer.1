@@ -9735,16 +9735,16 @@ This option will be ignored if used with the telecine option.
 .B telecine
 Enables 3:2 pulldown soft telecine mode: The muxer will make the
 video stream look like it was encoded at 30000/1001.
-It only works with MPEG-2 video when the output framerate,
-eventually converted with \-ofps, is 24000/1001fps.
+It only works with MPEG-2 video when the output framerate is
+24000/1001 fps, convert it with \-ofps if necessary.
 Any other framerate is incompatible with this option.
 .
 .TP
 .B film2pal
 Enables FILM to PAL and NTSC to PAL soft telecine mode: The muxer
 will make the video stream look like it was encoded at 25 fps.
-It only works with MPEG-2 video when the output framerate,
-eventually converted with \-ofps, is 24000/1001 fps.
+It only works with MPEG-2 video when the output framerate is
+24000/1001 fps, convert it with \-ofps if necessary.
 Any other framerate is incompatible with this option.
 .
 .TP
