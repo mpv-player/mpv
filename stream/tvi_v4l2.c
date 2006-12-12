@@ -876,6 +876,7 @@ static int uninit(priv_t *priv)
 	/* unqueue all remaining buffers */
 	memset(&buf,0,sizeof(buf));
 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	buf.memory = V4L2_MEMORY_MMAP;
 	while (!ioctl(priv->video_fd, VIDIOC_DQBUF, &buf));
     }
 
@@ -1395,6 +1396,7 @@ static void *video_grabber(void *data)
 
 	memset(&buf,0,sizeof(buf));
 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	buf.memory = V4L2_MEMORY_MMAP;
 	ret = ioctl(priv->video_fd, VIDIOC_DQBUF, &buf);
 
 	if (ret < 0) {
@@ -1411,6 +1413,7 @@ static void *video_grabber(void *data)
 	    for (i = 0; i < priv->mapcount; i++) {
 		memset(&buf,0,sizeof(buf));
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		buf.memory = V4L2_MEMORY_MMAP;
 		buf.index = i;
 		ret = ioctl(priv->video_fd, VIDIOC_QUERYBUF, &buf);
 		if (ret < 0) {
