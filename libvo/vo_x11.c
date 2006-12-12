@@ -85,6 +85,7 @@ static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t in_format;
 static uint32_t out_format = 0;
+static int out_offset;
 static int srcW = -1;
 static int srcH = -1;
 static int aspect;              // 1<<16 based fixed point aspect, so that the aspect stays correct during resizing
@@ -552,6 +553,17 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         default:
             draw_alpha_fnc = draw_alpha_null;
     }
+    out_offset = 0;
+    // for these formats conversion is currently not support and
+    // we can easily "emulate" them.
+    if (out_format & 64 && IMGFMT_IS_RGB(out_format) || IMGFMT_IS_BGR(out_format)) {
+      out_format &= ~64;
+#ifdef WORDS_BIGENDIAN
+      out_offset = 1;
+#else
+      out_offset = -1;
+#endif
+    }
 
     /* always allocate swsContext as size could change between frames */
     swsContext =
@@ -571,6 +583,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 static void Display_Image(XImage * myximage, uint8_t * ImageData)
 {
+    myximage->data += out_offset;
 #ifdef HAVE_SHM
     if (Shmem_Flag)
     {
@@ -588,6 +601,7 @@ static void Display_Image(XImage * myximage, uint8_t * ImageData)
                   (vo_dheight - myximage->height) / 2, dst_width,
                   myximage->height);
     }
+    myximage->data -= out_offset;
 }
 
 static void draw_osd(void)
