@@ -4600,7 +4600,7 @@ if test "$_sdl" = yes ; then
     _inc_extra="$_inc_extra `$_sdlconfig --cflags | sed s/-Dmain=SDL_main//`"
   else
     _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs`"
-    _inc_extra="$_inc_extra `$_sdlconfig --cflags`"
+    _inc_extra="$_inc_extra `$_sdlconfig --cflags | sed s/-D_GNU_SOURCE=1//`"
   fi
   _vosrc="$_vosrc vo_sdl.c"
   _vomodules="sdl $_vomodules"

@@ -32,8 +32,6 @@ SRCS=af.c \
 SRCS-$(CONFIG_LIBAVCODEC)    += af_lavcresample.c
 SRCS-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
 
-CFLAGS  = -D_GNU_SOURCE
-
 CFLAGS-$(CONFIG_LIBAVUTIL)   += -I../libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC)  += -I../libavcodec
 

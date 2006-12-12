@@ -157,7 +157,6 @@ CFLAGS  = -I.. \
           -I../libmpdemux \
           -I../stream \
           -I../loader \
-          -D_GNU_SOURCE \
 
 CFLAGS-$(CONFIG_LIBAVUTIL)    +=  -I../libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC)   +=  -I../libavcodec
