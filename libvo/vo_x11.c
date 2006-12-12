@@ -67,6 +67,8 @@ static void (*draw_alpha_fnc) (int x0, int y0, int w, int h,
 
 /* local data */
 static unsigned char *ImageData;
+//! original unaligned pointer for free
+static unsigned char *ImageDataOrig;
 
 /* X11 related variables */
 static XImage *myximage = NULL;
@@ -231,7 +233,8 @@ static void getMyXImage(void)
 #endif
         myximage = XCreateImage(mDisplay, vinfo.visual, depth, ZPixmap,
                              0, NULL, image_width, image_height, 8, 0);
-        myximage->data = malloc(myximage->bytes_per_line * image_height);
+        ImageDataOrig = malloc(myximage->bytes_per_line * image_height + 32);
+        myximage->data = ImageDataOrig + 16 - ((long)ImageDataOrig & 15);
         memset(myximage->data, 0, myximage->bytes_per_line * image_height);
         ImageData = myximage->data;
 #ifdef HAVE_SHM
@@ -250,7 +253,9 @@ static void freeMyXImage(void)
     } else
 #endif
     {
+        myximage->data = ImageDataOrig;
         XDestroyImage(myximage);
+        ImageDataOrig = NULL;
     }
     myximage = NULL;
     ImageData = NULL;
