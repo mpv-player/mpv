@@ -7886,7 +7886,7 @@ $_def_amr_wb
    fi
  done`
 `for part in $_libavmuxers_all; do
-   if \` echo $_libavmuxers | grep $part \`; then
+   if \` echo $_libavmuxers | grep $part > /dev/null \`; then
      echo $part | tr '[a-z] ' '[A-Z]' | sed 's/^/#define ENABLE_/;s/$/ 1/'
    else
      echo $part | tr '[a-z] ' '[A-Z]' | sed 's/^/#define ENABLE_/;s/$/ 0/'
