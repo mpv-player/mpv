@@ -473,6 +473,50 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
 }
 
 /**
+ * \brief dvdnav_aid_from_lang() returns the audio id corresponding to the language code 'lang'
+ * \param stream: - stream pointer
+ * \param lang: 2-characters language code[s], eventually separated by spaces of commas
+ * \return -1 on error, current subtitle id if successful
+ */
+int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
+  dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
+  int k;
+  uint8_t format, lg;
+  uint16_t lang, lcode;;
+
+#ifdef DVDNAV_FORMAT_AC3
+  //this macro is defined only in libdvdnav-cvs
+  while(language && strlen(language)>=2) {
+    lcode = (language[0] << 8) | (language[1]);
+    for(k=0; k<32; k++) {
+      lg = dvdnav_get_audio_logical_stream(priv->dvdnav, k);
+      if(lg == 0xff) continue;
+      lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
+      if(lang != 0xFFFF && lang == lcode) {
+        format = dvdnav_audio_stream_format(priv->dvdnav, lg);
+        switch(format) {
+          case DVDNAV_FORMAT_AC3:
+            return k+128;
+          case DVDNAV_FORMAT_DTS:
+            return k+136;
+          case DVDNAV_FORMAT_LPCM:
+            return k+160;
+          case DVDNAV_FORMAT_MPEGAUDIO:
+            return k;
+          default:
+            return -1;
+        }
+      }
+    }
+    language += 2;
+    while(language[0]==',' || language[0]==' ') ++language;
+  }
+#endif
+  return -1;
+}
+
+
+/**
  * \brief dvdnav_sid_from_lang() returns the subtitle id corresponding to the language code 'lang'
  * \param stream: - stream pointer
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
