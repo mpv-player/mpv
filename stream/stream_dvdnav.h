@@ -31,6 +31,7 @@ typedef struct {
 
 int dvdnav_number_of_subs(stream_t *stream);
 int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language);
+int dvdnav_lang_from_aid(stream_t *stream, int id, unsigned char *buf);
 int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language);
 int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf);
 int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button);
