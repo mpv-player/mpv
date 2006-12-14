@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21537 -->
+<!-- synced with r21612 -->
 <appendix id="bugreports">
 <title>Как сообщать об ошибках</title>
 
@@ -281,7 +281,7 @@ ld -v<!--
   Если у Вас проблема с XVIDIX:
   <itemizedlist>
     <listitem><para>глубина цвета X'ов:
-    <screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
+    <screen>xdpyinfo | grep "depth of root"</screen>
   </para></listitem>
   </itemizedlist>
 </para></listitem>
@@ -377,7 +377,7 @@ ld -v<!--
 <title>Проблемы при воспроизведении</title>
 <para>
 Пожалуйста, включите вывод <application>MPlayer</application>'а с уровнем
-&quot;многословности&quot;[verbose] 1, но запомните: <emphasis role="bold">не
+"многословности" [verbose] 1, но запомните: <emphasis role="bold">не
 сокращайте вывод</emphasis>, когда Вы его вставляете в почту. Разработчикам
 понадобятся все сообщения, чтобы правильно диагностировать проблему. Вы можете
 направить вывод в файл, например так:
@@ -397,7 +397,7 @@ mplayer -v <replaceable>options</replaceable> <replaceable>filename</replaceable
 расширением <filename>.txt</filename>. Опишите проблему, возникающую у Вас
 с соответствующим файлом и включите ваш электронный адрес и вывод 
 <application>MPlayer</application>'а
-с уровнем &quot;многословности&quot; 1. Куска файла размером 1-5 Мб обычно
+с уровнем "многословности" 1. Куска файла размером 1-5 Мб обычно
 бывает достаточно, чтобы воспроизвести проблему, но чтобы быть уверенными,
 мы просим вас сделать:
 <screen>

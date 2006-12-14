@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21537 -->
+<!-- synced with r21612 -->
 <chapter id="ports" xreflabel="Портинг">
 <title>Портинг</title>
 
@@ -121,7 +121,7 @@ MPlayer</application> &mdash; это скачать его с
 <para>
 Чтобы использовать Win32 DLL'и с <application>MPlayer</application>'ом, Вам необходимо 
 перекомпилировать
-ядро с &quot;<envar>option USER_LDT</envar>&quot; (если только у Вас не FreeBSD-CURRENT,
+ядро с "<envar>option USER_LDT</envar>" (если только у Вас не FreeBSD-CURRENT,
 где это включено по умолчанию).
 </para>
 
@@ -131,7 +131,7 @@ MPlayer</application> &mdash; это скачать его с
 <title>FreeBSD</title>
 <para>
 Если Ваш CPU поддерживает SSE, перекомпилируйте ядро с
-&quot;<envar>options CPU_ENABLE_SSE</envar>&quot; (необходимо FreeBSD-STABLE
+"<envar>options CPU_ENABLE_SSE</envar>" (необходимо FreeBSD-STABLE
 или патчи к ядру).
 </para>
 </sect2>
@@ -239,7 +239,7 @@ make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
 
 <para>
 Скрипт <filename>configure</filename> пытается обнаружить, какой ассемблер
-используется Вашей командой &quot;gcc&quot; (в том случае, если автоопределение
+используется Вашей командой "gcc" (в том случае, если автоопределение
 не сработает, используйте опцию
 <option>--as=<replaceable>/там/где/у/Вас/установлен/gnu-as</replaceable></option>, 
 чтобы сообщить скрипту <filename>configure</filename>, где можно обнаружить 

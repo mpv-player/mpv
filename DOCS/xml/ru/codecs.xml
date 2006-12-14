@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21537 -->
+<!-- synced with r21612 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -583,7 +583,7 @@ ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</repla
 </para>
 
 <note><para>Под Windows NT/2000/XP ищите эту информацию в реестре, например,
-ищите &quot;VIDC.HFYU&quot;. Чтобы узнать, как это делать, см. ниже старый
+ищите "VIDC.HFYU". Чтобы узнать, как это делать, см. ниже старый
 метод DirectShow.
 </para></note>
 </sect2>

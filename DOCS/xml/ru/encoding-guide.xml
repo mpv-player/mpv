@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21599  -->
+<!-- synced with r21612  -->
 <!-- **Partially** translated -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
 <sect1 id="menc-feat-dvd-mpeg4">
-<title>Создание высококачественного MPEG-4 (&quot;DivX&quot;) рипа из DVD фильма</title>
+<title>Создание высококачественного MPEG-4 ("DivX") рипа из DVD фильма</title>
 
 <para>
 Одним часто задаваемым вопросом является "Как мне сделать рип самого высокого 
@@ -2057,7 +2057,7 @@ soon as the movie begins to play:
 demux_mpg: 24000/1001 fps progressive NTSC content detected, switching framerate.
 </screen>
 From this point forward, demux_mpg should never say it finds
-&quot;30000/1001 fps NTSC content.&quot;
+"30000/1001 fps NTSC content."
 </para>
 
 <para>
@@ -2080,7 +2080,7 @@ occurred.
 
 <para>
 Sometimes progressive video on DVDs is referred to as
-&quot;soft-telecine&quot; because it is intended to
+"soft-telecine" because it is intended to
 be telecined by the DVD player.
 </para>
 </sect3>
@@ -2101,7 +2101,7 @@ framerate changes when it plays telecined video.
 
 <para>
 Watching a telecined video, you will see interlacing artifacts that
-seem to &quot;blink&quot;: they repeatedly appear and disappear.
+seem to "blink": they repeatedly appear and disappear.
 You can look closely at this by
 <orderedlist>
 <listitem><screen>mplayer dvd://1</screen></listitem>
@@ -2125,7 +2125,7 @@ You can look closely at this by
 
 <para>
 Sometimes telecined video on DVDs is referred to as
-&quot;hard-telecine&quot;. Since hard-telecine is already 60000/1001 fields
+"hard-telecine". Since hard-telecine is already 60000/1001 fields
 per second, the DVD player plays the video without any manipulation.
 </para>
 
@@ -2150,7 +2150,7 @@ a slow connection.
 <para>
 Interlaced video was originally filmed at 60000/1001 fields per second,
 and stored on the DVD as 30000/1001 frames per second. The interlacing effect
-(often called &quot;combing&quot;) is a result of combining pairs of
+(often called "combing") is a result of combining pairs of
 fields into frames. Each field is supposed to be 1/(60000/1001) seconds apart,
 and when they are displayed simultaneously the difference is apparent.
 </para>
@@ -2171,19 +2171,19 @@ When you view an interlaced video closely by frame-stepping with the
 <title>Mixed progressive and telecine</title>
 
 <para>
-All of a &quot;mixed progressive and telecine&quot; video was originally
+All of a "mixed progressive and telecine" video was originally
 24000/1001 frames per second, but some parts of it ended up being telecined.
 </para>
 
 <para>
 When <application>MPlayer</application> plays this category, it will
-(often repeatedly) switch back and forth between &quot;30000/1001 fps NTSC&quot;
-and &quot;24000/1001 fps progressive NTSC&quot;. Watch the bottom of
+(often repeatedly) switch back and forth between "30000/1001 fps NTSC"
+and "24000/1001 fps progressive NTSC". Watch the bottom of
 <application>MPlayer</application>'s output to see these messages.
 </para>
 
 <para>
-You should check the &quot;30000/1001 fps NTSC&quot; sections to make sure
+You should check the "30000/1001 fps NTSC" sections to make sure
 they are actually telecine, and not just interlaced.
 </para>
 </sect3>
@@ -2193,12 +2193,12 @@ they are actually telecine, and not just interlaced.
 <title>Mixed progressive and interlaced</title>
 
 <para>
-In &quot;mixed progressive and interlaced&quot; content, progressive
+In "mixed progressive and interlaced" content, progressive
 and interlaced video have been spliced together.
 </para>
 
 <para>
-This category looks just like &quot;mixed progressive and telecine&quot;,
+This category looks just like "mixed progressive and telecine",
 until you examine the 30000/1001 fps sections and see that they do not have the
 telecine pattern.
 </para>
@@ -2263,7 +2263,7 @@ progressive and telecine</link> section.
 For most practical cases it is not possible to retrieve a complete
 progressive video from interlaced content. The only way to do so
 without losing half of the vertical resolution is to double the
-framerate and try to &quot;guess&quot; what ought to make up the
+framerate and try to "guess" what ought to make up the
 corresponding lines for each field (this has drawbacks - see method 3).
 </para>
 
@@ -2285,7 +2285,7 @@ corresponding lines for each field (this has drawbacks - see method 3).
   these filters available to choose from, each with its own advantages
   and disadvantages. Consult <option>mplayer -pphelp</option> and
   <option>mplayer -vf help</option> to see what is available
-  (grep for &quot;deint&quot;), read Michael's Niedermayer
+  (grep for "deint"), read Michael's Niedermayer
   <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing filters comparison</ulink>,
   and search the
   <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
@@ -2365,7 +2365,7 @@ will be 24000/1001 frames per second.
   else <application>MEncoder</application> will crash.
   <option>pullup</option> is, however, the cleanest and most
   accurate method available for encoding both telecine and
-  &quot;mixed progressive and telecine&quot;.
+  "mixed progressive and telecine".
   <screen>
 mencoder dvd://1 -oac copy -vf pullup,softskip \
     -ovc lavc -ofps 24000/1001<!--
@@ -2425,7 +2425,7 @@ duration/location of each type.
   second video, they will be telecined along with the progressive
   frames. Half of the interlaced "frames" will be displayed for three
   fields' duration (3/(60000/1001) seconds), resulting in a flicking
-  &quot;jump back in time&quot; effect that looks quite bad. If you
+  "jump back in time" effect that looks quite bad. If you
   even attempt this, you <emphasis role="bold">must</emphasis> use a
   deinterlacing filter like <option>lb</option> or
   <option>l5</option>.
@@ -2470,7 +2470,7 @@ duration/location of each type.
   <title>About cropping:</title>
   <para>
   Video data on DVDs are stored in a format called YUV 4:2:0. In YUV
-  video, luma (&quot;brightness&quot;) and chroma (&quot;color&quot;)
+  video, luma ("brightness") and chroma ("color")
   are stored separately. Because the human eye is somewhat less
   sensitive to color than it is to brightness, in a YUV 4:2:0 picture
   there is only one chroma pixel for every four luma pixels. In a
@@ -2949,7 +2949,7 @@ A typical usage of this feature is to set the matrices preferred by the
 </para>
 
 <para>
-The <emphasis role="bold">KVCD &quot;Notch&quot; Quantization Matrix:</emphasis>
+The <emphasis role="bold">KVCD "Notch" Quantization Matrix:</emphasis>
 </para>
 
 <para>

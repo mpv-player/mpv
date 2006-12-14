@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21537 -->
+<!-- synced with r21612 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -351,7 +351,7 @@ end<!--
 <!-- ********** -->
 
 <sect2 id="slave-mode">
-<title>Подчинённый (&quot;рабский&quot;) режим</title>
+<title>Подчинённый ("рабский") режим</title>
 <para>
 Наличие подчинённого режима позволяет Вам создавать простые приложения к
 <application>MPlayer</application>'у. Когда режим включён (опцией

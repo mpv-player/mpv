@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21537 -->
+<!-- synced with r21612 -->
 <chapter id="containers">
 <title>Поддерживаемые форматы</title>
 
@@ -327,7 +327,7 @@ RoQ файлы - это мультимедийные файлы использу
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> - это
 IETF стандартный формат для описания видео и аудио RTP потоков.
-(требуется &quot;<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>&quot;.)
+(требуется "<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>".)
 </para>
 </sect2>
 

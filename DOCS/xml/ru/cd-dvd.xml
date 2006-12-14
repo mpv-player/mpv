@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21537 -->
+<!-- synced with r21612 -->
 <chapter id="cd-dvd">
 <title>Использование CD/DVD</title>
 
@@ -8,7 +8,7 @@
 
 <para>
 Современные приводы CD-ROM могут работать на очень  высоких скоростях, некоторые
-из них способны регулировать скорость чтения. Несколько аргументов &quot;за&quot;
+из них способны регулировать скорость чтения. Несколько аргументов за
 использование этой возможности:
 </para>
 
@@ -65,7 +65,7 @@
 
 <para>
 Обратитесь к 
-&quot;<filename>/proc/ide/<replaceable>[устройство cdrom]</replaceable>/settings</filename>&quot;
+"<filename>/proc/ide/<replaceable>[устройство cdrom]</replaceable>/settings</filename>"
 для подстройки Вашего CD-ROM привода.
 </para>
 
