@@ -1848,7 +1848,7 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
             if (demuxer->type == DEMUXER_TYPE_MATROSKA)
                 demux_mkv_get_audio_lang(demuxer, audio_id, lang, 9);
 #ifdef USE_DVDREAD
-            else {
+            else if(stream->type == STREAMTYPE_DVD) {
                 int code = dvd_lang_from_aid(stream, audio_id);
                 if (code) {
                     lang[0] = code >> 8;
