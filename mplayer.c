@@ -4190,6 +4190,7 @@ if(stream->type==STREAMTYPE_DVD){
 #ifdef USE_DVDNAV
 if(stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
+  if(audio_id==-1) audio_id=dvdnav_aid_from_lang(stream,audio_lang);
   if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=-1;
   if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvdnav_sid_from_lang(stream,dvdsub_lang);
   // setup global sub numbering
