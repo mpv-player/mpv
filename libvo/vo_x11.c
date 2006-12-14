@@ -556,7 +556,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     out_offset = 0;
     // for these formats conversion is currently not support and
     // we can easily "emulate" them.
-    if (out_format & 64 && IMGFMT_IS_RGB(out_format) || IMGFMT_IS_BGR(out_format)) {
+    if (out_format & 64 && (IMGFMT_IS_RGB(out_format) || IMGFMT_IS_BGR(out_format))) {
       out_format &= ~64;
 #ifdef WORDS_BIGENDIAN
       out_offset = 1;
