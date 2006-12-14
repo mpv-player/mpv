@@ -1857,6 +1857,11 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
                 }
             }
 #endif
+
+#ifdef USE_DVDNAV
+            else if(stream->type == STREAMTYPE_DVDNAV)
+                dvdnav_lang_from_aid(stream, audio_id, lang);
+#endif
             *(char**)arg = malloc(64);
             snprintf(*(char**)arg, 64, "(%d) %s", audio_id, lang);
         }
