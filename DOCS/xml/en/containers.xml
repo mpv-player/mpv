@@ -336,7 +336,7 @@ compiling <application>MPlayer</application> to be able to play it.
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> is an
 IETF standard format for describing video and/or audio RTP streams.
-(The &quot;<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>&quot;
+(The "<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>"
 are required.)
 </para>
 </sect2>

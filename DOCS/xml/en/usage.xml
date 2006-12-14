@@ -304,7 +304,7 @@ More about it on the <ulink url="http://www.lirc.org">LIRC homepage</ulink>.
 <para>
 If you have the LIRC package installed, <filename>configure</filename> will
 autodetect it. If everything went fine, <application>MPlayer</application>
-will print &quot;<systemitem>Setting up LIRC support...</systemitem>&quot;
+will print "<systemitem>Setting up LIRC support...</systemitem>"
 on startup. If an error occurs it will tell you. If there is no message about
 LIRC there is no support compiled in. That's it :-)
 </para>

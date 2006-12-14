@@ -315,7 +315,7 @@ DVB input works similarly.
 
 
 <sect1 id="menc-feat-mpeg4">
-<title>Encoding two pass MPEG-4 (&quot;DivX&quot;)</title>
+<title>Encoding two pass MPEG-4 ("DivX")</title>
 
 <para>
 The name comes from the fact that this method encodes the file
@@ -333,7 +333,7 @@ net.
 <example id="copy_audio_track">
 <title>copy audio track</title>
 <para>
-Two pass encode of the second track a DVD to an MPEG-4 (&quot;DivX&quot;)
+Two pass encode of the second track a DVD to an MPEG-4 ("DivX")
 AVI while copying the audio track.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
@@ -346,7 +346,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 <example id="encode_audio_track">
 <title>encode audio track</title>
 <para>
-Two pass encode of a DVD to an MPEG-4 (&quot;DivX&quot;) AVI while encoding
+Two pass encode of a DVD to an MPEG-4 ("DivX") AVI while encoding
 the audio track to MP3.
 Be careful using this method as it may lead to audio/video desync in
 some cases.

@@ -48,7 +48,7 @@ Here are just a few tips:
   Explanation: using this option, only the 26 and 23 channels will be usable,
   and there will be a nice OSD text upon channel switching, displaying the
   channel's name. Spaces in the channel name must be replaced by the
-  &quot;_&quot; character.
+  "_" character.
 </para></listitem>
 <listitem><para>
   Choose some sane image dimensions. The dimensions of the resulting image

@@ -45,7 +45,7 @@ Here are just a few tips:
   Explanation: With this option, only the 104.4 and 103.9 radio stations
   will be usable. There will be a nice OSD text upon channel switching,
   displaying the channel's name. Spaces in the channel name must be
-  replaced by the &quot;_&quot; character.
+  replaced by the "_" character.
 </para></listitem>
 <listitem><para>
   There are several ways of capturing audio. You can grab the sound either using

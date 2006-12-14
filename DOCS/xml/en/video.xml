@@ -1605,17 +1605,17 @@ Reports awaited!
 <title>DirectFB</title>
 
 <blockquote><para>
-&quot;DirectFB is a graphics library which was designed with embedded systems
+"DirectFB is a graphics library which was designed with embedded systems
 in mind. It offers maximum hardware accelerated performance at a minimum
-of resource usage and overhead.&quot; - quoted from
+of resource usage and overhead." - quoted from
 <ulink url="http://www.directfb.org"/>
 </para></blockquote>
 
 <para>I'll exclude DirectFB features from this section.</para>
 
 <para>
-Though <application>MPlayer</application> is not supported as a &quot;video
-provider&quot; in DirectFB, this output driver will enable video playback
+Though <application>MPlayer</application> is not supported as a "video
+provider" in DirectFB, this output driver will enable video playback
 through DirectFB. It will - of course - be accelerated, on my Matrox G400
 DirectFB's speed was the same as XVideo.
 </para>

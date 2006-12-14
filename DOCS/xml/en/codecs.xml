@@ -598,7 +598,7 @@ mail, and upload these files to the FTP site:
 </para>
 
 <note><para>On Windows NT/2000/XP search for this info in the registry,
-e.g. search for &quot;VIDC.HFYU&quot;. To find out how to do this, look at
+e.g. search for "VIDC.HFYU". To find out how to do this, look at
 the old DirectShow method below.
 </para></note>
 </sect2>

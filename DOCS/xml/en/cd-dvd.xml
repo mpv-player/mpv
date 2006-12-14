@@ -63,7 +63,7 @@ This enables DMA access, read-ahead, and IRQ unmasking (read the
 
 <para>
 Please refer to
-&quot;<filename>/proc/ide/<replaceable>[cdrom device]</replaceable>/settings</filename>&quot;
+"<filename>/proc/ide/<replaceable>[cdrom device]</replaceable>/settings</filename>"
 for fine-tuning your CD-ROM.
 </para>
 

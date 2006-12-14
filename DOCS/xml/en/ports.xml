@@ -124,7 +124,7 @@ create an appropriate symbolic link:
 
 <para>
 To use Win32 DLLs with <application>MPlayer</application> you will need to
-re-compile the kernel with &quot;<envar>option USER_LDT</envar>&quot;
+re-compile the kernel with "<envar>option USER_LDT</envar>"
 (unless you run FreeBSD-CURRENT,
 where this is the default).
 </para>
@@ -136,7 +136,7 @@ where this is the default).
 
 <para>
 If your CPU has SSE, recompile your kernel with
-&quot;<envar>options CPU_ENABLE_SSE</envar>&quot; (FreeBSD-STABLE or kernel
+"<envar>options CPU_ENABLE_SSE</envar>" (FreeBSD-STABLE or kernel
 patches required).
 </para>
 </sect2>
@@ -249,7 +249,7 @@ that cannot be compiled using Sun's assembler
 
 <para>
 The <filename>configure</filename> script tries to find out, which assembler
-program is used by your &quot;gcc&quot; command (in case the autodetection
+program is used by your "gcc" command (in case the autodetection
 fails, use the
 <option>--as=<replaceable>/wherever/you/have/installed/gnu-as</replaceable></option>
 option to tell the <filename>configure</filename> script where it can find GNU

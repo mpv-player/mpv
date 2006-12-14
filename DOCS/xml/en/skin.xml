@@ -501,21 +501,21 @@ blocks.
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-slabel"/>slabel = X, Y, fontid, &quot;text&quot;
+  <anchor id="skin-slabel"/>slabel = X, Y, fontid, "text"
   </literal></term>
   <listitem><para>
   Place a static label at the position <literal>X,Y</literal>.
   <literal>text</literal> is displayed using the font identified by
   <literal>fontid</literal>. The text is just a raw string
   (<literal>$x</literal> variables do not work) that must be enclosed between
-  double quotes (but the &quot; character cannot be part of the text). The
+  double quotes (but the " character cannot be part of the text). The
   label is displayed using the font identified by <literal>fontid</literal>.
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-dlabel"/>dlabel = X, Y, length, align, fontid, &quot;text&quot;
+  <anchor id="skin-dlabel"/>dlabel = X, Y, length, align, fontid, "text"
   </literal></term>
   <listitem>
   <para>
@@ -530,7 +530,7 @@ blocks.
   </para>
   <para>
   The text to be displayed is given by <literal>text</literal>: It must be
-  written between double quotes (but the &quot; character cannot be part of the
+  written between double quotes (but the " character cannot be part of the
   text). The label is displayed using the font identified by
   <literal>fontid</literal>. You can use the following variables in the text:
   </para>
@@ -780,7 +780,7 @@ in the form
 Where <literal><replaceable>image</replaceable></literal> is the name of the
 image file to be used for the font (you do not have to specify the extension).
 <anchor id="skin-font-char"/>
-<programlisting>&quot;char&quot; = X, Y, width, height</programlisting>
+<programlisting>"char" = X, Y, width, height</programlisting>
 Here <literal>X</literal> and <literal>Y</literal> specify the position of the
 <literal>char</literal> character in the image (<literal>0,0</literal> is the
 upper left corner). <literal>width</literal> and <literal>height</literal> are
@@ -790,13 +790,13 @@ the dimensions of the character in pixels.
 <para>
 This example defines the A, B, C characters using <filename>font.png</filename>.
 <programlisting>
-; Can be &quot;font&quot; instead of &quot;font.png&quot;.
+; Can be "font" instead of "font.png".
 image = font.png
 
 ; Three characters are enough for demonstration purposes :-)
-&quot;A&quot; =  0,0, 7,13
-&quot;B&quot; =  7,0, 7,13
-&quot;C&quot; = 14,0, 7,13
+"A" =  0,0, 7,13
+"B" =  7,0, 7,13
+"C" = 14,0, 7,13
 </programlisting>
 </para>
 

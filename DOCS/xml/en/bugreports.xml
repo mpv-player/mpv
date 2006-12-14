@@ -286,7 +286,7 @@ ld -v<!--
   <itemizedlist>
   <listitem><para>
     X colour depth:
-    <screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
+    <screen>xdpyinfo | grep "depth of root"</screen>
   </para></listitem>
   </itemizedlist>
 </para></listitem>
