@@ -796,6 +796,8 @@ static int prepare_charset(char *charmap, char *encoding, FT_ULong *charset, FT_
 static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *charcodes) {
 #ifdef HAVE_FREETYPE21
     FT_ULong  charcode;
+#else
+    int j;
 #endif
     FT_UInt   gindex;
     int i;
@@ -817,7 +819,6 @@ static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *ch
     }
 #else
     // for FT < 2.1 we have to use brute force enumeration
-    int j;
     i = 0;
     for (j = 33; j < 65536; j++) {
 	gindex = FT_Get_Char_Index(face, j);
