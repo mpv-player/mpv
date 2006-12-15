@@ -50,6 +50,7 @@ MPlayer (1.0)
     * obsolete Xvid 3 support removed
     * long-deprecated -vop option removed
     * video stream switching
+    * dvdnav:// honour -alang and -slang
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
