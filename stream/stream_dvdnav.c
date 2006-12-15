@@ -527,15 +527,9 @@ int dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
   uint16_t lang;
   dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
 
-  if(aid >= 0x80 && aid < 0x88)
-    aid -= 0x80;
-  else if(aid >= 0x88 && aid <= 0x8F)
-    aid -= 0x88;
-  else if(aid >= 0xA0 && aid <= 0xAF)
-    aid -= 0xA0;
   if(aid < 0)
     return 0;
-  lg = dvdnav_get_audio_logical_stream(priv->dvdnav, aid);
+  lg = dvdnav_get_audio_logical_stream(priv->dvdnav, aid & 0x7);
   if(lg == 0xff) return 0;
   lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
   if(lang == 0xffff) return 0;
