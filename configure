@@ -7357,6 +7357,18 @@ else
 fi
 echores "$_color_console"
 
+# linker paths should be the same for mencoder and mplayer
+_ld_tmp=""
+for I in $_libs_mplayer ; do
+  _tmp=`echo $I | sed -e s/^-L.*$//`
+  if test -z $_tmp ; then
+    _ld_extra="$I $_ld_extra"
+  else
+    _ld_tmp="$_ld_tmp $I"
+  fi
+done
+_libs_mplayer=$_ld_tmp
+
 #############################################################################
 echo "Creating config.mak"
 cat > config.mak << EOF
@@ -7501,6 +7513,7 @@ CONFIG_AMR_WB=$_amr_wb
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+CONFIG_X11_GRAB_DEVICE_DEMUXER=no
 CONFIG_FAAC=$_lavc_faac
 CONFIG_MP3LAME=$_lavc_mp3lame
 CONFIG_XVID=$_lavc_xvid
@@ -7892,6 +7905,10 @@ $_def_amr_wb
      echo $part | tr '[a-z] ' '[A-Z]' | sed 's/^/#define ENABLE_/;s/$/ 0/'
    fi
  done`
+// HACK: disable x11 demuxer for now
+#undef CONFIG_X11_GRAB_DEVICE_DEMUXER
+#undef ENABLE_X11_GRAB_DEVICE_DEMUXER
+#define ENABLE_X11_GRAB_DEVICE_DEMUXER 0
 
 $_def_lavc_faac
 $_def_lavc_xvid
