@@ -480,9 +480,8 @@ make install
 Wersje binarne nie są dostępne na stronie audiocoding.com, ale możesz
 ściągnąć (apt-getem) Debianowe paczki ze
 <ulink url="http://www.debian-multimedia.org/">strony domowej Christiana Marillata</ulink>,
-RPM-y dla Mandrake/Mandriva ze strony <ulink url="http://plf.zarb.org">P.L.F</ulink>.
-a RedHatowe RPM-y z
-<ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
+RPM-y dla Mandrake/Mandriva ze strony <ulink url="http://plf.zarb.org">P.L.F</ulink>,
+a RPM-y dla Fedory z <ulink url="http://rpm.livna.org/">Livna</ulink>.
 </para>
 </sect2>
 

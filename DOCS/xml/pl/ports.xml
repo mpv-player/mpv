@@ -53,10 +53,10 @@ z <ulink url="http://www.debian-multimedia.org/">jego strony domowej</ulink>.
 <sect2 id="rpm">
 <title>Pakiety RPM</title>
 <para>
-Dominik Mierzejewski tworzy i opiekuje się oficjalnymi pakietami RPM
-<application>MPlayera</application> dla Red Hata i Fedora Core.
-Są one dostępne w jego
-<ulink url="http://rpm.greysector.net/mplayer/">repozytorium</ulink>.
+Dominik Mierzejewski opiekuje się oficjalnymi pakietami RPM
+<application>MPlayera</application> dla Fedora Core.
+Są one dostępne w
+<ulink url="http://rpm.livna.org/">repozytorium Livna</ulink>.
 </para>
 
 <para>

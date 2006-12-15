@@ -60,10 +60,9 @@ our binary codec packages for a while, you can (apt-)get them from
 <title>RPM packaging</title>
 
 <para>
-Dominik Mierzejewski created and maintains the official RPM packages of
-<application>MPlayer</application> for Red Hat and Fedora Core. They are
-available
-from his <ulink url="http://rpm.greysector.net/mplayer/">repository</ulink>.
+Dominik Mierzejewski maintains the official RPM packages of
+<application>MPlayer</application> for Fedora Core. They are available
+from <ulink url="http://rpm.livna.org/">Livna repository</ulink>.
 </para>
 
 <para>
