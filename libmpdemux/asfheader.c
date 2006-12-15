@@ -60,6 +60,19 @@ const char asf_ext_stream_audio[16] = {0x9d, 0x8c, 0x17, 0x31,
   0xe1, 0x03, 0x28, 0x45, 0xb5, 0x82, 0x3d, 0xf9, 0xdb, 0x22, 0xf5, 0x03};
 const char asf_ext_stream_header[16] = {0xCB, 0xA5, 0xE6, 0x14,
   0x72, 0xC6, 0x32, 0x43, 0x83, 0x99, 0xA9, 0x69, 0x52, 0x06, 0x5B, 0x5A};
+const char asf_metadata_header[16] = {0xea, 0xcb, 0xf8, 0xc5,
+  0xaf, 0x5b, 0x77, 0x48, 0x84, 0x67, 0xaa, 0x8c, 0x44, 0xfa, 0x4c, 0xca};
+
+typedef struct {
+  // must be 0 for metadata record, might be non-zero for metadata lib record
+  uint16_t lang_list_index;
+  uint16_t stream_num;
+  uint16_t name_length;
+  uint16_t data_type;
+  uint32_t data_length;
+  uint16_t* name;
+  void* data;
+} ASF_meta_record_t;
 
 static char* get_ucs2str(const uint16_t* inbuf, uint16_t inlen)
 {
@@ -205,6 +218,71 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, dou
   return 0;
 }
 
+#define CHECKDEC(l, n) if (((l) -= (n)) < 0) return 0
+static char* read_meta_record(ASF_meta_record_t* dest, char* buf,
+    int* buf_len)
+{
+  CHECKDEC(*buf_len, 2 + 2 + 2 + 2 + 4);
+  dest->lang_list_index = LE_16(buf);
+  dest->stream_num = LE_16(&buf[2]);
+  dest->name_length = LE_16(&buf[4]);
+  dest->data_type = LE_16(&buf[6]);
+  dest->data_length = LE_32(&buf[8]);
+  buf += 2 + 2 + 2 + 2 + 4;
+  CHECKDEC(*buf_len, dest->name_length);
+  dest->name = (uint16_t*)buf;
+  buf += dest->name_length;
+  CHECKDEC(*buf_len, dest->data_length);
+  dest->data = buf;
+  buf += dest->data_length;
+  return buf;
+}
+
+static int get_meta(char *buf, int buf_len, int this_stream_num,
+    float* asp_ratio)
+{
+  int pos = 0;
+  uint16_t records_count;
+  uint16_t x = 0, y = 0;
+
+  if ((pos = find_asf_guid(buf, asf_metadata_header, pos, buf_len)) < 0)
+    return 0;
+
+  CHECKDEC(buf_len, pos);
+  buf += pos;
+  CHECKDEC(buf_len, 2);
+  records_count = LE_16(buf);
+  buf += 2;
+
+  while (records_count--) {
+    ASF_meta_record_t record_entry;
+    char* name;
+
+    if (!(buf = read_meta_record(&record_entry, buf, &buf_len)))
+        return 0;
+    /* reserved, must be zero */
+    if (record_entry.lang_list_index)
+      continue;
+    /* match stream number: 0 to match all */
+    if (record_entry.stream_num && record_entry.stream_num != this_stream_num)
+      continue;
+    if (!(name = get_ucs2str(record_entry.name, record_entry.name_length))) {
+      mp_msg(MSGT_HEADER, MSGL_ERR, MSGTR_MemAllocFailed);
+      continue;
+    }
+    if (strcmp(name, "AspectRatioX") == 0)
+      x = LE_16(record_entry.data);
+    else if (strcmp(name, "AspectRatioY") == 0)
+      y = LE_16(record_entry.data);
+    free(name);
+  }
+  if (x && y) {
+    *asp_ratio = (float)x / (float)y;
+    return 1;
+  }
+  return 0;
+}
+
 static int asf_init_audio_stream(demuxer_t *demuxer,struct asf_priv* asf, sh_audio_t* sh_audio, ASF_stream_header_t *streamh, int *ppos, uint8_t** buf, char *hdr, unsigned int hdr_len)
 {
   uint8_t *buffer = *buf;
@@ -336,6 +414,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
       case ASF_GUID_PREFIX_video_stream: {
         sh_video_t* sh_video=new_sh_video(demuxer,streamh->stream_no & 0x7F);
         unsigned int len=streamh->type_size-(4+4+1+2);
+        float asp_ratio;
 	++video_streams;
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
         sh_video->bih=calloc((len<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):len,1);
@@ -357,6 +436,10 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
 	  asf->avg_vid_frame_time=0.0; // only used for dvr-ms when > 0.0
 	  sh_video->fps=1000.0f;
 	  sh_video->frametime=0.001f;
+        }
+        if (get_meta(hdr, hdr_len, streamh->stream_no, &asp_ratio)) {
+          sh_video->aspect = asp_ratio * sh_video->bih->biWidth /
+            sh_video->bih->biHeight;
         }
 
         if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_video_header(sh_video->bih, MSGL_V);
