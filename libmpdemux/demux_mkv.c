@@ -2376,7 +2376,8 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
   for (i = 0; i < mkv_d->num_tracks; i++)
     {
       track = mkv_d->tracks[i];
-      if (track->type != MATROSKA_TRACK_SUBTITLE)
+      if (track->type != MATROSKA_TRACK_SUBTITLE ||
+          track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB)
         continue;
 
       track->sh_sub.type = 'a';
