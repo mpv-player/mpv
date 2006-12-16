@@ -96,8 +96,6 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	
 	font = calloc(1, sizeof(ass_font_t));
 	font->ftlibrary = ftlibrary;
-	font->path = strdup(path);
-	font->index = index;
 	font->face = face;
 	font->desc.family = strdup(desc->family);
 	font->desc.bold = desc->bold;
@@ -137,7 +135,7 @@ void ass_font_set_size(ass_font_t* font, int size)
 }
 
 #ifdef HAVE_FONTCONFIG
-static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font)
+static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t ch)
 {
 	char* path;
 	int index;
@@ -146,10 +144,6 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font)
 	
 	path = fontconfig_select_with_charset(fontconfig_priv, font->desc.family, font->desc.bold,
 					      font->desc.italic, &index, font->charset);
-	if (strcasecmp(path, font->path) == 0 && index == font->index) {
-		free(path);
-		return;
-	}
 
 	error = FT_New_Face(font->ftlibrary, path, index, &face);
 	if (error) {
@@ -158,12 +152,15 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font)
 	}
 	charmap_magic(face);
 
+	error = FT_Get_Char_Index(face, ch);
+	if (error == 0) { // the new font face is not better then the old one
+		FT_Done_Face(face);
+		return;
+	}
+
 	if (font->face) FT_Done_Face(font->face);
-	free(font->path);
 
 	font->face = face;
-	font->path = strdup(path);
-	font->index = index;
 	
 	FT_Set_Transform(font->face, &font->m, &font->v);
 	FT_Set_Pixel_Sizes(font->face, 0, font->size);
@@ -203,7 +200,7 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 	if (index == 0) {
 		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_GlyphNotFoundReselectingFont,
 		       ch, font->desc.family, font->desc.bold, font->desc.italic);
-		ass_font_reselect(fontconfig_priv, font);
+		ass_font_reselect(fontconfig_priv, font, ch);
 		index = FT_Get_Char_Index(font->face, ch);
 		if (index == 0) {
 			mp_msg(MSGT_ASS, MSGL_ERR, MSGTR_LIBASS_GlyphNotFound,
@@ -253,7 +250,6 @@ FT_Vector ass_font_get_kerning(ass_font_t* font, uint32_t c1, uint32_t c2)
 void ass_font_free(ass_font_t* font)
 {
 	if (font->face) FT_Done_Face(font->face);
-	if (font->path) free(font->path);
 	if (font->desc.family) free(font->desc.family);
 #ifdef HAVE_FONTCONFIG
 	if (font->charset) FcCharSetDestroy(font->charset);
