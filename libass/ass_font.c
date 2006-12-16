@@ -85,11 +85,11 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 			return 0;
 		}
 	} else {
-	error = FT_New_Face(ftlibrary, path, index, &face);
-	if (error) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
-		return 0;
-	}
+		error = FT_New_Face(ftlibrary, path, index, &face);
+		if (error) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
+			return 0;
+		}
 	}
 
 	charmap_magic(face);
@@ -177,17 +177,17 @@ void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
 {
 	int i;
 	for (i = 0; i < font->n_faces; ++i) {
-	FT_Face face = font->faces[i];
-	if (FT_Get_Char_Index(face, ch)) {
-		int v, v2;
-		v = face->size->metrics.ascender;
-		v2 = FT_MulFix(face->bbox.yMax, face->size->metrics.y_scale);
-		*asc = (v > v2 * 0.9) ? v : v2;
+		FT_Face face = font->faces[i];
+		if (FT_Get_Char_Index(face, ch)) {
+			int v, v2;
+			v = face->size->metrics.ascender;
+			v2 = FT_MulFix(face->bbox.yMax, face->size->metrics.y_scale);
+			*asc = (v > v2 * 0.9) ? v : v2;
 				
-		v = - face->size->metrics.descender;
-		v2 = - FT_MulFix(face->bbox.yMin, face->size->metrics.y_scale);
-		*desc = (v > v2 * 0.9) ? v : v2;
-		return;
+			v = - face->size->metrics.descender;
+			v2 = - FT_MulFix(face->bbox.yMin, face->size->metrics.y_scale);
+			*desc = (v > v2 * 0.9) ? v : v2;
+			return;
 		}
 	}
 	
