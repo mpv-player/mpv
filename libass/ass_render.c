@@ -1637,8 +1637,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 				      &text_info.glyphs[text_info.length].asc,
 				      &text_info.glyphs[text_info.length].desc);
 
-		printf("asc = %d, desc = %d  \n", text_info.glyphs[text_info.length].asc, text_info.glyphs[text_info.length].desc);
-
 		text_info.length++;
 
 		render_context.effect_type = EF_NONE;
