@@ -31,6 +31,8 @@ SRCS+= dshow/DS_AudioDecoder.c \
 
 include ../mpcommon.mak
 
+CFLAGS+=-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
+
 dshow/test: dshow/test.c $(LIBNAME)
 	$(CC) $(CFLAGS) -o $@ $^ -lstdc++
 
