@@ -213,7 +213,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
 
     if (strcmp(preset_name, "help") == 0) {
         mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-        lame_presets_longinfo_dm(stderr);
+        mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LamePresetsLongInfo);
         return -1;
     }
 
@@ -317,14 +317,5 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
     mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
     mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_InvalidLamePresetOptions);
     return -1;
-}
-#endif
-
-#ifdef HAVE_MP3LAME_PRESET
-/* lame_presets_longinfo_dm
-   taken out of presets_longinfo_dm in lame-3.93.1/frontend/parse.c and modified */
-static void  lame_presets_longinfo_dm ( FILE* msgfp )
-{
-        mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LamePresetsLongInfo);
 }
 #endif
