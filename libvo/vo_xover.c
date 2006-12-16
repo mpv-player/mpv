@@ -15,7 +15,6 @@
 #include <math.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 
 #include "config.h"
 #include "video_out.h"
