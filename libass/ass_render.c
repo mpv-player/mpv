@@ -1485,26 +1485,6 @@ static void process_karaoke_effects(void)
 	}
 }
 
-static int get_face_ascender(FT_Face face)
-{
-	int v = face->size->metrics.ascender;
-	int v2 = FT_MulFix(face->bbox.yMax, face->size->metrics.y_scale);
-	if (v > v2 * 0.9)
-		return v;
-	else
-		return v2;
-}
-
-static int get_face_descender(FT_Face face)
-{
-	int v = - face->size->metrics.descender;
-	int v2 = - FT_MulFix(face->bbox.yMin, face->size->metrics.y_scale);
-	if (v > v2 * 0.9)
-		return v;
-	else
-		return v2;
-}
-
 /**
  * \brief Calculate base point for positioning and rotation
  * \param bbox text bbox
@@ -1549,8 +1529,6 @@ static void get_base_point(FT_BBox bbox, int alignment, int* bx, int* by)
 static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 {
 	char* p;
-	FT_UInt glyph_index; 
-	FT_Bool use_kerning; 
 	FT_UInt previous; 
 	FT_UInt num_glyphs;
 	FT_Vector pen;
@@ -1596,19 +1574,15 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		if (code == 0)
 			break;
 
-		use_kerning = FT_HAS_KERNING(render_context.font->face);
-
 		if (text_info.length >= MAX_GLYPHS) {
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_MAX_GLYPHS_Reached, 
 					(int)(event - frame_context.track->events), event->Start, event->Duration, event->Text);
 			break;
 		}
 
-		glyph_index = FT_Get_Char_Index( render_context.font->face, code);
-
-		if ( use_kerning && previous && glyph_index ) {
+		if ( previous && code ) {
 			FT_Vector delta;
-			FT_Get_Kerning( render_context.font->face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
+			delta = ass_font_get_kerning(render_context.font, previous, code);
 			pen.x += delta.x * render_context.scale_x;
 			pen.y += delta.y * render_context.scale_y;
 		}
@@ -1644,9 +1618,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			FT_Glyph_Get_CBox( text_info.glyphs[text_info.length].glyph, FT_GLYPH_BBOX_PIXELS, &(text_info.glyphs[text_info.length].bbox) );
 		}
 
-		
-		previous = glyph_index;
-		
+		previous = code;
+
 		text_info.glyphs[text_info.length].symbol = code;
 		text_info.glyphs[text_info.length].linebreak = 0;
 		for (i = 0; i < 4; ++i) {
@@ -1657,11 +1630,14 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].effect_type = render_context.effect_type;
 		text_info.glyphs[text_info.length].effect_timing = render_context.effect_timing;
 		text_info.glyphs[text_info.length].effect_skip_timing = render_context.effect_skip_timing;
-		text_info.glyphs[text_info.length].asc = get_face_ascender(render_context.font->face);
-		text_info.glyphs[text_info.length].desc = get_face_descender(render_context.font->face);
 		text_info.glyphs[text_info.length].be = render_context.be;
 		text_info.glyphs[text_info.length].shadow = render_context.shadow;
 		text_info.glyphs[text_info.length].frz = render_context.rotation;
+		ass_font_get_asc_desc(render_context.font, code,
+				      &text_info.glyphs[text_info.length].asc,
+				      &text_info.glyphs[text_info.length].desc);
+
+		printf("asc = %d, desc = %d  \n", text_info.glyphs[text_info.length].asc, text_info.glyphs[text_info.length].desc);
 
 		text_info.length++;
 

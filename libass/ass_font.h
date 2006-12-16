@@ -48,7 +48,9 @@ typedef struct ass_font_s {
 ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* desc);
 void ass_font_set_transform(ass_font_t* font, FT_Matrix* m, FT_Vector* v);
 void ass_font_set_size(ass_font_t* font, int size);
+void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc);
 FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch);
+FT_Vector ass_font_get_kerning(ass_font_t* font, uint32_t c1, uint32_t c2);
 void ass_font_free(ass_font_t* font);
 
 #endif

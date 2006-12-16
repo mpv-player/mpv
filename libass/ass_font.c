@@ -178,6 +178,24 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font)
 }
 #endif
 
+void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
+{
+	FT_Face face = font->face;
+	if (FT_Get_Char_Index(face, ch)) {
+		int v, v2;
+		v = face->size->metrics.ascender;
+		v2 = FT_MulFix(face->bbox.yMax, face->size->metrics.y_scale);
+		*asc = (v > v2 * 0.9) ? v : v2;
+				
+		v = - face->size->metrics.descender;
+		v2 = - FT_MulFix(face->bbox.yMin, face->size->metrics.y_scale);
+		*desc = (v > v2 * 0.9) ? v : v2;
+		return;
+	}
+	
+	*asc = *desc = 0;
+}
+
 FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch)
 {
 	int error;
@@ -224,6 +242,20 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 	}
 	
 	return glyph;
+}
+
+FT_Vector ass_font_get_kerning(ass_font_t* font, uint32_t c1, uint32_t c2)
+{
+	FT_Vector v = {0, 0};
+	int i1, i2;
+	
+	if (!FT_HAS_KERNING(font->face))
+		return v;
+	i1 = FT_Get_Char_Index(font->face, c1);
+	i2 = FT_Get_Char_Index(font->face, c2);
+	if (i1 && i2)
+		FT_Get_Kerning(font->face, i1, i2, FT_KERNING_DEFAULT, &v);
+	return v;
 }
 
 void ass_font_free(ass_font_t* font)
