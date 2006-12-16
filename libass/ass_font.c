@@ -96,7 +96,8 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	
 	font = calloc(1, sizeof(ass_font_t));
 	font->ftlibrary = ftlibrary;
-	font->face = face;
+	font->faces[0] = face;
+	font->n_faces = 1;
 	font->desc.family = strdup(desc->family);
 	font->desc.bold = desc->bold;
 	font->desc.italic = desc->italic;
@@ -117,20 +118,24 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 
 void ass_font_set_transform(ass_font_t* font, FT_Matrix* m, FT_Vector* v)
 {
+	int i;
 	font->m.xx = m->xx;
 	font->m.xy = m->xy;
 	font->m.yx = m->yx;
 	font->m.yy = m->yy;
 	font->v.x = v->x;
 	font->v.y = v->y;
-	FT_Set_Transform(font->face, &font->m, &font->v);
+	for (i = 0; i < font->n_faces; ++i)
+		FT_Set_Transform(font->faces[i], &font->m, &font->v);
 }
 
 void ass_font_set_size(ass_font_t* font, int size)
 {
+	int i;
 	if (font->size != size) {
 		font->size = size;
-		FT_Set_Pixel_Sizes(font->face, 0, size);
+		for (i = 0; i < font->n_faces; ++i)
+			FT_Set_Pixel_Sizes(font->faces[i], 0, size);
 	}
 }
 
@@ -141,6 +146,9 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t 
 	int index;
 	FT_Face face;
 	int error;
+
+	if (font->n_faces == ASS_FONT_MAX_FACES)
+		return;
 	
 	path = fontconfig_select_with_charset(fontconfig_priv, font->desc.family, font->desc.bold,
 					      font->desc.italic, &index, font->charset);
@@ -158,18 +166,18 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t 
 		return;
 	}
 
-	if (font->face) FT_Done_Face(font->face);
-
-	font->face = face;
+	font->faces[font->n_faces++] = face;
 	
-	FT_Set_Transform(font->face, &font->m, &font->v);
-	FT_Set_Pixel_Sizes(font->face, 0, font->size);
+	FT_Set_Transform(face, &font->m, &font->v);
+	FT_Set_Pixel_Sizes(face, 0, font->size);
 }
 #endif
 
 void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
 {
-	FT_Face face = font->face;
+	int i;
+	for (i = 0; i < font->n_faces; ++i) {
+	FT_Face face = font->faces[i];
 	if (FT_Get_Char_Index(face, ch)) {
 		int v, v2;
 		v = face->size->metrics.ascender;
@@ -180,6 +188,7 @@ void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
 		v2 = - FT_MulFix(face->bbox.yMin, face->size->metrics.y_scale);
 		*desc = (v > v2 * 0.9) ? v : v2;
 		return;
+		}
 	}
 	
 	*asc = *desc = 0;
@@ -188,20 +197,31 @@ void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
 FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch)
 {
 	int error;
-	int index;
+	int index = 0;
+	int i;
 	FT_Glyph glyph;
+	FT_Face face = 0;
 
 	if (ch < 0x20)
 		return 0;
-	
-	index = FT_Get_Char_Index(font->face, ch);
+	if (font->n_faces == 0)
+		return 0;
+
+	for (i = 0; i < font->n_faces; ++i) {
+		face = font->faces[i];
+		index = FT_Get_Char_Index(face, ch);
+		if (index)
+			break;
+	}
+
 #ifdef HAVE_FONTCONFIG
 	FcCharSetAddChar(font->charset, ch);
 	if (index == 0) {
 		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_GlyphNotFoundReselectingFont,
 		       ch, font->desc.family, font->desc.bold, font->desc.italic);
 		ass_font_reselect(fontconfig_priv, font, ch);
-		index = FT_Get_Char_Index(font->face, ch);
+		face = font->faces[font->n_faces - 1];
+		index = FT_Get_Char_Index(face, ch);
 		if (index == 0) {
 			mp_msg(MSGT_ASS, MSGL_ERR, MSGTR_LIBASS_GlyphNotFound,
 			       ch, font->desc.family, font->desc.bold, font->desc.italic);
@@ -209,7 +229,7 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 	}
 #endif
 
-	error = FT_Load_Glyph(font->face, index, FT_LOAD_NO_BITMAP );
+	error = FT_Load_Glyph(face, index, FT_LOAD_NO_BITMAP );
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return 0;
@@ -219,12 +239,12 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
     ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR >= 2)) || \
     ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR == 1) && (FREETYPE_PATCH >= 10))
 // FreeType >= 2.1.10 required
-	if (!(font->face->style_flags & FT_STYLE_FLAG_ITALIC) && 
+	if (!(face->style_flags & FT_STYLE_FLAG_ITALIC) && 
 			(font->desc.italic > 55)) {
-		FT_GlyphSlot_Oblique(font->face->glyph);
+		FT_GlyphSlot_Oblique(face->glyph);
 	}
 #endif
-	error = FT_Get_Glyph(font->face->glyph, &glyph);
+	error = FT_Get_Glyph(face->glyph, &glyph);
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return 0;
@@ -236,20 +256,28 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 FT_Vector ass_font_get_kerning(ass_font_t* font, uint32_t c1, uint32_t c2)
 {
 	FT_Vector v = {0, 0};
-	int i1, i2;
-	
-	if (!FT_HAS_KERNING(font->face))
-		return v;
-	i1 = FT_Get_Char_Index(font->face, c1);
-	i2 = FT_Get_Char_Index(font->face, c2);
-	if (i1 && i2)
-		FT_Get_Kerning(font->face, i1, i2, FT_KERNING_DEFAULT, &v);
+	int i;
+
+	for (i = 0; i < font->n_faces; ++i) {
+		FT_Face face = font->faces[i];
+		int i1 = FT_Get_Char_Index(face, c1);
+		int i2 = FT_Get_Char_Index(face, c2);
+		if (i1 && i2) {
+			if (FT_HAS_KERNING(face))
+				FT_Get_Kerning(face, i1, i2, FT_KERNING_DEFAULT, &v);
+			return v;
+		}
+		if (i1 || i2) // these glyphs are from different font faces, no kerning information
+			return v;
+	}
 	return v;
 }
 
 void ass_font_free(ass_font_t* font)
 {
-	if (font->face) FT_Done_Face(font->face);
+	int i;
+	for (i = 0; i < font->n_faces; ++i)
+		if (font->faces[i]) FT_Done_Face(font->faces[i]);
 	if (font->desc.family) free(font->desc.family);
 #ifdef HAVE_FONTCONFIG
 	if (font->charset) FcCharSetDestroy(font->charset);

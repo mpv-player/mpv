@@ -595,7 +595,7 @@ static void change_border(double border)
 #if (FREETYPE_MAJOR > 2) || ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR > 1))
 			error = FT_Stroker_New( ass_renderer->ftlibrary, &render_context.stroker );
 #else // < 2.2
-			error = FT_Stroker_New( render_context.font->face->memory, &render_context.stroker );
+			error = FT_Stroker_New( render_context.font->faces[0]->memory, &render_context.stroker );
 #endif
 			if (error) {
 				mp_msg(MSGT_ASS, MSGL_V, "failed to get stroker\n");

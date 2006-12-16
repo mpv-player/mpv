@@ -31,10 +31,13 @@ typedef struct ass_font_desc_s {
 	unsigned italic;
 } ass_font_desc_t;
 
+#define ASS_FONT_MAX_FACES 10
+
 typedef struct ass_font_s {
 	ass_font_desc_t desc;
 	FT_Library ftlibrary;
-	FT_Face face;
+	FT_Face faces[ASS_FONT_MAX_FACES];
+	int n_faces;
 	FT_Matrix m; // current transformation
 	FT_Vector v; // current shift
 	int size;
