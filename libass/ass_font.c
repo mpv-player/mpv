@@ -78,7 +78,7 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	
 	mem_idx = find_font(library, path);
 	if (mem_idx >= 0) {
-		error = FT_New_Memory_Face(ftlibrary, library->fontdata[mem_idx].data,
+		error = FT_New_Memory_Face(ftlibrary, (unsigned char*)library->fontdata[mem_idx].data,
 					   library->fontdata[mem_idx].size, 0, &face);
 		if (error) {
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, path);

@@ -276,13 +276,13 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 
 #else // (FC_VERSION >= 20402)
 
-	rc = FT_New_Memory_Face(ftlibrary, data, data_size, 0, &face);
+	rc = FT_New_Memory_Face(ftlibrary, (unsigned char*)data, data_size, 0, &face);
 	if (rc) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, name);
 		return;
 	}
 
-	pattern = FcFreeTypeQueryFace(face, name, 0, FcConfigGetBlanks(priv->config));
+	pattern = FcFreeTypeQueryFace(face, (unsigned char*)name, 0, FcConfigGetBlanks(priv->config));
 	if (!pattern) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFreeTypeQueryFace");
 		FT_Done_Face(face);
