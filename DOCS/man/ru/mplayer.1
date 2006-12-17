@@ -6964,15 +6964,14 @@ ALPHA-команд, чтобы установить область в -225, -200, -175 и так далее для
 .
 .
 .
-.SH "CODEC SPECIFIC ENCODING OPTIONS (MENCODER ONLY)"
-You can specify codec specific encoding parameters using the following
-syntax:
+.SH "СПЕЦИФИЧНЫЕ ДЛЯ КОДЕКОВ ОПЦИИ КОДИРОВАНИЯ (ТОЛЬКО MENCODER)"
+Вы можете указать специфичные параметры кодеков, используя следующий синтаксис:
 .
 .TP
-.B \-<codec>opts <option1[=value],option2,...>
+.B \-<кодек>opts <опция1[=значение],значение2,...>
 .
 .PP
-Where <codec> may be: lavc, xvidenc, lame, toolame, twolame,
+Где <кодек> может быть: lavc, xvidenc, lame, toolame, twolame,
 nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .
@@ -6980,11 +6979,11 @@ nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .TP
 .B "help\ \ \ "
-get help
+показывает справку
 .
 .TP
 .B vbr=<0\-4>
-variable bitrate method
+метод переменного битпотока
 .PD 0
 .RSs
 .IPs 0
@@ -6992,7 +6991,7 @@ cbr
 .IPs 1
 mt
 .IPs 2
-rh (default)
+rh (по-умолчанию)
 .IPs 3
 abr
 .IPs 4
@@ -7002,46 +7001,47 @@ mtrh
 .
 .TP
 .B "abr\ \ \ \ "
-average bitrate
+среднее значение битпотока
 .
 .TP
 .B "cbr\ \ \ \ "
-constant bitrate
-Also forces CBR mode encoding on subsequent ABR presets modes.
+постоянный битпоток
+Также принудительно задействует CBR режим кодирования в последующих предопределенных
+ABR режимах.
 .
 .TP
 .B br=<0\-1024>
-bitrate in kbps (CBR and ABR only)
+битпоток в кбит/с (только CBR и ABR)
 .
 .TP
 .B q=<0\-9>
-quality (0 \- highest, 9 \- lowest) (VBR only)
+качество (0 \- лчушее, 9 \- худшее) (только VBR)
 .
 .TP
 .B aq=<0\-9>
-algorithmic quality (0 \- best/slowest, 9 \- worst/fastest)
+алгоритмическое качество (0 \- лучшее/медленное, 9 \- худшее/быстрое)
 .
 .TP
 .B ratio=<1\-100>
-compression ratio
+степень сжатия
 .
 .TP
 .B vol=<0\-10>
-audio input gain
+уровень звука
 .
 .TP
 .B mode=<0\-3>
-(default: auto)
+(по-умолчанию: авто)
 .PD 0
 .RSs
 .IPs 0
-stereo
+стерео
 .IPs 1
-joint-stereo
+joint-стерео
 .IPs 2
-dualchannel
+двухканальный
 .IPs 3
-mono
+моно
 .RE
 .PD 1
 .
@@ -7050,101 +7050,103 @@ mono
 .PD 0
 .RSs
 .IPs 0
-none
+нет
 .IPs 1
-all
+все
 .IPs 2
-adjust
+настроить
 .RE
 .PD 1
 .
 .TP
 .B "fast\ \ \ "
-Switch on faster encoding on subsequent VBR presets modes.
-This results in slightly lower quality and higher bitrates.
+Переключиться на быстрое кодирование в последующих предопределенных
+VBR режимах. Приводит к несколько меньшему качеству и увеличенному 
+битпотоку.
 .
 .TP
-.B highpassfreq=<freq>
-Set a highpass filtering frequency in Hz.
-Frequencies below the specified one will be cut off.
-A value of -1 will disable filtering, a value of 0
-will let LAME choose values automatically.
+.B highpassfreq=<частота>
+Устанавливает пороговую частоту для высокочастотного фильтра в Гц.
+Частоты ниже указанной будут обрезаны.
+Значение -1 отключит фильтрацию, значение 0
+предоставит lame возможность выбрать частоту автоматически.
 .
 .TP
-.B lowpassfreq=<freq>
-Set a lowpass filtering frequency in Hz.
-Frequencies above the specified one will be cut off.
-A value of -1 will disable filtering, a value of 0
-will let LAME choose values automatically.
+.B lowpassfreq=<частота>
+Устанавливает пороговую частоту для низкочастотного фильтра в Гц.
+Частоты выше указанной будут обрезаны.
+Значение -1 отключит чильтрацию, значение 0
+предоставит lame возможность выбрать частоту автоматически.
 .
 .TP
-.B preset=<value>
-preset values
+.B preset=<значение>
+предустановленные настройки
 .RSs
 .IPs "help\ "
-Print additional options and information about presets settings.
+Выводит дополнительные опции и информацию о предопределенных
+настройках.
 .IPs medium
-VBR encoding, good quality, 150\-180 kbps bitrate range
+VBR кодирование, хорошее качество, битпоток в диапазоне 150\-180 кбит/с
 .IPs standard
-VBR encoding, high quality, 170\-210 kbps bitrate range
+VBR кодирование, высокое качество, битпоток в диапазоне 170\-210 кбит/с
 .IPs extreme
-VBR encoding, very high quality, 200\-240 kbps bitrate range
+VBR кодирование, очень высокое качество, битпоток в диапазоне 200\-240 кбит/с
 .IPs insane
-CBR encoding, highest preset quality, 320 kbps bitrate
+CBR кодирование, самое высокое качество, битпоток 320 кбит/с
 .IPs <8\-320>
-ABR encoding at average given kbps bitrate
+ABR кодирование с указанным в кбит/с средним значением битпотока
 .RE
 .sp 1
 .RS
-.I EXAMPLES:
+.I ПРИМЕРЫ:
 .RE
 .PD 0
 .RSs
 .IPs fast:preset=standard
-suitable for most people and most music types and already quite high quality
+применимо для большинства людей и типов музыки с довольно высоким качеством
 .IPs cbr:preset=192
-Encode with ABR presets at a 192 kbps forced constant bitrate.
+Кодирование с ABR предустановками и жестко заданным постоянным битпотоком в 192 кбит/с
 .IPs preset=172
-Encode with ABR presets at a 172 kbps average bitrate.
+Кодирование с ABR предустановками и средним значением битпотока в 172 кбит/с
 .IPs preset=extreme
-for people with extremely good hearing and similar equipment
+для людей с исключительно хорошим слухом и таким же оборудованием
 .RE
 .PD 1
 .
 .
-.SS toolame and twolame (\-toolameopts and \-twolameopts respectively)
+.SS toolame и twolame (\-toolameopts и \-twolameopts соответственно)
 .
 .TP
 .B br=<32\-384>
-In CBR mode this parameter indicates the bitrate in kbps,
-when in VBR mode it is the minimum bitrate allowed per frame.
-VBR mode will not work with a value below 112.
+В режиме CBR этот параметр означает битпоток в кбит/с,
+в VBR режиме - это минимально допустимый битпоток кадра.
+VBR режим не будет работать со значениями меньше 112.
 .
 .TP
-.B vbr=<-50\-50> (VBR only)
-variability range; if negative the encoder shifts the average bitrate
-towards the lower limit, if positive towards the higher.
-When set to 0 CBR is used (default).
+.B vbr=<-50\-50> (только VBR)
+диапазон изменяемости; если отрицательно, кодировщик сдвигает средний битпоток в
+нижнюю сторону, если положительный - в верхнюю.
+Если установлен в 0, используется CBR (по-умолчанию).
 .
 .TP
-.B maxvbr=<32\-384> (VBR only)
-maximum bitrate allowed per frame, in kbps
+.B maxvbr=<32\-384> (только VBR)
+максимально допустимая величина битпотока на кадр, в кбит/с
 .
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
-(default: mono for 1-channel audio, stereo otherwise)
+(по-умолчанию: mono для 1-канального звука, иначе stereo)
 .
 .TP
 .B psy=<-1\-4>
-psychoacoustic model (default: 2)
+психоакустическая модель (по-умолчанию: 2)
 .
 .TP
 .B errprot=<0 | 1>
-Include error protection.
+Добавляет защиту от ошибок.
 .
 .TP
 .B debug=<0\-10>
-debug level
+уровень отладки
 .RE
 .PD 1
 .
@@ -7153,56 +7155,58 @@ debug level
 .
 .TP
 .B br=<bitrate>
-average bitrate in kbps (mutually exclusive with quality)
+среднее значение битпотока в кбит/с (несовместима с quality)
 .
 .TP
 .B quality=<1\-1000>
-quality mode, the higher the better (mutually exclusive with br)
+.\" FIXME exact translation possibly losts original meaning 
+.\" "quality mode" = режим качества
+режим качества, больше - лучше (несовместима с br)
 .
 .TP
 .B object=<1\-4>
-object type complexity
+сложность типа объекта 
 .PD 0
 .RSs
 .IPs 1
-MAIN (default)
+MAIN (по-умолчанию)
 .IPs 2
 LOW
 .IPs 3
 SSR
 .IPs 4
-LTP (extremely slow)
+LTP (ужасно медленно)
 .RE
 .PD 1
 .
 .TP
 .B mpeg=<2|4>
-MPEG version (default: 4)
+версия MPEG (по-умолчанию: 4)
 .
 .TP
 .B "tns\ \ \ \ "
-Enables temporal noise shaping.
+Включает подавление временного шума.
 .
 .TP
-.B cutoff=<0\-sampling_rate/2>
-cutoff frequency (default: sampling_rate/2)
+.B cutoff=<0\-частота_дискретизации/2>
+обрезаемая частота (по-умолчанию: частота_дискретизации/2)
 .
 .TP
 .B "raw\ \ \ \ "
-Stores the bitstream as raw payload with extradata in the container header
-(default: 0, corresponds to ADTS).
-Do not set this flag if not explicitly required or you will not be able to
-remux the audio stream later on.
+Сохраняет битовый поток в сыром виде с дополнительными данными в 
+заголовке контейнера (по-умолчанию: 0, соответствует ADTS).
+Не устанавливайте этот флаг, если этого не требуется специально, иначе
+вы не сможете провести повторное мультиплексирование [remux] аудио потока позже.
 .RE
 .PD 1
 .
 .
 .SS lavc (\-lavcopts)
 .
-Many libavcodec (lavc for short) options are tersely documented.
-Read the source for full details.
+Многие опции libavcodec (lavc для краткости) документированы очень скудно.
+Подробности ищите в исходниках.
 .PP
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
@@ -7211,7 +7215,7 @@ Read the source for full details.
 .
 .TP
 .B acodec=<value>
-audio codec (default: mp2)
+аудио кодек (по-умолчанию: mp2)
 .PD 0
 .RSs
 .IPs "mp2\ \ "
@@ -7221,38 +7225,40 @@ MPEG Layer 3
 .IPs "ac3\ \ "
 AC3
 .IPs adpcm_ima_wav
-IMA Adaptive PCM (4bits per sample, 4:1 compression)
+IMA Adaptive PCM (4bits на сэмпл, сжатие 4:1)
 .IPs "sonic\ "
-Experimental lossy/lossless codec
+Экспериментальный кодек с/без потерь
 .RE
 .PD 1
 .
 .TP
-.B abitrate=<value>
-audio bitrate in kbps (default: 224)
+.B abitrate=<значение>
+аудио битпоток в кбит/с (по-умолчанию: 224)
 .
 .TP
-.B atag=<value>
-Use the specified Windows audio format tag (e.g.\& atag=0x55).
+.B atag=<значение>
+Использовать указанный тэг аудио формата Windows (например, atag=0x55).
 .
 .TP
 .B bit_exact
-Use only bit exact algorithms (except (I)DCT).
-Additionally bit_exact disables several optimizations and thus
-should only be used for regression tests, which need binary
-identical files even if the encoder version changes.
-This also suppresses the user_data header in MPEG-4 streams.
-Do not use this option unless you know exactly what you are doing.
+Указывает использовать только побитово точные алгоритмы (кроме (I)DCT).
+Дополнительно bit_exact отключает некоторые оптимизации и,
+поэтому, должен использоваться только для тестов на
+деградацию, требующих бинарно идентичных файлов, даже
+есди меняется версия кодировщика.
+Эта опция также подавляет user_data заголовок в MPEG-4 потоках.
+Не используйте ее, если вы не знаете наверняка, что делаете.
 .
 .TP
 .B threads=<1\-8>
-Maximum number of threads to use (default: 1).
-May have a slight negative effect on motion estimation.
+Максимальное количество используемых потоков (threads) (по-умолчанию: 1).
+Может иметь незначительный негативный эффект при оценке
+движения.
 .RE
 .
 .TP
-.B vcodec=<value>
-Employ the specified codec (default: mpeg4).
+.B vcodec=<значение>
+Задействует указанный кодек (по-умолчанию: mpeg4).
 .PD 0
 .RSs
 .IPs mjpeg
@@ -7272,319 +7278,340 @@ DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
 .IPs "wmv1\ "
-Windows Media Video, version 1 (AKA WMV7)
+Windows Media Video, версия 1 (Он же WMV7)
 .IPs "wmv2\ "
-Windows Media Video, version 2 (AKA WMV8)
+Windows Media Video, версия 2 (Он же WMV8)
 .IPs "rv10\ "
-an old RealVideo codec
+старый RealVideo кодек
 .IPs mpeg1video
-MPEG-1 video
+MPEG-1 видео
 .IPs mpeg2video
-MPEG-2 video
+MPEG-2 видео
 .IPs huffyuv
 HuffYUV
-.IPs ffvhuff (also see: vstrict)
-nonstandard 20% smaller HuffYUV using YV12
+.IPs ffvhuff (смотрите также: vstrict)
+нестандартный, меньший на 20% HuffYUV c использованием YV12
 .IPs "asv1\ "
 ASUS Video v1
 .IPs "asv2\ "
 ASUS Video v2
-.IPs "ffv1 (also see: vstrict)"
-FFmpeg's lossless video codec
+.IPs "ffv1 (смотрите также: vstrict)"
+FFmpeg видео кодек без потерь 
 .IPs "flv\ \ "
-Sorenson H.263 used in Flash Video
+Sorenson H.263, использующийся в Flash Video
 .IPs dvvideo
 Sony Digital Video
 .IPs "svq1\ "
 Apple Sorenson Video 1
-.IPs "snow (also see: vstrict)"
-FFmpeg's experimental wavelet-based codec
+.IPs "snow (смотрите также: vstrict)"
+экспериментальный FFmpeg видео кодек, основанный на вейвлетах
 .RE
 .PD 1
 .
 .TP
 .B vqmin=<1\-31>
-minimum quantizer (pass 1/2)
+минимальный квантователь (проход 1/2)
 .RSs
 .IPs 1
-Not recommended (much larger file, little quality difference and weird side
-effects: msmpeg4, h263 will be very low quality, ratecontrol will be confused
-resulting in lower quality and some decoders will not be able to decode it).
+Не рекомендуется (намного больший файл, маленькое различие в качестве и странные
+побочные эффекты: msmpeg4, h263 будут очень плохого качества, модуль управления 
+величиной потока будет сбит с толку, что приведет к ухудшению качества, и декодеры 
+не смогут декодировать поток).
 .IPs 2
-Recommended for normal mpeg4/\:mpeg1video encoding (default).
+Рекомендуется для нормального mpeg4/\:mpeg1video кодирования (по-умолчанию).
 .IPs 3
-Recommended for h263(p)/\:msmpeg4.
-The reason for preferring 3 over 2 is that 2 could lead to overflows.
-(This will be fixed for h263(p) by changing the quantizer per MB in
-the future, msmpeg4 cannot be fixed as it does not support that.)
+Рекомендуется для h263(p)/\:msmpeg4.
+Причина предпочтения 3 перед 2 заключается в том, что 2 может привести к
+переполнению.
+(Для h263(p) в будущем это может быть исправлено изменением 
+значения квантователя на MB, для msmpeg4 это исправить невозможно,
+поскольку он не поддерживает подобную возможность.)
 .RE
 .
 .TP
 .B lmin=<0.01\-255.0>
-Minimum frame-level Lagrange multiplier for ratecontrol (default: 2.0).
-Lavc will rarely use quantizers below the value of lmin.
-Lowering lmin will make lavc more likely to choose lower quantizers for
-some frames, but not lower than the value of vqmin.
-Likewise, raising lmin will make lavc less likely to choose low
-quantizers, even if vqmin would have allowed them.
-You probably want to set lmin approximately equal to vqmin.
-When adaptive quantization is in use, changing lmin/lmax may have less
-of an effect; see mblmin/mblmax.
+Минимальное значение  множителя Лагранжа уровня кадра для модуля управления 
+величиной потока (по-умолчанию: 2.0).
+Lavc редко будет использовать значения квантователя меньше lmin.
+При меньшем значении lmin lavc будет предпочитать меньшее значение 
+квантователя для некоторых кадров, но всегда большее, чем vqmin.
+Аналогично, при увеличении lmin, lavc скорее всего не будет использовать
+маленькие знаяения квантователя, даже если vqmin это позволяет.
+Вы, возможно, хотите установить значение lmin приближенно
+равным vqmin. При использовании адаптивного квантования, изменение lmin/lmax
+.\" FIXME may have less of an effect = практически не иметь эффекта
+может практически не иметь эффекта; смотрите mblmin/mblmax.
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
-maximum Lagrange multiplier for ratecontrol (default: 31.0)
+максимальное значение множителя Лагранжа для модуля управления величиной 
+потока (по-умолчанию: 31.0)
 .RE
 .
 .TP
 .B mblmin=<0.01\-255.0>
-Minimum macroblock-level Lagrange multiplier for ratecontrol
-(default:2.0).
-This parameter affects adaptive quantization options like qprd,
-lumi_mask, etc..
+Минимальное значение множителя Лагранжа уровня макроблока для
+модуля управления величиной потока (по-умолчанию: 2.0).
+Этот параметр влияет на опции адаптивного квантования, такие как
+qprd, lumi_mask, и так далее...
 .RE
 .
 .TP
 .B mblmax=<0.01\-255.0>
-Maximum macroblock-level Lagrange multiplier for ratecontrol
-(default: 31.0).
+Максимальное значение множителя Лагранжа уровня макроблока для
+модуля управления величиной потока (по-умолчанию: 31.0).
 .RE
 .
 .TP
 .B vqscale=<0\-31>
-Constant quantizer /\: constant quality encoding (selects fixed quantizer mode).
-A lower value means better quality but larger files (default: 0).
-In case of snow codec, value 0 means lossless encoding.
-Since the other codecs do not support this, vqscale=0 will be ignored and
-variable quantizers are used, which is the default.
-1 is not recommended (see vqmin for details).
+Постоянный квантователь /\: кодирование с постоянным качеством
+(выбирает режим постоянного квантователя).
+Меньшее значение означает лучшее качество, но файлы большего 
+размера (по-умолчанию: 0).
+В случае snow кодека, 0 означает кодирование без потерь.
+Поскольку остальные кодеки этого не поддерживают, то vqscale=0 для них 
+проигнорируется и будут использованы переменные квантователи,
+что является поведением по-умолчанию.
+Использование 1 не рекомендуется (смотрите vqmin для подробностей).
 .
 .TP
 .B vqmax=<1\-31>
-Maximum quantizer (pass 1/2), 10\-31 should be a sane range (default: 31).
+Максимальное значение квантователя (проход 1/2), 10\-31 будет разумным 
+диапазоном (по-умолчанию: 31).
 .
 .TP
 .B mbqmin=<1\-31>
-obsolete, use vqmin
+устарело, используйте vqmin
 .
 .TP
 .B mbqmax=<1\-31>
-obsolete, use vqmax
+устарело, используйте vqmax
 .
 .TP
 .B vqdiff=<1\-31>
-maximum quantizer difference between consecutive I- or P-frames
-(pass 1/2) (default: 3)
+максимальное различие квантователя в последовательных I- или P-кадрах
+(проход 1/2) (по-умолчанию: 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
-maximum number of B-frames between non-B-frames:
+максимальное количество B-кадров между не-B-кадрами:
 .PD 0
 .RSs
 .IPs 0
-no B-frames (default)
+нет B-кадров (по-умолчанию)
 .IPs 0\-2
-sane range for MPEG-4
+разумный диапазон для MPEG-4
 .RE
 .PD 1
 .
 .TP
 .B vme=<0\-5>
-motion estimation method.
-Available methods are:
+метод оценки движения.
+Доступные методы:
 .PD 0
 .RSs
 .IPs 0
-none (very low quality)
+отсутствует (очень низкое качество)
 .IPs 1
-full (slow, currently unmaintained and disabled)
+полный (медленно, в данный момент не сопровождается и отключен)
 .IPs 2
-log (low quality, currently unmaintained and disabled)
+log (низкое качество, в данный момент не сопровождается и отключен)
 .IPs 3
-phods (low quality, currently unmaintained and disabled)
+phods (низкое качество, в данный момент не сопровождается и отключен)
 .IPs 4
-EPZS: size=1 diamond, size can be adjusted with the *dia options
-(default)
+EPZS: ромб с size=1, размер может быть изменен *dia поциями
+(по-умолчанию)
 .IPs 5
-X1 (experimental, currently aliased to EPZS)
+X1 (экспериментальный, в данный момент псевдоним EPZS)
 .IPs 8
-iter (iterative overlapped block, only used in snow)
+iter (итеративный перекрывающийся блок, используется только в snow)
 .RE
 .PD 1
 .sp 1
 .RS
 .br
-.I NOTE:
-0\-3 currently ignores the amount of bits spent,
-so quality may be low.
+.I ЗАМЕЧАНИЕ:
+0\-3 в данный момент игнорируют количество израсходованных битов,
+так что качество может быть низким.
 .RE
 .
 .TP
 .B me_range=<0\-9999>
-motion estimation search range (default: 0 (unlimited))
+диапазон поиска оценки движения (по-умолчанию: 0 (неограничен))
 .
 .TP
 .B mbd=<0\-2>
-Macroblock decision algorithm (high quality mode), encode each macro
-block in all modes and choose the best.
-This is slow but results in better quality and file size.
+Алгоритм принятия решения о макроблоке (режим высокого качества),
+Указывает кодировать каждый макроблок всеми режимами и выбирать лучший.
+Это работает медленно, но дает лучшее качество и меньший файл.
 .PD 0
 .RSs
 .IPs 0
-Use mbcmp (default).
+Используется mbcmp (по-умолчанию).
 .IPs 1
-Select the MB mode which needs the fewest bits (=vhq).
+Выбирает режим MB, требующий меньшее количество бит (=vhq).
 .IPs 2
-Select the MB mode which has the best rate distortion.
+Выбирает режим MB, имеющий лучшее соотношение сигнал-шум.
 .RE
 .PD 1
 .
 .TP
 .B "vhq\ \ \ \ "
-Same as mbd=1, kept for compatibility reasons.
+То же, что и mbd=1, сохранено для целей совместимости.
 .
 .TP
 .B "v4mv\ \ \ "
-Allow 4 motion vectors per macroblock (slightly better quality).
-Works better if used with mbd>0.
+Допускает 4 вектора движения на макроблок (немного лучшее качество).
+При использовании с mbd>0 работает лучше.
 .
 .TP
 .B "obmc\ \ \ "
-overlapped block motion compensation (H.263+)
+компенсация движения перекрывающегося блока (H.263+)
 .
 .TP
 .B "loop\ \ \ "
-loop filter (H.263+)
-note, this is broken
+loop фильтр (H.263+)
+имейте в виду, он сломан
 .
 .TP
 .B inter_threshold <-1000\-1000>
-Does absolutely nothing at the moment.
+На данный момент абсолютно ничего не делает.
 .
 .TP
 .B keyint=<0\-300>
-maximum interval between keyframes in frames (default: 250 or one
-keyframe every ten seconds in a 25fps movie.
-This is the recommended default for MPEG-4).
-Most codecs require regular keyframes in order to limit the accumulation of mismatch error.
-Keyframes are also needed for seeking, as seeking is only possible to a keyframe - but
-keyframes need more space than other frames, so larger numbers here mean
-slightly smaller files but less precise seeking.
-0 is equivalent to 1, which makes every frame a keyframe.
-Values >300 are not recommended as the quality might be bad depending upon
-decoder, encoder and luck.
-It is a common for MPEG-1/2 to use values <=30.
+максимальный интервал между ключевыми кадрами (по-умолчанию: 250, другими словами
+один ключевой кадр каждые десять секунд в 25fps фильме.
+Это рекомендуемое значение для MPEG-4).
+Большинство кодеков требуют наличия регулярных ключевых кадров, чтобы
+ограничить накопление ошибок несовпадения.
+Ключевые кадры также нужны для перемещения, поскольку перемещение
+возможно только по ним, но занимают больше места.
+Таким образом большие значения здесь означают файлы месколько
+меньшего размера, но с менее точным перемещением.
+0 эквивалентно 1, что делает каждый кадр ключевым.
+Значения >300 не рекомендуется использовать, поскольку качество
+может быть плохим в зависимости от декодера, кодера и удачи.
+Для MPEG-1/2 обычно используются значения <=30.
 .
 .TP
 .B sc_threshold=<-1000000000\-1000000000>
-Threshold for scene change detection.
-A keyframe is inserted by libavcodec when it detects a scene change.
-You can specify the sensitivity of the detection with this option.
--1000000000 means there is a scene change detected at every frame,
-1000000000 means no scene changes are detected (default: 0).
+Пороговое значение для определения изменения сцены.
+Ключевой кадр вставляется libavcodec тогда, когда он обнаруживает,
+что сцена изменилась.
+Этой опцией вы можете указать чувствительность определения.
+-1000000000 означает, что сцена меняется каждый кадр.
+1000000000 означает, что изменения сцены вообще не определяются (по-умолчанию: 0).
 .
 .TP
-.B sc_factor=<any positive integer>
-Causes frames with higher quantizers to be more likely to trigger a
-scene change detection and make libavcodec use an I-frame (default: 1).
-1\-16 is a sane range.
-Values between 2 and 6 may yield increasing PSNR (up to approximately
-0.04 dB) and better placement of I-frames in high-motion scenes.
-Higher values than 6 may give very slightly better PSNR (approximately
-0.01 dB more than sc_factor=6), but noticably worse visual quality.
+.B sc_factor=<любое положительное целое>
+Кадры с квантователем выше указанного значения с большей вероятность приведут к
+срабатыванию алгоритма определения изменения сцены и использованию
+кодеком I-кадра (по-умолчанию: 1).
+Разумный диапазон: 1\-16.
+Значения между 2 и 6 могут дать увеличенный PSNR (вплоть до примерно
+0.04 дБ) и лучшеее расположение I-кадров в сильно динамичных сценах.
+Значения больше 6 могут дать очень незначительное увеличение PSNR
+(примерно на 0.01 дБ больше, чем sc_factor=6), но заметно 
+ухудшат визуальное качество.
 .
 .TP
-.B vb_strategy=<0\-2> (pass one only)
-strategy to choose between I/P/B-frames:
+.B vb_strategy=<0\-2> (только первый проход)
+стратегия выбора между I/P/B-кадрами:
 .PD 0
 .RSs
 .IPs 0
-Always use the maximum number of B-frames (default).
+Всегда использовать максимальное количество B-кадров (по-умолчанию).
 .IPs 1
-Avoid B-frames in high motion scenes.
-See the b_sensitivity option to tune this strategy.
+Избегать использования B-кадров в сильно динамичных сценах.
+Смотрите опцию b_sensitivity для тюнинга этой стратегии.
 .IPs 2
-Places B-frames more or less optimally to yield maximum quality (slower).
-You may want to reduce the speed impact of this option by tuning the
-option brd_scale.
+Размещает B-кадры более или менее оптимально, чтобы получить максимальное качество (медленнее).
+Вы можете захотеть уменьшить влияние этой опции на скорость, настраивая 
+опцию brd_scale.
 .RE
 .PD 1
 .
 .TP
-.B b_sensitivity=<any integer greater than 0>
-Adjusts how sensitively vb_strategy=1 detects motion and avoids using
-B-frames (default: 40). 
-Lower sensitivities will result in more B-frames.
-Using more B-frames usually improves PSNR, but too many B-frames can
-hurt quality in high-motion scenes.
-Unless there is an extremely high amount of motion, b_sensitivity can
-safely be lowered below the default; 10 is a reasonable value in most
-cases.
+.B b_sensitivity=<любое целое большее 0>
+Настраивает чувствительность определения опцией vb_strategy=1 движения
+и избегания использования B-кадров (по-умолчанию: 40).
+Меньшее значение чувствительности даст в результате большее количество 
+B-кадров. Это обычно удучшает PSNR, но слишком большое их количество
+может навредить качеству в сильно динамичных сценах.
+Если же нет большого количества динамики, то можно 
+безопасно уменьшить b_sensitivity ниже значения по-умолчанию; 
+10 - разумнное значение в большинстве случаев.
 .
 .TP
 .B brd_scale=<0\-10>
-Downscales frames for dynamic B-frame decision (default: 0).
-Each time brd_scale is increased by one, the frame dimensions are
-divided by two, which improves speed by a factor of four.
-Both dimensions of the fully downscaled frame must be even numbers, so
-brd_scale=1 requires the original dimensions to be multiples of four,
-brd_scale=2 requires multiples of eight, etc.
-In other words, the dimensions of the original frame must both be
-divisible by 2^(brd_scale+1) with no remainder.
+.\"FIXME is translation correct
+.\" Downscales frames for dynamic B-frame decision (default: 0).
+Уменьшает размер изображения для определения динамичности 
+B-кадра (по-умолчанию: 0).
+При каждом увеличении brd_scale на единицу, размерности 
+делятся на два, что увеличивает скорость работы в четыре раза.
+Обе размерности полностью отмастшабированного кадра должны быть четными,
+таким образом brd_scale=1 требует, чтобы обе размерности были кратны четырем,
+brd_scale=2 требует кратность восьми и так далее.
+Другими словами, обе размерности оригинального кадра должны делиться
+на 2^(brd_scale+1) без остатка.
 .
 .TP
 .B bidir_refine=<0\-4>
-Refine the two motion vectors used in bidirectional macroblocks,
-rather than re-using vectors from the forward and backward searches.
-This option has no effect without B-frames.
+Уточнить два вектора движения, использующихся в двунаправленных
+макроблоках вместо повторного использования векторов из прямого и обратного поиска.
+Опция не имеет эффекта при отсутствии B-Кадров.
 .PD 0
 .RSs
 .IPs 0
-Disabled (default).
+Отключено (по-умолчанию).
 .IPs 1\-4
-Use a wider search (larger values are slower).
+Использование более широкого поиска (чем больше значение, тем медленнее).
 .RE
 .PD 1
 .
 .TP
 .B vpass=<1\-3>
-Activates internal two (or more) pass mode, only specify if you wish to
-use two (or more) pass encoding.
+Активирует внутренний режим с двумя (или более) проходами, указывайте,
+только если хотите использовать двух(или более)проходное кодирование.
 .PD 0
 .RSs
 .IPs 1
-first pass (also see turbo)
+первый проход (смотрите также turbo)
 .IPs 2
-second pass
+второй проход
 .IPs 3
-Nth pass (second and subsequent passes of N-pass encoding)
+N-й проход (второй и последующие проходы N-проходного режима)
 .RE
 .RS
-Here is how it works, and how to use it:
+Вот как это работает, и как это можно использовать:
 .br
-The first pass (vpass=1) writes the statistics file.
-You might want to deactivate some CPU-hungry options, like "turbo"
-mode does.
+Первый прход (vpass=1) записывает файл со статистикой.
+Возможно, вы захотите дективировать некоторые требовательные к
+CPU опции так, как это делает режим turbo.
 .br
-In two pass mode, the second pass (vpass=2) reads the statistics file and
-bases ratecontrol decisions on it.
+В двупроходном режиме второй проход (vpass=2) читает файл статистики и
+на основе этой информации принимаются решения об управлениии величиной потока.
 .br
-In N-pass mode, the second pass (vpass=3, that is not a typo)
-does both: It first reads the statistics, then overwrites them.
-You might want to backup divx2pass.log before doing this if there is
-any possibility that you will have to cancel MEncoder.
-You can use all encoding options, except very CPU-hungry options like "qns".
+В N-проходном режиме, второй проход (vpass=3, это не опечатка)
+делает две вещи: сначала читает файл статистики, затем перезаписывает его.
+возможно, перед этим вам захочется сохранить divx2pass.log, если 
+существует вероятность прерывания работы MEncoder.
+Можно использовать все опции, за исключением тех, что очень сильно
+потребляют CPU, например "qns".
 .br
-You can run this same pass over and over to refine the encode.
-Each subsequent pass will use the statistics from the previous pass to improve.
-The final pass can include any CPU-hungry encoding options.
+Вы можете запускать этот проход снова и снова для улучшения кодирования.
+Каждый последующий проход будет использовать статистику предыдущего для
+улучщения результата.
+Последний проход может включать любые нагружающие CPU опции.
 .br
-If you want a 2 pass encode, use first vpass=1, and then vpass=2.
+Если хотите сделать двухпроходное кодирование, используйте сначала vpass=1,
+затем vpass=2.
 .br
-If you want a 3 or more pass encode, use vpass=1 for the first pass
-and then vpass=3 and then vpass=3 again and again until you are
-satisfied with the encode.
+Если желаете кодировать в 3 или более проходов, используйте vpass=1
+для первого, затем vpass=3, затем vpass=3 снова и снова, пока
+не удовлетворитесь результатом кодирования.
 .RE
 .PD 1
 .sp 1
@@ -7594,375 +7621,379 @@ huffyuv:
 .PD 0
 .RSs
 .IPs "pass 1"
-Saves statistics.
+Сохраняет статистику.
 .IPs "pass 2"
-Encodes with an optimal Huffman table based upon statistics
-from the first pass.
+Кодирует с оптимальной таблицей Хафмана (Huffman), основанной
+на статистике из первого прохода.
 .RE
 .PD 1
 .
 .TP
-.B turbo (two pass only)
-Dramatically speeds up pass one using faster algorithms and disabling
-CPU-intensive options.
-This will probably reduce global PSNR a little bit (around 0.01dB) and
-change individual frame type and PSNR a little bit more (up to 0.03dB).
+.B turbo (только двухпроходный режим)
+Чрезвычайно ускоряет первый проход, используя более быстрые алгоритмы 
+и отключая сильно нагружающие CPU опции.
+Возможно это неcколько уменьшит общий PSNR (примерно на 0.01дБ), а
+также изменит тип и незначительно (вплоть до 0.03dB) PSNR отдельных кадров.
 .
 .TP
 .B aspect=<x/y>
-Store movie aspect internally, just like with MPEG files.
-Much nicer than rescaling, because quality is not decreased.
-Only MPlayer will play these files correctly, other players will display
-them with wrong aspect.
-The aspect parameter can be given as a ratio or a floating point number.
+Сохранает пропорции фильма внутри него, в точности как в MPEG файлах.
+Намного приятнее при масштабировании, поскольку качество не ухудшается.
+Только MPlayer сможет правильно воспроизвести такие файлы, остальные 
+проигрыватели будут показывать его с неверными пропорциями.
+Параметр опции aspect может быть задан дробью или вещественным числом.
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .RSs
 .PD 0
-.IPs "aspect=16/9 or aspect=1.78"
+.IPs "aspect=16/9 или aspect=1.78"
 .PD 1
 .RE
 .
 .TP
 .B autoaspect
-Same as the aspect option, but automatically computes aspect, taking
-into account all the adjustments (crop/\:expand/\:scale/\:etc.) made in the
-filter chain.
-Does not incur a performance penalty, so you can safely leave it
-always on.
+То же, что и опция aspect, но вычисляет пропорции автоматически,
+принимая во внимание все изменения (crop/\:expand/\:scale/\:другое.),
+производимые в цепочке фильтров. Производительность никак не страдает, так что 
+можно спокойно держать эту опцию постоянно включенной.
 .
 .TP
-.B vbitrate=<value>
-Specify bitrate (pass 1/2) (default: 800).
+.B vbitrate=<значение>
+Указывает битпоток (проход 1/2) (по-умолчанию: 800).
 .br
-.I WARNING:
-1kbit = 1000 bits
+.I ВНИМАНИЕ:
+1кбит = 1000 бит
 .PD 0
 .RSs
 .IPs 4\-16000
-(in kbit)
+(в кбитах)
 .IPs 16001\-24000000
-(in bit)
+(в битах)
 .RE
 .PD 1
 .
 .TP
-.B vratetol=<value>
-approximated file size tolerance in kbit.
-1000\-100000 is a sane range.
-(warning: 1kbit = 1000 bits)
-(default: 8000)
+.B vratetol=<значение>
+допустимое отклонение от примерного размера файла в кбит.
+1000\-100000 - разумный диапазон.
+(внимание: 1кбит = 1000 бит)
+(по-умолчанию: 8000)
 .br
-.I NOTE:
-vratetol should not be too large during the second pass or there might
-be problems if vrc_(min|max)rate is used.
+.I ЗАМЕЧАНИЕ:
+vratetol не должно быть слишком большим во время второго прохода, иначе могут
+быть проблемы при использовании vrc_(min|max)rate.
 .
 .TP
-.B vrc_maxrate=<value>
-maximum bitrate in kbit/\:sec (pass 1/2)
-(default: 0, unlimited)
+.B vrc_maxrate=<значение>
+максимальный битпоток в кбит/\:сек (проход 1/2)
+(по-умолчанию: 0, неограничен)
 .
 .TP
-.B vrc_minrate=<value>
-minimum bitrate in kbit/\:sec (pass 1/2)
-(default: 0, unlimited)
+.B vrc_minrate=<значение>
+минимальный битпоток в кбит/\:сек (проход 1/2)
+(по-умолчанию: 0, неограничен)
 .
 .TP
-.B vrc_buf_size=<value>
-buffer size in kbit (pass 1/2).
-For MPEG-1/2 this also sets the vbv buffer size, use 327 for VCD,
-917 for SVCD and 1835 for DVD.
+.B vrc_buf_size=<значение>
+размер буфера в кбит (проход 1/2).
+Для MPEG-1/2 это также устанавливает размер vbv буфера, для VCD используйте 327,
+917 для SVCD и 1835 для DVD.
 .
 .TP
 .B vrc_buf_aggressivity
-currently useless
+в данный момент бесполезна
 .
 .TP
 .B vrc_strategy
-Ratecontrol method.
-Note that some of the ratecontrol-affecting options will have no effect
-if vrc_strategy is not set to 0.
+Метод управления величиной потока.
+Имейте в виду, что некоторые опции, отвечающие за управление величиной потока
+не будут иметь эффекта, если vrc_strategy не установлена в 0.
 .PD 0
 .RSs
 .IPs 0
-Use internal lavc ratecontrol (default).
+Использование внутреннего модуля управления величиной потока lavc (по-умолчанию).
 .IPs 1
-Use Xvid ratecontrol (experimental; requires MEncoder to be compiled
-with support for Xvid 1.1 or higher).
+Использование модуля управления величиной потока Xvid (экспериментальный; требует,
+чтобы MPlayer был скомпилирован с поддержкой Xvid 1.1 или выше).
 .RE
 .PD 1
 .
+.\" FIXME chek translation for v?_qfactor options
 .TP
 .B vb_qfactor=<-31.0\-31.0>
-quantizer factor between B- and non-B-frames (pass 1/2) (default: 1.25)
+отношение квантователя B- и не-B-кадров (проход 1/2) (по-умолчанию: 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-quantizer factor between I- and non-I-frames (pass 1/2) (default: 0.8)
+отношение квантователя I- и не-I-кадров (проход 1/2) (по-умолчанию: 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
-quantizer offset between B- and non-B-frames (pass 1/2) (default: 1.25)
+смещение квантователя между B- и не-B-кадрами (проход 1/2) (по-умолчанию: 1.25)
 .
 .TP
 .B vi_qoffset=<-31.0\-31.0>
-(pass 1/2) (default: 0.0)
+(проход 1/2) (по-умолчанию: 0.0)
 .br
-if v{b|i}_qfactor > 0
+если v{b|i}_qfactor > 0
 .br
-I/B-frame quantizer = P-frame quantizer * v{b|i}_qfactor + v{b|i}_qoffset
+квантователь I/B-кадра  = квантователь P-кадра * v{b|i}_qfactor + v{b|i}_qoffset
 .br
-else
+иначе
 .br
-do normal ratecontrol (do not lock to next P-frame quantizer) and
-set q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+производится обычное управление величиной потока (не делается привязка к квантователю 
+следующего P-кадра) и устанавливается q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .br
-.I HINT:
-To do constant quantizer encoding with different quantizers for
-I/P- and B-frames you can use:
-lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>.
+.I ПОДСКАЗКА:
+Чтобы произвести кодирование с постоянным квантователем, отличающися для
+I/P- и B-кадров вы можете использовать:
+lmin= <ip_квантователь>:lmax= <ip_квантователь>:vb_qfactor= <b_квантователь/\:ip_квантователь>.
 .
 .TP
-.B vqblur=<0.0\-1.0> (pass one)
-Quantizer blur (default: 0.5), larger values will average the
-quantizer more over time (slower change).
+.B vqblur=<0.0\-1.0> (первый проход)
+Размытие квантователя (по-умолчанию: 0.5), большие значения 
+будут усреднять квантователь на большем интервале времени
+(более медленное изменение).
 .PD 0
 .RSs
 .IPs 0.0
-Quantizer blur disabled.
+Размытие квантователя отключено.
 .IPs 1.0
-Average the quantizer over all previous frames.
+Среднее значение квантователя берется по всем предыдущим кадрам.
 .RE
 .PD 1
 .
 .TP
-.B vqblur=<0.0\-99.0> (pass two)
-Quantizer gaussian blur (default: 0.5), larger values will average
-the quantizer more over time (slower change).
+.B vqblur=<0.0\-99.0> (второй проход)
+Гауссово размытие квантователя (по-умолчанию: 0.5), большие значения 
+будут усреднять квантователь на большем интервале времени
+(более медленное изменение квантователя).
 .
 .TP
 .B vqcomp=<0.0\-1.0>
-Quantizer compression, vrc_eq depends upon this (pass 1/2) (default: 0.5).
-For instance, assuming the default rate control equation is used,
-if vqcomp=1.0, the ratecontrol allocates to each frame the number of bits
-needed to encode them all at the same QP.
-If vqcomp=0.0, the ratecontrol allocates the same number of bits to each
-frame, i.e. strict CBR.
-.I NOTE:
-Those are extreme settings and should never be used.
-Perceptual quality will be optimal somewhere in between these two extremes.
+Сжатие квантователя. От этой опции зависит vrc_eq (проход 1/2) (по-умолчанию: 0.5).
+Предположим для определенности, что используется стандартная формула 
+управления битпотоком. Если vqcomp=1.0, контроль битпотока выделяет каждому кадру
+количество бит, необходимое для кодирования их с одинаковым QP.
+Если vqcomp=0.0, контроль битпотока выделяет одинаковое количество бит для
+каждого кадра, т.е. в точности CBR.
+.I ЗАМЕЧАНИЕ
+Эти значения - две крайности, их никогда не следует ипользовать.
+Качество восприятия будет оптимальным где-то между этими двумя значениями.
 .
 .TP
-.B vrc_eq=<equation>
-main ratecontrol equation (pass 1/2)
+.B vrc_eq=<формула>
+основная формула управления величиной потока (проход 1/2)
 .RE
 .RSs
 .IPs "1\ \ \ \ "
-constant bitrate
+постоянный битпоток
 .IPs "tex\ \ "
-constant quality
+постоянное качество
 .IPs 1+(tex/\:avgTex-1)*qComp
-approximately the equation of the old ratecontrol code
+приближенная формула старого модуля управления величиной потока
 .IPs tex^qComp
-with qcomp 0.5 or something like that (default)
+с qcomp 0.5 или чем-то похожим (по-умолчанию)
 .RE
 .PP
 .RS
-infix operators:
+встроенные операторы:
 .RE
 .RSs
 .IPs +,-,*,/,^
 .RE
 .PP
 .RS
-variables:
+переменные:
 .RE
 .RSs
 .IPs "tex\ \ "
-texture complexity
+сложность текстуры
 .IPs iTex,pTex
-intra, non-intra texture complexity
+сложность внутренней, не-внутренней текстуры
 .IPs avgTex
-average texture complexity
+средняя сложность текстуры
 .IPs avgIITex
-average intra texture complexity in I-frames
+средняя сложность внутренней текстуры в I-кадрах
 .IPs avgPITex
-average intra texture complexity in P-frames
+средняя сложность внутренней текстуры в P-кадрах
 .IPs avgPPTex
-average non-intra texture complexity in P-frames
+средняя сложность не-внутренней текстуры в P-кадрах
 .IPs avgBPTex
-average non-intra texture complexity in B-frames
+средняя сложность не-внутренней текстуры в B-кадрах
 .IPs "mv\ \ \ "
-bits used for motion vectors
+количество бит, используемых для векторов движения
 .IPs fCode
-maximum length of motion vector in log2 scale
+максимальная длина вектора движения по log2  шкале
 .IPs iCount
-number of intra macroblocks / number of macroblocks
+количество внутренних макроблоков / количество макроблоков
 .IPs "var\ \ "
-spatial complexity
+пространственная сложность
 .IPs mcVar
-temporal complexity
+временная сложность
 .IPs qComp
-qcomp from the command line
+qcomp из командной строки
 .IPs "isI, isP, isB"
-Is 1 if picture type is I/P/B else 0.
+Равно 1, если тип картинки I/P/B, иначе 0.
 .IPs "Pi,E\ "
-See your favorite math book.
+Смотрите в вашей любимой книге по математике.
 .RE
 .PP
 .RS
-functions:
+функции:
 .RE
 .RSs
 .IPs max(a,b),min(a,b)
-maximum / minimum
+максимум / минимум
 .IPs gt(a,b)
-is 1 if a>b, 0 otherwise
+Равно 1, если a>b, 0 иначе.
 .IPs lt(a,b)
-is 1 if a<b, 0 otherwise
+Равно 1, если a<b, 0 иначе.
 .IPs eq(a,b)
-is 1 if a==b, 0 otherwise
+Равно 1, если a==b, 0 иначе.
 .IPs "sin, cos, tan, sinh, cosh, tanh, exp, log, abs"
 .RE
 .
 .TP
-.B vrc_override=<options>
-User specified quality for specific parts (ending, credits, ...) (pass 1/2).
-The options are <start-frame>, <end-frame>, <quality>[/<start-frame>,
-<end-frame>, <quality>[/...]]:
+.B vrc_override=<опции>
+Указанное пользователем качество для определенных частей (концовок, титров, ...) (проход 1/2).
+Опции, указываемые в  формате <начальный кадр>, <конечный кадр>, 
+<качество>[/<начальный кадр>, <конечный кадр>, <качество>[/...]]:
 .PD 0
 .RSs
-.IPs "quality (2\-31)"
-quantizer
-.IPs "quality (-500\-0)"
-quality correction in %
+.IPs "качество (2\-31)"
+квантователь
+.IPs "качество (-500\-0)"
+коррекция качества в %
 .RE
 .PD 1
 .
 .TP
 .B vrc_init_cplx=<0\-1000>
-initial complexity (pass 1)
+начальная сложность (проход 1)
 .
 .TP
 .B vrc_init_occupancy=<0.0\-1.0>
-initial buffer occupancy, as a fraction of vrc_buf_size (default: 0.9)
+начальное заполнение буфера в виде части от vrc_buf_size (по-умолчанию: 0.9)
 .
 .TP
 .B vqsquish=<0|1>
-Specify how to keep the quantizer between qmin and qmax (pass 1/2).
+Указывает как удерживать квантователь между qmin и qmax (проход 1/2).
 .PD 0
 .RSs
 .IPs 0
-Use clipping.
+Использовать обрезание.
 .IPs 1
-Use a nice differentiable function (default).
+Использовать хорошо дифференцируемую функцию (по-умолчанию).
 .RE
 .PD 1
 .
 .TP
 .B vlelim=<-1000\-1000>
-Sets single coefficient elimination threshold for luminance.
-Negative values will also consider the DC coefficient (should be at least -4
-or lower for encoding at quant=1):
+Устанавливает порог отбрасывания одиночного коэффициента для яркостной компоненты.
+Отрицательные значения так же будут учитывать коэффициент DC (должна быть как минимум -4
+или ниже для кодирования с quant=1):
 .PD 0
 .RSs
 .IPs 0
-disabled (default)
+отключено (по-умолчанию)
 .IPs -4
-JVT recommendation
+рекомендация JVT
 .RE
 .PD 1
 .
 .TP
 .B vcelim=<-1000\-1000>
-Sets single coefficient elimination threshold for chrominance.
-Negative values will also consider the DC coefficient (should be at least -4
-or lower for encoding at quant=1):
+Устанавливает порог отбрасывания одиночного коэффициента для цветностной компоненты.
+Отрицательные значения так же будут учитывать коэффициент DC (должна быть как минимум -4
+или ниже для кодирования с quant=1):
 .PD 0
 .RSs
 .IPs 0
-disabled (default)
+отключено (по-умолчанию)
 .IPs 7
-JVT recommendation
+рекомендация JVT
 .RE
 .PD 1
 .
 .TP
 .B vstrict=<-2|-1|0|1>
-strict standard compliance
+строгость соответствия стандарту
 .PD 0
 .RSs
 .IPs 0
-disabled
+отключено
 .IPs 1
-Only recommended if you want to feed the output into the
-MPEG-4 reference decoder.
+Рекомендуется, только если вы хотите направить вывод в 
+эталонный MPEG-4 декодер.
 .IPs -1
-Allow libavcodec specific extensions (default).
+Разрешает специфичные расширения libavcodec (по-умолчанию).
 .IPs -2
-Enables experimental codecs and features which may not be playable
-with future MPlayer versions (snow, ffvhuff, ffv1).
+Задействует экспериментальные кодеки и возможности, которые могут 
+оказаться невоспроизводимыми в будущих версиях MPlayer (snow, ffvhuff, ffv1).
 .RE
 .PD 1
 .
 .TP
 .B "vdpart\ "
-Data partitioning.
-Adds 2 Bytes per video packet, improves error-resistance when transferring over
-unreliable channels (e.g.\& streaming over the internet).
-Each video packet will be encoded in 3 separate partitions:
+Разделение данных.
+Добавляет 2 байта в каждый видео пакет, улучшает устойчивость к ошибкам при
+передаче по ненадежным каналам (например для потокового вещания через интернет).
+Каждый видео пакет будет закодирован тремя независимыми разделами:
 .PD 0
 .RSs
-.IPs "1. MVs"
-movement
-.IPs "2. DC coefficients"
-low res picture
-.IPs "3. AC coefficients"
-details
+.IPs "1. MV"
+движение
+.IPs "2. DC коэффициенты"
+картинка низкого разрешения
+.IPs "3. AC коэффициенты"
+детали
 .RE
 .PD 1
 .RS
-MV & DC are most important, loosing them looks far worse than loosing
-the AC and the 1. & 2. partition.
-(MV & DC) are far smaller than the 3. partition (AC) meaning that errors
-will hit the AC partition much more often than the MV & DC partitions.
-Thus, the picture will look better with partitioning than without,
-as without partitioning an error will trash AC/\:DC/\:MV equally.
+MV & DC наиболее важны, их потеря будет выглядеть намного ужасней, чем потеря
+AC и раздела 1. или 2.
+(MV & DC) имеют намного меньший размер, чем раздел 3. (AC), это значит, что ошибки 
+на раздел AC будут приходиться значительно чаще, чем на разделы MV & DC.
+Таким образом, с разделением картинка будет выглядеть лучше, чем без него,
+поскольку без него ошибка с равной вероятностью уничтожит AC/\:DC/\:MV.
 .RE
 .
 .TP
-.B vpsize=<0\-10000> (also see vdpart)
-Video packet size, improves error-resistance.
+.B vpsize=<0\-10000> (смотрите также vdpart)
+Размер видео пакета, улучшает устойчивость к ошибкам.
 .PD 0
 .RSs
 .IPs "0\ \ \ \ "
-disabled (default)
+отключено (по-умолчанию)
 .IPs 100\-1000
-good choice
+хороший выбор
 .RE
 .PD 1
 .
 .TP
 .B "ss\ \ \ \ \ "
-slice structured mode for H.263+
+.\" FIXME untranslated
+slice structured режим для H.263+
 .
 .TP
 .B "gray\ \ \ "
-grayscale only encoding (faster)
+черно\-белое кодирование (быстрее)
 .
 .TP
 .B vfdct=<0\-10>
-DCT algorithm
+Алгоритм DCT (Дискретное Косинусное Преобразование) 
 .PD 0
 .RSs
 .IPs 0
-Automatically select a good one (default).
+.\" FIXME a good one = подходящий
+Автоматически выбирает подходящий (по-умолчанию).
 .IPs 1
-fast integer
+быстрый целочисленный
 .IPs 2
-accurate integer
+точный целочисленный
 .IPs 3
 MMX
 .IPs 4
@@ -7970,28 +8001,31 @@ mlib
 .IPs 5
 AltiVec
 .IPs 6
-floating point AAN
+вещественный AAN
 .RE
 .PD 1
 .
 .TP
 .B idct=<0\-99>
-IDCT algorithm
+Алгоритм IDCT (Обратное Дискретное Косинусное Преобразование)
 .br
-.I NOTE:
+.I ЗАМЕЧАНИЕ:
 To the best of our knowledge all these IDCTs do pass the IEEE1180 tests.
+Насколько нам известно, все эти алгоритмы проходят тесты IEEE1180.
+
 .PD 0
 .RSs
 .IPs 0
-Automatically select a good one (default).
+.\" FIXME a good one = подходящий
+Автоматически выбирает подходящий (по-умолчанию).
 .IPs 1
-JPEG reference integer
+целочисленный референсный JPEG
 .IPs 2
 simple
 .IPs 3
 simplemmx
 .IPs 4
-libmpeg2mmx (inaccurate, do not use for encoding with keyint >100)
+libmpeg2mmx (неточный, не используйте для кодирования с keyint >100)
 .IPs 5
 ps2
 .IPs 6
@@ -8007,331 +8041,341 @@ sh4
 .
 .TP
 .B lumi_mask=<0.0\-1.0>
-Luminance masking is a 'psychosensory' setting that is supposed to
-make use of the fact that the human eye tends to notice fewer details
-in very bright parts of the picture.
-Luminance masking compresses bright areas stronger than medium ones,
-so it will save bits that can be spent again on other frames, raising
-overall subjective quality, while possibly reducing PSNR.
+Маскирование светлых участков - это 'психосенсорная' настройка, призванная 
+использовать тот факт, что человеческий глаз имеет склонность 
+замечать меньшее количество деталей на очень светлых частях картинки.
+Светлые области сжимаются сильнее, чем среднеосвещенные,
+таким образом сохраняются биты, которые могут быть использованы в
+других кадрах, увеличивая общее субъективное качество, одновременно,
+может быть, уменьшая PSNR.
 .br
-.I WARNING:
-Be careful, overly large values can cause disastrous things.
+.I ВНИМАНИЕ:
+Будьте аккуратны, чрезмерно большие значения могут привести к сильному
+ухудшению качества.
 .br
-.I WARNING:
-Large values might look good on some monitors but may look horrible
-on other monitors.
+.I ВНИМАНИЕ:
+Большие значения могут на одних мониторах выглядеть хорошо, а
+на других  - ужасно.
 .PD 0
 .RSs
 .IPs "0.0\ \ "
-disabled (default)
+отключено (по-умолчанию)
 .IPs 0.0\-0.3
-sane range
+разумный диапазон
 .RE
 .PD 1
 .
 .TP
 .B dark_mask=<0.0\-1.0>
-Darkness masking is a 'psychosensory' setting that is supposed to
-make use of the fact that the human eye tends to notice fewer details
-in very dark parts of the picture.
-Darkness masking compresses dark areas stronger than medium ones,
-so it will save bits that can be spent again on other frames, raising
-overall subjective quality, while possibly reducing PSNR.
+Маскирование темных участков - это 'психосенсорная' настройка, призванная
+использовать тот факт, что человеческий глаз имеет склонность 
+замечать меньше деталей на очень темных частях картинки.
+Это маскирование сжимает темные области сильнее, чем среднеосвещенные,
+таким образом оно сохраняет биты, которые могут быть использованы в
+других кадрах, увеличивая общее субъективное качество, одновременно,
+может быть, уменьшая PSNR.
 .br
-.I WARNING:
-Be careful, overly large values can cause disastrous things.
+.I ВНИМАНИЕ:
+Будьте аккуратны, чрезмерно большие значения могут привести к 
+сильному ухудшению качества.
 .br
-.I WARNING:
-Large values might look good on some monitors but may look horrible
-on other monitors / TV / TFT.
+.I ВНИМАНИЕ:
+Большие значения могут на одних мониторах выглядеть хорошо, а
+на других мониторах / TV / TFT - ужасно.
 .PD 0
 .RSs
 .IPs "0.0\ \ "
-disabled (default)
+отключено (по-умолчанию)
 .IPs 0.0\-0.3
-sane range
+разумный диапазон
 .RE
 .PD 1
 .
 .TP
 .B tcplx_mask=<0.0\-1.0>
-Temporal complexity masking (default: 0.0 (disabled)).
-Imagine a scene with a bird flying across the whole scene; tcplx_mask
-will raise the quantizers of the bird's macroblocks (thus decreasing their
-quality), as the human eye usually does not have time to see all the bird's
-details.
-Be warned that if the masked object stops (e.g.\& the bird lands) it is
-likely to look horrible for a short period of time, until the encoder
-figures out that the object is not moving and needs refined blocks.
-The saved bits will be spent on other parts of the video, which may increase
-subjective quality, provided that tcplx_mask is carefully chosen.
+Маскирование временной сложности (по-умолчанию: 0.0 (отключено)).
+Представьте себе сцену с птицей, пролетающей через всю сцену; 
+tcplx_mask увеличит квантователи макроблоков птицы (таким образом
+снизив ее качество), поскольку человеческий глаз не будет иметь 
+достаточно времени, чтобы разглядеть все детали.
+если маскируемый объект останавливается (птица садится, например),
+он, скорее всего, будет ужасно выглядеть некоторое время, пока 
+крлировщик не обнаружит, что объект не движется и требует 
+большей детализации.
+Сэкономленные биты будут отданы другим частям видео, что может
+субъективно улучшить качество при условии, что 
+аккуратно выбрано tcplx_mask.
 .
 .TP
 .B scplx_mask=<0.0\-1.0>
-Spatial complexity masking.
-Larger values help against blockiness, if no deblocking filter is used for
-decoding, which is maybe not a good idea.
+Маскирование пространственной сложности.
+Большие значения помогают против эффекта квадратиков, если для декодирвоания не используется
+фильтр deblocking'а, использование которого, может быть, не очень хорошая идея.
 .br
-Imagine a scene with grass (which usually has great spatial complexity),
-a blue sky and a house; scplx_mask will raise the quantizers of the grass'
-macroblocks, thus decreasing its quality, in order to spend more bits on
-the sky and the house.
+Представьте сцену с травой (имеющей обычно огромную пространственную сложность),
+голубым небом и лошадью; scplx_mask увеличит квантователи макроблоков травы,
+таким образом ухудшая ее качество, чтобы потратить больше битов на небо и лошадь.
 .br
-.I HINT:
-Crop any black borders completely as they will reduce the quality
-of the macroblocks (also applies without scplx_mask).
+.I ПОДСКАЗКА:
+Полностью отрежте черные полосы, так как они уменьшают качество макроблоков 
+(что верно и без scplx_mask).
 .PD 0
 .RSs
 .IPs "0.0\ \ "
-disabled (default)
+отключено (по-умолчанию)
 .IPs 0.0\-0.5
-sane range
+разумный диапазон
 .RE
 .PD 1
 .sp 1
 .RS
-.I NOTE:
-This setting does not have the same effect as using a custom matrix that
-would compress high frequencies harder, as scplx_mask will reduce the
-quality of P blocks even if only DC is changing.
-The result of scplx_mask will probably not look as good.
+.I ЗАМЕЧАНИЕ:
+Эта опция не эквивалентна использованию нестандартной матрицы, 
+которая могла бы сильнее сжать высокие частоты, поскольку scplx_mask 
+уменьшит качество P блоков, даже если меняется только DC.
+Результат работы scplx_mask, возможно, будет выглядеть не очень хорошо.
 .RE
 .
 .TP
-.B p_mask=<0.0\-1.0> (also see vi_qfactor)
-Reduces the quality of inter blocks.
-This is equivalent to increasing the quality of intra blocks, because the
-same average bitrate will be distributed by the rate controller to the
-whole video sequence (default: 0.0 (disabled)).
-p_mask=1.0 doubles the bits allocated to each intra block.
+.B p_mask=<0.0\-1.0> (смотрите также vi_qfactor)
+Уменьшает качество inter блоков.
+Это эквивалентно увеличению качества внутренних блоков, потому что
+тот же самый битпоток будет распределен модулем управления величиной
+потока по всей последовательности видео (по-умолчанию: 0.0 (отключено)).
+p_mask=1.0 удваивает количество бит, выделяемых каждому внутреннему блоку.
 .
+.\" CHECKING STOPPED HERE
 .TP
 .B border_mask=<0.0\-1.0>
-border-processing for MPEG-style encoders.
-Border processing increases the quantizer for macroblocks which are less
-than 1/5th of the frame width/height away from the frame border,
-since they are often visually less important.
+Обработка-границ для кодировщиков MPEG-типа.
+Обработка границ увеличивает квантователь макроблоков, удаленных от
+границы менее, чем на 1/5 ширины/высоты кадра, так как они, как правило,
+визуально менее важны.
 .
 .TP
 .B "naq\ \ \ \ "
-Normalize adaptive quantization (experimental).
-When using adaptive quantization (*_mask), the average per-MB quantizer may no
-longer match the requested frame-level quantizer.
-Naq will attempt to adjust the per-MB quantizers to maintain the proper
-average.
+Нормализация адаптивного квантования (экспериментальное).
+Когда используется адаптивное квантование (*_mask), среднее значение
+квантователей уровня MB может перестать соответствовать запрошенному 
+квантователю уровня кадра.
+Naq попытается исправить квантователи уровня MB для сохранения должного
+усредненного значения.
 .
 .TP
 .B "ildct\ \ "
-Use interlaced DCT.
+Использовать черезстрочный DCT.
 .
 .TP
 .B "ilme\ \ \ "
-Use interlaced motion estimation (mutually exclusive with qpel).
+Использовать черезстрочную оценку движения (несовместомо с qpel).
 .
 .TP
 .B "alt\ \ \ \ "
-Use alternative scantable.
+Использовать альтернативную таблицу сканирования [scantable].
 .
 .TP
 .B "top=<-1\-1>\ \ \ "
 .PD 0
 .RSs
 .IPs -1
-automatic
+автоматически
 .IPs 0
-bottom field first
+нижнее поле первое
 .IPs 1
-top field first
+верхнее поле первое
 .RE
 .PD 1
 .
 .TP
-.B format=<value>
+.B format=<значение>
 .PD 0
 .RSs
 .IPs "YV12\ "
-default
+по-умолчанию
 .IPs "444P\ "
-for ffv1
+для ffv1
 .IPs "422P\ "
-for HuffYUV, lossless JPEG and ffv1
+для HuffYUV, JPEG без потерь и ffv1
 .IPs 411P,YVU9
-for lossless JPEG and ffv1
+для JPEG без потерь и ffv1
 .IPs BGR32
-for lossless JPEG and ffv1
+для JPEG без потерь и ffv1
 .RE
 .PD 1
 .
 .TP
 .B "pred\ \ \ "
-(for HuffYUV)
+(для HuffYUV)
+.\"FIXME check translation
 .PD 0
 .RSs
 .IPs 0
-left prediction
+левое предсказание
 .IPs 1
-plane/\:gradient prediction
+плоскостное/\:градиентное [plane/\:gradient] предсказание
 .IPs 2
-median prediction
+предсказание медианой [median prediction]
 .RE
 .PD 1
 .
 .TP
 .B "pred\ \ \ "
-(for lossless JPEG)
+(для JPEG без потерь)
+.\"FIXME check translation
 .PD 0
 .RSs
 .IPs 0
-left prediction
+левое предсказание
 .IPs 1
-top prediction
+верхнее предсказание
 .IPs 2
-topleft prediction
+верхнее-левое предсказание
 .IPs 3
-plane/\:gradient prediction
+плоскостное/\:градиентное [plane/\:gradient] предсказание
 .IPs 6
-mean prediction
+серединное предсказание
 .RE
 .PD 1
 .
 .TP
 .B "coder\ \ "
-(for ffv1)
+(для ffv1)
 .PD 0
 .RSs
 .IPs 0
-vlc coding (Golomb-Rice)
+кодирование кодами переменной длины (vlc) (Golomb-Rice)
 .IPs 1
-arithmetic coding (CABAC)
+арифметическое кодирование (CABAC)
 .RE
 .PD 1
 .
 .TP
 .B context
-(for ffv1)
+(для ffv1)
 .PD 0
 .RSs
 .IPs 0
-small context model
+маленькая контекстная модель [context model]
 .IPs 1
-large context model
+большая контекстная модель [context model]
 .RE
 .PD 1
 .sp 1
 .RS
-(for ffvhuff)
+(для ffvhuff)
 .RE
 .PD 0
 .RSs
 .IPs 0
-predetermined Huffman tables (builtin or two pass)
+предопределенные таблицы Хаффмана [Huffman] (встроенные или двухпроходные)
 .IPs 1
-adaptive Huffman tables
+адаптивные таблицы Хаффмана [Huffman]
 .RE
 .PD 1
 .
 .TP
 .B "qpel\ \ \ "
-Use quarter pel motion compensation (mutually exclusive with ilme).
+Использовать четвертьпиксельную (quarter pel) компенсацию движения (несовместимо с ilme).
 .br
-.I HINT:
-This seems only useful for high bitrate encodings.
+.I ПОДСКАЗКА:
+Похоже, что опция имеет смысл только для кодирования с высоким битпотоком.
 .
 .TP
 .B mbcmp=<0\-2000>
-Sets the comparison function for the macroblock decision, only used if mbd=0.
+Указывает функцию сравнения для принятия решения о выборе типа макроблока, 
+используется только при mbd=0.
 .PD 0
 .RSs
+.\" FIXME check ALL methods translation
 .IPs "0 (SAD)"
-sum of absolute differences, fast (default)
+сумма модулей разностей, быстрая (по-умолчанию)
 .IPs "1 (SSE)"
-sum of squared errors
+сумма квадратов ошибок
 .IPs "2 (SATD)"
-sum of absolute Hadamard transformed differences
+сумма модулей Hadamard преобразованных разностей
 .IPs "3 (DCT)"
-sum of absolute DCT transformed differences
+сумма модулей DCT преобразованных разностей
 .IPs "4 (PSNR)"
-sum of squared quantization errors (avoid, low quality)
+сумма квадратов ошибок квантования (избегайте, низкое качество)
 .IPs "5 (BIT)"
-number of bits needed for the block
+количество бит, необходимых для блока
 .IPs "6 (RD)"
-rate distortion optimal, slow
+оптимальность соотношения сигнал-шум, медленно
 .IPs "7 (ZERO)"
 0
 .IPs "8 (VSAD)"
-sum of absolute vertical differences
+сумма модулей вертикальных разностей
 .IPs "9 (VSSE)"
-sum of squared vertical differences
+сумма квадратов вертикальных разностей
 .IPs "10 (NSSE)"
-noise preserving sum of squared differences
+сумма квадратов разностей, сохраняющая шум 
 .IPs "11 (W53)"
-5/3 wavelet, only used in snow
+5/3 вейвлет, используется только в snow
 .IPs "12 (W97)"
-9/7 wavelet, only used in snow
+9/7 вейвлет, используется только в snow
 .IPs "+256\ "
-Also use chroma, currently does not work (correctly) with B-frames.
+Также использовать цветность, в данный момент не работает (правильно) с B-кадрами.
 .RE
 .PD 1
 .
 .TP
 .B ildctcmp=<0\-2000>
-Sets the comparison function for interlaced DCT decision
-(see mbcmp for available comparison functions).
+Устанавливает функцию сравнения для черезстрочного DCT
+(список функций смотрите в описании опции mbcmp).
 .
 .TP
 .B precmp=<0\-2000>
-Sets the comparison function for motion estimation pre pass
-(see mbcmp for available comparison functions) (default: 0).
+Устанавливает функцию сравнения для предварительного прохода оценки движения
+(список функций смотрите в описании опции mbcmp) (по-умолчанию:0).
 .
 .TP
 .B cmp=<0\-2000>
-Sets the comparison function for full pel motion estimation
-(see mbcmp for available comparison functions) (default: 0).
+Устанавливает функцию сравнения для full pel оценки движения
+(список функций смотрите в описании опции mbcmp) (по-умолчанию:0).
 .
 .TP
 .B subcmp=<0\-2000>
-Sets the comparison function for sub pel motion estimation
-(see mbcmp for available comparison functions) (default: 0).
+Устанавливает функцию сравнения для sub pel оценки движения
+(список функций смотрите в описании опции mbcmp) (по-умолчанию:0).
 .
 .TP
 .B nssew=<0\-1000000>
-This setting controls NSSE weight, where larger weights will result in
-more noise.
-0 NSSE is identical to SSE
-You may find this useful if you prefer to keep some noise in your encoded
-video rather than filtering it away before encoding (default: 8).
+Эта опция управляет весом в NSSE, чем больше вес, тем больше шума.
+0 NSSE идентично SSE
+Вы можете найти эту опцию полезной, если предпочитаете оставить некоторый
+шум в закодированном видео, а не отфильтровывать его до 
+начала кодирования (по-умолчанию: 8).
 .
 .TP
 .B predia=<-99\-6>
-diamond type and size for motion estimation pre-pass
+тип и размер ромба для предварительного прохода процесса оценки движения
 .
 .TP
 .B dia=<-99\-6>
-Diamond type & size for motion estimation.
-Motion search is an iterative process.
-Using a small diamond does not limit the search to finding only small
-motion vectors.
-It is just somewhat more likely to stop before finding the very best motion
-vector, especially when noise is involved.
-Bigger diamonds allow a wider search for the best motion vector, thus are
-slower but result in better quality.
+Тип и размер ромба для оценки движения.
+Поиск движения - это итеративный процесс.
+Использование ромба малого размера не ограничит поиск маленькими векторами движения.
+Просто будет выше верятность остановки процесса поиска еще до того, как будет 
+найден лучший вектор движения, особенно при наличии шума.
+Ромбы большего размера позволяют искать лучший вектор движения более широко, 
+поэтому они медленнее, но дают лучший результат.
 .br
-Big normal diamonds are better quality than shape-adaptive diamonds.
+.\"FIXME shape-adaptive = адаптивные
+Обычные ромбы большого размера лучше, чем адаптивные.
 .br
-Shape-adaptive diamonds are a good tradeoff between speed and quality.
+Адаптивные ромбы - это хороший компромисс между скоростью и качеством.
 .br
-.I NOTE:
-The sizes of the normal diamonds and shape adaptive ones do not have
-the same meaning.
+.I ЗАМЕЧАНИЕ:
+Размеры для обычных ромбов и адаптивных имеют одинаковое значение.
 .RSs
 .IPs -3
-shape adaptive (fast) diamond with size 3
+адаптивный (быстрый) ромб размера 3
 .IPs -2
-shape adaptive (fast) diamond with size 2
+адаптивный (быстрый) ромб размера 2
 .IPs -1
-uneven multi-hexagon search (slow)
+ассиметричный перекрестный поиск [uneven multi-hexagon search] (медленно)
 .IPs  1
-normal size=1 diamond (default) =EPZS type diamond
+обычный ромб с size=1 (по-умолчанию), он же ромб EPSZ типа
 .nf
 .ne
       0
@@ -8339,7 +8383,7 @@ normal size=1 diamond (default) =EPZS type diamond
       0
 .fi
 .IPs 2
-normal size=2 diamond
+обычный ромб с size=2
 .nf
 .ne
       0
@@ -8352,1458 +8396,1532 @@ normal size=2 diamond
 .
 .TP
 .B "trell\ \ "
-Trellis searched quantization.
-This will find the optimal encoding for each 8x8 block.
-Trellis searched quantization is quite simply an optimal quantization in
-the PSNR versus bitrate sense (Assuming that there would be no rounding
-errors introduced by the IDCT, which is obviously not the case.).
-It simply finds a block for the minimum of error and lambda*bits.
+.\" FIXME is translation correct? Trellis searched quantization.
+Квантование поиском по решетке.
+Найдет оптимальное кодирование для каждого блока 8x8.
+Попросту говоря, квантование решеткой оптимально с точки зрения PSNR, 
+а не в смысле битпотока (Предполагая, что там не будет ошибок округления, 
+вносимых IDCT, что, конечно же, не так.).
+Оно просто находит блок с минимальными error и lambda*bits.
 .PD 0
 .RSs
 .IPs lambda
-quantization parameter (QP) dependent constant
-.IPs "bits\ "
-amount of bits needed to encode the block
+константа, зависящая от параметра квантования (QP)
+.IPs  bits\ "
+количество бит, необходимых для кодирования блока
 .IPs error
-sum of squared errors of the quantization
+сумма квадратов ошибок квантования
 .RE
 .PD 1
 .
 .TP
 .B "cbp\ \ \ \ "
-Rate distorted optimal coded block pattern.
-Will select the coded block pattern which minimizes distortion + lambda*rate.
-This can only be used together with trellis quantization.
+.\" FIXME check translation
+Оптимальный по искажению потока шаблон закодированного блока [coded block pattern].
+Выберет шаблон закодированного блока, минимизирующий шум + лямбда*поток.
+Может использоваться только совместно с квантованием решеткой (опция trell).
 .
 .TP
 .B "mv0\ \ \ \ "
-Try to encode each MB with MV=<0,0> and choose the better one.
-This has no effect if mbd=0.
+Кодируется каждый MB с MV=<0,0> (т.е.\& каждый макроблок без движения) и
+выбирается лучший. Не имеет эффекта, если mbd=0.
 .
 .TP
-.B mv0_threshold=<any non-negative integer>
-When surrounding motion vectors are <0,0> and the motion estimation
-score of the current block is less than mv0_threshold, <0,0> is used for
-the motion vector and further motion estimation is skipped (default:
-256).
-Lowering mv0_threshold to 0 can give a slight (0.01dB) PSNR increase and
-possibly make the encoded video look slightly better; raising
-mv0_threshold past 320 results in diminished PSNR and visual quality.
-Higher values speed up encoding very slightly (usually less than 1%,
-depending on the other options used).
+.B mv0_threshold=<любое неотрицательное целое>
+В случае, когда окружающие векторы движения равны <0,0> и результат оценки 
+перемещения текущего блока меньше  mv0_threshold, в качестве вектора 
+движения будет использоваться <0,0> и дальнейшая оценка движения
+будет пропущена (по-умолчанию: 256).
+Уменьшение mv0_threshold до 0, может дать небольшое (0.01дБ) увеличение PSNR, и,
+возможно, закодированное видео будет выглядеть немного лучше; установка
+mv0_threshold значения выше 320 приведет к ухудшению PSNR и визульного
+качества. Большие значения очень незначительно ускоряют кодирование 
+(обычно меньше, чем на 1%, в зависимости от остальных опций).
 .br
-.I NOTE:
-This option does not require mv0 to be enabled.
+.I ЗАМЕЧАНИЕ:
+Для работы этой опции не требуется включать mv0.
 .
 .TP
-.B qprd (mbd=2 only)
-rate distorted optimal quantization parameter (QP) for the given
-lambda of each macroblock
+.B qprd (только mbd=2)
+.\" FIXME check translation
+Оптимальный по искажению потока параметр квантования (QP) для данного
+лямбда каждого макроблока
 .
 .TP
 .B last_pred=<0\-99>
-amount of motion predictors from the previous frame
+количество предсказателей движения из предыдущего кадра
 .PD 0
 .RSs
 .IPs 0
-(default)
+(по-умолчанию)
 .IPs a
-Will use 2a+1 x 2a+1 macroblock square of motion vector predictors from the
-previous frame.
+.\" FIXME Will use 2a+1 x 2a+1 macroblock square of motion vector predictors from the
+Будет использовать 2a+1 x 2a+1 макроблок  предсказателей векторов движения
+из предыдущего кадра.
 .RE
 .PD 1
 .
 .TP
 .B preme=<0\-2>
-motion estimation pre-pass
+предварительный проход для оценки движения
 .PD 0
 .RSs
 .IPs 0
-disabled
+отключено
 .IPs 1
-only after I-frames (default)
+только после I-кадров (по-умолчанию)
 .IPs 2
-always
+всегда
 .RE
 .PD 1
 .
 .TP
 .B subq=<1\-8>
-subpel refinement quality (for qpel) (default: 8 (high quality))
+качество оптимизации subpel (для qpel) (по-умолчанию: 8 (высокое качество))
 .br
-.I NOTE:
-This has a significant effect on speed.
+.I ЗАМЕЧАНИЕ:
+Существенно влияет на скорость.
 .
 .TP
 .B refs=<1\-8>
-number of reference frames to consider for motion compensation
-(Snow only) (default: 1)
+количество учитываемых для компенсации движения связанных кадров
+(только snow) (по-умолчанию: 1)
 .
 .TP
 .B "psnr\ \ \ "
-print the PSNR (peak signal to noise ratio) for the whole video after encoding
-and store the per frame PSNR in a file with a name like 'psnr_hhmmss.log'.
-Returned values are in dB (decibel), the higher the better.
+Выводит PSNR (пиковое отношение сигнала к шуму) для всего видео после 
+окончания процесса кодирования и сохраняет PSNR каждого кадра в файл 
+с именем, похожим на 'psnr_hhmmss.log'.
+Возвращаемые значения измеряются в дБ (децибел), чем выше, тем лучше.
 .
 .TP
 .B mpeg_quant
-Use MPEG quantizers instead of H.263.
+Использовать квантователи MPEG вместо H.263.
 .
 .TP
 .B "aic\ \ \ \ "
-Enable AC prediction for MPEG-4 or advanced intra prediction for H.263+.
-This will improve quality very slightly (around 0.02 dB PSNR) and slow
-down encoding very slightly (about 1%).
+Включает AC предсказание для MPEG-4 или улучшенное внутреннее предсказание для H.263+.
+Это очень незначительно улучшит качество (около 0.02 дБ PSNR), и незначительно
+уменьшит скорость (примерно на 1%).
 .br
-.I NOTE:
-vqmin should be 8 or larger for H.263+ AIC.
+.I ЗАМЕЧАНИЕ:
+Для H.263+ AIC vqmin должно быть 8 или выше.
 .
 .TP
 .B "aiv\ \ \ \ "
-alternative inter vlc for H.263+
+альтернативное inter vlc для H.263+
 .
 .TP
 .B "umv\ \ \ \ "
-unlimited MVs (H.263+ only)
-Allows encoding of arbitrarily long MVs.
+неограниченные MV (только H.263+)
+Позволяет кодировать сколь угодно длинные MV.
 .
 .TP
 .B ibias=<-256\-256>
-intra quantizer bias (256 equals 1.0, MPEG style quantizer default: 96,
-H.263 style quantizer default: 0)
+отклонение [bias] intra квантователя (256 эквивалентно 1.0, по-умолчанию для MPEG 
+квантователя 96, по-умолчанию для H.263 квантователя: 0)
 .br
-.I NOTE:
-The H.263 MMX quantizer cannot handle positive biases (set vfdct=1 or 2),
-the MPEG MMX quantizer cannot handle negative biases (set vfdct=1 or 2).
+.I ЗАМЕЧАНИЕ:
+H.263 MMX квантователь не может обрабатывать положительные отклонения (установите vfdct=1 или 2),
+MPEG MMX квантователь не может обрабатывать отрицательные отклонения (установите vfdct=1 или 2).
 .
 .TP
 .B pbias=<-256\-256>
-inter quantizer bias (256 equals 1.0, MPEG style quantizer default: 0,
-H.263 style quantizer default: -64)
+отклонение [bias] inter квантователя (256 эквивалентно 1.0, по-умолчанию для MPEG 
+квантователя 96, по-умолчанию для H.263 квантователя: -64)
 .br
-.I NOTE:
-The H.263 MMX quantizer cannot handle positive biases (set vfdct=1 or 2),
-the MPEG MMX quantizer cannot handle negative biases (set vfdct=1 or 2).
+.I ЗАМЕЧАНИЕ:
+H.263 MMX квантователь не может обрабатывать положительные отклонения (установите vfdct=1 или 2),
+MPEG MMX квантователь не может обрабатывать отрицательные отклонения (установите vfdct=1 или 2).
 .br
-.I HINT:
-A more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR.
+.I ПОДСКАЗКА:
+Похоже, что большее положительное отклонение (-32 \- -16 вместо -64) улучшает PSNR.
 .
 .TP
 .B nr=<0\-100000>
-Noise reduction, 0 means disabled.
-0\-600 is a useful range for typical content, but you may want to turn it
-up a bit more for very noisy content (default: 0).
-Given its small impact on speed, you might want to prefer to use this over
-filtering noise away with video filters like denoise3d or hqdn3d.
+Подавление шума, 0 означает отключено.
+0\-600 - разумный диапазон для типичного содердимого, но вы можете захотеть 
+несколько увеличить это значение для очень шумного контента (по-умолчанию: 0).
+В связи с малым влиянием на скорость, вы, возможно, предпочтете его
+таким фильтрам, как denoise3d или hqdn3d.
 .
 .TP
 .B qns=<0\-3>
-Quantizer noise shaping.
-Rather than choosing quantization to most closely match the source video
-in the PSNR sense, it chooses quantization such that noise (usually ringing)
-will be masked by similar-frequency content in the image.
-Larger values are slower but may not result in better quality.
-This can and should be used together with trellis quantization, in which case
-the trellis quantization (optimal for constant weight) will be used as
-startpoint for the iterative search.
+Подстраивание квантователя под шум в видео.
+Вместо выбора квантователя, наиболее точно подходящего, в смысле PSNR, 
+исходному видео, квантователь будет выбираться так, чтобы шум
+.\" FIXME is translation correct? will be masked by similar-frequency content in the image.
+(обычно ореол) маскировался содержимым изображения с похожей частотой.
+Большие значения работают медленнее, но лучшего качества могут и не дать.
+Эту опцию можно и следует использовать с квантованием решеткой (опция trell), в 
+этом случае квантование (оптимальное для постоянного веса) будет
+рассматриваться как точка отсчета при итеративном поиске.
 .PD 0
 .RSs
 .IPs 0
-disabled (default)
+отключено (по-умолчанию)
 .IPs 1
-Only lower the absolute value of coefficients.
+Только уменьшать абсолютные значения коэффициентов.
 .IPs 2
-Only change coefficients before the last non-zero coefficient + 1.
+Изменять только коэффициенты перед последним ненулевым + 1.
+
 .IPs 3
-Try all.
+Пробовать все.
 .RE
 .PD 1
 .
 .TP
-.B inter_matrix=<comma separated matrix>
-Use custom inter matrix.
-It needs a comma separated string of 64 integers.
+.B inter_matrix=<разделенная запятыми матрица>
+Использовать нестандартную inter матрицу.
+Необходимо указать 64 целых числа, разделенных запятыми.
 .
 .TP
-.B intra_matrix=<comma separated matrix>
-Use custom intra matrix.
-It needs a comma separated string of 64 integers.
+.B intra_matrix=<разделенная запятыми матрица>
+Использовать нестандартную intra матрицу.
+Необходимо указать 64 целых числа, разделенных запятыми.
 .
 .TP
 .B vqmod_amp
-experimental quantizer modulation
+экспериментальная модуляция квантователя
 .
 .TP
 .B vqmod_freq
-experimental quantizer modulation
+экспериментальная модуляция квантователя
 .
 .TP
 .B "dc\ \ \ \ \ "
-intra DC precision in bits (default: 8).
-If you specify vcodec=mpeg2video this value can be 8, 9, 10 or 11.
+размерность intra DC в битах (по-умолчанию: 8).
+Если вы указываете vcodec=mpeg2video, это значение может быть 8, 9, 10 или 11.
 .
 .TP
 .B cgop (also see sc_threshold)
-Close all GOPs.
-Currently it only works if scene change detection is disabled
+Закрыть все GOPы.
+На данный момент это работает, только если отключено определение смены сцены
 (sc_threshold=1000000000).
 .
 .TP
 .B vglobal=<0\-3>
-Control writing global video headers.
+Управляет записью глобальных видео заголовков.
 .PD 0
 .RSs
 .IPs 0
-Codec decides where to write global headers (default).
+Кодек решает, куда записывать глобальные заголовки (по-умолчанию).
 .IPs 1
-Write global headers only in extradata (needed for .mp4/MOV/NUT).
+Записывать глобальные заголовки только в дополнительные данные [extradata] 
+(требуется для .mp4/MOV/NUT).
 .IPs 2
-Write global headers only in front of keyframes.
+.\" FIXME only in front of keyframes = только перед ключевыми кадрами.
+Записывать глобальные заголовки только перед ключевыми кадрами.
 .IPs 3
-Combine 1 and 2.
+Комбинация 1 и 2.
 .RE
 .PD 1
 .
 .TP
 .B aglobal=<0\-3>
-Same as vglobal for audio headers.
+То же, что и vglobal для аудио заголовков.
 .
 .
 .SS nuv (\-nuvopts)
 .
-Nuppel video is based on RTJPEG and LZO.
-By default frames are first encoded with RTJPEG and then compressed with LZO,
-but it is possible to disable either or both of the two passes.
-As a result, you can in fact output raw i420, LZO compressed i420, RTJPEG,
-or the default LZO compressed RTJPEG.
+Nuppel видео основано на RTJPEG и LZO.
+По-умолчанию, кадры сначала кодируются c RTJPEG, а затем сжимаются c LZO,
+но возможно отключение любого или обоих из этих двух этапов.
+В результате, вы фактически можете получить сырой i420, i420 сжатый c LZO,
+RTJPEG, или RTJPEG сжатый c LZO.
 .br
-.I NOTE:
-The nuvrec documentation contains some advice and examples about the
-settings to use for the most common TV encodings.
+.I ЗАМЕЧАНИЕ:
+Документация на nuvrect содержит некоторые советы и примеры
+настроек для использования с наиболее распространенными TV кодировками.
 .
 .TP
 .B c=<0\-20>
-chrominance threshold (default: 1)
+порог цветности (по-умолчанию: 1)
 .
 .TP
 .B l=<0\-20>
-luminance threshold (default: 1)
+порог яркости (по-умолчанию: 1)
 .
 .TP
 .B "lzo\ \ \ \ "
-Enable LZO compression (default).
+Включить LZO сжатие (по-умолчанию).
 .
 .TP
 .B "nolzo\ \ "
-Disable LZO compression.
+Отключить LZO сжатие.
 .
 .TP
 .B q=<3\-255>
-quality level (default: 255)
+уровень качества (по-умолчанию: 255)
 .
 .TP
 .B "raw \ \ \ "
-Disable RTJPEG encoding.
+Отключить RTJPEG кодирование.
 .
 .TP
 .B "rtjpeg\ "
-Enable RTJPEG encoding (default).
+Включить RTJPEG кодирование (по-умолчанию).
 .
 .
 .SS xvidenc (\-xvidencopts)
 .
-There are three modes available: constant bitrate (CBR), fixed quantizer and
-two pass.
+Доступны три режима: костоянный битпоток (CBR), фиксированный квантователь и
+двухпроходный.
 .
 .TP
 .B pass=<1|2>
-Specify the pass in two pass mode.
+Указывает проход в двухпроходном режиме.
 .
 .TP
-.B turbo (two pass only)
-Dramatically speeds up pass one using faster algorithms and disabling
-CPU-intensive options.
-This will probably reduce global PSNR a little bit and change individual
-frame type and PSNR a little bit more.
+.B turbo (только двухпроходный режим)
+Чрезвычйно ускоряет первый проход, используя более быстрые алгоритмы и
+отключаяя интенсивно использующие CPU опции.
+Это, возможно, несколько уменьшит общий PSNR, а также тип и PSNR отдельных
+кадров.
 .
 .TP
-.B bitrate=<value> (CBR or two pass mode)
-Sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
-if >16000.
-If <value> is negative, Xvid will use its absolute value as the target size
-(in kBytes) of the video and compute the associated bitrate automagically
-(default: 687 kbits/s).
+.B bitrate=<значение> (CBR или двухпроходный режим)
+Устанавливает используемый битпоток в кбит/\:секунду, если <16000 или
+в битах/\:секунду, если >16000.
+Если <значение> отрицательно, Xvid будет использовать его абсолютное 
+значение в качестве размера выходного видео файла (в килобайтах)  и вычислит 
+соответствующий битпоток автоматически (по-умолчанию: 687 кбит/сек).
 .
 .TP
 .B fixed_quant=<1\-31>
-Switch to fixed quantizer mode and specify the quantizer to be used.
+Переключает в режим фиксированного квантователя и указывает используемый
+квантователь.
 .
 .TP
-.B zones=<zone0>[/<zone1>[/...]] (CBR or two pass mode)
-User specified quality for specific parts (ending, credits, ...).
-Each zone is <start-frame>,<mode>,<value> where <mode> may be
+.B zones=<зона0>[/<зона1>[/...]] (CBR или двухпроходной режим)
+Указанное пользователем качество для отдельных частей (концовок, титров, ...).
+Каждая зона задается в виде <начальный кадр>,<режим>,<значение>.
+Режим может быть:
 .PD 0
 .RSs
 .IPs "q"
-Constant quantizer override, where value=<2.0\-31.0>
-represents the quantizer value.
+Переопределяет постоянный квантователь, здесь значение=<2.0\-31.0>
+указывает значение квантователя.
 .IPs "w"
-Ratecontrol weight override, where value=<0.01\-2.00>
-represents the quality correction in %.
+Переопределяет вес модуля контроля величины битпотока, здесь
+значение=<0.0.1\-2.00) указывает коррекцию качества в %.
 .RE
 .PD 1
 .sp 1
 .RS
-.I EXAMPLE:
+.I ПРИМЕР:
 .RE
 .PD 0
 .RSs
 .IPs zones=90000,q,20
-Encodes all frames starting with frame 90000 at constant quantizer 20.
+кодирует все кадры, начиная с 90000, постоянным квантователем 20.
 .IPs zones=0,w,0.1/10001,w,1.0/90000,q,20
-Encode frames 0\-10000 at 10% bitrate, encode frames 90000
-up to the end at constant quantizer 20.
-Note that the second zone is needed to delimit the first zone, as
-without it everything up until frame 89999 would be encoded at 10%
-bitrate.
+Кодирует кадры 0\-10000 с битпотоком в 10%, кодирует кадры с 90000
+до последего постоянным квантователем 20.
+Заметьте, что вторая зона необходима для ограничения первой, поскольку 
+без нее битпотоком в 10% будет закодировано все вплоть до 89999 кадра.
 .RE
 .PD 1
 .
 .TP
 .B me_quality=<0\-6>
-This option controls the motion estimation subsystem.
-The higher the value, the more precise the estimation should be (default: 6).
-The more precise the motion estimation is, the more bits can be saved.
-Precision is gained at the expense of CPU time so decrease this setting if
-you need realtime encoding.
+Эта опция контролирует подсистему оценки движения.
+Чем выше значение, тем более точной будет оценка (по-умолчанию: 6).
+Чем больше точность оценки, тем больше битов будет сэкономлено.
+Точность дается за счет расхода времени CPU, так что уменьшите значение
+этой опции, если требуется кодирование в реальном времени.
 .
 .TP
 .B (no)qpel
-MPEG-4 uses a half pixel precision for its motion search by default.
-The standard proposes a mode where encoders are allowed to use quarter
-pixel precision.
-This option usually results in a sharper image.
-Unfortunately it has a great impact on bitrate and sometimes the
-higher bitrate use will prevent it from giving a better image
-quality at a fixed bitrate.
-It is better to test with and without this option and see whether it
-is worth activating.
+По-умолчанию, MPEG-4 использует получиксельную точность при поиске движения.
+Стандарт предполагает режим, когда кодировщикам позволяется использовать
+четвертьпиксельную точность.
+Результат, как правило, будет более четким.
+К сожалению, она сильно влияет на величину битпотока, и иногда
+увеличенное его значение не позволит получить лучшее качество 
+картинки в режиме кодирования с фиксированным битпотоком.
+Лучше попробовать обработку с этой опцией и без нее и посмотреть 
+не ухудшится ли результат.
 .
 .TP
 .B (no)gmc
-Enable Global Motion Compensation, which makes Xvid generate special
-frames (GMC-frames) which are well suited for Pan/\:Zoom/\:Rotating images.
-Whether or not the use of this option will save bits is highly
-dependent on the source material.
+Задействует Global Motion Compensation, в результате Xvid будет
+создавать специальные кадры (GMC-кадры), которые хорошо 
+подходят для изображений с Панорамированием/\:Масштабированием/\:Поворотом.
+Сэкономятся биты при использовании этой опции или нет, очень сильно
+зависит от исходного материала.
 .
 .TP
 .B (no)trellis
-Trellis Quantization is a kind of adaptive quantization method that
-saves bits by modifying quantized coefficients to make them more
-compressible by the entropy encoder.
-Its impact on quality is good, and if VHQ uses too much CPU for you,
-this setting can be a good alternative to save a few bits (and gain
-quality at fixed bitrate) at a lesser cost than with VHQ (default: on).
+.\"FIXME quantized coefficients
+Квантование Решеткой \- это один из методов адаптивного квантования,
+который экономит биты, модифицируя квантованные коэффициенты
+.\" FIXME untranslated "entropy encoder"
+[quantized coefficients] для их лучшего сжатия entropy encoder.
+Эта опция дает хороший прирост в качестве, и если VHQ по-вашему использует
+слишком много CPU, она может быть хорошей альтернативой для сохранения 
+нескольких бит (и увеличения качества при фиксированном битпотоке).
+за меньшую, чем с VHQ цену (по-умолчанию: включено).
 .
 .TP
 .B (no)cartoon
-Activate this if your encoded sequence is an anime/\:cartoon.
-It modifies some Xvid internal thresholds so Xvid takes better decisions on
-frame types and motion vectors for flat looking cartoons.
+Активируйте ее, если кодируете амине/\:мультфильм.
+Она изменяет некоторые из внутренних пороговых значений Xvid
+так, что Xvid принимает лучшие решения о типах кадров и векторах движения
+для "плоских" мультфильмов.
 .
 .TP
 .B (no)chroma_me
-The usual motion estimation algorithm uses only the luminance information to
-find the best motion vector.
-However for some video material, using the chroma planes can help find
-better vectors.
-This setting toggles the use of chroma planes for motion estimation
-(default: on).
+Обычный алгоритм оценки движения использует информацию только яркостной 
+компоненты для поиска лчушего вектора движения.
+.\" FIXME chroma planes = цветностные плоскости
+Однако, для некоторого видео материала использование цветностных 
+плоскостей может помоь найти лучшие векторы.
+Эта опция переключает использование цветностных плоскостей
+для оценки движения (по-умолчанию: включено).
 .
 .TP
 .B (no)chroma_opt
-Enable a chroma optimizer prefilter.
-It will do some extra magic on color information to minimize the
-stepped-stairs effect on edges.
-It will improve quality at the cost of encoding speed.
-It reduces PSNR by nature, as the mathematical deviation to the original
-picture will get bigger, but the subjective image quality will raise.
-Since it works with color information, you might want to turn it off when
-encoding in grayscale.
+Задействует предварительный фильтр оптимизации цветностной компоменты.
+Он производит дополнительные магические действия над
+информацией о цвете, чтобы минимизировать эффект лестницы на границах.
+Это улучшит качество ценой скорости кодирования.
+На самом деле PSNR уменьшается, так как станет больше математическое 
+отклонение от оригинальной картинки,
+но субъективное качество изображения будет лучше.
+Пскольку фильтр работает с информацией о цвете, его, возможно, стоит отключить
+при черно-белом кодировании.
 .
 .TP
 .B (no)hq_ac
-Activates high-quality prediction of AC coefficients for intra frames from
-neighbor blocks (default: on).
+Пктивирует высокоточное предсказание AC коэффициентов для intra кадров 
+из соседних блоков (по-умолчанию: включено).
 .
 .TP
 .B vhq=<0\-4>
-The motion search algorithm is based on a search in the usual color domain
-and tries to find a motion vector that minimizes the difference between the
-reference frame and the encoded frame.
-With this setting activated, Xvid will also use the frequency domain (DCT)
-to search for a motion vector that minimizes not only the spatial
-difference but also the encoding length of the block.
-Fastest to slowest:
+.\" FIXME check translation
+Алгоритм поиска движения основан на поиске в 
+обычной области цветов [usual color domain] и
+пытается найти вектор движения, минимизирующий различия между
+исходным и закодированным кадром.
+Когда эта опция активирована, Xvid также будет использовать область 
+частот [frequency domain] (DCT) для поиска вектора движения, 
+минимизирующего не только пространственное
+различие, но и кодируемую длину блока.
+От быстрых к медленным:
 .PD 0
 .RSs
 .IPs 0
-off
+отключено
 .IPs 1
-mode decision (inter/\:intra MB) (default)
+определяется режимом [mode decision] (inter/\:intra MB) (по-умолчанию)
 .IPs 2
-limited search
+ограниченный поиск
 .IPs 3
-medium search
+средний поиск
 .IPs 4
-wide search
+широкий поиск
 .RE
 .PD 1
 .
 .TP
 .B (no)lumi_mask
-Adaptive quantization allows the macroblock quantizers to vary inside
-each frame.
-This is a 'psychosensory' setting that is supposed to make use of the
-fact that the human eye tends to notice fewer details in very bright
-and very dark parts of the picture.
-It compresses those areas more strongly than medium ones, which will
-save bits that can be spent again on other frames, raising overall
-subjective quality and possibly reducing PSNR.
+Адаптивное квантование позволяет различаться квантователям макроблоков
+внутри каждого кадра.
+Это 'психосенсорная' настройка, призванная 
+использовать тот факт, что человеческий глаз имеет склонность 
+замечать меньшее количество деталей на очень светлых и
+очень темных частях картинки.
+Эти области сжимаются сильнее, чем среднеосвещенные,
+таким образом сохраняются биты, которые могут быть использованы в
+других кадрах, увеличивая общее субъективное качество, одновременно,
+может быть, уменьшая PSNR.
 .
 .TP
 .B (no)grayscale
-Make Xvid discard chroma planes so the encoded video is grayscale only.
-Note that this does not speed up encoding, it just prevents chroma data
-from being written in the last stage of encoding.
+.\" FIXME color planes
+Заставляет Xvid отбрасывать цветностные плоскости, таким образом  кодированное
+видео становится черно-белым. 
+Эта опция всего лишь отключает запись данных 
+о цвете на последнем этапе кодирования.
 .
 .TP
 .B (no)interlacing
-Encode the fields of interlaced video material.
-Turn this option on for interlaced content.
+Кодировать поля черезстрочного видео материала.
+Включайте эту опцию для черезстрочного содержимого.
 .br
-.I NOTE:
-Should you rescale the video, you would need an interlace-aware resizer,
-which you can activate with \-vf scale=<width>:<height>:1.
+.I ЗАМЕЧАНИЕ:
+Если желаете масштабировать видео, потребуется сохранение черезстрочности
+в модуле масштабирования, которое можно задействовать 
+опцией \-vf scale=<ширина>:<высота>:1.
 .
 .TP
 .B min_iquant=<0\-31>
-minimum I-frame quantizer (default: 2)
+минимальный квантователь I-кадра (по-умолчанию: 2)
 .
 .TP
 .B max_iquant=<0\-31>
-maximum I-frame quantizer (default: 31)
+максиимальный квантователь I-кадра (по-умолчанию: 31)
 .
 .TP
 .B min_pquant=<0\-31>
-minimum P-frame quantizer (default: 2)
+минимальный квантователь P-кадра (по-умолчанию: 2)
 .
 .TP
 .B max_pquant=<0\-31>
-maximum P-frame quantizer (default: 31)
+максиимальный квантователь P-кадра (по-умолчанию: 31)
 .
 .TP
 .B min_bquant=<0\-31>
-minimum B-frame quantizer (default: 2)
+минимальный квантователь B-кадра (по-умолчанию: 2)
 .
 .TP
 .B max_bquant=<0\-31>
-maximum B-frame quantizer (default: 31)
+максиимальный квантователь B-кадра (по-умолчанию: 31)
 .
 .TP
-.B min_key_interval=<value> (two pass only)
-minimum interval between keyframes (default: 0)
+.B min_key_interval=<значение> (только двухпроходный режим)
+минимальный интервал между ключевыми кадрами (по-умолчанию: 0)
 .
 .TP
-.B max_key_interval=<value>
-maximum interval between keyframes (default: 10*fps)
+.B max_key_interval=<значение>
+максиимальный интервал между ключевыми кадрами (по-умолчанию: 10*fps)
 .
 .TP
 .B quant_type=<h263|mpeg>
-Sets the type of quantizer to use.
-For high bitrates, you will find that MPEG quantization preserves more detail.
-For low bitrates, the smoothing of H.263 will give you less block noise.
-When using custom matrices, MPEG quantization
-.B must
-be used.
+Устанавливает используемый тип квантователя.
+можете заметить, что при высоких значениям битпотока MPEG квантование сохранаяет
+больше деталей.
+Для маленьких значений сглаживание H.263 даст меньший блочный шум.
+При использовании нестандартных матриц
+.B должно
+использоваться MPEG квантование.
 .
 .TP
-.B quant_intra_matrix=<filename>
-Load a custom intra matrix file.
-You can build such a file with xvid4conf's matrix editor.
+.B quant_intra_matrix=<имя_файла>
+Загружает файл с нестандартной intra матрицей.
+Вы можете создать такой файл редакотором матриц программы xvid4conf.
 .
 .TP
-.B quant_inter_matrix=<filename>
-Load a custom inter matrix file.
-You can build such a file with xvid4conf's matrix editor.
+.B quant_inter_matrix=<имя_файла>
+Загружает файл с нестандартной inter матрицей.
+Вы можете создать такой файл редакотором матриц программы xvid4conf.
 .
 .TP
-.B keyframe_boost=<0\-1000> (two pass mode only)
-Shift some bits from the pool for other frame types to intra frames,
-thus improving keyframe quality.
-This amount is an extra percentage, so a value of 10 will give
-your keyframes 10% more bits than normal
-(default: 0).
+.B keyframe_boost=<0\-1000> (только двухпроходный режим)
+Отдает intra кадрам биты, изначально предназначенные для других
+типов кадров, таким образом улучшая качество ключевых кадров.
+Дополнительное количество указывается в процентах, таким образом 
+значение 10 даст выделит ключевым кадрам на 10% больше бит, чем 
+обычно (по-умолчанию: 0)
 .
 .TP
-.B kfthreshold=<value> (two pass mode only)
-Works together with kfreduction.
-Determines the minimum distance below which you consider that
-two frames are considered consecutive and treated differently
-according to kfreduction
-(default: 10).
+.B kfthreshold=<значение> (только двухпроходный режим)
+Работает совместно с kfreduction.
+Определяет расстояние, при меньших значениех которого
+два кадра считаются последовательными и должны обрабатываться 
+особо, в соответствии с опцией kfreduction.
+(по-умолчанию: 10).
 .
 .TP
-.B kfreduction=<0\-100> (two pass mode only)
-The above two settings can be used to adjust the size of keyframes that
-you consider too close to the first (in a row).
-kfthreshold sets the range in which keyframes are reduced, and
-kfreduction determines the bitrate reduction they get.
-The last I-frame will get treated normally
-(default: 30).
+.B kfreduction=<0\-100> (только двухпроходный режим)
+Две предыдущие опции могут использоватьсяя для настройки размера 
+ключевых кадров, которые, как вы считаете, находятся слишком близко к 
+первому (в строке).
+kfthreshold устанавливает диапазон, в пределах которого урезаются кадры, а
+kfreduction - на сколько уменьшается их битпоток.
+Последний I-кадр обрабатывается как обычно. (по-умолчанию: 30).
 .
 .TP
 .B max_bframes=<0\-4>
-Maximum number of B-frames to put between I/P-frames (default: 2).
+Максимальное количество B-кадров, помещаемых между I/P-кадрами (по-умолчанию: 2).
 .
 .TP
 .B bquant_ratio=<0\-1000>
-quantizer ratio between B- and non-B-frames, 150=1.50 (default: 150)
+.\" FIXME need better translation
+коэффициент квантователя между B- и не-B-кадрами, 150=1.50 (по-умолчанию: 150)
 .
 .TP
 .B bquant_offset=<-1000\-1000>
-quantizer offset between B- and non-B-frames, 100=1.00 (default: 100)
+.\" FIXME need better translation
+смещение квантователся между B- и не-B-кадрами, 100=1.00 (по-умолчанию: 100)
 .
 .TP
 .B bf_threshold=<-255\-255>
-This setting allows you to specify what priority to place on the use of
-B-frames.
-The higher the value, the higher the probability of B-frames being used
-(default: 0).
-Do not forget that B-frames usually have a higher quantizer, and therefore
-aggressive production of B-frames may cause worse visual quality.
+Эта настройка позволяет указать приоритетность размещения B-кадров.
+Чем выше значение, тем выше вероятность использования B-кадров
+(по-умолчанию: 0).
+Не забывайте, что B-кадры обычно используют больший квантователь, и,
+поэтому, производство большого количества B-кадров может снизить
+визуальное качество.
 .
 .TP
 .B (no)closed_gop
-This option tells Xvid to close every GOP (Group Of Pictures bounded
-by two I-frames), which makes GOPs independent from each other.
-This just implies that the last frame of the GOP is either a P-frame or a
-I-frame but not a B-frame.
-It is usually a good idea to turn this option on (default: on).
+.\" FIXME N-frame typo?
+Эта опция говорит Xvid закрывать каздый GOP (Group Of Pictures, группа 
+картинок, ограниченная двумя I-кадрами), что делает их независимыми 
+друг от друга.
+Это всего лишь подразумевает, что последний кадр в GOP является 
+или P-кадрром, или I-кадром, но не B-кадром.
+Как правило, включение этой опции - хорошая идея (по-умолчанию: включено).
 .
 .TP
 .B (no)packed
-This option is meant to solve frame-order issues when encoding to
-container formats like AVI that cannot cope with out-of-order frames.
-In practice, most decoders (both software and hardware) are able to deal
-with frame-order themselves, and may get confused when this option is
-turned on, so you can safely leave if off, unless you really know what
-you are doing.
+Эта опция призвана решить проблемы порядка кадров при кодировании
+в AVI подобные форматы, неспособные справиться с неупорядоченными кадрами.
+На практике большинство декодеров (как программных, так и аппаратных)
+сами способны обращаться с порядком кадров, и могут 
+сбиться с толку, если эта опция включена, так что лучше выключить ее,
+если не знаете наверняка, что делаете.
 .br
-.I WARNING:
-This will generate an illegal bitstream, and will not be
-decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:Xvid.
+.I ВНИМАНИЕ:
+При этом генерируется нестандартный битовый поток, который не будет
+проигрываться ISO-MPEG-4 декодерами, за исключением 
+DivX/\:libavcodec/\:Xvid.
 .br
-.I WARNING:
-This will also store a fake DivX version in the file so the bug
-autodetection of some decoders might be confused.
+.I ВНИМАНИЕ:
+При этом также в файл записывается фальшивая версия DivX, 
+что может привести к проявлению бага автоопределения на некоторых 
+декодерах.
 .
 .TP
-.B frame_drop_ratio=<0\-100> (max_bframes=0 only)
-This setting allows the creation of variable framerate video streams.
-The value of the setting specifies a threshold under which, if the
-difference of the following frame to the previous frame is below or equal
-to this threshold, a frame gets not coded (a so called n-vop is placed
-in the stream).
-On playback, when reaching an n-vop the previous frame will be displayed.
+.B frame_drop_ratio=<0\-100> (только max_bframes=0)
+Эта настройка позволяет создание видео потоков с переменным битпотоком.
+Значение опции  указывает порог. Если разница последующего кадра с 
+предыдущим ниже этого значения, то кадр не кодируется (в поток помещается 
+так называемый n-vop).
+При воспроизведении, когда достигается n-vop, будет отображаться предыдущий 
+кадр.
 .br
-.I WARNING:
-Playing with this setting may result in a jerky video, so use it at your
-own risks!
+.I ВНИМАНИЕ:
+Игра с этой опцией может привести к дергающемуся видео, так что используйте
+ее на свой срах и риск!
 .
 .TP
-.B rc_reaction_delay_factor=<value>
-This parameter controls the number of frames the CBR rate controller
-will wait before reacting to bitrate changes and compensating for them
-to obtain a constant bitrate over an averaging range of frames.
+.B rc_reaction_delay_factor=<значение>
+Этот параметр контролирует количество кадров, которые CBR будет ждать
+перед тем, как среагировать на изменение битпотока и компенсировать
+его для сохранения постоянного значения на периоде усреднения
 .
 .TP
 .B rc_averaging_period=<value>
-Real CBR is hard to achieve.
-Depending on the video material, bitrate can be variable, and hard to predict.
-Therefore Xvid uses an averaging period for which it guarantees a given
-amount of bits (minus a small variation).
-This settings expresses the "number of frames" for which Xvid averages
-bitrate and tries to achieve CBR.
+Истинный CBR получить учень трудно.
+В зависимости от видео материала битпоток может меняться и трудно предсказуем.
+Поэтому Xvid использует период усреднения на котром гарантирует 
+указанное количество бит (минус небольшое отклонение).
+Эта опция выражает "количество кадров" для которого Xvid усредняет 
+битпоток и пытается получить CBR.
 .
 .TP
 .B rc_buffer=<value>
-size of the rate control buffer
+размер буфера модуля управления величиной битпотока.
 .
 .TP
 .B curve_compression_high=<0\-100>
-This setting allows Xvid to take a certain percentage of bits away from
-high bitrate scenes and give them back to the bit reservoir.
-You could also use this if you have a clip with so many bits allocated
-to high-bitrate scenes that the low(er)-bitrate scenes start to look bad
-(default: 0).
+Эта опция позволяет Xvid забрать указанное в процентах количество бит 
+из сцен с высоким битпотоком и вернуть их обратно в "хранилище".
+Вы также можете использовать ее, если имеете клип с настолько большим
+количеством бит в сценах с высоким битпотоком, что сцены
+с его низким значением выглядят ужасно (по-умолчанию:0).
 .
 .TP
 .B curve_compression_low=<0\-100>
-This setting allows Xvid to give a certain percentage of extra bits to the
-low bitrate scenes, taking a few bits from the entire clip.
-This might come in handy if you have a few low-bitrate scenes that are
-still blocky (default: 0).
+Эта опция позволяет Xvid передать указанное в процентах количество 
+дополнительных бит в сцены с маленьким битпотоком, забирая их 
+из всего клипа.
+Это может пригодиться, если есть несколько сцен с низким битпотоком
+на которых по-прежнему видны квадратики. (по-умолчанию: 0).
 .
 .TP
 .B overflow_control_strength=<0\-100>
-During pass one of two pass encoding, a scaled bitrate curve is computed.
-The difference between that expected curve and the result obtained during
-encoding is called overflow.
-Obviously, the two pass rate controller tries to compensate for that overflow,
-distributing it over the next frames.
-This setting controls how much of the overflow is distributed every time
-there is a new frame.
-Low values allow lazy overflow control, big rate bursts are compensated for
-more slowly (could lead to lack of precision for small clips).
-Higher values will make changes in bit redistribution more abrupt, possibly
-too abrupt if you set it too high, creating artifacts (default: 5).
+.\" FIXME  scaled bitrate curve 
+Во время первого из двух проходов кодирования, вычисляется масштабированная 
+кривая битпотока.
+Разница при кодировании между ожидаемой кривой и полученным результатом
+называется переполнением.
+Очевидно, что двухпроходной контроль битпотока пытается компенсировать 
+это переполнение, распределяя его между последующими кадрами.
+Эта опция контролирует, какое количество переполнения перераспределяется
+в каждый момент появляения нового кадра.
+Низкие значения разрешают "ленивое" управление переполнением, большие
+скачки битпотока компенсируются медленнее (могут привести к
+недостаточной точности для короткоих клипов).
+Большие значения сделают изменения в распределении бит более резкими,
+(возможно слишком резкими, если установите значение слишком большим)
+создавая артефакты (по-умолчанию: 5).
 .br
-.I NOTE:
-This setting impacts quality a lot, play with it carefully!
+.I ЗАМЕЧАНИЕ:
+Эта опция очень сильно влияет на качество, обращайтесь с ней осторожно!
 .
 .TP
 .B max_overflow_improvement=<0\-100>
-During the frame bit allocation, overflow control may increase the frame
-size.
-This parameter specifies the maximum percentage by which the overflow
-control is allowed to increase the frame size, compared to the ideal curve
-allocation
-(default: 5).
+В процессе распределения кадровых битов, управление переполнением может
+увеличить размер кадра.
+Этот параметр указывает максимальный размер в процентах, на котороый
+управление переполнением может увеличивать размер по сравнению с 
+идеальной кривой распределения. (по-умолчанию: 5).
 .
 .TP
 .B max_overflow_degradation=<0\-100>
-During the frame bit allocation, overflow control may decrease the frame
-size.
-This parameter specifies the maximum percentage by which the overflow
-control is allowed to decrease the frame size, compared to the ideal curve
-allocation
-(default: 5).
+В процессе распределения кадровых битов, управление переполнением может
+уменьшить размер кадра.
+Этот параметр указывает максимальный размер в процентах, на котороый
+управление переполнением может уменьшать размер по сравнению с 
+идеальной кривой распределения. (по-умолчанию: 5).
 .
 .TP
 .B container_frame_overhead=<0...>
-Specifies a frame average overhead per frame, in bytes.
-Most of the time users express their target bitrate for video w/o taking
-care of the video container overhead.
-This small but (mostly) constant overhead can cause the target file size
-to be exceeded.
-Xvid allows users to set the amount of overhead per frame the
-container generates (give only an average per frame).
-0 has a special meaning, it lets Xvid use its own default values
-(default: 24 \- AVI average overhead).
+Указывает среднюю величину накладных расхдов на кадр, в байтах.
+В большинстве случаев пользователи вычисляют битпоток для видео в выходном 
+файле, не учитывая накладные расходы видео контейнера.
+Эта малая, но (почти всегда) постоянная величина может привести к
+превышению желаемого размера выходного файла.
+Xvid позволяет указать количество вносимой контейнером дополнительной информации 
+для каждого кадра (задавайте усредненное значение для кадра).
+0 имеет особое значение, он дает Xvid возможность использовать его
+соьственные значения по-умолчанию
+(по-умолчанию: 24 \- усредненные накладные расходы AVI).
 .
 .TP
 .B profile=<profile_name>
-Restricts options and VBV (peak bitrate over a short period) according to
-the Simple, Advanced Simple and DivX profiles.
-The resulting videos should be playable on standalone players adhering to these
-profile specifications.
+Ограничивает опции и VBV (пиковое значение битпотока за короткий период)
+в соответствии с профилями "Простой", "Расширенный простой" и "DivX".
+Получающееся видео должно быть воспроизводимым на аппаратных проигрывателях,
+соблюдая спецификации этих профилей.
 .PD 0
 .RSs
 .IPs unrestricted
-no restrictions (default)
+без ограничений (по-умолчанию)
 .IPs "sp0\ \ "
-simple profile at level 0
+простой профиль уровня 0
 .IPs "sp1\ \ "
-simple profile at level 1
+простой профиль уровня 1
 .IPs "sp2\ \ "
-simple profile at level 2
+простой профиль уровня 2
 .IPs "sp3\ \ "
-simple profile at level 3
+простой профиль уровня 3
 .IPs "asp0\ "
-advanced simple profile at level 0
+расширенный простой профиль уровня 0
 .IPs "asp1\ "
-advanced simple profile at level 1
+расширенный простой профиль уровня 1
 .IPs "asp2\ "
-advanced simple profile at level 2
+расширенный простой профиль уровня 2
 .IPs "asp3\ "
-advanced simple profile at level 3
+расширенный простой профиль уровня 3
 .IPs "asp4\ "
-advanced simple profile at level 4
+расширенный простой профиль уровня 4
 .IPs "asp5\ "
-advanced simple profile at level 5
+расширенный простой профиль уровня 5
 .IPs dxnhandheld
-DXN handheld profile
+карманный профиль DXN
 .IPs dxnportntsc
-DXN portable NTSC profile
+портативный NTSC профиль DXN
 .IPs dxnportpal
-DXN portable PAL profile
+портативный PAL профиль DXN
 .IPs dxnhtntsc
-DXN home theater NTSC profile
+NTSC профиль DXN для домашнего кинотеатра
 .IPs dxnhtpal
-DXN home theater PAL profile
+PAL профиль DXN для домашнего кинотеатра
 .IPs dxnhdtv
-DXN HDTV profile
+HDTV профиль DXN
 .RE
 .PD 1
 .RS
-.I NOTE:
-These profiles should be used in conjunction with an appropriate \-ffourcc.
-Generally DX50 is applicable, as some players do not recognize Xvid but
-most recognize DivX.
+.I ЗАМЕЧАНИЕ:
+Эти профили должны использоваться вместе с соответствующим \-ffourcc.
+Кк правило применим DX50, поскольку некоторые проигрыватели не
+распознают Xvid, но прекрасно определяют DivX.
 .RE
 .
 .TP
 .B par=<mode>
-Specifies the Pixel Aspect Ratio mode (not to be confused with DAR,
-the Display Aspect Ratio).
-PAR is the ratio of the width and height of a single pixel.
-So both are related like this: DAR = PAR * (width/height).
+Указывает пропорции пиксела (Pixel Aspect Ratio, PAR).
+Не путайте ее с DAR (Display Aspect Ratio), пропорциями дисплея.
+PAR - это отношение ширины и высоты отдельного пиксела.
+Эти две величины связаны следующим
+образом: DAR = PAR * (ширина/высота).
 .br
-MPEG-4 defines 5 pixel aspect ratios and one extended
-one, giving the opportunity to specify a specific pixel aspect
-ratio.
-5 standard modes can be specified:
+MPEG-4 определяет 5 предопределенных пропорций пиксела и одну дополнительную,
+позволяющую указать желаемые пропорции вручную.
+Стандартные 5 вариантов:
 .PD 0
 .RSs
 .IPs vga11
-It is the usual PAR for PC content.
-Pixels are a square unit.
+Обычный PAR для PC содержимого.
+Пикселы квадратные.
 .IPs pal43
-PAL standard 4:3 PAR.
-Pixels are rectangles.
+Стандартный 4:3 PAR для PAL.
+Пикселы прямоугольные.
 .IPs pal169
-same as above
+аналогично предыдущему
 .IPs ntsc43
-same as above
+аналогично предыдущему
 .IPs ntsc169
-same as above (Do not forget to give the exact ratio.)
+аналогично предыдущему (Не забывайте задавать точные пропорции).
 .IPs "ext\ \ "
-Allows you to specify your own pixel aspect ratio with par_width and
+Позволяет вам указать собственные пропорции при помощи par_width и
 par_height.
 .RE
 .PD 1
 .RS
-.I NOTE:
-In general, setting aspect and autoaspect options is enough.
+.I ЗАМЕЧАНИЕ:
+Как правило, достаточно установить aspect и autoaspect.
 .RE
 .
 .TP
-.B par_width=<1\-255> (par=ext only)
-Specifies the width of the custom pixel aspect ratio.
+.B par_width=<1\-255> (только par=ext)
+Указывает ширину пропорций нестандартного пиксела.
 .
 .TP
-.B par_height=<1\-255> (par=ext only)
-Specifies the height of the custom pixel aspect ratio.
+.B par_height=<1\-255> (только par=ext)
+Указывает высоту пропорций нестандартного пиксела.
 .
 .TP
-.B aspect=<x/y | f (float value)>
-Store movie aspect internally, just like MPEG files.
-Much nicer solution than rescaling, because quality is not decreased.
-MPlayer and a few others players will play these files correctly, others
-will display them with the wrong aspect.
-The aspect parameter can be given as a ratio or a floating point number.
+.B aspect=<x/y | f (вещественное значение)>
+Сохраняет пропорции фильма внутри него, как в MPEG Файлах.
+Более приятное решение, чем масштабирование, поскольку качество не
+ухудшается. MPlayer и некоторые другие проигрыватели будут
+воспроизводить эти файлы правильно, остальные покажут их с неверными
+пропорциями.
+Параметр aspect может быть задан либо дробью, либо вещественным числом.
 .
 .TP
 .B (no)autoaspect
-Same as the aspect option, but automatically computes aspect, taking
-into account all the adjustments (crop/\:expand/\:scale/\:etc.) made in the
-filter chain.
+То же, что и опция aspect, но пропорции вычисляются автоматически
+с учетом всех изменений (crop/\:expand/\:scale/\:и так далее),
+производимых в цепочке фильтров.
 .
 .TP
 .B "psnr\ \ \ "
-Print the PSNR (peak signal to noise ratio) for the whole video after encoding
-and store the per frame PSNR in a file with a name like 'psnr_hhmmss.log' in
-the current directory.
-Returned values are in dB (decibel), the higher the better.
+Выводит PSNR (пиковое отношение сигнала к шуму) всего видео после окончания
+процесса кодирования и сохраняет покадровый PSNR в файл с именем 
+подобным 'psnr_hhmmss.log' в текущем каталоге.
+Возвращаемые значения измеряются в дБ (децибелл), чем выше, тем лучше.
 .
 .TP
 .B "debug\ \ "
-Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
-file.)
+Сохраняет покадровую статистику в ./xvid.dbg. (Это не управляющий файл
+двухпроходного режима.)
 .RE
 .
 .PP
 .sp 1
-The following option is only available in Xvid 1.1.x.
+Следующие опции доступны только в Xvid 1.1.x.
 .
 .TP
 .B bvhq=<0|1>
-This setting allows vector candidates for B-frames to be used for
-the encoding chosen using a rate distortion optimized operator,
-which is what is done for P-frames by the vhq option.
-This produces nicer-looking B-frames while incurring almost no
-performance penalty (default: 1).
+.\" FIXME untraslated. Need translation check. Possibly wrong.
+Опция позволяет векторам\-кандидатам для B-кадров
+быть использованными для кодирования, выбранного, 
+используя оператор, оптимизированный по соотношению сигнал-шум.
+Это в точности то, что делается для P-кадров опцией vhq.
+Эта опция производит хорошо смотрящиеся B-кадры, как правило, 
+никак не ухудшая производительность (по-умолчанию: 1).
 .
 .PP
 .sp 1
-The following option is only available in the 1.2.x version of Xvid.
+Следующие опции доступны только в Xvid 1.2.x.
 .
 .TP
 .B threads=<0\-n>
-Create n threads to run the motion estimation (default: 0).
-The maximum number of threads that can be used is the picture height
-divided by 16.
+Создает n потоков для выполнения оценки движения (по-умолчанию: 0).
+Максимальное количество потоков, которые можно использовать, равно
+высоте изображения, деленной на 16.
 .
 .
 .SS x264enc (\-x264encopts)
 .
 .TP
-.B bitrate=<value>
-Sets the average bitrate to be used in kbits/\:second (default: off).
-Since local bitrate may vary, this average may be inaccurate for
-very short videos (see ratetol).
-Constant bitrate can be achieved by combining this with vbv_maxrate,
-at significant reduction in quality.
+.B bitrate=<значение>
+Устанавливает используемый средний битпоток в кбит/секунду (по-молчанию: отключено).
+Поскольку локальное значение битпотока может меняться, эта величина может
+быть неточной для короткого видео (смотрите ratetol).
+Постоянный битпоток со значимой потерей в качестве можно получить, 
+комбинируя эту опцию с vbv_maxrate,
 .
 .TP
 .B qp=<0\-51>
-This selects the quantizer to use for P-frames.
-I- and B-frames are offset from this value by ip_factor and pb_factor, respectively.
-20\-40 is a useful range (default: 26).
-Lower values result in better fidelity, but higher bitrates.
-0 is lossless.
-Note that quantization in H.264 works differently from MPEG-1/2/4:
-H.264's quantization parameter (QP) is on a logarithmic scale.
-The mapping is approximately H264QP = 12 + 6*log2(MPEGQP).
-For example, MPEG at QP=2 is equivalent to H.264 at QP=18.
+Выбирает квантователь, используемый для P-кадров.
+Значения для I- и B-кадров получаются из этого смещением на ip_factor и pb_factor, 
+соответственно.
+20\-40 - полезный диапазон (по-умолчанию: 26).
+Меньшие значение дадут лучшую точность, но больший битпоток.
+0 - без потерь.
+Заметьте, что квантование в H.264 радотает иначе, чем в MPEG-1/2/4:
+параметр квантования H.264 (QP) задается в логарифмической шкале.
+Зависимость примерно такая: H264QP = 12 + 6*log2(MPEGQP).
+Например, QP=2 в MPEG эквивалентно QP=18 в H.264.
 .
 .TP
 .B crf=<1\-50>
-Enables constant quality mode, and selects the quality.
-The scale is similar to QP.
-Like the bitrate-based modes, this allows each frame to use a
-different QP based on the frame's complexity.
+Задействует режим постоянного качества и выбирает его уровень.
+Шкала такая же, как и для QP.
+Как и в режимах, основанных на битпотоке, эта опция позволяет 
+каждому кадру использовать собственный QP, основанный на 
+сложности кадра.
 .
 .TP
 .B pass=<1\-3>
-Enable 2 or 3-pass mode.
-It is recommended to always encode in 2 or 3-pass mode as it leads to a
-better bit distribution and improves overall quality.
+Задействует 2\-х и 3\-х проходной режим.
+Рекомендуется всегда кодировать в двух или трезпроходном режиме, 
+поскольку это приводит к лучшему распределению бит и повыщает 
+общее качество.
 .PD 0
 .RSs
 .IPs 1
-first pass
+первый проход
 .IPs 2
-second pass (of two pass encoding)
+второй проход (двухпроходного кодирования)
 .IPs 3
-Nth pass (second and third passes of three pass encoding)
+N\-й проход (второй и третий проходы трехпроходного кодирования)
 .RE
 .RS
-Here is how it works, and how to use it:
+Вот как это работает, и как это можно использовать:
 .br
-The first pass (pass=1) collects statistics on the video and writes them
-to a file.
-You might want to deactivate some CPU-hungry options, apart from the ones
-that are on by default.
+Первый проход собирает статистику видео и записывает ее в файл.
+Вы можете отключить некоторые CPU-прожорливые опции, кроме тех, что
+включены по-умолчанию.
 .br
-In two pass mode, the second pass (pass=2) reads the statistics file and
-bases ratecontrol decisions on it.
+В двухпроходном режиме, второй проход (pass=2) читает файл статистики
+и на его основе принимает решения об управлении битпотоком.
 .br
-In three pass mode, the second pass (pass=3, that is not a typo)
-does both: It first reads the statistics, then overwrites them.
-You can use all encoding options, except very CPU-hungry options.
+В трехпроходном режиме, второй проход (pass=3, это не опечатка)
+делает обе вещи: сначала читает статистику, затем переписывает ее.
+Вы можете использовать все опции, кроме очень сильно нагружающих CPU.
 .br
-The third pass (pass=3) is the same as the second pass, except that it has
-the second pass' statistics to work from.
-You can use all encoding options, including CPU-hungry ones.
+Третий проход (pass=3) \- то же самое, что и второй, за исключением того,
+что он работает со статистикой второго прохода. 
+Вы можете использовать все опции, кроме очень сильно нагружающих CPU.
 .br
-The first pass may use either average bitrate or constant quantizer.
-ABR is recommended, since it does not require guessing a quantizer.
-Subsequent passes are ABR, and must specify bitrate.
+Первый проход может использовать либо средний битпоток (ABR), либо 
+постоянный квантователь.
+Рекомендуется ABR, поскольку он не требует предположений о значении квантователя.
+Последующие проходы \- ABR, и должы указывать битпоток.
 .REss
 .
 .TP
 .B turbo=<0\-2>
-Fast first pass mode.
-During the first pass of a two or more pass encode it is possible to gain
-speed by disabling some options with negligible or even no impact on the
-final pass output quality.
+Быстрый первый проход.
+Во время первого прохода в режиме двух или более проходов, возможно
+увеличить скорость, отключив опции с несущественным или нулевым
+влиянием на качество последнего прохода.
 .PD 0
 .RSs
 .IPs 0
-disabled (default)
+отключено (по-умолчанию)
 .IPs 1
-Reduce subq, frameref and disable some inter-macroblock partition analysis
-modes.
+Уменьшает subq, frameref и отключает некоторые режимы анализа разбиения inter-макроблоков.
 .IPs 2
-Reduce subq and frameref to 1, use a diamond ME search and disable all
-partition analysis modes.
+Уменьшает subq и frameref до 1, использует ME поиск по ромбу и отключает все 
+режимы анализа разбиения inter-макроблоков.
 .RE
 .RS
-Level 1 can increase first pass speed up to 2x with no change in the global
-PSNR of the final pass compared to a full quality first pass.
+Уровень 1 может ускорить первый проход в два раза без изменения общего PSNR
+последнего прохода по сравнению с первым проходом в полном качестве.
 .br
-Level 2 can increase first pass speed up to 4x with about +/- 0.05dB change
-in the global PSNR of the final pass compared to a full quality first pass.
+Уровень 2 может ускорить первый проход в четыре раза с изменением PSNR
+в +/- 0.05дБ по сравнению  с первым проходом в полном качестве.
 .REss
 .
 .TP
 .B keyint=<value>
-Sets maximum interval between IDR-frames (default: 250).
-Larger values save bits, thus improve quality, at the cost of seeking
-precision.
-Unlike MPEG-1/2/4, H.264 does not suffer from DCT drift with large
-values of keyint.
+Устанавливает максимальный интервал между IDR-кадрами (по-умолчанию: 250).
+Большие значения экономят биты, таким образом, увеличивая качество ценой
+точности перемещения.
+В отличие от MPEG-1/2/4, H.264 не страдает от погрешности DCT при больших 
+значениях keyint.
 .
 .TP
 .B keyint_min=<1\-keyint/2>
-Sets minimum interval between IDR-frames (default: 25).
-If scenecuts appear within this interval, they are still encoded as
-I-frames, but do not start a new GOP.
-In H.264, I-frames do not necessarily bound a closed GOP because it is
-allowable for a P-frame to be predicted from more frames than just the one
-frame before it (also see frameref).
-Therefore, I-frames are not necessarily seekable.
-IDR-frames restrict subsequent P-frames from referring to any frame
-prior to the IDR-frame.
+Устанавливает минимальный интервал между IDR-кадрами (по-умолчанию: 25).
+Если в пределах этого интервала происходит изменение сцены, оно
+по-прежнему будет кодироваться I-кадром, а не начинать новый GOP.
+В H.264, I-кадры не обязательно ограничивают закрытый GOP,
+потому что допускается предсказание P-кадра из более, чем одного
+предыдущего кадра (смотрите также frameref).
+Следовательно, I-кадры не являются необходимыми для перемещения.
+IDR-кадры не позволяют последующим P-кадрам ссылаться на любой
+другой, предшествующий IDR-кадру.
 .
 .TP
 .B scenecut=<-1\-100>
-Controls how aggressively to insert extra I-frames (default: 40).
-With small values of scenecut, the codec often has to force an I-frame
-when it would exceed keyint.
-Good values of scenecut may find a better location for the I-frame.
-Large values use more I-frames than necessary, thus wasting bits.
--1 disables scene-cut detection, so I-frames are inserted only once
-every other keyint frames, even if a scene-cut occurs earlier.
-This is not recommended and wastes bitrate as scenecuts encoded as P-frames
-are just as big as I-frames, but do not reset the "keyint counter".
+Контролирует агрессивность вставки дополнительных I-кадров (по-умолчанию: 40).
+С малыми значениями scenecut, кодек зачастую должен принудительно вставлять
+I-кадр, когда может превыситься keyint.
+Хорошие значения scenecut могут найти лучшее положение для I-кадра.
+Большие значения используют больше I-Кадров, чем требуется, 
+зря расходуя биты.
+-1 отключает определение смены сцены, так что I-кадры вставляются только 
+один раз каждые keyint кадров, даже если ранее произошло изменение сцены.
+Это не рекомендуется и зря тратит битпоток, поскольку изменения сцены,
+закодированные P-кадрами такие же большие, как и I-кадры, но не 
+обнуляют "счетчик keyint".
 .
 .TP
 .B frameref=<1\-16>
-Number of previous frames used as predictors in B- and P-frames (default: 1).
-This is effective in anime, but in live-action material the improvements
-usually drop off very rapidly above 6 or so reference frames.
-This has no effect on decoding speed, but does increase the memory needed for
-decoding.
-Some decoders can only handle a maximum of 15 reference frames.
+Количество предыдущих кадров, используемых в качестве предсказателей 
+в B- и P-кадрах (по-умолчанию: 1).
+Это эффективно в аниме, но для материала с обычным движением, начиная
+примерно с 6 связанных кадров, улучшения очень быстро сходят на нет.
+Эта опция не влияет на скорость кодирования, но увеличивает  
+размер памяти, требуемой для декодирования.
+Некоторые декодеры могут обработать только до 15 связанных кадров.
 .
 .TP
 .B bframes=<0\-16>
-maximum number of consecutive B-frames between I- and P-frames (default: 0)
+максимальное количество последовательных B-кадров между I- и P-кадами (по-умолчанию: 0)
 .
 .TP
 .B (no)b_adapt
-Automatically decides when to use B-frames and how many, up to the maximum
-specified above (default: on).
-If this option is disabled, then the maximum number of B-frames is used.
+Автоматически решает когда и в каких количествах использовать B-кадры,
+вплоть до максимального значения, указанного выше (по-умолчанию: включено).
+Если опция отключена, используется максимальное количество B-кадров.
 .
 .TP
 .B b_bias=<-100\-100>
-Controls the decision performed by b_adapt.
-A higher b_bias produces more B-frames (default: 0).
+Управляет решением, представленным b_adapt.
+Большее значение b_bias создает больше B-кадров (по-умолчанию: 0).
 .
 .TP
 .B (no)b_pyramid
-Allows B-frames to be used as references for predicting other frames.
-For example, consider 3 consecutive B-frames: I0 B1 B2 B3 P4.
-Without this option, B-frames follow the same pattern as MPEG-[124].
-So they are coded in the order I0 P4 B1 B2 B3, and all the B-frames
-are predicted from I0 and P4.
-With this option, they are coded as I0 P4 B2 B1 B3.
-B2 is the same as above, but B1 is predicted from I0 and B2, and
-B3 is predicted from B2 and P4.
-This usually results in slightly improved compression, at almost no
-speed cost.
-However, this is an experimental option: it is not fully tuned and
-may not always help.
-Requires bframes >= 2.
-Disadvantage: increases decoding delay to 2 frames.
+Позволяет B-кадрам использоваться как ссылки для предсказания других кадров.
+Например, предположим 3 последовательных B-кадра: I0 B1 B2 B3 P4.
+Без этой опции, B-кадры следуют тому же шаблону, что и в MPEG-[124].
+Таким образом они кодируются в порядке I0 P4 B1 B2 B3, и все B-кадры
+предсказываются из I0 и P4.
+С этой опцией, они кодируются как I0 P4 B2 B1 B3.
+B2 такой же как и выше, но B1 предсказывается из I0 и B2, а
+B3 предсказывается из B2 и P4.
+Это обычно дает несколько улучшенное сжатие практически без потерь в скорости.
+Однако, это экспериментальная опция; она не полностью настраивается и не всегда
+помогает.
+Требуется bframes >= 2.
+Недостатки: увеличивает задержку декодирования до двух кадров.
 .
 .TP
 .B (no)deblock
-Use deblocking filter (default: on).
-As it takes very little time compared to its quality gain, it is not
-recommended to disable it.
+Использовать фильтр deblocking (по-умолчанию: включено).
+Поскольку он забирает немного времени по сравнению с улучшением качества,
+не рекомендуется его отключать.
 .
 .TP
 .B deblock=<-6\-6>,<-6\-6>
-The first parameter is AlphaC0 (default: 0).
-This adjusts thresholds for the H.264 in-loop deblocking filter.
-First, this parameter adjusts the maximum amount of change that the filter is
-allowed to cause on any one pixel.
-Secondly, this parameter affects the threshold for difference across the
-edge being filtered.
-A positive value reduces blocking artifacts more, but will also smear details.
+Первый параметр \- это AlphaC0 (по-умолчанию: 0).
+Он настраивает пороговые значения для H.264 in-loop deblocking фильтра.
+Во-первых, этот параметр настраивает максимальное количество изменений,
+которые может внести фильтр в любой отдельный пиксел.
+Во-вторых, он влияет на пороговое значение разности вдоль фильтруемой 
+границы.
+Положительное значение лучше убирает артефакты в виде квадратиков,
+но также смазывают детали.
 .br
-The second parameter is Beta (default: 0).
-This affects the detail threshold.
-Very detailed blocks are not filtered, since the smoothing caused by the
-filter would be more noticeable than the original blocking.
+Второй параметр \- это Beta (по-умолчанию: 0).
+Он влияет на порог детализации.
+Блоки с большим количеством деталей не фильтруются, поскольку смазывание,
+вносимое фильтром, будет более заметным, чем изначальная блочность.
 .br
-The default behavior of the filter almost always achieves optimal quality,
-so it is best to either leave it alone, or make only small adjustments.
-However, if your source material already has some blocking or noise which
-you would like to remove, it may be a good idea to turn it up a little bit.
+Поведение фильтра по-умолчанию почти всегда достигает оптимального
+качества, так что лучше либо оставить его в покое , либо вносить
+небольшие изменения.
+Однако, если исходный материал уже содержит некоторое количество
+блочности или шума, которые хочется удалить, будет неплохо слегка
+усилить его.
 .
 .TP
 .B (no)cabac
-Use CABAC (Context-Adaptive Binary Arithmetic Coding) (default: on).
-Slightly slows down encoding and decoding, but should save 10-15% bitrate.
-Unless you are looking for decoding speed, you should not disable it.
+Использовать CABAC (Context-Adaptive Binary Arithmetic Coding) (по-умолчанию: включено).
+Немного замедляет кдирование и декодирование, но должно сэкономить 10-15% битпотока.
+Не следует отключать его, если не гонитесь за скоростью кодирования.
 .
 .TP
-.B qp_min=<1\-51> (ABR or two pass)
-Minimum quantizer, 10\-30 seems to be a useful range (default: 10).
+.B qp_min=<1\-51> (ABR или двухпроходный режим)
+Минимальный квантователь, 10\-30 выглядит пригодным диапазоном (по-умолчанию: 10).
 .
 .TP
-.B qp_max=<1\-51> (ABR or two pass)
-maximum quantizer (default: 51)
+.B qp_max=<1\-51> (ABR или двухпроходный режим)
+Максимальный квантоваиель (по-умолчанию: 51)
 .
 .TP
-.B qp_step=<1\-50> (ABR or two pass)
-maximum value by which the quantizer may be incremented/decremented between
-frames (default: 4)
+.B qp_step=<1\-50> (ABR или двухпроходный режим)
+максимальное значение, на которое может увеличиваться/уменьшаться квантватель
+между кадрами (по-умолчанию: 4).
 .
 .TP
-.B ratetol=<0.1\-100.0> (ABR or two pass)
-allowed variance in average bitrate (no particular units) (default: 1.0)
+.B ratetol=<0.1\-100.0> (ABR или двухпроходный режим)
+допустимое колебание среднего значения битпотока (не для отдельных элементов) (по-умолчанию: 1.0)
 .
 .TP
-.B vbv_maxrate=<value> (ABR or two pass)
-maximum local bitrate, in kbits/\:second (default: disabled)
+.B vbv_maxrate=<значение> (ABR или двухпроходный режим)
+максимальный локальный битпоток, в кбит/\:секунду (по-умолчанию: отключено)
 .
 .TP
-.B vbv_bufsize=<value> (ABR or two pass)
-averaging period for vbv_maxrate, in kbits
-(default: none, must be specified if vbv_maxrate is enabled)
+.B vbv_bufsize=<значение> (ABR или двухпроходный режим)
+период усреднения для vbv_maxrate, в килобитах
+(по-умолчанию: нет, должен быть указан, если vbv_maxrate включен)
 .
 .TP
-.B vbv_init=<0.0\-1.0> (ABR or two pass)
-initial buffer occupancy, as a fraction of vbv_bufsize (default: 0.9)
+.B vbv_init=<0.0\-1.0> (ABR или двухпроходный режим)
+начальное заполнение буфера, в процентах от vbv_bufsize (по-умолчанию: 0.9)
 .
 .TP
-.B ip_factor=<value>
-quantizer factor between I- and P-frames (default: 1.4)
+.B ip_factor=<значение>
+отношение квантователя I- и P-кадров (по-умолчанию: 1.4)
 .
 .TP
-.B pb_factor=<value>
-quantizer factor between P- and B-frames (default: 1.3)
+.B pb_factor=<значение>
+отношение квантователя P- и B-кадров (по-умолчанию: 1.3)
 .
 .TP
-.B qcomp=<0\-1> (ABR or two pass)
-quantizer compression (default: 0.6).
-A lower value makes the bitrate more constant,
-while a higher value makes the quantization parameter more constant.
+.B qcomp=<0\-1> (ABR или двухпроходный режим)
+сжатие квантователя (по-умолчанию: 0.6).
+Меньшие значения делают битпоток более постоянным, в то время как
+большие значения делают более постоянными параметр квантования.
 .
 .TP
-.B cplx_blur=<0\-999> (two pass only)
-Temporal blur of the estimated frame complexity, before curve compression
-(default: 20).
-Lower values allow the quantizer value to jump around more,
-higher values force it to vary more smoothly.
-cplx_blur ensures that each I-frame has quality comparable to the following
-P-frames, and ensures that alternating high and low complexity frames
-(e.g. low fps animation) do not waste bits on fluctuating quantizer.
+.B cplx_blur=<0\-999> (только двухпроходный режим)
+Размытие во времени подсчитанной сложности кадра перед сжатием кривой.
+(по-умолчанию: 20).
+Меньшие значения позволяют значению квантователя "прыгать" сильнее,
+большие значения принуждают его меняться более плавно.
+cplx_blur гарантирует, что каждый I-кадр имеет качество, сравнимое с 
+последующими P-кадрами, и гарантирует, что чередование кадром с 
+маленькой и высокой сложностью (например, анимация с низким fps) 
+не расходует биты попусту из-за колебаний квантователя.
 .
 .TP
-.B qblur=<0\-99> (two pass only)
-Temporal blur of the quantization parameter, after curve compression
-(default: 0.5).
-Lower values allow the quantizer value to jump around more,
-higher values force it to vary more smoothly.
+.B qblur=<0\-99> (только двухпроходный режим)
+Размытие во времени параметра квантования после сжатия кривой
+(по-умолчанию: 0.5).
+Меньшие значения позволяют квантователю сильнее "прыгать",
+большие значения принуждают его меняться более плавно.
 .
 .TP
-.B zones=<zone0>[/<zone1>[/...]]
-User specified quality for specific parts (ending, credits, ...).
-Each zone is <start-frame>,<end-frame>,<option> where option may be
+.B zones=<зона0>[/<зона1>[/...]]
+Указанное пользователем качество отдельых частей (концовок, титров, ...).
+Каждая зона указывается в виде <первый кадр>,<последний кадр>,<опция>, где
+опция может быть
 .PD 0
 .RSs
 .IPs "q=<0\-51>"
-quantizer
+квантователь
 .IPs "b=<0.01\-100.0>"
-bitrate multiplier
+множитель битпотока
 .RE
 .PD 1
 .RS
-.I NOTE:
-The quantizer option is not strictly enforced.
-It affects only the planning stage of ratecontrol, and is still subject
-to overflow compensation and qp_min/qp_max.
+.I ЗАМЕЧАНИЕ:
+Опция квантователя не является жестко применяемой.
+.\" FIXME is translation correct?
+.\" It affects only the planning stage of ratecontrol, and is still subject
+.\" to overflow compensation and qp_min/qp_max.
+Она влияет только на стадию планирования модуля управления битпотоком,
+и по-прежнему является объектом для компенсации переполнения и qp_min/qp_max.
 .RE
 .
 .TP
 .B direct_pred=<name>
-Determines the type of motion prediction used for direct macroblocks
-in B-frames.
+Определяет тип предсказания движения, используемого для прямых 
+макроблоков в B-кадрах.
 .PD 0
 .RSs
 .IPs none
-Direct macroblocks are not used.
+Прямые макроблок не используются.
 .IPs spatial
-Motion vectors are extrapolated from neighboring blocks.
-(default)
+Векторы движения экстраполируются из соседних блоков.
+(по-умолчанию)
 .IPs temporal
-Motion vectors are interpolated from the following P-frame.
+Векторы движения интерполируются из последующего P-кадра.
 .IPs auto
-The codec selects between spatial and temporal for each frame.
+Кодек для каждого кадры выбирает между spatial и temporal.
 .RE
 .PD 1
 .RS
-Spatial and temporal are approximately the same speed and PSNR,
-the choice between them depends on the video content.
-Auto is slightly better, but slower.
-Auto is most effective when combined with multipass.
-direct_pred=none is both slower and lower quality.
+Spatial и temporal имеют примерно одинаковую скорость и PSNR,
+выбор между ними зависит от видео содержимого.
+Auto немного лучше, но медленнее.
+Auto наиболее эффективно в комбинации с multipass.
+direct_pred=none одновременно и медленнее, и хуже по качеству.
 .RE
 .
 .TP
 .B (no)weight_b
-Use weighted prediction in B-frames.
-Without this option, bidirectionally predicted macroblocks give
-equal weight to each reference frame.
-With this option, the weights are determined by the temporal position
-of the B-frame relative to the references.
-Requires bframes > 1.
+Использовать взвешенное предсказание в B-кадрах.
+Без этой опции, двунаправленно предсказанные макроблоки
+присваивают одинаковый вес каждому кадру, на который ссылаются.
+С этой опцией веса определяются временной позицией 
+B-кадра относительно того, на который он ссылается.
+Требует bframes > 1.
 .
 .TP
-.B partitions=<list>
-Enable some optional macroblock types (default: p8x8,b8x8,i8x8,i4x4).
+.B partitions=<список>
+Задейстует некоторые необязательные типы макроблоков (по-умолчанию: p8x8,b8x8,i8x8,i4x4).
 .PD 0
 .RSs
 .IPs p8x8
-Enable types p16x8, p8x16, p8x8.
+Задействует типы p16x8, p8x16, p8x8.
 .IPs p4x4
-Enable types p8x4, p4x8, p4x4.
-p4x4 is recommended only with subq >= 5, and only at low resolutions.
+Задействует типы p8x4, p4x8, p4x4.
+p4x4 рекомендуется только с subq >= 5, и только для низких разрешений.
 .IPs b8x8
-Enable types b16x8, b8x16, b8x8.
+Задействует типы b16x8, b8x16, b8x8.
 .IPs i8x8
-Enable type i8x8.
-i8x8 has no effect unless 8x8dct is enabled.
+Задействует тип i8x8.
+i8x8 не имеет эффекта, если не задействован 8x8dct.
 .IPs i4x4
-Enable type i4x4.
+Задействует тип i4x4.
 .IPs all
-Enable all of the above types.
+Задействует все вышеуказанные типы.
 .IPs none
-Disable all of the above types.
+Отключает все вышеуказанные типы.
 .RE
 .PD 1
 .RS
-Regardless of this option, macroblock types p16x16, b16x16, and i16x16
-are always enabled.
+Независимо от этой опции, типы макроблоков p16x16, b16x16, and i16x16
+всегда задействованы.
 .br
-The idea is to find the type and size that best describe a certain area
-of the picture.
-For example, a global pan is better represented by 16x16 blocks, while
-small moving objects are better represented by smaller blocks.
+Идея состоит в том, чтобы найти тип и размер, лучше всего описывающий
+определенные области изображения.
+Например, общий наезд лучше описывается блоками 16x16, в то время
+как небольшие движущиеся объекты лучше представляются меньшими блоками.
 .RE
 .
 .TP
 .B (no)8x8dct
-Adaptive spatial transform size: allows macroblocks to choose between
-4x4 and 8x8 DCT.
-Also allows the i8x8 macroblock type.
-Without this option, only 4x4 DCT is used.
+Размер адаптивного пространственного преобразования: позволяет 
+макроблокам выбирать между 4x4 и 8x8 DCT.
+Также позволяет использовать i8x8 тип макроблока.
+Без той опции используется только 4x4 DCT.
 .
 .TP
-.B me=<name>
-Select fullpixel motion estimation algorithm.
+.B me=<название>
+.\" FIXME check translation
+Выбирает полнопиксельный алгоритм оценки движения.
 .PD 0
 .RSs
 .IPs dia
-diamond search, radius 1 (fast)
+поиск по робму, радиус 1 (быстро)
 .IPs hex
-hexagon search, radius 2 (default)
+поиск по шестиугольнику, радиус 2 (по-умолчанию)
 .IPs umh
-uneven multi-hexagon search (slow)
+асимметричный перекрестный поиск (медленно)
 .IPs esa
-exhaustive search (very slow, and no better than umh)
+исчерпывающий поиск (очень медленно и не лучше, чем umh)
 .RE
 .PD 1
 .
 .TP
 .B me_range=<4\-64>
-radius of exhaustive or multi-hexagon motion search (default: 16)
+радиус исчерпывающего или по многоугольнику поиска движения (по-умолчанию: 16)
 .
 .TP
 .B subq=<1\-7>
-Adjust subpel refinement quality.
-This parameter controls quality versus speed tradeoffs involved in the motion
-estimation decision process.
-subq=5 can compress up to 10% better than subq=1.
+Настраивает улучшение качества subpel.
+Этот параметр контролирует выбор между качеством и скоростью 
+вносимыми в процессе принятия решений об оценке движения.
+subq=5 может сжимать до 10% лучше, чем subq=1.
 .PD 0
 .RSs
 .IPs 1
-Runs fullpixel precision motion estimation on all candidate
-macroblock types.
-Then selects the best type.
-Then refines the motion of that type to fast quarterpixel precision (fastest).
+Выполняет оуенку движения с полнопиксельной точностью для всех 
+возможных типов макроблоков. Затем выбирает лучший.
+Потом уточняет движение этого типа до быстрой четверьтпиксельной 
+точности (самый быстрый).
 .IPs 2
-Runs halfpixel precision motion estimation on all candidate macroblock types.
-Then selects the best type.
-Then refines the motion of that type to fast quarterpixel precision.
+Выполняет оуенку движения с полупиксельной точностью для всех 
+возможных типов макроблоков. Затем выбирает лучший.
+Потом уточняет движение этого типа до быстрой четверьтпиксельной 
+точности (самый быстрый).
 .IPs 3
-As 2, but uses a slower quarterpixel refinement.
+Как и 2, но использует более медленное четверьтпиксельное уточнение.
 .IPs 4
-Runs fast quarterpixel precision motion estimation on all candidate
-macroblock types.
-Then selects the best type.
-Then finishes the quarterpixel refinement for that type.
+Выполняет оуенку движения с быстрой четверьтпиксельной точностью для всех 
+возможных типов макроблоков. Затем выбирает лучший.
+Потом уточняет движение этого типа до четверьтпиксельной точности.
 .IPs 5
-Runs best quality quarterpixel precision motion estimation on all
-candidate macroblock types, before selecting the best type (default).
+Выполняет оуенку движения с четверьтпиксельной точностью высокого
+качества для всех возможных типов макроблоков, перед выбором 
+лучшего типа (по-умолчанию).
 .IPs 6
-Enables rate-distortion optimization of macroblock types in
-I- and P-frames.
+Задействет оптимизацию типов макроблокомв по соотношению сигнал-шум
+в I- и P-кадрах.
 .IPs 7
-Enables rate-distortion optimization of motion vectors and intra modes. (best)
+Задействует оптимизацию по соотношению сигнал-шум векторов движения
+и intra режимов. (лучший)
 .RE
 .PD 1
 .RS
-In the above, "all candidates" does not exactly mean all enabled types:
-4x4, 4x8, 8x4 are tried only if 8x8 is better than 16x16.
+В указанном выше "все возможные" не означает в точности все задействованные типы:
+4x4, 4x8, 8x4 пробуются, только если 8x8 лучше, чем 16x16.
 .RE
 .
 .TP
 .B (no)chroma_me
-Takes into account chroma information during subpixel motion search
-(default: enabled).
-Requires subq>=5.
+Принимает во внимание информацию о цвете во время subpixel поиска движения
+(по-умолчанию: включено).
+Требует subq>=5.
 .
 .TP
 .B (no)mixed_refs
-Allows each 8x8 or 16x8 motion partition to independently select a
-reference frame.
-Without this option, a whole macroblock must use the same reference.
-Requires frameref>1.
+Позволяет каждому 8x8 или 16x8 сегменту движения независимо 
+выбирать связанный кадр.
+Без этой опции весь макроблок должен использовать одну и ту же
+ссылку.
+Требует frameref>1.
 .
 .TP
 .B (no)brdo
-Enables rate-distortion optimization of macroblock types in B-frames.
-Requires subq>=6.
+Задействует отимизацию типов макроблоков по отношению сигнал-шум 
+в B-Кадрах.
+Требует subq>=6.
 .
 .TP
 .B (no)bime
-Refine the two motion vectors used in bidirectional macroblocks,
-rather than re-using vectors from the forward and backward searches.
-This option has no effect without B-frames.
+Уточняет два вектора движения, используемых в двунаправленных макроблоках,
+вместо повторного использования векторов и прямом и обратном поисках.
+Эта опция не имеет эффекта при отсутствии B-кадров.
 .
 .TP
 .B trellis=<0\-2>
-rate-distortion optimal quantization
+Квантование, оптимальное по соотношению сигнал-шум
 .PD 0
 .RSs
 .IPs 0
-disabled (default)
+отключено (по-умолчанию)
 .IPs 1
-enabled only for the final encode
+включено только для финального кодирования
 .IPs 2
-enabled during all mode decisions (slow, requires subq>=6)
+включено во время принятия решений обо всех режимах (медленно, требует subq>=6)
 .RE
 .PD 1
 .
 .TP
 .B deadzone_inter=<0\-32>
-Set the size of the inter luma quantization deadzone for non-trellis
-quantization (default: 21).
-Lower values help to preserve fine details and film grain (typically useful
-for high bitrate/quality encode), while higher values help filter out
-these details to save bits that can be spent again on other macroblocks
-and frames (typically useful for bitrate-starved encodes).
-It is recommended that you start by tweaking deadzone_intra before changing
-this parameter.
+.\" FIXME is translation correct?
+.\" Set the size of the inter luma quantization deadzone for non-trellis
+.\" quantization (default: 21).
+Устанавливает размер мертвой зоны inter квантования яркостной компоненты
+для не-trellis квантования (по-умолчанию: 21).
+.\" FIXME film grain = текстура фильма
+Меньшие значения позволяют сохранить хорошую детализацию и текстуру фильма
+(обычно полезно для кодирования высоким битпотоком/качеством), в то время
+как большие значения помогают отфильтровать эти детали для экономии бит,
+которые можно повторно использовать в других макроблоках и кадрах
+(обычно полезно для кодирования с умеренным битпотоком).
+Рекомендуется начать с настройки deadzone_intra перед изменением этого параметра.
 .
 .TP
 .B deadzone_intra=<0\-32>
-Set the size of the intra luma quantization deadzone for non-trellis
-quantization (default: 11).
-This option has the same effect as deadzone_inter except that it affects
-intra frames.
-It is recommended that you start by tweaking this parameter before changing
-deadzone_inter.
+.\" FIXME is translation correct?
+.\" Set the size of the intra luma quantization deadzone for non-trellis
+.\" quantization (default: 11).
+Устанавливает размер мертвой зоны intra квантования яркостной компоненты
+для не-trellis квантования (по-умолчанию: 21).
+Эта опция имеет тот же эффект, что и deadzone_inter, за исключением того, что
+она действует на intra кадры.
+Рекомендуется начать с настройки этого параметра, прежде чем
+изменять deadzone_inter.
 .
 .TP
 .B (no)fast_pskip
-Performs early skip detection in P-frames (default: enabled).
-This usually improves speed at no cost, but it can sometimes produce
-artifacts in areas with no details, like sky.
+Выполняет раннее определение пропусков в P-кадрах (по-умолчанию: включено).
+Это обычно увеличивает скорость без каких-либо затрат, но иногда 
+производит артефакты в областях без деталей, таких как небо.
 .
 .TP
 .B (no)dct_decimate
-Eliminate dct blocks in P-frames containing only a small single coefficient
-(default: enabled).
-This will remove some details, so it will save bits that can be spent
-again on other frames, hopefully raising overall subjective quality.
-If you are compressing non-anime content with a high target bitrate, you
-may want to disable this to preserve as much detail as possible.
+Отсеивает dct блоки в P-кадрах, содержащие только маленький одиночный 
+коэффициент (по-умолчанию: включено).
+Это удалит некоторые детали, тем самым сэкономит биты, которые могут быть
+снова использованы в других кадрах, надо надеяться, улучшая 
+общее субъективное качество.
+Если сжимаете не аниме с высоким выходным битпотоком, желательно 
+отключить эту опцию для сохранения столько деталей, насколько это возможно.
 .
 .TP
 .B nr=<0\-100000>
-Noise reduction, 0 means disabled.
-100\-1000 is a useful range for typical content, but you may want to turn it
-up a bit more for very noisy content (default: 0).
-Given its small impact on speed, you might want to prefer to use this over
-filtering noise away with video filters like denoise3d or hqdn3d.
+Подавление шума, 0 означает отключено.
+100\-1000 - разумный диапазон для обычного содержимого, но вы, возможно, захотите
+несколько увеличить это значение для очень шумного содержимого (по-умолчанию: 0).
+В связи с малым влиянием на скорость, вы, возможно, предпочтете использовать 
+эту опцию вместо denoise3d или hqdn3d.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
-Use a different quantizer for chroma as compared to luma.
-Useful values are in the range <-2\-2> (default: 0).
+Использовать для цветности квантователь, отличный от используемого для яркости 
+на указанное значение.
+Разумный диапазон - это <-2\-2> (по-умолчанию: 0).
 .
 .TP
-.B cqm=<flat|jvt|<filename>>
-Either uses a predefined custom quantization matrix or loads a JM format
-matrix file.
+.B cqm=<flat|jvt|<имя_файла>>
+Либо использует предопределенную нестантартную матрицу квантования или
+загружает файл матрицы в формате JM.
 .PD 0
 .RSs
 .IPs "flat\ "
-Use the predefined flat 16 matrix (default).
+.\" FIXME is translation correct?
+.\" Use the predefined flat 16 matrix (default).
+Использование предопределенной матрицы flat 16 (по-умолчанию).
 .IPs "jvt\ \ "
-Use the predefined JVT matrix.
-.IPs <filename>
-Use the provided JM format matrix file.
+Использование предопределенной матрицы JVT.
+.IPs <имя_файла>
+Использование указанного файла матрицы JM формата.
 .PD 1
 .RE
 .RS
-.I NOTE:
-Windows CMD.EXE users may experience problems with parsing the command line
-if they attempt to use all the CQM lists.
-This is due to a command line length limitation.
-In this case it is recommended the lists be put into a JM format CQM
-file and loaded as specified above.
+.I ЗАМЕЧАНИЕ:
+Пользователи Windows CMD.EXE могут столкнуться с проблемами разбора командной строки,
+если пытаются использовать все CQM списки.
+Это случается по причине ограничения на длину командной строки.
+В этом случает рекомендуется поместить списки в CQM файл JM формата и загрузить
+его, как указано выше.
 .RE
 .
 .TP
-.B cqm4iy=<list> (also see cqm)
-Custom 4x4 intra luminance matrix, given as a list of 16 comma separated
-values in the 1\-255 range.
+.B cqm4iy=<list> (смотрите также cqm)
+Нестандартная 4x4 яркостная intra матрица, заданная списком из 16 значений 
+в диапазоне 1\-255, разделенных запятой.
 .
 .TP
-.B cqm4ic=<list> (also see cqm)
-Custom 4x4 intra chrominance matrix, given as a list of 16 comma
-separated values in the 1\-255 range.
+.B cqm4ic=<list> (смотрите также cqm)
+Нестандартная 4x4 цветностная intra матрица, заданная списком из 16 значений 
+в диапазоне 1\-255, разделенных запятой.
 .
 .TP
-.B cqm4py=<list> (also see cqm)
-Custom 4x4 inter luminance matrix, given as a list of 16 comma separated
-values in the 1\-255 range.
+.B cqm4py=<list> (смотрите также cqm)
+Нестандартная 4x4 яркостная inter матрица, заданная списком из 16 значений 
+в диапазоне 1\-255, разделенных запятой.
 .
 .TP
-.B cqm4pc=<list> (also see cqm)
-Custom 4x4 inter chrominance matrix, given as a list of 16 comma
-separated values in the 1\-255 range.
+.B cqm4pc=<list> (смотрите также cqm)
+Нестандартная 4x4 цветностная inter матрица, заданная списком из 16 значений 
+в диапазоне 1\-255, разделенных запятой.
 .
 .TP
-.B cqm8iy=<list> (also see cqm)
-Custom 8x8 intra luminance matrix, given as a list of 64 comma separated
-values in the 1\-255 range.
+.B cqm8iy=<list> (смотрите также cqm)
+Нестандартная 8x8 яркостная intra матрица, заданная списком из 64 значений 
+в диапазоне 1\-255, разделенных запятой.
 .
 .TP
-.B cqm8py=<list> (also see cqm)
-Custom 8x8 inter luminance matrix, given as a list of 64 comma separated
-values in the 1\-255 range.
+.B cqm8py=<list> (смотрите также cqm)
+Нестандартная 8x8 цветностная inter матрица, заданная списком из 64 значений 
+в диапазоне 1\-255, разделенных запятой.
 .
 .TP
 .B level_idc=<10\-51>
-Set the bitstream's level as defined by annex A of the H.264 standard
-(default: 51 - Level 5.1).
-This is used for telling the decoder what capabilities it needs to support.
-Use this parameter only if you know what it means,
-and you have a need to set it.
+Устанавливает уровень битового потока, как указано в приложении A
+стандарта H.264 (по-умолчанию: 51 - Уровень 5.1).
+Это указывает декодеру, какие возможности он должен поддерживать.
+Используйте это параметр только, если знаете, что он означает, и
+нуждаетесь в его установке.
 .
 .TP
 .B threads=<1\-4>
-Split each frame into slices and encode them in parallel (default: 1).
-Also allows multithreaded decoding if the decoder supports it (lavc does not).
-This has a slight penalty to compression.
-Requires that libx264 was compiled with pthread support; if not, this
-option will produce a warning and enables slices but not multithreading.
+Разделить каждый кадр на слои и кодировать их параллельно (по-умолчанию: 1).
+Также позволяет мультипоточное декодирование, если декодер его поддерживает.
+(lavc - нет).
+Это несколько негативно сказывается на сжатии.
+Требует, чтобы libx264 была скомпилирована с поддержкой pthread; если это
+не так, будет выдано предупреждение и задействуются слои, но не
+многопоточность.
 .
 .TP
 .B (no)global_header
-Causes SPS and PPS to appear only once, at the beginning of the bitstream
-(default: disabled).
-Some players, such as the Sony PSP, require the use of this option.
-The default behavior causes SPS and PPS to repeat prior to each IDR frame.
+Приводят к тому, что SPS и PPS появляются только однажды - в начале 
+битового потока (по-умолчанию: отключено).
+Некоторые проигрыватели, такие как Sony PSP, требуют использования
+этой опции.
+Поведение по-умолчанию позволяет SPS и PPS повторяться
+перед каждым IDR кадром.
 .
 .TP
 .B (no)interlaced
-Treat the video content as interlaced.
+Рассматривать видео содержимое как черезстрочное.
 .
 .TP
 .B log=<-1\-3>
-Adjust the amount of logging info printed to the screen.
+Настраивает количество служебной информации, выводимой на экран.
 .PD 0
 .RSs
 .IPs "-1"
-none
+ничего
 .IPs " 0"
-Print errors only.
+Выводит только ошибки.
 .IPs " 1"
-warnings
+предупреждения
 .IPs " 2"
-PSNR and other analysis statistics when the encode finishes (default)
+PSNR и другую статистику анализа по окончании кодирования (по-умолчанию)
 .IPs " 3"
-PSNR, QP, frametype, size, and other statistics for every frame
+PSNR, QP, тип кадра, размер, и другую статистику для каждого кадра
 .RE
 .PD 1
 .
 .TP
 .B (no)psnr
-Print signal-to-noise ratio statistics.
+Выводит статистику по соотношению сигнал-шум.
 .br
-.I NOTE:
-The 'Y', 'U', 'V', and 'Avg' PSNR fields in the summary are not
-mathematically sound (they are simply the average of per-frame PSNRs).
-They are kept only for comparison to the JM reference codec.
-For all other purposes, please use either the 'Global' PSNR, or the per-frame
-PSNRs printed by log=3.
+.I ЗАМЕЧАНИЕ:
+PSNR поля  'Y', 'U', 'V', и 'Avg' PSNR с итогах не являются
+.\" FIXME untranslated
+mathematically sound (они просто среднее значение покадровых PSNR).
+Они оставлены для сравнения с эталонным JM кодеком.
+во всех остальных случаях используйте либо 'Global' PSNR, либо
+покадровый PSNR, выводимый параметром log=3.
 .
 .TP
 .B (no)ssim
-Print the Structural Similarity Metric results.
-This is an alternative to PSNR, and may be better correlated with the
-perceived quality of the compressed video.
+Выводит результаты Structural Similarity Metric (Метрики Структурного Сходства).
+Это альтернатива PSNR, которая может лучше кореллировать с ощущаемым качеством
+сжатого видео.
 .
 .TP
 .B (no)visualize
-Enable x264 visualizations during encoding.
-If the x264 on your system supports it, a new window will be opened during
-the encoding process, in which x264 will attempt to present an overview of
-how each frame gets encoded.
-Each block type on the visualized movie will be colored as follows:
+Задействует x264 визуализации во время кодирования.
+Если x264 в вашей системе поддерживает это, будет открыто новое окно
+во время процесса кодирования, в котором x264 будет пытаться 
+представить обзор того, как будет закодирован каждый кадр.
+Каждый тип блока визуализированного фильма будет раскрашенр как указано ниже:
 .PD 0
 .RSs
 .IPs red/pink
-intra block
+intra блок
 .IPs "blue\ "
-inter block
+inter блок
 .IPs green
-skip block
+пропущенный блок
 .IPs yellow
-B-block
+B-блок
 .RE
 .PD 1
 .RS
-This feature can be considered experimental and subject to change.
-In particular, it depends on x264 being compiled with visualizations enabled.
-Note that as of writing this, x264 pauses after encoding and visualizing
-each frame, waiting for the user to press a key, at which point the next
-frame will be encoded.
+Эта опция должна рассматриваться как экспериментальная и 
+являющаяся объектом для изменений.
+В частности, она зависит скомпилирован ли x264 с включенной визуализацией.
+.\" FIXME is translation correct
+.\" Note that as of writing this, x264 pauses after encoding and visualizing
+Имейте в виду, в силу реализации x264 останавливается кодирования и визуализации 
+каждого кадра, ждет нажатия пользователем клавиши, после чего 
+будет кодироваться следующий кадр.
 .RE
 .
 .
 .SS xvfw (\-xvfwopts)
-.
-Encoding with Video for Windows codecs is mostly obsolete unless you wish
-to encode to some obscure fringe codec.
+Кодирование с кодеками Video for Windows по большей части устарело,
+если только вы не хотите кодировать каким-то неизвестным сторонним кодеком.
 .
 .TP
-.B codec=<name>
-The name of the binary codec file with which to encode.
+.B codec=<имя>
+Имя файла бинарного кодека, с помощью которого нужно кодировать.
 .
 .
-.SS MPEG muxer (\-mpegopts)
+.SS MPEG мультиплексор (\-mpegopts)
 .
-The MPEG muxer can generate 5 types of streams, each of which has reasonable
-default parameters that the user can override.
-Generally, when generating MPEG files, it is advisable to disable
-MEncoder's frame-skip code (see \-noskip, \-mc as well as the
-harddup and softskip video filters).
+MPEG мультиплексор может генерировать 5 типов потоков, имеющих разумные 
+опции по-умолчанию, которые пользователь может переопределить.
+Вообще, когда генерируется MPEG файлы, желательно отключить код 
+пропуска кадров MEncoder'а (смотрите \-noskip, \-mc, а также 
+harddup и softskip видео фильтры).
 .PP
-.I EXAMPLE:
+.I ПРИМЕР:
 .PD 0
 .RSs
 .IPs format=mpeg2:tsaf:vbitrate=8000
@@ -9812,189 +9930,193 @@ harddup and softskip video filters).
 .
 .TP
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd | pes1 | pes2>
-stream format (default: mpeg2).
-pes1 and pes2 are very broken formats (no pack header and no padding),
-but VDR uses them; do not choose them unless you know exactly what you
-are doing.
+формат потока (по-умолчанию: mpeg2).
+pes1 и pes2 весьма сильно испорченные форматы (без заголовка упаковки и 
+набивки [padding]), но VDR их использует;
+не выбирайте их, если не знаете точно, что делаете.
 .
 .TP
-.B size=<up to 65535>
-Pack size in bytes, do not change unless you know exactly what
-you are doing (default: 2048).
+.B size=<вплоть до 65535>
+Размер упаковки в байтах, не изменяйте его, если не знаете 
+точно, что делаете (по-умолчанию: 2048).
 .
 .TP
-.B muxrate=<int>
-Nominal muxrate in kbit/s used in the pack headers (default: 1800 kb/s).
-Will be updated as necessary in the case of 'format=mpeg1' or 'mpeg2'.
+.B muxrate=<целое>
+Номинальная величина мультиплексированного потока
+в заголовках упаковки (по-умочланию: 1800 кбит/с).
+В случае 'format=mpeg1' или 'mpeg2' будет обновлено до
+нужной величины.
 .
 .TP
 .B "tsaf\ \ \ "
-Sets timestamps on all frames, if possible; recommended when format=dvd.
-If dvdauthor complains with a message like "..audio sector out of range...",
-you probably did not enable this option.
+Устанавливает временные метки всем кадрам, если возможно; рекомендуется при format=dvd.
+Если dvdauthor жалуется с сообщением "..audio sector out of range...", вы,
+возможно, забыли включить эту опцию.
 .
 .TP
 .B init_vpts=<100\-700>
-initial video pts, in milliseconds (default: 200)
+начальный pts видео, в миллисекундах (по-умолчанию: 200)
 .
 .TP
 .B init_apts=<100\-700>
-initial audio pts, in milliseconds (default: 200)
+начальный pts аудио, в миллисекундах (по-умолчанию: 200)
 .
 .TP
 .B vdelay=<1\-32760>
-Initial video delay time, in milliseconds (default: 0),
-use it if you want to delay video with respect to audio.
+Величина начальной задержки видео, в миллисекундах (по-умолчанию: 0),
+используйте эту опцию, если хотите задержать видео относительно звука.
 .
 .TP
 .B "drop\ \ \ "
-When used with init_adelay the muxer drops the part of audio that was
-anticipated.
+.\" FIXME is there an error ?
+Когда используется с init_adelay, мультиплексор выбрасывает часть аудио, 
+которая была пропущена.
 .
 .TP
 .B vwidth, vheight=<1\-4095>
-Set the video width and height when video is MPEG-1/2.
+Устанавливает ширину и высоту видео, если это MPEG-1/2.
 .
 .TP
 .B vpswidth, vpsheight=<1\-4095>
-Set pan and scan video width and height when video is MPEG-2.
+Устанавливает "pan and scan" ширину и высоту видео, если это MPEG-2.
 .
 .TP
 .B vaspect=<1 | 4/3 | 16/9 | 221/100>
-Sets the display aspect ratio for MPEG-2 video.
-Do not use it on MPEG-1 or the resulting aspect ratio will be completely wrong.
+Устанавливает пропорции отображения для MPEG-2 видео.
+Не спользуйте ее для MPEG-1 или результирующие пропорции будут 
+абсолютно неверными.
 .
 .TP
-.B vbitrate=<int>
-Sets the video bitrate in kbit/s for MPEG-1/2 video.
+.B vbitrate=<целое>
+Устанавливает величину видео битпотока в кбит/с для MPEG-1/2.
 .
 .TP
 .B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
-Sets the framerate for MPEG-1/2 video.
-This option will be ignored if used with the telecine option.
+Устанавливает частоту кадров для MPEG-1/2.
+Эта опция будет проигнорирована, если использовалась вместе с telecine.
 .
 .TP
 .B telecine
-Enables 3:2 pulldown soft telecine mode: The muxer will make the
-video stream look like it was encoded at 30000/1001.
-It only works with MPEG-2 video when the output framerate is
-24000/1001 fps, convert it with \-ofps if necessary.
-Any other framerate is incompatible with this option.
+Включает 3:2 пулдаун режим мягкого телесина: мультплексор
+сделает поток похожим на кодированный с 30000/1001 fps.
+Работает только с MPEG-2 видео, когда частота кадров на выходе 
+равна 20000/1001, при необходимости преобразуйте ее опцией \-ofps.
+Любые другие частоты кадров несовместимы с этой опцией.
 .
 .TP
 .B film2pal
-Enables FILM to PAL and NTSC to PAL soft telecine mode: The muxer
-will make the video stream look like it was encoded at 25 fps.
-It only works with MPEG-2 video when the output framerate is
-24000/1001 fps, convert it with \-ofps if necessary.
-Any other framerate is incompatible with this option.
+Включает FILM в PAL и NTSC в PAL режим мягкого телесина: мультиплексор
+сделает видео поток похожим на кодированный с 25 fps.
+Работает только с MPEG-2 видео, когда частота кадров на выходе
+равна 24000/1001, при необходимости преобразуйте ее опцией \-ofps.
+Любые другие частоты кадров несовместимы с этой опцией.
 .
 .TP
-.B tele_src and tele_dest
-Enables arbitrary telecining using Donand Graft's DGPulldown code.
-You need to specify the original and the desired framerate; the
-muxer will make the video stream look like it was encoded at
-<tele_dest> frames per second, replacing the nominal output framerate.
-It only works with MPEG-2 video when the input framerate is smaller
-than the output framerate and the framerate increase is <= 1.5.
-Example of PAL to NTSC telecining: tele_src=25:tele_dest=30000/1001.
+.B tele_src и tele_dest
+Включает процесс произвольного телесина, используя код DGPulldown 
+Дональда Грефта (Donand Graft). Вы должны указать оригинальную и 
+желаемую частоту кадров; мультиплексор сделает видео поток похожим 
+на закодированный с частотой <tele_dest> кадров в секунду,
+заменяя номинальную выходную частоту кадров.
+Работает только с MPEG-2, когда частота кадров на входе меньше, чем на выходе,
+и увеличение частоты <= 1.5.
+Пример для процесса телесина PAL в NTSC: tele_src=25:tele_dest=30000/1001.
 .
 .TP
 .B vbuf_size=<40\-1194>
-Sets the size of the video decoder's buffer, expressed in kilobytes.
-Specify it only if the bitrate of the video stream is too high for
-the chosen format and if you know perfectly well what you are doing.
-A too high value may lead to an unplayable movie, depending on the player's
-capabilities.
-When muxing HDTV video a value of 400 should suffice.
+Устанавливает размер буфера видео декодера, выраженный в килобайтах.
+Указывайте, только если битрейт видео потока слишком высок для
+выбранного формата, и вы отлично знаете, что делаете.
+Слишком высокие значения могут привести к невоспроизводимости фильма,
+это зависит от возможностей проигрывателя.
+При мультиплексировании HDTV видео должно быть достаточно значения 400.
 .
 .TP
 .B abuf_size=<4\-64>
-Sets the size of the audio decoder's buffer, expressed in kilobytes.
-The same principle as for vbuf_size applies.
+Устанавливает размер буфера аудио декодера, выраженный в килобайтах.
+Применяются те же правила, что и для vbuf_size.
 .
 .
-.SS FFmpeg libavformat demuxers (\-lavfdopts)
-.
-.TP
-.B probesize=<value>
-Maximum amount of data to probe during the detection phase.
-In the case of MPEG-TS this value identifies the maximum number
-of TS packets to scan.
-.
-.
-.
-.SS FFmpeg libavformat muxers (\-lavfopts) (also see \-of lavf)
+.SS Демультиплексоры FFmpeg libavformat (\-lavfdopts)
 .
 .TP
-.B delay=<value>
-Currently only meaningful for MPEG[12]: Maximum allowed distance,
-in seconds, between the reference timer of the output stream (SCR)
-and the decoding timestamp (DTS) for any stream present
-(demux to decode delay).
-Default is 0.7 (as mandated by the standards defined by MPEG).
-Higher values require larger buffers and must not be used.
+.B probesize=<значение>
+Максимальное количество анализируемых данных на этапе определения.
+В случае MPEG-TS эта величина означает максимальное количество
+сканируемых TS пакетов.
+.
+.
+.
+.SS Мультиплексоры FFmpeg libavformat (\-lavfopts) (смотрите также \-of lavf)
 .
 .TP
-.B format=<container_format>
-Override which container format to mux into
-(default: autodetect from output file extension).
+.B delay=<значение>
+На текущий момент имеет смысл только для MPEG[12]: Максимально допустимое отклонение
+в секундах, между таймером выходного потока (SCR) и временной меткой 
+декодирования (DTS) для любого присутствующего потока
+(задержка между декодированием и демультиплексированием).
+По-умолчанию 0.7 (утверждено MPEG стандартами).
+Значения больше этого требуют больших буферов и не должны использоваться.
+.
+.TP
+.B format=<формат_контейнера>
+Переопределяет формат, в который производится мультиплексирование
+(по-умолчанию: автоопределение по расширению выходного файла).
 .PD 0
 .RSs
 .IPs "mpg\ \ "
-MPEG-1 systems and MPEG-2 PS
+системы MPEG-1 и MPEG-2 PS
 .IPs "asf\ \ "
 Advanced Streaming Format
 .IPs "avi\ \ "
-Audio Video Interleave file
+файл со слоеными Видео и Аудио
 .IPs "wav\ \ "
 Waveform Audio
 .IPs "swf\ \ "
 Macromedia Flash
 .IPs "flv\ \ "
-Macromedia Flash video files
+Macromedia Flash видео файлы
 .IPs "rm\ \ \ "
-RealAudio and RealVideo
+RealAudio и RealVideo
 .IPs "au\ \ \ "
-SUN AU format
+формат SUN AU
 .IPs "nut\ \ "
-NUT open container format (experimental)
+формат открытого контейнера NUT (экспериментальное)
 .IPs "mov\ \ "
 QuickTime
 .IPs "mp4\ \ "
-MPEG-4 format
+MPEG-4 формат
 .IPs "dv\ \ \ "
-Sony Digital Video container
+Контейнер Sony Digital Video
 .RE
 .PD 1
 .TP
 .B i_certify_that_my_video_stream_does_not_use_b_frames
-MEncoder cannot assign correct timestamps when there are
-B-frames in the video stream, resulting in broken encodes.
-If you wish to use the lavf muxer, you must not let the video codec use
-B-frames (see the relevant documentation of each codec) and you also
-must specify this option.
+MEncoder не может назначить корректные временные метки, когда в
+видео потоке присутствуют B-кадры, что приводит к испорченному результату.
+Если хотите использовать lavf мультиплексор, вы должны запретить видео
+кодеку использовать B-кадры (смотрите соответствующую документацию каждого
+кодека) а также указать эту опцию.
 .
 .TP
-.B muxrate=<rate>
+.B muxrate=<поток>
 Минимальный битовый поток мультиплексирования, в бит/с;
 в данный момент имеет смысл только для MPEG[12].
 Иногда уго указание необходимо для избавления от "buffer underflows".
 .
 .TP
-.B packetsize=<size>
+.B packetsize=<размер>
 .\" FIXME better translation
 Размер, выраженный в байтах, атомарного[unitary] пакета для выбранного формата.
 При сжатии в MPEG[12] используются следующие значения по-умолчанию:
 2324 для [S]VCD, 2048 для всех остальных форматов.
 .
 .TP
-.B preload=<distance>
-На текущий момент имеет смысл только для MPEG[12]: Начальное разница, 
-в секундах, между значением таймера потока вывода (SCR) и временной меткой 
-.\" FIXME better translation
-декодирования (DTS) для любого существующего потока (задержка декодирования
-[demux to decode delay]).
+.B preload=<задержка>
+На текущий момент имеет смысл только для MPEG[12]: Начальная разница, 
+в секундах, между значением таймера выходного потока (SCR) и временной меткой 
+декодирования (DTS) для любого существующего потока (задержка между декодированием
+и демультиплексированием).
 .
 .
 .
