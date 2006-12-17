@@ -539,6 +539,11 @@ static char help_text[]=
 #define MSGTR_CantOpenDVD "Couldn't open DVD device: %s\n"
 
 // stream_dvd.c
+#define MSGTR_DVDspeedCantOpen "Couldn't open DVD device for writing, changing DVD speed needs write access.\n"
+#define MSGTR_DVDrestoreSpeed "Restoring DVD speed... "
+#define MSGTR_DVDlimitSpeed "Limiting DVD speed to %dKB/s... "
+#define MSGTR_DVDlimitFail "Failed.\n"
+#define MSGTR_DVDlimitOk "Ok.\n"
 #define MSGTR_NoDVDSupport "MPlayer was compiled without DVD support, exiting.\n"
 #define MSGTR_DVDnumTitles "There are %d titles on this DVD.\n"
 #define MSGTR_DVDinvalidTitle "Invalid DVD title number: %d\n"

@@ -29,8 +29,10 @@
 	{"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #if defined(USE_DVDREAD) || defined(USE_DVDNAV)
 	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
+	{"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
 #else
 	{"dvd-device", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"dvd-speed", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef USE_DVDREAD
 	{"dvd", "-dvd N has been removed, use dvd://N instead.\n" , CONF_TYPE_PRINT, 0, 0, 0, NULL},
@@ -362,6 +364,10 @@ extern char *cookies_file;
 extern int network_prefer_ipv4;
 extern int network_ipv4_only_proxy;
 
+#endif
+
+#if defined(USE_DVDREAD) || defined(USE_DVDNAV)
+extern int dvd_speed; /* stream/stream_dvd.c */
 #endif
 
 extern float a52_drc_level;

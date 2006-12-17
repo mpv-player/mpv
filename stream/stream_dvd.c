@@ -16,6 +16,14 @@
 #include <sys/cdrio.h>
 #endif
 
+#ifdef __linux__
+#include <linux/cdrom.h>
+#include <scsi/sg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#endif
+
 #define FIRST_AC3_AID 128
 #define FIRST_DTS_AID 136
 #define FIRST_MPG_AID 0
@@ -34,6 +42,83 @@ extern int dvd_chapter;
 extern int dvd_last_chapter;
 extern char* dvd_device;
 int dvd_angle=1;
+int dvd_speed=0; /* 0 => don't touch speed */
+
+static void dvd_set_speed(char *device, unsigned speed)
+{
+#if defined(__linux__) && defined(SG_IO) && defined(GPCMD_SET_STREAMING)
+  int fd;
+  unsigned char buffer[28];
+  unsigned char cmd[16];
+  unsigned char sense[16];
+  struct sg_io_hdr sghdr;
+  struct stat st;
+
+  memset(&sghdr, 0, sizeof(sghdr));
+  memset(buffer, 0, sizeof(buffer));
+  memset(sense, 0, sizeof(sense));
+  memset(cmd, 0, sizeof(cmd));
+  memset(&st, 0, sizeof(st));
+
+  if (stat(device, &st) == -1) return;
+
+  if (!S_ISBLK(st.st_mode)) return; /* not a block device */
+
+  if ((fd = open(device, O_RDWR | O_NONBLOCK)) == -1) {
+    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDspeedCantOpen);
+    return;
+  }
+
+  if (speed < 100) { /* speed times 1350KB/s (DVD single speed) */
+    speed *= 1350;
+  }
+
+  switch (speed) {
+  case 0: /* don't touch speed setting */
+    return;
+  case -1: /* restore default value */
+    if (dvd_speed == 0) return; /* we haven't touched the speed setting */
+    speed = 0;
+    buffer[0] = 4; /* restore default */
+    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDrestoreSpeed);
+    break;
+  default: /* limit to <speed> KB/s */
+    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitSpeed, speed);
+    break;
+  }
+
+  sghdr.interface_id = 'S';
+  sghdr.timeout = 5000;
+  sghdr.dxfer_direction = SG_DXFER_TO_DEV;
+  sghdr.mx_sb_len = sizeof(sense);
+  sghdr.dxfer_len = sizeof(buffer);
+  sghdr.cmd_len = sizeof(cmd);
+  sghdr.sbp = sense;
+  sghdr.dxferp = buffer;
+  sghdr.cmdp = cmd;
+
+  cmd[0] = GPCMD_SET_STREAMING;
+  cmd[10] = sizeof(buffer);
+
+  buffer[8] = 0xff;  /* first sector 0, last sector 0xffffffff */
+  buffer[9] = 0xff;
+  buffer[10] = 0xff;
+  buffer[11] = 0xff;
+
+  buffer[12] = buffer[20] = (speed >> 24) & 0xff; /* <speed> kilobyte */
+  buffer[13] = buffer[21] = (speed >> 16) & 0xff;
+  buffer[14] = buffer[22] = (speed >> 8)  & 0xff;
+  buffer[15] = buffer[23] = speed & 0xff;
+
+  buffer[18] = buffer[26] = 0x03; /* 1 second */
+  buffer[19] = buffer[27] = 0xe8;
+
+  if (ioctl(fd, SG_IO, &sghdr) < 0) {
+    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitFail);
+  }
+  mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitOk);
+#endif
+}
 
 #ifdef USE_DVDREAD
 #define	LIBDVDREAD_VERSION(maj,min,micro)	((maj)*10000 + (min)*100 + (micro))
@@ -398,6 +483,7 @@ void dvd_close(dvd_priv_t *d) {
   DVDClose(d->dvd);
   dvd_chapter = 1;
   dvd_last_chapter = 0;
+  dvd_set_speed(dvd_device, -1); /* -1 => restore default */
 }
 
 #endif /* #ifdef USE_DVDREAD */
@@ -743,6 +829,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
           return STREAM_UNSUPORTED;
         }
     }
+    dvd_set_speed(dvd_device, dvd_speed);
 
     mp_msg(MSGT_OPEN,MSGL_V,"Reading disc structure, please wait...\n");
 
