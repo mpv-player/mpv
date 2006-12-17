@@ -28,10 +28,7 @@ Adding new translations
 2) Make sure to create a 'Makefile' for the translation -- you can
    use 'en/Makefile' as an example.
 
-3) Set <book lang="XX"> to your language code if the DocBook XSL
-   stylesheets support it.
-
-4) If you want to use a customized XSL stylesheet, create one and name it
+3) If you want to use a customized XSL stylesheet, create one and name it
    'html-common.xsl'. Also create two additional XSL stylesheets
    ('html-single.xsl' and 'html-chunk.xsl'), with content such as this:
 
@@ -62,7 +59,7 @@ Adding new translations
    Including it can (and will) break building of documentation if chunk.xsl
    is installed at a nonstandard location.
 
-5) If you wish to change the output encoding of generated files, create
+4) If you wish to change the output encoding of generated files, create
    html-common.xsl as suggested in step 4) and add strings such as these
    somewhere between the <xsl:stylesheet ...> and </xsl:stylesheet> tags
    (please, pay attention to quotes):
@@ -70,17 +67,15 @@ Adding new translations
       <xsl:param name="chunker.output.encoding" select="'your_encoding'"/>
       <xsl:output encoding="your_encoding"/>
 
-   Use ru/html-common.xsl as example.
-
-6) If you are using your own HTML stylesheet, edit your Makefile and set
+5) If you are using your own HTML stylesheet, edit your Makefile and set
    the HTML_STYLESHEET variable to its name. Please, don't call your HTML
    stylesheet 'default.css'.
 
-7) In each translated file after the <?xml ... ?> tag you must put a note
-   like <!-- synced with 1.2 -->, where 1.2 is the revision of corresponding
+6) In each translated file after the <?xml ... ?> tag you must put a note
+   like <!-- synced with 2 -->, where 2 is the revision of corresponding
    English file (see comment at the top of file).
 
-8) While your translation isn't finished, you can change USE_SYMLINKS
+7) While your translation isn't finished, you can change USE_SYMLINKS
    to "yes" in your Makefile. This will help you testing your translation:
    English files will be used instead of untranslated ones, when generating
    HTML docs.
