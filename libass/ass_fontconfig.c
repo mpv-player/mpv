@@ -54,6 +54,7 @@ struct fc_instance_s {
  * \param bold font weight value
  * \param italic font slant value
  * \param index out: font index inside a file
+ * \param charset: contains the characters that should be present in the font, can be NULL
  * \return font file path
 */ 
 static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
@@ -150,6 +151,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
  * \param bold font weight value
  * \param italic font slant value
  * \param index out: font index inside a file
+ * \param charset: contains the characters that should be present in the font, can be NULL
  * \return font file path
 */ 
 char* fontconfig_select_with_charset(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
@@ -224,10 +226,13 @@ static char* validate_fname(char* name)
 }
 
 /**
- * \brief Process embedded matroska font. Saves it to ~/.mplayer/fonts.
- * \param name attachment name
- * \param data binary font data
- * \param data_size data size
+ * \brief Process memory font.
+ * \param priv private data
+ * \param library library object
+ * \param ftlibrary freetype library object
+ * \param idx index of the processed font in library->fontdata
+ * With FontConfig >= 2.4.2, builds a font pattern in memory via FT_New_Memory_Face/FcFreeTypeQueryFace.
+ * With older FontConfig versions, save the font to ~/.mplayer/fonts.
 */ 
 static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Library ftlibrary, int idx)
 {
@@ -309,7 +314,8 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 
 /**
  * \brief Init fontconfig.
- * \param dir additional directoryu for fonts
+ * \param library libass library object
+ * \param ftlibrary freetype library object
  * \param family default font family
  * \param path default font path
  * \return pointer to fontconfig private data
@@ -385,7 +391,7 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	return priv;
 }
 
-#else
+#else // HAVE_FONTCONFIG
 
 char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index)
 {

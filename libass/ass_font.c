@@ -52,6 +52,9 @@ static void charmap_magic(FT_Face face)
 	}
 }
 
+/**
+ * \brief find a memory font by name
+ */
 static int find_font(ass_library_t* library, char* name)
 {
 	int i;
@@ -61,6 +64,9 @@ static int find_font(ass_library_t* library, char* name)
 	return -1;
 }
 
+/**
+ * \brief Create a new ass_font_t according to "desc" argument
+ */
 ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* desc)
 {
 	char* path;
@@ -116,6 +122,9 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	return font;
 }
 
+/**
+ * \brief Set font transformation matrix and shift vector
+ **/
 void ass_font_set_transform(ass_font_t* font, FT_Matrix* m, FT_Vector* v)
 {
 	int i;
@@ -129,6 +138,9 @@ void ass_font_set_transform(ass_font_t* font, FT_Matrix* m, FT_Vector* v)
 		FT_Set_Transform(font->faces[i], &font->m, &font->v);
 }
 
+/**
+ * \brief Set font size
+ **/
 void ass_font_set_size(ass_font_t* font, int size)
 {
 	int i;
@@ -140,6 +152,10 @@ void ass_font_set_size(ass_font_t* font, int size)
 }
 
 #ifdef HAVE_FONTCONFIG
+/**
+ * \brief Select a new FT_Face with the given character
+ * The new face is added to the end of font->faces.
+ **/
 static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t ch)
 {
 	char* path;
@@ -173,6 +189,11 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t 
 }
 #endif
 
+/**
+ * \brief Get maximal font ascender and descender.
+ * \param ch character code
+ * The values are extracted from the font face that provides glyphs for the given character
+ **/
 void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
 {
 	int i;
@@ -194,6 +215,10 @@ void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
 	*asc = *desc = 0;
 }
 
+/**
+ * \brief Get a glyph
+ * \param ch character code
+ **/
 FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch)
 {
 	int error;
@@ -253,6 +278,9 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 	return glyph;
 }
 
+/**
+ * \brief Get kerning for the pair of glyphs.
+ **/
 FT_Vector ass_font_get_kerning(ass_font_t* font, uint32_t c1, uint32_t c2)
 {
 	FT_Vector v = {0, 0};
@@ -273,6 +301,9 @@ FT_Vector ass_font_get_kerning(ass_font_t* font, uint32_t c1, uint32_t c2)
 	return v;
 }
 
+/**
+ * \brief Deallocate ass_font_t
+ **/
 void ass_font_free(ass_font_t* font)
 {
 	int i;
