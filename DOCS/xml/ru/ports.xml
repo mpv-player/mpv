@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21624 -->
 <chapter id="ports" xreflabel="Портинг">
 <title>Портинг</title>
 
@@ -56,10 +56,9 @@
 <sect2 id="rpm">
 <title>RPM пакеты</title>
 <para>
-Dominik Mierzejewski собирает и поддерживает официальные Red Hat и Fedora Core RPM пакеты
-<application>MPlayer</application>'а. Они доступны с его
-
-<ulink url="http://rpm.greysector.net/mplayer/">сайта</ulink>.
+Dominik Mierzejewski поддерживает официальные Fedora Core RPM пакеты
+<application>MPlayer</application>'а. Они доступны в
+<ulink url="http://rpm.livan.org/">репозитории Livna</ulink>.
 </para>
 
 <para>

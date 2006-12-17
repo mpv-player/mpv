@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21624 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -502,7 +502,7 @@ make install
 Бинарники отсутствуют на audiocoding.com, но вы можете скачать (apt-get) Debian
 пакеты с <ulink url="http://marillat.free.fr">домашней страницы Christian Marillat</ulink>,
 Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHat RPM'ники
-с <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
+с <ulink url="http://rpm.livna.org/">Livna</ulink>.
 </para>
 </sect2>
 
