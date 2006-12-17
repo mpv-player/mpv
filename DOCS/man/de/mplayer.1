@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21531
+.\" In sync with r21651
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1086,8 +1086,8 @@ Programm (falls vorhanden) mit der gewählten Audiospur.
 .B \-alang <Sprachcode[,Sprachcode,...]> (siehe auch \-aid)
 Gibt eine Prioritätenliste der abzuspielenden Audiospuren an.
 Verschiedene Containerformate verwenden unterschiedliche Ländercodes.
-DVDs benutzen den zweibuchstabigen ISO 639-1-Sprachcode, Matroska und NUT
-benutzen den dreibuchstabigen ISO 639-2-Sprachcode, während OGM einen
+DVDs benutzen den zweibuchstabigen ISO 639-1-Sprachcode, Matroska, MPEG-TS und
+NUT benutzen den dreibuchstabigen ISO 639-2-Sprachcode, während OGM einen
 formlosen Bezeichner verwendet.
 MPlayer gibt alle vorhandenen Sprachen aus, wenn er im ausführlichen Modus
 (\-v) gestartet wird.
@@ -2015,10 +2015,17 @@ Speichert den Untertitel-Substream eines VOB-Streams.
 Siehe auch die Optionen \-dump*sub und \-vobsubout*.
 .
 .TP
-.B \-embeddedfonts (nur bei FreeType)
-Aktiviert die Extraktion von in Matroska eingebetteten Schriften.
+.B \-(no)embeddedfonts (nur bei FreeType)
+Aktiviert die Extraktion von in Matroska eingebetteten Schriften (Standard:
+deaktiviert).
 Diese Schriften können für das Rendern von SSA/ASS-Untertiteln verwendet werden
 (Option \-ass).
+Schriftdateien werden im Verzeichnis ~/.mplayer/fonts angelegt.
+.br
+.I ANMERKUNG:
+Bei der Verwendung von FontConfig 2.4.2 oder neuer werden eingebettete
+Schriften direkt vom Speicher geöffnet; diese Option ist per Voreinstellung
+aktiviert.
 .
 .TP
 .B \-ffactor <Nummer>
@@ -10217,16 +10224,16 @@ wird.
 .B telecine
 Aktiviert 3:2-Pulldown-Soft-telecine-Modus: Der Muxer wird dafür
 sorgen, dass der Videostream wie mit 30000/\:1001 fps encodiert aussieht.
-Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe,
-mit \-ofps eventuell konvertiert, 24000/\:1001 fps beträgt.
+Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe
+24000/\:1001 beträgt, konvertiere diese mit \-ofps, falls nötig.
 Jede andere Framerate ist mit dieser Option inkompatibel.
 .
 .TP
 .B film2pal
 Aktiviert FILM zu PAL und NTSC zu PAL Soft-telecine-Modus: Der Muxer wird dafür
 sorgen, dass der Videostream wie mit 25 fps encodiert aussieht.
-Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe,
-eventuell konvertiert mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
+Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe
+24000/\:1001 beträgt, konvertiere diese mit \-ofps, falls nötig.
 Jede andere Framerate ist mit dieser Option inkompatibel.
 .
 .TP
@@ -10241,12 +10248,13 @@ ist als die der Ausgabe und die Frameratenerhöhung <= 1.5 ist.
 Beispiel für Telecining von PAL zu NTSC: tele_src=25:tele_dest=30000/1001.
 .
 .TP
-.B vbuf_size=<40\-1024>
+.B vbuf_size=<40\-1194>
 Setzt die Größe des Puffers des Videodecoders in Kilobytes.
 Gib diese nur an, wenn die Bitrate des Videostreams zu groß für das gewählte
 Format ist und wenn du genau weißt, was du tust.
 Ein zu hoch gewählter Wert kann zu einem nicht abspielbaren Film führen,
 abhängig von den Fähigkeiten deines Players.
+Beim Muxen von HDTV-Video sollte ein Wert von 400 ausreichen.
 .
 .TP
 .B abuf_size=<4\-64>
