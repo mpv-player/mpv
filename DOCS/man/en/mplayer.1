@@ -1913,10 +1913,14 @@ Dumps the subtitle substream from VOB streams.
 Also see the \-dump*sub and \-vobsubout* options.
 .
 .TP
-.B \-embeddedfonts (FreeType only)
-Enables extraction of Matroska embedded fonts.
+.B \-(no)embeddedfonts (FreeType only)
+Enables extraction of Matroska embedded fonts (default: disabled).
 These fonts can be used for SSA/ASS subtitle
-rendering (\-ass option).
+rendering (\-ass option). Font files are created in ~/.mplayer/fonts directory.
+.br
+.I NOTE:
+With FontConfig 2.4.2 or newer, embedded fonts are opened directly from memory,
+and this option is enabled by default.
 .
 .TP
 .B \-ffactor <number>
