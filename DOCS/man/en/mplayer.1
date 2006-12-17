@@ -5598,14 +5598,14 @@ mix random noise with a (semi)regular pattern
 .PD 1
 .
 .TP
-.B denoise3d[=luma:chroma:time]
+.B denoise3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]
 This filter aims to reduce image noise producing smooth images and making still
 images really still (This should enhance compressibility.).
 .PD 0
 .RSs
-.IPs <luma_spc>
+.IPs <luma_spatial>
 spatial luma strength (default: 4)
-.IPs <chroma_spc>
+.IPs <chroma_spatial>
 spatial chroma strength (default: 3)
 .IPs <luma_tmp>
 luma temporal strength (default: 6)
@@ -5615,7 +5615,7 @@ chroma temporal strength (default: luma_tmp*chroma_spc/luma_spc)
 .PD 1
 .
 .TP
-.B hqdn3d[=luma:chroma:time]
+.B hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]
 High precision/\:quality version of the denoise3d filter.
 Parameters and usage are the same.
 .
