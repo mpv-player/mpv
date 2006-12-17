@@ -72,7 +72,7 @@ Adding new translations
    stylesheet 'default.css'.
 
 6) In each translated file after the <?xml ... ?> tag you must put a note
-   like <!-- synced with 2 -->, where 2 is the revision of corresponding
+   like <!-- synced with r2 -->, where 2 is the revision of corresponding
    English file (see comment at the top of file).
 
 7) While your translation isn't finished, you can change USE_SYMLINKS
