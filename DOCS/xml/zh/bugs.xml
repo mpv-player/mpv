@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- synced with 21537 -->
+<appendix id="bugs">
+<title>已知错误</title>
+
+<sect1 id="bugs-special">
+<title>对于特定系统/CPU的错误/问题</title>
+
+<itemizedlist>
+<listitem>
+  <para>在P3 2.2.x内核中的SIGILL (信号4):</para>
+  <para>问题：2.2.x内核没有很好的（正常工作的）SSE支持</para>
+  <para>解决方法：把内核升级至2.4.x</para>
+  <para>替代办法： <command>./configure --disable-sse</command></para>
+</listitem>
+
+<listitem>
+  <para>通用SIGILL(信号4)：</para>
+  <para>
+  问题：你在不同的机器上编译并运行<application>MPlayer</application>（例如在
+  P3的机器上编译在Celeron的机器上运行）
+  </para>
+  <para>
+  解决方法：在同一机器上编译并使用<application>MPlayer</application>！
+  </para>
+  <para>
+  替代办法：你也可以不管这些，在configure的时候使用<option>--enable-runtime-cpudetection</option>
+  选项或者你可以用更特定的选项禁用特殊的CPU指令集（像<option>--disable-mmx</option>，
+  <option>--disable-3dnow</option>等等）。
+  </para>
+</listitem>
+
+<listitem>
+  <para>转存媒体流的时候崩溃：</para>
+  <para>问题：core输出</para>
+  <para>解决方法：不要抱怨。确定你知道自己的毛巾在什么地方。</para>
+</listitem>
+</itemizedlist>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="bugs-audio">
+<title>各种各样的音视频合成及其他音频问题</title>
+
+<sect2 id="bugs-delay-all">
+<title>普遍性的饮品延迟或声音抖动（在所有或很多文件中存在）</title>
+
+<itemizedlist>
+<listitem><para>
+  最普遍情况：有错误的声卡驱动！- 尽量用其他驱动，尝试使用<option>-ao oss</option>
+  的ALSA OSS模拟，以及尝试<option>-ao sdl</option>，有时这会提供帮助。如果你的
+  在<option>-nosound</option>情况下正常播放，那么你就可以肯定是声卡驱动问题。
+</para></listitem>
+
+<listitem>
+  <para>音频缓存问题（错误的检测缓存大小）</para>
+  <para>
+  替代方法：<application>MPlayer</application>的<option>-abs</option>选项
+  </para>
+</listitem>
+
+<listitem><para>
+  采样率问题 - 也许你的声卡不支持你文件的采样率 - 尝试使用重新采样过滤器
+  （<option>-af resample=...</option>）
+</para></listitem>
+
+<listitem>
+  <para>机器变慢(CPU or VGA)</para>
+  <para>
+  尝试<option>-vo null</option>, 如果它正常播放，那么说明你有个慢速
+  VGA显卡/驱动
+  </para>
+  <para>
+  替代方法：买块更快的显卡或读此文档如何加速
+  </para>
+  <para>也可尝试<option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="bugs-delay-specific">
+<title>针对特定一个或一些文件的音频延时/不同步</title>
+
+<itemizedlist>
+<listitem>
+  <para>损坏的文件</para>
+  <para>
+  替代方法：
+  <itemizedlist>
+  <listitem>
+    <para>
+	使用<option>-ni</option>或者<option>-nobps</option>选项
+	（针对非音视频交织文件或损坏文件）
+	</para>
+    <para>及/或</para>
+  </listitem>
+  <listitem>
+    <para>
+	<option>-mc 0</option>
+	（存在错误的交织VBR音频文件的情况下需要）
+	</para>
+    <para>及/或</para>
+  </listitem>
+  <listitem>
+    <para>
+	<option>-delay</option>或在运行时按<keycap>+</keycap>/<keycap>-</keycap>
+    键调整延迟
+	</para>
+  </listitem>
+  </itemizedlist>
+  如果上述方法都不能奏效，请上传文件，我们将检查（并修正）。
+</para>
+</listitem>
+
+<listitem>
+  <para>你的声卡不支持48kHz回放</para>
+  <para>
+  替换方法：买一块更好的声卡...或者把每秒桢数降低10%（针对每秒30桢的电影用
+  <option>-fps 27</option>选项）或者使用重新采样过滤器
+  </para>
+</listitem>
+
+<listitem>
+  <para>
+  机器变慢（如果音视频不在0附近，并且状态条最后的数字在不断增加）
+  </para>
+  <para>替换方法：<option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="bugs-nosound">
+<title>完全没有声音</title>
+
+<itemizedlist>
+<listitem>
+  <para>你的文件使用了不被支持的音频编码</para>
+  <para>
+  解决方法：读文档并帮助我们添加对此媒体格式的支持。
+  </para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="bugs-nopicture">
+<title>完全没有图像（只有灰色/绿色的屏幕）</title>
+
+<itemizedlist>
+<listitem>
+  <para>你的文件使用了不被支持的视频编码</para>
+  <para>
+  解决方法：读文档并帮助我们添加对此媒体格式的支持。
+  </para>
+</listitem>
+
+<listitem>
+  <para>
+  自动选择的解码器不能对文件进行解码，尝试用
+  <option>-vc</option> or <option>-vfm</option>选型自行选择
+  </para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="bugs-video">
+<title>视频输出问题</title>
+
+<para>
+首先请注意<option>-fs</option>, <option>-vm</option>及
+<option>-zoom</option>选项并不被所有驱动所支持。另外，
+不是所有的驱动在硬件层面支持改变大小/缩放功能。
+</para>
+
+<formalpara>
+<title>屏幕菜单式显示/子显示 闪烁</title>
+<para>
+<itemizedlist>
+  <listitem><para>x11驱动：对不起，暂时未能解决</para></listitem>
+  <listitem><para>xv驱动：使用<option>-double</option>选项</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+<formalpara>
+<title>使用mga_vid
+  (<option>-vo mga</option> / <option>-vo xmga</option>)时出现绿色图片</title>
+<para>
+<itemizedlist>
+<listitem><para>
+  mga_vid错误的检测了你显卡的RAM大小，用
+  <option>mga_ram_size</option>选项重新加载。
+</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+</sect2>
+</sect1>
+
+</appendix>

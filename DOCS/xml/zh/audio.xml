@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- synced with 21537 -->
+<chapter id="audio">
+<title>音频输出设备</title>
+<sect1 id="sync">
+<title>音频/视频 同步</title>
+
+<para>
+Linux声卡驱动有兼容性问题。 这是因为<application>MPlayer</application>
+依赖于<emphasis>正确</emphasis>编写的声音驱动的一项内嵌特性以保证声音/视
+频的同步。可惜的是，一些驱动作者并不在代码中实现此特性，因为它对于播放MP3
+或者其他声效并不是必须的。
+</para>
+
+<para>
+其他播放器，像<ulink url="http://avifile.sf.net">aviplay</ulink>或
+<ulink url="http://xinehq.de">xine</ulink>也许会脱离这些驱动功能而工
+作，因为它们运用了内部计时的“简单”方法。测试表明他们的方法不如
+<application>MPlayer</application>的有效。
+</para>
+
+<para>
+和一个正确编写的声卡驱动一同使用 <application>MPlayer</application>将
+用不会发生由声音导致的音/视频不同步，除非使用很糟糕的文件(查询man页寻
+求解决方法)。
+</para>
+
+<para>
+如果你刚好有个糟糕的声卡驱动，尝试<option>-autosync</option>选项，它将
+解决你的问题。详细信息请查看man页。
+</para>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="troubleshooting">
+<title>解决问题</title>
+
+<para>一些注释：</para>
+
+<para>
+如果你使用0.5版本的ALSA，那么你几乎总是要使用<option>-ao alsa5</option>选项，
+因为0.5版的ALSA对OSS的模拟存在错误，将导致<emphasis role="bold">
+<application>MPlayer</application>崩溃</emphasis>，并出现如下信息：
+<screen>
+DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!
+</screen>
+</para>
+
+<para>
+如果用CD-ROM播放时声音出现间断，像<link linkend="drives">CD-ROM</link>部分
+所述那样打开去除IRQ选项。
+</para>
+</sect1>
+
+</chapter>

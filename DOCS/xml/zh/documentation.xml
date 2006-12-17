@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- synced with 21537 -->
+
+<bookinfo id="toc">
+<title><application>MPlayer</application> - 电影播放器</title>
+<subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
+<date>2003年3月24日</date>
+<copyright>
+  <year>2000</year>
+  <year>2001</year>
+  <year>2002</year>
+  <year>2003</year>
+  <year>2004</year>
+  <year>2005</year>
+  <year>2006</year>
+  <holder>MPlayer工作组</holder>
+</copyright>
+<!--
+<legalnotice>
+  <title>License</title>
+  <para>This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by the
+  Free Software Foundation; either version 2 of the License, or (at your
+  option) any later version.</para>
+
+  <para>This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  for more details.</para>
+
+  <para>You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.</para>
+</legalnotice>
+-->
+</bookinfo>
+
+
+<preface id="howtoread">
+<title>如何阅读此文档</title>
+
+<para>
+如果你是第一次安装：请确定你通读了从这里到安装部分的所有内容，并且遵循你将
+发现的链接。如果你有其他问题，回到<link linkend="toc">目录</link>并搜索相应
+标题，参见<xref linkend="faq"/>，或者在文件中用grep命令搜索。大多数的问题应
+该可以在此找到答案，其他问题也可能在我们的
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">邮件列表</ulink>
+中被提及。
+<!-- FIXME: This refers to nonexistent links
+Check the
+<ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archives</ulink>, there
+is a lot of valuable information to be found there.
+-->
+</para>
+</preface>
+
+
+<chapter id="intro">
+<title>介绍</title>
+
+<para>
+<application>MPlayer</application>是一款为Linux编写的电影播放器(在其他Unix
+上也可运行，并且很多<emphasis role="bold">非x86</emphasis>CPU。参见
+<xref linkend="ports"/>）。
+它能播放大部分由许多本地，XAnim，RealPlayer及Win32 DLL解码器支持的MPEG, VOB,
+AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg,
+FILM, RoQ, PVA, Matroska文件。你也可以观看
+<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
+及<emphasis role="bold">MPEG-4 (DivX)</emphasis>影片。<application>MPlayer</application>
+另外一个很大的特点是支持广泛的输出驱动。它能工作在X11, Xv, DGA, OpenGL, SVGAlib,
+fbdev, AAlib, libcaca, DirectFB下，但你可以使用GGI及SDL(此种方式下的所有驱动)
+以及一些低端的特定显卡驱动(针对Matrox, 3Dfx及Radeon, Mach64, Permedia3)！
+他们大多数支持软件或硬件视频伸缩，所以你能以全屏幕欣赏影片。
+<application>MPlayer</application>支持一些硬件MPEG解码器的显示，例如
+<link linkend="dvb">DVB</link>及<link linkend="dxr3">DXR3/Hollywood+</link>。
+并且你认为那些又大又漂亮的不重名的有阴影修饰的包括欧洲ISO 8859-1,2（匈牙利语，
+英语，捷克语等等），西里尔语，韩语字体的子标题
+(<emphasis role="bold">支持14种类型</emphasis>)，以及屏幕显示(OSD)如何呢？
+</para>
+
+<para>
+此播放器能稳定的播放损坏的MPEG文件（对于一些VCD很有用），并且它能播放著名的
+windows media player不能播放的损坏的AVI文件。甚至能播放没有索引部分的AVI文件，
+并且你还可以用<option>-idx</option>选项暂时重建索引，或者用
+<application>MEncoder</application>永久性的建立索引，以此支持定位查找！
+如你所见，稳定性及质量是最重要的，但速度也让人赞叹。还有一套强大的拥有视音频
+处理功能的滤镜系统。
+</para>
+
+<para>
+<application>MEncoder</application>(<application>MPlayer</application>的电影
+编码器)是一个简单的影片编码器，它可用于将<application>MPlayer</application>
+可播放的影片
+(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+编码成其他<application>MPlayer</application>可播放的形式(如后所述).
+It can encode with various codecs, like
+<emphasis role="bold">MPEG-4 (DivX4)</emphasis>
+(单通道或双通道), <systemitem class="library">libavcodec</systemitem>,
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
+音频。
+</para>
+
+<itemizedlist>
+<title><application>MEncoder</application>的特点</title>
+<listitem><simpara>
+  支持从大量文件格式中编码生成文件，并且是<application>MPlayer</application>
+  的解码器。
+</simpara></listitem>
+<listitem><simpara>
+  编码到所有FFmpeg的
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+  所支持的编码
+</simpara></listitem>
+<listitem><simpara>
+  对从与<emphasis role="bold">V4L兼容的TV调节器</emphasis>中出来的视频进行编码
+</simpara></listitem>
+<listitem><simpara>
+  编码/合成到相交织的AVI文件并有正确的索引
+</simpara></listitem>
+<listitem><simpara>
+  由外部音频流创建文件
+</simpara></listitem>
+<listitem><simpara>
+  1, 2 或 3通道编码
+</simpara></listitem>
+<listitem><para>
+  <emphasis role="bold">VBR</emphasis> MP3音频
+  <important><simpara>
+  在windows上的播放器中播放VBR MP3音频并不能总是得到很好的效果！
+  </simpara></important>
+</para></listitem>
+<listitem><simpara>
+  PCM音频
+</simpara></listitem>
+<listitem><simpara>
+  媒体流复制
+</simpara></listitem>
+<listitem><simpara>
+  输入A/V同步(基于PTS，可以通过<option>-mc 0</option>选型禁用)
+</simpara></listitem>
+<listitem><simpara>
+  通过<option>-ofps</option>选项对fps进行纠正（此功能在将
+  30000/1001 fps VOB 转换到 24000/1001 fps AVI的文件时有作用）
+</simpara></listitem>
+<listitem><simpara>
+  使用我们非常强大的滤镜系统（剪切，展开，覆盖，后续处理，旋转，缩放，
+  rgb/yuv之间的转换）
+</simpara></listitem>
+<listitem><simpara>
+  能编码为DVD/VOBsub<emphasis role="bold">并且</emphasis>能将文字子标题
+  放入所生成文件
+</simpara></listitem>
+<listitem><simpara>
+  能将DVD子标题变为VOBsub格式
+</simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>计划中的特性</title>
+<listitem><simpara>
+  更广泛的编/解码已知的文件格式/编解码器（通过DivX4/Indeo5/VIVO流生成VOB
+  文件:) ）。
+</simpara></listitem>
+</itemizedlist>
+
+<!-- FIXME: the license should be in bookinfo -->
+<para>
+<application>MPlayer</application>及<application>MEncoder</application>
+可以在遵循GNU通用公用协议第2版的前提下被发布。
+</para>
+
+</chapter>
+
+&install.xml;
+
+&usage.xml;
+&cd-dvd.xml;
+&faq.xml;
+
+&containers.xml;
+&codecs.xml;
+&video.xml;
+&audio.xml;
+&tvinput.xml;
+&radio.xml;
+
+&ports.xml;
+&mencoder.xml;
+&encoding-guide.xml;
+&bugreports.xml;
+&bugs.xml;
+&skin.xml;
+&history.xml;
