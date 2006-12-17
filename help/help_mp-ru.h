@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r21476
+// Synced with help_mp-en.h: r21655
 
 // ========================= MPlayer help ===========================
 
@@ -534,6 +534,11 @@ static char help_text[]=
 #define MSGTR_CantOpenDVD "Не могу открыть DVD: %s\n"
 
 // stream_dvd.c
+#define MSGTR_DVDspeedCantOpen "Невозможно открыть DVD устройство для записи, изменение скорости DVD требует доступ на запись.\n"
+#define MSGTR_DVDrestoreSpeed "Восстановление скорости DVD... "
+#define MSGTR_DVDlimitSpeed "Ограничение скорости DVD до %dКБ/с... "
+#define MSGTR_DVDlimitFail "Сбой ограничения скорости DVD.\n"
+#define MSGTR_DVDlimitOk "Ограничение скорости DVD произведено успешно.\n"
 #define MSGTR_NoDVDSupport "MPlayer был скомпилирован без поддержки DVD, выходим.\n"
 #define MSGTR_DVDnumTitles "На этом DVD %d роликов.\n"
 #define MSGTR_DVDinvalidTitle "Недопустимый номер DVD ролика: %d\n"
