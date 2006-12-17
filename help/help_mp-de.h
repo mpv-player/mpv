@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r21476
+// In sync with r21655
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -549,6 +549,11 @@ static char help_text[]=
 #define MSGTR_CantOpenDVD "Kann DVD-Laufwerk nicht öffnen: %s\n"
 
 // stream_dvd.c
+#define MSGTR_DVDspeedCantOpen "Kann DVD-Laufwerk nicht zum Schreiben öffnen, setzen der DVD-Geschwindigkeit\nbenötigt Schreibzugriff.\n"
+#define MSGTR_DVDrestoreSpeed "Setze DVD-Geschwindigkeit auf Laufwerksstandard zurück... "
+#define MSGTR_DVDlimitSpeed "Setzen der DVD-Geschwindigkeit auf %dKB/s... "
+#define MSGTR_FailedDotLF "Setzen der DVD-Geschwindigkeit fehlgeschlagen.\n"
+#define MSGTR_OkDotLF "Setzen der DVD-Geschwindigkeit erfolgreich.\n"
 #define MSGTR_NoDVDSupport "MPlayer wurde ohne DVD-Unterstützung übersetzt, beende.\n"
 #define MSGTR_DVDnumTitles "Es sind %d Titel auf dieser DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ungültige DVD-Titelnummer: %d\n"

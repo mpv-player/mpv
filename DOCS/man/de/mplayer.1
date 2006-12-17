@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21651
+.\" In sync with r21654
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1327,6 +1327,22 @@ Du kannst auch ein Verzeichnis angeben, das die zuvor direkt von DVD kopierten
 Dateien enthält (z.B.\& von vobcopy).
 Beachte, dass die Benutzung von \-dumpstream normalerweise ein besserer Weg
 ist, DVD-Titel zu kopieren (siehe Beispiele).
+.
+.TP
+.B \-dvd-speed <Faktor oder Geschwindigkeit in KB/s> (nur bei DVD)
+Versuche die DVD-Geschwindigkeit zu begrenzen (Standard: 0, keine Änderung).
+Die Grundgeschwindigkeit bei DVD ist ungefähr 1350KB/s, ein 8-fach Laufwerk
+kann also mit bis zu 10800KB/s lesen.
+Bei langsameren Geschwindigkeiten ist das Laufwerk leiser, 2700KB/s
+sollten zum Anschauen von DVDs ausreichen und leise sein.
+Beim Schließen setzt MPlayer die Geschwindigkeit auf den Standardwert
+des Laufwerks zurück.
+Werte kleiner als 100 entsprechen Vielfachen von 1350KB/s,
+d.h.\& \-dvd-speed 8 entspricht 10800KB/s (8-fach).
+.br
+.I ANMERKUNG:
+Für die Änderunge der Geschwindigkeit benötigst Du Schreibberechtigung für
+das DVD-Gerät.
 .
 .TP
 .B \-dvdangle <Winkel-ID> (nur bei DVD)
