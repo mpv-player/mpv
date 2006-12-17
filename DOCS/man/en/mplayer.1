@@ -1253,6 +1253,20 @@ Note that using \-dumpstream is usually a better way to
 copy DVD titles in the first place (see the examples).
 .
 .TP
+.B \-dvd-speed <factor or speed in KB/s> (DVD only)
+Try to limit DVD speed (default: 0, don't change speed).
+DVD base speed is about 1350KB/s, so a 8x drive can read at speeds up to
+10800KB/s.
+Slower speeds make the drive more quiet, for watching DVDs 2700KB/s should be
+quiet and fast enough.
+MPlayer resets the speed to the drive default value on close.
+Values less than 100 mean multiples of 1350KB/s, i.e.\& \-dvd-speed 8 selects
+10800KB/s.
+.br
+.I NOTE:
+You need write permission to the DVD device to change the speed.
+.
+.TP
 .B \-dvdangle <angle ID> (DVD only)
 Some DVD discs contain scenes that can be viewed from multiple angles.
 Here you can tell MPlayer which angles to use (default: 1).
