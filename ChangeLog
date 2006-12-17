@@ -29,6 +29,7 @@ MPlayer (1.0)
     Streaming:
     * authentication for Real RTSP streams
     * near-precise seeking in dvd://
+    * speed selection when playing dvd:// streams, to make drive quieter
 
     FFmpeg/libavcodec:
     * Intel Music coder audio decoder
