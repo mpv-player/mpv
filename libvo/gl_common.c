@@ -1338,7 +1338,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
   }
 
   // set new values
-  vo_window = win;
+  vo_w32_window = win;
   vo_hdc = windc;
   {
     RECT rect;

@@ -32,6 +32,9 @@ LIBVO_EXTERN(gl)
 #ifdef GL_WIN32
 static int gl_vinfo = 0;
 static HGLRC gl_context = 0;
+#define update_xinerama_info w32_update_xinerama_info
+#define vo_init vo_w32_init
+#define vo_window vo_w32_window
 #else
 static XVisualInfo *gl_vinfo = NULL;
 static GLXContext gl_context = 0;

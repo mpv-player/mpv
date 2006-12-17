@@ -29,6 +29,7 @@ uint32_t o_dwidth;
 uint32_t o_dheight;
 
 static HINSTANCE hInstance;
+#define vo_window vo_w32_window
 HWND vo_window = 0;
 static int event_flags;
 static int mon_cnt;
@@ -147,7 +148,7 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p) {
     return TRUE;
 }
 
-void update_xinerama_info(void) {
+void w32_update_xinerama_info(void) {
     xinerama_x = xinerama_y = 0;
     if (xinerama_screen < -1) {
         int tmp;
@@ -186,7 +187,7 @@ static void updateScreenProperties() {
     vo_screenwidth = dm.dmPelsWidth;
     vo_screenheight = dm.dmPelsHeight;
     vo_depthonscreen = dm.dmBitsPerPel;
-    update_xinerama_info();
+    w32_update_xinerama_info();
 }
 
 static void changeMode(void) {
@@ -310,7 +311,7 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
     return createRenderingContext();
 }
 
-int vo_init(void) {
+int vo_w32_init(void) {
     HICON 	mplayerIcon = 0;
     char 	exedir[MAX_PATH];
     HINSTANCE	user32;
