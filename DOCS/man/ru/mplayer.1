@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r21606
+.\" synced with r21648
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -980,7 +980,7 @@ MPlayer выводит все доступные аудио ID, когда запущен в режиме
 .B \-alang <код языка[,код языка,...]> (смотрите также \-aid)
 Указывает список используемых языков в порядке приоритетности.
 Различные форматы файлов используют различные коды языков.
-DVD используют ISO 639-1 двухбуквенные коды, Matroska и NUT используют ISO 639-2
+DVD используют ISO 639-1 двухбуквенные коды, Matroska, MPEG-TS и NUT используют ISO 639-2
 трехбуквенные коды языков, в то время как OGM использует идентификаторы в свободной форме.
 MPlayer выводит доступные языки, когда запущен в режиме вывода подробных сообщений (\-v).
 .sp 1
@@ -1861,10 +1861,14 @@ SubViewer (SRT).
 Смотрите также опции \-dump*sub и \-vobsubout*.
 .
 .TP
-.B \-embeddedfonts (только FreeType)
-Задействует извлечение внедренных шрифтов Matroska.
+.B \-(no)embeddedfonts (только FreeType)
+Задействует извлечение внедренных шрифтов Matroska (по-умолчанию: отключено).
 Эти шрифты затем могут быть использованы для рендеринга SSA/ASS субтитров
-(опция \-ass).
+(опция \-ass). Файлы шрифтов создаются в каталоге ~/.mplayer/fonts.
+.br
+.I ЗАМЕЧАНИЕ:
+С FontConfig 2.4.2 или новее, внедренные шрифты открываются непосредственно из памяти,
+и эта опция включена по-умолчанию.
 .
 .TP
 .B \-ffactor <число>
@@ -8884,7 +8888,7 @@ aggressive production of B-frames may cause worse visual quality.
 This option tells Xvid to close every GOP (Group Of Pictures bounded
 by two I-frames), which makes GOPs independent from each other.
 This just implies that the last frame of the GOP is either a P-frame or a
-N-frame but not a B-frame.
+I-frame but not a B-frame.
 It is usually a good idea to turn this option on (default: on).
 .
 .TP
