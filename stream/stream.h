@@ -101,6 +101,7 @@ typedef struct stream_st {
   unsigned int buf_pos,buf_len;
   off_t pos,start_pos,end_pos;
   int eof;
+  int mode; //STREAM_READ or STREAM_WRITE
   unsigned int cache_pid;
   void* cache_data;
   void* priv; // used for DVD, TV, RTSP etc
@@ -122,6 +123,7 @@ int cache_stream_seek_long(stream_t *s,off_t pos);
 #define stream_enable_cache(x,y,z,w) 1
 #endif
 void fixup_network_stream_cache(stream_t *stream);
+int stream_write_buffer(stream_t *s, unsigned char *buf, int len);
 
 inline static int stream_read_char(stream_t *s){
   return (s->buf_pos<s->buf_len)?s->buffer[s->buf_pos++]:
@@ -291,6 +293,7 @@ void free_stream(stream_t *s);
 stream_t* new_memory_stream(unsigned char* data,int len);
 stream_t* open_stream(char* filename,char** options,int* file_format);
 stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format);
+stream_t* open_output_stream(char* filename,char** options);
 
 extern int dvd_title;
 extern int dvd_chapter;
