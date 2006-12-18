@@ -116,6 +116,7 @@ demuxers:
 
 muxers:
     * muxer_lavf.c - Michael Niedermayer
+    * muxer_mpeg.c - Nico Sabbi
 
 streams:
     * stream_pvr.c - Benjamin Zores
@@ -123,6 +124,9 @@ streams:
     * stream_rtp.c - Benjamin Zores
     * stream_rtsp.c - Benjamin Zores
     * stream_radio.c - Vladimir Voroshilov
+    * stream_dvb.c - Nico Sabbi
+    * stream_dvd.c - Nico Sabbi
+    * stream_dvdnav.c - Nico Sabbi
 
 codec support:
     * FFmpeg: Michael Niedermayer
@@ -141,6 +145,9 @@ audio filters:
     * af_ladspa.c - Ivo van Poorten
     * af_equalizer.c - Reynaldo H. Verdejo Pinochet
     * af_karaoke.c - Reynaldo H. Verdejo Pinochet
+
+audio encoders:
+    * ae_toolame.c, ae_twolame.c and ae_faac.c - Nico Sabbi
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
