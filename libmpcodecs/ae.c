@@ -7,6 +7,7 @@
 #include <math.h>
 #include "aviheader.h"
 #include "ms_hdr.h"
+#include "stream.h"
 #include "muxer.h"
 #include "ae.h"
 #include "config.h"

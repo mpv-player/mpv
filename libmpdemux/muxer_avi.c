@@ -130,19 +130,19 @@ static muxer_stream_t* avifile_new_stream(muxer_t *muxer,int type){
     return s;
 }
 
-static void write_avi_chunk(FILE *f,unsigned int id,int len,void* data){
+static void write_avi_chunk(stream_t *stream,unsigned int id,int len,void* data){
  int le_len = le2me_32(len);
  int le_id = le2me_32(id);
- fwrite(&le_id,4,1,f);
- fwrite(&le_len,4,1,f);
+ stream_write_buffer(stream, &le_id, 4);
+ stream_write_buffer(stream, &le_len, 4);
 
 if(len>0){
   if(data){
     // DATA
-    fwrite(data,len,1,f);
+    stream_write_buffer(stream, data, len);
     if(len&1){  // padding
       unsigned char zerobyte=0;
-      fwrite(&zerobyte,1,1,f);
+      stream_write_buffer(stream, &zerobyte, 1);
     }
   } else {
     // JUNK
@@ -151,20 +151,19 @@ if(len>0){
     while(len>0){
       int l=strlen(avi_junk_data);
       if(l>len) l=len;
-      fwrite(avi_junk_data,l,1,f);
+      stream_write_buffer(stream, avi_junk_data, l);
       len-=l;
     }
   }
 }
 }
 
-static void write_avi_list(FILE *f,unsigned int id,int len);
+static void write_avi_list(stream_t *s,unsigned int id,int len);
 static void avifile_write_standard_index(muxer_t *muxer);
 
 static void avifile_odml_new_riff(muxer_t *muxer)
 {
     struct avi_stream_info *vsi = muxer->def_v->priv;
-    FILE *f = muxer->file;
     uint32_t riff[3];
 
     mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: Starting new RIFF chunk at %dMB.\n", (int)(muxer->file_end/1024/1024));
@@ -174,17 +173,17 @@ static void avifile_odml_new_riff(muxer_t *muxer)
         vsi->riffofssize+=16;
         vsi->riffofs=realloc_struct(vsi->riffofs,(vsi->riffofssize+1),sizeof(off_t));
     }
-    vsi->riffofs[vsi->riffofspos] = ftello(f);
+    vsi->riffofs[vsi->riffofspos] = stream_tell(muxer->stream);
 
     /* RIFF/AVIX chunk */
     riff[0]=le2me_32(mmioFOURCC('R','I','F','F'));
     riff[1]=0;
     riff[2]=le2me_32(mmioFOURCC('A','V','I','X'));
-    fwrite(riff,12,1,f);
+    stream_write_buffer(muxer->stream, riff, 12);
 
-    write_avi_list(f,listtypeAVIMOVIE,0);
+    write_avi_list(muxer->stream,listtypeAVIMOVIE,0);
 
-    muxer->file_end = ftello(f);
+    muxer->file_end = stream_tell(muxer->stream);
 }
 
 static void avifile_write_header(muxer_t *muxer);
@@ -197,10 +196,10 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags,
     int paddedlen = len + (len&1);
 
     if (s->type == MUXER_TYPE_VIDEO && !s->h.dwSuggestedBufferSize) {
-	off_t pos=ftell(muxer->file);
-	fseek(muxer->file, 0, SEEK_SET);
+	off_t pos=stream_tell(muxer->stream);
+	stream_seek(muxer->stream, 0);
 	avifile_write_header(muxer);
-	fseek(muxer->file, pos, SEEK_SET);
+	stream_seek(muxer->stream, pos);
     }
 
     rifflen = muxer->file_end - vsi->riffofs[vsi->riffofspos] - 8;
@@ -238,7 +237,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags,
     ++si->idxpos;
 
     // write out the chunk:
-    write_avi_chunk(muxer->file,s->ckid,len,s->buffer); /* unsigned char */
+    write_avi_chunk(muxer->stream,s->ckid,len,s->buffer); /* unsigned char */
 
     if (len > s->h.dwSuggestedBufferSize){
 	s->h.dwSuggestedBufferSize = len;
@@ -248,7 +247,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags,
     muxer->file_end += 8 + paddedlen;
 }
 
-static void write_avi_list(FILE *f,unsigned int id,int len){
+static void write_avi_list(stream_t *stream,unsigned int id,int len){
   unsigned int list_id=FOURCC_LIST;
   int le_len;
   int le_id;
@@ -256,9 +255,9 @@ static void write_avi_list(FILE *f,unsigned int id,int len){
   list_id = le2me_32(list_id);
   le_len = le2me_32(len);
   le_id = le2me_32(id);
-  fwrite(&list_id,4,1,f);
-  fwrite(&le_len,4,1,f);
-  fwrite(&le_id,4,1,f);
+  stream_write_buffer(stream, &list_id, 4);
+  stream_write_buffer(stream, &le_len, 4);
+  stream_write_buffer(stream, &le_id, 4);
 }
 
 #define WFSIZE(wf) (sizeof(WAVEFORMATEX)+(wf)->cbSize)
@@ -269,7 +268,6 @@ static void avifile_write_header(muxer_t *muxer){
   unsigned int i;
   unsigned int hdrsize;
   muxer_info_t info[16];
-  FILE *f = muxer->file;
   VideoPropHeader vprp;
   uint32_t aspect = avi_aspect(muxer->def_v);
   struct avi_stream_info *vsi = muxer->def_v->priv;
@@ -306,17 +304,17 @@ static void avifile_write_header(muxer_t *muxer){
           rifflen = vsi->riffofs[i+1] - vsi->riffofs[i] - 8;
           movilen = le2me_32(rifflen - 12);
           rifflen = le2me_32(rifflen);
-          fseeko(f, vsi->riffofs[i]+4, SEEK_SET);
-          fwrite(&rifflen,4,1,f);
+          stream_seek(muxer->stream, vsi->riffofs[i]+4);
+          stream_write_buffer(muxer->stream,&rifflen,4);
 
           /* fixup movi length */
           if (i > 0) {
-              fseeko(f, vsi->riffofs[i]+16, SEEK_SET);
-              fwrite(&movilen,4,1,f);
+              stream_seek(muxer->stream, vsi->riffofs[i]+16);
+              stream_write_buffer(muxer->stream,&movilen,4);
           }
       }
 
-      fseeko(f, 12, SEEK_SET);
+      stream_seek(muxer->stream, 12);
   } else {
     // RIFF header:
     riff[0]=mmioFOURCC('R','I','F','F');
@@ -325,7 +323,7 @@ static void avifile_write_header(muxer_t *muxer){
     riff[0]=le2me_32(riff[0]);
     riff[1]=le2me_32(riff[1]);
     riff[2]=le2me_32(riff[2]);
-    fwrite(&riff,12,1,f);
+    stream_write_buffer(muxer->stream,&riff,12);
   }
 
   // update AVI header:
@@ -370,10 +368,10 @@ static void avifile_write_header(muxer_t *muxer){
 	  hdrsize += 32 + 16*si->superidxsize; //indx
       }
   }
-  write_avi_list(f,listtypeAVIHEADER,hdrsize);
+  write_avi_list(muxer->stream,listtypeAVIHEADER,hdrsize);
   
   le2me_MainAVIHeader(&muxer->avih);
-  write_avi_chunk(f,ckidAVIMAINHDR,sizeof(muxer->avih),&muxer->avih); /* MainAVIHeader */
+  write_avi_chunk(muxer->stream,ckidAVIMAINHDR,sizeof(muxer->avih),&muxer->avih); /* MainAVIHeader */
   le2me_MainAVIHeader(&muxer->avih);
 
   // stream headers:
@@ -416,9 +414,9 @@ static void avifile_write_header(muxer_t *muxer){
 	  break;
       }
 
-      write_avi_list(f,listtypeSTREAMHEADER,hdrsize);
+      write_avi_list(muxer->stream,listtypeSTREAMHEADER,hdrsize);
       le2me_AVIStreamHeader(&s->h);
-      write_avi_chunk(f,ckidSTREAMHEADER,sizeof(s->h),&s->h); /* AVISTreamHeader */ // strh
+      write_avi_chunk(muxer->stream,ckidSTREAMHEADER,sizeof(s->h),&s->h); /* AVISTreamHeader */ // strh
       le2me_AVIStreamHeader(&s->h);
 
       switch(s->type){
@@ -426,7 +424,7 @@ static void avifile_write_header(muxer_t *muxer){
 {
           int biSize=s->bih->biSize;
           le2me_BITMAPINFOHEADER(s->bih);
-          write_avi_chunk(f,ckidSTREAMFORMAT,biSize,s->bih); /* BITMAPINFOHEADER */
+          write_avi_chunk(muxer->stream,ckidSTREAMFORMAT,biSize,s->bih); /* BITMAPINFOHEADER */
           le2me_BITMAPINFOHEADER(s->bih);
 
 	  if (aspect != 0) {
@@ -434,7 +432,7 @@ static void avifile_write_header(muxer_t *muxer){
 	      le2me_VideoPropHeader(&vprp);
 	      le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[0]);
 	      le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[1]);
-	      write_avi_chunk(f,mmioFOURCC('v','p','r','p'),
+	      write_avi_chunk(muxer->stream,mmioFOURCC('v','p','r','p'),
 	                      sizeof(VideoPropHeader) -
 	                      sizeof(VIDEO_FIELD_DESC)*(2-fields),
 	                      &vprp); /* Video Properties Header */
@@ -445,7 +443,7 @@ static void avifile_write_header(muxer_t *muxer){
 {
           int wfsize = WFSIZE(s->wf);
           le2me_WAVEFORMATEX(s->wf);
-          write_avi_chunk(f,ckidSTREAMFORMAT,wfsize,s->wf); /* WAVEFORMATEX */
+          write_avi_chunk(muxer->stream,ckidSTREAMFORMAT,wfsize,s->wf); /* WAVEFORMATEX */
           le2me_WAVEFORMATEX(s->wf);
 }	  
 	  break;
@@ -462,7 +460,7 @@ static void avifile_write_header(muxer_t *muxer){
 	  idxhdr[6] = 0;
 	  idxhdr[7] = 0;
 
-	  fwrite(idxhdr,sizeof(idxhdr),1,f);
+	  stream_write_buffer(muxer->stream,idxhdr,sizeof(idxhdr));
 	  for (j=0; j<n; j++) {
 	      struct avi_odmlsuperidx_entry *entry = &si->superidx[j];
 	      unsigned int data[4];
@@ -470,7 +468,7 @@ static void avifile_write_header(muxer_t *muxer){
 	      data[1] = le2me_32(entry->ofs >> 32);
 	      data[2] = le2me_32(entry->len);
 	      data[3] = le2me_32(entry->duration);
-	      fwrite(data,sizeof(data),1,f);
+	      stream_write_buffer(muxer->stream,data,sizeof(data));
 	  }
       }
   }
@@ -479,8 +477,8 @@ static void avifile_write_header(muxer_t *muxer){
   if (isodml) {
       memset(dmlh, 0, sizeof(dmlh));
       dmlh[0] = le2me_32(muxer->avih.dwTotalFrames);
-      write_avi_list(f,mmioFOURCC('o','d','m','l'),sizeof(dmlh)+8);
-      write_avi_chunk(f,mmioFOURCC('d','m','l','h'),sizeof(dmlh),dmlh);
+      write_avi_list(muxer->stream,mmioFOURCC('o','d','m','l'),sizeof(dmlh)+8);
+      write_avi_chunk(muxer->stream,mmioFOURCC('d','m','l','h'),sizeof(dmlh),dmlh);
   }
 
 // ============= INFO ===============
@@ -527,27 +525,27 @@ info[i].id=0;
   }
   // write infos:
   if (hdrsize!=0){
-      write_avi_list(f,mmioFOURCC('I','N','F','O'),hdrsize);
+      write_avi_list(muxer->stream,mmioFOURCC('I','N','F','O'),hdrsize);
       for(i=0;info[i].id!=0;i++) if(info[i].text){
-          write_avi_chunk(f,info[i].id,strlen(info[i].text)+1,info[i].text);
+          write_avi_chunk(muxer->stream,info[i].id,strlen(info[i].text)+1,info[i].text);
       }
   }
 
   // JUNK:
-  write_avi_chunk(f,ckidAVIPADDING,MOVIALIGN-(ftello(f)%MOVIALIGN)-8,NULL); /* junk */
+  write_avi_chunk(muxer->stream,ckidAVIPADDING,MOVIALIGN-(stream_tell(muxer->stream)%MOVIALIGN)-8,NULL); /* junk */
   if (!isodml) {
     // 'movi' header:
-    write_avi_list(f,listtypeAVIMOVIE,muxer->movi_end-ftello(f)-12);
+    write_avi_list(muxer->stream,listtypeAVIMOVIE,muxer->movi_end-stream_tell(muxer->stream)-12);
   } else {
-    if (ftello(f) != MOVIALIGN) {
+    if (stream_tell(muxer->stream) != MOVIALIGN) {
 	mp_msg(MSGT_MUXER, MSGL_ERR, "Opendml superindex is too big for reserved space!\n");
-	mp_msg(MSGT_MUXER, MSGL_ERR, "Expected filepos %d, real filepos %ld, missing space %ld\n", MOVIALIGN, ftell(muxer->file), ftell(muxer->file)-MOVIALIGN);
+	mp_msg(MSGT_MUXER, MSGL_ERR, "Expected filepos %d, real filepos %ld, missing space %ld\n", MOVIALIGN, stream_tell(muxer->stream), stream_tell(muxer->stream)-MOVIALIGN);
 	mp_msg(MSGT_MUXER, MSGL_ERR, "Try increasing MOVIALIGN in libmpdemux/muxer_avi.c\n");
     }
-    write_avi_list(f,listtypeAVIMOVIE,muxer->movi_end-ftello(f)-12);
+    write_avi_list(muxer->stream,listtypeAVIMOVIE,muxer->movi_end-stream_tell(muxer->stream)-12);
   }
-  muxer->movi_start=ftello(muxer->file);
-  if (muxer->file_end == 0) muxer->file_end = ftello(muxer->file);
+  muxer->movi_start=stream_tell(muxer->stream);
+  if (muxer->file_end == 0) muxer->file_end = stream_tell(muxer->stream);
 }
 
 static void avifile_odml_write_index(muxer_t *muxer){
@@ -619,36 +617,36 @@ static void avifile_odml_write_index(muxer_t *muxer){
 	idxhdr[7] = 0; /* unused */
 
 	si->superidx[j].len = 32 + 8*k;
-	si->superidx[j].ofs = ftello(muxer->file);
+	si->superidx[j].ofs = stream_tell(muxer->stream);
 	si->superidx[j].duration = duration;
 
-	fwrite(idxhdr,sizeof(idxhdr),1,muxer->file);
+	stream_write_buffer(muxer->stream, idxhdr,sizeof(idxhdr));
 	for (k=0; k<entries_per_subidx && idxpos<si->idxpos; k++) {
 	    unsigned int entry[2];
 	    entry[0] = le2me_32(si->idx[idxpos].ofs - start);
 	    entry[1] = le2me_32(si->idx[idxpos].len | si->idx[idxpos].flags);
 	    idxpos++;
-	    fwrite(entry,sizeof(entry),1,muxer->file);
+	    stream_write_buffer(muxer->stream, entry, sizeof(entry));
 	}
      }
   }
-  muxer->file_end=ftello(muxer->file);
+  muxer->file_end=stream_tell(muxer->stream);
 }
 
 static void avifile_write_standard_index(muxer_t *muxer){
 
-  muxer->movi_end=ftello(muxer->file);
+  muxer->movi_end=stream_tell(muxer->stream);
   if(muxer->idx && muxer->idx_pos>0){
       int i;
       // fixup index entries:
 //      for(i=0;i<muxer->idx_pos;i++) muxer->idx[i].dwChunkOffset-=muxer->movi_start-4;
       // write index chunk:
       for (i=0; i<muxer->idx_pos; i++) le2me_AVIINDEXENTRY((&muxer->idx[i]));
-      write_avi_chunk(muxer->file,ckidAVINEWINDEX,16*muxer->idx_pos,muxer->idx); /* AVIINDEXENTRY */
+      write_avi_chunk(muxer->stream,ckidAVINEWINDEX,16*muxer->idx_pos,muxer->idx); /* AVIINDEXENTRY */
       for (i=0; i<muxer->idx_pos; i++) le2me_AVIINDEXENTRY((&muxer->idx[i]));
       muxer->avih.dwFlags|=AVIF_HASINDEX;
   }
-  muxer->file_end=ftello(muxer->file);
+  muxer->file_end=stream_tell(muxer->stream);
 }
 
 static void avifile_write_index(muxer_t *muxer){

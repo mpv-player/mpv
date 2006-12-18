@@ -359,13 +359,13 @@ static void exit_sighandler(int x){
 }
 
 static muxer_t* muxer=NULL;
-static FILE* muxer_f=NULL;
 
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 int main(int argc,char* argv[]){
 
 stream_t* stream=NULL;
+stream_t* ostream=NULL;
 demuxer_t* demuxer=NULL;
 stream_t* stream2=NULL;
 demuxer_t* demuxer2=NULL;
@@ -402,6 +402,7 @@ int decoded_frameno=0;
 int next_frameno=-1;
 int curfile=0;
 int new_srate=0;
+int fformat=DEMUXER_TYPE_UNKNOWN;
 
 unsigned int timer_start=0;
 ao_data_t ao_data = {0,0,0,0,OUTBURST,-1,0};
@@ -713,17 +714,13 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
 // Apply current settings for forced subs
 spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 
-// set up output file:
-if(!strcmp(out_filename, "-"))
-    muxer_f=stdout;
-else
-    muxer_f=fopen(out_filename,"wb");
-if(!muxer_f) {
+ostream = open_output_stream(out_filename, 0);
+if(!ostream) {
   mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CannotOpenOutputFile, out_filename);
   mencoder_exit(1,NULL);
 }
 
-muxer=muxer_new_muxer(out_file_format,muxer_f);
+muxer=muxer_new_muxer(out_file_format,ostream);
 if(!muxer) {
   mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CannotInitializeMuxer);
   mencoder_exit(1,NULL);
@@ -1092,7 +1089,7 @@ while(!at_eof){
     float v_pts=0;
     int skip_flag=0; // 1=skip  -1=duplicate
 
-    if((end_at.type == END_AT_SIZE && end_at.pos <= ftello(muxer_f))  ||
+    if((end_at.type == END_AT_SIZE && end_at.pos <= stream_tell(muxer->stream))  ||
        (end_at.type == END_AT_TIME && end_at.pos < mux_v->timer))
         break;
 
@@ -1451,7 +1448,7 @@ if(sh_audio && !demuxer2){
 	    	mux_v->timer, decoded_frameno, (int)(p*100),
 	    	(t>1) ? (int)(decoded_frameno/t+0.5) : 0,
 	    	(p>0.001) ? (int)((t/p-t)/60) : 0, 
-	    	(p>0.001) ? (int)(ftello(muxer_f)/p/1024/1024) : 0,
+	    	(p>0.001) ? (int)(stream_tell(muxer->stream)/p/1024/1024) : 0,
 	    	v_pts_corr,
 	    	(mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
 	    	(mux_a && mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0,
@@ -1463,7 +1460,7 @@ if(sh_audio && !demuxer2){
 	    mux_v->timer, decoded_frameno, (int)(p*100),
 	    (t>1) ? (float)(decoded_frameno/t) : 0,
 	    (p>0.001) ? (int)((t/p-t)/60) : 0, 
-	    (p>0.001) ? (int)(ftello(muxer_f)/p/1024/1024) : 0,
+	    (p>0.001) ? (int)(stream_tell(muxer->stream)/p/1024/1024) : 0,
 	    v_pts_corr,
 	    (mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
 	    (mux_a && mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0
@@ -1506,10 +1503,12 @@ if(sh_audio && !demuxer2){
 
  frame_data = (s_frame_data){ .start = NULL, .in_size = 0, .frame_time = 0., .already_read = 0 };
 
+#if 0
  if(ferror(muxer_f)) {
      mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile, out_filename);
      mencoder_exit(1, NULL);
  }
+#endif
 
 } // while(!at_eof)
 
@@ -1549,13 +1548,15 @@ if(aencoder)
         aencoder->fixup(aencoder);
 
 if (muxer->cont_write_index) muxer_write_index(muxer);
-muxer_f_size=ftello(muxer_f);
-fseek(muxer_f,0,SEEK_SET);
+muxer_f_size=stream_tell(muxer->stream);
+stream_seek(muxer->stream,0);
 if (muxer->cont_write_header) muxer_write_header(muxer); // update header
+#if 0
 if(ferror(muxer_f) || fclose(muxer_f) != 0) {
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile, out_filename);
     mencoder_exit(1, NULL);
 }
+#endif
 if(vobsub_writer)
     vobsub_out_close(vobsub_writer);
 

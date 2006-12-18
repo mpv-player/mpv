@@ -25,6 +25,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 
+#include "stream.h"
 #include "muxer.h"
 
 #include "img_format.h"

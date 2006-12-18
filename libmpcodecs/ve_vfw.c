@@ -23,6 +23,7 @@
 #include "mp_image.h"
 #include "vf.h"
 
+#include "stream.h"
 #include "muxer.h"
 
 //===========================================================================//

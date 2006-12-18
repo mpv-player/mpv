@@ -9,6 +9,7 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 
+#include "stream.h"
 #include "muxer.h"
 
 static muxer_stream_t* rawaudiofile_new_stream(muxer_t *muxer,int type){
@@ -50,7 +51,7 @@ static void rawaudiofile_write_chunk(muxer_stream_t *s,size_t len,unsigned int f
 
     // write out the chunk:
     if (s->type==MUXER_TYPE_AUDIO)
-        fwrite(s->buffer,len,1,muxer->file);
+        stream_write_buffer(muxer->stream, s->buffer, len);
 }
 
 static void rawaudiofile_write_header(muxer_t *muxer){

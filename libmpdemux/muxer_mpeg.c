@@ -12,8 +12,8 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 
-#include "muxer.h"
 #include "stream.h"
+#include "muxer.h"
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
@@ -748,7 +748,7 @@ static void write_pes_padding(uint8_t *buff, uint16_t len)
 	memset(&buff[6], 0xff, len - 6);
 }
 
-static void write_psm_block(muxer_t *muxer, FILE *f)
+static void write_psm_block(muxer_t *muxer, stream_t *stream)
 {
 	uint16_t offset, stuffing_len;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
@@ -763,7 +763,7 @@ static void write_psm_block(muxer_t *muxer, FILE *f)
 		write_pes_padding(&buff[offset], stuffing_len);
 		offset += stuffing_len;
 	}
-	fwrite(buff, offset, 1, f);
+	stream_write_buffer(stream, buff, offset);
 	priv->headers_size += offset;
 }
 
@@ -824,7 +824,7 @@ static uint32_t calc_pes_hlen(int format, muxer_headers_t *h, muxer_priv_t *priv
 }
 
 	
-static int write_mpeg_pack(muxer_t *muxer, muxer_stream_t *s, FILE *f, int isoend)
+static int write_mpeg_pack(muxer_t *muxer, muxer_stream_t *s, stream_t *stream, int isoend)
 {
 	size_t tot, offset;
 	muxer_priv_t *priv;
@@ -842,7 +842,7 @@ static int write_mpeg_pack(muxer_t *muxer, muxer_stream_t *s, FILE *f, int isoen
 		buff[offset + 2] = 1;
 		buff[offset + 3] = 0xb9;
 		
-		fwrite(buff, priv->packet_size, 1, f);
+		stream_write_buffer(stream, buff, priv->packet_size);
 		return 1;
 	}
 	else	//FAKE DVD NAV PACK
@@ -863,7 +863,7 @@ static int write_mpeg_pack(muxer_t *muxer, muxer_stream_t *s, FILE *f, int isoen
 			offset += stuffing_len;
 		}
 			
-		fwrite(buff, offset, 1, f);
+		stream_write_buffer(stream, buff, offset);
 		priv->headers_size += offset;
 		tot = offset;
 		muxer->movi_end += tot;
@@ -1240,7 +1240,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 	spriv->size += len;
 
 	if(dvd_pack && (spriv->pack_offset == priv->packet_size))
-		write_mpeg_pack(muxer, NULL, muxer->file, 0);	//insert fake Nav Packet
+		write_mpeg_pack(muxer, NULL, muxer->stream, 0);	//insert fake Nav Packet
 
 	if(n > 0)
 		remove_frames(spriv,  n);
@@ -1259,7 +1259,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 		spriv->pack_offset += diff;
 	}
 	
-	fwrite(spriv->pack, spriv->pack_offset, 1, muxer->file);
+	stream_write_buffer(muxer->stream, spriv->pack, spriv->pack_offset);
 
 	priv->headers_size += spriv->pack_offset - len;
 	priv->data_size += len;
@@ -2351,7 +2351,7 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 	spriv->psm_fixed = 1;
 	priv->psm_streams_cnt++;
 	if((priv->psm_streams_cnt == muxer->num_videos + muxer->num_audios) && priv->use_psm)
-		write_psm_block(muxer, muxer->file);
+		write_psm_block(muxer, muxer->stream);
   }
 
   flush_buffers(muxer, 0);
@@ -2374,7 +2374,7 @@ static void mpegfile_write_index(muxer_t *muxer)
 	while(flush_buffers(muxer, 0) > 0);
 	flush_buffers(muxer, 1);
 	if(priv->is_genmpeg1 || priv->is_genmpeg2)
-		write_mpeg_pack(muxer, NULL, muxer->file, 1);	//insert fake Nav Packet
+		write_mpeg_pack(muxer, NULL, muxer->stream, 1);	//insert fake Nav Packet
 		
 	mp_msg(MSGT_MUXER, MSGL_INFO, "\nOverhead: %.3lf%% (%"PRIu64" / %"PRIu64")\n", 100.0 * (double)priv->headers_size / (double)priv->data_size, priv->headers_size, priv->data_size);
 }
@@ -2400,7 +2400,7 @@ static void mpegfile_write_header(muxer_t *muxer)
 	//write the first system header only for generic mpeg1/2 muxes, and only when we have collected all necessary infos
 	if(priv->is_genmpeg1 || priv->is_genmpeg2 || ((priv->is_xvcd || priv->is_xsvcd) && (priv->headers_cnt == 1)))
 	{
-		write_mpeg_pack(muxer, NULL, muxer->file, 0);
+		write_mpeg_pack(muxer, NULL, muxer->stream, 0);
 		priv->update_system_header = 0;
 	}
 	

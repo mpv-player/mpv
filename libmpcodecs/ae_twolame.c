@@ -9,6 +9,7 @@
 #include "aviheader.h"
 #include "libaf/af_format.h"
 #include "ms_hdr.h"
+#include "stream.h"
 #include "muxer.h"
 #include "ae_twolame.h"
 #include "libmpdemux/mp3_hdr.h"

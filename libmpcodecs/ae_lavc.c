@@ -8,6 +8,7 @@
 #include "mp_msg.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
+#include "stream.h"
 #include "muxer.h"
 #include "ae_lavc.h"
 #include "help_mp.h"

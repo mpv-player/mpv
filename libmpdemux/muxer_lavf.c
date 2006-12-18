@@ -12,8 +12,8 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 
-#include "muxer.h"
 #include "stream.h"
+#include "muxer.h"
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
@@ -89,14 +89,30 @@ static int mp_read(URLContext *h, unsigned char *buf, int size)
 static int mp_write(URLContext *h, unsigned char *buf, int size)
 {
 	muxer_t *muxer = (muxer_t*)h->priv_data;
-	return fwrite(buf, 1, size, muxer->file);
+	return stream_write_buffer(muxer->stream, buf, size);
 }
 
 static offset_t mp_seek(URLContext *h, offset_t pos, int whence)
 {
 	muxer_t *muxer = (muxer_t*)h->priv_data;
+	if(whence == SEEK_CUR)
+	{
+		off_t cur = stream_tell(muxer->stream);
+		if(cur == -1)
+			return -1;
+		pos += cur;
+	}
+	else if(whence == SEEK_END)
+	{
+		off_t size=0;
+		if(stream_control(muxer->stream, STREAM_CTRL_GET_SIZE, &size) == STREAM_UNSUPORTED || size < pos)
+			return -1;
+		pos = size - pos;
+	}
 	mp_msg(MSGT_MUXER, MSGL_DBG2, "SEEK %"PRIu64"\n", (int64_t)pos);
-	return fseeko(muxer->file, pos, whence);
+	if(!stream_seek(muxer->stream, pos))
+		return -1;
+	return 0;
 }
 
 
