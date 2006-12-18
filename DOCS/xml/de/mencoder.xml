@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21079 -->
+<!-- in sync with r21424 -->
 <chapter id="mencoder">
 <title>Allgemeiner Gebrauch von <application>MEncoder</application></title>
 
@@ -40,11 +40,11 @@ Audiocodecs:
 <tbody>
   <row>
     <entry>mp3lame</entry>
-    <entry>Encodiere nach VBR-, ABR- oder CBR-MP3 mittels LAME</entry>
+    <entry>encodiere nach VBR-, ABR- oder CBR-MP3 mittels LAME</entry>
   </row>
   <row>
     <entry>lavc</entry>
-    <entry>Verwende einen der Audiocodecs von
+    <entry>verwende einen der Audiocodecs von
     <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem></link>
     </entry>
   </row>
@@ -62,11 +62,11 @@ Audiocodecs:
   </row>
   <row>
     <entry>pcm</entry>
-    <entry>Unkomprimiertes PCM-Audio</entry>
+    <entry>unkomprimiertes PCM-Audio</entry>
   </row>
   <row>
     <entry>copy</entry>
-    <entry>Nicht neu codieren, kopiere einfach nur komprimierte Frames</entry>
+    <entry>nicht neu codieren, kopiere einfach nur komprimierte Frames</entry>
   </row>
 </tbody>
 </tgroup>
@@ -101,15 +101,15 @@ Video-Codecs:
   </row>
   <row>
     <entry>raw</entry>
-    <entry>Unkomprimierte Video-Frames</entry>
+    <entry>unkomprimierte Video-Frames</entry>
   </row>
   <row>
     <entry>copy</entry>
-    <entry>Nicht neu codieren, kopiere einfach nur komprimierte Frames</entry>
+    <entry>nicht neu codieren, kopiere einfach nur komprimierte Frames</entry>
   </row>
   <row>
     <entry>frameno</entry>
-    <entry>Verwendet für 3-pass-Encodierung (nicht empfohlen)</entry>
+    <entry>verwendet für 3-pass-Encodierung (nicht empfohlen)</entry>
   </row>
 </tbody>
 </tgroup>
@@ -133,7 +133,7 @@ Containerformate:
 <tbody>
   <row>
     <entry>lavf</entry>
-    <entry>Einer der von
+    <entry>einer der von
     <systemitem class="library">libavformat</systemitem>
     unterstützten Container</entry>
   </row>
@@ -252,9 +252,10 @@ Containerformate:
   Erzeugen eines Macromedia Flash Videos, das in einem Web-Browser mit dem
   Macromedia Flash Plugin abgespielt werden kann:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
--lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3 \
--srate 22050
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replaceable> -of lavf \
+    -oac mp3lame -lameopts abr:br=56 -ovc lavc \
+    -lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3 \
+    -srate 22050
 </screen>
 </para>
 </informalexample>
@@ -339,11 +340,10 @@ MPEG-4 Videos 24kHz, und für H.264 48kHz betragen.
 <title>Encodierung für PSP</title>
 <para>
 <screen>
-mencoder -oac lavc -ovc lavc -of lavf -lavcopts
-aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
--af lavcresample=24000 -vf harddup -lavfopts
-format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
--ofps 30000/1001 input.video -o output.psp
+mencoder -ofps 30000/1001 -af resample=24000 -vf harddup -of lavf \
+-oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+-lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+<replaceable>input.video</replaceable> -o <replaceable>output.psp</replaceable>
 </screen>
 Der Titel des Videos kann folgendermaßen angepasst werden:
 <option>-info name=<replaceable>MovieTitle</replaceable></option>.
@@ -419,19 +419,22 @@ Ausgabedatei von <application>MEncoder</application> zu ändern.
 <para>
 Beispiel:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other_options</replaceable> -o <replaceable>output.mpg</replaceable>
+mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video \
+    -oac copy <replaceable>other_options</replaceable> -o <replaceable>output.mpg</replaceable>
 </screen>
 Erzeugen einer für das Abspielen auf Systemen mit minimalem Multimedia-Support
 geeigneten MPEG1-Datei, wie etwa auf Standard-Windows-Installationen:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>output.mpg</replaceable> -oac lavc -ovc lavc \
--lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
+mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 \
+    -o <replaceable>output.mpg</replaceable> -oac lavc -ovc lavc \
+    -lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 Das gleiche bei Benutzung des MPEG-Muxers von <systemitem class="library">libavformat</systemitem>:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -of lavf -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
--ovc lavc -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0 \
--o VCD.mpg -ofps 25 -vf scale=352:288,harddup -oac lavc -lavcopts acodec=mp2:abitrate=224
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>VCD.mpg</replaceable> -ofps 25 -vf scale=352:288,harddup -of lavf \
+    -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
+    -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
+    -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0 \
 </screen>
 </para>
 </informalexample>
@@ -474,7 +477,8 @@ verwenden.
 <para>
 Anwendung:
 <screen>
-mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -vf scale=640:480 -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell \
+    -vf scale=640:480 -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -522,7 +526,8 @@ sie. Dieser Abschnitt behandelt das <emphasis role="bold">Kopieren</emphasis>.
 <para>
 Beispiel:
 <screen>
-mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D \
+    -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 
@@ -562,7 +567,8 @@ Die Erklärung der Option <option>-mf</option> steht in der Manpage.
   Erzeugen einer MPEG4-Datei aus allen im aktuellen Verzeichnis liegenden
   JPEG-Dateien:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc \
+    -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -572,7 +578,8 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=m
   Erzeugen einer MPEG4-Datei aus einigen im aktuellen Verzeichnis liegenden
   JPEG-Dateien:
 <screen>
-mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg \
+    -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -584,7 +591,7 @@ mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=6
   sollen, eine pro Zeile):
 <screen>
 mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \
--ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
+    -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -679,17 +686,20 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
 <example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
 <title>Kopieren zweier Untertitel aus einer DVD während einer 2-pass-Encodierung</title>
 <screen>
-rm subtitles.idx subtitles.sub
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
+rm <replaceable>subtitles.idx</replaceable> <replaceable>subtitles.sub</replaceable>
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
+    -vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 0 -sid 2
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
+    -vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 1 -sid 5<!--
 --></screen>
 </example>
 
 <example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Kopieren eines französichen Untertitels aus einer MPEG-Datei</title>
 <screen>
-rm subtitles.idx subtitles.sub
-mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1 -nosound -ovc copy
+rm <replaceable>subtitles.idx</replaceable> <replaceable>subtitles.sub</replaceable>
+mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout <replaceable>subtitles</replaceable> -vobsuboutindex 0 \
+    -vobsuboutid fr -sid 1 -nosound -ovc copy
 </screen>
 </example>
 
@@ -734,7 +744,8 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 
 <para>
 Anwendung:
-<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>output.avi</replaceable></screen>
+<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -vf crop=714:548:0:14 -oac copy -ovc lavc \
+    -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -o <replaceable>output.avi</replaceable></screen>
 </para>
 </sect1>
 
