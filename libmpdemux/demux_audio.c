@@ -32,7 +32,7 @@ typedef struct da_priv {
 #define MAX_WAVHDR_LEN (1 * 1024 * 1024)
 
 // how many valid frames in a row we need before accepting as valid MP3
-#define MIN_MP3_HDRS 5
+#define MIN_MP3_HDRS 12
 
 //! Used to describe a potential (chain of) MP3 headers we found
 typedef struct mp3_hdr {
