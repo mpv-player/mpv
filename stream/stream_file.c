@@ -68,6 +68,22 @@ static int seek_forward(stream_t *s,off_t newpos) {
   return 1;
 }
 
+static int control(stream_t *s, int cmd, void *arg) {
+  switch(cmd) {
+    case STREAM_CTRL_GET_SIZE: {
+      off_t size;
+
+      size = lseek(s->fd, 0, SEEK_END);
+      lseek(s->fd, s->pos, SEEK_SET);
+      if(size != (off_t)-1) {
+        *((off_t*)arg) = size;
+        return 1;
+      }
+    }
+  }
+  return STREAM_UNSUPORTED;
+}
+
 static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   int f;
   mode_t m = 0;
@@ -148,6 +164,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   stream->fd = f;
   stream->fill_buffer = fill_buffer;
   stream->write_buffer = write_buffer;
+  stream->control = control;
 
   m_struct_free(&stream_opts,opts);
   return STREAM_OK;
