@@ -78,7 +78,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   if(mode == STREAM_READ)
     m = O_RDONLY;
   else if(mode == STREAM_WRITE)
-    m = O_WRONLY;
+    m = O_RDWR|O_CREAT;
   else {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[file] Unknown open mode %d\n",mode);
     m_struct_free(&stream_opts,opts);
@@ -117,7 +117,10 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 #endif
     }
   } else {
-    f=open(filename,m);
+    if(mode == STREAM_READ)
+      f=open(filename,m);
+    else
+      f=open(filename,m, S_IRUSR|S_IWUSR);
     if(f<0) {
       mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);
       m_struct_free(&stream_opts,opts);
@@ -131,7 +134,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 #else
   if(len == -1) {
 #endif
-    stream->seek = seek_forward;
+    if(mode == STREAM_READ) stream->seek = seek_forward;
     stream->type = STREAMTYPE_STREAM; // Must be move to STREAMTYPE_FILE
     stream->flags |= STREAM_SEEK_FW;
   } else if(len >= 0) {
