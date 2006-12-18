@@ -52,6 +52,8 @@ MPlayer (1.0)
     * long-deprecated -vop option removed
     * video stream switching
     * dvdnav:// honour -alang and -slang
+    * mencoder now can write to output streams; file:// is the only stream currently
+      supported
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
