@@ -396,7 +396,7 @@ Miscellaneous options:
                          \$LINGUAS is also honored) [en]
                          (Available: $LANGUAGES all)
   --with-install=PATH    path to a custom install program
-  --enable-color-console enable color console output [disable]
+  --enable-color-console enable color console output (UNSUPPORTED) [disable]
 
 Advanced options:
   --enable-mmx              enable MMX [autodetect]
