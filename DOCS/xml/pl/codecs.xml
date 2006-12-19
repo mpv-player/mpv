@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21168 -->
+<!-- synced with r21624 -->
 <!-- Opiekun: Boski -->
 <chapter id="codecs">
 <title>Obsługiwane kodeki</title>
@@ -23,50 +23,54 @@ Najważniejsze ze wszystkich:
 <listitem><simpara>
   <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) i
   <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) video
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   natywne dekodery dla <emphasis role="bold">wszystkich wariantów DivX,
   3ivX, M$ MPEG-4</emphasis> v1, v2 i innych rodzajów MPEG-4
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   natywne dekodery dla <emphasis role="bold">Windows Media Video 7/8</emphasis>
-     (<emphasis role="bold">WMV1/WMV2</emphasis>) i dekodery Win32 DLL
+  (<emphasis role="bold">WMV1/WMV2</emphasis>) i dekodery Win32 DLL
   dla <emphasis role="bold">Windows Media Video 9</emphasis>
-  (<emphasis role="bold">WMV3</emphasis>). Oba używane w plikach <filename>.wmv</filename>
-  </simpara></listitem>
+  (<emphasis role="bold">WMV3</emphasis>).
+  Oba używane w plikach <filename>.wmv</filename>
+</simpara></listitem>
 <listitem><simpara>
   natywny dekoder <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   natywny dekoder <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   dekoder <emphasis role="bold">3ivX</emphasis> w wersji 1 i 2
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
-  Kodeki Cinepak i <emphasis role="bold">Intel Indeo</emphasis> (3.1,3.2,4.1,5.0)
-  </simpara></listitem>
+  Kodeki Cinepak i <emphasis role="bold">Intel Indeo</emphasis>
+  (3.1,3.2,4.1,5.0)
+</simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 i inne formaty sprzętowe
-  </simpara></listitem>
+  <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 i inne formaty
+  sprzętowe
+</simpara></listitem>
 <listitem><simpara>
-  VIVO 1.0, 2.0, I263 i inne warianty <emphasis role="bold">H.263(+)</emphasis>
-  </simpara></listitem>
+  VIVO 1.0, 2.0, I263 i inne warianty
+  <emphasis role="bold">H.263(+)</emphasis>
+</simpara></listitem>
 <listitem><simpara>
   FLI/FLC
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">RealVideo 1.0 i 2.0</emphasis> przy użyciu
   <systemitem class="library">libavcodec</systemitem> i kodeki
   <emphasis role="bold">RealVideo 3.0 i 4.0</emphasis> używające bibliotek
   RealPlayer
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   natywny dekoder HuffYUV
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Różne stare proste formaty podobne do RLE
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <para>
@@ -76,6 +80,7 @@ obsługiwane, zajrzyj do działu
 i pomóż nam dodać ich obsługę.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
@@ -106,6 +111,7 @@ Po prostu uruchom <filename>./configure</filename> i kompiluj.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="xvid">
 <title>Xvid</title>
@@ -118,6 +124,7 @@ znany kodek DivX.
 Łączy bardzo dobrą jakość video i dobre osiągi dzięki optymalizacjami kodu dla
 większości nowoczesnych procesorów.
 </para>
+
 <para>
 Zaczął się jako odłam kodeka OpenDivX.
 Stało się to gdy ProjectMajo zmienił OpenDivX na zamknięte DivX4.
@@ -147,71 +154,80 @@ pomocy Xvid. Domyślnie używana jest biblioteka
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
-  </para></step>
+</para></step>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
 </para></step>
 <step><para>
   <screen>cd xvidcore/build/generic</screen>
-  </para></step>
+</para></step>
 <step><para>
   <screen>./bootstrap.sh</screen>
-  </para></step>
+</para></step>
 <step><para>
   <screen>./configure</screen>
   Możesz potrzebować dodać jakieś opcje (przejrzyj wyjście
   polecenia <command>./configure --help</command>)
-  </para></step>
+</para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
-  </para></step>
+</para></step>
 <step><para>
   Jeżeli użyłeś opcji <option>--enable-divxcompat</option>,
   skopiuj <filename>../../src/divx4.h</filename> do
   <filename class="directory">/usr/local/include/</filename>.
-  </para></step>
+</para></step>
 <step><para>
   Przekompiluj <application>MPlayera</application> z opcjami
   <option>--with-xvidlibdir=<replaceable>/ścieżka/do/</replaceable>libxvidcore.a</option>
   <option>--with-xvidincdir=<replaceable>/ścieżka/do/</replaceable>xvid.h</option>.
-  </para></step>
+</para></step>
 </procedure>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="codec-x264">
 <title><systemitem class="library">x264</systemitem></title>
 
 <sect3 id="codec-x264-whatis">
 <title>Co to jest <systemitem class="library">x264</systemitem>?</title>
+
 <para>
-  <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
-  jest biblioteką służącą do tworzenia strumieni video H.264.
-  Nie jest w 100% ukończona, ale ma przynajmniej pewną obsługę większości
-  mających wpływ na jakość możliwości H.264.
-  Jest też wiele zaawansowanych możliwości w specyfikacji H.264, które nie mają
-  nic wspólnego z jakością jako taką; wiele z nich jeszcze nie jest
-  zaimplementowanych w <systemitem class="library">x264</systemitem>.
+<ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+jest biblioteką służącą do tworzenia strumieni video H.264.
+Nie jest w 100% ukończona, ale ma przynajmniej pewną obsługę większości
+mających wpływ na jakość możliwości H.264.
+Jest też wiele zaawansowanych możliwości w specyfikacji H.264, które nie mają
+nic wspólnego z jakością jako taką; wiele z nich jeszcze nie jest
+zaimplementowanych w <systemitem class="library">x264</systemitem>.
 </para>
 
 <itemizedlist>
 <title>Możliwości kodera</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Wielokrotne referencje</para></listitem>
-  <listitem><para>Intra: wszystkie typy makrobloków 
-     (16x16, 8x8 i 4x4 z wszystkimi predykcjami)</para></listitem>
-  <listitem><para>Inter P: wszystkie podziały
-     (od 16x16 aż do 4x4)</para></listitem>
-  <listitem><para>Inter B: podziały od 16x16 do 8x8
-    (włączając SKIP/DIRECT)</para></listitem>
-  <listitem><para>Kontrola tempa: stały kwantyzator, stały bitrate,
-    jedno- albo wieloprzebiegowe ABR, opcjonalne VBV</para></listitem>
+  <listitem><para>
+  Intra: wszystkie typy makrobloków (16x16, 8x8 i 4x4 z wszystkimi predykcjami)
+  </para></listitem>
+  <listitem><para>
+  Inter P: wszystkie podziały (od 16x16 aż do 4x4)
+  </para></listitem>
+  <listitem><para>
+  Inter B: podziały od 16x16 do 8x8 (włączając SKIP/DIRECT)
+  </para></listitem>
+  <listitem><para>
+  Kontrola tempa: stały kwantyzator, stały bitrate,
+  jedno- albo wieloprzebiegowe ABR, opcjonalne VBV
+  </para></listitem>
   <listitem><para>Wykrywanie zmian scen</para></listitem>
   <listitem><para>Adaptatywne umieszczanie klatek B</para></listitem>
-  <listitem><para>Referencyjne klatki B / dowolna kolejność
-    ramek</para></listitem>
-  <listitem><para>adaptywna transformacja przestrzenna
-    8x8 i 4x4</para></listitem>
+  <listitem><para>
+  Referencyjne klatki B / dowolna kolejność ramek
+  </para></listitem>
+  <listitem><para>
+  adaptywna transformacja przestrzenna 8x8 i 4x4
+  </para></listitem>
   <listitem><para>tryb bezstratny</para></listitem>
   <listitem><para>Własne matryce kwantyzacji</para></listitem>
   <listitem><para>Równoległe kodowanie wielu fragmentów</para></listitem>
@@ -219,96 +235,108 @@ pomocy Xvid. Domyślnie używana jest biblioteka
 </itemizedlist>
 </sect3>
 
+
 <sect3 id="codec-h264-whatis">
 <title>Co to jest H.264</title>
+
 <para>
-  H.264 jedną z nazw nowego kodeka video opracowanego wspólnie przez ITU
-  i MPEG.
-  Może też być prawidłowo nazywany okropnymi nazwami "ISO/IEC 14496-10" lub
-  "MPEG-4 Part 10". Częściej jest nazywany "MPEG-4 AVC" albo po prostu "AVC".
+H.264 jedną z nazw nowego kodeka video opracowanego wspólnie przez ITU
+i MPEG.
+Może też być prawidłowo nazywany okropnymi nazwami "ISO/IEC 14496-10" lub
+"MPEG-4 Part 10". Częściej jest nazywany "MPEG-4 AVC" albo po prostu "AVC".
 </para>
+
 <para>
-  Jakkolwiek go nie nazywać, H.264 może być wart wypróbowania ponieważ
-  zazwyczaj może dorównać jakością MPEG-4 ASP z mniejszą o 5%-30% objętością.
-  Dokładne wyniki zależą od materiału źródłowego i kodera.
-  Zyski z używania H.264 nie są za darmo: Dekodowanie strumieni H.264 mają
-  duże wymagania obliczeniowe i pamięciowe.
-  Na przykład, na Athlonie 1733 MHz, film H.264 w rozdzielczości DVD 1500kbps
-  wymaga do zdekodowania około 35% CPU.
-  Dla porównania, dekodowanie strumienia MPEG-4 ASP w rozdzielczości DVD
-  1500kbps wymaga około 10% CPU.
-  Oznacza to że dekodowanie wysokiej jakości strumieni jest prawie nie do
-  pomyślenia dla zwykłych użytkowników.
-  Oznacza to również że dobry DVD rip może się czasami zacinać na procesorach
-  wolniejszych niż jakieś 2.0 GHz.
+Jakkolwiek go nie nazywać, H.264 może być wart wypróbowania ponieważ
+zazwyczaj może dorównać jakością MPEG-4 ASP z mniejszą o 5%-30% objętością.
+Dokładne wyniki zależą od materiału źródłowego i kodera.
+Zyski z używania H.264 nie są za darmo: Dekodowanie strumieni H.264 mają
+duże wymagania obliczeniowe i pamięciowe.
+Na przykład, na Athlonie 1733 MHz, film H.264 w rozdzielczości DVD 1500kbps
+wymaga do zdekodowania około 35% CPU.
+Dla porównania, dekodowanie strumienia MPEG-4 ASP w rozdzielczości DVD
+1500kbps wymaga około 10% CPU.
+Oznacza to że dekodowanie wysokiej jakości strumieni jest prawie nie do
+pomyślenia dla zwykłych użytkowników.
+Oznacza to również że dobry DVD rip może się czasami zacinać na procesorach
+wolniejszych niż jakieś 2.0 GHz.
 </para>
+
 <para>
-  Jeśli używasz <systemitem class="library">x264</systemitem>,
-  wymagania kodowania nie są o wiele większe niż te, do których przywykliśmy
-  przy MPEG-4 ASP.
-  Na przykład, na Athlonie 1733 MHz typowe kodowanie DVD będzie działać
-  z 5-15fps.
+Jeśli używasz <systemitem class="library">x264</systemitem>,
+wymagania kodowania nie są o wiele większe niż te, do których przywykliśmy
+przy MPEG-4 ASP.
+Na przykład, na Athlonie 1733 MHz typowe kodowanie DVD będzie działać z 5-15fps.
 </para>
+
 <para>
-  Ten dokument nie ma wyjaśniać szczegółów H.264, ale jeśli jesteś
-  zainteresowany niewielkim wstępem możesz chcieć przeczytać
-  <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
+Ten dokument nie ma wyjaśniać szczegółów H.264, ale jeśli jesteś
+zainteresowany niewielkim wstępem możesz chcieć przeczytać
+<ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
 </para>
 </sect3>
+
 
 <sect3 id="codec-x264-playback">
 <title>Jak mogę odtwarzać filmy H.264 używając <application>MPlayera</application></title>
+
 <para>
-  <application>MPlayer</application> używa dekodera H.264 z
-  <systemitem class="library">libavcodec</systemitem>.
-  <systemitem class="library">libavcodec</systemitem> miało choć trochę zdatny
-  do użytku dekoder H.264 od około czerwca 2004, ale od tego czasu wprowadzono
-  wiele zmian i poprawek, zarówno pod względem obsługiwanej funkcjonalności
-  jak i zużycia CPU.
-  Na wszelki wypadek lepiej jest używać najnowszej wersji z Subversion.
+<application>MPlayer</application> używa dekodera H.264 z
+<systemitem class="library">libavcodec</systemitem>.
+<systemitem class="library">libavcodec</systemitem> miało choć trochę zdatny
+do użytku dekoder H.264 od około czerwca 2004, ale od tego czasu wprowadzono
+wiele zmian i poprawek, zarówno pod względem obsługiwanej funkcjonalności
+jak i zużycia CPU.
+Na wszelki wypadek lepiej jest używać najnowszej wersji z Subversion.
 </para>
+
 <para>
-  Jeśli chcesz szybki i łatwy sposób na sprawdzenie czy były ostatnio zmiany
-  w obsłudze H.264 w <systemitem class="library">libavcodec</systemitem>,
-  możesz patrzeć na
-  <ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">interfejs sieciowy repozytorium SVN FFmpega</ulink>
+Jeśli chcesz szybki i łatwy sposób na sprawdzenie czy były ostatnio zmiany
+w obsłudze H.264 w <systemitem class="library">libavcodec</systemitem>,
+możesz patrzeć na
+<ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">interfejs sieciowy repozytorium SVN FFmpega</ulink>
 </para>
 </sect3>
 
-<sect3 id="codec-x264-encode">
-<title>Jak mogę kodować filmy używając <application>MEncodera</application> i <systemitem class="library">x264</systemitem>?</title>
-<para>
-  Jeśli masz zainstalowanego klienta subversion, możesz uzyskać najnowsze
-  źródła x264 tym poleceniem:
-  <screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
-  Źródła <application>MPlayera</application> są aktualizowane, gdy tylko
-  zmieni się API <systemitem class="library">x264</systemitem>, więc zalecane
-  jest także używanie <application>MPlayera</application> z Subversion.
-  Być może sytuacja się zmieni jeśli i gdy nastąpi "wydanie"
-  <systemitem class="library">x264</systemitem>.
-  W międzyczasie <systemitem class="library">x264</systemitem> powinna być
-  uważana za niestabilną, w tym sensie że jej interface programistyczny może
-  się zmienić.
-</para>
-<para>
-  <systemitem class="library">x264</systemitem> buduje się i instaluje
-  w sposób standardowy:
-  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-  To zainstaluje libx264.a w /usr/local/lib oraz x264.h w /usr/local/include.
 
-  Gdy biblioteka i nagłówki <systemitem class="library">x264</systemitem> są
-  już w standardowych miejscach, budowanie <application>MPlayera</application>
-  z obsługą <systemitem class="library">x264</systemitem> jest proste.
-  Uruchom standardowe:
-  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-  Skrypt konfiguracyjny wykryje że spełniłeś wymagania do obsługi
-  <systemitem class="library">x264</systemitem>.
+<sect3 id="codec-x264-encode">
+<title>Jak mogę kodować filmy używając <application>MEncodera</application>
+  i <systemitem class="library">x264</systemitem>?</title>
+
+<para>
+Jeśli masz zainstalowanego klienta subversion, możesz uzyskać najnowsze
+źródła x264 tym poleceniem:
+<screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
+Źródła <application>MPlayera</application> są aktualizowane, gdy tylko
+zmieni się API <systemitem class="library">x264</systemitem>, więc zalecane
+jest także używanie <application>MPlayera</application> z Subversion.
+Być może sytuacja się zmieni jeśli i gdy nastąpi "wydanie"
+<systemitem class="library">x264</systemitem>.
+W międzyczasie <systemitem class="library">x264</systemitem> powinna być
+uważana za niestabilną, w tym sensie że jej interface programistyczny może
+się zmienić.
+</para>
+
+<para>
+<systemitem class="library">x264</systemitem> buduje się i instaluje
+w sposób standardowy:
+<screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
+To zainstaluje libx264.a w /usr/local/lib oraz x264.h w /usr/local/include.
+Gdy biblioteka i nagłówki <systemitem class="library">x264</systemitem> są
+już w standardowych miejscach, budowanie <application>MPlayera</application>
+z obsługą <systemitem class="library">x264</systemitem> jest proste.
+Uruchom standardowe:
+<screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
+Skrypt konfiguracyjny wykryje że spełniłeś wymagania do obsługi
+<systemitem class="library">x264</systemitem>.
 </para>
 </sect3>
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="audio-codecs">
 <title>Kodeki audio</title>
@@ -318,48 +346,50 @@ pomocy Xvid. Domyślnie używana jest biblioteka
 <listitem><simpara>
   MPEG layer 1/2/3 (MP1/2/3) audio (<emphasis role="bold">natywny</emphasis>
   kod, z optymalizacją dla MMX/SSE/3DNow!)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
-  Windows Media Audio 7 i 8 (AKA WMAv1 i WMAv2) (<emphasis role="bold">natywny</emphasis> kod, z
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
+  Windows Media Audio 7 i 8 (AKA WMAv1 i WMAv2)
+  (<emphasis role="bold">natywny</emphasis> kod, z
+  <link linkend="ffmpeg"> <systemitem class="library">libavcodec</systemitem></link>)
+</simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (poprzez DLL DMO)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   AC3 Dolby audio (<emphasis role="bold">natywny</emphasis> kod, z
   optymalizacją MMX/SSE/3DNow!)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
- przetwarzanie AC3 przez kartę dźwiękową
-  </simpara></listitem>
+  przetwarzanie AC3 przez kartę dźwiękową
+</simpara></listitem>
 <listitem><simpara>
   AAC
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   kodek Ogg Vorbis audio (<emphasis role="bold">natywna</emphasis> biblioteka)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   RealAudio: DNET (AC3 z niskim bitratem), Cook, Sipro i ATRAC3
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   QuickTime: kodeki Qualcomm i QDesign
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   VIVO audio (g723, Vivo Siren)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Voxware audio (poprzez DirectShow DLL)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   formaty alaw i ulaw, różne gsm, adpcm i pcm i inne stare, proste kodeki
   audio
-  </simpara></listitem>
- <listitem><simpara>
-    kodeki mowy Adaptive Multi-Rate (AMR)
- </simpara></listitem>
+</simpara></listitem>
+<listitem><simpara>
+  kodeki mowy Adaptive Multi-Rate (AMR)
+</simpara></listitem>
 </itemizedlist>
 
+<!-- ********** -->
 
 <sect2 id="swac3">
 <title>Programowe dekodowanie AC3</title>
@@ -400,9 +430,11 @@ albo nowszy (przypuszczalnie działa także ALSA CVS).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="hwac3">
 <title>Sprzętowe dekodowanie AC3</title>
+
 <para>
 Potrzebna jest karta obsługująca AC3, z cyfrowym wyjściem (S/PDIF). Sterownik
 musi prawidłowo obsługiwać format AFMT_AC3 (robi to C-Media). Podłącz swój
@@ -413,15 +445,16 @@ dekodującymi DXR3/Hollywood+ MPEG.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="libmad">
 <title>Obsługa <systemitem class="library">libmad</systemitem></title>
 
 <para>
 <ulink url="http://www.underbit.com/products/mad/"><systemitem class="library">libmad</systemitem></ulink>
-jest wieloplatformową,
-stałoprzecinkową (wewnętrznie 24-bitowe PCM) biblioteką dekodującą dźwięk
-MPEG. Nie odtwarza zbyt dobrze uszkodzonych plików i czasami ma problemy
+jest wieloplatformową, stałoprzecinkową (wewnętrznie 24-bitowe PCM) biblioteką
+dekodującą dźwięk MPEG.
+Nie odtwarza zbyt dobrze uszkodzonych plików i czasami ma problemy
 z przewijaniem, ale na platformach bez jednostki zmiennoprzecinkowej (FPU),
 czyli na przykład <link linkend="arm">ARM</link>,
 może mieć lepszą wydajność niż mp3lib.
@@ -435,6 +468,7 @@ przy użyciu <systemitem class="library">libmad</systemitem>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="hwmpa">
 <title>Sprzętowy kodek MPEG audio</title>
@@ -449,9 +483,11 @@ urządzeniami audio (np. OSS i ALSA), bo nie będzie to działało
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="aac">
 <title>Kodek AAC</title>
+
 <para>
 AAC (Advanced Audio Coding) jest kodekiem audio spotykanym czasami w plikach
 MOV i MP4. Otwarty dekoder nazywany FAAD dostępny jest na stronie
@@ -485,9 +521,11 @@ a RPM-y dla Fedory z <ulink url="http://rpm.livna.org/">Livna</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="amr">
 <title>Kodeki AMR</title>
+
 <para>
 Kodeki mowy Adaptive Multi-Rate są używane w telefonii komórkowej
 trzeciej generacji (3G).
@@ -495,6 +533,7 @@ Opis implementacji udostępniany jest przez
 <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
 (za darmo dla osób prywatnych).
 </para>
+
 <para>
 Żeby uaktywnić obsługę kodeków, pobierz źródła kodeków
 <ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink> i
@@ -515,7 +554,9 @@ Gdy już to zrobisz, kontynuuj <link linkend="features">budowanie</link>
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="codec-importing">
 <title>Importowanie kodeków Win32-HOWTO</title>
@@ -556,11 +597,12 @@ ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;nazwakodeka&gt;</rep
 </para>
 
 <note><para> W systemach Windows NT/2000/XP szukaj powyższych informacji
-w rejestrze, np. szukaj wyrażenia &quot;VIDC.HFYU&quot;. Aby dowiedzieć się jak
+w rejestrze, np. szukaj wyrażenia "VIDC.HFYU". Aby dowiedzieć się jak
 to zrobić, spójrz niżej na starą metodę DirectShow.
 </para></note>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="dshow-codecs">
 <title>Kodeki DirectShow</title>
@@ -572,10 +614,10 @@ poprzednika. Sprawa ma się gorzej z DirectShow, ponieważ:
 <listitem><simpara>
   <filename>system.ini</filename> nie zawiera wymaganych informacji,
   zamiast tego są one przechowywane w rejestrze.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Z tego powodu wymagane jest GUID kodeka.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 </para>
 
@@ -587,36 +629,34 @@ Używając <application>Microsoft GraphEdit</application> (szybki sposób)
 <step><para>
   Pobierz <application>GraphEdit</application> z dowolnego DirectX SDK, albo z
   <ulink url="http://doom9.net">doom9</ulink>
-  </para></step>
+</para></step>
 <step><para>
   Uruchom <command>graphedit.exe</command>.
-  </para></step>
+</para></step>
 <step><para>
   Z menu wybierz Graph -> Insert Filters.
-  </para></step>
+</para></step>
 <step><para>
   Rozwiń listę <systemitem>DirectShow Filters</systemitem>
-  </para></step>
+</para></step>
 <step><para>
   Wybierz właściwy kodek i rozwiń go.
-  </para></step>
+</para></step>
 <step><para>
   We wpisie <systemitem>DisplayName</systemitem> spójrz na tekst w
   nawiasach klamrowych po znaku "backslash" i zapisz go (pięć bloków
   oddzielonych kreskami, GUID).
-  </para></step>
+</para></step>
 <step><para>
   Binariami kodeka jest plik określony w polu <systemitem>Filename</systemitem>.
-  </para></step>
+</para></step>
 </procedure>
 
-<note>
-<para>
+<note><para>
 Jeżeli nie ma pola <systemitem>Filename</systemitem>, a
 <systemitem>DisplayName</systemitem> zawiera coś w stylu
 <systemitem>device:dmo</systemitem>, to jest to kodek DMO.
-</para>
-</note>
+</para></note>
 
 <procedure>
 <title>Stara Metoda:</title>
@@ -625,16 +665,16 @@ Weź głęboki oddech i zacznij przeszukiwanie rejestru...
 </para>
 <step><para>
   Uruchom <command>regedit</command>.
-  </para></step>
+</para></step>
 <step><para>
   Naciśnij <keycap>Ctrl</keycap>+<keycap>F</keycap>, odznacz dwa pierwsze
   pola (checkboxes) i zaznacz trzecie. Wpisz fourcc kodeka (np.
   <userinput>TM20</userinput>).
-  </para></step>
+</para></step>
 <step><para>
   Powinieneś zobaczyć pole zawierające ścieżkę i nazwę pliku (np.
   <filename>C:\WINDOWS\SYSTEM\TM20DEC.AX</filename>).
-  </para></step>
+</para></step>
 <step><para>
   Gdy odnalazłeś już plik, potrzebny będzie GUID. Spróbuj ponownego
   wyszukiwania, ale tym razem wpisz nazwę kodeka, a nie jego fourcc. Jego nazwę
@@ -643,28 +683,25 @@ Weź głęboki oddech i zacznij przeszukiwanie rejestru...
   <guimenuitem>Zaawansowane</guimenuitem>.
   Jeżeli jej tam nie będzie, to masz pecha. Spróbuj odgadnąć nazwę (np. spróbuj
   wyszukać "TrueMotion").
-  </para></step>
+</para></step>
 <step><para>
-Jeżeli GUID został odnaleziony, powinieneś ujrzeć pola <guilabel>FriendlyName</guilabel>
-  i <guilabel>CLSID</guilabel>. Zapisz szesnastobajtowy CLSID będący GUIDem,
-  którego potrzebujemy.
-  </para></step>
+  Jeżeli GUID został odnaleziony, powinieneś ujrzeć pola
+  <guilabel>FriendlyName</guilabel> i <guilabel>CLSID</guilabel>. Zapisz
+  szesnastobajtowy CLSID będący GUIDem, którego potrzebujemy.
+</para></step>
 </procedure>
 
-<note>
-<para>
+<note><para>
 Jeżeli wyszukiwanie się nie powiedzie, spróbuj zaznaczyć wszystkie pola
 (checkboxes). Prawdopodobnie dostaniesz fałszywe trafienia, ale być może
 będziesz miał szczęście...
-</para>
-</note>
+</para></note>
 
 <para>
 Teraz, kiedy masz już wszystkie niezbędne informacje (fourcc, GUID, plik
 z kodekiem, przykładowy plik AVI), umieść swoją prośbę o obsługę kodeka
 za pomocą poczty elektronicznej i wyślij ww. pliki na poniższy serwer FTP:
-<systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;nazwakodeka&gt;</replaceable>/
-</systemitem>
+<systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;nazwakodeka&gt;</replaceable>/</systemitem>
 </para>
 
 <para>
@@ -675,4 +712,5 @@ DOCS/tech/codecs.conf.txt</ulink> (tylko po angielsku - przyp. tłum.).
 
 </sect2>
 </sect1>
+
 </chapter>
