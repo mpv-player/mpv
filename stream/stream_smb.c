@@ -55,6 +55,20 @@ static void smb_auth_fn(const char *server, const char *share,
    if (temp[0]) strncpy(password, temp, pwmaxlen - 1);
 }
 
+static int control(stream_t *s, int cmd, void *arg) {
+  switch(cmd) {
+    case STREAM_CTRL_GET_SIZE: {
+      off_t size = smbc_lseek(s->fd,0,SEEK_END);
+      smbc_lseek(s->fd,s->pos,SEEK_SET);
+      if(size != (off_t)-1) {
+        *((off_t*)arg) = size;
+        return 1;
+      }
+    }
+  }
+  return STREAM_UNSUPORTED;
+}
+
 static int seek(stream_t *s,off_t newpos) {
   s->pos = newpos;
   if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) {
@@ -90,7 +104,7 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
   if(mode == STREAM_READ)
     m = O_RDONLY;
   else if (mode == STREAM_WRITE) //who's gonna do that ?
-    m = O_WRONLY;
+    m = O_RDWR|O_CREAT;
   else {
     mp_msg(MSGT_OPEN, MSGL_ERR, "[smb] Unknown open mode %d\n", mode);
     m_struct_free (&stream_opts, opts);
@@ -117,20 +131,23 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
     return STREAM_ERROR;
   }
   
+  stream->flags = mode;
+  len = 0;
+  if(mode == STREAM_READ) {
   len = smbc_lseek(fd,0,SEEK_END);
   smbc_lseek (fd, 0, SEEK_SET);
-  if (len <= 0)
-    stream->flags = 0;
-  else {
-    stream->flags = STREAM_READ | STREAM_SEEK;
-    stream->end_pos = len;
+  }
+  if(len > 0 || mode == STREAM_WRITE) {
+    stream->flags |= STREAM_SEEK;
     stream->seek = seek;
+    if(mode == STREAM_READ) stream->end_pos = len;
   }
   stream->type = STREAMTYPE_SMB;
   stream->fd = fd;
   stream->fill_buffer = fill_buffer;
   stream->write_buffer = write_buffer;
   stream->close = close_f;
+  stream->control = control;
   
   m_struct_free(&stream_opts, opts);
   return STREAM_OK;
