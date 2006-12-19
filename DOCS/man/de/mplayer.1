@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21654
+.\" In sync with r21659
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -5867,23 +5867,25 @@ Mische Rauschen mit einem (halbwegs) gleichmäßigen Muster
 .PD 1
 .
 .TP
-.B "denoise3d[=Helligkeit:Farbwert:Zeit]"
+.B "denoise3d[=Helligkeit_r:Farbwert_r:Helligkeit_z:Farbwert_z]"
 Dieser Filter versucht, Bildrauschen zu unterdrücken und so bewegungslose
 Bilder wirklich statisch zu machen (was das Bild besser komprimierbar machen
 sollte).
 .PD 0
 .RSs
-.IPs <Helligkeit>
+.IPs <Helligkeit_r>
 räumliche Helligkeitsstärke (Standard: 4)
-.IPs <Farbwert>
+.IPs <Farbwert_r>
 räumliche Farbstärke (Standard: 3)
-.IPs <Zeit>
-zeitliche Stärke (Standard: 6)
+.IPs <Helligkeit_z>
+zeitliche Helligkeitsstärke (Standard: 6)
+.IPs <Farbwert_z>
+zeitliche Farbstärke (Standard: Helligkeit_r*Farbwert_r/Helligkeit_z)
 .RE
 .PD 1
 .
 .TP
-.B hqdn3d[=Helligkeit:Farbwert:Zeit]
+.B hqdn3d[=Helligkeit_r:Farbwert_r:Helligkeit_z:Farbwert_z]"
 Hochpräzise und -qualitative Version des Denoise3d-Filters.
 Parameter und Gebrauch sind dieselben.
 .

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- In sync with r21376 -->
+<!-- In sync with r21508 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -501,8 +501,8 @@
 
       <para>
         Die meisten DVDs besitzen ein bestimmtes Maß schwarzer Balken
-        an ihren Rändern. Diese dort zu belassen kann die Qualität auf
-        verschiedene Art und Weise negativ beeinflussen.
+        an ihren Rändern. Diese dort zu belassen wird für die Qualität in mehrfacher
+        Hinsicht <emphasis role="bold">sehr</emphasis> schädlich sein.
       </para>
 
       <orderedlist>
