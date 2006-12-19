@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21612 -->
 <!-- Opiekun: Cobra -->
 <chapter id="formats">
 <title>Kontenery</title>
@@ -33,6 +33,9 @@ tworzyć takie pliki.
 </para>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="video-formats">
 <title>Formaty video</title>
 
@@ -48,21 +51,21 @@ Pliki MPEG spotykamy w różnych odmianach:
   MPG: To jest najbardziej <emphasis role="bold">podstawowa</emphasis> forma
   plików MPEG. Zawiera video MPEG-1 i audio MP2 (MPEG-1 warstwa 2) lub rzadziej
   MP1.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   DAT: To dokładnie ten sam format, co MPG, tylko z innym rozszerzeniem. Jest
   on używany na płytach <emphasis role="bold">Video CD</emphasis>. W związku
   ze sposobem tworzenia płyt VCD i struktury Linuksa, pliki DAT nie mogą być
   odtwarzane ani kopiowane z VCD jak zwykłe pliki. Musisz użyć opcji
   <option>vcd://</option> by odtworzyć Video CD.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   VOB: To format pliku MPEG na płytach <emphasis role="bold">DVD</emphasis>.
   Jest to to samo, co MPG, plus możliwość umieszczenia w nim napisów lub
   dźwięku nie-MPEG (AC3). Zawiera zakodowany strumień obrazu MPEG-2 i przeważnie
   dźwięk AC3, lecz dozwolone są także DTS, MP2 i nieskompresowane LPCM.
   <emphasis role="bold">Przejrzyj sekcję <link linkend="dvd">DVD</link></emphasis>!
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   TY: To jest strumień TiVo MPEG. Zawiera on dane MPEG PES strumieni audio
   i video, oraz dodatkowe informacje jak napisy Closed Caption. Ten format nie
@@ -70,7 +73,7 @@ Pliki MPEG spotykamy w różnych odmianach:
   TiVo. Więcej informacji o formacie strumienia TiVo można uzyskać na
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   stronie TyStudio</ulink>.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <para>
@@ -89,6 +92,7 @@ skalowane w trakcie kodowania lub odtwarzane z opcją <option>-aspect</option>
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="avi">
 <title>Pliki AVI</title>
@@ -115,15 +119,13 @@ Niestety jedyny program, który potrafi tworzyć takie pliki -
 <application>NanDub</application> - ma z tym problem.
 </para>
 
-<note>
-<para>
+<note><para>
 Kamery DV tworzą surowe strumienie DV, które są konwertowane przez narzędzia
 do zgrywania DV do dwóch różnych typów plików AVI. Pliki te zawierają wtedy
 albo osobne strumienie audio i video, które <application>MPlayer</application>
 potrafi odtwarzać lub surowy strumień DV, którego obsługa jest w trakcie
 rozwoju.
-</para>
-</note>
+</para></note>
 
 <para>
 Istnieją dwa typy plików AVI:
@@ -135,13 +137,13 @@ Istnieją dwa typy plików AVI:
   <application>MPlayer</application> wykrywa je jako przeplatane, ale powoduje
   to utratę synchronizacji A/V (najczęściej przy skokach). Pliki te powinny
   być odtwarzane jako bez przeplotu (opcja <option>-ni</option>).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Bez przeplotu:</emphasis> Najpierw umieszczony jest
   cały strumień video, a potem cały strumień audio. Wymaga to więc dużo
   "chodzenia" po pliku, co powoduje, że trudno jest je odtwarzać z sieci lub z
   CD-ROMów.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 </para>
 
@@ -158,13 +160,13 @@ dla plików AVI:
   nagłówkami i pliki z dźwiękiem VBR (Variable Bitrate - zmienne
   tempo bitowe) utworzone za pomocą niekompatybilnego z VBR programu kodującego
   spowodują desynchronizację A/V przy tej metodzie (głównie przy skokach).
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">oparte na przeplocie:</emphasis> Nie korzysta z
   informacji o tempie bitowym z nagłówka, lecz zamiast tego używa względnej
   pozycji przeplecionych fragmentów audio i video, dzięki czemu źle zakodowane
   pliki z dźwiękiem VBR można normalnie odtwarzać.
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 </para>
 
@@ -182,9 +184,11 @@ tę regułę:
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="asf-wmv">
 <title>Pliki ASF/WMV</title>
+
 <para>
 ASF (Active Streaming Format - Aktywny Format Strumieniowania) pochodzi z
 Microsoftu. Stworzyli oni dwa warianty ASF: v1.0 i v2.0. v1.0 jest używana
@@ -198,6 +202,7 @@ widział żadnego pliku v2.0 :). Zauważ, że dzisiejsze pliki ASF mają rozszer
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="mov">
 <title>Pliki QuickTime/MOV</title>
@@ -214,6 +219,7 @@ wyciągnąć za pomocą opcji <option>-dumpvideo</option> oraz
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="vivo">
 <title>Pliki VIVO</title>
@@ -234,9 +240,11 @@ Kodek video plików VIVO/2.0 to zmodyfikowany, niestandardowy
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="fli">
 <title>Pliki FLI</title>
+
 <para>
 <emphasis role="bold">FLI</emphasis> jest bardzo starym formatem używanym przez
 Autodesk Animator,
@@ -248,6 +256,7 @@ będzie trochę zaśmiecony przez krótką chwilę po skoku.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="realmedia">
 <title>Pliki RealMedia (RM)</title>
@@ -258,9 +267,11 @@ pliki RealMedia (<filename>.rm</filename>).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nuppelvideo">
 <title>Pliki NuppelVideo</title>
+
 <para>
 <ulink url="http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/">NuppelVideo</ulink>
 jest narzędziem do zgrywania TV (AFAIK :). <application>MPlayer</application>
@@ -274,9 +285,11 @@ Działają również skoki.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="yuv4mpeg">
 <title>Pliki yuv4mpeg</title>
+
 <para>
 <ulink url="http://mjpeg.sf.net">yuv4mpeg / yuv4mpeg2</ulink>
 to format plików stosowany przez
@@ -287,26 +300,32 @@ obrazów YUV 4:2:0.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="film">
 <title>Pliki FILM</title>
+
 <para>
 Format ten jest używany przez stare gry CD-ROM na Sega Saturn.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="roq">
 <title>Pliki RoQ</title>
+
 <para>
 Pliki RoQ to pliki multimedialne używane w niektórych grach ID, np.
 Quake III czy Return to Castle Wolfenstein.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="ogg">
 <title>Pliki OGG/OGM</title>
+
 <para>
 Jest to nowy format plików z <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
 Może zawierać dowolne kodeki audio i video, CBR lub VBR. Będziesz potrzebował
@@ -316,19 +335,23 @@ oraz <systemitem class="library">libvorbis</systemitem> zanim skompilujesz
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="sdp">
 <title>Pliki SDP</title>
+
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink>
 to format opisu strumieni RTP audio lub video będący standardem IETF.
-(Wymagane jest &quot;<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>&quot;.)
+(Wymagane jest "<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>".)
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="pva">
 <title>Pliki PVA</title>
+
 <para>
 PVA to format MPEGo-podobny używany przez oprogramowanie kart DVB (np.:
 <application>MultiDec</application> lub <application>WinTV</application> pod
@@ -336,9 +359,11 @@ Windows).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nsv">
 <title>Pliki NSV</title>
+
 <para>
 NSV (NullSoft Video) jest formatem plików używanym przez odtwarzacz
 <application>Winamp</application> do strumieniowania audio i video.
@@ -354,9 +379,11 @@ audio VLB).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="matroska">
 <title>Pliki matroska</title>
+
 <para>
 Matroska jest otwartym formatem przechowywania.
 Więcej informacji na
@@ -364,27 +391,31 @@ Więcej informacji na
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nut">
 <title>Pliki NUT</title>
+
 <para>
 NUT jest formatem przechowywania opracowanym przez ludzi
-z <application>MPlayera</application> i <application>FFmpeg</application>. Oba
-projekty go obsługują.
+z <application>MPlayera</application> i <application>FFmpeg</application>.
+Oba projekty go obsługują.
 Więcej informacji na
 <ulink url="http://www.nut.hu/">oficjalnej stronie</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="gif">
 <title>Pliki GIF</title>
+
 <para>
 Format <emphasis role="bold">GIF</emphasis> jest powszechnym formatem zapisu
 grafiki sieciowej. Istnieją dwie wersje specyfikacji GIF: GIF87a oraz GIF89a.
 Główną różnicą jest to, że GIF89a pozwala na animację.
-<application>MPlayer</application> obsługuje oba
-formaty plików za pomocą biblioteki <systemitem class="library">libungif</systemitem>
+<application>MPlayer</application> obsługuje oba formaty plików za pomocą
+biblioteki <systemitem class="library">libungif</systemitem>
 lub innej, kompatybilnej z libgif biblioteki. Nieanimowane GIFy są wyświetlane
 jako filmy o pojedynczej klatce. (Użyj opcji <option>-loop</option> oraz
 <option>-fixed-vo</option> by wyświetlić je dłużej.)
@@ -407,8 +438,8 @@ patentowych w związku z kompresją LZW.
 </para>
 
 <para>
-Jeśli Twoja dystrybucja nie zawiera biblioteki <systemitem class="library">libungif</systemitem>,
-pobierz ją ze
+Jeśli Twoja dystrybucja nie zawiera biblioteki
+<systemitem class="library">libungif</systemitem>, pobierz ją ze
 <ulink url="http://sourceforge.net/projects/libungif">strony domowej libungif</ulink>.
 By uzyskać szczegółowe informacje techniczne, zajrzyj do
 <ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">specyfikacji GIF89a</ulink>.
@@ -416,7 +447,9 @@ By uzyskać szczegółowe informacje techniczne, zajrzyj do
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="audio-formats">
 <title>Formaty audio</title>
@@ -430,8 +463,11 @@ Nie jest to jednak zalecane zastosowanie <application>MPlayera</application>.
 Powinieneś raczej użyć <ulink url="http://www.xmms.org">XMMSa</ulink>.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="mp3">
 <title>Pliki MP3</title>
+
 <para>
 Możesz mieć pewne problemy przy odtwarzaniu niektórych plików
 MP3, które <application>MPlayer</application> błędnie rozpozna jako
@@ -443,8 +479,11 @@ przypadkach.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="ogg-vorbis">
 <title>Pliki OGG/OGM (Vorbis)</title>
+
 <para>
 Wymaga poprawnie zainstalowanych bibliotek
 <systemitem class="library">libogg</systemitem> i
@@ -452,8 +491,11 @@ Wymaga poprawnie zainstalowanych bibliotek
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="cdda">
 <title>CD audio</title>
+
 <para>
 <application>MPlayer</application> potrafi korzystać z programu
 <application>cdparanoia</application> do odtwarzania CDDA (Audio CD). Sekcja
@@ -467,8 +509,11 @@ zostać wykorzystana do przekazania opcji do programu
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="xmms">
 <title>XMMS</title>
+
 <para>
 <application>MPlayer</application> potrafi korzystać z wtyczek wejścia z
 programu <application>XMMS</application> do odtwarzania wielu formatów. Istnieją
@@ -488,4 +533,5 @@ ręcznie za pomocą opcji konfiguracji <option>--with-xmmsplugindir</option> i
 </para>
 </sect2>
 </sect1>
+
 </chapter>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20637 -->
+<!-- synced with r21612 -->
 <!-- Opiekun: Emdej -->
 <chapter id="cd-dvd">
 <title>Używanie CD/DVD</title>
@@ -16,17 +16,19 @@ naszego napędu:
 
 <itemizedlist>
 <listitem><para>
-Istnieją doniesienia o błędach odczytu przy dużych prędkościach, szczególnie
-podczas używania uszkodzonych bądź wadliwie wytłoczonych/nagranych płyt CD.
-Redukcja prędkości odczytu może uchronić nas przed utratą danych w takich
-przypadkach.
+  Istnieją doniesienia o błędach odczytu przy dużych prędkościach, szczególnie
+  podczas używania uszkodzonych bądź wadliwie wytłoczonych/nagranych płyt CD.
+  Redukcja prędkości odczytu może uchronić nas przed utratą danych w takich
+  przypadkach.
 </para></listitem>
 
 <listitem><para>
-Wiele napędów CD jest dokuczliwie głośnych. Redukcja prędkości może zmniejszyć
-natężenie hałasu.
+  Wiele napędów CD jest dokuczliwie głośnych. Redukcja prędkości może zmniejszyć
+  natężenie hałasu.
 </para></listitem>
 </itemizedlist>
+
+<!-- ********** -->
 
 <sect2 id="drives_linux">
 <title>Linux</title>
@@ -68,8 +70,9 @@ odmaskowanie IRQ (IRQ unmasking) (więcej przeczytasz na stronach man do
 </para>
 
 <para>
-Proszę sprawdzić &quot;<filename>/proc/ide/<replaceable>[urządzenie cdrom]</replaceable>/settings&quot;</filename>
-dla dostrojenia swojego napędu CD-ROM.
+Proszę sprawdzić
+"<filename>/proc/ide/<replaceable>[urządzenie cdrom]</replaceable>/settings</filename>"
+by dostroić swój napędu CD-ROM.
 </para>
 
 <para>
@@ -78,6 +81,8 @@ Dla napędów SCSI nie istnieje jednolity sposób ustawiawiania tych parametrów
 <ulink url="http://das.ist.org/~georg/">napędami SCSI Plextor</ulink>.
 </para>
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="drives_freebsd">
 <title>FreeBSD</title>
@@ -98,13 +103,18 @@ sysctl hw.ata.atapi_dma=1
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="dvd">
 <title>Odtwarzanie DVD</title>
+
 <para>
 Aby poznać pełną listę dostępnych opcji, proszę przeczytać odpowiednie strony
 man. Składnia do odtwarzania standardowego DVD jest następująca:
-<screen>mplayer dvd://<replaceable>&lt;ścieżka&gt;</replaceable> [-dvd-device <replaceable>&lt;urządzenie&gt;</replaceable>]</screen>
+<screen>
+mplayer dvd://<replaceable>&lt;ścieżka&gt;</replaceable> [-dvd-device <replaceable>&lt;urządzenie&gt;</replaceable>]
+</screen>
 </para>
 
 <para>
@@ -219,9 +229,12 @@ ustawić region tylko 5 razy.
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="vcd">
 <title>Odtwarzanie VCD</title>
+
 <para>
 Pełna lista dostępnych opcji znajduje się na stronie man. Składnia dla
 standardowego Video CD (VCD) jest następująca:
@@ -253,47 +266,47 @@ i odtwarzać plik wynikowy za pomocą <application>MPlayera</application>
 <title>Struktura VCD</title>
 <para>
 Video CD (VCD) składa się z sektorów CD-ROM XA, tzn. ścieżek CD-ROM 
-mode 2 form 1 i form 2:</para>
-</formalpara>
-
+mode 2 form 1 i form 2:
 <itemizedlist>
 <listitem><para>
-Pierwsza ścieżka jest w formacie mode 2 form 2, który oznacza użycie korekcji 
-błędów L2. Ścieżka ta zawiera system plików ISO-9660 o gęstości 2048 bajtów/sektor.
-Ten system plików z kolei zawiera metainformacje VCD, a także nieruchome klatki, często 
-używane w menu. Segmenty MPEG dla menu mogą także być składowane w tejże pierwszej 
-ścieżce, ale MPEGi muszą być podzielone na kawałki po 150 sektorów. System plików ISO-9660 
-może zawierać inne pliki bądź programy, niekonieczne dla eksploatacji VCD.
+  Pierwsza ścieżka jest w formacie mode 2 form 2, który oznacza użycie korekcji
+  błędów L2. Ścieżka ta zawiera system plików ISO-9660 o gęstości 2048
+  bajtów/sektor.  Ten system plików z kolei zawiera metainformacje VCD, a także
+  nieruchome klatki, często używane w menu. Segmenty MPEG dla menu mogą także
+  być składowane w tejże pierwszej ścieżce, ale MPEGi muszą być podzielone na
+  kawałki po 150 sektorów. System plików ISO-9660 może zawierać inne pliki bądź
+  programy, niekonieczne dla eksploatacji VCD.
 </para></listitem>
 
 <listitem><para>
-Druga i pozostałe ścieżki są zwykle ścieżkami video MPEG typu raw o gęstości 
-2324 bajtów/sektor, zawierającymi jeden pakiet danych MGEG PS na sektor.
-Ścieżki te są w formacje mode 2 form 1, więc przechowują one więcej danych 
-na sektor, w zamian za słabszą korekcję błędów. Możliwe są też ścieżki 
-CD-DA na VCD poza pierwszą ścieżką.
-Niektóre systemy operacyjne używają pewnych trików aby ścieżki nie zawierające 
-systemu plików ISO-9660 były widoczne w systemie plików. W pozostałych systemach, 
-jak na przykład w systemie GNU/Linux, nie ma takiej możliwości (jeszcze). W takim 
-przypadku dane MPEG <emphasis role="bold">nie mogą być montowane</emphasis>. 
-Jako że większość filmów znajduje się na tego typu ścieżce,
-powinieneś spróbować na początek opcji <option>vcd://2</option>.
+  Druga i pozostałe ścieżki są zwykle ścieżkami video MPEG typu raw o gęstości 
+  2324 bajtów/sektor, zawierającymi jeden pakiet danych MGEG PS na sektor.
+  Ścieżki te są w formacje mode 2 form 1, więc przechowują one więcej danych na
+  sektor, w zamian za słabszą korekcję błędów. Możliwe są też ścieżki CD-DA na
+  VCD poza pierwszą ścieżką. Niektóre systemy operacyjne używają pewnych
+  trików aby ścieżki nie zawierające systemu plików ISO-9660 były widoczne
+  w systemie plików. W pozostałych systemach, jak na przykład w systemie
+  GNU/Linux, nie ma takiej możliwości (jeszcze). W takim przypadku dane MPEG
+  <emphasis role="bold">nie mogą być montowane</emphasis>. 
+  Jako że większość filmów znajduje się na tego typu ścieżce,
+  powinieneś spróbować na początek opcji <option>vcd://2</option>.
 </para></listitem>
 
 <listitem><para>
-Istnieją również płyty VCD bez pierwszej ścieżki (pojedyncza ścieżka i
-brak systemu plików w ogóle). Je również da się odtwarzać, ale nie da
-się ich montować.
+  Istnieją również płyty VCD bez pierwszej ścieżki (pojedyncza ścieżka i
+  brak systemu plików w ogóle). Je również da się odtwarzać, ale nie da
+  się ich montować.
 </para></listitem>
 
-<listitem><para> Definicja standardu Video CD, nazywana "Białą Księgą"
-Phillipsa, generalnie nie jest dostępna online, musi być zakupiona u Phillipsa. 
-Bardziej szczegółowe informacje na temat Video CD można znaleźć na 
-<ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">stronie 
-dokumentacji vcdimagera</ulink>.
+<listitem><para>
+  Definicja standardu Video CD, nazywana "Białą Księgą" Phillipsa,
+  generalnie nie jest dostępna online, musi być zakupiona u Phillipsa. 
+  Bardziej szczegółowe informacje na temat Video CD można znaleźć na 
+  <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">stronie dokumentacji vcdimagera</ulink>.
 </para></listitem>
-
 </itemizedlist>
+</para>
+</formalpara>
 
 <formalpara>
 <title>O plikach .DAT</title>

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21612 -->
 <!-- Opiekun: Boski -->
+
 <appendix id="bugreports">
 <title>Jak zgłaszać błędy</title>
+
 <para>
 Dobre raporty błędów stanowią bardzo istotny wkład w rozwój każdego
 projektu. Jednak tak jak pisanie dobrych programów wymaga sporo pracy, tak
@@ -13,8 +15,14 @@ rozwoju <application>MPlayera</application>. Należy jednak pamiętać, że
 trzeba dostarczyć <emphasis role="bold">wszystkie</emphasis> informacje o które
 poprosimy i postępować dokładnie według instrukcji zawartej w tym dokumencie.
 </para>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_security">
 <title>Zgłaszanie błędów związanych z bezpieczeństwem</title>
+
 <para>
 Jeśli znalazłeś lukę, którą można wykorzystać, i chcesz zrobić dobry uczynek
 i pozwolić nam ją naprawić zanim ją ujawnisz, chętnie przyjmiemy zgłoszenie
@@ -27,100 +35,121 @@ Proszę, nie opóźniaj zgłoszenia żeby stworzyć exploit wykorzystujący luk�
 możesz go wysłać w następnym liście.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_fix">
 <title>Jak poprawiać błędy</title>
+
 <para>
 Jeżeli uważasz, że posiadasz wystarczające umiejętności, namawiamy Cię do
 samodzielnego poprawiania błędów. A może już to zrobiłeś? Przeczytaj
 <ulink url="../../tech/patches.txt">ten krótki dokument</ulink>, żeby dowiedzieć
 się w jaki sposób dodać swoją łatę do źródeł
-<application>MPlayera</application>. Jeżeli będziesz miał jakieś pytania, pomogą
-Ci ludzie z listy
+<application>MPlayera</application>. Jeżeli będziesz miał jakieś pytania,
+pomogą Ci ludzie z listy
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 (tylko w języku angielskim -przyp. tłumacza).
 </para>
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_regression_test">
-	<title>Jak wykonać test regresji za pomocą Subversion</title>
-	<para>
-		Czasami zdarza się problem typu "wcześniej działało, a teraz przestało...".
-		Tutaj znajduje się, opisana krok po kroku, procedura, której celem jest próba
-		znalezienia źródła problemu.
-		<emphasis role="bold">Nie jest</emphasis> ona przeznaczona
-		dla przeciętnego użytkownika.
-	</para>
-	<para>
-		Najpierw należy pobrać źródła MPlayera z SVN.
-		Więcej szczegółów na ten temat znajduje się na 
-		<ulink url="http://www.mplayerhq.hu/dload.html">tej stronie</ulink>.
-	</para>
-	<para>
-		W rezultacie w katalogu mplayer/ znajdzie się obraz drzewa Subversion, po stronie klienta.
-		Teraz zaktualizuj ten obraz do daty, która Cię interesuje:
-		<screen>
-			cd mplayer/
-			svn update -r {"2004-08-23"}
-		</screen>
-		Format daty to RRRR-MM-DD GG:MM:SS.
-		Używając takiego formatu daty masz pewność, że będziesz w stanie wyciągać łatki
-		zgodnie z datą, gdy zostały dodane, dokładnie tak jak w przypadku
-		<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">archiwum logów CVS MPlayera</ulink>.
-	</para>
-	<para>
-		Następnie postępuj tak jak w przypadku normalnej aktualizacji:
-		<screen>
-			./configure
-			make
-		</screen>
-	</para>
-	<para>
-		Jeżeli czytasz ten dokument, a nie jesteś programistą, najszybszym
-		sposobem na dotarcie do miejsca w którym pojawi się problem jest
-		użycie binarnego wyszukiwania &mdash; tzn. szukania daty
-		pojawienia się problemu poprzez dzielenie interwału czasowego na pół
-		przy każdym kolejnym wyszukiwaniu.
-		Przykładowo, jeżeli problem wystąpił w 2003, spróbuj najpierw szukać
-		problemu w wydaniu z połowy roku. Jeżeli będzie obecny, cofnij się
-		do pierwszego kwietnia; jeżeli nie, przejdź do pierwszego października itd.
-	</para>
-	<para>
-		Jeżeli masz dużo wolnego miejsca na twardym dysku (pełna kompilacja
-		zajmuje aktualnie 100 MB albo około 300-350 MB jeżeli uaktywnione
-		jest debuggowanie), skopiuj najstarszą działającą wersję zanim dokonasz
-		aktualizacji; oszczędzi to sporo czasu, jeżeli zajdzie potrzeba powrotu
-		do starszej wersji.
-		(Zazwyczaj konieczne jest uruchomienie 'make distclean' przed
-		rekompilacją wcześniejszej wersji, więc jeżeli nie zrobisz kopii zapasowej
-		oryginalnego drzewa, będziesz musiał wszystko rekompilować, jeśli
-		będziesz chciał wrócić do aktualnej wersji.)
-	</para>
-	<para>
-		Kiedy znajdziesz dzień w którym pojawił się problem, kontynuuj szukanie
-		używając archiwum mplayer-cvslog (uporządkowane wg daty) i bardziej
-		precyzyjnych aktualizacji svn obejmujących godziny, minuty i sekundy:
-		<screen>
-			svn update -r {"2004-08-23 15:17:25"}
-		</screen>
-		To pomoże ci łatwo znaleźć łatkę, która jest winowajcą.
-	</para>
-	<para>
-		Jeżeli znajdziesz łatkę, która jest źródłem problemu, to znaczy, że już
-		prawie osiągnąłeś sukces; wyślij informację o niej na
-		<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>
-		lub zapisz się na listę 
-		<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
-		i tam wyślij raport.
-		Istnieje szansa, że autor łatki zasugeruje w jaki sposób rozwiązać problem.
-		Możesz też wpatrywać się w łatkę tak długo, aż nie będzie mogła wytrzymać
-		i wyjawi ci lokalizację błędu:-).
-	</para>
+<title>Jak wykonać test regresji za pomocą Subversion</title>
+
+<para>
+Czasami zdarza się problem typu "wcześniej działało, a teraz przestało...".
+Tutaj znajduje się, opisana krok po kroku, procedura, której celem jest próba
+znalezienia źródła problemu.
+<emphasis role="bold">Nie jest</emphasis> ona przeznaczona
+dla przeciętnego użytkownika.
+</para>
+
+<para>
+Najpierw należy pobrać źródła MPlayera z SVN.
+Więcej szczegółów na ten temat znajduje się na 
+<ulink url="http://www.mplayerhq.hu/dload.html">tej stronie</ulink>.
+</para>
+
+<para>
+W rezultacie w katalogu mplayer/ znajdzie się obraz drzewa Subversion, po stronie klienta.
+Teraz zaktualizuj ten obraz do daty, która Cię interesuje:
+<screen>
+cd mplayer/
+svn update -r {"2004-08-23"}
+</screen>
+Format daty to RRRR-MM-DD GG:MM:SS.
+Używając takiego formatu daty masz pewność, że będziesz w stanie wyciągać łatki
+zgodnie z datą, gdy zostały dodane, dokładnie tak jak w przypadku
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">archiwum listy MPlayer-cvslog</ulink>.
+</para>
+
+<para>
+Następnie postępuj tak jak w przypadku normalnej aktualizacji:
+<screen>
+./configure
+make
+</screen>
+</para>
+
+<para>
+Jeżeli czytasz ten dokument, a nie jesteś programistą, najszybszym
+sposobem na dotarcie do miejsca w którym pojawi się problem jest
+użycie binarnego wyszukiwania &mdash; tzn. szukania daty
+pojawienia się problemu poprzez dzielenie interwału czasowego na pół
+przy każdym kolejnym wyszukiwaniu.
+Przykładowo, jeżeli problem wystąpił w 2003, spróbuj najpierw szukać
+problemu w wydaniu z połowy roku. Jeżeli będzie obecny, cofnij się
+do pierwszego kwietnia; jeżeli nie, przejdź do pierwszego października itd.
+</para>
+
+<para>
+Jeżeli masz dużo wolnego miejsca na twardym dysku (pełna kompilacja
+zajmuje aktualnie 100 MB albo około 300-350 MB jeżeli uaktywnione
+jest debuggowanie), skopiuj najstarszą działającą wersję zanim dokonasz
+aktualizacji; oszczędzi to sporo czasu, jeżeli zajdzie potrzeba powrotu
+do starszej wersji.
+(Zazwyczaj konieczne jest uruchomienie 'make distclean' przed
+rekompilacją wcześniejszej wersji, więc jeżeli nie zrobisz kopii zapasowej
+oryginalnego drzewa, będziesz musiał wszystko rekompilować, jeśli
+będziesz chciał wrócić do aktualnej wersji.)
+</para>
+
+<para>
+Kiedy znajdziesz dzień w którym pojawił się problem, kontynuuj szukanie
+używając archiwum mplayer-cvslog (uporządkowane wg daty) i bardziej
+precyzyjnych aktualizacji svn obejmujących godziny, minuty i sekundy:
+<screen>
+svn update -r {"2004-08-23 15:17:25"}
+</screen>
+To pomoże ci łatwo znaleźć łatkę, która jest winowajcą.
+</para>
+
+<para>
+Jeżeli znajdziesz łatkę, która jest źródłem problemu, to znaczy, że już
+prawie osiągnąłeś sukces; wyślij informację o niej na
+<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>
+lub zapisz się na listę 
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+i tam wyślij raport.
+Istnieje szansa, że autor łatki zasugeruje w jaki sposób rozwiązać problem.
+Możesz też wpatrywać się w łatkę tak długo, aż nie będzie mogła wytrzymać
+i wyjawi ci lokalizację błędu:-).
+</para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="bugreports_report">
 <title>Jak zgłaszać błędy</title>
+
 <para>
 Po pierwsze sprawdź najnowszą wersję SVN <application>MPlayera</application>,
 ponieważ dany błąd może być już w niej naprawiony. Rozwój
@@ -161,7 +190,7 @@ dokument <ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">"Jak
 mądrze zadawać pytania"</ulink> napisany przez
 <ulink url="http://www.catb.org/~esr/">Erica S. Raymonda</ulink>
 (Polskie tłumaczenie tego dokumentu można znaleźć
-+<ulink url="http://rtfm.killfile.pl/">tutaj</ulink> -przyp. tłum.). Istnieje
+<ulink url="http://rtfm.killfile.pl/">tutaj</ulink> -przyp. tłum.). Istnieje
 także inny dokumentem tego typu zatytułowany
 <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">Jak efektywnie zgłaszać błędy</ulink>
 stworzony przez <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simona Tathama</ulink>
@@ -176,18 +205,25 @@ odpowiemy na Twoje zgłoszenie.
 
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_where">
 <title>Gdzie zgłaszać błędy</title>
+
 <para>
 Zapisz się na listę MPlayer-users:
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 i wyślij swoje zgłoszenie błędu na
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/>, gdzie będzie można je omówić.
 </para>
+
 <para>
 Jeżeli wolisz, możesz zamiast tego skorzystać z naszej nowej
 <ulink url="http://bugzilla.mplayerhq.hu/">Bugzilli</ulink> (systemu zgłaszania błędów - przyp. tłum.)
 </para>
+
 <para>
 Językiem obowiązującym na tej liście jest
 <emphasis role="bold">angielski</emphasis>. Prosimy trzymać się zasad standardowej
@@ -205,8 +241,13 @@ odpowiedzi.
 </para>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_what">
 <title>Co zgłaszać</title>
+
 <para>
 Może zajść potrzeba dołączenia logu, konfiguracji lub przykładowego
 pliku w Twoim
@@ -218,8 +259,11 @@ rozmiaru każdej wiadomości na 80k. Jeżeli potrzebujesz wysłać coś większe
 musisz to skompresować albo załadować na serwer.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_system">
 <title>Informacja o systemie operacyjnym</title>
+
 <para>
 <itemizedlist>
 <listitem><para>
@@ -230,42 +274,41 @@ Nazwa Twojej dystrybucji Linuksa albo system operacyjny. Np.:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-wersja jądra (kernela):
-<screen>uname -a</screen>
+  wersja jądra (kernela):
+  <screen>uname -a</screen>
 </para></listitem>
 <listitem><para>
-wersja biblioteki libc:
-<screen>ls -l /lib/libc[.-]*</screen>
+  wersja biblioteki libc:
+  <screen>ls -l /lib/libc[.-]*</screen>
 </para></listitem>
 <listitem><para>
-wersja gcc i ld:
-<screen>
+  wersja gcc i ld:
+  <screen>
 gcc -v
-ld -v
-</screen>
+ld -v<!--
+  --></screen>
 </para></listitem>
 <listitem><para>
-wersja binutils:
-<screen>
-as --version
-</screen>
+  wersja binutils:
+  <screen>as --version</screen>
 </para></listitem>
 <listitem><para>
-Jeżeli masz problem z trybem pełnoekranowym:
+  Jeżeli masz problem z trybem pełnoekranowym:
   <itemizedlist>
     <listitem><para>Menadżer okien i wersja</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Jeżeli masz problem z XVIDIXem:
+  Jeżeli masz problem z XVIDIXem:
   <itemizedlist>
-    <listitem><para>głębia barw Xów (colour depth):
-<screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
-    </para></listitem>
+  <listitem><para>
+    głębia barw Xów (colour depth):
+    <screen>xdpyinfo | grep "depth of root"</screen>
+  </para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Jeżeli tylko GUI zawiera błędy:
+  Jeżeli tylko GUI zawiera błędy:
   <itemizedlist>
     <listitem><para>wersja GTK</para></listitem>
     <listitem><para>wersja GLIB</para></listitem>
@@ -277,23 +320,26 @@ Jeżeli tylko GUI zawiera błędy:
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_hardware">
 <title>Sprzęt i sterowniki</title>
+
 <para>
 <itemizedlist>
 <listitem><para>
-informacje o procesorze (CPU) (to działa tylko pod Linuksem):
-<screen>cat /proc/cpuinfo</screen>
+  informacje o procesorze (CPU) (to działa tylko pod Linuksem):
+  <screen>cat /proc/cpuinfo</screen>
 </para></listitem>
 <listitem><para>
-Producent karty graficznej i model. Np.:
+  Producent karty graficznej i model. Np.:
   <itemizedlist>
     <listitem><para>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
     <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Typ sterownika wideo i wersja, np:
+  Typ sterownika wideo i wersja, np:
   <itemizedlist>
     <listitem><para>wbudowane sterowniki X</para></listitem>
     <listitem><para>nVidia 0.9.623</para></listitem>
@@ -302,7 +348,7 @@ Typ sterownika wideo i wersja, np:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Typ karty dźwiękowej i sterownik, np:
+  Typ karty dźwiękowej i sterownik, np:
   <itemizedlist>
     <listitem><para>Creative SBLive! Gold ze sterownikiem OSS z oss.creative.com</para></listitem>
     <listitem><para>Creative SB16 ze sterownikiem OSS z kernela</para></listitem>
@@ -310,15 +356,18 @@ Typ karty dźwiękowej i sterownik, np:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Jeżeli masz wątpliwości, załącz wyjście linuksowego polecenia
-<command>lspci -vv</command>.
+  Jeżeli masz wątpliwości, załącz wyjście linuksowego polecenia
+  <command>lspci -vv</command>.
 </para></listitem>
 </itemizedlist>
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_configure">
 <title>Problemy z konfiguracją</title>
+
 <para>
 Jeżeli <command>./configure</command> zwraca błąd albo
 automatyczne wykrywanie czegoś zawiedzie, przeczytaj
@@ -330,19 +379,25 @@ zapomniałeś zainstalować pakietów rozwojowych (tych z przyrostkiem -dev albo
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_compilation">
 <title>Problemy z kompilacją</title>
+
 <para>
 Prosimy załączyć następujące pliki:
 <itemizedlist>
-<listitem><para>config.h</para></listitem>
-<listitem><para>config.mak</para></listitem>
+  <listitem><para>config.h</para></listitem>
+  <listitem><para>config.mak</para></listitem>
 </itemizedlist>
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_playback">
 <title>Problemy z odtwarzaniem</title>
+
 <para>
 Prosimy załączyć wyjście <application>MPlayera</application> w trybie gadatliwym
 na poziomie pierwszym (opcja -v - przyp. tłum.), ale pamiętając o
@@ -365,7 +420,9 @@ rozszerzeniem .txt. Opisz w nim problem, który masz z zawartym plikiem i załą
 swój adres email oraz wyjście <application>MPlayera</application> w trybie
 gadatliwym na poziomie pierwszym. Zazwyczaj pierwsze 1-5 MB pliku jest
 wystarczające do odtworzenia problemu, ale żeby być pewnym prosimy wykonać:
-<screen>dd if=<replaceable>twój_plik</replaceable> of=<replaceable>mały_plik</replaceable> bs=1024k count=5</screen>
+<screen>
+dd if=<replaceable>twój_plik</replaceable> of=<replaceable>mały_plik</replaceable> bs=1024k count=5
+</screen>
 To polecenie weźmie pierwsze pięć megabajtów
 '<emphasis role="bold">twojego_pliku</emphasis>' i zapisze je do
 '<emphasis role="bold">małego_pliku</emphasis>'. Następnie spróbuj odtworzyć
@@ -377,8 +434,11 @@ poprzez pocztę elektroniczną! Załaduj je na serwer FTP i wyślij tylko
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_crash">
 <title>Awarie programu (ang. Crashes)</title>
+
 <para>
 Musisz uruchomić <application>MPlayera</application> wewnątrz
 <command>gdb</command> i wysłać nam kompletne wyjście, albo jeżeli posiadasz
@@ -386,8 +446,10 @@ zrzut <filename>core</filename> (ang. core dump) utworzony w wyniku awarii,
 wyciągnąć z niego użyteczne informacje. Oto jak to zrobić:
 </para>
 
+
 <sect3 id="bugreports_debug">
 <title>Jak otrzymać informację o awarii</title>
+
 <para>
 Przekompiluj <application>MPlayera</application> z opcją debugowania kodu:
 <screen>
@@ -397,10 +459,11 @@ make
 i uruchom <application>MPlayera</application> używając gdb:
 <screen>gdb ./mplayer</screen>
 Jesteś teraz wewnątrz gdb. Wpisz:
-<screen>run -v <replaceable>opcje-mplayera</replaceable>
-<replaceable>nazwa_pliku</replaceable></screen> i odtwórz swoją awarię. Gdy
-tylko to zrobisz, gdb przeniesie cię z powrotem do linii poleceń, gdzie należy
-wpisać
+<screen>
+run -v <replaceable>opcje-mplayera</replaceable> <replaceable>nazwa_pliku</replaceable>
+</screen>
+i odtwórz swoją awarię. Gdy tylko to zrobisz, gdb przeniesie cię z powrotem do
+wiersza poleceń, gdzie należy wpisać
 <screen>
 bt
 disass $pc-32 $pc+32
@@ -409,8 +472,10 @@ info all-registers
 </para>
 </sect3>
 
+
 <sect3 id="bugreports_core">
 <title>Jak wyciągnąć sensowne informacje ze zrzutu core (ang. core dump)</title>
+
 <para>
 Utwórz plik z nastepującymi poleceniami:
 <screen>
@@ -419,14 +484,21 @@ disass $pc-32 $pc+32
 info all-registers
 </screen>
 A następnie uruchomić następujące polecenie:
-<screen>gdb mplayer --core=core -batch 	--command=<replaceable>plik_z_poleceniami</replaceable> &gt; mplayer.bug</screen>
+<screen>
+gdb mplayer --core=core -batch 	--command=<replaceable>plik_z_poleceniami</replaceable> &gt; mplayer.bug
+</screen>
 </para>
 </sect3>
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_advusers">
 <title>Wiem co robię...</title>
+
 <para>
 Jeżeli utworzyłeś właściwy raport błędu kierując się powyższymi wskazówkami i
 jesteś pewien że to błąd <application>MPlayera</application>, nie kompilatora
@@ -443,10 +515,9 @@ albo obrzucony wyzwiskami.
 Dlatego też nie obrażaj nas i zapisz się na listę -advusers tylko jeżeli
 naprawdę wiesz co robisz i czujesz się zaawansowanym użytkownikiem lub
 deweloperem. Jeżeli spełniasz te kryteria, nie powinno Ci sprawić problemu
-znalezienie sposobu zapisania się na listę (pamiętaj, że musisz biegle znać j.
-angielski - przyp. tłum.)
+znalezienie sposobu zapisania się na listę
+(pamiętaj, że musisz biegle znać j. angielski - przyp. tłum.)
 </para>
-
 </sect1>
 
 </appendix>
