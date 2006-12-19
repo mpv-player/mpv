@@ -2550,25 +2550,26 @@ duration/location of each type.
 
 
 <sect1 id="menc-feat-enc-libavcodec">
-<title>Encoding with the <systemitem class="library">libavcodec</systemitem>
-  codec family</title>
+<title>Кодирование семейством кодеков <systemitem class="library">libavcodec</systemitem>
+</title>
 
 <para>
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-provides simple encoding to a lot of interesting video and audio formats.
-You can encode to the following codecs (more or less up to date):
+предоставляет возможность простого кодирования в множество интересных видео и
+аудио форматов. Вы можете кодировать следующими кодеками (более или менее
+свежий список):
 </para>
 
 <!-- ********** -->
 
 <sect2 id="menc-feat-enc-libavcodec-video-codecs">
-<title><systemitem class="library">libavcodec</systemitem>'s video codecs</title>
+<title>Видео кодеки <systemitem class="library">libavcodec</systemitem></title>
 
 <para>
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-  <row><entry>Video codec name</entry><entry>Description</entry></row>
+  <row><entry>Название видео кодека</entry><entry>Описание</entry></row>
 </thead>
 <tbody>
 <row>
@@ -2577,7 +2578,7 @@ You can encode to the following codecs (more or less up to date):
 </row>
 <row>
   <entry>ljpeg</entry>
-  <entry>lossless JPEG</entry>
+  <entry>JPEG без потери качества</entry>
 </row>
 <row>
   <entry>h261</entry>
@@ -2593,23 +2594,24 @@ You can encode to the following codecs (more or less up to date):
 </row>
 <row>
   <entry>mpeg4</entry>
-  <entry>ISO standard MPEG-4 (DivX, Xvid compatible)</entry>
+  <entry>ISO стандарт MPEG-4 (DivX, Xvid совместимый)</entry>
 </row>
 <row>
   <entry>msmpeg4</entry>
-  <entry>pre-standard MPEG-4 variant by MS, v3 (AKA DivX3)</entry>
+  <entry>вариант пре-стандарта MPEG-4 от MS, v3 (он же DivX3)</entry>
 </row>
 <row>
   <entry>msmpeg4v2</entry>
-  <entry>pre-standard MPEG-4 by MS, v2 (used in old ASF files)</entry>
+  <entry>вариант пре-стандарта MPEG-4 от MS, v2 (используемый в старых ASF
+  файлах)</entry>
 </row>
 <row>
   <entry>wmv1</entry>
-  <entry>Windows Media Video, version 1 (AKA WMV7)</entry>
+  <entry>Windows Media Video, версия 1 (он же WMV7)</entry>
 </row>
 <row>
   <entry>wmv2</entry>
-  <entry>Windows Media Video, version 2 (AKA WMV8)</entry>
+  <entry>Windows Media Video, версия 2 (он же WMV8)</entry>
 </row>
 <row>
   <entry>rv10</entry>
@@ -2621,35 +2623,35 @@ You can encode to the following codecs (more or less up to date):
 </row>
 <row>
   <entry>mpeg1video</entry>
-  <entry>MPEG-1 video</entry>
+  <entry>MPEG-1 видео</entry>
 </row>
 <row>
   <entry>mpeg2video</entry>
-  <entry>MPEG-2 video</entry>
+  <entry>MPEG-2 видео</entry>
 </row>
 <row>
   <entry>huffyuv</entry>
-  <entry>lossless compression</entry>
+  <entry>сжатие без потерь</entry>
 </row>
 <row>
   <entry>asv1</entry>
-  <entry>ASUS Video v1</entry>
+  <entry>ASUS Видео v1</entry>
 </row>
 <row>
   <entry>asv2</entry>
-  <entry>ASUS Video v2</entry>
+  <entry>ASUS Видео v2</entry>
 </row>
 <row>
   <entry>ffv1</entry>
-  <entry>FFmpeg's lossless video codec</entry>
+  <entry>видео кодек без потерь из FFmpeg</entry>
 </row>
 <row>
   <entry>svq1</entry>
-  <entry>Sorenson video 1</entry>
+  <entry>Sorenson видео 1</entry>
 </row>
 <row>
   <entry>flv</entry>
-  <entry>Sorenson H.263 used in Flash Video</entry>
+  <entry>Sorenson H.263 используемый в Flash Видео</entry>
 </row>
 <row>
   <entry>dvvideo</entry>
@@ -2657,19 +2659,19 @@ You can encode to the following codecs (more or less up to date):
 </row>
 <row>
   <entry>snow</entry>
-  <entry>FFmpeg's experimental wavelet-based codec</entry>
+  <entry>экспериментальный кодек FFmpeg, основанный на вейвлетах</entry>
 </row>
 </tbody>
 </tgroup>
 </informaltable>
 
-The first column contains the codec names that should be passed after the
-<literal>vcodec</literal> config, like: 
+Первый столбец содержит названия кодеков, которые следует указывать после
+<literal>vcodec</literal> опции, например:
 <option>-lavcopts vcodec=msmpeg4</option>
 </para>
 
 <informalexample><para>
-An example with MJPEG compression:
+Пример с MJPEG сжатием:
 <screen>
 mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy
 </screen>
@@ -2679,12 +2681,12 @@ mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy
 <!-- ********** -->
 
 <sect2 id="menc-feat-enc-libavcodec-audio-codecs">
-<title><systemitem class="library">libavcodec</systemitem>'s audio codecs</title>
+<title>Аудио кодеки <systemitem class="library">libavcodec</systemitem></title>
 <para>
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Audio codec name</entry><entry>Description</entry></row>
+<row><entry>Название аудио кодека</entry><entry>Описание</entry></row>
 </thead>
 <tbody>
 <row>
@@ -2693,174 +2695,179 @@ mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy
 </row>
 <row>
   <entry>ac3</entry>
-  <entry>AC3, AKA Dolby Digital</entry>
+  <entry>AC3, он же Dolby Digital</entry>
 </row>
 <row>
   <entry>adpcm_ima_wav</entry>
-  <entry>IMA adaptive PCM (4 bits per sample, 4:1 compression)</entry>
+  <entry>IMA адаптивный PCM (4 бита на сэмпл, сжатие 4:1)</entry>
 </row>
 <row>
   <entry>sonic</entry>
-  <entry>experimental lossy/lossless codec</entry>
+  <entry>экспериментальный кодек с сжатием с/без потерь</entry>
 </row>
 </tbody>
 </tgroup>
 </informaltable>
 
-The first column contains the codec names that should be passed after the
-<literal>acodec</literal> option, like: <option>-lavcopts acodec=ac3</option>
+Первый столбец содержит названия кодеков, которые следует указывать после
+<literal>acodec</literal> опции, например: <option>-lavcopts acodec=ac3</option>
 </para>
 
 <informalexample><para>
-An example with AC3 compression:
+Пример с AC3 сжатием:
 <screen>
 mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy
 </screen>
 </para></informalexample>
 
 <para>
-Contrary to <systemitem class="library">libavcodec</systemitem>'s video
-codecs, its audio codecs do not make a wise usage of the bits they are
-given as they lack some minimal psychoacoustic model (if at all)
-which most other codec implementations feature.
-However, note that all these audio codecs are very fast and work
-out-of-the-box everywhere <application>MEncoder</application> has been
-compiled with <systemitem class="library">libavcodec</systemitem> (which
-is the case most of time), and do not depend on external libraries.
+В отличие от видео кодеков <systemitem class="library">libavcodec</systemitem>,
+ее аудио кодеки не очень разумно используют отданные им биты, в силу
+неудачной реализации некоторой минимальной психоакустической модели (если она
+вообще есть), которая является характерной чертой большинства остальных реализаций кодеков.
+Однако заметьте, что все эти аудио кодеки очень быстры и работают прямо из
+коробки везде, где <application>MEncoder</application> скомпилирован с
+<systemitem class="library">libavcodec</systemitem> (а почти всегда так оно и
+есть), и не зависят от внешних библиотек.
 </para>
 </sect2>
 
 <!-- ********** -->
 
 <sect2 id="menc-feat-dvd-mpeg4-lavc-encoding-options">
-<title>Encoding options of libavcodec</title>
+<title>Опции кодирования libavcodec</title>
 
 <para>
-Ideally, you would probably want to be able to just tell the encoder to switch
-into "high quality" mode and move on.
-That would probably be nice, but unfortunately hard to implement as different
-encoding options yield different quality results depending on the source material.
-That is because compression depends on the visual properties of the video
-in question.
-For example, anime and live action have very different properties and
-thus require different options to obtain optimum encoding.
-The good news is that some options should never be left out, like
-<option>mbd=2</option>, <option>trell</option>, and <option>v4mv</option>.
-See below for a detailed description of common encoding options.
+В идеале, вы, наверное, хотели бы иметь возможность просто сказать кодировщику
+переключиться на "высокое качество" и начать кодирование.
+Это было бы замечательно, но, к сожалению, трудно реализуемо, поскольку
+различные опции кодирования, в зависимости от исходного материала, дают в результате 
+различное качество.
+Так происходит потому, что сжатие зависит от визуальных свойств видео.
+Например, аниме и живая съемка имеют сильно отличающиеся свойства и,
+поэтому, требуют разные опции для получения оптимального результата.
+Хорошая новость состоит в том, что некоторые опции, такие как 
+<option>mbd=2</option>, <option>trell</option>, и <option>v4mv</option> могут
+быть опущены.
+Детальное описание основных опций кодирования смотрите ниже.
 </para>
 
 <itemizedlist>
-<title>Options to adjust:</title>
+<title>Опции для настройки:</title>
 <listitem><para>
-  <emphasis role="bold">vmax_b_frames</emphasis>: 1 or 2 is good, depending on
-  the movie.
-  Note that if you need to have your encode be decodable by DivX5, you
-  need to activate closed GOP support, using
-  <systemitem class="library">libavcodec</systemitem>'s <option>cgop</option>
-  option, but you need to deactivate scene detection, which
-  is not a good idea as it will hurt encode efficiency a bit.
+  <emphasis role="bold">vmax_b_frames</emphasis>: хороши 1 или 2, в зависимости
+  от фильма.
+  Заметьте, если хотите, чтобы ваш фильм декодировался DivX5, вы должны
+  активировать поддержку закрытых GOP, используя опцию <option>cgop</option>
+  <systemitem class="library">libavcodec</systemitem>, но также должны деактивировать 
+  определение сцен, что не является хорошей идеей, поскольку несколько вредит
+  эффективности.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">vb_strategy=1</emphasis>: helps in high-motion scenes.
-  On some videos, vmax_b_frames may hurt quality, but vmax_b_frames=2 along
-  with vb_strategy=1 helps.
+  <emphasis role="bold">vb_strategy=1</emphasis>: помогает в высокодинамичных
+  сценах.
+  Для некоторых видео файлов vmax_b_frames может повредить качеству, но vmax_b_frames=2
+  вместе с vb_strategy=1 поможет в этом случае.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">dia</emphasis>: motion search range. Bigger is better
-  and slower.
-  Negative values are a completely different scale.
-  Good values are -1 for a fast encode, or 2-4 for slower.
+  <emphasis role="bold">dia</emphasis>: диапазон поиска движения. Большие
+  значения лучше и медленнее.
+  Отрицательные значения - это совершенно другая шкала.
+  Хорошими значениями являются -1 для быстрого кодирования или 2-4 - для 
+  медленного.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">predia</emphasis>: motion search pre-pass.
-  Not as important as dia. Good values are 1 (default) to 4. Requires preme=2
-  to really be useful.
+  <emphasis role="bold">predia</emphasis>: предпроход поиска движения.
+  Не так важен, как dia. Хорошими являются значения от 1 (по-умолчанию) до 4.
+  Требует preme=2, чтобы быть действительно полезным.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">cmp, subcmp, precmp</emphasis>: Comparison function for
-  motion estimation.
-  Experiment with values of 0 (default), 2 (hadamard), 3 (dct), and 6 (rate
-  distortion).
-  0 is fastest, and sufficient for precmp.
-  For cmp and subcmp, 2 is good for anime, and 3 is good for live action.
-  6 may or may not be slightly better, but is slow.
+  <emphasis role="bold">cmp, subcmp, precmp</emphasis>: Функция сравнения для
+  поиска движения.
+  Поэкспериментируйте со значениями 0 (по-умолчанию), 2 (hadamard), 3 (dct), и 6
+  (соотношение сигнал-шум).
+  0 - самый быстрый и достаточен для precmp.
+  В случае cmp и subcmp 2 является хорошим для аниме, а 3 для живой съемки.
+  6 может оказаться лучше, а может и нет, но он медленнее.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">last_pred</emphasis>: Number of motion predictors to
-  take from the previous frame.
-  1-3 or so help at little speed cost.
-  Higher values are slow for no extra gain.
+  <emphasis role="bold">last_pred</emphasis>: Количество предсказателей
+  движения, берущихся из предыдущего кадра.
+  1-3 или около того помогут вам ценой небольшой потери в скорости.
+  Большие значения медленны и не дают дополнительного улучшения.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">cbp, mv0</emphasis>: Controls the selection of macroblocks.
-  Small speed cost for small quality gain.
+  <emphasis role="bold">cbp, mv0</emphasis>: Контролирует выбор макроблоков.
+  Незначительное снижение скорости с небольшим приростом в качестве.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">qprd</emphasis>: adaptive quantization based on the
-  macroblock's complexity.
-  May help or hurt depending on the video and other options.
-  This can cause artifacts unless you set vqmax to some reasonably small value
-  (6 is good, maybe as low as 4); vqmin=1 should also help.
+  <emphasis role="bold">qprd</emphasis>: адаптивное квантование, основанное на
+  сложности макроблока.
+  Может сделать лучше или хуже в зависимости от видео и других опций.
+  Она также может привести к появлению артефактов, если вы не установите vqmax в
+  некоторое разумно малое значение
+  (хорошо - 6, может быть даже 4); vqmin=1 также может помочь.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">qns</emphasis>: very slow, especially when combined
-  with qprd.
-  This option will make the encoder minimize noise due to compression
-  artifacts instead of making the encoded video strictly match the source.
-  Do not use this unless you have already tweaked everything else as far as it
-  will go and the results still are not good enough.
+  <emphasis role="bold">qns</emphasis>: очень медленно, особенно в комбинации с qprd.
+  Эта опция укажет кодировщику минимизировать шум от артефактов сжатия вместо
+  создания закодированного видео, полностью идентичного исходному.
+  Не используйте ее, если только не перепробовали настроить все, что было 
+  возможно, а результат все таки недостаточно хорош.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">vqcomp</emphasis>: Tweak ratecontrol.
-  What values are good depends on the movie.
-  You can safely leave this alone if you want.
-  Reducing vqcomp puts more bits on low-complexity scenes, increasing it puts
-  them on high-complexity scenes (default: 0.5, range: 0-1. recommended range:
-  0.5-0.7).
+  <emphasis role="bold">vqcomp</emphasis>: Настраивает управление битпотоком.
+  Какие значения являются хорошими зависит от фильма.
+  Если хотите, можете без опаски оставить значение по-умолчанию.
+  Уменьшение vqcomp отдает больше бит в сцены с низкой сложностью, увеличение
+  его передает биты в очень сложные сцены (по-умолчанию: 0.5, диапазон: 0-1.
+  рекомендуемый диапазон: 0.5-0.7).
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">vlelim, vcelim</emphasis>: Sets the single coefficient
-  elimination threshold for luminance and chroma planes.
-  These are encoded separately in all MPEG-like algorithms.
-  The idea behind these options is to use some good heuristics to determine
-  when the change in a block is less than the threshold you specify, and in
-  such a case, to just  encode the block as "no change".
-  This saves bits and perhaps speeds up encoding. vlelim=-4 and vcelim=9
-  seem to be good for live movies, but seem not to help with anime;
-  when encoding animation, you should probably leave them unchanged.
+  <emphasis role="bold">vlelim, vcelim</emphasis>: Устанавливает порог
+  отбрасывания одиночного коэффициента для яркостной и цветностной плоскостей.
+  Они кодируются независимо во всех MPEG-похожих алгоритмах.
+  Идея этих опций заключается в использованию некоторой хорошей эвристики для
+  определения момента, когда изменения в блоке ниже указанного вами порога, и что его
+  стоит кодировать как "блок без изменений". 
+  Это сохраняет быти и, возможно, ускоряет кодирование. 
+  vlelim=-4 и vcelim=9 выглядят неплохими для живой съемки, но, скорее всего, не
+  помогут для аниме; при кодировании анимации вам, возможно, следует оставить
+  эту опцию неизменной.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">qpel</emphasis>: Quarter pixel motion estimation.
-  MPEG-4 uses half pixel precision for its motion search by default,
-  therefore this option comes with an overhead as more information will be
-  stored in the encoded file.
-  The compression gain/loss depends on the movie, but it is usually not very
-  effective on anime.
-  qpel always incurs a significant cost in CPU decode time (+25% in
-  practice).
+  <emphasis role="bold">qpel</emphasis>: Четверьтпиксельная оценка движения.
+  По-умолчанию, MPEG-4 использует полупиксельную точность для оценки движения,
+  следовательно, эта опция вносит дополнительные накладные рахсоды, поскольку
+  сохраняет больше информации в закодированном файле.
+  Улучшение/ухудшение степени сжатия зависит от фильма, но обычно эта опция не
+  очень эффективна для аниме.
+  qpel всегда вносит значительный вклад в CPU время декодирования (+25% на
+  практике).
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">psnr</emphasis>: does not affect the actual encoding,
-  but writes a log file giving the type/size/quality of each frame, and
-  prints a summary of PSNR (Peak Signal to Noise Ratio) at the end.
+  <emphasis role="bold">psnr</emphasis>: не влияет на сам процесс кодирования,
+  но выводит в файл тип/размер/качество каждого кадра, а также итоговый
+  PSNR (Peak Signal to Noise Ratio, пиковое отношения сигнала к шуму) в конце
+  прцесса.
 </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
-<title>Options not recommended to play with:</title>
+<title>Опции, с которыми играть не стоит:</title>
 <listitem><para>
-  <emphasis role="bold">vme</emphasis>: The default is best.
+  <emphasis role="bold">vme</emphasis>: Значение по-умолчанию является лучшим.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">lumi_mask, dark_mask</emphasis>: Psychovisual adaptive
-  quantization.
-  You do not want to play with those options if you care about quality.
-  Reasonable values may be effective in your case, but be warned this is very
-  subjective.
+  <emphasis role="bold">lumi_mask, dark_mask</emphasis>: Психовизуальное
+  адаптивное квантование.
+  Не стоит играть с этими опциями, если заботитесь о качестве.
+  Разумные значения могут быть эффективными в вашем случае, но имейте в виду,
+  что это весьма субъективно.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">scplx_mask</emphasis>: Tries to prevent blocky
-  artifacts, but postprocessing is better.
+  <emphasis role="bold">scplx_mask</emphasis>: Пытается предотвратить появление
+  квадратиков, но постобработка делает это лучше.
 </para></listitem>
 </itemizedlist>
 </sect2>
@@ -2868,23 +2875,21 @@ See below for a detailed description of common encoding options.
 <!-- ********** -->
 
 <sect2 id="menc-feat-mpeg4-lavc-example-settings">
-<title>Encoding setting examples</title>
+<title>Примеры настроек кодирования</title>
 
 <para>
-The following settings are examples of different encoding
-option combinations that affect the speed vs quality tradeoff
-at the same target bitrate.
+Следующие настройки - это примеры различных комбинаций опций кодирования,
+которые влияют на соотношение скорость-качество при той же величине целевого
+биптотока.
 </para>
 
 <para>
-All the encoding settings were tested on a 720x448 @30000/1001 fps
-video sample, the target bitrate was 900kbps, and the machine was an
-AMD-64 3400+ at 2400 MHz in 64 bits mode.
-Each encoding setting features the measured encoding speed (in
-frames per second) and the PSNR loss (in dB) compared to the "very
-high quality" setting.
-Please understand that depending on your source, your machine type
-and development advancements, you may get very different results.
+Все настройки кодирования проверялись на тестовом видео 720x448 @30000/1001 fps 
+с целевым битпотоком 900кбит/сек, на машине AMD-64 3400+ с 2400 МГц и 64 битном режиме.
+Для каждой настройки кодирования указаны измеренная скорость кодирования (в
+кадрах в секунду) и потеря PSNR (в дБ) по сравнению с настройкой "очень высокое
+качество". Поймите, пожалуйста, что в зависимости от вашего материала, типа
+машины, прогресса разработки вы можете получить сильно отличающиеся результаты.
 </para>
 
 <para>
@@ -2892,33 +2897,33 @@ and development advancements, you may get very different results.
 <tgroup cols="4">
 <thead>
 <row>
-  <entry>Description</entry>
-  <entry>Encoding options</entry>
-  <entry>speed (in fps)</entry>
-  <entry>Relative PSNR loss (in dB)</entry>
+  <entry>Описание</entry>
+  <entry>Опции кодирования</entry>
+  <entry>скорость (в fps)</entry>
+  <entry>Относительная потеря PSNR (в дБ)</entry>
 </row>
 </thead>
 <tbody>
 <row>
-  <entry>Very high quality</entry>
+  <entry>Очень высокое качество</entry>
   <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:qns=2</option></entry>
   <entry>6fps</entry>
   <entry>0dB</entry>
 </row>
 <row>
-  <entry>High quality</entry>
+  <entry>Высокое качество</entry>
   <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:last_pred=2:dia=-1:vmax_b_frames=2:vb_strategy=1:cmp=3:subcmp=3:precmp=0:vqcomp=0.6:turbo</option></entry>
   <entry>15fps</entry>
   <entry>-0.5dB</entry>
 </row>
 <row>
-  <entry>Fast</entry>
+  <entry>Быстрое</entry>
   <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:turbo</option></entry>
   <entry>42fps</entry>
   <entry>-0.74dB</entry>
 </row>
 <row>
-  <entry>Realtime</entry>
+  <entry>Реального времени</entry>
   <entry><option>vcodec=mpeg4:mbd=2:turbo</option></entry>
   <entry>54fps</entry>
   <entry>-1.21dB</entry>
@@ -2932,24 +2937,25 @@ and development advancements, you may get very different results.
 <!-- ********** -->
 
 <sect2 id="custommatrices">
-<title>Custom inter/intra matrices</title>
+<title>Нестандартные inter/intra матрицы</title>
 
 <para>
-With this feature of
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-you are able to set custom inter (I-frames/keyframes) and intra
-(P-frames/predicted frames) matrices. It is supported by many of the codecs:
-<systemitem>mpeg1video</systemitem> and <systemitem>mpeg2video</systemitem>
-are reported as working.
+С этой возможностью
+<link linkend="ffmpeg"><systemitem
+class="library">libavcodec</systemitem></link>,
+вы можете установить нестандартные inter (I-кадры/ключевые) и intra
+(P-кадры/предсказанные) матрицы. Это поддерживается многими кодеками:
+В <systemitem>mpeg1video</systemitem> и <systemitem>mpeg2video</systemitem>
+также заявлена поддержка.
 </para>
 
 <para>
-A typical usage of this feature is to set the matrices preferred by the
-<ulink url="http://www.kvcd.net/">KVCD</ulink> specifications.
+Обычное использовани этой опции - установить матрицы, предпочитаемые
+спецификациями <ulink url="http://www.kvcd.net/">KVCD</ulink>.
 </para>
 
 <para>
-The <emphasis role="bold">KVCD "Notch" Quantization Matrix:</emphasis>
+<emphasis role="bold">KVCD Матрица Квантования "Notch":</emphasis>
 </para>
 
 <para>
@@ -2979,7 +2985,7 @@ Inter:
 </para>
 
 <para>
-Usage:
+Использование:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -oac copy -ovc lavc \
     -lavcopts inter_matrix=...:intra_matrix=...
@@ -3002,86 +3008,87 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,\
 <!-- ********** -->
 
 <sect2 id="menc-feat-dvd-mpeg4-example">
-<title>Example</title>
+<title>Пример</title>
 
 <para>
-So, you have just bought your shiny new copy of Harry Potter and the Chamber
-of Secrets (widescreen edition, of course), and you want to rip this DVD
-so that you can add it to your Home Theatre PC. This is a region 1 DVD,
-so it is NTSC. The example below will still apply to PAL, except you will
-omit <option>-ofps 24000/1001</option> (because the output framerate is the
-same as the input framerate), and of course the crop dimensions will be
-different.
+Итак, вы только что купили новенькую, блестящую копию фильма "Гарри Поттер и Тайная
+Комната" (в широкоэкранном формате, конечно) и хотите сделать рип этого DVD так,
+чтобы добавить его к Домашнему кинотеатру на PC. Это DVD первого региона, 
+поэтому NTSC. Пример ниже также применим и для PAL, за исключением того, что
+надо будет опустить <option>-ofps 24000/1001</option> (поскольку частота кадров
+на выходе такая же, как и на входе), и, конечно, границы обрезания будут
+другими.
 </para>
 
 <para>
-After running <option>mplayer dvd://1</option>, we follow the process
-detailed in the section <link linkend="menc-feat-telecine">How to deal
-with telecine and interlacing in NTSC DVDs</link> and discover that it is
-24000/1001 fps progressive video, which means that we need not use an inverse
-telecine filter, such as <option>pullup</option> or
-<option>filmdint</option>.
+После запуска <option>mplayer dvd://1</option> мы следуем процессу, детально
+описанному в разделе <link linkend="menc-feat-telecine">Как работать с телесином
+и черезстрочностью в NTSC DVD</link>, и выясняем, что это 24000/1001 fps
+прогрессивное видео, а значит использовать фильтры обратного телесина,
+такие как <option>pullup</option> или <option>filmdint</option> не нужно.
 </para>
 
 <para>
-Next, we want to determine the appropriate crop rectangle, so we use the
-cropdetect filter:
+Далее, мы хотим определить верные границы обрезания, поэтому используем фильтр 
+cropdetect:
 <screen>mplayer dvd://1 -vf cropdetect</screen>
-Make sure you seek to a fully filled frame (such as a bright scene), and
-you will see in <application>MPlayer</application>'s console output:
+Убедитесь, что переместились к полностью заполненному кадру (например,
+к светлой сцене), вы должны увидеть в консоли <application>MPlayer</application>:
 <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
-We then play the movie back with this filter to test its correctness:
+Затем снова воспроизводим фильм с этим фильтром для проверки его корректности:
 <screen>mplayer dvd://1 -vf crop=720:362:0:58</screen>
-And we see that it looks perfectly fine. Next, we ensure the width and
-height are a multiple of 16. The width is fine, however the height is
-not. Since we did not fail 7th grade math, we know that the nearest
-multiple of 16 lower than 362 is 352.
+И убеждаемся, что все выглядит прекрасно. Далее, проверяем, что ширина и высота
+делятся на 16. С шириной все в порядке, а с высотой - нет. 
+Поскольку мы не заваливали математику в 7-ом классе, то знаем, что ближайшее
+целое, меньшее 362 и кратное 16, равно 352.
 </para>
 
 <para>
-We could just use <option>crop=720:352:0:58</option>, but it would be nice
-to take a little off the top and a little off the bottom so that we
-retain the center. We have shrunk the height by 10 pixels, but we do not
-want to increase the y-offset by 5-pixels since that is an odd number and
-will adversely affect quality. Instead, we will increase the y-offset by
-4 pixels:
+Мы могли бы просто использовать <option>crop=720:352:0:58</option>, но будет
+лучше отрезать понемногу от верха и низа, чтобы центр остался на месте.
+Мы уменьшили высоту на 10 пикселов, но не хотим увеличивать смещение по y на 5,
+поскольку это нечетное число и отрицательно скажется на качестве.
+Вместо этого, мы увеличим y на 4:
 <screen>mplayer dvd://1 -vf crop=720:352:0:62</screen>
-Another reason to shave pixels from both the top and the bottom is that we
-ensure we have eliminated any half-black pixels if they exist. Note that if
-your video is telecined, make sure the <option>pullup</option> filter (or
-whichever inverse telecine filter you decide to use) appears in the filter
-chain before you crop. If it is interlaced, deinterlace before cropping.
-(If you choose to preserve the interlaced video, then make sure your
-vertical crop offset is a multiple of 4.)
+Другая причина, по которой мы урезаем пикселы сверху и снизу, заключаемся в том,
+что мы хотим убедиться, что удалены все наполовину черные пикселы, если они есть.
+Если ваше видео телесиненное, убедитесь, что фильтр <option>pullup</option> (или
+любой другой фильтр обратного телесина, который вы решили использовать)
+находится в цепочке до фильтра crop.
+Если оно черезстрочное, то перед обрезкой проведите деинтерлейсинг.
+(Если решили сохранить черезстрочность видео, убедитесь, что вертикальный сдвиг
+обрезания кратен 4.)
 </para>
 
 <para>
-If you are really concerned about losing those 10 pixels, you might
-prefer instead to scale the dimensions down to the nearest multiple of 16.
-The filter chain would look like:
+Если вас действительно заботит потеря этих 10 пикселов, вы можете
+вместо этого отмасштабировать фильм, уменьшив размерности до ближайших 
+кратных 16 значений.
+Цепочка фильтров будет выглядеть примерно так:
 <screen>-vf crop=720:362:0:58,scale=720:352</screen>
-Scaling the video down like this will mean that some small amount of
-detail is lost, though it probably will not be perceptible. Scaling up will
-result in lower quality (unless you increase the bitrate). Cropping
-discards those pixels altogether. It is a tradeoff that you will want to
-consider for each circumstance. For example, if the DVD video was made
-for television, you might want to avoid vertical scaling, since the line
-sampling corresponds to the way the content was originally recorded.
+Подобное уменьшение изображения будет означать потерю небольшого количества
+деталей, хотя это, возможно, окажется незаметным. Масштабирование изображения в
+сторону увеличения даст худшее качество (если вы не увеличиваете битпоток).
+Обрезка же полностью выбросит те пикселы. Это компромисс, идти на который или нет,
+придется решать в каждом частном случае. Например, если DVD видео было создано
+для телевидения,  вы можете захотеть избежать вертикального масштабирования,
+поскольки частота строчной развертки [line sampling] соответствует тому, как содержимое
+изначально записывалось.
 </para>
 
 <para>
-On inspection, we see that our movie has a fair bit of action and high
-amounts of detail, so we pick 2400Kbit for our bitrate.
+При проверке видим, что наш фильм имеет немного движения и большое количество
+деталей, так что выбираем для битпотока значение 2400Кбит/сек.
 </para>
 
 <para>
-We are now ready to do the two pass encode. Pass one:
+Теперь мы готовы произвести двухпроходное кодирование. Проход первый:
 <screen>
 mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</replaceable> -ovc lavc \
     -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
     -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2
 </screen>
-And pass two is the same, except that we specify <option>vpass=2</option>:
+И второй проход с теми же параметрами, за исключением <option>vpass=2</option>:
 <screen>
 mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</replaceable> -ovc lavc \
     -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
@@ -3090,38 +3097,36 @@ mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</
 </para>
 
 <para>
-The options <option>v4mv:mbd=2:trell</option> will greatly increase the
-quality at the expense of encoding time. There is little reason to leave
-these options out when the primary goal is quality. The options
-<option>cmp=3:subcmp=3:mbcmp=3</option> select a comparison function that
-yields higher quality than the defaults. You might try experimenting with
-this parameter (refer to the man page for the possible values) as
-different functions can have a large impact on quality depending on the
-source material. For example, if you find
-<systemitem class="library">libavcodec</systemitem> produces too much
-blocky artifacting, you could try selecting the experimental NSSE as
-comparison function via <option>*cmp=10</option>.
+Опции <option>v4mv:mbd=2:trell</option> значительно улучшат качество ценой
+времени кодирования. Нет никаких оснований отключать эти
+опции, когда главным критерием является качество. Опции 
+<option>cmp=3:subcmp=3:mbcmp=3</option> выбирают функцию сравнения, дающую
+лучшее качество, чем стандартная. Вы можете поэкспериментировать с этим параметром
+(возможные значения смотрите на man странице), поскольку разные функции могут
+давать разный прирост в качестве в зависимости от исходного материала.
+Например, если вы  замечаете, что <systemitem class="library">libavcodec</systemitem>
+производит слишком много блочных артефактов (квадратиков), то можете попытаться
+выбрать экспериментальный NSSE в качестве функции сравнения при помощи опциеи <option>*cmp=10</option>.
 </para>
 
 <para>
-For this movie, the resulting AVI will be 138 minutes long and nearly
-3GB. And because you said that file size does not matter, this is a
-perfectly acceptable size. However, if you had wanted it smaller, you
-could try a lower bitrate. Increasing bitrates have diminishing
-returns, so while we might clearly see an improvement from 1800Kbit to
-2000Kbit, it might not be so noticeable above 2000Kbit. Feel
-free to experiment until you are happy.
+Для этого фильма полученный AVI будет 138 минут длинной и рамером около 3Гб.
+И, поскольку вы сказали, что размер файла значения не имеет, это вполне
+приемлемый результат. Однако, если все-таки хотите получить меньший размер файла, 
+можете попробовать уменьшить битпоток. Увеличение битпотока имеет снижающийся эффект, 
+поэтому, хотя мы можем ясно видеть улучшение от 1800Кбит/сек до 20000Кбит/сек, оно 
+может быть не столь заметно выше 20000Кбит/сек.
 </para>
 
 <para>
-Because we passed the source video through a denoise filter, you may want
-to add some of it back during playback. This, along with the
-<option>spp</option> post-processing filter, drastically improves the
-perception of quality and helps eliminate blocky artifacts in the video.
-With <application>MPlayer</application>'s <option>autoq</option> option,
-you can vary the amount of post-processing done by the spp filter
-depending on available CPU. Also, at this point, you may want to apply
-gamma and/or color correction to best suit your display. For example:
+Так как мы пропустили исходное видео через фильтр удаления шума, то, возможно,
+захочется вернуть какую-то его часть во время воспроизведения.
+Это, совместпно с фильтром постобработки <option>spp</option>, существенно
+улучшит воспринимаемое качество и поможет избежать блочных артефактов в видео.
+Опцией <option>autoq</option> <application>MPlayer</application>'а вы можете
+изменять величину производимой фильтром spp постобработки в зависимости от
+доступных ресурсов CPU. Вдобавок, на этом этапе вы можете захотеть применить 
+коррекцию гаммы и/или цвета для лучшего соответствия вашему монитору. Например:
 <screen>
 mplayer <replaceable>Harry_Potter_2.avi</replaceable> -vf spp,noise=9ah:5ah,eq2=1.2 -autoq 3
 </screen>
