@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21537 -->
 <!-- Opiekun: Cobra -->
 
 <appendix id="bugs">
@@ -8,150 +8,185 @@
 
 <sect1 id="bugs-special">
 <title>Specjalne systemowe/specyficzne dla procesora błędy/problemy</title>
+
 <itemizedlist>
 <listitem>
-<para>SIGILL (sygnał 4) na P3 przy jądrze 2.2.x:</para>
-<para>Problem: jądro 2.2.x nie ma prawidłowej (działającej) obsługi SSE</para>
-<para>Rozwiązanie: aktualizacja jądra do 2.4.x</para>
-<para>Obejście: <command>./configure --disable-sse</command></para>
+  <para>SIGILL (sygnał 4) na P3 przy jądrze 2.2.x:</para>
+  <para>Problem: jądro 2.2.x nie ma prawidłowej (działającej) obsługi SSE</para>
+  <para>Rozwiązanie: aktualizacja jądra do 2.4.x</para>
+  <para>Obejście: <command>./configure --disable-sse</command></para>
 </listitem>
 
 <listitem>
-<para>Ogólny SIGILL (sygnał 4):</para>
-<para>Problem: skompilowałeś i próbowałeś uruchomić
-<application>MPlayera</application> na dwóch różnych maszynach
-(np. skompilowałeś na P3, a próbowałeś uruchomić na Celeronie)</para>
-<para>Rozwiązanie: kompiluj <application>MPlayera</application> na tej samej
-maszynie, na której chcesz go używać!</para>
-<para>Obejście: Możesz o tym wszystkim zapomnieć, jeśli skonfigurujesz
-<application>MPlayera</application> z opcją
-<option>--enable-runtime-cpudetection</option> lub możesz wyłączyć
-pewnie zestawy instrukcji procesora za pomocą odpowiednich opcji (np.
-<option>--disable-mmx</option>, <option>--disable-3dnow</option>, itd.).
-</para>
+  <para>Ogólny SIGILL (sygnał 4):</para>
+  <para>
+  Problem: skompilowałeś i próbowałeś uruchomić
+  <application>MPlayera</application> na dwóch różnych maszynach
+  (np. skompilowałeś na P3, a próbowałeś uruchomić na Celeronie)
+  </para>
+  <para>
+  Rozwiązanie: kompiluj <application>MPlayera</application> na tej samej
+  maszynie, na której chcesz go używać!
+  </para>
+  <para>
+  Obejście: Możesz o tym wszystkim zapomnieć, jeśli skonfigurujesz
+  <application>MPlayera</application> z opcją
+  <option>--enable-runtime-cpudetection</option> lub możesz wyłączyć
+  pewnie zestawy instrukcji procesora za pomocą odpowiednich opcji
+  (np. <option>--disable-mmx</option>, <option>--disable-3dnow</option>, itd.).
+  </para>
 </listitem>
 
 <listitem>
-<para>Zwisy podczas zapisywania strumieni:</para>
-<para>Problem: zrzut pamięci</para>
-<para>Rozwiązanie: Nie panikuj. Upewnij się, że wiesz, gdzie jest ręcznik.</para>
+  <para>Zwisy podczas zapisywania strumieni:</para>
+  <para>Problem: zrzut pamięci</para>
+  <para>Rozwiązanie: Nie panikuj. Upewnij się, że wiesz, gdzie jest ręcznik.</para>
 </listitem>
 </itemizedlist>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="bugs-audio">
 <title>Różne problemy z synchronizacją A-V i dźwiękiem</title>
 
 <sect2 id="bugs-delay-all">
-<title>Ogólne opóźnienie audio lub "dławiący się" dźwięk (występuje przy wszystkich lub wielu plikach)</title>
+<title>Ogólne opóźnienie audio lub "dławiący się" dźwięk (występuje przy
+  wszystkich lub wielu plikach)</title>
+
 <itemizedlist>
 <listitem><para>
-najczęściej: zepsuty sterownik dźwięku! - spróbuj użyć innych sterowników, np.
-emulacji OSS ALSA za pomocą opcji <option>-ao oss</option>. Spróbuj także
-<option>-ao sdl</option>. Opcje te czasem pomagają. Jeśli Twój plik odtwarza się
-bez problemów z opcją <option>-nosound</option>, to możesz być pewien, że to
-wina karty dźwiękowej lub jej sterownika.
+  najczęściej: zepsuty sterownik dźwięku! - spróbuj użyć innych sterowników, np.
+  emulacji OSS ALSA za pomocą opcji <option>-ao oss</option>. Spróbuj także
+  <option>-ao sdl</option>. Opcje te czasem pomagają. Jeśli Twój plik odtwarza
+  się bez problemów z opcją <option>-nosound</option>, to możesz być pewien, że
+  to wina karty dźwiękowej lub jej sterownika.
 </para></listitem>
 
 <listitem>
-<para>problemy z buforem audio (źle wykryty rozmiar bufora)</para>
-<para>Obejście: opcja <application>MPlayera</application> <option>-abs</option></para>
+  <para>problemy z buforem audio (źle wykryty rozmiar bufora)</para>
+  <para>
+  Obejście: opcja <application>MPlayera</application> <option>-abs</option>
+  </para>
 </listitem>
 
 <listitem><para>
-problemy z częstotliwością próbkowania - być może Twoja karta nie obsługuje
-częstotliwości próbkowania użytych w Twoich plikach - spróbuj filtru resample
-(<option>-af resample=...</option>)
+  problemy z częstotliwością próbkowania - być może Twoja karta nie obsługuje
+  częstotliwości próbkowania użytych w Twoich plikach - spróbuj filtru resample
+  (<option>-af resample=...</option>)
 </para></listitem>
 
 <listitem>
-<para>powolna maszyna (procesor lub karta graficzna)</para>
-<para>spróbuj opcji <option>-vo null</option>, jeśli odtwarza dobrze, oznacza
-to, że masz zbyt wolną kartę graficzną lub jej sterownik</para>
-<para>Obejście: kup szybszą kartę lub poczytaj tę dokumentację by dowiedzieć się
-jak przyspieszyć odtwarzanie</para>
-<para>Spróbuj również opcji<option>-framedrop</option></para>
+  <para>powolna maszyna (procesor lub karta graficzna)</para>
+  <para>
+  spróbuj opcji <option>-vo null</option>, jeśli odtwarza dobrze, oznacza to,
+  że masz zbyt wolną kartę graficzną lub jej sterownik
+  </para>
+  <para>
+  Obejście: kup szybszą kartę lub poczytaj tę dokumentację by dowiedzieć się
+  jak przyspieszyć odtwarzanie
+  </para>
+  <para>Spróbuj również opcji<option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-delay-specific">
 <title>Opóźnienia/desynchronizacja dźwięku specyficzne dla jednego lub kilku plików</title>
+
 <itemizedlist>
 <listitem>
-<para>zły plik</para>
-<para>
-Obejścia:
+  <para>zły plik</para>
+  <para>
+  Obejścia:
   <itemizedlist>
   <listitem>
-    <para>opcje <option>-ni</option> lub <option>-nobps</option> (dla plików
-    bez przeplotu lub uszkodzonych)</para>
+    <para>
+    opcje <option>-ni</option> lub <option>-nobps</option>
+    (dla plików bez przeplotu lub uszkodzonych)
+    </para>
     <para>i/lub</para>
   </listitem>
   <listitem>
-    <para>opcja <option>-mc 0</option> (wymagana dla plików ze
-    złym przeplotem dźwięku VBR)</para>
+    <para>
+    opcja <option>-mc 0</option>
+    (wymagana dla plików ze złym przeplotem dźwięku VBR)
+    </para>
     <para>i/lub</para>
   </listitem>
   <listitem>
-    <para>opcja <option>-delay</option> lub klawisze <keycap>+</keycap>/<keycap>-</keycap>
-    w trakcie odtwarzania do regulacji opóźnienia</para>
+    <para>
+    opcja <option>-delay</option> lub klawisze <keycap>+</keycap>/<keycap>-</keycap>
+    w trakcie odtwarzania do regulacji opóźnienia
+    </para>
   </listitem>
   </itemizedlist>
-Jeśli żadne z wymienionych rozwiązań nie przynoszą efektu, przyślij nam plik, a
-my to sprawdzimy (i naprawimy).
-</para>
+  Jeśli żadne z wymienionych rozwiązań nie przynoszą efektu, przyślij nam plik, a
+  my to sprawdzimy (i naprawimy).
+  </para>
 </listitem>
 
 <listitem>
-<para>Twoja karta dźwiękowa nie obsługuje próbkowania 48kHz</para>
-<para>Obejście: kup lepszą kartę... lub spróbuj zmniejszyć liczbę klatek na
-sekundę o 10% (używając opcji <option>-fps 27</option> dla filmu o 30 klatkach
-na sekundę) lub użyj filtru resample</para>
+  <para>Twoja karta dźwiękowa nie obsługuje próbkowania 48kHz</para>
+  <para>
+  Obejście: kup lepszą kartę... lub spróbuj zmniejszyć liczbę klatek na sekundę
+  o 10% (używając opcji <option>-fps 27</option> dla filmu o 30 klatkach
+  na sekundę) lub użyj filtru resample
+  </para>
 </listitem>
 
 <listitem>
-<para>powolna maszyna (jeśli A-V nie jest w okolicach 0 i ostatnia liczba w
-statusie zwiększa się)</para>
-<para>Obejście: opcja <option>-framedrop</option></para>
+  <para>
+  powolna maszyna (jeśli A-V nie jest w okolicach 0 i ostatnia liczba w
+  statusie zwiększa się)
+  </para>
+  <para>Obejście: opcja <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-nosound">
 <title>Zupełny brak dźwięku</title>
+
 <itemizedlist>
 <listitem>
-<para>Twój plik używa nieobsługiwanego kodeka audio</para>
-<para>Rozwiązanie: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
+  <para>Twój plik używa nieobsługiwanego kodeka audio</para>
+  <para>Rozwiązanie: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-nopicture">
 <title>Zupełny brak obrazu (jedynie puste, szare lub zielone okno)</title>
+
 <itemizedlist>
 <listitem>
-<para>Twój plik używa nieobsługiwanego kodeka video</para>
-<para>Rozwiązanie: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
+  <para>Twój plik używa nieobsługiwanego kodeka video</para>
+  <para>Rozwiązanie: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
 </listitem>
 
 <listitem>
-<para>
-automatycznie wybrany kodek nie potrafi dekodować pliku, spróbuj użyć innego
-za pomocą opcji <option>-vc</option> lub <option>-vfm</option>
-</para>
+  <para>
+  automatycznie wybrany kodek nie potrafi dekodować pliku, spróbuj użyć innego
+  za pomocą opcji <option>-vc</option> lub <option>-vfm</option>
+  </para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-video">
 <title>Problemy z wyjściem video</title>
+
 <para>
 Pierwsza uwaga: opcje <option>-fs -vm</option> i <option>-zoom</option> nie są
 obsługiwane przez wszystkie sterowniki. Dodatkowo, nie wszystkie sterowniki
@@ -162,18 +197,24 @@ obsługują sprzętowe skalowanie/powiększanie.
 <title>Migotanie OSD/napisów</title>
 <para>
 <itemizedlist>
-<listitem><para>sterownik x11: przykro nam, ale nie da się tego teraz naprawić</para></listitem>
-<listitem><para>sterownik xv: użyj opcji <option>-double</option></para></listitem>
+<listitem><para>
+  sterownik x11: przykro nam, ale nie da się tego teraz naprawić
+</para></listitem>
+<listitem><para>
+  sterownik xv: użyj opcji <option>-double</option>
+</para></listitem>
 </itemizedlist>
 </para>
 </formalpara>
 
 <formalpara>
-<title>Zielony obraz przy użyciu mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<title>Zielony obraz przy użyciu mga_vid
+  (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
 <para>
 <itemizedlist>
-<listitem><para>mga_vid źle wykrył ilość pamięci RAM na Twojej karcie, przeładuj
-go używając opcji <option>mga_ram_size</option>.
+<listitem><para>
+  mga_vid źle wykrył ilość pamięci RAM na Twojej karcie, przeładuj
+  go używając opcji <option>mga_ram_size</option>.
 </para></listitem>
 </itemizedlist>
 </para>

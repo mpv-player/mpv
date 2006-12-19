@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20572 -->
+<!-- synced with r21537 -->
 <!-- Opiekun: chwilowo nikt (poprzednio Paszczi)-->
+
 <chapter id="audio">
 <title>Urządzenia wyjściowe audio</title>
+
 <sect1 id="sync">
 <title>Synchronizacja Audio/Video</title>
 
@@ -37,24 +39,30 @@ man.
 </para>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="troubleshooting">
 <title>Rozwiązywanie problemów</title>
 
 <para>Kilka uwag:</para>
 <para>
-  Jeżeli posiadasz sterowniki ALSA w wersji 0.5, prawie zawsze konieczne będzie
-  użycie <option>-ao alsa5</option>, ponieważ ich kod emulacji OSS jest wadliwy i
-  spowoduje <emphasis role="bold">błąd <application>MPlayera</application></emphasis>
-  wyświetlając komunikat o treści podobnej do tej:
-  <screen>
-    DEMUXER: Za dużo (945 w 8390980 bajtach) pakietów video w buforze!
-    (DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!)<!--
---></screen>
+Jeżeli posiadasz sterowniki ALSA w wersji 0.5, prawie zawsze konieczne będzie
+użycie <option>-ao alsa5</option>, ponieważ ich kod emulacji OSS jest wadliwy i
+spowoduje <emphasis role="bold">błąd <application>MPlayera</application></emphasis>
+wyświetlając komunikat o treści podobnej do tej:
+<screen>
+DEMUXER: Za dużo (945 w 8390980 bajtach) pakietów video w buforze!
+(DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!)
+</screen>
 </para>
+
 <para>
-  Jeśli dźwięk przerywany jest krótkimi trzaskami podczas odtwarzania z CD-ROMu,
-  włącz odmaskowywanie przerwań, tak jak opisano to w rozdziale dotyczącym
-  <link linkend="drives">CD-ROMu</link>.
+Jeśli dźwięk przerywany jest krótkimi trzaskami podczas odtwarzania z CD-ROMu,
+włącz odmaskowywanie przerwań, tak jak opisano to w rozdziale dotyczącym
+<link linkend="drives">CD-ROMu</link>.
 </para>
 </sect1>
+
 </chapter>

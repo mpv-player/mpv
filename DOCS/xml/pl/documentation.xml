@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21374 -->
+<!-- synced with r21537 -->
 <!-- Opiekun: Torinthiel -->
 
 <bookinfo id="toc">
@@ -47,7 +47,8 @@ Jeśli masz jeszcze jakieś pytania, wróć do <link linkend="toc">Spisu
 treści</link> i w nim poszukaj odpowiedniego tematu, przeczytaj
 <xref linkend="faq"/> albo spróbuj przegrepować zbiory. Odpowiedź na większość
 pytań powinna być zawarta w niniejszej dokumentacji, a pozostałe prawdopodobnie zostały
-już zadane na naszych <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">listach dyskusyjnych</ulink>.
+już zadane na naszych
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">listach dyskusyjnych</ulink>.
 <!-- TODO: Jak będzie przetłumaczona strona to zmienić link -->
 <!-- FIXME: Nieistniejące łącza
 Sprawdź <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">archiwa</ulink>,
@@ -116,64 +117,64 @@ oraz audio <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
 <listitem><simpara>
   Kodowanie z szerokiego zakresu formatów i dekoderów
   <application>MPlayer</application>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Kodowanie na wszystkie kodeki
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   z ffmpeg.
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Kodowanie obrazu z <emphasis role="bold">tunerów kompatybilnych z V4L</emphasis>
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Kodowanie/multipleksowanie przeplatanych zbiorów AVI z prawidłowymi
   indeksami
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Tworzenie zbiorów z zewnętrznego strumienia audio
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Kodowanie 1, 2 lub 3-przebiegowe
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><para>
   Dźwięk MP3 <emphasis role="bold">VBR</emphasis>
   <important><simpara>
   Dźwięk MP3 VBR w odtwarzaczach pod Windows nie zawsze brzmi przyjemnie!
   </simpara></important>
-  </para></listitem>
+</para></listitem>
 <listitem><simpara>
   Dźwięk PCM
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Kopiowanie strumieniowe
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Synchronizacja wejścia A/V (oparta na PTS, może być wyłączona opcją
   <option>-mc 0</option>)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Korekta fps opcją <option>-ofps</option> (przydatne gdy kodujesz
   30000/1001 fps VOB na 24000/1001 fps AVI)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Możliwość zastosowania naszego potężnego systemu filtrów (kadrowanie,
   powiększanie, obracanie, postproces, skalowanie, konwersja rgb/yuv)
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Możliwość wkodowania DVD/VOBsub <emphasis role="bold">ORAZ</emphasis> napisów
   w zbiór wyjściowy
-  </simpara></listitem>
+</simpara></listitem>
 <listitem><simpara>
   Możliwość zapisu napisów DVD do formatu VOBsub
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <itemizedlist>
-  <title>Planowane możliwości</title>
-  <listitem><simpara>
+<title>Planowane możliwości</title>
+<listitem><simpara>
   Zwiększenie zakresu dostępnych formatów/kodeków do (de)kodowania
   (tworzenie zbiorów VOB ze strumieniami DivX4/Indeo5/VIVO :).
-  </simpara></listitem>
+</simpara></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->
