@@ -499,8 +499,8 @@ options to <application>cdparanoia</application>.
 
 <sect2 id="xmms">
 <title>XMMS</title>
-<para>
 
+<para>
 <application>MPlayer</application> can use <application>XMMS</application> input
 plugins to play many file formats. There are plugins for SNES game tunes, SID
 tunes (from Commodore 64), many Amiga formats, .xm, .it, VQF, musepack, Bonk,
