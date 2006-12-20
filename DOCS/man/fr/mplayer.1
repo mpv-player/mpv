@@ -1,4 +1,4 @@
-.\" synced with r21561
+.\" synced with r21697
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -108,7 +108,7 @@ cue://fichier[:piste]
 .
 .br
 .B mplayer
-[file mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv] ://
+[file mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb] ://
 [utilisateur:motdepasse@]URL[:port] [options]
 .
 .br
@@ -133,7 +133,7 @@ tivo://hôte/[list|llist|fsid]
 .br
 .B mencoder
 [options] fichier
-[fichier|URL|\-] [\-o\ fichier]
+[fichier|URL|\-] [\-o fichier | file://fichier | smb://[user:pass@]host/filepath] 
 .
 .br
 .B mencoder
@@ -1088,7 +1088,7 @@ Pour jouer des flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 .B \-alang <code de langue[,code de langue,...]> (voir aussi \-aid)
 Définit une liste de langues de pistes audio à jouer en priorité.
 Chaque format de conteneur utilise des codes de pays différents.
-Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska et NUT
+Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska, MPEG-TS et NUT
 les codes à trois lettres ISO 639-2, tandis que OGM utilise des
 identifiants à forme libre.
 MPlayer affiche les langues disponibles quand il est lancé en mode bavard
@@ -1331,6 +1331,18 @@ Vous pouvez aussi donner un répertoire contenant l'arborescence complète
 d'un DVD (que vous auriez copié, par exemple, avec vobcopy).
 Notez que l'utilisation de \-dumpstream est souvent une meilleure solution
 pour copier des titres de DVD (voir les exemples).
+.
+.TP
+.B \-dvd-speed <facteur ou débit en Ko/s> (DVD uniquement)
+Essaye de limiter la vitesse du DVD (par défaut\ : ne change rien).
+La vitesse de base d'un DVD est d'environ 1350Ko/s, donc un lecteur 8x
+peut lire jusqu'à une vitesse de 10800Ko/s.
+Une vitesse plus lente rend le lecteur plus silencieux; pour regarder un DVD,
+une vitesse de 2700KB/s devrait être assez rapide et silencieux.
+MPlayer ré-initialise le lecteur à sa vitesse d'origine quand il termine
+la lecture.
+Les valeurs inférieures 100 signifie un multiple de 1350Ko/s, c-à-d
+\-dvd-speed 8 met la limite à 10800Ko/s.
 .
 .TP
 .B \-dvdangle <ID angle> (DVD uniquement)
@@ -2013,6 +2025,11 @@ Voir également les options \-dump*sub et \-vobsubout*.
 Active l'extraction des polices embarquées dans les fichiers Matroska.
 Ces polices peuvent être utilisées pour l'affichage des sous-titres
 SSA/ASS (option \-ass).
+Les fichiers de polices seront créés dans le répertoire ~/.mplayer/fonts.
+.br
+.I NOTE\ :
+Avec FontConfig 2.4.2 ou ultérieur, les polices embarquées sont ouvertes
+directement depuis la mémoire, et cette option est activé par défaut.
 .
 .TP
 .B \-ffactor <nombre>
@@ -5890,22 +5907,24 @@ mixe du bruit aléatoire avec un motif (semi-)régulier
 .PD 1
 .
 .TP
-.B "denoise3d[=luma:chroma:temps]"
+.B "denoise3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]"
 Ce filtre est destiné à réduire le bruit de l'image pour que les plans fixes
 soient vraiment fixes (cela devrait améliorer la compressibilité.).
 .PD 0
 .RSs
-.IPs <luma>
+.IPs <luma_spatial>
 force spatiale du luma (par défaut\ : 4)
-.IPs <chroma>
+.IPs <chroma_spatial>
 force spatiale du chroma (par défaut\ : 3)
-.IPs <time>
-force temporelle (par défaut\ : 6)
+.IPs <luma_tmp>
+force temporelle du luma (par défaut\ : 6)
+.IPs <chroma_tmp>
+force temporelle du chroma (par défaut\ : luma_tmp*chroma_spatial/luma_spatial)
 .RE
 .PD 1
 .
 .TP
-.B "hqdn3d[=luma:chroma:temps]"
+.B "hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]"
 Version haute précision\/:qualité du filtre denoise3d.
 Les paramètres et le comportement sont les mêmes.
 .
@@ -10315,8 +10334,8 @@ temps que l'option téléciné.
 Active le mode pulldown 3:2 logiciel\ : Le multiplexeur va faire comme
 si la vidéo avait été encodée à 30000/1001.
 Ne fonctionne qu'avec les vidéos MPEG-2 dont le nombre de trames par
-seconde, éventuellement convertit avec l'option \-ofps, est
-24000/1001.
+seconde est 24000/1001, convertissez-le avec l'option \-ofps si
+nécessaire.
 Tout autre nombre de trames par seconde est incompatible avec cette
 option.
 .
@@ -10325,8 +10344,8 @@ option.
 Active le mode téléciné logiciel FILM vers PAL et NTSC vers PAL\ :
 Il va faire comme si la vidéo avait été encodée à 25 fps.
 Ne fonctionne qu'avec les vidéos MPEG-2 dont le nombre de trames par
-seconde, éventuellement convertit avec l'option \-ofps, est
-24000/1001.
+seconde est 24000/1001, convertissez-le avec l'option \-ofps si
+nécessaire.
 Tout autre nombre de trames par seconde est incompatible avec cette
 option.
 .
