@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r21001
+// Synced with help_mp-en.h r21655
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -275,9 +275,12 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "警告: -speed 不保证能和 -oac copy 一起正常工作!\n"\
 "你的编码可能失败!\n"
 #define MSGTR_ErrorWritingFile "%s: 写文件错误。\n"
+#define MSGTR_FlushingVideoFrames "\n清空(flush)视频帧。\n"
+#define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "过滤器尚未配置! 空文件?\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD 推荐的视频比特率为: %d\n"
 #define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d B/s)  大小: %"PRIu64" 字节  %5.3f 秒  %d 帧\n"
 #define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d B/s)  大小: %"PRIu64" 字节  %5.3f 秒\n"
+#define MSGTR_EdlSkipStartEndCurrent "EDL跳过: 开始: %.2f  结束: %.2f   当前: V: %.2f  A: %.2f     \r"
 #define MSGTR_OpenedStream "成功: 格式: %d数据: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "视频编解码器: 帧复制 (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "音频编解码器: 帧复制 (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
@@ -485,6 +488,15 @@ static char help_text[]=
 // fifo.c
 #define MSGTR_CannotMakePipe "不能建立 PIPE!\n"
 
+// parser-mecmd.c, parser-mpcmd.c
+#define MSGTR_NoFileGivenOnCommandLine "'--' 表示没有更多选项, 但命令行没有给出文件名。\n"
+#define MSGTR_TheLoopOptionMustBeAnInteger "这个loop选项必须是个整数: %s\n"
+#define MSGTR_UnknownOptionOnCommandLine "命令行有未知的选项: -%s\n"
+#define MSGTR_ErrorParsingOptionOnCommandLine "解析命令行选项出错: -%s\n"
+#define MSGTR_InvalidPlayEntry "无效的播放条目 %s\n"
+#define MSGTR_NotAnMEncoderOption "-%s 不是一个MEncoder选项\n"
+#define MSGTR_NoFileGiven "没有给出文件\n"
+
 // m_config.c
 #define MSGTR_SaveSlotTooOld "保存从 lvl %d 里找到的 slot 太旧: %d !!!\n"
 #define MSGTR_InvalidCfgfileOption "选项 %s 不能在配置文件里使用。\n"
@@ -519,6 +531,11 @@ static char help_text[]=
 #define MSGTR_CantOpenDVD "打不开 DVD 设备: %s\n"
 
 // stream_dvd.c
+#define MSGTR_DVDspeedCantOpen "不能以写方式打开DVD设备, 改变DVD速度需要写方式。\n"
+#define MSGTR_DVDrestoreSpeed "恢复DVD速度... "
+#define MSGTR_DVDlimitSpeed "限制DVD速度至 %dKB/s... "
+#define MSGTR_DVDlimitFail "限制DVD速度失败。\n"
+#define MSGTR_DVDlimitOk "限制DVD速度成功。\n"
 #define MSGTR_NoDVDSupport "MPlayer 编译成不支持 DVD，退出中。\n"
 #define MSGTR_DVDnumTitles "此 DVD 有 %d 个标题。\n"
 #define MSGTR_DVDinvalidTitle "无效的 DVD 标题号: %d\n"
@@ -570,6 +587,9 @@ static char help_text[]=
 #define MSGTR_InvalidMPEGES "MPEG-ES 流无效??? 请联系作者, 这可能是个错误:(\n"
 #define MSGTR_FormatNotRecognized "============= 抱歉, 此文件格式无法辨认或支持 ===============\n"\
 				  "===     如果此文件是一个 AVI, ASF 或 MPEG 流, 请联系作者!    ===\n"
+#define MSGTR_SettingProcessPriority "设置进程优先级: %s\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] 文件格式:%d  fourcc:0x%X  大小:%dx%d  帧速:%5.2f  帧时间:=%6.4f\n"
+#define MSGTR_CannotInitializeMuxer "不能初始化muxer。"
 #define MSGTR_MissingVideoStream "未找到视频流。\n"
 #define MSGTR_MissingAudioStream "未找到音频流...  -> 没声音。\n"
 #define MSGTR_MissingVideoStreamBug "没有视频流!? 请联系作者, 这可能是个错误:(\n"
@@ -659,6 +679,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: 编解码器无法设置 sh->disp_w 和 sh->disp_h, 尝试绕过。\n"
 #define MSGTR_VoConfigRequest "VDec: vo 配置请求 - %d x %d (色彩空间首选项: %s)\n"
+#define MSGTR_UsingXAsOutputCspNoY "VDec: 使用 %s 作为输出 csp (没有 %d)\n"
 #define MSGTR_CouldNotFindColorspace "找不到匹配的色彩空间 - 重新尝试 -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "电影宽高比为 %.2f:1 - 预放大到正确的电影宽高比。\n"
 #define MSGTR_MovieAspectUndefined "电影宽高比未定义 - 没使用预放大。\n"
@@ -1909,6 +1930,11 @@ static char help_text[]=
 "[VO_XV] 请参见 'mplayer -vo help' 找其它 (非-xv) 视频输出驱动。\n"\
 "[VO_XV] 试试 -vo x11.\n"
 
+
+// loader/ldt_keeper.c
+
+#define MSGTR_LOADER_DYLD_Warning "警告: 尝试使用 DLL 编解码器, 但是环境变量\n         DYLD_BIND_AT_LAUNCH 未设定。 这很可能造成程序崩溃。\n"
+
 // stream/stream_radio.c
 
 #define MSGTR_RADIO_ChannelNamesDetected "[radio] 检测到广播通道名。\n"
@@ -1954,3 +1980,66 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverV4L "[radio] 使用 V4Lv1 广播接口。\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[radio] 使用 *BSD BT848 广播接口。\n"
 
+// ================================== LIBASS ====================================
+
+// ass_bitmap.c
+#define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] FT_Glyph_To_Bitmap 出错 %d \n"
+#define MSGTR_LIBASS_UnsupportedPixelMode "[ass] 不支持的象素模式: %d\n"
+
+// ass.c
+#define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] 警告: 没有找到风格(style) '%s', 将使用 '%s'\n"
+#define MSGTR_LIBASS_BadTimestamp "[ass] 错误的时间戳\n"
+#define MSGTR_LIBASS_BadEncodedDataSize "[ass] 错误的编码数据大小\n"
+#define MSGTR_LIBASS_FontLineTooLong "[ass] 字体行太长: %d, %s\n"
+#define MSGTR_LIBASS_EventFormatHeaderMissing "[ass] 未找到事件格式头\n"
+#define MSGTR_LIBASS_ErrorOpeningIconvDescriptor "[ass] 打开iconv描述符出错。\n"
+#define MSGTR_LIBASS_ErrorRecodingFile "[ass] 记录到文件出错。\n"
+#define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): 文件打开(fopen)失败\n"
+#define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): 文件定位(fseek)失败\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): 拒绝装入大于10M的字幕\n"
+#define MSGTR_LIBASS_ReadFailed "读失败, %d: %s\n"
+#define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] 已加入字幕文件: <内存> (%d styles, %d events)\n"
+#define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] 已加入字幕文件: %s (%d styles, %d events)\n"
+#define MSGTR_LIBASS_FailedToCreateDirectory "[ass] 创建目录失败 %s\n"
+#define MSGTR_LIBASS_NotADirectory "[ass] 不是一个目录: %s\n"
+
+// ass_cache.c
+#define MSGTR_LIBASS_TooManyFonts "[ass] 太多字体\n"
+#define MSGTR_LIBASS_ErrorOpeningFont "[ass] 打开字体出错: %s, %d\n"
+
+// ass_fontconfig.c
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: 选中的字体家族不是要求的: '%s' != '%s'\n"
+#define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: 使用缺省字体家族: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: 使用缺省字体: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: 使用 'Arial' 字体家族: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_FcInitLoadConfigAndFontsFailed "[ass] FcInitLoadConfigAndFonts 失败。\n"
+#define MSGTR_LIBASS_UpdatingFontCache "[ass] 更新字体缓存区。\n"
+#define MSGTR_LIBASS_BetaVersionsOfFontconfigAreNotSupported "[ass] 不支持测试版的fontconfig。\n[ass] 在报告bug前请先更新。\n"
+#define MSGTR_LIBASS_FcStrSetAddFailed "[ass] FcStrSetAdd 失败。\n"
+#define MSGTR_LIBASS_FcDirScanFailed "[ass] FcDirScan 失败。\n"
+#define MSGTR_LIBASS_FcDirSave "[ass] FcDirSave 失败。\n"
+#define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] FcConfigAppFontAddDir 失败\n"
+#define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig 已禁用, 将只使用缺省字体。\n"
+#define MSGTR_LIBASS_FunctionCallFailed "[ass] %s 失败\n"
+
+// ass_render.c
+#define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] PlayResX 和 PlayResY 都没有定义. 假定为 384x288。\n"
+#define MSGTR_LIBASS_PlayResYUndefinedSettingY "[ass] PlayResY 未定义, 设为 %d。\n"
+#define MSGTR_LIBASS_PlayResXUndefinedSettingX "[ass] PlayResX 未定义, 设为 %d。\n"
+#define MSGTR_LIBASS_FT_Init_FreeTypeFailed "[ass] FT_Init_FreeType 失败。\n"
+#define MSGTR_LIBASS_Init "[ass] 初始化\n"
+#define MSGTR_LIBASS_InitFailed "[ass] 初始化失败。\n"
+#define MSGTR_LIBASS_BadCommand "[ass] 错误的命令: %c%c\n"
+#define MSGTR_LIBASS_ErrorLoadingGlyph  "[ass] 装入字形出错。\n"
+#define MSGTR_LIBASS_FT_Glyph_Stroke_Error "[ass] FT_Glyph_Stroke 错误 %d \n"
+#define MSGTR_LIBASS_UnknownEffectType_InternalError "[ass] 未知的效果类型 (内部错误)\n"
+#define MSGTR_LIBASS_NoStyleFound "[ass] 找不到风格(style)!\n"
+#define MSGTR_LIBASS_EmptyEvent "[ass] 空事件!\n"
+#define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] 达到了字形最大值: 事件 %d, 开始 = %llu, 时长 = %llu\n 文本 = %s\n"
+#define MSGTR_LIBASS_EventHeightHasChanged "[ass] 警告! 事件高度(height) 已改变!  \n"
+#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] 过多同时的事件!\n"
+
+// ass_font.c
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] 字形 0x%X 未找到, 重新选择字体 (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFound "[ass] 字形 0x%X 未在字体中找到 (%s, %d, %d)\n"
+#define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] 打开内存字体出错: %s\n"
