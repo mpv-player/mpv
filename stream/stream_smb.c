@@ -134,8 +134,8 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
   stream->flags = mode;
   len = 0;
   if(mode == STREAM_READ) {
-  len = smbc_lseek(fd,0,SEEK_END);
-  smbc_lseek (fd, 0, SEEK_SET);
+    len = smbc_lseek(fd,0,SEEK_END);
+    smbc_lseek (fd, 0, SEEK_SET);
   }
   if(len > 0 || mode == STREAM_WRITE) {
     stream->flags |= STREAM_SEEK;
