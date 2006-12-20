@@ -4208,42 +4208,43 @@ and development advancements, you may get very different results.
 
 <sect1 id="menc-feat-video-for-windows">
 <title>
-  Encoding with the <systemitem class="library">Video For Windows</systemitem>
-  codec family
+  Кодирование семейством кодеков <systemitem class="library">Video For Windows</systemitem>
 </title>
 
 <para>
-Video for Windows provides simple encoding by means of binary video codecs.
-You can encode with the following codecs (if you have more, please tell us!)
+Video for Windows предоставляет простое кодирование в смысле бинарных видео
+кодеков. Вы можете кодировать следующими кодеками (если у вас есть другие,
+сообщите нам!)
 </para>
 
 <para>
-Note that support for this is very experimental and some codecs may not work
-correctly. Some codecs will only work in certain colorspaces, try
-<option>-vf format=bgr24</option> and <option>-vf format=yuy2</option>
-if a codec fails or gives wrong output.
+Имейте в виду, что поддержка этой возможности очень экспериментальная и
+некоторые кодеки могут не работать корректно. Некоторые кодеки могут работать
+только в определенных пространствах цветов, попробуйте 
+<option>-vf format=bgr24</option> и <option>-vf format=yuy2</option>,
+если кодек выдает ошибку или кодирует неверно.
 </para>
 
 <!-- ********** -->
 
 <sect2 id="menc-feat-enc-vfw-video-codecs">
-<title>Video for Windows supported codecs</title>
+<title>поддерживаемые кодеки Video for Windows</title>
 
 <para>
 <informaltable frame="all">
 <tgroup cols="4">
 <thead>
 <row>
-  <entry>Video codec file name</entry>
-  <entry>Description (FourCC)</entry>
+  <entry>Имя файла с видео кодеком</entry>
+  <entry>Описание (FourCC)</entry>
   <entry>md5sum</entry>
-  <entry>Comment</entry>
+  <entry>Комментарий</entry>
 </row>
 </thead>
 <tbody>
 <row>
   <entry>aslcodec_vfw.dll</entry>
-  <entry>Alparysoft lossless codec vfw (ASLC)</entry>
+  <entry>Alparysoft vfw кодек без потерь (ASLC)</entry>
   <entry>608af234a6ea4d90cdc7246af5f3f29a</entry>
   <entry></entry>
 </row>
@@ -4267,7 +4268,7 @@ if a codec fails or gives wrong output.
 </row>
 <row>
   <entry>huffyuv.dll</entry>
-  <entry>HuffYUV (lossless) (HFYU)</entry>
+  <entry>HuffYUV (без потерь) (HFYU)</entry>
   <entry>b74695b50230be4a6ef2c4293a58ac3b</entry>
   <entry></entry>
 </row>
@@ -4311,7 +4312,7 @@ if a codec fails or gives wrong output.
   <entry>tsccvid.dll</entry>
   <entry>TechSmith Camtasia Screen Codec (TSCC)</entry>
   <entry>8230d8560c41d444f249802a2700d1d5</entry>
-  <entry>shareware error on windows</entry>
+  <entry>ошибка shareware в windows</entry>
 </row>
 <row>
   <entry>vp31vfw.dll</entry>
@@ -4329,27 +4330,27 @@ if a codec fails or gives wrong output.
   <entry>vp6vfw.dll</entry>
   <entry>On2 VP6 Personal Codec (VP60)</entry>
   <entry>04d635a364243013898fd09484f913fb</entry>
-  <entry>crashing on Linux</entry>
+  <entry>крах в Linux</entry>
 </row>
 <row>
   <entry>vp7vfw.dll</entry>
   <entry>On2 VP7 Personal Codec (VP70)</entry>
   <entry>cb4cc3d4ea7c94a35f1d81c3d750bc8d</entry>
-  <entry>wrong FourCC?</entry>
+  <entry>неверный FourCC?</entry>
 </row>
 <row>
   <entry>ViVD2.dll</entry>
-  <entry>SoftMedia ViVD V2 codec VfW (GXVE)</entry>
+  <entry>SoftMedia ViVD V2 VfW кодек (GXVE)</entry>
   <entry>a7b4bf5cac630bb9262c3f80d8a773a1</entry>
   <entry></entry>
 </row>
 <row>
   <entry>msulvc06.DLL</entry>
-  <entry>MSU Lossless codec (MSUD)</entry>
+  <entry>MSU кодек без потерь (MSUD)</entry>
   <entry>294bf9288f2f127bb86f00bfcc9ccdda</entry>
   <entry>
-  Decodable by <application>Window Media Player</application>,
-  not <application>MPlayer</application> (yet).
+  Может декодироваться <application>Window Media Player</application>,
+  но не <application>MPlayer</application> (пока).
   </entry>
 </row>
 <row>
@@ -4362,14 +4363,14 @@ if a codec fails or gives wrong output.
 </tgroup>
 </informaltable>
 
-The first column contains the codec names that should be passed after the
-<literal>codec</literal> parameter, 
-like: <option>-xvfwopts codec=divx.dll</option>
-The FourCC code used by each codec is given in the parentheses.
+Первый столбец содержит имена кодекво, которые должны указываться после 
+<literal>codec</literal> параметра, 
+например: <option>-xvfwopts codec=divx.dll</option>
+FourCC код, используемый каждым кодеком, указан в скобках.
 </para>
 <informalexample>
 <para>
-An example with VP3 compression:
+Пример сжатия с помощью VP3:
 <screen>
 mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy
 </screen>
