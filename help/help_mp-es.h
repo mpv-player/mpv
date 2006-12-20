@@ -1828,8 +1828,14 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Nombre de driver desconocido: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Utilizando interfaz de radio V4Lv2.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Utilizando interfaz de radio V4Lv1.\n"
+
+// ================================== LIBASS ====================================
+
+// ass_bitmap.c
 #define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] FT_Glyph_To_Bitmap error %d \n"
 #define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Modo píxel no soportado: %d\n"
+
+// ass.c
 #define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Aviso: no se ha encontrado ningun estilo llamado '%s', usando '%s'\n"
 #define MSGTR_LIBASS_BadTimestamp "[ass] fecha/hora errónea\n"
 #define MSGTR_LIBASS_BadEncodedDataSize "[ass] tamaño de datos erróneamente codificado\n"
@@ -1845,8 +1851,12 @@ static char help_text[]=
 #define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Añadido fichero de subtítulos: %s (%d estilos, %d eventos)\n"
 #define MSGTR_LIBASS_FailedToCreateDirectory "[ass] Ha fallado la creación del directorio %s\n"
 #define MSGTR_LIBASS_NotADirectory "[ass] No es un directorio: %s\n"
+
+// ass_cache.c
 #define MSGTR_LIBASS_TooManyFonts "[ass] Demasiadas fuentes\n"
 #define MSGTR_LIBASS_ErrorOpeningFont "[ass] Error abriendo la fuente: %s, %d\n"
+
+// ass_fontconfig.c
 #define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: La familia de la fuente seleccionada no es la que se ha pedido: '%s' != '%s'\n"
 #define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Usando el grupo de fuentes por defecto: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Usando la fuente por defecto : (%s, %d, %d) -> %s, %d\n"
@@ -1860,6 +1870,8 @@ static char help_text[]=
 #define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] FcConfigAppFontAddDir ha fallado\n"
 #define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig deshabilitado, sólo se utilizará la fuente por defecto.\n"
 #define MSGTR_LIBASS_FunctionCallFailed "[ass] %s ha fallado\n"
+
+// ass_render.c
 #define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] Ni PlayResX ni PlayResY están definidos. Asumiendo 384x288.\n"
 #define MSGTR_LIBASS_PlayResYUndefinedSettingY "[ass] PlayResY no está definido, estableciendo %d.\n"
 #define MSGTR_LIBASS_PlayResXUndefinedSettingX "[ass] PlayResX no está definido, estableciendo %d.\n"
@@ -1875,6 +1887,8 @@ static char help_text[]=
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] MAX_GLYPHS alcanzado: evento %d, comienzo = %llu, duración = %llu\n Texto = %s\n"
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] ¡Aviso! ¡El tamaño del evento ha cambiado!  \n"
 #define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Demasiados eventos simultáneos!\n"
+
+// ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glifo 0x%X no encontrado, seleccionando la fuente para (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] No se ha encontrado el glifo 0x%X en la fuente para (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Error abriendo la fuente en memoria: %s\n"
