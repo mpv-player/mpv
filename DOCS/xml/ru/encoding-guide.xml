@@ -3139,202 +3139,197 @@ mplayer <replaceable>Harry_Potter_2.avi</replaceable> -vf spp,noise=9ah:5ah,eq2=
 
 
 <sect1 id="menc-feat-xvid">
-<title>Encoding with the <systemitem class="library">Xvid</systemitem>
-  codec</title>
+<title>Кодирование кодеком <systemitem class="library">Xvid</systemitem></title>
 
 <para>
-<systemitem class="library">Xvid</systemitem> is a free library for
-encoding MPEG-4 ASP video streams.
-Before starting to encode, you need to <link linkend="xvid">
-set up <application>MEncoder</application> to support it</link>.
+<systemitem class="library">Xvid</systemitem> - это свободная библиотека для
+кодирования MPEG-4 ASP видео потоков.
+Перед тем, как начать кодирование, вам потребуется <link linkend="xvid">
+настроить <application>MEncoder</application> для его поддержки</link>.
 </para>
 
 <para>
-This guide mainly aims at featuring the same kind of information
-as x264's encoding guide.
-Therefore, please begin by reading
-<link linkend="menc-feat-x264-encoding-options-intro">the first part</link>
-of that guide.
+Это руководство в основном нацелено на особенности применения тех же методов,
+что описаны в руководстве по кодированию с помощью x264.
+Поэтому, сначала прочтите, пожалуйста, 
+<link linkend="menc-feat-x264-encoding-options-intro">первую часть</link>
+того руководства.
 </para>
 
 <!-- ********** -->
 
 <sect2 id="menc-feat-xvid-intro">
-<title>What options should I use to get the best results?</title>
+<title>Какие опции следует использовать для получения лучших резудьтатов?</title>
 
 <para>
-Please begin by reviewing the
-<systemitem class="library">Xvid</systemitem> section of
-<application>MPlayer</application>'s man page.
-This section is intended to be a supplement to the man page.
+Пожалуйста, начните с просмотра раздела 
+<systemitem class="library">Xvid</systemitem> man страницы
+<application>MPlayer</application>.
+Этот раздел предполагается как дополнение к man странице.
 </para>
 
 <para>
-The Xvid default settings are already a good tradeoff between
-speed and quality, therefore you can safely stick to them if
-the following section puzzles you.
+Настройки по-умолчанию Xvid уже являются хорошим выбором между скоростью и
+качеством, поэтому вы можете без опасений придерживаться их, если следующий
+раздел вас озадачивает.
 </para>
 </sect2>
 
 <!-- ********** -->
 
 <sect2 id="menc-feat-xvid-encoding-options">
-<title>Encoding options of <systemitem class="library">Xvid</systemitem></title>
+<title>Опции кодирования <systemitem class="library">Xvid</systemitem></title>
 
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">vhq</emphasis>
-  This setting affects the macroblock decision algorithm, where the
-  higher the setting, the wiser the decision.
-  The default setting may be safely used for every encode, while
-  higher settings always help PSNR but are significantly slower.
-  Please note that a better PSNR does not necessarily mean
-  that the picture will look better, but tells you that it is
-  closer to the original.
-  Turning it off will noticeably speed up encoding; if speed is
-  critical for you, the tradeoff may be worth it.
+  Эта опция влияет на алгоритм принятия решений о макроблоке, чем выше значение, тем
+  мудрее будут решения.
+  Значение по-умолчанию можно без опаски использовать для любого кодирования, в
+  то время, как более высокие значения улучшат PSNR, но будут работать значительно
+  медленнее.
+  Заметье, пожалуйста, что лучший PSNR не обязательно означает лучше выглядящую
+  картинку, но говорит, что она ближе к оригиналу.
+  Отключение этой опции заметно ускоряет кодирование; это может быть достойным
+  компромиссом, если скорость вам критична.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">bvhq</emphasis>
-  This does the same job as vhq, but does it on B-frames.
-  It has a negligible impact on speed, and slightly improves quality
-  (around +0.1dB PSNR).
+  То же, что и vhq, но для B-кадров.
+  Имеет незначительное влияние на скорость и слегка улучшает качество (около
+  +0.1дБ).
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">max_bframes</emphasis>
-  A higher number of consecutive allowed B-frames usually improves
-  compressibility, although it may also lead to more blocking artifacts.
-  The default setting is a good tradeoff between compressibility and
-  quality, but you may increase it up to 3 if you are bitrate-starved.
-  You may also decrease it to 1 or 0 if you are aiming at perfect
-  quality, though in that case you should make sure your
-  target bitrate is high enough to ensure that the encoder does not
-  have to increase quantizers to reach it.
+  Большее число допустимых последовательных B-кадров обычно улучшает
+  сжимаемость, хотя оно может также привести к большему количеству блочных
+  артефактов (квадратиков).
+  Значение по-умолчанию - хороший выбор между сжимаемостью и качеством, но вы
+  можете увеличить его до 3, если стеснены величиной битпотока.
+  Вы также можете уменьшить это значение до 1 или 0, если печетесь об отличном качестве,
+  впрочем в этом случае вы должны убедиться, что целевой битпоток достаточно высок,
+  дабы кодировщик не увеличивал значение квантователя, сохраняя нужную величину
+  битпотока.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">bf_threshold</emphasis>
-  This controls the B-frame sensitivity of the encoder, where a higher
-  value leads to more B-frames being used (and vice versa).
-  This setting is to be used together with <option>max_bframes</option>;
-  if you are bitrate-starved, you should increase both
-  <option>max_bframes</option> and <option>bf_threshold</option>,
-  while you may increase <option>max_bframes</option> and reduce
-  <option>bf_threshold</option> so that the encoder may use more
-  B-frames in places that only <emphasis role="bold">really</emphasis>
-  need them.
-  A low number of <option>max_bframes</option> and a high value of
-  <option>bf_threshold</option> is probably not a wise choice as it
-  will force the encoder to put B-frames in places that would not
-  benefit from them, therefore reducing visual quality.
-  However, if you need to be compatible with standalone players that
-  only support old DivX profiles (which only supports up to 1
-  consecutive B-frame), this would be your only way to
-  increase compressibility through using B-frames.
+  Управляет чувствительностью кодировщика к B-кадрам, где большие значения
+  приводят к использованию большиего количество B-кадров (и наоборот).
+  Опция должна использоваться совместно с <option>max_bframes</option>;
+  если вы стеснены величиной битпотока, то должны увеличить и 
+  <option>max_bframes</option>, и <option>bf_threshold</option>,
+  в том время как увеличение <option>max_bframes</option> и уменьшение
+  <option>bf_threshold</option> позволят кодировщику использовать больше
+  B-кадров в местах, где это <emphasis role="bold">действительно</emphasis>
+  необходимо.
+  Низкое количество <option>max_bframes</option> и высокое значение 
+  <option>bf_threshold</option> - это, возможно, не самое мудрое решение,
+  поскольку оно принудит кодировщик размещать B-кадры в местах, которые никак не
+  выиграют от этого, тем самым ухудшая визуальное качество.
+  Однако, если вам требуется совместимость с аппаратными
+  проигрывателями, поддерживающими только старые DivX профили (которые
+  поддерживают только 1 последовательный B-кадр), это единственный способ 
+  увеличить сжимаемость при помощи B-кадров.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">trellis</emphasis>
-  Optimizes the quantization process to get an optimal tradeoff
-  between PSNR and bitrate, which allows significant bit saving.
-  These bits will in return be spent elsewhere on the video,
-  raising overall visual quality.
-  You should always leave it on as its impact on quality is huge.
-  Even if you are looking for speed, do not disable it until you
-  have turned down <option>vhq</option> and all other more
-  CPU-hungry options to the minimum.
+  Оптимизирует процесс квантования для получения оптимального 
+  соотношения между PSNR и битпотоком, что позволяет существенно экономить биты.
+  Эти биты впоследствии будут потрачены на другие части видео, что приведет к
+  увеличению общего качества.
+  Следует всегда оставлять эту опцию включенной, поскольку ее влияние на
+  качество огромно. Даже если вы заботитесь о скорости, не отключайте ее до тех
+  пор, пока не выставили <option>vhq</option> и остальные более CPU-прожорливые
+  опции на минимум.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">hq_ac</emphasis>
-  Activates a better coefficient cost estimation method, which slightly
-  reduces filesize by around 0.15 to 0.19% (which corresponds to less
-  than 0.01dB PSNR increase), while having a negligible impact on speed.
-  It is therefore recommended to always leave it on.
+  Активирует более точный метод оценки стоимости коэффициентов, что
+  уменьшает размер файла примерно на 0.15 - 0.19% (соответствует увеличению
+  PSNR меньше, чем на 0.01дБ), имея несущественное влияние на скорость.
+  Поэтому, рекомендуется всегда держать эту опцию включенной.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">cartoon</emphasis>
-  Designed to better encode cartoon content, and has no impact on
-  speed as it just tunes the mode decision heuristics for this type
-  of content.
+  Разработана для лучшего кодирования мультфильмов и не влияет на скорость,
+  поскольку всего-лишь настраивает эвристики принятия решений о режимах для
+  этого типа содержимого.
 </para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">me_quality</emphasis>
-  This setting is to control the precision of the motion estimation.
-  The higher <option>me_quality</option>, the more
-  precise the estimation of the original motion will be, and the
-  better the resulting clip will capture the original motion.
+  Это опция для настройки точности оценки движения.
+  Чем выше <option>me_quality</option>, тем точнее будет оценка оригинального
+  
+  движения и тем лучше получающийся отрывок будет фиксировать оригинальное движение.
   </para>
 
   <para>
-  The default setting is best in all cases;
-  thus it is not recommended to turn it down unless you are
-  really looking for speed, as all the bits saved by a good motion
-  estimation would be spent elsewhere, raising overall quality.
-  Therefore, do not go any lower than 5, and even that only as a last
-  resort.
+  Настройка по-умолчанию лучше во всех случаях, поэтому не рекомендуется ее
+  выключать, если только вы действительно не гонитесь за скоростью, поскольку
+  биты, сэкономленные хорошей оценкой движения, могут быть использованы
+  где-нибудь еще, увеличивая общее качество.
+  Таким образом, не используйте значения ниже 5, да и его - только в крайнем
+  случае.
   </para>
 </listitem>
 <listitem><para>
   <emphasis role="bold">chroma_me</emphasis>
-  Improves motion estimation by also taking the chroma (color)
-  information into account, whereas <option>me_quality</option>
-  alone only uses luma (grayscale).
-  This slows down encoding by 5-10% but improves visual quality
-  quite a bit by reducing blocking effects and reduces filesize by
-  around 1.3%.
-  If you are looking for speed, you should disable this option before
-  starting to consider reducing <option>me_quality</option>.
+  Улучшает оценку движения, дополнительно принимая во внимание информацию о
+  цвете, тогда как одна <option>me_quality</option> использует только яркость.
+  Это замедляет кодирование на 5-10%, но несколько улучшает визуальное качество,
+  уменьшая эффект блочности и сокращая размер файла примерно на 1.3%.
+  Если вас интересует скорость, следует попробовать отключить эту опцию, прежде
+  чем решите уменьшать значение <option>me_quality</option>.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">chroma_opt</emphasis>
-  Is intended to increase chroma image quality around pure
-  white/black edges, rather than improving compression.
-  This can help to reduce the "red stairs" effect.
+  Эта опция служит для увеличения качества цветного изображения вокруг чисто черных/белых
+  краниц вместо улучшения сжатия. Она также может помочь против
+  эффекта красных ступенек ["red stairs" effect].
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">lumi_mask</emphasis>
-  Tries to give less bitrate to part of the picture that the
-  human eye cannot see very well, which should allow the encoder
-  to spend the saved bits on more important parts of the picture.
-  The quality of the encode yielded by this option highly depends
-  on personal preferences and on the type and monitor settings
-  used to watch it (typically, it will not look as good if it is
-  bright or if it is a TFT monitor).
+  Пытается отдать меньший битпоток областям изображения, которые 
+  человеческий глаз не в состоянии цвидеть достаточно хорошо, что
+  позволит кодировщику потратить сэкономленные биты на более важные 
+  части картинки. Качество закодированного материала, привнесенное этой 
+  опцией, сильно зависит от личных предпочтений и от типа и настроек монитора,
+  использовавшегося для просмотра (обычно результат выглядит не очень хорошо,
+  если он яркий, или является TFT монитором).
 </para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">qpel</emphasis>
-  Raise the number of candidate motion vectors by increasing
-  the precision of the motion estimation from halfpel to
-  quarterpel.
-  The idea is to find better motion vectors which will in return
-  reduce bitrate (hence increasing quality).
-  However, motion vectors with quarterpel precision require a
-  few extra bits to code, but the candidate vectors do not always
-    give (much) better results.
-    Quite often, the codec still spends bits on the extra precision,
-    but little or no extra quality is gained in return.
-    Unfortunately, there is no way to foresee the possible gains of
-    <option>qpel</option>, so you need to actually encode with and
-    without it to know for sure.
+  Увеличивает количество предполагаемых векторов движения, повышая точность
+  оценки движения с полупиксельной до четверьтпиксельной.
+  Идея состоит в том, чтобы найти лучшие векторы движения, которые взамен
+  уменьшат битпоток (тем самым увеличивая качество).
+  Однако, векторы движения с четверьтпиксельной точностью требуют большего
+  количества дополнительных бит для кодирования, а векторы-кандидаты не всегда
+  дают (значительно) лучшие результаты.
+  Почти всегда кодек тратит дополнительные биты на повышенную точность
+  впустую, а в взамен получает или вообще ничего, или небольшое увеличение качества.
+  К сожалению, нет способа предсказать возможные улучшения от <option>qpel</option>, 
+  так что вам пирдется сделать кодирование с ней и без нее, чтобы знать
+  наверняка.
   </para>
   
   <para>
-  <option>qpel</option> can be almost double encoding time, and
-  requires as much as 25% more processing power to decode.
-  It is not supported by all standalone players.
+  <option>qpel</option> может привести к удвоенному времени кодирования и
+  требует, как минимум, на 25% большей мощности при декодировании.
+  Она поддерживается не всеми аппаратными проигрывателями.
   </para>
 </listitem>
 <listitem><para>
   <emphasis role="bold">gmc</emphasis>
-  Tries to save bits on panning scenes by using a single motion
-  vector for the whole frame.
-  This almost always raises PSNR, but significantly slows down
-  encoding (as well as decoding).
-  Therefore, you should only use it when you have turned
-  <option>vhq</option> to the maximum.
-  <systemitem class="library">Xvid</systemitem>'s GMC is more
-  sophisticated than DivX's, but is only supported by few
-  standalone players.
+  Пытается сэкономить биты в сценах с приближением, используя один вектор
+  движения для всего кадра. Это почти всегда увеличивает PSNR, но заметно
+  замедляет кодирования (так же как и декодирование).
+  Поэтому вас следует использовать ее, только когда вы включили 
+  <option>vhq</option> на максимум.
+  GMC <systemitem class="library">Xvid</systemitem>'а является более сложным,
+  чем у DivX'а, но поддерживается только некоторыми аппаратными проигрывателями.
 </para></listitem>
 </itemizedlist>
 </sect2>
@@ -3342,16 +3337,15 @@ the following section puzzles you.
 <!-- ********** -->
 
 <sect2 id="menc-feat-xvid-encoding-profiles">
-<title>Encoding profiles</title>
+<title>Профили кодирования</title>
 
 <para>
-Xvid supports encoding profiles through the <option>profile</option> option,
-which are used to impose restrictions on the properties of the Xvid video
-stream such that it will be playable on anything which supports the
-chosen profile.
-The restrictions relate to resolutions, bitrates and certain MPEG-4
-features.
-The following table shows what each profile supports.
+Xvid поддерживает профили кодирования через опцию <option>profile</option>,
+которая используется для накладиывания ограничений на значения видео потока Xvid таким
+образом, что он будет воспроизводиться на всем, что поддерживает выбранный
+профиль.
+Ограничения относятся к разрешению, битпотоку и некоторым возможностям MPEG-4.
+Следующая таблица показывает, что поддерживает тот или иной профиль.
 </para>
 
 <informaltable>
@@ -3379,12 +3373,12 @@ The following table shows what each profile supports.
 <tbody>
 <row>
   <entry></entry>
-  <entry spanname="spa2-5">Simple</entry>
-  <entry spanname="spa6-11">Advanced Simple</entry>
+  <entry spanname="spa2-5">Простой</entry>
+  <entry spanname="spa6-11">Расширенный простой</entry>
   <entry spanname="spa12-17">DivX</entry>
 </row>
 <row>
-  <entry>Profile name</entry>
+  <entry>Название профиля</entry>
   <entry>0</entry>
   <entry>1</entry>
   <entry>2</entry>
@@ -3396,14 +3390,14 @@ The following table shows what each profile supports.
   <entry>4</entry>
   <entry>5</entry>
   <entry>Handheld</entry>
-  <entry>Portable NTSC</entry>
-  <entry>Portable PAL</entry>
-  <entry>Home Theater NTSC</entry>
-  <entry>Home Theater PAL</entry>
+  <entry>Портативный NTSC</entry>
+  <entry>Портативный PAL</entry>
+  <entry>Домашний кинотеатр NTSC</entry>
+  <entry>Домашний кинотеатр PAL</entry>
   <entry>HDTV</entry>
 </row>
 <row>
-  <entry>Width [pixels]</entry>
+  <entry>Ширина [пикселов]</entry>
   <entry>176</entry>
   <entry>176</entry>
   <entry>352</entry>
@@ -3422,7 +3416,7 @@ The following table shows what each profile supports.
   <entry>1280</entry>
 </row>
 <row>
-  <entry>Height [pixels]</entry>
+  <entry>Высота [пикселов]</entry>
   <entry>144</entry>
   <entry>144</entry>
   <entry>288</entry>
@@ -3441,7 +3435,7 @@ The following table shows what each profile supports.
   <entry>720</entry>
 </row>
 <row>
-  <entry>Frame rate [fps]</entry>
+  <entry>Частота кадров [fps]</entry>
   <entry>15</entry>
   <entry>15</entry>
   <entry>15</entry>
@@ -3460,7 +3454,7 @@ The following table shows what each profile supports.
   <entry>30</entry>
 </row>
 <row>
-  <entry>Max average bitrate [kbps]</entry>
+  <entry>Максимальный средний битпоток [кбит/сек]</entry>
   <entry>64</entry>
   <entry>64</entry>
   <entry>128</entry>
@@ -3479,7 +3473,7 @@ The following table shows what each profile supports.
   <entry>9708.4</entry>
 </row>
 <row>
-  <entry>Peak average bitrate over 3 secs [kbps]</entry>
+  <entry>Пиковое значение средней величины битпотока за 3 секунды [кбит/сек]</entry>
   <entry></entry>
   <entry></entry>
   <entry></entry>
@@ -3498,7 +3492,7 @@ The following table shows what each profile supports.
   <entry>16000</entry>
 </row>
 <row>
-  <entry>Max. B-frames</entry>
+  <entry>Макс. B-кадров</entry>
   <entry>0</entry>
   <entry>0</entry>
   <entry>0</entry>
@@ -3517,7 +3511,7 @@ The following table shows what each profile supports.
   <entry>2</entry>
 </row>
 <row>
-  <entry>MPEG quantization</entry>
+  <entry>MPEG квантование</entry>
   <entry></entry>
   <entry></entry>
   <entry></entry>
@@ -3536,7 +3530,7 @@ The following table shows what each profile supports.
   <entry></entry>
 </row>
 <row>
-  <entry>Adaptive quantization</entry>
+  <entry>Адаптивное квантование</entry>
   <entry></entry>
   <entry></entry>
   <entry></entry>
@@ -3555,7 +3549,7 @@ The following table shows what each profile supports.
   <entry>X</entry>
 </row>
 <row>
-  <entry>Interlaced encoding</entry>
+  <entry>Черезстрочное кодирование</entry>
   <entry></entry>
   <entry></entry>
   <entry></entry>
@@ -3574,7 +3568,7 @@ The following table shows what each profile supports.
   <entry>X</entry>
 </row>
 <row>
-  <entry>Quaterpixel</entry>
+  <entry>Четвертьпиксельная точность</entry>
   <entry></entry>
   <entry></entry>
   <entry></entry>
@@ -3619,51 +3613,50 @@ The following table shows what each profile supports.
 <!-- ********** -->
 
 <sect2 id="menc-feat-xvid-example-settings">
-<title>Encoding setting examples</title>
+<title>Примеры настроек кодирования</title>
 
 <para>
-The following settings are examples of different encoding
-option combinations that affect the speed vs quality tradeoff
-at the same target bitrate.
+Последующие настройки - это примеры различных комбинаций опций кодирования,
+которые влияют на соотношения скорость-качество при той же величине целевого
+битпотока.
 </para>
 
 <para>
-All the encoding settings were tested on a 720x448 @30000/1001 fps
-video sample, the target bitrate was 900kbps, and the machine was an
-AMD-64 3400+ at 2400 MHz in 64 bits mode.
-Each encoding setting features the measured encoding speed (in
-frames per second) and the PSNR loss (in dB) compared to the "very
-high quality" setting.
-Please understand that depending on your source, your machine type
-and development advancements, you may get very different results.
+Все настройки кодирования проверялись на тестовом видео 720x448 @30000/1001 fps 
+с целевым битпотоком 900кбит/сек, на машине AMD-64 3400+ с 2400 МГц и 64 битном режиме.
+Для каждой настройки кодирования указаны измеренная скорость кодирования (в
+кадрах в секунду) и потеря PSNR (в дБ) по сравнению с настройкой "очень высокое
+качество". Поймите, пожалуйста, что в зависимости от вашего материала, типа
+машины, прогресса разработки вы можете получить сильно отличающиеся результаты.
 </para>
 
 <informaltable frame="all">
 <tgroup cols="4">
 <thead>
-<row><entry>Description</entry><entry>Encoding options</entry><entry>speed (in fps)</entry><entry>Relative PSNR loss (in dB)</entry></row>
+<row><entry>Описание</entry><entry>Опции кодирования</entry><entry>скорость 
+(в fps)</entry><entry>Относительная потеря PSNR (в дБ)</entry></row>
 </thead>
 <tbody>
 <row>
-  <entry>Very high quality</entry>
+  <entry>Очень высокое качество</entry>
   <entry><option>chroma_opt:vhq=4:bvhq=1:quant_type=mpeg</option></entry>
   <entry>16fps</entry>
   <entry>0dB</entry>
 </row>
 <row>
-  <entry>High quality</entry>
+  <entry>Высокое качество</entry>
   <entry><option>vhq=2:bvhq=1:chroma_opt:quant_type=mpeg</option></entry>
   <entry>18fps</entry>
   <entry>-0.1dB</entry>
 </row>
 <row>
-  <entry>Fast</entry>
+  <entry>Быстрое</entry>
   <entry><option>turbo:vhq=0</option></entry>
   <entry>28fps</entry>
   <entry>-0.69dB</entry>
 </row>
 <row>
-  <entry>Realtime</entry>
+  <entry>Реального времени</entry>
   <entry><option>turbo:nochroma_me:notrellis:max_bframes=0:vhq=0</option></entry>
   <entry>38fps</entry>
   <entry>-1.48dB</entry>
