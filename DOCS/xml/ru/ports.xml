@@ -25,7 +25,7 @@
 
 Если  вы хотите передать дополнительные опции configure, установите 
 соответствующее значение переменной окружения <envar>DEB_BUILD_OPTIONS</envar>.
-В частности, если хотите поддердку GUI и OSD, укажите:
+В частности, если хотите поддержку GUI и OSD, укажите:
 
 <screen>DEB_BUILD_OPTIONS="--enable-gui --enable-menu" fakeroot debian/rules binary</screen>
 
@@ -293,7 +293,7 @@ MPlayer interrupted by signal 11 in module: init_audio_codec
   Nevada b31 релизах. Исправлено в Solaris Nevada b32; тем не менее
   Sun еще следует портировать исправление обратно на Solaris 10. Проект MPlayer
   осведомил Sun об этой проблеме и патч в данный момент готовится для
-  Solaris 10. Больше информаци об этой ошибке ищите 
+  Solaris 10. Больше информации об этой ошибке ищите 
   на:
   <ulink url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
 </para></listitem>
@@ -488,7 +488,7 @@ GCC 4.0, если собираете на POWER5.
 </para>
 
 <para>
-Убедитесть, что используете GNU make
+Убедитесь, что используете GNU make
 (<filename>/opt/freeware/bin/gmake</filename>) для сборки
 <application>MPlayer</application>, поскольку столкнетесь с проблемами при 
 использовании <filename>/usr/ccs/bin/make</filename>.
@@ -566,7 +566,7 @@ Messages in the GTK-2 interface will be broken then.<!--
 Пока ещё нет официального GUI, но версия командной строки полностью функциональна. 
 Обратитесь к списку рассылки
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
-за помошью и дополнительной информацией. 
+за помощью и дополнительной информацией. 
 Официальные бинарники под Windows могут быть найдены на 
 <ulink url="http://www.mplayerhq.hu/design7/dload.html">странице закачки</ulink>.
 Пакеты установки и простые GUI фронтенды доступны из внешних
@@ -781,7 +781,7 @@ Fink предлагает как предкомпилированные бина
 </para>
 
 <para>
-В частноски для компиляции <application>MPlayer</application> с поддержкой OSD:
+В частности для компиляции <application>MPlayer</application> с поддержкой OSD:
 <screen>sudo port install pkgconfig</screen>
 Это установит <application>pkg-config</application>, который является системой 
 управления флагами компиляции/сборки библиотек.
@@ -864,7 +864,7 @@ MPlayer_source_directory
 </para>
 
 <para>
-Если конфигурируете для G4 или более позднего CPU с поддержной AltiVec,
+Если конфигурируете для G4 или более позднего CPU с поддержкой AltiVec,
 делайте так:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11

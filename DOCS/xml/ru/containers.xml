@@ -154,7 +154,7 @@ AVI файлов:
   <ulink url="http://avifile.sourceforge.net">avifile</ulink> и
   <application>Windows Media Player</application>. Файлы с испорченными
   заголовками и файлы созданные с VBR аудио в не VBR-совместимом кодировщике
-  приведут к A/V десинхронизации при использовании этого метода (по большей
+  приведут к A/V рассинхронизации при использовании этого метода (по большей
   части при перемещении по фильму).
 </simpara></listitem>
 <listitem><simpara>
@@ -347,7 +347,7 @@ PVA - это похожий на MPEG формат, используемый в 
 <title>NSV files</title>
 <para>
 NSV (NullSoft Video) &mdash; это формат файла, используемый
-<application>Winamp</application>'ом для потокового фудио и видео.
+<application>Winamp</application>'ом для потокового аудио и видео.
 Видео бывает VP3, VP5 или VP6, а аудио &mdash; MP3, AAC или VLB.
 Версии NSV, в которых только аудио, имеют расширение <filename>.nsa</filename>.
 <application>MPlayer</application> воспроизводит как NSV потоки,
