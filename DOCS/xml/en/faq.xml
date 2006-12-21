@@ -155,7 +155,8 @@ can be a problem on Mandrake systems).
 <qandaentry>
 <question><para>
 Building on Mac OS 10.3 leads to several link errors</para></question>
-<answer><para>
+<answer>
+<para>
 The link error you're experiencing most likely looks like this:
 <screen>
 ld: Undefined symbols:
@@ -169,29 +170,32 @@ The undefined symbols are present in Mac OS 10.4,
 but not 10.3.
 One solution can be to downgrade to QuickTime 7.0.1.
 Here is a better solution.
-</para><para>
-Get an <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">older copy of the frameworks</ulink>.
+</para>
+<para>
+Get an
+<ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">older copy of the frameworks</ulink>.
 This will give you a compressed file that contains the QuickTime
 7.0.1 Framework and a 10.3.9 QuartzCore Framework.
-</para><para>
+</para>
+<para>
 Uncompress the files somewhere that is not in your System folder.
 (i.e. do not install these frameworks into your
 <filename class="directory">/System/Library/Frameworks</filename>!
 Using this older copy is only meant to get around link errors!)
-<screen>
-gunzip &lt; CompatFrameworks.tgz | tar xvf -
-</screen>
+<screen>gunzip &lt; CompatFrameworks.tgz | tar xvf -</screen>
 In config.mak, you should append 
 <systemitem>-F/path/to/where/you/extracted</systemitem>
 to the <systemitem>OPTFLAGS</systemitem> variable.
 If you use <application>X-Code</application>, you can just select these
 frameworks instead of the system ones.
-</para><para>
+</para>
+<para>
 The resulting <application>MPlayer</application> binary will actually
 use the framework that is installed on your system via dynamic links that
 are resolved at run-time.
 (You can verify this using <systemitem>otool -l</systemitem>).
-</para></answer>
+</para>
+</answer>
 </qandaentry>
 </qandadiv>
 
@@ -384,9 +388,13 @@ access any menu items!
 <answer><para>
 Are you using FVWM? Try the following:
 <orderedlist>
-<listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
-<listitem><para>Set <systemitem>Use Applications position hints</systemitem>
-to <systemitem>Yes</systemitem></para></listitem>
+<listitem><para>
+  Start -> Settings -> Configuration -> Base Configuration
+</para></listitem>
+<listitem><para>
+  Set <systemitem>Use Applications position hints</systemitem>
+  to <systemitem>Yes</systemitem>
+</para></listitem>
 </orderedlist>
 </para></answer>
 </qandaentry>
@@ -436,9 +444,7 @@ How can I get subtitles to appear on the black margins around a movie?
 Use the <systemitem>expand</systemitem> video filter to increase the
 area onto which the movie is rendered vertically and place the movie
 at the top border, for example:
-<screen>
-mplayer -vf expand=0:-100:0:0 -slang de dvd://1
-</screen>
+<screen>mplayer -vf expand=0:-100:0:0 -slang de dvd://1</screen>
 </para></answer>
 </qandaentry>
 
@@ -530,21 +536,21 @@ If you run into this problem you have two options:
   </para>
   <procedure>
   <step><para>
-	Edit <filename>/etc/syconfig/prelink</filename> and change
-	<programlisting>PRELINK_OPTS=-mR</programlisting> to
-	<programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
+    Edit <filename>/etc/syconfig/prelink</filename> and change
+    <programlisting>PRELINK_OPTS=-mR</programlisting> to
+    <programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
   </para></step>
   <step><para>
     <command>touch /var/lib/misc/prelink.force</command>
   </para></step>
-  <step><para><command>/etc/cron.daily/prelink</command>
-  (This relinks all the applications, and it takes
-  quite a while.)
+  <step><para>
+    <command>/etc/cron.daily/prelink</command>
+    (This relinks all the applications, and it takes quite a while.)
   </para></step>
   <step><para>
     <command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
     (This turns off exec-shield for the
-	<application>MPlayer</application> binary.)
+    <application>MPlayer</application> binary.)
   </para></step>
   </procedure>
 </listitem>
@@ -643,9 +649,7 @@ option explicitly enables software scaling.
 <question><para>
 I've just installed <application>MPlayer</application>. When I want to
 open a video file it causes a fatal error:
-<screen>
-Error opening/initializing the selected video_out (-vo) device.
-</screen>
+<screen>Error opening/initializing the selected video_out (-vo) device.</screen>
 How can I solve my problem?
 </para></question>
 <answer><para>

@@ -245,9 +245,13 @@ the command line. This option will be a good candidate to put in your
 configuration file (see the manual page for details).
 The second is to create a symlink called <filename>subfont.ttf</filename>
 to the font file of your choice. Either
-<screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+<screen>
+ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf
+</screen>
 for each user individually or a system-wide one:
-<screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
+<screen>
+ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf
+</screen>
 </para>
 
 <para>
@@ -256,8 +260,9 @@ If <application>MPlayer</application> was compiled with
 won't work, instead <option>-font</option> expects a
 <systemitem class="library">fontconfig</systemitem> font name
 and defaults to the sans-serif font. Example:
-
-<screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
+<screen>
+mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable>
+</screen>
 </para>
 
 <para>
@@ -287,8 +292,12 @@ Uncompress the file you downloaded to
 <filename class="directory">$PREFIX/share/mplayer</filename>.
 Then rename or symlink one of the extracted directories to
 <filename class="directory">font</filename>, for example:
-<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-<screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
+<screen>
+ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font
+</screen>
+<screen>
+ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font
+</screen>
 </para>
 
 <para>
@@ -340,7 +349,7 @@ the Preferences menu is currently UNIMPLEMENTED!
 </simpara></listitem>
 <listitem><para>
   start <application>MPlayer</application> by the following example:
-  <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
+  <screen>mplayer -menu <replaceable>file.avi</replaceable></screen>
   </para></listitem>
 <listitem><simpara>
   push any menu key you defined
