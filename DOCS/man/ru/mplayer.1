@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r21659
+.\" synced with r21692
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -107,7 +107,7 @@ cue://файл[:дорожка]
 .
 .br
 .B mplayer
-[файл|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv]://
+[файл|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
 [пользователь:пароль@]URL[:порт] [опции]
 .
 .br
@@ -133,7 +133,7 @@ tivo://адрес/[list|llist|fsid]
 .br
 .B mencoder
 [опции] файл
-[файл|URL|\-] [\-o файл]
+[файл|URL|\-] [\-o файл | file://файл | smb://[пользователь:пароль@host]/путь_к_файлу]
 .
 .br
 .B mencoder
@@ -5672,7 +5672,7 @@ FIXME: Explain what this does.
 .IPs <luma_tmp>
 временная устойчивость яркостной компоненты (по-умолчанию: 6)
 .IPs <chroma_tmp>
-временная устойчивость цветностной компоненты (по-умолчанию: luma_tmp*chroma_spc/luma_spc)
+временная устойчивость цветностной компоненты (по-умолчанию: luma_tmp*chroma_spatial/luma_spatial)
 .RE
 .PD 1
 .
@@ -8972,7 +8972,6 @@ kfreduction - на сколько уменьшается их битпоток.
 .
 .TP
 .B (no)closed_gop
-.\" FIXME N-frame typo?
 Эта опция говорит Xvid закрывать каждый GOP (Group Of Pictures, группа 
 картинок, ограниченная двумя I-кадрами), что делает их независимыми 
 друг от друга.
