@@ -2877,7 +2877,9 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
     ass_process_chunk(track->sh_sub.ass_track, block, size, (long long)timecode, (long long)block_duration);
     return;
   }
-  clear_subtitles(demuxer, timecode, 1);
+  // Use code below only to parse this single sub, old subs timed in libass
+  if (ass_enabled)
+      clear_subtitles(demuxer, timecode, 1);
 #endif
 
   ptr1 = block;
