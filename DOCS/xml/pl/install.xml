@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21395 -->
+<!-- synced with r21706 -->
 <!-- Opiekun: brak (poprzednio Paszczi) -->
 <chapter id="install">
 <title>Instalacja</title>
@@ -17,6 +17,10 @@ ale niekoniecznie też musi być trudne. Jeżeli zauważysz zachowanie inne niż
 tutaj opisane, proszę poszukaj w dokumentacji, a na pewno znajdziesz
 odpowiedzi.
 </para>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="softreq">
 <title>Wymagane oprogramowanie</title>
@@ -43,12 +47,10 @@ odpowiedzi.
 <listitem><para>
   <emphasis role="bold">make</emphasis> - sugerowaną wersją jest 3.79.x lub
   nowsza. Żeby zbudować dokumentację XML potrzebujesz przynajmniej 3.80.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - opcjonalna, wymagana by mieć
   czcionkę do OSD i napisów. Wymagana jest przynajmniej wersja 2.0.9.
-</para></listitem>
-<listitem><para>
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - opcjonalny koder/dekoder JPEG,
@@ -93,6 +95,8 @@ odpowiedzi.
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="features">
 <title>Możliwości</title>
@@ -103,22 +107,25 @@ odpowiedzi.
   <link linkend="gui">GUI</link> przed kompilacją.
 </para></listitem>
 <listitem><para>
-  Jeżeli chcesz zainstalować <application>MEncodera</application> (naszego
-  wspaniałego enkodera do wszelkich celów), przeczytaj sekcję <link linkend="mencoder">
-  <application>MEncoder</application></link>.
+  Jeżeli chcesz zainstalować <application>MEncodera</application>
+  (naszego wspaniałego enkodera do wszelkich celów), przeczytaj sekcję
+  <link linkend="mencoder"><application>MEncoder</application></link>.
 </para></listitem>
 <listitem><para>
-  Jeżeli masz <emphasis role="bold">tuner TV</emphasis> kompatybilny z V4L i
-  chcesz oglądać/przechwytywać i kodować filmy przy pomocy <application>MPlayera</application>,
+  Jeżeli masz <emphasis role="bold">tuner TV</emphasis> kompatybilny z V4L
+  i chcesz oglądać/przechwytywać i kodować filmy przy pomocy
+  <application>MPlayera</application>,
   przeczytaj rozdział <link linkend="tv-input">wejście TV</link>.
 </para></listitem>
 <listitem><para>
-  Jeżeli masz <emphasis role="bold">tuner radiowy</emphasis> kompatybilny z V4L i
-  chcesz słuchać i zapisywać dźwięk przy pomocy <application>MPlayera</application>,
+  Jeżeli masz <emphasis role="bold">tuner radiowy</emphasis> kompatybilny z V4L
+  i chcesz słuchać i zapisywać dźwięk przy pomocy
+  <application>MPlayera</application>,
   przeczytaj rozdział <link linkend="radio">radio</link>.
 </para></listitem>
 <listitem><para>
-  Dostępne jest miłe, gotowe do użycia <emphasis role="bold">Menu OSD</emphasis>.
+  Dostępne jest miłe, gotowe do użycia
+  <emphasis role="bold">Menu OSD</emphasis>.
   Przeczytaj rozdział <link linkend="subosd">menu OSD</link>.
 </para></listitem>
 </itemizedlist>
@@ -128,7 +135,8 @@ Potem skompiluj <application>MPlayera</application>:
 <screen>
 ./configure
 make
-make install</screen>
+make install
+</screen>
 </para>
 
 <para>
@@ -154,7 +162,6 @@ z opcji <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>
 lub <option>-afm</option> w wierszu poleceń, lub w Twoim pliku konfiguracyjnym
 (sprawdź stronę man).
 </para>
-
 
 <para>
 Użytkownicy Debiana mogą sobie zbudować paczkę .deb, jest
@@ -183,21 +190,22 @@ korzystać z OSD i napisów. Zalecana jest instalacja czcionki TTF i ustawienie
 rozdział <link linkend="subosd">Napisy i OSD</link> dla uzyskania bardziej
 szczegółowych informacji.
 </para>
-
-
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="gui">
 <title>A co z GUI?</title>
 
 <para>
-GUI wymaga biblioteki GTK 1.2.x lub GTK 2.0 (nie jest w pełni w GTK, ale jego panele są).
-Skórki przechowywane są w formacie PNG, tak więc musi być zainstalowane GTK,
-<systemitem class="library">libpng</systemitem>
-(i ich pakiety rozwojowe, zazwyczaj nazwane <systemitem class="library">gtk-dev</systemitem>
-i <systemitem class="library">libpng-dev</systemitem>).
+GUI wymaga biblioteki GTK 1.2.x lub GTK 2.0 (nie jest w pełni w GTK, ale jego
+panele są). Skórki przechowywane są w formacie PNG, tak więc musi być
+zainstalowane GTK, <systemitem class="library">libpng</systemitem>
+(i ich pakiety rozwojowe, zazwyczaj nazwane
+<systemitem class="library">gtk-dev</systemitem> i
+<systemitem class="library">libpng-dev</systemitem>).
 Możesz go zbudować podając opcję <option>--enable-gui</option> skryptowi
 <filename>./configure</filename>. Aby skorzystać z trybu GUI, musisz wywołać
 polecenie <command>gmplayer</command>.
@@ -205,11 +213,11 @@ polecenie <command>gmplayer</command>.
 
 <para>
 Jako że <application>MPlayer</application> nie zawiera żadnej skórki, musisz
-je ściągnąć, jeżeli chcesz używać GUI. Sprawdź <ulink
-url="http://www.mplayerhq.hu/dload.html">stronę z zasobami do pobrania</ulink>.
-Skórki powinny być rozpakowane do katalogu dostępnego dla wszystkich (<filename
-class="directory">$PREFIX/share/mplayer/skins</filename>) lub do <filename
-class="directory">$HOME/.mplayer/skins</filename>.
+je ściągnąć, jeżeli chcesz używać GUI. Sprawdź
+<ulink url="http://www.mplayerhq.hu/dload.html">stronę z zasobami do pobrania</ulink>.
+Skórki powinny być rozpakowane do katalogu dostępnego dla wszystkich
+(<filename class="directory">$PREFIX/share/mplayer/skins</filename>) lub do
+<filename class="directory">$HOME/.mplayer/skins</filename>.
 <application>MPlayer</application> sprawdza je w poszukiwaniu
 folderu nazwanego <filename class="directory">default</filename>, ale
 możesz użyć opcji <option>-skin <replaceable>nowaskórka</replaceable></option>
@@ -219,7 +227,9 @@ program korzystał ze skórki w katalogu
 </para>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="fonts-osd">
 <title>Czcionki i OSD</title>
@@ -232,6 +242,7 @@ ponieważ wyglądają o wiele lepiej, mogą być prawidłowo przeskalowane do
 wielkości filmu i lepiej sobie radzą z różnymi sposobami kodowania.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="truetype-fonts">
 <title>Czcionki TrueType</title>
@@ -245,9 +256,13 @@ Ta opcja jest też dobrym kandydatem do włożenie w plik konfiguracyjny
 Drugi to stworzenie dowiązania symbolicznego (symlink) o nazwie
 <filename>subfont.ttf</filename> wskazującego na wybraną czcionkę.
 Albo 
-<screen>ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+<screen>
+ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> ~/.mplayer/subfont.ttf
+</screen>
 dla każdego użytkownika osobno, albo ogólnosystemowe:
-<screen>ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
+<screen>
+ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf
+</screen>
 </para>
 
 <para>
@@ -257,8 +272,9 @@ zamiast tego <option>-font</option> oczekuje nazwy czcionki według
 <systemitem class="library">fontconfig</systemitem> i domyślnie bierze
 czcionkę sans-serif.
 Przykład:
-
-<screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
+<screen>
+mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable>
+</screen>
 </para>
 
 <para>
@@ -268,6 +284,7 @@ Przykład:
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bitmap-fonts">
 <title>Czcionki bitmapowe</title>
@@ -288,8 +305,12 @@ Rozpakuj ściągnięty plik do katalogu
 Potem przemianuj lub stwórz dowiązanie symboliczne jednego z rozpakowanych
 katalogów na nazwę
 <filename class="directory">font</filename>, na przykład:
-<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-<screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
+<screen>
+ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font
+</screen>
+<screen>
+ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font
+</screen>
 </para>
 
 <para>
@@ -300,15 +321,16 @@ Innym rozwiązaniem jest mieć napisy zakodowane w UTF-8 i używać opcji
 rozszerzeniem <filename>.utf</filename>
 i mieć go w tym samym katalogu co film.
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="osdmenu">
 <title>Menu OSD</title>
 
 <para>
-<application>MPlayer</application> ma całkowicie definiowalny Interfejs Menu OSD.
+<application>MPlayer</application>
+ma całkowicie definiowalny Interfejs Menu OSD.
 </para>
 
 <note><simpara>
@@ -318,8 +340,8 @@ Menu Ustawienia nie jest jeszcze ZAIMPLEMENTOWANE!
 <orderedlist>
 <title>Instalacja</title>
 <listitem><simpara>
- skompiluj <application>MPlayera</application> z opcją <option>--enable-menu</option>
-  dla skryptu <filename>./configure</filename>
+  skompiluj <application>MPlayera</application> z opcją
+  <option>--enable-menu</option> dla skryptu <filename>./configure</filename>
 </simpara></listitem>
 <listitem><simpara>
   upewnij się, że masz zainstalowaną czcionkę OSD
@@ -335,12 +357,12 @@ Menu Ustawienia nie jest jeszcze ZAIMPLEMENTOWANE!
   <filename class="directory">/usr/local/etc/mplayer</filename>)
 </simpara></listitem>
 <listitem><simpara>
-  sprawdź i ewentualnie przerób plik <filename>input.conf</filename>, aby określić funkcje klawiszy
-  (wszystko jest tam opisane).
+  sprawdź i ewentualnie przerób plik <filename>input.conf</filename>,
+  aby określić funkcje klawiszy (wszystko jest tam opisane).
 </simpara></listitem>
 <listitem><para>
   uruchom <application>MPlayera</application> przykładową komendą:
-  <screen>$ mplayer -menu <replaceable>plik.avi</replaceable></screen>
+  <screen>mplayer -menu <replaceable>plik.avi</replaceable></screen>
 </para></listitem>
 <listitem><simpara>
   wciśnij dowolny klawisz, który wcześniej zdefiniowałeś
@@ -350,21 +372,25 @@ Menu Ustawienia nie jest jeszcze ZAIMPLEMENTOWANE!
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="rtc">
 <title>RTC</title>
+
 <para>
 Istnieją trzy metody synchronizacji w <application>MPlayerze</application>.
 
 <itemizedlist>
-<listitem><simpara>
-<emphasis role="bold">Żeby skorzystać ze starej metody</emphasis>, nie musisz
+<listitem><para>
+  <emphasis role="bold">Żeby skorzystać ze starej metody</emphasis>, nie musisz
   robić nic. Używa ona <systemitem>usleep()</systemitem>, aby poprawnie
   zsynchronizować A/V z dokładnością +/- 10ms. Czasami jednak synchronizacja
   musi być jeszcze dokładniejsza.
-</simpara></listitem>
-<listitem><para>
+</para></listitem>
+<listitem>
+  <para>
   Kod <emphasis role="bold">nowego zegara</emphasis> korzysta do tego celu
   z RTC (RealTime Clock), ponieważ jest on dokładny co do 1ms.
   Włącza się go opcją
@@ -380,20 +406,21 @@ Istnieją trzy metody synchronizacji w <application>MPlayerze</application>.
   <filename>/etc/sysctl.conf</filename>.
   </para>
   <para>
-   Możesz zobaczyć wydajność nowego synchronizatora w wierszu stanu.
-   Zarządzanie energią w BIOSach niektórych notebooków z procesorami w technologii
-   speedstep nie współgra z RTC. Dźwięk i obraz mogą być niezsynchronizowane.
-   Podłączenie zewnętrznego źródła energii przed włączeniem notebooka
-   wydaje się pomagać.
-   W niektórych zestawieniach sprzętowych (sprawdzone przy używaniu DVD bez
-   obsługi DMA na płycie ALi1541) korzystanie z RTC wywołuje skokowe odtwarzanie.
-   Zaleca się skorzystanie w tych przypadkach z trzeciej metody.
-</para></listitem>
-<listitem><simpara>
+  Możesz zobaczyć wydajność nowego synchronizatora w wierszu stanu.
+  Zarządzanie energią w BIOSach niektórych notebooków z procesorami w technologii
+  speedstep nie współgra z RTC. Dźwięk i obraz mogą być niezsynchronizowane.
+  Podłączenie zewnętrznego źródła energii przed włączeniem notebooka
+  wydaje się pomagać.
+  W niektórych zestawieniach sprzętowych (sprawdzone przy używaniu DVD bez
+  obsługi DMA na płycie ALi1541) korzystanie z RTC wywołuje skokowe odtwarzanie.
+  Zaleca się skorzystanie w tych przypadkach z trzeciej metody.
+  </para>
+</listitem>
+<listitem><para>
   <emphasis role="bold">Trzeci kod zegara</emphasis> włączany jest opcją
   <option>-softsleep</option>. Ma dokładność RTC, ale z niego nie korzysta.
   Wymaga jednak większej mocy obliczeniowej procesora.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 </sect1>
