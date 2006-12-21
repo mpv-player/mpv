@@ -135,8 +135,13 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   } else {
     if(mode == STREAM_READ)
       f=open(filename,m);
-    else
-      f=open(filename,m, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+    else {
+      mode_t openmode = S_IRUSR|S_IWUSR;
+#ifndef __MINGW32__
+      openmode |= S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH;
+#endif
+      f=open(filename,m, openmode);
+    }
     if(f<0) {
       mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);
       m_struct_free(&stream_opts,opts);
