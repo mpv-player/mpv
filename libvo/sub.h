@@ -67,8 +67,6 @@ extern unsigned char* vo_osd_text;
 extern int vo_osd_progbar_type;
 extern int vo_osd_progbar_value;   // 0..255
 
-extern subtitle* vo_sub;
-
 extern void* vo_spudec;
 extern void* vo_vobsub;
 
