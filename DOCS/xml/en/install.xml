@@ -369,12 +369,12 @@ the Preferences menu is currently UNIMPLEMENTED!
 There are three timing methods in <application>MPlayer</application>.
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">To use the old method</emphasis>, you don't have to do
   anything. It uses <systemitem>usleep()</systemitem> to tune
   A/V sync, with +/- 10ms accuracy. However sometimes the sync has to be
   tuned even finer.
-</simpara></listitem>
+</para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">The new timer</emphasis> code uses the RTC (RealTime
