@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21686 -->
 <chapter id="containers">
 <title>Поддерживаемые форматы</title>
 
@@ -485,6 +485,7 @@ url="http://www.xmms.org">XMMS</ulink>.
 
 <sect2 id="xmms">
 <title>XMMS</title>
+
 <para>
 <application>MPlayer</application> может использовать
 <application>XMMS</application>

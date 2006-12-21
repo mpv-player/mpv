@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21537 -->
+<!-- synced with r21706 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -244,9 +244,13 @@ make install
 помещение в файл конфигурации (для подробностей смотрите страницу man руководства).
 Второй - создание символической ссылки с именем <filename>subfont.ttf</filename> на выбранный 
 файл шрифта. Либо 
-<screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+<screen>
+ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf
+</screen>
 индивидуально для каждого пользователя, либо одну общесистемную
-<screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
+<screen>
+ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf
+</screen>
 </para>
 
 <para>
@@ -255,9 +259,10 @@ make install
 вместо этого, опция <option>-font</option> ожидает
 <systemitem class="library">fontconfig</systemitem> название шрифта,
  и по умолчанию это шрифт sans-serif. Пример: 
-<screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable>
-  <replaceable>anime.mkv</replaceable></screen>
-   </para>
+<screen>
+mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable>
+</screen>
+</para>
 <para>
 Чтобы получить список шрифтов, известных 
 <systemitem class="library">fontconfig</systemitem>,
@@ -283,8 +288,12 @@ make install
 <filename class="directory">$PREFIX/share/mplayer</filename>.
 После этого переименуйте каталог или создайте символическую ссылку на него с именем
 <filename class="directory">font</filename>, например:
-<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-<screen>ln -s <replaceable>$PREFIX/mplayer/arial-24</replaceable> $PREFIX/mplayer/font</screen>
+<screen>
+ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font
+</screen>
+<screen>
+ln -s <replaceable>$PREFIX/mplayer/arial-24</replaceable> $PREFIX/mplayer/font
+</screen>
 </para>
 
 <para>
@@ -334,7 +343,7 @@ make install
 </simpara></listitem>
 <listitem><para>
   запустите <application>MPlayer</application> как в следующем примере:
-  <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
+  <screen>mplayer -menu <replaceable>file.avi</replaceable></screen>
 </para></listitem>
 <listitem><simpara>
   нажмите любую меню-кнопку, которую Вы определили
@@ -353,12 +362,12 @@ make install
 У <application>MPlayer</application>'а есть три метода синхронизации.
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Чтобы использовать старый метод синхронизации</emphasis>,
   Вам ничего не надо делать. Он использует <systemitem>usleep()</systemitem>,
   чтобы подстроить A/V синхронизацию, с точностью +/- 10ms. Однако, иногда
   требуется даже большая точность синхронизации.
-</simpara></listitem>
+</para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">Новый таймер</emphasis> использует RTC (Real Time

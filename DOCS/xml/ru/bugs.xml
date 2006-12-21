@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21537 -->
+<!-- synced with r21686 -->
 <appendix id="bugs">
 <title>Известные проблемы</title>
 
@@ -118,12 +118,12 @@
     <para>
       <option>-delay</option> или кнопки <keycap>+</keycap>/<keycap>-</keycap>
     во время выполнения для подстройки задержки
-      </para>
+    </para>
   </listitem>
   </itemizedlist>
   Если ничто из этого не помогает, пожалуйста, закачайте нам файл, мы выполним проверку 
   (и внесём исправления).
-</para>
+  </para>
 </listitem>
 <listitem>
   <para>Ваша звуковая карта не поддерживает воспроизведение на 48 кГц </para>

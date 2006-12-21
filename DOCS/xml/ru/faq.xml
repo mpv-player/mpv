@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with  r21537  -->
+<!-- synced with  r21705  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -152,7 +152,8 @@ Configure завершается с указанным сообщением, и 
 <qandaentry>
 <question><para>
 Сборка в Mac OS 10.3 приводит к нескольким ошибкам линковки</para></question>
-<answer><para>
+<answer>
+<para>
 Как правило, ошибка линковки выглядит так:
 <screen>
 ld: Undefined symbols:
@@ -163,26 +164,29 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
 распространяющих бинарники пользователям 10.3 через Software Update.
 Неопределённые символы присутствуют в 10.4, но их нет в 10.3.
 Одно из решений - откат QuickTime до версии 7.0.1, но есть и лучшее.
-</para><para>
-Загрузите <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">более старую версию фреймворка</ulink>.
+</para>
+<para>
+Загрузите 
+<ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">более старую версию фреймворка</ulink>.
 Вы получите архив, содержащий фреймворк QuickTime 7.0.1 и QuartzCore 10.3.9.
-</para><para>
+</para>
+<para>
 Распакуйте файл куда-нибудь, кроме папки System (т.е. не устанавливайте эти программы
 в. <filename class="directory">/System/Library/Frameworks</filename>!
 Эта старая копия нужна только для решения проблем с линковкой!)
-<screen>
-gunzip &lt; CompatFrameworks.tgz | tar xvf -
-</screen>
+<screen>gunzip &lt; CompatFrameworks.tgz | tar xvf -</screen>
 В config.mak следует добавить 
 <systemitem>-F/path/to/where/you/extracted</systemitem>
 к переменной <systemitem>OPTFLAGS</systemitem>.
 При использвании <application>X-Code</application> вы можете просто выбрать эти фреймворки
 вместо системных.
-</para><para>
+</para>
+<para>
 Получившийся бинарный <application>MPlayer</application> будет использовать фреймворк,
 установленный в вашей системе, используя динамические ссылки времени исполнения.
 (Это можно проверить, запустив <systemitem>otool -l</systemitem>).
-</para></answer>
+</para>
+</answer>
 </qandaentry>
 </qandadiv>
 
@@ -378,9 +382,13 @@ A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
 <answer><para>
 Используете FVWM? Попробуйте следующее:
 <orderedlist>
-<listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
-<listitem><para>Установите <systemitem>Use Applications position hints</systemitem>
-в <systemitem>Yes</systemitem></para></listitem>
+<listitem><para>
+  Start -> Settings -> Configuration -> Base Configuration
+</para></listitem>
+<listitem><para>
+  Установите <systemitem>Use Applications position hints</systemitem>
+  в <systemitem>Yes</systemitem>
+</para></listitem>
 </orderedlist>
 </para></answer>
 </qandaentry>
@@ -429,9 +437,7 @@ mplayer <replaceable>опции</replaceable> <replaceable>имя_файла</re
 <answer><para>
 Воспользуйтесь видео фильтром <systemitem>expand</systemitem> для увеличения области 
 рендеринга по вертикали и разместите изображение у верхней кромки:
-<screen>
-mplayer -vf expand=0:-100:0:0 -slang de dvd://1
-</screen>
+<screen>mplayer -vf expand=0:-100:0:0 -slang de dvd://1</screen>
 </para></answer>
 </qandaentry>
 
@@ -520,20 +526,20 @@ Windows Media 9.)
   </para>
   <procedure>
   <step><para>
-      Отредактируйте <filename>/etc/syconfig/prelink</filename> и измените
-      <programlisting>PRELINK_OPTS=-mR</programlisting> на
-      <programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
+    Отредактируйте <filename>/etc/syconfig/prelink</filename> и измените
+    <programlisting>PRELINK_OPTS=-mR</programlisting> на
+    <programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
   </para></step>
   <step><para>
-      <command>touch /var/lib/misc/prelink.force</command>
+    <command>touch /var/lib/misc/prelink.force</command>
   </para></step>
   <step><para>
-      <command>/etc/cron.daily/prelink</command>
-      (Это перелинкует все приложения, что может занять длительное время.)
+    <command>/etc/cron.daily/prelink</command>
+    (Это перелинкует все приложения, что может занять длительное время.)
   </para></step>
   <step><para>
-      <command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
-      (Это отключит exec-shield для исполняемого файла <application>MPlayer</application>.)
+    <command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
+    (Это отключит exec-shield для исполняемого файла <application>MPlayer</application>.)
   </para></step>
   </procedure>
 </listitem>
@@ -632,9 +638,7 @@ Windows Media 9.)
 <question><para>
 Я только что установил <application>MPlayer</application>. Попытка открыть файл
 приводит к фатальной ошибке:
-<screen>
-Error opening/initializing the selected video_out (-vo) device.
-</screen>
+<screen>Error opening/initializing the selected video_out (-vo) device.</screen>
 Как решить проблему?
 </para></question>
 <answer><para>
