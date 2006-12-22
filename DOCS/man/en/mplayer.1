@@ -1254,7 +1254,7 @@ copy DVD titles in the first place (see the examples).
 .
 .TP
 .B \-dvd-speed <factor or speed in KB/s> (DVD only)
-Try to limit DVD speed (default: 0, don't change speed).
+Try to limit DVD speed (default: 0, no change).
 DVD base speed is about 1350KB/s, so a 8x drive can read at speeds up to
 10800KB/s.
 Slower speeds make the drive more quiet, for watching DVDs 2700KB/s should be
@@ -1264,7 +1264,7 @@ Values less than 100 mean multiples of 1350KB/s, i.e.\& \-dvd-speed 8 selects
 10800KB/s.
 .br
 .I NOTE:
-You need write permission to the DVD device to change the speed.
+You need write access to the DVD device to change the speed.
 .
 .TP
 .B \-dvdangle <angle ID> (DVD only)
@@ -1931,7 +1931,7 @@ Also see the \-dump*sub and \-vobsubout* options.
 Enables extraction of Matroska embedded fonts (default: disabled).
 These fonts can be used for SSA/ASS subtitle
 rendering (\-ass option).
-Font files are created in ~/.mplayer/fonts directory.
+Font files are created in the ~/.mplayer/\:fonts directory.
 .br
 .I NOTE:
 With FontConfig 2.4.2 or newer, embedded fonts are opened directly from memory,
