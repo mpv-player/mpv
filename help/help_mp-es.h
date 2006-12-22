@@ -34,14 +34,14 @@ static char help_text[]=
 " -nosound             No reproducir sonido.\n"
 " -fs, -vm, -zoom      Opciones de pantalla completa (pantalla completa, cambio de modo de video, escalado por software).\n"
 " -x <x> -y <y>        Escalar imagen a resolución dada (para usar con -vm o -zoom).\n"
-" -sub <archivo>       Especificar archivo de subtitulos a usar (mira también -subfps, -subdelay).\n"
+" -sub <archivo>       Especificar archivo de subtítulos a usar (revise también -subfps, -subdelay).\n"
 " -playlist <archivo>  Especificar archivo con la lista de reproducción.\n"
 " -vid <x> -aid <y>    Opciones para especificar el stream de video (x) y de audio (y) a reproducir.\n"
 " -fps <x> -srate <y>  Opciones para cambiar la tasa de video (x fps) y de audio (y Hz).\n"
-" -pp <calidad>        Activar filtro de postprocesado (revisa el manual para para obtener  más información).\n"
+" -pp <calidad>        Activar filtro de postproceso (revise el manual para para obtener más información).\n"
 " -framedrop           Activar el descarte de cuadros/frames (para máquinas lentas).\n\n"
 
-"Teclas básicas ('man mplayer' para una lista completa, mira también input.conf):\n"
+"Teclas básicas ('man mplayer' para una lista completa, revise también input.conf):\n"
 " <-  ó  ->       Avanzar o retroceder diez segundos.\n"
 " arriba ó abajo  Avanzar o retroceder un minuto.\n"
 " pgup ó pgdown   Avanzar o retroceder diez minutos.\n"
@@ -54,11 +54,11 @@ static char help_text[]=
 " z ó x           Ajustar el retardo de la subtítulación en más o menos 0.1 segundos.\n"
 " r ó t           Ajustar posición de la subtítulación (mira también -vf expand).\n"
 "\n"
-" *** Lee el manual para enterarte del resto de las opciones (avanzadas) y teclas! de control ***\n"
+" *** REVISE EL MANUAL PARA OTROS DETALLES, OPCIONES (AVANZADAS) Y TECLAS DE CONTROL ***\n"
 "\n";
 #endif
 
-#define MSGTR_SamplesWanted "Se necesitan muestras en este formato para mejorar el soporte. Por favor contacta a los desarrolladores.\n"
+#define MSGTR_SamplesWanted "Se necesitan muestras de este formato para mejorar el soporte. Por favor contacte a los desarrolladores.\n"
 
 
 
@@ -69,58 +69,58 @@ static char help_text[]=
 #define MSGTR_Exiting "\nSaliendo...\n"
 #define MSGTR_ExitingHow "\nSaliendo... (%s)\n"
 #define MSGTR_Exit_quit "Salida."
-#define MSGTR_Exit_eof "Fin del archivo."
+#define MSGTR_Exit_eof "Fin de archivo."
 #define MSGTR_Exit_error "Error fatal."
-#define MSGTR_IntBySignal "\nMPlayer ha sido interrumpido con señal %d en el módulo: %s \n"
+#define MSGTR_IntBySignal "\nMPlayer fue interrumpido con señal %d en el módulo: %s \n"
 #define MSGTR_NoHomeDir "No se puede encontrar el directorio HOME.\n"
 #define MSGTR_GetpathProblem "Problema en get_path(\"config\").\n"
 #define MSGTR_CreatingCfgFile "Creando archivo de configuración: %s.\n"
-#define MSGTR_CopyCodecsConf "Copia/Enlaza <árbol del código fuente de MPlayer>/etc/codecs.conf a ~/.mplayer/codecs.conf\n"
+#define MSGTR_CopyCodecsConf "Copie/Enlace <árbol del código fuente de MPlayer>/etc/codecs.conf a ~/.mplayer/codecs.conf\n"
 #define MSGTR_BuiltinCodecsConf "Usando codecs.conf interno por omisión.\n" 
-#define MSGTR_CantLoadFont "No se puede cargar typografía: %s.\n"
-#define MSGTR_CantLoadSub "No se puede cargar subtítulo: %s.\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: No se encuentra el stream seleccionado.\n"
-#define MSGTR_CantOpenDumpfile "No se puede abrir el archivo de dump.\n"
+#define MSGTR_CantLoadFont "No se pudo cargar typografía: %s.\n"
+#define MSGTR_CantLoadSub "No se pudo cargar subtítulo: %s.\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: No se encuentró el stream seleccionado.\n"
+#define MSGTR_CantOpenDumpfile "No se puede abrir el archivo de dump/volcado.\n"
 #define MSGTR_CoreDumped "Core dumped ;)\n"
 #define MSGTR_FPSnotspecified "FPS no especificado (o inválido) en la cabecera! Usa la opción -fps.\n"
 #define MSGTR_TryForceAudioFmtStr "Tratando de forzar la familia de codecs de audio %s...\n"
-#define MSGTR_RTFMCodecs "Lee el archivo DOCS/HTML/es/codecs.html!\n"
-#define MSGTR_CantFindAudioCodec "No se encuentra codec para el formato de audio 0x%X!\n"
+#define MSGTR_RTFMCodecs "Revise el archivo DOCS/HTML/es/codecs.html!\n"
+#define MSGTR_CantFindAudioCodec "No se encontró codec para el formato de audio 0x%X!\n"
 #define MSGTR_TryForceVideoFmtStr "Tratando de forzar la familia de codecs de video %s...\n"
-#define MSGTR_CantFindVideoCodec "No se encuentra codec para el formato de video 0x%X!\n"
+#define MSGTR_CantFindVideoCodec "No se encontró codec para el formato de video 0x%X!\n"
 #define MSGTR_CannotInitVO "FATAL: No se puede inicializar el driver de video!\n"
 #define MSGTR_CannotInitAO "No se puede abrir o inicializar dispositivo de audio, no se reproducirá sonido.\n"
 #define MSGTR_StartPlaying "Comenzando la reproducción...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
 "       **************************************************************\n"\
-"       **** Tu sistema es demasiado lento para reproducir esto!  ****\n"\
+"       **** Su sistema es demasiado lento para reproducir esto!  ****\n"\
 "       **************************************************************\n"\
 "Posibles razones, problemas, soluciones:\n"\
 "- Más común: controlador de _audio_ con errores o arruinado.\n"\
 "  - Intenta con -ao sdl o la emulación OSS de ALSA.\n"\
-"  - Proba con diferentes valores para -autosync, 30 es un buen comienzo.\n"\
+"  - Pruebe con diferentes valores para -autosync, 30 es un buen comienzo.\n"\
 "- Salida de video lenta\n"\
-"  - Proba otro driver -vo (para obtener una lista, -vo help) o intenta\n"\
+"  - Pruebe otro driver -vo (para obtener una lista, -vo help) o intente\n"\
 "    iniciar con la opción -framedrop!\n"\
 "- CPU lenta\n"\
-"  - No intente reproducir DVDs o DivX grandes en una CPU lenta. Intenta\n"\
+"  - No intente reproducir DVDs o DivX grandes en una CPU lenta. Intente\n"\
 "    iniciar con la opción -hardframedrop.\n"\
 "- Archivo erróneo o arruinado\n"\
-"  - Proba combinaciones de -nobps -ni -mc 0.\n"\
+"  - Pruebe combinaciones de -nobps -ni -mc 0.\n"\
 "- Medios lentos (unidad NFS/SMB, DVD, VCD, etc)\n"\
 "  - Intente con -cache 8192.\n"\
-"- Esta usando -cache para reproducir archivos AVI no entrelazados?\n"\
+"- Esta utilizando -cache para reproducir archivos AVI no entrelazados?\n"\
 "  - Intente con -nocache.\n"\
-"Lee DOCS/HTML/es/video.html para consejos de ajuste o mayor velocidad.\n"\
-"Si nada de eso sirve, lee DOCS/HTML/es/bugreports.html\n\n"
+"Lea DOCS/HTML/es/video.html para consejos de ajuste/mejora de la velocidad.\n"\
+"Si nada de eso sirve, revise DOCS/HTML/es/bugreports.html\n\n"
 
 #define MSGTR_NoGui "MPlayer fue compilado sin soporte para interfaz gráfica.\n"
 #define MSGTR_GuiNeedsX "La interfaz gráfica de MPlayer requiere X11!\n"
 #define MSGTR_Playing "Reproduciendo %s.\n"
 #define MSGTR_NoSound "Audio: sin sonido.\n"
 #define MSGTR_FPSforced "FPS forzado a %5.3f  (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "Compilado con detección de CPU en tiempo de ejecución - esto no es óptimo! Para obtener mejor rendimiento, recompila MPlayer con --disable-runtime-cpudetection.\n"
+#define MSGTR_CompiledWithRuntimeDetection "Compilado con detección de CPU en tiempo de ejecución - esto no es óptimo! Para obtener mejor rendimiento, recompile MPlayer con --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Compilado para CPU x86 con extensiones:"
 #define MSGTR_AvailableVideoOutputDrivers "Controladores de salida de video disponibles:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Controadores de salida de audio disponibles:\n"
@@ -133,12 +133,12 @@ static char help_text[]=
 #define MSGTR_CannotReadVideoProperties "Vídeo: no se puede leer las propiedades.\n"
 #define MSGTR_NoStreamFound "No se ha encontrado stream.\n"
 #define MSGTR_ErrorInitializingVODevice "Error abriendo/inicializando el dispositivo de la salida de video (-vo)!\n"
-#define MSGTR_ForcedVideoCodec "Forzado el codec de video: %s.\n"
-#define MSGTR_ForcedAudioCodec "Forzado el codec de audio: %s\n"
+#define MSGTR_ForcedVideoCodec "Codec de video forzado: %s.\n"
+#define MSGTR_ForcedAudioCodec "Codec de audio forzado: %s\n"
 #define MSGTR_Video_NoVideo "Vídeo: no hay video!\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: No se pudo inicializar los filtros de video (-vf) o salida de video (-vo)!\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATAL: No fue posible inicializar los filtros (-vf) o la salida de video (-vo)!\n"
 #define MSGTR_Paused "\n  =====  PAUSA  =====\r"
-#define MSGTR_PlaylistLoadUnable "\nNo se puede cargar la lista de reproducción %s.\n"
+#define MSGTR_PlaylistLoadUnable "\nNo fue posible cargar la lista de reproducción %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\
 "  Esto puede deberse a un defecto en nuestra nueva rutina de autodetección de CPU...\n"\
@@ -147,19 +147,19 @@ static char help_text[]=
 "- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\
 "  Esto ocurre normalmente cuando ejecuta el programa en una CPU diferente de\n"\
 "  la usada para compilarlo o para la cual fue optimizado.\n"\
-"  ¡Verifica eso!\n"
+"  ¡Verifique eso!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer se detuvo por mal uso de CPU/FPU/RAM.\n"\
-"  Recompila MPlayer con la opción --enable-debug y hace un backtrace en\n"\
-"  'gdb' y un desensamblado. Para más detalles, revisa\n"\
+"  Recompile MPlayer con la opción --enable-debug y haga un backtrace con\n"\
+"  'gdb' y un desensamblado. Para más detalles, revise\n"\
 "  DOCS/HTML/es/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
-"- MPlayer se detuvo. Esto no debería haber pasado.\n"\
+"- MPlayer se detuvo. Esto no debería pasar.\n"\
 "  Puede ser un defecto en el código de MPlayer, en sus controladores\n"\
-"  _o_ en su versión de gcc. Si piensas que es culpa de MPlayer, por\n"\
-"  favor revisa DOCS/HTML/es/bugreports.html y sigue las instrucciones que allí\n"\
-"  se encuentran. No podemos ayudarte a menos que nos proveas esa\n"\
-"  información cuando estes reportando algún posible defecto.\n"
+"  _o_ en su versión de gcc. Si piensa que es culpa de MPlayer, por\n"\
+"  favor revise DOCS/HTML/es/bugreports.html y siga las instrucciones que allí\n"\
+"  se encuentran. No podemos ayudarle a menos que nos provea esa\n"\
+"  información cuando reporte algún posible defecto.\n"
 #define MSGTR_LoadingConfig "Cargando configuración '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: se agregó el archivo de subtítulo (%d): %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB: Archivo de subtítulos borrado (%d): %s\n"
@@ -167,7 +167,7 @@ static char help_text[]=
 #define MSGTR_CommandLine "Linea de Comando:"
 #define MSGTR_RTCDeviceNotOpenable "Fallo al abrir %s: %s (el usuario debe tener permisos de lectura)\n"
 #define MSGTR_LinuxRTCInitErrorIrqpSet "Error iniciando Linux RTC en llamada a ioctl (rtc_irqp_set %lu): %s\n"
-#define MSGTR_IncreaseRTCMaxUserFreq "Prueba agregando \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" a los scripts de inicio de tu sistema.\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "Pruebe agregando \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" a los scripts de inicio de su sistema.\n"
 #define MSGTR_LinuxRTCInitErrorPieOn "Error iniciando Linux RTC en llamada a ioctl (rtc_pie_on): %s\n"
 #define MSGTR_UsingTimingType "Usando temporización %s.\n"
 #define MSGTR_NoIdleAndGui "La opcion -idle no puede usarse con GMPlayer.\n"
@@ -276,7 +276,7 @@ static char help_text[]=
 #define MSGTR_ForcingOutputFourcc "Forzando salida fourcc a %x [%.4s].\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Forzando la etiqueta del formato de la salida de audio a 0x%x.\n"
 #define MSGTR_DuplicateFrames "\n%d frame(s) duplicados.\n"
-#define MSGTR_SkipFrame "\nse salta frame...\n"
+#define MSGTR_SkipFrame "\nSaltando frame/cuadro...\n"
 #define MSGTR_ResolutionDoesntMatch "\nEl nuevo archivo de video tiene diferente resolución o espacio de colores que el anterior.\n"
 #define MSGTR_FrameCopyFileMismatch "\nTodos los archivos de video deben tener fps, resolución y codec identicos para -ovc copy.\n"
 #define MSGTR_AudioCopyFileMismatch "\nTodos los archivos deben tener codec de audio y formato identicos para -oac copy.\n"
@@ -307,10 +307,10 @@ static char help_text[]=
 #define MSGTR_LameVersion "Versión de LAME %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Error: La tasa de bits especificada esta fuera de los rangos de valor para esta preconfiguración\n"\
 "\n"\
-"Cuando usa este modo debe ingresar un valor entre \"8\" y \"320\"\n"\
+"Cuando utilice este modo debe ingresar un valor entre \"8\" y \"320\"\n"\
 "\n"\
-"Para mayor informción prueba: \"-lameopts preset=help\"\n"
-#define MSGTR_InvalidLamePresetOptions "Error: No ingreso un perfil valido y/o opciones con una preconfiguración\n"\
+"Para mayor información pruebe: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Error: No ingresó un perfil válido y/o opciones con una preconfiguración\n"\
 "\n"\
 "Los perfiles disponibles son:\n"\
 "\n"\
@@ -333,40 +333,40 @@ static char help_text[]=
 #define MSGTR_LamePresetsLongInfo "\n"\
 "Las opciones de preconfiguración estan hechas para proveer la mayor calidad posible.\n"\
 "\n"\
-"Estas han sido en su mayor sometidas y ajustadas por medio de pruebas rigurosas de\n"\
+"Estas han sido en su mayor parte sometidas y ajustadas por medio de pruebas rigurosas de\n"\
 "doble escucha ciega (double blind listening) para verificar y lograr este objetivo\n"\
 "\n"\
 "Son continuamente actualizadas para con el desarrollo actual que esta\n"\
 "ocurriendo y como resultado debería proveer practicamente la mejor calidad\n"\
-"actualmente posible de LAME.\n"\
+"actualmente posible con LAME.\n"\
 "\n"\
-"Para activar estas preconfiguración:\n"\
+"Para activar estas preconfiguracines:\n"\
 "\n"\
-"   For modos VBR (en general mayor calidad):\n"\
+"   For modos VBR (en general de mejor calidad):\n"\
 "\n"\
 "     \"preset=standard\" Esta preconfiguración generalmente debería ser transparente\n"\
-"                             para la mayoría de la genta en la música y ya es bastante\n"\
+"                             para la mayoría de la gente en la música y ya es bastante\n"\
 "                             buena en calidad.\n"\
 "\n"\
 "     \"preset=extreme\" Si tiene un oido extramademente bueno y un equipo\n"\
 "                             similar, esta preconfiguración normalmente le\n"\
-"                             proveera una calidad levemente superior al modo "\
+"                             proveerá una calidad levemente superior al modo "\
                                "\"standard\"\n"\
 "\n"\
-"   Para 320kbps CBR (la mayor calidad posible desde las preconfiguraciones):\n"\
+"   Para 320kbps CBR (la mejor calidad posible desde las preconfiguraciones):\n"\
 "\n"\
 "     \"preset=insane\"  Esta preconfiguración será excesiva para la mayoria\n"\
-"                             de la gente en la mayoria de las ocasiones, pero si debe\n"\
-"                             tener la mayor calidad posible sin tener en cuenta el\n"\
+"                             de la gente y en la mayoria de las ocasiones, pero si debe\n"\
+"                             tener la mejor calidad posible sin tener en cuenta el\n"\
 "                             tamaño del archivo, esta es la opción definitiva.\n"\
 "\n"\
-"   Para modos ABR (alta calidad por tasa de bits dado pero no tan alto como modo VBR):\n"\
+"   Para modos ABR (alta calidad por tasa de bits dado pero no tan alto como el modo VBR):\n"\
 "\n"\
-"     \"preset=<kbps>\"  Usando esta preconfiguración normalmente obtendrá buena\n"\
+"     \"preset=<kbps>\"  Utilizando esta preconfiguración normalmente obtendrá buena\n"\
 "                             calidad a la tasa de bits especificada. Dependiendo de\n"\
 "                             la tasa de bits ingresada, esta preconfiguración determinará\n"\
-"                             las opciones optimas para esa situación particular.\n"\
-"                             A pessar que funciona, no es tan flexible como el modo\n"\
+"                             las opciones óptimas para esa situación particular.\n"\
+"                             A pesar que funciona, no es tan flexible como el modo\n"\
 "                             VBR, y normalmente no llegarán a obtener el mismo nivel\n"\
 "                             de calidad del modo VBR a mayores tasas de bits.\n"\
 "\n"\
@@ -384,13 +384,13 @@ static char help_text[]=
 "            desventaja al cambio de velocidad es que muchas veces la tasa de\n"\
 "            bits será levemente más alta respecto del modo normal y la calidad\n"\
 "            puede llegar a ser un poco más baja también.\n"\
-"Advertencia: con la versión actual las preconfiruaciones \"fast\" puede llegar a\n"\
+"Advertencia: con la versión actual las preconfiguraciones \"fast\" pueden llegar a\n"\
 "             dar como resultado tasas de bits demasiado altas comparadas a los normales.\n"\
 "\n"\
 "   \"cbr\"  - Si usa el modo ABR (ver más arriba) con una tasa de bits significativa\n"\
 "            como 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
 "            puede usar la opción \"cbr\" para forzar la codificación en modo CBR\n"\
-"            en lugar del modo por omisión ABR. ABR provee mayor calidad pero\n"\
+"            en lugar del modo por omisión ABR. ABR provee mejor calidad pero\n"\
 "            CBR podría llegar a ser util en  situaciones tales como cuando se\n"\
 "            recibe un flujo mp3 a través de internet.\n"\
 "\n"\
@@ -407,13 +407,13 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_LameCantInit "No se pudo setear las opciones de Lame, revise el"\
-" bitrate/samplerate, algunos bitrates muy bajos (<32) necesitan una tasa de"\
+#define MSGTR_LameCantInit "No fue posible setear las opciones de LAME, revise el"\
+" bitrate/samplerate. Algunos bitrates muy bajos (<32) necesitan una tasa de"\
 " muestreo más baja (ej. -srate 8000). Si todo falla, pruebe con un preset."
 #define MSGTR_ConfigFileError "error en archivo de configuración"
 #define MSGTR_ErrorParsingCommandLine "error en parametros de la línea de comando"
 #define MSGTR_VideoStreamRequired "¡El flujo de video es obligatorio!\n"
-#define MSGTR_ForcingInputFPS "en su lugar los cuadros por segundos de entrada serán interpretados como %5.2f\n"
+#define MSGTR_ForcingInputFPS "en su lugar el fps de entrada será interpretado como %5.2f\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "El formato de archivo de salida RAWVIDEO no soporta audio - desactivando audio\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Este demuxer todavía no soporta -nosound.\n"
 #define MSGTR_MemAllocFailed "falló la asignación de memoria"
@@ -423,7 +423,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "LAVC Audio, no se encuentra el codificador para el codec %s\n"
 #define MSGTR_CouldntAllocateLavcContext "LAVC Audio, ¡no se puede asignar contexto!\n"
 #define MSGTR_CouldntOpenCodec "No se puede abrir el codec %s, br=%d\n"
-#define MSGTR_CantCopyAudioFormat "El formato de audio 0x%x no es compatible con '-oac copy', profavor pruebe '-oac pcm' o use '-fafmttag' para sobreescribirlo.\n"
+#define MSGTR_CantCopyAudioFormat "El formato de audio 0x%x no es compatible con '-oac copy', por favor pruebe '-oac pcm' o use '-fafmttag' para sobreescribirlo.\n"
 
 // cfg-mencoder.h
 
@@ -476,7 +476,7 @@ static char help_text[]=
 "                 (320 kbps de tasa de bits)\n"\
 "                 <8-320>: codificación ABR con tasa de bits en promedio en los kbps dados.\n\n"
 
-//codec-cfg.c:
+//codec-cfg.c: 
 #define MSGTR_DuplicateFourcc "FourCC duplicado"
 #define MSGTR_TooManyFourccs "demasiados FourCCs/formatos..."
 #define MSGTR_ParseError "error en el analísis"
