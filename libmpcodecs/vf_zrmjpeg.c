@@ -39,6 +39,13 @@
 #include "libavcodec/mpegvideo.h"
 //#include "jpeg_enc.h" /* this file is not present yet */
 
+/* code from ffmpeg/libavcodec */
+#if defined(__GNUC__) && (__GNUC__ > 3 || __GNUC_ == 3 && __GNUC_MINOR__ > 0)
+#    define always_inline __attribute__((always_inline)) inline
+#else
+#    define always_inline inline
+#endif
+
 #undef malloc
 #undef free
 #undef realloc
@@ -151,7 +158,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
  * So 16           <= qscale * quant_matrix[i]             <= 7905
  * so (1<<19) / 16 >= (1<<19) / (qscale * quant_matrix[i]) >= (1<<19) / 7905
  * so 32768        >= (1<<19) / (qscale * quant_matrix[i]) >= 67 */
-				qmat[qscale][i] = (int)((uint64_t_C(1) <<
+				qmat[qscale][i] = (int)((UINT64_C(1) <<
 						QMAT_SHIFT_MMX) / (qscale
 							*quant_matrix[j]));
 				qmat16[qscale][0][i] = (1 << QMAT_SHIFT_MMX)

@@ -113,7 +113,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
                    so (1<<19) / 16 >= (1<<19) / (qscale * quant_matrix[i]) >= (1<<19) / 7905
                    so 32768        >= (1<<19) / (qscale * quant_matrix[i]) >= 67
                 */
-                qmat  [qscale][i] = (int)((uint64_t_C(1) << QMAT_SHIFT_MMX) / (qscale * quant_matrix[j]));
+                qmat  [qscale][i] = (int)((UINT64_C(1) << QMAT_SHIFT_MMX) / (qscale * quant_matrix[j]));
                 qmat16[qscale][0][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[j]);
 
                 if(qmat16[qscale][0][i]==0 || qmat16[qscale][0][i]==128*256) qmat16[qscale][0][i]=128*256-1;
