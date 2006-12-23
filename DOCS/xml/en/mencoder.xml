@@ -609,6 +609,12 @@ mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=j
 </para>
 </informalexample>
 
+You can mix different types of images, regardless of the method you use
+&mdash; individual filenames, wildcard or file with list &mdash; provided of
+course they have the same dimensions.
+So you can e.g. take title frame from PNG file,
+and then put a slideshow of your JPEG photos.
+
 <informalexample>
 <para>
 Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current
