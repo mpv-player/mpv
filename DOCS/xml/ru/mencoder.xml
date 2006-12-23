@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21744 -->
 <chapter id="mencoder">
 <title>Основы использования <application>MEncoder</application></title>
 
@@ -603,6 +603,12 @@ mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=j
 </screen>
 </para>
 </informalexample>
+
+Вы можете смешивать различные типы изображений независимо от используемого
+метода &mdash; отдельные файлы, маска или файл со списком &mdash; при условии,
+конечно, что они имеют одинаковое разрешение.
+Так что вы можете, например, взять титульный кадр из PNG файла, а затем
+поместить слайдшоу из JPEG фотографий.
 
 <informalexample>
 <para>
