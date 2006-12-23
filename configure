@@ -7905,10 +7905,6 @@ $_def_amr_wb
      echo $part | tr '[a-z] ' '[A-Z]' | sed 's/^/#define ENABLE_/;s/$/ 0/'
    fi
  done`
-// HACK: disable x11 demuxer for now
-#undef CONFIG_X11_GRAB_DEVICE_DEMUXER
-#undef ENABLE_X11_GRAB_DEVICE_DEMUXER
-#define ENABLE_X11_GRAB_DEVICE_DEMUXER 0
 
 $_def_lavc_faac
 $_def_lavc_xvid
