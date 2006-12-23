@@ -891,6 +891,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		||(strcmp(priv->driver, "directx") == 0)
 		||(strcmp(priv->driver, "Quartz") == 0)
 		||(strcmp(priv->driver, "cgx") == 0)
+		||(strcmp(priv->driver, "os4video") == 0)
 		||((strcmp(priv->driver, "aalib") == 0) && priv->X)){
 			if( mp_msg_test(MSGT_VO,MSGL_V) ) {
  				mp_msg(MSGT_VO,MSGL_V, "SDL: setting windowed mode\n"); }
