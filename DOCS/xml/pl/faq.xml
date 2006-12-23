@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21705 -->
+<!-- synced with r21741 -->
 <!-- Opiekun: Frogu -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
@@ -408,7 +408,9 @@ nie mogę dostać się do żadnych elementów menu!
 Czy używasz FVWM? Spróbuj tego:
 <orderedlist>
 <listitem><para>
-  Start -> Settings -> Configuration -> Base Configuration
+  <menuchoice><guimenu>Start</guimenu> <guisubmenu>Settings</guisubmenu>
+    <guisubmenu>Configuration</guisubmenu> 
+	<guimenuitem>Base Configuration</guimenuitem></menuchoice>
 </para></listitem>
 <listitem><para>
   Ustaw <systemitem>Use Applications position hints</systemitem>

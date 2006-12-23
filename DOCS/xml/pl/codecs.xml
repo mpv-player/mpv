@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21624 -->
+<!-- synced with r21741 -->
 <!-- Opiekun: Boski -->
 <chapter id="codecs">
 <title>Obsługiwane kodeki</title>
@@ -634,7 +634,9 @@ Używając <application>Microsoft GraphEdit</application> (szybki sposób)
   Uruchom <command>graphedit.exe</command>.
 </para></step>
 <step><para>
-  Z menu wybierz Graph -> Insert Filters.
+  Z menu wybierz
+  <menuchoice><guimenu>Graph</guimenu>
+  <guisubmenu>Insert Filters</guisubmenu></menuchoice>.
 </para></step>
 <step><para>
   Rozwiń listę <systemitem>DirectShow Filters</systemitem>
@@ -667,9 +669,9 @@ Weź głęboki oddech i zacznij przeszukiwanie rejestru...
   Uruchom <command>regedit</command>.
 </para></step>
 <step><para>
-  Naciśnij <keycap>Ctrl</keycap>+<keycap>F</keycap>, odznacz dwa pierwsze
-  pola (checkboxes) i zaznacz trzecie. Wpisz fourcc kodeka (np.
-  <userinput>TM20</userinput>).
+  Naciśnij <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>,
+  odznacz dwa pierwsze pola (checkboxes) i zaznacz trzecie. Wpisz fourcc kodeka
+  (np.  <userinput>TM20</userinput>).
 </para></step>
 <step><para>
   Powinieneś zobaczyć pole zawierające ścieżkę i nazwę pliku (np.
@@ -679,8 +681,8 @@ Weź głęboki oddech i zacznij przeszukiwanie rejestru...
   Gdy odnalazłeś już plik, potrzebny będzie GUID. Spróbuj ponownego
   wyszukiwania, ale tym razem wpisz nazwę kodeka, a nie jego fourcc. Jego nazwę
   można sprawdzić, kiedy Media Player odtwarza plik, odszukując ją w
-  <guimenu>Plik</guimenu> -&gt; <guisubmenu>Opcje</guisubmenu> -&gt;
-  <guimenuitem>Zaawansowane</guimenuitem>.
+  <menuchoice><guimenu>Plik</guimenu> <guisubmenu>Opcje</guisubmenu>
+  <guimenuitem>Zaawansowane</guimenuitem></menuchoice>.
   Jeżeli jej tam nie będzie, to masz pecha. Spróbuj odgadnąć nazwę (np. spróbuj
   wyszukać "TrueMotion").
 </para></step>
