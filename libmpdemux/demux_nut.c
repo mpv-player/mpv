@@ -104,20 +104,20 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 
 			sh_audio->wf= wf; sh_audio->ds = demuxer->audio;
 			sh_audio->audio.dwSampleSize = 0; // FIXME
-			sh_audio->audio.dwScale = s[i].time_base.nom;
+			sh_audio->audio.dwScale = s[i].time_base.num;
 			sh_audio->audio.dwRate = s[i].time_base.den;
 			sh_audio->format = 0;
 			for (j = 0; j < s[i].fourcc_len && j < 4; j++)
 				sh_audio->format |= s[i].fourcc[j]<<(j*8);
 			sh_audio->channels = s[i].channel_count;
 			sh_audio->samplerate =
-				s[i].samplerate_nom / s[i].samplerate_denom;
+				s[i].samplerate_num / s[i].samplerate_denom;
 			sh_audio->i_bps = 0; // FIXME
 
 			wf->wFormatTag = sh_audio->format;
 			wf->nChannels = s[i].channel_count;
 			wf->nSamplesPerSec =
-				s[i].samplerate_nom / s[i].samplerate_denom;
+				s[i].samplerate_num / s[i].samplerate_denom;
 			wf->nAvgBytesPerSec = 0; // FIXME
 			wf->nBlockAlign = 0; // FIXME
 			wf->wBitsPerSample = 0; // FIXME
@@ -141,7 +141,7 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 			sh_video->ds = demuxer->video;
 			sh_video->disp_w = s[i].width;
 			sh_video->disp_h = s[i].height;
-			sh_video->video.dwScale = s[i].time_base.nom;
+			sh_video->video.dwScale = s[i].time_base.num;
 			sh_video->video.dwRate  = s[i].time_base.den;
 
 			sh_video->fps = sh_video->video.dwRate/
@@ -196,7 +196,7 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 		return 0; // fatal error
 	}
 
-	pts = (double)pd.pts * priv->s[pd.stream].time_base.nom /
+	pts = (double)pd.pts * priv->s[pd.stream].time_base.num /
 	                       priv->s[pd.stream].time_base.den;
 
 	if (pd.stream == demuxer->audio->id)  {
@@ -256,7 +256,7 @@ static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_dela
 
 	if (flags & 2) // percent
 		time_pos *= priv->s[0].max_pts *
-		               (double)priv->s[0].time_base.nom /
+		               (double)priv->s[0].time_base.num /
 		                       priv->s[0].time_base.den;
 
 	while ((ret = nut_seek(nut, time_pos, nutflags, tmp)) == NUT_ERR_EAGAIN);
@@ -271,7 +271,7 @@ static int demux_control_nut(demuxer_t * demuxer, int cmd, void * arg) {
 	switch (cmd) {
 		case DEMUXER_CTRL_GET_TIME_LENGTH:
 			*((double *)arg) = priv->s[0].max_pts *
-				(double)priv->s[0].time_base.nom /
+				(double)priv->s[0].time_base.num /
 				        priv->s[0].time_base.den;
 			return DEMUXER_CTRL_OK;
 		case DEMUXER_CTRL_GET_PERCENT_POS:
