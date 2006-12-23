@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21466 -->
+<!-- synced with r21748 -->
 <!-- Opiekun: Qba -->
 <chapter id="mencoder">
 <title>Podstawy używania <application>MEncodera</application></title>
@@ -31,44 +31,43 @@ by uzyskać listę wszystkich kodeków video obsługiwanych przez
 <application>MEncodera</application> na Twoim komputerze.
 Dostępne są następujące:
 </para>
+
 <para>
 Kodeki audio:
-
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
 <row><entry>Nazwa kodeka audio</entry><entry>Opis</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>mp3lame</entry>
-    <entry>kodowanie na MP3 VBR, ABR lub przy użyciu LAME</entry>
-  </row>
-  <row>
-    <entry>lavc</entry>
-    <entry>używa jednego z <link linkend="menc-feat-enc-libavcodec-audio-codecs">kodeków audio z <systemitem class="library">libavcodec</systemitem></link>
-    </entry>
-  </row>
-  <row>
-    <entry>faac</entry>
-    <entry>koder audio FAAC AAC</entry>
-  </row>
-  <row>
-    <entry>toolame</entry>
-    <entry>koder MPEG Audio Layer 2</entry>
-  </row>
-  <row>
-    <entry>twolame</entry>
-    <entry>koder MPEG Audio Layer 2 encoder oparty na tooLAME</entry>
-  </row>
-  <row>
-    <entry>pcm</entry>
-    <entry>nieskompresowany dźwięk PCM</entry>
-  </row>
-  <row>
-    <entry>copy</entry>
-    <entry>nie przekodowywuj, tylko przekopiuj zakodowane ramki</entry>
-  </row>
+<row>
+  <entry>mp3lame</entry>
+  <entry>kodowanie na MP3 VBR, ABR lub przy użyciu LAME</entry>
+</row>
+<row>
+  <entry>lavc</entry>
+  <entry>używa jednego z <link linkend="menc-feat-enc-libavcodec-audio-codecs">kodeków audio z <systemitem class="library">libavcodec</systemitem></link></entry>
+</row>
+<row>
+  <entry>faac</entry>
+  <entry>koder audio FAAC AAC</entry>
+</row>
+<row>
+  <entry>toolame</entry>
+  <entry>koder MPEG Audio Layer 2</entry>
+</row>
+<row>
+  <entry>twolame</entry>
+  <entry>koder MPEG Audio Layer 2 encoder oparty na tooLAME</entry>
+</row>
+<row>
+  <entry>pcm</entry>
+  <entry>nieskompresowany dźwięk PCM</entry>
+</row>
+<row>
+  <entry>copy</entry>
+  <entry>nie przekodowywuj, tylko przekopiuj zakodowane ramki</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -82,35 +81,34 @@ Kodeki video:
 <row><entry>Nazwa kodeka video</entry><entry>Opis</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>lavc</entry>
-    <entry>używa jednego z <link linkend="menc-feat-enc-libavcodec-video-codecs">kodeków video z <systemitem class="library">libavcodec</systemitem></link>
-    </entry>
-  </row>
-  <row>
-    <entry>xvid</entry>
-    <entry>Xvid, kodek MPEG-4 Advanced Simple Profile (ASP)</entry>
-  </row>
-  <row>
-    <entry>x264</entry>
-    <entry>x264, MPEG-4 Advanced Video Coding (AVC), zwany kodekiem H.264</entry>
-  </row>
-  <row>
-    <entry>nuv</entry>
-    <entry>nuppel video, używany przez niektóre aplikacje czasu rzeczywistego</entry>
-  </row>
-  <row>
-    <entry>raw</entry>
-    <entry>nieskompresowane klatki video</entry>
-  </row>
-  <row>
-    <entry>copy</entry>
-    <entry>nie przekodowywuj, tylko przekopiuj zakodowane ramki</entry>
-  </row>
-  <row>
-    <entry>frameno</entry>
-    <entry>używany do kodowania trójprzebiegowego (nie zalecane)</entry>
-  </row>
+<row>
+  <entry>lavc</entry>
+  <entry>używa jednego z <link linkend="menc-feat-enc-libavcodec-video-codecs">kodeków video z <systemitem class="library">libavcodec</systemitem></link></entry>
+</row>
+<row>
+  <entry>xvid</entry>
+  <entry>Xvid, kodek MPEG-4 Advanced Simple Profile (ASP)</entry>
+</row>
+<row>
+  <entry>x264</entry>
+  <entry>x264, MPEG-4 Advanced Video Coding (AVC), zwany kodekiem H.264</entry>
+</row>
+<row>
+  <entry>nuv</entry>
+  <entry>nuppel video, używany przez niektóre aplikacje czasu rzeczywistego</entry>
+</row>
+<row>
+  <entry>raw</entry>
+  <entry>nieskompresowane klatki video</entry>
+</row>
+<row>
+  <entry>copy</entry>
+  <entry>nie przekodowywuj, tylko przekopiuj zakodowane ramki</entry>
+</row>
+<row>
+  <entry>frameno</entry>
+  <entry>używany do kodowania trójprzebiegowego (nie zalecane)</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -132,27 +130,27 @@ Formaty przechowywania:
 <row><entry>Nazwa formatu</entry><entry>Opis</entry></row>
 </thead>
 <tbody>
-  <row>
-    <entry>lavf</entry>
-    <entry>jeden z formatów obsługiwanych przez
-    <systemitem class="library">libavformat</systemitem></entry>
-  </row>
-  <row>
-    <entry>avi</entry>
-    <entry>Audio-Video Interleaved (Przeplecione Audio-Video)</entry>
-  </row>
-  <row>
-    <entry>mpeg</entry>
-    <entry>MPEG-1 i MPEG-2 PS</entry>
-  </row>
-  <row>
-    <entry>rawvideo</entry>
-    <entry>surowy strumień video (bez muxowania - tylko jeden strumień video)</entry>
-  </row>
-  <row>
-    <entry>rawaudio</entry>
-    <entry>surowy strumień audio (bez muxowania - tylko jeden strumień audio)</entry>
-  </row>
+<row>
+  <entry>lavf</entry>
+  <entry>jeden z formatów obsługiwanych przez
+  <systemitem class="library">libavformat</systemitem></entry>
+</row>
+<row>
+  <entry>avi</entry>
+  <entry>Audio-Video Interleaved (Przeplecione Audio-Video)</entry>
+</row>
+<row>
+  <entry>mpeg</entry>
+  <entry>MPEG-1 i MPEG-2 PS</entry>
+</row>
+<row>
+  <entry>rawvideo</entry>
+  <entry>surowy strumień video (bez muxowania - tylko jeden strumień video)</entry>
+</row>
+<row>
+  <entry>rawaudio</entry>
+  <entry>surowy strumień audio (bez muxowania - tylko jeden strumień audio)</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -182,54 +180,54 @@ Możesz wymusić konkretny format opcją <option>format</option> biblioteki
   <entry>Opis</entry>
 </row></thead>
 <tbody>
-  <row>
-    <entry>mpg</entry>
-    <entry>MPEG-1 i MPEG-2 PS</entry>
-  </row>
-  <row>
-    <entry>asf</entry>
-    <entry>Advanced Streaming Format (Zaawansowany format strumieniowy)</entry>
-  </row>
-  <row>
-    <entry>avi</entry>
-    <entry>Audio-Video Interleaved</entry>
-  </row>
-  <row>
-    <entry>wav</entry>
-    <entry>Waveform Audio</entry>
-  </row>
-  <row>
-    <entry>swf</entry>
-    <entry>Macromedia Flash</entry>
-  </row>
-  <row>
-    <entry>flv</entry>
-    <entry>Macromedia Flash video</entry>
-  </row>
-  <row>
-    <entry>rm</entry>
-    <entry>RealMedia</entry>
-  </row>
-  <row>
-    <entry>au</entry>
-    <entry>SUN AU</entry>
-  </row>
-  <row>
-    <entry>nut</entry>
-    <entry>otwarty format NUT (eksperymentalny i jeszcze bez specyfikacji)</entry>
-  </row>
-  <row>
-    <entry>mov</entry>
-    <entry>QuickTime</entry>
-  </row>
-  <row>
-    <entry>mp4</entry>
-    <entry>MPEG-4 format</entry>
-  </row>
-  <row>
-    <entry>dv</entry>
-    <entry>format Sony Digital Video</entry>
-  </row>
+<row>
+  <entry>mpg</entry>
+  <entry>MPEG-1 i MPEG-2 PS</entry>
+</row>
+<row>
+  <entry>asf</entry>
+  <entry>Advanced Streaming Format (Zaawansowany format strumieniowy)</entry>
+</row>
+<row>
+  <entry>avi</entry>
+  <entry>Audio-Video Interleaved</entry>
+</row>
+<row>
+  <entry>wav</entry>
+  <entry>Waveform Audio</entry>
+</row>
+<row>
+  <entry>swf</entry>
+  <entry>Macromedia Flash</entry>
+</row>
+<row>
+  <entry>flv</entry>
+  <entry>Macromedia Flash video</entry>
+</row>
+<row>
+  <entry>rm</entry>
+  <entry>RealMedia</entry>
+</row>
+<row>
+  <entry>au</entry>
+  <entry>SUN AU</entry>
+</row>
+<row>
+  <entry>nut</entry>
+  <entry>otwarty format NUT (eksperymentalny i jeszcze bez specyfikacji)</entry>
+</row>
+<row>
+  <entry>mov</entry>
+  <entry>QuickTime</entry>
+</row>
+<row>
+  <entry>mp4</entry>
+  <entry>MPEG-4 format</entry>
+</row>
+<row>
+  <entry>dv</entry>
+  <entry>format Sony Digital Video</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -243,8 +241,8 @@ może zostać prawidłowo odtworzony przez odtwarzacze inne niż
 <application>MPlayer</application>.
 </para>
 
-<informalexample>
-<para>Przykład:</para>
+<example>
+<title>kodowanie do formatu Macromedia Flash</title>
 <para>
 Tworzenie zbioru Macromedia Flash video, nadającego się do odtwarzania
 w przeglądarce sieciowej z wtyczką Macromedia Flash:
@@ -254,7 +252,7 @@ mencoder <replaceable>wejście.avi</replaceable> -o <replaceable>wyjście.flv</r
     -lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3
 </screen>
 </para>
-</informalexample>
+</example>
 </sect1>
 
 
@@ -325,7 +323,7 @@ Jeżeli pierwszy raz o tym słyszysz, powinieneś zajrzeć do któregoś z wielu
 przewodników dostępnych w sieci.
 </para>
 
-<example>
+<example id="copy_audio_track">
 <title>kopiowanie ścieżki dźwiękowej</title>
 <para>
 Dwuprzebiegowe kodowanie DVD do MPEG-4 ("DivX") AVI z kopiowaniem ścieżki dźwiękowej.
@@ -337,7 +335,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 </para>
 </example>
 
-<example>
+<example id="encode_audio_track">
 <title>kodowanie ścieżki dźwiękowej</title>
 <para>
 Dwuprzebiegowe kodowanie DVD do MPEG-4 ("DivX") AVI z kodowaniem ścieżki dźwiękowej do MP3.
@@ -406,6 +404,7 @@ Możesz też ustawić tytuł filmu dzięki
 
 <sect1 id="menc-feat-mpeg">
 <title>Kodowanie do formatu MPEG</title>
+
 <para>
 <application>MEncoder</application> może tworzyć pliki formatu MPEG (MPEG-PS).
 Zazwyczaj, jeśli używasz filmu MPEG-1 albo MPEG-2, to jest tak ponieważ
@@ -444,7 +443,7 @@ mencoder <replaceable>wejście.avi</replaceable> -o <replaceable>VCD.mpg</replac
 
 <note><title>Wskazówka:</title>
 <para>
-Jeżeli z jakiegoś powodu nie satysfakcjonuje Cię jakość wideo
+Jeżeli z jakiegoś powodu nie satysfakcjonuje Cię jakość video
 z drugiego przebiegu, możesz ponownie uruchomić kodowanie
 swojego video z inną docelową szybkością transmisji (bitrate),
 zakładając, że zapisałeś statystyki pliku z poprzedniego przebiegu.
@@ -479,7 +478,7 @@ Jeśli nie jest on podany <application>MEncoder</application> użyje wartości 2
 </para>
 
 <para>
-Przykład:
+Sposób użycia:
 <screen>
 mencoder <replaceable>wejscie.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell \
     -vf scale=640:480 -o <replaceable>wyjście.avi</replaceable>
@@ -495,9 +494,10 @@ mencoder <replaceable>wejscie.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4
 <title>Kopiowanie strumieni</title>
 
 <para>
-<application>MEncoder</application> obsługuje strumienie wejściowe na dwa sposoby:
-<emphasis role="bold">koduje</emphasis> lub <emphasis role="bold">kopiuje</emphasis>
-je. Ta sekcja jest o <emphasis role="bold">kopiowaniu</emphasis>.
+<application>MEncoder</application> obsługuje strumienie wejściowe na dwa
+sposoby: <emphasis role="bold">koduje</emphasis> lub
+<emphasis role="bold">kopiuje</emphasis> je.
+Ta sekcja jest o <emphasis role="bold">kopiowaniu</emphasis>.
 </para>
 
 <itemizedlist>
@@ -542,7 +542,8 @@ mencoder <replaceable>wejście.nsv</replaceable> -oac copy -fafmttag 0x706D \
 
 
 <sect1 id="menc-feat-enc-images">
-<title>Kodowanie z wielu wejściowych plików obrazkowych (JPEG, PNG, TGA itp.)</title>
+<title>Kodowanie z wielu wejściowych plików obrazkowych
+  (JPEG, PNG, TGA itp.)</title>
 
 <para>
 <application>MEncoder</application> jest w stanie stworzyć film z jednego
@@ -554,13 +555,14 @@ Poprzez proste kopiowanie ramek może stworzyć pliki MJPEG
 <orderedlist>
 <title>Jak to działa:</title>
 <listitem><para>
-  <application>MEncoder</application> <emphasis>dekoduje</emphasis> wejściowy obrazek/obrazki z pomocą biblioteki
-  <systemitem class="library">libjpeg</systemitem> (w przypadku dekodowania PNG, skorzysta z
-  <systemitem class="library">libpng</systemitem>).
+  <application>MEncoder</application> <emphasis>dekoduje</emphasis> wejściowy
+  obrazek/obrazki z pomocą biblioteki
+  <systemitem class="library">libjpeg</systemitem> (w przypadku dekodowania
+  PNG, skorzysta z <systemitem class="library">libpng</systemitem>).
 </para></listitem>
 <listitem><para>
-  Potem <application>MEncoder</application> kompresuje zdekodowane pliki podanym kompresorem
-  (DivX4, Xvid, FFmpeg msmpeg4, itd.).
+  Potem <application>MEncoder</application> kompresuje zdekodowane pliki
+  podanym kompresorem (DivX4, Xvid, FFmpeg msmpeg4, itd.).
 </para></listitem>
 </orderedlist>
 
@@ -600,6 +602,12 @@ mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=j
 </screen>
 </para>
 </informalexample>
+
+Możesz mieszać rózne typy obrazków, niezależnie od używanej metody
+&mdash; wymieniane pliki, znaki globalne czy plik z listą &mdash; o ile
+oczywiście wszystkie mają te same wymiary.
+Możesz więc n.p. zrobić klatkę tytułową z obrazka PNG a potem umieścić pokaz
+swoich zdjęć JPEG.
 
 <informalexample>
 <para>
@@ -652,18 +660,18 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
 <title>Wydobywanie napisów z DVD do pliku VOBsub</title>
 
 <para>
-<application>MEncoder</application> jest w stanie wyciągnąć napisy z DVD do pliku
-w formacie VOBsub. Tworzy je para plików z rozszerzeniem
-<filename>.idx</filename> i <filename>.sub</filename>, które są zazwyczaj spakowane do
-pojedyńczego archiwum <filename>.rar</filename>.
+<application>MEncoder</application> jest w stanie wyciągnąć napisy z DVD do
+pliku w formacie VOBsub. Tworzy je para plików z rozszerzeniem
+<filename>.idx</filename> i <filename>.sub</filename>, które są zazwyczaj
+spakowane do pojedyńczego archiwum <filename>.rar</filename>.
 <application>MPlayer</application> może je odtwarzać z opcjami
 <option>-vobsub</option> i <option>-vobsubid</option>.
 </para>
 
 <para>
 Podajesz nazwę bazową (tzn. bez rozszerzenia <filename>.idx</filename> lub
-<filename>.sub</filename>) pliku wyjściowego opcją
-<option>-vobsubout</option> oraz indeks dla tego pliku opcją <option>-vobsuboutindex</option>.
+<filename>.sub</filename>) pliku wyjściowego opcją <option>-vobsubout</option>
+oraz indeks dla tego pliku opcją <option>-vobsuboutindex</option>.
 </para>
 
 <para>
@@ -673,17 +681,18 @@ wskazać plik <filename>.ifo</filename> potrzebny do stworzenia pliku wynikowego
 </para>
 
 <para>
-Jeżeli źródłem nie jest DVD i nie masz pliku <filename>.ifo</filename>, będziesz musiał użyć opcji
-<option>-vobsubid</option>, aby podać id języka, które będzie umieszczone w pliku
-<filename>.idx</filename>.
+Jeżeli źródłem nie jest DVD i nie masz pliku <filename>.ifo</filename>,
+będziesz musiał użyć opcji <option>-vobsubid</option>, aby podać id języka,
+które będzie umieszczone w pliku <filename>.idx</filename>.
 </para>
 
 <para>
-Każde uruchomienie dołączy do istniejących napisów, jeżeli pliki <filename>.idx</filename>
-i <filename>.sub</filename> istnieją. Więc powinieneś je usunąć przed uruchomieniem.
+Każde uruchomienie dołączy do istniejących napisów, jeżeli pliki
+<filename>.idx</filename> i <filename>.sub</filename> istnieją.
+Powinieneś więc usunąć je przed uruchomieniem.
 </para>
 
-<example>
+<example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
 <title>Kopiowanie dwóch napisów z DVD podczas dwu-przebiegowego kodowania</title>
 <screen>
 rm <replaceable>napisy.idx</replaceable> <replaceable>napisy.sub</replaceable>
@@ -694,7 +703,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 --></screen>
 </example>
 
-<example>
+<example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Kopiowanie francuskich napisów z pliku MPEG</title>
 <screen>
 rm <replaceable>napisy.idx</replaceable> <replaceable>napisy.sub</replaceable>
@@ -710,29 +719,32 @@ mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replace
 
 <sect1 id="aspect">
 <title>Utrzymywanie proporcji obrazu (aspect ratio)</title>
+
 <para>
 Pliki DVD i SVCD (tzn. MPEG-1/2) zawierają informacje o proporcji obrazu, która
-opisuje, jak odtwarzacz ma skalować strumień video, żeby ludzie nie byli jajogłowi
-(np.: 480x480 + 4:3 = 640x480).
-Jednak przy kodowaniu plików AVI (DivX) musisz być świadom, że nagłówek AVI nie przechowuje
-tej wartości. Przeskalowywanie jest obrzydliwe i czasochłonne, musi być jakiś lepszy sposób!
+opisuje, jak odtwarzacz ma skalować strumień video, żeby ludzie nie byli
+jajogłowi (np.: 480x480 + 4:3 = 640x480).
+Jednak przy kodowaniu plików AVI (DivX) musisz być świadom, że nagłówek AVI nie
+przechowuje tej wartości.
+Przeskalowywanie jest obrzydliwe i czasochłonne, musi być jakiś lepszy sposób!
 </para>
 
 <para>Jest</para>
 
 <para>
-MPEG-4 posiada unikalną cechę: strumień video może posiadać swoją wartość proporcji obrazu.
-Tak, dokładnie jak pliki MPEG-1/2 (DVD, SVCD) i H.263. Niestety, istnieje tylko kilka
-odtwarzaczy wideo, pomijając <application>MPlayera</application>, które
-obsługują tą cechę MPEG-4.
+MPEG-4 posiada unikalną cechę: strumień video może posiadać swoją wartość
+proporcji obrazu.  Tak, dokładnie jak pliki MPEG-1/2 (DVD, SVCD) i H.263.
+Niestety, istnieje tylko kilka odtwarzaczy video, pomijając
+<application>MPlayera</application>, które obsługują tę cechę MPEG-4.
 </para>
 
 <para>
 Możliwość ta może być jedynie używana z kodekiem <systemitem>mpeg4</systemitem>
-z biblioteki <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
-Pamiętaj: chociaż <application>MPlayer</application>
-poprawnie odtworzy stworzone pliki, inne odtwarzacze
-mogą użyć złych proporcji obrazu (aspect ratio).
+z biblioteki
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
+Pamiętaj: chociaż <application>MPlayer</application> poprawnie odtworzy
+stworzone pliki, inne odtwarzacze mogą użyć złych proporcji obrazu
+(aspect ratio).
 </para>
 
 <para>
@@ -743,8 +755,10 @@ i <systemitem>crop</systemitem> na stronie man.
 
 <para>
 Sposób użycia:
-<screen>mencoder <replaceable>przykładowy-svcd.mpg</replaceable> -vf crop=714:548:0:14 -oac copy -ovc lavc \
-    -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -o <replaceable>wyjście.avi</replaceable></screen>
+<screen>
+mencoder <replaceable>przykładowy-svcd.mpg</replaceable> -vf crop=714:548:0:14 -oac copy -ovc lavc \
+    -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -o <replaceable>wyjście.avi</replaceable>
+</screen>
 </para>
 </sect1>
 

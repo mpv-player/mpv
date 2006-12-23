@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21748 -->
 <chapter id="radio">
 <title>Radio</title>
 
@@ -12,6 +12,7 @@ radiowego kompatybilnego z V4L. Opis opcji i sterowania klawiaturą znajduje si�
 na stronie man.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="radio-compilation">
 <title>Kompilacja</title>
@@ -22,95 +23,86 @@ na stronie man.
   <filename>./configure</filename> z opcją <option>--enable-radio</option>
   i (jeśli chcesz móc przechwytywać radio)
   <option>--enable-radio-capture</option>.
-  </para></step>
+</para></step>
 <step><para>
   Upewnij się że Twój tuner działa z innym oprogramowaniem do radia w Linuksie,
   na przykład z <application>XawTV</application>.
-  </para></step>
+</para></step>
 </procedure>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="radio-tips">
 <title>Rady przy stosowaniu</title>
+
 <para>
 Pełna lista opcji jest dostępna na stronie man.
 Tu jest tylko kilka porad:
-</para>
+
 <itemizedlist>
-<listitem>
-<para>
-Używaj opcji <option>channels</option>. Na przykład:
-<screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
-Wyjaśnienie: Przy użyciu tej opcji dostępne będą tylko stacje na
-częstotliwościach 104.4 i 103.9. Przy przełączaniu kanału OSD będzie
-wyświetlać nazwę kanału. Spacje w nazwie kanału muszą zostać zastąpione przez
-znak &quot;_&quot;.
-</para>
-</listitem>
-
-<listitem>
-<para>
-Jest kilka metod przechwytywania audio. Możesz przechwytywać dźwięk albo
-korzystając ze swojej karty dźwiękowej i zewnętrznego kabelka łączącego kartę
-video z wejściem dźwięku, albo używając wbudowanego w chip saa7134 konwertera
-ADC. W tym drugim przypadku, musisz załadować sterownik
-<systemitem>saa7134-alsa</systemitem> lub <systemitem>saa7134-oss</systemitem>.
-</para>
-</listitem>
-
-<listitem>
-<para>
-Do przechwytywania dźwięku nie można użyć <application>MEncodera</application>,
-ponieważ wymaga on do działania strumienia video. Możesz więc albo użyć
-<application>arecord</application> z projektu ALSA albo opcji
-<option>-ao pcm:file=file.wav</option>. W tym drugim przypadku nie będziesz
-słyszał dźwięku (chyba że masz kabelek do line-in i wyłączyłeś jego wyciszenie).
-</para>
-</listitem>
+<listitem><para>
+  Używaj opcji <option>channels</option>. Na przykład:
+  <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
+  Wyjaśnienie: Przy użyciu tej opcji dostępne będą tylko stacje na
+  częstotliwościach 104.4 i 103.9. Przy przełączaniu kanału OSD będzie
+  wyświetlać nazwę kanału. Spacje w nazwie kanału muszą zostać zastąpione przez
+  znak "_".
+</para></listitem>
+<listitem><para>
+  Jest kilka metod przechwytywania audio. Możesz przechwytywać dźwięk albo
+  korzystając ze swojej karty dźwiękowej i zewnętrznego kabelka łączącego kartę
+  video z wejściem dźwięku, albo używając wbudowanego w chip saa7134 konwertera
+  ADC. W tym drugim przypadku, musisz załadować sterownik
+  <systemitem>saa7134-alsa</systemitem> lub <systemitem>saa7134-oss</systemitem>.
+</para></listitem>
+<listitem><para>
+  Do przechwytywania dźwięku nie można użyć
+  <application>MEncodera</application>, ponieważ wymaga on do działania
+  strumienia video. Możesz więc albo użyć <application>arecord</application>
+  z projektu ALSA albo opcji <option>-ao pcm:file=file.wav</option>.
+  W tym drugim przypadku nie będziesz słyszał dźwięku
+  (chyba że masz kabelek do line-in i wyłączyłeś jego wyciszenie).
+</para></listitem>
 </itemizedlist>
+</para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="radio-examples">
 <title>Przykłady</title>
 
-
-<informalexample>
-<para>
+<informalexample><para>
 Wejście ze standardowego V4L (przy użyciu kabelka line-in, bez przechwytywania):
 <screen>
 mplayer radio://104.4
 </screen>
-</para>
-</informalexample>
+</para></informalexample>
 
-<informalexample>
-<para>
+<informalexample><para>
 Wejście ze standardowego V4L (przy użyciu kabelka line-in, bez przechwytywania,
 interface V4Lv1):
 <screen>
 mplayer -radio driver=v4l radio://104.4
 </screen>
-</para>
-</informalexample>
+</para></informalexample>
 
-<informalexample>
-<para>
+<informalexample><para>
 Odtwarzanie drugiego kanału z listy:
 <screen>
 mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
 </screen>
-</para>
-</informalexample>
+</para></informalexample>
 
-<informalexample>
-<para>
+<informalexample><para>
 Przesyłanie dźwięku szyną PCI z wewnętrznego konwertera ADC na karcie radiowej.
 W tym przykładzie tuner jest używany jako druga karta dźwiękowa (urządzenia alsa
 hw:1,0). Dla kart opartych na saa7134 musi być załadowany moduł saa7134-alsa
 lub saa7134-oss.
 <screen>
-mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture
+mplayer -rawaudio rate=32000 radio://2/capture \
+  -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm
 </screen>
 <note><para>Jeśli używasz nazw urządzeń ALSA dwukropki muszą być zastąpione
 znakami równości a przecinki kropkami.
