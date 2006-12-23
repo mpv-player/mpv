@@ -389,7 +389,9 @@ access any menu items!
 Are you using FVWM? Try the following:
 <orderedlist>
 <listitem><para>
-  Start -> Settings -> Configuration -> Base Configuration
+  <menuchoice><guimenu>Start</guimenu><guisubmenu>Settings</guisubmenu>
+    <guisubmenu>Configuration</guisubmenu>
+    <guimenuitem>Base Configuration</guimenuitem></menuchoice>
 </para></listitem>
 <listitem><para>
   Set <systemitem>Use Applications position hints</systemitem>

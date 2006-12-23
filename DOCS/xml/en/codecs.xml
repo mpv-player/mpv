@@ -635,7 +635,9 @@ Using <application>Microsoft GraphEdit</application> (fast)
   Start <command>graphedit.exe</command>.
 </para></step>
 <step><para>
-  From the menu select Graph -> Insert Filters.
+  From the menu select
+  <menuchoice><guimenu>Graph</guimenu>
+  <guisubmenu>Insert Filters</guisubmenu></menuchoice>.
 </para></step>
 <step><para>
   Expand item <systemitem>DirectShow Filters</systemitem>.
@@ -681,8 +683,8 @@ Take a deep breath and start searching the registry...
   Now that you have the file, we need the GUID. Try searching again, but
   now search for the codec's name, not the fourcc. Its name can be acquired
   when Media Player is playing the file, by checking
-  <guimenu>File</guimenu> -&gt; <guisubmenu>Properties</guisubmenu> -&gt;
-  <guimenuitem>Advanced</guimenuitem>.
+  <menuchoice><guimenu>File</guimenu> <guisubmenu>Properties</guisubmenu>
+  <guimenuitem>Advanced</guimenuitem></menuchoice>.
   If not, you are out of luck. Try guessing (e.g. search for TrueMotion).
 </para></step>
 <step><para>
