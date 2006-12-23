@@ -671,9 +671,9 @@ Take a deep breath and start searching the registry...
   Start <command>regedit</command>.
 </para></step>
 <step><para>
-  Press <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>, disable the first two
-  checkboxes, and enable the third. Type in the fourcc of the codec (e.g.
-  <userinput>TM20</userinput>).
+  Press <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>, disable
+  the first two checkboxes, and enable the third. Type in the fourcc of the
+  codec (e.g. <userinput>TM20</userinput>).
 </para></step>
 <step><para>
   You should see a field which contains the path and the filename (e.g.

@@ -39,7 +39,6 @@ of TV options and keyboard controls.
 <para>
 The full listing of the options is available on the manual page.
 Here are just a few tips:
-</para>
 
 <itemizedlist>
 <listitem><para>
@@ -133,6 +132,7 @@ Here are just a few tips:
   check the "full duplex" option in the sound server preference menu.
 </para></listitem>
 </itemizedlist>
+</para>
 </sect2>
 
 <!-- ********** -->

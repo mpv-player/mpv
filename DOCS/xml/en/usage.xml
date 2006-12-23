@@ -105,9 +105,6 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
 <sect1 id="subosd">
 <title>Subtitles and OSD</title>
 
@@ -232,9 +229,6 @@ mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <
 About DVD subtitles, read the <link linkend="dvd">DVD</link> section.
 </para>
 </sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -371,7 +365,6 @@ The commands are documented in the
 </sect2>
 </sect1>
 
-<!-- ********** -->
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
@@ -388,20 +381,26 @@ HTTP, FTP, MMS or RTSP/RTP protocol.
 Playing works simply by passing the URL on the command line.
 <application>MPlayer</application> honors the <envar>http_proxy</envar>
 environment variable, using a proxy if available. Proxies can also be forced:
-<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
+<screen>
+mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable>
+</screen>
 </para>
 
 <para>
 <application>MPlayer</application> can read from stdin
 (<emphasis>not</emphasis> named pipes). This can for example be used to
 play from FTP:
-<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -</screen>
+<screen>
+wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -
+</screen>
 </para>
 
 <note><para>
 It is also recommended to enable <option>-cache</option> when playing
 from the network:
-<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
+<screen>
+wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -
+</screen>
 </para></note>
 
 <!-- ********** -->
@@ -426,7 +425,6 @@ This works with all protocols supported by
 </sect2>
 </sect1>
 
-<!-- ********** -->
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
@@ -636,7 +634,7 @@ your equipment supports.
 
 <itemizedlist>
 <title>To enable passthrough in the <application>MPlayer</application>
-configuration file: </title>
+  configuration file: </title>
 <listitem><para>
   For AC3 only, use <option>ac=hwac3,</option>
 </para></listitem>
@@ -652,9 +650,10 @@ configuration file: </title>
 Note that there is a comma (",") at the end of
 <option>ac=hwac3,</option> and <option>ac=hwdts,</option>. This will make
 <application>MPlayer</application> fall back on the codecs it normally uses when
-playing a file that does not have AC3 or DTS audio. <option>afm=hwac3</option>
-does not need a comma; <application>MPlayer</application> will fall back anyway
-when an audio family is specified.
+playing a file that does not have AC3 or DTS audio.
+<option>afm=hwac3</option> does not need a comma;
+<application>MPlayer</application> will fall back anyway when an audio family
+is specified.
 </para>
 </sect3>
 
@@ -893,7 +892,7 @@ channel 2 --> channel 2<!--
   Write out the channel copies as pairs of suboptions. Note that the first
   channel is 0, the second is 1, etc. The order of these suboptions does not
   matter as long as they are properly grouped into
-<replaceable>source:destination</replaceable> pairs.
+  <replaceable>source:destination</replaceable> pairs.
 </para></listitem>
 </orderedlist>
 </para>

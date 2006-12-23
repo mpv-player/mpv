@@ -45,8 +45,7 @@ Audio Codecs:
 </row>
 <row>
   <entry>lavc</entry>
-  <entry>use one of <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem>'s audio codecs</link>
-  </entry>
+  <entry>use one of <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem>'s audio codecs</link></entry>
 </row>
 <row>
   <entry>faac</entry>
@@ -83,8 +82,7 @@ Video codecs:
 <tbody>
 <row>
   <entry>lavc</entry>
-  <entry>use one of <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem>'s video codecs</link>
-  </entry>
+  <entry>use one of <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem>'s video codecs</link></entry>
 </row>
 <row>
   <entry>xvid</entry>
@@ -413,6 +411,7 @@ Note that you can set the title of the video with
 
 <sect1 id="menc-feat-mpeg">
 <title>Encoding to MPEG format</title>
+
 <para>
 <application>MEncoder</application> can create MPEG (MPEG-PS) format output
 files.
@@ -731,6 +730,7 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 
 <sect1 id="aspect">
 <title>Preserving aspect ratio</title>
+
 <para>
 DVDs and SVCDs (i.e. MPEG-1/2) files contain an aspect ratio value, which
 describes how the player should scale the video stream, so humans will not
