@@ -187,22 +187,22 @@ tudod megadni (teljes elérési út is megadható).
 <title>Felirat időzítés és pozícionálás beállítása:</title>
 <varlistentry>
   <term><option>-subdelay <replaceable>mp</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Késlelteti a feliratot <option><replaceable>mp</replaceable></option> másodperccel.
     Lehet negatív is. Az érték a film időpozíciójának számlálójához adódik hozzá.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>RÁTA</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Megadhatod a felirat fájl képkocka/mp rátáját (lebegőpontos szám).
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     A felirat pozícióját adhatod meg.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -744,48 +744,48 @@ neki. A csatornák számozása 0-tól indul.
 
 <orderedlist spacing="compact">
 <title>mono</title>
-<listitem override="0"><simpara>középső</simpara></listitem>
+<listitem override="0"><para>középső</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>sztereó</title>
-<listitem override="0"><simpara>bal</simpara></listitem>
-<listitem><simpara>jobb</simpara></listitem>
+<listitem override="0"><para>bal</para></listitem>
+<listitem><para>jobb</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>kvadrafónikus</title>
-<listitem override="0"><simpara>bal első</simpara></listitem>
-<listitem><simpara>jobb első</simpara></listitem>
-<listitem><simpara>bal hátsó</simpara></listitem>
-<listitem><simpara>jobb hátsó</simpara></listitem>
+<listitem override="0"><para>bal első</para></listitem>
+<listitem><para>jobb első</para></listitem>
+<listitem><para>bal hátsó</para></listitem>
+<listitem><para>jobb hátsó</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 4.0</title>
-<listitem override="0"><simpara>bal első</simpara></listitem>
-<listitem><simpara>jobb első</simpara></listitem>
-<listitem><simpara>közép hátsó</simpara></listitem>
-<listitem><simpara>közép első</simpara></listitem>
+<listitem override="0"><para>bal első</para></listitem>
+<listitem><para>jobb első</para></listitem>
+<listitem><para>közép hátsó</para></listitem>
+<listitem><para>közép első</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.0</title>
-<listitem override="0"><simpara>bal első</simpara></listitem>
-<listitem><simpara>jobb első</simpara></listitem>
-<listitem><simpara>bal hátsó</simpara></listitem>
-<listitem><simpara>jobb hátsó</simpara></listitem>
-<listitem><simpara>közép első</simpara></listitem>
+<listitem override="0"><para>bal első</para></listitem>
+<listitem><para>jobb első</para></listitem>
+<listitem><para>bal hátsó</para></listitem>
+<listitem><para>jobb hátsó</para></listitem>
+<listitem><para>közép első</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.1</title>
-<listitem override="0"><simpara>bal első</simpara></listitem>
-<listitem><simpara>jobb első</simpara></listitem>
-<listitem><simpara>bal hátsó</simpara></listitem>
-<listitem><simpara>jobb hátsó</simpara></listitem>
-<listitem><simpara>közép első</simpara></listitem>
-<listitem><simpara>mélynyomó</simpara></listitem>
+<listitem override="0"><para>bal első</para></listitem>
+<listitem><para>jobb első</para></listitem>
+<listitem><para>bal hátsó</para></listitem>
+<listitem><para>jobb hátsó</para></listitem>
+<listitem><para>közép első</para></listitem>
+<listitem><para>mélynyomó</para></listitem>
 </orderedlist>
 
 </para>
@@ -1082,31 +1082,31 @@ A <option>pan</option> csak öt csatornára küld kimenetet, az első alopció 5
 <listitem><para>
 Hat bemeneti csatorna van és öt kimeneti csatorna, ez hat részt jelent öt alopcióval.
   <itemizedlist spacing="compact">
-  <listitem><simpara>
+  <listitem><para>
   A bal első csatornát csak saját magára kell ismételni:
   "1:0:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Ugyan ez a jobb első csatornára:
   "0:1:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Ugyan ez a bal hátsó csatornára:
   "0:0:1:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   És a jobb hátsó csatornára:
   "0:0:0:1:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Közép első szintén:
   "0:0:0:0:1"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   És most kell eldöntenünk, hogy mit csináljunk a mélynyomóval, pl.
   felezve a jobb elsőre és a bal elsőre:
   "0.5:0.5:0:0:0"
-  </simpara></listitem>
+  </para></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>

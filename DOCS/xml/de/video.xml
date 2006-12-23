@@ -617,40 +617,40 @@ EndSection
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   Bei der Kombination aus XFree 4.0.3 und dem
   <filename>nv.o</filename>-Treiber gibt es einen Fehler, der zu
   merkwürdigen Farben führt.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Die ATI-Treiber müssen den Videomodus mehrmals zurückstellen,
   nachdem der DGA-Modus verlassen wurde.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Einige Treiber schaffen es manchmal einfach nicht, in die vorherige
   Auflösung zurückzuschalten. Benutze in solch einem Fall
   <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> und
   <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>,
   um manuell die Auflösung zu ändern.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Einige Treiber zeigen einfach nur merkwürdige Farben an.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Manche Treiber lügen, was die von ihnen in den Prozessorspeicher
   eingeblendete Menge Grafikspeicher anbelangt, weswegen vo_dga
   nicht die Doppelpufferung verwendet (SIS?).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Einige Treiber schaffen es nicht einmal, auch nur einen einzigen
   gültigen Grafikmodus bereitzustellen. In solchen Fällen
   gibt der DGA-Treiber schwachsinnige Modi wie z.B. 100000x100000 oder
   so ähnlich aus.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Das OSD funktioniert nur, wenn auch die Doppelpufferung aktiviert
   ist (sonst flimmert es).
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 </sect2>
@@ -731,12 +731,12 @@ EndSection
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   EGA-Karte mit EGA-Monitor: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   EGA-Karte mit CGA-Monitor: 320x200x4bpp, 640x200x4bpp
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -805,30 +805,30 @@ EndSection
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Gibt das zu verwendende Framebuffergerät an (Standard: <filename>/dev/fb0</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Gibt zu benutzenden Modusnamen an (wie sie in <filename>/etc/fb.modes</filename> stehen)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Konfigurationsdatei für die Modi (Standard: <filename>/etc/fb.modes</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
-  <listitem><simpara>
+  <listitem><para>
   <emphasis role="bold">Wichtige</emphasis> Werte, schau dir die
   <filename>example.conf</filename> an.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1086,27 +1086,27 @@ make<!--
   Hier sind die wichtigsten:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Wählt den empfohlenen aa-Treiber (X11, curses, Linux).
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Benutze alle 256 Zeichen.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Benutze 8 Bit ASCII-Zeichen.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Gib alle aalib-Optionen aus.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1162,20 +1162,20 @@ make<!--
 <itemizedlist>
 <title>Die Unterschiede zu <systemitem class="library">AAlib</systemitem> sind
   folgende:</title>
-<listitem><simpara>
+<listitem><para>
   16 verfügbare Farben für die Zeichenausgabe (256 Farbpaare)
- </simpara></listitem>
-<listitem><simpara>
+ </para></listitem>
+<listitem><para>
   Farbbild-Dithering
- </simpara></listitem>
+ </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Aber <systemitem class="library">libcaca</systemitem> hat auch folgende
   Einschränkungen:</title>
-<listitem><simpara>
+<listitem><para>
    keine Unterstützung für Helligkeit, Kontrast, Gamma
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -1210,21 +1210,21 @@ make<!--
   bestimmten Umgebungsvariablen:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Setze den empfohlenen caca-Treiber. z.B. ncurses, slang, x11.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (nur bei X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Spezifiziere die Anzahl der Spalten und Zeilen, z.B. 128x50.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (nur bei X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
   Legt die zu verwendende Schrift fest, z.B. fixed, nexus.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1277,32 +1277,32 @@ make<!--
 
 <itemizedlist spacing="compact">
 <title>VORTEILE</title>
-<listitem><simpara>
+<listitem><para>
   Du hast die Möglichkeit, selbst dann Filme anzusehen, wenn
   <emphasis role="bold">Linux nichts von deiner Grafikhardware weiß</emphasis>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Du musst keine einzige Grafikanwendung installiert haben (wie
   X11/XFree86, fbdev usw.). Dieser Treiber wird im
   <emphasis role="bold">Textmodus</emphasis>
   benutzt.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Die Chancen stehen gut, dass der <emphasis role="bold">TV-Ausgang funktioniert</emphasis>.
   (Es läuft nachweislich zumindest auf ATI-Karten.)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Dieser Treiber ruft die <function>int 10h</function>-Routine wirklich auf und ist
   dementsprechend kein Emulator - er ruft <emphasis role="bold">echte</emphasis>
   Funktionen des <emphasis>echten</emphasis> BIOS im <emphasis>Real</emphasis>-Modus
   auf (bzw. im vm68-Modus).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Du kannst den Treiber zusammen mit VIDIX verwenden und erhältst
   dadurch gleichzeitig eine hardwarebeschleunigte Grafikanzeige
   <emphasis role="bold">und</emphasis> den TV-Ausgang! (für ATI-Karten empfohlen)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Wenn du ein VESA-VBE-3.0+-BIOS hast und irgendwo die Optionen
   <option>monitor-hfreq</option>, <option>monitor-vfreq</option>,
   <option>monitor-dotclock</option> angegeben werden (Kommandozeile,
@@ -1310,20 +1310,20 @@ make<!--
   Bildwiederholrate (mit den generischen Timingformeln). Um dieses Feature
   zu aktivieren, müssen <emphasis role="bold">alle</emphasis>
   Monitoroptionen angegeben werden.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
 <title>NACHTEILE</title>
-<listitem><simpara>
+<listitem><para>
   Der Treiber funtkioniert nur auf <emphasis role="bold">x86-Systemen</emphasis>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Er kann nur von <systemitem class="username">root</systemitem> benutzt werden.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Momentan ist er nur für <emphasis role="bold">Linux</emphasis> verfügbar.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <important>
@@ -1337,19 +1337,19 @@ make<!--
 <title>BEI VESA VERFÜGBARE KOMMANDOZEILENOPTIONEN</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
   Momentan erkannt: <literal>dga</literal>, um den DGA-Modus zu erzwingen
   und <literal>nodga</literal>, um ihn zu deaktivieren. Im DGA-Modus kannst du den
   Doppelpuffermodus mit <option>-double</option> aktivieren. Anmerkung: Du
   kannst diese Parameter auch weglassen, um die <emphasis role="bold">automatische
   Erkennung</emphasis> des DGA-Modus zu ermöglichen.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
 <title>BEKANNTE PROBLEME UND WIE MAN SIE UMGEHT</title>
-<listitem><simpara>
+<listitem><para>
   Wenn du unter Linux eine <emphasis role="bold">NLS</emphasis>-Schrift
   verwendest und du den VESA-Treiber aus dem Textmodus heraus aufrufst,
   dann wird nach dem Beenden von <application>MPlayer</application> die
@@ -1358,26 +1358,26 @@ make<!--
   <command>setsysfont</command> laden, das z.B. bei Mandrake zur
   Distribution gehört. (<emphasis role="bold">Tip:</emphasis> Das
   gleiche Tool wird für die Lokalisation von fbdev verwendet.)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Manche <emphasis role="bold">Linux-Grafiktreiber</emphasis> aktualisieren
   nicht den aktiven <emphasis role="bold">BIOS-Modus</emphasis> im DOS-Speicher.
   Wenn du also so ein Problem hast, dann verwende den VESA-Treiber nur aus dem
   <emphasis role="bold">Textmodus</emphasis> heraus. Andernfalls
   wird immer der Textmodus (#03) aktiviert werden, und du wirst den
   Computer neustarten müssen.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Oftmals siehst du nur einen <emphasis role="bold">schwarzen Bildschirm</emphasis>,
   wenn der VESA-Treiber beendet wird. Um die Anzeige wieder in den richtigen Zustand
   zu versetzen, wechsele einfach zu einer anderen Console (mit
   <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>) und wieder zurück.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Um eine <emphasis role="bold">funktionierende TV-Ausgabe</emphasis> zu erhalten,
   musst du das TV-Kabel eingesteckt haben, bevor du deinen PC bootest, da das BIOS
   nur einmal während der POST-Phase initialisiert wird.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -1412,18 +1412,18 @@ make<!--
   in deine <filename>XF86Config</filename> ein.
 
 <itemizedlist spacing="compact">
-<listitem><simpara>
+<listitem><para>
   Wenn du XFree86 4.x.x hast, dann benutze die Option <option>-vm</option>.
   MPlayer wird dann die Auflösung in diejenige ändern,
   in die dein Film am besten hineinpasst. Wenn das nicht funktioniert:
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Unter XFree86 3.x.x musst du mit
   <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap>
   und
   <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   die Auflösung ändern.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -1464,7 +1464,7 @@ make<!--
 
 <itemizedlist spacing="compact">
 <title>VERWENDUNG</title>
-<listitem><simpara>
+<listitem><para>
   Du kannst den eigenständigen Videotreiber benutzen:
   <option>-vo vidix</option>
   Dieser Treiber wurde als das X11-Frontend für die VIDIX-Technologie
@@ -1478,8 +1478,8 @@ make<!--
   Grafikspeicher minus 4MB eintragen. Wenn du über weniger als 8MB
   Grafikspeicher verfügst, dann solltest du stattdessen die Option
   &quot;XaaNoPixmapCache&quot; in der &quot;screen&quot;-Sektion verwenden.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Es gibt einen VIDIX-Treiber für die Konsole: <option>-vo cvidix</option>.
   Dieser benötigt für die meisten Karten einen funktionierenden und
   initialisierten Framebuffer (oder du wirst stattdessen den Bildschirm
@@ -1491,21 +1491,21 @@ make<!--
   dazu finden.
   Um Text an den Rändern und den blinkenden Cursor loszuwerden,
   probiere etwas wie den folgenden Befehl:
-</simpara>
+</para>
 <screen>setterm -cursor off > /dev/tty9</screen>
-<simpara>
+<para>
   (welcher davon ausgeht, dass <systemitem>tty9</systemitem> bis dahin ungenutzt ist).
   Wechsle dann zu <systemitem>tty9</systemitem>.
   Andererseits sollte dir <option>-colorkey 0</option> ein Video liefern, das
   im "Hintergrund" läuft; das hängt jedoch davon ab, dass die colorkey-Funktionalität
   korrekt funktioniert.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Du kannst auch das VIDIX-Untergerät verwenden, das bei vielen
   Treibern zur Verfügung steht:
   <option>-vo vesa:vidix</option> (<emphasis role="bold">nur unter Linux</emphasis>)
   und <option>-vo fbdev:vidix</option>
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -1515,15 +1515,15 @@ make<!--
 
 <itemizedlist spacing="compact">
 <title>ANFORDERUNGEN</title>
-<listitem><simpara>
+<listitem><para>
   Die Grafikkarte sollte sich gerade im Grafikmodus befinden (ausser
   nVidia-Karten mit den <option>-vo cvidix</option> Ausgabe-Treibern).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <application>MPlayer</application>s Videoausgabetreiber sollte den
   aktiven Videomodus kennen und in der Lage sein, dem VIDIX-Untergerät
   ein paar Charakteristika des X-Servers mitzuteilen.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <formalpara>
@@ -2558,25 +2558,25 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>Dateiname</replaceabl
 
 <itemizedlist>
 <title>STATUS DER ATI-TV-AUSGABEUNTERSTÜTZUNG UNTER LINUX</title>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">ATI Mach64</emphasis>:
   Von <ulink url="http://gatos.sf.net">GATOS</ulink> unterstützt.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
   Von <ulink url="http://gatos.sf.net">GATOS</ulink> unterstützt.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Radeon</emphasis> und <emphasis role="bold">Rage128</emphasis>:
   Von <application>MPlayer</application> unterstützt!
   Lies die <link linkend="vesa">VESA-Treiber-</link> und
   <link linkend="vidix">VIDIX</link>-Sektionen.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
   Von <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>
   unterstützt.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -2662,31 +2662,31 @@ EndSection
   <keycap>Fn</keycap>+<keycap>F5</keycap>.
   Getestet auf einem Tecra 8000, 2.6.15 Kernel mit vesafb, ALSA v1.0.10.
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Chrontel 70xx Encoder-Chip</emphasis>:
   Zu finden im IBM Thinkpad 390E und möglicherweise anderen Thinkpads oder
   Notebooks.
-  </simpara><simpara>
+  </para><para>
   Du musst <option>-vo vesa:neotv_pal</option> für PAL oder
   <option>-vo vesa:neotv_ntsc</option> für NTSC verwenden.
   Es wird eine TV-Output-Funktion in folgenden 16bpp und 8bpp-Modi
   zur Verfügung stellen:
-  </simpara>
+  </para>
   <itemizedlist>
-    <listitem><simpara>NTSC 320x240, 640x480 und evtl. auch 800x600.</simpara></listitem>
-    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.</simpara></listitem>
+    <listitem><para>NTSC 320x240, 640x480 und evtl. auch 800x600.</para></listitem>
+    <listitem><para>PAL  320x240, 400x300, 640x480, 800x600.</para></listitem>
   </itemizedlist>
-  <simpara>Der Modus 512x384 wird im BIOS nicht unterstützt. Du musst das Bild
+  <para>Der Modus 512x384 wird im BIOS nicht unterstützt. Du musst das Bild
   auf eine andere Auflösung skalieren, um die TV-Ausgabe zu aktivieren.
   Wenn du auf dem Schirm ein Bild in 640x480 oder in 800x600 siehst, jedoch nicht
   in 320x240 oder einer kleineren Auflösung, musst du zwei Tabellen in
   <filename>vbelib.c</filename> ersetzen.
   Siehe Funktion vbeSetTV für Details. Bitte kontaktiere in diesem Fall den Autor.
-  </simpara>
-  <simpara>
+  </para>
+  <para>
   Bekanntes Problem: Nur VESA, keine weiteren Schalter wie Helligkeit, Kontrast,
   Blacklevel, Flimmerfilter sind implementiert.
-  </simpara>
+  </para>
 </listitem>
 </itemizedlist>
 </para>

@@ -187,23 +187,23 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
     <title>Untertitel-Timing und Platzierung angeben:</title>
     <varlistentry>
       <term><option>-subdelay <replaceable>sek</replaceable></option></term>
-      <listitem><simpara>
+      <listitem><para>
           Verzögert Untertitel um <option><replaceable>sek</replaceable></option>
           Sekunden. Kann negativ sein. Dieser Wert wird zum Zeitpositionszähler
           hinzuaddiert.
-        </simpara></listitem>
+        </para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>-subfps <replaceable>RATE</replaceable></option></term>
-      <listitem><simpara>
+      <listitem><para>
           Gibt die Frame/sek-Rate der Untertiteldatei (Fließkommazahl) an.
-        </simpara></listitem>
+        </para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-      <listitem><simpara>
+      <listitem><para>
           Gibt die Position der Untertitel an.
-        </simpara></listitem>
+        </para></listitem>
     </varlistentry>
   </variablelist>
   
@@ -734,48 +734,48 @@ end<!--
 				
 				<orderedlist spacing="compact">
 					<title>Mono</title>
-					<listitem override="0"><simpara>mittig</simpara></listitem>
+					<listitem override="0"><para>mittig</para></listitem>
 				</orderedlist>
 				
 				<orderedlist spacing="compact">
 					<title>Stereo</title>
-					<listitem override="0"><simpara>links</simpara></listitem>
-					<listitem><simpara>rechts</simpara></listitem>
+					<listitem override="0"><para>links</para></listitem>
+					<listitem><para>rechts</para></listitem>
 				</orderedlist>
 				
 				<orderedlist spacing="compact">
 					<title>Quadraphonisch</title>
-					<listitem override="0"><simpara>links vorne</simpara></listitem>
-					<listitem><simpara>rechts vorne</simpara></listitem>
-					<listitem><simpara>links hinten</simpara></listitem>
-					<listitem><simpara>rechts hinten</simpara></listitem>
+					<listitem override="0"><para>links vorne</para></listitem>
+					<listitem><para>rechts vorne</para></listitem>
+					<listitem><para>links hinten</para></listitem>
+					<listitem><para>rechts hinten</para></listitem>
 				</orderedlist>
 				
 				<orderedlist spacing="compact">
 					<title>Surround 4.0</title>
-					<listitem override="0"><simpara>links vorne</simpara></listitem>
-					<listitem><simpara>rechts vorne</simpara></listitem>
-					<listitem><simpara>mittig hinten</simpara></listitem>
-					<listitem><simpara>mittig vorne</simpara></listitem>
+					<listitem override="0"><para>links vorne</para></listitem>
+					<listitem><para>rechts vorne</para></listitem>
+					<listitem><para>mittig hinten</para></listitem>
+					<listitem><para>mittig vorne</para></listitem>
 				</orderedlist>
 				
 				<orderedlist spacing="compact">
 					<title>Surround 5.0</title>
-					<listitem override="0"><simpara>links vorne</simpara></listitem>
-					<listitem><simpara>rechts vorne</simpara></listitem>
-					<listitem><simpara>links hinten</simpara></listitem>
-					<listitem><simpara>rechts hinten</simpara></listitem>
-					<listitem><simpara>mittig vorne</simpara></listitem>
+					<listitem override="0"><para>links vorne</para></listitem>
+					<listitem><para>rechts vorne</para></listitem>
+					<listitem><para>links hinten</para></listitem>
+					<listitem><para>rechts hinten</para></listitem>
+					<listitem><para>mittig vorne</para></listitem>
 				</orderedlist>
 				
 				<orderedlist spacing="compact">
 					<title>Surround 5.1</title>
-					<listitem override="0"><simpara>links vorne</simpara></listitem>
-					<listitem><simpara>rechts vorne</simpara></listitem>
-					<listitem><simpara>links hinten</simpara></listitem>
-					<listitem><simpara>rechts hinten</simpara></listitem>
-					<listitem><simpara>mittig vorne</simpara></listitem>
-					<listitem><simpara>Subwoofer</simpara></listitem>
+					<listitem override="0"><para>links vorne</para></listitem>
+					<listitem><para>rechts vorne</para></listitem>
+					<listitem><para>links hinten</para></listitem>
+					<listitem><para>rechts hinten</para></listitem>
+					<listitem><para>mittig vorne</para></listitem>
+					<listitem><para>Subwoofer</para></listitem>
 				</orderedlist>
 				
 			</para>
@@ -1108,35 +1108,35 @@ channel 2 --> channel 2<!--
 							Sechs Eingabekanäle und fünf Ausgabekanäle bedeuten sechs Teile von fünf Suboptionen.
 							<itemizedlist spacing="compact">
 								<listitem>
-									<simpara>
+									<para>
 										Der linke vordere Kanal wird nur auf sich selbst repliziert: "1:0:0:0:0"
-									</simpara>
+									</para>
 								</listitem>
 								<listitem>
-									<simpara>
+									<para>
 										Das gleiche gilt für den rechten vorderen Kanal: "0:1:0:0:0"
-									</simpara>
+									</para>
 								</listitem>
 								<listitem>
-									<simpara>
+									<para>
 										Das gleiche gilt für den linken hinteren Kanal:	"0:0:1:0:0"
-									</simpara>
+									</para>
 								</listitem>
 								<listitem>
-									<simpara>
+									<para>
 										Und das gleiche auch für den rechten hinteren Kanal: "0:0:0:1:0"
-									</simpara>
+									</para>
 								</listitem>
 								<listitem>
-									<simpara>
+									<para>
 										Vordere Mitte auch: "0:0:0:0:1"
-									</simpara>
+									</para>
 								</listitem>
 								<listitem>
-									<simpara>
+									<para>
 										Jetzt müssen wir entscheiden, was mit dem Subwoofer geschieht, zum Beispiel
 										eine Hälfte jeweils nach vorne rechts und vorne links: "0.5:0.5:0:0:0"
-									</simpara>
+									</para>
 								</listitem>
 							</itemizedlist>
 						</para>

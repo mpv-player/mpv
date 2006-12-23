@@ -320,40 +320,40 @@ extension and have it in the same directory as the video file.
 OSD Menu interface.
 </para>
 
-<note><simpara>
+<note><para>
 the Preferences menu is currently UNIMPLEMENTED!
-</simpara></note>
+</para></note>
 
 <orderedlist>
 <title>Installation</title>
-<listitem><simpara>
+<listitem><para>
   compile <application>MPlayer</application> by passing the
   <option>--enable-menu</option> to <filename>./configure</filename>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   make sure you have an OSD font installed
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   copy <filename>etc/menu.conf</filename> to your
   <filename class="directory">.mplayer</filename> directory
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   copy <filename>etc/input.conf</filename> to your
   <filename class="directory">.mplayer</filename> directory, or to the
   system-wide <application>MPlayer</application> config dir (default:
   <filename class="directory">/usr/local/etc/mplayer</filename>)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   check and edit <filename>input.conf</filename> to enable menu movement keys
   (it is described there).
-</simpara></listitem>
+</para></listitem>
 <listitem><para>
   start <application>MPlayer</application> by the following example:
   <screen>mplayer -menu <replaceable>file.avi</replaceable></screen>
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   push any menu key you defined
-</simpara></listitem>
+</para></listitem>
 </orderedlist>
 </sect2>
 </sect1>

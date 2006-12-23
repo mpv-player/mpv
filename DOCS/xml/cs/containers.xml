@@ -43,33 +43,33 @@ MPEG soubory se vyskytují v různých obálkách:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   MPG: Toto je <emphasis role="bold">nejjednodušší</emphasis> forma souborových
   formátů MPEG. Obsahuje MPEG-1 video a MP2 (MPEG-1 layer 2) nebo méně často
   MP1 audio.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   DAT: Toto je naprosto stejný formát jako MPG, jen s jinou příponou. Používá se
   na <emphasis role="bold">Video CD</emphasis>. Díky způsobu, jak jsou VCD
 	vytvářeny a Linux navržen, nemohou být DAT soubory přehrávány nebo kopírovány
 	z VCD jako běžné soubory. Musíte použít <option>vcd://</option>
   pro přehrávání Video CD.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VOB: Toto je souborový formát MPEG na <emphasis role="bold">DVD</emphasis>.
   Je stejný jako MPG, plus schopnost obsahovat titulky nebo ne-MPEG
   (AC3) audio. Obsahuje video enkódované do MPEG-2 a obvykle AC3 audio, ale DTS,
   MP2 a nekomprimovaný LPCM jsou rovněž povoleny. <emphasis role="bold">Přečtěte
 	si <link linkend="dvd">DVD</link> sekci</emphasis>!
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   TY: Toto je TiVo MPEG datový proud. Obsahuje MPEG PES data pro audio a
   video datové proudy, spolu s dodatečnými informacemi jako closed captions.
 	Kontejner není produktem MPEG programu, ale je to uzavřený formát vytvořený
 	firmou TiVo. Více informací o TiVo proudovém formátu naleznete na
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   stránkách TyStudia</ulink>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -124,26 +124,26 @@ přehrávat, nebo surový DV proud, jehož podpora je ve vývoji.
 <para>
 Známe dva druhy AVI souborů:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Prokládaný:</emphasis> Audio a video obsah je proložený.
 	Toto je obvyklé použití. Doporučené a většinou používané. Některé nástroje
 	vytvářejí AVI se špatnou synchronizací. <application>MPlayer</application>
 	detekuje tyto soubory jako prokládané a to vyvrcholí ztrátou
 	A/V synchronizace, pravděpodobně při přetáčení. Tyto soubory by měly být
 	přehrávány jako neprokládané (s volbou <option>-ni</option>).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Neprokládané:</emphasis> Nejprve jde celý video proud,
 	pak celý audio proud. To vyžaduje mnoho hledání, což činí přehrávání ze sítě
 	nebo CD-ROM obtížným.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
 <para>
 <application>MPlayer</application> podporuje dva druhy časování pro AVI soubory:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">založený na bps:</emphasis> Vychází z bitové/vzorkové
 	rychlosti video/audio proudu. Tuto metodu používá většina přehrávačů,
 	včetně <ulink url="http://avifile.sf.net">avifile</ulink>
@@ -151,13 +151,13 @@ Známe dva druhy AVI souborů:
 	hlavičkami a soubory obsahující VBR audio nevytvořené VBR slučitelným
 	enkodérem vyústí v rozejití zvuku a videa při použití této metody
 	(zpravidla při převíjení).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">založený na prokládání:</emphasis> Nepoužívá hodnotu
 	bitové rychlosti z hlavičky, místo toho využívá relativní pozici prokládaných
 	audio a video chunků, což umožňuje přehrávat špatně enkódované soubory s VBR
 	zvukem.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 

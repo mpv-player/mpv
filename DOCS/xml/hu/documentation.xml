@@ -110,63 +110,63 @@ alkotó codec-ekkel, audiót tekintve pedig
 
 <itemizedlist>
 <title>Az <application>MEncoder</application> előnyei</title>
-<listitem><simpara>
+<listitem><para>
   Az <application>MPlayer</application> által támogatott összes formátumból lehet
   kódolni
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Az FFmpeg <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   által támogatott összes formátumba tud tömöríteni
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Videó grabbelés <emphasis role="bold">V4L kompatibilis TV tunerekről</emphasis>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Helyes index-szel rendelkező AVI fájlok kódolása/multiplexelése
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Opcionálisan külső audio stream használata
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   1, 2 vagy 3 menetes kódolás
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 audió
-  <important><simpara>
+  <important><para>
   a VBR-es MP3-akat nem minden Windows rendszerre elérhető lejátszó kezeli helyesen!
-  </simpara></important>
+  </para></important>
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   PCM audió
-3  </simpara></listitem>
-<listitem><simpara>
+3  </para></listitem>
+<listitem><para>
   Stream másolás
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Bemeneti file A/V szinkronizálása (PTS-alapú, az <option>-mc 0</option> opcióval kikapcsolható)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   fps javítás az <option>-ofps</option> opcióval (hasznos ha 30000/1001 fps-es
   VOB-ot kódolsz 24000/1001 fps-es AVI-ba)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Roppant jó szűrő rendszer használata (crop, expand, flip, postprocess, rotate, scale,
   RGB/YUV konverzió)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   A kimeneti fájlba bele tudja kódolni mind a DVD/VOBsub, mind a szöveges feliratokat
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   DVD feliratok külső VOBsub fájlba történő rippelése
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Tervezett funkciók</title>
-<listitem><simpara>
+<listitem><para>
   Még szélesebb skálája a be- és kimeneti formátumoknak és a codec-eknek
   (VOB fájlok készítése DivX4/Indeo5/VIVO streammel :).
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->

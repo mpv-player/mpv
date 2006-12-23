@@ -114,67 +114,67 @@ oraz audio <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
 
 <itemizedlist>
 <title>Możliwości <application>MEncodera</application></title>
-<listitem><simpara>
+<listitem><para>
   Kodowanie z szerokiego zakresu formatów i dekoderów
   <application>MPlayer</application>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Kodowanie na wszystkie kodeki
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   z ffmpeg.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Kodowanie obrazu z <emphasis role="bold">tunerów kompatybilnych z V4L</emphasis>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Kodowanie/multipleksowanie przeplatanych zbiorów AVI z prawidłowymi
   indeksami
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Tworzenie zbiorów z zewnętrznego strumienia audio
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Kodowanie 1, 2 lub 3-przebiegowe
-</simpara></listitem>
+</para></listitem>
 <listitem><para>
   Dźwięk MP3 <emphasis role="bold">VBR</emphasis>
-  <important><simpara>
+  <important><para>
   Dźwięk MP3 VBR w odtwarzaczach pod Windows nie zawsze brzmi przyjemnie!
-  </simpara></important>
+  </para></important>
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   Dźwięk PCM
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Kopiowanie strumieniowe
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Synchronizacja wejścia A/V (oparta na PTS, może być wyłączona opcją
   <option>-mc 0</option>)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Korekta fps opcją <option>-ofps</option> (przydatne gdy kodujesz
   30000/1001 fps VOB na 24000/1001 fps AVI)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Możliwość zastosowania naszego potężnego systemu filtrów (kadrowanie,
   powiększanie, obracanie, postproces, skalowanie, konwersja rgb/yuv)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Możliwość wkodowania DVD/VOBsub <emphasis role="bold">ORAZ</emphasis> napisów
   w zbiór wyjściowy
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Możliwość zapisu napisów DVD do formatu VOBsub
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Planowane możliwości</title>
-<listitem><simpara>
+<listitem><para>
   Zwiększenie zakresu dostępnych formatów/kodeków do (de)kodowania
   (tworzenie zbiorów VOB ze strumieniami DivX4/Indeo5/VIVO :).
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->

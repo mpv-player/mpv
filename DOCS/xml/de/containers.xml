@@ -48,40 +48,40 @@
 
       <itemizedlist>
         <listitem>
-          <simpara>
+          <para>
             MPG: Dies ist die <emphasis role="bold">grundlegende</emphasis>
             Form des MPEG-Dateiformates.
             Es enthält MPEG1-Video und MP2-(MPEG-1 Layer 2) oder selten MP1-Audio.
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             DAT: Dies ist dasselbe Format wie MPG mit einer anderen
             Endung. Es wird auf <emphasis role="bold">Video-CD</emphasis>s benutzt.
             Auf Grund der Tatsache, wie VCDs erzeugt werden und wie Linux entworfen
             wurde, kann man die DAT-Dateien einer VCD weder abspielen noch kopieren.
             Du musst die Option <option>-vcd</option> zum Abspielen einer Video-CD
             verwenden.
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             VOB: VOB ist das MPEG-Dateiformat bei <emphasis role="bold">DVD</emphasis>s.
             Es ist das gleiche wie MPG mit zusätzlicher Unterstützung für Untertitel
             oder nicht-MPEG-(AC3)-Audio. Es enthält MPEG-2-Video und normalerweise
             AC3-Audio, aber auch DTS, MP2 und unkomprimierte LPCMs sind erlaubt.
             <emphasis role="bold">Lies die <link linkend="dvd">DVD-Sektion</link>!</emphasis>
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             TY: Dies ist ein TiVo MPEG-Stream. Er enthält gleichermaßen MPEG-PES-Daten
             für Audio- und Video-Streams wie auch extra Informationen wie geschlossene
             Titel. Der Container ist kein MPEG-Programmstream, sondern ein geschlossenes,
             von TiVo erzeugtes Format. Mehr Informationen zum TiVo-Streamformat
             findest Du auf der
             <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">TyStudio-Seite</ulink>.
-          </simpara>
+          </para>
         </listitem>
       </itemizedlist>
 
@@ -145,7 +145,7 @@
         Es gibt 2 Arten von AVI-Dateien:
         <itemizedlist>
           <listitem>
-            <simpara>
+            <para>
               <emphasis role="bold">Interleaved:</emphasis> Audio- und Videoinhalt
               werden paketweise ineinander geschachtelt. Die ist üblich, wird empfohlen
               und auch meist gemacht. Einige Tools erzeugen interleaved AVIs mit
@@ -154,15 +154,15 @@
               zum Verlust von A/V-Synchronisation führen kann (evtl. erst beim Vor-/Zurückspulen).
               Diese Dateien sollten non-interleaved (mit der Option <option>-ni</option>)
               abgespielt werden.
-            </simpara>
+            </para>
           </listitem>
           <listitem>
-            <simpara>
+            <para>
               <emphasis role="bold">Non-interleaved:</emphasis> Als erstes kommt der
               ganze Videostream, dann der ganze Audiostream. Dies erfordert viel
               Suchen in der Datei, was die Wiedergabe vom Netzwerk oder von CDROM schwierig
               macht.
-            </simpara>
+            </para>
           </listitem>
         </itemizedlist>
       </para>
@@ -172,7 +172,7 @@
         AVI-Dateien:
         <itemizedlist>
           <listitem>
-            <simpara>
+            <para>
               <emphasis role="bold">bps-basiert</emphasis>: Diese Methode basiert auf
               der Bitrate/Samplerate des Video-/Audiostreams. Diese Methode wird von den
               meisten Playern verwendet, inklusive
@@ -181,15 +181,15 @@
               Headern und Dateien, welche mit VBR-Audio aber nicht VBR-unterstützendem
               Encoder erstellt wurden, führen mit dieser Methode zu A/V-Desynchronisation
               (meistens beim Spulen).
-            </simpara>
+            </para>
           </listitem>
           <listitem>
-            <simpara>
+            <para>
               <emphasis role="bold">interleaving-basiert</emphasis>: Diese Methode benutzt
               nicht mehr den Wert der Bitrate sondern die relative Position des
               Audio-Paketes zum aktuellen Video-Paket, was einige falsch codierte
               Dateien mit VBR-Audio abspielbar macht.
-            </simpara>
+            </para>
           </listitem>
         </itemizedlist>
       </para>

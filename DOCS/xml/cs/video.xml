@@ -572,35 +572,35 @@ ovladači pro XFree.
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   V XFree 4.0.3 je v <filename>nv.o</filename> chyba vedoucí
   k podivným barvám.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Ovladač pro ATI vyžaduje více než jedno zpětné přepnutí režimu po skončení
   používání DGA.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Některé ovladače selžou při přepnutí do normálního rozlišení (použijte
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> a
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   pro ruční přepnutí).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Některé ovladače zobrazují divné barvy.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Některé ovladače lžou o množství paměti kterou mapují do adresového prostoru
   procesu, takže vo_dga nepoužije dvojitou vyrovnávací paměť (SIS?).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Některé ovladače nezvládnou ohlásit dokonce ani jeden platný režim.
   V tom případě rozhraní DGA spadne s hláškou o nesmaslném režimu
   100000x100000 nebo tak.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   OSD pracuje pouze se zapnutou dvojitou vyrovnávací pamětí (jinak poblikává).
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 </sect2>
@@ -672,12 +672,12 @@ jakýkoli film v 16 barvách, což je vhodné v následujících konfiguracích:
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   EGA karta s EGA monitorem: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   EGA karta s CGA monitorem: 320x200x4bpp, 640x200x4bpp
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -742,30 +742,30 @@ Výstup FBdev přijímá několik dodatečných voleb:
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
-  <listitem><simpara>
+  <listitem><para>
     nastaví zařízení framebufferu k použití (výchozí: <filename>/dev/fb0</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
-  <listitem><simpara>
+  <listitem><para>
     název režimu k použití (podle <filename>/etc/fb.modes</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
-  <listitem><simpara>
+  <listitem><para>
     config soubor režimů (výchozí: <filename>/etc/fb.modes</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
-  <listitem><simpara>
+  <listitem><para>
     <emphasis role="bold">důležité</emphasis> hodnoty, viz
     <filename>example.conf</filename>
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1016,27 +1016,27 @@ Můžete použít některé klávesy v AA okně pro změnu renderovacích voleb:
 důležitých:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Nastaví doporučený aa ovladač (X11, curses, Linux).
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Použití všech 256 znaků.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Použití osmibitového ASCII.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Vypíše všechny aalib volby.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1089,20 +1089,20 @@ rozhraní caca libvo.
 
 <itemizedlist>
 <title>Odlišnosti od <systemitem class="library">AAlib</systemitem> jsou:</title>
-<listitem><simpara>
+<listitem><para>
    16 dostupných barev pro znakový výstup (256 barev pro pár)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
    rozhodování podle barev v obrázku
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Ale <systemitem class="library">libcaca</systemitem> má také následující
   omezení:</title>
-<listitem><simpara>
+<listitem><para>
    nemá podpora pro jas, kontrast a gamu
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -1133,21 +1133,21 @@ V caca okně můžete použít některé klávesy pro změnu renderovacích volb
    proměnné prostředí:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Nastaví doporučený caca ovladač, jako ncurses, slang, x11.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (pouze X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Nastaví počet řad a sloupců. Např. 128x50.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (pouze X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Nastaví použitý font. Např. fixed, nexus.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1194,50 +1194,50 @@ výstup.)
 
 <itemizedlist spacing="compact">
 <title>VÝHODY</title>
-<listitem><simpara>
+<listitem><para>
   Máte šanci sledovat video <emphasis role="bold">dokonce i když Linux nezná
   </emphasis> váš video hardware.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Nepotřebujete mít ve svém Linuxu nainstalovány žádné věci související s
   grafikou (jako X11 (alias XFree86), fbdev atd). Toto rozhraní lze provozovat
   z <emphasis role="bold">textového režimu</emphasis>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Máte šanci získat <emphasis role="bold">funkční TV-out</emphasis>.
   (Je to pravda minimálně s kartami ATI).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Toto rozhraní volá <function>int 10h</function> handler, takže není
   emulátorem &ndash; volá <emphasis role="bold">skutečné</emphasis> věci
   <emphasis>skutečného</emphasis> BIOSu v <emphasis>reálném režimu</emphasis>
   (ve skutečnosti v režimu vm86).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Můžete s ním použít VIDIX, takže dostanete akcelerované video
   <emphasis role="bold">a</emphasis> TV výstup současně!
   (Doporučeno pro karty ATI.)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Máte-li VESA VBE 3.0+ a nastavili jste si někde
   <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option>
   (config soubor nebo příkazový řádek) dostanete nejvyšší možný obnovovací
   kmitočet. (Using General Timing Formula). Abyste této funkce dosáhli, musíte
   nastavit <emphasis role="bold">všechna</emphasis> nastavení monitoru.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
 <title>NEVÝHODY</title>
-<listitem><simpara>
+<listitem><para>
    Pracuje pouze na <emphasis role="bold">systémech x86</emphasis>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Může to použít pouze <systemitem class="username">root</systemitem>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Zatím je dostupné pouze pro <emphasis role="bold">Linux</emphasis>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <important>
@@ -1251,19 +1251,19 @@ Nefunguje!
 <title>VOLBY PŘÍKAZOVÉHO ŘÁDKU DOSTUPNÉ PRO VESA</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>volby</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     zatím dostupné: <literal>dga</literal> pro vynucení dga režimu a
     <literal>nodga</literal> pro jeho potlačení. V režimu dga můžete zapnout
     dvojitou vyrovnávací paměť pomocí volby <option>-double</option>.
     Poznámka: Tyto volby můžete vynechat, abyste zapli
     <emphasis role="bold">autodetekci</emphasis> dga režimu.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
 <title>ZNÁMÉ PROBLÉMY A KLIČKY</title>
-<listitem><simpara>
+<listitem><para>
   Pokud máte nainstalován <emphasis role="bold">NLS</emphasis> font v
   Linuxové konzoli a použijete VESA rozhraní v textovém režimu, pak po
   ukončení <application>MPlayer</application>u budete mít nahrán
@@ -1272,25 +1272,25 @@ Nefunguje!
   <command>setsysfont</command> z distribuce Mandrake/Mandriva.
   (<emphasis role="bold">Tip</emphasis>: Stejná utilita je použita pro
   lokalizaci fbdev).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Některé <emphasis role="bold">Linuxové grafické ovladače</emphasis> neobnovují
   aktivní <emphasis role="bold">režim BIOSu</emphasis> v DOSové paměti.
   Takže pokud máte tento problém &ndash; vždy používejte VESA rozhraní pouze v
   <emphasis role="bold">textovém režimu</emphasis>. Jinak bude přesto aktivován
   textový režim (#03) a budete muset restartovat počítač.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Často po ukončení VESA rozhraní dostanete <emphasis role="bold">černou</emphasis>
   obrazovku. Chcete-li vrátit obraz do původního stavu &ndash; jednoduše se
   přepněte do jiné konzole (stiskem <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>)
   a pak se přepněte zpět stejným způsobem.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Chcete-li <emphasis role="bold">funkční TV-out</emphasis>, musíte mít
   připojený TV konektor před startem počítače, jelikož se video BIOS
   inicializuje pouze jednou během POST procedury.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -1320,16 +1320,16 @@ Je to jednoduché. Viz <link linkend="dga-modelines">modelines v DGA sekci</link
 a přidejte je do svého <filename>XF86Config</filename>.
 
 <itemizedlist spacing="compact">
-<listitem><simpara>
+<listitem><para>
   Máte-li XFree86 4.x.x: použijte volbu <option>-vm</option>. Ta změní
   rozlišení tak, aby do něj film dobře vešel. Když ne:
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   S XFree86 3.x.x: musíte cyklovat dostupnými rozlišeními pomocí tlačítek
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
   a
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
@@ -1367,7 +1367,7 @@ tohoto rozhraní je maximalizace rychlosti přehrávání videa.
 
 <itemizedlist spacing="compact">
 <title>POUŽITÍ</title>
-<listitem><simpara>
+<listitem><para>
   Můžete použít samostatné video rozhraní: <option>-vo xvidix</option>.
   Toto rozhraní bylo vytvořeno jako front end X11 k technologii VIDIX.
   Vyžaduje X server a může pracovat pouze pod X serverem. Poznamenejme, že
@@ -1376,8 +1376,8 @@ tohoto rozhraní je maximalizace rychlosti přehrávání videa.
   množství video paměti použité X pomocí volby "VideoRam" v XF86Config o 4MB.
   Pokud máte méně než 8MB video ram, můžete místo toho použít volbu
   "XaaNoPixmapCache" v sekci screen.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Existuje konzolové VIDIX rozhraní: <option>-vo cvidix</option>.
   To vyžaduje pro většinu karet funkční inicializovaný framebuffer (jinak pouze
   rozhodíte obrazovku) a dosáhnete podobného efektu jako s
@@ -1385,22 +1385,22 @@ tohoto rozhraní je maximalizace rychlosti přehrávání videa.
   jsou schopny zobrazit plně grafické video na reálné textové konzoli. Viz
   sekci <link linkend="vidix-nvidia">nvidia_vid</link> pro více informací.
   Abyste se zbavili textu na okrajích a blikajícího kursoru, zkuste něco jako
-  </simpara>
+  </para>
 
   <screen>setterm -cursor off > /dev/tty9</screen>
 
-  <simpara>
+  <para>
   (předpokládáme, že <systemitem>tty9</systemitem> není dosud používaná) a pak
   se přepneme do <systemitem>tty9</systemitem>.
   Na druhou stranu volba <option>-colorkey 0</option> by měla poskytnout
   video běžící na "pozadí", zprávná funkce však závisí na funkčnosti colorkey.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Můžete použít VIDIXové podzařízení, které bylo zabudováno do několika video
   ovladačů, například: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">pouze Linux</emphasis>) a
   <option>-vo fbdev:vidix</option>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -1410,15 +1410,15 @@ Nezáleží na tom, které video výstupní rozhraní je použito s
 
 <itemizedlist spacing="compact">
 <title>POŽADAVKY</title>
-<listitem><simpara>
+<listitem><para>
   Video karta by měla být v grafickém režimu (vyjma karet nVidia s výstupním
   rozhraním <option>-vo cvidix</option>).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Výstupní video rozhraní <application>MPlayer</application>u by mělo znát
   aktivní video režim a být schopno sdělit VIDIXovému podzařízení některé video
   charakteristiky serveru.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <formalpara>
@@ -2343,24 +2343,24 @@ z důvodu jejich licencované technologii Macrovision.
 
 <itemizedlist>
 <title>STATUS TV VÝSTUPU NA KARTÁCH ATI POD LINUXEM</title>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">ATI Mach64</emphasis>:
   podporovaný <ulink url="http://gatos.sf.net">GATOS</ulink>em.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
   podporovaný <ulink url="http://gatos.sf.net">GATOS</ulink>em.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Radeon</emphasis> a <emphasis role="bold">Rage128</emphasis>:
   podporovaný <application>MPlayer</application>em!
   Podívejte se na sekce <link linkend="vesa">VESA</link> a
   <link linkend="vidix">VIDIX</link>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
   podporovaný <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>em.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -2420,46 +2420,46 @@ Samozřejmě je nejdůležitější část TwinView.
 Čip NeoMagic lze nalézt v různých laptopech. Některé z nich jsou vybaveny
 jednoduchým analogovým TV enkodérem, některé jej mají mnohem pokročilejší.
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Analogový enkodér</emphasis>:
   Testováno na Toshibě Tecra 8000. Její čip pro TV výstup je mizerný křáp.
   Pokud možno se mu obloukem vyhněte.
-  </simpara> <simpara>
+  </para> <para>
   Musíte použít <option>-vo vesa</option>. Testovaný čip umí jen poměr stran
   1.333333, takže se ujistěte, že používáte volby <option>-x</option>,
   <option>-y</option> a/nebo filtry
   <option>-vf scale,crop,expand</option>, pokud počítač neumožní TV výstup.
   Maximální rozlišení je 720*576 v 16bpp.
-  </simpara>
-  <simpara>
+  </para>
+  <para>
   Známá omezení: pouze VESA, omezení poměru stran 1.33333, obraz není vždy
   vycentrován, barevná hloubka filmu se každých 10 minut změní na 4bpp a
   zůstane tak. Často zatuhává, problémy se zobrazováním na LCD.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Chrontel 70xx enkodér</emphasis>:
   Nalezen v  IBM Thinkpad 390E a bude pravděpodobně i ostatních Thinkpadech nebo
   noteboocích.
-  </simpara><simpara>
+  </para><para>
   Musíte použít <option>-vo vesa:neotv_pal</option> pro PAL nebo
   <option>-vo vesa:neotv_ntsc</option> pro NTSC.
   To vám zpřístupní funkci TV výstupu v následujících 16 bpp a 8 bpp režimech:
-  </simpara>
+  </para>
   <itemizedlist>
-    <listitem><simpara>NTSC 320x240, 640x480 a možná také 800x600.</simpara></listitem>
-    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.</simpara></listitem>
+    <listitem><para>NTSC 320x240, 640x480 a možná také 800x600.</para></listitem>
+    <listitem><para>PAL  320x240, 400x300, 640x480, 800x600.</para></listitem>
   </itemizedlist>
-  <simpara>Režim 512x384 není podporován BIOSem. Musíte obraz škálovat do
+  <para>Režim 512x384 není podporován BIOSem. Musíte obraz škálovat do
   jiného rozlišení pro aktivaci TV výstupu. Pokud vidíte obraz na obrazovce
   v 640x480 nebo v 800x600, ale ne v 320x240 nebo jiném menším rozlišení,
   musíte nahradit dvě tabulky ve <filename>vbelib.c</filename>.
   Viz funkci vbeSetTV pro více informací. V tomto případě prosím kontaktujte
   autora.
-  </simpara>
-  <simpara>
+  </para>
+  <para>
   Známá omezení: pouze VESA, žádné další ovládací prvky jako jas, kontrast,
   úroveň černé, filtrace blikání nejsou implementovány.
-  </simpara>
+  </para>
 </listitem>
 </itemizedlist>
 </para>

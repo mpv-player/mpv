@@ -191,22 +191,22 @@ VOBsub субтитры состоят из большого (несколько
 <title>Регулировка синхронизации и местоположения субтитров:</title>
 <varlistentry>
   <term><option>-subdelay <replaceable>sec</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Задерживает субтитры на <option><replaceable>sec</replaceable></option>
 	секунд. Это значение может быть отрицательным.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>RATE</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Указывает количество кадров/сек для файла субтитров (вещественное число)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Указывает позицию субтитров.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -772,48 +772,48 @@ mplayer <replaceable>filename</replaceable> -channels 6 -af resample=48000,hrtf
 
 <orderedlist spacing="compact">
 <title>mono[моно]</title>
-  <listitem override="0"><simpara>center[центральный]</simpara></listitem>
+  <listitem override="0"><para>center[центральный]</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>stereo[стерео]</title>
-  <listitem override="0"><simpara>left[левый]</simpara></listitem>
-  <listitem><simpara>right[правый]</simpara></listitem>
+  <listitem override="0"><para>left[левый]</para></listitem>
+  <listitem><para>right[правый]</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>quadraphonic[квадрофонический]</title>
-<listitem override="0"><simpara>left front[левый передний]</simpara></listitem>
-  <listitem><simpara>right front[правый передний]</simpara></listitem>
-  <listitem><simpara>left rear[левый задний]</simpara></listitem>
-  <listitem><simpara>right rear[правый задний]</simpara></listitem>
+<listitem override="0"><para>left front[левый передний]</para></listitem>
+  <listitem><para>right front[правый передний]</para></listitem>
+  <listitem><para>left rear[левый задний]</para></listitem>
+  <listitem><para>right rear[правый задний]</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 4.0[окружение 4.0]</title>
-  <listitem override="0"><simpara>left front[левый передний]</simpara></listitem>
-  <listitem><simpara>right front[правый передний]</simpara></listitem>
-  <listitem><simpara>center rear[центральный задний]</simpara></listitem>
-  <listitem><simpara>center front[центральный передний]</simpara></listitem>
+  <listitem override="0"><para>left front[левый передний]</para></listitem>
+  <listitem><para>right front[правый передний]</para></listitem>
+  <listitem><para>center rear[центральный задний]</para></listitem>
+  <listitem><para>center front[центральный передний]</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.0[]окружение 5.0</title>
-  <listitem override="0"><simpara>left front[левый передний]</simpara></listitem>
-  <listitem><simpara>right front[правый передний]</simpara></listitem>
-  <listitem><simpara>left rear[левый задний]</simpara></listitem>
-  <listitem><simpara>right rear[правый задний]</simpara></listitem>
-  <listitem><simpara>center front[центральный передний]</simpara></listitem>
+  <listitem override="0"><para>left front[левый передний]</para></listitem>
+  <listitem><para>right front[правый передний]</para></listitem>
+  <listitem><para>left rear[левый задний]</para></listitem>
+  <listitem><para>right rear[правый задний]</para></listitem>
+  <listitem><para>center front[центральный передний]</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.1[окружение 5.1]</title>
-  <listitem override="0"><simpara>left front[левый передний]</simpara></listitem>
-  <listitem><simpara>right front[правый передний]</simpara></listitem>
-  <listitem><simpara>left rear[левый задний]</simpara></listitem>
-  <listitem><simpara>right rear[правый задний]</simpara></listitem>
-  <listitem><simpara>center front[центральный передний]</simpara></listitem>
-  <listitem><simpara>subwoofer[сабвуфер]</simpara></listitem>
+  <listitem override="0"><para>left front[левый передний]</para></listitem>
+  <listitem><para>right front[правый передний]</para></listitem>
+  <listitem><para>left rear[левый задний]</para></listitem>
+  <listitem><para>right rear[правый задний]</para></listitem>
+  <listitem><para>center front[центральный передний]</para></listitem>
+  <listitem><para>subwoofer[сабвуфер]</para></listitem>
 </orderedlist>
 </para>
 
@@ -1090,31 +1090,31 @@ mplayer <replaceable>6-channel.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0
 <listitem><para>
   Шесть входных каналов означает шесть наборов по пять подопций в каждом.
   <itemizedlist spacing="compact">
-  <listitem><simpara>
+  <listitem><para>
     Левый передний дублируется только на себя:
     "1:0:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     То же для правого переднего:
     "0:1:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     То же для левого заднего:
     "0:0:1:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     И то же для правого заднего:
     "0:0:0:1:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     Центральный передний, тоже:
     "0:0:0:0:1"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     И, наконец, мы должны решить что же делать с сабвуфером,
     например, половина на передний правый и половина на передний левый:
     "0.5:0.5:0:0:0"
-  </simpara></listitem>
+  </para></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>

@@ -189,22 +189,22 @@ musisz przekazać opcję <option>-sub
 <title>Dopasowywanie czasu wyświetlania i położenia napisów:</title>
 <varlistentry>
   <term><option>-subdelay <replaceable>sek</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Opóźnia wyświetlanie napisów o <option><replaceable>sek</replaceable></option> sekund.
     Może być liczbą ujemną. Wartość jest dodawana do licznika czasu filmu.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>ILOŚĆ</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Określa ilość klatek na sekundę pliku z napisami (liczba rzeczywista).
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Określa położenie napisów.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -765,48 +765,48 @@ ich i sprawdź czy odpowiednie źródła dźwięku się zgadzają. Kanały są n
 
 <orderedlist spacing="compact">
 <title>mono</title>
-<listitem override="0"><simpara>środkowy</simpara></listitem>
+<listitem override="0"><para>środkowy</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>stereo</title>
-<listitem override="0"><simpara>lewy</simpara></listitem>
-<listitem><simpara>prawy</simpara></listitem>
+<listitem override="0"><para>lewy</para></listitem>
+<listitem><para>prawy</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>kwadrofonia</title>
-<listitem override="0"><simpara>lewy przedni</simpara></listitem>
-<listitem><simpara>prawy przedni</simpara></listitem>
-<listitem><simpara>lewy tylny</simpara></listitem>
-<listitem><simpara>prawy tylny</simpara></listitem>
+<listitem override="0"><para>lewy przedni</para></listitem>
+<listitem><para>prawy przedni</para></listitem>
+<listitem><para>lewy tylny</para></listitem>
+<listitem><para>prawy tylny</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 4.0</title>
-<listitem override="0"><simpara>lewy przedni</simpara></listitem>
-<listitem><simpara>prawy przedni</simpara></listitem>
-<listitem><simpara>środkowy tylny</simpara></listitem>
-<listitem><simpara>środkowy przedni</simpara></listitem>
+<listitem override="0"><para>lewy przedni</para></listitem>
+<listitem><para>prawy przedni</para></listitem>
+<listitem><para>środkowy tylny</para></listitem>
+<listitem><para>środkowy przedni</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.0</title>
-<listitem override="0"><simpara>lewy przedni</simpara></listitem>
-<listitem><simpara>prawy przedni</simpara></listitem>
-<listitem><simpara>lewy tylny</simpara></listitem>
-<listitem><simpara>prawy tylny</simpara></listitem>
-<listitem><simpara>środkowy przedni</simpara></listitem>
+<listitem override="0"><para>lewy przedni</para></listitem>
+<listitem><para>prawy przedni</para></listitem>
+<listitem><para>lewy tylny</para></listitem>
+<listitem><para>prawy tylny</para></listitem>
+<listitem><para>środkowy przedni</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.1</title>
-<listitem override="0"><simpara>lewy przedni</simpara></listitem>
-<listitem><simpara>prawy przedni</simpara></listitem>
-<listitem><simpara>lewy tylny</simpara></listitem>
-<listitem><simpara>prawy tylny</simpara></listitem>
-<listitem><simpara>środkowy przedni</simpara></listitem>
-<listitem><simpara>subwoofer (głośnik niskotonowy)</simpara></listitem>
+<listitem override="0"><para>lewy przedni</para></listitem>
+<listitem><para>prawy przedni</para></listitem>
+<listitem><para>lewy tylny</para></listitem>
+<listitem><para>prawy tylny</para></listitem>
+<listitem><para>środkowy przedni</para></listitem>
+<listitem><para>subwoofer (głośnik niskotonowy)</para></listitem>
 </orderedlist>
 
 </para>
@@ -1115,31 +1115,31 @@ podopcja to "5".
 <listitem><para>
 Sześć kanałów wejściowych i pięć wyjściowych oznacza 6 grup po 5 podopcji.
   <itemizedlist spacing="compact">
-  <listitem><simpara>
+  <listitem><para>
   Lewy przedni kanał replikuje samego siebie:
   "1:0:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Identycznie dla prawego przedniego kanału:
   "0:1:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Tak samo dla lewego tylnego:
   "0:0:1:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Oraz tak samo dla prawego tylnego:
   "0:0:0:1:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Środkowy też:
   "0:0:0:0:1"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Teraz musimy zdecydować, co zrobić z subwooferem. Na przykład możemy podzielić
   go po połowie na lewy przedni i prawy przedni:
   "0.5:0.5:0:0:0"
-  </simpara></listitem>
+  </para></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>

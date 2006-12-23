@@ -192,22 +192,22 @@ you have to pass the option <option>-sub
 <title>Adjusting subtitle timing and placement:</title>
 <varlistentry>
   <term><option>-subdelay <replaceable>sec</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Delays subtitles by <option><replaceable>sec</replaceable></option> seconds.
     Can be negative. The value is added to movie's time position counter.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>RATE</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Specify frame/sec rate of subtitle file (float number).
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Specify the position of subtitles.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -776,48 +776,48 @@ source matches. Channels are numbered starting with 0.
 
 <orderedlist spacing="compact">
 <title>mono</title>
-  <listitem override="0"><simpara>center</simpara></listitem>
+  <listitem override="0"><para>center</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>stereo</title>
-  <listitem override="0"><simpara>left</simpara></listitem>
-  <listitem><simpara>right</simpara></listitem>
+  <listitem override="0"><para>left</para></listitem>
+  <listitem><para>right</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>quadraphonic</title>
-  <listitem override="0"><simpara>left front</simpara></listitem>
-  <listitem><simpara>right front</simpara></listitem>
-  <listitem><simpara>left rear</simpara></listitem>
-  <listitem><simpara>right rear</simpara></listitem>
+  <listitem override="0"><para>left front</para></listitem>
+  <listitem><para>right front</para></listitem>
+  <listitem><para>left rear</para></listitem>
+  <listitem><para>right rear</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 4.0</title>
-  <listitem override="0"><simpara>left front</simpara></listitem>
-  <listitem><simpara>right front</simpara></listitem>
-  <listitem><simpara>center rear</simpara></listitem>
-  <listitem><simpara>center front</simpara></listitem>
+  <listitem override="0"><para>left front</para></listitem>
+  <listitem><para>right front</para></listitem>
+  <listitem><para>center rear</para></listitem>
+  <listitem><para>center front</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.0</title>
-  <listitem override="0"><simpara>left front</simpara></listitem>
-  <listitem><simpara>right front</simpara></listitem>
-  <listitem><simpara>left rear</simpara></listitem>
-  <listitem><simpara>right rear</simpara></listitem>
-  <listitem><simpara>center front</simpara></listitem>
+  <listitem override="0"><para>left front</para></listitem>
+  <listitem><para>right front</para></listitem>
+  <listitem><para>left rear</para></listitem>
+  <listitem><para>right rear</para></listitem>
+  <listitem><para>center front</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.1</title>
-  <listitem override="0"><simpara>left front</simpara></listitem>
-  <listitem><simpara>right front</simpara></listitem>
-  <listitem><simpara>left rear</simpara></listitem>
-  <listitem><simpara>right rear</simpara></listitem>
-  <listitem><simpara>center front</simpara></listitem>
-  <listitem><simpara>subwoofer</simpara></listitem>
+  <listitem override="0"><para>left front</para></listitem>
+  <listitem><para>right front</para></listitem>
+  <listitem><para>left rear</para></listitem>
+  <listitem><para>right rear</para></listitem>
+  <listitem><para>center front</para></listitem>
+  <listitem><para>subwoofer</para></listitem>
 </orderedlist>
 </para>
 
@@ -1103,31 +1103,31 @@ subwoofer channel yourself you need to downmix manually with
 <listitem><para>
   Six input channels and five output channels means six sets of five suboptions.
   <itemizedlist spacing="compact">
-  <listitem><simpara>
+  <listitem><para>
     The left front channel only replicates onto itself:
     "1:0:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     Same for the right front channel:
     "0:1:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     Same for the left rear channel:
     "0:0:1:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     And also the same for the right rear channel:
     "0:0:0:1:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     Center front, too:
     "0:0:0:0:1"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     And now we have to decide what to do with the subwoofer,
     e.g. half into front right and front left:
     "0.5:0.5:0:0:0"
-  </simpara></listitem>
+  </para></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>

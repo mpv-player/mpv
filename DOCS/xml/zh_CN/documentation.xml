@@ -102,65 +102,65 @@ It can encode with various codecs, like
 
 <itemizedlist>
 <title><application>MEncoder</application>的特点</title>
-<listitem><simpara>
+<listitem><para>
   支持从大量文件格式中编码生成文件，并且是<application>MPlayer</application>
   的解码器。
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   编码到所有FFmpeg的
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   所支持的编码
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   对从与<emphasis role="bold">V4L兼容的TV调节器</emphasis>中出来的视频进行编码
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   编码/合成到相交织的AVI文件并有正确的索引
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   由外部音频流创建文件
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   1, 2 或 3通道编码
-</simpara></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3音频
-  <important><simpara>
+  <important><para>
   在windows上的播放器中播放VBR MP3音频并不能总是得到很好的效果！
-  </simpara></important>
+  </para></important>
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   PCM音频
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   媒体流复制
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   输入A/V同步(基于PTS，可以通过<option>-mc 0</option>选型禁用)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   通过<option>-ofps</option>选项对fps进行纠正（此功能在将
   30000/1001 fps VOB 转换到 24000/1001 fps AVI的文件时有作用）
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   使用我们非常强大的滤镜系统（剪切，展开，覆盖，后续处理，旋转，缩放，
   rgb/yuv之间的转换）
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   能编码为DVD/VOBsub<emphasis role="bold">并且</emphasis>能将文字子标题
   放入所生成文件
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   能将DVD子标题变为VOBsub格式
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>计划中的特性</title>
-<listitem><simpara>
+<listitem><para>
   更广泛的编/解码已知的文件格式/编解码器（通过DivX4/Indeo5/VIVO流生成VOB
   文件:) ）。
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->

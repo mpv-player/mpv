@@ -299,41 +299,41 @@ kiterjesztéssel és tedd a videóval azonos könyvtárba.
 Az <application>MPlayer</application>nek az OSD Menüje teljesen igényre szabható.
 </para>
 
-<note><simpara>
+<note><para>
 a Tulajdonságok menü még NINCS KIFEJLESZTVE!
-</simpara></note>
+</para></note>
 
 <orderedlist>
 <title>Telepítés</title>
-<listitem><simpara>
+<listitem><para>
   fordítsd le az <application>MPlayer</application>t a <filename>./configure</filename>-nak
   az <option>--enable-menu</option> kapcsoló megadásával
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   bizonyosodj meg róla, hogy van telepített OSD betűkészleted
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   másold át az <filename>etc/menu.conf</filename> fájlt a
   <filename class="directory">.mplayer</filename> könyvtárba
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   másold át az <filename>etc/input.conf</filename> fájlt a
   <filename class="directory">.mplayer</filename> könyvtárba, vagy egy
   rendszerszinten elérhető <application>MPlayer</application> konfigurációs
   könyvtárba (alapértelmezett: <filename class="directory">/usr/local/etc/mplayer</filename>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   ellenőrizd le és írd át az <filename>input.conf</filename> fájlt a menüben
   történő mozgáshoz használt billentyűk engedélyezéséhez
   (ott le van írva).
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
   indítsd el az <application>MPlayer</application>t az alábbi példa alapján:
   <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   nyomd meg valamelyik menü gombot, amit megadtál
-  </simpara></listitem>
+  </para></listitem>
 </orderedlist>
 
 </sect2>
@@ -347,12 +347,12 @@ a Tulajdonságok menü még NINCS KIFEJLESZTVE!
 Három fajta időzítési eljárás van az <application>MPlayer</application>ben.
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
 <emphasis role="bold">A régi módszer használatához</emphasis> nem kell tenned
   semmit. Ez az <systemitem>usleep()</systemitem> függvényt használja az
   A/V szinkronizáláshoz, +/- 10ms-es pontossággal. Van amikor ennél is pontosabb
   szinkronizálás szükséges.
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
 <emphasis role="bold">Az új időzítő</emphasis> kód az RTC-t (RealTime Clock)
   használja, mert ennek pontos, 1 ms-es időzítői vannak. A <option>-rtc</option>
@@ -376,11 +376,11 @@ Három fajta időzítési eljárás van az <application>MPlayer</application>ben
    meghajtók esetén erősítették meg) az RTC időzítő használata kihagyásokat okoz
    lejátszás közben. Ebben az esetben a harmadik módszer használata javasolt.
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">A harmadik időzítő kód</emphasis> a <option>-softsleep</option>
   kapcsolóval kapcsolható be. Az RTC hatékonyságával rendelkezik, de nem használja
   azt. Másrészről viszont jobban eszi a procit.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 </sect1>

@@ -314,40 +314,40 @@ ln -s <replaceable>$PREFIX/mplayer/arial-24</replaceable> $PREFIX/mplayer/font
 У <application>MPlayer</application>'а существует целиком определяемый пользователем интерфейс OSD меню.
 </para>
 
-<note><simpara>
+<note><para>
 меню Preferences[Настройки] в настоящий момент НЕ НАПИСАНО!
-</simpara></note>
+</para></note>
 
 <orderedlist>
 <title>Установка</title>
-<listitem><simpara>
+<listitem><para>
   скомпилируйте <application>MPlayer</application>, указав 
   <filename>./configure</filename> параметр <option>--enable-menu</option>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   убедитесь, что у Вас установлен OSD шрифт
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   скопируйте <filename>etc/menu.conf</filename> в Ваш каталог <filename
   class="directory">.mplayer</filename>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   скопируйте <filename>etc/input.conf</filename> в Ваш каталог 
   <filename class="directory">.mplayer</filename>, или в системный конфигурационный
   каталог <application>MPlayer</application>'а (по умолчанию: 
   <filename class="directory">/usr/local/etc/mplayer</filename>)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   проверьте и отредактируйте <filename>input.conf</filename>, чтобы включить
   кнопки перемещения по меню (это здесь описано).
-</simpara></listitem>
+</para></listitem>
 <listitem><para>
   запустите <application>MPlayer</application> как в следующем примере:
   <screen>mplayer -menu <replaceable>file.avi</replaceable></screen>
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   нажмите любую меню-кнопку, которую Вы определили
-</simpara></listitem>
+</para></listitem>
 </orderedlist>
 </sect2>
 </sect1>

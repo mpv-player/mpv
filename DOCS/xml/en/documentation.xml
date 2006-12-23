@@ -109,65 +109,65 @@ audio.
 
 <itemizedlist>
 <title><application>MEncoder</application> features</title>
-<listitem><simpara>
+<listitem><para>
   Encoding from the wide range of fileformats and decoders of
   <application>MPlayer</application>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Encoding to all the codecs of FFmpeg's
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Video encoding from <emphasis role="bold">V4L compatible TV tuners</emphasis>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Encoding/multiplexing to interleaved AVI files with proper index
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Creating files from external audio stream
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   1, 2 or 3 pass encoding
-</simpara></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 audio
-  <important><simpara>
+  <important><para>
   VBR MP3 audio doesn't always play nicely on windows players!
-  </simpara></important>
+  </para></important>
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   PCM audio
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Stream copying
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Input A/V synchronizing (PTS-based, can be disabled with
   <option>-mc 0</option> option)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   fps correction with <option>-ofps</option> option (useful when encoding
   30000/1001 fps VOB to 24000/1001 fps AVI)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Using our very powerful filter system (crop, expand, flip, postprocess,
   rotate, scale, rgb/yuv conversion)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Can encode DVD/VOBsub <emphasis role="bold">AND</emphasis> text subtitles
   into the output file
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Can rip DVD subtitles to VOBsub format
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Planned features</title>
-<listitem><simpara>
+<listitem><para>
   Even wider variety of available en/decoding formats/codecs
   (creating VOB files with DivX4/Indeo5/VIVO streams :).
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->

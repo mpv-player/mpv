@@ -46,33 +46,33 @@ MPEG files come in different guises:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   MPG: This is the most <emphasis role="bold">basic</emphasis> form of the
   MPEG file formats. It contains MPEG-1 video, and MP2 (MPEG-1 layer 2) or
   rarely MP1 audio.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   DAT: This is the very same format as MPG with a different extension. It
   is used on <emphasis role="bold">Video CDs</emphasis>. Due to the way VCDs
   are created and Linux is designed, the DAT files cannot be played nor copied
   from VCDs as regular files. You have to use <option>vcd://</option>
   to play a Video CD.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   VOB: This is the MPEG file format on <emphasis role="bold">DVDs</emphasis>.
   It is the same as MPG, plus the capability to contain subtitles or non-MPEG
   (AC3) audio. It contains encoded MPEG-2 video and usually AC3 audio, but DTS,
   MP2 and uncompressed LPCM are allowed, too. <emphasis role="bold">Read the
   <link linkend="dvd">DVD</link> section</emphasis>!
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   TY: This is a TiVo MPEG stream. It contains MPEG PES data for audio and
   video streams, as well as extra information like closed captions. The
   container is not an MPEG program stream, but a closed format created by
   TiVo. For more information on TiVo stream format, please refer to
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   the TyStudio page</ulink>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -128,7 +128,7 @@ the raw DV stream for which support is under development.
 <para>
 There are two kinds of AVI files:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Interleaved:</emphasis> Audio and video content is
   interleaved. This is the standard usage. Recommended and mostly used. Some
   tools create interleaved AVIs with bad sync.
@@ -136,12 +136,12 @@ There are two kinds of AVI files:
   climaxes in loss of A/V sync, probably at seeking.
   These files should be played as non-interleaved
   (with the <option>-ni</option> option).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Non-interleaved:</emphasis> First comes the whole
   video stream, then the whole audio stream. It thus needs a lot of seeking,
   making playing from network or CD-ROM difficult.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -149,20 +149,20 @@ There are two kinds of AVI files:
 <application>MPlayer</application> supports two kinds of timings for AVI
 files:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">bps-based:</emphasis> It is based on the
   bitrate/samplerate of the video/audio stream. This method is used by
   most players, including <ulink url="http://avifile.sf.net">avifile</ulink>
   and <application>Windows Media Player</application>. Files with broken
   headers, and files created with VBR audio but not VBR-compliant encoder
   will result in A/V desync with this method (mostly at seeking).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">interleaving-based:</emphasis> It does not use the
   bitrate value of the header, instead it uses the relative position of
   interleaved audio and video chunks,
   making badly encoded files with VBR audio playable.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 

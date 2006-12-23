@@ -571,36 +571,36 @@ with every chipset driver for XFree out there.
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   With XFree 4.0.3 and <filename>nv.o</filename> there is a bug resulting
   in strange colors.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   ATI driver requires to switch mode back more than once after finishing
   using of DGA.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Some drivers simply fail to switch back to normal resolution (use
   <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad +</keycap></keycombo>
   and
   <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>
   to switch back manually).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Some drivers simply display strange colors.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Some drivers lie about the amount of memory they map into the process's
   address space, thus vo_dga won't use double buffering (SIS?).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Some drivers seem to fail to report even a single valid mode. In this
   case the DGA driver will crash telling you about a nonsense mode of
   100000x100000 or something like that.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   OSD only works with double buffering enabled (else it flickers).
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 </sect2>
@@ -670,12 +670,12 @@ sets:
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   EGA card with EGA monitor: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   EGA card with CGA monitor: 320x200x4bpp, 640x200x4bpp
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -741,30 +741,30 @@ The FBdev output takes some additional parameters above the others:
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
-  <listitem><simpara>
+  <listitem><para>
     specify the framebuffer device to use (default: <filename>/dev/fb0</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
-  <listitem><simpara>
+  <listitem><para>
     mode name to use (according to <filename>/etc/fb.modes</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
-  <listitem><simpara>
+  <listitem><para>
     config file of modes (default: <filename>/etc/fb.modes</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
-  <listitem><simpara>
+  <listitem><para>
     <emphasis role="bold">important</emphasis> values, see
     <filename>example.conf</filename>
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1017,27 +1017,27 @@ You can use some keys in the AA Window to change rendering options:
 important:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Set recommended aa driver (X11, curses, Linux).
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Use all 256 characters.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Use eight bit ASCII.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Prints out all aalib options.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1093,20 +1093,20 @@ will be built.
 <itemizedlist>
 <title>The differences with <systemitem class="library">AAlib</systemitem> are
   the following:</title>
-<listitem><simpara>
+<listitem><para>
    16 available colors for character output (256 color pairs)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
    color image dithering
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>But <systemitem class="library">libcaca</systemitem> also has the
   following limitations:</title>
-<listitem><simpara>
+<listitem><para>
    no support for brightness, contrast, gamma
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -1137,21 +1137,21 @@ You can use some keys in the caca window to change rendering options:
   certain environment variables:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Set recommended caca driver. e.g. ncurses, slang, x11.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (X11 only)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Specifies the number of rows and columns. e.g. 128x50.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (X11 only)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Specifies the font to use. e.g. fixed, nexus.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1202,50 +1202,50 @@ at least.)
 
 <itemizedlist spacing="compact">
 <title>ADVANTAGES</title>
-<listitem><simpara>
+<listitem><para>
   You have chances to watch movies <emphasis role="bold">if Linux even doesn't
   know</emphasis> your video hardware.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   You don't need to have installed any graphics' related things on your
   Linux (like X11 (AKA XFree86), fbdev and so on). This driver can be run
   from <emphasis role="bold">text-mode</emphasis>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   You have chances to get <emphasis role="bold">working TV-out</emphasis>.
   (It's known at least for ATI's cards).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   This driver calls <function>int 10h</function> handler thus it's not
   an emulator - it calls <emphasis role="bold">real</emphasis> things of
   <emphasis>real</emphasis> BIOS in <emphasis>real-mode</emphasis>
   (actually in vm86 mode).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   You can use VIDIX with it, thus getting accelerated video display
   <emphasis role="bold">and</emphasis> TV output at the same time!
   (Recommended for ATI cards.)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   If you have VESA VBE 3.0+, and you had specified
   <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option> somewhere
   (config file, or command line) you will get the highest possible refresh rate.
   (Using General Timing Formula). To enable this feature you have to specify
   <emphasis role="bold">all</emphasis> your monitor options.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
 <title>DISADVANTAGES</title>
-<listitem><simpara>
+<listitem><para>
    It works only on <emphasis role="bold">x86 systems</emphasis>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   It can be used only by <systemitem class="username">root</systemitem>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Currently it's available only for <emphasis role="bold">Linux</emphasis>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <important><para>
@@ -1257,19 +1257,19 @@ It won't work!
 <title>COMMAND LINE OPTIONS AVAILABLE FOR VESA</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     currently recognized: <literal>dga</literal> to force dga mode and
     <literal>nodga</literal> to disable dga mode. In dga mode you can enable
     double buffering via the <option>-double</option> option. Note: you may omit
     these parameters to enable <emphasis role="bold">autodetection</emphasis> of
     dga mode.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
 <title>KNOWN PROBLEMS AND WORKAROUNDS</title>
-<listitem><simpara>
+<listitem><para>
   If you have installed <emphasis role="bold">NLS</emphasis> font on your
   Linux box and run VESA driver from text-mode then after terminating
   <application>MPlayer</application> you will have
@@ -1278,26 +1278,26 @@ It won't work!
   utility from the Mandrake/Mandriva distribution for example.
   (<emphasis role="bold">Hint</emphasis>: The same utility is used for
   localization of fbdev).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Some <emphasis role="bold">Linux graphics drivers</emphasis> don't update
   active <emphasis role="bold">BIOS mode</emphasis> in DOS memory.
   So if you have such problem - always use VESA driver only from
   <emphasis role="bold">text-mode</emphasis>. Otherwise text-mode (#03) will
   be activated anyway and you will need restart your computer.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Often after terminating VESA driver you get
   <emphasis role="bold">black</emphasis> screen. To return your screen to
   original state - simply switch to other console (by pressing
   <keycombo><keycap>Alt</keycap><keycap>F&lt;x&gt;</keycap></keycombo>)
   then switch to your previous console by the same way.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   To get <emphasis role="bold">working TV-out</emphasis> you need have plugged
   TV-connector in before booting your PC since video BIOS initializes
   itself only once during POST procedure.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -1328,18 +1328,18 @@ It's very simple. See the <link linkend="dga-modelines">DGA section's
 modelines</link>, and insert them into your <filename>XF86Config</filename>.
 
 <itemizedlist spacing="compact">
-<listitem><simpara>
+<listitem><para>
   If you have XFree86 4.x.x: use the <option>-vm</option> option. It will
   change to a resolution your movie fits in. If it doesn't:
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   With XFree86 3.x.x: you have to cycle through available resolutions
   with the
   <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad +</keycap></keycombo>
   and
   <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>
   keys.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -1379,7 +1379,7 @@ main goal of this interface is to maximize the speed of video playback.
 
 <itemizedlist spacing="compact">
 <title>USAGE</title>
-<listitem><simpara>
+<listitem><para>
   You can use standalone video output driver: <option>-vo xvidix</option>.
   This driver was developed as X11's front end to VIDIX technology. It
   requires X server and can work only under X server. Note that, as it directly
@@ -1389,9 +1389,9 @@ main goal of this interface is to maximize the speed of video playback.
   in the device section. You should set this to the amount of memory installed
   on your card minus 4MB. If you have less than 8MB of video ram, you can use
   the option "XaaNoPixmapCache" in the screen section instead.
-</simpara></listitem>
+</para></listitem>
 <listitem>
-  <simpara>
+  <para>
   There is a console VIDIX driver: <option>-vo cvidix</option>.
   This requires a working and initialized framebuffer for most cards (or else
   you'll just mess up the screen), and you'll have a similar effect as with
@@ -1399,24 +1399,24 @@ main goal of this interface is to maximize the speed of video playback.
   are able to output truly graphical video on a real text console. See the
   <link linkend="vidix-nvidia">nvidia_vid</link> section for more information.
   To get rid of text on the borders and the blinking cursor, try something like
-  </simpara>
+  </para>
 
   <screen>setterm -cursor off > /dev/tty9</screen>
 
-  <simpara>
+  <para>
   (assuming <systemitem>tty9</systemitem> is unused so far) and then
   switch to <systemitem>tty9</systemitem>.
   On the other hand, <option>-colorkey 0</option> should give you a video
   running in the "background", though this depends on the colorkey
   functionality to work right.
-  </simpara>
+  </para>
 </listitem>
-<listitem><simpara>
+<listitem><para>
   You can use VIDIX subdevice which was applied to several video output
   drivers, such as: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">Linux only</emphasis>) and
   <option>-vo fbdev:vidix</option>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -1426,15 +1426,15 @@ Indeed it doesn't matter which video output driver is used with
 
 <itemizedlist spacing="compact">
 <title>REQUIREMENTS</title>
-<listitem><simpara>
+<listitem><para>
   Video card should be in graphics mode (except nVidia cards with the
   <option>-vo cvidix</option> output driver).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <application>MPlayer</application>'s video output driver should know
   active video mode and be able to tell to VIDIX subdevice some video
   characteristics of server.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <formalpara><title>USAGE METHODS</title>
@@ -2397,25 +2397,25 @@ because of their licensed Macrovision technology.
 
 <itemizedlist>
 <title>ATI CARDS TV-OUT STATUS ON LINUX</title>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">ATI Mach64</emphasis>:
   supported by <ulink url="http://gatos.sf.net">GATOS</ulink>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
   supported by <ulink url="http://gatos.sf.net">GATOS</ulink>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Radeon</emphasis> and <emphasis role="bold">Rage128</emphasis>:
   supported by <application>MPlayer</application>!
   Check <link linkend="vesa">VESA driver</link> and
   <link linkend="vidix">VIDIX</link> sections.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
   supported by
   <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -2504,28 +2504,28 @@ with a simple analog TV encoder, some have a more advanced one.
   Tested on a Tecra 8000, 2.6.15 kernel with vesafb, ALSA v1.0.10.
 </para></listitem>
 <listitem>
-  <simpara>
+  <para>
   <emphasis role="bold">Chrontel 70xx encoder chip</emphasis>:
   Found in IBM Thinkpad 390E and possibly other Thinkpads or notebooks.
-  </simpara><simpara>
+  </para><para>
   You must use <option>-vo vesa:neotv_pal</option> for PAL or
   <option>-vo vesa:neotv_ntsc</option> for NTSC.
   It will provide TV output function in the following 16 bpp and 8 bpp modes:
-  </simpara>
+  </para>
   <itemizedlist>
-    <listitem><simpara>NTSC 320x240, 640x480 and maybe 800x600 too.</simpara></listitem>
-    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.</simpara></listitem>
+    <listitem><para>NTSC 320x240, 640x480 and maybe 800x600 too.</para></listitem>
+    <listitem><para>PAL  320x240, 400x300, 640x480, 800x600.</para></listitem>
   </itemizedlist>
-  <simpara>Mode 512x384 is not supported in BIOS. You must scale the image
+  <para>Mode 512x384 is not supported in BIOS. You must scale the image
   to a different resolution to activate TV out. If you can see an image on the
   screen in 640x480 or in 800x600 but not in 320x240 or other smaller
   resolution you need to replace two tables in <filename>vbelib.c</filename>.
   See the vbeSetTV function for details. Please contact the author in this case.
-  </simpara>
-  <simpara>
+  </para>
+  <para>
   Known issues: VESA-only, no other controls such as brightness, contrast,
   blacklevel, flickfilter are implemented.
-  </simpara>
+  </para>
 </listitem>
 </itemizedlist>
 </para>

@@ -19,55 +19,55 @@
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">MPEG1</emphasis> (<emphasis role="bold">VCD</emphasis>) и
   <emphasis role="bold">MPEG2</emphasis> (<emphasis role="bold">DVD</emphasis>) видео
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   "родные" декодеры для <emphasis role="bold">всех вариантов DivX,
   3ivX, M$ MPEG-4</emphasis> v1, v2 и других вариантов MPEG-4.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   "родной" декодер для <emphasis role="bold">Windows Media Video 7/8</emphasis>
   (<emphasis role="bold">WMV1/WMV2</emphasis>), и Win32 DLL декодер
   для <emphasis role="bold">Windows Media Video 9</emphasis>
   (<emphasis role="bold">WMV3</emphasis>), оба используются в <filename>.wmv
   </filename> файлах
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   "родной" <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> декодер
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   "родной" <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> декодер
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">3ivx</emphasis> v1, v2 декодер
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Cinepak и <emphasis role="bold">Intel Indeo</emphasis> кодеки (3.1,3.2,4.1,5.0)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 и другие аппаратные
   форматы
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   VIVO 1.0, 2.0, I263 и другие <emphasis role="bold">h263(+)</emphasis> варианты
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   FLI/FLC
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">RealVideo 1.0 &amp; 2.0 </emphasis> из
   <systemitem class="library">libavcodec</systemitem>, и
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> кодеки, используя 
   библиотеки RealPlayer
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   "родной" декодер для HuffYUV
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Различные старые, простые, похожие на RLE форматы
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -335,49 +335,49 @@ DVD-разрешением требует около 10% CPU. Это означ�
 
 <itemizedlist>
 <title>Наиболее важными аудио кодеками среди всех являются:</title>
-<listitem><simpara>
+<listitem><para>
   MPEG layer 1/2/3 (MP1/2/3) аудио (<emphasis role="bold">родной</emphasis>
   код, с MMX/SSE/3DNow! оптимизацией)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Windows Media Audio 7 и 8 (они же WMAv1 и WMAv2) (<emphasis role="bold">родной</emphasis> код, с
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Windows Media Audio 9 (WMAv3) (используя DMO DLL)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   AC3 Dolby аудио (<emphasis role="bold">родной</emphasis> код, с
   MMX/SSE/3DNow! оптимизацией)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   AC3 пропускаемый через звуковое оборудование
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   AAC
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Ogg Vorbis аудио кодек (<emphasis role="bold">родная</emphasis> библиотека)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   RealAudio: DNET (AC3 с низким битпотоком), Cook, Sipro и ATRAC3
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   QuickTime: Qualcomm и QDesign аудио кодеки
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   VIVO аудио (g723, Vivo Siren)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Voxware аудио (используя DirectShow DLL)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   alaw и ulaw, различные gsm, adpcm и pcm форматы и другие простые старые аудио
   кодеки
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Adaptive Multi-Rate (AMR) речевые кодеки
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 
@@ -597,13 +597,13 @@ ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</repla
 DirectShow - это более новый Video API, которые даже хуже, чем его предшественник.
 Все сложнее с DirectShow, поскольку
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <filename>system.ini</filename> не содержит необходимую информацию, вместо
   этого она хранится в реестре и 
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   нам нужен GUID этого кодека.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 

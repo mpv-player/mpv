@@ -577,35 +577,35 @@ tartozó chipset vezérlőkkel.
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   Az XFree 4.0.3 és az <filename>nv.o</filename> esetén van egy hiba, ami
   érdekes színeket eredményez.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   ATI vezérlő esetén egynél többször kell visszaváltani a módot a DGA-s
   lejátszás után.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Néhány vezérlő egyszerűen képtelen visszaváltani normál felbontásra
   (használd a <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> és
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   kombinációkat a kézi váltáshoz).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Néhány vezérlő egyszerűen rossz színeket jelenít meg.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Néhány vezérlő hamis adatot ad a processz címterébe bemappolt memória méretéről,
   így a vo_dga nem használ dupla bufferelést (SIS?).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Néhány vezérlő egy használható módot sem jelez. Ebben az esetben a
   DGA vezérlő összeomlik és azt írja, hogy 100000x100000-es értelmetlen mód
   vagy valami hasonló.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Az OSD csak engedélyezett dupla buffereléssel működik (különben villog).
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 </sect2>
@@ -680,12 +680,12 @@ beállítások használatát:
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   EGA kártya EGA monitorral: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   EGA kártya CGA monitorral: 320x200x4bpp, 640x200x4bpp
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -751,30 +751,30 @@ Az FBdev kimenetnek a fentiek mellett van néhány paramétere is:
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
-  <listitem><simpara>
+  <listitem><para>
     megadhatod a használni kívánt framebuffer eszközt (alapértelmezett: <filename>/dev/fb0</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
-  <listitem><simpara>
+  <listitem><para>
     használni kívánt mód neve (a <filename>/etc/fb.modes</filename> fájlnak megfelelően)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
-  <listitem><simpara>
+  <listitem><para>
     módokat tartalmazó konfigurációs fájl (alapértelmezett: <filename>/etc/fb.modes</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
-  <listitem><simpara>
+  <listitem><para>
     <emphasis role="bold">fontos</emphasis> értékek, lásd
     <filename>example.conf</filename>
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1031,27 +1031,27 @@ Pár billentyű segítségével állíthatod a renderelési opciókat az AA Abla
 <title>Maga az AAlib számtalan lehetőséget biztosít. Itt van pár fontosabb:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Beállítja a javasolt aa vezérlőt (X11, curses, Linux).
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Mind a 256 karakter használata.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Nyolc bites ASCII.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Kiírja az összes aalib kapcsolót.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1108,20 +1108,20 @@ elkészül.
 <itemizedlist>
 <title>A különbség az <systemitem class="library">AAlib</systemitem>-hez képest
   a következőek:</title>
-<listitem><simpara>
+<listitem><para>
    16 elérhető szín a karakter kimenetre (256 színű párok)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
    színes kép dithering
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>De a <systemitem class="library">libcaca</systemitem>-nak megvan az
   alábbi korlátja:</title>
-<listitem><simpara>
+<listitem><para>
    nincs fényerő, kontraszt és gamma támogatás
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -1151,21 +1151,21 @@ Pár billentyűvel szabályozhatod a caca ablakban a renderelés opcióit:
 <title>A <systemitem class="library">libcaca</systemitem> figyel pár környezeti változót is:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Állítsd be a javasolt caca vezérlőt, pl. ncurses, slang, x11.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (csak X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Megadja a sorok és oszlopok számát, pl. 128x50.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (csak X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Megadja a használni kívánt betűtípust, pl. fixed, nexus.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1214,49 +1214,49 @@ többi VBE funkció ezután az aktív vezérlővel dolgozik.
 
 <itemizedlist spacing="compact">
 <title>ELŐNYÖK</title>
-<listitem><simpara>
+<listitem><para>
   Van esélyed a film nézésre akkor is <emphasis role="bold">ha a Linux nem ismeri</emphasis>
   a videó hardveredet.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Nem kell telepítened semmiféle grafikus dolgot a Linuxodra (mint pl. X11 (AKA XFree86),
   fbdev és így tovább). Ez a vezérlő fut <emphasis role="bold">szöveges-módban</emphasis>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Jó eséllyel <emphasis role="bold">működő TV-kimenetet</emphasis> kapsz.
   (Legalábbis az ATI kártyákon).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Ez a vezérlő meghívja az <function>int 10h</function> kezelőt így nem
   emulátor - <emphasis role="bold">igazi</emphasis> dolgokat hív az
   <emphasis>igazi</emphasis> BIOS-ban <emphasis>valós-módban</emphasis>
   (valójában vm86 módban).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Használhatod a VIDIX-et vele, így gyorsított videó megjelenítést kapsz
   <emphasis role="bold">és</emphasis> TV kimenetet egy időben!
   (Javasolt az ATI kártyákhoz.)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Ha VESA VBE 3.0+-od van, és megadtad a
   <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option>-ot valahol
   (konfigurációs fájlban vagy paranccsorban), a lehető legjobb frissítési rátát kapod.
   (Általános Időzítő Formulát használva). Ezen képesség engedélyezéséhez meg kell adnod
   a monitorod <emphasis role="bold">összes</emphasis> opcióját.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
 <title>HÁTRÁNYOK</title>
-<listitem><simpara>
+<listitem><para>
    Csak <emphasis role="bold">x86 rendszereken</emphasis> működik.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Csak a <systemitem class="username">root</systemitem> használhatja.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Jelenleg csak <emphasis role="bold">Linux</emphasis> alatt elérhető.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <important>
@@ -1270,19 +1270,19 @@ Nem fog menni!
 <title>A VESA PARANCSSORI KAPCSOLÓI</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     jelenleg felismert: <literal>dga</literal> a dga mód használatához és
     <literal>nodga</literal> a dga mód letiltásához. A dga módban engedélyezheted
     a dupla bufferelést a <option>-double</option> kapcsolóval. Megjegyzés: ezen
     paraméterek elhagyásával engedélyezed a dga mód <emphasis role="bold">automatikus
     detektálását</emphasis>.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
 <title>ISMERT PROBLÉMÁK ÉS MEGOLDÁSAIK</title>
-<listitem><simpara>
+<listitem><para>
   Ha telepítettél <emphasis role="bold">NLS</emphasis> betűtípust a Linux rendszeredre
   és VESA vezérlőt használsz szöveges-módban, akkor az <application>MPlayer</application>ből
   való kilépés után a <emphasis role="bold">ROM betűtípusa</emphasis> lesz betöltve a nemzeti
@@ -1291,25 +1291,25 @@ Nem fog menni!
   található <command>setsysfont</command> nevű segédprogram használatával.
   (<emphasis role="bold">Tanács</emphasis>: Ugyan ez a segédprogram használható az
   fbdev honosítására is).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Some <emphasis role="bold">Linux graphics drivers</emphasis> don't update
   active <emphasis role="bold">BIOS mode</emphasis> in DOS memory.
   Tehát ha ilyen problémáid vannak - mindig csak <emphasis role="bold">szöveges módban</emphasis>
   használd a VESA vezérlőt. Különben a szöveges mód (#03) aktiválódik mindenképp
   és újra kell indítanod a számítógépedet.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Gyakran a VESA vezérlő bezárása után <emphasis role="bold">fekete</emphasis>
   képernyőt kapsz. Hogy visszaállítsd a képernyődet az eredeti állapotába - egyszerűen csak
   válts át másik konzolra (az <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap> gombok
   megnyomásával) majd válts vissza ugyanígy.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   A <emphasis role="bold">működő TV kimenethez</emphasis> be kell dugnod a
   TV-csatlakozót mielőtt betöltene a PC-d, mivel a videó BIOS csak egyszer,
   a POST eljárás során inicializálja magát.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -1343,17 +1343,17 @@ modeline-jait</link>, és írd be őket az <filename>XF86Config</filename>
 fájlba.
 
 <itemizedlist spacing="compact">
-<listitem><simpara>
+<listitem><para>
   Ha XFree86 4.x.x-ed van: használd a <option>-vm</option> kapcsolót. Ez átvált
   egy olyan felbontásra, amin elfér a film. Ha mégsem:
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   XFree86 3.x.x-szel: körkörösen végigmehetsz az elérhető felbontásokon a
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap>
   és
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   gombokkal.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -1391,7 +1391,7 @@ maximalizálása.
 
 <itemizedlist spacing="compact">
 <title>HASZNÁLAT</title>
-<listitem><simpara>
+<listitem><para>
   Használhatsz egyedülálló videó kimeneti vezérlőt: <option>-vo xvidix</option>.
   Ez a vezérlő a VIDIX-es technológia X11-es front end-je. X szerver kell hozzá
   és csak X szerverrel működik. Jegyezd meg, hogy mivel közvetlenül éri el a hardvert
@@ -1400,8 +1400,8 @@ maximalizálása.
   "VideoRam" opciójával adhatsz meg az eszköz részben. Ajánlott ezt a kártyádon lévő
   memória mínusz 4 MB-ra állítani. Ha kevesebb, mint 8 MB videó ram-od van, akkor
   ehelyett használhatod az "XaaNoPixmapCache" opciót a képernyő részben.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Van egy konzolos VIDIX vezérlő: <option>-vo cvidix</option>.
   Ehhez egy működő és inicializált frambuffer kell a legtöbb kártyánál (vagy különben
   csak összeszemeteled a képernyőd), és hasonló eredményt kapsz, mint a
@@ -1409,22 +1409,22 @@ maximalizálása.
   kártyák azonban képesek tényleges grafikus kimenetre igazi szöveges konzolon.
   Lásd az <link linkend="vidix-nvidia">nvidia_vid</link> részt a további információkért.
   Hogy megszabadulj a határoló szövegektől és a villogó kurzortól, próbálj ki valami ilyesmit:
-  </simpara>
+  </para>
 
   <screen>setterm -cursor off > /dev/tty9</screen>
 
-  <simpara>
+  <para>
   (feltéve, hogy a <systemitem>tty9</systemitem> eddig nem volt használva) és ezután
   válts a <systemitem>tty9</systemitem>-re.
   Másrész a <option>-colorkey 0</option>-t ajánlott megadni egy "háttérben" futó
   videónál, mivel a helyes működése a colorkey funkcionalításától függ.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Használhatod a VIDIX aleszközt, ami számos videó kimeneti vezérlővel együtt használható,
   például: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">csak Linux</emphasis>) és
   <option>-vo fbdev:vidix</option>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -1434,15 +1434,15 @@ Igazából nem számít, hogy melyik videó kimeneti vezérlőt használod együ
 
 <itemizedlist spacing="compact">
 <title>KÖVETELMÉNYEK</title>
-<listitem><simpara>
+<listitem><para>
   A videó kártyának grafikus módban kell lennie (kivéve az nVidia kártyákat a
   <option>-vo cvidix</option> kimeneti vezérlővel).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Az <application>MPlayer</application> videó kimeneti vezérlőnek tudnia kell
   aktiválni a videó módot és információkat kell tudnia átadni a VIDIX aleszköznek
   a szerver videó karakterisztikájáról.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <formalpara>
@@ -2409,24 +2409,24 @@ a licenszelt Macrovision technológiájuk miatt.
 
 <itemizedlist>
 <title>ATI KÁRTYÁK TV-KIMENETÉNEK ÁLLAPOTA LINUXON</title>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">ATI Mach64</emphasis>:
   támogatja a <ulink url="http://gatos.sf.net">GATOS</ulink>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
   támogatja a <ulink url="http://gatos.sf.net">GATOS</ulink>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Radeon</emphasis> és <emphasis role="bold">Rage128</emphasis>:
   támogatja az <application>MPlayer</application>!
   Lásd a <link linkend="vesa">VESA vezérlő</link> és
   a <link linkend="vidix">VIDIX</link> részt.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
   támogatja az <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -2513,29 +2513,29 @@ analóg TV kódolóval van felszerelve, mások sokkal fejlettebbel rendelkeznek.
   háromszor. Tesztelve Tecra 8000-en, 2.6.15 kernel vesafb-vel, ALSA v1.0.10-en.
 </para></listitem>
 <listitem>
-  <simpara>
+  <para>
   <emphasis role="bold">Chrontel 70xx kódoló chip</emphasis>:
   Az IBM Thinkpad 390E és talán más Thinkpad-okban és notebook-okban található.
-  </simpara><simpara>
+  </para><para>
   A <option>-vo vesa:neotv_pal</option>-t kell használnod a PAL-hoz vagy
   a <option>-vo vesa:neotv_ntsc</option>-t az NTSC-hez.
   TV kimenetet biztosít az alábbi 16 bpp és 8 bpp módokban:
-  </simpara>
+  </para>
   <itemizedlist>
-    <listitem><simpara>NTSC 320x240, 640x480 és talán 800x600 is.</simpara></listitem>
-    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.  </simpara></listitem>
+    <listitem><para>NTSC 320x240, 640x480 és talán 800x600 is.</para></listitem>
+    <listitem><para>PAL  320x240, 400x300, 640x480, 800x600.  </para></listitem>
   </itemizedlist>
-  <simpara>Az 512x384-es módot nem támogatja a BIOS. Át kell méretezned a képet
+  <para>Az 512x384-es módot nem támogatja a BIOS. Át kell méretezned a képet
   egy másik felbontásra a TV kimenet aktiválásához. Ha egy képet látsz a
   képernyőn 640x480-ban vagy 800x600-ban, de semmit 320x240-ben vagy kisebb
   felbontáson, ki kell cserélned két táblázatot a <filename>vbelib.c</filename>
   fájlban. Lásd a vbeSetTV függvényeket a részletekért. Kérlek keresd meg a szerzőt
   ebben az esetben.
-  </simpara>
-  <simpara>
+  </para>
+  <para>
   Ismert dolgok: Csak VESA, semmilyen más beállítás, pl. fényesség, kontraszt,
   blacklevel, flickfilter nincs implementálva.
-  </simpara>
+  </para>
 </listitem>
 </itemizedlist>
 </para>

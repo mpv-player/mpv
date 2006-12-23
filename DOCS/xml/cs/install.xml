@@ -199,11 +199,11 @@ která se jim vejde do paměti, při <emphasis role="bold">nízkém zatížení 
 <listitem><para>
   <emphasis role="bold">Ostatní karty</emphasis>: žádná z výše uvedených?
   <itemizedlist>
-  <listitem><simpara>
+  <listitem><para>
     Zkuste zda XFree86 ovladač (a vaše karta) podporuje hardwarovou
     akceleraci. Pro více informací viz sekci <link linkend="xv">Xv</link>.
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     Pokud ne, pak nejsou video vlastnosti vaší karty podporovány vaším operačním
     systémem:( Jestliže hardwarové škálování pracuje ve Windows, ještě to
     neznamená, že bude funkční v Linuxu nebo jiném operačním systému.
@@ -211,7 +211,7 @@ která se jim vejde do paměti, při <emphasis role="bold">nízkém zatížení 
     nezveřejnila specifikace svých
     čipů -- pokud používáte jejich karty pak máte smůlu.
     Viz <xref linkend="non-yuv-cards"/>.
-    </simpara></listitem>
+    </para></listitem>
   </itemizedlist>
   </para></listitem>
 </itemizedlist>
@@ -231,20 +231,20 @@ videorežimu, například
 Přepínání videorežimu lze zapnout použitím volby <option>-vm</option>,
 což pracuje s těmito ovladači:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">používáte</emphasis> XFree86: viz detaily v části
   <link linkend="dga">DGA ovladač</link> a
   <link linkend="x11">X11 ovladač</link>. Doporučujeme DGA! Vyzkoušejte také DGA
   přes SDL, někdy je lepší.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">nepoužíváte</emphasis> XFree86: zkoušejte ovladače
   v následujícím pořadí:
   <link linkend="vesa">vesa</link>,
   <link linkend="fbdev">fbdev</link>,
   <link linkend="svgalib">svgalib</link>,
   <link linkend="aalib">aalib</link>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 </sect2>
@@ -257,28 +257,28 @@ což pracuje s těmito ovladači:
   GD 7548: byla integrovaná na základní desce a testována v noteboocích řady
   Compaq Armada 41xx.
   <itemizedlist>
-  <listitem><simpara>
+  <listitem><para>
     XFree86 3: pracuje v režimech 8/16bpp. Ovladač je ovšem velmi pomalý a
     nestabilní při
     800x600@16bpp. <emphasis role="bold">Doporučujeme: 640x480@16bpp</emphasis>
-   </simpara></listitem>
-  <listitem><simpara>
+   </para></listitem>
+  <listitem><para>
     XFree86 4: Xserver zamrznul brzy po startu pokud nebyla vypnuta akcelerace,
     ale pak se vše zpomalilo víc než v XFree86 3. Není XVideo.
-   </simpara></listitem>
-  <listitem><simpara>
+   </para></listitem>
+  <listitem><para>
     FBdev: framebuffer lze zapnout pomocí modulu jádra <systemitem>clgenfb</systemitem>.
     Pracoval ovšem pouze v 8bpp barevné hloubce, což je k ničemu.
     Zdrojový kód clgenfb musí být rozšířen o ID 7548 před kompilací.
-   </simpara></listitem>
-  <listitem><simpara>
+   </para></listitem>
+  <listitem><para>
     VESA: karta podporuje pouze VBE 1.2, takže výstup VESA nelze použít.
     Nelze to obejít pomocí UniVBE.
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     SVGAlib: detekuje starší Cirrus čip. Použitelné, ale pomalé při
     <option>-bpp 8</option>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para></listitem>
 </itemizedlist>
@@ -290,7 +290,7 @@ což pracuje s těmito ovladači:
 <title>Zvukové karty</title>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Soundblaster Live!</emphasis>: s touto kartou můžete
   použít 4 nebo 6 (<emphasis role="bold">5.1</emphasis>) kanálové AC3 dekódování
   místo 2 kanálového.
@@ -298,18 +298,18 @@ což pracuje s těmito ovladači:
   <link linkend="swac3">Softwarové dekódování AC3</link>. Pro hardwarové AC3
   tunelování <emphasis role="bold">musíte</emphasis> použít ALSA 0.9 s OSS
   emulací!
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">C-Media s S/PDIF výstupem</emphasis>: hardwarové AC3
   tunelování je s těmito kartami možné, viz sekci
   <link linkend="hwac3">Hardwarové AC3 dekódování</link>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Vlastnosti <emphasis role="bold">ostatních karet</emphasis> nejsou
   <application>MPlayer</application>em podporovány.
   <emphasis role="bold">Velmi doporučujeme k přečtení sekci
   <link linkend="audio">zvukové karty</link>!</emphasis>
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </sect1>
 
@@ -531,41 +531,41 @@ a umístěte jej do adresáře s filmem.
 Menu (nabídka na obrazovce).
 </para>
 
-<note><simpara>
+<note><para>
 Menu Preferences NENÍ v současnosti IMPLEMENTOVÁNO!
-</simpara></note>
+</para></note>
 
 <orderedlist>
 <title>Instalace</title>
-<listitem><simpara>
+<listitem><para>
   zkompilujte <application>MPlayer</application> s volbou
   <option>--enable-menu</option>
   předanou do <filename>./configure</filename>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   ujistěte se že máte nainstalován OSD font
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   zkopírujte <filename>etc/menu.conf</filename> do svého
   <filename class="directory">.mplayer</filename> adresáře
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   zkopírujte <filename>etc/menu.conf</filename> do svého
   <filename class="directory">.mplayer</filename> adresáře, nebo do systémového
   <application>MPlayer</application> konfiguračního adresáře (výchozí:
   <filename class="directory">/usr/local/etc/mplayer</filename>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   zkontrolujte a upravte <filename>input.conf</filename>, abyste zapnuli klávesy
   pro pohyb v menu (to je popsáno zde).
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
   spusťte <application>MPlayer</application> podle následujícího příkladu:
   <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   stiskněte některou z kláves, kterou jste definovali
-  </simpara></listitem>
+  </para></listitem>
 </orderedlist>
 
 </sect2>
@@ -579,12 +579,12 @@ Menu Preferences NENÍ v současnosti IMPLEMENTOVÁNO!
 V <application>MPlayer</application> jsou zabudovány tři metody časování.
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
 <emphasis role="bold">Abyste použili starou metodu</emphasis>, nemusíte dělat
   vůbec nic. Ta používá <systemitem>usleep()</systemitem> pro hlídání
   A/V synchronizace s přesností +/- 10ms. Ačkoli někdy může být synchronizace
   hlídána ještě jemněji.
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
 Kód <emphasis role="bold">nového časovače</emphasis> používá pro tento účel RTC
   (hodiny reálného času), protože mají přesné 1ms časovače.
@@ -609,11 +609,11 @@ Kód <emphasis role="bold">nového časovače</emphasis> používá pro tento ú
    Pak doporučujeme
    použít třetí metodu.
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Třetí kód časovače</emphasis> se zapíná volbou
   <option>-softsleep</option>. Je stejně efektní jako RTC, ale nepoužívá RTC.
   Na druhou stranu více zatěžuje CPU.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 </sect1>

@@ -47,33 +47,33 @@ Pliki MPEG spotykamy w różnych odmianach:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   MPG: To jest najbardziej <emphasis role="bold">podstawowa</emphasis> forma
   plików MPEG. Zawiera video MPEG-1 i audio MP2 (MPEG-1 warstwa 2) lub rzadziej
   MP1.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   DAT: To dokładnie ten sam format, co MPG, tylko z innym rozszerzeniem. Jest
   on używany na płytach <emphasis role="bold">Video CD</emphasis>. W związku
   ze sposobem tworzenia płyt VCD i struktury Linuksa, pliki DAT nie mogą być
   odtwarzane ani kopiowane z VCD jak zwykłe pliki. Musisz użyć opcji
   <option>vcd://</option> by odtworzyć Video CD.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   VOB: To format pliku MPEG na płytach <emphasis role="bold">DVD</emphasis>.
   Jest to to samo, co MPG, plus możliwość umieszczenia w nim napisów lub
   dźwięku nie-MPEG (AC3). Zawiera zakodowany strumień obrazu MPEG-2 i przeważnie
   dźwięk AC3, lecz dozwolone są także DTS, MP2 i nieskompresowane LPCM.
   <emphasis role="bold">Przejrzyj sekcję <link linkend="dvd">DVD</link></emphasis>!
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   TY: To jest strumień TiVo MPEG. Zawiera on dane MPEG PES strumieni audio
   i video, oraz dodatkowe informacje jak napisy Closed Caption. Ten format nie
   jest strumieniem programu MPEG, ale zamkniętym formatem stworzonym przez
   TiVo. Więcej informacji o formacie strumienia TiVo można uzyskać na
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   stronie TyStudio</ulink>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -130,20 +130,20 @@ rozwoju.
 <para>
 Istnieją dwa typy plików AVI:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Z przeplotem:</emphasis> Zawartość audio i video jest
   przepleciona. Jest to standardowy typ - zalecany i przeważnie używany.
   Niektóre narzędzia tworzą przeplatane pliki AVI ze złą synchronizacją.
   <application>MPlayer</application> wykrywa je jako przeplatane, ale powoduje
   to utratę synchronizacji A/V (najczęściej przy skokach). Pliki te powinny
   być odtwarzane jako bez przeplotu (opcja <option>-ni</option>).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Bez przeplotu:</emphasis> Najpierw umieszczony jest
   cały strumień video, a potem cały strumień audio. Wymaga to więc dużo
   "chodzenia" po pliku, co powoduje, że trudno jest je odtwarzać z sieci lub z
   CD-ROMów.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -151,7 +151,7 @@ Istnieją dwa typy plików AVI:
 <application>MPlayer</application> obsługuje dwie metody synchronizacji
 dla plików AVI:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">oparte na bps (bitach na sekundę):</emphasis> Oparta
   jest na liczbie bitów/próbek na sekundę strumieni audio/video. Metoda ta jest
   stosowana przez większość odtwarzaczy, włączając w to
@@ -160,13 +160,13 @@ dla plików AVI:
   nagłówkami i pliki z dźwiękiem VBR (Variable Bitrate - zmienne
   tempo bitowe) utworzone za pomocą niekompatybilnego z VBR programu kodującego
   spowodują desynchronizację A/V przy tej metodzie (głównie przy skokach).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">oparte na przeplocie:</emphasis> Nie korzysta z
   informacji o tempie bitowym z nagłówka, lecz zamiast tego używa względnej
   pozycji przeplecionych fragmentów audio i video, dzięki czemu źle zakodowane
   pliki z dźwiękiem VBR można normalnie odtwarzać.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 

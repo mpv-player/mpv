@@ -40,33 +40,33 @@ Az MPEG fájlok különböző alakúak lehetnek:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   MPG: Ez a <emphasis role="bold">legalapabb</emphasis> formátum az
   MPEG fájl formátumok közül. MPEG-1 videót és MP2 (MPEG-1 layer 2) vagy
   ritkán MP1 audiót tartalmaz.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   DAT: Ez majdnem ugyan olyan formátum, mint az MPG, csak a kiterjesztés
   különbözik. <emphasis role="bold">Video CD</emphasis>-ken használják. A VCD-k
   készítési és a Linux tervezési módja miatt a DAT fájlokat nem lehet sem
   lejátszani sem átmásolni a VCD-kről mint rendes fájlokat. A
   <option>vcd://</option> előtagot kell használnod a Video CD lejátszásához.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VOB: Ez a <emphasis role="bold">DVD</emphasis>-ken használt MPEG fájl formátum.
   Ugyan az, mint az MPG, plusz tartalmazhat feliratot és nem-MPEG (AC3) hangot.
   Kódolt MPEG-2 videót és általában AC3 audiót tartalmaz, de DTS, MP2 és
   tömörítetlen LPCM is megengedett. <emphasis role="bold">Olvasd el a
   <link linkend="dvd">DVD</link> részt</emphasis>!
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   TY: Ez egy TiVo MPEG stream. MPEG PES adatot tartalmaz az audió és
   videó stream-hez, valamint extra információkat, mint pl. zárt feliratok.
   A konténer nem MPEG program stream, csak egy TiVo által készített hasonló
   formátum. Ha többet akarsz megtudni a TiVo stream formátumról, olvasd el a
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   TyStudio oldalát</ulink>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -121,19 +121,19 @@ játszani vagy nyers DV stream-et, aminek a támogatása még fejlesztés alatt 
 <para>
 Kétfajta AVI fájl létezik:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Interleaved (átlapolt):</emphasis> Az audió és a videó
   tartalom át van lapolva. Ez az alapértelmezett. Javasolt és a legtöbbször használt.
   Néhány segédprogram hibás szinkronú átlapolt AVI-t készít. Az <application>MPlayer</application>
   ezeket átlapoltként detektálja és emiatt elveszik az A/V szinkronizáció,
   valószínűleg pörgetésnél. Ezeket a fájlokat nem-átlapoltként kell lejátszani
   (a <option>-ni</option> kapcsolóval).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Non-interleaved (Nem-átlapolt):</emphasis> Először jön a
   teljes videó folyam, majd a teljes audió folyam. Így rengeteg ugrásra van szükség,
   mely megnehezíti a hálózati és CD-ROM-ról történő lejátszást.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
@@ -141,19 +141,19 @@ Kétfajta AVI fájl létezik:
 Az <application>MPlayer</application> kétféle időzítést támogat az AVI
 fájlokhoz:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">bps-alapú:</emphasis> A videó/audió folyam bitrátán/mintavételi
   rátáján alapul. Ezt a módszert használja a legtöbb lejátszó, beleértve az
   <ulink url="http://avifile.sf.net">avifile</ulink>t és a
   <application>Windows Media Player</application>-t. A sérült fejlécű vagy VBR
   audióval, de nem VBR-kész kódolóval készített fájlok A/V deszinkronizációhoz
   vezetnek ezzel a módszerrel (legtöbbször pörgetésnél).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">interleaving-alapú:</emphasis> Nem használja a fejléc bitráta
   értékét, inkább az átlapolt audió és videó darabok relatív pozícióját nézi,
   lehetővé téve ezzel a VBR audió-s, rosszul kódolt fájlok lejátszását.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 

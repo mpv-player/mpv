@@ -18,55 +18,55 @@ A legfontosabb dolgok:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) és
   <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) videó
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   natív dekódolók <emphasis role="bold">az összes DivX variánshoz,
   3ivX-hez, M$ MPEG-4</emphasis> v1, v2 és más MPEG4 variánsokhoz
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   natív dekódoló <emphasis role="bold">Windows Media Video 7/8</emphasis>
   (<emphasis role="bold">WMV1/WMV2</emphasis>), és Win32 DLL dekódoló
   a <emphasis role="bold">Windows Media Video 9</emphasis> formátumhoz
   (<emphasis role="bold">WMV3</emphasis>), mindkettőt a <filename>.wmv</filename>
   fájloknál használjuk
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   natív <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> dekódoló
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   natív <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> dekódoló
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">3ivx</emphasis> v1, v2 dekódoló
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Cinepak és <emphasis role="bold">Intel Indeo</emphasis> codec (3.1,3.2,4.1,5.0)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 és más hardveres
   formátumok
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VIVO 1.0, 2.0, I263 és egyéb <emphasis role="bold">H.263(+)</emphasis> variánsok
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   FLI/FLC
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> a
   <systemitem class="library">libavcodec</systemitem>-ből és
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> codec a RealPlayer
   könyvtárak felhasználásával
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   natív dekódoló HuffYUV-hoz
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   különböző régi, egyszerű, RLE-szerű formátum
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -323,49 +323,49 @@ mivel jobb a sebessége.
 
 <itemizedlist>
 <title>A legfontosabb audió codec-ek:</title>
-<listitem><simpara>
+<listitem><para>
   MPEG layer 1/2/3 (MP1/2/3) audió (<emphasis role="bold">natív</emphasis>
   kód, MMX/SSE/3DNow! optimalizációval)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Windows Media Audio 7 és 8 (ismert mint WMAv1 és WMAv2) (<emphasis role="bold">natív</emphasis> kód,
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>-kel)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Windows Media Audio 9 (WMAv3) (DMO DLL-lel)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   AC3 Dolby audió (<emphasis role="bold">natív</emphasis> kód,
   MMX/SSE/3DNow! optimalizációval)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   hangkártyán áteresztő AC3
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   AAC
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Ogg Vorbis audió codec (<emphasis role="bold">natív</emphasis> függvénykönyvtár)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   RealAudio: DNET (alacsony bitrátájú AC3), Cook, Sipro és ATRAC3
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   QuickTime: Qualcomm és QDesign audió codec-ek
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VIVO audió (g723, Vivo Siren)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Voxware audió (DirectShow DLL használatával)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   alaw és ulaw, számos gsm, adpcm és pcm formátum és más, egyszerű, régi
   audió codec
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Adaptive Multi-Rate (AMR) beszéd codec
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 
@@ -568,13 +568,13 @@ megcsinálni, nézd meg a régi DirectShow módszert lejebb.
 A DirectShow egy újabb Videó API, ami még rosszabb, mint az elődje.
 A dolgok nehezebben mennek a DirectShow-val, mivel
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   a <filename>system.ini</filename> nem tartalmazza a megfelelő információkat,
   azok a regisztrációs adatbázisban vannak és
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   szükségünk van a codec GUID-jére.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 

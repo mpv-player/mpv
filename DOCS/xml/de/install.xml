@@ -342,43 +342,43 @@ make install</screen>
       </para>
 
       <note>
-        <simpara>
+        <para>
           Das Menü Einstellungen ist momentan NICHT IMPLEMENTIERT!
-        </simpara>
+        </para>
       </note>
 
       <orderedlist>
         <title>Installation</title>
         <listitem>
-          <simpara>
+          <para>
             compiliere <application>MPlayer</application> mit Übergabe von <option>--enable-menu</option>
             an <filename>./configure</filename>
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             stelle sicher, dass du ein OSD-Font installiert hast
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             kopiere <filename>etc/menu.conf</filename> in dein
             <filename class="directory">.mplayer</filename>-Verzeichnis
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             kopiere <filename>etc/input.conf</filename> in dein
             <filename class="directory">.mplayer</filename>-Verzeichnis oder in das systemweite
             <application>MPlayer</application>-Konfigurationsverzeichnis (Standard:
             <filename class="directory">/usr/local/etc/mplayer</filename>)
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             überprüfe und editiere <filename>input.conf</filename>, um Menüsteuerungstasten
             zu aktivieren (das ist dort beschrieben).
-          </simpara>
+          </para>
         </listitem>
         <listitem>
           <para>
@@ -387,9 +387,9 @@ make install</screen>
           </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             drücke irgendeine von dir definierte Menütaste
-          </simpara>
+          </para>
         </listitem>
       </orderedlist>
 
@@ -405,12 +405,12 @@ make install</screen>
 
       <itemizedlist>
         <listitem>
-          <simpara>
+          <para>
             <emphasis role="bold">Um die alte Methode zu verwenden</emphasis>, musst du
             gar nichts machen. Diese benutzt <systemitem>usleep()</systemitem>, um
             A/V-Synchronisation abzustimmen, mit +/- 10ms Genauigkeit. Trotzdem muss manchmal
             die Synchronisation noch feiner abgestimmt werden.
-          </simpara>
+          </para>
         </listitem>
         <listitem>
           <para>
@@ -440,11 +440,11 @@ make install</screen>
           </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             <emphasis role="bold">Der Code des dritten Zeitgebers</emphasis> wird mit der Option
             <option>-softsleep</option> aktiviert. Der hat die Effizienz von RTC, benutzt RTC aber nicht.
             Auf der anderen Seite benötigt er mehr CPU.
-          </simpara>
+          </para>
         </listitem>
       </itemizedlist>
     </para>

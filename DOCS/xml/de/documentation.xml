@@ -111,93 +111,93 @@
       <itemizedlist>
         <title><application>MEncoder</application> Features</title>
         <listitem>
-          <simpara>
+          <para>
             Encodierung zu der weitreichenden Menge Dateiformate und Decoder von
             <application>MPlayer</application>
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Encodierung zu allen Codecs von FFmpegs
             <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Videoencodierung von <emphasis role="bold">V4L-kompatiblen TV-Empfängern</emphasis>
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Encodierung/Multiplexing von interleaved AVI-Dateien mit ordentlichem Index
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Erstellung von Dateien aus externen Audiostreams
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Encodierung in 1, 2 oder 3 Durchläufen
-          </simpara>
+          </para>
         </listitem>
         <listitem>
           <para>
             <emphasis role="bold">VBR</emphasis>-MP3-Audio
-            <important><simpara>
+            <important><para>
                 VBR-MP3-Audio wird von Windows-Playern nicht immer sauber wiedergegeben!
-              </simpara></important>
+              </para></important>
           </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             PCM-Audio
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Streamkopien
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Input-A/V-Synchronisation (PTS-basiert, kann mit der Option
             <option>-mc 0</option> deaktiviert werden)
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             fps-Korrektur mit der Option <option>-ofps</option> (nützlich bei Encodierung von
             30000/1001 fps VOB zu 24000/1001 fps AVI)
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Benutzung unseres sehr mächtigen Filtersystems (abschneiden, expandieren, spiegeln,
             nachbearbeiten, rotieren, skalieren, rgb/yuv-Konvertierung)
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Kann DVD/VOBsub- <emphasis role="bold">UND</emphasis> Textuntertitel in die
             Ausgabedatei encodieren
-          </simpara>
+          </para>
         </listitem>
         <listitem>
-          <simpara>
+          <para>
             Kann DVD-Untertitel in das VOBsub-Format rippen
-          </simpara>
+          </para>
         </listitem>
       </itemizedlist>
 
       <itemizedlist>
         <title>Geplante Features</title>
         <listitem>
-          <simpara>
+          <para>
             Noch breiteres Feld an verfügbaren En-/Decodierungsformaten/-codecs
             (erstellen von VOB-Dateien mit DivX4/Indeo5/VIVO-Streams :).
-          </simpara>
+          </para>
         </listitem>
       </itemizedlist>
 

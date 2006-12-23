@@ -333,40 +333,40 @@ i mieć go w tym samym katalogu co film.
 ma całkowicie definiowalny Interfejs Menu OSD.
 </para>
 
-<note><simpara>
+<note><para>
 Menu Ustawienia nie jest jeszcze ZAIMPLEMENTOWANE!
-</simpara></note>
+</para></note>
 
 <orderedlist>
 <title>Instalacja</title>
-<listitem><simpara>
+<listitem><para>
   skompiluj <application>MPlayera</application> z opcją
   <option>--enable-menu</option> dla skryptu <filename>./configure</filename>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   upewnij się, że masz zainstalowaną czcionkę OSD
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   skopiuj plik <filename>etc/menu.conf</filename> do Twojego katalogu
   <filename class="directory">.mplayer</filename>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   skopiuj plik <filename>etc/input.conf</filename> do Twojego katalogu
   <filename class="directory">.mplayer</filename> lub do ogólnosystemowego
   katalogu z konfiguracją <application>MPlayera</application> (domyślnie:
   <filename class="directory">/usr/local/etc/mplayer</filename>)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   sprawdź i ewentualnie przerób plik <filename>input.conf</filename>,
   aby określić funkcje klawiszy (wszystko jest tam opisane).
-</simpara></listitem>
+</para></listitem>
 <listitem><para>
   uruchom <application>MPlayera</application> przykładową komendą:
   <screen>mplayer -menu <replaceable>plik.avi</replaceable></screen>
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   wciśnij dowolny klawisz, który wcześniej zdefiniowałeś
-</simpara></listitem>
+</para></listitem>
 </orderedlist>
 
 </sect2>

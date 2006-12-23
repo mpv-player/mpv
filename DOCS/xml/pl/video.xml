@@ -603,36 +603,36 @@ jest bezbłędna dla każdego sterownika XFree.
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   Istnieje błąd związany z XFree 4.0.3 i sterownikiem <filename>nv.o</filename>
   objawiający się dziwnymi kolorami.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Sterowniki ATI wymagają wielokrotnego przełączania trybu po użyciu DGA.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Niektóre sterowniki po prostu nie wracają do normalnej rozdzielczości (użyj
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> oraz
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   aby przełączać się ręcznie).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Niektóre sterowniki wyświetlają dziwne kolory.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Niektóre sterowniki kłamią na temat rozmiaru pamięci,
   którą mapują na przestrzeń adresową procesu.
   Przez to vo_dga nie będzie używać podwójnego buforowania (SIS?).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Niektóre sterowniki nie zwracają żadnego poprawnego trybu.
   W tym wypadku sterownik DGA się wywali mówiąc Ci o bezsensownym
   trybie 100000x100000 (lub podobnym).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   OSD działa tylko z włączonym podwójnym buforowaniem (w przeciwnym razie
   migocze).
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 </sect2>
@@ -710,12 +710,12 @@ Użyteczne jest to w następujących zestawieniach:
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   karta EGA z monitorem EGA: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   karta EGA z monitorem CGA: 320x200x4bpp, 640x200x4bpp
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -779,30 +779,30 @@ Wyjście FBdev przyjmuje kilka dodatkowych parametrów:
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Określa urządzanie bufora ramki, którego użyć (domyślnie: <filename>/dev/fb0</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Nazwa trybu do użycia (zgodnie z <filename>/etc/fb.modes</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Plik konfiguracyjny trybów (domyślnie: <filename>/etc/fb.modes</filename>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
-  <listitem><simpara>
+  <listitem><para>
     <emphasis role="bold">ważne</emphasis> wartości, patrz
     <filename>example.conf</filename>
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1060,27 +1060,27 @@ Możesz używać następujących klawiszy w oknie AA, aby zmienić opcje rendero
 kilka ważniejszych:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Ustawia sugerowany sterownik aa (X11, curses, Linux)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Używa wszystkich 256 znaków.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Używa 8-bitowego ASCII
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Wyświetla wszystkie opcje aalib
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1139,20 +1139,20 @@ sterownik caca libvo.
 <itemizedlist>
 <title>Różnice między <systemitem class="library">AAlib</systemitem> są
   następujące:</title>
-<listitem><simpara>
+<listitem><para>
   16 dostępnych kolorów na wyjściu znakowym (256 par kolorów)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   dirthering obrazu kolorowego
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Lecz <systemitem class="library">libcaca</systemitem> ma także
   następujące ograniczenia:</title>
-<listitem><simpara>
+<listitem><para>
   brak obsługi jasności, kontrastu, gammy
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -1184,21 +1184,21 @@ Aby zmienić opcje renderowania, możesz użyć następujących klawiszy w oknie
   następujących zmiennych środowiskowych:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Ustawia zalecany sterownik caca, np. ncurses, slang, x11.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (tylko X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Określa liczbę wierszy i kolumn, np. 128x50.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (tylko X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Określa jakiej użyć czcionki, np. fixed, nexus.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1249,54 +1249,54 @@ lub przynajmniej samodzielnym wyjściem.)
 
 <itemizedlist spacing="compact">
 <title>ZALETY</title>
-<listitem><simpara>
+<listitem><para>
   Jest szansa, że będziesz mógł oglądać filmy
   <emphasis role="bold">nawet, gdy Linux nie wie</emphasis>, jakiego sprzętu używasz.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Nie ma potrzeby instalowania jakichkolwiek rzeczy związanych z grafiką
   (takich jak X11 (AKA XFree86), fbdev i tak dalej) na Twoim Linuksie.
   Ten sterownik można uruchamiać z <emphasis role="bold">trybu tekstowego</emphasis>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Jest szansa że uzyskasz <emphasis role="bold">działające wyjście TV</emphasis>.
   (Jest tak przynajmniej w przypadku kart ATI).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Ten sterownik wywołuje procedurę obsługi przerwania 10h
   (<function>int 10h</function> handler), nie jest więc emulatorem -
   odwołuje się do <emphasis role="bold">rzeczywistych</emphasis> rzeczy
   <emphasis>rzeczywistego</emphasis> BIOSu w
   <emphasis>trybie rzeczywistym (real-mode)</emphasis>. (tak naprawdę,
   to w trybie vm86, ale działa równie szybko).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Możesz używać VIDIX, uzyskując przez to przyśpieszone wyświetlanie video
   <emphasis role="bold">oraz</emphasis> wyjście TV w tym samym czasie!
   (Zalecane dla kart ATI.)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Jeżeli masz VESA VBE 3.0+ i określiłeś gdzieś
   <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option>
   (w pliku konfiguracyjnym lub w wierszu poleceń), uzyskasz najwyższą możliwą
   częstotliwość odświeżania (Używając General Timing Formula
   (Ogólnej Formuły Taktowania)). Aby to włączyć, musisz określić
   <emphasis role="bold">wszystkie</emphasis> opcje monitora.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
 <title>WADY</title>
-<listitem><simpara>
+<listitem><para>
   Działa tylko na <emphasis role="bold">systemach x86</emphasis>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Może być używane tylko przez użytkownika
   <systemitem class="username">root</systemitem>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Obecnie jest dostępne tylko dla <emphasis role="bold">Linuksa</emphasis>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <important>
@@ -1310,20 +1310,20 @@ Nie będzie działać!
 <title>OPCJE WIERSZA POLECEŃ DLA VESA</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     obecnie rozpoznawane: <literal>dga</literal>, aby wymusić tryb dga oraz
     <literal>nodga</literal>, aby wyłączyć tryb dga. W trybie dga możesz
     włączyć podwójne buforowanie
     opcją <option>-double</option>. Informacja: możesz pominąć
     te parametry, aby włączyć <emphasis role="bold">automatyczne wykrywanie
     </emphasis> trybu dga.
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
 <title>ZNANE PROBLEMY I ICH OBEJŚCIA</title>
-<listitem><simpara>
+<listitem><para>
   Jeżeli zainstalowałeś czcionkę <emphasis role="bold">NLS
   (Native Language Support - Obsługa Języka Rodzimego)</emphasis>
   w swoim Linuksie i używasz sterownika VESA z trybu tekstowego to po
@@ -1333,27 +1333,27 @@ Nie będzie działać!
   <command>setsysfont</command> z dystrybucji Mandrake/Mandriva.
   (<emphasis role="bold">Podpowiedź</emphasis>:
   To samo narzędzie jest używane do lokalizacji fbdev).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Niektóre <emphasis role="bold">Linuksowe sterowniki grafiki</emphasis>
   nie aktualizują aktywnego <emphasis role="bold">trybu BIOS</emphasis>
   w pamięci DOS.  Więc jeżeli masz taki problem - zawsze używaj trybu VESA
   tylko z <emphasis role="bold">trybu tekstowego</emphasis>.
   W przeciwnym wypadku tryb tekstowy (#03) i tak będzie włączany
   i będziesz musiał restartować komputer.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Często po zakończeniu pracy sterownika VESA dostajesz
   <emphasis role="bold">czarny</emphasis> ekran.
   Aby przywrócić ekran do stanu oryginalnego po prostu przełącz się na
   inną konsolę (wciskając <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>)
   po czym przełącz się z powrotem na poprzednią konsolę w ten sam sposób.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Aby uzyskać <emphasis role="bold">działające wyjście TV</emphasis>
   musisz mieć podłączony odbiornik TV przed włączeniem swojego PC,
   ponieważ video BIOS inicjalizuje się tylko podczas procedury POST
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -1388,17 +1388,17 @@ Jest to bardzo proste. Spójrz na
 i wstaw je do swojego <filename>XF86Config</filename>.
 
 <itemizedlist spacing="compact">
-<listitem><simpara>
+<listitem><para>
   Jeżeli masz 4.x.x: użyj opcji <option>-vm</option>.
   Zmieni ona rozdzielczość na taką jaką ma twój film. Jeżeli nie:
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   W XFree86 3.x.x: musisz poruszać się po dostępnych rozdzielczościach
   poprzez kombinacje klawiszy
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap>
   oraz
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -1444,7 +1444,7 @@ głównym celem tego interfejsu jest maksymalizacja szybkości odtwarzania video
 
 <itemizedlist spacing="compact">
 <title>ZASTOSOWANIE</title>
-<listitem><simpara>
+<listitem><para>
   Możesz używać samodzielnego sterownika wyjścia video:
   <option>-vo xvidix</option>. Ten sterownik został stworzony jako
   interfejs X11
@@ -1456,8 +1456,8 @@ głównym celem tego interfejsu jest maksymalizacja szybkości odtwarzania video
   Powinieneś ustawić to na rozmiar pamięci na karcie minus 4MB.
   Jeżeli masz mniej niż 8MB pamięci video (video RAM),
   możesz użyć zamiast tego opcji "XaaNoPixmapCache" w sekcji "screen".
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Istnieje konsolowy sterownik VIDIX: <option>-vo cvidix</option>.
   Wymaga on dla większości kart działającego i zainicjalizowanego bufora ramki
   (albo po prostu zapaskudzisz sobie ekran). Otrzymasz podobny efekt jak przy
@@ -1466,24 +1466,24 @@ głównym celem tego interfejsu jest maksymalizacja szybkości odtwarzania video
   tekstowej. Więcej informacji znajdziesz w sekcji
   <link linkend="vidix-nvidia">nvidia_vid</link>.
   Żeby pozbyć się tekstu na ramkach i mrugającego kursora, wypróbuj coś w rodzaju
-  </simpara>
+  </para>
 
   <screen>setterm -cursor off > /dev/tty9</screen>
 
-  <simpara>
+  <para>
   (zakładając, że do tej pory nie używałeś <systemitem>tty9</systemitem>)
   a potem przełącz się na <systemitem>tty9</systemitem>.
   Z drugiej strony, <option>-colorkey 0</option> powinno dać video odtwarzające
   się "w tle", chociaż działanie tego zależy od prawidłowego funkcjonowania
   koloru kluczowego.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Możesz użyć podurządzenia (subdevice) VIDIX, które zostało dodane
   do rozmaitych sterowników wyjścia video, takich jak:
   <option>-vo vesa:vidix</option>
   (<emphasis role="bold">tylko Linux</emphasis>)
   oraz <option>-vo fbdev:vidix</option>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -1493,15 +1493,15 @@ W rzeczywistości nie ma znaczenia, który sterownik wyjścia video jest używan
 
 <itemizedlist spacing="compact">
 <title>WYMAGANIA</title>
-<listitem><simpara>
+<listitem><para>
   Karta graficzna powinna pracować w trybie graficznym (z wyjątkiem kart nVidia
   z w/w sterownikiem wyjścia <option>-vo cvidix</option>).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Sterownik wyjścia video <application>MPlayera</application> powinien znać
   aktywny tryb video, a także powinien być w stanie przekazać podurządzeniu
   VIDIX niektóre cechy serwera.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <formalpara>
@@ -2494,24 +2494,24 @@ ich licencjonowanej technologii Macrovision.
 
 <itemizedlist>
 <title>STAN KART ATI Z TV-OUT POD LINUKSEM</title>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">ATI Mach64</emphasis>:
   obsługiwane przez <ulink url="http://gatos.sf.net">GATOS</ulink>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
   obsługiwane przez <ulink url="http://gatos.sf.net">GATOS</ulink>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Radeon</emphasis> oraz <emphasis role="bold">Rage128</emphasis>:
   obsługiwane przez <application>MPlayera</application>!
   Sprawdź sekcje <link linkend="vesa">sterownik VESA</link> oraz
   <link linkend="vidix">VIDIX</link>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
   obsługiwane przez <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -2600,31 +2600,31 @@ prosty analogowy koder TV, inne mają bardziej zaawansowaną wersję.
 </para></listitem>
   
 <listitem>
-  <simpara>
+  <para>
   <emphasis role="bold">Układ kodujący Chrontel 70xx</emphasis>:
   Obecny w IBM thinkpad 390E, a możliwe, że także w innych Thinkpadach lub notebookach.
-  </simpara><simpara>
+  </para><para>
   Dla trybu PAL musisz użyć <option>-vo vesa:neotv_pal</option>.
   Dla trybu NTSC - <option>-vo vesa:neotv_ntsc</option>.
   Zapewni to funkcjonowanie wyjścia TV w następujących trybach 16 bpp i 8 bpp:
-  </simpara>
+  </para>
   <itemizedlist>
-    <listitem><simpara>NTSC 320x240, 640x480, być może także 800x600.</simpara></listitem>
-    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.</simpara></listitem>
+    <listitem><para>NTSC 320x240, 640x480, być może także 800x600.</para></listitem>
+    <listitem><para>PAL  320x240, 400x300, 640x480, 800x600.</para></listitem>
   </itemizedlist>
-  <simpara>Tryb 512x384 nie jest obsługiwany przez BIOS. Musisz przeskalować
+  <para>Tryb 512x384 nie jest obsługiwany przez BIOS. Musisz przeskalować
   obraz do innej rozdzielczości aby aktywować wyjście TV. Jeżeli widzisz obraz
   na ekranie w rozdzielczości 640x480 lub 800x600, lecz nie w 320x240, lub
   w innych mniejszych rozdzielczościach, to musisz zamienić dwie tabele
   w <filename>vbelib.c</filename>.
   Więcej szczegółów znajdziesz w kodzie funkcji vbeSetTV. W tym przypadku
   skontaktuj się z autorem.
-  </simpara>
-  <simpara>
+  </para>
+  <para>
   Znane problemy: Tylko VESA, nie są zaimplementowane ustawienia obrazu takie
   jak jasność, kontrast, poziom czerni (blacklevel) i filtr migotania
   (flickfilter).
-  </simpara>
+  </para>
 </listitem>
 </itemizedlist>
 

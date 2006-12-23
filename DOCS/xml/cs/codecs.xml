@@ -19,57 +19,57 @@ Nejdůležitější ze všech jsou:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) a
   <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) video
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   nativní dekodéry pro <emphasis role="bold">všechny DivX varianty,
   3ivX, MS MPEG-4</emphasis> v1, v2 a ostatní MPEG-4 varianty
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   nativní dekodér pro <emphasis role="bold">Windows Media Video 7/8</emphasis>
   (<emphasis role="bold">WMV1/WMV2</emphasis>), a Win32 DLL dekodér
   pro <emphasis role="bold">Windows Media Video 9</emphasis>
   (<emphasis role="bold">WMV3</emphasis>), obojí používané ve <filename>.wmv</filename>
   souborech
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   nativní <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> dekodér
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   nativní <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> dekodér
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">3ivx</emphasis> v1, v2 dekodér
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Cinepak a <emphasis role="bold">Intel Indeo</emphasis> kodeky
   (3.1,3.2,4.1,5.0)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 a další hardwarové
   formáty
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VIVO 1.0, 2.0, I263 a další <emphasis role="bold">H.263(+)</emphasis>
   varianty
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   FLI/FLC
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> z
   <systemitem class="library">libavcodec</systemitem>, a
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> kodeky používající
   knihovny z RealPlayeru
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   nativní dekodér pro HuffYUV
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Různé staré a jednoduché formáty podobné RLE
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -323,50 +323,50 @@ jelikož poskytuje vyšší rychlost.
 
 <itemizedlist>
 <title>Nejdůležitější ze všech jsou audio kodeky:</title>
-<listitem><simpara>
+<listitem><para>
   MPEG layer 1/2/3 (MP1/2/3) audio (<emphasis role="bold">nativní</emphasis>
   kód, s MMX/SSE/3DNow! optimalizací)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Windows Media Audio 7 a 8 (ALIAS WMAv1 a WMAv2)
   (<emphasis role="bold">nativní</emphasis> kód, podpora v
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Windows Media Audio 9 (WMAv3) (používá DMO DLL)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   AC3 Dolby audio (<emphasis role="bold">nativní</emphasis> kód, s
   MMX/SSE/3DNow! optimalizací)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   AC3 tunelování přes hardware zvukové karty
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   AAC
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Ogg Vorbis audio kodek (<emphasis role="bold">nativní</emphasis> knihovna)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   RealAudio: DNET (AC3 s nízkým datovým tokem), Cook, Sipro a ATRAC3
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   QuickTime: Qualcomm a QDesign audio kodeky
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VIVO audio (g723, Vivo Siren)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Voxware audio (používá DirectShow DLL)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   alaw a ulaw, různé gsm, adpcm a pcm formáty a ostatní jednoduché starší
   audio kodeky
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Adaptivní Multi-Rate (AMR) kodeky pro mluvené slovo
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 
@@ -579,13 +579,13 @@ DirectShow Stará metoda.
 DirectShow je novější Video API, které je ještě horší než jeho předchůdce.
 Pracuje se s ním hůře, protože
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <filename>system.ini</filename> neobsahuje potřebné údaje,
   místo toho jsou uloženy v registrech a
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   potřebujeme GUID kodeku.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 

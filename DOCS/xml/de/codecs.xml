@@ -19,53 +19,53 @@
     </para>
 
     <itemizedlist>
-      <listitem><simpara>
+      <listitem><para>
           <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) und
           <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) Video
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           Native Decoder für
           <emphasis role="bold">alle DivX-Varianten, 3ivX, M$ MPEG-4</emphasis>
           v1, v2 und andere MPEG-4 Varianten
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           Nativer Decoder für <emphasis role="bold">Windows Media Video 7/8</emphasis>
           (<emphasis role="bold">WMV1/WMV2</emphasis>) und Win32 DLL Decoder
           für <emphasis role="bold">Windows Media Video 9</emphasis>
           (<emphasis role="bold">WMV3</emphasis>), beide in Gebrauch in <filename>.wmv</filename>-Dateien
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           Nativer <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> Decoder
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           Nativer <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> Decoder
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           <emphasis role="bold">3ivx</emphasis> v1, v2 Decoder
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           Cinepak und <emphasis role="bold">Intel Indeo</emphasis> Codecs (3.1,3.2,4.1,5.0)
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 und andere Hardwareformate
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           VIVO 1.0, 2.0, I263 und andere <emphasis role="bold">H.263(+)</emphasis>-Varianten
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           FLI/FLC
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> von
           <systemitem class="library">libavcodec</systemitem> und
           <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> Codecs mittels der RealPlayer Bibliotheken
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           Native Decoder für HuffYUV
-        </simpara></listitem>
-      <listitem><simpara>
+        </para></listitem>
+      <listitem><para>
           Verschiedene alte und simple RLE-ähnliche Formate
-        </simpara></listitem>
+        </para></listitem>
     </itemizedlist>
 
     <para>
@@ -317,49 +317,49 @@
   <title>Audiocodecs</title>
   <itemizedlist>
     <title>Die allerwichtigsten Audiocodecs:</title>
-    <listitem><simpara>
+    <listitem><para>
         MPEG layer 1/2/3 (MP1/2/3) Audio (<emphasis role="bold">nativer</emphasis>
         Decoder, mit MMX/SSE/3DNow! Optimierung)
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         Windows Media Audio 7 und 8 (alias WMAv1 und WMAv2) (<emphasis role="bold">nativer</emphasis> Decoder, mit
         <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         Windows Media Audio 9 (WMAv3) (unter Verwendung der DMO-DLL)
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         AC3 Dolby Audio (<emphasis role="bold">nativer</emphasis> Decoder, mit
         MMX/SSE/3DNow! Optimierung)
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         AC3-Passthrough unter Verwendung der Soundkartenhardware
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         AAC
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         Ogg Vorbis Audiocodec (<emphasis role="bold">native</emphasis> Bibliothek)
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         RealAudio: DNET (AC3 mit niedriger Bitrate), Cook, Sipro and ATRAC3
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         QuickTime: Qualcomm und QDesign Audio Decoder
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         VIVO Audio (g723, Vivo Siren)
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         Voxware Audio (unter Verwendung der DirectShow-DLL)
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         alaw und ulaw, verschiedene gsm, adpcm und pcm Formate und andere einfache alte
         Audiocodecs
-      </simpara></listitem>
-    <listitem><simpara>
+      </para></listitem>
+    <listitem><para>
         Adaptive Multi-Rate (AMR) Sprachcodecs
-      </simpara></listitem>
+      </para></listitem>
   </itemizedlist>
 
 
@@ -571,13 +571,13 @@ mv c-code libavcodec/amrwb_float<!--
       DirectShow ist die neuere Video-API, die noch schlechter ist als ihr Vorgänger.
       Dinge sind schwieriger geworden mit DirectShow, da
       <itemizedlist>
-        <listitem><simpara>
+        <listitem><para>
             <filename>system.ini</filename> nicht die benötigten Informationen enthält,
             die statt dessen in der Registry gespeichert ist.
-          </simpara></listitem>
-        <listitem><simpara>
+          </para></listitem>
+        <listitem><para>
             wir die GUID des Codecs benötigen.
-          </simpara></listitem>
+          </para></listitem>
       </itemizedlist>
     </para>
 

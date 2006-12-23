@@ -108,66 +108,66 @@ audia.
 
 <itemizedlist>
 <title>Vlastnosti <application>MEncoder</application>u</title>
-<listitem><simpara>
+<listitem><para>
   Enkódování ze široké řady formátů souboru a dekodérů
   <application>MPlayer</application>u
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Enkódování pomocí všech FFmpeg
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
    kodeků
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Video enkódování z <emphasis role="bold">V4L kompatibilních TV tunerů</emphasis>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Enkódování/multiplexování do prokládaných AVI souborů se správným indexem
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Tvorba souborů z externího audio proudu
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   1, 2 nebo 3 průchodové enkódování
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 zvuk
-  <important><simpara>
+  <important><para>
   VBR MP3 zvuk není vždy přehráván dobře přehrávači pro windows!
-  </simpara></important>
+  </para></important>
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   PCM zvuk
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Kopírování datového proudu
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Vstupní A/V synchronizace (založená na PTS, lze ji vypnout pomocí
   volby <option>-mc 0</option>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Korekce snímkové rychlosti pomocí volby <option>-ofps</option> (užitečné při enkódování
   30000/1001 fps VOB do 24000/1001 fps AVI)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Používá výkonný systém filtrů (ořez, expanze, postproces, rotace, škálování (změna velikosti),
   konverze rgb/yuv)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Umí enkódovat DVD/VOBsub <emphasis role="bold">A</emphasis> textové titulky do výstupního
   souboru
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Umí ripovat DVD titulky do VOBsub formátu
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Plánované vlastnosti</title>
-<listitem><simpara>
+<listitem><para>
   Ještě širší možnosti dostupných en/dekódovacích formátů/kodeků
   (tvorba VOB souborů s DivX4/Indeo5/VIVO datovými proudy :).
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->

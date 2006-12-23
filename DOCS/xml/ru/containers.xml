@@ -44,33 +44,33 @@ MPEG файлы бывают различных разновидностей:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   MPG: Это наиболее <emphasis role="bold">основная</emphasis> форма файлов
   формата MPEG. Она содержит MPEG1 видео, и MP2 (MPEG-1 layer 2) или реже
   MP1 аудио.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   DAT: Это почти такой же формат, как MPG, только с другим расширением. Он
   используется на <emphasis role="bold">Video CD</emphasis>. Из-за метода,
   которым создаются VCD и дизайна Linux'а, DAT файлы не могут проигрываться и
   копироваться с VCD, как обычные файлы. Для проигрывания Video CD Вы должны
   использовать <option>vcd://</option>.
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   VOB: Это формат MPEG файлов на <emphasis role="bold">DVD'шниках</emphasis>.
   Это такой же формат, как и MPG, плюс возможность содержать субтитры и
   не-MPEG (AC3) аудио. Он содержит кодированное MPEG2 видео и обычно AC3
   аудио, но DTS, MP2 и не запакованный LPCM тоже возможны. <emphasis role="bold">
   Читайте секцию <link linkend="dvd">DVD</link></emphasis>!
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   TY: Это TiVo MPEG поток. Он содержит как MPEG PES данные аудио и видео потоков,
   так и дополнительную информацию вроде субтитров. Формат файла - 
   это не программный поток MPEG (MPEG program stream), а некий закрытый формат,
   созданный TiVo. Более побдробно о формате TiVo можно прочитать 
   на <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   странице TyStudio</ulink>.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -126,7 +126,7 @@ DV камеры создают сырые DV потоки, которые сре
 <para>
 Существует два класса AVI файлов:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">'Слоёные'[Interleaved]:</emphasis> Аудио и видео
   содержимое 'переплетается'. Это стандартное применение. Рекомендовано и
   используется чаще всего. Некоторые программы создают слоёные AVI'шники
@@ -134,12 +134,12 @@ DV камеры создают сырые DV потоки, которые сре
   определяет это как слоёный файл, и затем теряет A/V синхронизацию,
   вероятно при перемещении по файлу. Такие файлы должны проигрываться как
   не слоёные (с опцией <option>-ni</option>).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">Не слоёные:</emphasis> Сначала идёт весь видео поток,
   затем весь аудио поток. Это требует огромного количества перемещений по файлу,
   что делает проигрывание таких файлов по сети или с CD-ROM затруднительным.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -147,7 +147,7 @@ DV камеры создают сырые DV потоки, которые сре
 <application>MPlayer</application> поддерживает два типа синхронизации для
 AVI файлов:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">основанный на bps[битпотоке]:</emphasis> Он основан на
   битпотоке/потоке сэмплов для видео/аудио потоков. Этот метод применяется
   большинством плееров, включая
@@ -156,13 +156,13 @@ AVI файлов:
   заголовками и файлы созданные с VBR аудио в не VBR-совместимом кодировщике
   приведут к A/V рассинхронизации при использовании этого метода (по большей
   части при перемещении по фильму).
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">основанный на слоёности:</emphasis> Он не использует
   значение битпотока из заголовка, вместо этого используется относительная
   позиция слоёных кусков аудио и видео, что делает воспроизводимыми 
   плохо закодированные с VBR аудио.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 

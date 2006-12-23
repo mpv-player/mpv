@@ -19,57 +19,57 @@ The most important ones above all:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) and
   <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) video
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   native decoders for <emphasis role="bold">all DivX variants,
   3ivX, M$ MPEG-4</emphasis> v1, v2 and other MPEG-4 variants
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   native decoder for <emphasis role="bold">Windows Media Video 7/8</emphasis>
   (<emphasis role="bold">WMV1/WMV2</emphasis>), and Win32 DLL decoder
   for <emphasis role="bold">Windows Media Video 9</emphasis>
   (<emphasis role="bold">WMV3</emphasis>),
   both used in <filename>.wmv</filename> files
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   native <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> decoder
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   native <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> decoder
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">3ivx</emphasis> v1, v2 decoder
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Cinepak and <emphasis role="bold">Intel Indeo</emphasis> codecs
   (3.1,3.2,4.1,5.0)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 and other hardware
   formats
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   VIVO 1.0, 2.0, I263 and other <emphasis role="bold">H.263(+)</emphasis>
   variants
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   FLI/FLC
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> from
   <systemitem class="library">libavcodec</systemitem>, and
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> codecs using
   RealPlayer libraries
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   native decoder for HuffYUV
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Various old simple RLE-like formats
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -346,50 +346,50 @@ satisfied the requirements for <systemitem class="library">x264</systemitem>.
 
 <itemizedlist>
 <title>The most important audio codecs above all:</title>
-<listitem><simpara>
+<listitem><para>
   MPEG layer 1/2/3 (MP1/2/3) audio (<emphasis role="bold">native</emphasis>
   code, with MMX/SSE/3DNow! optimization)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Windows Media Audio 7 and 8 (AKA WMAv1 and WMAv2)
   (<emphasis role="bold">native</emphasis> code, with
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Windows Media Audio 9 (WMAv3) (using DMO DLL)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   AC3 Dolby audio (<emphasis role="bold">native</emphasis> code, with
   MMX/SSE/3DNow! optimization)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   AC3 passing through sound card hardware
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   AAC
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Ogg Vorbis audio codec (<emphasis role="bold">native</emphasis> library)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   RealAudio: DNET (low bitrate AC3), Cook, Sipro and ATRAC3
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   QuickTime: Qualcomm and QDesign audio codecs
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   VIVO audio (g723, Vivo Siren)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Voxware audio (using DirectShow DLL)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   alaw and ulaw, various gsm, adpcm and pcm formats and other simple old
   audio codecs
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Adaptive Multi-Rate (AMR) speech codecs
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <!-- ********** -->
@@ -612,13 +612,13 @@ the old DirectShow method below.
 DirectShow is the newer Video API, which is even worse than its predecessor.
 Things are harder with DirectShow, since
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <filename>system.ini</filename> does not contain the needed information,
   instead it is stored in the registry and
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   we need the GUID of the codec.
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 

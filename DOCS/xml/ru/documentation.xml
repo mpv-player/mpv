@@ -111,69 +111,69 @@ windows media player. Даже AVI файлы без индекса являют
 
 <itemizedlist>
 <title>Возможности <application>MEncoder</application>'а</title>
-<listitem><simpara>
+<listitem><para>
   кодирование из широкого спектра форматов файлов и декодеров
   <application>MPlayer'а</application>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   кодирование во все кодеки FFmpeg'овской библиотеки
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   кодирование видео с <emphasis role="bold">V4L совместимых TV тюнеров
   </emphasis>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   кодирование/мультиплексирование в "слоёные"[interleaved] AVI файлы
   с соответствующим индексом
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   создание файлов с аудио потоком из внешнего файла
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   кодирование в 1, 2 или 3 прохода
-</simpara></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 аудио
-  <important><simpara>
+  <important><para>
   VBR MP3 аудио не всегда хорошо проигрывается плеерами Windows!
-  </simpara></important>
+  </para></important>
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   PCM аудио
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   копирование потоков
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   входная A/V синхронизация (основана на PTS, может быть отключена с помощью
   ключа <option>-mc 0</option> )
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   коррекция FPS[кадров/сек] ключом <option>-ofps</option> (полезно при кодировании
   29.97fps VOB в 24fps AVI)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   использование нашей очень мощной системы плагинов (обрезание[crop],
   расширение[expand], отражение[flip], пост-обработка[postprocess],
   поворот[rotate], масштабирование[scale], rgb/yuv преобразования)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   может кодировать DVD/VOBsub <emphasis role="bold">И</emphasis> текстовые субтитры 
   в один выходной файл
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   может извлекать DVD субтитры в VOBsub формат
-</simpara></listitem>
+</para></listitem>
 
 </itemizedlist>
 
 <itemizedlist>
 <title>Планируемые возможности</title>
-<listitem><simpara>
+<listitem><para>
   ещё большее количество доступных форматов кодирования.декодирования
   (создание VOB файлов с DivX4/Indeo5/VIVO потоками :)
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->
