@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21624 -->
+<!-- synced with r21737 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -620,7 +620,9 @@ DirectShow - это более новый Video API, которые даже х�
   Запустите <command>graphedit.exe</command>.
 </para></step>
 <step><para>
-  В меню выберите Graph -> Insert Filters.
+  В меню выберите
+  <menuchoice><guimenu>Graph</guimenu>
+  <guisubmenu>Insert Filters</guisubmenu></menuchoice>.
 </para></step>
 <step><para>
   Щёлкните <systemitem>DirectShow Filters</systemitem>.
@@ -653,8 +655,8 @@ DirectShow - это более новый Video API, которые даже х�
   Запустите <command>regedit</command>.
 </para></step>
 <step><para>
-  Нажмите <keycap>Ctrl</keycap>+<keycap>F</keycap>, отключите первые две галочки
-  и включите третью. Наберите fourcc Вашего кодека (например, 
+  Нажмите <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>, отключите первые 
+  две галочки и включите третью. Наберите fourcc Вашего кодека (например, 
   <userinput>TM20</userinput>).
 </para></step>
 <step><para>
@@ -665,8 +667,8 @@ DirectShow - это более новый Video API, которые даже х�
   Теперь, когда у Вас есть файл, нам нужен GUID. Попробуйте поискать снова,
   но теперь ищите имя кодека, а не fourcc. Это имя может быть получено,
   когда Media Player проигрывает файл, проверив
-  <guimenu>File</guimenu> -&gt; <guisubmenu>Properties</guisubmenu> -&gt;
-  <guimenuitem>Advanced</guimenuitem>.
+  <menuchoice><guimenu>File</guimenu> <guisubmenu>Properties</guisubmenu> 
+  <guimenuitem>Advanced</guimenuitem></menuchoice>.
   Если нет, Вам не повезло. Попробуйте угадать (например, ищите TrueMotion).
 </para></step>
 <step><para>

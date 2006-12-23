@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21737 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -591,8 +591,9 @@ AMD K6-2 CPU может работать начиная с 400 МГц и выш�
 <listitem><simpara>
   Некоторые драйвера просто не в состоянии переключиться обратно в
   нормальный режим (используйте 
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> и
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad +</keycap></keycombo>
+  и
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>
   для нормального переключения).
 </simpara></listitem>
 <listitem><simpara>
@@ -1299,9 +1300,9 @@ BIOS ROM на той же карте, то возможно скрыть от п
 <listitem><simpara>
   Часто после завершения работы  VESA драйвера вы получаете 
   <emphasis role="bold">черный</emphasis> экран. Чтобы вернуться в обычный режим 
-  просто переключитесь на другую консоль 
-  (нажав <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>) затем переключитесь
-  обратно тем же способом.
+  просто переключитесь на другую консоль (нажав 
+  <keycombo><keycap>Alt</keycap><keycap>F&lt;x&gt;</keycap></keycombo>) 
+  затем переключитесь обратно тем же способом.
 </simpara></listitem>
 <listitem><simpara>
   Для получения <emphasis role="bold">работающего TV выхода</emphasis> необходимо,
@@ -1346,9 +1347,11 @@ BIOS ROM на той же карте, то возможно скрыть от п
 <listitem><simpara>
   C XFree86 3.x.x: циклически переключайтесь между разными разрешениями с помощью
   клавиш
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Доп. клавиша плюс</keycap>
-  and
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Доп. клавиша минус</keycap>.
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Доп. клавиша
+  плюс</keycap></keycombo>
+  и
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Доп. клавиша
+  минус</keycap></keycombo>.
 </simpara></listitem>
 </itemizedlist>
 </para>
@@ -2302,7 +2305,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
    --></screen>
 
       (Если используете X, переключитесь теперь в matroxfb при помощи, например
-      <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>F1</keycap>.)
+      <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>F1</keycap></keycombo>.)
       Замените <literal>640</literal> и <literal>512</literal>, если установили другое
       разрешение...
     </para></step>
@@ -2470,7 +2473,8 @@ EndSection
   следующие параметры в командной строке ядра:
   <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
   Вам следует запустить <application>X</application>, затем переключитесь в
-  консольный режим при помощи, например, <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>.
+  консольный режим при помощи, например, 
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>F1</keycap></keycombo>.
   Если вы не запустите <application>X</application> до запуска
   <application>MPlayer</application> в консоли, видео станет медленным и
   дрожащим[choppy] (объяснения приветствуются).
@@ -2480,7 +2484,8 @@ EndSection
 
   Теперь вы должны увидеть фильм, запущенный в консольном режиме, заполняющий 
   примерно половину LCD экрана вашего ноутбука.
-  Для переключения в TV нажмите <keycap>Fn</keycap>+<keycap>F5</keycap> три раза.
+  Для переключения в TV нажмите 
+  <keycombo><keycap>Fn</keycap><keycap>F5</keycap></keycombo> три раза.
   Тестировался на Tecra 8000, 2.6.15 ядре с vesafb, ALSA v1.0.10.
 </para></listitem>
 <listitem>

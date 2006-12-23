@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with  r21705  -->
+<!-- synced with  r21737  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -383,7 +383,9 @@ A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
 Используете FVWM? Попробуйте следующее:
 <orderedlist>
 <listitem><para>
-  Start -> Settings -> Configuration -> Base Configuration
+  <menuchoice><guimenu>Start</guimenu><guisubmenu>Settings</guisubmenu>
+    <guisubmenu>Configuration</guisubmenu>
+    <guimenuitem>Base Configuration</guimenuitem></menuchoice>
 </para></listitem>
 <listitem><para>
   Установите <systemitem>Use Applications position hints</systemitem>
