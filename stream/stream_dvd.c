@@ -802,18 +802,18 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device);
         } else {
 #if DVDREAD_VERSION <= LIBDVDREAD_VERSION(0,9,4)
-          int len;
-          if(!UDFFindFile(dvd,"/",&len)) {
+          dvd_file_t *dvdfile = DVDOpenFile(dvd,dvd_title,DVD_READ_INFO_FILE);
+          if(!dvdfile) {
             mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device);
             DVDClose(dvd);
-          } else
-#endif
-          {
-          free(temp_device);
-          break;
+            continue;
           }
+          DVDCloseFile(dvdfile);
+#endif
+          break;
         }
       }
+      free(temp_device);
 
       if(!dvd) {
         m_struct_free(&stream_opts,opts);
