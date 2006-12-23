@@ -118,16 +118,16 @@ núcleo 2.4.x es recomendado.
   plataformas. Es también reconocido como el más rápido para esta tarea. Vea
   la sección <link linkend="ffmpeg">FFmpeg</link> para más detalles. Características:
   <itemizedlist>
-  <listitem><simpara>
+  <listitem><para>
     obtener la decodificación de formatos de vídeo mencionados arriba, en máquinas no-x86
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     codificación con la mayoría de los codecs mencionados
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     este codec es el <emphasis role="bold">más rápido disponible</emphasis> para
     DivX/3/4/5 y otros tipos de MPEG4. ¡Recomendado!
-    </simpara></listitem>
+    </para></listitem>
   </itemizedlist>
   </para></listitem>
 <listitem><para>
@@ -145,21 +145,21 @@ núcleo 2.4.x es recomendado.
   </note>
   Características:
   <itemizedlist>
-  <listitem><simpara>
+  <listitem><para>
     necesita esto si quiere reproducir o codificar por ejemplo películas
     guardadas con varios compresores de hardware, como tarjetas sintonizadoras,
     cámaras digitales (ejemplo: DV, ATI VCR, MJPEG)
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     necesaria si quiere reproducir <emphasis role="bold">películas WMV9/WMA9</emphasis>.
-   </simpara></listitem>
-  <listitem><simpara>
+   </para></listitem>
+  <listitem><para>
     No es necesaria para el viejo formato AFS con vídeo MP41 o MP42 (aunque el
     audio VoxWare es frecuente en éstos archivos - que usa un codec de Win32), o
     WMV7. Tampoco se necesita para WMA (Windows Media Audio),
     <systemitem class="library">libavcodec</systemitem> tiene un decodificador
     de fuente abierta para eso.
-    </simpara></listitem>
+    </para></listitem>
   </itemizedlist>
   </para></listitem>
 <listitem><para>
@@ -176,35 +176,35 @@ núcleo 2.4.x es recomendado.
   (ver más arriba) es más rápido y tiene mejor calidad que este, tanto para codificar
   como para decodificar. Características:
   <itemizedlist>
-  <listitem><simpara>
+  <listitem><para>
     codificación en 1 o 2 pasadas con
     <link linkend="mencoder"><application>MEncoder</application></link>
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     puede reproducir películas viejas en <emphasis role="bold">DivX3</emphasis>
     mucho más rápido que la DLL de Win32 ¡pero más lento que <emphasis role="bold">
     <systemitem class="library">libavcodec</systemitem></emphasis>!
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     es de código cerrado, y solo la versión para x86 esta disponible.
-    </simpara></listitem>
+    </para></listitem>
   </itemizedlist>
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XviD</emphasis>: Alternativa de código abierto a la codificación de
   DivX4Linux. Características:
   <itemizedlist>
-  <listitem><simpara>
+  <listitem><para>
     codificación en 1 o 2 pasadas con
     <link linkend="mencoder"><application>MEncoder</application></link>
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     es de código abierto, entonces es multiplataforma.
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     es aproximadamente 2 veces más rápido que DivX4 para codificar - la 
     misma calidad
-    </simpara></listitem>
+    </para></listitem>
   </itemizedlist>
   </para></listitem>
 <listitem><para>
@@ -307,18 +307,18 @@ cuando hagan zoom), por lo tanto la pantalla completa es agradable y muy rápida
 <listitem><para>
   <emphasis role="bold">Otras placas</emphasis>: ¿ninguna de las de arriba?
   <itemizedlist>
-  <listitem><simpara>
+  <listitem><para>
     Pruebe si el controlador de XFree86 (y su placa) soportan aceleración
     por hardware. Vea la sección <link linkend="xv">Xv</link> para más detalles.
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     Si no lo hace, entonces las características de vídeos de su placa no están
     soportadas en su sistema operativo :( Si el escalado por hardware funciona
     bajo Windows, no implica que funcionará bajo Linux o algún otro sistema operativo,
     depende de los controladores. Muchos fabricantes ni construyen controladores para
     Linux ni liberan las especificaciones de sus chips - por lo tanto anda sin suerte
     si esta usando una de sus placas. Vea <xref linkend="non-yuv-cards"/>.
-    </simpara></listitem>
+    </para></listitem>
   </itemizedlist>
   </para></listitem>
 </itemizedlist>
@@ -336,19 +336,19 @@ pero le advierto: esto es lento), o cambiando a un modo de vídeo más chico, po
 El cambio de modo de vídeo se activa usando la opción <option>-vm</option> y
 funciona con los siguientes controladores:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">usando</emphasis> XFree86: vea los detalles en las secciones del <link linkend="dga">controlador DGA</link> y
   <link linkend="x11">el controlador X11</link>. ¡DGA es lo más recomendado! Además,
   intente usar DGA a través de SDL, muchas veces es mejor.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">sin usar</emphasis> XFree86: pruebe los controladores en el
   siguiente orden:
   <link linkend="vesa">vesa</link>,
   <link linkend="fbdev">fbdev</link>,
   <link linkend="svgalib">svgalib</link>,
   <link linkend="aalib">aalib</link>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 </sect3>
@@ -360,29 +360,29 @@ funciona con los siguientes controladores:
 <listitem><para>
   GD 7548: incorporada y testeada en la serie de notebooks Compaq Armada 41xx.
   <itemizedlist>
-  <listitem><simpara>
+  <listitem><para>
     XFree86 3: funciona en los modos 8/16 bpp. De todas maneras, el controlador es
     dramáticamente lento y defectuoso en 800x600@16bpp. <emphasis role="bold">
     Recomendado: 640x480@16bpp</emphasis>
-    </simpara></listitem>
-  <listitem><simpara>
+    </para></listitem>
+  <listitem><para>
     XFree86 4: el servidor X se congela apenas arranca a menos que la aceleración
     este desactivada, pero todo se vuelve más lento que en XFree86 3. No tiene soporte
     de XVideo.
-   </simpara></listitem>
-  <listitem><simpara>
+   </para></listitem>
+  <listitem><para>
     FBdev: el framebuffer puede ser activado con el controlador <systemitem>clgenfb</systemitem>
     del núcleo, aunque a mi me funcionó solo en 8bpp, por lo tanto inservible.
     La fuente de <systemitem>clgenfb</systemitem> tiene que ser extendido para el ID 7548 antes de ser compilado.
-   </simpara></listitem>
-  <listitem><simpara>
+   </para></listitem>
+  <listitem><para>
     VESA: la placa es solamente capaz de VBE 1.2, por lo tanto la salida VESA no puede ser usada.
     No puede ser usada con UniVBE para que funcione.
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
     SVGAlib: detecta un chip Cirrus más viejo. Es lento pero se puede usar con la opción
     <option>-bpp 8</option>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para></listitem>
 </itemizedlist>
@@ -394,23 +394,23 @@ funciona con los siguientes controladores:
 <title>Placas de Sonido</title>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Soundblaster Live!</emphasis>: con esta placa puede usar
   4 o 6 (<emphasis role="bold">5.1</emphasis>) canales de decodificación AC3 en lugar de
   2. Lea la sección <link linkend="swac3">decodificación de AC3 por software</link>. ¡Para
   la transferencia AC3 por hardware <emphasis role="bold">debe</emphasis> usar ALSA 0.9 con
   emulación OSS!
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">C-Media con salida SP/DIF</emphasis>: transferencia AC3 por
   hardware es posible con estas placas, vea la sección 
   <link linkend="hwac3">decodificación de AC3 por hardware</link>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Las características de <emphasis role="bold">otras placas</emphasis> no están soportadas
   en <application>MPlayer</application>. <emphasis role="bold">¡Es muy recomendado leer la
   sección de <link linkend="audio-dev">placas de sonido</link>!</emphasis>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -627,23 +627,23 @@ tiempo y la información del texto a colocar. Uso: si tiene un archivo como
 <title>Ajustando la sincronización de subtítulos y su ubicación:</title>
 <varlistentry>
   <term><option>-subdelay <replaceable>seg</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Retrasa los subtítulos en <option><replaceable>seg</replaceable></option> segundos.
     Puede ser un número negativo.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>TASA</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Especifica la tasa de cuadros por segundo del archivo de subtítulos 
     (número flotante).
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Especifica la posición de los subtítulos.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -828,18 +828,18 @@ por favor lea la página del manual).
 OSD tiene 4 estados (cambielo con <keycap>o</keycap>):
 
 <orderedlist>
-<listitem><simpara>
+<listitem><para>
   barra de volumen + barra de búsqueda (por omisión)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   barra de volumen + barra de búsqueda + reloj + posición porcentual del archivo cuando se busca
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   barra de volumen + barra de búsqueda + reloj + duración total de la pelicula
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   solamente subtítulos 
-  </simpara></listitem>
+  </para></listitem>
 </orderedlist>
 
 Puede cambiar el comportamiento por omisión cambiando la variable
@@ -857,40 +857,40 @@ Puede cambiar el comportamiento por omisión cambiando la variable
 completamente configurable por el usuario.
 </para>
 
-<note><simpara>
+<note><para>
 ¡el menú Preferencias no esta actualmente implementado!
-</simpara></note>
+</para></note>
 
 <orderedlist>
 <title>Instalación</title>
-<listitem><simpara>
+<listitem><para>
   compile <application>MPlayer</application> pasándole la opción <option>--enable-menu</option>
   a <filename>./configure</filename>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   asegúrese de tener una fuente OSD instalada
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   copie el archivo <filename>etc/menu.conf</filename> a su directorio 
   <filename class="directory">.mplayer</filename>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   copie el archivo <filename>etc/input.conf</filename> a su directorio
   <filename class="directory">.mplayer</filename>, o al directorio general de configuración de
   <application>MPlayer</application> (por omisión:
   <filename class="directory">/usr/local/etc/mplayer</filename>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   verifique y edite el archivo <filename>input.conf</filename> para activar las
   teclas de movimiento en el menú (está descripto en el archivo).
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
   inicie <application>MPlayer</application> como en el ejemplo:
   <screen>$ mplayer -menu <replaceable>archivo.avi</replaceable></screen>
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   pulse cualquier tecla de menú que haya definido
-  </simpara></listitem>
+  </para></listitem>
 </orderedlist>
 
 </sect2>
@@ -904,12 +904,12 @@ completamente configurable por el usuario.
 Existen tres métodos de temporización en <application>MPlayer</application>.
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
 <emphasis role="bold">Para usar el método viejo</emphasis>, no tiene que hacer 
   nada. Usa <systemitem>usleep()</systemitem> para ajustar la sincronización
   A/V, con una precisión de +/- 10ms. Sin embargo muchas veces la sincronización
   debe ser más precisa.
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
 <emphasis role="bold">El nuevo código temporizador</emphasis> usa el RTC (Reloj de
   Tiempo Real) de su PC para esta tarea, ya que tiene precisión de 1ms. Es activado
@@ -941,11 +941,11 @@ Existen tres métodos de temporización en <application>MPlayer</application>.
    de DVD en una placa ALi1541) el uso del RTC puede causar defectos en la reproducción.
    Es recomendado usar el tercer método en esos casos.
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">El tercer código de temporización</emphasis> es activado con la opción
   <option>-softsleep</option>. Tiene la eficiencia del RTC, pero no usa el RTC. Por otro lado
   requiere más CPU.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 <note><para><emphasis role="bold">¡NUNCA instale un archivo ejecutable de 
 <application>MPlayer</application>con permisos de SUID root en un sistema

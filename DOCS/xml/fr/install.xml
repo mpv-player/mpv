@@ -301,39 +301,39 @@ dans le même répertoire que la vidéo.
 <application>MPlayer</application> possède une interface de menu OSD complètement modulable.
 </para>
 
-<note><simpara>
+<note><para>
 Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant!
-</simpara></note>
+</para></note>
 
 <orderedlist>
 <title>Installation</title>
-<listitem><simpara>
+<listitem><para>
   compilez <application>MPlayer</application> en passant le paramètre <option>--enable-menu</option>
   à <filename>./configure</filename>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   assurez-vous que les polices OSD sont installées
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   copiez <filename>etc/menu.conf</filename> dans votre répertoire
   <filename class="directory">.mplayer</filename>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   copiez <filename>etc/input.conf</filename> dans votre répertoire
   <filename class="directory">.mplayer</filename>, ou dans le fichier de config globale de
   <application>MPlayer</application> (par défaut: <filename class="directory">/usr/local/etc/mplayer</filename>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   trouvez et éditez <filename>input.conf</filename> pour activer les touches
   correspondants aux mouvements dans le menu (c'est décrit sur place).
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
   lancez <application>MPlayer</application> avec par exemple:
   <screen>$ mplayer -menu <replaceable>fichier.avi</replaceable></screen>
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   pressez n'importe laquelle des touches menu que vous avez défini
-  </simpara></listitem>
+  </para></listitem>
 </orderedlist>
 
 </sect2>
@@ -348,12 +348,12 @@ Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant!
 Il y a trois méthodes de synchro dans <application>MPlayer</application>.
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
 <emphasis role="bold">Pour utiliser l'ancienne méthode</emphasis>, vous n'avez
 rien à faire. Elle utilise <systemitem>usleep()</systemitem> pour régler la
 synchro A/V, avec une précision de +/- 10ms. Cependant parfois la synchro doit être
 réglé encore plus finement.
-  </simpara></listitem>
+  </para></listitem>
 <listitem><para>
 <emphasis role="bold">Le nouveau code de synchro</emphasis> utilise la RTC
 (Real Time Clock) du PC pour cette tâche, car elle à des timers précis à 1ms près.
@@ -378,11 +378,11 @@ Vous pouvez rendre ce réglagle permanant en ajoutant la seconde commande au fic
 	le DMA et cartes-mère basé sur le chipset ALi1541), l'utilisation du timer RTC rend la lecture
 	irrégulière (NdT: skippy).
   </para></listitem>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">La troisième méthode de synchro</emphasis> est activée par l'option
   <option>-softsleep</option>. Il à la précision de la RTC, mais n'utilise pas la RTC.
   D'un autre côté, il nécessite plus de CPU.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 </sect1>

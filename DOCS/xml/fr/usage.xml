@@ -185,22 +185,22 @@ exemple.txt</option> (éventuellement avec le chemin complet).
 <title>Réglage du timing et de l'emplacement des sous-titres:</title>
 <varlistentry>
   <term><option>-subdelay <replaceable>sec</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Décale les sous-titres de <option><replaceable>sec</replaceable></option> secondes.
     Peut être négatif. La valeur est ajouté au compteur d'avancement du film (movie's time position counter).
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>DÉBIT</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Spécifie le rapport trame/sec du fichier de sous-titres (nombre à virgule).
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     Spécifie la position des sous-titres sur l'écran.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -754,48 +754,48 @@ Les canaux sont numérotés à partir de par 0.
 
 <orderedlist spacing="compact">
 <title>mono</title>
-<listitem override="0"><simpara>centre</simpara></listitem>
+<listitem override="0"><para>centre</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>stéréo</title>
-<listitem override="0"><simpara>gauche</simpara></listitem>
-<listitem><simpara>droite</simpara></listitem>
+<listitem override="0"><para>gauche</para></listitem>
+<listitem><para>droite</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>quadraphonique</title>
-<listitem override="0"><simpara>devant gauche</simpara></listitem>
-<listitem><simpara>devant droite</simpara></listitem>
-<listitem><simpara>arrière gauche</simpara></listitem>
-<listitem><simpara>arrière droite</simpara></listitem>
+<listitem override="0"><para>devant gauche</para></listitem>
+<listitem><para>devant droite</para></listitem>
+<listitem><para>arrière gauche</para></listitem>
+<listitem><para>arrière droite</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 4.0</title>
-<listitem override="0"><simpara>devant gauche</simpara></listitem>
-<listitem><simpara>devant droite</simpara></listitem>
-<listitem><simpara>arrière centre</simpara></listitem>
-<listitem><simpara>devant centre</simpara></listitem>
+<listitem override="0"><para>devant gauche</para></listitem>
+<listitem><para>devant droite</para></listitem>
+<listitem><para>arrière centre</para></listitem>
+<listitem><para>devant centre</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.0</title>
-<listitem override="0"><simpara>devant gauche</simpara></listitem>
-<listitem><simpara>devant droite</simpara></listitem>
-<listitem><simpara>arrière gauche</simpara></listitem>
-<listitem><simpara>arrière droite</simpara></listitem>
-<listitem><simpara>devant centre</simpara></listitem>
+<listitem override="0"><para>devant gauche</para></listitem>
+<listitem><para>devant droite</para></listitem>
+<listitem><para>arrière gauche</para></listitem>
+<listitem><para>arrière droite</para></listitem>
+<listitem><para>devant centre</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.1</title>
-<listitem override="0"><simpara>devant gauche</simpara></listitem>
-<listitem><simpara>devant droite</simpara></listitem>
-<listitem><simpara>arrière gauche</simpara></listitem>
-<listitem><simpara>arrière droite</simpara></listitem>
-<listitem><simpara>devant centre</simpara></listitem>
-<listitem><simpara>caisson de basse</simpara></listitem>
+<listitem override="0"><para>devant gauche</para></listitem>
+<listitem><para>devant droite</para></listitem>
+<listitem><para>arrière gauche</para></listitem>
+<listitem><para>arrière droite</para></listitem>
+<listitem><para>devant centre</para></listitem>
+<listitem><para>caisson de basse</para></listitem>
 </orderedlist>
 
 </para>
@@ -1109,31 +1109,31 @@ Puisque <option>pan</option> a besoin d'examiner chacun des six canaux, spécifi
 <listitem><para>
 Six canaux d'entrées et cinq de sortie signifient six ensembles de cinq sous-options.
   <itemizedlist spacing="compact">
-  <listitem><simpara>
+  <listitem><para>
   Le canal avant gauche ne se réplique que vers lui-même:
   "1:0:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Pareil pour le canal avant droit:
   "0:1:0:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Pareil pour le canal arrière gauche:
   "0:0:1:0:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   et aussi de même pour le canal arrière droit:
   "0:0:0:1:0"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Avant centre, aussi:
   "0:0:0:0:1"
-  </simpara></listitem>
-  <listitem><simpara>
+  </para></listitem>
+  <listitem><para>
   Et maintenant que nous avons décidé quoi faire avec le caisson de basse,
   e.g. moitié vers l'avant droit et l autre vers l'avant gauche:
   "0.5:0.5:0:0:0"
-  </simpara></listitem>
+  </para></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>

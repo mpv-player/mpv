@@ -579,34 +579,34 @@ chaque chipset pour XFree.
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   Avec XFree 4.0.3 et <filename>nv.o</filename> un bogue affiche des couleurs étranges.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Les pilotes ATI requièrent de changer plusieurs fois de mode après l'utilisation
   du DGA.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Certains pilotes échouent à revenir à la résolution normale (utilisez
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> et
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap> pour y retourner
   manuellement).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Certains pilotes affichent simplement des couleurs étranges.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Certains pilotes mentent a propos de la quantité de mémoire allouée dans l'espace
   d'adressage du processus, empêchant vo_dga d'utiliser le doublebuffering (SIS ?)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Certains pilotes semblent ne pas pouvoir reporter ne serait-ce qu'un seul mode valide.
   Dans ce cas le driver DGA plantera en vous affichant un mode 100000x100000 ou
   quelque chose comme ça.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   L'OSD fonctionne uniquement avec le doublebuffering activé (sinon il clignote).
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 </sect2>
@@ -679,12 +679,12 @@ configurations suivantes:
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   carte EGA avec moniteur EGA: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   carte EGA avec moniteur CGA: 320x200x4bpp, 640x200x4bpp
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -749,30 +749,30 @@ La sortie FBdev accepte certains paramètres additionnels:
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
-  <listitem><simpara>
+  <listitem><para>
     spécifie le device framebuffer a utiliser (par défaut : <filename>/dev/fb0</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
-  <listitem><simpara>
+  <listitem><para>
     mode a utiliser (d'après le fichier <filename>/etc/fb.modes</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
-  <listitem><simpara>
+  <listitem><para>
     fichier de configuration des modes (par défaut : <filename>/etc/fb.modes</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
-  <listitem><simpara>
+  <listitem><para>
     valeurs <emphasis role="bold">importantes</emphasis>, voir
     <filename>example.conf</filename>
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1022,27 +1022,27 @@ options de rendu:
 <title>AAlib elle-même propose de nombreuses options. En voici les principales:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Choisit le pilote aa (X11, curses, Linux)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Utilise les 256 caractères
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
-  <listitem><simpara>
+  <listitem><para>
    Utilise l'ASCII 8 bits
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Affiche toutes les options de AAlib
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1097,20 +1097,20 @@ sera compilé.
 <itemizedlist>
 <title>Les différences avec <systemitem class="library">AAlib</systemitem> sont
   les suivantes:</title>
-<listitem><simpara>
+<listitem><para>
    16 couleurs disponible pour l'affichage des caractères (256 paires de couleur)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
    tramage des images en couleur
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Mais <systemitem class="library">libcaca</systemitem> à également les
   limitations suivantes:</title>
-<listitem><simpara>
+<listitem><para>
    aucun support pour la luminosité, le contraste, le gamma
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -1142,21 +1142,21 @@ options de rendu:
 présence de certaines variables d'environnement:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Définie le pilote caca recommandé, c-a-d. ncurses, slang, x11.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (X11 uniquement)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Spécifie le nombre de lignes de collones. par ex. 128x50.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (X11 uniquement)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Spécifie la police à utiliser. par ex. fixed, nexus.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1204,49 +1204,49 @@ une sortie indépendante).
 
 <itemizedlist spacing="compact">
 <title>AVANTAGES</title>
-<listitem><simpara>
+<listitem><para>
   Vous avez la possibilité de voir des films <emphasis role="bold">même si Linux ne
   connaît pas</emphasis> votre matériel vidéo.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Vous n'avez pas besoin d'avoir de logiciels graphiques installés sur votre Linux
   (comme X11 (alias XFree86), fbdev et autres). Ce pilote peut fonctionner en
   <emphasis role="bold">mode texte</emphasis>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Vous avez des chances de faire <emphasis role="bold">fonctionner la sortie TV</emphasis>
   (C'est le cas au moins pour les cartes ATI).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Ce pilote appelle le gestionnaire <function>int 10h</function> ainsi ce n'est pas un
   émulateur - il appelle des choses <emphasis role="bold">réelles</emphasis> dans le BIOS
   <emphasis>réel</emphasis> en <emphasis>mode réel</emphasis> (pour l'instant en mode vm86).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Vous pouvez l'utiliser avec VIDIX, accélérant ainsi l'affichage vidéo
   <emphasis role="bold">et</emphasis> la sortie TV en même temps (recommandé pour les cartes ATI) !
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   si vous avez un BIOS VESA VBE 3.0+, et que vous avez spécifié
   <systemitem>monitor-hfreq, monitor-vfreq, monitor-dotclock</systemitem> quelque part
   (fichier de config, ou ligne de commande) vous aurez le plus haut taux de
   rafraîchissement possible (en utilisant la Formule Générale de Timing).
   Pour activer cette fonctionnalité vous devrez spécifier
   <emphasis role="bold">toutes</emphasis> les options de votre moniteur.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
 <title>DÉSAVANTAGES</title>
-<listitem><simpara>
+<listitem><para>
   Il ne fonctionne que sur les <emphasis role="bold">systèmes x86</emphasis>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Il ne peut être utilisé qu'en <systemitem class="username">root</systemitem>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Pour l'instant il n'est disponible que pour <emphasis role="bold">Linux</emphasis>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <important>
@@ -1261,19 +1261,19 @@ fonctionnera pas !
 <title>OPTIONS EN LIGNE DE COMMANDE POUR VESA</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     actuellement reconnu: <literal>dga</literal> pour forcer le mode dga et
     <literal>nodga</literal>pour le désactiver. En mode dga vous pouvez
     activer le double buffering via l'option <option>-double</option>. Note: vous
     pouvez omettre ces paramètres pour activer l'<emphasis role="bold">autodétection</emphasis>
     du mode dga.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
 <title>PROBLÈMES CONNUS ET CONTOURNEMENTS</title>
-<listitem><simpara>
+<listitem><para>
   Si vous avez installé des polices <emphasis role="bold">NLS</emphasis> sur votre
   Linux box et que vous lancez le pilote VESA depuis le mode texte alors après la
   fermeture de <application>MPlayer</application> vous aurez la
@@ -1282,27 +1282,27 @@ fonctionnera pas !
   <command>setsysfont</command> de la distribution Mandrake/Mandriva par exemple.
   (<emphasis role="bold">Astuce</emphasis>: Le même utilitaire peut être utilisé pour
   la localisation de fbdev).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Certains <emphasis role="bold">pilotes graphiques Linux</emphasis> de mettent pas à
   jour le <emphasis role="bold">mode BIOS</emphasis> actif en mémoire DOS.
   Donc si vous avez un tel problème - utilisez toujours le pilote VESA uniquement
   depuis le <emphasis role="bold">mode texte</emphasis>.
   Sinon le mode texte (#03) sera activé de toute façon et vous devrez redémarrer
   votre ordinateur.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Souvent après la fin du pilote VESA vous avez un
   <emphasis role="bold">écran noir</emphasis>.
   Pour retourner à l'état original de votre écran - passez simplement sur une autre
   console (en tapant <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>) et revenez
   à la première de la même façon.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Pour faire <emphasis role="bold">fonctionner la sortie TV</emphasis> vous
   devez avoir branché le connecteur TV avant le démarrage de votre PC car
   le BIOS vidéo s'initialise uniquement à ce moment-là.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -1333,16 +1333,16 @@ vidéo à la place. C'est très simple. Voyez la <link linkend="dga-modelines">s
 des modelines DGA</link>, et insérez-les dans votre <filename>XF86Config</filename>.
 
 <itemizedlist spacing="compact">
-<listitem><simpara>
+<listitem><para>
   Si vous avez XFree86 4.x.x: utilisez l'option <option>-vm</option>. Elle changera de
   résolution pour s'adapter à celle de votre film. Si non:
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Avec XFree86 3.x.x: Vous devrez parcourir les résolutions possibles avec les touches
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
   et
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>moins</keycap>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
@@ -1381,7 +1381,7 @@ vitesse de la lecture vidéo.
 
 <itemizedlist spacing="compact">
 <title>UTILISATION</title>
-<listitem><simpara>
+<listitem><para>
   Vous pouvez utiliser le pilote de sortie vidéo autonome: <option>-vo xvidix</option>.
   Ce pilote à été développé comme un front end X11 pour la technologie VIDIX. Il
   requiert un serveur X et ne peut fonctionner que sous X. Notez que, comme il accède
@@ -1393,8 +1393,8 @@ vitesse de la lecture vidéo.
   votre carte moins 4Mo.
   Si vous avez moins de 8Mo de mémoire vidéo, vous pouvez utiliser l'option
   "XaaNoPixmapCache" dans la section "screen" à la place.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Il existe un pilote console VIDIX: <option>-vo cvidix</option>.
   Celui-ci requiert un framebuffer fonctionnel et initialisé pour la plupart
   des cartes (ou sinon vous brouillerez simplement l'écran), et vous aurez un
@@ -1402,12 +1402,12 @@ vitesse de la lecture vidéo.
   Les cartes nVidia par contre sont capables d'afficher de la vidéo graphique
   dans une console texte. Voir la section
   <link linkend="vidix-nvidia">nvidia_vid</link> pour plus d'informations.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Vous pouvez utiliser le sous-périphérique VIDIX qui à été appliqué à de nombreux
   pilotes de sortie vidéo, tels que: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">Linux uniquement</emphasis>) et <option>-vo fbdev:vidix</option>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -1417,15 +1417,15 @@ n'a pas d'importance.
 
 <itemizedlist spacing="compact">
 <title>BESOINS</title>
-<listitem><simpara>
+<listitem><para>
   La carte graphique devrait être en mode graphique (excepté les cartes nVidia
   avec le pilote <option>-vo cvidix</option>).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Le pilote de sortie vidéo de <application>MPlayer</application> devrait
   connaître les modes vidéos actifs et être capable de donner au sous-périphérique
   VIDIX quelques caractéristiques du serveur.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <formalpara>
@@ -2358,24 +2358,24 @@ leur technologie Macrovision sous licence.
 
 <itemizedlist>
 <title>ÉTAT DE LA SORTIE TV ATI SUR LINUX</title>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">ATI Mach64</emphasis>:
   supporté par <ulink url="http://gatos.sf.net">GATOS</ulink>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
   supporté par <ulink url="http://gatos.sf.net">GATOS</ulink>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Radeon</emphasis> et <emphasis role="bold">Rage128</emphasis>:
   supporté par <application>MPlayer</application> !
   Vérifiez les sections <link linkend="vesa">pilote VESA</link> et
   <link linkend="vidix">VIDIX</link>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
   supporté par <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -2454,29 +2454,29 @@ d'un encodeur TV analogique simple, certains en ont un plus avancé.
   Pour switcher vers la TV tapez <keycap>Fn</keycap>+<keycap>F5</keycap> trois fois.
   Testé sur un Tecra 8000, noyau 2.6.15 avec vesafb, ALSA v1.0.10.
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">chip Chrontel 70xx encoder</emphasis>:
   Présent dans l'IBM Thinkpad 390E et probablement dans d'autres Thinkpads ou portables.
-  </simpara><simpara>
+  </para><para>
   Vous devez utiliser <option>-vo vesa:neotv_pal</option> pour PAL ou
   <option>-vo vesa:neotv_ntsc</option> pour NTSC.
   Cela fournira la sortie TV dans les modes 16 bpp et 8 bpp suivants:
-  </simpara>
+  </para>
   <itemizedlist>
-    <listitem><simpara>NTSC 320x240, 640x480 et peut être aussi 800x600.</simpara></listitem>
-    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.</simpara></listitem>
+    <listitem><para>NTSC 320x240, 640x480 et peut être aussi 800x600.</para></listitem>
+    <listitem><para>PAL  320x240, 400x300, 640x480, 800x600.</para></listitem>
   </itemizedlist>
-  <simpara>le mode 512x384 n'est pas supporté par le BIOS. Vous devez redimmensionner
+  <para>le mode 512x384 n'est pas supporté par le BIOS. Vous devez redimmensionner
   l'image à une résolution différente pour activer la sortie TV. Si vous voyez
   une image sur l'écran en 640x480 ou en 800x600 mais pas en 320x240 ou autre
   résolution plus faible, vous devez remplacer deux tables dans <filename>vbelib.c</filename>.
   Voir la fonction vbeSetTV pour plus de détails. Veuillez contacter l'auteur dans
   ce cas.
-  </simpara>
-  <simpara>
+  </para>
+  <para>
   Problèmes connus: VESA uniquement, aucun autre contrôle tel que luminosité,
   contraste, blacklevel, flickfilter n'est implémenté.
-  </simpara>
+  </para>
 </listitem>
 </itemizedlist>
 </para>

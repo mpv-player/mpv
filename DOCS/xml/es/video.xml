@@ -568,37 +568,37 @@ funciona bien con todos los controladores de chipsets para XFree existentes.
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   Con XFree 4.0.3 y <filename>nv.o</filename> hay un fallo que resulta en
   extraños colores.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   El controlador ATI requiere cambiar el modo original más de una vez una
   vez finaliza el uso de DGA.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Algunos controladores símplemente fallan al volver a la resolución
   normal (use
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> y 
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   para volver al modo normal de manera manual).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Algunos controladores símplemente muestran colores extraños.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Algunos controladores se quejan de la cantidad de memoria que intenta
   mapear el espacio de direcciones del proceso, incluso cuando vo_dga no
   quiere usar doblebuffering (¿SIS?).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Algunos controladores parecen fallar informando de un único modo
   válido. En este caso el controlador DGA falla diciendole que no tiene
   sentido el modo 100000x100000 o algo así.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   OSD solo funciona con doblebuffering activado (si no parpadea).
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 </sect4>
@@ -642,29 +642,29 @@ en la (si está presente) banda negra.
 <title>Hay varias opciones en la línea de órdenes para SDL:</title>
 <varlistentry>
   <term><option>-vo sdl:<replaceable>nombre</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     especifica el controlador de SDL de video a usar (i.e. <literal>aalib</literal>,
     <literal>dga</literal>, <literal>x11</literal>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-ao sdl:<replaceable>nombre</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     especifica el controlador de SDL de audio a usar (i.e. <literal>dsp</literal>,
     <literal>esd</literal>, <literal>arts</literal>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-noxv</option></term>
-  <listitem><simpara>
+  <listitem><para>
     desactiva la aceleración hardware XVideo
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-forcexv</option></term>
-  <listitem><simpara>
+  <listitem><para>
     intenta forzar la aceleración XVideo
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -687,14 +687,14 @@ en la (si está presente) banda negra.
 
 <itemizedlist>
 <title>Fallos conocidos:</title>
-<listitem><simpara>
+<listitem><para>
   Al pulsar teclas bajo una consola sdl:aalib el controlador la repite
   indefinidamente. (¡Mejor use la opción <option>-vo aa</option>!) Es un
   fallo de SDL, yo no puedo cambiarlo (probado con SDL 1.2.1).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   ¡NO USE SDL con GUI! El comportamiento no será el esperado.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </sect4>
 
@@ -731,12 +731,12 @@ puede usar con las siguientes configuraciones de equipos:
 </formalpara>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   Tarjeta EGA con monitor EGA: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Tarjeta EGA con monitor CGA: 320x200x4bpp, 640x200x4bpp
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -801,30 +801,30 @@ La salida FBdev toma parámetros adicionales sobre los otros:
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
-  <listitem><simpara>
+  <listitem><para>
     especifica el dispositivo framebuffer a usar (<filename>/dev/fb0</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
-  <listitem><simpara>
+  <listitem><para>
     nombre del modo a usar (de acuerdo con <filename>/etc/fb.modes</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
-  <listitem><simpara>
+  <listitem><para>
     archivo de configuración de modos (por defecto <filename>/etc/fb.modes</filename>)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
-  <listitem><simpara>
+  <listitem><para>
     valores importantes <emphasis role="bold">important</emphasis>, vea
     <filename>example.conf</filename>
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1081,27 +1081,27 @@ de renderizado:
 algunas de las más importantes:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
-  <listitem><simpara>
+  <listitem><para>
     establecer el controlador aa recomendado (X11, curses, Linux)
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
-  <listitem><simpara>
+  <listitem><para>
     usar los 256 caracteres
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
-  <listitem><simpara>
+  <listitem><para>
     usar ASCII de ocho bit
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
-  <listitem><simpara>
+  <listitem><para>
     muestra todas las opciones de aalib
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1158,20 +1158,20 @@ caca libvo será construido.
 <itemizedlist>
 <title>Las diferencias con <systemitem class="library">AAlib</systemitem> son las
 siguientes:</title>
-<listitem><simpara>
+<listitem><para>
   16 colores disponibles para la salida de caracteres (256 pares de colores)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   difuminado del color de la imagen
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Pero <systemitem class="library">libcaca</systemitem> también tiene las siguientes
 limitaciones:</title>
-<listitem><simpara>
+<listitem><para>
   no soporta brillo, contraste, gamma
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -1202,21 +1202,21 @@ Puede usar algunas teclas en la ventana caca para cambiar opciones de renderizad
 variables de entorno:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Establece el controlador caca recomendado, e.g. ncurses, slang, x11.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_GEOMETRY (solo X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Especifica el número de filas y columnas. e.g. 128x50.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>CACA_FONT (solo X11)</option></term>
-  <listitem><simpara>
+  <listitem><para>
     Especifica la tipografía a usar. e.g. fixed, nexus.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -1266,51 +1266,51 @@ al menos una salida individual.)
 
 <itemizedlist spacing="compact">
 <title>VENTAJAS</title>
-<listitem><simpara>
+<listitem><para>
   Le permite ver sus películas <emphasis role="bold">incluso si Linux no
   conoce</emphasis> su hardware de video.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   No necesita tener instalado nada relacionado con gráficos en su Linux
   (como X11 (también conocido como XFree86), fbdev ni nada por el estilo).
   Este controlador puede funcionar en <emphasis role="bold">modo-texto</emphasis>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Puede hacer <emphasis role="bold">funcionar la salida-TV</emphasis>.
   (Esto es conocido al menos para las tarjetas ATI).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Este controlador llama al manejador <function>int 10h</function> y no
   realiza una emulación - hace llamas <emphasis role="bold">reales</emphasis>
   de BIOS <emphasis>real</emphasis> en <emphasis>modo-real</emphasis>.
   (actualmente en modo vm86).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Puede usar VIDIX con él, obteniendo pantalla de gráficos acelerados
   <emphasis role="bold">y</emphasis> salida TV al mismo tiempo!
   (Recomendado para tarjetas ATI.)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Si tiene VESA VBE 3.0+, y especifica
   <systemitem>monitor-hfreq, monitor-vfreq, monitor-dotclock</systemitem> en
   algún sitio (archivo de configuración, o línea de órdenes) podrá obtener
   la tasa de refresco mayor posible. (Usando la Fórmula de Temporización General).
   Para activar ésta característica debe especificar <emphasis role="bold">todas</emphasis>
   las opciones de su monitor.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist spacing="compact">
 <title>DESVENTAJAS</title>
-<listitem><simpara>
+<listitem><para>
   Solo funciona en <emphasis role="bold">sistemas x86</emphasis>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Solo puede ser usado por <systemitem class="username">root</systemitem>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   En la actualidad solo está disponible para  <emphasis role="bold">Linux</emphasis>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <important>
@@ -1324,19 +1324,19 @@ No use este controlador con <emphasis role="bold">GCC 2.96</emphasis>!
 <title>OPCIONES EN LA LÍNEA DE ÓRDENES PARA VESA</title>
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
-  <listitem><simpara>
+  <listitem><para>
     reconocidas actualmente: <literal>dga</literal> para forzar el modo dga
     y <literal>nodga</literal> para desactivar el modo dga. En modo dga puede
     activar doble buffering mediante la opción <option>-double</option>. Nota:
     puede omitir estos parámetros activando
     <emphasis role="bold">autodetección</emphasis> del modo dga.
-    </simpara></listitem>
+    </para></listitem>
 </varlistentry>
 </variablelist>
 
 <itemizedlist spacing="compact">
 <title>PROBLEMAS CONOCIDOS Y SUS SOLUCIONES</title>
-<listitem><simpara>
+<listitem><para>
   Si tiene instalada una tipografía <emphasis role="bold">NLS</emphasis> en
   su equipo Linux y ejecuta el controlador VESA en modo-texto entonces después
   de terminar <application>MPlayer</application> tendrá cargada una
@@ -1345,26 +1345,26 @@ No use este controlador con <emphasis role="bold">GCC 2.96</emphasis>!
   <command>setsysfont</command> de la distribución Mandrake por ejemplo.
   (<emphasis role="bold">Consejo</emphasis>: La misma utilidad se usa para
   la localización de fbdev).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Algunos <emphasis role="bold">controladores gráficos para Linux</emphasis>
   no actualizan el <emphasis role="bold">modo BIOS</emphasis> activo en la
   memoria DOS. Si tiene ese problema - use siempre el controlador VESA solo
   en <emphasis role="bold">modo-texto</emphasis>. De otro modo
   el modo texto (#03) será activado de todas maneras y tendrá que reiniciar
   la computadora.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Además puede obtener una pantalla <emphasis role="bold">negra</emphasis> cuando
   el controlador VESA termine. Para volver al estado original de la pantalla -
   símplemente cambie a otra consola (pulsando <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>)
   y vuelva a la consola original del mismo modo.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Para  hacer que <emphasis role="bold">funcione la salida-TV</emphasis> deberá
   tener conectado el conector de TV antes de iniciar el PC porque la BIOS de video
   lo inicia automáticamente durante el proceso POST.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </sect4>
 
@@ -1396,17 +1396,17 @@ Es muy simple. Vea los <link linkend="dga-modelines">la sección de modos de
 DGA</link>, e insertela en su <filename>XF86Config</filename>.
 
 <itemizedlist spacing="compact">
-<listitem><simpara>
+<listitem><para>
   Si tiene XFree86 4.x.x: use la opcioón <option>-vm</option>. Esto cambiará
   a una resolución donde la película se ajuste. Si no lo hace:
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Con XFree86 3.x.x: tiene que cambiar entre las resoluciones disponibles
   con las teclas
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
   y 
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
@@ -1445,7 +1445,7 @@ de la reproducción de video.
 
 <itemizedlist spacing="compact">
 <title>USO</title>
-<listitem><simpara>
+<listitem><para>
   Puede usar un controlador de salida de video individual:
   <option>-vo xvidix</option>. Este controlador ha sido desarrollado como u
   front end de X11 a la tecnología VIDIX. Requiere un servidor X y puede funcionar
@@ -1456,8 +1456,8 @@ de la reproducción de video.
   XF86Config en la sección device. Debe establecer el valor a la cantidad de
   memoria instalada en su tarjeta menos 4MB. Si tiene menos de 8MB de ram de
   video, puede usar la opción "XaaNoPixmapCache" en la sección screen en su lugar.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Hay un controlador de consola VIDIX: <option>-vo cvidix</option>.
   Requiere un framebuffer inicializado y funcionando para muchas tarjetas (o
   fastidiará su pantalla), y obtendrá un efecto similar al que se obtiene con
@@ -1465,12 +1465,12 @@ de la reproducción de video.
   embargo, son capaces de mostrar gráficos reales de video sobre una consola
   de texto real. Vea la sección <link linkend="vidix-nvidia">nvidia_vid</link>
   para más información.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Puede usar el subdispositivo VIDIX aplicado a varios controladores de salida
   de video, tales como: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">solo en Linux</emphasis>) y <option>-vo fbdev:vidix</option>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -1480,15 +1480,15 @@ Como ve no impora qué controlador de salida de video se usa con
 
 <itemizedlist spacing="compact">
 <title>REQUISITOS</title>
-<listitem><simpara>
+<listitem><para>
   La tarjeta gráfica debe estar en modo gráfico (excepto las tarjetas nVidia
   con el controlador de salida <option>-vo cvidix</option>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   El controlador de salida de video de <application>MPlayer</application> debe
   conocer el modo de video activo y ser capaz de decir al subdispositivo
   VIDIX algunas características de video del servidor.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <formalpara>
@@ -2500,24 +2500,24 @@ debido a los problemas de licencia de la tecnología Macrovision.
 
 <itemizedlist>
 <title>ESTADO DE LA SALIDA DE TV DE LAS TARJETAS ATI EN LINUX</title>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">ATI Mach64</emphasis>:
   soportado por <ulink url="http://gatos.sf.net">gatos</ulink>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
   soportado por <ulink url="http://gatos.sf.net">gatos</ulink>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Radeon</emphasis> y <emphasis role="bold">Rage128</emphasis>:
   soportados por <application>MPlayer</application>!
   Consulte el <link linkend="vesa">controlador VESA</link> y la secciones
   <link linkend="vidix">VIDIX</link>.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
   soportado por <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>

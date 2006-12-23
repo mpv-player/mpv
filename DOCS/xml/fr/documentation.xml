@@ -114,63 +114,63 @@ audio <emphasis role="bold">PCM/MP3/MP3 VBR</emphasis>.
 
 <itemizedlist>
 <title>Fonctionnalités de <application>MEncoder</application></title>
-<listitem><simpara>Encodage à partir de la grande variété de formats de fichiers
-et de décodeurs de <application>MPlayer</application></simpara></listitem>
-<listitem><simpara>
+<listitem><para>Encodage à partir de la grande variété de formats de fichiers
+et de décodeurs de <application>MPlayer</application></para></listitem>
+<listitem><para>
   Encodage dans tous les codecs
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> de ffmpeg
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Encodage vidéo depuis <emphasis role="bold">les tuners TV compatibles V4L</emphasis>
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Encodage/multiplexage vers fichiers AVI entrelacés avec index propre
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Création de fichiers à partir de flux audio externes
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Encodage 1, 2 ou 3 passes
-</simpara></listitem>
+</para></listitem>
 <listitem><para>
   MP3 audio <emphasis role="bold">VBR</emphasis>
-  <important><simpara>
+  <important><para>
   L'audio MP3 VBR peut ne pas être bien lu sur les lecteurs Windows!
-  </simpara></important>
+  </para></important>
 </para></listitem>
-<listitem><simpara>
+<listitem><para>
   PCM audio
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Copie de flux (stream)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Synchronisation A/V de la source (basé sur PTS, peut être désactivé avec l'option
   <option>-mc 0</option>)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Correction FPS avec l'option <option>-ofps</option> (utile
   pour l'encodage d'un VOB 29.97fps en AVI 24fps)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Utilise notre très puissant système de plugins (crop, expand,
   flip, postprocess, rotate, scale, conversion rgb/yuv)
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Peut encoder les sous-titres DVD/VOBsub <emphasis role="bold">ET</emphasis>
   texte dans le fichier de destination
-</simpara></listitem>
-<listitem><simpara>
+</para></listitem>
+<listitem><para>
   Peut ripper les sous-titres DVD en format VOBsub
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Fonctionnalités prévues</title>
-<listitem><simpara>
+<listitem><para>
   Toujours plus de formats/codecs disponibles
   (création de fichiers VOB avec des flux DivX4/Indeo5/VIVO :)
-</simpara></listitem>
+</para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->

@@ -152,60 +152,60 @@ Puede obtener una lista completa ejecutando
 
 <itemizedlist>
 <title>Teclado</title>
-<listitem><simpara>Cualquier caracter imprimible</simpara></listitem>
-<listitem><simpara><literal>SPACE</literal></simpara></listitem>
-<listitem><simpara><literal>ENTER</literal></simpara></listitem>
-<listitem><simpara><literal>TAB</literal></simpara></listitem>
-<listitem><simpara><literal>CTRL</literal></simpara></listitem>
-<listitem><simpara><literal>BS</literal></simpara></listitem>
-<listitem><simpara><literal>DEL</literal></simpara></listitem>
-<listitem><simpara><literal>INS</literal></simpara></listitem>
-<listitem><simpara><literal>HOME</literal></simpara></listitem>
-<listitem><simpara><literal>END</literal></simpara></listitem>
-<listitem><simpara><literal>PGUP</literal></simpara></listitem>
-<listitem><simpara><literal>PGDWN</literal></simpara></listitem>
-<listitem><simpara><literal>ESC</literal></simpara></listitem>
-<listitem><simpara><literal>RIGHT</literal></simpara></listitem>
-<listitem><simpara><literal>LEFT</literal></simpara></listitem>
-<listitem><simpara><literal>UP</literal></simpara></listitem>
-<listitem><simpara><literal>DOWN</literal></simpara></listitem>
+<listitem><para>Cualquier caracter imprimible</para></listitem>
+<listitem><para><literal>SPACE</literal></para></listitem>
+<listitem><para><literal>ENTER</literal></para></listitem>
+<listitem><para><literal>TAB</literal></para></listitem>
+<listitem><para><literal>CTRL</literal></para></listitem>
+<listitem><para><literal>BS</literal></para></listitem>
+<listitem><para><literal>DEL</literal></para></listitem>
+<listitem><para><literal>INS</literal></para></listitem>
+<listitem><para><literal>HOME</literal></para></listitem>
+<listitem><para><literal>END</literal></para></listitem>
+<listitem><para><literal>PGUP</literal></para></listitem>
+<listitem><para><literal>PGDWN</literal></para></listitem>
+<listitem><para><literal>ESC</literal></para></listitem>
+<listitem><para><literal>RIGHT</literal></para></listitem>
+<listitem><para><literal>LEFT</literal></para></listitem>
+<listitem><para><literal>UP</literal></para></listitem>
+<listitem><para><literal>DOWN</literal></para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Ratón (solo funciona bajo X)</title>
-<listitem><simpara>
-  <literal>MOUSE_BTN0</literal> (Botón izquierdo)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN1</literal> (Botón derecho)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN2</literal> (Botón central)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN3</literal> (Rueda)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN4</literal> (Rueda)</simpara></listitem>
-<listitem><simpara>...</simpara></listitem>
-<listitem><simpara><literal>MOUSE_BTN9</literal></simpara></listitem>
+<listitem><para>
+  <literal>MOUSE_BTN0</literal> (Botón izquierdo)</para></listitem>
+<listitem><para>
+  <literal>MOUSE_BTN1</literal> (Botón derecho)</para></listitem>
+<listitem><para>
+  <literal>MOUSE_BTN2</literal> (Botón central)</para></listitem>
+<listitem><para>
+  <literal>MOUSE_BTN3</literal> (Rueda)</para></listitem>
+<listitem><para>
+  <literal>MOUSE_BTN4</literal> (Rueda)</para></listitem>
+<listitem><para>...</para></listitem>
+<listitem><para><literal>MOUSE_BTN9</literal></para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Palanca de juegos (para que funcione debe habilitarse durante la compilación)</title>
-<listitem><simpara>
+<listitem><para>
   <literal>JOY_RIGHT</literal> o
-  <literal>JOY_AXIS0_PLUS</literal></simpara></listitem>
-<listitem><simpara>
+  <literal>JOY_AXIS0_PLUS</literal></para></listitem>
+<listitem><para>
   <literal>JOY_LEFT</literal> o
-  <literal>JOY_AXIS0_MINUS</literal></simpara></listitem>
-<listitem><simpara>
+  <literal>JOY_AXIS0_MINUS</literal></para></listitem>
+<listitem><para>
   <literal>JOY_UP</literal> o
-  <literal>JOY_AXIS1_MINUS</literal></simpara></listitem>
-<listitem><simpara>
+  <literal>JOY_AXIS1_MINUS</literal></para></listitem>
+<listitem><para>
   <literal>JOY_DOWN</literal> o
-  <literal>JOY_AXIS1_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS2_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS2_MINUS</literal></simpara></listitem>
-<listitem><simpara>...</simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS9_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS9_MINUS</literal></simpara></listitem>
+  <literal>JOY_AXIS1_PLUS</literal></para></listitem>
+<listitem><para><literal>JOY_AXIS2_PLUS</literal></para></listitem>
+<listitem><para><literal>JOY_AXIS2_MINUS</literal></para></listitem>
+<listitem><para>...</para></listitem>
+<listitem><para><literal>JOY_AXIS9_PLUS</literal></para></listitem>
+<listitem><para><literal>JOY_AXIS9_MINUS</literal></para></listitem>
 </itemizedlist>
 </sect3>
 
@@ -269,12 +269,12 @@ Puede obtener una lista completa de órdenes ejecutando
 <listitem><para><literal>volume</literal> (int) dir</para>
   <para>Incrementa/reduce el volumen
   </para></listitem>
-<listitem><simpara><literal>contrast</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
-<listitem><simpara><literal>brightness</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
-<listitem><simpara><literal>hue</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
+<listitem><para><literal>contrast</literal> (int) val [(int) abs=0]
+  </para></listitem>
+<listitem><para><literal>brightness</literal> (int) val [(int) abs=0]
+  </para></listitem>
+<listitem><para><literal>hue</literal> (int) val [(int) abs=0]
+  </para></listitem>
 <listitem><para><literal>saturation</literal> (int) val [(int) abs=0]</para>
   <para>
   Establece/Ajusta los parámetros de video. Rango de val entre -100 y 100.
@@ -316,13 +316,13 @@ Puede obtener una lista completa de órdenes ejecutando
   <para>
   Cambia la lista de canales.
   </para></listitem>
-<listitem><simpara><literal>gui_loadfile</literal></simpara></listitem>
-<listitem><simpara><literal>gui_loadsubtitle</literal></simpara></listitem>
-<listitem><simpara><literal>gui_about</literal></simpara></listitem>
-<listitem><simpara><literal>gui_play</literal></simpara></listitem>
-<listitem><simpara><literal>gui_stop</literal></simpara></listitem>
-<listitem><simpara><literal>gui_playlist</literal></simpara></listitem>
-<listitem><simpara><literal>gui_preferences</literal></simpara></listitem>
+<listitem><para><literal>gui_loadfile</literal></para></listitem>
+<listitem><para><literal>gui_loadsubtitle</literal></para></listitem>
+<listitem><para><literal>gui_about</literal></para></listitem>
+<listitem><para><literal>gui_play</literal></para></listitem>
+<listitem><para><literal>gui_stop</literal></para></listitem>
+<listitem><para><literal>gui_playlist</literal></para></listitem>
+<listitem><para><literal>gui_preferences</literal></para></listitem>
 <listitem><para><literal>gui_skinbrowser</literal></para>
   <para>
   Acciones para el GUI

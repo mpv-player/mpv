@@ -43,33 +43,33 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   MPG: C'est la forme la plus <emphasis role="bold">basique</emphasis> des formats
   de fichier MPEG. Il contient de la vidéo MPEG-1, et de l'audio MP2 (MPEG-1 layer 2)
   ou plus rarement MP1.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   DAT: C'est très exactement le même format que MPG mais avec une extension différente.
   Il est utilisé dans les <emphasis role="bold">Video CDs</emphasis>. A cause de
   la façon dont sont créés les VCDs et dont linux est conçu, les fichiers DAT ne
   peuvent être ni lus ni copiés depuis des VCDs en temps que fichiers réguliers.
   Vous devrez utiliser l'option <option>vcd://</option> pour lire un Video CD.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VOB: C'est le format de fichier MPEG des <emphasis role="bold">DVDs</emphasis>.
   C'est le même que MPG, plus la capacité de contenir des sous-titres et de
   l'audio non-MPEG (AC3). Il contient de la vidéo encodée en MPEG2 et généralement
   de l'audio AC3, mais DTS, MP2 et LPCM non-compressé sont également autorisés.
   Lisez la section <link linkend="dvd">DVD</link>!
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   TY: C'est un flux TiVo MPEG. Il contient les données MPEG PES pour les flux audio et
   vidéo, ainsi que des informations en plus comme les closed captions (CC). Le
   conteneur n'est pas un flux de programme MPEG, mais un format fermé créé par
   TiVo. Pour plus d'informations sur le format de flux TiVo, veuillez vous référer à
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   la page TyStudio</ulink>.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -123,38 +123,38 @@ peut lire, soit un flux DV brut pour lequel le support est en développement.
 <para>
 Il y a deux types de fichiers AVI:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Entrelacé:</emphasis> Les contenus audios et vidéos sont
   entrelacés. C'est l'utilisation standard. Recommandée et généralement utilisée.
   Certains outils créent des AVIs entrelacés avec une mauvaise synchro.
   <application>MPlayer</application> les détecte comme entrelacés, ce qui va
   enduire une perte de synchro A/V, probablement pendant un déplacement. Ces
   fichiers devraient être lu en tant que non-entrelacés (avec l'option <option>-ni</option>).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">Non-entrelacé:</emphasis> D'abord vient le flux vidéo
   entier, puis le flux audio entier. Il a donc besoin de beaucoup de déplacements,
   rendant la lecture depuis le réseau ou un CD-ROM difficile.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
 <para>
 <application>MPlayer</application> supporte deux types de synchro pour les fichiers AVI:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">basé sur bps</emphasis>: Basé sur le bitrate/samplerate du flux
   video/audio. Cette méthode est utilisé dans la plupart des lecteurs,
   incluant <ulink url="http://avifile.sf.net">avifile</ulink>
   et <application>Windows Media Player</application>. Les fichiers avec des entêtes endommagées,
   et les fichiers créés avec de l'audio VBR mais pas avec un encodeur VBR-compliant
   auront une désynchro A/V avec cette méthode (la plupart du temps en se déplaçant).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">basé sur l'entrelacement</emphasis>: N'utilise pas le bitrate
   de l'entête, à la place utilise la position relative des morceaux d'audio et de
   vidéo entrelacés, rendant lisibles les fichiers mal encodés avec de l'audio VBR.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 

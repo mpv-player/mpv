@@ -44,26 +44,26 @@ Los archivos MPEG vienen en diferentes formas:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   MPG: Esta es la forma más <emphasis role="bold">básica</emphasis> de
   los archivos de formato MPEG. Contiene video MPEG1, y audio MP2
   (MPEG-1 layer 2) o rara vez audio MP1.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   DAT: Este es exactamente el mismo formato que un MPG con la diferencia
   en la extensión. Es usado en <emphasis role="bold">Video CDs</emphasis>.
   Debido a la manera en la que se crean los VCDs y en la que Linux está
   diseñado, los archivos DAT no pueden ser reproducidos ni copiados
   desde VCDs como archivos regulares. Debe usar <option>vcd://</option>
   para reproducir un Video CD.
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VOB: Este es el formato de archivo MPEG en <emphasis role="bold">DVDs</emphasis>.
   Es el mismo que MPG, sumando la capacidad para contener subtítulos o audio
   no-MPEG (AC3). Contiene video codificado con MPEG2 y normalmente audio en
   AC3, pero DTS, MP2 y LPCM sin comprimir también está permitido.
   ¡<emphasis role="bold">Lea la sección de <link linkend="dvd">DVD</link></emphasis>!
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -123,7 +123,7 @@ para el que el soporte está siendo desarrollado.
 <para>
 Hay dos tipos de archivos AVI:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Interpolado:</emphasis> El contenido de audio y video
   es interpolado. Este es el uso estándar. Recomentado y mayormente usado.
   Algunas herramientas crean AVis interpolados con mala sincronización.
@@ -131,13 +131,13 @@ Hay dos tipos de archivos AVI:
   resulta en pérdida de sincronía A/V, probablemente en los posicionamientos.
   Estos archivos deben ser reproducidos como no-interpolados (con la
   opción <option>-ni</option>).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">No-interpolado:</emphasis> Primero tiene el flujo
   de video completo, después el de audio completo. Por ello necesita un
   montón de posicionamientos, haciendo la reproducción desde la red o
   CD-ROM difícil.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
@@ -145,7 +145,7 @@ Hay dos tipos de archivos AVI:
 <application>MPlayer</application> soporta dos tipos de temporizaciones
 para archivos AVI:
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">bps-based:</emphasis> Está basado en la tasa
   de bits/muestreo del flujo de video/audio. Este método es usado por
   la mayoría de los reproductores, incluyendo
@@ -154,13 +154,13 @@ para archivos AVI:
   cabecera en mal estado, y los archivos creados con audio en VBR pero
   no con un codificador VBR-compliant resultan en desincronización A/V
   con éste método (la mayoría de las veces en las búsquedas).
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">interleaving-based:</emphasis> No usa como valor
   de tasa de bits la de la cabecera, en lugar de eso usa una posición
   relativa de trozos de audio y video interpolados, creando archivos mal
   codificados con audio VBR reproducible.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 

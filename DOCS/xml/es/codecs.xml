@@ -18,53 +18,53 @@ Los más importantes por encima de todo son:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">MPEG1</emphasis> (<emphasis role="bold">VCD</emphasis>) y 
   <emphasis role="bold">MPEG2</emphasis> (<emphasis role="bold">DVD</emphasis>) video
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   decodificadores nativos para <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
   DivX 5.01, 3ivX, M$ MPEG4</emphasis> v1, v2 y otras variantes de MPEG4
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   decodificador nativo para <emphasis role="bold">Windows Media Video 7/8</emphasis>
   (<emphasis role="bold">WMV1/WMV2</emphasis>), y decodificador Win32 DLL
   para <emphasis role="bold">Windows Media Video 9</emphasis>
   (<emphasis role="bold">WMV3</emphasis>), ambos usados en archivos <filename>.wmv</filename>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   decodificador <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> nativo
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   decodificador <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> nativo
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   decodificador <emphasis role="bold">3ivx</emphasis> v1, v2
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Codecs Cinepak y <emphasis role="bold">Intel Indeo</emphasis> (3.1,3.2,4.1,5.0)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 y otros formatos de hardware
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   VIVO 1.0, 2.0, I263 y otras variantes <emphasis role="bold">h263(+)</emphasis>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   FLI/FLC
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> de
   <systemitem class="library">libavcodec</systemitem>, y
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> usando
   bibliotecas RealPlayer
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   decodificador nativo para HuffYUV
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Varios formatos antiguos simples tipo-RLE
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -101,17 +101,17 @@ disponible bajo una licencia de Código Abierto.
 DivX4 funciona de dos maneras:
 <variablelist>
 <varlistentry><term><option>-vc odivx</option></term>
-<listitem><simpara>
+<listitem><para>
   Usa el codec en el estilo OpenDivX. En este caso produce imágenes YV12
   en su propio buffer, y <application>MPlayer</application> hace la conversión
   en el espacio de color vía libvo. (<emphasis role="bold">¡Rápido, recomendado!</emphasis>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry><term><option>-vc divx4</option></term>
-<listitem><simpara>
+<listitem><para>
   Usa la conversión en el espacio de color del codec. En este modo puede usar
   YUY2/UYVY, también. (<emphasis role="bold">LENTO</emphasis>)
-  </simpara></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 </para>
@@ -389,14 +389,14 @@ si el controlador de salida de video lo permite.
 versiones de RealVideo:
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   RealVideo 1.0, 2.0 (fourcc RV10, RV20) - cod/decodificación soportada por
   <systemitem class="library">libavcodec</systemitem>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   RealVideo 3.0, 4.0 (fourcc RV30, RV40) - decodificación soportada por
   <emphasis role="bold">bibliotecas de RealPlayer</emphasis>
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
@@ -440,32 +440,32 @@ tengan el mismo origen.
 
 <itemizedlist>
 <title>VENTAJAS</title>
-<listitem><simpara>
+<listitem><para>
   código abierto
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   su API es compatible con DivX5 añadiendo soporte para que sea más fácil
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   soporte de codificación en 2-pasadas
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   muy buena calidad codificando, más velocidad que DivX4 (puede optimizarlo
   para su equipo compilándolo)
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>DESVENTAJAS</title>
-<listitem><simpara>
+<listitem><para>
   actualmente no <emphasis role="bold">decodifica</emphasis> bien todos los
   archivos DivX/DivX4 (no hay problema porque
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   puede reproducirlos)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   bajo desarrollo 
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
@@ -520,16 +520,16 @@ video Sorenson con los siguientes decodificadores:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - decodificación soportada
   por <emphasis role="bold">codec nativo</emphasis>
   (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - decodificación soportada
   por <emphasis role="bold">codec nativo</emphasis>
   (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <procedure>
@@ -555,46 +555,46 @@ video Sorenson con los siguientes decodificadores:
 
 <itemizedlist>
 <title>Los codecs de audio más importantes por encima de todo:</title>
-<listitem><simpara>
+<listitem><para>
   Audio MPEG layer 1/2/3 (MP1/2/3) (código <emphasis role="bold">nativo</emphasis>
   con optimización MMX/SSE/3DNow!)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Windows Media Audio 7 y 8 (aka WMAv1 y WMAv2) (código
   <emphasis role="bold">nativo</emphasis>, con
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   Windows Media Audio 9 (WMAv3) (usando DMO DLL)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   AC3 Dolby audio (código <emphasis role="bold">nativo</emphasis>, con optimización
   MMX/SSE/3DNow!)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   AC3 pasando a través de hardware de tarjeta de sonido
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   AAC
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   codec de audio Ogg Vorbis (biblioteca <emphasis role="bold">nativa</emphasis>)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   RealAudio: DNET (AC3 con baja tasa de bits), Cook, Sipro y ATRAC3
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   QuickTime: codecs de audio Qualcomm y QDesign
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   audio VIVO (g723, Vivo Siren)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   audio Voxware (usando DLL DirectShow)
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   alaw y ulaw, varios formatos gsm, adpcm y pcm y otros codecs de audio simples viejos
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 
@@ -690,14 +690,14 @@ versiones de RealAudio:
 </para>
 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   RealAudio DNET - decodificación soportada por
   <systemitem class="library">liba52</systemitem>
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   RealAudio Cook/Sipro/ATRAC3 - decodificación soportada por
   <emphasis role="bold">bibliotecas RealPlayer</emphasis>
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
@@ -819,13 +819,13 @@ vea el antiguo método DirectShow más abajo.
 DirectShow es la nueva API de Video, que es incluso peor que su predecesor.
 Las cosas son más difíciles con DirectShow, ya que 
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <filename>system.ini</filename> no contiene la información necesaria,
   en lugar de eso está guardada en el registro y
-  </simpara></listitem>
-<listitem><simpara>
+  </para></listitem>
+<listitem><para>
   se necesita el GUID del codec.
-  </simpara></listitem>
+  </para></listitem>
 </itemizedlist>
 </para>
 
