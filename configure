@@ -1462,8 +1462,9 @@ EOF
 esac # case "$host_arch" in
 
 if test "$_runtime_cpudetection" = yes ; then
-  if x86; then
-    _cmov=no
+  if x86 || x86_64 ; then
+    _cmov=yes
+    x86 && _cmov=no
     _mmx=yes
     _3dnow=yes
     _3dnowext=yes
