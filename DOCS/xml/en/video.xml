@@ -581,8 +581,9 @@ with every chipset driver for XFree out there.
 </simpara></listitem>
 <listitem><simpara>
   Some drivers simply fail to switch back to normal resolution (use
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> and
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad +</keycap></keycombo>
+  and
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>
   to switch back manually).
 </simpara></listitem>
 <listitem><simpara>
@@ -1288,8 +1289,8 @@ It won't work!
 <listitem><simpara>
   Often after terminating VESA driver you get
   <emphasis role="bold">black</emphasis> screen. To return your screen to
-  original state - simply switch to other console
-  (by pressing <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>)
+  original state - simply switch to other console (by pressing
+  <keycombo><keycap>Alt</keycap><keycap>F&lt;x&gt;</keycap></keycombo>)
   then switch to your previous console by the same way.
 </simpara></listitem>
 <listitem><simpara>
@@ -1334,9 +1335,9 @@ modelines</link>, and insert them into your <filename>XF86Config</filename>.
 <listitem><simpara>
   With XFree86 3.x.x: you have to cycle through available resolutions
   with the
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap>
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad +</keycap></keycombo>
   and
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>
   keys.
 </simpara></listitem>
 </itemizedlist>
@@ -2315,7 +2316,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
    --></screen>
 
       (If you use X, now change to matroxfb with for example
-      <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>F1</keycap>.)
+      <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>F1</keycap></keycombo>.)
       Change <literal>640</literal> and <literal>512</literal> if you set
       the resolution to other...
     </para></step>
@@ -2488,7 +2489,8 @@ with a simple analog TV encoder, some have a more advanced one.
   the following parameters on the kernel command line:
   <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
   You should start <application>X</application>, then switch to console mode
-  with e.g. <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>.
+  with e.g.
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>F1</keycap></keycombo>.
   If you fail to start <application>X</application> before running
   <application>MPlayer</application> from the console, the video
   becomes slow and choppy (explanations are welcome).
@@ -2497,8 +2499,8 @@ with a simple analog TV encoder, some have a more advanced one.
   <screen>clear; mplayer -vo fbdev -zoom -cache 8192 dvd://</screen>
 
   Now you should see the movie running in console mode filling up about
-  half your laptop's LCD screen.
-  To switch to TV hit <keycap>Fn</keycap>+<keycap>F5</keycap> three times.
+  half your laptop's LCD screen. To switch to TV hit
+  <keycombo><keycap>Fn</keycap><keycap>F5</keycap></keycombo> three times.
   Tested on a Tecra 8000, 2.6.15 kernel with vesafb, ALSA v1.0.10.
 </para></listitem>
 <listitem>
