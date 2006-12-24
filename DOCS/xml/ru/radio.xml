@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21748 -->
 <chapter id="radio">
 <title>Радио</title>
 
@@ -38,6 +38,7 @@
 <para>
 Полный список опций доступен на страницах руководства (man).
 Вот всего несколько советов:
+
 <itemizedlist>
 <listitem><para>
   Использование <option>channels</option> опции. Пример:

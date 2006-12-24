@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21741 -->
+<!-- synced with r21748 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -235,9 +235,6 @@ mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
 <sect1 id="control">
 <title>Управление</title>
 
@@ -363,8 +360,6 @@ end<!--
 </sect2>
 </sect1>
 
-<!-- ********** -->
-
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
@@ -382,19 +377,25 @@ HTTP, FTP, MMS или RTSP/RTP протокол.
 Также, <application>MPlayer</application> учитывает переменную среды
 <envar>http_proxy</envar> и использует прокси[proxy], если это возможно.
 Также можно заставить использовать прокси:
-<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
+<screen>
+mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable>
+</screen>
 </para>
 
 <para>
 <application>MPlayer</application> может считывать данные со стандартного входа
 (а <emphasis>не</emphasis> из поименованных каналов). Это может, например,
 использоваться при проигрывании файлов по FTP:
-<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -</screen>
+<screen>
+wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -
+</screen>
 </para>
 
 <note><para>
 Мы рекомендуем включать <option>-cache</option> при проигрывании из сети:
-<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
+<screen>
+wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -
+</screen>
 </para></note>
 
 <!-- ********** -->
@@ -418,7 +419,6 @@ mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfi
 </sect2>
 </sect1>
 
-<!-- ********** -->
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 

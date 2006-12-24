@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21748 -->
 <chapter id="tv">
 <title>TV</title>
 
@@ -39,7 +39,6 @@
 <para>
 Полный список опций доступен на страницах руководства (man).
 Вот всего несколько советов:
-</para>
 
 <itemizedlist>
 <listitem><para>
@@ -139,6 +138,7 @@
   звукового сервера.
 </para></listitem>
 </itemizedlist>
+</para>
 </sect2>
 
 <!-- ********** -->

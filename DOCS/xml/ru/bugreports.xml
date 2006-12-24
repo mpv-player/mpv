@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21760 -->
 <appendix id="bugreports">
 <title>Как сообщать об ошибках</title>
 
@@ -65,8 +65,9 @@
 
 <para>
 Во-первых, вам нужно получить исходный код MPlayer из Subversion.
-Инструкции могут быть найдены в нижней части 
-<ulink url="http://www.mplayerhq.hu/dload.html">этой страницы</ulink>.
+Инструкции могут быть найдены в
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#svn">разделе Subversion
+страницы закачки</ulink>.
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21744 -->
+<!-- synced with r21748 -->
 <chapter id="mencoder">
 <title>Основы использования <application>MEncoder</application></title>
 
@@ -49,10 +49,7 @@
 </row>
 <row>
   <entry>lavc</entry>
-  <entry>
-  Используйте один из кодеков библиотеки 
-  <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem></link>
-  </entry>
+  <entry>Используйте один из кодеков библиотеки <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem></link></entry>
 </row>
 <row>
   <entry>faac</entry>
@@ -89,9 +86,7 @@
 <tbody>
 <row>
   <entry>lavc</entry>
-  <entry>
-  Используйте один из кодеков библиотеки <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem></link>
-  </entry>
+  <entry>Используйте один из кодеков библиотеки <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem></link></entry>
 </row>
 <row>
   <entry>xvid</entry>
@@ -318,7 +313,6 @@ DVD ролика или VCD дорожки.
 
 <sect1 id="menc-feat-mpeg4">
 <title>Двухпроходное кодирование MPEG-4 ("DivX")</title>
-
 <para>
 Название происходит из того факта, что кодирование файла производится 
 <emphasis>дважды</emphasis>.
