@@ -67,8 +67,8 @@ occurred. This is <emphasis role="bold">not</emphasis> for casual users.
 
 <para>
 First, you'd need to fetch MPlayer's source tree from Subversion.
-Instructions can be found at the bottom of
-<ulink url="http://www.mplayerhq.hu/dload.html">this page</ulink>.
+Instructions can be found in the
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#svn">Subversion section of the download page</ulink>.
 </para>
 
 <para>
