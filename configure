@@ -1128,21 +1128,21 @@ EOF
 	cpuopt=-mcpu
     fi
     if test "$_runtime_cpudetection" = no ; then
-    case "$pvendor" in
-    AuthenticAMD)
-      proc=k8;;
-    GenuineIntel)
-      case "$pmodel" in
-      6) proc=core2;;
+      case "$pvendor" in
+      AuthenticAMD)
+        proc=k8;;
+      GenuineIntel)
+        case "$pmodel" in
+        6) proc=core2;;
+        *)
+          # 64-bit prescotts exist, but as far as GCC is concerned they
+          # have the same capabilities as a nocona.
+          proc=nocona;;
+        esac
+        ;;
       *)
-        # 64-bit prescotts exist, but as far as GCC is concerned they have the
-        # same capabilities as a nocona.
-        proc=nocona;;
+        proc=error;;
       esac
-      ;;
-    *)
-      proc=error;;
-    esac
     fi # test "$_runtime_cpudetection" = no
 
     echocheck "GCC & CPU optimization abilities"
