@@ -826,7 +826,7 @@ fi
 # XXX: this should be ok..
 _cpuinfo="echo"
 
-if test "$_runtime_cpudetection" = no
+if test "$_runtime_cpudetection" = no ; then
 
 # Cygwin has /proc/cpuinfo, but only supports Intel CPUs
 # FIXME: Remove the cygwin check once AMD CPUs are supported
