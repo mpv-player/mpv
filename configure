@@ -548,6 +548,10 @@ for ac_option do
   esac
 done
 
+if test "$_runtime_cpudetection" = yes && not x86 && not ppc; then
+  die "Runtime CPU detection only works for x86, x86-64 and PPC!"
+fi
+
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
   # OS name
