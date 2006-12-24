@@ -3671,295 +3671,292 @@ Xvid поддерживает профили кодирования через �
 
 
 <sect1 id="menc-feat-x264">
-<title>Encoding with the <systemitem class="library">x264</systemitem> codec</title>
+<title>Кодирование кодеком <systemitem class="library">x264</systemitem></title>
 <para>
-<systemitem class="library">x264</systemitem> is a free library for
-encoding H.264/AVC video streams.
-Before starting to encode, you need to <link linkend="codec-x264-encode">
-set up <application>MEncoder</application> to support it</link>.
+<systemitem class="library">x264</systemitem> это свободная библиотека для
+кодирование H.264/AVC видео потоков.
+Перед началом кодирование вы должны <link linkend="codec-x264-encode">
+настроить <application>MEncoder</application> для его поддержки</link>.
 </para>
 
 <!-- ********** -->
 
 <sect2 id="menc-feat-x264-encoding-options">
-<title>Encoding options of x264</title>
+<title>Опции кодирования x264</title>
 
 <para>
-Please begin by reviewing the
-<systemitem class="library">x264</systemitem> section of
-<application>MPlayer</application>'s man page.
-This section is intended to be a supplement to the man page.
-Here you will find quick hints about which options are most
-likely to interest most people. The man page is more terse,
-but also more exhaustive, and it sometimes offers much better
-technical detail.
+Начните, пожалуйста с просмотра раздела 
+<systemitem class="library">x264</systemitem> 
+man страницы <application>MPlayer</application>'а.
+Этот раздел предполагается быть дополнением к странице man.
+Здесь вы найдете быстрые подсказки о том, какие опции чаще всего интересуют
+большинство людей. Страница man более лаконична, но также более полна и порой
+намного лучше преподносит технические детали.
 </para>
 
 
 <sect3 id="menc-feat-x264-encoding-options-intro">
-<title>Introduction</title>
+<title>Введение</title>
 
 <para>
-This guide considers two major categories of encoding options:
+Это руководство рассматривает две главные категории опций кодирования:
 </para>
 
 <orderedlist>
 <listitem><para>
-  Options which mainly trade off encoding time vs. quality
+  Опции, в основном влияющие на соотношение скорость-качество.
 </para></listitem>
 <listitem><para>
-  Options which may be useful for fulfilling various personal
-  preferences and special requirements
+  Опции, которые могут быть полезны для удовлетворения различный
+  пользовательский предпочтений и специальных требований.
 </para></listitem>
 </orderedlist>
 
 <para>
-Ultimately, only you can decide which options are best for your
-purposes. The decision for the first class of options is the simplest:
-you only have to decide whether you think the quality differences
-justify the speed differences. For the second class of options,
-preferences may be far more subjective, and more factors may be
-involved. Note that some of the "personal preferences and special
-requirements" options can still have large impacts on speed or quality,
-but that is not what they are primarily useful for. A couple of the
-"personal preference" options may even cause changes that look better
-to some people, but look worse to others.
+В конце концов, только вы можете решать какие опции являются лучшими для ваших
+целей. Решение для первого класса опций очень простое:
+надо только определить, считаете ли вы, что разница в качестве оправдывает разницу в
+скорости.  Для второго класса опций предпочтения могут быть значительно более
+субъективными и зависеть от большего числа факторов. 
+Имейте в виду, что некоторые из опций категории "пользовательских предпочтений и специальных
+требований" могут все же иметь большое влияние на скорость или качество,
+но это не основное их предназначение.
+Часть опций из "пользовательских предпочтений" могут даже привести к изменениям,
+которые выглядят лучше для одних людей и хуже - для других.
 </para>
 
 <para>
-Before continuing, you need to understand that this guide uses only one
-quality metric: global PSNR.
-For a brief explanation of what PSNR is, see
-<ulink url="http://en.wikipedia.org/wiki/PSNR">the Wikipedia article on PSNR</ulink>.
-Global PSNR is the last PSNR number reported when you include
-the <option>psnr</option> option in <option>x264encopts</option>.
-Any time you read a claim about PSNR, one of the assumptions
-behind the claim is that equal bitrates are used.
+Перед тем как продолжить, вам придется понять, что это руководство использует
+только одну метрику качества: глобальный PSNR.
+Краткое описание того, что такое PSNR, смотрите в
+<ulink url="http://en.wikipedia.org/wiki/PSNR">статье Википедии о PSNR</ulink>.
+Глобальный PSNR - это последнее значение PSNR, выводимое на консоль, когда в
+<option>x264encopts</option> включена опция <option>psnr</option>.
+Каждый раз, когда вы читаете утверждения о PSNR, за ними скрывается
+предположение, что используются одинаковые значения битпотока.
 </para>
 
 <para>
-Nearly all of this guide's comments assume you are using
-two pass.
-When comparing options, there are two major reasons for using
-two pass encoding.
-First, using two pass often gains around 1dB PSNR, which is a
-very big difference.
-Secondly, testing options by doing direct quality comparisons
-with one pass encodes introduces a major confounding
-factor: bitrate often varies significantly with each encode.
-It is not always easy to tell whether quality changes are due
-mainly to changed options, or if they mostly reflect essentially
-random differences in the achieved bitrate.
+Почти все комментарии этого руководства предполагают, что вы используете два
+прохода.
+Есть две основные причины использовать двухпроходное кодирование при сравнении
+опций.
+Во-первых, использование двух проходов увеличивает PSNR примерно на 1дБ,
+что является очень хорошим значением.
+Во-вторых, тестирование опций прямым сравнением качества при однопроходном
+кодировании вводит основной сбивающий фактор: зачастую битпоток значительно
+меняется при каждом кодировании.
+Не всегда можно с легкостью сказать, изменилось ли качество в основном за счет
+изменения опций, или оно по большей части отражает случайные изменения
+в полученном битпотоке.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-x264-encoding-options-speedvquality">
-<title>Options which primarily affect speed and quality</title>
+<title>Опции, затрагивающие, в основном, скорость и качество</title> 
 
 <itemizedlist>
 <listitem>
   <para>
   <emphasis role="bold">subq</emphasis>:
-  Of the options which allow you to trade off speed for quality,
-  <option>subq</option> and <option>frameref</option> (see below) are usually
-  by far the most important.
-  If you are interested in tweaking either speed or quality, these
-  are the first options you should consider.
-  On the speed dimension, the <option>frameref</option> and
-  <option>subq</option> options interact with each other fairly
-  strongly.
-  Experience shows that, with one reference frame,
-  <option>subq=5</option> (the default setting) takes about 35% more time than
-  <option>subq=1</option>.
-  With 6 reference frames, the penalty grows to over 60%.
-  <option>subq</option>'s effect on PSNR seems fairly constant
-  regardless of the number of reference frames.
-  Typically, <option>subq=5</option> achieves 0.2-0.5 dB higher global
-  PSNR in comparison <option>subq=1</option>.
-  This is usually enough to be visible.
+  Из всех опций, позволяющих выбирать между скоростью и качеством, 
+  <option>subq</option> и <option>frameref</option> (смотрите ниже), пожалуй,
+  самые важные.
+  Если вы заинтересованы в тонкой настройке либо скорости, лио качества, 
+  эти две  - первое, с чего вам стоит начать.
+  С точки зрения скорости, опции <option>frameref</option> и
+  <option>subq</option> очень жестко взаимодействуют друг с другом.
+  Опыт показывает, что с одним ссылающимся кадром
+  <option>subq=5</option> (настройка по-умолчанию) расходует на 35% больше
+  времени, чем  <option>ubq=1</option>.
+  С 6 ссылающимися кадрами эта величина достигает 60%.
+  Эффект <option>subq</option> на PSNR выглядит довольно постоянным, в отличие
+  от количества ссылающийся кадров.
+  Как правило, <option>subq=5</option> достигает значения глобального PSNR 
+  на 0.2-0.5 дБ большего, чем  при <option>subq=1</option>.
+  Обычно этого достаточно, чтобы заметить.
   </para>
   
   <para>
-  <option>subq=6</option> is the slowest, highest quality mode.
-  In comparison to <option>subq=5</option>, it usually gains 0.1-0.4 dB
-  global PSNR with speed costs varying from 25%-100%.
-  Unlike other levels of <option>subq</option>, the behavior of
-  <option>subq=6</option> does not depend much on <option>frameref</option>
-  and <option>me</option>.  Instead, the effectiveness of <option>subq=6
-  </option> depends mostly upon the number of B-frames used. In normal
-  usage, this means <option>subq=6</option> has a large impact on both speed
-  and quality in complex, high motion scenes, but it may not have much effect
-  in low-motion scenes. Note that it is still recommended to always set
-  <option>bframes</option> to something other than zero (see below).
+  <option>subq=6</option> - это самый медленный режим с лучшим качеством.
+  Если сравнивать с <option>subq=5</option>, он обычно дает на 0.1-0.4 дБ
+  больший глобальный PSNR ценой потери 25%-100% скорости.
+  В отличие от остальных уровней <option>subq</option>, поведение 
+  <option>subq=6</option> не так сильно зависит от <option>frameref</option>
+  и <option>me</option>.  Вместо этого, эффективность <option>subq=6
+  </option> по большей части зависит от количества используемых B-кадров. При
+  обычном использовании это означает, что <option>subq=6</option> в сложных,
+  высокодинамичных сценах имеет большое влияние как на скорость, так и на
+  качество, но в сценах с малым количествах движения она не имеет такого
+  эффекта. Имейте в виду, что по-прежнему рекомендуется всегда устанавливать 
+  <option>bframes</option> в значение, отличное от нуля (смотрите далее).
   </para>
 </listitem>
 <listitem>
   <para>
   <emphasis role="bold">frameref</emphasis>:
-  <option>frameref</option> is set to 1 by default, but this
-  should not be taken to imply that it is reasonable to set it to 1.
-  Merely raising <option>frameref</option> to 2 gains around
-  0.15dB PSNR with a 5-10% speed penalty; this seems like a good tradeoff.
-  <option>frameref=3</option> gains around 0.25dB PSNR over
-  <option>frameref=1</option>, which should be a visible  difference.
-  <option>frameref=3</option> is around 15% slower than
+  <option>frameref</option> по-умолчанию установлена в 1, но это не значит, что
+  ее стоит устанавливать в 1.
+  Только увеличение <option>frameref</option> до 2 дает прирост PSNR примерно
+  на 0.15дБ за счет уменьшения скорости на 5-10%; похоже, что это неплохая цена.
+  <option>frameref=3</option> дает примерно 0.25dB PSNR сверх
+  <option>frameref=1</option>, что должно быть видимой разницей.
+  <option>frameref=3</option> медленнее примерно на 15%, чем
   <option>frameref=1</option>.
-  Unfortunately, diminishing returns set in rapidly.
-  <option>frameref=6</option> can be expected to gain only
-  0.05-0.1 dB over <option>frameref=3</option> at an additional
-  15% speed penalty.
-  Above <option>frameref=6</option>, the quality gains are
-  usually very small (although you should keep in mind throughout
-  this whole discussion that it can vary quite a lot depending on your source).
-  In a fairly typical case, <option>frameref=12</option>
-  will improve global PSNR by a tiny 0.02dB over
-  <option>frameref=6</option>, at a speed cost of 15%-20%.
-  At such high <option>frameref</option> values, the only really
-  good thing that can be said is that increasing it even further will
-  almost certainly never <emphasis role="bold">harm</emphasis>
-  PSNR, but the additional quality benefits are barely even
-  measurable, let alone perceptible.
+  К сожалению, улучшение очень быстро сходит на нет.
+  От <option>frameref=6</option> можно ожидать прироста PSNR лишь на 
+  0.05-0.1 дБ по сравнению с <option>frameref=3</option> с дополнительной
+  потерей 15% скорости.
+  Выше <option>frameref=6</option> качество обычно увеличивается очень незначительно 
+  (хотя на всем протяжении этой дискуссии вам следует иметь в виду, оно может
+  значительно изменяться в зависимости от исходного материала).
+  В довольно типичном случае <option>frameref=12</option> улучшит глобальный 
+  PSNR всего на 0.02дБ по сравнению с <option>frameref=6</option>, 
+  ценой 15%-20% скорости.
+  При таких высоких значениях <option>frameref</option>, единственная
+  действительно хорошая вешь, о которой может быть сказано, состоит в том, что
+  дальнейшее ее увеличение почти никогда не будет <emphasis
+  role="bold">вредить</emphasis> PSNR, но увеличение качества будет трудно даже
+  измерить, не говоря уже о его заметности.
   </para>
-  <note><title>Note:</title>
+  <note><title>Замечание:</title>
   <para>
-  Raising <option>frameref</option> to unnecessarily high values
-  <emphasis role="bold">can</emphasis> and
-  <emphasis role="bold">usually does</emphasis>
-  hurt coding efficiency if you turn CABAC off.
-  With CABAC on (the default behavior), the possibility of setting
-  <option>frameref</option> "too high" currently seems too remote
-  to even worry about, and in the future, optimizations may remove
-  the possibility altogether.
+  Увеличение <option>frameref</option> до чрезмерно высоких значений 
+  <emphasis role="bold">может</emphasis> и
+  <emphasis role="bold">обычно наносит</emphasis>
+  вред эффективности кодирования, если CABAC отключен.
+  С задействованным CABAC (настройка по-умолчанию), возможность установки 
+  <option>frameref</option> "слишком высоким" на данный момент выглядит слишком
+  далекой, чтобы об этом беспокоиться, а в будущем оптимизации могут вообще
+  убрать такую возможность.
   </para></note>
   <para>
-  If you care about speed, a reasonable compromise is to use low
-  <option>subq</option> and <option>frameref</option> values on
-  the first pass, and then raise them on the second pass.
-  Typically, this has a negligible negative effect on the final
-  quality: You will probably lose well under 0.1dB PSNR, which
-  should be much too small of a difference to see.
-  However, different values of <option>frameref</option> can
-  occasionally affect frametype decision.
-  Most likely, these are rare outlying cases, but if you want to
-  be pretty sure, consider whether your video has either
-  fullscreen repetitive flashing patterns or very large temporary
-  occlusions which might force an I-frame.
-  Adjust the first-pass <option>frameref</option> so it is large
-  enough to contain the duration of the flashing cycle (or occlusion).
-  For example, if the scene flashes back and forth between two images
-  over a duration of three frames, set the first pass
-  <option>frameref</option> to 3 or higher.
-  This issue is probably extremely rare in live action video material,
-  but it does sometimes come up in video game captures.
-  </para>
+  Если вас заботит скорость, разумным компромиссом будет использовать низкие
+  значения <option>subq</option> и <option>frameref</option> в первом проходе, а
+  <!-- FIXME  is translation correct ? -->
+  затем увеличить из во втором: Вы, возможно, потеряете вплоть до 0.1дБ PSNR,
+  что может быть достаточно малым значением, чтобы его заметить.
+  Однако, различные значения <option>frameref</option> могут 
+  иногда повлиять на решение о выборе типа кадра.
+  Скорее всего, это довольно редкие крайние случаи, но если вы хотите точно
+  уверены, подумайте, содержит ли ваше видео полноэкранные
+  <!-- FIXME is translation correct? -->
+  периодически вспыхивающие изображения или очень большие паузы, которые могут стать
+  причиной принудительной вставки I-кадра.
+  Настройте <option>frameref</option> в первом проходе так, чтобы 
+  она была достаточно большой, чтобы содержать длительность цикла вспыхивания
+  (или паузы).
+  Например, если сцены вспыхивает и гаснет в течении двух кадров из трех,
+  установите <option>frameref</option> равным 3 или выше.
+  Эта проблема, возможно, очень редко появляется для живой съемки, но она иногда
+  появляется при записи видео игр.
+ </para>
 </listitem>
 <listitem>
   <para>
   <emphasis role="bold">me</emphasis>:
-  This option is for choosing the motion estimation search method.
-  Altering this option provides a straightforward quality-vs-speed
-  tradeoff. <option>me=dia</option> is only a few percent faster than
-  the default search, at a cost of under 0.1dB global PSNR. The 
-  default setting (<option>me=hex</option>) is a reasonable tradeoff
-  between speed and quality. <option>me=umh</option> gains a little under
-  0.1dB global PSNR, with a speed penalty that varies depending on
-  <option>frameref</option>.  At high values of
-  <option>frameref</option> (e.g. 12 or so), <option>me=umh</option>
-  is about 40% slower than the default <option> me=hex</option>. With
-  <option>frameref=3</option>, the speed penalty incurred drops to
-  25%-30%.
+  Эта опция используется для выбора метода оценки движения.
+  Изменение этой опции оказывает прямое влияние на соотношение
+  скорость-качество. <option>me=dia</option> лишь на несколько процентов
+  быстрее, чем поиск по-умолчанию ценой не больше 0.1дБ глобального PSNR. 
+  Значение по-умолчанию (<option>me=hex</option>) разумный выбор между скоростью
+  и качеством. <option>me=umh</option> немного, вплоть до 0.1дБ, улучшает
+  глобальный PSNR, соответствующее падение скорости зависит меняется и 
+  зависит от <option>frameref</option>.  С высокими значениями 
+  <option>frameref</option> (например, 12 или около того), <option>me=umh</option>
+  примерно на 40% медленнее, чем настройка по-умолчанию <option> me=hex</option>.
+  С <option>frameref=3</option>, падение скорости уменьшается до 25%-30%.
   </para>
   <para>
-  <option>me=esa</option> uses an exhaustive search that is too slow for
-  practical use.
+  <option>me=esa</option> использует исчерпывающий поиск, который работает
+  слишком медленно для практического применения.
   </para>
 </listitem>
 <listitem><para>
   <emphasis role="bold">partitions=all</emphasis>:
-  This option enables the use of 8x4, 4x8 and 4x4 subpartitions in
-  predicted macroblocks (in addition to the default partitions).
-  Enabling it results in a fairly consistent
-  10%-15% loss of speed. This option is rather useless in source
-  containing only low motion, however in some high-motion source,
-  particularly source with lots of small moving objects, gains of
-  about 0.1dB can be expected.
+  Эта опция задействует использование сегментов 8x4, 4x8 и 4x4 в предсказанных
+  макроблоках (в дополнение к стандартным).
+  Ее включение приведет к довольно постоянной 10%-15% потере в скорости.
+  Эта опция практически бесполезна для исходного материала, содержащего только
+  небольшое движение, тем не менее, для некоторого высокодинамичного,
+  особенно с большим количеством мелких движущихся объектов, следует ожидать
+  прироста в 0.1дБ.
 </para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">bframes</emphasis>:
-  If you are used to encoding with other codecs, you may have found
-  that B-frames are not always useful.
-  In H.264, this has changed: there are new techniques and block
-  types that are possible in B-frames.
-  Usually, even a naive B-frame choice algorithm can have a
-  significant PSNR benefit.
-  It is interesting to note that using B-frames usually speeds up
-  the second pass somewhat, and may also speed up a single
-  pass encode if adaptive B-frame decision is turned off.
+  Если вы занимались кодированием с другими кодеками, то могли заметить, что
+  B-кадры не всегда полезны.
+  В H.264 это изменилось: есть новые техники и типы блоков, возможные в B-кадрах.
+  Обычно, даже примитивный алгоритм выбора B-кадров может дать значимую
+  выгоду для PSNR.
+  Интересно заметить, что использование B-кадров обычно отчасти ускоряет второй
+  проход, а также может ускорить однопроходное кодирование, если отключено
+  адаптивное принятие решения о B-кадрах.
   </para>
   <para>
-  With adaptive B-frame decision turned off
-  (<option>x264encopts</option>'s <option>nob_adapt</option>),
-  the optimal value for this setting is usually no more than
-  <option>bframes=1</option>, or else high-motion scenes can suffer.
-  With adaptive B-frame decision on (the default behavior), it is
-  safe to use higher values; the encoder will reduce the use of
-  B-frames in scenes where they would hurt compression.
-  The encoder rarely chooses to use more than 3 or 4 B-frames;
-  setting this option any higher will have little effect.
+  С отключенным адаптивным принятием решения о B-кадрах
+  (<option>x264encopts</option>'ой <option>nob_adapt</option>),
+  оптимальное значение этой опции обычно не превышает 
+  <option>bframes=1</option>, иначе пострадают высокодинамичные сцены.
+  С включенным адаптивным принятием решения о B-кадрах (поведение по-умолчанию),
+  можно безопасно использовать более высокие значения; кодировщик уменьшит
+  количество B-кадров в сценах, где они повредят сжатию.
+  Кодировщик редко решает использовать больше, чем 3 или 4 B-кадра;
+  установка этой опции в любое более высокое значение не будет иметь большого
+  эффекта.
   </para>
 </listitem>
 <listitem>
   <para>
   <emphasis role="bold">b_adapt</emphasis>:
-  Note: This is on by default.
+  Заметьте: она включена по-умолчанию.
   </para>
   <para>
-  With this option enabled, the encoder will use a reasonably fast
-  decision process to reduce the number of B-frames used in scenes that
-  might not benefit from them as much.
-  You can use <option>b_bias</option> to tweak how B-frame-happy
-  the encoder is.
-  The speed penalty of adaptive B-frames is currently rather modest,
-  but so is the potential quality gain.
-  It usually does not hurt, however.
-  Note that this only affects speed and frametype decision on the
-  first pass.
-  <option>b_adapt</option> and <option>b_bias</option> have no
-  effect on subsequent passes.
+  Когда эта опция включена, кодировщик будет использовать разумно 
+  быстрый процесс принятия решения для уменьшения количества B-кадров,
+  используемых в сценах, которые от этого не сильно выиграют.
+  Вы можете использовать <option>b_bias</option> для тонкой настройки того,
+  насколько "счастлив" будет кодировщик использованию B-кадров.
+  Потеря в скорости при использовании адаптивных B-кадров на данный момент,
+  пожалуй, умереннее, но таково же и потенциальное улучшение качества.
+  Тем не менее, хуже от этого обычно не становится.
+  Заметьте, что эта опция влияет на скорость и решение о типе кадра только в первом
+  проходе.
+  <option>b_adapt</option> и <option>b_bias</option> не имеют эффекта в
+  последующих проходах.
   </para>
 </listitem>
 <listitem><para>
   <emphasis role="bold">b_pyramid</emphasis>:
-  You might as well enable this option if you are using >=2 B-frames;
-  as the man page says, you get a little quality improvement at no
-  speed cost.
-  Note that these videos cannot be read by libavcodec-based decoders
-  older than about March 5, 2005.
+  С тем же успехом вы можете включить эту опцию, если используете >=2 B-кадров;
+  вы получите небольшое улучшение качества без потери в скорости, как и говорит
+  man руководство.
+  Имейте в виду, что такое видео не может быть прочитано основанными на
+  libavcodec декодерами, созданными ранее, чем примерно 5 Марта 2005. 
 </para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">weight_b</emphasis>:
-  In typical cases, there is not much gain with this option.
-  However, in crossfades or fade-to-black scenes, weighted
-  prediction gives rather large bitrate savings.
-  In MPEG-4 ASP, a fade-to-black is usually best coded as a series
-  of expensive I-frames; using weighted prediction in B-frames
-  makes it possible to turn at least some of these into much smaller
-  B-frames.
-  Encoding time cost is minimal, as no extra decisions need to be made.
-  Also, contrary to what some people seem to guess, the decoder
-  CPU requirements are not much affected by weighted prediction,
-  all else being equal.
+  В обычных случаях эта опция не дает большого улучшения.
+  Однако, в проявляющихся или затухающих сценах взвешенное предсказание дает
+  довольно большую экономию битпотока.
+  В MPEG-4 ASP затухание обычно лучше кодируется последовательностью дорогих
+  I-кадров; используя взвешенное предсказание в B-кадрах делает возможным
+  преобразовать хотя бы часть из них в значительно более маленькие B-Кадры.
+  Потери в скорости кодирования минимальны, поскольку не требуется делать
+  дополнительные принятия решений.
+  <!-- FIXME is translation correct -->
+  Вдобавок, вопреки возможным предположениям, взвешенное предсказание не так
+  сильно влияет на требования декодера к CPU, все остальное же полностью совпадает.
   </para>
   <para>
-  Unfortunately, the current adaptive B-frame decision algorithm
-  has a strong tendency to avoid B-frames during fades.
-  Until this changes, it may be a good idea to add
-  <option>nob_adapt</option> to your x264encopts, if you expect
-  fades to have a large effect in your particular video
-  clip.
+  К сожалению, текущий алгоритм адаптивного принятия решений о B-Кадрах имеет
+  твердую склонность к избеганию использования B-кадров при затуханиях.
+  До тех пор, пока это не изменится, хорошей идеей, возможно, будет добавить 
+  <option>nob_adapt</option> к x264encopts, если предполагаете, что затухания
+  будут иметь сильный эффект на ваш конкретный видеоклип.
   </para>
 </listitem>
 </itemizedlist>
@@ -3967,177 +3964,176 @@ random differences in the achieved bitrate.
 
 
 <sect3 id="menc-feat-x264-encoding-options-misc-preferences">
-<title>Options pertaining to miscellaneous preferences</title>
+<title>Опции, относящиеся к различным предпочтениям</title>
 <itemizedlist>
 <listitem>
   <para>
-  <emphasis role="bold">Two pass encoding</emphasis>:
-  Above, it was suggested to always use two pass encoding, but there
-  are still reasons for not using it. For instance, if you are capturing
-  live TV and encoding in realtime, you are forced to use single-pass.
-  Also, one pass is obviously faster than two passes; if you use the
-  exact same set of options on both passes, two pass encoding is almost
-  twice as slow.
+  <emphasis role="bold">Двухпроходное кодирование</emphasis>:
+  Выше советовалось всегда использовать кдирование в два прохода, но все же
+  существуют причины этого не делать. Например, если вы захватываете TV
+  трансляцию и кодируете в реальном времени, придется использовать однопроходный
+  режим. К тому же один проход очевидно быстрее, чем два; если вы используете
+  точно такой же набор опций в обоих случаях, двухпроходной режим медленнее
+  вдвое.
   </para>
   <para>
-  Still, there are very good reasons for using two pass encoding. For
-  one thing, single pass ratecontrol is not psychic, and it often makes
-  unreasonable choices because it cannot see the big picture. For example,
-  suppose you have a two minute long video consisting of two distinct
-  halves.  The first half is a very high-motion scene lasting 60 seconds
-  which, in isolation, requires about 2500kbps in order to look decent.
-  Immediately following it is a much less demanding 60-second scene
-  that looks good at 300kbps. Suppose you ask for 1400kbps on the theory
-  that this is enough to accomodate both scenes. Single pass ratecontrol
-  will make a couple of "mistakes" in such a case. First of all, it
-  will target 1400kbps in both segments. The first segment may end up
-  heavily overquantized, causing it to look unacceptably and unreasonably
-  blocky. The second segment will be heavily underquantized; it may look
-  perfect, but the bitrate cost of that perfection will be completely
-  unreasonable. What is even harder to avoid is the problem at the
-  transition between the two scenes. The first seconds of the low motion
-  half will be hugely over-quantized, because the ratecontrol is still
-  expecting the kind of bitrate requirements it met in the first half
-  of the video. This "error period" of heavily over-quantized low motion
-  will look jarringly bad, and will actually use less than the 300kbps
-  it would have taken to make it look decent. There are ways to
-  mitigate the pitfalls of single-pass encoding, but they may tend to
-  increase bitrate misprediction.
+  Все же существует очень хорошие причины использовать кодирование в два
+  прохода. Во-первых, управление битпотоком при однопроходного режима не
+  является телепатом и часто делает необоснованный выбор, потому что не может
+  видеть общую картину. Например, предположим, что вы имеете двухминутное видео,
+  состоящее из двух независимых частей. Первая половина - очень динамичная
+  сцена, продолжающаяся 60 секунд и требующая сама по себе битпоток примерно
+  2500 кбит/сек, чтобы прилично выглядеть. Сразу за ней следует менее
+  требовательная 60-секундная сцена, которая хорошо выглядит при 300 кбит/сек.
+  Предположим, вы запросили битпоток 14000 кбит/сек; в теории этого достаточно
+  для удовлетворения потребностей обеих сцен.
+  В этом случае управление битпотоком в однопроходном режиме сделает пару "ошибок".
+  Во-первых, оно установит битпоток в 1400 кбит/сек для обеих частей. Первая
+  часть может оказаться чрезмерно квантованной, что приведет к
+  недопустимому и неоправданно блочному изображению. Вторая часть будет
+  недостаточно квантованной; она может выглядеть отлично, но цена битпотока для
+  этого качества будет полностью неоправданной.
+  Чего намного труднее избежать, так это проблемы перехода между двумя
+  сценами. В первых секундах малодинамичной части квантователь будет чрезвычайно
+  превышен, потому что управление битпотоком все еще ожидает встретить такие же 
+  требования к битпотоку как и в первой части. Этот "ошибочный период" с
+  чрезвычайно превышенным квантованием будет выглядеть раздражающе неприятно и
+  использовать на самом деле меньше, чем 300 кбит/сек, требуемых ему для того,
+  чтобы прилично выглядеть. Существуют способы смягчить эффект от подобных
+  подводных камней однопроходного режима, но они могут иметь склонность к
+  усилению неверного предсказания битпотока.
   </para>
   <para>
-  Multipass ratecontrol can offer huge advantages over a single pass.
-  Using the statistics gathered from the first pass encode, the encoder
-  can estimate, with reasonable accuracy, the "cost" (in bits) of
-  encoding any given frame, at any given quantizer. This allows for
-  a much more rational, better planned allocation of bits between the
-  expensive (high-motion) and cheap (low-motion) scenes. See
-  <option>qcomp</option> below for some ideas on how to tweak this
-  allocation to your liking.
+  Многопроходное кодирование может предложить огромные преимущества по сравнению
+  с однопроходным. Используя статистику, собранную при первом проходе, 
+  кодировщик может оценить, с разумной точностью, "стоимость" (в битах)
+  кодирования любого заданного кадра при любом заданном квантователе.
+  Это делает возможным намного более рациональное, лучше спланированное
+  распределение битов между дорогими (высокодинамичными) и дешевыми
+  (малодинамичными) сценами. Смотрите <option>qcomp</option> ниже, чтобы узнать
+  некоторые идеи о том, как можно это распределение настроить по вашему вкусу.
   </para>
   <para>
-  Moreover, two passes need not take twice as long as one pass. You can
-  tweak the options in the first pass for higher speed and lower quality.
-  If you choose your options well, you can get a very fast first pass.
-  The resulting quality in the second pass will be slightly lower because size
-  prediction is less accurate, but the quality difference is normally much
-  too small to be visible. Try, for example, adding
-  <option>subq=1:frameref=1</option> to the first pass
-  <option>x264encopts</option>. Then, on the second pass, use slower,
-  higher-quality options:
+  Более того, два прохода занимают не двойное время по сравнению с одним.
+  Вы можете настроить опции первого прохода на более быструю скорость и низкое
+  качество. Если хорошо выберете опции, вы получите очень быстрый первый проход.
+  Полученное качество во втором проходе будет несколько ниже, потому что
+  предсказание размера менее точно, но разница в качестве обычно слишком мала,
+  чтобы быть заметной. Попробуйте, например, добавить
+  <option>subq=1:frameref=1</option> в <option>x264encopts</option> первого
+  прохода. Затем, при втором проходе, используйте более медленные, с лучшим
+  качеством опции:
   <option>subq=6:frameref=15:partitions=all:me=umh</option>
   </para>
 </listitem>
 <listitem><para>
-  <emphasis role="bold">Three pass encoding</emphasis>?
-  x264 offers the ability to make an arbitrary number of consecutive
-  passes. If you specify <option>pass=1</option> on the first pass,
-  then use <option>pass=3</option> on a subsequent pass, the subsequent
-  pass will both read the statistics from the previous pass, and write
-  its own statistics. An additional pass following this one will have
-  a very good base from which to make highly accurate predictions of
-  framesizes at a chosen quantizer. In practice, the overall quality
-  gain from this is usually close to zero, and quite possibly a third
-  pass will result in slightly worse global PSNR than the pass before
-  it. In typical usage, three passes help if you get either bad bitrate
-  prediction or bad looking scene transitions when using only two passes.
-  This is somewhat likely to happen on extremely short clips. There are
-  also a few special cases in which three (or more) passes are handy
-  for advanced users, but for brevity, this guide omits discussing those
-  special cases.
+  <emphasis role="bold">Кодирование в три прохода</emphasis>?
+  x264 предоставляет возможность делать желаемое количество последовательных
+  проходов. Если вы указали <option>pass=1</option> при первом проходе,
+  используйте затем <option>pass=3</option> в последующем проходе, этот проход
+  будет одновременно читать статистику предыдущего прохода и записывать ее
+  собственную. Дополнительный проход, следующий за этим, будет иметь очень
+  хорошую основу для осуществления очень точных предсказаний размеров кадров при
+  выбранном квантователе. На практике, общее улучшение качества от использования
+  этого режима близко к нулю и, вполне возможно, третий проход приведет к
+  немного худшему глобальному PSNR, чем у предыдущего прохода.
+  При обычном использовании три прохода помогают, если вы при двух проходах
+  получаете либо плохое предсказание битпотока, либо плохо выглядящие переходы
+  между сценами. Это в точности то, что наверняка будет происходить на очень
+  коротких клипах. Существуют также особые случаи, когда три (или более)
+  проходом удобны для продвинутых пользователей, но, для краткости, это
+  руководство не включает в себя описание этих особых случаев.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">qcomp</emphasis>:
-  <option>qcomp</option> trades off the number of bits allocated
-  to "expensive" high-motion versus "cheap" low-motion frames. At
-  one extreme, <option>qcomp=0</option> aims for true constant
-  bitrate. Typically this would make high-motion scenes look completely
-  awful, while low-motion scenes would probably look absolutely
-  perfect, but would also use many times more bitrate than they
-  would need in order to look merely excellent. At the other extreme,
-  <option>qcomp=1</option> achieves nearly constant quantization parameter
-  (QP). Constant QP does not look bad, but most people think it is more
-  reasonable to shave some bitrate off of the extremely expensive scenes
-  (where the loss of quality is not as noticeable) and reallocate it to
-  the scenes that are easier to encode at excellent quality.
-  <option>qcomp</option> is set to 0.6 by default, which may be slightly
-  low for many peoples' taste (0.7-0.8 are also commonly used).
+  <option>qcomp</option> управляет соотношением количества бит, отданных
+  "дорогим" высокодинамичным и "дешевым" малодинамичным кадрам. Один крайний
+  случай, <option>qcomp=0</option>, предназначен для истинно постоянного
+  битпотока. Обычно это сделает высокодинамичные сцены выглядящими просто
+  ужасно, в то время как малодинамичные сцены будут, возможно, выглядеть
+  отлично, но при этом будут использовать во много раз больший битпоток, чем им
+  необходимо, чтобы выглядеть просто великолепно.
+  Другая крайность, <option>qcomp=1</option>, добивается примерно одинакового
+  параметра квантования (QP). Постоянный QP не выглядит ужасно, но большинство
+  людей думают, что более разумно частично снизить битпоток в сильно
+  дорогих сценах (где потеря качества не очень заметна) и перераспределить их в
+  сцены, которые легче закодировать с отличным качеством.
+  <option>qcomp</option> по-умолчанию установлена в 0.6, что по мнению многих
+  людей может быть несколько мало (также часто используется 0.7-0.8).
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">keyint</emphasis>:
-  <option>keyint</option> is solely for trading off file seekability against
-  coding efficiency. By default, <option>keyint</option> is set to 250. In
-  25fps material, this guarantees the ability to seek to within 10 seconds
-  precision. If you think it would be important and useful to be able to
-  seek within 5 seconds of precision, set <option>keyint=125</option>;
-  this will hurt quality/bitrate slightly. If you care only about quality
-  and not about seekability, you can set it to much higher values
-  (understanding that there are diminishing returns which may become
-  vanishingly low, or even zero). The video stream will still have seekable
-  points as long as there are some scene changes.
+  <option>keyint</option> - единственная возможность выбора между удобством
+  перемещения по файлу и эффективностью кодирования. По-умолчанию
+  <option>keyint</option> установлена в 250. В материале с 25fps это гарантирует
+  возможность перемещения с точностью до 10 секунд. Если вы считаете, что более
+  важным и полезным будет перемещение с точностью до 5 секунд, установите
+  <option>keyint=125</option>; это немного ухудшит качество/битпоток. Если вы
+  заботитесь только о качестве, но не о перемещаемости, вы можете установить
+  значение этой опции в более высокое значение (понимая, что улучшение будет
+  убывающим, вплоть до исчезающе малого или даже нулевого). Видео поток
+  по-прежнему будет иметь точки перемещения, пока в нем есть какие-то изменения
+  сцен.
 </para></listitem> 
 <listitem>
   <para>
   <emphasis role="bold">deblock</emphasis>:
-  This topic is going to be a bit controversial.
+  Этот раздел может быть несколько спорным.
   </para>
   <para>
-  H.264 defines a simple deblocking procedure on I-blocks that uses
-  pre-set strengths and thresholds depending on the QP of the block
-  in question.
-  By default, high QP blocks are filtered heavily, and low QP blocks
-  are not deblocked at all.
-  The pre-set strengths defined by the standard are well-chosen and
-  the odds are very good that they are PSNR-optimal for whatever
-  video you are trying to encode.
-  The <option>deblock</option> allow you to specify offsets to the preset deblocking
-  thresholds.
+  H.264 определяет простую процедуру удаления блочности в I-блоках, которая
+  использует предустановленные степени обработки и пороговые значения в
+  зависимости от QP интересующего блока.
+  По-умолчанию, блоки с высоким QP обрабатываются сильнее, а в блоках с низким
+  QP удаление блочности вообще не производится.
+  Предустановленые степени обработки, определенные стандартом, тщательно подобраны
+  и имеют хорошие шансы быть PSNR-оптимальными для любого видео, которое вы
+  пытаетесь кодировать.
+  Опция <option>deblock</option> позволяет указать смещения предустановленных
+  пороговых значений деблокинга.
   </para>
   <para>
-  Many people seem to think it is a good idea to lower the deblocking
-  filter strength by large amounts (say, -3).
-  This is however almost never a good idea, and in most cases,
-  people who are doing this do not understand very well how
-  deblocking works by default.
+  Похоже, многие думают, что хорошей идеей является значительное уменьшение силы
+  воздействия фильтра деблокинга (читай, -3).
+  Это, однако, почти никогда не является хорошей идеей, и, люди, это делающие, в большинстве
+  случаев не совсем хорошо понимают, как работает удаление
+  блочности по-умолчанию.
   </para>
   <para>
-  The first and most important thing to know about the in-loop
-  deblocking filter is that the default thresholds are almost always
-  PSNR-optimal.
-  In the rare cases that they are not optimal, the ideal offset is
-  plus or minus 1.
-  Adjusting deblocking parameters by a larger amount is almost
-  guaranteed to hurt PSNR.
-  Strengthening the filter will smear more details; weakening the
-  filter will increase the appearance of blockiness.
+  Первая и самая важная вещь, которую нужно знать о in-loop фильтре удаления
+  блочности состоит в том, что пороговые значения по-умолчанию практически
+  всегда PSNR-оптимальны.
+  В редких случаях, где они неоптимальны, идеальное смещение будет плюс минус 1.
+  Изменение параметров деблокинга на большие значения фактически гарантирует
+  ухудшение PSNR.
+  Усиление фильтра размажет больше деталей; ослабление - оставит больше квадратиков.
   </para>
   <para>
-  It is definitely a bad idea to lower the deblocking thresholds if
-  your source is mainly low in spacial complexity (i.e., not a lot
-  of detail or noise).
-  The in-loop filter does a rather excellent job of concealing
-  the artifacts that occur.
-  If the source is high in spacial complexity, however, artifacts
-  are less noticeable.
-  This is because the ringing tends to look like detail or noise.
-  Human visual perception easily notices when detail is removed,
-  but it does not so easily notice when the noise is wrongly
-  represented.
-  When it comes to subjective quality, noise and detail are somewhat
-  interchangeable.
-  By lowering the deblocking filter strength, you are most likely
-  increasing error by adding ringing artifacts, but the eye does
-  not notice because it confuses the artifacts with detail.
+  По определению плохая идея уменьшать пороги деблокинга, если ваш исходный
+  материал в основном имеет небольшую пространственную сложность (т.е. не имеет
+  множества деталей или шума).
+  In-loop фильтр делает весьма неплохую работу по сокрытию появляющихся
+  артефактов. Однако, если исходный материал имеет высокую пространственную
+  сложность, артефакты будут практически незаметны.
+  Это происходит потому, что ореолы имеют склонность выглядеть как детали или
+  шум. Зрительное восприятие легко замечает отсутствие деталей, но ему не так
+  легко обратить внимание на неверно изображенный шум.
+  Когда речь идет о субъективном качестве, шум и детали в некоторой степени
+  взаимозаменяемы.
+  Уменьшая силу фильтра удаления блочности, вы скорее всего увеличиваете ошибку,
+  добавляя ореолы, но глаз этого не замечает, поскольку он путает артефакты с
+  деталями.
   </para>
   <para>
-  This <emphasis role="bold">still</emphasis> does not justify
-  lowering the deblocking filter strength, however.
-  You can generally get better quality noise from postprocessing.
-  If your H.264 encodes look too blurry or smeared, try playing with
-  <option>-vf noise</option> when you play your encoded movie.
-  <option>-vf noise=8a:4a</option> should conceal most mild
-  artifacting.
-  It will almost certainly look better than the results you
-  would have gotten just by fiddling with the deblocking filter.
+  Однако, это <emphasis role="bold">по-прежнему</emphasis> не оправдывает
+  уменьшение силы фильтра. Вы в большинстве случаев можете получить более
+  качественный шум при помощи постобработки.
+  Если результат кодирования при помощи H.264 выглядит слишком смазанным или
+  размытым, попробуйте поиграть с <option>-vf noise</option>, при
+  воспроизведении закодированного фильма.
+  <option>-vf noise=8a:4a</option> должна скрыть большинство мелких артефактов.
+  Ее результат почти наверняка будет выглядеть лучше, чем полученный при помощи
+  махинаций с фильтром удаления блочности.
   </para>
 </listitem>
 </itemizedlist>
@@ -4147,50 +4143,48 @@ random differences in the achieved bitrate.
 <!-- ********** -->
 
 <sect2 id="menc-feat-x264-example-settings">
-<title>Encoding setting examples</title>
+<title>Примеры настроек кодирования</title>
 
 <para>
-The following settings are examples of different encoding
-option combinations that affect the speed vs quality tradeoff
-at the same target bitrate.
+Последующие настройки - это примеры различных комбинаций опций кодирования,
+которые влияют на соотношения скорость-качество при той же величине целевого
+битпотока.
 </para>
 
 <para>
-All the encoding settings were tested on a 720x448 @30000/1001 fps
-video sample, the target bitrate was 900kbps, and the machine was an
-AMD-64 3400+ at 2400 MHz in 64 bits mode.
-Each encoding setting features the measured encoding speed (in
-frames per second) and the PSNR loss (in dB) compared to the "very
-high quality" setting.
-Please understand that depending on your source, your machine type
-and development advancements, you may get very different results.
+Все настройки кодирования проверялись на тестовом видео 720x448 @30000/1001 fps 
+с целевым битпотоком 900кбит/сек, на машине AMD-64 3400+ с 2400 МГц и 64-х битном режиме.
+Для каждой настройки кодирования указаны измеренная скорость кодирования (в
+кадрах в секунду) и потеря PSNR (в дБ) по сравнению с настройкой "очень высокое
+качество". Поймите, пожалуйста, что в зависимости от вашего материала, типа
+машины, прогресса разработки вы можете получить сильно отличающиеся результаты.
 </para>
 
 <informaltable frame="all">
 <tgroup cols="4">
 <thead>
 <row>
-  <entry>Description</entry>
-  <entry>Encoding options</entry>
-  <entry>speed (in fps)</entry>
-  <entry>Relative PSNR loss (in dB)</entry>
+  <entry>Описание</entry>
+  <entry>Опции кодирования</entry>
+  <entry>скорость (в fps)</entry>
+  <entry>Относительная потеря PSNR (в дБ)</entry>
 </row>
 </thead>
 <tbody>
 <row>
-  <entry>Very high quality</entry>
+  <entry>Очень высокое качество</entry>
   <entry><option>subq=6:partitions=all:8x8dct:me=umh:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6fps</entry>
   <entry>0dB</entry>
 </row>
 <row>
-  <entry>High quality</entry>
+  <entry>Высокое качество</entry>
   <entry><option>subq=5:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>13fps</entry>
   <entry>-0.89dB</entry>
 </row>
 <row>
-  <entry>Fast</entry>
+  <entry>Быстро</entry>
   <entry><option>subq=4:bframes=2:b_pyramid:weight_b</option></entry>
   <entry>17fps</entry>
   <entry>-1.48dB</entry>
