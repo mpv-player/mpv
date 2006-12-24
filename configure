@@ -825,6 +825,9 @@ fi
 
 # XXX: this should be ok..
 _cpuinfo="echo"
+
+if test "$_runtime_cpudetection" = no
+
 # Cygwin has /proc/cpuinfo, but only supports Intel CPUs
 # FIXME: Remove the cygwin check once AMD CPUs are supported
 if test -r /proc/cpuinfo && not cygwin; then
@@ -874,6 +877,9 @@ if x86 ; then
   echores "$pname"
 fi
 
+fi # test "$_runtime_cpudetection" = no
+
+
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _def_arch_x86="#define ARCH_X86 1"
@@ -882,6 +888,7 @@ case "$host_arch" in
   _target_arch="TARGET_ARCH_X86_32 = yes"
 
 
+  if test "$_runtime_cpudetection" = no ; then
   case "$pvendor" in
   AuthenticAMD)
     case "$pfamily" in
@@ -989,6 +996,8 @@ case "$host_arch" in
   *)
     proc=i586 iproc=586 ;;
   esac
+  fi # test "$_runtime_cpudetection" = no
+
 
     # check that gcc supports our CPU, if not, fall back to earlier ones
     # LGB: check -mcpu and -march swithing step by step with enabling
@@ -1118,6 +1127,7 @@ EOF
     else
 	cpuopt=-mcpu
     fi
+    if test "$_runtime_cpudetection" = no ; then
     case "$pvendor" in
     AuthenticAMD)
       proc=k8;;
@@ -1133,6 +1143,7 @@ EOF
     *)
       proc=error;;
     esac
+    fi # test "$_runtime_cpudetection" = no
 
     echocheck "GCC & CPU optimization abilities"
 cat > $TMPC << EOF
