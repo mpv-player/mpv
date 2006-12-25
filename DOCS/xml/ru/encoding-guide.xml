@@ -1929,278 +1929,300 @@ mkvmerge -o <replaceable>выходной_файл.mkv</replaceable> <replaceabl
 
 
 <sect1 id="menc-feat-telecine">
-<title>How to deal with telecine and interlacing within NTSC DVDs</title>
+<title>Как работать с телесином и чересстрочной развёрткой на NTSC DVD</title>
 
 <sect2 id="menc-feat-telecine-intro">
-<title>Introduction</title>
-
+<title>Введение</title>
 <formalpara>
-<title>What is telecine?</title>
+<title>Что такое телесин?</title>
 <para>
-If you do not understand much of what is written in this document,
-read the
-<ulink url="http://en.wikipedia.org/wiki/Telecine">Wikipedia entry on telecine</ulink>.
-It is an understandable and reasonably comprehensive
-description of what telecine is.
+Если Вы не понимаете многое из того, что здесь написано, 
+прочтите
+<ulink url="http://en.wikipedia.org/wiki/Telecine">статью Википедии о телесине</ulink>.
+Это понятное и разумно обширное описание того, что такое
+телесин.
 </para></formalpara>
 
 <formalpara>
-<title>A note about the numbers.</title>
+<title>Замечание о числах.</title>
 <para>
-Many documents, including the guide linked above, refer to the fields
-per second value of NTSC video as 59.94 and the corresponding frames
-per second values as 29.97 (for telecined and interlaced) and 23.976
-(for progressive). For simplicity, some documents even round these
-numbers to 60, 30, and 24.
+Многие документы, включая указанное выше руководство, ссылаются
+на количество полей в секунду 59.94 для NTSC видео и 
+соответствующие кадровые частоты 29.97 (для подверженного 
+телесину и чересстрочного видео) и 23.976 (для построчного).
+Для простоты в ряде статей эти числа даже округляются до 60, 30
+и 24 соответственно.
 </para></formalpara>
 
 <para>
-Strictly speaking, all those numbers are approximations. Black and
-white NTSC video was exactly 60 fields per second, but 60000/1001
-was later chosen to accomodate color data while remaining compatible
-with contemporary black and white televisions. Digital NTSC video
-(such as on a DVD) is also 60000/1001 fields per second. From this,
-interlaced and telecined video are derived to be 30000/1001 frames
-per second; progressive video is 24000/1001 frames per second.
+Строго говоря, все эти числа являются аппроксимациями. 
+Чёрно-белое NTSC видео было точно с 60 полями в секунду, но 
+позже была выбрана частота 60000/1001 для адаптации цветовой
+информации с сохранением совместимости с чёрно-белым 
+телевидением. 
+Цифровое NTSC видео (такое как на DVD) также с 60000/1001
+полями в секунду. Отсюда возникла кадровая частота 30000/1001
+кадр/сек для чересстрочного и телесиненного видео; построчное 
+видео идёт с 24000/1001 кадр/сек.
 </para>
 
 <para>
-Older versions of the <application>MEncoder</application> documentation
-and many archived mailing list posts refer to 59.94, 29.97, and 23.976.
-All <application>MEncoder</application> documentation has been updated
-to use the fractional values, and you should use them too.
+Старые версии документации <application>MEncoder</application>
+и много архивных сообщений из списков рассылки ссылаются на
+59.94, 29.97 и 23.976. Вся документация <application>MEncoder</application> 
+была обновлена для использования дробных значений, и Вам так же
+следует их использовать.
 </para>
 
 <para>
-<option>-ofps 23.976</option> is incorrect.
-<option>-ofps 24000/1001</option> should be used instead.
+<option>-ofps 23.976</option> &mdash; неправильно.
+Взамен нужно использовать <option>-ofps 24000/1001</option>.
 </para>
 
 <formalpara>
-<title>How telecine is used.</title>
+<title>Как используется телесин.</title>
 <para>
-All video intended to be displayed on an NTSC
-television set must be 60000/1001 fields per second. Made-for-TV movies 4  
-and shows are often filmed directly at 60000/1001 fields per second, but
-the majority of cinema is filmed at 24 or 24000/1001 frames per
-second. When cinematic movie DVDs are mastered, the video is then
-converted for television using a process called telecine.
+Всё видео, предназначенное для просмотра на NTSC телевидении
+должно быть с 60000/1001 полями в секунду. Фильмы, сделанные 
+для показа на TV часто снимаются непосредственно при 60000/1001
+полей в секунду, но большинство кино снимается на 24 или 
+24000/1001 кадрах в секунду. В процессе создания DVD с 
+кинофильмом, видео преобразуется для телевидения с помощью
+процесса, называемого телесин.
 </para></formalpara>
 
 <para>
-On a DVD, the video is never actually stored as 60000/1001 fields per
-second. For video that was originally 60000/1001, each pair of fields is
-combined to form a frame, resulting in 30000/1001 frames per
-second. Hardware DVD players then read a flag embedded in the video
-stream to determine whether the odd- or even-numbered lines should
-form the first field.
+В действительности, видео никогда не хранится на DVD с 
+60000/1001 полей в секунду. Для видео, оригинально являющегося
+60000/1001, каждая пара полей объединяется для формирования 
+кадра, приводя к 30000/1001 кадрам в секунду. Затем аппаратные
+DVD плееры читают флаг, включенный в видеопоток, для определения
+того какие, чётные или нечётные строки должны формировать первый 
+кадр.
 </para>
 
 <para>
-Usually, 24000/1001 frames per second content stays as it is when
-encoded for a DVD, and the DVD player must perform telecining
-on-the-fly. Sometimes, however, the video is telecined
-<emphasis>before</emphasis> being stored on the DVD; even though it
-was originally 24000/1001 frames per second, it becomes 60000/1001 fields per
-second. When it is stored on the DVD, pairs of fields are combined to form
-30000/1001 frames per second.
+Обычно, содержимое с частотой кадров 24000/1001 остаётся 
+неизменным при кодировании на DVD и DVD плеер должен выполнить
+телесин на лету. Однако, иногда видео подвергается телесину
+<emphasis>до</emphasis> записи на DVD; и хотя оно изначально
+было с 24000/1001 кадр/сек, видео становится с 60000/1001 полями
+в секунду. Когда оно сохраняется на DVD, пары полей объединяются
+для формирования 30000/1001 кадров в секунду.
 </para>
 
 <para>
-When looking at individual frames formed from 60000/1001 fields per
-second video, telecined or otherwise, interlacing is clearly visible
-wherever there is any motion, because one field (say, the
-even-numbered lines) represents a moment in time 1/(60000/1001)
-seconds later than the other. Playing interlaced video on a computer
-looks ugly both because the monitor is higher resolution and because
-the video is shown frame-after-frame instead of field-after-field.
+При рассмотрении отдельных кадров, полученных из 60000/1001 
+полей в секунду, телесиненных или наоборот, чересстрочная 
+развёртка чётко видна в случае, если есть какое-либо движение, 
+поскольку одно поле (скажем, с чётными номерами строк) 
+отображает момент времени на 1/(60000/1001) секунды позже, чем 
+другое поле. Воспроизведение чересстрочного видео на компьютере
+выглядит скверно по двум причинам: монитор обладает более высоким
+разрешением и видео показывается покадрово, вместо отображения по
+полям.
 </para>
 
 <itemizedlist>
-<title>Notes:</title>
+<title>Замечания:</title>
 <listitem><para>
-  This section only applies to NTSC DVDs, and not PAL.
+Этот раздел применим только к NTSC DVD, а не к PAL.
 </para></listitem>
 <listitem><para>
-  The example <application>MEncoder</application> lines throughout the
-  document are <emphasis role="bold">not</emphasis> intended for
-  actual use. They are simply the bare minimum required to encode the
-  pertaining video category. How to make good DVD rips or fine-tune
-  <systemitem class="library">libavcodec</systemitem> for maximal
-  quality is not within the scope of this document.
+Примеры командных строк <application>MEncoder</application> 
+в данном разделе <emphasis role="bold">не</emphasis> 
+предназначены для реального использования. Они просто являются
+минимально необходимым требованием для кодирования 
+соответствующей категории видео. То, как сделать хорошие DVD
+рипы или тонко настроить 
+<systemitem class="library">libavcodec</systemitem> для 
+достижения максимального качества, не входит в рамки данного 
+раздела.
 </para></listitem>
 <listitem><para>
-  There are a couple footnotes specific to this guide, linked like this:
+Есть несколько сносок, специфичных для данного руководства, 
+обозначенных следующим образом:
   <link linkend="menc-feat-telecine-footnotes">[1]</link>
 </para></listitem>
 </itemizedlist>
 </sect2>
 
-<!-- ********** -->
-
 <sect2 id="menc-feat-telecine-ident">
-<title>How to tell what type of video you have</title>
+<title>Как распознать тип Вашего видео</title>
 
 <sect3 id="menc-feat-telecine-ident-progressive">
-<title>Progressive</title>
-
+<title>Построчная развёртка</title>
 <para>
-Progressive video was originally filmed at 24000/1001 fps, and stored
-on the DVD without alteration.
+Видео с построчной развёрткой изначально записывается на
+24000/1001 fps и сохраняется на DVD без чередования.
 </para>
 
 <para>
-When you play a progressive DVD in <application>MPlayer</application>,
-<application>MPlayer</application> will print the following line as
-soon as the movie begins to play:
-<screen>
-demux_mpg: 24000/1001 fps progressive NTSC content detected, switching framerate.
-</screen>
-From this point forward, demux_mpg should never say it finds
-"30000/1001 fps NTSC content."
+При воспроизведении DVD с построчной развёрткой в 
+<application>MPlayer</application>, <application>MPlayer</application> 
+выведет следующую строку при начале воспроизведения фильма:
+
+<screen>demux_mpg: обнаружено 24000/1001 кадра/сек NTSC содержимое с построчной развёрткой,
+переключаю частоту кадров.</screen>
+
+Начиная с этого момента, demux_mpg should никогда не должен
+сообщать о том, что найдено
+&quot;30000/1001 кадров/сек NTSC содержимое&quot;.
 </para>
 
 <para>
-When you watch progressive video, you should never see any
-interlacing. Beware, however, because sometimes there is a tiny bit
-of telecine mixed in where you would not expect. I have encountered TV
-show DVDs that have one second of telecine at every scene change, or
-at seemingly random places. I once watched a DVD that had a
-progressive first half, and the second half was telecined. If you
-want to be <emphasis>really</emphasis> thorough, you can scan the
-entire movie:
+При просмотре видео с построчной развёрткой Вы не должны никогда
+наблюдать чересстрочность. Однако, будьте осторожны, поскольку 
+иногда есть небольшая примесь телесина там, где Вы этого не 
+ожидаете. Мной наблюдались DVD с TV-шоу, у которых была одна 
+секунда телесина при каждой смене сцен или в случайных на вид
+местах. Однажды я видел DVD, у которого одна половина была с 
+построчной развёрткой, а вторая &mdash; телесиненной. Если Вы
+желаете быть <emphasis>действительно</emphasis> уверенными,
+Вы можете просканировать весь фильм:
+
 <screen>mplayer dvd://1 -nosound -vo null -benchmark</screen>
-Using <option>-benchmark</option> makes
-<application>MPlayer</application> play the movie as quickly as it
-possibly can; still, depending on your hardware, it can take a
-while. Every time demux_mpg reports a framerate change, the line
-immediately above will show you the time at which the change
-occurred.
+
+Использование <option>-benchmark</option> позволяет
+<application>MPlayer</application> воспроизводить фильм столь
+быстро, сколь это возможно; тем не менее, в зависимости от 
+Вашего железа, это может занять некоторое время. Всякий раз, 
+когда demux_mpg будет сообщать об изменении частоты кадров,
+строка прямо над сообщением покажет вам время, при котором
+произошло изменение.
 </para>
 
 <para>
-Sometimes progressive video on DVDs is referred to as
-"soft-telecine" because it is intended to
-be telecined by the DVD player.
+Иногда видео на DVD с построчной развёрткой называют 
+&quot;мягким телесином&quot;, поскольку предполагается, что
+телесин будет выполнен DVD плеером. 
 </para>
 </sect3>
 
-
 <sect3 id="menc-feat-telecine-ident-telecined">
-<title>Telecined</title>
-
+<title>Телесин</title>
 <para>
-Telecined video was originally filmed at 24000/1001, but was telecined
-<emphasis>before</emphasis> it was written to the DVD.
+Телесиненное видео изначально снимается на 24000/1001 кадр/сек, 
+но подвергается телесину <emphasis>до</emphasis> записи на DVD.
 </para>
 
 <para>
-<application>MPlayer</application> does not (ever) report any
-framerate changes when it plays telecined video.
+<application>MPlayer</application> не (всегда) сообщает об
+изменении частоты кадров при воспроизведении телесиненного
+видео.
 </para>
 
 <para>
-Watching a telecined video, you will see interlacing artifacts that
-seem to "blink": they repeatedly appear and disappear.
-You can look closely at this by
+При просмотре телесиненного видео, Вы будете видеть "мерцающие"
+артефакты чересстрочной развёртки: они будут многократно 
+повторяться и исчезать.
+Вы можете детально это рассмотреть следующим образом:
 <orderedlist>
-<listitem><screen>mplayer dvd://1</screen></listitem>
+<listitem>
+  <screen>mplayer dvd://1</screen>
+  </listitem>
 <listitem><para>
-  Seek to a part with motion.
-</para></listitem>
+  Переместитесь в часть фильма с движением.
+  </para></listitem>
 <listitem><para>
-  Use the <keycap>.</keycap> key to step forward one frame at a time.
-</para></listitem>
+  Используйте клавишу <keycap>.</keycap> для покадровой перемотки
+  вперёд.
+  </para></listitem>
 <listitem><para>
-  Look at the pattern of interlaced-looking and progressive-looking
-  frames. If the pattern you see is PPPII,PPPII,PPPII,... then the
-  video is telecined. If you see some other pattern, then the video
-  may have been telecined using some non-standard method;
-  <application>MEncoder</application> cannot losslessly convert
-  non-standard telecine to progressive. If you do not see any
-  pattern at all, then it is most likely interlaced.
-</para></listitem>
+  Наблюдайте за последовательностью кадров с чересстрочной и 
+  построчной развёрткой. Если Вы видите следующую структуру: 
+  ЧЧЧПП,ЧЧЧПП,ЧЧЧПП,... (где Ч &mdash; чересстрочные, а П &mdash;
+  построчные кадры), значит видео телесиненное. Если Вы 
+  наблюдаете иную структуру, видео может быть телесиненным,
+  используя какой-либо нестандартный метод;
+  <application>MEncoder</application> не может преобразовать 
+  без потерь нестандартный телесин в построчную развёртку.
+  Если Вы не видите вообще никакой структуры, значит наиболее 
+  вероятно, что видео с чересстрочной развёрткой.
+  </para></listitem>
 </orderedlist>
 </para>
 
 <para>
-Sometimes telecined video on DVDs is referred to as
-"hard-telecine". Since hard-telecine is already 60000/1001 fields
-per second, the DVD player plays the video without any manipulation.
+Иногда подверженное телесину видео на DVD называют "жестким телесином".
+Поскольку жесткий телесин уже имеет 60000/1001 полей в секунду, DVD
+проигрыватель, воспроизводя его, не делает никаких преобразований.
 </para>
 
 <para>
-Another way to tell if your source is telecined or not is to play
-the source with the <option>-vf pullup</option> and <option>-v</option>
-command line options to see how <option>pullup</option> matches frames.
-If the source is telecined, you should see on the console a 3:2 pattern
-with <systemitem>0+.1.+2</systemitem> and <systemitem>0++1</systemitem>
-alternating.
-This technique has the advantage that you do not need to watch the
-source to identify it, which could be useful if you wish to automate
-the encoding procedure, or to carry out said procedure remotely via
-a slow connection.
+Другой способ выяснить, был ваш источник подвержен телесину или нет, заключается
+в воспроизведении исходного материала с опциями командной строки 
+<option>-vf pullup</option> и <option>-v</option>, чтобы увидеть, как 
+<option>pullup</option> сопоставляет кадры.
+Если источник был телесиненным, вы должны увидеть в консоли 3:2 структуру с
+чередующимися <systemitem>0+.1.+2</systemitem> и <systemitem>0++1</systemitem>.
+Преимущество этой техники состоит в том, что не требуется просматривать исходный
+материал для его идентификации, это может быть полезно для автоматизации
+процедуры кодирования или выполнения вышеуказанной процедуры удаленно через
+медленное соединение.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-ident-interlaced">
-<title>Interlaced</title>
+<title>Чересстрочная развертка</title>
 
 <para>
-Interlaced video was originally filmed at 60000/1001 fields per second,
-and stored on the DVD as 30000/1001 frames per second. The interlacing effect
-(often called "combing") is a result of combining pairs of
-fields into frames. Each field is supposed to be 1/(60000/1001) seconds apart,
-and when they are displayed simultaneously the difference is apparent.
+Чересстрочное видео изначально снималось на 60000/1001 полями в секунду,
+и сохранялось на DVD с 30000/1001 кадрами в секунду. Эффект чересстрочности
+(часто называемый "гребенкой")  - результат объединения пары полей в кадры.
+Поля сдвинуты друг относительно друга на 1/(60000/1001) секунды,
+и, когда отображаются одновременно, разница заметна.
 </para>
 
 <para>
-As with telecined video, <application>MPlayer</application> should
-not ever report any framerate changes when playing interlaced content.
+Как и с подверженным телесину видео <application>MPlayer</application> не должен
+сообщать о каких-либо изменениях частоты кадров при воспроизведении
+чересстрочного содержимого.
 </para>
 
 <para>
-When you view an interlaced video closely by frame-stepping with the
-<keycap>.</keycap> key, you will see that every single frame is interlaced.
+Внимательно, кадр за кадром, при помощи клавиши <keycap>.</keycap>, рассматривая
+чересстрочное видео, вы увидите, что каждый отдельный кадр - чересстрочный.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-ident-mixedpt">
-<title>Mixed progressive and telecine</title>
+<title>Смешанные построчная развертка и телесин</title>
 
 <para>
-All of a "mixed progressive and telecine" video was originally
-24000/1001 frames per second, but some parts of it ended up being telecined.
+Все видео со "смешанными построчной разверткрй и телесином" изначально было с
+24000/1001 кадрами в секунду, но некоторые его части оказались подвержены
+телесину.
 </para>
 
 <para>
-When <application>MPlayer</application> plays this category, it will
-(often repeatedly) switch back and forth between "30000/1001 fps NTSC"
-and "24000/1001 fps progressive NTSC". Watch the bottom of
-<application>MPlayer</application>'s output to see these messages.
+Когда <application>MPlayer</application> воспроизводит эту категорию, он будет
+(как правило, периодически) переключаться между "30000/1001 fps NTSC" и
+"24000/1001 fps progressive NTSC". Смотрите конец вывода 
+<application>MPlayer</application>, чтобы увидеть эти сообщения.
 </para>
 
 <para>
-You should check the "30000/1001 fps NTSC" sections to make sure
-they are actually telecine, and not just interlaced.
+Вам следует проверить разделы "30000/1001 fps NTSC", чтобы убедиться, что видео
+действительно телесиненное, а не просто чересстрочное.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-ident-mixedpi">
-<title>Mixed progressive and interlaced</title>
+<title>Смешанные построчная и чересстрочная развертки</title>
 
 <para>
-In "mixed progressive and interlaced" content, progressive
-and interlaced video have been spliced together.
+В содержимом со "смешанными построчной и чересстрочной развертками",
+прогрессивное и чересстрочное видео переплетаются друг с другом.
 </para>
 
 <para>
-This category looks just like "mixed progressive and telecine",
-until you examine the 30000/1001 fps sections and see that they do not have the
-telecine pattern.
+Эта категория выглядит также, как и "смешанные построчная развертка и телесин", 
+до тех пор, пока не проверите разделы 30000/1001 fps и не увидите, что структура 
+телесина отсутствует.
 </para>
 </sect3>
 </sect2>
@@ -2208,23 +2230,24 @@ telecine pattern.
 <!-- ********** -->
 
 <sect2 id="menc-feat-telecine-encode">
-<title>How to encode each category</title>
+<title>Как кодировать каждую категорию</title>
 
 <para>
-As I mentioned in the beginning, example <application>MEncoder</application>
-lines below are <emphasis role="bold">not</emphasis> meant to actually be used;
-they only demonstrate the minimum parameters to properly encode each category.
+Как уже было сказано выше, последующие примеры командных строк 
+<application>MEncoder</application> <emphasis role="bold">не</emphasis> означают, 
+что надо использовать именно их; они всего лишь примеры минимального набора параметров 
+для правильного кодирования каждой категории.
 </para>
 
 
 <sect3 id="menc-feat-telecine-encode-progressive">
-<title>Progressive</title>
+<title>Построчная развертка</title>
 
 <para>
-Progressive video requires no special filtering to encode. The only
-parameter you need to be sure to use is
-<option>-ofps 24000/1001</option>. Otherwise, <application>MEncoder</application>
-will try to encode at 30000/1001 fps and will duplicate frames.
+Видео с построчной разверткой не требует специальной обработки для кодирования.
+Единственный нужный вам для уверенности параметр - это <option>-ofps 24000/1001</option>. 
+В противном случае <application>MEncoder</application> будет пытаться кодировать
+с 30000/1001 кадрами в секунду и создаст дублирующиеся кадры.
 </para>
 
 <para>
@@ -2232,108 +2255,104 @@ will try to encode at 30000/1001 fps and will duplicate frames.
 </para>
 
 <para>
-It is often the case, however, that a video that looks progressive
-actually has very short parts of telecine mixed in. Unless you are
-sure, it is safest to treat the video as
-<link linkend="menc-feat-telecine-encode-mixedpt">mixed progressive and telecine</link>.
-The performance loss is small
-<link linkend="menc-feat-telecine-footnotes">[3]</link>.
+Часты случай, однако, когда видео, выглядящее прогрессивным, на самом деле
+содержит очень короткие подверженные телесину части. Если вы не уверены,
+безопаснее будет считать его как видео со
+<link linkend="menc-feat-telecine-encode-mixedpt">смешанными построчной
+разверткой телесином</link>.
+Потеря скорости невелика<link linkend="menc-feat-telecine-footnotes">[3]</link>.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-encode-telecined">
-<title>Telecined</title>
+<title>Телесин</title>
 
 <para>
-Telecine can be reversed to retrieve the original 24000/1001 content,
-using a process called inverse-telecine.
-<application>MPlayer</application> contains several filters to
-accomplish this; the best filter, <option>pullup</option>, is described
-in the <link linkend="menc-feat-telecine-encode-mixedpt">mixed
-progressive and telecine</link> section.
+Телесин может быть отменен для получения оригинального 24000/1001 содержимого
+при помощи процесса, называемого обратный телесин.
+<application>MPlayer</application> содержит несколько фильтров для выполнения
+этого; лучший из них, <option>pullup</option> описан в разделе 
+<link linkend="menc-feat-telecine-encode-mixedpt">смешанные построчная развертка
+и телесин</link>.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-encode-interlaced">
-<title>Interlaced</title>
+<title>Чересстрочная развертка</title>
 
 <para>
-For most practical cases it is not possible to retrieve a complete
-progressive video from interlaced content. The only way to do so
-without losing half of the vertical resolution is to double the
-framerate and try to "guess" what ought to make up the
-corresponding lines for each field (this has drawbacks - see method 3).
+На практике в большинстве случаев невозможно получить полностью прогрессивное
+видео из чересстрочного содержимого.
+Единственный способ сделать это без потери половины вертикального разрешения
+- это удвоить частоту кадров и попытаться "угадать", что должно составить 
+соответствующие линии каждого поля (этот способ имеет недостатки, смотрите метод
+3).
 </para>
 
 <orderedlist>
 <listitem><para>
-  Encode the video in interlaced form. Normally, interlacing wreaks
-  havoc with the encoder's ability to compress well, but
-  <systemitem class="library">libavcodec</systemitem> has two
-  parameters specifically for dealing with storing interlaced video a
-  bit better: <option> ildct</option> and <option>ilme</option>. Also,
-  using <option>mbd=2</option> is strongly recommended
-  <link linkend="menc-feat-telecine-footnotes">[2] </link> because it
-  will encode macroblocks as non-interlaced in places where there is
-  no motion. Note that <option>-ofps</option> is NOT needed here.
+  Кодируйте видео в чересстрочной форме. Обычно это наносит вред способности
+  кодировщика хорошо сжимать, то <systemitem class="library">libavcodec</systemitem>
+  имеет два параметра специально для чуть лучшего сохранения чересстрочного
+  видео: <option>ildct</option> и <option>ilme</option>. К тому же, настоятельно
+  рекомендуется использовать 
+  <option>mbd=2</option><link linkend="menc-feat-telecine-footnotes">[2]</link>,
+  потому что при этом макроблоки в местах без движения будут кодированы как
+  нечересстрочные. Имейте в виду, что <option>-ofps</option> здесь НЕ нужна.
   <screen>mencoder dvd://1 -oac copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
 </para></listitem>
 <listitem><para>
-  Use a deinterlacing filter before encoding. There are several of
-  these filters available to choose from, each with its own advantages
-  and disadvantages. Consult <option>mplayer -pphelp</option> and
-  <option>mplayer -vf help</option> to see what is available
-  (grep for "deint"), read Michael's Niedermayer
-  <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing filters comparison</ulink>,
-  and search the
-  <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
-  MPlayer mailing lists</ulink> to find many discussions about the
-  various filters.
-  Again, the framerate is not changing, so no
-  <option>-ofps</option>. Also, deinterlacing should be done after
-  cropping <link linkend="menc-feat-telecine-footnotes">[1]</link> and
-  before scaling.
+  Используйте фильтр деинтерлейсинга перед кодированием. Существует несколько
+  таких фильтров на выбор, каждый имеет свои преимущества и недостатки. 
+  Обратитесь к <option>mplayer -pphelp</option> и <option>mplayer -vf help</option>
+  для определения доступных (grep по "deint"), прочтите 
+  <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Сравнение
+  фильтров деинтерлейсинга</ulink> Майкла Нидермайера (Michael Niedermayer),
+  и поищите в <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
+  списках рассылки MPlayer</ulink>, чтобы найти множество обсуждений различных
+  фильтров.
+  И опять, частота кадров не меняется, поэтому никаких <option>-ofps</option>. 
+  к тому же деинтерлейсинг следует производить после обрезания
+  <link linkend="menc-feat-telecine-footnotes">[1]</link> и до масштабирования.
   <screen>mencoder dvd://1 -oac copy -vf yadif -ovc lavc</screen>
 </para></listitem>
 <listitem><para>
-  Unfortunately, this option is buggy with
-  <application>MEncoder</application>; it ought to work well with
-  <application>MEncoder G2</application>, but that is not here yet. You
-  might experience crahes. Anyway, the purpose of <option> -vf
-  tfields</option> is to create a full frame out of each field, which
-  makes the framerate 60000/1001. The advantage of this approach is that no
-  data is ever lost; however, since each frame comes from only one
-  field, the missing lines have to be interpolated somehow. There are
-  no very good methods of generating the missing data, and so the
-  result will look a bit similar to when using some deinterlacing
-  filters. Generating the missing lines creates other issues, as well,
-  simply because the amount of data doubles. So, higher encoding
-  bitrates are required to maintain quality, and more CPU power is
-  used for both encoding and decoding. tfields has several different
-  options for how to create the missing lines of each frame. If you
-  use this method, then Reference the manual, and chose whichever
-  option looks best for your material. Note that when using
-  <option>tfields</option> you
-  <emphasis role="bold">have to</emphasis> specify both
-  <option>-fps</option> and <option>-ofps</option> to be twice the
-  framerate of your original source.
+  К сожалению, эта опция сбоит с <application>MEncoder</application>; она должна
+  хорошо работать с <application>MEncoder G2</application>, но его пока нет. Вы
+  можете столкнуться с крахами. Как бы то ни было, назначение опции 
+  <option> -vf tfields</option> - создать полный кадр из каждого поля, что
+  делает частоту кадров равной 60000/1001. Преимущество этого подхода в том, что
+  никакие данные не теряются, однако, каждый кадр получается только из одного
+  пол, недостающие строки как-то интерполируются. Это не очень хорошие методы
+  генерации недостающих данных, поэтому результат будет выглядеть весьма похожим
+  на применение фильтра деинтерлейсинга. Генерация недостающих срок также создает
+  другие проблемы, просто потому что количество данных удваивается.
+  Таким образом, для сохранения качества требуются более высокие значения
+  битпотока как для кодирования, так и для декодирования. tfields имеет
+  несколько различных опций, определяющих способ создания недостающих строк
+  каждого кадра. Если выбрали этот способ, обратитесь к руководству и выберите
+  ту опцию, которая лучше подходит для вашего материала. Имейте в виду, что при
+  использовании <option>tfields</option> вы 
+  <emphasis role="bold">должны</emphasis> указать как <option>-fps</option>, так
+  и <option>-ofps</option>, установив им значение, равное удвоенной частоте
+  исходного материала.
   <screen>
 mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
     -fps 60000/1001 -ofps 60000/1001<!--
   --></screen>
 </para></listitem>
 <listitem><para>
-  If you plan on downscaling dramatically, you can extract and encode
-  only one of the two fields. Of course, you will lose half the vertical
-  resolution, but if you plan on downscaling to at most 1/2 of the
-  original, the loss will not matter much. The result will be a
-  progressive 30000/1001 frames per second file. The procedure is to use
-  <option>-vf field</option>, then crop
-  <link linkend="menc-feat-telecine-footnotes">[1]</link> and scale
-  appropriately. Remember that you will have to adjust the scale to
-  compensate for the vertical resolution being halved.
+  Если планируете сильно уменьшать размер изображения, можно извлекать и
+  декодировать только одно поле из двух. Конечно, вы потеряете половину
+  вертикального разрешения, но если планируется уменьшать размер как минимум
+  вдвое, потеря будет не сильно заметна. В результате получится прогрессивный
+  файл с 30000/1001 кадрами в секунду. Процедура следующая: 
+  <option>-vf field</option>, затем обрезание
+  <link linkend="menc-feat-telecine-footnotes">[1]</link> и масштабирование
+  соответствующим образом. Помните, что потребуется скорректировать масштабирование
+  для компенсации уменьшенного вдвое вертикального разрешения.
   <screen>mencoder dvd://1 -oac copy -vf field=0 -ovc lavc</screen>
 </para></listitem>
 </orderedlist>
@@ -2341,59 +2360,56 @@ mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
 
 
 <sect3 id="menc-feat-telecine-encode-mixedpt">
-<title>Mixed progressive and telecine</title>
+<title>Смешанные построчная развертка и телесин</title>
 
 <para>
-In order to turn mixed progressive and telecine video into entirely
-progressive video, the telecined parts have to be
-inverse-telecined. There are three ways to accomplish this,
-described below. Note that you should
-<emphasis role="bold">always</emphasis> inverse-telecine before any
-rescaling; unless you really know what you are doing,
-inverse-telecine before cropping, too
+Для преобразования видео со смешанными построчной разверткой и телесином в
+полностью прогрессивное необходимо к подверженным телесину частям применить
+обратный телесин. Есть три описанных ниже способа добиться этого.
+Заметьте, что следует <emphasis role="bold">всегда</emphasis> применять обратный
+телесин до какого-либо масштабирования; за исключением случая, когда вы точно
+знаете, что делаете, делайте обратный телесин также до обрезания
 <link linkend="menc-feat-telecine-footnotes">[1]</link>.
-<option>-ofps 24000/1001</option> is needed here because the output video
-will be 24000/1001 frames per second.
+<option>-ofps 24000/1001</option> здесь необходима, поскольку видео на выходе
+будет с 24000/1001 кадрами в секунду.
 </para>
 
 <itemizedlist>
 <listitem><para>
-  <option>-vf pullup</option> is designed to inverse-telecine
-  telecined material while leaving progressive data alone. In order to
-  work properly, <option>pullup</option> <emphasis role="bold">must</emphasis>
-  be followed by the <option>softskip</option> filter or
-  else <application>MEncoder</application> will crash.
-  <option>pullup</option> is, however, the cleanest and most
-  accurate method available for encoding both telecine and
-  "mixed progressive and telecine".
+  <option>-vf pullup</option> разработана для обратного телесина материала,
+  телесину подверженного, оставляя прогрессивные данные как есть. Для правильной
+  работы после <option>pullup</option> <emphasis role="bold">должен</emphasis>
+  следовать фильтр <option>softskip</option>, иначе произойдет крах
+  <application>MEncoder</application>.
+  <option>pullup</option> является, однако, самый чистый и точный метод,
+  доступный для кодирования и телесина, и "смешанного прогрессивного с телесином".
   <screen>
 mencoder dvd://1 -oac copy -vf pullup,softskip \
     -ovc lavc -ofps 24000/1001<!--
   --></screen>
 </para></listitem>
 <listitem><para>
-  An older method
-  is to, rather than inverse-telecine the telecined parts, telecine
-  the non-telecined parts and then inverse-telecine the whole
-  video. Sound confusing? softpulldown is a filter that goes through
-  a video and makes the entire file telecined. If we follow
-  softpulldown with either <option>detc</option> or
-  <option>ivtc</option>, the final result will be entirely
-  progressive. <option>-ofps 24000/1001</option> is needed.
+  Более старый метод заключается не в применении обратного телесина к
+  телесиненным частям, а, наоборот, в телесине не подверженных телесину частей и
+  последующем применении обратного телесина ко всему видео. Звучит запутанно? 
+  softpulldown - это фильтр, проходящий по видео и делающий телесиненным весь
+  файл. Если следом за softpulldown указать либо <option>detc</option>, либо
+  <option>ivtc</option>, финальный результат будет полностью прогрессивным. 
+  <option>-ofps 24000/1001</option> необходима.
   <screen>
 mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
   </screen>
 </para></listitem>
 <listitem><para>
-  I have not used <option>-vf filmdint</option> myself, but here is what
-  D Richard Felker III has to say:
+  Лично я не использовал <option>-vf filmdint</option>, но вот что сказал 
+  Д Ричарт Фелкер III (D Richard Felker III):
 
-  <blockquote><para>It is OK, but IMO it tries to deinterlace rather
-     than doing inverse telecine too often (much like settop DVD
-     players &amp; progressive TVs) which gives ugly flickering and
-     other artifacts. If you are going to use it, you at least need to
-     spend some time tuning the options and watching the output first
-     to make sure it is not messing up.
+  <blockquote><para>С ним все в порядке, но IMO он слишком часто пытается
+     сделать деинтерлейс iвместо обратного телесина (в точности как аппаратные
+     DVD проигрыватели &amp; прогрессивные TV), что в результате дает мерзкое
+     мерцание и другие артефакты. Если собираетесь его использовать, потребуется
+     как минимум потратить немного времени для тонкой настройки опций и
+     просмотра результата, чтобы убедиться, что он не испорчен.
   </para></blockquote>
 </para></listitem>
 </itemizedlist>
@@ -2401,59 +2417,61 @@ mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
 
 
 <sect3 id="menc-feat-telecine-encode-mixedpi">
-<title>Mixed progressive and interlaced</title>
+<title>Смешанные построчная и чересстрочная развертки</title>
 
 <para>
-There are two options for dealing with this category, each of
-which is a compromise. You should decide based on the
-duration/location of each type.
+Существует две опции для этой категории, каждая из которых - это компромисс. Вы
+должны выбрать, исходя из продолжительности/положения каждого типа.
 </para>
 
 <itemizedlist>
 <listitem>
   <para>
-  Treat it as progressive. The interlaced parts will look interlaced,
-  and some of the interlaced fields will have to be dropped, resulting
-  in a bit of uneven jumpiness. You can use a postprocessing filter if
-  you want to, but it may slightly degrade the progressive parts.
+  Рассматривайте видео как прогрессивное. Чересстрочные части будут выглядеть
+  чересстрочными, и потребуется удаление некоторых из чересстрочных полей, что
+  <!-- is translation correct? -->
+  даст в результате некоторое скачкообразное дрожание. Вы можете использовать
+  фильтр постобработки, если хотите, но это может несколько ухудшить
+  прогрессивные части.
   </para>
 
   <para>
-  This option should definitely not be used if you want to eventually
-  display the video on an interlaced device (with a TV card, for
-  example). If you have interlaced frames in a 24000/1001 frames per
-  second video, they will be telecined along with the progressive
-  frames. Half of the interlaced "frames" will be displayed for three
-  fields' duration (3/(60000/1001) seconds), resulting in a flicking
-  "jump back in time" effect that looks quite bad. If you
-  even attempt this, you <emphasis role="bold">must</emphasis> use a
-  deinterlacing filter like <option>lb</option> or
-  <option>l5</option>.
+  Эта опция определенно не должна использоваться, если вы зотите время от
+  времени отображать видео на чересстрочном устройстве (с помощью TV карты,
+  например). Если у вас есть чересстрочные кадры в видео с 24000/1001 кадрами в
+  секунду, к ним, как и к прогрессивным, будет применен телесин. Половина их
+  чересстрочных "кадров" будут отображаться с длительностью трех полей
+  (3/(60000/1001) секунд), давая в результате неприятно выглядящий эффект 
+  <!-- FIXME is translation correct? -->
+  "прыжка назад во времени". Даже если вы пробуете это, вы 
+  <emphasis role="bold">должны</emphasis> использовать фильтр деинтерлейсинга,
+  такой как <option>lb</option> или <option>l5</option>.
   </para>
 
   <para>
-  It may also be a bad idea for progressive display, too. It will drop
-  pairs of consecutive interlaced fields, resulting in a discontinuity
-  that can be more visible than with the second method, which shows
-  some progressive frames twice. 30000/1001 frames per second interlaced
-  video is already a bit choppy because it really should be shown at
-  60000/1001 fields per second, so the duplicate frames do not stand out as
-  much.
+  Для отображения на прогрессивном дисплее это тоже моет быть плохой идеей.
+  Будут отбрасываться пары последовательных чересстрочных полей, приводя к 
+  разрывам, которые могут быть заметнее, чем использование второго метода,
+  отображающего некоторые прогрессивные кадры дважды. Чересстрочное видео с 
+  30000/1001 кадрами в секунду уже несколько прерывисто, потому что в реальности
+  оно должно отображаться с 60000/1001 полями в секунду, так что дублирующиеся
+  кадры не так сильно выделяются.
   </para>
 
   <para>
-  Either way, it is best to consider your content and how you intend to
-  display it. If your video is 90% progressive and you never intend to
-  show it on a TV, you should favor a progressive approach. If it is
-  only half progressive, you probably want to encode it as if it is all
-  interlaced.
+  Так или иначе, лучше всего определить тип вашего содержимого и как вы его
+  собираетесь показывать. Если видео на 90% прогрессивное и вы никогда не будете
+  показывать его на TV, вам следует отдать предпочтение прогрессивному варианту. 
+  Если оно только на половину прогрессивное, вы, возможно, захотите кодировать
+  его, как если бы оно было чересстрочным.
   </para>
 </listitem>
 
 <listitem><para>
-  Treat it as interlaced. Some frames of the progressive parts will
-  need to be duplicated, resulting in uneven jumpiness. Again,
-  deinterlacing filters may slightly degrade the progressive parts.
+  Считайте его чересстрочным. Некоторые кадры прогрессивной части потребуют
+  <!-- is translation correct? -->
+  дублирования, что даст в результате некоторое скачкообразное дрожание. И
+  снова, фильтры деинтерлейсинга могут несколько ухудшить прогрессивные части.
 </para></listitem>
 </itemizedlist>
 </sect3>
@@ -2462,83 +2480,84 @@ duration/location of each type.
 <!-- ********** -->
 
 <sect2 id="menc-feat-telecine-footnotes">
-<title>Footnotes</title>
+<title>Примечания</title>
 
 <orderedlist>
 <listitem>
   <formalpara>
-  <title>About cropping:</title>
+  <title>Об обрезании:</title>
   <para>
-  Video data on DVDs are stored in a format called YUV 4:2:0. In YUV
-  video, luma ("brightness") and chroma ("color")
-  are stored separately. Because the human eye is somewhat less
-  sensitive to color than it is to brightness, in a YUV 4:2:0 picture
-  there is only one chroma pixel for every four luma pixels. In a
-  progressive picture, each square of four luma pixels (two on each
-  side) has one common chroma pixel. You must crop progressive YUV
-  4:2:0 to even resolutions, and use even offsets. For example,
-  <option>crop=716:380:2:26</option> is OK but
-  <option>crop=716:380:3:26 </option> is not.
+  Видеоданные на DVDs хранятся в формате, называемом YUV 4:2:0. В YUV
+  видео, люма ("яркость") и хрома ("цвет") хранятся отдельно. 
+  Поскольку человеческий глаз менее чувствителен к цвету, чем к яркости, 
+  в YUV 4:2:0 изображении присутствует только один цветностный пиксел на четыре
+  яркостных. В прогрессивном изображении каждый квадрат из четырех яркостных 
+  пикселов (два на два) имеют один общий цветностный пиксел. Вы должны обрезать
+  прогрессивное YUV 4:2:0 до четных размеров и использовать четные смещения.
+  Например, 
+  <option>crop=716:380:2:26</option> - правильно, а
+  <option>crop=716:380:3:26 </option> - нет.
   </para>
   </formalpara>
 
   <para>
-  When you are dealing with interlaced YUV 4:2:0, the situation is a
-  bit more complicated. Instead of every four luma pixels in the
-  <emphasis>frame</emphasis> sharing a chroma pixel, every four luma
-  pixels in each <emphasis> field</emphasis> share a chroma
-  pixel. When fields are interlaced to form a frame, each scanline is
-  one pixel high. Now, instead of all four luma pixels being in a
-  square, there are two pixels side-by-side, and the other two pixels
-  are side-by-side two scanlines down. The two luma pixels in the
-  intermediate scanline are from the other field, and so share a
-  different chroma pixel with two luma pixels two scanlines away. All
-  this confusion makes it necessary to have vertical crop dimensions
-  and offsets be multiples of four. Horizontal can stay even.
+  Когда имеете дело с чересстрочным YUV 4:2:0, ситуация чуть более сложная.
+  Вместо разделения одного цветностного пиксела четырьмя яркостными пикселами в
+  <emphasis>кадре</emphasis>, каждые четыре пиксела каждого
+  <emphasis>поля</emphasis> разделяют цветностный пиксел. Когда поля объединены в
+  кадр, каждая строка имеет высоту в один пиксел. Теперь, вместо квадрата из
+  четырех пикселов мы имеем два соседних пиксела, а два других расположены
+  на две строки ниже. Два яркостных пиксела следующей строки принадлежат
+  другому полю, и, поэтому, разделяют другой пиксел цветности с двумя пикселами
+  на две строки дальше. Вся эта неразбериха требует, чтобы вертикальные размеры
+  и смещения обрезания были кратны четырем. Горизонтальные могут оставаться
+  четными.
   </para>
 
   <para>
-  For telecined video, I recommend that cropping take place after
-  inverse telecining. Once the video is progressive you only need to
-  crop by even numbers. If you really want to gain the slight speedup
-  that cropping first may offer, you must crop vertically by multiples
-  of four or else the inverse-telecine filter will not have proper data.
+  Для телесиненного видео я рекомендую производить обрезание после обратного
+  телесина. Так как видео прогрессивное, достаточно обрезать только по четным
+  размерам. Если же действительно хотите получить небольшую прибавку к скорости,
+  которую может дать обрезка, вам придется производить обрезание с вертикальными
+  размерностями, кратными четырем. В противном случае фильтр обратного телесина
+  не будет иметь подходящих данных.
   </para>
 
   <para>
-  For interlaced (not telecined) video, you must always crop
-  vertically by multiples of four unless you use <option>-vf
-  field</option> before cropping.
+  Для чересстрочного (не подверженного телесину) видео, вы всегда должны
+  производить обрезание с вертикальными размерностями, кратными четырем, если
+  только не используете <option>-vf field</option> перед обрезанием.
   </para>
 </listitem>
 
 <listitem><formalpara>
-  <title>About encoding parameters and quality:</title>
+  <title>О параметрах кодирования и качестве:</title>
   <para>
-  Just because I recommend <option>mbd=2</option> here does not mean it
-  should not be used elsewhere. Along with <option>trell</option>,
-  <option>mbd=2</option> is one of the two
-   <systemitem class="library">libavcodec</systemitem> options that
-  increases quality the most, and you should always use at least those
-  two unless the drop in encoding speed is prohibitive (e.g. realtime
-  encoding). There are many other options to
-  <systemitem class="library">libavcodec</systemitem> that increase
-  encoding quality (and decrease encoding speed) but that is beyond
-  the scope of this document.
+  <!-- FIXME is translation correct? -->
+  Если я здесь рекомендую <option>mbd=2</option>, это еще не значит, что эту
+  опцию не следует использовать где-либо еще. Совместно с <option>trell</option>
+  <option>mbd=2</option> является одной из двух опций
+  <systemitem class="library">libavcodec</systemitem>, которые значительно
+  увеличивают качество. Вам всегда следует использовать как минимум эти две,
+  за исключением случая, когда потеря скорости кодирования недопустима
+  (например, кодирование в реальном времени). Есть множество других 
+  <systemitem class="library">libavcodec</systemitem> опций, улучшающих качество
+  (и замедляющих кодирование), но их описание выходит за рамки этого
+  документа.
   </para>
 </formalpara></listitem>
 
 <listitem><formalpara>
-  <title>About the performance of pullup:</title>
+  <title>О производительности pullup:</title>
   <para>
-  It is safe to use <option>pullup</option> (along with <option>softskip
-  </option>) on progressive video, and is usually a good idea unless
-  the source has been definitively verified to be entirely progressive.
-  The performace loss is small for most cases. On a bare-minimum encode,
-  <option>pullup</option> causes <application>MEncoder</application> to
-  be 50% slower. Adding sound processing and advanced <option>lavcopts
-  </option> overshadows that difference, bringing the performance
-  decrease of using <option>pullup</option> down to 2%.
+  Использование <option>pullup</option> (совместно с <option>softskip</option>)
+  для прогрессивного видео вполне безопасно и обычно является хорошей идеей,
+  если только про источник не известно достоверно, что он полностью
+  прогрессивный. Потеря скорости мала в большинстве случаев.
+  В минимальном варианте кодирования <option>pullup</option> замедляет
+  <application>MEncoder</application> на 50%. Добавление обработки звука и
+  продвинутых <option>lavcopts</option> опций затмевает эту разницу, уменьшая 
+  падение производительности от использования <option>pullup</option> до 2%.
   </para>
 </formalpara></listitem>
 </orderedlist>
