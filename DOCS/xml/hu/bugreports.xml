@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21760 -->
 <appendix id="bugreports">
 <title>Hogyan jelentsd a hibákat</title>
+
 <para>
 A jó hiba jelentések nagyon értékes hozzájárulások bármilyen szoftver
 fejlesztéséhez. De, akárcsak jó programot írni, jó probléma jelentést
@@ -12,8 +13,14 @@ Tehát miközben a visszajelzések kritikus és nagyon megbecsült az
 hogy <emphasis role="bold">minden</emphasis> általunk kért információt meg
 kell adnod és követned kell az ebben a dokumentumban leírt lépéseket.
 </para>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_security">
 <title>Biztonsági hibák jelentése</title>
+
 <para>
 Ha egy kihasználható hibát találsz és a helyesen akarsz cselekedni,
 vagyis előbb a mi tudomásunkra akarod hozni, mielőtt publikálnád,
@@ -27,8 +34,14 @@ Kérjük ne késlekedj a jelentéseddel egy proof-of-concept exploit írása
 miatt, azt később is elküldheted egy másik levélben.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_fix">
 <title>Hogyan javíts hibákat</title>
+
 <para>
 Ha úgy érzed, hogy képes vagy rá, bátran állj neki és javítsd ki a hibát magad.
 Vagy talán már meg is tetted? Kérlek olvasd el <ulink url="../../tech/patches.txt">ezt a rövid dokumentumot</ulink>,
@@ -37,20 +50,27 @@ Az <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlay
 levelezési listán lévő emberkék segítenek neked, ha kérdésed van.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_regression_test">
 <title>Hogyan tesztelj a Subversion segítségével</title>
+
 <para>
 Egy néha előforduló probléma, hogy "régen még működött, de most már nem...".
 Következzék hát egy lépésenkénti leírás, mely segít a probléma
 megtalálásában. Ez <emphasis role="bold">nem</emphasis> az átlagos
 felhasználóknak szól.
 </para>
+
 <para>
 Először is, be kell szerezned az MPlayer forrás fáját a Subversionből.
-Az utasításokat megtalálod
-<ulink url="http://www.mplayerhq.hu/dload.html">ennek az oldalnak</ulink>
-az alján.
+Az utasításokat megtalálod a
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#svn">letöltési oldal Subversion részében</ulink>.
 </para>
+
 <para>
 Ezután lesz az mplayer/ könyvtárban a Subversion fáról egy pillanatképed,
 a kliens oldalon. Ezután frissítsd ezt a kívánt dátumúra:
@@ -63,6 +83,7 @@ Ezen dátum formátum használata biztosítja, hogy benne legyen minden olyan
 javítás, ami az adott dátumig commit-olva lett és bekerült az
 <ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archívumába</ulink>.
 </para>
+
 <para>
 Majd folytasd, mint egy normális frissítést:
 <screen>
@@ -70,6 +91,7 @@ Majd folytasd, mint egy normális frissítést:
 make
 </screen>
 </para>
+
 <para>
 Ha olyan olvassa ezt, aki nem programozó, annak gyorsabb megkeresni a
 probléma forrását bináris keresés használatával &mdash; ekkor
@@ -80,6 +102,7 @@ Például a probléma előfordult 2003 közepén, akkor kérdezd meg, hogy
 Ha igen, akkor menj vissza április elsejére; ha nem, menj október elsejére,
 és így tovább.
 </para>
+
 <para>
 Ha nagyon sok hely van a merevlemezeden (egy teljes fordítás jelenleg 100 MB
 és 300-350 MB körül van a hibakereső szimbólumokkal), másold át a
@@ -89,6 +112,7 @@ spórolsz, ha vissza kell lépned.
 előtt, így ha nem készítesz mentést az eredeti forrás fádról, újra kell fordítanod
 mindent, ha visszajössz a jelenbe.)
 </para>
+
 <para>
 Ha megvan a nap, amikor a probléma megjelent, folytasd a keresést az
 mplayer-cvslog archívum segítségével (dátum szerint rendezve) és egy sokkal
@@ -98,6 +122,7 @@ svn update -r {"2004-08-23 15:17:25"}
 </screen>
 Így könnyen megtalálod azt a javítást, ami okozta.
 </para>
+
 <para>
 Ha megvan a javítás, ami a problémát okozta, majdnem győztél is;
 jelentsd az
@@ -110,16 +135,22 @@ Addig azonban a javításra is gyanakodva tekint, amíg nem tiszta, hogy hol
 is van a hiba :-).
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_report">
 <title>Hogyan jelentsd a hibákat</title>
+
 <para>
 Mindenek előtt kérlek, hogy mindig próbáld ki az <application>MPlayer</application>
 legújabb Subversion verzióját, hátha az általad felfedezett hibát már kijavították
 benne. A fejlesztés borzasztó gyorsan halad, a legtöbb, hivatalos kiadásban
 meglévő problémát napokon vagy akár órákon belül jelentik, így
-<emphasis role="bold">csak a Subversionből</emphasis> küldj hibajelentést. Ebbe
-beleértendőek az <application>MPlayer</application> bináris csomagjai is. A
-CVS utasításokat megtalálod
+<emphasis role="bold">csak a Subversion felhasználásával</emphasis> küldj hibajelentést.
+Ebbe beleértendőek az <application>MPlayer</application> bináris csomagjai is.
+A Subversion utasításokat megtalálod
 <ulink url="http://www.mplayerhq.hu/dload.html">ennek az oldalnak</ulink>
 az alján vagy a README fájlban. Ha ez sem segít, olvasd el az
 <link linkend="bugs">ismert hibák</link> listáját és a dokumentáció többi részét.
@@ -128,41 +159,44 @@ jelentsd.
 </para>
 
 <para>
-Kérlek ne küljd hibajelentést személyesen egy fejlesztőnek. Ez csapatmunka és így
-számos embert érdekelhet. Néha más felhasználók is belefutnak a te problémáidba,
-és esetleg tudják, hogy hogyan lehet megkerülni, még akkor is, ha hiba van az
-<application>MPlayer</application> kódjában.
+Kérlek ne küljd hibajelentést személyesen egy fejlesztőnek. Ez csapatmunka és
+így számos embert érdekelhet. Néha más felhasználók is belefutnak a te
+problémáidba, és esetleg tudják, hogy hogyan lehet megkerülni, még akkor is,
+ha hiba van az <application>MPlayer</application> kódjában.
 </para>
 
 <para>
 Kérlek olyan részletesen írd le a problémádat, amilyen részletesen csak lehet.
-Végezz egy kis felderítő munkát, szűkítsd le azon körülmények körét, amelyek között
-a hiba előfordul. A hiba csak adott szituációban jön elő? Bizonyos fájlokra vagy
-fájl típusokra vonatkozóan? Csak egy codec esetén vagy független a használt codec-től?
-Mindegyik kimeneti vezérlővel elő tudod hozni? Minél több információt adsz meg,
-annál nagyobb az esély a hiba kijavítására. Kérlek ne felejtsd el mellékelni azon
-értékes információkat, amit lejjebb írunk, különben képtelenek vagyunk megfelelően
-megkeresni a problémádat.
+Végezz egy kis felderítő munkát, szűkítsd le azon körülmények körét, amelyek
+között a hiba előfordul. A hiba csak adott szituációban jön elő? Bizonyos
+fájlokra vagy fájl típusokra vonatkozóan? Csak egy codec esetén vagy független
+a használt codec-től? Mindegyik kimeneti vezérlővel elő tudod hozni? Minél több
+információt adsz meg, annál nagyobb az esély a hiba kijavítására. Kérlek ne
+felejtsd el mellékelni azon értékes információkat, amit lejjebb írunk, különben
+képtelenek vagyunk megfelelően megkeresni a problémádat.
 </para>
 
 <para>
 Egy kitűnő és jól megírt útmutató kérdések publikus fórumokban történő feltevéséhez
-a <ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">How To Ask
-Questions The Smart Way</ulink>
+a <ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">How To Ask Questions The Smart Way</ulink>
 (<ulink url="http://www.no.info.hu/~kryss/gnu/esr/smart-questions_hu.html">magyarul</ulink>)
 <ulink url="http://www.catb.org/~esr/">Eric S. Raymond</ulink>-tól.
 Van egy másik is, a
-<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report
-Bugs Effectively</ulink> című <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>-tól.
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report Bugs Effectively</ulink>
+című <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>-tól.
 Ha követed ezeket a leírásokat, kapsz segítséget. De kérlek értsd meg, hogy a
 levelezési listákat önként, a szabad időnkben nézzük. Van más dolgunk is, és nem
 tudjuk garantálni, hogy kapsz megoldást vagy egyáltalán választ a problémádra.
 </para>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="bugreports_where">
 <title>Hol kell jelezni a hibákat</title>
+
 <para>
 Iratkozz fel az MPlayer-users levelezési listára:
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
@@ -171,26 +205,34 @@ Iratkozz fel az MPlayer-users levelezési listára:
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/> (illetve
 <ulink url="mailto:mplayer-felhasznalok@mplayerhq.hu"/>) címre, ahol meg lehet vitatni.
 </para>
+
 <para>
 Ha inkább azt szeretnéd, használhatod a vadi új
 <ulink url="http://bugzilla.mplayerhq.hu/">Bugzillánkat</ulink> is.
 </para>
+
 <para>
-Ezen lista nyelve az <emphasis role="bold">angol</emphasis> (a -felhasznalok listáé
-természetesen magyar). Kövesd a szabványos
-<ulink url="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Irányelveket</ulink> és
-<emphasis role="bold">ne küldj HTML levelet</emphasis> egyik levelezési listánkra se.
-Ha nem így teszel, akkor vagy egyszerűen figyelmen kívül hagynak vagy kitiltanak.
-Ha nem tudod mi az a HTML levél vagy hogy miért rossz az, olvasd el ezt a
-<ulink url="http://expita.com/nomime.html">frankó leírást</ulink>. Mindent részletesen
-megmagyaráz és tanácsokat ad a HTML kikapcsolásához. Szintén tartsd észben, hogy nem
-CC-zünk (carbon-copy) egyéneknek, így jól teszed, ha feliratkozol, hogy megkapd te is
-a választ.
+Ezen lista nyelve az <emphasis role="bold">angol</emphasis> (a -felhasználóké magyar).
+Kövesd a szabványos
+<ulink url="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Irányelveket</ulink>
+és <emphasis role="bold">ne küldj HTML levelet</emphasis> egyik levelezési
+listánkra se. Ha nem így teszel, akkor vagy egyszerűen figyelmen kívül hagynak
+vagy kitiltanak. Ha nem tudod mi az a HTML levél vagy hogy miért rossz az, olvasd
+el ezt a
+<ulink url="http://expita.com/nomime.html">frankó leírást</ulink>. Mindent
+részletesen megmagyaráz és tanácsokat ad a HTML kikapcsolásához. Szintén tartsd
+észben, hogy nem CC-zünk (carbon-copy) egyéneknek, így jól teszed, ha
+feliratkozol, hogy megkapd te is a választ.
 </para>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_what">
 <title>Mit jelents</title>
+
 <para>
 A hibajelentésedhez csatolnod kell a log-ot, konfigurációs vagy minta fájlokat.
 Ha ezek közül valamelyik nagy, jobb ha feltöltöd az
@@ -200,54 +242,56 @@ bele a hiba jelentésedbe. A levelezési listáinkon az üzenet mérete maximum 
 ha ennél nagyobb fájlod van, tömörítened kell, vagy feltöltened.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_system">
 <title>Rendszer információk</title>
+
 <para>
 <itemizedlist>
 <listitem><para>
-A Linux disztribúciód vagy operációs rendszered verziója, pl.:
+  A Linux disztribúciód vagy operációs rendszered verziója, pl.:
   <itemizedlist>
     <listitem><para>Red Hat 7.1</para></listitem>
     <listitem><para>Slackware 7.0 + 7.1-es fejlesztői csomagjai ...</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-kernel verziója:
-<screen>uname -a</screen>
+  kernel verziója:
+  <screen>uname -a</screen>
 </para></listitem>
 <listitem><para>
-libc verziója:
-<screen>ls -l /lib/libc[.-]*</screen>
+  libc verziója:
+  <screen>ls -l /lib/libc[.-]*</screen>
 </para></listitem>
 <listitem><para>
-gcc és ld verziója:
-<screen>
+  gcc és ld verziója:
+  <screen>
 gcc -v
-ld -v
-</screen>
+ld -v<!--
+  --></screen>
 </para></listitem>
 <listitem><para>
-binutils verziója:
-<screen>
-as --version
-</screen>
+  binutils verziója:
+  <screen>as --version</screen>
 </para></listitem>
 <listitem><para>
-Ha a teljes képernyős lejátszással van gondod:
+  Ha a teljes képernyős lejátszással van gondod:
   <itemizedlist>
     <listitem><para>Ablakezelő tíusa és verziója</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Ha az XVIDIX-szel van problémád:
+  Ha az XVIDIX-szel van problémád:
   <itemizedlist>
-    <listitem><para>X szín mélyésg:
-<screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
+    <listitem><para>
+    X szín mélység:
+    <screen>xdpyinfo | grep "depth of root"</screen>
     </para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Ha csak a GUI a hibás:
+  Ha csak a GUI a hibás:
   <itemizedlist>
     <listitem><para>GTK verziója</para></listitem>
     <listitem><para>GLIB verziója</para></listitem>
@@ -259,23 +303,26 @@ Ha csak a GUI a hibás:
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_hardware">
 <title>Hardver és vezérlők</title>
+
 <para>
 <itemizedlist>
 <listitem><para>
-CPU infó (csak Linuxon működik):
-<screen>cat /proc/cpuinfo</screen>
+  CPU infó (csak Linuxon működik):
+  <screen>cat /proc/cpuinfo</screen>
 </para></listitem>
 <listitem><para>
-Videó kártya gyártója és modellje, pl.:
+  Videó kártya gyártója és modellje, pl.:
   <itemizedlist>
     <listitem><para>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
     <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Videó vezérlő típusa &amp; verziója, pl.:
+  Videó vezérlő típusa &amp; verziója, pl.:
   <itemizedlist>
     <listitem><para>X built-in driver</para></listitem>
     <listitem><para>nVidia 0.9.623</para></listitem>
@@ -284,7 +331,7 @@ Videó vezérlő típusa &amp; verziója, pl.:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Hangkártya típusa &amp; vezérlője, pl.:
+  Hangkártya típusa &amp; vezérlője, pl.:
   <itemizedlist>
     <listitem><para>Creative SBLive! Gold with OSS driver from oss.creative.com</para></listitem>
     <listitem><para>Creative SB16 with kernel OSS drivers</para></listitem>
@@ -292,14 +339,17 @@ Hangkártya típusa &amp; vezérlője, pl.:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Ha nem vagy biztos benne, csatold az <command>lspci -vv</command> kimenetét (Linux alatt).
+  Ha nem vagy biztos benne, csatold az <command>lspci -vv</command> kimenetét (Linux alatt).
 </para></listitem>
 </itemizedlist>
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_configure">
 <title>Konfigurációs problémák</title>
+
 <para>
 Ha a <command>./configure</command> futtatása közben fordult elő valami hiba,
 vagy valaminek az automatikus detektálása nem sikerült, olvasd el a <filename>configure.log</filename>
@@ -312,23 +362,30 @@ fájlt a hibajelentésedhez.
 
 <sect2 id="bugreports_compilation">
 <title>Fordítási problémák</title>
+
 <para>
 Kérlek csatold a következő fájlokat:
 <itemizedlist>
-<listitem><para>config.h</para></listitem>
-<listitem><para>config.mak</para></listitem>
+  <listitem><para>config.h</para></listitem>
+  <listitem><para>config.mak</para></listitem>
 </itemizedlist>
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_playback">
 <title>Lejátszási problémák</title>
+
 <para>
-Írd meg az <application>MPlayer</application> kimenetét az 1. szintű beszédességgel,
-de figyelj rá, hogy <emphasis role="bold">ne szerkeszd át a kimenetet</emphasis>, amikor
-beilleszted a levélbe. A fejlesztőknek szükségük van azokra az üzenetekre, hogy pontosan
-diagnosztizálják a problémát. A kimenetet átirányíthatod fájlba így:
-<screen>mplayer -v <replaceable>options</replaceable> <replaceable>filename</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
+Írd meg az <application>MPlayer</application> kimenetét az 1. szintű
+beszédességgel, de figyelj rá, hogy
+<emphasis role="bold">ne szerkeszd át a kimenetet</emphasis>,
+amikor beilleszted a levélbe. A fejlesztőknek szükségük van azokra az üzenetekre,
+hogy pontosan diagnosztizálják a problémát. A kimenetet átirányíthatod fájlba így:
+<screen>
+mplayer -v <replaceable>options</replaceable> <replaceable>filename</replaceable> &gt; mplayer.log 2&gt;&amp;1
+</screen>
 </para>
 
 <para>
@@ -337,13 +394,16 @@ Ha a probléma egy vagy több fájl esetén specifikus, kérlek töltsd fel ide:
 </para>
 
 <para>
-Tölts fel egy apró, a fájloddal megegyező nevű, de .txt kiterjesztésű szöveges fájlt
-is. Írd le a problémát, ami az adott fájllal jelentkezik és írd bele az e-mail
-címed valamint az <application>MPlayer</application> kimenetét 1. szintű beszédességgel.
-Általában a fájl első 1-5 MB-ja elég a hiba reprodukálásához, de a biztonság kedvéért:
-<screen>dd if=<replaceable>yourfile</replaceable> of=<replaceable>smallfile</replaceable> bs=1024k count=5</screen>
-Ez az első 5 megabájtot a '<emphasis role="bold">your-file</emphasis>'-ból átírja a
-'<emphasis role="bold">small-file</emphasis>'-ba. Ezután próbáld ki ezt a kicsi
+Tölts fel egy apró, a fájloddal megegyező nevű, de .txt kiterjesztésű szöveges
+fájlt is. Írd le a problémát, ami az adott fájllal jelentkezik és írd bele az
+e-mail címed valamint az <application>MPlayer</application> kimenetét 1. szintű
+beszédességgel. Általában a fájl első 1-5 MB-ja elég a hiba reprodukálásához,
+de a biztonság kedvéért:
+<screen>
+dd if=<replaceable>yourfile</replaceable> of=<replaceable>smallfile</replaceable> bs=1024k count=5
+</screen>
+Ez az első 5 megabájtot a '<emphasis role="bold">your-file</emphasis>'-ból átírja
+a '<emphasis role="bold">small-file</emphasis>'-ba. Ezután próbáld ki ezt a kicsi
 fájlt is és ha a hiba még mindig jelentkezik, akkor ez elegendő lesz nekünk.
 Kérlek <emphasis role="bold">soha</emphasis> ne küldj fájlokat mail-en keresztül!
 Töltsd fel és csak az FTP szerveren élő elérési utat/fájlnevet írd meg. Ha a fájl
@@ -352,16 +412,20 @@ is elegendő.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_crash">
 <title>Összeomlások</title>
+
 <para>
-Az <application>MPlayer</application>t a <command>gdb</command>-n belül kell futtatnod,
-és elküldeni a teljes kimenetet vagy ha van <filename>core</filename> dump-od az
-összeomlásról, abból is kiszedheted a hasznos információkat. Lássuk hogyan:
+Az <application>MPlayer</application>t a <command>gdb</command>-n belül kell
+futtatnod, és elküldeni a teljes kimenetet vagy ha van <filename>core</filename>
+dump-od az összeomlásról, abból is kiszedheted a hasznos információkat. Íme így:
 </para>
 
 <sect3 id="bugreports_debug">
 <title>Hogyan tárolhatóak a reprodukálható összeomlás információi</title>
+
 <para>
 Fordítsd újra az <application>MPlayer</application>t a debug-oló kód engedélyezésével:
 <screen>
@@ -371,7 +435,9 @@ make
 majd futtasd az <application>MPlayer</application>t a gdb-ben az alábbi paranccsal:
 <screen>gdb ./mplayer</screen>
 Most a gdb-ben vagy. Írd be:
-<screen>run -v <replaceable>kapcsolok-az-mplayernek</replaceable> <replaceable>fajlnev</replaceable></screen>
+<screen>
+run -v <replaceable>kapcsolok-az-mplayernek</replaceable> <replaceable>fajlnev</replaceable>
+</screen>
 és reprodukáld az összeomlást. Amint megtörtént, a gdb visszaadja a parancssort, ahol
 be kell írnod:
 <screen>
@@ -382,8 +448,10 @@ info all-registers
 </para>
 </sect3>
 
+
 <sect3 id="bugreports_core">
 <title>Hogyan szedd ki a hasznos információkat a core dump-ból</title>
+
 <para>
 Hozd létre a következő parancs fájlt:
 <screen>
@@ -392,31 +460,38 @@ disass $pc-32 $pc+32
 info all-registers
 </screen>
 Majd add ki ezt a parancsot:
-<screen>gdb mplayer --core=core -batch --command=<replaceable>command_file</replaceable> &gt; mplayer.bug</screen>
+<screen>
+gdb mplayer --core=core -batch --command=<replaceable>command_file</replaceable> &gt; mplayer.bug
+</screen>
 </para>
 </sect3>
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_advusers">
 <title>Tudom hogy mit csinálok...</title>
+
 <para>
-Ha készítettél egy megfelelő hibajelentést a fenti utasítások betartásával és biztos
-vagy benne, hogy az <application>MPlayer</application>ben van a hiba és nem a fordítóban
-vagy hibás fájl miatt, már elolvastad a dokumentációt és nem tudtad javítani a problémát,
-a hang vezérlőid rendben vannak, akkor iratkozz fel az MPlayer-advusers listára és
-küldd el a hibajelentésedet oda a jobb és gyorsabb válaszért.
+Ha készítettél egy megfelelő hibajelentést a fenti utasítások betartásával
+és biztos vagy benne, hogy az <application>MPlayer</application>ben van a
+hiba és nem a fordítóban vagy hibás fájl miatt, már elolvastad a dokumentációt
+és nem tudtad javítani a problémát, a hang vezérlőid rendben vannak, akkor
+iratkozz fel az MPlayer-advusers listára és küldd el a hibajelentésedet oda
+a jobb és gyorsabb válaszért.
 </para>
 
 <para>
-Fontold meg, ha kezdő kérdéseket vagy a leírásban megválaszolt kérdéseket küldesz
-be, vagy figyelmen kívül hagynak vagy elkezdenek flame-elni válaszolás helyett.
-Tehát ne flame-elj és csak akkor iratkozz fel az -advusers listára, ha tényleg
-tudod, hogy mit csinálsz és gyakorlott <application>MPlayer</application> felhasználónak
-vagy fejlesztőnek érzed magad. Ha megfelesz ezen kritériának, nem fog nehezedre esni,
-hogy kitaláld, hogy iratkozhatsz fel...
+Fontold meg, ha kezdő kérdéseket vagy a leírásban megválaszolt kérdéseket
+küldesz be, vagy figyelmen kívül hagynak vagy elkezdenek flame-elni válaszolás
+helyett. Tehát ne flame-elj és csak akkor iratkozz fel az -advusers listára,
+ha tényleg tudod, hogy mit csinálsz és gyakorlott <application>MPlayer</application>
+felhasználónak vagy fejlesztőnek érzed magad. Ha megfelesz ezen kritériának,
+nem fog nehezedre esni, hogy kitaláld, hogy iratkozhatsz fel...
 </para>
-
 </sect1>
 
 </appendix>

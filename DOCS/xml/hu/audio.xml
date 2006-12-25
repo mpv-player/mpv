@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21537 -->
 <chapter id="audio">
 <title>Audió kimeneti eszközök</title>
 <sect1 id="sync">
@@ -30,26 +30,33 @@ nagyon rosszul elkészített fájlok esetén (lásd a man oldalt a megkerülésh
 
 <para>
 Ha neked rossz audió vezérlőd van, próbáld ki a <option>-autosync</option>
-kapcsolót, megszünteti a problémáidat. Lásd a man oldalt a bővebb információkért.
+kapcsolót, megszünteti a problémáidat. Lásd a man oldalt a bővebb
+információkért.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="troubleshooting">
 <title>Problémamegoldás</title>
 
 <para>Néhány megjegyzés:</para>
+
 <para>
-  Ha 0.5-ös ALSA-d van, akkor majdnem mindig a <option>-ao alsa5</option>-öt kell
-  használnod, mivel az ALSA 0.5-nek hibás az OSS emulációs kódja,
-  és <emphasis role="bold">össze fogja omlasztani az <application>MPlayer</application>t</emphasis>
-  egy ehhez hasonló üzenettel:
-  <screen>
-DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
---></screen>
+Ha 0.5-ös ALSA-d van, akkor majdnem mindig a <option>-ao alsa5</option>-öt kell
+használnod, mivel az ALSA 0.5-nek hibás az OSS emulációs kódja,
+és <emphasis role="bold">össze fogja omlasztani az <application>MPlayer</application>t</emphasis>
+egy ehhez hasonló üzenettel:
+<screen>
+DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!
+</screen>
 </para>
+
 <para>
-  Ha a hang kattog CD-ROM-ról történő lejátszás közben, kapcsold be az IRQ
-  unmasking-ot, amint az a <link linkend="drives">CD-ROM</link> részben le van írva.
+Ha a hang kattog CD-ROM-ról történő lejátszás közben, kapcsold be az IRQ
+unmasking-ot, amint az a <link linkend="drives">CD-ROM</link> részben le van írva.
 </para>
 </sect1>
 
