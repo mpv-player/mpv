@@ -1,150 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21686 -->
 <appendix id="bugs">
 <title>Ismert hibák</title>
 
-
 <sect1 id="bugs-special">
 <title>Speciális rendszer/CPU-specifikus hibák/problémák</title>
+
 <itemizedlist>
 <listitem>
-<para>SIGILL (signal 4) P3-on 2.2.x kernelekkel:</para>
-<para>Probléma: a 2.2.x kernelben nincs megfelelő (működő) SSE támogatás</para>
-<para>Megoldás: frissítsd a kernelt 2.4.x-re</para>
-<para>Tüneti kezelés: <command>./configure --disable-sse</command></para>
+  <para>SIGILL (signal 4) P3-on 2.2.x kernelekkel:</para>
+  <para>Probléma: a 2.2.x kernelben nincs megfelelő (működő) SSE támogatás</para>
+  <para>Megoldás: frissítsd a kernelt 2.4.x-re</para>
+  <para>Tüneti kezelés: <command>./configure --disable-sse</command></para>
 </listitem>
 
 <listitem>
-<para>Általános SIGILL (signal 4):</para>
-<para>Probléma: az <application>MPlayer</application> nem ugyan azon a gépen
-fordítottad és futtattad (például P3-on fordítottad és Celeron futtattad)</para>
-<para>Megoldás: ugyan azon a gépen fordítsd le az <application>MPlayer</application>t,
-amelyiken futtatni fogod!</para>
-<para>Tüneti kezelés: Ezt az egészet elfelejtheted, ha a
-<option>--enable-runtime-cpudetection</option> kapcsolót használod a konfigurálásnál
-vagy az egyes CPU utasítás készleteket letilthatod külön-külön a megfelelő
-kapcsolókkal (úgy mint <option>--disable-mmx</option>, <option>--disable-3dnow</option>, stb).
-</para>
+  <para>Általános SIGILL (signal 4):</para>
+  <para>
+  Probléma: az <application>MPlayer</application> nem ugyan azon a gépen
+  fordítottad és futtattad (például P3-on fordítottad és Celeron futtattad)
+  </para>
+  <para>
+  Megoldás: ugyan azon a gépen fordítsd le az <application>MPlayer</application>t,
+  amelyiken futtatni fogod!
+  </para>
+  <para>
+  Tüneti kezelés: Ezt az egészet elfelejtheted, ha a <option>--enable-runtime-cpudetection</option>
+  kapcsolót használod a konfigurálásnál vagy az egyes CPU utasítás
+  készleteket letilthatod külön-külön a megfelelő kapcsolókkal (úgy mint
+  <option>--disable-mmx</option>, <option>--disable-3dnow</option>, stb).
+  </para>
 </listitem>
 
 <listitem>
-<para>Összeomlás stream-ek mentésekor:</para>
-<para>Probléma: core dump</para>
-<para>Tüneti kezelés: Ne pánikolj. Keresd meg a törülköződet!</para>
+  <para>Összeomlás stream-ek mentésekor:</para>
+  <para>Probléma: core dump</para>
+  <para>Tüneti kezelés: Ne pánikolj. Keresd meg a törülköződet!</para>
 </listitem>
 </itemizedlist>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="bugs-audio">
 <title>Különböző A-V szinkron és egyéb audió problémán</title>
 
 <sect2 id="bugs-delay-all">
-<title>Általánosan előforduló audió késés vagy szaggatott hang (kilép az összes, vagy legalábbis sok fájlnál)</title>
+<title>Általánosan előforduló audió késés vagy szaggatott hang
+  (kilép az összes, vagy legalábbis sok fájlnál)</title>
+
 <itemizedlist>
 <listitem><para>
-Leggyakrabban: hibás audió vezérlő! - próbálj meg más vezérlőt használni, próbáld ki az ALSA
-OSS emulációját a <option>-ao oss</option> kapcsolóval, valamint a <option>-ao sdl</option>-t is,
-néha segít. Ha a fájl lejátszása jó a <option>-nosound</option> kapcsolóval, akkor biztos lehetsz
-benne, hogy a hangkártya (vezérlő) a hibás.
+  Leggyakrabban: hibás audió vezérlő! - próbálj meg más vezérlőt használni, próbáld
+  ki az ALSA OSS emulációját a <option>-ao oss</option> kapcsolóval, valamint a
+  <option>-ao sdl</option>-t is, néha segít. Ha a fájl lejátszása jó a <option>-nosound</option>
+  kapcsolóval, akkor biztos lehetsz benne, hogy a hangkártya (vezérlő) a hibás.
 </para></listitem>
 
 <listitem>
-<para>audió buffer problémák (a buffer méretét rosszul detektálja)</para>
-<para>Tüneti kezelés: az <application>MPlayer</application> <option>-abs</option> kapcsolója</para>
+  <para>audió buffer problémák (a buffer méretét rosszul detektálja)</para>
+  <para>
+  Tüneti kezelés: az <application>MPlayer</application> <option>-abs</option> kapcsolója
+  </para>
 </listitem>
 
 <listitem><para>
-mintaráta problémák - talán a kártyád nem támogatja a fájlban használt mintarátát -
-próbáld ki a resampling szűrőt (<option>-af resample=...</option>)
+  mintaráta problémák - talán a kártyád nem támogatja a fájlban használt mintarátát -
+  próbáld ki a resampling szűrőt (<option>-af resample=...</option>)
 </para></listitem>
 
 <listitem>
-<para>lassú gép (CPU vagy VGA)</para>
-<para>próbáld ki a <option>-vo null</option> kapcsolót, ha úgy jól működik, akkor lassú
-a VGA kártyád/vezérlőd</para>
-<para>Tüneti kezelés: vegyél egy gyorsabb kártyát vagy olvasd el a tuningolási dokumentációt</para>
-<para>Megpróbálhatod még a <option>-framedrop</option>-ot is</para>
+  <para>lassú gép (CPU vagy VGA)</para>
+  <para>
+  próbáld ki a <option>-vo null</option> kapcsolót, ha úgy jól működik,
+  akkor lassú a VGA kártyád/vezérlőd
+  </para>
+  <para>
+  Tüneti kezelés: vegyél egy gyorsabb kártyát vagy olvasd el a tuningolási dokumentációt
+  </para>
+  <para>Megpróbálhatod még a <option>-framedrop</option>-ot is</para>
 </listitem>
 </itemizedlist>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-delay-specific">
 <title>Audió késés/szinkronizáció elvesztése egy vagy néhány fájl esetén</title>
+
 <itemizedlist>
 <listitem>
-<para>hibás fájl</para>
-<para>
-Tüneti kezelés:
+  <para>hibás fájl</para>
+  <para>
+  Tüneti kezelés:
   <itemizedlist>
   <listitem>
-    <para><option>-ni</option> vagy <option>-nobps</option> kapcsoló (a
-    nem-átlapolt vagy hibás fájlokhoz)</para>
-    <para>and/or</para>
-  </listitem>
-  <listitem>
-    <para><option>-mc 0</option> (szükséges a rosszul átlapolt VBS audiós
-    fájlokhoz)</para>
+    <para>
+    <option>-ni</option> vagy <option>-nobps</option> kapcsoló
+    (a nem-átlapolt vagy hibás fájlokhoz)
+    </para>
     <para>és/vagy</para>
   </listitem>
   <listitem>
-    <para><option>-delay</option> vagy a <keycap>+</keycap>/<keycap>-</keycap>
-    gombok futás közbeni beállításhoz</para>
+    <para>
+    <option>-mc 0</option>
+    (szükséges a rosszul átlapolt VBS audiós fájlokhoz)
+    </para>
+    <para>és/vagy</para>
+  </listitem>
+  <listitem>
+    <para>
+    <option>-delay</option> vagy a <keycap>+</keycap>/<keycap>-</keycap>
+    gombok futás közbeni beállításhoz
+    </para>
   </listitem>
   </itemizedlist>
-Ha egyik sem segít, légy szíves töltsd fel a fájlt, és megnézzük (és javítjuk).
-</para>
+  Ha egyik sem segít, légy szíves töltsd fel a fájlt, és megnézzük (és javítjuk).
+  </para>
 </listitem>
 
 <listitem>
-<para>a hangkártyád nem támogatja a 48kHz-es lejátszást</para>
-<para>Tüneti kezelés: vegyél egy jobb hangkártyát... vagy próbáld meg csökkenteni az
-fps-t 10%-kal (<option>-fps 27</option> kapcsoló egy 30fps-es filmnél) vagy használd a
-resample szűrőt</para>
+  <para>a hangkártyád nem támogatja a 48kHz-es lejátszást</para>
+  <para>
+  Tüneti kezelés: vegyél egy jobb hangkártyát... vagy próbáld meg csökkenteni az fps-t
+  10%-kal (<option>-fps 27</option> egy 30fps-es filmnél) vagy használd a resample szűrőt
+  </para>
 </listitem>
 
 <listitem>
-<para>lassú gép (ha az A-V nem 0 körüli és a státusz sorban lévő utolsó szám
-emelkedik)</para>
-<para>Tüneti kezelés: <option>-framedrop</option></para>
+  <para>
+  lassú gép (ha az A-V nem 0 körüli és a státusz sorban lévő
+  utolsó szám emelkedik)
+  </para>
+  <para>Tüneti kezelés: <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-nosound">
 <title>Egyáltalán nincs hang</title>
+
 <itemizedlist>
 <listitem>
-<para>a fájlod nem támogatott audió codec-et használ</para>
-<para>Megoldás: olvasd el a dokumentációt és segíts a támogatás elkészítésében</para>
+  <para>a fájlod nem támogatott audió codec-et használ</para>
+  <para>
+  Megoldás: olvasd el a dokumentációt és segíts a támogatás elkészítésében
+  </para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-nopicture">
 <title>Egyáltalán nincs kép (csak üres szürke/zöld ablak)</title>
+
 <itemizedlist>
 <listitem>
-<para>a fájlod egy nem támogatott videó codec-et használ</para>
-<para>Megoldás: olvasd el a dokumentációt és segíts a támogatás elkészítésében</para>
+  <para>a fájlod egy nem támogatott videó codec-et használ</para>
+  <para>
+  Megoldás: olvasd el a dokumentációt és segíts a támogatás elkészítésében
+  </para>
 </listitem>
 
 <listitem>
-<para>
-az automatikusan kiválasztott codec nem tudja dekódolni a fájlt, próbálj meg másik
-codec-et kiválasztani a <option>-vc</option> vagy <option>-vfm</option> kapcsolókkal
-</para>
+  <para>
+  az automatikusan kiválasztott codec nem tudja dekódolni a fájlt, próbálj meg másik
+  codec-et kiválasztani a <option>-vc</option> vagy <option>-vfm</option> kapcsolókkal
+  </para>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bugs-video">
 <title>Videó-kimeneti problémák</title>
+
 <para>
 Vedd figyelembe, hogy a <option>-fs -vm</option> és <option>-zoom</option> kapcsolókat
 nem mindegyik vezérlő támogatja. Ráadásul csak pár vezérlő támogatja a hardveres
@@ -155,18 +191,20 @@ méretezést/nagyítást.
 <title>OSD/felirat vibrálás</title>
 <para>
 <itemizedlist>
-<listitem><para>x11 vezérlő: bocs, ez jelenleg nem javítható</para></listitem>
-<listitem><para>xv vezérlő: használd a <option>-double</option> kapcsolót</para></listitem>
+  <listitem><para>x11 vezérlő: bocs, ez jelenleg nem javítható</para></listitem>
+  <listitem><para>xv vezérlő: használd a <option>-double</option> kapcsolót</para></listitem>
 </itemizedlist>
 </para>
 </formalpara>
 
 <formalpara>
-<title>Zöld kép mga_vid használatakor (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<title>Zöld kép mga_vid használatakor
+  (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
 <para>
 <itemizedlist>
-<listitem><para>az mga_vid rosszul detektálja a kártyád RAM-jának méretét, töltsd be újra
-a <option>mga_ram_size</option> kapcsolóval
+<listitem><para>
+  az mga_vid rosszul detektálja a kártyád RAM-jának méretét, töltsd be
+  újra a <option>mga_ram_size</option> kapcsolóval
 </para></listitem>
 </itemizedlist>
 </para>
