@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21374 -->
+<!-- synced with r21741 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -62,10 +62,10 @@ mert rengeteg értékes információt tartalmaz.
 <para>
 Az <application>MPlayer</application> egy Linuxon működő videolejátszó (fut
 számos más Unix-on és akár <emphasis role="bold">nem-x86</emphasis> processzorokon
-is, lásd <xref linkend="ports"/>). Le tudja játszani a legtöbb MPEG, VOB, AVI,
-OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
-PVA, és Matroska file-t, és ezekhez felsorakoztat jónéhány natív, XAnim, RealPlayer
-és Win32 DLL codecet. Nézhetsz vele 
+is, lásd <xref linkend="ports"/>).
+Le tudja játszani a legtöbb MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4,
+FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, és Matroska file-t, és ezekhez
+felsorakoztat jónéhány natív, XAnim, RealPlayer és Win32 DLL codecet. Nézhetsz vele 
 <emphasis role="bold">VideoCD-t, SVCD-t, DVD-t, 3ivx, RealMedia, Sorenson, Theora</emphasis>
 és <emphasis role="bold">MPEG-4 (DivX)</emphasis> filmet is. Az <application>MPlayer</application>
 másik nagy előnye a megjelenítési módok széles választékában rejlik.
@@ -79,9 +79,9 @@ MPEG kártyákkal történő dekódolást/megjelenítést, így például a
 <link linkend="dvb">DVB</link> és <link linkend="dxr3">DXR3/Hollywood+</link>
 kártyákon!
 És még nem is szóltam a szép, élsímított, árnyékolt feliratozásról
-(<emphasis role="bold">14 támogatott típus!</emphasis>), ami támogat
-európai/ISO-88592-1,2 (magyar, angol, cseh, stb), cirill és koreai fontokat,
-valamint OSD-t!
+(<emphasis role="bold">14 támogatott típus!</emphasis>),
+ami támogat európai/ISO-88592-1,2 (magyar, angol, cseh, stb), cirill és koreai
+fontokat, valamint az OSD-ről!
 </para>
 
 <para>
@@ -96,69 +96,71 @@ videó-audió szerkesztéshez.
 </para>
 
 <para>
-Az <application>MEncoder</application> (<application>MPlayer's</application> Movie
+A <application>MEncoder</application> (<application>MPlayer's</application> Movie
 Encoder) egy egyszerű film kódoló, az <application>MPlayer</application> által
 ismert formátumok
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
-más, az <application>MPlayer</application>rel is lejátszható formátumokba való
-átalakításra. Sokféle codec-kel tud kódolni, például <emphasis role="bold">MPEG-4 (DivX4)</emphasis>-gyel
+más <application>MPlayer</application> által lejátszható formátumokba való
+átalakításához (lásd lejjebb).
+Sokféle codec-kel tud kódolni, például <emphasis role="bold">MPEG-4 (DivX4)</emphasis>-gyel
 (egy vagy két menetes), a <systemitem class="library">libavcodec</systemitem>-et
 alkotó codec-ekkel, audiót tekintve pedig
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis> a választék.
 </para>
 
-
 <itemizedlist>
 <title>Az <application>MEncoder</application> előnyei</title>
 <listitem><para>
-  Az <application>MPlayer</application> által támogatott összes formátumból lehet
-  kódolni
-  </para></listitem>
+  Az <application>MPlayer</application> által támogatott
+  összes formátumból lehet kódolni
+</para></listitem>
 <listitem><para>
   Az FFmpeg <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   által támogatott összes formátumba tud tömöríteni
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Videó grabbelés <emphasis role="bold">V4L kompatibilis TV tunerekről</emphasis>
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Helyes index-szel rendelkező AVI fájlok kódolása/multiplexelése
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Opcionálisan külső audio stream használata
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   1, 2 vagy 3 menetes kódolás
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 audió
   <important><para>
   a VBR-es MP3-akat nem minden Windows rendszerre elérhető lejátszó kezeli helyesen!
   </para></important>
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   PCM audió
-3  </para></listitem>
+</para></listitem>
 <listitem><para>
   Stream másolás
-  </para></listitem>
+</para></listitem>
 <listitem><para>
-  Bemeneti file A/V szinkronizálása (PTS-alapú, az <option>-mc 0</option> opcióval kikapcsolható)
-  </para></listitem>
+  Bemeneti file A/V szinkronizálása (PTS-alapú, az
+  <option>-mc 0</option> opcióval kikapcsolható)
+</para></listitem>
 <listitem><para>
-  fps javítás az <option>-ofps</option> opcióval (hasznos ha 30000/1001 fps-es
-  VOB-ot kódolsz 24000/1001 fps-es AVI-ba)
-  </para></listitem>
+  fps javítás az <option>-ofps</option> opcióval (hasznos ha
+  30000/1001 fps-es VOB-ot kódolsz 24000/1001 fps-es AVI-ba)
+</para></listitem>
 <listitem><para>
-  Roppant jó szűrő rendszer használata (crop, expand, flip, postprocess, rotate, scale,
-  RGB/YUV konverzió)
-  </para></listitem>
+  Roppant jó szűrő rendszer használata (crop, expand, flip, postprocess,
+  rotate, scale, RGB/YUV konverzió)
+</para></listitem>
 <listitem><para>
-  A kimeneti fájlba bele tudja kódolni mind a DVD/VOBsub, mind a szöveges feliratokat
-  </para></listitem>
+  A kimeneti fájlba bele tudja kódolni mind a DVD/VOBsub, mind a
+  szöveges feliratokat
+</para></listitem>
 <listitem><para>
   DVD feliratok külső VOBsub fájlba történő rippelése
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <itemizedlist>
@@ -166,7 +168,7 @@ alkotó codec-ekkel, audiót tekintve pedig
 <listitem><para>
   Még szélesebb skálája a be- és kimeneti formátumoknak és a codec-eknek
   (VOB fájlok készítése DivX4/Indeo5/VIVO streammel :).
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->
