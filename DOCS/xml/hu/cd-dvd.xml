@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20637 -->
+<!-- synced with r21612 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -14,22 +14,24 @@ meg akarja megváltoztatni a CD-ROM meghajtó sebességét:
 
 <itemizedlist>
 <listitem><para>
-Sok helyen írtak olvasási hibákról, melyek nagy sebességnél fordulnak elő,
-különösen rosszul nyomott CD-ROM-ok esetén. A csökkentett sebességgel megelőzheted
-az adatvesztést ilyen esetben.
+  Sok helyen írtak olvasási hibákról, melyek nagy sebességnél fordulnak elő,
+  különösen rosszul nyomott CD-ROM-ok esetén. A csökkentett sebességgel megelőzheted
+  az adatvesztést ilyen esetben.
 </para></listitem>
 
 <listitem><para>
-Sok CD-ROM idegesítően hangos, alacsonyabb sebességen kisebb a zaj.
+  Sok CD-ROM idegesítően hangos, alacsonyabb sebességen kisebb a zaj.
 </para></listitem>
 </itemizedlist>
+
+<!-- ********** -->
 
 <sect2 id="drives_linux">
 <title>Linux</title>
 
 <para>
 Az IDE CD-ROM meghajtók sebességét a <command>hdparm</command>, a <command>setcd</command>
-vagy a <command>cdctl</command> nevezetű programmal módosíthatod. Így működnek:
+vagy a <command>cdctl</command> programmal módosíthatod. Így működnek:
 <screen>hdparm -E <replaceable>[sebesség]</replaceable> <replaceable>[cdrom eszköz]</replaceable></screen>
 <screen>setcd -x <replaceable>[sebesség]</replaceable> <replaceable>[cdrom eszköz]</replaceable></screen>
 <screen>cdctl -bS <replaceable>[sebesség]</replaceable></screen>
@@ -49,28 +51,30 @@ Ha root jogaid vannak, a következő parancs is segíthet:
 Ez beállítja a fájl előreolvasást 2 MB-ra, ami segít a karcos CD-ROM-ok esetében.
 Ha túl nagyra állítod, a meghajtó folyton felpörög majd leáll, és drasztikus módon
 csökkenni fog a teljesítménye.
-A javasolt módszer a CD-ROM meghajtó <command>hdparm</command>-mal történő beállítása:
+A javasolt módszer a CD-ROM meghajtó
+<command>hdparm</command>-mal történő beállítása:
 <screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom eszköz]</replaceable></screen>
 </para>
 
 <para>
-Ez bekapcsolja a DMA elérést, az előreolvasást, és az IRQ unmasking-ot (olvasd el a <command>hdparm</command>
-man oldalát a bővebb magyarázatért).
+Ez bekapcsolja a DMA elérést, az előreolvasást, és az IRQ unmasking-ot
+(olvasd el a <command>hdparm</command> man oldalát a bővebb magyarázatért).
 </para>
 
 <para>
-Nézd meg a &quot;<filename>/proc/ide/<replaceable>[cdrom eszköz]</replaceable>/settings</filename>&quot;
+Nézd meg a
+"<filename>/proc/ide/<replaceable>[cdrom eszköz]</replaceable>/settings</filename>"
 fájlt a CD-ROM tuningolásához.
 </para>
 
 <para>
-A SCSI meghajtókra vonatkozóan nincs egységes módszer ezen paraméterek beállításához.
-(Ismersz egyet? Mondd el nekünk is!) Van egy eszköz, ami
+A SCSI meghajtókra vonatkozóan nincs egységes módszer ezen paraméterek
+beállításához. (Ismersz egyet? Mondd el nekünk is!) Van egy eszköz, ami
 <ulink url="http://das.ist.org/~georg/">Plextor SCSI meghajtókkal</ulink> működik.
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="drives_freebsd">
 <title>FreeBSD</title>
@@ -92,13 +96,18 @@ sysctl hw.ata.atapi_dma=1
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="dvd">
 <title>DVD lejátszás</title>
+
 <para>
 A használható kapcsolók teljes listájáért olvasd el a man oldalt.
 A szintaxis egy szabványos DVD lejátszásához a következő:
-<screen>mplayer dvd://<replaceable>&lt;sáv&gt;</replaceable> [-dvd-device <replaceable>&lt;eszköz&gt;</replaceable>]</screen>
+<screen>
+mplayer dvd://<replaceable>&lt;sáv&gt;</replaceable> [-dvd-device <replaceable>&lt;eszköz&gt;</replaceable>]
+</screen>
 </para>
 
 <para>
@@ -118,12 +127,13 @@ eszközt a parancssorban a <option>-dvd-device</option> kapcsolóval.
 </para>
 
 <para>
-Az <application>MPlayer</application> fel tudja használni a <systemitem>libdvdread</systemitem>-ot
-és a <systemitem>libdvdcss</systemitem>-t is a DVD-k lejátszásához és dekódolásához.
-Ez a két függvénykönyvtár megtalálható az <application>MPlayer</application> forrás fájában,
-nem kell őket külön telepítened. Használhatod a két függvénykönyvtár rendszer-szintű
-verzióját is, de ez <emphasis role="bold">nem</emphasis> javasolt, mivel hibák forrása
-lehet, a függvénykönyvtárak közötti inkompatibilítást és sebességcsökkenést okozhat.
+Az <application>MPlayer</application> fel tudja használni a
+<systemitem>libdvdread</systemitem>-ot és a <systemitem>libdvdcss</systemitem>-t
+is a DVD-k lejátszásához és dekódolásához. Ez a két függvénykönyvtár megtalálható
+az <application>MPlayer</application> forrás fájában, nem kell őket külön
+telepítened. Használhatod a két függvénykönyvtár rendszer-szintű verzióját is,
+de ez <emphasis role="bold">nem</emphasis> javasolt, mivel hibák forrása lehet,
+a függvénykönyvtárak közötti inkompatibilítást és sebességcsökkenést okozhat.
 </para>
 
 <note><para>
@@ -142,11 +152,12 @@ amik másolhatóak/lejátszhatóak egy nem titkosított DVD mountolt fájlrendsz
 </formalpara>
 
 <para>
-Az .IFO fájlok a filmben történő navígációhoz tartalmaznak információkat (fejezet/cím/szög
-térkép, nyelvtáblázat, stb.) és szökségesek a .VOB tartalmának olvasásához és értelmezéséhez
-(film). A .BUK fájlok ezek biztonsági mentései. <emphasis role="bold">Szektorokat</emphasis>
-használnak mindenhol, így a lemezen nyers szektor címzést kell használni a DVD navigáláshoz
-és a tartalom dekódolásához.
+Az .IFO fájlok a filmben történő navígációhoz tartalmaznak információkat
+(fejezet/cím/szög térkép, nyelvtáblázat, stb.) és szökségesek a .VOB
+tartalmának olvasásához és értelmezéséhez (film). A .BUK fájlok ezek
+biztonsági mentései. <emphasis role="bold">Szektorokat</emphasis> használnak
+mindenhol, így a lemezen nyers szektor címzést kell használni a DVD
+navigáláshoz és a tartalom dekódolásához.
 </para>
 
 <para>
@@ -161,17 +172,17 @@ használnak.
 </para>
 
 <para>
-Néha a <filename>/dev/dvd</filename> nem olvasható a felhasználók által, így
-a <systemitem>libdvdread</systemitem> szerzői egy emulációs réteget készítettek,
-ami átalakítja a szektor címeket fájlnév+eltolásra, így nyers elérést emulál a
-mountolt fájlrendszeren vagy akár a merevlemezen is.
+Néha a <filename>/dev/dvd</filename> nem olvasható a felhasználók által,
+így a <systemitem>libdvdread</systemitem> szerzői egy emulációs réteget
+készítettek, ami átalakítja a szektor címeket fájlnév+eltolásra, így nyers
+elérést emulál a mountolt fájlrendszeren vagy akár a merevlemezen is.
 </para>
 
 <para>
-A <systemitem>libdvdread</systemitem> elfogadja a mountolás helyét is az eszköz
-neve helyett a nyers címzéshez, az eszköz nevét a <filename>/proc/mounts</filename>
-fájlból olvassa ki. Solaris-ra lett kifejlesztve, ahol az eszköz nevek dinamikusan
-vannak lefoglalva.
+A <systemitem>libdvdread</systemitem> elfogadja a mountolás helyét is az
+eszköz neve helyett a nyers címzéshez, az eszköz nevét a
+<filename>/proc/mounts</filename> fájlból olvassa ki. Solaris-ra lett
+kifejlesztve, ahol az eszköz nevek dinamikusan vannak lefoglalva.
 </para>
 
 <formalpara>
@@ -184,91 +195,96 @@ lásd a man oldalt.
 </formalpara>
 
 <para>
-Az RPC-1 DVD meghajtók csak szoftveresen védik a régió kódot. Az RPC-2 meghajtókban
-hardveres védelem van, ami csak 5 változtatást engedélyez. Szükséges/javasolt
-a firmware frissítése RPC-1-re ha RPC-2-es DVD meghajtód van. Megpróbálhatsz
-keresni firmware frissítést az Interneten,
+Az RPC-1 DVD meghajtók csak szoftveresen védik a régió kódot. Az RPC-2
+meghajtókban hardveres védelem van, ami csak 5 változtatást engedélyez.
+Szükséges/javasolt a firmware frissítése RPC-1-re ha RPC-2-es DVD
+meghajtód van. Megpróbálhatsz keresni firmware frissítést az Interneten,
 <ulink url="http://forum.rpc-1.com/dl_all.php">ez a firmware fórum</ulink>
-egy jó kiinduló pont lehet. Ha nincs firmware javítás a te meghajtódhoz, használd
-a <ulink url="http://linvdr.org/projects/regionset/">regionset eszközt</ulink>
+egy jó kiinduló pont lehet.
+Ha nincs firmware javítás a te meghajtódhoz, használd a
+<ulink url="http://linvdr.org/projects/regionset/">regionset eszközt</ulink>
 a DVD meghajtód régió kódjának beállításához (Linux alatt).
 <emphasis role="bold">Figyelem</emphasis>: Csak 5 alkalommal állíthatod át a régió kódot.
 </para>
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="vcd">
 <title>VCD lejátszás</title>
+
 <para>
-A használható kapcsolók teljes listájáért olvasd el a man oldalt. Egy szabványos
-Video CD (VCD) szintaxisa a következő:
+A használható kapcsolók teljes listájáért olvasd el a man oldalt. Egy
+szabványos Video CD (VCD) szintaxisa a következő:
 <screen>mplayer vcd://<replaceable>&lt;sáv&gt;</replaceable> [-cdrom-device <replaceable>&lt;eszköz&gt;</replaceable>]</screen>
 Például:
 <screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
-Az alapértelmezett VCD eszköz a <filename>/dev/cdrom</filename>. Ha a te beállításaid
-különbözőek, készíts egy szimbolikus linket vagy add meg a megfelelő eszközt a
-parancssorban a <option>-cdrom-device</option> kapcsolóval.
+Az alapértelmezett VCD eszköz a <filename>/dev/cdrom</filename>. Ha a te
+beállításaid különbözőek, készíts egy szimbolikus linket vagy add meg a
+megfelelő eszközt a parancssorban a <option>-cdrom-device</option> kapcsolóval.
 </para>
 
 <note><para>
 A Plextor és néhány Toshiba SCSI CD-ROM meghajtónak borzalmas a teljesítménye
 CVD olvasáskor. Ez azért van, mert a CDROMREADRAW <systemitem>ioctl</systemitem>
-nincs teljesen implementálva ezekben a meghajtókban. Ha ismered a SCSI programozást,
-kérlek <ulink url="../../tech/patches.txt">segíts nekünk</ulink> egy általános
-SCSI támogatás elkészítésében VCD-khez.
+nincs teljesen implementálva ezekben a meghajtókban. Ha ismered a SCSI
+programozást, kérlek <ulink url="../../tech/patches.txt">segíts nekünk</ulink>
+egy általános SCSI támogatás elkészítésében VCD-khez.
 </para></note>
 
 <para>
 Addig is kinyerheted az adatokat a VCD-ről a
 <ulink url="http://ftp.ntut.edu.tw/ftp/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
-segítségével, majd az eredményül kapott fájlt lejátszhatod az <application>MPlayer</application>rel.
+segítségével, majd a kapott fájlt lejátszhatod az <application>MPlayer</application>rel.
 </para>
 
 <formalpara>
 <title>VCD struktúra</title>
 <para>
 Egy Video CD (VCD) CD-ROM XA szektorokból áll, pl. CD-ROM 2-es módban
-1-es és 2-es formátumú sávok:</para>
-</formalpara>
-
+1-es és 2-es formátumú sávok:
 <itemizedlist>
 <listitem><para>
-Az első sáv 2-es módban, 2-es formátumban van, ami azt jelenti, hogy L2
-hibajavítást használ. A sáv ISO-9660 fájlrendszert tartalmaz 2048
-bájt/szektorral. Ez a fájlrendszer VCD metaadat információkat tartalmaz,
-valamint gyakran a menükben alkalmazott képkockákat. A menük MPEG
-szegmensei is ezen az első sávon tárolhatóak, de az MPEG-eket fel kell
-osztani 150 szektoros csonkokra. Az ISO-9660 fájlrendszer tartalmazhat
-egyéb fájlokat vagy programokat, amik a VCD működése szempontjából nem
-lényegesek.
+  Az első sáv 2-es módban, 2-es formátumban van, ami azt jelenti, hogy L2
+  hibajavítást használ. A sáv ISO-9660 fájlrendszert tartalmaz 2048
+  bájt/szektorral. Ez a fájlrendszer VCD metaadat információkat tartalmaz,
+  valamint gyakran a menükben alkalmazott képkockákat. A menük MPEG
+  szegmensei is ezen az első sávon tárolhatóak, de az MPEG-eket fel kell
+  osztani 150 szektoros csonkokra. Az ISO-9660 fájlrendszer tartalmazhat
+  egyéb fájlokat vagy programokat, amik a VCD működése szempontjából nem
+  lényegesek.
 </para></listitem>
 
 <listitem><para>
-A második és a további sávok általában nyers 2324 bájt/szektor formátumú
-MPEG (film) sáv, mely egy MPEG PS adat csomagot tartalmaz szektoronként.
-Ezek 2-es mód 1-es formátumban vannak, így több adatot tárolnak szektoronként
-némi hibajavítás elveszítése árán. Lehet CD-DA sáv is a VCD-n az első
-sáv után. Némelyik operációs rendszeren van egy kis csalás, amivel ezek
-a nem-ISO-9660 sávok megjelennek a fájlrendszerben. Más operációs
-rendszereken, például GNU/Linux-on ez nem így van (még). Itt az MPEG
-adat <emphasis role="bold">nem mountolható</emphasis>. Mivel a legtöbb
-film ilyen típusú sávon belül van, először próbáld ki a <option>vcd://2</option>
--t.</para></listitem>
+  A második és a további sávok általában nyers 2324 bájt/szektor formátumú
+  MPEG (film) sáv, mely egy MPEG PS adat csomagot tartalmaz szektoronként.
+  Ezek 2-es mód 1-es formátumban vannak, így több adatot tárolnak
+  szektoronként némi hibajavítás elveszítése árán. Lehet CD-DA sáv is a
+  VCD-n az első sáv után. Némelyik operációs rendszeren van egy kis csalás,
+  amivel ezek a nem-ISO-9660 sávok megjelennek a fájlrendszerben. Más
+  operációs rendszereken, például GNU/Linux-on ez nem így van (még). Itt
+  az MPEG adat <emphasis role="bold">nem mountolható</emphasis>. Mivel a
+  legtöbb film ilyen típusú sávon belül van, először próbáld ki a
+  <option>vcd://2</option>-t.
+</para></listitem>
 
 <listitem><para>
-Léteznek olyan VCD lemezek is, melyeken nincs meg az első sáv (egy sáv és
-egyáltalán nincs fájlrendszer). Ezek szintén lejátszhatóak, de nem lehet
-őket becsatolni.
+  Léteznek olyan VCD lemezek is, melyeken nincs meg az első sáv (egy sáv és
+  egyáltalán nincs fájlrendszer). Ezek szintén lejátszhatóak, de nem lehet
+  őket becsatolni.
 </para></listitem>
 
-<listitem><para>A Video CD szabvány definícióját a Philips "Fehér könyv"-nek
-nevezte el és nem szabadon hozzáférhető, a Philipstől kell megvásárolni.
-A Video CD-kről sokkal részletesebb információt találhatsz a
-<ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">vcdimager dokumentációjában</ulink>.
+<listitem><para>
+  A Video CD szabvány definícióját a Philips "Fehér könyv"-nek
+  nevezte el és nem szabadon hozzáférhető, a Philipstől kell megvásárolni.
+  A Video CD-kről sokkal részletesebb információt találhatsz a
+  <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">vcdimager dokumentációjában</ulink>.
 </para></listitem>
-
 </itemizedlist>
+</para>
+</formalpara>
 
 <formalpara>
 <title>A .DAT fájlokról</title>
