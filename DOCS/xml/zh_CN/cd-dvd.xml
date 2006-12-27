@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- synced with r21612  -->
+<chapter id="cd-dvd">
+<title>CD/DVD用法</title>
+
+<sect1 id="drives">
+<title>CD/DVD驱动器</title>
+
+<para>
+现代的CD-ROM驱动器能达到很高的速度，然而一些CD-ROM也可以在降低速度下运行。
+有几条原因可能使你考虑改变CD-ROM的读盘速度：
+</para>
+
+<itemizedlist>
+<listitem><para>
+  有报告称告诉读取可产生错误，尤其是制作恶劣的CD-ROM。降低速度可以防止这些
+  情况下的数据丢失。
+</para></listitem>
+
+<listitem><para>
+  许多CD-ROM驱动器有很讨厌的噪音，低俗可以降低这些噪音。
+</para></listitem>
+</itemizedlist>
+
+<!-- ********** -->
+
+<sect2 id="drives_linux">
+<title>Linux</title>
+
+<para>
+你可以使用<command>hdparm</command>，<command>setcd</command>或
+<command>cdctl</command>以减慢IDE CD-ROM的驱动器。使用方法如下：
+<screen>hdparm -E <replaceable>[speed]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
+<screen>setcd -x <replaceable>[speed]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
+<screen>cdctl -bS <replaceable>[speed]</replaceable></screen>
+</para>
+
+<para>
+如果你使用SCSI模拟，你必须把设置应用到真正的IDE驱动器，不是被
+模拟的SCSI设备。
+</para>
+
+<para>
+如果你有root权限，下面的命令也可能有帮助：
+<screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
+</para>
+
+<para>
+这将预读取的文件设置为2MB，这对有划痕的CD-ROM有帮助。如果你设置
+的太大，驱动器会不断来回转动，极大降低性能。
+推荐你使用<command>hdparm</command>调整你的CD-ROM：
+<screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom device]</replaceable></screen>
+</para>
+
+<para>
+这开启了DMA读取，预读，以及IRQ遮盖（对于详细解释阅读
+<command>hdparm</command>man页）。
+</para>
+
+<para>
+请阅读
+"<filename>/proc/ide/<replaceable>[cdrom device]</replaceable>/settings</filename>"
+以很好调整你的CD-ROM。
+</para>
+
+<para>
+SCSI驱动器没有统一设置参数的方法（你知道？告诉我们！），有一个工具
+<ulink url="http://das.ist.org/~georg/">Plextor SCSI drives</ulink>可参照。
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="drives_freebsd">
+<title>FreeBSD</title>
+
+<para>speed:
+<screen>
+cdcontrol [-f <replaceable>device</replaceable>] speed <replaceable>[speed]</replaceable>
+</screen>
+</para>
+
+<para>DMA:
+<screen>
+sysctl hw.ata.atapi_dma=1
+</screen>
+</para>
+
+</sect2>
+
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="dvd">
+<title>DVD回放</title>
+
+<para>
+对于完整的可用选项，请阅读man页。
+播放标准DVD的语法如下：
+<screen>
+mplayer dvd://<replaceable>&lt;track&gt;</replaceable> [-dvd-device <replaceable>&lt;device&gt;</replaceable>]
+</screen>
+</para>
+
+<para>
+例如：
+<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
+</para>
+
+<para>
+如果你使用dvdnav支持编译<application>MPlayer</application>，语法是一样的，但你要用
+dvdnav://而不用dvd://。
+</para>
+
+<para>
+默认的DVD设备是<filename>/dev/dvd</filename>。如果你的设置不同，创建
+个连接或者在命令行中用<option>-dvd-device</option>指定正确的设备。
+</para>
+
+<para>
+对于DVD回放及解密，<application>MPlayer</application>使用
+<systemitem>libdvdread</systemitem>及<systemitem>libdvdcss</systemitem>
+这两个库在
+<application>MPlayer</application>的源码树中，你不必单独安装。你也可以使用
+全系统可用的版本，但这种做法不被推荐，因为它能导致错误，库不兼容以及更慢的
+速度。
+</para>
+
+<note><para>
+对于DVD解码问题，尝试禁用supermount，或者其它相应特性。一些RPC-2驱动器
+可能还需要设置区域代码。
+</para></note>
+
+<formalpara>
+<title>DVD结构</title>
+<para>
+DVD磁盘的每个簇有带有ECC/CRC的2048字节。每个轨上采用UDF文件格式，包含各种文
+件（小的.IFO及.BUK文件以极大的（1GB）的.VOB文件）。它们是真正的文件能从被挂
+载的未加密的DVD中复制/播放。
+</para>
+</formalpara>
+
+<para>
+.IFO文件包含电影的浏览信息（章/标题/视角图，语言表等），它们被用于读及解析
+.VOB的内容（影片）。.BUK文件是它们的备份。他们到处使用<emphasis role="bold">簇</emphasis>，
+所以你需要指定光盘上真正的簇地址以完成DVD浏览或对内容进行解密。
+</para>
+
+<para>
+DVD支持通过原始的对设备基于簇的访问。不幸的是，（在Linux中）要得到一个文件
+的簇地址，你必须是超级用户。那就是我们不使用内核的文件系统的原因，我们在用
+户层对此进行了重新实现。<systemitem>libdvdread</systemitem> 0.9.x完成了此项
+工作。我们并不需要内核中的UDF文件系统驱动因为它们已经有了自己内置的UDF文件
+</para>
+
+<para>
+有时<filename>/dev/dvd</filename>对用户不可读，所以
+<systemitem>libdvdread</systemitem>的作者实现了一个模拟层，其实现了将簇地址
+提交到文件名+偏移量中，以模拟在挂载的文件系统甚至是硬盘上的直接访问。
+</para>
+
+<para>
+<systemitem>libdvdread</systemitem>对于直接访问甚至支持挂载点而不是设备名并
+检查<filename>/proc/mounts</filename>以得到设备名称。其被开发在Solaris上，
+在那系统上设备名是动态分配的。
+</para>
+
+<formalpara>
+<title>DVD解密</title>
+<para>
+DVD解密通过<systemitem>libdvdcss</systemitem>完成。这个方法可以通过
+<envar>DVDCSS_METHOD</envar>环境变量设置，具体细节参考man页。
+</para>
+</formalpara>
+
+<para>
+RPC-1 DVD驱动器只使用软件对区域设置进行保护。RPC-2驱动器有一个硬件保护，只准
+许做5次更改。你可能需要或被推荐把firmware升级到RPC-1，如果你有个RPC-2 DVD驱动
+器。你可以在因特网上寻找firmware的升级，
+<ulink url="http://forum.rpc-1.com/dl_all.php">此firmware论坛</ulink>
+对你的搜索可能是个好起点。如果没有针对你的设备的firmware升级，使用
+<ulink url="http://linvdr.org/projects/regionset/">区域工具</ulink>
+来设置你DVD的区域码（在Linux下）。
+<emphasis role="bold">警告</emphasis>：你只可以设置5次区域。
+</para>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="vcd">
+<title>VCD回放</title>
+
+<para>
+对于可用选项的详细列表，请阅读man页。对于标准视频CD (VCD)的语法如下：
+<screen>mplayer vcd://<replaceable>&lt;track&gt;</replaceable> [-cdrom-device <replaceable>&lt;device&gt;</replaceable>]</screen>
+例如：
+<screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
+默认的VCD设备是<filename>/dev/cdrom</filename>。如果你的设置不同，建
+立个连接或者在命令行通过<option>-cdrom-device</option>选项指定正确设备。
+</para>
+
+<note><para>
+至少Plextor及一些Toshiba SCSI CD-ROM驱动器对读取VCD有着恐怖的性能。这是因为
+针对这些设备的CDROMREADRAW <systemitem>ioctl</systemitem>没有完成。如果你有
+SCSI编程知识，请<ulink url="../../tech/patches.txt">帮我们</ulink>实现对SCSI
+VCD的支持。
+</para></note>
+
+<para>
+同时，你可以通过
+In the meantime you can extract data from VCDs with
+<ulink url="http://ftp.ntut.edu.tw/ftp/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
+从VCD提取数据并用<application>MPlayer</application>播放最终文件。
+</para>
+
+<formalpara>
+<title>VCD结构</title>
+<para>
+视频CD (VCD)由CD-ROM XA簇组成，例如CD-ROM 模式 2
+表格1及2轨：
+<itemizedlist>
+<listitem><para>
+  第一个轨道处于模式2表格2格式下，这意味着他使用L2错误恢复。此轨道含有
+  ISO-9660文件系统，其拥有2048字节/簇。此文件系统含有VCD属性数据信息，
+  以及经常用于菜单上的静态桢。对菜单的MPEG块也能存于这第一个轨道上，但
+  MPEG不得不被分散成一系列的150个簇的块。ISO-9660文件系统可以包含其它
+  对于VCD操作不重要的文件或程序。
+</para></listitem>
+
+<listitem><para>
+  第二及余下的轨道通常是原始的2324字节/簇的MPEG(影片)轨道，每个簇包含
+  一个MPEG PS数据包。这些处于模式2表格1格式，所以他们没簇存储更多数据，
+  损失了一些纠错。在一个VCD的第一个轨道后也包含CD-DA轨道也是合法的。在
+  一些操作系统中，有些技巧是这些非ISO-9660轨道出现在文件系统中。在另外
+  一些操作系统中如GNU/Linux，这还（未）被实现。在此，MPEG数据
+  <emphasis role="bold">不能被挂载</emphasis>。因为大部分电影在这种轨道
+  内，你应先试<option>vcd://2</option>。
+</para></listitem>
+
+<listitem><para>
+  还存在没有第一个轨道的VCD（单一轨道根本没有文件系统）。他们仍然是可
+  播放的，但不能被挂载。
+</para></listitem>
+
+<listitem><para>
+  视频CD的定义被称为Philips"白皮书"，它通常并不出现在网上因为它要从
+  Philips购买。对于视频CD更详细的资料可从
+  <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">vcdimager文档</ulink>
+  获取。
+</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+<formalpara>
+<title>关于.DAT文件</title>
+<para>
+被挂载的VCD上处于第一个轨道上的~600MB的文件并不是真正的文件！它是所谓的ISO网
+关，其被创建以便Windows处理这些轨道（Windows根本不允许应用程序直接访问原始设
+备）。在Linux下你不能复制或播放这些文件（它们包含垃圾）。在Windows下，这是可
+能的因为他的iso9660驱动模拟了在文件内直接读取轨道。要播放.DAT文件，你需要内核
+驱动，岂可再PowerDVD的Linux版本中找到。其有一个更改的iso9660文件系统
+(<filename>vcdfs/isofs-2.4.X.o</filename>)驱动，你可以通过<application>MPlayer</application>
+复制甚至播放.DAT文件。但在Linux内核的标准的iso9660驱动上它不能工作！另外使用
+使用<option>vcd://</option>。对于VCD复制另外的方法是内核新的
+<ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink>驱动（不是
+官方内核的一部分）其将CD会话显示为镜像文件及<ulink url="http://cdrdao.sf.net/">cdrdao</ulink>，
+一个逐位的ＣＤ抓轨／复制程序。
+</para>
+</formalpara>
+</sect1>
+</chapter>
