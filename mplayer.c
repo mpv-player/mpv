@@ -3514,34 +3514,10 @@ void pause_loop(void)
 #endif
 }
 
+void print_version(void){
+  mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", MP_TITLE);
 
-int main(int argc,char* argv[]){
-
-
-char * mem_ptr;
-
-int file_format=DEMUXER_TYPE_UNKNOWN;
-
-// movie info:
-
-/* Flag indicating whether MPlayer should exit without playing anything. */
-int opt_exit = 0;
-
-//float a_frame=0;    // Audio
-
-int i;
-char *tmp;
-
-int gui_no_filename=0;
-
-  srand((int) time(NULL)); 
-
-  InitTimer();
-  
-  mp_msg_init();
-
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2006 MPlayer Team\n");
-  /* Test for CPU capabilities (and corresponding OS support) for optimizing */
+/* Test for CPU capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
 #ifdef ARCH_X86
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
@@ -3573,7 +3549,34 @@ int gui_no_filename=0;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
 #endif /* RUNTIME_CPUDETECT */
 #endif /* ARCH_X86 */
+}
 
+int main(int argc,char* argv[]){
+
+
+char * mem_ptr;
+
+int file_format=DEMUXER_TYPE_UNKNOWN;
+
+// movie info:
+
+/* Flag indicating whether MPlayer should exit without playing anything. */
+int opt_exit = 0;
+
+//float a_frame=0;    // Audio
+
+int i;
+char *tmp;
+
+int gui_no_filename=0;
+
+  srand((int) time(NULL)); 
+
+  InitTimer();
+  
+  mp_msg_init();
+
+  print_version();
 #if defined(WIN32) && defined(USE_WIN32DLL)
   set_path_env();
 #endif /*WIN32 && USE_WIN32DLL*/

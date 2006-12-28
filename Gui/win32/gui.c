@@ -30,7 +30,6 @@
 #include <mplayer.h>
 #include <mp_msg.h>
 #include <help_mp.h>
-#include <cpudetect.h>
 #include <input/input.h>
 #include <input/mouse.h>
 #include <osdep/keycodes.h>
@@ -51,12 +50,11 @@
 # define WM_XBUTTONDBLCLK  0x020D
 #endif
 
-#define MP_TITLE "MPlayer " VERSION " (C) 2000-2006 MPlayer Team"
-
 /* Globals / Externs */
 extern void renderinfobox(skin_t *skin, window_priv_t *priv);
 extern void renderwidget(skin_t *skin, image *dest, widget *item, int state);
 extern void mplayer_put_key(int code);
+extern void print_version(void);
 extern int WinID;
 float sub_aspect;
 
@@ -105,38 +103,7 @@ void console_toggle(void)
         fp = freopen("con", "w", stdout);
         *stderr = *fp;
         setvbuf(stderr, NULL, _IONBF, 0);
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", MP_TITLE);
-        GetCpuCaps(&gCpuCaps);
-#ifdef ARCH_X86
-        mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
-               gCpuCaps.hasMMX, gCpuCaps.hasMMX2,
-               gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
-               gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
-#ifdef RUNTIME_CPUDETECT
-        mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithRuntimeDetection);
-#else
-        mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithCPUExtensions);
-#ifdef HAVE_MMX
-        mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX");
-#endif
-#ifdef HAVE_MMX2
-        mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX2");
-#endif
-#ifdef HAVE_3DNOW
-        mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNow");
-#endif
-#ifdef HAVE_3DNOWEX
-        mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNowEx");
-#endif
-#ifdef HAVE_SSE
-        mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE");
-#endif
-#ifdef HAVE_SSE2
-        mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE2");
-#endif
-        mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n\n");
-#endif
-#endif
+        print_version();
         console_state = 1;
     }
 }

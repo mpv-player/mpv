@@ -9,8 +9,10 @@ test $svn_revision || svn_revision=UNKNOWN
 
 NEW_REVISION="#define VERSION \"dev-SVN-r${svn_revision}${extra}\""
 OLD_REVISION=`cat version.h 2> /dev/null`
+TITLE="#define MP_TITLE \"MPlayer dev-SVN-r${svn_revision}${extra} (C) 2000-2006 MPlayer Team\""
 
 # Update version.h only on revision changes to avoid spurious rebuilds
 if test "$NEW_REVISION" != "$OLD_REVISION"; then
     echo "$NEW_REVISION" > version.h
+    echo "$TITLE" >> version.h
 fi
