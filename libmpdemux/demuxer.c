@@ -106,7 +106,9 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_mpeg_gxf,
   &demuxer_desc_mpeg4_es,
   &demuxer_desc_h264_es,
+#ifdef MUSEPACK
   &demuxer_desc_mpc,
+#endif
   &demuxer_desc_audio,
   &demuxer_desc_mpeg_ty,
 #ifdef STREAMING_LIVE555

@@ -21,7 +21,6 @@ SRCS  = asfheader.c \
         demux_mf.c \
         demux_mkv.c ebml.c \
         demux_mov.c \
-        demux_mpc.c \
         demux_mpg.c \
         demux_nsv.c \
         demux_nuv.c \
@@ -55,6 +54,7 @@ SRCS-$(GIF)                     += demux_gif.c
 SRCS-$(LIBDV)                   += demux_rawdv.c
 SRCS-$(LIBNUT)                  += demux_nut.c
 SRCS-$(LIBVORBIS)               += demux_ogg.c
+SRCS-$(MUSEPACK)                += demux_mpc.c
 SRCS-$(STREAMING_LIVE555)       += demux_rtp.cpp demux_rtp_codec.cpp
 SRCS-$(WIN32DLL)                += demux_avs.c
 SRCS-$(XMMS_PLUGINS)            += demux_xmms.c
