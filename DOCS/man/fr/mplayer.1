@@ -1,4 +1,4 @@
-.\" synced with r21697
+.\" synced with r21758
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -1111,7 +1111,7 @@ certains contrôles.
 Indiquez le nom du demultiplexeur parmi la liste donnée par \-audio-demuxer
 help.
 Pour assurer la compatibilité ascendante, il est aussi possible de donner
-l'ID du démultiplexeur comme défini dans libmpdemux/\:demuxer.h.
+l'ID du démultiplexeur comme défini dans subreader.h.
 Par exemple, \-audio-demuxer audio ou \-audio-demuxer 17 force le
 démultiplexeur MP3.
 .
@@ -1334,7 +1334,7 @@ pour copier des titres de DVD (voir les exemples).
 .
 .TP
 .B \-dvd-speed <facteur ou débit en Ko/s> (DVD uniquement)
-Essaye de limiter la vitesse du DVD (par défaut\ : ne change rien).
+Essaye de limiter la vitesse du DVD (par défaut\ : pas de changement).
 La vitesse de base d'un DVD est d'environ 1350Ko/s, donc un lecteur 8x
 peut lire jusqu'à une vitesse de 10800Ko/s.
 Une vitesse plus lente rend le lecteur plus silencieux; pour regarder un DVD,
@@ -1343,6 +1343,10 @@ MPlayer ré-initialise le lecteur à sa vitesse d'origine quand il termine
 la lecture.
 Les valeurs inférieures 100 signifie un multiple de 1350Ko/s, c-à-d
 \-dvd-speed 8 met la limite à 10800Ko/s.
+.br
+.I NOTE\ :
+Vous devez avoir un accès en écriture au périphérique DVD pour changer la
+vitesse.
 .
 .TP
 .B \-dvdangle <ID angle> (DVD uniquement)
@@ -2021,11 +2025,11 @@ Extrait les sous-titres d'un flux VOB.
 Voir également les options \-dump*sub et \-vobsubout*.
 .
 .TP
-.B \-embeddedfonts (FreeType uniquement)
+.B \-(no)embeddedfonts (FreeType uniquement)
 Active l'extraction des polices embarquées dans les fichiers Matroska.
 Ces polices peuvent être utilisées pour l'affichage des sous-titres
 SSA/ASS (option \-ass).
-Les fichiers de polices seront créés dans le répertoire ~/.mplayer/fonts.
+Les fichiers de polices seront créés dans le répertoire ~/.mplayer/\:fonts.
 .br
 .I NOTE\ :
 Avec FontConfig 2.4.2 ou ultérieur, les polices embarquées sont ouvertes
@@ -7565,14 +7569,14 @@ MPEG-1 video
 MPEG-2 video
 .IPs huffyuv
 HuffYUV
-.IPs ffvhuff (voir aussi\ : vstrict)
+.IPs ffvhuff
 HuffYUV non-standard produisant des fichiers 20% plus petits en
 utilisant YV12
 .IPs "asv1\ "
 ASUS Video v1
 .IPs "asv2\ "
 ASUS Video v2
-.IPs ffv1 (voir aussi\ : vstrict)
+.IPs ffv1
 codec vidéo sans perte de FFmpeg
 .IPs flv\ \
 Sorenson H.263 used in Flash Video
@@ -8232,7 +8236,7 @@ Autorise des extensions spécifiques à libavcodec (par défaut).
 .IPs -2
 Active les codecs et les fonctionnalités expérimentales risquant de ne
 plus pouvoir être lues par les futures versions de MPlayer
-(snow, ffvhuff, ffv1).
+(snow).
 .RE
 .PD 1
 .
@@ -10301,7 +10305,7 @@ Retard vidéo initial, en millisecondes (par défaut\ : 0),
 .
 .TP
 .B "drop\ \ \ "
-Lorsque utilisé en même temps que init_adelay, le multiplexeur élimine
+Lorsque utilisé en même temps que vdelay, le multiplexeur élimine
 le début de la piste sonore qui n'aurait pas été jouée si elle commençait
 avant la vidéo.
 .
@@ -10356,13 +10360,14 @@ de Donand Graft.
 Vous devez donner la cadence de prise de vue (framerate) de la
 source ainsi que la cadence désirée\ ; le multiplexeur fera en
 sorte que le flux vidéo soit comme si il avait été encodé à
-<tele_dest> images par secondes, en remplaçant la cadence de sortie
-nominale.
+la cadence demandée.
 Ceci ne fonctionne avec les vidéos MPEG-2 que quand la cadence de prise
 de vue de la source est plus faible que celle en sortie, et que
 l'accélération de la cadence est <= 1.5.
 .sp 1
-.I EXEMPLE:
+.RS
+.I EXEMPLE\ :
+.RE
 .PD 0
 .RSs
 .IPs "tele_src=25:tele_dest=30000/1001"
