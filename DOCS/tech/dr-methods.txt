@@ -9,7 +9,7 @@ The main point is the same, but they work different.
 
 method 1: decoding directly to externally provided buffers.
 so, the codec decodes macroblocks directly to the buffer provided by the
-caller. as this buffer will be readed later (for MC of next frame) it's not
+caller. as this buffer will be read later (for MC of next frame) it's not
 a good idea to place such buffers in slow video ram. but.
 there are many video out drivers using buffers in system ram, and using some
 way of memcpy or DMA to blit it to video ram at display time.
