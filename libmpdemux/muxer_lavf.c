@@ -26,6 +26,7 @@
 extern unsigned int codec_get_wav_tag(int id);
 extern enum CodecID codec_get_bmp_id(unsigned int tag);
 extern enum CodecID codec_get_wav_id(unsigned int tag);
+extern const int mp_wav_tags[];
 
 extern char *info_name;
 extern char *info_artist;
@@ -209,6 +210,8 @@ static void fix_parameters(muxer_stream_t *stream)
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
 		ctx->codec_id = codec_get_wav_id(stream->wf->wFormatTag); 
+                if(!ctx->codec_id)
+                        ctx->codec_id = codec_get_id(mp_wav_tags, stream->wf->wFormatTag);
 #if 0 //breaks aac in mov at least
 		ctx->codec_tag = codec_get_wav_tag(ctx->codec_id);
 #endif

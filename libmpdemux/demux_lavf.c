@@ -87,6 +87,7 @@ const CodecTag mp_wav_tags[] = {
     { CODEC_ID_WAVPACK,           MKTAG('W', 'V', 'P', 'K')},
     { CODEC_ID_WESTWOOD_SND1,     MKTAG('S', 'N', 'D', '1')},
     { CODEC_ID_XAN_DPCM,          MKTAG('A', 'x', 'a', 'n')},
+    { CODEC_ID_AMR_NB,            MKTAG('n', 'b',   0,   0)},
     { 0, 0 },
 };
 

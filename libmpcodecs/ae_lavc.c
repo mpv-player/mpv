@@ -30,6 +30,7 @@ extern int  avcodec_inited;
 static int compressed_frame_size = 0;
 #if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
 extern unsigned int codec_get_wav_tag(int id);
+extern const int mp_wav_tags[];
 #endif
 
 static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
@@ -173,6 +174,8 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 	{
 #if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
 		lavc_param_atag = codec_get_wav_tag(lavc_acodec->id);
+                if(!lavc_param_atag)
+                        lavc_param_atag =  codec_get_tag(mp_wav_tags, lavc_acodec->id);
 #else
 		lavc_param_atag = lavc_find_atag(lavc_param_acodec);
 #endif
