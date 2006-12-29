@@ -56,9 +56,12 @@ static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 			mux_a->h.dwSampleSize = 0; // Blocksize not constant
 		} 
 		else 
-			mux_a->h.dwSampleSize = mux_a->h.dwScale;
+			mux_a->h.dwSampleSize = 0;
 	}
-	mux_a->wf->nBlockAlign = mux_a->h.dwScale;
+        if(mux_a->h.dwSampleSize)
+                mux_a->wf->nBlockAlign = mux_a->h.dwSampleSize;
+        else
+                mux_a->wf->nBlockAlign = 1;
 	mux_a->h.dwSuggestedBufferSize = (encoder->params.audio_preload*mux_a->wf->nAvgBytesPerSec)/1000;
 	mux_a->h.dwSuggestedBufferSize -= mux_a->h.dwSuggestedBufferSize % mux_a->wf->nBlockAlign;
 
