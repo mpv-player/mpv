@@ -143,7 +143,7 @@ int display_openfilewindow(gui_t *gui, int add)
             {
                 if (GetFullPathName(filename, MAX_PATH, filename, &filepart))
                 {
-                    if(!parse_filename(filename, playtree, mconfig, add? 0 : 1))
+                    if(!parse_filename(filename, playtree, mconfig, 0))
                         gui->playlist->add_track(gui->playlist, filename, NULL, filepart, 0);
                     mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] Adding file: %s - path %s\n", filespec, filename);
                     result++;
