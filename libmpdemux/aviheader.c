@@ -206,6 +206,9 @@ while(1){
     case mmioFOURCC('i', 'n', 'd', 'x'): {
       uint32_t i;
       avisuperindex_chunk *s;
+
+      if(!index_mode) break;
+
       if(chunksize<=24){
         break;
       }
