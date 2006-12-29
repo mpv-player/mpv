@@ -470,7 +470,7 @@ in several ways.
 <orderedlist>
 <listitem>
   <para>
-  MPEG-type compression is also highly dependent on frequency domain
+  MPEG-type compression is highly dependent on frequency domain
   transformations, in particular the Discrete Cosine Transform (DCT),
   which is similar to the Fourier transform. This sort of encoding is
   efficient for representing patterns and smooth transitions, but it
