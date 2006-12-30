@@ -749,8 +749,6 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 			http_debug_hdr( http_hdr );
 		}
 		
-		stream->streaming_ctrl->data = (void*)http_hdr;
-
 		// Check if we can make partial content requests and thus seek in http-streams
 		if( http_hdr!=NULL && http_hdr->status_code==200 ) {
 		    char *accept_ranges;
@@ -858,7 +856,9 @@ err_out:
 	fd = -1;
 	res = STREAM_UNSUPORTED;
 	http_free( http_hdr );
+	http_hdr = NULL;
 out:
+	stream->streaming_ctrl->data = (void*)http_hdr;
 	stream->fd = fd;
 	return res;
 }
