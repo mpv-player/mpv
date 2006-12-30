@@ -113,15 +113,15 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt, int *pids)
 		return 0;
 	}
 #ifdef HAVE_DVB_HEAD
-    priv->sec_fd=0;
+	priv->sec_fd=0;
 #else
 	priv->sec_fd = open(dvb_secdev[n], O_RDWR);
-    if(priv->sec_fd < 0)
-    {
+	if(priv->sec_fd < 0)
+	{
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING SEC DEVICE %s: ERRNO %d\n", dvb_secdev[n], errno);
 		close(priv->fe_fd);
-      	return 0;
-    }
+		return 0;
+	}
 #endif
 	priv->demux_fds_cnt = 0;
 	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
@@ -148,7 +148,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt, int *pids)
 		return 0;
 	}
 
-    return 1;
+	return 1;
 }
 
 
@@ -312,7 +312,7 @@ static int SecGetStatus (int fd, struct secStatus *state)
 		break;
     }
 
- 	mp_msg(MSGT_DEMUX, MSGL_V, "SEC CONT TONE: %s\n", (state->contTone == SEC_TONE_ON ? "ON" : "OFF"));
+    mp_msg(MSGT_DEMUX, MSGL_V, "SEC CONT TONE: %s\n", (state->contTone == SEC_TONE_ON ? "ON" : "OFF"));
     return 0;
 }
 
@@ -348,8 +348,8 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 
 	if (ioctl(fd_frontend,FE_SET_FRONTEND,feparams) < 0)
 	{
-	mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR tuning channel\n");
-	return -1;
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR tuning channel\n");
+		return -1;
 	}
 
 	pfd[0].fd = fd_frontend;
@@ -445,8 +445,8 @@ static int check_status(int fd_frontend,FrontendParameters* feparams,int tuner_t
 
 	while(1)
 	{
-	    if(ioctl(fd_frontend, FE_GET_EVENT, &event) == -1)
-	    break;
+		if(ioctl(fd_frontend, FE_GET_EVENT, &event) == -1)
+		break;
 	}
 
 	i = 0; res = -1;
@@ -546,9 +546,9 @@ static int check_status(int fd_frontend,FrontendParameters* feparams,int tuner_t
 		mp_msg(MSGT_DEMUX, MSGL_V, "FE_STATUS:");
 		
 		if(ioctl(fd_frontend,FE_READ_STATUS,&festatus) >= 0)
-		    print_status(festatus);
+			print_status(festatus);
 		else
-		    mp_msg(MSGT_DEMUX, MSGL_ERR, " ERROR, UNABLE TO READ_STATUS");
+			mp_msg(MSGT_DEMUX, MSGL_ERR, " ERROR, UNABLE TO READ_STATUS");
 		    
 		mp_msg(MSGT_DEMUX, MSGL_V, "\n");
 	}
