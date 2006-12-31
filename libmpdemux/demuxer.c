@@ -1055,9 +1055,9 @@ int demuxer_get_current_time(demuxer_t *demuxer){
     double get_time_ans = 0;
     double tm;
     sh_video_t *sh_video = demuxer->video->sh;
-    if(stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&tm)!=STREAM_UNSUPORTED) {
-        get_time_ans = tm;
-    } else if(sh_video) get_time_ans = sh_video->pts;
+    if(demuxer->stream_pts != MP_NOPTS_VALUE)
+        get_time_ans = demuxer->stream_pts;
+    else if(sh_video) get_time_ans = sh_video->pts;
     return (int) get_time_ans;
 }
 
