@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "mp_msg.h"
+#include "asmrp.h"
 
 /*
 #define LOG
@@ -646,8 +647,11 @@ static int asmrp_eval (asmrp_t *p, int *matches) {
 #ifdef LOG
       printf ("rule #%d is true\n", rule_num);
 #endif
-      matches[num_matches] = rule_num;
-      num_matches++;
+      if(num_matches < MAX_RULEMATCHES - 1)
+        matches[num_matches++] = rule_num;
+      else
+        mp_msg(MSGT_STREAM, MSGL_ERR,
+	  "Ignoring matched asm rule %d, too many matched rules.\n", rule_num);
     }
 
     rule_num++;
