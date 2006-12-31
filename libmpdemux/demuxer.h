@@ -85,6 +85,7 @@
 typedef struct demux_packet_st {
   int len;
   double pts;
+  double stream_pts;
   off_t pos;  // position in index (AVI) or file (MPG)
   unsigned char* buffer;
   int flags; // keyframe, etc
@@ -176,6 +177,7 @@ typedef struct demuxer_st {
   off_t movi_start;
   off_t movi_end;
   stream_t *stream;
+  double stream_pts;       // current stream pts, if applicable (e.g. dvd)
   char *filename; ///< Needed by avs_check_file
   int synced;  // stream synced (used by mpeg)
   int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
@@ -210,6 +212,7 @@ inline static demux_packet_t* new_demux_packet(int len){
   // still using 0 by default in case there is some code that uses 0 for both
   // unknown and a valid pts value
   dp->pts=correct_pts ? MP_NOPTS_VALUE : 0;
+  dp->stream_pts = MP_NOPTS_VALUE;
   dp->pos=0;
   dp->flags=0;
   dp->refcount=1;

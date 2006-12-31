@@ -184,6 +184,7 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char
   demuxer_t *d=malloc(sizeof(demuxer_t));
   memset(d,0,sizeof(demuxer_t));
   d->stream=stream;
+  d->stream_pts = MP_NOPTS_VALUE;
   d->movi_start=stream->start_pos;
   d->movi_end=stream->end_pos;
   d->seekable=1;
@@ -381,6 +382,7 @@ int ds_fill_buffer(demux_stream_t *ds){
         ds->pts_bytes=0;
       }
       ds->pts_bytes+=p->len; // !!!
+      if(p->stream_pts != MP_NOPTS_VALUE) demux->stream_pts=p->stream_pts;
       ds->flags=p->flags;
       // unlink packet:
       ds->bytes-=p->len;
@@ -933,9 +935,9 @@ if(!demuxer->seekable){
     if(flags & 1)  // absolute seek
       pts = 0.0f;
     else {
-      if(stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &tmp) == STREAM_UNSUPORTED)
+      if(demuxer->stream_pts == MP_NOPTS_VALUE)
         goto dmx_seek;
-      pts = tmp;
+      pts = demuxer->stream_pts;
     }
 
     if(flags & 2) {  // percent seek
