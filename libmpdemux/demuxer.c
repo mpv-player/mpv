@@ -1053,7 +1053,6 @@ double demuxer_get_time_length(demuxer_t *demuxer){
  */
 int demuxer_get_current_time(demuxer_t *demuxer){
     double get_time_ans = 0;
-    double tm;
     sh_video_t *sh_video = demuxer->video->sh;
     if(demuxer->stream_pts != MP_NOPTS_VALUE)
         get_time_ans = demuxer->stream_pts;
