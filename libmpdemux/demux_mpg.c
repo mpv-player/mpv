@@ -191,7 +191,10 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   unsigned char c=0;
   unsigned long long pts=0;
   unsigned long long dts=0;
+  int l;
+  double stream_pts = MP_NOPTS_VALUE;
   demux_stream_t *ds=NULL;
+  demux_packet_t* dp;
   mpg_demuxer_t *priv = (mpg_demuxer_t *) demux->priv;
   
   mp_dbg(MSGT_DEMUX,MSGL_DBG3,"demux_read_packet: %X\n",id);
@@ -405,7 +408,22 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if(ds){
     mp_dbg(MSGT_DEMUX,MSGL_DBG2,"DEMUX_MPG: Read %d data bytes from packet %04X\n",len,id);
 //    printf("packet start = 0x%X  \n",stream_tell(demux->stream)-packet_start_pos);
-    ds_read_packet(ds,demux->stream,len,pts/90000.0f,demux->filepos,0);
+
+    dp=new_demux_packet(len);
+    if(!dp) {
+      mp_dbg(MSGT_DEMUX,MSGL_ERR,"DEMUX_MPG ERROR: couldn't create demux_packet(%d bytes)\n",len);
+      stream_skip(demux->stream,len);
+      return 0;
+    }
+    l = stream_read(demux->stream,dp->buffer,len);
+    if(l<len)
+      resize_demux_packet(dp, l);
+    len = l;
+    dp->pts=pts/90000.0f;
+    dp->pos=demux->filepos;
+    if(stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&stream_pts)!=STREAM_UNSUPORTED)
+      dp->stream_pts = stream_pts;
+    ds_add_packet(ds,dp);
     if (demux->priv) ((mpg_demuxer_t*)demux->priv)->last_pts = pts/90000.0f;
 //    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
     return 1;
