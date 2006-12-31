@@ -76,6 +76,7 @@ const CodecTag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
     { CODEC_ID_ADPCM_EA,          MKTAG('A', 'D', 'E', 'A')},
     { CODEC_ID_ADPCM_IMA_WS,      MKTAG('A', 'I', 'W', 'S')},
+    { CODEC_ID_AMR_NB,            MKTAG('n', 'b',   0,   0)},
     { CODEC_ID_DSICINAUDIO,       MKTAG('D', 'C', 'I', 'A')},
     { CODEC_ID_INTERPLAY_DPCM,    MKTAG('I', 'N', 'P', 'A')},
     { CODEC_ID_MUSEPACK7,         MKTAG('M', 'P', 'C', ' ')},
@@ -87,7 +88,6 @@ const CodecTag mp_wav_tags[] = {
     { CODEC_ID_WAVPACK,           MKTAG('W', 'V', 'P', 'K')},
     { CODEC_ID_WESTWOOD_SND1,     MKTAG('S', 'N', 'D', '1')},
     { CODEC_ID_XAN_DPCM,          MKTAG('A', 'x', 'a', 'n')},
-    { CODEC_ID_AMR_NB,            MKTAG('n', 'b',   0,   0)},
     { 0, 0 },
 };
 
