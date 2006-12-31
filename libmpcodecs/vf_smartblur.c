@@ -29,7 +29,11 @@
 #include <malloc.h>
 #endif
 
+#ifdef USE_LIBAVUTIL_SO
+#include <ffmpeg/avutil.h>
+#else
 #include "avutil.h"
+#endif
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
