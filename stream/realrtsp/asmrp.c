@@ -426,7 +426,7 @@ static int asmrp_operand (asmrp_t *p) {
     i = asmrp_find_id (p, p->str);
     if (i<0) {
       mp_msg(MSGT_STREAM, MSGL_ERR, "error: unknown identifier %s\n", p->str);
-    }
+    } else
     ret = p->sym_tab[i].v;
 
     asmrp_get_sym (p);
