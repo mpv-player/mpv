@@ -337,6 +337,7 @@ static rmff_header_t *real_parse_sdp(char *data, char **stream_rules, uint32_t b
 
   rmff_fix_header(header);
   buf = xbuffer_free(buf);
+  sdpplin_free(desc);
 
   return header;
 }
