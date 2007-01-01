@@ -421,7 +421,13 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     len = l;
     dp->pts=pts/90000.0f;
     dp->pos=demux->filepos;
-    if(stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&stream_pts)!=STREAM_UNSUPORTED)
+    /*
+      workaround:
+      set dp->stream_pts only when feeding the video stream, or strangely interleaved files
+      (such as SWIII) will show strange alternations in the stream time, wildly going
+      back and forth
+    */
+    if(ds == demux->video && stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&stream_pts)!=STREAM_UNSUPORTED)
       dp->stream_pts = stream_pts;
     ds_add_packet(ds,dp);
     if (demux->priv) ((mpg_demuxer_t*)demux->priv)->last_pts = pts/90000.0f;
