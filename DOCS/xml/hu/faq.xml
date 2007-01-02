@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21152 -->
+<!-- synced with r21737 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -68,6 +68,7 @@ mint ahogy <ulink url="http://freshmeat.net/articles/view/889/">mások sem</ulin
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-compilation-installation">
 <title>Fordítás és telepítés</title>
@@ -153,7 +154,8 @@ léteznek-e (ez Mandrake rendszereken lehet probléma).
 <qandaentry>
 <question><para>
 A Mac OS 10.3 alatti fordítás számos szerkesztési hibát okoz</para></question>
-<answer><para>
+<answer>
+<para>
 A szerkesztési hiba, amit tapasztalhatsz, valószínűleg így néz ki:
 <screen>
 ld: Undefined symbols:
@@ -167,32 +169,36 @@ A nem definiált szimbólumok jelen vannak a Mac OS 10.4-ben,
 de nincsenek ott a 10.3-ban.
 Az egyik megoldás a QuickTime 7.0.1-re történő downgrade lehet.
 De van egy jobb is.
-</para><para>
-Szerezz be a <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">framework-ök régebbi másolatát</ulink>.
+</para>
+<para>
+Szerezd be a
+<ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">framework-ök régebbi másolatát</ulink>.
 Ez egy tömörített fájl, ami tartalmazza a QuickTime
 7.0.1 Framework-öt és a 10.3.9 QuartzCore Framework-öt.
-</para><para>
+</para>
+<para>
 Csomagold ki a fájlokat valahova a System könyvtáradon kívülre.
 (vagyis ne telepítsd ezen framework-öket a
 <filename class="directory">/System/Library/Frameworks</filename>
 könyvtáradba! A régebbi másolat csak a szerkesztési hibák ellen kell!)
-<screen>
-gunzip &lt; CompatFrameworks.tgz | tar xvf -
-</screen>
+<screen>gunzip &lt; CompatFrameworks.tgz | tar xvf -</screen>
 A config.mak fájlba írd be
 <systemitem>-F/eleresi/ut/ahova/kicsomagoltad</systemitem>
 az <systemitem>OPTFLAGS</systemitem> változóhoz.
 Ha <application>X-Code</application>-ot használsz, egyszerűen kiválaszthatod
 ezeket a framework-öket a rendszer sajátjai helyett.
-</para><para>
+</para>
+<para>
 A keletkező <application>MPlayer</application> bináris a rendszeredbe
 telepített framework-öt fogja használni dinamikus link-ek segítségével,
 melyek futási időben kerülnek feloldásra.
 (Ezt leellenőrizheted a <systemitem>otool -l</systemitem> használatával).
-</para></answer>
+</para>
+</answer>
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-general">
 <title>Általános kérdések</title>
@@ -209,7 +215,8 @@ Igen. Lásd a weboldal
 
 <qandaentry>
 <question><para>
-Találtam egy csúnya hibát, amikor megpróbáltam lejátszani a kedvenc videómat! Kit értesítsek?
+Találtam egy csúnya hibát, amikor megpróbáltam lejátszani a kedvenc videómat!
+Kit értesítsek?
 </para></question>
 <answer><para>
 Kérünk olvasd el a <link linkend="bugreports">hiba jelentési útmutatót</link>
@@ -223,8 +230,9 @@ Problémám van a ... codec-kel történő lejátszással. Egyáltalán használ
 </para></question>
 <answer><para>
 Ellenőrizd a <ulink url="../../codecs-status.html">codec státusz</ulink>
-oldalt, ha nem tartalmazza a te codecedet, olvasd el a <link linkend="codecs">codec dokumentációt</link>,
-különösen a <link linkend="codec-importing">codec importálás HOGYAN</link>-t és keress meg minket.
+oldalt, ha nem tartalmazza a te codecedet, olvasd el a
+<link linkend="codecs">codec dokumentációt</link>, különösen a
+<link linkend="codec-importing">codec importálás HOGYAN</link>-t és keress meg minket.
 </para></answer>
 </qandaentry>
 
@@ -234,8 +242,8 @@ Ha elindítom a lejátszást, ezt az üzenetet kapom, de látszólag minden rend
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-Speciálisan beállított kernel kell az új időzítő kód használatához. A részletekért
-lásd az <link linkend="rtc">RTC</link> részt a dokumentációban.
+Speciálisan beállított kernel kell az új időzítő kód használatához.
+A részletekért lásd az <link linkend="rtc">RTC</link> részt a dokumentációban.
 </para></answer>
 </qandaentry>
 
@@ -262,46 +270,67 @@ Mit jelentenek a számok a státusz sorban?
 </para></question>
 <answer><para>
 Például:
-<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
+<screen>
+A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>A: 2.1</systemitem></term>
-<listitem><para>audió pozíció másodpercekben</para></listitem>
+<varlistentry>
+  <term><systemitem>A: 2.1</systemitem></term>
+  <listitem><para>audió pozíció másodpercekben</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>V: 2.2</systemitem></term>
-<listitem><para>videó pozíció másodpercekben</para></listitem>
+<varlistentry>
+  <term><systemitem>V: 2.2</systemitem></term>
+  <listitem><para>videó pozíció másodpercekben</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
-<listitem><para>audió-videó különbség másodpercekben (késleltetés)</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V: -0.167</systemitem></term>
+  <listitem><para>audió-videó különbség másodpercekben (késleltetés)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>ct: 0.042</systemitem></term>
-<listitem><para>teljes elvégzett A-V szinkron</para></listitem>
+<varlistentry>
+  <term><systemitem>ct: 0.042</systemitem></term>
+  <listitem><para>teljes elvégzett A-V szinkron</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>57/57</systemitem></term>
-<listitem><para>lejátszott/dekódolt képkockák (az utolsó kereséstől számítva)</para></listitem>
+<varlistentry>
+  <term><systemitem>57/57</systemitem></term>
+  <listitem><para>
+  lejátszott/dekódolt képkockák (az utolsó kereséstől számítva)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>41%</systemitem></term>
-<listitem><para>videó codec CPU használata százalékban
+<varlistentry>
+  <term><systemitem>41%</systemitem></term>
+  <listitem><para>
+  videó codec CPU használata százalékban
   (a slice rendering-nél és a direkt rendering-nél ebben benne
-  van a video_out is)</para></listitem>
+  van a video_out is)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0%</systemitem></term>
-<listitem><para>video_out CPU használat</para></listitem>
+<varlistentry>
+  <term><systemitem>0%</systemitem></term>
+  <listitem><para>video_out CPU használat</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2.6%</systemitem></term>
-<listitem><para>audió codec CPU használat százalékban</para></listitem>
+<varlistentry>
+  <term><systemitem>2.6%</systemitem></term>
+  <listitem><para>audió codec CPU használat százalékban</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0</systemitem></term>
-<listitem><para>az A-V szinkron fenntartása miatt eldobott képkockák száma</para></listitem>
+<varlistentry>
+  <term><systemitem>0</systemitem></term>
+  <listitem><para>az A-V szinkron fenntartása miatt eldobott képkockák száma</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>4</systemitem></term>
-<listitem><para>a kép utófeldolgozás aktuális szintje (<option>-autoq</option>
-használatakor)</para></listitem>
+<varlistentry>
+  <term><systemitem>4</systemitem></term>
+  <listitem><para>
+  a kép utófeldolgozás aktuális szintje (<option>-autoq</option> használatakor)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>49%</systemitem></term>
-<listitem><para>aktuálisan használt cache méret (50% körül a normális)</para></listitem>
+<varlistentry>
+  <term><systemitem>49%</systemitem></term>
+  <listitem><para>
+  aktuálisan használt cache méret (50% körül a normális)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>1.00x</systemitem></term>
-<listitem><para>lejátszási sebesség az eredeti sebesség faktorjaként</para></listitem>
+<varlistentry>
+  <term><systemitem>1.00x</systemitem></term>
+  <listitem><para>lejátszási sebesség az eredeti sebesség faktorjaként</para></listitem>
 </varlistentry>
 </variablelist>
 Ezek legtöbbje hibakeresési céllal szerepel, a <option>-quiet</option>
@@ -316,7 +345,8 @@ történő lejátszás értékeit.
 
 <qandaentry>
 <question><para>
-Üzeneteket kapok a <filename>/usr/local/lib/codecs/</filename> könyvtárban nem található fájlokról...
+Üzeneteket kapok a <filename>/usr/local/lib/codecs/</filename>
+könyvtárban nem található fájlokról...
 </para></question>
 <answer><para>
 Töltsd le a bináris codeceket a
@@ -343,8 +373,9 @@ A feliratok gyönyörűek, a legszebbek, amit valaha láttam, de lelassítják
 a lejátszást! Tudom, hogy hihetetlen ...
 </para></question>
 <answer><para>
-Miután lefuttattad a <filename>./configure</filename>-t, írd át a <filename>config.h</filename>
-fájlt és cseréld ki az <systemitem>#undef FAST_OSD</systemitem> sort
+Miután lefuttattad a <filename>./configure</filename>-t,
+írd át a <filename>config.h</filename> fájlt és
+cseréld ki az <systemitem>#undef FAST_OSD</systemitem> sort
 <systemitem>#define FAST_OSD</systemitem>-re. Aztán forgass újra.
 </para></answer>
 </qandaentry>
@@ -357,9 +388,15 @@ sem tudom elérni!
 <answer><para>
 FVWM-et használsz? Próbáld ki ezt:
 <orderedlist>
-<listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
-<listitem><para>Állítsd át a <systemitem>Use Applications position hints</systemitem>-et
-<systemitem>Yes</systemitem>-re</para></listitem>
+<listitem><para>
+  <menuchoice><guimenu>Start</guimenu><guisubmenu>Settings</guisubmenu>
+    <guisubmenu>Configuration</guisubmenu>
+    <guimenuitem>Base Configuration</guimenuitem></menuchoice>
+</para></listitem>
+<listitem><para>
+  Állítsd át a <systemitem>Use Applications position hints</systemitem>-et
+  <systemitem>Yes</systemitem>-re!
+</para></listitem>
 </orderedlist>
 </para></answer>
 </qandaentry>
@@ -370,11 +407,14 @@ Hogy tudom az <application>MPlayer</application> a háttérben futtatni?
 </para></question>
 <answer><para>
 Így:
-<screen>mplayer <replaceable>kapcsolók</replaceable> <replaceable>fájlnév</replaceable> &lt; /dev/null &amp;</screen>
+<screen>
+mplayer <replaceable>kapcsolók</replaceable> <replaceable>fájlnév</replaceable> &lt; /dev/null &amp;
+</screen>
 </para></answer>
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-playback">
 <title>Lejátszási problémák</title>
@@ -405,9 +445,7 @@ Hogyan jeleníthetem meg a feliratot a film körül lévő fekete sávon?
 Használd az <systemitem>expand</systemitem> videó szűrőt a videó függőleges
 renderelési területének növeléséhez és igazítsd a filmet a felső határhoz,
 például:
-<screen>
-mplayer -vf expand=0:-100:0:0 -slang de dvd://1
-</screen>
+<screen>mplayer -vf expand=0:-100:0:0 -slang de dvd://1</screen>
 </para></answer>
 </qandaentry>
 
@@ -490,34 +528,33 @@ szegmentálási hiba.)
 <para>
 Ha egy ilyenbe belefutsz, két lehetőséged van:
 <itemizedlist>
-<listitem><para>Várj két hetet. Akkor újra működni fog.</para></listitem>
-<listitem><para>Szerkeszd újra a rendszer összes binárisát egy másik
-prelink opcióval. Itt van lépésről lépésre:</para>
-<para>
-<orderedlist>
-<listitem><para>Írd át a <filename>/etc/syconfig/prelink</filename> fájlt és változtasd meg a</para>
-<para>
-<programlisting>
-PRELINK_OPTS=-mR
-</programlisting>
-</para>
-<para>
-sort erre:
-<programlisting>
-PRELINK_OPTS="-mR --no-exec-shield"
-</programlisting>
-</para>
-</listitem>
-<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
-<listitem><para><command>/etc/cron.daily/prelink</command>
-(Ez újraszerkeszti az összes alkalmazást, ami elég sokáig tart.)</para></listitem>
-<listitem>
-<para><command>execstack -s <replaceable>/eleresi/ut/</replaceable>mplayer</command>
-(Ez kikapcsolja az exec-shield-et az <application>MPlayer</application> binárisán.)
-</para>
-</listitem>
-</orderedlist>
-</para>
+<listitem><para>
+  Várj két hetet. Akkor talán újra működni fog.
+</para></listitem>
+<listitem><para>
+  Szerkeszd újra a rendszer összes binárisát egy másik
+  prelink opcióval. Itt van lépésről lépésre:
+  </para>
+  <procedure>
+  <step><para>
+    Írd át a <filename>/etc/syconfig/prelink</filename>
+    fájlt és változtasd meg a
+    <programlisting>PRELINK_OPTS=-mR</programlisting>-t
+    <programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>-re
+  </para></step>
+  <step><para>
+    <command>touch /var/lib/misc/prelink.force</command>
+  </para></step>
+  <step><para>
+    <command>/etc/cron.daily/prelink</command>
+    (Ez újraszerkeszti az összes alkalmazást, ami elég sokáig tart.)
+  </para></step>
+  <step><para>
+    <command>execstack -s <replaceable>/eleresi/ut/</replaceable>mplayer</command>
+    (Ez kikapcsolja az exec-shield-et az
+    <application>MPlayer</application> binárisán.)
+  </para></step>
+  </procedure>
 </listitem>
 </itemizedlist>
 </para></answer>
@@ -537,38 +574,41 @@ lett, vagy fordítsd újra futásidejű CPU felismeréssel
 
 <qandaentry>
 <question><para>
-Ha menteni próbálok a tuneremről, működik, de a színek érdekesek lesznek. Más alkalmazásokkal
-minden rendben van.
+Ha menteni próbálok a tuneremről, működik, de a színek érdekesek lesznek.
+Más alkalmazásokkal minden rendben van.
 </para></question>
 <answer><para>
-A kártyád valószínűleg támogatottként jelöl meg bizonyos színtereketet, miközben nem
-támogatja őket. Próbáld meg YUY2-vel az alapértelmezett YV12 helyett (lásd a
-<link linkend="tv-input">TV</link> fejezetet).
+A kártyád valószínűleg támogatottként jelöl meg bizonyos színtereketet,
+miközben nem támogatja őket. Próbáld meg YUY2-vel az alapértelmezett
+YV12 helyett (lásd a <link linkend="tv-input">TV</link> fejezetet).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Furcsa százalékos értékeket kapok (nagyon magasak), miközben a notebook-omon játszok le
-fájlokat.
+Furcsa százalékos értékeket kapok (nagyon magasak),
+miközben a notebook-omon játszok le fájlokat.
 </para></question>
 <answer><para>
-A notebookod energia menedzselő / energia takarékoskodó rendszerének (BIOS, nem kernel)
-hatása. Dugd be a külső áramkábelt <emphasis role="bold">mielőtt</emphasis> bekapcsolod
-a notebookodat. Megnézheted, hogy a <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
+A notebookod energia menedzselő / energia takarékoskodó rendszerének
+(BIOS, nem kernel) hatása. Dugd be a külső áramkábelt
+<emphasis role="bold">mielőtt</emphasis> bekapcsolod a notebookodat.
+Megnézheted, hogy a <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
 (SpeedStep interfész Linuxra) segít-e neked.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Az audió/videó teljesen elveszti a szinkront ha az <application>MPlayer</application>t
-root-ként futtatom a notebookon. Normálisan működik, ha felhasználóként futtatom.
+Az audió/videó teljesen elveszti a szinkront ha az
+<application>MPlayer</application>t
+root-ként futtatom a notebookon.
+Normálisan működik, ha felhasználóként futtatom.
 </para></question>
 <answer><para>
-Ez megint csak az energia menedzsment hatása (lásd feljebb). Dugd be a külső áramkábelt
-<emphasis role="bold">mielőtt</emphasis> bekapcsolod a notebookodat vagy
-használd a <option>-nortc</option> kapcsolót.
+Ez megint csak az energia menedzsment hatása (lásd feljebb). Dugd be a
+külső áramkábelt <emphasis role="bold">mielőtt</emphasis> bekapcsolod
+a notebookodat vagy használd a <option>-nortc</option> kapcsolót.
 </para></answer>
 </qandaentry>
 
@@ -584,6 +624,7 @@ Próbáld meg a <option>-nocache</option> kapcsolót.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-driver">
 <title>Videó/audió vezérlő problémák (vo/ao)</title>
@@ -609,21 +650,17 @@ az alternatív videó kimeneti vezérlőkről szóló információkért. A
 <question><para>
 Most telepítettem az <application>MPlayer</application>t. Amikor meg akarok
 nyitni vele egy videó fájlt, végzetes hibával elszáll:
-<screen>
-Error opening/initializing the selected video_out (-vo) device.
-</screen>
+<screen>Error opening/initializing the selected video_out (-vo) device.</screen>
 Hogyan oldhatom meg ezt a problémát?
 </para></question>
 <answer><para>
 Csak változtass a videó kimeneti eszközön. Írd be a következő parancsot
 a használható videó kimeneti vezérlők listájához:
-<screen>
-mplayer -vo help
-</screen>
+<screen>mplayer -vo help</screen>
 Miután kiválasztottad a megfelelő videó kimeneti vezérlőt, írd be a konfigurációs
 fájlodba. Ezt egy
 <programlisting>
- vo = <replaceable>selected_vo</replaceable>
+vo = <replaceable>selected_vo</replaceable>
 </programlisting>
 sor <filename>~/.mplayer/config</filename> fájlhoz adásával és/vagy
 <programlisting>
@@ -659,7 +696,8 @@ fel a fájlt az FTP-re.
 <qandaentry>
 <question><para>
 A számítógépem az MS DivX AVI-kat ~ 640x300-as felbontásban játssza le, sztereó MP3
-hanggal, és lassú. Ha használom a <option>-nosound</option> kapcsolót, minden rendben (csak nincs hang).
+hanggal, és lassú.
+Ha használom a <option>-nosound</option> kapcsolót, minden rendben (csak nincs hang).
 </para></question>
 <answer><para>
 A géped túl lassú vagy a hangkártyád vezérlője hibás. Nézd végig a dokumentációt,
@@ -683,20 +721,21 @@ használd a <option>-ao alsa:device=dmix</option> kapcsolót.
 <question><para>
 Nincs hang videó lejátszása közben, és egy ehhez hasonló üzenetet kapok:
 <screen>
-    AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
-    audio_setup: Can't open audio device /dev/dsp: Device or resource busy
-    couldn't open/init audio device -> NOSOUND
-    Audio: no sound!!!
-    Start playing...
+AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+audio_setup: Can't open audio device /dev/dsp: Device or resource busy
+couldn't open/init audio device -> NOSOUND
+Audio: no sound!!!
+Start playing...
 </screen>
 </para></question>
 <answer><para>
-KDE-t vagy GNOME-ot futtatsz aRts vagy ESD hang démonnal? Próbáld meg kikapcsolni
-a hang démont vagy használd a <option>-ao arts</option> vagy <option>-ao esd</option>
-kapcsolót, hogy az <application>MPlayer</application> aRts-ot vagy ESD-t használjon.
-Talán az ALSA-t OSS emuláció nélkül futtatod, próbáld meg betölteni az ALSA OSS
-kernel modulját vagy megadni a <option>-ao alsa</option> kapcsolót a parancssorban
-a közvetlen ALSA audió kimeneti vezérlő használatához.
+KDE-t vagy GNOME-ot futtatsz aRts vagy ESD hang démonnal? Próbáld meg
+kikapcsolni a hang démont vagy használd a <option>-ao arts</option> vagy
+<option>-ao esd</option> kapcsolót, hogy az <application>MPlayer</application>
+aRts-ot vagy ESD-t használjon.
+Talán az ALSA-t OSS emuláció nélkül futtatod, próbáld meg betölteni az ALSA
+OSS kernel modulját vagy megadni a <option>-ao alsa</option> kapcsolót a
+parancssorban a közvetlen ALSA audió kimeneti vezérlő használatához.
 </para></answer>
 </qandaentry>
 
@@ -719,8 +758,8 @@ artsdsp-vel indítod.
 
 <qandaentry>
 <question><para>
-A/V szinkronizálási problémáim vannak. Néhány AVI fájlom rendesen lejátszódik,
-de néhány dupla sebességgel megy!
+A/V szinkronizálási problémáim vannak.
+Néhány AVI fájlom rendesen lejátszódik, de néhány dupla sebességgel megy!
 </para></question>
 <answer><para>
 Hibás hang kártyád/vezérlőd van. Legvalószínűbb, hogy rögzítve van 44100Hz-en,
@@ -731,26 +770,29 @@ Hibás hang kártyád/vezérlőd van. Legvalószínűbb, hogy rögzítve van 441
 
 <qandaentry>
 <question><para>
-Amikor filmet játszok le, szétesik a videó-audió szinkron és/vagy az <application>MPlayer</application>
-összeomlik ezzel az üzenettel:
-<screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
+Amikor filmet játszok le, szétesik a videó-audió szinkron
+és/vagy az <application>MPlayer</application> összeomlik ezzel az üzenettel:
+<screen>
+DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!
+</screen>
 </para></question>
 <answer><para>
 Ennek több oka lehet.
 <itemizedlist>
 <listitem><para>
-A CPU-d <emphasis>és/vagy</emphasis> videó kártyád <emphasis>és/vagy</emphasis>
-buszod túl lassú. Az <application>MPlayer</application> ebben az esetben
-írja ki ezt az üzenetet (és az eldobott képkockák száma gyorsan nő).
+  A CPU-d <emphasis>és/vagy</emphasis> videó kártyád <emphasis>és/vagy</emphasis>
+  buszod túl lassú. Az <application>MPlayer</application> ebben az esetben
+  írja ki ezt az üzenetet (és az eldobott képkockák száma gyorsan nő).
 </para></listitem>
 <listitem><para>
-Ha ez egy AVI fájl, talán rossz az interleaving. Próbáld meg a
-<option>-ni</option> kapcsolót ennek elhárításához.
-Vagy talán hibás a fejléce, ebben az esetben a <option>-nobps</option>
-és/vagy a <option>-mc 0</option> segíthet.
+  Ha ez egy AVI fájl, talán rossz az interleaving. Próbáld meg a
+  <option>-ni</option> kapcsolót ennek elhárításához.
+  Vagy talán hibás a fejléce, ebben az esetben a <option>-nobps</option>
+  és/vagy a <option>-mc 0</option> segíthet.
 </para></listitem>
 <listitem><para>
-A hang vezérlőd hibás. Lásd az <link linkend="audio">audió részt</link>.
+  A hang vezérlőd hibás.
+  Lásd az <link linkend="audio">audió részt</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -758,7 +800,8 @@ A hang vezérlőd hibás. Lásd az <link linkend="audio">audió részt</link>.
 
 <qandaentry>
 <question><para>
-Hogyan szabadulhatok meg az A/V deszinkronizációtól a RealMedia folyamokban történő léptetésnél?
+Hogyan szabadulhatok meg az A/V deszinkronizációtól
+a RealMedia folyamokban történő léptetésnél?
 </para></question>
 <answer><para>
 A <option>-mc 0.1</option> segíthet.
@@ -766,6 +809,7 @@ A <option>-mc 0.1</option> segíthet.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-dvd">
 <title>DVD lejátszás</title>
@@ -814,7 +858,8 @@ Igen. Lásd a <link linkend="dvd">DVD fejezetet</link>.
 Hogy tudom beállítani a DVD meghajtóm régió kódját? Nincs Windows-om!
 </para></question>
 <answer><para>
-Használd a <ulink url="http://linvdr.org/projects/regionset/">regionset eszközt</ulink>.
+Használd a
+<ulink url="http://linvdr.org/projects/regionset/">regionset eszközt</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -901,6 +946,7 @@ A visszafelé lépés valószínűleg nem lesz mostanában megvalósítva.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
 
 <qandadiv id="faq-encoding">
 <title>Elkódolás</title>
@@ -936,8 +982,9 @@ fájlba.
 Hogy tudok automatikusan (S)VCD-t készíteni?
 </para></question>
 <answer><para>
-Használd a <filename>mencvcd</filename> szkriptet a <filename class="directory">TOOLS</filename>
-alkönyvtárból. Ezzel DVD-ket és más filmeket tudsz VCD vagy SVCD formátumba
+Használd a <filename>mencvcd</filename> szkriptet a
+<filename class="directory">TOOLS</filename> alkönyvtárból.
+Ezzel DVD-ket és más filmeket tudsz VCD vagy SVCD formátumba
 kódolni és még közvetlenül CD-re is írhatod őket.
 </para></answer>
 </qandaentry>
@@ -1048,7 +1095,8 @@ Helyesen kell megadnod a <option>-sid</option> kapcsolót!
 Csak a kiválasztott fejezeteket tudom elkódolni a DVD-ről?
 </para></question>
 <answer><para>
-Használd a <option>-chapter</option> kapcsolót pontosan, például: <option>-chapter 5-7</option>.
+Használd a <option>-chapter</option> kapcsolót pontosan,
+például: <option>-chapter 5-7</option>.
 </para></answer>
 </qandaentry>
 
@@ -1063,36 +1111,48 @@ Nem, a VFAT nem támogatja a 2GB+ fájlokat.
 
 <qandaentry>
 <question><para>
-Mit jelentenek a státusz sorban lévő számok a kódolási folyamat közben?
+Mit jelentenek a státusz sorban lévő számok a kódolási
+folyamat közben?
 </para></question>
 <answer><para>
 Példa:
-<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+<screen>
+Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
-<listitem><para>időbeli pozíció a kódolt folyamban</para></listitem>
+  <varlistentry>
+  <term><systemitem>Pos: 264.5s</systemitem></term>
+  <listitem><para>időbeli pozíció a kódolt folyamban</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>6612f</systemitem></term>
-<listitem><para>az elkódolt videó kockák száma</para></listitem>
+<varlistentry>
+  <term><systemitem>6612f</systemitem></term>
+  <listitem><para>az elkódolt videó kockák száma</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>( 2%)</systemitem></term>
-<listitem><para>a bemeneti folyam már elkódolt része</para></listitem>
+<varlistentry>
+  <term><systemitem>( 2%)</systemitem></term>
+  <listitem><para>a bemeneti folyam már elkódolt része</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>7.12fps</systemitem></term>
-<listitem><para>kódolási sebesség</para></listitem>
+<varlistentry>
+  <term><systemitem>7.12fps</systemitem></term>
+  <listitem><para>kódolási sebesség</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
-<listitem><para>becsült hátralévő kódolási idő</para></listitem>
+<varlistentry>
+  <term><systemitem>Trem: 576min</systemitem></term>
+  <listitem><para>becsült hátralévő kódolási idő</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2856mb</systemitem></term>
-<listitem><para>a kódolt fájl becsült végső fájlmérete</para></listitem>
+<varlistentry>
+  <term><systemitem>2856mb</systemitem></term>
+  <listitem><para>a kódolt fájl becsült végső fájlmérete</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
-<listitem><para>aktuális késleltetés az audió és a videó folyam között</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V:0.065</systemitem></term>
+  <listitem><para>aktuális késleltetés az audió és a videó folyam között</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>[2126:192]</systemitem></term>
-<listitem>
-<para>átlagos videó bitráta (kb/s-ben) és átlagos audió bitráta (kb/s-ben)</para></listitem>
+<varlistentry>
+  <term><systemitem>[2126:192]</systemitem></term>
+  <listitem><para>
+  átlagos videó bitráta (kb/s-ben) és átlagos audió bitráta (kb/s-ben)
+  </para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
@@ -1100,7 +1160,8 @@ Példa:
 
 <qandaentry>
 <question><para>
-Miért negatív a <application>MEncoder</application> által kiírt javasolt bitráta?
+Miért negatív a <application>MEncoder</application> által kiírt
+javasolt bitráta?
 </para></question>
 <answer><para>
 Mert a bitráta, amivel kódoltad az audiót túl nagy ahhoz, hogy a film ráférjen
@@ -1137,10 +1198,10 @@ Közvetlenül nem lehetséges, de megpróbálhatod a következőt (figyelj a
 <emphasis role="bold">&amp;</emphasis> jelre az
 <command>mplayer</command> parancs végén):
 <screen>
-	mkfifo encode
-	mplayer -ao pcm -aofile encode dvd://1 &amp;
-	lame <replaceable>kapcsoloid</replaceable> encode music.mp3
-	rm encode
+mkfifo encode
+mplayer -ao pcm -aofile encode dvd://1 &amp;
+lame <replaceable>kapcsoloid</replaceable> encode music.mp3
+rm encode
 </screen>
 Így bármilyen kódolót használhatsz, nem csak a <application>LAME</application>-t,
 csak cseréld ki a <command>lame</command>-t a kedvenc audió kódolóddal a fenti
@@ -1169,7 +1230,7 @@ Ezért a <systemitem class="library">libavcodec</systemitem> által használt
 a <application>MEncoder</application> <option>-ffourcc</option> kapcsolójával.
 Ugyanígy a már meglévő fájljaidban is megváltoztathatod a FourCC-t:
 <screen>
-  mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
 </screen>
 Figyelj rá, hogy ez XVID-re állítja a FourCC-t a DIVX helyett.
 Ez a javasolt eljárás, mivel a DIVX FourCC DivX4-et jelent, ami egy
