@@ -279,7 +279,9 @@ d	10024e64	Radeon R300 [Radeon 9700] (Secondary)	0
 d	10024148	Radeon R350 AH [Radeon 9800]	0
 d	10024149	Radeon R350 AI [Radeon 9800]	0
 d	10024150	Radeon RV350 AP [Radeon 9600 Pro]	0
+d	10024151	Radeon RV350 AQ [Radeon 9600SE]	0
 d	10024170	Radeon RV350 AP [Radeon 9600 Pro] (Secondary)	0
+d	10024171	Radeon RV350 AQ [Radeon 9600SE] (Secondary)	0
 d	10024152	Radeon RV350 AR [Radeon 9600XT]	0
 d	10024153	Radeon RV350 BK [Radeon 9550]	0
 d	10024168	Radeon R350 [Radeon 9800] (Secondary)	0
