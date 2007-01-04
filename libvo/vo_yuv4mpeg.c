@@ -157,7 +157,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	image_u = image_y + image_width * image_height;
 	image_v = image_u + image_width * image_height / 4;
 	
-	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%ld:%ld I%c A%"PRId64":%"PRId64"\n", 
+	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%ld:%ld I%c A%d:%d\n", 
 			image_width, image_height, (long)(image_fps * 1000000.0), 
 			(long)1000000, config_interlace,
 			pixelaspect.num, pixelaspect.den);
