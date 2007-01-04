@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 
 #include "config.h"
 #include "subopt-helper.h"
@@ -86,6 +87,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 {
 	AVRational pixelaspect = av_div_q((AVRational){d_width, d_height},
 	                                  (AVRational){width, height});
+	AVRational fps_frac = av_d2q(vo_fps, INT_MAX);
 	if (image_width == width && image_height == height &&
 	     image_fps == vo_fps && vo_config_count)
 	  return 0;
@@ -157,9 +159,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	image_u = image_y + image_width * image_height;
 	image_v = image_u + image_width * image_height / 4;
 	
-	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%ld:%ld I%c A%d:%d\n", 
-			image_width, image_height, (long)(image_fps * 1000000.0), 
-			(long)1000000, config_interlace,
+	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%d:%d I%c A%d:%d\n", 
+			image_width, image_height, fps_frac.num, fps_frac.den,
+			config_interlace,
 			pixelaspect.num, pixelaspect.den);
 
 	fflush(yuv_out);
