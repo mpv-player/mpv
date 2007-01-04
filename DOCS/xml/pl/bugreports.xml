@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21760 -->
 <!-- Opiekun: Boski -->
 
 <appendix id="bugreports">
@@ -72,8 +72,8 @@ dla przeciętnego użytkownika.
 
 <para>
 Najpierw należy pobrać źródła MPlayera z SVN.
-Więcej szczegółów na ten temat znajduje się na 
-<ulink url="http://www.mplayerhq.hu/dload.html">tej stronie</ulink>.
+Więcej szczegółów na ten temat znajduje się w 
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#svn">sekcji o Subversion strony pobierania</ulink>.
 </para>
 
 <para>
@@ -177,7 +177,7 @@ Prosimy opisywać problem tak dokładnie, jak to tylko możliwe. Należy sprawdz
 jakich dokładnie okolicznościach pojawia się błąd. Czy występuje on tylko w
 określonych sytuacjach? Czy ma związek z konkretnym plikiem lub typem plików?
 Czy dotyczy tylko danego kodeka, czy też jest niezależny od kodeków? Czy możesz
-go powtórzyć z każdym wyjściem wideo? Im więcej informacji dostarczysz, tym
+go powtórzyć z każdym wyjściem video? Im więcej informacji dostarczysz, tym
 większe są szanse na rozwiązanie zgłoszonego problemu. Nie należy również
 zapominać o dołączeniu wartościowych informacji wymienionych poniżej. W
 przeciwnym wypadku nie będziemy w stanie prawidłowo zdiagnozować zgłoszonego
@@ -339,7 +339,7 @@ ld -v<!--
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-  Typ sterownika wideo i wersja, np:
+  Typ sterownika video i wersja, np:
   <itemizedlist>
     <listitem><para>wbudowane sterowniki X</para></listitem>
     <listitem><para>nVidia 0.9.623</para></listitem>
