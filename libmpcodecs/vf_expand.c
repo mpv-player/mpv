@@ -31,6 +31,7 @@ static struct vf_priv_s {
     double aspect;
     int round;
     unsigned char* fb_ptr;
+    int passthrough;
     int first_slice;
 } vf_priv_dflt = {
   -1,-1,
@@ -39,6 +40,7 @@ static struct vf_priv_s {
   0.,
   1,
   NULL,
+  0,
   0
 };
 
@@ -170,6 +172,10 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
+    if(outfmt == IMGFMT_MPEGPES) {
+      vf->priv->passthrough = 1;
+      return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
+    }
     if (outfmt == IMGFMT_IF09) return 0;
     // calculate the missing parameters:
 #if 0
@@ -332,6 +338,13 @@ static void draw_slice(struct vf_instance_s* vf,
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+    if (vf->priv->passthrough) {
+      mp_image_t *dmpi = vf_get_image(vf->next, IMGFMT_MPEGPES,
+                                      MP_IMGTYPE_EXPORT, 0, mpi->w, mpi->h);
+      dmpi->planes[0]=mpi->planes[0];
+      return vf_next_put_image(vf,dmpi, pts);
+    }
+
     if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	vf->dmpi=mpi->priv;
 	if(!vf->dmpi) { mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_FunWhydowegetNULL); return 0; }
@@ -389,9 +402,14 @@ static int control(struct vf_instance_s* vf, int request, void* data){
     return vf_next_control(vf,request,data);
 }
 
+static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+  return (vf_next_query_format(vf,fmt));
+}
+
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->control=control;
+    vf->query_format=query_format;
     vf->start_slice=start_slice;
     vf->draw_slice=draw_slice;
     vf->get_image=get_image;

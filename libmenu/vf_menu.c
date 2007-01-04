@@ -37,6 +37,7 @@ int attribute_used menu_startup = 0;
 struct vf_priv_s {
   menu_t* root;
   menu_t* current;
+  int passthrough;
 };
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts);
@@ -178,6 +179,13 @@ inline static void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) {
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
   mp_image_t *dmpi = NULL;
 
+  if (vf->priv->passthrough) {
+    dmpi=vf_get_image(vf->next, IMGFMT_MPEGPES, MP_IMGTYPE_EXPORT,
+                      0, mpi->w, mpi->h);
+    dmpi->planes[0]=mpi->planes[0];
+    return vf_next_put_image(vf,dmpi, pts);
+  }
+
   if(vf->priv->current->show 
   || (vf->priv->current->parent && vf->priv->current->parent->show)) {
   // Close all menu who requested it
@@ -257,8 +265,15 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     load_font_ft(width,height);
   }
 #endif
+  if(outfmt == IMGFMT_MPEGPES)
+    vf->priv->passthrough = 1;
   return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
+
+static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+  return (vf_next_query_format(vf,fmt));
+}
+
 static int open(vf_instance_t *vf, char* args){
   if(!st_priv) {
     st_priv = calloc(1,sizeof(struct vf_priv_s));
@@ -273,6 +288,7 @@ static int open(vf_instance_t *vf, char* args){
   }
 
   vf->config = config;
+  vf->query_format=query_format;
   vf->put_image = put_image;
   vf->get_image = get_image;
   vf->uninit=uninit;
