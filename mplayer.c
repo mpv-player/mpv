@@ -593,6 +593,11 @@ char *get_metadata (metadata_t type) {
   return meta;
 }
 
+#include "mixer.h"
+mixer_t mixer;
+/// step size of mixer changes
+int volstep = 3;
+
 static void uninit_player(unsigned int mask){
   mask=inited_flags&mask;
 
@@ -669,6 +674,7 @@ static void uninit_player(unsigned int mask){
   if(mask&INITED_AO){
     inited_flags&=~INITED_AO;
     current_module="uninit_ao";
+    if (user_muted | edl_muted) mixer_mute(&mixer); 
     audio_out->uninit(eof?0:1); audio_out=NULL;
   }
 
@@ -814,11 +820,6 @@ static void exit_sighandler(int x){
 }
 
 extern void mp_input_register_options(m_config_t* cfg);
-
-#include "mixer.h"
-mixer_t mixer;
-/// step size of mixer changes
-int volstep = 3;
 
 #include "cfg-mplayer.h"
 
