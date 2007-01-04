@@ -924,7 +924,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		if((err=vbeSaveState(&init_state)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSaveState",err);
-			return -1;
 		}
 		
 		/* TODO: 
