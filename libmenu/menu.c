@@ -53,7 +53,7 @@ typedef struct menu_def_st {
 } menu_def_t;
 
 static menu_def_t* menu_list = NULL;
-static int mcount = 0;
+static int menu_count = 0;
 
 
 static int menu_parse_config(char* buffer) {
@@ -91,20 +91,20 @@ static int menu_parse_config(char* buffer) {
     }
     // Got it : add this to our list
     if(minfo) {
-      menu_list = realloc(menu_list,(mcount+2)*sizeof(menu_def_t));
-      menu_list[mcount].name = name;
-      menu_list[mcount].type = minfo;
-      menu_list[mcount].cfg = m_struct_alloc(&minfo->priv_st);
-      menu_list[mcount].args = body;
+      menu_list = realloc(menu_list,(menu_count+2)*sizeof(menu_def_t));
+      menu_list[menu_count].name = name;
+      menu_list[menu_count].type = minfo;
+      menu_list[menu_count].cfg = m_struct_alloc(&minfo->priv_st);
+      menu_list[menu_count].args = body;
       // Setup the attribs
       for(i = 0 ; attribs[2*i] ; i++) {
 	if(strcasecmp(attribs[2*i],"name") == 0) continue;
-	if(!m_struct_set(&minfo->priv_st,menu_list[mcount].cfg,attribs[2*i], attribs[2*i+1]))
+	if(!m_struct_set(&minfo->priv_st,menu_list[menu_count].cfg,attribs[2*i], attribs[2*i+1]))
 	  mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_BadAttrib,attribs[2*i],attribs[2*i+1],
 		 name,parser->line);
       }
-      mcount++;
-      memset(&menu_list[mcount],0,sizeof(menu_def_t));
+      menu_count++;
+      memset(&menu_list[menu_count],0,sizeof(menu_def_t));
     } else {
       mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_UnknownMenuType,element,parser->line);
       free(name);
@@ -174,7 +174,7 @@ void menu_unint(void) {
     if(menu_list[i].args) free(menu_list[i].args);
   }
   free(menu_list);
-  mcount = 0;
+  menu_count = 0;
 }
 
 /// Default read_key function
