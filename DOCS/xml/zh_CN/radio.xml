@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- synced with r21748 -->
+<chapter id="radio">
+<title>广播电台</title>
+
+<sect1 id="radio-input" xreflabel="Radio input">
+<title>电台输入</title>
+
+<para>
+这一部分将说明如何从V4L兼容的电台调谐器收听电台广播。 
+请阅读手册中关于电台的可选项和键盘控制的描述。
+</para>
+
+<!-- ********** -->
+
+<sect2 id="radio-compilation">
+<title>编译</title>
+
+<procedure>
+<step><para>
+  首先, 你需要重新编译MPlayer, 使用<filename>./configure</filename>带上选项
+  <option>--enable-radio</option> 和(如果你想要支持捕捉)
+  <option>--enable-radio-capture</option>
+</para></step>
+<step><para>
+  确认你的电台调谐器可以和Linux的其他收音软件工作。 比如<application>XawTV</application>。
+</para></step>
+</procedure>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="radio-tips">
+<title>使用技巧</title>
+
+<para>
+可用选项的完整列表在手册中有列出。
+这里只给出一些技巧:
+
+<itemizedlist>
+<listitem><para>
+  使用<option>channels</option>选项。 例子:
+  <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
+  解释: 使用该选项, 则只可使用104.4和103.9电台。 在频道切换时, 将会有个不错的OSD文字,
+  显示频道的名字。 频道的名字中的空格必须替换成下划线("_")。
+</para></listitem>
+<listitem><para>
+  有好几种方法可以捕捉声音。 为捕捉音频, 你可以通过连接视频卡和音频输入的外接线用你的声卡捕捉,
+  也可以使用saa7134芯片内置的ADC。 在后一种情况下, 你要加载<systemitem>saa7134-alsa</systemitem>
+  或<systemitem>saa7134-oss</systemitem>驱动。
+</para></listitem>
+<listitem><para>
+  <application>MEncoder</application>不能用于音频捕捉,
+  因为它需要视频流才工作。 因此你可以, 或使用ALSA项目的<application>arecord</application>,
+  或者使用选项<option>-ao pcm:file=file.wav</option>。 在后一种情况下, 
+  你将听不到任何声音 (除非你用了输入线, 并且关闭了输入线静音)。
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="radio-examples">
+<title>例子</title>
+
+<informalexample><para>
+从标准的V4L输入 (使用输入线, 捕捉开关关闭):
+<screen>mplayer radio://104.4</screen>
+</para></informalexample>
+
+<informalexample><para>
+从标准的V4L输入 (使用输入线, 捕捉开关关闭, V4Lv1接口):
+<screen>mplayer -radio driver=v4l radio://104.4</screen>
+</para></informalexample>
+
+<informalexample><para>
+播放频道列表中的第二个频道:
+<screen>mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2</screen>
+</para></informalexample>
+
+<informalexample>
+<para>
+把声音从收音卡的内置ADC传到PCI总线。
+在这个例子中, 调谐器被用成是第二块声卡(ALSA device hw:1,0)。
+对于基于saa7134的卡, 必须加载 saa7134-alsa 或 saa7134-oss 模块。
+<screen>
+mplayer -rawaudio rate=32000 radio://2/capture \
+    -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm
+</screen>
+<note><para>当使用ALSA设备名时, 冒号(:)必须替换成等号(=),
+逗号(,)要替换成句点(.)
+</para></note>
+</para>
+</informalexample>
+</sect2>
+</sect1>
+
+</chapter>
