@@ -567,15 +567,15 @@ double ds_get_next_pts(demux_stream_t *ds)
     if(demux->audio->packs>=MAX_PACKS || demux->audio->bytes>=MAX_PACK_BYTES){
       mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_TooManyAudioInBuffer,demux->audio->packs,demux->audio->bytes);
       mp_msg(MSGT_DEMUXER,MSGL_HINT,MSGTR_MaybeNI);
-      return -1;
+      return MP_NOPTS_VALUE;
     }
     if(demux->video->packs>=MAX_PACKS || demux->video->bytes>=MAX_PACK_BYTES){
       mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_TooManyVideoInBuffer,demux->video->packs,demux->video->bytes);
       mp_msg(MSGT_DEMUXER,MSGL_HINT,MSGTR_MaybeNI);
-      return -1;
+      return MP_NOPTS_VALUE;
     }
     if(!demux_fill_buffer(demux,ds))
-      return -1;
+      return MP_NOPTS_VALUE;
   }
   return ds->first->pts;
 }
