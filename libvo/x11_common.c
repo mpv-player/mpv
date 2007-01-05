@@ -208,7 +208,7 @@ static int x11_errorhandler(Display * display, XErrorEvent * event)
            "Error code: %x, request code: %x, minor code: %x\n",
            event->error_code, event->request_code, event->minor_code);
 
-    abort();
+//    abort();
     //exit_player("X11 error");
 #undef MSGLEN
 }
