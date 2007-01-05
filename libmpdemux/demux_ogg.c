@@ -1602,7 +1602,7 @@ static void demux_close_ogg(demuxer_t* demuxer) {
     for (i = 0; i < ogg_d->num_sub; i++)
     {
       os = &ogg_d->subs[i];
-      ogg_stream_clear(&ogg_d->subs[i].stream);
+      ogg_stream_clear(&os->stream);
       if(os->vi_inited)
         vorbis_info_clear(&os->vi);
     }
