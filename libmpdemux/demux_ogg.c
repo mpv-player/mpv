@@ -1600,7 +1600,12 @@ static void demux_close_ogg(demuxer_t* demuxer) {
   if(ogg_d->subs)
   {
     for (i = 0; i < ogg_d->num_sub; i++)
+    {
+      os = &ogg_d->subs[i];
       ogg_stream_clear(&ogg_d->subs[i].stream);
+      if(os->vi_inited)
+        vorbis_info_clear(&os->vi);
+    }
     free(ogg_d->subs);
   }
   if(ogg_d->syncpoints)
@@ -1611,11 +1616,6 @@ static void demux_close_ogg(demuxer_t* demuxer) {
     for (i = 0; i < ogg_d->n_text; i++)
       if (ogg_d->text_langs[i]) free(ogg_d->text_langs[i]);
     free(ogg_d->text_langs);
-  }
-  if(demuxer->audio->id > -1 && demuxer->audio->id < ogg_d->num_sub) {
-    os = &ogg_d->subs[demuxer->audio->id];
-    if(os->vi_inited)
-      vorbis_info_clear(&os->vi);
   }
   free(ogg_d);
 }
