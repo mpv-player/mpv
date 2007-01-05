@@ -251,15 +251,16 @@ static void fix_parameters(muxer_stream_t *stream)
 		ctx->time_base.num = stream->h.dwScale;
 		if(stream->bih+1 && (stream->bih->biSize > sizeof(BITMAPINFOHEADER)))
 		{
-			ctx->extradata = av_malloc(stream->bih->biSize - sizeof(BITMAPINFOHEADER));
+			ctx->extradata_size = stream->bih->biSize - sizeof(BITMAPINFOHEADER);
+			ctx->extradata = av_malloc(ctx->extradata_size);
 			if(ctx->extradata != NULL)
-			{
-				ctx->extradata_size = stream->bih->biSize - sizeof(BITMAPINFOHEADER);
 				memcpy(ctx->extradata, stream->bih+1, ctx->extradata_size);
-			}
 			else
+			{
 				mp_msg(MSGT_MUXER, MSGL_ERR, "MUXER_LAVF(video stream) error! couldn't allocate %d bytes for extradata\n",
-					stream->bih->biSize - sizeof(BITMAPINFOHEADER));
+					ctx->extradata_size);
+				ctx->extradata_size = 0;
+			}
 		}
 	}
 }
