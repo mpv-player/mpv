@@ -548,10 +548,6 @@ for ac_option do
   esac
 done
 
-if test "$_runtime_cpudetection" = yes && not x86 && not ppc; then
-  die "Runtime CPU detection only works for x86, x86-64 and PPC!"
-fi
-
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
   # OS name
@@ -636,6 +632,10 @@ fi
 
 echo "Detected operating system: $system_name"
 echo "Detected host architecture: $host_arch"
+
+if test "$_runtime_cpudetection" = yes && not x86 && not ppc; then
+  die "Runtime CPU detection only works for x86, x86-64 and PPC!"
+fi
 
 # LGB: temporary files
 for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
