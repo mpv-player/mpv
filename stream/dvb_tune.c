@@ -346,12 +346,6 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 	int ok=0, locks=0;
 	time_t tm1, tm2;
 
-	if (ioctl(fd_frontend,FE_SET_FRONTEND,feparams) < 0)
-	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR tuning channel\n");
-		return -1;
-	}
-
 	pfd[0].fd = fd_frontend;
 	pfd[0].events = POLLPRI;
 
@@ -443,21 +437,9 @@ static int check_status(int fd_frontend,FrontendParameters* feparams,int tuner_t
 	
 	struct pollfd pfd[1];
 
-	while(1)
-	{
-		if(ioctl(fd_frontend, FE_GET_EVENT, &event) == -1)
-		break;
-	}
-
 	i = 0; res = -1;
 	while ((i < 3) && (res < 0))
 	{
-		if (ioctl(fd_frontend,FE_SET_FRONTEND,feparams) < 0)
-		{
-			mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR tuning channel\n");
-			return -1;
-		}
-
 		pfd[0].fd = fd_frontend;
 		pfd[0].events = POLLIN | POLLPRI;
 
@@ -652,6 +634,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 #else
   FrontendParameters feparams;
   FrontendInfo fe_info;
+  FrontendEvent event;
   struct secStatus sec_state;
 #endif
 
@@ -785,7 +768,18 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 
 #ifndef HAVE_DVB_HEAD
   if (fd_sec) SecGetStatus(fd_sec, &sec_state);
+  while(1)
+  {
+    if(ioctl(fd_frontend, FE_GET_EVENT, &event) == -1)
+    break;
+  }
 #endif
+
+  if(ioctl(fd_frontend,FE_SET_FRONTEND,&feparams) < 0)
+  {
+    mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR tuning channel\n");
+    return -1;
+  }
 
   return(check_status(fd_frontend,&feparams,fe_info.type, (hi_lo ? LOF2 : LOF1), timeout));
 }
