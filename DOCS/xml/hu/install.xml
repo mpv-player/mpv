@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21395 -->
+<!-- synced with r21741 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -16,9 +16,8 @@ nehéz. Ha ezen leírástól eltérő működést tapasztalsz, kérlek nézd vé
 a dokumentációt és megtalálod a válaszokat.
 </para>
 
-<para>
-Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
-</para>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="softreq">
@@ -33,62 +32,66 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   <emphasis role="bold">gcc</emphasis> - a javasolt verziók a 2.95
   és 3.4+. A 2.96 és 3.0.x tudvalevőleg hibás kódot generálnak, a 3.1-nek és a 3.2-nek is
   vannak problémái, a 3.3-nak kisebb hibái. PowerPC-n használj 4.x+ verziót.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Xorg/XFree86</emphasis> - a javasolt verzió a
   4.3 vagy későbbi. Győződj meg róla, hogy a
   <emphasis role="bold">fejlesztői csomagok</emphasis> is telepítve vannak,
   különben nem fog működni.
-  Nem feltétlenül van szükséged az X-re, néhány videó kimeneti vezérlő működik nélküle is.
-  </para></listitem>
+  Nem feltétlenül van szükséged az X-re, néhány videó kimeneti vezérlő
+  működik nélküle is.
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">make</emphasis> - a javasolt verzió
   3.79.x vagy régebbi. Az XML dokumentáció elkészítéséhez 3.80-as kell.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> 2.0.9 vagy későbbi szükséges,
   valamint egy betűtípus is az OSD-hez és a feliratokhoz.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - választható JPEG kódoló/dekódoló,
   a JPEG videó kimeneti vezérlőhöz és az MJPEG videó dekódolóhoz szükséges.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - választható (M)PNG dekóder,
   a GUI-hoz és a PNG videó kimeneti vezérlőhöz szükséges.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - 3.90 vagy későbbi javasolt,
   szükséges MP3 audió <application>MEncoder</application>rel
   történő kódolásához.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - javasolt, szükséges a tömörített
   MOV fejlécekhez és a PNG támogatáshoz
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - választható, szükséges néhány RTSP/RTP folyamokhoz
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - választható, 0.9.13 vagy későbbi kell.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - választható, szükséges a CDDA támogatáshoz
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libxmms</emphasis> - választható, XMMS input plugin támogatáshoz kell.
   Legalább 1.2.7-es szükséges.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - választható, smb hálózat támogatásához kell.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - választható, az ALSA audió kimenet
   támogatásához. Legalább 0.9.0rc4 szükséges.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="features">
@@ -96,27 +99,29 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
 
 <itemizedlist>
 <listitem><para>
-  Döntsd el, hogy szükséged van-e GUI-ra. Ha igen, akkor nézd meg a <link linkend="gui">GUI</link>
-  fejezetet a fordítás előtt!
-  </para></listitem>
+  Döntsd el, hogy szükséged van-e GUI-ra. Ha igen, akkor nézd meg
+  a <link linkend="gui">GUI</link> fejezetet a fordítás előtt!
+</para></listitem>
 <listitem><para>
-  Ha telepíteni akarod a <application>MEncoder</application>t is (a nagyszerű, mindent
-  tudó kódolónkat), nézd meg a <link linkend="mencoder"><application>MEncoder</application></link> részt!
-  </para></listitem>
+  Ha telepíteni akarod a <application>MEncoder</application>t is (a
+  nagyszerű, mindent tudó kódolónkat), nézd meg a
+  <link linkend="mencoder"><application>MEncoder</application></link> részt!
+</para></listitem>
 <listitem><para>
   Ha V4L kompatibilis <emphasis role="bold">TV tuner</emphasis> kártyád van,
-  és nézni/grabbelni vagy kódolni szeretnél filmeket az <application>MPlayer</application>rel,
+  és nézni/grabbelni vagy kódolni szeretnél filmeket az
+  <application>MPlayer</application>rel,
   olvasd el a <link linkend="tv-input">TV bemenet</link> fejezetet.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
-  Ha van V4L kompatibilis <emphasis role="bold">rádió tuner</emphasis> kártyád
-  és <application>MPlayer</application>rel szeretnél hallgatni vagy lementeni,
-  olvasd el a <link linkend="radio">rádió</link> részt.
-  </para></listitem>
+  Ha van V4L kompatibilis <emphasis role="bold">rádió tuner</emphasis>
+  kártyád és <application>MPlayer</application>rel szeretnél hallgatni
+  vagy lementeni, olvasd el a <link linkend="radio">rádió</link> részt.
+</para></listitem>
 <listitem><para>
-  Roppant jól sikerült <emphasis role="bold">OSD Menü</emphasis> támogatás vár használatra.
-  Lásd az <link linkend="subosd">OSD menü</link> fejezetet!
-  </para></listitem>
+  Roppant jól sikerült <emphasis role="bold">OSD Menü</emphasis> támogatás
+  vár használatra. Lásd az <link linkend="subosd">OSD menü</link> fejezetet!
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -124,16 +129,18 @@ Mindezek után fordítsd le az <application>MPlayer</application>t:
 <screen>
 ./configure
 make
-make install</screen>
+make install
+</screen>
 </para>
 
 <para>
-Ezek után az <application>MPlayer</application> máris használatra kész. A
-<filename class="directory">$PREFIX/share/mplayer</filename> könyvtárban van
-a <filename>codecs.conf</filename> fájl, ami a codec-eket és azok tulajdonságait
-írja le a programnak. Ez a fájl csak akkor kell, ha meg akarod változtatni a
-képességeit, egyébként nem, mert a binárisban van egy másolat róla. Ellenőrizd le,
-hogy van-e <filename>codecs.conf</filename> nevű fájlod a home könyvtáradban
+Ezek után az <application>MPlayer</application> máris használatra kész.
+A <filename class="directory">$PREFIX/share/mplayer</filename> könyvtárban
+van a <filename>codecs.conf</filename> fájl, ami a codec-eket és azok
+tulajdonságait írja le a programnak. Ez a fájl csak akkor kell, ha meg
+akarod változtatni a képességeit, egyébként nem, mert a binárisban van egy
+másolat róla. Ellenőrizd le, hogy van-e <filename>codecs.conf</filename>
+nevű fájlod a home könyvtáradban
 (<filename>~/.mplayer/codecs.conf</filename>), melyet régebbi
 <application>MPlayer</application> verziók hagyhattak ott, és ha van, töröld le!
 </para>
@@ -148,7 +155,6 @@ használd a <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
 vagy <option>-afm</option> kapcsolókat akár a parancssorban akár a konfigurációs fájlban
 (lásd man oldal).
 </para>
-
 
 <para>
 A Debian használók .deb csomagot is készíthetnek maguknak, roppant egyszerűen.
@@ -176,18 +182,20 @@ feliratozás működjön. A javasolt eljárás, hogy telepíted a TTF betűkész
 majd megmondod az <application>MPlayer</application>nek, hogy használja azt.
 Lásd a <link linkend="subosd">Feliratok és az OSD</link> részt bővebben.
 </para>
-
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="gui">
 <title>Mi a helyzet a GUI-val?</title>
 
 <para>
 A GUI-hoz GTK 1.2.x vagy GTK 2.0 kell (nem teljesen GTK-s, de a panelek igen).
-A skinek sPNG formátumúak, így telepített GTK, <systemitem class="library">libpng</systemitem>
-(és a fejlesztői cuccok, amik általában <systemitem class="library">gtk-dev</systemitem>
+A skinek sPNG formátumúak, így telepített GTK,
+<systemitem class="library">libpng</systemitem> (és a fejlesztői cuccok, amik
+általában <systemitem class="library">gtk-dev</systemitem>
 és <systemitem class="library">libpng-dev</systemitem> néven futnak) szükséges.
 A <filename>./configure</filename>-nak az <option>--enable-gui</option> kapcsoló
 megadásával írhatod elő, hogy GUI-t is készítsen. Ezután ha a GUI-s változatot
@@ -211,7 +219,9 @@ használatban.
 </para>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="fonts-osd">
 <title>Betűtípusok és OSD</title>
@@ -225,6 +235,7 @@ megfelelően méretezhető a film méretéhez és jobban együttműködik a
 különböző kódolásokkal.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="truetype-fonts">
 <title>TrueType betűk</title>
@@ -232,13 +243,17 @@ különböző kódolásokkal.
 <para>
 A TrueType betűtípusok kétféle módon használhatóak. Az egyik a
 <option>-font</option> opcióval egy TrueType betűtípus fájl megadása
-a parancssorban. Ez az opció jó eséllyel pályázik arra, hogy bekerüljön
-a konfigurációs fájlodba (lásd a man oldalt a részletekért).
-A másik, hogy készítesz egy <filename>subfont.ttf</filename> nevű symlink-et
-a választott betűtípus fájlhoz. Vagy
-<screen>ln -s <replaceable>/eleresi/ut/pelda_betu.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+a parancssorban. Ez az opció jó eséllyel pályázik arra, hogy
+bekerüljön a konfigurációs fájlodba (lásd a man oldalt a részletekért).
+A másik, hogy készítesz egy <filename>subfont.ttf</filename> nevű
+symlink-et a választott betűtípus fájlhoz. Vagy
+<screen>
+ln -s <replaceable>/eleresi/ut/pelda_betu.ttf</replaceable> ~/.mplayer/subfont.ttf
+</screen>
 külön minden egyes felhasználóhoz, vagy az egész rendszerre vonatkozóan:
-<screen>ln -s <replaceable>/eleresi/ut/pelda_betu.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
+<screen>
+ln -s <replaceable>/eleresi/ut/pelda_betu.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf
+</screen>
 </para>
 
 <para>
@@ -252,11 +267,13 @@ Például:
 </para>
 
 <para>
-A <systemitem class="library">fontconfig</systemitem> által ismert
-betűtípusok listáját az <command>fc-list</command> paranccsal nézheted meg.
+A <systemitem class="library">fontconfig</systemitem>
+által ismert betűtípusok listáját az
+<command>fc-list</command> paranccsal nézheted meg.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="bitmap-fonts">
 <title>bittérképes betűk</title>
@@ -276,8 +293,12 @@ Csomagold ki a letöltött fájlokat a
 <filename class="directory">$PREFIX/share/mplayer</filename> könyvtárba.
 Ezután nevezd át vagy készíts egy symlink-et valamelyik kicsomagolt könyvtárra
 <filename class="directory">font</filename> néven, például:
-<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-<screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
+<screen>
+ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font
+</screen>
+<screen>
+ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font
+</screen>
 </para>
 
 <para>
@@ -288,15 +309,16 @@ kódlapjára. A másik megoldás UTF-8 kódolású feliratok használata és a
 fájl neveként ugyan azt a nevet, mint a videó fájlé, de <filename>.utf</filename>
 kiterjesztéssel és tedd a videóval azonos könyvtárba.
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="osdmenu">
 <title>OSD menü</title>
 
 <para>
-Az <application>MPlayer</application>nek az OSD Menüje teljesen igényre szabható.
+Az <application>MPlayer</application>nek az OSD Menüje teljesen
+igényre szabható.
 </para>
 
 <note><para>
@@ -308,53 +330,55 @@ a Tulajdonságok menü még NINCS KIFEJLESZTVE!
 <listitem><para>
   fordítsd le az <application>MPlayer</application>t a <filename>./configure</filename>-nak
   az <option>--enable-menu</option> kapcsoló megadásával
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   bizonyosodj meg róla, hogy van telepített OSD betűkészleted
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   másold át az <filename>etc/menu.conf</filename> fájlt a
   <filename class="directory">.mplayer</filename> könyvtárba
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   másold át az <filename>etc/input.conf</filename> fájlt a
   <filename class="directory">.mplayer</filename> könyvtárba, vagy egy
   rendszerszinten elérhető <application>MPlayer</application> konfigurációs
   könyvtárba (alapértelmezett: <filename class="directory">/usr/local/etc/mplayer</filename>)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   ellenőrizd le és írd át az <filename>input.conf</filename> fájlt a menüben
   történő mozgáshoz használt billentyűk engedélyezéséhez
   (ott le van írva).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   indítsd el az <application>MPlayer</application>t az alábbi példa alapján:
-  <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
-  </para></listitem>
+  <screen>mplayer -menu <replaceable>file.avi</replaceable></screen>
+</para></listitem>
 <listitem><para>
   nyomd meg valamelyik menü gombot, amit megadtál
-  </para></listitem>
+</para></listitem>
 </orderedlist>
-
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="rtc">
 <title>RTC</title>
+
 <para>
 Három fajta időzítési eljárás van az <application>MPlayer</application>ben.
 
 <itemizedlist>
 <listitem><para>
-<emphasis role="bold">A régi módszer használatához</emphasis> nem kell tenned
-  semmit. Ez az <systemitem>usleep()</systemitem> függvényt használja az
-  A/V szinkronizáláshoz, +/- 10ms-es pontossággal. Van amikor ennél is pontosabb
-  szinkronizálás szükséges.
-  </para></listitem>
+  <emphasis role="bold">A régi módszer használatához</emphasis> nem kell
+  tenned semmit. Ez az <systemitem>usleep()</systemitem> függvényt használja
+  az A/V szinkronizáláshoz, +/- 10ms-es pontossággal. Van amikor ennél is
+  pontosabb szinkronizálás szükséges.
+</para></listitem>
 <listitem><para>
-<emphasis role="bold">Az új időzítő</emphasis> kód az RTC-t (RealTime Clock)
+  <emphasis role="bold">Az új időzítő</emphasis> kód az RTC-t (RealTime Clock)
   használja, mert ennek pontos, 1 ms-es időzítői vannak. A <option>-rtc</option>
   kapcsoló engedélyezi, de megfelelően beállított kernel kell hozzá.
   Ha 2.4.19pre8 vagy későbbi kernelt használsz, beállíthatod a maximum
@@ -363,24 +387,25 @@ Három fajta időzítési eljárás van az <application>MPlayer</application>ben
   valamelyikét az RTC normál felhasználók számára történő engedélyezéséhez:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
   <screen>sysctl dev/rtc/max-user-freq=1024</screen>
-  Ezt a beállítást állandósíthatod az utóbbi <filename>/etc/sysctl.conf</filename> fájba
-  történő írásával.
+  Ezt a beállítást állandósíthatod az utóbbi
+  <filename>/etc/sysctl.conf</filename> fájba történő írásával.
   </para>
   <para>
-   Az új időzítő eredményét a státusz sorban láthatod.
-   Néhány sebesség-léptetéses (speedstep) CPU-val rendelkező
-   notebook BIOS-ának energia takarékossági funkciói rosszul működnek együtt az
-   RTC-vel. Elromolhat az audió és a videó szinkronizációja. Úgy tűnik, ha bedugod
-   a hálózati csatlakozót, mielőtt bekapcsolnád a notebookot, az segít.
-   Néhány hardver összeállításban (ALi1541-es alaplapokkal használt nem DMA-s DVD
-   meghajtók esetén erősítették meg) az RTC időzítő használata kihagyásokat okoz
-   lejátszás közben. Ebben az esetben a harmadik módszer használata javasolt.
-  </para></listitem>
+  Az új időzítő eredményét a státusz sorban láthatod.
+  Néhány sebesség-léptetéses (speedstep) CPU-val rendelkező
+  notebook BIOS-ának energia takarékossági funkciói rosszul működnek együtt az
+  RTC-vel. Elromolhat az audió és a videó szinkronizációja. Úgy tűnik, ha bedugod
+  a hálózati csatlakozót, mielőtt bekapcsolnád a notebookot, az segít.
+  Néhány hardver összeállításban (ALi1541-es alaplapokkal használt nem DMA-s DVD
+  meghajtók esetén erősítették meg) az RTC időzítő használata kihagyásokat okoz
+  lejátszás közben. Ebben az esetben a harmadik módszer használata javasolt.
+  </para>
+</listitem>
 <listitem><para>
   <emphasis role="bold">A harmadik időzítő kód</emphasis> a <option>-softsleep</option>
   kapcsolóval kapcsolható be. Az RTC hatékonyságával rendelkezik, de nem használja
   azt. Másrészről viszont jobban eszi a procit.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 </sect1>
