@@ -63,8 +63,8 @@ endif
 
 all:    $(LIBNAME) $(SHORTNAME)
 
-pci_names.c:
-	LC_ALL=C $(AWK) -f pci_db2c.awk oth/pci.db
+pci_names.c:	oth/pci.db
+	LC_ALL=C $(AWK) -f pci_db2c.awk $<
 
 test:
 	$(CC) test.c -o test $(SHORTNAME)
