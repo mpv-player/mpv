@@ -338,7 +338,7 @@ static void print_status(fe_status_t festatus)
 
 
 #ifdef HAVE_DVB_HEAD
-static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams, int tuner_type, uint32_t base, int tmout)
+static int check_status(int fd_frontend, int tmout)
 {
 	int32_t strength;
 	fe_status_t festatus;
@@ -371,35 +371,6 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 
 	if(festatus & FE_HAS_LOCK)
 	{
-		if(ioctl(fd_frontend,FE_GET_FRONTEND,feparams) >= 0)
-		{
-		switch(tuner_type)
-		{
-			case FE_OFDM:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",feparams->frequency);
-			break;
-			case FE_QPSK:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",(unsigned int)((feparams->frequency)+base));
-			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",feparams->u.qpsk.symbol_rate);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",feparams->u.qpsk.fec_inner);
-			mp_msg(MSGT_DEMUX, MSGL_V, "\n");
-			break;
-			case FE_QAM:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",feparams->frequency);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",feparams->u.qpsk.symbol_rate);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",feparams->u.qpsk.fec_inner);
-			break;
-#ifdef DVB_ATSC
-			case FE_ATSC:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",feparams->frequency);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        Modulation: %d\n",feparams->u.vsb.modulation);
-			break;
-#endif
-			default:
-			break;
-		}
-		}
-
 		strength=0;
 		if(ioctl(fd_frontend,FE_READ_BER,&strength) >= 0)
 		mp_msg(MSGT_DEMUX, MSGL_V, "Bit error rate: %d\n",strength);
@@ -428,7 +399,7 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 
 #else
 
-static int check_status(int fd_frontend,FrontendParameters* feparams,int tuner_type,uint32_t base, int tmout)
+static int check_status(int fd_frontend, int tmout)
 {
 	int i,res;
 	int32_t strength;
@@ -489,29 +460,6 @@ static int check_status(int fd_frontend,FrontendParameters* feparams,int tuner_t
 
 	if (event.type == FE_COMPLETION_EV)
 	{
-		switch(tuner_type)
-		{
-			case FE_OFDM:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",event.u.completionEvent.Frequency);
-			break;
-
-			case FE_QPSK:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",(unsigned int)((event.u.completionEvent.Frequency)+base));
-			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",event.u.completionEvent.u.qpsk.SymbolRate);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",event.u.completionEvent.u.qpsk.FEC_inner);
-			mp_msg(MSGT_DEMUX, MSGL_V, "\n");
-			break;
-
-			case FE_QAM:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",event.u.completionEvent.Frequency);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",event.u.completionEvent.u.qpsk.SymbolRate);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",event.u.completionEvent.u.qpsk.FEC_inner);
-			break;
-
-			default:
-			break;
-		}
-
 		strength=0;
 		if(ioctl(fd_frontend,FE_READ_BER,&strength) >= 0)
 		mp_msg(MSGT_DEMUX, MSGL_V, "Bit error rate: %d\n",strength);
@@ -781,5 +729,5 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
     return -1;
   }
 
-  return(check_status(fd_frontend,&feparams,fe_info.type, (hi_lo ? LOF2 : LOF1), timeout));
+  return(check_status(fd_frontend, timeout));
 }
