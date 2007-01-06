@@ -591,6 +591,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 	    fd_frontend, fd_sec, (long unsigned int)freq, (long unsigned int)srate, pol, tone, diseqc);
 
 
+  memset(&feparams, 0, sizeof(feparams));
   if ( (res = ioctl(fd_frontend,FE_GET_INFO, &fe_info) < 0))
   {
   	mp_msg(MSGT_DEMUX, MSGL_FATAL, "FE_GET_INFO FAILED\n");
