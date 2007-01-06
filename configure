@@ -886,6 +886,8 @@ case "$host_arch" in
   _target_arch_x86="TARGET_ARCH_X86 = yes"
   _def_arch="#define ARCH_X86_32 1"
   _target_arch="TARGET_ARCH_X86_32 = yes"
+  iproc=486
+  proc=i486
 
 
   if test "$_runtime_cpudetection" = no ; then
