@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20561 -->
+<!-- synced with r21624 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
 <sect1 id="linux">
 <title>Linux</title>
+
 <para>
 Az elsődleges fejlesztési platform a Linux x86-on, ennek ellenére az 
 <application>MPlayer</application> számos más Linux által támogatott architektúrán
@@ -14,8 +15,11 @@ egyik sem támogatott a fejlesztők által</emphasis>, ezért ha bármi gond ad�
 akkor a bináris csomag készítőjével kell felvenni a kapcsolatot, nem pedig velünk.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="debian">
 <title>Debian csomagolás</title>
+
 <para>
 Debian csomag készítéséhez futtasd az alábbi parancsot az
 <application>MPlayer</application> forrásának könyvtárában:
@@ -50,17 +54,20 @@ a bináris codec csomagokból, melyek akár az apt-get segítségével is telep�
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="rpm">
 <title>RedHat csomagolás</title>
+
 <para>
 Dominik Mierzejewski készítette el és tartja karban az <application>MPlayer</application>
-hivatalos RPM csomagjait a Red Hat-hoz és a Fedora Core-hoz. Elérhetőek ezen a
-<ulink url="http://rpm.greysector.net/mplayer/">helyen</ulink>.
+hivatalos RPM csomagjait a Fedora Core-hoz. Elérhetőek
+ezen a <ulink url="http://rpm.greysector.net/mplayer/">helyen</ulink>.
 </para>
 
 <para>
-A Mandrake/Mandriva RPM csomagok a <ulink url="http://plf.zarb.org/">P.L.F.</ulink> oldalán
-találhatóak.
+A Mandrake/Mandriva RPM csomagok a
+<ulink url="http://plf.zarb.org/">P.L.F.</ulink> oldalán találhatóak.
 A SuSE régen az <application>MPlayer</application> egy csonkított verzióját tartalmazta,
 de az utóbbi kiadásokból már kiszedték. SuSE-val működő csomagok a
 <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>
@@ -68,8 +75,11 @@ oldalon találhatóak.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="arm">
 <title>ARM</title>
+
 <para>
 Az <application>MPlayer</application> működik ARM CPU-val rendelkező PDA-kon is,
 mint páldául a Sharp Zaurus, vagy a Compaq Ipaq. Megszerzésének legegyszerűbb
@@ -86,8 +96,13 @@ Ha GUI frontend-et is szeretnél, használd az xmms-embedded-et.
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bsd">
 <title>*BSD</title>
+
 <para>
 Az <application>MPlayer</application> fut az összes ismert BSD-n.
 Léteznek ports/pkgsrc/fink/stb. verziók az
@@ -101,48 +116,62 @@ szintaxist használ) és a binutils valamelyik frissebb verziójára.
 </para>
 
 <para>
-Ha az <application>MPlayer</application> nem találja a <filename>/dev/cdrom</filename>-ot
-vagy a <filename>/dev/dvd</filename>-t, csinálj egy symlinket:
+Ha az <application>MPlayer</application> nem találja a
+<filename>/dev/cdrom</filename>-ot vagy a <filename>/dev/dvd</filename>-t,
+csinálj egy symlinket:
 <screen>ln -s /dev/<replaceable>cdrom_egység</replaceable> /dev/cdrom</screen>
 </para>
 
 <para>
 Ha Win32 DLL-eket akarsz használni az <application>MPlayer</application>rel,
-újra kell fordítanod a kernelt
-&quot;<envar>option USER_LDT</envar>&quot;-vel (kivéve, ha FreeBSD-CURRENT-et
+újra kell fordítanod a kernelt "<envar>option USER_LDT</envar>"-vel
+(kivéve, ha FreeBSD-CURRENT-et
 használsz, ahol ez az alapállapot).
 </para>
 
+<!-- ********** -->
 
 <sect2 id="freebsd">
 <title>FreeBSD</title>
+
 <para>
 Ha a processzorod támogatja az SSE-t, akkor ezen utasításkészlet kihasználásához
-a kernelt az &quot;<envar>options CPU_ENABLE_SSE</envar>&quot; beállítással
+a kernelt az "<envar>options CPU_ENABLE_SSE</envar>" beállítással
 kell fordítani (ehhez FreeBSD-STABLE vagy kernelpatchekre van szükség).
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="openbsd">
 <title>OpenBSD</title>
+
 <para>
 A gas különböző verzióinak hiányosságai miatt (relokáció vs MMX), két
 lépésben kell fordítani: előszőr legyen a nem-natív verzió a <envar>$PATH</envar>-ban,
 majd add ki a <command>gmake -k</command> parancsot, majd a natív verzióval
 <command>gmake</command>.
 </para>
+
 <para>
 Az OpenBSD 3.4-től a fenti kavarás már nem szükséges.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="darwin">
 <title>Darwin</title>
+
 <para>
 Lásd a <link linkend="macos">Mac OS</link> részt.
 </para>
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="unix">
 <title>Kereskedelmi Unix</title>
@@ -154,8 +183,11 @@ mint a szabad Unix-okon, lehet, hogy némi kézi beállítást igényel a
 fordítás.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="solaris">
 <title>Solaris</title>
+
 <para>
 Az <application>MPlayer</application> Solaris 2.6 vagy újabb rendszereken működik.
 A SUN audió vezérlőjét a <option>-ao sun</option> kapcsolóval használhatod.
@@ -177,18 +209,17 @@ is.
 
 <para><emphasis role="bold">Figyelmeztetés:</emphasis></para>
 <itemizedlist>
-<listitem><para>A <emphasis role="bold">mediaLib</emphasis>
-<emphasis role="bold">jelenleg le van tiltva</emphasis> alapértelmezésben
-az <application>MPlayer</application>ben, mivel hibás. A SPARC felhasználók,
-akik az MPlayert mediaLib támogatással forgatták, egy vastag, zöld
-csíkról számoltak be a libavcodec-kal kódolt és dekódolt videók esetén.
-Ha mégis akarod, engedélyezheted:
-<screen>
-$ ./configure --enable-mlib
-</screen>
-Azonban ezt a saját felelősségedre tedd. Az x86 felhasználóknak
-<emphasis role="bold">soha</emphasis> sem ajánlott mediaLib-et használni,
-mivel nagyon lerontja az MPlayer teljesítményét.
+<listitem><para>
+  A <emphasis role="bold">mediaLib</emphasis>
+  <emphasis role="bold">jelenleg le van tiltva</emphasis> alapértelmezésben
+  az <application>MPlayer</application>ben, mivel hibás. A SPARC felhasználók,
+  akik az MPlayert mediaLib támogatással forgatták, egy vastag, zöld
+  csíkról számoltak be a libavcodec-kal kódolt és dekódolt videók esetén.
+  Ha mégis akarod, engedélyezheted:
+  <screen>./configure --enable-mlib</screen>
+  Azonban ezt a saját felelősségedre tedd. Az x86 felhasználóknak
+  <emphasis role="bold">soha</emphasis> sem ajánlott mediaLib-et használni,
+  mivel nagyon lerontja az MPlayer teljesítményét.
 </para></listitem>
 </itemizedlist>
 
@@ -197,14 +228,14 @@ A fordításhoz GNU <application>make</application>-re lesz szükséged
 (<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), natív
 Solaris make nem jó. Egy tipikus hiba, ha mégis azzal probálkozol:
 <screen>
-   % /usr/ccs/bin/make
-   make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
+% /usr/ccs/bin/make
+make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
 </screen>
 </para>
 
 <para>
-Solaris SPARC-on GNU C/C++ fordító is kell; az nem számít, hogy assemblerrel
-vagy nélküle van.
+Solaris SPARC-on GNU C/C++ fordító is kell; az nem számít, hogy
+assemblerrel vagy nélküle van.
 </para>
 
 <para>
@@ -216,8 +247,9 @@ assemblere (<filename>/usr/ccs/bin/as</filename>) nem támogat.
 
 <para>
 A <filename>configure</filename> script megpróbálja megkereseni, hogy a
-&quot;gcc&quot; parancsod melyik assemblert indítja (ha nem sikerül neki,
-használd a <option>--as=<replaceable>/ahova/installalva/lett/a/gnu-as</replaceable></option>
+"gcc" parancsod melyik assemblert indítja (ha nem sikerül neki,
+használd a
+<option>--as=<replaceable>/ahova/installalva/lett/a/gnu-as</replaceable></option>
 kapcsolót, hogy megadd a <filename>configure</filename>nak az "as" helyét
 a rendszeredben).
 </para>
@@ -225,35 +257,38 @@ a rendszeredben).
 <para>Megoldások a gyakori problémákra:</para>
 <itemizedlist>
 <listitem><para>
-Hibaüzenet a <filename>configure</filename>-tól egy Solaris x86-os rendszeren
-GNU assembler nélküli GCC használata esetén:
-<screen>
-   % configure
-   ...
-   Checking assembler (/usr/ccs/bin/as) ... , failed
-   Please upgrade(downgrade) binutils to 2.10.1...
-</screen>
-(Megoldás: &quot;<option>--with-as=gas</option>&quot;-al fordított GCC használata)
+  Hibaüzenet a <filename>configure</filename>-tól egy Solaris x86-os
+  rendszeren GNU assembler nélküli GCC használata esetén:
+  <screen>
+% configure
+...
+Checking assembler (/usr/ccs/bin/as) ... , failed
+Please upgrade(downgrade) binutils to 2.10.1...<!--
+  --></screen>
+  (Megoldás: <option>--with-as=gas</option>-al fordított GCC
+  használata)
 </para>
 
 <para>
-Tipikus hiba, ha a GNU C fordító nem GNU assemblert (GNU as) használ:
+Tipikus hiba, ha a GNU C fordító nem GNU assemblert (GNU as)
+használ:
 <screen>
-   % gmake
-   ...
-   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math
-        -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
-   Assembler: mplayer.c
-   "(stdin)", line 3567 : Illegal mnemonic
-   "(stdin)", line 3567 : Syntax error
-   ... további "Illegal mnemonic" és "Syntax error" hibák ...
+% gmake
+...
+gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math
+     -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
+Assembler: mplayer.c
+"(stdin)", line 3567 : Illegal mnemonic
+"(stdin)", line 3567 : Syntax error
+... további "Illegal mnemonic" és "Syntax error" hibák ...
 </screen>
 </para>
 </listitem>
 
-<listitem><para>Az <application>MPlayer</application> segfault-olhat ha win32codec-eket
-használó videót akarsz kódolni vagy dekódolni:
-<screen>
+<listitem><para>
+  Az <application>MPlayer</application> segfault-olhat ha
+  win32codec-eket használó videót akarsz kódolni vagy dekódolni:
+  <screen>
 ...
 Trying to force audio codec driver family acm...
 Opening audio decoder: [acm] Win32/ACM decoders
@@ -262,50 +297,56 @@ Couldn't install fs segment, expect segfault
 
 
 MPlayer interrupted by signal 11 in module: init_audio_codec
-...
-</screen>
-Ez a Solaris 10-ben és a pre-Solaris Nevada b31-ben a sysi86() egyik
-változtatása miatt van. Javítva lett a Solaris Nevada b32-ben; bár a
-Sun-nak még vissza kell vezetnie a javítást a Solaris 10-be. Az MPlayer
-Project felhívta a Sun figyelmét a problémára, a javítás készülőben van
-a Solaris 10-hez. Ettől a hibáról további információt itt találhatsz:
-<ulink
-url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
-</para>
-</listitem>
+...<!--
+  --></screen>
+  Ez a Solaris 10-ben és a pre-Solaris Nevada b31-ben a sysi86() egyik
+  változtatása miatt van. Javítva lett a Solaris Nevada b32-ben; bár a
+  Sun-nak még vissza kell vezetnie a javítást a Solaris 10-be. Az
+  MPlayer Project felhívta a Sun figyelmét a problémára, a javítás
+  készülőben van a Solaris 10-hez. Ettől a hibáról további információt
+  itt találhatsz:
+  <ulink url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
+</para></listitem>
 
 <listitem><para>
-A Solaris 8 hibái miatt nem biztos, hogy le tudsz játszani 4 GB-nál nagyobb DVD lemezt:
+A Solaris 8 hibái miatt nem biztos,
+hogy le tudsz játszani 4 GB-nál nagyobb DVD lemezt:
 </para>
 
 <itemizedlist>
 <listitem><para>
-Az sd(7D) vezérlőnek a Solaris 8 x86-ban van egy hibája a >4GB lemez blokkok elérésénél
-egy eszközön, melyen a logikai blokkméret != DEV_BSIZE-zel (pl. CD-ROM és DVD média).
-A 32 bites egész túlcsordulása miatt a lemez cím modulo 4GB kerül megcímzésre
-(<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
-Ez a probléma a SPARC alapú Solaris 8-on nincs.
+  Az sd(7D) vezérlőnek a Solaris 8 x86-ban van egy hibája a >4GB lemez blokkok
+  elérésénél egy eszközön, melyen a logikai blokkméret != DEV_BSIZE-zel
+  (pl. CD-ROM és DVD média).
+  A 32 bites egész túlcsordulása miatt a lemez cím modulo 4GB kerül megcímzésre
+  (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
+  Ez a probléma a SPARC alapú Solaris 8-on nincs.
 </para></listitem>
 
 <listitem><para>
-Egy hasonló hiba van a hsfs(7FS) fájlrendszer kódjában is (alias ISO9660),
-a hsfs nem támogatja a 4 GB-nál nagyobb partíciókat/lemezeket, minden adat
-modulo 4GB-vel lesz elérve
-(<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
-Ez a hiba a 109764-04 (sparc) / 109765-04 (x86) jelzésű patch-ek telepítése
-után megszűnik.
+  Egy hasonló hiba van a hsfs(7FS) fájlrendszer kódjában is (alias ISO9660),
+  a hsfs nem támogatja a 4 GB-nál nagyobb partíciókat/lemezeket, minden adat
+  modulo 4GB-vel lesz elérve
+  (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
+  Ez a hiba a 109764-04 (sparc) / 109765-04
+  (x86) jelzésű patch-ek telepítése után megszűnik.
 </para></listitem>
 </itemizedlist>
 </listitem>
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="irix">
 <title>IRIX</title>
+
 <para>
 A GNU install programot kell feltelepítened, és (ha nem tetted bele a globális
 path-ba) megadni a helyét:
-<screen>./configure --with-install=<replaceable>/eleresi/ut/es/install_neve</replaceable></screen>
+<screen>
+./configure --with-install=<replaceable>/eleresi/ut/es/install_neve</replaceable>
+</screen>
 </para>
 
 <para>
@@ -313,15 +354,15 @@ Lehet az alap IRIX 6.5-ös install-t is használni, de ebben az esetben
 a <filename>Makefile</filename> egy kis kézi átírásra szorul. A következő
 két sort kell átírni:
 <programlisting>
-  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
+$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 
-  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
+$(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 </programlisting>
 erre:
 <programlisting>
-  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
+$(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
 
-  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
+$(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
 Add ki a következő parancsokat (az <application>MPlayer</application> forrás könyvtárában):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
@@ -329,9 +370,11 @@ ezután símán fordíts és telepíts.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="hp-ux">
 <title>HP-UX</title>
+
 <para>
 Joe Page ad helyet egy részletes HP-UX <application>MPlayer</application>
 <ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOGYAN</ulink>-nak
@@ -351,7 +394,6 @@ A meglehetősen gyenge natív HP-UX hangrendszer helyett inkább használd a GNU
 <para>
 Hozd létre a DVD eszközt
 nézd végig a SCSI buszt:
-</para>
 
 <screen>
 # ioscan -fn
@@ -368,89 +410,81 @@ ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE  
 ...
 </screen>
 
-<para>
 A képernyőn a kimenetben egy Pioneer DVD-ROM látszik a 2. SCSI címen.
 A kártya a 8/16-os hardver útra az 1-essel hivatkozik.
 </para>
 
 <para>
 Készíts egy linket a nyers eszközről a DVD eszközre.
-</para>
-
 <screen>
 # ln -s /dev/rdsk/c<replaceable>&lt;SCSI busz hivatkozás&gt;</replaceable>t<replaceable>&lt;SCSI cél ID&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable> /dev/<replaceable>&lt;eszköz&gt;</replaceable>
 </screen>
-
-<para>
 Például:
+<screen># ln -s /dev/rdsk/c1t2d0 /dev/dvd</screen>
 </para>
-
-<screen>
-# ln -s /dev/rdsk/c1t2d0 /dev/dvd
-</screen>
 
 <para>
 Itt van pár gyakori probléma megoldása:
-</para>
 
 <itemizedlist>
 <listitem>
-<para>
-A rendzser összeomlik indításkor a következő hibaüzenettel:
-<screen>
-/usr/lib/dld.sl: Unresolved symbol: finite (code) from /usr/local/lib/gcc-lib/hppa2.0n-hp-hpux11.00/3.2/../../../libGL.sl
-</screen>
-</para>
-
-<para>
-Ez azt jelenti, hogy a <systemitem>.finite().</systemitem> függvény
-nincs benne a szabványos HP-UX math függvénykönyvtárban.
-Ekkor <systemitem>.isfinite().</systemitem> van helyette.
-Megoldás: Használd a legújabb Mesa depot fájlt.
-</para>
+  <para>
+  A rendzser összeomlik indításkor a következő hibaüzenettel:
+  <screen>
+/usr/lib/dld.sl: Unresolved symbol: finite (code) from /usr/local/lib/gcc-lib/hppa2.0n-hp-hpux11.00/3.2/../../../libGL.sl<!--
+  --></screen>
+  </para>
+  <para>
+  Ez azt jelenti, hogy a <systemitem>.finite().</systemitem> függvény
+  nincs benne a szabványos HP-UX math függvénykönyvtárban.
+  Ekkor <systemitem>.isfinite().</systemitem> van helyette.
+  Megoldás: Használd a legújabb Mesa depot fájlt.
+  </para>
 </listitem>
 
 <listitem>
-<para>
-Összeomlás lejátszáskor a következő hibaüzenettel:
-<screen>
-/usr/lib/dld.sl: Unresolved symbol: sem_init (code) from /usr/local/lib/libSDL-1.2.sl.0
-</screen>
-</para>
-
-<para>
-Megoldás: Használd a configure extralibdir opcióját
-<option>--with-extralibdir="/usr/lib -lrt"</option>
-</para>
+  <para>
+  Összeomlás lejátszáskor a következő hibaüzenettel:
+  <screen>
+/usr/lib/dld.sl: Unresolved symbol: sem_init (code) from /usr/local/lib/libSDL-1.2.sl.0<!--
+  --></screen>
+  </para>
+  <para>
+  Megoldás: Használd a configure extralibdir opcióját
+  <option>--with-extralibdir="/usr/lib -lrt"</option>
+  </para>
 </listitem>
 
 <listitem>
-<para>
-Az MPlayer segfault-ol egy ilyesmi üzenettel:
-<screen>
+  <para>
+  Az MPlayer segfault-ol egy ilyesmi üzenettel:
+  <screen>
 Pid 10166 received a SIGSEGV for stack growth failure.
 Possible causes: insufficient memory or swap space, or stack size exceeded maxssiz.
-Segmentation fault
-</screen>
-</para>
-
-<para>
-Megoldás:
-A HP-UX kernel alapértelmezésként 8MB-os(?) méretű vermet használ processzenként.(11.0 és
-az újabb 10.20 foltok engedik növelni a <systemitem>maxssiz</systemitem>-t egészen
-350MB-ig a 32-bit-es programokhoz). Növelned kell a <systemitem>maxssiz</systemitem>-t
-és újrafordítani a kernelt (majd reboot-olni). Ehhez használhatod a SAM-ot. (Ha már itt
-tartunk, nézd meg a <systemitem>maxdsiz</systemitem> paramétert is az egy program által
-használható maximum adatmennyiséghez. Az alkalmazásaidon múlik, hogy az alapértelmezett
-64MB elég vagy sem.)
-</para>
+Segmentation fault<!--
+  --></screen>
+  </para>
+  <para>
+  Megoldás:
+  A HP-UX kernel alapértelmezésként 8MB-os(?) méretű vermet használ
+  processzenként. (11.0 és az újabb 10.20 foltok engedik növelni a
+  <systemitem>maxssiz</systemitem>-t egészen 350MB-ig a 32-bit-es
+  programokhoz). Növelned kell a <systemitem>maxssiz</systemitem>-t
+  és újrafordítani a kernelt (majd reboot-olni). Ehhez használhatod
+  a SAM-ot. (Ha már itt tartunk, nézd meg a <systemitem>maxdsiz</systemitem>
+  paramétert is az egy program által használható maximum adatmennyiséghez.
+  Az alkalmazásaidon múlik, hogy az alapértelmezett 64MB elég vagy sem.)
+  </para>
 </listitem>
 </itemizedlist>
-
+</para>
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="aix">
 <title>AIX</title>
+
 <para>
 Az <application>MPlayer</application> sikeresen fordul AIX 5.1-en,
 5.2-n és 5.3-on, GCC 3.3 vagy újabbal. Az
@@ -474,26 +508,25 @@ A következő architektúrákat teszteltük:
 </para>
 
 <itemizedlist>
-<listitem><para>604e</para></listitem>
-<listitem><para>POWER3</para></listitem>
-<listitem><para>POWER4</para></listitem>
+  <listitem><para>604e</para></listitem>
+  <listitem><para>POWER3</para></listitem>
+  <listitem><para>POWER4</para></listitem>
 </itemizedlist>
 
 <para>
 A következő architektúrák nem lettek tesztelve, de működhetnek:
-</para>
 <itemizedlist>
-<listitem><para>POWER</para></listitem>
-<listitem><para>POWER2</para></listitem>
-<listitem><para>POWER5</para></listitem>
+  <listitem><para>POWER</para></listitem>
+  <listitem><para>POWER2</para></listitem>
+  <listitem><para>POWER5</para></listitem>
 </itemizedlist>
+</para>
 
 <para>
 Az Ultimedia Services-en keresztüli hang nem támogatott, mert az Ultimedia-t
 dobták az AIX 5.1-ben; ezért az egyetlen lehetőség az AIX Open
-Sound System (OSS) vezérlők használata a 4Front Technologies-től <ulink
-url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html
-</ulink>.
+Sound System (OSS) vezérlők használata a 4Front Technologies-től
+<ulink url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink>.
 A 4Front Technologies szabadon biztosítja az OSS vezérlőket az AIX 5.1-hez
 nem-üzleti felhasználásra; azonban jelenleg nincs hang kimeneti vezérlő
 AIX 5.2 és 5.3 alá. Ez azt jelenti, hogy az <emphasis role="bold">AIX 5.2
@@ -505,98 +538,103 @@ AIX 5.2 és 5.3 alá. Ez azt jelenti, hogy az <emphasis role="bold">AIX 5.2
 <itemizedlist>
 <listitem>
 <para>
-Ha ezt a hibaüzenetet kapod a <filename>configure</filename>-tól:
-<screen>
+  Ha ezt a hibaüzenetet kapod a <filename>configure</filename>-tól:
+  <screen>
 $ ./configure
 ...
 Checking for iconv program ... no
 No working iconv program found, use
 --charset=US-ASCII to continue anyway.
-Messages in the GTK-2 interface will be broken then.
-</screen>
-Ez azért van, mert az AIX nem-szabványos kódlap neveket használ; ezért
-az MPlayer kimenetének másik kódlapra konvertálása jelenleg nem
-támogatott. A megoldás:
-<screen>
-$ ./configure --charset=noconv
-</screen>
-</para>
+Messages in the GTK-2 interface will be broken then.<!--
+  --></screen>
+  Ez azért van, mert az AIX nem-szabványos kódlap neveket használ;
+  ezért az MPlayer kimenetének másik kódlapra konvertálása jelenleg
+  nem támogatott. A megoldás:
+  <screen>$ ./configure --charset=noconv</screen>
+  </para>
 </listitem>
 </itemizedlist>
-
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="windows">
 <title>Windows</title>
 
-<para>Igen, az <application>MPlayer</application> fut Windows-on
-  <ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> és
-  <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink> alatt.
-  Még nincs hivatalos GUI-ja, de a parancssoros verzió
-  teljes mértékben használható. Ajánlott megnézni az
-  <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
-  levelezési listát is segítéségért és a legfrissebb információkért.
-  A hivatalos Windows-os binárisok megtalálhatóak a
-  <ulink url="http://www.mplayerhq.hu/design7/dload.html">letöltési oldalon</ulink>.
-  A külső forrásból származó telepítő csomagokat és egyszerű GUI frontend-eket
-  összegyűjtöttük a 
-  <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">kapcsolódó projektek oldal</ulink>
-  Windows-os részében.
+<para>
+Igen, az <application>MPlayer</application> fut Windows-on
+<ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> és
+<ulink url="http://www.mingw.org/"><application>MinGW</application></ulink> alatt.
+Még nincs hivatalos GUI-ja, de a parancssoros verzió
+teljes mértékben használható. Ajánlott megnézni az
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
+levelezési listát is segítéségért és a legfrissebb információkért.
+A hivatalos Windows-os binárisok megtalálhatóak a
+<ulink url="http://www.mplayerhq.hu/design7/dload.html">letöltési oldalon</ulink>.
+A külső forrásból származó telepítő csomagokat és egyszerű GUI frontend-eket
+összegyűjtöttük a 
+<ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">kapcsolódó projektek oldal</ulink>
+Windows-os részében.
 </para>
 
-<para>Ha el akarod kerülni a parancssor használatát, van egy egyszerű trükk.
-  Tegyél egy parancsikont az asztalodra, ami valami hasonló parancssort
-  tartalmaz:
-  <screen><replaceable>c:\eleresi\ut\</replaceable>mplayer.exe %1</screen>
-  Ezután az <application>MPlayer</application> le fog játszani bármilyen
-  videót, amit erre a parancsikonra ejtesz. Írd hozzá a <option>-fs</option>
-  kapcsolót a teljes képernyős módhoz.
+<para>
+Ha el akarod kerülni a parancssor használatát, van egy egyszerű trükk.
+Tegyél egy parancsikont az asztalodra, ami valami hasonló parancssort
+tartalmaz:
+<screen><replaceable>c:\eleresi\ut\</replaceable>mplayer.exe %1</screen>
+Ezután az <application>MPlayer</application> le fog játszani bármilyen
+videót, amit erre a parancsikonra ejtesz. Írd hozzá a <option>-fs</option>
+kapcsolót a teljes képernyős módhoz.
 </para>
 
-<para>A legjobb eredmény a natív DirectX videó kimeneti vezérlővel
-  (<option>-vo directx</option>). Alternatívaként van OpenGL és SDL, de
-  az OpenGL teljesítménye nagyban változik a rendszerek között, az SDL pedig
-  torzítja a képet vagy összeomlik néhány rendszeren. Ha torz a kép,
-  próbáld meg kikapcsolni a hardveres gyorsítást a
-  <option>-vo directx:noaccel</option> kapcsolóval. Töltsd le a
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">DirectX 7 fejléc fájlokat</ulink>
-  a DirectX videó kimeneti vezérlő beforgatásához.</para>
+<para>
+A legjobb eredmény a natív DirectX videó kimeneti vezérlővel
+(<option>-vo directx</option>). Alternatívaként van OpenGL és SDL, de
+az OpenGL teljesítménye nagyban változik a rendszerek között, az SDL pedig
+torzítja a képet vagy összeomlik néhány rendszeren. Ha torz a kép,
+próbáld meg kikapcsolni a hardveres gyorsítást a
+<option>-vo directx:noaccel</option> kapcsolóval. Töltsd le a
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">DirectX 7 fejléc fájlokat</ulink>
+a DirectX videó kimeneti vezérlő beforgatásához.
+</para>
 
-<para>A <link linkend="vidix">VIDIX</link> is működik már Windows alatt
-  a <option>-vo winvidix</option> kapcsolóval, bár még kisérleti fázisban
-  van és egy kis kézi állítgatás kell hozzá. Töltsd le a
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink>
-  vagy <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (MTRR támogatással)</ulink>
-  fájlt és másold be a <filename class="directory">libdha/dhahelperwin</filename> könyvtárba
-  az <application>MPlayer</application> forrás fádban. Nyisd meg a konzolt és
-  válts át erre a könyvtárra, majd írd be
+<para>
+A <link linkend="vidix">VIDIX</link> is működik már Windows alatt
+a <option>-vo winvidix</option> kapcsolóval, bár még kisérleti fázisban
+van és egy kis kézi állítgatás kell hozzá. Töltsd le a
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> vagy
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (MTRR támogatással)</ulink>
+fájlt és másold be a <filename class="directory">libdha/dhahelperwin</filename> könyvtárba
+az <application>MPlayer</application> forrás fádban. Nyisd meg a konzolt
+és válts át erre a könyvtárra, majd írd be
+<screen>gcc -o dhasetup.exe dhasetup.c</screen>
+és futtasd
+<screen>dhasetup.exe install</screen>
+mint Adminisztrátor. Ezután újra kell indítanod a gépet. Ha készen vagy
+másold a <systemitem class="library">.so</systemitem> fájlokat a
+<filename class="directory">vidix/drivers</filename> könyvtárból az
+<filename class="directory">mplayer/vidix</filename> könyvtárba,
+az <filename>mplayer.exe</filename>-hez relatíven.
+</para>
 
-  <screen>gcc -o dhasetup.exe dhasetup.c</screen>
-
-  és futtasd
-
-  <screen>dhasetup.exe install</screen>
-
-  mint Adminisztrátor. Ezután újra kell indítanod a gépet. Ha készen vagy
-  másold a <systemitem class="library">.so</systemitem> fájlokat a
-  <filename class="directory">vidix/drivers</filename> könyvtárból az
-  <filename class="directory">mplayer/vidix</filename> könyvtárba,
-  az <filename>mplayer.exe</filename>-hez relatíven.</para>
-
-<para>A legjobb eredményhez az <application>MPlayer</application>nek egy olyan
-  színteret kell használnia, amit a videó kártyád támogat. Sajnos sok Windows-os
-  grafikus vezérlő hibásan támogatottnak jelent pár színteret. Hogy megtudd,
-  melyiket, próbáld ki az
-
-  <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>szinter</replaceable> <replaceable>film</replaceable></screen>
-
-  parancsot, ahol a <replaceable>szinter</replaceable> bármelyik színtér lehet,
-  amit a <option>-vf format=fmt=help</option> kapcsoló kiír. Ha találsz
-  olyan színteret, amit a kártyád részben hibásan kezel,
-  <option>-vf noformat=<replaceable>szinter</replaceable></option>
-  kapcsolóval megakadályozhatod a használatát. Írd be ezt a konfigurációs fájlodba,
-  hogy véglegesen kimaradjon a használatból.</para>
+<para>
+A legjobb eredményhez az <application>MPlayer</application>nek egy olyan
+színteret kell használnia, amit a videó kártyád támogat. Sajnos sok Windows-os
+grafikus vezérlő hibásan támogatottnak jelent pár színteret. Hogy megtudd,
+melyiket, próbáld ki az
+<screen>
+mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>szinter</replaceable> <replaceable>film</replaceable>
+</screen>
+parancsot, ahol a <replaceable>szinter</replaceable> bármelyik színtér lehet,
+amit a <option>-vf format=fmt=help</option> kapcsoló kiír. Ha találsz
+olyan színteret, amit a kártyád részben hibásan kezel,
+<option>-vf noformat=<replaceable>szinter</replaceable></option>
+kapcsolóval megakadályozhatod a használatát. Írd be ezt a konfigurációs fájlodba,
+hogy véglegesen kimaradjon a használatból.
+</para>
 
 <para>Vannak speciálisan Windowsra készített codec csomagok a
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">letöltési oldalunkon</ulink>,
@@ -611,86 +649,99 @@ $ ./configure --charset=noconv
   <application>MPlayer</application>t futtató felhasználó által, de csak bizonyos
   rendszereken (NT4). Próbáld meg írhatóvá tenni őket, ha problémáid vannak.</para>
 
-<para>VCD-ket is lejátszhatsz a <filename>.DAT</filename> vagy <filename>.MPG</filename> fájlok
-  lejátszásával, amit a Windows meglát a VCD-n. Így nagyszerűen működik (javítsd ki a CD-ROM-od
-  betűjelét):</para>
-
+<para>
+VCD-ket is lejátszhatsz a <filename>.DAT</filename> vagy
+<filename>.MPG</filename> fájlok lejátszásával, amit a Windows meglát a VCD-n.
+Így nagyszerűen működik (javítsd ki a CD-ROM-od betűjelét):
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
-
-<para>A DVD-k is működnek, add meg a <option>-dvd-device</option> kapcsolócal a DVD-ROM-od
-  betűjelét:</para>
-
-<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
-
-<para>A <application>Cygwin</application>/<application>MinGW</application>
-  konzol meglehetősen lassú. Kimenet átirányítással vagy a
-  <option>-quiet</option> kapcsolóval a jelentések szerint javítható a
-  teljesítmény néhány rendszeren. A Direct renderelés (<option>-dr</option>)
-  is segíthet. Ha a lejátszás szaggatott, próbáld meg a
-  <option>-autosync 100</option> opciót. Ha ezek közül bármelyik segít, írd
-  be a konfigurációs fájlodba.</para>
+A DVD-k is működnek, add meg a <option>-dvd-device</option> kapcsolóval
+a DVD-ROM-od betűjelét:
+<screen>
+mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:
+</screen>
+A <application>Cygwin</application>/<application>MinGW</application>
+konzol meglehetősen lassú. Kimenet átirányítással vagy a
+<option>-quiet</option> kapcsolóval a jelentések szerint javítható a
+teljesítmény néhány rendszeren. A Direct renderelés (<option>-dr</option>)
+is segíthet. Ha a lejátszás szaggatott, próbáld meg a
+<option>-autosync 100</option> opciót. Ha ezek közül bármelyik segít, írd
+be a konfigurációs fájlodba.
+</para>
   
 <note>
-
-<para>Windows-on a futásidejű CPU-detektálás letiltja az SSE támogatást
-  visszatérő és nehezen követhető SSE-vel kapcsolatos fagyások miatt. Ha
-  szeretnél SSE támogatást, futás idejű CPU-detektálás nélkül kell
-  fordítanod.
+<para>
+Windows-on a futásidejű CPU-detektálás letiltja az SSE támogatást
+visszatérő és nehezen követhető SSE-vel kapcsolatos fagyások miatt. Ha
+szeretnél SSE támogatást, futás idejű CPU-detektálás nélkül kell
+fordítanod.
 </para>
 
-<para>Ha Pentium 4-ed van és fagyásokat tapasztalsz a RealPlayer codec-ekkel,
-  le kell tiltanod a hyperthread támogatást.
+<para>
+Ha Pentium 4-ed van és fagyásokat tapasztalsz a RealPlayer
+codec-ekkel, le kell tiltanod a hyperthread támogatást.
 </para>
-
 </note>
 
+<!-- ********** -->
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
 
-<para>A <application>Cygwin</application> 1.5.0 vagy későbbi
-  verziójára lesz szükséged az <application>MPlayer</application>
-  lefordításához.</para>   
+<para>
+A <application>Cygwin</application> 1.5.0 vagy későbbi verziójára
+lesz szükséged az <application>MPlayer</application> lefordításához.
+</para>
 
-<para>A DirectX fejléc fájlokat a <filename class="directory">/usr/include/</filename> vagy
-  <filename class="directory">/usr/local/include/</filename> könyvtárba
-  kell kicsomagolni.</para>
+<para>
+A DirectX fejléc fájlokat ki kell csomagolni a
+<filename class="directory">/usr/include/</filename> vagy
+<filename class="directory">/usr/local/include/</filename> könyvtárba.
+</para>
 
-<para>Az SDL előállításával és <application>Cygwin</application>
-  alatti használatával kapcsolatos utasításokat és fájlokat a
-  <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl oldalon</ulink>
-  találod meg.</para>
-
+<para>
+Az SDL előállításával és <application>Cygwin</application> alatti
+használatával kapcsolatos utasítások és fájlok megtalálhatóak a
+<ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl oldalon</ulink>.
+</para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="mingw">
 <title><application>MinGW</application></title>
 
-<para>A <application>MinGW</application> egy olyan verziójának telepítése,
-  ami le tudja fordítani az <application>MPlayer</application>t, régebben eléggé
-  trükkös volt, de most már simán megy. Csak telepítsd a <application>MinGW</application>
-  3.1.0 vagy későbbi és az MSYS 1.0.9 vagy későbbi verzóját és az MSYS telepítés utáni
-  beállító programjának mondd meg, hogy telepítve van a <application>MinGW</application>.
+<para>
+A <application>MinGW</application> egy olyan verziójának telepítése,
+ami le tudja fordítani az <application>MPlayer</application>t, régebben eléggé
+trükkös volt, de most már simán megy. Csak telepítsd a <application>MinGW</application>
+3.1.0 vagy későbbi és az MSYS 1.0.9 vagy későbbi verzóját és az MSYS telepítés utáni
+beállító programjának mondd meg, hogy telepítve van a <application>MinGW</application>.
 </para>
 
-<para>A DirectX fejléc fájlokat a <filename class="directory">/mingw/include/</filename>
-  könyvtárba kell kicsomagolni.</para>
+<para>
+Csomagold ki a DirectX fejléc fájlokat a
+<filename class="directory">/mingw/include/</filename> könyvtárba.
+</para>
 
-<para>A tömörített MOV fejlécek támogatásához
-  <ulink url="http://www.gzip.org/zlib/">zlib</ulink> kell, ami
-  alaphelyzetben nincs benne a <application>MinGW</application>-ben.
-  Állítsd be a <option>--prefix=/mingw</option> kapcsolóval és
-  telepítsd, mielőtt az <application>MPlayer</application>t fordítanád.</para>
+<para>
+A tömörített MOV fejlécek támogatásához
+<ulink url="http://www.gzip.org/zlib/">zlib</ulink> kell, ami
+alaphelyzetben nincs benne a <application>MinGW</application>-ben.
+Állítsd be a <option>--prefix=/mingw</option> kapcsolóval és
+telepítsd, mielőtt az <application>MPlayer</application>t fordítanád.
+</para>
   
-<para>Az <application>MPlayer</application> és a szükséges függvénykönyvtárak
-  elkészítésének módját elolvashatod az
-  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.</para>
-
+<para>
+Az <application>MPlayer</application> és a szükséges függvénykönyvtárak
+elkészítésének módját elolvashatod az
+<ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.
+</para>
 </sect2>
-
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="macos">
 <title>Mac OS</title>
@@ -738,18 +789,24 @@ Ez telepíti a <application>pkg-config</application>-ot, ami a függvénykönyvt
 fordítási/szerkesztési flag-jeinek kezelését végző rendszer.
 Az <application>MPlayer</application> <systemitem>configure</systemitem> script-je
 is ezt használja a függvénykönyvtárak megfelelő detektálásához.
-Ezután hasonló módon telepítheted a <application>fontconfig</application>-ot:
+Ezután hasonló módon telepítheted a
+<application>fontconfig</application>-ot:
 <screen>sudo port install fontconfig</screen>
 Ezek után indíthatod az <application>MPlayer</application>
 <systemitem>configure</systemitem> script-jét (figyelj a
 <systemitem>PKG_CONFIG_PATH</systemitem> és <systemitem>PATH</systemitem>
-környezeti változók beállítására, hogy a <systemitem>configure</systemitem> megtalálja
-a MacPorts-szal telepített függvénykönyvtárakat):
-<screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
+környezeti változók beállítására, hogy a <systemitem>configure</systemitem>
+megtalálja a MacPorts-szal telepített függvénykönyvtárakat):
+<screen>
+PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure
+</screen>
 </para>
+
+<!-- ********** -->
 
 <sect2 id="osx_gui">
 <title>MPlayer OS X GUI</title>
+
 <para>
 Van egy natív GUI az <application>MPlayer</application>hez egy előfordított
 <application>MPlayer</application> binárissal együtt Mac OS X alá a
@@ -779,7 +836,6 @@ nélkül.
 
 <para>
 Az SVN modulok letöltéséhez használt az alábbi parancsokat:
-
 <screen>
 svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
 svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
@@ -789,7 +845,6 @@ svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
 <para>
 Az <application>MPlayerOSX</application> elkészítéséhez valami ilyesmit kell
 csinálnod:
-
 <screen>
 MPlayer_forras_konyvtar
    |
@@ -799,13 +854,11 @@ MPlayer_forras_konyvtar
    |
    |--->mplayerosx     (MPlayer OS X Subversion forrás)
 </screen>
-
 Először a main és main_noaltivec-et kell lefordítanod.
 </para>
 
 <para>
 Ezután állíts be egy globális változót:
-
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
 
@@ -830,24 +883,24 @@ Lehet, hogy szerkesztened kell a <filename>config.mak</filename> fájlt és
 
 <para>
 Folytasd a
-<screen>
-make
-</screen>
+<screen>make</screen>
 paranccsal, majd menj a mplayerosx könyvtárba és írd be 
-
-<screen>
-make dist
-</screen>
+<screen>make dist</screen>
 Ez egy tömörített <systemitem>.dmg</systemitem> archívot hoz létre
 egy használatra kész binárissal.
 </para>
 
 <para>
 Használhatod az <application>Xcode</application> 2.1 projektet is;
-a régi, <application>Xcode</application> 1.x projekt nem működik már.
+a régi, <application>Xcode</application> 1.x projekt nem működik
+már.
 </para>
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="exotic_platforms">
 <title>Egzotikus platformok</title>
@@ -859,8 +912,11 @@ a fő forrás fába.
 A fordítási leíráshoz nézd meg a rendszer-specifikus dokumentációt.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="qnx">
 <title>QNX</title>
+
 <para>
 Le kell töltened és telepítened kell az SDL-t a QNX-re. Majd futtasd az
 <application>MPlayer</application>t a <option>-vo sdl:driver=photon</option>
@@ -873,10 +929,13 @@ mivel a QNX-nek csak X <emphasis>emulációja</emphasis> van, ami nagyon lassú.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
-Az emberek a <ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>-nél
+Az emberek a
+<ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>-nél
 készítettek csomagokat az aktuális <application>MPlayer</application>ből
 és <application>MEncoder</application>ből.
 </para>
@@ -890,16 +949,16 @@ MorphOS alá. Sajnálatos módon csak a 0.90-es széria van kész.
 Letölthető a <ulink url="http://www.morphzone.org/">MorphZone</ulink>-ról:
 <itemizedlist>
 <listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-<application>MPlayer</application> 0.91 bináris</ulink>
+  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
+  <application>MPlayer</application> 0.91 bináris</ulink>
 </para></listitem>
 <listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-<application>MPlayer</application> 0.91 forrás</ulink>
+  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
+  <application>MPlayer</application> 0.91 forrás</ulink>
 </para></listitem>
 <listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
-<application>MEncoder</application> 0.91 bináris</ulink>
+  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
+  <application>MEncoder</application> 1.0pre3 bináris</ulink>
 </para></listitem>
 </itemizedlist>
 </para>
