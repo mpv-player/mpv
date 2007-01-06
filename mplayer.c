@@ -2893,6 +2893,9 @@ static double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 
 static void update_subtitles(void)
 {
+    unsigned char *packet=NULL;
+    int len;
+    char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
     // find sub
     if (subdata) {
 	double pts = sh_video->pts;
@@ -2908,9 +2911,8 @@ static void update_subtitles(void)
     }
 
     // DVD sub:
-    if (vo_config_count && vo_spudec) {
-	unsigned char* packet=NULL;
-	int len, timestamp;
+    if (vo_config_count && vo_spudec && type == 'v') {
+	int timestamp;
 	current_module = "spudec";
 	spudec_heartbeat(vo_spudec, 90000*sh_video->timer);
 	/* Get a sub packet from the DVD or a vobsub and make a timestamp
@@ -2953,6 +2955,22 @@ static void update_subtitles(void)
 
 	if (spudec_changed(vo_spudec))
 	    vo_osd_changed(OSDTYPE_SPU);
+    } else if (dvdsub_id >= 0 && type == 't') {
+      double pts = MP_NOPTS_VALUE;
+      while (d_dvdsub->first) {
+        double nextpts = ds_get_next_pts(d_dvdsub);
+        if (nextpts == MP_NOPTS_VALUE || nextpts - sub_delay > sh_video->pts)
+          break;
+        len = ds_get_packet_sub(d_dvdsub, &packet);
+        pts = nextpts - sub_delay;
+      }
+      if (pts != MP_NOPTS_VALUE) {
+        static subtitle subs;
+        sub_clear_text(&subs, MP_NOPTS_VALUE);
+        sub_add_text(&subs, packet, len, MP_NOPTS_VALUE);
+        vo_sub = &subs;
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+      }
     }
     current_module=NULL;
 }

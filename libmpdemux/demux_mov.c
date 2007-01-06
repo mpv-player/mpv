@@ -2172,29 +2172,15 @@ if(trak->pos==0 && trak->stream_header_len>0){
         int len = trak->samples[samplenr].size;
         double subpts = (double)trak->samples[samplenr].pts / (double)trak->timescale;
         stream_seek(demuxer->stream, pos);
-        if (sh->type == 'v')
-          ds_read_packet(demuxer->sub, demuxer->stream, len, subpts, pos, 0);
-        else {
-          int i;
-          char *line = priv->subtext;
+        if (sh->type != 'v') {
           stream_skip(demuxer->stream, 2); // size
           len -= 2;
           if (len < 0) len = 0;
           if (len > MOV_MAX_SUBLEN) len = MOV_MAX_SUBLEN;
-          stream_read(demuxer->stream, priv->subtext, len);
-          priv->subtext[len] = 0;
-          priv->subs.lines = 1;
-          priv->subs.text[0] = &priv->subtext;
-          while ((line = strchr(line, '\n'))) {
-            *line++ = 0;
-            priv->subs.text[priv->subs.lines] = line;
-            priv->subs.lines++;
-          }
-          vo_sub = &priv->subs;
         }
+        ds_read_packet(demuxer->sub, demuxer->stream, len, subpts, pos, 0);
         priv->current_sub = samplenr;
       }
-      vo_osd_changed (OSDTYPE_SUBTITLE);
     }
 
     return 1;

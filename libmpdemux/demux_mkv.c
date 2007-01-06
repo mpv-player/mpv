@@ -166,7 +166,6 @@ typedef struct mkv_demuxer
   uint64_t tc_scale, cluster_tc, first_tc;
   int has_first_tc;
 
-  uint64_t clear_subs_at[SUB_MAX_TEXT];
   subtitle subs;
 
   uint64_t cluster_size;
@@ -2490,9 +2489,6 @@ demux_mkv_open (demuxer_t *demuxer)
   mkv_d->parsed_cues = malloc (sizeof (off_t));
   mkv_d->parsed_seekhead = malloc (sizeof (off_t));
 
-  for (i=0; i < SUB_MAX_TEXT; i++)
-    mkv_d->subs.text[i] = malloc (256);
-
   while (!cont)
     {
       switch (ebml_read_id (s, NULL))
@@ -2725,6 +2721,9 @@ demux_mkv_open (demuxer_t *demuxer)
 }
 
 static void
+clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all);
+
+static void
 demux_close_mkv (demuxer_t *demuxer)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
@@ -2735,14 +2734,12 @@ demux_close_mkv (demuxer_t *demuxer)
 #ifdef USE_ICONV
       subcp_close();
 #endif
+      clear_subtitles(demuxer, 0, 1);
       free_cached_dps (demuxer);
       if (mkv_d->tracks)
         {
           for (i=0; i<mkv_d->num_tracks; i++)
             demux_mkv_free_trackentry(mkv_d->tracks[i]);
-          for (i=0; i < SUB_MAX_TEXT; i++)
-            if (mkv_d->subs.text[i])
-              free (mkv_d->subs.text[i]);
           free (mkv_d->tracks);
         }
       if (mkv_d->indexes)
@@ -2855,15 +2852,12 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
 }
 
 static void
-clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all);
-
-static void
 handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
                  int64_t size, uint64_t block_duration, uint64_t timecode)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  char *ptr1, *ptr2;
-  int state, i;
+  char *ptr1;
+  int i;
 
   if (block_duration == 0)
     {
@@ -2883,24 +2877,6 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
 #endif
 
   ptr1 = block;
-  while (ptr1 - block <= size && (*ptr1 == '\n' || *ptr1 == '\r'))
-    ptr1++;
-  ptr2 = block + size - 1;
-  while (ptr2 >= block && (*ptr2 == '\n' || *ptr2 == '\r'))
-    {
-      *ptr2 = 0;
-      ptr2--;
-    }
-
-  if (mkv_d->subs.lines > SUB_MAX_TEXT - 2)
-    {
-      mp_msg (MSGT_DEMUX, MSGL_WARN,
-              MSGTR_MPDEMUX_MKV_TooManySublines);
-      return;
-    }
-  ptr2 = mkv_d->subs.text[mkv_d->subs.lines];
-  state = 0;
-
   if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
     {
       /* Find text section. */
@@ -2909,94 +2885,18 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
           i++;
       if (*ptr1 == '\0')  /* Broken line? */
         return;
-
-      /* Load text. */
-      while (ptr1 - block < size)
-        {
-          if (*ptr1 == '{')
-            state = 1;
-          else if (*ptr1 == '}' && state == 1)
-            state = 2;
-
-          if (state == 0)
-            {
-              *ptr2++ = *ptr1;
-              if (ptr2 - mkv_d->subs.text[mkv_d->subs.lines] >= 255)
-                break;
-            }
-          ptr1++;
-      
-          /* Newline */
-          while (ptr1+1-block < size && *ptr1 == '\\' && (*(ptr1+1)|0x20) == 'n')
-            {
-              mkv_d->clear_subs_at[mkv_d->subs.lines++]
-                = timecode + block_duration;
-              *ptr2 = '\0';
-              if (mkv_d->subs.lines >= SUB_MAX_TEXT)
-                {
-                  mp_msg (MSGT_DEMUX, MSGL_WARN,
-                          MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst,
-                          SUB_MAX_TEXT);
-                  mkv_d->subs.lines--;
-                  ptr1=block+size;
-                  break;
-                }
-              ptr2 = mkv_d->subs.text[mkv_d->subs.lines];
-              ptr1 += 2;
-            }
-
-          if (state == 2)
-            state = 0;
-        }
-      *ptr2 = '\0';
     }
-  else
-    {
-      while (ptr1 - block < size)
-        {
-          if (*ptr1 == '\n' || *ptr1 == '\r')
-            {
-              if (state == 0)  /* normal char --> newline */
-                {
-                  *ptr2 = '\0';
-                  mkv_d->clear_subs_at[mkv_d->subs.lines++]
-                    = timecode + block_duration;
-                  if (mkv_d->subs.lines >= SUB_MAX_TEXT)
-                    {
-                      mp_msg (MSGT_DEMUX, MSGL_WARN,
-                              MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst,
-                              SUB_MAX_TEXT);
-                      mkv_d->subs.lines--;
-                      ptr1=block+size;
-                      break;
-                    }
-                  ptr2 = mkv_d->subs.text[mkv_d->subs.lines];
-                  state = 1;
-                }
-            }
-          else if (*ptr1 == '<')  /* skip HTML tags */
-            state = 2;
-          else if (*ptr1 == '>')
-            state = 0;
-          else if (state != 2)  /* normal character */
-            {
-              state = 0;
-              if ((ptr2 - mkv_d->subs.text[mkv_d->subs.lines]) < 255)
-                *ptr2++ = *ptr1;
-            }
-          ptr1++;
-        }
-      *ptr2 = '\0';
-    }
-  mkv_d->clear_subs_at[mkv_d->subs.lines++] = timecode + block_duration;
 
   sub_utf8 = 1;
+  sub_add_text(&mkv_d->subs, ptr1, size - (ptr1 - block),
+                 (timecode + block_duration) / 1000.0f);
 #ifdef USE_ASS
   if (ass_enabled) {
     mkv_d->subs.start = timecode / 10;
     mkv_d->subs.end = (timecode + block_duration) / 10;
     ass_process_subtitle(track->sh_sub.ass_track, &mkv_d->subs);
-  } else
+    return;
+  }
 #endif
   vo_sub = &mkv_d->subs;
   vo_osd_changed (OSDTYPE_SUBTITLE);
@@ -3006,48 +2906,9 @@ static void
 clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  int i, lines_cut = 0;
-  char *tmp;
-
-  /* Clear all? */
-  if (clear_all)
-    {
-      lines_cut = mkv_d->subs.lines;
-      mkv_d->subs.lines = 0;
-#ifdef USE_ASS
-      if (!ass_enabled)
-#endif
-      if (lines_cut)
-        {
-          vo_sub = &mkv_d->subs;
-          vo_osd_changed (OSDTYPE_SUBTITLE);
-        }
-      return;
-    }
-
-  /* Clear the subtitles if they're obsolete now. */
-  for (i=0; i < mkv_d->subs.lines; i++)
-    {
-      if (mkv_d->clear_subs_at[i] <= timecode)
-        {
-          tmp = mkv_d->subs.text[i];
-          memmove (mkv_d->subs.text+i, mkv_d->subs.text+i+1,
-                   (mkv_d->subs.lines-i-1) * sizeof (*mkv_d->subs.text));
-          memmove (mkv_d->clear_subs_at+i, mkv_d->clear_subs_at+i+1,
-                   (mkv_d->subs.lines-i-1) * sizeof (*mkv_d->clear_subs_at));
-          mkv_d->subs.text[--mkv_d->subs.lines] = tmp;
-          i--;
-          lines_cut = 1;
-        }
-    }
-#ifdef USE_ASS
-  if (!ass_enabled)
-#endif
-  if (lines_cut)
-    {
-      vo_sub = &mkv_d->subs;
-      vo_osd_changed (OSDTYPE_SUBTITLE);
-    }
+  double pts = clear_all ? MP_NOPTS_VALUE : (timecode / 1000.0f);
+  if (sub_clear_text(&mkv_d->subs, pts))
+    vo_osd_changed(OSDTYPE_SUBTITLE);
 }
 
 // Taken from demux_real.c. Thanks to the original developpers :)
