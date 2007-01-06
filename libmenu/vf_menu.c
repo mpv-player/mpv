@@ -90,7 +90,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
 
   switch(cmd->id) {
   case MP_CMD_PAUSE :
-#if 0 // http://lists.mplayerhq.hu/pipermail/mplayer-dev-eng/2003-March/017331.html
+#if 0 // http://lists.mplayerhq.hu/pipermail/mplayer-dev-eng/2003-March/017286.html
     if(!paused && !go2pause) { // Initial pause cmd -> wait the next put_image
       go2pause = 1;
       return 1;
