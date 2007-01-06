@@ -588,14 +588,14 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 
 
   mp_msg(MSGT_DEMUX, MSGL_V,  "TUNE_IT, fd_frontend %d, fd_sec %d\nfreq %lu, srate %lu, pol %c, tone %i, specInv, diseqc %u, fe_modulation_t modulation,fe_code_rate_t HP_CodeRate, fe_transmit_mode_t TransmissionMode,fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth\n",
-	    fd_frontend, fd_sec, (long unsigned int)freq, (long unsigned int)srate, pol, tone, diseqc);
+    fd_frontend, fd_sec, (long unsigned int)freq, (long unsigned int)srate, pol, tone, diseqc);
 
 
   memset(&feparams, 0, sizeof(feparams));
   if ( (res = ioctl(fd_frontend,FE_GET_INFO, &fe_info) < 0))
   {
-  	mp_msg(MSGT_DEMUX, MSGL_FATAL, "FE_GET_INFO FAILED\n");
-	return -1;
+        mp_msg(MSGT_DEMUX, MSGL_FATAL, "FE_GET_INFO FAILED\n");
+        return -1;
   }
 
 
@@ -636,22 +636,22 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       {
         // this must be an absolute frequency
         if (freq < SLOF)
-	{
+        {
 #ifdef HAVE_DVB_HEAD
           freq = feparams.frequency=(freq-LOF1);
 #else
           freq = feparams.Frequency=(freq-LOF1);
 #endif
-	    hi_lo = 0;
+          hi_lo = 0;
         }
-	else
-	{
+        else
+        {
 #ifdef HAVE_DVB_HEAD
           freq = feparams.frequency=(freq-LOF2);
 #else
           freq = feparams.Frequency=(freq-LOF2);
 #endif
-	    hi_lo = 1;
+          hi_lo = 1;
         }
       }
       else
@@ -676,15 +676,15 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       dfd = fd_sec;
 #endif
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-S to Freq: %u, Pol: %c Srate: %d, 22kHz: %s, LNB:  %d\n",freq,pol,srate,hi_lo ? "on" : "off", diseqc);
+      mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-S to Freq: %u, Pol: %c Srate: %d, 22kHz: %s, LNB:  %d\n",freq,pol,srate,hi_lo ? "on" : "off", diseqc);
 
-   if(do_diseqc(dfd, diseqc, (pol == 'V' ? 1 : 0), hi_lo) == 0)
-	mp_msg(MSGT_DEMUX, MSGL_V, "DISEQC SETTING SUCCEDED\n");
-   else
-   {
-	mp_msg(MSGT_DEMUX, MSGL_ERR, "DISEQC SETTING FAILED\n");
-	return -1;
-   }
+      if(do_diseqc(dfd, diseqc, (pol == 'V' ? 1 : 0), hi_lo) == 0)
+          mp_msg(MSGT_DEMUX, MSGL_V, "DISEQC SETTING SUCCEDED\n");
+      else
+      {
+          mp_msg(MSGT_DEMUX, MSGL_ERR, "DISEQC SETTING FAILED\n");
+          return -1;
+      }
       break;
     case FE_QAM:
       mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-C to %d, srate=%d\n",freq,srate);
