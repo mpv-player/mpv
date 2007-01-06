@@ -157,7 +157,6 @@ extern int dvdsub_id;
 
 static subtitle ogg_sub;
 extern subtitle* vo_sub;
-static float clear_sub;
 //FILE* subout;
 
 static
@@ -224,9 +223,9 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
       (unsigned char)packet[2],
       &packet[3]);
 
-  ogg_sub.lines = 0;
   if (((unsigned char)packet[0]) == 0x88) { // some subtitle text
     // Find data start
+    double endpts = MP_NOPTS_VALUE;
     int32_t duration = 0;
     int16_t hdrlen = (*packet & PACKET_LEN_BITS01)>>6, i;
     hdrlen |= (*packet & PACKET_LEN_BITS2) <<1;
@@ -242,37 +241,10 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
       if(pack->granulepos == -1)
         pack->granulepos = os->lastpos + os->lastsize;
       pts = (float)pack->granulepos/(float)os->samplerate;
-      clear_sub = 1.0 + pts + (float)duration/1000.0;
+      endpts = 1.0 + pts + (float)duration/1000.0;
     }
-    ogg_sub.text[0] = realloc(ogg_sub.text[0], OGG_SUB_MAX_LINE);
-    while (1) {
-      int c = lcv < pack->bytes ? packet[lcv++] : 0;
-      if(c=='\n' || c==0 || line_pos >= OGG_SUB_MAX_LINE-1){
-	  ogg_sub.text[ogg_sub.lines][line_pos] = 0; // close sub
-          if(line_pos) {
-              ogg_sub.lines++;
-              ogg_sub.text[ogg_sub.lines] = realloc(ogg_sub.text[ogg_sub.lines], OGG_SUB_MAX_LINE);
-          }
-	  if(!c || ogg_sub.lines>=SUB_MAX_TEXT) break; // EOL or TooMany
-          line_pos = 0;
-      }
-      switch (c) {
-        case '\r':
-        case '\n': // just ignore linefeeds for now
-                   // their placement seems rather haphazard
-          break;
-        case '<': // some html markup, ignore for now
-          ignoring = 1;
-          break;
-        case '>':
-          ignoring = 0;
-          break;
-        default:
-          if(!ignoring) 
-	  ogg_sub.text[ogg_sub.lines][line_pos++] = c;
-          break;
-      }
-    }
+    sub_clear_text(&ogg_sub, MP_NOPTS_VALUE);
+    sub_add_text(&ogg_sub, &packet[lcv], pack->bytes - lcv, endpts);
   }
 
   mp_msg(MSGT_DEMUX,MSGL_DBG2,"Ogg sub lines: %d  first: '%s'\n",
@@ -556,11 +528,9 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
     return 0;
 
   /// Clear subtitles if necessary (for broken files)
-  if ((clear_sub > 0) && (pts >= clear_sub)) {
-    ogg_sub.lines = 0;
+  if (sub_clear_text(&ogg_sub, pts)) {
     vo_sub = &ogg_sub;
     vo_osd_changed(OSDTYPE_SUBTITLE);
-    clear_sub = -1;
   }
   /// Send the packet
   dp = new_demux_packet(pack->bytes-(data-pack->packet));
@@ -848,7 +818,6 @@ int demux_ogg_open(demuxer_t* demuxer) {
   subcp_open(NULL);
 #endif
 
-  clear_sub = -1;
   s = demuxer->stream;
 
   demuxer->priv =
@@ -1569,10 +1538,10 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
         }
       }
       if(!precision && (is_keyframe || os->vorbis || os->speex) ) {
-        ogg_sub.lines = 0;
-        vo_sub = &ogg_sub;
-        vo_osd_changed(OSDTYPE_SUBTITLE);
-        clear_sub = -1;
+        if (sub_clear_text(&ogg_sub, MP_NOPTS_VALUE)) {
+          vo_sub = &ogg_sub;
+          vo_osd_changed(OSDTYPE_SUBTITLE);
+        }
 	op.granulepos=granulepos_orig;
 	demux_ogg_add_packet(ds,os,ds->id,&op);
 	return;
