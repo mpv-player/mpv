@@ -29,8 +29,20 @@ extern int  lavc_param_audio_global_header;
 extern int  avcodec_inited;
 static int compressed_frame_size = 0;
 #if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
-extern unsigned int codec_get_wav_tag(int id);
-extern const int mp_wav_tags[];
+#ifdef USE_LIBAVFORMAT_SO
+#include <ffmpeg/avformat.h>
+typedef struct CodecTag {
+    int id;
+    unsigned int tag;
+    unsigned int invalid_asf : 1;
+} CodecTag;
+unsigned int codec_get_wav_tag(int id);
+unsigned int codec_get_tag(const CodecTag *tags, int id);
+#else
+#include "libavformat/avformat.h"
+#include "libavformat/riff.h"
+#endif
+extern const CodecTag mp_wav_tags[];
 #endif
 
 static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)

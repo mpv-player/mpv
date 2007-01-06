@@ -19,14 +19,21 @@
 #include "m_option.h"
 #ifdef USE_LIBAVFORMAT_SO
 #include <ffmpeg/avformat.h>
+typedef struct CodecTag {
+    int id;
+    unsigned int tag;
+    unsigned int invalid_asf : 1;
+} CodecTag;
+unsigned int codec_get_wav_tag(int id);
+enum CodecID codec_get_bmp_id(unsigned int tag);
+enum CodecID codec_get_wav_id(unsigned int tag);
+enum CodecID codec_get_id(const CodecTag *tags, unsigned int tag);
 #else
 #include "avformat.h"
+#include "libavformat/riff.h"
 #endif
 
-extern unsigned int codec_get_wav_tag(int id);
-extern enum CodecID codec_get_bmp_id(unsigned int tag);
-extern enum CodecID codec_get_wav_id(unsigned int tag);
-extern const int mp_wav_tags[];
+extern const CodecTag mp_wav_tags[];
 
 extern char *info_name;
 extern char *info_artist;
