@@ -33,17 +33,12 @@
 #ifdef USE_LIBAVFORMAT_SO
 #include <ffmpeg/avformat.h>
 #include <ffmpeg/opt.h>
-typedef struct CodecTag {
-    int id;
-    unsigned int tag;
-    unsigned int invalid_asf : 1;
-} CodecTag;
 #else
 #include "avformat.h"
-#include "riff.h"
 #include "avi.h"
 #include "opt.h"
 #endif
+#include "riff.h"
 
 #define PROBE_BUF_SIZE 2048
 
