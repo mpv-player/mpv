@@ -765,7 +765,7 @@ dvb_config_t *dvb_get_config(void)
 	for(i=0; i<MAX_CARDS; i++)
 	{
 		sprintf(filename, "/dev/dvb/adapter%d/frontend0", i);
-		fd = open(filename, O_RDWR | O_NONBLOCK);
+		fd = open(filename, O_RDONLY|O_NONBLOCK);
 		if(fd < 0)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_V, "DVB_CONFIG, can't open device %s, skipping\n", filename);
