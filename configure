@@ -7537,7 +7537,6 @@ CONFIG_AMR_WB=$_amr_wb
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-CONFIG_X11_GRAB_DEVICE_DEMUXER=no
 CONFIG_FAAC=$_lavc_faac
 CONFIG_MP3LAME=$_lavc_mp3lame
 CONFIG_XVID=$_lavc_xvid
