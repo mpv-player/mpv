@@ -4513,7 +4513,7 @@ To calculate the correct scaling size, use the expanded NTSC width of
 
 <para>
 2.35:1 or "Cinemascope" PAL
-<screen>-vf scale="720:432,expand=720:576 -lavcopts aspect=16/9</screen>
+<screen>-vf scale=720:432,expand=720:576 -lavcopts aspect=16/9</screen>
 To calculate the correct scaling size, use the expanded PAL width of
 1024/2.35 = 432
 </para>
