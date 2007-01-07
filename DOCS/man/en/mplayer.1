@@ -7304,14 +7304,20 @@ so quality may be low.
 motion estimation search range (default: 0 (unlimited))
 .
 .TP
-.B mbd=<0\-2>
+.B mbd=<0\-2> (see also *cmp, qpel)
 Macroblock decision algorithm (high quality mode), encode each macro
 block in all modes and choose the best.
 This is slow but results in better quality and file size.
+When mbd is set to 1 or 2, the value of mbcmp is ignored when comparing
+macroblocks.
+If any comparison setting (precmp, subcmp, cmp, or mbcmp) is nonzero,
+however, a slower but better half-pel motion search will be used,
+regardless of what mbd is set to.
+If qpel is set, quarter-pel motion search will be used regardless.
 .PD 0
 .RSs
 .IPs 0
-Use mbcmp (default).
+Use comparison function given by mbcmp (default).
 .IPs 1
 Select the MB mode which needs the fewest bits (=vhq).
 .IPs 2
@@ -8118,7 +8124,8 @@ This seems only useful for high bitrate encodings.
 .
 .TP
 .B mbcmp=<0\-2000>
-Sets the comparison function for the macroblock decision, only used if mbd=0.
+Sets the comparison function for the macroblock decision, has only
+an effect if mbd=0.
 .PD 0
 .RSs
 .IPs "0 (SAD)"

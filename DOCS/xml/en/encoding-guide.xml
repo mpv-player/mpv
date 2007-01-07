@@ -2953,13 +2953,13 @@ amounts of detail, so we pick 2400Kbit for our bitrate.
 We are now ready to do the two pass encode. Pass one:
 <screen>
 mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</replaceable> -ovc lavc \
-    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
+    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:autoaspect:vpass=1 \
     -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2
 </screen>
 And pass two is the same, except that we specify <option>vpass=2</option>:
 <screen>
 mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</replaceable> -ovc lavc \
-    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
+    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:autoaspect:vpass=2 \
     -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2
 </screen>
 </para>
@@ -2968,7 +2968,7 @@ mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</
 The options <option>v4mv:mbd=2:trell</option> will greatly increase the
 quality at the expense of encoding time. There is little reason to leave
 these options out when the primary goal is quality. The options
-<option>cmp=3:subcmp=3:mbcmp=3</option> select a comparison function that
+<option>cmp=3:subcmp=3</option> select a comparison function that
 yields higher quality than the defaults. You might try experimenting with
 this parameter (refer to the man page for the possible values) as
 different functions can have a large impact on quality depending on the
