@@ -209,6 +209,7 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
   int fill = this->real_session->recv_size - this->real_session->recv_read;
 
   if (len < 0) return 0;
+  if (this->real_session->recv_size < 0) return -1;
   while (to_copy > fill) {
     
     memcpy(dest, source, fill);
