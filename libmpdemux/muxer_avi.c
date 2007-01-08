@@ -201,7 +201,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags,
 	avifile_write_header(muxer);
 	stream_seek(muxer->stream, pos);
     }
-
+  if(index_mode){
     rifflen = muxer->file_end - vsi->riffofs[vsi->riffofspos] - 8;
     if (vsi->riffofspos == 0) {
 	rifflen += 8+muxer->idx_pos*sizeof(AVIINDEXENTRY);
@@ -235,7 +235,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags,
     si->idx[si->idxpos].ofs=muxer->file_end;
     si->idx[si->idxpos].len=len;
     ++si->idxpos;
-
+  }
     // write out the chunk:
     write_avi_chunk(muxer->stream,s->ckid,len,s->buffer); /* unsigned char */
 
