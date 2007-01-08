@@ -480,6 +480,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     sh_audio_t *sh_audio = NULL;
     tvi_functions_t *funcs;
     
+    demuxer->priv=NULL;
     if(!(tvh=tv_begin())) return NULL;
     if (!tv_init(tvh)) return NULL;
     if (!open_tv(tvh)){
@@ -625,7 +626,9 @@ no_audio:
 static void demux_close_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
+    if (!tvh) return;
     tvh->functions->uninit(tvh->priv);
+    demuxer->priv=NULL;
 }
 
 /* ================== STREAM_TV ===================== */
@@ -668,7 +671,12 @@ int tv_init(tvi_handle_t *tvh)
 
 int tv_uninit(tvi_handle_t *tvh)
 {
-    return(tvh->functions->uninit(tvh->priv));
+    int res;
+    if(!tvh) return 1;
+    if (!tvh->priv) return 1;
+    res=tvh->functions->uninit(tvh->priv);
+    if(res) tvh->priv=NULL;
+    return res;
 }
 
 /* utilities for mplayer (not mencoder!!) */
