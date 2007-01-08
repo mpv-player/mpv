@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21802  -->
+<!-- synced with r21849  -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
@@ -3111,13 +3111,13 @@ cropdetect:
 Теперь мы готовы произвести двухпроходное кодирование. Проход первый:
 <screen>
 mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</replaceable> -ovc lavc \
-    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
+    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:autoaspect:vpass=1 \
     -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2
 </screen>
 И второй проход с теми же параметрами, за исключением <option>vpass=2</option>:
 <screen>
 mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</replaceable> -ovc lavc \
-    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
+    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:autoaspect:vpass=2 \
     -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2
 </screen>
 </para>
@@ -3126,7 +3126,7 @@ mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</
 Опции <option>v4mv:mbd=2:trell</option> значительно улучшат качество ценой
 времени кодирования. Нет никаких оснований отключать эти
 опции, когда главным критерием является качество. Опции 
-<option>cmp=3:subcmp=3:mbcmp=3</option> выбирают функцию сравнения, дающую
+<option>cmp=3:subcmp=3</option> выбирают функцию сравнения, дающую
 лучшее качество, чем стандартная. Вы можете поэкспериментировать с этим параметром
 (возможные значения смотрите на man странице), поскольку разные функции могут
 давать разный прирост в качестве в зависимости от исходного материала.
@@ -4654,8 +4654,8 @@ DVD с NTSC Pullup:
 </para>
 
 <para>
-2.35:1 or "кинематографический" PAL
-<screen>-vf scale="720:432,expand=720:576 -lavcopts aspect=16/9</screen>
+2.35:1 or "Кинематографический" PAL
+<screen>-vf scale=720:432,expand=720:576 -lavcopts aspect=16/9</screen>
 Для вычисления правильного размера масштабирования используйте расширинную
 ширину PAL 1024/2.35 = 432
 </para>
