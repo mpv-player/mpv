@@ -493,7 +493,7 @@ static int check_status(int fd_frontend, int tmout)
 
 #ifdef HAVE_DVB_HEAD
 
-static struct diseqc_cmd {
+struct diseqc_cmd {
    struct dvb_diseqc_master_cmd cmd;
    uint32_t wait;
 };
