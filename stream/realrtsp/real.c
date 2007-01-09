@@ -649,6 +649,7 @@ init_real_rtsp_session (void)
 
   real_rtsp_session = malloc (sizeof (struct real_rtsp_session_t));
   real_rtsp_session->recv = xbuffer_init (BUF_SIZE);
+  real_rtsp_session->rdteof = 0;
 
   return real_rtsp_session;
 }

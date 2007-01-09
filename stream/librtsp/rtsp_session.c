@@ -208,6 +208,8 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
     (char *) (this->real_session->recv + this->real_session->recv_read);
   int fill = this->real_session->recv_size - this->real_session->recv_read;
 
+  if(this->real_session->rdteof)
+    return -1;
   if (len < 0) return 0;
   if (this->real_session->recv_size < 0) return -1;
   while (to_copy > fill) {
@@ -218,8 +220,10 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
     this->real_session->recv_read = 0;
     this->real_session->recv_size =
       real_get_rdt_chunk (this->s, (char **)&(this->real_session->recv));
-    if (this->real_session->recv_size < 0)
-      return -1;
+    if (this->real_session->recv_size < 0) {
+      this->real_session->rdteof = 1;
+      this->real_session->recv_size = 0;
+    }
     source = (char *) this->real_session->recv;
     fill = this->real_session->recv_size;
 

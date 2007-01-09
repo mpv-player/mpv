@@ -45,6 +45,8 @@ struct real_rtsp_session_t {
   uint8_t header[HEADER_SIZE];
   int header_len;
   int header_read;
+
+  int rdteof;
 };
 
 int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer);
