@@ -3,9 +3,11 @@ MPlayer (1.0)
   rc2
 
     DOCS:
-    * Russian man page translation started
     * console messages and XML documentation converted to UTF-8
+    * Russian documentation translation finished
+    * Russian man page translation started
     * Chinese man page updated
+    * Chinese documentation translation started
 
     Decoders:
     * Intel Music Coder audio decoding via lavc
