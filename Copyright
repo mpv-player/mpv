@@ -68,7 +68,7 @@ Copyright:  1998, 1999 Eric Smith <eric@brouhaha.com>
 License:    GNU General Public License
 
 Name:       libmpeg2
-Version:    0.4.0b + patches
+Version:    0.4.1 + patches
 Homepage:   http://libmpeg2.sourceforge.net/
 Directory:  libmpeg2
 Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
