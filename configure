@@ -5818,11 +5818,11 @@ EOF
   cc_check -ldts $_ld_lm && _libdts=yes
 fi
 if test "$_libdts" = yes ; then
-  _def_libdts='#define CONFIG_DTS 1'
+  _def_libdts='#define CONFIG_LIBDTS 1'
   _ld_extra="$_ld_extra -ldts"
   _codecmodules="libdts $_codecmodules"
 else
-  _def_libdts='#undef CONFIG_DTS'
+  _def_libdts='#undef CONFIG_LIBDTS'
   _nocodecmodules="libdts $_nocodecmodules"
 fi
 echores "$_libdts"
@@ -7506,7 +7506,7 @@ LIBDV = $_libdv
 XVID4 = $_xvid
 X264 = $_x264
 LIBNUT = $_nut
-CONFIG_DTS = $_libdts
+CONFIG_LIBDTS = $_libdts
 MPLAYER = $_mplayer
 MENCODER = $_mencoder
 CDDA = $_cdda
