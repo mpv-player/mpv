@@ -4,7 +4,6 @@
 #include "config.h"
 
 #ifndef HAVE_GLOB
-#ifdef __MINGW32__
 #include <windows.h>
 #include "glob.h"
 
@@ -71,7 +70,6 @@ void globfree(glob_t *pglob)
 	}
 	free(pglob->gl_pathv);
 }
-#endif     /*__MINGW32__*/
 #endif     /*HAVE_GLOB*/
 
 #if 0
