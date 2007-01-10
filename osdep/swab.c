@@ -2,7 +2,7 @@
 
 #ifndef	HAVE_SWAB
 /* system has no swab.  emulate via bswap */
-#include "bswap.h"
+#include "mpbswap.h"
 #include <unistd.h>
 
 void swab(const void *from, void *to, ssize_t n) {
