@@ -3411,8 +3411,10 @@ _strlcpy=no
 cc_check && _strlcpy=yes
 if test "$_strlcpy" = yes ; then
  _def_strlcpy='#define HAVE_STRLCPY 1'
+ _need_strlcpy=no
 else
  _def_strlcpy='#undef HAVE_STRLCPY'
+ _need_strlcpy=yes
 fi
 echores "$_strlcpy"
 
@@ -3425,8 +3427,10 @@ _strlcat=no
 cc_check && _strlcat=yes
 if test "$_strlcat" = yes ; then
  _def_strlcat='#define HAVE_STRLCAT 1'
+ _need_strlcat=no
 else
  _def_strlcat='#undef HAVE_STRLCAT'
+ _need_strlcat=yes
 fi
 echores "$_strlcat"
 
@@ -7488,6 +7492,8 @@ NEED_FTELLO  = $_need_ftello
 NEED_GLOB    = $_need_glob
 NEED_SCANDIR = $_need_scandir
 NEED_SETENV  = $_need_setenv
+NEED_STRLCAT = $_need_strlcat
+NEED_STRLCPY = $_need_strlcpy
 NEED_STRSEP  = $_need_strsep
 NEED_SWAB    = $_need_swab
 NEED_VSSCANF = $_need_vsscanf

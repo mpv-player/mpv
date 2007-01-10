@@ -3,8 +3,6 @@ include ../config.mak
 
 LIBNAME = libosdep.a
 
-SRCS= strl.c \
-
 SRCS-$(HAVE_SYS_MMAN_H)       += mmap_anon.c
 SRCS-$(MACOSX_FINDER_SUPPORT) += macosx_finder_args.c
 ifneq ($(TARGET_OS),MINGW32)
@@ -16,6 +14,8 @@ SRCS-$(NEED_FTELLO)           += ftello.c
 SRCS-$(NEED_GETTIMEOFDAY)     += gettimeofday.c
 SRCS-$(NEED_SCANDIR)          += scandir.c
 SRCS-$(NEED_SETENV)           += setenv.c
+SRCS-$(NEED_STRLCAT)          += strlcat.c
+SRCS-$(NEED_STRLCPY)          += strlcpy.c
 SRCS-$(NEED_STRSEP)           += strsep.c
 SRCS-$(NEED_SWAB)             += swab.c
 SRCS-$(NEED_VSSCANF)          += vsscanf.c
