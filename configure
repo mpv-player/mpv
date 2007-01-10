@@ -3439,8 +3439,10 @@ _fseeko=no
 cc_check && _fseeko=yes
 if test "$_fseeko" = yes ; then
  _def_fseeko='#define HAVE_FSEEKO 1'
+ _need_fseeko=no
 else
  _def_fseeko='#undef HAVE_FSEEKO'
+ _need_fseeko=yes
 fi
 echores "$_fseeko"
 
@@ -7234,8 +7236,10 @@ _ftello=no
 cc_check && _ftello=yes
 if test "$_ftello" = yes ; then
  _def_ftello='#define HAVE_FTELLO 1'
+ _need_ftello=no
 else
  _def_ftello='#undef HAVE_FTELLO'
+ _need_ftello=yes
 fi
 echores "$_ftello"
 
@@ -7479,6 +7483,8 @@ HAVE_XVMC_ACCEL = $_xvmc
 
 HAVE_SYS_MMAN_H = _mman
 
+NEED_FSEEKO  = $_need_fseeko
+NEED_FTELLO  = $_need_ftello
 NEED_GLOB    = $_need_glob
 NEED_SCANDIR = $_need_scandir
 NEED_SETENV  = $_need_setenv

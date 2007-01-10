@@ -4,13 +4,11 @@
  */
 
 #include "config.h"
- 
-#if !defined(HAVE_FSEEKO) || !defined(HAVE_FTELLO)
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#endif
 
 #ifdef WIN32
 #define flockfile
@@ -25,7 +23,6 @@
  *	This is thread-safe on BSD/OS using flockfile/funlockfile.
  */
 
-#ifndef HAVE_FSEEKO
 int
 fseeko(FILE *stream, off_t offset, int whence)
 {
@@ -68,17 +65,3 @@ failure:
 	funlockfile(stream);
 	return -1;
 }
-#endif
-
-
-#ifndef HAVE_FTELLO
-off_t
-ftello(FILE *stream)
-{
-	fpos_t floc;
-
-	if (fgetpos(stream, &floc) != 0)
-		return -1;
-	return floc;
-}
-#endif

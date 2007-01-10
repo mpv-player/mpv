@@ -4,7 +4,6 @@ include ../config.mak
 LIBNAME = libosdep.a
 
 SRCS= strl.c \
-      fseeko.c \
 
 SRCS-$(HAVE_SYS_MMAN_H)       += mmap_anon.c
 SRCS-$(MACOSX_FINDER_SUPPORT) += macosx_finder_args.c
@@ -12,6 +11,8 @@ ifneq ($(TARGET_OS),MINGW32)
 SRCS-$(STREAM_CACHE)          += shmem.c
 endif
 
+SRCS-$(NEED_FSEEKO)           += fseeko.c
+SRCS-$(NEED_FTELLO)           += ftello.c
 SRCS-$(NEED_GETTIMEOFDAY)     += gettimeofday.c
 SRCS-$(NEED_SCANDIR)          += scandir.c
 SRCS-$(NEED_SETENV)           += setenv.c
