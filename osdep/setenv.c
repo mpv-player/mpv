@@ -1,6 +1,6 @@
 /* setenv implementation for systems lacking it. */
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef HAVE_SETENV
 
