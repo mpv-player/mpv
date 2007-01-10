@@ -3378,8 +3378,10 @@ _scandir=no
 cc_check && _scandir=yes
 if test "$_scandir" = yes ; then
  _def_scandir='#define HAVE_SCANDIR 1'
+ _need_scandir=no
 else
  _def_scandir='#undef HAVE_SCANDIR'
+ _need_scandir=yes
 fi
 echores "$_scandir"
 
@@ -3393,8 +3395,10 @@ _strsep=no
 cc_check && _strsep=yes
 if test "$_strsep" = yes ; then
  _def_strsep='#define HAVE_STRSEP 1'
+ _need_strsep=no
 else
  _def_strsep='#undef HAVE_STRSEP'
+ _need_strsep=yes
 fi
 echores "$_strsep"
 
@@ -3463,8 +3467,10 @@ _vsscanf=no
 cc_check && _vsscanf=yes
 if test "$_vsscanf" = yes ; then
   _def_vsscanf='#define HAVE_VSSCANF 1'
+  _need_vsscanf=no
 else
   _def_vsscanf='#undef HAVE_VSSCANF'
+  _need_vsscanf=yes
 fi
 echores "$_vsscanf"
 
@@ -3478,8 +3484,10 @@ _swab=no
 cc_check && _swab=yes
 if test "$_swab" = yes ; then
   _def_swab='#define HAVE_SWAB 1'
+  _need_swab=no
 else
   _def_swab='#undef HAVE_SWAB'
+  _need_swab=yes
 fi
 echores "$_swab"
 
@@ -3529,8 +3537,10 @@ _glob=no
 cc_check && _glob=yes
 if test "$_glob" = yes ; then
   _def_glob='#define HAVE_GLOB 1'
+  _need_glob=no
 else
   _def_glob='#undef HAVE_GLOB'
+  _need_glob=yes
 fi
 echores "$_glob"
 
@@ -3544,8 +3554,10 @@ _setenv=no
 cc_check && _setenv=yes
 if test "$_setenv" = yes ; then
   _def_setenv='#define HAVE_SETENV 1'
+  _need_setenv=no
 else
   _def_setenv='#undef HAVE_SETENV'
+  _need_setenv=yes
 fi
 echores "$_setenv"
 
@@ -7464,6 +7476,15 @@ HAVE_MLIB = $_mlib
 HAVE_PTHREADS = $_pthreads
 
 HAVE_XVMC_ACCEL = $_xvmc
+
+HAVE_SYS_MMAN_H = _mman
+
+NEED_GLOB    = $_need_glob
+NEED_SCANDIR = $_need_scandir
+NEED_SETENV  = $_need_setenv
+NEED_STRSEP  = $_need_strsep
+NEED_SWAB    = $_need_swab
+NEED_VSSCANF = $_need_vsscanf
 
 # for FFmpeg
 SRC_PATH=..

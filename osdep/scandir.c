@@ -6,8 +6,6 @@
 
 #include "config.h"
 
-#ifndef	HAVE_SCANDIR
-
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdlib.h>
@@ -118,7 +116,6 @@ error:
     }
     return -1;
 }
-#endif
 
 
 #if	STANDALONE_MAIN

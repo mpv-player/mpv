@@ -1,6 +1,5 @@
 #include "config.h"
 
-#ifndef	HAVE_VSSCANF
 /* system has no vsscanf.  try to provide one */
 
 #include <stdio.h>
@@ -17,4 +16,3 @@ vsscanf(const char *str, const char *format, va_list ap)
     long p5 = va_arg(ap, long);
     return sscanf(str, format, p1, p2, p3, p4, p5);
 }
-#endif

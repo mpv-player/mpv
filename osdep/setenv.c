@@ -2,8 +2,6 @@
 
 #include "config.h"
 
-#ifndef HAVE_SETENV
-
 #include <stdlib.h>
 #include <string.h>
 #ifndef MP_DEBUG
@@ -26,4 +24,3 @@ int setenv(const char *name, const char *val, int overwrite)
 
   return 0;
 }
-#endif

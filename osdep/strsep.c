@@ -5,7 +5,6 @@
 
 #include "config.h"
 
-#ifndef HAVE_STRSEP
 char *strsep(char **stringp, const char *delim) {
   char *begin, *end;
 
@@ -39,4 +38,3 @@ char *strsep(char **stringp, const char *delim) {
  
   return begin;
 }
-#endif

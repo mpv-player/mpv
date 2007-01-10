@@ -3,7 +3,6 @@
  * \brief Provide a compatible anonymous space mapping function
  */
 #include "config.h"
-#ifdef HAVE_SYS_MMAN_H
 
 #include <stdio.h>
 #include <unistd.h>
@@ -63,5 +62,3 @@ void *mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)
 
     return result;
 }
-
-#endif /* HAVE_SYS_MMAN_H */

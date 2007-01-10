@@ -3,7 +3,6 @@
 
 #include "config.h"
 
-#ifndef HAVE_GLOB
 #include <windows.h>
 #include "glob.h"
 
@@ -85,4 +84,3 @@ int main(){
    
    return 0;
 }
-#endif
