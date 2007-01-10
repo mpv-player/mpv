@@ -2898,11 +2898,12 @@ telecine filter, such as <option>pullup</option> or
 <option>filmdint</option>.
 </para>
 
-<para>
+<para id="menc-feat-dvd-mpeg4-example-crop">
 Next, we want to determine the appropriate crop rectangle, so we use the
 cropdetect filter:
 <screen>mplayer dvd://1 -vf cropdetect</screen>
-Make sure you seek to a fully filled frame (such as a bright scene), and
+Make sure you seek to a fully filled frame (such as a bright scene,
+past the opening credits and logos), and
 you will see in <application>MPlayer</application>'s console output:
 <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
 We then play the movie back with this filter to test its correctness:
@@ -4076,6 +4077,321 @@ and development advancements, you may get very different results.
 </tgroup>
 </informaltable>
 </sect2>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="menc-feat-quicktime-7">
+<title>Using <application>MEncoder</application> to create
+<application>QuickTime</application>-compatible files</title>
+
+
+<sect2 id="menc-feat-quicktime-7-why-use-it">
+<title>Why would one want to produce <application>QuickTime</application>-compatible Files?</title>
+
+<para>
+  There are several reasons why producing
+  <application>QuickTime</application>-compatible files can be desirable.
+</para>
+<itemizedlist>
+<listitem><para>
+  You want any computer illiterate to be able to watch your encode on
+  any major platform (Windows, Mac OSX, Unices &hellip;).
+</para></listitem>
+<listitem><para>
+  <application>QuickTime</application> is able to take advantage of more
+  hardware and software acceleration features of Mac OSX than
+  platform-independent players like <application>MPlayer</application>
+  or <application>VLC</application>.
+  That means that your encodes have a chance to be played smoothly by older
+  G4-powered machines.
+</para></listitem>
+<listitem><para>
+  <application>QuickTime</application> 7 support the next-generation codec H.264,
+  which yields significantly better picture quality than previous codec
+  generations (MPEG-2, MPEG-4 &hellip;).
+</para></listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-constraints">
+<title><application>QuickTime</application> 7 limitations</title>
+
+<para>
+  <application>QuickTime</application> 7 supports H.264 video and AAC audio,
+  but it does not support them muxed in AVI container format.
+  However, you can use <application>MEncoder</application> to encode
+  the video and audio, and then use an external program such as
+  <application>mp4creator</application> (part of the
+  <ulink url="http://mpeg4ip.sourceforge.net/">MPEG4IP suite</ulink>)
+  to remux the video and audio tracks into an MP4 container.
+</para>
+
+<para>
+  <application>QuickTime</application>'s support for H.264 is limited,
+  so you will need to drop some advanced features.
+  If you encode your video with features that
+  <application>QuickTime</application> 7 does not support,
+  <application>QuickTime</application>-based players will show you a pretty
+  white screen instead of your expected video.
+</para>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">B-frames</emphasis>:
+  <application>QuickTime</application> 7 supports a maximum of 1 B-frame, i.e.
+  <option>-x264encopts bframes=1</option>.  This means that
+  <option>b_pyramid</option> and <option>weight_b</option> will have no
+  effect, since they require <option>bframes</option> to be greater than 1.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Macroblocks</emphasis>:
+  <application>QuickTime</application> 7 does not support 8x8 DCT macroblocks.
+  This option (<option>8x8dct</option>) is off by default, so just be sure
+  not to explicitly enable it.  This also means that the <option>i8x8</option>
+  option will have no effect, since it requires <option>8x8dct</option>.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Aspect ratio</emphasis>:
+  <application>QuickTime</application> 7 does not support SAR (sample
+  aspect ratio) information in MPEG-4 files; it assumes that SAR=1.  Read
+  <link linkend="menc-feat-quicktime-7-scale">the section on scaling</link>
+  for a workaround.
+</para></listitem>
+</itemizedlist>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-crop">
+<title>Cropping</title>
+<para>
+  Suppose you want to rip your freshly bought copy of "The Chronicles of
+  Narnia" Your DVD is region 1,
+  which means it is NTSC.  The example below would still apply to PAL,
+  except you would omit <option>-ofps 24000/1001</option> and use slightly
+  different <option>crop</option> and <option>scale</option> dimensions.
+</para>
+
+<para>
+  After running <option>mplayer dvd://1</option>, you follow the process
+  detailed in the section <link linkend="menc-feat-telecine">How to deal
+  with telecine and interlacing in NTSC DVDs</link> and discover that it is
+  24000/1001 fps progressive video.  This simplifies the process somewhat,
+  since you do not need to use an inverse telecine filter such as
+  <option>pullup</option> or a deinterlacing filter such as
+  <option>yadif</option>.
+</para>
+
+<para>
+  Next, you need to crop out the black bars from the top and bottom of the
+  video, as detailed in <link linkend="menc-feat-dvd-mpeg4-example-crop">this</link>
+  previous section.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-scale">
+<title>Scaling</title>
+
+<para>
+  The next step is truly heartbreaking.
+  <application>QuickTime</application> 7 does not support MPEG-4 videos
+  with a sample aspect ratio other than 1, so you will need to upscale
+  (which wastes a lot of disk space) or downscale (which loses some
+  details of the source) the video to square pixels.
+  Either way you do it, this is highly inefficient, but simply can not
+  be avoided if you want your video to be playable by
+  <application>QuickTime</application> 7.
+  <application>MEncoder</application> can apply the appropriate upscaling
+  or downscaling by specifying respectively <option>-vf scale=-10:-1</option>
+  or <option>-vf scale=-1:-10</option>.
+  This will scale your video to the correct width for the cropped height,
+  rounded to the closest multiple of 16 for optimal compression.
+  Remember that if you are cropping, you should crop first, then scale:
+
+  <screen>-vf crop=720:352:0:62,scale=-10:-1</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-avsync">
+<title>A/V sync</title>
+
+<para>
+  Because you will be remuxing into a different container, you should
+  always use the <option>harddup</option> option to ensure that duplicated
+  frames are actually duplicated in the video output.  Without this option,
+  <application>MEncoder</application> will simply put a marker in the video
+  stream that a frame was duplicated, and rely on the client software to
+  show the same frame twice.  Unfortunately, this "soft duplication" does
+  not survive remuxing, so the audio would slowly lose sync with the video.
+</para>
+
+<para>
+  The final filter chain looks like this:
+  <screen>-vf crop=720:352:0:62,scale=-10:-1,harddup</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-bitrate">
+<title>Bitrate</title>
+
+<para>
+  As always, the selection of bitrate is a matter the technical properties
+  of the source, as explained
+  <link linkend="menc-feat-dvd-mpeg4-resolution-bitrate">here</link>, as
+  well as a matter of taste.
+  This movie has a fair bit of action and lots of detail, but H.264 video
+  looks good at much lower bitrates than XviD or other MPEG-4 codecs.
+  After much experimentation, the author of this guide chose to encode
+  this movie at 900kbps, and thought that it looked very good.
+  You may decrease bitrate if you need to save more space, or increase
+  it if you need to improve quality.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-example">
+<title>Encoding example</title>
+
+<para>
+  You are now ready to encode the video.  Since you care about
+  quality, of course you will be doing a two-pass encode.  To shave off
+  some encoding time, you can specify the <option>turbo</option> option
+  on the first pass; this reduces <option>subq</option> and
+  <option>frameref</option> to 1.  To save some disk space, you can
+  use the <option>ss</option> option to strip off the first few seconds
+  of the video.  (I found that this particular movie has 32 seconds of
+  credits and logos.)  <option>bframes</option> can be 0 or 1.
+  The other options are documented in <link
+  linkend="menc-feat-x264-encoding-options-speedvquality">Encoding with
+  the <systemitem class="library">x264</systemitem> codec</link> and
+  the man page.
+
+  <screen>mencoder dvd://1 -o /dev/null -ss 32 -ovc x264 \
+-x264encopts pass=1:turbo:bitrate=900:bframes=1:\
+me=umh:4x4mv:trellis=1:qp_step=4:qcomp=0.7:direct_pred=3:keyint=300 \
+-vf crop=720:352:0:62,scale=-10:-1,harddup \
+-oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-ofps 24000/1001</screen>
+
+  If you have multi-processor machine, you can add
+  <option>threads=auto</option>.  This increases encoding speed by about
+  94% per CPU core, with very little quality penalty (about 0.005dB for
+  dual processor, about 0.01dB for a quad processor machine).
+</para>
+
+<para>
+  The second pass is the same, except that you specify the output file
+  and set <option>pass=2</option>.
+
+  <screen>mencoder dvd://1 <emphasis role="bold">-o narnia.avi</emphasis> -ss 32 -ovc x264 \
+-x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
+me=umh:4x4mv:trellis=1:qp_step=4:qcomp=0.7:direct_pred=3:keyint=300 \
+-vf crop=720:352:0:62,scale=-10:-1,harddup \
+-oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-ofps 24000/1001</screen>
+</para>
+
+<para>
+  The resulting AVI should play perfectly in
+  <application>MPlayer</application>, but of course
+  <application>QuickTime</application> can not play it because it does
+  not support H.264 muxed in AVI.
+  So the next step is to remux the video into an MP4 container.
+</para>
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-remux">
+<title>Remuxing as MP4</title>
+
+<para>
+  There are several ways to remux AVI files to MP4.  You can use
+  <application>mp4creator</application>, which is part of the
+  <ulink url="http://mpeg4ip.sourceforge.net/">MPEG4IP suite</ulink>.
+</para>
+
+<para>
+  First, demux the AVI into separate audio and video streams using
+  <application>MPlayer</application>.
+
+  <screen>mplayer narnia.avi -dumpaudio -dumpfile narnia.aac
+mplayer narnia.avi -dumpvideo -dumpfile narnia.h264</screen>
+
+  The filenames are important; <application>mp4creator</application>
+  requires that AAC audio streams be named <systemitem>.aac</systemitem>
+  and H.264 video streams be named <systemitem>.h264</systemitem>.
+</para>
+
+<para>
+  Now use <application>mp4creator</application> to create a new
+  MP4 file out of the audio and video streams.
+
+  <screen>mp4creator -create=narnia.aac narnia.mp4
+mp4creator -create=narnia.h264 -rate=23.976 narnia.mp4</screen>
+
+  Unlike the encoding step, you must specify the framerate as a
+  decimal (such as 23.976), not a fraction (such as 24000/1001).
+</para>
+
+<para>
+  This <systemitem>narnia.mp4</systemitem> file should now be playable
+  with any <application>QuickTime</application> 7 application, such as
+  <application>QuickTime Player</application> or
+  <application>iTunes</application>.  If you are planning to view the
+  video in a web browser with the <application>QuickTime</application>
+  plugin, you should also hint the movie so that the
+  <application>QuickTime</application> plugin can start playing it
+  while it is still downloading.  <application>mp4creator</application>
+  can create these hint tracks:
+
+  <screen>mp4creator -hint=1 narnia.mp4
+mp4creator -hint=2 narnia.mp4
+mp4creator -optimize narnia.mp4</screen>
+
+  You can check the final result to ensure that the hint tracks were
+  created successfully:
+
+  <screen>mp4creator -list narnia.mp4</screen>
+
+  You should see a list of tracks: 1 audio, 1 video, and 2 hint tracks.
+
+<screen>Track   Type    Info
+1       audio   MPEG-4 AAC LC, 8548.714 secs, 190 kbps, 48000 Hz
+2       video   H264 Main@5.1, 8549.132 secs, 899 kbps, 848x352 @ 23.976001 fps
+3       hint    Payload mpeg4-generic for track 1
+4       hint    Payload H264 for track 2
+</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-metadata">
+<title>Adding metadata tags</title>
+
+<para>
+  If you want to add tags to your video that show up in iTunes, you can use
+  <ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>.
+  
+  <screen>AtomicParsley narnia.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
+
+  The <option>--metaEnema</option> option removes any existing metadata
+  (<application>mp4creator</application> inserts its name in the 
+  "encoding tool" tag), and <option>--freefree</option> reclaims the
+  space from the deleted metadata.
+  The <option>--stik</option> option sets the type of video (such as Movie
+  or TV Show), which iTunes uses to group related video files.
+  The <option>--overWrite</option> option overwrites the original file;
+  without it, <application>AtomicParsley</application> creates a new
+  auto-named file in the same directory and leaves the original file
+  untouched.
+</para>
+
+</sect2>
+
 </sect1>
 
 
