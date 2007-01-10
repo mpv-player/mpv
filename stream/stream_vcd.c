@@ -13,7 +13,7 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#if defined(__FreeBSD__) || defined(__DragonFly__)
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
 #include <sys/cdrio.h>
 #include "vcd_read_fbsd.h" 
 #elif defined(__NetBSD__) || defined (__OpenBSD__)
@@ -71,7 +71,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   int ret,ret2,f;
   mp_vcd_priv_t* vcd;
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
   int bsize = VCD_SECTOR_SIZE;
 #endif
 
@@ -119,7 +119,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
   mp_msg(MSGT_OPEN,MSGL_V,"VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
   if (ioctl (f, CDRIOCSETBLOCKSIZE, &bsize) == -1) {
     mp_msg(MSGT_OPEN,MSGL_WARN,"Error in CDRIOCSETBLOCKSIZE");
   }

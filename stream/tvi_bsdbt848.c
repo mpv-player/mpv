@@ -44,7 +44,7 @@
 #elif defined(__DragonFly__)
 #include <dev/video/meteor/ioctl_meteor.h>
 #include <dev/video/bktr/ioctl_bt848.h>
-#elif __FreeBSD_version >= 502100
+#elif (__FreeBSD_version >= 502100) || defined(__FreeBSD_kernel__)
 #include <dev/bktr/ioctl_meteor.h>
 #include <dev/bktr/ioctl_bt848.h>
 #else

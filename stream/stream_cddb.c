@@ -41,7 +41,7 @@
 
 #if defined(__linux__)
 	#include <linux/cdrom.h>
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 	#include <sys/cdio.h>
 #elif defined(WIN32)
         #include <ddk/ntddcdrm.h>
@@ -110,7 +110,7 @@ read_toc(const char *dev) {
 		cdtoc[i].sec = tocentry.cdte_addr.msf.second;
 		cdtoc[i].frame = tocentry.cdte_addr.msf.frame;
 	}
-#elif defined(__FreeBSD__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
 	{
 	struct ioc_toc_header tochdr;
 	ioctl(drive, CDIOREADTOCHEADER, &tochdr);

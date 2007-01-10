@@ -105,7 +105,7 @@ hpux()    { issystem "HP-UX"   ; return "$?" ; }
 irix()    { issystem "IRIX"    ; return "$?" ; }
 aix()     { issystem "AIX"     ; return "$?" ; }
 cygwin()  { issystem "CYGWIN"  ; return "$?" ; }
-freebsd() { issystem "FreeBSD" ; return "$?" ; }
+freebsd() { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; return "$?" ; }
 netbsd()  { issystem "NetBSD"  ; return "$?" ; }
 bsdos()   { issystem "BSD/OS"  ; return "$?" ; }
 openbsd() { issystem "OpenBSD" ; return "$?" ; }
@@ -558,6 +558,9 @@ if test -z "$_target" ; then
   IRIX*)
     system_name=IRIX
     ;;
+  GNU/kFreeBSD)
+    system_name=FreeBSD
+    ;;
   HP-UX*)
     system_name=HP-UX
     ;;
@@ -618,6 +621,7 @@ else # if test -z "$_target"
   case "`echo $system_name | tr A-Z a-z`" in
     linux) system_name=Linux ;;
     freebsd) system_name=FreeBSD ;;
+    gnu/kfreebsd) system_name=FreeBSD ;;
     netbsd) system_name=NetBSD ;;
     bsd/os) system_name=BSD/OS ;;
     openbsd) system_name=OpenBSD ;;
@@ -8070,7 +8074,7 @@ $_def_vcd
 #elif defined(__OpenBSD__)
 #define DEFAULT_CDROM_DEVICE	"/dev/rcd0a"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 #define DEFAULT_CDROM_DEVICE	"/dev/acd0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #else

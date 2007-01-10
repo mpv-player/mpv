@@ -62,7 +62,7 @@
 /* OS depended stuff */
 #if defined (linux)
 #include "sysdep/pci_linux.c"
-#elif defined (__FreeBSD__) || defined(__DragonFly__)
+#elif defined (__FreeBSD__) || defined (__FreeBSD_kernel__) || defined(__DragonFly__)
 #include "sysdep/pci_freebsd.c"
 #elif defined (__386BSD__)
 #include "sysdep/pci_386bsd.c"
