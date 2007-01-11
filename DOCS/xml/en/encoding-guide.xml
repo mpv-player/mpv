@@ -4273,7 +4273,7 @@ and development advancements, you may get very different results.
 
   <screen>mencoder dvd://1 -o /dev/null -ss 32 -ovc x264 \
 -x264encopts pass=1:turbo:bitrate=900:bframes=1:\
-me=umh:4x4mv:trellis=1:qp_step=4:qcomp=0.7:direct_pred=3:keyint=300 \
+me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
 -vf crop=720:352:0:62,scale=-10:-1,harddup \
 -oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
@@ -4290,7 +4290,7 @@ me=umh:4x4mv:trellis=1:qp_step=4:qcomp=0.7:direct_pred=3:keyint=300 \
 
   <screen>mencoder dvd://1 <emphasis role="bold">-o narnia.avi</emphasis> -ss 32 -ovc x264 \
 -x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
-me=umh:4x4mv:trellis=1:qp_step=4:qcomp=0.7:direct_pred=3:keyint=300 \
+me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
 -vf crop=720:352:0:62,scale=-10:-1,harddup \
 -oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
