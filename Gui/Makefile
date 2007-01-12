@@ -2,7 +2,7 @@ include ../config.mak
 
 LIBNAME = libgui.a
 
-CFLAGS = -I../loader -I./wm -I./skin
+CFLAGS = -I../loader -I./wm -I./skin -I../libavutil/
 #CFLAGS += -DDEBUG
 
 ifeq ($(TARGET_WIN32),yes)
