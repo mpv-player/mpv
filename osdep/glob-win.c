@@ -69,7 +69,6 @@ void globfree(glob_t *pglob)
 	}
 	free(pglob->gl_pathv);
 }
-#endif     /*HAVE_GLOB*/
 
 #if 0
 int main(){
@@ -84,3 +83,4 @@ int main(){
    
    return 0;
 }
+#endif
