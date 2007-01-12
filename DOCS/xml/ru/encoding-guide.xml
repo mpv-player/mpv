@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21849 -->
+<!-- synced with r21879 -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
@@ -4215,6 +4215,347 @@ man страницы <application>MPlayer</application>'а.
 </tgroup>
 </informaltable>
 </sect2>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="menc-feat-quicktime-7">
+<title>Использование <application>MEncoder</application> 
+для создания совместимых с <application>QuickTime</application>
+файлов</title>
+
+
+<sect2 id="menc-feat-quicktime-7-why-use-it">
+<title>Зачем необходимо создавать совместимые с <application>QuickTime</application>
+файлы?</title>
+
+<para>
+  Есть несколько причин, по которым создание 
+  <application>QuickTime</application>-совместимых файлов может быть
+  желательно.
+</para>
+<itemizedlist>
+<listitem><para>
+  Вы хотите, чтобы любой компьютерно неграмотный человек мог смотреть
+  результат Вашего кодирования на большинстве платформ (Windows, Mac OSX, Unices &hellip;).
+</para></listitem>
+<listitem><para>
+  <application>QuickTime</application> 
+  позволяет воспользоваться преимуществами большего числа возможностей
+  аппаратного и программного ускорения на Mac OSX, чем платформо-независимые
+  плееры наподобие <application>MPlayer</application> или
+  <application>VLC</application>.
+  Это означает, что Ваше кодирование имеет шансы плавно воспроизводиться
+  на старых машинах, оснащённых G4.
+</para></listitem>
+<listitem><para>
+  <application>QuickTime</application> 7 поддерживает кодек нового поколения
+  H.264, который даёт существенно лучшее качество изображения, чем 
+  предыдущие поколения кодеков (MPEG-2, MPEG-4 &hellip;).
+</para></listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-constraints">
+<title>Ограничения <application>QuickTime</application> 7</title>
+
+<para>
+  <application>QuickTime</application> 7 поддерживает H.264 видео и 
+  AAC аудио, но не поддерживает их мультиплексирование в формат 
+  контейнера AVI.
+  Однако, Вы можете использовать <application>MEncoder</application> 
+  для кодирования видео и аудио, а потом использовать внешнюю 
+  программу, такую как <application>mp4creator</application> (часть
+  <ulink url="http://mpeg4ip.sourceforge.net/">пакета MPEG4I</ulink>)
+  для ремультиплексирования видео и аудио дорожек в контейнер MP4.
+</para>
+
+<para>
+  Поддержка H.264 в <application>QuickTime</application> ограничена,
+  так что Вам придётся отказаться от нескольких продвинутых возможностей.
+  Если Вы кодируете видео с возможностями, не поддерживаемыми
+  <application>QuickTime</application> 7,
+  плееры, основанные на <application>QuickTime</application>,
+  покажут Вам милый белый экран вместо ожидаемого Вами видео.
+</para>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">B-кадры</emphasis>:
+  <application>QuickTime</application> 7 поддерживает максимум 1 B-кадр,
+  т.е. <option>-x264encopts bframes=1</option>. Это означает, что 
+  <option>b_pyramid</option> и <option>weight_b</option> не дадут 
+  эффекта, поскольку им необходимо, чтобы <option>bframes</option> 
+  было больше 1.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Макроблоки</emphasis>:
+  <application>QuickTime</application> 7 не поддерживает 8x8 DCT макроблоки.
+  Эта опция (<option>8x8dct</option>) выключена по умолчанию, так что 
+  просто удостоверьтесь, что явно её не задали.
+  Это также означает, что опция <option>i8x8</option> будет бесполезна,
+  т.к. ей необходима <option>8x8dct</option>.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Коэффициент соотношения сторон</emphasis>:
+  <application>QuickTime</application> 7 не поддерживает информацию
+  SAR (коэффициент пропорций пиксела, sample aspect ratio) 
+  в MPEG-4 файлах; он предполагает SAR=1. Прочтите
+  <link linkend="menc-feat-quicktime-7-scale">раздел о масштабировании</link>
+  для обхода проблемы.
+</para></listitem>
+</itemizedlist>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-crop">
+<title>Обрезание</title>
+<para>
+  Предположим, что Вы хотите сделать рип свежекупленной копии "Хроник
+  Нарнии" и Ваш регион DVD 1, что означает, что это NTSC.
+  Пример ниже будет также применим к PAL, за исключением того, что Вам 
+  нужно будет опустить <option>-ofps 24000/1001</option> и использовать
+  слегка отличающиеся размеры для <option>crop</option> и <option>scale</option>.
+</para>
+
+<para>
+  После запуска <option>mplayer dvd://1</option>, Вы следуете процессу, 
+  описанному в разделе <link linkend="menc-feat-telecine">Как работать 
+  с телесином и чересстрочной развёрткой на NTSC DVD</link> и обнаруживаете, 
+  что это 24000/1001 fps видео с построчной развёрткой. Это несколько 
+  упрощает обработку, поскольку Вам не нужно использовать фильтр 
+  обратного телесина, такой как <option>pullup</option>, или фильтр 
+  деинтерлейса, такой как <option>yadif</option>.
+</para>
+
+<para>
+  Затем Вам необходимо усечь чёрные полосы сверху и снизу видео, как 
+  описано в <link linkend="menc-feat-dvd-mpeg4-example-crop">этом</link>
+  разделе.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-scale">
+<title>Масштабирование</title>
+
+<para>
+  Следующий шаг действительно душераздирающий.
+  <application>QuickTime</application> 7 не поддерживает MPEG-4 видео 
+  с коэффициентом соотношения сторон пиксела, отличным от 1. Так что Вам 
+  придётся масштабировать видео либо в сторону увеличения (что впустую 
+  потратит много места на диске), либо в строну уменьшения (что приведёт 
+  к потере некоторых деталей источника) для квадратизации пикселов.
+  Какой бы способ Вы не выбрали, это будет крайне неэффективным, но 
+  не может быть опущено, если Вы хотите, чтоб Ваше видео воспроизводилось
+  с помощью <application>QuickTime</application> 7.
+  <application>MEncoder</application> может применить необходимое 
+  увеличивающее или уменьшающее масштабирование, если ему указать
+  <option>-vf scale=-10:-1</option> или <option>-vf scale=-1:-10</option>
+  соответственно.
+  Это отмасштабирует Ваше видео до корректной ширины для усечённой 
+  высоты, округлённой до ближайшего множителя 16 для оптимального 
+  сжатия.
+  Помните, что если производите обрезание, то нужно сперва обрезать, а лишь затем 
+  масштабировать:
+
+  <screen>-vf crop=720:352:0:62,scale=-10:-1</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-avsync">
+<title>A/V синхронизация</title>
+
+<para>
+  Поскольку Вы будете мультиплексировать в другой контейнер, Вы должны
+  всегда использовать опцию <option>harddup</option>, чтобы убедиться, 
+  что дублирующиеся кадры будут действительно дублироваться в полученном
+  видео. Без этой опции <application>MEncoder</application> будет просто
+  располагать маркер в видеопотоке о том, что кадр был повторен, и будет
+  полагаться на то, что клиентское программное обеспечение покажет кадр 
+  дважды. К сожалению, это "мягкое дублирование" не переживает 
+  ремультиплексирование, в результате чего аудио будет постепенно терять
+  синхронизацию с видео.
+</para>
+
+<para>
+  В итоге, цепочка фильтров выглядит следующим образом:
+  <screen>-vf crop=720:352:0:62,scale=-10:-1,harddup</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-bitrate">
+<title>Битпоток</title>
+
+<para>
+  Как обычно, выбор битпотока зависит от технических свойств исходного 
+  материала, как объясняется
+  <link linkend="menc-feat-dvd-mpeg4-resolution-bitrate">здесь</link>,
+  как, впрочем, и от личного вкуса.
+  Этот фильм обладает небольшим количеством движения и большим 
+  количеством деталей, но H.264 видео хорошо выглядит на существенно 
+  меньших битпотоках, чем XviD или другие MPEG-4 кодеки.
+  После длительного экспериментирования, автор данного руководства 
+  решил кодировать фильм на 900 кбит/сек, и считает, что он выглядит 
+  очень хорошо. Вы можете уменьшить битпоток, если Вам нужно сохранить
+  больше места, или увеличить, если Вам нужно улучшить качество.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-example">
+<title>Пример кодирования</title>
+
+<para>
+  Теперь Вы готовы к кодированию видео. Поскольку Вы заботитесь 
+  о качестве, Вы , разумеется, будете делать двупроходное кодирование.
+  Для некоторого сокращения времени кодирования, Вы можете указать
+  опцию <option>turbo</option> при первом проходе; это уменьшит
+  <option>subq</option> и <option>frameref</option> до 1. 
+  Чтобы сохранить немного места на диске, Вы можете использовать
+  параметр <option>ss</option> для отрезания первых нескольких 
+  секунд видео. (Я обнаружил, что, в частности, у данного фильма 
+  есть 32 секунды титров и логотипов.)
+  <option>bframes</option> может быть 0 или 1.
+  остальные опции описаны в разделе <link
+  linkend="menc-feat-x264-encoding-options-speedvquality">Кодирование
+  кодеком <systemitem class="library">x264</systemitem></link> и на
+  man странице.
+
+  <screen>mencoder dvd://1 -o /dev/null -ss 32 -ovc x264 \
+-x264encopts pass=1:turbo:bitrate=900:bframes=1:\
+me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
+-vf crop=720:352:0:62,scale=-10:-1,harddup \
+-oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-ofps 24000/1001</screen>
+
+  Если у Вас многопроцессорная машина, Вы можете добавить
+  <option>threads=auto</option>. Это увеличит скорость кодирования
+  на примерно 94% для каждого ядра CPU, при очень небольшом 
+  ухудшении качества (около 0.005дБ для двухпроцессорной
+  и 0.01дБ для четырёхпроцессорной машины).
+</para>
+
+<para>
+  Второй проход выполняется аналогично, за исключением того, что Вам 
+  нужно указать выходной файл и установить <option>pass=2</option>.
+
+  <screen>mencoder dvd://1 <emphasis role="bold">-o нарния.avi</emphasis> -ss 32 -ovc x264 \
+-x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
+me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
+-vf crop=720:352:0:62,scale=-10:-1,harddup \
+-oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-ofps 24000/1001</screen>
+</para>
+
+<para>
+  Получившееся AVI должно хорошо воспроизводиться в
+  <application>MPlayer</application>, но, конечно же,
+  <application>QuickTime</application> не сможет его воспроизвести, 
+  т.к. не поддерживает H.264, мультиплексированный в AVI.
+  Так что следующий шаг &mdash; ремультиплексирование видео в контейнер MP4.
+</para>
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-remux">
+<title>Ремультиплексирование в MP4</title>
+
+<para>
+  Существует несколько способов ремультиплексирования AVI файлов 
+  в MP4. Вы можете использовать <application>mp4creator</application>, 
+  являющийся частью
+  <ulink url="http://mpeg4ip.sourceforge.net/">пакета MPEG4IP</ulink>.
+</para>
+
+<para>
+  Сперва демультиплексируйте AVI в отдельные аудио и видео потоки 
+  с помощью <application>MPlayer</application>.
+
+  <screen>mplayer нарния.avi -dumpaudio -dumpfile нарния.aac
+mplayer нарния.avi -dumpvideo -dumpfile нарния.h264</screen>
+
+  Имена файлов важны; для <application>mp4creator</application>
+  необходимо, чтобы AAC аудио потоки назывались <systemitem>.aac</systemitem>
+  и H.264 видео потоки назывались <systemitem>.h264</systemitem>.
+</para>
+
+<para>
+  Теперь используйте <application>mp4creator</application> для создания 
+  нового MP4 файла из аудио и видео потоков.
+
+  <screen>mp4creator -create=нарния.aac нарния.mp4
+mp4creator -create=нарния.h264 -rate=23.976 нарния.mp4</screen>
+
+  В отличии от этапа кодирования, Вам нужно указать частоту кадров
+  как десятичную (например, 23.976), а не целую (например, 24000/1001)
+  дробь.
+</para>
+
+<para>
+  Теперь файл <systemitem>нарния.mp4</systemitem> должен проигрываться
+  с помощью любого <application>QuickTime</application> 7 приложения,
+  например, <application>QuickTime Player</application> или
+  <application>iTunes</application>. 
+  Если Вы планируете просмотр видео в вэб-браузере с помощью плагина 
+  
+  <!-- FIXME: как правильно перевести hint track? я выбрал вариант
+  "вспомогательная дорожка", но в правильности/оптимальности не уверен...  -->
+
+  <application>QuickTime</application>, Вам также необходимо 
+  модифицировать фильм таким образом, чтобы плагин
+  <application>QuickTime</application> мог начать его воспроизведение
+  ещё во время загрузки. <application>mp4creator</application>
+  может создать эти вспомогательные дорожки (т.н. hint tracks):
+
+  <screen>mp4creator -hint=1 нарния.mp4
+mp4creator -hint=2 нарния.mp4
+mp4creator -optimize нарния.mp4</screen>
+
+  Вы можете проверить полученный результат, чтобы убедиться, что 
+  вспомогательные дорожки были успешно созданы.
+
+  <screen>mp4creator -list нарния.mp4</screen>
+
+  Вы должны увидеть список дорожек: 1 аудио, 1 видео и 2 вспомогательных.
+
+<screen>Track   Type    Info
+1       audio   MPEG-4 AAC LC, 8548.714 secs, 190 kbps, 48000 Hz
+2       video   H264 Main@5.1, 8549.132 secs, 899 kbps, 848x352 @ 23.976001 fps
+3       hint    Payload mpeg4-generic for track 1
+4       hint    Payload H264 for track 2
+</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-metadata">
+<title>Добавление тегов метаданных</title>
+
+<para>
+  Если Вы хотите добавить в видео теги, которые отображаются в iTunes, Вы 
+  можете использовать
+  <ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>.
+  
+  <screen>AtomicParsley нарния.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
+
+  Опция <option>--metaEnema</option> удаляет любые существующие метаданные
+  (<application>mp4creator</application> вставляет своё название в тег
+  "утилита кодирования") и <option>--freefree</option> высвобождает место,
+  оставшееся от удалённых метаданных.
+  Опция <option>--stik</option> устанавливает тип видео (например, 
+  Movie или TV Show), который используется iTunes для группировки 
+  родственных видеофайлов.
+  Опция <option>--overWrite</option> перезаписывает исходный файл; без неё
+  <application>AtomicParsley</application> создаст новый файл с автоматическим
+  именем в том же каталоге и оставит исходный файл нетронутым.
+</para>
+
+</sect2>
+
 </sect1>
 
 
