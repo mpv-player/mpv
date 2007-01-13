@@ -3717,7 +3717,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   if(!parse_codec_cfg(mem_ptr=get_path("codecs.conf"))){
     if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
       if(!parse_codec_cfg(NULL)){
-	mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
         exit_player_with_rc(NULL, 0);
       }
       mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_BuiltinCodecsConf);

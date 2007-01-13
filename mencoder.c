@@ -457,7 +457,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   if(!parse_codec_cfg(get_path("codecs.conf"))){
     if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
       if(!parse_codec_cfg(NULL)){
-	mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
 	mencoder_exit(1,NULL);
       }
       mp_msg(MSGT_MENCODER,MSGL_V,MSGTR_BuiltinCodecsConf);
