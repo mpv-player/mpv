@@ -3527,8 +3527,10 @@ _gettimeofday=no
 cc_check && _gettimeofday=yes
 if test "$_gettimeofday" = yes ; then
   _def_gettimeofday='#define HAVE_GETTIMEOFDAY 1'
+  _need_gettimeofday=no
 else
   _def_gettimeofday='#undef HAVE_GETTIMEOFDAY'
+  _need_gettimeofday=yes
 fi
 echores "$_gettimeofday"
 
@@ -7489,6 +7491,7 @@ HAVE_SYS_MMAN_H = $_mman
 
 NEED_FSEEKO  = $_need_fseeko
 NEED_FTELLO  = $_need_ftello
+NEED_GETTTIMEOFDAY    = $_need_getttimeofday
 NEED_GLOB    = $_need_glob
 NEED_SCANDIR = $_need_scandir
 NEED_SETENV  = $_need_setenv
