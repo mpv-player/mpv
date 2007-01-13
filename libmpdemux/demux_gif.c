@@ -189,8 +189,8 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   // video_read_properties() will choke
   sh_video->ds = demuxer->video;
 
-  sh_video->disp_w = gif->SWidth;
-  sh_video->disp_h = gif->SHeight;
+  sh_video->disp_w = (uint16_t)gif->SWidth;
+  sh_video->disp_h = (uint16_t)gif->SHeight;
 
   sh_video->format = mmioFOURCC(8, 'R', 'G', 'B');
   
