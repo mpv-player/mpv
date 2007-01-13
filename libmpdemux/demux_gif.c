@@ -53,6 +53,8 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   ColorMapObject *effective_map = NULL;
   char *buf = NULL;
   int refmode = 0;
+  int transparency = 0;
+  uint8_t transparent_col;
 
   while (type != IMAGE_DESC_RECORD_TYPE) {
     if (DGifGetRecordType(gif, &type) == GIF_ERROR) {
@@ -78,8 +80,10 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         int frametime = 0;
         if (p[0] == 4) // is the length correct?
         {
+          transparency = p[1] & 1;
           frametime = (p[3] << 8) | p[2]; // set the time, centiseconds
           refmode = (p[1] >> 2) & 3;
+          transparent_col = p[4];  
         }
         priv->current_pts += frametime;
       } else if ((code == 0xFE) && (verbose)) { // comment extension
@@ -144,6 +148,20 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       priv->palette[(y * 4) + 3] = 0;
     }
 
+    if (transparency) {
+      uint8_t *dpos = dest, *spos = buf;
+      int hleft = h;
+      while (hleft-- > 0) {
+        int wleft = w;
+        while (wleft-- > 0) {
+          if (*spos != transparent_col)
+            *dpos = *spos;
+          dpos++; spos++;
+        }
+        dpos += priv->w - w;
+        spos += gif->Image.Width - w;
+      }
+    } else
     memcpy_pic(dest, buf, w, h, priv->w, gif->Image.Width);
 
     if (refmode == 1) memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
