@@ -109,7 +109,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   dp = new_demux_packet(priv->w * priv->h);
   buf = malloc(len);
   memset(buf, 0, len);
-  memset(dp->buffer, 0, len);
+  memset(dp->buffer, 0, priv->w * priv->h);
   
   if (DGifGetLine(gif, buf, len) == GIF_ERROR) {
     PrintGifError();
