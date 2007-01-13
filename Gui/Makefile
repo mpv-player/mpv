@@ -2,8 +2,10 @@ include ../config.mak
 
 LIBNAME = libgui.a
 
-CFLAGS = -I../loader -I./wm -I./skin -I../libavutil/
+CFLAGS = -I../loader -I./wm -I./skin
 #CFLAGS += -DDEBUG
+
+CFLAGS-$(CONFIG_LIBAVUTIL)   += -I../libavutil
 
 ifeq ($(TARGET_WIN32),yes)
 SRCS = win32/dialogs.c \
