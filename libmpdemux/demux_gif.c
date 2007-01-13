@@ -18,7 +18,7 @@
 
 #include <gif_lib.h>
 static int current_pts = 0;
-static unsigned char *pallete = NULL;
+static unsigned char *palette = NULL;
 
 #define GIF_SIGNATURE (('G' << 16) | ('I' << 8) | 'F')
 
@@ -116,12 +116,12 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   {
     int y;
 
-    // copy the pallete
+    // copy the palette
     for (y = 0; y < 256; y++) {
-	pallete[(y * 4) + 0] = effective_map->Colors[y].Blue;
-	pallete[(y * 4) + 1] = effective_map->Colors[y].Green;
-	pallete[(y * 4) + 2] = effective_map->Colors[y].Red;
-	pallete[(y * 4) + 3] = 0;
+	palette[(y * 4) + 0] = effective_map->Colors[y].Blue;
+	palette[(y * 4) + 1] = effective_map->Colors[y].Green;
+	palette[(y * 4) + 2] = effective_map->Colors[y].Red;
+	palette[(y * 4) + 3] = 0;
     }
 
     for (y = 0; y < gif->Image.Height; y++) {
@@ -196,7 +196,7 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   sh_video->bih->biCompression = sh_video->format;
   sh_video->bih->biBitCount = 8;
   sh_video->bih->biPlanes = 2;
-  pallete = (unsigned char *)(sh_video->bih + 1);
+  palette = (unsigned char *)(sh_video->bih + 1);
   
   demuxer->priv = gif;
 
