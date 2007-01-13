@@ -7491,7 +7491,7 @@ HAVE_SYS_MMAN_H = $_mman
 
 NEED_FSEEKO  = $_need_fseeko
 NEED_FTELLO  = $_need_ftello
-NEED_GETTTIMEOFDAY    = $_need_getttimeofday
+NEED_GETTIMEOFDAY    = $_need_gettimeofday
 NEED_GLOB    = $_need_glob
 NEED_SCANDIR = $_need_scandir
 NEED_SETENV  = $_need_setenv
