@@ -17,8 +17,11 @@
 #include "stheader.h"
 
 #include <gif_lib.h>
-static int current_pts = 0;
-static unsigned char *palette = NULL;
+typedef struct {
+  int current_pts;
+  unsigned char *palette;
+  GifFileType *gif;
+} gif_priv_t;
 
 #define GIF_SIGNATURE (('G' << 16) | ('I' << 8) | 'F')
 
@@ -38,7 +41,8 @@ static int gif_check_file(demuxer_t *demuxer)
 
 static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
-  GifFileType *gif = (GifFileType *)demuxer->priv;
+  gif_priv_t *priv = demuxer->priv;
+  GifFileType *gif = priv->gif;
   GifRecordType type = UNDEFINED_RECORD_TYPE;
   int len = 0;
   demux_packet_t *dp = NULL;
@@ -69,7 +73,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         int frametime = 0;
         if (p[0] == 4) // is the length correct?
           frametime = (p[3] << 8) | p[2]; // set the time, centiseconds
-        current_pts += frametime;
+        priv->current_pts += frametime;
       } else if ((code == 0xFE) && (verbose)) { // comment extension
 	// print iff verbose
 	printf("GIF comment: ");
@@ -118,10 +122,10 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
     // copy the palette
     for (y = 0; y < 256; y++) {
-	palette[(y * 4) + 0] = effective_map->Colors[y].Blue;
-	palette[(y * 4) + 1] = effective_map->Colors[y].Green;
-	palette[(y * 4) + 2] = effective_map->Colors[y].Red;
-	palette[(y * 4) + 3] = 0;
+	priv->palette[(y * 4) + 0] = effective_map->Colors[y].Blue;
+	priv->palette[(y * 4) + 1] = effective_map->Colors[y].Green;
+	priv->palette[(y * 4) + 2] = effective_map->Colors[y].Red;
+	priv->palette[(y * 4) + 3] = 0;
     }
 
     for (y = 0; y < gif->Image.Height; y++) {
@@ -138,7 +142,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   free(buf);
 
   demuxer->video->dpos++;
-  dp->pts = ((float)current_pts) / 100;
+  dp->pts = ((float)priv->current_pts) / 100;
   dp->pos = stream_tell(demuxer->stream);
   ds_add_packet(demuxer->video, dp);
 
@@ -147,10 +151,11 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
 static demuxer_t* demux_open_gif(demuxer_t* demuxer)
 {
+  gif_priv_t *priv = calloc(1, sizeof(gif_priv_t));
   sh_video_t *sh_video = NULL;
   GifFileType *gif = NULL;
 
-  current_pts = 0;
+  priv->current_pts = 0;
   demuxer->seekable = 0; // FIXME
 
   // go back to the beginning
@@ -196,25 +201,21 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   sh_video->bih->biCompression = sh_video->format;
   sh_video->bih->biBitCount = 8;
   sh_video->bih->biPlanes = 2;
-  palette = (unsigned char *)(sh_video->bih + 1);
+  priv->palette = (unsigned char *)(sh_video->bih + 1);
   
-  demuxer->priv = gif;
+  priv->gif = gif;
+  demuxer->priv = priv;
 
   return demuxer;
 }
 
 static void demux_close_gif(demuxer_t* demuxer)
 {
-  GifFileType *gif = (GifFileType *)demuxer->priv;
-
-  if(!gif)
-    return;
-
-  if (DGifCloseFile(gif) == GIF_ERROR)
+  gif_priv_t *priv = demuxer->priv;
+  if (!priv) return;
+  if (priv->gif && DGifCloseFile(priv->gif) == GIF_ERROR)
     PrintGifError();
-  
-  demuxer->stream->fd = 0;
-  demuxer->priv = NULL;
+  free(priv);
 }
 
 
