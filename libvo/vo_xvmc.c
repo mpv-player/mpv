@@ -802,7 +802,7 @@ static void init_osd_yuv_pal(){
       }
       rez = XvMCSetSubpicturePalette(mDisplay, &subpicture, palette);
       if(rez!=Success){
-         printf("vo_xvmc: set pallete fail\n");
+         printf("vo_xvmc: Setting palette failed.\n");
       }
    }
 }
