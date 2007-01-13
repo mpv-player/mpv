@@ -119,9 +119,11 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
   {
     int y;
+    int cnt = effective_map->ColorCount;
+    if (cnt > 256) cnt = 256;
 
     // copy the palette
-    for (y = 0; y < 256; y++) {
+    for (y = 0; y < cnt; y++) {
 	priv->palette[(y * 4) + 0] = effective_map->Colors[y].Blue;
 	priv->palette[(y * 4) + 1] = effective_map->Colors[y].Green;
 	priv->palette[(y * 4) + 2] = effective_map->Colors[y].Red;
