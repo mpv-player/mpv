@@ -816,16 +816,11 @@ framebuffer, and don't ask for it, since it's not an
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
-This section is about the Matrox G200/G400/G450/G550 BES (Back-End Scaler)
-support, the <systemitem>mga_vid</systemitem> kernel driver.
+This is a combination of a video output driver and a Linux kernel module
+for the Matrox G200/G400/G450/G550 BES (Back-End Scaler).
 It has hardware VSYNC support with triple buffering. It works on both
-framebuffer console and under X.
+framebuffer console and under X, but only with Linux 2.4.x.
 </para>
-
-<warning><para>
-This is Linux only! On non-Linux (tested on FreeBSD) systems, you can use
-<link linkend="vidix">VIDIX</link> instead!
-</para></warning>
 
 <procedure>
 <title>Installation:</title>
