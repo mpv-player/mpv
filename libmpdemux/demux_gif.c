@@ -68,7 +68,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       if (code == 0xF9) {
         int frametime = 0;
         if (p[0] == 4) // is the length correct?
-          frametime = (p[1] << 8) | p[2]; // set the time, centiseconds
+          frametime = (p[3] << 8) | p[2]; // set the time, centiseconds
         current_pts += frametime;
       } else if ((code == 0xFE) && (verbose)) { // comment extension
 	// print iff verbose
