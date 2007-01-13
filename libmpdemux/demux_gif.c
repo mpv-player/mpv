@@ -21,6 +21,7 @@ typedef struct {
   int current_pts;
   unsigned char *palette;
   GifFileType *gif;
+  int w, h;
 } gif_priv_t;
 
 #define GIF_SIGNATURE (('G' << 16) | ('I' << 8) | 'F')
@@ -104,7 +105,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   }
 
   len = gif->Image.Width * gif->Image.Height;
-  dp = new_demux_packet(len);
+  dp = new_demux_packet(priv->w * priv->h);
   buf = malloc(len);
   memset(buf, 0, len);
   memset(dp->buffer, 0, len);
@@ -121,6 +122,10 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     int y;
     int cnt = effective_map->ColorCount;
     if (cnt > 256) cnt = 256;
+    int l = FFMIN(gif->Image.Left, priv->w);
+    int t = FFMIN(gif->Image.Top, priv->h);
+    int w = FFMIN(gif->Image.Width, priv->w - l);
+    int h = FFMIN(gif->Image.Height, priv->h - t);
 
     // copy the palette
     for (y = 0; y < cnt; y++) {
@@ -130,14 +135,13 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 	priv->palette[(y * 4) + 3] = 0;
     }
 
-    for (y = 0; y < gif->Image.Height; y++) {
+    for (y = 0; y < h; y++) {
       unsigned char *drow = dp->buffer;
       unsigned char *gbuf = buf + (y * gif->Image.Width);
 
-      drow += gif->Image.Width * (y + gif->Image.Top);
-      drow += gif->Image.Left;
+      drow += priv->w * (y + t) + l;
 
-      memcpy(drow, gbuf, gif->Image.Width);
+      memcpy(drow, gbuf, w);
     }
   }
 
@@ -204,6 +208,8 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   sh_video->bih->biBitCount = 8;
   sh_video->bih->biPlanes = 2;
   priv->palette = (unsigned char *)(sh_video->bih + 1);
+  priv->w = sh_video->disp_w;
+  priv->h = sh_video->disp_h;
   
   priv->gif = gif;
   demuxer->priv = priv;
