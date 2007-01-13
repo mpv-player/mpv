@@ -23,6 +23,8 @@ typedef struct {
   unsigned char *palette;
   GifFileType *gif;
   int w, h;
+  int useref;
+  char *refimg;
 } gif_priv_t;
 
 #define GIF_SIGNATURE (('G' << 16) | ('I' << 8) | 'F')
@@ -50,6 +52,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   demux_packet_t *dp = NULL;
   ColorMapObject *effective_map = NULL;
   char *buf = NULL;
+  int refmode = 0;
 
   while (type != IMAGE_DESC_RECORD_TYPE) {
     if (DGifGetRecordType(gif, &type) == GIF_ERROR) {
@@ -74,7 +77,10 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       if (code == 0xF9) {
         int frametime = 0;
         if (p[0] == 4) // is the length correct?
+        {
           frametime = (p[3] << 8) | p[2]; // set the time, centiseconds
+          refmode = (p[1] >> 2) & 3;
+        }
         priv->current_pts += frametime;
       } else if ((code == 0xFE) && (verbose)) { // comment extension
 	// print iff verbose
@@ -108,7 +114,10 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   len = gif->Image.Width * gif->Image.Height;
   dp = new_demux_packet(priv->w * priv->h);
   buf = calloc(gif->Image.Width, gif->Image.Height);
-  memset(dp->buffer, 0, priv->w * priv->h);
+  if (priv->useref)
+    memcpy(dp->buffer, priv->refimg, priv->w * priv->h);
+  else
+    memset(dp->buffer, gif->SBackGroundColor, priv->w * priv->h);
   
   if (DGifGetLine(gif, buf, len) == GIF_ERROR) {
     PrintGifError();
@@ -139,6 +148,11 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   }
 
   free(buf);
+
+  priv->useref = 1;
+  if (refmode == 1) memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
+  // TODO: refmode == 2, set area of current image to background color
+  if (!refmode) priv->useref = 0;
 
   demuxer->video->dpos++;
   dp->pts = ((float)priv->current_pts) / 100;
@@ -203,6 +217,7 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   priv->palette = (unsigned char *)(sh_video->bih + 1);
   priv->w = sh_video->disp_w;
   priv->h = sh_video->disp_h;
+  priv->refimg = malloc(priv->w * priv->h);
   
   priv->gif = gif;
   demuxer->priv = priv;
@@ -216,6 +231,7 @@ static void demux_close_gif(demuxer_t* demuxer)
   if (!priv) return;
   if (priv->gif && DGifCloseFile(priv->gif) == GIF_ERROR)
     PrintGifError();
+  free(priv->refimg);
   free(priv);
 }
 
