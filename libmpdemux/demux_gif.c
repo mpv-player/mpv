@@ -120,8 +120,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
   {
     int y;
-    int cnt = effective_map->ColorCount;
-    if (cnt > 256) cnt = 256;
+    int cnt = FFMIN(effective_map->ColorCount, 256);
     int l = FFMIN(gif->Image.Left, priv->w);
     int t = FFMIN(gif->Image.Top, priv->h);
     int w = FFMIN(gif->Image.Width, priv->w - l);
