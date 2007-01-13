@@ -17,6 +17,7 @@
 #include "stheader.h"
 
 #include <gif_lib.h>
+#include "libvo/fastmemcpy.h"
 typedef struct {
   int current_pts;
   unsigned char *palette;
@@ -125,6 +126,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     int t = FFMAX(FFMIN(gif->Image.Top, priv->h), 0);
     int w = FFMAX(FFMIN(gif->Image.Width, priv->w - l), 0);
     int h = FFMAX(FFMIN(gif->Image.Height, priv->h - t), 0);
+    unsigned char *dest = dp->buffer + priv->w * t + l;
 
     // copy the palette
     for (y = 0; y < cnt; y++) {
@@ -134,14 +136,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 	priv->palette[(y * 4) + 3] = 0;
     }
 
-    for (y = 0; y < h; y++) {
-      unsigned char *drow = dp->buffer;
-      unsigned char *gbuf = buf + (y * gif->Image.Width);
-
-      drow += priv->w * (y + t) + l;
-
-      memcpy(drow, gbuf, w);
-    }
+    memcpy_pic(dest, buf, w, h, priv->w, gif->Image.Width);
   }
 
   free(buf);
