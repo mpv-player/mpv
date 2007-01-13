@@ -181,10 +181,7 @@ static void handlemsg(HWND hWnd, int msg)
         case evLoadPlay:
         case evLoad:
             if(display_openfilewindow(gui, 0) && (msg == evLoadPlay))
-            {
-                mplGotoTheNext = guiIntfStruct.Playing? 0 : 1;
                 handlemsg(hWnd, evDropFile);
-            }
             return;
         case evLoadSubtitle:
             display_opensubtitlewindow(gui);

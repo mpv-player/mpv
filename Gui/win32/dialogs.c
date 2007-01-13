@@ -529,7 +529,6 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
                 case ID_PLAY:
                         if(selected) pl->current = selected - 1;
                         mplSetFileName(NULL, pl->tracks[pl->current]->filename, STREAMTYPE_STREAM);
-                        mplGotoTheNext = guiIntfStruct.Playing? 0 : 1;
                         gui->startplay(gui);
                     }
                     return 0;

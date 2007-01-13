@@ -280,6 +280,7 @@ static void guiSetEvent(int event)
             mplSetFileName(NULL, filename, STREAMTYPE_FILE);
             guiIntfStruct.FilenameChanged = guiIntfStruct.NewPlay = 1;
             update_playlistwindow();
+            mplGotoTheNext = guiIntfStruct.Playing? 0 : 1;
             guiGetEvent(guiCEvent, (void *) guiSetStop);
             guiGetEvent(guiCEvent, (void *) guiSetPlay);
             break;
