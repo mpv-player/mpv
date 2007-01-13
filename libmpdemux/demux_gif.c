@@ -138,22 +138,22 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
     // copy the palette
     for (y = 0; y < cnt; y++) {
-	priv->palette[(y * 4) + 0] = effective_map->Colors[y].Blue;
-	priv->palette[(y * 4) + 1] = effective_map->Colors[y].Green;
-	priv->palette[(y * 4) + 2] = effective_map->Colors[y].Red;
-	priv->palette[(y * 4) + 3] = 0;
+      priv->palette[(y * 4) + 0] = effective_map->Colors[y].Blue;
+      priv->palette[(y * 4) + 1] = effective_map->Colors[y].Green;
+      priv->palette[(y * 4) + 2] = effective_map->Colors[y].Red;
+      priv->palette[(y * 4) + 3] = 0;
     }
 
     memcpy_pic(dest, buf, w, h, priv->w, gif->Image.Width);
 
-  priv->useref = 1;
-  if (refmode == 1) memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
+    priv->useref = 1;
+    if (refmode == 1) memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
     if (refmode == 2 && priv->useref) {
       dest = priv->refimg + priv->w * t + l;
       memset(buf, gif->SBackGroundColor, len);
       memcpy_pic(dest, buf, w, h, priv->w, gif->Image.Width);
     }
-  if (!refmode) priv->useref = 0;
+    if (!refmode) priv->useref = 0;
   }
 
   free(buf);
