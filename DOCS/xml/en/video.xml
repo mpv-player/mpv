@@ -901,6 +901,51 @@ with
 
 <!-- ********** -->
 
+<sect2 id="tdfx_vid">
+<title>tdfx_vid</title>
+
+<para>
+This is a combination of a Linux kernel module and a video output
+driver, similar to <link linkend="mga_vid">mga_vid</link>.
+You'll need a 2.4.x kernel with the <systemitem>agpgart</systemitem>
+driver since <systemitem>tdfx_vid</systemitem> uses AGP.
+Pass <option>--enable-tdfxfb</option> to <command>configure</command>
+to build the video output driver and build the kernel module with
+the following instructions.
+</para>
+
+<procedure>
+<title>Installing the tdfx_vid.o kernel module:</title>
+<step><para>
+  Compile <filename>tdfx_vid.o</filename>:
+  <screen>
+cd drivers
+make tdfx_vid.o</screen>
+</para></step>
+<step><para>
+  Then create the <filename>/dev/tdfx_vid</filename> device:
+  <screen>mknod /dev/tdfx_vid c 178 0</screen>
+  and load the driver with
+  <screen>insmod tdfx_vid.o</screen>
+</para></step>
+<step><para>
+  To make it load/unload automatically when needed, first insert the
+  following line at the end of <filename>/etc/modules.conf</filename>:
+
+  <programlisting>alias char-major-178 tdfx_vid</programlisting>
+
+  Then copy the <filename>tdfx_vid.o</filename> module to the appropriate
+  place under <filename>/lib/modules/<replaceable>kernel
+  version</replaceable>/<replaceable>somewhere</replaceable></filename>
+  and run
+  <screen>depmod -a</screen>
+</para></step>
+</procedure>
+
+</sect2>
+
+<!-- ********** -->
+
 <sect2 id="opengl">
 <title>OpenGL output</title>
 
