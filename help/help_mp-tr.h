@@ -63,7 +63,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Anadizin bulunamıyor\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problemi\n"
 #define MSGTR_CreatingCfgFile "Ayar dosyası oluşturuluyor: %s\n"
-#define MSGTR_CopyCodecsConf "(MPlayer kaynağı etc/codecs.conf dosyasını ~/.mplayer/codecs.conf olarak kopyalayın/bağlayın)\n"
 #define MSGTR_BuiltinCodecsConf "Gömülü codecs.conf dosyası kullanılıyor\n"
 #define MSGTR_CantLoadFont "Yazıtipi açılamıyor: %s\n"
 #define MSGTR_CantLoadSub "Altyazı açılamıyor: %s\n"

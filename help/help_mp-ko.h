@@ -58,7 +58,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "홈디렉토리를 찾을 수 없습니다.\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") 문제 발생\n"
 #define MSGTR_CreatingCfgFile "설정파일을 만듭니다.: %s\n"
-#define MSGTR_CopyCodecsConf "((MPlayer 소스 트리의) etc/codecs.conf를 ~/.mplayer/codecs.conf로 복사 또는 링크하세요.)\n"
 #define MSGTR_BuiltinCodecsConf "내장된 기본 codecs.conf를 사용합니다.\n"
 #define MSGTR_CantLoadFont "폰트를 읽어 들일 수 없습니다.: %s\n"
 #define MSGTR_CantLoadSub "자막을 읽어 들일 수 없습니다.: %s\n"

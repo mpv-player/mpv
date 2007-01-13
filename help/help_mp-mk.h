@@ -59,7 +59,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Не може да го пронајде HOME директориумот.\n"
 #define MSGTR_GetpathProblem "get_path(\"конфигурирај\") проблем"
 #define MSGTR_CreatingCfgFile "Создавање на конфигурациона датотека: %s\n"
-#define MSGTR_CopyCodecsConf "(Копирај/линкувај etc/codecs.conf од MPlayer изворните кодови во ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Користи вградени стандардни codecs.conf\n"
 #define MSGTR_CantLoadFont "Не може да се вчита фонтот: %s\n"
 #define MSGTR_CantLoadSub "Не може да се вчитаат преводите: %s\n"

@@ -61,7 +61,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Kan inte lokalisera $HOME-katalog.\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problem\n"
 #define MSGTR_CreatingCfgFile "Skapar konfigfil: %s\n"
-#define MSGTR_CopyCodecsConf "(Kopiera/länka etc/codecs.conf från MPlayer's källkod till ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Använder standardinbyggd codecs.conf.\n"
 #define MSGTR_CantLoadFont "Kan inte ladda font: %s\n"
 #define MSGTR_CantLoadSub "Kan inte ladda vald textning: %s\n"

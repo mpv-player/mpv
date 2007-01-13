@@ -66,7 +66,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Impossibile trovare la HOME directory\n"
 #define MSGTR_GetpathProblem "Problema in get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Creo il file di configurazione: %s\n"
-#define MSGTR_CopyCodecsConf "(copia/linka etc/codecs.conf dai sorgenti di MPlayer a ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Utilizzo la versione interna predefinita di codecs.conf\n"
 #define MSGTR_CantLoadFont "Impossibile caricare i font: %s\n"
 #define MSGTR_CantLoadSub "Impossibile caricare i sottotitoli: %s\n"

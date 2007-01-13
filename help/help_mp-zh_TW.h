@@ -66,7 +66,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "找不到主(HOME)目録\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") 問題\n"
 #define MSGTR_CreatingCfgFile "創建配置文件: %s\n"
-#define MSGTR_CopyCodecsConf "(複製/鏈接 MPlayer 中的源代碼 etc/codecs.conf 到 ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "使用内建默認的 codecs.conf 文件。\n"
 #define MSGTR_CantLoadFont "不能加載位圖字體: %s\n"
 #define MSGTR_CantLoadSub "不能加載字幕: %s\n"

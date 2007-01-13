@@ -65,7 +65,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Nem találom a HOME könyvtárat.\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") probléma\n"
 #define MSGTR_CreatingCfgFile "Konfigurációs fájl létrehozása: %s\n"
-#define MSGTR_CopyCodecsConf "(másold/linkeld az etc/codecs.conf fájlt ~/.mplayer/codecs.conf-ba)\n"
 #define MSGTR_BuiltinCodecsConf "Befordított codecs.conf használata.\n"
 #define MSGTR_CantLoadFont "Nem tudom betölteni a következő bittérképes betűt: %s\n"
 #define MSGTR_CantLoadSub "Nem tudom betölteni a feliratot: %s\n"

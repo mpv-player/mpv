@@ -58,7 +58,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Kan ikke finne HOME katalog\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problem\n"
 #define MSGTR_CreatingCfgFile "Oppretter konfigurasjonsfil: %s\n"
-#define MSGTR_CopyCodecsConf "(kopier eller link etc/codecs.conf (fra MPlayer kildekode) til ~/.mplayer/codecs.conf)\n"
 #define MSGTR_CantLoadFont "Kan ikke laste skrifttype: %s\n"
 #define MSGTR_CantLoadSub "Kan ikke laste undertitler: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATALT: valgte stream mangler!\n"

@@ -63,7 +63,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Nemohu nalézt domácí adresář.\n"
 #define MSGTR_GetpathProblem "Nastal problém s get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Vytvářím konfigurační soubor: %s\n"
-#define MSGTR_CopyCodecsConf "(Zkopírujte/nalinkujte etc/codecs.conf ze zdrojových kódů MPlayeru do ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Používám zabudovaný výchozí codecs.conf.\n"
 #define MSGTR_CantLoadFont "Nemohu načíst bitmapový font: %s\n"
 #define MSGTR_CantLoadSub "Nemohu načíst titulky: %s\n"

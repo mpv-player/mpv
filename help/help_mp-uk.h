@@ -62,7 +62,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Не можу знайти домашній каталог\n"
 #define MSGTR_GetpathProblem "проблеми у get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Створення файлу конфігурації: %s\n"
-#define MSGTR_CopyCodecsConf "(скопіюйте etc/codecs.conf (з текстів MPlayer) у ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Використовую вбудований codecs.conf\n"
 #define MSGTR_CantLoadFont "Не можу завантажити шрифт: %s\n"
 #define MSGTR_CantLoadSub "Не можу завантажити субтитри: %s\n"
