@@ -81,8 +81,8 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         if (p[0] == 4) // is the length correct?
         {
           transparency = p[1] & 1;
-          frametime = (p[3] << 8) | p[2]; // set the time, centiseconds
           refmode = (p[1] >> 2) & 3;
+          frametime = (p[3] << 8) | p[2]; // set the time, centiseconds
           transparent_col = p[4];  
         }
         priv->current_pts += frametime;
@@ -162,7 +162,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         spos += gif->Image.Width - w;
       }
     } else
-    memcpy_pic(dest, buf, w, h, priv->w, gif->Image.Width);
+      memcpy_pic(dest, buf, w, h, priv->w, gif->Image.Width);
 
     if (refmode == 1) memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
     if (refmode == 2 && priv->useref) {
