@@ -791,6 +791,8 @@ Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
 
 Voroshilov, Vladimir <voroshil@gmail.com>
     * Radio support
+    * Russian documentation translation
+    * Russian man page translation
 
 Wigren, Per <wigren@home.se>
     * bmovl - Bitmap Overlay video filter
@@ -919,6 +921,9 @@ MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
     * Marcin Biernat (Boski Cinek) <boski_cinek@o2.pl>
     * Marek Jarycki (Emdej) <emdej@emdej.com>
     * Leszek Kaplita (Flex) <flex@tenbit.pl>
+
+Savchenko, Andrew <bircoph@list.ru>
+    * Russian documentation translation
 
 Zubimendi, Andoni <andoni@lpsat.net>.
     * Spanish documentation translation
