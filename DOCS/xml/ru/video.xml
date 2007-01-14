@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21741 -->
+<!-- synced with r21897 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -832,16 +832,11 @@ mplayer -vm -fbmode <replaceable>название_режима</replaceable> <re
 <title>Matrox фреймбуфер (mga_vid)</title>
 
 <para>
-Этот раздел о поддержке Matrox G200/G400/G450/G550 BES (Back-End Scaler)
-и драйвере ядра <systemitem>mga_vid</systemitem>.
-Он имеет поддержку VSYNC с тройной буферизацией. Работает как во фреймбуфер консоли, так и 
-под X.
+Это комбинация драйвера вывода и модуля ядра Linux для 
+Matrox G200/G400/G450/G550 BES (Back-End Scaler).
+Он имеет поддержку VSYNC с тройной буферизацией. Работает как во фреймбуфер 
+консоли, так и под X, но только с Linux 2.4.x.
 </para>
-
-<warning><para>
-Он только для Linux! На не-Linux системах (проверялось на FreeBSD) можете вместо
-него использовать <link linkend="vidix">VIDIX</link>!
-</para></warning>
 
 <procedure>
 <title>Установка:</title>
@@ -910,6 +905,49 @@ make<!--
 фильмой с YUV ускорением. Вам потребуется ядро с поддержкой tdfxfb и перекомпиляция с
 <screen>./configure --enable-tdfxfb</screen>
 </para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="tdfx_vid">
+<title>tdfx_vid</title>
+
+<para>
+Это комбинация модуля Linux ядра и драйвера вывода видео, аналогичный 
+<link  linkend="mga_vid">mga_vid</link>.
+Вам потребуется 2.4.x ядро с драйвером <systemitem>agpgart</systemitem>,
+поскольку <systemitem>tdfx_vid</systemitem> использует AGP.
+Укажите <command>configure</command> опцию <option>--enable-tdfxfb</option>
+для сборки драйвера вывода видео и соберите модуль ядра, как указано далее.
+</para>
+
+<procedure>
+<title>Установка tdfx_vid.o модуля ядра:</title>
+<step><para>
+  Скомпилируйте <filename>tdfx_vid.o</filename>
+  <screen>
+cd drivers
+make tdfx_vid.o</screen>
+</para></step>
+<step><para>
+  Создайте файл устройства <filename>/dev/tdfx_vid</filename>:
+  <screen>mknod /dev/tdfx_vid c 178 0</screen>
+  и загрузите драйвер командой
+  <screen>insmod tdfx_vid.o</screen>
+</para></step>
+<step><para>
+  Чтобы сделать его загружающимся/выгружающимся автоматически, сначала вставьте
+  следующую строку в конец <filename>/etc/modules.conf</filename>:
+
+  <programlisting>alias char-major-178 tdfx_vid</programlisting>
+
+  Затем скопируйте модуль <filename>tdfx_vid.o</filename> в подходящее место в
+  <filename>/lib/modules/<replaceable>версия
+  ядра</replaceable>/<replaceable>путь</replaceable></filename> и запустите 
+  <screen>depmod -a</screen>
+</para></step>
+</procedure>
+
 </sect2>
 
 <!-- ********** -->

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21879 -->
+<!-- synced with r21917 -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
@@ -5124,7 +5124,7 @@ VCD и SVCD:
   видео на однослойном DVD.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">vtrict</emphasis>:
+  <emphasis role="bold">vstrict</emphasis>:
   <option>vstrict</option>=0 следует использовать для создания DVD.
   Без этой опции <application>MEncoder</application> создает поток, который не
   может быть корректно декодирован некоторыми аппаратными DVD проигрывателями.
