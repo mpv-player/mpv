@@ -5639,6 +5639,25 @@ else
 fi
 echores "$_mad"
 
+echocheck "Twolame"
+if test "$_twolame" = auto ; then
+  cat > $TMPC <<EOF
+#include <twolame.h>
+int main(void) { twolame_init(); return 0; }
+EOF
+  _twolame=no
+  cc_check -ltwolame $_ld_lm && _twolame=yes
+fi
+if test "$_twolame" = yes ; then
+  _def_twolame='#define HAVE_TWOLAME 1'
+  _libs_mencoder="$_libs_mencoder -ltwolame"
+  _codecmodules="twolame $_codecmodules"
+else
+  _def_twolame='#undef HAVE_TWOLAME'
+  _nocodecmodules="twolame $_nocodecmodules"
+fi
+echores "$_twolame"
+
 echocheck "Toolame"
 if test "$_toolame" = auto ; then
   cat > $TMPC <<EOF
@@ -5660,25 +5679,6 @@ if test "$_toolamedir" ; then
   _res_comment="using $_toolamedir"
 fi
 echores "$_toolame"
-
-echocheck "Twolame"
-if test "$_twolame" = auto ; then
-  cat > $TMPC <<EOF
-#include <twolame.h>
-int main(void) { twolame_init(); return 0; }
-EOF
-  _twolame=no
-  cc_check -ltwolame $_ld_lm && _twolame=yes
-fi
-if test "$_twolame" = yes ; then
-  _def_twolame='#define HAVE_TWOLAME 1'
-  _libs_mencoder="$_libs_mencoder -ltwolame"
-  _codecmodules="twolame $_codecmodules"
-else
-  _def_twolame='#undef HAVE_TWOLAME'
-  _nocodecmodules="twolame $_nocodecmodules"
-fi
-echores "$_twolame"
 
 echocheck "OggVorbis support"
 if test "$_tremor_internal" = yes; then
