@@ -459,7 +459,7 @@ parse_smil(play_tree_parser_t* p) {
     if (line[0]=='\0')
       continue;
     if (!entrymode) { // all entries filled so far 
-      if (strncasecmp(line,"<video",6)==0  || strncasecmp(line,"<audio",6)==0 || strncasecmp(line,"<media",6)) {
+      if (strncasecmp(line,"<video",6)==0  || strncasecmp(line,"<audio",6)==0 || strncasecmp(line,"<media",6)==0) {
         pos=strstr(line,"src=");   // Is source present on this line
         if (pos !=NULL) {
           s_start=pos+5;
