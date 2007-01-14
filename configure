@@ -5659,14 +5659,17 @@ fi
 echores "$_twolame"
 
 echocheck "Toolame"
-test "$_twolame" = yes && _toolame=no && _res_comment="disabled by twolame"
 if test "$_toolame" = auto ; then
+  _toolame=no
+if test "$_twolame" = yes ; then
+  _res_comment="disabled by twolame"
+else
   cat > $TMPC <<EOF
 #include <toolame.h>
 int main(void) { toolame_init(); return 0; }
 EOF
-  _toolame=no
   cc_check -ltoolame $_ld_lm && _toolame=yes
+fi
 fi
 if test "$_toolame" = yes ; then
   _def_toolame='#define HAVE_TOOLAME 1'
