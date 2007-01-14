@@ -4598,7 +4598,7 @@ The DVD, SVCD, and VCD formats are subject to heavy constraints.
 Only a small selection of encoded picture sizes and aspect ratios are
 available.
 If your movie does not already meet these requirements, you may have
-to scale,crop or add black borders to the picture to make it
+to scale, crop or add black borders to the picture to make it
 compliant.
 </para>
 
@@ -4962,7 +4962,7 @@ or DVD:
   than an hour of video on a single-layer DVD.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">vtrict</emphasis>:
+  <emphasis role="bold">vstrict</emphasis>:
   <option>vstrict</option>=0 should be used to create DVDs.
   Without this option, <application>MEncoder</application> creates a
   stream that cannot be correctly decoded by some standalone DVD
