@@ -5659,6 +5659,7 @@ fi
 echores "$_twolame"
 
 echocheck "Toolame"
+test "$_twolame" = yes && _toolame=no && _res_comment="disabled by twolame"
 if test "$_toolame" = auto ; then
   cat > $TMPC <<EOF
 #include <toolame.h>
