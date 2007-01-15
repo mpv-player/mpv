@@ -3658,7 +3658,8 @@ random differences in the achieved bitrate.
   This is usually enough to be visible.
   </para>
   <para>
-  <option>subq=6</option> is the slowest, highest quality mode.
+  <option>subq=6</option> is slower and yields better quality at a reasonable
+  cost.
   In comparison to <option>subq=5</option>, it usually gains 0.1-0.4 dB
   global PSNR with speed costs varying from 25%-100%.
   Unlike other levels of <option>subq</option>, the behavior of
@@ -3669,6 +3670,14 @@ random differences in the achieved bitrate.
   and quality in complex, high motion scenes, but it may not have much effect
   in low-motion scenes. Note that it is still recommended to always set
   <option>bframes</option> to something other than zero (see below).
+  </para>
+  <para>
+  <option>subq=7</option> is the slowest, highest quality mode.
+  In comparison to <option>subq=6</option>, it usually gains 0.01-0.05 dB
+  global PSNR with speed costs varying from 15%-33%.
+  Since the tradeoff encoding time vs. quality is quite low, you should
+  only use it if you are after every bit saving and if encoding time is
+  not an issue.
   </para>
 </listitem>
 <listitem>
