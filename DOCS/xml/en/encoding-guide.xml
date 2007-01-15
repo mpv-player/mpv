@@ -1472,8 +1472,8 @@ which widely depend on personal taste and technical constraints.
   boost encoding speed &mdash; by about 40-60% in typical cases &mdash;
   with little if any picture degradation.
   <systemitem class="library">x264</systemitem> also allows multi-threaded
-  encoding, which currently speeds up encoding by 15-30% (depending on
-  the encoding settings) while lowering PSNR by about 0.05dB.
+  encoding, which currently speeds up encoding by 94% per CPU core while
+  lowering PSNR between 0.005dB and 0.01dB on a typical setup.
   </para>
 </listitem>
 
@@ -3848,6 +3848,20 @@ random differences in the achieved bitrate.
   clip.
   </para>
 </listitem>
+<listitem id="menc-feat-x264-encoding-options-speedvquality-threads">
+  <para>
+  <emphasis role="bold">threads</emphasis>:
+  This option allows to spawn threads to encode in parallel on multiple CPUs.
+  You can manually select the number of threads to be created or, better, set
+  <option>threads=auto</option> and let
+  <systemitem class="library">x264</systemitem> detect how many CPUs are
+  available and pick an appropriate number of threads.
+  If you have a multi-processor machine, you should really consider using it
+  as it can to increase encoding speed linearly with the number of CPU cores
+  (about 94% per CPU core), with very little quality reduction (about 0.005dB
+  for dual processor, about 0.01dB for a quad processor machine).
+  </para>
+</listitem>
 </itemizedlist>
 </sect3>
 
@@ -4287,10 +4301,12 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 -oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 
-  If you have multi-processor machine, you can add
-  <option>threads=auto</option>.  This increases encoding speed by about
-  94% per CPU core, with very little quality penalty (about 0.005dB for
-  dual processor, about 0.01dB for a quad processor machine).
+  If you have a multi-processor machine, don't miss the opportunity to
+  dramatically speed-up encoding by enabling
+  <link linkend="menc-feat-x264-encoding-options-speedvquality-threads">
+  <systemitem class="library">x264</systemitem>'s multi-threading mode</link>
+  by adding <option>threads=auto</option> to your <option>x264encopts</option>
+  command-line.
 </para>
 
 <para>
