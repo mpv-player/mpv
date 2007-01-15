@@ -4165,7 +4165,7 @@ and development advancements, you may get very different results.
 <listitem><para>
   <emphasis role="bold">B-frames</emphasis>:
   <application>QuickTime</application> 7 supports a maximum of 1 B-frame, i.e.
-  <option>-x264encopts bframes=1</option>.  This means that
+  <option>-x264encopts bframes=1</option>. This means that
   <option>b_pyramid</option> and <option>weight_b</option> will have no
   effect, since they require <option>bframes</option> to be greater than 1.
 </para></listitem>
@@ -4173,13 +4173,13 @@ and development advancements, you may get very different results.
   <emphasis role="bold">Macroblocks</emphasis>:
   <application>QuickTime</application> 7 does not support 8x8 DCT macroblocks.
   This option (<option>8x8dct</option>) is off by default, so just be sure
-  not to explicitly enable it.  This also means that the <option>i8x8</option>
+  not to explicitly enable it. This also means that the <option>i8x8</option>
   option will have no effect, since it requires <option>8x8dct</option>.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Aspect ratio</emphasis>:
   <application>QuickTime</application> 7 does not support SAR (sample
-  aspect ratio) information in MPEG-4 files; it assumes that SAR=1.  Read
+  aspect ratio) information in MPEG-4 files; it assumes that SAR=1. Read
   <link linkend="menc-feat-quicktime-7-scale">the section on scaling</link>
   for a workaround.
 </para></listitem>
@@ -4192,7 +4192,7 @@ and development advancements, you may get very different results.
 <para>
   Suppose you want to rip your freshly bought copy of "The Chronicles of
   Narnia". Your DVD is region 1,
-  which means it is NTSC.  The example below would still apply to PAL,
+  which means it is NTSC. The example below would still apply to PAL,
   except you would omit <option>-ofps 24000/1001</option> and use slightly
   different <option>crop</option> and <option>scale</option> dimensions.
 </para>
@@ -4201,7 +4201,7 @@ and development advancements, you may get very different results.
   After running <option>mplayer dvd://1</option>, you follow the process
   detailed in the section <link linkend="menc-feat-telecine">How to deal
   with telecine and interlacing in NTSC DVDs</link> and discover that it is
-  24000/1001 fps progressive video.  This simplifies the process somewhat,
+  24000/1001 fps progressive video. This simplifies the process somewhat,
   since you do not need to use an inverse telecine filter such as
   <option>pullup</option> or a deinterlacing filter such as
   <option>yadif</option>.
@@ -4245,10 +4245,10 @@ and development advancements, you may get very different results.
 <para>
   Because you will be remuxing into a different container, you should
   always use the <option>harddup</option> option to ensure that duplicated
-  frames are actually duplicated in the video output.  Without this option,
+  frames are actually duplicated in the video output. Without this option,
   <application>MEncoder</application> will simply put a marker in the video
   stream that a frame was duplicated, and rely on the client software to
-  show the same frame twice.  Unfortunately, this "soft duplication" does
+  show the same frame twice. Unfortunately, this "soft duplication" does
   not survive remuxing, so the audio would slowly lose sync with the video.
 </para>
 
@@ -4281,13 +4281,13 @@ and development advancements, you may get very different results.
 <title>Encoding example</title>
 
 <para>
-  You are now ready to encode the video.  Since you care about
-  quality, of course you will be doing a two-pass encode.  To shave off
+  You are now ready to encode the video. Since you care about
+  quality, of course you will be doing a two-pass encode. To shave off
   some encoding time, you can specify the <option>turbo</option> option
   on the first pass; this reduces <option>subq</option> and
-  <option>frameref</option> to 1.  To save some disk space, you can
+  <option>frameref</option> to 1. To save some disk space, you can
   use the <option>ss</option> option to strip off the first few seconds
-  of the video.  (I found that this particular movie has 32 seconds of
+  of the video. (I found that this particular movie has 32 seconds of
   credits and logos.)  <option>bframes</option> can be 0 or 1.
   The other options are documented in <link
   linkend="menc-feat-x264-encoding-options-speedvquality">Encoding with
@@ -4334,7 +4334,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <title>Remuxing as MP4</title>
 
 <para>
-  There are several ways to remux AVI files to MP4.  You can use
+  There are several ways to remux AVI files to MP4. You can use
   <application>mp4creator</application>, which is part of the
   <ulink url="http://mpeg4ip.sourceforge.net/">MPEG4IP suite</ulink>.
 </para>
@@ -4366,7 +4366,7 @@ mp4creator -create=narnia.h264 -rate=23.976 narnia.mp4</screen>
   This <systemitem>narnia.mp4</systemitem> file should now be playable
   with any <application>QuickTime</application> 7 application, such as
   <application>QuickTime Player</application> or
-  <application>iTunes</application>.  If you are planning to view the
+  <application>iTunes</application>. If you are planning to view the
   video in a web browser with the <application>QuickTime</application>
   plugin, you should also hint the movie so that the
   <application>QuickTime</application> plugin can start playing it
