@@ -687,7 +687,7 @@ do{
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... PES packet found: %03X\n",head);
     } else
       if(head==0x1B6) ++num_elementary_packets1B6;
-#if 1
+
     if( ( (num_elementary_packets100>50 && num_elementary_packets101>50) ||
           (num_elementary_packetsPES>50) ) && skipped>4000000){
         mp_msg(MSGT_DEMUX,MSGL_V,"sync_mpeg_ps: seems to be ES/PES stream...\n");
@@ -699,7 +699,6 @@ do{
         demux->stream->eof=1;
         break;
     }
-#endif
   }
 } while(ret!=1);
   mp_dbg(MSGT_DEMUX,MSGL_DBG2,"demux: %d bad bytes skipped\n",skipped);
