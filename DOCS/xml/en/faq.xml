@@ -79,8 +79,9 @@ job, so why change? Besides, we dislike the auto* tools, just like
 Compilation fails with an error and <application>gcc</application> bails out
 with some cryptic message containing the phrase
 <systemitem>internal compiler error</systemitem> or
-<systemitem>unable to find a register to spill</systemitem>.
-</para></question>
+<systemitem>unable to find a register to spill</systemitem> or
+<systemitem>can't find a register in class `GENERAL_REGS'
+while reloading `asm'</systemitem>.</para></question>
 <answer><para>
 You have stumbled over a bug in <application>gcc</application>. Please
 <ulink url="http://gcc.gnu.org/bugs.html">report it to the gcc team</ulink>
