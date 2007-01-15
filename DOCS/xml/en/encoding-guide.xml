@@ -4121,18 +4121,18 @@ and development advancements, you may get very different results.
 <itemizedlist>
 <listitem><para>
   You want any computer illiterate to be able to watch your encode on
-  any major platform (Windows, Mac OSX, Unices &hellip;).
+  any major platform (Windows, Mac OS X, Unices &hellip;).
 </para></listitem>
 <listitem><para>
   <application>QuickTime</application> is able to take advantage of more
-  hardware and software acceleration features of Mac OSX than
+  hardware and software acceleration features of Mac OS X than
   platform-independent players like <application>MPlayer</application>
   or <application>VLC</application>.
   That means that your encodes have a chance to be played smoothly by older
   G4-powered machines.
 </para></listitem>
 <listitem><para>
-  <application>QuickTime</application> 7 support the next-generation codec H.264,
+  <application>QuickTime</application> 7 supports the next-generation codec H.264,
   which yields significantly better picture quality than previous codec
   generations (MPEG-2, MPEG-4 &hellip;).
 </para></listitem>
@@ -4144,7 +4144,7 @@ and development advancements, you may get very different results.
 
 <para>
   <application>QuickTime</application> 7 supports H.264 video and AAC audio,
-  but it does not support them muxed in AVI container format.
+  but it does not support them muxed in the AVI container format.
   However, you can use <application>MEncoder</application> to encode
   the video and audio, and then use an external program such as
   <application>mp4creator</application> (part of the
@@ -4191,7 +4191,7 @@ and development advancements, you may get very different results.
 <title>Cropping</title>
 <para>
   Suppose you want to rip your freshly bought copy of "The Chronicles of
-  Narnia" Your DVD is region 1,
+  Narnia". Your DVD is region 1,
   which means it is NTSC.  The example below would still apply to PAL,
   except you would omit <option>-ofps 24000/1001</option> and use slightly
   different <option>crop</option> and <option>scale</option> dimensions.
@@ -4224,7 +4224,7 @@ and development advancements, you may get very different results.
   with a sample aspect ratio other than 1, so you will need to upscale
   (which wastes a lot of disk space) or downscale (which loses some
   details of the source) the video to square pixels.
-  Either way you do it, this is highly inefficient, but simply can not
+  Either way you do it, this is highly inefficient, but simply cannot
   be avoided if you want your video to be playable by
   <application>QuickTime</application> 7.
   <application>MEncoder</application> can apply the appropriate upscaling
@@ -4263,7 +4263,7 @@ and development advancements, you may get very different results.
 <title>Bitrate</title>
 
 <para>
-  As always, the selection of bitrate is a matter the technical properties
+  As always, the selection of bitrate is a matter of the technical properties
   of the source, as explained
   <link linkend="menc-feat-dvd-mpeg4-resolution-bitrate">here</link>, as
   well as a matter of taste.
