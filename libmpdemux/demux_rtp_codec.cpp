@@ -3,6 +3,7 @@
 
 #include "demux_rtp_internal.h"
 extern "C" {
+#include <limits.h>
 #include "stheader.h"
 }
 
