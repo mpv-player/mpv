@@ -180,6 +180,7 @@ static void new_audio_stream(demuxer_t *demux, int aid){
       case 0x80: if((aid & 0xF8) == 0x88) sh_a->format=0x2001;//dts
                   else sh_a->format=0x2000;break; // ac3
     }
+    if(aid == 0xC0) sh_a->format=0x2000;
     if (mpg_d) mpg_d->a_stream_ids[mpg_d->num_a_streams++] = aid;
   }
   if(demux->audio->id==-1) demux->audio->id=aid;
@@ -312,7 +313,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
             ds=demux->sub;
         }
           
-      } else if((aid & 0xC0) == 0x80 || (aid & 0xE0) == 0x00) {
+      } else if((aid & 0xC0) == 0x80 || (aid & 0xE0) == 0x00 || aid==0xC0) {
 
 //        aid=128+(aid&0x7F);
         // aid=0x80..0xBF
