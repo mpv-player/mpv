@@ -508,15 +508,12 @@ static int demux_mpg_probe(demuxer_t *demuxer) {
          }
          file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
       } else
-#if 1
           // fuzzy mpeg4-es detection. do NOT enable without heavy testing of mpeg formats detection!
         if(num_elementary_packets1B6>3 && num_elementary_packets12x>=1 &&
            num_elementary_packetsPES==0 && num_elementary_packets100<=num_elementary_packets12x &&
            demuxer->synced<2) {
              file_format=DEMUXER_TYPE_MPEG4_ES;
         } else
-#endif
-#if 1
          // fuzzy h264-es detection. do NOT enable without heavy testing of mpeg formats detection!
         if((num_h264_slice>3 || (num_h264_dpa>3 && num_h264_dpb>3 && num_h264_dpc>3)) && 
           /* FIXME num_h264_sps>=1 && */ num_h264_pps>=1 && num_h264_idr>=1 &&
@@ -524,7 +521,6 @@ static int demux_mpg_probe(demuxer_t *demuxer) {
           demuxer->synced<2) {
             file_format=DEMUXER_TYPE_H264_ES;
         } else
-#endif
         {
           if(demuxer->synced==2)
             mp_msg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
