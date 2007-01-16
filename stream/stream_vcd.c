@@ -24,6 +24,8 @@
 #include "vcd_read.h"
 #endif
 
+#include "libmpdemux/demuxer.h"
+
 extern char *cdrom_device;
 
 static struct stream_priv_s {
@@ -135,6 +137,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   stream->fill_buffer = fill_buffer;
   stream->seek = seek;
   stream->close = close_s;
+  *file_format = DEMUXER_TYPE_MPEG_PS;
 
   m_struct_free(&stream_opts,opts);
   return STREAM_OK;
