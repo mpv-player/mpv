@@ -167,8 +167,26 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       priv->palette[(y * 4) + 3] = 0;
     }
 
-    memcpy_transp_pic(dest, buf, w, h, priv->w, gif->Image.Width,
-                      transparency, transparent_col);
+    if (gif->Image.Interlace) {
+      uint8_t *s = buf;
+      memcpy_transp_pic(dest, s, w, h >> 3,
+                        priv->w << 3, gif->Image.Width,
+                        transparency, transparent_col);
+      s += (h >> 3) * w;
+      memcpy_transp_pic(dest + (gif->Image.Width << 2), s, w, h >> 3,
+                        priv->w << 3, gif->Image.Width,
+                        transparency, transparent_col);
+      s += (h >> 3) * w;
+      memcpy_transp_pic(dest + (gif->Image.Width << 1), s, w, h >> 2,
+                        priv->w << 2, gif->Image.Width,
+                        transparency, transparent_col);
+      s += (h >> 2) * w;
+      memcpy_transp_pic(dest + gif->Image.Width, s, w, h >> 1,
+                        priv->w << 1, gif->Image.Width,
+                        transparency, transparent_col);
+    } else
+      memcpy_transp_pic(dest, buf, w, h, priv->w, gif->Image.Width,
+                        transparency, transparent_col);
 
     if (refmode == 1) memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
     if (refmode == 2 && priv->useref) {
