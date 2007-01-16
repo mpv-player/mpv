@@ -24,7 +24,7 @@ typedef struct {
   GifFileType *gif;
   int w, h;
   int useref;
-  char *refimg;
+  uint8_t *refimg;
 } gif_priv_t;
 
 #define GIF_SIGNATURE (('G' << 16) | ('I' << 8) | 'F')
@@ -70,7 +70,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   int len = 0;
   demux_packet_t *dp = NULL;
   ColorMapObject *effective_map = NULL;
-  char *buf = NULL;
+  uint8_t *buf = NULL;
   int refmode = 0;
   int transparency = 0;
   uint8_t transparent_col;
