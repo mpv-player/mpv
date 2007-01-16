@@ -233,6 +233,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
   } else {
     if(mp_input_key_cb)
       mp_input_key_cb = NULL;
+
+    if(mpi->flags&MP_IMGFLAG_DIRECT)
+      dmpi = mpi->priv;
+    else {
     dmpi = vf_get_image(vf->next,mpi->imgfmt,
 			MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
 			mpi->w,mpi->h);
@@ -244,6 +248,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     dmpi->planes[1] = mpi->planes[1];
     dmpi->planes[2] = mpi->planes[2];
     dmpi->priv      = mpi->priv;
+  }
   }
   return vf_next_put_image(vf,dmpi, pts);
 }
