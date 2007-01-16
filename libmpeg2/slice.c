@@ -1604,6 +1604,12 @@ do {									\
     }									\
 } while (0)
 
+static void motion_dummy (mpeg2_decoder_t * const decoder,
+                          motion_t * const motion,
+                          mpeg2_mc_fct * const * const table)
+{
+}
+
 void mpeg2_init_fbuf (mpeg2_decoder_t * decoder, uint8_t * current_fbuf[3],
 		      uint8_t * forward_fbuf[3], uint8_t * backward_fbuf[3])
 {
@@ -1661,7 +1667,9 @@ void mpeg2_init_fbuf (mpeg2_decoder_t * decoder, uint8_t * current_fbuf[3],
 
     if (decoder->mpeg1) {
 	decoder->motion_parser[0] = motion_zero_420;
+        decoder->motion_parser[MC_FIELD] = motion_dummy;
 	decoder->motion_parser[MC_FRAME] = motion_mp1;
+        decoder->motion_parser[MC_DMV] = motion_dummy;
 	decoder->motion_parser[4] = motion_reuse_420;
     } else if (decoder->picture_structure == FRAME_PICTURE) {
 	if (decoder->chroma_format == 0) {
