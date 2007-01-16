@@ -237,18 +237,18 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     if(mpi->flags&MP_IMGFLAG_DIRECT)
       dmpi = mpi->priv;
     else {
-    dmpi = vf_get_image(vf->next,mpi->imgfmt,
-			MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
-			mpi->w,mpi->h);
+      dmpi = vf_get_image(vf->next,mpi->imgfmt,
+                          MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
+                          mpi->w,mpi->h);
 
-    dmpi->stride[0] = mpi->stride[0];
-    dmpi->stride[1] = mpi->stride[1];
-    dmpi->stride[2] = mpi->stride[2];
-    dmpi->planes[0] = mpi->planes[0];
-    dmpi->planes[1] = mpi->planes[1];
-    dmpi->planes[2] = mpi->planes[2];
-    dmpi->priv      = mpi->priv;
-  }
+      dmpi->stride[0] = mpi->stride[0];
+      dmpi->stride[1] = mpi->stride[1];
+      dmpi->stride[2] = mpi->stride[2];
+      dmpi->planes[0] = mpi->planes[0];
+      dmpi->planes[1] = mpi->planes[1];
+      dmpi->planes[2] = mpi->planes[2];
+      dmpi->priv      = mpi->priv;
+    }
   }
   return vf_next_put_image(vf,dmpi, pts);
 }
