@@ -43,6 +43,25 @@ static int gif_check_file(demuxer_t *demuxer)
   return 0;
 }
 
+static void memcpy_transp_pic(uint8_t *dst, uint8_t *src, int w, int h,
+                int dstride, int sstride, int transp, uint8_t trans_col) {
+  if (transp) {
+    dstride -= w;
+    sstride -= w;
+    while (h-- > 0) {
+      int wleft = w;
+      while (wleft-- > 0) {
+        if (*src != trans_col)
+          *dst = *src;
+        dst++; src++;
+      }
+      dst += dstride;
+      src += sstride;
+    }
+  } else
+    memcpy_pic(dst, src, w, h, dstride, sstride);
+}
+
 static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
   gif_priv_t *priv = demuxer->priv;
@@ -148,21 +167,8 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       priv->palette[(y * 4) + 3] = 0;
     }
 
-    if (transparency) {
-      uint8_t *dpos = dest, *spos = buf;
-      int hleft = h;
-      while (hleft-- > 0) {
-        int wleft = w;
-        while (wleft-- > 0) {
-          if (*spos != transparent_col)
-            *dpos = *spos;
-          dpos++; spos++;
-        }
-        dpos += priv->w - w;
-        spos += gif->Image.Width - w;
-      }
-    } else
-      memcpy_pic(dest, buf, w, h, priv->w, gif->Image.Width);
+    memcpy_transp_pic(dest, buf, w, h, priv->w, gif->Image.Width,
+                      transparency, transparent_col);
 
     if (refmode == 1) memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
     if (refmode == 2 && priv->useref) {
