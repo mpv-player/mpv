@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21659
+.\" In sync with r21725
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -108,7 +108,7 @@ cue://Datei[:Titel]
 .
 .br
 .B mplayer
-[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv]://
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
 [Benutzer:Passwort@]URL[:Port] [Optionen]
 .
 .br
@@ -134,7 +134,8 @@ tivo://Rechnername/[list|llist|fsid]
 .br
 .B mencoder
 [Optionen] Datei
-[Datei|URL|\-] [\-o Datei]
+[Datei|URL|\-] [\-o Datei | file://Datei |
+smb://[Benutzer:Passwort@]Host/Verzeichnis]
 .
 .br
 .B mencoder
@@ -1341,7 +1342,7 @@ Werte kleiner als 100 entsprechen Vielfachen von 1350KB/s,
 d.h.\& \-dvd-speed 8 entspricht 10800KB/s (8-fach).
 .br
 .I ANMERKUNG:
-Für die Änderung der Geschwindigkeit benötigst Du Schreibberechtigung für
+Für die Änderung der Geschwindigkeit benötigst Du Schreibzugriff auf
 das DVD-Gerät.
 .
 .TP
@@ -2036,7 +2037,7 @@ Aktiviert die Extraktion von in Matroska eingebetteten Schriften (Standard:
 deaktiviert).
 Diese Schriften können für das Rendern von SSA/ASS-Untertiteln verwendet werden
 (Option \-ass).
-Schriftdateien werden im Verzeichnis ~/.mplayer/fonts angelegt.
+Schriftdateien werden im Verzeichnis ~/.mplayer/\:fonts angelegt.
 .br
 .I ANMERKUNG:
 Bei der Verwendung von FontConfig 2.4.2 oder neuer werden eingebettete
@@ -7504,13 +7505,13 @@ MPEG-1 Video
 MPEG-2 Video
 .IPs huffyuv
 HuffYUV
-.IPs ffvhuff (siehe auch: vstrict)
+.IPs ffvhuff
 nicht-standardkonformes, 20% kleineres HuffYUV, benutzt YV12
 .IPs "asv1\ "
 ASUS Video v1
 .IPs "asv2\ "
 ASUS Video v2
-.IPs "ffv1 (siehe auch: vstrict)"
+.IPs "ffv1"
 FFmpegs verlustfreier Videocodec
 .IPs "flv\ \ "
 Sorenson H.263, der in Flash Videodateien benutzt wird
@@ -8169,8 +8170,7 @@ decodiert werden soll.
 Erlaubt die Benutzung libavcodec-spezifischer Erweiterungen (Standard).
 .IPs -2
 Erlaubt die Benutzung experimenteller Codecs und Features, die von zukünftigen
-Versionen von MPlayer möglicherweise nicht abspielbar sein werden (snow,
-ffvhuff, ffv1).
+Versionen von MPlayer möglicherweise nicht abspielbar sein werden (snow).
 .RE
 .PD 1
 .
@@ -10259,11 +10259,20 @@ Jede andere Framerate ist mit dieser Option inkompatibel.
 Ermöglicht beliebiges Telecining durch Verwendung des DGPulldown-Codes von
 Donand Graft.
 Du musst die originale und die erwünschte Framerate angeben; der Muxer wird
-den Videostream dann so aussehen lassen, als wäre er mit <tele_dest> Frames
-pro Sekunde encodiert worden, dabei wird die nominale Ausgabeframerate ersetzt.
+den Videostream dann so aussehen lassen, als wäre er mit gewünschten
+Framerate encodiert worden.
 Dies funktioniert bei MPEG-2 nur dann, wenn die Framerate der Eingabe kleiner
 ist als die der Ausgabe und die Frameratenerhöhung <= 1.5 ist.
-Beispiel für Telecining von PAL zu NTSC: tele_src=25:tele_dest=30000/1001.
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.PD 0
+.RSs
+.IPs tele_src=25,tele_dest=30000/1001
+Telecining von PAL zu NTSC
+.RE
+.PD 1
 .
 .TP
 .B vbuf_size=<40\-1194>
