@@ -3595,6 +3595,10 @@ int gui_no_filename=0;
   
   mp_msg_init();
 
+  for(i=1; i<argc; i++)
+    if(!strcmp(argv[i], "-really-quiet"))
+      verbose= -10;
+
   print_version();
 #if defined(WIN32) && defined(USE_WIN32DLL)
   set_path_env();
