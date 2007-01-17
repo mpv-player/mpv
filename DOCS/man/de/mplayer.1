@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21725
+.\" In sync with r21882
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -255,7 +255,7 @@ Verringert/\:erhöht die Lautstärke.
 Ton-Stummschaltung.
 .IPs "_ (nur bei MPEG-TS und libavformat)"
 Wechselt zwischen den verfügbaren Videospuren.
-.IPs "# (nur bei MPEG, Matroska, AVI und libavformat)"
+.IPs "# (nur bei DVD, MPEG, Matroska, AVI und libavformat)"
 Wechselt zwischen den verfügbaren Audiospuren.
 .IPs "TAB (nur bei MPEG-TS)"
 Wechselt zwischen den verfügbaren MPEG-Programmen.
@@ -1110,8 +1110,8 @@ Erzwingt den Audiodemuxertyp für \-audiofile.
 Setze ein '+' vor den Namen, um den Demuxer zu erzwingen, dann werden
 einige Überprüfungen nicht durchgeführt!
 Gib den Demuxernamen an, wie er von \-audio-demuxer help angezeigt wird.
-Zur Rückwärtskompatibilität wird auch die Demuxer-ID, wie in
-libmpdemux/\:demuxer.h definiert akzeptiert.
+Zur Rückwärtskompatibilität wird auch die Demuxer-ID, wie sie in
+subreader.h definiert wird, akzeptiert.
 \-audio-demuxer audio oder \-audio-demuxer 17 erzwingt das Abspielen als MP3.
 .
 .TP
@@ -7657,15 +7657,23 @@ kann daher gering sein.
 Umfang der Bewegungsabschätzung (Standard: 0 (unbegrenzt))
 .
 .TP
-.B mbd=<0\-2>
+.B mbd=<0\-2> (siehe auch *cmp, qpel)
 Macroblock decision algorithm: Entscheidungsalgorithmus für Macro-Blocks (hohe
 Qualitätsstufe), encodiert jeden Macro-Block in allen Modi und wählt den
 besten aus.
 Dies ist zwar langsam, führt aber zu besserer Qualität und Dateigröße.
+Wenn mbd auf 1 oder 2 gesetzt ist, wird der mbcmp-Wert beim Vergleich von
+Macro-Blöcken ignoriert.
+Falls jedoch irgendeine Vergleichseinstellung (precmp, subcmp, cmp oder mbcmp)
+ungleich null ist, wird eine langsamere aber bessere Bewegungssuche verwendet,
+die auf halbe Pixel genau arbeitet.
+Dabei ist egal, auf welchen Wert mbd gesetzt wurde.
+Wenn qpel gesetzt ist, wird in jedem Falle auf Viertelpixel genaue
+Bewegungssuche verwendet.
 .PD 0
 .RSs
 .IPs 0
-Benutze mbcmp (Standard).
+Benutze von mbcmp gegebene Vergleichsfunktion (Standard).
 .IPs 1
 Wählt denjenigen Modus für einen Macro-Block, der die wenigsten Bits benötigt
 (entspricht vhq).
@@ -8514,8 +8522,8 @@ Dies scheint nur für Encodierung mit hohen Bitraten sinnvoll zu sein.
 .
 .TP
 .B mbcmp=<0\-2000>
-Setzt die Vergleichsfunktion für Macroblockentscheidungen, wird nur bei mbd=0
-benutzt.
+Setzt die Vergleichsfunktion für Macroblockentscheidungen; hat nur
+Auswirkungen bei mbd=0.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -10054,14 +10062,11 @@ Verwende diesen Parameter nur, wenn Du weißt, was Du tust und wenn Du ihn
 setzen musst.
 .
 .TP
-.B threads=<1\-4>
-Jeden Frame in Scheiben spalten und diese parallel encodieren (Standard: 1).
-Ermöglich weiterhin Multithread-Decodierung, falls vom Decoder unterstützt
-(lavc tut dies nicht).
-Das geht leicht zu Lasten der Komprimierung.
-Um diese Funktion nutzen zu können, muss libx264 mit Unterstützung für pthread
-kompiliert worden sein; falls das nicht der Fall ist, wird diese Option eine
-Warnung ausgeben und aktiviert Scheiben, jedoch nicht Multithreading.
+.B threads=<0\-16>
+Erstellt Threads, um parallel auf mehreren CPUs zu encodieren (Standard: 1).
+Dies führt zu geringen Einbußen der Kompressionsqualität.
+0 oder 'auto' weist x264 an, die verfügbare Anzahl CPUs zu erkennen und eine
+entsprechende Anzahl Threads zu wählen.
 .
 .TP
 .B (no)global_header
@@ -10206,7 +10211,7 @@ Initiale Zeit, um die das Video verzögert wird, in Millisekunden (Standard:
 .
 .TP
 .B "drop\ \ \ "
-Bei Benutzung mit init_adelay verwirft der Muxer den Teil der Audiospur, der
+Bei Benutzung mit vdelay verwirft der Muxer den Teil der Audiospur, der
 angepasst wurde.
 .
 .
