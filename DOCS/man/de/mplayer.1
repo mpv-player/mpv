@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21882
+.\" In sync with r21954
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -4276,10 +4276,11 @@ Fehler liefern können)
 .br
 4: sehr agressiv
 .REss
-.IPs "fast (nur bei MPEG-2)"
+.IPs "fast (nur bei MPEG-2, MPEG-4 und H.264)"
 Aktiviere Optimierungen, die nicht den Spezifikationen entsprechen und
 möglicherweise Probleme verursachen können, wie beispielsweise einfachere
-Dequantisierung bei angenommener Benutzung der Standardquantisierungsmatrix und
+Dequantisierung, einfachere Bewegungskompensierung, angenommene Benutzung
+der Standardquantisierungsmatrix und
 angenommen, dass YUV als 4:2:0 vorliegt, und das Überspringen von ein paar
 Überprüfungen, die sonst
 vorgenommen werden, um fehlerhafte Bitstreams zu erkennen.
