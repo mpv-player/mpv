@@ -283,7 +283,74 @@ try_fec:
 	return TS_PH_PACKET_SIZE;
 }
 
+static int parse_avc_sps(uint8_t *buf, int len, int *w, int *h);
 
+static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
+{
+	int i;
+	ts_priv_t *priv = (ts_priv_t*) demuxer->priv;
+
+	if(priv->ts.streams[es->pid].sh)
+		return;
+
+	if((IS_AUDIO(es->type) || IS_AUDIO(es->subtype)) && priv->last_aid+1 < MAX_A_STREAMS)
+	{
+		sh_audio_t *sh = new_sh_audio_aid(demuxer, priv->last_aid, es->pid);
+		if(sh)
+		{
+			sh->format = IS_AUDIO(es->type) ? es->type : es->subtype;
+			sh->ds = demuxer->audio;
+
+			priv->ts.streams[es->pid].id = priv->last_aid;
+			priv->ts.streams[es->pid].sh = sh;
+			priv->ts.streams[es->pid].type = TYPE_AUDIO;
+			mp_msg(MSGT_DEMUX, MSGL_V, "\r\nADDED AUDIO PID %d, type: %x stream n. %d\r\n", es->pid, sh->format, priv->last_aid);
+			priv->last_aid++;
+		}
+
+		if(es->extradata && es->extradata_len)
+		{
+			sh->wf = (WAVEFORMATEX *) malloc(sizeof (WAVEFORMATEX) + es->extradata_len);
+			sh->wf->cbSize = es->extradata_len;
+			memcpy(sh->wf + 1, es->extradata, es->extradata_len);
+		}
+	}
+
+	if((IS_VIDEO(es->type) || IS_VIDEO(es->subtype)) && priv->last_vid+1 < MAX_V_STREAMS)
+	{
+		sh_video_t *sh = new_sh_video_vid(demuxer, priv->last_vid, es->pid);
+		if(sh)
+		{
+			sh->format = IS_VIDEO(es->type) ? es->type : es->subtype;;
+			sh->ds = demuxer->video;
+
+			priv->ts.streams[es->pid].id = priv->last_vid;
+			priv->ts.streams[es->pid].sh = sh;
+			priv->ts.streams[es->pid].type = TYPE_VIDEO;
+			mp_msg(MSGT_DEMUX, MSGL_V, "\r\nADDED VIDEO PID %d, type: %x stream n. %d\r\n", es->pid, sh->format, priv->last_vid);
+			priv->last_vid++;
+
+
+			if(sh->format == VIDEO_AVC && es->extradata && es->extradata_len)
+			{
+				int w = 0, h = 0;
+				sh->bih = (BITMAPINFOHEADER *) calloc(1, sizeof(BITMAPINFOHEADER) + es->extradata_len);
+				sh->bih->biSize= sizeof(BITMAPINFOHEADER) + es->extradata_len;
+				sh->bih->biCompression = sh->format;
+				memcpy(sh->bih + 1, es->extradata, es->extradata_len);
+				mp_msg(MSGT_DEMUXER,MSGL_DBG2, "EXTRADATA(%d BYTES): \n", es->extradata_len);
+				for(i = 0;i < es->extradata_len; i++)
+					mp_msg(MSGT_DEMUXER,MSGL_DBG2, "%02x ", (int) es->extradata[i]);
+				mp_msg(MSGT_DEMUXER,MSGL_DBG2,"\n");
+				if(parse_avc_sps(es->extradata, es->extradata_len, &w, &h))
+				{
+					sh->bih->biWidth = w;
+					sh->bih->biHeight = h;
+				}
+			}
+		}
+	}
+}
 
 static int ts_check_file(demuxer_t * demuxer)
 {
@@ -926,37 +993,14 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 	start_pos = ts_detect_streams(demuxer, &params);
 
-	demuxer->video->id = params.vpid;
 	demuxer->sub->id = params.spid;
 	priv->prog = params.prog;
 
 	if(params.vtype != UNKNOWN)
 	{
-		ES_stream_t *es = priv->ts.pids[params.vpid];
-		sh_video = new_sh_video_vid(demuxer, 0, es->pid);
-		priv->ts.streams[params.vpid].id = 0;
-		priv->ts.streams[params.vpid].sh = sh_video;
-		priv->ts.streams[params.vpid].type = TYPE_VIDEO;
-		priv->last_vid = 0;
-		demuxer->video->id = 0;
-
-		if(params.vtype == VIDEO_AVC && es->extradata && es->extradata_len)
-		{
-			int w = 0, h = 0;
-			sh_video->bih = (BITMAPINFOHEADER *) calloc(1, sizeof(BITMAPINFOHEADER) + es->extradata_len);
-			sh_video->bih->biSize= sizeof(BITMAPINFOHEADER) + es->extradata_len;
-			sh_video->bih->biCompression = params.vtype;
-			memcpy(sh_video->bih + 1, es->extradata, es->extradata_len);
-			mp_msg(MSGT_DEMUXER,MSGL_DBG2, "EXTRADATA(%d BYTES): \n", es->extradata_len);
-			for(i = 0;i < es->extradata_len; i++)
-				mp_msg(MSGT_DEMUXER,MSGL_DBG2, "%02x ", (int) es->extradata[i]);
-			mp_msg(MSGT_DEMUXER,MSGL_DBG2,"\n");
-			if(parse_avc_sps(es->extradata, es->extradata_len, &w, &h))
-			{
-				sh_video->bih->biWidth = w;
-				sh_video->bih->biHeight = h;
-			}
-		}
+		ts_add_stream(demuxer, priv->ts.pids[params.vpid]);
+		sh_video = priv->ts.streams[params.vpid].sh;
+		demuxer->video->id = priv->ts.streams[params.vpid].id;
 		sh_video->ds = demuxer->video;
 		sh_video->format = params.vtype;
 		demuxer->video->sh = sh_video;
@@ -964,22 +1008,12 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 	if(params.atype != UNKNOWN)
 	{
-		ES_stream_t *es = priv->ts.pids[params.apid];
-		sh_audio = new_sh_audio_aid(demuxer, 0, es->pid);
-		priv->ts.streams[params.apid].id = 0;
-		priv->ts.streams[params.apid].sh = sh_audio;
-		priv->ts.streams[params.apid].type = TYPE_AUDIO;
-		priv->last_aid = 0;
-		demuxer->audio->id = 0;
+		ts_add_stream(demuxer, priv->ts.pids[params.apid]);
+		sh_audio = priv->ts.streams[params.apid].sh;
+		demuxer->audio->id = priv->ts.streams[params.apid].id;
 		sh_audio->ds = demuxer->audio;
 		sh_audio->format = params.atype;
 		demuxer->audio->sh = sh_audio;
-		if(es->extradata && es->extradata_len)
-		{
-			sh_audio->wf = (WAVEFORMATEX *) malloc(sizeof (WAVEFORMATEX) + es->extradata_len);
-			sh_audio->wf->cbSize = es->extradata_len;
-			memcpy(sh_audio->wf + 1, es->extradata, es->extradata_len);
-                }
 	}
 
 
@@ -2697,37 +2731,8 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			// PES CONTENT STARTS HERE
 		if(! probe)
 		{
-			if((IS_AUDIO(tss->type) || IS_AUDIO(tss->subtype)) && is_start && !priv->ts.streams[pid].sh && priv->last_aid+1 < MAX_A_STREAMS)
-			{
-				sh_audio_t *sh = new_sh_audio_aid(demuxer, priv->last_aid+1, pid);
-				if(sh)
-				{
-					sh->format = IS_AUDIO(tss->type) ? tss->type : tss->subtype;
-					sh->ds = demuxer->audio;
-
-					priv->last_aid++;
-					priv->ts.streams[pid].id = priv->last_aid;
-					priv->ts.streams[pid].sh = sh;
-					priv->ts.streams[pid].type = TYPE_AUDIO;
-					mp_msg(MSGT_DEMUX, MSGL_V, "\r\nADDED AUDIO PID %d, type: %x stream n. %d\r\n", pid, sh->format, priv->last_aid);
-				}
-			}
-
-			if((IS_VIDEO(tss->type) || IS_VIDEO(tss->subtype)) && is_start && !priv->ts.streams[pid].sh && priv->last_vid+1 < MAX_V_STREAMS)
-			{
-				sh_video_t *sh = new_sh_video_vid(demuxer, priv->last_vid+1, pid);
-				if(sh)
-				{
-					sh->format = IS_VIDEO(tss->type) ? tss->type : tss->subtype;
-					sh->ds = demuxer->video;
-
-					priv->last_vid++;
-					priv->ts.streams[pid].id = priv->last_vid;
-					priv->ts.streams[pid].sh = sh;
-					priv->ts.streams[pid].type = TYPE_VIDEO;
-					mp_msg(MSGT_DEMUX, MSGL_V, "\r\nADDED VIDEO PID %d, type: %x stream n. %d\r\n", pid, sh->format, priv->last_vid);
-				}
-			}
+			if((is_video || is_audio) && is_start && !priv->ts.streams[pid].sh)
+				ts_add_stream(demuxer, tss);
 
 			if((pid == demuxer->sub->id))	//or the lang is right
 			{
