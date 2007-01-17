@@ -181,7 +181,7 @@ static void new_audio_stream(demuxer_t *demux, int aid){
                   else sh_a->format=0x2000;break; // ac3
     }
     //evo files
-    if(aid & 0xC0 == 0xC0) sh_a->format=0x2000;
+    if((aid & 0xC0) == 0xC0) sh_a->format=0x2000;
     if (mpg_d) mpg_d->a_stream_ids[mpg_d->num_a_streams++] = aid;
   }
   if(demux->audio->id==-1) demux->audio->id=aid;
