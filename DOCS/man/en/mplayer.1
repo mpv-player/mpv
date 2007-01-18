@@ -761,6 +761,17 @@ Automatically attaches gdb upon crash or SIGTRAP.
 Support must be compiled in by configuring with \-\-enable-crash-debug.
 .
 .TP
+.B \-doubleclick-time
+Time in milliseconds to recognize two consecutive button presses as
+a double-click (default: 300).
+Set to 0 to let your windowing system decide what a double-click is
+(\-vo directx only).
+.br
+.I NOTE:
+you will get slightly different behaviour depending on whether you bind
+MOUSE_BTN0_DBL or MOUSE_BTN0\-MOUSE_BTN0_DBL.
+.
+.TP
 .B \-edlout <filename>
 Creates a new file and writes edit decision list (EDL) records to it.
 During playback, the user hits 'i' to mark the start or end of a skip block.
