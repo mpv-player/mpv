@@ -1,4 +1,4 @@
-.\" synced with r21758
+.\" synced with r21959
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -256,7 +256,7 @@ Réduit/\:augmente le volume.
 Coupe le son (mute).
 .IPs "_ (MPEG-TS et libavformat uniquement)"
 Alterne entre les pistes vidéos disponibles.
-.IPs "# (MPEG, Matroska, AVI et libavformat uniquement)"
+.IPs "# (DVD, MPEG, Matroska, AVI et libavformat uniquement)"
 Alterne entre les pistes audio disponibles.
 .IPs "TAB (MPEG-TS uniquement)"
 Alterne entre les différents programmes disponibles.
@@ -797,6 +797,17 @@ Cette option ne fonctionne pas bien avec certains démultiplexeurs et certains co
 Attache gdb automatiquement lors d'un crash ou d'un SIGTRAP.
 N'est géré que si MPlayer a été compilé avec l'option de
 configuration \-\-enable-crash-debug.
+.
+.TP
+.B \-doubleclick-time
+Délais en milli-secondes pour interpréter deux clics consécutifs comme un
+double-clic (default\ : 300).
+Mettre à 0 pour laisser le gestionnaire de fenêtes décider ce qu'est un double-clic
+(\-vo directx uniquement).
+.br
+.I NOTE\ :
+Vous aurez un comportement différent si vous associez MOUSE_BTN0_DBL ou
+MOUSE_BTN0\-MOUSE_BTN0_DBL.
 .
 .TP
 .B \-edlout <nomfichier>
@@ -4302,12 +4313,13 @@ les flux valides)
 .br
 4: très agressive
 .REss
-.IPs "fast (MPEG-2 only)"
+.IPs "fast (MPEG-2, MPEG-4, et H.264 uniquement)"
 Active des optimisations non conformes aux spécifications, et
 qui peuvent éventuellement poser problème, comme une déquantification
-plus simple, l'hypothèse que les matrices de quantification ont été
-utilisées, que l'espace de couleur est YUV 4:2:0 et le saut de quelques
-vérifications pour détecter les flux endommagés.
+plus simple, une compensation de mouvement plus simple, l'hypothèse que
+les matrices de quantifications par défaut ont été utilisées, que l'espace
+de couleur est YUV 4:2:0 et le saut de quelques vérifications pour
+détecter les flux endommagés.
 .IPs "gray\ "
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 .IPs "idct=<0\-99> (voir \-lavcopts)"
@@ -7721,15 +7733,22 @@ intervalle de recherche de l'estimation de mouvement
 (par défaut\ : 0 (illimité))
 .
 .TP
-.B mbd=<0\-2>
+.B mbd=<0\-2> (voir aussi *cmp, qpel)
 Algorithme de décision de macro-block (mode haute qualité), encode chaque
 macro-block dans tous les modes et choisit le meilleur.
 C'est lent mais permet d'améliorer la qualité visuelle et réduire la taille 
 du fichier.
+Quand mbd est mis à 1 ou 2, la valeur de de mbcmp est ingnoré quand les
+macro-blocks sont comparés entre eux.
+En revanche, si l'une des options de comparaisons (precmp, subcmp, cmp, or
+mbcmp) n'est pas à zéro, une recherche de mouvement half-pel plus lente et
+de meilleure qualité est utilisée, quel que soit la valeur de mbd.
+Si qpel est activé, une recherche de mouvement quart-pel sera utilisé dans
+tous les cas.
 .PD 0
 .RSs
 .IPs 0
-Utilise mbcmp (par défaut).
+Utilise la fonction de comparaison donnée par mbcmp (par défaut).
 .IPs 1
 Sélectionne le mode MB qui requiert le moins de bits (=vhq).
 .IPs 2
@@ -8579,7 +8598,7 @@ Cela ne semble utile que pour les encodages à haut débit.
 .TP
 .B mbcmp=<0\-2000>
 Choisit la fonction de comparaison pour décider du meilleur du macroblock
-à coder, utilisé uniquement si mbd=0.
+à coder, n'a d'effet que si mbd=0.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -10139,15 +10158,12 @@ N'utilisez ce paramètre que si vous saisissez bien ce qu'il signifie,
 et qu'il vous faut le modifier.
 .
 .TP
-.B threads=<1\-4>
-Découpe chaque trame en tranche (slice) et les encode en parallèle
+.B threads=<1\-16>
+Crée des threads pour encoder en parallèle sur plusieurs processeurs
 (par défaut\ : 1).
-Autorise de plus le décodage "multi-threadé" si le décodeur le gère
-(pas libavcodec).
-Cela dégrade un peu la compressibilité.
-Cela nécessite que libx264 a été compilé avec le support pthread\ ;
-Si ce n'est pas le cas, cette option affichera un avertissement et
-activera le découpage en tranches, sans le multithreading.
+Cela dégrade un peu la qualité de la compression.
+0 ou 'auto' demande à x264 de détecter le nombre de processeurs et de
+créer le nombre de threads approprié.
 .
 .TP
 .B (no)global_header
