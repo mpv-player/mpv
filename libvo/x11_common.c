@@ -86,7 +86,7 @@ int vo_fs_type = 0; // needs to be accessible for GUI X11 code
 static int vo_fs_flip = 0;
 char **vo_fstype_list;
 
-/* if equal to 1 means that WM is a metacity (broken as hell) */
+/* 1 means that the WM is metacity (broken as hell) */
 int metacity_hack = 0;
 
 static Atom XA_NET_SUPPORTED;
@@ -120,10 +120,10 @@ static int vo_x11_get_fs_type(int supported);
 
 /*
  * Sends the EWMH fullscreen state event.
- * 
- * action: could be on of _NET_WM_STATE_REMOVE -- remove state
- *                        _NET_WM_STATE_ADD    -- add state
- *                        _NET_WM_STATE_TOGGLE -- toggle
+ *
+ * action: could be one of _NET_WM_STATE_REMOVE -- remove state
+ *                         _NET_WM_STATE_ADD    -- add state
+ *                         _NET_WM_STATE_TOGGLE -- toggle
  */
 void vo_x11_ewmh_fullscreen(int action)
 {
@@ -134,7 +134,7 @@ void vo_x11_ewmh_fullscreen(int action)
     {
         XEvent xev;
 
-        /* init X event structure for _NET_WM_FULLSCREEN client msg */
+        /* init X event structure for _NET_WM_FULLSCREEN client message */
         xev.xclient.type = ClientMessage;
         xev.xclient.serial = 0;
         xev.xclient.send_event = True;
@@ -169,7 +169,7 @@ void vo_hidecursor(Display * disp, Window win)
     static char bm_no_data[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (WinID == 0)
-        return;                 // do not hide, if we're playing at rootwin
+        return;                 // do not hide if playing on the root window
 
     colormap = DefaultColormap(disp, DefaultScreen(disp));
     if ( !XAllocNamedColor(disp, colormap, "black", &black, &dummy) )
@@ -304,14 +304,15 @@ static int vo_wm_detect(void)
                 wm |= vo_wm_LAYER;
                 metacity_hack |= 1;
             } else
-                // metacity is the only manager I know which reports support only for _WIN_LAYER
-                // hint in _WIN_PROTOCOLS (what's more support for it is broken)
+                /* metacity is the only window manager I know which reports
+                 * supporting only the _WIN_LAYER hint in _WIN_PROTOCOLS.
+                 * (what's more support for it is broken) */
                 metacity_hack |= 2;
         }
         XFree(args);
         if (wm && (metacity_hack == 1))
         {
-            // metacity reports that it supports layers, but it is not really truth :-)
+            // metacity claims to support layers, but it is not the truth :-)
             wm ^= vo_wm_LAYER;
             mp_msg(MSGT_VO, MSGL_V,
                    "[x11] Using workaround for Metacity bugs.\n");
@@ -326,7 +327,7 @@ static int vo_wm_detect(void)
         XFree(args);
 #if 0
         // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
-        // (in their implementation it only changes internal state of window, nothing more!!!)
+        // (in their implementation it only changes internal window state, nothing more!!!)
         if (wm & vo_wm_FULLSCREEN)
         {
             if (x11_get_property(XA_BLACKBOX_PID, &args, &nitems))
@@ -414,7 +415,7 @@ int vo_init(void)
     char *dispName;
 	
 	if (vo_rootwin)
-		WinID = 0; // use root win
+		WinID = 0; // use root window
 
     if (vo_depthonscreen)
     {
@@ -441,8 +442,8 @@ int vo_init(void)
                "vo: couldn't open the X11 display (%s)!\n", dispName);
         return 0;
     }
-    mScreen = DefaultScreen(mDisplay);  // Screen ID.
-    mRootWin = RootWindow(mDisplay, mScreen);   // Root window ID.
+    mScreen = DefaultScreen(mDisplay);  // screen ID
+    mRootWin = RootWindow(mDisplay, mScreen);   // root window ID
 
     init_atoms();
 
@@ -968,7 +969,7 @@ void vo_x11_uninit(void)
         f_gc = NULL;
     }
 #ifdef HAVE_NEW_GUI
-    /* destroy window only if it's not controlled by GUI */
+    /* destroy window only if it's not controlled by the GUI */
     if (!use_gui)
 #endif
     {
@@ -1105,14 +1106,14 @@ int vo_x11_check_events(Display * mydisplay)
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
-                // Ignore mouse whell press event
+                // Ignore mouse wheel press event.
                 if (Event.xbutton.button > 3)
                 {
                     mplayer_put_key(MOUSE_BTN0 + Event.xbutton.button - 1);
                     break;
                 }
 #ifdef HAVE_NEW_GUI
-                // Ignor mouse button 1 - 3 under gui 
+                // Ignore mouse button 1-3 under GUI.
                 if (use_gui && (Event.xbutton.button >= 1)
                     && (Event.xbutton.button <= 3))
                     break;
@@ -1128,7 +1129,7 @@ int vo_x11_check_events(Display * mydisplay)
                     mouse_timer = GetTimerMS();
                 }
 #ifdef HAVE_NEW_GUI
-                // Ignor mouse button 1 - 3 under gui 
+                // Ignore mouse button 1-3 under GUI.
                 if (use_gui && (Event.xbutton.button >= 1)
                     && (Event.xbutton.button <= 3))
                     break;
@@ -1209,8 +1210,8 @@ void vo_x11_sizehint(int x, int y, int width, int height, int max)
         vo_hint.max_height = 0;
     }
 
-    // set min height/width to 4 to avoid off by one errors
-    // and because mga_vid requires a minial size of 4 pixel
+    // Set minimum height/width to 4 to avoid off-by-one errors
+    // and because mga_vid requires a minimal size of 4 pixels.
     vo_hint.min_width = vo_hint.min_height = 4;
     vo_hint.flags |= PMinSize;
 
@@ -1358,8 +1359,8 @@ void vo_x11_setlayer(Display * mDisplay, Window vo_window, int layer)
         else if (vo_fs_type & vo_wm_FULLSCREEN)
             xev.data.l[1] = XA_NET_WM_STATE_FULLSCREEN;
         else if (vo_fs_type & vo_wm_BELOW)
-            // This is not fallback. We can safely assume that situation where
-            // only NETWM_STATE_BELOW is supported and others not, doesn't exist.
+            // This is not fallback. We can safely assume that the situation
+            // where only NETWM_STATE_BELOW is supported doesn't exist.
             xev.data.l[1] = XA_NET_WM_STATE_BELOW;
 
         XSendEvent(mDisplay, mRootWin, False, SubstructureRedirectMask,
@@ -1514,7 +1515,7 @@ void vo_x11_fullscreen(void)
 
         XMoveResizeWindow(mDisplay, vo_window, x, y, w, h);
     }
-    /* some WMs lose ontop after fullscreeen */
+    /* some WMs lose ontop after fullscreen */
     if ((!(vo_fs)) & vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
@@ -1772,7 +1773,8 @@ static int x11_selectinput_errorhandler(Display * display,
                "X11 error: BadAccess during XSelectInput Call\n");
         mp_msg(MSGT_VO, MSGL_ERR,
                "X11 error: The 'ButtonPressMask' mask of specified window has probably already used by another appication (see man XSelectInput)\n");
-        /* If you think mplayer should shutdown with this error, comments out following line */
+        /* If you think MPlayer should shutdown with this error,
+         * comment out the following line */
         return 0;
     }
     if (old_handler != NULL)
@@ -1930,9 +1932,9 @@ int vo_find_depth_from_visuals(Display * dpy, int screen,
                    visuals[i].red_mask, visuals[i].green_mask,
                    visuals[i].blue_mask);
             /*
-             * save the visual index and it's depth, if this is the first
+             * Save the visual index and its depth, if this is the first
              * truecolor visul, or a visual that is 'preferred' over the
-             * previous 'best' visual
+             * previous 'best' visual.
              */
             if (bestvisual_depth == -1
                 || (visuals[i].depth >= 15
@@ -2033,11 +2035,11 @@ uint32_t vo_x11_set_equalizer(char *name, int value)
     /*
      * IMPLEMENTME: consider using XF86VidModeSetGammaRamp in the case
      * of TrueColor-ed window but be careful:
-     * unlike the colormaps, which are private for the X client
+     * Unlike the colormaps, which are private for the X client
      * who created them and thus automatically destroyed on client
      * disconnect, this gamma ramp is a system-wide (X-server-wide)
-     * setting and _must_ be restored before the process exit.
-     * Unforunately when the process crashes (or get killed
+     * setting and _must_ be restored before the process exits.
+     * Unforunately when the process crashes (or gets killed
      * for some reason) it is impossible to restore the setting,
      * and such behaviour could be rather annoying for the users.
      */
@@ -2304,8 +2306,8 @@ int vo_xv_enable_vsync()
  * \brief Get maximum supported source image dimensions.
  *
  *   This function does not set the variables pointed to by
- * width and height if the information could not be retreived.
- * So the caller is reponsible for initing them properly.
+ * width and height if the information could not be retrieved,
+ * so the caller is reponsible for properly initializing them.
  *
  * \param width [out] The maximum width gets stored here.
  * \param height [out] The maximum height gets stored here.
@@ -2495,7 +2497,7 @@ int vo_xv_init_colorkey()
     xv_ck_info.method = CK_METHOD_NONE;
   } /* end: should we draw colorkey */
 
-  /* output information about the curren colorkey settings */
+  /* output information about the current colorkey settings */
   vo_xv_print_ck_info();
 
   return 1; // success
@@ -2506,10 +2508,9 @@ int vo_xv_init_colorkey()
  *
  * Draws the colorkey depending on the set method ( colorkey_handling ).
  *
- * It also draws the black bars ( when the video doesn't fit to the
- * display in full screen ) seperately, so they don't overlap with the
- * video area.
- * It doesn't call XFlush
+ * Also draws the black bars ( when the video doesn't fit the display in
+ * fullscreen ) separately, so they don't overlap with the video area.
+ * It doesn't call XFlush.
  *
  */
 inline void vo_xv_draw_colorkey(  int32_t x,  int32_t y,
@@ -2529,7 +2530,7 @@ inline void vo_xv_draw_colorkey(  int32_t x,  int32_t y,
   if ( vo_fs )
   {
     XSetForeground( mDisplay, vo_gc, 0 );
-    /* making non overlap fills, requiare 8 checks instead of 4*/
+    /* making non-overlap fills, requires 8 checks instead of 4 */
     if ( y > 0 )
       XFillRectangle( mDisplay, vo_window, vo_gc,
                       0, 0,
@@ -2549,7 +2550,7 @@ inline void vo_xv_draw_colorkey(  int32_t x,  int32_t y,
   }
 }
 
-/** \brief tests if a valid arg for the ck suboption was given */ 
+/** \brief Tests if a valid argument for the ck suboption was given. */
 int xv_test_ck( void * arg )
 {
   strarg_t * strarg = (strarg_t *)arg;
@@ -2563,7 +2564,7 @@ int xv_test_ck( void * arg )
 
   return 0;
 }
-/** \brief tests if a valid arg for the ck-method suboption was given */ 
+/** \brief Tests if a valid arguments for the ck-method suboption was given. */
 int xv_test_ckm( void * arg )
 {
   strarg_t * strarg = (strarg_t *)arg;
