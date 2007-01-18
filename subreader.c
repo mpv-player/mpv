@@ -355,10 +355,13 @@ static subtitle *sub_read_line_subviewer(stream_t *st,subtitle *current) {
 	current->start = a1*360000+a2*6000+a3*100+a4/10;
 	current->end   = b1*360000+b2*6000+b3*100+b4/10;
 	for (i=0; i<SUB_MAX_TEXT;) {
+	    int blank = 1;
 	    if (!stream_read_line (st, line, LINE_LEN)) break;
 	    len=0;
-	    for (p=line; *p!='\n' && *p!='\r' && *p; p++,len++);
-	    if (len) {
+	    for (p=line; *p!='\n' && *p!='\r' && *p; p++,len++)
+		if (*p != ' ' && *p != '\t')
+		    blank = 0;
+	    if (len && !blank) {
                 int j=0,skip=0;
 		char *curptr=current->text[i]=malloc (len+1);
 		if (!current->text[i]) return ERR;
