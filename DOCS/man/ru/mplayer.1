@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r21882
+.\" synced with r21954
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -4069,7 +4069,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .br
 4: очень агрессивная
 .REss
-.IPs "fast (только MPEG-2)"
+.IPs "fast (только MPEG-2, MPEG-4 и H.264)"
 .\" FIXME is translation correct?
 .\" Enable optimizations which do not comply to the specification and might
 .\" potentially cause problems, like simpler dequantization, assuming use
@@ -4077,8 +4077,8 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .\" checks to detect damaged bitstreams.
 Включает оптимизации, которые не подчиняются спецификации и, потенциально, 
 могут быть причиной проблем, такие как упрощенное деквантование[dequantization],
-предполагающее использование стандартной матрицы квантования, YUV 4:2:0 и
-пропускающая некоторые проверки поврежденности битового потока.
+упрощенная компенсация движения, предположение использования стандартной матрицы 
+квантования, YUV 4:2:0 и пропуск некоторых проверок поврежденности битового потока.
 .IPs "gray\ "
 декодирование только в оттенках серого (немного быстрее, чем с цветом)
 .IPs "idct=<0\-99> (смотрите \-lavcopts)"
