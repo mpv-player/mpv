@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21748 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -9,21 +9,19 @@
 <para>
 Az <application>MPlayer</application> egy komplex lejátszási sort használ.
 Először a globális opciók szerepelnek, például
-
 <screen>mplayer -vfm 5</screen>
-
-majd a fájlnév után írt kapcsolók, amik csak a megadott fájlra/URL-re/bármire
-vonatkoznak, például:
-
-<screen>mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4</screen>
+majd a fájlnév után írt kapcsolók, amik csak a megadott
+fájlra/URL-re/bármire vonatkoznak, például:
+<screen>
+mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4
+</screen>
 </para>
 
 <para>
-A fájlneveket/URL-eket csoportosíthatod a <literal>{</literal> és <literal>}</literal>
-segítségével. Ez főleg a <option>-loop</option> kapcsolóval együtt hasznos:
-
+A fájlneveket/URL-eket csoportosíthatod a <literal>{</literal> és
+<literal>}</literal> segítségével. Ez főleg a <option>-loop</option>
+kapcsolóval együtt hasznos:
 <screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
-
 A fenti parancs a fájlokat ebben a sorrendben játsza le: 1, 1, 2, 1, 1, 2, 1, 1, 2.
 </para>
 
@@ -105,40 +103,45 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="subosd">
 <title>Feliratok és OSD</title>
 
 <para>
-Az <application>MPlayer</application> feliratokat is meg tud jeleníteni a filmekkel
-együtt. Jelenleg a következő formátumok támogatottak:
+Az <application>MPlayer</application> feliratokat is meg tud jeleníteni a
+filmekkel együtt. Jelenleg a következő formátumok támogatottak:
 <itemizedlist>
-<listitem><para>VOBsub</para></listitem>
-<listitem><para>OGM</para></listitem>
-<listitem><para>CC (closed caption)</para></listitem>
-<listitem><para>MicroDVD</para></listitem>
-<listitem><para>SubRip</para></listitem>
-<listitem><para>SubViewer</para></listitem>
-<listitem><para>Sami</para></listitem>
-<listitem><para>VPlayer</para></listitem>
-<listitem><para>RT</para></listitem>
-<listitem><para>SSA</para></listitem>
-<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
-<listitem><para>MPsub</para></listitem>
-<listitem><para>AQTitle</para></listitem>
-<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
+  <listitem><para>VOBsub</para></listitem>
+  <listitem><para>OGM</para></listitem>
+  <listitem><para>CC (closed caption)</para></listitem>
+  <listitem><para>MicroDVD</para></listitem>
+  <listitem><para>SubRip</para></listitem>
+  <listitem><para>SubViewer</para></listitem>
+  <listitem><para>Sami</para></listitem>
+  <listitem><para>VPlayer</para></listitem>
+  <listitem><para>RT</para></listitem>
+  <listitem><para>SSA</para></listitem>
+  <listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
+  <listitem><para>MPsub</para></listitem>
+  <listitem><para>AQTitle</para></listitem>
+  <listitem><para>
+    <ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink>
+  </para></listitem>
 </itemizedlist>
 </para>
 
 <para>
-Az <application>MPlayer</application> az előzőleg felsorolt felirat formátumokat
-(<emphasis role="bold">az első három kivételével</emphasis>) át is tudja konvertálni
-az alábbi formátumokba, a megadott kapcsolókkal:
+Az <application>MPlayer</application> az előzőleg felsorolt felirat
+formátumokat (<emphasis role="bold">az első három kivételével</emphasis>)
+át is tudja konvertálni az alábbi formátumokba, a megadott kapcsolókkal:
 <itemizedlist>
-<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
-<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
-<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
-<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
-<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
+  <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
+  <listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
+  <listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
+  <listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
+  <listitem><para>Sami: <option>-dumpsami</option></para></listitem>
 </itemizedlist>
 </para>
 
@@ -154,9 +157,9 @@ A parancssori kapcsolók eléggé különböznek az az egyes formátumoknál:
 <formalpara>
 <title>VOBsub feliratok</title>
 <para>
-A VOBsub feliratok egy nagy (néhány megabájtos) <filename>.SUB</filename> fájlból
-és opcionálisan egy <filename>.IDX</filename> és/vagy <filename>.IFO</filename>
-fájlból állnak.  Ha olyan fájlaid vannak, hogy
+A VOBsub feliratok egy nagy (néhány megabájtos) <filename>.SUB</filename>
+fájlból és opcionálisan egy <filename>.IDX</filename> és/vagy
+<filename>.IFO</filename> fájlból állnak.  Ha olyan fájlaid vannak, hogy
 <filename><replaceable>sample.sub</replaceable></filename>,
 <filename><replaceable>sample.ifo</replaceable></filename> (opcionális),
 <filename><replaceable>sample.idx</replaceable></filename> - meg kell adnod az
@@ -165,10 +168,10 @@ fájlból állnak.  Ha olyan fájlaid vannak, hogy
 (teljes elérési út is megadható). A <option>-vobsubid</option> kapcsoló olyan,
 mint a <option>-sid</option> a DVD-knél, segítségével felirat sávok (nyelvek)
 közül választhatsz. Abban az esetben, ha elfelejted a <option>-vobsubid</option>
-kapcsolót, az <application>MPlayer</application> a <option>-slang</option> kapcsolóval
-megadott nyelveket próbálja használni, és a <systemitem>langidx</systemitem>-re ugrik
-az <filename>.IDX</filename> fájlban, hogy beállítsa a felirat nyelvét. Ha ez nem
-sikerül, nem lesz felirat.
+kapcsolót, az <application>MPlayer</application> a <option>-slang</option>
+kapcsolóval megadott nyelveket próbálja használni, és a
+<systemitem>langidx</systemitem>-re ugrik az <filename>.IDX</filename> fájlban,
+hogy beállítsa a felirat nyelvét. Ha ez nem sikerül, nem lesz felirat.
 </para>
 </formalpara>
 
@@ -190,19 +193,19 @@ tudod megadni (teljes elérési út is megadható).
   <listitem><para>
     Késlelteti a feliratot <option><replaceable>mp</replaceable></option> másodperccel.
     Lehet negatív is. Az érték a film időpozíciójának számlálójához adódik hozzá.
-    </para></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subfps <replaceable>RÁTA</replaceable></option></term>
   <listitem><para>
     Megadhatod a felirat fájl képkocka/mp rátáját (lebegőpontos szám).
-    </para></listitem>
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
   <listitem><para>
     A felirat pozícióját adhatod meg.
-    </para></listitem>
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -216,13 +219,20 @@ végleg meg akarod oldani ezt a problémát, kézzel kell átkonvertálnod a fel
 fájl frame rátáját.
 Az <application>MPlayer</application> el tudja végezni ezt a konverziót neked:
 
-<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable></screen>
+<screen>
+mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> \
+    -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable>
+</screen>
 </para>
 
 <para>
 A DVD feliratokról a <link linkend="dvd">DVD</link> fejezetben olvashatsz bővebben.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="control">
 <title>Vezérlés</title>
@@ -234,6 +244,7 @@ vezérelheted billentyűzettel, egérrel, joystickkal vagy távirányítóval
 (LIRC használatával). Olvasd el a man oldalon a használható billentyűk listáját.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="ctrl-cfg">
 <title>Vezérlés beállítása</title>
@@ -275,6 +286,7 @@ ENTER pt_step 1 1<!--
 </example>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="lirc">
 <title>Irányítás LIRC-ből</title>
@@ -290,7 +302,7 @@ olvashatsz erről.
 <para>
 Ha feltelepítetted a LIRC csomagot, a <filename>configure</filename> automatikusan
 megtalálja. Ha minden jól megy, az <application>MPlayer</application> egy ilyen
-üzenetet ír ki indításkor: &quot;<computeroutput>Setting up lirc support...</computeroutput>&quot;.
+üzenetet ír ki indításkor: "<computeroutput>Setting up lirc support...</computeroutput>".
 Ha valami hiba történt, tájékoztat róla. Ha semmit sem mond a LIRC-ről,
 akkor a támogatása nincs beforgatva. Ennyi :-)
 </para>
@@ -341,13 +353,15 @@ megadásához.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="slave-mode">
 <title>Szolga mód</title>
+
 <para>
 A szolga mód segítségével egyszerű frontend-eket készíthetsz az
-<application>MPlayer</application>hez. Ha a
-<option>-slave</option> kapcsolóval futtatod az <application>MPlayer</application>t,
+<application>MPlayer</application>hez. Ha a <option>-slave</option>
+kapcsolóval futtatod az <application>MPlayer</application>t,
 beolvassa az új sor karakterrel (\n) elválasztott parancsokat
 a standard bemenetről (stdin).
 A parancsok a <ulink url="../../tech/slave.txt">slave.txt</ulink> fájlban
@@ -355,6 +369,9 @@ vannak leírva.
 </para>
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="streaming">
@@ -370,57 +387,72 @@ A lejátszáshoz egyszerűen csak be kell írni az URL-t a parancssorba.
 Az <application>MPlayer</application> figyeli a
 <envar>http_proxy</envar> környezeti változót is, és használja a
 proxy-t, ha van. Azonban így is megadhatod a proxy-t:
-<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
+<screen>
+mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable>
+</screen>
 </para>
 
 <para>
 Az <application>MPlayer</application> tud olvasni a standard bemenetről (stdin)
 is (<emphasis>nem</emphasis> nevesített pipe). Ezt például FTP-ről történő lejátszásnál
 tudod használni:
-<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -</screen>
+<screen>
+wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -
+</screen>
 </para>
 
 <note><para>
-Tanácsos megadni a <option>-cache</option> kapcsolót, ha hálózatról játszol le:
-<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
+Tanácsos megadni a <option>-cache</option> kapcsolót, ha hálózatról
+játszol le:
+<screen>
+wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -
+</screen>
 </para></note>
+
+<!-- ********** -->
 
 <sect2 id="streaming-save">
 <title>Stream-elt tartalom lementése</title>
+
 <para>
-  Ha már sikerült az <application>MPlayer</application>rel lejátszani
-  a kedvenc internetes stream-edet, a <option>-dumpstream</option>
-  kapcsoló segítségével el is tudod menteni a folyamot egy fájlba.
-  Például:
+Ha már sikerült az <application>MPlayer</application>rel lejátszani
+a kedvenc internetes stream-edet, a <option>-dumpstream</option>
+kapcsoló segítségével el is tudod menteni a folyamot egy fájlba.
+Például:
 <screen>
-  mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>stream.asf</replaceable>
+mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>stream.asf</replaceable>
 </screen>
-  Ez el fogja menteni a
-  <replaceable>http://217.71.208.37:8006</replaceable> szerveren stream-elt
-  tartalmat a <replaceable>stream.asf</replaceable> fájlba.
-  Ez működik az <application>MPlayer</application> által támogatott
-  összes protokollal, mint MMS, RSTP és így tovább.
+Ez el fogja menteni a
+<replaceable>http://217.71.208.37:8006</replaceable> szerveren stream-elt
+tartalmat a <replaceable>stream.asf</replaceable> fájlba.
+Ez működik az <application>MPlayer</application> által támogatott
+összes protokollal, mint MMS, RSTP és így tovább.
 </para>
 </sect2>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="mpst" xreflabel="Remote streams">
 <title>Távoli stream-ek</title>
 
 <para>
-A távoli stream-ek segítségévela legtöbb <application>MPlayer</application> által
-ismert stream típust elérheted egy távoli hoszt segítségével is. A fő célja ennek,
-hogy direkt módon használhasd egy másik számítógép CD vagy DVD meghajtóját
-hálózaton keresztül (feltéve, hogy megvan a megfelelő sávszélesség).
+A távoli stream-ek segítségévela legtöbb <application>MPlayer</application>
+által ismert stream típust elérheted egy távoli hoszt segítségével is. A fő
+célja ennek, hogy direkt módon használhasd egy másik számítógép CD vagy DVD
+meghajtóját hálózaton keresztül (feltéve, hogy megvan a megfelelő sávszélesség).
 Letöltési oldalon pár stream típus (jelenleg a TV és az MF) nem használhatóak
-távolról, mert a demuxer szintjén vannak implementálva.
-Ez sajnálatos az MF esetében, de a TV stream-hez úgyis eszeveszettül nagy
-sávszélesség kellene.
+távolról, mert a demuxer szintjén vannak implementálva. Ez sajnálatos az MF
+esetében, de a TV stream-hez úgyis eszeveszettül nagy sávszélesség kellene.
 </para>
+
+<!-- ********** -->
 
 <sect2 id="compile_mpst_server">
 <title>A szerver fordítása</title>
+
 <para>
 Miután lefordítottad az <application>MPlayer</application>t, menj a
 <filename>TOOLS/netstream</filename> könyvtárba és add ki a
@@ -431,8 +463,11 @@ Linuxon).
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="use_mpst">
 <title>Távoli stream-ek használata</title>
+
 <para>
 Először el kell indítanod a szervert azon a gépen, amit távolról el akarsz
 érni. Jelenleg a szerver nagyon kezdetleges és nincs parancssori kapcsolója,
@@ -455,10 +490,12 @@ Vigyázz, a jelenlegi szerver semennyire sem biztonságos. Tehát ne panaszkodj
 a számos exploit miatt, ami esetleg kihasználhatja ezt. Inkább küldj néhány
 (jó) javítást, hogy jobb legyen vagy kezd el írni a saját szervered.
 </para>
-
 </sect2>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="edl" xreflabel="Edit Decision Lists (EDL)">
 <title>Edit Decision Lists (EDL)</title>
@@ -481,21 +518,26 @@ Az EDL fájl formátuma eléggé egyszerű. Egy sorban egy parancs van, ami mega
 hogy mit kell csinálni (skip/mute) és mikor (másodperc alapú mutatóval).
 </para>
 
+<!-- ********** -->
+
 <sect2 id="edl_using">
 <title>EDL fájl használata</title>
+
 <para>
-Add meg a <option>-edl &lt;fájlnév&gt;</option> kapcsolót, amikor indítod az
-<application>MPlayer</application>t, a videóhoz használni kívánt EDL fájl nevével.
+Add meg a <option>-edl &lt;fájlnév&gt;</option> kapcsolót, amikor
+indítod az <application>MPlayer</application>t, a videóhoz használni
+kívánt EDL fájl nevével.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="edl_making">
 <title>EDL fájl készítése</title>
+
 <para>
 A jelenlegi EDL fájl formátum:
-<programlisting>
-[kezdő másodperc] [befejező másodperc] [akció]
-</programlisting>
+<programlisting>[kezdő másodperc] [befejező másodperc] [akció]</programlisting>
 Ahol a másodpercek lebegőpontos számok, az akció pedig vagy
 <literal>0</literal> a kihagyáshoz vagy <literal>1</literal> az elnémításhoz. Például:
 <programlisting>
@@ -519,8 +561,10 @@ megváltoztathatod az alapértelmezett műveletet, ami az egyes sorok által
 leírt blokkok kihagyása.
 </para>
 </sect2>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="advaudio" xreflabel="Advanced Audio">
@@ -531,6 +575,7 @@ leírt blokkok kihagyása.
 
 <sect3 id="advaudio-surround-DVD">
 <title>DVD-k</title>
+
 <para>
 A legtöbb DVD és sok más fájl térhatású hangot tartalmaz.
 Az <application>MPlayer</application> támogatja a térhatású lejátszást, de
@@ -538,17 +583,13 @@ alapértelmezésként nem engedélyezi, mivel a sztereó berendezések a gyakori
 A több, mint két csatornás audiót tartalmazó fájlok lejátszásához használd a
 <option>-channels</option> kapcsolót.
 Például egy 5.1-es audióval rendelkező DVD lejátszása:
-
 <screen>mplayer dvd://1 -channels 6</screen>
-
 Figyelj rá, hogy az "5.1" név ellenére valójában hat különálló csatorna van.
 Ha van térhatású hangfalszetted, nyugodtan beleírhatod a
 <option>channels</option> opciót az <application>MPlayer</application>
 konfigurációs fájljába, a <filename>~/.mplayer/config</filename>-ba. Például a
 kvadrafónikus lejátszás alapértelmezetté tételéhez írd be ezt a sort:
-
 <programlisting>channels=4</programlisting>
-
 Az <application>MPlayer</application> ekkor az audiót négy csatornán fogja
 lejátszani, ha mind a négy csatorna elérhető.
 </para>
@@ -561,13 +602,10 @@ lejátszani, ha mind a négy csatorna elérhető.
 <para>
 Az <application>MPlayer</application> nem duplázza meg a csatornákat alapból,
 ahogy a legtöbb audió vezérlő sem. Ha ilyet akarsz, kézzel kell megadnod:
-
 <screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
-
 Lásd a <link linkend="advaudio-channels-copying">csatorna másolásról</link>
 szóló rész a magyarázatért.
 </para>
-
 </sect3>
 
 
@@ -591,27 +629,27 @@ engedélyezd, amelyiket a berendezésed támogatja.
 <itemizedlist>
 <title>Áteresztés engedélyezése a parancssorban:</title>
 <listitem><para>
-Csak AC3-hoz használd a <option>-ac hwac3</option> kapcsolót.
+  Csak AC3-hoz használd a <option>-ac hwac3</option> kapcsolót.
 </para></listitem>
 <listitem><para>
-CSak DTS-hez használd a <option>-ac hwdts</option> kapcsolót
+  CSak DTS-hez használd a <option>-ac hwdts</option> kapcsolót
 </para></listitem>
 <listitem><para>
-AC3 és DTS esetén használd a <option>-afm hwac3</option> kapcsolót.
+  AC3 és DTS esetén használd a <option>-afm hwac3</option> kapcsolót.
 </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Áteresztés engedélyezése az <application>MPlayer</application>
-konfigurációs fájljában: </title>
+  konfigurációs fájljában: </title>
 <listitem><para>
-Csak AC3-hoz használd az <option>ac=hwac3,</option> sort.
+  Csak AC3-hoz használd az <option>ac=hwac3,</option> sort.
 </para></listitem>
 <listitem><para>
-Csak DTS-hez használd az <option>ac=hwdts,</option> sort.
+  Csak DTS-hez használd az <option>ac=hwdts,</option> sort.
 </para></listitem>
 <listitem><para>
-AC3 és DTS esetén használd az <option>afm=hwac3</option> sort.
+  AC3 és DTS esetén használd az <option>afm=hwac3</option> sort.
 </para></listitem>
 </itemizedlist>
 
@@ -623,8 +661,8 @@ amiben nincs AC3-as vagy DTS audió. Az <option>afm=hwac3</option>
 sorba nem kell vessző; az <application>MPlayer</application> mindenképpen vált
 ha egy audió család van megadva.
 </para>
-
 </sect3>
+
 
 <sect3 id="hwmpa-surround-passthrough">
 <title>MPEG audió áteresztés</title>
@@ -644,20 +682,23 @@ To use this codec:
 </para>
 </sect3>
 
+
 <sect3 id="advaudio-surround-matrix">
 <title>Mátrix-kódolású audió</title>
 
 <para>
 <emphasis>***TENNIVALÓ***</emphasis>
 </para>
+
 <para>
-Ezt a részt még el kell készíteni, de addig nem lehet befejezni, amíg valaki nem
-ad nekünk hozzá példafájlokat teszteléshez. Ha van mátrix-kódolású audió fájlod,
-tudod, hogy hol lehet találni ilyet vagy van bármilyen információd, hálásak lennénk
-ha üzennél nekünk az
+Ezt a részt még el kell készíteni, de addig nem lehet befejezni, amíg valaki
+nem ad nekünk hozzá példafájlokat teszteléshez. Ha van mátrix-kódolású audió
+fájlod, tudod, hogy hol lehet találni ilyet vagy van bármilyen információd,
+hálásak lennénk ha üzennél nekünk az
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>
 levelezési listára. Írj egy "[matrix-encoded audio]"-t a tárgy sorba.
 </para>
+
 <para>
 Ha nem érkezik fájl vagy további információ, ez a fejezet törölve lesz.
 </para>
@@ -666,14 +707,13 @@ Ha nem érkezik fájl vagy további információ, ez a fejezet törölve lesz.
 Jó link-ek:
 <itemizedlist>
 <listitem><para>
-<ulink url="http://electronics.howstuffworks.com/surround-sound5.htm">http://electronics.howstuffworks.com/surround-sound5.htm</ulink>
+  <ulink url="http://electronics.howstuffworks.com/surround-sound5.htm">http://electronics.howstuffworks.com/surround-sound5.htm</ulink>
 </para></listitem>
 <listitem><para>
-<ulink url="http://www.extremetech.com/article2/0,1697,1016875,00.asp">http://www.extremetech.com/article2/0,1697,1016875,00.asp</ulink>
+  <ulink url="http://www.extremetech.com/article2/0,1697,1016875,00.asp">http://www.extremetech.com/article2/0,1697,1016875,00.asp</ulink>
 </para></listitem>
 </itemizedlist>
 </para>
-
 </sect3>
 
 
@@ -689,19 +729,18 @@ melyben méréseket végeztek emberi műfejre szerelt mikrofonokkal.
 
 <para>
 Bár nem lehet tökéletesen imitálni egy térhatású rendszert,
-az <application>MPlayer</application> HRTF szűrője biztosít térben némileg mélyített
-hangot két csatornás fülhallgatón. A hagyományos lekeverés egyszerűen kombinálja az
-összes csatornát kettőbe; a csatornák kombinálásán túl a <option>hrtf</option>
-finom visszhangot generál, kissé növeli a sztereó elválasztást és megváltoztatja
-néhány frekvencia hangerejét. A HRTF hangzásának minősége függ a forrás audiótól
-és az emberi érzékléstől, de mindenképpen megér egy próbát.
+az <application>MPlayer</application> HRTF szűrője biztosít térben némileg
+mélyített hangot két csatornás fülhallgatón. A hagyományos lekeverés
+egyszerűen kombinálja az összes csatornát kettőbe; a csatornák kombinálásán
+túl a <option>hrtf</option> finom visszhangot generál, kissé növeli a sztereó
+elválasztást és megváltoztatja néhány frekvencia hangerejét. A HRTF
+hangzásának minősége függ a forrás audiótól és az emberi érzékléstől, de
+mindenképpen megér egy próbát.
 </para>
 
 <para>
 DVD lejátszása DVD HRTF-fel:
-
 <screen>mplayer dvd://1 -channels 6 -af hrtf</screen>
-
 </para>
 
 <para>
@@ -709,11 +748,10 @@ A <option>hrtf</option> csak 5 vagy 6 csatornával működik jól, valamint
 48 kHz-es audió kell hozzá. A DVD audió már 48 kHz-es, de ha van egy fájlod
 ettől különböző mintavételezési rátával, akkor a <option>hrtf</option>-fel
 történő lejátszáshoz újra kell mintáznod:
-
-<screen>mplayer <replaceable>fájlnév</replaceable> -channels 6 -af resample=48000,hrtf</screen>
-
+<screen>
+mplayer <replaceable>fájlnév</replaceable> -channels 6 -af resample=48000,hrtf
+</screen>
 </para>
-
 </sect3>
 
 
@@ -725,11 +763,10 @@ Ha nem hallasz semmilyen hangot a térhatású csatornáidból, ellenőrizd a mi
 beállításait egy mixer programmal, mint pl. az <application>alsamixer</application>;
 az audió kimenetek gyakran le vannak némítva és nulla hangerőre vannak állítva alapértelmezésben.
 </para>
-
 </sect3>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="advaudio-channels">
 <title>Csatorna többszörözés</title>
@@ -738,56 +775,55 @@ az audió kimenetek gyakran le vannak némítva és nulla hangerőre vannak áll
 <title>Általános információk</title>
 
 <para>
-Sajnos nincs szabvány a csatornák sorrendjére vonatkozóan. Az alábbi sorrend az
-AC3-é, ami eléggé tipikus; próbáld meg ezt és meglátod, hogy a forrásod megfelel-e
-neki. A csatornák számozása 0-tól indul.
+Sajnos nincs szabvány a csatornák sorrendjére vonatkozóan. Az alábbi sorrend
+az AC3-é, ami eléggé tipikus; próbáld meg ezt és meglátod, hogy a forrásod
+megfelel-e neki. A csatornák számozása 0-tól indul.
 
 <orderedlist spacing="compact">
 <title>mono</title>
-<listitem override="0"><para>középső</para></listitem>
+  <listitem override="0"><para>középső</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>sztereó</title>
-<listitem override="0"><para>bal</para></listitem>
-<listitem><para>jobb</para></listitem>
+  <listitem override="0"><para>bal</para></listitem>
+  <listitem><para>jobb</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>kvadrafónikus</title>
-<listitem override="0"><para>bal első</para></listitem>
-<listitem><para>jobb első</para></listitem>
-<listitem><para>bal hátsó</para></listitem>
-<listitem><para>jobb hátsó</para></listitem>
+  <listitem override="0"><para>bal első</para></listitem>
+  <listitem><para>jobb első</para></listitem>
+  <listitem><para>bal hátsó</para></listitem>
+  <listitem><para>jobb hátsó</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 4.0</title>
-<listitem override="0"><para>bal első</para></listitem>
-<listitem><para>jobb első</para></listitem>
-<listitem><para>közép hátsó</para></listitem>
-<listitem><para>közép első</para></listitem>
+  <listitem override="0"><para>bal első</para></listitem>
+  <listitem><para>jobb első</para></listitem>
+  <listitem><para>közép hátsó</para></listitem>
+  <listitem><para>közép első</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.0</title>
-<listitem override="0"><para>bal első</para></listitem>
-<listitem><para>jobb első</para></listitem>
-<listitem><para>bal hátsó</para></listitem>
-<listitem><para>jobb hátsó</para></listitem>
-<listitem><para>közép első</para></listitem>
+  <listitem override="0"><para>bal első</para></listitem>
+  <listitem><para>jobb első</para></listitem>
+  <listitem><para>bal hátsó</para></listitem>
+  <listitem><para>jobb hátsó</para></listitem>
+  <listitem><para>közép első</para></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
 <title>surround 5.1</title>
-<listitem override="0"><para>bal első</para></listitem>
-<listitem><para>jobb első</para></listitem>
-<listitem><para>bal hátsó</para></listitem>
-<listitem><para>jobb hátsó</para></listitem>
-<listitem><para>közép első</para></listitem>
-<listitem><para>mélynyomó</para></listitem>
+  <listitem override="0"><para>bal első</para></listitem>
+  <listitem><para>jobb első</para></listitem>
+  <listitem><para>bal hátsó</para></listitem>
+  <listitem><para>jobb hátsó</para></listitem>
+  <listitem><para>közép első</para></listitem>
+  <listitem><para>mélynyomó</para></listitem>
 </orderedlist>
-
 </para>
 
 <para>
@@ -805,7 +841,6 @@ vagy eltávolítására, a hangkártya felé kiküldött csatornák számának b
 való. Lásd a következő fejezeteket a csatorna manipulációval kapcsolatos bővebb
 információkért.
 </para>
-
 </sect3>
 
 
@@ -819,9 +854,7 @@ automatikusan két hangszórón keresztül kerülnek lejátszásra; sajnos, a le
 mono hangú fájl tulajdonképpen szereóként van elkódolva, amiben az egyik csatornát
 lenémították. A legkönnyebb és legbolondbiztosabb megoldás arra, hogy mindkét
 hangszórón ugyanaz a kimenet legyen, az <option>extrastereo</option> szűrő:
-
 <screen>mplayer <replaceable>fájlnév</replaceable> -af extrastereo=0</screen>
-
 </para>
 
 <para>
@@ -831,11 +864,10 @@ megvalósítására a hangerő csökkentése nélkül, de azok komplexek és kü
 kapcsolókat igényelnek attól függően, hogy melyik csatornát tartod meg. Ha tényleg
 szükséges a hangerő megtartása, könnyebb, ha a <option>volume</option> szűrővel
 kikísérletezed és megkeresed a helyes hangerőt. Például:
-
-<screen>mplayer <replaceable>filename</replaceable> -af extrastereo=0,volume=5</screen>
-
+<screen>
+mplayer <replaceable>filename</replaceable> -af extrastereo=0,volume=5
+</screen>
 </para>
-
 </sect3>
 
 
@@ -849,53 +881,52 @@ esetenként bonyolult és némi odafigyelést kíván.
 
 <orderedlist spacing="compact">
 <listitem><para>
-Döntsd el, hány kimeneti csatornára van szükséged. Ez az első alopció.
+  Döntsd el, hány kimeneti csatornára van szükséged. Ez az első alopció.
 </para></listitem>
 <listitem><para>
-Számold meg, hány csatornamozgatást fogsz véghezvinni. Ez a második alopció.
-Minden csatorna több különböző helyre mozgatható egy időben, de tartsd észben,
-hogy ha egy csatornát mozgatsz (még ha csak egy helyre is), a forrás csatorna
-üres lesz amíg másik csatornát nem mozgatsz a helyére. Csatorna másolásakor
-a forrás ugyan az marad, egyszerűen csak mozgasd a csatornát mind a cél mind
-a forrás helyre. Például:
-<programlisting>
+  Számold meg, hány csatornamozgatást fogsz véghezvinni. Ez a második alopció.
+  Minden csatorna több különböző helyre mozgatható egy időben, de tartsd észben,
+  hogy ha egy csatornát mozgatsz (még ha csak egy helyre is), a forrás csatorna
+  üres lesz amíg másik csatornát nem mozgatsz a helyére. Csatorna másolásakor
+  a forrás ugyan az marad, egyszerűen csak mozgasd a csatornát mind a cél mind
+  a forrás helyre. Például:
+  <programlisting>
 2-es csatorna --> 3-as csatorna
-2-es csatorna --> 2-es csatorna
-</programlisting>
+2-es csatorna --> 2-es csatorna<!--
+  --></programlisting>
 </para></listitem>
 <listitem><para>
-Írd le a csatorna másolásokat alopció párokként. Figyelj rá, hogy az első csatorna
-a 0, a második az 1, stb. Ezen alopciók sorrendje nem számít, amíg megfelelően
-vannak csoportosítva <replaceable>forrás:cél</replaceable> párokba.
+  Írd le a csatorna másolásokat alopció párokként. Figyelj rá, hogy az első
+  csatorna a 0, a második az 1, stb. Ezen alopciók sorrendje nem számít,
+  amíg megfelelően vannak csoportosítva
+  <replaceable>forrás:cél</replaceable> párokba.
 </para></listitem>
 </orderedlist>
-
 </para>
 
-
 <bridgehead>Példa: egy csatorna két hangszóróra</bridgehead>
-
 <para>
 Itt egy példa az egy csatorna több hangszóróra való kiküldésének egy másik módjára.
 Ebben a példában feltételezzük, hogy a bal csatornát kell lejátszani és a jobb
 csatornát eldobjuk. Követve a fenti leírást:
 <orderedlist>
 <listitem><para>
-Ahhoz, hogy egy-egy kimeneti csatorna legyen mindkét hangszóróhoz, az első
-alopciónak "2"-nek kell lennie.
+  Ahhoz, hogy egy-egy kimeneti csatorna legyen mindkét hangszóróhoz, az első
+  alopciónak "2"-nek kell lennie.
 </para></listitem>
 <listitem><para>
-A bal csatornát kell mozgatni a jobb csatornára és saját magára is, hogy ne
-legyen üres. Ez összesen két mozgatás, ami miatt a második alopció is "2".
+  A bal csatornát kell mozgatni a jobb csatornára és saját magára is, hogy ne
+  legyen üres. Ez összesen két mozgatás, ami miatt a második alopció is "2".
 </para></listitem>
 <listitem><para>
-A bal csatorna mozgatásához (0. csatorna) a jobb csatornára (1. csatorna) az
-alopció pár "0:1", "0:0" mozgatja a bal csatornát saját magára.
+  A bal csatorna mozgatásához (0. csatorna) a jobb csatornára (1. csatorna) az
+  alopció pár "0:1", "0:0" mozgatja a bal csatornát saját magára.
 </para></listitem>
 </orderedlist>
 Mindezt összerakva kapjuk:
-
-<screen>mplayer <replaceable>fájlnév</replaceable> -af channels=2:2:0:1:0:0</screen>
+<screen>
+mplayer <replaceable>fájlnév</replaceable> -af channels=2:2:0:1:0:0
+</screen>
 </para>
 
 <para>
@@ -906,13 +937,10 @@ csatornán van. Valamint nehezebb megjegyezni és begépelni.
 </para>
 
 <bridgehead>Példa: bal csatorna két hangszóróra rövidítve</bridgehead>
-
 <para>
 Van egy sokkal könnyebb mód a <option>channels</option> szűrő használatára,
 hogy a bal csatornát mindkét hangszórón megszólaltassuk:
-
 <screen>mplayer <replaceable>fájlnév</replaceable> -af channels=1</screen>
-
 A második csatorna figyelmen kívül marad és további alopciók nélkül az egyetlen
 megmaradó csatorna egyedül marad. A hangkártya vezérlők az egy csatornás
 audiót automatikusan lejátszák mindkét hangszórón. Ez csak akkor működik, ha
@@ -925,24 +953,23 @@ Másik gyakori művelet az elülső csatornák duplázása és lejátszása hát
 hangszórókon kvadrafónikus beállítással.
 <orderedlist>
 <listitem><para>
-Négy kimeneti csatorna kell. Az első alopció "4".
+  Négy kimeneti csatorna kell. Az első alopció "4".
 </para></listitem>
 <listitem><para>
-A két elülső csatornát kell mozgatni a megfelelő hátsóra és saját magára. Ez négy
-mozgatás, a második alopció "4".
+  A két elülső csatornát kell mozgatni a megfelelő hátsóra és saját magára. Ez négy
+  mozgatás, a második alopció "4".
 </para></listitem>
 <listitem><para>
-A bal elsőt (0. csatorna) kell mozgatni a bal hátsóra (2. csatorna): "0:2".
-A bal elsőt saját magára is kell mozgatni: "0:0". A jobb elsőt (1. csatorna)
-a jobb hátsóra (3. csatorna): "1:3", és saját magára kell mozgatni: "1:1".
+  A bal elsőt (0. csatorna) kell mozgatni a bal hátsóra (2. csatorna): "0:2".
+  A bal elsőt saját magára is kell mozgatni: "0:0". A jobb elsőt (1. csatorna)
+  a jobb hátsóra (3. csatorna): "1:3", és saját magára kell mozgatni: "1:1".
 </para></listitem>
 </orderedlist>
 Az alopciók összeállításával kapjuk:
-
-<screen>mplayer <replaceable>fájlnév</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1</screen>
-
+<screen>
+mplayer <replaceable>fájlnév</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1
+</screen>
 </para>
-
 </sect3>
 
 
@@ -955,71 +982,68 @@ csatornákat. Ezzel meg lehet csinálni mindent, amit a <option>channels</option
 szűrővel, és még többet is. Sajnos az alopciók még komplikáltabbak.
 <orderedlist>
 <listitem><para>
-Döntsd el, hány csatornával akarsz dolgozni. Ezt a <option>-channels</option>
-és/vagy <option>-af channels</option> kapcsolókkal kell megadnod. A példák
-megmutatják, mikor melyiket kell használni.
+  Döntsd el, hány csatornával akarsz dolgozni. Ezt a <option>-channels</option>
+  és/vagy <option>-af channels</option> kapcsolókkal kell megadnod. A példák
+  megmutatják, mikor melyiket kell használni.
 </para></listitem>
 <listitem><para>
-Döntsd el, hány csatornát adsz át a <option>pan</option>-nek (a további dekódolt
-csatornák figyelmen kívül maradnak). Ez az első alopció és szabályozza a kimeneti
-csatornák számát is.
+  Döntsd el, hány csatornát adsz át a <option>pan</option>-nek (a további
+  dekódolt csatornák figyelmen kívül maradnak). Ez az első alopció és
+  szabályozza a kimeneti csatornák számát is.
 </para></listitem>
 <listitem><para>
-A fennmaradó alopciók megadják, hogy melyik csatornát milyen mértékben kell
-bekeverni mindegyik másik csatornába. Ez az igazán bonyolult dolog. Könnyítésként
-válaszd szét az alopciókat különböző részekre, egy rész minden egyes kimeneti
-csatornához. Minden egy részen belül található alopció egy bemeneti csatornának
-felel meg. A szám, amit megadsz, a bemeneti csatorna kimeneti csatornába történő
-bekeverésének százalékos aránya lesz.
-</para>
-<para>
-A <option>pan</option> 0 és 512 közötti értékeket fogad el, az eredeti hangerő 0%
-és 51200%-ának megfelelően. Légy óvatos, ha 1-nél nagyobb értékeket használsz.
-Nem csak nagy hangerőt adhat, de ha túlléped a hangkártyád mintavételezési rátáját,
-kellemetlen pukkanásokat és kattanásokat hallhatsz. Ha akarod, a <option>pan</option>-t
-követheti egy <option>,volume</option> a vágás engedélyezéséhez, de jobb a
-<option>pan</option> értékeit olyan alacsonyan tartani, hogy ne kelljen vágni.
-</para></listitem>
+  A fennmaradó alopciók megadják, hogy melyik csatornát milyen mértékben kell
+  bekeverni mindegyik másik csatornába. Ez az igazán bonyolult dolog. Könnyítésként
+  válaszd szét az alopciókat különböző részekre, egy rész minden egyes kimeneti
+  csatornához. Minden egy részen belül található alopció egy bemeneti csatornának
+  felel meg. A szám, amit megadsz, a bemeneti csatorna kimeneti csatornába
+  történő bekeverésének százalékos aránya lesz.
+  </para>
+  <para>
+  A <option>pan</option> 0 és 512 közötti értékeket fogad el, az eredeti
+  hangerő 0% és 51200%-ának megfelelően. Légy óvatos, ha 1-nél nagyobb értékeket
+  használsz. Nem csak nagy hangerőt adhat, de ha túlléped a hangkártyád
+  mintavételezési rátáját, kellemetlen pukkanásokat és kattanásokat hallhatsz.
+  Ha akarod, a <option>pan</option>-t követheti egy <option>,volume</option>
+  a vágás engedélyezéséhez, de jobb a <option>pan</option> értékeit olyan
+  alacsonyan tartani, hogy ne kelljen vágni.
+  </para>
+</listitem>
 </orderedlist>
 </para>
 
 <bridgehead>Példa: egy csatorna két hangszóróra</bridgehead>
-
 <para>
 Itt van egy újabb példa a bal csatorna két hangszórón történő lejátszására. Kövesd
 a fent leírt lépéseket:
 <orderedlist>
 <listitem><para>
-A <option>pan</option>nek két kimeneti csatornája lesz, így az első alopció "2".
+  A <option>pan</option>nek két kimeneti csatornája lesz, így az első
+  alopció "2".
 </para></listitem>
 <listitem><para>
-Mivel két bemeneti csatornánk van, két alopció rész lesz.
-Mivel két kimeneti csatornánk van, két alopció lesz részenként.
-A fájl bal csatornája teljes hangerővel mehet az új bal és jobb
-csatornára.
-Így az első alopció rész "1:1".
-A jobb csatornát figyelmen kívül kell hagyni, így a második "0:0".
-A sorvégi 0 értékek elhagyhatóak, de a könnyebb megértésért
-most megtartjuk őket.
+  Mivel két bemeneti csatornánk van, két alopció rész lesz.
+  Mivel két kimeneti csatornánk van, két alopció lesz részenként.
+  A fájl bal csatornája teljes hangerővel mehet az új bal és jobb
+  csatornára.
+  Így az első alopció rész "1:1".
+  A jobb csatornát figyelmen kívül kell hagyni, így a második "0:0".
+  A sorvégi 0 értékek elhagyhatóak, de a könnyebb megértésért
+  most megtartjuk őket.
 </para></listitem>
 </orderedlist>
 Ezen opciók összeállítása adja:
-
 <screen>mplayer <replaceable>fájlnév</replaceable> -af pan=2:1:1:0:0</screen>
-
 Ha inkább a jobb csatorna kell a bal helyett, a <option>pan</option> alopciói
 "2:0:0:1:1" lesznek.
 </para>
 
 
 <bridgehead>Példa: bal csatorna két hangszóróra rövidítve</bridgehead>
-
 <para>
 Amint a <option>channels</option>-el, itt is lehet rövidíteni, ha a csak a bal
 csatornával dolgozol:
-
 <screen>mplayer <replaceable>fájlnév</replaceable> -af pan=1:1</screen>
-
 Mivel a <option>pan</option>-nek csak egy bemeneti csatornája van (a másik csatorna
 figyelmen kívül marad), csak egy része van az alopcióknak, ami megadja, hogy az
 egyetlen csatorna saját maga 100%-át kapja.
@@ -1031,95 +1055,93 @@ Az <application>MPlayer</application> 6 csatornás PCM dekódolója nem tud leke
 Itt egy módszer a PCM lekeverésre a <option>pan</option> használatával:
 <orderedlist>
 <listitem><para>
-A kimeneti csatornák száma 2, így az első alopció "2".
+  A kimeneti csatornák száma 2, így az első alopció "2".
 </para></listitem>
 <listitem><para>
-Hat bemeneti csatornával hat alopció rész lesz. Szerencsére mivel csak az első
-két csatorna kimenetével foglalkozunk, csak két részt kell készítenünk; a
-maradék négy elhagyható. Vigyázz, nem mindig ugyan az a csatornák sorrendje a
-többcsatornás audió fájlokban! Ez a példa egy olyan fájl lekeverését szemlélteti,
-amiben ugyan olyan csatornák vannak, mint az AC3 5.1 esetén:
-<programlisting>
+  Hat bemeneti csatornával hat alopció rész lesz. Szerencsére mivel csak az első
+  két csatorna kimenetével foglalkozunk, csak két részt kell készítenünk; a
+  maradék négy elhagyható. Vigyázz, nem mindig ugyan az a csatornák sorrendje a
+  többcsatornás audió fájlokban! Ez a példa egy olyan fájl lekeverését szemlélteti,
+  amiben ugyan olyan csatornák vannak, mint az AC3 5.1 esetén:
+  <programlisting>
 0 - bal első
 1 - jobb első
 2 - bal hátsó
 3 - jobb hátsó
 4 - középső első
-5 - mélynyomó
-</programlisting>
-Az alopciók első csoportja az eredeti hangerő százalékát adja, sorrendben,
-amit mindegyik kimeneti csatorna a bal első csatornától kap: "1:0".
-A jobb első csatornának a jobb kimenetre kell mennie: "0:1".
-Ugyan ez a hátsó csatornákra: "1:0" és "0:1".
-A középső csatorna mindkét kimeneti csatornára átmegy fél hangerővel:
-"0.5:0.5", a mélynyomó pedig mindkettőre teljes hangerővel: "1:1".
+5 - mélynyomó<!--
+  --></programlisting>
+  Az alopciók első csoportja az eredeti hangerő százalékát adja, sorrendben,
+  amit mindegyik kimeneti csatorna a bal első csatornától kap: "1:0".
+  A jobb első csatornának a jobb kimenetre kell mennie: "0:1".
+  Ugyan ez a hátsó csatornákra: "1:0" és "0:1".
+  A középső csatorna mindkét kimeneti csatornára átmegy fél hangerővel:
+  "0.5:0.5", a mélynyomó pedig mindkettőre teljes hangerővel: "1:1".
 </para></listitem>
 </orderedlist>
 Mindezt összerakva:
-
-<screen>mplayer <replaceable>6-channel.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1</screen>
-
+<screen>
+mplayer <replaceable>6-channel.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1
+</screen>
 A fenti példa százalékok csak durva példák. Nyugodtan játszadozz velük!
 </para>
 
 <bridgehead>Példa: 5.1-es audió lejátszása nagy hangszórókon, mélynyomó nélkül</bridgehead>
-
 <para>
-Ha egy pár nagy hangszóród van elől, nem kell pénzt áldoznod mélynyomóra a teljes
-5.1-es hangzáshoz. Ha a <option>-channels 5</option> használatával kéred, hogy a
-liba52 az 5.1-es audiót 5.0-ban dekódolja, a mélynyomó csatornája egyszerűen
-elmarad. Ha a mélynyomó csatornáját saját magad szeretnéd szétosztani,
-kézzel kell lekeverned a <option>pan</option>-nal:
-
+Ha egy pár nagy hangszóród van elől, nem kell pénzt áldoznod mélynyomóra a
+teljes 5.1-es hangzáshoz. Ha a <option>-channels 5</option> használatával
+kéred, hogy a liba52 az 5.1-es audiót 5.0-ban dekódolja, a mélynyomó
+csatornája egyszerűen elmarad. Ha a mélynyomó csatornáját saját magad
+szeretnéd szétosztani, kézzel kell lekeverned a
+<option>pan</option>-nal:
 <orderedlist>
 <listitem><para>
-Mivel a <option>pan</option>-nak mind a hat csatornával kell foglalkoznia, add
-meg a <option>-channels 6</option> kapcsolót, hogy a liba52 dekódolja őket.
+  Mivel a <option>pan</option>-nak mind a hat csatornával kell foglalkoznia, add
+  meg a <option>-channels 6</option> kapcsolót, hogy a liba52 dekódolja őket.
 </para></listitem>
 <listitem><para>
-A <option>pan</option> csak öt csatornára küld kimenetet, az első alopció 5.
+  A <option>pan</option> csak öt csatornára küld kimenetet, az első alopció 5.
 </para></listitem>
 <listitem><para>
-Hat bemeneti csatorna van és öt kimeneti csatorna, ez hat részt jelent öt alopcióval.
+  Hat bemeneti csatorna van és öt kimeneti csatorna, ez hat részt jelent öt alopcióval.
   <itemizedlist spacing="compact">
   <listitem><para>
-  A bal első csatornát csak saját magára kell ismételni:
-  "1:0:0:0:0"
+    A bal első csatornát csak saját magára kell ismételni:
+    "1:0:0:0:0"
   </para></listitem>
   <listitem><para>
-  Ugyan ez a jobb első csatornára:
-  "0:1:0:0:0"
+    Ugyan ez a jobb első csatornára:
+    "0:1:0:0:0"
   </para></listitem>
   <listitem><para>
-  Ugyan ez a bal hátsó csatornára:
-  "0:0:1:0:0"
+    Ugyan ez a bal hátsó csatornára:
+    "0:0:1:0:0"
   </para></listitem>
   <listitem><para>
-  És a jobb hátsó csatornára:
-  "0:0:0:1:0"
+    És a jobb hátsó csatornára:
+    "0:0:0:1:0"
   </para></listitem>
   <listitem><para>
-  Közép első szintén:
-  "0:0:0:0:1"
+    Közép első szintén:
+    "0:0:0:0:1"
   </para></listitem>
   <listitem><para>
-  És most kell eldöntenünk, hogy mit csináljunk a mélynyomóval, pl.
-  felezve a jobb elsőre és a bal elsőre:
-  "0.5:0.5:0:0:0"
+    És most kell eldöntenünk, hogy mit csináljunk a mélynyomóval, pl.
+    felezve a jobb elsőre és a bal elsőre:
+    "0.5:0.5:0:0:0"
   </para></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>
 Ezen opciók összevonásával születik meg az eredmény:
-
-<screen>mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=5:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0.5:0.5:0:0:0</screen>
-
+<screen>
+mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=5:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0.5:0.5:0:0:0
+</screen>
 </para>
-
 </sect3>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="advaudio-volume">
 <title>Szoftveres hangerő állítás</title>
@@ -1133,11 +1155,8 @@ a hangerő állító gombokat (alapértelmezettként <keycap>9</keycap> és
 <keycap>0</keycap>) a nagyobb hangerő eléréséhez. Figyelj rá, hogy ez nem hagyja
 figyelmen kívül a hangkártyád keverőjét; az <application>MPlayer</application>
 csak erősít az eredeti jelen mielőtt kiküldené a hangkártyára.
-
 A következő példa jó kezdésként:
-
 <screen>mplayer <replaceable>halk-fájl</replaceable> -softvol -softvol-max 300</screen>
-
 A <option>-softvol-max</option> opció megadja a maximálisan megengedhető kimeneti
 hangerőt az eredeti hangerő százalékában. Például a <option>-softvol-max 200</option>
 az eredeti szint dupláját engedélyezi.
@@ -1155,9 +1174,7 @@ ha nagyobb pontosságot akarsz.
 A <option>-softvol</option> opció a <option>volume</option> audió szűrő
 vezérlésével működik. Ha egy fájlt egy bizonyos hangerővel akarsz lejátszani az
 elejétől kezdve, megadhatod a <option>volume</option>-val kézzel:
-
 <screen>mplayer <replaceable>halk-fájl</replaceable> -af volume=10</screen>
-
 Ez 10 decibel-es növeléssel játsszal le a fájlt. Légy óvatos, ha a
 <option>volume</option> szűrőt használod - könnyen károsíthatod a füleidet, ha
 túl nagy értéket használsz. Kezd alacsonyan és fokozatosan menj felfelé, amíg
@@ -1166,9 +1183,6 @@ meg, a <option>volume</option>-nek lehet, hogy le kell csípnie a jelet, hogy
 megakadályozza a hangkártyád elfogadható tartományán kívül eső adatok küldését;
 ez zavart audiót eredményez.
 </para>
-
 </sect2>
-
 </sect1>
-
 </chapter>
