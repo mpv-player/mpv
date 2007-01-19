@@ -31,10 +31,11 @@ static int compressed_frame_size = 0;
 #if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
 #ifdef USE_LIBAVFORMAT_SO
 #include <ffmpeg/avformat.h>
+#include <ffmpeg/riff.h>
 #else
 #include "libavformat/avformat.h"
-#endif
 #include "libavformat/riff.h"
+#endif
 extern const CodecTag mp_wav_tags[];
 #endif
 
