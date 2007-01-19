@@ -372,7 +372,7 @@ static int init(sh_video_t *sh){
 	    avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
 	    memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
 	}
-	avctx->sub_id= BE_32(avctx->extradata+4);
+	avctx->sub_id= AV_RB32(avctx->extradata+4);
 
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
         break;
