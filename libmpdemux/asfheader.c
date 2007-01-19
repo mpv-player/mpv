@@ -20,7 +20,7 @@
 #ifdef ARCH_X86
 #define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))
 #else
-#define	ASF_LOAD_GUID_PREFIX(guid)	LE_32(guid)
+#define	ASF_LOAD_GUID_PREFIX(guid)	AV_RL32(guid)
 #endif
 
 #define ASF_GUID_PREFIX_audio_stream	0xF8699E40
@@ -202,11 +202,11 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, dou
     // flags(4) (reliable,seekable,no_cleanpoints?,resend-live-cleanpoints, rest of bits reserved)
 
     buffer +=8+8+4+4+4+4+4+4+4+4;
-    this_stream_num=LE_16(buffer);buffer+=2;
+    this_stream_num=AV_RL16(buffer);buffer+=2;
 
     if (this_stream_num == stream_num) {
       buffer+=2; //skip stream-language-id-index
-      avg_ft = LE_32(buffer) | (uint64_t)LE_32(buffer + 4) << 32; // provided in 100ns units
+      avg_ft = AV_RL32(buffer) | (uint64_t)AV_RL32(buffer + 4) << 32; // provided in 100ns units
       *avg_frame_time = avg_ft/10000000.0f;
 
       // after this are values for stream-name-count and
@@ -223,11 +223,11 @@ static char* read_meta_record(ASF_meta_record_t* dest, char* buf,
     int* buf_len)
 {
   CHECKDEC(*buf_len, 2 + 2 + 2 + 2 + 4);
-  dest->lang_list_index = LE_16(buf);
-  dest->stream_num = LE_16(&buf[2]);
-  dest->name_length = LE_16(&buf[4]);
-  dest->data_type = LE_16(&buf[6]);
-  dest->data_length = LE_32(&buf[8]);
+  dest->lang_list_index = AV_RL16(buf);
+  dest->stream_num = AV_RL16(&buf[2]);
+  dest->name_length = AV_RL16(&buf[4]);
+  dest->data_type = AV_RL16(&buf[6]);
+  dest->data_length = AV_RL32(&buf[8]);
   buf += 2 + 2 + 2 + 2 + 4;
   CHECKDEC(*buf_len, dest->name_length);
   dest->name = (uint16_t*)buf;
@@ -251,7 +251,7 @@ static int get_meta(char *buf, int buf_len, int this_stream_num,
   CHECKDEC(buf_len, pos);
   buf += pos;
   CHECKDEC(buf_len, 2);
-  records_count = LE_16(buf);
+  records_count = AV_RL16(buf);
   buf += 2;
 
   while (records_count--) {
@@ -271,9 +271,9 @@ static int get_meta(char *buf, int buf_len, int this_stream_num,
       continue;
     }
     if (strcmp(name, "AspectRatioX") == 0)
-      x = LE_16(record_entry.data);
+      x = AV_RL16(record_entry.data);
     else if (strcmp(name, "AspectRatioY") == 0)
-      y = LE_16(record_entry.data);
+      y = AV_RL16(record_entry.data);
     free(name);
   }
   if (x && y) {
@@ -546,14 +546,14 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
         uint32_t max_bitrate;
         char *ptr = &hdr[pos];
         mp_msg(MSGT_HEADER,MSGL_V,"============ ASF Stream group == START ===\n");
-        stream_count = LE_16(ptr);
+        stream_count = AV_RL16(ptr);
         ptr += sizeof(uint16_t);
         if (ptr > &hdr[hdr_len]) goto len_err_out;
         if(stream_count > 0)
               streams = malloc(2*stream_count*sizeof(uint32_t));
         mp_msg(MSGT_HEADER,MSGL_V," stream count=[0x%x][%u]\n", stream_count, stream_count );
         for( i=0 ; i<stream_count ; i++ ) {
-          stream_id = LE_16(ptr);
+          stream_id = AV_RL16(ptr);
           ptr += sizeof(uint16_t);
           if (ptr > &hdr[hdr_len]) goto len_err_out;
           memcpy(&max_bitrate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
