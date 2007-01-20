@@ -194,6 +194,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   unsigned long long pts=0;
   unsigned long long dts=0;
   int l;
+  int pes_ext2_subid=-1;
   double stream_pts = MP_NOPTS_VALUE;
   demux_stream_t *ds=NULL;
   demux_packet_t* dp;
@@ -207,7 +208,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 //}
 
 //  if(id==0x1BA) packet_start_pos=stream_tell(demux->stream);
-  if(id<0x1BC || id>=0x1F0) return -1;
+  if((id<0x1BC || id>=0x1F0) && id != 0x1FD) return -1;
   if(id==0x1BE) return -1; // padding stream
   if(id==0x1BF) return -1; // private2
 
@@ -252,8 +253,10 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if((c>>6)==2){
     int pts_flags;
     int hdrlen;
+    int parse_ext2;
     // System-2 (.VOB) stream:
     c=stream_read_char(demux->stream); pts_flags=c>>6;
+    parse_ext2 = (id == 0x1FD) && ((c & 0x3F) == 1);
     c=stream_read_char(demux->stream); hdrlen=c;
     len-=2;
     mp_dbg(MSGT_DEMUX,MSGL_DBG3,"  hdrlen=%d  (len=%d)",hdrlen,len);
@@ -271,8 +274,40 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       len-=10;hdrlen-=10;
     }
     len-=hdrlen;
-    if(hdrlen>0) stream_skip(demux->stream,hdrlen); // skip header bytes
+    if(hdrlen>0) {
+      if(!parse_ext2)
+        stream_skip(demux->stream,hdrlen); // skip header bytes
+      else if(hdrlen>=3) {
+        c=stream_read_char(demux->stream);
+        hdrlen--;
+        if(c != 0x1F && c!= 0x0F) { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: invalid pes_extension field  \n"); return -1;}
+        if(c == 0x1F) {
+          //STD
+          stream_skip(demux->stream, 2);
+          hdrlen-=2;
+        }
+        c=stream_read_char(demux->stream); //pes_extension2 flag
+        hdrlen--;
+        if(c!=0x81)  { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown pes_extension2 format, len is > 1  \n"); return -1;}
+        c=stream_read_char(demux->stream); //pes_extension2 payload === substream id
+        if(c!=0x75 && (c<0x55 || c>0x5F))   { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown vc1 substream_id: 0x%x  \n", c); return -1;}
+        pes_ext2_subid=c;
+      }
+    }
     
+    if(id==0x1FD && pes_ext2_subid!=-1) {
+      //==== EVO VC1 STREAMS ===//
+      if(!demux->v_streams[pes_ext2_subid]) new_sh_video(demux,pes_ext2_subid);
+      if(demux->video->id==-1) demux->video->id=pes_ext2_subid;
+      if(demux->video->id==pes_ext2_subid){
+        ds=demux->video;
+        if(!ds->sh) ds->sh=demux->v_streams[pes_ext2_subid];
+        if(priv && ds->sh) {
+          sh_video_t *sh = (sh_video_t *)ds->sh;
+          sh->format = mmioFOURCC('W', 'V', 'C', '1');
+        }
+      }
+    }
     //============== DVD Audio sub-stream ======================
     if(id==0x1BD){
       int aid, rawa52 = 0;
