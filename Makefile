@@ -278,20 +278,20 @@ ifeq ($(MENCODER),yes)
 		fi ; \
 	done
 endif
-	@$(INSTALL) -d $(DATADIR)
-	@$(INSTALL) -d $(DATADIR)/font
+	$(INSTALL) -d $(DATADIR)
+	$(INSTALL) -d $(DATADIR)/font
 ifeq ($(GUI),yes)
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	@$(INSTALL) -d $(DATADIR)/skins
+	$(INSTALL) -d $(DATADIR)/skins
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
 	@echo "*** for GUI, and extract to $(DATADIR)/skins/"
-	@$(INSTALL) -d $(prefix)/share/pixmaps
+	$(INSTALL) -d $(prefix)/share/pixmaps
 	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/mplayer.xpm
-	@$(INSTALL) -d $(prefix)/share/applications
+	$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/mplayer.desktop
 endif
-	@$(INSTALL) -d $(CONFDIR)
-	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
+	$(INSTALL) -d $(CONFDIR)
+	if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 
 uninstall:
 	-rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
