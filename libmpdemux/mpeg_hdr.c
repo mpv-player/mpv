@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
 #include "mpeg_hdr.h"
@@ -158,7 +159,16 @@ unsigned char mp_getbits(unsigned char *buffer, unsigned int from, unsigned char
     return  y;
 }
 
+static inline unsigned int mp_getbits16(unsigned char *buffer, unsigned int from, unsigned char len)
+{
+    if(len > 8)
+        return (mp_getbits(buffer, from, len - 8) << 8) | mp_getbits(buffer, from + len - 8, 8);
+    else
+        return mp_getbits(buffer, from, len);
+}
+
 #define getbits mp_getbits
+#define getbits16 mp_getbits16
 
 static int read_timeinc(mp_mpeg_header_t * picture, unsigned char * buffer, int n)
 {
@@ -408,4 +418,109 @@ int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
 
   free(dest);
   return n;
+}
+
+static int mp_unescape03(unsigned char *buf, int len)
+{
+  unsigned char *dest;
+  int i, j, skip;
+
+  dest = malloc(len);
+  if(! dest)
+    return 0;
+
+  j = i = skip = 0;
+  while(i <= len-3)
+  {
+    if(buf[i] == 0 && buf[i+1] == 0 && buf[i+2] == 3)
+    {
+      dest[j] = dest[j+1] = 0;
+      j += 2;
+      i += 3;
+      skip++;
+    }
+    else
+    {
+      dest[j] = buf[i];
+      j++;
+      i++;
+    }
+  }
+  dest[j] = buf[len-2];
+  dest[j+1] = buf[len-1];
+  len -= skip;
+  memcpy(buf, dest, len);
+  free(dest);
+
+  return len;
+}
+
+int mp_vc1_decode_sequence_header(mp_mpeg_header_t * picture, unsigned char * buf, int len)
+{
+  int n, x;
+
+  len = mp_unescape03(buf, len);
+
+  picture->display_picture_width = picture->display_picture_height = 0;
+  picture->fps = 0;
+  n = 0;
+  x = getbits(buf, n, 2);
+  n += 2;
+  if(x != 3) //not advanced profile
+    return 0;
+
+  getbits16(buf, n, 14);
+  n += 14;
+  picture->display_picture_width = getbits16(buf, n, 12) * 2 + 2;
+  n += 12;
+  picture->display_picture_height = getbits16(buf, n, 12) * 2 + 2;
+  n += 12;
+  getbits(buf, n, 6);
+  n += 6;
+  x = getbits(buf, n, 1);
+  n += 1;
+  if(x) //display info
+  {
+    getbits16(buf, n, 14);
+    n += 14;
+    getbits16(buf, n, 14);
+    n += 14;
+    if(getbits(buf, n++, 1)) //aspect ratio
+    {
+      x = getbits(buf, n, 4);
+      n += 4;
+      if(x == 15)
+      {
+        getbits16(buf, n, 16);
+        n += 16;
+      }
+    }
+
+    if(getbits(buf, n++, 1)) //framerates
+    {
+      int frexp=0, frnum=0, frden=0;
+
+      if(getbits(buf, n++, 1))
+      {
+        frexp = getbits16(buf, n, 16);
+        n += 16;
+        picture->fps = (double) (frexp+1) / 32.0; 
+      }
+      else
+      {
+        float frates[] = {0, 24000, 25000, 30000, 50000, 60000, 48000, 72000, 0};
+        float frdivs[] = {0, 1000, 1001, 0};
+
+        frnum = getbits(buf, n, 8);
+        n += 8;
+        frden = getbits(buf, n, 4);
+        n += 4;
+        if((frden == 1 || frden == 2) && (frnum < 8))
+            picture->fps = frates[frnum] / frdivs[frden];
+      }
+    }
+  }
+
+  //free(dest);
+  return 1;
 }

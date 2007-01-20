@@ -26,3 +26,4 @@ float mpeg12_aspect_info(mp_mpeg_header_t *picture);
 int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer);
 void mp4_header_process_vop(mp_mpeg_header_t * picture, unsigned char * buffer);
 int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len);
+int mp_vc1_decode_sequence_header(mp_mpeg_header_t * picture, unsigned char * buf, int len);
