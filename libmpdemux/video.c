@@ -365,7 +365,7 @@ mpeg_header_parser:
    while(1){
       int i=sync_video_packet(d_video);
       if(i==0x10F) break; // found it!
-      if(!i || !read_video_packet(d_video)){
+      if(!i || !skip_video_packet(d_video)){
         if( mp_msg_test(MSGT_DECVIDEO,MSGL_V) )  mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Couldn't find VC-1 sequence header\n");
         return 0;
