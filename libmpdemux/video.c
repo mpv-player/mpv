@@ -49,6 +49,7 @@ enum {
 	VIDEO_MPEG12,
 	VIDEO_MPEG4,
 	VIDEO_H264,
+	VIDEO_VC1,
 	VIDEO_OTHER
 } video_codec;
 
@@ -74,6 +75,8 @@ if((d_video->demuxer->file_format == DEMUXER_TYPE_PVA) ||
     ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000005))
   )
     video_codec = VIDEO_H264;
+  else if((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS) && (sh_video->format==mmioFOURCC('W', 'V', 'C', '1')))
+    video_codec = VIDEO_VC1;
   else
     video_codec = VIDEO_OTHER;
     
@@ -354,6 +357,65 @@ mpeg_header_parser:
     sh_video->i_bps / 1000.0 );
   break;
  }
+ case VIDEO_VC1: {
+   int j;
+   // Find sequence_header:
+   videobuf_len=0;
+   videobuf_code_len=0;
+   mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Searching for VC1 sequence header... ");
+   while(1){
+      int i=sync_video_packet(d_video);
+      if(i==0x10F) break; // found it!
+      if(!i || !read_video_packet(d_video)){
+        if( mp_msg_test(MSGT_DECVIDEO,MSGL_V) )  mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Couldn't find VC-1 sequence header\n");
+        return 0;
+      }
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_INFO,"found\n");
+   if(!videobuffer) {
+     videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE + FF_INPUT_BUFFER_PADDING_SIZE);
+     if (videobuffer) memset(videobuffer+VIDEOBUFFER_SIZE, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+     else {
+       mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
+       return 0;
+     }
+   }
+   if(!read_video_packet(d_video)){ 
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Couldn't read VC-1 sequence header!\n");
+     return 0;
+   }
+
+   while(1) {
+      int i=sync_video_packet(d_video);
+      if(i==0x10E) break; // found it!
+      if(!i || !skip_video_packet(d_video)){
+        mp_msg(MSGT_DECVIDEO,MSGL_V,"Couldn't find VC-1 entry point sync-code:(\n");
+        return 0;
+      }
+   }
+   if(!read_video_packet(d_video)){
+      mp_msg(MSGT_DECVIDEO,MSGL_V,"Couldn't read VC-1 entry point sync-code:(\n");
+      return 0;
+   }
+
+
+   if(mp_vc1_decode_sequence_header(&picture, &videobuffer[4], videobuf_len-4)) {
+     sh_video->bih = (BITMAPINFOHEADER *) realloc(sh_video->bih, sizeof(BITMAPINFOHEADER) + videobuf_len);
+     sh_video->bih->biSize= sizeof(BITMAPINFOHEADER) + videobuf_len;
+     memcpy(sh_video->bih + 1, videobuffer, videobuf_len);
+     sh_video->bih->biCompression = sh_video->format;
+     sh_video->bih->biWidth = sh_video->disp_w = picture.display_picture_width;
+     sh_video->bih->biHeight = sh_video->disp_h = picture.display_picture_height;
+     if(picture.fps > 0) {
+       sh_video->frametime=1.0/picture.fps;
+       sh_video->fps = picture.fps;
+     }
+     mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VIDEO:  VC-1  %dx%d, %5.3f fps, header len: %d\n",
+       sh_video->disp_w, sh_video->disp_h, sh_video->fps, videobuf_len);
+   }
+  break;
+ }
 } // switch(file_format)
 
 return 1;
@@ -548,6 +610,17 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	*start=videobuffer; in_size=videobuf_len;
 	videobuf_len=0;
 
+  }  else if((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==mmioFOURCC('W', 'V', 'C', '1'))) {
+       int j;
+       while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE) {
+         int i=sync_video_packet(d_video);
+         if(!i) return -1;
+         if(!read_video_packet(d_video)) return -1; // EOF
+         if(i==0x10D) break;
+       }
+       *start=videobuffer;
+       in_size=videobuf_len;
+       videobuf_len=0;
   } else {
       // frame-based file formats: (AVI,ASF,MOV)
     in_size=ds_get_packet(d_video,start);
