@@ -340,36 +340,14 @@ static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsig
   return n;
 }
 
+static int mp_unescape03(unsigned char *buf, int len);
+
 int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
 {
-  unsigned int n = 0, v, i, j, mbh;
-  unsigned char *dest;
+  unsigned int n = 0, v, i, mbh;
   int frame_mbs_only;
 
-  dest = (unsigned char*) malloc(len);
-  if(! dest)
-    return 0;
-  j = i = 0;
-  while(i <= len-3)
-  {
-    if(buf[i] == 0 && buf[i+1] == 0 && buf[i+2] == 3)
-    {
-      dest[j] = dest[j+1] = 0;
-      j += 2;
-      i += 3;
-    }
-    else
-    {
-      dest[j] = buf[i];
-      j++;
-      i++;
-    }
-  }
-  dest[j] = buf[len-2];
-  dest[j+1] = buf[len-1];
-  j += 2;
-  len = j+1;
-  buf = dest;
+  len = mp_unescape03(buf, len);
   
   picture->fps = picture->timeinc_unit = picture->timeinc_resolution = 0;
   n = 24;
@@ -416,7 +394,6 @@ int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
   if(getbits(buf, n++, 1))
     n = h264_parse_vui(picture, buf, n);
 
-  free(dest);
   return n;
 }
 
