@@ -358,7 +358,6 @@ mpeg_header_parser:
   break;
  }
  case VIDEO_VC1: {
-   int j;
    // Find sequence_header:
    videobuf_len=0;
    videobuf_code_len=0;
@@ -401,7 +400,7 @@ mpeg_header_parser:
 
 
    if(mp_vc1_decode_sequence_header(&picture, &videobuffer[4], videobuf_len-4)) {
-     sh_video->bih = (BITMAPINFOHEADER *) realloc(sh_video->bih, sizeof(BITMAPINFOHEADER) + videobuf_len);
+     sh_video->bih = (BITMAPINFOHEADER *) calloc(1, sizeof(BITMAPINFOHEADER) + videobuf_len);
      sh_video->bih->biSize= sizeof(BITMAPINFOHEADER) + videobuf_len;
      memcpy(sh_video->bih + 1, videobuffer, videobuf_len);
      sh_video->bih->biCompression = sh_video->format;
@@ -611,7 +610,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	videobuf_len=0;
 
   }  else if((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==mmioFOURCC('W', 'V', 'C', '1'))) {
-       int j;
        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE) {
          int i=sync_video_packet(d_video);
          if(!i) return -1;
