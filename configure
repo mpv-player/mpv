@@ -678,6 +678,13 @@ if aix ; then
   _ld_extra="$_ld_extra -lC"
 fi
 
+# If IRIX we must use ar instead of ranlib (not present on IRIX systems)
+if irix ; then
+  _ranlib='ar -r'
+elif linux ; then
+  _ranlib='true'
+fi
+
 # Check how to call 'head' and 'tail'. Newer versions spit out warnings
 # if used as 'head -1' instead of 'head -n 1', but older versions don't
 # know about '-n'.
@@ -2523,13 +2530,6 @@ echo "ftp://ftp.gnu.org/gnu/gawk/"
 echo "If you don't need VIDIX, you can use configure --disable-vidix instead."
 die "no awk"
 fi
-fi
-
-# If IRIX we must use ar instead of ranlib (not present on IRIX systems)
-if irix ; then
-  _ranlib='ar -r'
-elif linux ; then
-  _ranlib='true'
 fi
 
 ######################
