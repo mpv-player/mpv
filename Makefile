@@ -256,20 +256,18 @@ ifeq ($(VIDIX),yes)
 	-install -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
 endif
 	$(INSTALL) -d $(BINDIR)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) \
-		$(BINDIR)/mplayer$(EXESUF)
+	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) $(BINDIR)
 	$(INSTALL) -d $(MANDIR)/man1
 	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
-			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/mplayer.1 ; \
+			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/ ; \
 		else \
 			$(INSTALL) -d $(MANDIR)/$$i/man1 ; \
-			$(INSTALL) -c -m 644 DOCS/man/$$i/mplayer.1 $(MANDIR)/$$i/man1/mplayer.1 ; \
+			$(INSTALL) -c -m 644 DOCS/man/$$i/mplayer.1 $(MANDIR)/$$i/man1/ ; \
 		fi ; \
 	done
 ifeq ($(MENCODER),yes)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) mencoder$(EXESUF) \
-		$(BINDIR)/mencoder$(EXESUF)
+	$(INSTALL) -m 755 $(INSTALLSTRIP) mencoder$(EXESUF) $(BINDIR)
 	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
 			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
@@ -286,9 +284,9 @@ ifeq ($(GUI),yes)
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
 	@echo "*** for GUI, and extract to $(DATADIR)/skins/"
 	$(INSTALL) -d $(prefix)/share/pixmaps
-	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/mplayer.xpm
+	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
 	$(INSTALL) -d $(prefix)/share/applications
-	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/mplayer.desktop
+	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
 endif
 	$(INSTALL) -d $(CONFDIR)
 	if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
