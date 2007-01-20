@@ -309,7 +309,6 @@ uninstall:
 	$(MAKE) -C libdha uninstall
 	rm -f $(LIBDIR)/mplayer/vidix/*.so
 	-rmdir -p $(LIBDIR)/mplayer/vidix
-	@echo "Uninstall completed"
 
 dirclean:
 	-rm -f *.o *.a *~
