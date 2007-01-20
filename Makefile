@@ -239,7 +239,7 @@ mencoder$(EXESUF): $(MENCODER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
-	$(HOST_CC) -I. -DCODECS2HTML codec-cfg.c -o $@
+	$(HOST_CC) -I. -DCODECS2HTML $< -o $@
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
@@ -247,7 +247,7 @@ codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 codec-cfg.o: codecs.conf.h
 
 codecs2html$(EXESUF): mp_msg.o
-	$(CC) -DCODECS2HTML codec-cfg.c mp_msg.o -o $@
+	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
 
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
@@ -258,9 +258,6 @@ endif
 	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) \
 		$(BINDIR)/mplayer$(EXESUF)
-ifeq ($(GUI),yes)
-	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-endif
 	$(INSTALL) -d $(MANDIR)/man1
 	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
@@ -284,6 +281,7 @@ endif
 	@$(INSTALL) -d $(DATADIR)
 	@$(INSTALL) -d $(DATADIR)/font
 ifeq ($(GUI),yes)
+	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
 	@$(INSTALL) -d $(DATADIR)/skins
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
 	@echo "*** for GUI, and extract to $(DATADIR)/skins/"
