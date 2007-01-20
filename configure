@@ -468,6 +468,7 @@ _iwmmxt=auto
 _mtrr=auto
 _install=install
 _ranlib=ranlib
+_ldconfig=ldconfig
 _cc=cc
 test "$CC" && _cc="$CC"
 _gcc_check=yes
@@ -661,6 +662,10 @@ TMPS="$I/mplayer-conf-$RANDOM-$$.S"
 # (libraries) which might be installed into /usr/local.  Let users use this
 # stuff explicitly as command line argument.  In other words: It would be
 # resonable to have only /usr/include or only /usr/local/include.
+
+if openbsd ; then
+  _ldconfig="ldconfig -R"
+fi
 
 if freebsd ; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
@@ -7445,6 +7450,7 @@ CC = $_cc
 HOST_CC = $_host_cc
 AWK = $_awk
 RANLIB = $_ranlib
+LDCONFIG = $_ldconfig
 INSTALL = $_install
 EXTRA_INC = $_inc_extra
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)

@@ -84,19 +84,11 @@ install:
 	install -m 755 $(INSTALLSTRIP) -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
 	rm -f $(LIBDIR)/libdha.so
 	ln -sf $(LIBNAME) $(LIBDIR)/$(SHORTNAME)
-ifeq ($(TARGET_OS),OpenBSD)
-	-ldconfig -R
-else
-	-ldconfig
-endif
+	-$(LDCONFIG)
 
 uninstall:
 	rm -f $(LIBDIR)/libdha.so $(LIBDIR)/$(SHORTNAME) $(LIBDIR)/$(LIBNAME)
-ifeq ($(TARGET_OS),OpenBSD)
-	-ldconfig -R
-else
-	-ldconfig
-endif
+	-$(LDCONFIG)
 
 ifneq ($(wildcard .depend),)
 include .depend
