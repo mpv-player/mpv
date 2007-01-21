@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r21001 (2006. 11. 19.)
+// Sync'ed with help_mp-en.h r21906 (2007. 01. 21.)
 
 // ========================= MPlayer help ===========================
 
@@ -271,10 +271,13 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "FIGYELEM: A -speed nem biztos, hogy jól működik az -oac copy-val!\n"\
 "A kódolásod hibás lehet!\n"
 #define MSGTR_ErrorWritingFile "%s: hiba a fájl írásánál.\n"
+#define MSGTR_FlushingVideoFrames "\nVideó kockák ürítése.\n"
+#define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "A szűrők nincsenek konfigurálva! Üres fájl?\n"
 #define MSGTR_RecommendedVideoBitrate "Ajánlott video bitráta %s CD-hez: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/mp  (%d B/s)  méret: %"PRIu64" byte  %5.3f mp  %d képkocka\n"
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/mp  (%d B/s)  méret: %"PRIu64" byte  %5.3f mp\n"
-#define MSGTR_OpenedStream "kész: formátum: %d  adat: 0x%X - 0x%x\n"
+#define MSGTR_EdlSkipStartEndCurrent "EDL SKIP: Kezdete: %.2f  Vége: %.2f   Aktuális: V: %.2f  A: %.2f     \r"
+#define MSGTR_OpenedStream "sikeres: formátum: %d  adat: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "audiocodec: framecopy (formátum=%x csati=%d ráta=%d bit=%d B/s=%d sample-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audió kiválasztva.\n"
@@ -491,6 +494,15 @@ static char help_text[]=
 // fifo.c
 #define MSGTR_CannotMakePipe "Nem hozható létre PIPE!\n"
 
+// parser-mecmd.c, parser-mpcmd.c
+#define MSGTR_NoFileGivenOnCommandLine "'--' azt jelöli, hogy nincs több opció, de nincs fájlnév megadva a parancssorban.\n"
+#define MSGTR_TheLoopOptionMustBeAnInteger "A loop opciónak egésznek kell lennie: %s\n"
+#define MSGTR_UnknownOptionOnCommandLine "Ismeretlen opció a parancssorban: -%s\n"
+#define MSGTR_ErrorParsingOptionOnCommandLine "Hiba a parancssorban megadott opció értelmezésekor: -%s\n"
+#define MSGTR_InvalidPlayEntry "Hibás lejátszási bejegyzés: %s\n"
+#define MSGTR_NotAnMEncoderOption "-%s nem MEncoder opció\n"
+#define MSGTR_NoFileGiven "Nincs megadva fájl\n"
+
 // m_config.c
 #define MSGTR_SaveSlotTooOld "A talált mentési slot a(z) %d lvl-ből túl régi: %d !!!\n"
 #define MSGTR_InvalidCfgfileOption "A(z) %s kapcsoló nem használható konfigurációs fájlban.\n"
@@ -525,6 +537,11 @@ static char help_text[]=
 #define MSGTR_CantOpenDVD "Nem tudom megnyitni a DVD eszközt: %s\n"
 
 // stream_dvd.c
+#define MSGTR_DVDspeedCantOpen "Nem nyitható meg a DVD eszköz írásra, a DVD sebesség változtatásához írási jog kell.\n"
+#define MSGTR_DVDrestoreSpeed "DVD sebesség visszaállítása... "
+#define MSGTR_DVDlimitSpeed "DVD sebesség korlátozása %dKB/s-ra... "
+#define MSGTR_DVDlimitFail "DVD sebesség korlátozása sikertelen.\n"
+#define MSGTR_DVDlimitOk "DVD sebesség korlátozása sikeres.\n"
 #define MSGTR_NoDVDSupport "Az MPlayer DVD támogatás nélkül lett lefordítva, kilépés.\n"
 #define MSGTR_DVDnumTitles "%d sáv van a DVD-n.\n"
 #define MSGTR_DVDinvalidTitle "Helytelen DVD sáv: %d\n"
@@ -576,6 +593,9 @@ static char help_text[]=
 #define MSGTR_InvalidMPEGES "Hibás MPEG-ES-folyam? Lépj kapcsolatba a készítőkkel, lehet, hogy hiba!\n"
 #define MSGTR_FormatNotRecognized "========= Sajnos ez a fájlformátum ismeretlen vagy nem támogatott ===========\n"\
 				  "= Ha ez egy AVI, ASF vagy MPEG fájl, lépj kapcsolatba a készítőkkel (hiba)! =\n"
+#define MSGTR_SettingProcessPriority "Folyamat priorításának beállítása: %s\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  méret:%dx%d  fps:%5.2f  ftime:=%6.4f\n"
+#define MSGTR_CannotInitializeMuxer "A muxer nem inicializálható."
 #define MSGTR_MissingVideoStream "Nincs képfolyam!\n"
 #define MSGTR_MissingAudioStream "Nincs hangfolyam... -> hang nélkül\n"
 #define MSGTR_MissingVideoStreamBug "Nincs képfolyam?! Írj a szerzőnek, lehet hogy hiba :(\n"
@@ -665,6 +685,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: a codec nem állította be az sh->disp_w és az sh_disp_h izéket, megpróbálom workaroundolni!\n"
 #define MSGTR_VoConfigRequest "VDec: vo config kérés - %d x %d (preferált színtér: %s)\n"
+#define MSGTR_UsingXAsOutputCspNoY "VDec: %s használata kimeneti színtérként (nincs %d)\n"
 #define MSGTR_CouldNotFindColorspace "Nem találok egyező colorspace-t - újra próbálom a -vf scale filterrel...\n"
 #define MSGTR_MovieAspectIsSet "A film aspect értéke %.2f:1 - aspect arány javítása.\n"
 #define MSGTR_MovieAspectUndefined "A film aspect értéke nem definiált - nincs arányjavítás.\n"
@@ -1915,6 +1936,11 @@ static char help_text[]=
 "[VO_XV] Lásd az 'mplayer -vo help'-et más (nem-xv) videó kimeneti vezérlőkért.\n"\
 "[VO_XV] Próbáld ki a -vo x11 -et.\n"
 
+
+// loader/ldt_keeper.c
+
+#define MSGTR_LOADER_DYLD_Warning "FIGYELMEZTETÉS: DLL codec-ek használatának kísérlete, de a\n         DYLD_BIND_AT_LAUNCH környezeti változó nincs beállítva. Így ez összeomlást okoz.\n"
+
 // stream/stream_radio.c
 
 #define MSGTR_RADIO_ChannelNamesDetected "[radio] Rádió csatornák neve megtalálva.\n"
@@ -1960,3 +1986,66 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverV4L "[radio] V4Lv1 rádió interfész használata.\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[radio] *BSD BT848 rádió interfész használata.\n"
 
+// ================================== LIBASS ====================================
+
+// ass_bitmap.c
+#define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] FT_Glyph_To_Bitmap hiba %d \n"
+#define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Nem támogatott pixel mód: %d\n"
+
+// ass.c
+#define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Figyelmeztetés: nincs '%s' nevű stílus, '%s' használata\n"
+#define MSGTR_LIBASS_BadTimestamp "[ass] hibás időbélyeg\n"
+#define MSGTR_LIBASS_BadEncodedDataSize "[ass] rossz kódolt adatméret\n"
+#define MSGTR_LIBASS_FontLineTooLong "[ass] Betűtípus sor túl hosszú: %d, %s\n"
+#define MSGTR_LIBASS_EventFormatHeaderMissing "[ass] Esemény formátum fejléc hiányzik\n"
+#define MSGTR_LIBASS_ErrorOpeningIconvDescriptor "[ass] hiba az iconv leíró megnyitásakor.\n"
+#define MSGTR_LIBASS_ErrorRecodingFile "[ass] hiba a fájl rögzítésekor.\n"
+#define MSGTR_LIBASS_FopenFailed "[ass] ass_read_file(%s): fopen sikertelen\n"
+#define MSGTR_LIBASS_FseekFailed "[ass] ass_read_file(%s): fseek sikertelen\n"
+#define MSGTR_LIBASS_RefusingToLoadSubtitlesLargerThan10M "[ass] ass_read_file(%s): 10M-nél nagyobb felirat fájl betöltése visszautasítva\n"
+#define MSGTR_LIBASS_ReadFailed "Olvasás sikertelen, %d: %s\n"
+#define MSGTR_LIBASS_AddedSubtitleFileMemory "[ass] Felirat fájl hozzáadása: <memória> (%d stílus, %d esemény)\n"
+#define MSGTR_LIBASS_AddedSubtitleFileFname "[ass] Felirat fájl hozzáadása: %s (%d stílus, %d esemény)\n"
+#define MSGTR_LIBASS_FailedToCreateDirectory "[ass] Sikertelen a(z) %s könyvtár létrehozása\n"
+#define MSGTR_LIBASS_NotADirectory "[ass] Nem könyvtár: %s\n"
+
+// ass_cache.c
+#define MSGTR_LIBASS_TooManyFonts "[ass] Túl sok betűtípus\n"
+#define MSGTR_LIBASS_ErrorOpeningFont "[ass] Hiba a betűtípus megnyitásakor: %s, %d\n"
+
+// ass_fontconfig.c
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: A kiválasztott betűtípus család nem a kért: '%s' != '%s'\n"
+#define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Alapértelmezett betűtípus család használata: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Alapértelmezett betűtípus használata: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: 'Arial' betűtípus család használata: (%s, %d, %d) -> %s, %d\n"
+#define MSGTR_LIBASS_FcInitLoadConfigAndFontsFailed "[ass] FcInitLoadConfigAndFonts sikertelen.\n"
+#define MSGTR_LIBASS_UpdatingFontCache "[ass] Betűtípus cache frissítése.\n"
+#define MSGTR_LIBASS_BetaVersionsOfFontconfigAreNotSupported "[ass] A fontconfig béta verziói nem támogatottak.\n[ass] Frissíts, mielőtt hibát jelentesz.\n"
+#define MSGTR_LIBASS_FcStrSetAddFailed "[ass] FcStrSetAdd sikertelen.\n"
+#define MSGTR_LIBASS_FcDirScanFailed "[ass] FcDirScan sikertelen.\n"
+#define MSGTR_LIBASS_FcDirSave "[ass] FcDirSave sikertelen.\n"
+#define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] FcConfigAppFontAddDir sikertelen\n"
+#define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig letiltva, csak az alapértelmezett betűtípus használható.\n"
+#define MSGTR_LIBASS_FunctionCallFailed "[ass] %s sikertelen\n"
+
+// ass_render.c
+#define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] Sem a PlayResX sem a PlayResY nincs definiálva. 384x288 a feltételezett.\n"
+#define MSGTR_LIBASS_PlayResYUndefinedSettingY "[ass] PlayResY nem definiált, beállított érték: %d.\n"
+#define MSGTR_LIBASS_PlayResXUndefinedSettingX "[ass] PlayResX nem definiált, beállított érték: %d.\n"
+#define MSGTR_LIBASS_FT_Init_FreeTypeFailed "[ass] FT_Init_FreeType sikertelen.\n"
+#define MSGTR_LIBASS_Init "[ass] Inicializálás\n"
+#define MSGTR_LIBASS_InitFailed "[ass] Inicializálás sikertelen.\n"
+#define MSGTR_LIBASS_BadCommand "[ass] Hibás parancs: %c%c\n"
+#define MSGTR_LIBASS_ErrorLoadingGlyph  "[ass] Hiba a jel betöltésekor.\n"
+#define MSGTR_LIBASS_FT_Glyph_Stroke_Error "[ass] FT_Glyph_Stroke %d hiba \n"
+#define MSGTR_LIBASS_UnknownEffectType_InternalError "[ass] Ismeretlen effekt típus (belső hiba)\n"
+#define MSGTR_LIBASS_NoStyleFound "[ass] Nem található stílus!\n"
+#define MSGTR_LIBASS_EmptyEvent "[ass] Üres esemény!\n"
+#define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] MAX_GLYPHS elérve: %d esemény, start = %llu, tartam = %llu\n Szöveg = %s\n"
+#define MSGTR_LIBASS_EventHeightHasChanged "[ass] Figyelem! Esemény magassága megváltozott!  \n"
+#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Túl sok egyidejű esemény!\n"
+
+// ass_font.c
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] 0x%X jel nem található, betűtípus újraválasztása ehhez: (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFound "[ass] 0x%X jel nem található a betűtípusban ehhez: (%s, %d, %d)\n"
+#define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Hiba a betűtípus memóriában történő megnyitásakor: %s\n"
