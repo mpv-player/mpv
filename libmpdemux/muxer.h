@@ -98,6 +98,8 @@ typedef struct muxbuf_t {
   unsigned int flags;
 } muxbuf_t;
 
+extern char *force_fourcc;
+
 muxer_t *muxer_new_muxer(int type,stream_t *stream);
 #define muxer_new_stream(muxer,a) muxer->cont_new_stream(muxer,a)
 #define muxer_stream_fix_parameters(muxer, a) muxer->fix_stream_parameters(a)
