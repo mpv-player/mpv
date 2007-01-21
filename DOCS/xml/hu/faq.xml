@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21737 -->
+<!-- synced with r21930 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -78,8 +78,10 @@ mint ahogy <ulink url="http://freshmeat.net/articles/view/889/">mások sem</ulin
 A fordítás leáll hibaüzenettel és a <application>gcc</application> valami
 titokzatos üzenetet ad ki magából, ami a
 <systemitem>internal compiler error</systemitem> vagy
-<systemitem>unable to find a register to spill</systemitem> sorokat
-tartalmazza.
+<systemitem>unable to find a register to spill</systemitem> vagy
+<systemitem>can't find a register in class `GENERAL_REGS'
+while reloading `asm'</systemitem>.</para></question>
+sorokat tartalmazza.
 </para></question>
 <answer><para>
 Belebotlottál egy <application>gcc</application> hibába. Kérjük

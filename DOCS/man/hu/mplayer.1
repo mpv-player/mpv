@@ -1,4 +1,4 @@
-.\" Synced with r21531
+.\" Synced with r21989
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -107,7 +107,7 @@ cue://fájl[:sáv]
 .
 .br
 .B mplayer
-[fájl|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv]://
+[fájl|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
 [felhasználó:jelszó@]URL[:port] [opciók]
 .
 .br
@@ -133,7 +133,7 @@ tivo://host/[lista|llist|fsid]
 .br
 .B mencoder
 [opciók] fájl
-[fájl|URL|\-] [\-o\ fájl]
+[fájl|URL|\-] [\-o\ fájl | file://fájl | smb://[felhasználó:jelszó@]hoszt/fájlút]
 .
 .br
 .B mencoder
@@ -243,7 +243,7 @@ Hangerõ csökkentése/\:növelése.
 Hang elnémítása.
 .IPs "_ (csak MPEG-TS és libavformat mellett)"
 Váltás az elérhetõ videó sávok között.
-.IPs "# (csak MPEG, Matroska, AVI és libavformat mellett)"
+.IPs "# (csak DVD, MPEG, Matroska, AVI és libavformat mellett)"
 Váltás az elérhetõ audió sávok között.
 .IPs "TAB (csak MPEG-TS)"
 Váltás az elérhetõ programok között.
@@ -760,6 +760,17 @@ Automatikusan kapcsolódik a gdb-hez összeomlásnál vagy SIGTRAP-nál.
 A támogatását be kell fordítani a configure \-\-enable-crash-debug kapcsolójával.
 .
 .TP
+.B \-doubleclick-time
+Két egymás utáni gombnyomás dupla-kattintásként történõ értelmezéséhez
+szükséges idõkorlát milliszekundumban (alapértelmezett: 300).
+A 0 érték az ablakozó rendszerre bízza a dupla-kattintás eldöntését
+(csak \-vo directx).
+.br
+.I MEGJEGYZÉS:
+Kicsit más mûködést kapsz attól függõen, hogy a MOUSE_BTN0_DBL
+vagy MOUSE_BTN0\-MOUSE_BTN0_DBL-hez rendelsz-e hozzá funckiót.
+.
+.TP
 .B \-edlout <fájlnév>
 Létrehoz egy új fájlt és az edit decision list (EDL) rekordokat beleírja.
 Lejátszás közben, a felhasználó az 'i' gomb megnyomásával jelölheti meg egy
@@ -1028,10 +1039,10 @@ programot (ha van) fogja használni a kiválaszott audió folyammal.
 .B \-alang <nyelv kód[,nyelv kód,...]> (lásd még \-aid)
 A használni kívánt nyelvek priorítás listája.
 A különbözõ konténer formátumok különbözõ nyelv kódokat alkalmaznak.
-A DVD-k az ISO 639-1 két betûs nyelv kódokat, a Matroska és a NUT az
-ISO 639-2 három betûs nyelv kódokat, míg az az OGM egy egyéni azonosítót
-használ. Az MPlayer kiírja a használható nyelveket ha bõbeszédû (\-v)
-módban fut.
+A DVD-k az ISO 639-1 két betûs nyelv kódokat, a Matroska, az MPEG-TS és
+a NUT az ISO 639-2 három betûs nyelv kódokat, míg az az OGM egy egyéni
+azonosítót használ. Az MPlayer kiírja a használható nyelveket ha
+bõbeszédû (\-v) módban fut.
 .sp 1
 .I PÉLDA:
 .PD 0
@@ -1256,9 +1267,24 @@ várakozással töltött másodpercek maximális száma. Alapértelmezett 30.
 .TP
 .B \-dvd-device <eszköz elérési útja> (csak DVD)
 Megadja a DVD eszközt (alapértelmezett: /dev/\:dvd).
-Megadhatsz egy könyvtárat is, ami egy elõzõleg DVD-rõl (pl. vobcopy-val) lemásolt
-fájlokat tartalmaz. Vedd figyelembe, hogy a \-dumpstream használata általában
-jobb megoldás a DVD sávok másolásához (lásd a példákat).
+Megadhatsz egy könyvtárat is, ami egy elõzõleg DVD-rõl (pl. vobcopy-val)
+lemásolt fájlokat tartalmaz. Vedd figyelembe, hogy a \-dumpstream
+használata általában jobb megoldás a DVD sávok másolásához
+(lásd a példákat).
+.
+.TP
+.B \-dvd-speed <együttható vagy sebesség KB/s-ben> (csak DVD)
+Megpróbálja korlátozni a DVD sebességet (alapértelmezett: 0, nincs változás).
+A DVD alap sebessége 1350KB/s körül van, így egy 8x-os meghajtó akár
+10800KB/s-mal is képes olvasni.
+Az alacsonyabb sebesség halkabbá teszi a meghajtót, DVD-k nézéséhez a
+2700KB/s-os sebesség megfelelõen halk és elég gyors.
+Az MPlayer visszaállítja a meghajtó alapértelmezett sebességét kilépéskor.
+A 100-nál kisebb értékek az 1350KB/s többszörösét jelentik, pl.\& \-dvd-speed 8
+10800KB/s-et választ ki.
+.br
+.I MEGJEGYZÉS:
+Írási joggal kell rendelkezned a DVD eszközre a sebesség megváltoztatásához.
 .
 .TP
 .B \-dvdangle <szög ID> (csak DVD)
@@ -1920,10 +1946,15 @@ VOB stream-ekbõl a felirat stream kimentése.
 Lásd még a \-dump*sub és \-vobsubout* opciókat is.
 .
 .TP
-.B \-embeddedfonts (csak FreeType)
-Engedélyezi a matroska beágyazott betûinek kicsomagolását.
+.B \-(no)embeddedfonts (csak FreeType)
+Engedélyezi a matroska beágyazott betûinek kicsomagolását (alapértelmezett: kikapcsolva).
 Ezek a betûtípusok használhatóak az SSA/ASS feliratok
 rendereléséhez (-ass kapcsoló).
+A betûtípus fájlok a ~/.mplayer/fonts könyvtárban lesznek létrehozva.
+.br
+.I MEGJEGYZÉS:
+2.4.2 vagy újabb FontConfig esetén a beágyazott betûtípusok közvetlenül a memóriából
+kerülnek megnyitásra és ez az opció alapértelmezésben engedélyezett.
 .
 .TP
 .B \-ffactor <szám>
@@ -2114,7 +2145,7 @@ A felirat demuxer típusát adja meg a \-subfile opcióhoz.
 A név elé írt '+' jellel kényszerítheted, így elmarad pár ellenõrzés!
 A demuxer nevét kell megadni a \-sub-demuxer help listának megfelelõen.
 Kompatibilítási okokból elfogadja a demuxer ID-t is, ahogy
-az a libmpdemux/\:demuxer.h fájlban van.
+az a subreader.h fájlban van.
 .
 .TP
 .B \-sub-fuzziness <mód>
@@ -4074,11 +4105,12 @@ Hibatûrési stratégia beállítása.
 .br
 4: nagyon agresszív
 .REss
-.IPs "fast (csak MPEG-2)"
+.IPs "fast (csak MPEG-2, MPEG-4 és H.264)"
 Optimalizálás engedélyezése, ami nem felel meg a specifikációnak és esetlegesen
-hibát okozhat, mint például az egyszerûbb dekvantizáció, az alapértelmezett
-kvantálási mátrix feltételezett használata, YUV 4:2:0 feltételezése és még néhány
-ellenõrzés kihagyása a hibás bitfolyamok megtalálására.
+hibát okozhat, mint például az egyszerûbb dekvantizáció, egyszerûbb mozgás
+kompenzáció, az alapértelmezett kvantálási mátrix feltételezett használata,
+YUV 4:2:0 feltételezése és még néhány ellenõrzés kihagyása a hibás bitfolyamok
+megtalálására.
 .IPs "gray\ "
 Csak fekete-fehér dekódolás (egy kicsit gyorsabb, mint a színes)
 .IPs "idct=<0\-99> (lásd \-lavcopts)"
@@ -5601,23 +5633,25 @@ véletlen zajok összekeverése egy (félig) szabályos mintával
 .PD 1
 .
 .TP
-.B denoise3d[=luma:chroma:idõ]
+.B denoise3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp
 Ez a szûrõ csökkenti a kép zaját, simább képeket állít elõ és a
 mozdulatlan képekbõl tényleg mozdulatlanokat csinál (Ez növeli a
 tömöríthetõséget.).
 .PD 0
 .RSs
-.IPs <luma>
+.IPs <luma_spatial>
 térbeli luma erõsítés (alapértelmezett: 4)
-.IPs <chroma>
+.IPs <chroma_spatial>
 térbeli chroma erõsítés (alapértelmezett: 3)
-.IPs <time>
-ideiglenes erõsítés (alapértelmezett: 6)
+.IPs <luma_tmp>
+idõbeli luma erõsítés (alapértelmezett: 6)
+.IPs <chroma_tmp>
+idõbeli chroma erõsítés (alapértelmezett: luma_tmp*chroma_spatial/luma_spatial)
 .RE
 .PD 1
 .
 .TP
-.B hqdn3d[=luma:chroma:idõ]
+.B hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]
 A denoise3d szûrõ nagy precízitású/\:minõségû változata.
 A paraméterek és a használat ugyan olyan.
 .
@@ -7156,13 +7190,13 @@ MPEG-1 videó
 MPEG-2 videó
 .IPs huffyuv
 HuffYUV
-.IPs ffvhuff (lásd még: vstrict)
+.IPs ffvhuff
 nem szabványos 20%-kal kisebb HuffYUV YV12 használattal
 .IPs "asv1\ "
 ASUS Video v1
 .IPs "asv2\ "
 ASUS Video v2
-.IPs "ffv1 (lásd még: vstrict)"
+.IPs "ffv1"
 FFmpeg veszteségmentes videó codec-je
 .IPs "flv\ \ "
 Flash videókban használt Sorenson H.263
@@ -7299,14 +7333,20 @@ iter (iteratív átlapolt blokk, csak snow-ban használják)
 mozgás becslés keresési tartománya (alapértelmezett: 0 (végtelen))
 .
 .TP
-.B mbd=<0\-2>
+.B mbd=<0\-2> (lásd még *cmp, qpel)
 Makroblokk döntési algoritmus (nagyon jó minõségû mód), minden makró
 blokkot elkódol minden módban és kiválasztja a legjobbat.
 Ez lassú, de jobb minõséget és fájl méretet ad.
+Ha az mbd 1-re vagy 2-re van állítva, az mbcmp értéke figyelmen kívül
+marad a makroblokkok összehasonlításakor.
+Ha bármilyen összehasonlító beállítás (precmp, subcmp, cmp, vagy mbcmp)
+értéke nem nulla, egy lassabb, de jobb half-pel mozgás keresés lesz
+használva, függetlenül az mbd beállított értékétõl.
+Ha a qpel be van állítva, egy quarter-pel mozgás keresés fut le.
 .PD 0
 .RSs
 .IPs 0
-mbcmp használata (alapértelmezett).
+Az mbcmp által megadott összehasonlító függvény használata (alapértelmezett).
 .IPs 1
 MB mód kiválasztása, amihez a legkevesebb bit kell (=vhq).
 .IPs 2
@@ -7777,7 +7817,7 @@ dekódolni.
 Engedélyezi a libavcodec specifikus kiterjeszéseket (alapértelmezett).
 .IPs -2
 Kísérleti codec-ek és funkciók engedélyezése, melyek nem biztos, hogy
-lejátszhatóak lesznek a jövõbeli MPlayer verziókkal (snow, ffvhuff, ffv1).
+lejátszhatóak lesznek a jövõbeli MPlayer verziókkal (snow).
 .RE
 .PD 1
 .
@@ -8113,7 +8153,7 @@ Ez csak a nagy bitrátájú kódolásoknál tûnik hasznosnak.
 .TP
 .B mbcmp=<0\-2000>
 Beállítja az összehasonlító függvényt a makroblokk döntéshez, csak mdb=0
-esetén használatos.
+esetén van hatása.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -9578,13 +9618,11 @@ Csak akkor használd ezt a paramétert, ha tudod, hogy mit jelent
 és szükséged van a beállítására.
 .
 .TP
-.B threads=<1\-4>
-Minden kockát szeletekre vág és párhuzamosan kódolja el õket (alapértelmezett: 1).
-Engedélyezi a többszálú dekódolást is, ha a dekóder támogatja (a lavc nem).
-Ez egy kicsit visszaüt a tömörítésben.
-Használatához pthread támogatással lefordított libx264 szükséges; ha nincs,
-akkor ez az opció egy figyelmeztetést ad és engedélyezi a szeletelést, de
-letiltja a többszálúsítást.
+.B threads=<0\-16>
+Gyermek szálak száma párhuzamos kódolásnál több CPU esetén (alapértelmezett: 1).
+Ez nagyon kis mértékben ront a tömörített minõségen.
+A 0 vagy 'auto' az x264-re bízza a CPU-k számának detektálását és
+a szálak megfelelõ számának kiválasztását.
 .
 .TP
 .B (no)global_header
@@ -9725,7 +9763,7 @@ use it if you want to delay video with respect to audio.
 .
 .TP
 .B "drop\ \ \ "
-Ha az init_adelay opcióval együtt használod, a muxer eldobja az
+Ha a vdelay opcióval együtt használod, a muxer eldobja az
 audiónak azt a részét, ami megelõzi a videót.
 .
 .TP
@@ -9754,16 +9792,16 @@ Ez az opció figyelmen kívül lesz hagyva, ha a telecine opcióval használod.
 .B telecine
 Engedélyezi a 3:2-es pulldown soft telecine módot: a muxer úgy trükköz a
 videó folyammal, hogy 30000/1001-en kódoltnak tûnik.
-Csak akkor mûködik MPEG-2 videóval, ha az \-ofps kapcsolóval beállított
-kimeneti frameráta 24000/1001 fps.
+Csak akkor mûködik MPEG-2 videóval ha a kimeneti frameráta 24000/1001 fps,
+szükség esetén konvertálj az \-ofps kapcsolóval.
 Bármelyik más frameráta inkompatibilis ezzel az opcióval.
 .
 .TP
 .B film2pal
 Engedélyezi a FILM-PAL és NTSC-PAL soft telecine módot: a muxer úgy trükköz
 a videó folyammal, hogy 25 fps-en kódoltnak fog tûnni.
-Csak akkor mûködik MPEG-2 videóval, ha az \-ofps kapcsolóval beállított
-kimeneti frameráta 24000/1001 fps.
+Csak akkor mûködik MPEG-2 videóval ha a kimeneti frameráta 24000/1001 fps,
+szükség esetén konvertálj az \-ofps kapcsolóval.
 Bármelyik más frameráta inkompatibilis ezzel az opcióval.
 .
 .TP
@@ -9771,19 +9809,29 @@ Bármelyik más frameráta inkompatibilis ezzel az opcióval.
 Bekapcsolja az önkéntes telecine-lést Donand Graft's DGPulldown kódjának
 felhasználásával.
 Meg kell adnod az eredeti és a kívánt framerátát; a muxer a videó
-folyamot olyan kódolásúnak láttatja, mintha <tele_dest> kocka per másodperccel
-lett volna elkódolva, lecserélve a névleges kimeneti framerátát.
+folyamot olyan kódolásúnak láttatja, mintha a kívánt framerátával lett volna
+elkódolva.
 Csak akkor mûködik az MPEG-2-vel, ha a bementi frameráta kisebb, mint a kimeneti
 és a frameráta növekedése <= 1.5.
-Példa PAL-ból NTSC-be történõ telecine-re: tele_src=25:tele_dest=30000/1001.
+.sp 1
+.RS
+.I PÉLDA:
+.RE
+.PD 0
+.RSs
+.IPs tele_src=25,tele_dest=30000/1001
+PAL-ból NTSC-be történõ telecine
+.RE
+.PD 1
 .
 .TP
-.B vbuf_size=<40\-1024>
+.B vbuf_size=<40\-1194>
 Beállítja a videó dekódoló bufferjének a méretét, kilobájtokban kifejezve.
 Csak akkor add meg, ha a videó folyam bitrátája túl nagy a kiválasztott
 formátumhoz és pontosan tudod, hogy mit csinálsz.
 A túl nagy érték lejátszhatatlan filmet eredményezhet, a lejátszó képességeitõl
 függõen.
+Ha HDTV-be keversz, a 400-as érték megfelelõ.
 .
 .TP
 .B abuf_size=<4\-64>

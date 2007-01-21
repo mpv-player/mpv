@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r21934 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -451,7 +451,7 @@ rontják a minőséget.
 <orderedlist>
 <listitem>
   <para>
-  Az MPEG-típusú tömörítés szintén nagyban függ a frekvencia tartományok
+  Az MPEG-típusú tömörítés nagyban függ a frekvencia tartományok
   transzformálásától is, általában a Diszkrét Koszinusz Transzformációt
   (DCT) használják, ami hasonló a Fourier transzformációhoz. Ez a fajta
   kódolás hatékony a minták és a sima átmenetek átalakításához, de
@@ -945,7 +945,7 @@ eldobni, akkor a videó méretezését kell megfontolnod inkább. Ezt nézzük
 meg a következő példánkban.
 Tulajdonképpen engedélyezheted a <option>cropdetect</option> szűrőnek,
 hogy ezt az egészet megcsinálja helyetted, mivel van egy opcionális
-<option>kerekítési</option> paramétere, ami alapértelmezésként 16.  
+<option>kerekítési</option> paramétere, ami alapértelmezésként 16.
 </para>
 
 <para>
@@ -1098,7 +1098,7 @@ A <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="libra
 itt felsoroltaknál fejlettebb kódolási opciók segítségével lehetséges
 ugyan ilyen minőség elérése 0,18-0,20-as CQ mellett egy 1 CD-s rip
 esetén és 0,24-0,26-ossal 2 CD-s rip-nél.
-Az MPEG-4 ASP codec-eknél, mint pl. az <systemitem class="library">x264</systemitem>,
+Az MPEG-4 AVC codec-eknél, mint pl. az <systemitem class="library">x264</systemitem>,
 használhatsz 0,14-0,16-os CQ tartományt a szabványos kódolási opciókkal
 és lemehetsz akár 0,10-0,12-ig is az
 <link linkend="menc-feat-x264-example-settings"><systemitem class="library">x264</systemitem> fejlett kódolási beállításaival</link>.
@@ -1447,11 +1447,9 @@ a személyes igények és a technikai korlátok határoznak meg.
   melyet a <option>threads</option> opció kapcsol be, használható a
   kódolási sebesség &mdash; átlagban kb. 40-60%-os &mdash; növelésére,
   nagyon csekély vagy semmilyen képromlással.
-  jelleggel vannak javítások a kódolási sebesség átlagos esetben kb.
-  40-60%-os növelésére, csekély képromlás mellett.
   Az <systemitem class="library">x264</systemitem> is tudja a több-szálas
-  kódolást, ami jelenleg 15-30%-kal (a kódolási beállításoktól függően)
-  gyorsítja fel a kódolást míg a PSNR-t kb. 0.05dB-vel csökkenti.
+  kódolást, ami jelenleg CPU magonként 94%-kal gyorsítja fel a kódolást
+  míg a PSNR-t kb. 0.005dB és 0.01dB közötti értékkel csökkenti.
   </para>
 </listitem>
 
@@ -2871,12 +2869,13 @@ hogy nem kell inverz telecine szűrőt használnod, mint pl. a
 <option>pullup</option> vagy a <option>filmdint</option>.
 </para>
 
-<para>
+<para id="menc-feat-dvd-mpeg4-example-crop">
 Következőnek megállapítjuk a megfelelő vágási téglalapot, így használjuk a
 cropdetect szűrőt:
 <screen>mplayer dvd://1 -vf cropdetect</screen>
 Győződj meg róla, hogy egy teljesen kitöltött képkockán állsz (pl. egy világos
-jelenet), ezt fogod látni az <application>MPlayer</application> konzol kimenetén:
+jelenet a nyitó képek és logók után), ezt fogod látni az
+<application>MPlayer</application> konzol kimenetén:
 <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
 Ezután lejátszuk a filmet ezzel a szűrővel a számok ellenérzéséhez:
 <screen>mplayer dvd://1 -vf crop=720:362:0:58</screen>
@@ -2925,13 +2924,13 @@ nagyon részletes, így 2400Kbit-et választunk bitrátának.
 Most már készen vagyunk a két lépéses kódoláshoz. Első lépés:
 <screen>
 mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</replaceable> -ovc lavc \
-    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
+    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:autoaspect:vpass=1 \
     -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2
 </screen>
 A második lépés ugyan ez, csak megadjuk a <option>vpass=2</option>-t:
 <screen>
 mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</replaceable> -ovc lavc \
-    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
+    -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:autoaspect:vpass=2 \
     -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2
 </screen>
 </para>
@@ -2939,7 +2938,7 @@ mencoder dvd://1 -ofps 24000/1001 -oac copy -o <replaceable>Harry_Potter_2.avi</
 <para>
 A <option>v4mv:mbd=2:trell</option> kapcsolók nagyban javítják a minőséget
 a kódolási idő rovására. Nem ajánlott ezen opciók elhagyása, ha a fő cél
-a jó minőség. A <option>cmp=3:subcmp=3:mbcmp=3</option> opciók egy
+a jó minőség. A <option>cmp=3:subcmp=3</option> opciók egy
 összehasonlító függvényt választanak ki, ami jobb minőséget biztosít,
 mint az alapértelmezettek. Ezzel a paraméterrel is kísérletezhetsz (lásd
 a man oldalt a lehetséges értékekért), mivel a különböző függvények
@@ -3625,7 +3624,7 @@ elért bitráta különbségből adódik.
   Általában ez már látható különbség.
   </para>
   <para>
-  A <option>subq=6</option> a leglassabb, legjobb minőséget nyújtó mód.
+  A <option>subq=6</option> lassabb, de jobb minőséget ad elfogadható áron.
   A <option>subq=5</option>-tel összehasonlítva általában 0.1-0.4 dB nyereséget
   jelent a globális PSNR-ben, 25%-100% között változó sebességveszteség árán.
   A <option>subq</option> egyéb értékeitől eltérően a <option>subq=6</option>
@@ -3638,6 +3637,13 @@ elért bitráta különbségből adódik.
   meg, hogy még mindig javasoljuk a <option>bframes</option> értékének
   valamilyen nullától különböző értékre történő állítását (lásd lejjebb).
   </para>
+  <para>
+  <option>subq=7</option> a leglassabb, legjobb minőséget nyújtó mód.
+  A <option>subq=6</option>-tal összehasonlítva általában 0.01-0.05 dB
+  globális PSNR növelést jelent, változó 15%-33%-os sebességveszteség árán.
+  Mivel a kódolási idő vs. minőség arány eléggé rossz, csak akkor ajánlott
+  használni, ha minden egyes bit fontos és a kódolási idő nem számít.
+  </para>  
 </listitem>
 <listitem>
   <para>
@@ -3804,6 +3810,20 @@ elért bitráta különbségből adódik.
   lehet a <option>nob_adapt</option> opció hozzáadása az
   x264encopts-hoz, ha arra számítasz, hogy sötétedések jelentősen
   befolyásolják a videódat.
+  </para>
+</listitem>
+<listitem id="menc-feat-x264-encoding-options-speedvquality-threads">
+  <para>
+  <emphasis role="bold">threads</emphasis>:
+  Ez az opció szálak segítségével párhuzamos kódolást tesz lehetővé több
+  CPU-n. A létrejövő szálak száma kézzel is beállítható, de jobb a
+  <option>threads=auto</option> és rábízni az
+  <systemitem class="library">x264</systemitem>-re a használható CPU-k
+  felderítését és a szálak optimális számának megállapítását.
+  Ha több processzoros géped van, nem árt fontolóra venni ennek a használatát,
+  mivel a CPU magokkal arányosan megnövelheti a kódolási sebességet
+  (kb. 94% CPU magonként), nagyon kicsi minőségromlással (kb. 0.005dB
+  dual processzornál, 0.01dB quad processzoros gépnél).
   </para>
 </listitem>
 </itemizedlist>
@@ -4043,6 +4063,324 @@ Kérlek vedd figyelembe, hogy a forrásanyagodtól, a géped típusától
 </tgroup>
 </informaltable>
 </sect2>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="menc-feat-quicktime-7">
+<title><application>QuickTime</application>-kompatibilis fájlok
+készítése a <application>MEncoder</application> használatával</title>
+
+
+<sect2 id="menc-feat-quicktime-7-why-use-it">
+<title>Miért akarna bárki is <application>QuickTime</application>-kompatibilis fájlokat készíteni?</title>
+
+<para>
+  Több oka is van annak, hogy kívánatos lehet
+  <application>QuickTime</application>-kompatibilis fájlok készítése.
+</para>
+<itemizedlist>
+<listitem><para>
+  Azt szertnéd, hogy minden gép le tudja játszani a kódolásod bármelyik
+  fő platformon (Windows, Mac OS X, Unices &hellip;).
+</para></listitem>
+<listitem><para>
+  A <application>QuickTime</application> több hardveres és szoftveres
+  gyorsítást ki tud használni Mac OS X-en, mint a platform-független
+  lejátszók, mint például az <application>MPlayer</application>
+  vagy a <application>VLC</application>.
+  Ez azt jelenti, hogy a kódolásaid jó eséllyel szebben mennek majd egy
+  régi G4-alapú gépen.
+</para></listitem>
+<listitem><para>
+  A <application>QuickTime</application> 7 támogatja a következő
+  generációs H.264 codec-et, ami sokkal jobb képminőséget biztosít,
+  mint az előző codec generációk (MPEG-2, MPEG-4 &hellip;).
+</para></listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-constraints">
+<title><application>QuickTime</application> 7 korlátok</title>
+
+<para>
+  A <application>QuickTime</application> 7 támogatja a H.264 videót
+  és az AAC audiót, de nem támogatja ezek AVI konténer formátumba
+  történő keverését. Mindamellett használhatod a
+  <application>MEncoder</application>t a videó és az audió kódolásához,
+  és utána egy külső programmal, mint pl. az
+  <application>mp4creator</application> (az
+  <ulink url="http://mpeg4ip.sourceforge.net/">MPEG4IP suite</ulink> része)
+  újrakevered a videó és audió sávokat egy MP4 konténerbe.
+</para>
+
+<para>
+  A <application>QuickTime</application> H.264 támogatása korlátolt,
+  így néhány fejlett funkció nem lesz elérhető.
+  Ha olyan funkciókkal kódolod el a videódat, amiket a
+  <application>QuickTime</application> 7 nem támogat, a
+  <application>QuickTime</application>-alapú lejátszók egy csodás
+  fehér képet fognak mutatni neked a várt videó helyett.
+</para>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">B-frame-k</emphasis>:
+  A <application>QuickTime</application> 7 maximum 1 B-frame-t támogat, pl.
+  <option>-x264encopts bframes=1</option>. Ez azt jelenti, hogy a
+  <option>b_pyramid</option>-nek és a <option>weight_b</option>-nek nem
+  lesz hatása, mivel 1-nél több <option>bframe</option> kell nekik.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Makroblokkok</emphasis>:
+  A <application>QuickTime</application> 7 nem támogatja a 8x8 DCT makroblokkokat.
+  Ez az opció (<option>8x8dct</option>) ki van kapcsolva alapértelmezésben,
+  ezért győződj meg, hogy még véletlenül sem engedélyezed. Ez azt is jelenti,
+  hogy a <option>i8x8</option>-nak nem lesz hatása, mivel ahhoz a
+  <option>8x8dct</option> szükséges.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Méret arány</emphasis>:
+  A <application>QuickTime</application> 7 nem támogatja a SAR (sample
+  aspect ratio) információkat az MPEG-4 fájlokban; feltételezi, hogy a SAR=1.
+  Olvasd el a
+  <link linkend="menc-feat-quicktime-7-scale">méretezés részt</link>
+  a tüneti kezeléshez.
+</para></listitem>
+</itemizedlist>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-crop">
+<title>Vágás</title>
+<para>
+  Tegyük fel, hogy rip-pelni szeretnéd a "Narnia krónikái" frissen vásárolt
+  másolatát. A DVD-d régió 1-es,
+  ami azt jelenti, hogy NTSC. Az alábbi példa működik PAL-ra is,
+  feltéve, hogy elhagyod a <option>-ofps 24000/1001</option>-et és kicsit más
+  <option>crop</option> és <option>scale</option> méreteket adsz meg.
+</para>
+
+<para>
+  Miután lefuttattad az <option>mplayer dvd://1</option>-et, kövesd a
+  <link linkend="menc-feat-telecine">Mit kezdjünk a telecine-nel és az átlapolással
+  NTSC DVD-ken</link> részben leírtakat, és rájössz, hogy ez egy
+  24000/1001 fps-es progresszív videó. Ez kicsit leegyszerűsíti a folyamatot,
+  mivel nem kell inverz telecine szűrőt használnod, mint a
+  <option>pullup</option> vagy deinterlacing szűrőt, mint a
+  <option>yadif</option>.
+</para>
+
+<para>
+  Ezután le kell vágnod a fekete sávokat a videó tetején és alján,
+  ahogy az <link linkend="menc-feat-dvd-mpeg4-example-crop">ebben</link>
+  az előző részben le van írva.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-scale">
+<title>Méretezés</title>
+
+<para>
+  A következő lépés szívszaggató.
+  A <application>QuickTime</application> 7 nem támogatja azon MPEG-4 videókat,
+  melyekben a sample aspect ratio 1-től különböző, így vagy fel kell méretezned
+  (ami rengeteg lemezterületet elvisz) vagy le kell méretezned (ami miatt elveszik
+  a forrás pár részlete) a videót négyzetes pixelekre.
+  Bárhogy is csinálod, ez nagyon nem jó, de nem kerülheted ki, ha
+  <application>QuickTime</application> 7 által lejátszható videót akarsz.
+  A <application>MEncoder</application> végre tudja hajtani a megfelelő fel-
+  illetve leméretezést megfelelően a <option>-vf scale=-10:-1</option> vagy
+  a <option>-vf scale=-1:-10</option> megadásával.
+  Ez a videódat a vágott magasságnak megfelelő szélességűre méretezi,
+  16 legközelebbi többszörösére kerekítve az optimális tömörítéshez.
+  Emlékezz rá, hogy ha vágsz, először vágnod kell, utána méretezni:
+
+  <screen>-vf crop=720:352:0:62,scale=-10:-1</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-avsync">
+<title>A/V szinkron</title>
+
+<para>
+  Mivel egy másik konténerbe keversz, mindig ajánlott a <option>harddup</option>
+  opció használata annak biztosítására, hogy a duplikált kockák a kimeneti
+  videóban is duplikálva lesznek. Ezen opció nélkül a
+  <application>MEncoder</application> egyszerűen csak egy jelet tesz a videó
+  folyamba a képkocka duplikálásának helyére és innentől a kliens szoftveren
+  műlik, hogy kétszer mutatja-e az adott kockát. Sajnos ez a "szoft duplikálás"
+  nem éli túl az újrakeverést, így az audió lassan elveszíti a szinkront a videóval.
+</para>
+
+<para>
+  A végleges szűrőlánc így néz ki:
+  <screen>-vf crop=720:352:0:62,scale=-10:-1,harddup</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-bitrate">
+<title>Bitráta</title>
+
+<para>
+  Mint mindig, a bitráta megválasztása a forrás technikai tulajdonságaitól függ,
+  ahogy az
+  <link linkend="menc-feat-dvd-mpeg4-resolution-bitrate">itt</link> le van írva,
+  valamint az egyéni ízlésedttől is.
+  Ebben a filmben sok akció van nagy részletességgel, de a H.264 videó sokkal
+  kisebb bitrátán is jobban néz ki, mint az XviD vagy más MPEG-4 codec-ek.
+  Hosszas kísérletezés után ezen leírás szerzője úgy döntött, hogy 900kbps-en
+  kódolja el ezt a filmet és úgy hiszi, hogy nagyon jól néz ki.
+  Csökkentheted a bitrátát, ha több helyet kell megspórolnod vagy növelheted,
+  ha javítanod kell a minőséget.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-example">
+<title>Kódolási példa</title>
+
+<para>
+  Készen állsz a videó elkódolására. Mivel érdekel a minőség, természetesen
+  két-lépéses kódolást futtatsz le. Hogy megspóroljunk némi kódolási időt,
+  megadhatod a <option>turbo</option> opciót az első lépésben; ez lecsökkenti
+  a <option>subq</option>-t és a <option>frameref</option>-et 1-re. Némi
+  lemezterület megspórolása érdekében használhatod az
+  <option>ss</option> opciót a videó első pár másodpercének levágásához.
+  (Úgy tűnik, hogy a konkrét film 32 másodpercnyi stáblistát és logót
+  tartalmaz.)  A <option>bframes</option> lehet 0 vagy 1.
+  A többi opció a <link
+  linkend="menc-feat-x264-encoding-options-speedvquality">Kódolás az
+  <systemitem class="library">x264</systemitem> codec-kel</link> részben
+  és a man oldalon van leírva.
+
+  <screen>mencoder dvd://1 -o /dev/null -ss 32 -ovc x264 \
+-x264encopts pass=1:turbo:bitrate=900:bframes=1:\
+me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
+-vf crop=720:352:0:62,scale=-10:-1,harddup \
+-oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-ofps 24000/1001</screen>
+
+  Ha több processzoros géped van, ne hagy ki a kódolás drasztikus módon történő
+  gyorsításának a lehetőségét, melyet az
+  <link linkend="menc-feat-x264-encoding-options-speedvquality-threads">
+  <systemitem class="library">x264</systemitem> több-processzoros módja</link>
+  nyújt a <option>threads=auto</option> <option>x264encopts</option>-ban
+  történő megadásával a parancssorban.
+</para>
+
+<para>
+  A második lépés ugyan ez, kivéve, hogy meg kell adni a kimeneti fájlt és
+  a <option>pass=2</option>-őt.
+
+  <screen>mencoder dvd://1 <emphasis role="bold">-o narnia.avi</emphasis> -ss 32 -ovc x264 \
+-x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
+me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
+-vf crop=720:352:0:62,scale=-10:-1,harddup \
+-oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-ofps 24000/1001</screen>
+</para>
+
+<para>
+  Az eredmény AVI tökéletesen lejátszható az
+  <application>MPlayer</application>-rel, de természetesen a
+  <application>QuickTime</application> nem játsza le, mivel nem támogatja
+  az AVI-ba kevert H.264-et.
+  Ezért a következő lépés a videó MP4 konténerbe történő keverése.
+</para>
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-remux">
+<title>Újrakeverés MP4-ként</title>
+
+<para>
+  Több mód is van az AVI MP4-be történő újrakeverésére. Használhatod az
+  <application>mp4creator</application>-t, ami az
+  <ulink url="http://mpeg4ip.sourceforge.net/">MPEG4IP suite</ulink> része.
+</para>
+
+<para>
+  Először az AVI-ból különálló audió és videó folyamokat kell készíteni az
+  <application>MPlayer</application>rel.
+
+  <screen>mplayer narnia.avi -dumpaudio -dumpfile narnia.aac
+mplayer narnia.avi -dumpvideo -dumpfile narnia.h264</screen>
+
+  A fájlnevek fontosak; az <application>mp4creator</application>
+  <systemitem>.aac</systemitem> kiterjesztésű AAC audió folyamot és
+  <systemitem>.h264</systemitem> kiterjesztésű H.264 videó folyamot vár.
+</para>
+
+<para>
+  Ezután használd az <application>mp4creator</application>-t egy új MP4
+  fájl létrehozásához az audió és videó folyamból.
+
+  <screen>mp4creator -create=narnia.aac narnia.mp4
+mp4creator -create=narnia.h264 -rate=23.976 narnia.mp4</screen>
+
+  A kódolási lépéstől eltérően itt a framerátát decimálisként
+  (23.976) kell megadni, nem törtként (24000/1001).
+</para>
+
+<para>
+  Ennek a <systemitem>narnia.mp4</systemitem> fájlnak már bármilyen
+  <application>QuickTime</application> 7 alkalmazással lejátszhatónak kell
+  lennie, mint például a <application>QuickTime Player</application> vagy
+  az <application>iTunes</application>. Ha a videót böngészőben szeretnéd
+  megnézni a <application>QuickTime</application> plugin-nel, utasítanod kell
+  a <application>QuickTime</application> plugin-t, hogy kezdje meg a lejátszást,
+  miközben még tart a letöltés. Az <application>mp4creator</application>
+  bele tudja tenni a videóba az ehhez szükséges utasító sávokat:
+
+  <screen>mp4creator -hint=1 narnia.mp4
+mp4creator -hint=2 narnia.mp4
+mp4creator -optimize narnia.mp4</screen>
+
+  Ellenőrizheted a végső eredményt, hogy meggyőződj róla, hogy az utasító
+  sávok rendben elkészültek:
+
+  <screen>mp4creator -list narnia.mp4</screen>
+
+  Látnod kell a sávok listáját: 1 audió, 1 videó és 2 hint sáv.
+
+<screen>Track   Type    Info
+1       audio   MPEG-4 AAC LC, 8548.714 secs, 190 kbps, 48000 Hz
+2       video   H264 Main@5.1, 8549.132 secs, 899 kbps, 848x352 @ 23.976001 fps
+3       hint    Payload mpeg4-generic for track 1
+4       hint    Payload H264 for track 2
+</screen>
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-quicktime-7-metadata">
+<title>Metadata tag-ek hozzáadása</title>
+
+<para>
+  Ha tag-eket akarsz hozzáfűzni a videódhoz, amiket az iTunes megjelnít, használhatod az
+  <ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>-t.
+  
+  <screen>AtomicParsley narnia.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
+
+  A <option>--metaEnema</option> opció eltávolít minden meglévő metadata-t
+  (<application>mp4creator</application> beszúrja a saját nevét az
+  "encoding tool" tag-be), a <option>--freefree</option> pedig visszaszerzi
+  a törölt metadata által elfoglalt helyet.
+  A <option>--stik</option> opció beállítja a videó típusát (mint pl. Movie
+  vagy TV Show), aminek a segítségével az iTunes csoportosítani tudja a fájlokat.
+  A <option>--overWrite</option> opció felülírja az eredeti fájlt;
+  ennélkül az <application>AtomicParsley</application> egy új, automatikusan
+  elnevezett fájlt hoz létre ugyan abban a könyvtárban és érintetlenül hagyja
+  az eredeti fájlt.
+</para>
+
+</sect2>
+
 </sect1>
 
 
@@ -4478,12 +4816,12 @@ használják.
 2.35:1 vagy "Cinemascope" NTSC
 <screen>-vf scale=720:368,expand=720:480 -lavcopts aspect=16/9</screen>
 A helyes méretarány kiszámításához használd a 854/2.35 = 368-as kibővített
-NTSC szélességet.  
+NTSC szélességet.
 </para>
 
 <para>
 2.35:1 vagy "Cinemascope" PAL
-<screen>-vf scale="720:432,expand=720:576 -lavcopts aspect=16/9</screen>
+<screen>-vf scale=720:432,expand=720:576 -lavcopts aspect=16/9</screen>
 A helyes méretarány kiszámításához használd a 1024/2.35 = 432-es kibővített
 PAL szélességet.
 </para>
@@ -4616,7 +4954,7 @@ vagy DVD kompatibilis film készítésekor:
   órányi videód lehet egy egyrétegű DVD-n.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">vtrict</emphasis>:
+  <emphasis role="bold">vstrict</emphasis>:
   <option>vstrict</option>=0 ajánlott DVD-k készítéséhez.
   Ezen opció nélkül a <application>MEncoder</application> egy olyan
   folyamot készít, amit néhány asztali lejátszó nem tud helyesen
