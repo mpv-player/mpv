@@ -7591,6 +7591,7 @@ CONFIG_FAAC=$_lavc_faac
 CONFIG_MP3LAME=$_lavc_mp3lame
 CONFIG_XVID=$_lavc_xvid
 CONFIG_X264=$_lavc_x264
+CONFIG_ZLIB=$_zlib
 CONFIG_GPL=yes
 CONFIG_ENCODERS=$_mencoder
 CONFIG_MUXERS=$_mencoder
