@@ -917,6 +917,7 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
     mp_msg(MSGT_INPUT,MSGL_WARN,"                         \n");
     return NULL;
   }
+  if (strcmp(cmd, "ignore") == 0) return NULL;
   ret =  mp_input_parse_cmd(cmd);
   if(!ret) {
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrInvalidCommandForKey,mp_input_get_key_name(key_down[0]));
