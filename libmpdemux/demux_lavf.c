@@ -86,7 +86,7 @@ const AVCodecTag mp_wav_tags[] = {
     { 0, 0 },
 };
 
-const CodecTag mp_bmp_tags[] = {
+const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
     { CODEC_ID_FLIC,              MKTAG('F', 'L', 'I', 'C')},
     { CODEC_ID_IDCIN,             MKTAG('I', 'D', 'C', 'I')},
