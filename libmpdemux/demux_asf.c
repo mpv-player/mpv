@@ -360,7 +360,10 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
               unsigned int time2=0;
 	      int keyframe=0;
 
-              if(p>=p_end) mp_msg(MSGT_DEMUX,MSGL_V,"Warning! invalid packet 1, sig11 coming soon...\n");
+              if(p>=p_end) {
+                mp_msg(MSGT_DEMUX,MSGL_V,"Warning! invalid packet 1, aborting parsing...\n");
+                break;
+              }
 
               if( mp_msg_test(MSGT_DEMUX,MSGL_DBG2) ){
                 int i;
