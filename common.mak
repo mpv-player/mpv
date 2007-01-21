@@ -33,10 +33,6 @@ $(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
 %.o: %.S
 	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
 
-# BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
-%.o: %.cpp
-	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
-
 %: %.o $(LIB)
 	$(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
 
@@ -69,6 +65,7 @@ install-lib-shared: $(SLIBNAME)
 		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME_WITH_MAJOR)
 	cd "$(shlibdir)" && \
 		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME)
+	$(SLIB_INSTALL_EXTRA_CMD)
 
 install-lib-static: $(LIB)
 	install -d "$(libdir)"
