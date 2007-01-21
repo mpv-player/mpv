@@ -420,6 +420,8 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
         sh_video->bih=calloc((len<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):len,1);
         memcpy(sh_video->bih,&buffer[4+4+1+2],len);
 	le2me_BITMAPINFOHEADER(sh_video->bih);
+	if (sh_video->bih->biSize > len && sh_video->bih->biSize > sizeof(BITMAPINFOHEADER))
+		sh_video->bih->biSize = len;
         if (sh_video->bih->biCompression == mmioFOURCC('D', 'V', 'R', ' ')) {
           //mp_msg(MSGT_DEMUXER, MSGL_WARN, MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat);
           //sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
