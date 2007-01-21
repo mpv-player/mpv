@@ -24,7 +24,7 @@
 #endif
 #include "libavformat/riff.h"
 
-extern const CodecTag mp_wav_tags[];
+extern const AVCodecTag mp_wav_tags[];
 
 extern char *info_name;
 extern char *info_artist;

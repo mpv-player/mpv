@@ -67,7 +67,7 @@ extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 int64_t ff_gcd(int64_t a, int64_t b);
 
-const CodecTag mp_wav_tags[] = {
+const AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
     { CODEC_ID_ADPCM_EA,          MKTAG('A', 'D', 'E', 'A')},
     { CODEC_ID_ADPCM_IMA_WS,      MKTAG('A', 'I', 'W', 'S')},
