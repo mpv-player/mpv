@@ -36,7 +36,7 @@ static int compressed_frame_size = 0;
 #include "libavformat/avformat.h"
 #include "libavformat/riff.h"
 #endif
-extern const CodecTag mp_wav_tags[];
+extern const AVCodecTag mp_wav_tags[];
 #endif
 
 static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
