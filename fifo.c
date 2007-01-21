@@ -79,6 +79,8 @@ void mplayer_put_key(int code) {
       (code & ~MP_KEY_DOWN) >= MOUSE_BTN0_DBL &&
       (code & ~MP_KEY_DOWN) <= MOUSE_BTN9_DBL)
     return;
+  // ignore mouse wheel down events since they can easily get stuck
+  if (code < (MOUSE_BTN3 | MP_KEY_DOWN) || code > (MOUSE_BTN4 | MP_KEY_DOWN))
   mplayer_put_key_internal(code);
   if (code & MP_KEY_DOWN) {
     code &= ~MP_KEY_DOWN;

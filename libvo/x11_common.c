@@ -1106,12 +1106,6 @@ int vo_x11_check_events(Display * mydisplay)
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
-                // Ignore mouse wheel press event.
-                if (Event.xbutton.button > 3)
-                {
-                    mplayer_put_key(MOUSE_BTN0 + Event.xbutton.button - 1);
-                    break;
-                }
 #ifdef HAVE_NEW_GUI
                 // Ignore mouse button 1-3 under GUI.
                 if (use_gui && (Event.xbutton.button >= 1)
