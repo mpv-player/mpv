@@ -67,7 +67,7 @@ extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 int64_t ff_gcd(int64_t a, int64_t b);
 
-const AVCodecTag mp_wav_tags[] = {
+static const AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
     { CODEC_ID_ADPCM_EA,          MKTAG('A', 'D', 'E', 'A')},
     { CODEC_ID_ADPCM_IMA_WS,      MKTAG('A', 'I', 'W', 'S')},
@@ -86,7 +86,9 @@ const AVCodecTag mp_wav_tags[] = {
     { 0, 0 },
 };
 
-const AVCodecTag mp_bmp_tags[] = {
+const struct AVCodecTag *mp_wav_taglists[] = {codec_wav_tags, mp_wav_tags, 0};
+
+static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
     { CODEC_ID_FLIC,              MKTAG('F', 'L', 'I', 'C')},
     { CODEC_ID_IDCIN,             MKTAG('I', 'D', 'C', 'I')},
@@ -98,6 +100,8 @@ const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_XAN_WC3,           MKTAG('W', 'C', '3', 'V')},
     { 0, 0 },
 };
+
+const struct AVCodecTag *mp_bmp_taglists[] = {codec_bmp_tags, mp_bmp_tags, 0};
 
 static int mp_open(URLContext *h, const char *filename, int flags){
     return 0;
@@ -252,9 +256,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             priv->astreams[priv->audio_streams] = i;
             priv->audio_streams++;
             if(!codec->codec_tag)
-                codec->codec_tag= codec_get_wav_tag(codec->codec_id);
-            if(!codec->codec_tag)
-                codec->codec_tag= codec_get_tag(mp_wav_tags, codec->codec_id);
+                codec->codec_tag= av_codec_get_tag(mp_wav_taglists, codec->codec_id);
             wf->wFormatTag= codec->codec_tag;
             wf->nChannels= codec->channels;
             wf->nSamplesPerSec= codec->sample_rate;
@@ -326,9 +328,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
 
             if(!codec->codec_tag)
-                codec->codec_tag= codec_get_bmp_tag(codec->codec_id);
-            if(!codec->codec_tag)
-                codec->codec_tag= codec_get_tag(mp_bmp_tags, codec->codec_id);
+                codec->codec_tag= av_codec_get_tag(mp_bmp_taglists, codec->codec_id);
             bih->biSize= sizeof(BITMAPINFOHEADER) + codec->extradata_size;
             bih->biWidth= codec->width;
             bih->biHeight= codec->height;

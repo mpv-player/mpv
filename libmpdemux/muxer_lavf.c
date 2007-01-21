@@ -22,9 +22,9 @@
 #else
 #include "avformat.h"
 #endif
-#include "libavformat/riff.h"
 
-extern const AVCodecTag mp_wav_tags[];
+extern const struct AVCodecTag *mp_wav_taglists[];
+extern const struct AVCodecTag *mp_bmp_taglists[];
 
 extern char *info_name;
 extern char *info_artist;
@@ -207,9 +207,7 @@ static void fix_parameters(muxer_stream_t *stream)
 
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
-		ctx->codec_id = codec_get_wav_id(stream->wf->wFormatTag); 
-                if(!ctx->codec_id)
-                        ctx->codec_id = codec_get_id(mp_wav_tags, stream->wf->wFormatTag);
+		ctx->codec_id = av_codec_get_id(mp_wav_taglists, stream->wf->wFormatTag); 
 #if 0 //breaks aac in mov at least
 		ctx->codec_tag = codec_get_wav_tag(ctx->codec_id);
 #endif
@@ -238,7 +236,7 @@ static void fix_parameters(muxer_stream_t *stream)
 	}
 	else if(stream->type == MUXER_TYPE_VIDEO)
 	{
-		ctx->codec_id = codec_get_bmp_id(stream->bih->biCompression);
+		ctx->codec_id = av_codec_get_id(mp_bmp_taglists, stream->bih->biCompression);
                 if(ctx->codec_id <= 0 || force_fourcc)
                     ctx->codec_tag= stream->bih->biCompression;
 		mp_msg(MSGT_MUXER, MSGL_INFO, "VIDEO CODEC ID: %d\n", ctx->codec_id);
