@@ -190,6 +190,7 @@ static void new_audio_stream(demuxer_t *demux, int aid){
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
   int d;
   int len;
+  int set_pts=0; // !=0 iff pts has been set to a proper value
   unsigned char c=0;
   unsigned long long pts=0;
   unsigned long long dts=0;
@@ -241,12 +242,14 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   // Read System-1 stream timestamps:
   if((c>>4)==2){
     pts=read_mpeg_timestamp(demux->stream,c);
+    set_pts=1;
     len-=4;
   } else
   if((c>>4)==3){
     pts=read_mpeg_timestamp(demux->stream,c);
     c=stream_read_char(demux->stream);
     if((c>>4)!=1) pts=0; //printf("{ERROR4}");
+    else set_pts = 1;
     dts=read_mpeg_timestamp(demux->stream,c);
     len-=4+1+4;
   } else
@@ -264,11 +267,13 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     if(pts_flags==2 && hdrlen>=5){
       c=stream_read_char(demux->stream);
       pts=read_mpeg_timestamp(demux->stream,c);
+      set_pts=1;
       len-=5;hdrlen-=5;
     } else
     if(pts_flags==3 && hdrlen>=10){
       c=stream_read_char(demux->stream);
       pts=read_mpeg_timestamp(demux->stream,c);
+      set_pts=1;
       c=stream_read_char(demux->stream);
       dts=read_mpeg_timestamp(demux->stream,c);
       len-=10;hdrlen-=10;
@@ -467,7 +472,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     if(ds == demux->video && stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&stream_pts)!=STREAM_UNSUPORTED)
       dp->stream_pts = stream_pts;
     ds_add_packet(ds,dp);
-    if (demux->priv) ((mpg_demuxer_t*)demux->priv)->last_pts = pts/90000.0f;
+    if (demux->priv && set_pts) ((mpg_demuxer_t*)demux->priv)->last_pts = pts/90000.0f;
 //    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
     return 1;
   }
