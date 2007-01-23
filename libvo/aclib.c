@@ -8,6 +8,7 @@
   runtime cpu detection by michael niedermayer (michaelni@gmx.at) is under GPL
 */
 #include <stddef.h>
+#include <string.h>
 #include "cpudetect.h"
 #include "fastmemcpy.h"
 #undef memcpy
