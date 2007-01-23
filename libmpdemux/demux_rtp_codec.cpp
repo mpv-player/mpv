@@ -4,6 +4,7 @@
 #include "demux_rtp_internal.h"
 extern "C" {
 #include <limits.h>
+#include <math.h>
 #include "stheader.h"
 }
 
@@ -247,19 +248,24 @@ static void needVideoFrameRate(demuxer_t* demuxer,
   unsigned char* packetData; unsigned packetDataLen;
   float lastPTS = 0.0, curPTS;
   unsigned const maxNumFramesToWaitFor = 300;
+  int lastfps = 0;
   for (unsigned i = 0; i < maxNumFramesToWaitFor; ++i) {
     if (!awaitRTPPacket(demuxer, d_video, packetData, packetDataLen, curPTS)) {
       break;
     }
 
-    if (curPTS > lastPTS && lastPTS != 0.0) {
+    if (curPTS != lastPTS && lastPTS != 0.0) {
       // Use the difference between these two "pts"s to guess the frame rate.
       // (should really check that there were no missing frames inbetween)#####
       // Guess the frame rate as an integer.  If it's not, use "-fps" instead.
-      fps = (int)(1/(curPTS-lastPTS) + 0.5); // rounding
+      fps = (int)(1/fabs(curPTS-lastPTS) + 0.5); // rounding
+        if (fps == lastfps) {
       fprintf(stderr, "demux_rtp: Guessed the video frame rate as %d frames-per-second.\n\t(If this is wrong, use the \"-fps <frame-rate>\" option instead.)\n", fps);
       sh_video->fps = fps;
+      sh_video->frametime=1.0f/fps;
       return;
+        }
+      if (fps>lastfps) lastfps = fps;
     }
     lastPTS = curPTS;
   }
