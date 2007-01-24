@@ -111,6 +111,7 @@ typedef struct {
    /**
     * Used to reorder audio data
     */
+    unsigned int intl_id[MAX_STREAMS]; ///< interleaver id, per stream
     int sub_packet_size[MAX_STREAMS]; ///< sub packet size, per stream
     int sub_packet_h[MAX_STREAMS]; ///< number of coded frames per block
     int coded_framesize[MAX_STREAMS]; ///< coded frame size, per stream
@@ -697,22 +698,20 @@ got_audio:
 		free(sub_packet_lengths);
 		return 1;
 	    }
-        if ((((sh_audio_t*)ds->sh)->format == mmioFOURCC('2', '8', '_', '8')) ||
-            (((sh_audio_t*)ds->sh)->format == mmioFOURCC('c', 'o', 'o', 'k')) ||
-            (((sh_audio_t*)ds->sh)->format == mmioFOURCC('a', 't', 'r', 'c')) ||
-            (((sh_audio_t*)ds->sh)->format == mmioFOURCC('s', 'i', 'p', 'r'))) {
+        if ((priv->intl_id[stream_id] == mmioFOURCC('I', 'n', 't', '4')) ||
+            (priv->intl_id[stream_id] == mmioFOURCC('g', 'e', 'n', 'r')) ||
+            (priv->intl_id[stream_id] == mmioFOURCC('s', 'i', 'p', 'r'))) {
             sps = priv->sub_packet_size[stream_id];
             sph = priv->sub_packet_h[stream_id];
             cfs = priv->coded_framesize[stream_id];
             w = priv->audiopk_size[stream_id];
             spc = priv->sub_packet_cnt;
-            switch (((sh_audio_t*)ds->sh)->format) {
-                case mmioFOURCC('2', '8', '_', '8'):
+            switch (priv->intl_id[stream_id]) {
+                case mmioFOURCC('I', 'n', 't', '4'):
                     for (x = 0; x < sph / 2; x++)
                         stream_read(demuxer->stream, priv->audio_buf + x * 2 * w + spc * cfs, cfs);
                     break;
-                case mmioFOURCC('c', 'o', 'o', 'k'):
-                case mmioFOURCC('a', 't', 'r', 'c'):
+                case mmioFOURCC('g', 'e', 'n', 'r'):
                     for (x = 0; x < w / sps; x++)
                         stream_read(demuxer->stream, priv->audio_buf + sps * (sph * x + ((sph + 1) / 2) * (spc & 1) +
                                     (spc >> 1)), sps);
@@ -768,7 +767,7 @@ got_audio:
                     ds_add_packet(ds, dp);
                 }
             }
-        } else { // Not a codec that require reordering
+        } else { // No interleaving
             dp = new_demux_packet(len);
             stream_read(demuxer->stream, dp->buffer, len);
 
@@ -1355,15 +1354,17 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 
 		    if (version == 5)
 		    {
-			stream_skip(demuxer->stream, 4);  // "genr"
+			stream_read(demuxer->stream, buf, 4);  // interleaver id
+			priv->intl_id[stream_id] = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 			stream_read(demuxer->stream, buf, 4); // fourcc
 			buf[4] = 0;
 		    }
 		    else
 		    {		
-			/* Desc #1 */
-			skip_str(1, demuxer);
-			/* Desc #2 */
+			/* Interleaver id */
+			get_str(1, demuxer, buf, sizeof(buf));
+			priv->intl_id[stream_id] = MKTAG(buf[0], buf[1], buf[2], buf[3]);
+			/* Codec FourCC */
 			get_str(1, demuxer, buf, sizeof(buf));
 		    }
                    }
@@ -1391,10 +1392,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 
 			case MKTAG('2', '8', '_', '8'):
 			    sh->wf->nBlockAlign = coded_frame_size;
-			    priv->sub_packet_size[stream_id] = sub_packet_size;
-			    priv->sub_packet_h[stream_id] = sub_packet_h;
-			    priv->coded_framesize[stream_id] = coded_frame_size;
-			    priv->audiopk_size[stream_id] = frame_size;
 			    break;
 
 			case MKTAG('s', 'i', 'p', 'r'):
@@ -1413,16 +1410,11 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			    sh->wf->cbSize = codecdata_length;
 			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
 			    stream_read(demuxer->stream, ((char*)(sh->wf+1)), codecdata_length); // extras
-                if ((sh->format == MKTAG('a', 't', 'r', 'c')) ||
-                    (sh->format == MKTAG('c', 'o', 'o', 'k')))
+                if (priv->intl_id[stream_id] == MKTAG('g', 'e', 'n', 'r'))
     			    sh->wf->nBlockAlign = sub_packet_size;
     			else
     			    sh->wf->nBlockAlign = coded_frame_size;
 
-			    priv->sub_packet_size[stream_id] = sub_packet_size;
-			    priv->sub_packet_h[stream_id] = sub_packet_h;
-			    priv->coded_framesize[stream_id] = coded_frame_size;
-			    priv->audiopk_size[stream_id] = frame_size;
 			    break;
 
 			case MKTAG('r', 'a', 'a', 'c'):
@@ -1445,6 +1437,12 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			default:
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
 		    }
+
+		    // Interleaver setup
+		    priv->sub_packet_size[stream_id] = sub_packet_size;
+		    priv->sub_packet_h[stream_id] = sub_packet_h;
+		    priv->coded_framesize[stream_id] = coded_frame_size;
+		    priv->audiopk_size[stream_id] = frame_size;
 
 		    sh->wf->wFormatTag = sh->format;
 		    
