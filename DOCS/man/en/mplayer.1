@@ -3594,16 +3594,14 @@ Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
 .
 .TP
 .B 3dfx (Linux only)
-3dfx specific video output driver.
-This driver directly uses the 3dfx hardware on top of X11.
+3dfx-specific video output driver that directly uses
+the hardware on top of X11.
 Only 16 bpp are supported.
-FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
 .
 .TP
 .B tdfxfb (Linux only)
-This driver employs the tdfx framebuffer driver to play movies with
+This driver employs the tdfxfb framebuffer driver to play movies with
 YUV acceleration on 3dfx cards.
-FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
 .PD 0
 .RSs
 .IPs <device>
@@ -3613,9 +3611,8 @@ Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
 .
 .TP
 .B tdfx_vid (Linux only)
-3dfx specific video output driver.
-This driver directly uses the tdfx_vid kernel module.
-FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
+3dfx-specific video output driver that works in combination with
+the tdfx_vid kernel module.
 .PD 0
 .RSs
 .IPs <device>
