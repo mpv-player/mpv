@@ -5911,11 +5911,11 @@ if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
   if echo $_libavencoders | grep -q faac ; then
     _lavc_faac=yes
-    _def_lavc_faac="#define CONFIG_FAAC 1"
+    _def_lavc_faac="#define CONFIG_LIBFAAC 1"
     _libs_mplayer="$_libs_mplayer $_ld_faac"
   else
     _lavc_faac=no
-    _def_lavc_faac="#undef CONFIG_FAAC"
+    _def_lavc_faac="#undef CONFIG_LIBFAAC"
   fi
   _codecmodules="faac $_codecmodules"
 else
@@ -6616,11 +6616,11 @@ EOF
     cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
     if echo $_libavencoders | grep -q mp3lame ; then
       _lavc_mp3lame=yes
-      _def_lavc_mp3lame="#define CONFIG_MP3LAME 1"
+      _def_lavc_mp3lame="#define CONFIG_LIBMP3LAME 1"
       _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
     else
       _lavc_mp3lame=no
-      _def_lavc_mp3lame="#undef CONFIG_MP3LAME"
+      _def_lavc_mp3lame="#undef CONFIG_LIBMP3LAME"
     fi
   else
     _def_mp3lame='#undef HAVE_MP3LAME'
@@ -7623,7 +7623,7 @@ CONFIG_AMR_WB=$_amr_wb
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-CONFIG_FAAC=$_lavc_faac
+CONFIG_LIBFAAC=$_lavc_faac
 CONFIG_LIBMP3LAME=$_lavc_mp3lame
 CONFIG_XVID=$_lavc_xvid
 CONFIG_X264=$_lavc_x264
