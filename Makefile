@@ -277,7 +277,6 @@ ifeq ($(MENCODER),yes)
 	done
 endif
 	$(INSTALL) -d $(DATADIR)
-	$(INSTALL) -d $(DATADIR)/font
 ifeq ($(GUI),yes)
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
 	$(INSTALL) -d $(DATADIR)/skins
