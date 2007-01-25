@@ -3815,7 +3815,7 @@ demuxer_desc_t demuxer_desc_matroska = {
   "mkv",
   "Matroska",
   "Aurelien Jacobs",
-  "based on gstreamer demuxer by Ronald Bultje and demux_mkv.cpp by Moritz Bunkus",
+  "",
   DEMUXER_TYPE_MATROSKA,
   1, // safe autodetect
   demux_mkv_open,
