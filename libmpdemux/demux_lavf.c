@@ -32,9 +32,11 @@
 
 #ifdef USE_LIBAVFORMAT_SO
 #include <ffmpeg/avformat.h>
+#include <ffmpeg/avutil.h>
 #include <ffmpeg/opt.h>
 #else
 #include "avformat.h"
+#include "avutil.h"
 #include "avi.h"
 #include "opt.h"
 #endif
@@ -64,8 +66,6 @@ typedef struct lavf_priv_t{
 
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
-
-int64_t ff_gcd(int64_t a, int64_t b);
 
 static const AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
