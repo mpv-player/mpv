@@ -80,7 +80,7 @@ titokzatos üzenetet ad ki magából, ami a
 <systemitem>internal compiler error</systemitem> vagy
 <systemitem>unable to find a register to spill</systemitem> vagy
 <systemitem>can't find a register in class `GENERAL_REGS'
-while reloading `asm'</systemitem>.</para></question>
+while reloading `asm'</systemitem>.
 sorokat tartalmazza.
 </para></question>
 <answer><para>
