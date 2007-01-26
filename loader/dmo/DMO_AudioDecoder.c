@@ -35,8 +35,6 @@ struct _DMO_AudioDecoder
 
 #include "../../mp_msg.h"
 
-#define __MODULE__ "DirectShow audio decoder"
-
 typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 

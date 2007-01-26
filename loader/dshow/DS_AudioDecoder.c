@@ -33,8 +33,6 @@ struct _DS_AudioDecoder
 #include <stdio.h>
 #include <stdlib.h>
 
-#define __MODULE__ "DirectShow audio decoder"
-
 typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
 
 DS_AudioDecoder * DS_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* wf)

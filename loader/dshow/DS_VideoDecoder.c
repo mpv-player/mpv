@@ -58,8 +58,6 @@ struct _DS_VideoDecoder
 // strcmp((const char*)info.dll,...)  is used instead of  (... == ...)
 // so Arpi could use char* pointer in his simplified DS_VideoDecoder class
 
-#define __MODULE__ "DirectShow_VideoDecoder"
-
 #define false 0
 #define true 1
 
