@@ -7,6 +7,7 @@
 #if defined(HAVE_MMX) || defined(HAVE_MMX2) || defined(HAVE_3DNOW) \
 /*    || defined(HAVE_SSE) || defined(HAVE_SSE2) */
 #include <stddef.h>
+#include <inttypes.h>
 
 extern void * fast_memcpy(void * to, const void * from, size_t len);
 extern void * mem2agpcpy(void * to, const void * from, size_t len);
@@ -28,8 +29,8 @@ static inline void * mem2agpcpy_pic(void * dst, const void * src, int bytesPerLi
 	if(dstStride == srcStride)
 	{
 		if (srcStride < 0) {
-	    		src += (height-1)*srcStride;
-	    		dst += (height-1)*dstStride;
+	    		src = (uint8_t*)src + (height-1)*srcStride;
+	    		dst = (uint8_t*)dst + (height-1)*dstStride;
 	    		srcStride = -srcStride;
 		}
 
@@ -40,8 +41,8 @@ static inline void * mem2agpcpy_pic(void * dst, const void * src, int bytesPerLi
 		for(i=0; i<height; i++)
 		{
 			mem2agpcpy(dst, src, bytesPerLine);
-			src+= srcStride;
-			dst+= dstStride;
+			src = (uint8_t*)src + srcStride;
+			dst = (uint8_t*)dst + dstStride;
 		}
 	}
 
@@ -56,8 +57,8 @@ static inline void * memcpy_pic(void * dst, const void * src, int bytesPerLine, 
 	if(dstStride == srcStride)
 	{
 		if (srcStride < 0) {
-	    		src += (height-1)*srcStride;
-	    		dst += (height-1)*dstStride;
+	    		src = (uint8_t*)src + (height-1)*srcStride;
+	    		dst = (uint8_t*)dst + (height-1)*dstStride;
 	    		srcStride = -srcStride;
 		}
 
@@ -68,8 +69,8 @@ static inline void * memcpy_pic(void * dst, const void * src, int bytesPerLine, 
 		for(i=0; i<height; i++)
 		{
 			memcpy(dst, src, bytesPerLine);
-			src+= srcStride;
-			dst+= dstStride;
+			src = (uint8_t*)src + srcStride;
+			dst = (uint8_t*)dst + dstStride;
 		}
 	}
 
