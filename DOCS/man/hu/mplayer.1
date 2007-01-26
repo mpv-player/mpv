@@ -1,4 +1,4 @@
-.\" Synced with r21989
+.\" Synced with r22016
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -1193,6 +1193,8 @@ A fájlt Netscape formátumúnak feltételezi.
 .TP
 .B \-delay <másodperc>
 audió késleltetés másodpercben (pozitív vagy negatív lebegõpontos szám)
+A negatív értékek az audiót, a pozitív értékek a videót késleltetik.
+Figyelj rá, hogy ez a \-audio-delay MEncoder opció tökéletes ellentéte.
 .br
 .I MEGJEGYZÉS:
 Ha MEncoder-rel használod, nem garantált a helyes mûködés \-ovc copy
@@ -1217,7 +1219,6 @@ A név elé írt '+' jellel kényszerítheted, így elmarad pár ellenõrzés!
 A demuxer nevét kell megadni a libmpdemux/\:demuxer.h fájlnak megfelelõen.
 Kompatibilítási okokból elfogadja a demuxer ID-t is, ahogy
 az a libmpdemux/\:demuxer.h fájlban van.
-A \-demuxer audio vagy \-demuxer 17 az MP3 demuxert kényszeríti.
 .
 .TP
 .B \-dumpaudio (csak MPlayer)
@@ -3620,16 +3621,14 @@ Explicit kiválasztja a használandó fbdev eszköz nevét (alapértelmezett: /dev/\:f
 .
 .TP
 .B 3dfx (csak Linux)
-3dfx specifikus kimeneti videó vezérlõ.
-Ez a vezérlõ direkt használja a 3dfx hardvert az X11 felett.
+3dfx specifikus kimeneti videó vezérlõ, ami közvetlenül.
+használja a hardvert az X11 felett.
 Csak a 16 bpp támogatott.
-FIXME: Muszáj különbséget tenni a 3dfx, tdfxfb és a tdfx_vid között?
 .
 .TP
 .B tdfxfb (csak Linux)
-Ez a vezérlõ a tdfx framebuffer vezérlõt használja a film YUV gyorsítással
+Ez a vezérlõ a tdfxfb framebuffer vezérlõt használja a film YUV gyorsítással
 történõ lejátszásához 3dfx kártyákon.
-FIXME: Muszáj különbséget tenni a 3dfx, tdfxfb és a tdfx_vid között?
 .PD 0
 .RSs
 .IPs <eszköz>
@@ -3639,9 +3638,8 @@ Explicit megadja a használni kívánt fbdev eszköz nevét (alapértelmezett: /dev/\:
 .
 .TP
 .B tdfx_vid (csak Linux)
-3dfx specifikus kimeneti videó vezérlõ.
-Ez a vezérlõ direkt használja a tdfx_vid kernel modult.
-FIXME: Muszáj különbséget tenni a 3dfx, tdfxfb és a tdfx_vid között?
+3dfx specifikus kimeneti videó vezérlõ, amely a tdfx_vid
+kernel modullal mûködik együtt.
 .PD 0
 .RSs
 .IPs <eszköz>
