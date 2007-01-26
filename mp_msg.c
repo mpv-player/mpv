@@ -14,6 +14,7 @@
 #endif
 #ifdef USE_ICONV
 #include <iconv.h>
+#include <errno.h>
 #endif
 
 #if	defined(FOR_MENCODER) || defined(CODECS2HTML)
@@ -37,6 +38,36 @@ char *mp_msg_charset = NULL;
 static char *old_charset = NULL;
 static iconv_t msgiconv;
 #endif
+
+const char* filename_recode(const char* filename)
+{
+#if !defined(USE_ICONV) || !defined(MSG_CHARSET)
+    return filename;
+#else
+    static iconv_t inv_msgiconv = (iconv_t)(-1);
+    static char recoded_filename[MSGSIZE_MAX];
+    size_t filename_len, max_path;
+    char* precoded;
+    if (!strcasecmp(mp_msg_charset, MSG_CHARSET) ||
+	    !strcasecmp(mp_msg_charset, "noconv"))
+       return filename;	
+    if (inv_msgiconv == (iconv_t)(-1)) {
+	inv_msgiconv = iconv_open(MSG_CHARSET, mp_msg_charset);
+	if (inv_msgiconv == (iconv_t)(-1))
+	    return filename;
+    }
+    filename_len = strlen(filename);
+    max_path = MSGSIZE_MAX - 4;
+    precoded = recoded_filename;
+    if (iconv(inv_msgiconv, &filename, &filename_len,
+	    &precoded, &max_path) == (size_t)(-1) && errno == E2BIG) {
+	precoded[0] = precoded[1] = precoded[2] = '.';
+	precoded += 3;
+    }
+    *precoded = '\0';
+    return recoded_filename;
+#endif
+}
 
 void mp_msg_init(void){
     int i;

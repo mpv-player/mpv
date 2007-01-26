@@ -132,6 +132,7 @@ void mp_msg(int mod, int lev, const char *format, ... );
 #   endif
 #endif
 
+const char* filename_recode(const char* filename);
 
 #endif
 #endif

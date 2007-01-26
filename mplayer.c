@@ -995,7 +995,8 @@ void add_subtitles(char *filename, float fps, int silent)
 #else
     if(!subd && !silent) 
 #endif
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_CantLoadSub, filename);
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_CantLoadSub,
+		filename_recode(filename));
     
 #ifdef USE_ASS
     if (!asst && !subd) return;
@@ -1005,9 +1006,11 @@ void add_subtitles(char *filename, float fps, int silent)
 #endif
     set_of_subtitles[set_of_sub_size] = subd;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_ID=%d\n", set_of_sub_size);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n", filename);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n",
+	   filename_recode(filename));
     ++set_of_sub_size;
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AddedSubtitleFile, set_of_sub_size, filename);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AddedSubtitleFile, set_of_sub_size,
+	    filename_recode(filename));
 }
 
 // FIXME: if/when the GUI calls this, global sub numbering gets (potentially) broken.
@@ -3824,7 +3827,8 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #ifdef HAVE_BITMAP_FONT
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
-       if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
+       if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,
+		filename_recode(font_name));
   } else {
       // try default:
        vo_font=read_font_desc( mem_ptr=get_path("font/font.desc"),font_factor,verbose>1);
@@ -4076,7 +4080,9 @@ while (player_idle_mode && !filename) {
 }
 //---------------------------------------------------------------------------
 
-    if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
+    if(filename)
+	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing,
+		filename_recode(filename));
 
 if (edl_filename) {
     if (edl_records) free_edl(edl_records);
@@ -4087,7 +4093,7 @@ if (edl_output_filename) {
     if ((edl_fd = fopen(edl_output_filename, "w")) == NULL)
     {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlCantOpenForWrite,
-               edl_output_filename);
+		filename_recode(edl_output_filename));
     }
 }
 
@@ -4097,7 +4103,8 @@ if (edl_output_filename) {
     if (vobsub_name){
       vo_vobsub=vobsub_open(vobsub_name,spudec_ifo,1,&vo_spudec);
       if(vo_vobsub==NULL)
-        mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,vobsub_name);
+        mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,
+		filename_recode(vobsub_name));
     }else if(sub_auto && filename && (strlen(filename)>=5)){
       /* try to autodetect vobsub from movie filename ::atmos */
       char *buf = malloc((strlen(filename)-3)),*psub;
@@ -4164,7 +4171,8 @@ if (edl_output_filename) {
     play_tree_t* entry;
     // Handle playlist
     current_module="handle_playlist";
-    mp_msg(MSGT_CPLAYER,MSGL_V,"Parsing playlist %s...\n",filename);
+    mp_msg(MSGT_CPLAYER,MSGL_V,"Parsing playlist %s...\n",
+	    filename_recode(filename));
     entry = parse_playtree(stream,0);
     eof=playtree_add_playlist(entry);
     goto goto_next_file;
@@ -4257,7 +4265,8 @@ if (demuxer && demuxer->type==DEMUXER_TYPE_PLAYLIST)
   {	 
     char *temp, *bname;
     
-    mp_msg(MSGT_CPLAYER,MSGL_V,"Adding file %s to element entry.\n",playlist_entry);
+    mp_msg(MSGT_CPLAYER,MSGL_V,"Adding file %s to element entry.\n",
+	    filename_recode(playlist_entry));
 
     bname=mp_basename(playlist_entry);
     if ((strlen(bname)>10) && !strncmp(bname,"qt",2) && !strncmp(bname+3,"gateQT",6))
@@ -4511,7 +4520,8 @@ if (global_sub_size) {
     }
 }
 
-  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_FILENAME=%s\n", filename);
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_FILENAME=%s\n",
+	  filename_recode(filename));
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_DEMUXER=%s\n", demuxer->desc->name);
   if (sh_video) {
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
@@ -5253,7 +5263,8 @@ if(step_sec>0) {
         if (v < 0) {
           for (v = 0; v < set_of_sub_size; ++v) {
             subd = set_of_subtitles[v];
-            mp_msg(MSGT_CPLAYER, MSGL_STATUS, MSGTR_RemovedSubtitleFile, v + 1, subd->filename);
+            mp_msg(MSGT_CPLAYER, MSGL_STATUS, MSGTR_RemovedSubtitleFile, v + 1,
+		    filename_recode(subd->filename));
             sub_free(subd);
             set_of_subtitles[v] = NULL;
           }
@@ -5270,7 +5281,8 @@ if(step_sec>0) {
         }
         else if (v < set_of_sub_size) {
           subd = set_of_subtitles[v];
-          mp_msg(MSGT_CPLAYER, MSGL_STATUS, MSGTR_RemovedSubtitleFile, v + 1, subd->filename);
+          mp_msg(MSGT_CPLAYER, MSGL_STATUS, MSGTR_RemovedSubtitleFile, v + 1,
+		  filename_recode(subd->filename));
           sub_free(subd);
           if (set_of_sub_pos == v) {
             global_sub_pos = -2;
