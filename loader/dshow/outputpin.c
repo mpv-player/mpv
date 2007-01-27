@@ -589,7 +589,7 @@ static HRESULT STDCALL COutputMemPin_QueryInterface(IUnknown* This, const GUID* 
 {
     COutputPin* p = (COutputPin*)This;
 
-    Debug printf("COutputPin_M_QueryInterface(%p) called\n", This);
+    Debug printf("COutputMemPin_QueryInterface(%p) called\n", This);
     if (!ppv)
 	return E_INVALIDARG;
 
