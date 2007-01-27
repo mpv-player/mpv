@@ -268,7 +268,7 @@ static HRESULT STDCALL COutputPin_Connect(IPin * This,
 				    /* [in] */ IPin *pReceivePin,
 				    /* [in] */ /* const */ AM_MEDIA_TYPE *pmt)
 {
-    Debug printf("COutputPin_Connect() called\n");
+    Debug printf("COutputPin_Connect(%p) called\n",This);
 /*
     *pmt=((COutputPin*)This)->type;
     if(pmt->cbFormat>0)
@@ -365,7 +365,7 @@ static HRESULT STDCALL COutputPin_ConnectedTo(IPin * This,
 static HRESULT STDCALL COutputPin_ConnectionMediaType(IPin * This,
 						      /* [out] */ AM_MEDIA_TYPE *pmt)
 {
-    Debug printf("CInputPin::ConnectionMediaType() called\n");
+    Debug printf("COutputPin_ConnectionMediaType(%p) called\n",This);
     if (!pmt)
 	return E_INVALIDARG;
     *pmt = ((COutputPin*)This)->type;
@@ -469,7 +469,7 @@ static HRESULT STDCALL COutputPin_QueryAccept(IPin * This,
 static HRESULT STDCALL COutputPin_EnumMediaTypes(IPin * This,
 					   /* [out] */ IEnumMediaTypes **ppEnum)
 {
-    Debug printf("COutputPin_EnumMediaTypes() called\n");
+    Debug printf("COutputPin_EnumMediaTypes(%p) called\n",This);
     if (!ppEnum)
 	return E_INVALIDARG;
     *ppEnum = (IEnumMediaTypes*) CEnumMediaTypesCreate(&((COutputPin*)This)->type);
@@ -585,7 +585,7 @@ static HRESULT STDCALL COutputPin_NewSegment(IPin * This,
  * Make sure to call Release on received interface when you are done
  *
  */
-static HRESULT STDCALL COutputPin_M_QueryInterface(IUnknown* This, const GUID* iid, void** ppv)
+static HRESULT STDCALL COutputMemPin_QueryInterface(IUnknown* This, const GUID* iid, void** ppv)
 {
     COutputPin* p = (COutputPin*)This;
 
@@ -637,10 +637,10 @@ static HRESULT STDCALL COutputPin_M_QueryInterface(IUnknown* This, const GUID* i
  * Make sure to call Release on received interface when you are done
  *
  */
-static HRESULT STDCALL COutputPin_GetAllocator(IMemInputPin* This,
+static HRESULT STDCALL COutputMemPin_GetAllocator(IMemInputPin* This,
 					 /* [out] */ IMemAllocator** ppAllocator)
 {
-    Debug printf("COutputPin_GetAllocator(%p, %p) called\n", This->vt, ppAllocator);
+    Debug printf("COutputMemPin_GetAllocator(%p, %p) called\n", This->vt, ppAllocator);
     *ppAllocator = (IMemAllocator*) MemAllocatorCreate();
     return 0;
 }
@@ -657,11 +657,11 @@ static HRESULT STDCALL COutputPin_GetAllocator(IMemInputPin* This,
  * \return Apropriate error code otherwise
  *
  */
-static HRESULT STDCALL COutputPin_NotifyAllocator(IMemInputPin* This,
+static HRESULT STDCALL COutputMemPin_NotifyAllocator(IMemInputPin* This,
 						  /* [in] */ IMemAllocator* pAllocator,
 						  /* [in] */ int bReadOnly)
 {
-    Debug printf("COutputPin_NotifyAllocator(%p, %p) called\n", This, pAllocator);
+    Debug printf("COutputMemPin_NotifyAllocator(%p, %p) called\n", This, pAllocator);
     ((COutputMemPin*)This)->pAllocator = (MemAllocator*) pAllocator;
     return 0;
 }
@@ -678,10 +678,10 @@ static HRESULT STDCALL COutputPin_NotifyAllocator(IMemInputPin* This,
  * \return E_POINTER - Null pointer
  *
  */
-static HRESULT STDCALL COutputPin_GetAllocatorRequirements(IMemInputPin* This,
+static HRESULT STDCALL COutputMemPin_GetAllocatorRequirements(IMemInputPin* This,
 							   /* [out] */ ALLOCATOR_PROPERTIES* pProps)
 {
-    return output_unimplemented("COutputPin_GetAllocatorRequirements", This);
+    return output_unimplemented("COutputMemPin_GetAllocatorRequirements", This);
 }
 
 /**
@@ -715,14 +715,14 @@ static HRESULT STDCALL COutputPin_GetAllocatorRequirements(IMemInputPin* This,
  * Developer must use critical sections for thread-safing work.
  *
  */
-static HRESULT STDCALL COutputPin_Receive(IMemInputPin* This,
+static HRESULT STDCALL COutputMemPin_Receive(IMemInputPin* This,
 					  /* [in] */ IMediaSample* pSample)
 {
     COutputMemPin* mp = (COutputMemPin*)This;
     char* pointer;
     int len;
 
-    Debug printf("COutputPin_Receive(%p) called\n", This);
+    Debug printf("COutputMemPin_Receive(%p) called\n", This);
     if (!pSample)
 	return E_INVALIDARG;
     if (pSample->vt->GetPointer(pSample, (BYTE**) &pointer))
@@ -776,12 +776,12 @@ static HRESULT STDCALL COutputPin_Receive(IMemInputPin* This,
  * Developer must use critical sections for thread-safing work.
  *
  */
-static HRESULT STDCALL COutputPin_ReceiveMultiple(IMemInputPin * This,
+static HRESULT STDCALL COutputMemPin_ReceiveMultiple(IMemInputPin * This,
 					    /* [size_is][in] */ IMediaSample **pSamples,
 					    /* [in] */ long nSamples,
 					    /* [out] */ long *nSamplesProcessed)
 {
-    return output_unimplemented("COutputPin_ReceiveMultiple", This);
+    return output_unimplemented("COutputMemPin_ReceiveMultiple", This);
 }
 
 /**
@@ -793,9 +793,9 @@ static HRESULT STDCALL COutputPin_ReceiveMultiple(IMemInputPin * This,
  * \return S_FALSE - the pin will not block
  *
  */
-static HRESULT STDCALL COutputPin_ReceiveCanBlock(IMemInputPin * This)
+static HRESULT STDCALL COutputMemPin_ReceiveCanBlock(IMemInputPin * This)
 {
-    return output_unimplemented("COutputPin_ReceiveCanBlock", This);
+    return output_unimplemented("COutputMemPin_ReceiveCanBlock", This);
 }
 
 /**
@@ -915,10 +915,10 @@ static HRESULT STDCALL COutputPin_Release(IUnknown* This)
  * Return value should be used only for debug purposes
  *
  */
-static HRESULT STDCALL COutputPin_M_AddRef(IUnknown* This)
+static HRESULT STDCALL COutputMemPin_AddRef(IUnknown* This)
 {
     COutputMemPin* p = (COutputMemPin*) This;
-    Debug printf("COutputPin_MAddRef(%p) called (%p, %d)\n", p, p->parent, p->parent->refcount);
+    Debug printf("COutputMemPin_AddRef(%p) called (%p, %d)\n", p, p->parent, p->parent->refcount);
     p->parent->refcount++;
     return 0;
 }
@@ -935,10 +935,10 @@ static HRESULT STDCALL COutputPin_M_AddRef(IUnknown* This)
  * Return value should be used only for debug purposes
  *
  */
-static HRESULT STDCALL COutputPin_M_Release(IUnknown* This)
+static HRESULT STDCALL COutputMemPin_Release(IUnknown* This)
 {
     COutputMemPin* p = (COutputMemPin*) This;
-    Debug printf("COutputPin_MRelease(%p) called (%p,   %d)\n",
+    Debug printf("COutputMemPin_Release(%p) called (%p,   %d)\n",
 		 p, p->parent, p->parent->refcount);
     if (--p->parent->refcount <= 0)
 	COutputPin_Destroy(p->parent);
@@ -997,15 +997,15 @@ COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt)
     This->vt->EndFlush = COutputPin_EndFlush;
     This->vt->NewSegment = COutputPin_NewSegment;
 
-    This->mempin->vt->QueryInterface = COutputPin_M_QueryInterface;
-    This->mempin->vt->AddRef = COutputPin_M_AddRef;
-    This->mempin->vt->Release = COutputPin_M_Release;
-    This->mempin->vt->GetAllocator = COutputPin_GetAllocator;
-    This->mempin->vt->NotifyAllocator = COutputPin_NotifyAllocator;
-    This->mempin->vt->GetAllocatorRequirements = COutputPin_GetAllocatorRequirements;
-    This->mempin->vt->Receive = COutputPin_Receive;
-    This->mempin->vt->ReceiveMultiple = COutputPin_ReceiveMultiple;
-    This->mempin->vt->ReceiveCanBlock = COutputPin_ReceiveCanBlock;
+    This->mempin->vt->QueryInterface = COutputMemPin_QueryInterface;
+    This->mempin->vt->AddRef = COutputMemPin_AddRef;
+    This->mempin->vt->Release = COutputMemPin_Release;
+    This->mempin->vt->GetAllocator = COutputMemPin_GetAllocator;
+    This->mempin->vt->NotifyAllocator = COutputMemPin_NotifyAllocator;
+    This->mempin->vt->GetAllocatorRequirements = COutputMemPin_GetAllocatorRequirements;
+    This->mempin->vt->Receive = COutputMemPin_Receive;
+    This->mempin->vt->ReceiveMultiple = COutputMemPin_ReceiveMultiple;
+    This->mempin->vt->ReceiveCanBlock = COutputMemPin_ReceiveCanBlock;
 
     This->mempin->frame_size_pointer = 0;
     This->mempin->frame_pointer = 0;
