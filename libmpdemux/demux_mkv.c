@@ -637,9 +637,10 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
               return modified;
             }
 
-          *dest = malloc (dstlen);
+          *dest = NULL;
           while (1)
             {
+              *dest = realloc (*dest, dstlen);
               result = lzo1x_decompress_safe (src, *size, *dest, &dstlen,
                                               NULL);
               if (result == LZO_E_OK)
@@ -655,7 +656,6 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
               mp_msg (MSGT_DEMUX, MSGL_DBG2,
                       "[mkv] lzo decompression buffer too small.\n");
               dstlen *= 2;
-              *dest = realloc (*dest, dstlen);
             }
           *size = dstlen;
         }
