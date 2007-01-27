@@ -648,6 +648,8 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
                 {
                   mp_msg (MSGT_DEMUX, MSGL_WARN,
                           MSGTR_MPDEMUX_MKV_LzoDecompressionFailed);
+                  free(*dest);
+                  *dest = NULL;
                   return modified;
                 }
               mp_msg (MSGT_DEMUX, MSGL_DBG2,
