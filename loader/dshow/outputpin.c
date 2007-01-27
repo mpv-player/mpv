@@ -531,7 +531,7 @@ static HRESULT STDCALL COutputPin_BeginFlush(IPin * This)
 }
 
 /**
- * \brief IPin::BeginFlush (ends a flush operation)
+ * \brief IPin::EndFlush (ends a flush operation)
  *
  * \param[in] This  pointer to IPin interface
  *
@@ -545,7 +545,7 @@ static HRESULT STDCALL COutputPin_EndFlush(IPin * This)
 }
 
 /**
- * \brief IPin::BeginFlush (media sample received after this call grouped as segment with common
+ * \brief IPin::NewSegment (media sample received after this call grouped as segment with common
  *        start,stop time and rate)
  *
  * \param[in] This   pointer to IPin interface
