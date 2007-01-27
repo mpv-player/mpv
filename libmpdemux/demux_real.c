@@ -926,9 +926,10 @@ got_video:
 			// this fragment is for new packet, close the old one
 			mp_msg(MSGT_DEMUX,MSGL_DBG2, "closing probably incomplete packet, len: %d  \n",dp->len);
 			if(priv->video_after_seek){
-			    dp->pts=timestamp;
 				priv->kf_base = 0;
 				priv->kf_pts = dp_hdr->timestamp;
+				dp->pts=
+				real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 				priv->video_after_seek = 0;
 			} else if (dp_hdr->len >= 3)
 			    dp->pts =
@@ -963,9 +964,10 @@ got_video:
  			    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "fragment (%d bytes) appended, %d bytes left\n",vpkg_offset,len);
 			    // we know that this is the last fragment -> we can close the packet!
 			    if(priv->video_after_seek){
-			        dp->pts=timestamp;
 				    priv->kf_base = 0;
 				    priv->kf_pts = dp_hdr->timestamp;
+				    dp->pts=
+				    real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 				    priv->video_after_seek = 0;
 			    } else if (dp_hdr->len >= 3)
 				dp->pts =
@@ -1004,6 +1006,13 @@ got_video:
 		    stream_read(demuxer->stream, dp_data, len);
 		    ds->asf_packet=dp;
 		    len=0;
+		    if(priv->video_after_seek){
+		        priv->kf_base = 0;
+		        priv->kf_pts = dp_hdr->timestamp;
+		        dp->pts=
+		        real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
+		        priv->video_after_seek = 0;
+		    }
 		    break;
 		}
 		// whole packet (not fragmented):
@@ -1019,9 +1028,10 @@ got_video:
 		dp_hdr->len=vpkg_length; len-=vpkg_length;
 		stream_read(demuxer->stream, dp_data, vpkg_length);
 		if(priv->video_after_seek){
-		    dp->pts=timestamp;
 			priv->kf_base = 0;
 			priv->kf_pts = dp_hdr->timestamp;
+			dp->pts=
+			real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 			priv->video_after_seek = 0;
 		} else if (dp_hdr->len >= 3)
 		    dp->pts =
