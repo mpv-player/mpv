@@ -48,7 +48,8 @@ const char* filename_recode(const char* filename)
     static char recoded_filename[MSGSIZE_MAX];
     size_t filename_len, max_path;
     char* precoded;
-    if (!strcasecmp(mp_msg_charset, MSG_CHARSET) ||
+    if (!mp_msg_charset ||
+        !strcasecmp(mp_msg_charset, MSG_CHARSET) ||
         !strcasecmp(mp_msg_charset, "noconv"))
         return filename;
     if (inv_msgiconv == (iconv_t)(-1)) {
