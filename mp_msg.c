@@ -17,7 +17,7 @@
 #include <errno.h>
 #endif
 
-#if	defined(FOR_MENCODER) || defined(CODECS2HTML)
+#if defined(FOR_MENCODER) || defined(CODECS2HTML)
 #undef HAVE_NEW_GUI
 #endif
 
@@ -49,20 +49,20 @@ const char* filename_recode(const char* filename)
     size_t filename_len, max_path;
     char* precoded;
     if (!strcasecmp(mp_msg_charset, MSG_CHARSET) ||
-	    !strcasecmp(mp_msg_charset, "noconv"))
-       return filename;	
+        !strcasecmp(mp_msg_charset, "noconv"))
+        return filename;
     if (inv_msgiconv == (iconv_t)(-1)) {
-	inv_msgiconv = iconv_open(MSG_CHARSET, mp_msg_charset);
-	if (inv_msgiconv == (iconv_t)(-1))
-	    return filename;
+        inv_msgiconv = iconv_open(MSG_CHARSET, mp_msg_charset);
+        if (inv_msgiconv == (iconv_t)(-1))
+            return filename;
     }
     filename_len = strlen(filename);
     max_path = MSGSIZE_MAX - 4;
     precoded = recoded_filename;
     if (iconv(inv_msgiconv, &filename, &filename_len,
-	    &precoded, &max_path) == (size_t)(-1) && errno == E2BIG) {
-	precoded[0] = precoded[1] = precoded[2] = '.';
-	precoded += 3;
+              &precoded, &max_path) == (size_t)(-1) && errno == E2BIG) {
+        precoded[0] = precoded[1] = precoded[2] = '.';
+        precoded += 3;
     }
     *precoded = '\0';
     return recoded_filename;
@@ -151,7 +151,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
       flag=0;
     }
 #endif    
-    {	unsigned char v_colors[10]={9,1,3,15,7,2,2,8,8,8};
+    {   unsigned char v_colors[10]={9,1,3,15,7,2,2,8,8,8};
         static const char *lev_text[]= {
                                 "FATAL",
                                 "ERROR",
@@ -226,8 +226,8 @@ void mp_msg(int mod, int lev, const char *format, ... ){
     }
 #endif
     if (lev <= MSGL_WARN){
-	fprintf(stderr, "%s", tmp);fflush(stderr);
+        fprintf(stderr, "%s", tmp);fflush(stderr);
     } else {
-	printf("%s", tmp);fflush(stdout);
+        printf("%s", tmp);fflush(stdout);
     }
 }
