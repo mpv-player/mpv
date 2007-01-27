@@ -11,17 +11,16 @@
 #include <string.h>
 #include <stdlib.h>
 
-/*
-    An object beyond interface IEnumMediaTypes.
-    Returned by COutputPin through call IPin::EnumMediaTypes().
-*/
-
 static inline int output_unimplemented(const char* s, void* p)
 {
     Debug printf("%s(%p) called (UNIMPLEMENTED)", s, p);
     return E_NOTIMPL;
 }
 
+/**
+    An object beyond interface IEnumMediaTypes.
+    Returned by COutputPin through call IPin::EnumMediaTypes().
+*/
 typedef struct CEnumMediaTypes
 {
     IEnumMediaTypes_vt* vt;
@@ -30,6 +29,9 @@ typedef struct CEnumMediaTypes
     GUID interfaces[2];
 } CEnumMediaTypes;
 
+/**
+   IMemOutput interface implementation
+*/
 struct _COutputMemPin
 {
     IMemInputPin_vt* vt;
@@ -40,6 +42,21 @@ struct _COutputMemPin
     COutputPin* parent;
 };
 
+/**
+ * \brief IEnumMediaTypes:Next (retrives a specified number of media types )
+ *
+ * \param[in]  This pointer to CEnumMediaTypes object
+ * \param[in]  cMediaTypes number of media types to retrive
+ * \param[out] ppMediaTypes array of AM_MEDIA_TYPE structure pointers of size cMediaTypes
+ * \param[out] pcFetched address of variables that receives number of returned media types
+ *
+ * \return S_OK - success
+ * \return S_FALSE - did not return as meny structures as requested
+ * \return E_INVALIDARG Invalid argument
+ * \return E_POINTER Null pointer
+ * \return VFW_E_ENUM_OUT_OF_SYNC - pin's state has changed and is now inconsistent with enumerator
+ *
+ */
 static HRESULT STDCALL CEnumMediaTypes_Next(IEnumMediaTypes * This,
 					    /* [in] */ ULONG cMediaTypes,
 					    /* [size_is][out] */ AM_MEDIA_TYPE **ppMediaTypes,
@@ -70,18 +87,51 @@ static HRESULT STDCALL CEnumMediaTypes_Next(IEnumMediaTypes * This,
 }
 
 /* I expect that these methods are unused. */
+
+/**
+ * \brief IEnumMediaTypes::Skip (skips over a specified number of media types)
+ *
+ * \param[in]  This pointer to CEnumMEdiaTypes object
+ * \param[in]  cMediaTypes number of media types to skip
+ *
+ * \return S_OK - success
+ * \return S_FALSE - skipped past the end of the sequence
+ * \return VFW_E_ENUM_OUT_OF_SYNC - pin's state has changed and is now inconsistent with enumerator
+ *
+ */
 static HRESULT STDCALL CEnumMediaTypes_Skip(IEnumMediaTypes * This,
 					    /* [in] */ ULONG cMediaTypes)
 {
     return output_unimplemented("CEnumMediaTypes::Skip", This);
 }
 
+/**
+ * \brief IEnumMediaTypes::Reset (resets enumeration sequence to beginning)
+ *
+ * \param[in]  This pointer to CEnumMEdiaTypes object
+ *
+ * \return S_OK - success
+ *
+ */
 static HRESULT STDCALL CEnumMediaTypes_Reset(IEnumMediaTypes * This)
 {
     Debug printf("CEnumMediaTypes::Reset(%p) called\n", This);
     return 0;
 }
 
+/**
+ * \brief IEnumMediaTypes::Clone (makes a copy of enumerator, returned object
+ *        starts at the same position as original)
+ *
+ * \param[in]  This pointer to CEnumMEdiaTypes object
+ * \param[out] ppEnum address of variable that receives pointer to IEnumMediaTypes interface
+ *
+ * \return S_OK - success
+ * \return E_OUTOFMEMRY - Insufficient memory
+ * \return E_POINTER - Null pointer
+ * \return VFW_E_ENUM_OUT_OF_SYNC - pin's state has changed and is now inconsistent with enumerator
+ *
+ */
 static HRESULT STDCALL CEnumMediaTypes_Clone(IEnumMediaTypes * This,
 				      /* [out] */ IEnumMediaTypes **ppEnum)
 {
@@ -89,15 +139,29 @@ static HRESULT STDCALL CEnumMediaTypes_Clone(IEnumMediaTypes * This,
     return E_NOTIMPL;
 }
 
+/**
+ * \brief CEnumMediaTypes destructor
+ *
+ * \param[in]  This pointer to CEnumMediaTypes object
+ *
+ */
 static void CEnumMediaTypes_Destroy(CEnumMediaTypes* This)
 {
     free(This->vt);
     free(This);
 }
 
-// IPin->IUnknown methods
+// IEnumMediaTypes->IUnknown methods
 IMPLEMENT_IUNKNOWN(CEnumMediaTypes)
 
+/**
+ * \brief CEnumMediaTypes constructor
+ *
+ * \param[in]  amt media type for enumerating
+ *
+ * \return pointer to CEnumMEdiaTypes object or NULL if error occured
+ *
+ */
 static CEnumMediaTypes* CEnumMediaTypesCreate(const AM_MEDIA_TYPE* amt)
 {
     CEnumMediaTypes *This = (CEnumMediaTypes*) malloc(sizeof(CEnumMediaTypes)) ;
@@ -132,9 +196,27 @@ static CEnumMediaTypes* CEnumMediaTypesCreate(const AM_MEDIA_TYPE* amt)
 
 /*************
  * COutputPin
+ *
+ * WARNING:
+ * This is implementation of INPUT pin in DirectShow's terms
+ *
  *************/
 
 
+/**
+ *
+ * \brief IUnknown::QueryInterface (query object for interface)
+ * \param[in]  This pointer to IUnknown interface
+ * \param[in]  iid  GUID of requested interface
+ * \param[out] ppv  receives pointer to interface
+ *
+ * \return S_OK - success (and *ppv contains valid pointer)
+ * \return E_NOINTERFACE - interface not found (and *ppv was set NULL)
+ *
+ * \note
+ * Make sure to call Release on received interface when you are done
+ *
+ */
 static HRESULT STDCALL COutputPin_QueryInterface(IUnknown* This, const GUID* iid, void** ppv)
 {
     COutputPin* p = (COutputPin*) This;
@@ -167,6 +249,21 @@ static HRESULT STDCALL COutputPin_QueryInterface(IUnknown* This, const GUID* iid
 }
 
 // IPin methods
+
+/**
+ * \brief IPin::Connect (connects pin to another pin)
+ *
+ * \param[in] This          pointer to IPin interface
+ * \param[in] pReceivePin   pointer to IPin interface of remote pin
+ * \param[in] pmt suggested media type for link. Can be NULL (any media type)
+ *
+ * \return S_OK - success.
+ * \return VFW_E_ALREADY_CONNECTED - pin already connected
+ * \return VFW_E_NOT_STOPPED - filter is active
+ * \return VFW_E_TYPE_NOT_ACCEPT - type is not acceptable
+ * \return Apropriate error code otherwise.
+ *
+ */
 static HRESULT STDCALL COutputPin_Connect(IPin * This,
 				    /* [in] */ IPin *pReceivePin,
 				    /* [in] */ /* const */ AM_MEDIA_TYPE *pmt)
@@ -185,6 +282,25 @@ static HRESULT STDCALL COutputPin_Connect(IPin * This,
     // if I put return 0; here, it crashes
 }
 
+/**
+ * \brief IPin::ReceiveConnection (accepts a connection from another pin)
+ *
+ * \param[in] This       pointer to IPin interface
+ * \param[in] pConnector connecting pin's IPin interface
+ * \param[in] pmt        suggested media type for connection
+ *
+ * \return S_OK - success
+ * \return E_POINTER - Null pointer
+ * \return VFW_E_ALREADY_CONNECTED - pin already connected
+ * \return VFW_E_NOT_STOPPED - filter is active
+ * \return VFW_E_TYPE_NOT_ACCEPT - type is not acceptable
+ *
+ * \note
+ * When returning S_OK method should also do the following:
+ *  - store media type and return the same type in IPin::ConnectionMediaType
+ *  - store pConnector and return it in IPin::ConnectedTo
+ *
+ */
 static HRESULT STDCALL COutputPin_ReceiveConnection(IPin * This,
 						    /* [in] */ IPin *pConnector,
 						    /* [in] */ const AM_MEDIA_TYPE *pmt)
@@ -194,12 +310,37 @@ static HRESULT STDCALL COutputPin_ReceiveConnection(IPin * This,
     return 0;
 }
 
+/**
+ * \brief IPin::Disconnect (accepts a connection from another pin)
+ *
+ * \param[in] This pointer to IPin interface
+ *
+ * \return S_OK - success
+ * \return S_FALSE - pin was not connected
+ * \return VFW_E_NOT_STOPPED - filter is active
+ *
+ * \note
+ *   To break connection you have to also call Disconnect on other pin
+ */
 static HRESULT STDCALL COutputPin_Disconnect(IPin * This)
 {
     Debug printf("COutputPin_Disconnect(%p) called\n", This);
     return 1;
 }
 
+/**
+ * \brief IPin::ConnectedTo (retrieves pointer to the connected pin, if such exist)
+ *
+ * \param[in]  This pointer to IPin interface
+ * \param[out] pPin pointer to remote pin's IPin interface
+ *
+ * \return S_OK - success
+ * \return E_POINTER - Null pointer
+ * \return VFW_E_NOT_CONNECTED - pin is not connected
+ *
+ * \note
+ * Caller must call Release on received IPin, when done
+ */
 static HRESULT STDCALL COutputPin_ConnectedTo(IPin * This,
 					/* [out] */ IPin **pPin)
 {
@@ -210,6 +351,17 @@ static HRESULT STDCALL COutputPin_ConnectedTo(IPin * This,
     return 0;
 }
 
+/**
+ * \brief IPin::ConnectionMediaType (retrieves media type for connection, if such exist)
+ *
+ * \param[in]  This pointer to IPin interface
+ * \param[out] pmt pointer to AM_MEDIA_TYPE,  that receives connection media type
+ *
+ * \return S_OK - success
+ * \return E_POINTER - Null pointer
+ * \return VFW_E_NOT_CONNECTED - pin is not connected
+ *
+ */
 static HRESULT STDCALL COutputPin_ConnectionMediaType(IPin * This,
 						      /* [out] */ AM_MEDIA_TYPE *pmt)
 {
@@ -225,12 +377,35 @@ static HRESULT STDCALL COutputPin_ConnectionMediaType(IPin * This,
     return 0;
 }
 
+/**
+ * \brief IPin::QueryPinInfo (retrieves information about the pin)
+ *
+ * \param[in]  This  pointer to IPin interface
+ * \param[out] pInfo pointer to PIN_INFO structure, that receives pin info
+ *
+ * \return S_OK - success
+ * \return E_POINTER - Null pointer
+ *
+ * \note
+ * If pInfo->pFilter is not NULL, then caller must call Release on pInfo->pFilter when done
+ *
+ */
 static HRESULT STDCALL COutputPin_QueryPinInfo(IPin * This,
 					       /* [out] */ PIN_INFO *pInfo)
 {
     return output_unimplemented("COutputPin_QueryPinInfo", This);
 }
 
+/**
+ * \brief IPin::QueryDirection (retrieves pin direction)
+ *
+ * \param[in]  This    pointer to IPin interface
+ * \param[out] pPinDir pointer to variable, that receives pin direction (PINDIR_INPUT,PINDIR_OUTPUT)
+ *
+ * \return S_OK - success
+ * \return E_POINTER - Null pointer
+ *
+ */
 static HRESULT STDCALL COutputPin_QueryDirection(IPin * This,
 					   /* [out] */ PIN_DIRECTION *pPinDir)
 {
@@ -241,18 +416,56 @@ static HRESULT STDCALL COutputPin_QueryDirection(IPin * This,
     return 0;
 }
 
+/**
+ * \brief IPin::QueryId (retrieves pin identificator)
+ *
+ * \param[in]  This pointer to IPin interface
+ * \param[out] Id   adress of variable, that receives string with pin's Id.
+ *
+ * \return S_OK - success
+ * \return E_OUTOFMEMORY - Insufficient memory
+ * \return E_POINTER     - Null pointer
+ *
+ * \note
+ * Pin's Id is not the same as pin's name
+ *
+ */
 static HRESULT STDCALL COutputPin_QueryId(IPin * This,
 					  /* [out] */ LPWSTR *Id)
 {
     return output_unimplemented("COutputPin_QueryId", This);
 }
 
+/**
+ * \brief IPin::QueryAccept (determines can media type be accepted or not)
+ *
+ * \param[in] This  pointer to IPin interface
+ * \param[in] pmt   Media type to check
+ *
+ * \return S_OK - success
+ * \return S_FALSE - pin rejects media type
+ *
+ */
 static HRESULT STDCALL COutputPin_QueryAccept(IPin * This,
 					      /* [in] */ const AM_MEDIA_TYPE *pmt)
 {
     return output_unimplemented("COutputPin_QueryAccept", This);
 }
 
+/**
+ * \brief IPin::EnumMediaTypes (enumerates the pin's preferred media types)
+ *
+ * \param[in] This  pointer to IPin interface
+ * \param[out] ppEnum adress of variable that receives pointer to IEnumMEdiaTypes interface
+ *
+ * \return S_OK - success
+ * \return E_OUTOFMEMORY - Insufficient memory
+ * \return E_POINTER     - Null pointer
+ *
+ * \note
+ * Caller must call Release on received interface when done
+ *
+ */
 static HRESULT STDCALL COutputPin_EnumMediaTypes(IPin * This,
 					   /* [out] */ IEnumMediaTypes **ppEnum)
 {
@@ -263,6 +476,18 @@ static HRESULT STDCALL COutputPin_EnumMediaTypes(IPin * This,
     return 0;
 }
 
+/**
+ * \brief IPin::QueryInternalConnections (retries pin's internal connections)
+ *
+ * \param[in]     This  pointer to IPin interface
+ * \param[out]    apPin Array that receives pins, internally connected to this
+ * \param[in,out] nPint Size of an array
+ *
+ * \return S_OK - success
+ * \return S_FALSE - pin rejects media type
+ * \return E_NOTIMPL - not implemented
+ *
+ */
 static HRESULT STDCALL COutputPin_QueryInternalConnections(IPin * This,
 						     /* [out] */ IPin **apPin,
 						     /* [out][in] */ ULONG *nPin)
@@ -270,21 +495,68 @@ static HRESULT STDCALL COutputPin_QueryInternalConnections(IPin * This,
     return output_unimplemented("COutputPin_QueryInternalConnections", This);
 }
 
+/**
+ * \brief IPin::EndOfStream (notifies pin, that no data is expected, until new run command)
+ *
+ * \param[in] This  pointer to IPin interface
+ *
+ * \return S_OK - success
+ * \return E_UNEXPECTED - The pin is output pin
+ *
+ * \note 
+ * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream, 
+ * IMemAllocator::GetBuffer runs in different (streaming) thread then other 
+ * methods (application thread).
+ * IMemoryInputPin::NewSegment runs either in streaming or application thread.
+ * Developer must use critical sections for thread-safing work.
+ *
+ */
 static HRESULT STDCALL COutputPin_EndOfStream(IPin * This)
 {
     return output_unimplemented("COutputPin_EndOfStream", This);
 }
 
+/**
+ * \brief IPin::BeginFlush (begins a flush operation)
+ *
+ * \param[in] This  pointer to IPin interface
+ *
+ * \return S_OK - success
+ * \return E_UNEXPECTED - The pin is output pin
+ *
+ */
 static HRESULT STDCALL COutputPin_BeginFlush(IPin * This)
 {
     return output_unimplemented("COutputPin_BeginFlush", This);
 }
 
+/**
+ * \brief IPin::BeginFlush (ends a flush operation)
+ *
+ * \param[in] This  pointer to IPin interface
+ *
+ * \return S_OK - success
+ * \return E_UNEXPECTED - The pin is output pin
+ *
+ */
 static HRESULT STDCALL COutputPin_EndFlush(IPin * This)
 {
     return output_unimplemented("COutputPin_EndFlush", This);
 }
 
+/**
+ * \brief IPin::BeginFlush (media sample received after this call grouped as segment with common
+ *        start,stop time and rate)
+ *
+ * \param[in] This   pointer to IPin interface
+ * \param[in] tStart start time of new segment
+ * \param[in] tStop  end time of new segment
+ * \param[in] dRate  rate at wich segment should be processed
+ *
+ * \return S_OK - success
+ * \return E_UNEXPECTED - The pin is output pin
+ *
+ */
 static HRESULT STDCALL COutputPin_NewSegment(IPin * This,
 				       /* [in] */ REFERENCE_TIME tStart,
 				       /* [in] */ REFERENCE_TIME tStop,
@@ -299,6 +571,20 @@ static HRESULT STDCALL COutputPin_NewSegment(IPin * This,
 
 // IMemInputPin->IUnknown methods
 
+/**
+ * \brief IUnknown::QueryInterface (query object for interface)
+ *
+ * \param[in]  This pointer to IUnknown interface
+ * \param[in]  iid  GUID of requested interface
+ * \param[out] ppv  receives pointer to interface
+ *
+ * \return S_OK - success (and *ppv contains valid pointer)
+ * \return E_NOINTERFACE - interface not found (and *ppv was set NULL)
+ *
+ * \note
+ * Make sure to call Release on received interface when you are done
+ *
+ */
 static HRESULT STDCALL COutputPin_M_QueryInterface(IUnknown* This, const GUID* iid, void** ppv)
 {
     COutputPin* p = (COutputPin*)This;
@@ -338,6 +624,19 @@ static HRESULT STDCALL COutputPin_M_QueryInterface(IUnknown* This, const GUID* i
 
 // IMemInputPin methods
 
+/**
+ * \brief IMemInputPin::GetAllocator (retrives memory allocator, proposed by pin)
+ *
+ * \param[in]  This pointer to IMemInputPin interface
+ * \param[out]  ppAllocator  address of variable that receives allocator's IMemAllocator interface
+ *
+ * \return S_OK - success
+ * \return VFW_E_NO_ALLOCATOR - No allocator
+ *
+ * \note
+ * Make sure to call Release on received interface when you are done
+ *
+ */
 static HRESULT STDCALL COutputPin_GetAllocator(IMemInputPin* This,
 					 /* [out] */ IMemAllocator** ppAllocator)
 {
@@ -346,6 +645,18 @@ static HRESULT STDCALL COutputPin_GetAllocator(IMemInputPin* This,
     return 0;
 }
 
+/**
+ *
+ * \brief IMemInputPin::NotifyAllocator (specifies an allocator for the connection)
+ *
+ * \param[in]  This pointer to IMemInputPin interface
+ * \param[in]  pAllocator  allocator's IMemAllocator interface
+ * \param[in]  bReadOnly specifies whether samples from allocator are readonly
+ *
+ * \return S_OK - success
+ * \return Apropriate error code otherwise
+ *
+ */
 static HRESULT STDCALL COutputPin_NotifyAllocator(IMemInputPin* This,
 						  /* [in] */ IMemAllocator* pAllocator,
 						  /* [in] */ int bReadOnly)
@@ -355,12 +666,55 @@ static HRESULT STDCALL COutputPin_NotifyAllocator(IMemInputPin* This,
     return 0;
 }
 
+/**
+ * \brief IMemInputPin::GetAllocatorRequirements (retrieves allocator properties requested by
+ *        input pin)
+ *
+ * \param[in]  This pointer to IMemInputPin interface
+ * \param[out]  pProps pointer to a structure that receives allocator properties
+ *
+ * \return S_OK - success
+ * \return E_NOTIMPL - Not implemented
+ * \return E_POINTER - Null pointer
+ *
+ */
 static HRESULT STDCALL COutputPin_GetAllocatorRequirements(IMemInputPin* This,
 							   /* [out] */ ALLOCATOR_PROPERTIES* pProps)
 {
     return output_unimplemented("COutputPin_GetAllocatorRequirements", This);
 }
 
+/**
+ * \brief IMemInputPin::Receive (receives the next media sample int thre stream)
+ *
+ * \param[in]  This pointer to IMemInputPin interface
+ * \param[in]  pSample pointer to sample's IMediaSample interface
+ *
+ * \return S_OK - success
+ * \return S_FALSE - The sample was rejected
+ * \return E_POINTER - Null pointer
+ * \return VFW_E_INVALIDMEDIATYPE - invalid media type
+ * \return VFW_E_RUNTIME_ERROR - run-time error occured
+ * \return VFW_E_WRONG_STATE - pin is stopped
+ *
+ * \remarks
+ * Method san do on of the following:
+ * - reject sample
+ * - accept sample and process it in another thread
+ * - accept sample and process it before returning
+ *
+ * In second case method should increase reference count for sample (through AddRef)
+ * In the last case method might block indefinitely. If this might
+ * happen IMemInpuPin::ReceiveCAnBlock returns S_OK
+ *
+ * \note 
+ * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream, 
+ * IMemAllocator::GetBuffer runs in different (streaming) thread then other 
+ * methods (application thread).
+ * IMemoryInputPin::NewSegment runs either in streaming or application thread.
+ * Developer must use critical sections for thread-safing work.
+ *
+ */
 static HRESULT STDCALL COutputPin_Receive(IMemInputPin* This,
 					  /* [in] */ IMediaSample* pSample)
 {
@@ -396,6 +750,32 @@ static HRESULT STDCALL COutputPin_Receive(IMemInputPin* This,
     return 0;
 }
 
+/**
+ * \brief IMemInputPin::ReceiveMultiple (receives multiple samples in the stream)
+ *
+ * \param[in]  This pointer to IMemInputPin interface
+ * \param[in]  pSamples          pointer to array with samples
+ * \param[in]  nSamples          number of samples in array
+ * \param[out] nSamplesProcessed number of processed samples
+ *
+ * \return S_OK - success
+ * \return S_FALSE - The sample was rejected
+ * \return E_POINTER - Null pointer
+ * \return VFW_E_INVALIDMEDIATYPE - invalid media type
+ * \return VFW_E_RUNTIME_ERROR - run-time error occured
+ * \return VFW_E_WRONG_STATE - pin is stopped
+ *
+ * \remarks
+ * This method behaves like IMemInputPin::Receive but for array of samples
+ *
+ * \note 
+ * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream, 
+ * IMemAllocator::GetBuffer runs in different (streaming) thread then other 
+ * methods (application thread).
+ * IMemoryInputPin::NewSegment runs either in streaming or application thread.
+ * Developer must use critical sections for thread-safing work.
+ *
+ */
 static HRESULT STDCALL COutputPin_ReceiveMultiple(IMemInputPin * This,
 					    /* [size_is][in] */ IMediaSample **pSamples,
 					    /* [in] */ long nSamples,
@@ -404,16 +784,39 @@ static HRESULT STDCALL COutputPin_ReceiveMultiple(IMemInputPin * This,
     return output_unimplemented("COutputPin_ReceiveMultiple", This);
 }
 
+/**
+ * \brief IMemInputPin::ReceiveCanBlock (determines whether IMemInputPin:::Receive might block)
+ *
+ * \param[in]  This pointer to IMemInputPin interface
+ *
+ * \return S_OK - the pin might block
+ * \return S_FALSE - the pin will not block
+ *
+ */
 static HRESULT STDCALL COutputPin_ReceiveCanBlock(IMemInputPin * This)
 {
     return output_unimplemented("COutputPin_ReceiveCanBlock", This);
 }
 
+/**
+ * \brief COutputPin::SetFramePointer (sets internal frame pointer to an external buffer)
+ *
+ * \param[in]  This pointer to COutputPin class
+ * \param[in]  z    new pointer
+ *
+ */
 static void COutputPin_SetFramePointer(COutputPin* This, char** z)
 {
     This->mempin->frame_pointer = z;
 }
 
+/**
+ * \brief COutputPin::SetFramePointer2 (sets allocator's pointer to an external buffer)
+ *
+ * \param[in]  This pointer to COutputPin class
+ * \param[in]  z    new pointer
+ *
+ */
 static void COutputPin_SetPointer2(COutputPin* This, char* p)
 {
     if (This->mempin->pAllocator)
@@ -421,16 +824,36 @@ static void COutputPin_SetPointer2(COutputPin* This, char* p)
 	This->mempin->pAllocator->SetPointer(This->mempin->pAllocator, p);
 }
 
+/**
+ * \brief COutputPin::SetFrameSizePointer (sets pointer to variable that receives frame size)
+ *
+ * \param[in]  This pointer to COutputPin class
+ * \param[in]  z    new pointer
+ *
+ */
 static void COutputPin_SetFrameSizePointer(COutputPin* This, long* z)
 {
     This->mempin->frame_size_pointer = z;
 }
 
+/**
+ * \brief COutputPin::SetNewFormat(sets new media format for the pin)
+ *
+ * \param[in]  This pointer to COutputPin class
+ * \param[in]  amt  new media format
+ *
+ */
 static void COutputPin_SetNewFormat(COutputPin* This, const AM_MEDIA_TYPE* amt)
 {
     This->type = *amt;
 }
 
+/**
+ * \brief COutputPin destructor
+ *
+ * \param[in]  This pointer to COutputPin class
+ *
+ */
 static void COutputPin_Destroy(COutputPin* This)
 {
     if (This->mempin->vt)
@@ -442,6 +865,17 @@ static void COutputPin_Destroy(COutputPin* This)
     free(This);
 }
 
+/**
+ * \brief IUnknown::AddRef (increases reference counter for interface)
+ *
+ * \param[in]  This pointer to IUnknown class
+ *
+ * \return new value of reference counter
+ *
+ * \remarks
+ * Return value should be used only for debug purposes
+ *
+ */
 static HRESULT STDCALL COutputPin_AddRef(IUnknown* This)
 {
     Debug printf("COutputPin_AddRef(%p) called (%d)\n", This, ((COutputPin*)This)->refcount);
@@ -449,6 +883,18 @@ static HRESULT STDCALL COutputPin_AddRef(IUnknown* This)
     return 0;
 }
 
+/**
+ * \brief IUnknown::Release (desreases reference counter for interface)
+ *
+ * \param[in]  This pointer to IUnknown class
+ *
+ * \return new value of reference counter
+ *
+ * \remarks
+ * When reference counter reaches zero calls destructor
+ * Return value should be used only for debug purposes
+ *
+ */
 static HRESULT STDCALL COutputPin_Release(IUnknown* This)
 {
     Debug printf("COutputPin_Release(%p) called (%d)\n", This, ((COutputPin*)This)->refcount);
@@ -458,6 +904,17 @@ static HRESULT STDCALL COutputPin_Release(IUnknown* This)
     return 0;
 }
 
+/**
+ * \brief IUnknown::AddRef (increases reference counter for interface)
+ *
+ * \param[in]  This pointer to IUnknown class
+ *
+ * \return new value of reference counter
+ *
+ * \remarks
+ * Return value should be used only for debug purposes
+ *
+ */
 static HRESULT STDCALL COutputPin_M_AddRef(IUnknown* This)
 {
     COutputMemPin* p = (COutputMemPin*) This;
@@ -466,6 +923,18 @@ static HRESULT STDCALL COutputPin_M_AddRef(IUnknown* This)
     return 0;
 }
 
+/**
+ * \brief IUnknown::Release (desreases reference counter for interface)
+ *
+ * \param[in]  This pointer to IUnknown class
+ *
+ * \return new value of reference counter
+ *
+ * \remarks
+ * When reference counter reaches zero calls destructor
+ * Return value should be used only for debug purposes
+ *
+ */
 static HRESULT STDCALL COutputPin_M_Release(IUnknown* This)
 {
     COutputMemPin* p = (COutputMemPin*) This;
@@ -476,6 +945,15 @@ static HRESULT STDCALL COutputPin_M_Release(IUnknown* This)
     return 0;
 }
 
+/**
+ * \brief COutputPin constructor
+ *
+ * \param[in]  amt media type for pin
+ *
+ * \return pointer to COutputPin if success
+ * \return NULL if error occured
+ *
+ */
 COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt)
 {
     COutputPin* This = (COutputPin*) malloc(sizeof(COutputPin));
