@@ -601,7 +601,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
           zstream.avail_in = *size;
 
           modified = 1;
-          *dest = malloc (*size);
+          *dest = NULL;
           zstream.avail_out = *size;
           do {
             *size += 4000;
