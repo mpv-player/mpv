@@ -185,6 +185,7 @@ int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
 
     while(1){
 	int i;
+	int orig_w, orig_h;
 	// restore original fourcc:
 	if(sh_video->bih) sh_video->bih->biCompression=orig_fourcc;
 	if(!(sh_video->codec=find_video_codec(sh_video->format,
@@ -238,22 +239,30 @@ int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
 		sh_video->codec->name, sh_video->codec->drv);
 	    continue;
 	}
+	orig_w = sh_video->bih ? sh_video->bih->biWidth : sh_video->disp_w;
+	orig_h = sh_video->bih ? sh_video->bih->biHeight : sh_video->disp_h;
+	sh_video->disp_w = orig_w;
+	sh_video->disp_h = orig_h;
 	// it's available, let's try to init!
 	if(sh_video->codec->flags & CODECS_FLAG_ALIGN16){
 	    // align width/height to n*16
-	    // FIXME: save orig w/h, and restore if codec init failed!
-	    if(sh_video->bih){
-		sh_video->disp_w=sh_video->bih->biWidth=(sh_video->bih->biWidth+15)&(~15);
-		sh_video->disp_h=sh_video->bih->biHeight=(sh_video->bih->biHeight+15)&(~15);
-	    } else {
 		sh_video->disp_w=(sh_video->disp_w+15)&(~15);
 		sh_video->disp_h=(sh_video->disp_h+15)&(~15);
-	    }
+	}
+	if (sh_video->bih) {
+		sh_video->bih->biWidth = sh_video->disp_w;
+		sh_video->bih->biHeight = sh_video->disp_h;
 	}
 	// init()
 	mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_OpeningVideoDecoder,mpvdec->info->short_name,mpvdec->info->name);
 	if(!mpvdec->init(sh_video)){
 	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_VDecoderInitFailed);
+	    sh_video->disp_w=orig_w;
+	    sh_video->disp_h=orig_h;
+	    if (sh_video->bih) {
+		sh_video->bih->biWidth = sh_video->disp_w;
+		sh_video->bih->biHeight = sh_video->disp_h;
+	    }
 	    continue; // try next...
 	}
 	// Yeah! We got it!
