@@ -572,6 +572,44 @@ static int num_h264_pps=0;
 
 static int num_mp3audio_packets=0;
 
+static void clear_stats()
+{
+  num_elementary_packets100=0;
+  num_elementary_packets101=0;
+  num_elementary_packets1B6=0;
+  num_elementary_packets12x=0;
+  num_elementary_packetsPES=0;
+  num_h264_slice=0; //combined slice
+  num_h264_dpa=0; //DPA Slice
+  num_h264_dpb=0; //DPB Slice
+  num_h264_dpc=0; //DPC Slice
+  num_h264_idr=0; //IDR Slice
+  num_h264_sps=0;
+  num_h264_pps=0;
+  num_mp3audio_packets=0;
+}
+
+//assumes demuxer->synced < 2
+static inline void update_stats(int head)
+{
+  if(head==0x1B6) ++num_elementary_packets1B6;
+  else if(head==0x100) ++num_elementary_packets100;
+  else if(head==0x101) ++num_elementary_packets101;
+  else if(head==0x1BD || (0x1C0<=head && head<=0x1EF))
+    num_elementary_packetsPES++;
+  else if(head>=0x120 && head<=0x12F) ++num_elementary_packets12x;
+  else if(head>=0x100 && head<0x1B0)
+  {
+    if((head&~0x60) == 0x101) ++num_h264_slice;
+    else if((head&~0x60) == 0x102) ++num_h264_dpa;
+    else if((head&~0x60) == 0x103) ++num_h264_dpb;
+    else if((head&~0x60) == 0x104) ++num_h264_dpc;
+    else if((head&~0x60) == 0x105 && head != 0x105) ++num_h264_idr;
+    else if((head&~0x60) == 0x107 && head != 0x107) ++num_h264_sps;
+    else if((head&~0x60) == 0x108 && head != 0x108) ++num_h264_pps;
+  }
+}
+
 static int demux_mpg_probe(demuxer_t *demuxer) {
   int pes=1;
   int tmp;
@@ -586,19 +624,7 @@ static int demux_mpg_probe(demuxer_t *demuxer) {
   }
   stream_seek(demuxer->stream,tmppos);
 
-  num_elementary_packets100=0;
-  num_elementary_packets101=0;
-  num_elementary_packets1B6=0;
-  num_elementary_packets12x=0;
-  num_elementary_packetsPES=0;
-  num_h264_slice=0; //combined slice
-  num_h264_dpa=0; //DPA Slice
-  num_h264_dpb=0; //DPB Slice
-  num_h264_dpc=0; //DPC Slice
-  num_h264_idr=0; //IDR Slice
-  num_h264_sps=0;
-  num_h264_pps=0;
-  num_mp3audio_packets=0;
+  clear_stats();
 
   if(demux_mpg_open(demuxer))
     file_format=DEMUXER_TYPE_MPEG_PS;
@@ -784,26 +810,13 @@ do{
         }
       if(demux->synced==3) demux->synced=(ret==1)?2:0; // PES detect
   } else {
+    update_stats(head);
     if(head>=0x100 && head<0x1B0){
-      if(head==0x100) ++num_elementary_packets100; else
-      if(head==0x101) ++num_elementary_packets101; else
-      if(head>=0x120 && head<=0x12F) ++num_elementary_packets12x;
-      
-      if((head&~0x60) == 0x101) ++num_h264_slice; else
-      if((head&~0x60) == 0x102) ++num_h264_dpa; else
-      if((head&~0x60) == 0x103) ++num_h264_dpb; else
-      if((head&~0x60) == 0x104) ++num_h264_dpc; else
-      if((head&~0x60) == 0x105 && head != 0x105) ++num_h264_idr; else
-      if((head&~0x60) == 0x107 && head != 0x107) ++num_h264_sps; else
-      if((head&~0x60) == 0x108 && head != 0x108) ++num_h264_pps;
-      
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... elementary video packet found: %03X\n",head);
     } else
     if((head>=0x1C0 && head<0x1F0) || head==0x1BD){
-      ++num_elementary_packetsPES;
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... PES packet found: %03X\n",head);
-    } else
-      if(head==0x1B6) ++num_elementary_packets1B6;
+    }
 
     if( ( (num_elementary_packets100>50 && num_elementary_packets101>50) ||
           (num_elementary_packetsPES>50) ) && skipped>4000000){
