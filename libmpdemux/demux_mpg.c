@@ -1059,11 +1059,13 @@ static demuxer_t* demux_mpg_ps_open(demuxer_t* demuxer)
         clear_stats();
         do {
             head=sync_video_packet(demuxer->video);
+            if(!head) break;
             update_stats(head);
             skip_video_packet(demuxer->video);
-        } while(stream_tell(demuxer->stream) < pos + ps_probe);
+        } while(stream_tell(demuxer->stream) < pos + ps_probe && !demuxer->stream->eof);
 
         ds_free_packs(demuxer->video);
+        demuxer->stream->eof=0;
         stream_seek(demuxer->stream, pos);
         mp_msg(MSGT_DEMUX,MSGL_INFO,"MPEG packet stats: p100: %d  p101: %d p1B6: %d p12x: %d sli: %d a: %d b: %d c: %d idr: %d sps: %d pps: %d\n",
             num_elementary_packets100, num_elementary_packets101,
