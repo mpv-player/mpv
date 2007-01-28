@@ -29,8 +29,10 @@
 
 typedef struct mpg_demuxer {
   float last_pts;
-  float final_pts;
-  int has_valid_timestamps;
+  float first_pts;              // first pts found in stream
+  float first_to_final_pts_len; // difference between final pts and first pts
+  int has_valid_timestamps;     // !=0 iff time stamps look linear
+                                // (not necessarily starting with 0)
   unsigned int es_map[0x40];	//es map of stream types (associated to the pes id) from 0xb0 to 0xef
   int num_a_streams;
   int a_stream_ids[MAX_A_STREAMS];
@@ -102,49 +104,123 @@ static int parse_psm(demuxer_t *demux, int len) {
 // 500000 is a wild guess
 #define TIMESTAMP_PROBE_LEN 500000
 
+//MAX_PTS_DIFF_FOR_CONSECUTIVE denotes the maximum difference
+//between two pts to consider them consecutive
+//1.0 is a wild guess
+#define MAX_PTS_DIFF_FOR_CONSECUTIVE 1.0
+
+//returns the first pts found within TIME_STAMP_PROBE_LEN bytes after stream_pos in demuxer's stream.
+//if no pts is found or an error occurs, -1.0 is returned.
+//Packs are freed.
+static float read_first_mpeg_pts_at_position(demuxer_t* demuxer, off_t stream_pos)
+{
+  stream_t *s = demuxer->stream;
+  mpg_demuxer_t *mpg_d = demuxer->priv;
+  float pts = -1.0; //the pts to return;
+  float found_pts1; //the most recently found pts
+  float found_pts2; //the pts found before found_pts1
+  float found_pts3; //the pts found before found_pts2
+  int found = 0;
+
+  if(!mpg_d || stream_pos < 0)
+    return pts;
+
+  found_pts3 = found_pts2 = found_pts1 = mpg_d->last_pts;
+  stream_seek(s, stream_pos);
+
+  //We look for pts.
+  //However, we do not stop at the first found one, as timestamps may reset
+  //Therefore, we seek until we found three consecutive
+  //pts within MAX_PTS_DIFF_FOR_CONSECUTIVE.
+
+  while(found<3 && !s->eof
+   && (fabsf(found_pts2-found_pts1) < MAX_PTS_DIFF_FOR_CONSECUTIVE)
+   && (fabsf(found_pts3-found_pts2) < MAX_PTS_DIFF_FOR_CONSECUTIVE)
+   && (stream_tell(s) < stream_pos + TIMESTAMP_PROBE_LEN)
+   && ds_fill_buffer(demuxer->video))
+  {
+    if(mpg_d->last_pts != found_pts1)
+    {
+      if(!found)
+        found_pts3 = found_pts2 = found_pts1 = mpg_d->last_pts; //the most recently found pts
+      else
+      {
+        found_pts3 = found_pts2;
+        found_pts2 = found_pts1;
+        found_pts1 = mpg_d->last_pts;
+      }
+      found++;
+    }
+  }
+
+  if(found == 3) pts = found_pts3;
+
+  //clean up from searching of first pts;
+  ds_free_packs(demuxer->audio);
+  ds_free_packs(demuxer->video);
+  ds_free_packs(demuxer->sub);
+
+  return pts;
+}
+
 /// Open an mpg physical stream
 static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
   stream_t *s = demuxer->stream;
-  off_t pos = stream_tell(s);
-  off_t end_seq_start;
-  float half_pts = 0.0;
   mpg_demuxer_t* mpg_d;
 
   if (!ds_fill_buffer(demuxer->video)) return 0;
-  end_seq_start = demuxer->movi_end-TIMESTAMP_PROBE_LEN;
   mpg_d = calloc(1,sizeof(mpg_demuxer_t));
-  demuxer->priv = mpg_d;
-  mpg_d->final_pts = 0.0;
-  mpg_d->has_valid_timestamps = 1;
-  mpg_d->num_a_streams = 0;
-  if (demuxer->seekable && stream_tell(demuxer->stream) < end_seq_start) {
-    off_t half_pos = pos + end_seq_start / 2;
-    stream_seek(s, half_pos);
-    while ((!s->eof) && ds_fill_buffer(demuxer->video) && half_pts == 0.0) {
-      half_pts = mpg_d->last_pts;
-      if (stream_tell(s) > half_pos + TIMESTAMP_PROBE_LEN)
-        break;
-    }
-    stream_seek(s,end_seq_start);
-    while ((!s->eof) && ds_fill_buffer(demuxer->video)) {
-      if (mpg_d->final_pts < mpg_d->last_pts) mpg_d->final_pts = mpg_d->last_pts;
-      if (stream_tell(s) > demuxer->movi_end)
-        break;
-    }
-    // educated guess about validity of timestamps
-    if (mpg_d->final_pts > 3 * half_pts || mpg_d->final_pts < 1.5 * half_pts) {
-      mpg_d->has_valid_timestamps = 0;
-    }
-    ds_free_packs(demuxer->audio);
-    ds_free_packs(demuxer->video);
-    ds_free_packs(demuxer->sub);
-    demuxer->stream->eof=0; // clear eof flag
-    demuxer->video->eof=0;
-    demuxer->audio->eof=0;
-    
-    stream_seek(s,pos);
-    ds_fill_buffer(demuxer->video);
-  }
+  if(mpg_d)
+  {
+    demuxer->priv = mpg_d;
+    mpg_d->last_pts = -1.0;
+    mpg_d->first_pts = -1.0;
+
+    //if seeking is allowed set has_valid_timestamps if appropriate
+    if(demuxer->seekable
+       && demuxer->stream->type == STREAMTYPE_FILE 
+       && demuxer->movi_start != demuxer-> movi_end
+    )
+    {
+      //We seek to the beginning of the stream, to somewhere in the
+      //middle, and to the end of the stream, while remembering the pts
+      //at each of the three positions. With these pts, we check whether
+      //or not the pts are "linear enough" to justify seeking by the pts
+      //of the stream
+
+      //The position where the stream is now
+      off_t pos = stream_tell(s);
+      float first_pts = read_first_mpeg_pts_at_position(demuxer, demuxer->movi_start);
+      if(first_pts != -1.0)
+      {
+        float middle_pts = read_first_mpeg_pts_at_position(demuxer, (demuxer->movi_end - demuxer->movi_start)/2);
+        if(middle_pts != -1.0)
+        {
+          float final_pts = read_first_mpeg_pts_at_position(demuxer, demuxer->movi_end - TIMESTAMP_PROBE_LEN);
+          if(final_pts != -1.0)
+          {
+            // found proper first, middle, and final pts.
+            float proportion = (middle_pts-first_pts==0) ? -1 : (final_pts-middle_pts)/(middle_pts-first_pts);
+            // if they are linear enough set has_valid_timestamps
+            if((0.5 < proportion) && (proportion < 2))
+            {
+              mpg_d->first_pts = first_pts;
+              mpg_d->first_to_final_pts_len = final_pts - first_pts;
+              mpg_d->has_valid_timestamps = 1;
+            }
+          }
+        }
+      }
+
+      //Cleaning up from seeking in stream
+      demuxer->stream->eof=0;
+      demuxer->video->eof=0;
+      demuxer->audio->eof=0;
+
+      stream_seek(s,pos);
+      ds_fill_buffer(demuxer->video);
+    } // if ( demuxer->seekable )
+  } // if ( mpg_d )
   return demuxer;
 }
 
@@ -770,8 +846,8 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
   //================= seek in MPEG ==========================
   //calculate the pts to seek to
     if(flags & 2) {
-      if (mpg_d && mpg_d->final_pts > 0.0)
-        newpts += mpg_d->final_pts * rel_seek_secs;
+      if (mpg_d && mpg_d->first_to_final_pts_len > 0.0)
+        newpts += mpg_d->first_to_final_pts_len * rel_seek_secs;
       else
         newpts += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) * oldpts / oldpos;
     } else
@@ -784,8 +860,8 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
     } else {
 	// time seek (secs)
         if (mpg_d && mpg_d->has_valid_timestamps) {
-          if (mpg_d->final_pts > 0.0)
-            newpos += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) / mpg_d->final_pts;
+          if (mpg_d->first_to_final_pts_len > 0.0)
+            newpos += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) / mpg_d->first_to_final_pts_len;
           else if (oldpts > 0.0)
             newpos += rel_seek_secs * (oldpos - demuxer->movi_start) / oldpts;
         } else if(!sh_video || !sh_video->i_bps) // unspecified or VBR
@@ -871,14 +947,14 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
               return DEMUXER_CTRL_GUESS;
             }
             if (mpg_d && mpg_d->has_valid_timestamps) {
-              *((double *)arg)=(double)mpg_d->final_pts;
-              return DEMUXER_CTRL_GUESS;
+              *((double *)arg)=(double)mpg_d->first_to_final_pts_len;
+              return DEMUXER_CTRL_OK;
             }
     		return DEMUXER_CTRL_DONTKNOW;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
-            if (mpg_d && mpg_d->has_valid_timestamps && mpg_d->final_pts > 0.0) {
-              *((int *)arg)=(int)(100 * mpg_d->last_pts / mpg_d->final_pts);
+            if (mpg_d && mpg_d->has_valid_timestamps && mpg_d->first_to_final_pts_len > 0.0) {
+              *((int *)arg)=(int)(100 * (mpg_d->last_pts-mpg_d->first_pts) / mpg_d->first_to_final_pts_len);
               return DEMUXER_CTRL_OK;
             }
 	    return DEMUXER_CTRL_DONTKNOW;
