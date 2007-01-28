@@ -811,15 +811,13 @@ do{
       if(demux->synced==3) demux->synced=(ret==1)?2:0; // PES detect
   } else {
     update_stats(head);
-    if(head>=0x100 && head<0x1B0){
+    if(head>=0x100 && head<0x1B0)
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... elementary video packet found: %03X\n",head);
-    } else
-    if((head>=0x1C0 && head<0x1F0) || head==0x1BD){
+    else if((head>=0x1C0 && head<0x1F0) || head==0x1BD)
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... PES packet found: %03X\n",head);
-    }
 
-    if( ( (num_elementary_packets100>50 && num_elementary_packets101>50) ||
-          (num_elementary_packetsPES>50) ) && skipped>4000000){
+    if(((num_elementary_packets100>50 && num_elementary_packets101>50) ||
+        (num_elementary_packetsPES>50)) && skipped>4000000){
         mp_msg(MSGT_DEMUX,MSGL_V,"sync_mpeg_ps: seems to be ES/PES stream...\n");
         demux->stream->eof=1;
         break;
