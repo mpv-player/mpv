@@ -17,6 +17,18 @@
  */
 static const int SAFETY_ACEL = 1024;
 
+/**
+ * \brief IPin::QueryInternalConnections (retries pin's internal connections)
+ *
+ * \param[in]     This  pointer to IPin interface
+ * \param[out]    apPin Array that receives pins, internally connected to this
+ * \param[in,out] nPint Size of an array
+ *
+ * \return S_OK - success
+ * \return S_FALSE - pin rejects media type
+ * \return E_NOTIMPL - not implemented
+ *
+ */
 static long STDCALL CMediaSample_QueryInterface(IUnknown* This,
 						/* [in] */ const GUID* iid,
 						/* [iid_is][out] */ void **ppv)
@@ -39,6 +51,17 @@ static long STDCALL CMediaSample_QueryInterface(IUnknown* This,
     return E_NOINTERFACE;
 }
 
+/**
+ * \brief IUnknown::AddRef (increases reference counter for interface)
+ *
+ * \param[in]  This pointer to IUnknown class
+ *
+ * \return new value of reference counter
+ *
+ * \remarks
+ * Return value should be used only for debug purposes
+ *
+ */
 static long STDCALL CMediaSample_AddRef(IUnknown* This)
 {
     Debug printf("CMediaSample_AddRef(%p) called\n", This);
@@ -46,6 +69,12 @@ static long STDCALL CMediaSample_AddRef(IUnknown* This)
     return 0;
 }
 
+/**
+ * \brief CMediaSample destructor
+ *
+ * \param[in] This pointer to CMediaSample object
+ *
+ */
 void CMediaSample_Destroy(CMediaSample* This)
 {
 
@@ -57,6 +86,18 @@ void CMediaSample_Destroy(CMediaSample* This)
     free(This);
 }
 
+/**
+ * \brief IUnknown::Release (desreases reference counter for interface)
+ *
+ * \param[in]  This pointer to IUnknown class
+ *
+ * \return new value of reference counter
+ *
+ * \remarks
+ * When reference counter reaches zero calls destructor
+ * Return value should be used only for debug purposes
+ *
+ */
 static long STDCALL CMediaSample_Release(IUnknown* This)
 {
     CMediaSample* parent = (CMediaSample*)This;
@@ -71,6 +112,18 @@ static long STDCALL CMediaSample_Release(IUnknown* This)
     return 0;
 }
 
+/**
+ * \brief IMediaSample::GetPointer (retrieves a read/write pointer to the media sample's buffer)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[out] address of variable that receives pointer to sample's buffer
+ *
+ * \return S_OK success
+ * \return apropriate error otherwise 
+ *
+ * \note The calles should not free or reallocate buffer
+ *
+ */
 static HRESULT STDCALL CMediaSample_GetPointer(IMediaSample* This,
 					       /* [out] */ BYTE** ppBuffer)
 {
@@ -81,12 +134,35 @@ static HRESULT STDCALL CMediaSample_GetPointer(IMediaSample* This,
     return 0;
 }
 
+/**
+ * \brief IMediaSample::GetSize (retrieves a size of buffer in bytes)
+ *
+ * \param[in] This pointer to CMediaSample object
+ *
+ * \return size of buffer in bytes
+ *
+ */
 static long STDCALL CMediaSample_GetSize(IMediaSample * This)
 {
     Debug printf("CMediaSample_GetSize(%p) called -> %d\n", This, ((CMediaSample*) This)->size);
     return ((CMediaSample*) This)->size;
 }
 
+/**
+ * \brief IMediaSample::GetTime (retrieves a stream time at wich sample sould start and finish)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[out] pTimeStart pointer to variable that receives start time
+ * \param[out] pTimeEnd pointer to variable that receives end time
+ *
+ * \return S_OK success
+ * \return VFW_E_NO_STOP_TIME The sample has valid start time, but no stop time
+ * \return VFW_E_SAMPLE_TIME_NOT_SET The sample is not time-stamped 
+ *
+ * \remarks
+ * Both values are relative to stream time
+ *
+ */
 static HRESULT STDCALL CMediaSample_GetTime(IMediaSample * This,
 					    /* [out] */ REFERENCE_TIME *pTimeStart,
 					    /* [out] */ REFERENCE_TIME *pTimeEnd)
@@ -95,6 +171,22 @@ static HRESULT STDCALL CMediaSample_GetTime(IMediaSample * This,
     return E_NOTIMPL;
 }
 
+/**
+ * \brief IMediaSample::SetTime (sets a stream time at wich sample sould start and finish)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[out] pTimeStart pointer to variable that contains start time
+ * \param[out] pTimeEnd pointer to variable that contains end time
+ *
+ * \return S_OK success
+ * \return apropriate error otherwise
+ *
+ * \remarks
+ * Both values are relative to stream time
+ * To invalidate the stream times set pTimeStart and pTimeEnd to NULL. this will cause
+ * IMEdiaSample::GetTime to return VFW_E_SAMPLE_TIME_NOT_SET
+ *
+ */
 static HRESULT STDCALL CMediaSample_SetTime(IMediaSample * This,
 					    /* [in] */ REFERENCE_TIME *pTimeStart,
 					    /* [in] */ REFERENCE_TIME *pTimeEnd)
@@ -103,6 +195,18 @@ static HRESULT STDCALL CMediaSample_SetTime(IMediaSample * This,
     return E_NOTIMPL;
 }
 
+/**
+ * \brief IMediaSample::IsSyncPoint (determines if start of this sample is sync point)
+ *
+ * \param[in] This pointer to CMediaSample object
+ *
+ * \return S_OK start of this sample is sync point
+ * \return S_FALSE start of this sample is not sync point
+ *
+ * \remarks
+ * If bTemporalCompression of AM_MEDIA_TYPE is FALSE, all samples are sync points.
+ *
+ */
 static HRESULT STDCALL CMediaSample_IsSyncPoint(IMediaSample * This)
 {
     Debug printf("CMediaSample_IsSyncPoint(%p) called\n", This);
@@ -111,6 +215,16 @@ static HRESULT STDCALL CMediaSample_IsSyncPoint(IMediaSample * This)
     return 1;
 }
 
+/**
+ * \brief IMediaSample::SetSyncPoint (specifies if start of this sample is sync point)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[in] bIsSyncPoint specifies whether this is sync point or not
+ *
+ * \return S_OK success
+ * \return apropriate error code otherwise
+ *
+ */
 static HRESULT STDCALL CMediaSample_SetSyncPoint(IMediaSample * This,
 						 long bIsSyncPoint)
 {
@@ -119,6 +233,19 @@ static HRESULT STDCALL CMediaSample_SetSyncPoint(IMediaSample * This,
     return 0;
 }
 
+/**
+ * \brief IMediaSample::IsPreroll (determines if this sample is preroll sample)
+ *
+ * \param[in] This pointer to CMediaSample object
+ *
+ * \return S_OK if this sample is preroll sample
+ * \return S_FALSE if this sample is not preroll sample
+ *
+ * \remarks
+ * Preroll samples are processed but  not displayed. They are lokated in media stream
+ * before displayable samples.
+ *
+ */
 static HRESULT STDCALL CMediaSample_IsPreroll(IMediaSample * This)
 {
     Debug printf("CMediaSample_IsPreroll(%p) called\n", This);
@@ -129,6 +256,20 @@ static HRESULT STDCALL CMediaSample_IsPreroll(IMediaSample * This)
     return 1;//S_FALSE
 }
 
+/**
+ * \brief IMediaSample::SetPreroll (specifies if this sample is preroll sample)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[in] bIsPreroll specifies whether this sample is preroll sample or not
+ *
+ * \return S_OK success
+ * \return apropriate error code otherwise
+ *
+ * \remarks
+ * Preroll samples are processed but  not displayed. They are lokated in media stream
+ * before displayable samples.
+ *
+ */
 static HRESULT STDCALL CMediaSample_SetPreroll(IMediaSample * This,
 					       long bIsPreroll)
 {
@@ -137,12 +278,30 @@ static HRESULT STDCALL CMediaSample_SetPreroll(IMediaSample * This,
     return 0;
 }
 
+/**
+ * \brief IMediaSample::GetActualDataLength (retrieves the length of valid data in the buffer)
+ *
+ * \param[in] This pointer to CMediaSample object
+ *
+ * \return length of valid data in buffer in bytes
+ *
+ */
 static long STDCALL CMediaSample_GetActualDataLength(IMediaSample* This)
 {
     Debug printf("CMediaSample_GetActualDataLength(%p) called -> %d\n", This, ((CMediaSample*)This)->actual_size);
     return ((CMediaSample*)This)->actual_size;
 }
 
+/**
+ * \brief IMediaSample::SetActualDataLength (specifies the length of valid data in the buffer)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[in]  __MIDL_0010 length of data in sample in bytes
+ *
+ * \return S_OK success
+ * \return VFW_E_BUFFER_OVERFLOW length specified by parameter is larger than buffer size
+ *
+ */
 static HRESULT STDCALL CMediaSample_SetActualDataLength(IMediaSample* This,
 							long __MIDL_0010)
 {
@@ -163,6 +322,21 @@ static HRESULT STDCALL CMediaSample_SetActualDataLength(IMediaSample* This,
     return 0;
 }
 
+/**
+ * \brief IMediaSample::GetMediaType (retrieves media type, if it changed from previous sample)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[out] ppMediaType address of variable that receives pointer to AM_MEDIA_TYPE.
+ *
+ * \return S_OK success
+ * \return S_FALSE Media type was not changed from previous sample
+ * \return E_OUTOFMEMORY Insufficient memory
+ *
+ * \remarks
+ * If media type is not changed from previous sample, ppMediaType is null
+ * If method returns S_OK caller should free memory allocated for structure 
+ * including pbFormat block
+ */
 static HRESULT STDCALL CMediaSample_GetMediaType(IMediaSample* This,
 						 AM_MEDIA_TYPE** ppMediaType)
 {
@@ -186,6 +360,16 @@ static HRESULT STDCALL CMediaSample_GetMediaType(IMediaSample* This,
     return 0;
 }
 
+/**
+ * \brief IMediaType::SetMediaType (specifies media type for sample)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[in] pMediaType pointer to AM_MEDIA_TYPE specifies new media type
+ *
+ * \return S_OK success
+ * \return E_OUTOFMEMORY insufficient memory
+ *
+ */
 static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
 						 AM_MEDIA_TYPE *pMediaType)
 {
@@ -209,12 +393,37 @@ static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
     return 0;
 }
 
+/**
+ * \brief IMediaSample::IsDiscontinuity (determines if this sample represents data break 
+ *        in stream)
+ *
+ * \param[in] This pointer to CMediaSample object
+ *
+ * \return S_OK if this sample is break in data stream
+ * \return S_FALSE otherwise
+ *
+ * \remarks 
+ * Discontinuity occures when filter seeks to different place in the stream or when drops
+ * samples.
+ *
+ */
 static HRESULT STDCALL CMediaSample_IsDiscontinuity(IMediaSample * This)
 {
     Debug printf("CMediaSample_IsDiscontinuity(%p) called\n", This);
     return ((CMediaSample*) This)->isDiscontinuity;
 }
 
+/**
+ * \brief IMediaSample::IsDiscontinuity (specifies whether this sample represents data break 
+ *        in stream)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[in] bDiscontinuity if TRUE this sample represents discontinuity with previous sample
+ *
+ * \return S_OK success
+ * \return apropriate error code otherwise
+ *
+ */
 static HRESULT STDCALL CMediaSample_SetDiscontinuity(IMediaSample * This,
 						     long bDiscontinuity)
 {
@@ -223,6 +432,17 @@ static HRESULT STDCALL CMediaSample_SetDiscontinuity(IMediaSample * This,
     return 0;
 }
 
+/**
+ * \brief IMediaSample::GetMediaTime (retrieves the media times of this sample)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[out] pTimeStart pointer to variable that receives start time
+ * \param[out] pTimeEnd pointer to variable that receives end time
+ *
+ * \return S_OK success
+ * \return VFW_E_MEDIA_TIME_NOT_SET The sample is not time-stamped 
+ *
+ */
 static HRESULT STDCALL CMediaSample_GetMediaTime(IMediaSample * This,
 						 /* [out] */ LONGLONG *pTimeStart,
 						 /* [out] */ LONGLONG *pTimeEnd)
@@ -235,6 +455,20 @@ static HRESULT STDCALL CMediaSample_GetMediaTime(IMediaSample * This,
     return 0;
 }
 
+/**
+ * \brief IMediaSample::GetMediaTime (retrieves the media times of this sample)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[out] pTimeStart pointer to variable that specifies start time
+ * \param[out] pTimeEnd pointer to variable that specifies end time
+ *
+ * \return S_OK success
+ * \return apropriate error code otherwise
+ *
+ * \remarks
+ * To invalidate the media times set pTimeStart and pTimeEnd to NULL. this will cause
+ * IMEdiaSample::GetTime to return VFW_E_MEDIA_TIME_NOT_SET
+ */
 static HRESULT STDCALL CMediaSample_SetMediaTime(IMediaSample * This,
 						 /* [in] */ LONGLONG *pTimeStart,
 						 /* [in] */ LONGLONG *pTimeEnd)
@@ -247,7 +481,13 @@ static HRESULT STDCALL CMediaSample_SetMediaTime(IMediaSample * This,
     return 0;
 }
 
-// extension for direct memory write or decompressed data
+/**
+ * \brief CMediaSample::SetPointer (extension for direct memory write of decompressed data)
+ *
+ * \param[in] This pointer to CMediaSample object
+ * \param[in] pointer pointer to an external buffer to store data to
+ *
+ */
 static void CMediaSample_SetPointer(CMediaSample* This, char* pointer)
 {
     Debug printf("CMediaSample_SetPointer(%p) called  -> %p\n", This, pointer);
@@ -257,12 +497,27 @@ static void CMediaSample_SetPointer(CMediaSample* This, char* pointer)
 	This->block = This->own_block;
 }
 
+/**
+ * \brief CMediaSample::SetPointer (resets pointer to external buffer with internal one)
+ *
+ * \param[in] This pointer to CMediaSample object
+ *
+ */
 static void CMediaSample_ResetPointer(CMediaSample* This)
 {
     Debug printf("CMediaSample_ResetPointer(%p) called\n", This);
     This->block = This->own_block;
 }
 
+/**
+ * \brief CMediaSample constructor
+ *
+ * \param[in] allocator IMemallocator interface of allocator to use
+ * \param[in] _size size of internal buffer
+ *
+ * \return pointer to CMediaSample object of NULL if error occured
+ *
+ */
 CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int _size)
 {
     CMediaSample* This = (CMediaSample*) malloc(sizeof(CMediaSample));
