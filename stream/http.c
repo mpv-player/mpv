@@ -680,7 +680,7 @@ base64_encode(const void *enc, int encLen, char *out, int outMax) {
 	shift = 0;
 	outMax &= ~3;
 
-	while( outLen<outMax ) {
+	while(1) {
 		if( encLen>0 ) {
 			// Shift in byte
 			bits <<= 8;
@@ -706,15 +706,14 @@ base64_encode(const void *enc, int encLen, char *out, int outMax) {
 
 		// Encode 6 bit segments
 		while( shift>=6 ) {
+			if (outLen >= outMax)
+				return -1;
 			shift -= 6;
 			*out = b64[ (bits >> shift) & 0x3F ];
 			out++;
 			outLen++;
 		}
 	}
-
-	// Output overflow
-	return -1;
 }
 
 //! If this function succeeds you must closesocket stream->fd
