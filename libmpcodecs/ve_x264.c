@@ -86,6 +86,11 @@ void x264enc_set_param(m_option_t* opt, char* arg)
         initted = 1;
     }
 
+    if(!arg) {
+        parse_error = 1;
+        return;
+    }
+
     while(*arg) {
         char *name = arg;
         char *value;
