@@ -364,7 +364,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
   }
   size=(header[1]<<16)+(header[2]<<8)+(header[3]);
   flags1=header[4];
-  if ((flags1!=0x40)&&(flags1!=0x42))
+  if ((flags1!=0x40)&&(flags1!=0x42)&&(flags1!=0x41))
   {
 #ifdef LOG
     printf("got flags1: 0x%02x\n",flags1);
