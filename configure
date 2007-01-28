@@ -690,6 +690,12 @@ elif linux ; then
   _ranlib='true'
 fi
 
+if win32 ; then
+  _exesuf=".exe"
+  # -lwinmm is always needed for osdep/timer-win2.c
+  _ld_extra="$_ld_extra -lwinmm"
+fi
+
 # Check how to call 'head' and 'tail'. Newer versions spit out warnings
 # if used as 'head -1' instead of 'head -n 1', but older versions don't
 # know about '-n'.
@@ -2262,11 +2268,6 @@ test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
 test -z "$_mandir" && _mandir="$_prefix/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir" && _libdir="$_prefix/lib"
-
-# For lack of a better place to put platform-specific stuff ..
-win32 && _exesuf=".exe"
-# -lwinmm is always needed for osdep/timer-win2.c
-win32 && _ld_extra="$_ld_extra -lwinmm"
 
 
 if x86_32 ; then
