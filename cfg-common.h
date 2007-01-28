@@ -235,6 +235,7 @@
 	{"tsprog", &ts_prog, CONF_TYPE_INT, CONF_RANGE, 0, 65534, NULL},
 #define TS_MAX_PROBE_SIZE 2000000 /* don't forget to change this in libmpdemux/demux_ts.c too */
 	{"tsprobe", &ts_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
+	{"psprobe", &ps_probe, CONF_TYPE_POSITION, 0, 0, TS_MAX_PROBE_SIZE, NULL},
 	{"tskeepbroken", &ts_keep_broken, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	// draw by slices or whole frame (useful with libmpeg2/libavcodec)
@@ -384,6 +385,7 @@ extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
 extern int ts_prog;
 extern int ts_keep_broken;
 extern off_t ts_probe;
+extern off_t ps_probe;
 
 #include "stream/tv.h"
 #include "stream/stream_radio.h"

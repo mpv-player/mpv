@@ -41,6 +41,7 @@ typedef struct mpg_demuxer {
 
 extern char* dvdsub_lang;
 static int mpeg_pts_error=0;
+off_t ps_probe = 0;
 
 static int parse_psm(demuxer_t *demux, int len) {
   unsigned char c, id, type;
@@ -1049,6 +1050,35 @@ static demuxer_t* demux_mpg_ps_open(demuxer_t* demuxer)
         } else {
             sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;
         }
+    }
+
+    if(!sh_video->format && ps_probe > 0) {
+        int mpeg2, h264, mpeg4, head;
+        off_t pos = stream_tell(demuxer->stream);
+
+        clear_stats();
+        do {
+            head=sync_video_packet(demuxer->video);
+            update_stats(head);
+            skip_video_packet(demuxer->video);
+        } while(stream_tell(demuxer->stream) < pos + ps_probe);
+
+        ds_free_packs(demuxer->video);
+        stream_seek(demuxer->stream, pos);
+        mp_msg(MSGT_DEMUX,MSGL_INFO,"MPEG packet stats: p100: %d  p101: %d p1B6: %d p12x: %d sli: %d a: %d b: %d c: %d idr: %d sps: %d pps: %d\n",
+            num_elementary_packets100, num_elementary_packets101,
+            num_elementary_packets1B6, num_elementary_packets12x,
+            num_h264_slice, num_h264_dpa, num_h264_dpb, num_h264_dpc,
+            num_h264_idr, num_h264_sps, num_h264_pps);
+
+        if(num_elementary_packets1B6>3 && num_elementary_packets12x>=1 &&
+            num_elementary_packets100<=num_elementary_packets12x)
+            sh_video->format = 0x10000004;
+        else if((num_h264_slice>3 || (num_h264_dpa>3 && num_h264_dpb>3 && num_h264_dpc>3)) &&
+            num_h264_sps>=1 && num_h264_pps>=1 && num_h264_idr>=1 &&
+            num_elementary_packets1B6==0)
+                sh_video->format = 0x10000005;
+        else sh_video->format = 0x10000002;
     }
 
     return demuxer;
