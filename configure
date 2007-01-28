@@ -787,8 +787,6 @@ bugs!
 
         GCC 2.96 IS NOT AND WILL NOT BE SUPPORTED BY US !
 
-    *** For details please read DOCS/HTML/en/users-vs-dev.html ***
-
 EOF
     die "Bad gcc version"
   fi
@@ -798,7 +796,7 @@ cat <<EOF
 ******************************************************************************
 
 Hmm. You really want to compile MPlayer with an *UNSUPPORTED* C compiler?
-Ok. You know. Do it. Did you read DOCS/HTML/en/users-vs-dev.html???
+Ok. You know. Do it.
 
 DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* compiler's fault!
 Get ready for mysterious crashes, no-picture bugs, strange noises... REALLY!
