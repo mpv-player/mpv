@@ -64,7 +64,7 @@ static struct vf_priv_s {
 
 	unsigned char* planes[3];
 	unsigned char* dirty_rows;
-} vf_priv_dflt;
+} const vf_priv_dflt;
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;

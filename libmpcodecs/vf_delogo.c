@@ -45,7 +45,7 @@
 static struct vf_priv_s {
     unsigned int outfmt;
     int xoff, yoff, lw, lh, band, show;
-} vf_priv_dflt = {
+} const vf_priv_dflt = {
     0,
     0, 0, 0, 0, 0, 0
 };

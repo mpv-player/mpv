@@ -21,7 +21,7 @@ static struct vf_priv_s {
 	unsigned char *buf;
 	int brightness;
 	int contrast;
-} vf_priv_dflt = {
+} const vf_priv_dflt = {
   NULL,
   0,
   0

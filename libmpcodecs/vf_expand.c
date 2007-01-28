@@ -33,7 +33,7 @@ static struct vf_priv_s {
     unsigned char* fb_ptr;
     int passthrough;
     int first_slice;
-} vf_priv_dflt = {
+} const vf_priv_dflt = {
   -1,-1,
   -1,-1,
   0,

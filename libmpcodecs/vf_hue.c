@@ -21,7 +21,7 @@ static struct vf_priv_s {
 	uint8_t *buf[2];
 	float hue;
 	float saturation;
-} vf_priv_dflt = {
+} const vf_priv_dflt = {
   {NULL, NULL},
   0.0,
   1.0,

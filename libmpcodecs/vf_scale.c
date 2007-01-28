@@ -31,7 +31,7 @@ static struct vf_priv_s {
     int noup;
     int accurate_rnd;
     int query_format_cache[64];
-} vf_priv_dflt = {
+} const vf_priv_dflt = {
   -1,-1,
   0,
   {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
