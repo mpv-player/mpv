@@ -37,14 +37,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-#ifdef WORDS_BIGENDIAN
-#define TGA_ALPHA32   0x000000ff
-#define TGA_SHIFT32   8
-#else
-#define TGA_ALPHA32   0xff000000
-#define TGA_SHIFT32   0
-#endif
-
 static vo_info_t info =
 {
 	"Targa output",
@@ -121,14 +113,26 @@ static int write_tga( char *file, int bpp, int dx, int dy, uint8_t *buf, int str
             if (bpp == 32) {
                 /* Setup the alpha channel for every pixel */
                 while (dy-- > 0) {
-                    uint32_t    *d;
-                    uint32_t    *s;
+                    uint8_t    *d;
+                    uint8_t    *s;
                     int         x;
 
-                    s = (uint32_t *)buf;
+                    s = buf;
                     d = line_buff;
                     for(x = 0; x < dx; x++) {
-                        *d++ = ((*s++) << TGA_SHIFT32) | TGA_ALPHA32;
+                    #ifdef WORDS_BIGENDIAN
+                        d[0] = s[3];
+                        d[1] = s[2];
+                        d[2] = s[1];
+                        d[3] = 0xff;
+                    #else
+                        d[0] = 0xff;
+                        d[1] = s[1];
+                        d[2] = s[2];
+                        d[3] = s[3];
+                    #endif
+                        d+=4;
+                        s+=4;
                     }
                     if (fwrite(line_buff, wb, 1, fo) != 1) {
                         er = 4;
