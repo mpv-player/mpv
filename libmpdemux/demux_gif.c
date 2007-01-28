@@ -101,6 +101,13 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         {
           transparency = p[1] & 1;
           refmode = (p[1] >> 2) & 3;
+          // HACK: specification says
+          // > 0 - No disposal specified. The decoder is not required to take any action.
+          // but browsers treat it the same way as
+          // > 1 - Do not dispose. The graphic is to be left in place.
+          // Some broken files rely on this, e.g.
+          // http://samples.mplayerhq.hu/GIF/broken-gif/CLAIRE.GIF
+          if (refmode == 0) refmode = 1;
           frametime = (p[3] << 8) | p[2]; // set the time, centiseconds
           transparent_col = p[4];  
         }
