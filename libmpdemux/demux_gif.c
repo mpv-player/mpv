@@ -247,9 +247,6 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   // video_read_properties() will choke
   sh_video->ds = demuxer->video;
 
-  sh_video->disp_w = (uint16_t)gif->SWidth;
-  sh_video->disp_h = (uint16_t)gif->SHeight;
-
   sh_video->format = mmioFOURCC(8, 'R', 'G', 'B');
   
   sh_video->fps = 5.0f;
@@ -257,11 +254,11 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   
   sh_video->bih = malloc(sizeof(BITMAPINFOHEADER) + (256 * 4));
   sh_video->bih->biCompression = sh_video->format;
+  sh_video->bih->biWidth = priv->w = (uint16_t)gif->SWidth;
+  sh_video->bih->biHeight = priv->h = (uint16_t)gif->SHeight;
   sh_video->bih->biBitCount = 8;
   sh_video->bih->biPlanes = 2;
   priv->palette = (unsigned char *)(sh_video->bih + 1);
-  priv->w = sh_video->disp_w;
-  priv->h = sh_video->disp_h;
   priv->refimg = malloc(priv->w * priv->h);
   
   priv->gif = gif;
