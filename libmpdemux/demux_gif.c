@@ -180,15 +180,15 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                         priv->w << 3, gif->Image.Width,
                         transparency, transparent_col);
       s += (h >> 3) * w;
-      memcpy_transp_pic(dest + (gif->Image.Width << 2), s, w, h >> 3,
+      memcpy_transp_pic(dest + (priv->w << 2), s, w, h >> 3,
                         priv->w << 3, gif->Image.Width,
                         transparency, transparent_col);
       s += (h >> 3) * w;
-      memcpy_transp_pic(dest + (gif->Image.Width << 1), s, w, h >> 2,
+      memcpy_transp_pic(dest + (priv->w << 1), s, w, h >> 2,
                         priv->w << 2, gif->Image.Width,
                         transparency, transparent_col);
       s += (h >> 2) * w;
-      memcpy_transp_pic(dest + gif->Image.Width, s, w, h >> 1,
+      memcpy_transp_pic(dest + priv->w, s, w, h >> 1,
                         priv->w << 1, gif->Image.Width,
                         transparency, transparent_col);
     } else
