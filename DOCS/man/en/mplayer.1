@@ -1631,6 +1631,13 @@ program (if present) you want to play.
 Can be used with \-vid and \-aid.
 .
 .TP
+.B \-psprobe <byte position>
+When playing an MPEG-PS stream, this option lets you specify how many
+bytes in the stream you want MPlayer to scan in order to identify the
+video codec used. This option is needed to play EVO files containing
+H264 streams.
+.
+.TP
 .B \-radio <option1:option2:...> (radio only)
 These options set various parameters of the radio capture module.
 For listening to radio with MPlayer use 'radio://<frequency>'
