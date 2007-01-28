@@ -176,19 +176,23 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
     if (gif->Image.Interlace) {
       uint8_t *s = buf;
-      memcpy_transp_pic(dest, s, w, h >> 3,
+      int ih = (h - 0 + 7) >> 3;
+      memcpy_transp_pic(dest, s, w, ih,
                         priv->w << 3, gif->Image.Width,
                         transparency, transparent_col);
-      s += (h >> 3) * w;
-      memcpy_transp_pic(dest + (priv->w << 2), s, w, h >> 3,
+      s += ih * w;
+      ih = (h - 4 + 7) >> 3;
+      memcpy_transp_pic(dest + (priv->w << 2), s, w, ih,
                         priv->w << 3, gif->Image.Width,
                         transparency, transparent_col);
-      s += (h >> 3) * w;
-      memcpy_transp_pic(dest + (priv->w << 1), s, w, h >> 2,
+      s += ih * w;
+      ih = (h - 2 + 3) >> 2;
+      memcpy_transp_pic(dest + (priv->w << 1), s, w, ih,
                         priv->w << 2, gif->Image.Width,
                         transparency, transparent_col);
-      s += (h >> 2) * w;
-      memcpy_transp_pic(dest + priv->w, s, w, h >> 1,
+      s += ih * w;
+      ih = (h - 1 + 1) >> 1;
+      memcpy_transp_pic(dest + priv->w, s, w, ih,
                         priv->w << 1, gif->Image.Width,
                         transparency, transparent_col);
     } else
