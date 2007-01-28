@@ -469,6 +469,7 @@ _mtrr=auto
 _install=install
 _ranlib=ranlib
 _ldconfig=ldconfig
+_ldd=ldd
 _cc=cc
 test "$CC" && _cc="$CC"
 _gcc_check=yes
@@ -672,7 +673,6 @@ if freebsd ; then
   _inc_extra="$_inc_extra -I/usr/local/include"
 fi
 
-_ldd=ldd
 if darwin; then
   _ldd="otool -L"
   _ld_extra="$_ld_extra -L/usr/local/lib"
