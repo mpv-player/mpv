@@ -1233,6 +1233,9 @@ static int get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 	// not found, get a new outline glyph from face
 //	mp_msg(MSGT_ASS, MSGL_INFO, "miss, index = %d, symbol = %c, adv = (%d, %d)\n", index, symbol, advance->x, advance->y);
 
+	info->outline_glyph = 0;
+	info->bm = info->bm_o = info->bm_s = 0;
+	
 	info->glyph = ass_font_get_glyph(frame_context.ass_priv->fontconfig_priv, render_context.font, symbol);
 	if (!info->glyph)
 		return 0;
@@ -1246,11 +1249,7 @@ static int get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 		if (error) {
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_Stroke_Error, error);
 		}
-	} else {
-		info->outline_glyph = 0;
 	}
-
-	info->bm = info->bm_o = info->bm_s = 0;
 
 	return 0;
 }
