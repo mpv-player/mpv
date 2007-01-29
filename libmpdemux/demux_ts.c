@@ -1500,7 +1500,7 @@ static int ts_sync(stream_t *stream)
 {
 	int c=0;
 
-	mp_msg(MSGT_DEMUX, MSGL_DBG2, "TS_SYNC \n");
+	mp_msg(MSGT_DEMUX, MSGL_DBG3, "TS_SYNC \n");
 
 	while(((c=stream_read_char(stream)) != 0x47) && ! stream->eof);
 
