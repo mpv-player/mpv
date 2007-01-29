@@ -1424,6 +1424,13 @@ Use IPv6 on network connections.
 Falls back on IPv4 automatically.
 .
 .TP
+.B \-psprobe <byte position>
+When playing an MPEG-PS stream, this option let's you specify how many
+bytes in the stream you want MPlayer to scan in order to identify the
+video codec used.
+This option is needed to play EVO files containing H.264 streams.
+.
+.TP
 .B \-pvr <option1:option2:...> (PVR only)
 This option tunes various encoding properties of the PVR capture module.
 It has to be used with any hardware MPEG encoder based card supported by the
@@ -1487,6 +1494,62 @@ dvd:   DVD compatible stream
 .REss
 .RE
 .PD 1
+.
+.TP
+.B \-radio <option1:option2:...> (radio only)
+These options set various parameters of the radio capture module.
+For listening to radio with MPlayer use 'radio://<frequency>'
+(if channels option is not given) or 'radio://<channel_number>'
+(if channels option is given) as a movie URL.
+You can see allowed frequency range by running MPlayer with '\-v'.
+To start the grabbing subsystem, use 'radio://<frequency or channel>/capture'.
+If the capture keyword is not given you can listen to radio
+using the line-in cable only.
+Using capture to listen is not recommended due to synchronization
+problems, which makes this process uncomfortable.
+.sp 1
+Available options are:
+.RSs
+.IPs device=<value>
+Radio device to use (default: /dev/radio0 for Linux and /dev/tuner0 for *BSD).
+.IPs driver=<value>
+Radio driver to use (default: v4l2 if available, otherwise v4l).
+Currently, v4l and v4l2 drivers are supported.
+.IPs volume=<0..100>
+sound volume for radio device (default 100)
+.IPs freq_min=<value> (*BSD BT848 only)
+minimum allowed frequency (default: 87.50)
+.IPs freq_max=<value> (*BSD BT848 only)
+maximum allowed frequency (default: 108.00)
+.IPs channels=<frequency>\-<name>,<frequency>\-<name>,...
+Set channel list.
+Use _ for spaces in names (or play with quoting ;-).
+The channel names will then be written using OSD and the slave commands
+radio_step_channel and radio_set_channel will be usable for
+a remote control (see LIRC).
+If given, number in movie URL will be treated as channel position in
+channel list.
+.br
+.I EXAMPLE:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<value> (with radio capture enabled)
+Name of device to capture sound from.
+Without such a name capture will be disabled,
+even if the capture keyword appears in the URL.
+For ALSA devices use it in the form hw=<card>.<device>.
+If the device name contains a '=', the module will use
+ALSA to capture, otherwise OSS.
+.IPs arate=<value> (with radio capture enabled)
+Rate in samples per second (default: 44100).
+.br
+.I NOTE:
+When using audio capture set also \-rawaudio rate=<value> option
+with the same value as arate.
+If you have problems with sound speed (runs too quickly), try to play
+with different rate values (e.g.\& 48000,44100,32000,...).
+.IPs achannels=<value> (with radio capture enabled)
+Number of audio channels to capture.
+.RE
 .
 .TP
 .B \-rawaudio <option1:option2:...>
@@ -1629,69 +1692,6 @@ audio and video IDs.
 When playing an MPEG-TS stream, you can specify with this option which
 program (if present) you want to play.
 Can be used with \-vid and \-aid.
-.
-.TP
-.B \-psprobe <byte position>
-When playing an MPEG-PS stream, this option let's you specify how many
-bytes in the stream you want MPlayer to scan in order to identify the
-video codec used.
-This option is needed to play EVO files containing H.264 streams.
-.
-.TP
-.B \-radio <option1:option2:...> (radio only)
-These options set various parameters of the radio capture module.
-For listening to radio with MPlayer use 'radio://<frequency>'
-(if channels option is not given) or 'radio://<channel_number>'
-(if channels option is given) as a movie URL.
-You can see allowed frequency range by running MPlayer with '\-v'.
-To start the grabbing subsystem, use 'radio://<frequency or channel>/capture'.
-If the capture keyword is not given you can listen to radio
-using the line-in cable only.
-Using capture to listen is not recommended due to synchronization
-problems, which makes this process uncomfortable.
-.sp 1
-Available options are:
-.RSs
-.IPs device=<value>
-Radio device to use (default: /dev/radio0 for Linux and /dev/tuner0 for *BSD).
-.IPs driver=<value>
-Radio driver to use (default: v4l2 if available, otherwise v4l).
-Currently, v4l and v4l2 drivers are supported.
-.IPs volume=<0..100>
-sound volume for radio device (default 100)
-.IPs freq_min=<value> (*BSD BT848 only)
-minimum allowed frequency (default: 87.50)
-.IPs freq_max=<value> (*BSD BT848 only)
-maximum allowed frequency (default: 108.00)
-.IPs channels=<frequency>\-<name>,<frequency>\-<name>,...
-Set channel list.
-Use _ for spaces in names (or play with quoting ;-).
-The channel names will then be written using OSD and the slave commands
-radio_step_channel and radio_set_channel will be usable for
-a remote control (see LIRC).
-If given, number in movie URL will be treated as channel position in
-channel list.
-.br
-.I EXAMPLE:
-radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<value> (with radio capture enabled)
-Name of device to capture sound from.
-Without such a name capture will be disabled,
-even if the capture keyword appears in the URL.
-For ALSA devices use it in the form hw=<card>.<device>.
-If the device name contains a '=', the module will use
-ALSA to capture, otherwise OSS.
-.IPs arate=<value> (with radio capture enabled)
-Rate in samples per second (default: 44100).
-.br
-.I NOTE:
-When using audio capture set also \-rawaudio rate=<value> option
-with the same value as arate.
-If you have problems with sound speed (runs too quickly), try to play
-with different rate values (e.g.\& 48000,44100,32000,...).
-.IPs achannels=<value> (with radio capture enabled)
-Number of audio channels to capture.
-.RE
 .
 .TP
 .B \-tv <option1:option2:...> (TV/\:PVR only)
