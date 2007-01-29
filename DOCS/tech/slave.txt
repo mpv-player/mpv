@@ -382,3 +382,57 @@ hide
 run <value>
     Run <value> as shell command. In OSD menu console mode stdout and stdin
     are through the video output driver.
+
+
+Available properties:
+
+osdlevel
+speed
+filename
+path
+demuxer
+stream_pos
+stream_start
+stream_end
+stream_length
+length
+volume
+mute
+audio_delay
+audio_format
+audio_bitrate
+samplerate
+channels
+switch_audio
+fullscreen
+deinterlace
+ontop
+rootwin
+border
+framedropping
+gamma
+brightness
+contrast
+saturation
+hue
+panscan
+vsync
+video_format
+video_bitrate
+width
+height
+fps
+aspect
+switch_video
+switch_program
+sub
+sub_delay
+sub_pos
+sub_alignment
+sub_visibility
+sub_forced_only
+tv_brightness
+tv_contrast
+tv_saturation
+tv_hue
+
