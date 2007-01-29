@@ -1010,7 +1010,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	{
 		ES_stream_t *es = priv->ts.pids[params.apid]; 
 		
-		if(!IS_AUDIO(es->type) && !IS_AUDIO(es->subtype)) es->subtype = params.atype;
+		if(!IS_AUDIO(es->type) && !IS_AUDIO(es->subtype) && IS_AUDIO(params.atype)) es->subtype = params.atype;
 		ts_add_stream(demuxer, priv->ts.pids[params.apid]);
 		sh_audio = priv->ts.streams[params.apid].sh;
 		demuxer->audio->id = priv->ts.streams[params.apid].id;
