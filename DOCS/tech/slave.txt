@@ -386,53 +386,56 @@ run <value>
 
 Available properties:
 
-osdlevel
-speed
-filename
-path
-demuxer
-stream_pos
-stream_start
-stream_end
-stream_length
-length
-volume
-mute
-audio_delay
-audio_format
-audio_bitrate
-samplerate
-channels
-switch_audio
-fullscreen
-deinterlace
-ontop
-rootwin
-border
-framedropping
-gamma
-brightness
-contrast
-saturation
-hue
-panscan
-vsync
-video_format
-video_bitrate
-width
-height
-fps
-aspect
-switch_video
-switch_program
-sub
-sub_delay
-sub_pos
-sub_alignment
-sub_visibility
-sub_forced_only
-tv_brightness
-tv_contrast
-tv_saturation
-tv_hue
+name               type      min     max     get set step comment
+=================================================================
+
+osdlevel           int       0       3       X   X   X    as -osdlevel
+speed              float     0.01    100     X   X   X    as -speed
+filename           string                    X            file playing wo path
+path               string                    X            file playing
+demuxer            string                    X            demuxer used
+stream_pos         pos       0               X   X        position in stream
+stream_start       pos       0               X            start pos in stream
+stream_end         pos       0               X            end pos in stream
+stream_length      pos       0               X            (end - start)
+length             double                    X            length of file in seconds
+volume             float     0       100     X   X   X    change volume
+mute               flag      0       1       X   X   X
+audio_delay        float     -100    100     X   X   X
+audio_format       int                       X
+audio_bitrate      int                       X
+samplerate         int                       X
+channels           int                       X
+switch_audio       int       -2      255     X   X   X    select audio stream
+fullscreen         flag      0       1       X   X   X
+deinterlace        flag      0       1       X   X   X
+ontop              flag      0       1       X   X   X
+rootwin            flag      0       1       X   X   X
+border             flag      0       1       X   X   X
+framedropping      int       0       2       X   X   X    1 = soft, 2 = hard
+gamma              int       -100    100     X   X   X
+brightness         int       -100    100     X   X   X
+contrast           int       -100    100     X   X   X
+saturation         int       -100    100     X   X   X
+hue                int       -100    100     X   X   X
+panscan            float     0       1       X   X   X
+vsync              flag      0       1       X   X   X
+video_format       int                       X
+video_bitrate      int                       X
+width              int                       X            "display" width
+height             int                       X            "display" height
+fps                float                     X
+aspect             float                     X
+switch_video       int       -2      255     X   X   X    select video stream
+switch_program     int       -1      65535   X   X   X    (see TAB default keybind)
+sub                int       -1              X   X   X    select subtitle stream
+sub_delay          float                     X   X   X
+sub_pos            int       0       100     X   X   X    subtitle position
+sub_alignment      int       0       2       X   X   X    subtitle alignment
+sub_visibility     flag      0       1       X   X   X    show/hide subtitles
+sub_forced_only    flag      0       1       X   X   X
+tv_brightness      int       -100    100     X   X   X
+tv_contrast        int       -100    100     X   X   X
+tv_saturation      int       -100    100     X   X   X
+tv_hue             int       -100    100     X   X   X
 
