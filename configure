@@ -455,7 +455,9 @@ for parm in "$@" ; do
   esac
 done
 
-# 1st pass checking for vital options
+# GOTCHA: the variables below defines the default behavior for autodetection
+# and have - unless stated otherwise - at least 2 states : yes no
+# If autodetection is available then the third state is: auto
 _mmx=auto
 _3dnow=auto
 _3dnowext=auto
@@ -476,85 +478,7 @@ _gcc_check=yes
 _as=auto
 _runtime_cpudetection=no
 _cross_compile=auto
-for ac_option do
-  case "$ac_option" in
-  --target=*)
-    _target=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --cc=*)
-    _cc=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --host-cc=*)
-    _host_cc=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --as=*)
-    _as=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --enable-gcc-check)
-    _gcc_check=yes
-    ;;
-  --disable-gcc-check)
-    _gcc_check=no
-    ;;
-  --enable-static)
-    _ld_static='-static'
-    ;;
-  --disable-static)
-    _ld_static=''
-    ;;
-  --with-extraincdir=*)
-    _inc_extra=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
-    ;;
-  --with-extralibdir=*)
-    _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
-  --extra-libs=*)
-    _extra_libs=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --extra-libs-mplayer=*)
-    _libs_mplayer=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --extra-libs-mencoder=*)
-    _libs_mencoder=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --enable-runtime-cpudetection)
-    _runtime_cpudetection=yes
-    ;;
-  --disable-runtime-cpudetection)
-    _runtime_cpudetection=no
-    ;;
-  --enable-cross-compile)
-    _cross_compile=yes
-    ;;
-  --disable-cross-compile)
-    _cross_compile=no
-    ;;
-  --with-install=*)
-    _install=`echo $ac_option | cut -d '=' -f 2 `
-    ;;
-  --enable-profile)
-    _profile='-p'
-    ;;
-  --disable-profile)
-    _profile=
-    ;;
-  --enable-debug)
-    _debug='-g'
-    ;;
-  --enable-debug=*)
-    _debug=`echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --disable-debug)
-    _debug=
-    ;;
-  esac
-done
-
 _prefix="/usr/local"
-
-# GOTCHA: the variables below defines the default behavior for autodetection
-# and have - unless stated otherwise - at least 2 states : yes no
-# If autodetection is available then the third state is: auto
 _libavutil=auto
 _libavutil_so=auto
 _libavcodec=auto
@@ -728,32 +652,75 @@ _asmalign_pot=auto
 _color_console=no
 for ac_option do
   case "$ac_option" in
-  # Skip 1st pass
-  --target=*) ;;
-  --cc=*) ;;
-  --host-cc=*) ;;
-  --as=*) ;;
-  --enable-gcc-check) ;;
-  --disable-gcc-check) ;;
-  --enable-static*) ;;
-  --disable-static*) ;;
-  --with-extraincdir=*) ;;
-  --with-extralibdir=*) ;;
-  --extra-libs=*) ;;
-  --extra-libs-mplayer=*) ;;
-  --extra-libs-mencoder=*) ;;
-  --enable-runtime-cpudetection) ;;
-  --disable-runtime-cpudetection) ;;
-  --enable-cross-compile) ;;
-  --disable-cross-compile) ;;
-  --with-install=*) ;;
-  --enable-profile) ;;
-  --disable-profile) ;;
-  --enable-debug) ;;
-  --enable-debug=*) ;;
-  --disable-debug) ;;
-
-  # Real 2nd pass
+  --target=*)
+    _target=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --cc=*)
+    _cc=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --host-cc=*)
+    _host_cc=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --as=*)
+    _as=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --enable-gcc-check)
+    _gcc_check=yes
+    ;;
+  --disable-gcc-check)
+    _gcc_check=no
+    ;;
+  --enable-static)
+    _ld_static='-static'
+    ;;
+  --disable-static)
+    _ld_static=''
+    ;;
+  --with-extraincdir=*)
+    _inc_extra=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
+    ;;
+  --with-extralibdir=*)
+    _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --extra-libs=*)
+    _extra_libs=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --extra-libs-mplayer=*)
+    _libs_mplayer=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --extra-libs-mencoder=*)
+    _libs_mencoder=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --enable-runtime-cpudetection)
+    _runtime_cpudetection=yes
+    ;;
+  --disable-runtime-cpudetection)
+    _runtime_cpudetection=no
+    ;;
+  --enable-cross-compile)
+    _cross_compile=yes
+    ;;
+  --disable-cross-compile)
+    _cross_compile=no
+    ;;
+  --with-install=*)
+    _install=`echo $ac_option | cut -d '=' -f 2 `
+    ;;
+  --enable-profile)
+    _profile='-p'
+    ;;
+  --disable-profile)
+    _profile=
+    ;;
+  --enable-debug)
+    _debug='-g'
+    ;;
+  --enable-debug=*)
+    _debug=`echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --disable-debug)
+    _debug=
+    ;;
   --enable-mencoder)	_mencoder=yes	;;
   --disable-mencoder)	_mencoder=no	;;
   --enable-mplayer)	_mplayer=yes	;;
