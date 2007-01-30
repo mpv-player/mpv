@@ -648,6 +648,79 @@ for ac_option do
   --help|-help|-h)
     show_help
     ;;
+  --prefix=*)
+    _prefix=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --bindir=*)
+    _bindir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --datadir=*)
+    _datadir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --mandir=*)
+    _mandir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --confdir=*)
+    _confdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --libdir=*)
+    _libdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --codecsdir=*)
+    _codecsdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --win32codecsdir=*)
+    _win32codecsdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --xanimcodecsdir=*)
+    _xanimcodecsdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --realcodecsdir=*)
+    _realcodecsdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-extraincdir=*)
+    _inc_extra=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
+    ;;
+  --with-extralibdir=*)
+    _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+
+  --with-install=*)
+    _install=`echo $ac_option | cut -d '=' -f 2 `
+    ;;
+  --with-xvmclib=*)
+    _xvmclib=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+
+  --with-sdl-config=*)
+    _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-freetype-config=*)
+    _freetypeconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-fribidi-config=*)
+    _fribidiconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-gtk-config=*)
+    _gtkconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-glib-config=*)
+    _glibconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-dvdnav-config=*)
+    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+
+  --extra-libs=*)
+    _extra_libs=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --extra-libs-mplayer=*)
+    _libs_mplayer=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --extra-libs-mencoder=*)
+    _libs_mencoder=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+
   --target=*)
     _target=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -660,35 +733,18 @@ for ac_option do
   --as=*)
     _as=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --enable-gcc-check)   _gcc_check=yes  ;;
-  --disable-gcc-check)  _gcc_check=no   ;;
+  --charset=*)
+    _charset=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --language=*)
+    _language=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+
   --enable-static)
     _ld_static='-static'
     ;;
   --disable-static)
     _ld_static=''
-    ;;
-  --with-extraincdir=*)
-    _inc_extra=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
-    ;;
-  --with-extralibdir=*)
-    _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
-  --extra-libs=*)
-    _extra_libs=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --extra-libs-mplayer=*)
-    _libs_mplayer=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --extra-libs-mencoder=*)
-    _libs_mencoder=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --enable-runtime-cpudetection)    _runtime_cpudetection=yes   ;;
-  --disable-runtime-cpudetection)   _runtime_cpudetection=no    ;;
-  --enable-cross-compile)           _cross_compile=yes          ;;
-  --disable-cross-compile)          _cross_compile=no           ;;
-  --with-install=*)
-    _install=`echo $ac_option | cut -d '=' -f 2 `
     ;;
   --enable-profile)
     _profile='-p'
@@ -705,6 +761,12 @@ for ac_option do
   --disable-debug)
     _debug=
     ;;
+  --enable-gcc-check)   _gcc_check=yes  ;;
+  --disable-gcc-check)  _gcc_check=no   ;;
+  --enable-runtime-cpudetection)    _runtime_cpudetection=yes   ;;
+  --disable-runtime-cpudetection)   _runtime_cpudetection=no    ;;
+  --enable-cross-compile)           _cross_compile=yes          ;;
+  --disable-cross-compile)          _cross_compile=no           ;;
   --enable-mencoder)	_mencoder=yes	;;
   --disable-mencoder)	_mencoder=no	;;
   --enable-mplayer)	_mplayer=yes	;;
@@ -1034,30 +1096,12 @@ for ac_option do
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
 
-  --charset=*)
-    _charset=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --language=*)
-    _language=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-
-  --codecsdir=*)
-    _codecsdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --win32codecsdir=*)
-    _win32codecsdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --xanimcodecsdir=*)
-    _xanimcodecsdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --realcodecsdir=*)
-    _realcodecsdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-
   --enable-crash-debug)	_crash_debug=yes ;;
   --disable-crash-debug) _crash_debug=no ;;
   --enable-sighandler)  _sighandler=yes  ;;
   --disable-sighandler) _sighandler=no   ;;
+  --enable-win32) _win32=yes ;;
+  --disable-win32) _win32=no ;;
 
   --enable-sse)	_sse=yes ;;
   --disable-sse) _sse=no ;;
@@ -1080,49 +1124,6 @@ for ac_option do
   --enable-mmx)	_mmx=yes ;;
   --disable-mmx) # 3Dnow! and MMX2 require MMX
         _3dnow=no _3dnowext=no _mmx=no _mmxext=no ;;
-
-  --enable-win32) _win32=yes ;;
-  --disable-win32) _win32=no ;;
-
-  --with-xvmclib=*)
-    _xvmclib=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-sdl-config=*)
-    _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-freetype-config=*)
-    _freetypeconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-fribidi-config=*)
-    _fribidiconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-gtk-config=*)
-    _gtkconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-glib-config=*)
-    _glibconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-dvdnav-config=*)
-    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --prefix=*)
-    _prefix=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --bindir=*)
-    _bindir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --datadir=*)
-    _datadir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --mandir=*)
-    _mandir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --confdir=*)
-    _confdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --libdir=*)
-    _libdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
 
   *)
     echo "Unknown parameter: $ac_option"
