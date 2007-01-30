@@ -660,12 +660,8 @@ for ac_option do
   --as=*)
     _as=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --enable-gcc-check)
-    _gcc_check=yes
-    ;;
-  --disable-gcc-check)
-    _gcc_check=no
-    ;;
+  --enable-gcc-check)   _gcc_check=yes  ;;
+  --disable-gcc-check)  _gcc_check=no   ;;
   --enable-static)
     _ld_static='-static'
     ;;
@@ -687,18 +683,10 @@ for ac_option do
   --extra-libs-mencoder=*)
     _libs_mencoder=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --enable-runtime-cpudetection)
-    _runtime_cpudetection=yes
-    ;;
-  --disable-runtime-cpudetection)
-    _runtime_cpudetection=no
-    ;;
-  --enable-cross-compile)
-    _cross_compile=yes
-    ;;
-  --disable-cross-compile)
-    _cross_compile=no
-    ;;
+  --enable-runtime-cpudetection)    _runtime_cpudetection=yes   ;;
+  --disable-runtime-cpudetection)   _runtime_cpudetection=no    ;;
+  --enable-cross-compile)           _cross_compile=yes          ;;
+  --disable-cross-compile)          _cross_compile=no           ;;
   --with-install=*)
     _install=`echo $ac_option | cut -d '=' -f 2 `
     ;;
@@ -1066,18 +1054,10 @@ for ac_option do
     _realcodecsdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
 
-  --enable-crash-debug)
-    _crash_debug=yes
-    ;;
-  --disable-crash-debug)
-    _crash_debug=no
-    ;;
-  --enable-sighandler)
-    _sighandler=yes
-    ;;
-  --disable-sighandler)
-    _sighandler=no
-    ;;
+  --enable-crash-debug)	_crash_debug=yes ;;
+  --disable-crash-debug) _crash_debug=no ;;
+  --enable-sighandler)  _sighandler=yes  ;;
+  --disable-sighandler) _sighandler=no   ;;
 
   --enable-sse)	_sse=yes ;;
   --disable-sse) _sse=no ;;
