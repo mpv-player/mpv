@@ -2841,6 +2841,18 @@ if test "$_use_aton" = yes; then
   _def_use_aton='#define USE_ATON 1'
 fi
 
+echocheck "network"
+# FIXME network check
+if test "$_network" = yes ; then
+  _def_network='#define MPLAYER_NETWORK 1'
+  _ld_extra="$_ld_extra $_ld_sock"
+  _inputmodules="network $_inputmodules"
+else
+  _noinputmodules="network $_noinputmodules"
+  _def_network='#undef MPLAYER_NETWORK'
+  _ftp=no
+fi
+echores "$_network"
 
 echocheck "inttypes.h (required)"
 cat > $TMPC << EOF
@@ -3891,9 +3903,9 @@ EOF
   for I in "" -L/usr/X11R6/lib -L/usr/lib/X11R6 -L/usr/X11/lib \
            -L/usr/lib32 -L/usr/openwin/lib -L/usr/X11R6/lib64 -L/usr/lib ; do
     if netbsd; then
-      _ld_tmp="$I -lXext -lX11 $_ld_sock $_ld_pthread -Wl,-R`echo $I | sed s/^-L//`"
+      _ld_tmp="$I -lXext -lX11 $_ld_pthread -Wl,-R`echo $I | sed s/^-L//`"
     else
-      _ld_tmp="$I -lXext -lX11 $_ld_sock $_ld_pthread"
+      _ld_tmp="$I -lXext -lX11 $_ld_pthread"
     fi
     cc_check $_inc_x11 $_ld_tmp && _libs_mplayer="$_libs_mplayer $_ld_tmp" \
                       && _x11=yes && break
@@ -6865,19 +6877,6 @@ elif test  "$_select" = yes ; then
 fi
 echores "$_select"
 
-
-echocheck "network"
-# FIXME network check
-if test "$_network" = yes ; then
-  _def_network='#define MPLAYER_NETWORK 1'
-  _ld_extra="$_ld_extra $_ld_sock"
-  _inputmodules="network $_inputmodules"
-else
-  _noinputmodules="network $_noinputmodules"
-  _def_network='#undef MPLAYER_NETWORK'
-  _ftp=no
-fi
-echores "$_network"
 
 echocheck "ftp"
 if not beos && test "$_ftp" = yes ; then
