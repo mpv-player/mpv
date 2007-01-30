@@ -155,7 +155,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 	    return NULL;
     }
 
-    w = mpi->w * mpi->h;
+    w = (mpi->w * mpi->h * mpi->bpp) / 8;
     r = lzo1x_decompress_safe (data, len, mpi->planes[0], &w, priv->wrkmem);
     if (r != LZO_E_OK) {
 	/* this should NEVER happen */
