@@ -76,6 +76,7 @@ static const AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_INTERPLAY_DPCM,    MKTAG('I', 'N', 'P', 'A')},
     { CODEC_ID_MUSEPACK7,         MKTAG('M', 'P', 'C', ' ')},
     { CODEC_ID_PCM_S24BE,         MKTAG('i', 'n', '2', '4')},
+    { CODEC_ID_PCM_S16BE,         MKTAG('t', 'w', 'o', 's')},
     { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
     { CODEC_ID_ROQ_DPCM,          MKTAG('R', 'o', 'Q', 'A')},
     { CODEC_ID_SHORTEN,           MKTAG('s', 'h', 'r', 'n')},
