@@ -448,13 +448,6 @@ EOF
 exit 0
 } #show_help()
 
-for parm in "$@" ; do
-  case $parm in
-    --help|-help|-h)
-      show_help
-  esac
-done
-
 # GOTCHA: the variables below defines the default behavior for autodetection
 # and have - unless stated otherwise - at least 2 states : yes no
 # If autodetection is available then the third state is: auto
@@ -652,6 +645,9 @@ _asmalign_pot=auto
 _color_console=no
 for ac_option do
   case "$ac_option" in
+  --help|-help|-h)
+    show_help
+    ;;
   --target=*)
     _target=`echo $ac_option | cut -d '=' -f 2`
     ;;
