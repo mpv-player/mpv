@@ -249,15 +249,23 @@ codec-cfg.o: codecs.conf.h
 codecs2html$(EXESUF): mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
 
-install: $(ALL_PRG)
-ifeq ($(VIDIX),yes)
+INSTALL_TARGETS-$(MPLAYER)  += install-mplayer install-mplayer-man
+INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
+INSTALL_TARGETS-$(GUI)      += install-gui
+INSTALL_TARGETS-$(VIDIX)    += install-vidix
+INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
+
+install: install-dirs $(INSTALL_TARGETS)
+
+install-vidix:
 	$(MAKE) -C libdha install
 	mkdir -p $(LIBDIR)/mplayer/vidix
 	-install -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
-endif
-	$(INSTALL) -d $(BINDIR)
+
+install-mplayer: mplayer$(EXESUF)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) $(BINDIR)
-	$(INSTALL) -d $(MANDIR)/man1
+
+install-mplayer-man:
 	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
 			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/ ; \
@@ -266,7 +274,8 @@ endif
 			$(INSTALL) -c -m 644 DOCS/man/$$i/mplayer.1 $(MANDIR)/$$i/man1/ ; \
 		fi ; \
 	done
-ifeq ($(MENCODER),yes)
+
+install-mencoder: mencoder$(EXESUF)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) mencoder$(EXESUF) $(BINDIR)
 	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
@@ -275,9 +284,8 @@ ifeq ($(MENCODER),yes)
 			cd $(MANDIR)/$$i/man1 && ln -sf mplayer.1 mencoder.1 ; \
 		fi ; \
 	done
-endif
-	$(INSTALL) -d $(DATADIR)
-ifeq ($(GUI),yes)
+
+install-gui:
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
 	$(INSTALL) -d $(DATADIR)/skins
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
@@ -286,7 +294,11 @@ ifeq ($(GUI),yes)
 	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
 	$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
-endif
+
+install-dirs:
+	$(INSTALL) -d $(BINDIR)
+	$(INSTALL) -d $(DATADIR)
+	$(INSTALL) -d $(MANDIR)/man1
 	$(INSTALL) -d $(CONFDIR)
 	if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 
