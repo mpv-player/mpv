@@ -550,6 +550,652 @@ for ac_option do
   esac
 done
 
+_prefix="/usr/local"
+
+# GOTCHA: the variables below defines the default behavior for autodetection
+# and have - unless stated otherwise - at least 2 states : yes no
+# If autodetection is available then the third state is: auto
+_libavutil=auto
+_libavutil_so=auto
+_libavcodec=auto
+_amr_nb=auto
+_amr_nb_fixed=auto
+_amr_wb=auto
+_libavdecoders_all=`sed -n 's/^[^#]*DEC.*, *\(.*\)).*/\1_decoder/p' "libavcodec/allcodecs.c"`
+_libavdecoders=` echo $_libavdecoders_all | sed -e s/aac_decoder// -e s/mpeg4aac_decoder//  -e s/ac3_decoder// -e s/libgsm_decoder// -e s/libvorbis_decoder// `
+_libavencoders_all=`sed -n 's/^[^#]*ENC.*, *\(.*\)).*/\1_encoder/p' "libavcodec/allcodecs.c"`
+_libavencoders=` echo $_libavencoders_all | sed -e s/libgsm_encoder// -e s/libtheora_encoder// `
+_libavparsers_all=`sed -n 's/^[^#]*PARSER.*, *\(.*\)).*/\1_parser/p' "libavcodec/allcodecs.c"`
+_libavparsers=$_libavparsers_all
+_libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c `
+_libavdemuxers=`echo $_libavdemuxers_all | sed -e s/audio_demuxer// -e s/dc1394_demuxer// -e s/dv1394_demuxer// -e s/redir_demuxer// -e s/rtsp_demuxer//  -e s/sdp_demuxer// -e s/video_grab_device_demuxer// -e s/x11_grab_device_demuxer// -e s/v4l2_demuxer// `
+_libavmuxers_all=`sed -n 's/^[^#]*_MUX.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c`
+_libavmuxers=`echo $_libavmuxers_all | sed -e s/audio_muxer// -e s/rtp_muxer// `
+_libavcodec_so=auto
+_libavformat=auto
+_libavformat_so=auto
+_libpostproc=auto
+_libpostproc_so=auto
+_libavcodec_mpegaudio_hp=yes
+_mencoder=yes
+_mplayer=yes
+_x11=auto
+_xshape=auto
+_dga=auto	# 1 2 no auto
+_xv=auto
+_xvmc=no  #auto when complete
+_sdl=auto
+_directx=auto
+_win32waveout=auto
+_nas=auto
+_png=auto
+_jpeg=auto
+_pnm=yes
+_md5sum=yes
+_gif=auto
+_gl=auto
+_ggi=auto
+_ggiwmh=auto
+_aa=auto
+_caca=auto
+_svga=auto
+_vesa=auto
+_fbdev=auto
+_dvb=auto
+_dvbhead=auto
+_dxr2=auto
+_dxr3=auto
+_ivtv=auto
+_iconv=auto
+_langinfo=auto
+_rtc=auto
+_ossaudio=auto
+_arts=auto
+_esd=auto
+_polyp=auto
+_jack=auto
+_openal=auto
+_libcdio=auto
+_liblzo=auto
+_mad=auto
+_toolame=auto
+_twolame=auto
+_tremor_internal=yes
+_tremor_low=no
+_tremor_external=auto
+_libvorbis=auto
+_speex=auto
+_theora=auto
+_mp3lib=yes
+_liba52=yes
+_libdts=auto
+_libmpeg2=yes
+_faad_internal=auto
+_faad_external=auto
+_faad_fixed=no
+_faac=auto
+_ladspa=auto
+_xmms=no
+_dvdnav=auto
+_dvdnavconfig=dvdnav-config
+_dvdread=auto
+_dvdread_internal=auto
+_libdvdcss_internal=auto
+_xanim=auto
+_real=auto
+_live=auto
+_xinerama=auto
+_mga=auto
+_xmga=auto
+_vm=auto
+_xf86keysym=auto
+_mlib=no #broken, thus disabled
+_sgiaudio=auto
+_sunaudio=auto
+_alsa=auto
+_fastmemcpy=yes
+_unrarlib=yes
+_win32=auto
+_select=yes
+_radio=no
+_radio_capture=no
+_radio_v4l=auto
+_radio_v4l2=auto
+_radio_bsdbt848=auto
+_tv=yes
+_tv_v4l1=auto
+_tv_v4l2=auto
+_tv_bsdbt848=auto
+_pvr=auto
+_network=yes
+_winsock2=auto
+_smbsupport=auto
+_vidix_internal=auto
+_vidix_external=auto
+_joystick=no
+_xvid=auto
+_x264=auto
+_nut=auto
+_lirc=auto
+_lircc=auto
+_gui=no
+_gtk1=no
+_termcap=auto
+_termios=auto
+_3dfx=no
+_s3fb=no
+_tdfxfb=no
+_tdfxvid=no
+_tga=yes
+_directfb=auto
+_zr=auto
+_bl=no
+_largefiles=no
+#_language=en
+_shm=auto
+_linux_devfs=no
+_charset="UTF-8"
+_dynamic_plugins=no
+_crash_debug=no
+_sighandler=yes
+_libdv=auto
+_cdparanoia=auto
+_cddb=auto
+_big_endian=auto
+_bitmap_font=yes
+_freetype=auto
+_fontconfig=auto
+_menu=no
+_qtx=auto
+_macosx=auto
+_maemo=auto
+_macosx_finder_support=no
+_macosx_bundle=auto
+_sortsub=yes
+_freetypeconfig='freetype-config'
+_fribidi=auto
+_fribidiconfig='fribidi-config'
+_enca=auto
+_inet6=auto
+_gethostbyname2=auto
+_ftp=yes
+_musepack=auto
+_vstream=auto
+_pthreads=auto
+_ass=auto
+_rpath=no
+_asmalign_pot=auto
+_color_console=no
+for ac_option do
+  case "$ac_option" in
+  # Skip 1st pass
+  --target=*) ;;
+  --cc=*) ;;
+  --host-cc=*) ;;
+  --as=*) ;;
+  --enable-gcc-check) ;;
+  --disable-gcc-check) ;;
+  --enable-static*) ;;
+  --disable-static*) ;;
+  --with-extraincdir=*) ;;
+  --with-extralibdir=*) ;;
+  --extra-libs=*) ;;
+  --extra-libs-mplayer=*) ;;
+  --extra-libs-mencoder=*) ;;
+  --enable-runtime-cpudetection) ;;
+  --disable-runtime-cpudetection) ;;
+  --enable-cross-compile) ;;
+  --disable-cross-compile) ;;
+  --with-install=*) ;;
+  --enable-profile) ;;
+  --disable-profile) ;;
+  --enable-debug) ;;
+  --enable-debug=*) ;;
+  --disable-debug) ;;
+
+  # Real 2nd pass
+  --enable-mencoder)	_mencoder=yes	;;
+  --disable-mencoder)	_mencoder=no	;;
+  --enable-mplayer)	_mplayer=yes	;;
+  --disable-mplayer)	_mplayer=no	;;
+  --enable-dynamic-plugins) _dynamic_plugins=yes ;;
+  --disable-dynamic-plugins) _dynamic_plugins=no ;;
+  --enable-x11)		_x11=yes	;;
+  --disable-x11)	_x11=no		;;
+  --enable-xshape)	_xshape=yes	;;
+  --disable-xshape)	_xshape=no	;;
+  --enable-xv)		_xv=yes		;;
+  --disable-xv)		_xv=no		;;
+  --enable-xvmc)        _xvmc=yes       ;;
+  --disable-xvmc)       _xvmc=no        ;;
+  --enable-sdl)		_sdl=yes	;;
+  --disable-sdl)	_sdl=no		;;
+  --enable-directx)     _directx=yes    ;;
+  --disable-directx)    _directx=no     ;;
+  --enable-win32waveout)  _win32waveout=yes ;;
+  --disable-win32waveout) _win32waveout=no  ;;
+  --enable-nas)		_nas=yes	;;
+  --disable-nas)	_nas=no		;;
+  --enable-png)		_png=yes	;;
+  --disable-png)	_png=no		;;
+  --enable-jpeg)	_jpeg=yes	;;
+  --disable-jpeg)	_jpeg=no		;;
+  --enable-pnm)		_pnm=yes	;;
+  --disable-pnm)	_pnm=no		;;
+  --enable-md5sum)	_md5sum=yes	;;
+  --disable-md5sum)	_md5sum=no	;;
+  --enable-gif)	_gif=yes	;;
+  --disable-gif)	_gif=no		;;
+  --enable-gl)		_gl=yes		;;
+  --disable-gl)		_gl=no		;;
+  --enable-ggi)		_ggi=yes	;;
+  --disable-ggi)	_ggi=no		;;
+  --enable-ggiwmh)	_ggiwmh=yes	;;
+  --disable-ggiwmh)	_ggiwmh=no	;;
+  --enable-aa)		_aa=yes		;;
+  --disable-aa)		_aa=no		;;
+  --enable-caca)	_caca=yes	;;
+  --disable-caca)	_caca=no	;;
+  --enable-svga)	_svga=yes	;;
+  --disable-svga)	_svga=no	;;
+  --enable-vesa)	_vesa=yes	;;
+  --disable-vesa)	_vesa=no	;;
+  --enable-fbdev)	_fbdev=yes	;;
+  --disable-fbdev)	_fbdev=no	;;
+  --enable-dvb)		_dvb=yes	;;
+  --disable-dvb)        _dvb=no		;;
+  --enable-dvbhead)	_dvbhead=yes	;;
+  --disable-dvbhead)    _dvbhead=no	;;
+  --enable-dxr2)	_dxr2=yes	;;
+  --disable-dxr2)	_dxr2=no	;;
+  --enable-dxr3)	_dxr3=yes	;;
+  --disable-dxr3)	_dxr3=no	;;
+  --enable-ivtv)        _ivtv=yes       ;;
+  --disable-ivtv)       _ivtv=no        ;;
+  --enable-iconv)	_iconv=yes	;;
+  --disable-iconv)	_iconv=no	;;
+  --enable-langinfo)	_langinfo=yes	;;
+  --disable-langinfo)	_langinfo=no	;;
+  --enable-rtc)	        _rtc=yes	;;
+  --disable-rtc)	_rtc=no	        ;;
+  --enable-libdv)	_libdv=yes	;;
+  --disable-libdv)	_libdv=no	;;
+  --enable-ossaudio)	_ossaudio=yes	;;
+  --disable-ossaudio)	_ossaudio=no	;;
+  --enable-arts)	_arts=yes	;;
+  --disable-arts)	_arts=no	;;
+  --enable-esd)		_esd=yes	;;
+  --disable-esd)	_esd=no		;;
+  --enable-polyp)	_polyp=yes	;;
+  --disable-polyp)	_polyp=no		;;
+  --enable-jack)	_jack=yes	;;
+  --disable-jack)	_jack=no	;;
+  --enable-openal)	_openal=yes	;;
+  --disable-openal)	_openal=no	;;
+  --enable-mad)		_mad=yes	;;
+  --disable-mad)	_mad=no		;;
+  --enable-toolame)	_toolame=yes	;;
+  --disable-toolame)	_toolame=no	;;
+  --enable-twolame)	_twolame=yes	;;
+  --disable-twolame)	_twolame=no	;;
+  --enable-libcdio)	_libcdio=yes	;;
+  --disable-libcdio)	_libcdio=no	;;
+  --enable-liblzo)	_liblzo=yes	;;
+  --disable-liblzo)	_liblzo=no		;;
+  --enable-libvorbis)	_libvorbis=yes	;;
+  --disable-libvorbis)	_libvorbis=no	;;
+  --enable-speex)	_speex=yes	;;
+  --disable-speex)	_speex=no	;;
+  --enable-tremor-internal)	_tremor_internal=yes	;;
+  --disable-tremor-internal)	_tremor_internal=no	;;
+  --enable-tremor-low)	_tremor_low=yes	;;
+  --disable-tremor-low)	_tremor_low=no	;;
+  --enable-tremor-external)	_tremor_external=yes	;;
+  --disable-tremor-external)	_tremor_external=no	;;
+  --enable-theora)	_theora=yes	;;
+  --disable-theora)	_theora=no	;;
+  --enable-mp3lib)	_mp3lib=yes	;;
+  --disable-mp3lib)	_mp3lib=no	;;
+  --enable-liba52)	_liba52=yes	;;
+  --disable-liba52)	_liba52=no	;;
+  --enable-libdts)	_libdts=yes     ;;
+  --disable-libdts)	_libdts=no      ;;
+  --enable-libmpeg2)	_libmpeg2=yes	;;
+  --disable-libmpeg2)	_libmpeg2=no	;;
+  --enable-musepack)	_musepack=yes	;;
+  --disable-musepack)	_musepack=no	;;
+  --enable-faad-internal)	_faad_internal=yes	;;
+  --disable-faad-internal)	_faad_internal=no	;;
+  --enable-faad-external)	_faad_external=yes	;;
+  --disable-faad-external)	_faad_external=no	;;
+  --enable-faad-fixed)	_faad_fixed=yes	;;
+  --disable-faad-fixed)	_faad_fixed=no	;;
+  --enable-faac)	_faac=yes	;;
+  --disable-faac)	_faac=no	;;
+  --enable-ladspa)	_ladspa=yes	;;
+  --disable-ladspa)	_ladspa=no		;;
+  --enable-xmms)	_xmms=yes	;;
+  --disable-xmms)	_xmms=no	;;
+  --enable-dvdread)	_dvdread=yes	;;
+  --disable-dvdread)	_dvdread=no	;;
+  --enable-dvdread-internal)	_dvdread_internal=yes	;;
+  --disable-dvdread-internal)	_dvdread_internal=no	;;
+  --enable-libdvdcss-internal)	_libdvdcss_internal=yes	;;
+  --disable-libdvdcss-internal)	_libdvdcss_internal=no	;;
+  --enable-dvdnav)	_dvdnav=yes	;;
+  --disable-dvdnav)	_dvdnav=no	;;
+  --enable-xanim)	_xanim=yes	;;
+  --disable-xanim)	_xanim=no	;;
+  --enable-real)	_real=yes	;;
+  --disable-real)	_real=no	;;
+  --enable-live)	_live=yes	;;
+  --disable-live)	_live=no	;;
+  --enable-xinerama)	_xinerama=yes	;;
+  --disable-xinerama)	_xinerama=no	;;
+  --enable-mga)		_mga=yes	;;
+  --disable-mga)	_mga=no		;;
+  --enable-xmga)	_xmga=yes	;;
+  --disable-xmga)	_xmga=no	;;
+  --enable-vm)		_vm=yes		;;
+  --disable-vm)		_vm=no		;;
+  --enable-xf86keysym)	_xf86keysym=yes	;;
+  --disable-xf86keysym)	_xf86keysym=no	;;
+  --enable-mlib)	_mlib=yes	;;
+  --disable-mlib)	_mlib=no	;;
+  --enable-sunaudio)	_sunaudio=yes	;;
+  --disable-sunaudio)	_sunaudio=no	;;
+  --enable-sgiaudio)	_sgiaudio=yes	;;
+  --disable-sgiaudio)	_sgiaudio=no	;;
+  --enable-alsa)	_alsa=yes	;;
+  --disable-alsa)	_alsa=no	;;
+  --enable-tv)		_tv=yes		;;
+  --disable-tv)		_tv=no		;;
+  --enable-tv-bsdbt848)	_tv_bsdbt848=yes	;;
+  --disable-tv-bsdbt848)	_tv_bsdbt848=no	;;
+  --enable-tv-v4l1)	_tv_v4l1=yes	;;
+  --disable-tv-v4l1)	_tv_v4l1=no	;;
+  --enable-tv-v4l2)	_tv_v4l2=yes	;;
+  --disable-tv-v4l2)	_tv_v4l2=no	;;
+  --enable-radio)       _radio=yes	;;
+  --enable-radio-capture)       _radio_capture=yes	;;
+  --disable-radio-capture)       _radio_capture=no	;;
+  --disable-radio)	_radio=no	;;
+  --enable-radio-v4l)	_radio_v4l=yes	;;
+  --disable-radio-v4l)	_radio_v4l=no	;;
+  --enable-radio-v4l2)	_radio_v4l2=yes	;;
+  --disable-radio-v4l2)	_radio_v4l2=no	;;
+  --enable-radio-bsdbt848)	_radio_bsdbt848=yes	;;
+  --disable-radio-bsdbt848)	_radio_bsdbt848=no	;;
+  --enable-pvr)  	_pvr=yes	;;
+  --disable-pvr)	_pvr=no 	;;
+  --enable-fastmemcpy)	_fastmemcpy=yes	;;
+  --disable-fastmemcpy)	_fastmemcpy=no	;;
+  --enable-network)	_network=yes	;;
+  --disable-network)	_network=no	;;
+  --enable-winsock2)	_winsock2=yes	;;
+  --disable-winsock2)	_winsock2=no	;;
+  --enable-smb)		_smbsupport=yes	;;
+  --disable-smb)	_smbsupport=no	;;
+  --enable-vidix-internal)	_vidix_internal=yes	;;
+  --disable-vidix-internal)	_vidix_internal=no	;;
+  --enable-vidix-external)	_vidix_external=yes	;;
+  --disable-vidix-external)	_vidix_external=no	;;
+  --enable-joystick)	_joystick=yes	;;
+  --disable-joystick)	_joystick=no	;;
+  --enable-xvid)	_xvid=yes	;;
+  --disable-xvid)	_xvid=no	;;
+  --enable-x264)        _x264=yes       ;;
+  --disable-x264)       _x264=no        ;;
+  --enable-nut)		_nut=yes	;;
+  --disable-nut)	_nut=no		;;
+  --enable-libavutil)	_libavutil=yes	;;
+  --disable-libavutil)	_libavutil=no	;;
+  --enable-libavutil_so)	_libavutil_so=yes	;;
+  --disable-libavutil_so)	_libavutil_so=no	;;
+  --enable-libavcodec)	_libavcodec=yes	;;
+  --disable-libavcodec)	_libavcodec=no	;;
+  --enable-libavcodec_so)	_libavcodec_so=yes	;;
+  --disable-libavcodec_so)	_libavcodec_so=no	;;
+  --enable-amr_nb)	_amr_nb=yes	;;
+  --disable-amr_nb)	_amr_nb=no	;;
+  --enable-amr_nb-fixed)	_amr_nb_fixed=yes ;;
+  --disable-amr_nb-fixed)	_amr_nb_fixed=no ;;
+  --enable-amr_wb)	_amr_wb=yes	;;
+  --disable-amr_wb)	_amr_wb=no	;;
+  --enable-decoder=*)	_libavdecoders="$_libavdecoders `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-decoder=*)	_libavdecoders=`echo $_libavdecoders | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
+  --enable-encoder=*)	_libavencoders="$_libavencoders `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-encoder=*)	_libavencoders=`echo $_libavencoders | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
+  --enable-parser=*)	_libavparsers="$_libavparsers `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-parser=*)	_libavparsers=`echo $_libavparsers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
+  --enable-demuxer=*)	_libavdemuxers="$_libavdemuxers `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-demuxer=*)	_libavdemuxers=`echo $_libavdemuxers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
+  --enable-muxer=*)	_libavmuxers="$_libavmuxers `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-muxer=*)	_libavmuxers=`echo $_libavmuxers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
+  --enable-libavformat)	_libavformat=yes;;
+  --disable-libavformat)	_libavformat=no	;;
+  --enable-libavformat_so)	_libavformat_so=yes	;;
+  --disable-libavformat_so)	_libavformat_so=no	;;
+  --enable-libpostproc)		_libpostproc=yes	;;
+  --disable-libpostproc)	_libpostproc=no		;;
+  --enable-libpostproc_so)	_libpostproc_so=yes	;;
+  --disable-libpostproc_so)	_libpostproc_so=no	;;
+  --enable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=yes	;;
+  --disable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=no	;;
+
+  --enable-lirc)	_lirc=yes	;;
+  --disable-lirc)	_lirc=no	;;
+  --enable-lircc)	_lircc=yes	;;
+  --disable-lircc)	_lircc=no	;;
+  --enable-gui)		_gui=yes	;;
+  --disable-gui)	_gui=no		;;
+  --enable-gtk1)	_gtk1=yes	;;
+  --disable-gtk1)	_gtk1=no	;;
+  --enable-termcap)	_termcap=yes	;;
+  --disable-termcap)	_termcap=no	;;
+  --enable-termios)	_termios=yes    ;;
+  --disable-termios)    _termios=no     ;;
+  --enable-3dfx)	_3dfx=yes	;;
+  --disable-3dfx)	_3dfx=no	;;
+  --enable-s3fb)	_s3fb=yes	;;
+  --disable-s3fb)	_s3fb=no	;;
+  --enable-tdfxfb)	_tdfxfb=yes	;;
+  --disable-tdfxfb)	_tdfxfb=no	;;
+  --disable-tdfxvid)	_tdfxvid=no	;;
+  --enable-tdfxvid)	_tdfxvid=yes	;;
+  --disable-tga)	_tga=no	  	;;
+  --enable-tga)		_tga=yes	;;
+  --enable-directfb)	_directfb=yes	;;
+  --disable-directfb)	_directfb=no	;;
+  --enable-zr)		_zr=yes		;;
+  --disable-zr)		_zr=no		;;
+  --enable-bl)		_bl=yes		;;
+  --disable-bl)		_bl=no		;;
+  --enable-mtrr)	_mtrr=yes	;;
+  --disable-mtrr)	_mtrr=no	;;
+  --enable-largefiles)	_largefiles=yes	;;
+  --disable-largefiles)	_largefiles=no	;;
+  --enable-shm)		_shm=yes	;;
+  --disable-shm)	_shm=no         ;;
+  --enable-select)	_select=yes	;;
+  --disable-select)	_select=no	;;
+  --enable-linux-devfs)	_linux_devfs=yes	;;
+  --disable-linux-devfs)	_linux_devfs=no	;;
+  --enable-cdparanoia)	_cdparanoia=yes	;;
+  --disable-cdparanoia)	_cdparanoia=no	;;
+  --enable-cddb)	_cddb=yes	;;
+  --disable-cddb)	_cddb=no	;;
+  --enable-big-endian)  _big_endian=yes ;;
+  --disable-big-endian) _big_endian=no  ;;
+  --enable-bitmap-font)    _bitmap_font=yes   ;;
+  --disable-bitmap-font)   _bitmap_font=no    ;;
+  --enable-freetype)    _freetype=yes   ;;
+  --disable-freetype)   _freetype=no    ;;
+  --enable-fontconfig)  _fontconfig=yes ;;
+  --disable-fontconfig) _fontconfig=no  ;;
+  --enable-unrarlib)	_unrarlib=yes	;;
+  --disable-unrarlib)	_unrarlib=no	;;
+  --enable-ftp)         _ftp=yes        ;;
+  --disable-ftp)        _ftp=no         ;;
+  --enable-vstream)     _vstream=yes    ;;
+  --disable-vstream)    _vstream=no     ;;
+  --enable-pthreads)    _pthreads=yes   ;;
+  --disable-pthreads)   _pthreads=no    ;;
+  --enable-ass)         _ass=yes        ;;
+  --disable-ass)        _ass=no         ;;
+  --enable-rpath)       _rpath=yes      ;;
+  --disable-rpath)      _rpath=no       ;;
+  --enable-color-console)  _color_console=yes ;;
+  --disable-color-console) _color_console=no  ;;
+
+  --enable-fribidi)     _fribidi=yes    ;;
+  --disable-fribidi)    _fribidi=no     ;;
+
+  --enable-enca)        _enca=yes    ;;
+  --disable-enca)       _enca=no     ;;
+
+  --enable-inet6)	_inet6=yes	;;
+  --disable-inet6)	_inet6=no	;;
+
+  --enable-gethostbyname2)	_gethostbyname2=yes	;;
+  --disable-gethostbyname2)	_gethostbyname2=no	;;
+
+  --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
+  --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
+  --disable-dga) _dga=no ;;
+
+  --enable-menu) _menu=yes ;;
+  --disable-menu) _menu=no ;;
+
+  --enable-qtx) _qtx=yes ;;
+  --disable-qtx) _qtx=no ;;
+
+  --enable-macosx) _macosx=yes ;;
+  --disable-macosx) _macosx=no ;;
+  --enable-macosx-finder-support) _macosx_finder_support=yes ;;
+  --disable-macosx-finder-support) _macosx_finder_support=no ;;
+  --enable-macosx-bundle) _macosx_bundle=yes;;
+  --disable-macosx-bundle) _macosx_bundle=no;;
+
+  --enable-maemo) _maemo=yes ;;
+  --disable-maemo) _maemo=no ;;
+
+  --enable-sortsub) _sortsub=yes ;;
+  --disable-sortsub) _sortsub=no ;;
+
+  --charset=*)
+    _charset=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --language=*)
+    _language=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+
+  --codecsdir=*)
+    _codecsdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --win32codecsdir=*)
+    _win32codecsdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --xanimcodecsdir=*)
+    _xanimcodecsdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --realcodecsdir=*)
+    _realcodecsdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+
+  --enable-crash-debug)
+    _crash_debug=yes
+    ;;
+  --disable-crash-debug)
+    _crash_debug=no
+    ;;
+  --enable-sighandler)
+    _sighandler=yes
+    ;;
+  --disable-sighandler)
+    _sighandler=no
+    ;;
+
+  --enable-sse)	_sse=yes ;;
+  --disable-sse) _sse=no ;;
+  --enable-sse2) _sse2=yes ;;
+  --disable-sse2) _sse2=no ;;
+  --enable-mmxext) _mmxext=yes ;;
+  --disable-mmxext) _mmxext=no ;;
+  --enable-3dnow) _3dnow=yes ;;
+  --disable-3dnow) _3dnow=no _3dnowext=no ;;
+  --enable-3dnowext) _3dnow=yes _3dnowext=yes ;;
+  --disable-3dnowext) _3dnowext=no ;;
+  --enable-cmov) _cmov=yes ;;
+  --disable-cmov) _cmov=no ;;
+  --enable-altivec) _altivec=yes ;;
+  --disable-altivec) _altivec=no ;;
+  --enable-armv5te) _armv5te=yes ;;
+  --disable-armv5te) _armv5te=no ;;
+  --enable-iwmmxt) _iwmmxt=yes ;;
+  --disable-iwmmxt) _iwmmxt=no ;;
+  --enable-mmx)	_mmx=yes ;;
+  --disable-mmx) # 3Dnow! and MMX2 require MMX
+        _3dnow=no _3dnowext=no _mmx=no _mmxext=no ;;
+
+  --enable-win32) _win32=yes ;;
+  --disable-win32) _win32=no ;;
+
+  --with-xvmclib=*)
+    _xvmclib=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-sdl-config=*)
+    _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-freetype-config=*)
+    _freetypeconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-fribidi-config=*)
+    _fribidiconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-gtk-config=*)
+    _gtkconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-glib-config=*)
+    _glibconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-dvdnav-config=*)
+    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --prefix=*)
+    _prefix=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --bindir=*)
+    _bindir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --datadir=*)
+    _datadir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --mandir=*)
+    _mandir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --confdir=*)
+    _confdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --libdir=*)
+    _libdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+
+  *)
+    echo "Unknown parameter: $ac_option"
+    exit 1
+    ;;
+
+  esac
+done
+
+# Atmos: moved this here, to be correct, if --prefix is specified
+test -z "$_bindir" && _bindir="$_prefix/bin"
+test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
+test -z "$_mandir" && _mandir="$_prefix/man"
+test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
+test -z "$_libdir" && _libdir="$_prefix/lib"
+
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
   # OS name
@@ -1621,651 +2267,6 @@ if test -n "$CPPFLAGS" ; then
   _warn_CFLAGS=yes
 fi
 
-_prefix="/usr/local"
-
-# GOTCHA: the variables below defines the default behavior for autodetection
-# and have - unless stated otherwise - at least 2 states : yes no
-# If autodetection is available then the third state is: auto
-_libavutil=auto
-_libavutil_so=auto
-_libavcodec=auto
-_amr_nb=auto
-_amr_nb_fixed=auto
-_amr_wb=auto
-_libavdecoders_all=`sed -n 's/^[^#]*DEC.*, *\(.*\)).*/\1_decoder/p' "libavcodec/allcodecs.c"`
-_libavdecoders=` echo $_libavdecoders_all | sed -e s/aac_decoder// -e s/mpeg4aac_decoder//  -e s/ac3_decoder// -e s/libgsm_decoder// -e s/libvorbis_decoder// `
-_libavencoders_all=`sed -n 's/^[^#]*ENC.*, *\(.*\)).*/\1_encoder/p' "libavcodec/allcodecs.c"`
-_libavencoders=` echo $_libavencoders_all | sed -e s/libgsm_encoder// -e s/libtheora_encoder// `
-_libavparsers_all=`sed -n 's/^[^#]*PARSER.*, *\(.*\)).*/\1_parser/p' "libavcodec/allcodecs.c"`
-_libavparsers=$_libavparsers_all
-_libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c `
-_libavdemuxers=`echo $_libavdemuxers_all | sed -e s/audio_demuxer// -e s/dc1394_demuxer// -e s/dv1394_demuxer// -e s/redir_demuxer// -e s/rtsp_demuxer//  -e s/sdp_demuxer// -e s/video_grab_device_demuxer// -e s/x11_grab_device_demuxer// -e s/v4l2_demuxer// `
-_libavmuxers_all=`sed -n 's/^[^#]*_MUX.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c`
-_libavmuxers=`echo $_libavmuxers_all | sed -e s/audio_muxer// -e s/rtp_muxer// `
-_libavcodec_so=auto
-_libavformat=auto
-_libavformat_so=auto
-_libpostproc=auto
-_libpostproc_so=auto
-_libavcodec_mpegaudio_hp=yes
-_mencoder=yes
-_mplayer=yes
-_x11=auto
-_xshape=auto
-_dga=auto	# 1 2 no auto
-_xv=auto
-_xvmc=no  #auto when complete
-_sdl=auto
-_directx=auto
-_win32waveout=auto
-_nas=auto
-_png=auto
-_jpeg=auto
-_pnm=yes
-_md5sum=yes
-_gif=auto
-_gl=auto
-_ggi=auto
-_ggiwmh=auto
-_aa=auto
-_caca=auto
-_svga=auto
-_vesa=auto
-_fbdev=auto
-_dvb=auto
-_dvbhead=auto
-_dxr2=auto
-_dxr3=auto
-_ivtv=auto
-_iconv=auto
-_langinfo=auto
-_rtc=auto
-_ossaudio=auto
-_arts=auto
-_esd=auto
-_polyp=auto
-_jack=auto
-_openal=auto
-_libcdio=auto
-_liblzo=auto
-_mad=auto
-_toolame=auto
-_twolame=auto
-_tremor_internal=yes
-_tremor_low=no
-_tremor_external=auto
-_libvorbis=auto
-_speex=auto
-_theora=auto
-_mp3lib=yes
-_liba52=yes
-_libdts=auto
-_libmpeg2=yes
-_faad_internal=auto
-_faad_external=auto
-_faad_fixed=no
-_faac=auto
-_ladspa=auto
-_xmms=no
-_dvdnav=auto
-_dvdnavconfig=dvdnav-config
-_dvdread=auto
-_dvdread_internal=auto
-_libdvdcss_internal=auto
-_xanim=auto
-_real=auto
-_live=auto
-_xinerama=auto
-_mga=auto
-_xmga=auto
-_vm=auto
-_xf86keysym=auto
-_mlib=no #broken, thus disabled
-_sgiaudio=auto
-_sunaudio=auto
-_alsa=auto
-_fastmemcpy=yes
-_unrarlib=yes
-_win32=auto
-_select=yes
-_radio=no
-_radio_capture=no
-_radio_v4l=auto
-_radio_v4l2=auto
-_radio_bsdbt848=auto
-_tv=yes
-_tv_v4l1=auto
-_tv_v4l2=auto
-_tv_bsdbt848=auto
-_pvr=auto
-_network=yes
-_winsock2=auto
-_smbsupport=auto
-_vidix_internal=auto
-_vidix_external=auto
-_joystick=no
-_xvid=auto
-_x264=auto
-_nut=auto
-_lirc=auto
-_lircc=auto
-_gui=no
-_gtk1=no
-_termcap=auto
-_termios=auto
-_3dfx=no
-_s3fb=no
-_tdfxfb=no
-_tdfxvid=no
-_tga=yes
-_directfb=auto
-_zr=auto
-_bl=no
-_largefiles=no
-#_language=en
-_shm=auto
-_linux_devfs=no
-_charset="UTF-8"
-_dynamic_plugins=no
-_crash_debug=no
-_sighandler=yes
-_libdv=auto
-_cdparanoia=auto
-_cddb=auto
-_big_endian=auto
-_bitmap_font=yes
-_freetype=auto
-_fontconfig=auto
-_menu=no
-_qtx=auto
-_macosx=auto
-_maemo=auto
-_macosx_finder_support=no
-_macosx_bundle=auto
-_sortsub=yes
-_freetypeconfig='freetype-config'
-_fribidi=auto
-_fribidiconfig='fribidi-config'
-_enca=auto
-_inet6=auto
-_gethostbyname2=auto
-_ftp=yes
-_musepack=auto
-_vstream=auto
-_pthreads=auto
-_ass=auto
-_rpath=no
-_asmalign_pot=auto
-_color_console=no
-for ac_option do
-  case "$ac_option" in
-  # Skip 1st pass
-  --target=*) ;;
-  --cc=*) ;;
-  --host-cc=*) ;;
-  --as=*) ;;
-  --enable-gcc-check) ;;
-  --disable-gcc-check) ;;
-  --enable-static*) ;;
-  --disable-static*) ;;
-  --with-extraincdir=*) ;;
-  --with-extralibdir=*) ;;
-  --extra-libs=*) ;;
-  --extra-libs-mplayer=*) ;;
-  --extra-libs-mencoder=*) ;;
-  --enable-runtime-cpudetection) ;;
-  --disable-runtime-cpudetection) ;;
-  --enable-cross-compile) ;;
-  --disable-cross-compile) ;;
-  --with-install=*) ;;
-  --enable-profile) ;;
-  --disable-profile) ;;
-  --enable-debug) ;;
-  --enable-debug=*) ;;
-  --disable-debug) ;;
-
-  # Real 2nd pass
-  --enable-mencoder)	_mencoder=yes	;;
-  --disable-mencoder)	_mencoder=no	;;
-  --enable-mplayer)	_mplayer=yes	;;
-  --disable-mplayer)	_mplayer=no	;;
-  --enable-dynamic-plugins) _dynamic_plugins=yes ;;
-  --disable-dynamic-plugins) _dynamic_plugins=no ;;
-  --enable-x11)		_x11=yes	;;
-  --disable-x11)	_x11=no		;;
-  --enable-xshape)	_xshape=yes	;;
-  --disable-xshape)	_xshape=no	;;
-  --enable-xv)		_xv=yes		;;
-  --disable-xv)		_xv=no		;;
-  --enable-xvmc)        _xvmc=yes       ;;
-  --disable-xvmc)       _xvmc=no        ;;
-  --enable-sdl)		_sdl=yes	;;
-  --disable-sdl)	_sdl=no		;;
-  --enable-directx)     _directx=yes    ;;
-  --disable-directx)    _directx=no     ;;
-  --enable-win32waveout)  _win32waveout=yes ;;
-  --disable-win32waveout) _win32waveout=no  ;;
-  --enable-nas)		_nas=yes	;;
-  --disable-nas)	_nas=no		;;
-  --enable-png)		_png=yes	;;
-  --disable-png)	_png=no		;;
-  --enable-jpeg)	_jpeg=yes	;;
-  --disable-jpeg)	_jpeg=no		;;
-  --enable-pnm)		_pnm=yes	;;
-  --disable-pnm)	_pnm=no		;;
-  --enable-md5sum)	_md5sum=yes	;;
-  --disable-md5sum)	_md5sum=no	;;
-  --enable-gif)	_gif=yes	;;
-  --disable-gif)	_gif=no		;;
-  --enable-gl)		_gl=yes		;;
-  --disable-gl)		_gl=no		;;
-  --enable-ggi)		_ggi=yes	;;
-  --disable-ggi)	_ggi=no		;;
-  --enable-ggiwmh)	_ggiwmh=yes	;;
-  --disable-ggiwmh)	_ggiwmh=no	;;
-  --enable-aa)		_aa=yes		;;
-  --disable-aa)		_aa=no		;;
-  --enable-caca)	_caca=yes	;;
-  --disable-caca)	_caca=no	;;
-  --enable-svga)	_svga=yes	;;
-  --disable-svga)	_svga=no	;;
-  --enable-vesa)	_vesa=yes	;;
-  --disable-vesa)	_vesa=no	;;
-  --enable-fbdev)	_fbdev=yes	;;
-  --disable-fbdev)	_fbdev=no	;;
-  --enable-dvb)		_dvb=yes	;;
-  --disable-dvb)        _dvb=no		;;
-  --enable-dvbhead)	_dvbhead=yes	;;
-  --disable-dvbhead)    _dvbhead=no	;;
-  --enable-dxr2)	_dxr2=yes	;;
-  --disable-dxr2)	_dxr2=no	;;
-  --enable-dxr3)	_dxr3=yes	;;
-  --disable-dxr3)	_dxr3=no	;;
-  --enable-ivtv)        _ivtv=yes       ;;
-  --disable-ivtv)       _ivtv=no        ;;
-  --enable-iconv)	_iconv=yes	;;
-  --disable-iconv)	_iconv=no	;;
-  --enable-langinfo)	_langinfo=yes	;;
-  --disable-langinfo)	_langinfo=no	;;
-  --enable-rtc)	        _rtc=yes	;;
-  --disable-rtc)	_rtc=no	        ;;
-  --enable-libdv)	_libdv=yes	;;
-  --disable-libdv)	_libdv=no	;;
-  --enable-ossaudio)	_ossaudio=yes	;;
-  --disable-ossaudio)	_ossaudio=no	;;
-  --enable-arts)	_arts=yes	;;
-  --disable-arts)	_arts=no	;;
-  --enable-esd)		_esd=yes	;;
-  --disable-esd)	_esd=no		;;
-  --enable-polyp)	_polyp=yes	;;
-  --disable-polyp)	_polyp=no		;;
-  --enable-jack)	_jack=yes	;;
-  --disable-jack)	_jack=no	;;
-  --enable-openal)	_openal=yes	;;
-  --disable-openal)	_openal=no	;;
-  --enable-mad)		_mad=yes	;;
-  --disable-mad)	_mad=no		;;
-  --enable-toolame)	_toolame=yes	;;
-  --disable-toolame)	_toolame=no	;;
-  --enable-twolame)	_twolame=yes	;;
-  --disable-twolame)	_twolame=no	;;
-  --enable-libcdio)	_libcdio=yes	;;
-  --disable-libcdio)	_libcdio=no	;;
-  --enable-liblzo)	_liblzo=yes	;;
-  --disable-liblzo)	_liblzo=no		;;
-  --enable-libvorbis)	_libvorbis=yes	;;
-  --disable-libvorbis)	_libvorbis=no	;;
-  --enable-speex)	_speex=yes	;;
-  --disable-speex)	_speex=no	;;
-  --enable-tremor-internal)	_tremor_internal=yes	;;
-  --disable-tremor-internal)	_tremor_internal=no	;;
-  --enable-tremor-low)	_tremor_low=yes	;;
-  --disable-tremor-low)	_tremor_low=no	;;
-  --enable-tremor-external)	_tremor_external=yes	;;
-  --disable-tremor-external)	_tremor_external=no	;;
-  --enable-theora)	_theora=yes	;;
-  --disable-theora)	_theora=no	;;
-  --enable-mp3lib)	_mp3lib=yes	;;
-  --disable-mp3lib)	_mp3lib=no	;;
-  --enable-liba52)	_liba52=yes	;;
-  --disable-liba52)	_liba52=no	;;
-  --enable-libdts)	_libdts=yes     ;;
-  --disable-libdts)	_libdts=no      ;;
-  --enable-libmpeg2)	_libmpeg2=yes	;;
-  --disable-libmpeg2)	_libmpeg2=no	;;
-  --enable-musepack)	_musepack=yes	;;
-  --disable-musepack)	_musepack=no	;;
-  --enable-faad-internal)	_faad_internal=yes	;;
-  --disable-faad-internal)	_faad_internal=no	;;
-  --enable-faad-external)	_faad_external=yes	;;
-  --disable-faad-external)	_faad_external=no	;;
-  --enable-faad-fixed)	_faad_fixed=yes	;;
-  --disable-faad-fixed)	_faad_fixed=no	;;
-  --enable-faac)	_faac=yes	;;
-  --disable-faac)	_faac=no	;;
-  --enable-ladspa)	_ladspa=yes	;;
-  --disable-ladspa)	_ladspa=no		;;
-  --enable-xmms)	_xmms=yes	;;
-  --disable-xmms)	_xmms=no	;;
-  --enable-dvdread)	_dvdread=yes	;;
-  --disable-dvdread)	_dvdread=no	;;
-  --enable-dvdread-internal)	_dvdread_internal=yes	;;
-  --disable-dvdread-internal)	_dvdread_internal=no	;;
-  --enable-libdvdcss-internal)	_libdvdcss_internal=yes	;;
-  --disable-libdvdcss-internal)	_libdvdcss_internal=no	;;
-  --enable-dvdnav)	_dvdnav=yes	;;
-  --disable-dvdnav)	_dvdnav=no	;;
-  --enable-xanim)	_xanim=yes	;;
-  --disable-xanim)	_xanim=no	;;
-  --enable-real)	_real=yes	;;
-  --disable-real)	_real=no	;;
-  --enable-live)	_live=yes	;;
-  --disable-live)	_live=no	;;
-  --enable-xinerama)	_xinerama=yes	;;
-  --disable-xinerama)	_xinerama=no	;;
-  --enable-mga)		_mga=yes	;;
-  --disable-mga)	_mga=no		;;
-  --enable-xmga)	_xmga=yes	;;
-  --disable-xmga)	_xmga=no	;;
-  --enable-vm)		_vm=yes		;;
-  --disable-vm)		_vm=no		;;
-  --enable-xf86keysym)	_xf86keysym=yes	;;
-  --disable-xf86keysym)	_xf86keysym=no	;;
-  --enable-mlib)	_mlib=yes	;;
-  --disable-mlib)	_mlib=no	;;
-  --enable-sunaudio)	_sunaudio=yes	;;
-  --disable-sunaudio)	_sunaudio=no	;;
-  --enable-sgiaudio)	_sgiaudio=yes	;;
-  --disable-sgiaudio)	_sgiaudio=no	;;
-  --enable-alsa)	_alsa=yes	;;
-  --disable-alsa)	_alsa=no	;;
-  --enable-tv)		_tv=yes		;;
-  --disable-tv)		_tv=no		;;
-  --enable-tv-bsdbt848)	_tv_bsdbt848=yes	;;
-  --disable-tv-bsdbt848)	_tv_bsdbt848=no	;;
-  --enable-tv-v4l1)	_tv_v4l1=yes	;;
-  --disable-tv-v4l1)	_tv_v4l1=no	;;
-  --enable-tv-v4l2)	_tv_v4l2=yes	;;
-  --disable-tv-v4l2)	_tv_v4l2=no	;;
-  --enable-radio)       _radio=yes	;;
-  --enable-radio-capture)       _radio_capture=yes	;;
-  --disable-radio-capture)       _radio_capture=no	;;
-  --disable-radio)	_radio=no	;;
-  --enable-radio-v4l)	_radio_v4l=yes	;;
-  --disable-radio-v4l)	_radio_v4l=no	;;
-  --enable-radio-v4l2)	_radio_v4l2=yes	;;
-  --disable-radio-v4l2)	_radio_v4l2=no	;;
-  --enable-radio-bsdbt848)	_radio_bsdbt848=yes	;;
-  --disable-radio-bsdbt848)	_radio_bsdbt848=no	;;
-  --enable-pvr)  	_pvr=yes	;;
-  --disable-pvr)	_pvr=no 	;;
-  --enable-fastmemcpy)	_fastmemcpy=yes	;;
-  --disable-fastmemcpy)	_fastmemcpy=no	;;
-  --enable-network)	_network=yes	;;
-  --disable-network)	_network=no	;;
-  --enable-winsock2)	_winsock2=yes	;;
-  --disable-winsock2)	_winsock2=no	;;
-  --enable-smb)		_smbsupport=yes	;;
-  --disable-smb)	_smbsupport=no	;;
-  --enable-vidix-internal)	_vidix_internal=yes	;;
-  --disable-vidix-internal)	_vidix_internal=no	;;
-  --enable-vidix-external)	_vidix_external=yes	;;
-  --disable-vidix-external)	_vidix_external=no	;;
-  --enable-joystick)	_joystick=yes	;;
-  --disable-joystick)	_joystick=no	;;
-  --enable-xvid)	_xvid=yes	;;
-  --disable-xvid)	_xvid=no	;;
-  --enable-x264)        _x264=yes       ;;
-  --disable-x264)       _x264=no        ;;
-  --enable-nut)		_nut=yes	;;
-  --disable-nut)	_nut=no		;;
-  --enable-libavutil)	_libavutil=yes	;;
-  --disable-libavutil)	_libavutil=no	;;
-  --enable-libavutil_so)	_libavutil_so=yes	;;
-  --disable-libavutil_so)	_libavutil_so=no	;;
-  --enable-libavcodec)	_libavcodec=yes	;;
-  --disable-libavcodec)	_libavcodec=no	;;
-  --enable-libavcodec_so)	_libavcodec_so=yes	;;
-  --disable-libavcodec_so)	_libavcodec_so=no	;;
-  --enable-amr_nb)	_amr_nb=yes	;;
-  --disable-amr_nb)	_amr_nb=no	;;
-  --enable-amr_nb-fixed)	_amr_nb_fixed=yes ;;
-  --disable-amr_nb-fixed)	_amr_nb_fixed=no ;;
-  --enable-amr_wb)	_amr_wb=yes	;;
-  --disable-amr_wb)	_amr_wb=no	;;
-  --enable-decoder=*)	_libavdecoders="$_libavdecoders `echo $ac_option | cut -d '=' -f 2`" ;;
-  --disable-decoder=*)	_libavdecoders=`echo $_libavdecoders | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
-  --enable-encoder=*)	_libavencoders="$_libavencoders `echo $ac_option | cut -d '=' -f 2`" ;;
-  --disable-encoder=*)	_libavencoders=`echo $_libavencoders | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
-  --enable-parser=*)	_libavparsers="$_libavparsers `echo $ac_option | cut -d '=' -f 2`" ;;
-  --disable-parser=*)	_libavparsers=`echo $_libavparsers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
-  --enable-demuxer=*)	_libavdemuxers="$_libavdemuxers `echo $ac_option | cut -d '=' -f 2`" ;;
-  --disable-demuxer=*)	_libavdemuxers=`echo $_libavdemuxers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
-  --enable-muxer=*)	_libavmuxers="$_libavmuxers `echo $ac_option | cut -d '=' -f 2`" ;;
-  --disable-muxer=*)	_libavmuxers=`echo $_libavmuxers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
-  --enable-libavformat)	_libavformat=yes;;
-  --disable-libavformat)	_libavformat=no	;;
-  --enable-libavformat_so)	_libavformat_so=yes	;;
-  --disable-libavformat_so)	_libavformat_so=no	;;
-  --enable-libpostproc)		_libpostproc=yes	;;
-  --disable-libpostproc)	_libpostproc=no		;;
-  --enable-libpostproc_so)	_libpostproc_so=yes	;;
-  --disable-libpostproc_so)	_libpostproc_so=no	;;
-  --enable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=yes	;;
-  --disable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=no	;;
-
-  --enable-lirc)	_lirc=yes	;;
-  --disable-lirc)	_lirc=no	;;
-  --enable-lircc)	_lircc=yes	;;
-  --disable-lircc)	_lircc=no	;;
-  --enable-gui)		_gui=yes	;;
-  --disable-gui)	_gui=no		;;
-  --enable-gtk1)	_gtk1=yes	;;
-  --disable-gtk1)	_gtk1=no	;;
-  --enable-termcap)	_termcap=yes	;;
-  --disable-termcap)	_termcap=no	;;
-  --enable-termios)	_termios=yes    ;;
-  --disable-termios)    _termios=no     ;;
-  --enable-3dfx)	_3dfx=yes	;;
-  --disable-3dfx)	_3dfx=no	;;
-  --enable-s3fb)	_s3fb=yes	;;
-  --disable-s3fb)	_s3fb=no	;;
-  --enable-tdfxfb)	_tdfxfb=yes	;;
-  --disable-tdfxfb)	_tdfxfb=no	;;
-  --disable-tdfxvid)	_tdfxvid=no	;;
-  --enable-tdfxvid)	_tdfxvid=yes	;;
-  --disable-tga)	_tga=no	  	;;
-  --enable-tga)		_tga=yes	;;
-  --enable-directfb)	_directfb=yes	;;
-  --disable-directfb)	_directfb=no	;;
-  --enable-zr)		_zr=yes		;;
-  --disable-zr)		_zr=no		;;
-  --enable-bl)		_bl=yes		;;
-  --disable-bl)		_bl=no		;;
-  --enable-mtrr)	_mtrr=yes	;;
-  --disable-mtrr)	_mtrr=no	;;
-  --enable-largefiles)	_largefiles=yes	;;
-  --disable-largefiles)	_largefiles=no	;;
-  --enable-shm)		_shm=yes	;;
-  --disable-shm)	_shm=no         ;;
-  --enable-select)	_select=yes	;;
-  --disable-select)	_select=no	;;
-  --enable-linux-devfs)	_linux_devfs=yes	;;
-  --disable-linux-devfs)	_linux_devfs=no	;;
-  --enable-cdparanoia)	_cdparanoia=yes	;;
-  --disable-cdparanoia)	_cdparanoia=no	;;
-  --enable-cddb)	_cddb=yes	;;
-  --disable-cddb)	_cddb=no	;;
-  --enable-big-endian)  _big_endian=yes ;;
-  --disable-big-endian) _big_endian=no  ;;
-  --enable-bitmap-font)    _bitmap_font=yes   ;;
-  --disable-bitmap-font)   _bitmap_font=no    ;;
-  --enable-freetype)    _freetype=yes   ;;
-  --disable-freetype)   _freetype=no    ;;
-  --enable-fontconfig)  _fontconfig=yes ;;
-  --disable-fontconfig) _fontconfig=no  ;;
-  --enable-unrarlib)	_unrarlib=yes	;;
-  --disable-unrarlib)	_unrarlib=no	;;
-  --enable-ftp)         _ftp=yes        ;;
-  --disable-ftp)        _ftp=no         ;;
-  --enable-vstream)     _vstream=yes    ;;
-  --disable-vstream)    _vstream=no     ;;
-  --enable-pthreads)    _pthreads=yes   ;;
-  --disable-pthreads)   _pthreads=no    ;;
-  --enable-ass)         _ass=yes        ;;
-  --disable-ass)        _ass=no         ;;
-  --enable-rpath)       _rpath=yes      ;;
-  --disable-rpath)      _rpath=no       ;;
-  --enable-color-console)  _color_console=yes ;;
-  --disable-color-console) _color_console=no  ;;
-
-  --enable-fribidi)     _fribidi=yes    ;;
-  --disable-fribidi)    _fribidi=no     ;;
-
-  --enable-enca)        _enca=yes    ;;
-  --disable-enca)       _enca=no     ;;
-
-  --enable-inet6)	_inet6=yes	;;
-  --disable-inet6)	_inet6=no	;;
-
-  --enable-gethostbyname2)	_gethostbyname2=yes	;;
-  --disable-gethostbyname2)	_gethostbyname2=no	;;
-
-  --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
-  --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
-  --disable-dga) _dga=no ;;
-
-  --enable-menu) _menu=yes ;;
-  --disable-menu) _menu=no ;;
-
-  --enable-qtx) _qtx=yes ;;
-  --disable-qtx) _qtx=no ;;
-
-  --enable-macosx) _macosx=yes ;;
-  --disable-macosx) _macosx=no ;;
-  --enable-macosx-finder-support) _macosx_finder_support=yes ;;
-  --disable-macosx-finder-support) _macosx_finder_support=no ;;
-  --enable-macosx-bundle) _macosx_bundle=yes;;
-  --disable-macosx-bundle) _macosx_bundle=no;;  
-
-  --enable-maemo) _maemo=yes ;;
-  --disable-maemo) _maemo=no ;;
-
-  --enable-sortsub) _sortsub=yes ;;
-  --disable-sortsub) _sortsub=no ;;
-
-  --charset=*)
-    _charset=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --language=*)
-    _language=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-
-  --codecsdir=*)
-    _codecsdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --win32codecsdir=*)
-    _win32codecsdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --xanimcodecsdir=*)
-    _xanimcodecsdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --realcodecsdir=*)
-    _realcodecsdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-
-  --enable-crash-debug)
-    _crash_debug=yes
-    ;;
-  --disable-crash-debug)
-    _crash_debug=no
-    ;;
-  --enable-sighandler)
-    _sighandler=yes
-    ;;
-  --disable-sighandler)
-    _sighandler=no
-    ;;
-
-  --enable-sse)	_sse=yes ;;
-  --disable-sse) _sse=no ;;
-  --enable-sse2) _sse2=yes ;;
-  --disable-sse2) _sse2=no ;;
-  --enable-mmxext) _mmxext=yes ;;
-  --disable-mmxext) _mmxext=no ;;
-  --enable-3dnow) _3dnow=yes ;;
-  --disable-3dnow) _3dnow=no _3dnowext=no ;;
-  --enable-3dnowext) _3dnow=yes _3dnowext=yes ;;
-  --disable-3dnowext) _3dnowext=no ;;
-  --enable-cmov) _cmov=yes ;;
-  --disable-cmov) _cmov=no ;;
-  --enable-altivec) _altivec=yes ;;
-  --disable-altivec) _altivec=no ;;
-  --enable-armv5te) _armv5te=yes ;;
-  --disable-armv5te) _armv5te=no ;;
-  --enable-iwmmxt) _iwmmxt=yes ;;
-  --disable-iwmmxt) _iwmmxt=no ;;
-  --enable-mmx)	_mmx=yes ;;
-  --disable-mmx) # 3Dnow! and MMX2 require MMX
-        _3dnow=no _3dnowext=no _mmx=no _mmxext=no ;;
-
-  --enable-win32) _win32=yes ;;
-  --disable-win32) _win32=no ;;
-
-  --with-xvmclib=*)
-    _xvmclib=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-sdl-config=*)
-    _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-freetype-config=*)
-    _freetypeconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-fribidi-config=*)
-    _fribidiconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-gtk-config=*)
-    _gtkconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-glib-config=*)
-    _glibconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-dvdnav-config=*)
-    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --prefix=*)
-    _prefix=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --bindir=*)
-    _bindir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --datadir=*)
-    _datadir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --mandir=*)
-    _mandir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --confdir=*)
-    _confdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --libdir=*)
-    _libdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-
-  *)
-    echo "Unknown parameter: $ac_option"
-    exit 1
-    ;;
-
-  esac
-done
-
-# Atmos: moved this here, to be correct, if --prefix is specified
-test -z "$_bindir" && _bindir="$_prefix/bin"
-test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
-test -z "$_mandir" && _mandir="$_prefix/man"
-test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
-test -z "$_libdir" && _libdir="$_prefix/lib"
 
 
 if x86_32 ; then
