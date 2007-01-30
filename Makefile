@@ -257,10 +257,12 @@ INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 install: install-dirs $(INSTALL_TARGETS)
 
-install-vidix:
-	$(MAKE) -C libdha install
-	mkdir -p $(LIBDIR)/mplayer/vidix
-	-install -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
+install-dirs:
+	$(INSTALL) -d $(BINDIR)
+	$(INSTALL) -d $(DATADIR)
+	$(INSTALL) -d $(MANDIR)/man1
+	$(INSTALL) -d $(CONFDIR)
+	if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 
 install-mplayer: mplayer$(EXESUF)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) $(BINDIR)
@@ -295,12 +297,10 @@ install-gui:
 	$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
 
-install-dirs:
-	$(INSTALL) -d $(BINDIR)
-	$(INSTALL) -d $(DATADIR)
-	$(INSTALL) -d $(MANDIR)/man1
-	$(INSTALL) -d $(CONFDIR)
-	if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
+install-vidix:
+	$(MAKE) -C libdha install
+	mkdir -p $(LIBDIR)/mplayer/vidix
+	-install -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
 
 uninstall:
 	-rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
