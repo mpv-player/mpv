@@ -35,8 +35,6 @@ typedef struct {
 static int control (sh_video_t *sh, int cmd, void* arg, ...)
 {
     lzo_context_t *priv = sh->context;
-    //printf("[%s] Query!! (%s)\n", MOD_NAME, (codec==IMGFMT_BGR24)?"BGR":"none");
-    //printf("[%s] Query!! (%s)\n", MOD_NAME, (codec==IMGFMT_YV12)?"YV12":"none");
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
 	if (*(int *)arg == priv->codec) return CONTROL_TRUE;
@@ -89,8 +87,6 @@ static void uninit(sh_video_t *sh)
 
     sh->context = NULL;
 }
-
-//mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
