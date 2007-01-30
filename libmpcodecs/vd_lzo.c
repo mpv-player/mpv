@@ -39,8 +39,7 @@ static int control (sh_video_t *sh, int cmd, void* arg, ...)
     //printf("[%s] Query!! (%s)\n", MOD_NAME, (codec==IMGFMT_YV12)?"YV12":"none");
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
-	if( (*((int*)arg)) == IMGFMT_BGR24 && priv->codec == IMGFMT_BGR24) return CONTROL_TRUE;
-	if( (*((int*)arg)) == IMGFMT_YV12 && priv->codec == IMGFMT_YV12) return CONTROL_TRUE;
+	if (*(int *)arg == priv->codec) return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
     return CONTROL_UNKNOWN;
