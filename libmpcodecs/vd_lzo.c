@@ -108,12 +108,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
     
 
     if (!init_done) {
-	lzo_byte *tmp=NULL;
+	lzo_byte *tmp = lzo_malloc(sh->bih->biSizeImage);
 	
 	// decompress one frame to see if its
 	// either YV12 or RGB24
-	if (!tmp) tmp = lzo_malloc(sh->bih->biSizeImage);
-
 	mp_msg (MSGT_DECVIDEO, MSGL_V, "[%s] 2 depth %d, format %d data %p len (%d) (%d)\n",
 	    MOD_NAME, sh->bih->biBitCount, sh->format, data, len, sh->bih->biSizeImage
 	    );
