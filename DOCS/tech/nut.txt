@@ -736,10 +736,11 @@ Syncpoint tags:
 
 back_ptr_div16 (v)
     back_ptr = back_ptr_div16 * 16 + 15
-    back_ptr must point to a position within 16 bytes of a syncpoint
-    startcode. This syncpoint MUST be the closest syncpoint such that at
-    least one keyframe with a pts lower or equal to the original syncpoint's
-    global_key_pts for all streams lies between it and the current syncpoint.
+    back_ptr must point to a position up to 15 bytes before a syncpoint
+    startcode. Relative to position of current syncpoint. The syncpoint
+    pointed to MUST be the closest syncpoint such that at least one keyframe
+    with a pts lower or equal to the current syncpoint's global_key_pts for
+    all streams lies between it and the current syncpoint.
 
     A stream where EOR is set is to be ignored for back_ptr.
 
