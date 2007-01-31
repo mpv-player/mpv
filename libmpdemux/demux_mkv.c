@@ -36,10 +36,10 @@
 #include <zlib.h>
 #endif
 
-#ifdef USE_LIBLZO
-#include <lzo1x.h>
+#ifdef USE_LIBAVUTIL_SO
+#include <ffmpeg/lzo.h>
 #else
-#include "libmpcodecs/native/minilzo.h"
+#include "libavutil/lzo.h"
 #endif
 
 #if !defined(MIN)
@@ -630,23 +630,18 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
           /* lzo encoded track */
           int dstlen = *size * 3;
 
-          if (lzo_init () != LZO_E_OK)
-            {
-              mp_msg (MSGT_DEMUX, MSGL_WARN,
-                      MSGTR_MPDEMUX_MKV_LzoInitializationFailed);
-              return modified;
-            }
-
           *dest = NULL;
           while (1)
             {
-              *dest = realloc (*dest, dstlen);
-              result = lzo1x_decompress_safe (src, *size, *dest, &dstlen,
-                                              NULL);
-              if (result == LZO_E_OK)
+              int srclen = *size;
+              if (dstlen > SIZE_MAX - LZO_OUTPUT_PADDING) goto lzo_fail;
+              *dest = realloc (*dest, dstlen + LZO_OUTPUT_PADDING);
+              result = lzo1x_decode (*dest, &dstlen, src, &srclen);
+              if (result == 0)
                 break;
-              if (result != LZO_E_OUTPUT_OVERRUN)
+              if (!(result & LZO_OUTPUT_FULL))
                 {
+lzo_fail:
                   mp_msg (MSGT_DEMUX, MSGL_WARN,
                           MSGTR_MPDEMUX_MKV_LzoDecompressionFailed);
                   free(*dest);
@@ -1157,7 +1152,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
 	    // audit: cheap guard against overflows later..
 	    if (num > SIZE_MAX - 1000) return 0;
             l = x + num;
-            track->private_data = malloc (num);
+            track->private_data = malloc (num + LZO_INPUT_PADDING);
             if (stream_read(s, track->private_data, num) != (int) num)
               goto err_out;
             track->private_size = num;
@@ -3409,7 +3404,8 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                 case MATROSKA_ID_BLOCK:
                   block_length = ebml_read_length (s, &tmp);
                   free(block);
-                  block = malloc (block_length);
+                  if (block_length > SIZE_MAX - LZO_INPUT_PADDING) return 0;
+                  block = malloc (block_length + LZO_INPUT_PADDING);
                   demuxer->filepos = stream_tell (s);
                   if (stream_read (s,block,block_length) != (int) block_length)
                   {
