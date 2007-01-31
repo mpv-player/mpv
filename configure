@@ -2128,6 +2128,7 @@ EOF
 	_optimizing="$_optimizing $2"
         return 0
       else
+        eval _$2=no
         echores "failed"
         echo "It seems that your kernel does not correctly support $2."
         echo "To use $2 extensions in MPlayer, you have to upgrade/recompile your kernel!"
@@ -2137,13 +2138,14 @@ EOF
     return 0
   }
 
-  extcheck $_mmx "mmx" "emms" || _mmx=no
-  extcheck $_mmxext "mmxext" "sfence" || _mmxext=no
-  extcheck $_3dnow "3dnow" "femms" || _3dnow=no
-  extcheck $_3dnowext "3dnowext" "pswapd %%mm0, %%mm0" || _3dnowext=no
-  extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" || _sse=no _gcc3_ext="$_gcc3_ext -mno-sse"
-  extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" || _sse2=no _gcc3_ext="$_gcc3_ext -mno-sse2"
-  extcheck $_cmov "cmov" "cmovb %%eax,%%ebx" || _cmov=no
+  extcheck $_mmx      "mmx"      "emms"
+  extcheck $_mmxext   "mmxext"   "sfence"
+  extcheck $_3dnow    "3dnow"    "femms"
+  extcheck $_3dnowext "3dnowext" "pswapd %%mm0, %%mm0"
+  extcheck $_sse      "sse"      "xorps %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse"
+  extcheck $_sse2     "sse2"     "xorpd %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse2"
+  extcheck $_cmov     "cmov"     "cmovb %%eax,%%ebx"
+
   echocheck "mtrr support"
   echores "$_mtrr"
 
