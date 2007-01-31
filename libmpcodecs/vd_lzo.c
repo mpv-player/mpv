@@ -91,7 +91,6 @@ static void uninit(sh_video_t *sh)
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 {
-    static int init_done = 0;
     int r;
     mp_image_t* mpi;
     int w;
@@ -102,7 +101,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
     }
     
 
-    if (!init_done) {
+    if (priv->codec == -1) {
 	lzo_byte *tmp = lzo_malloc(sh->bih->biSizeImage);
 	
 	// decompress one frame to see if its
@@ -135,8 +134,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 	    return NULL;
 	}
 
-	if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,priv->codec)) return NULL;
-	init_done++;
+	if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,priv->codec)) {
+	    priv->codec = -1;
+	    return NULL;
+	}
     }
 
     mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0,
