@@ -1474,7 +1474,7 @@ if x86 ; then
                            -e s/xmm/sse/ -e s/kni/sse/`
 
   for ext in $pparam ; do
-    eval test \$_$ext = auto 2>/dev/null && eval _$ext=yes
+    eval test \$_$ext = auto 2>/dev/null && eval _$ext=kernel_check
   done
 
   # SSE implies MMX2, but not all SSE processors report the mmxext CPU flag.
@@ -2111,7 +2111,7 @@ fi
 
 if x86_32 && test "$_runtime_cpudetection" = no ; then
   extcheck() {
-    if test "$1" = yes ; then
+    if test "$1" = kernel_check ; then
       echocheck "kernel support of $2"
       cat > $TMPC <<EOF
 #include <signal.h>
@@ -2123,6 +2123,7 @@ int main(void){
 EOF
 
       if cc_check && tmp_run ; then
+        eval _$2=yes
         echores "yes"
 	_optimizing="$_optimizing $2"
         return 0
