@@ -5863,7 +5863,7 @@ int main(void) { unsigned long x, y; faacEncOpen(48000, 2, &x, &y); return 0; }
 EOF
   _faac=no
   for _ld_faac in "-lfaac" "-lfaac -lmp4v2 -lstdc++" ; do
-    cc_check -c -O4 $_ld_tmp $_ld_lm && _libs_mencoder="$_libs_mencoder $_ld_faac" && _faac=yes && break
+    cc_check -O4 $_ld_tmp $_ld_lm && _libs_mencoder="$_libs_mencoder $_ld_faac" && _faac=yes && break
   done
 fi
 if test "$_faac" = yes ; then
