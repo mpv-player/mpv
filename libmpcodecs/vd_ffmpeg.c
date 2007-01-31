@@ -717,6 +717,12 @@ typedef struct dp_hdr_s {
     uint32_t chunktab;	// offset to chunk offset array
 } dp_hdr_t;
 
+void swap_palette(void *pal) {
+    int i;
+    uint32_t *p = pal;
+    for (i = 0; i < AVPALETTE_COUNT; i++)
+        p[i] = le2me_32(p[i]);
+}
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
@@ -884,6 +890,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	mpi->stride[2]*=2;
     }
     
+#ifdef WORDS_BIGENDIAN
+    // FIXME: this might cause problems for buffers with FF_BUFFER_HINTS_PRESERVE
+    if (mpi->bpp == 8)
+        swap_palette(mpi->planes[1]);
+#endif
 /* to comfirm with newer lavc style */
     mpi->qscale =pic->qscale_table;
     mpi->qstride=pic->qstride;
