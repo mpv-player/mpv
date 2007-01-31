@@ -6,12 +6,10 @@
 
 #include "vd_internal.h"
 
-#ifdef USE_LIBLZO
-#include <lzo1x.h>
+#ifdef USE_LIBAVUTIL_SO
+#include <ffmpeg/lzo.h>
 #else
-#include "native/minilzo.h"
-#define lzo_malloc malloc
-#define lzo_free free
+#include "libavutil/lzo.h"
 #endif
 
 #define MOD_NAME "DecLZO"
@@ -27,7 +25,6 @@ static vd_info_t info = {
 LIBVD_EXTERN(lzo)
 
 typedef struct {
-    lzo_byte *wrkmem;
     uint8_t *buffer;
     int bufsz;
     int codec;
@@ -51,8 +48,8 @@ static int init(sh_video_t *sh)
 {
     lzo_context_t *priv;
 
-    if (lzo_init() != LZO_E_OK) {
-	mp_msg (MSGT_DECVIDEO, MSGL_ERR, "[%s] lzo_init() failed\n", MOD_NAME);
+    if (sh->bih->biSizeImage <= 0) {
+	mp_msg (MSGT_DECVIDEO, MSGL_ERR, "[%s] Invalid frame size\n", MOD_NAME);
 	return 0; 
     }
 
@@ -63,16 +60,9 @@ static int init(sh_video_t *sh)
 	return 0;
     }
     priv->bufsz = sh->bih->biSizeImage;
-    priv->buffer = malloc(priv->bufsz);
+    priv->buffer = malloc(priv->bufsz + LZO_OUTPUT_PADDING);
     priv->codec = -1;
     sh->context = priv;
-
-    priv->wrkmem = (lzo_bytep) lzo_malloc(LZO1X_1_MEM_COMPRESS);
-
-    if (priv->wrkmem == NULL) {
-	mp_msg (MSGT_DECVIDEO, MSGL_ERR, "[%s] Cannot alloc work memory\n", MOD_NAME);
-	return 0;
-    }
 
     return 1;
 }
@@ -84,8 +74,6 @@ static void uninit(sh_video_t *sh)
     
     if (priv)
     {
-	if (priv->wrkmem)
-	    lzo_free(priv->wrkmem);
 	free(priv->buffer);
 	free(priv);
     }
@@ -105,8 +93,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 	    return NULL; // skipped frame
     }
     
-    r = lzo1x_decompress_safe (data, len, priv->buffer, &w, priv->wrkmem);
-    if (r != LZO_E_OK) {
+    r = lzo1x_decode(priv->buffer, &w, data, &len);
+    if (r) {
 	/* this should NEVER happen */
 	mp_msg (MSGT_DECVIDEO, MSGL_ERR, 
 		"[%s] internal error - decompression failed: %d\n", MOD_NAME, r);
@@ -119,7 +107,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 	    MOD_NAME, sh->bih->biBitCount, sh->format, data, len, sh->bih->biSizeImage
 	    );
 
-	if        (w == (sh->bih->biSizeImage))   {
+	if (w == 0) {
 	    priv->codec = IMGFMT_BGR24;
 	    mp_msg (MSGT_DECVIDEO, MSGL_V, "[%s] codec choosen is BGR24\n", MOD_NAME);
 	} else if (w == (sh->bih->biSizeImage)/2) {
