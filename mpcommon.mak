@@ -26,7 +26,7 @@ distclean:: clean
 	rm -f .depend
 
 dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+	$(CC) -MM $(CFLAGS) $(SRCS) $(SRCS2) 1>.depend
 
 ifneq ($(wildcard .depend),)
 include .depend
