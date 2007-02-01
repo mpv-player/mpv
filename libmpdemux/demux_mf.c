@@ -67,6 +67,7 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   mf_t         *mf = NULL;
   
   if(!demuxer->stream->url) return NULL;
+  if(strncmp(demuxer->stream->url, "mf://", 5)) return NULL;
 
 
   mf=open_mf(demuxer->stream->url + 5);
