@@ -1574,6 +1574,64 @@ dvd:   Flux compatible DVD.
 .PD 1
 .
 .TP
+.B \-radio <option1:option2:...> (radio uniquement)
+Les options suivantes permettent de paramétrer le module de capture
+radio.
+Pour écouter la radio avec MPlayer, utilisez une URL de
+type 'radio://<fréquence>' (si l'option 'channels' n'est pas donnée),
+ou 'radio://<numéro de canal>' (si l'option 'channels' est donnée).
+Pour voir la plage de fréquence autorisée, lancez MPlayer avec l'option '\-v'.
+Pour commencer l'enregistrement, faites 'radio://<fréquence ou canal>/capture'.
+Si le mot-clef capture n'est pas donné vous pouvez uniquement écouter
+la radio par la sortie line-in.
+Utiliser 'capture' pour écouter n'est pas recommandé à cause des
+problèmes de synchronisation, ce qui rend l'écoute désagréable.
+.sp 1
+Les options disponibles sont:
+.RSs
+.IPs device=<valeur>
+Le périphérique radio à utiliser (par défaut\ : /dev/radio0 sous Linux et
+/dev/tuner0 sous *BSD).
+.IPs driver=<valeur>
+Le pilote radio à utiliser (par défaut\ : v4l2 si disponible,
+v4l sinon).
+.IPs volume=<0..100>
+volume du périphérique radio (par défaut\ : 100)
+.IPs freq_min=<valeur> (*BSD BT848 uniquement)
+fréquence minimale autorisée (par défaut\ : 87.50)
+.IPs freq_max=<valeur> (*BSD BT848 uniquement)
+fréquence maximale autorisée (default: 108.00)
+.IPs channels=<fréquence>\-<nom>,<fréquence>\-<nom>,...
+Défini la liste des canaux.
+Utilisez _ pour les espaces (ou jouez avec les guillements).
+Les noms des canaux seront alors affichées en utilisant l'OSD et les
+commandes esclaves radio_step_channel et radio_set_channel seront
+utilisables par télécommande (voir LIRC).
+Si un numéro est donné dans l'URL, il sera compris comme la position
+du canal dans la liste des canaux.
+.br
+.I EXEMPLE:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<valeur> (avec la capture radio activée)
+Nom du périphérique depuis lequel enregistrer le son.
+Faute d'être spécifié, la capture sera désactivée, même
+si le mot-clef capture apparaît dans l'URL.
+Donnez les périphériques ALSA sous la forme hw=<card>.<device>.
+Si le nom contient un '=', la capture se fera avec ALSA, sinon
+avec OSS.
+.IPs arate=<value> (avec la capture radio activée)
+Nombre d'échantillons par seconde (par défaut: 44100).
+.br
+.I NOTE:
+Pendant les capture, utilisez aussi l'option \-rawaudio rate=<valeur>
+avec la même valeur que arate.
+Si vous avez des problèmes de vitesse du son (trop rapide), essayez
+différents taux d'échantillonnage (c-à-d 48000,44100,32000,...).
+.IPs achannels=<value> (avec la capture radio activée)
+Nombre de canaux audios à enregistrer.
+.RE
+.
+.TP
 .B \-rawaudio <option1:option2:...>
 Cette option vous permet de lire des fichiers audio bruts.
 Vous devez aussi utiliser \-demuxer rawaudio.
@@ -1719,64 +1777,6 @@ désirés.
 Pour la lecture de flux MPEG-TS, vous pouvez indiquer quel programme (si
 présent) vous voulez lire.
 Peut être utilisé avec \-vid et \-aid.
-.
-.TP
-.B \-radio <option1:option2:...> (radio uniquement)
-Les options suivantes permettent de paramétrer le module de capture
-radio.
-Pour écouter la radio avec MPlayer, utilisez une URL de
-type 'radio://<fréquence>' (si l'option 'channels' n'est pas donnée),
-ou 'radio://<numéro de canal>' (si l'option 'channels' est donnée).
-Pour voir la plage de fréquence autorisée, lancez MPlayer avec l'option '\-v'.
-Pour commencer l'enregistrement, faites 'radio://<fréquence ou canal>/capture'.
-Si le mot-clef capture n'est pas donné vous pouvez uniquement écouter
-la radio par la sortie line-in.
-Utiliser 'capture' pour écouter n'est pas recommandé à cause des
-problèmes de synchronisation, ce qui rend l'écoute désagréable.
-.sp 1
-Les options disponibles sont:
-.RSs
-.IPs device=<valeur>
-Le périphérique radio à utiliser (par défaut\ : /dev/radio0 sous Linux et
-/dev/tuner0 sous *BSD).
-.IPs driver=<valeur>
-Le pilote radio à utiliser (par défaut\ : v4l2 si disponible,
-v4l sinon).
-.IPs volume=<0..100>
-volume du périphérique radio (par défaut\ : 100)
-.IPs freq_min=<valeur> (*BSD BT848 uniquement)
-fréquence minimale autorisée (par défaut\ : 87.50)
-.IPs freq_max=<valeur> (*BSD BT848 uniquement)
-fréquence maximale autorisée (default: 108.00)
-.IPs channels=<fréquence>\-<nom>,<fréquence>\-<nom>,...
-Défini la liste des canaux.
-Utilisez _ pour les espaces (ou jouez avec les guillements).
-Les noms des canaux seront alors affichées en utilisant l'OSD et les
-commandes esclaves radio_step_channel et radio_set_channel seront
-utilisables par télécommande (voir LIRC).
-Si un numéro est donné dans l'URL, il sera compris comme la position
-du canal dans la liste des canaux.
-.br
-.I EXEMPLE:
-radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<valeur> (avec la capture radio activée)
-Nom du périphérique depuis lequel enregistrer le son.
-Faute d'être spécifié, la capture sera désactivée, même
-si le mot-clef capture apparaît dans l'URL.
-Donnez les périphériques ALSA sous la forme hw=<card>.<device>.
-Si le nom contient un '=', la capture se fera avec ALSA, sinon
-avec OSS.
-.IPs arate=<value> (avec la capture radio activée)
-Nombre d'échantillons par seconde (par défaut: 44100).
-.br
-.I NOTE:
-Pendant les capture, utilisez aussi l'option \-rawaudio rate=<valeur>
-avec la même valeur que arate.
-Si vous avez des problèmes de vitesse du son (trop rapide), essayez
-différents taux d'échantillonnage (c-à-d 48000,44100,32000,...).
-.IPs achannels=<value> (avec la capture radio activée)
-Nombre de canaux audios à enregistrer.
-.RE
 .
 .TP
 .B \-tv <option1:option2:...> (TV/\:PVR uniquement)
