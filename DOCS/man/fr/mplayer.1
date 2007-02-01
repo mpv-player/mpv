@@ -1,4 +1,4 @@
-.\" synced with r21959
+.\" synced with r22089
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -1260,6 +1260,9 @@ Ce fichier est supposé être au format Netscape.
 .TP
 .B \-delay <sec>
 Retard audio en secondes (nombre flottant positif ou négatif).
+Les valeurs négatives délayent le son, et les valeurs positives délayent
+la vidéo.
+Notez que c'est l'exact opposé de l'option \-audio-delay de MEncoder.
 .br
 .I NOTE\ :
 Lorsque utilisé avec MEncoder et \-ovc copy, le résultat peut ne pas
@@ -1284,8 +1287,6 @@ certains contrôles.
 Indiquez le nom du démultiplexeur comme listé par \-demuxer help.
 Pour assurer la compatibilité ascendante, il est aussi possible de donner
 l'ID du démultiplexeur comme définit dans libmpdemux/\:demuxer.h.
-Par exemple, \-audio-demuxer audio ou \-audio-demuxer 17 force le
-démultiplexeur MP3.
 .
 .TP
 .B \-dumpaudio (MPlayer uniquement)
@@ -1415,6 +1416,11 @@ Vous ne pouvez utiliser cette option que si le media en question permet les
 déplacements (c-à-d pas depuis stdin, un pipe, etc).
 .
 .TP
+.B \-noidx
+Saute la reconstruction de l'index du fichier.
+Avec cette option, MEncoder saute l'écriture de l'index du fichier.
+.
+.TP
 .B \-ipv4-only-proxy (réseau uniquement)
 Saute le proxy pour les adresses IPv6.
 Il sera toujours utilisé pour les connections IPv4.
@@ -1489,6 +1495,14 @@ Se rabat automatiquement sur IPv6.
 .B \-prefer-ipv6 (réseau IPv6 uniquement)
 Utilise IPv4 pour les connections réseau.
 Se rabat automatiquement sur IPv4.
+.
+.TP
+.B \-psprobe <position en octets>
+En jouant des flux MPEG-PS, cette option vous permet de spécifier combien
+d'octets doivent être scannés par MPlayer pour identifier le codec vidéo
+utilisé.
+Cette option est nécessaire pour lire les fichiers EVO contenant un flux
+H264.
 .
 .TP
 .B \-pvr <option1:option2:...> (carte PVR uniquement)
@@ -3810,16 +3824,14 @@ Choisit explicitement le périphérique fbdev à utiliser (par défaut\ :
 .
 .TP
 .B 3dfx (Linux uniquement)
-Pilote de sortie vidéo spécifique aux cartes 3dfx.
-Ce pilote exploite directement les circuits matériels 3dfx sous X11.
+Pilote de sortie vidéo spécifique aux cartes 3dfx, qui exploite directement
+les circuits matériels 3dfx sous X11.
 Ne gère que le 16 bits/pixel.
-FIXME: Meilleure explication des différences entre 3dfx, tdfxfb et tdfx_vid?
 .
 .TP
 .B tdfxfb (Linux uniquement)
-Ce pilote utilise le pilote framebuffer tdfx pour jouer les films avec
+Ce pilote utilise le pilote framebuffer tdfxfb pour jouer les films avec
 accélération YUV des 3dfx.
-FIXME: Meilleure explication des différences entre 3dfx, tdfxfb et tdfx_vid?
 .PD 0
 .RSs
 .IPs <périph>
@@ -3830,9 +3842,8 @@ Choisit explicitement le périphérique fbdev à utiliser (par défaut\ :
 .
 .TP
 .B tdfx_vid (Linux uniquement)
-Pilote de sortie vidéo spécifique aux cartes 3Dfx.
-Ce pilote utilise directement le module noyau tdfx_vid.
-FIXME: Meilleure explication des différences entre 3dfx, tdfxfb et tdfx_vid?
+Pilote de sortie vidéo spécifique aux cartes 3Dfx qui fonctionnne avec
+le module noyau tdfx_vid.
 .PD 0
 .RSs
 .IPs <périph>
@@ -9562,7 +9573,7 @@ L'équivalence est approximativement H264QP = 12 + 6*log2(MPEGQP).
 Par exemple, MPEG à QP=2 est équivalent à H.264 à QP=18.
 .
 .TP
-.B crf=<1\-50>
+.B crf=<1.0\-50.0>
 Active le mode qualité constante, et choisi la qualité.
 L'échelle est similaire à QP.
 Tout comme les modes basés sur le bitrate, celui-ci permet aux trames
