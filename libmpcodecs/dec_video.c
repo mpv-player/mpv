@@ -39,6 +39,8 @@ extern double vout_time_usage;
 
 #include "cpudetect.h"
 
+int field_dominance=-1;
+
 int divx_quality=0;
 
 vd_functions_t* mpvdec=NULL;
@@ -381,6 +383,11 @@ tt = t*0.000001f;
 video_time_usage+=tt;
 
 if(!mpi || drop_frame) return NULL; // error / skipped frame
+
+ if (field_dominance == 0)
+     mpi->fields |= MP_IMGFIELD_TOP_FIRST;
+ else if (field_dominance == 1)
+     mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
  if (correct_pts) {
      sh_video->num_buffered_pts--;

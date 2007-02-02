@@ -241,6 +241,7 @@
 	// draw by slices or whole frame (useful with libmpeg2/libavcodec)
 	{"slices", &vd_use_slices, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noslices", &vd_use_slices, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"field-dominance", &field_dominance, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
 
 #ifdef USE_LIBAVCODEC
 	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -349,6 +350,9 @@ extern int divx_quality;
 
 /* defined in codec-cfg.c */
 extern char * codecs_file;
+
+/* defined in dec_video.c */
+extern int field_dominance;
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;

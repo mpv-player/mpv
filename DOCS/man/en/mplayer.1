@@ -3983,6 +3983,20 @@ incorrect or missing in the file being played.
 Disable automatic movie aspect ratio compensation.
 .
 .TP
+.B "\-field-dominance <-1\-1>
+Set first field for interlaced content. Useful for deinterlacers that double the framerate: \-vf tfields=1, \-vf yadif=1 and \-vo xvmc:bobdeint.
+.PD 0
+.RSs
+.IPs -1
+auto (default) If the decoder doesn't export the appropriate information, it falls back to 0 (top field first).
+.IPs 0
+top field first
+.IPs 1
+bottom field first
+.RE
+.PD 1
+.
+.TP
 .B "\-flip \ "
 Flip image upside-down.
 .
@@ -6280,7 +6294,7 @@ desired (double) framerate!
 2: Translate fields by 1/4 pixel with linear interpolation (no jump).
 .br
 4: Translate fields by 1/4 pixel with 4tap filter (higher quality) (default).
-.IPs <field_dominance>
+.IPs <field_dominance>\ (DEPRECATED)
 -1: auto (default)
 Only works if the decoder exports the appropriate information and
 no other filters which discard that information come before tfields
@@ -6289,6 +6303,9 @@ in the filter chain, otherwise it falls back to 0 (top field first).
 0: top field first
 .br
 1: bottom field first
+.br
+.I NOTE:
+This option will possibly be removed in a future version. Use \-field-dominance instead.
 .RE
 .PD 1
 .
@@ -6305,8 +6322,11 @@ Yet another deinterlacing filter
 2: Like 0 but skips spatial interlacing check.
 .br
 3: Like 1 but skips spatial interlacing check.
-.IPs <field_dominance>
+.IPs <field_dominance>\ (DEPRECATED)
 Operates like tfields.
+.br
+.I NOTE:
+This option will possibly be removed in a future version. Use \-field-dominance instead.
 .RE
 .PD 1
 .
