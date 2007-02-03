@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22061
+.\" In sync with r22075
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1439,6 +1439,11 @@ Diese Option ist nur nutzbar, wenn das zugrundeliegende Medium spulen
 unterstützt (z.B.\& nicht bei Standardeingabe, Pipe, etc.\&)
 .
 .TP
+.B \-noidx
+Überspringe die Neugenerierung der Indexdatei.
+MEncoder überspringt bei dieser Option das Schreiben des Index.
+.
+.TP
 .B \-ipv4-only-proxy (nur bei Netzwerk)
 Überspringt Proxy-Server bei IPv6-Adressen.
 Für IPv4-Verbindungen wird er aber benutzt.
@@ -1514,6 +1519,13 @@ Benutzt IPv6 bei Netzwerkverbindungen.
 Greift automatisch auf IPv4-Verbindungen zurück.
 .
 .TP
+.B \-psprobe <Byte-Position>
+Beim Abspielen eines MPEG-PS-Streams lässt dich diese Option wählen, wie
+viele Bytes des Streams MPlayer untersuchen soll, um den zu benutzenden
+Videocodec zu identifizieren.
+Diese Option ist nötig, um EVO-Dateien abzuspielen, die H264-Streams enthalten.
+.
+.TP
 .B \-pvr <Option1:Option2:...> (nur bei PVR)
 Diese Option nimmt verschiedene Feineinstellungen der Eigenschaften für die
 Encodierung des PVR-Capture-Moduls vor.
@@ -1580,6 +1592,67 @@ dvd:   DVD-kompatibler Stream
 .REss
 .RE
 .PD 1
+.
+.TP
+.B \-radio <Option1:Option2:...> (Radio only)
+Diese Optionen setzen verschiedene Parameter des Radio-Capture-Moduls.
+Für das Radiohören mit MPlayer benutze 'radio://<Frequenz>'
+(wenn die Option channels nicht gegeben ist) oder 'radio://<Kanal_Nummer>'
+(wenn die Option channels angegeben wurde) als Film-URL.
+Du kannst dir den erlaubten Frequenzbereich anzeigen lassen, indem du MPlayer
+mit der Option '\-v' startest.
+Um das Aufnahme-Subsystem zu starten, benutze
+\'radio://<Frequenz oder Kanal>/capture'.
+Wenn das Schlüsselwort capture nicht gegeben ist, kannst du nur mit einem
+Line-In-Kabel Radio hören.
+Capture zu verwenden für das Anhören wird nicht empfohlen wegen
+Synchronisationsproblemen, was diesen Prozess unkomfortabel macht.
+.sp 1
+Verfügbare Optionen sind folgende:
+.RSs
+.IPs device=<Wert>
+Radiogerät, das verwendet werden soll (Standard: /dev/radio0 für Linux und
+/dev/tuner0 für *BSD).
+.IPs driver=<Wert>
+Radiotreiber, der verwendet werden soll (Standard: v4l2 wenn verfügbar, v4l
+sonst).
+Momentan werden die Treiber v4l und v4l2 unterstützt.
+.IPs volume=<0..100>
+Lautstärke für das Radiogerät (Standard: 100)
+.IPs freq_min=<Wert> (nut bei *BSD BT848)
+minimal erlaubte Frequenz (Standard: 87.50)
+.IPs freq_max=<Wert> (nur bei *BSD BT848)
+maximal erlaubte Frequenz (Standard: 108.00)
+.IPs channels=<Frequenz>\-<Name>,<Frequenz>\-<Name>,...
+Setzt die Liste der Kanäle.
+Benutze _ für Leerzeichen in Namen (oder spiele mit der Quotierung ;-).
+Die Kanalnamen werden dann mittels OSD geschrieben, und für eine Fernbedienung
+(siehe LIRC) werden die Slave-Kommandos radio_step_channel und radio_set_channel
+nutzbar sein.
+Falls angegeben, wird die Nummer in einer Film-URL als Kanalposition in der
+Kanalliste verstanden.
+.br
+.I BEISPIELE:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<Wert> (mit Radio Capture aktiviert)
+Name des Geräts, von dem der Ton aufgenommen werden soll.
+Ohne einen solchen Namen wird die Aufnahme deaktiviert, selbst wenn das
+Schlüsselwort capture in der URL auftaucht.
+Benutze dies für ALSA-Geräte in der Form hw=<Karte>.<Gerät>.
+Wenn der Gerätename ein '=' enthält, wird das Modul ALSA für die Aufnahme
+verwenden, sonst OSS.
+.IPs arate=<Wert> (mit Radio Capture aktiviert)
+Rate in Samples pro Sekunde (Standard: 44100).
+.br
+.I ANMERKUNG:
+Bei Verwendung von Audioaufnahme setze auch die Option \-rawaudio rate=<Wert>
+mit dem selben Wert wie für arate.
+Wenn du Probleme mit der Tongeschwindigkeit hast (zu schnell läuft), versuche
+es mit verschiedenen Werten für die Rate (z.B.\& 48000,44100,32000,...)
+abzuspielen.
+.IPs achannels=<Wert> (mit Radio Capture aktiviert)
+Anzahl der aufzunehmenden Audiokanäle.
+.RE
 .
 .TP
 .B \-rawaudio <Option1:Option2:...>
@@ -1727,74 +1800,6 @@ soll.
 Beim Abspielen eines MPEG-TS-Streams kann mit dieser Option ausgewählt werden,
 welches Programm (falls vorhanden) abgespielt werden soll.
 Kann in Verbindung mit \-vid und \-aid benutzt werden.
-.
-.TP
-.B \-psprobe <Byte-Position>
-Beim Abspielen eines MPEG-PS-Streams lässt dich diese Option wählen, wie
-viele Bytes des Streams MPlayer untersuchen soll, um den zu benutzenden
-Videocodec zu identifizieren.
-Diese Option ist nötig, um EVO-Dateien abzuspielen, die H264-Streams enthalten.
-.
-.TP
-.B \-radio <Option1:Option2:...> (Radio only)
-Diese Optionen setzen verschiedene Parameter des Radio-Capture-Moduls.
-Für das Radiohören mit MPlayer benutze 'radio://<Frequenz>'
-(wenn die Option channels nicht gegeben ist) oder 'radio://<Kanal_Nummer>'
-(wenn die Option channels angegeben wurde) als Film-URL.
-Du kannst dir den erlaubten Frequenzbereich anzeigen lassen, indem du MPlayer
-mit der Option '\-v' startest.
-Um das Aufnahme-Subsystem zu starten, benutze
-\'radio://<Frequenz oder Kanal>/capture'.
-Wenn das Schlüsselwort capture nicht gegeben ist, kannst du nur mit einem
-Line-In-Kabel Radio hören.
-Capture zu verwenden für das Anhören wird nicht empfohlen wegen
-Synchronisationsproblemen, was diesen Prozess unkomfortabel macht.
-.sp 1
-Verfügbare Optionen sind folgende:
-.RSs
-.IPs device=<Wert>
-Radiogerät, das verwendet werden soll (Standard: /dev/radio0 für Linux und
-/dev/tuner0 für *BSD).
-.IPs driver=<Wert>
-Radiotreiber, der verwendet werden soll (Standard: v4l2 wenn verfügbar, v4l
-sonst).
-Momentan werden die Treiber v4l und v4l2 unterstützt.
-.IPs volume=<0..100>
-Lautstärke für das Radiogerät (Standard: 100)
-.IPs freq_min=<Wert> (nut bei *BSD BT848)
-minimal erlaubte Frequenz (Standard: 87.50)
-.IPs freq_max=<Wert> (nur bei *BSD BT848)
-maximal erlaubte Frequenz (Standard: 108.00)
-.IPs channels=<Frequenz>\-<Name>,<Frequenz>\-<Name>,...
-Setzt die Liste der Kanäle.
-Benutze _ für Leerzeichen in Namen (oder spiele mit der Quotierung ;-).
-Die Kanalnamen werden dann mittels OSD geschrieben, und für eine Fernbedienung
-(siehe LIRC) werden die Slave-Kommandos radio_step_channel und radio_set_channel
-nutzbar sein.
-Falls angegeben, wird die Nummer in einer Film-URL als Kanalposition in der
-Kanalliste verstanden.
-.br
-.I BEISPIELE:
-radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<Wert> (mit Radio Capture aktiviert)
-Name des Geräts, von dem der Ton aufgenommen werden soll.
-Ohne einen solchen Namen wird die Aufnahme deaktiviert, selbst wenn das
-Schlüsselwort capture in der URL auftaucht.
-Benutze dies für ALSA-Geräte in der Form hw=<Karte>.<Gerät>.
-Wenn der Gerätename ein '=' enthält, wird das Modul ALSA für die Aufnahme
-verwenden, sonst OSS.
-.IPs arate=<Wert> (mit Radio Capture aktiviert)
-Rate in Samples pro Sekunde (Standard: 44100).
-.br
-.I ANMERKUNG:
-Bei Verwendung von Audioaufnahme setze auch die Option \-rawaudio rate=<Wert>
-mit dem selben Wert wie für arate.
-Wenn du Probleme mit der Tongeschwindigkeit hast (zu schnell läuft), versuche
-es mit verschiedenen Werten für die Rate (z.B.\& 48000,44100,32000,...)
-abzuspielen.
-.IPs achannels=<Wert> (mit Radio Capture aktiviert)
-Anzahl der aufzunehmenden Audiokanäle.
-.RE
 .
 .TP
 .B \-tv <Option1:Option2:...> (nur bei TV/\:PVR)
