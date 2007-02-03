@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22075
+.\" In sync with r22104
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -4183,6 +4183,23 @@ fehlen.
 Deaktiviert die automatische Anpassung des Höhen-/\:Breitenverhältnisses.
 .
 .TP
+.B "\-field-dominance <-1\-1>"
+Stellt das erste Feld ein bei interlaced Inhalten.
+Nützlich für Deinterlacer, die die Framerate verdoppeln: \-vf tfields=1,
+\-vf yadif=1 und \-vo xvmc:bobdeint.
+.PD 0
+.RSs
+.IPs -1
+auto (default) Fällt auf 0 (obere Felder zuerst) zurück,
+wenn der Decoder keine angemessenen Informationen ausgibt.
+.IPs 0
+obere Felder zuerst
+.IPs 1
+untere Felder zuerst
+.RE
+.PD 1
+.
+.TP
 .B "\-flip \ "
 Stellt das Bild auf den Kopf (horizontales Spiegeln).
 .
@@ -6599,7 +6616,7 @@ nicht allzu gut.)
 2: Wandle Felder mit linearer Interpolation zu 1/4 Pixel um (kein Sprung).
 .br
 4: Wandle Felder mit dem 4tap-Filter zu 1/4 Pixel um (höhere Qualität) (Standard).
-.IPs <Feld_Dominanz>
+.IPs <Feld_Dominanz>\ (VERALTET)
 -1: automatisch (Standard)
 Funktioniert nur, wenn der Decoder angemessene Informationen ausgibt und keine
 anderen Filter in der Filterkette vor tfields kommen, die diese Informationen
@@ -6608,6 +6625,10 @@ verwefen; sonst fällt der Filter zurück auf 0 (obere Felder zuerst).
 0: obere Felder zuerst
 .br
 1: untere Felder zuerst
+.br
+.I ANMERKUNG:
+Diese Option wird in einer zukünftigen Version vermutlich entfernt.
+Benutze stattdessen \-field-dominance.
 .RE
 .PD 1
 .
@@ -6624,8 +6645,12 @@ Noch ein Deinterlacing-Filter
 2: Wie 0, überspringt aber die Überprüfung für räumliches Interlacing.
 .br
 3: Wie 1, überspringt aber die Überprüfung für räumliches Interlacing.
-.IPs <Felddominanz>
+.IPs <Felddominanz>\ (VERALTET)
 Arbeitet wie tfields.
+.br
+.I ANMERKUNG:
+Diese Option wird in einer zukünftigen Version vermutlich entfernt.
+Benutze stattdessen \-field-dominance.
 .RE
 .PD 1
 .
@@ -9530,7 +9555,7 @@ Das Mapping ist ungefähr H264QP = 12 + 6*log2(MPEGQP).
 Beispielsweise ist MPEG bei QP=2 vergleichbar mit H.264 bei QP=18.
 .
 .TP
-.B crf=<1\-50>
+.B crf=<1.0\-50.0>
 Aktiviert den "constant quality mode" und legt die die Qualität fest.
 Die Skala ist ähnlich der des QP.
 Ähnlich wie die Bitraten-basierten Modi ermöglicht
