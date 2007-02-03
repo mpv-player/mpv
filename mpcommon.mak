@@ -12,10 +12,8 @@ LIBS = $(LIBNAME) $(LIBNAME2)
 all:    $(LIBS)
 
 $(LIBNAME): $(OBJS)
-	$(AR) r $@ $^
-	$(RANLIB) $@
-
 $(LIBNAME2): $(OBJS2)
+$(LIBNAME) $(LIBNAME2): $(OBJS2)
 	$(AR) r $@ $^
 	$(RANLIB) $@
 
