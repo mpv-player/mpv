@@ -478,15 +478,15 @@ _libavcodec=auto
 _amr_nb=auto
 _amr_nb_fixed=auto
 _amr_wb=auto
-_libavdecoders_all=`sed -n 's/^[^#]*DEC.*, *\(.*\)).*/\1_decoder/p' "libavcodec/allcodecs.c"`
+_libavdecoders_all=`sed -n 's/^[^#]*DEC.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavdecoders=` echo $_libavdecoders_all | sed -e s/aac_decoder// -e s/mpeg4aac_decoder//  -e s/ac3_decoder// -e s/libgsm_decoder// -e s/libvorbis_decoder// `
-_libavencoders_all=`sed -n 's/^[^#]*ENC.*, *\(.*\)).*/\1_encoder/p' "libavcodec/allcodecs.c"`
+_libavencoders_all=`sed -n 's/^[^#]*ENC.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavencoders=` echo $_libavencoders_all | sed -e s/libgsm_encoder// -e s/libtheora_encoder// `
-_libavparsers_all=`sed -n 's/^[^#]*PARSER.*, *\(.*\)).*/\1_parser/p' "libavcodec/allcodecs.c"`
+_libavparsers_all=`sed -n 's/^[^#]*PARSER.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavparsers=$_libavparsers_all
-_libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c `
+_libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavdemuxers=`echo $_libavdemuxers_all | sed -e s/audio_demuxer// -e s/dc1394_demuxer// -e s/dv1394_demuxer// -e s/redir_demuxer// -e s/rtsp_demuxer//  -e s/sdp_demuxer// -e s/video_grab_device_demuxer// -e s/x11_grab_device_demuxer// -e s/v4l2_demuxer// `
-_libavmuxers_all=`sed -n 's/^[^#]*_MUX.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c`
+_libavmuxers_all=`sed -n 's/^[^#]*_MUX.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavmuxers=`echo $_libavmuxers_all | sed -e s/audio_muxer// -e s/rtp_muxer// `
 _libavcodec_so=auto
 _libavformat=auto
@@ -7620,12 +7620,11 @@ EOF
 
 ff_config_enable () {
 for part in $1; do
-  ucname=` echo $part | tr '[a-z]' '[A-Z]' `
   if ` echo $2 | grep $part > /dev/null `; then
-    echo "#define CONFIG_$ucname 1"
-    echo "#define ENABLE_$ucname 1"
+    echo "#define CONFIG_$part 1"
+    echo "#define ENABLE_$part 1"
   else
-    echo "#define ENABLE_$ucname 0"
+    echo "#define ENABLE_$part 0"
   fi
 done
 }
