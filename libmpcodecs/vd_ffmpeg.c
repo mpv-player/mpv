@@ -431,12 +431,14 @@ static void uninit(sh_video_t *sh){
             );
     }
 
+    if (avctx) {
     if (avctx && avctx->codec && avcodec_close(avctx) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
 
     av_freep(&avctx->extradata);
     av_freep(&avctx->palctrl);
     av_freep(&avctx->slice_offset);
+    }
 
     av_freep(&avctx);
     av_freep(&ctx->pic);
