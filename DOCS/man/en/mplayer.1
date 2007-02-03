@@ -3987,12 +3987,15 @@ incorrect or missing in the file being played.
 Disable automatic movie aspect ratio compensation.
 .
 .TP
-.B "\-field-dominance <-1\-1>
-Set first field for interlaced content. Useful for deinterlacers that double the framerate: \-vf tfields=1, \-vf yadif=1 and \-vo xvmc:bobdeint.
+.B "\-field-dominance <-1\-1>"
+Set first field for interlaced content.
+Useful for deinterlacers that double the framerate: \-vf tfields=1,
+\-vf yadif=1 and \-vo xvmc:bobdeint.
 .PD 0
 .RSs
 .IPs -1
-auto (default) If the decoder doesn't export the appropriate information, it falls back to 0 (top field first).
+auto (default) If the decoder doesn't export the appropriate information,
+it falls back to 0 (top field first).
 .IPs 0
 top field first
 .IPs 1
@@ -6309,7 +6312,8 @@ in the filter chain, otherwise it falls back to 0 (top field first).
 1: bottom field first
 .br
 .I NOTE:
-This option will possibly be removed in a future version. Use \-field-dominance instead.
+This option will possibly be removed in a future version.
+Use \-field-dominance instead.
 .RE
 .PD 1
 .
@@ -6330,7 +6334,8 @@ Yet another deinterlacing filter
 Operates like tfields.
 .br
 .I NOTE:
-This option will possibly be removed in a future version. Use \-field-dominance instead.
+This option will possibly be removed in a future version.
+Use \-field-dominance instead.
 .RE
 .PD 1
 .
