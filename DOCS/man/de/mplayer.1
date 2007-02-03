@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r21954
+.\" In sync with r22061
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -798,6 +798,17 @@ Unterstützung hierfür muss einkompiliert sein durch Ausführung von 'configure'
 mit \-\-enable-crash-debug.
 .
 .TP
+.B \-doubleclick-time
+Zeit in Millisekunden, um zwei aufeinander folgende Mausklicks als Doppelklick
+zu erkennen (Standard: 300).
+Setze dies auf 0, um deinen Window-Manager entscheiden zu lassen, was ein
+Doppelklick ist (nur bei \-vo directx).
+.br
+.I ANMERKUNG:
+Du wirst leicht unterschiedliches Verhalten erleben, je nach dem, ob du
+MOUSE_BTN0_DBL oder MOUSE_BTN0\-MOUSE_BTN0_DBL bindest.
+.
+.TP
 .B \-edlout <Dateiname>
 Erstellt eine neue Datei und schreibt EDL (edit decision list) -Markierungen
 hinein.
@@ -1247,7 +1258,11 @@ Es wird angenommen, dass die Datei im Netscape-Format vorliegt.
 .
 .TP
 .B \-delay <Sekunden>
-Audioverzögerung in Sekunden (postive oder negative Fließkommazahl).
+Audioverzögerung in Sekunden (postive oder negative Fließkommazahl)
+.br
+Negative Werte verzögern den Ton, positive Werte verzögern das Video.
+Beachte, dass dies das genaue Gegenteil der MEncoder-Option \-audio-delay
+ist.
 .br
 .I HINWEIS:
 Falls diese Option mit MEncoder benutzt wird, funktioniert sie im Zusammenhang
@@ -1273,7 +1288,6 @@ einige Überprüfungen nicht durchgeführt!
 Gib den Demuxernamen, wie er von \-demuxer help angezeigt wird, an.
 Zur Rückwärtskompatibilität wird auch die Demuxer-ID, wie in
 libmpdemux/\:demuxer.h definiert, akzeptiert.
-\-demuxer audio oder \-demuxer 17 erzwingt das Abspielen als MP3.
 .
 .TP
 .B \-dumpaudio (nur MPlayer)
@@ -1713,6 +1727,13 @@ soll.
 Beim Abspielen eines MPEG-TS-Streams kann mit dieser Option ausgewählt werden,
 welches Programm (falls vorhanden) abgespielt werden soll.
 Kann in Verbindung mit \-vid und \-aid benutzt werden.
+.
+.TP
+.B \-psprobe <Byte-Position>
+Beim Abspielen eines MPEG-PS-Streams lässt dich diese Option wählen, wie
+viele Bytes des Streams MPlayer untersuchen soll, um den zu benutzenden
+Videocodec zu identifizieren.
+Diese Option ist nötig, um EVO-Dateien abzuspielen, die H264-Streams enthalten.
 .
 .TP
 .B \-radio <Option1:Option2:...> (Radio only)
@@ -3766,17 +3787,14 @@ Wähle das zu verwendende fbdev-Gerät explizit (Standard: /dev/\:fb0).
 .
 .TP
 .B 3dfx (nur bei Linux)
-3Dfx-spezifischer Videoausgabetreiber.
-Dieser Treiber benutzt die 3Dfx-Hardware direkt auf X11.
+3Dfx-spezifischer Videoausgabetreiber, der die 3Dfx-Hardware direkt auf X11
+verwendet.
 Nur 16 bpp werden unterstützt.
-FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
 .
 .TP
 .B tdfxfb (nur bei Linux)
-Dieser Treiber setzt den tdfx-Framebuffer-Treiber ein, um auf 3dfx-Karten Filme
-mit
-YUV-Beschleunigung abzuspielen.
-FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
+Dieser Treiber setzt den tdfxfb-Framebuffer-Treiber ein, um auf 3dfx-Karten
+Filme mit YUV-Beschleunigung abzuspielen.
 .PD 0
 .RSs
 .IPs <Gerät>
@@ -3786,9 +3804,8 @@ Wähle das zu benutzende fbdev-Gerät explizit (Standard: /dev/\:fb0).
 .
 .TP
 .B tdfx_vid (nur bei Linux)
-3Dfx-spezifischer Videoausgabetreiber.
-Dieser Treiber benutzt das tdfx_vid-Kernelmodul direkt.
-FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
+3Dfx-spezifischer Videoausgabetreiber, der in Verbindung mit dem
+tdfx_vid-Kernelmodul funktioniert.
 .PD 0
 .RSs
 .IPs <Gerät>
