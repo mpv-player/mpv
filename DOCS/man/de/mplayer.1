@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22104
+.\" In sync with r22113
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -3486,27 +3486,6 @@ Benutze glxinfo oder ein ähnliches Tool um dir die unterstützten
 OpenGL-Erweiterungen anzeigen zu lassen.
 .PD 0
 .RSs
-.IPs (no)manyfmts
-Schaltet die Unterstütztung für mehr (RGB und BGR) Farbformate.
-Benötigt eine OpenGL-Version >= 1.2.
-.IPs slice-height=<0\-...>
-Anzahl der Linien, die an einem Stück zur Textur kopiert werden (Standard: 4).
-0 für ganzes Bild.
-.br
-.I ANMERKUNG:
-Falls der YUV-Farbraum benutzt wird (siehe yuv-Unteroption), gilt folgendes:
-.RSss
-Wenn der Dekoder in Streifen rendert (siehe \-noslices), dann hat diese
-Einstellung keinen Effekt, die Streifengröße des Dekoders wird benutzt.
-.br
-Wenn der Dekoder nicht in Streifen rendert, dann ist die Standardeinstellung
-16.
-.RE
-.IPs (no)osd
-(De)aktiviere die Unterstützung für das Rendern des OSD via OpenGL (Standard:
-aktiviert).
-Hauptsächlich für Testzwecke, Du solltest \-osdlevel 0 benutzen, um OSD zu
-deaktivieren.
 .IPs (no)scaled-osd
 Ändert das Verhalten des OSD bei Änderung der Fenstergröße (Standard:
 deaktiviert).
@@ -3517,10 +3496,6 @@ Vollbildmodus die Ränder.
 Funktioniert momentan nicht mit ass-Untertiteln (siehe \-ass).
 .IPs osdcolor=<0xRRGGBB>
 Farbe für das OSD (Standard: 0xffffff, entspricht weiß).
-.IPs (no)aspect
-(De)aktiviert die Skalierung des Aspekts und die Unterstützung für Panscan
-(Standard: aktiviert).
-Deaktivierung kann die Geschwindigkeit möglicherweise erhöhen.
 .IPs rectangle=<0,1,2>
 Wähle einen bestimmten Typ für rechtwinklige Texturen aus.
 Dies spart Grafikspeicher, ist aber oft langsamer (Standard: 0).
@@ -3532,9 +3507,6 @@ Dies spart Grafikspeicher, ist aber oft langsamer (Standard: 0).
 2: Benutze die GL_ARB_texture_non_power_of_two-Erweiterung.
 Dies wird manchmal nur durch Software emuliert und ist dann sehr langsam.
 .RE
-.IPs (no)glfinish
-Rufe glFinish() vor dem Wechsel der Puffer auf.
-Langsamer, aber sorgt manchmal für korrektere Ausgabe (Standard: aus).
 .IPs swapinterval=<n>
 Minimales Intervall zwischen zwei Pufferwechseln, in angezeigten Bildern
 (Standard: 1).
@@ -3622,6 +3594,38 @@ GL_LINEAR-Interpolation, benutze sonst GL_NEAREST.
 .IPs (no)customtrect
 Wenn aktiviert, benutze für die customtex-Textur texture_rectangle.
 Standardeinstellung ist deaktiviert.
+.RE
+Normalerweise gibt es keinen Grund, die folgenden Optionen zu verwenden.
+Sie sind hauptsächlich für Testzwecke.
+.RSs
+.IPs (no)glfinish
+Rufe glFinish() vor dem Wechsel der Puffer auf.
+Langsamer, aber sorgt manchmal für korrektere Ausgabe (Standard: aus).
+.IPs (no)manyfmts
+Schaltet die Unterstütztung für mehr (RGB und BGR) Farbformate.
+Benötigt eine OpenGL-Version >= 1.2.
+.IPs slice-height=<0\-...>
+Anzahl der Linien, die an einem Stück zur Textur kopiert werden (Standard: 4).
+0 für ganzes Bild.
+.br
+.I ANMERKUNG:
+Falls der YUV-Farbraum benutzt wird (siehe yuv-Unteroption), gilt folgendes:
+.RSss
+Wenn der Dekoder in Streifen rendert (siehe \-noslices), dann hat diese
+Einstellung keinen Effekt, die Streifengröße des Dekoders wird benutzt.
+.br
+Wenn der Dekoder nicht in Streifen rendert, dann ist die Standardeinstellung
+16.
+.RE
+.IPs (no)osd
+(De)aktiviere die Unterstützung für das Rendern des OSD via OpenGL (Standard:
+aktiviert).
+Hauptsächlich für Testzwecke, Du solltest \-osdlevel 0 benutzen, um OSD zu
+deaktivieren.
+.IPs (no)aspect
+(De)aktiviert die Skalierung des Aspekts und die Unterstützung für Panscan
+(Standard: aktiviert).
+Deaktivierung kann die Geschwindigkeit möglicherweise erhöhen.
 .REss
 .RE
 .PD 1
