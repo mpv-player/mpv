@@ -673,6 +673,8 @@ static int demux_mpg_probe(demuxer_t *demuxer) {
             mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_NotSystemStream);
         }
   }
+  //FIXME this shouldn't be necessary
+  stream_seek(demuxer->stream,tmppos);
   return file_format;
 }
 
