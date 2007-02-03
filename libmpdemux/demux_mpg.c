@@ -1053,7 +1053,7 @@ static demuxer_t* demux_mpg_ps_open(demuxer_t* demuxer)
     }
 
     if(!sh_video->format && ps_probe > 0) {
-        int mpeg2, h264, mpeg4, head;
+        int head;
         off_t pos = stream_tell(demuxer->stream);
 
         clear_stats();
