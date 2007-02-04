@@ -544,7 +544,6 @@ static int parse_str_list(m_option_t* opt,char *name, char *param, void* dst, in
 
 
   while(ptr[0] != '\0') {
-    last_ptr = ptr;
     ptr = strchr(ptr,LIST_SEPARATOR);
     if(!ptr) {
       n++;
