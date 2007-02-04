@@ -86,6 +86,13 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 		return TCP_ERROR_FATAL;
 	}
 
+#if defined SO_RCVTIMEO && defined SO_SNDTIMEO
+	tv.tv_sec = 10;
+	tv.tv_usec = 0;
+	setsockopt(socket_server_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+	setsockopt(socket_server_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+#endif
+
 	switch (af) {
 		case AF_INET:  our_s_addr = (void *) &server_address.four.sin_addr; break;
 #ifdef HAVE_AF_INET6
