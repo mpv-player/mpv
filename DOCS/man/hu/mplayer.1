@@ -1,4 +1,4 @@
-.\" Synced with r22016
+.\" Synced with r22123
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 11. 19." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 02. 04." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1193,6 +1193,7 @@ A fájlt Netscape formátumúnak feltételezi.
 .TP
 .B \-delay <másodperc>
 audió késleltetés másodpercben (pozitív vagy negatív lebegõpontos szám)
+.br
 A negatív értékek az audiót, a pozitív értékek a videót késleltetik.
 Figyelj rá, hogy ez a \-audio-delay MEncoder opció tökéletes ellentéte.
 .br
@@ -1362,6 +1363,11 @@ Hasznos hibás/\:befejezetlen letöltéseknél vagy hibás fájloknál.
 (tehát pl. stdin-nel, pipe-al nem).
 .
 .TP
+.B \-noidx
+Az index fájl újraépítésének kihagyása.
+A MEncoder nem készít indexet ezzel az opcióval.
+.
+.TP
 .B \-ipv4-only-proxy (csak hálózaton)
 Proxy figyelmen kívül hagyása az IPv6 címeknél.
 Az IPv4 kapcsolatoknál használva lesz.
@@ -1433,6 +1439,13 @@ IPv6 preferálása hálózati lejátszás esetén.
 Automatikusan visszavált IPv4-ra, amennyiben szükséges.
 .
 .TP
+.B \-psprobe <bájt pozíció>
+MPEG-PS folyam lejátszásakor ezzel az opcióval megadhatod, hogy az
+MPlayer hány bájtot vizsgáljon át a használt videó codec azonosításához.
+Ez az opció a H264 folyamokat tartalmazó EVO fájlok lejátszásához
+szükséges.
+.
+.TP
 .B \-pvr <opció1:opció2:...> (csak PVR)
 Ez az opció különbözõ kódolási tulajdonságokat állít be a PVR rögzítõ modulban.
 Bármilyen, a V4L2 vezérlõ által támogatott hardveres MPEG kódolóval rendelkezõ
@@ -1496,6 +1509,63 @@ dvd:   DVD kompatibilis folyam
 .REss
 .RE
 .PD 1
+.
+.TP
+.B \-radio <opció1:opció2:...> (csak rádió)
+Ezek az opciók a rádió adás rögzítõ modul különbözõ paramétereit állítják be.
+MPlayerrel történõ rádióhallgatáshoz használd a 'radio://<frekvencia>'
+(ha a channels opció nincs megadva) vagy a 'radio://<csatorna_szám>'
+(ha a channels meg vannak adva) formát film URL-ként.
+Az engedélyezett frekvencia tartományt az MPlayer '\-v' kapcsolója írja ki.
+A rögzítõ alrendszer elindításához használd
+a 'radio://<frekvencia vagy csatorna>/capture' formát.
+Ha a capture kulcsszó nincs megadva, csak a line-in kábelen keresztül
+tudsz rádiót hallgatni.
+A capture-rel történõ hallgatás nem javasolt szinkronizációs problémák
+miatt, ami élvezhetetlenné teszi az adést.
+.sp 1
+A használható opciók:
+.RSs
+.IPs device=<érték>
+A használandó rádiós eszköz (alapértelmezett: /dev/radio0 Linux alatt és /dev/tuner0 *BSD alatt).
+.IPs driver=<érték>
+A használandó rádió vezérlõ (alapértelmezett: v4l2 ha van, különben v4l).
+Jelenleg a v4l és v4l2 vezérlõk támogatottak.
+.IPs volume=<0..100>
+A rádiós eszköz hangereje (alapértelmezett: 100)
+.IPs freq_min=<érték> (csak *BSD BT848)
+minimálisan engedélyezett frekvencia (alapértelmezett: 87.50)
+.IPs freq_max=<érték> (csak *BSD BT848)
+maximálisan engedélyezett frekvencia (alapértelmezett: 108.00)
+.IPs channels=<frekvencia>\-<név>,<frekvencia>\-<név>,...
+Beállítja a csatorna listát.
+Használj _ jelent a szóköz helyett a nevekben (vagy idézõjeleket ;-).
+A csatorna nevek az OSD segítségével lesznek kiírva és a
+radio_step_channel és radio_set_channel szolga módú parancsok használhatóak
+a távoli vezérlésre (lásd LIRC).
+Ha meg van adva, az URL-ben szereplõ szám a csatorna pozícióját adja meg
+a csatorna listában.
+.br
+.I PÉLDA:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<érték> (a rádió rögzítés bekapcsolásával)
+Annak az eszköznek a neve, melyrõl rögzíteni kell.
+Ezen mentési név megadása nélkül a mentés akkor is le lesz tiltva,
+ha a capture kulcsszó szerepel az URL-ben.
+ALSA eszközökhöz használd a hw=<kártya>.<eszköz> formát.
+Ha az eszköz neve '=' jelet tartalmaz, a modul az ALSA-t
+használja a rögzítésre, különben az OSS-t.
+.IPs arate=<érték> (a rádió rögzítés bekapcsolásával)
+Mintavételi ráta (alapértelmezett: 44100).
+.br
+.I MEGJEGYZÉS:
+Ha audió mentést végzel, állítsd be a \-rawaudio rate=<érték> opciót
+is ugyan arra az értékre, mint az arate-t.
+Ha problémád van a hang sebességével (túl gyors), próbáld meg
+lejátszani más ráta értékekkel (pl.\& 48000,44100,32000,...).
+.IPs achannels=<érték> (a rádió rögzítés bekapcsolásával)
+A rögzítendõ audió csatornák száma.
+.RE
 .
 .TP
 .B \-rawaudio <opció1:opció2:...>
@@ -1639,63 +1709,6 @@ MPlayer hány bájton keresse a kívánt audió és videó ID-ket.
 MPEG-TS folyam lejátszásánál ezzel a kapcsolóval megadhatod, hogy melyik
 programot (ha létezik) akarod nézni.
 A \-vid és \-aid kapcsolókkal együtt használható.
-.
-.TP
-.B \-radio <opció1:opció2:...> (csak rádió)
-Ezek az opciók a rádió adás rögzítõ modul különbözõ paramétereit állítják be.
-MPlayerrel történõ rádióhallgatáshoz használd a 'radio://<frekvencia>'
-(ha a channels opció nincs megadva) vagy a 'radio://<csatorna_szám>'
-(ha a channels meg vannak adva) formát film URL-ként.
-Az engedélyezett frekvencia tartományt az MPlayer '\-v' kapcsolója írja ki.
-A rögzítõ alrendszer elindításához használd
-a 'radio://<frekvencia vagy csatorna>/capture' formát.
-Ha a capture kulcsszó nincs megadva, csak a line-in kábelen keresztül
-tudsz rádiót hallgatni.
-A capture-rel történõ hallgatás nem javasolt szinkronizációs problémák
-miatt, ami élvezhetetlenné teszi az adést.
-.sp 1
-A használható opciók:
-.RSs
-.IPs device=<érték>
-A használandó rádiós eszköz (alapértelmezett: /dev/radio0 Linux alatt és /dev/tuner0 *BSD alatt).
-.IPs driver=<érték>
-A használandó rádió vezérlõ (alapértelmezett: v4l2 ha van, különben v4l).
-Jelenleg a v4l és v4l2 vezérlõk támogatottak.
-.IPs volume=<0..100>
-A rádiós eszköz hangereje (alapértelmezett: 100)
-.IPs freq_min=<érték> (csak *BSD BT848)
-minimálisan engedélyezett frekvencia (alapértelmezett: 87.50)
-.IPs freq_max=<érték> (csak *BSD BT848)
-maximálisan engedélyezett frekvencia (alapértelmezett: 108.00)
-.IPs channels=<frekvencia>\-<név>,<frekvencia>\-<név>,...
-Beállítja a csatorna listát.
-Használj _ jelent a szóköz helyett a nevekben (vagy idézõjeleket ;-).
-A csatorna nevek az OSD segítségével lesznek kiírva és a
-radio_step_channel és radio_set_channel szolga módú parancsok használhatóak
-a távoli vezérlésre (lásd LIRC).
-Ha meg van adva, az URL-ben szereplõ szám a csatorna pozícióját adja meg
-a csatorna listában.
-.br
-.I PÉLDA:
-radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<érték> (a rádió rögzítés bekapcsolásával)
-Annak az eszköznek a neve, melyrõl rögzíteni kell.
-Ezen mentési név megadása nélkül a mentés akkor is le lesz tiltva,
-ha a capture kulcsszó szerepel az URL-ben.
-ALSA eszközökhöz használd a hw=<kártya>.<eszköz> formát.
-Ha az eszköz neve '=' jelet tartalmaz, a modul az ALSA-t
-használja a rögzítésre, különben az OSS-t.
-.IPs arate=<érték> (a rádió rögzítés bekapcsolásával)
-Mintavételi ráta (alapértelmezett: 44100).
-.br
-.I MEGJEGYZÉS:
-Ha audió mentést végzel, állítsd be a \-rawaudio rate=<érték> opciót
-is ugyan arra az értékre, mint az arate-t.
-Ha problémád van a hang sebességével (túl gyors), próbáld meg
-lejátszani más ráta értékekkel (pl.\& 48000,44100,32000,...).
-.IPs achannels=<érték> (a rádió rögzítés bekapcsolásával)
-A rögzítendõ audió csatornák száma.
-.RE
 .
 .TP
 .B \-tv <opció1:opció2:...> (csak TV/\:PVR)
@@ -3325,26 +3338,6 @@ Használd a glxinfo-t vagy valami hasonló eszközt a támogatott OpenGL
 kiterjesztések megtekintéséhez.
 .PD 0
 .RSs
-.IPs (no)manyfmts
-Több szín formátum (RGB és BGR) támogatása (alapértelmezett: engedélyezve).
-OpenGL verzió >= 1.2 szükséges hozzá.
-.IPs slice-height=<0\-...>
-Az egy darabban a textúrára másolandó sorok száma (alapértelmezett: 4).
-0 a teljes kép.
-.br
-.I MEGJEGYZÉS:
-Ha YUV színteret használsz (lásd yuv alopció), különleges szabályok lépnek életbe:
-.RSss
-Ha a dekódoló slice renderelést használ (lásd \-noslices), ennek a beállításnak
-nincs hatása, a dekódoló által megadott slice méret lesz használva.
-.br
-Ha a dekódoló nem használ slice renderelést, az alapértelmezett 16.
-.RE
-.IPs (no)osd
-Engedélyezi vagy letiltja az OSD OpenGL-en keresztüli renderelésének
-támogatását (alapértelmezett: engedélyezett).
-Ez az opció teszteléshez van; az OSD letiltásához használd helyette a
-\-osdlevel 0 kapcsolót.
 .IPs (no)scaled-osd
 Az OSD viselkedésének megváltoztatása, amikor az ablakméret módosul
 (alapértelmezett: letiltva).
@@ -3355,10 +3348,6 @@ használja teljes képernyõs módban.
 Nem mûködik jól ass feliratokkal (lásd \-ass).
 .IPs osdcolor=<0xRRGGBB>
 OSD színe (alapértelmezett: 0xffffff, ez megfelel a fehérnek).
-.IPs (no)aspect
-Engedélyezi vagy letiltja a kép átméretezést és a pan-and-scan támogatást
-(alapértelmezett: engedélyezett).
-A kikapcsolása növeli a sebességet.
 .IPs rectangle=<0,1,2>
 Kiválasztja a téglalap alakú textúrák használatát, ami videó RAM-ot spórol
 meg, de sokszor lassabb (alapértelmezett: 0).
@@ -3370,9 +3359,6 @@ meg, de sokszor lassabb (alapértelmezett: 0).
 2: GL_ARB_texture_non_power_of_two kiterjesztés használata.
 Néhány esetben csak szoftveresen támogatott és ezért nagyon lassú.
 .RE
-.IPs (no)glfinish
-Buffer csere elõtt a glFinish() meghívása.
-Lassabb, de a legtöbb esetben jobb kimenetet biztosít (alapértelmezett: kikapcsolva).
 .IPs swapinterval=<n>
 Minimális idõköz két buffercsere között, a megjelenített képkockák
 számában mérve (alapértelmezett: 1).
@@ -3455,6 +3441,37 @@ különben GL_NEAREST a customtex textúrákhoz.
 .IPs (no)customtrect
 Ha engedélyezve van, texture_rectangle-t használ a customtex textúrákhoz.
 Alapértelmezésben le van tiltva.
+.RE
+Alapesetben a következõ opciókra nincs szükség, többnyire csak tesztelési
+célokat szolgálnak.
+.RSs
+.IPs (no)glfinish
+Buffer csere elõtt a glFinish() meghívása.
+Lassabb, de a legtöbb esetben jobb kimenetet biztosít (alapértelmezett: kikapcsolva).
+.IPs (no)manyfmts
+Több szín formátum (RGB és BGR) támogatása (alapértelmezett: engedélyezve).
+OpenGL verzió >= 1.2 szükséges hozzá.
+.IPs slice-height=<0\-...>
+Az egy darabban a textúrára másolandó sorok száma (alapértelmezett: 4).
+0 a teljes kép.
+.br
+.I MEGJEGYZÉS:
+Ha YUV színteret használsz (lásd yuv alopció), különleges szabályok lépnek életbe:
+.RSss
+Ha a dekódoló slice renderelést használ (lásd \-noslices), ennek a beállításnak
+nincs hatása, a dekódoló által megadott slice méret lesz használva.
+.br
+Ha a dekódoló nem használ slice renderelést, az alapértelmezett 16.
+.RE
+.IPs (no)osd
+Engedélyezi vagy letiltja az OSD OpenGL-en keresztüli renderelésének
+támogatását (alapértelmezett: engedélyezett).
+Ez az opció teszteléshez van; az OSD letiltásához használd helyette a
+\-osdlevel 0 kapcsolót.
+.IPs (no)aspect
+Engedélyezi vagy letiltja a kép átméretezést és a pan-and-scan támogatást
+(alapértelmezett: engedélyezett).
+A kikapcsolása növeli a sebességet.
 .REss
 .RE
 .PD 1
@@ -3993,6 +4010,23 @@ információ hibás vagy hiányzik a lejátszandó fájlban.
 .TP
 .B \-noaspect
 Kikapcsolja az automatikus film képarány kompenzációt.
+.
+.TP
+.B "\-field-dominance <-1\-1>"
+Beállítja az elsõ mezõt az átlapolt tartalomnál.
+Hasznos a framerátát duplázó deinterlacer-eknél: \-vf tfields=1,
+\-vf yadif=1 and \-vo xvmc:bobdeint.
+.PD 0
+.RSs
+.IPs -1
+automatikus (alapértelmezett) Ha a dekódoló nem küldi ki a megfelelõ információkat,
+visszalép 0-ra (felsõ mezõ elõször).
+.IPs 0
+felsõ mezõ elõször
+.IPs 1
+alsó mezõ elõször
+.RE
+.PD 1
 .
 .TP
 .B "\-flip \ "
@@ -6268,7 +6302,7 @@ Minden kockát teljes magasságúvá növel, de a váltakozó sorok feketék lesznek;
 a frameráta változatlan.
 .IPs 4
 Átlapolja a páros kockák páros sorait a páratlan kockák páratlan soraival.
-Teljes magasságú kockát készít fele framerátával.
+Változatlan magasság mellett a frameráta felezõdik.
 .RE
 .PD 1
 .
@@ -6289,7 +6323,7 @@ kívánt (dupla) framerátára!
 2: Eltolja a mezõket 1/4 pixellel, lineáris interpolációval (nincs ugrás).
 .br
 4: Eltolja a mezõket 1/4 pixellel, 4tap szûrõvel (jobb minõségû) (alapértelmezett).
-.IPs <mezõ_dominancia>
+.IPs <mezõ_dominancia>\ (IDEJÉTMÚLT)
 -1: auto (alapértelmezett)
 Csak akkor mûködik, ha a dekódoló exportálja a megfelelõ információkat
 és nincs semmilyen más, ezen információkat eldobó szûrõ betöltve a
@@ -6298,6 +6332,10 @@ tfields elõtt, különben visszalép 0-ra (felsõ mezõ elõször).
 0: felsõ elõször
 .br
 1: alsó elõször
+.br
+.I MEGJEGYZÉS:
+Ez az opció valószínûleg el lesz távolítva a jövõbeli verziókból.
+Használd inkább a \-field-dominance kapcsolót.
 .RE
 .PD 1
 .
@@ -6314,8 +6352,12 @@ Még egy deinterlacing szûrõ
 2: Mint a 0, de kihagyja a térbeli interlacing ellenõrzést.
 .br
 3: Mint az 1, de kihagyja a térbeli interlacing ellenõrzést.
-.IPs <mezõ_dominancia>
+.IPs <mezõ_dominancia>\ (IDEJÉTMÚLT)
 Úgy mûködik, mint a tfields-nél.
+.br
+.I MEGJEGYZÉS:
+Ez az opció valószínûleg el lesz távolítva a jövõbeli verziókból.
+Használd inkább a \-field-dominance kapcsolót.
 .RE
 .PD 1
 .
@@ -9075,7 +9117,7 @@ A map-polás körülbelül H264QP = 12 + 6*log2(MPEGQP).
 Például az MPEG QP=2-vel azonos a H.264 QP=18-cal.
 .
 .TP
-.B crf=<1\-50>
+.B crf=<1.0\-50.0>
 Engedélyezi a konstans minõségi módot és kiválasztja a minõséget.
 Ez a skála hasonló a QP-hez.
 Csakúgy, mint a bitráta-alapú módok, ez is megengedi az egyes kockáknak
