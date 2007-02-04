@@ -454,7 +454,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
         stream_skip(demuxer->stream, chunk_size);
     } while (chunk_type != mmioFOURCC('d', 'a', 't', 'a'));
     demuxer->movi_start = stream_tell(s);
-    demuxer->movi_end = s->end_pos;
+    demuxer->movi_end = chunk_size ? demuxer->movi_start + chunk_size : s->end_pos;
 //    printf("wav: %X .. %X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
     // Check if it contains dts audio
     if((w->wFormatTag == 0x01) && (w->nChannels == 2) && (w->nSamplesPerSec == 44100)) {
@@ -598,6 +598,11 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   case WAV : {
     unsigned align = sh_audio->wf->nBlockAlign;
     l = sh_audio->wf->nAvgBytesPerSec;
+    if (demux->movi_end && l > demux->movi_end - stream_tell(s)) {
+      // do not read beyond end, there might be junk after data chunk
+      l = demux->movi_end - stream_tell(s);
+      if (l <= 0) return 0;
+    }
     if (align)
       l = (l + align - 1) / align * align;
     dp = new_demux_packet(l);
