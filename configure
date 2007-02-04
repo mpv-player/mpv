@@ -2109,7 +2109,7 @@ if test "$_runtime_cpudetection" = yes ; then
   fi
 fi
 
-if x86_32 && test "$_runtime_cpudetection" = no ; then
+if x86 && test "$_runtime_cpudetection" = no ; then
   extcheck() {
     if test "$1" = kernel_check ; then
       echocheck "kernel support of $2"
