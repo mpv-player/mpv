@@ -13,7 +13,7 @@ all:    $(LIBS)
 
 $(LIBNAME): $(OBJS)
 $(LIBNAME2): $(OBJS2)
-$(LIBNAME) $(LIBNAME2): $(OBJS2)
+$(LIBNAME) $(LIBNAME2):
 	$(AR) r $@ $^
 	$(RANLIB) $@
 
