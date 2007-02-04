@@ -86,7 +86,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 		return TCP_ERROR_FATAL;
 	}
 
-#if defined SO_RCVTIMEO && defined SO_SNDTIMEO
+#if defined(SO_RCVTIMEO) && defined(SO_SNDTIMEO)
 	tv.tv_sec = 10;
 	tv.tv_usec = 0;
 	setsockopt(socket_server_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
