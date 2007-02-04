@@ -7284,10 +7284,10 @@ Maximum macroblock-level Lagrange multiplier for ratecontrol
 .TP
 .B vqscale=<0\-31>
 Constant quantizer /\: constant quality encoding (selects fixed quantizer mode).
-A lower value means better quality but larger files (default: 0).
+A lower value means better quality but larger files (default: -1).
 In case of snow codec, value 0 means lossless encoding.
-Since the other codecs do not support this, vqscale=0 will be ignored and
-variable quantizers are used, which is the default.
+Since the other codecs do not support this, vqscale=0 will have an undefined
+effect.
 1 is not recommended (see vqmin for details).
 .
 .TP
