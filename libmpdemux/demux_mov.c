@@ -2177,6 +2177,7 @@ if(trak->pos==0 && trak->stream_header_len>0){
           len -= 2;
           if (len < 0) len = 0;
           if (len > MOV_MAX_SUBLEN) len = MOV_MAX_SUBLEN;
+          sub_utf8 = 1;
         }
         ds_read_packet(demuxer->sub, demuxer->stream, len, subpts, pos, 0);
         priv->current_sub = samplenr;
