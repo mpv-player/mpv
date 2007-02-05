@@ -35,16 +35,21 @@ static void mplayer_put_key_internal(int code){
 
 #else
 
-int key_fifo_size = 10;
+int key_fifo_size = 7;
 static int *key_fifo_data = NULL;
 static int key_fifo_read=0;
 static int key_fifo_write=0;
 
 static void mplayer_put_key_internal(int code){
+  int fifo_free = key_fifo_read - key_fifo_write - 1;
+  if (fifo_free < 0) fifo_free += key_fifo_size;
 //  printf("mplayer_put_key(%d)\n",code);
   if (key_fifo_data == NULL)
     key_fifo_data = malloc(key_fifo_size * sizeof(int));
-  if(((key_fifo_write+1)%key_fifo_size)==key_fifo_read) return; // FIFO FULL!!
+  if(!fifo_free) return; // FIFO FULL!!
+  // reserve some space for key release events to avoid stuck keys
+  if((code & MP_KEY_DOWN) && fifo_free < (key_fifo_size >> 1))
+    return;
   key_fifo_data[key_fifo_write]=code;
   key_fifo_write=(key_fifo_write+1)%key_fifo_size;
 }
@@ -79,8 +84,6 @@ void mplayer_put_key(int code) {
       (code & ~MP_KEY_DOWN) >= MOUSE_BTN0_DBL &&
       (code & ~MP_KEY_DOWN) <= MOUSE_BTN9_DBL)
     return;
-  // ignore mouse wheel down events since they can easily get stuck
-  if (code < (MOUSE_BTN3 | MP_KEY_DOWN) || code > (MOUSE_BTN4 | MP_KEY_DOWN))
   mplayer_put_key_internal(code);
   if (code & MP_KEY_DOWN) {
     code &= ~MP_KEY_DOWN;
