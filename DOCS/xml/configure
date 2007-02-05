@@ -126,14 +126,12 @@ EOF
 echo "Searching for DTD..."
 for _try_dtd in \
   /usr/share/xml/docbook/*/docbookx.dtd \
-  /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd \
-  /usr/share/docbook-xml42/docbookx.dtd \
-  /usr/share/sgml/docbook/xml-dtd-4.1.2*/docbookx.dtd \
-  /usr/share/sgml/docbook/xml-dtd-4.2/docbookx.dtd \
-  /usr/share/sgml/docbook/xml-dtd-4.4/docbookx.dtd \
-  /usr/share/xml/docbook/schema/dtd/4.2/docbookx.dtd \
-  /opt/local/share/xml/docbook-xml/4.2/docbookx.dtd \
-  /usr/share/sgml/docbook/dtd/4.2/docbookx.dtd
+  /usr/share/sgml/docbook/*/docbookx.dtd \
+  /usr/share/sgml/docbook/dtd/*/docbookx.dtd \
+  /usr/share/sgml/docbook/dtd/xml/*/docbookx.dtd \
+  /usr/share/docbook-xml*/docbookx.dtd \
+  /opt/local/share/xml/docbook-xml/*/docbookx.dtd \
+  /usr/share/apps/ksgmltools2/docbook/*/docbookx.dtd
 do
   if test -f "$_try_dtd"
   then
