@@ -315,7 +315,10 @@ LOCAL int stream_read_frame_body(int size){
  */
 LOCAL int read_frame(struct frame *fr){
   unsigned long newhead;
-  unsigned char hbuf[8];
+  union {
+    unsigned char buf[8];
+    unsigned long dummy; // for alignment
+  } hbuf;
   int skipped,resyncpos;
   int frames=0;
 
@@ -325,7 +328,7 @@ resync:
 
   set_pointer(512);
   fsizeold=fr->framesize;       /* for Layer3 */
-  if(!stream_head_read(hbuf,&newhead)) return 0;
+  if(!stream_head_read(hbuf.buf,&newhead)) return 0;
   if(!decode_header(fr,newhead)){
     // invalid header! try to resync stream!
 #ifdef DEBUG_RESYNC
@@ -333,7 +336,7 @@ resync:
 #endif
 retry1:
     while(!decode_header(fr,newhead)){
-      if(!stream_head_shift(hbuf,&newhead)) return 0;
+      if(!stream_head_shift(hbuf.buf,&newhead)) return 0;
     }
     resyncpos=MP3_fpos-4;
     // found valid header
@@ -343,14 +346,14 @@ retry1:
     if(!stream_read_frame_body(fr->framesize)) return 0; // read body
     set_pointer(512);
     fsizeold=fr->framesize;       /* for Layer3 */
-    if(!stream_head_read(hbuf,&newhead)) return 0;
+    if(!stream_head_read(hbuf.buf,&newhead)) return 0;
     if(!decode_header(fr,newhead)){
       // invalid hdr! go back...
 #ifdef DEBUG_RESYNC
       printf("INVALID\n");
 #endif
 //      mp3_seek(resyncpos+1);
-      if(!stream_head_read(hbuf,&newhead)) return 0;
+      if(!stream_head_read(hbuf.buf,&newhead)) return 0;
       goto retry1;
     }
 #ifdef DEBUG_RESYNC
