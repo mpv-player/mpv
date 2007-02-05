@@ -586,7 +586,7 @@ found_subpic:
          break;
       case BACKEND_SUBPICTURE:
          printf("vo_xvmc: OSD support by backend rendering (fast)\n");
-         printf("vo_xvmc: Pleace send feedback to configrm that it work,otherwise send bugreport!\n");
+         printf("vo_xvmc: Please send feedback to confirm that it works,otherwise send bugreport!\n");
          break;
    }
 
