@@ -313,6 +313,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 XGetGeometry(mDisplay, vo_window, &mRoot,
                              &drwX, &drwY, &vo_dwidth, &vo_dheight,
                              &drwBorderWidth, &drwDepth);
+                if (vo_dwidth <= 0) vo_dwidth = d_width;
+                if (vo_dheight <= 0) vo_dheight = d_height;
                 drwX = drwY = 0; // coordinates need to be local to the window
                 aspect_save_prescale(vo_dwidth, vo_dheight);
             } else
