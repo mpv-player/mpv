@@ -511,9 +511,22 @@ static int str_list_del(char** del, int n,void* dst) {
   return 1;
 }
   
+static char *get_nextsep(char *ptr, char sep, int modify) {
+    char *last_ptr = ptr;
+    for(;;){
+        ptr = strchr(ptr, sep);
+        if(ptr && ptr>last_ptr && ptr[-1]=='\\'){
+            if (modify) memmove(ptr-1, ptr, strlen(ptr)+1);
+            else ptr++;
+        }else
+            break;
+    }
+    return ptr;
+}
 
 static int parse_str_list(m_option_t* opt,char *name, char *param, void* dst, int src) {
   int n = 0,len = strlen(opt->name);
+  char *str;
   char *ptr = param, *last_ptr, **res;
   int op = OP_NONE;
 
@@ -544,7 +557,7 @@ static int parse_str_list(m_option_t* opt,char *name, char *param, void* dst, in
 
 
   while(ptr[0] != '\0') {
-    ptr = strchr(ptr,LIST_SEPARATOR);
+    ptr = get_nextsep(ptr, LIST_SEPARATOR, 0);
     if(!ptr) {
       n++;
       break;
@@ -561,12 +574,12 @@ static int parse_str_list(m_option_t* opt,char *name, char *param, void* dst, in
   if(!dst) return 1;
 
   res = malloc((n+2)*sizeof(char*));
-  ptr = param;
+  ptr = str = strdup(param);
   n = 0;
 
   while(1) {
     last_ptr = ptr;
-    ptr = strchr(ptr,LIST_SEPARATOR);
+    ptr = get_nextsep(ptr, LIST_SEPARATOR, 1);
     if(!ptr) {
       res[n] = strdup(last_ptr);
       n++;
@@ -580,6 +593,7 @@ static int parse_str_list(m_option_t* opt,char *name, char *param, void* dst, in
     n++;
   }
   res[n] = NULL;
+  free(str);
 
   switch(op) {
   case OP_ADD:
@@ -1671,13 +1685,7 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
 
   while(ptr[0] != '\0') {
     last_ptr = ptr;
-    for(;;){
-        ptr = strchr(ptr,LIST_SEPARATOR);
-        if(ptr && ptr>last_ptr && ptr[-1]=='\\'){
-            memmove(ptr-1, ptr, strlen(ptr)+1);
-        }else
-            break;
-    }
+    ptr = get_nextsep(ptr, LIST_SEPARATOR, 1);
 
     if(!ptr) {
       r = parse_obj_settings(name,last_ptr,opt->priv,dst ? &res : NULL,n);
