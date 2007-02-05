@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r22129 -->
 <chapter id="mencoder">
 <title>Основы использования <application>MEncoder</application></title>
 
@@ -10,8 +10,10 @@
 Ряд наглядных примеров и подробные руководства по использованию отдельных
 параметров кодирования, можно узнать прочтя 
 <ulink url="../../tech/encoding-tips.txt">советы по кодированию</ulink>, которые мы
-собрали из отдельных нитей[threads] рассылки MPlayer-users. В
-<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">архивах</ulink>
+собрали из отдельных нитей[threads] рассылки MPlayer-users. В архивах
+<ulink url="http://lists.mplayerhq.hu/pipermail/mencoder-users/">здесь</ulink>
+и, особенно по поводу старых вещей,
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">здесь</ulink>
 найдется множество дискуссий, посвященных всех аспектам и проблемам кодирования 
 при помощи  <application>MEncoder</application>.
 </para>
