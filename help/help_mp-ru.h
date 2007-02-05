@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r21906
+// Synced with help_mp-en.h: r22139
 
 // ========================= MPlayer help ===========================
 
@@ -1003,7 +1003,9 @@ static char help_text[]=
 
 // ======================= VO Video Output drivers ========================
 
-#define MSGTR_VOincompCodec "Извините, выбранное устройство видеовывода не совместимо с этим кодеком.\n"
+#define MSGTR_VOincompCodec "Извините, выбранное устройство видеовывода не совместимо с этим кодеком.\n"\
+                "Попробуйте добавить фильтр scale к вашему списку фильтров.\n"\
+                "Например, -vf spp,scale вместо -vf spp.\n"
 #define MSGTR_VO_GenericError "Произошла следующая ошибка"
 #define MSGTR_VO_UnableToAccess "Не могу получить доступ"
 #define MSGTR_VO_ExistsButNoDirectory "уже существует, но не является директорией."
