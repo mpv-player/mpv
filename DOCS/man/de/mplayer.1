@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22113
+.\" In sync with r22138
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -3595,8 +3595,12 @@ GL_LINEAR-Interpolation, benutze sonst GL_NEAREST.
 Wenn aktiviert, benutze für die customtex-Textur texture_rectangle.
 Standardeinstellung ist deaktiviert.
 .RE
+.sp 1
+.RS
 Normalerweise gibt es keinen Grund, die folgenden Optionen zu verwenden.
 Sie sind hauptsächlich für Testzwecke.
+.RE
+.sp 1
 .RSs
 .IPs (no)glfinish
 Rufe glFinish() vor dem Wechsel der Puffer auf.
@@ -4194,12 +4198,12 @@ Nützlich für Deinterlacer, die die Framerate verdoppeln: \-vf tfields=1,
 .PD 0
 .RSs
 .IPs -1
-auto (default) Fällt auf 0 (obere Felder zuerst) zurück,
+auto (default): Fällt auf 0 (oberes Feld zuerst) zurück,
 wenn der Decoder keine angemessenen Informationen ausgibt.
 .IPs 0
-obere Felder zuerst
+oberes Feld zuerst
 .IPs 1
-untere Felder zuerst
+unteres Feld zuerst
 .RE
 .PD 1
 .
@@ -6598,7 +6602,7 @@ schwarz; die Framerate bleibt unverändert.
 .IPs 4
 Verschachtele gerade Zeilen von geraden Frames mit ungeraden Zeilen von
 ungeraden Frames.
-Generiert einen Frame voller Höhe bei halber Framerate.
+Die Höhe bleibt ungeändert bei halber Framerate.
 .RE
 .PD 1
 .
@@ -7636,11 +7640,10 @@ Bitratenkontrolle (Standard: 31.0).
 .B vqscale=<0\-31>
 Encodierung mit konstantem Quantisierungsparameter bzw.\& konstanter Qualität
 (wählt den 'fixed quantizer'-Modus).
-Ein kleinerer Wert bedeutet bessere Qualität bei größeren Dateien (Standard: 0).
+Ein kleinerer Wert bedeutet bessere Qualität bei größeren Dateien (Standard: -1).
 Im Falle des snow Codecs bedeutet der Wert 0 verlustfreie Encodierung.
-Da die anderen Codecs dies nicht unterstützen, wird vqscale=0 bei diesen
-ignoriert, und variable Quantisierer werden verwendet, was die 
-Standardeinstellung ist.
+Da die anderen Codecs dies nicht unterstützen, hat vqscale=0 bei diesen
+nicht-definierte Auswirkungen.
 Der Wert 1 wird nicht empfohlen (siehe vqmin für Details).
 .
 .TP
@@ -9560,7 +9563,7 @@ Beispielsweise ist MPEG bei QP=2 vergleichbar mit H.264 bei QP=18.
 .
 .TP
 .B crf=<1.0\-50.0>
-Aktiviert den "constant quality mode" und legt die die Qualität fest.
+Aktiviert den "constant quality mode" und legt die Qualität fest.
 Die Skala ist ähnlich der des QP.
 Ähnlich wie die Bitraten-basierten Modi ermöglicht
 dies, für jeden Frame einen anderen QP festzulegen, je nach dessen Komplexität.

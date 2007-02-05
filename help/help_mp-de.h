@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r21906
+// In sync with r22139
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -1026,7 +1026,8 @@ static char help_text[]=
 
 #define MSGTR_VOincompCodec \
 "Der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"\
-"Versuche den scale-Filter hinzuzufügen, z.B. -vf spp,scale an Stelle von -vf spp.\n"
+"Versuche den scale-Filter zu deiner Filterliste hinzuzufügen,\n"
+"z.B. mit -vf spp,scale an Stelle von -vf spp.\n"
 #define MSGTR_VO_GenericError "Dieser Fehler ist aufgetreten"
 #define MSGTR_VO_UnableToAccess "Zugriff nicht möglich."
 #define MSGTR_VO_ExistsButNoDirectory "Existiert schon, ist aber kein Verzeichnis."
