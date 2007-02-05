@@ -417,7 +417,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
         vf->priv->do_deinterlace= 2;
         return 0;
     }else
-        continue_buffered_image(vf);
+        return continue_buffered_image(vf);
 }
 
 static int continue_buffered_image(struct vf_instance_s *vf)
