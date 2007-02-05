@@ -5868,7 +5868,7 @@ EOF
 fi
 if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
-  if echo $_libavencoders | grep -q faac ; then
+  if echo $_libavencoders | grep -q FAAC ; then
     _lavc_faac=yes
     _def_lavc_faac="#define CONFIG_LIBFAAC 1"
     _libs_mplayer="$_libs_mplayer $_ld_faac"
@@ -6506,7 +6506,7 @@ if test "$_x264" = yes ; then
   _x264=yes
   _def_x264='#define HAVE_X264 1'
   _codecmodules="x264 $_codecmodules"
-  if echo $_libavencoders | grep -q x264 ; then
+  if echo $_libavencoders | grep -q X264 ; then
     _lavc_x264=yes
     _def_lavc_x264='#define CONFIG_X264 1'
     _libs_mplayer="$_libs_mplayer $_ld_x264"
@@ -6573,7 +6573,7 @@ EOF
 int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
     cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
-    if echo $_libavencoders | grep -q mp3lame ; then
+    if echo $_libavencoders | grep -q MP3LAME ; then
       _lavc_mp3lame=yes
       _def_lavc_mp3lame="#define CONFIG_LIBMP3LAME 1"
       _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
@@ -6595,7 +6595,7 @@ if test "$_mencoder" = yes ; then
   _def_muxers='#define CONFIG_MUXERS 1'
 else
   # mpeg1video for vf_lavc, snow for vf_uspp and vf_mcdeint
-  _libavencoders="mpeg1video_encoder snow_encoder"
+  _libavencoders="MPEG1VIDEO_ENCODER SNOW_ENCODER"
   _libavmuxers=""
 fi
 echores "$_mencoder"
