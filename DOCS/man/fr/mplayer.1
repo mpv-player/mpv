@@ -1,4 +1,4 @@
-.\" synced with r22089
+.\" synced with r22104
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -4213,6 +4213,23 @@ ration d'aspect est incorrecte ou manquante dans le fichier lu.
 Désactive la compensation automatique du rapport hauteur/\:largeur.
 .
 .TP
+.B "\-field-dominance <-1\-1>
+Défini le premier champ du contenu entrelacé.
+Utile pour les dé-entrelaceurs qui doublent le nombre d'images par seconde
+\-vf tfields=1, \-vf yadif=1 et \-vo xvmc:bobdeint.
+.PD 0
+.RSs
+.IPs -1
+auto (par défaut) Si le décodeur l'exporte pas l'information nécessaire,
+se rabat sur 0 (le champs du haut en premier).
+.IPs 0
+le champ du haut d'abord
+.IPs 1
+le champ du bas d'abord
+.RE
+.PD 1
+.
+.TP
 .B "\-flip\ \ "
 Renverse l'image de haut en bas.
 .
@@ -6626,7 +6643,7 @@ bon.)
 4: Fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
 qualité) (par défaut).
 .
-.IPs <dominance de champs>
+.IPs <dominance de champs> (DEPRECATED/À ÉVITER)
 -1: auto (par défaut)
 Ne fonctionne que si le décodeur exporte les informations nécessaires
 et que les filtres de la chaîne de filtres appliqués avant tfields
@@ -6636,6 +6653,10 @@ par le champ du haut.
 0: champ du haut d'abord
 .br
 1: champ du bas d'abord
+.br
+.I NOTE\ :
+Cette option sera probablement elevée dans une version ultérieure.
+Utilisez \-field-dominance à la place.
 .RE
 .PD 1
 .
@@ -6649,8 +6670,12 @@ par le champ du haut.
 1: sort une trame pour chaque champ d'entrée
 2: comme 0 mais ne vérifie pas l'entrelacement spatial
 3: comme 3 mais ne vérifie pas l'entrelacement spatial 
-.IPs <dominance_de_champ>
+.IPs <dominance de champ> (DEPRECATED/À ÉVITER)
 cf tfields
+.br
+.I NOTE\ :
+Cette option sera probablement elevée dans une version ultérieure.
+Utilisez \-field-dominance à la place.
 .RE
 .PD 1
 .
