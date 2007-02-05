@@ -1009,7 +1009,8 @@ static char help_text[]=
 // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "The selected video_out device is incompatible with this codec.\n"\
-                "Try adding the scale filter, e.g. -vf spp,scale instead of -vf spp.\n"
+                "Try appending the scale filter to your filter list,\n"\
+                "e.g. -vf spp,scale instead of -vf spp.\n"
 #define MSGTR_VO_GenericError "This error has occurred"
 #define MSGTR_VO_UnableToAccess "Unable to access"
 #define MSGTR_VO_ExistsButNoDirectory "already exists, but is not a directory."
