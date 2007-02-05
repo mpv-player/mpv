@@ -411,9 +411,13 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     vf->priv->buffered_i = 0;
     vf->priv->buffered_pts = pts;
 
-    return vf->priv->do_deinterlace?
-           continue_buffered_image(vf):
-           vf_next_put_image(vf, mpi, pts);
+    if(vf->priv->do_deinterlace == 0)
+        return vf_next_put_image(vf, mpi, pts);
+    else if(vf->priv->do_deinterlace == 1){
+        vf->priv->do_deinterlace= 2;
+        return 0;
+    }else
+        continue_buffered_image(vf);
 }
 
 static int continue_buffered_image(struct vf_instance_s *vf)
@@ -478,7 +482,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
         *(int*)data = vf->priv->do_deinterlace;
         return CONTROL_OK;
       case VFCTRL_SET_DEINTERLACE:
-        vf->priv->do_deinterlace = *(int*)data;
+        vf->priv->do_deinterlace = 2*!!*(int*)data;
         return CONTROL_OK;
     }
     return vf_next_control (vf, request, data);
