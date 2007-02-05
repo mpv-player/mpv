@@ -2336,8 +2336,10 @@ int sub_clear_text(subtitle *sub, double pts) {
     if (pts == MP_NOPTS_VALUE || (endpts != MP_NOPTS_VALUE && pts >= endpts)) {
       int j;
       free(sub->text[i]);
-      for (j = i + 1; j < sub->lines; j++)
+      for (j = i + 1; j < sub->lines; j++) {
         sub->text[j - 1] = sub->text[j];
+        sub->endpts[j - 1] = sub->endpts[j];
+      }
       sub->lines--;
       changed = 1;
     } else
