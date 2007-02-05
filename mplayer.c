@@ -2979,8 +2979,7 @@ static void update_subtitles(void)
       }
 #ifdef USE_ASS
       if (ass_enabled) {
-        static global_ass_track = NULL;
-        sh_sub_t *sh = (sh_sub_t *)d_dvdsub->sh;
+        static ass_track_t *global_ass_track = NULL;
         if (!global_ass_track) global_ass_track = ass_default_track(ass_library);
         ass_track = global_ass_track;
         vo_sub = NULL;
