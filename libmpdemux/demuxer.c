@@ -22,6 +22,7 @@
 
 #include "libaf/af_format.h"
 
+extern void resync_video_stream(sh_video_t *sh_video);
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 
 // Demuxer list

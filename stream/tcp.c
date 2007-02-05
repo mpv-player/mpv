@@ -19,6 +19,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "input/input.h"
 
 #ifndef HAVE_WINSOCK2
 #include <netdb.h>

@@ -40,8 +40,6 @@
 
 extern int stream_cache_size;
 
-extern int mp_input_check_interrupt(int time);
-
 /* Variables for the command line option -user, -passwd, -bandwidth,
    -user-agent and -nocookies */
 

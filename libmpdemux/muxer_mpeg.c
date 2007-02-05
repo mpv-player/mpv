@@ -872,7 +872,7 @@ static int write_mpeg_pack(muxer_t *muxer, muxer_stream_t *s, stream_t *stream, 
 	}
 }
 
-static int update_demux_bufsize(muxer_headers_t *spriv, uint64_t dts, int framelen, int type)
+static void update_demux_bufsize(muxer_headers_t *spriv, uint64_t dts, int framelen, int type)
 {
 	int dim = (spriv->track_len+16)*sizeof(buffer_track_t);
 
@@ -882,7 +882,7 @@ static int update_demux_bufsize(muxer_headers_t *spriv, uint64_t dts, int framel
 		if(!tmp)
 		{
 			mp_msg(MSGT_MUXER, MSGL_ERR, "\r\nERROR, couldn't realloc %d bytes for tracking buffer\r\n", dim);
-			return 0;
+			return;
 		}
 		spriv->buffer_track = tmp;
 		memset(&(spriv->buffer_track[spriv->track_pos+1]), 0, 16*sizeof(buffer_track_t));

@@ -246,8 +246,8 @@ static int get_space(void) {
 
 /** Return the current latency in seconds */
 static float get_delay(void) {
-    assert(stream && context && pa_stream_get_state(stream) == PA_STREAM_READY);
     pa_usec_t latency;
+    assert(stream && context && pa_stream_get_state(stream) == PA_STREAM_READY);
 
     /*     latency = 0; */
 /*     wait_for_operation(pa_stream_get_latency(stream, latency_func, NULL)); */
