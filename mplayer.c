@@ -2899,6 +2899,11 @@ static void update_subtitles(void)
     unsigned char *packet=NULL;
     int len;
     char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
+    if (type == 'a')
+#ifdef USE_ASS
+      if (!ass_enabled)
+#endif
+      type = 't';
     // find sub
     if (subdata) {
 	double pts = sh_video->pts;
@@ -2959,21 +2964,43 @@ static void update_subtitles(void)
 	if (spudec_changed(vo_spudec))
 	    vo_osd_changed(OSDTYPE_SPU);
     } else if (dvdsub_id >= 0 && type == 't') {
+      static subtitle subs;
+      double curpts = sh_video->pts + sub_delay;
       double pts = MP_NOPTS_VALUE;
+      double endpts;
+      vo_sub = &subs;
       while (d_dvdsub->first) {
         double nextpts = ds_get_next_pts(d_dvdsub);
-        if (nextpts == MP_NOPTS_VALUE || nextpts - sub_delay > sh_video->pts)
+        if (nextpts == MP_NOPTS_VALUE || nextpts > curpts)
           break;
+        endpts = d_dvdsub->first->endpts;
         len = ds_get_packet_sub(d_dvdsub, &packet);
-        pts = nextpts - sub_delay;
+        pts = nextpts;
       }
+#ifdef USE_ASS
+      if (ass_enabled) {
+        static global_ass_track = NULL;
+        sh_sub_t *sh = (sh_sub_t *)d_dvdsub->sh;
+        if (!global_ass_track) global_ass_track = ass_default_track(ass_library);
+        ass_track = global_ass_track;
+        vo_sub = NULL;
+        if (pts != MP_NOPTS_VALUE) {
+          if (endpts == MP_NOPTS_VALUE) endpts = pts + 3;
+          sub_clear_text(&subs, MP_NOPTS_VALUE);
+          sub_add_text(&subs, packet, len, endpts);
+          subs.start = pts * 100;
+          subs.end = endpts * 100;
+          ass_process_subtitle(ass_track, &subs);
+        }
+      } else
+#endif
       if (pts != MP_NOPTS_VALUE) {
-        static subtitle subs;
+        if (endpts == MP_NOPTS_VALUE)
         sub_clear_text(&subs, MP_NOPTS_VALUE);
-        sub_add_text(&subs, packet, len, MP_NOPTS_VALUE);
-        vo_sub = &subs;
+        sub_add_text(&subs, packet, len, endpts);
         vo_osd_changed(OSDTYPE_SUBTITLE);
-      }
+      } else if (sub_clear_text(&subs, curpts))
+        vo_osd_changed(OSDTYPE_SUBTITLE);
     }
     current_module=NULL;
 }

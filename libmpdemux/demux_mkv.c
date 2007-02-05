@@ -166,8 +166,6 @@ typedef struct mkv_demuxer
   uint64_t tc_scale, cluster_tc, first_tc;
   int has_first_tc;
 
-  subtitle subs;
-
   uint64_t cluster_size;
   uint64_t blockgroup_size;
 
@@ -523,7 +521,6 @@ demux_mkv_parse_idx (mkv_track_t *t)
     return 0;
   memcpy(buf, t->private_data, t->private_size);
   buf[t->private_size] = 0;
-  t->sh_sub.type = 'v';
   t->sh_sub.has_palette = 0;
 
   pos = buf;
@@ -2376,8 +2373,6 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
           track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB)
         continue;
 
-      track->sh_sub.type = 'a';
-
       if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
         {
           track->sh_sub.ass_track = ass_new_track(ass_library);
@@ -2391,10 +2386,6 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
             }
           ass_process_codec_private(track->sh_sub.ass_track, track->private_data, track->private_size);
         }
-      else
-        {
-          track->sh_sub.ass_track = ass_default_track(ass_library);
-        }
     }
 }
 #endif
@@ -2405,15 +2396,13 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
   if (track->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN)
     {
       sh_sub_t *sh = new_sh_sub_sid(demuxer, track->tnum, sid);
-      if ((track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB) ||
-          (track->subtitle_type == MATROSKA_SUBTYPE_SSA))
-        {
-          if (track->private_data != NULL)
-            {
+      track->sh_sub.type = 't';
+      if (track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB)
+        track->sh_sub.type = 'v';
+      if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
+        track->sh_sub.type = 'a';
               if (sh)
                 memcpy(sh, &track->sh_sub, sizeof(sh_sub_t));
-            }
-        }
     }
   else
     {
@@ -2718,9 +2707,6 @@ demux_mkv_open (demuxer_t *demuxer)
 }
 
 static void
-clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all);
-
-static void
 demux_close_mkv (demuxer_t *demuxer)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
@@ -2731,7 +2717,6 @@ demux_close_mkv (demuxer_t *demuxer)
 #ifdef USE_ICONV
       subcp_close();
 #endif
-      clear_subtitles(demuxer, 0, 1);
       free_cached_dps (demuxer);
       if (mkv_d->tracks)
         {
@@ -2853,6 +2838,7 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
                  int64_t size, uint64_t block_duration, uint64_t timecode)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+  demux_packet_t *dp;
   char *ptr1;
   int i;
 
@@ -2868,9 +2854,6 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
     ass_process_chunk(track->sh_sub.ass_track, block, size, (long long)timecode, (long long)block_duration);
     return;
   }
-  // Use code below only to parse this single sub, old subs timed in libass
-  if (ass_enabled)
-      clear_subtitles(demuxer, timecode, 1);
 #endif
 
   ptr1 = block;
@@ -2885,27 +2868,12 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
     }
 
   sub_utf8 = 1;
-  sub_add_text(&mkv_d->subs, ptr1, size - (ptr1 - block),
-                 (timecode + block_duration) / 1000.0f);
-#ifdef USE_ASS
-  if (ass_enabled) {
-    mkv_d->subs.start = timecode / 10;
-    mkv_d->subs.end = (timecode + block_duration) / 10;
-    ass_process_subtitle(track->sh_sub.ass_track, &mkv_d->subs);
-    return;
-  }
-#endif
-  vo_sub = &mkv_d->subs;
-  vo_osd_changed (OSDTYPE_SUBTITLE);
-}
-
-static void
-clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all)
-{
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  double pts = clear_all ? MP_NOPTS_VALUE : (timecode / 1000.0f);
-  if (sub_clear_text(&mkv_d->subs, pts))
-    vo_osd_changed(OSDTYPE_SUBTITLE);
+  size -= ptr1 - block;
+  dp = new_demux_packet(size);
+  memcpy(dp->buffer, ptr1, size);
+  dp->pts = timecode / 1000.0f;
+  dp->endpts = (timecode + block_duration) / 1000.0f;
+  ds_add_packet(demuxer->sub, dp);
 }
 
 // Taken from demux_real.c. Thanks to the original developpers :)
@@ -3240,8 +3208,6 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
     return -1;
   }
   current_pts = tc / 1000.0;
-
-  clear_subtitles(demuxer, tc, 0);
 
   for (i=0; i<mkv_d->num_tracks; i++)
     if (mkv_d->tracks[i]->tnum == num) {
@@ -3628,10 +3594,6 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
         mkv_d->skip_to_timecode = target_timecode;
       mkv_d->a_skip_to_keyframe = 1;
 
-      /* Clear subtitles. */
-      if (target_timecode <= mkv_d->last_pts * 1000)
-        clear_subtitles(demuxer, 0, 1);
-
       demux_mkv_fill_buffer(demuxer, NULL);
     }
   else if ((demuxer->movi_end <= 0) || !(flags & 1))
@@ -3669,10 +3631,6 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
         mkv_d->v_skip_to_keyframe = 1;
       mkv_d->skip_to_timecode = index->timecode;
       mkv_d->a_skip_to_keyframe = 1;
-
-      /* Clear subtitles. */
-      if (index->timecode <= mkv_d->last_pts * 1000)
-        clear_subtitles(demuxer, 0, 1);
 
       demux_mkv_fill_buffer(demuxer, NULL);
     }
