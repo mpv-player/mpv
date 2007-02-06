@@ -108,6 +108,7 @@ static int texture_width;
 static int texture_height;
 static int mpi_flipped;
 static int vo_flipped;
+static int ass_border_x, ass_border_y;
 
 static unsigned int slice_height = 1;
 
@@ -132,6 +133,8 @@ static void resize(int x,int y){
     scale_x = (GLdouble) new_w / (GLdouble) x;
     scale_y = (GLdouble) new_h / (GLdouble) y;
     glScaled(scale_x, scale_y, 1);
+    ass_border_x = (vo_screenwidth - new_w) / 2;
+    ass_border_y = (vo_screenheight - new_h) / 2;
   }
   glOrtho(0, image_width, image_height, 0, -1,1);
 
@@ -959,11 +962,9 @@ static int control(uint32_t request, void *data, ...)
       r->mt = r->mb = r->ml = r->mr = 0;
       if (scaled_osd) {r->w = image_width; r->h = image_height;}
       else if (vo_fs) {
-        int aw, ah;
-        aspect(&aw, &ah, A_ZOOM);
         r->w = vo_screenwidth; r->h = vo_screenheight;
-        r->ml = r->mr = (vo_screenwidth - aw) / 2;
-        r->mt = r->mb = (vo_screenheight - ah) / 2;
+        r->ml = r->mr = ass_border_x > 0 ? ass_border_x : 0;
+        r->mt = r->mb = ass_border_y > 0 ? ass_border_y : 0;
       } else {
         r->w = vo_dwidth; r->h = vo_dheight;
       }
