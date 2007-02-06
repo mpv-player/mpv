@@ -2966,17 +2966,14 @@ static void update_subtitles(void)
     } else if (dvdsub_id >= 0 && type == 't') {
       static subtitle subs;
       double curpts = sh_video->pts + sub_delay;
-      double pts = MP_NOPTS_VALUE;
       double endpts;
       vo_sub = &subs;
       while (d_dvdsub->first) {
-        double nextpts = ds_get_next_pts(d_dvdsub);
-        if (nextpts == MP_NOPTS_VALUE || nextpts > curpts)
+        double pts = ds_get_next_pts(d_dvdsub);
+        if (pts > curpts)
           break;
         endpts = d_dvdsub->first->endpts;
         len = ds_get_packet_sub(d_dvdsub, &packet);
-        pts = nextpts;
-      }
 #ifdef USE_ASS
       if (ass_enabled) {
         static ass_track_t *global_ass_track = NULL;
@@ -2998,7 +2995,9 @@ static void update_subtitles(void)
         sub_clear_text(&subs, MP_NOPTS_VALUE);
         sub_add_text(&subs, packet, len, endpts);
         vo_osd_changed(OSDTYPE_SUBTITLE);
-      } else if (sub_clear_text(&subs, curpts))
+      }
+      }
+      if (sub_clear_text(&subs, curpts))
         vo_osd_changed(OSDTYPE_SUBTITLE);
     }
     current_module=NULL;
