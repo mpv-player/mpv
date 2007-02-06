@@ -764,15 +764,17 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if(sh->bih->biSize>=sizeof(*sh->bih)+8){
         int i;
         dp_hdr_t *hdr= (dp_hdr_t*)data;
+        uint32_t *offsets = (uint32_t*)(data + hdr->chunktab) + 1;
+        char *end = data + len;
 
         if(avctx->slice_offset==NULL) 
             avctx->slice_offset= av_malloc(sizeof(int)*1000);
         
 //        for(i=0; i<25; i++) printf("%02X ", ((uint8_t*)data)[i]);
         
-        avctx->slice_count= hdr->chunks+1;
-        for(i=0; i<avctx->slice_count; i++)
-            avctx->slice_offset[i]= ((uint32_t*)(data+hdr->chunktab))[2*i+1];
+        avctx->slice_count= FFMIN(hdr->chunks+1, 1000);
+        for(i=0; i<avctx->slice_count && end >= &offsets[2*i+1]; i++)
+            avctx->slice_offset[i]= offsets[2*i];
 	len=hdr->len;
         data+= sizeof(dp_hdr_t);
     }
