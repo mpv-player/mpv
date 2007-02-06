@@ -1,4 +1,4 @@
-.\" synced with r22104
+.\" synced with r22107
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -3499,30 +3499,6 @@ Utilisez glxinfo ou un outil similaire pour afficher les extensions
 d'OpenGL gérées.
 .PD 0
 .RSs
-.IPs (no)manyfmts
-Active la gestion de plus de formats de couleurs (RGB and BGR)
-(par défaut\ : activé).
-Nécessite une version d'OpenGL >= 1.2.
-.IPs slice-height=<0\-...>
-Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
-0 pour l'image entière.
-.br
-.I NOTE\ :
-Si l'espace de couleur YUV est utilisé (voir la sous-option yuv), des
-règles spéciales s'appliquent\ :
-.RSss
-Si le décodeur utilise le rendu en "slice" (voir \-noslices), cette option
-n'a pas d'effet, et la taille de "slice" utilisée par le décodeur est
-utilisée.
-.br
-Si le décodeur n'utilise pas le rendu en "slice", la valeur par défaut
-est 16.
-.RE
-.IPs (no)osd
-Active ou désactive la gestion de l'incrustation OSD via OpenGL
-(par défaut\ : activé).
-Cette option présente à des fins de des tests\ ; vous devriez plutôt utiliser
-\-osdlevel 0 pour désactiver l'incrustation OSD.
 .IPs (no)scaled-osd
 Change le comportement de l'OSD quand la taille de la fenêtre vidéo change
 (par défaut\ : désactivé).
@@ -3533,10 +3509,6 @@ et en mode plein-écran, s'affichera dans les bandes noires.
 Ne fonctionne pas bien avec les sous-titres ass (voir \-ass).
 .IPs osdcolor=<0xRRGGBB>
 Couleur de l'OSD (par défaut\ : 0xffffff, correspond à blanc).
-.IPs (no)aspect
-Active ou désactive la gestion du redimensionnement du ratio d'aspect et
-le "pan-and-scan" (par défaut\ : activé).
-Sa désactivation peut économiser un peu de temps processeur.
 .IPs rectangle=<0,1,2>
 Définit l'utilisation des textures rectangulaires ce qui économise de la
 RAM vidéo, mais est souvent plus lent (par défaut\ : 0).
@@ -3548,9 +3520,6 @@ RAM vidéo, mais est souvent plus lent (par défaut\ : 0).
 2: Utilise l'extension GL_ARB_texture_non_power_of_two.
 N'est dans certains cas que supporté de manière logicielle, donc lent.
 .RE
-.IPs (no)glfinish
-Appelle glFinish() avant d'échanger les tampons.
-Plus lent mais dans certains cas affichage "plus correct".
 .IPs swapinterval=<n>
 Intervalle minimum entre chaque échange de tampon, exprimé en nombre de
 trames affichées (par défaut\ : 1).
@@ -3640,6 +3609,41 @@ Utilise l'interpolation GL_LINEAR (par défaut), sinon utilise
 GL_NEAREST comme texture customtex.
 .IPs (no)customtrect
 Utilise texture_rectangle comme texture customtex.
+.RE
+Les options suivantes sont surtout là à des fins de tests, aussi, vous
+ne devriez pas avoir à les utiliser.
+.RSs
+.IPs (no)glfinish
+Appelle glFinish() avant d'échanger les tampons.
+Plus lent mais dans certains cas affichage "plus correct".
+.IPs (no)manyfmts
+Active la gestion de plus de formats de couleurs (RGB and BGR)
+(par défaut\ : activé).
+Nécessite une version d'OpenGL >= 1.2.
+.IPs slice-height=<0\-...>
+Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
+0 pour l'image entière.
+.br
+.I NOTE\ :
+Si l'espace de couleur YUV est utilisé (voir la sous-option yuv), des
+règles spéciales s'appliquent\ :
+.RSss
+Si le décodeur utilise le rendu en "slice" (voir \-noslices), cette option
+n'a pas d'effet, et la taille de "slice" utilisée par le décodeur est
+utilisée.
+.br
+Si le décodeur n'utilise pas le rendu en "slice", la valeur par défaut
+est 16.
+.RE
+.IPs (no)osd
+Active ou désactive la gestion de l'incrustation OSD via OpenGL
+(par défaut\ : activé).
+Cette option présente à des fins de des tests\ ; vous devriez plutôt utiliser
+\-osdlevel 0 pour désactiver l'incrustation OSD.
+.IPs (no)aspect
+Active ou désactive la gestion du redimensionnement du ratio d'aspect et
+le "pan-and-scan" (par défaut\ : activé).
+Sa désactivation peut économiser un peu de temps processeur.
 .REss
 .RE
 .PD 1
