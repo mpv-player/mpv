@@ -46,9 +46,11 @@
 
 extern char *audio_lang;
 static unsigned int opt_probesize = 0;
+static char *opt_format;
 
 m_option_t lavfdopts_conf[] = {
 	{"probesize", &(opt_probesize), CONF_TYPE_INT, CONF_RANGE, 32, INT_MAX, NULL},
+	{"format",    &(opt_format),    CONF_TYPE_STRING,       0,  0,       0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -156,6 +158,13 @@ static URLProtocol mp_protocol = {
     mp_close,
 };
 
+static void list_formats(void) {
+    AVInputFormat *fmt;
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "Available lavf input formats:\n");
+    for (fmt = first_iformat; fmt; fmt = fmt->next)
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "%15s : %s\n", fmt->name, fmt->long_name);
+}
+
 static int lavf_check_file(demuxer_t *demuxer){
     AVProbeData avpd;
     uint8_t buf[PROBE_BUF_SIZE];
@@ -173,6 +182,19 @@ static int lavf_check_file(demuxer_t *demuxer){
     avpd.buf= buf;
     avpd.buf_size= PROBE_BUF_SIZE;
 
+    if (opt_format) {
+        if (strcmp(opt_format, "help") == 0) {
+           list_formats();
+           return 0;
+        }
+        priv->avif= av_find_input_format(opt_format);
+        if (!priv->avif) {
+            mp_msg(MSGT_DEMUX,MSGL_FATAL,"Unknown lavf format %s\n", opt_format);
+            return 0;
+        }
+        mp_msg(MSGT_DEMUX,MSGL_INFO,"Forced lavf %s demuxer\n", priv->avif->long_name);
+        return DEMUXER_TYPE_LAVF;
+    }
     priv->avif= av_probe_input_format(&avpd, 1);
     if(!priv->avif){
         mp_msg(MSGT_HEADER,MSGL_V,"LAVF_check: no clue about this gibberish!\n");
