@@ -581,7 +581,7 @@ static int config(struct vf_instance_s* vf,
 	    lavc_venc_context->pix_fmt = PIX_FMT_YUV410P;
 	    break;
 	case IMGFMT_BGR32:
-	    lavc_venc_context->pix_fmt = PIX_FMT_RGBA32;
+	    lavc_venc_context->pix_fmt = PIX_FMT_RGB32;
 	    break;
 	default:
     	    mp_msg(MSGT_MENCODER,MSGL_ERR,"%s is not a supported format\n", vo_format_name(lavc_param_format));

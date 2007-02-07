@@ -231,7 +231,7 @@ static int init(sh_video_t *sh){
       avcodec_init();
       avcodec_register_all();
       avcodec_inited=1;
-      av_log_set_callback(mp_msp_av_log_callback);
+      av_vlog = mp_msp_av_log_callback;
     }
 
     ctx = sh->context = malloc(sizeof(vd_ffmpeg_ctx));
@@ -302,7 +302,7 @@ static int init(sh_video_t *sh){
     avctx->error_concealment= lavc_param_error_concealment;
     avctx->debug= lavc_param_debug;
     if (lavc_param_debug)
-        av_log_set_level(AV_LOG_DEBUG);
+        av_log_level = AV_LOG_DEBUG;
     avctx->debug_mv= lavc_param_vismv;
     avctx->skip_top   = lavc_param_skip_top;
     avctx->skip_bottom= lavc_param_skip_bottom;
@@ -524,9 +524,9 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 	case PIX_FMT_YUVJ444P:
 	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //photo jpeg
 	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
-	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
+	case PIX_FMT_YUYV422: ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
 	case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_RGB24;break; //qtrle
-	case PIX_FMT_RGBA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv / mjpeg
+	case PIX_FMT_RGB32:   ctx->best_csp=IMGFMT_BGR32;break; //huffyuv / mjpeg
 	case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //8bps
 	case PIX_FMT_RGB555:  ctx->best_csp=IMGFMT_BGR15;break; //rpza,cram
 	case PIX_FMT_RGB565:  ctx->best_csp=IMGFMT_BGR16;break; //4xm
