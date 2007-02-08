@@ -64,6 +64,9 @@
 #include "network.h"
 #include "tcp.h"
 
+extern int audio_id;
+extern int video_id;
+
 #define BUF_SIZE 102400
 #define HDR_BUF_SIZE 8192
 #define MAX_STREAMS 20
@@ -645,6 +648,12 @@ int asf_mmst_streaming_start(stream_t *stream)
 
   memset (data, 0, 40);
 
+  if (audio_id > 0) {
+    data[2] = 0xFF;
+    data[3] = 0xFF;
+    data[4] = audio_id;
+    send_command(s, 0x33, num_stream_ids, 0xFFFF | audio_id << 16, 8, data);
+  } else {
   for (i=1; i<num_stream_ids; i++) {
     data [ (i-1) * 6 + 2 ] = 0xFF;
     data [ (i-1) * 6 + 3 ] = 0xFF;
@@ -653,6 +662,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   }
 
   send_command (s, 0x33, num_stream_ids, 0xFFFF | stream_ids[0] << 16, (num_stream_ids-1)*6+2 , data);
+  }
 
   get_answer (s);
 
