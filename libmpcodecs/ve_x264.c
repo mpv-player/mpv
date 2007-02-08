@@ -324,6 +324,7 @@ static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in)
 static void uninit(struct vf_instance_s *vf)
 {
     h264_module_t *mod=(h264_module_t*)vf->priv;
+    if (mod->x264)
     x264_encoder_close(mod->x264);
 }
 
