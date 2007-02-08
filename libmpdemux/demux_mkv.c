@@ -2664,6 +2664,10 @@ demux_mkv_open (demuxer_t *demuxer)
                     MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack, track->tnum);
 	    dvdsub_id = demux_mkv_reverse_id(mkv_d, track->tnum, MATROSKA_TRACK_SUBTITLE);
             demuxer->sub->id = track->tnum;
+            if (demuxer->sub->sh == NULL)
+              demuxer->sub->sh = malloc(sizeof(sh_sub_t));
+            if (demuxer->sub->sh != NULL)
+              memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(sh_sub_t));
           }
   else
     demuxer->sub->id = -2;
