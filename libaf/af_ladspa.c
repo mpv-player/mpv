@@ -254,7 +254,7 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
     } else if (setup->ninputs == 2) {
         af_msg(AF_MSG_VERBOSE, "%s: this is a stereo effect\n", setup->myname);
     } else {
-        af_msg(AF_MSG_VERBOSE, "%s: this is a %i-channel effect,"
+        af_msg(AF_MSG_VERBOSE, "%s: this is a %i-channel effect, "
                "support is experimental\n", setup->myname, setup->ninputs);
     }
 
