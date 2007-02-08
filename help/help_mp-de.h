@@ -1026,7 +1026,7 @@ static char help_text[]=
 
 #define MSGTR_VOincompCodec \
 "Der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"\
-"Versuche den scale-Filter zu deiner Filterliste hinzuzufügen,\n"
+"Versuche den scale-Filter zu deiner Filterliste hinzuzufügen,\n"\
 "z.B. mit -vf spp,scale an Stelle von -vf spp.\n"
 #define MSGTR_VO_GenericError "Dieser Fehler ist aufgetreten"
 #define MSGTR_VO_UnableToAccess "Zugriff nicht möglich."
