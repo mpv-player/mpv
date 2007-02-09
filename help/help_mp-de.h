@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r22139
+// In sync with r22185
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -551,8 +551,8 @@ static char help_text[]=
 #define MSGTR_DVDspeedCantOpen "Kann DVD-Laufwerk nicht zum Schreiben öffnen, setzen der DVD-Geschwindigkeit\nbenötigt Schreibzugriff.\n"
 #define MSGTR_DVDrestoreSpeed "Setze DVD-Geschwindigkeit auf Laufwerksstandard zurück... "
 #define MSGTR_DVDlimitSpeed "Setzen der DVD-Geschwindigkeit auf %dKB/s... "
-#define MSGTR_FailedDotLF "Setzen der DVD-Geschwindigkeit fehlgeschlagen.\n"
-#define MSGTR_OkDotLF "Setzen der DVD-Geschwindigkeit erfolgreich.\n"
+#define MSGTR_DVDlimitFail "fehlgeschlagen\n"
+#define MSGTR_DVDlimitOk "erfolgreich\n"
 #define MSGTR_NoDVDSupport "MPlayer wurde ohne DVD-Unterstützung übersetzt, beende.\n"
 #define MSGTR_DVDnumTitles "Es sind %d Titel auf dieser DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ungültige DVD-Titelnummer: %d\n"
@@ -1237,8 +1237,6 @@ static char help_text[]=
 "[AO_ALSA]   device=<Gerätname>\n"\
 "[AO_ALSA]     Setzt Gerät (ändere , zu . und : zu =)\n"
 #define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] Keine Unterstützung für %d Kanäle.\n"
-#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Kann ALSA-Konfiguration nicht lesen: %s\n"
-#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] Kann Konfiguration nicht kopieren: %s\n"
 #define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] Öffnen im nonblock-Modus fehlgeschlagen, versuche im block-Modus zu öffnen.\n"
 #define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Fehler beim Öffnen der Wiedergabe: %s\n"
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Fehler beim Setzen des block-Modus %s.\n"
