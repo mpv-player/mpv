@@ -7411,7 +7411,8 @@ if test "$_libvorbis" = no ; then
   _libavmuxers=`echo $_libavmuxers | sed -e s/OGG_MUXER// `
 fi
 if test "$_nut" = no ; then
-  _libavmuxers=`echo $_libavmuxers | sed -e s/NUT_MUXER// `
+  _libavdemuxers=`echo $_libavdemuxers | sed -e s/LIBNUT_DEMUXER// `
+  _libavmuxers=`echo $_libavmuxers | sed -e s/LIBNUT_MUXER// `
 fi
 
 #############################################################################
