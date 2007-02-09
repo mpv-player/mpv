@@ -27,6 +27,7 @@ MPlayer (1.0)
       lavf), while video switching is also handled by demux_lavf.c and
       demux_avi.c.
     * audio and video switching for AVI demuxer (video switching untested).
+    * support for VC1 in MPEG-TS and MPEG-PS files (bd,hd)-dvd
 
     Streaming:
     * authentication for Real RTSP streams
