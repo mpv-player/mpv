@@ -260,6 +260,7 @@ static void new_audio_stream(demuxer_t *demux, int aid){
     }
     //evo files
     if((aid & 0xC0) == 0xC0) sh_a->format=0x2000;
+    else if(aid >= 0x98 && aid <= 0x9f) sh_a->format=0x2001;
     if (mpg_d) mpg_d->a_stream_ids[mpg_d->num_a_streams++] = aid;
   }
   if(demux->audio->id==-1) demux->audio->id=aid;
