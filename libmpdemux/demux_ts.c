@@ -3156,6 +3156,8 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 		{
 			if(i==0x1B6) break; // found it!
 		}
+		else if(sh_video->format == VIDEO_VC1 && (i==0x10E || i==0x10F))
+			break;
 		else	//H264
 		{
 			if((i & ~0x60) == 0x101 || (i & ~0x60) == 0x102 || (i & ~0x60) == 0x105) break;
