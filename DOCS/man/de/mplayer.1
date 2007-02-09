@@ -6286,7 +6286,7 @@ und sollte nur von MEncoder, nicht von MPlayer verwendet werden.
 Wie bei detc muss auch hier bei Benutzung von MEncoder die korrekte
 Ausgabe-Framerate (\-ofps 24000/1001) angegeben werden.
 Die Entwicklung an itvc findet nicht weiter statt, da die Filter pullup und
-filmident genauer zu sein scheinen.
+filmdint genauer zu sein scheinen.
 .
 .TP
 .B pullup[=jl:jr:jo:ju:sb:mp]
@@ -6341,8 +6341,7 @@ abbrechen.
 .REss
 .
 .TP
-.B filmdint[=Optionen]
-Inverse telecine-Filter, ähnlich dem Pullup-Filter oben.
+.B filmdint[=Optionen] Inverse telecine-Filter, ähnlich dem Pullup-Filter oben.
 Er ist konstruiert, jedes Pulldown-Muster zu handhaben, inklusive mixed soft
 und hard telecine sowie begrenzter Unterstützung für Filme, deren
 Framerate für die Wiedergabe auf einem Fernseher verringert oder
@@ -9532,7 +9531,8 @@ Die folgende Option ist nur bei Xvid 1.2.x verfügbar.
 .TP
 .B threads=<0\-n>
 Erzeugt n Threads für die Bewegungsabschätzung (Standard: 0).
-Die maximale Anzahl zu benutzender Threads die Bildhöhe geteilt durch 16.
+Die Bildhöhe geteilt durch 16 ergibt die maximale Anzahl Threads, die
+verwendet werden kann.
 .
 .
 .SS x264enc (\-x264encopts)
