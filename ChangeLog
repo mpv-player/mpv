@@ -19,6 +19,7 @@ MPlayer (1.0)
     * libmpeg2 updated to 0.4.1
     * fixed resolution switching with libmpeg2
     * handle resolution switching for Real codecs
+    * gif decoder should decode all gifs now (please test and provide non-working samples!)
 
     Demuxers:
     * implemented switch_video and switch_program consistently with switch_audio
@@ -28,11 +29,13 @@ MPlayer (1.0)
       demux_avi.c.
     * audio and video switching for AVI demuxer (video switching untested).
     * support for VC1 in MPEG-TS and MPEG-PS files (bd,hd)-dvd
+    * preliminary support for evo demuxing
 
     Streaming:
     * authentication for Real RTSP streams
     * near-precise seeking in dvd://
     * speed selection when playing dvd:// streams, to make drive quieter
+    * svq3 and h264 rtsp fixes, now rtsp apple keynotes are playable!
 
     FFmpeg/libavcodec:
     * Intel Music coder audio decoder
@@ -40,10 +43,12 @@ MPlayer (1.0)
     * H.264 decoding speedup
     * Native NUT demuxer updated to spec
     * NUT muxing and demuxing support via libnut
+    * WMA encoder
 
     Filters:
     * obsolete fame filter removed
     * vf_geq speed-ups
+    * vf yadif green frame fixed 
 
     Ports:
     * further Intel Mac fixes
@@ -51,6 +56,9 @@ MPlayer (1.0)
     Drivers:
     * ALSA audio output now sets the non-audio bit for AC3 passthrough even
       if the user-specified default device name tries to clear it
+
+    General bugfixes:
+    * fix mjpegb on BE systems
 
     Others:
     * libdvdcss updated to Subversion HEAD, now same as upstream version
@@ -61,6 +69,9 @@ MPlayer (1.0)
     * dvdnav:// honour -alang and -slang
     * mencoder now can write to output streams; file:// and smb:// are the only stream
       currently supported
+    * -really-quiet works fully now
+    * select libavformat demuxer (-lavfdopts format=)
+    * support -ffourcc with -of lavf
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
