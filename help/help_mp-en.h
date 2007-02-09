@@ -1203,8 +1203,6 @@ static char help_text[]=
 "[AO_ALSA]   device=<device-name>\n"\
 "[AO_ALSA]     Sets device (change , to . and : to =)\n"
 #define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d channels are not supported.\n"
-#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Cannot read ALSA configuration: %s\n"
-#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] Cannot copy configuration: %s\n"
 #define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] Open in nonblock-mode failed, trying to open in block-mode.\n"
 #define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Playback open error: %s\n"
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Error setting block-mode %s.\n"

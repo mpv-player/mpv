@@ -16,6 +16,7 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include <math.h>
 #include <string.h>
 
@@ -257,48 +258,49 @@ static int str_maxlen(strarg_t *str) {
   return 1;
 }
 
-/* change a PCM definition for correct AC-3 playback */
-static void set_non_audio(snd_config_t *root, const char *name_with_args)
+static int try_open_device(const char *device, int open_mode, int try_ac3)
 {
-  char *name, *colon, *old_value_str;
-  snd_config_t *config, *args, *aes0, *old_def, *def;
-  int value, err;
+  int err, len;
+  char *ac3_device, *args;
 
-  /* strip the parameters from the PCM name */
-  if ((name = strdup(name_with_args)) != NULL) {
-    if ((colon = strchr(name, ':')) != NULL)
-      *colon = '\0';
-    /* search the PCM definition that we'll later use */
-    if (snd_config_search_alias_hooks(root, strchr(name, '.') ? NULL : "pcm",
-				      name, &config) >= 0) {
-      /* does this definition have an "AES0" parameter? */
-      if (snd_config_search(config, "@args", &args) >= 0 &&
-	  snd_config_search(args, "AES0", &aes0) >= 0) {
-	/* read the old default value */
-	value = IEC958_AES0_CON_NOT_COPYRIGHT |
-		IEC958_AES0_CON_EMPHASIS_NONE;
-	if (snd_config_search(aes0, "default", &old_def) >= 0) {
-	  /* don't use snd_config_get_integer() because alsa-lib <= 1.0.12
-	   * parses hex numbers as strings */
-	  if (snd_config_get_ascii(old_def, &old_value_str) >= 0) {
-	    sscanf(old_value_str, "%i", &value);
-	    free(old_value_str);
-	  }
-	} else
-	  old_def = NULL;
-	/* set the non-audio bit */
-	value |= IEC958_AES0_NONAUDIO;
-	/* set the new default value */
-	if (snd_config_imake_integer(&def, "default", value) >= 0) {
-	  if (old_def)
-	    snd_config_substitute(old_def, def);
-	  else
-	    snd_config_add(aes0, def);
-	}
+  if (try_ac3) {
+    /* to set the non-audio bit, use AES0=6 */
+    len = strlen(device);
+    ac3_device = malloc(len + 7 + 1);
+    if (!ac3_device)
+      return -ENOMEM;
+    strcpy(ac3_device, device);
+    args = strchr(ac3_device, ':');
+    if (!args) {
+      /* no existing parameters: add it behind device name */
+      strcat(ac3_device, ":AES0=6");
+    } else {
+      do
+	++args;
+      while (isspace(*args));
+      if (*args == '\0') {
+	/* ":" but no parameters */
+	strcat(ac3_device, "AES0=6");
+      } else if (*args != '{') {
+	/* a simple list of parameters: add it at the end of the list */
+	strcat(ac3_device, ",AES0=6");
+      } else {
+	/* parameters in config syntax: add it inside the { } block */
+	do
+	  --len;
+	while (len > 0 && isspace(ac3_device[len]));
+	if (ac3_device[len] == '}')
+	  strcpy(ac3_device + len, " AES0=6}");
       }
     }
-    free(name);
+    err = snd_pcm_open(&alsa_handler, ac3_device, SND_PCM_STREAM_PLAYBACK,
+		       open_mode);
+    free(ac3_device);
   }
+  if (!try_ac3 || err < 0)
+    err = snd_pcm_open(&alsa_handler, device, SND_PCM_STREAM_PLAYBACK,
+		       open_mode);
+  return err;
 }
 
 /*
@@ -310,7 +312,6 @@ static int init(int rate_hz, int channels, int format, int flags)
     int err;
     int block;
     strarg_t device;
-    snd_config_t *my_config;
     snd_pcm_uframes_t bufsize;
     snd_pcm_uframes_t boundary;
     opt_t subopts[] = {
@@ -490,24 +491,12 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
     if (!alsa_handler) {
-      if ((err = snd_config_update()) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_CannotReadAlsaConfiguration, snd_strerror(err));
-	return 0;
-      }
-      if ((err = snd_config_copy(&my_config, snd_config)) < 0) {
-	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_CannotCopyConfiguration, snd_strerror(err));
-	return 0;
-      }
-      if (format == AF_FORMAT_AC3)
-	set_non_audio(my_config, alsa_device);
       //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
-      if ((err = snd_pcm_open_lconf(&alsa_handler, alsa_device,
-				    SND_PCM_STREAM_PLAYBACK, open_mode, my_config)) < 0)
+      if ((err = try_open_device(alsa_device, open_mode, format == AF_FORMAT_AC3)) < 0)
 	{
 	  if (err != -EBUSY && ao_noblock) {
 	    mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_OpenInNonblockModeFailed);
-	    if ((err = snd_pcm_open_lconf(&alsa_handler, alsa_device,
-					  SND_PCM_STREAM_PLAYBACK, 0, my_config)) < 0) {
+	    if ((err = try_open_device(alsa_device, 0, format == AF_FORMAT_AC3)) < 0) {
 	      mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PlaybackOpenError, snd_strerror(err));
 	      return(0);
 	    }
@@ -516,7 +505,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    return(0);
 	  }
 	}
-      snd_config_delete(my_config);
 
       if ((err = snd_pcm_nonblock(alsa_handler, 0)) < 0) {
          mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_ErrorSetBlockMode, snd_strerror(err));

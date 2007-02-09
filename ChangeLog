@@ -47,6 +47,10 @@ MPlayer (1.0)
     Ports:
     * further Intel Mac fixes
 
+    Drivers:
+    * ALSA audio output now sets the non-audio bit for AC3 passthrough even
+      if the user-specified default device name tries to clear it
+
     Others:
     * libdvdcss updated to Subversion HEAD, now same as upstream version
     * libmpdvdkit split into libdvdread and libdvdcss
