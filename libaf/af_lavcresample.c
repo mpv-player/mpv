@@ -84,9 +84,9 @@ static void uninit(struct af_instance_s* af)
     if(af->setup){
         af_resample_t *s = af->setup;
         if(s->avrctx) av_resample_close(s->avrctx);
-	int i;
-	for (i=0; i < AF_NCH; i++)
-	    free(s->in[i]);
+        int i;
+        for (i=0; i < AF_NCH; i++)
+            free(s->in[i]);
         free(s);
     }
 }
