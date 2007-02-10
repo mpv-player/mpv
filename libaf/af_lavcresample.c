@@ -17,14 +17,12 @@
 #include "rational.h"
 #endif
 
-#define CHANS 6
-
 int64_t ff_gcd(int64_t a, int64_t b);
 
 // Data for specific instances of this filter
 typedef struct af_resample_s{
     struct AVResampleContext *avrctx;
-    int16_t *in[CHANS];
+    int16_t *in[AF_NCH];
     int in_alloc;
     int index;
     
@@ -48,7 +46,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         return AF_DETACH;
 
     af->data->nch    = data->nch;
-    if (af->data->nch > CHANS) af->data->nch = CHANS;
+    if (af->data->nch > AF_NCH) af->data->nch = AF_NCH;
     af->data->format = AF_FORMAT_S16_NE;
     af->data->bps    = 2;
     af->mul.n = af->data->rate;
@@ -99,7 +97,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   int chans   = data->nch;
   int in_len  = data->len/(2*chans);
   int out_len = (in_len*af->mul.n) / af->mul.d + 10;
-  int16_t tmp[CHANS][out_len];
+  int16_t tmp[AF_NCH][out_len];
     
   if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
       return NULL;
