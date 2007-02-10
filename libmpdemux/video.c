@@ -85,48 +85,11 @@ switch(video_codec){
  case VIDEO_OTHER: {
  if((d_video->demuxer->file_format == DEMUXER_TYPE_ASF) || (d_video->demuxer->file_format == DEMUXER_TYPE_AVI)) {
   // display info: 
-  
-#if 0
-    if(sh_video->bih->biCompression == BI_RGB &&
-       (sh_video->video.fccHandler == mmioFOURCC('D', 'I', 'B', ' ') ||
-        sh_video->video.fccHandler == mmioFOURCC('R', 'G', 'B', ' ') ||
-        sh_video->video.fccHandler == mmioFOURCC('R', 'A', 'W', ' ') ||
-        sh_video->video.fccHandler == 0)) {
-                sh_video->format = mmioFOURCC(0, 'R', 'G', 'B') | sh_video->bih->biBitCount;
-    }
-    else 					    
-#endif
         sh_video->format=sh_video->bih->biCompression;
 
     sh_video->disp_w=sh_video->bih->biWidth;
     sh_video->disp_h=abs(sh_video->bih->biHeight);
 
-#if 0
-    /* hack to support decoding of mpeg1 chunks in AVI's with libmpeg2 -- 2002 alex */
-    if ((sh_video->format == 0x10000001) ||
-	(sh_video->format == 0x10000002) ||
-	(sh_video->format == mmioFOURCC('m','p','g','1')) ||
-	(sh_video->format == mmioFOURCC('M','P','G','1')) ||
-	(sh_video->format == mmioFOURCC('m','p','g','2')) ||
-	(sh_video->format == mmioFOURCC('M','P','G','2')) ||
-	(sh_video->format == mmioFOURCC('m','p','e','g')) ||
-	(sh_video->format == mmioFOURCC('M','P','E','G')))
-    {
-	int saved_pos, saved_type;
-
-	/* demuxer pos saving is required for libavcodec mpeg decoder as it's
-	   reading the mpeg header self! */
-	
-	saved_pos = d_video->buffer_pos;
-	saved_type = d_video->demuxer->file_format;
-
-	d_video->demuxer->file_format = DEMUXER_TYPE_MPEG_ES;
-	video_read_properties(sh_video);
-	d_video->demuxer->file_format = saved_type;
-	d_video->buffer_pos = saved_pos;
-//	goto mpeg_header_parser;
-    }
-#endif
   }
   break;
  }
@@ -294,8 +257,6 @@ mpeg_header_parser:
       }
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
-//   sh_video=d_video->sh;sh_video->ds=d_video;
-//   mpeg2_init();
    // ========= Read & process sequence header & extension ============
    if(!videobuffer) {
      videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE + FF_INPUT_BUFFER_PADDING_SIZE);
@@ -313,10 +274,8 @@ mpeg_header_parser:
    if(mp_header_process_sequence_header (&picture, &videobuffer[4])) {
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_BadMpegSequHdr); 
      goto mpeg_header_parser;
-     //return 0;
    }
    if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
-//    videobuf_len=0;
     int pos=videobuf_len;
     if(!read_video_packet(d_video)){ 
       mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CannotReadMpegSequHdrEx);
@@ -328,15 +287,10 @@ mpeg_header_parser:
     }
    }
    
-//   printf("picture.fps=%d\n",picture.fps);
    // display info:
    sh_video->format=picture.mpeg1?0x10000001:0x10000002; // mpeg video
    sh_video->fps=picture.fps;
    if(!sh_video->fps){
-//     if(!force_fps){
-//       fprintf(stderr,"FPS not specified (or invalid) in the header! Use the -fps option!\n");
-//       return 0;
-//     }
      sh_video->frametime=0;
    } else {
      sh_video->frametime=1.0/picture.fps;
@@ -454,7 +408,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     float pts1=d_video->pts;
     float pts=0;
     int picture_coding_type=0;
-//    unsigned char* start=NULL;
     int in_size=0;
     
     *start=NULL;
@@ -479,14 +432,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	  int start=videobuf_len+4;
           if(in_frame){
             if(i<0x101 || i>=0x1B0){  // not slice code -> end of frame
-#if 0
-              // send END OF FRAME code:
-              videobuffer[videobuf_len+0]=0;
-              videobuffer[videobuf_len+1]=0;
-              videobuffer[videobuf_len+2]=1;
-              videobuffer[videobuf_len+3]=0xFF;
-              videobuf_len+=4;
-#endif
               if(!i) return -1; // EOF
               break;
             }
@@ -495,13 +440,10 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 		pts=d_video->pts;
 		d_video->pts=0;
 	    }
-            //if(i==0x100) in_frame=1; // picture startcode
             if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
             else if(!i) return -1; // EOF
           }
-	  //if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
           if(!read_video_packet(d_video)) return -1; // EOF
-          //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
 	  // process headers:
 	  switch(i){
 	      case 0x1B3: mp_header_process_sequence_header (&picture, &videobuffer[start]);break;
@@ -510,21 +452,11 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	      case 0x100: picture_coding_type=(videobuffer[start+1] >> 3) & 7;break;
 	  }
         }
-        
-        // if(videobuf_len>max_framesize) max_framesize=videobuf_len; // debug
-        //printf("--- SEND %d bytes\n",videobuf_len);
-//	if(grab_frames==1){
-//	      FILE *f=fopen("grab.mpg","ab");
-//	      fwrite(videobuffer,videobuf_len-4,1,f);
-//	      fclose(f);
-//	}
 
 	*start=videobuffer; in_size=videobuf_len;
-	//blit_frame=decode_video(video_out,sh_video,videobuffer,videobuf_len,drop_frame);
 
 #if 1
     // get mpeg fps:
-    //newfps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
     if(sh_video->fps!=picture.fps) if(!force_fps && !telecine){
             mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,picture.fps,sh_video->fps-picture.fps,picture.frame_rate_code);
             sh_video->fps=picture.fps;
@@ -558,7 +490,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
   } else if((demuxer->file_format==DEMUXER_TYPE_MPEG4_ES) || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004)) ||
             ((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000004))
   ){
-      //
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
           if(!i) return -1;
@@ -571,7 +502,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
   } else if(demuxer->file_format==DEMUXER_TYPE_H264_ES || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005)) ||
             ((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000005))
   ){
-      //
         int in_picture = 0;
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
@@ -627,11 +557,8 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
       // frame-based file formats: (AVI,ASF,MOV)
     in_size=ds_get_packet(d_video,start);
     if(in_size<0) return -1; // EOF
-//    if(in_size>max_framesize) max_framesize=in_size;
-//    blit_frame=decode_video(video_out,sh_video,start,in_size,drop_frame);
   }
 
-//  vdecode_time=video_time_usage-vdecode_time;
 
 //------------------------ frame decoded. --------------------
 
@@ -697,23 +624,19 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
        demuxer->file_format==DEMUXER_TYPE_MPEG_ES ||
        demuxer->file_format==DEMUXER_TYPE_MPEG_TY){
 
-//	if(pts>0.0001) printf("\r!!! pts: %5.3f [%d] (%5.3f)   \n",pts,picture_coding_type,i_pts);
 
 	sh_video->pts+=frame_time;
 	if(picture_coding_type<=2 && sh_video->i_pts){
-//	    printf("XXX predict: %5.3f pts: %5.3f error=%5.5f   \n",i_pts,d_video->pts2,i_pts-d_video->pts2);
 	    sh_video->pts=sh_video->i_pts;
 	    sh_video->i_pts=pts;
 	} else {
 	    if(pts){
 		if(picture_coding_type<=2) sh_video->i_pts=pts;
 		else {
-//		    printf("BBB predict: %5.3f pts: %5.3f error=%5.5f   \n",pts,d_video->pts2,pts-d_video->pts2);
 		    sh_video->pts=pts;
 		}
 	    }
 	}
-//	printf("\rIII pts: %5.3f [%d] (%5.3f)   \n",d_video->pts2,picture_coding_type,i_pts);
     } else
 	sh_video->pts=d_video->pts;
     
