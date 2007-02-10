@@ -362,7 +362,8 @@ static void uninit(struct af_instance_s *af)
 	free(af->setup);
     }
     if(af->data)
-	free(af->data);
+	free(af->data->audio);
+    free(af->data);
 }
 
 /* Filter data through filter

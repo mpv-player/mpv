@@ -298,7 +298,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 static void uninit(struct af_instance_s* af)
 {
   if(af->data)
-    free(af->data);
+    free(af->data->audio);
+  free(af->data);
 }
 
 // Filter data through filter

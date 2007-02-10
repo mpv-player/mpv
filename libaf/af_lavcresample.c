@@ -79,10 +79,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 static void uninit(struct af_instance_s* af)
 {
     if(af->data)
-        free(af->data);
+        free(af->data->audio);
+    free(af->data);
     if(af->setup){
         af_resample_t *s = af->setup;
         if(s->avrctx) av_resample_close(s->avrctx);
+	int i;
+	for (i=0; i < AF_NCH; i++)
+	    free(s->in[i]);
         free(s);
     }
 }
@@ -109,7 +113,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   if(s->in_alloc < in_len + s->index){
       s->in_alloc= in_len + s->index;
       for(i=0; i<chans; i++){
-          s->in[i]= realloc(s->in[i], s->in_alloc*sizeof(int16_t)); //FIXME free this maybe ;)
+          s->in[i]= realloc(s->in[i], s->in_alloc*sizeof(int16_t));
       }
   }
 
