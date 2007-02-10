@@ -82,9 +82,9 @@ static void uninit(struct af_instance_s* af)
         free(af->data->audio);
     free(af->data);
     if(af->setup){
+        int i;
         af_resample_t *s = af->setup;
         if(s->avrctx) av_resample_close(s->avrctx);
-        int i;
         for (i=0; i < AF_NCH; i++)
             free(s->in[i]);
         free(s);
