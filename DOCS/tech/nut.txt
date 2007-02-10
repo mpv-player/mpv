@@ -301,6 +301,7 @@ stream_header:
 frame:
     frame_code                          f(8)
     frame_flags= flags[frame_code]
+    frame_res= reserved_count[frame_code]
     if(frame_flags&FLAG_CODED){
         coded_flags                     v
         frame_flags ^= coded_flags
@@ -315,8 +316,8 @@ frame:
         data_size_msb                   v
     }
     if(frame_flags&FLAG_RESERVED)
-        reserved_count[frame_code]      v
-    for(i=0; i<reserved_count[frame_code]; i++)
+        frame_res                       v
+    for(i=0; i<frame_res; i++)
         reserved                        v
     if(frame_flags&FLAG_CHECKSUM){
         checksum                        u(32)
