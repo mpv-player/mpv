@@ -1,4 +1,4 @@
-.\" synced with r22107
+.\" synced with r22150
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -919,7 +919,7 @@ restera valide.
 .TP
 .B \-key-fifo-size <2\-65000>
 Définit la taille de la FIFO qui tamponne les évènements clavier
-(par défaut\ :10).
+(par défaut\ : 7).
 Une FIFO de taille n peut tamponner (n - 1) évènements.
 Si elle est trop petite, quelques évènements risquent d'être perdus
 (débouchant sur une erreur "stuck mouse button" ou un effet similaire).
@@ -1259,7 +1259,8 @@ Ce fichier est supposé être au format Netscape.
 .
 .TP
 .B \-delay <sec>
-Retard audio en secondes (nombre flottant positif ou négatif).
+retard audio en secondes (nombre flottant positif ou négatif)
+.br
 Les valeurs négatives délayent le son, et les valeurs positives délayent
 la vidéo.
 Notez que c'est l'exact opposé de l'option \-audio-delay de MEncoder.
@@ -3610,8 +3611,12 @@ GL_NEAREST comme texture customtex.
 .IPs (no)customtrect
 Utilise texture_rectangle comme texture customtex.
 .RE
+.sp 1
+.RS
 Les options suivantes sont surtout là à des fins de tests, aussi, vous
 ne devriez pas avoir à les utiliser.
+.RE
+.sp 1
 .RSs
 .IPs (no)glfinish
 Appelle glFinish() avant d'échanger les tampons.
@@ -4224,7 +4229,7 @@ Utile pour les dé-entrelaceurs qui doublent le nombre d'images par seconde
 .PD 0
 .RSs
 .IPs -1
-auto (par défaut) Si le décodeur l'exporte pas l'information nécessaire,
+auto (par défaut)\ : Si le décodeur l'exporte pas l'information nécessaire,
 se rabat sur 0 (le champs du haut en premier).
 .IPs 0
 le champ du haut d'abord
@@ -6623,7 +6628,7 @@ en noir, le débit est inchangé.
 .IPs 4
 Entrelace les lignes paires a en utilisant des trames paires, et les lignes
 impaires avec d'après les trames impaires.
-Génère les trames de taille normale avec un débit réduit de moitié.
+La hauteur est inchangée et le débit d'image réduit de moitié.
 .RE
 .PD 1
 .
@@ -7699,11 +7704,10 @@ lumi_mask, etc..
 .B vqscale=<0\-31>
 Quantificateur constant /\: qualité d'encodage constante.
 Une valeur basse signifie une meilleur qualité mais de gros fichiers
-(par défaut\ : 0).
+(par défaut\ : -1).
 Dans le cas du codec Snow, 0 signifie encodage sans perte.
-Étant donné que tous les codecs ne le supporte pas, vqscale=0 sera ignoré
-et l'encodage à quanta variable sera utilisé, ce qui est le comportement
-par défaut.
+Étant donné que tous les codecs ne le supporte pas, vqscale=0 aura un
+effet imprévisible.
 1 est déconseillé (voir vqmin pour plus de détails).
 .
 .TP
