@@ -161,9 +161,11 @@ static void asmrp_string (asmrp_t *p) {
 
   while ( (p->ch!='"') && (p->ch>=32) ) {
 
-    p->str[l] = p->ch;
+    if(l < ASMRP_MAX_ID - 1)
+      p->str[l++] = p->ch;
+    else
+      mp_msg(MSGT_STREAM, MSGL_ERR, "error: string too long, ignoring char %c.\n", p->ch);
 
-    l++;
     asmrp_getch (p);
   }
   p->str[l]=0;
@@ -183,9 +185,11 @@ static void asmrp_identifier (asmrp_t *p) {
   while ( ((p->ch>='A') && (p->ch<='z'))
 	  || ((p->ch>='0') && (p->ch<='9'))) {
 
-    p->str[l] = p->ch;
+    if(l < ASMRP_MAX_ID - 1)
+      p->str[l++] = p->ch;
+    else
+      mp_msg(MSGT_STREAM, MSGL_ERR, "error: identifier too long, ignoring char %c.\n", p->ch);
 
-    l++;
     asmrp_getch (p);
   }
   p->str[l]=0;
@@ -381,6 +385,10 @@ static int asmrp_set_id (asmrp_t *p, char *s, int v) {
   i = asmrp_find_id (p, s);
 
   if (i<0) {
+    if (p->sym_tab_num == ASMRP_MAX_SYMTAB - 1) {
+      mp_msg(MSGT_STREAM, MSGL_ERR, "sym_tab overflow, ignoring identifier %s\n", s);
+      return 0;
+    }
     i = p->sym_tab_num;
     p->sym_tab_num++;
     p->sym_tab[i].id = strdup (s);
