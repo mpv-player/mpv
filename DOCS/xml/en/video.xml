@@ -1732,7 +1732,7 @@ Then compile and install as usual.</para>
 
 <formalpara><title>USAGE</title>
 <para>
-Hardware decoding (playing standard MPEG-1/2 files) can be done with this
+Hardware decoding of streams containing MPEG-1/2 video and/or MPEG audio can be done with this
 command:
 <screen>
 mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable>
@@ -1741,8 +1741,9 @@ mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable>
 </formalpara>
 
 <para>
-Software decoding or transcoding different formats to MPEG-1 can be achieved
-using a command like this:
+Decoding of any other type of video stream requires transcoding to MPEG-1, thus it's slow
+and may not be worth the trouble, especially if your computer is slow.
+It can be achieved using a command like this:
 <screen>
 mplayer -ao mpegpes -vo mpegpes <replaceable>yourfile.ext</replaceable>
 mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>yourfile.ext</replaceable>
