@@ -832,9 +832,9 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
           {
             /* ignore unknown attributes, but provide access to them */
             *fsdp_buf[1] = '\0';
-            strncat (fsdp_buf[1], fsdp_buf[0], MAXLONGFIELDLEN);
-            strncat (fsdp_buf[1], ":", MAXLONGFIELDLEN);
-            strncat (fsdp_buf[1], longfsdp_buf, MAXLONGFIELDLEN);
+            strncat (fsdp_buf[1], fsdp_buf[0], MAXSHORTFIELDLEN-1);
+            strncat (fsdp_buf[1], ":", MAXSHORTFIELDLEN-strlen(fsdp_buf[1])-1);
+            strncat (fsdp_buf[1], longfsdp_buf, MAXSHORTFIELDLEN-strlen(fsdp_buf[1])-1);
             if (NULL == media->unidentified_attributes)
             {
               media->unidentified_attributes_count = 0;
