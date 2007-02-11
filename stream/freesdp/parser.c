@@ -479,9 +479,9 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
       {
         /* ignore unknown attributes, but provide access to them */
         *longfsdp_buf = '\0';
-        strncat (longfsdp_buf, fsdp_buf[0], MAXLONGFIELDLEN);
-        strncat (longfsdp_buf, ":", MAXLONGFIELDLEN);
-        strncat (longfsdp_buf, fsdp_buf[1], MAXLONGFIELDLEN);
+        strncat (longfsdp_buf, fsdp_buf[0], MAXLONGFIELDLEN-1);
+        strncat (longfsdp_buf, ":", MAXLONGFIELDLEN-strlen(longfsdp_buf)-1);
+        strncat (longfsdp_buf, fsdp_buf[1], MAXLONGFIELDLEN-strlen(longfsdp_buf)-1);
         if (NULL == dsc->unidentified_attributes)
         {
           dsc->unidentified_attributes_count = 0;
@@ -515,7 +515,7 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
       {
         /* ignore unknown attributes, but provide access to them */
         *longfsdp_buf = '\0';
-        strncat (longfsdp_buf, fsdp_buf[0], MAXLONGFIELDLEN);
+        strncat (longfsdp_buf, fsdp_buf[0], MAXLONGFIELDLEN-1);
         if (NULL == dsc->unidentified_attributes)
         {
           dsc->unidentified_attributes_count = 0;
@@ -868,7 +868,7 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
           {
             /* ignore unknown attributes, but provide access to them */
             *longfsdp_buf = '\0';
-            strncat (longfsdp_buf, fsdp_buf[0], MAXLONGFIELDLEN);
+            strncat (longfsdp_buf, fsdp_buf[0], MAXLONGFIELDLEN-1);
             if (NULL == media->unidentified_attributes)
             {
               media->unidentified_attributes_count = 0;
