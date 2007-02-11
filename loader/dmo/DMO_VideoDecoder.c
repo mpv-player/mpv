@@ -119,6 +119,7 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
      
         this->iv.m_bh = malloc(bihs);
         memcpy(this->iv.m_bh, format, bihs);
+        this->iv.m_bh->biSize = bihs;
 
         this->iv.m_State = STOP;
         //this->iv.m_pFrame = 0;
