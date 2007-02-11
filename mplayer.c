@@ -418,6 +418,7 @@ float begin_skip = MP_NOPTS_VALUE; ///< start time of the current skip while on 
 int use_filedir_conf;
 
 static unsigned int inited_flags=0;
+static void update_subtitles(int reset);
 #define INITED_VO 1
 #define INITED_AO 2
 #define INITED_GUI 4
@@ -2364,14 +2365,12 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
 #ifdef USE_DVDREAD
             if (vo_spudec && stream->type == STREAMTYPE_DVD) {
                 d_dvdsub->id = dvdsub_id;
-                spudec_reset(vo_spudec);
             }
 #endif
 
 #ifdef USE_DVDNAV
             if (vo_spudec && stream->type == STREAMTYPE_DVDNAV) {
                 d_dvdsub->id = dvdsub_id;
-                spudec_reset(vo_spudec);
             }
 #endif
             if (stream->type != STREAMTYPE_DVD && stream->type != STREAMTYPE_DVDNAV) {
@@ -2397,17 +2396,14 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
 #endif
             }
         }
-    } else { // off
-        vo_osd_changed(OSDTYPE_SUBTITLE);
-        if(vo_spudec) vo_osd_changed(OSDTYPE_SPU);
     }
 #ifdef USE_DVDREAD
     if (vo_spudec && (stream->type == STREAMTYPE_DVD || stream->type == STREAMTYPE_DVDNAV) && dvdsub_id < 0 && reset_spu) {
         dvdsub_id = -2;
         d_dvdsub->id = dvdsub_id;
-        spudec_reset(vo_spudec);
     }
 #endif
+    update_subtitles(1);
 
     return M_PROPERTY_OK;
 }
@@ -2894,16 +2890,28 @@ static double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 	audio_out->get_delay();
 }
 
-static void update_subtitles(void)
+static void update_subtitles(int reset)
 {
     unsigned char *packet=NULL;
     int len;
     char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
+    static subtitle subs;
     if (type == 'a')
 #ifdef USE_ASS
       if (!ass_enabled)
 #endif
       type = 't';
+    if (reset) {
+	sub_clear_text(&subs, MP_NOPTS_VALUE);
+	if (vo_sub) {
+	    vo_sub = NULL;
+	    vo_osd_changed(OSDTYPE_SUBTITLE);
+	}
+	if (vo_spudec) {
+	    spudec_reset(vo_spudec);
+	    vo_osd_changed(OSDTYPE_SPU);
+	}
+    }
     // find sub
     if (subdata) {
 	double pts = sh_video->pts;
@@ -2964,7 +2972,6 @@ static void update_subtitles(void)
 	if (spudec_changed(vo_spudec))
 	    vo_osd_changed(OSDTYPE_SPU);
     } else if (dvdsub_id >= 0 && type == 't') {
-	static subtitle subs;
 	double curpts = sh_video->pts + sub_delay;
 	double endpts;
 	vo_sub = &subs;
@@ -3032,7 +3039,7 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	current_module = "decode video";
 	decoded_frame = decode_video(sh_video, start, in_size, 0, pts);
 	if (decoded_frame) {
-	    update_subtitles();
+	    update_subtitles(0);
 	    update_osd_msg();
 	    current_module = "filter video";
 	    if (filter_video(sh_video, decoded_frame, sh_video->pts))
@@ -3462,7 +3469,7 @@ static double update_video(int *blit_frame)
 		drop_frame = dropped_frames = 0;
 	    ++total_frame_cnt;
 	}
-	update_subtitles();
+	update_subtitles(0);
 	update_osd_msg();
 	current_module = "decode_video";
 	decoded_frame = decode_video(sh_video, start, in_size, drop_frame,
@@ -5629,7 +5636,7 @@ if(rel_seek_secs || abs_seek_pos){
 	audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 	drop_frame_cnt=0;
 
-        if(vo_spudec) spudec_reset(vo_spudec);
+        update_subtitles(1);
       }
   }
 /*
