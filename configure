@@ -485,7 +485,7 @@ _libavencoders=` echo $_libavencoders_all | sed -e s/LIBGSM_ENCODER// -e s/LIBTH
 _libavparsers_all=`sed -n 's/^[^#]*PARSER.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavparsers=$_libavparsers_all
 _libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
-_libavdemuxers=`echo $_libavdemuxers_all | sed -e s/AUDIO_DEMUXER// -e s/DC1394_DEMUXER// -e s/DV1394_DEMUXER// -e s/REDIR_DEMUXER// -e s/RTSP_DEMUXER//  -e s/SDP_DEMUXER// -e s/VIDEO_GRAB_DEVICE_DEMUXER// -e s/X11_GRAB_DEVICE_DEMUXER// -e s/V4L2_DEMUXER// `
+_libavdemuxers=`echo $_libavdemuxers_all | sed -e s/AUDIO_DEMUXER// -e s/DC1394_DEMUXER// -e s/DV1394_DEMUXER// -e s/REDIR_DEMUXER// -e s/RTSP_DEMUXER// -e s/SDP_DEMUXER// -e s/VIDEO_GRAB_DEVICE_DEMUXER// -e s/X11_GRAB_DEVICE_DEMUXER// -e s/V4L2_DEMUXER// -e s/LIBNUT_DEMUXER// `
 _libavmuxers_all=`sed -n 's/^[^#]*_MUX.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavmuxers=`echo $_libavmuxers_all | sed -e s/AUDIO_MUXER// -e s/RTP_MUXER// `
 _libavcodec_so=auto
@@ -7411,7 +7411,6 @@ if test "$_libvorbis" = no ; then
   _libavmuxers=`echo $_libavmuxers | sed -e s/OGG_MUXER// `
 fi
 if test "$_nut" = no ; then
-  _libavdemuxers=`echo $_libavdemuxers | sed -e s/LIBNUT_DEMUXER// `
   _libavmuxers=`echo $_libavmuxers | sed -e s/LIBNUT_MUXER// `
 fi
 
