@@ -2147,11 +2147,11 @@ EOF
   extcheck $_cmov     "cmov"     "cmovb %%eax,%%ebx"
 
   echocheck "mtrr support"
-  echores "$_mtrr"
-
-  if test "$_mtrr" = yes ; then
+  if test "$_mtrr" = kernel_check ; then
+    _mtrr="yes"
     _optimizing="$_optimizing mtrr"
   fi
+  echores "$_mtrr"
 
   if test "$_gcc3_ext" != ""; then
     # if we had to disable sse/sse2 because the active kernel does not
