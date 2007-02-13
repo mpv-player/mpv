@@ -144,6 +144,9 @@ main(int argc, char **argv)
       }
       processor_name[48] = 0;
       model_name = processor_name;
+      while (*model_name == ' ') {
+        model_name++;
+      }
     }
   } else {
     amd_flags = 0;
