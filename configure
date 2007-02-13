@@ -6060,6 +6060,15 @@ EOF
   for I in $_inc_extra "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
     cxx_check $I/liveMedia/include $I/UsageEnvironment/include \
       $I/groupsock/include && _livelibdir=`echo $I| sed s/-I//` && \
+      _ld_extra="$_ld_extra $_livelibdir/liveMedia/libliveMedia.a \
+                 $_livelibdir/groupsock/libgroupsock.a \
+                 $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
+                 $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a \
+                 -lstdc++" \
+      _inc_extra="$_inc_extra -I$_livelibdir/liveMedia/include \
+                  -I$_livelibdir/UsageEnvironment/include \
+                  -I$_livelibdir/BasicUsageEnvironment/include \
+                  -I$_livelibdir/groupsock/include" && \
       _live=yes && break
   done
   if test "$_live" != yes ; then
@@ -6071,15 +6080,6 @@ fi
 if test "$_live" = yes && test "$_network" = yes ; then
   _res_comment="using $_livelibdir"
   _def_live='#define STREAMING_LIVE555 1'
-  _ld_extra="$_ld_extra $_livelibdir/liveMedia/libliveMedia.a \
-           $_livelibdir/groupsock/libgroupsock.a \
-           $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
-           $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a \
-           -lstdc++"
-  _inc_extra="$_inc_extra -I$_livelibdir/liveMedia/include \
-             -I$_livelibdir/UsageEnvironment/include \
-             -I$_livelibdir/BasicUsageEnvironment/include \
-             -I$_livelibdir/groupsock/include"
  _inputmodules="live555 $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes ; then
   _res_comment="using distribution version"
