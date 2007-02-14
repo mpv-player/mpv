@@ -1954,7 +1954,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	if(sh){
 	    demuxer->sub->sh=sh;
 	} else {
-	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected video stream (%d) does not exists\n",demuxer->video->id);
+	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected subtitle stream (%d) does not exists\n",demuxer->sub->id);
 	    demuxer->sub->id=-2;
 	}
     }
