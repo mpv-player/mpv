@@ -37,11 +37,11 @@ What should be documented?
   * its valid range
   * where it is set (optional)
   * where validity checking is done (optional, mandatory for variables which
-    are set by something external, eg user parameters, file information etc)
+    are set by something external, e.g. user parameters, file information etc)
 
 - #define, typedefs, structs
   * all global definitions
-  * all local definitions whose use is not imediatly clear by their name
+  * all local definitions whose use is not immediately clear by their name
     (as a rule of thumb, it's better to document too much than not enough)
   * all dependencies
 
@@ -124,7 +124,7 @@ There are a couple of special tags for doxygen:
 \warning <text>
    Add a section for a warning.
 \anchor <refname>
-   Set an invisible anchor which can be used to create a link with /ref.
+   Set an invisible anchor which can be used to create a link with \ref.
 \ref <refname> [<text>]
    Add a link to <refname>.
 
