@@ -322,12 +322,26 @@ static void write_trailer(muxer_t *muxer)
 	av_free(priv->oc);
 }
 
+static void list_formats(void) {
+	AVOutputFormat *fmt;
+	mp_msg(MSGT_DEMUX, MSGL_INFO, "Available lavf output formats:\n");
+	for (fmt = first_oformat; fmt; fmt = fmt->next)
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "%15s : %s\n", fmt->name, fmt->long_name);
+}
+
 extern char *out_filename;
 int muxer_init_muxer_lavf(muxer_t *muxer)
 {
 	muxer_priv_t *priv;
 	AVOutputFormat *fmt = NULL;
 	char mp_filename[256] = "menc://stream.dummy";
+
+	av_register_all();
+
+	if (strcmp(conf_format, "help") == 0) {
+		list_formats();
+		return 0;
+	}
 
 	mp_msg(MSGT_MUXER, MSGL_WARN, "** MUXER_LAVF *****************************************************************\n");
 	if (!conf_allow_lavf) {
@@ -351,8 +365,6 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 	if(priv == NULL)
 		return 0;
 
-	av_register_all();
-	
 	priv->oc = av_alloc_format_context();
 	if(!priv->oc) 
 	{
