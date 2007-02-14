@@ -1936,7 +1936,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	if(sh){
 	    demuxer->audio->sh=sh; sh->ds=demuxer->audio;
 	} else {
-	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected audio stream (%d) does not exists\n",demuxer->audio->id);
+	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected audio stream (%d) does not exist\n",demuxer->audio->id);
 	    demuxer->audio->id=-2;
 	}
     }
@@ -1945,7 +1945,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	if(sh){
 	    demuxer->video->sh=sh; sh->ds=demuxer->video;
 	} else {
-	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected video stream (%d) does not exists\n",demuxer->video->id);
+	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected video stream (%d) does not exist\n",demuxer->video->id);
 	    demuxer->video->id=-2;
 	}
     }
@@ -1954,7 +1954,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	if(sh){
 	    demuxer->sub->sh=sh;
 	} else {
-	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected subtitle stream (%d) does not exists\n",demuxer->sub->id);
+	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected subtitle stream (%d) does not exist\n",demuxer->sub->id);
 	    demuxer->sub->id=-2;
 	}
     }
