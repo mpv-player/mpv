@@ -6,7 +6,7 @@ also used for displaying subtitles. MPlayer also has a GUI with skin support and
 several unofficial alternative graphical frontends are available.
 
 MEncoder is a command line video encoder for advanced users that can be built
-from the MPlayer source tree. An unofficial graphical frontend exists but is
+from the MPlayer source tree. Unofficial graphical frontends exist but are
 not included.
 
 This document is for getting you started in a few minutes. It cannot answer all
@@ -25,12 +25,11 @@ Requirements:
 
 
 Before you start...
-Unless you know what are you doing, consult DOCS/HTML/en/video.html to see
-which driver to use with your video card to get the best quality and
-performance. Most cards require special drivers not included with XFree86 to
-drive their 2-D video acceleration features like YUV and scaling.
-
-Without accelerated video even an 800MHz P3 may be too slow to play DVDs.
+Make sure that your version of X has Xvideo support, without it even very
+fast machines may not be able to properly play high resolution videos in
+fullscreen mode. Consult DOCS/HTML/en/video.html for details. There you may
+also find out about special card-specific video output drivers that can yield
+optimal performance.
 
 
 ______________________
@@ -65,12 +64,12 @@ _______________________________
 STEP1: Installing Binary Codecs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MPlayer has builtin support for the most common audio and video formats, but
-for some external binary codecs are required. Examples include newer RealVideo
-variants and a couple of uncommon formats. This step is not mandatory, but
-recommended for getting MPlayer to play a broader range of formats. Please
-note that binary codecs only work on the platform they were compiled for.
-We provide packages for x86 and PowerPC.
+MPlayer has builtin support for the most common audio and video formats. For a
+few formats no native decoder exists and external binary codecs are required
+to handle them, for example newer RealVideo variants and a variety of uncommon
+formats. This step is not mandatory, but recommended for getting MPlayer to
+play a broader range of formats. Please note that binary codecs only work on
+the processor architecture they were compiled for.
 
 Unpack the codecs archives and put the contents in a directory where MPlayer
 will find them. The default directory is /usr/local/lib/codecs/ (it used to be
@@ -86,8 +85,8 @@ MPlayer can be adapted to all kinds of needs and hardware environments. Run
 
   ./configure
 
-to configure MPlayer with the default options. The codecs you installed above
-should be autodetected. GUI support has to be enabled separately, run
+to configure MPlayer with the default options. GUI support has to be enabled
+separately, run
 
   ./configure --enable-gui
 
@@ -181,8 +180,7 @@ or for the GUI
   gmplayer <moviefile>
 
 gmplayer is a symbolic link to mplayer created by 'make install'.
-Without <moviefile>, MPlayer will come up and you will be able to use the GUI
-filepicker.
+Without <moviefile>, gmplayer will start with the GUI filepicker.
 
 To play a VCD track or a DVD title, try:
 
@@ -196,7 +194,7 @@ with the '-vo' switch to see which one gives you the best performance.
 If you get jerky playback or no sound, experiment with the '-ao' switch (see
 '-ao help') to choose between different audio drivers. Note that jerky playback
 is caused by buggy audio drivers or a slow processor and video card. With a
-good audio and video driver combination, one can play DVDs and 720x576 DivX
+good audio and video driver combination, one can play DVDs and 720x576 MPEG-4
 files smoothly on a Celeron 366. Slower systems may need the '-framedrop'
 option.
 
