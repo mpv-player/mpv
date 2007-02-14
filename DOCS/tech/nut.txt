@@ -850,6 +850,8 @@ info packet types
         see http://www.loc.gov/standards/iso639-2/englangn.html
         and http://www.din.de/gremien/nas/nabd/iso3166ma/codlstp1/en_listp1.html
         the language code
+        a demuxer MUST ignore unknown language and country codes instead of
+        treating them as an error
     "Disposition"
         "original", "dub" (translated), "comment", "lyrics", "karaoke"
         Note: if someone needs some others, please tell us about them, so we
