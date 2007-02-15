@@ -786,6 +786,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     ifo_handle_t *vmg_file;
     tt_srpt_t *tt_srpt;
     ifo_handle_t *vts_file;
+    pgc_t *pgc;
     /**
      * Open the disc.
      */
@@ -954,6 +955,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     d->vts_file=vts_file;
     d->cur_title = dvd_title+1;
 
+    pgc = vts_file->vts_pgcit ? vts_file->vts_pgcit->pgci_srp[ttn].pgc : NULL;
     /**
      * Check number of audio channels and types
      */
@@ -963,13 +965,14 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         int i;
         for(i=0;i<8;i++)
 #ifdef USE_DVDREAD_INTERNAL
-          if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i].present) {
+          if(pgc->audio_control[i].present) {
 #else
-          if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i] & 0x8000) {
+          if(pgc->audio_control[i] & 0x8000) {
 #endif
             audio_attr_t * audio = &vts_file->vtsi_mat->vts_audio_attr[i];
             int language = 0;
             char tmp[] = "unknown";
+            stream_language_t *audio_stream = &d->audio_streams[d->nr_of_channels];
 
             if(audio->lang_type == 1) {
               language=audio->lang_code;
@@ -978,43 +981,43 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
               tmp[2]=0;
             }
 
-            d->audio_streams[d->nr_of_channels].language=language;
+            audio_stream->language=language;
 #ifdef USE_DVDREAD_INTERNAL
-            d->audio_streams[d->nr_of_channels].id=vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i].s_audio;
+            audio_stream->id=pgc->audio_control[i].s_audio;
 #else
-            d->audio_streams[d->nr_of_channels].id=vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i] >> 8 & 7;
+            audio_stream->id=pgc->audio_control[i] >> 8 & 7;
 #endif
             switch(audio->audio_format) {
               case 0: // ac3
-                d->audio_streams[d->nr_of_channels].id+=FIRST_AC3_AID;
+                audio_stream->id+=FIRST_AC3_AID;
                 break;
               case 6: // dts
-                d->audio_streams[d->nr_of_channels].id+=FIRST_DTS_AID;
+                audio_stream->id+=FIRST_DTS_AID;
                 break;
               case 2: // mpeg layer 1/2/3
               case 3: // mpeg2 ext
-                d->audio_streams[d->nr_of_channels].id+=FIRST_MPG_AID;
+                audio_stream->id+=FIRST_MPG_AID;
                 break;
               case 4: // lpcm
-                d->audio_streams[d->nr_of_channels].id+=FIRST_PCM_AID;
+                audio_stream->id+=FIRST_PCM_AID;
                 break;
            }
 
-           d->audio_streams[d->nr_of_channels].type=audio->audio_format;
+           audio_stream->type=audio->audio_format;
            // Pontscho: to my mind, tha channels:
            //  1 - stereo
            //  5 - 5.1
-           d->audio_streams[d->nr_of_channels].channels=audio->channels;
+           audio_stream->channels=audio->channels;
            mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo,
              d->nr_of_channels,
              dvd_audio_stream_types[ audio->audio_format ],
              dvd_audio_stream_channels[ audio->channels ],
              tmp,
-             d->audio_streams[d->nr_of_channels].id
+             audio_stream->id
            );
-           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", d->audio_streams[d->nr_of_channels].id);
+           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", audio_stream->id);
            if(language && tmp[0])
-             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", d->audio_streams[d->nr_of_channels].id, tmp);
+             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", audio_stream->id, tmp);
 
            d->nr_of_channels++;
          }
@@ -1031,14 +1034,15 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       d->nr_of_subtitles=0;
       for(i=0;i<32;i++)
 #ifdef USE_DVDREAD_INTERNAL
-      if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].present) {
+      if(pgc->subp_control[i].present) {
 #else
-      if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] & 0x80000000) {
+      if(pgc->subp_control[i] & 0x80000000) {
 #endif
         subp_attr_t * subtitle = &vts_file->vtsi_mat->vts_subp_attr[i];
         video_attr_t *video = &vts_file->vtsi_mat->vts_video_attr;
         int language = 0;
         char tmp[] = "unknown";
+        stream_language_t *sub_stream = &d->subtitles[d->nr_of_subtitles];
 
         if(subtitle->type == 1) {
           language=subtitle->lang_code;
@@ -1047,19 +1051,19 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
           tmp[2]=0;
         }
 
-        d->subtitles[ d->nr_of_subtitles ].language=language;
-        d->subtitles[ d->nr_of_subtitles ].id=d->nr_of_subtitles;
+        sub_stream->language=language;
+        sub_stream->id=d->nr_of_subtitles;
         if(video->display_aspect_ratio == 0) /* 4:3 */
 #ifdef USE_DVDREAD_INTERNAL
-          d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].s_4p3;
+          sub_stream->id = pgc->subp_control[i].s_4p3;
 #else
-          d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] >> 24 & 31;
+          sub_stream->id = pgc->subp_control[i] >> 24 & 31;
 #endif
         else if(video->display_aspect_ratio == 3) /* 16:9 */
 #ifdef USE_DVDREAD_INTERNAL
-          d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].s_lbox;
+          sub_stream->id = pgc->subp_control[i].s_lbox;
 #else
-          d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] >> 8 & 31;
+          sub_stream->id = pgc->subp_control[i] >> 8 & 31;
 #endif
 
         mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, d->nr_of_subtitles, tmp);
