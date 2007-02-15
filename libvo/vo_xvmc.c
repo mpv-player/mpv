@@ -318,12 +318,14 @@ XvMCSurfaceInfo * mc_surf_list;
 	 XFree(mc_surf_list);//if mc_surf_num==0 is list==NULL ?
       }//for ports
    }//for adaptors
+   XvFreeAdaptorInfo(ai);
 
    if(!query) printf("vo_xvmc: Could not find free matching surface. Sorry.\n");
    return 0;
 
 // somebody know cleaner way to escape from 3 internal loops?
 surface_found:
+   XvFreeAdaptorInfo(ai);
 
    memcpy(surf_info,&mc_surf_list[s],sizeof(XvMCSurfaceInfo));
    if( mp_msg_test(MSGT_VO,MSGL_DBG3) || !query)
@@ -804,6 +806,7 @@ static void init_osd_yuv_pal(){
       if(rez!=Success){
          printf("vo_xvmc: Setting palette failed.\n");
       }
+      free(palette);
    }
 }
 
