@@ -2049,3 +2049,5 @@ static char help_text[]=
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X not found, reselecting font for (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] Glyph 0x%X not found in font for (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Error opening memory font: %s\n"
+#define MSGTR_LIBASS_NoCharmaps "[ass] font face with no charmaps\n"
+#define MSGTR_LIBASS_NoCharmapAutodetected "[ass] no charmap autodetected, trying the first one\n"

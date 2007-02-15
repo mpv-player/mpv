@@ -47,8 +47,18 @@ static void charmap_magic(FT_Face face)
 		unsigned eid = cmap->encoding_id;
 		if (pid == 3 /*microsoft*/ && (eid == 1 /*unicode bmp*/ || eid == 10 /*full unicode*/)) {
 			FT_Set_Charmap(face, cmap);
-			break;
+			return;
 		}
+	}
+
+	if (!face->charmap) {
+		if (face->num_charmaps == 0) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_NoCharmaps);
+			return;
+		}
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_NoCharmapAutodetected);
+		FT_Set_Charmap(face, face->charmaps[0]);
+		return;
 	}
 }
 
