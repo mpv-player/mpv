@@ -773,12 +773,10 @@ static char* parse_tag(char* p, double pwr) {
 		mystrtod(&p, &val);
 		mp_msg(MSGT_ASS, MSGL_V, "frx/fry unimplemented \n");
 	} else if (mystrcmp(&p, "frz") || mystrcmp(&p, "fr")) {
-		double angle;
 		double val;
 		mystrtod(&p, &val);
-		mp_msg(MSGT_ASS, MSGL_DBG2, "setting rotation to %.2f\n", val * pwr);
-		angle = M_PI * val / 180;
-		render_context.rotation = angle * pwr;
+		val *= M_PI / 180;
+		render_context.rotation = val * pwr + render_context.rotation * (1-pwr);
 	} else if (mystrcmp(&p, "fn")) {
 		char* start = p;
 		char* family;
