@@ -7640,6 +7640,14 @@ cat > config.h << EOF
 
 #define CONFIGURATION "$_configuration"
 
+/* make sure we never get lavformat's poll() emulation, the results are
+   horrible if the X libs try to actually use it, see MPlayer-users
+   Message-ID: <45D49541.8060101@infernix.net>
+   Date: Thu, 15 Feb 2007 18:15:45 +0100
+   Subject: [MPlayer-users] Crash with backtrace when playing back demuxed...
+*/
+#define HAVE_SYS_POLL_H 1
+
 /* use GNU internationalization */
 $_def_i18n
 
