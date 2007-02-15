@@ -136,6 +136,7 @@ typedef struct render_context_s {
 		} evt_type;
 	int pos_x, pos_y; // position
 	int org_x, org_y; // origin
+	char have_origin; // origin is explicitly defined; if 0, get_base_point() is used
 	double scale_x, scale_y;
 	int hspacing; // distance between letters, in pixels
 	double border; // outline width
@@ -872,6 +873,7 @@ static char* parse_tag(char* p, double pwr) {
 		//				render_context.evt_type = EVENT_POSITIONED;
 		render_context.org_x = v1;
 		render_context.org_y = v2;
+		render_context.have_origin = 1;
 	} else if (mystrcmp(&p, "t")) {
 		double v[3];
 		int v1, v2;
@@ -1172,6 +1174,7 @@ static void init_render_context(ass_event_t* event)
 	render_context.pos_y = 0;
 	render_context.org_x = 0;
 	render_context.org_y = 0;
+	render_context.have_origin = 0;
 	render_context.clip_x0 = 0;
 	render_context.clip_y0 = 0;
 	render_context.clip_x1 = frame_context.track->PlayResX;
@@ -1778,7 +1781,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		FT_Vector center;
 		FT_Matrix matrix_rotate;
 		
-		if (((render_context.org_x != 0) || (render_context.org_y != 0)) && (render_context.evt_type == EVENT_POSITIONED)) {
+		if (render_context.have_origin) {
 			center.x = render_context.org_x;
 			center.y = render_context.org_y;
 		} else {
