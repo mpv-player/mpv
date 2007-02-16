@@ -1894,7 +1894,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			// calculating shift vector
 			// shift = (position - center)*M - (position - center)
 			start.x = int_to_d6(info->pos.x + device_x - center.x);
-			start.y = int_to_d6(info->pos.y + device_y - center.y);
+			start.y = - int_to_d6(info->pos.y + device_y - center.y);
 			start_old.x = start.x;
 			start_old.y = start.y;
 
