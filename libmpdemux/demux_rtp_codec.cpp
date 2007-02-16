@@ -40,6 +40,7 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
 	     strcmp(subsession->codecName(), "MP2T") == 0) {
     flags |= RTPSTATE_IS_MPEG12_VIDEO|RTPSTATE_IS_MULTIPLEXED;
   } else if (strcmp(subsession->codecName(), "H263") == 0 ||
+	     strcmp(subsession->codecName(), "H263-2000") == 0 ||
 	     strcmp(subsession->codecName(), "H263-1998") == 0) {
     bih->biCompression = sh_video->format
       = mmioFOURCC('H','2','6','3');
