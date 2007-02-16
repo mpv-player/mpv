@@ -497,12 +497,12 @@ static void compute_string_bbox( text_info_t* info, FT_BBox *abbox ) {
 	if (text_info.length > 0) {
 		bbox.xMin = 32000;
 		bbox.xMax = -32000;
-		bbox.yMin = - (text_info.lines[0].asc >> 6) + text_info.glyphs[0].pos.y;
-		bbox.yMax = ((text_info.height - text_info.lines[0].asc) >> 6) + text_info.glyphs[0].pos.y;
+		bbox.yMin = - d6_to_int(text_info.lines[0].asc) + text_info.glyphs[0].pos.y;
+		bbox.yMax = d6_to_int(text_info.height - text_info.lines[0].asc) + text_info.glyphs[0].pos.y;
 
 		for (i = 0; i < text_info.length; ++i) {
 			int s = text_info.glyphs[i].pos.x;
-			int e = s + (text_info.glyphs[i].advance.x >> 6);
+			int e = s + d6_to_int(text_info.glyphs[i].advance.x);
 			bbox.xMin = FFMIN(bbox.xMin, s);
 			bbox.xMax = FFMAX(bbox.xMax, e);
 		}
@@ -1241,8 +1241,8 @@ static int get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 	if (!info->glyph)
 		return 0;
 
-	info->advance.x = info->glyph->advance.x >> 10;
-	info->advance.y = info->glyph->advance.y >> 10;
+	info->advance.x = d16_to_d6(info->glyph->advance.x);
+	info->advance.y = d16_to_d6(info->glyph->advance.y);
 
 	if (render_context.stroker) {
 		info->outline_glyph = info->glyph;
@@ -1410,7 +1410,7 @@ static void wrap_lines_smart(int max_text_width)
 			int height = text_info.lines[cur_line - 1].desc + text_info.lines[cur_line].asc;
 			cur_line ++;
 			pen_shift_x = - cur->pos.x;
-			pen_shift_y += (height >> 6) + global_settings->line_spacing;
+			pen_shift_y += d6_to_int(height) + global_settings->line_spacing;
 			mp_msg(MSGT_ASS, MSGL_DBG2, "shifting from %d to %d by (%d, %d)\n", i, text_info.length - 1, pen_shift_x, pen_shift_y);
 		}
 		cur->pos.x += pen_shift_x;
@@ -1606,8 +1606,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			continue;
 		}
 		
-		text_info.glyphs[text_info.length].pos.x = pen.x >> 6;
-		text_info.glyphs[text_info.length].pos.y = pen.y >> 6;
+		text_info.glyphs[text_info.length].pos.x = d6_to_int(pen.x);
+		text_info.glyphs[text_info.length].pos.y = d6_to_int(pen.y);
 		
 		pen.x += text_info.glyphs[text_info.length].advance.x;
 		pen.x += render_context.hspacing;
@@ -1722,7 +1722,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	if (render_context.evt_type == EVENT_NORMAL ||
 	    render_context.evt_type == EVENT_HSCROLL) {
 		if (valign == VALIGN_TOP) { // toptitle
-			device_y = y2scr_top(MarginV) + (text_info.lines[0].asc >> 6);
+			device_y = y2scr_top(MarginV) + d6_to_int(text_info.lines[0].asc);
 		} else if (valign == VALIGN_CENTER) { // midtitle
 			int scr_y = y2scr(frame_context.track->PlayResY / 2);
 			device_y = scr_y - (bbox.yMax - bbox.yMin) / 2;
@@ -1732,8 +1732,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 				mp_msg(MSGT_ASS, MSGL_V, "Invalid valign, supposing 0 (subtitle)\n");
 			scr_y = y2scr_sub(frame_context.track->PlayResY - MarginV);
 			device_y = scr_y;
-			device_y -= (text_info.height >> 6);
-			device_y += (text_info.lines[0].asc >> 6);
+			device_y -= d6_to_int(text_info.height);
+			device_y += d6_to_int(text_info.lines[0].asc);
 		}
 	} else if (render_context.evt_type == EVENT_VSCROLL) {
 		if (render_context.scroll_direction == SCROLL_TB)
@@ -1807,8 +1807,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 
 			// calculating shift vector
 			// shift = (position - center)*M - (position - center)
-			start.x = (info->pos.x + device_x - center.x) << 6;
-			start.y = - (info->pos.y + device_y - center.y) << 6;
+			start.x = int_to_d6(info->pos.x + device_x - center.x);
+			start.y = int_to_d6(info->pos.y + device_y - center.y);
 			start_old.x = start.x;
 			start_old.y = start.y;
 
@@ -1817,8 +1817,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			start.x -= start_old.x;
 			start.y -= start_old.y;
 
-			info->pos.x += start.x >> 6;
-			info->pos.y -= start.y >> 6;
+			info->pos.x += d6_to_int(start.x);
+			info->pos.y -= d6_to_int(start.y);
 
 			if (info->glyph)
 				FT_Glyph_Transform( info->glyph, &matrix_rotate, 0 );
@@ -1827,8 +1827,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		}
 	}
 
-	event_images->top = device_y - (text_info.lines[0].asc >> 6);
-	event_images->height = text_info.height >> 6;
+	event_images->top = device_y - d6_to_int(text_info.lines[0].asc);
+	event_images->height = d6_to_int(text_info.height);
 	event_images->detect_collisions = render_context.detect_collisions;
 	event_images->shift_direction = (valign == VALIGN_TOP) ? 1 : -1;
 	event_images->event = event;

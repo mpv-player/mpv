@@ -25,5 +25,31 @@ int mystrtoi(char** p, int base, int* res);
 int mystrtou32(char** p, int base, uint32_t* res);
 int mystrtod(char** p, double* res);
 int strtocolor(char** q, uint32_t* res);
+
+static inline int d6_to_int(int x) {
+	return (x + 32) >> 6;
+}
+static inline int d16_to_int(int x) {
+	return (x + 32768) >> 16;
+}
+static inline int int_to_d6(int x) {
+	return x << 6;
+}
+static inline int int_to_d16(int x) {
+	return x << 16;
+}
+static inline int d16_to_d6(int x) {
+	return (x + 512) >> 10;
+}
+static inline int d6_to_d16(int x) {
+	return x << 10;
+}
+static inline double d6_to_double(int x) {
+	return x / 64.;
+}
+static inline int double_to_d6(double x) {
+	return (int)(x * 64);
+}
+
 #endif
 
