@@ -128,7 +128,7 @@ typedef struct render_context_s {
 	
 	FT_Stroker stroker;
 	int alignment; // alignment overrides go here; if zero, style value will be used
-	double rotation;
+	double frz;
 	enum {	EVENT_NORMAL, // "normal" top-, sub- or mid- title
 		EVENT_POSITIONED, // happens after pos(,), margins are ignored
 		EVENT_HSCROLL, // "Banner" transition effect, text_width is unlimited
@@ -776,7 +776,7 @@ static char* parse_tag(char* p, double pwr) {
 		double val;
 		mystrtod(&p, &val);
 		val *= M_PI / 180;
-		render_context.rotation = val * pwr + render_context.rotation * (1-pwr);
+		render_context.frz = val * pwr + render_context.frz * (1-pwr);
 	} else if (mystrcmp(&p, "fn")) {
 		char* start = p;
 		char* family;
@@ -1151,7 +1151,7 @@ static void reset_render_context(void)
 	render_context.hspacing = 0; // FIXME
 	render_context.be = 0;
 	render_context.shadow = render_context.style->Shadow;
-	render_context.rotation = M_PI * render_context.style->Angle / 180.;
+	render_context.frz = M_PI * render_context.style->Angle / 180.;
 
 	// FIXME: does not reset unsupported attributes.
 }
@@ -1210,7 +1210,7 @@ static int get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 	key->outline = (render_context.border * 0xFFFF); // convert to 16.16
 	key->scale_x = (render_context.scale_x * 0xFFFF);
 	key->scale_y = (render_context.scale_y * 0xFFFF);
-	key->angle = (render_context.rotation * 0xFFFF);
+	key->frz = (render_context.frz * 0xFFFF);
 	key->advance = *advance;
 	key->bold = render_context.bold;
 	key->italic = render_context.italic;
@@ -1632,7 +1632,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].effect_skip_timing = render_context.effect_skip_timing;
 		text_info.glyphs[text_info.length].be = render_context.be;
 		text_info.glyphs[text_info.length].shadow = render_context.shadow;
-		text_info.glyphs[text_info.length].frz = render_context.rotation;
+		text_info.glyphs[text_info.length].frz = render_context.frz;
 		ass_font_get_asc_desc(render_context.font, code,
 				      &text_info.glyphs[text_info.length].asc,
 				      &text_info.glyphs[text_info.length].desc);
