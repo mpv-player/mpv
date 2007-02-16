@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r22139
+// Synced with help_mp-en.h: r22228
 
 // ========================= MPlayer help ===========================
 
@@ -536,8 +536,8 @@ static char help_text[]=
 #define MSGTR_DVDspeedCantOpen "Невозможно открыть DVD устройство для записи, изменение скорости DVD требует доступ на запись.\n"
 #define MSGTR_DVDrestoreSpeed "Восстановление скорости DVD... "
 #define MSGTR_DVDlimitSpeed "Ограничение скорости DVD до %dКБ/с... "
-#define MSGTR_DVDlimitFail "Сбой ограничения скорости DVD.\n"
-#define MSGTR_DVDlimitOk "Ограничение скорости DVD произведено успешно.\n"
+#define MSGTR_DVDlimitFail "ошибка\n"
+#define MSGTR_DVDlimitOk "успешно\n"
 #define MSGTR_NoDVDSupport "MPlayer был скомпилирован без поддержки DVD, выходим.\n"
 #define MSGTR_DVDnumTitles "На этом DVD %d роликов.\n"
 #define MSGTR_DVDinvalidTitle "Недопустимый номер DVD ролика: %d\n"
@@ -1198,8 +1198,6 @@ static char help_text[]=
 "[AO_ALSA]   device=<имя-устройства>\n"\
 "[AO_ALSA]     Устанавливает устройство (замените , на . и : на =)\n"
 #define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] Количество каналов %d не поддерживается.\n"
-#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Невозможно прочитать конфигурацию ALSA: %s\n"
-#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] Невозможно скопировать конфигурацию: %s\n"
 #define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] Ошибка открытия в неблокирующем режиме, попытка открыть в режиме блокирования.\n"
 #define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Ошибка начала воспроизведения: %s\n"
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Ошибка установки блокирующего режима: %s.\n"
@@ -1375,6 +1373,8 @@ static char help_text[]=
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Глиф 0x%X не найден, выбираю шрифт заново для (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] В шрифте не найден глиф 0x%X для (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Ошибка открытия шрифта в памяти: %s\n"
+#define MSGTR_LIBASS_NoCharmaps "[ass] шрифт без таблиц символов\n"
+#define MSGTR_LIBASS_NoCharmapAutodetected "[ass] автоматически определить таблицу символов не удалось, пробуется первая доступная\n"
 
 // format.c
 
