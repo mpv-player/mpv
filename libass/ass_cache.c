@@ -136,6 +136,9 @@ static unsigned glyph_hash(glyph_hash_key_t* key) {
 	val += key->advance.y << 16;
 	val += key->bold << 1;
 	val += key->italic << 20;
+	val += key->frx;
+	val += key->fry << 1;
+	val += key->frz << 2;
 	return val;
 }
 

@@ -39,7 +39,7 @@ typedef struct glyph_hash_key_s {
 
 	// the following affects bitmap glyphs only
 	unsigned scale_x, scale_y; // 16.16
-	int frz; // signed 16.16
+	int frx, fry, frz; // signed 16.16
 	
 	FT_Vector advance; // subpixel shift vector
 } glyph_hash_key_t;

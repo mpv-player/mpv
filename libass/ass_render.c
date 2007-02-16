@@ -98,7 +98,7 @@ typedef struct glyph_info_s {
 //	int height;
 	int be; // blur edges
 	int shadow;
-	double frz; // z-axis rotation
+	double frx, fry, frz; // rotation
 	
 	glyph_hash_key_t hash_key;
 } glyph_info_t;
@@ -128,7 +128,7 @@ typedef struct render_context_s {
 	
 	FT_Stroker stroker;
 	int alignment; // alignment overrides go here; if zero, style value will be used
-	double frz;
+	double frx, fry, frz;
 	enum {	EVENT_NORMAL, // "normal" top-, sub- or mid- title
 		EVENT_POSITIONED, // happens after pos(,), margins are ignored
 		EVENT_HSCROLL, // "Banner" transition effect, text_width is unlimited
@@ -768,10 +768,16 @@ static char* parse_tag(char* p, double pwr) {
 		render_context.pos_y = y;
 		render_context.detect_collisions = 0;
 		render_context.evt_type = EVENT_POSITIONED;
-	} else if (mystrcmp(&p, "frx") || mystrcmp(&p, "fry")) {
+	} else if (mystrcmp(&p, "frx")) {
 		double val;
 		mystrtod(&p, &val);
-		mp_msg(MSGT_ASS, MSGL_V, "frx/fry unimplemented \n");
+		val *= M_PI / 180;
+		render_context.frx = val * pwr + render_context.frx * (1-pwr);
+	} else if (mystrcmp(&p, "fry")) {
+		double val;
+		mystrtod(&p, &val);
+		val *= M_PI / 180;
+		render_context.fry = val * pwr + render_context.fry * (1-pwr);
 	} else if (mystrcmp(&p, "frz") || mystrcmp(&p, "fr")) {
 		double val;
 		mystrtod(&p, &val);
@@ -1151,6 +1157,7 @@ static void reset_render_context(void)
 	render_context.hspacing = 0; // FIXME
 	render_context.be = 0;
 	render_context.shadow = render_context.style->Shadow;
+	render_context.frx = render_context.fry = 0.;
 	render_context.frz = M_PI * render_context.style->Angle / 180.;
 
 	// FIXME: does not reset unsupported attributes.
@@ -1210,6 +1217,8 @@ static int get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 	key->outline = (render_context.border * 0xFFFF); // convert to 16.16
 	key->scale_x = (render_context.scale_x * 0xFFFF);
 	key->scale_y = (render_context.scale_y * 0xFFFF);
+	key->frx = (render_context.frx * 0xFFFF);
+	key->fry = (render_context.fry * 0xFFFF);
 	key->frz = (render_context.frz * 0xFFFF);
 	key->advance = *advance;
 	key->bold = render_context.bold;
@@ -1522,6 +1531,94 @@ static void get_base_point(FT_BBox bbox, int alignment, int* bx, int* by)
 }
 
 /**
+ * \brief Multiply 4-vector by 4-matrix
+ * \param a 4-vector
+ * \param m 4-matrix]
+ * \param b out: 4-vector
+ * Calculates a * m and stores result in b
+ */
+static inline void transform_point_3d(double *a, double *m, double *b)
+{
+	b[0] = a[0] * m[0] + a[1] * m[4] + a[2] * m[8] +  a[3] * m[12];
+	b[1] = a[0] * m[1] + a[1] * m[5] + a[2] * m[9] +  a[3] * m[13];
+	b[2] = a[0] * m[2] + a[1] * m[6] + a[2] * m[10] + a[3] * m[14];
+	b[3] = a[0] * m[3] + a[1] * m[7] + a[2] * m[11] + a[3] * m[15];
+}
+
+/**
+ * \brief Apply 3d transformation to a vector
+ * \param v FreeType vector (2d)
+ * \param m 4-matrix
+ * Transforms v by m, projects the result back to the screen plane
+ * Result is returned in v.
+ */
+static inline void transform_vector_3d(FT_Vector* v, double *m) {
+	double a[4], b[4];
+	a[0] = d6_to_double(v->x);
+	a[1] = d6_to_double(v->y);
+	a[2] = 0.;
+	a[3] = 1.;
+	transform_point_3d(a, m, b);
+	if (b[3] < 0.001 && b[3] > -0.001)
+		b[3] = b[3] < 0. ? -0.001 : 0.001;
+	v->x = double_to_d6(b[0] / b[3]);
+	v->y = double_to_d6(b[1] / b[3]);
+}
+
+/**
+ * \brief Apply 3d transformation to a glyph
+ * \param glyph FreeType glyph
+ * \param m 4-matrix
+ * Transforms glyph by m, projects the result back to the screen plane
+ * Result is returned in glyph.
+ */
+static inline void transform_glyph_3d(FT_Glyph glyph, double *m) {
+	int i;
+	FT_Outline* outline = &((FT_OutlineGlyph)glyph)->outline;
+
+	for (i=0; i<outline->n_points; i++)
+		transform_vector_3d(outline->points + i, m);
+
+	transform_vector_3d(&glyph->advance, m);
+}
+
+/**
+ * \brief Apply 3d transformation to several objects
+ * \param vec FreeType vector
+ * \param glyph FreeType glyph
+ * \param glyph2 FreeType glyph
+ * \param frx x-axis rotation angle
+ * \param fry y-axis rotation angle
+ * \param frz z-axis rotation angle
+ * Rotates the given vector and both glyphs by frx, fry and frz.
+ */
+void transform_3d(FT_Vector* vec, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz)
+{
+	if (frx != 0. || fry != 0. || frz != 0.) {
+		double m[16];
+		double sx = sin(frx);
+		double sy = sin(fry);
+ 		double sz = sin(frz);
+		double cx = cos(frx);
+		double cy = cos(fry);
+		double cz = cos(frz);
+		m[0] = cy * cz;   m[1] = cz*sx*sy + sz*cx;   m[2]  = sz*sx - cz*cx*sy;   m[3] = 0.0;
+		m[4] = -sz*cy;    m[5] = cz*cx - sz*sy*sx;   m[6]  = sz*sy*cx + cz*sx;   m[7] = 0.0;
+		m[8] = sy;        m[9] = -sx*cy;             m[10] = cx*cy;              m[11] = 0.0;
+		m[12] = 0.0;      m[13] = 0.0;               m[14] = 0.0;                m[15] = 1.0;
+
+		if (glyph && *glyph)
+			transform_glyph_3d(*glyph, m);
+
+		if (glyph2 && *glyph2)
+			transform_glyph_3d(*glyph2, m);
+
+		if (vec)
+			transform_vector_3d(vec, m);
+	}
+}
+
+/**
  * \brief Main ass rendering function, glues everything together
  * \param event event to render
  * Process event, appending resulting ass_image_t's to images_root.
@@ -1632,6 +1729,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].effect_skip_timing = render_context.effect_skip_timing;
 		text_info.glyphs[text_info.length].be = render_context.be;
 		text_info.glyphs[text_info.length].shadow = render_context.shadow;
+		text_info.glyphs[text_info.length].frx = render_context.frx;
+		text_info.glyphs[text_info.length].fry = render_context.fry;
 		text_info.glyphs[text_info.length].frz = render_context.frz;
 		ass_font_get_asc_desc(render_context.font, code,
 				      &text_info.glyphs[text_info.length].asc,
@@ -1775,9 +1874,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 
 	// rotate glyphs if needed
 	{
-		double angle = 0.;
 		FT_Vector center;
-		FT_Matrix matrix_rotate;
 		
 		if (render_context.have_origin) {
 			center.x = render_context.org_x;
@@ -1794,17 +1891,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			FT_Vector start_old;
 			glyph_info_t* info = text_info.glyphs + i;
 
-			if (info->frz < 0.00001 && info->frz > -0.00001)
-				continue;
-			
-			if (info->frz != angle) {
-				angle = info->frz;
-				matrix_rotate.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
-				matrix_rotate.xy = (FT_Fixed)( -sin( angle ) * 0x10000L );
-				matrix_rotate.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
-				matrix_rotate.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
-			}
-
 			// calculating shift vector
 			// shift = (position - center)*M - (position - center)
 			start.x = int_to_d6(info->pos.x + device_x - center.x);
@@ -1812,7 +1898,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			start_old.x = start.x;
 			start_old.y = start.y;
 
-			FT_Vector_Transform(&start, &matrix_rotate);
+			transform_3d(&start, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
 			
 			start.x -= start_old.x;
 			start.y -= start_old.y;
@@ -1820,10 +1906,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			info->pos.x += d6_to_int(start.x);
 			info->pos.y -= d6_to_int(start.y);
 
-			if (info->glyph)
-				FT_Glyph_Transform( info->glyph, &matrix_rotate, 0 );
-			if (info->outline_glyph)
-				FT_Glyph_Transform( info->outline_glyph, &matrix_rotate, 0 );
 		}
 	}
 
