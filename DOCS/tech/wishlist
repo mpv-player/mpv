@@ -19,6 +19,7 @@ Documentation:
 
  * write -lavdopts documentation
 
+ * continue ipod/embedded device encoding guide
 
 
 Small improvements:
@@ -37,6 +38,8 @@ Small improvements:
 
  * real mute support, not just setting volume to 0
 
+ * add help suboption to -lavcopts vcodec=/acodec=, -lavfopts format=,
+   -tv driver=, -subcp, and anything else that needs it.
 
 
 Cleanup:
@@ -56,19 +59,14 @@ Filters:
 
  * eq filter should support RGB in addition to YUV
 
+ * pitch audio filter
+ 
+ * move filters into ffmpeg
 
 
 Enhancements:
 
- * adapt colored output from MPlayerXP
-
  * merge VIDIX from MPlayerXP/sourceforge
-
- * port ASF muxing from MPlayerXP
-
- * write nut muxer/demuxer
-
- * SSA style & colors handling
 
  * support for VirtualDub and Winamp plugins
 
@@ -84,15 +82,11 @@ Enhancements:
 
  * implement Plextor compatible SCSI VCD reading
 
- * -stop option for MPlayer similar to -endpos for MEncoder
-
- * color subtitles
-
  * DirectX video acceleration -vo for Windows (similar to XvmC)
 
  * hardware MPEG encoding support (Ati cards)
 
- * automatically display subtitles in black bands
+ * make -ass-use-margins work on widescreen video only! (not 4/3 video)
 
  * nsc playlist support
 
@@ -105,11 +99,13 @@ Enhancements:
 
  * allow multiple -dump* options at the same time - bug #70
 
+ * scale osd when video window changes size
 
+ * get -ass working in mencoder
 
 Difficult stuff:
 
- * RE all closed source codecs (QDMC, WMV9, RV30, RV40, sipr, ...)
+ * RE all closed source codecs (QDMC, WMA9, RV30, RV40, sipr, ...)
 
  * support for Bink/Smacker codecs
 
@@ -139,7 +135,7 @@ Difficult stuff:
 
  * support for pausing/resuming of encoding in MEncoder
 
- * TV support under Windows
+ * finish TV support under Windows
 
  * DRM support (divx.com, WMV, WMA, iTunes)
 
