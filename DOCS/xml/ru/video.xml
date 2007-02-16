@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21897 -->
+<!-- synced with r22201 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -1741,15 +1741,17 @@ Ville Syrjala имеет
 <formalpara>
 <title>ИСПОЛЬЗОВАНИЕ</title>
 <para>
-Аппаратное декодирование (воспроизведение стандартных MPEG-1/2 файлов) может быть выполнено
-следующей командой:
+Аппаратное декодирование потоков, содержащих MPEG-1/2 видео и/или MPEG аудио, может быть 
+выполнено следующей командой:
 <screen>mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable></screen>
 </para>
 </formalpara>
 
 <para>
-Программное декодирование или транскодирование различных форматов в MPEG-1 производится,
-используя команду:
+Декодирование любых других видео потоков требует транскодирования в MPEG-1,
+поэтому оно медленно и, возможно, не стоит неприятностей, особенно если ваш
+компьютер медленный.
+Его можно добиться, используя команду:
 <screen>
 mplayer -ao mpegpes -vo mpegpes <replaceable>yourfile.ext</replaceable>
 mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>yourfile.ext</replaceable>
