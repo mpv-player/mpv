@@ -338,7 +338,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 
 	av_register_all();
 
-	if (strcmp(conf_format, "help") == 0) {
+	if (conf_format && strcmp(conf_format, "help") == 0) {
 		list_formats();
 		return 0;
 	}
