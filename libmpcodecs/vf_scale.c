@@ -282,6 +282,17 @@ static int config(struct vf_instance_s* vf,
             vf->priv->palette[4*i+3]=0;
 	}
 	break; }
+    case IMGFMT_RGB4: 
+    case IMGFMT_RG4B: {
+	int i;
+	vf->priv->palette=malloc(4*16);
+	for(i=0; i<16; i++){
+	    vf->priv->palette[4*i+0]=4*(i>>3)*63;
+	    vf->priv->palette[4*i+1]=4*((i>>1)&3)*21;
+	    vf->priv->palette[4*i+2]=4*((i&1)&1)*63;
+            vf->priv->palette[4*i+3]=0;
+	}
+	break; }
     }
 
     if(!opt_screen_size_x && !opt_screen_size_y && !(screen_size_xy >= 0.001)){
