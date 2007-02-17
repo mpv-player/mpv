@@ -257,6 +257,7 @@ static int config(struct vf_instance_s* vf,
 	    vf->priv->palette[4*i+0]=4*(i&3)*21;
 	    vf->priv->palette[4*i+1]=4*((i>>2)&7)*9;
 	    vf->priv->palette[4*i+2]=4*((i>>5)&7)*9;
+            vf->priv->palette[4*i+3]=0;
 	}
 	break; }
     case IMGFMT_BGR4: 
@@ -267,6 +268,7 @@ static int config(struct vf_instance_s* vf,
 	    vf->priv->palette[4*i+0]=4*(i&1)*63;
 	    vf->priv->palette[4*i+1]=4*((i>>1)&3)*21;
 	    vf->priv->palette[4*i+2]=4*((i>>3)&1)*63;
+            vf->priv->palette[4*i+3]=0;
 	}
 	break; }
     }
