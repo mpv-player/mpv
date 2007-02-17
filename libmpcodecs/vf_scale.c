@@ -249,6 +249,17 @@ static int config(struct vf_instance_s* vf,
 	vf->priv->palette=NULL;
     }
     switch(best){
+    case IMGFMT_RGB8: {
+      /* set 332 palette for 8 bpp */
+	int i;
+	vf->priv->palette=malloc(4*256);
+	for(i=0; i<256; i++){
+	    vf->priv->palette[4*i+0]=4*(i>>6)*21;
+	    vf->priv->palette[4*i+1]=4*((i>>3)&7)*9;
+	    vf->priv->palette[4*i+2]=4*((i&7)&7)*9;
+            vf->priv->palette[4*i+3]=0;
+	}
+	break; }
     case IMGFMT_BGR8: {
       /* set 332 palette for 8 bpp */
 	int i;
@@ -442,6 +453,8 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_411P: 
     case IMGFMT_BGR8: 
     case IMGFMT_RGB8: 
+    case IMGFMT_BG4B: 
+    case IMGFMT_RG4B: 
     {
 	unsigned int best=find_best_out(vf);
 	int flags;
