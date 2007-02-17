@@ -193,6 +193,8 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
       = parseStreamMuxConfigStr(subsession->fmtp_config(),
 				codecdata_len);
     sh_audio->codecdata_len = codecdata_len;
+    //faad doesn't understand LATM's data length field, so omit it
+    ((MPEG4LATMAudioRTPSource*)subsession->rtpSource())->omitLATMDataLengthField();
   } else if (strcmp(subsession->codecName(), "MPEG4-GENERIC") == 0) {
     wf->wFormatTag = sh_audio->format = mmioFOURCC('m','p','4','a');
     // For the codec to work correctly, it needs "AudioSpecificConfig"
