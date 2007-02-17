@@ -1684,8 +1684,11 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
         a_pts = forward_audio(sh_video->pts - frame_data->frame_time + audio_delay, d_audio, mux_a);
 
         if (done) {
-            frame_data->already_read = 1;
-            if (!framecopy || (sh_video->ds->flags & 1)) return 1;
+            // wait for keyframe in case of -ovc copy
+            if (!framecopy || (sh_video->ds->flags & 1)) {
+                frame_data->already_read = 1;
+                return 1;
+            }
         }
         if (sh_video->pts >= end_pts) done = 1;
 
