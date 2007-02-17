@@ -4252,6 +4252,7 @@ if (stream->type != STREAMTYPE_DVD && stream->type != STREAMTYPE_DVDNAV) {
     if (demuxer->s_streams[i])
       global_sub_size++;
 }
+if (global_sub_size <= dvdsub_id) global_sub_size = dvdsub_id + 1;
 
 current_module="demux_open2";
 
