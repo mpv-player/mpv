@@ -451,23 +451,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   int_pause = 0;
   vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
-  panscan_init();
-  aspect_save_orig(width,height);
-  aspect_save_prescale(d_width,d_height);
-  update_xinerama_info();
-
-  aspect(&d_width,&d_height,A_NOZOOM);
-  vo_dx = (int)(vo_screenwidth - d_width) / 2;
-  vo_dy = (int)(vo_screenheight - d_height) / 2;
-  geometry(&vo_dx, &vo_dy, &d_width, &d_height,
-           vo_screenwidth, vo_screenheight);
-  vo_dx += xinerama_x;
-  vo_dy += xinerama_y;
 #ifdef HAVE_NEW_GUI
   if (use_gui) {
     // GUI creates and manages window for us
-    vo_dwidth = d_width;
-    vo_dheight= d_height;
     guiGetEvent(guiSetShVideo, 0);
 #ifndef GL_WIN32
     goto glconfig;
@@ -1066,6 +1052,9 @@ static int control(uint32_t request, void *data, ...)
       return VO_TRUE;
     }
     break;
+  case VOCTRL_UPDATE_SCREENINFO:
+    update_xinerama_info();
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }

@@ -62,7 +62,7 @@ static int config(struct vf_instance_s* vf,
     // save vo's stride capability for the wanted colorspace:
     vf->default_caps=query_format(vf,outfmt) & VFCAP_ACCEPT_STRIDE;
 
-    if(video_out->config(width,height,d_width,d_height,flags,"MPlayer",outfmt))
+    if(config_video_out(video_out,width,height,d_width,d_height,flags,"MPlayer",outfmt))
 	return 0;
 
 #ifdef USE_ASS

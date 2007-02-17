@@ -601,23 +601,10 @@ found_subpic:
    vo_xv_enable_vsync();//it won't break anything
 
 //taken from vo_xv
-   panscan_init();
-
-   aspect_save_orig(width,height);
-   aspect_save_prescale(d_width,d_height);
-
    image_height = height;
    image_width = width;
 
    vo_mouse_autohide = 1;
-
-   update_xinerama_info();
-   aspect(&d_width,&d_height,A_NOZOOM);
-   vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
-   geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth, vo_screenheight);
-   vo_dx += xinerama_x;
-   vo_dy += xinerama_y;
-   vo_dwidth=d_width; vo_dheight=d_height;
 
 #ifdef HAVE_XF86VM
    if( flags&VOFLAG_MODESWITCHING ) vm = 1;
@@ -1442,6 +1429,9 @@ static int control(uint32_t request, void *data, ... )
 
          return(vo_xv_get_eq(xv_port, data, value));
       }
+      case VOCTRL_UPDATE_SCREENINFO:
+         update_xinerama_info();
+         return VO_TRUE;
    }
 return VO_NOTIMPL;
 }

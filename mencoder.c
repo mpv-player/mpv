@@ -214,6 +214,12 @@ char *info_copyright=NULL;
 char *info_sourceform=NULL;
 char *info_comment=NULL;
 
+// Needed by libmpcodecs vf_vo.c
+int config_video_out(vo_functions_t *vo, uint32_t width, uint32_t height,
+                     uint32_t d_width, uint32_t d_height, uint32_t flags,
+                     char *title, uint32_t format) {
+  return 1;
+}
 // Needed by libmpdemux.
 int mp_input_check_interrupt(int time) {
   usec_sleep(time);

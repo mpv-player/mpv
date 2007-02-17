@@ -240,23 +240,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     title = "MPlayer VIDIX X11 Overlay";
 
-    panscan_init();
-
     image_height = height;
     image_width = width;
     image_format = format;
     vo_mouse_autohide = 1;
 
-    aspect_save_orig(width, height);
-    aspect_save_prescale(d_width, d_height);
-    aspect_save_screenres(vo_screenwidth, vo_screenheight);
-
-    vo_dx = 0;
-    vo_dy = 0;
-    vo_dx = (vo_screenwidth - d_width) / 2;
-    vo_dy = (vo_screenheight - d_height) / 2;
-    geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth,
-             vo_screenheight);
     window_width = d_width;
     window_height = d_height;
 
@@ -287,11 +275,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                    vo_depthonscreen);
     }
     mp_msg(MSGT_VO, MSGL_V, "Using colorkey: %x\n", colorkey);
-
-    aspect(&d_width, &d_height, A_NOZOOM);
-
-    vo_dwidth = d_width;
-    vo_dheight = d_height;
 
 #ifdef HAVE_NEW_GUI
     if (use_gui)
@@ -556,6 +539,10 @@ static int control(uint32_t request, void *data, ...)
 
                 return vidix_control(request, data, value);
             }
+        case VOCTRL_UPDATE_SCREENINFO:
+            aspect_save_screenres(vo_screenwidth, vo_screenheight);
+            return VO_TRUE;
+
     }
     return vidix_control(request, data);
 //  return VO_NOTIMPL;

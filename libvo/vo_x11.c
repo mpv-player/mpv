@@ -336,15 +336,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     in_format = format;
     srcW = width;
     srcH = height;
-    update_xinerama_info();
-    vo_dx = (vo_screenwidth - d_width) / 2;
-    vo_dy = (vo_screenheight - d_height) / 2;
-    geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth,
-             vo_screenheight);
-    vo_dx += xinerama_x;
-    vo_dy += xinerama_y;
-    vo_dwidth = d_width;
-    vo_dheight = d_height;
 
     if (flags & (VOFLAG_FULLSCREEN|VOFLAG_MODESWITCHING))
         fullscreen = 1;
@@ -833,6 +824,9 @@ static int control(uint32_t request, void *data, ...)
                 vo_x11_fullscreen();
                 vo_x11_clearwindow(mDisplay, vo_window);
             }
+            return VO_TRUE;
+        case VOCTRL_UPDATE_SCREENINFO:
+            update_xinerama_info();
             return VO_TRUE;
     }
     return VO_NOTIMPL;
