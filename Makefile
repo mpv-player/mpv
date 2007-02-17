@@ -27,6 +27,7 @@ SRCS_COMMON = asxparser.c \
               m_config.c \
               m_option.c \
               m_struct.c \
+              mpcommon.c \
               parser-cfg.c \
               playtree.c \
               playtreeparser.c \

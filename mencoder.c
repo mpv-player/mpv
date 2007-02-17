@@ -90,7 +90,7 @@
 #include "libmpcodecs/ae.h"
 int vo_doublebuffering=0;
 int vo_directrendering=0;
-int vo_config_count=0;
+int vo_config_count=1;
 int forced_subs_only=0;
 
 //--------------------------
@@ -199,9 +199,6 @@ int   sub_auto = 0;
 int   subcc_enabled=0;
 int   suboverlap_enabled = 1;
 
-sub_data* subdata=NULL;
-float sub_last_pts = -303;
-
 int auto_expand=1;
 int encode_duplicates=1;
 
@@ -229,9 +226,9 @@ int mp_input_check_interrupt(int time) {
 #ifdef USE_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
-
-ass_track_t* ass_track = 0; // current track to render
 #endif
+char *current_module;
+#include "mpcommon.h"
 
 //char *out_audio_codec=NULL; // override audio codec
 //char *out_video_codec=NULL; // override video codec
@@ -1475,36 +1472,19 @@ if(sh_audio && !demuxer2){
     }
         fflush(stdout);
 
-  // find sub
-  if(subdata && sh_video->pts>0){
-      float pts=sh_video->pts;
-      if(sub_fps==0) sub_fps=sh_video->fps;
-      if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
-         find_sub(subdata, (pts+sub_delay) * 
-				 (subdata->sub_uses_time? 100. : sub_fps)); 
-	 // FIXME! frame counter...
-         sub_last_pts = pts;
-      }
-  }
-
 #ifdef USE_DVDREAD
 // DVD sub:
- if(vo_spudec||vobsub_writer){
+ if(vobsub_writer){
      unsigned char* packet=NULL;
      int len;
      while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
 	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,sh_video->pts,d_dvdsub->pts);
-	 if (vo_spudec)
-	 spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
-	 if (vobsub_writer)
 	     vobsub_out_output(vobsub_writer,packet,len,mux_v->timer + d_dvdsub->pts - sh_video->pts);
      }
-     if (vo_spudec) {
-     spudec_heartbeat(vo_spudec,90000*sh_video->pts);
-     vo_osd_changed(OSDTYPE_SPU);
-     }
  }
+ else
 #endif
+    update_subtitles(sh_video, d_dvdsub, 0);
 
  frame_data = (s_frame_data){ .start = NULL, .in_size = 0, .frame_time = 0., .already_read = 0 };
 
