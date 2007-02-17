@@ -2460,7 +2460,7 @@ static pmt_t* pmt_of_pid(ts_priv_t *priv, int pid, mp4_decoder_config_t **mp4_de
 						return &(priv->pmt[i]);
 					}
 				}
-			}	
+			}
 		}
 	}
 	
@@ -2528,34 +2528,34 @@ static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **
 
 	if((*dp != NULL) && (*dp_offset > 0))
 	{
-			ret = *dp_offset;
-			resize_demux_packet(*dp, ret);	//shrinked to the right size
-			ds_add_packet(ds, *dp);
-			mp_msg(MSGT_DEMUX, MSGL_DBG2, "ADDED %d  bytes to %s fifo, PTS=%.3f\n", ret, (ds == demuxer->audio ? "audio" : (ds == demuxer->video ? "video" : "sub")), (*dp)->pts);
-			if(si)
+		ret = *dp_offset;
+		resize_demux_packet(*dp, ret);	//shrinked to the right size
+		ds_add_packet(ds, *dp);
+		mp_msg(MSGT_DEMUX, MSGL_DBG2, "ADDED %d  bytes to %s fifo, PTS=%.3f\n", ret, (ds == demuxer->audio ? "audio" : (ds == demuxer->video ? "video" : "sub")), (*dp)->pts);
+		if(si)
+		{
+			float diff = (*dp)->pts - si->last_pts;
+			float dur;
+
+			if(abs(diff) > 1) //1 second, there's a discontinuity
 			{
-				float diff = (*dp)->pts - si->last_pts;
-				float dur;
-
-				if(abs(diff) > 1) //1 second, there's a discontinuity
-				{
-					si->duration += si->last_pts - si->first_pts;
-					si->first_pts = si->last_pts = (*dp)->pts;
-				}
-				else
-				{
-					si->last_pts = (*dp)->pts;
-				}
-				si->size += ret;
-				dur = si->duration + (si->last_pts - si->first_pts);
-
-				if(dur > 0 && ds == demuxer->video)
-				{
-					ts_priv_t * priv = (ts_priv_t*) demuxer->priv;
-					if(dur > 1)	//otherwise it may be unreliable
-						priv->vbitrate = (uint32_t) ((float) si->size / dur);
-				}
+				si->duration += si->last_pts - si->first_pts;
+				si->first_pts = si->last_pts = (*dp)->pts;
 			}
+			else
+			{
+				si->last_pts = (*dp)->pts;
+			}
+			si->size += ret;
+			dur = si->duration + (si->last_pts - si->first_pts);
+
+			if(dur > 0 && ds == demuxer->video)
+			{
+				ts_priv_t * priv = (ts_priv_t*) demuxer->priv;
+				if(dur > 1)	//otherwise it may be unreliable
+					priv->vbitrate = (uint32_t) ((float) si->size / dur);
+			}
+		}
 	}
 
 	*dp = NULL;
@@ -3101,7 +3101,6 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 	else
 	{
 		// time seek (secs)
-
 		if(! video_stats) // unspecified or VBR
 			newpos += 2324*75*rel_seek_secs; // 174.3 kbyte/sec
 		else
@@ -3152,10 +3151,8 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 		{
 			if(i==0x1B3 || i==0x1B8) break; // found it!
 		}
-		else if(sh_video->format == VIDEO_MPEG4)
-		{
-			if(i==0x1B6) break; // found it!
-		}
+		else if((sh_video->format == VIDEO_MPEG4) && (i==0x1B6))
+			break;
 		else if(sh_video->format == VIDEO_VC1 && (i==0x10E || i==0x10F))
 			break;
 		else	//H264
