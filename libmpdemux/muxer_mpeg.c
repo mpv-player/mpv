@@ -187,27 +187,27 @@ typedef struct {
 #define TELECINE_DGPULLDOWN 3
 
 m_option_t mpegopts_conf[] = {
-	{"format", &(conf_mux), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-	{"size", &(conf_packet_size), CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
-	{"muxrate", &(conf_muxrate), CONF_TYPE_INT, CONF_RANGE, 0, 12000000, NULL},	//12 Mb/s
-	{"vaspect", &(conf_vaspect), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
-	{"vframerate", &(conf_vframerate), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
-	{"vwidth", &(conf_vwidth), CONF_TYPE_INT, CONF_RANGE, 1, 4095, NULL},
-	{"vheight", &(conf_vheight), CONF_TYPE_INT, CONF_RANGE, 1, 4095, NULL},
-	{"vpswidth", &(conf_panscan_width), CONF_TYPE_INT, CONF_RANGE, 1, 16383, NULL},
-	{"vpsheight", &(conf_panscan_height), CONF_TYPE_INT, CONF_RANGE, 1, 16383, NULL},
-	{"vbitrate", &(conf_vbitrate), CONF_TYPE_INT, CONF_RANGE, 1, 104857599, NULL},
-	{"init_vpts", &(conf_init_vpts), CONF_TYPE_INT, CONF_RANGE, 100, 700, NULL},		//2*frametime at 60fps
-	{"init_apts", &(conf_init_apts), CONF_TYPE_INT, CONF_RANGE, 100, 700, NULL},
-	{"vdelay", &conf_init_adelay, CONF_TYPE_INT, CONF_RANGE, 1, 32760, NULL},
-	{"vbuf_size", &conf_vbuf_size, CONF_TYPE_INT, CONF_RANGE, 40, 1194, NULL},
-	{"abuf_size", &conf_abuf_size, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
-	{"drop", &conf_drop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, PULLDOWN32, NULL},
-	{"film2pal", &conf_telecine, CONF_TYPE_FLAG, 0, 0, TELECINE_FILM2PAL, NULL},
-	{"tele_src", &(conf_telecine_src), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
-	{"tele_dest", &(conf_telecine_dest), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
+	{"format", &(conf_mux), CONF_TYPE_STRING, M_OPT_GLOBAL, 0 ,0, NULL},
+	{"size", &(conf_packet_size), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 0, 65535, NULL},
+	{"muxrate", &(conf_muxrate), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 0, 12000000, NULL},	//12 Mb/s
+	{"vaspect", &(conf_vaspect), CONF_TYPE_FLOAT, M_OPT_GLOBAL, 0, 0, NULL},
+	{"vframerate", &(conf_vframerate), CONF_TYPE_FLOAT, M_OPT_GLOBAL, 0, 0, NULL},
+	{"vwidth", &(conf_vwidth), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 4095, NULL},
+	{"vheight", &(conf_vheight), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 4095, NULL},
+	{"vpswidth", &(conf_panscan_width), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 16383, NULL},
+	{"vpsheight", &(conf_panscan_height), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 16383, NULL},
+	{"vbitrate", &(conf_vbitrate), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 104857599, NULL},
+	{"init_vpts", &(conf_init_vpts), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 100, 700, NULL},	//2*frametime at 60fps
+	{"init_apts", &(conf_init_apts), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 100, 700, NULL},
+	{"vdelay", &conf_init_adelay, CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 32760, NULL},
+	{"vbuf_size", &conf_vbuf_size, CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 40, 1194, NULL},
+	{"abuf_size", &conf_abuf_size, CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 4, 64, NULL},
+	{"drop", &conf_drop, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, 1, NULL},
+	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, 1, NULL},
+	{"telecine", &conf_telecine, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, PULLDOWN32, NULL},
+	{"film2pal", &conf_telecine, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, TELECINE_FILM2PAL, NULL},
+	{"tele_src", &(conf_telecine_src), CONF_TYPE_FLOAT, M_OPT_GLOBAL, 0, 0, NULL},
+	{"tele_dest", &(conf_telecine_dest), CONF_TYPE_FLOAT, M_OPT_GLOBAL, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
