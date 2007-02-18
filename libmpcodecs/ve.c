@@ -35,7 +35,9 @@ static vf_info_t* encoder_list[]={
 #ifdef HAVE_XVID4
     &ve_info_xvid,
 #endif
+#ifdef USE_LIBLZO
     &ve_info_nuv,
+#endif
 #ifdef HAVE_X264
     &ve_info_x264,
 #endif

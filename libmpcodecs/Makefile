@@ -134,12 +134,12 @@ SRCS-$(ZORAN)                 += vd_zrmjpeg.c vf_zrmjpeg.c
 SRCS2=ae.c \
              ae_pcm.c \
              ve.c \
-             ve_nuv.c \
              ve_raw.c \
 
 SRCS2-$(CONFIG_LIBAVCODEC)    += ae_lavc.c ve_lavc.c
 SRCS2-$(CONFIG_LIBAVCODEC_SO) += ae_lavc.c ve_lavc.c
 SRCS2-$(LIBDV)                += ve_libdv.c
+SRCS2-$(LIBLZO)               += ve_nuv.c
 SRCS2-$(QTX_CODECS)           += ve_qtvideo.c
 SRCS2-$(WIN32DLL)             += ve_vfw.c
 SRCS2-$(X264)                 += ve_x264.c
