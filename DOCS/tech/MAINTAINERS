@@ -72,7 +72,8 @@ Platforms/ports:
 
 MPlayer code:
     * build system: Diego Biurrun
-    * A-V sync code, MPlayer/MEncoder core: None
+    * A-V sync code, MPlayer core: Uoti Urpala
+    * MEncoder core: None (unmaintained)
     * libmpdemux: Roberto Togni, Nico Sabbi
     * libmpcodecs: Roberto Togni
     * TV input/capture: Jindrich Makovicka
