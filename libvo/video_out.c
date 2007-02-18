@@ -332,6 +332,7 @@ int config_video_out(vo_functions_t *vo, uint32_t width, uint32_t height,
   aspect_save_prescale(d_width,d_height);
   vo->control(VOCTRL_UPDATE_SCREENINFO, NULL);
 
+  if (vo_screenwidth && vo_screenheight) {
   aspect(&d_width,&d_height,A_NOZOOM);
   vo_dx = (int)(vo_screenwidth - d_width) / 2;
   vo_dy = (int)(vo_screenheight - d_height) / 2;
@@ -341,6 +342,7 @@ int config_video_out(vo_functions_t *vo, uint32_t width, uint32_t height,
   vo_dy += xinerama_y;
   vo_dwidth = d_width;
   vo_dheight = d_height;
+  }
 
   return vo->config(width, height, d_width, d_height, flags, title, format);
 }
