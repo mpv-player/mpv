@@ -7538,6 +7538,7 @@ CONFIG_LIBAVFORMAT_SO = $_libavformat_so
 CONFIG_LIBPOSTPROC = $_libpostproc
 CONFIG_LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
+LIBLZO = $_liblzo
 LIBDV = $_libdv
 XVID4 = $_xvid
 X264 = $_x264
