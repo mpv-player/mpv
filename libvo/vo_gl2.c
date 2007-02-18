@@ -700,6 +700,9 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
     vo_window = vo_x11_create_smooth_window(mDisplay, RootWindow(mDisplay,mScreen), 
 		                            vinfo->visual, hint.x, hint.y, hint.width, hint.height, vinfo->depth, vo_x11_create_colormap(vinfo));
 
+    vo_x11_classhint( mDisplay,vo_window,"gl2" );
+    vo_hidecursor(mDisplay,vo_window);
+
 	XSelectInput(mDisplay, vo_window, StructureNotifyMask);
 
 	/* Tell other applications about this window */
@@ -718,9 +721,6 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 	}
 	while (xev.type != MapNotify || xev.xmap.event != vo_window);
 
-  vo_x11_classhint( mDisplay,vo_window,"gl2" );
-  vo_hidecursor(mDisplay,vo_window);
-  
 	XSync(mDisplay, False);
 
 	//XSelectInput(mDisplay, vo_window, StructureNotifyMask); // !!!!
