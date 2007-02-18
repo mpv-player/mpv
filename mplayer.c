@@ -238,7 +238,6 @@ static int list_properties = 0;
 #define MAX_TERM_OSD_LEVEL 1
 
 int osd_level=1;
-int osd_level_saved=-1;
 // if nonzero, hide current OSD contents when GetTimerMS() reaches this
 unsigned int osd_visible;
 static int osd_function=OSD_PLAY;
