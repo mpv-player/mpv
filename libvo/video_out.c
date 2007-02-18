@@ -327,6 +327,8 @@ vo_functions_t* init_best_video_out(char** vo_list){
 int config_video_out(vo_functions_t *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      char *title, uint32_t format) {
+  static uint32_t old_width, old_height, old_format;
+  int res;
   panscan_init();
   aspect_save_orig(width,height);
   aspect_save_prescale(d_width,d_height);
@@ -342,7 +344,14 @@ int config_video_out(vo_functions_t *vo, uint32_t width, uint32_t height,
   vo_dwidth = d_width;
   vo_dheight = d_height;
 
-  return vo->config(width, height, d_width, d_height, flags, title, format);
+  if (vo_config_count && width == old_width && height == old_height &&
+      format == old_format)
+    flags |= VOFLAG_SAME_INPUT;
+  res = vo->config(width, height, d_width, d_height, flags, title, format);
+  if (!res) {
+    old_width = width; old_height = height; old_format = format;
+  }
+  return res;
 }
 
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA)  

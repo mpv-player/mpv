@@ -95,6 +95,7 @@ typedef struct {
 #define VOFLAG_MODESWITCHING	0x02
 #define VOFLAG_SWSCALE		0x04
 #define VOFLAG_FLIPPING		0x08
+#define VOFLAG_SAME_INPUT	0x10
 #define VOFLAG_XOVERLAY_SUB_VO  0x10000
 
 typedef struct vo_info_s
