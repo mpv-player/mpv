@@ -140,6 +140,12 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
     }
 	
     rtsp_session->real_session = init_real_rtsp_session ();
+    if(!strncmp(h->streams[0]->mime_type, "application/vnd.rn-rmadriver", h->streams[0]->mime_type_size)) {
+      rtsp_session->real_session->header_len = 0;
+      rtsp_session->real_session->recv_size = 0;
+      rtsp_session->real_session->rdt_rawdata = 1;
+      mp_msg(MSGT_OPEN, MSGL_V, "smil-over-realrtsp playlist, switching to raw rdt mode\n");
+    } else {
     rtsp_session->real_session->header_len =
       rmff_dump_header (h, (char *) rtsp_session->real_session->header, 1024);
 
@@ -150,6 +156,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
 
     rtsp_session->real_session->recv_size =
       rtsp_session->real_session->header_len;
+    }
     rtsp_session->real_session->recv_read = 0;
   } else /* not a Real server : try RTP instead */
   {
@@ -219,7 +226,7 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
     dest += fill;
     this->real_session->recv_read = 0;
     this->real_session->recv_size =
-      real_get_rdt_chunk (this->s, (char **)&(this->real_session->recv));
+      real_get_rdt_chunk (this->s, (char **)&(this->real_session->recv), this->real_session->rdt_rawdata);
     if (this->real_session->recv_size < 0) {
       this->real_session->rdteof = 1;
       this->real_session->recv_size = 0;

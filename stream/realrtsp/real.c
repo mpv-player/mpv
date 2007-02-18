@@ -342,7 +342,7 @@ static rmff_header_t *real_parse_sdp(char *data, char **stream_rules, uint32_t b
   return header;
 }
 
-int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
+int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer, int rdt_rawdata) {
 
   int n=1;
   uint8_t header[8];
@@ -414,6 +414,10 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
   else
     ph.flags=0;
   *buffer = xbuffer_ensure_size(*buffer, 12+size);
+  if(rdt_rawdata) {
+    n=rtsp_read_data(rtsp_session, *buffer, size-12);
+    return (n <= 0) ? 0 : n;
+  }
   rmff_dump_pheader(&ph, *buffer);
   size-=12;
   n=rtsp_read_data(rtsp_session, (*buffer)+12, size);
@@ -650,6 +654,7 @@ init_real_rtsp_session (void)
   real_rtsp_session = malloc (sizeof (struct real_rtsp_session_t));
   real_rtsp_session->recv = xbuffer_init (BUF_SIZE);
   real_rtsp_session->rdteof = 0;
+  real_rtsp_session->rdt_rawdata = 0;
 
   return real_rtsp_session;
 }
