@@ -844,10 +844,11 @@ info packet types
         Note: do not forget the timezone
     "Keywords"
     "Language"
-        ISO 639 and ISO 3166 for language/country code
-        something like "eng" (US English), can be 0 if unknown
-        and "multi" if several languages
-        see http://www.loc.gov/standards/iso639-2/englangn.html
+        An ISO 639-2 (three-letter) language code, optionally followed by an
+        ISO 3166-1 country code that is separated from the language
+        code by a hyphen.  All codes defined in ISO 639-2 are allowed,
+        including "und" (Undetermined), "mul" (Multiple languages)
+        see http://www.loc.gov/standards/iso639-2/
         and http://www.din.de/gremien/nas/nabd/iso3166ma/codlstp1/en_listp1.html
         the language code
         a demuxer MUST ignore unknown language and country codes instead of
