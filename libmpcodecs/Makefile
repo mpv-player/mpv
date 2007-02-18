@@ -6,8 +6,7 @@ ifeq ($(MENCODER),yes)
 LIBNAME2 = libmpencoders.a
 endif
 
-SRCS = native/minilzo.c \
-       native/nuppelvideo.c \
+SRCS = native/nuppelvideo.c \
        native/RTjpegN.c \
        native/xa_gsm.c \
        img_format.c \

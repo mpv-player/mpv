@@ -21,7 +21,6 @@ all: netstream
 DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
 	$(MPROOT)/stream/stream.a \
 	$(MPROOT)/dvdread/libdvdread.a \
-	$(MPROOT)/libmpcodecs/native/minilzo.o \
 	$(MPROOT)/libvo/aclib.o \
 	$(MPROOT)/libmpcodecs/img_format.o \
 	$(MPROOT)/liba52/liba52.a \

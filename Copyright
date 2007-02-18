@@ -30,13 +30,6 @@ Copyright:  1992 by Jutta Degener and Carsten Bormann, TU Berlin
 License:    permissive, see libmpcodecs/native/xa_gsm.c
 
 
-Name:       miniLZO
-Version:    1.07
-Homepage:   http://www.oberhumer.com/opensource/lzo/#minilzo
-Directory:  libmpcodecs/native/
-Copyright:  1996-2000 Markus Franz Xaver Johannes Oberhumer
-License:    GNU General Public License
-
 Name:       liba52
 Version:    0.7.4 + patches
 Homepage:   http://liba52.sourceforge.net/
