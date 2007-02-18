@@ -36,6 +36,7 @@ MPlayer (1.0)
     * near-precise seeking in dvd://
     * speed selection when playing dvd:// streams, to make drive quieter
     * SVQ3 and H.264 RTSP fixes, now RTSP Apple keynotes are playable
+    * smil playlist over Real RTSP
 
     FFmpeg/libavcodec:
     * Intel Music coder audio decoder
