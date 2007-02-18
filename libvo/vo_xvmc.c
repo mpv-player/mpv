@@ -419,14 +419,33 @@ opt_t subopts [] =
    return 0;
 }
 
-static int init_xvmc(int width, int height, unsigned format) {
+static int config(uint32_t width, uint32_t height,
+		       uint32_t d_width, uint32_t d_height,
+		       uint32_t flags, char *title, uint32_t format){
 int i,mode_id,rez;
 int numblocks,blocks_per_macroblock;//bpmb we have 6,8,12
+
+//from vo_xv
+char *hello = (title == NULL) ? "XvMC render" : title;
+XSizeHints hint;
+XVisualInfo vinfo;
+XGCValues xgcv;
+XSetWindowAttributes xswa;
+XWindowAttributes attribs;
+unsigned long xswamask;
+int depth;
+#ifdef HAVE_XF86VM
+int vm=0;
+unsigned int modeline_width, modeline_height;
+static uint32_t vm_width;
+static uint32_t vm_height;
+#endif
+//end of vo_xv
 
    if( !IMGFMT_IS_XVMC(format) )
    {
       assert(0);//should never happen, abort on debug or
-      return -1;//return error on relese
+      return 1;//return error on relese
    }
 
 // Find free port that supports MC, by querying adaptors
@@ -581,38 +600,6 @@ found_subpic:
 
    vo_xv_enable_vsync();//it won't break anything
 
-   /* store image dimesions for displaying */
-   p_render_surface_visible = NULL;
-   p_render_surface_to_show = NULL;
-
-   free_element = 0;
-   first_frame = 1;
-   return 0;
-}
-
-static int config(uint32_t width, uint32_t height,
-		       uint32_t d_width, uint32_t d_height,
-		       uint32_t flags, char *title, uint32_t format){
-//from vo_xv
-char *hello = (title == NULL) ? "XvMC render" : title;
-XSizeHints hint;
-XVisualInfo vinfo;
-XGCValues xgcv;
-XSetWindowAttributes xswa;
-XWindowAttributes attribs;
-unsigned long xswamask;
-int depth;
-#ifdef HAVE_XF86VM
-int vm=0;
-unsigned int modeline_width, modeline_height;
-static uint32_t vm_width;
-static uint32_t vm_height;
-#endif
-//end of vo_xv
-
-   if (!(flags & VOFLAG_SAME_INPUT))
-     if (init_xvmc(width, height, format) < 0) return -1;
-
 //taken from vo_xv
    image_height = height;
    image_width = width;
@@ -756,6 +743,13 @@ static uint32_t vm_height;
    if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
 //end vo_xv
+
+   /* store image dimesions for displaying */
+   p_render_surface_visible = NULL;
+   p_render_surface_to_show = NULL;
+
+   free_element = 0;
+   first_frame = 1;
 
    vo_directrendering = 1;//ugly hack, coz xvmc works only with direct rendering
    return 0;		
