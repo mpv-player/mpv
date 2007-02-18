@@ -176,21 +176,21 @@ I. BASICS:
   Neither method will change the history, checking out an old version will
   always return exactly that revision with all its bugs and features. The
   difference is that with the svn copy method the broken commit will not be
-  part of the directly vissible history of the revisions after the reversal
-  So if the change was completly broken like reindenting a file against the
-  maintainers decission, or a change which mixed functional and cosmetic
-  changes then its better if its not part of the vissible history as it
+  part of the directly visible history of the revisions after the reversal
+  So if the change was completely broken like reindenting a file against the
+  maintainers decision, or a change which mixed functional and cosmetic
+  changes then its better if its not part of the visible history as it
   would make it hard to read, review and would also break svn annotate
   For the example of a change which mixed functional and cosmetic parts they
-  should of course be commited again after the reversal but seperatly, so one
+  should of course be committed again after the reversal but separately, so one
   change with the functional stuff and one with the cosmetics
   OTOH if the change which you want to reverse was simply buggy but not
   totally broken then it should be reversed with svn merge as otherwise
   the fact that the change was bad would be hidden
   One method to decide which reversal method is best is to ask yourself
-  if theres any value in seeing the whole bad change and its removial
+  if theres any value in seeing the whole bad change and its removal
   in svn vs. just seeing a comment that says what has been reversed while
-  the actual change does not clutter the immedeatly vissible history and
+  the actual change does not clutter the immediately visible history and
   svn annotate.
   If you are even just slightly uncertain how to revert something then ask on
   the mplayer-dev mailinglist.
