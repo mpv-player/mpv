@@ -5564,18 +5564,18 @@ fi
 echores "$_rtc"
 
 
-echocheck "external liblzo support"
+echocheck "liblzo2 support"
 if test "$_liblzo" = auto ; then
   _liblzo=no
   cat > $TMPC << EOF
-#include <lzo1x.h>
+#include <lzo/lzo1x.h>
 int main(void) { lzo_init();return 0; }
 EOF
-  cc_check -llzo && _liblzo=yes
+  cc_check -llzo2 && _liblzo=yes
 fi
 if test "$_liblzo" = yes ; then
   _def_liblzo='#define USE_LIBLZO 1'
-  _ld_extra="$_ld_extra -llzo"
+  _ld_extra="$_ld_extra -llzo2"
   _codecmodules="liblzo $_codecmodules"
 else
   _def_liblzo='#undef USE_LIBLZO'
