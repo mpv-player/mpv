@@ -20,7 +20,7 @@
 #include "vf.h"
 
 #include "libmpdemux/nuppelvideo.h"
-#include "native/minilzo.h"
+#include <lzo1x.h>
 #include "native/RTjpegN.h"
 
 #define LZO_AL(size) (((size) + (sizeof(long) - 1)) / sizeof(long))
