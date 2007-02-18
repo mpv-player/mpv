@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <sys/stat.h>
 
 #include "config.h"
 
@@ -29,11 +30,13 @@
 //===========================================================================//
 
 static char *vfw_param_codec = NULL;
+static char *vfw_param_compdata = NULL;
 
 #include "m_option.h"
 
 m_option_t vfwopts_conf[]={
     {"codec", &vfw_param_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"compdata", &vfw_param_compdata, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -48,11 +51,14 @@ static int encoder_buf_size=0;
 static int encoder_frameno=0;
 
 //int init_vfw_encoder(char *dll_name, BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *output_bih)
-static BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, BITMAPINFOHEADER *input_bih,unsigned int out_fourcc)
+static BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, char *compdatafile, BITMAPINFOHEADER *input_bih,unsigned int out_fourcc)
 {
   HRESULT ret;
   BITMAPINFOHEADER* output_bih=NULL;
   int temp_len;
+  FILE *fd=NULL;
+  char *drvdata=NULL;
+  struct stat st;
 
 //sh_video = malloc(sizeof(sh_video_t));
 
@@ -92,6 +98,47 @@ if (icinfo.dwFlags & VIDCF_QUALITYTIME)
 mp_msg(MSGT_WIN32,MSGL_INFO,"\n");
 }
 #endif
+
+  if(compdatafile){
+    if (!strncmp(compdatafile, "dialog", 6)){
+      if (ICSendMessage(encoder_hic, ICM_CONFIGURE, -1, 0) != ICERR_OK){
+        mp_msg(MSGT_WIN32,MSGL_ERR,"Compressor doesn't have a configure dialog!\n");
+        return NULL;
+      }
+      if (ICSendMessage(encoder_hic, ICM_CONFIGURE, 0, 0) != ICERR_OK){
+        mp_msg(MSGT_WIN32,MSGL_ERR,"Compressor configure dialog failed!\n");
+        return NULL;
+      }
+    }
+    else {
+      if (stat(compdatafile, &st) < 0){
+        mp_msg(MSGT_WIN32,MSGL_ERR,"Compressor data file not found!\n");
+        return NULL;
+      }
+      fd = fopen(compdatafile, "rb");
+      if (!fd){
+        mp_msg(MSGT_WIN32,MSGL_ERR,"Cannot open Compressor data file!\n");
+        return NULL;
+      }
+      drvdata = (char *) malloc(st.st_size);
+      if (fread(drvdata, st.st_size, 1, fd) != 1) {
+        mp_msg(MSGT_WIN32,MSGL_ERR,"Cannot read Compressor data file!\n");
+        fclose(fd);
+        free(drvdata);
+        return NULL;
+      }
+      fclose(fd);
+      mp_msg(MSGT_WIN32,MSGL_ERR,"Compressor data %d bytes\n", st.st_size);
+      if (!(temp_len = (unsigned int) ICSendMessage(encoder_hic, ICM_SETSTATE, (LPARAM) drvdata, (int) st.st_size))){
+        mp_msg(MSGT_WIN32,MSGL_ERR,"ICSetState failed!\n");
+        fclose(fd);
+        free(drvdata);
+        return NULL;
+      }
+      free(drvdata);
+      mp_msg(MSGT_WIN32,MSGL_INFO,"ICSetState ret: %d\n", temp_len);
+    }
+  }
 
   temp_len = ICCompressGetFormatSize(encoder_hic, input_bih);
   mp_msg(MSGT_WIN32,MSGL_INFO,"ICCompressGetFormatSize ret: %d\n", temp_len);
@@ -243,6 +290,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     int ret;
 //    flip_upside_down(vo_image_ptr,vo_image_ptr,3*vo_w,vo_h); // dirty hack
     ret=vfw_encode_frame(mux_v->bih, mux_v->buffer, vfw_bih, mpi->planes[0], &flags, 10000);
+//    if (ret != ICERR_OK)
+//	return 0;
     muxer_write_chunk(mux_v,mux_v->bih->biSizeImage,flags, pts, pts);
     return 1;
 }
@@ -275,7 +324,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     }
 //    mux_v->bih=vfw_open_encoder("divxc32.dll",vfw_bih,mmioFOURCC('D', 'I', 'V', '3'));
 //    mux_v->bih=vfw_open_encoder("AvidAVICodec.dll",vfw_bih, 0);
-    mux_v->bih = vfw_open_encoder(vfw_param_codec, vfw_bih, 0);
+    mux_v->bih = vfw_open_encoder(vfw_param_codec, vfw_param_compdata, vfw_bih, 0);
     if(!mux_v->bih) return 0;
 
     return 1;
