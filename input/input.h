@@ -3,7 +3,7 @@
 #define MP_CMD_AUDIO_DELAY 1
 #define MP_CMD_QUIT 2
 #define MP_CMD_PAUSE 3
-#define MP_CMD_GRAB_FRAMES 4
+// #define MP_CMD_GRAB_FRAMES 4  // was a no-op command for years
 #define MP_CMD_PLAY_TREE_STEP 5
 #define MP_CMD_PLAY_TREE_UP_STEP 6
 #define MP_CMD_PLAY_ALT_SRC_STEP 7

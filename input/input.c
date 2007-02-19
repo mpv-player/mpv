@@ -62,7 +62,6 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_QUIT, "quit", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
   { MP_CMD_FRAME_STEP, "frame_step", 0, { {-1,{0}} } },
-  { MP_CMD_GRAB_FRAMES, "grab_frames",0, { {-1,{0}} }  },
   { MP_CMD_PLAY_TREE_STEP, "pt_step",1, { { MP_CMD_ARG_INT ,{0}}, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
   { MP_CMD_PLAY_TREE_UP_STEP, "pt_up_step",1,  { { MP_CMD_ARG_INT,{0} }, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
   { MP_CMD_PLAY_ALT_SRC_STEP, "alt_src_step",1, { { MP_CMD_ARG_INT,{0} }, {-1,{0}} } },

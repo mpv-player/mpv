@@ -4490,7 +4490,6 @@ fflush(stdout);
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
 //float num_frames=0;      // number of frames played
-int grab_frames=0;
 
 int frame_time_remaining=0; // flag
 int blit_frame=0;
@@ -4885,9 +4884,6 @@ if(step_sec>0) {
     case MP_CMD_QUIT : {
       exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
     }
-    case MP_CMD_GRAB_FRAMES : {
-      grab_frames=2;
-    } break;
     case MP_CMD_PLAY_TREE_STEP : {
       int n = cmd->args[0].v.i == 0 ? 1 : cmd->args[0].v.i;
       int force = cmd->args[1].v.i;

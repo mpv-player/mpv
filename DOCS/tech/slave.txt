@@ -136,9 +136,6 @@ get_video_codec
 get_video_resolution
     Print out the video resolution of the current file.
 
-grab_frames
-    Currently unimplemented.
-
 screenshot <value>
     Take a screenshot. Requires the screenshot filter to be loaded.
         0 Take a single screenshot.
