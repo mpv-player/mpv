@@ -43,7 +43,7 @@ typedef struct ass_style_s {
 	int StrikeOut;
 	double ScaleX;
 	double ScaleY;
-	int Spacing;
+	double Spacing;
 	int Angle;
 	int BorderStyle;
 	double Outline;

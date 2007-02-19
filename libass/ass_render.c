@@ -150,7 +150,7 @@ typedef struct render_context_s {
 	int org_x, org_y; // origin
 	char have_origin; // origin is explicitly defined; if 0, get_base_point() is used
 	double scale_x, scale_y;
-	int hspacing; // distance between letters, in pixels
+	double hspacing; // distance between letters, in pixels
 	double border; // outline width
 	uint32_t c[4]; // colors(Primary, Secondary, so on) in RGBA
 	int clip_x0, clip_y0, clip_x1, clip_y1;
@@ -713,11 +713,11 @@ static char* parse_tag(char* p, double pwr) {
 				render_context.scale_y = render_context.style->ScaleY;
 		}
 	} else if (mystrcmp(&p, "fsp")) {
-		int val;
-		if (mystrtoi(&p, 10, &val))
-			render_context.hspacing = val * pwr;
+		double val;
+		if (mystrtod(&p, &val))
+			render_context.hspacing = render_context.hspacing * ( 1 - pwr ) + val * pwr;
 		else
-			render_context.hspacing = 0;
+			render_context.hspacing = render_context.style->Spacing;
 	} else if (mystrcmp(&p, "fs")) {
 		int val;
 		if (mystrtoi(&p, 10, &val))
@@ -1158,7 +1158,7 @@ static void reset_render_context(void)
 	change_border(-1.);
 	render_context.scale_x = render_context.style->ScaleX;
 	render_context.scale_y = render_context.style->ScaleY;
-	render_context.hspacing = 0; // FIXME
+	render_context.hspacing = render_context.style->Spacing;
 	render_context.be = 0;
 	render_context.shadow = render_context.style->Shadow;
 	render_context.frx = render_context.fry = 0.;
@@ -1711,7 +1711,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].pos.y = d6_to_int(pen.y);
 		
 		pen.x += text_info.glyphs[text_info.length].advance.x;
-		pen.x += render_context.hspacing;
+		pen.x += double_to_d6(render_context.hspacing);
 		pen.y += text_info.glyphs[text_info.length].advance.y;
 		
 		// if it's an outline glyph, we still need to fill the bbox
