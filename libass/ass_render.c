@@ -702,13 +702,13 @@ static char* parse_tag(char* p, double pwr) {
 		if (tp == 'x') {
 			if (mystrtod(&p, &val)) {
 				val /= 100;
-				render_context.scale_x = (val - 1.) * pwr + 1.;
+				render_context.scale_x = render_context.scale_x * ( 1 - pwr) + val * pwr;
 			} else
 				render_context.scale_x = render_context.style->ScaleX;
 		} else if (tp == 'y') {
 			if (mystrtod(&p, &val)) {
 				val /= 100;
-				render_context.scale_y = (val - 1.) * pwr + 1.;
+				render_context.scale_y = render_context.scale_y * ( 1 - pwr) + val * pwr;
 			} else
 				render_context.scale_y = render_context.style->ScaleY;
 		}
