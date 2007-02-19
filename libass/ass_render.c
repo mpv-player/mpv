@@ -979,9 +979,10 @@ static char* parse_tag(char* p, double pwr) {
 			render_context.be = 0;
 	} else if (mystrcmp(&p, "b")) {
 		int b;
-		if (mystrtoi(&p, 10, &b))
-			render_context.bold = b;
-		else
+		if (mystrtoi(&p, 10, &b)) {
+			if (pwr >= 1.)
+				render_context.bold = b;
+		} else
 			render_context.bold = - render_context.style->Bold;
 		update_font();
 	} else if (mystrcmp(&p, "i")) {
