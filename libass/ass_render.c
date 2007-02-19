@@ -983,14 +983,14 @@ static char* parse_tag(char* p, double pwr) {
 			if (pwr >= 1.)
 				render_context.bold = b;
 		} else
-			render_context.bold = - render_context.style->Bold;
+			render_context.bold = render_context.style->Bold;
 		update_font();
 	} else if (mystrcmp(&p, "i")) {
 		int i;
 		if (mystrtoi(&p, 10, &i))
 			render_context.italic = i;
 		else
-			render_context.italic = - render_context.style->Italic;
+			render_context.italic = render_context.style->Italic;
 		update_font();
 	} else if (mystrcmp(&p, "kf") || mystrcmp(&p, "K")) {
 		int val = strtol(p, &p, 10);
@@ -1152,8 +1152,8 @@ static void reset_render_context(void)
 	if (render_context.family)
 		free(render_context.family);
 	render_context.family = strdup(render_context.style->FontName);
-	render_context.bold = - render_context.style->Bold;
-	render_context.italic = - render_context.style->Italic;
+	render_context.bold = render_context.style->Bold;
+	render_context.italic = render_context.style->Italic;
 	update_font();
 
 	change_border(-1.);

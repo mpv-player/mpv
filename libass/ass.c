@@ -458,6 +458,9 @@ static int process_style(ass_track_t* track, char *str)
 	}
 	style->ScaleX /= 100.;
 	style->ScaleY /= 100.;
+	style->Bold = !!style->Bold;
+	style->Italic = !!style->Italic;
+	style->Underline = !!style->Underline;
 	if (!style->Name)
 		style->Name = strdup("Default");
 	if (!style->FontName)
