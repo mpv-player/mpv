@@ -747,7 +747,7 @@ static subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
 	}
     current->lines=i+1;
 
-    if ((current->text[0]=="") && (current->text[1]=="")) {
+    if (!strlen(current->text[0]) && !strlen(current->text[1])) {
 #ifdef USE_SORTSUB
 	previous_sub_end = 0;
 #else
@@ -803,7 +803,7 @@ static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
 	}
     current->lines=i+1;
 
-    if ((current->text[0]=="") && (i==0)) {
+    if (!strlen(current->text[0]) && (i==0)) {
 #ifdef USE_SORTSUB
 	previous_sub_end = 0;
 #else
