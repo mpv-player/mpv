@@ -1293,9 +1293,9 @@ static void measure_text()
 		if (i < text_info.length) {
 			glyph_info_t* cur = text_info.glyphs + i;
 			if (cur->asc > max_asc)
-				max_asc = cur->asc * render_context.scale_y;
+				max_asc = cur->asc;
 			if (cur->desc > max_desc)
-				max_desc = cur->desc * render_context.scale_y;
+				max_desc = cur->desc;
 		}
 	}
 }
@@ -1739,6 +1739,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		ass_font_get_asc_desc(render_context.font, code,
 				      &text_info.glyphs[text_info.length].asc,
 				      &text_info.glyphs[text_info.length].desc);
+		text_info.glyphs[text_info.length].asc *= render_context.scale_y;
+		text_info.glyphs[text_info.length].desc *= render_context.scale_y;
 
 		text_info.length++;
 
