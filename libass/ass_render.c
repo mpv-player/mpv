@@ -61,6 +61,15 @@ typedef struct ass_settings_s {
 	char* default_family;
 } ass_settings_t;
 
+// a rendered event
+typedef struct event_images_s {
+	ass_image_t* imgs;
+	int top, height;
+	int detect_collisions;
+	int shift_direction;
+	ass_event_t* event;
+} event_images_t;
+
 struct ass_renderer_s {
 	ass_library_t* library;
 	FT_Library ftlibrary;
@@ -71,6 +80,9 @@ struct ass_renderer_s {
 
 	ass_image_t* images_root; // rendering result is stored here
 	ass_image_t* prev_images_root;
+
+	event_images_t* eimg; // temporary buffer for sorting rendered events
+	int eimg_size; // allocated buffer size
 };
 
 typedef enum {EF_NONE = 0, EF_KARAOKE, EF_KARAOKE_KF, EF_KARAOKE_KO} effect_t;
@@ -184,15 +196,6 @@ static text_info_t text_info;
 static render_context_t render_context;
 static frame_context_t frame_context;
 
-// a rendered event
-typedef struct event_images_s {
-	ass_image_t* imgs;
-	int top, height;
-	int detect_collisions;
-	int shift_direction;
-	ass_event_t* event;
-} event_images_t;
-
 struct render_priv_s {
 	int top, height;
 	int render_id;
@@ -271,6 +274,7 @@ void ass_renderer_done(ass_renderer_t* priv)
 	if (priv && priv->ftlibrary) FT_Done_FreeType(priv->ftlibrary);
 	if (priv && priv->fontconfig_priv) fontconfig_done(priv->fontconfig_priv);
 	if (priv && priv->synth_priv) ass_synth_done(priv->synth_priv);
+	if (priv && priv->eimg) free(priv->eimg);
 	if (priv) free(priv);
 	if (text_info.glyphs) free(text_info.glyphs);
 }
@@ -2265,7 +2269,6 @@ int ass_detect_change(ass_renderer_t *priv)
 ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now, int* detect_change)
 {
 	int i, cnt, rc;
-	event_images_t eimg[MAX_EVENTS];
 	event_images_t* last;
 	ass_image_t** tail;
 	
@@ -2279,33 +2282,32 @@ ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long lon
 	for (i = 0; i < track->n_events; ++i) {
 		ass_event_t* event = track->events + i;
 		if ( (event->Start <= now) && (now < (event->Start + event->Duration)) ) {
-			if (cnt < MAX_EVENTS) {
-				rc = ass_render_event(event, eimg + cnt);
-				if (!rc) ++cnt;
-			} else {
-				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_TooManySimultaneousEvents);
-				break;
+			if (cnt >= priv->eimg_size) {
+				priv->eimg_size += 100;
+				priv->eimg = realloc(priv->eimg, priv->eimg_size * sizeof(event_images_t));
 			}
+			rc = ass_render_event(event, priv->eimg + cnt);
+			if (!rc) ++cnt;
 		}
 	}
 
 	// sort by layer
-	qsort(eimg, cnt, sizeof(event_images_t), cmp_event_layer);
+	qsort(priv->eimg, cnt, sizeof(event_images_t), cmp_event_layer);
 
 	// call fix_collisions for each group of events with the same layer
-	last = eimg;
+	last = priv->eimg;
 	for (i = 1; i < cnt; ++i)
-		if (last->event->Layer != eimg[i].event->Layer) {
-			fix_collisions(last, eimg + i - last);
-			last = eimg + i;
+		if (last->event->Layer != priv->eimg[i].event->Layer) {
+			fix_collisions(last, priv->eimg + i - last);
+			last = priv->eimg + i;
 		}
 	if (cnt > 0)
-		fix_collisions(last, eimg + cnt - last);
+		fix_collisions(last, priv->eimg + cnt - last);
 
 	// concat lists
 	tail = &ass_renderer->images_root;
 	for (i = 0; i < cnt; ++i) {
-		ass_image_t* cur = eimg[i].imgs;
+		ass_image_t* cur = priv->eimg[i].imgs;
 		while (cur) {
 			*tail = cur;
 			tail = &cur->next;
