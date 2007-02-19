@@ -55,6 +55,7 @@ static int bob_deinterlace;
 static int top_field_first;
 
 static int image_width,image_height;
+static int image_format;
 static uint32_t  drwX,drwY;
 
 #define NO_SUBPICTURE      0
@@ -108,6 +109,7 @@ static const struct{
                   };
 
 static void xvmc_free(void);
+static void xvmc_clean_surfaces(void);
 static int count_free_surfaces();
 static xvmc_render_state_t * find_free_surface();
 
@@ -450,6 +452,10 @@ static uint32_t vm_height;
 
 // Find free port that supports MC, by querying adaptors
    if( xv_port != 0 || number_of_surfaces != 0 ){
+      if( height==image_height && width==image_width && image_format==format){
+         xvmc_clean_surfaces();
+         goto skip_surface_allocation;
+      }
       xvmc_free();
    };
    numblocks=((width+15)/16)*((height+15)/16);
@@ -604,6 +610,8 @@ found_subpic:
    image_height = height;
    image_width = width;
 
+skip_surface_allocation:
+
    vo_mouse_autohide = 1;
 
 #ifdef HAVE_XF86VM
@@ -752,6 +760,7 @@ found_subpic:
    first_frame = 1;
 
    vo_directrendering = 1;//ugly hack, coz xvmc works only with direct rendering
+   image_format=format;
    return 0;		
 }
 
@@ -1324,6 +1333,23 @@ xvmc_render_state_t * visible_rndr;
    for(i=0;i<number_of_surfaces;i++)
       printf("vo_xvmc: surface[%d].state=%d\n",i,surface_render[i].state);
    return NULL;
+}
+
+static void xvmc_clean_surfaces(void){
+int i;
+
+  for(i=0; i<number_of_surfaces; i++){
+
+      surface_render[i].state&=!( MP_XVMC_STATE_DISPLAY_PENDING |
+                                  MP_XVMC_STATE_OSD_SOURCE |
+                                  0);
+      surface_render[i].p_osd_target_surface_render=NULL;
+      if(surface_render[i].state != 0){
+         mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: surface[%d].state=%d\n",
+                                   i,surface_render[i].state);
+      }
+   }
+   free_element=0;//clean up the queue
 }
 
 static uint32_t get_image(mp_image_t *mpi){
