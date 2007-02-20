@@ -373,7 +373,7 @@ demuxer_desc_t demuxer_desc_xmms = {
   "XMMS demuxer",
   "xmms",
   "XMMS",
-  "?",
+  "Balatoni Denes, A'rpi",
   "requires XMMS plugins",
   DEMUXER_TYPE_XMMS,
   0, // safe autodetect
