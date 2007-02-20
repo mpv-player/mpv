@@ -775,22 +775,22 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "frx")) {
 		double val;
 		if (mystrtod(&p, &val)) {
-		val *= M_PI / 180;
-		render_context.frx = val * pwr + render_context.frx * (1-pwr);
+			val *= M_PI / 180;
+			render_context.frx = val * pwr + render_context.frx * (1-pwr);
 		} else
 			render_context.frx = 0.;
 	} else if (mystrcmp(&p, "fry")) {
 		double val;
 		if (mystrtod(&p, &val)) {
-		val *= M_PI / 180;
-		render_context.fry = val * pwr + render_context.fry * (1-pwr);
+			val *= M_PI / 180;
+			render_context.fry = val * pwr + render_context.fry * (1-pwr);
 		} else
 			render_context.fry = 0.;
 	} else if (mystrcmp(&p, "frz") || mystrcmp(&p, "fr")) {
 		double val;
 		if (mystrtod(&p, &val)) {
-		val *= M_PI / 180;
-		render_context.frz = val * pwr + render_context.frz * (1-pwr);
+			val *= M_PI / 180;
+			render_context.frz = val * pwr + render_context.frz * (1-pwr);
 		} else
 			render_context.frz = M_PI * render_context.style->Angle / 180.;
 	} else if (mystrcmp(&p, "fn")) {
@@ -824,19 +824,19 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "an")) {
 		int val;
 		if (mystrtoi(&p, 10, &val) && val) {
-		int v = (val - 1) / 3; // 0, 1 or 2 for vertical alignment
-		mp_msg(MSGT_ASS, MSGL_DBG2, "an %d\n", val);
-		if (v != 0) v = 3 - v;
-		val = ((val - 1) % 3) + 1; // horizontal alignment
-		val += v*4;
-		mp_msg(MSGT_ASS, MSGL_DBG2, "align %d\n", val);
-		render_context.alignment = val;
+			int v = (val - 1) / 3; // 0, 1 or 2 for vertical alignment
+			mp_msg(MSGT_ASS, MSGL_DBG2, "an %d\n", val);
+			if (v != 0) v = 3 - v;
+			val = ((val - 1) % 3) + 1; // horizontal alignment
+			val += v*4;
+			mp_msg(MSGT_ASS, MSGL_DBG2, "align %d\n", val);
+			render_context.alignment = val;
 		} else
 			render_context.alignment = render_context.style->Alignment;
 	} else if (mystrcmp(&p, "a")) {
 		int val = strtol(p, &p, 10);
 		if (mystrtoi(&p, 10, &val) && val)
-		render_context.alignment = val;
+			render_context.alignment = val;
 		else
 			render_context.alignment = render_context.style->Alignment;
 	} else if (mystrcmp(&p, "pos")) {
@@ -1004,7 +1004,7 @@ static char* parse_tag(char* p, double pwr) {
 		int i;
 		if (mystrtoi(&p, 10, &i))
 			if (pwr >= .5)
-			render_context.italic = i;
+				render_context.italic = i;
 		else
 			render_context.italic = render_context.style->Italic;
 		update_font();
