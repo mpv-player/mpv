@@ -791,9 +791,12 @@ static char* parse_tag(char* p, double pwr) {
 		char* start = p;
 		char* family;
 		skip_all('\\');
-		family = malloc(p - start + 1);
-		strncpy(family, start, p - start);
-		family[p - start] = '\0';
+		if (p > start) {
+			family = malloc(p - start + 1);
+			strncpy(family, start, p - start);
+			family[p - start] = '\0';
+		} else
+			family = strdup(render_context.style->FontName);
 		if (render_context.family)
 			free(render_context.family);
 		render_context.family = family;
