@@ -19,6 +19,7 @@ MPlayer (1.0)
     * libmpeg2 updated to 0.4.1
     * fixed resolution switching with libmpeg2
     * handle resolution switching for Real codecs
+    * ffmpeg video decoder handles aspect ratio changes
 
     Demuxers:
     * implemented switch_video and switch_program consistently with switch_audio
