@@ -17,6 +17,21 @@ static Boolean
 parseQTState_audio(QuickTimeGenericRTPSource::QTState const& qtState,
 		   unsigned& fourcc, unsigned& numChannels); // forward
 		       
+static BITMAPINFOHEADER * insertVideoExtradata(BITMAPINFOHEADER *bih,
+                                               unsigned char * extraData,
+                                               unsigned size)
+{
+    BITMAPINFOHEADER * original = bih;
+    if (!size || size > INT_MAX - sizeof(BITMAPINFOHEADER))
+        return bih;
+    bih = (BITMAPINFOHEADER*)realloc(bih, sizeof(BITMAPINFOHEADER) + size);
+    if (!bih)
+        return original;
+    bih->biSize = sizeof(BITMAPINFOHEADER) + size;
+    memcpy(bih+1, extraData, size);
+    return bih;
+}
+
 void rtpCodecInitialize_video(demuxer_t* demuxer,
 			      MediaSubsession* subsession,
 			      unsigned& flags) {
@@ -67,7 +82,7 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     unsigned configLen;
     unsigned char* configData
       = parseGeneralConfigStr(subsession->fmtp_config(), configLen);
-    insertRTPData(demuxer, demuxer->video, configData, configLen);
+    sh_video->bih = bih = insertVideoExtradata(bih, configData, configLen);
     needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "X-QT") == 0 ||
 	     strcmp(subsession->codecName(), "X-QUICKTIME") == 0) {
@@ -103,11 +118,9 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
         if ((!memcmp(pos+4, "avcC", 4) || 
              !memcmp(pos+4, "esds", 4) || 
              !memcmp(pos+4, "SMI ", 4)) &&
-            atomLength > 8 &&
-            atomLength <= INT_MAX-sizeof(BITMAPINFOHEADER)) {
-          bih->biSize = sizeof(BITMAPINFOHEADER)+atomLength-8;
-          sh_video->bih = bih = (BITMAPINFOHEADER*)realloc(bih, bih->biSize);
-          memcpy(bih+1, pos+8, atomLength-8);
+            atomLength > 8) {
+          sh_video->bih = bih = 
+              insertVideoExtradata(bih, pos+8, atomLength-8);
           break;
         }
         pos += atomLength;
