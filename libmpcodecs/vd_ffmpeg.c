@@ -39,7 +39,6 @@ typedef struct {
     AVCodecContext *avctx;
     AVFrame *pic;
     enum PixelFormat pix_fmt;
-    float last_aspect;
     int do_slices;
     int do_dr1;
     int vo_inited;
@@ -51,6 +50,7 @@ typedef struct {
     double inv_qp_sum;
     int ip_count;
     int b_count;
+    AVRational last_sample_aspect_ratio;
 } vd_ffmpeg_ctx;
 
 //#ifdef USE_LIBPOSTPROC
@@ -411,7 +411,6 @@ static int init(sh_video_t *sh){
         return 0;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: libavcodec init OK!\n");
-    ctx->last_aspect=-3;
     return 1; //mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
 }
 
@@ -498,17 +497,15 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
     
      // it is possible another vo buffers to be used after vo config()
      // lavc reset its buffers on width/heigh change but not on aspect change!!!
-    if (// aspect != ctx->last_aspect ||
+    if (av_cmp_q(avctx->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
 	width != sh->disp_w  ||
 	height != sh->disp_h ||
 	pix_fmt != ctx->pix_fmt ||
 	!ctx->vo_inited)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
-        ctx->last_aspect = aspect;
-//	if(ctx->last_aspect>=0.01 && ctx->last_aspect<100)
-	if(sh->aspect==0.0)
-	    sh->aspect = ctx->last_aspect;
+	ctx->last_sample_aspect_ratio = avctx->sample_aspect_ratio;
+	sh->aspect = aspect;
 	sh->disp_w = width;
 	sh->disp_h = height;
 	ctx->pix_fmt = pix_fmt;
