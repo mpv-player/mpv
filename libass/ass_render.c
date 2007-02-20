@@ -2056,10 +2056,6 @@ static int cmp_event_layer(const void* p1, const void* p2)
 		return -1;
 	if (e1->Layer > e2->Layer)
 		return 1;
-	if (e1->Start < e2->Start)
-		return -1;
-	if (e1->Start > e2->Start)
-		return 1;
 	if (e1->ReadOrder < e2->ReadOrder)
 		return -1;
 	if (e1->ReadOrder > e2->ReadOrder)
