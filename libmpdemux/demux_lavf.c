@@ -284,7 +284,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             wf->nChannels= codec->channels;
             wf->nSamplesPerSec= codec->sample_rate;
             wf->nAvgBytesPerSec= codec->bit_rate/8;
-            wf->nBlockAlign= codec->block_align;
+            wf->nBlockAlign= codec->block_align ? codec->block_align : 1;
             wf->wBitsPerSample= codec->bits_per_sample;
             wf->cbSize= codec->extradata_size;
             if(codec->extradata_size){
