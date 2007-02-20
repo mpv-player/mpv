@@ -283,8 +283,8 @@ static int demux_xmms_open(demuxer_t* demuxer) {
         ip->get_song_info(demuxer->stream->url,&xmms_title,&xmms_length);
     if (xmms_length<=0) demuxer->seekable=0;
 
-    mp_msg(MSGT_DEMUX,MSGL_INFO,"Waiting for the XMMS plugin to start "
-                                "playback of '%s'...\n",demuxer->stream->url);
+    mp_msg(MSGT_DEMUX,MSGL_INFO,MSGTR_MPDEMUX_XMMS_WaitForStart,
+                                                        demuxer->stream->url);
     while (xmms_channels==0) {
         usleep(10000);
         if(ip->get_time()<0) return 0;
