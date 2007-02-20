@@ -995,7 +995,7 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "b")) {
 		int b;
 		if (mystrtoi(&p, 10, &b)) {
-			if (pwr >= 1.)
+			if (pwr >= .5)
 				render_context.bold = b;
 		} else
 			render_context.bold = render_context.style->Bold;
@@ -1003,6 +1003,7 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "i")) {
 		int i;
 		if (mystrtoi(&p, 10, &i))
+			if (pwr >= .5)
 			render_context.italic = i;
 		else
 			render_context.italic = render_context.style->Italic;
