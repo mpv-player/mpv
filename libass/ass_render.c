@@ -774,19 +774,25 @@ static char* parse_tag(char* p, double pwr) {
 		render_context.evt_type = EVENT_POSITIONED;
 	} else if (mystrcmp(&p, "frx")) {
 		double val;
-		mystrtod(&p, &val);
+		if (mystrtod(&p, &val)) {
 		val *= M_PI / 180;
 		render_context.frx = val * pwr + render_context.frx * (1-pwr);
+		} else
+			render_context.frx = 0.;
 	} else if (mystrcmp(&p, "fry")) {
 		double val;
-		mystrtod(&p, &val);
+		if (mystrtod(&p, &val)) {
 		val *= M_PI / 180;
 		render_context.fry = val * pwr + render_context.fry * (1-pwr);
+		} else
+			render_context.fry = 0.;
 	} else if (mystrcmp(&p, "frz") || mystrcmp(&p, "fr")) {
 		double val;
-		mystrtod(&p, &val);
+		if (mystrtod(&p, &val)) {
 		val *= M_PI / 180;
 		render_context.frz = val * pwr + render_context.frz * (1-pwr);
+		} else
+			render_context.frz = M_PI * render_context.style->Angle / 180.;
 	} else if (mystrcmp(&p, "fn")) {
 		char* start = p;
 		char* family;
@@ -816,7 +822,8 @@ static char* parse_tag(char* p, double pwr) {
 		}
 		// FIXME: simplify
 	} else if (mystrcmp(&p, "an")) {
-		int val = strtol(p, &p, 10);
+		int val;
+		if (mystrtoi(&p, 10, &val) && val) {
 		int v = (val - 1) / 3; // 0, 1 or 2 for vertical alignment
 		mp_msg(MSGT_ASS, MSGL_DBG2, "an %d\n", val);
 		if (v != 0) v = 3 - v;
@@ -824,9 +831,14 @@ static char* parse_tag(char* p, double pwr) {
 		val += v*4;
 		mp_msg(MSGT_ASS, MSGL_DBG2, "align %d\n", val);
 		render_context.alignment = val;
+		} else
+			render_context.alignment = render_context.style->Alignment;
 	} else if (mystrcmp(&p, "a")) {
 		int val = strtol(p, &p, 10);
+		if (mystrtoi(&p, 10, &val) && val)
 		render_context.alignment = val;
+		else
+			render_context.alignment = render_context.style->Alignment;
 	} else if (mystrcmp(&p, "pos")) {
 		int v1, v2;
 		skip('(');
@@ -1182,7 +1194,7 @@ static void init_render_context(ass_event_t* event)
 	reset_render_context();
 
 	render_context.evt_type = EVENT_NORMAL;
-	render_context.alignment = 0;
+	render_context.alignment = render_context.style->Alignment;
 	render_context.pos_x = 0;
 	render_context.pos_y = 0;
 	render_context.org_x = 0;
@@ -1764,8 +1776,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	
 	// alignments
 	alignment = render_context.alignment;
-	if (!alignment)
-		alignment = render_context.style->Alignment;
 	halign = alignment & 3;
 	valign = alignment & 12;
 
