@@ -1,24 +1,24 @@
 /*
- *  Copyright (C) 2002-2004 Balatoni Denes and A'rpi
+ * Copyright (C) 2002-2004 Balatoni Denes and A'rpi
  *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation; either version 2
- *  of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  */
 
 // This is not reentrant because of global static variables, but most of
-// the plugins are not reentrant either perhaps 
+// the plugins are not reentrant either perhaps
 #include "config.h"
 
 #include <stdlib.h>
@@ -74,7 +74,8 @@ static void disk_flush(int time) {
 }
 
 static int disk_free(void) { // vqf plugin sends more than it should
-    return (XMMS_PACKETSIZE-xmms_audiopos<XMMS_PACKETSIZE/4 ? 0:XMMS_PACKETSIZE-xmms_audiopos-XMMS_PACKETSIZE/4);
+    return (XMMS_PACKETSIZE-xmms_audiopos<XMMS_PACKETSIZE/4 ?
+                            0:XMMS_PACKETSIZE-xmms_audiopos-XMMS_PACKETSIZE/4);
 }
 
 static int disk_playing(void) {
@@ -165,12 +166,14 @@ static int no_plugins=0;
 
 /* Dummy functions  */
 static InputVisType input_get_vis_type(){return 0;}
-static void input_add_vis_pcm(int time, AFormat fmt, int nch, int length, void *ptr){}
+static void input_add_vis_pcm(int time, AFormat fmt, int nch, int length,
+                                                                void *ptr){}
 static void input_set_info_text(char * text){}
 char *xmms_get_gentitle_format(){ return ""; }
 /* Dummy functions  END*/
 
-static void input_set_info(char* title,int length, int rate, int freq, int nch){
+static void input_set_info(char* title,int length, int rate, int freq, int nch)
+{
     xmms_length=length;
 }
 
@@ -191,7 +194,8 @@ static void init_plugins_from_dir(const char *plugin_dir){
             gpi=dlsym(handle, "get_iplugin_info");
             if(gpi){
                 InputPlugin *p=gpi();
-                mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_FoundPlugin,ent->d_name,p->description);
+                mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_FoundPlugin,
+                                                ent->d_name,p->description);
                 p->handle = handle;
                 p->filename = strdup(filename);
                 p->get_vis_type = input_get_vis_type;
@@ -225,7 +229,8 @@ static void init_plugins(){
 static void cleanup_plugins(){
     while(no_plugins>0){
         --no_plugins;
-        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_ClosingPlugin,input_plugins[no_plugins]->filename);
+        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_ClosingPlugin,
+                                        input_plugins[no_plugins]->filename);
         if(input_plugins[no_plugins]->cleanup)
             input_plugins[no_plugins]->cleanup();
         dlclose(input_plugins[no_plugins]->handle);
@@ -250,7 +255,7 @@ static int demux_xmms_open(demuxer_t* demuxer) {
     }
     if(!ip) return 0; // no plugin to handle this...
 
-    pthread_mutex_init(&xmms_mutex,NULL);    
+    pthread_mutex_init(&xmms_mutex,NULL);
 
     xmms_priv=priv=malloc(sizeof(xmms_priv_t));
     memset(priv,0,sizeof(xmms_priv_t));
@@ -274,10 +279,12 @@ static int demux_xmms_open(demuxer_t* demuxer) {
     ip->output = &xmms_output_plugin;
     xmms_playing=1;
     ip->play_file(demuxer->stream->url);
-    if (ip->get_song_info) ip->get_song_info(demuxer->stream->url,&xmms_title,&xmms_length);
+    if (ip->get_song_info)
+        ip->get_song_info(demuxer->stream->url,&xmms_title,&xmms_length);
     if (xmms_length<=0) demuxer->seekable=0;
 
-    mp_msg(MSGT_DEMUX,MSGL_INFO,"Waiting for the XMMS plugin to start playback of '%s'...\n",demuxer->stream->url);
+    mp_msg(MSGT_DEMUX,MSGL_INFO,"Waiting for the XMMS plugin to start "
+                                "playback of '%s'...\n",demuxer->stream->url);
     while (xmms_channels==0) {
         usleep(10000);
         if(ip->get_time()<0) return 0;
@@ -295,8 +302,9 @@ static int demux_xmms_open(demuxer_t* demuxer) {
     }
     w->wBitsPerSample = sh_audio->samplesize*8;
     w->nChannels = sh_audio->channels = xmms_channels;
-    w->nSamplesPerSec = sh_audio->samplerate = xmms_samplerate; 
-    xmms_byterate = w->nAvgBytesPerSec = xmms_samplerate*sh_audio->channels*sh_audio->samplesize;
+    w->nSamplesPerSec = sh_audio->samplerate = xmms_samplerate;
+    xmms_byterate = w->nAvgBytesPerSec =
+                    xmms_samplerate*sh_audio->channels*sh_audio->samplesize;
     w->nBlockAlign = sh_audio->samplesize*sh_audio->channels;
     w->cbSize = 0;
 
@@ -323,7 +331,8 @@ static int demux_xmms_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
     ds->pos = priv->spos;
 
     memcpy(dp->buffer,xmms_audiobuffer,XMMS_PACKETSIZE/2);
-    memcpy(xmms_audiobuffer,&xmms_audiobuffer[XMMS_PACKETSIZE/2],xmms_audiopos-XMMS_PACKETSIZE/2);
+    memcpy(xmms_audiobuffer,&xmms_audiobuffer[XMMS_PACKETSIZE/2],
+                                            xmms_audiopos-XMMS_PACKETSIZE/2);
     xmms_audiopos-=XMMS_PACKETSIZE/2;
     pthread_mutex_unlock(&xmms_mutex);
 
@@ -332,7 +341,8 @@ static int demux_xmms_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
     return 1;
 }
 
-static void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
+static void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,
+                                               float audio_delay,int flags){
     stream_t* s = demuxer->stream;
     sh_audio_t* sh_audio = demuxer->audio->sh;
     xmms_priv_t *priv=demuxer->priv;
@@ -341,10 +351,10 @@ static void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_d
     if(priv->ip->get_time()<0) return;
 
     pos = (flags & 1) ? 0 : priv->spos / sh_audio->wf->nAvgBytesPerSec;
-    if (flags & 2) 
+    if (flags & 2)
         pos+= rel_seek_secs*xmms_length;
-    else 
-        pos+= rel_seek_secs;  
+    else
+        pos+= rel_seek_secs;
 
     if (pos<0) pos=0;
     if (pos>=xmms_length) pos=xmms_length-1;
@@ -377,9 +387,10 @@ static int demux_xmms_control(demuxer_t *demuxer,int cmd, void *arg){
             return DEMUXER_CTRL_GUESS;
 
         case DEMUXER_CTRL_GET_PERCENT_POS:
-            if (xmms_length<=0) 
+            if (xmms_length<=0)
                 return DEMUXER_CTRL_DONTKNOW;
-            *((int *)arg)=(int)( priv->spos / (float)(sh_audio->wf->nAvgBytesPerSec) / xmms_length );
+            *((int *)arg)=(int)( priv->spos /
+                        (float)(sh_audio->wf->nAvgBytesPerSec) / xmms_length );
             return DEMUXER_CTRL_OK;
 
         default:
