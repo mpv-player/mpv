@@ -155,19 +155,17 @@ static void input_set_info(char* title,int length, int rate, int freq, int nch){
     xmms_length=length;
 }
 
-static void init_plugins(){
+static void init_plugins_from_dir(const char *plugin_dir){
     DIR *dir;
     struct dirent *ent;
     
-    no_plugins=0;
-
-    dir = opendir(XMMS_INPUT_PLUGIN_DIR);
+    dir = opendir(plugin_dir);
     if (!dir) return;
     
     while ((ent = readdir(dir)) != NULL){
-	char filename[strlen(XMMS_INPUT_PLUGIN_DIR)+strlen(ent->d_name)+4];
+	char filename[strlen(plugin_dir)+strlen(ent->d_name)+4];
 	void* handle;
-	sprintf(filename,XMMS_INPUT_PLUGIN_DIR "/%s",ent->d_name);
+	sprintf(filename, "%s/%s", plugin_dir, ent->d_name);
 	handle=dlopen(filename, RTLD_NOW);
 	if(handle){
 	    void *(*gpi) (void);
@@ -188,6 +186,21 @@ static void init_plugins(){
 	}
     }
     closedir(dir);
+}
+
+static void init_plugins(){
+    char *home;
+
+    no_plugins=0;
+
+    home = getenv("HOME");
+    if(home != NULL) {
+	char xmms_home[strlen(home) + 15];
+	sprintf(xmms_home, "%s/.xmms/Plugins", home);
+	init_plugins_from_dir(xmms_home);
+    }
+
+    init_plugins_from_dir(XMMS_INPUT_PLUGIN_DIR);
 }
 
 static void cleanup_plugins(){
