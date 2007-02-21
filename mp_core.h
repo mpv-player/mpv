@@ -62,6 +62,10 @@ typedef struct MPContext {
     demux_stream_t *d_sub;
     mixer_t mixer;
     vo_functions_t *video_out;
+    // Frames buffered in the vo ready to flip. Currently always 0 or 1.
+    // This is really a vo variable but currently there's no suitable vo
+    // struct.
+    int num_buffered_frames;
 
     short edl_muted; ///< Stores whether EDL is currently in muted mode.
     short user_muted; ///< Stores whether user wanted muted mode.

@@ -3182,6 +3182,7 @@ float time_frame=0; // Timer
 
 int frame_time_remaining=0; // flag
 int blit_frame=0;
+mpctx->num_buffered_frames=0;
 
 // Make sure old OSD does not stay around,
 // e.g. with -fixed-vo and same-resolution files
@@ -3297,7 +3298,7 @@ if(!mpctx->sh_video) {
   vo_pts=mpctx->sh_video->timer*90000.0;
   vo_fps=mpctx->sh_video->fps;
 
-  if (!frame_time_remaining) {
+  if (!mpctx->num_buffered_frames) {
       double frame_time = update_video(&blit_frame);
       mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
       if (mpctx->sh_video->vf_inited < 0) {
@@ -3306,8 +3307,11 @@ if(!mpctx->sh_video) {
       }
       if (frame_time < 0)
 	  mpctx->eof = 1;
-      else
+      else {
+	  // might return with !eof && !blit_frame if !correct_pts
+	  mpctx->num_buffered_frames += blit_frame;
 	  time_frame += frame_time / playback_speed;  // for nosound
+      }
   }
 
 // ==========================================================================
@@ -3338,6 +3342,7 @@ if(!mpctx->sh_video) {
 	   unsigned int t2=GetTimer();
 
 	   if(vo_config_count) mpctx->video_out->flip_page();
+	   mpctx->num_buffered_frames--;
 
 	   vout_time_usage += (GetTimer() - t2) * 0.000001;
         }
@@ -3559,7 +3564,7 @@ if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted) mixer_mute(&mp
 
   rel_seek_secs=0;
   abs_seek_pos=0;
-  frame_time_remaining=0;
+  mpctx->num_buffered_frames = 0;
   current_module=NULL;
   loop_seek=0;
 }
