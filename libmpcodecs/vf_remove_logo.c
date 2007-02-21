@@ -142,8 +142,8 @@ typedef struct
 /**
  * \brief Stores persistant variables.
  *
- * Variables stored here are kept from frame to frame, and seperate instances of
- * the filter will get their own seperate copies.
+ * Variables stored here are kept from frame to frame, and separate instances of
+ * the filter will get their own separate copies.
  */
 typedef struct
 {

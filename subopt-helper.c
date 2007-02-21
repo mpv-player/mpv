@@ -108,7 +108,7 @@ int subopt_parse( char const * const str, opt_t * opts )
           /* type specific code */
           if ( opts[idx].type == OPT_ARG_BOOL )
           {
-            /* Handle OPT_ARG_BOOL seperately so *
+            /* Handle OPT_ARG_BOOL separately so *
              * the others can share code.        */
 
             /* set option to true */

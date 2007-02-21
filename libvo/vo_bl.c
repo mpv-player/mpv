@@ -424,7 +424,7 @@ static int preinit(const char *arg) {
 					bl_hosts[no_bl_hosts].port);
 			no_bl_hosts++;
 		} else {
-			mp_msg(MSGT_VO, MSGL_ERR, "bl: syntax error in entry %d in subdevice %s, should be a comma seperated\nlist of host=name:port and file=foo.bml\n", no_bl_hosts, no_bl_files, arg);
+			mp_msg(MSGT_VO, MSGL_ERR, "bl: syntax error in entry %d in subdevice %s, should be a comma separated\nlist of host=name:port and file=foo.bml\n", no_bl_hosts, no_bl_files, arg);
 			return 1;
 		}
 		p = ++q;

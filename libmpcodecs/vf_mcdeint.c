@@ -218,7 +218,7 @@ static int config(struct vf_instance_s* vf,
             case 1:
                 avctx_enc->flags |= CODEC_FLAG_4MV;
                 avctx_enc->dia_size=2;
-//                avctx_enc->mb_decision = MB_DECISSION_RD;
+//                avctx_enc->mb_decision = MB_DECISION_RD;
             case 0:
                 avctx_enc->flags |= CODEC_FLAG_QPEL;
             }

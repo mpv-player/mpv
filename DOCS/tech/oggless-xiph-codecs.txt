@@ -14,7 +14,7 @@ License     GPL + GFDL + anything neeeded to turn this into a open standard
 
 Minimum container requirments:
 This appendix only explains how to store xiph codecs in containers which 
-support at least one global header per stream, can seperate individual codec
+support at least one global header per stream, can separate individual codec
 packets and in principle support the codec, so for example in the case of
 vorbis that would be variable bitrate and variable number of samples/packet
 Storage in other containers is outside the scope of this appendix
@@ -25,7 +25,7 @@ Global header:
 If the container can store 3 headers per stream in an unambiguos and ordered
 way then they shall be stored in that way, if OTOH the container is only
 capable to store a single global header then the 3 codec headers shall be
-concatenated without any additional header, footer or seperator between them
+concatenated without any additional header, footer or separator between them
 to recover the 3 headers from such a global header the following procedure
 shall be used:
 
@@ -48,7 +48,7 @@ for a global header chunk then glbl shall be used
 Storing packets:
 Each codec packet shall be stored in exactly one "container packet"
 and one "container packet" must not contain more then one codec packet
-"container packet" here means the smallest seperateable unit of data in the
+"container packet" here means the smallest separatable unit of data in the
 container
 
 
@@ -113,12 +113,12 @@ storing xiph codecs in nut
 
 Example and Disscussion of mpeg-ps / mpeg-ts container
 These containers neither support a global header nor provide the neccessary
-packet seperation / framing, so storing xiph codecs in them is outside the 
+packet separation / framing, so storing xiph codecs in them is outside the 
 scope of this appendix
 
 
 Example and Disscussion of wav container
-wav does not provide the neccessary packet seperation / framing, so storing 
+wav does not provide the neccessary packet separation / framing, so storing 
 xiph codecs in it is outside the scope of this appendix
 
 

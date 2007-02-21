@@ -79,7 +79,7 @@ typedef struct {
 } vivo_priv_t;
 
 /* parse all possible extra headers */
-/* (audio headers are seperate - mostly with recordtype=3 or 4) */
+/* (audio headers are separate - mostly with recordtype=3 or 4) */
 #define TEXTPARSE_ALL 1
 
 static void vivo_parse_text_header(demuxer_t *demux, int header_len)

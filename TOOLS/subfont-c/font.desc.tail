@@ -22,7 +22,7 @@
 ; the alpha to get a smooth black outline of the letters, which 
 ; makes them visible even on white areas of the movie.
 ;
-; MPlayer needs at least two seperate 8bit/pixel format bitmap 
+; MPlayer needs at least two separate 8bit/pixel format bitmap
 ; files and a .desc file to be able to use the font. One of the
 ; files is the bitmap the other is the alpha. The .desc (like this
 ; one) gives MPlayer the information needed to convert a bitmap

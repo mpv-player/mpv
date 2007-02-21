@@ -297,7 +297,7 @@ Erik Augustson <erik_27can@yahoo.com>
 pre4
 - URL open
 - use windows native menus
-- Gui runs in a seperate thread now because some controls interupt playback :(
+- Gui runs in a separate thread now because some controls interrupt playback :(
 
 pre 3
 - some of the previous features broken again
