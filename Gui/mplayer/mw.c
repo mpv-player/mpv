@@ -21,6 +21,7 @@
 #include "../mixer.h"
 #include "../libvo/sub.h"
 #include "../mplayer.h"
+#include "../access_mpcontext.h"
 
 #include "../libmpdemux/demuxer.h"
 #include "../libmpdemux/stheader.h"
@@ -32,8 +33,6 @@
 
 #include "play.h"
 #include "widgets.h"
-
-extern mixer_t mixer; // mixer from mplayer.c
 
 extern unsigned int GetTimerMS( void );
 
@@ -80,6 +79,7 @@ static unsigned last_redraw_time = 0;
 void mplEventHandling( int msg,float param )
 {
  int iparam = (int)param;
+ mixer_t *mixer = mpctx_get_mixer(guiIntfStruct.mpcontext);
 
  switch( msg )
   {
@@ -108,7 +108,7 @@ void mplEventHandling( int msg,float param )
 	goto play;
 
    case evSetSubtitle:
-	mp_property_do("sub",M_PROPERTY_SET,&iparam); 
+        mp_property_do("sub",M_PROPERTY_SET,&iparam,guiIntfStruct.mpcontext); 
 	break;
 
 #ifdef HAVE_VCD
@@ -247,7 +247,7 @@ NoPause:
 
    case evIncVolume:  vo_x11_putkey( wsGrayMul ); break;
    case evDecVolume:  vo_x11_putkey( wsGrayDiv ); break;
-   case evMute:       mixer_mute( &mixer ); break;
+   case evMute:       mixer_mute( mixer ); break;
 
    case evSetVolume:
         guiIntfStruct.Volume=param;
@@ -261,7 +261,7 @@ set_volume:
 	 if ( l > guiIntfStruct.Volume ) l=guiIntfStruct.Volume;
 	 if ( r > guiIntfStruct.Volume ) r=guiIntfStruct.Volume;
 //	 printf( "!!! v: %.2f b: %.2f -> %.2f x %.2f\n",guiIntfStruct.Volume,guiIntfStruct.Balance,l,r );
-         mixer_setvolume( &mixer,l,r );
+         mixer_setvolume( mixer,l,r );
 	}
 	if ( osd_level )
 	 {

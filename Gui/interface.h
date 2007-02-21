@@ -57,6 +57,7 @@ typedef struct
    guiVideoStruct        videodata;
    guiUnknownErrorStruct error;
    
+   struct MPContext * mpcontext;
    void * sh_video;
    void * afilter;
    void * demuxer;
@@ -131,6 +132,7 @@ extern guiInterface_t guiIntfStruct;
 #define guiSetDemuxer       15
 #define guiSetParameters    16
 #define guiSetAfilter       17
+#define guiSetContext       18
 
 #define guiSetStop  0
 #define guiSetPlay  1

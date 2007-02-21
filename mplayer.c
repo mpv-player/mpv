@@ -386,9 +386,24 @@ void *mpctx_get_video_out(MPContext *mpctx)
     return mpctx->video_out;
 }
 
+void *mpctx_get_audio_out(MPContext *mpctx)
+{
+    return mpctx->video_out;
+}
+
 void *mpctx_get_playtree_iter(MPContext *mpctx)
 {
     return mpctx->playtree_iter;
+}
+
+void *mpctx_get_mixer(MPContext *mpctx)
+{
+    return &mpctx->mixer;
+}
+
+void *mpctx_get_global_sub_size(MPContext *mpctx)
+{
+    return mpctx->global_sub_size;
 }
 
 static int is_valid_metadata_type (metadata_t type) {
@@ -2546,6 +2561,7 @@ current_module = NULL;
 #ifdef HAVE_NEW_GUI
   if(use_gui){
        guiInit();
+       guiGetEvent(guiSetContext, mpctx);
        inited_flags|=INITED_GUI;
        guiGetEvent( guiCEvent,(char *)((gui_no_filename) ? 0 : 1) );
   }

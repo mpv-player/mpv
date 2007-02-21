@@ -6,6 +6,7 @@
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../mplayer.h"
+#include "../../access_mpcontext.h"
 #include "../../mixer.h"
 
 #include "../app.h"
@@ -60,8 +61,6 @@
 #include "../pixmaps/vcd.xpm"
 #include "../pixmaps/playvcd.xpm"
 #endif
-
-extern mixer_t mixer; // mixer from mplayer.c
 
 void ActivateMenuItem( int Item )
 {
@@ -378,7 +377,6 @@ const char * GetLanguage( int language )
  return NULL;
 }
 
-extern int global_sub_size;
 
 GtkWidget * DVDSubMenu;
 GtkWidget * DVDTitleMenu;
@@ -400,6 +398,9 @@ GtkWidget * create_PopUpMenu( void )
  Menu=gtk_menu_new();
  gtk_widget_realize (Menu);
  window1 = gtk_widget_get_toplevel(Menu);
+ mixer_t *mixer = mpctx_get_mixer(guiIntfStruct.mpcontext);
+ int global_sub_size = mpctx_get_global_sub_size(guiIntfStruct.mpcontext);
+
 
   AddMenuItem( window1, (const char*)ab_xpm, Menu,MSGTR_MENU_AboutMPlayer"     ", evAbout );
   AddSeparator( Menu );
@@ -590,7 +591,7 @@ GtkWidget * create_PopUpMenu( void )
    }
 
   AddSeparator( Menu );
-  MenuItem=AddMenuCheckItem( window1, (const char*)sound_xpm, Menu,MSGTR_MENU_Mute,mixer.muted,evMute );
+  MenuItem=AddMenuCheckItem( window1, (const char*)sound_xpm, Menu,MSGTR_MENU_Mute,mixer->muted,evMute );
   if ( !guiIntfStruct.AudioType ) gtk_widget_set_sensitive( MenuItem,FALSE );
   AddMenuItem( window1, (const char*)pl_xpm, Menu,MSGTR_MENU_PlayList, evPlayList );
   AddMenuItem( window1, (const char*)skin_xpm, Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );

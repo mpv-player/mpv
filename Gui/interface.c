@@ -16,6 +16,7 @@
 #include "mplayer/play.h"
 
 #include "mplayer.h"
+#include "access_mpcontext.h"
 #include "app.h"
 #include "cfg.h"
 #include "help_mp.h"
@@ -49,7 +50,6 @@ extern af_cfg_t af_cfg;
 #include "m_config.h"
 #include "m_option.h"
 
-extern mixer_t mixer; // mixer from mplayer.c
 
 guiInterface_t guiIntfStruct;
 int guiWinID=-1;
@@ -418,8 +418,6 @@ int guiCMDArray[] =
   evSkinBrowser
  };
 
-extern ao_functions_t * audio_out;
-extern vo_functions_t * video_out;
 extern int    		frame_dropping;
 extern int              stream_dump_type;
 extern int  		vcd_track;
@@ -550,10 +548,20 @@ static void remove_vf( char * str )
 
 int guiGetEvent( int type,char * arg )
 {
+  ao_functions_t *audio_out = NULL;
+  vo_functions_t *video_out = NULL;
+  mixer_t *mixer = NULL;
+
  stream_t * stream = (stream_t *) arg;
 #ifdef USE_DVDREAD
  dvd_priv_t * dvdp = (dvd_priv_t *) arg;
 #endif 
+
+ if (guiIntfStruct.mpcontext) {
+   audio_out = mpctx_get_audio_out(guiIntfStruct.mpcontext);
+   video_out = mpctx_get_video_out(guiIntfStruct.mpcontext);
+   mixer = mpctx_get_mixer(guiIntfStruct.mpcontext);
+ }
 
  switch ( type )
   {
@@ -588,6 +596,8 @@ int guiGetEvent( int type,char * arg )
 	if ( (int)arg ) { guiIntfStruct.NoWindow=True; wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow ); }
 	  else wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
 	break;
+   case guiSetContext:
+	guiIntfStruct.mpcontext=(void *)arg;
    case guiSetDemuxer:
 	guiIntfStruct.demuxer=(void *)arg;
 	break;
@@ -672,7 +682,7 @@ int guiGetEvent( int type,char * arg )
         if ( audio_out )
 	{
 	 float l,r;
-	 mixer_getvolume( &mixer,&l,&r );
+	 mixer_getvolume( mixer,&l,&r );
 	 guiIntfStruct.Volume=(r>l?r:l);
 	 if ( r != l ) guiIntfStruct.Balance=( ( r - l ) + 100 ) * 0.5f;
 	   else guiIntfStruct.Balance=50.0f;
@@ -701,7 +711,7 @@ int guiGetEvent( int type,char * arg )
         if ( audio_out )
 	{
 	 float l,r;
-	 mixer_getvolume( &mixer,&l,&r );
+	 mixer_getvolume( mixer,&l,&r );
 	 guiIntfStruct.Volume=(r>l?r:l);
 	 if ( r != l ) guiIntfStruct.Balance=( ( r - l ) + 100 ) * 0.5f;
 	   else guiIntfStruct.Balance=50.0f;
