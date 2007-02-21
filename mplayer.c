@@ -564,7 +564,7 @@ void uninit_player(unsigned int mask){
     current_module="uninit_acodec";
     if(mpctx->sh_audio) uninit_audio(mpctx->sh_audio);
 #ifdef HAVE_NEW_GUI
-    guiGetEvent(guiSetAfilter, (char *)NULL);
+    if (use_gui) guiGetEvent(guiSetAfilter, (char *)NULL);
 #endif
     mpctx->sh_audio=NULL;
   }
@@ -1185,7 +1185,7 @@ int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
   if (!sh_audio)
   {
 #ifdef HAVE_NEW_GUI
-    guiGetEvent(guiSetAfilter, (char *)NULL);
+    if (use_gui) guiGetEvent(guiSetAfilter, (char *)NULL);
 #endif
     mpctx->mixer.afilter = NULL;
     return 0;
@@ -1205,7 +1205,7 @@ int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
            ao_data->outburst * 4, ao_data->buffersize);
   mpctx->mixer.afilter = sh_audio->afilter;
 #ifdef HAVE_NEW_GUI
-  guiGetEvent(guiSetAfilter, (char *)sh_audio->afilter);
+  if (use_gui) guiGetEvent(guiSetAfilter, (char *)sh_audio->afilter);
 #endif
   return result;
 }
