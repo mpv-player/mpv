@@ -1628,6 +1628,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	case MP_CMD_GET_PROPERTY:{
 		m_option_t *prop;
 		void *val;
+		char *tmp;
 		prop = mp_property_find(cmd->args[0].v.s);
 		if (!prop) {
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
@@ -1642,7 +1643,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			   cmd->args[0].v.s);
 		    break;
 		}
-		char *tmp = m_option_print(prop, val);
+		tmp = m_option_print(prop, val);
 		if (!tmp || tmp == (char *) -1) {
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to print value of property '%s'.\n",
