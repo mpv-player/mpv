@@ -79,7 +79,7 @@ static m_option_t cfg_fields[] = {
 m_option_t*  mp_property_find(const char* name);
 
 static void entry_set_text(menu_t* menu, list_entry_t* e) {
-  char* val = m_property_print(e->opt);
+  char* val = m_property_print(e->opt, menu->ctx);
   int l,edit = (mpriv->edit && e == mpriv->p.current);
   if(!val) {
     if(mpriv->hide_na) {
@@ -227,22 +227,22 @@ static void read_cmd(menu_t* menu,int cmd) {
     case MENU_CMD_UP:
       if(!mpriv->edit) break;
     case MENU_CMD_RIGHT:
-      if(m_property_do(e->opt,M_PROPERTY_STEP_UP,NULL) > 0)
+      if(m_property_do(e->opt,M_PROPERTY_STEP_UP,NULL,menu->ctx) > 0)
         update_entries(menu);
       return;
     case MENU_CMD_DOWN:
       if(!mpriv->edit) break;
     case MENU_CMD_LEFT:
-      if(m_property_do(e->opt,M_PROPERTY_STEP_DOWN,NULL) > 0)
+      if(m_property_do(e->opt,M_PROPERTY_STEP_DOWN,NULL,menu->ctx) > 0)
         update_entries(menu);
       return;
       
     case MENU_CMD_OK:
       // check that the property is writable
-      if(m_property_do(e->opt,M_PROPERTY_SET,NULL) < 0) return;
+      if(m_property_do(e->opt,M_PROPERTY_SET,NULL,menu->ctx) < 0) return;
       // shortcut for flags
       if(e->opt->type == CONF_TYPE_FLAG) {
-        if(m_property_do(e->opt,M_PROPERTY_STEP_UP,NULL) > 0)
+	if(m_property_do(e->opt,M_PROPERTY_STEP_UP,NULL,menu->ctx) > 0)
           update_entries(menu);
         return;
       }

@@ -381,6 +381,16 @@ static unsigned int inited_flags=0;
 
 #define mp_basename2(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
 
+void *mpctx_get_video_out(MPContext *mpctx)
+{
+    return mpctx->video_out;
+}
+
+void *mpctx_get_playtree_iter(MPContext *mpctx)
+{
+    return mpctx->playtree_iter;
+}
+
 static int is_valid_metadata_type (metadata_t type) {
   switch (type)
   {
@@ -2485,14 +2495,14 @@ current_module = NULL;
 
 #ifdef HAVE_MENU
  if(use_menu) {
-   if(menu_cfg && menu_init(menu_cfg))
+   if(menu_cfg && menu_init(mpctx, menu_cfg))
      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);
    else {
      menu_cfg = get_path("menu.conf");
-     if(menu_init(menu_cfg))
+     if(menu_init(mpctx, menu_cfg))
        mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);
      else {
-       if(menu_init(MPLAYER_CONFDIR "/menu.conf"))
+       if(menu_init(mpctx, MPLAYER_CONFDIR "/menu.conf"))
          mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, MPLAYER_CONFDIR"/menu.conf");
        else {
          mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitFailed);

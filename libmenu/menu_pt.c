@@ -19,10 +19,9 @@
 
 #include "playtree.h"
 #include "input/input.h"
+#include "access_mpcontext.h"
 
 #define mp_basename(s) (strrchr((s),'/')==NULL?(char*)(s):(strrchr((s),'/')+1))
-
-extern play_tree_iter_t* playtree_iter;
 
 struct list_entry_s {
   struct list_entry p;
@@ -58,7 +57,7 @@ static void read_cmd(menu_t* menu,int cmd) {
     char str[15];
     play_tree_t* i;
     mp_cmd_t* c;
-
+    play_tree_iter_t* playtree_iter = mpctx_get_playtree_iter(menu->ctx);
 
     if(playtree_iter->tree == mpriv->p.current->pt)
       break;
@@ -107,6 +106,8 @@ static void close_menu(menu_t* menu) {
 static int op(menu_t* menu, char* args) {
   play_tree_t* i;
   list_entry_t* e;
+  play_tree_iter_t* playtree_iter = mpctx_get_playtree_iter(menu->ctx);
+  
   args = NULL; // Warning kill
 
   menu->draw = menu_list_draw;

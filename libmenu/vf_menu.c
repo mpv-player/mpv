@@ -23,8 +23,7 @@
 #include "input/input.h"
 #include "m_struct.h"
 #include "menu.h"
-
-extern vo_functions_t* video_out;
+#include "access_mpcontext.h"
 
 
 static struct vf_priv_s* st_priv = NULL;
@@ -78,6 +77,7 @@ static mp_image_t* alloc_mpi(int w, int h, uint32_t fmt) {
 }
 
 void vf_menu_pause_update(struct vf_instance_s* vf) {
+  vo_functions_t *video_out = mpctx_get_video_out(vf->priv->current->ctx);
   if(pause_mpi) {
     put_image(vf,pause_mpi, MP_NOPTS_VALUE);
     // Don't draw the osd atm

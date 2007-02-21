@@ -52,6 +52,7 @@ typedef struct menu_def_st {
   char* args;
 } menu_def_t;
 
+static struct MPContext *menu_ctx = NULL;
 static menu_def_t* menu_list = NULL;
 static int menu_count = 0;
 
@@ -122,7 +123,7 @@ static int menu_parse_config(char* buffer) {
 #define BUF_STEP 1024
 #define BUF_MIN 128
 #define BUF_MAX BUF_STEP*1024
-int menu_init(char* cfg_file) {
+int menu_init(struct MPContext *mpctx, char* cfg_file) {
   char* buffer = NULL;
   int bl = BUF_STEP, br = 0;
   int f, fd;
@@ -160,6 +161,7 @@ int menu_init(char* cfg_file) {
 
   close(fd);
 
+  menu_ctx = mpctx;
   f = menu_parse_config(buffer);
   free(buffer);
   return f;
@@ -216,6 +218,7 @@ menu_t* menu_open(char *name) {
   m = calloc(1,sizeof(menu_t));
   m->priv_st = &(menu_list[i].type->priv_st);
   m->priv = m_struct_copy(m->priv_st,menu_list[i].cfg);
+  m->ctx = menu_ctx;
   if(menu_list[i].type->open(m,menu_list[i].args))
     return m;
   if(m->priv)
