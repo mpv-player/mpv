@@ -45,6 +45,7 @@ SRCS_MPLAYER = mplayer.c \
                mixer.c \
                parser-mpcmd.c \
                subopt-helper.c \
+               command.c \
 
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \

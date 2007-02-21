@@ -17,13 +17,13 @@
 
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 
-int m_property_do(m_option_t* prop, int action, void* arg) {
+int m_property_do(m_option_t* prop, int action, void* arg, void *ctx) {
     if(!prop) return M_PROPERTY_UNKNOWN;
-    return ((m_property_ctrl_f)prop->p)(prop,action,arg);
+    return ((m_property_ctrl_f)prop->p)(prop,action,arg,ctx);
 }
 
 
-char* m_property_print(m_option_t* prop) {
+char* m_property_print(m_option_t* prop, void *ctx) {
     m_property_ctrl_f ctrl;
     void* val;
     char* ret;
@@ -32,11 +32,11 @@ char* m_property_print(m_option_t* prop) {
 
     ctrl = prop->p;
     // look if the property have it's own print func
-    if(ctrl(prop,M_PROPERTY_PRINT,&ret) >= 0)
+    if(ctrl(prop,M_PROPERTY_PRINT,&ret, ctx) >= 0)
         return ret;
     // fallback on the default print for this type
     val = calloc(1,prop->type->size);    
-    if(ctrl(prop,M_PROPERTY_GET,val) <= 0) {
+    if(ctrl(prop,M_PROPERTY_GET,val,ctx) <= 0) {
         free(val);
         return NULL;
     }
@@ -45,7 +45,7 @@ char* m_property_print(m_option_t* prop) {
     return ret == (char*)-1 ? NULL : ret;
 }
 
-int m_property_parse(m_option_t* prop, char* txt) {
+int m_property_parse(m_option_t* prop, char* txt, void *ctx) {
     m_property_ctrl_f ctrl;
     void* val;
     int r;
@@ -54,7 +54,7 @@ int m_property_parse(m_option_t* prop, char* txt) {
 
     ctrl = prop->p;
     // try the property own parsing func
-    if((r = ctrl(prop,M_PROPERTY_PARSE,txt)) !=  M_PROPERTY_NOT_IMPLEMENTED)
+    if((r = ctrl(prop,M_PROPERTY_PARSE,txt,ctx)) !=  M_PROPERTY_NOT_IMPLEMENTED)
         return r;
     // fallback on the default
     val = calloc(1,prop->type->size);
@@ -62,13 +62,13 @@ int m_property_parse(m_option_t* prop, char* txt) {
         free(val);
         return r;
     }
-    r = ctrl(prop,M_PROPERTY_SET,val);
+    r = ctrl(prop,M_PROPERTY_SET,val,ctx);
     m_option_free(prop,val);
     free(val);
     return r;
 }
 
-char* m_properties_expand_string(m_option_t* prop_list,char* str) {
+char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx) {
     int l,fr=0,pos=0,size=strlen(str)+512;
     char *p = NULL,*e,*ret = malloc(size), num_val;
     int skip = 0, lvl = 0, skip_lvl = 0;
@@ -110,7 +110,7 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str) {
             memcpy(pname,str+2,pl);
             pname[pl] = 0;
             if((prop = m_option_list_find(prop_list,pname)) &&
-               (p = m_property_print(prop)))
+               (p = m_property_print(prop, ctx)))
                 l = strlen(p), fr = 1;
             else
                 l = 0;
@@ -124,7 +124,7 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str) {
                 memcpy(pname,str+2,pl);
                 pname[pl] = 0;
                 if(!(prop = m_option_list_find(prop_list,pname)) ||
-                   m_property_do(prop,M_PROPERTY_GET,NULL) < 0)
+                   m_property_do(prop,M_PROPERTY_GET,NULL, ctx) < 0)
                     skip = 1, skip_lvl = lvl;
             }
             str = e+1, l = 0;

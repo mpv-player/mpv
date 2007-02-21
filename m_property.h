@@ -78,7 +78,7 @@
 
 /// \ingroup Properties
 /// \brief Property action callback.
-typedef int(*m_property_ctrl_f)(m_option_t* prop,int action,void* arg);
+typedef int(*m_property_ctrl_f)(m_option_t* prop,int action,void* arg,void *ctx);
 
 /// Do an action on a property.
 /** \param prop The property.
@@ -86,20 +86,20 @@ typedef int(*m_property_ctrl_f)(m_option_t* prop,int action,void* arg);
  *  \param arg Argument, usually a pointer to the data type used by the property.
  *  \return See \ref PropertyActionsReturn.
  */
-int m_property_do(m_option_t* prop, int action, void* arg);
+int m_property_do(m_option_t* prop, int action, void* arg, void *ctx);
 
 /// Print the current value of a property.
 /** \param prop The property.
  *  \return A newly allocated string with the current value or NULL on error.
  */
-char* m_property_print(m_option_t* prop);
+char* m_property_print(m_option_t* prop, void *ctx);
 
 /// Set a property.
 /** \param prop The property.
  *  \param txt The value to set.
  *  \return 1 on success, 0 on error.
  */
-int m_property_parse(m_option_t* prop, char* txt);
+int m_property_parse(m_option_t* prop, char* txt, void *ctx);
 
 /// Print a list of properties.
 void m_properties_print_help_list(m_option_t* list);
@@ -115,7 +115,7 @@ void m_properties_print_help_list(m_option_t* list);
  *  \param str The string to expand.
  *  \return The newly allocated expanded string.
  */
-char* m_properties_expand_string(m_option_t* prop_list,char* str);
+char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx);
 
 // Helpers to use MPlayer's properties
 
@@ -123,7 +123,7 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str);
 m_option_t*  mp_property_find(const char* name);
 
 /// Do an action with an MPlayer property.
-int mp_property_do(const char* name,int action, void* val);
+int mp_property_do(const char* name,int action, void* val, void *ctx);
 
 /// \defgroup PropertyImplHelper Property implementation helpers
 /// \ingroup Properties
