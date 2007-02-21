@@ -1002,10 +1002,10 @@ static char* parse_tag(char* p, double pwr) {
 		update_font();
 	} else if (mystrcmp(&p, "i")) {
 		int i;
-		if (mystrtoi(&p, 10, &i))
+		if (mystrtoi(&p, 10, &i)) {
 			if (pwr >= .5)
 				render_context.italic = i;
-		else
+		} else
 			render_context.italic = render_context.style->Italic;
 		update_font();
 	} else if (mystrcmp(&p, "kf") || mystrcmp(&p, "K")) {
