@@ -401,7 +401,7 @@ void *mpctx_get_mixer(MPContext *mpctx)
     return &mpctx->mixer;
 }
 
-void *mpctx_get_global_sub_size(MPContext *mpctx)
+int mpctx_get_global_sub_size(MPContext *mpctx)
 {
     return mpctx->global_sub_size;
 }
