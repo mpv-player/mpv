@@ -394,12 +394,12 @@ GtkWidget * create_PopUpMenu( void )
  GtkWidget * SubMenu = NULL;
  GtkWidget * MenuItem = NULL;
  GtkWidget * H, * N, * D, * F;
+ mixer_t *mixer = mpctx_get_mixer(guiIntfStruct.mpcontext);
+ int global_sub_size = mpctx_get_global_sub_size(guiIntfStruct.mpcontext);
 
  Menu=gtk_menu_new();
  gtk_widget_realize (Menu);
  window1 = gtk_widget_get_toplevel(Menu);
- mixer_t *mixer = mpctx_get_mixer(guiIntfStruct.mpcontext);
- int global_sub_size = mpctx_get_global_sub_size(guiIntfStruct.mpcontext);
 
 
   AddMenuItem( window1, (const char*)ab_xpm, Menu,MSGTR_MENU_AboutMPlayer"     ", evAbout );
