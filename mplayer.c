@@ -2084,7 +2084,6 @@ void pause_loop(void)
 	} else
 	    mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
-	fflush(stdout);
     }
 #ifdef HAVE_NEW_GUI
     if (use_gui)
@@ -3073,8 +3072,6 @@ if(mpctx->sh_video){
 
 }
 
-fflush(stdout);
-
 if(!mpctx->sh_video && !mpctx->sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NoStreamFound);
 #ifdef HAS_DVBIN_SUPPORT
@@ -3228,7 +3225,6 @@ current_module="main";
 
 // Disable the term OSD in verbose mode
 if(verbose) term_osd = 0;
-fflush(stdout);
 
 {
 //int frame_corr_num=0;   //
@@ -3306,7 +3302,7 @@ if ( use_gui ) {
 if(loop_times>1) loop_times--; else
 if(loop_times==1) loop_times = -1;
 
-mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);
 
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
@@ -3539,7 +3535,6 @@ if(rel_seek_secs || abs_seek_pos){
       if (vo_vobsub)
 	//vobsub_reset(vo_vobsub);
 	vobsub_seek(vo_vobsub,mpctx->sh_video->pts);
-      fflush(stdout);
 
       if(mpctx->sh_video){
 	 current_module="seek_video_reset";
