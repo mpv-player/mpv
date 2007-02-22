@@ -20,13 +20,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/* On mingw compile with: gcc getopt.c vfw2menc.c -o vfw2menc.exe -lwinmm */
-/* Using wine: winegcc getopt.c vfw2menc.c -o vfw2menc -lwinmm */
+/* On mingw compile with: gcc getopt.c vfw2menc.c -o vfw2menc.exe -lwinmm -lole32 */
+/* Using wine: winegcc getopt.c vfw2menc.c -o vfw2menc -lwinmm -lole32 */
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_DEPRECATE
 #pragma warning(disable: 4996)
 #endif
+
+#define __VERSION__ "0.1"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +38,17 @@
 #include <vfw.h>
 
 #define BAIL(msg) { printf("%s: %s\n", argv[0], msg); ret = -1; goto cleanup; }
+
+typedef struct {
+    UINT             uDriverSignature;
+    HINSTANCE        hDriverModule;
+    DRIVERPROC       DriverProc;
+    DWORD            dwDriverID;
+} DRVR;
+
+typedef DRVR  *PDRVR;
+typedef DRVR  *NPDRVR;
+typedef DRVR  *LPDRVR;
 
 enum
 {
@@ -138,7 +151,7 @@ static struct option long_options[] =
 
 void help(const char *progname)
 {
-    printf("VFW to mencoder - Copyright 2006 - Gianluigi Tiesi <sherpya@netfarm.it>\n");
+    printf("VFW to mencoder v"__VERSION__" - Copyright 2007 - Gianluigi Tiesi <sherpya@netfarm.it>\n");
     printf("This program is Free Software\n\n");
     printf("Usage: %s\n", progname);
     printf("      -h|--help            - displays this help\n");
@@ -157,13 +170,16 @@ void help(const char *progname)
     printf("Usage with mencoder -ovc vfw -xvfwopts codec=vp6vfw.dll:compdata=settings.mcf\n");
 }
 
-
 int main(int argc, char *argv[])
 {
     char *driver = NULL;
     char *fourcc = NULL;
     char *filename = NULL;
     unsigned char mode = 0;
+    DWORD dwFCC = 0;
+    ICOPEN icopen;
+    HRESULT coinit = S_FALSE;
+    /* ICINFO icinfo; */
 
     wchar_t drvfile[MAX_PATH];
     HDRVR hDriver = NULL;
@@ -208,9 +224,10 @@ int main(int argc, char *argv[])
                 break;
             default:
                 printf("Wrong arguments!\n");
+                help(argv[0]);
+                goto cleanup;
         }
     }
-
 
     if (!(argc == optind) && (mode != MODE_NONE) &&
         driver && (filename || (mode == MODE_VIEW)))
@@ -222,11 +239,33 @@ int main(int argc, char *argv[])
     if (!MultiByteToWideChar(CP_ACP, 0, driver, -1, drvfile, MAX_PATH))
         BAIL("MultiByteToWideChar() failed\n");
 
-    if (!(hDriver = OpenDriver(drvfile, 0, (fourcc) ? ((LPARAM) fourcc) : 0)))
+    if (fourcc) memcpy(&dwFCC, fourcc, 4);
+    memset(&icopen, 0, sizeof(icopen));
+
+    icopen.dwSize = sizeof(icopen);
+    icopen.fccType = ICTYPE_VIDEO; /* VIDC */
+    icopen.fccHandler = dwFCC;
+    icopen.dwVersion  = 0x00001000; /* FIXME */
+    icopen.dwFlags = ICMODE_COMPRESS;
+    icopen.dwError = 0;
+    icopen.pV1Reserved = NULL;
+    icopen.pV2Reserved = NULL;
+    icopen.dnDevNode = -1; /* FIXME */
+
+    coinit = CoInitialize(NULL);
+
+    if (!(hDriver = OpenDriver(drvfile, NULL, (LPARAM) &icopen)))
         BAIL("OpenDriver() failed\n");
+
+   /*
+        memset(&icinfo, 0, sizeof(ICINFO));
+        icinfo.dwSize = sizeof(ICINFO);
+        SendDriverMessage(hDriver, ICM_GETINFO, (LPARAM) &icinfo, sizeof(ICINFO));
+    */
 
     if (SendDriverMessage(hDriver, ICM_CONFIGURE, -1, 0) != ICERR_OK)
         BAIL("The driver doesn't provide a configure dialog");
+
 
     switch(mode)
     {
@@ -243,8 +282,11 @@ int main(int argc, char *argv[])
                 BAIL("Cannot save settings to file");
             break;
         case MODE_VIEW:
-            if (SendDriverMessage(hDriver, ICM_CONFIGURE, 0, 0) != ICERR_OK)
-                BAIL("ICM_CONFIGURE failed");
+            {
+                HWND hwnd = GetDesktopWindow();
+                if (SendDriverMessage(hDriver, ICM_CONFIGURE, (LPARAM) hwnd, 0) != ICERR_OK)
+                    BAIL("ICM_CONFIGURE failed");
+            }
             break;
         default:
             BAIL("This should not happen :)");
@@ -255,5 +297,6 @@ cleanup:
     if (fourcc) free(fourcc);
     if (filename) free(filename);
     if (hDriver) CloseDriver(hDriver, 0, 0);
+    if (coinit == S_OK) CoUninitialize();
     return ret;
 }
