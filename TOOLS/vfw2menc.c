@@ -3,6 +3,8 @@
  *
  * Copyright (c) 2006 Gianluigi Tiesi <sherpya@netfarm.it>
  *
+ * Official Website : http://oss.netfarm.it/mplayer-win32.php
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
