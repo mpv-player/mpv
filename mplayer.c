@@ -2170,6 +2170,62 @@ void print_version(void){
 #endif /* ARCH_X86 */
 }
 
+
+// Find the right mute status and record position for new file position
+static void edl_seek_reset(MPContext *mpctx)
+{
+    mpctx->edl_muted = 0;
+    next_edl_record = edl_records;
+
+    while (next_edl_record) {
+	if (next_edl_record->start_sec >= mpctx->sh_video->pts)
+	    break;
+
+	if (next_edl_record->action == EDL_MUTE)
+	    mpctx->edl_muted = !mpctx->edl_muted;
+	next_edl_record = next_edl_record->next;
+    }
+    if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted)
+	mixer_mute(&mpctx->mixer);
+}
+
+
+// Execute EDL command for the current position if one exists
+static void edl_update(MPContext *mpctx)
+{
+    if (!next_edl_record)
+	return;
+
+    if (!mpctx->sh_video) {
+	mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlNOsh_video);
+	free_edl(edl_records);
+	next_edl_record = NULL; 
+	edl_records = NULL;
+	return;
+    }
+
+    if (mpctx->sh_video->pts >= next_edl_record->start_sec) {
+	if (next_edl_record->action == EDL_SKIP) {
+	    mpctx->osd_function = OSD_FFW;
+	    abs_seek_pos = 0;
+	    rel_seek_secs = next_edl_record->length_sec;
+	    mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop "
+		   "[%f], length [%f]\n", next_edl_record->start_sec,
+		   next_edl_record->stop_sec, next_edl_record->length_sec);
+	    edl_decision = 1;
+	}
+	else if (next_edl_record->action == EDL_MUTE) {
+	    mpctx->edl_muted = !mpctx->edl_muted;
+	    if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted)
+		mixer_mute(&mpctx->mixer);
+	    mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f]\n",
+		   next_edl_record->start_sec );
+	}
+	next_edl_record = next_edl_record->next;
+    }
+}
+
+
 int main(int argc,char* argv[]){
 
 
@@ -3419,31 +3475,7 @@ if(step_sec>0) {
 	rel_seek_secs+=step_sec;
 }
 
-//================= EDL =========================================
-
- if( next_edl_record ) { // Are we (still?) doing EDL?
-  if ( !mpctx->sh_video ) {
-    mp_msg( MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlNOsh_video );
-    free_edl(edl_records);
-    next_edl_record = NULL; 
-    edl_records = NULL;
-  } else {
-   if( mpctx->sh_video->pts >= next_edl_record->start_sec ) {
-     if( next_edl_record->action == EDL_SKIP ) {
-       mpctx->osd_function = OSD_FFW;
-       abs_seek_pos = 0;
-       rel_seek_secs = next_edl_record->length_sec;
-       mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop [%f], length [%f]\n", next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec );
-       edl_decision = 1;
-     } else if( next_edl_record->action == EDL_MUTE ) {
-       mpctx->edl_muted = !mpctx->edl_muted;
-       if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted) mixer_mute(&mpctx->mixer);
-       mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f]\n", next_edl_record->start_sec );
-     }
-     next_edl_record=next_edl_record->next;
-   }
-  }
- }
+ edl_update(mpctx);
 
 //================= Keyboard events, SEEKing ====================
 
@@ -3539,28 +3571,8 @@ if(rel_seek_secs || abs_seek_pos){
         update_subtitles(mpctx->sh_video, mpctx->d_sub, 1);
       }
   }
-/*
- * We saw a seek, have to rewind the EDL operations stack
- * and find the next EDL action to take care of.
- */
 
-mpctx->edl_muted = 0;
-next_edl_record = edl_records;
-
-while (next_edl_record)
-{
-    /* Trying to remember if we need to mute/unmute first;
-     * prior EDL implementation lacks this.
-     */
-  
-    if (next_edl_record->start_sec >= mpctx->sh_video->pts)
-        break;
-
-    if (next_edl_record->action == EDL_MUTE) mpctx->edl_muted = !mpctx->edl_muted;
-    next_edl_record = next_edl_record->next;
-
-}
-if ((mpctx->user_muted | mpctx->edl_muted) != mpctx->mixer.muted) mixer_mute(&mpctx->mixer);
+  edl_seek_reset(mpctx);
 
   rel_seek_secs=0;
   abs_seek_pos=0;
