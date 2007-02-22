@@ -675,7 +675,7 @@ static uint32_t Directx_ManageDisplay()
 			ovfx.dckDestColorkey.dwColorSpaceLowValue = destcolorkey; 
             ovfx.dckDestColorkey.dwColorSpaceHighValue = destcolorkey;
 		}
-        // set the flags we'll send to UpdateOverlay      //DDOVER_AUTOFLIP|DDOVERFX_MIRRORLEFTRIGHT|DDOVERFX_MIRRORUPDOWN could be usefull?;
+        // set the flags we'll send to UpdateOverlay      //DDOVER_AUTOFLIP|DDOVERFX_MIRRORLEFTRIGHT|DDOVERFX_MIRRORUPDOWN could be useful?;
         dwUpdateFlags = DDOVER_SHOW | DDOVER_DDFX;
         /*if hardware can't do colorkeying set the window on top*/
 		if(capsDrv.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY) dwUpdateFlags |= DDOVER_KEYDESTOVERRIDE;

@@ -81,7 +81,7 @@ The main modules:
      Then it calculates duration, either from fixed FPS value, or from the
      PTS difference between and after reading the frame.
 
-2.e. other utility functions: there are some usefull code there, like
+2.e. other utility functions: there are some useful code there, like
     AVI muxer, or mp3 header parser, but leave them for now.
 
 So everything is ok 'till now. It can be found in libmpdemux/ library.

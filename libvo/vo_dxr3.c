@@ -19,7 +19,7 @@
  * 2003-01-02:
  *  Added patch from Jens Axboe that makes vo_dxr3 return to previous TV norm
  *   after quiting.
- *  Added patch from Thomas Jarosch that fixed alot of textual ouput
+ *  Added patch from Thomas Jarosch that fixed a lot of textual ouput
  *   errors.
  *
  * 2002-12-24: (Hohoho)

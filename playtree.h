@@ -205,7 +205,7 @@ play_tree_iter_free(play_tree_iter_t* iter);
 int 
 play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes);
 
-/// Step up, usefull to break a loop, etc.
+/// Step up, useful to break a loop, etc.
 /** \param iter The iterator.
  *  \param d The direction: d > 0 == next , d < 0 == prev
  *  \param with_node TRUE == stop on nodes with childs, FALSE == go directly to the next child
@@ -214,7 +214,7 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes);
 int
 play_tree_iter_up_step(play_tree_iter_t* iter, int d,int with_nodes);
 
-/// Enter a node child list, only usefull when stopping on nodes.
+/// Enter a node child list, only useful when stopping on nodes.
 int
 play_tree_iter_down_step(play_tree_iter_t* iter, int d,int with_nodes);
 

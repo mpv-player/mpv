@@ -8,8 +8,8 @@
 //  The QuickTime File Format PDF from Apple:
 //  http://developer.apple.com/techpubs/quicktime/qtdevdocs/PDF/QTFileFormat.pdf
 //  (Complete list of documentation at http://developer.apple.com/quicktime/)
-//  MP4-Lib sources from http://mpeg4ip.sf.net/ might be usefull fot .mp4
-//  aswell as .mov specific stuff.
+//  MP4-Lib sources from http://mpeg4ip.sf.net/ might be useful for .mp4
+//  as well as .mov specific stuff.
 //  All sort of Stuff about MPEG4:
 //  http://www.cmlab.csie.ntu.edu.tw/~pkhsiao/thesis.html
 //  I really recommend N4270-1.doc and N4270-2.doc which are exact specs

@@ -90,7 +90,7 @@ Each vo driver _has_ to implement these:
       window size and position. The code should look as following:
       ---
       set x,y,w,h to the values supplied by the caller or to those you deam
-      usefull.
+      useful.
       call geometry(&x, &y, &w, &h, screenw, screenh)
       call aspect()
       ---
@@ -114,7 +114,7 @@ Each vo driver _has_ to implement these:
 	 draw_alpha() for each. As a help, osd.c contains draw_alpha for
 	 each pixelformats, use this if possible!
 	 
-	 NOTE: this one will be obsolete soon! But it's still usefull when
+	 NOTE: This one will be obsolete soon! But it's still useful when
 	 you want to do tricks, like rendering osd _after_ hardware scaling
 	 (tdfxfb) or render subtitles under of the image (vo_mpegpes, sdl)
 
