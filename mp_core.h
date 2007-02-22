@@ -46,9 +46,7 @@
 typedef struct MPContext {
     int osd_show_percentage;
     int osd_function;
-    demux_stream_t *d_audio;
     ao_functions_t *audio_out;
-    float begin_skip; ///< start time of the current skip while on edlout mode
     play_tree_t *playtree;
     play_tree_iter_t *playtree_iter;
     int eof;
@@ -58,6 +56,7 @@ typedef struct MPContext {
     demuxer_t *demuxer;
     sh_audio_t *sh_audio;
     sh_video_t *sh_video;
+    demux_stream_t *d_audio;
     demux_stream_t *d_video;
     demux_stream_t *d_sub;
     mixer_t mixer;
@@ -67,6 +66,8 @@ typedef struct MPContext {
     // struct.
     int num_buffered_frames;
 
+    float begin_skip; ///< start time of the current skip while on edlout mode
+    // audio is muted if either EDL or user activates mute
     short edl_muted; ///< Stores whether EDL is currently in muted mode.
     short user_muted; ///< Stores whether user wanted muted mode.
 
