@@ -2596,7 +2596,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>Dateiname</replaceabl
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
-  Zuerst musst du die Closed-Soure-Treiber von <ulink url="http://nvidia.com"/>
+  Zuerst musst du die Closed-Source-Treiber von <ulink url="http://nvidia.com"/>
   herunterladen. Ich werde Installation und Konfiguration nicht im Detail
   beschreiben, da dies außerhalb der Aufgabe dieses Dokuments liegt.
 </para>
