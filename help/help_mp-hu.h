@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r21906 (2007. 01. 21.)
+// Sync'ed with help_mp-en.h r22292 (2007. 02. 23.)
 
 // ========================= MPlayer help ===========================
 
@@ -540,8 +540,8 @@ static char help_text[]=
 #define MSGTR_DVDspeedCantOpen "Nem nyitható meg a DVD eszköz írásra, a DVD sebesség változtatásához írási jog kell.\n"
 #define MSGTR_DVDrestoreSpeed "DVD sebesség visszaállítása... "
 #define MSGTR_DVDlimitSpeed "DVD sebesség korlátozása %dKB/s-ra... "
-#define MSGTR_DVDlimitFail "DVD sebesség korlátozása sikertelen.\n"
-#define MSGTR_DVDlimitOk "DVD sebesség korlátozása sikeres.\n"
+#define MSGTR_DVDlimitFail "sikertelen\n"
+#define MSGTR_DVDlimitOk "sikeres\n"
 #define MSGTR_NoDVDSupport "Az MPlayer DVD támogatás nélkül lett lefordítva, kilépés.\n"
 #define MSGTR_DVDnumTitles "%d sáv van a DVD-n.\n"
 #define MSGTR_DVDinvalidTitle "Helytelen DVD sáv: %d\n"
@@ -1008,7 +1008,8 @@ static char help_text[]=
 // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "A kiválasztott video_out eszköz nem kompatibilis ezzel a codec-kel.\n"\
-                "Próbáld meg hozzáadni a scale szűrőt, pl. -vf spp,scale a -vf spp helyett.\n"
+                "Próbáld meg hozzáadni a scale szűrőt a szűrő listádhoz,\n"\
+                "pl. -vf spp,scale a -vf spp helyett.\n"
 #define MSGTR_VO_GenericError "Hiba történt"
 #define MSGTR_VO_UnableToAccess "Nem elérhető"
 #define MSGTR_VO_ExistsButNoDirectory "már létezik, de nem könyvtár."
@@ -1201,8 +1202,6 @@ static char help_text[]=
 "[AO_ALSA]   device=<eszköz-név>\n"\
 "[AO_ALSA]     Beállítja az eszközt (cseréld ki a ,-t .-ra és a :-t =-re)\n"
 #define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d csatorna nem támogatott.\n"
-#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Az ALSA konfiguráció nem olvasható: %s\n"
-#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] A konfiguráció nem másolható: %s\n"
 #define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] A nonblock-módú megnyitás sikertelen, megpróbálom block-módban megnyitni.\n"
 #define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Visszajátszás megnyitásának hibája: %s\n"
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Hiba a(z) %s block-mód beállításakor.\n"
@@ -1559,6 +1558,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_XMMS_FoundPlugin "Megtalált plugin: %s (%s).\n"
 #define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Plugin lezárása: %s.\n"
+#define MSGTR_MPDEMUX_XMMS_WaitForStart "Várakozás a(z) '%s' XMMS plugin általi lejátszására...\n"
 
 // ========================== LIBMPMENU ===================================
 
@@ -2043,9 +2043,10 @@ static char help_text[]=
 #define MSGTR_LIBASS_EmptyEvent "[ass] Üres esemény!\n"
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] MAX_GLYPHS elérve: %d esemény, start = %llu, tartam = %llu\n Szöveg = %s\n"
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Figyelem! Esemény magassága megváltozott!  \n"
-#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Túl sok egyidejű esemény!\n"
 
 // ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] 0x%X jel nem található, betűtípus újraválasztása ehhez: (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] 0x%X jel nem található a betűtípusban ehhez: (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Hiba a betűtípus memóriában történő megnyitásakor: %s\n"
+#define MSGTR_LIBASS_NoCharmaps "[ass] betűtípus leírás karaktertábla nélkül\n"
+#define MSGTR_LIBASS_NoCharmapAutodetected "[ass] nincs alapértelmezetten megtalált karaktertábla, az elsőt próbálom\n"
