@@ -418,6 +418,7 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
 int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp)
 {
     HRESULT result;
+    ALLOCATOR_PROPERTIES props,props1;
     int should_test=1;
     int stoped = 0;   
     
@@ -609,6 +610,24 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
 	printf("Error reconnecting input pin 0x%x\n", (int)result);
 	return -1;
     }
+
+    if(this->m_pDS_Filter->m_pAll)
+        this->m_pDS_Filter->m_pAll->vt->Release(this->m_pDS_Filter->m_pAll);
+    this->m_pDS_Filter->m_pAll=MemAllocatorCreate();
+    if (!this->m_pDS_Filter->m_pAll)
+    {
+        printf("Call to MemAllocatorCreate failed\n");
+        return -1;
+    }
+    //Seting allocator property according to our media type
+    props.cBuffers=1;
+    props.cbBuffer=this->m_sDestType.lSampleSize;
+    props.cbAlign=1;
+    props.cbPrefix=0;
+    this->m_pDS_Filter->m_pAll->vt->SetProperties(this->m_pDS_Filter->m_pAll, &props, &props1);
+    //Notify remote pin about choosed allocator
+    this->m_pDS_Filter->m_pImp->vt->NotifyAllocator(this->m_pDS_Filter->m_pImp, this->m_pDS_Filter->m_pAll, 0);
+
     result = this->m_pDS_Filter->m_pOutputPin->vt->ReceiveConnection(this->m_pDS_Filter->m_pOutputPin,
 							       (IPin *)this->m_pDS_Filter->m_pOurOutput,
 							       &this->m_sDestType);
