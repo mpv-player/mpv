@@ -2225,7 +2225,7 @@ static void edl_update(MPContext *mpctx)
 }
 
 
-// style & 1 == 0 means seek relative to current position, == 1 means relative
+// style & 1 == 0 means seek relative to current position, == 1 means absolute
 // style & 2 == 0 means amount in seconds, == 2 means fraction of file length
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
 static int seek(MPContext *mpctx, double amount, int style)
