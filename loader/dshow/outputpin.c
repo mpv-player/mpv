@@ -7,6 +7,7 @@
 #include "wine/winerror.h"
 #include "wine/windef.h"
 #include "outputpin.h"
+#include "mediatype.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -73,14 +74,8 @@ static HRESULT STDCALL CEnumMediaTypes_Next(IEnumMediaTypes * This,
 
     if (pcFetched)
 	*pcFetched=1;
-    ppMediaTypes[0] = malloc(sizeof(AM_MEDIA_TYPE));
-    // copy structures - C can handle this...
-    **ppMediaTypes = *type;
-    if (ppMediaTypes[0]->pbFormat)
-    {
-	ppMediaTypes[0]->pbFormat=malloc(ppMediaTypes[0]->cbFormat);
-	memcpy(ppMediaTypes[0]->pbFormat, type->pbFormat, ppMediaTypes[0]->cbFormat);
-    }
+    ppMediaTypes[0] = CreateMediaType(type);
+
     if (cMediaTypes == 1)
 	return 0;
     return 1;
@@ -177,7 +172,7 @@ static CEnumMediaTypes* CEnumMediaTypesCreate(const AM_MEDIA_TYPE* amt)
     }
 
     This->refcount = 1;
-    This->type = *amt;
+    CopyMediaType(&(This->type),amt);
 
     This->vt->QueryInterface = CEnumMediaTypes_QueryInterface;
     This->vt->AddRef = CEnumMediaTypes_AddRef;
@@ -368,12 +363,7 @@ static HRESULT STDCALL COutputPin_ConnectionMediaType(IPin * This,
     Debug printf("COutputPin_ConnectionMediaType(%p) called\n",This);
     if (!pmt)
 	return E_INVALIDARG;
-    *pmt = ((COutputPin*)This)->type;
-    if (pmt->cbFormat>0)
-    {
-	pmt->pbFormat=malloc(pmt->cbFormat);
-	memcpy(pmt->pbFormat, ((COutputPin*)This)->type.pbFormat, pmt->cbFormat);
-    }
+    CopyMediaType(pmt,&(((COutputPin*)This)->type));
     return 0;
 }
 
@@ -845,7 +835,7 @@ static void COutputPin_SetFrameSizePointer(COutputPin* This, long* z)
  */
 static void COutputPin_SetNewFormat(COutputPin* This, const AM_MEDIA_TYPE* amt)
 {
-    This->type = *amt;
+    CopyMediaType(&(This->type),amt);
 }
 
 /**
@@ -862,6 +852,7 @@ static void COutputPin_Destroy(COutputPin* This)
 	free(This->mempin);
     if (This->vt)
 	free(This->vt);
+    FreeMediaType(&(This->type));
     free(This);
 }
 
@@ -976,7 +967,7 @@ COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt)
 
     This->refcount = 1;
     This->remote = 0;
-    This->type = *amt;
+    CopyMediaType(&(This->type),amt);
 
     This->vt->QueryInterface = COutputPin_QueryInterface;
     This->vt->AddRef = COutputPin_AddRef;

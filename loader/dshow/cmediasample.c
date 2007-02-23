@@ -5,6 +5,7 @@
  */
 
 #include "cmediasample.h"
+#include "mediatype.h"
 #include "wine/winerror.h"
 #include <stdio.h>
 #include <string.h>
@@ -81,8 +82,7 @@ void CMediaSample_Destroy(CMediaSample* This)
     Debug printf("CMediaSample_Destroy(%p) called (ref:%d)\n", This, This->refcount);
     free(This->vt);
     free(This->own_block);
-    if (This->media_type.pbFormat)
-	free(This->media_type.pbFormat);
+    FreeMediaType(&(This->media_type));
     free(This);
 }
 
@@ -352,10 +352,7 @@ static HRESULT STDCALL CMediaSample_GetMediaType(IMediaSample* This,
 
     t = &((CMediaSample*)This)->media_type;
     //    if(t.pbFormat)free(t.pbFormat);
-    (*ppMediaType) = malloc(sizeof(AM_MEDIA_TYPE));
-    **ppMediaType = *t;
-    (*ppMediaType)->pbFormat = malloc(t->cbFormat);
-    memcpy((*ppMediaType)->pbFormat, t->pbFormat, t->cbFormat);
+    *ppMediaType=CreateMediaType(t);
     //    *ppMediaType=0; //media type was not changed
     return 0;
 }
@@ -378,16 +375,8 @@ static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
     if (!pMediaType)
 	return E_INVALIDARG;
     t = &((CMediaSample*)This)->media_type;
-    if (t->pbFormat)
-	free(t->pbFormat);
-    t = pMediaType;
-    if (t->cbFormat)
-    {
-	t->pbFormat = malloc(t->cbFormat);
-	memcpy(t->pbFormat, pMediaType->pbFormat, t->cbFormat);
-    }
-    else
-        t->pbFormat = 0;
+    FreeMediaType(t);
+    CopyMediaType(t,pMediaType);
     ((CMediaSample*) This)->type_valid=1;
 
     return 0;

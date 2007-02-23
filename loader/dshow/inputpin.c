@@ -5,6 +5,7 @@
  */
 
 #include "inputpin.h"
+#include "mediatype.h"
 #include "wine/winerror.h"
 #include <string.h>
 #include <stdio.h>
@@ -311,12 +312,7 @@ static long STDCALL CInputPin_ConnectionMediaType(IPin* This,
     Debug printf("CInputPin_ConnectionMediaType(%p) called\n", This);
     if (!pmt)
 	return E_INVALIDARG;
-    *pmt=((CInputPin*)This)->type;
-    if (pmt->cbFormat > 0)
-    {
-	pmt->pbFormat=malloc(pmt->cbFormat);
-	memcpy(pmt->pbFormat, ((CInputPin*)This)->type.pbFormat, pmt->cbFormat);
-    }
+    CopyMediaType(pmt,&(((CInputPin*)This)->type));
     return 0;
 }
 
@@ -527,6 +523,7 @@ static long STDCALL CInputPin_NewSegment(IPin* This,
 static void CInputPin_Destroy(CInputPin* This)
 {
     free(This->vt);
+    FreeMediaType(&(This->type));
     free(This);
 }
 
@@ -550,7 +547,7 @@ CInputPin* CInputPinCreate(CBaseFilter* p, const AM_MEDIA_TYPE* amt)
 
     This->refcount = 1;
     This->parent = p;
-    This->type = *amt;
+    CopyMediaType(&(This->type),amt);
 
     This->vt= (IPin_vt*) malloc(sizeof(IPin_vt));
 

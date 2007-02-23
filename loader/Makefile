@@ -19,6 +19,7 @@ SRCS+= dshow/DS_AudioDecoder.c \
        dshow/DS_Filter.c \
        dshow/DS_VideoDecoder.c \
        dshow/allocator.c \
+       dshow/mediatype.c \
        dshow/cmediasample.c \
        dshow/guids.c \
        dshow/inputpin.c \
