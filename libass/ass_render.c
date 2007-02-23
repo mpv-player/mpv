@@ -834,7 +834,7 @@ static char* parse_tag(char* p, double pwr) {
 		} else
 			render_context.alignment = render_context.style->Alignment;
 	} else if (mystrcmp(&p, "a")) {
-		int val = strtol(p, &p, 10);
+		int val;
 		if (mystrtoi(&p, 10, &val) && val)
 			render_context.alignment = val;
 		else
