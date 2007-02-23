@@ -2225,6 +2225,53 @@ static void edl_update(MPContext *mpctx)
 }
 
 
+// style & 1 == 0 means seek relative to current position, == 1 means relative
+// style & 2 == 0 means amount in seconds, == 2 means fraction of file length
+// return -1 if seek failed (non-seekable stream?), 0 otherwise
+static int seek(MPContext *mpctx, double amount, int style)
+{
+    current_module = "seek";
+    if (demux_seek(mpctx->demuxer, amount, audio_delay, style) == 0)
+	return -1;
+
+    if (mpctx->sh_video) {
+	current_module = "seek_video_reset";
+	resync_video_stream(mpctx->sh_video);
+	if (vo_config_count)
+	    mpctx->video_out->control(VOCTRL_RESET, NULL);
+	mpctx->sh_video->num_buffered_pts = 0;
+	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
+	mpctx->num_buffered_frames = 0;
+	// Not all demuxers set d_video->pts during seek, so this value
+	// (which is used by at least vobsub and edl code below) may
+	// be completely wrong (probably 0).
+	mpctx->sh_video->pts = mpctx->d_video->pts;
+	update_subtitles(mpctx->sh_video, mpctx->d_sub, 1);
+    }
+      
+    if (mpctx->sh_audio) {
+	current_module = "seek_audio_reset";
+	mpctx->audio_out->reset(); // stop audio, throwing away buffered data
+	mpctx->sh_audio->a_buffer_len = 0;
+	mpctx->sh_audio->a_out_buffer_len = 0;
+    }
+
+    if (vo_vobsub) {
+	current_module = "seek_vobsub_reset";
+	vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
+    }
+
+    edl_seek_reset(mpctx);
+
+    c_total = 0;
+    max_pts_correction = 0.1;
+    audio_time_usage = 0; video_time_usage = 0; vout_time_usage = 0;
+    drop_frame_cnt = 0;
+
+    current_module = NULL;
+    return 0;
+}
+
 int main(int argc,char* argv[]){
 
 
@@ -3527,52 +3574,18 @@ if(step_sec>0) {
   }
 
 if(rel_seek_secs || abs_seek_pos){
-  current_module="seek";
-  if(demux_seek(mpctx->demuxer,rel_seek_secs,audio_delay,abs_seek_pos)){
-      // success:
-      /* FIXME there should be real seeking for vobsub */
-      if(mpctx->sh_video) mpctx->sh_video->pts=mpctx->d_video->pts;
-      if (vo_vobsub)
-	//vobsub_reset(vo_vobsub);
-	vobsub_seek(vo_vobsub,mpctx->sh_video->pts);
-
-      if(mpctx->sh_video){
-	 current_module="seek_video_reset";
-         resync_video_stream(mpctx->sh_video);
-         if(vo_config_count) mpctx->video_out->control(VOCTRL_RESET,NULL);
-	 mpctx->sh_video->num_buffered_pts = 0;
-	 mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
-      }
-      
-      if(mpctx->sh_audio){
-        current_module="seek_audio_reset";
-        mpctx->audio_out->reset(); // stop audio, throwing away buffered data
-        mpctx->sh_audio->a_buffer_len = 0;
-        mpctx->sh_audio->a_out_buffer_len = 0;
-      }
+  if (seek(mpctx, rel_seek_secs, abs_seek_pos) >= 0) {
         // Set OSD:
       if(!loop_seek){
 	if( !edl_decision )
           set_osd_bar(0,"Position",0,100,demuxer_get_percent_pos(mpctx->demuxer));
       }
-
-      if(mpctx->sh_video) {
-	c_total=0;
-	max_pts_correction=0.1;
+      // osd_function has been set (or not) by the code triggering the seek
 	osd_visible=(GetTimerMS() + 1000) | 1; // to revert to PLAY pointer after 1 sec
-	audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
-	drop_frame_cnt=0;
-
-        update_subtitles(mpctx->sh_video, mpctx->d_sub, 1);
-      }
   }
-
-  edl_seek_reset(mpctx);
 
   rel_seek_secs=0;
   abs_seek_pos=0;
-  mpctx->num_buffered_frames = 0;
-  current_module=NULL;
   loop_seek=0;
 }
 
