@@ -3587,6 +3587,7 @@ if(rel_seek_secs || abs_seek_pos){
   rel_seek_secs=0;
   abs_seek_pos=0;
   loop_seek=0;
+  edl_decision = 0;
 }
 
 #ifdef HAVE_NEW_GUI
