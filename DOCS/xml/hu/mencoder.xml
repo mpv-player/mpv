@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r22129 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -10,7 +10,9 @@ kódolási paraméter bővebb leírásáért olvasd el a
 <ulink url="../../tech/encoding-tips.txt">kódolási tippeket</ulink>, amiket
 számos levelezési lista szálból gyűjtöttünk össze az MPlayer-users-ről.
 Kereshetsz az
-<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">archívumban</ulink>
+<ulink url="http://lists.mplayerhq.hu/pipermail/mencoder-users/">archívumban</ulink>,
+vagy a nagyon régi dolgok után
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">itt</ulink>,
 a rengeteg beszélgetés között, melyek a <application>MEncoder</application>rel
 történő kódolást több szempontból vizsgálják és kiemelik a problémákat vele
 kapcsolatban.

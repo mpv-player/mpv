@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21934 -->
+<!-- synced with r22141 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -4069,6 +4069,183 @@ Kérlek vedd figyelembe, hogy a forrásanyagodtól, a géped típusától
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
+<sect1 id="menc-feat-video-for-windows">
+<title>
+  Kódolás a <systemitem class="library">Video For Windows</systemitem>
+  codec családdal
+</title>
+
+<para>
+A Video for Windows egyszerű kódolást biztosít bináris videó codec-ekkel.
+A következő codec-ekkel kódolhatsz (ha több is van, kérjük áruld el!)
+</para>
+
+<para>
+Tartsd észben, hogy ez nagyon kísérleti támogatás és néhány codec hibásan
+működhet. Néhány codec csak bizonyos színterekben működik jól, próbáld ki
+a <option>-vf format=bgr24</option> és <option>-vf format=yuy2</option>
+opciókat, ha a codec hibázik vagy rossz kimenetet ad.
+</para>
+
+<!-- ********** -->
+
+<sect2 id="menc-feat-enc-vfw-video-codecs">
+<title>Video for Windows által támogatott codec-ek</title>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="4">
+<thead>
+<row>
+  <entry>Videó codec fájl név</entry>
+  <entry>Leírás</entry>
+  <entry>md5sum</entry>
+  <entry>Megjegyzés</entry>
+</row>
+</thead>
+<tbody>
+<row>
+  <entry>aslcodec_vfw.dll</entry>
+  <entry>Alparysoft veszteségmentes codec vfw (ASLC)</entry>
+  <entry>608af234a6ea4d90cdc7246af5f3f29a</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>avimszh.dll</entry>
+  <entry>AVImszh (MSZH)</entry>
+  <entry>253118fe1eedea04a95ed6e5f4c28878</entry>
+  <entry><option>-vf format</option> kell hozzá</entry>
+</row>
+<row>
+  <entry>avizlib.dll</entry>
+  <entry>AVIzlib (ZLIB)</entry>
+  <entry>2f1cc76bbcf6d77d40d0e23392fa8eda</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>divx.dll</entry>
+  <entry>DivX4Windows-VFW</entry>
+  <entry>acf35b2fc004a89c829531555d73f1e6</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>huffyuv.dll</entry>
+  <entry>HuffYUV (veszteségmentes) (HFYU)</entry>
+  <entry>b74695b50230be4a6ef2c4293a58ac3b</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>iccvid.dll</entry>
+  <entry>Cinepak Video (cvid)</entry>
+  <entry>cb3b7ee47ba7dbb3d23d34e274895133</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>icmw_32.dll</entry>
+  <entry>Motion Wavelets (MWV1)</entry>
+  <entry>c9618a8fc73ce219ba918e3e09e227f2</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>jp2avi.dll</entry>
+  <entry>ImagePower MJPEG2000 (IPJ2)</entry>
+  <entry>d860a11766da0d0ea064672c6833768b</entry>
+  <entry><option>-vf flip</option></entry>  
+</row>
+<row>
+  <entry>m3jp2k32.dll</entry>
+  <entry>Morgan MJPEG2000 (MJ2C)</entry>
+  <entry>f3c174edcbaef7cb947d6357cdfde7ff</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>m3jpeg32.dll</entry>
+  <entry>Morgan Motion JPEG Codec (MJPG)</entry>
+  <entry>1cd13fff5960aa2aae43790242c323b1</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>mpg4c32.dll</entry>
+  <entry>Microsoft MPEG-4 v1/v2</entry>
+  <entry>b5791ea23f33010d37ab8314681f1256</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>tsccvid.dll</entry>
+  <entry>TechSmith Camtasia Screen Codec (TSCC)</entry>
+  <entry>8230d8560c41d444f249802a2700d1d5</entry>
+  <entry>shareware hiba windows-on</entry>
+</row>
+<row>
+  <entry>vp31vfw.dll</entry>
+  <entry>On2 Open Source VP3 Codec (VP31)</entry>
+  <entry>845f3590ea489e2e45e876ab107ee7d2</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>vp4vfw.dll</entry>
+  <entry>On2 VP4 Personal Codec (VP40)</entry>
+  <entry>fc5480a482ccc594c2898dcc4188b58f</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>vp6vfw.dll</entry>
+  <entry>On2 VP6 Personal Codec (VP60)</entry>
+  <entry>04d635a364243013898fd09484f913fb</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>vp7vfw.dll</entry>
+  <entry>On2 VP7 Personal Codec (VP70)</entry>
+  <entry>cb4cc3d4ea7c94a35f1d81c3d750bc8d</entry>
+  <entry>hibás FourCC?</entry>
+</row>
+<row>
+  <entry>ViVD2.dll</entry>
+  <entry>SoftMedia ViVD V2 codec VfW (GXVE)</entry>
+  <entry>a7b4bf5cac630bb9262c3f80d8a773a1</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>msulvc06.DLL</entry>
+  <entry>MSU Lossless codec (MSUD)</entry>
+  <entry>294bf9288f2f127bb86f00bfcc9ccdda</entry>
+  <entry>
+  Dekódolható a <application>Window Media Player</application>rel,
+  de az <application>MPlayer</application>rel nem (még).
+  </entry>
+</row>
+<row>
+  <entry>camcodec.dll</entry>
+  <entry>CamStudio veszteségmentes videó codec (CSCD)</entry>
+  <entry>0efe97ce08bb0e40162ab15ef3b45615</entry>
+  <entry>sf.net/projects/camstudio</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+
+Az első oszlop a codec nevét tartalmazza, amit a <literal>codec</literal>
+paraméter után kell megadni, így:
+<option>-xvfcopts codec=divx.dll</option>
+Az egyes codec-ek által használt FourCC kód zárójelben látható.
+</para>
+
+<informalexample>
+<para>
+Egy példa VP3 tömörítéssel:
+<screen>
+mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy
+</screen>
+</para>
+</informalexample>
+</sect2>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="menc-feat-quicktime-7">
 <title><application>QuickTime</application>-kompatibilis fájlok
 készítése a <application>MEncoder</application> használatával</title>
@@ -4381,183 +4558,6 @@ mp4creator -optimize narnia.mp4</screen>
 
 </sect2>
 
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
-<sect1 id="menc-feat-video-for-windows">
-<title>
-  Kódolás a <systemitem class="library">Video For Windows</systemitem>
-  codec családdal
-</title>
-
-<para>
-A Video for Windows egyszerű kódolást biztosít bináris videó codec-ekkel.
-A következő codec-ekkel kódolhatsz (ha több is van, kérjük áruld el!)
-</para>
-
-<para>
-Tartsd észben, hogy ez nagyon kísérleti támogatás és néhány codec hibásan
-működhet. Néhány codec csak bizonyos színterekben működik jól, próbáld ki
-a <option>-vf format=bgr24</option> és <option>-vf format=yuy2</option>
-opciókat, ha a codec hibázik vagy rossz kimenetet ad.
-</para>
-
-<!-- ********** -->
-
-<sect2 id="menc-feat-enc-vfw-video-codecs">
-<title>Video for Windows által támogatott codec-ek</title>
-
-<para>
-<informaltable frame="all">
-<tgroup cols="4">
-<thead>
-<row>
-  <entry>Videó codec fájl név</entry>
-  <entry>Leírás</entry>
-  <entry>md5sum</entry>
-  <entry>Megjegyzés</entry>
-</row>
-</thead>
-<tbody>
-<row>
-  <entry>aslcodec_vfw.dll</entry>
-  <entry>Alparysoft veszteségmentes codec vfw (ASLC)</entry>
-  <entry>608af234a6ea4d90cdc7246af5f3f29a</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>avimszh.dll</entry>
-  <entry>AVImszh (MSZH)</entry>
-  <entry>253118fe1eedea04a95ed6e5f4c28878</entry>
-  <entry><option>-vf format</option> kell hozzá</entry>
-</row>
-<row>
-  <entry>avizlib.dll</entry>
-  <entry>AVIzlib (ZLIB)</entry>
-  <entry>2f1cc76bbcf6d77d40d0e23392fa8eda</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>divx.dll</entry>
-  <entry>DivX4Windows-VFW</entry>
-  <entry>acf35b2fc004a89c829531555d73f1e6</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>huffyuv.dll</entry>
-  <entry>HuffYUV (veszteségmentes) (HFYU)</entry>
-  <entry>b74695b50230be4a6ef2c4293a58ac3b</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>iccvid.dll</entry>
-  <entry>Cinepak Video (cvid)</entry>
-  <entry>cb3b7ee47ba7dbb3d23d34e274895133</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>icmw_32.dll</entry>
-  <entry>Motion Wavelets (MWV1)</entry>
-  <entry>c9618a8fc73ce219ba918e3e09e227f2</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>jp2avi.dll</entry>
-  <entry>ImagePower MJPEG2000 (IPJ2)</entry>
-  <entry>d860a11766da0d0ea064672c6833768b</entry>
-  <entry><option>-vf flip</option></entry>  
-</row>
-<row>
-  <entry>m3jp2k32.dll</entry>
-  <entry>Morgan MJPEG2000 (MJ2C)</entry>
-  <entry>f3c174edcbaef7cb947d6357cdfde7ff</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>m3jpeg32.dll</entry>
-  <entry>Morgan Motion JPEG Codec (MJPG)</entry>
-  <entry>1cd13fff5960aa2aae43790242c323b1</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>mpg4c32.dll</entry>
-  <entry>Microsoft MPEG-4 v1/v2</entry>
-  <entry>b5791ea23f33010d37ab8314681f1256</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>tsccvid.dll</entry>
-  <entry>TechSmith Camtasia Screen Codec (TSCC)</entry>
-  <entry>8230d8560c41d444f249802a2700d1d5</entry>
-  <entry>shareware hiba windows-on</entry>
-</row>
-<row>
-  <entry>vp31vfw.dll</entry>
-  <entry>On2 Open Source VP3 Codec (VP31)</entry>
-  <entry>845f3590ea489e2e45e876ab107ee7d2</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>vp4vfw.dll</entry>
-  <entry>On2 VP4 Personal Codec (VP40)</entry>
-  <entry>fc5480a482ccc594c2898dcc4188b58f</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>vp6vfw.dll</entry>
-  <entry>On2 VP6 Personal Codec (VP60)</entry>
-  <entry>04d635a364243013898fd09484f913fb</entry>
-  <entry>összeomlik Linux alatt</entry>
-</row>
-<row>
-  <entry>vp7vfw.dll</entry>
-  <entry>On2 VP7 Personal Codec (VP70)</entry>
-  <entry>cb4cc3d4ea7c94a35f1d81c3d750bc8d</entry>
-  <entry>hibás FourCC?</entry>
-</row>
-<row>
-  <entry>ViVD2.dll</entry>
-  <entry>SoftMedia ViVD V2 codec VfW (GXVE)</entry>
-  <entry>a7b4bf5cac630bb9262c3f80d8a773a1</entry>
-  <entry></entry>
-</row>
-<row>
-  <entry>msulvc06.DLL</entry>
-  <entry>MSU Lossless codec (MSUD)</entry>
-  <entry>294bf9288f2f127bb86f00bfcc9ccdda</entry>
-  <entry>
-  Dekódolható a <application>Window Media Player</application>rel,
-  de az <application>MPlayer</application>rel nem (még).
-  </entry>
-</row>
-<row>
-  <entry>camcodec.dll</entry>
-  <entry>CamStudio veszteségmentes videó codec (CSCD)</entry>
-  <entry>0efe97ce08bb0e40162ab15ef3b45615</entry>
-  <entry>sf.net/projects/camstudio</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-
-Az első oszlop a codec nevét tartalmazza, amit a <literal>codec</literal>
-paraméter után kell megadni, így:
-<option>-xvfcopts codec=divx.dll</option>
-Az egyes codec-ek által használt FourCC kód zárójelben látható.
-</para>
-
-<informalexample>
-<para>
-Egy példa VP3 tömörítéssel:
-<screen>
-mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy
-</screen>
-</para>
-</informalexample>
-</sect2>
 </sect1>
 
 

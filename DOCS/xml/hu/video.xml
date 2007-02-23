@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21897 -->
+<!-- synced with r22201 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1741,8 +1741,8 @@ Majd fordíts és telepíts, mint rendesen.</para>
 
 <formalpara><title>HASZNÁLAT</title>
 <para>
-A hardveres dekódolás (szabványos MPEG-1/2 fájlok lejátszása)
-elvégezhető ezzel a paranccsal:
+A hardveres dekódolás szabványos MPEG-1/2 videó folyamot és/vagy MPEG audiót tartalmazó
+fájlok esetén elvégezhető ezzel a paranccsal:
 <screen>
 mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable>
 </screen>
@@ -1750,8 +1750,9 @@ mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable>
 </formalpara>
 
 <para>
-A Szoftveres dekódolás vagy átkódolás különböző formátumokról MPEG-1-re egy ehhez hasonló
-paranccsal érhető el:
+Bármilyen más típusú videó folyam esetén MPEG-1-be történő átkódolás szükséges, ezért
+lassú és nem éri meg a vesződést, különösen ha lassú a géped.
+Egy ehhez hasonló paranccsal végezhető el:
 <screen>
 mplayer -ao mpegpes -vo mpegpes <replaceable>yourfile.ext</replaceable>
 mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>yourfile.ext</replaceable>

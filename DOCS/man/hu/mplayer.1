@@ -1,4 +1,4 @@
-.\" Synced with r22123
+.\" Synced with r22150
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 02. 04." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 02. 23." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -868,7 +868,7 @@ mindig mûködni fog.
 .TP
 .B \-key-fifo-size <2\-65000>
 A billentyûzet eseményeket bufferelõ FIFO méretét adhatod meg vele
-(alapértelmezett: 10).
+(alapértelmezett: 7).
 Az n méretû FIFO (n-1) eseményt tud tárolni.
 Ha túl kicsi, néhány esemény elveszhet ("beragadt egérgomb" és
 hasonló effektusok).
@@ -3442,8 +3442,12 @@ különben GL_NEAREST a customtex textúrákhoz.
 Ha engedélyezve van, texture_rectangle-t használ a customtex textúrákhoz.
 Alapértelmezésben le van tiltva.
 .RE
+.sp 1
+.RS
 Alapesetben a következõ opciókra nincs szükség, többnyire csak tesztelési
 célokat szolgálnak.
+.RE
+.sp 1
 .RSs
 .IPs (no)glfinish
 Buffer csere elõtt a glFinish() meghívása.
@@ -4019,7 +4023,7 @@ Hasznos a framerátát duplázó deinterlacer-eknél: \-vf tfields=1,
 .PD 0
 .RSs
 .IPs -1
-automatikus (alapértelmezett) Ha a dekódoló nem küldi ki a megfelelõ információkat,
+automatikus (alapértelmezett): Ha a dekódoló nem küldi ki a megfelelõ információkat,
 visszalép 0-ra (felsõ mezõ elõször).
 .IPs 0
 felsõ mezõ elõször
@@ -7302,10 +7306,10 @@ Maximális makroblokk-szintû Lagrange szorzó a ratecontrol-hoz
 .TP
 .B vqscale=<0\-31>
 Konstans kvantáló /\: konstans minõségû kódolás (fix kvantálási mód kiválasztása).
-A kisebb érték jobb minõséget, de nagyobb fájlt jelent (alapértelmezett: 0).
+A kisebb érték jobb minõséget, de nagyobb fájlt jelent (alapértelmezett: -1).
 Snow codec esetén a 0 veszteségmentes tömörítést jelent.
-Mivel a többi codec nem támogatja ezt, a vqscale=0 figyelmen kívül lesz hagyva
-és változó kvantálók lesznek használva, ami az alapértelmezett.
+Mivel a többi codec nem támogatja ezt, ilyen esetekben a vqscale=0 hatása
+nem definiált.
 Az 1 nem javasolt (lásd a vqmin-t a részletekért).
 .
 .TP
