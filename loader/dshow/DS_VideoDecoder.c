@@ -278,14 +278,8 @@ void DS_VideoDecoder_StartInternal(DS_VideoDecoder *this)
     ALLOCATOR_PROPERTIES props, props1;
     Debug printf("DS_VideoDecoder_StartInternal\n");
     //cout << "DSSTART" << endl;
-    this->m_pDS_Filter->Start(this->m_pDS_Filter);
-    
-    props.cBuffers = 1;
-    props.cbBuffer = this->m_sDestType.lSampleSize;
-    props.cbAlign = 1;
-    props.cbPrefix = 0;
-    this->m_pDS_Filter->m_pAll->vt->SetProperties(this->m_pDS_Filter->m_pAll, &props, &props1);
     this->m_pDS_Filter->m_pAll->vt->Commit(this->m_pDS_Filter->m_pAll);
+    this->m_pDS_Filter->Start(this->m_pDS_Filter);
     
     this->iv.m_State = START;
 }

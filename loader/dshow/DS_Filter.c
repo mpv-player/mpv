@@ -37,24 +37,12 @@ static void DS_Filter_Start(DS_Filter* This)
 {
     HRESULT hr;
 
-    if (This->m_pAll)
-	return;
-
     //Debug printf("DS_Filter_Start(%p)\n", This);
     hr = This->m_pFilter->vt->Run(This->m_pFilter, (REFERENCE_TIME)0);
     if (hr != 0)
     {
 	Debug printf("WARNING: m_Filter->Run() failed, error code %x\n", (int)hr);
     }
-    hr = This->m_pImp->vt->GetAllocator(This->m_pImp, &This->m_pAll);
-
-    if (hr || !This->m_pAll)
-    {
-	Debug printf("WARNING: error getting IMemAllocator interface %x\n", (int)hr);
-	This->m_pImp->vt->Release((IUnknown*)This->m_pImp);
-        return;
-    }
-    This->m_pImp->vt->NotifyAllocator(This->m_pImp, This->m_pAll, 0);
 }
 
 static void DS_Filter_Stop(DS_Filter* This)
@@ -114,6 +102,8 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
     int init = 0;
 //    char eb[250];
     const char* em = NULL;
+    MemAllocator* tempAll;
+    ALLOCATOR_PROPERTIES props,props1;
     HRESULT result;
     DS_Filter* This = (DS_Filter*) malloc(sizeof(DS_Filter));
     if (!This)
@@ -125,6 +115,13 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
     CoInitialize(0L);
 #endif
 
+    /*
+        tempAll is not used  anywhere. 
+	MemAllocatorCreate() is called to ensure that RegisterComObject for IMemoryAllocator
+	will be	called before possible call 
+	to CoCreateInstance(...,&IID_IMemoryAllocator,...) from binary codec.
+    */
+    tempAll=MemAllocatorCreate();
     This->m_pFilter = NULL;
     This->m_pInputPin = NULL;
     This->m_pOutputPin = NULL;
@@ -248,6 +245,22 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	    em = "could not connect to input pin";
             break;
 	}
+	result = This->m_pImp->vt->GetAllocator(This->m_pImp, &This->m_pAll);
+	if (result || !This->m_pAll)
+	{
+	    em="error getting IMemAllocator interface";
+            break;
+	}
+
+        //Seting allocator property according to our media type
+	props.cBuffers=1;
+	props.cbBuffer=This->m_pOurType->lSampleSize;
+	props.cbAlign=1;
+	props.cbPrefix=0;
+	This->m_pAll->vt->SetProperties(This->m_pAll, &props, &props1);
+
+	//Notify remote pin about choosed allocator
+	This->m_pImp->vt->NotifyAllocator(This->m_pImp, This->m_pAll, 0);
 
 	This->m_pOurOutput = COutputPinCreate(This->m_pDestType);
 
@@ -263,6 +276,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	init++;
         break;
     }
+    tempAll->vt->Release(tempAll);
 
     if (!init)
     {
