@@ -302,7 +302,7 @@ install-gui:
 install-vidix:
 	$(MAKE) -C libdha install
 	mkdir -p $(LIBDIR)/mplayer/vidix
-	-install -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
+	$(INSTALL) -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
 
 uninstall:
 	-rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
