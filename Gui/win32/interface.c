@@ -35,6 +35,7 @@
 #include <input/input.h>
 #include <libvo/video_out.h>
 #include <libao2/audio_out.h>
+#include <access_mpcontext.h>
 #include "gui.h"
 #include "dialogs.h"
 #include "wincfg.h"
@@ -43,13 +44,10 @@
 #endif
 
 extern m_obj_settings_t *vf_settings;
-extern vo_functions_t *video_out;
-extern ao_functions_t *audio_out;
 extern void exit_player(const char *how);
 extern char *filename;
 extern int abs_seek_pos;
 extern float rel_seek_secs;
-extern mixer_t mixer;
 extern int audio_id;
 extern int video_id;
 extern int dvdsub_id;
@@ -69,6 +67,9 @@ static gui_t *mygui = NULL;
 static int update_subwindow(void);
 static RECT old_rect;
 static DWORD style;
+ao_functions_t *audio_out = NULL;
+vo_functions_t *video_out = NULL;
+mixer_t *mixer = NULL;
 
 /* test for playlist files, no need to specify -playlist on the commandline.
  * add any conceivable playlist extensions here.
@@ -144,6 +145,9 @@ void greplace(char ***list, char *search, char *replace)
 /* this function gets called by the gui to update mplayer */
 static void guiSetEvent(int event)
 {
+    if(guiIntfStruct.mpcontext)
+        mixer = mpctx_get_mixer(guiIntfStruct.mpcontext);
+
     switch(event)
     {
         case evPlay:
@@ -245,22 +249,22 @@ static void guiSetEvent(int event)
                 break;
 
             if (guiIntfStruct.Balance == 50.0f)
-                mixer_setvolume(&mixer, guiIntfStruct.Volume, guiIntfStruct.Volume);
+                mixer_setvolume(mixer, guiIntfStruct.Volume, guiIntfStruct.Volume);
 
             l = guiIntfStruct.Volume * ((100.0f - guiIntfStruct.Balance) / 50.0f);
             r = guiIntfStruct.Volume * ((guiIntfStruct.Balance) / 50.0f);
 
             if (l > guiIntfStruct.Volume) l=guiIntfStruct.Volume;
             if (r > guiIntfStruct.Volume) r=guiIntfStruct.Volume;
-            mixer_setvolume(&mixer, l, r);
+            mixer_setvolume(mixer, l, r);
             /* Check for balance support on mixer - there is a better way ?? */
             if (r != l)
             {
-                mixer_getvolume(&mixer, &l, &r);
+                mixer_getvolume(mixer, &l, &r);
                 if (r == l)
                 {
                     mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] Mixer doesn't support balanced audio\n");
-                    mixer_setvolume(&mixer, guiIntfStruct.Volume, guiIntfStruct.Volume);
+                    mixer_setvolume(mixer, guiIntfStruct.Volume, guiIntfStruct.Volume);
                     guiIntfStruct.Balance = 50.0f;
                 }
             }
@@ -489,6 +493,13 @@ int guiGetEvent(int type, char *arg)
     dvd_priv_t *dvdp = (dvd_priv_t *) arg;
 #endif
     if(!mygui || !mygui->skin) return 0;
+
+    if(guiIntfStruct.mpcontext)
+    {
+        audio_out = mpctx_get_audio_out(guiIntfStruct.mpcontext);
+        video_out = mpctx_get_video_out(guiIntfStruct.mpcontext);
+        mixer = mpctx_get_mixer(guiIntfStruct.mpcontext);
+    }
 
     switch (type)
     {
@@ -730,7 +741,7 @@ int guiGetEvent(int type, char *arg)
                 /* Some audio_out drivers do not support balance e.g. dsound */
                 /* FIXME this algo is not correct */
                 float l, r;
-                mixer_getvolume(&mixer, &l, &r);
+                mixer_getvolume(mixer, &l, &r);
                 guiIntfStruct.Volume = (r > l ? r : l); /* max(r,l) */
                 if (r != l)
                     guiIntfStruct.Balance = ((r-l) + 100.0f) * 0.5f;

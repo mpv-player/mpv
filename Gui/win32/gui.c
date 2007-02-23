@@ -61,6 +61,8 @@ float sub_aspect;
 DWORD oldtime;
 NOTIFYICONDATA nid;
 int console_state = 0;
+play_tree_t *playtree = NULL;
+m_config_t* mconfig = NULL;
 
 static HBRUSH    colorbrush = NULL;           //Handle to colorkey brush
 static COLORREF windowcolor = RGB(255,0,255); //Windowcolor == colorkey
