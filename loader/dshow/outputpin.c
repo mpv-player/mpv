@@ -142,6 +142,7 @@ static HRESULT STDCALL CEnumMediaTypes_Clone(IEnumMediaTypes * This,
  */
 static void CEnumMediaTypes_Destroy(CEnumMediaTypes* This)
 {
+    FreeMediaType(&(This->type));
     free(This->vt);
     free(This);
 }
