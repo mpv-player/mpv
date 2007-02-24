@@ -137,7 +137,7 @@ options snd-pcm-oss snd_dsp_map=0 snd_adsp_map=2	# do the mapping
 
 This works flawlessly in combination with alsa's native 
 SysVrc-init-script 'alsasound'. Be sure to disable any distribution 
-dependant script (e.g. Mandrake-8.1 has an 'alsa' script which depends 
+dependent script (e.g. Mandrake-8.1 has an 'alsa' script which depends 
 on ALSA-0.5).
 
 Sorry for you *BSD'lers out there. I have no grasp on sound support there.

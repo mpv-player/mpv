@@ -302,7 +302,7 @@ bits (i.e. 900kbps is 900000))
 
 This way it apeared that the minimum bits per block is ~40, very
 good results are with ~50, and everything above 60 is a waste of bandwidth.
-And what's actually funny is that it was independant of codec used. The
+And what's actually funny is that it was independent of codec used. The
 results were exactly the same, whether I used DIV3 (with tricky nandub's
 magick), ffmpeg odivx, DivX5 on Windows or XviD.
 

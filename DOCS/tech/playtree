@@ -117,7 +117,7 @@ Ok, that's all for now. To have some exemples look into mplayer.c ;)
 First just after config parsing, the iterator is created there. Also
 after stream opening, in case the stream is a playlist it replace the
 entry which contained the playlist by the result of the parsing.
-In the event handeling it check if a step can be done, etc. And finnaly
+In the event handling it check if a step can be done, etc. And finnaly
 at the end it go the next entry.
 
 Suggestion, flames, etc about this doc must go to albeu@free.fr

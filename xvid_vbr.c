@@ -1327,7 +1327,7 @@ static int vbr_getquant_2pass2(void *sstate)
 
 	state->desired_bytes2 = bytes2;
 
-	/* Ugly dependance between getquant and getintra */
+	/* Ugly dependence between getquant and getintra */
 	intra = state->getintra(state);
 
 	if(intra) {

@@ -64,7 +64,7 @@ extern int verbose;
 
 #define MSGT_TV 24	// TV input subsystem
 
-#define MSGT_OSDEP 25	// OS Dependant parts (linux/ for now)
+#define MSGT_OSDEP 25	// OS-dependent parts
 
 #define MSGT_SPUDEC 26	// spudec.c
 

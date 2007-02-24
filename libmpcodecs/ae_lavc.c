@@ -206,7 +206,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 
 	/*
 	* Special case for adpcm_ima_wav.
-	* The bitrate is only dependant on samplerate.
+	* The bitrate is only dependent on samplerate.
 	* We have to known frame_size and block_align in advance,
 	* so I just copied the code from libavcodec/adpcm.c
 	*
