@@ -250,7 +250,7 @@ static int cfg_include(m_option_t *conf, char *filename){
 	return m_config_parse_config_file(mconfig, filename);
 }
 
-static char *seek_to_sec=NULL;
+static double seek_to_sec;
 static off_t seek_to_byte=0;
 
 static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
@@ -1035,16 +1035,7 @@ else {
 }
 
 if (seek_to_sec) {
-    int a,b; float d;
-
-    if (sscanf(seek_to_sec, "%d:%d:%f", &a,&b,&d)==3)
-        d += 3600*a + 60*b;
-    else if (sscanf(seek_to_sec, "%d:%f", &a, &d)==2)
-        d += 60*a;
-    else 
-        sscanf(seek_to_sec, "%f", &d);
-
-    demux_seek(demuxer, d, audio_delay, 1);
+    demux_seek(demuxer, seek_to_sec, audio_delay, 1);
 //  there is 2 way to handle the -ss option in 3-pass mode:
 // > 1. do the first pass for the whole file, and use -ss for 2nd/3rd pases only
 // > 2. do all the 3 passes with the same -ss value

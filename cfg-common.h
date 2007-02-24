@@ -93,7 +93,7 @@
 
 	// seek to byte/seconds position
 	{"sb", &seek_to_byte, CONF_TYPE_POSITION, CONF_MIN, 0, 0, NULL},
-	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
+	{"ss", &seek_to_sec, CONF_TYPE_TIME, 0, 0, 0, NULL},
 
 	// stop at given position
 	{"endpos", &end_at, CONF_TYPE_TIME_SIZE, 0, 0, 0, NULL},

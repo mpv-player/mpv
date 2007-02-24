@@ -239,7 +239,7 @@ int term_osd = 1;
 static char* term_osd_esc = "\x1b[A\r\x1b[K";
 static char* playing_msg = NULL;
 // seek:
-static char *seek_to_sec=NULL;
+static double seek_to_sec;
 static off_t seek_to_byte=0;
 static off_t step_sec=0;
 static int loop_times=-1;
@@ -3537,16 +3537,8 @@ if(step_sec>0) {
   mpctx->was_paused = 0;
 
   if (seek_to_sec) {
-    int a,b; float d;
-    
-    if (sscanf(seek_to_sec, "%d:%d:%f", &a,&b,&d)==3)
-	rel_seek_secs += 3600*a +60*b +d ;
-    else if (sscanf(seek_to_sec, "%d:%f", &a, &d)==2)
-	rel_seek_secs += 60*a +d;
-    else if (sscanf(seek_to_sec, "%f", &d)==1)
-	rel_seek_secs += d;
-
-     seek_to_sec = NULL;
+      rel_seek_secs += seek_to_sec;
+      seek_to_sec = 0;
   }
   
   if (end_at.type != END_AT_NONE) {

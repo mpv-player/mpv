@@ -1188,13 +1188,56 @@ m_option_type_t m_option_type_afmt = {
 };
 
 
+static double parse_timestring(char *str)
+{
+  int a, b;
+  double d;
+  if (sscanf(str, "%d:%d:%lf", &a, &b, &d) == 3)
+    return 3600*a + 60*b + d;
+  else if (sscanf(str, "%d:%lf", &a, &d) == 2)
+    return 60*a + d;
+  else if (sscanf(str, "%lf", &d) == 1)
+    return d;
+  return -1e100;
+}
+    
+
+static int parse_time(m_option_t* opt,char *name, char *param, void* dst, int src)
+{
+  if (param == NULL || strlen(param) == 0)
+    return M_OPT_MISSING_PARAM;
+  
+  double time = parse_timestring(param);
+  if (time == -1e100) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid time: '%s'\n",
+           name,param);
+    return M_OPT_INVALID;
+  }
+  
+  if (dst)
+    *(double *)dst = time;
+  return 1;
+}
+
+m_option_type_t m_option_type_time = {
+  "Time",
+  "",
+  sizeof(double),
+  0,
+  parse_time,
+  NULL,
+  copy_opt,
+  copy_opt,
+  NULL,
+  NULL
+};
+
+
 // Time or size (-endpos)
 
 static int parse_time_size(m_option_t* opt,char *name, char *param, void* dst, int src) {
   m_time_size_t ts;
   char unit[4];
-  int a,b;
-  float d;
   double end_at;
 
   if (param == NULL || strlen(param) == 0)
@@ -1221,15 +1264,9 @@ static int parse_time_size(m_option_t* opt,char *name, char *param, void* dst, i
     }
   }
 
-  /* End at time parsing. This has to be last because of
-   * sscanf("%f", ...) below */
-  if (sscanf(param, "%d:%d:%f", &a, &b, &d) == 3)
-    end_at = 3600*a + 60*b + d;
-  else if (sscanf(param, "%d:%f", &a, &d) == 2)
-    end_at = 60*a + d;
-  else if (sscanf(param, "%f", &d) == 1)
-    end_at = d;
-  else {
+  /* End at time parsing. This has to be last because the parsing accepts
+   * even a number followed by garbage */
+  if ((end_at = parse_timestring(param)) == -1e100) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid time or size: '%s'\n",
            name,param);
     return M_OPT_INVALID;

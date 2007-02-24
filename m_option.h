@@ -28,6 +28,7 @@ extern m_option_type_t m_option_type_double;
 extern m_option_type_t m_option_type_string;
 extern m_option_type_t m_option_type_string_list;
 extern m_option_type_t m_option_type_position;
+extern m_option_type_t m_option_type_time;
 extern m_option_type_t m_option_type_time_size;
 
 extern m_option_type_t m_option_type_print;
@@ -168,6 +169,7 @@ extern m_obj_params_t m_span_params_def;
 #define CONF_TYPE_OBJ_PRESETS	(&m_option_type_obj_presets)
 #define CONF_TYPE_CUSTOM_URL	(&m_option_type_custom_url)
 #define CONF_TYPE_OBJ_PARAMS	(&m_option_type_obj_params)
+#define CONF_TYPE_TIME		(&m_option_type_time)
 #define CONF_TYPE_TIME_SIZE	(&m_option_type_time_size)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
