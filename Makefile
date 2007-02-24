@@ -427,9 +427,7 @@ Gui/libgui.a: .norecurse $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
 
 libass/libass.a: .norecurse $(wildcard libass/*.[ch])
 
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+-include .depend
 
 .PHONY: all install* uninstall dirclean clean distclean strip dep depend
 .PHONY: doxygen doxygen_clean
