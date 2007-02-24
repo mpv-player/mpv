@@ -12,7 +12,6 @@ SVN CLEANUP work:
     (checks requires for stride==width, and aligned planes)
   - bte.diff - something input plugin (uses fork() )
   - lavc_statsfile_errorchecking-patch - handle errors writing to logfile
-  - xine-lib-cvs-xvmc.diff - XvMC support for libmpeg2 0.3.x
   - fastermemcpy.diff - cacheline-size dependent optimizations
   - fire-x86-runtime-options.diff - en/disable (force) cpu features runtime
     (needs to be integrated with --runtime-cpu-detection en/disabled modes)
