@@ -2155,9 +2155,11 @@ if(trak->pos==0 && trak->stream_header_len>0){
     
     ++trak->pos;
 
-    if (demuxer->sub->id >= 0) {
-      int samplenr = 0;
+    trak = NULL;
+    if (demuxer->sub->id >= 0 && demuxer->sub->id < priv->track_db)
       trak = priv->tracks[demuxer->sub->id];
+    if (trak) {
+      int samplenr = 0;
       while (samplenr < trak->samples_size) {
         double subpts = (double)trak->samples[samplenr].pts / (double)trak->timescale;
         if (subpts >= pts) break;
