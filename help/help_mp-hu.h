@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r22292 (2007. 02. 23.)
+// Sync'ed with help_mp-en.h r22331 (2007. 02. 24.)
 
 // ========================= MPlayer help ===========================
 
@@ -164,7 +164,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Menü inicializálás nem sikerült.\n"
 #define MSGTR_Getch2InitializedTwice "FIGYELEM: getch2_init kétszer lett meghívva!\n"
 #define MSGTR_DumpstreamFdUnavailable "Ezt a folyamot nem lehet dump-olni - a fájlleíró nem elérhető.\n"
-#define MSGTR_FallingBackOnPlaylist "Visszalépés a(z) %s lejátszási lista értelmezése közben...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "A libmenu video szűrőt nem sikerült a(z) %s főmenüvel megnyitni.\n"
 #define MSGTR_AudioFilterChainPreinitError "Hiba az audio szűrő lánc elő-inicializálásában!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC olvasási hiba: %s\n"
