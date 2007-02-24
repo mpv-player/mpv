@@ -21,8 +21,6 @@ SVN CLEANUP work:
   - fix and apply dvd menu patches.
 - review and implement draw_slice() support in video filters
 - remove vidix/ and use external vidix
-- remove libass/ and use external libass
-- fix uau commit mess
 
 FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -37,7 +35,6 @@ FOR THE NEXT RELEASE:
 - cleanup qtaudio/qtvideo (move globals to context)
 - cleanup DMO interfaces
 - Port GUI code to plain gtk without using X functions (any volunteers??? we really need help here)
-- fix all gui breakage (freevo/mythtv? xbmc? geexbox?) caused by uau commit
 
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
