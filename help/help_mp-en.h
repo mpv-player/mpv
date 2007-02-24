@@ -165,7 +165,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Menu init failed.\n"
 #define MSGTR_Getch2InitializedTwice "WARNING: getch2_init called twice!\n"
 #define MSGTR_DumpstreamFdUnavailable "Cannot dump this stream - no file descriptor available.\n"
-#define MSGTR_FallingBackOnPlaylist "Falling back on trying to parse playlist %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Can't open libmenu video filter with root menu %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Error at audio filter chain pre-init!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC read error: %s\n"

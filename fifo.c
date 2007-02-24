@@ -1,39 +1,5 @@
 #include "input/mouse.h"
 
-#if 0
-
-// keyboard:
-static int keyb_fifo_put=-1;
-static int keyb_fifo_get=-1;
-
-static void set_nonblock_flag(int fd) {
-  int oldflags;
-
-  oldflags = fcntl(fd, F_GETFL, 0);
-  if (oldflags != -1) {
-    if (fcntl(keyb_fifo_put, F_SETFL, oldflags | O_NONBLOCK) != -1) {
-       return;
-    }
-  }
-  mp_msg(MSGT_INPUT,MSGL_ERR,"Cannot set nonblocking mode for fd %d!\n", fd);
-}
-
-static void make_pipe(int* pr,int* pw){
-  int temp[2];
-  if(pipe(temp)!=0) mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotMakePipe);
-  *pr=temp[0];
-  *pw=temp[1];
-  set_nonblock_flag(temp[1]);
-}
-
-static void mplayer_put_key_internal(int code){
-
-    if( write(keyb_fifo_put,&code,4) != 4 ){
-        mp_msg(MSGT_INPUT,MSGL_ERR,"*** key event dropped (FIFO is full) ***\n");
-    }
-}
-
-#else
 
 int key_fifo_size = 7;
 static int *key_fifo_data = NULL;
@@ -66,7 +32,6 @@ int mplayer_get_key(int fd){
   return key;
 }
 
-#endif
 
 static unsigned doubleclick_time = 300;
 

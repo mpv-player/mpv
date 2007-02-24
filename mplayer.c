@@ -2586,14 +2586,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 // Init input system
 current_module = "init_input";
 mp_input_init(use_gui);
-#if 0
-make_pipe(&keyb_fifo_get,&keyb_fifo_put);
-
-if(keyb_fifo_get > 0)
-  mp_input_add_key_fd(keyb_fifo_get,1,NULL,NULL);
-#else
   mp_input_add_key_fd(-1,0,mplayer_get_key,NULL);
-#endif
 if(slave_mode)
 #ifndef __MINGW32__
    mp_input_add_cmd_fd(0,1,NULL,NULL);
@@ -3008,30 +3001,7 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
 }
 
 if(!mpctx->demuxer) 
-{
-#if 0
-  play_tree_t* entry;
-  // Handle playlist
-  current_module="handle_playlist";
-  switch(mpctx->stream->type){
-  case STREAMTYPE_VCD:
-  case STREAMTYPE_DVD:
-  case STREAMTYPE_CDDA:
-  case STREAMTYPE_VCDBINCUE:
-    // don't try to parse raw media as playlist, it's unlikely
-    goto goto_next_file;
-  }
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_FallingBackOnPlaylist,filename);
-  stream_reset(mpctx->stream);
-  stream_seek(mpctx->stream,mpctx->stream->start_pos);
-  entry = parse_playtree(mpctx->stream,0);
-  if(!entry)
-    mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
-  else
-    eof=playtree_add_playlist(entry);
-#endif
   goto goto_next_file;
-}
 inited_flags|=INITED_DEMUXER;
 
 if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_DVDNAV) {
