@@ -1664,10 +1664,6 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		
 		if(s->buffer[3])
 		{	// Sequence or GOP -- scan for Picture
-			/*while (ptr < len-5 && 
-				(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1 || s->buffer[ptr+3] != 0)) 
-				ptr++;*/
-
 			do_loop: while (ptr < len-5 && 
 				(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1))
 				ptr++;
