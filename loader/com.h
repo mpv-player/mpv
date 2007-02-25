@@ -74,8 +74,7 @@ struct IClassFactory
     struct IClassFactory_vt* vt;
 };
 
-#if !defined(__MINGW32__) 
-//need proper ifdef to check Co* functions availability 
+#ifdef WIN32_LOADER 
 long CoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
  		      long dwClsContext, const GUID* riid, void** ppv);
 void* CoTaskMemAlloc(unsigned long cb);
