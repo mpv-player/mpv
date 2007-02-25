@@ -2574,7 +2574,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 
   if(conf_telecine_src>0 && conf_telecine_dest>0 && conf_telecine_src < conf_telecine_dest)
   {
-	int snum, sden, tnum, tden, sfps, tfps;
+	int sfps, tfps;
 	
 	sfps = (int) (conf_telecine_src * 1001 + 0.5);
 	tfps = (int) (conf_telecine_dest * 1001 + 0.5);
