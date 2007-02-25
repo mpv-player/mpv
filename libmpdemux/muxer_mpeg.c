@@ -1607,6 +1607,9 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 	uint8_t *pce_ptr = NULL;	//pointer to picture coding extension
 	int frames_diff, d1, gop_reset = 0;	//how any frames we advanced respect to the last one
 	int ret;
+	int i, err;
+	uint32_t temp_ref;
+	int pt;
 	
 	mp_msg(MSGT_MUXER, MSGL_DBG2,"parse_mpeg12_video, len=%u\n", (uint32_t) len);
 	if(s->buffer[0] != 0 || s->buffer[1] != 0 || s->buffer[2] != 1 || len<6) 
@@ -1614,82 +1617,82 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		mp_msg(MSGT_MUXER, MSGL_ERR,"Unknown video format, possibly non-MPEG1/2 stream, len=%d!\n", len);
 		return 0;
 	}
-	
-	if(s->buffer[3] == 0 || s->buffer[3] == 0xb3 || s->buffer[3] == 0xb8) 
+
+	temp_ref = 0;
+	pt = 0;
+	err = 0;
+	i = 0;
+	while(i + 4 < len)
 	{	// Video (0) Sequence header (b3) or GOP (b8)
-		uint32_t temp_ref;
-		int pt;
-		
-		if(s->buffer[3] == 0xb3) //sequence
+		if((s->buffer[i] == 0) && (s->buffer[i+1] == 0) && (s->buffer[i+2] == 1))
 		{
-			fps_ptr = &(s->buffer[7]);
-			mp_header_process_sequence_header(&(spriv->picture), &(s->buffer[4]));
-			spriv->delta_pts = spriv->nom_delta_pts = parse_fps(spriv->picture.fps);
-			
-			spriv->delta_clock = (double) 1/fps;
-			//the 2 lines below are needed to handle non-standard frame rates (such as 18)
-			if(! spriv->delta_pts)
-				spriv->delta_pts = spriv->nom_delta_pts = (uint64_t) ((double)27000000.0 * spriv->delta_clock );
-			mp_msg(MSGT_MUXER, MSGL_DBG2, "\nFPS: %.3f, FRAMETIME: %.3lf\n", fps, (double)1/fps);
-			if(priv->patch_seq)
-				patch_seq(priv, s->buffer);
-			
-			tmp = 12;
-			if(s->buffer[tmp-1] & 2)
-				tmp += 64;
-			
-			if(s->buffer[tmp-1] & 1)
-				tmp += 64;
-			
-			if(s->buffer[tmp] == 0 && s->buffer[tmp+1] == 0 && s->buffer[tmp+2] == 1 && s->buffer[tmp+3] == 0xb5)
+			switch(s->buffer[i+3])
 			{
-				se_ptr = &(s->buffer[tmp+4]);
-				mp_header_process_extension(&(spriv->picture), &(s->buffer[tmp+4]));
-			}
-		}
-		
-		
-		if(spriv->picture.mpeg1 == 0 && priv->patch_sde)
-		{
-			while((s->buffer[tmp] != 0 || s->buffer[tmp+1] != 0 || s->buffer[tmp+2] != 1 || s->buffer[tmp+3] != 0xb5 ||
-				((s->buffer[tmp+4] & 0xf0) != 0x20)) &&
-				(tmp < len-5))
-				tmp++;
-			
-			if(tmp < len-5)		//found
-				patch_panscan(priv, &(s->buffer[tmp+4]));
-		}
-		
-		
-		if(s->buffer[3])
-		{	// Sequence or GOP -- scan for Picture
-			do_loop: while (ptr < len-5 && 
-				(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1))
-				ptr++;
+				case 0xb3: //sequence
+				{
+					if(i + 11 > len)
+					{
+						err=1;
+						break;
+					}
+					fps_ptr = &(s->buffer[i+7]);
+					mp_header_process_sequence_header(&(spriv->picture), &(s->buffer[i+4]));
+					spriv->delta_pts = spriv->nom_delta_pts = parse_fps(spriv->picture.fps);
+					
+					spriv->delta_clock = (double) 1/fps;
+					//the 2 lines below are needed to handle non-standard frame rates (such as 18)
+					if(! spriv->delta_pts)
+						spriv->delta_pts = spriv->nom_delta_pts = (uint64_t) ((double)27000000.0 * spriv->delta_clock );
+					mp_msg(MSGT_MUXER, MSGL_DBG2, "\nFPS: %.3f, FRAMETIME: %.3lf\n", fps, (double)1/fps);
+					if(priv->patch_seq)
+						patch_seq(priv, &(s->buffer[i]));
+				}
+				break;
 
-			if(s->buffer[ptr+3] == 0xb8)
-				gop_reset = 1;
-
-			if(s->buffer[ptr+3])	//not frame
-			{
-				ptr++;
-				goto do_loop;
-			}
+				case 0xb5:
+					if(i + 9 > len)
+					{
+						err = 1;
+						break;
+					}
+					mp_header_process_extension(&(spriv->picture), &(s->buffer[i+4]));
+					if(((s->buffer[i+4] & 0xf0) == 0x20))
+					{
+						se_ptr = &(s->buffer[i+4]);
+						if(priv->patch_sde)
+							patch_panscan(priv, se_ptr);
+					}
+					if((s->buffer[i+4] & 0xf0) == 0x80)
+					{
+						pce_ptr = &(s->buffer[i+4]);
+					}
+					break;
+		
+				case 0xb8:
+					gop_reset = 1;
+					break;
+		
+				case 0x00:
+					if(i + 5 > len)
+					{
+						err = 1;
+						break;
+					}
+					pt = (s->buffer[i+5] & 0x1c) >> 3;
+					temp_ref = (s->buffer[i+4]<<2)+(s->buffer[i+5]>>6);
+					break;
+				}
+			if(err) break;	//something went wrong
+			if(s->buffer[i+3] >= 0x01 && s->buffer[i+3] <= 0xAF) break;	//slice, we have already analized what we need
 		}
-
-		if (ptr >= len-5) 
-		{
-			pt = 0; // Picture not found?!
-			temp_ref = 0;
-			mp_msg(MSGT_MUXER, MSGL_ERR,"Warning: picture not found in GOP!\n");
-		} 
-		else 
-		{
+		i++;
+	}
+	if(err)
+		mp_msg(MSGT_MUXER, MSGL_ERR,"Warning: picture too short or broken!\n");
+	
 			//following 2 lines are workaround: lavf doesn't sync to sequence headers before passing demux_packets
 			if(!spriv->nom_delta_pts)	
 				spriv->delta_pts = spriv->nom_delta_pts = parse_fps(fps);
-			pt = (s->buffer[ptr+5] & 0x1c) >> 3;
-			temp_ref = (s->buffer[ptr+4]<<2)+(s->buffer[ptr+5]>>6);
 			if(!spriv->vframes)
 				spriv->last_tr = spriv->max_tr = temp_ref;
 			d1 = temp_ref - spriv->last_tr;
@@ -1715,27 +1718,15 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			spriv->last_tr = temp_ref;
 			if(spriv->picture.mpeg1 == 0) 
 			{
-				size_t tmp = ptr;
-			
-				while (ptr < len-5 && 
-					(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1 || s->buffer[ptr+3] != 0xb5)) 
-						ptr++;
-				if(ptr < len-5) 
+				if(spriv->telecine && pce_ptr)
 				{
-					pce_ptr = &(s->buffer[ptr+4]);
-					if(spriv->telecine)
 						soft_telecine(priv, spriv, fps_ptr, se_ptr, pce_ptr, frames_diff);
 					spriv->picture.display_time = 100;
-					mp_header_process_extension(&(spriv->picture), &(s->buffer[ptr+4]));
+					mp_header_process_extension(&(spriv->picture), pce_ptr);
 					if(spriv->picture.display_time >= 50 && spriv->picture.display_time <= 300) 
 						spriv->delta_pts = (spriv->nom_delta_pts * spriv->picture.display_time) / 100;
 				}
-				else 
-					spriv->delta_pts = spriv->nom_delta_pts;
-			
-				ptr = tmp;
 			}
-		}
 	
 		if(! spriv->vframes)
 			frames_diff = 1;
@@ -1776,7 +1767,6 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			}
 		}
 		spriv->vframes++;
-	}
 	
 	mp_msg(MSGT_MUXER, MSGL_DBG2,"parse_mpeg12_video, return %u\n", (uint32_t) len);
 	return len;
