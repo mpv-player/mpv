@@ -1937,6 +1937,14 @@ EOF
 		*) ;;
 	    esac
 	fi
+	# gcc 3.4 and up supports 440*
+	if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "4" || test "$_cc_major" -ge "4"; then
+	    case "$proc" in
+                440EP*) _march='-mcpu=440fp' _mcpu='-mtune=440fp' ;;
+                440G* ) _march='-mcpu=440'   _mcpu='-mtune=440'   ;;
+		*) ;;
+	    esac
+	fi
 	# gcc 4.0 and up supports POWER5
 	if test "$_cc_major" -ge "4"; then
 	    case "$proc" in
