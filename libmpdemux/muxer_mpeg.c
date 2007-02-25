@@ -1690,83 +1690,83 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 	if(err)
 		mp_msg(MSGT_MUXER, MSGL_ERR,"Warning: picture too short or broken!\n");
 	
-			//following 2 lines are workaround: lavf doesn't sync to sequence headers before passing demux_packets
-			if(!spriv->nom_delta_pts)	
-				spriv->delta_pts = spriv->nom_delta_pts = parse_fps(fps);
-			if(!spriv->vframes)
-				spriv->last_tr = spriv->max_tr = temp_ref;
-			d1 = temp_ref - spriv->last_tr;
-			if(gop_reset)
-				frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
-			else
-			{
-				if(d1 < -6)	//there's a wraparound
-					frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
-				else if(d1 > 6)	//there's a wraparound
-					frames_diff = spriv->max_tr + 1 + spriv->last_tr - temp_ref;
-				else if(!d1)	//pre-emptive fix against broken sequences
-					frames_diff = 1;
-				else	
-					frames_diff = d1;
-			}
-			mp_msg(MSGT_MUXER, MSGL_DBG2, "\nLAST: %d, TR: %d, GOP: %d, DIFF: %d, MAX: %d, d1: %d\n", 
-			spriv->last_tr, temp_ref, gop_reset, frames_diff, spriv->max_tr, d1);
-
-			if(temp_ref > spriv->max_tr || gop_reset)
-				spriv->max_tr = temp_ref;
-			
-			spriv->last_tr = temp_ref;
-			if(spriv->picture.mpeg1 == 0) 
-			{
-				if(spriv->telecine && pce_ptr)
-				{
-						soft_telecine(priv, spriv, fps_ptr, se_ptr, pce_ptr, frames_diff);
-					spriv->picture.display_time = 100;
-					mp_header_process_extension(&(spriv->picture), pce_ptr);
-					if(spriv->picture.display_time >= 50 && spriv->picture.display_time <= 300) 
-						spriv->delta_pts = (spriv->nom_delta_pts * spriv->picture.display_time) / 100;
-				}
-			}
-	
-		if(! spriv->vframes)
+	//following 2 lines are workaround: lavf doesn't sync to sequence headers before passing demux_packets
+	if(!spriv->nom_delta_pts)	
+		spriv->delta_pts = spriv->nom_delta_pts = parse_fps(fps);
+	if(!spriv->vframes)
+		spriv->last_tr = spriv->max_tr = temp_ref;
+	d1 = temp_ref - spriv->last_tr;
+	if(gop_reset)
+		frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
+	else
+	{
+		if(d1 < -6)	//there's a wraparound
+			frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
+		else if(d1 > 6)	//there's a wraparound
+			frames_diff = spriv->max_tr + 1 + spriv->last_tr - temp_ref;
+		else if(!d1)	//pre-emptive fix against broken sequences
 			frames_diff = 1;
+		else	
+			frames_diff = d1;
+	}
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nLAST: %d, TR: %d, GOP: %d, DIFF: %d, MAX: %d, d1: %d\n", 
+	spriv->last_tr, temp_ref, gop_reset, frames_diff, spriv->max_tr, d1);
 
-		spriv->last_dts += spriv->delta_pts;
-		spriv->last_pts += spriv->nom_delta_pts*(frames_diff-1) + spriv->delta_pts;
-
-		ret = add_frame(spriv, spriv->delta_pts, s->buffer, len, pt, spriv->last_dts, spriv->last_pts);
-		if(ret < 0)
+	if(temp_ref > spriv->max_tr || gop_reset)
+		spriv->max_tr = temp_ref;
+	
+	spriv->last_tr = temp_ref;
+	if(spriv->picture.mpeg1 == 0) 
+	{
+		if(spriv->telecine && pce_ptr)
 		{
-			mp_msg(MSGT_MUXER, MSGL_FATAL, "\r\nPARSE_MPEG12: add_frames(%d) failed, exit\r\n", len);
-			return 0;
+			soft_telecine(priv, spriv, fps_ptr, se_ptr, pce_ptr, frames_diff);
+			spriv->picture.display_time = 100;
+			mp_header_process_extension(&(spriv->picture), pce_ptr);
+			if(spriv->picture.display_time >= 50 && spriv->picture.display_time <= 300) 
+				spriv->delta_pts = (spriv->nom_delta_pts * spriv->picture.display_time) / 100;
 		}
-		mp_msg(MSGT_MUXER, MSGL_DBG2, "\r\nVIDEO FRAME, PT: %C, tr: %d, diff: %d, dts: %.3lf, pts: %.3lf, pdt: %u, gop_reset: %d\r\n",
-			ftypes[pt], temp_ref, frames_diff, ((double) spriv->last_dts/27000000.0f), 
-			((double) spriv->last_pts/27000000.0f), spriv->picture.display_time, gop_reset);
+	}
+	
+	if(! spriv->vframes)
+		frames_diff = 1;
 
-		if(pt == B_FRAME)
+	spriv->last_dts += spriv->delta_pts;
+	spriv->last_pts += spriv->nom_delta_pts*(frames_diff-1) + spriv->delta_pts;
+
+	ret = add_frame(spriv, spriv->delta_pts, s->buffer, len, pt, spriv->last_dts, spriv->last_pts);
+	if(ret < 0)
+	{
+		mp_msg(MSGT_MUXER, MSGL_FATAL, "\r\nPARSE_MPEG12: add_frames(%d) failed, exit\r\n", len);
+		return 0;
+	}
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "\r\nVIDEO FRAME, PT: %C, tr: %d, diff: %d, dts: %.3lf, pts: %.3lf, pdt: %u, gop_reset: %d\r\n",
+		ftypes[pt], temp_ref, frames_diff, ((double) spriv->last_dts/27000000.0f), 
+		((double) spriv->last_pts/27000000.0f), spriv->picture.display_time, gop_reset);
+
+	if(pt == B_FRAME)
+	{
+		int j, n, adj = 0;
+		int64_t diff = spriv->last_dts - spriv->last_pts;
+		
+		if(diff != 0)
 		{
-			int j, n, adj = 0;
-			int64_t diff = spriv->last_dts - spriv->last_pts;
+			n = spriv->framebuf_used - 1;
 			
-			if(diff != 0)
+			for(j = n; j >= 0; j--)
 			{
-				n = spriv->framebuf_used - 1;
-				
-				for(j = n; j >= 0; j--)
+				if(spriv->framebuf[j].pts >= spriv->last_pts)
 				{
-					if(spriv->framebuf[j].pts >= spriv->last_pts)
-					{
-						spriv->framebuf[j].pts += diff;
-						adj++;
-					}
+					spriv->framebuf[j].pts += diff;
+					adj++;
 				}
-				mp_msg(MSGT_MUXER, MSGL_V, "\r\nResynced B-frame by %d units, DIFF: %lld (%.3lf),[pd]ts=%.3lf\r\n",
-					n, diff, (double) diff/27000000.0f, (double) spriv->last_pts/27000000.0f);
-				spriv->last_pts = spriv->last_dts;
 			}
+			mp_msg(MSGT_MUXER, MSGL_V, "\r\nResynced B-frame by %d units, DIFF: %lld (%.3lf),[pd]ts=%.3lf\r\n",
+				n, diff, (double) diff/27000000.0f, (double) spriv->last_pts/27000000.0f);
+			spriv->last_pts = spriv->last_dts;
 		}
-		spriv->vframes++;
+	}
+	spriv->vframes++;
 	
 	mp_msg(MSGT_MUXER, MSGL_DBG2,"parse_mpeg12_video, return %u\n", (uint32_t) len);
 	return len;
