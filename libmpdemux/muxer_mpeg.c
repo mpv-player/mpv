@@ -157,7 +157,7 @@ typedef struct {
 
 typedef struct {
 	int has_pts, has_dts, pes_is_aligned, type, min_pes_hlen, psm_fixed;
-	int real_framerate, delay_rff;
+	int delay_rff;
 	uint64_t pts, last_pts, last_dts, dts, size, frame_duration, delta_pts, nom_delta_pts, last_saved_pts;
 	uint32_t buffer_size;
 	double delta_clock, timer;
@@ -1623,7 +1623,6 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		if(s->buffer[3] == 0xb3) //sequence
 		{
 			fps_ptr = &(s->buffer[7]);
-			spriv->real_framerate = *fps_ptr & 0x0f;
 			mp_header_process_sequence_header(&(spriv->picture), &(s->buffer[4]));
 			spriv->delta_pts = spriv->nom_delta_pts = parse_fps(spriv->picture.fps);
 			
