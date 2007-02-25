@@ -1601,7 +1601,6 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 
 static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_headers_t *spriv, float fps, size_t len)
 {
-	size_t ptr = 0, tmp = 0;
 	uint8_t *fps_ptr = NULL;	//pointer to the fps byte in the sequence header
 	uint8_t *se_ptr = NULL;		//pointer to sequence extension
 	uint8_t *pce_ptr = NULL;	//pointer to picture coding extension
