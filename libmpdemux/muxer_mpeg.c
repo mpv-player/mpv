@@ -1695,19 +1695,17 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 				spriv->last_tr = spriv->max_tr = temp_ref;
 			d1 = temp_ref - spriv->last_tr;
 			if(gop_reset)
-			{
 				frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
-			}
 			else
 			{
-			if(d1 < -6)	//there's a wraparound
-				frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
-			else if(d1 > 6)	//there's a wraparound
-				frames_diff = spriv->max_tr + 1 + spriv->last_tr - temp_ref;
-			else if(!d1)	//pre-emptive fix against broken sequences
-				frames_diff = 1;
-			else	
-				frames_diff = d1;
+				if(d1 < -6)	//there's a wraparound
+					frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
+				else if(d1 > 6)	//there's a wraparound
+					frames_diff = spriv->max_tr + 1 + spriv->last_tr - temp_ref;
+				else if(!d1)	//pre-emptive fix against broken sequences
+					frames_diff = 1;
+				else	
+					frames_diff = d1;
 			}
 			mp_msg(MSGT_MUXER, MSGL_DBG2, "\nLAST: %d, TR: %d, GOP: %d, DIFF: %d, MAX: %d, d1: %d\n", 
 			spriv->last_tr, temp_ref, gop_reset, frames_diff, spriv->max_tr, d1);
