@@ -238,6 +238,25 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
 
     wf->wFormatTag = sh_audio->format = fourcc;
     wf->nChannels = numChannels;
+
+    uint8_t *pos = (uint8_t*)qtRTPSource->qtState.sdAtom + 52;
+    uint8_t *endpos = (uint8_t*)qtRTPSource->qtState.sdAtom
+                      + qtRTPSource->qtState.sdAtomSize;
+    while (pos+8 < endpos) {
+      unsigned atomLength = pos[0]<<24 | pos[1]<<16 | pos[2]<<8 | pos[3];
+      if (atomLength == 0 || atomLength > endpos-pos) break;
+      if (!memcmp(pos+4, "wave", 4) && fourcc==mmioFOURCC('Q','D','M','2') &&
+          atomLength > 8 &&
+          atomLength <= INT_MAX) {
+        sh_audio->codecdata = (unsigned char*) malloc(atomLength-8);
+        if (sh_audio->codecdata) {
+          memcpy(sh_audio->codecdata, pos+8, atomLength-8);
+          sh_audio->codecdata_len = atomLength-8;
+        }
+        break;
+      }
+      pos += atomLength;
+    }
   } else {
     fprintf(stderr,
 	    "Unknown MPlayer format code for MIME type \"audio/%s\"\n",
