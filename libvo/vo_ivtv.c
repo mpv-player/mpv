@@ -78,9 +78,11 @@ ivtv_reset (int blank_screen)
 {
   struct ivtv_cfg_stop_decode sd;
   struct ivtv_cfg_start_decode sd1;
+  int flags = 0;
 
-  sd.hide_last = blank_screen;
-  sd.pts_stop = 0;
+  if (blank_screen)
+    flags |= IVTV_STOP_FL_HIDE_FRAME;
+  sd.flags = flags;
  
   if (ioctl (ivtv_fd, IVTV_IOC_STOP_DECODE, &sd) < 0)
   {
