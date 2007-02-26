@@ -578,7 +578,7 @@ static HRESULT STDCALL COutputPin_NewSegment(IPin * This,
  */
 static HRESULT STDCALL COutputMemPin_QueryInterface(IUnknown* This, const GUID* iid, void** ppv)
 {
-    COutputPin* p = (COutputPin*)This;
+    COutputMemPin* p = (COutputMemPin*)This;
 
     Debug printf("COutputMemPin_QueryInterface(%p) called\n", This);
     if (!ppv)
@@ -599,8 +599,8 @@ static HRESULT STDCALL COutputMemPin_QueryInterface(IUnknown* This, const GUID* 
     }*/
     if(!memcmp(iid, &IID_IMemInputPin, 16))
     {
-	*ppv = p->mempin;
-	p->mempin->vt->AddRef(This);
+	*ppv = p;
+	p->vt->AddRef(This);
 	return 0;
     }
     Debug printf("Unknown interface : %08x-%04x-%04x-%02x%02x-" \
