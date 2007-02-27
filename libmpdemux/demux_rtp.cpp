@@ -348,7 +348,6 @@ Boolean insertRTPData(demuxer_t* demuxer, demux_stream_t* ds,
 
   // Copy our data into the buffer, and save it:
   memmove(dp->buffer, data, dataLen);
-  dp->len = dataLen;
   dp->pts = 0;
   bufferQueue->savePendingBuffer(dp);
   return True;
@@ -402,7 +401,7 @@ static void afterReading(void* clientData, unsigned frameSize,
   if (frameSize > 0) demuxer->stream->eof = 0;
 
   demux_packet_t* dp = bufferQueue->dp;
-  dp->len = frameSize;
+  resize_demux_packet(dp, frameSize);
 
   // Set the packet's presentation time stamp, depending on whether or
   // not our RTP source's timestamps have been synchronized yet: 
