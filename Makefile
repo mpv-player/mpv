@@ -14,11 +14,6 @@ CFLAGS                      += $(CFLAGS-yes)
 
 #CFLAGS += -Wall
 
-# Do not strip the binaries at installation
-ifeq ($(STRIPBINARIES),yes)
-INSTALLSTRIP = -s
-endif
-
 SRCS_COMMON = asxparser.c \
               codec-cfg.c \
               cpudetect.c \

@@ -2193,13 +2193,13 @@ echores $_named_asm_args
 
 
 # Checking for CFLAGS
-_stripbinaries=yes
+_install_strip="-s"
 if test "$_profile" != "" || test "$_debug" != "" ; then
   CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
   if test "$_cc_major" -ge "3" ; then
     CFLAGS=`echo "$CFLAGS" | sed -e 's/\(-Wall\)/\1 -Wno-unused-parameter/'`
   fi
-  _stripbinaries=no
+  _install_strip=
 elif test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe -fomit-frame-pointer"
@@ -7448,7 +7448,7 @@ LDCONFIG = $_ldconfig
 INSTALL = $_install
 EXTRA_INC = $_inc_extra
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
-STRIPBINARIES = $_stripbinaries
+INSTALLSTRIP = $_install_strip
 CHARSET = $_charset
 HELP_FILE = $_mp_help
 
