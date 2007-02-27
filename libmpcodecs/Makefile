@@ -150,9 +150,7 @@ SRCS2-$(TWOLAME)              += ae_twolame.c
 SRCS2-$(MP3LAME)              += ae_lame.c
 
 
-# -I.. to include ../liba52 before ../libavcodec/liba52.
-CFLAGS  = -I.. \
-          -Inative \
+CFLAGS  = -Inative \
           -I../libmpdemux \
           -I../stream \
           -I../loader \
