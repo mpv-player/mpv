@@ -279,6 +279,7 @@ static void needVideoFrameRate(demuxer_t* demuxer,
   int fps = (int)(subsession->videoFPS());
   if (fps != 0) {
     sh_video->fps = fps;
+    sh_video->frametime = 1.0f/fps;
     return;
   }
   
