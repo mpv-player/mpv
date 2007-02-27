@@ -643,6 +643,7 @@ _ass=auto
 _rpath=no
 _asmalign_pot=auto
 _color_console=no
+_stream_cache=yes
 for ac_option do
   case "$ac_option" in
   --help|-help|-h)
@@ -1284,6 +1285,10 @@ if win32 ; then
   _exesuf=".exe"
   # -lwinmm is always needed for osdep/timer-win2.c
   _ld_extra="$_ld_extra -lwinmm"
+fi
+
+if mingw32 ; then
+  _stream_cache=no
 fi
 
 # Check how to call 'head' and 'tail'. Newer versions spit out warnings
@@ -7458,7 +7463,7 @@ MPLAYER_NETWORK = $_network
 FTP = $_ftp
 STREAMING_LIVE555 = $_live
 VSTREAM = $_vstream
-STREAM_CACHE = yes
+STREAM_CACHE = $_stream_cache
 DVBIN = $_dvbin
 VIDIX = $_vidix_internal
 EXTERNAL_VIDIX = $_vidix_external
@@ -7736,7 +7741,7 @@ $_def_stddef
 
 /* Define this to compile stream-caching support, it can be enabled via
    -cache <kilobytes> */
-#define USE_STREAM_CACHE 1
+$_def_stream_cache
 
 /* Define if you are using XviD library */
 $_def_xvid

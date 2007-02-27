@@ -5,9 +5,7 @@ LIBNAME = libosdep.a
 
 SRCS-$(HAVE_SYS_MMAN_H)       += mmap_anon.c
 SRCS-$(MACOSX_FINDER_SUPPORT) += macosx_finder_args.c
-ifneq ($(TARGET_OS),MINGW32)
 SRCS-$(STREAM_CACHE)          += shmem.c
-endif
 
 SRCS-$(NEED_FSEEKO)           += fseeko.c
 SRCS-$(NEED_FTELLO)           += ftello.c
