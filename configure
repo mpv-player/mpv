@@ -644,6 +644,7 @@ _rpath=no
 _asmalign_pot=auto
 _color_console=no
 _stream_cache=yes
+_def_stream_cache="#define USE_STREAM_CACHE 1"
 for ac_option do
   case "$ac_option" in
   --help|-help|-h)
@@ -1289,6 +1290,7 @@ fi
 
 if mingw32 ; then
   _stream_cache=no
+  _def_stream_cache="#undef USE_STREAM_CACHE"
 fi
 
 # Check how to call 'head' and 'tail'. Newer versions spit out warnings
