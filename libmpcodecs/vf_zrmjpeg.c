@@ -530,7 +530,7 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	// Init q matrix
 	j->s->intra_matrix[0] = ff_mpeg1_default_intra_matrix[0];
 	for (i = 1; i < 64; i++)
-		j->s->intra_matrix[i] = clip_uint8(
+		j->s->intra_matrix[i] = av_clip_uint8(
 			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3);
 
 	// precompute matrix
