@@ -12,6 +12,7 @@ endif
 SRCS-$(NEED_FSEEKO)           += fseeko.c
 SRCS-$(NEED_FTELLO)           += ftello.c
 SRCS-$(NEED_GETTIMEOFDAY)     += gettimeofday.c
+SRCS-$(NEED_GLOB)             += glob-win.c
 SRCS-$(NEED_SCANDIR)          += scandir.c
 SRCS-$(NEED_SETENV)           += setenv.c
 SRCS-$(NEED_STRLCAT)          += strlcat.c
@@ -30,7 +31,6 @@ timer = timer-darwin.c
 endif
 ifeq ($(TARGET_OS),MINGW32)
 getch = getch2-win.c
-SRCS-$(NEED_GLOB)             += glob-win.c
 endif
 SRCS += $(timer)
 SRCS += $(getch)
