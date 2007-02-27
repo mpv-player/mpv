@@ -3111,12 +3111,6 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 	if(newpos < demuxer->movi_start)
   		newpos = demuxer->movi_start;	//begininng of stream
 
-#ifdef _LARGEFILE_SOURCE
-	newpos &= ~((long long) (STREAM_BUFFER_SIZE - 1));  /* sector boundary */
-#else
-	newpos &= ~(STREAM_BUFFER_SIZE - 1);  /* sector boundary */
-#endif
-
 	stream_seek(demuxer->stream, newpos);
 	for(i = 0; i < 8192; i++)
 		if(priv->ts.pids[i] != NULL)

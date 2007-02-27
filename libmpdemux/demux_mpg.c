@@ -892,11 +892,6 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
 	    if(newpos<demuxer->movi_start) newpos=demuxer->movi_start;
 	}
 
-#ifdef _LARGEFILE_SOURCE
-        newpos&=~((long long)STREAM_BUFFER_SIZE-1);  /* sector boundary */
-#else
-        newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
-#endif
         stream_seek(demuxer->stream,newpos);
 
         // re-sync video:
