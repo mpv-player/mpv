@@ -179,7 +179,7 @@ I. BASICS:
   part of the directly visible history of the revisions after the reversal
   So if the change was completely broken like reindenting a file against the
   maintainers decision, or a change which mixed functional and cosmetic
-  changes then its better if its not part of the visible history as it
+  changes then it is better if it is not part of the visible history as it
   would make it hard to read, review and would also break svn annotate
   For the example of a change which mixed functional and cosmetic parts they
   should of course be committed again after the reversal but separately, so one
@@ -188,12 +188,12 @@ I. BASICS:
   totally broken then it should be reversed with svn merge as otherwise
   the fact that the change was bad would be hidden
   One method to decide which reversal method is best is to ask yourself
-  if theres any value in seeing the whole bad change and its removal
-  in svn vs. just seeing a comment that says what has been reversed while
+  if there is any value in seeing the whole bad change and its removal
+  in SVN vs just seeing a comment that says what has been reversed while
   the actual change does not clutter the immediately visible history and
   svn annotate.
   If you are even just slightly uncertain how to revert something then ask on
-  the mplayer-dev mailinglist.
+  the mplayer-dev-eng mailing list.
 
 
 10. Reverting local changes
