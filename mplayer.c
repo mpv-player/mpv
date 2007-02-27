@@ -3330,6 +3330,17 @@ if(play_n_frames==0){
   mpctx->eof=PT_NEXT_ENTRY; goto goto_next_file;
 }
 
+if (seek_to_sec) {
+    seek(mpctx, seek_to_sec, 1);
+    end_at.pos += seek_to_sec;
+}
+
+if (end_at.type == END_AT_SIZE) {
+    mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_MPEndposNoSizeBased);
+    end_at.type = END_AT_NONE;
+}
+
+
 while(!mpctx->eof){
     float aq_sleep_time=0;
 if(!mpctx->sh_audio && mpctx->d_audio->sh) {
@@ -3505,20 +3516,6 @@ if(step_sec>0) {
   }
 }
   mpctx->was_paused = 0;
-
-  if (seek_to_sec) {
-      rel_seek_secs += seek_to_sec;
-      seek_to_sec = 0;
-  }
-  
-  if (end_at.type != END_AT_NONE) {
-    if(end_at.type == END_AT_SIZE) {
-      mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_MPEndposNoSizeBased);
-      end_at.type = END_AT_NONE;
-    } else {
-      end_at.pos += rel_seek_secs;
-    }
-  }
 
   /* Looping. */
   if(mpctx->eof==1 && loop_times>=0) {
