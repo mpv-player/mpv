@@ -195,7 +195,7 @@ static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
       float first_pts = read_first_mpeg_pts_at_position(demuxer, demuxer->movi_start);
       if(first_pts != -1.0)
       {
-        float middle_pts = read_first_mpeg_pts_at_position(demuxer, (demuxer->movi_end - demuxer->movi_start)/2);
+        float middle_pts = read_first_mpeg_pts_at_position(demuxer, (demuxer->movi_end + demuxer->movi_start)/2);
         if(middle_pts != -1.0)
         {
           float final_pts = read_first_mpeg_pts_at_position(demuxer, demuxer->movi_end - TIMESTAMP_PROBE_LEN);
