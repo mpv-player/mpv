@@ -581,6 +581,26 @@ demux_packet_t* ReadBufferQueue::getPendingBuffer() {
   return dp;
 }
 
+static int demux_rtp_control(struct demuxer_st *demuxer, int cmd, void *arg) {
+  double endpts = ((RTPState*)demuxer->priv)->mediaSession->playEndTime();
+
+  switch(cmd) {
+    case DEMUXER_CTRL_GET_TIME_LENGTH:
+      if (endpts <= 0)
+        return DEMUXER_CTRL_DONTKNOW;
+      *((double *)arg) = endpts;
+      return DEMUXER_CTRL_OK;
+
+    case DEMUXER_CTRL_GET_PERCENT_POS:
+      if (endpts <= 0)
+        return DEMUXER_CTRL_DONTKNOW;
+      *((int *)arg) = (int)(((RTPState*)demuxer->priv)->videoBufferQueue->prevPacketPTS*100/endpts);
+      return DEMUXER_CTRL_OK;
+
+    default:
+      return DEMUXER_CTRL_NOTIMPL;
+    }
+}
 
 demuxer_desc_t demuxer_desc_rtp = {
   "LIVE555 RTP demuxer",
@@ -595,5 +615,5 @@ demuxer_desc_t demuxer_desc_rtp = {
   demux_open_rtp,
   demux_close_rtp,
   NULL,
-  NULL
+  demux_rtp_control
 };
