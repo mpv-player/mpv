@@ -50,6 +50,4 @@ distclean: clean
 dep depend:
 	$(CC) -MM $(CFLAGS) test.c $(SRCS) 1>.depend
 
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+-include .depend
