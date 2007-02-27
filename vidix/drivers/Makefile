@@ -67,6 +67,4 @@ distclean: clean
 dep depend:
 # do nothing here
 
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+-include .depend

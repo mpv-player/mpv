@@ -35,6 +35,4 @@ dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 	$(MAKE) -C drivers depend
 
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+-include .depend

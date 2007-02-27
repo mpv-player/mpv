@@ -90,6 +90,4 @@ uninstall:
 	rm -f $(LIBDIR)/libdha.so $(LIBDIR)/$(SHORTNAME) $(LIBDIR)/$(LIBNAME)
 	-$(LDCONFIG)
 
-ifneq ($(wildcard .depend),)
-include .depend
-endif
+-include .depend
