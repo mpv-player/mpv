@@ -30,7 +30,7 @@ MPlayer (1.0)
     * audio and video switching for AVI demuxer (video switching untested)
     * GIF demuxer improvements, should work with all GIFs now
     * support for VC1 in MPEG-TS and MPEG-PS files (bd,hd)-dvd
-    * preliminary support for EVO demuxing
+    * support for EVO demuxing
 
     Streaming:
     * authentication for Real RTSP streams
@@ -74,6 +74,8 @@ MPlayer (1.0)
     * support for doubleclick as input event
     * -really-quiet works fully now
     * select libavformat demuxer (-lavfdopts format=)
+    * internal minilzo removed in favor of FFmpeg implementation,
+      use liblzo2 for encoding
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
