@@ -6073,11 +6073,11 @@ EOF
   for I in $_inc_extra "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
     cxx_check $I/liveMedia/include $I/UsageEnvironment/include \
       $I/groupsock/include && _livelibdir=`echo $I| sed s/-I//` && \
-      _ld_extra="$_ld_extra $_livelibdir/liveMedia/libliveMedia.a \
+      _ld_extra="$_livelibdir/liveMedia/libliveMedia.a \
                  $_livelibdir/groupsock/libgroupsock.a \
                  $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
                  $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a \
-                 -lstdc++" \
+                 $_ld_extra  -lstdc++" \
       _inc_extra="$_inc_extra -I$_livelibdir/liveMedia/include \
                   -I$_livelibdir/UsageEnvironment/include \
                   -I$_livelibdir/BasicUsageEnvironment/include \
