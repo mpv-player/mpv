@@ -118,6 +118,7 @@ for i in "$@"; do
         printoption "stupid    " "test for stupid code" "$_stupid"
         echo
         printoption "all       " "enable all tests" "no"
+        echo  "                   (-noall can be specified as -none)"
         echo
         printoption "showcont  " "show offending content of file(s)" \
                                                                    "$_showcont"
