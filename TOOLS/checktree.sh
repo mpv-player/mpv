@@ -105,7 +105,7 @@ list_svn() {
 
 for i in "$@"; do
     case "$i" in
-    -help)
+    -help|--help|-h|-\?)
         echo -e "\n$0 [options] [files]\n"
         echo -e "options:\n"
         printoption "spaces    " "test for spaces in filenames" "$_spaces"
