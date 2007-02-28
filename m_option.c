@@ -1204,10 +1204,12 @@ static double parse_timestring(char *str)
 
 static int parse_time(m_option_t* opt,char *name, char *param, void* dst, int src)
 {
+  double time;
+
   if (param == NULL || strlen(param) == 0)
     return M_OPT_MISSING_PARAM;
   
-  double time = parse_timestring(param);
+  time = parse_timestring(param);
   if (time == -1e100) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid time: '%s'\n",
            name,param);
