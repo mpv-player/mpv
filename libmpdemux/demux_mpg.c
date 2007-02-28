@@ -180,7 +180,8 @@ static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
 
     //if seeking is allowed set has_valid_timestamps if appropriate
     if(demuxer->seekable
-       && demuxer->stream->type == STREAMTYPE_FILE 
+       && (demuxer->stream->type == STREAMTYPE_FILE
+           || demuxer->stream->type == STREAMTYPE_VCD)
        && demuxer->movi_start != demuxer-> movi_end
     )
     {
