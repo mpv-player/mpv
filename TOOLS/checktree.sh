@@ -79,24 +79,9 @@ all_filenames() {
         | grep -v "\.\#\|\~$\|\.depend\|\/\.svn\/\|config.mak\|^\./config\.h" \
         | grep -v "^\./version\.h\|\.o$\|\.a$\|configure.log\|^\./help_mp.h"
     else
-        list_svn .
+        svn info -R | sed -n '/Path:/bb; :a; d; b; :b; s/Path: /.\//; h; :c; n;
+                              /Node Kind:/bd; bc; :d; /directory/ba; g; p;'
     fi
-}
-
-list_svn() {
-    tmpfiles=`sed '/name/ba; /kind/ba; d; b;
-                   :a; s/^ *....=\"\(.*\)\".*$/\1/;' $1/.svn/entries | \
-              sed '/$/N; s/\n/ /; / dir$/d; s/ file$//;'`
-    tmpdirs=`sed ' /name/ba; /kind/ba; d; b;
-                   :a; s/^ *....=\"\(.*\)\".*$/\1/;' $1/.svn/entries | \
-             sed ' /$/N; s/\n/ /; / file$/d; /^ dir$/d; s/ dir$//;'`
-
-    for i in $tmpfiles; do
-        echo $1/$i
-    done
-    for j in $tmpdirs; do
-        list_svn $1/$j
-    done
 }
 
 # -----------------------------------------------------------------------------
@@ -125,8 +110,8 @@ for i in "$@"; do
         echo
         printoption "color     " "colored output" "$_color"
         printoption "head      " "print heading for each test" "$_head"
-        printoption "svn       " "use .svn/ to determine which files to check"\
-                                                                        "$_svn"
+        printoption "svn       " 
+                    "use svn info to determine which files to check" "$_svn"
         echo -e "\nIf no files are specified, the whole tree is traversed."
         echo -e "If there are, -(no)svn has no effect.\n"
         exit
