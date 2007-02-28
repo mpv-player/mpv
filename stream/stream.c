@@ -299,26 +299,10 @@ off_t newpos=0;
     return 1;
   }
 
-  switch(s->type){
-  case STREAMTYPE_STREAM:
-#ifdef _LARGEFILE_SOURCE
-    newpos=pos&(~((long long)STREAM_BUFFER_SIZE-1));break;
-#else
-    newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
-#endif
-  default:
-    // Round on sector size
-    if(s->sector_size)
-      newpos=(pos/s->sector_size)*s->sector_size;
-    else { // Otherwise on the buffer size
-#ifdef _LARGEFILE_SOURCE
-      newpos=pos&(~((long long)STREAM_BUFFER_SIZE-1));break;
-#else
-      newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
-#endif
-    }
-    break;
-  }
+  if(s->sector_size)
+      newpos = (pos/s->sector_size)*s->sector_size;
+  else
+      newpos = pos&(~((off_t)STREAM_BUFFER_SIZE-1));
 
 if( mp_msg_test(MSGT_STREAM,MSGL_DBG3) ){
   mp_msg(MSGT_STREAM,MSGL_DBG3, "s->pos=%"PRIX64"  newpos=%"PRIX64"  new_bufpos=%"PRIX64"  buflen=%X  \n",
