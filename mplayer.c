@@ -3528,7 +3528,7 @@ if(step_sec>0) {
     if(loop_times==1) loop_times=-1;
     play_n_frames=play_n_frames_mf;
     mpctx->eof=0;
-    abs_seek_pos=3; rel_seek_secs=0; // seek to start of movie (0%)
+    abs_seek_pos=1; rel_seek_secs=seek_to_sec;
     loop_seek = 1;
   }
 
