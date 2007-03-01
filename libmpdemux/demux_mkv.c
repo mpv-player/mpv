@@ -42,13 +42,6 @@
 #include "libavutil/lzo.h"
 #endif
 
-#if !defined(MIN)
-#define MIN(a, b)	((a)<(b)?(a):(b))
-#endif
-#if !defined(MAX)
-#define MAX(a, b)	((a)>(b)?(a):(b))
-#endif
-
 static unsigned char sipr_swaps[38][2]={
     {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
     {13,39},{14,73},{15,53},{16,69},{17,57},{19,88},{20,34},{21,71},{24,46},
@@ -389,12 +382,9 @@ vobsub_parse_palette (mkv_track_t *t, const char *start)
       r = tmp >> 16 & 0xff;
       g = tmp >> 8 & 0xff;
       b = tmp & 0xff;
-      y = MIN(MAX((int)(0.1494 * r + 0.6061 * g + 0.2445 * b), 0),
-              0xff);
-      u = MIN(MAX((int)(0.6066 * r - 0.4322 * g - 0.1744 * b) + 128,
-                  0), 0xff);
-      v = MIN(MAX((int)(-0.08435 * r - 0.3422 * g + 0.4266 * b) +
-                  128, 0), 0xff);
+      y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
+      u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
+      v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
       t->sh_sub.palette[i] = y << 16 | u << 8 | v;
       start += 6;
       while ((*start == ',') || isspace(*start))

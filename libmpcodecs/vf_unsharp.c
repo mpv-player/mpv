@@ -35,13 +35,7 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
-
-#ifndef MIN
-#define        MIN(a,b) (((a)<(b))?(a):(b))
-#endif
-#ifndef MAX
-#define        MAX(a,b) (((a)>(b))?(a):(b))
-#endif
+#include "libavutil/common.h"
 
 //===========================================================================//
 
@@ -258,8 +252,8 @@ static void parse( FilterParam *fp, char* args ) {
     fp->msizeY = ( z && z+1<max ) ? atoi( pos=z+1 ) : fp->msizeX;
 
     // min/max & odd
-    fp->msizeX = 1 | MIN( MAX( fp->msizeX, MIN_MATRIX_SIZE ), MAX_MATRIX_SIZE );
-    fp->msizeY = 1 | MIN( MAX( fp->msizeY, MIN_MATRIX_SIZE ), MAX_MATRIX_SIZE );
+    fp->msizeX = 1 | av_clip(fp->msizeX, MIN_MATRIX_SIZE, MAX_MATRIX_SIZE);
+    fp->msizeY = 1 | av_clip(fp->msizeY, MIN_MATRIX_SIZE, MAX_MATRIX_SIZE);
 
     // parse amount
     pos = strchr( pos+1, ':' );

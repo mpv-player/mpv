@@ -71,6 +71,7 @@
 #ifndef HAVE_NO_POSIX_SELECT
 
 #include "mp_msg.h"
+#include "libavutil/common.h"
 
 #include "libvo/fastmemcpy.h"
 
@@ -89,8 +90,6 @@
 #define TRUE  1
 #define FALSE 0
 
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define INRANGE(a,b,c)	( ((a) < (b)) ? (b) : ( ((a) > (c)) ? (c) : (a) ) )
 
 #define rgb2y(R,G,B)  ( (( 263*R + 516*G + 100*B) >> 10) + 16  )
@@ -298,10 +297,10 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 					vf->priv->x2 = vf->priv->y2 = 0;
 				}
 				// Define how much of our bitmap that contains graphics!
-				vf->priv->x1 = MAX( 0, MIN(vf->priv->x1, imgx) );
-				vf->priv->y1 = MAX( 0, MIN(vf->priv->y1, imgy) );
-				vf->priv->x2 = MIN( vf->priv->w, MAX(vf->priv->x2, ( imgx + imgw)) );
-				vf->priv->y2 = MIN( vf->priv->h, MAX(vf->priv->y2, ( imgy + imgh)) );
+				vf->priv->x1 = av_clip(imgx, 0, vf->priv->x1);
+				vf->priv->y1 = av_clip(imgy, 0, vf->priv->y1);
+				vf->priv->x2 = av_clip(imgx + imgw, vf->priv->x2, vf->priv->w);
+				vf->priv->y2 = av_clip(imgy + imgh, vf->priv->y2, vf->priv->h);
 			}
 			
 			if( command == CMD_CLEAR ) {

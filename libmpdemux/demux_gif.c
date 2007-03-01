@@ -160,10 +160,10 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   {
     int y;
     int cnt = FFMIN(effective_map->ColorCount, 256);
-    int l = FFMAX(FFMIN(gif->Image.Left, priv->w), 0);
-    int t = FFMAX(FFMIN(gif->Image.Top, priv->h), 0);
-    int w = FFMAX(FFMIN(gif->Image.Width, priv->w - l), 0);
-    int h = FFMAX(FFMIN(gif->Image.Height, priv->h - t), 0);
+    int l = av_clip(gif->Image.Left, 0, priv->w);
+    int t = av_clip(gif->Image.Top, 0, priv->h);
+    int w = av_clip(gif->Image.Width, 0, priv->w - l);
+    int h = av_clip(gif->Image.Height, 0, priv->h - t);
     unsigned char *dest = dp->buffer + priv->w * t + l;
 
     // copy the palette
