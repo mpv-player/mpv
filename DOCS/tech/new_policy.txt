@@ -1,0 +1,291 @@
+New Policy Draft
+Version 20070301
+
+Intro:
+------
+This document is an attempt to write a new policy as the old is fairly
+confusing and easy to missunderstand, its intention is not really to
+change the rules but rather to write them down clearer ...
+also for simplicity and to prevent flamewars, i would suggest that you
+fork this document and propose that fork as alternative if you have a
+significant disagreement with me on some part
+
+Author:
+-------
+Michael Niedermayer
+the authors of the old policy as i liberally copy and pasted from it
+
+TODO:
+add more explanations, justificaions and examples
+how to become/loose maintainer status
+review patches.txt
+security/exploit rules
+------------------------
+
+
+1. Definitions
+--------------
+* MPlayer developer, generally refered to simply as developer in this document
+  is any person who has a open (not cracked, not suspended) svn write account
+* MPlayer admin, generally refered to simply as admin in this document, every
+  admin is also a developer
+* CAN/MUST/SHOULD desriptions ...
+* public developer mailing list (mplayer-dev-eng at mplayerhq in hungary)
+
+
+C. Code and SVN Rules
+-----------------------------
+Renaming/moving/copying files or contents of files
+  Do not move, rename or copy files of which you are not the maintainer without
+  discussing it on the public developer mailinglist first!
+
+  Never copy or move a file by using 'svn delete' and 'svn add'. Always use
+  'svn move' or 'svn copy' instead in order to preserve history and minimize
+  the size of diffs.
+
+  To split a file, use 'svn copy' and remove the unneeded lines from each file.
+
+  Don't do a lot of cut'n'paste from one file to another without a very good
+  reason and discuss it on the mplayer-dev-eng mailing list first. It will make
+  those changes hard to trace.
+
+  Such actions are useless and treated as cosmetics in 99% of cases,
+  so try to avoid them.
+
+Reverting broken commits
+  There are 2 ways to reverse a change, they differ significantly in what they
+  do to the svn repository
+  The recommit old method:
+    svn merge
+    svn ci <file>
+    This simply changes the file(s) back to their old version localy and then
+    the change is commited as if it is a new change
+  The svn copy method
+    svn rm <file>
+    svn ci <file>
+    svn cp -r<good revision> svn://svn.mplayerhq.hu/mplayer/trunk/[<path>/]<file> <file>
+    svn ci <file>
+    This simply removes the file and then copies the last good version with
+    its history over it, this method can only be used to revert the n last
+    commits but not to revert a bad commit in the middle of its history
+  Neither method will change the history, checking out an old version will
+  always return exactly that revision with all its bugs and features. The
+  difference is that with the svn copy method the broken commit will not be
+  part of the directly visible history of the revisions after the reversal
+  So if the change was completely broken like reindenting a file against the
+  maintainers decision, or a change which mixed functional and cosmetic
+  changes then it is better if it is not part of the visible history as it
+  would make it hard to read, review and would also break svn annotate
+  For the example of a change which mixed functional and cosmetic parts they
+  should of course be committed again after the reversal but separately, so one
+  change with the functional stuff and one with the cosmetics
+  OTOH if the change which you want to reverse was simply buggy but not
+  totally broken then it should be reversed with svn merge as otherwise
+  the fact that the change was bad would be hidden
+  One method to decide which reversal method is best is to ask yourself
+  if there is any value in seeing the whole bad change and its removal
+  in SVN vs just seeing a comment that says what has been reversed while
+  the actual change does not clutter the immediately visible history and
+  svn annotate.
+  If you are even just slightly uncertain how to revert something then ask on
+  the mplayer-dev-eng mailing list.
+
+Broken code 
+   You must not commit code which breaks MPlayer! (Meaning unfinished but
+   enabled code which breaks compilation or compiles but does not work.)
+   You can commit unfinished stuff (for testing etc), but it must be disabled
+   (#ifdef etc) by default so it does not interfere with other developers'
+   work.
+
+Testing code
+   You don't have to over-test things. If it works for you, and you think it
+   should work for others, too, then commit. If your code has problems
+   (portability, exploits compiler bugs, unusual environment etc) they will be
+   reported and eventually fixed.
+
+Spliting changes
+   Do not commit unrelated changes together, split them into self-contained
+   pieces.
+   if you have any doubt disscuss it on the developer mailing list before
+   commiting, also when in doubt more spliting is better then less, changes
+   which are larger then 10kbyte generally should be split into several
+   incremental chanegs if possible even if you think they are all related
+   keeping changes well split makes reviewing and understanding them on 
+   svn log at the time of commit and later when debuging a bug much easier
+
+Compiler Warning fixes
+   Do not change code to hide warnings without ensuring that the underlaying
+   logic is correct and thus the warning was inappropriate
+
+4. Do not change behavior of the program (renaming options etc) or
+   remove functionality from the code without approval in a discussion on
+   the mplayer-dev-eng mailing list.
+
+
+5. Do not commit changes to the build system (Makefiles, configure script)
+   which change behaviour, defaults etc, without asking first. The same
+   applies to compiler warning fixes, trivial looking fixes and to code
+   maintained by other developers. We usually have a reason for doing things
+   the way we do. Send your changes as patches to the mplayer-dev-eng mailing
+   list, and if the code maintainers say OK, you may commit. This does not
+   apply to files you wrote and/or maintain.
+
+
+Cosmetics
+   We refuse source indentation and other cosmetic changes if they are mixed
+   with functional changes, such commits will be reverted. Every
+   developer has his own indentation style, you should not change it. Of course
+   if you (re)write something, you can use your own style... (Many projects
+   force a given indentation style - we don't.) If you really need to make
+   indentation changes (try to avoid this), separate them strictly from real
+   changes.
+
+   NOTE: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
+   do NOT change the indentation of the inner part (don't move it to the right)!
+
+
+Commit log message
+   Always fill out the commit log message. Describe in a few lines what you
+   changed and why. You can refer to mailing list postings if you fix a
+   particular bug. Comments such as "fixed!" or "Changed it." are unacceptable.
+
+
+Applying patches
+   If you apply a patch by someone else, include the name and email address in
+   the log message. Since the mplayer-cvslog mailing list is publicly
+   archived you should add some spam protection to the email address. Send an
+   answer to mplayer-dev-eng (or wherever you got the patch from) saying that
+   you applied the patch. If the patch contains a documentation change, commit
+   that as well; do not leave it to the documentation maintainers.
+
+
+messing with other developers code
+   Do NOT commit to code actively maintained by others without permission. Send
+   a patch to mplayer-dev-eng instead.
+
+
+Subscribe to svnlog
+    Subscribe to the mplayer-cvslog mailing list. The diffs of all commits
+    are sent there and reviewed by all the other developers. Bugs and possible
+    improvements or general questions regarding commits are discussed there. We
+    expect you to react if problems with your code are uncovered.
+
+
+Documentation
+    Update the documentation if you change behavior or add features. If you are
+    unsure how best to do this, send a patch to mplayer-docs, the documentation
+    maintainers will review and commit your stuff.
+
+
+Controversial changes
+    Always send a patch to the mplayer-dev-eng mailing list before committing
+    if you suspect that the change is going to be controversial. Based on past
+    experience, these changes are likely to be controversial:
+     - feature removal, even if obsolete
+     - changes to "special" output messages (like the "Core dumped ;)" message)
+     - verbosity changes from default (info) level
+     - changes to "historical" parts of docs and webpages
+     - use of internal or external libraries
+     - changes to the internal architecture
+     - non trivial changes to very fundamental parts of mplayer
+
+
+Public discussions
+    Try to keep important discussions and requests (also) on the
+    mplayer-dev-eng mailing list, so that all developers can benefit from them.
+    IRC is good for quick discussions, but nobody is there 24/7.
+    also subscribe to the public developer mailing list
+
+
+Patches
+    read and follow patches.txt when sending patches for mplayer
+
+
+Insults
+    Do not insult other people in relation to mplayer on any public mailing
+    list, that is calling code from someone else a pile of broken shit is
+    perfectly fine but calling the developer herself a retarded f*cking moron
+    is not acceptable
+
+
+Forking
+    People disagreeing with the developers or admins may fork the project,
+    the admins MUST in that case provide a svn dump with all history if
+    the person forking wants one
+
+
+Communicating passwords
+    Developers who have provided a public gpg key shall only receive
+    passwords or other sensitive information related to mplayer encrypted
+    with their gpg key
+
+
+V. Votes
+--------
+Its inevitable that some things will be decided by voting, votes in the past
+have due to total lack of rules been problematic for example as many people
+rather wrote long texts and voted based on some condition instead of saying
+a clear yes or no, still its important that people can vote based on a
+condition
+The result of a vote is binding for all developers and admins, though of
+course they can leave the project and thus cease to be a developer or admin
+any time
+
+Vs. Starting a vote
+Any single developer can start a vote, to do so she has to send a mail to the
+public developer mailing list of the project with a subject containing [VOTE]
+and a clear and concise description, a longer descrition can be in the body
+of the mail
+
+Vp. Proposing an option (point on the ballot, better term?)
+Any single developer can propose an option upto 7 days after a vote has
+been started, to do so she has to reply to the original vote mail on the
+public developer mailing list and clearly, concise and unmistakably desribe
+the option and place [VOTE-OPTION] instead of [VOTE] in the subject
+in addition to proposed options, there always exists the default option
+of doing nothing
+options can be conditional on anything which at the end of the vote can
+be clearly and unmistakably be awnsered with true or false
+
+Vv. Voting
+Any developer can cast a vote upto 10 days days after a vote has been
+started, to do so she has to reply to the original vote mail on the
+public developer mailing list and rate options each with an integer
+unrated options shall be counted equal to the default option
+Any admin can cast a veto against any option except the default upto 10 days
+days after a vote has been started, to do so she has to reply to the original
+vote mail on the public developer mailing list and replace 
+[VOTE] by [VOTE-VETO]
+Developers and admins who use gpg/pgp MUST sign their votes and vetos
+
+Vc. Counting votes
+The person starting the vote has to count the votes and vetos and publish
+the result on the public developer mailing list as reply to the original vote
+with [VOTE-RESULTS] instead of [VOTE] in the subject
+Vcv. Counting vetos, an option shall be removed if the majority of admins
+that is yes >= no && yes>0 cast a veto against it
+Vcc. the votes shall be counted by using the Condorcet/Clone Proof SSD
+Voting Method
+
+S. Changes to developer and Admin status
+----------------------------------------
+The majority of admins, that is yes>no can give and take away 
+developer and admin status to people
+furthermore any developer or admin can step back and thus loose
+his admin and or developer status
+People disagreeing with the admins are free to fork the project
+new developers should be asked for real name, public gpg key, phone
+number and email addresses, none of this is mandatory though, it is asked
+so as to be able to contact the developer if the need arises and one
+contact method fails
+
+
+O. Violations
+-------------
+Any admin can after at least one admin has warned another developer
+due to breaking policy, suspend his acount if he repeats the violation
+Ow. A policy violation warning MUST be CCed to the developer who violated
+the policy
+
+
+We think our rules are not too hard. If you have comments, contact us.
