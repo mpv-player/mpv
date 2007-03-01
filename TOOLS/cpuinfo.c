@@ -215,7 +215,7 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(11, "syscall", "SYSCALL and SYSRET"),
       CPUID_FEATURE_DEF(19, "mp", "MP Capable"),
       CPUID_FEATURE_DEF(20, "nx", "No-Execute Page Protection"),
-      CPUID_FEATURE_DEF(22, "mmxext","MMX Technology (AMD Extensions)"),
+      CPUID_FEATURE_DEF(22, "mmxext", "MMX Technology (AMD Extensions)"),
       CPUID_FEATURE_DEF(25, "fxsr_opt", "Fast FXSAVE/FXRSTOR"),
       CPUID_FEATURE_DEF(27, "rdtscp", "RDTSCP Instruction"),
       CPUID_FEATURE_DEF(29, "lm", "Long Mode Capable"),
