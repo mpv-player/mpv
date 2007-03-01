@@ -71,8 +71,8 @@ int tv_param_quality = 90;
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
 int tv_param_alsa = 0;
 #endif
-char* tv_param_adevice = NULL;
 #endif
+char* tv_param_adevice = NULL;
 int tv_param_brightness = 0;
 int tv_param_contrast = 0;
 int tv_param_hue = 0;
@@ -80,6 +80,33 @@ int tv_param_saturation = 0;
 tv_channels_t *tv_channel_list;
 tv_channels_t *tv_channel_current, *tv_channel_last;
 char *tv_channel_last_real;
+
+/* enumerating drivers (like in stream.c) */
+extern tvi_info_t tvi_info_dummy;
+#ifdef HAVE_TV_V4L1
+extern tvi_info_t tvi_info_v4l;
+#endif
+#ifdef HAVE_TV_V4L2
+extern tvi_info_t tvi_info_v4l2;
+#endif
+#ifdef HAVE_TV_BSDBT848
+extern tvi_info_t tvi_info_bsdbt848;
+#endif
+
+static const tvi_info_t* tvi_driver_list[]={
+    &tvi_info_dummy,
+#ifdef HAVE_TV_V4L1
+    &tvi_info_v4l,
+#endif
+#ifdef HAVE_TV_V4L2
+    &tvi_info_v4l2,
+#endif
+#ifdef HAVE_TV_BSDBT848
+    &tvi_info_bsdbt848,
+#endif
+    NULL
+};
+
 
 /* ================== DEMUX_TV ===================== */
 /*
@@ -482,7 +509,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     
     demuxer->priv=NULL;
     if(!(tvh=tv_begin())) return NULL;
-    if (!tv_init(tvh)) return NULL;
+    if (!tvh->functions->init(tvh->priv)) return NULL;
     if (!open_tv(tvh)){
 	tv_uninit(tvh);
 	return NULL;
@@ -632,41 +659,39 @@ static void demux_close_tv(demuxer_t *demuxer)
 }
 
 /* ================== STREAM_TV ===================== */
-tvi_handle_t *tvi_init_dummy(char *device);
-tvi_handle_t *tvi_init_v4l(char *device, char *adevice);
-tvi_handle_t *tvi_init_v4l2(char *device, char *adevice);
-tvi_handle_t *tvi_init_bsdbt848(char *device);
 
 tvi_handle_t *tv_begin(void)
 {
-    if (!strcmp(tv_param_driver, "dummy"))
-	return tvi_init_dummy(tv_param_device);
-#ifdef HAVE_TV_V4L1
-    if (!strcmp(tv_param_driver, "v4l"))
-	return tvi_init_v4l(tv_param_device, tv_param_adevice);
-#endif
-#ifdef HAVE_TV_V4L2
-    if (!strcmp(tv_param_driver, "v4l2"))
-	return tvi_init_v4l2(tv_param_device, tv_param_adevice);
-#endif
-#ifdef HAVE_TV_BSDBT848
-    if (!strcmp(tv_param_driver, "bsdbt848"))
-	return tvi_init_bsdbt848(tv_param_device);
-#endif
+    int i;
+    tvi_info_t* info;
+    tvi_handle_t* h;
+    if(!strcmp(tv_param_driver,"help")){
+        mp_msg(MSGT_TV,MSGL_INFO,"Available drivers:\n");
+        for(i=0;tvi_driver_list[i];i++){
+	    mp_msg(MSGT_TV,MSGL_INFO," %s\t%s",tvi_driver_list[i]->short_name,tvi_driver_list[i]->name);
+	    if(tvi_driver_list[i]->comment)
+	        mp_msg(MSGT_TV,MSGL_INFO," (%s)",tvi_driver_list[i]->comment);
+	    mp_msg(MSGT_TV,MSGL_INFO,"\n");
+	}
+	return NULL;
+    }
 
+    for(i=0;tvi_driver_list[i];i++){
+        if (!strcmp(tvi_driver_list[i]->short_name, tv_param_driver)){
+            h=tvi_driver_list[i]->tvi_init(tv_param_device,tv_param_adevice);
+            if(!h) return NULL;
+
+            mp_msg(MSGT_TV, MSGL_INFO, "Selected driver: %s\n", tvi_driver_list[i]->short_name);
+            mp_msg(MSGT_TV, MSGL_INFO, " name: %s\n", tvi_driver_list[i]->name);
+            mp_msg(MSGT_TV, MSGL_INFO, " author: %s\n", tvi_driver_list[i]->author);
+            if (tvi_driver_list[i]->comment)
+                mp_msg(MSGT_TV, MSGL_INFO, " comment: %s\n", tvi_driver_list[i]->comment);
+            return h;
+        }
+    }
+    
     mp_msg(MSGT_TV, MSGL_ERR, "No such driver: %s\n", tv_param_driver); 
     return(NULL);
-}
-
-int tv_init(tvi_handle_t *tvh)
-{
-    mp_msg(MSGT_TV, MSGL_INFO, "Selected driver: %s\n", tvh->info->short_name);
-    mp_msg(MSGT_TV, MSGL_INFO, " name: %s\n", tvh->info->name);
-    mp_msg(MSGT_TV, MSGL_INFO, " author: %s\n", tvh->info->author);
-    if (tvh->info->comment)
-	mp_msg(MSGT_TV, MSGL_INFO, " comment: %s\n", tvh->info->comment);
-
-    return(tvh->functions->init(tvh->priv));
 }
 
 int tv_uninit(tvi_handle_t *tvh)

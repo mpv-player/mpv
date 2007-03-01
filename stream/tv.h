@@ -52,6 +52,7 @@ extern int tv_param_saturation;
 
 typedef struct tvi_info_s
 {
+    struct tvi_handle_s * (*tvi_init)(char *device,char *adevice);
     const char *name;
     const char *short_name;
     const char *author;
@@ -74,7 +75,6 @@ typedef struct tvi_functions_s
 } tvi_functions_t;
 
 typedef struct tvi_handle_s {
-    tvi_info_t		*info;
     tvi_functions_t	*functions;
     void		*priv;
     int 		seq;

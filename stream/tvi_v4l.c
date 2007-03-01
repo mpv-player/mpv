@@ -48,7 +48,10 @@
 
 #include "audio_in.h"
 
-static tvi_info_t info = {
+static tvi_handle_t *tvi_init_v4l(char *device, char *adevice);
+
+tvi_info_t tvi_info_v4l = {
+	tvi_init_v4l,
 	"Video 4 Linux input",
 	"v4l",
 	"Alex Beregszaszi",
@@ -266,7 +269,7 @@ static void setup_audio_buffer_sizes(priv_t *priv)
 	   priv->audio_buffer_size, priv->audio_in.blocksize, priv->aud_skew_cnt);
 }
 
-tvi_handle_t *tvi_init_v4l(char *device, char *adevice)
+static tvi_handle_t *tvi_init_v4l(char *device, char *adevice)
 {
     tvi_handle_t *h;
     priv_t *priv;

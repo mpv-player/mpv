@@ -46,8 +46,11 @@ known issues:
 #include "tv.h"
 #include "audio_in.h"
 
+#define info tvi_info_v4l2
+static tvi_handle_t *tvi_init_v4l2(char *video_dev, char *audio_dev);
 /* information about this file */
-static tvi_info_t info = {
+tvi_info_t tvi_info_v4l2 = {
+    tvi_init_v4l2,
     "Video 4 Linux 2 input",
     "v4l2",
     "Martin Olschewski <olschewski@zpr.uni-koeln.de>",
@@ -814,7 +817,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 #define PRIV ((priv_t *) (tvi_handle->priv))
 
 /* handler creator - entry point ! */
-tvi_handle_t *tvi_init_v4l2(char *video_dev, char *audio_dev)
+static tvi_handle_t *tvi_init_v4l2(char *video_dev, char *audio_dev)
 {
     tvi_handle_t *tvi_handle;
 

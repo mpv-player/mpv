@@ -66,8 +66,10 @@
 #include "libmpcodecs/img_format.h"
 #include "tv.h"
 
+static tvi_handle_t *tvi_init_bsdbt848(char *device, char *adevice);
 /* information about this file */
-static tvi_info_t info = {
+tvi_info_t tvi_info_bsdbt848 = {
+    tvi_init_bsdbt848,
     "Brooktree848 Support",
     "bsdbt848",
     "Charles Henrich",
@@ -169,7 +171,7 @@ return;
 }
 
 /* handler creator - entry point ! */
-tvi_handle_t *tvi_init_bsdbt848(char *device)
+static tvi_handle_t *tvi_init_bsdbt848(char *device,char* adevice)
 {
     return(new_handle());
 }

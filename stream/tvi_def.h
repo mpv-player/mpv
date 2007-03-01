@@ -41,7 +41,6 @@ static tvi_handle_t *new_handle(void)
 	return(NULL);
     }
     memset(h->priv, 0, sizeof(priv_t));
-    h->info = &info;
     h->functions = &functions;
     h->seq = 0;
     h->chanlist = -1;
