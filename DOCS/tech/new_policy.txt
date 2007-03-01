@@ -4,7 +4,7 @@ Version 20070301
 Intro:
 ------
 This document is an attempt to write a new policy as the old is fairly
-confusing and easy to missunderstand, its intention is not really to
+confusing and easy to misunderstand, its intention is not really to
 change the rules but rather to write them down clearer ...
 also for simplicity and to prevent flamewars, i would suggest that you
 fork this document and propose that fork as alternative if you have a
@@ -16,7 +16,7 @@ Michael Niedermayer
 the authors of the old policy as i liberally copy and pasted from it
 
 TODO:
-add more explanations, justificaions and examples
+add more explanations, justifications and examples
 how to become/loose maintainer status
 review patches.txt
 security/exploit rules
@@ -25,11 +25,11 @@ security/exploit rules
 
 1. Definitions
 --------------
-* MPlayer developer, generally refered to simply as developer in this document
+* MPlayer developer, generally referred to simply as developer in this document
   is any person who has a open (not cracked, not suspended) svn write account
-* MPlayer admin, generally refered to simply as admin in this document, every
+* MPlayer admin, generally referred to simply as admin in this document, every
   admin is also a developer
-* CAN/MUST/SHOULD desriptions ...
+* CAN/MUST/SHOULD descriptions ...
 * public developer mailing list (mplayer-dev-eng at mplayerhq in hungary)
 
 
@@ -103,15 +103,15 @@ Testing code
    (portability, exploits compiler bugs, unusual environment etc) they will be
    reported and eventually fixed.
 
-Spliting changes
+Splitting changes
    Do not commit unrelated changes together, split them into self-contained
    pieces.
-   if you have any doubt disscuss it on the developer mailing list before
-   commiting, also when in doubt more spliting is better then less, changes
+   if you have any doubt discuss it on the developer mailing list before
+   committing, also when in doubt more splitting is better then less, changes
    which are larger then 10kbyte generally should be split into several
-   incremental chanegs if possible even if you think they are all related
+   incremental changes if possible even if you think they are all related
    keeping changes well split makes reviewing and understanding them on 
-   svn log at the time of commit and later when debuging a bug much easier
+   svn log at the time of commit and later when debugging a bug much easier
 
 Compiler Warning fixes
    Do not change code to hide warnings without ensuring that the underlaying
@@ -238,31 +238,31 @@ and a clear and concise description, a longer descrition can be in the body
 of the mail
 
 Vp. Proposing an option (point on the ballot, better term?)
-Any single developer can propose an option upto 7 days after a vote has
+Any single developer can propose an option up to 7 days after a vote has
 been started, to do so she has to reply to the original vote mail on the
-public developer mailing list and clearly, concise and unmistakably desribe
+public developer mailing list and clearly, concise and unmistakably describe
 the option and place [VOTE-OPTION] instead of [VOTE] in the subject
 in addition to proposed options, there always exists the default option
 of doing nothing
 options can be conditional on anything which at the end of the vote can
-be clearly and unmistakably be awnsered with true or false
+be clearly and unmistakably be answered with true or false
 
 Vv. Voting
-Any developer can cast a vote upto 10 days days after a vote has been
+Any developer can cast a vote up to 10 days days after a vote has been
 started, to do so she has to reply to the original vote mail on the
 public developer mailing list and rate options each with an integer
 unrated options shall be counted equal to the default option
-Any admin can cast a veto against any option except the default upto 10 days
+Any admin can cast a veto against any option except the default up to 10 days
 days after a vote has been started, to do so she has to reply to the original
 vote mail on the public developer mailing list and replace 
 [VOTE] by [VOTE-VETO]
-Developers and admins who use gpg/pgp MUST sign their votes and vetos
+Developers and admins who use gpg/pgp MUST sign their votes and vetoes
 
 Vc. Counting votes
-The person starting the vote has to count the votes and vetos and publish
+The person starting the vote has to count the votes and vetoes and publish
 the result on the public developer mailing list as reply to the original vote
 with [VOTE-RESULTS] instead of [VOTE] in the subject
-Vcv. Counting vetos, an option shall be removed if the majority of admins
+Vcv. Counting vetoes, an option shall be removed if the majority of admins
 that is yes >= no && yes>0 cast a veto against it
 Vcc. the votes shall be counted by using the Condorcet/Clone Proof SSD
 Voting Method
@@ -283,7 +283,7 @@ contact method fails
 O. Violations
 -------------
 Any admin can after at least one admin has warned another developer
-due to breaking policy, suspend his acount if he repeats the violation
+due to breaking policy, suspend his account if he repeats the violation
 Ow. A policy violation warning MUST be CCed to the developer who violated
 the policy
 
