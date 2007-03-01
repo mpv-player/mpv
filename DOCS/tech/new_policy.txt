@@ -265,7 +265,9 @@ The person starting the vote has to count the votes and vetoes and publish
 the result on the public developer mailing list as reply to the original vote
 with [VOTE-RESULTS] instead of [VOTE] in the subject
 Vcv. Counting vetoes, an option shall be removed if the majority of admins
-that is yes >= no && yes>0 cast a veto against it
+that is yes >= no && yes>0 cast a veto against it and the option has less 
+than 2/3 majority in the vote, that is number of developer rating it higher
+than the default <= 2*number of developers rating it lower then the default
 Vcc. the votes shall be counted by using the Condorcet/Clone Proof SSD
 Voting Method
 
