@@ -32,7 +32,6 @@
 
 #include "../config.h"
 #include "libavutil/common.h"
-#include "mpbswap.h"
 #include "real.h"
 #include "asmrp.h"
 #include "sdpplin.h"
@@ -42,6 +41,7 @@
 #else
 #include "libavutil/md5.h"
 #endif
+#include "libavutil/intreadwrite.h"
 #include "../http.h"
 #include "mp_msg.h"
 
@@ -56,16 +56,6 @@ static const unsigned char xor_table[] = {
     0x63, 0x11, 0x03, 0x71, 0x08, 0x08, 0x70, 0x02,
     0x10, 0x57, 0x05, 0x18, 0x54, 0x00, 0x00, 0x00 };
 
-
-#define BE_32C(x,y) (*((uint32_t*)(x))=be2me_32(y))
-
-#define BE_16(x)  be2me_16(*(uint16_t*)(x))
-
-#define BE_32(x)  be2me_32(*(uint32_t*)(x))
-
-#ifndef MAX
-#define MAX(x,y) ((x>y) ? x : y)
-#endif
 
 #define BUF_SIZE 4096
 
@@ -125,9 +115,9 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
   /* initialize buffer */
   memset(buf, 0, 128);
   ptr=buf;
-  BE_32C(ptr, 0xa1e9149d);
+  AV_WB32(ptr, 0xa1e9149d);
   ptr+=4;
-  BE_32C(ptr, 0x0e6b3b59);
+  AV_WB32(ptr, 0x0e6b3b59);
   ptr+=4;
 
   /* some (length) checks */
@@ -193,7 +183,7 @@ static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection
   mlti_chunk+=4;
 
   /* next 16 bits are the number of rules */
-  numrules=BE_16(mlti_chunk);
+  numrules=AV_RB16(mlti_chunk);
   if (selection >= numrules) return 0;
 
   /* now <numrules> indices of codecs follows */
@@ -201,13 +191,13 @@ static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection
   mlti_chunk+=(selection+1)*2;
 
   /* get our index */
-  codec=BE_16(mlti_chunk);
+  codec=AV_RB16(mlti_chunk);
 
   /* skip to number of codecs */
   mlti_chunk+=(numrules-selection)*2;
 
   /* get number of codecs */
-  numrules=BE_16(mlti_chunk);
+  numrules=AV_RB16(mlti_chunk);
 
   if (codec >= numrules) {
     mp_msg(MSGT_STREAM, MSGL_WARN, "realrtsp: codec index >= number of codecs. %i %i\n",
@@ -219,11 +209,11 @@ static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection
  
   /* now seek to selected codec */
   for (i=0; i<codec; i++) {
-    size=BE_32(mlti_chunk);
+    size=AV_RB32(mlti_chunk);
     mlti_chunk+=size+4;
   }
   
-  size=BE_32(mlti_chunk);
+  size=AV_RB32(mlti_chunk);
 
 #ifdef LOG
   hexdump(mlti_chunk+4, size);
@@ -309,10 +299,10 @@ static rmff_header_t *real_parse_sdp(char *data, char **stream_rules, uint32_t b
 	len,
 	buf);
 
-    duration=MAX(duration,desc->stream[i]->duration);
+    duration=FFMAX(duration,desc->stream[i]->duration);
     max_bit_rate+=desc->stream[i]->max_bit_rate;
     avg_bit_rate+=desc->stream[i]->avg_bit_rate;
-    max_packet_size=MAX(max_packet_size, desc->stream[i]->max_packet_size);
+    max_packet_size=FFMAX(max_packet_size, desc->stream[i]->max_packet_size);
     if (avg_packet_size)
       avg_packet_size=(avg_packet_size + desc->stream[i]->avg_packet_size) / 2;
     else
@@ -392,7 +382,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer, int rdt_rawdata) {
   unknown1=(header[5]<<16)+(header[6]<<8)+(header[7]);
   n=rtsp_read_data(rtsp_session, header, 6);
   if (n<6) return 0;
-  ts=BE_32(header);
+  ts=AV_RB32(header);
   
 #ifdef LOG
   printf("ts: %u, size: %u, flags: 0x%02x, unknown values: 0x%06x 0x%02x 0x%02x\n", 
