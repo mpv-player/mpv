@@ -1856,6 +1856,11 @@ in this case <application>MPlayer</application> will include in the
 stream all the indicated pids, plus pid 0 (that contains the PAT).
 You are encouraged to include in each row the PMT pid for the
 corresponding channel (if you know it).
+You can also specify 8192, this will select all pids on this frequency
+and you can then switch between the programs with TAB.
+This might need more bandwidth, though cheap cards always transfer all
+channels at least to the kernel so it does not make much of a difference
+for these.
 Other possible uses are: televideo pid, second audio track, etc.
 </para>
 
