@@ -5432,7 +5432,7 @@ void* LookupExternalByName(const char* library, const char* name)
 
 #ifndef LOADLIB_TRY_NATIVE
   /* hack for vss h264 */
-  if (!strcmp(library,"vssh264core.dll"))
+  if (!strcmp(library,"vssh264core.dll") || !strcmp(library,"3ivx.dll"))
 #endif
     /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
     {
