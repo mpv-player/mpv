@@ -27,10 +27,8 @@ security/exploit rules
 --------------
 * MPlayer developer, generally referred to simply as developer in this document
   is any person who has a open (not cracked, not suspended) svn write account
-* MPlayer admin, generally referred to simply as admin in this document, every
-  admin is also a developer
-  Note the set of admins is independant of the set of people who are root at 
-  mphq
+* MPlayer leader, generally referred to simply as leader in this document, every
+  leader is also a developer
 * CAN/MUST/SHOULD descriptions ...
 * public developer mailing list (mplayer-dev-eng at mplayerhq in hungary)
 
@@ -211,8 +209,8 @@ Insults
 
 
 Forking
-    People disagreeing with the developers or admins may fork the project,
-    the admins MUST in that case provide a svn dump with all history if
+    People disagreeing with the developers or leaders may fork the project,
+    the leaders MUST in that case provide a svn dump with all history if
     the person forking wants one
 
 
@@ -229,8 +227,8 @@ have due to total lack of rules been problematic for example as many people
 rather wrote long texts and voted based on some condition instead of saying
 a clear yes or no, still its important that people can vote based on a
 condition
-The result of a vote is binding for all developers and admins, though of
-course they can leave the project and thus cease to be a developer or admin
+The result of a vote is binding for all developers and leaders, though of
+course they can leave the project and thus cease to be a developer or leader
 any time
 
 Vs. Starting a vote
@@ -254,30 +252,30 @@ Any developer can cast a vote up to 10 days days after a vote has been
 started, to do so she has to reply to the original vote mail on the
 public developer mailing list and rate options each with an integer
 unrated options shall be counted equal to the default option
-Any admin can cast a veto against any option except the default up to 10 days
+Any leader can cast a veto against any option except the default up to 10 days
 days after a vote has been started, to do so she has to reply to the original
 vote mail on the public developer mailing list and replace 
 [VOTE] by [VOTE-VETO]
-Developers and admins who use gpg/pgp MUST sign their votes and vetoes
+Developers and leaders who use gpg/pgp MUST sign their votes and vetoes
 
 Vc. Counting votes
 The person starting the vote has to count the votes and vetoes and publish
 the result on the public developer mailing list as reply to the original vote
 with [VOTE-RESULTS] instead of [VOTE] in the subject
-Vcv. Counting vetoes, an option shall be removed if the majority of admins
+Vcv. Counting vetoes, an option shall be removed if the majority of leaders
 that is yes >= no && yes>0 cast a veto against it and the option has less 
 than 2/3 majority in the vote, that is number of developer rating it higher
 than the default <= 2*number of developers rating it lower then the default
 Vcc. the votes shall be counted by using the Condorcet/Clone Proof SSD
 Voting Method
 
-S. Changes to developer and Admin status
+S. Changes to developer and Leader status
 ----------------------------------------
-The majority of admins, that is yes>no can give and take away 
-developer and admin status to people
-furthermore any developer or admin can step back and thus loose
-his admin and or developer status
-People disagreeing with the admins are free to fork the project
+The majority of leaders, that is yes>no can give and take away 
+developer and leader status to people
+furthermore any developer or leader can step back and thus loose
+his leader and or developer status
+People disagreeing with the leaders are free to fork the project
 new developers should be asked for real name, public gpg key, phone
 number and email addresses, none of this is mandatory though, it is asked
 so as to be able to contact the developer if the need arises and one
@@ -286,7 +284,7 @@ contact method fails
 
 O. Violations
 -------------
-Any admin can after at least one admin has warned another developer
+Any leader can after at least one leader has warned another developer
 due to breaking policy, suspend his account if he repeats the violation
 Ow. A policy violation warning MUST be CCed to the developer who violated
 the policy
