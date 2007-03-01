@@ -176,7 +176,7 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(16, "pat", "Page Attribute Table"),
       CPUID_FEATURE_DEF(17, "pse36", "Page Size Extension 36-bit"),
       CPUID_FEATURE_DEF(18, "pn", "Processor Serial Number"),
-      CPUID_FEATURE_DEF(19, "cflsh", "CFLUSH instruction"),
+      CPUID_FEATURE_DEF(19, "cflush", "CFLUSH instruction"),
       CPUID_FEATURE_DEF(21, "dts", "Debug Store"),
       CPUID_FEATURE_DEF(22, "acpi", "Thermal Monitor and Clock Ctrl"),
       CPUID_FEATURE_DEF(23, "mmx", "MMX Technology"),
