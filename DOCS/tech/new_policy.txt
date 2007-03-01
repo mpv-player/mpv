@@ -267,7 +267,7 @@ that is yes >= no && yes>0 cast a veto against it and the option has less
 than 2/3 majority in the vote, that is number of developer rating it higher
 than the default <= 2*number of developers rating it lower then the default
 Vcc. the votes shall be counted by using the Condorcet/Clone Proof SSD
-Voting Method
+Voting Method described in http://www.debian.org/devel/constitution A.6
 
 S. Changes to developer and Leader status
 ----------------------------------------
