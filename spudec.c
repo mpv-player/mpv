@@ -30,8 +30,6 @@
 #endif
 #include "libswscale/swscale.h"
 
-#define MIN(a, b)	((a)<(b)?(a):(b))
-
 /* Valid values for spu_aamode:
    0: none (fastest, most ugly)
    1: approximate
@@ -706,7 +704,7 @@ static void scale_table(unsigned int start_src, unsigned int start_tar, unsigned
   }
   src_step = (delta_src << 16) / delta_tar >>1;
   for (t = 0; t<=delta_tar; src += (src_step << 1), t++){
-    table[t].position= MIN(src >> 16, end_src - 1);
+    table[t].position= FFMIN(src >> 16, end_src - 1);
     table[t].right_down = src & 0xffff;
     table[t].left_up = 0x10000 - table[t].right_down;
   }
@@ -936,7 +934,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	    for (y = 0; y < spu->scaled_height; ++y) {
 	      const double unscaled_y = y * inv_scaley;
 	      const double unscaled_y_bottom = unscaled_y + inv_scaley;
-	      const unsigned int top_low_row = MIN(unscaled_y_bottom, unscaled_y + 1.0);
+	      const unsigned int top_low_row = FFMIN(unscaled_y_bottom, unscaled_y + 1.0);
 	      const double top = top_low_row - unscaled_y;
 	      const unsigned int height = unscaled_y_bottom > top_low_row
 		? (unsigned int) unscaled_y_bottom - top_low_row
@@ -947,7 +945,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      for (x = 0; x < spu->scaled_width; ++x) {
 		const double unscaled_x = x * inv_scalex;
 		const double unscaled_x_right = unscaled_x + inv_scalex;
-		const unsigned int left_right_column = MIN(unscaled_x_right, unscaled_x + 1.0);
+		const unsigned int left_right_column = FFMIN(unscaled_x_right, unscaled_x + 1.0);
 		const double left = left_right_column - unscaled_x;
 		const unsigned int width = unscaled_x_right > left_right_column
 		  ? (unsigned int) unscaled_x_right - left_right_column

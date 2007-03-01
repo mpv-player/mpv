@@ -470,7 +470,7 @@ static int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ct
       if (drop_chunk) continue;
     }
     if (rest == 0 && waiting > 0 && size-read > 0) {
-      int s = MIN(waiting,size-read);
+      int s = FFMIN(waiting,size-read);
       memset(buffer+read,0,s);
       waiting -= s;
       read += s;

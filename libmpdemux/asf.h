@@ -6,10 +6,6 @@
 #include "libavutil/common.h"
 #include "mpbswap.h"
 
-#ifndef MIN
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#endif
-
 ///////////////////////
 // MS GUID definition
 ///////////////////////
