@@ -29,6 +29,8 @@ security/exploit rules
   is any person who has a open (not cracked, not suspended) svn write account
 * MPlayer admin, generally referred to simply as admin in this document, every
   admin is also a developer
+  Note the set of admins is independant of the set of people who are root at 
+  mphq
 * CAN/MUST/SHOULD descriptions ...
 * public developer mailing list (mplayer-dev-eng at mplayerhq in hungary)
 
