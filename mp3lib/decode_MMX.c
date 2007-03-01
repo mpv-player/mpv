@@ -244,5 +244,5 @@ ASMALIGN(4)
 	"emms\n\t"
         :
 	:"m"(bandPtr),"m"(channel),"m"(samples),"m"(buffs),"m"(bo), "m"(temp)
-	:"memory","%edi","%esi","%ebx","%esp");
+	:"memory","%edi","%esi","%eax","%ebx","%ecx","%edx","%esp");
 }

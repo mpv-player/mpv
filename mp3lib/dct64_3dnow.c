@@ -924,5 +924,5 @@ void dct64_MMX_3dnow(real *a,real *b,real *c)
 "	femms\n\t"
 	:
 	:"m"(a),"m"(b),"m"(c),"m"(tmp[0])
-	:"memory","%ebx","%esi","%edi");
+	:"memory","%eax","%ebx","%ecx","%edx","%esi","%edi");
 }
