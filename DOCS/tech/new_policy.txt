@@ -262,12 +262,26 @@ Vc. Counting votes
 The person starting the vote has to count the votes and vetoes and publish
 the result on the public developer mailing list as reply to the original vote
 with [VOTE-RESULTS] instead of [VOTE] in the subject
-Vcv. Counting vetoes, an option shall be removed if the majority of leaders
-that is yes >= no && yes>0 cast a veto against it and the option has less 
-than 2/3 majority in the vote, that is number of developer rating it higher
-than the default <= 2*number of developers rating it lower then the default
+Vcv. Counting vetoes
+if the majority of leaders that is yes >= no && yes>0 cast a veto against an
+option then it has a required supermajority of 2:1 otherwise it has a
+required supermajority of 0:1 and in either case no quorum requirement
 Vcc. the votes shall be counted by using the Condorcet/Clone Proof SSD
 Voting Method described in http://www.debian.org/devel/constitution A.6
+
+Reasoning behind avoiding of a quorum and majority requirement except in
+the case of vetoes
+short awnser its stupid and has catastrophical failure modes
+example of one such failure mode, lets assume a 1:1 majority requirement
+as debian uses by default, there are 101 developers who vote, there are
+3 options A,B and D the default (doing nothing / further discussions)
+50 developers prefer A over B and B over discussions (A>B>D)
+50 developers prefer discussions over A and A over B (D>A>B)
+1 developer prefers B over discussions and discussions over A (B>D>A)
+in this case A is approved by 50 of 101 developers and is droped due to
+the lack of majority, B is approved by 51 of 101 developers and is not
+furthermore B wins even though 100 of 101 developers prefer A over B
+
 
 S. Changes to developer and Leader status
 ----------------------------------------
