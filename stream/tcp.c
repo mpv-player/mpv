@@ -77,6 +77,9 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	
 #ifdef HAVE_WINSOCK2
 	u_long val;
+	int to;
+#else
+	struct timeval to;
 #endif
 	
 	socket_server_fd = socket(af, SOCK_STREAM, 0);
@@ -88,10 +91,15 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	}
 
 #if defined(SO_RCVTIMEO) && defined(SO_SNDTIMEO)
-	tv.tv_sec = 10;
-	tv.tv_usec = 0;
-	setsockopt(socket_server_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-	setsockopt(socket_server_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+#ifdef HAVE_WINSOCK2
+	/* timeout in milliseconds */
+	to = 10 * 1000;
+#else
+	to.tv_sec = 10;
+	to.tv_usec = 0;
+#endif
+	setsockopt(socket_server_fd, SOL_SOCKET, SO_RCVTIMEO, &to, sizeof(to));
+	setsockopt(socket_server_fd, SOL_SOCKET, SO_SNDTIMEO, &to, sizeof(to));
 #endif
 
 	switch (af) {
