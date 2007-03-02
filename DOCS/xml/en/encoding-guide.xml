@@ -4270,12 +4270,52 @@ The FourCC code used by each codec is given in the parentheses.
 
 <informalexample>
 <para>
-An example with VP3 compression:
+An example to convert an ISO DVD trailer to a VP6 flash video file
+using compdata bitrate settings:
 <screen>
-mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy
+mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceable>trailer.flv</replaceable> \
+-ovc vfw -xvfwopts codec=vp6vfw.dll:compdata=onepass.mcf -oac mp3lame \
+-lameopts cbr:br=64 -af lavcresample=22050 -vf yadif,scale=320:240,flip \
+-of lavf -lavfopts i_certify_that_my_video_stream_does_not_use_b_frames
 </screen>
 </para>
 </informalexample>
+</sect2>
+
+<sect2 id="menc-feat-video-for-windows-bitrate-settings">
+<title>Using vfw2menc to create a codec settings file.</title>
+
+<para>
+To encode with the Video for Windows codecs, you will need to set bitrate
+and other options. This is known to work on x86 on both *NIX and Windows.
+</para>
+<para>
+First you must build the <application>vfw2menc</application> program.
+It is located in the <filename class="directory">/TOOLS/</filename> subdirectory of MPlayer source.
+To build on Linux, this can be done using <application>Wine</application>:
+<screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
+
+To build on Windows in <application>MinGW</application> or <application>Cygwin</application> use:
+<screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
+
+To build on <application>MSVC</application> you will need getopt.
+Getopt can be found in the original <application>vfw2menc</application> archive available at:
+The <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer on win32</ulink> project.
+</para>
+<informalexample>
+<para>
+Below is an example with the VP6 codec.
+<screen>
+vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf
+</screen>
+This will open the VP6 codec dialog window. Repeat this step for the second pass
+and use <option>-s <replaceable>secondpass.mcf</replaceable></option>.
+</para>
+</informalexample>
+<para>
+Windows users can use <option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option> to have
+the codec dialog display before encoding starts.
+</para>
 </sect2>
 </sect1>
 
