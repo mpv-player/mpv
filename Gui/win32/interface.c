@@ -523,7 +523,8 @@ int guiGetEvent(int type, char *arg)
         audio_out = mpctx_get_audio_out(guiIntfStruct.mpcontext);
         video_out = mpctx_get_video_out(guiIntfStruct.mpcontext);
         mixer = mpctx_get_mixer(guiIntfStruct.mpcontext);
-    }
+        playtree = mpctx_get_playtree_iter(guiIntfStruct.mpcontext);
+	}
 
     switch (type)
     {
