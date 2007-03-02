@@ -542,6 +542,9 @@ int guiGetEvent(int type, char *arg)
                 ShowWindow(mygui->subwindow, SW_HIDE);
             break;
         }
+        case guiSetContext:
+            guiIntfStruct.mpcontext = (void *) arg;
+            break;
         case guiSetDemuxer:
             guiIntfStruct.demuxer = (void *) arg;
             break;
