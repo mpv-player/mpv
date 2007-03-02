@@ -431,6 +431,30 @@ void mplSetFileName(char *dir, char *name, int type)
     free((void **) &guiIntfStruct.Subtitlename);
 }
 
+void mplFullScreen( void )
+{
+    if(!guiIntfStruct.sh_video) return;
+
+    if(sub_window)
+    {
+        if(!fullscreen && IsWindowVisible(mygui->subwindow) && !IsIconic(mygui->subwindow))
+           GetWindowRect(mygui->subwindow, &old_rect);
+
+        if(fullscreen)
+        {
+            fullscreen = 0;
+            style = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
+        } else {
+            fullscreen = 1;
+            style = WS_VISIBLE | WS_POPUP;
+        }
+        SetWindowLong(mygui->subwindow, GWL_STYLE, style);
+        update_subwindow();
+    }
+    video_out->control(VOCTRL_FULLSCREEN, 0);
+    if(sub_window) ShowWindow(mygui->subwindow, SW_SHOW);
+}
+
 static DWORD WINAPI GuiThread(void)
 {
     MSG msg;
@@ -643,31 +667,8 @@ int guiGetEvent(int type, char *arg)
             switch((int) arg)
             {
                 case MP_CMD_GUI_FULLSCREEN:
-                {
-                    if(!guiIntfStruct.sh_video) break;
-
-                    if(!sub_window)
-                    {
-                        video_out->control(VOCTRL_FULLSCREEN, 0);
-                        break;
-                    }
-
-                    if(!fullscreen && IsWindowVisible(mygui->subwindow) && !IsIconic(mygui->subwindow))
-                        GetWindowRect(mygui->subwindow, &old_rect);
-
-                    if(fullscreen)
-                    {
-                        fullscreen = 0;
-                        style = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
-                    } else {
-                        fullscreen = 1;
-                        style = WS_VISIBLE | WS_POPUP;
-                    }
-                    SetWindowLong(mygui->subwindow, GWL_STYLE, style);
-                    mpcodecs_config_vo(guiIntfStruct.sh_video, guiIntfStruct.MovieWidth,
-                                       guiIntfStruct.MovieHeight, 0);
+                    mplFullScreen();
                     break;
-                }
                 case MP_CMD_QUIT:
                 {
                     mygui->uninit(mygui);
