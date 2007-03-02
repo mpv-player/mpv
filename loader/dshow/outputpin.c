@@ -709,36 +709,14 @@ static HRESULT STDCALL COutputMemPin_GetAllocatorRequirements(IMemInputPin* This
 static HRESULT STDCALL COutputMemPin_Receive(IMemInputPin* This,
 					  /* [in] */ IMediaSample* pSample)
 {
-    COutputMemPin* mp = (COutputMemPin*)This;
-    char* pointer;
-    int len;
-
     Debug printf("COutputMemPin_Receive(%p) called\n", This);
     if (!pSample)
 	return E_INVALIDARG;
-    if (pSample->vt->GetPointer(pSample, (BYTE**) &pointer))
-	return -1;
-    len = pSample->vt->GetActualDataLength(pSample);
-    if (len == 0)
-	len = pSample->vt->GetSize(pSample);//for iv50
-    //if(me.frame_pointer)memcpy(me.frame_pointer, pointer, len);
 
-    if (mp->frame_pointer)
-	*(mp->frame_pointer) = pointer;
-    if (mp->frame_size_pointer)
-	*(mp->frame_size_pointer) = len;
-/*
-    FILE* file=fopen("./uncompr.bmp", "wb");
-    char head[14]={0x42, 0x4D, 0x36, 0x10, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00};
-    *(int*)(&head[2])=len+0x36;
-    fwrite(head, 14, 1, file);
-    fwrite(&((VIDEOINFOHEADER*)me.type.pbFormat)->bmiHeader, sizeof(BITMAPINFOHEADER), 1, file);
-    fwrite(pointer, len, 1, file);
-    fclose(file);
-*/
-//    pSample->vt->Release((IUnknown*)pSample);
-
-    return 0;
+    if(((COutputMemPin*)This)->parent->SampleProc)
+        return ((COutputMemPin*)This)->parent->SampleProc(((COutputMemPin*)This)->parent->pUserData,pSample);
+    //reject sample
+    return S_FALSE;
 }
 
 /**
@@ -772,7 +750,13 @@ static HRESULT STDCALL COutputMemPin_ReceiveMultiple(IMemInputPin * This,
 					    /* [in] */ long nSamples,
 					    /* [out] */ long *nSamplesProcessed)
 {
-    return output_unimplemented("COutputMemPin_ReceiveMultiple", This);
+    HRESULT hr;
+    Debug printf("COutputMemPin_ReceiveMultiple(%p) %d\n", This,nSamples);
+    for(*nSamplesProcessed=0; *nSamplesProcessed < nSamples; *nSamplesProcessed++) {
+         hr = This->vt->Receive(This,pSamples[*nSamplesProcessed]);
+         if (hr != S_OK) break;
+    }
+    return hr;
 }
 
 /**
@@ -787,44 +771,6 @@ static HRESULT STDCALL COutputMemPin_ReceiveMultiple(IMemInputPin * This,
 static HRESULT STDCALL COutputMemPin_ReceiveCanBlock(IMemInputPin * This)
 {
     return output_unimplemented("COutputMemPin_ReceiveCanBlock", This);
-}
-
-/**
- * \brief COutputPin::SetFramePointer (sets internal frame pointer to an external buffer)
- *
- * \param[in]  This pointer to COutputPin class
- * \param[in]  z    new pointer
- *
- */
-static void COutputPin_SetFramePointer(COutputPin* This, char** z)
-{
-    This->mempin->frame_pointer = z;
-}
-
-/**
- * \brief COutputPin::SetFramePointer2 (sets allocator's pointer to an external buffer)
- *
- * \param[in]  This pointer to COutputPin class
- * \param[in]  z    new pointer
- *
- */
-static void COutputPin_SetPointer2(COutputPin* This, char* p)
-{
-    if (This->mempin->pAllocator)
-        // fixme
-	This->mempin->pAllocator->SetPointer(This->mempin->pAllocator, p);
-}
-
-/**
- * \brief COutputPin::SetFrameSizePointer (sets pointer to variable that receives frame size)
- *
- * \param[in]  This pointer to COutputPin class
- * \param[in]  z    new pointer
- *
- */
-static void COutputPin_SetFrameSizePointer(COutputPin* This, long* z)
-{
-    This->mempin->frame_size_pointer = z;
 }
 
 /**
@@ -946,7 +892,7 @@ static HRESULT STDCALL COutputMemPin_Release(IUnknown* This)
  * \return NULL if error occured
  *
  */
-COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt)
+COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt,SAMPLEPROC SampleProc,void* pUserData)
 {
     COutputPin* This = (COutputPin*) malloc(sizeof(COutputPin));
     IMemInputPin_vt* ivt;
@@ -963,6 +909,9 @@ COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt)
         COutputPin_Destroy(This);
 	return NULL;
     }
+
+    This->SampleProc=SampleProc;
+    This->pUserData=pUserData;
 
     This->mempin->vt = ivt;
 
@@ -1005,9 +954,6 @@ COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt)
     This->mempin->refcount = 1;
     This->mempin->parent = This;
 
-    This->SetPointer2 = COutputPin_SetPointer2;
-    This->SetFramePointer = COutputPin_SetFramePointer;
-    This->SetFrameSizePointer = COutputPin_SetFrameSizePointer;
     This->SetNewFormat = COutputPin_SetNewFormat;
 
     return This;

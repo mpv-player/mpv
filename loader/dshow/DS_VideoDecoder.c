@@ -31,6 +31,7 @@ struct _DS_VideoDecoder
     int m_bIsDivX;             // for speed
     int m_bIsDivX4;            // for speed
 };
+static SampleProcUserData sampleProcData;
 
 #include "DS_VideoDecoder.h"
 
@@ -175,7 +176,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
                               * ((this->iv.m_obh.biBitCount + 7) / 8);
 
 
-	this->m_pDS_Filter = DS_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType);
+	this->m_pDS_Filter = DS_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType,&sampleProcData);
 	
 	if (!this->m_pDS_Filter)
 	{
@@ -307,10 +308,6 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
     }
     
     //cout << "DECODE " << (void*) pImage << "   d: " << (void*) pImage->Data() << endl;
-    if (pImage)
-    {
-	this->m_pDS_Filter->m_pOurOutput->SetPointer2(this->m_pDS_Filter->m_pOurOutput,pImage);
-    }
 
 
     sample->vt->SetActualDataLength(sample, size);
@@ -340,7 +337,10 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
     {
 	Debug printf("DS_VideoDecoder::DecodeInternal() error putting data into input pin %x\n", result);
     }
-
+    if (pImage)
+    {
+        memcpy(pImage, sampleProcData.frame_pointer, sampleProcData.frame_size);
+    }
     sample->vt->Release((IUnknown*)sample);
 
 #if 0

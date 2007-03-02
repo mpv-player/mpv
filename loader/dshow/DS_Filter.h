@@ -8,6 +8,11 @@
 extern "C" {
 #endif
 
+typedef struct {
+    char* frame_pointer;
+    long frame_size;
+} SampleProcUserData;
+
 /**
    User will allocate and fill format structures, call Create(),
    and then set up m_pAll.
@@ -35,7 +40,7 @@ struct _DS_Filter
 };
 
 DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
-			   AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt);
+			   AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt,SampleProcUserData* pUserData);
 void DS_Filter_Destroy(DS_Filter* This);
 
 #if defined(__cplusplus)

@@ -95,9 +95,34 @@ void DS_Filter_Destroy(DS_Filter* This)
 #endif
 }
 
+static HRESULT STDCALL DS_Filter_CopySample(void* pUserData,IMediaSample* pSample){
+    char* pointer;
+    int len;
+    SampleProcUserData* pData=(SampleProcUserData*)pUserData;
+    Debug printf("CopySample called(%p,%p)\n",pSample,pUserData);
+    if (pSample->vt->GetPointer(pSample, (BYTE**) &pointer))
+	return 1;
+    len = pSample->vt->GetActualDataLength(pSample);
+    if (len == 0)
+	len = pSample->vt->GetSize(pSample);//for iv50
+
+    pData->frame_pointer = pointer;
+    pData->frame_size = len;
+/*
+    FILE* file=fopen("./uncompr.bmp", "wb");
+    char head[14]={0x42, 0x4D, 0x36, 0x10, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00};
+    *(int*)(&head[2])=len+0x36;
+    fwrite(head, 14, 1, file);
+    fwrite(&((VIDEOINFOHEADER*)me.type.pbFormat)->bmiHeader, sizeof(BITMAPINFOHEADER), 1, file);
+    fwrite(pointer, len, 1, file);
+    fclose(file);
+*/
+    return 0;
+}
+
 DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 			   AM_MEDIA_TYPE* in_fmt,
-			   AM_MEDIA_TYPE* out_fmt)
+			   AM_MEDIA_TYPE* out_fmt,SampleProcUserData* pUserData)
 {
     int init = 0;
 //    char eb[250];
@@ -262,7 +287,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	//Notify remote pin about choosed allocator
 	This->m_pImp->vt->NotifyAllocator(This->m_pImp, This->m_pAll, 0);
 
-	This->m_pOurOutput = COutputPinCreate(This->m_pDestType);
+	This->m_pOurOutput = COutputPinCreate(This->m_pDestType,DS_Filter_CopySample,pUserData);
 
 	result = This->m_pOutputPin->vt->ReceiveConnection(This->m_pOutputPin,
 							   (IPin*) This->m_pOurOutput,
