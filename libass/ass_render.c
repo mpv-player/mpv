@@ -1899,7 +1899,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		
 		if (render_context.have_origin) {
 			center.x = x2scr(render_context.org_x);
-			center.y = x2scr(render_context.org_y);
+			center.y = y2scr(render_context.org_y);
 		} else {
 			int bx, by;
 			get_base_point(bbox, alignment, &bx, &by);
