@@ -257,6 +257,9 @@ int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
 	}
 	// init()
 	mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_OpeningVideoDecoder,mpvdec->info->short_name,mpvdec->info->name);
+	// clear vf init error, it is no longer relevant
+	if (sh_video->vf_inited < 0)
+		sh_video->vf_inited = 0;
 	if(!mpvdec->init(sh_video)){
 	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_VDecoderInitFailed);
 	    sh_video->disp_w=orig_w;
