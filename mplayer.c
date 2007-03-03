@@ -388,7 +388,7 @@ void *mpctx_get_video_out(MPContext *mpctx)
 
 void *mpctx_get_audio_out(MPContext *mpctx)
 {
-    return mpctx->video_out;
+    return mpctx->audio_out;
 }
 
 void *mpctx_get_playtree_iter(MPContext *mpctx)
