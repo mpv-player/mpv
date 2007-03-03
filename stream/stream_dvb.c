@@ -176,8 +176,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			ptr->name = (char*) malloc(k+1);
 			if(! ptr->name)
 				continue;
-			strncpy(ptr->name, line, k);
-			ptr->name[k] = 0;
+			strlcpy(ptr->name, line, k+1);
 		}
 		else
 			continue;
@@ -764,7 +763,7 @@ dvb_config_t *dvb_get_config(void)
 	conf->cards = NULL;
 	for(i=0; i<MAX_CARDS; i++)
 	{
-		sprintf(filename, "/dev/dvb/adapter%d/frontend0", i);
+		snprintf(filename, sizeof(filename), "/dev/dvb/adapter%d/frontend0", i);
 		fd = open(filename, O_RDONLY|O_NONBLOCK);
 		if(fd < 0)
 		{
@@ -824,7 +823,7 @@ dvb_config_t *dvb_get_config(void)
 		conf->cards[conf->count].devno = i;
 		conf->cards[conf->count].list = list;
 		conf->cards[conf->count].type = type;
-		sprintf(name, "DVB-%c card n. %d", type==TUNER_TER ? 'T' : (type==TUNER_CBL ? 'C' : 'S'), conf->count+1);
+		snprintf(name, 20, "DVB-%c card n. %d", type==TUNER_TER ? 'T' : (type==TUNER_CBL ? 'C' : 'S'), conf->count+1);
 		conf->cards[conf->count].name = name;
 		conf->count++;
 	}
