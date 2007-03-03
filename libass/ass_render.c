@@ -1724,8 +1724,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			continue;
 		}
 		
-		text_info.glyphs[text_info.length].pos.x = d6_to_int(pen.x);
-		text_info.glyphs[text_info.length].pos.y = d6_to_int(pen.y);
+		text_info.glyphs[text_info.length].pos.x = pen.x >> 6;
+		text_info.glyphs[text_info.length].pos.y = pen.y >> 6;
 		
 		pen.x += text_info.glyphs[text_info.length].advance.x;
 		pen.x += double_to_d6(render_context.hspacing);
