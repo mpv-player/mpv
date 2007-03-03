@@ -62,6 +62,8 @@ const char asf_ext_stream_header[16] = {0xCB, 0xA5, 0xE6, 0x14,
   0x72, 0xC6, 0x32, 0x43, 0x83, 0x99, 0xA9, 0x69, 0x52, 0x06, 0x5B, 0x5A};
 const char asf_metadata_header[16] = {0xea, 0xcb, 0xf8, 0xc5,
   0xaf, 0x5b, 0x77, 0x48, 0x84, 0x67, 0xaa, 0x8c, 0x44, 0xfa, 0x4c, 0xca};
+const char asf_content_encryption[16] = {0xfb, 0xb3, 0x11, 0x22,
+  0x23, 0xbd, 0xd2, 0x11, 0xb4, 0xb7, 0x00, 0xa0, 0xc9, 0x55, 0xfc, 0x6e};
 
 typedef struct {
   // must be 0 for metadata record, might be non-zero for metadata lib record
@@ -283,6 +285,47 @@ static int get_meta(char *buf, int buf_len, int this_stream_num,
   return 0;
 }
 
+static int is_drm(char* buf, int buf_len)
+{
+  uint32_t data_len, type_len, key_len, url_len;
+  int pos = find_asf_guid(buf, asf_content_encryption, 0, buf_len);
+
+  if (pos < 0)
+    return 0;
+
+  CHECKDEC(buf_len, pos + 4);
+  buf += pos;
+  data_len = AV_RL32(buf);
+  buf += 4;
+  CHECKDEC(buf_len, data_len);
+  buf += data_len;
+  type_len = AV_RL32(buf);
+  if (type_len < 4)
+    return 0;
+  CHECKDEC(buf_len, 4 + type_len + 4);
+  buf += 4;
+
+  if (buf[0] != 'D' || buf[1] != 'R' || buf[2] != 'M' || buf[3] != '\0')
+    return 0;
+
+  buf += type_len;
+  key_len = AV_RL32(buf);
+  CHECKDEC(buf_len, key_len + 4);
+  buf += 4;
+
+  buf[key_len - 1] = '\0';
+  mp_msg(MSGT_HEADER, MSGL_V, "DRM Key ID: %s\n", buf); 
+
+  buf += key_len;
+  url_len = AV_RL32(buf);
+  CHECKDEC(buf_len, url_len);
+  buf += 4;
+
+  buf[url_len - 1] = '\0';
+  mp_msg(MSGT_HEADER, MSGL_INFO, MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL, buf);
+  return 1;
+} 
+
 static int asf_init_audio_stream(demuxer_t *demuxer,struct asf_priv* asf, sh_audio_t* sh_audio, ASF_stream_header_t *streamh, int *ppos, uint8_t** buf, char *hdr, unsigned int hdr_len)
 {
   uint8_t *buffer = *buf;
@@ -350,6 +393,9 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
     mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader);
     goto err_out;
   }
+
+  if (is_drm(hdr, hdr_len))
+    mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_DRMProtected);
 
   if ((pos = find_asf_guid(hdr, asf_ext_stream_audio, 0, hdr_len)) >= 0)
   {
