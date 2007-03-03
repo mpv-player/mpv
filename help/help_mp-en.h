@@ -1356,6 +1356,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "No data chunk following header!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: no audio or video headers found - broken file?\n"
 #define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Invalid length in ASF header!\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "DRM License URL: %s\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "This file has been encumbered with DRM encryption, It will not play in MPlayer!\n"
 
 // asf_mmst_streaming.c
 
