@@ -795,10 +795,11 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     /* Dynamic DVD drive selection on Darwin */
     if(!strcmp(dvd_device, "/dev/rdiskN")) {
       int i;
-      char *temp_device = malloc(strlen(dvd_device)+1);
+      size_t len = strlen(dvd_device);
+      char *temp_device = malloc(len);
 
       for (i = 1; i < 10; i++) {
-        sprintf(temp_device, "/dev/rdisk%d", i);
+        snprintf(temp_device, len, "/dev/rdisk%d", i);
         dvd = DVDOpen(temp_device);
         if(!dvd) {
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device);
