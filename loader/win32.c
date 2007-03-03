@@ -5291,12 +5291,13 @@ struct libs libraries[]={
     LL(shlwapi)
 };
 
-static void ext_stubs(void)
+static WIN_BOOL WINAPI ext_stubs(void)
 {
     volatile int idx = 0xdeadabcd;
     // make sure gcc does not do eip-relative call or something like that
     volatile void (*my_printf)(char *, char *) = (void *)0xdeadfbcd;
     my_printf("Called unk_%s\n", export_names[idx]);
+    return 0;
 }
 
 #define MAX_STUB_SIZE 0x60
