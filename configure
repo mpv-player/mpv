@@ -6065,8 +6065,8 @@ echocheck "LIVE555 Streaming Media libraries"
 if test "$_live" = auto  && test "$_network" = yes ; then
   cat > $TMPCPP << EOF
 #include <liveMedia.hh>
-#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1090195200)
-#error Please upgrade to version 2004.07.19 or later of the "LIVE555 Streaming Media" libraries - available from <www.live555.com/liveMedia/>
+#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1141257600)
+#error Please upgrade to version 2006.03.03 or later of the "LIVE555 Streaming Media" libraries - available from <www.live555.com/liveMedia/>
 #endif
 int main(void) {}
 EOF
