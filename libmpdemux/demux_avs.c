@@ -54,8 +54,7 @@ typedef WINAPI void (*imp_avs_release_clip)(AVS_Clip *);
 typedef WINAPI AVS_VideoFrame* (*imp_avs_get_frame)(AVS_Clip *, int n);
 typedef WINAPI void (*imp_avs_release_video_frame)(AVS_VideoFrame *);
 #ifdef ENABLE_AUDIO
-//typedef WINAPI int (*imp_avs_get_audio)(AVS_Clip *, void * buf, uint64_t start, uint64_t count); 
-typedef WINAPI int (*imp_avs_get_audio)(AVS_ScriptEnvironment *, void * buf, uint64_t start, uint64_t count); 
+typedef WINAPI int (*imp_avs_get_audio)(AVS_Clip *, void * buf, uint64_t start, uint64_t count); 
 #endif
 
 #define Q(string) # string
@@ -219,7 +218,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         int l = sh_audio->wf->nAvgBytesPerSec;
         dp = new_demux_packet(l);
         
-        if (AVS->avs_get_audio(AVS->avs_env, dp->buffer, AVS->frameno*sh_video->fps*l, l))
+        if (AVS->avs_get_audio(AVS->clip, dp->buffer, AVS->frameno*sh_video->fps*l, l))
         {
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_get_audio() failed\n");
             return 0;
