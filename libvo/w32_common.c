@@ -132,6 +132,14 @@ int vo_w32_check_events(void) {
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);
     }
+    if (WinID >= 0) {
+        RECT r;
+        GetClientRect(vo_window, &r);
+        if (r.right != vo_dwidth || r.bottom != vo_dheight)
+            event_flags |= VO_EVENT_RESIZE;
+        vo_dwidth = r.right;
+        vo_dheight = r.bottom;
+    }
     
     return event_flags;
 }
