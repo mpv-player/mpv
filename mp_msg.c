@@ -8,13 +8,10 @@
 
 #include "config.h"
 
-#ifdef USE_LANGINFO
-#include <locale.h>
-#include <langinfo.h>
-#endif
 #ifdef USE_ICONV
 #include <iconv.h>
 #include <errno.h>
+extern char* get_term_charset();
 #endif
 
 #if defined(FOR_MENCODER) || defined(CODECS2HTML)
@@ -79,13 +76,8 @@ void mp_msg_init(void){
     mp_msg_levels[MSGT_IDENTIFY] = -1; // no -identify output by default
 #ifdef USE_ICONV
     mp_msg_charset = getenv("MPLAYER_CHARSET");
-#ifdef USE_LANGINFO
-    if (!mp_msg_charset) {
-      setlocale(LC_CTYPE, "");
-      mp_msg_charset = nl_langinfo(CODESET);
-      setlocale(LC_CTYPE, "C");
-    }
-#endif
+    if (!mp_msg_charset)
+      mp_msg_charset = get_term_charset();
 #endif
 }
 

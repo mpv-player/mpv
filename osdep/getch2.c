@@ -28,6 +28,11 @@
 #endif
 #endif
 
+#if defined(USE_LANGINFO) && defined(USE_ICONV)
+#include <locale.h>
+#include <langinfo.h>
+#endif
+
 #include <unistd.h>
 
 #include "keycodes.h"
@@ -237,4 +242,17 @@ void getch2_disable(void){
 #endif
     getch2_status=0;
 }
+
+#ifdef USE_ICONV
+char* get_term_charset()
+{
+    char* charset = NULL;
+#ifdef USE_LANGINFO
+    setlocale(LC_CTYPE, "");
+    charset = nl_langinfo(CODESET);
+    setlocale(LC_CTYPE, "C");
+#endif
+    return charset;
+}
+#endif
 
