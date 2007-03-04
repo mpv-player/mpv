@@ -167,11 +167,9 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     demux_packet_t *dp = NULL;
     AVS_T *AVS = (AVS_T *) demuxer->priv;
 
-    demux_stream_t *d_video=demuxer->video;
-    sh_video_t *sh_video=d_video->sh;
-
     if (ds == demuxer->video)
     {
+        sh_video_t *sh_video = demuxer->video->sh;
         char *dst;
         int w, h;
         if (AVS->video_info->num_frames < AVS->frameno) return 0; // EOF
@@ -348,8 +346,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
 
 static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
 {   
-    demux_stream_t *d_video=demuxer->video;
-    sh_video_t *sh_video=d_video->sh;
+    sh_video_t *sh_video=demuxer->video->sh;
     AVS_T *AVS = (AVS_T *) demuxer->priv;
 
     switch(cmd)
