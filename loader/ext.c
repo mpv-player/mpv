@@ -559,39 +559,25 @@ INT WINAPI WideCharToMultiByte(UINT codepage, DWORD flags, LPCWSTR src,
      INT srclen,LPSTR dest, INT destlen, LPCSTR defch, WIN_BOOL* used_defch)
 {
     int i;
-    if(src==0)
-	return 0;
-    if ((srclen==-1)&&(dest==0)) return 0;
     if(srclen==-1){srclen=0; while(src[srclen++]);}
-//    for(i=0; i<srclen; i++)
-//	printf("%c", src[i]);
-//    printf("\n");
-    if(dest==0)
-    {
-    for(i=0; i<srclen; i++)
-    {
-	src++;
-    	if(*src==0)
-	    return i+1;
-    }
-	return srclen+1;
-    }
+    if(destlen==0)
+	return srclen;
     if(used_defch)
 	*used_defch=0;
     for(i=0; i<min(srclen, destlen); i++)
-    {
-	*dest=(char)*src;
-	dest++;
-	src++;
-	if(*src==0)
-	    return i+1;
-    }
+	*dest++=(char)*src++;
     return min(srclen, destlen);
 }
 INT WINAPI MultiByteToWideChar(UINT codepage,DWORD flags, LPCSTR src, INT srclen,
     LPWSTR dest, INT destlen)
 {
-    return 0;
+    int i;
+    if(srclen==-1){srclen=0; while(src[srclen++]);}
+    if(destlen==0)
+	return srclen;
+    for(i=0; i<min(srclen, destlen); i++)
+	*dest++=(WCHAR)*src++;
+    return min(srclen, destlen);
 }
 HANDLE WINAPI OpenFileMappingA(DWORD access, WIN_BOOL prot, LPCSTR name)
 {
