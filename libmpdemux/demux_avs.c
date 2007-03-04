@@ -172,7 +172,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         sh_video_t *sh_video = demuxer->video->sh;
         char *dst;
         int w, h;
-        if (AVS->video_info->num_frames < AVS->frameno) return 0; // EOF
+        if (AVS->video_info->num_frames <= AVS->frameno) return 0; // EOF
 
         curr_frame = AVS->avs_get_frame(AVS->clip, AVS->frameno);
         if (!curr_frame)
