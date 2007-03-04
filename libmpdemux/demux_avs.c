@@ -362,14 +362,17 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
 static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
 {   
     sh_video_t *sh_video=demuxer->video->sh;
+    sh_audio_t *sh_audio=demuxer->audio->sh;
     AVS_T *AVS = demuxer->priv;
 
     switch(cmd)
     {
         case DEMUXER_CTRL_GET_TIME_LENGTH:
         {
-            if (!AVS->video_info->num_frames) return DEMUXER_CTRL_DONTKNOW;
-            *((double *)arg) = (double)AVS->video_info->num_frames / sh_video->fps;
+            double res = sh_video ? (double)AVS->video_info->num_frames / sh_video->fps : 0;
+            if (sh_audio)
+              res = FFMAX(res, (double)AVS->video_info->num_audio_samples / sh_audio->samplerate);
+            *((double *)arg) = res;
             return DEMUXER_CTRL_OK;
         }
         case DEMUXER_CTRL_GET_PERCENT_POS:
