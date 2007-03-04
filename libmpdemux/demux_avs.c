@@ -409,8 +409,7 @@ static void demux_close_avs(demuxer_t* demuxer)
 
 static void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
 {
-    demux_stream_t *d_video=demuxer->video;
-    sh_video_t *sh_video=d_video->sh;
+    sh_video_t *sh_video=demuxer->video->sh;
     AVS_T *AVS = demuxer->priv;
     int video_pos=AVS->frameno;
     
