@@ -62,8 +62,8 @@ extern char *mDisplayName;
 extern int fs_layer;
 extern int stop_xscreensaver;
 extern char **vo_fstype_list;
-extern int vo_nomouse_input;
 #endif
+extern int vo_nomouse_input;
 extern int WinID;
 
 #ifdef HAVE_MENU
@@ -240,8 +240,8 @@ m_option_t mplayer_opts[]={
 	{"nostop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"stop_xscreensaver", "Use -stop-xscreensaver instead, options with _ have been obsoleted.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0,0,-1,NULL},
 #endif
+	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0,0,-1,NULL},
 
 	{"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, -2, 32, NULL},
 
