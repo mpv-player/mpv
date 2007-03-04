@@ -4,9 +4,12 @@
 // for additional virtual keycodes
 
 
+#include <stdio.h>
 #include <windows.h>
 #include "keycodes.h"
 #include "input/input.h"
+// HACK, stdin is used as something else below
+#undef stdin
 
 int mp_input_win32_slave_cmd_func(int fd,char* dest,int size){
   DWORD retval;
