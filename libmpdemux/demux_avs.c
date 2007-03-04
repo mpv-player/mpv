@@ -235,6 +235,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
 {
     int found = 0;
     AVS_T *AVS = demuxer->priv;
+    int audio_samplesize = 0;
     AVS->frameno = 0;
     AVS->sampleno = 0;
 
@@ -314,6 +315,16 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
     
     /* Audio */
     if (avs_has_audio(AVS->video_info))
+      switch (AVS->video_info->sample_type) {
+        case AVS_SAMPLE_INT8:  audio_samplesize = 1; break;
+        case AVS_SAMPLE_INT16: audio_samplesize = 2; break;
+        case AVS_SAMPLE_INT24: audio_samplesize = 3; break;
+        case AVS_SAMPLE_INT32:
+        case AVS_SAMPLE_FLOAT: audio_samplesize = 4; break;
+        default:
+          mp_msg(MSGT_DEMUX, MSGL_ERR, "AVS: unknown audio type, disabling\n");
+      }
+    if (audio_samplesize)
     {
         sh_audio_t *sh_audio = new_sh_audio(demuxer, 0);
         found = 1;
@@ -333,8 +344,8 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
             (AVS->video_info->sample_type == AVS_SAMPLE_FLOAT) ? 0x3 : 0x1;
         sh_audio->wf->nChannels = sh_audio->channels = AVS->video_info->nchannels;
         sh_audio->wf->nSamplesPerSec = sh_audio->samplerate = AVS->video_info->audio_samples_per_second;
-        sh_audio->wf->nAvgBytesPerSec = AVS->video_info->audio_samples_per_second * 4;
-        sh_audio->samplesize = 2;
+        sh_audio->samplesize = audio_samplesize;
+        sh_audio->wf->nAvgBytesPerSec = sh_audio->channels * sh_audio->samplesize * sh_audio->samplerate;
         sh_audio->wf->nBlockAlign = sh_audio->channels * sh_audio->samplesize;
         sh_audio->wf->wBitsPerSample = sh_audio->samplesize * 8;
         sh_audio->wf->cbSize = 0;
