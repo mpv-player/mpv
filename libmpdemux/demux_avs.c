@@ -210,7 +210,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         int samples = sh_audio->samplerate;
         uint64_t l = samples * sh_audio->channels * sh_audio->samplesize;
         if (l > INT_MAX) {
-            mp_msg(MSGT_DEMUX, MSGL_FATAL, "AVS: audio pakcet too big\n");
+            mp_msg(MSGT_DEMUX, MSGL_FATAL, "AVS: audio packet too big\n");
             return 0;
         }
         dp = new_demux_packet(l);
