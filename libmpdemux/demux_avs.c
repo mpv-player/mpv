@@ -217,6 +217,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
             return 0;
         }
         dp = new_demux_packet(l);
+        dp->pts = AVS->sampleno / sh_audio->samplerate;
         
         if (AVS->avs_get_audio(AVS->clip, dp->buffer, AVS->sampleno, samples))
         {
