@@ -589,6 +589,24 @@ Description:  Dumps vobsub soft subtitles streams embedded in AVI files.
 Usage:        avisubdump <movie.avi>
 
 
+vfw2menc.c
+
+Author:       Gianluigi Tiesi
+
+Description:  Creates a codec settings file from the Video for Windows codecs
+              found in the mplayer codec packs.
+
+Usage:        vfw2menc -f <fourcc> -d <codec.dll> -s <settingsfile.mcf>
+              -h|--help            - displays this help
+              -d|--driver filename - dll or drv to load
+              -f|--fourcc fourcc   - fourcc of selected driver
+              -s|--save filename   - save settings to file
+              -c|--check filename  - load and show setting in filename
+              -v|--view            - displays the config dialog and do nothing
+
+Notes:        Works on x86 only.
+
+
 
 Format conversion scripts in the TOOLS dir
 ------------------------------------------
