@@ -53,9 +53,7 @@ typedef WINAPI AVS_Clip* (*imp_avs_take_clip)(AVS_Value, AVS_ScriptEnvironment *
 typedef WINAPI void (*imp_avs_release_clip)(AVS_Clip *);
 typedef WINAPI AVS_VideoFrame* (*imp_avs_get_frame)(AVS_Clip *, int n);
 typedef WINAPI void (*imp_avs_release_video_frame)(AVS_VideoFrame *);
-#ifdef ENABLE_AUDIO
 typedef WINAPI int (*imp_avs_get_audio)(AVS_Clip *, void * buf, uint64_t start, uint64_t count); 
-#endif
 
 #define Q(string) # string
 #define IMPORT_FUNC(x) \
@@ -82,9 +80,7 @@ typedef struct tagAVS
     imp_avs_release_clip avs_release_clip;
     imp_avs_get_frame avs_get_frame;
     imp_avs_release_video_frame avs_release_video_frame;
-#ifdef ENABLE_AUDIO
     imp_avs_get_audio avs_get_audio;
-#endif
 } AVS_T;
 
 AVS_T *initAVS(const char *filename)
@@ -114,9 +110,7 @@ AVS_T *initAVS(const char *filename)
     IMPORT_FUNC(avs_release_clip);
     IMPORT_FUNC(avs_get_frame);
     IMPORT_FUNC(avs_release_video_frame);
-#ifdef ENABLE_AUDIO
     IMPORT_FUNC(avs_get_audio);
-#endif
     
     AVS->avs_env = AVS->avs_create_script_environment(AVISYNTH_INTERFACE_VERSION);
     if (!AVS->avs_env)
@@ -209,7 +203,6 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         AVS->avs_release_video_frame(curr_frame);
     }
     
-#ifdef ENABLE_AUDIO
     /* Audio */
     if (ds == demuxer->audio)
     {
@@ -224,7 +217,6 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         }
         ds_add_packet(demuxer->audio, dp);
     }
-#endif
     
     return 1;
 }
@@ -309,7 +301,6 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         sh_video->num_frames_decoded = 0;
     }
     
-#ifdef ENABLE_AUDIO
     /* Audio */
     if (avs_has_audio(AVS->video_info))
     {
@@ -317,7 +308,11 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         found = 1;
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Clip has audio -> Channels = %d - Freq = %d\n", AVS->video_info->nchannels, AVS->video_info->audio_samples_per_second);
 
+#ifdef ENABLE_AUDIO
         if (demuxer->audio->id == -1) demuxer->audio->id = 0;
+#else
+        if (demuxer->audio->id == -1) demuxer->audio->id = -2;
+#endif
         if (demuxer->audio->id == 0)
         demuxer->audio->sh = sh_audio;
         sh_audio->ds = demuxer->audio;
@@ -333,7 +328,6 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
         sh_audio->o_bps = sh_audio->wf->nAvgBytesPerSec;
     }
-#endif
 
     AVS->init = 1;
     if (found)
