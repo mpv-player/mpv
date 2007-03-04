@@ -134,7 +134,9 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
         pos +=stream_tell(stream);
     else if(whence == SEEK_END)
         pos += stream->end_pos;
-    else if(whence != SEEK_SET)
+    else if(whence == SEEK_SET)
+        pos += stream->start_pos;
+    else
         return -1;
 
     if(pos<stream->end_pos && stream->eof)
@@ -142,7 +144,7 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
     if(stream_seek(stream, pos)==0)
         return -1;
 
-    return pos;
+    return pos - stream->start_pos;
 }
 
 static int mp_close(URLContext *h){
