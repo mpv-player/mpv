@@ -20,8 +20,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/* On mingw compile with: gcc getopt.c vfw2menc.c -o vfw2menc.exe -lwinmm -lole32 */
-/* Using wine: winegcc getopt.c vfw2menc.c -o vfw2menc -lwinmm -lole32 */
+/* On MinGW compile with: gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32 */
+/* Using Wine: winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32 */
+/* MSVC requires getopt.c and getopt.h available at the original website */
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_DEPRECATE
