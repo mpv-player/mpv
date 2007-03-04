@@ -326,7 +326,8 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         sh_audio->ds = demuxer->audio;
         
         sh_audio->wf = (WAVEFORMATEX*) malloc(sizeof(WAVEFORMATEX));
-        sh_audio->wf->wFormatTag = sh_audio->format = 0x1;
+        sh_audio->wf->wFormatTag = sh_audio->format =
+            (AVS->video_info->sample_type == AVS_SAMPLE_FLOAT) ? 0x3 : 0x1;
         sh_audio->wf->nChannels = sh_audio->channels = AVS->video_info->nchannels;
         sh_audio->wf->nSamplesPerSec = sh_audio->samplerate = AVS->video_info->audio_samples_per_second;
         sh_audio->wf->nAvgBytesPerSec = AVS->video_info->audio_samples_per_second * 4;
