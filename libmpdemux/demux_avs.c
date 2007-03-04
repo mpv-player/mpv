@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -71,6 +72,7 @@ typedef struct tagAVS
 #endif
     HMODULE dll;
     int frameno;
+    uint64_t sampleno;
     int init;
     
     imp_avs_create_script_environment avs_create_script_environment;
@@ -207,15 +209,22 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     if (ds == demuxer->audio)
     {
         sh_audio_t *sh_audio = ds->sh;
-        int l = sh_audio->wf->nAvgBytesPerSec;
+        int samples = sh_audio->samplerate;
+        uint64_t l = samples * sh_audio->channels * sh_audio->samplesize;
+        if (l > INT_MAX) {
+            mp_msg(MSGT_DEMUX, MSGL_FATAL, "AVS: audio pakcet too big\n");
+            return 0;
+        }
         dp = new_demux_packet(l);
         
-        if (AVS->avs_get_audio(AVS->clip, dp->buffer, AVS->frameno*sh_video->fps*l, l))
+        if (AVS->avs_get_audio(AVS->clip, dp->buffer, AVS->sampleno, samples))
         {
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_get_audio() failed\n");
             return 0;
         }
         ds_add_packet(demuxer->audio, dp);
+
+        AVS->sampleno += samples;
     }
     
     return 1;
@@ -226,6 +235,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
     int found = 0;
     AVS_T *AVS = (AVS_T *) demuxer->priv;
     AVS->frameno = 0;
+    AVS->sampleno = 0;
 
     mp_msg(MSGT_DEMUX, MSGL_V, "AVS: demux_open_avs()\n");
     demuxer->seekable = 1;
@@ -322,8 +332,9 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         sh_audio->wf->nChannels = sh_audio->channels = AVS->video_info->nchannels;
         sh_audio->wf->nSamplesPerSec = sh_audio->samplerate = AVS->video_info->audio_samples_per_second;
         sh_audio->wf->nAvgBytesPerSec = AVS->video_info->audio_samples_per_second * 4;
-        sh_audio->wf->nBlockAlign = 4;
-        sh_audio->wf->wBitsPerSample = sh_audio->samplesize = 16; // AVS->video_info->sample_type ??
+        sh_audio->samplesize = 2;
+        sh_audio->wf->nBlockAlign = sh_audio->channels * sh_audio->samplesize;
+        sh_audio->wf->wBitsPerSample = sh_audio->samplesize * 8;
         sh_audio->wf->cbSize = 0;
         sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
         sh_audio->o_bps = sh_audio->wf->nAvgBytesPerSec;
