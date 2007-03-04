@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <limits.h>
 #include <windows.h>
+#include <windowsx.h>
 
 #include "osdep/keycodes.h"
 #include "input/input.h"
@@ -10,6 +12,7 @@
 #include "w32_common.h"
 
 extern void mplayer_put_key(int code);
+extern int enable_mouse_movements;
 
 #ifndef MONITOR_DEFAULTTOPRIMARY
 #define MONITOR_DEFAULTTOPRIMARY 1
@@ -110,6 +113,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         case WM_RBUTTONDOWN:
             if (!vo_nomouse_input)
                 mplayer_put_key(MOUSE_BTN2);
+            break;
+        case WM_MOUSEMOVE:
+            if (enable_mouse_movements) {
+                char cmd_str[40];
+                snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i",
+                        GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+                mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
+            }
             break;
         case WM_MOUSEWHEEL:
             if (!vo_nomouse_input) {
