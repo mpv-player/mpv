@@ -867,10 +867,10 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       if (DVDDiscID(dvd, discid) >= 0)
       {
         int i;
-        char buf[33];
+        mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_DVD_DISC_ID=");
         for (i = 0; i < 16; i ++)
-          sprintf(buf+2*i, "%02X", discid[i]);
-        mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_DVD_DISC_ID=%s\n", buf);
+          mp_msg(MSGT_IDENTIFY, MSGL_V, "%02X", discid[i]);
+        mp_msg(MSGT_IDENTIFY, MSGL_V, "\n");
       }
     }
     /**
