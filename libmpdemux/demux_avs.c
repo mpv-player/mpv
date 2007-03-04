@@ -87,7 +87,7 @@ typedef struct tagAVS
 
 AVS_T *initAVS(const char *filename)
 {   
-    AVS_T *AVS = (AVS_T *) malloc (sizeof(AVS_T));
+    AVS_T *AVS = malloc (sizeof(AVS_T));
     AVS_Value arg0 = avs_new_value_string(filename);
     AVS_Value args = avs_new_value_array(&arg0, 1);
     
@@ -165,7 +165,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
     AVS_VideoFrame *curr_frame;
     demux_packet_t *dp = NULL;
-    AVS_T *AVS = (AVS_T *) demuxer->priv;
+    AVS_T *AVS = demuxer->priv;
 
     if (ds == demuxer->video)
     {
@@ -234,7 +234,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 static demuxer_t* demux_open_avs(demuxer_t* demuxer)
 {
     int found = 0;
-    AVS_T *AVS = (AVS_T *) demuxer->priv;
+    AVS_T *AVS = demuxer->priv;
     AVS->frameno = 0;
     AVS->sampleno = 0;
 
@@ -301,7 +301,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         sh_video->fps = (float) ((float) AVS->video_info->fps_numerator / (float) AVS->video_info->fps_denominator);
         sh_video->frametime = 1.0 / sh_video->fps;
         
-        sh_video->bih = (BITMAPINFOHEADER*) malloc(sizeof(BITMAPINFOHEADER) + (256 * 4));
+        sh_video->bih = malloc(sizeof(BITMAPINFOHEADER) + (256 * 4));
         sh_video->bih->biCompression = sh_video->format;
         sh_video->bih->biBitCount = avs_bits_per_pixel(AVS->video_info);
         //sh_video->bih->biPlanes = 2;
@@ -328,7 +328,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         demuxer->audio->sh = sh_audio;
         sh_audio->ds = demuxer->audio;
         
-        sh_audio->wf = (WAVEFORMATEX*) malloc(sizeof(WAVEFORMATEX));
+        sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
         sh_audio->wf->wFormatTag = sh_audio->format =
             (AVS->video_info->sample_type == AVS_SAMPLE_FLOAT) ? 0x3 : 0x1;
         sh_audio->wf->nChannels = sh_audio->channels = AVS->video_info->nchannels;
@@ -351,7 +351,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
 static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
 {   
     sh_video_t *sh_video=demuxer->video->sh;
-    AVS_T *AVS = (AVS_T *) demuxer->priv;
+    AVS_T *AVS = demuxer->priv;
 
     switch(cmd)
     {
@@ -374,7 +374,7 @@ static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
 
 static void demux_close_avs(demuxer_t* demuxer)
 {
-    AVS_T *AVS = (AVS_T *) demuxer->priv;
+    AVS_T *AVS = demuxer->priv;
 
     if (AVS)
     {
@@ -396,7 +396,7 @@ static void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs, float audio_
 {
     demux_stream_t *d_video=demuxer->video;
     sh_video_t *sh_video=d_video->sh;
-    AVS_T *AVS = (AVS_T *) demuxer->priv;
+    AVS_T *AVS = demuxer->priv;
     int video_pos=AVS->frameno;
     
     //mp_msg(MSGT_DEMUX, MSGL_V, "AVS: seek rel_seek_secs = %f - flags = %x\n", rel_seek_secs, flags);
