@@ -337,7 +337,6 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         sh_audio->wf->wBitsPerSample = sh_audio->samplesize * 8;
         sh_audio->wf->cbSize = 0;
         sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
-        sh_audio->o_bps = sh_audio->wf->nAvgBytesPerSec;
     }
 
     AVS->init = 1;
