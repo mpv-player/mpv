@@ -426,7 +426,6 @@ static void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs, float audio_
     AVS->frameno = video_pos;
     sh_video->num_frames_decoded = video_pos;
     sh_video->num_frames = video_pos;
-    d_video->pts=AVS->frameno / sh_video->fps; // OSD
 }
 
 static int avs_check_file(demuxer_t *demuxer)
