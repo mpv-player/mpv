@@ -379,7 +379,7 @@ static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
         case DEMUXER_CTRL_GET_PERCENT_POS:
         {
             if (!AVS->video_info->num_frames) return DEMUXER_CTRL_DONTKNOW;
-            *((int *)arg) = (int) (AVS->frameno * 100 / AVS->video_info->num_frames);
+            *((int *)arg) = AVS->frameno * 100 / AVS->video_info->num_frames;
             return DEMUXER_CTRL_OK;
         }
     default:
