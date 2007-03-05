@@ -412,21 +412,29 @@ static void demux_close_avs(demuxer_t* demuxer)
 static void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
 {
     sh_video_t *sh_video=demuxer->video->sh;
+    sh_audio_t *sh_audio=demuxer->audio->sh;
     AVS_T *AVS = demuxer->priv;
-    int video_pos=AVS->frameno;
+    double video_pos = sh_video ?
+                       (double)AVS->frameno / sh_video->fps :
+                       (double)AVS->sampleno / sh_audio->samplerate;
     
     //mp_msg(MSGT_DEMUX, MSGL_V, "AVS: seek rel_seek_secs = %f - flags = %x\n", rel_seek_secs, flags);
     
     // seek absolute
     if (flags&1) video_pos=0;
 
-    video_pos += (rel_seek_secs * sh_video->fps);
+    video_pos += rel_seek_secs;
     if (video_pos < 0) video_pos = 0;
-    if (video_pos > AVS->video_info->num_frames) video_pos = AVS->video_info->num_frames;
         
-    AVS->frameno = video_pos;
-    sh_video->num_frames_decoded = video_pos;
-    sh_video->num_frames = video_pos;
+    if (sh_video) {
+      AVS->frameno = FFMIN(video_pos * sh_video->fps,
+                           AVS->video_info->num_frames);
+      sh_video->num_frames_decoded = AVS->frameno;
+      sh_video->num_frames = AVS->frameno;
+    }
+    if (sh_audio)
+      AVS->sampleno = FFMIN(video_pos * sh_audio->samplerate,
+                            AVS->video_info->num_audio_samples);
 }
 
 static int avs_check_file(demuxer_t *demuxer)
