@@ -41,7 +41,6 @@
 #include "demux_avs.h"
 
 #define MAX_AVS_SIZE    16 * 1024 /* 16k should be enough */
-#undef ENABLE_AUDIO
 
 HMODULE WINAPI LoadLibraryA(LPCSTR);
 FARPROC WINAPI GetProcAddress(HMODULE,LPCSTR);
@@ -331,11 +330,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         found = 1;
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Clip has audio -> Channels = %d - Freq = %d\n", AVS->video_info->nchannels, AVS->video_info->audio_samples_per_second);
 
-#ifdef ENABLE_AUDIO
         if (demuxer->audio->id == -1) demuxer->audio->id = 0;
-#else
-        if (demuxer->audio->id == -1) demuxer->audio->id = -2;
-#endif
         if (demuxer->audio->id == 0)
         demuxer->audio->sh = sh_audio;
         sh_audio->ds = demuxer->audio;
