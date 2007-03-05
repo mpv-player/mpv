@@ -417,11 +417,16 @@ static void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs, float audio_
     double video_pos = sh_video ?
                        (double)AVS->frameno / sh_video->fps :
                        (double)AVS->sampleno / sh_audio->samplerate;
+    double duration = sh_video ?
+                      (double)AVS->video_info->num_frames / sh_video->fps :
+                      (double)AVS->video_info->num_audio_samples / sh_audio->samplerate;
     
     //mp_msg(MSGT_DEMUX, MSGL_V, "AVS: seek rel_seek_secs = %f - flags = %x\n", rel_seek_secs, flags);
     
     // seek absolute
     if (flags&1) video_pos=0;
+    // seek precent
+    if (flags&2) rel_seek_secs *= duration;
 
     video_pos += rel_seek_secs;
     if (video_pos < 0) video_pos = 0;
