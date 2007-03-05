@@ -104,7 +104,7 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
   if(mode == STREAM_READ)
     m = O_RDONLY;
   else if (mode == STREAM_WRITE) //who's gonna do that ?
-    m = O_RDWR|O_CREAT;
+    m = O_RDWR|O_CREAT|O_TRUNC;
   else {
     mp_msg(MSGT_OPEN, MSGL_ERR, "[smb] Unknown open mode %d\n", mode);
     m_struct_free (&stream_opts, opts);
