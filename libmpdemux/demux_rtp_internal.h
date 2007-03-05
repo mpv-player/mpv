@@ -36,8 +36,4 @@ Boolean awaitRTPPacket(demuxer_t* demuxer, demux_stream_t* ds,
     // "streamType": 0 => video; 1 => audio
     // This routine returns False if the input stream has closed
 
-// A routine for adding our own data to an incoming RTP data stream:
-Boolean insertRTPData(demuxer_t* demuxer, demux_stream_t* ds,
-		      unsigned char* data, unsigned dataLen);
-
 #endif

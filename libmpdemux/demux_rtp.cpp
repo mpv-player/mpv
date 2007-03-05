@@ -325,34 +325,6 @@ Boolean awaitRTPPacket(demuxer_t* demuxer, demux_stream_t* ds,
   return True;
 }
 
-Boolean insertRTPData(demuxer_t* demuxer, demux_stream_t* ds,
-		      unsigned char* data, unsigned dataLen) {
-  // Begin by finding the buffer queue that we want to add data to.
-  // (Get this from the RTP state, which we stored in
-  //  the demuxer's 'priv' field)
-  RTPState* rtpState = (RTPState*)(demuxer->priv);
-  ReadBufferQueue* bufferQueue = NULL;
-  if (ds == demuxer->video) {
-    bufferQueue = rtpState->videoBufferQueue;
-  } else if (ds == demuxer->audio) {
-    bufferQueue = rtpState->audioBufferQueue;
-  } else {
-    fprintf(stderr, "(demux_rtp)insertRTPData: internal error: unknown stream\n");
-    return False;
-  }
-
-  if (data == NULL || dataLen == 0) return False;
-
-  demux_packet_t* dp = new_demux_packet(dataLen);
-  if (dp == NULL) return False;
-
-  // Copy our data into the buffer, and save it:
-  memmove(dp->buffer, data, dataLen);
-  dp->pts = 0;
-  bufferQueue->savePendingBuffer(dp);
-  return True;
-}
-
 static void teardownRTSPorSIPSession(RTPState* rtpState); // forward
 
 extern "C" void demux_close_rtp(demuxer_t* demuxer) {
