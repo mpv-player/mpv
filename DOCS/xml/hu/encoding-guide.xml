@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22141 -->
+<!-- synced with r22413 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -4233,12 +4233,52 @@ Az egyes codec-ek által használt FourCC kód zárójelben látható.
 
 <informalexample>
 <para>
-Egy példa VP3 tömörítéssel:
+Egy példa egy ISO DVD ajánló VP6 flash videó fájlba történő átalakítására
+a compdata bitráta beállításaival:
 <screen>
-mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy
+mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceable>trailer.flv</replaceable> \
+-ovc vfw -xvfwopts codec=vp6vfw.dll:compdata=onepass.mcf -oac mp3lame \
+-lameopts cbr:br=64 -af lavcresample=22050 -vf yadif,scale=320:240,flip \
+-of lavf -lavfopts i_certify_that_my_video_stream_does_not_use_b_frames
 </screen>
 </para>
 </informalexample>
+</sect2>
+
+<sect2 id="menc-feat-video-for-windows-bitrate-settings">
+<title>A vfw2menc használata a codec beállításokat tartalmazó fájl elkészítéséhez.</title>
+
+<para>
+A Video for Windows codec-ekkel történő kódoláshoz be kell állítanod a
+bitrátát és egyéb opciókat. x86-on ez működik mind *NIX, mind Windows alatt.
+</para>
+<para>
+Először is le kell fordítanod a <application>vfw2menc</application> programot.
+A <filename class="directory">/TOOLS/</filename> alkönyvtárban található az MPlayer forrásában.
+A Linux alatti elkészítéséhez a <application>Wine</application>-t kell használni:
+<screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
+
+Windows alatt <application>MinGW</application> vagy <application>Cygwin</application> használatával:
+<screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
+
+Az <application>MSVC</application>-vel történő fordításhoz szükséges a getopt.
+A getopt megtalálható az eredeti <application>vfw2menc</application> archivban itt:
+The <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer win32 alatt</ulink> projekt.
+</para>
+<informalexample>
+<para>
+Az alábbi példa VP6 codec-kel működik.
+<screen>
+vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf
+</screen>
+Ez megnyitja a VP6 codec dialógus ablakot. Ismételd meg ezt a második lépéshez is
+és használd a <option>-s <replaceable>secondpass.mcf</replaceable></option> kapcsolót.
+</para>
+</informalexample>
+<para>
+A Windows használók a <option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option>
+kapcsolóval a kódolás megkezdése előtt jeleníthetik meg a codec dialógust.
+</para>
 </sect2>
 </sect1>
 

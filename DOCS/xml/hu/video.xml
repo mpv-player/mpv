@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22201 -->
+<!-- synced with r22402 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1866,6 +1866,11 @@ ebben az esetben az <application>MPlayer</application> beleveszi a
 stream-be az összes jelzett pid-et, plusz a pid 0-t (ami a PAT-ot
 tartalmazza). Javasolt a PMT pid bevétele minden sorba a megfelelő
 csatornáknál (ha tudod).
+Megadhatsz 8192-őt is, ez kiválaszt minden pid-et ezen a frekvencián,
+majd ezután a TAB-bal tudsz váltani a programok között.
+Ez nagyobb sávszélességet igényel, de az olcsóbb kártyák mindig átviszik
+az összes csatornát legalább a kernelig, így ezeknél nem jelent számottevő
+különbséget.
 Egyéb lehetőségek: televideo pid, második audió sáv, stb.
 </para>
 

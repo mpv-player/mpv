@@ -1,4 +1,4 @@
-.\" Synced with r22150
+.\" Synced with r22461
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 02. 23." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 03. 05." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -932,7 +932,7 @@ Joystick támogatás kikapcsolása.
 LIRC támogatás kikapcsolása.
 .
 .TP
-.B \-nomouseinput (csak X11)
+.B \-nomouseinput
 Kikapcsolja az egérgomb nyomás/\:felengedés input-ot (a mozplayerxp
 helyzetérzékeny menüje igényli ezt a kapcsolót).
 .
@@ -1722,7 +1722,8 @@ Használható opciók:
 .IPs noaudio
 hang kikapcsolása
 .IPs driver=<érték>
-elérhetõ: dummy, v4l, v4l2, bsdbt848
+Lásd a \-tv driver=help-et a befordított TV bemeneti vezérlõk listájához.
+elérhetõek: dummy, v4l, v4l2, bsdbt848
 .IPs device=<érték>
 TV eszköz megadása (alapértelmezett: /dev/\:video0).
 .IPs input=<érték>
@@ -9750,6 +9751,10 @@ nem akarsz valami periférikus, titokzatos codec-kel kódolni.
 .TP
 .B codec=<név>
 A bináris codec fájl neve, amivel kódolni akarsz.
+.
+.TP
+.B compdata=<fájl>
+A codec beállításokat tartalmazó fájl neve (pl. firstpass.mcf), melyet a vfw2menc készített.
 .
 .
 .SS MPEG muxer (\-mpegopts)
