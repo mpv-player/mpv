@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r22331 (2007. 02. 24.)
+// Sync'ed with help_mp-en.h r22428 (2007. 03. 05.)
 
 // ========================= MPlayer help ===========================
 
@@ -1355,6 +1355,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Nincs adat rész a fejléc után!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: nem található audió vagy videó fejléc - hibás fájl?\n"
 #define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Hibás hossz az ASF fejlécben!\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "DRM Licensz URL: %s\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "Ez a fájl DRM titkosítással van ellátva, nem lehet lejátszani az MPlayerrel!\n"
 
 // asf_mmst_streaming.c
 
