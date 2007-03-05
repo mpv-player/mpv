@@ -2434,10 +2434,6 @@ demux_mkv_open (demuxer_t *demuxer)
   int i, version, cont = 0;
   char *str;
 
-#ifdef USE_ICONV
-  subcp_open(NULL);
-#endif
-
   stream_seek(s, s->start_pos);
   str = ebml_read_header (s, &version);
   if (str == NULL || strcmp (str, "matroska") || version > 2)
@@ -2708,9 +2704,6 @@ demux_close_mkv (demuxer_t *demuxer)
   if (mkv_d)
     {
       int i;
-#ifdef USE_ICONV
-      subcp_close();
-#endif
       free_cached_dps (demuxer);
       if (mkv_d->tracks)
         {
