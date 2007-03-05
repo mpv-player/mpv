@@ -177,6 +177,7 @@ static mp_cmd_t mp_cmds[] = {
 
 static mp_key_name_t key_names[] = {
   { ' ', "SPACE" },
+  { '#', "SHARP" },
   { KEY_ENTER, "ENTER" },
   { KEY_TAB, "TAB" },
   { KEY_CTRL, "CTRL" },
