@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22150
+.\" In sync with r22461
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -985,7 +985,7 @@ Schaltet die Joystickunterstützung aus.
 Schaltet Unterstützung für LIRC aus.
 .
 .TP
-.B \-nomouseinput (nur bei X11)
+.B \-nomouseinput
 Sperrt die Eingabe mittels Mausbuttons (Buttonpress/\:-release) (diese Option
 wird unter anderem von mozplayerxp verwendet, um ein eigenes Kontextmenü
 anzuzeigen).
@@ -1813,6 +1813,7 @@ Verfügbare Optionen:
 .IPs noaudio
 kein Sound
 .IPs driver=<Wert>
+Siehe \-tv driver=help für eine Liste eincompilierter TV-Eingabetreiber.
 mögliche Werte: dummy, v4l, v4l2, bsdbt848
 .IPs device=<Wert>
 Gibt ein anderes TV-Gerät als /dev/\:video0 an.
@@ -10207,6 +10208,11 @@ denn, du möchtest mit irgendeinem obskuren Codec encodieren.
 .TP
 .B codec=<Name>
 Der Name der Binärcodecdatei, mit der encodiert werden soll.
+.
+.TP
+.B compdata=<Datei>
+Der Name der Datei mit den Codec-Einstellungen (etwa firstpass.mcf), die
+von vfw2menc erstellt wurde.
 .
 .
 .SS MPEG Muxer (\-mpegopts)

@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r22185
+// In sync with r22428
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -170,7 +170,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Initialisierung des Menüs fehlgeschlagen.\n"
 #define MSGTR_Getch2InitializedTwice "WARNUNG: getch2_init doppelt aufgerufen!\n"
 #define MSGTR_DumpstreamFdUnavailable "Kann Dump dieses Streams nicht anlegen - kein 'fd' verfügbar.\n"
-#define MSGTR_FallingBackOnPlaylist "Falle zurück auf den Versuch, Playlist %s einzulesen...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Kann den libmenu-Videofilter nicht mit dem Ursprungsmenü %s öffnen.\n"
 #define MSGTR_AudioFilterChainPreinitError "Fehler bei der Vorinitialisierung der Audiofilterkette!\n"
 #define MSGTR_LinuxRTCReadError "Linux-RTC-Lesefehler: %s\n"
@@ -1394,6 +1393,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Auf den Header folgt kein Datenblock!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: Kein Ton/Bild-Header gefunden - kaputte Datei?\n"
 #define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Ungültige Längenangabe im ASF-Header!\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "URL der DRM-Lizenz: %s\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "Diese Datei wurde mit DRM-Verschlüsselung versehen, MPlayer wird sie nicht abspielen!\n"
 
 // asf_mmst_streaming.c
 
@@ -1597,6 +1598,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_XMMS_FoundPlugin "Plugin gefunden: %s (%s).\n"
 #define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Plugin geschlossen: %s.\n"
+#define MSGTR_MPDEMUX_XMMS_WaitForStart "Warte auf die Wiedergabe des XMMS-Plugins von '%s'...\n"
 
 // ========================== LIBMPMENU ===================================
 
@@ -2103,10 +2105,11 @@ static char help_text[]=
 #define MSGTR_LIBASS_EmptyEvent "[ass] Leeres Ereignis!\n"
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] MAX_GLYPHS erreicht: Ereignis %d, Start = %llu, Dauer = %llu\n Text = %s\n"
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Warnung! Ereignishöhe geändert!  \n"
-#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Zu viele simultane Ereignisse!\n"
 
 // ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X nicht gefunden, wähle Schrift erneut für (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] Glyph 0x%X in Schrift für (%s, %d, %d) nicht gefunden\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Fehler beim Öffnen der Schrift im Speicher: %s\n"
+#define MSGTR_LIBASS_NoCharmaps "[ass] Schriftfläche ohne Zeichentabelle\n"
+#define MSGTR_LIBASS_NoCharmapAutodetected "[ass] keine Zeichentabelle automatisch erkennt, probiere die erste\n"
 
