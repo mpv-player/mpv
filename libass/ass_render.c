@@ -1803,16 +1803,16 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		last_break = -1;
 		for (i = 1; i < text_info.length + 1; ++i) { // (text_info.length + 1) is the end of the last line
 			if ((i == text_info.length) || text_info.glyphs[i].linebreak) {
-				int width, shift;
+				int width, shift = 0;
 				glyph_info_t* first_glyph = text_info.glyphs + last_break + 1;
 				glyph_info_t* last_glyph = text_info.glyphs + i - 1;
 
 				while ((last_glyph > first_glyph) && ((last_glyph->symbol == '\n') || (last_glyph->symbol == 0)))
 					last_glyph --;
 
-				width = last_glyph->pos.x + last_glyph->bbox.xMax - first_glyph->pos.x - first_glyph->bbox.xMin;
-				shift = - first_glyph->bbox.xMin; // now text line starts exactly at 0 (left margin)
+				width = last_glyph->pos.x + d6_to_int(last_glyph->advance.x) - first_glyph->pos.x;
 				if (halign == HALIGN_LEFT) { // left aligned, no action
+					shift = 0;
 				} else if (halign == HALIGN_RIGHT) { // right aligned
 					shift = max_text_width - width;
 				} else if (halign == HALIGN_CENTER) { // centered
