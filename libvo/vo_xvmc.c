@@ -36,6 +36,8 @@
 #include "Gui/interface.h"
 #endif
 
+#include "libavutil/common.h"
+
 //no chanse xinerama to be suported in near future
 #undef HAVE_XINERAMA
 
@@ -421,6 +423,23 @@ opt_t subopts [] =
    return 0;
 }
 
+static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
+  *drwX = *drwY = 0;
+  aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
+  if (vo_fs) {
+    aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
+    vo_dwidth = FFMIN(vo_dwidth, vo_screenwidth);
+    vo_dheight = FFMIN(vo_dheight, vo_screenheight);
+    *drwX = (vo_screenwidth - vo_dwidth) / 2;
+    *drwY = (vo_screenheight - vo_dheight) / 2;
+    mp_msg(MSGT_VO, MSGL_V, "[xvmc-fs] dx: %d dy: %d dw: %d dh: %d\n",
+           *drwX, *drwY, vo_dwidth, vo_dheight);
+  } else if (WinID == 0) {
+    *drwX = vo_dx;
+    *drwY = vo_dy;
+  }
+}
+
 static int config(uint32_t width, uint32_t height,
 		       uint32_t d_width, uint32_t d_height,
 		       uint32_t flags, char *title, uint32_t format){
@@ -644,21 +663,6 @@ skip_surface_allocation:
       }
       else
 #endif
-      if ( vo_fs )
-      {
-#ifdef X11_FULLSCREEN
-     /* this code replaces X11_FULLSCREEN hack in mplayer.c
-      * aspect() is available through aspect.h for all vos.
-      * besides zooming should only be done with -zoom,
-      * but I leave the old -fs behaviour so users don't get
-      * irritated for now (and send lots o' mails ;) ::atmos
-      */
-
-         aspect(&d_width,&d_height,A_ZOOM);
-#endif
-
-      }
-   vo_dwidth=d_width; vo_dheight=d_height;
    hint.flags = PPosition | PSize /* | PBaseSize */;
    hint.base_width = hint.width; hint.base_height = hint.height;
    XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
@@ -685,9 +689,8 @@ skip_surface_allocation:
          XGetGeometry(mDisplay, vo_window, &mRoot,
                       &drwX, &drwY, &vo_dwidth, &vo_dheight,
                       &drwBorderWidth, &drwDepth);
-         drwX = drwY = 0; // coordinates need to be local to the window
          aspect_save_prescale(vo_dwidth, vo_dheight);
-      } else { drwX=vo_dx; drwY=vo_dy; }
+      }
    } else 
       if ( vo_window == None ){
          vo_window = XCreateWindow(mDisplay, mRootWin,
@@ -733,16 +736,8 @@ skip_surface_allocation:
 #endif
    }
 
-   aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
-   if ( (( flags&VOFLAG_FULLSCREEN )&&( WinID <= 0 )) || vo_fs )
-   {
-      aspect(&vo_dwidth,&vo_dheight,A_ZOOM);
-      drwX=( vo_screenwidth - (vo_dwidth > vo_screenwidth?vo_screenwidth:vo_dwidth) ) / 2;
-      drwY=( vo_screenheight - (vo_dheight > vo_screenheight?vo_screenheight:vo_dheight) ) / 2;
-      vo_dwidth=(vo_dwidth > vo_screenwidth?vo_screenwidth:vo_dwidth);
-      vo_dheight=(vo_dheight > vo_screenheight?vo_screenheight:vo_dheight);
-      mp_msg(MSGT_VO,MSGL_V, "[xvmc-fs] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
-   }
+   if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
+   calc_drwXY(&drwX, &drwY);
 
    panscan_calc();
 
@@ -1099,7 +1094,6 @@ int i,cfs;
 }
 
 static void check_events(void){
-int dwidth,dheight;
 Window mRoot;
 uint32_t drwBorderWidth,drwDepth;
 
@@ -1110,20 +1104,10 @@ int e=vo_x11_check_events(mDisplay);
 
       XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&vo_dwidth,&vo_dheight,
                    &drwBorderWidth,&drwDepth );
-      drwX = drwY = 0;
       mp_msg(MSGT_VO,MSGL_V, "[xvmc] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,
               vo_dwidth,vo_dheight );
 
-      aspect(&dwidth,&dheight,A_NOZOOM);
-      if ( vo_fs )
-      {
-         aspect(&dwidth,&dheight,A_ZOOM);
-         drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
-         drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
-         vo_dwidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
-         vo_dheight=(dheight > vo_screenheight?vo_screenheight:dheight);
-         mp_msg(MSGT_VO,MSGL_V, "[xvmc-fs] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
-      }
+      calc_drwXY(&drwX, &drwY);
    }
    if ( e & VO_EVENT_EXPOSE )
    {

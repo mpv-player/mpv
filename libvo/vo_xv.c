@@ -43,6 +43,8 @@ Buffer allocation:
 #include "Gui/interface.h"
 #endif
 
+#include "libavutil/common.h"
+
 static vo_info_t info = {
     "X11/Xv",
     "xv",
@@ -89,7 +91,6 @@ static int int_pause;
 
 static Window mRoot;
 static uint32_t drwX, drwY, drwBorderWidth, drwDepth;
-static uint32_t dwidth, dheight;
 static uint32_t max_width = 0, max_height = 0; // zero means: not set
 
 static void (*draw_alpha_fnc) (int x0, int y0, int w, int h,
@@ -140,6 +141,23 @@ static void draw_alpha_null(int x0, int y0, int w, int h,
 
 
 static void deallocate_xvimage(int foo);
+
+static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
+  *drwX = *drwY = 0;
+  aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
+  if (vo_fs) {
+    aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
+    vo_dwidth = FFMIN(vo_dwidth, vo_screenwidth);
+    vo_dheight = FFMIN(vo_dheight, vo_screenheight);
+    *drwX = (vo_screenwidth - vo_dwidth) / 2;
+    *drwY = (vo_screenheight - vo_dheight) / 2;
+    mp_msg(MSGT_VO, MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",
+           *drwX, *drwY, vo_dwidth, vo_dheight);
+  } else if (WinID == 0) {
+    *drwX = vo_dx;
+    *drwY = vo_dy;
+  }
+}
 
 /*
  * connect to server, create and map window,
@@ -242,23 +260,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             aspect_save_screenres(modeline_width, modeline_height);
         } else
 #endif
-        if (vo_fs)
-        {
-#ifdef X11_FULLSCREEN
-            /* this code replaces X11_FULLSCREEN hack in mplayer.c
-             * aspect() is available through aspect.h for all vos.
-             * besides zooming should only be done with -zoom,
-             * but I leave the old -fs behaviour so users don't get
-             * irritated for now (and send lots o' mails ;) ::atmos
-             */
-
-            aspect(&d_width, &d_height, A_ZOOM);
-#endif
-
-        }
-//   dwidth=d_width; dheight=d_height; //XXX: what are the copy vars used for?
-        vo_dwidth = d_width;
-        vo_dheight = d_height;
         hint.flags = PPosition | PSize /* | PBaseSize */ ;
         hint.base_width = hint.width;
         hint.base_height = hint.height;
@@ -299,12 +300,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                              &drwBorderWidth, &drwDepth);
                 if (vo_dwidth <= 0) vo_dwidth = d_width;
                 if (vo_dheight <= 0) vo_dheight = d_height;
-                drwX = drwY = 0; // coordinates need to be local to the window
                 aspect_save_prescale(vo_dwidth, vo_dheight);
-            } else
-            {
-                drwX = vo_dx;
-                drwY = vo_dy;
             }
         } else if (vo_window == None)
         {
@@ -400,25 +396,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     set_gamma_correction();
 #endif
 
-    aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
-    if (((flags & VOFLAG_FULLSCREEN) && (WinID <= 0)) || vo_fs)
-    {
-        aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
-        drwX =
-            (vo_screenwidth -
-             (vo_dwidth >
-              vo_screenwidth ? vo_screenwidth : vo_dwidth)) / 2;
-        drwY =
-            (vo_screenheight -
-             (vo_dheight >
-              vo_screenheight ? vo_screenheight : vo_dheight)) / 2;
-        vo_dwidth =
-            (vo_dwidth > vo_screenwidth ? vo_screenwidth : vo_dwidth);
-        vo_dheight =
-            (vo_dheight > vo_screenheight ? vo_screenheight : vo_dheight);
-        mp_msg(MSGT_VO, MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",
-               drwX, drwY, vo_dwidth, vo_dheight);
-    }
+    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
+    calc_drwXY(&drwX, &drwY);
 
     panscan_calc();
     
@@ -557,25 +536,7 @@ static void check_events(void)
         mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", drwX,
                drwY, vo_dwidth, vo_dheight);
 
-        aspect(&dwidth, &dheight, A_NOZOOM);
-        if (vo_fs)
-        {
-            aspect(&dwidth, &dheight, A_ZOOM);
-            drwX =
-                (vo_screenwidth -
-                 (dwidth > vo_screenwidth ? vo_screenwidth : dwidth)) / 2;
-            drwY =
-                (vo_screenheight -
-                 (dheight >
-                  vo_screenheight ? vo_screenheight : dheight)) / 2;
-            vo_dwidth =
-                (dwidth > vo_screenwidth ? vo_screenwidth : dwidth);
-            vo_dheight =
-                (dheight > vo_screenheight ? vo_screenheight : dheight);
-            mp_msg(MSGT_VO, MSGL_V,
-                   "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n", drwX, drwY,
-                   vo_dwidth, vo_dheight);
-        }
+        calc_drwXY(&drwX, &drwY);
     }
 
     if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
