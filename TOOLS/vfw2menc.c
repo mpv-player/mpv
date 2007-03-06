@@ -29,7 +29,7 @@
 #pragma warning(disable: 4996)
 #endif
 
-#define __VERSION__ "0.1"
+#define VERSION "0.1"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -152,7 +152,7 @@ static struct option long_options[] =
 
 void help(const char *progname)
 {
-    printf("VFW to mencoder v"__VERSION__" - Copyright 2007 - Gianluigi Tiesi <sherpya@netfarm.it>\n");
+    printf("VFW to mencoder v"VERSION" - Copyright 2007 - Gianluigi Tiesi <sherpya@netfarm.it>\n");
     printf("This program is Free Software\n\n");
     printf("Usage: %s\n", progname);
     printf("      -h|--help            - displays this help\n");
