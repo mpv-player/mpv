@@ -184,6 +184,10 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
     wf->nBlockAlign = 1;
     wf->wBitsPerSample = 8;
     wf->cbSize = 0;
+  } else if (strcmp(subsession->codecName(), "AMR") == 0) {
+    wf->wFormatTag = sh_audio->format = mmioFOURCC('s','a','m','r');
+  } else if (strcmp(subsession->codecName(), "AMR-WB") == 0) {
+    wf->wFormatTag = sh_audio->format = mmioFOURCC('s','a','w','b');
   } else if (strcmp(subsession->codecName(), "GSM") == 0) {
     wf->wFormatTag = sh_audio->format = mmioFOURCC('a','g','s','m');
     wf->nAvgBytesPerSec = 1650;
