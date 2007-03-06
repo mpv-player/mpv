@@ -3586,7 +3586,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->eof);
 if(mpctx->dvbin_reopen)
 {
   mpctx->eof = 0;
-  uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
+  uninit_player(INITED_ALL-(INITED_GUI|INITED_STREAM|INITED_INPUT|INITED_GETCH2|(fixed_vo?INITED_VO:0)));
   cache_uninit(mpctx->stream);
   mpctx->dvbin_reopen = 0;
   goto goto_enable_cache;
