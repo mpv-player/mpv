@@ -1266,6 +1266,7 @@ static int get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 
 	info->outline_glyph = 0;
 	info->bm = info->bm_o = info->bm_s = 0;
+	info->advance.x = info->advance.y = 0;
 	
 	info->glyph = ass_font_get_glyph(frame_context.ass_priv->fontconfig_priv, render_context.font, symbol);
 	if (!info->glyph)
@@ -1734,6 +1735,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		// if it's an outline glyph, we still need to fill the bbox
 		if (text_info.glyphs[text_info.length].glyph) {
 			FT_Glyph_Get_CBox( text_info.glyphs[text_info.length].glyph, FT_GLYPH_BBOX_PIXELS, &(text_info.glyphs[text_info.length].bbox) );
+		} else {
+			text_info.glyphs[text_info.length].bbox.xMin = 0;
+			text_info.glyphs[text_info.length].bbox.yMin = 0;
+			text_info.glyphs[text_info.length].bbox.xMax = 0;
+			text_info.glyphs[text_info.length].bbox.yMax = 0;
 		}
 
 		previous = code;
