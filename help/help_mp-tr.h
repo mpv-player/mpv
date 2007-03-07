@@ -1753,7 +1753,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Önemli hata oluştu! Devam edilemiyor.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] bilinmeyen altaygıt: '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] bilinmeyen altaygıt: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Bu mod için çok az video belleğiniz var:\n[VO_VESA] Gereken: %08lX Mevcut: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Monitörünüzü özelliklerine göre tanımlamalısınız. Tazeleme oranı değiştirilemiyor.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Bu mod ile monitör sınırları uyarlanamaz. Tazeleme oranı değiştirilemiyor.\n"

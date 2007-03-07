@@ -1766,7 +1766,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Wystąpił błąd krytyczny! Nie moge kontynuuować.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] nieznane podurządzenie: '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] nieznane podurządzenie: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Masz za mało pamięci video dla tego trybu:\n[VO_VESA] Wymagane: %08lX obecne: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Musisz podać możliwości monitora. Nie zmieniam częstotliwości odświeżania.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Tryb nie jest zgodny z limitami monitora. Nie zmieniam częstotliwości odświeżania.\n"

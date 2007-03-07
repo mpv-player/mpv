@@ -1865,7 +1865,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] 發生致命錯誤! 不能繼續。\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] 未知子設備: '%s'。\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] 未知子設備: '%s'。\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] 顯存太小不能支持這個模式:\n[VO_VESA] 需要: %08lX 可用: %08lX。\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] 你需要設置顯示器的兼容性。不要改變刷新率。\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] 模式超出顯示器的限製。不要改變刷新率。\n"

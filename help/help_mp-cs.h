@@ -1864,7 +1864,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Nastala závažná chyba! Nemohu pokračovat.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Neznámé podzařízení: '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] Neznámé podzařízení: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Pro tento režim máte málo videopaměti:\n[VO_VESA] Požadováno: %08lX dostupné: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Měl(a) byste specifikovat možnosti monitoru. Nebudu měnit obnovovací frekvenci.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Požadavky režimu přesahují schopnosti monitoru. Nebudu měnit obnovovací frekvenci.\n"

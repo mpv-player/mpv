@@ -459,7 +459,7 @@ static uint32_t parseSubDevice(const char *sd)
    else
    if(memcmp(sd,"vidix",5) == 0) vidix_name = &sd[5]; /* vidix_name will be valid within init() */
 #endif
-   else { mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_UnkownSubdevice, sd); return 0xFFFFFFFFUL; }
+   else { mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_UnknownSubdevice, sd); return 0xFFFFFFFFUL; }
    return flags;
 }
 

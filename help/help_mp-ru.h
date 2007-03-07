@@ -1989,7 +1989,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Возникла фатальная ошибка! Не могу продолжить.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] неизвестное субустройство: '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] неизвестное субустройство: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] У Вас слишком мало видеопамяти для этого режима:\n[VO_VESA] Необходимо: %08lX имеется: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Вам нужно указать возможности монитора. Не изменяю частоту обновления.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Режим не соответсвует ограничениям монитора. Не изменяю частоту обновления.\n"

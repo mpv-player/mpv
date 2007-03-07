@@ -1937,7 +1937,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fataler Fehler aufgetreten! Kann nicht fortfahren.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] unbekanntes Subgerät: '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] unbekanntes Subgerät: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Du hast zu wenig Videospeicher für diesen Modus:\n[VO_VESA] Benötigt: %08lX vorhanden: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Du musst die Fähigkeiten deines Monitors angeben.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Der Modus passt nicht zu den Beschränkungen des Monitors.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"

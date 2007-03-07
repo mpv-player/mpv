@@ -1878,7 +1878,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Végzetes hiba történt! Nem lehet folytatni.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] ismeretlen aleszköz: '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] ismeretlen aleszköz: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Túl kevés videó memóriád van ehhez a módhoz:\n[VO_VESA] Szükséges: %08lX rendelkezésre áll: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Meg kell adnod a monitor adatait. Nem változott a frissítési ráta.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] A mód nem felel meg a monitor korlátainak. Nem változott a frissítési ráta.\n"

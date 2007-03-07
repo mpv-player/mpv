@@ -1879,7 +1879,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fatal error occurred! Can't continue.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] unknown subdevice: '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] unknown subdevice: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] You have too little video memory for this mode:\n[VO_VESA] Required: %08lX present: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] You have to specify the capabilities of the monitor. Not changing refresh rate.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] The mode does not fit the monitor limits. Not changing refresh rate.\n"

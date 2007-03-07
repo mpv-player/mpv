@@ -1860,7 +1860,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Erreur fatale produite ! Impossible de continuer.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Sous-périphérique inconnu : '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] Sous-périphérique inconnu : '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Pas assez de mémoire vidéo pour ce mode :\n[VO_VESA] Requis : %08lX présent : %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Spécifiez les capacités du moniteur. Ne pas changer le taux de rafraîchissement.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Mode non adapté aux limites du moniteur. Ne pas changer le taux de rafraîchissement.\n"
