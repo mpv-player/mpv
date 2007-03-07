@@ -740,7 +740,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    trak->durmap[0].num, trak->timescale/trak->durmap[0].dur,
 		    char2short(trak->stdata,24)/trak->durmap[0].dur);*/
 		sh->samplerate=char2short(trak->stdata,24);
-		if((sh->samplerate < 7000) && trak->durmap) {
+		if((sh->samplerate < 7000) && trak->durmap && trak->durmap[0].dur > 1) {
 		  switch(char2short(trak->stdata,24)/trak->durmap[0].dur) {
 		    // TODO: add more cases.
 		    case 31:
