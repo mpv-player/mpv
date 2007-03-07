@@ -504,8 +504,11 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 	!ctx->vo_inited)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
+	if (sh->aspect == 0 ||
+	    av_cmp_q(avctx->sample_aspect_ratio, 
+	             ctx->last_sample_aspect_ratio))
+	    sh->aspect = aspect;
 	ctx->last_sample_aspect_ratio = avctx->sample_aspect_ratio;
-	sh->aspect = aspect;
 	sh->disp_w = width;
 	sh->disp_h = height;
 	ctx->pix_fmt = pix_fmt;
