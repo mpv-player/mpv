@@ -1071,6 +1071,11 @@ Enables caching for the stream used by \-audiofile, using the specified
 amount of memory.
 .
 .TP
+.B \-[no]reuse-socket (udp:// only)
+Specifies to try to reuse the socket address even though it's in use by another
+-non actively listening- process.
+.
+.TP
 .B \-bandwidth <value> (network only)
 Specify the maximum bandwidth for network streaming (for servers that are
 able to send content in different bitrates).
