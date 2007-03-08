@@ -500,7 +500,7 @@ parse_smil(play_tree_parser_t* p) {
         payload++;
       // Skip ") at the end of the last line from the current packet
       line[strlen(line)-2] = 0;
-      line = realloc(line, strlen(line)+strlen(payload));
+      line = realloc(line, strlen(line)+strlen(payload)+1);
       strcat (line, payload);
       npkt++;
     } else
