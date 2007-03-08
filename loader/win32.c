@@ -2435,7 +2435,10 @@ static void* WINAPI expGetProcAddress(HMODULE mod, char* name)
     default:
 	result=GetProcAddress(mod, name);
     }
-    dbgprintf("GetProcAddress(0x%x, '%s') => 0x%x\n", mod, name, result);
+    if((unsigned int)name > 0xffff)
+	dbgprintf("GetProcAddress(0x%x, '%s') => 0x%x\n", mod, name, result);
+    else
+	dbgprintf("GetProcAddress(0x%x, '%d') => 0x%x\n", mod, (int)name, result);
     return result;
 }
 
@@ -5419,10 +5422,9 @@ void* LookupExternalByName(const char* library, const char* name)
 	printf("ERROR: library=0\n");
 	return (void*)ext_unknown;
     }
-    if(name==0)
+    if((unsigned long)name<=0xffff)
     {
-	printf("ERROR: name=0\n");
-	return (void*)ext_unknown;
+	return LookupExternal(library, (int)name);
     }
     dbgprintf("External func %s:%s\n", library, name);
     for(i=0; i<sizeof(libraries)/sizeof(struct libs); i++)
