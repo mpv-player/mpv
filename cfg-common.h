@@ -58,6 +58,8 @@
 	{"cookies-file", &cookies_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"prefer-ipv4", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 0, 1, NULL},	
 	{"ipv4-only-proxy", &network_ipv4_only_proxy, CONF_TYPE_FLAG, 0, 0, 1, NULL},	
+	{"reuse-socket", &reuse_socket, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"noreuse-socket", &reuse_socket, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 #ifdef HAVE_AF_INET6
 	{"prefer-ipv6", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #else
@@ -368,6 +370,7 @@ extern char *cookies_file;
 
 extern int network_prefer_ipv4;
 extern int network_ipv4_only_proxy;
+extern int reuse_socket;
 
 #endif
 
