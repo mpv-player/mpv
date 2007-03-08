@@ -4859,6 +4859,9 @@ struct libs
 #define FF(X,Y) \
     {#X, Y, (void*)exp##X},
 
+#define UNDEFF(X, Y) \
+    {#X, Y, (void*)-1},
+
 struct exports exp_kernel32[]=
 {
     FF(GetVolumeInformationA,-1)
@@ -5015,6 +5018,10 @@ struct exports exp_kernel32[]=
     {"LoadLibraryExA", -1, (void*)&LoadLibraryExA},
     FF(SetThreadIdealProcessor,-1)
     FF(SetProcessAffinityMask, -1)
+    UNDEFF(FlsAlloc, -1)
+    UNDEFF(FlsGetValue, -1)
+    UNDEFF(FlsSetValue, -1)
+    UNDEFF(FlsFree, -1)
 };
 
 struct exports exp_msvcrt[]={
@@ -5426,6 +5433,8 @@ void* LookupExternalByName(const char* library, const char* name)
 	{
 	    if(strcmp(name, libraries[i].exps[j].name))
 		continue;
+ 	    if((unsigned int)(libraries[i].exps[j].func) == -1)
+		return NULL; //undefined func
 	    //	    printf("Hit: 0x%08X\n", libraries[i].exps[j].func);
 	    return libraries[i].exps[j].func;
 	}
