@@ -145,19 +145,6 @@ void mp_msg(int mod, int lev, const char *format, ... ){
     }
 #endif    
     {   unsigned char v_colors[10]={9,1,3,15,7,2,2,8,8,8};
-        static const char *lev_text[]= {
-                                "FATAL",
-                                "ERROR",
-                                "WARN",
-                                "HINT",
-                                "INFO",
-                                "STATUS",
-                                "V",
-                                "DGB2",
-                                "DGB3",
-                                "DGB4",
-                                "DBG5",
-        };
         static const char *mod_text[MSGT_MAX]= {
                                 "GLOBAL",
                                 "CPLAYER",
