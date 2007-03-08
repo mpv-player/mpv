@@ -144,7 +144,6 @@ static void deallocate_xvimage(int foo);
 
 static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
   *drwX = *drwY = 0;
-  aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
   if (vo_fs) {
     aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
     vo_dwidth = FFMIN(vo_dwidth, vo_screenwidth);
@@ -396,6 +395,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     set_gamma_correction();
 #endif
 
+    aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
     calc_drwXY(&drwX, &drwY);
 
@@ -532,7 +532,6 @@ static void check_events(void)
     {
         XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &vo_dwidth,
                      &vo_dheight, &drwBorderWidth, &drwDepth);
-        drwX = drwY = 0;
         mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", drwX,
                drwY, vo_dwidth, vo_dheight);
 

@@ -425,7 +425,6 @@ opt_t subopts [] =
 
 static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
   *drwX = *drwY = 0;
-  aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
   if (vo_fs) {
     aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
     vo_dwidth = FFMIN(vo_dwidth, vo_screenwidth);
@@ -736,6 +735,7 @@ skip_surface_allocation:
 #endif
    }
 
+   aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
    calc_drwXY(&drwX, &drwY);
 
