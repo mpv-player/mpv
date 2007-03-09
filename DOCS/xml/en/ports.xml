@@ -858,7 +858,8 @@ You first need to build main and main_noaltivec.
 </para>
 
 <para>
-Next, set a global variable:
+To begin with, in order to ensure maximum backwards compatibility, set an
+environment variable:
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
 
@@ -869,12 +870,11 @@ Then, configure:
 <para>
 If you configure for a G4 or later CPU with AltiVec support, do as follows:
 <screen>
-./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+./configure --disable-gl --disable-x11
 </screen>
 If you configure for a G3-powered machine without AltiVec, use:
 <screen>
-./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11 \
-    --disable-altivec
+./configure --disable-gl --disable-x11 --disable-altivec
 </screen>
 You may need to edit <filename>config.mak</filename> and change
 <systemitem>-mcpu</systemitem> and <systemitem>-mtune</systemitem>
