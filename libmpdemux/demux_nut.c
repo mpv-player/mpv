@@ -201,9 +201,6 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 
 	if (pd.stream == demuxer->audio->id)  {
 		ds = demuxer->audio;
-		if (!demuxer->video->sh) {
-			((sh_audio_t*)ds->sh)->delay = pts;
-		}
 	}
 	else if (pd.stream == demuxer->video->id) {
 		ds = demuxer->video;
