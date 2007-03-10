@@ -143,6 +143,7 @@ int display_openfilewindow(gui_t *gui, int add)
             {
                 if (GetFullPathName(filename, MAX_PATH, filename, &filepart))
                 {
+                    mplSetFileName(NULL, filename, STREAMTYPE_FILE);
                     if(!parse_filename(filename, playtree, mconfig, 0))
                         gui->playlist->add_track(gui->playlist, filename, NULL, filepart, 0);
                     mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] Adding file: %s - path %s\n", filespec, filename);
@@ -791,6 +792,7 @@ static LRESULT CALLBACK TitleChapterWndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
     int i=0, j=0;
     char titles[MAX_PATH] = "";
     char chapters[MAX_PATH] = "";
+    gui_t *gui = (gui_t *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
     switch (iMsg)
     {
         case WM_CREATE:
@@ -859,9 +861,7 @@ static LRESULT CALLBACK TitleChapterWndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
 
                     if((guiIntfStruct.DVD.current_title != 0 || guiIntfStruct.DVD.current_chapter != 0))
                     {
-                        mplGotoTheNext = 0;
-                        guiGetEvent(guiCEvent, (void *) guiSetStop);
-                        guiGetEvent(guiCEvent, (void *) guiSetPlay);
+                        gui->startplay(gui);
                         DestroyWindow(hwnd);
                     }
                 }

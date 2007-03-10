@@ -167,10 +167,6 @@ static void guiSetEvent(int event)
             guiIntfStruct.DiskChanged = 1;
 
             mplSetFileName(NULL, dvd_device, STREAMTYPE_DVD);
-            guiIntfStruct.Title = guiIntfStruct.DVD.current_title;
-            guiIntfStruct.Chapter = guiIntfStruct.DVD.current_chapter;
-            guiIntfStruct.Angle = guiIntfStruct.DVD.current_angle;
-
             dvdname[0] = 0;
             strcat(dvdname, "DVD Movie");
             GetVolumeInformation(dvd_device, dvdname, MAX_PATH, NULL, NULL, NULL, NULL, 0);
@@ -281,13 +277,28 @@ static void guiSetEvent(int event)
         case evDropFile:
         case evLoadPlay:
         {
-            mplSetFileName(NULL, filename, STREAMTYPE_FILE);
-            guiIntfStruct.FilenameChanged = guiIntfStruct.NewPlay = 1;
-            update_playlistwindow();
-            mplGotoTheNext = guiIntfStruct.Playing? 0 : 1;
-            guiGetEvent(guiCEvent, (void *) guiSetStop);
-            guiGetEvent(guiCEvent, (void *) guiSetPlay);
-            break;
+            switch(guiIntfStruct.StreamType)
+            {
+                case STREAMTYPE_DVD:
+                {
+                    guiIntfStruct.Title = guiIntfStruct.DVD.current_title;
+                    guiIntfStruct.Chapter = guiIntfStruct.DVD.current_chapter;
+                    guiIntfStruct.Angle = guiIntfStruct.DVD.current_angle;
+                    guiIntfStruct.DiskChanged = 1;
+                    guiGetEvent(guiCEvent, (void *) guiSetPlay);
+                    break;
+                }
+                default:
+                {
+                    guiIntfStruct.FilenameChanged = guiIntfStruct.NewPlay = 1;
+                    update_playlistwindow();
+                    mplGotoTheNext = guiIntfStruct.Playing? 0 : 1;
+                    guiGetEvent(guiCEvent, (void *) guiSetStop);
+                    guiGetEvent(guiCEvent, (void *) guiSetPlay);
+                    break;
+               }
+           }
+           break;
         }
         case evNext:
             mplNext();
