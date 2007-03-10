@@ -344,7 +344,6 @@ void mplNext(void)
                            STREAMTYPE_STREAM);
             break;
     }
-    mplGotoTheNext = 0;
     mygui->startplay(mygui);
 }
 
@@ -367,7 +366,6 @@ void mplPrev(void)
                            STREAMTYPE_STREAM);
             break;
     }
-    mplGotoTheNext = 0;
     mygui->startplay(mygui);
 }
 
