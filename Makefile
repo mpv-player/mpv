@@ -246,6 +246,9 @@ codec-cfg.o: codecs.conf.h
 codecs2html$(EXESUF): mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
 
+codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
+	$(CC) -I. -DTESTING codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap -o $@
+
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
@@ -319,7 +322,8 @@ uninstall:
 clean:
 	-rm -f *.o *.a *~
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
-	  codecs2html$(EXESUF) codecs.conf.h help_mp.h version.h
+	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
+	  codecs.conf.h help_mp.h version.h
 	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
 
 distclean: clean doxygen_clean
