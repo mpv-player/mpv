@@ -1154,9 +1154,9 @@ static void print_status(float a_pos, float a_v, float corr)
     else
       saddf(line, &pos, width, "??%% ??%% ??,?%% ");
   } else if (mpctx->sh_audio) {
-    if (mpctx->sh_audio->delay > 0.5)
+    if (mpctx->delay > 0.5)
       saddf(line, &pos, width, "%4.1f%% ",
-        100.0*audio_time_usage/(double)mpctx->sh_audio->delay);
+        100.0*audio_time_usage/(double)mpctx->delay);
     else
       saddf(line, &pos, width, "??,?%% ");
   }
@@ -1699,7 +1699,7 @@ static void adjust_sync_and_print_status(int between_frames, float timing_error)
 	     * value here, even a "corrected" one, would be incompatible with
 	     * autosync mode.)
 	     */
-	    a_pts = written_audio_pts(mpctx->sh_audio, mpctx->d_audio) - mpctx->sh_audio->delay;
+	    a_pts = written_audio_pts(mpctx->sh_audio, mpctx->d_audio) - mpctx->delay;
 	else
 	    a_pts = playing_audio_pts(mpctx->sh_audio, mpctx->d_audio, mpctx->audio_out);
 
@@ -1729,7 +1729,7 @@ static void adjust_sync_and_print_status(int between_frames, float timing_error)
 	    else
 		max_pts_correction = mpctx->sh_video->frametime*0.10; // +-10% of time
 	    if (!between_frames) {
-		mpctx->sh_audio->delay+=x;
+		mpctx->delay+=x;
 		c_total+=x;
 	    }
 	    if(!quiet)
@@ -1760,7 +1760,7 @@ static int fill_audio_out_buffers(void)
 	// all the current uses of ao_data.pts seem to be in aos that handle
 	// sync completely wrong; there should be no need to use ao_data.pts
 	// in get_space()
-	ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+sh_audio->delay)*90000.0;
+	ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
 	bytes_to_write = mpctx->audio_out->get_space();
 	if (mpctx->sh_video || bytes_to_write >= ao_data.outburst)
 	    break;
@@ -1812,14 +1812,14 @@ static int fill_audio_out_buffers(void)
 	// Is this pts value actually useful for the aos that access it?
 	// They're obviously badly broken in the way they handle av sync;
 	// would not having access to this make them more broken?
-	ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+sh_audio->delay)*90000.0;
+	ao_data.pts = ((mpctx->sh_video?mpctx->sh_video->timer:0)+mpctx->delay)*90000.0;
 	playsize = mpctx->audio_out->play(sh_audio->a_out_buffer, playsize, playflags);
 
 	if (playsize > 0) {
 	    sh_audio->a_out_buffer_len -= playsize;
 	    memmove(sh_audio->a_out_buffer, &sh_audio->a_out_buffer[playsize],
 		    sh_audio->a_out_buffer_len);
-	    sh_audio->delay += playback_speed*playsize/(double)ao_data.bps;
+	    mpctx->delay += playback_speed*playsize/(double)ao_data.bps;
 	}
 	else if (audio_eof && mpctx->audio_out->get_delay() < .04) {
 	    // Sanity check to avoid hanging in case current ao doesn't output
@@ -1852,12 +1852,12 @@ static int sleep_until_update(float *time_frame, float *aq_sleep_time)
 	     * sync to settle at the right value (but it eventually will.)
 	     * This settling time is very short for values below 100.
 	     */
-	    float predicted = mpctx->sh_audio->delay / playback_speed + *time_frame;
+	    float predicted = mpctx->delay / playback_speed + *time_frame;
 	    float difference = delay - predicted;
 	    delay = predicted + difference / (float)autosync;
 	}
 
-	*time_frame = delay - mpctx->sh_audio->delay / playback_speed;
+	*time_frame = delay - mpctx->delay / playback_speed;
 
 	// delay = amount of audio buffered in soundcard/driver
 	if (delay > 0.25) delay=0.25; else
@@ -2014,7 +2014,7 @@ static double update_video(int *blit_frame)
 	    max_framesize = in_size; // stats
 	sh_video->timer += frame_time;
 	if (mpctx->sh_audio)
-	    mpctx->sh_audio->delay -= frame_time;
+	    mpctx->delay -= frame_time;
 	// video_read_frame can change fps (e.g. for ASF video)
 	vo_fps = sh_video->fps;
 	// check for frame-drop:
@@ -2022,7 +2022,7 @@ static double update_video(int *blit_frame)
 	if (mpctx->sh_audio && !mpctx->d_audio->eof) {
 	    static int dropped_frames;
 	    float delay = playback_speed*mpctx->audio_out->get_delay();
-	    float d = delay-mpctx->sh_audio->delay;
+	    float d = delay-mpctx->delay;
 	    // we should avoid dropping too many frames in sequence unless we
 	    // are too late. and we allow 100ms A-V delay here:
 	    if (d < -dropped_frames*frame_time-0.100 &&
@@ -2062,7 +2062,7 @@ static double update_video(int *blit_frame)
 	sh_video->last_pts = sh_video->pts;
 	sh_video->timer += frame_time;
 	if(mpctx->sh_audio)
-	    mpctx->sh_audio->delay -= frame_time;
+	    mpctx->delay -= frame_time;
 	*blit_frame = 1;
     }
     return frame_time;
@@ -2242,6 +2242,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 	mpctx->sh_video->num_buffered_pts = 0;
 	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
 	mpctx->num_buffered_frames = 0;
+	mpctx->delay = 0;
 	// Not all demuxers set d_video->pts during seek, so this value
 	// (which is used by at least vobsub and edl code below) may
 	// be completely wrong (probably 0).
@@ -3276,7 +3277,7 @@ if(mpctx->sh_video){
 if(mpctx->sh_audio){
   if (! ignore_start)
     audio_delay -= mpctx->sh_audio->stream_delay;
-  mpctx->sh_audio->delay=-audio_delay;
+  mpctx->delay=-audio_delay;
 }
 
 if(!mpctx->sh_audio){
@@ -3561,7 +3562,7 @@ if(rel_seek_secs || abs_seek_pos){
 	 guiIntfStruct.Position=(len <= 0? 0.0f : ( pos - mpctx->demuxer->movi_start ) * 100.0f / len );
 	}
 	if ( mpctx->sh_video ) guiIntfStruct.TimeSec=mpctx->sh_video->pts;
-	  else if ( mpctx->sh_audio ) guiIntfStruct.TimeSec=mpctx->sh_audio->delay;
+	  else if ( mpctx->sh_audio ) guiIntfStruct.TimeSec=mpctx->delay;
 	guiIntfStruct.LengthInSec=demuxer_get_time_length(mpctx->demuxer);
 	guiGetEvent( guiReDraw,NULL );
 	guiGetEvent( guiSetVolume,NULL );

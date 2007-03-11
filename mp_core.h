@@ -66,6 +66,13 @@ typedef struct MPContext {
     // struct.
     int num_buffered_frames;
 
+    // AV sync: the next frame should be shown when the audio out has this
+    // much (in seconds) buffered data left. Increased when more data is
+    // written to the ao, decreased when moving to the next frame.
+    // In the audio-only case used as a timer since the last seek
+    // by the audio CPU usage meter.
+    double delay;
+
     float begin_skip; ///< start time of the current skip while on edlout mode
     // audio is muted if either EDL or user activates mute
     short edl_muted; ///< Stores whether EDL is currently in muted mode.

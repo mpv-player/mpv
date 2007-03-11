@@ -929,7 +929,6 @@ if(!demuxer->seekable){
 #if 0
     if(sh_audio) sh_audio->timer=sh_video->timer;
 #else
-    if(sh_audio) sh_audio->delay=0;
     if(sh_video) sh_video->timer=0; // !!!!!!
 #endif
 

@@ -419,7 +419,7 @@ static int mp_property_audio_delay(m_option_t * prop, int action,
 	    float delay = audio_delay;
 	    m_property_delay(prop, action, arg, &audio_delay);
 	    if (mpctx->sh_audio)
-		mpctx->sh_audio->delay -= audio_delay - delay;
+		mpctx->delay -= audio_delay - delay;
 	}
 	return M_PROPERTY_OK;
     default:

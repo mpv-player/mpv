@@ -12,7 +12,6 @@ typedef struct {
   struct codecs_st *codec;
   unsigned int format;
   int inited;
-  double delay;	   // relative (to sh_video->timer) time in audio stream
   float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
   // output format:
   int sample_format;
