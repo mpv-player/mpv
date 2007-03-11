@@ -330,7 +330,7 @@ strip:
 	strip -s $(ALL_PRG)
 
 dep depend: help_mp.h version.h
-	$(CC) -MM $(CFLAGS) -DCODECS2HTML mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
+	$(CC) -MM $(CFLAGS) -DCODECS2HTML $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
 # ./configure must be rerun if it changed
