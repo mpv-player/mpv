@@ -708,6 +708,26 @@ static const char *bicub_filt_template_RECT =
   "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};"
   BICUB_FILT_MAIN("RECT");
 
+#define BICUB_X_FILT_MAIN(textype) \
+  "ADD coord, fragment.texcoord[%c].xyxy, cdelta.xyxw;" \
+  "ADD coord2, fragment.texcoord[%c].xyxy, cdelta.zyzw;" \
+  "TEX a.r, coord, texture[%c], "textype";" \
+  "TEX b.r, coord2, texture[%c], "textype";" \
+  /* x-interpolation */ \
+  "LRP yuv.%c, parmx.b, a.rrrr, b.rrrr;"
+
+static const char *bicub_x_filt_template_2D =
+  "MAD coord.x, fragment.texcoord[%c], {%f, %f}, {0.5, 0.5};"
+  "TEX parmx, coord, texture[%c], 1D;"
+  "MUL cdelta.xz, parmx.rrgg, {-%f, 0, %f, 0};"
+  BICUB_X_FILT_MAIN("2D");
+
+static const char *bicub_x_filt_template_RECT =
+  "ADD coord.x, fragment.texcoord[%c], {0.5, 0.5};"
+  "TEX parmx, coord, texture[%c], 1D;"
+  "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};"
+  BICUB_X_FILT_MAIN("RECT");
+
 static const char *yuv_prog_template =
   "PARAM ycoef = {%.4f, %.4f, %.4f};"
   "PARAM ucoef = {%.4f, %.4f, %.4f};"
@@ -765,6 +785,7 @@ static void create_scaler_textures(int scaler, int *texu, char *texs) {
     case YUV_SCALER_BILIN:
       break;
     case YUV_SCALER_BICUB:
+    case YUV_SCALER_BICUB_X:
       texs[0] = (*texu)++;
       gen_spline_lookup_tex(GL_TEXTURE0 + texs[0]);
       texs[0] += '0';
@@ -959,6 +980,17 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                  texs[0], (float)1.0 / texw, (float)1.0 / texw,
                  texs[0], (float)1.0 / texh, (float)1.0 / texh,
                  in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
+      break;
+    case YUV_SCALER_BICUB_X:
+      if (rect)
+        snprintf(*prog_pos, *remain, bicub_x_filt_template_RECT,
+                 in_tex, texs[0],
+                 in_tex, in_tex, in_tex, in_tex, out_comp);
+      else
+        snprintf(*prog_pos, *remain, bicub_x_filt_template_2D,
+                 in_tex, (float)texw, (float)texh,
+                 texs[0], (float)1.0 / texw, (float)1.0 / texw,
+                 in_tex, in_tex, in_tex, in_tex, out_comp);
       break;
   }
   *remain -= strlen(*prog_pos);

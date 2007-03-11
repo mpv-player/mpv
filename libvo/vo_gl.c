@@ -894,6 +894,7 @@ static int preinit(const char *arg)
               "  lscale=<n>\n"
               "    0: use standard bilinear scaling for luma.\n"
               "    1: use improved bicubic scaling for luma.\n"
+              "    2: use cubic in X, linear in Y direction scaling for luma.\n"
               "  cscale=<n>\n"
               "    as lscale but for chroma (2x slower with little visible effect).\n"
               "  customprog=<filename>\n"
