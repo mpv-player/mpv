@@ -124,7 +124,9 @@ cat > html-single.xsl << EOF
 EOF
 
 echo "Searching for DTD..."
+#FIXME: This should prefer higher version numbers, not the other way around ..
 for _try_dtd in \
+  /usr/share/xml/docbook/*/dtd/4*/docbookx.dtd \
   /usr/share/xml/docbook/*/docbookx.dtd \
   /usr/share/sgml/docbook/*/docbookx.dtd \
   /usr/share/sgml/docbook/dtd/*/docbookx.dtd \
