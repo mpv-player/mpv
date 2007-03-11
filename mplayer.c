@@ -1615,8 +1615,6 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	}
 	if (in_size > max_framesize)
 	    max_framesize = in_size;
-	if (pts == MP_NOPTS_VALUE)
-	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts value from demuxer MISSING\n");
 	current_module = "decode video";
 	decoded_frame = decode_video(sh_video, start, in_size, 0, pts);
 	if (decoded_frame) {

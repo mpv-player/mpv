@@ -337,7 +337,7 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
     unsigned int t2;
     double tt;
 
-    if (correct_pts) {
+    if (correct_pts && pts != MP_NOPTS_VALUE) {
 	int delay = get_current_video_decoder_lag(sh_video);
 	if (delay >= 0) {
 	    if (delay > sh_video->num_buffered_pts)
@@ -395,8 +395,15 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
 	mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
     if (correct_pts) {
-	sh_video->num_buffered_pts--;
-	sh_video->pts = sh_video->buffered_pts[sh_video->num_buffered_pts];
+	if (sh_video->num_buffered_pts) {
+	    sh_video->num_buffered_pts--;
+	    sh_video->pts = sh_video->buffered_pts[sh_video->num_buffered_pts];
+	}
+	else {
+	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "No pts value from demuxer to "
+		   "use for frame!\n");
+	    sh_video->pts = MP_NOPTS_VALUE;
+	}
     }
     return mpi;
 }
