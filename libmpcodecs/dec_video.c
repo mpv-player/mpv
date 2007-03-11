@@ -329,91 +329,94 @@ return 1; // success
 
 extern int vo_directrendering;
 
-void *decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame, double pts){
-mp_image_t *mpi=NULL;
-unsigned int t=GetTimer();
-unsigned int t2;
-double tt;
+void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
+		   int drop_frame, double pts)
+{
+    mp_image_t *mpi = NULL;
+    unsigned int t = GetTimer();
+    unsigned int t2;
+    double tt;
 
- if (correct_pts) {
-     int delay = get_current_video_decoder_lag(sh_video);
-     if (delay >= 0) {
-	 if (delay > sh_video->num_buffered_pts)
+    if (correct_pts) {
+	int delay = get_current_video_decoder_lag(sh_video);
+	if (delay >= 0) {
+	    if (delay > sh_video->num_buffered_pts)
 #if 0
-	     // this is disabled because vd_ffmpeg reports the same lag
-	     // after seek even when there are no buffered frames,
-	     // leading to incorrect error messages
-	     mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Not enough buffered pts\n");
+		// this is disabled because vd_ffmpeg reports the same lag
+		// after seek even when there are no buffered frames,
+		// leading to incorrect error messages
+		mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Not enough buffered pts\n");
 #else
-	 ;
+	    ;
 #endif
-	 else
-	     sh_video->num_buffered_pts = delay;
-     }
-     if (sh_video->num_buffered_pts ==
-	                     sizeof(sh_video->buffered_pts)/sizeof(double))
-	 mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Too many buffered pts\n");
-     else {
-	 int i, j;
-	 for (i = 0; i < sh_video->num_buffered_pts; i++)
-	     if (sh_video->buffered_pts[i] < pts)
-		 break;
-	 for (j = sh_video->num_buffered_pts; j > i; j--)
-	     sh_video->buffered_pts[j] = sh_video->buffered_pts[j-1];
-	 sh_video->buffered_pts[i] = pts;
-	 sh_video->num_buffered_pts++;
-     }
- }
+	    else
+		sh_video->num_buffered_pts = delay;
+	}
+	if (sh_video->num_buffered_pts ==
+			sizeof(sh_video->buffered_pts)/sizeof(double))
+	    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Too many buffered pts\n");
+	else {
+	    int i, j;
+	    for (i = 0; i < sh_video->num_buffered_pts; i++)
+		if (sh_video->buffered_pts[i] < pts)
+		    break;
+	    for (j = sh_video->num_buffered_pts; j > i; j--)
+		sh_video->buffered_pts[j] = sh_video->buffered_pts[j-1];
+	    sh_video->buffered_pts[i] = pts;
+	    sh_video->num_buffered_pts++;
+	}
+    }
 
-//if(!(sh_video->ds->flags&1) || sh_video->ds->pack_no<5)
-mpi=mpvdec->decode(sh_video, start, in_size, drop_frame);
+    mpi = mpvdec->decode(sh_video, start, in_size, drop_frame);
 
-//------------------------ frame decoded. --------------------
+    //------------------------ frame decoded. --------------------
 
 #ifdef HAVE_MMX
-	// some codecs are broken, and doesn't restore MMX state :(
-	// it happens usually with broken/damaged files.
-if(gCpuCaps.has3DNow){
+    // some codecs are broken, and doesn't restore MMX state :(
+    // it happens usually with broken/damaged files.
+    if (gCpuCaps.has3DNow) {
 	__asm __volatile ("femms\n\t":::"memory");
-}
-else if(gCpuCaps.hasMMX){
+    }
+    else if (gCpuCaps.hasMMX) {
 	__asm __volatile ("emms\n\t":::"memory");
-}
+    }
 #endif
 
-t2=GetTimer();t=t2-t;
-tt = t*0.000001f;
-video_time_usage+=tt;
+    t2 = GetTimer(); t = t2-t;
+    tt = t*0.000001f;
+    video_time_usage += tt;
 
-if(!mpi || drop_frame) return NULL; // error / skipped frame
+    if (!mpi || drop_frame)
+	return NULL;    // error / skipped frame
 
- if (field_dominance == 0)
-     mpi->fields |= MP_IMGFIELD_TOP_FIRST;
- else if (field_dominance == 1)
-     mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
+    if (field_dominance == 0)
+	mpi->fields |= MP_IMGFIELD_TOP_FIRST;
+    else if (field_dominance == 1)
+	mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
- if (correct_pts) {
-     sh_video->num_buffered_pts--;
-     sh_video->pts = sh_video->buffered_pts[sh_video->num_buffered_pts];
- }
- return mpi;
+    if (correct_pts) {
+	sh_video->num_buffered_pts--;
+	sh_video->pts = sh_video->buffered_pts[sh_video->num_buffered_pts];
+    }
+    return mpi;
 }
 
-int filter_video(sh_video_t *sh_video, void *frame, double pts) {
-mp_image_t *mpi = frame;
-unsigned int t2 = GetTimer();
-vf_instance_t *vf = sh_video->vfilter;
-// apply video filters and call the leaf vo/ve
-int ret = vf->put_image(vf,mpi, pts);
-if(ret>0) {
-    vf->control(vf,VFCTRL_DRAW_OSD,NULL);
+int filter_video(sh_video_t *sh_video, void *frame, double pts)
+{
+    mp_image_t *mpi = frame;
+    unsigned int t2 = GetTimer();
+    vf_instance_t *vf = sh_video->vfilter;
+    // apply video filters and call the leaf vo/ve
+    int ret = vf->put_image(vf, mpi, pts);
+    if (ret > 0) {
+	vf->control(vf, VFCTRL_DRAW_OSD, NULL);
 #ifdef USE_ASS
-    vf->control(vf,VFCTRL_DRAW_EOSD,NULL);
+	vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
 #endif
-}
+    }
 
-    t2=GetTimer()-t2;
+    t2 = GetTimer()-t2;
     vout_time_usage += t2*0.000001;
 
-return ret;
+    return ret;
 }
