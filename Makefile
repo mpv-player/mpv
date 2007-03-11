@@ -316,13 +316,11 @@ uninstall:
 	rm -f $(LIBDIR)/mplayer/vidix/*.so
 	-rmdir -p $(LIBDIR)/mplayer/vidix
 
-dirclean:
+clean:
 	-rm -f *.o *.a *~
-
-clean: dirclean
 	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
 
-distclean: dirclean doxygen_clean
+distclean: clean doxygen_clean
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 	-rm -f *~ mplayer$(EXESUF) mencoder$(EXESUF) \
 	  codec-cfg$(EXESUF) codecs2html$(EXESUF) codecs.conf.h \
