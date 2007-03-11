@@ -318,13 +318,13 @@ uninstall:
 
 clean:
 	-rm -f *.o *.a *~
+	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
+	  codecs2html$(EXESUF) codecs.conf.h help_mp.h version.h
 	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
 
 distclean: clean doxygen_clean
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
-	-rm -f *~ mplayer$(EXESUF) mencoder$(EXESUF) \
-	  codec-cfg$(EXESUF) codecs2html$(EXESUF) codecs.conf.h \
-          .depend configure.log config.mak config.h help_mp.h version.h
+	-rm -f .depend configure.log config.mak config.h
 
 strip:
 	strip -s $(ALL_PRG)
