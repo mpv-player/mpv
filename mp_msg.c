@@ -14,7 +14,7 @@
 extern char* get_term_charset();
 #endif
 
-#if defined(FOR_MENCODER) || defined(CODECS2HTML)
+#if defined(FOR_MENCODER)
 #undef HAVE_NEW_GUI
 #endif
 
