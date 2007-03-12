@@ -1128,7 +1128,7 @@ demuxer_desc_t demuxer_desc_mpeg_gxf = {
   "MPEG ES in GXF demuxer",
   "mpeggxf",
   "MPEG-ES in GXF",
-  "Reimar Döffinger",
+  "Reimar Doeffinger",
   "Mpeg",
   DEMUXER_TYPE_MPEG_GXF,
   0, // hack autodetection

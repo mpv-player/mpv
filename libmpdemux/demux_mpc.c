@@ -1,6 +1,6 @@
 /**
  * Demuxer for Musepack v7 bitstream
- * by Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
+ * by Reimar Doeffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
  * This code may be be relicensed under the terms of the GNU LGPL when it
  * becomes part of the FFmpeg project (ffmpeg.org)
  */

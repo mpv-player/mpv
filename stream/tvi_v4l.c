@@ -10,7 +10,7 @@
     Jindrich Makovicka <makovick@gmail.com>
 
   Mjpeg hardware encoding support by 
-    Iván Szántó <szivan@freemail.hu>
+    Ivan Szanto <szivan@freemail.hu>
 
   CODE IS UNDER DEVELOPMENT, NO FEATURE REQUESTS PLEASE!
 */
