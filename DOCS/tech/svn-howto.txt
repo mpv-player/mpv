@@ -237,7 +237,8 @@ II. POLICY / RULES:
 
 
 3. Do not commit unrelated changes together, split them into self-contained
-   pieces.
+   pieces, but not smaller. Do not split commits by files or directories,
+   keep related changes together.
 
 
 4. Do not change behavior of the program (renaming options etc) or
