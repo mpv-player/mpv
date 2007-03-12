@@ -520,32 +520,10 @@ parse_smil(play_tree_parser_t* p) {
       continue;
     if (!entrymode) { // all entries filled so far 
       if (strncasecmp(line,"<video",6)==0  || strncasecmp(line,"<audio",6)==0 || strncasecmp(line,"<media",6)==0) {
-        pos=strstr(line,"src=");   // Is source present on this line
-        if (pos !=NULL) {
-          s_start=pos+5;
-          s_end=strchr(s_start,'"');
-            if (s_end == NULL) {
-              mp_msg(MSGT_PLAYTREE,MSGL_V,"Error parsing this source line %s\n",line);
-              continue;   
-            }
-          if (s_end-s_start> 511) {
-            mp_msg(MSGT_PLAYTREE,MSGL_V,"Cannot store such a large source %s\n",line);
-            continue;
-          }
-          strncpy(source,s_start,s_end-s_start);
-          source[(s_end-s_start)]='\0'; // Null terminate
-          entry = play_tree_new();
-          play_tree_add_file(entry,source);
-          if(!list)  //Insert new entry
-            list = entry;
-          else
-            play_tree_append_entry(last_entry,entry);
-          last_entry = entry;
-        } else {
           entrymode=1;
-        }
       }
-    } else { //Entry found but not yet filled
+    }
+    if (entrymode) { //Entry found but not yet filled
       pos = strstr(line,"src=");   // Is source present on this line
       if (pos != NULL) {
         entrymode=0;
