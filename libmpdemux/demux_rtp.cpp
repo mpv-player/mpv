@@ -436,13 +436,13 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   //  the demuxer's 'priv' field)
   RTPState* rtpState = (RTPState*)(demuxer->priv);
   ReadBufferQueue* bufferQueue = NULL;
-  int amr = 0;
+  int headersize = 0;
   if (ds == demuxer->video) {
     bufferQueue = rtpState->videoBufferQueue;
   } else if (ds == demuxer->audio) {
     bufferQueue = rtpState->audioBufferQueue;
     if (bufferQueue->readSource()->isAMRAudioSource())
-      amr = 1;
+      headersize = 1;
   } else {
     fprintf(stderr, "(demux_rtp)getBuffer: internal error: unknown stream\n");
     return NULL;
@@ -470,7 +470,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
 
   // Schedule the read operation:
   bufferQueue->blockingFlag = 0;
-  bufferQueue->readSource()->getNextFrame(&dp->buffer[amr], MAX_RTP_FRAME_SIZE - amr,
+  bufferQueue->readSource()->getNextFrame(&dp->buffer[headersize], MAX_RTP_FRAME_SIZE - headersize,
 					  afterReading, bufferQueue,
 					  onSourceClosure, bufferQueue);
   // Block ourselves until data becomes available:
@@ -478,7 +478,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
     = bufferQueue->readSource()->envir().taskScheduler();
   scheduler.doEventLoop(&bufferQueue->blockingFlag);
 
-  if (amr)
+  if (headersize == 1) // amr
     dp->buffer[0] =
         ((AMRAudioSource*)bufferQueue->readSource())->lastFrameHeader();
 
