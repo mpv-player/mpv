@@ -4,7 +4,7 @@ Introduction
 ------------
 MPlayer features a very flexible codec architecture which allows it to
 use its own open source codecs, as well as open source libraries, Win32
-codec DLLs, and XAnim binary codec modules. To the MPlayer user, the
+codec DLLs and other binary codec modules. To the MPlayer user, the
 most visible piece of this architecture is the etc/codecs.conf file. This
 is a text-based configuration file that controls which MPlayer components
 are in charge of handling particular compressed data formats.
