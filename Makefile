@@ -426,5 +426,5 @@ libass/libass.a: .norecurse $(wildcard libass/*.[ch])
 
 -include .depend
 
-.PHONY: all install* uninstall dirclean clean distclean strip dep depend
+.PHONY: all install* uninstall clean distclean strip dep depend
 .PHONY: doxygen doxygen_clean
