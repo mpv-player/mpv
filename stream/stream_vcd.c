@@ -1,6 +1,10 @@
 
 #include "config.h"
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include "mp_msg.h"
 #include "stream.h"
 #include "help_mp.h"
@@ -10,7 +14,9 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifndef WIN32
 #include <sys/ioctl.h>
+#endif
 #include <errno.h>
 
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
@@ -20,6 +26,8 @@
 #include "vcd_read_nbsd.h"
 #elif defined(SYS_DARWIN)
 #include "vcd_read_darwin.h" 
+#elif defined(WIN32)
+#include "vcd_read_win32.h"
 #else
 #include "vcd_read.h"
 #endif
@@ -76,8 +84,16 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
   int bsize = VCD_SECTOR_SIZE;
 #endif
+#ifdef WIN32
+  HANDLE hd;
+  char device[] = "\\\\.\\?:";
+#endif
 
-  if(mode != STREAM_READ) {
+  if(mode != STREAM_READ
+#ifdef WIN32
+      || GetVersion() > 0x80000000 // Win9x
+#endif
+      ) {
     m_struct_free(&stream_opts,opts);
     return STREAM_UNSUPORTED;
   }
@@ -89,7 +105,15 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       p->device = strdup(DEFAULT_CDROM_DEVICE);
   }
 
+#ifdef WIN32
+  device[4] = p->device[0];
+  /* open() can't be used for devices so do it the complicated way */
+  hd = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL,
+	  OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+  f = _open_osfhandle((long)hd, _O_RDONLY);
+#else
   f=open(p->device,O_RDONLY);
+#endif
   if(f<0){ 
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,p->device);
     m_struct_free(&stream_opts,opts);
