@@ -27,3 +27,5 @@ dep depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) $(SRCS2) 1>.depend
 
 -include .depend
+
+.PHONY: all clean distclean dep depend
