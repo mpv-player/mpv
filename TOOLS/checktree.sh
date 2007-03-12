@@ -110,7 +110,7 @@ for i in "$@"; do
         echo
         printoption "color     " "colored output" "$_color"
         printoption "head      " "print heading for each test" "$_head"
-        printoption "svn       " 
+        printoption "svn       " \
                     "use svn info to determine which files to check" "$_svn"
         echo -e "\nIf no files are specified, the whole tree is traversed."
         echo -e "If there are, -(no)svn has no effect.\n"
