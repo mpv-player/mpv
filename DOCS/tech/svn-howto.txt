@@ -189,7 +189,7 @@ I. BASICS:
   the fact that the change was bad would be hidden
   One method to decide which reversal method is best is to ask yourself
   if there is any value in seeing the whole bad change and its removal
-  in SVN vs just seeing a comment that says what has been reversed while
+  in SVN vs. just seeing a comment that says what has been reversed while
   the actual change does not clutter the immediately visible history and
   svn annotate.
   If you are even just slightly uncertain how to revert something then ask on
