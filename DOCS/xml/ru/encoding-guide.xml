@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22141 -->
+<!-- synced with r22413 -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
@@ -4408,12 +4408,57 @@ FourCC код, используемый каждым кодеком, указа�
 </para>
 <informalexample>
 <para>
-Пример сжатия с помощью VP3:
+Пример конвертации ISO DVD ролика в VP6 flash видео файл с использованием
+compdata настроек битпотока:
 <screen>
-mencoder dvd://2 -o <replaceable>ролик2.avi</replaceable> -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy
+mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceable>trailer.flv</replaceable> \
+-ovc vfw -xvfwopts codec=vp6vfw.dll:compdata=onepass.mcf -oac mp3lame \
+-lameopts cbr:br=64 -af lavcresample=22050 -vf yadif,scale=320:240,flip \
+-of lavf -lavfopts i_certify_that_my_video_stream_does_not_use_b_frames
 </screen>
 </para>
 </informalexample>
+</sect2>
+
+<sect2 id="menc-feat-video-for-windows-bitrate-settings">
+<title>Использование vfw2menc для создания файла настроек кодека.</title>
+
+<para>
+Для кодирования кодеками Video for Windows, Вам потребуется установить
+величину битпотока и другие опции. Известно, что это работает на x86 и для
+*NIX, и для Windows.
+</para>
+<para>
+Во-первых, Вы должны собрать программу <application>vfw2menc</application>.
+Она находится в подкаталоге <filename class="directory">/TOOLS/</filename>
+дерева исходников MPlayer.
+Для сборки под Linux, это можно сделать, воспользовавшись <application>Wine</application>:
+<screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
+
+Для сборки под Windows в <application>MinGW</application> или
+<application>Cygwin</application> используйте:
+<screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
+
+Для сборки в <application>MSVC</application> вам потребуется getopt.
+Getopt можно найти в исходном архиве <application>vfw2menc</application>,
+доступном в:
+Проект <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer на win32</ulink>.
+</para>
+<informalexample>
+<para>
+Далее следует пример использования с VP6 кодеком.
+<screen>
+vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf
+</screen>
+Это откроет диалоговое окно кодека VP6. Повторите этот шаг для второго прохода,
+указав <option>-s <replaceable>secondpass.mcf</replaceable></option>.
+</para>
+</informalexample>
+<para>
+Пользователи Windows могут использовать <option>-xvfwopts
+codec=vp6vfw.dll:compdata=dialog</option>, чтобы показать окно настроек кодека
+перед началом кодирования.
+</para>
 </sect2>
 </sect1>
 
