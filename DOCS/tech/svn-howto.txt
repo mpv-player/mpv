@@ -118,7 +118,7 @@ I. BASICS:
 
   When prompted for a password, type the password you got assigned by the
   project admins. By default, Subversion caches all authentication tokens.
-  This behaviour can be disabled by setting both 'store-passwords' and
+  This behavior can be disabled by setting both 'store-passwords' and
   'store-auth-creds' to "no" in ~/.subversion/config. You might need to remove
   previous cache files, which are located in ~/.subversion/auth, by hand.
 
@@ -159,20 +159,20 @@ I. BASICS:
 9. Reverting broken commits
 
   There are 2 ways to reverse a change, they differ significantly in what they
-  do to the svn repository
+  do to the repository.
   The recommit old method:
     svn merge
     svn ci <file>
-    This simply changes the file(s) back to their old version localy and then
-    the change is commited as if it is a new change
+    This simply changes the file(s) back to their old version locally and then
+    the change is committed as if it were a new change.
   The svn copy method
     svn rm <file>
     svn ci <file>
     svn cp -r<good revision> svn://svn.mplayerhq.hu/mplayer/trunk/[<path>/]<file> <file>
     svn ci <file>
     This simply removes the file and then copies the last good version with
-    its history over it, this method can only be used to revert the n last
-    commits but not to revert a bad commit in the middle of its history
+    its history over it. This method can only be used to revert the n last
+    commits but not to revert a bad commit in the middle of its history.
   Neither method will change the history, checking out an old version will
   always return exactly that revision with all its bugs and features. The
   difference is that with the svn copy method the broken commit will not be
@@ -180,13 +180,13 @@ I. BASICS:
   So if the change was completely broken like reindenting a file against the
   maintainers decision, or a change which mixed functional and cosmetic
   changes then it is better if it is not part of the visible history as it
-  would make it hard to read, review and would also break svn annotate
+  would make it hard to read, review and would also break svn annotate.
   For the example of a change which mixed functional and cosmetic parts they
   should of course be committed again after the reversal but separately, so one
-  change with the functional stuff and one with the cosmetics
+  change with the functional stuff and one with the cosmetics.
   OTOH if the change which you want to reverse was simply buggy but not
   totally broken then it should be reversed with svn merge as otherwise
-  the fact that the change was bad would be hidden
+  the fact that the change was bad would be hidden.
   One method to decide which reversal method is best is to ask yourself
   if there is any value in seeing the whole bad change and its removal
   in SVN vs. just seeing a comment that says what has been reversed while
@@ -246,7 +246,7 @@ II. POLICY / RULES:
 
 
 5. Do not commit changes to the build system (Makefiles, configure script)
-   which change behaviour, defaults etc, without asking first. The same
+   which change behavior, defaults etc, without asking first. The same
    applies to compiler warning fixes, trivial looking fixes and to code
    maintained by other developers. We usually have a reason for doing things
    the way we do. Send your changes as patches to the mplayer-dev-eng mailing
@@ -300,7 +300,7 @@ II. POLICY / RULES:
      - feature removal, even if obsolete
      - changes to "special" output messages (like the "Core dumped ;)" message)
      - verbosity changes from default (info) level
-     - changes to "historical" parts of docs and webpages
+     - changes to "historical" parts of docs and web pages
      - use of internal or external libraries
 
 
