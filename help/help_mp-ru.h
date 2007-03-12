@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r22292
+// Synced with help_mp-en.h: r22483
 
 // ========================= MPlayer help ===========================
 
@@ -160,7 +160,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Не могу инициализировать меню.\n"
 #define MSGTR_Getch2InitializedTwice "ПРЕДУПРЕЖДЕНИЕ: getch2_init вызван дважды!\n"
 #define MSGTR_DumpstreamFdUnavailable "Не могу создать дамп этого потока - нет доступных файловых описателей.\n"
-#define MSGTR_FallingBackOnPlaylist "Не могу проанализировать список воспроизведения %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Не могу открыть видеофильтр libmenu с этим корневым меню %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Ошибка в цепочке pre-init аудиофильтра!\n"
 #define MSGTR_LinuxRTCReadError "Ошибка чтения Linux RTC: %s\n"
@@ -1468,6 +1467,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Нет звена данных, следующих за заголовком!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: не найден аудио или видео заголовок - испорченный файл?\n"
 #define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Неверная длина в заголовке ASF!\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "URL DRM лицензии: %s\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "Файл был обременен DRM шифрованием, он не будет воспроизводиться в MPlayer!\n"
 
 // asf_mmst_streaming.c
 
