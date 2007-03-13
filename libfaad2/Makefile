@@ -45,8 +45,6 @@ CFLAGS  = -D_GNU_SOURCE
 
 # The FIXED_POINT implementation of FAAD2 improves performance
 # on some platforms, especially for SBR files.
-ifeq ($(FAAD_FIXED),yes)
-CFLAGS  += -DFIXED_POINT
-endif
+CFLAGS-$(FAAD_FIXED)  += -DFIXED_POINT
 
 include ../mpcommon.mak
