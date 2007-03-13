@@ -318,6 +318,10 @@ uninstall:
 	rm -f $(LIBDIR)/mplayer/vidix/*.so
 	-rmdir -p $(LIBDIR)/mplayer/vidix
 
+dep depend: help_mp.h version.h codecs.conf.h
+	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) $(SRCS_MENCODER) $(SRCS_COMMON) 1>.depend
+	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
+
 clean:
 	-rm -f *.o *.a *~
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
@@ -331,10 +335,6 @@ distclean: clean doxygen_clean
 
 strip:
 	strip -s $(ALL_PRG)
-
-dep depend: help_mp.h version.h codecs.conf.h
-	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) $(SRCS_MENCODER) $(SRCS_COMMON) 1>.depend
-	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
 # ./configure must be rerun if it changed
 config.h: configure
