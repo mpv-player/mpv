@@ -12,8 +12,8 @@ SRCS_COMMON = crc.c \
 
 include ../mpcommon.mak
 
-test: $(LIBNAME_COMMON) test.c
-	$(CC) $(CFLAGS)  test.c ../cpudetect.c -o test ../osdep/libosdep.a ./liba52.a -lm
+test: test.c ../osdep/libosdep.a $(LIBNAME_COMMON)
+	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 distclean::
 	rm -f test
