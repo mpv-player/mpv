@@ -36,7 +36,6 @@ SRCS_COMMON-$(UNRARLIB) += unrarlib.c
 SRCS_MPLAYER = mplayer.c \
                m_property.c \
                mp_msg.c \
-               $(SRCS_COMMON) \
                mixer.c \
                parser-mpcmd.c \
                subopt-helper.c \
@@ -44,7 +43,6 @@ SRCS_MPLAYER = mplayer.c \
 
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
-                $(SRCS_COMMON) \
                 parser-mecmd.c \
                 xvid_vbr.c \
 
@@ -62,14 +60,15 @@ LIBS_MPLAYER = libvo/libvo.a \
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 libmpdemux/libmpmux.a \
 
+OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 
 # Having this in libosdep.a is not enough.
 OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
 
-MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(LIBS_MPLAYER)  $(COMMON_LIBS)
-MENCODER_DEPS = $(OBJS_MENCODER) $(LIBS_MENCODER) $(COMMON_LIBS)
+MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(LIBS_MPLAYER)  $(COMMON_LIBS)
+MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(LIBS_MENCODER) $(COMMON_LIBS)
 
 PARTS = libmpdemux \
         stream \
