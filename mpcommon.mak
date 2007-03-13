@@ -28,7 +28,7 @@ clean::
 distclean:: clean
 	rm -f .depend
 
-dep depend:
+dep depend::
 	$(CC) -MM $(CFLAGS) $(SRCS_COMMON) $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 
 -include .depend
