@@ -17,6 +17,6 @@ SRCS-$(TARGET_ALTIVEC)    += motion_comp_altivec.c idct_altivec.c
 SRCS-$(TARGET_VIS)        += motion_comp_vis.c
 SRCS-$(TARGET_ARCH_ALPHA) += idct_alpha.c motion_comp_alpha.c
 
-CFLAGS = -I../libvo -DMPG12PLAY
+CFLAGS = -I../libvo
 
 include ../mpcommon.mak
