@@ -9,7 +9,7 @@ CFLAGS += -I. -I.. $(OPTFLAGS)
 
 LIBS = $(LIBNAME) $(LIBNAME2)
 
-all:    $(LIBS)
+libs: $(LIBS)
 
 $(LIBNAME): $(OBJS)
 $(LIBNAME2): $(OBJS2)
@@ -28,4 +28,4 @@ dep depend:
 
 -include .depend
 
-.PHONY: all clean distclean dep depend
+.PHONY: libs clean distclean dep depend
