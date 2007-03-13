@@ -14,6 +14,15 @@ CFLAGS                      += $(CFLAGS-yes)
 
 #CFLAGS += -Wall
 
+COMMON_LDFLAGS += $(EXTRA_LIB)\
+                  $(EXTRALIBS) \
+
+LDFLAGS_MPLAYER = $(EXTRALIBS_MPLAYER) \
+                  $(COMMON_LDFLAGS) \
+
+LDFLAGS_MENCODER = $(EXTRALIBS_MENCODER) \
+                   $(COMMON_LDFLAGS) \
+
 SRCS_COMMON = asxparser.c \
               codec-cfg.c \
               cpudetect.c \
@@ -59,16 +68,6 @@ LIBS_MPLAYER = libvo/libvo.a \
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 libmpdemux/libmpmux.a \
-
-OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
-OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
-OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
-
-# Having this in libosdep.a is not enough.
-OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
-
-MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(LIBS_MPLAYER)  $(COMMON_LIBS)
-MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(LIBS_MENCODER) $(COMMON_LIBS)
 
 PARTS = libmpdemux \
         stream \
@@ -117,15 +116,6 @@ PARTS-$(GUI)                      += Gui
 LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
 PARTS-$(LIBMENU)                  += libmenu
 
-COMMON_LDFLAGS += $(EXTRA_LIB)\
-                  $(EXTRALIBS) \
-
-LDFLAGS_MPLAYER = $(EXTRALIBS_MPLAYER) \
-                  $(COMMON_LDFLAGS) \
-
-LDFLAGS_MENCODER = $(EXTRALIBS_MENCODER) \
-                   $(COMMON_LDFLAGS) \
-
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
@@ -136,7 +126,17 @@ OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
 PARTS        += $(PARTS-yes)
 ALL_PRG      += $(ALL_PRG-yes)
 
+OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
+OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
+OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
+
+# Having this in libosdep.a is not enough.
+OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
+
 COMMON_LIBS += osdep/libosdep.a
+
+MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(LIBS_MPLAYER)  $(COMMON_LIBS)
+MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(LIBS_MENCODER) $(COMMON_LIBS)
 
 
 all:	$(ALL_PRG)
