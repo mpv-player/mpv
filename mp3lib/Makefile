@@ -1,6 +1,6 @@
 include ../config.mak
 
-LIBNAME_COMMON = libMP3.a
+LIBNAME_COMMON = libmp3.a
 
 ifeq ($(TARGET_ARCH_SGI_MIPS),yes)
 OPTFLAGS := $(OPTFLAGS:-O4=-O0)

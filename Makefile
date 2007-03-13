@@ -94,7 +94,7 @@ COMMON_LIBS-$(CONFIG_LIBPOSTPROC) += libpostproc/libpostproc.a
 PARTS-$(CONFIG_LIBPOSTPROC)       += libpostproc
 COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
 PARTS-$(WIN32DLL)                 += loader
-COMMON_LIBS-$(MP3LIB)             += mp3lib/libMP3.a
+COMMON_LIBS-$(MP3LIB)             += mp3lib/libmp3.a
 PARTS-$(MP3LIB)                   += mp3lib
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 PARTS-$(LIBA52)                   += liba52
@@ -201,7 +201,7 @@ liba52/liba52.a:
 libfaad2/libfaad2.a:
 	$(MAKE) -C libfaad2
 
-mp3lib/libMP3.a:
+mp3lib/libmp3.a:
 	$(MAKE) -C mp3lib
 
 tremor/libvorbisidec.a:
@@ -413,7 +413,7 @@ libswscale/libswscale.a: .norecurse $(wildcard libswscale/*.[ch])
 
 libmpeg2/libmpeg2.a: .norecurse $(wildcard libmpeg2/*.[ch])
 liba52/liba52.a: .norecurse $(wildcard liba52/*.[ch])
-mp3lib/libMP3.a: .norecurse $(wildcard mp3lib/*.[ch])
+mp3lib/libmp3.a: .norecurse $(wildcard mp3lib/*.[ch])
 libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 
 loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
