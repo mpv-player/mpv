@@ -119,6 +119,8 @@ int cache_stream_fill_buffer(stream_t *s);
 int cache_stream_seek_long(stream_t *s,off_t pos);
 #else
 // no cache, define wrappers:
+int stream_fill_buffer(stream_t *s);
+int stream_seek_long(stream_t *s,off_t pos);
 #define cache_stream_fill_buffer(x) stream_fill_buffer(x)
 #define cache_stream_seek_long(x,y) stream_seek_long(x,y)
 #define stream_enable_cache(x,y,z,w) 1
