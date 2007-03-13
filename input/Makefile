@@ -1,4 +1,3 @@
-
 include ../config.mak
 
 LIBNAME_MPLAYER = libinput.a

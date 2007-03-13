@@ -1,4 +1,3 @@
-
 include ../config.mak
 
 LIBNAME_COMMON = libosdep.a

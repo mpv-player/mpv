@@ -2,13 +2,13 @@ include ../config.mak
 
 LIBNAME_COMMON = stream.a
 
-SRCS_COMMON += open.c \
-        stream.c \
-        stream_cue.c \
-        stream_file.c \
-        stream_mf.c \
-        stream_null.c \
-        url.c \
+SRCS_COMMON = open.c \
+              stream.c \
+              stream_cue.c \
+              stream_file.c \
+              stream_mf.c \
+              stream_null.c \
+              url.c \
 
 SRCS_COMMON-$(CDDA)              += stream_cdda.c cdinfo.c
 SRCS_COMMON-$(CDDB)              += stream_cddb.c
@@ -18,29 +18,29 @@ SRCS_COMMON-$(DVDREAD)           += stream_dvd.c
 SRCS_COMMON-$(FTP)               += stream_ftp.c
 SRCS_COMMON-$(LIBSMBCLIENT)      += stream_smb.c
 SRCS_COMMON-$(MPLAYER_NETWORK)   += stream_netstream.c     \
-                             asf_mmst_streaming.c   \
-                             asf_streaming.c        \
-                             cookies.c              \
-                             http.c                 \
-                             network.c              \
-                             pnm.c                  \
-                             rtp.c                  \
-                             udp.c                  \
-                             tcp.c                  \
-                             stream_rtp.c           \
-                             stream_rtsp.c          \
-                             stream_udp.c           \
-                             freesdp/common.c       \
-                             freesdp/errorlist.c    \
-                             freesdp/parser.c       \
-                             librtsp/rtsp.c         \
-                             librtsp/rtsp_rtp.c     \
-                             librtsp/rtsp_session.c \
-                             realrtsp/asmrp.c       \
-                             realrtsp/real.c        \
-                             realrtsp/rmff.c        \
-                             realrtsp/sdpplin.c     \
-                             realrtsp/xbuffer.c     \
+                                    asf_mmst_streaming.c   \
+                                    asf_streaming.c        \
+                                    cookies.c              \
+                                    http.c                 \
+                                    network.c              \
+                                    pnm.c                  \
+                                    rtp.c                  \
+                                    udp.c                  \
+                                    tcp.c                  \
+                                    stream_rtp.c           \
+                                    stream_rtsp.c          \
+                                    stream_udp.c           \
+                                    freesdp/common.c       \
+                                    freesdp/errorlist.c    \
+                                    freesdp/parser.c       \
+                                    librtsp/rtsp.c         \
+                                    librtsp/rtsp_rtp.c     \
+                                    librtsp/rtsp_session.c \
+                                    realrtsp/asmrp.c       \
+                                    realrtsp/real.c        \
+                                    realrtsp/rmff.c        \
+                                    realrtsp/sdpplin.c     \
+                                    realrtsp/xbuffer.c     \
 
 SRCS_COMMON-$(PVR)               += stream_pvr.c
 SRCS_COMMON-$(RADIO)             += stream_radio.c
