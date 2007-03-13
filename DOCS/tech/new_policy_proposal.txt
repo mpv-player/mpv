@@ -4,7 +4,7 @@ Version 20070301
 Intro:
 ------
 This document is an attempt to write a new policy as the old is fairly
-confusing and easy to misunderstand, it's intention is not really to
+confusing and easy to misunderstand, its intention is not really to
 change the rules but rather to write them down clearer ...
 also for simplicity and to prevent flamewars, i would suggest that you
 fork this document and propose that fork as alternative if you have a
