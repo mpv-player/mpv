@@ -1,9 +1,9 @@
 
 include ../config.mak
 
-LIBNAME=libass.a
+LIBNAME_COMMON = libass.a
 
-SRCS = ass.c \
+SRCS_COMMON = ass.c \
        ass_cache.c \
        ass_fontconfig.c \
        ass_render.c \

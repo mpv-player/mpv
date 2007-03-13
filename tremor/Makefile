@@ -1,9 +1,8 @@
-
-LIBNAME = libvorbisidec.a
-
 include ../config.mak
 
-SRCS	= bitwise.c \
+LIBNAME_COMMON = libvorbisidec.a
+
+SRCS_COMMON = bitwise.c \
           block.c \
           codebook.c \
           floor0.c \

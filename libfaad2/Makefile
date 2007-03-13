@@ -1,9 +1,8 @@
-
-LIBNAME = libfaad2.a
-
 include ../config.mak
 
-SRCS    = bits.c \
+LIBNAME_COMMON = libfaad2.a
+
+SRCS_COMMON = bits.c \
           cfft.c \
           common.c \
           decoder.c \

@@ -1,12 +1,10 @@
 
 include ../config.mak
 
-LIBNAME = libmpcodecs.a
-ifeq ($(MENCODER),yes)
-LIBNAME2 = libmpencoders.a
-endif
+LIBNAME_COMMON   = libmpcodecs.a
+LIBNAME_MENCODER = libmpencoders.a
 
-SRCS = native/nuppelvideo.c \
+SRCS_COMMON = native/nuppelvideo.c \
        native/RTjpegN.c \
        native/xa_gsm.c \
        img_format.c \
@@ -97,57 +95,57 @@ SRCS = native/nuppelvideo.c \
        vf_yuy2.c \
        vf_yvu9.c \
 
-SRCS-$(CONFIG_ASS)            += vf_ass.c
+SRCS_COMMON-$(CONFIG_ASS)            += vf_ass.c
 # These filters use private headers and do not work with shared libavcodec.
-SRCS-$(CONFIG_LIBAVCODEC)     += vf_fspp.c \
+SRCS_COMMON-$(CONFIG_LIBAVCODEC)     += vf_fspp.c \
                                  vf_geq.c \
                                  vf_mcdeint.c \
                                  vf_qp.c \
                                  vf_spp.c \
                                  vf_uspp.c \
 
-SRCS-$(CONFIG_LIBAVCODEC)     += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
-SRCS-$(CONFIG_LIBAVCODEC_SO)  += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
-SRCS-$(CONFIG_LIBPOSTPROC)    += vf_pp.c
-SRCS-$(CONFIG_LIBPOSTPROC_SO) += vf_pp.c
-SRCS-$(FAAD)                  += ad_faad.c
-SRCS-$(JPEG)                  += vd_ijpg.c
-SRCS-$(LIBA52)                += ad_liba52.c
-SRCS-$(LIBDV)                 += ad_libdv.c vd_libdv.c
-SRCS-$(LIBMAD)                += ad_libmad.c
-SRCS-$(LIBMPEG2)              += vd_libmpeg2.c
-SRCS-$(LIBTHEORA)             += vd_theora.c
-SRCS-$(LIBVORBIS)             += ad_libvorbis.c
-SRCS-$(MP3LIB)                += ad_mp3lib.c
-SRCS-$(MUSEPACK)              += ad_mpc.c
-SRCS-$(PNG)                   += vd_mpng.c vf_screenshot.c
-SRCS-$(QTX_CODECS)            += ad_qtaudio.c vd_qtvideo.c
-SRCS-$(REAL_CODECS)           += ad_realaud.c vd_realvid.c
-SRCS-$(SPEEX)                 += ad_speex.c
-SRCS-$(WIN32DLL)              += ad_acm.c ad_dmo.c ad_dshow.c ad_twin.c \
+SRCS_COMMON-$(CONFIG_LIBAVCODEC)     += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
+SRCS_COMMON-$(CONFIG_LIBAVCODEC_SO)  += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
+SRCS_COMMON-$(CONFIG_LIBPOSTPROC)    += vf_pp.c
+SRCS_COMMON-$(CONFIG_LIBPOSTPROC_SO) += vf_pp.c
+SRCS_COMMON-$(FAAD)                  += ad_faad.c
+SRCS_COMMON-$(JPEG)                  += vd_ijpg.c
+SRCS_COMMON-$(LIBA52)                += ad_liba52.c
+SRCS_COMMON-$(LIBDV)                 += ad_libdv.c vd_libdv.c
+SRCS_COMMON-$(LIBMAD)                += ad_libmad.c
+SRCS_COMMON-$(LIBMPEG2)              += vd_libmpeg2.c
+SRCS_COMMON-$(LIBTHEORA)             += vd_theora.c
+SRCS_COMMON-$(LIBVORBIS)             += ad_libvorbis.c
+SRCS_COMMON-$(MP3LIB)                += ad_mp3lib.c
+SRCS_COMMON-$(MUSEPACK)              += ad_mpc.c
+SRCS_COMMON-$(PNG)                   += vd_mpng.c vf_screenshot.c
+SRCS_COMMON-$(QTX_CODECS)            += ad_qtaudio.c vd_qtvideo.c
+SRCS_COMMON-$(REAL_CODECS)           += ad_realaud.c vd_realvid.c
+SRCS_COMMON-$(SPEEX)                 += ad_speex.c
+SRCS_COMMON-$(WIN32DLL)              += ad_acm.c ad_dmo.c ad_dshow.c ad_twin.c \
                                  vd_dmo.c vd_dshow.c vd_vfw.c vd_vfwex.c
-SRCS-$(XANIM_CODECS)          += vd_xanim.c
-SRCS-$(XVID4)                 += vd_xvid4.c
-SRCS-$(ZORAN)                 += vd_zrmjpeg.c vf_zrmjpeg.c
+SRCS_COMMON-$(XANIM_CODECS)          += vd_xanim.c
+SRCS_COMMON-$(XVID4)                 += vd_xvid4.c
+SRCS_COMMON-$(ZORAN)                 += vd_zrmjpeg.c vf_zrmjpeg.c
 
 
-SRCS2=ae.c \
+SRCS_MENCODER=ae.c \
              ae_pcm.c \
              ve.c \
              ve_raw.c \
 
-SRCS2-$(CONFIG_LIBAVCODEC)    += ae_lavc.c ve_lavc.c
-SRCS2-$(CONFIG_LIBAVCODEC_SO) += ae_lavc.c ve_lavc.c
-SRCS2-$(LIBDV)                += ve_libdv.c
-SRCS2-$(LIBLZO)               += ve_nuv.c
-SRCS2-$(QTX_CODECS)           += ve_qtvideo.c
-SRCS2-$(WIN32DLL)             += ve_vfw.c
-SRCS2-$(X264)                 += ve_x264.c
-SRCS2-$(XVID4)                += ve_xvid4.c
-SRCS2-$(FAAC)                 += ae_faac.c
-SRCS2-$(TOOLAME)              += ae_toolame.c
-SRCS2-$(TWOLAME)              += ae_twolame.c
-SRCS2-$(MP3LAME)              += ae_lame.c
+SRCS_MENCODER-$(CONFIG_LIBAVCODEC)    += ae_lavc.c ve_lavc.c
+SRCS_MENCODER-$(CONFIG_LIBAVCODEC_SO) += ae_lavc.c ve_lavc.c
+SRCS_MENCODER-$(LIBDV)                += ve_libdv.c
+SRCS_MENCODER-$(LIBLZO)               += ve_nuv.c
+SRCS_MENCODER-$(QTX_CODECS)           += ve_qtvideo.c
+SRCS_MENCODER-$(WIN32DLL)             += ve_vfw.c
+SRCS_MENCODER-$(X264)                 += ve_x264.c
+SRCS_MENCODER-$(XVID4)                += ve_xvid4.c
+SRCS_MENCODER-$(FAAC)                 += ae_faac.c
+SRCS_MENCODER-$(TOOLAME)              += ae_toolame.c
+SRCS_MENCODER-$(TWOLAME)              += ae_twolame.c
+SRCS_MENCODER-$(MP3LAME)              += ae_lame.c
 
 
 CFLAGS  = -Inative \

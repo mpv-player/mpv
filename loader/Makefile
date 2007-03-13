@@ -1,21 +1,21 @@
 include ../config.mak
 
-LIBNAME = libloader.a
+LIBNAME_COMMON = libloader.a
 
 CFLAGS= -Idshow -DMPLAYER -D__WINE__ -DNOAVIFILE_HEADERS
 #CFLAGS+=-Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
 
-SRCS= driver.c afl.c vfl.c
+SRCS_COMMON  = driver.c afl.c vfl.c
 ifneq ($(TARGET_WIN32),yes)
-SRCS+= ldt_keeper.c pe_image.c module.c ext.c win32.c \
+SRCS_COMMON += ldt_keeper.c pe_image.c module.c ext.c win32.c \
        pe_resource.c resource.c registry.c elfdll.c
 # QTX emulation is not supported in Darwin
 ifneq ($(TARGET_OS),Darwin)
-SRCS+= wrapper.S
+SRCS_COMMON += wrapper.S
 endif
 endif
 
-SRCS+= dshow/DS_AudioDecoder.c \
+SRCS_COMMON += dshow/DS_AudioDecoder.c \
        dshow/DS_Filter.c \
        dshow/DS_VideoDecoder.c \
        dshow/allocator.c \

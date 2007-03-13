@@ -1,10 +1,10 @@
 
 include ../config.mak
 
-LIBNAME = libinput.a
+LIBNAME_MPLAYER = libinput.a
 
-SRCS=input.c
-SRCS-$(JOYSTICK) += joystick.c
-SRCS-$(LIRC)     += lirc.c
+SRCS_MPLAYER              = input.c
+SRCS_MPLAYER-$(JOYSTICK) += joystick.c
+SRCS_MPLAYER-$(LIRC)     += lirc.c
 
 include ../mpcommon.mak

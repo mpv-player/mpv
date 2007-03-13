@@ -1,12 +1,10 @@
 
 include ../config.mak
 
-LIBNAME2 = libosd.a
-ifeq ($(MPLAYER),yes)
-LIBNAME = libvo.a
-endif
+LIBNAME_COMMON  = libosd.a
+LIBNAME_MPLAYER = libvo.a
 
-SRCS=aspect.c \
+SRCS_MPLAYER = aspect.c \
      geometry.c \
      spuenc.c \
      video_out.c \
@@ -15,15 +13,15 @@ SRCS=aspect.c \
      vo_yuv4mpeg.c \
      $(VO_SRCS) \
 
-SRCS-$(EXTERNAL_VIDIX) +=  vosub_vidix.c
-SRCS-$(VIDIX)          +=  vosub_vidix.c
+SRCS_MPLAYER-$(EXTERNAL_VIDIX) +=  vosub_vidix.c
+SRCS_MPLAYER-$(VIDIX)          +=  vosub_vidix.c
 
-SRCS2 = aclib.c \
+SRCS_COMMON = aclib.c \
         osd.c \
         sub.c \
 
-SRCS2-$(BITMAP_FONT) +=  font_load.c
-SRCS2-$(FREETYPE)    +=  font_load_ft.c
+SRCS_COMMON-$(BITMAP_FONT) +=  font_load.c
+SRCS_COMMON-$(FREETYPE)    +=  font_load_ft.c
 
 CFLAGS-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
 

@@ -1,6 +1,6 @@
 include ../config.mak
 
-LIBNAME = libgui.a
+LIBNAME_MPLAYER = libgui.a
 
 CFLAGS = -I../loader -I./wm -I./skin
 #CFLAGS += -DDEBUG
@@ -8,7 +8,7 @@ CFLAGS = -I../loader -I./wm -I./skin
 CFLAGS-$(CONFIG_LIBAVUTIL)   += -I../libavutil
 
 ifeq ($(TARGET_WIN32),yes)
-SRCS = win32/dialogs.c \
+SRCS_MPLAYER = win32/dialogs.c \
        win32/gui.c \
        win32/interface.c \
        win32/playlist.c \
@@ -18,7 +18,7 @@ SRCS = win32/dialogs.c \
        win32/wincfg.c \
 
 else
-SRCS = wm/ws.c \
+SRCS_MPLAYER = wm/ws.c \
        wm/wsxdnd.c \
        app.c \
        interface.c \

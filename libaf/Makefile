@@ -1,8 +1,8 @@
 include ../config.mak
 
-LIBNAME = libaf.a
+LIBNAME_COMMON = libaf.a
 
-SRCS=af.c \
+SRCS_COMMON = af.c \
      af_center.c \
      af_channels.c \
      af_comp.c \
@@ -29,8 +29,8 @@ SRCS=af.c \
      window.c \
      $(AF_SRCS) \
 
-SRCS-$(CONFIG_LIBAVCODEC)    += af_lavcresample.c
-SRCS-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
+SRCS_COMMON-$(CONFIG_LIBAVCODEC)    += af_lavcresample.c
+SRCS_COMMON-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
 
 CFLAGS-$(CONFIG_LIBAVUTIL)   += -I../libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC)  += -I../libavcodec

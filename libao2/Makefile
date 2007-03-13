@@ -1,8 +1,8 @@
 include ../config.mak
 
-LIBNAME = libao2.a
+LIBNAME_MPLAYER = libao2.a
 
-SRCS=audio_out.c \
+SRCS_MPLAYER = audio_out.c \
      ao_mpegpes.c \
      ao_null.c \
      ao_pcm.c \

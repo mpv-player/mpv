@@ -1,9 +1,8 @@
-
-LIBNAME = stream.a
-
 include ../config.mak
 
-SRCS += open.c \
+LIBNAME_COMMON = stream.a
+
+SRCS_COMMON += open.c \
         stream.c \
         stream_cue.c \
         stream_file.c \
@@ -11,14 +10,14 @@ SRCS += open.c \
         stream_null.c \
         url.c \
 
-SRCS-$(CDDA)              += stream_cdda.c cdinfo.c
-SRCS-$(CDDB)              += stream_cddb.c
-SRCS-$(DVBIN)             += dvb_tune.c stream_dvb.c
-SRCS-$(DVDNAV)            += stream_dvdnav.c
-SRCS-$(DVDREAD)           += stream_dvd.c
-SRCS-$(FTP)               += stream_ftp.c
-SRCS-$(LIBSMBCLIENT)      += stream_smb.c
-SRCS-$(MPLAYER_NETWORK)   += stream_netstream.c     \
+SRCS_COMMON-$(CDDA)              += stream_cdda.c cdinfo.c
+SRCS_COMMON-$(CDDB)              += stream_cddb.c
+SRCS_COMMON-$(DVBIN)             += dvb_tune.c stream_dvb.c
+SRCS_COMMON-$(DVDNAV)            += stream_dvdnav.c
+SRCS_COMMON-$(DVDREAD)           += stream_dvd.c
+SRCS_COMMON-$(FTP)               += stream_ftp.c
+SRCS_COMMON-$(LIBSMBCLIENT)      += stream_smb.c
+SRCS_COMMON-$(MPLAYER_NETWORK)   += stream_netstream.c     \
                              asf_mmst_streaming.c   \
                              asf_streaming.c        \
                              cookies.c              \
@@ -43,28 +42,28 @@ SRCS-$(MPLAYER_NETWORK)   += stream_netstream.c     \
                              realrtsp/sdpplin.c     \
                              realrtsp/xbuffer.c     \
 
-SRCS-$(PVR)               += stream_pvr.c
-SRCS-$(RADIO)             += stream_radio.c
-SRCS-$(RADIO_CAPTURE)     += audio_in.c
-SRCS-$(STREAM_CACHE)      += cache2.c
-SRCS-$(STREAMING_LIVE555) += stream_livedotcom.c
-SRCS-$(TV)                += stream_tv.c tv.c frequencies.c tvi_dummy.c
-SRCS-$(TV_BSDBT848)       += tvi_bsdbt848.c
-SRCS-$(TV_V4L1)           += tvi_v4l.c  audio_in.c
-SRCS-$(TV_V4L2)           += tvi_v4l2.c audio_in.c
-SRCS-$(VCD)               += stream_vcd.c
-SRCS-$(VSTREAM)           += stream_vstream.c
+SRCS_COMMON-$(PVR)               += stream_pvr.c
+SRCS_COMMON-$(RADIO)             += stream_radio.c
+SRCS_COMMON-$(RADIO_CAPTURE)     += audio_in.c
+SRCS_COMMON-$(STREAM_CACHE)      += cache2.c
+SRCS_COMMON-$(STREAMING_LIVE555) += stream_livedotcom.c
+SRCS_COMMON-$(TV)                += stream_tv.c tv.c frequencies.c tvi_dummy.c
+SRCS_COMMON-$(TV_BSDBT848)       += tvi_bsdbt848.c
+SRCS_COMMON-$(TV_V4L1)           += tvi_v4l.c  audio_in.c
+SRCS_COMMON-$(TV_V4L2)           += tvi_v4l2.c audio_in.c
+SRCS_COMMON-$(VCD)               += stream_vcd.c
+SRCS_COMMON-$(VSTREAM)           += stream_vstream.c
 
 #FIXME: These should have variables assigned in configure.
 ifeq ($(TV_V4L),yes)
-SRCS-$(ALSA1X)            += ai_alsa1x.c
-SRCS-$(ALSA9)             += ai_alsa.c
-SRCS-$(OSS)               += ai_oss.c
+SRCS_COMMON-$(ALSA1X)            += ai_alsa1x.c
+SRCS_COMMON-$(ALSA9)             += ai_alsa.c
+SRCS_COMMON-$(OSS)               += ai_oss.c
 endif
 ifeq ($(RADIO_CAPTURE),yes)
-SRCS-$(ALSA1X)            += ai_alsa1x.c
-SRCS-$(ALSA9)             += ai_alsa.c
-SRCS-$(OSS)               += ai_oss.c
+SRCS_COMMON-$(ALSA1X)            += ai_alsa1x.c
+SRCS_COMMON-$(ALSA9)             += ai_alsa.c
+SRCS_COMMON-$(OSS)               += ai_oss.c
 endif
 
 CFLAGS = -I../loader

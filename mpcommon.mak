@@ -1,19 +1,24 @@
-SRCS         += $(SRCS-yes)
-SRCS2        += $(SRCS2-yes)
+SRCS_COMMON          += $(SRCS_COMMON-yes)
+SRCS_MPLAYER         += $(SRCS_MPLAYER-yes)
+SRCS_MENCODER        += $(SRCS_MENCODER-yes)
 CFLAGS       += $(CFLAGS-yes)
 
-OBJS  = $(addsuffix .o, $(basename $(SRCS)) )
-OBJS2 = $(addsuffix .o, $(basename $(SRCS2)) )
+OBJS_COMMON    = $(addsuffix .o, $(basename $(SRCS_COMMON)) )
+OBJS_MPLAYER   = $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
+OBJS_MENCODER  = $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
 
 CFLAGS += -I. -I.. $(OPTFLAGS)
 
-LIBS = $(LIBNAME) $(LIBNAME2)
+LIBS-$(MPLAYER)  += $(LIBNAME_MPLAYER)
+LIBS-$(MENCODER) += $(LIBNAME_MENCODER)
+LIBS              = $(LIBNAME_COMMON) $(LIBS-yes)
 
 libs: $(LIBS)
 
-$(LIBNAME): $(OBJS)
-$(LIBNAME2): $(OBJS2)
-$(LIBNAME) $(LIBNAME2):
+$(LIBNAME_COMMON):   $(OBJS_COMMON)
+$(LIBNAME_MPLAYER):  $(OBJS_MPLAYER)
+$(LIBNAME_MENCODER): $(OBJS_MENCODER)
+$(LIBNAME_COMMON) $(LIBNAME_MPLAYER) $(LIBNAME_MENCODER):
 	$(AR) r $@ $^
 	$(RANLIB) $@
 
@@ -24,7 +29,7 @@ distclean:: clean
 	rm -f .depend
 
 dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) $(SRCS2) 1>.depend
+	$(CC) -MM $(CFLAGS) $(SRCS_COMMON) $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 
 -include .depend
 

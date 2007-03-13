@@ -1,9 +1,9 @@
 
-LIBNAME = liba52.a
+LIBNAME_COMMON = liba52.a
 
 include ../config.mak
 
-SRCS    = crc.c \
+SRCS_COMMON = crc.c \
           resample.c \
           bit_allocate.c \
           bitstream.c \
@@ -13,7 +13,7 @@ SRCS    = crc.c \
 
 include ../mpcommon.mak
 
-test:        $(LIBNAME) test.c
+test: $(LIBNAME_COMMON) test.c
 	$(CC) $(CFLAGS)  test.c ../cpudetect.c -o test ../osdep/libosdep.a ./liba52.a -lm
 
 distclean::
