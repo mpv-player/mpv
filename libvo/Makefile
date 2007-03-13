@@ -24,6 +24,4 @@ SRCS_COMMON-$(FREETYPE)    +=  font_load_ft.c
 
 CFLAGS-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
 
-CFLAGS = -I../osdep
-
 include ../mpcommon.mak
