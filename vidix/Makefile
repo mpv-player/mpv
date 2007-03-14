@@ -19,7 +19,7 @@ clean:
 	$(MAKE) -C drivers clean
 
 distclean: clean
-	rm -f .depend test
+	rm -f .depend
 	$(MAKE) -C drivers distclean
 
 dep depend:
