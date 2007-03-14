@@ -1,8 +1,6 @@
 
 include ../../config.mak
 
-BINDIR = $(LIBDIR)/mplayer/vidix
-
 VIDIX_LIBS = -L../../libdha -ldha
 VIDIX_LIBS_M = $(VIDIX_LIBS) -lm
 VIDIX_LIBS_X = $(VIDIX_LIBS_M) $(X_LIB)
