@@ -40,8 +40,7 @@ ifneq ($(wildcard svgalib_helper),)
 CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
 endif
 
-.c.o: pci_names.c
-	$(CC) -c $(CFLAGS) -o $@ $<
+all: pci_names.c $(LIBNAME) $(SHORTNAME)
 
 $(LIBNAME):     $(OBJS)
 ifeq ($(TARGET_WIN32),yes)
@@ -51,8 +50,6 @@ else
 	ln -sf $@ $(SHORTNAME)
 	ln -sf $@ $(VSHORTNAME)
 endif
-
-all:    $(LIBNAME) $(SHORTNAME)
 
 pci_names.c:	oth/pci.db
 	LC_ALL=C $(AWK) -f pci_db2c.awk $<
