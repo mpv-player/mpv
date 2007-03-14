@@ -4291,8 +4291,8 @@ and other options. This is known to work on x86 on both *NIX and Windows.
 </para>
 <para>
 First you must build the <application>vfw2menc</application> program.
-It is located in the <filename class="directory">TOOLS</filename>
- of the MPlayer source tree.
+It is located in the <filename class="directory">TOOLS</filename> subdirectory 
+of the MPlayer source tree.
 To build on Linux, this can be done using <application>Wine</application>:
 <screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
 
@@ -4301,8 +4301,8 @@ To build on Windows in <application>MinGW</application> or
 <screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
 
 To build on <application>MSVC</application> you will need getopt.
-Getopt can be found in the original <application>vfw2menc</application>
- archive available at:
+Getopt can be found in the original <application>vfw2menc</application> 
+archive available at:
 The <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer on win32</ulink> project.
 </para>
 <informalexample>
@@ -4311,14 +4311,14 @@ Below is an example with the VP6 codec.
 <screen>
 vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf
 </screen>
-This will open the VP6 codec dialog window.
- Repeat this step for the second pass
+This will open the VP6 codec dialog window. 
+Repeat this step for the second pass
 and use <option>-s <replaceable>secondpass.mcf</replaceable></option>.
 </para>
 </informalexample>
 <para>
-Windows users can use
- <option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option> to have
+Windows users can use 
+<option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option> to have
 the codec dialog display before encoding starts.
 </para>
 </sect2>
