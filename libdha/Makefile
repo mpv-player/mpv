@@ -1,5 +1,3 @@
-# makefile
-
 include ../config.mak
 
 MAJOR_VERSION = 1
@@ -12,7 +10,6 @@ SHORTNAME = libdha.dll
 else
 SHORTNAME = libdha.so.$(MAJOR_VERSION)
 SONAME_FLAGS = -Wl,-soname,$(SHORTNAME)
-#SHORTNAME = libdha.so
 VSHORTNAME = libdha.so
 endif
 ifeq ($(TARGET_WIN32),yes)
@@ -45,8 +42,6 @@ CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
 endif
 
 .SUFFIXES: .c .o
-
-# .PHONY: all clean
 
 .c.o: pci_names.c
 	$(CC) -c $(CFLAGS) -o $@ $<
