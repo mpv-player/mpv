@@ -55,7 +55,7 @@ distclean: clean
 	rm -f .depend
 
 dep depend:
-# do nothing here
+	$(CC) -MM $(CFLAGS) $(wildcard *.c) 1>.depend
 
 -include .depend
 
