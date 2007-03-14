@@ -7,8 +7,6 @@ VIDIX_LIBS_M = $(VIDIX_LIBS) -lm
 VIDIX_LIBS_X = $(VIDIX_LIBS_M) $(X_LIB)
 
 CFLAGS           = -fPIC
-RAGE128_CFLAGS   = $(CFLAGS) -DRAGE128
-MGA_CRTC2_CFLAGS = $(CFLAGS) -DCRTC2
 
 libs:   cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
         nvidia_vid.so mga_vid.so mga_crtc2_vid.so pm3_vid.so \
@@ -18,10 +16,10 @@ libs:   cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
 	$(CC) -shared $^ $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
 
 mga_crtc2_vid.o: mga_vid.c
-	$(CC) -c $(MGA_CRTC2_CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -DCRTC2 -o $@ $<
 
 rage128_vid.o: radeon_vid.c
-	$(CC) -c $(RAGE128_CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -DRAGE128 -o $@ $<
 
 sis_vid.so: sis_vid.o sis_bridge.o
 
