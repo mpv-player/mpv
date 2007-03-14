@@ -16,8 +16,6 @@ all:    cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
 
 .SUFFIXES: .c .o
 
-# .PHONY: all clean
-
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
@@ -66,3 +64,5 @@ dep depend:
 # do nothing here
 
 -include .depend
+
+.PHONY: all clean distclean dep depend
