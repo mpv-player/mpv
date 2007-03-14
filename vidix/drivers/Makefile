@@ -8,7 +8,7 @@ CFLAGS           = -fPIC -I. -I.. $(OPTFLAGS)
 RAGE128_CFLAGS   = $(CFLAGS) -DRAGE128
 MGA_CRTC2_CFLAGS = $(CFLAGS) -DCRTC2
 
-all:    cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
+libs:   cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
         nvidia_vid.so mga_vid.so mga_crtc2_vid.so pm3_vid.so \
         sis_vid.so unichrome_vid.so savage_vid.so
 
@@ -49,4 +49,4 @@ dep depend:
 
 -include .depend
 
-.PHONY: all clean distclean dep depend
+.PHONY: libs clean distclean dep depend
