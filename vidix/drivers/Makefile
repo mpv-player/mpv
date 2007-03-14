@@ -1,10 +1,8 @@
 include ../../config.mak
 
 SRCS_MPLAYER = $(wildcard *.c)
-
 VIDIX_LIBS   = -L../../libdha -ldha
-
-CFLAGS           = -fPIC
+CFLAGS       = -fPIC
 
 libs:   cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
         nvidia_vid.so mga_vid.so mga_crtc2_vid.so pm3_vid.so \
