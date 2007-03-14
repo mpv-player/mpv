@@ -53,12 +53,12 @@ endif
 
 $(LIBNAME):     $(OBJS)
 ifeq ($(TARGET_WIN32),yes)
-	$(AR) r $(LIBNAME) $(OBJS)
+	$(AR) r $@ $^
 else
-	#$(CC) -shared $(SONAME_FLAGS) -o $(LIBNAME) $(OBJS) $(LIBS)
-	$(CC) -shared -Wl,-soname -Wl,$(LIBNAME) -o $(LIBNAME) $(OBJS) $(LIBS)
-	ln -sf $(LIBNAME) $(SHORTNAME)
-	ln -sf $(LIBNAME) $(VSHORTNAME)
+	#$(CC) -shared $(SONAME_FLAGS) -o $@ $^ $(LIBS)
+	$(CC) -shared -Wl,-soname -Wl,$@ -o $@ $^ $(LIBS)
+	ln -sf $@ $(SHORTNAME)
+	ln -sf $@ $(VSHORTNAME)
 endif
 
 all:    $(LIBNAME) $(SHORTNAME)
@@ -66,8 +66,8 @@ all:    $(LIBNAME) $(SHORTNAME)
 pci_names.c:	oth/pci.db
 	LC_ALL=C $(AWK) -f pci_db2c.awk $<
 
-test:
-	$(CC) test.c -o test $(SHORTNAME)
+test: $(SHORTNAME)
+	$(CC) test.c -o $@ $^
 
 clean:
 	rm -f *.o *.a *~ *.so *.so.*
