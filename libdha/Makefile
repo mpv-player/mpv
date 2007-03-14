@@ -72,7 +72,7 @@ dep depend: pci_names.c
 
 install:
 	-mkdir -p $(LIBDIR)
-	install -m 755 $(INSTALLSTRIP) -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
+	$(INSTALL) -m 755 $(INSTALLSTRIP) -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
 	rm -f $(LIBDIR)/libdha.so
 	ln -sf $(LIBNAME) $(LIBDIR)/$(SHORTNAME)
 	-$(LDCONFIG)
