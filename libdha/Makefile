@@ -40,8 +40,6 @@ ifneq ($(wildcard svgalib_helper),)
 CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
 endif
 
-.SUFFIXES: .c .o
-
 .c.o: pci_names.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
