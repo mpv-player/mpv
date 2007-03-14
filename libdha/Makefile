@@ -9,7 +9,6 @@ ifeq ($(TARGET_OS),CYGWIN)
 SHORTNAME = libdha.dll
 else
 SHORTNAME = libdha.so.$(MAJOR_VERSION)
-SONAME_FLAGS = -Wl,-soname,$(SHORTNAME)
 VSHORTNAME = libdha.so
 endif
 ifeq ($(TARGET_WIN32),yes)
@@ -50,7 +49,6 @@ $(LIBNAME):     $(OBJS)
 ifeq ($(TARGET_WIN32),yes)
 	$(AR) r $@ $^
 else
-	#$(CC) -shared $(SONAME_FLAGS) -o $@ $^ $(LIBS)
 	$(CC) -shared -Wl,-soname -Wl,$@ -o $@ $^ $(LIBS)
 	ln -sf $@ $(SHORTNAME)
 	ln -sf $@ $(VSHORTNAME)
