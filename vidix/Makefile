@@ -4,7 +4,7 @@ LIBNAME_MPLAYER = libvidix.a
 
 SRCS_MPLAYER    = vidixlib.c
 
-all: libs
+libs:
 	$(MAKE) -C drivers
 
 clean::
