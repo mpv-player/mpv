@@ -13,12 +13,6 @@ all:    cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
         nvidia_vid.so mga_vid.so mga_crtc2_vid.so pm3_vid.so \
         sis_vid.so unichrome_vid.so savage_vid.so
 
-
-.SUFFIXES: .c .o
-
-%.o: %.c
-	$(CC) -c $(CFLAGS) -o $@ $<
-
 %.so: %.o
 	$(CC) -shared $^ $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
 
