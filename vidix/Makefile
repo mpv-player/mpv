@@ -11,8 +11,8 @@ all:	$(LIBNAME)
 	$(MAKE) -C drivers
 
 $(LIBNAME):	$(OBJS)
-	$(AR) r $(LIBNAME) $(OBJS)
-	$(RANLIB) $(LIBNAME)
+	$(AR) r $@ $^
+	$(RANLIB) $@
 
 clean:
 	rm -f *.o *.a *~
