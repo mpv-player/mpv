@@ -1,10 +1,12 @@
 include ../../config.mak
 
+SRCS_MPLAYER = $(wildcard *.c)
+
 VIDIX_LIBS   = -L../../libdha -ldha
 VIDIX_LIBS_M = $(VIDIX_LIBS) -lm
 VIDIX_LIBS_X = $(VIDIX_LIBS_M) $(X_LIB)
 
-CFLAGS           = -fPIC -I. -I.. $(OPTFLAGS)
+CFLAGS           = -fPIC
 RAGE128_CFLAGS   = $(CFLAGS) -DRAGE128
 MGA_CRTC2_CFLAGS = $(CFLAGS) -DCRTC2
 
@@ -38,15 +40,7 @@ cyberblade_vid.so nvidia_vid.so mga_vid.so mga_crtc2_vid.so unichrome_vid.so \
 savage_vid.so:
 	$(CC) -shared $< $(VIDIX_LIBS_M) -Wl,-soname,$@ -o $@
 
-clean:
-	rm -f *.o *.so *~
+include ../../mpcommon.mak
 
-distclean: clean
-	rm -f .depend
-
-dep depend:
-	$(CC) -MM $(CFLAGS) $(wildcard *.c) 1>.depend
-
--include .depend
-
-.PHONY: libs clean distclean dep depend
+clean::
+	rm -f *.so
