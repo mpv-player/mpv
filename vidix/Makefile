@@ -7,9 +7,7 @@ OBJS	= $(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS)
 
-all:	$(LIBNAME) do_drivers
-
-do_drivers:
+all:	$(LIBNAME)
 	$(MAKE) -C drivers
 
 $(LIBNAME):	$(OBJS)
