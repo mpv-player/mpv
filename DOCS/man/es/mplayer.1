@@ -4,14 +4,13 @@
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun,
 .\" Jonas Jermann y traducida al español por Juan Martín López.
 .\" 
+.\" FIXME: break lines longer than 80 characters; remove trailing whitespaces
 .
 .\" --------------------------------------------------------------------------
 .\" Definiciones de Macros
 .\" --------------------------------------------------------------------------
 .
-.\" la identación por defecto es 7, ¡no cambiar!
-.nr IN 7
-.\" define la identación para las subopciones
+.\" define la indentación para las subopciones
 .nr SS 5 
 .\" añade una nueva subopción
 .de IPs
@@ -19,7 +18,7 @@
 ..
 .\" principio del primer nivel de subopciones, finaliza con .RE
 .de RSs
-.RS \n(IN+3
+.RS 10
 ..
 .\" principio del segundo nivel de subopciones
 .de RSss
@@ -39,9 +38,11 @@
 .TH MPlayer 1 "2004-07-19" "Proyecto MPlayer" "El Reproductor de Películas"
 .
 .SH NOMBRE
+.RSs
 mplayer  \- reproductor de películas
 .br
 mencoder \- codificador de películas
+.RE
 .
 .\" --------------------------------------------------------------------------
 .\" Sinopsis
@@ -50,125 +51,115 @@ mencoder \- codificador de películas
 .SH SINOPSIS
 .na
 .nh
+.RSs
 .B mplayer
-.RI [opciones]\ [ \ file\  | \ URL\  | \ playlist\  | \ \-\  ]
+.RI [opciones]\ [archivo|URL|playlist|\-]
+.RSs
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-[opciones globales]
-.I archivo1 
-[opciones específicas] [archivo2] [opciones específicas]
+[opciones]
+fichero1 
+[opciones específicas] fichero2 [opciones específicas]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-[opciones globales]
-.RI { "grupo de archivos y opciones" }
+[opciones]
+{grupo de ficheros y opciones}
 [opciones específicas del grupo]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvd://[título |[título_inicial-título_final ]
+[dvd|dvdnav]://[título|[título_inicial]-título_final]
 [opciones]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.I vcd://pista[/dispositivo]
-.
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I dvd://[título |[título_inicial]-título_final ]
+vcd://pista[/dispositivo]
 [opciones]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.I vcd://pista[/dispositivo]
+tv://[canal]
 [opciones]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.I tv://[canal]
+radio://[canal|frecuencia][/capture]
 [opciones]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvb://[numero_tarjeta@]canal
+pvr://
 [opciones]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.I mf://máscara
+dvb://[numero_tarjeta@]canal
+[opciones]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+mf://máscara
 [-mf opciones] [opciones]
 .
 .br
 .in
 .B mplayer
-'in +\n[.k]u
-.I [cdda|cddb]://pista[:velocidad][/dispositivo]
+'in +\n[.k]u 
+[cdda|cddb]://pista[-pista_final][:velocidad][/dispositivo]
 [opciones]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.I cue://archivo[:pista]
+cue://archivo[:pista]
+[opciones]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u [fichero|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
+[usuario:contraseña@]URL[:puerto] [opciones]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+sdp://fichero
 [opciones]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p | ftp ] ://
-[usuario:contraseña@]\fIURL\fP[:puerto][opciones]
-.
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I sdp://archivo
+mpst://host[:puerto]/URL
 [opciones]
 .
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.I mpst://host[:puerto]/URL
-[opciones]
-.
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://host/list
-[opciones]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://host/llist
-[opciones]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://host/fsid
+tivo://host/[list|llist|fsid]
 [opciones]
 .br
 .in
@@ -179,9 +170,17 @@ mencoder \- codificador de películas
 .br
 .B mencoder
 [opciones]
+fichero [fichero|URL|\-]
+[\-o\ fichero\ |\ file://fichero\ |\ 
+smb://[usuario:contraseña@]host/ruta_al_fichero]
 .
-.RI [ \ archivo\  | \ URL\  | \ \-\  ]
-[\-o\ archivo]
+.br
+.B mencoder
+[opciones]
+.
+fichero1
+[opciones específicas] fichero2 [opciones específicas]
+.RE
 .ad
 .hy
 .
@@ -190,11 +189,12 @@ mencoder \- codificador de películas
 .\" --------------------------------------------------------------------------
 .
 .SH DESCRIPCIÓN
+.RSs
 .B mplayer
 es un reproductor de películas para Linux (funciona en muchas otras
 plataformas y arquitecturas de CPU, vea la documentación).
-Reproduce la mayoría de los archivos MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, 
-QT/\:MOV/\:MP4, OGG/\:OGM, MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ,
+Reproduce la mayoría de los ficheros MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, 
+QT/\:MOV/\:MP4, ogg/\:OGM, MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ,
 soportados de forma nativa y otros codecs binarios.
 Además puede ver VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 e incluso películas
 WMV.
@@ -202,19 +202,19 @@ WMV.
 MPlayer soporta un amplio rango de controladores de salida de video y de
 audio.
 Funciona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
-Quartz, pero también puede usar GGI, SDL (y todos sus controladores),
+Quartz, Mac OS X CoreVideo, pero también puede usar GGI, SDL (y todos sus controladores),
 VESA (en cualquier tarjeta compatible con VESA, incluso sin X11), algunos
 controladores de tarjetas específicas a bajo nivel (par Matrox, 3Dfs y ATI)
 y algunas tarjetas decodificadoras de MPEG por hardware, tales como Siemens
-DVB, DXR2 y DXR3/\:Hollywood+.
+DVB, Hauppauge PVR (IVTV), DXR2 y DXR3/\:Hollywood+.
 La mayoría de ellos soportan escalado por software o por hardware, para que
 pueda disfrutar de las películas en modo de pantalla completa.
 .PP
 MPlayer tiene información en pantalla (OSD, On Screen Display) sobre el estado,
 subtítulos grandes y bonitos con suavizado de bordes y realimentación visual
 de los controles con teclado.
-Tipos de letra Europeo/\:ISO 8859-1,2 (Húngaro, Inglés, Checoslovaco, etc),
-Cirílico y Koreano son soportados en 12 formatos de subtítulo (MicroDVD, SubRip,
+Tipos de letra Europeo/\:ISO8859-1,2 (Húngaro, Inglés, Checoslovaco, etc),
+Cirílico y Koreano se soportan en 12 formatos de subtítulos (MicroDVD, SubRip,
 OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS y el nuestro:
 MPsub) así como subtítulos DVD (cadenas SPU, VOBsub y Closed Captions).
 .PP
@@ -222,50 +222,62 @@ MPsub) así como subtítulos DVD (cadenas SPU, VOBsub y Closed Captions).
 (Codificador de Películas de MPlayer) es un codificador simple de películas,
 diseñado para codificar películas que se pueden reproducir con MPlayer (vea
 más arriba) a otros formatos también reproducibles con MPlayer (vea más abajo).
-Codifica a DivX4, XviD, cualquier codec de libavcodec y audio en
+Codifica a MPEG-4 (DivX/Xvid), cualquier codec de libavcodec y audio en
 PCM/\:MP3/\:VBRMP3 en 1, 2 o 3\ pasadas.
 Además, tiene habilidades para copiar flujos, un potente sistema de filtros 
-(recortar, expandir, voltear, post-procesar, rotar, escalar, ruidos, 
+(recortar, expandir, girar, post-procesar, rotar, escalar, ruidos, 
 conversión rgb/\:yuv) y más.
 .PP
 .B gmplayer
 es MPlayer con una interfaz gráfica para el usuario.
 Tiene las mismas opciones que MPlayer.
 .PP
-.B ¡Vea también la documentación HTML!
+Se pueden encontrar ejemplos de uso para familiarizarle rápidamente con el manejo
+del programa al final de esta página del manual
+.PP
+.B ¡Lea también la documentación HTML!
+.RE
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Control por teclado 
+.\" Control interactivo
 .\" --------------------------------------------------------------------------
 .
-.SH "CONTROL POR TECLADO"
-MPlayer tiene una capa de control totalmente configurable, dada por
-órdenes, que le permite controlar MPlayer usando el teclado, el ratón,
-la palanca de juegos o el mando a distancia (usando LIRC).
-.br
-El archivo de configuración por defecto para el sistema de entrada es
-~/.mplayer/\:input.conf pero puede ser cambiado usando la opción
-\-input conf.
-.TP
-.B control general 
-.PD 0
+.SH "CONTROL INTERACTIVO"
 .RSs
+MPlayer tiene una capa de control totalmente configurable, dirigida por
+órdenes, que le permite controlar MPlayer usando el teclado, el ratón,
+un mando de juegos o un mando a distancia (usando LIRC). Vea la opción 
+-input para conocer las maneras de configurarlo.
+.TP
+.B control por teclado 
+.PD 0
+.RSss
 .IPs "<\- y \->"
 Posiciona atrás/\:adelante 10 segundos.
 .IPs "arriba y abajo"
 Posiciona atrás/\:adelante 1 minuto.
 .IPs "repág y avpág"
 Posiciona atrás/\:adelante 10 minutos.
+.IPs "[ y ]"
+Aumenta/disminuye la velocidad de reproducción en un 10%
+.IPs "{ y }"
+Dobla/Divide la velocidad de reproducción.
+.IPs "Retroceso"
+Devuelve la reproducción a la velocidad normal.
 .IPs "< y >"
-retrocede/\:avanza en la lista de reproducción
+retrocede/\:avanza en la lista de reproducción.
 .IPs "INICIO y FIN"
-siguiente/\:previa entrada del árbol de reproducción en la lista actual
+siguiente/\:previa entrada del árbol de reproducción en la lista actual.
 .IPs "INS y SUPR"
 siguiente/\:previa fuente alternativa (solo para listas
-de reproducción ASX)
+de reproducción ASX).
 .IPs "p / ESPACIO"
-Pausa la película (cualquier tecla para salir del modo pausa).
+Pausa la película (cualquier tecla para salir del modo pausa). 
+.IPs ".\ \ \ \ "
+Paso adelante. Pesionar una vez detiene la película.
+Cada pulsación posterior reproduce un frame y detiene la película
+otra vez (cualquier otra tecla hace retornar al modo normal).
 .IPs "q / ESC"
 Detiene la película y sale.
 .IPs "+ y -"
@@ -276,10 +288,14 @@ Decrementa/\:incrementa el volumen.
 Decrementa/\:incrementa el volumen.
 .IPs "m\ \ \ \ "
 Silencia el sonido.
+.IPs "_ (sólo MPEG-TS and libavformat)"
+Alterna entre las pistas de vídeo disponibles
+.IPs "# (sólo MPEG, Matroska, AVI y libavformat)"
+Alterna entre las pistas de audio disponibles
 .IPs "f\ \ \ \ "
-Cambia el modo de pantalla completa.
+Cambia al modo de pantalla completa (vea también -fs).
 .IPs "T\ \ \ \ "
-Cambia el modo siempre-visible.
+Cambia al modo siempre-visible (vea también -ontop).
 .IPs "w y e"
 Decrementa/\:incrementa el rango de pan y scan.
 .IPs "o\ \ \ \ "
@@ -291,66 +307,161 @@ cambia entre los estados del salto de imágenes: nada / saltar el mostrar
 en pantalla / saltar decodificación (vea \-framedrop y \-hardframedrop).
 .IPs "v\ \ \ \ "
 Cambia la visibilidad de los subtítulos.
-.IPs "b/j"
-Cicla a través de los subtítulos disponibles.
+.IPs "j\ \ \ \ "
+Alterna entre los subtítulos disponibles.
+.IPs "y/g\ \ \ \ "
+Paso adelante/atrás en la lista de subtítulos
 .IP "F\ \ \ \ "
 Cambia la visibilidad de "subtítulos forzados".
 .IPs "a\ \ \ \ "
 Cambia la alineación de los subtítulos: arriba/\:enmedio/\:abajo.
-.IPs "z y x"
+.IPs "x y z"
 Ajusta el retardo de subtítulos por +/\:- 0.1 segundos.
 .IPs "r y t"
 Mueve los subtítulos arriba/\:abajo.
-.IPs "i\ \ \ \ "
+.IPs "i (sólo modo -edlout)"
 Establece una marca EDL.
-.RE
+.IPs "s (sólo -vf screenshot)"
+Realiza una captura de pantalla.
+.IPs "S (sólo -vf screenshot)"
+Comienza/para la toma de capturas de pantalla.
+.IPs "I\ \ \ \ "
+Muestra el nombre del fichero que se está reproduciendo en pantalla.
+.IPs "D (sólo -vo xvmc, -vf yadif)"
+Activa/desactiva el desentrelazador.
 .PD 1
 .PP
-(Las siguientes teclas son válidas solamente cuando se usa una salida
-de video acelerada por hardware (xv, (x)vidix, (x)mga, etc), o el filtro
-de ecualizador por software (\-vf eq o \-vf eq2).
+(Las siguientes teclas son válidas únicamente cuando se usa una salida
+de video acelerada por hardware (xv, (x)vidix, (x)mga, etc), el ecualizador
+por software (\-vf eq o \-vf eq2) o el filtro de tonalidad (\-vf hue).)
 .PP
 .PD 0
-.RSs
 .IPs "1 y 2"
 Ajusta el contraste.
 .IPs "3 y 4"
 Ajusta el brillo.
-adjust brightness
 .IPs "5 y 6"
 Ajusta el matiz.
 .IPs "7 y 8"
 Ajusta la saturación.
-.RE
 .PD 1
-.
-.TP
-.B control del GUI con el teclado
+.PP
+(Las siguientes teclas son válidas únicamente cuando se usa quartz o 
+el controlador de vídeo de macosx)
+.PP
 .PD 0
-.RSs
-.IPs ENTER
-Inicia la reproducción.
-.IPs "s\ \ \ \ "
+.IPs "command + 0"
+Cambia el tamaño de la ventana a la mitad de su tamaño.
+.IPs "command + 1"
+Cambia el tamaño de la ventana a su tamaño original.
+.IPs "command + 2"
+Cambia el tamaño de la ventana al doble su tamaño original.
+.IPs "command + f"
+Cambia al modo de pantalla completa (vea también -fs).
+.IPs "command + [ and command + ]"
+Establece el canal alfa de la ventana de la película.
+.PD 1
+.PP
+(Las siguientes teclas son válidas únicamente cuando se usa el
+controlador de vídeo sdl)
+.PP
+.PD 0
+.IPs "c\ \ \ \ "
+Alterna entre los diferentes modos de pantalla completa.
+.IPs "n\ \ \ \ "
+Vuelve al modo original.
+.PD 1
+.PP
+(Las siguientes teclas son válidas únicamente cuando se usa un
+teclado multimedia)
+.PP
+.PD 0
+.IPs "PAUSE"
+pausa.
+.IPs "STOP\ \ \ \ "
+Detiene la reproducción y sale.
+.IPs "PREVIOUS and NEXT"
+Posiciona atrás/\:adelante 1 minuto.
+.PD 1
+.PP
+(Las siguientes teclas son válidas únicamente cuando se ha compilado
+con soporte para la interfaz gráfica y tienen precedencia sobre las
+anteriores)
+.PP
+.PD 0
+.IPs "ENTER"
+Comienza la reproducción.
+.IPs "ESC\ \ \ \ "
 Detiene la reproducción.
 .IPs "l\ \ \ \ "
-Darga un archivo.
+Carga un fichero.
+.IPs "t\ \ \ \ "
+Carga los subtítulos.
 .IPs "c\ \ \ \ "
-Navegador de pieles.
-.IPs "p\ \ \ \ "
-Cambia a lista de reproducción.
-.RE
+Abre el navegador de temas.
+.IPs "r\ \ \ \ "
+Abre el diálogo de preferencias.
 .PD 1
-.
-.TP
-.B control de la entrada de TV
+.PP
+(Las siguientes teclas son válidas únicamente cuando se ha compilado
+con soporte para la TV o DVB y tienen precedencia sobre las
+anteriores)
+.PP
 .PD 0
-.RSs
-.IPs "h y k"
-Selecciona canal previo/\:siguiente.
+.IPs "h and k"
+Selecciona el canal anterior/siguiente.
 .IPs "n\ \ \ \ "
 Cambia la norma.
 .IPs "u\ \ \ \ "
 Cambia la lista de canales.
+.PD 1
+.PP
+(Las siguientes teclas son válidas únicamente cuando se ha compilado
+con soporte para dvdnav: se usan para navegar por los menús)
+.PP
+.PD 0
+.IPs "Teclado numérico 8"
+Selecciona el botón hacia arriba.
+.IPs "Teclado numérico 2"
+Selecciona el botón hacia abajo.
+.IPs "Teclado numérico 4"
+Selecciona el botón hacia la izquierda.
+.IPs "Teclado numérico 6"
+Selecciona el botón hacia la derecha.
+.IPs "Teclado numérico 5"
+Vuelve al menú principal.
+.IPs "Teclado numérico 7"
+Vuelve al menú más cercano (el orden preferido es: 
+capítulo->título->raíz).
+.IPs "Teclado numérico INTRO"
+Confirma la elección.
+.PD 1
+.
+.TP
+.B control del ratón
+.PD 0
+.RSs
+.IPs "Botón 3 y Botón 4"
+Posiciona atrás/\:adelante 1 minuto.
+.IPs "Botón 4 y Botón 5"
+Aumenta/disminuye el volumen
+.RE
+.PD 1
+.
+.TP
+.B control del joystick
+.PD 0
+.RSs
+.IPs "izquierda y derecha"
+Posiciona atrás/\:adelante 10 segundos.
+.IPs "arriba y abajo"
+Posiciona atrás/\:adelante 1 minuto.
+.IPs "botón 1"
+Pausa
+.IPs "botón 2"
+Cambia los estados OSD: ninguno / búsqueda / búsqueda + contador / búsqueda + contador+ tiempo total
+.IPs "botón 3"
+Aumenta/disminuye el volumen
 .RE
 .PD 1
 .
@@ -366,26 +477,60 @@ opuesto a la opción \-fs es \-nofs.
 Si una opción está marcada como (XXX solamente), solo funcionará en
 combinación con la opción XXX o si está compilado con soporte XXX.
 .PP
-Puede escribir todas sus opciones en un archivo de configuración que será
-leído cada vez que se ejecute MPlayer.
+.I NOTA:
+El analizador de subopciones (se usa por ejemplo para las subopciones -ao pcm)
+soporta un modo especial de escape de cadenas pensado para usarse
+con interfaces gráficas de usuario externas.
+.br
+Tienen el siguiente formato:
+.br
+%n%string_of_length_n
+.br
+.I EJEMPLOS:
+.br
+mplayer \-ao pcm:file=%10%C:test.wav test.avi
+.br
+O en un script:
+.br
+mplayer \-ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
+.PP
+.
+.\" --------------------------------------------------------------------------
+.\" Ficheros de configuración
+.\" --------------------------------------------------------------------------
+.
+.SH "FICHEROS DE CONFIGURACIÓN"
+Puede escribir todas sus opciones en ficheros de configuración que serán
+leídos cada vez que se ejecute MPlayer/MEncoder.
 El archivo de configuración del sistema global 'mplayer.conf' está en su
-directorio de configueración (p.e.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer),
-el específico de usuario es '~/\:.mplayer/\:config'.
+directorio de configueración (p.e.\& /etc/\:mplayer 
+o /usr/\:local/\:etc/\:mplayer), el específico de usuario
+es '~/\:.mplayer/\:config'. El fichero de configuración para
+MEncoder es mencoder.conf en su directorio de configuración
+(p.e.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer) el específico 
+de usuario es '~/\:.mplayer/mencoder.conf'.
 Las opciones específicas de usuario sobreescriben a las del sistema y a su vez las
 que se pasan por línea de comandos sustituyen a estas.
 La sintaxis del archivo de configuración es 'opción=<valor>', todo lo que haya
 después de un '#' es considerado un comentario.
 Las opciones que funcionan sin valores pueden ser habilitadas estableciendo
-su valor a 'si' o '1' o 'true' y deshabilitadas estableciendo su valor a 'no'
-o '0' o 'false'.
-Incluso las subopciones pueden se especificadas de este modo.
+su valor a 'yes' o '1' o 'true' y deshabilitadas estableciendo su valor a 'no'
+o '0' o 'false'. Incluso las subopciones pueden se especificadas de este modo.
 .PP
-.I EJEMPLO:
+También puede escribir ficheros de configuración para ficheros específicos.
+Si dispone de un archivo de configuración para un archivo llamado 'pelicula.avi',
+cree otro archivo llamado 'pelicula.avi.conf' con las opciones específicas y
+colóquelo en ~/.mplayer o en el mismo directorio que el fichero mientras use 
+la opción \-use-filedir-conf (tanto en la línea de comandos como en el fichero 
+de configuración global).
+.PP
+.I "EJEMPLO DE FICHERO DE CONFIGURACIÓN DE MPLAYER:"
+.sp 1
 .nf
 # Usar controlador de Matrox por defecto.
 vo=xmga
-# Me encanta practicar manualidades mientras veo videos.
-flip=si
+# Me encanta practicar manualidades mientras veo vídeos.
+flip=yes
 # Decodificar/\:codificar múltiples archivos desde png,
 # empezando con mf://mascaradearchivo
 mf=type=png:fps=25
@@ -393,26 +538,126 @@ mf=type=png:fps=25
 vf=eq2=1.0:-0.8
 .fi
 .PP
-También puede escribir archivos de configuración para archivos específicos.
-Si dispone de un archivo de configuración para un archivo llamado 'pelicula.avi',
-cree otro archivo llamado 'pelicula.avi.conf' con las opciones específicas y
-colóquelo en ~/.mplayer o en el mismo directorio que el archivo.
+.I "EJEMPLO DE FICHERO DE CONFIGURACIÓN DE MENCODER:"
+.sp 1
+.nf
+# Establece la salida de Mencoder a un fichero por defecto.
+o=encoded.avi
+# Las 4 siguientes líneas permiten a mencoder tv:// comenzar la captura inmediatamente
+oac=pcm=yes
+ovc=lavc=yes
+lavcopts=vcodec=mjpeg
+tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
+# conjunto de opciones por defecto más complejo
+lavcopts=vcodec=mpeg4:autoaspect=1
+lameopts=aq=2:vbr=4
+ovc=lavc=1
+oac=lavc=1
+passlogfile=pass1stats.log
+noautoexpand=1
+subfont-autoscale=3
+subfont-osd-scale=6
+subfont-text-scale=4
+subalign=2
+subpos=96
+spuaa=20
+.fi
 .
+.\" --------------------------------------------------------------------------
+.\" Perfiles
+.\" --------------------------------------------------------------------------
 .
+.SH "PERFILES"
+Para facilitar el trabajo con diferentes configuraciones se pueden definir 
+perfiles en los ficheros de configuración. Un perfil comienza con su nombre entre
+corchetes, p.e.\& '[mi-perfil]'.
+Todas las opciones que le sigan serán parte del perfil.
+Se puede definir una descripción (mostrada por \-profile help) con la
+opción profile-desc.
+Para acabar el perfil, comience otro o use el nombre de perfil
+default para seguir con las opciones normales.
+.fi
+.PP
+.I "PERFIL DE EJEMPLO DE MENCODER:"
+.sp 1
+.nf
+
+[mpeg4]
+profile-desc="Codificación MPEG4"
+ovc=lacv=yes
+lavcopts=vcodec=mpeg4:vbitrate=1200
+
+[mpeg4-hq]
+profile-desc="Codificación HQ MPEG4"
+profile=mpeg4
+lavcopts=mbd=2:trell=yes:v4mv=yes
+.fi
 .
 .SH "OPCIONES GENERALES"
 .
 .TP
-.B \-codecs-file <nombrearchivo>
+.B \-codecs-file <nombrearchivo> (Vea también \-afm, \-ac, \-vfm y \-vc.)
 Usa el archivo codecs.conf especificado en lugar del instalado por sistema o el
-interno .
-Vea también \-afm, \-ac, \-vfm y \-vc.
+interno.
 .
 .TP
 .B \-include <archivo\ de\ configuración>
 Archivo de configuración específico que se consultará después del que haya por
 defecto.
 .
+.TP
+.B \-list-options
+Saca por pantalla todas las opciones disponibles
+.
+.TP
+.B \-msgcharset <charset>
+Convierte los mensajes de la consola al conjunto de caracteres especificado 
+(default: autodetect). El texto se codificará con el parámetro especificado
+con la opción de configuración \-\-charset. Establézcalo a noconv para 
+deshabilitar la conversión (por e.j.\& problemas con iconv ).
+.br
+.I NOTA:
+La opción tiene efecto después de que el analizador de la línea de comandos
+ha finalizado. La variable de entorno MPLAYER_CHARSET puede ayudarle a
+deshacerse de las primeras líneas de salida estropeada.
+.TP
+.B \-msglevel <all=<nivel>:<módulo>=<nivel>:...>
+Controla la cantidad de mensajes para cada módulo. El módulo 'all' cambia la
+cantidad de mensajes para el resto de módulos no especificados en la línea de
+comandos. Vea '\-msglevel help' para una lista de todos los módulos.
+.br
+.I NOTA:
+Los mensajes mostrados antes de que la línea de comandos haya sido analizada
+únicamente pueden ser controlados por la variable de entorno MPLAYER_VERBOSE
+que se aplica a todos los módulos.
+.br
+Niveles disponibles:
+.PD 0
+.RSs
+.IPs "-1"
+completo silencio
+.IPs " 0"
+únicamente mensajes fatales
+.IPs " 1"
+mensajes de error
+.IPs " 2"
+mensajes de aviso
+.IPs " 3"
+mensajes de ayuda cortos
+.IPs " 4"
+mensajes de información
+.IPs " 5"
+mensajes de estado (aquellos ocultos por \-quiet)
+.IPs " 6"
+mensajes prolijos.
+.IPs " 7"
+nivel de detección de errores 2
+.IPs " 8"
+nivel de detección de errores 3
+.IPs " 9"
+nivel de detección de errores 4
+.RE
+.PD 1
 .TP
 .B "\-quiet\ \ "
 Hace que MPlayer muestre menos información; en particular oculta la línea de
@@ -421,23 +666,42 @@ Es particularmente útil en terminales lentos o donde no funciona bien el manejo
 del retorno de carro (i.e.\& \\r).
 .
 .TP
-.B \-v, \-verbose
-Aumenta el nivel de prolijo (más \-v significa más prolijo).
-.PD 0
+.B \-priority <prio> (sólo Windows)
+Establece la prioridad de acuerdo a un conjuto de prioridades predefinidas 
+disponibles bajo Windows.
+Posibles valores de <prio>:
 .RSs
-.IPs 0
-solo alguna salida para informar (por defecto)
-.IPs 1
-alguna información de depuración básica, cabecera avi, valores de funciones
-(depuración inicial)
-.IPs 2
-muestra índices avi, entradas de trozos de video, más información de depuración
-(depuración del reproductor)
-.IPs 3
-muestra todo lo relacionado con los elementos que analizan la entrada
-(depuración del analizador)
+idle|belownormal|normal|abovenormal|high|realtime
 .RE
-.PD 1
+.sp 1
+.RS
+.I AVISO:
+Usar la prioridad realtime puede causar un cuelgue del sistema.
+.RE
+.TP
+.B \-profile <perfil1,perfil2,...>
+Usa los perfiles dados, \-profile muestra una lista con todos los perfiles definidos.
+.
+.TP
+.B \-really-quiet (vea también \-quiet)
+Muestra incluso menos mensajes de salida y de estado que con la opción \-quiet.
+.
+.TP
+.B \-show-profile <perfil>
+Muestra la descripción y el contenido de un perfil.
+.
+.TP
+.B \-use-filedir-conf
+Busca un fichero de configuración específico en el mismo directorio que el
+fichero que se va a reproducir.
+.br
+.I AVISO:
+Puede ser peligroso si se reproduce desde un lugar desconocido.
+.
+.TP
+.B \-v, \-verbose
+Aumenta el nivel de prolijo, un nivel por cada -v encontrado en
+la línea de comandos.
 .
 .
 .
@@ -487,20 +751,29 @@ solo video (puede ver esto como un valor infinito de fps).
 Cambia el colorkey a un valor RGB de su elección.
 0x000000 es negro y 0xffffff es blanco.
 Solo soportado por los controladores de salida de video cvidix, fbdev, svga,
-vesa, winvidix, xmga, xvidix y xover.
+vesa, winvidix, xmga, xvidix, xover, xv (vea \-vo xv:ck), xvmc (vea \-vo xv:ck) 
+y directx.
 .TP
 .B \-nocolorkey
 Deshabilita el colorkeying.
 Solo soportado por los controladores de salida de video cvidix, fbdev, svga, vesa,
-winvidix, xmga, xvidix y xover.
+winvidix, xmga, xvidix, xover, xv (vea \-vo xv:ck), xvmc (vea \-vo xv:ck) y directx.
 .
 .TP
-.B \-edl <nombredearchivo> (EDL solamente)
-Habilita acciones de edición de lista de decisión (EDL)  durante la reproducción.
-El video puede ser saltado y el audio silenciado y activado de acuerdo a unas
-entradas dadas en el archivo.
-Vea DOCS/\:HTML/\:es/\:edl.html para detalles sobre como usar esta
-característica.
+.B \-correct-pts (experimental)
+Cambia MPlayer a un modo experimental en el que las marcas de tiempo para las imágenes 
+de vídeo se calculan de una forma diferente y se soportan los filtros de vídeo que 
+añaden nuevas imágenes o modifican las marcas de tiempo de los existentes Se pueden 
+ver las marcas de tiempo mas precisas por ejemplo cuando se reproducen
+subtítulos sincronizados a cambios de escena con la opción \-ass.
+Sin \-correct-pts seguramente la sincronización irá desplazada algunas imágenes.
+Esta opción no funciona correctamente con algunos demuxers y codecs.
+.
+.TP
+.B \-crash-debug (CÓDIGO DE DETECCIÓN DE ERRORES)
+Automáticamente añade gdb sobre un fallo o SIGTRAP.
+El soporte debe estar compilado añadiendo \-\-enable-crash-debug en 
+la fase de configurado.
 .
 .TP
 .B \-edlout <nombredearchivo> (EDL solamente)
@@ -509,7 +782,7 @@ Durante la reproducción, cuando el usuario pulse 'i', una entrada para saltar
 los últimos dos segundos de reproducción será escrita al archivo.
 Esto proporciona un punto de partida para que el usuario pueda ajustar de 
 manera fina las entradas de EDL después.
-Vea DOCS/\:HTML/\:es/\:edl.html para detalles.
+Vea http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:edl.html para más detalles.
 .
 .TP
 .B \-enqueue (solo GUI)
@@ -517,19 +790,26 @@ Encola los archivos dados en la línea de comandos en la lista de reproducción
 en lugar de reproducirlos inmediatamente.
 .
 .TP
-.B \-fixed-vo (¡CÓDIGO BETA!)
+.B \-fixed-vo
 Fuerza un sistema de video fijo para múltiples archivos (una (des)inicialización
 para todos los archivos).
-Por lo tanto solo una ventana será abierta para todos los archivos.
-Actualmente los siguiente controladores funcionan bien con fixed-vo: gl2,
-mga, svga, x11, xmga, xv, xvidx y dfbmga.
+Por lo tanto sólo se abrirá una ventana para todos los archivos.
+Actualmente los siguiente controladores funcionan bien con fixed-vo: gl, gl2, 
+mga, svga, x11, xmga, xv, xvidix y dfbmga.
 .
 .TP
 .B \-framedrop (vea también \-hardframedrop)
 Se salta la representación de algunas imágenes para mantener la sincronización A/\:V
 en sistemas lentos.
-Los filtros de video no son aplicados a estas imágenes.
+Los filtros de vídeo no se aplican a estas imágenes.
 Para los marcos tipo B el proceso de decodificación es completamente saltado.
+.
+.TP
+.B \-(no)gui
+Habilita o deshabilita la interfaz gráfica (la acción por defecto depende del nombre
+del binario).
+Únicamente funciona si se usa como primer argumento de la línea de 
+comandos. No funciona como opción en el fichero de configuración.
 .
 .TP
 .B \-h, \-help, \-\-help
@@ -542,9 +822,22 @@ Salto mayor de imágenes (puede romper la decodificación).
 .
 .TP
 .B \-identify
+Atajo para -msglevel identify=4.
 Muestra parámetros del archivo en un formato fácilmente analizable.
+También muestra información sobre los lenguajes y los IDs de los subtítulos
+y las pista de audio. En algunos casos puede obtener más información
+usando \-msglevel identify=6.
+Por ejemplo, para un DVD mostrará la duración de cada título así como
+el ID del disco.
 El script wrapper TOOLS/\:midentify suprime todas las otras salidas de MPlayer
 y (con suerte) muestra los nombres de archivo.
+.
+.TP
+.B \-idle (vea también \-slave)
+Hace que MPlayer espere en un modo ocioso en vez de salir cuando no hay un
+fichero para reproducir.
+Es útil sobretodo cuando se ejecuta MPlayer en modo esclavo y puede
+ser controlado a través de comandos de entrada.
 .
 .TP
 .B \-input <comandos>
@@ -552,19 +845,19 @@ Esta opción puede usarse para configurar algunas partes del sistema de entrada.
 Las rutas son relativas a ~/\:.mplayer/.
 .br
 .I NOTA:
-Autorepetición está soportada actualmente solo por palanca de juegos.
+Autorrepetición está soportada actualmente solo por palanca de juegos.
 .sp 1
 Las órdenes disponibles son:
 .sp 1
 .PD 0
 .RSs
-.IPs conf=<archivo>
+.IPs conf=<fichero>
 Leer input.conf alternativo.
 Si no se da la ruta completa, se asume ~/\:.mplayer/\:<archivo>.
 .IPs ar-delay
-Retardo en mseg antes de empezar a autorepetir una tecla (0 para deshabilitar).
+Retardo en mseg antes de empezar a autorrepetir una tecla (0 para deshabilitar).
 .IPs ar-rate
-Número de pulsaciones de tecla a generar por segundo en autorepetición.
+Número de pulsaciones de tecla a generar por segundo en autorrepetición.
 .IPs keylist
 Muestra todas las teclas a las que pueden asignarse órdenes.
 .IPs cmdlist
@@ -572,23 +865,34 @@ Muestra todas las órdenes para las que pueden asignarse teclas.
 .IPs js-dev
 Especifica el dispositivo de palanca de juegos a usar (por defecto:
 /dev/\:input/\:js0).
-.IPs "archivo\ "
+.IPs file=<fichero>
 Lee comandos desde el archivo dado.
 Esto es más útil con un fifo.
 .br
 .I NOTA:
-Cuando el archivo especificado es un fifo MPlayer lo abre de manera que pueda
+Cuando el fichero especificado es un fifo MPlayer lo abre de manera que pueda
 hacer 'echo "seek 10" > mp_pipe' y el pipe sigue siendo válido.
 .RE
 .PD 1
+.
+.TP
+.B \-key-fifo-size <2\-65000>
+Espeficia el tamaño del FIFO que almacena eventos de teclado (default: 10).
+Un FIFO de tamaño n puede almacenar (n-1) eventos.
+Si es demasiado pequeño se pueden perder algunos eventos (conduciendo
+a "botones de ratón pegados" y efectos similares).
+Si es demasiado grande puede parecer que MPlayer se cuelga
+mientras procesa los eventos almacenados.
+Esta opción se introdujo para obtener el mimso comportamiento que antes,
+establézcalo a 2 para Linux o a 1024 para Windows.
 .
 .TP
 .B \-lircconf <archivo> (LIRC solamente)
 Especifica un archivo de configuración para LIRC (por defecto: ~/\:.lircrc).
 .
 .TP
-.B \-list-options
-Imprime todas las opciones disponibles.
+.B \-list-properties
+Imprime todas las propiedades disponibles.
 .
 .TP
 .B \-loop <número>
@@ -600,12 +904,22 @@ Repite la reproducción de la película <número> veces.
 Activa soporte para menú OSD.
 .
 .TP
-.B \-menu-cfg <archivo> (menú OSD solamente)
+.B \-menu-cfg <fichero> (menú OSD solamente)
 Usa un menu.conf alternativo.
 .
 .TP
 .B \-menu-root <valor> (menú OSD solamente)
 Especifica el menú principal.
+.
+TP
+.B \-menu-startup (menú OSD solamente)
+Muestra el menú principal al comienzo de ejecución.
+.
+.TP
+.B \-mouse-movements
+Permite a MPlayer recibir eventos del puntero enviados por el controlador
+de vídeo de salida (actualmente sólo los derivados de X11 están soportados).
+Es necesario para seleccionar los botones en los menús de los DVD.
 .
 .TP
 .B \-noconsolecontrols
@@ -627,13 +941,17 @@ Desactiva el soporte para LIRC.
 .
 .TP
 .B \-nomouseinput (X11 solamente)
-Deshabilita la entrada de pulsar/\:soltar botón del ratón (el menú contextual
-de mozplayerxp se basa en esta opción).
+Deshabilita la entrada de pulsar/\:soltar botón del ratón (el menú
+contextual de mozplayerxp se basa en esta opción).
 .
 .TP
-.B \-nortc (RTC solamente) 
-Desactiva el uso del RTC de Linux (reloj en tiempo real \- /dev/\:rtc) como
-mecanismo de control de tiempo.
+.B \-rtc (RTC solamente) 
+Activa el uso del RTC de Linux (realtime clock \- /dev/\:rtc) como mecanismo
+de sincronización.
+Esto despierta el proceso cada 1/1024 para comprobar el tiempo actual.
+Es inútil con los kernels modernos de Linux configurados para escritorio
+ya que ellos despiertan el proceso con una precisión similar cuando usan
+el proceso normal de sueño.
 .
 .TP
 .B \-playlist <archivo>
@@ -648,9 +966,15 @@ después se aplican solo a los elementos de esta lista de reproducción.
 FIXME: Esto deber aclararse mejor.
 .
 .TP
-.B \-really-quiet (vea también \-quiet)
-Muestra todavía menos salida y mensajes de estado que con \-quiet.
-.
+.B \-playing-msg <cadena>
+Imprime una cadena antes de empezar la reproducción.
+Las siguientes expansiones están soportadas.
+.RSs
+.IPs ${NAME}
+Expande el valor de la propiedad NAME.
+.IPs $(NAME:TEXT)
+Expande TEXT sólo si la propiedad nombre esta disponible.
+.RE
 .TP
 .B \-rtc-device <dispositivo>
 Usa el dispositivo especificado para la temporización RTC.
@@ -691,10 +1015,6 @@ Tan preciso como RTC sin requerir privilegios especiales.
 Se paga el precio de un consumo alto de CPU.
 .
 .TP
-.B \-speed <0.01\-100>
-Decelera o acelera la reproducción con un factor dado como parámetro.
-.
-.TP
 .B \-sstep <seg>
 Muestra cada imagen durante <seg> segundos.
 Útil para presentaciones.
@@ -721,8 +1041,12 @@ Cuando se reproducen flujos MPEG-TS, MPlayer/\:MEncoder usará el primer programa
 (si está presente) con el flujo de audio elegido.
 .
 .TP
-.B \-alang <código de país de dos letras> (vea también \-aid) (DVD
-solamente)
+.B \-alang <código de país,[código de país, ...]> (vea también \-aid)
+Especifica una lista de prioridades de lenguaje de audio a usar.
+Diferentes formatos de contención usan diferentes códigos de lenguaje.
+Los DVDs usan ISO 639-1 códigos de lenguaje de dos letras, Matroska, MPEG-TS and NUT
+use ISO 639-2 códigos de lenguaje de tres letras, mientras OGM usa un identificador libre
+Mplayer imprime los lenguajes disponibles cuando se ejecuta en modo prolijo
 Selecciona el idioma de audio para el DVD y siempre intenta reproducir pistas
 cuyo lenguaje coincide con el código dado.
 MPlayer muestra una lista de los idiomas disponibles cuando se ejecuta
@@ -731,16 +1055,20 @@ en modo prolijo (\-v).
 .I EJEMPLO:
 .PD 0
 .RSs
-.IPs "\-alang es,en"
+.IPs "mplayer dvd://1 \-alang es,en"
 Reproduce en Español y cambia a Inglés si el Español no está disponible.
+.IPs "mplayer \-alang jpn example.mkv"
+Reproduce un fichero Matroska en japonés.
 .RE
 .PD 1
 .
 .TP
-.B \-audio-demuxer <número> (\-audiofile solo)
+.B \-audio-demuxer <número> (\-audiofile sólo)
 Fuerza el tipo de audio demuxer para \-audiofile.
-Tome el ID del demuxer como se define en libmpdemux/\:demuxer.h.
-\-audio-demuxer 17 fuerza MP3.
+Use un '+' delante del nombre para forzarlo, ¡esto evitará algunos chequeos!.
+Pásele al demuxer uno de los nombres de la lista imprimida por \-audio-demuxer help.
+Por compatibilidad con versiones anteriores también acepta el ID del demuxer como 
+se define en libmpdemux/\:demuxer.h \-audio-demuxer audio o \-audio-demuxer 17 fuerza MP3.
 .
 .TP
 .B \-audiofile <nombredearchivo>
@@ -757,16 +1085,14 @@ especificada de memoria.
 Especifica el máximo ancho de banda para el streaming de red (para
 servidores que son capaces de enviar contenido en diferentes bitrates).
 Útil si quiere ver contenido multimedia en vivo desde una conexión lenta.
-.
-.TP
-.B \-cdrom-device <ruta\ al\ dispositivo>
-Especifica el dispositivo de CD-ROM (por defecto: /dev/\:cdrom).
+Con streaming Real RTSP, también se usa para establecer ancho de banda máximo
+de envío, permitiendo un relleno de la cache más rápido y un volcado del stream.
 .
 .TP
 .B \-cache <kBytes>
-Esta opción especifica cuánta memoria (en KBytes) se usa para precachear
-un archivo o URL.
-Especialmente útil en medios lentos.
+Esta opción especifica cuanta memoria se usará (en kBytes) cuando se rellene
+la cache para reproducir un fichero o una URL.
+Especialmente útil para medios lentos.
 .
 .TP
 .B \-cache-min <porcentaje>
@@ -774,9 +1100,10 @@ La reproducción comenzará cuando el umbral de relleno de caché establecido
 con esta opción se alcance.
 .
 .TP
-.B \-cache-prefill <porcentaje> (aún no implementado)
-Cuando la caché se vacía MPlayer queda en pausa y reanuda la reproducción
-una vez que se ha alcanzado de nuevo el umbral establecido con esta opción.
+.B \-cache-seek-min <porcentaje>
+Si se tiene que realizar una búsqueda a una posición dentro de porcentaje del tamaño
+de la cache desde la posición actual, MPlayer esperará a que se llene la cache hasta
+esa posición en vez de realizar una búsqueda en el flujo (por defecto: 50).
 .
 .TP
 .B \-cdda <opción1:opción2> (CDDA solamente)
@@ -787,11 +1114,12 @@ Las opciones disponibles son:
 .IPs speed=<valor>
 Establece la velocidad del CD.
 .IPs paranoia=<0\-2>
-Establece el nivel de paranoia.
+Establece el nivel de paranoia. Otro valor que no sea 0 parece que impide
+la reproducción de cualquier cosa excepto la primera pista.
 .RSss
-0: deshabilita la comprobación
+0: deshabilita la comprobación (por defecto)
 .br
-1: solapa la comprobación solamente (por defecto)
+1: solapa la comprobación solamente 
 .br
 2: corrección y verificación completa
 .REss
@@ -805,7 +1133,8 @@ sectores.
 .IPs toc-bias
 Asume que el desplazamiento inicial de la pista 1 como viene dada en el TOC
 será direccionada como LBA\ 0.
-Algunas unidades Toshiba necesitan esto para obtener los límites de las pistas correctamente.
+Algunas unidades Toshiba necesitan esto para obtener los límites de las
+pistas correctamente.
 .IPs toc-offset=<valor>
 Añade <valor> sectores a los valores reportados cuando se direccionan pistas.
 Puede ser negativo.
@@ -814,21 +1143,20 @@ Puede ser negativo.
 .RE
 .
 .TP
-.B \-channels <número>
+.B \-cdrom-device <ruta al dispositivo>
+Especifica el dispositivo de CD-ROM (por defecto: /dev/cdrom).
+.TP
+.B \-channels <número> (vea también \-af canales)
 Cambia el número de canales de reproducción (por defecto: 2).
-Si el número de canales de salida es mayor que el número de canales de entrada
-se insertan canales vacíos (a menos que se mezcle de mono a estéreo, entonces
-el canal mono es repetido en ambos canales de salida).
-Si el número de canales de salida es menor que el número de canales de entrada,
-el resultado depende del decodificador de audio (\-afm).
-MPlayer pregunta al decodificador para decodificar el audio en tantos canales
-como se haya especificado.
-Ahora se coloca el decodificador hasta rellenar los requisitos.
-Si la salida del decodificador tiene más canales de los pedidos, los canales
-excedentes son truncados.
-Esto es normalmente importante solo cuando se reproducen videos con audio
-AC3 (como DVDs). En este caso liba52 decodifica por defecto y mezcla correctamente
-el audio en el número de canales requeridos.
+MPlayer pide al decodificador que decodifique el audio en tantos canales como
+se hayan especificado. Entonces depende del decodificador cumplir con la
+petición.
+Normalmente sólo es importante cuando se reproducen vídeos con audio AC3
+(como los DVDs).
+En ese caso la liba52 realiza la decodificación por defecto y mezcla
+correctamente el audio en el número de canales que se han pedido.
+Para controlar directamente el número de canales de salida independientemente
+de canales que han sido decodificados, use el filtro de canales
 .br
 .I NOTA:
 Esta opción es agradecida por los codecs (AC3 solo), filtros (surround) y
@@ -848,7 +1176,7 @@ surround
 .PD 1
 .
 .TP
-.B \-chapter <id\ del\ capítulo>[\-<id\ capítulo\ final>] (DVD solamente)
+.B \-chapter <id\ del\ capítulo>[\-<id\ capítulo\ final>] (dvd:// y dvdnav:// solamente)
 Especifica qué capítulo se empieza a reproducir.
 Opcionalmente se especifica en qué capítulo se termina la
 reproducción (por defecto: 1).
@@ -864,14 +1192,40 @@ y ~/.netscape/) en lugar de leer desde las ubicaciones por defecto.
 Se supone que el archivo está en formato de Netscape.
 .
 .TP
-.B \-demuxer <número>
+.B \-delay <sec>
+Establece el retraso en segundos (valor real positivo o negativo).
+.br
+.I NOTA:
+Cuando se usa con MEncoder, no se garantiza que funcione correctamente
+con \-ovc copy; use \-audio-delay en su lugar.
+.
+.TP
+.B \-ignore-start
+Ignora el tiempo de comienzo especificado para flujos en ficheros AVI.
+Con MPlayer esto anula los retrasos en los flujos de los ficheros codificados
+con la opción \-audio-delay.
+Durante la codificación, esta opción previene que MEncoder transfiera los
+tiempos de comienzo del flujo original al nuevo fichero; la
+opción \-audio-delay no se ve afectada.
+Tenga en cuenta que a veces MEncoder ajusta los tiempos de comienzo del flujo
+automáticamente para compensar con anticipación retrasos debidos a la
+codificación así que no use esta opción para codificar sin haberla probado
+primero.
+.
+.TP
+.B \-demuxer <[+]nombre>
 Fuerza el tipo de demuxer.
-Dado el ID del demuxer como se define en libmpdemux/demuxer.h
-\-demuxer 17 fuerza MP3.
+Use un '+' delante del nombre para forzarlo, ¡esto evitará algunas comprobaciones!.
+Pásele al demuxer uno de los nombres de la lista imprimida por \-demuxer help.
+Por compatibilidad con versiones anteriores también acepta el ID del demuxer como 
+se define en libmpdemux/\:demuxer.h \-demuxer audio o \-demuxer 17 fuerza MP3.
 .
 .TP
 .B \-dumpaudio (MPlayer solamente)
-Vuelca audio comprimido raw a ./stream.dump (útil con MPEG/\:AC3).
+Vuelca audio comprimido raw a ./stream.dump (útil con MPEG/\:AC3), en la mayoría del
+resto de casos el fichero resultante no será reproducible si utiliza más de un -dumpaudio,
+-dumpvideo, -dumpstream en la línea de comandos sólo funcionará el último que haya sido 
+especificado.
 .
 .TP
 .B \-dumpfile <nombredelarchivo> (MPlayer solamente)
@@ -882,10 +1236,14 @@ Debe ser usado junto con \-dumpaudio / \-dumpvideo / \-dumpstream.
 .B \-dumpstream (MPlayer solamente)
 Vuelca el flujo raw a ./stream.dump.
 Útil cuando se ripea desde DVD o red.
+Si utiliza más de un \-dumpaudio, \-dumpvideo, \-dumpstream en la línea de
+comandos sólo funcionará el último que haya sido especificado.
 .
 .TP
 .B \-dumpvideo (MPlayer solamente)
 Vuelca flujo de vídeo comprimido raw a ./stream.dump (no es muy usable).
+Si utiliza más de un -dumpaudio, \-dumpvideo, \-dumpstream en la línea
+de comandos sólo funcionará el último que haya sido especificado.
 .
 .TP
 .B \-dvbin <opciones> (DVB solamente)
@@ -900,17 +1258,69 @@ Especifica el número de tarjeta usada 1\-4 (por defecto: 1).
 Ordena a MPlayer que lea los canales desde la lista <archivo>.
 Por defecto es ~/.mplayer/\:channels.conf.{sat,ter,cbl} (basado en su tipo
 de tarjeta) o ~/.mplayer/\:channels.conf como última opción.
+.IPs timeout=<1\-30>
+Número máximo de segundos a esperar cuando configurar una frecuencia antes
+de darse por vencido (por defecto: 30).
 .RE
 .PD 1
 .
 .TP
 .B \-dvd-device <ruta\ al\ dispositivo> (DVD solamente)
 Especifica el dispositivo de DVD (por defecto: /dev/\:dvd).
+También puede especificar un directorio que contenga los ficheros copiados
+previamente directamente de un DVD (con p.e.\& vobcopy).
+Tenga en cuenta que usar \-dumpstream es normalmente una forma mejor 
+para copiar los títulos del DVD en primer lugar (vea los ejemplos).
+.
+.TP
+.B \-dvd-speed <factor o velocidad en KB/s> (DVD solamente)
+Intenta limitar la velocidad del DVD (por defecto: 0, sin cambios).
+La velocidad base del DVD 1350KB/s, así que un lector 8x puede leer a velocidades
+hasta 10800KB/s.
+Velocidades más pequeñas hacen la unidad más silenciosa, para ver
+DVDs 2700KB/s debería ser suficientemente rápido y silencioso.
+MPlayer resetea la velocidad del dispositivo a la velocidad por defecto al
+cerrarse p.e.\& \-dvd-speed 8 seleciona 10800KB/s.
+.br
+.I NOTA:
+Se necesita acceso de escritura al dispositivo de DVD para poder cambiar la velocidad.
 .
 .TP
 .B \-dvdangle <ángulo\ id> (DVD solamente)
 Algunos discos DVD contienen escenas que pueden verse desde múltiples ángulos.
 Aquí puede usted decirle a MPlayer qué ángulos desea usar (por defecto: 1).
+.
+.TP
+.B \-edl <nombredearchivo>
+Habilita acciones de edición de lista de decisión (EDL)  durante la reproducción.
+El video puede ser saltado y el audio silenciado y activado de acuerdo a unas
+entradas dadas en el archivo.
+Vea http://www.mplayer-hq.hu/DOCS/HTML/en/edl.html para detalles sobre como usar esta
+característica.
+.
+.TP
+.B \-endpos <[[hh:]mm:]ss[.ms]|tamaño[b|kb|mb]> (vea también \-ss y \-sb)
+Para en un tiempo o tamaño dado.
+.br
+.I NOTA:
+La posición por tamaño sólo está habilitada para MEncoder y no será precisa, ya que
+únicamente puede parar en un límite del frame.
+Cuando se usa en conjunción con la opción \-ss, el tiempo especificado por \-endpos
+se adelantará los segundos indicados por \-ss.
+.sp 1
+.I EJEMPLOS:
+.PD 0
+.RSs
+.IPs "\-endpos 56"
+Para a los 56 segundos.
+.IPs "\-endpos 01:10:00"
+Para a la hora y 10 minutos.
+.IPs "\-ss 10 \-endpos 56"
+Para al minuto y 6 segundos.
+.IPs "\-endpos 100mb"
+Sólo codifica 100 MB.
+.RE
+.PD 1
 .
 .TP
 .B \-forceidx
@@ -1023,10 +1433,73 @@ Si falla, usa IPv6 automáticamente.
 .B \-prefer-ipv6 (red solamente)
 Usa IPv6 para las conecciones de red.
 Si falla, usa IPv4 automáticamente.
+.TP
+.B \-pvr <opción1:opción2:...> (solamente PVR)
+Esta opción ajusta varias opciones del módulo de captura PVR.
+Tiene que usarse con cualquier hardware codificador MPEG soportado
+por el driver V4L2.
+Se conoce que funciona con Hauppauge WinTV PVR\-150/250/350/500
+y todas las tarjetas basadas en IVTV. Tenga en cuenta que sólo los kernels de Linux
+2.6.18 y superiores pueden manejar flujos MPEG a través de la capa V4L2.
+Para la captura y visionado de un flujo MPEG por hardware con MPlayer,MEncoder 
+use 'pvr://' como la url de la película.
+.sp 1
+Las opciones disponibles son:
+.RSs
+.IPs aspect=<0\-3>
+Especifica el ratio de la entrada:
+.RSss
+0: 1:1
+.br
+1: 4:3 (por defecto)
+.br
+2: 16:9
+.br
+3: 2.21:1
+.REss
+.IPs arate=<32000\-48000>
+Especifica el ratio de codificación del audio (por defecto: 48000 Hz,
+disponibles: 32000, 44100 y 48000 Hz).
+.IPs alayer=<1\-3>
+Especifica la capa de codificación MPEG para el audio (por defecto: 2).
+.IPs abitrate=<32\-448>
+Especifica el bitrate de codificación del audio (por defecto: 384).
+.IPs amode=<valor>
+Especifica el modo de codificación del audio.
+Los posibles valores son: 'stereo', 'joint_stereo', 'dual' y 'mono'
+(por defecto: stereo).
+.IPs vbitrate=<valor>
+Especifica el valor medio del bitrate de la codificación de vídeo
+(por defecto: 6).
+.IPs vmode=<valor>
+Especifica el valor de codificación de vídeo.
+.RSss
+vbr: BitRate variable (por defecto)
+.br
+cbr: BitRate constante
+.REss
+.IPs fmt=<valor>
+Escoge un formato MPEG para la codificación
+.RSss
+ps:    MPEG-2 Flujo de programa (por defecto)
+.br
+ts:    MPEG-2 Flujo de transporte
+.br
+mpeg1: MPEG-1 Flujo de sistema
+.br
+vcd:   Flujo compatible con Video CD
+.br
+svcd:  Flujo compatible con Super Video CD
+.br
+dvd:   Flujo compatible con DVD
+.REss
+.RE
+.PD 1
 .
 .TP
 .B \-rawaudio <opción1:opción2:...>
-Esta opción le permite reproducir archivos de audio raw.
+Esta opción le permite reproducir archivos de audio raw, debe usarse junto
+con la opción \-demuxer rawaudio.
 También puede usarse para reproducir audio CDs que no son 44KHz 16-bit
 estéreo.
 Para reproducir flujos crudos AC3 use \-rawaudio on:format=0x2000.
@@ -1035,8 +1508,6 @@ Las opciones disponibles son:
 .sp 1
 .PD 0
 .RSs
-.IPs "on\ \ \ "
-Usa demuxer de audio raw.
 .IPs channels=<valor>
 número de canales
 .IPs rate=<valor>
@@ -1046,37 +1517,63 @@ tamaño de la muestra en bytes
 .IPs bitrate=<valor>
 tasa de bits para archivos rawaudio
 .IPs format=<valor>
-fourcc en hex
+fourcc en hexadecimal
 .RE
 .PD 1
 .
 .TP
 .B \-rawvideo <opción1:opción2:...>
-Esta opción le permite reproducir videos raw.
+Esta opción le permite reproducir vídeos raw, debe usarse junto con
+la opción \-demuxer rawvideo.
 .sp 1
 Las opciones disponibles son:
 .sp 1
 .PD 0
 .RSs
-.IPs "on\ \ \ "
-Usa demuxer de video raw.
 .IPs fps=<valor>
 razón en imágenes por segundo (por defecto: 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
 establece tamaño estandar de imagen
 .IPs w=<valor>
-ancho de la imagen en pixels
+ancho de la imagen en píxeles
 .IPs h=<valor>
-alto de la imagen en pixels
+alto de la imagen en píxeles
 image height in pixels
 .IPs i420|yv12|yuy2|y8
 establece espacio de color
 .IPs format=<valor>
-espacio de color (fourcc) en hex
+espacio de color (fourcc) en hexadecimal
 .IPs size=<valor>
 tamaño de marco en Bytes
+.REss
+.sp 1
+.RS
+.I EJEMPLOS:
+.RE
+.PD 0
+.RSs
+.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif"
+Reproduce el famoso vídeo de ejemplo "foreman".
+.IPs "mplayer sample-720x576.yuv -demuxer rawvideo -rawvideo w=720:h=576"
+Reproduce un ejemplo como raw YUV.
 .RE
 .PD 1
+.
+.TP
+.B \-rtsp-port
+Usado junto con URLs 'rtsp://' para forzar el número de puerto del cliente.
+Esta opción puede ser útil si esta detrás de un router y quiere dirigir el
+flujo RTSP desde el servidor a un cliente específico.
+.
+.TP
+.B \-rtsp-destination
+Usado junto con URLs 'rtsp://' para forzar la dirección IP de destino a
+la que estar asociada.
+Esta opción puede ser útil para algunos servidores
+RTSP que no mandan paquetes RTP a la interfaz adecuada.
+Si la conexión al servidor RTSP falla, use la opción \-v para ver a que
+dirección IP está intentando asociarse MPlayer y trate de forzar la
+asociación con una IP asignada a su ordenador en su lugar.
 .
 .TP
 .B \-rtsp-stream-over-tcp (LIVE555 solamente)
@@ -1100,9 +1597,20 @@ Se posiciona en el byte indicado.
 principio.
 .
 .TP
+.B \-speed <0.01\-100>
+Acelera o ralentiza la reproducción por el factor pasado como parámetro.
+No se garantiza que funcione correctamente con la opción \-oac copy.
+.
+.TP
 .B \-srate <Hz>
-Elige la tasa de muestreo de salida, remuestreando si es necesario.
-MEncoder pasa este valor a LAME para remuestreado.
+Elige la tasa de muestreo de salida
+(por supuesto las tarjetas de sonido tienen limitaciones al respecto).
+Si la frecuencia seleccionada difiere de la existente en el medio seleccionado
+se insertará un filtro de audio de resample o lavcresample para compensar la
+diferencia.
+El tipo de resampleo puede ser controlado por la opción \-af-adv.
+La opción por defecto es usar el resampleo rápido que puede causar cierta
+distorsión.
 .
 .TP
 .B \-ss <tiempo> (vea también la opción \-sb)
@@ -1121,8 +1629,8 @@ Se posiciona en 1\ hora 10\ minutos.
 .TP
 .B \-tskeepbroken
 Le dice a MPlayer que no descarte paquetes TS detectados como no válidos
-en el medio que se esté reproduciendo. Algunas veces es necesario para
-reproducir archivos MPEG-TS corruptos.
+en el medio que se esté reproduciendo.
+Algunas veces es necesario para reproducir archivos MPEG-TS corruptos.
 .
 .TP
 .B \-tsprobe <posición\ byte>
@@ -1135,6 +1643,59 @@ deseados.
 Mientras se reproducen flujos MPEG-TS, puede especificar con ésta
 opción que programa (si está presente) desea reproducir.
 Puede ser usada con \-vid y \-aid.
+.
+.TP
+.B \-radio <opción1:opción2:...> (solamente radio)
+Esta opción ajusta varias propiedades del módulo de captura de radio.
+Para oír la radio con MPlayer use 'radio://frecuencia' (si la opción
+de canales no está dada) o 'radio://<número_canal>' (si la opción de
+canales está dada) como una URL de película. Puede ver el rango de 
+frecuencias permitidas ejecutando MPlayer con la opción '\-v'.
+Para iniciar el subsistema de grabación, use 'radio://<frecuencia
+o canal>/capture'. Si no se usa la palabra clave capture usted sólo
+puede escuchar la radio usando el cable de entrada.
+Usar la opción de captura para escuchar la radio no es nada recomendable
+debido a problemas de sincronización que hacen que el proceso no sea
+nada confortable.
+.sp 1
+Las opciones disponibles son:
+.RSs
+.IPs device=<valor>
+Dispositivo de radio a usar (por defecto: /dev/radio0 para Linux y /dev/tuner0 para *BSD).
+.IPs driver=<valor>
+Driver de radio a usar (por defecto: v4l2 si está disponible, en otro caso v4l).
+.IPs volume=<0..100>
+Volumen de sonido para el dispositivo de radio (por defecto: 100).
+.IPs freq_min=<valor> (solamente *BSD BT848)
+Frecuencia mínima permitida (por defecto: 87.50).
+.IPs freq_max=<valor> (solamente *BSD BT848)
+Frecuencia máxima permitida (por defecto: 108.00).
+.IPs channels=<frecuencia>\-<nombre>,<frecuencia>\-<nombre>,...
+Fija la lista de canales.
+Use _ para los espacios en los nombres, los canales entonces los nombres serán escritos
+usando OSD y los comandos slave radio_step_channel y radio_set_channel se podrán usar con
+un control remoto (vea también LIRC).
+Si se especifica la opción, un número en la URL de la película será tratado como una posición
+en la lista de canales.
+.br
+.I EJEMPLO:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<valor> (con la opción de radio capture habilitada)
+Nombre del dispositivo desde el que grabar. Sin este valor la grabación estará 
+deshabilitada incluso si la palabra clave capture aparece en la URL.
+Para dispositivos ALSA use el nombre en la forma de hw=<tarjeta>.<dispositivo>.
+Si el nombre del dispositivo contiene un '=', el módulo usará ALSA para grabar,
+en cualquier otro caso usará OSS.
+.IPs arate=<valor> (con la opción de radio capture habilitada)
+Tasa en muestras por segundo (por defecto: 44100).
+.br
+.I NOTA:
+Cuando use la captura de audio establezca también la opción \-rawaudio rate=<valor>
+con el mismo valor que arate. Si tiene problemas con la velocidad del sonido (va demasiado
+deprisa), pruebe cambiando el valor de la tasa (p.e.\& 48000,44100,32000,...).
+.IPs achannels=<valor> (con la opción de radio capture habilitada)
+Número de canales de audio que desea grabar.
+.RE
 .
 .TP
 .B \-tv <opción1:opción2:...> (TV solamente)
@@ -1160,7 +1721,7 @@ No compatible con el parámetro de los canales.
 .IPs outfmt=<valor>
 Especifica el formato de salida del sintonizador con un valor preestablecido
 soportado por el controlador V4L (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
-i420) o un formato arbitrario dado como valor hex.
+i420) o un formato arbitrario dado como valor hexadecimal.
 Pruebe outfmt=help para una lista de todos los formatos disponibles.
 .IPs width=<valor>
 anchura de la ventana de salida
@@ -1289,6 +1850,64 @@ Fuerza parámetros de audio para el demuxer VIVO (para pruebas).
 Vea también \-vf expand.
 .
 .TP
+.B \-ass (solamente FreeType)
+Activa el renderizado de subtítulos SSA/ASS.
+Con esta opción se usará libass para los subtítulos externos
+SSA/ASS y las pistas Matroska. Puede que también quiera usar
+la opción \-embeddedfonts.
+.
+.TP
+.B \-ass-border-color <valor>
+Establece el color del borde (contorno) para el texto de los subtítulos
+El formato del color es RRGGBBAA.
+.
+.TP
+.B \-ass-bottom-margin <valor>
+Añade una banda negra en la parte inferior de la imagen.
+El renderizador SSA/ASS puede poner los subtítulos ahí (con \-ass-use-margins).
+.
+.TP
+.B \-ass-color <valor>
+Establece el color del texto de los subtítulos
+El formato del color es RRGGBBAA.
+.
+.TP
+.B \-ass-font-scale <valor>
+Establece el coeficiente de la escala que se usará para las fuentes en el
+renderizador SSA/ASS.
+.
+.TP
+.B \-ass-force-style <[Estilo.]Parámetro=Valor[,...]>
+Sobreescribe algunos parámetros de estilo.
+.sp
+.I EJEMPLO:
+.PD 0
+.RSs
+\-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
+.TP
+.B \-ass-line-spacing <valor>
+Establece el valor del espaciado de línea para el renderizador SSA/ASS.
+.
+.TP
+.B \-ass-styles <nombre_de_fichero>
+Carga todos los estilos SSA/ASS encontrados en el fichero y los usa para
+renderizar los subtítulos.
+La sintaxis del fichero es exactamente como la sección
+[V4 Styles] / [V4+ Styles] de SSA/ASS.
+.
+.TP
+.B \-ass-top-margin <valor>
+Añade una banda negra en la parte superior de la imagen.
+El renderizador SSA/ASS puede poner los subtítulos ahí (con \-ass-use-margins).
+.
+.TP
+.B \-(no)ass-use-margins
+Habilita/deshabilita el uso de subtítulos inferiores y superiores en los
+bordes negros cuando estan disponibles (por defecto: no).
+.
+.TP
 .B \-dumpjacosub (MPlayer solamente)
 Convierte el subtítulo dado (especificado con la opción \-sub) al formato
 de subtítulo basado en tiempo JACOsub.
@@ -1317,14 +1936,31 @@ Crea un archivo dumpsub.smi en el directorio actual.
 Convierte el subtítulo dado (especificado con la opción \-sub) al formato
 de subtítulo basado en tiempo SubViewer (SRT).
 Crea un archivo dumpsub.srt en el directorio actual.
+.br
+.I NOTE:
+Algunos reproductores hardware se paran con ficheros de subtítulos SRT que
+usan acabados de línea Unix.
+Si es tan desafortunado de poseer uno de esos aparatos, pase los ficheros
+de subtítulos a través de unix2dos o algún programa similar para
+sustituir los acabados de líneas Unix por acabados de líneas DOS/Windows.
 .
 .TP
-.B \-dumpsub (MPlayer only) (CÓDIGO BETA)
+.B \-dumpsub (solamente MPlayer) (CÓDIGO BETA)
 Vuelca el flujo de subtítulo desde archivos VOB
 Vea también las opciones \-dump*sub y \-vobsubout*.
 .
 .TP
-.B \-ffactor <número> (OSD solamente)
+.B \-(no)embeddedfonts (solamente FreeType)
+Habilita la extracción de las fuentes incrustadas Matroska (por defecto: desactivado)
+Estas fuentes pueden ser usadas para el renderizado de subtítulos SSA/ASS (opción \-ass)
+Los ficheros de las fuentes se crean en el directorio ~/.mplayer/\:fonts
+.br
+.I NOTA:
+Con FontConfig 2.4.2 o superior, las fuentes incrustadas se abren directamente desde la
+memoria y esta opción está activada por defecto.
+.
+.TP
+.B \-ffactor <número>
 Muestreo mapa alpha de la tipografía.
 Puede ser:
 .PD 0
@@ -1345,7 +1981,13 @@ línea exterior negra gruesa
 Activa inversión de subtítulos usando FriBiDi.
 .
 .TP
-.B \-font <ruta\ a\ archivo\ font.desc> (OSD solamente)
+.B \-noflip-hebrew-commas
+Cambia la presuposición de FriBiDi sobre la posición de las comas en los subtítulos,
+Use esta opción si las comas en los subtítulos se ven al principio de la frase en vez
+de al final.
+.
+.TP
+.B \-font <ruta\ a\ archivo\ font.desc>
 Búsqueda de tipografías OSB/\:SUB en un directorio alternativo (por defecto
 para tipografías normales: ~/\:.mplayer/\:font/\:font.desc, por defecto para
 tipografías FreeType:
@@ -1391,6 +2033,10 @@ de subtítulos VOBsub.
 Desactiva carga automática de archivos de subtítulo.
 .
 .TP
+.B \-osd-duration <time>
+Establece la duración de los mensajes OSD en ms (por defecto: 1000).
+.
+.TP
 .B \-osdlevel <0\-3> (MPlayer solamente)
 Especifica en qué modo de OSD se debe iniciar.
 .
@@ -1414,28 +2060,34 @@ está aún visible (por defecto esto está habilitado solo para formatos
 específicos).
 .
 .TP
-.B \-sid <ID> (vea también la opción \-slang)
+.B \-sid <ID> (vea también la opción \-slang, \-vobsubid)
 Muestra los subtítulos de DVD en el idioma especificado por <ID> (0\-31).
 MPlayer muestra la lista de idiomas disponibles cuando se ejecuta en modo
 prolijo (\-v).
+Si no puede seleccionar uno de los subtítulos en un DVD, pruebe
+también con \-vobsubid.
 .
 .TP
 .B \-slang <código\ de\ país[,código\ de\ país,...]> (vea también \-sid)
-Especifica una lista de prioridades de idiomas de subtítulos de DVD a usar.
-Los idiomas deben darse como códigos de dos letras de país.
+Especifica una lista de idiomas de subtítulos a usar.
+Diferentes formatos de contención usan diferentes códigos de lenguaje.
+Los DVDs usan ISO 639-1 códigos de lenguaje de dos letras, Matroska, MPEG-TS and NUT
+use ISO 639-2 códigos de lenguaje de tres letras, mientras OGM usa un identificador libre
 MPlayer muestra la lista de idiomas disponibles cuando se ejecuta en modo
 prolijo (\-v).
 .sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
-.IPs "\-slang es,en"
+.IPs "mplayer \-slang es,en"
 Selecciona Español y vuelve a Inglés si el Español no está disponible.
+.IPs "mplayer \-slang jpn example.mkv"
+Reproduce un fichero Matroska con subtítulos en japonés.
 .RE
 .PD 1
 .
 .TP
-.B \-spuaa <modo> (OSD solamente)
+.B \-spuaa <modo>
 Modo antialias/\:escalado para DVD/\:VOBsub.
 Un valor de 16 puede añadirse al <modo> para forzar escalado incluso cuando
 la imagen original y la escalada coinciden en tamaño.
@@ -1497,9 +2149,12 @@ la intensidad del color.
 255 significa blanco y 0 negro.
 .
 .TP
-.B \-sub-demuxer <número> (solo con \-subfile) (CÓDIGO BETA)
+.B \-sub-demuxer <[+]nombre> (sólo con \-subfile) (CÓDIGO BETA)
 Fuerza el tipo de demuxer de subtítulos para \-subfile.
-Especifica ID de demuxer como está definido en subreader.h.
+Use un '+' delante del nombre para forzarlo, ¡esto evitará algunos chequeos!.
+Pásele al demuxer uno de los nombres de la lista imprimida por \-sub-demuxer help.
+Por compatibilidad con versiones anteriores también acepta el ID del demuxer como 
+se define en subreader.h.
 .
 .TP
 .B \-sub-fuzziness <modo>
@@ -1522,7 +2177,7 @@ subtítulos.
 Usado para pruebas. 
 .
 .TP
-.B \-subalign <0\-2> (OSD solamente)
+.B \-subalign <0\-2>
 Especifica cómo deben alinearse los subtítulos con \-subpos.
 .PD 0
 .RSs
@@ -1584,7 +2239,7 @@ Puede ser negativo.
 .
 .TP
 .B \-subfile <nombredearchivo> (CÓDIGO BETA)
-Actualmente no es útil.
+Actualmente la opción es inútil.
 Lo mismo que \-audiofile, pero para flujos de subtítulos (¿OggDS?).
 .TP
 .B \-subfont-autoscale <0\-3> (solamente FreeType)
@@ -1641,7 +2296,7 @@ defecto: fps de la película).
 Solo archivos SUB basados en imágenes, p.e.\& no el formato MicroDVD.
 .
 .TP
-.B \-subpos <0\-100> (útil con \-vf expand) (OSD solamente)
+.B \-subpos <0\-100> (útil con \-vf expand)
 Especifica la posición de los subtítulos en pantalla.
 El valor es la posición vertical de los subtítulos en % de la altura de pantalla.
 .TP
@@ -1649,6 +2304,18 @@ El valor es la posición vertical de los subtítulos en % de la altura de pantalla
 Especifica el ancho máximo de los subtítulos en pantalla.
 Útil para salida de TV.
 El valor es la anchura de los subtítulos en % del ancho de la pantalla.
+.
+.TP
+.B \-noterm-osd
+Deshabilita la escritura de mensajes OSD en la consola cuando ninguna salida
+de vídeo está disponible.
+.
+.TP
+.B \-term-osd-esc <secuencia de escape>
+Especifica la secuencia de escape a usar antes de escribir un mensaje OSD
+en la consola.
+La secuencia de escape debería mover el puntero al comienzo de la línea usada
+por el OSD y limpiarla (por defecto: ^[[A\\r^[[K).
 .
 .TP
 .B \-unicode
@@ -1668,7 +2335,6 @@ el '.idx', '.ifo' o '.sub'.
 .B \-vobsubid <0\-31>
 Especifica el ID del subtítulo VOBsub.
 .
-.TP
 .
 .
 .SH "OPCIONES DE SALIDA DE AUDIO (MPLAYER SOLAMENTE)"
