@@ -1,6 +1,6 @@
-LIBNAME = libvidix.a
-
 include ../config.mak
+
+LIBNAME = libvidix.a
 
 SRCS    = vidixlib.c
 OBJS	= $(SRCS:.c=.o)
