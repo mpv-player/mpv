@@ -3,7 +3,6 @@ include ../../config.mak
 SRCS_MPLAYER = $(wildcard *.c)
 
 VIDIX_LIBS   = -L../../libdha -ldha
-VIDIX_LIBS_M = $(VIDIX_LIBS) -lm
 
 CFLAGS           = -fPIC
 
@@ -22,15 +21,8 @@ rage128_vid.o: radeon_vid.c
 
 sis_vid.so: sis_vid.o sis_bridge.o
 
-cyberblade_vid.so: cyberblade_vid.o
-nvidia_vid.so: nvidia_vid.o
-mga_vid.so: mga_vid.o
-mga_crtc2_vid.so: mga_crtc2_vid.o
-unichrome_vid.so: unichrome_vid.o
-savage_vid.so: savage_vid.o
 cyberblade_vid.so nvidia_vid.so mga_vid.so mga_crtc2_vid.so unichrome_vid.so \
-savage_vid.so:
-	$(CC) -shared $< $(VIDIX_LIBS_M) -Wl,-soname,$@ -o $@
+savage_vid.so: VIDIX_LIBS += -lm
 
 include ../../mpcommon.mak
 
