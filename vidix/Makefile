@@ -1,16 +1,16 @@
 include ../config.mak
 
-LIBNAME = libvidix.a
+LIBNAME_MPLAYER = libvidix.a
 
-SRCS    = vidixlib.c
-OBJS	= $(SRCS:.c=.o)
+SRCS_MPLAYER    = vidixlib.c
+OBJS_MPLAYER	= $(SRCS_MPLAYER:.c=.o)
 
 CFLAGS  = $(OPTFLAGS)
 
-all:	$(LIBNAME)
+all:	$(LIBNAME_MPLAYER)
 	$(MAKE) -C drivers
 
-$(LIBNAME):	$(OBJS)
+$(LIBNAME_MPLAYER): $(OBJS_MPLAYER)
 	$(AR) r $@ $^
 	$(RANLIB) $@
 
@@ -23,7 +23,7 @@ distclean: clean
 	$(MAKE) -C drivers distclean
 
 dep depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) 1>.depend
 	$(MAKE) -C drivers depend
 
 -include .depend
