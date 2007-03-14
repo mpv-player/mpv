@@ -4,10 +4,10 @@ include ../../config.mak
 VIDIX_LIBS = -L../../libdha -ldha
 VIDIX_LIBS_M = $(VIDIX_LIBS) -lm
 VIDIX_LIBS_X = $(VIDIX_LIBS_M) $(X_LIB)
-VIDIX_CFLAGS = -fPIC -I. -I.. $(OPTFLAGS)
+CFLAGS = -fPIC -I. -I.. $(OPTFLAGS)
 
-RAGE128_CFLAGS=$(VIDIX_CFLAGS) -DRAGE128
-MGA_CRTC2_CFLAGS=$(VIDIX_CFLAGS) -DCRTC2
+RAGE128_CFLAGS=$(CFLAGS) -DRAGE128
+MGA_CRTC2_CFLAGS=$(CFLAGS) -DCRTC2
 
 all:    cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
         nvidia_vid.so mga_vid.so mga_crtc2_vid.so pm3_vid.so \
@@ -19,7 +19,7 @@ all:    cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
 # .PHONY: all clean
 
 %.o: %.c
-	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 %.so: %.o
 	$(CC) -shared $^ $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
