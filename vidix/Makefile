@@ -7,13 +7,6 @@ OBJS	= $(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS)
 
-.SUFFIXES: .c .o
-
-# .PHONY: all clean
-
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
 all:	$(LIBNAME) do_drivers
 
 do_drivers:
