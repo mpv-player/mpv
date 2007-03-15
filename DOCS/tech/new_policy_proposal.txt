@@ -219,7 +219,7 @@ Forking
 Communicating passwords
     Developers who have provided a public gpg key shall only receive
     passwords or other sensitive information related to mplayer encrypted
-    with their gpg key
+    with their gpg key or in another secure way
 
 
 V. Votes
