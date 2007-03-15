@@ -13,8 +13,8 @@
 #include <libdv/dv_types.h>
 
 #include "stream/stream.h"
-#include "demuxer.h"
-#include "stheader.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
 
 #include "vd_internal.h"
 

@@ -18,8 +18,8 @@
 #include "img_format.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
-#include "stheader.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
 #include "dec_video.h"
 
 #include "vd.h"

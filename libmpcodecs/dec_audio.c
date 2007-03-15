@@ -7,10 +7,10 @@
 #include "help_mp.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 
 #include "codec-cfg.h"
-#include "stheader.h"
+#include "libmpdemux/stheader.h"
 
 #include "dec_audio.h"
 #include "ad.h"

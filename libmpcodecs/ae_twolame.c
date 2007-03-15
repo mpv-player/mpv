@@ -6,11 +6,11 @@
 #include <sys/types.h>
 #include "m_option.h"
 #include "mp_msg.h"
-#include "aviheader.h"
+#include "libmpdemux/aviheader.h"
 #include "libaf/af_format.h"
-#include "ms_hdr.h"
+#include "libmpdemux/ms_hdr.h"
 #include "stream/stream.h"
-#include "muxer.h"
+#include "libmpdemux/muxer.h"
 #include "ae_twolame.h"
 #include "libmpdemux/mp3_hdr.h"
 

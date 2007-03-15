@@ -15,14 +15,14 @@
 #include "osdep/shmem.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
-#include "parse_es.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/parse_es.h"
 
 #include "codec-cfg.h"
 
 #include "libvo/video_out.h"
 
-#include "stheader.h"
+#include "libmpdemux/stheader.h"
 #include "vd.h"
 #include "vf.h"
 

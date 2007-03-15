@@ -8,11 +8,11 @@
 
 #include "codec-cfg.h"
 #include "stream/stream.h"
-#include "demuxer.h"
-#include "stheader.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
 
 #include "stream/stream.h"
-#include "muxer.h"
+#include "libmpdemux/muxer.h"
 
 #include "img_format.h"
 #include "mp_image.h"
