@@ -9,13 +9,13 @@
 #define dump_ImageDescription(x)
 #endif
 
-#include "wine/windef.h"
+#include "loader/wine/windef.h"
 
 #include "mp_msg.h"
 #include "vd_internal.h"
 
 #ifdef WIN32_LOADER
-#include "ldt_keeper.h"
+#include "loader/ldt_keeper.h"
 #endif
 
 static vd_info_t info = {
@@ -31,7 +31,7 @@ LIBVD_EXTERN(qtvideo)
 #include "bswap.h"
 
 #ifndef MACOSX
-#include "qtx/qtxsdk/components.h"
+#include "loader/qtx/qtxsdk/components.h"
 
 HMODULE   WINAPI LoadLibraryA(LPCSTR);
 FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);

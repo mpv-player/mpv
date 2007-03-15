@@ -11,7 +11,7 @@
 #include "help_mp.h"
 
 #include "vd_internal.h"
-#include "wine/windef.h"
+#include "loader/wine/windef.h"
 
 static vd_info_t info = {
 	"RealVideo decoder",

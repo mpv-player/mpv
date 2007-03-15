@@ -14,11 +14,11 @@
 #include "mpbswap.h"
 
 #ifdef WIN32_LOADER 
-#include "ldt_keeper.h" 
+#include "loader/ldt_keeper.h"
 #endif 
 
 #include "loader/qtx/qtxsdk/components.h"
-#include "wine/windef.h"
+#include "loader/wine/windef.h"
 
 #include "codec-cfg.h"
 #include "stream.h"

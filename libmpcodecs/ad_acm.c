@@ -6,7 +6,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "wineacm.h"
+#include "loader/wineacm.h"
 
 #include "ad_internal.h"
 #include "osdep/timer.h"

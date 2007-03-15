@@ -15,10 +15,10 @@
 //#include "demuxer.h"
 //#include "stheader.h"
 
-#include "loader.h"
-//#include "wine/mmreg.h"
-#include "wine/vfw.h"
-#include "wine/avifmt.h"
+#include "loader/loader.h"
+//#include "loader/wine/mmreg.h"
+#include "loader/wine/vfw.h"
+#include "loader/wine/avifmt.h"
 
 #include "img_format.h"
 #include "mp_image.h"

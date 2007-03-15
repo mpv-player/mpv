@@ -19,7 +19,7 @@ static ad_info_t info =
 
 LIBAD_EXTERN(dshow)
 
-#include "dshow/DS_AudioDecoder.h"
+#include "loader/dshow/DS_AudioDecoder.h"
 
 static int init(sh_audio_t *sh)
 {
