@@ -29,7 +29,7 @@
 #include "libass/ass_mp.h"
 
 #ifdef USE_QTX_CODECS
-#include "qtx/qtxsdk/components.h"
+#include "loader/qtx/qtxsdk/components.h"
 #endif
 
 #ifdef HAVE_ZLIB

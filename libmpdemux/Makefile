@@ -65,8 +65,6 @@ SRCS_MENCODER = muxer.c \
 SRCS_MENCODER-$(CONFIG_LIBAVFORMAT)     += muxer_lavf.c
 SRCS_MENCODER-$(CONFIG_LIBAVFORMAT_SO)  += muxer_lavf.c
 
-CFLAGS = -I../loader
-
 CFLAGS-$(CONFIG_LIBAVUTIL)      += -I../libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC)     += -I../libavcodec
 CFLAGS-$(CONFIG_LIBAVFORMAT)    += -I../libavformat

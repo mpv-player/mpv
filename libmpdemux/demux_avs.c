@@ -32,10 +32,10 @@
 #include "stheader.h"
 #include "libvo/fastmemcpy.h"
 
-#include "wine/windef.h"
+#include "loader/wine/windef.h"
 
 #ifdef WIN32_LOADER
-#include "ldt_keeper.h"
+#include "loader/ldt_keeper.h"
 #endif
 
 #include "demux_avs.h"
