@@ -18,8 +18,7 @@ SRCS_COMMON-$(TARGET_ALTIVEC) += dct64_altivec.c
 
 include ../mpcommon.mak
 
-decode_i586.o: decode_i586.c
-	$(CC) -c $(CFLAGS) -fomit-frame-pointer -o $@ $<
+decode_i586.o: CFLAGS += -fomit-frame-pointer
 
 %: %.c $(LIBNAME_COMMON) ../libvo/aclib.o ../mp_msg-mencoder.o ../cpudetect.o ../osdep/getch2.o
 	$(CC) $(CFLAGS) -o $@ $^ -ltermcap -lm
