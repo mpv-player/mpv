@@ -136,8 +136,9 @@ Cosmetics
    indentation changes (try to avoid this), separate them strictly from real
    changes.
 
-   NOTE: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
-   do NOT change the indentation of the inner part (don't move it to the right)!
+   NOTE: If you had to put if()@{ .. @} over a large (> 5 lines) chunk of code,
+   then either do NOT change the indentation of the inner part within (don't
+   move it to the right)! or do so in a separate commit
 
 
 Commit log message
