@@ -6089,7 +6089,7 @@ EOF
                  $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
                  $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a \
                  $_ld_extra  -lstdc++" \
-      _inc_extra="$_inc_extra -I$_livelibdir/liveMedia/include \
+      _inc_extraxx="-I$_livelibdir/liveMedia/include \
                   -I$_livelibdir/UsageEnvironment/include \
                   -I$_livelibdir/BasicUsageEnvironment/include \
                   -I$_livelibdir/groupsock/include" && \
@@ -7466,6 +7466,7 @@ RANLIB = $_ranlib
 LDCONFIG = $_ldconfig
 INSTALL = $_install
 EXTRA_INC = $_inc_extra
+EXTRAXX_INC = $_inc_extraxx
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
 INSTALLSTRIP = $_install_strip
 CHARSET = $_charset

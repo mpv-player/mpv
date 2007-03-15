@@ -71,6 +71,6 @@ CFLAGS-$(CONFIG_LIBAVUTIL)      += -I../libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC)     += -I../libavcodec
 CFLAGS-$(CONFIG_LIBAVFORMAT)    += -I../libavformat
 
-CXXFLAGS  = $(subst -Wdeclaration-after-statement,,$(CFLAGS)) -D__STDC_LIMIT_MACROS
+CXXFLAGS  = $(subst -Wdeclaration-after-statement,,$(CFLAGS)) -D__STDC_LIMIT_MACROS $(EXTRAXX_INC)
 
 include ../mpcommon.mak
