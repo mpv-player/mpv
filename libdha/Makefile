@@ -4,13 +4,12 @@ MAJOR_VERSION = 1
 MINOR_VERSION = 0
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION)
 
+LIBNAME = libdha.so.$(VERSION)
 SHORTNAME = libdha.so.$(MAJOR_VERSION)
 VSHORTNAME = libdha.so
 ifeq ($(TARGET_WIN32),yes)
 LIBNAME = libdha.a
 SHORTNAME = libdha.a
-else
-LIBNAME = libdha.so.$(VERSION)
 endif
 
 SRCS_MPLAYER = libdha.c \
