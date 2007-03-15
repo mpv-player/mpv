@@ -28,7 +28,7 @@ CFLAGS = -fPIC -I. -I.. $(OPTFLAGS)
 
 ifeq ($(TARGET_OS),OpenBSD)
 ifeq ($(TARGET_ARCH_X86),yes)
-LIBS += -li386
+EXTRALIBS += -li386
 endif
 endif
 
@@ -45,7 +45,7 @@ $(LIBNAME): $(OBJS_MPLAYER)
 ifeq ($(TARGET_WIN32),yes)
 	$(AR) r $@ $^
 else
-	$(CC) -shared -Wl,-soname -Wl,$@ -o $@ $^ $(LIBS)
+	$(CC) -shared -Wl,-soname -Wl,$@ -o $@ $^ $(EXTRALIBS)
 	ln -sf $@ $(SHORTNAME)
 	ln -sf $@ $(VSHORTNAME)
 endif
