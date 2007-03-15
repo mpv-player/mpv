@@ -12,6 +12,4 @@ SRCS_COMMON = ass.c \
               ass_library.c \
               ass_font.c \
 
-CFLAGS  = -I../libmpcodecs
-
 include ../mpcommon.mak
