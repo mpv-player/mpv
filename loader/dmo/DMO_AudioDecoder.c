@@ -9,7 +9,7 @@
 #include "audiodecoder.h"
 #include "except.h"
 #else
-#include "libwin32.h"
+#include "dshow/libwin32.h"
 #ifdef WIN32_LOADER
 #include "ldt_keeper.h"
 #endif

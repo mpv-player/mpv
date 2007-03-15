@@ -5,8 +5,8 @@
 
 *********************************************************/
 #include "config.h"
-#include "guids.h"
-#include "interfaces.h"
+#include "dshow/guids.h"
+#include "dshow/interfaces.h"
 #include "registry.h"
 #ifdef WIN32_LOADER
 #include "../ldt_keeper.h"
@@ -15,7 +15,7 @@
 #ifndef NOAVIFILE_HEADERS
 #include "videodecoder.h"
 #else
-#include "libwin32.h"
+#include "dshow/libwin32.h"
 #endif
 #include "DMO_Filter.h"
 

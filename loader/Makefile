@@ -2,7 +2,7 @@ include ../config.mak
 
 LIBNAME_COMMON = libloader.a
 
-CFLAGS= -Idshow -DMPLAYER -D__WINE__ -DNOAVIFILE_HEADERS
+CFLAGS= -DMPLAYER -D__WINE__ -DNOAVIFILE_HEADERS
 #CFLAGS+=-Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
 
 SRCS_COMMON  = driver.c afl.c vfl.c
