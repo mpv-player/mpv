@@ -2,8 +2,7 @@ include ../config.mak
 
 MAJOR_VERSION = 1
 MINOR_VERSION = 0
-VERSION = $(MAJOR_VERSION).$(MINOR_VERSION) 
-
+VERSION = $(MAJOR_VERSION).$(MINOR_VERSION)
 
 ifeq ($(TARGET_OS),CYGWIN)
 SHORTNAME = libdha.dll
@@ -19,13 +18,13 @@ LIBNAME = libdha.so.$(VERSION)
 endif
 
 SRCS_MPLAYER = libdha.c \
-     mtrr.c \
-     pci.c \
-     pci_names.c \
+               mtrr.c \
+               pci.c \
+               pci_names.c \
 
-OBJS_MPLAYER=$(SRCS_MPLAYER:.c=.o)
+OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
-CFLAGS  = -fPIC -I. -I.. $(OPTFLAGS)
+CFLAGS = -fPIC -I. -I.. $(OPTFLAGS)
 
 ifeq ($(TARGET_OS),OpenBSD)
 ifeq ($(TARGET_ARCH_X86),yes)
