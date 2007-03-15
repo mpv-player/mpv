@@ -4,12 +4,9 @@ MAJOR_VERSION = 1
 MINOR_VERSION = 0
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION)
 
-LIBNAME = libdha.so.$(VERSION)
-SHORTNAME = libdha.so.$(MAJOR_VERSION)
-VSHORTNAME = libdha.so
+LIBNAME = libdha.so
 ifeq ($(TARGET_WIN32),yes)
 LIBNAME = libdha.a
-SHORTNAME = libdha.a
 endif
 
 SRCS_MPLAYER = libdha.c \
@@ -41,8 +38,8 @@ ifeq ($(TARGET_WIN32),yes)
 	$(AR) r $@ $^
 else
 	$(CC) -shared -Wl,-soname -Wl,$@ -o $@ $^ $(EXTRALIBS)
-	ln -sf $@ $(SHORTNAME)
-	ln -sf $@ $(VSHORTNAME)
+	ln -sf $@ $@.$(VERSION)
+	ln -sf $@ $@.$(MAJOR_VERSION)
 endif
 
 pci_names.c:	oth/pci.db
@@ -63,11 +60,11 @@ dep depend: pci_names.c
 install:
 	-mkdir -p $(LIBDIR)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
-	ln -sf $(LIBNAME) $(LIBDIR)/$(SHORTNAME)
+	ln -sf $(LIBNAME) $(LIBDIR)/$(LIBNAME).$(MAJOR_VERSION)
 	-$(LDCONFIG)
 
 uninstall:
-	rm -f $(LIBDIR)/libdha.so $(LIBDIR)/$(SHORTNAME) $(LIBDIR)/$(LIBNAME)
+	rm -f $(LIBDIR)/$(LIBNAME) $(LIBDIR)/$(LIBNAME).$(MAJOR_VERSION) $(LIBDIR)/$(LIBNAME).$(VERSION)
 	-$(LDCONFIG)
 
 -include .depend
