@@ -4,12 +4,8 @@ MAJOR_VERSION = 1
 MINOR_VERSION = 0
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION)
 
-ifeq ($(TARGET_OS),CYGWIN)
-SHORTNAME = libdha.dll
-else
 SHORTNAME = libdha.so.$(MAJOR_VERSION)
 VSHORTNAME = libdha.so
-endif
 ifeq ($(TARGET_WIN32),yes)
 LIBNAME = libdha.a
 SHORTNAME = libdha.a
