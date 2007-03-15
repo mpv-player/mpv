@@ -39,7 +39,7 @@ ifneq ($(wildcard svgalib_helper),)
 CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
 endif
 
-all: pci_names.c $(LIBNAME) $(SHORTNAME)
+all: pci_names.c $(LIBNAME)
 
 $(LIBNAME): $(OBJS_MPLAYER)
 ifeq ($(TARGET_WIN32),yes)
