@@ -113,10 +113,6 @@ Splitting changes
    keeping changes well split makes reviewing and understanding them on 
    svn log at the time of commit and later when debugging a bug much easier
 
-Compiler Warning fixes
-   Do not change code to hide warnings without ensuring that the underlaying
-   logic is correct and thus the warning was inappropriate
-
 4. Do not change behavior of the program (renaming options etc) or
    remove functionality from the code without approval in a discussion on
    the mplayer-dev-eng mailing list.
@@ -195,6 +191,11 @@ Public discussions
     mplayer-dev-eng mailing list, so that all developers can benefit from them.
     IRC is good for quick discussions, but nobody is there 24/7.
     also subscribe to the public developer mailing list
+
+
+Compiler Warning fixes
+   Do not change code to hide warnings without ensuring that the underlaying
+   logic is correct and thus the warning was inappropriate
 
 
 Patches
