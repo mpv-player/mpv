@@ -115,6 +115,7 @@ darwin()  { issystem "Darwin"  ; return "$?" ; }
 gnu()     { issystem "GNU"     ; return "$?" ; }
 mingw32() { issystem "MINGW32" ; return "$?" ; }
 morphos() { issystem "MorphOS" ; return "$?" ; }
+amigaos() { issystem "AmigaOS" ; return "$?" ; }
 win32()   { cygwin || mingw32  ; return "$?" ; }
 beos()    { issystem "BEOS"    ; return "$?" ; }
 
@@ -1147,7 +1148,7 @@ if test -z "$_target" ; then
   # OS name
   system_name=`uname -s 2>&1`
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS|MorphOS|AIX)
+  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS|MorphOS|AIX|AmigaOS)
     ;;
   IRIX*)
     system_name=IRIX
@@ -1222,6 +1223,7 @@ else # if test -z "$_target"
     sunos) system_name=SunOS ;;
     qnx) system_name=QNX ;;
     morphos) system_name=MorphOS ;;
+    amigaos) system_name=AmigaOS ;;
     mingw32msvc) system_name=MINGW32 ;;
   esac
   # We need to convert underscores so that values like k6-2 and pentium-mmx can be passed
@@ -1289,6 +1291,13 @@ if win32 ; then
 fi
 
 if mingw32 ; then
+  _stream_cache=no
+  _def_stream_cache="#undef USE_STREAM_CACHE"
+fi
+
+if amigaos ; then
+  _select=no
+  _sighandler=no
   _stream_cache=no
   _def_stream_cache="#undef USE_STREAM_CACHE"
 fi
@@ -7166,6 +7175,9 @@ if darwin ; then
   # libavcodec (from ffmpeg) requires CONFIG_DARWIN to enable AltiVec on Darwin/MacOSX
   test "$_altivec" = yes && CFLAGS="$CFLAGS -DCONFIG_DARWIN"
 fi
+if amigaos ; then
+  CFLAGS="$CFLAGS -DNEWLIB -D__USE_INLINE__ -DSYS_AMIGAOS4"
+fi
 if hpux ; then
   # use flag for HPUX missing setenv()
   CFLAGS="$CFLAGS -DHPUX"
@@ -8132,6 +8144,9 @@ $_def_vcd
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 #define DEFAULT_CDROM_DEVICE	"/dev/acd0"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(SYS_AMIGAOS4)
+#define DEFAULT_CDROM_DEVICE    "a1ide.device:2"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #else
 #define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
