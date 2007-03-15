@@ -57,8 +57,7 @@ test: $(SHORTNAME)
 	$(CC) test.c -o $@ $^
 
 clean:
-	rm -f *.o *.a *~ *.so *.so.*
-	rm -f pci_*.c pci_*.h pci.db
+	rm -f *.o *.a *~ *.so *.so.* pci_*.c pci_*.h pci.db
 
 distclean: clean
 	rm -f .depend test
