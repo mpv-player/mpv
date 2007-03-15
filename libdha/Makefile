@@ -18,12 +18,12 @@ else
 LIBNAME = libdha.so.$(VERSION)
 endif
 
-SRCS=libdha.c \
+SRCS_MPLAYER = libdha.c \
      mtrr.c \
      pci.c \
      pci_names.c \
 
-OBJS=$(SRCS:.c=.o)
+OBJS_MPLAYER=$(SRCS_MPLAYER:.c=.o)
 
 CFLAGS  = -fPIC -I. -I.. $(OPTFLAGS)
 
@@ -42,7 +42,7 @@ endif
 
 all: pci_names.c $(LIBNAME) $(SHORTNAME)
 
-$(LIBNAME):     $(OBJS)
+$(LIBNAME): $(OBJS_MPLAYER)
 ifeq ($(TARGET_WIN32),yes)
 	$(AR) r $@ $^
 else
@@ -65,7 +65,7 @@ distclean: clean
 	rm -f .depend test
 
 dep depend: pci_names.c
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) 1>.depend
 
 install:
 	-mkdir -p $(LIBDIR)
