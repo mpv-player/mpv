@@ -105,13 +105,13 @@ Testing code
 
 Splitting changes
    Do not commit unrelated changes together, split them into self-contained
-   pieces.
-   if you have any doubt discuss it on the developer mailing list before
-   committing, also when in doubt more splitting is better then less, changes
-   which are larger then 10kbyte generally should be split into several
-   incremental changes if possible even if you think they are all related
-   keeping changes well split makes reviewing and understanding them on 
-   svn log at the time of commit and later when debugging a bug much easier
+   pieces. Also dont forget that if part B depends on part A but A doesnt
+   depend on B, then A can and should be commited first and seperately from B.
+   Keeping changes well split into self contained parts makes reviewing and
+   understanding them on svn log at the time of commit and later when
+   debugging a bug much easier.
+   Also if you have doubt about spliting or not spliting, dont hesitate to
+   ask/disscuss it on the developer mailing list.
 
 4. Do not change behavior of the program (renaming options etc) or
    remove functionality from the code without approval in a discussion on
