@@ -16,9 +16,6 @@ SRCS_COMMON-$(TARGET_SSE)     += dct64_sse.c
 endif
 ifeq ($(TARGET_ALTIVEC),yes)
 SRCS_COMMON += dct64_altivec.c
-ifeq ($(TARGET_OS),Darwin)
-CFLAGS += -faltivec
-endif
 endif
 
 include ../mpcommon.mak
