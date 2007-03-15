@@ -18,8 +18,6 @@ ifeq ($(TARGET_ALTIVEC),yes)
 SRCS_COMMON += dct64_altivec.c
 ifeq ($(TARGET_OS),Darwin)
 CFLAGS += -faltivec
-else
-CFLAGS += -maltivec -mabi=altivec
 endif
 endif
 
