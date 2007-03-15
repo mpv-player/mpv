@@ -21,11 +21,11 @@
 #include "loader/wine/windef.h"
 
 #include "codec-cfg.h"
-#include "stream.h"
+#include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "stream.h"
+#include "stream/stream.h"
 #include "muxer.h"
 
 #include "img_format.h"
