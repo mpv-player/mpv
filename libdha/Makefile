@@ -14,9 +14,7 @@ SRCS_MPLAYER = libdha.c \
                pci.c \
                pci_names.c \
 
-OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
-
-CFLAGS = -fPIC -I. -I.. $(OPTFLAGS)
+CFLAGS = -fPIC
 
 ifeq ($(TARGET_OS),OpenBSD)
 ifeq ($(TARGET_ARCH_X86),yes)
@@ -33,6 +31,8 @@ endif
 
 all: pci_names.c $(LIBNAME)
 
+include ../mpcommon.mak
+
 $(LIBNAME): $(OBJS_MPLAYER)
 ifeq ($(TARGET_WIN32),yes)
 	$(AR) r $@ $^
@@ -48,14 +48,13 @@ pci_names.c:	oth/pci.db
 test: pci.o
 	$(CC) test.c -o $@ $^
 
-clean:
-	rm -f *.o *.a *~ *.so *.so.* pci_*.c pci_*.h pci.db
+clean::
+	rm -f *.so *.so.* pci_*.c pci_*.h pci.db
 
-distclean: clean
-	rm -f .depend test
+distclean::
+	rm -f test
 
-dep depend: pci_names.c
-	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) 1>.depend
+dep depend:: pci_names.c
 
 install:
 	-mkdir -p $(LIBDIR)
@@ -66,5 +65,3 @@ install:
 uninstall:
 	rm -f $(LIBDIR)/$(LIBNAME) $(LIBDIR)/$(LIBNAME).$(MAJOR_VERSION) $(LIBDIR)/$(LIBNAME).$(VERSION)
 	-$(LDCONFIG)
-
--include .depend
