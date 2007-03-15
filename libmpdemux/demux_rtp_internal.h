@@ -5,7 +5,7 @@
 
 extern "C" {
 #ifndef __STREAM_H
-#include "stream.h"
+#include "stream/stream.h"
 #endif
 #ifndef __DEMUXER_H
 #include "demuxer.h"

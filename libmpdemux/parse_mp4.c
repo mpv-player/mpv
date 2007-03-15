@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include "parse_mp4.h"
 #include "mp_msg.h"
-#include "stream.h"
+#include "stream/stream.h"
 
 //#define MP4_DUMPATOM
 

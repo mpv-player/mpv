@@ -13,7 +13,7 @@
 #include "mp_msg.h"
 #include "libavutil/common.h"
 #include "mpbswap.h"
-#include "stream.h"
+#include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
 

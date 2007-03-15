@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 
-#include "stream.h"
+#include "stream/stream.h"
 #include "ebml.h"
 #include "libavutil/common.h"
 #include "mpbswap.h"

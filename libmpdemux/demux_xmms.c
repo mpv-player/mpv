@@ -33,7 +33,7 @@
 
 #include "m_option.h"
 #include "libaf/af_format.h"
-#include "stream.h"
+#include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
 

@@ -9,7 +9,7 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 
-#include "stream.h"
+#include "stream/stream.h"
 #include "muxer.h"
 
 static muxer_stream_t* rawaudiofile_new_stream(muxer_t *muxer,int type){

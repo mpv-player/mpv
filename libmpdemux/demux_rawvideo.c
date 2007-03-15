@@ -8,7 +8,7 @@
 
 #include "m_option.h"
 
-#include "stream.h"
+#include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
 

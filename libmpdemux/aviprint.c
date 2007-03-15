@@ -6,7 +6,7 @@
 #include "config.h"
 
 // for avi_stream_id():
-#include "stream.h"
+#include "stream/stream.h"
 #include "demuxer.h"
 
 #include "aviheader.h"

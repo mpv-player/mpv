@@ -19,7 +19,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
-#include "stream.h"
+#include "stream/stream.h"
 
 #include "mf.h"
 

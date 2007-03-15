@@ -12,7 +12,7 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 
-#include "stream.h"
+#include "stream/stream.h"
 #include "muxer.h"
 #include "demuxer.h"
 #include "stheader.h"

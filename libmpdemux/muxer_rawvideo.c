@@ -8,13 +8,13 @@
 #include "config.h"
 #include "version.h"
 
-//#include "stream.h"
+//#include "stream/stream.h"
 //#include "demuxer.h"
 //#include "stheader.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
 
-#include "stream.h"
+#include "stream/stream.h"
 #include "muxer.h"
 
 static muxer_stream_t* rawvideofile_new_stream(muxer_t *muxer,int type){

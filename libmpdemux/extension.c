@@ -5,7 +5,7 @@
 
 #include "config.h"
 
-#include "stream.h"
+#include "stream/stream.h"
 #include "demuxer.h"
 
 /*
