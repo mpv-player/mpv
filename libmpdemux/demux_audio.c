@@ -453,7 +453,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
       chunk_size = stream_read_dword_le(demuxer->stream);
       if (chunk_type != mmioFOURCC('d', 'a', 't', 'a'))
         stream_skip(demuxer->stream, chunk_size);
-    } while (chunk_type != mmioFOURCC('d', 'a', 't', 'a'));
+    } while (!s->eof && chunk_type != mmioFOURCC('d', 'a', 't', 'a'));
     demuxer->movi_start = stream_tell(s);
     demuxer->movi_end = chunk_size ? demuxer->movi_start + chunk_size : s->end_pos;
 //    printf("wav: %X .. %X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
