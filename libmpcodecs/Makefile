@@ -148,7 +148,6 @@ SRCS_MENCODER-$(MP3LAME)              += ae_lame.c
 
 
 CFLAGS  = -I../libmpdemux \
-          -I../stream \
 
 CFLAGS-$(CONFIG_LIBAVUTIL)    +=  -I../libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC)   +=  -I../libavcodec

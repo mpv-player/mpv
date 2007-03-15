@@ -14,7 +14,7 @@
 #include "osdep/timer.h"
 #include "osdep/shmem.h"
 
-#include "stream.h"
+#include "stream/stream.h"
 #include "demuxer.h"
 #include "parse_es.h"
 
