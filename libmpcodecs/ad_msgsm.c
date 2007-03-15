@@ -16,7 +16,7 @@ static ad_info_t info =
 
 LIBAD_EXTERN(msgsm)
 
-#include "xa_gsm.h"
+#include "native/xa_gsm.h"
 
 static int init(sh_audio_t *sh_audio)
 {

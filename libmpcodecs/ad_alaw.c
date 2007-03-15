@@ -16,7 +16,7 @@ static ad_info_t info =
 
 LIBAD_EXTERN(alaw)
 
-#include "alaw.h"
+#include "native/alaw.h"
 
 static int init(sh_audio_t *sh_audio)
 {

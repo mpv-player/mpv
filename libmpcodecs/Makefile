@@ -147,8 +147,7 @@ SRCS_MENCODER-$(TWOLAME)              += ae_twolame.c
 SRCS_MENCODER-$(MP3LAME)              += ae_lame.c
 
 
-CFLAGS  = -Inative \
-          -I../libmpdemux \
+CFLAGS  = -I../libmpdemux \
           -I../stream \
 
 CFLAGS-$(CONFIG_LIBAVUTIL)    +=  -I../libavutil
