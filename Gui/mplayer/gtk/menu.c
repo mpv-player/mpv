@@ -3,21 +3,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../config.h"
-#include "../../help_mp.h"
-#include "../../mplayer.h"
-#include "../../access_mpcontext.h"
-#include "../../mixer.h"
+#include "config.h"
+#include "help_mp.h"
+#include "mplayer.h"
+#include "access_mpcontext.h"
+#include "mixer.h"
 
-#include "../app.h"
+#include "app.h"
 
 #include "menu.h"
 #include "../widgets.h"
 #include "app.h"
 
-#include "../../stream/stream.h"
-#include "../../libmpdemux/demuxer.h"
-#include "../../libmpdemux/stheader.h"
+#include "stream/stream.h"
+#include "../libmpdemux/demuxer.h"
+#include "../libmpdemux/stheader.h"
 
 #include "../pixmaps/ab.xpm"
 #include "../pixmaps/half.xpm"

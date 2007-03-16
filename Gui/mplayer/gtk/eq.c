@@ -9,13 +9,13 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "../app.h"
-#include "../cfg.h"
-#include "../../config.h"
-#include "../../help_mp.h"
-#include "../../mplayer.h"
-#include "../../libaf/equalizer.h"
-#include "../../libvo/video_out.h"
+#include "app.h"
+#include "cfg.h"
+#include "config.h"
+#include "help_mp.h"
+#include "mplayer.h"
+#include "libaf/equalizer.h"
+#include "libvo/video_out.h"
 #include "../widgets.h"
 #include "mplayer.h"
 

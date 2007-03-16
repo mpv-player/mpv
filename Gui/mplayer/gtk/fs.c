@@ -7,17 +7,17 @@
 #include <unistd.h>
 
 #include "../gmplayer.h"
-#include "../../mplayer.h"
+#include "mplayer.h"
 
 #include "mplayer/pixmaps/up.xpm"
 #include "mplayer/pixmaps/dir.xpm"
 #include "mplayer/pixmaps/file.xpm"
 
-#include "../app.h"
-#include "../interface.h"
-#include "../../config.h"
-#include "../../help_mp.h"
-#include "../../stream/stream.h"
+#include "app.h"
+#include "interface.h"
+#include "config.h"
+#include "help_mp.h"
+#include "stream/stream.h"
 
 #include "../widgets.h"
 #include "fs.h"
