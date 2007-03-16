@@ -7404,7 +7404,7 @@ _libs_mplayer=$_ld_tmp
 #############################################################################
 # Take care of ffmpeg dependencies
 if test "$_zlib" = no ; then
-  _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// `
+  _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// s/DXA_DECODER// `
   _libavencoders=`echo $_libavencoders | sed -e s/FLASHSV_ENCODER// -e s/PNG_ENCODER// -e s/ZMBV_ENCODER// `
 fi
 if test "$_amr_nb" = no && test "$_amr_nb_fixed" = no ; then
