@@ -66,8 +66,6 @@ SRCS_COMMON-$(ALSA9)             += ai_alsa.c
 SRCS_COMMON-$(OSS)               += ai_oss.c
 endif
 
-CFLAGS = -I../loader
-
 include ../mpcommon.mak
 
 clean::
