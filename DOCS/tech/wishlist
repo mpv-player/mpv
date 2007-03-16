@@ -39,8 +39,9 @@ Small improvements:
  * real mute support, not just setting volume to 0
 
  * add help suboption to -lavcopts vcodec=/acodec=, -lavfopts format=,
-   -tv driver=, -subcp, and anything else that needs it.
+   -subcp, and anything else that needs it.
 
+ * ability to set mplayer default/startup volume
 
 Cleanup:
 
@@ -63,6 +64,11 @@ Filters:
  
  * move filters into ffmpeg
 
+ * autocrop filter
+
+ * insert af volnorm during playback
+
+ * insert deinterlace filter during playback
 
 Enhancements:
 
@@ -102,6 +108,12 @@ Enhancements:
  * scale osd when video window changes size
 
  * get -ass working in mencoder
+
+ * left/right channel playback (-af pan=1:1 or -stereo) (in gui too)
+
+ * rotate/position osd
+
+ * timeout and reconnect options for streaming
 
 Difficult stuff:
 
@@ -147,3 +159,8 @@ Difficult stuff:
  * reverse playback
 
  * more directshow filter/muxer support
+
+ * encode and display video at the same time
+
+ * write mpimage for displaying pictures
+
