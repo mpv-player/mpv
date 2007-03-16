@@ -7,7 +7,9 @@
 #include "loader/wine/avifmt.h"
 #include "loader/wine/vfw.h"
 
+#include "stream/stream.h"
 #include "libmpdemux/muxer.h"
+#include "libmpdemux/demuxer.h"
 
 char *info_name;
 char *info_artist;
