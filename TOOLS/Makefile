@@ -12,7 +12,7 @@ OBJS = alaw-gen$(EXESUF) \
 	movinfo$(EXESUF) \
 	png2raw$(EXESUF) \
 	subrip$(EXESUF) \
-	vivodump$(EXESUF) \
+#	vivodump$(EXESUF) \
 	302m_convert$(EXESUF) \
 	360m_convert$(EXESUF) \
 
@@ -30,8 +30,10 @@ subrip: subrip.c
           ../unrarlib.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
           ../libmpcodecs/img_format.o ../osdep/getch2.o -ltermcap -lm
 
+#FIXME: Linking is broken, help welcome.
 vivodump: vivodump.c
-	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a ../stream/stream.a
+	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a \
+           ../stream/stream.a ../osdep/getch2.o -ltermcap -lm
 
 fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) -g $< -o fastmem-mmx$(EXESUF)  ../libvo/aclib.o -DNAME=\"mmx\"      -DHAVE_MMX
