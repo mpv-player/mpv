@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22461
+.\" In sync with r22622
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1134,6 +1134,11 @@ Film ab.
 .B \-audiofile-cache <kBytes>
 Aktiviert das Zwischenspeichern des von \-audiofile benutzten Streams; benutzt
 dafür die angegebene Menge Speicher.
+.
+.TP
+.B \-reuse-socket (nur bei udp://)
+Erlaubt, dass ein Socket von einem anderen Prozess wiederverwendet wird,
+sobald es geschlossen wird.
 .
 .TP
 .B \-bandwidth <Wert> (nur bei Netzwerk)
@@ -3579,6 +3584,10 @@ Nur gültig für yuv-Modi 2, 3, 4 und 6.
 Benötigt eine zusätzliche Textureinheit.
 Ältere Karten werden dies für Chrominanz zumindest im Vollbildmodus nicht
 verarbeiten können.
+.br
+2: Benutze kubische Filterung in horizontaler, lineare Filterung in vertikaler
+Richtung.
+Funktioniert auf ein paar mehr Karten als Methode 1.
 .RE
 .IPs cscale=<n>
 Wählt die zu benutzende Skalierungsmethode für Chrominanzskalierung.
