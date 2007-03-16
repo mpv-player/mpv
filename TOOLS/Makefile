@@ -27,8 +27,8 @@ png2raw: png2raw.c
 
 subrip: subrip.c
 	$(CC) $(CFLAGS) -g -o $@ $< ../vobsub.o ../spudec.o ../mp_msg.o \
-          ../unrarlib.o ../libswscale/swscale.o ../libswscale/rgb2rgb.o \
-          ../libswscale/yuv2rgb.o ../libmpcodecs/img_format.o -lm
+          ../unrarlib.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
+          ../libmpcodecs/img_format.o ../osdep/getch2.o -ltermcap -lm
 
 vivodump: vivodump.c
 	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a ../stream/stream.a
