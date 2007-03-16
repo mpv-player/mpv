@@ -5270,6 +5270,7 @@ if test "$_libdvdcss_internal" = yes ; then
     _ld_extra="$_ld_extra -framework IOKit"
   fi
   _inputmodules="libdvdcss $_inputmodules"
+  _largefiles=yes
 else
   _noinputmodules="libdvdcss $_noinputmodules"
 fi
@@ -7191,7 +7192,7 @@ fi
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
   CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
-  if test "$_dvdread" = yes ; then
+  if test "$_dvdread" = yes || test "$_libdvdcss_internal" = yes ; then
     # dvdread support requires this (for off64_t)
     CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
   fi
