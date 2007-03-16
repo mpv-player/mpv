@@ -5698,7 +5698,6 @@ if test "$_tremor_internal" = yes ; then
   _codecmodules="tremor(internal) $_codecmodules"
   _res_comment="internal Tremor"
   if test "$_tremor_low" = yes ; then
-    _tremor_flags='-D_LOW_ACCURACY_'
     _res_comment="internal low accuracy Tremor"
   fi
 elif test "$_tremor_external" = yes ; then
@@ -7490,7 +7489,7 @@ MP3LIB = $_mp3lib
 LIBA52 = $_liba52
 LIBMPEG2 = $_libmpeg2
 TREMOR_INTERNAL = $_tremor_internal
-TREMOR_FLAGS = $_tremor_flags
+TREMOR_LOW = $_tremor_low
 FAAD = $_faad
 
 SPEEX = $_speex
