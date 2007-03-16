@@ -28,6 +28,8 @@
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 
+#include "libavutil/common.h"
+
 #ifdef USE_QTX_CODECS
 #include "loader/qtx/qtxsdk/components.h"
 #endif
@@ -3554,18 +3556,26 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
                 diff = target_timecode + mkv_d->first_tc -
                        (int64_t) mkv_d->indexes[i].timecode * mkv_d->tc_scale / 1000000.0;
 
-                if ((flags & 1 || target_timecode <= mkv_d->last_pts*1000)
-                    && diff >= 0 && diff < min_diff)
-                  {
-                    min_diff = diff;
-                    index = mkv_d->indexes + i;
-                  }
-                else if (target_timecode > mkv_d->last_pts*1000
-                         && diff < 0 && -diff < min_diff)
-                  {
-                    min_diff = -diff;
-                    index = mkv_d->indexes + i;
-                  }
+                if ((flags & 1 || target_timecode <= mkv_d->last_pts*1000)) {
+                    // Absolute seek or seek backward: find the last index
+                    // position before target time
+                    if (diff < 0 || diff >= min_diff)
+                        continue;
+                }
+                else {
+                    // Relative seek forward: find the first index position
+                    // after target time. If no such index exists, find last
+                    // position between current position and target time.
+                    if (diff <= 0) {
+                        if (min_diff <= 0 && diff <= min_diff)
+                            continue;
+                    }
+                    else if (diff >= FFMIN(target_timecode - mkv_d->last_pts,
+                                           min_diff))
+                        continue;
+                }
+                min_diff = diff;
+                index = mkv_d->indexes + i;
               }
 
           if (index)  /* We've found an entry. */
