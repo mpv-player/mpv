@@ -1,4 +1,4 @@
-.\" synced with r22150
+.\" synced with r22503
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -988,7 +988,7 @@ Activé par défaut, si il a été compilé pour.
 Désactive la gestion de LIRC.
 .
 .TP
-.B \-nomouseinput (X11 uniquement)
+.B \-nomouseinput
 Désactive l'interprétation des boutons de la souris (le menu contextuel
 de mozplayerxp dépend de cette option).
 .
@@ -1135,6 +1135,11 @@ pendant la visualisation d'un film.
 .B \-audiofile-cache <Koctets>
 Active la mise en cache pour le flux utilisé par \-audiofile, en utilisant
 la quantité demandée de mémoire.
+.
+.TP
+.B \-(no)reuse-socket (udp:// uniquement)
+Permet au socket d'être ré-utilisé par un autre processus aussitôt que
+celui-ci la ferme.
 .
 .TP
 .B \-bandwidth <valeur> (réseau uniquement)
@@ -1802,7 +1807,8 @@ Les options disponibles sont:
 .IPs noaudio
 aucun son
 .IPs driver=<valeur>
-disponible: dummy, v4l, v4l2, bsdbt848
+Voir \-tv driver=help pour avoir la liste des pilotes d'entrée TV activés à la compilation.
+disponibles: dummy, v4l, v4l2, bsdbt848
 .IPs device=<valeur>
 Spécifie un autre périphérique que celui par défaut /dev/\:video0.
 .IPs input=<valeur>
