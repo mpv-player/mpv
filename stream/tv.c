@@ -361,10 +361,16 @@ static int open_tv(tvi_handle_t *tvh)
 		        sizeof(tv_channel_current->name));
 		sep[0] = '\0';
 		strncpy(tv_channel_current->number, tmp, 5);
+		tv_channel_current->number[4]='\0';
 
 		while ((sep=strchr(tv_channel_current->name, '_')))
 		    sep[0] = ' ';
 
+		// if channel number is a number and larger than 1000 threat it as frequency
+                // tmp still contain pointer to null-terminated string with channel number here
+		if (atoi(tmp)>1000){ 
+		    tv_channel_current->freq=atoi(tmp);
+		}else{
 		tv_channel_current->freq = 0;
 		for (i = 0; i < chanlists[tvh->chanlist].count; i++) {
 		    cl = tvh->chanlist_s[i];
@@ -372,6 +378,7 @@ static int open_tv(tvi_handle_t *tvh)
 			tv_channel_current->freq=cl.freq;
 			break;
 		    }
+		}
 		}
 	        if (tv_channel_current->freq == 0)
 		    mp_msg(MSGT_TV, MSGL_ERR, "Couldn't find frequency for channel %s (%s)\n",

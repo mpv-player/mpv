@@ -1751,6 +1751,10 @@ Set tuner to <value> channel.
 available: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<channel>\-<name>,<channel>\-<name>,...
 Set names for channels.
+.I NOTE:
+If <channel> is an integer greater than 1000, it will be treated as frequency (in kHz)
+rather than channel name from frequency table.
+.br
 Use _ for spaces in names (or play with quoting ;-).
 The channel names will then be written using OSD, and the slave commands
 tv_step_channel, tv_set_channel and tv_last_channel will be usable for
