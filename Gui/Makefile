@@ -2,7 +2,6 @@ include ../config.mak
 
 LIBNAME_MPLAYER = libgui.a
 
-CFLAGS = -I./skin
 #CFLAGS += -DDEBUG
 
 CFLAGS-$(CONFIG_LIBAVUTIL)   += -I../libavutil
