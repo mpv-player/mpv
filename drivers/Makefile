@@ -1,6 +1,6 @@
 KERNEL_DIR=/lib/modules/`uname -r`/build
 KERNEL_INCLUDES= $(KERNEL_DIR)/include
-INCLUDES = -I$(KERNEL_INCLUDES) -I$(KERNEL_INCLUDES)/asm
+INCLUDES = -I$(KERNEL_INCLUDES)
 VERSION = $(shell grep UTS_RELEASE $(KERNEL_INCLUDES)/linux/version.h | cut -d '"' -f2)
 MDIR = /lib/modules/$(VERSION)/misc
 
