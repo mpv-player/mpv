@@ -1,16 +1,15 @@
 KERNEL_DIR=/lib/modules/`uname -r`/build
 KERNEL_INCLUDES= $(KERNEL_DIR)/include
-INCLUDES = -I$(KERNEL_INCLUDES)
 VERSION = $(shell grep UTS_RELEASE $(KERNEL_INCLUDES)/linux/version.h | cut -d '"' -f2)
 MDIR = /lib/modules/$(VERSION)/misc
 
 ifneq (,$(findstring 2.6, $(VERSION)))
 MGA_VID_OBJ = mga_vid.ko
-CFLAGS = -O2 -D__KERNEL__ -DMODULE $(INCLUDES) -Wall -include $(KERNEL_INCLUDES)/config/modversions.h
+CFLAGS = -O2 -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES) -Wall -include $(KERNEL_INCLUDES)/config/modversions.h
 all: $(MGA_VID_OBJ) mga_vid_test
 else
 MGA_VID_OBJ = mga_vid.o
-CFLAGS = -O2 -D__KERNEL__ -DMODULE $(INCLUDES) -Wall -include $(KERNEL_INCLUDES)/linux/modversions.h
+CFLAGS = -O2 -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES) -Wall -include $(KERNEL_INCLUDES)/linux/modversions.h
 all: $(MGA_VID_OBJ) mga_vid_test tdfx_vid.o tdfx_vid_test
 endif
 
