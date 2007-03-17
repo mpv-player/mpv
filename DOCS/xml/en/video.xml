@@ -825,6 +825,11 @@ buffering. It works on both a framebuffer console and under X, but only
 with Linux 2.4.x.
 </para>
 
+<para>
+For a Linux 2.6.x version of this driver check out
+<ulink url="http://attila.kinali.ch/mga/"/>.
+</para>
+
 <procedure>
 <title>Installation:</title>
 <step><para>
