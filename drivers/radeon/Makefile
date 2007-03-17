@@ -29,7 +29,7 @@ rage128_vid.o: radeon_vid.c radeon.h radeon_vid.h
 
 dep depend:
 
-clean: 
+clean:
 	rm -f *.o *.a *~
 
 distclean: clean
