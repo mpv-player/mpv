@@ -15,7 +15,6 @@ CPPFLAGS := -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES)
 CFLAGS := $(CPPFLAGS) -O2 \
 	-fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math\
 	-include $(KERNEL_INCLUDES)/linux/modversions.h
-AFLAGS := -D__ASSEMBLY__ $(CPPFLAGS)
 
 
 all: radeonfb.o radeon_vid.o rage128_vid.o
