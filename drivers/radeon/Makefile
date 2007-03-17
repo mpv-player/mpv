@@ -4,10 +4,6 @@ CONFIG_SHELL=/bin/sh -c
 KERNEL_VERSION=$(shell $(CONFIG_SHELL) 'uname -r')
 MOD_PATH=/lib/modules/$(KERNEL_VERSION)/kernel/drivers/video/
 
-#
-# standard CFLAGS
-#
-
 CPPFLAGS := -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES)
 
 CFLAGS := $(CPPFLAGS) -O2 \
