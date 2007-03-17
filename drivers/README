@@ -1,3 +1,8 @@
+The code in this directory is the old mga_vid driver for Linux kernels
+prior to 2.6. It does _not_ compile for version 2.6.x.
+
+For Linux kernel 2.6.x please get the newest version of the 2.6 port from
+http://attila.kinali.ch/mga/
 
 mga_vid  -  MGA G200/G400 YUV Overlay kernel module
 
