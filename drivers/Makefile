@@ -7,10 +7,7 @@ CFLAGS = -O2 -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES) -Wall -include $(KERNEL_
 all: mga_vid.o mga_vid_test tdfx_vid.o tdfx_vid_test
 
 mga_vid.o: mga_vid.c mga_vid.h
-	$(CC) $(CFLAGS) -c $<
-
 tdfx_vid.o: tdfx_vid.c 3dfx.h
-	$(CC) $(CFLAGS) -c $<
 
 %_test: %_test.c
 	$(CC) -O -o $@ $<
