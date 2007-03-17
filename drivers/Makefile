@@ -25,9 +25,6 @@ mga_vid.o: mga_vid.c mga_vid.h
 mga_vid.ko: mga_vid.c mga_vid.h
 	$(MAKE) -C $(KERNEL_DIR) SUBDIRS=$(PWD) modules
 
-sis_vid.o: sis_vid.c sis_vid.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $<
-
 mga_vid_test: mga_vid_test.c
 	$(CC) -O $(INCLUDES) -o $@ $@.c
 
