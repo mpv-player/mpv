@@ -5,18 +5,14 @@ VERSION = $(shell grep UTS_RELEASE $(KERNEL_INCLUDES)/linux/version.h | cut -d '
 MDIR = /lib/modules/$(VERSION)/misc
 
 ifneq (,$(findstring 2.6, $(VERSION)))
-obj-m += mga_vid.o
+MGA_VID_OBJ = mga_vid.ko
 CFLAGS = -O2  -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/config/modversions.h -Wall
 else
+MGA_VID_OBJ = mga_vid.o
 CFLAGS = -O2  -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/linux/modversions.h -Wall
 endif
 
-ifneq (,$(findstring 2.6, $(VERSION)))
-all: mga_vid.ko mga_vid_test
-else
-all: mga_vid.o mga_vid_test
-endif
-# sis_vid.o
+all: $(MGA_VID_OBJ) mga_vid_test
 
 mga_vid.o: mga_vid.c mga_vid.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<
@@ -33,13 +29,9 @@ tdfx_vid.o: tdfx_vid.c 3dfx.h
 tdfx_vid_tst: tdfx_vid_tst.c
 	$(CC) -O -o $@ $<
 
-install: mga_vid.o
+install: $(MGA_VID_OBJ)
 	-mkdir -p $(MDIR)
-ifneq (,$(findstring 2.6, $(VERSION)))
-	install -m 644 mga_vid.ko $(MDIR)/mga_vid.ko
-else
-	install -m 644 mga_vid.o $(MDIR)/mga_vid.o
-endif
+	install -m 644 $(MGA_VID_OBJ) $(MDIR)
 	depmod -a
 
 dep depend:
