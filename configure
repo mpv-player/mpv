@@ -646,6 +646,7 @@ _asmalign_pot=auto
 _color_console=no
 _stream_cache=yes
 _def_stream_cache="#define USE_STREAM_CACHE 1"
+_need_shmem=yes
 for ac_option do
   case "$ac_option" in
   --help|-help|-h)
@@ -1291,8 +1292,7 @@ if win32 ; then
 fi
 
 if mingw32 ; then
-  _stream_cache=no
-  _def_stream_cache="#undef USE_STREAM_CACHE"
+  _need_shmem=no
 fi
 
 if amigaos ; then
@@ -7519,6 +7519,7 @@ NEED_GETTIMEOFDAY    = $_need_gettimeofday
 NEED_GLOB    = $_need_glob
 NEED_SCANDIR = $_need_scandir
 NEED_SETENV  = $_need_setenv
+NEED_SHMEM   = $_need_shmem
 NEED_STRLCAT = $_need_strlcat
 NEED_STRLCPY = $_need_strlcpy
 NEED_STRSEP  = $_need_strsep
