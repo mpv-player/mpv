@@ -2,10 +2,9 @@ KERNEL_INCLUDES = /lib/modules/`uname -r`/build/include
 VERSION = $(shell grep UTS_RELEASE $(KERNEL_INCLUDES)/linux/version.h | cut -d '"' -f2)
 MDIR = /lib/modules/$(VERSION)/misc
 
-MGA_VID_OBJ = mga_vid.o
 CFLAGS = -O2 -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES) -Wall -include $(KERNEL_INCLUDES)/linux/modversions.h
 
-all: $(MGA_VID_OBJ) mga_vid_test tdfx_vid.o tdfx_vid_test
+all: mga_vid.o mga_vid_test tdfx_vid.o tdfx_vid_test
 
 mga_vid.o: mga_vid.c mga_vid.h
 	$(CC) $(CFLAGS) -c $<
@@ -19,9 +18,9 @@ tdfx_vid.o: tdfx_vid.c 3dfx.h
 tdfx_vid_test: tdfx_vid_test.c
 	$(CC) -O -o $@ $<
 
-install: $(MGA_VID_OBJ)
+install:
 	-mkdir -p $(MDIR)
-	install -m 644 $(MGA_VID_OBJ) $(MDIR)
+	install -m 644 mga_vid.o $(MDIR)
 	depmod -a
 
 dep depend:
