@@ -14,18 +14,18 @@ Simply type two commands in this directory:
 make
 make install
 
-Anyway you should have 'Frame buffer support' compiled into linux-kernel
-and at least '8bpp packed pixel support' compiled and installed as module.  
-(But if you plan to use this module with mplayer you also should have
-16bpp, 24bpp and 32bpp pixel support compiled as modules).  
+Anyway you should have 'framebuffer support' compiled into linux-kernel
+and at least '8bpp packed pixel support' compiled and installed as module.
+(But if you plan to use this module with MPlayer you also should have
+16bpp, 24bpp and 32bpp pixel support compiled as modules).
 
 
                       Radeon video overlay
 		      ====================
-		      
-Was designed for mplayer and currently can be used only by mplayer.
-It's RGB-YUV BES for radeon cards (althrough there is experimental
-support for rage128 / rage128pro chips).
+
+It was designed for MPlayer and currently can be used only by MPlayer.
+It's RGB-YUV BES for Radeon cards (althrough there is experimental
+support for Rage128 / Rage128pro chips).
 
 rage128_vid is contained within radeon_vid.c. As for a Rage128 framebuffer -
 use the one from your Linux distribution.
@@ -36,13 +36,11 @@ Installation:
 Simply type two commands in this directory:
 make
 make install
-If you install it first time then type also:
-make nodes
 
-Using with mplayer:
+Using with MPlayer:
 ~~~~~~~~~~~~~~~~~~~
 
-Currently there is only way to use ATI's drivers:
+Currently there is only one way to use ATI's drivers:
 mplayer -vo vesa:lvo:/dev/radeon_vid -<your vesa's options> filename
 or
 mplayer -vo vesa:lvo:/dev/rage128_vid -<your vesa's options> filename
@@ -56,33 +54,32 @@ this package.
 Configuring:
 ~~~~~~~~~~~~
 
-You can tune up some parameters with using following trick:
-echo "parameter=value">/dev/radeon_vid
+You can tune some parameters with the following trick:
+echo "parameter=value" > /dev/radeon_vid
 Example (disables adaptive deinterlacing):
-echo "deinterlace=off">/dev/radeon_vid
+echo "deinterlace=off" > /dev/radeon_vid
 
-To know more about these parameters - try read /dev/radeon_vid file ;)
+To know more about these parameters - try reading the /dev/radeon_vid file ;)
 For example:
 cat /dev/radeon_vid
 
 List of parameters:
 ~~~~~~~~~~~~~~~~~~~
-if you have rage128 chip:
+If you have Rage128 chip:
 brightness=decval          (-64:+63) changes brightness
-saturation=decval          (0:+31) changes saturation 0 == grayscaled mode
-else - if you have radeon:
-brightness=decval          (-1000:+1000) -1000 == black screen 
+saturation=decval          (0:+31) changes saturation 0 == grayscale mode
+else - if you have Radeon:
+brightness=decval          (-1000:+1000) -1000 == black screen
 saturation=decval          (-1000:+1000) -1000 == grayscaled mode
 contrast=decval            (-1000:+1000) -1000 == black screen
 hue=decval                 (-1000:+1000) -1000 == +1000 (full circle)
                            all other values are within this range
-Note: 0 is default value for every parameter on radeons
-WARNING: This driver violates rule: "no float in the kernel".
-So if you have problems then don't use color correction and
-tell me about these problems.
+Note: 0 is the default value for every parameter on Radeons.
+WARNING: This driver violates the rule: "no float in the kernel".
+So if you have problems then don't use color correction.
 
 double_buff=on/off         enables/disables double buffering
-deinterlace=on/off         enables/disables adaprive deinterlacing
+deinterlace=on/off         enables/disables adaptive deinterlacing
 deinterlace_pattern=hexval defines deinterlacing pattern
 
 Driver parameters:
@@ -92,34 +89,33 @@ You can use some additional parameters during module loading:
 Example:
 modprobe radeon_vid swap_fourcc=1
 
-List of driver's parameters:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mtrr=1/0                   configures MTRR (if available) default = 1
-swap_fourcc=1/0            performs byte swapping of passed fourcc.
-			   (It's required for compatibility with -vo mga)
-			   
-To know more about driver's parameters execute:
+List of driver parameters:
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+mtrr=1/0                   Configures MTRR (if available), default = 1.
+swap_fourcc=1/0            Performs byte swapping of passed fourcc.
+			   (It's required for compatibility with -vo mga.)
+
+To know more about driver parameters execute:
 modinfo radeon_vid
 or
 modinfo rage128_vid
-			   
+
 Note:
 ~~~~~
-For command line of mplayer: 
+For command line of MPlayer:
 You can pass only options with can be recognized by vo_vesa driver.
-(Indeed radeon_vid and rage128_vid are stupid things and can create
-video overlay only. But mode switching and other adjustement performs
-vo_vesa driver. This mean that they use VESA BIOS as graphics server).
+(Indeed radeon_vid and rage128_vid are stupid things and can only create
+video overlay. Mode switching and other adjustments are performed by the
+vo_vesa driver. This mean that they use the VESA BIOS as graphics server.)
 
-Conslusion:
+Conclusion:
 ~~~~~~~~~~~
 This stuff (radeon(rage128)_vid) currently doesn't support any standards.
-So after implementing linux standards I'll fully rewrite this driver.
 
 Full example:
 ~~~~~~~~~~~~~
 modprobe radeon_vid mtrr=1
-echo "deinterlace_pattern=F0055555">/dev/radeon_vid
+echo "deinterlace_pattern=F0055555" > /dev/radeon_vid
 mplayer -vo vesa:lvo:/dev/radeon_vid -fs -zoom -bpp 32 filename
 
 Enjoy!
