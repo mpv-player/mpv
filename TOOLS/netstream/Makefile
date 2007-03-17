@@ -3,7 +3,7 @@ MPROOT=../..
 
 include $(MPROOT)/config.mak
 
-CFLAGS  = $(OPTFLAGS) -I$(MPROOT) -I$(MPROOT)/loader
+CFLAGS  = $(OPTFLAGS) -I$(MPROOT)
 
 all: netstream
 
