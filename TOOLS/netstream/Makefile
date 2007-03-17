@@ -4,7 +4,7 @@ MPROOT=../..
 include $(MPROOT)/config.mak
 
 INCLUDE = -I$(MPROOT) -I$(MPROOT)/loader
-CFLAGS  = $(OPTFLAGS) $(INCLUDE)
+CFLAGS  = $(OPTFLAGS)
 
 # .PHONY: all clean
 
