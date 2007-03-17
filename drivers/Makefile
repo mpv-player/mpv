@@ -20,19 +20,19 @@ endif
 # sis_vid.o
 
 mga_vid.o: mga_vid.c mga_vid.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $(basename $@).c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 
 mga_vid.ko: mga_vid.c mga_vid.h
 	$(MAKE) -C $(KERNEL_DIR) SUBDIRS=$(PWD) modules
 
 sis_vid.o: sis_vid.c sis_vid.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $(basename $@).c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 
 mga_vid_test: mga_vid_test.c
 	$(CC) -O $(INCLUDES) -o $@ $@.c
 
 tdfx_vid.o: tdfx_vid.c 3dfx.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $(basename $@).c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 
 tdfx_vid_tst: tdfx_vid_tst.c
 	$(CC) -O $(INCLUDES) -o $@ $@.c
