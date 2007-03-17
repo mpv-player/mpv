@@ -6,8 +6,6 @@ include $(MPROOT)/config.mak
 INCLUDE = -I$(MPROOT) -I$(MPROOT)/loader
 CFLAGS  = $(OPTFLAGS) $(INCLUDE)
 
-.SUFFIXES: .c .cpp .o
-
 # .PHONY: all clean
 
 all: netstream
