@@ -10,10 +10,6 @@ CFLAGS  = $(OPTFLAGS) $(INCLUDE)
 
 all: netstream
 
-.c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
-
-
 # FIXME: linking is a mess that should be fixed properly some day
 # it does not work with either GUI, LIVE555 or libavformat enabled
 DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
