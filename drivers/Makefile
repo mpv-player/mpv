@@ -20,7 +20,7 @@ tdfx_vid_test: tdfx_vid_test.c
 
 install:
 	-mkdir -p $(MDIR)
-	install -m 644 mga_vid.o $(MDIR)
+	install -m 644 mga_vid.o tdfx_vid.o $(MDIR)
 	depmod -a
 
 dep depend:
