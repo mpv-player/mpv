@@ -48,3 +48,5 @@ vid:
 	make install
 	rmmod radeon_vid
 	modprobe radeon_vid mtrr=1
+
+.PHONY: all dep depend clean distclean install nodes vid
