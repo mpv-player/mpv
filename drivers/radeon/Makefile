@@ -21,11 +21,11 @@ AFLAGS := -D__ASSEMBLY__ $(CPPFLAGS)
 all: radeonfb.o radeon_vid.o rage128_vid.o
 
 radeonfb.o: radeonfb.c radeon.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $(basename $@).c
+	$(CC) $(CFLAGS) -c $<
 radeon_vid.o: radeon_vid.c radeon.h radeon_vid.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $(basename $@).c
+	$(CC) $(CFLAGS) -c $<
 rage128_vid.o: radeon_vid.c radeon.h radeon_vid.h
-	$(CC) $(CFLAGS) -DRAGE128 $(INCLUDES) -c radeon_vid.c -o $@
+	$(CC) $(CFLAGS) -DRAGE128 -c $< -o $@
 
 dep depend:
 
