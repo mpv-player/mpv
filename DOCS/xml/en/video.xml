@@ -840,9 +840,10 @@ make<!--
 --></screen>
 </para></step>
 <step><para>
-  Then create <filename>/dev/mga_vid</filename> device:
-  <screen>mknod /dev/mga_vid c 178 0</screen>
-  and load the driver with
+  Then run (as <systemitem class="username">root</systemitem>)
+  <screen>make install</screen>
+  which should install the module and create the device node for you.
+  Load the driver with
   <screen>insmod mga_vid.o</screen>
 </para></step>
 <step><para>
@@ -858,13 +859,6 @@ make<!--
   following line at the end of <filename>/etc/modules.conf</filename>:
 
   <programlisting>alias char-major-178 mga_vid</programlisting>
-
-  Then copy the <filename>mga_vid.o</filename> module to the appropriate
-  place under <filename>/lib/modules/<replaceable>kernel
-  version</replaceable>/<replaceable>somewhere</replaceable></filename>.
-  </para><para>
-  Then run
-  <screen>depmod -a</screen>
 </para></step>
 <step><para>
   Now you have to (re)compile <application>MPlayer</application>,
@@ -932,9 +926,10 @@ cd drivers
 make</screen>
 </para></step>
 <step><para>
-  Then create the <filename>/dev/tdfx_vid</filename> device:
-  <screen>mknod /dev/tdfx_vid c 178 0</screen>
-  and load the driver with
+  Then run (as <systemitem class="username">root</systemitem>)
+  <screen>make install</screen>
+  which should install the module and create the device node for you.
+  Load the driver with
   <screen>insmod tdfx_vid.o</screen>
 </para></step>
 <step><para>
@@ -942,14 +937,13 @@ make</screen>
   following line at the end of <filename>/etc/modules.conf</filename>:
 
   <programlisting>alias char-major-178 tdfx_vid</programlisting>
-
-  Then copy the <filename>tdfx_vid.o</filename> module to the appropriate
-  place under <filename>/lib/modules/<replaceable>kernel
-  version</replaceable>/<replaceable>somewhere</replaceable></filename>
-  and run
-  <screen>depmod -a</screen>
 </para></step>
 </procedure>
+
+<para>
+There is a test application called <command>tdfx_vid_test</command> in the same
+directory. It should print out some useful information if all is working well.
+</para>
 
 </sect2>
 
