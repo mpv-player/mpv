@@ -816,10 +816,13 @@ framebuffer, and don't ask for it, since it's not an
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
-This is a combination of a video output driver and a Linux kernel module
-for the Matrox G200/G400/G450/G550 BES (Back-End Scaler).
-It has hardware VSYNC support with triple buffering. It works on both
-framebuffer console and under X, but only with Linux 2.4.x.
+<systemitem>mga_vid</systemitem> is a combination of a video output driver and
+a Linux kernel module that utilitizes the Matrox G200/G400/G450/G550 video
+scaler/overlay unit to perform YUV->RGB colorspace conversion and arbitrary
+video scaling.
+<systemitem>mga_vid</systemitem> has hardware VSYNC support with triple
+buffering. It works on both a framebuffer console and under X, but only
+with Linux 2.4.x.
 </para>
 
 <procedure>
@@ -860,7 +863,7 @@ make<!--
 </para></step>
 <step><para>
   Now you have to (re)compile <application>MPlayer</application>,
-  <filename>./configure</filename> will detect
+  <command>./configure</command> will detect
   <filename>/dev/mga_vid</filename> and build the 'mga' driver. Using it
   from <application>MPlayer</application> goes by <option>-vo mga</option>
   if you have matroxfb console, or <option>-vo xmga</option> under XFree86
@@ -879,6 +882,12 @@ info, for example by
 and can be written for brightness change:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
+
+<para>
+There is a test application called <command>mga_vid_test</command> in the same
+directory. It should draw 256x256 images on the screen if all is working well.
+</para>
+
 </sect2>
 
 <!-- ********** -->
