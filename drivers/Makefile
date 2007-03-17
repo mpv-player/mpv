@@ -11,11 +11,10 @@ else
 CFLAGS = -O2  -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/linux/modversions.h -Wall
 endif
 
-all:
 ifneq (,$(findstring 2.6, $(VERSION)))
-	$(MAKE) mga_vid.ko mga_vid_test
+all: mga_vid.ko mga_vid_test
 else
-	$(MAKE) mga_vid.o mga_vid_test
+all: mga_vid.o mga_vid_test
 endif
 # sis_vid.o
 
