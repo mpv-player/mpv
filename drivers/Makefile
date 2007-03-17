@@ -18,6 +18,8 @@ install:
 	-mkdir -p $(MDIR)
 	install -m 644 $(OBJS) $(MDIR)
 	depmod -a
+	-mknod /dev/mga_vid  c 178 0
+	-mknod /dev/tdfx_vid c 178 0
 
 dep depend:
 
