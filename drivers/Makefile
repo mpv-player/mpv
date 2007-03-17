@@ -1,5 +1,4 @@
-KERNEL_DIR=/lib/modules/`uname -r`/build
-KERNEL_INCLUDES= $(KERNEL_DIR)/include
+KERNEL_INCLUDES = /lib/modules/`uname -r`/build/include
 VERSION = $(shell grep UTS_RELEASE $(KERNEL_INCLUDES)/linux/version.h | cut -d '"' -f2)
 MDIR = /lib/modules/$(VERSION)/misc
 
