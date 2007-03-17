@@ -342,7 +342,7 @@ int main(int argc, char** argv) {
   struct sockaddr_in addr;
 
   mp_msg_init();
-  mp_msg_set_level(verbose+MSGL_STATUS);
+  //  mp_msg_set_level(verbose+MSGL_STATUS);
   
 #ifdef __MINGW32__
   WSADATA wsaData;
@@ -396,8 +396,6 @@ int mp_input_check_interrupt(int time){
 
 // for libdvdread:
 #include "get_path.c"
-
-int verbose=0;
 
 int stream_cache_size=0;
 
