@@ -1,10 +1,8 @@
 KERNEL_INCLUDES = /usr/src/linux/include
-INCLUDES = -I$(KERNEL_INCLUDES)
 # auto install
 CONFIG_SHELL=/bin/sh -c
 KERNEL_VERSION=$(shell $(CONFIG_SHELL) 'uname -r')
-MOD_PATH_PREFIX=
-MOD_PATH=$(MOD_PATH_PREFIX)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/video/
+MOD_PATH=/lib/modules/$(KERNEL_VERSION)/kernel/drivers/video/
 
 #
 # standard CFLAGS
