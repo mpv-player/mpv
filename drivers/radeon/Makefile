@@ -10,11 +10,11 @@ MOD_PATH=$(MOD_PATH_PREFIX)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/video/
 # standard CFLAGS
 #
 
-CPPFLAGS := -D__KERNEL__ -I$(KERNEL_INCLUDES)
+CPPFLAGS := -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES)
 
 CFLAGS := $(CPPFLAGS) -O2 \
 	-fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math\
-	-D__KERNEL__  -DMODULE  -include $(KERNEL_INCLUDES)/linux/modversions.h
+	-include $(KERNEL_INCLUDES)/linux/modversions.h
 AFLAGS := -D__ASSEMBLY__ $(CPPFLAGS)
 
 
