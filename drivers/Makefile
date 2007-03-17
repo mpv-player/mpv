@@ -36,11 +36,9 @@ install: $(MGA_VID_OBJ)
 
 dep depend:
 
-clean: 
-	rm -f *.o *.a *~
-	rm -f *.ko .mga* mga_vid.mod.c
+clean:
+	rm -f *.o *~ *.ko mga_vid_test tdfx_vid_tst
 
 distclean: clean
-	rm -f mga_vid_test tdfx_vid_tst
 
 .PHONY: all install dep depend clean distclean
