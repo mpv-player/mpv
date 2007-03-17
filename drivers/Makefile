@@ -26,13 +26,13 @@ mga_vid.ko: mga_vid.c mga_vid.h
 	$(MAKE) -C $(KERNEL_DIR) SUBDIRS=$(PWD) modules
 
 mga_vid_test: mga_vid_test.c
-	$(CC) -O $(INCLUDES) -o $@ $@.c
+	$(CC) -O $(INCLUDES) -o $@ $<
 
 tdfx_vid.o: tdfx_vid.c 3dfx.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 
 tdfx_vid_tst: tdfx_vid_tst.c
-	$(CC) -O $(INCLUDES) -o $@ $@.c
+	$(CC) -O $(INCLUDES) -o $@ $<
 
 install: mga_vid.o
 	-mkdir -p $(MDIR)
