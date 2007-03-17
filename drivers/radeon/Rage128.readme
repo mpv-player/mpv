@@ -1,4 +1,0 @@
-The rage128_vid is containted within radeon_vid.c
-so read README file and follow its instructions.
-
-As for Rage128 framebuffer - use it from Linux distributive.

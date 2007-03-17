@@ -27,6 +27,9 @@ Was designed for mplayer and currently can be used only by mplayer.
 It's RGB-YUV BES for radeon cards (althrough there is experimental
 support for rage128 / rage128pro chips).
 
+rage128_vid is contained within radeon_vid.c. As for a Rage128 framebuffer -
+use the one from your Linux distribution.
+
 Installation:
 ~~~~~~~~~~~~~
 
