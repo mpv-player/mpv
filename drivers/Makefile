@@ -11,7 +11,7 @@ all: $(MGA_VID_OBJ) mga_vid_test
 else
 MGA_VID_OBJ = mga_vid.o
 CFLAGS = -O2 -D__KERNEL__ -DMODULE $(INCLUDES) -Wall -include $(KERNEL_INCLUDES)/linux/modversions.h
-all: $(MGA_VID_OBJ) mga_vid_test tdfx_vid.o tdfx_vid_tst
+all: $(MGA_VID_OBJ) mga_vid_test tdfx_vid.o tdfx_vid_test
 endif
 
 mga_vid.o: mga_vid.c mga_vid.h
@@ -26,7 +26,7 @@ mga_vid_test: mga_vid_test.c
 tdfx_vid.o: tdfx_vid.c 3dfx.h
 	$(CC) $(CFLAGS) -c $<
 
-tdfx_vid_tst: tdfx_vid_tst.c
+tdfx_vid_test: tdfx_vid_test.c
 	$(CC) -O -o $@ $<
 
 install: $(MGA_VID_OBJ)
@@ -37,7 +37,7 @@ install: $(MGA_VID_OBJ)
 dep depend:
 
 clean:
-	rm -f *.o *~ *.ko mga_vid_test tdfx_vid_tst
+	rm -f *.o *~ *.ko mga_vid_test tdfx_vid_test
 
 distclean: clean
 
