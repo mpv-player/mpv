@@ -4,6 +4,7 @@ prior to 2.6. It does _not_ compile for version 2.6.x.
 For Linux kernel 2.6.x please get the newest version of the 2.6 port from
 http://attila.kinali.ch/mga/
 
+
 mga_vid  -  MGA G200/G400 YUV Overlay kernel module
 
 	Author:
@@ -15,31 +16,31 @@ mga_vid  -  MGA G200/G400 YUV Overlay kernel module
 
                        WARNING  -----  WARNING
 
-This code messes with your video card and your xserver. It will probably
-lock up your box, format your hard drive, and cause your brand new g400 
+This code messes with your video card and your X server. It will probably
+lock up your box, format your hard drive, and cause your brand new G400
 MAX to spout 6 inch flames. You have been warned.
 
                        WARNING  -----  WARNING
 
 What does this code do?
 
-	 mga_vid is a kernel module that utilitizes the Matrox g200/g400 video 
-	 scaler/overlay unit to perform YUV->RGB colorspace conversion and
-	 arbitrary video scaling.
+	 mga_vid is a kernel module that utilitizes the Matrox G200/G400/G550
+	 video scaler/overlay unit to perform YUV->RGB colorspace conversion
+	 and arbitrary video scaling.
 
 	 mga_vid is also a monster hack.
 
 How does mga_vid work?
 
-	This kernel module sets up the BES (backend scaler) with approriate values
-	based on parameters supplied via ioctl. It also maps a chunk of video
-	memory into userspace via mmap. This memory is stolen from X (which may
-	decide to write to it later). The application can then write image data
-	directly to the frame buffer (if it knows the right padding, etc).
+	This kernel module sets up the BES (backend scaler) with appropriate
+	values based on parameters supplied via ioctl. It also maps a chunk of
+	video memory into userspace via mmap. This memory is stolen from X
+	(which may decide to write to it later). The application can then write
+	image data directly to the framebuffer (if it knows the right padding,
+	etc).
 
 
 How do I know if mga_vid works on my system?
 
-	There are test applications called mga_vid_test_g400 and mga_vid_test_g200.
-	Use the appropriate one for your card. This test code should draw some
-	nice 256x256 images for you if all is working well.
+	There is a test application called mga_vid_test. This test code should
+	draw some nice 256x256 images for you if all is working well.
