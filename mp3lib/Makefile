@@ -2,10 +2,6 @@ include ../config.mak
 
 LIBNAME_COMMON = libmp3.a
 
-ifeq ($(TARGET_ARCH_SGI_MIPS),yes)
-OPTFLAGS := $(OPTFLAGS:-O4=-O0)
-endif
-
 SRCS_COMMON = sr1.c
 ifeq ($(TARGET_ARCH_X86_32),yes)
 SRCS_COMMON                   += decode_i586.c
