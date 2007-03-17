@@ -55,3 +55,4 @@ clean:
 distclean: clean
 	rm -f mga_vid_test tdfx_vid_tst
 
+.PHONY: all install dep depend clean distclean
