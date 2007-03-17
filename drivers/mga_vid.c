@@ -145,9 +145,7 @@ static unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base
                 *endp = (char *)cp;
         return result;
 }
-#endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0) || LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,5)
 static long simple_strtol(const char *cp,char **endp,unsigned int base)
 {
         if(*cp=='-')
@@ -1461,13 +1459,8 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 		return(-EAGAIN);
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,3)
-	if(remap_page_range(vma, vma->vm_start, card->mem_base + card->src_base,
-		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
-#else
 	if(remap_page_range(vma->vm_start, card->mem_base + card->src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
-#endif
 	{
 		printk(KERN_ERR "mga_vid: error mapping video memory\n");
 		return(-EAGAIN);
@@ -1507,11 +1500,7 @@ static int mga_vid_open(struct inode *inode, struct file *file)
 {
 	mga_card_t * card;
 	
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,2)
-	int minor = MINOR(inode->i_rdev.value);
-#else
 	int minor = MINOR(inode->i_rdev);
-#endif
 
 	if(!file->private_data)
 	{
