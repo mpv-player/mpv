@@ -924,7 +924,7 @@ the following instructions.
   Compile <filename>tdfx_vid.o</filename>:
   <screen>
 cd drivers
-make tdfx_vid.o</screen>
+make</screen>
 </para></step>
 <step><para>
   Then create the <filename>/dev/tdfx_vid</filename> device:
