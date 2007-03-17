@@ -5,8 +5,6 @@ include $(MPROOT)/config.mak
 
 CFLAGS  = $(OPTFLAGS) -I$(MPROOT) -I$(MPROOT)/loader
 
-# .PHONY: all clean
-
 all: netstream
 
 # FIXME: linking is a mess that should be fixed properly some day
@@ -36,3 +34,5 @@ netstream: $(MPROOT)/libmpdemux/libmpdemux.a $(MPROOT)/stream/stream.a netstream
 
 clean:
 	rm -f *.o *.a *~
+
+.PHONY: all clean
