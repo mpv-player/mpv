@@ -330,6 +330,9 @@ tv_last_channel
 tv_set_freq <frequency in MHz>
     Set the TV tuner frequency.
 
+tv_step_freq <frequency offset in MHz>
+    Set the TV tuner frequency relative to current value.
+
 tv_set_norm <norm>
     Set the TV tuner norm (PAL, SECAM, NTSC, ...).
 

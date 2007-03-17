@@ -781,6 +781,21 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
     return(1);
 }
 
+/*****************************************************************
+ * \brief tune current frequency by step_interval value
+ * \parameter step_interval increment value in 1/16 MHz
+ * \note frequency is rounded to 1/16 MHz value
+ * \return 1
+ *
+ */
+int tv_step_freq(tvi_handle_t* tvh, float step_interval){
+    unsigned long frequency;
+
+    tv_get_freq(tvh,&frequency);
+    frequency+=step_interval;
+    return tv_set_freq(tvh,frequency);
+}
+
 int tv_step_channel_real(tvi_handle_t *tvh, int direction)
 {
     struct CHANLIST cl;

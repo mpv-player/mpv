@@ -184,6 +184,7 @@ int tv_step_chanlist(tvi_handle_t *tvh);
 
 int tv_set_freq(tvi_handle_t *tvh, unsigned long freq);
 int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq);
+int tv_step_freq(tvi_handle_t *tvh, float step_interval);
 
 int tv_set_norm(tvi_handle_t *tvh, char* norm);
 

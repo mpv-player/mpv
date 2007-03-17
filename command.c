@@ -1941,6 +1941,12 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			    cmd->args[0].v.f * 16.0);
 	    break;
 
+	case MP_CMD_TV_STEP_FREQ:
+	    if (mpctx->file_format == DEMUXER_TYPE_TV)
+		tv_step_freq((tvi_handle_t *) (mpctx->demuxer->priv),
+			    cmd->args[0].v.f * 16.0);
+	    break;
+
 	case MP_CMD_TV_SET_NORM:
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_set_norm((tvi_handle_t *) (mpctx->demuxer->priv),
