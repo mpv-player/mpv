@@ -43,11 +43,3 @@ netstream: $(MPROOT)/libmpdemux/libmpdemux.a $(MPROOT)/stream/stream.a netstream
 
 clean:
 	rm -f *.o *.a *~
-
-distclean: clean
-	rm -f .depend test
-
-dep depend:
-	$(CC) -MM $(CFLAGS) test.c $(SRCS) 1>.depend
-
--include .depend
