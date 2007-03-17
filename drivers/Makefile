@@ -4,7 +4,9 @@ MDIR = /lib/modules/$(VERSION)/misc
 
 CFLAGS = -O2 -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES) -Wall -include $(KERNEL_INCLUDES)/linux/modversions.h
 
-all: mga_vid.o mga_vid_test tdfx_vid.o tdfx_vid_test
+OBJS = mga_vid.o tdfx_vid.o
+
+all: $(OBJS) mga_vid_test tdfx_vid_test
 
 mga_vid.o: mga_vid.c mga_vid.h
 tdfx_vid.o: tdfx_vid.c 3dfx.h
@@ -14,7 +16,7 @@ tdfx_vid.o: tdfx_vid.c 3dfx.h
 
 install:
 	-mkdir -p $(MDIR)
-	install -m 644 mga_vid.o tdfx_vid.o $(MDIR)
+	install -m 644 $(OBJS) $(MDIR)
 	depmod -a
 
 dep depend:
