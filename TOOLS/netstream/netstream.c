@@ -42,7 +42,8 @@
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "mp_msg.h"
-#include "bswap.h"
+#include "libavutil/common.h"
+#include "mpbswap.h"
 
 /// Netstream packets def and some helpers
 #include "stream/netstream.h"
