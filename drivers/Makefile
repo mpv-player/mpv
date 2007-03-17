@@ -6,16 +6,16 @@ MDIR = /lib/modules/$(VERSION)/misc
 
 ifneq (,$(findstring 2.6, $(VERSION)))
 MGA_VID_OBJ = mga_vid.ko
-CFLAGS = -O2  -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/config/modversions.h -Wall
+CFLAGS = -O2 -D__KERNEL__ -DMODULE $(INCLUDES) -Wall -include $(KERNEL_INCLUDES)/config/modversions.h
 else
 MGA_VID_OBJ = mga_vid.o
-CFLAGS = -O2  -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/linux/modversions.h -Wall
+CFLAGS = -O2 -D__KERNEL__ -DMODULE $(INCLUDES) -Wall -include $(KERNEL_INCLUDES)/linux/modversions.h
 endif
 
 all: $(MGA_VID_OBJ) mga_vid_test
 
 mga_vid.o: mga_vid.c mga_vid.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 mga_vid.ko: mga_vid.c mga_vid.h
 	$(MAKE) -C $(KERNEL_DIR) SUBDIRS=$(PWD) modules
@@ -24,7 +24,7 @@ mga_vid_test: mga_vid_test.c
 	$(CC) -O -o $@ $<
 
 tdfx_vid.o: tdfx_vid.c 3dfx.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 tdfx_vid_tst: tdfx_vid_tst.c
 	$(CC) -O -o $@ $<
