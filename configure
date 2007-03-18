@@ -6234,7 +6234,7 @@ if test "$_libavcodec" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
 if test "$_libavcodec_so" = auto ; then
   _libavcodec_so=no
-  _res_comment="libavcodec.so is broken/obsolete"
+  _res_comment="libavcodec.so is discouraged over static libavcodec"
 # FIXME : check for avcodec_find_encoder_by_name() for mencoder
   cat > $TMPC << EOF
 #include <ffmpeg/avcodec.h>
