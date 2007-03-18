@@ -1292,6 +1292,9 @@ if win32 ; then
   _exesuf=".exe"
   # -lwinmm is always needed for osdep/timer-win2.c
   _ld_extra="$_ld_extra -lwinmm"
+  _confwin32='TARGET_WIN32 = yes'
+else
+  _confwin32='TARGET_WIN32 = no'
 fi
 
 if mingw32 ; then
@@ -7249,12 +7252,6 @@ if cygwin ; then
   #CFLAGS="$CFLAGS -D__CYGWIN__ -D__CYGWIN_USE_BIG_TYPES__"
   # stat.st_size with BIG_TYPES is broken (not set) ::atmos 
   CFLAGS="$CFLAGS -D__CYGWIN__"
-fi
-
-if win32 ; then
-  _confwin32='TARGET_WIN32 = yes'
-else
-  _confwin32='TARGET_WIN32 = no'
 fi
 
 # Dynamic linking flags 
