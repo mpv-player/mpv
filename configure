@@ -6132,7 +6132,7 @@ elif test "$_live_dist" = yes && test "$_network" = yes ; then
   _live="yes"
   _def_live='#define STREAMING_LIVE555 1'
   _ld_extra="$_ld_extra -lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
-  _inc_extra="$_inc_extra -I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
+  _inc_extraxx="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
              -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  _inputmodules="live555 $_inputmodules"
 else
