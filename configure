@@ -1505,6 +1505,61 @@ fi
 
 fi # test "$_runtime_cpudetection" = no
 
+if x86 && test "$_runtime_cpudetection" = no ; then
+  extcheck() {
+    if test "$1" = kernel_check ; then
+      echocheck "kernel support of $2"
+      cat > $TMPC <<EOF
+#include <signal.h>
+void catch() { exit(1); }
+int main(void){
+  signal(SIGILL, catch);
+  __asm__ __volatile__ ("$3":::"memory");return(0);
+}
+EOF
+
+      if cc_check && tmp_run ; then
+        eval _$2=yes
+        echores "yes"
+	_optimizing="$_optimizing $2"
+        return 0
+      else
+        eval _$2=no
+        echores "failed"
+        echo "It seems that your kernel does not correctly support $2."
+        echo "To use $2 extensions in MPlayer, you have to upgrade/recompile your kernel!"
+	return 1
+      fi
+    fi
+    return 0
+  }
+
+  extcheck $_mmx      "mmx"      "emms"
+  extcheck $_mmxext   "mmxext"   "sfence"
+  extcheck $_3dnow    "3dnow"    "femms"
+  extcheck $_3dnowext "3dnowext" "pswapd %%mm0, %%mm0"
+  extcheck $_sse      "sse"      "xorps %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse"
+  extcheck $_sse2     "sse2"     "xorpd %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse2"
+  extcheck $_cmov     "cmov"     "cmovb %%eax,%%ebx"
+
+  echocheck "mtrr support"
+  if test "$_mtrr" = kernel_check ; then
+    _mtrr="yes"
+    _optimizing="$_optimizing mtrr"
+  fi
+  echores "$_mtrr"
+
+  if test "$_gcc3_ext" != ""; then
+    # if we had to disable sse/sse2 because the active kernel does not
+    # support this instruction set extension, we also have to tell
+    # gcc3 to not generate sse/sse2 instructions for normal C code
+    cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+    cc_check $_march $_gcc3_ext && _march="$_march $_gcc3_ext"
+  fi
+
+fi
 
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
@@ -2133,61 +2188,6 @@ if test "$_runtime_cpudetection" = yes ; then
   fi
 fi
 
-if x86 && test "$_runtime_cpudetection" = no ; then
-  extcheck() {
-    if test "$1" = kernel_check ; then
-      echocheck "kernel support of $2"
-      cat > $TMPC <<EOF
-#include <signal.h>
-void catch() { exit(1); }
-int main(void){
-  signal(SIGILL, catch);
-  __asm__ __volatile__ ("$3":::"memory");return(0);
-}
-EOF
-
-      if cc_check && tmp_run ; then
-        eval _$2=yes
-        echores "yes"
-	_optimizing="$_optimizing $2"
-        return 0
-      else
-        eval _$2=no
-        echores "failed"
-        echo "It seems that your kernel does not correctly support $2."
-        echo "To use $2 extensions in MPlayer, you have to upgrade/recompile your kernel!"
-	return 1
-      fi
-    fi
-    return 0
-  }
-
-  extcheck $_mmx      "mmx"      "emms"
-  extcheck $_mmxext   "mmxext"   "sfence"
-  extcheck $_3dnow    "3dnow"    "femms"
-  extcheck $_3dnowext "3dnowext" "pswapd %%mm0, %%mm0"
-  extcheck $_sse      "sse"      "xorps %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse"
-  extcheck $_sse2     "sse2"     "xorpd %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse2"
-  extcheck $_cmov     "cmov"     "cmovb %%eax,%%ebx"
-
-  echocheck "mtrr support"
-  if test "$_mtrr" = kernel_check ; then
-    _mtrr="yes"
-    _optimizing="$_optimizing mtrr"
-  fi
-  echores "$_mtrr"
-
-  if test "$_gcc3_ext" != ""; then
-    # if we had to disable sse/sse2 because the active kernel does not
-    # support this instruction set extension, we also have to tell
-    # gcc3 to not generate sse/sse2 instructions for normal C code
-    cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
-    cc_check $_march $_gcc3_ext && _march="$_march $_gcc3_ext"
-  fi
-
-fi
 
 
 echocheck "assembler support of -pipe option"
