@@ -7409,6 +7409,8 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
+CXXFLAGS="-I.. $CFLAGS -D__STDC_LIMIT_MACROS"
+
 if cc_check -Wdeclaration-after-statement ; then
   CFLAGS="-Wdeclaration-after-statement $CFLAGS"
 fi
@@ -7478,8 +7480,9 @@ RANLIB = $_ranlib
 LDCONFIG = $_ldconfig
 INSTALL = $_install
 EXTRA_INC = $_inc_extra
-EXTRAXX_INC = $_inc_extraxx
+EXTRAXX_INC = $_inc_extra $_inc_extraxx
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
+CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
 INSTALLSTRIP = $_install_strip
 CHARSET = $_charset
 HELP_FILE = $_mp_help
