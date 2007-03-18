@@ -574,7 +574,7 @@ _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
 _unrarlib=yes
-_win32=auto
+_win32dll=auto
 _select=yes
 _radio=no
 _radio_capture=no
@@ -1105,8 +1105,8 @@ for ac_option do
   --disable-crash-debug) _crash_debug=no ;;
   --enable-sighandler)  _sighandler=yes  ;;
   --disable-sighandler) _sighandler=no   ;;
-  --enable-win32) _win32=yes ;;
-  --disable-win32) _win32=no ;;
+  --enable-win32dll) _win32dll=yes ;;
+  --disable-win32dll) _win32dll=no ;;
 
   --enable-sse)	_sse=yes ;;
   --disable-sse) _sse=no ;;
@@ -3065,7 +3065,7 @@ else
   _def_pthreads='#undef HAVE_PTHREADS'
   _nas=no ; _tv_v4l1=no ; _macosx=no
   if not mingw32 ; then
-    _win32=no
+    _win32dll=no
   fi
 fi
 echores "$_pthreads"
@@ -6014,14 +6014,14 @@ fi
 
 
 echocheck "Win32 codecs"
-if test "$_win32" = auto ; then
-  _win32=no
+if test "$_win32dll" = auto ; then
+  _win32dll=no
   if x86_32 && not qnx; then
-    _win32=yes
+    _win32dll=yes
   fi
 fi
-if test "$_win32" = yes ; then
-  _def_win32='#define USE_WIN32DLL 1'
+if test "$_win32dll" = yes ; then
+  _def_win32dll='#define USE_WIN32DLL 1'
   test -z "$_win32codecsdir" && _win32codecsdir=$_codecsdir
   _res_comment="using $_win32codecsdir"
   openbsd && x86_32 && _ld_extra="$_ld_extra -li386"
@@ -6033,11 +6033,11 @@ if test "$_win32" = yes ; then
   fi
   _codecmodules="win32 $_codecmodules"
 else
-  _def_win32='#undef USE_WIN32DLL'
+  _def_win32dll='#undef USE_WIN32DLL'
   _def_win32_loader='#undef WIN32_LOADER'
   _nocodecmodules="win32 $_nocodecmodules"
 fi
-echores "$_win32"
+echores "$_win32dll"
 
 
 echocheck "XAnim codecs"
@@ -6066,7 +6066,7 @@ echocheck "RealPlayer codecs"
 if test "$_real" = auto ; then
   _real=no
   _res_comment="dynamic loader support needed"
-  if test "$_dl" = yes || test "$_win32" = yes &&
+  if test "$_dl" = yes || test "$_win32dll" = yes &&
      (linux || freebsd || netbsd || win32 || darwin) ; then
     _real=yes
   fi
@@ -6935,7 +6935,7 @@ echores "$_menu"
 
 echocheck "QuickTime codecs"
 if test "$_qtx" = auto ; then
-  test "$_win32" = yes || darwin && _qtx=yes
+  test "$_win32dll" = yes || darwin && _qtx=yes
 fi
 if test "$_qtx" = yes ; then
     _def_qtx='#define USE_QTX_CODECS 1'
@@ -7566,7 +7566,7 @@ DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
 DVDCSS_INTERNAL = $_libdvdcss_internal
 DVDNAV = $_dvdnav
-WIN32DLL = $_win32
+WIN32DLL = $_win32dll
 QTX_CODECS = $_qtx
 REAL_CODECS = $_real
 XANIM_CODECS = $_xanim
@@ -7960,7 +7960,7 @@ $_def_libpostproc
 $_def_libpostproc_so
 
 /* Win32 DLL support */
-$_def_win32
+$_def_win32dll
 #define WIN32_PATH "$_win32codecsdir"
 
 /* Mac OS X specific features */
