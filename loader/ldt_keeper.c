@@ -62,8 +62,8 @@ int modify_ldt(int func, void *ptr, unsigned long bytecount);
 #include <sys/segment.h>
 #include <sys/sysi86.h>
 
-/* solaris x86: add missing prototype for sysi86() */
-#ifdef HAVE_SYSI86
+/* solaris x86: add missing prototype for sysi86(), but only when sysi86(int, void*) is known to be valid */
+#ifdef HAVE_SYSI86_iv
 #ifdef  __cplusplus
 extern "C" {
 #endif

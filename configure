@@ -3590,6 +3590,11 @@ _sysi86=no
 cc_check && _sysi86=yes
 if test "$_sysi86" = yes ; then
   _def_sysi86='#define HAVE_SYSI86 1'
+  cat > $TMPC << EOF
+  #include <sys/sysi86.h>
+  int main (void) { int sysi86(int, void*); sysi86(0); return 0; }
+EOF
+  cc_check && _def_sysi86_iv='#define HAVE_SYSI86_iv 1'
 else
   _def_sysi86='#undef HAVE_SYSI86'
 fi
@@ -7932,6 +7937,7 @@ int setenv(const char *name, const char *val, int overwrite);
 
 /* Define this if your system has sysi86 */
 $_def_sysi86
+$_def_sysi86_iv
 
 /* Define this if your system has pthreads */
 $_def_pthreads
