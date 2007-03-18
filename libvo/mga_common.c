@@ -372,12 +372,6 @@ static int mga_init(int width,int height,unsigned int format){
             return (-1);
         }
 
-	if(width>1023 || height >1023)
-	{
-		mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
-		return (-1);
-	}
-
 	mga_vid_config.src_width = width;
 	mga_vid_config.src_height= height;
 	if(!mga_vid_config.dest_width)
@@ -389,11 +383,40 @@ static int mga_init(int width,int height,unsigned int format){
 	
 	mga_vid_config.num_frames=(vo_directrendering && !vo_doublebuffering)?1:3;
 	mga_vid_config.version=MGA_VID_VERSION;
+
+	if(width > 1024 && height > 1024)
+	{
+		mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
+		return (-1);
+	} else if(height <= 1024)
+	{
+		// try whether we have a G550
+		int ret;
+		if(ret = ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
+		{
+			if(mga_vid_config.card_type != MGA_G550)
+			{
+				// we don't have a G550, so our resolution is too high
+				mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
+				return (-1);
+			} else {
+				// there is a deeper problem
+				// we have a G550, but still couldn't configure mga_vid
+				perror("Error in mga_vid_config ioctl()");
+				mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_IncompatibleDriverVersion);
+				return -1;
+			}
+			// if we arrived here, then we could successfully configure mga_vid
+			// at this high resolution
+		}
+	} else {
+	// configure mga_vid in case resolution is < 1024x1024 too
 	if (ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
 	{
 		perror("Error in mga_vid_config ioctl()");
                 mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_IncompatibleDriverVersion);
 		return -1;
+	}
 	}
 	
 	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_MGA_UsingBuffers,mga_vid_config.num_frames);
