@@ -2453,6 +2453,14 @@ You can encode to the following codecs (more or less up to date):
   <entry>lossless JPEG</entry>
 </row>
 <row>
+  <entry>targa</entry>
+  <entry>Targa</entry>
+</row>
+<row>
+  <entry>bmp</entry>
+  <entry>BMP image</entry>
+</row>
+<row>
   <entry>h261</entry>
   <entry>H.261</entry>
 </row>
@@ -2525,12 +2533,20 @@ You can encode to the following codecs (more or less up to date):
   <entry>Sorenson H.263 used in Flash Video</entry>
 </row>
 <row>
+  <entry>flashsv</entry>
+  <entry>Flash Screen Video</entry>
+</row>
+<row>
   <entry>dvvideo</entry>
   <entry>Sony Digital Video</entry>
 </row>
 <row>
   <entry>snow</entry>
   <entry>FFmpeg's experimental wavelet-based codec</entry>
+</row>
+<row>
+  <entry>zbmv</entry>
+  <entry>Zip Blocks Motion Video</entry>
 </row>
 </tbody>
 </tgroup>
@@ -2577,6 +2593,22 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 <row>
   <entry>sonic</entry>
   <entry>experimental lossy/lossless codec</entry>
+</row>
+<row>
+  <entry>vorbis</entry>
+  <entry>Xiph Ogg Vorbis codec</entry>
+</row>
+<row>
+  <entry>aiff</entry>
+  <entry>AIFF/AIFF-C codec</entry>
+</row>
+<row>
+  <entry>gsm</entry>
+  <entry>GSM-MS codec</entry>
+</row>
+<row>
+  <entry>wma</entry>
+  <entry>Windows Media Audio codec</entry>
 </row>
 </tbody>
 </tgroup>
