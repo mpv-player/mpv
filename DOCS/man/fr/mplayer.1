@@ -1,4 +1,4 @@
-.\" synced with r22503
+.\" synced with r22637
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -1138,8 +1138,8 @@ la quantité demandée de mémoire.
 .
 .TP
 .B \-(no)reuse-socket (udp:// uniquement)
-Permet au socket d'être ré-utilisé par un autre processus aussitôt que
-celui-ci la ferme.
+Permet au socket d'être ré-utilisé par un autre processus aussitôt qu'il
+est fermé.
 .
 .TP
 .B \-bandwidth <valeur> (réseau uniquement)
@@ -1609,6 +1609,10 @@ fréquence minimale autorisée (par défaut\ : 87.50)
 fréquence maximale autorisée (default: 108.00)
 .IPs channels=<fréquence>\-<nom>,<fréquence>\-<nom>,...
 Défini la liste des canaux.
+.I NOTE\ :
+Si <channel> est un entier supérieur à 1000, il sera interprété comme une
+fréquence (en in kHz) au lieu du nom du canal de la table des fréquences.
+.br
 Utilisez _ pour les espaces (ou jouez avec les guillements).
 Les noms des canaux seront alors affichées en utilisant l'OSD et les
 commandes esclaves radio_step_channel et radio_set_channel seront
@@ -3600,6 +3604,10 @@ Valide uniquement pour les modes yuv 2, 3, 4 et 6.
 Nécessite une unité de texture supplémentaire.
 Les cartes plus anciennes ne pourront pas gérer le chroma, tout du moins
 pas en mode plein écran.
+.br
+2: Utilise un fitrage cubique en direction horizontale, et un filtre
+linéaire en vectical.
+Fonctionne avec un peu plus de cartes que la méthode 1.
 .RE
 .IPs cscale=<n>
 Sélection de la fonction de mise à l'échelle à utiliser pour la chrominance.
@@ -4228,7 +4236,7 @@ ration d'aspect est incorrecte ou manquante dans le fichier lu.
 Désactive la compensation automatique du rapport hauteur/\:largeur.
 .
 .TP
-.B "\-field-dominance <-1\-1>
+.B \-field-dominance <-1\-1>
 Défini le premier champ du contenu entrelacé.
 Utile pour les dé-entrelaceurs qui doublent le nombre d'images par seconde
 \-vf tfields=1, \-vf yadif=1 et \-vo xvmc:bobdeint.
@@ -10303,6 +10311,11 @@ que vous vouliez encoder avec des codecs confidentiels.
 .TP
 .B codec=<nom>
 Le nom du fichier du codec binaire avec lequel vous souhaitez encoder.
+.
+.TP
+.B compdata=<fichier>
+Le nom du fichier de configuration de codec (ex\ : firstpass.mcf) créé
+par vfw2menc.
 .
 .
 .SS multiplexeur MPEG (\-mpegopts)
