@@ -474,8 +474,9 @@ parse_smil(play_tree_parser_t* p) {
   }
 
   //Get entries from smil 
+  src_line = line;
   line = NULL;
-  while((src_line = play_tree_parser_get_line(p)) != NULL) {
+  do {
     strstrip(src_line);
     if (line) {
       free(line);
@@ -516,26 +517,30 @@ parse_smil(play_tree_parser_t* p) {
           for (j = i; line[j]; j++)
             line[j] = line[j+1];
     }
-    if (line[0]=='\0')
-      continue;
+    pos = line;
+   while (pos) {
     if (!entrymode) { // all entries filled so far 
-      if (strncasecmp(line,"<video",6)==0  || strncasecmp(line,"<audio",6)==0 || strncasecmp(line,"<media",6)==0) {
+     while (pos=strchr(pos, '<')) {
+      if (strncasecmp(pos,"<video",6)==0  || strncasecmp(pos,"<audio",6)==0 || strncasecmp(pos,"<media",6)==0) {
           entrymode=1;
+          break; // Got a valid tag, exit '<' search loop
       }
+      pos++;
+     }
     }
     if (entrymode) { //Entry found but not yet filled
-      pos = strstr(line,"src=");   // Is source present on this line
+      pos = strstr(pos,"src=");   // Is source present on this line
       if (pos != NULL) {
         entrymode=0;
         s_start=pos+5;
         s_end=strchr(s_start,'"');
         if (s_end == NULL) {
           mp_msg(MSGT_PLAYTREE,MSGL_V,"Error parsing this source line %s\n",line);
-          continue;
+          break;
         }
         if (s_end-s_start> 511) {
           mp_msg(MSGT_PLAYTREE,MSGL_V,"Cannot store such a large source %s\n",line);
-          continue;
+          break;
         }
         strncpy(source,s_start,s_end-s_start);
         source[(s_end-s_start)]='\0'; // Null terminate
@@ -546,9 +551,11 @@ parse_smil(play_tree_parser_t* p) {
         else
           play_tree_append_entry(last_entry,entry);
         last_entry = entry;
+        pos = s_end;
       }
     }
-  }
+   }
+  } while((src_line = play_tree_parser_get_line(p)) != NULL);
 
   if (line)
     free(line);
