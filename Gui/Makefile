@@ -4,8 +4,6 @@ LIBNAME_MPLAYER = libgui.a
 
 #CFLAGS += -DDEBUG
 
-CFLAGS-$(CONFIG_LIBAVUTIL)   += -I../libavutil
-
 ifeq ($(TARGET_WIN32),yes)
 SRCS_MPLAYER = win32/dialogs.c \
                win32/gui.c \

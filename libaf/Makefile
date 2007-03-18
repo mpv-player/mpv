@@ -32,9 +32,6 @@ SRCS_COMMON = af.c \
 SRCS_COMMON-$(CONFIG_LIBAVCODEC)    += af_lavcresample.c
 SRCS_COMMON-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
 
-CFLAGS-$(CONFIG_LIBAVUTIL)   += -I../libavutil
-CFLAGS-$(CONFIG_LIBAVCODEC)  += -I../libavcodec
-
 ifeq ($(TARGET_OS),MINGW32)
 CFLAGS += -D_IO_H_
 endif

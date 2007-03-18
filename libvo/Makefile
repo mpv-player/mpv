@@ -22,6 +22,4 @@ SRCS_COMMON = aclib.c \
 SRCS_COMMON-$(BITMAP_FONT) +=  font_load.c
 SRCS_COMMON-$(FREETYPE)    +=  font_load_ft.c
 
-CFLAGS-$(CONFIG_LIBAVUTIL) +=  -I../libavutil
-
 include ../mpcommon.mak
