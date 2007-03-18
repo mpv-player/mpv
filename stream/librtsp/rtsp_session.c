@@ -140,7 +140,8 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
     }
 	
     rtsp_session->real_session = init_real_rtsp_session ();
-    if(!strncmp(h->streams[0]->mime_type, "application/vnd.rn-rmadriver", h->streams[0]->mime_type_size)) {
+    if(!strncmp(h->streams[0]->mime_type, "application/vnd.rn-rmadriver", h->streams[0]->mime_type_size) ||
+       !strncmp(h->streams[0]->mime_type, "application/smil", h->streams[0]->mime_type_size)) {
       rtsp_session->real_session->header_len = 0;
       rtsp_session->real_session->recv_size = 0;
       rtsp_session->real_session->rdt_rawdata = 1;
