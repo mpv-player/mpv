@@ -1,13 +1,12 @@
 SRCS_COMMON          += $(SRCS_COMMON-yes)
 SRCS_MPLAYER         += $(SRCS_MPLAYER-yes)
 SRCS_MENCODER        += $(SRCS_MENCODER-yes)
-CFLAGS       += $(CFLAGS-yes)
 
 OBJS_COMMON    = $(addsuffix .o, $(basename $(SRCS_COMMON)) )
 OBJS_MPLAYER   = $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
 OBJS_MENCODER  = $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
 
-CFLAGS += -I. -I.. $(OPTFLAGS)
+CFLAGS += $(CFLAGS-yes) -I. -I.. $(OPTFLAGS)
 
 LIBS-$(MPLAYER)  += $(LIBNAME_MPLAYER)
 LIBS-$(MENCODER) += $(LIBNAME_MENCODER)
