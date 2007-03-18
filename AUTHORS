@@ -364,6 +364,9 @@ Holm, David (dholm, mswitch) <dholm@telia.com>
 Horst, Bohdan (Nexus) <nexus@irc.pl>
     * FreeBSD support
 
+Hoyos, Carl Eugen (cehoyos) <cehoyos@ag.or.at>
+    * improvements to LIVE555 demuxer
+
 Huehner, Stefan (huehner) <stefan@huehner.org>
     * Major code cleanup patches
 
