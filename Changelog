@@ -8,14 +8,15 @@ MPlayer (1.0)
     * Russian man page translation finished
     * Chinese man page updated
     * Chinese documentation translation started
+    * Documented get/set/step properties in DOCS/tech/slave.txt
 
     Decoders:
     * Intel Music Coder audio decoding via lavc
     * Fraps v2/v4 video decoding via lavc
-    * fringe codecs: 4XM audio, Electronic Arts ADPCM audio, Delphine CIN audio
+    * Video game codecs: 4XM audio, Electronic Arts ADPCM audio, Delphine CIN audio
       and video, Interplay DPCM audio, Sierra VMD video, Tiertex SEQ video,
       Westwood IMA ADPCM audio, XAN wc3 video, Id CIN video, Interplay video,
-      XAN ADPCM audio, Westwood SND1 audio via lavc
+      XAN ADPCM audio, Westwood SND1 audio, Feeble Files DXA video via lavc
     * libmpeg2 updated to 0.4.1
     * fixed resolution switching with libmpeg2
     * handle resolution switching for Real codecs
@@ -31,6 +32,7 @@ MPlayer (1.0)
     * GIF demuxer improvements, should work with all GIFs now
     * support for VC1 in MPEG-TS and MPEG-PS files (bd,hd)-dvd
     * support for EVO demuxing
+    * support -noidx with -demuxer lavf
 
     Streaming:
     * authentication for Real RTSP streams
