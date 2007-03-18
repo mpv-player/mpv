@@ -7188,35 +7188,6 @@ else
 fi
 echores "$_crash_debug"
 
-if darwin ; then
-  CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -DSYS_DARWIN -DCONFIG_DARWIN -shared-libgcc"
-  if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
-    CFLAGS="$CFLAGS -no-cpp-precomp"
-  fi
-fi
-if amigaos ; then
-  CFLAGS="$CFLAGS -DNEWLIB -D__USE_INLINE__ -DSYS_AMIGAOS4"
-fi
-if hpux ; then
-  # use flag for HPUX missing setenv()
-  CFLAGS="$CFLAGS -DHPUX"
-fi
-# Thread support
-if linux ; then
-  CFLAGS="$CFLAGS -D_REENTRANT"
-elif bsd ; then
-  # FIXME bsd needs this so maybe other OS'es
-  CFLAGS="$CFLAGS -D_THREAD_SAFE"
-fi
-# 64 bit file offsets?
-if test "$_largefiles" = yes || freebsd ; then
-  CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
-  if test "$_dvdread" = yes || test "$_libdvdcss_internal" = yes ; then
-    # dvdread support requires this (for off64_t)
-    CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
-  fi
-fi
-
 echocheck "compiler support for noexecstack"
 cat > $TMPC <<EOF
 int main(void) { return 0; }
@@ -7226,10 +7197,6 @@ if cc_check -Wl,-z,noexecstack ; then
   echores "yes"
 else
   echores "no"
-fi
-
-if cc_check -Wdeclaration-after-statement ; then
-  CFLAGS="-Wdeclaration-after-statement $CFLAGS"
 fi
 
 echocheck "ftello()"
@@ -7249,13 +7216,6 @@ else
  _need_ftello=yes
 fi
 echores "$_ftello"
-
-# Determine OS dependent libs
-if cygwin ; then
-  #CFLAGS="$CFLAGS -D__CYGWIN__ -D__CYGWIN_USE_BIG_TYPES__"
-  # stat.st_size with BIG_TYPES is broken (not set) ::atmos 
-  CFLAGS="$CFLAGS -D__CYGWIN__"
-fi
 
 # Dynamic linking flags 
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
@@ -7412,6 +7372,46 @@ for I in $_libs_mplayer ; do
   fi
 done
 _libs_mplayer=$_ld_tmp
+
+
+#############################################################################
+if darwin ; then
+  CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -DSYS_DARWIN -DCONFIG_DARWIN -shared-libgcc"
+  if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
+    CFLAGS="$CFLAGS -no-cpp-precomp"
+  fi
+fi
+if amigaos ; then
+  CFLAGS="$CFLAGS -DNEWLIB -D__USE_INLINE__ -DSYS_AMIGAOS4"
+fi
+if hpux ; then
+  # use flag for HPUX missing setenv()
+  CFLAGS="$CFLAGS -DHPUX"
+fi
+# Thread support
+if linux ; then
+  CFLAGS="$CFLAGS -D_REENTRANT"
+elif bsd ; then
+  # FIXME bsd needs this so maybe other OS'es
+  CFLAGS="$CFLAGS -D_THREAD_SAFE"
+fi
+if cygwin ; then
+  #CFLAGS="$CFLAGS -D__CYGWIN__ -D__CYGWIN_USE_BIG_TYPES__"
+  # stat.st_size with BIG_TYPES is broken (not set) ::atmos
+  CFLAGS="$CFLAGS -D__CYGWIN__"
+fi
+# 64 bit file offsets?
+if test "$_largefiles" = yes || freebsd ; then
+  CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+  if test "$_dvdread" = yes || test "$_libdvdcss_internal" = yes ; then
+    # dvdread support requires this (for off64_t)
+    CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
+  fi
+fi
+
+if cc_check -Wdeclaration-after-statement ; then
+  CFLAGS="-Wdeclaration-after-statement $CFLAGS"
+fi
 
 #############################################################################
 # Take care of ffmpeg dependencies
