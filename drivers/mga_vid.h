@@ -15,8 +15,6 @@
 #ifndef __LINUX_MGAVID_H
 #define __LINUX_MGAVID_H
 
-//#include <inttypes.h>
-
 typedef struct mga_vid_config_s
 {
 uint16_t version;
@@ -52,6 +50,9 @@ uint32_t num_frames;
 
 #define MGA_G200 0x1234
 #define MGA_G400 0x5678
+// currently unused, G450 are mapped to MGA_G400
+// #define MGA_G450 0x9ABC
+#define MGA_G550 0xDEF0
 
 #define MGA_VID_VERSION 0x0201
 
