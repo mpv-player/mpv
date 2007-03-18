@@ -1301,6 +1301,10 @@ if mingw32 ; then
   _need_shmem=no
 fi
 
+if cygwin ; then
+  _def_confwin32='#define WIN32'
+fi
+
 if amigaos ; then
   _select=no
   _sighandler=no
@@ -7248,7 +7252,6 @@ echores "$_ftello"
 
 # Determine OS dependent libs
 if cygwin ; then
-  _def_confwin32='#define WIN32'
   #CFLAGS="$CFLAGS -D__CYGWIN__ -D__CYGWIN_USE_BIG_TYPES__"
   # stat.st_size with BIG_TYPES is broken (not set) ::atmos 
   CFLAGS="$CFLAGS -D__CYGWIN__"
