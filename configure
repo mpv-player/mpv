@@ -459,6 +459,7 @@ _mmxext=auto
 _sse=auto
 _sse2=auto
 _cmov=auto
+_fast_cmov=auto
 _armv5te=auto
 _iwmmxt=auto
 _mtrr=auto
@@ -1119,6 +1120,8 @@ for ac_option do
   --disable-3dnowext) _3dnowext=no ;;
   --enable-cmov) _cmov=yes ;;
   --disable-cmov) _cmov=no ;;
+  --enable-fast-cmov) _fast_cmov=yes ;;
+  --disable-fast-cmov) _fast_cmov=no ;;
   --enable-altivec) _altivec=yes ;;
   --disable-altivec) _altivec=no ;;
   --enable-armv5te) _armv5te=yes ;;
@@ -1970,6 +1973,17 @@ EOF
         echores "$proc"
     fi
 
+    #FIXME: The runtime CPU detection could check this as well.
+    if test _cmov = "yes" && test _fast_cmov = "auto" ; then
+        _fast_cmov="yes"
+        case "$proc" in
+            pentium4|prescott|nocona)
+                _fast_cmov="no"
+        esac
+    else
+        _fast_cmov="no"
+    fi
+
     echocheck "GCC & CPU optimization abilities"
 
     if test -n "$proc"; then
@@ -2437,6 +2451,8 @@ _def_sse2='#undef HAVE_SSE2'
 test "$_sse2" = yes && _def_sse2='#define HAVE_SSE2 1'
 _def_cmov='#undef HAVE_CMOV'
 test "$_cmov" = yes && _def_cmov='#define HAVE_CMOV 1'
+_def_fast_cmov='#undef HAVE_FAST_CMOV'
+test "$_fast_cmov" = yes && _def_fast_cmov='#define HAVE_FAST_CMOV 1'
 _def_armv5te='#undef HAVE_ARMV5TE'
 test "$_armv5te" = yes && _def_armv5te='#define HAVE_ARMV5TE 1'
 _def_iwmmxt='#undef HAVE_IWMMXT'
@@ -8310,6 +8326,7 @@ $_def_mmxext	// only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
 $_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
 $_def_cmov	// only define if you have CMOV (i686+, without VIA C3)
+$_def_fast_cmov	// only define if CMOV is fast
 $_def_altivec	// only define if you have Altivec (G4)
 $_def_armv5te	// only define if you have Enhanced DSP Extensions (ARM)
 $_def_iwmmxt	// only define if you have XScale IWMMX (ARM)
