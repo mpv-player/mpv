@@ -7416,6 +7416,9 @@ fi
 
 CXXFLAGS="-I.. $CFLAGS -D__STDC_LIMIT_MACROS"
 
+cat > $TMPC << EOF
+int main() { return 0; }
+EOF
 if cc_check -Wdeclaration-after-statement ; then
   CFLAGS="-Wdeclaration-after-statement $CFLAGS"
 fi
