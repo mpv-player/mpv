@@ -410,13 +410,13 @@ static int mga_init(int width,int height,unsigned int format){
 			// at this high resolution
 		}
 	} else {
-	// configure mga_vid in case resolution is < 1024x1024 too
-	if (ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
-	{
-		perror("Error in mga_vid_config ioctl()");
-                mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_IncompatibleDriverVersion);
-		return -1;
-	}
+		// configure mga_vid in case resolution is < 1024x1024 too
+		if (ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
+		{
+			perror("Error in mga_vid_config ioctl()");
+			mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_IncompatibleDriverVersion);
+			return -1;
+		}
 	}
 	
 	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_MGA_UsingBuffers,mga_vid_config.num_frames);
