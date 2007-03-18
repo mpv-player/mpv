@@ -7186,9 +7186,6 @@ if darwin ; then
   if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
     CFLAGS="$CFLAGS -no-cpp-precomp"
   fi
-
-  # libavcodec (from ffmpeg) requires CONFIG_DARWIN to enable AltiVec on Darwin/MacOSX
-  test "$_altivec" = yes && CFLAGS="$CFLAGS -DCONFIG_DARWIN"
 fi
 if amigaos ; then
   CFLAGS="$CFLAGS -DNEWLIB -D__USE_INLINE__ -DSYS_AMIGAOS4"
