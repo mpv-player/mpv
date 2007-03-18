@@ -1787,6 +1787,16 @@ EOF
       esac
     fi
 
+    if test $_cmov = "yes" && test $_fast_cmov = "auto" ; then
+        _fast_cmov="yes"
+        case "$proc" in
+            pentium4|prescott|nocona)
+                _fast_cmov="no"
+        esac
+    else
+        _fast_cmov="no"
+    fi
+
     echores "$proc"
     ;;
 
@@ -1971,17 +1981,6 @@ EOF
         echores "$proc altivec"
     else
         echores "$proc"
-    fi
-
-    #FIXME: The runtime CPU detection could check this as well.
-    if test _cmov = "yes" && test _fast_cmov = "auto" ; then
-        _fast_cmov="yes"
-        case "$proc" in
-            pentium4|prescott|nocona)
-                _fast_cmov="no"
-        esac
-    else
-        _fast_cmov="no"
     fi
 
     echocheck "GCC & CPU optimization abilities"
