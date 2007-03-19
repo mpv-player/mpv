@@ -2493,10 +2493,6 @@ You can encode to the following codecs (more or less up to date):
   <entry>pre-standard MPEG-4 variant by MS, v3 (AKA DivX3)</entry>
 </row>
 <row>
-  <entry>msmpeg4v1</entry>
-  <entry>pre-standard MPEG-4 by MS, v1</entry>
-</row>
-<row>
   <entry>msmpeg4v2</entry>
   <entry>pre-standard MPEG-4 by MS, v2 (used in old ASF files)</entry>
 </row>
@@ -2541,10 +2537,6 @@ You can encode to the following codecs (more or less up to date):
   <entry>ASUS Video v2</entry>
 </row>
 <row>
-  <entry>vcr1</entry>
-  <entry>ATI VCR1 codec</entry>
-</row>
-<row>
   <entry>ffv1</entry>
   <entry>FFmpeg's lossless video codec</entry>
 </row>
@@ -2571,10 +2563,6 @@ You can encode to the following codecs (more or less up to date):
 <row>
   <entry>zbmv</entry>
   <entry>Zip Blocks Motion Video</entry>
-</row>
-<row>
-  <entry>cljr</entry>
-  <entry>Cirrus Logic AccuPak codec</entry>
 </row>
 </tbody>
 </tgroup>
