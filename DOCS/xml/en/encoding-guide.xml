@@ -2635,10 +2635,6 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
   <entry>AIFF/AIFF-C codec</entry>
 </row>
 <row>
-  <entry>gsm</entry>
-  <entry>GSM-MS codec</entry>
-</row>
-<row>
   <entry>wmav1</entry>
   <entry>Windows Media Audio v1 codec</entry>
 </row>
