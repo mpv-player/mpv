@@ -6,7 +6,7 @@
 
 include config.mak
 
-CFLAGS = $(OPTFLAGS) -I.
+CFLAGS = -I. $(OPTFLAGS)
 
 CFLAGS-$(CONFIG_LIBAVUTIL)  += -I./libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC) += -I./libavcodec
