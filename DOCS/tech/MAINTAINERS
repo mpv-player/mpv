@@ -140,6 +140,7 @@ video filters:
     * vf_filmdint.c - Zoltan Hidvegi
     * vf_blackframe.c - Ivo van Poorten
     * vf_zrmjpeg.c - Rik Snel
+    * all filters written by Michael Niedermayer - Michael Niedermayer
 
 audio filters:
     * general: Alex Beregszaszi
