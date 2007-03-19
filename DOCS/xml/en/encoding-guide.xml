@@ -2453,6 +2453,10 @@ You can encode to the following codecs (more or less up to date):
   <entry>lossless JPEG</entry>
 </row>
 <row>
+  <entry>jpegls</entry>
+  <entry>JPEG LS</entry>
+</row>
+<row>
   <entry>targa</entry>
   <entry>Targa image</entry>
 </row>
@@ -2489,6 +2493,10 @@ You can encode to the following codecs (more or less up to date):
   <entry>pre-standard MPEG-4 variant by MS, v3 (AKA DivX3)</entry>
 </row>
 <row>
+  <entry>msmpeg4v1</entry>
+  <entry>pre-standard MPEG-4 by MS, v1</entry>
+</row>
+<row>
   <entry>msmpeg4v2</entry>
   <entry>pre-standard MPEG-4 by MS, v2 (used in old ASF files)</entry>
 </row>
@@ -2521,12 +2529,20 @@ You can encode to the following codecs (more or less up to date):
   <entry>lossless compression</entry>
 </row>
 <row>
+  <entry>ffvhuff</entry>
+  <entry>FFmpeg modified huffyuv lossless</entry>
+</row>
+<row>
   <entry>asv1</entry>
   <entry>ASUS Video v1</entry>
 </row>
 <row>
   <entry>asv2</entry>
   <entry>ASUS Video v2</entry>
+</row>
+<row>
+  <entry>vcr1</entry>
+  <entry>ATI VCR1 codec</entry>
 </row>
 <row>
   <entry>ffv1</entry>
@@ -2555,6 +2571,10 @@ You can encode to the following codecs (more or less up to date):
 <row>
   <entry>zbmv</entry>
   <entry>Zip Blocks Motion Video</entry>
+</row>
+<row>
+  <entry>cljr</entry>
+  <entry>Cirrus Logic AccuPak codec</entry>
 </row>
 </tbody>
 </tgroup>
