@@ -12,8 +12,6 @@ CFLAGS-$(CONFIG_LIBAVUTIL)  += -I./libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC) += -I./libavcodec
 CFLAGS                      += $(CFLAGS-yes)
 
-#CFLAGS += -Wall
-
 COMMON_LDFLAGS += $(EXTRA_LIB)\
                   $(EXTRALIBS) \
 
