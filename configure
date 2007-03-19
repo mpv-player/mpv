@@ -7403,7 +7403,7 @@ fi
 if cygwin ; then
   #CFLAGS="$CFLAGS -D__CYGWIN__ -D__CYGWIN_USE_BIG_TYPES__"
   # stat.st_size with BIG_TYPES is broken (not set) ::atmos
-  CFLAGS="$CFLAGS -D__CYGWIN__"
+  CFLAGS="$CFLAGS -D__CYGWIN__ -DSYS_CYGWIN"
 fi
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
