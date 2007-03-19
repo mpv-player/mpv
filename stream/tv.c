@@ -181,7 +181,10 @@ static int norm_from_string(tvi_handle_t *tvh, char* norm)
 	strncpy(str, norm, sizeof(str)-1);
 	str[sizeof(str)-1] = '\0';
         if (funcs->control(tvh->priv, TVI_CONTROL_SPC_GET_NORMID, str) != TVI_CONTROL_TRUE)
+        {
+	    mp_msg(MSGT_TV, MSGL_WARN, "tv.c: norm_from_string(%s): Bogus norm parameter, setting default.\n", norm);
 	    return 0;
+        }
 	return *(int *)str;
     }
 #endif
