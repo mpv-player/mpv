@@ -2454,11 +2454,19 @@ You can encode to the following codecs (more or less up to date):
 </row>
 <row>
   <entry>targa</entry>
-  <entry>Targa</entry>
+  <entry>Targa image</entry>
+</row>
+<row>
+  <entry>gif</entry>
+  <entry>GIF image</entry>
 </row>
 <row>
   <entry>bmp</entry>
   <entry>BMP image</entry>
+</row>
+<row>
+  <entry>png</entry>
+  <entry>PNG image</entry>
 </row>
 <row>
   <entry>h261</entry>
