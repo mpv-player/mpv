@@ -2600,7 +2600,11 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 </row>
 <row>
   <entry>sonic</entry>
-  <entry>experimental lossy/lossless codec</entry>
+  <entry>experimental FFmpeg lossy codec</entry>
+</row>
+<row>
+  <entry>sonicls</entry>
+  <entry>experimental FFmpeg lossless codec</entry>
 </row>
 <row>
   <entry>vorbis</entry>
@@ -2615,8 +2619,12 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
   <entry>GSM-MS codec</entry>
 </row>
 <row>
-  <entry>wma</entry>
-  <entry>Windows Media Audio codec</entry>
+  <entry>wmav1</entry>
+  <entry>Windows Media Audio v1 codec</entry>
+</row>
+<row>
+  <entry>wmav2</entry>
+  <entry>Windows Media Audio v2 codec</entry>
 </row>
 </tbody>
 </tgroup>
