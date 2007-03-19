@@ -9,7 +9,6 @@ SRCS_COMMON = af.c \
               af_delay.c \
               af_dummy.c \
               af_equalizer.c \
-              af_export.c \
               af_extrastereo.c \
               af_format.c \
               af_gate.c \
@@ -31,6 +30,7 @@ SRCS_COMMON = af.c \
 
 SRCS_COMMON-$(CONFIG_LIBAVCODEC)    += af_lavcresample.c
 SRCS_COMMON-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
+SRCS_COMMON-$(HAVE_SYS_MMAN_H)      += af_export.c
 
 ifeq ($(TARGET_OS),MINGW32)
 CFLAGS += -D_IO_H_
