@@ -2631,10 +2631,6 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
   <entry>Xiph Ogg Vorbis codec</entry>
 </row>
 <row>
-  <entry>aiff</entry>
-  <entry>AIFF/AIFF-C codec</entry>
-</row>
-<row>
   <entry>wmav1</entry>
   <entry>Windows Media Audio v1 codec</entry>
 </row>
