@@ -171,7 +171,7 @@ static int norm_from_string(tvi_handle_t *tvh, char* norm)
     else if (!strcasecmp(norm, "ntscjp"))
 	return TV_NORM_NTSCJP;
     else {
-	mp_msg(MSGT_TV, MSGL_V, "tv.c: norm_from_string(%s): Bogus norm parameter, setting PAL.\n", norm);
+	mp_msg(MSGT_TV, MSGL_WARN, "tv.c: norm_from_string(%s): Bogus norm parameter, setting PAL.\n", norm);
 	return TV_NORM_PAL;
     }
 #ifdef HAVE_TV_V4L2
