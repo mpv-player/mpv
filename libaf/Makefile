@@ -32,8 +32,4 @@ SRCS_COMMON-$(CONFIG_LIBAVCODEC)    += af_lavcresample.c
 SRCS_COMMON-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)      += af_export.c
 
-ifeq ($(TARGET_OS),MINGW32)
-CFLAGS += -D_IO_H_
-endif
-
 include ../mpcommon.mak
