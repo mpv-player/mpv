@@ -51,7 +51,10 @@ bmovl-test$(EXESUF): bmovl-test.c
 gltest: gltest.c ../osdep/timer-lx.o
 	$(CC) -O4 -g -o $@ $^ -lglut
 
+vfw2menc$(EXESUF): vfw2menc.c
+	$(CC) $< -o $@ -lwinmm -lole32
+
 clean distclean:
 	rm -f $(OBJS)
-	rm -f fastmem-* fastmem2-*
-	rm -f cpuinfo$(EXESUF) fastmemcpybench bmovl-test$(EXESUF) gltest
+	rm -f fastmem-* fastmem2-* fastmemcpybench gltest
+	rm -f cpuinfo$(EXESUF) bmovl-test$(EXESUF) vfw2menc$(EXESUF)
