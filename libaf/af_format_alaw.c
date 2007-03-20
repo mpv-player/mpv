@@ -14,7 +14,6 @@
 #ifndef __af_format_alaw_c
 #define __af_format_alaw_c
 
-#include <unistd.h>
 #include <inttypes.h>
 
 #include "af.h"

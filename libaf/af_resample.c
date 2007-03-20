@@ -11,7 +11,6 @@
 /* This audio filter changes the sample rate. */
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <inttypes.h>
 
 #include "af.h"
