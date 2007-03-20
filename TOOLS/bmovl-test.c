@@ -115,4 +115,6 @@ int main(int argc, char **argv) {
 	// Clean up
 	free(bitmap);
 	SDL_FreeSurface(image);
+
+	return 0;
 }
