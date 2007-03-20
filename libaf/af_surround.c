@@ -250,7 +250,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data){
   return data;
 }
 
-static int open(af_instance_t* af){
+static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
@@ -271,5 +271,5 @@ af_info_t af_info_surround =
         "Steve Davies <steve@daviesfam.org>",
         "",
         AF_FLAGS_NOT_REENTRANT,
-        open
+        af_open
 };

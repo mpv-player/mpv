@@ -164,7 +164,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   return data;
 }
 
-static int open(af_instance_t* af){
+static int af_open(af_instance_t* af){
   af_resample_t *s = calloc(1,sizeof(af_resample_t));
   af->control=control;
   af->uninit=uninit;
@@ -186,5 +186,5 @@ af_info_t af_info_lavcresample = {
   "Michael Niedermayer",
   "",
   AF_FLAGS_REENTRANT,
-  open
+  af_open
 };

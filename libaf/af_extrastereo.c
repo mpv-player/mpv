@@ -125,7 +125,7 @@ static af_data_t* play_float(struct af_instance_s* af, af_data_t* data)
 }
 
 // Allocate memory and set function pointers
-static int open(af_instance_t* af){
+static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play_s16;
@@ -147,5 +147,5 @@ af_info_t af_info_extrastereo = {
     "Alex Beregszaszi & Pierre Lombard",
     "",
     AF_FLAGS_NOT_REENTRANT,
-    open
+    af_open
 };

@@ -589,7 +589,7 @@ static int allocate(af_hrtf_t *s)
 }
 
 /* Allocate memory and set function pointers */
-static int open(af_instance_t* af)
+static int af_open(af_instance_t* af)
 {
     int i;
     af_hrtf_t *s;
@@ -663,5 +663,5 @@ af_info_t af_info_hrtf = {
     "ylai",
     "",
     AF_FLAGS_REENTRANT,
-    open
+    af_open
 };

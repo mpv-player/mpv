@@ -306,7 +306,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 }
 
 // Allocate memory and set function pointers
-static int open(af_instance_t* af){
+static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
@@ -325,7 +325,7 @@ af_info_t af_info_format = {
   "Anders",
   "",
   AF_FLAGS_REENTRANT,
-  open
+  af_open
 };
 
 static inline uint32_t load24bit(void* data, int pos) {
