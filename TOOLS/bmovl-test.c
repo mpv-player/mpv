@@ -2,6 +2,8 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
+#include <stdlib.h>
 #include <SDL.h>
 #include <SDL_image.h>
 
