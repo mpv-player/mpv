@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r21906
+// Updated to help_mp-en.h r22483
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -164,7 +164,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Inizializzazione Menu fallita.\n"
 #define MSGTR_Getch2InitializedTwice "WARNING: getch2_init chiamata 2 volte!\n"
 #define MSGTR_DumpstreamFdUnavailable "Non posso fare il dump di questo flusso - nessun descrittore file disponibile.\n"
-#define MSGTR_FallingBackOnPlaylist "Provo infine a interpretare playlist %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Non riesco ad aprire il filtro video libmenu col menu base %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Errore nel pre-init della sequenza di filtri audio!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC: errore di lettura: %s\n"
@@ -539,9 +538,9 @@ static char help_text[]=
 // stream_dvd.c
 #define MSGTR_DVDspeedCantOpen "Impossibile aprire il dispositivo DVD in scrittura, modificarne la velocità\nrichiede accesso in scrittura.\n"
 #define MSGTR_DVDrestoreSpeed "Ripristino la velocità del DVD... "
-#define MSGTR_DVDlimitSpeed "Limito la velocità del DVD a %dKB/s... "
-#define MSGTR_DVDlimitFail "Limitazione velocità del DVD fallita.\n"
-#define MSGTR_DVDlimitOk "Limitazione velocità del DVD riuscita.\n"
+#define MSGTR_DVDlimitSpeed "Limitazione della velocità del DVD a %dKB/s... "
+#define MSGTR_DVDlimitFail "non riuscita\n"
+#define MSGTR_DVDlimitOk "riuscita\n"
 #define MSGTR_CantOpenDVD "Impossibile aprire il dispositivo DVD: %s\n"
 #define MSGTR_NoDVDSupport "MPlayer è stato compilato senza il supporto per DVD, esco\n" 
 #define MSGTR_DVDnumTitles "Ci sono %d titolo/i su questo DVD.\n"
@@ -1007,7 +1006,8 @@ static char help_text[]=
 // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "Il dispositivo di uscita video_out scelto è incompatibile con questo codec.\n"\
-                "Prova aggiungendo il filtro scale, per esempio -vf spp,scale invece di -vf spp.\n"
+                "Prova aggiungendo il filtro scale alla sequenza dei filtri,\n"\
+		"per esempio -vf spp,scale invece di -vf spp.\n"
 #define MSGTR_VO_GenericError "E' accaduto questo errore"
 #define MSGTR_VO_UnableToAccess "Impossibile accedere a"
 #define MSGTR_VO_ExistsButNoDirectory "già esiste, ma non è una directory."
@@ -1204,8 +1204,6 @@ static char help_text[]=
 "[AO_ALSA]   device=<nome-dispositivo>\n"\
 "[AO_ALSA]     Seleziona il dispositivo (cambia i , in . e i : in =)\n"
 #define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] non sono supportati %d canali.\n"
-#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Impossibile leggere la configurazione ALSA: %s\n"
-#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] Impossibile copiare la configurazione: %s\n"
 #define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] Apertura in modalità non bloccante fallita, provo con la bloccante.\n"
 #define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Errore aprendo il Playback: %s\n"
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Errore impostando la modalità bloccante %s.\n"
@@ -1360,6 +1358,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Nessun dato trovato dopo l'intestazione!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: nessuna intestazione audio o video trovata - file danneggiato?\n"
 #define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Lunghezza non valida nell'intestazione ASF!\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "URL Licenza DRM: %s\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "Questo file è stato oscurato con protezione DRM, non potrà esser riprodotto in MPlayer!\n"
 
 // asf_mmst_streaming.c
 
@@ -1558,6 +1558,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_XMMS_FoundPlugin "Trovato plugin: %s (%s).\n"
 #define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Chiudo plugin: %s.\n"
+#define MSGTR_MPDEMUX_XMMS_WaitForStart "Attendo che il plugin XMMS inizi la riproduzione di '%s'...\n"
 
 // ========================== LIBMPMENU ===================================
 
@@ -2031,10 +2032,11 @@ static char help_text[]=
 #define MSGTR_LIBASS_NoStyleFound "[ass] Nessuno stile trovato!\n"
 #define MSGTR_LIBASS_EmptyEvent "[ass] Evento vuoto!\n"
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] Raggiunto MAX_GLYPHS: evento %d, inizio = %llu, durata = %llu\n Testo = %s\n"
-#define MSGTR_LIBASS_EventHeightHasChanged "[ass] Attenzione! L'evento otto è cambiato!  \n"
-#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Troppi eventi simultanei!\n"
+#define MSGTR_LIBASS_EventHeightHasChanged "[ass] Attenzione! L'evento altezza è cambiato!  \n"
 
 // ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glifo 0x%X non trovato, riseleziono il font per (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] Glifo 0x%X non trovato nel font per (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Errore aprendo il font in memoria: %s\n"
+#define MSGTR_LIBASS_NoCharmaps "[ass] font face senza alcuna mappa caratteri\n"
+#define MSGTR_LIBASS_NoCharmapAutodetected "[ass] nessuna mappa caratteri rilevata automaticamente, provo la prima\n"
