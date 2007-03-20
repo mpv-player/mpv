@@ -392,7 +392,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer, int rdt_rawdata) {
   
   ph.object_version=0;
   ph.length=size;
-  ph.stream_number=(flags1>>1)&1;
+  ph.stream_number=(flags1>>1)&0x1f;
   ph.timestamp=ts;
   ph.reserved=0;
   if ((flags2&1) == 0 && (prev_ts != ts || prev_stream_number != ph.stream_number))
@@ -452,6 +452,7 @@ rmff_header_t *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidt
   int status;
   uint32_t maxbandwidth = bandwidth;
   char* authfield = NULL;
+  int i;
   
   /* get challenge */
   challenge1=strdup(rtsp_search_answers(rtsp_session,"RealChallenge1"));
@@ -591,14 +592,15 @@ autherr:
   sprintf(buf, "%s/streamid=0", mrl);
   rtsp_request_setup(rtsp_session,buf,NULL);
 
-  if (h->prop->num_streams > 1) {
+  /* Do setup for all the other streams we subscribed to */
+  for (i = 1; i < h->prop->num_streams; i++) {
     rtsp_schedule_field(rtsp_session, "Transport: x-pn-tng/tcp;mode=play,rtp/avp/tcp;unicast;mode=play");
     buf = xbuffer_ensure_size(buf, strlen(session_id) + 32);
     sprintf(buf, "If-Match: %s", session_id);
     rtsp_schedule_field(rtsp_session, buf);
 
     buf = xbuffer_ensure_size(buf, strlen(mrl) + 32);
-    sprintf(buf, "%s/streamid=1", mrl);
+    sprintf(buf, "%s/streamid=%d", mrl, i);
     rtsp_request_setup(rtsp_session,buf,NULL);
   }
   /* set stream parameter (bandwidth) with our subscribe string */
