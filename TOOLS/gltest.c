@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <inttypes.h>
+#include <string.h>
 
 // pixel size:  3 or 4
 #define BYTES_PP 3
