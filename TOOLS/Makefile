@@ -46,7 +46,7 @@ fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) -g $< -o fastmem2-sse$(EXESUF) ../libvo/aclib.o -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
 
 bmovl-test$(EXESUF): bmovl-test.c
-	$(CC) -O3 -I/usr/include/SDL -lSDL_image -o $@ $<
+	$(CC) -O3 $(EXTRA_INC) -o $@ $< -lSDL_image
 
 gltest: gltest.c ../osdep/timer-lx.o
 	$(CC) -O4 -g -o $@ $^ -lglut
