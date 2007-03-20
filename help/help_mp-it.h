@@ -1007,7 +1007,7 @@ static char help_text[]=
 
 #define MSGTR_VOincompCodec "Il dispositivo di uscita video_out scelto è incompatibile con questo codec.\n"\
                 "Prova aggiungendo il filtro scale alla sequenza dei filtri,\n"\
-		"per esempio -vf spp,scale invece di -vf spp.\n"
+                "per esempio -vf spp,scale invece di -vf spp.\n"
 #define MSGTR_VO_GenericError "E' accaduto questo errore"
 #define MSGTR_VO_UnableToAccess "Impossibile accedere a"
 #define MSGTR_VO_ExistsButNoDirectory "già esiste, ma non è una directory."
