@@ -22,16 +22,16 @@ endif
 
 all: $(OBJS)
 
-png2raw: png2raw.c
+png2raw$(EXESUF): png2raw.c
 	$(CC) $< -o $@ -lpng
 
-subrip: subrip.c
+subrip$(EXESUF): subrip.c
 	$(CC) $(CFLAGS) -g -o $@ $< ../vobsub.o ../spudec.o ../mp_msg.o \
           ../unrarlib.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
           ../libmpcodecs/img_format.o ../osdep/getch2.o -ltermcap -lm
 
 #FIXME: Linking is broken, help welcome.
-vivodump: vivodump.c
+vivodump$(EXESUF): vivodump.c
 	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a \
            ../stream/stream.a ../osdep/getch2.o -ltermcap -lm
 
