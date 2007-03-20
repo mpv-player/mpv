@@ -359,7 +359,15 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer, int rdt_rawdata) {
 #ifdef LOG
     printf("got flags1: 0x%02x\n",flags1);
 #endif
-    if(header[6] == 0x06) {
+    if(header[6] == 0x06) { // eof packet
+      rtsp_read_data(rtsp_session, header, 7); // Skip the rest of the eof packet
+      /* Some files have short auxiliary streams, we must ignore eof packets
+       * for these streams to avoid premature eof.
+       * Now the code declares eof only if the stream with id == 0 gets eof
+       * (old code was: eof on the first eof packet received).
+       */
+      if(flags1 & 0x7c) // ignore eof for streams with id != 0
+        return 0;
       mp_msg(MSGT_STREAM, MSGL_INFO, "realrtsp: Stream EOF detected\n");
       return -1;
     }
