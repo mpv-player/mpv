@@ -7919,7 +7919,7 @@ $_def_vsscanf
 /* Define this if your system has swab */
 $_def_swab
 
-/* Define this if your system has no posix select */
+/* Define this if your system has posix select */
 $_def_posix_select
 
 /* Define this if your system has gettimeofday */
