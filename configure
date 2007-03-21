@@ -7530,6 +7530,7 @@ HAVE_PTHREADS = $_pthreads
 HAVE_XVMC_ACCEL = $_xvmc
 
 HAVE_SYS_MMAN_H = $_mman
+HAVE_POSIX_SELECT = $_posix_select
 
 NEED_FSEEKO  = $_need_fseeko
 NEED_FTELLO  = $_need_ftello

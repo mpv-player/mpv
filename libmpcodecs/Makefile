@@ -33,7 +33,6 @@ SRCS_COMMON = native/nuppelvideo.c \
               vf_1bpp.c \
               vf_2xsai.c \
               vf_blackframe.c \
-              vf_bmovl.c \
               vf_boxblur.c \
               vf_crop.c \
               vf_cropdetect.c \
@@ -108,6 +107,7 @@ SRCS_COMMON-$(CONFIG_LIBAVCODEC_SO)  += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lav
 SRCS_COMMON-$(CONFIG_LIBPOSTPROC)    += vf_pp.c
 SRCS_COMMON-$(CONFIG_LIBPOSTPROC_SO) += vf_pp.c
 SRCS_COMMON-$(FAAD)                  += ad_faad.c
+SRCS_COMMON-$(HAVE_POSIX_SELECT)     += vf_bmovl.c
 SRCS_COMMON-$(JPEG)                  += vd_ijpg.c
 SRCS_COMMON-$(LIBA52)                += ad_liba52.c
 SRCS_COMMON-$(LIBDV)                 += ad_libdv.c vd_libdv.c
