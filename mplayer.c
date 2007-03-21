@@ -2593,7 +2593,7 @@ if(slave_mode)
   mp_input_add_cmd_fd(0,0,mp_input_win32_slave_cmd_func,NULL);
 #endif
 else if(!noconsolecontrols)
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
   mp_input_add_key_fd(0,1,NULL,NULL);
 #else
   mp_input_add_key_fd(0,0,NULL,NULL);

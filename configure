@@ -3518,12 +3518,9 @@ cat > $TMPC << EOF
 int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfds,&readfds,NULL,NULL,&timeout); return 0; }
 EOF
 _posix_select=no
-cc_check && _posix_select=yes
-if test "$_posix_select" = no ; then
-  _def_no_posix_select='#define HAVE_NO_POSIX_SELECT 1'
-else
-  _def_no_posix_select='#undef HAVE_NO_POSIX_SELECT'
-fi
+_def_posix_select='#undef HAVE_POSIX_SELECT'
+cc_check && _posix_select=yes \
+  && _def_posix_select='#define HAVE_POSIX_SELECT 1'
 echores "$_posix_select"
 
 
@@ -7922,7 +7919,7 @@ $_def_vsscanf
 $_def_swab
 
 /* Define this if your system has no posix select */
-$_def_no_posix_select
+$_def_posix_select
 
 /* Define this if your system has gettimeofday */
 $_def_gettimeofday

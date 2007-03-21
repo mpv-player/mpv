@@ -934,7 +934,7 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
 
 int
 mp_input_read_key_code(int time) {
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
   fd_set fds;
   struct timeval tv,*time_val;
 #endif
@@ -948,7 +948,7 @@ mp_input_read_key_code(int time) {
     return MP_INPUT_NOTHING;
   }
 
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
   FD_ZERO(&fds);
 #endif
   // Remove fd marked as dead and build the fd_set
@@ -962,13 +962,13 @@ mp_input_read_key_code(int time) {
       continue;
     if(key_fds[i].fd > max_fd)
       max_fd = key_fds[i].fd;
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
     FD_SET(key_fds[i].fd,&fds);
 #endif
     n++;
   }
 
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
 // if we have fd's without MP_FD_NO_SELECT flag, call select():
 if(n>0){
 
@@ -1001,7 +1001,7 @@ if(n>0){
       last_loop %= (num_key_fd+1);
       continue;
     }
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
     // No input from this fd
     if(! (key_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(key_fds[i].fd,&fds) && key_fds[i].fd != 0)
       continue;
@@ -1124,7 +1124,7 @@ mp_input_read_keys(int time,int paused) {
 
 static mp_cmd_t*
 mp_input_read_cmds(int time) {
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
   fd_set fds;
   struct timeval tv,*time_val;
 #endif
@@ -1135,7 +1135,7 @@ mp_input_read_cmds(int time) {
   if(num_cmd_fd == 0)
     return NULL;
 
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
   FD_ZERO(&fds);
 #endif
   for(i = 0; (unsigned int)i < num_cmd_fd ; i++) {
@@ -1149,7 +1149,7 @@ mp_input_read_cmds(int time) {
       got_cmd = 1;
     if(cmd_fds[i].fd > max_fd)
       max_fd = cmd_fds[i].fd;
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
     FD_SET(cmd_fds[i].fd,&fds);
 #endif
     n++;
@@ -1158,7 +1158,7 @@ mp_input_read_cmds(int time) {
   if(num_cmd_fd == 0)
     return NULL;
 
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
   if(time >= 0) {
     tv.tv_sec=time/1000; 
     tv.tv_usec = (time%1000)*1000;
@@ -1189,7 +1189,7 @@ mp_input_read_cmds(int time) {
       last_loop %= (num_cmd_fd+1);
       continue;
     }
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
     if( ! (cmd_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(cmd_fds[i].fd,&fds) && ! (cmd_fds[i].flags & MP_FD_GOT_CMD) )
       continue;
 #endif

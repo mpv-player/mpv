@@ -68,7 +68,7 @@
 #include "vf.h"
 #include "img_format.h"
 
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
 
 #include "mp_msg.h"
 #include "libavutil/common.h"

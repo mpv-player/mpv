@@ -102,7 +102,7 @@ extern vf_info_t vf_info_geq;
 // list of available filters:
 static vf_info_t* filter_list[]={
     &vf_info_rectangle,
-#ifndef HAVE_NO_POSIX_SELECT
+#ifdef HAVE_POSIX_SELECT
     &vf_info_bmovl,
 #endif
     &vf_info_crop,
