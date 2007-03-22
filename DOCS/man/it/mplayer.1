@@ -1,4 +1,4 @@
-.\" synced with r21221
+.\" synced with r21452
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
@@ -259,7 +259,7 @@ Diminuisce/\:aumenta il volume.
 Suono muto.
 .IPs "_ (solo MPEG-TS e libavformat)"
 Passa attraverso tutte le tracce video disponibili.
-.IPs "# (solo MPEG e Matroska)" 
+.IPs "# (solo MPEG, Matroska, AVI e libavformat)" 
 Passa attraverso tutte le tracce audio disponibili.
 .IPs "TAB (solo MPEG-TS)"
 Passa attraverso tutti i programmi disponibili.
@@ -3374,10 +3374,8 @@ Driver di uscita video molto generico che dovrebbe funzionare su qualsiasi
 scheda compatibile con VESA VBE 2.0.
 .PD 0
 .RSs
-.IPs "dga\ \ "
-Attiva il modo DGA.
-.IPs nodga
-Disattiva il modo DGA.
+.IPs (no)dga
+Attiva/disattiva la modalità DGA (default: attiva).
 .IPs neotv_pal
 Attiva l'uscita TV di NeoMagic e seleziona la norma PAL.
 .IPs neotv_ntsc
@@ -3719,6 +3717,21 @@ Driver video di uscita per il modulo del kernel SyncFB, il quale
 fornisce speciali caratteristiche delle schede Matrox Gxxx, come
 deinterlacciamento, scalatura e sincronizzazione dell'uscita video
 con il ritracciamento verticale del tuo monitor.
+.
+.TP
+.B s3fb (solo Linux) (vedi anche \-vf yuv2 e \-dr)
+Driver di uscita video specifico per S3 Virge.
+Questo driver supporta la conversione e la scalatura YUV della scheda, il doppio
+buffering e il direct rendering.
+Usa \-vf yuy2 per ottenere la renderizzazione YUY2 accellerata hardware, che su
+questa scheda è decisamente più veloce di YV12.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Seleziona esplicitamente il nome del dispositivo fbdev da usare
+(default: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B 3dfx (solo Linux)
@@ -5123,12 +5136,6 @@ La sintassi è:
 .TP
 .B \-vf <filtro1[=parametro1:parametro2:...],filtro2,...>
 Attiva una catena di filtri video.
-.
-.TP
-.B \-vop <...,filtro2[=parametro1:parametro2:...]],filtro1> (OBSOLETO)
-Attiva una catena di filtri video, da applicare in ordine
-.B inverso.
-Deprecato in favore di \-vf.
 .PP
 Molti parametri sono opzionali e verrano caricati a valori di default se
 omessi.
@@ -8524,7 +8531,7 @@ diamante di dimensione 3 con forma adattiva (veloce)
 .IPs -2
 diamante di dimensione 2 con forma adattiva (veloce)
 .IPs -1
-particolarmente speciale: può essere più lento e/o migliore che dia=-2.
+ricerca multi-esagonale dispari (lenta)
 .IPs  1
 diamante normale con dimensione=1 (default) =diamante di tipo EPZS
 .nf
@@ -10161,6 +10168,20 @@ Funziona solo  con video in formato MPEG-2 quando il framerate di uscita,
 eventualmente convertito con \-ofps, è 24000/1001 oppure 24 fps.
 Qualsiasi altro valore di velocità è incompatibile con questa opzione.
 .
+.TP
+.B vbuf_size=<40\-1194>
+Imposta la dimensione del buffer del decodificatore video, espressa in kilobyte.
+Da specificare solo se la frequenza bit del flusso video è troppo alta per il
+formato scelto e solo se sai perfettamente cosa stai facendo.
+Un valore troppo alto potrebbe portare ad un filmato illegibile, in dipendenza
+dalle caratteristiche del riproduttore.
+Facendo un muxing video HDTV, un valore di 400 dovrebbe essere sufficiente.
+.
+.TP
+.B abuf_size=<4\-64>
+Imposta la dimensione del buffer del decodificatore audio, espressa in kilobyte.
+Valgono le stesse regole di vbuf_size.
+.
 .
 .SS FFmpeg libavformat demuxer (\-lavfdopts)
 .
@@ -10220,6 +10241,9 @@ Formato contenitore Sony Digital Video
 MEncoder non può assegnare valori corretti di timestamps (marcatori di tempo)
 quando ci sono dei fotogrammi di tipo B nel flusso video, ottenendo così
 delle codifiche errate.
+Se desideri utilizzare il muxer lavf, devi impedire che il codec video utilizzi
+fotogrammi B (vedi la relativa documentazione di ciascun codec) e devi anche
+specificare questa opzione.
 .
 .TP
 .B muxrate=<velocità>
