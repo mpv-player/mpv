@@ -268,10 +268,9 @@ static char help_text[]=
 #define MSGTR_AudioCopyFileMismatch "\nTutti i file devono avere lo stesso codec audio e formato per -oac copy.\n"
 #define MSGTR_NoAudioFileMismatch "\nImpossibile mescolare file solo audio con file video. Prova con -nosound.\n"
 #define MSGTR_NoSpeedWithFrameCopy "WARNING: -speed non è detto che funzioni correttamente con -oac copy!\n"\
-"L'encoding potrebbe essere danneggiato!\n"
+"La codifica potrebbe risultare danneggiata!\n"
 #define MSGTR_ErrorWritingFile "%s: errore nella scrittura del file.\n"
-// TODO::
-//#define MSGTR_FlushingVideoFrames "\nFlushing fotogrammi video.\n"
+#define MSGTR_FlushingVideoFrames "\nScaricamento fotogrammi video.\n"
 #define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "I filtri non son stati configurati! File vuoto?\n"
 #define MSGTR_RecommendedVideoBitrate "Il bitrate video consigliato per %s CD è: %d\n"
 #define MSGTR_VideoStreamResult "\nFlusso video: %8.3f kbit/s  (%d B/s)  dim.: %"PRIu64" byte  %5.3f sec  %d fotogrammi\n"
@@ -377,7 +376,7 @@ static char help_text[]=
 "\n"\
 "   \"cbr\"  - se usi la modalità ABR (leggi sopra) con un certo bitrate\n"\
 "            significativo come 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
-"            puoi usare l'opzione \"cbr\" per forzare l'encoding in modalità\n"\
+"            puoi usare l'opzione \"cbr\" per forzare la codifica in modalità\n"\
 "            CBR al posto dello standard abr. ABR dà una più alta qualità,\n"\
 "            ma CBR torna utile in quelle situazioni dove ad esempio\n"\
 "            trasmettere un MP3 su internet può essere importante.\n"\
