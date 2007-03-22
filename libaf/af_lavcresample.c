@@ -64,8 +64,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->rate = out_rate;
     return test_output_res;
   case AF_CONTROL_COMMAND_LINE:{
+    s->cutoff= 0.0;
     sscanf((char*)arg,"%d:%d:%d:%d:%lf", &af->data->rate, &s->filter_length, &s->linear, &s->phase_shift, &s->cutoff);
-    if(s->cutoff <= 0.0) s->cutoff= max(1.0 - 1.0/s->filter_length, 0.80);
+    if(s->cutoff <= 0.0) s->cutoff= max(1.0 - 6.5/(s->filter_length+8), 0.80);
     return AF_OK;
   }
   case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET:
@@ -173,7 +174,7 @@ static int af_open(af_instance_t* af){
   af->mul.d=1;
   af->data=calloc(1,sizeof(af_data_t));
   s->filter_length= 16;
-  s->cutoff= max(1.0 - 1.0/s->filter_length, 0.80);
+  s->cutoff= max(1.0 - 6.5/(s->filter_length+8), 0.80);
   s->phase_shift= 10;
 //  s->setup = RSMP_INT | FREQ_SLOPPY;
   af->setup=s;
