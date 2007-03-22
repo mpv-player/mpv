@@ -125,8 +125,8 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
         }
         pos += atomLength;
       }
-      needVideoFrameRate(demuxer, subsession);
     }
+    needVideoFrameRate(demuxer, subsession);
   } else {
     fprintf(stderr,
 	    "Unknown MPlayer format code for MIME type \"video/%s\"\n",
