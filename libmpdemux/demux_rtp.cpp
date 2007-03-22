@@ -412,7 +412,7 @@ static void afterReading(void* clientData, unsigned frameSize,
   bufferQueue->prevPacketWasSynchronized = hasBeenSynchronized;
 
   dp->pos = demuxer->filepos;
-  demuxer->filepos += frameSize;
+  demuxer->filepos += frameSize + headersize;
 
   // Signal any pending 'doEventLoop()' call on this queue:
   bufferQueue->blockingFlag = ~0;
