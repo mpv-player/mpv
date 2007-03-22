@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r22483
+// Updated to help_mp-en.h r22772
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -1970,11 +1970,11 @@ static char help_text[]=
 #define MSGTR_RADIO_CaptureStarting "[radio] Inizio la parte di cattura.\n"
 #define MSGTR_RADIO_ClearBufferFailed "[radio] Pulizia buffer fallita: %s\n"
 #define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Chiamata a stream_enable_cache fallito: %s\n"
-#define MSGTR_RADIO_DriverUnknownId "[radio] Id driver sconosciuto: %d\n"
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Nome driver sconosciuto: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Uso l'interfaccia radio V4Lv2.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Uso l'interfaccia radio V4Lv1.\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[radio] Utilizzo l'interfaccia radio *BSD BT848.\n"
+#define MSGTR_RADIO_AvailableDrivers "[radio] Driver disponibili: "
 
 // ================================== LIBASS ====================================
 
