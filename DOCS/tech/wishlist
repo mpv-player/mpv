@@ -68,8 +68,6 @@ Filters:
 
  * insert af volnorm during playback
 
- * insert deinterlace filter during playback
-
 Enhancements:
 
  * merge VIDIX from MPlayerXP/sourceforge
@@ -114,6 +112,8 @@ Enhancements:
  * rotate/position osd
 
  * timeout and reconnect options for streaming
+
+ * support all image formats in mf:// (bmp)
 
 Difficult stuff:
 
