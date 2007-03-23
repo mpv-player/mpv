@@ -620,7 +620,8 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
 static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
-  struct VbeInfoBlock vib;  
+  static struct VbeInfoBlock vib;
+  static int vib_set;
   struct VesaModeInfoBlock vmib;
   struct VesaCRTCInfoBlock crtc_pass;
   size_t i,num_modes;
@@ -649,12 +650,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	} 
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
 	memcpy(vib.VESASignature,"VBE2",4);
-	if((err=vbeGetControllerInfo(&vib)) != VBE_OK)
+	if(!vib_set && (err=vbeGetControllerInfo(&vib)) != VBE_OK)
 	{
 	  PRINT_VBE_ERR("vbeGetControllerInfo",err);
 	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound);
 	  return -1;
 	}
+	vib_set = 1;
 	/* Print general info here */
 	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion,
 		(int)(vib.VESAVersion >> 8) & 0xff,
