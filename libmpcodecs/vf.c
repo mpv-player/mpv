@@ -124,6 +124,7 @@ static vf_info_t* filter_list[]={
 #ifdef USE_LIBAVCODEC
     &vf_info_lavc,
     &vf_info_lavcdeint,
+    &vf_info_pp7,
 #endif
 #ifdef HAVE_ZR
     &vf_info_zrmjpeg,
@@ -173,13 +174,11 @@ static vf_info_t* filter_list[]={
     &vf_info_fspp,
     &vf_info_qp,
     &vf_info_mcdeint,
+    &vf_info_geq,
 #endif
     &vf_info_yuvcsp,
     &vf_info_kerndeint,
     &vf_info_rgbtest,
-#ifdef USE_LIBAVCODEC
-    &vf_info_pp7,
-#endif
     &vf_info_phase,
     &vf_info_divtc,
     &vf_info_harddup,
@@ -192,9 +191,6 @@ static vf_info_t* filter_list[]={
 #endif
     &vf_info_yadif,
     &vf_info_blackframe,
-#ifdef USE_LIBAVCODEC_DSPUTIL
-    &vf_info_geq,
-#endif
     NULL
 };
 
