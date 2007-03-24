@@ -1,7 +1,7 @@
-KERNEL_INCLUDES = /usr/src/linux/include
-INCLUDES = -I$(KERNEL_INCLUDES)
-CFLAGS = -O2 -D__KERNEL__ -DMODULE -include $(KERNEL_INCLUDES)/linux/modversions.h
-VERSION = $(shell grep UTS_RELEASE $(KERNEL_INCLUDES)/linux/version.h | cut -d '"' -f2)
+KERNEL_INC = /usr/src/linux/include
+INCLUDES = -I$(KERNEL_INC)
+CFLAGS = -O2 -D__KERNEL__ -DMODULE -include $(KERNEL_INC)/linux/modversions.h
+VERSION = $(shell grep RELEASE $(KERNEL_INC)/linux/version.h | cut -d'"' -f2)
 MDIR = /lib/modules/$(VERSION)/misc
 
 all: dhahelper.o test
@@ -19,7 +19,7 @@ install: dhahelper.o
 
 dep depend:
 
-clean: 
+clean:
 	rm -f *.o *~
 
 distclean: clean
