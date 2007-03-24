@@ -7409,7 +7409,8 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
-CXXFLAGS="-I.. $CFLAGS -D__STDC_LIMIT_MACROS"
+CFLAGS="-I. -I.. -I../libavutil $CFLAGS"
+CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
 cat > $TMPC << EOF
 int main() { return 0; }
