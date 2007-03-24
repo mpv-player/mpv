@@ -1,8 +1,9 @@
-KERNEL_INCLUDES = /lib/modules/`uname -r`/build/include
-VERSION = $(shell grep UTS_RELEASE $(KERNEL_INCLUDES)/linux/version.h | cut -d '"' -f2)
+KERNEL_INC = /lib/modules/`uname -r`/build/include
+VERSION = $(shell grep RELEASE $(KERNEL_INC)/linux/version.h | cut -d'"' -f2)
 MDIR = /lib/modules/$(VERSION)/misc
 
-CFLAGS = -O2 -D__KERNEL__ -DMODULE -I$(KERNEL_INCLUDES) -Wall -include $(KERNEL_INCLUDES)/linux/modversions.h
+CFLAGS = -O2 -D__KERNEL__ -DMODULE -Wall -I$(KERNEL_INC) \
+  -include $(KERNEL_INC)/linux/modversions.h
 
 OBJS = mga_vid.o tdfx_vid.o radeon_vid.o rage128_vid.o
 
