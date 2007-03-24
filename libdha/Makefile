@@ -20,7 +20,7 @@ ifneq ($(wildcard svgalib_helper),)
 CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
 endif
 
-all: pci_names.c $(LIBNAME)
+all: $(LIBNAME)
 
 include ../mpcommon.mak
 
