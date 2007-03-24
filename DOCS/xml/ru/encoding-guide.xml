@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22413 -->
+<!-- synced with r22753 -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
@@ -2600,6 +2600,26 @@ mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
   <entry>JPEG без потери качества</entry>
 </row>
 <row>
+  <entry>jpegls</entry>
+  <entry>JPEG LS</entry>
+</row>
+<row>
+  <entry>targa</entry>
+  <entry>Targa рисунок</entry>
+</row>
+<row>
+  <entry>gif</entry>
+  <entry>GIF рисунок</entry>
+</row>
+<row>
+  <entry>bmp</entry>
+  <entry>BMP рисунок</entry>
+</row>
+<row>
+  <entry>png</entry>
+  <entry>PNG рисунок</entry>
+</row>
+<row>
   <entry>h261</entry>
   <entry>H.261</entry>
 </row>
@@ -2653,6 +2673,10 @@ mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
   <entry>сжатие без потерь</entry>
 </row>
 <row>
+  <entry>ffvhuff</entry>
+  <entry>huffyuv без потерь, модифицированный FFmpeg</entry>
+</row>
+<row>
   <entry>asv1</entry>
   <entry>ASUS Видео v1</entry>
 </row>
@@ -2673,12 +2697,20 @@ mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
   <entry>Sorenson H.263 используемый в Flash Видео</entry>
 </row>
 <row>
+  <entry>flashsv</entry>
+  <entry>Flash Screen Video</entry>
+</row>
+<row>
   <entry>dvvideo</entry>
   <entry>Sony Digital Video</entry>
 </row>
 <row>
   <entry>snow</entry>
   <entry>экспериментальный кодек FFmpeg, основанный на вейвлетах</entry>
+</row>
+<row>
+  <entry>zbmv</entry>
+  <entry>Zip Blocks Motion Video</entry>
 </row>
 </tbody>
 </tgroup>
@@ -2722,7 +2754,23 @@ mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy
 </row>
 <row>
   <entry>sonic</entry>
-  <entry>экспериментальный кодек с сжатием с/без потерь</entry>
+  <entry>экспериментальный кодек от FFmpeg с потерями (lossy)</entry>
+</row>
+<row>
+  <entry>sonicls</entry>
+  <entry>экспериментальный кодек от FFmpeg без потерь (lossless)</entry>
+</row>
+<row>
+  <entry>vorbis</entry>
+  <entry>Xiph Ogg Vorbis кодек</entry>
+</row>
+<row>
+  <entry>wmav1</entry>
+  <entry>Windows Media Audio v1 кодек</entry>
+</row>
+<row>
+  <entry>wmav2</entry>
+  <entry>Windows Media Audio v2 кодек</entry>
 </row>
 </tbody>
 </tgroup>
@@ -4430,7 +4478,7 @@ mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceab
 </para>
 <para>
 Во-первых, Вы должны собрать программу <application>vfw2menc</application>.
-Она находится в подкаталоге <filename class="directory">/TOOLS/</filename>
+Она находится в подкаталоге <filename class="directory">TOOLS</filename>
 дерева исходников MPlayer.
 Для сборки под Linux, это можно сделать, воспользовавшись <application>Wine</application>:
 <screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
@@ -4455,9 +4503,9 @@ vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf
 </para>
 </informalexample>
 <para>
-Пользователи Windows могут использовать <option>-xvfwopts
-codec=vp6vfw.dll:compdata=dialog</option>, чтобы показать окно настроек кодека
-перед началом кодирования.
+Пользователи Windows могут использовать 
+<option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option>, 
+для показа окна настроек кодека перед началом кодирования.
 </para>
 </sect2>
 </sect1>
