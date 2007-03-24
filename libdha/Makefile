@@ -36,9 +36,6 @@ test: pci.o
 clean::
 	rm -f *.so *.so.* pci_*.c pci_*.h pci.db
 
-distclean::
-	rm -f test
-
 dep depend:: pci_names.c
 
 install:

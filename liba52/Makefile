@@ -14,6 +14,3 @@ include ../mpcommon.mak
 
 test: test.c ../osdep/libosdep.a $(LIBNAME_COMMON)
 	$(CC) $(CFLAGS) -o $@ $^ -lm
-
-distclean::
-	rm -f test

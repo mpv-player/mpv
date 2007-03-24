@@ -18,6 +18,3 @@ decode_i586.o: CFLAGS += -fomit-frame-pointer
 
 %: %.c $(LIBNAME_COMMON) ../libvo/aclib.o ../mp_msg-mencoder.o ../cpudetect.o ../osdep/getch2.o
 	$(CC) $(CFLAGS) -o $@ $^ -ltermcap -lm
-
-distclean::
-	rm -f test test2
