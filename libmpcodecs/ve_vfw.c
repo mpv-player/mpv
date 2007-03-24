@@ -131,7 +131,6 @@ mp_msg(MSGT_WIN32,MSGL_INFO,"\n");
       mp_msg(MSGT_WIN32,MSGL_ERR,"Compressor data %d bytes\n", st.st_size);
       if (!(temp_len = (unsigned int) ICSendMessage(encoder_hic, ICM_SETSTATE, (LPARAM) drvdata, (int) st.st_size))){
         mp_msg(MSGT_WIN32,MSGL_ERR,"ICSetState failed!\n");
-        fclose(fd);
         free(drvdata);
         return NULL;
       }
