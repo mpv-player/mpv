@@ -6033,7 +6033,6 @@ if test "$_win32dll" = yes ; then
   _def_win32dll='#define USE_WIN32DLL 1'
   test -z "$_win32codecsdir" && _win32codecsdir=$_codecsdir
   _res_comment="using $_win32codecsdir"
-  openbsd && x86_32 && _ld_extra="$_ld_extra -li386"
   if not win32 ; then
     _def_win32_loader='#define WIN32_LOADER 1'
   else
@@ -7230,6 +7229,7 @@ fi
 _ld_extra="$_ld_extra $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_extra="$_ld_extra -ldvd"
 netbsd && x86_32 && _ld_extra="$_ld_extra -li386"
+openbsd && x86_32 && _ld_extra="$_ld_extra -li386"
 
 _def_debug='#undef MP_DEBUG'
 test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'
