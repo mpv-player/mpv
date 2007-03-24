@@ -80,37 +80,39 @@ PARTS = libmpdemux \
         input \
         libvo \
         libaf \
+        liba52 \
+        libavcodec \
+        libavformat \
+        libpostproc \
+        loader \
+        mp3lib \
+        libmpeg2 \
+        libfaad2 \
+        tremor \
+        libdha \
+        vidix \
+        vidix/drivers \
+        dvdread \
+        libdvdcss \
+        libass \
+        Gui \
+        libmenu \
 
 COMMON_LIBS-$(CONFIG_LIBAVFORMAT) += libavformat/libavformat.a
-PARTS-$(CONFIG_LIBAVFORMAT)       += libavformat
 COMMON_LIBS-$(CONFIG_LIBAVCODEC)  += libavcodec/libavcodec.a
-PARTS-$(CONFIG_LIBAVCODEC)        += libavcodec
 COMMON_LIBS-$(CONFIG_LIBPOSTPROC) += libpostproc/libpostproc.a
-PARTS-$(CONFIG_LIBPOSTPROC)       += libpostproc
 COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
-PARTS-$(WIN32DLL)                 += loader
 COMMON_LIBS-$(MP3LIB)             += mp3lib/libmp3.a
-PARTS-$(MP3LIB)                   += mp3lib
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
-PARTS-$(LIBA52)                   += liba52
 COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
-PARTS-$(LIBMPEG2)                 += libmpeg2
 COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
-PARTS-$(FAAD_INTERNAL)            += libfaad2
 COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
-PARTS-$(TREMOR_INTERNAL)          += tremor
 LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
-PARTS-$(VIDIX)                    += libdha vidix vidix/drivers
 COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
-PARTS-$(DVDREAD_INTERNAL)         += dvdread
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
-PARTS-$(DVDCSS_INTERNAL)          += libdvdcss
 COMMON_LIBS-$(CONFIG_ASS)         += libass/libass.a
-PARTS-$(CONFIG_ASS)               += libass
 LIBS_MPLAYER-$(GUI)               += Gui/libgui.a
-PARTS-$(GUI)                      += Gui
 LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
-PARTS-$(LIBMENU)                  += libmenu
 
 # Having this in libosdep.a is not enough.
 OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
