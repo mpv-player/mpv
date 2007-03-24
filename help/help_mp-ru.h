@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r22483
+// Synced with help_mp-en.h: r22772
 
 // ========================= MPlayer help ===========================
 
@@ -1302,11 +1302,11 @@ static char help_text[]=
 #define MSGTR_RADIO_CaptureStarting "[radio] Запуск модуля захвата.\n"
 #define MSGTR_RADIO_ClearBufferFailed "[radio] Ошибка очистки буфера: %s\n"
 #define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Ошибка вызова stream_enable_cache: %s\n"
-#define MSGTR_RADIO_DriverUnknownId "[radio] Неизвестный тип дравера: %d\n"
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Неизвестный драйвер: %s\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Используется V4Lv1 радио интерфейс.\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Используется V4Lv2 радио интерфейс.\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[radio] Используется *BSD BT848 радио интерфейс.\n"
+#define MSGTR_RADIO_AvailableDrivers "[radio] Доступные драйверы: "
 
 // ================================== LIBASS ====================================
 
