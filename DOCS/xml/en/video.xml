@@ -1552,9 +1552,8 @@ Alternatively, you can use a special kernel module, like this:
   <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
 </para></step>
 <step><para>
-  Required if you download the source from the svgalib site: Remove the comment
-  before the CFLAGS line containing "svgalib_helper" string from the
-  <filename class="directory">libdha/Makefile</filename>.
+  Remove the comment before the CFLAGS line containing the "svgalib_helper"
+  string from the <filename class="directory">libdha/Makefile</filename>.
 </para></step>
 <step><para>
   Recompile and install libdha.

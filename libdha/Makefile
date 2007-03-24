@@ -16,9 +16,7 @@ CFLAGS = -fPIC
 # If you want libdha to use svgalib_helper for hardware access,
 # uncomment this statement, and change the -I to the correct directory
 # that includes svgalib_helper.o:
-ifneq ($(wildcard svgalib_helper),)
-CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
-endif
+#CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
 
 all: $(LIBNAME)
 
