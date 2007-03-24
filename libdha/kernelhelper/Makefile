@@ -1,16 +1,12 @@
 KERNEL_INC = /usr/src/linux/include
-INCLUDES = -I$(KERNEL_INC)
-CFLAGS = -O2 -D__KERNEL__ -DMODULE -include $(KERNEL_INC)/linux/modversions.h
+CFLAGS = -O2 -D__KERNEL__ -DMODULE -I$(KERNEL_INC) \
+  -include $(KERNEL_INC)/linux/modversions.h
 VERSION = $(shell grep RELEASE $(KERNEL_INC)/linux/version.h | cut -d'"' -f2)
 MDIR = /lib/modules/$(VERSION)/misc
 
 all: dhahelper.o test
 
 dhahelper.o: dhahelper.c dhahelper.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $(basename $@).c
-
-test: test.c
-	$(CC) -O $(INCLUDES) -o $@ $@.c
 
 install: dhahelper.o
 	-mkdir -p $(MDIR)
