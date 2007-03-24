@@ -114,6 +114,9 @@ PARTS-$(GUI)                      += Gui
 LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
 PARTS-$(LIBMENU)                  += libmenu
 
+# Having this in libosdep.a is not enough.
+OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
+
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
@@ -127,9 +130,6 @@ ALL_PRG      += $(ALL_PRG-yes)
 OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
 OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
-
-# Having this in libosdep.a is not enough.
-OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
 
 COMMON_LIBS += osdep/libosdep.a
 
