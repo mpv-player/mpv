@@ -16,12 +16,6 @@ SRCS_MPLAYER = libdha.c \
 
 CFLAGS = -fPIC
 
-ifeq ($(TARGET_OS),OpenBSD)
-ifeq ($(TARGET_ARCH_X86),yes)
-EXTRALIBS += -li386
-endif
-endif
-
 # If you want libdha to use svgalib_helper for hardware access,
 # uncomment this statement, and change the -I to the correct directory
 # that includes svgalib_helper.o:
