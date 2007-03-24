@@ -60,12 +60,57 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libswscale/libswscale.a \
               libvo/libosd.a \
 
+COMMON_LIBS-$(CONFIG_LIBAVFORMAT) += libavformat/libavformat.a
+COMMON_LIBS-$(CONFIG_LIBAVCODEC)  += libavcodec/libavcodec.a
+COMMON_LIBS-$(CONFIG_LIBPOSTPROC) += libpostproc/libpostproc.a
+COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
+COMMON_LIBS-$(MP3LIB)             += mp3lib/libmp3.a
+COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
+COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
+COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
+COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
+COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
+COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
+COMMON_LIBS-$(CONFIG_ASS)         += libass/libass.a
+
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
                input/libinput.a \
 
+LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
+LIBS_MPLAYER-$(GUI)               += Gui/libgui.a
+LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
+
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 libmpdemux/libmpmux.a \
+
+# Having this in libosdep.a is not enough.
+OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
+
+ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
+ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
+
+SRCS_COMMON  += $(SRCS_COMMON-yes)
+COMMON_LIBS  += $(COMMON_LIBS-yes)
+LIBS_MPLAYER += $(LIBS_MPLAYER-yes)
+OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
+PARTS        += $(PARTS-yes)
+ALL_PRG      += $(ALL_PRG-yes)
+
+OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
+OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
+OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
+
+COMMON_LIBS += osdep/libosdep.a
+
+MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(LIBS_MPLAYER)  $(COMMON_LIBS)
+MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(LIBS_MENCODER) $(COMMON_LIBS)
+
+INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
+INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
+INSTALL_TARGETS-$(GUI)      += install-gui
+INSTALL_TARGETS-$(VIDIX)    += install-vidix
+INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 PARTS = libmpdemux \
         stream \
@@ -97,44 +142,6 @@ PARTS = libmpdemux \
         libass \
         Gui \
         libmenu \
-
-COMMON_LIBS-$(CONFIG_LIBAVFORMAT) += libavformat/libavformat.a
-COMMON_LIBS-$(CONFIG_LIBAVCODEC)  += libavcodec/libavcodec.a
-COMMON_LIBS-$(CONFIG_LIBPOSTPROC) += libpostproc/libpostproc.a
-COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
-COMMON_LIBS-$(MP3LIB)             += mp3lib/libmp3.a
-COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
-COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
-COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
-COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
-LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
-COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
-COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
-COMMON_LIBS-$(CONFIG_ASS)         += libass/libass.a
-LIBS_MPLAYER-$(GUI)               += Gui/libgui.a
-LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
-
-# Having this in libosdep.a is not enough.
-OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
-
-ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
-ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
-
-SRCS_COMMON  += $(SRCS_COMMON-yes)
-COMMON_LIBS  += $(COMMON_LIBS-yes)
-LIBS_MPLAYER += $(LIBS_MPLAYER-yes)
-OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
-PARTS        += $(PARTS-yes)
-ALL_PRG      += $(ALL_PRG-yes)
-
-OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
-OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
-OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
-
-COMMON_LIBS += osdep/libosdep.a
-
-MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(LIBS_MPLAYER)  $(COMMON_LIBS)
-MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(LIBS_MENCODER) $(COMMON_LIBS)
 
 
 all:	$(ALL_PRG)
@@ -246,12 +253,6 @@ codecs2html$(EXESUF): mp_msg.o
 
 codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
 	$(CC) -I. -DTESTING codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap -o $@
-
-INSTALL_TARGETS-$(MPLAYER)  += install-mplayer install-mplayer-man
-INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
-INSTALL_TARGETS-$(GUI)      += install-gui
-INSTALL_TARGETS-$(VIDIX)    += install-vidix
-INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 install: install-dirs $(INSTALL_TARGETS)
 
