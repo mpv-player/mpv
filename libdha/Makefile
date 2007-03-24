@@ -5,9 +5,6 @@ MINOR_VERSION = 0
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION)
 
 LIBNAME = libdha.so
-ifeq ($(TARGET_WIN32),yes)
-LIBNAME = libdha.a
-endif
 
 SRCS_MPLAYER = libdha.c \
                mtrr.c \
@@ -28,13 +25,9 @@ all: pci_names.c $(LIBNAME)
 include ../mpcommon.mak
 
 $(LIBNAME): $(OBJS_MPLAYER)
-ifeq ($(TARGET_WIN32),yes)
-	$(AR) r $@ $^
-else
 	$(CC) -shared -Wl,-soname -Wl,$@ -o $@ $^ $(EXTRALIBS)
 	ln -sf $@ $@.$(VERSION)
 	ln -sf $@ $@.$(MAJOR_VERSION)
-endif
 
 pci_names.c:	oth/pci.db
 	LC_ALL=C $(AWK) -f pci_db2c.awk $<
