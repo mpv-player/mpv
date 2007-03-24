@@ -20,6 +20,8 @@ CFLAGS = -fPIC
 
 all: $(LIBNAME)
 
+dep depend:: pci_names.c
+
 include ../mpcommon.mak
 
 $(LIBNAME): $(OBJS_MPLAYER)
@@ -35,8 +37,6 @@ test: pci.o
 
 clean::
 	rm -f *.so *.so.* pci_*.c pci_*.h pci.db
-
-dep depend:: pci_names.c
 
 install:
 	-mkdir -p $(LIBDIR)
