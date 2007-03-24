@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22402 -->
+<!-- synced with r22704 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -832,10 +832,18 @@ mplayer -vm -fbmode <replaceable>название_режима</replaceable> <re
 <title>Matrox фреймбуфер (mga_vid)</title>
 
 <para>
-Это комбинация драйвера вывода и модуля ядра Linux для 
-Matrox G200/G400/G450/G550 BES (Back-End Scaler).
-Он имеет поддержку VSYNC с тройной буферизацией. Работает как во фреймбуфер 
+<systemitem>mga_vid</systemitem> - это комбинация драйвера вывода и модуля ядра
+Linux, использующая модуль видео масштабирования/оверлея 
+Matrox G200/G400/G450/G550 для выполнения YUV->RGB преобразования цветового
+пространства и произвольного масштабирования.
+<systemitem>mga_vid</systemitem> имеет аппаратную поддержку VSYNC с тройной 
+буферизацией. Работает как во фреймбуфер 
 консоли, так и под X, но только с Linux 2.4.x.
+</para>
+
+<para>
+Версию этого драйверя для Linux 2.6.x ищите на
+<ulink url="http://attila.kinali.ch/mga/"/>.
 </para>
 
 <procedure>
@@ -848,9 +856,10 @@ make<!--
 --></screen>
 </para></step>
 <step><para>
-  Затем создайте устройство <filename>/dev/mga_vid</filename>:
-  <screen>mknod /dev/mga_vid c 178 0</screen>
-  и загрузите драйвер:
+  Затем запустите (под <systemitem class="username">root</systemitem>)
+  <screen>make install</screen>
+  что должно установить модуль и создать для Вас файл устройства.
+  Загрузите драйвер:
   <screen>insmod mga_vid.o</screen>
 </para></step>
 <step><para>
@@ -866,16 +875,10 @@ make<!--
   следующую строку в конец файла <filename>/etc/modules.conf</filename>:
 
   <programlisting>alias char-major-178 mga_vid</programlisting>
-
-  Затем скопируйте модуль <filename>mga_vid.o</filename> в соответствующее место в каталоге 
-  <filename>/lib/modules/<replaceable>версия_ядра</replaceable>/<replaceable>где_то_тут</replaceable></filename>.
-  </para><para>
-  Затем запустите 
-  <screen>depmod -a</screen>
 </para></step>
 <step><para>
   Теперь надо (пере)скомпилировать <application>MPlayer</application>,
-  <filename>./configure</filename> определит
+  <command>./configure</command> определит
   <filename>/dev/mga_vid</filename> и соберет драйвер 'mga'. 
   Использование его в <application>MPlayer</application> осуществляется 
   опцией <option>-vo mga</option>, если используете консоль matroxfb, или
@@ -894,6 +897,13 @@ make<!--
 В него можно писать для изменения яркости:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
+
+<para>
+В том же каталоге есть тестовая программа, называющаяся
+<command>mga_vid_test</command>. Если все работает нормально, она должна 
+рисовать на экране изображения 256x256.
+</para>
+
 </sect2>
 
 <!-- ********** -->
@@ -927,12 +937,13 @@ make<!--
   Скомпилируйте <filename>tdfx_vid.o</filename>
   <screen>
 cd drivers
-make tdfx_vid.o</screen>
+make</screen>
 </para></step>
 <step><para>
-  Создайте файл устройства <filename>/dev/tdfx_vid</filename>:
-  <screen>mknod /dev/tdfx_vid c 178 0</screen>
-  и загрузите драйвер командой
+  Запустите (от <systemitem class="username">root</systemitem>):
+  <screen>make install</screen>
+  что должно установить модуль и создать для Вас файл устройства.
+  Загрузите драйвер:
   <screen>insmod tdfx_vid.o</screen>
 </para></step>
 <step><para>
@@ -940,13 +951,14 @@ make tdfx_vid.o</screen>
   следующую строку в конец <filename>/etc/modules.conf</filename>:
 
   <programlisting>alias char-major-178 tdfx_vid</programlisting>
-
-  Затем скопируйте модуль <filename>tdfx_vid.o</filename> в подходящее место в
-  <filename>/lib/modules/<replaceable>версия
-  ядра</replaceable>/<replaceable>путь</replaceable></filename> и запустите 
-  <screen>depmod -a</screen>
 </para></step>
 </procedure>
+
+<para>
+В том же каталоге есть тестовая программа, называющаяся
+<command>tdfx_vid_test</command>. Она должна вывести некоторую полезную
+информацию, если все работает нормально.
+</para>
 
 </sect2>
 
