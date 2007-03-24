@@ -6149,7 +6149,7 @@ if test "$_libavutil" = auto ; then
   if test -d libavutil ; then
     _libavutil=yes
   else
-    _libavutil=no
+    die "MPlayer will not compile without libavutil in the source tree."
   fi
 fi
 echores "$_libavutil"
