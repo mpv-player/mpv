@@ -13,8 +13,6 @@ OBJS = alaw-gen$(EXESUF) \
 	png2raw$(EXESUF) \
 	subrip$(EXESUF) \
 #	vivodump$(EXESUF) \
-	302m_convert$(EXESUF) \
-	360m_convert$(EXESUF) \
 
 ifeq ($(TARGET_ARCH_X86),yes)
 OBJS += cpuinfo$(EXESUF) fastmemcpybench
@@ -48,13 +46,10 @@ fastmemcpybench: fastmemcpybench.c
 bmovl-test$(EXESUF): bmovl-test.c
 	$(CC) -O3 $(EXTRA_INC) -o $@ $< -lSDL_image
 
-gltest: gltest.c ../osdep/timer-lx.o
-	$(CC) -O4 -g -o $@ $^ -lglut
-
 vfw2menc$(EXESUF): vfw2menc.c
 	$(CC) $< -o $@ -lwinmm -lole32
 
 clean distclean:
 	rm -f $(OBJS)
-	rm -f fastmem-* fastmem2-* fastmemcpybench gltest
+	rm -f fastmem-* fastmem2-* fastmemcpybench
 	rm -f cpuinfo$(EXESUF) bmovl-test$(EXESUF) vfw2menc$(EXESUF)

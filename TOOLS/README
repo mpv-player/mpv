@@ -605,26 +605,3 @@ Usage:        vfw2menc -f <fourcc> -d <codec.dll> -s <settingsfile.mcf>
               -v|--view            - displays the config dialog and do nothing
 
 Notes:        Works on x86 only.
-
-
-
-Format conversion scripts in the TOOLS dir
-------------------------------------------
-
-302m_convert.c
-
-Author:       Reimar Döffinger
-
-Description:  Converts D-Cinema Audio (SMPTE 302M?) to WAV.
-
-Usage:        302m_convert <in.302> <out.wav>
-
-
-360m_convert.c
-
-Author:       Reimar Döffinger
-
-Description:  Converts D-Cinema Video (MPEG-2 in GXF, SMPTE 360M) to MPEG-ES.
-              Use -demuxer mpeges to play the converted file.
-
-Usage:        360m_convert <in.gxf> <out.m2v>
