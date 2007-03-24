@@ -79,7 +79,7 @@ static void close_s(stream_t *stream) {
 
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
-  int ret,ret2,f;
+  int ret,ret2,f,sect,tmp;
   mp_vcd_priv_t* vcd;
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
   int bsize = VCD_SECTOR_SIZE;
@@ -143,6 +143,18 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
+  /* search forward up to at most 3 seconds to skip leading margin */
+  sect = ret / VCD_SECTOR_DATA;
+  for (tmp = sect; tmp < sect + 3 * 75; tmp++) {
+    char mem[VCD_SECTOR_DATA];
+    //since MPEG packs are block-aligned we stop discarding sectors if they are non-null
+    if (vcd_read(vcd, mem) != VCD_SECTOR_DATA || mem[2] || mem[3])
+      break;
+  }
+  mp_msg(MSGT_OPEN, MSGL_DBG2, "%d leading sectors skipped\n", tmp - sect);
+  vcd_set_msf(vcd, tmp);
+  ret = tmp * VCD_SECTOR_DATA;
+
   mp_msg(MSGT_OPEN,MSGL_V,"VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
 
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
