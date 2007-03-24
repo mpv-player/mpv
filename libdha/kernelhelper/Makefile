@@ -16,7 +16,6 @@ install: dhahelper.o
 dep depend:
 
 clean:
-	rm -f *.o *~
+	rm -f *.o *~ test
 
 distclean: clean
-	rm -f test
