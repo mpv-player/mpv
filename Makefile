@@ -102,7 +102,7 @@ PARTS-$(FAAD_INTERNAL)            += libfaad2
 COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
 PARTS-$(TREMOR_INTERNAL)          += tremor
 LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
-PARTS-$(VIDIX)                    += libdha vidix
+PARTS-$(VIDIX)                    += libdha vidix vidix/drivers
 COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
 PARTS-$(DVDREAD_INTERNAL)         += dvdread
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
@@ -210,6 +210,7 @@ libdha/libdha.so:
 
 vidix/libvidix.a: libdha/libdha.so
 	$(MAKE) -C vidix
+	$(MAKE) -C vidix/drivers
 
 Gui/libgui.a:
 	$(MAKE) -C Gui
