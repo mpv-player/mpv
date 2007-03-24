@@ -6,10 +6,9 @@ OBJS_COMMON    = $(addsuffix .o, $(basename $(SRCS_COMMON)) )
 OBJS_MPLAYER   = $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
 OBJS_MENCODER  = $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
 
-CFLAGS-$(CONFIG_LIBAVUTIL)      += -I../libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC)     += -I../libavcodec
 CFLAGS-$(CONFIG_LIBAVFORMAT)    += -I../libavformat
-CFLAGS += -I. -I.. $(CFLAGS-yes) $(OPTFLAGS)
+CFLAGS += -I. -I.. -I../libavutil $(CFLAGS-yes) $(OPTFLAGS)
 
 LIBS-$(MPLAYER)  += $(LIBNAME_MPLAYER)
 LIBS-$(MENCODER) += $(LIBNAME_MENCODER)

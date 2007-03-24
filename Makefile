@@ -6,9 +6,8 @@
 
 include config.mak
 
-CFLAGS = -I. $(OPTFLAGS)
+CFLAGS = -I. -I./libavutil $(OPTFLAGS)
 
-CFLAGS-$(CONFIG_LIBAVUTIL)  += -I./libavutil
 CFLAGS-$(CONFIG_LIBAVCODEC) += -I./libavcodec
 CFLAGS                      += $(CFLAGS-yes)
 
@@ -57,6 +56,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
               stream/stream.a \
+              libavutil/libavutil.a \
               libswscale/libswscale.a \
               libvo/libosd.a \
 
@@ -85,8 +85,6 @@ COMMON_LIBS-$(CONFIG_LIBAVFORMAT) += libavformat/libavformat.a
 PARTS-$(CONFIG_LIBAVFORMAT)       += libavformat
 COMMON_LIBS-$(CONFIG_LIBAVCODEC)  += libavcodec/libavcodec.a
 PARTS-$(CONFIG_LIBAVCODEC)        += libavcodec
-COMMON_LIBS-$(CONFIG_LIBAVUTIL)   += libavutil/libavutil.a
-PARTS-$(CONFIG_LIBAVUTIL)         += libavutil
 COMMON_LIBS-$(CONFIG_LIBPOSTPROC) += libpostproc/libpostproc.a
 PARTS-$(CONFIG_LIBPOSTPROC)       += libpostproc
 COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
