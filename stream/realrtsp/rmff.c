@@ -73,61 +73,30 @@ static void hexdump (const char *buf, int length) {
 static void rmff_dump_fileheader(rmff_fileheader_t *fileheader, char *buffer) {
 
   if (!fileheader) return;
-  fileheader->object_id=AV_RB32(&fileheader->object_id);
-  fileheader->size=AV_RB32(&fileheader->size);
-  fileheader->object_version=AV_RB16(&fileheader->object_version);
-  fileheader->file_version=AV_RB32(&fileheader->file_version);
-  fileheader->num_headers=AV_RB32(&fileheader->num_headers);
-  
-  memcpy(buffer, fileheader, 8);
-  memcpy(&buffer[8], &fileheader->object_version, 2);
-  memcpy(&buffer[10], &fileheader->file_version, 8);
-
-  fileheader->size=AV_RB32(&fileheader->size);
-  fileheader->object_version=AV_RB16(&fileheader->object_version);
-  fileheader->file_version=AV_RB32(&fileheader->file_version);
-  fileheader->num_headers=AV_RB32(&fileheader->num_headers);
-  fileheader->object_id=AV_RB32(&fileheader->object_id);
+  AV_WB32(buffer, fileheader->object_id);
+  AV_WB32(buffer+4, fileheader->size);
+  AV_WB16(buffer+8, fileheader->object_version);
+  AV_WB32(buffer+10, fileheader->file_version);
+  AV_WB32(buffer+14, fileheader->num_headers);
 }
 
 static void rmff_dump_prop(rmff_prop_t *prop, char *buffer) {
 
   if (!prop) return;
-  prop->object_id=AV_RB32(&prop->object_id);
-  prop->size=AV_RB32(&prop->size);
-  prop->object_version=AV_RB16(&prop->object_version);
-  prop->max_bit_rate=AV_RB32(&prop->max_bit_rate);
-  prop->avg_bit_rate=AV_RB32(&prop->avg_bit_rate);
-  prop->max_packet_size=AV_RB32(&prop->max_packet_size);
-  prop->avg_packet_size=AV_RB32(&prop->avg_packet_size);
-  prop->num_packets=AV_RB32(&prop->num_packets);
-  prop->duration=AV_RB32(&prop->duration);
-  prop->preroll=AV_RB32(&prop->preroll);
-  prop->index_offset=AV_RB32(&prop->index_offset);
-  prop->data_offset=AV_RB32(&prop->data_offset);
-  prop->num_streams=AV_RB16(&prop->num_streams);
-  prop->flags=AV_RB16(&prop->flags);
-
-  memcpy(buffer, prop, 8);
-  memcpy(&buffer[8], &prop->object_version, 2);
-  memcpy(&buffer[10], &prop->max_bit_rate, 36);
-  memcpy(&buffer[46], &prop->num_streams, 2);
-  memcpy(&buffer[48], &prop->flags, 2);
-  
-  prop->size=AV_RB32(&prop->size);
-  prop->object_version=AV_RB16(&prop->object_version);
-  prop->max_bit_rate=AV_RB32(&prop->max_bit_rate);
-  prop->avg_bit_rate=AV_RB32(&prop->avg_bit_rate);
-  prop->max_packet_size=AV_RB32(&prop->max_packet_size);
-  prop->avg_packet_size=AV_RB32(&prop->avg_packet_size);
-  prop->num_packets=AV_RB32(&prop->num_packets);
-  prop->duration=AV_RB32(&prop->duration);
-  prop->preroll=AV_RB32(&prop->preroll);
-  prop->index_offset=AV_RB32(&prop->index_offset);
-  prop->data_offset=AV_RB32(&prop->data_offset);
-  prop->num_streams=AV_RB16(&prop->num_streams);
-  prop->flags=AV_RB16(&prop->flags);
-  prop->object_id=AV_RB32(&prop->object_id);
+  AV_WB32(buffer, prop->object_id);
+  AV_WB32(buffer+4, prop->size);
+  AV_WB16(buffer+8, prop->object_version);
+  AV_WB32(buffer+10, prop->max_bit_rate);
+  AV_WB32(buffer+14, prop->avg_bit_rate);
+  AV_WB32(buffer+18, prop->max_packet_size);
+  AV_WB32(buffer+22, prop->avg_packet_size);
+  AV_WB32(buffer+26, prop->num_packets);
+  AV_WB32(buffer+30, prop->duration);
+  AV_WB32(buffer+34, prop->preroll);
+  AV_WB32(buffer+38, prop->index_offset);
+  AV_WB32(buffer+42, prop->data_offset);
+  AV_WB16(buffer+46, prop->num_streams);
+  AV_WB16(buffer+48, prop->flags);
 }
 
 static void rmff_dump_mdpr(rmff_mdpr_t *mdpr, char *buffer) {
@@ -135,47 +104,29 @@ static void rmff_dump_mdpr(rmff_mdpr_t *mdpr, char *buffer) {
   int s1, s2, s3;
 
   if (!mdpr) return;
-  mdpr->object_id=AV_RB32(&mdpr->object_id);
-  mdpr->size=AV_RB32(&mdpr->size);
-  mdpr->object_version=AV_RB16(&mdpr->object_version);
-  mdpr->stream_number=AV_RB16(&mdpr->stream_number);
-  mdpr->max_bit_rate=AV_RB32(&mdpr->max_bit_rate);
-  mdpr->avg_bit_rate=AV_RB32(&mdpr->avg_bit_rate);
-  mdpr->max_packet_size=AV_RB32(&mdpr->max_packet_size);
-  mdpr->avg_packet_size=AV_RB32(&mdpr->avg_packet_size);
-  mdpr->start_time=AV_RB32(&mdpr->start_time);
-  mdpr->preroll=AV_RB32(&mdpr->preroll);
-  mdpr->duration=AV_RB32(&mdpr->duration);
+  AV_WB32(buffer, mdpr->object_id);
+  AV_WB32(buffer+4, mdpr->size);
+  AV_WB16(buffer+8, mdpr->object_version);
+  AV_WB16(buffer+10, mdpr->stream_number);
+  AV_WB32(buffer+12, mdpr->max_bit_rate);
+  AV_WB32(buffer+16, mdpr->avg_bit_rate);
+  AV_WB32(buffer+20, mdpr->max_packet_size);
+  AV_WB32(buffer+24, mdpr->avg_packet_size);
+  AV_WB32(buffer+28, mdpr->start_time);
+  AV_WB32(buffer+32, mdpr->preroll);
+  AV_WB32(buffer+36, mdpr->duration);
 
-  memcpy(buffer, mdpr, 8);
-  memcpy(&buffer[8], &mdpr->object_version, 2);
-  memcpy(&buffer[10], &mdpr->stream_number, 2);
-  memcpy(&buffer[12], &mdpr->max_bit_rate, 28);
-  memcpy(&buffer[40], &mdpr->stream_name_size, 1);
+  buffer[40] = mdpr->stream_name_size;
   s1=mdpr->stream_name_size;
   memcpy(&buffer[41], mdpr->stream_name, s1);
 
-  memcpy(&buffer[41+s1], &mdpr->mime_type_size, 1);
+  buffer[41+s1] = mdpr->mime_type_size;
   s2=mdpr->mime_type_size;
   memcpy(&buffer[42+s1], mdpr->mime_type, s2);
   
-  mdpr->type_specific_len=AV_RB32(&mdpr->type_specific_len);
-  memcpy(&buffer[42+s1+s2], &mdpr->type_specific_len, 4);
-  mdpr->type_specific_len=AV_RB32(&mdpr->type_specific_len);
+  AV_WB32(buffer+42+s1+s2, mdpr->type_specific_len);
   s3=mdpr->type_specific_len;
   memcpy(&buffer[46+s1+s2], mdpr->type_specific_data, s3);
-
-  mdpr->size=AV_RB32(&mdpr->size);
-  mdpr->stream_number=AV_RB16(&mdpr->stream_number);
-  mdpr->max_bit_rate=AV_RB32(&mdpr->max_bit_rate);
-  mdpr->avg_bit_rate=AV_RB32(&mdpr->avg_bit_rate);
-  mdpr->max_packet_size=AV_RB32(&mdpr->max_packet_size);
-  mdpr->avg_packet_size=AV_RB32(&mdpr->avg_packet_size);
-  mdpr->start_time=AV_RB32(&mdpr->start_time);
-  mdpr->preroll=AV_RB32(&mdpr->preroll);
-  mdpr->duration=AV_RB32(&mdpr->duration);
-  mdpr->object_id=AV_RB32(&mdpr->object_id);
-
 }
 
 static void rmff_dump_cont(rmff_cont_t *cont, char *buffer) {
@@ -183,59 +134,34 @@ static void rmff_dump_cont(rmff_cont_t *cont, char *buffer) {
   int p;
 
   if (!cont) return;
-  cont->object_id=AV_RB32(&cont->object_id);
-  cont->size=AV_RB32(&cont->size);
-  cont->object_version=AV_RB16(&cont->object_version);
-
-  memcpy(buffer, cont, 8);
-  memcpy(&buffer[8], &cont->object_version, 2);
+  AV_WB32(buffer, cont->object_id);
+  AV_WB32(buffer+4, cont->size);
+  AV_WB16(buffer+8, cont->object_version);
   
-  cont->title_len=AV_RB16(&cont->title_len);
-  memcpy(&buffer[10], &cont->title_len, 2);
-  cont->title_len=AV_RB16(&cont->title_len);
+  AV_WB16(buffer+10, cont->title_len);
   memcpy(&buffer[12], cont->title, cont->title_len);
   p=12+cont->title_len;
 
-  cont->author_len=AV_RB16(&cont->author_len);
-  memcpy(&buffer[p], &cont->author_len, 2);
-  cont->author_len=AV_RB16(&cont->author_len);
+  AV_WB16(buffer+p, cont->author_len);
   memcpy(&buffer[p+2], cont->author, cont->author_len);
   p+=2+cont->author_len;
 
-  cont->copyright_len=AV_RB16(&cont->copyright_len);
-  memcpy(&buffer[p], &cont->copyright_len, 2);
-  cont->copyright_len=AV_RB16(&cont->copyright_len);
+  AV_WB16(buffer+p, cont->copyright_len);
   memcpy(&buffer[p+2], cont->copyright, cont->copyright_len);
   p+=2+cont->copyright_len;
 
-  cont->comment_len=AV_RB16(&cont->comment_len);
-  memcpy(&buffer[p], &cont->comment_len, 2);
-  cont->comment_len=AV_RB16(&cont->comment_len);
+  AV_WB16(buffer+p, cont->comment_len);
   memcpy(&buffer[p+2], cont->comment, cont->comment_len);
-
-  cont->size=AV_RB32(&cont->size);
-  cont->object_version=AV_RB16(&cont->object_version);
-  cont->object_id=AV_RB32(&cont->object_id);
 }
 
 static void rmff_dump_dataheader(rmff_data_t *data, char *buffer) {
 
   if (!data) return;
-  data->object_id=AV_RB32(&data->object_id);
-  data->size=AV_RB32(&data->size);
-  data->object_version=AV_RB16(&data->object_version);
-  data->num_packets=AV_RB32(&data->num_packets);
-  data->next_data_header=AV_RB32(&data->next_data_header);
-
-  memcpy(buffer, data, 8);
-  memcpy(&buffer[8], &data->object_version, 2);
-  memcpy(&buffer[10], &data->num_packets, 8);
-  
-  data->num_packets=AV_RB32(&data->num_packets);
-  data->next_data_header=AV_RB32(&data->next_data_header);
-  data->size=AV_RB32(&data->size);
-  data->object_version=AV_RB16(&data->object_version);
-  data->object_id=AV_RB32(&data->object_id);
+  AV_WB32(buffer, data->object_id);
+  AV_WB32(buffer+4, data->size);
+  AV_WB16(buffer+8, data->object_version);
+  AV_WB32(buffer+10, data->num_packets);
+  AV_WB32(buffer+14, data->next_data_header);
 }
 
 int rmff_dump_header(rmff_header_t *h, char *buffer, int max) {
