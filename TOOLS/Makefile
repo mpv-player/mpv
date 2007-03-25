@@ -49,7 +49,17 @@ bmovl-test$(EXESUF): bmovl-test.c
 vfw2menc$(EXESUF): vfw2menc.c
 	$(CC) $< -o $@ -lwinmm -lole32
 
+REAL_SRCS    = $(wildcard realcodecs/*.c)
+REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
+
+realcodecs: $(REAL_TARGETS)
+realcodecs: CFLAGS += -g
+
+%.so.6.0: %.o
+	ld -shared -o $@ $< -ldl -lc
+
 clean distclean:
 	rm -f $(OBJS)
 	rm -f fastmem-* fastmem2-* fastmemcpybench
 	rm -f cpuinfo$(EXESUF) bmovl-test$(EXESUF) vfw2menc$(EXESUF)
+	rm -f $(REAL_TARGETS)
