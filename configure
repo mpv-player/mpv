@@ -2509,11 +2509,11 @@ if qnx ; then
 fi
 
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
-_awk=
+_awk=awk
 if test "$_vidix_internal" = yes ; then
 _awk_verc_fail=yes
 echocheck "awk"
-for _awk in mawk gawk nawk awk; do
+for _awk in mawk gawk nawk; do
   if ( $_awk 'BEGIN{testme();}function testme(){print"";}' ) >> "$TMPLOG" 2>&1; then
     _awk_verc_fail=no
     break
