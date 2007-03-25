@@ -67,7 +67,7 @@ extern int fribidi_flip_commas;
 #endif
 
 sub_data* sub_read_file (char *filename, float pts);
-subtitle* subcp_recode1 (subtitle *sub);
+subtitle* subcp_recode (subtitle *sub);
 // enca_fd is the file enca uses to determine the codepage.
 // setting to NULL disables enca.
 struct stream_st;
