@@ -70,19 +70,29 @@ static void hexdump (const char *buf, int length) {
  * writes header data to a buffer
  */
 
-static void rmff_dump_fileheader(rmff_fileheader_t *fileheader, char *buffer) {
+static int rmff_dump_fileheader(rmff_fileheader_t *fileheader, char *buffer, int bufsize) {
 
-  if (!fileheader) return;
+  if (!fileheader) return 0;
+
+  if (bufsize < RMFF_FILEHEADER_SIZE)
+    return -1;
+
   AV_WB32(buffer, fileheader->object_id);
   AV_WB32(buffer+4, fileheader->size);
   AV_WB16(buffer+8, fileheader->object_version);
   AV_WB32(buffer+10, fileheader->file_version);
   AV_WB32(buffer+14, fileheader->num_headers);
+
+  return RMFF_FILEHEADER_SIZE;
 }
 
-static void rmff_dump_prop(rmff_prop_t *prop, char *buffer) {
+static int rmff_dump_prop(rmff_prop_t *prop, char *buffer, int bufsize) {
 
-  if (!prop) return;
+  if (!prop) return 0;
+
+  if (bufsize < RMFF_PROPHEADER_SIZE)
+    return -1;
+
   AV_WB32(buffer, prop->object_id);
   AV_WB32(buffer+4, prop->size);
   AV_WB16(buffer+8, prop->object_version);
@@ -97,13 +107,20 @@ static void rmff_dump_prop(rmff_prop_t *prop, char *buffer) {
   AV_WB32(buffer+42, prop->data_offset);
   AV_WB16(buffer+46, prop->num_streams);
   AV_WB16(buffer+48, prop->flags);
+
+  return RMFF_PROPHEADER_SIZE;
 }
 
-static void rmff_dump_mdpr(rmff_mdpr_t *mdpr, char *buffer) {
+static int rmff_dump_mdpr(rmff_mdpr_t *mdpr, char *buffer, int bufsize) {
 
   int s1, s2, s3;
 
-  if (!mdpr) return;
+  if (!mdpr) return 0;
+
+  if (!(bufsize > RMFF_MDPRHEADER_SIZE + mdpr->stream_name_size + mdpr->mime_type_size &&
+        (unsigned)bufsize - RMFF_MDPRHEADER_SIZE - mdpr->stream_name_size - mdpr->mime_type_size > mdpr->type_specific_len))
+    return -1;
+
   AV_WB32(buffer, mdpr->object_id);
   AV_WB32(buffer+4, mdpr->size);
   AV_WB16(buffer+8, mdpr->object_version);
@@ -127,13 +144,20 @@ static void rmff_dump_mdpr(rmff_mdpr_t *mdpr, char *buffer) {
   AV_WB32(buffer+42+s1+s2, mdpr->type_specific_len);
   s3=mdpr->type_specific_len;
   memcpy(&buffer[46+s1+s2], mdpr->type_specific_data, s3);
+
+  return RMFF_MDPRHEADER_SIZE + s1 + s2 + s3;
 }
 
-static void rmff_dump_cont(rmff_cont_t *cont, char *buffer) {
+static int rmff_dump_cont(rmff_cont_t *cont, char *buffer, int bufsize) {
 
   int p;
 
-  if (!cont) return;
+  if (!cont) return 0;
+
+  if (bufsize < RMFF_CONTHEADER_SIZE + cont->title_len + cont->author_len +
+      cont->copyright_len + cont->comment_len)
+    return -1;
+
   AV_WB32(buffer, cont->object_id);
   AV_WB32(buffer+4, cont->size);
   AV_WB16(buffer+8, cont->object_version);
@@ -152,43 +176,65 @@ static void rmff_dump_cont(rmff_cont_t *cont, char *buffer) {
 
   AV_WB16(buffer+p, cont->comment_len);
   memcpy(&buffer[p+2], cont->comment, cont->comment_len);
+
+  return RMFF_CONTHEADER_SIZE + cont->title_len + cont->author_len +
+         cont->copyright_len + cont->comment_len;
 }
 
-static void rmff_dump_dataheader(rmff_data_t *data, char *buffer) {
+static int rmff_dump_dataheader(rmff_data_t *data, char *buffer, int bufsize) {
 
-  if (!data) return;
+  if (!data) return 0;
+
+  if (bufsize < RMFF_DATAHEADER_SIZE)
+    return -1;
+
   AV_WB32(buffer, data->object_id);
   AV_WB32(buffer+4, data->size);
   AV_WB16(buffer+8, data->object_version);
   AV_WB32(buffer+10, data->num_packets);
   AV_WB32(buffer+14, data->next_data_header);
+
+  return RMFF_DATAHEADER_SIZE;
 }
 
 int rmff_dump_header(rmff_header_t *h, char *buffer, int max) {
 
-  int written=0;
+  int written=0, size;
   rmff_mdpr_t **stream=h->streams;
 
-  rmff_dump_fileheader(h->fileheader, &buffer[written]);
-  written+=h->fileheader->size;
-  rmff_dump_prop(h->prop, &buffer[written]);
-  written+=h->prop->size;
-  rmff_dump_cont(h->cont, &buffer[written]);
-  written+=h->cont->size;
+  if ((size=rmff_dump_fileheader(h->fileheader, &buffer[written], max)) < 0)
+    goto buftoosmall;
+  written+=size;
+  max -= size;
+  if ((size=rmff_dump_prop(h->prop, &buffer[written], max)) < 0)
+    goto buftoosmall;
+  written+=size;
+  max -= size;
+  if ((size=rmff_dump_cont(h->cont, &buffer[written], max)) < 0)
+    goto buftoosmall;
+  written+=size;
+  max -= size;
   if (stream)
   {
     while(*stream)
     {
-      rmff_dump_mdpr(*stream, &buffer[written]);
-      written+=(*stream)->size;
+      if ((size=rmff_dump_mdpr(*stream, &buffer[written], max)) < 0)
+        goto buftoosmall;
+      written+=size;
+      max -= size;
       stream++;
     }
   }
     
-  rmff_dump_dataheader(h->data, &buffer[written]);
-  written+=18;
+  if ((size=rmff_dump_dataheader(h->data, &buffer[written], max)) < 0)
+    goto buftoosmall;
+  written+=size;
 
   return written;
+
+buftoosmall:
+  mp_msg(MSGT_STREAM, MSGL_ERR, "rmff_dumpheader: buffer too small, aborting. Please report\n");
+  return -1;
 }
 
 void rmff_dump_pheader(rmff_pheader_t *h, char *data) {

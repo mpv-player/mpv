@@ -49,6 +49,12 @@
 
 #define RMFF_HEADER_SIZE 0x12
 
+#define RMFF_FILEHEADER_SIZE 18
+#define RMFF_PROPHEADER_SIZE 50
+#define RMFF_MDPRHEADER_SIZE 46
+#define RMFF_CONTHEADER_SIZE 18
+#define RMFF_DATAHEADER_SIZE 18
+
 #define FOURCC_TAG( ch0, ch1, ch2, ch3 ) \
         (((long)(unsigned char)(ch3)       ) | \
         ( (long)(unsigned char)(ch2) << 8  ) | \
