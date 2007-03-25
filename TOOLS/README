@@ -608,11 +608,16 @@ Notes:        Works on x86 only.
 
 realcodecs/
 
-Author:       misc.
+Author:       miscellaneous
 
-Description:  Wrappers for Linux Real binary codecs (.so), used to analyze,
-              alter and dump the data flow between RealPlayer and the codecs.
+Description:  Wrappers for Linux Real binary codecs used to analyze, alter and
+              dump the data flow between RealPlayer and its codecs.
 
-Usage:        See realcodecs/HOWTO
+Usage:        - Set the path to the RealPlayer codecs directory in the C files.
+              - Run 'make realcodecs'.
+              - Rename the original codecs to match the names expected in the
+                wrapper sources. The default is to give them a "real" prefix,
+                e.g. realcook.so.6.0.
+              - Put the wrappers in the RealPlayer codecs directory.
 
 Notes:        Known to work at least on Linux x86 with RealPlayer8.
