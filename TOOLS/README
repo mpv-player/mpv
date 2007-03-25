@@ -21,7 +21,6 @@ TVout/matroxset
 TVout/con2fb
 benchmark-gab
 netstream
-realcodecs
 
 
 MPlayer scripts in the TOOLS dir
@@ -605,3 +604,15 @@ Usage:        vfw2menc -f <fourcc> -d <codec.dll> -s <settingsfile.mcf>
               -v|--view            - displays the config dialog and do nothing
 
 Notes:        Works on x86 only.
+
+
+realcodecs/
+
+Author:       misc.
+
+Description:  Wrappers for Linux Real binary codecs (.so), used to analyze,
+              alter and dump the data flow between RealPlayer and the codecs.
+
+Usage:        See realcodecs/HOWTO
+
+Notes:        Known to work at least on Linux x86 with RealPlayer8.
