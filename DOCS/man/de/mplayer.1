@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22622
+.\" In sync with r22779
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1856,6 +1856,10 @@ Setzt den Tuner auf Kanal <Wert>.
 Werte: europe-east, europe-west, us-bcast, us-cable, etc.\&
 .IPs channels=<Kanal>\-<Name>,<Kanal>\-<Name>,...
 Setzt Namen für Kanäle.
+.I ANMERKUNG:
+Wenn <Kanal> eine Ganzzahl größer als 1000 ist, wird sie als Frequenz (in
+kHz) behandelt, ansonsten als Kanalname aus der Frequenztabelle.
+.br
 Benutze '_' anstelle von Leerzeichen bei Namen (oder spiele mit der
 Shellquotierung rum ;-).
 Die Sendernamen werden dann per OSD angezeigt, und die Slave-Kommandos
@@ -3499,7 +3503,8 @@ Falls aktiviert ist das Verhalten den anderen Videoausgabetreibern ähnlicher,
 was bei Schriftarten mit fester Größe besser ist.
 Deaktiviert sieht es mit FreeType-Schriftarten besser aus und benutzt im
 Vollbildmodus die Ränder.
-Funktioniert momentan nicht mit ass-Untertiteln (siehe \-ass).
+Funktioniert momentan nicht mit ass-Untertiteln (siehe \-ass), du kannst sie
+statt dessen jedoch ohne OpenGL-Unterstützung mit \-vf ass darstellen lassen.
 .IPs osdcolor=<0xRRGGBB>
 Farbe für das OSD (Standard: 0xffffff, entspricht weiß).
 .IPs rectangle=<0,1,2>
