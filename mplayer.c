@@ -3555,9 +3555,7 @@ if(rel_seek_secs || abs_seek_pos){
 	  // get pos from frame number / total frames
 	  guiIntfStruct.Position=(float)mpctx->d_video->pack_no*100.0f/mpctx->sh_video->video.dwLength;
 	} else {
-	 off_t len = ( mpctx->demuxer->movi_end - mpctx->demuxer->movi_start );
-	 off_t pos = ( mpctx->demuxer->file_format == DEMUXER_TYPE_AUDIO?mpctx->stream->pos:mpctx->demuxer->filepos );
-	 guiIntfStruct.Position=(len <= 0? 0.0f : ( pos - mpctx->demuxer->movi_start ) * 100.0f / len );
+          guiIntfStruct.Position=demuxer_get_percent_pos(mpctx->demuxer);
 	}
 	if ( mpctx->sh_video ) guiIntfStruct.TimeSec=mpctx->sh_video->pts;
 	  else if ( mpctx->sh_audio ) guiIntfStruct.TimeSec=mpctx->delay;
