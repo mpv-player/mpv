@@ -7,6 +7,14 @@
 .\" FIXME: break lines longer than 80 characters; remove trailing whitespaces
 .\" FIXME: New sentences need to start on new lines.
 .
+.\" FIXME: Partir las líneas que contienen más de 80 caracteres; borrar
+.\" los espacios finales.
+.\" FIXME: Las nuevas frases deben comenzar en nuevas líneas.
+.\" Arreglado hasta Opciones 432
+.\" 
+.\" Traducido hasta la línea 2359 hay que revisar también las anteriores para
+.\" detectar algunos pequeños cambios.
+.
 .\" --------------------------------------------------------------------------
 .\" Definiciones de Macros
 .\" --------------------------------------------------------------------------
@@ -36,14 +44,13 @@
 .\" Título
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-07-19" "Proyecto MPlayer" "El Reproductor de Películas"
+.TH MPlayer 1 "2006-10-15" "Proyecto MPlayer" "El Reproductor de Películas"
 .
 .SH NOMBRE
-.RSs
 mplayer  \- reproductor de películas
 .br
 mencoder \- codificador de películas
-.RE
+.
 .
 .\" --------------------------------------------------------------------------
 .\" Sinopsis
@@ -52,136 +59,99 @@ mencoder \- codificador de películas
 .SH SINOPSIS
 .na
 .nh
-.RSs
 .B mplayer
-.RI [opciones]\ [archivo|URL|playlist|\-]
-.RSs
+[opciones] [archivo|URL|playlist|\-]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[opciones]
-fichero1 
+[opciones] fichero1
 [opciones específicas] fichero2 [opciones específicas]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 [opciones]
 {grupo de ficheros y opciones}
 [opciones específicas del grupo]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 [dvd|dvdnav]://[título|[título_inicial]-título_final]
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 vcd://pista[/dispositivo]
-[opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 tv://[canal]
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 radio://[canal|frecuencia][/capture]
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 pvr://
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 dvb://[numero_tarjeta@]canal
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 mf://máscara
 [-mf opciones] [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u 
 [cdda|cddb]://pista[-pista_final][:velocidad][/dispositivo]
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 cue://archivo[:pista]
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u [fichero|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
+[fichero|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
 [usuario:contraseña@]URL[:puerto] [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 sdp://fichero
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 mpst://host[:puerto]/URL
 [opciones]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
 tivo://host/[list|llist|fsid]
 [opciones]
+.
 .br
-.in
 .B gmplayer
 [opciones]
 [\-skin\ skin]
 .
 .br
 .B mencoder
-[opciones]
-fichero [fichero|URL|\-]
-[\-o\ fichero\ |\ file://fichero\ |\ 
+[opciones] fichero
+[fichero|URL|\-] [\-o\ fichero\ |\ file://fichero\ |
 smb://[usuario:contraseña@]host/ruta_al_fichero]
 .
 .br
 .B mencoder
-[opciones]
-.
-fichero1
+[opciones] fichero1
 [opciones específicas] fichero2 [opciones específicas]
-.RE
 .ad
 .hy
 .
@@ -190,10 +160,9 @@ fichero1
 .\" --------------------------------------------------------------------------
 .
 .SH DESCRIPCIÓN
-.RSs
 .B mplayer
-es un reproductor de películas para Linux (funciona en muchas otras
-plataformas y arquitecturas de CPU, vea la documentación).
+es un reproductor de películas para Linux (funciona en muchas otras plataformas
+y arquitecturas de CPU, vea la documentación).
 Reproduce la mayoría de los ficheros MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, 
 QT/\:MOV/\:MP4, ogg/\:OGM, MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ,
 soportados de forma nativa y otros codecs binarios.
@@ -203,17 +172,17 @@ WMV.
 MPlayer soporta un amplio rango de controladores de salida de video y de
 audio.
 Funciona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
-Quartz, Mac OS X CoreVideo, pero también puede usar GGI, SDL (y todos sus controladores),
-VESA (en cualquier tarjeta compatible con VESA, incluso sin X11), algunos
-controladores de tarjetas específicas a bajo nivel (par Matrox, 3Dfs y ATI)
-y algunas tarjetas decodificadoras de MPEG por hardware, tales como Siemens
-DVB, Hauppauge PVR (IVTV), DXR2 y DXR3/\:Hollywood+.
+Quartz, Mac OS X CoreVideo, pero también puede usar GGI, SDL (y todos sus
+controladores), VESA (en cualquier tarjeta compatible con VESA, incluso sin X11)
+, algunos controladores de tarjetas específicas a bajo nivel (par Matrox, 3Dfs y
+ ATI) y algunas tarjetas decodificadoras de MPEG por hardware, tales como
+Siemens DVB, Hauppauge PVR (IVTV), DXR2 y DXR3/\:Hollywood+.
 La mayoría de ellos soportan escalado por software o por hardware, para que
 pueda disfrutar de las películas en modo de pantalla completa.
 .PP
 MPlayer tiene información en pantalla (OSD, On Screen Display) sobre el estado,
-subtítulos grandes y bonitos con suavizado de bordes y realimentación visual
-de los controles con teclado.
+subtítulos grandes y bonitos con suavizado de bordes y realimentación visual de
+los controles con teclado.
 Tipos de letra Europeo/\:ISO8859-1,2 (Húngaro, Inglés, Checoslovaco, etc),
 Cirílico y Koreano se soportan en 12 formatos de subtítulos (MicroDVD, SubRip,
 OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS y el nuestro:
@@ -225,19 +194,18 @@ diseñado para codificar películas que se pueden reproducir con MPlayer (vea
 más arriba) a otros formatos también reproducibles con MPlayer (vea más abajo).
 Codifica a MPEG-4 (DivX/Xvid), cualquier codec de libavcodec y audio en
 PCM/\:MP3/\:VBRMP3 en 1, 2 o 3\ pasadas.
-Además, tiene habilidades para copiar flujos, un potente sistema de filtros 
-(recortar, expandir, girar, post-procesar, rotar, escalar, ruidos, 
+Además, tiene habilidades para copiar flujos, un potente sistema de filtros
+(recortar, expandir, girar, post-procesar, rotar, escalar, ruidos,
 conversión rgb/\:yuv) y más.
 .PP
 .B gmplayer
 es MPlayer con una interfaz gráfica para el usuario.
 Tiene las mismas opciones que MPlayer.
 .PP
-Se pueden encontrar ejemplos de uso para familiarizarle rápidamente con el manejo
-del programa al final de esta página del manual
+Se pueden encontrar ejemplos de uso para familiarizarle rápidamente con el
+manejo del programa al final de esta página del manual
 .PP
 .B ¡Lea también la documentación HTML!
-.RE
 .
 .
 .\" --------------------------------------------------------------------------
@@ -245,13 +213,12 @@ del programa al final de esta página del manual
 .\" --------------------------------------------------------------------------
 .
 .SH "CONTROL INTERACTIVO"
-.RSs
-MPlayer tiene una capa de control totalmente configurable, dirigida por
-órdenes, que le permite controlar MPlayer usando el teclado, el ratón,
-un mando de juegos o un mando a distancia (usando LIRC). Vea la opción 
--input para conocer las maneras de configurarlo.
+MPlayer tiene una capa de control totalmente configurable, dirigida por órdenes,
+ que le permite controlar MPlayer usando el teclado, el ratón, un mando de
+juegos o un mando a distancia (usando LIRC). Vea la opción -input para conocer
+las maneras de configurarlo.
 .TP
-.B control por teclado 
+.B control por teclado
 .PD 0
 .RSss
 .IPs "<\- y \->"
@@ -271,14 +238,13 @@ retrocede/\:avanza en la lista de reproducción.
 .IPs "INICIO y FIN"
 siguiente/\:previa entrada del árbol de reproducción en la lista actual.
 .IPs "INS y SUPR"
-siguiente/\:previa fuente alternativa (solo para listas
-de reproducción ASX).
+siguiente/\:previa fuente alternativa (solo para listas de reproducción ASX).
 .IPs "p / ESPACIO"
-Pausa la película (cualquier tecla para salir del modo pausa). 
+Pausa la película (cualquier tecla para salir del modo pausa).
 .IPs ".\ \ \ \ "
 Paso adelante. Pesionar una vez detiene la película.
-Cada pulsación posterior reproduce un frame y detiene la película
-otra vez (cualquier otra tecla hace retornar al modo normal).
+Cada pulsación posterior reproduce un frame y detiene la película otra vez
+(cualquier otra tecla hace retornar al modo normal).
 .IPs "q / ESC"
 Detiene la película y sale.
 .IPs "+ y -"
@@ -300,8 +266,8 @@ Cambia al modo siempre-visible (vea también -ontop).
 .IPs "w y e"
 Decrementa/\:incrementa el rango de pan y scan.
 .IPs "o\ \ \ \ "
-Cambia entre los estados de OSD: nada / posición / posición + tiempo /
-posición + tiempo + tiempo total.
+Cambia entre los estados de OSD: nada / posición / posición + tiempo posición +
+tiempo + tiempo total.
 .IPs "d\ \ \ \ "
 Cambia el saltarse imágenes.
 cambia entre los estados del salto de imágenes: nada / saltar el mostrar
@@ -332,9 +298,9 @@ Muestra el nombre del fichero que se está reproduciendo en pantalla.
 Activa/desactiva el desentrelazador.
 .PD 1
 .PP
-(Las siguientes teclas son válidas únicamente cuando se usa una salida
-de video acelerada por hardware (xv, (x)vidix, (x)mga, etc), el ecualizador
-por software (\-vf eq o \-vf eq2) o el filtro de tonalidad (\-vf hue).)
+(Las siguientes teclas son válidas únicamente cuando se usa una salida de video
+acelerada por hardware (xv, (x)vidix, (x)mga, etc), el ecualizador por software
+(\-vf eq o \-vf eq2) o el filtro de tonalidad (\-vf hue).)
 .PP
 .PD 0
 .IPs "1 y 2"
@@ -347,8 +313,8 @@ Ajusta el matiz.
 Ajusta la saturación.
 .PD 1
 .PP
-(Las siguientes teclas son válidas únicamente cuando se usa quartz o 
-el controlador de vídeo de macosx)
+(Las siguientes teclas son válidas únicamente cuando se usa quartz o el
+controlador de vídeo de macosx)
 .PP
 .PD 0
 .IPs "command + 0"
@@ -363,8 +329,8 @@ Cambia al modo de pantalla completa (vea también -fs).
 Establece el canal alfa de la ventana de la película.
 .PD 1
 .PP
-(Las siguientes teclas son válidas únicamente cuando se usa el
-controlador de vídeo sdl)
+(Las siguientes teclas son válidas únicamente cuando se usa el controlador de
+vídeo sdl)
 .PP
 .PD 0
 .IPs "c\ \ \ \ "
@@ -373,8 +339,8 @@ Alterna entre los diferentes modos de pantalla completa.
 Vuelve al modo original.
 .PD 1
 .PP
-(Las siguientes teclas son válidas únicamente cuando se usa un
-teclado multimedia)
+(Las siguientes teclas son válidas únicamente cuando se usa un teclado
+multimedia)
 .PP
 .PD 0
 .IPs "PAUSE"
@@ -385,9 +351,8 @@ Detiene la reproducción y sale.
 Posiciona atrás/\:adelante 1 minuto.
 .PD 1
 .PP
-(Las siguientes teclas son válidas únicamente cuando se ha compilado
-con soporte para la interfaz gráfica y tienen precedencia sobre las
-anteriores)
+(Las siguientes teclas son válidas únicamente cuando se ha compilado con soporte
+ para la interfaz gráfica y tienen precedencia sobre las anteriores)
 .PP
 .PD 0
 .IPs "ENTER"
@@ -404,9 +369,8 @@ Abre el navegador de temas.
 Abre el diálogo de preferencias.
 .PD 1
 .PP
-(Las siguientes teclas son válidas únicamente cuando se ha compilado
-con soporte para la TV o DVB y tienen precedencia sobre las
-anteriores)
+(Las siguientes teclas son válidas únicamente cuando se ha compilado con soporte
+ para la TV o DVB y tienen precedencia sobre las anteriores)
 .PP
 .PD 0
 .IPs "h and k"
@@ -417,8 +381,8 @@ Cambia la norma.
 Cambia la lista de canales.
 .PD 1
 .PP
-(Las siguientes teclas son válidas únicamente cuando se ha compilado
-con soporte para dvdnav: se usan para navegar por los menús)
+(Las siguientes teclas son válidas únicamente cuando se ha compilado con soporte
+ para dvdnav: se usan para navegar por los menús)
 .PP
 .PD 0
 .IPs "Teclado numérico 8"
@@ -432,8 +396,7 @@ Selecciona el botón hacia la derecha.
 .IPs "Teclado numérico 5"
 Vuelve al menú principal.
 .IPs "Teclado numérico 7"
-Vuelve al menú más cercano (el orden preferido es: 
-capítulo->título->raíz).
+Vuelve al menú más cercano (el orden preferido es: capítulo->título->raíz).
 .IPs "Teclado numérico INTRO"
 Confirma la elección.
 .PD 1
@@ -460,7 +423,8 @@ Posiciona atrás/\:adelante 1 minuto.
 .IPs "botón 1"
 Pausa
 .IPs "botón 2"
-Cambia los estados OSD: ninguno / búsqueda / búsqueda + contador / búsqueda + contador+ tiempo total
+Cambia los estados OSD: ninguno / búsqueda / búsqueda + contador / búsqueda +
+contador+ tiempo total.
 .IPs "botón 3"
 Aumenta/disminuye el volumen
 .RE
@@ -480,8 +444,8 @@ combinación con la opción XXX o si está compilado con soporte XXX.
 .PP
 .I NOTA:
 El analizador de subopciones (se usa por ejemplo para las subopciones -ao pcm)
-soporta un modo especial de escape de cadenas pensado para usarse
-con interfaces gráficas de usuario externas.
+soporta un modo especial de escape de cadenas pensado para usarse con interfaces
+ gráficas de usuario externas.
 .br
 Tienen el siguiente formato:
 .br
@@ -2341,76 +2305,16 @@ Especifica el ID del subtítulo VOBsub.
 .SH "OPCIONES DE SALIDA DE AUDIO (MPLAYER SOLAMENTE)"
 .
 .TP
-.B \-abs <valor> (\-ao oss solamente) (OBSOLETO)
+.B \-abs <valor> (\-ao oss sólamente) (OBSOLETO)
 Sobreescribe la detección del tamaño del buffer de audio del
 controlador/\:tarjeta.
 .
 .TP
-.B \-aofile <nombrearchivo>
-Sobreescribe el nombre de archivo por defecto para \-ao pcm.
-.
-.TP
-.B \-aop <list=plugin1,plugin2...:opción1=valor1:opt2=val2...>
-Especifica los plugin(s) de audio y sus opciones (vea también la documentación).
-.sp 1
-Las opciones disponibles son:
-.
-.RSs
-.IPs list=[plugins]
-lista de plugins separados por comas (resample, surround, format, volume,
-extrastereo, volnorm, delay)
-.IPs delay=<seg>
-plugin de ejemplo, no usar (solo plugin delay).
-.IPs format=<formato>
-formato de salida (formato para el plugin solamente)
-.IPs fout=<Hz>
-frecuencia de salida (plugin de resample solamente)
-.IPs volume=<0\-255>
-volumen (plugin de volumen solamente)
-.IPs mul=<valor>
-coeficiente de estéreo (por defecto: 2.5) (plugin extraestéreo solamente)
-.IPs softclip
-compresor con capacidad / 'soft-clipping' (plugin de volumen solamente)
-.RE
-.
-.TP
-.B \-delay <seg>
-Retardo de audio en segundos (número real positivo o negativo).
-.TP
-.B \-format <0\-8192>
-Selecciona el formato usado para la salida desde la capa de filtro (de
-acuerdo a los defines en libao2/\:afmt.h):
-.
-.PD 0
-.RSs
-.IPs 1
-Mu-Law
-.IPs 2
-A-Law
-.IPs 4
-Ima-ADPCM
-.IPs 8
-unsigned 8-bit
-.IPs 16
-signed 16-bit (little-endian)
-.IPs 32
-unsigned 16-bit (little-endian)
-.IPs 64
-unsigned 16-bit (big-endian)
-.IPs 128
-signed  16-bit (little-endian)
-.IPs 256
-signed 16-bit (big-endian)
-.IPs 512
-MPEG (2) Audio
-.IPs 1024
-AC3
-.IPs 4096
-signed 32-bit (little-endian)
-.IPs 8192
-signed 32-bit (big-endian)
-.RE
-.PD 1
+.B \-format <formato> (vea también la opción format del filtro de audio)
+Selecciona el formato de la muestra usado para la salida desde la capa del
+filtro de audio hasta la tarjeta de sonido.
+Los valores que <formato> acepta están listados abajo en la descripción del
+formato en el filtro de audio.
 .
 .TP
 .B \-mixer <dispositivo>
@@ -2418,7 +2322,7 @@ Usa un dispositivo mezclador diferente al que hay por defecto /dev/\:mixer.
 Para ALSA este es el nombre del mezclador.
 .
 .TP
-.B \-mixer-channel <mixer line> (solo para \-ao oss y \-ao alsa)
+.B \-mixer-channel <mixer line>[,mixer index] (solo para \-ao oss y \-ao alsa)
 Esta opción le dice a MPlayer que use un canal diferente al PCM por
 defecto para controlar el volumen.
 Las opciones para OSS incluyen
@@ -2427,16 +2331,31 @@ Para una lista completa de opciones busque SOUND_DEVICE_NAMES en
 /usr/\:include/\:linux/\:soundcard.h.
 Para ALSA puede usar los nombres por ejemplo como los muestra alsamixer,
 .B Master, Line, PCM.
+.br
+.I NOTA:
+El nombre de los canales de mezcla de ALSA seguidos de un número deben ser
+especificados en el formato <nombre,número>, p.e.\& un canal llamado 'PCM 1' en
+alsamixer convertirse a
+.BR PCM,1 .
 .
 .TP
-.B \-nowaveheader (\-ao pcm solamente)
-No incluir encabezado wave.
-Usado para raw PCM.
+.B \-softvol
+Fuerza el uso del mezcaldor por software en vez de usar el mezclador de la
+tarjeta de sonido.
+.
+.TP
+.B \-softvol-max <10.0\-10000.0>
+Fija el nivel máximo de amplificación en porcentaje (por defecto: 110).
+Un valor de 200 le permitirá ajustar el volumen hasta un máximo del doble del
+nivel actual.
+Con valores por debajo de 100 el volumen inicial (que es el 100%) estará por
+debajo del máximo, p.e.\& el OSD no se mostrará correctamente.
 .
 .TP
 .B \-volstep <0\-100>
-Establece el tamaño de salto de los cambios del mezclador de volumen en
-porcentaje del rango completo (por defecto: 3).
+Establece el porcentaje de incremento o decremento para los cambios de volumen,
+el porcentaje es en relación con el total.
+.
 .
 .
 .SH "CONTROLADORES DE SALIDA DE AUDIO (MPLAYER SOLAMENTE)"
@@ -2450,11 +2369,11 @@ Especifica una lista de controladores de salida de audio a usar.
 .PP
 Si la lista tiene una ',' al final, intentará usar finalmente los controladores
 no listados en la línea de órdenes.
-Las subopciones son opcionales y pueden ser omitidas la mayoría de las veces.
+Las subopciones son opcionales y se pueden omitir la mayoría de las veces.
 .br
 .I NOTA:
 Vea \-ao help para una lista de controladores disponibles.
-.
+.sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
