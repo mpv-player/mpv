@@ -47,6 +47,11 @@
 
 #define UNUSED(x) ((void)(x))
 
+#include "libavcodec/avcodec.h"
+#if LIBAVCODEC_BUILD < ((51<<16)+(40<<8)+2)
+#error You need at least libavcodecs v51.40.2
+#endif
+
 
 static int benchmark;
 static int use_sleep;
