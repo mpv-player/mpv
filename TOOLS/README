@@ -26,6 +26,15 @@ netstream
 MPlayer scripts in the TOOLS dir
 --------------------------------
 
+edgedetect.fp, emboss.fp
+
+Author:       Reimar Döffinger
+
+Description:  Examples of custom fragment program for OpenGL video out driver
+
+Usage:        mplayer -vo gl:yuv=4:customprog=edgedetect.fp
+
+
 midentify
 
 Author:       Tobias Diedrich
