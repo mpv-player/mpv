@@ -10,9 +10,9 @@
 .\" FIXME: Partir las líneas que contienen más de 80 caracteres; borrar
 .\" los espacios finales.
 .\" FIXME: Las nuevas frases deben comenzar en nuevas líneas.
-.\" Arreglado hasta Opciones 432
+.\" Arreglado hasta la línea 652.
 .\" 
-.\" Traducido hasta la línea 2359 hay que revisar también las anteriores para
+.\" Traducido hasta la línea 2573 hay que revisar también las anteriores para
 .\" detectar algunos pequeños cambios.
 .
 .\" --------------------------------------------------------------------------
@@ -439,13 +439,13 @@ Aumenta/disminuye el volumen
 Cada opción 'etiqueta' tiene su contrapartida 'noetiqueta', es decir, \& el
 opuesto a la opción \-fs es \-nofs.
 .PP
-Si una opción está marcada como (XXX solamente), solo funcionará en
-combinación con la opción XXX o si está compilado con soporte XXX.
+Si una opción está marcada como (XXX solamente), solo funcionará en combinación
+con la opción XXX o si está compilado con soporte XXX.
 .PP
 .I NOTA:
 El analizador de subopciones (se usa por ejemplo para las subopciones -ao pcm)
 soporta un modo especial de escape de cadenas pensado para usarse con interfaces
- gráficas de usuario externas.
+gráficas de usuario externas.
 .br
 Tienen el siguiente formato:
 .br
@@ -465,17 +465,17 @@ mplayer \-ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .\" --------------------------------------------------------------------------
 .
 .SH "FICHEROS DE CONFIGURACIÓN"
-Puede escribir todas sus opciones en ficheros de configuración que serán
-leídos cada vez que se ejecute MPlayer/MEncoder.
+Puede escribir todas sus opciones en ficheros de configuración que serán leídos
+cada vez que se ejecute MPlayer/MEncoder.
 El archivo de configuración del sistema global 'mplayer.conf' está en su
-directorio de configueración (p.e.\& /etc/\:mplayer 
+directorio de configueración (p.e.\& /etc/\:mplayer
 o /usr/\:local/\:etc/\:mplayer), el específico de usuario
 es '~/\:.mplayer/\:config'. El fichero de configuración para
 MEncoder es mencoder.conf en su directorio de configuración
-(p.e.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer) el específico 
+(p.e.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer) el específico
 de usuario es '~/\:.mplayer/mencoder.conf'.
-Las opciones específicas de usuario sobreescriben a las del sistema y a su vez las
-que se pasan por línea de comandos sustituyen a estas.
+Las opciones específicas de usuario sobreescriben a las del sistema y a su vez
+las que se pasan por línea de comandos sustituyen a estas.
 La sintaxis del archivo de configuración es 'opción=<valor>', todo lo que haya
 después de un '#' es considerado un comentario.
 Las opciones que funcionan sin valores pueden ser habilitadas estableciendo
@@ -483,11 +483,11 @@ su valor a 'yes' o '1' o 'true' y deshabilitadas estableciendo su valor a 'no'
 o '0' o 'false'. Incluso las subopciones pueden se especificadas de este modo.
 .PP
 También puede escribir ficheros de configuración para ficheros específicos.
-Si dispone de un archivo de configuración para un archivo llamado 'pelicula.avi',
+Si dispone de un archivo de configuración para un archivo llamado 'pelicula.avi'
 cree otro archivo llamado 'pelicula.avi.conf' con las opciones específicas y
-colóquelo en ~/.mplayer o en el mismo directorio que el fichero mientras use 
-la opción \-use-filedir-conf (tanto en la línea de comandos como en el fichero 
-de configuración global).
+colóquelo en ~/.mplayer o en el mismo directorio que el fichero mientras use la
+opción \-use-filedir-conf (tanto en la línea de comandos como en el fichero de
+configuración global).
 .PP
 .I "EJEMPLO DE FICHERO DE CONFIGURACIÓN DE MPLAYER:"
 .sp 1
@@ -508,12 +508,13 @@ vf=eq2=1.0:-0.8
 .nf
 # Establece la salida de Mencoder a un fichero por defecto.
 o=encoded.avi
-# Las 4 siguientes líneas permiten a mencoder tv:// comenzar la captura inmediatamente
+# Las 4 siguientes líneas permiten a mencoder tv:// comenzar la captura
+# inmediatamente.
 oac=pcm=yes
 ovc=lavc=yes
 lavcopts=vcodec=mjpeg
 tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
-# conjunto de opciones por defecto más complejo
+# conjunto de opciones por defecto más complejo.
 lavcopts=vcodec=mpeg4:autoaspect=1
 lameopts=aq=2:vbr=4
 ovc=lavc=1
@@ -533,14 +534,14 @@ spuaa=20
 .\" --------------------------------------------------------------------------
 .
 .SH "PERFILES"
-Para facilitar el trabajo con diferentes configuraciones se pueden definir 
-perfiles en los ficheros de configuración. Un perfil comienza con su nombre entre
-corchetes, p.e.\& '[mi-perfil]'.
+Para facilitar el trabajo con diferentes configuraciones se pueden definir
+perfiles en los ficheros de configuración. Un perfil comienza con su nombre
+entre corchetes, p.e.\& '[mi-perfil]'.
 Todas las opciones que le sigan serán parte del perfil.
-Se puede definir una descripción (mostrada por \-profile help) con la
-opción profile-desc.
-Para acabar el perfil, comience otro o use el nombre de perfil
-default para seguir con las opciones normales.
+Se puede definir una descripción (mostrada por \-profile help) con la opción
+profile-desc.
+Para acabar el perfil, comience otro o use el nombre de perfil default para
+seguir con las opciones normales.
 .fi
 .PP
 .I "PERFIL DE EJEMPLO DE MENCODER:"
@@ -576,15 +577,15 @@ Saca por pantalla todas las opciones disponibles
 .
 .TP
 .B \-msgcharset <charset>
-Convierte los mensajes de la consola al conjunto de caracteres especificado 
-(default: autodetect). El texto se codificará con el parámetro especificado
-con la opción de configuración \-\-charset. Establézcalo a noconv para 
-deshabilitar la conversión (por e.j.\& problemas con iconv ).
+Convierte los mensajes de la consola al conjunto de caracteres especificado
+(default: autodetect). El texto se codificará con el parámetro especificado con
+la opción de configuración \-\-charset. Establézcalo a noconv para deshabilitar
+la conversión (por e.j.\& problemas con iconv ).
 .br
 .I NOTA:
-La opción tiene efecto después de que el analizador de la línea de comandos
-ha finalizado. La variable de entorno MPLAYER_CHARSET puede ayudarle a
-deshacerse de las primeras líneas de salida estropeada.
+La opción tiene efecto después de que el analizador de la línea de comandos ha
+finalizado. La variable de entorno MPLAYER_CHARSET puede ayudarle a deshacerse
+de las primeras líneas de salida estropeada.
 .TP
 .B \-msglevel <all=<nivel>:<módulo>=<nivel>:...>
 Controla la cantidad de mensajes para cada módulo. El módulo 'all' cambia la
@@ -632,7 +633,7 @@ del retorno de carro (i.e.\& \\r).
 .
 .TP
 .B \-priority <prio> (sólo Windows)
-Establece la prioridad de acuerdo a un conjuto de prioridades predefinidas 
+Establece la prioridad de acuerdo a un conjuto de prioridades predefinidas
 disponibles bajo Windows.
 Posibles valores de <prio>:
 .RSs
@@ -645,7 +646,8 @@ Usar la prioridad realtime puede causar un cuelgue del sistema.
 .RE
 .TP
 .B \-profile <perfil1,perfil2,...>
-Usa los perfiles dados, \-profile muestra una lista con todos los perfiles definidos.
+Usa los perfiles dados, \-profile muestra una lista con todos los perfiles
+definidos.
 .
 .TP
 .B \-really-quiet (vea también \-quiet)
@@ -2363,6 +2365,7 @@ el porcentaje es en relación con el total.
 Los controladores de salida de audio son interfaces para las diferentes
 facilidades de salida de audio.
 La sintaxis es:
+.
 .TP
 .B \-ao <driver1[:subopción1[=valor]:...],driver2,...[,]>
 Especifica una lista de controladores de salida de audio a usar.
@@ -2379,29 +2382,27 @@ Vea \-ao help para una lista de controladores disponibles.
 .RSs
 .IPs "\-ao alsa,oss,"
 Prueba el controlador ALSA, luego el OSS, y finalmente otros.
-.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
-Establece el modo noblock,mmap y el nombre del dispositivo como primera
+.IPs "\-ao alsa:noblock:device=hw=0.3"
+Establece el modo noblock y el nombre del dispositivo como primera
 tarjeta, cuarto dispositivo.
 .RE
 .PD 1
-.
-FIXME: Documentar subopciones para sdl, arts, esd, jack, nas, macosx, sgi,
-sun, dxr2, mpegpes, null, pcm, plugin.
+.sp 1
 Los controladores de audio disponibles son:
 .
 .TP
 .B "alsa\ \ \ "
-Controlador de salida de audio ALSA 0.9/\:1.x.
+Controlador de salida de audio ALSA 0.9/\:1.x
 .PD 0
 .RSs
-.IPs "mmap\ \ \ "
-Establece el modo experimental mmap (no funciona para más de dos canales).
 .IPs noblock
 Establece el modo noblock.
 .IPs device=<dispositivo>
 Establece el nombre del dispositivo.
 Reemplace cualquier ',' con '.' y cualquier ':' con '=' en el nombre del
 dispositivo ALSA.
+Para usar la salida hwac3 vía S/PDIF, use un dispositivo "iec958" o "spdif", a
+menos que realmente sepa como configurarlo correctamente.
 .RE
 .PD 1
 .
@@ -2414,56 +2415,160 @@ Controlador de salida de audio ALSA 0.5.
 Controlador de salida de audio OSS.
 .PD 0
 .RSs
-.IPs dsp-device
-Establece el dispositivo de salida de autio (por defecto: /dev/\:dsp).
+.IPs <dsp-device>
+Establece el dispositivo de salida de audio (por defecto: /dev/\:dsp).
+.IPs <mixer-device>
+Establece el dispositivo de mezcla de audio (por defecto: /dev/\:mixer).
+.IPs <mixer-channel>
+Establece el canal de mezcla (por defecto: pcm).
 .RE
 .PD 1
+.
 .TP
-.B "sdl\ \ \ \ "
+.B sdl (SDL solamente)
 Biblioteca de controlador de salida de audio SDL (Simple Directmedia Layer)
 altamente independiente de la plataforma.
+.PD 0
+.RSs
+.IPs <controlador>
+Selecciona el controlador de audio que SDL debe usar (por defecto: deja que SDL
+escoja).
+.RE
+.PD 1
+.
 .TP
 .B "arts\ \ \ "
-Salida de audio a través del demonio Arts.
+Salida de audio a través del demonio aRts.
 .TP
 .B "esd\ \ \ \ "
 Salida de audio a través del demonio ESD.
+.PD 0
+.RSs
+.IPs <servidor>
+Selecciona el servidor ESD a utilizar (por defecto: servidor local).
+.RE
+.PD 1
+.
 .TP
 .B "jack\ \ \ \ "
 Salida de audio a través de JACK (Jack Audio Connection Kit).
+.PD 0
+.RSs
+.IPs port=<nombre>
+Conecta a los puertos que tienen el nombre dado (por defecto: puertos físicos).
+.IPs name=<nombre del cliente>
+Nombre del cliente que se le pasa a JACK (por defecto: MPlayer [<PID>]).
+Es útil si desea que ciertas conexiones se establezcan automáticamente.
+.IPs (no)estimate
+Estimación del retraso del audio, supuestamente hace que la reproducción del
+vídeo sea más uniforme (por defecto: activada).
+.RE
+.PD 1
+.
 .TP
 .B "nas\ \ \ \ "
 Salida de audio a través de NAS.
+.
 .TP
 .B macosx (Mac OS X solamente)
 Controlador de salida de audio nativo Mac OS X.
+.
+.TP
+.B "openal\ "
+Controlador de salida de audio OpenAl, es experimental y está sin acabar (el
+sonido se mezclará en un sólo canal).
+.
 .TP
 .B sgi (SGI solamente)
 Controlador de salida de audio SGI nativo.
+.PD 0
+.RSs
+.IPs "<nombre del dispositivo de salida>"
+Especifica la interfaz del dispositivo de salida (por defecto: configuración del
+sistema).
+Por ejemplo, 'Salida Analógica' o 'Salida Digital'.
+.RE
+.PD 1
+.
 .TP
 .B sun (Sun solamente)
 Controlador de salida de audio Sun nativo.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifia el dispositivo de audio (por defecto: /dev/\:audio).
+.RE
+.PD 1
+.
 .TP
 .B win32 (Windows solamente)
 Controlador de salida de audio de forma de onda nativo de Windows.
+.
+.TP
+.B dsound (Windows solamente)
+Controlador de salida de audio DirectX DirectSound.
+.PD 0
+.RSs
+.IPs device=<numdispositivo>
+Selecciona el número del dispositivo que será usado.
+Reproducir un fichero con la opción \-v mostrará una lista de los dispositivos
+disponibles
+.RE
+.PD 1
+.
 .TP
 .B dxr2 (vea también \-dxr2) (DXR2 solamente)
 Controlador de salida específico de Creative DXR2.
+.
+.TP
+.B ivtv (IVTV solamente)
+Controlador de salida MPEG específico IVTV.
+Solamente funciona con \-ac hwmpa.
+.
 .TP
 .B mpegpes (DVB solamente)
-Controlador de salida específico de DVB.
+Controlador de salida para tarjetas DVB que escriben la salida a un fichero
+MPEG-PES si no hay ninguna tarjeta DVB instalada.
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Tarjeta DVB a usar si hay más de una.
+.IPs file=<fichero>
+Fichero de salida
+.RE
+.PD 1
+.
 .TP
 .B "null\ \ \ "
 No produce salida de audio pero mantiene la velocidad de reproducción
-del video.
+del vídeo.
 Use \-nosound para pruebas de rendimiento.
+.
 .TP
-.B pcm (vea también \-aofile)
-Salida de audio escrita a un archivo Raw PCM/\:wave.
-Escribe el sonido a ./audiodump.wav.
+.B "pcm\ \ \ \ "
+Escribe ficheros raw PCM/wave con el audio de salida.
+.PD 0
+.RSs
+.IPs (no)waveheader
+Incluye o excluye la cabecera de las ondas (por defecto: incluido).
+Cuando no se incluya se generará un fichero PCM.
+.IPs file=<fichero>
+Escribe el sonido en el <fichero> en vez de en la opción por defecto
+audiodump.wav.
+Si se especifica nowaveheader, la opción por defecto es audiodump.pcm.
+.IPs "fast\ "
+Trata de volcar la información mas rápido que en tiempo real. Asegurese de
+que la salida no se ve truncada (normalmente con el mensaje "Demasiados paquetes
+de vídeo en el buffer").
+Es normal obtener el mensaje "¡Su sistema es demasiado lento para reproducir
+esto!".
+.RE
+.PD 1
+.
 .TP
 .B "plugin\ \ "
-Controlador de salida de audio con plugin.
+Controlador de salida de audio con algun complemento.
+.
 .
 .
 .SH "OPCIONES DE SALIDA DE VIDEO (MPLAYER SOLAMENTE)"
