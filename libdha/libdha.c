@@ -48,6 +48,8 @@
 #   undef DEV_MEM
 #   define DEV_MEM "/dev/mem"
 #  endif
+#elif defined(sun) && defined (i386)
+#define DEV_MEM "/dev/xsvc"
 # endif /* SVR4 */
 
 #if defined(__OpenBSD__)
