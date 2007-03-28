@@ -65,6 +65,7 @@ MPlayer (1.0)
     Drivers:
     * ALSA audio output now sets the non-audio bit for AC3 passthrough even
       if the user-specified default device name tries to clear it
+    * fixed internal vidix in Solaris/x86, also auto-enabled
 
     Others:
     * libdvdcss updated to Subversion HEAD, now same as upstream version
