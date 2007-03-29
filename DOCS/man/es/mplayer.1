@@ -10,9 +10,9 @@
 .\" FIXME: Partir las líneas que contienen más de 80 caracteres; borrar
 .\" los espacios finales.
 .\" FIXME: Las nuevas frases deben comenzar en nuevas líneas.
-.\" Arreglado hasta la línea 652.
+.\" Arreglado hasta la línea 804.
 .\" 
-.\" Traducido hasta la línea 2573 hay que revisar también las anteriores para
+.\" Traducido hasta la línea 3035 hay que revisar también las anteriores para
 .\" detectar algunos pequeños cambios.
 .
 .\" --------------------------------------------------------------------------
@@ -478,8 +478,8 @@ Las opciones específicas de usuario sobreescriben a las del sistema y a su vez
 las que se pasan por línea de comandos sustituyen a estas.
 La sintaxis del archivo de configuración es 'opción=<valor>', todo lo que haya
 después de un '#' es considerado un comentario.
-Las opciones que funcionan sin valores pueden ser habilitadas estableciendo
-su valor a 'yes' o '1' o 'true' y deshabilitadas estableciendo su valor a 'no'
+Las opciones que funcionan sin valores pueden ser activadas estableciendo
+su valor a 'yes' o '1' o 'true' y desactivadas estableciendo su valor a 'no'
 o '0' o 'false'. Incluso las subopciones pueden se especificadas de este modo.
 .PP
 También puede escribir ficheros de configuración para ficheros específicos.
@@ -579,7 +579,7 @@ Saca por pantalla todas las opciones disponibles
 .B \-msgcharset <charset>
 Convierte los mensajes de la consola al conjunto de caracteres especificado
 (default: autodetect). El texto se codificará con el parámetro especificado con
-la opción de configuración \-\-charset. Establézcalo a noconv para deshabilitar
+la opción de configuración \-\-charset. Establézcalo a noconv para inhabilitar
 la conversión (por e.j.\& problemas con iconv ).
 .br
 .I NOTA:
@@ -692,11 +692,11 @@ Especificando \-autosync\ 1 hará lo mismo, pero se se usará sutilmente el
 algoritmo de corrección de A/\:V.
 Un ratio de imágenes de video irregular que funciona bien con \-nosound puede
 incluso mejorarse estableciendo este a un valor entero mayor que 1.
-Cuanto más alto sea el valor, más cerca se estará de la sincronización de \-nosound.
-Pruebe \-autosync\ 30 para suavizar problemas con controladores de sonido que no
-implementan una medida del retardo de audio perfecta.
+Cuanto más alto sea el valor, más cerca se estará de la sincronización de
+\-nosound. Pruebe \-autosync\ 30 para suavizar problemas con controladores de
+sonido que no implementan una medida del retardo de audio perfecta.
 .sp 1
-Con este valor, si ocurre un desplazamiento de sincronización A/\:V grande solo
+Con este valor, si ocurre un desplazamiento de sincronización A/\:V grande sólo
 pasarán 1 o 2\ segundos hasta estabilizarse.
 Este retardo en tiempo de reacción a repentinos desplazamientos A/\:V debe ser
 el único efecto colateral de activar esta opción, para todos los controladores
@@ -707,39 +707,40 @@ de sonido.
 Muestra algunas estadísticas en uso de CPU e imágenes eliminadas al final de
 la reproducción.
 Úselo en combinación con \-nosound y \-vo null para medida del rendimiento del
-codec de video.
+codec de vídeo.
 .br
 .I NOTA:
 Con esta opción MPlayer ignorará la duración de las imágenes mientras reproduzca
-solo video (puede ver esto como un valor infinito de fps).
+sólo vídeo (puede ver esto como un valor infinito de fps).
 .
 .TP
 .B \-colorkey <número>
 Cambia el colorkey a un valor RGB de su elección.
 0x000000 es negro y 0xffffff es blanco.
 Solo soportado por los controladores de salida de video cvidix, fbdev, svga,
-vesa, winvidix, xmga, xvidix, xover, xv (vea \-vo xv:ck), xvmc (vea \-vo xv:ck) 
+vesa, winvidix, xmga, xvidix, xover, xv (vea \-vo xv:ck), xvmc (vea \-vo xv:ck)
 y directx.
 .TP
 .B \-nocolorkey
-Deshabilita el colorkeying.
-Solo soportado por los controladores de salida de video cvidix, fbdev, svga, vesa,
-winvidix, xmga, xvidix, xover, xv (vea \-vo xv:ck), xvmc (vea \-vo xv:ck) y directx.
+Desactiva el colorkeying.
+Sólo soportado por los controladores de salida de video cvidix, fbdev, svga,
+vesa, winvidix, xmga, xvidix, xover, xv (vea \-vo xv:ck), xvmc (vea \-vo xv:ck)
+y directx.
 .
 .TP
 .B \-correct-pts (experimental)
-Cambia MPlayer a un modo experimental en el que las marcas de tiempo para las imágenes 
-de vídeo se calculan de una forma diferente y se soportan los filtros de vídeo que 
-añaden nuevas imágenes o modifican las marcas de tiempo de los existentes Se pueden 
-ver las marcas de tiempo mas precisas por ejemplo cuando se reproducen
-subtítulos sincronizados a cambios de escena con la opción \-ass.
+Cambia MPlayer a un modo experimental en el que las marcas de tiempo para las
+imágenes de vídeo se calculan de una forma diferente y se soportan los filtros
+de vídeo que añaden nuevas imágenes o modifican las marcas de tiempo de los
+existentes. Se pueden ver las marcas de tiempo mas precisas por ejemplo cuando
+se reproducen subtítulos sincronizados a cambios de escena con la opción \-ass.
 Sin \-correct-pts seguramente la sincronización irá desplazada algunas imágenes.
 Esta opción no funciona correctamente con algunos demuxers y codecs.
 .
 .TP
 .B \-crash-debug (CÓDIGO DE DETECCIÓN DE ERRORES)
 Automáticamente añade gdb sobre un fallo o SIGTRAP.
-El soporte debe estar compilado añadiendo \-\-enable-crash-debug en 
+El soporte debe estar compilado añadiendo \-\-enable-crash-debug en
 la fase de configurado.
 .
 .TP
@@ -747,7 +748,7 @@ la fase de configurado.
 Crea un nuevo archivo y escribe lista de decisión de edición (EDL) al mismo.
 Durante la reproducción, cuando el usuario pulse 'i', una entrada para saltar
 los últimos dos segundos de reproducción será escrita al archivo.
-Esto proporciona un punto de partida para que el usuario pueda ajustar de 
+Esto proporciona un punto de partida para que el usuario pueda ajustar de
 manera fina las entradas de EDL después.
 Vea http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:edl.html para más detalles.
 .
@@ -761,21 +762,21 @@ en lugar de reproducirlos inmediatamente.
 Fuerza un sistema de video fijo para múltiples archivos (una (des)inicialización
 para todos los archivos).
 Por lo tanto sólo se abrirá una ventana para todos los archivos.
-Actualmente los siguiente controladores funcionan bien con fixed-vo: gl, gl2, 
+Actualmente los siguientes controladores funcionan bien con fixed-vo: gl, gl2,
 mga, svga, x11, xmga, xv, xvidix y dfbmga.
 .
 .TP
 .B \-framedrop (vea también \-hardframedrop)
-Se salta la representación de algunas imágenes para mantener la sincronización A/\:V
-en sistemas lentos.
+Se salta la representación de algunas imágenes para mantener la sincronización
+A/\:V en sistemas lentos.
 Los filtros de vídeo no se aplican a estas imágenes.
 Para los marcos tipo B el proceso de decodificación es completamente saltado.
 .
 .TP
 .B \-(no)gui
-Habilita o deshabilita la interfaz gráfica (la acción por defecto depende del nombre
-del binario).
-Únicamente funciona si se usa como primer argumento de la línea de 
+Habilita o inhabilita la interfaz gráfica (la acción por defecto depende del
+nombre del binario).
+Únicamente funciona si se usa como primer argumento de la línea de
 comandos. No funciona como opción en el fichero de configuración.
 .
 .TP
@@ -822,7 +823,7 @@ Las órdenes disponibles son:
 Leer input.conf alternativo.
 Si no se da la ruta completa, se asume ~/\:.mplayer/\:<archivo>.
 .IPs ar-delay
-Retardo en mseg antes de empezar a autorrepetir una tecla (0 para deshabilitar).
+Retardo en mseg antes de empezar a autorrepetir una tecla (0 para inhabilitar).
 .IPs ar-rate
 Número de pulsaciones de tecla a generar por segundo en autorrepetición.
 .IPs keylist
@@ -908,7 +909,7 @@ Desactiva el soporte para LIRC.
 .
 .TP
 .B \-nomouseinput (X11 solamente)
-Deshabilita la entrada de pulsar/\:soltar botón del ratón (el menú
+Inhabilita la entrada de pulsar/\:soltar botón del ratón (el menú
 contextual de mozplayerxp se basa en esta opción).
 .
 .TP
@@ -1084,7 +1085,7 @@ Establece la velocidad del CD.
 Establece el nivel de paranoia. Otro valor que no sea 0 parece que impide
 la reproducción de cualquier cosa excepto la primera pista.
 .RSss
-0: deshabilita la comprobación (por defecto)
+0: desactiva la comprobación (por defecto)
 .br
 1: solapa la comprobación solamente 
 .br
@@ -1380,7 +1381,7 @@ Ayuda con algunos archivos AVI que tienen la cabecera en mal estado.
 .
 .TP
 .B \-noextbased
-Deshabilita la selección del demuxer basada en extensión del nombre de
+Invalida la selección del demuxer basada en extensión del nombre de
 archivo.
 Por defecto, cuando un tipo de archivo (demuxer) no puede ser detectado
 con fiabilidad (el archivo no tiene cabecera o no es demasiado fiable),
@@ -1649,7 +1650,7 @@ en la lista de canales.
 radio://1, radio://104.4, radio_set_channel 1
 .IPs adevice=<valor> (con la opción de radio capture habilitada)
 Nombre del dispositivo desde el que grabar. Sin este valor la grabación estará 
-deshabilitada incluso si la palabra clave capture aparece en la URL.
+desactivada incluso si la palabra clave capture aparece en la URL.
 Para dispositivos ALSA use el nombre en la forma de hw=<tarjeta>.<dispositivo>.
 Si el nombre del dispositivo contiene un '=', el módulo usará ALSA para grabar,
 en cualquier otro caso usará OSS.
@@ -1871,7 +1872,7 @@ El renderizador SSA/ASS puede poner los subtítulos ahí (con \-ass-use-margins).
 .
 .TP
 .B \-(no)ass-use-margins
-Habilita/deshabilita el uso de subtítulos inferiores y superiores en los
+Habilita/Inhabilita el uso de subtítulos inferiores y superiores en los
 bordes negros cuando estan disponibles (por defecto: no).
 .
 .TP
@@ -2139,7 +2140,7 @@ Carga todos los subtítulos en el directorio actual.
 .
 .TP
 .B \-sub-no-text-pp
-Deshabilita todo tipo de postproceso de texto después de cargar los
+Inhabilita todo tipo de postproceso de texto después de cargar los
 subtítulos.
 Usado para pruebas. 
 .
@@ -2274,7 +2275,7 @@ El valor es la anchura de los subtítulos en % del ancho de la pantalla.
 .
 .TP
 .B \-noterm-osd
-Deshabilita la escritura de mensajes OSD en la consola cuando ninguna salida
+Inhabilita la escritura de mensajes OSD en la consola cuando ninguna salida
 de vídeo está disponible.
 .
 .TP
@@ -2307,7 +2308,7 @@ Especifica el ID del subtítulo VOBsub.
 .SH "OPCIONES DE SALIDA DE AUDIO (MPLAYER SOLAMENTE)"
 .
 .TP
-.B \-abs <valor> (\-ao oss sólamente) (OBSOLETO)
+.B \-abs <valor> (\-ao oss solamente) (OBSOLETO)
 Sobreescribe la detección del tamaño del buffer de audio del
 controlador/\:tarjeta.
 .
@@ -2567,48 +2568,45 @@ esto!".
 .
 .TP
 .B "plugin\ \ "
-Controlador de salida de audio con algun complemento.
+Controlador de salida de audio con alguna extensión.
 .
 .
 .
-.SH "OPCIONES DE SALIDA DE VIDEO (MPLAYER SOLAMENTE)"
-.TP
-.B \-aa* (\-vo aa solamente)
-Puede obtener una lista y explicación de las opciones disponibles
-ejecutando
-.I mplayer \-aahelp
+.SH "OPCIONES DE SALIDA DE VÍDEO (MPLAYER SOLAMENTE)"
 .
 .TP
 .B \-adapter <valor>
 Establece la tarjeta gráfica que recibirá la imagen.
-Necesita la opción \-vm para funcionar.
 Puede obtener una lista de las tarjeta gráficas disponibles cuando ejecute
 esta opción con \-v.
-Actualmente solo funciona con \-vo directx.
+Actualmente sólo funciona con con el controlador de salida de vídeo directx.
 .
 .TP
 .B \-bpp <profundidad>
-Usar una profundidad de color diferente a la autodetectada.
-No todos los drivers \-vo lo soportan (fbdev, dga2, svga, vesa).
+Usar una profundidad de color diferente a la que se ha detectado.
+Sólo soportado por los controladores de salida de vídeo fbdev, dga2, svga, vesa.
 .
 .TP
-.B \-brightness <\-100-100>
-Ajusta el brillo del video de salida (por defecto 0).
-No soportado por todos los controladores de salida de video.
+.B \-border
+Reproduce la película con adornos y bordes.
+Dado que la opción está activada por defecto, use \-noborder para invalidar los
+adornos de la ventana.
+Soportado por el controlador de salida de vídeo directx.
 .
 .TP
-.B \-contrast <\-100-100>
-Ajusta el contraste del video de salida (por defecto 0).
-No soportado por todos los controladores de salida de video.
+.B \-brightness <-100\-100>
+Ajusta el brillo del vídeo de salida (por defecto 0).
+No soportado por todos los controladores de salida de vídeo.
 .
 .TP
-.B \-dfbopts <valor> (\-vo directfb solamente)
-Especifica una lista de parámetros del controlador de salida de video directfb.
+.B \-contrast <-100\-100>
+Ajusta el contraste del vídeo de salida (por defecto 0).
+No soportado por todos los controladores de salida de vídeo.
 .
 .TP
 .B \-display <nombre> (X11 solamente)
-Especifica el nombre del host y muestra el número de servidor X en el que
-se desea mostrar.
+Se debe especificar el nombre y el número del dispositivo del servidor de las X
+en el que desea que se muestre el vídeo.
 .sp 1
 .I EJEMPLO:
 .PD 0
@@ -2618,26 +2616,16 @@ se desea mostrar.
 .PD 1
 .
 .TP
-.B \-double
-Activa doble buffer.
-Corrije parpadeos almacenando dos imágenes en memoria, y mostrando una
-mientras se decodifica la otra.
-Puede afectar al OSD negativamente, pero a menudo elimina el parpadeo OSD.
-Necesita el doble de memoria que con buffer simple, por lo que puede no
-funcionar en tarjetas que tenga muy poca memoria.
-.
-.TP
 .B "\-dr \ \ \ "
-Activa el renderizado directo (no soportado por todos los codecs y salidas
-de video)
+Activa el renderizado directo (no está soportado por todos los codecs y salidas
+de vídeo)
 .br
-.I ADVERTENCIA:
-¡puede causar corrupción de OSD/\:SUB!
+.I AVISO:
+¡Puede causar corrupción en OSD/\:SUB!
 .
 .TP
 .B \-dxr2 <opción1:opción2:...>
-Esta opción es usada para controlar el controlador de salida de video dxr2.
-.
+Esta opción se usa para gestionar el controlador de salida de vídeo dxr2.
 .RSs
 .IPs ar-mode=<valor>
 modo de razón de aspecto (0 = normal, 1 = pan y scan, 2 = letterbox
@@ -2720,29 +2708,23 @@ Afina la superposición (por defecto 1000).
 .RE
 .
 .TP
-.B \-fb <dispositivo> (\-vo fbdev o directfb solamente) (OBSOLETO)
-Especifica el dispositivo de framebuffer a usar (por defecto: /dev/\:fb0).
-.TP
 .B \-fbmode <nombredelmodo> (\-vo fbdev solamente)
-Cambia el modo de video al que se haya denominado como <nombredelmodo>
+Cambia el modo de vídeo al que se haya denominado como <nombredelmodo>
 en /etc/\:fb.modes.
 .br
 .I NOTA:
-VESA framebuffer no soporta el cambio de modo.
+El framebuffer VESA no soporta el cambio de modo.
+.
 .TP
 .B \-fbmodeconfig <nombrearchivo> (\-vo fbdev solamente)
 Usa este archivo de configuración en lugar del archivo de configuración (por
 defecto: /etc/\:fb.modes).
 .
 .TP
-.B \-forcexv (\-vo sdl solamente)
-Fuerza el uso de XVideo a través del controlador de salida de video sdl.
-.
-.TP
 .B \-fs (vea también \-zoom)
 Reproducción a pantalla completa (centra la película, y crea bandas
 negras alrededor).
-No soportado por todos los controladores de salida de video.
+No está soportado por todos los controladores de salida de vídeo.
 .
 .TP
 .B \-fsmode-dontuse <0\-31> (OBSOLETO, use la opción \-fs)
@@ -2750,10 +2732,9 @@ Pruebe esta opción si continúa teniendo problemas en pantalla completa.
 .
 .TP
 .B \-fstype <tipo1,tipo2,...> (X11 solamente)
-Especifica una lista de prioridad de los modos de capa de pantalla completa
-para ser usados.
+Especifica una lista de prioridad de los modos de pantalla completa que serán
+usados.
 Puede negar modos usando el prefijo '\-'.
-.br
 Si tiene problemas como por ejemplo que la ventana en pantalla completa sea
 cubierta por otras ventanas intente usar un orden distinto.
 .br
@@ -2794,18 +2775,22 @@ soportados.
 Fija el cambio a pantalla completa en OpenBox 1.x.
 .RE
 .PD 1
+.
 .TP
 .B \-geometry x[%][:y[%]] or [WxH][+x+y]
-Ajusta donde se tendrá la salida en pantalla inicialmente.
+Ajusta donde estará la salida en la pantalla inicialmente.
 Las especificaciones x e y son medidas en pixels desde arriba-izquierda de la
 pantalla hasta arriba-izquierda de la imagen que será mostrada, sin embargo
 si se indica el signo de porcentaje después del argumento el valor se toma
 como un porcentaje del tamaño de la pantalla en esa dirección.
-También soporta el formato de opción estandar de X11 \-geometry.
+También soporta el formato de opción estándar de X11 \-geometry.
+Si se especifica una ventana externa usando la opción \-wid entonces las
+coordenadas x e y son relativas a la posición arriba-izquierda de esa ventana en
+vez de la pantalla
 .br
 .I NOTA:
-Esta opción está solo soportada por los controladores de salida de video
-x11, xmga, xv, xvmc, xvidix, directx y tdfxfb.
+Esta opción está solo soportada por los controladores de salida de vídeo
+x11, xmga, xv, xvmc, xvidix, gl, gl2, directx y tdfxfb.
 .sp 1
 .I EJEMPLO:
 .PD 0
@@ -2823,53 +2808,19 @@ Coloca la ventana en la esquina inferior izquierda de la pantalla.
 .
 .TP
 .B \-guiwid <id\ de\ ventana> (vea también \-wid) (GUI solamente)
-Esto le dice al GUI que use una ventana X11 y se pegue debajo del video,
-lo cual es útil para embebir en un navegador un mini-GUI (con
-el plugin MPlayer por ejemplo).
+Esto le dice al GUI que use una ventana X11 y se pegue debajo del vídeo,
+lo cual es útil para embeber en un navegador un mini-GUI (con
+la extensión MPlayer por ejemplo).
 .
 .TP
 .B \-hue <-100\-100>
-Ajusta el matiz de la señal de video (por defecto: 0).
-Puede obtener negativos coloreados de la imagen con esta opción.
-No soportado por todos los controladores de salida de video.
-.
-.TP
-.B \-jpeg <opción1:opción2:...> (\-vo jpeg solamente)
-Especifica las opciones para la salida jpeg.
-.br
-Las opciones disponibles son:
-.sp 1
-.PD 0
-.RSs
-.IPs [no]progressive
-Especifica JPEG estandar o progresivo (por defecto: noprogressive)
-.IPs [no]baseline
-Especifica el uso o no de línea base (por defecto: baseline)
-.IPs optimize=<0\-100>
-factor de optimización (por defecto: 100)
-.IPs smooth=<0\-100>
-factor de suavizado (por defecto: 0)
-.IPs quality=<0\-100>
-factor de calidad (por defecto: 75)
-.IPs outdir=<valor>
-Especifica el directorio donde se guardarán los archivos JPEG.
-Si no se especifica, todos los archivos JPEG serán escritos en el directorio
-actual.
-.IP subdirs=<valor>
-Si se especifica, MPlayer creará subdirectorios numerados con el prefijo
-especificado.
-Si no se especifica, no se crearán los subdirectorios y todos los archivos
-JPEG se escribirán en el mismo directorio.
-.IP maxfiles=<valor>
-Número máximo de archivos JPEG que se guardarán por subdirectorio en caso de
-especificar subdirs.
-Debe ser igual o mayor que 1 (por defecto: 1000).
-.RE
-.PD 1
+Ajusta el matiz de la señal de vídeo (por defecto: 0).
+Puede obtener colores inversos en la imagen con esta opción.
+No está soportado por todos los controladores de salida de vídeo.
 .
 .TP
 .B \-monitor-dotclock <rango[,rango,...]> (\-vo fbdev y vesa solamente)
-Especifica el rango de dotclock y pixelclock del monitor.
+Especifica el rango de dotclock o pixelclock del monitor.
 .
 .TP
 .B \-monitor-hfreq <rango[,rango,...]> (\-vo fbdev y vesa solamente)
@@ -2893,28 +2844,39 @@ Establece la razón de aspecto de su monitor o pantalla de TV.
 .PD 1
 .
 .TP
+.B \-monitorpixelaspect <razón> (vea también \-aspect)
+Establece el aspecto de un único pixel de su monitor o pantalla de televisión
+(por defecto: desactivado).
+Invalida la opción \-monitoraspect .
+Un valor de 0 la inhabilita, un valor de 1 significa pixels cuadrados
+(correcto para (¿casi?) todos los LCDs).
+.
+.TP
+.B \-nodouble
+Desactiva el almacenamiento de imágenes doble, principalmente con propósitos de
+depuración. El almacenamiento de imágenes doble soluciona los problemas de
+parpadeo almacenando dos imágenes en memoria y mostrando una mientras decodifica
+la otra.
+Puede afectar al OSD negativamente, pero a menudo elimina el parpadeo del OSD.
+.
+.TP
 .B \-nograbpointer
 No capturar el puntero del ratón después de cambiar el modo de video (\-vm).
 Útil en una configuración multicabeza.
 .
 .TP
 .B \-nokeepaspect
-No mantiene la razón de aspecto cuando se redimensionan ventanas.
-Solo funciona con los controladores de salida de video x11, xv, xmga, xvidix,
+No mantiene la razón de aspecto cuando se cambia el tamaño de las ventanas.
+Solo funciona con los controladores de salida de vídeo x11, xv, xmga, xvidix,
 y directx.
 Además bajo X11 su administrador de ventanas necesita entender los consejos
 de aspecto de ventana.
 .
 .TP
-.B \-noxv (\-vo sdl solamente)
-Deshabilita el uso de XVideo a través del controlador de salida de video
-de sdl.
-.
-.TP
 .B \-ontop
 Hace que la ventana de reproducción se quede por encima de las otras ventanas.
-Soportado por controladores que usen X11, excepto SDL, así como directx y gl2
-bajo Windows.
+Soportado por controladores que usen X11, excepto SDL, así como directx,macosx,
+quartz, ggi y gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -2922,7 +2884,17 @@ Activa funcionalidad pan y scan (recortando los lados de por ejemplo una
 película a 16:9 para ajustarla a una pantalla 4:3 sin bandas negras).
 .br
 El rango controla cuánto de la imagen será recortado.
-Solo funciona con los controladores de salida de video xv, xmga, mga y xvidix.
+Sólo funciona con los controladores de salida de vídeo xv, xmga, mga, gl, gl2,
+quartz, macosx y xvidix.
+.
+.TP
+.B \-panscanrange <-19.0\-99.0> (experimental)
+Cambia el rango de la funcionalidad pan y scan (por defecto: 1).
+Valores positivos significan múltiplos del rango por defecto.
+Con valores negativos puede hacer zoom hasta un factor de \-panscanrange+1.
+P.e. \-panscanrange -3 permite un factor de zoom de hasta 4.
+Esta característica es experimental.
+No reporte errores a menos que esté usando \-vo gl.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2935,23 +2907,24 @@ Actualmente solo está soportado por \-vo directx combinado con la opción
 Reproduce la película en la ventana raíz (fondo de escritorio).
 Las imágenes del fondo de escritorio pueden cubrir sin embargo a la ventana
 de la película.
-Funciona solo con los controladores de salida de video x11, xv, xmga,
-xvidix, quartz y directx.
+Funciona sólo con los controladores de salida de vídeo x11, xv, xmga,
+xvidix, quartz, macosx y directx.
 .
 .TP
 .B \-saturation <-100\-100>
-Ajusta la saturación de la salida de video (por defecto: 0).
+Ajusta la saturación de la salida de vídeo (por defecto: 0).
 Puede obtener salida en escala de grises con esta opción.
+No está soportado por todos los controladores de vídeo de salida
 .
 .TP
 .B \-screenh <pixels>
 Especifica la resolución vertical de la pantalla para los controladores
-de salida de video que no conozcan esta resolución como fbdev, x11 y TVout.
+de salida de vídeo que no conozcan esta resolución como fbdev, x11 y TVout.
 .
 .TP
 .B \-screenw <pixels>
 Especifica la resolución horizontal de la pantalla para los controladores
-de salida de video que no conozcan esta resolución como fbdev, x11 y TVout.
+de salida de vídeo que no conozcan esta resolución como fbdev, x11 y TVout.
 .
 .TP
 .B \-stop-xscreensaver (X11 solamente)
@@ -2960,33 +2933,34 @@ al finalizar.
 .
 .TP
 .B "\-vm \ \ \ "
-Intenta cambiar a un modo de video mejor.
+Intenta cambiar a un modo de vídeo diferente.
 Soportado por los controladores de salida de video dga, x11, xv, sdl y
 directx.
-Si se usa con el controlador de salida de video de directx las opciones
+Si se usa con el controlador de salida de vídeo de directx las opciones
 \-screenw, \-screenh, \-bpp y \-refreshrate pueden usarse para establecer
 un nuevo modo de pantalla.
 .
 .TP
 .B "\-vsync \ \ "
-Activa VBI para los controladores de salida de video vesa, dfbmga y svga.
+Activa VBI para los controladores de salida de vídeo vesa, dfbmga y svga.
 .
 .TP
-.B \-wid <id\ de\ ventana> (vea también \-guiwid) (X11 solamente)
-Le dice a MPlayer que use una ventana X11 existente.
-Útil para embebir MPlayer en un navegador (con la extensión plugger por
+.B \-wid <id\ de\ ventana> (vea también \-guiwid) (sólo X11, OpenGL y DirectX)
+Le dice a MPlayer que use una ventana existente.
+Útil para embeber MPlayer en un navegador (con la extensión plugger por
 ejemplo).
 .
 .TP
-.B \-xineramascreen <0\-...>
-En configuraciones de Xinerame (p.e.\& un solo escritorio que se extiende sobre
+.B \-xineramascreen <\-2\-...> (X11 only)
+En configuraciones de Xinerama (p.e.\& un único escritorio que se extiende sobre
 múltiples pantallas) esta opción le dice a MPlayer en qué pantalla ha de
 reproducir la película.
-.
-.TP
-.B \-z <0\-9> (\-vo png solamente)
-Especifica el nivel de compresión para la salida de video de png.
-0 si no hay compresión, 9 para la máxima compresión.
+Un valor de \-2 significa pantalla completa a través de todo el dispositivo
+virtual, \-1 significa pantalla completa en el dispositivo en el que está la
+ventana actual.
+La posición inicial especificada con la opción \-geometry es relativa a la
+pantalla especificada.
+Normalmente sólo funcionara con "\-fstype \-fullscreen" o "\-fstype none".
 .
 .TP
 .B \-zrbw (\-vo zr solamente)
@@ -2994,13 +2968,15 @@ Muestra en blanco y negro.
 Para rendimiento óptimo, esta opción puede combinarse con '\-lavdopts gray'.
 .
 .TP
-.B \-zrcrop <[ancho]x[alto]+[desplazamiento x]+[desplazamiento y]> (\-vo zr solamente)
+.B \-zrcrop <[ancho]x[alto]+[desplazamiento x]+[desplazamiento y]> (\-vo zr\
+ solamente)
 Selecciona una parte de la imagen de entrada para mostrar, se puede usar
 esta opción varias veces para cambiar en modo cinerama.
 En el modo cinerama la película es distribuida sobre más de una TV (o
 proyectores) para crear una pantalla mayor.
 Las opciones que aparecen después de n-ésimo \-zrcrop se aplican a la tarjeta
-n\-ésima, cada tarjeta debe al menos tener un \-zrdev adicionalmente a \-zrcrop.
+MJPEG n\-ésima, cada tarjeta debe tener al menos un \-zrdev adicionalmente a
+\-zrcrop.
 Para ejemplos, vea la salida de \-zrhelp y la sección Zr de la documentación.
 .
 .TP
@@ -3028,7 +3004,7 @@ y un ejemplo del modo cinerama.
 .
 .TP
 .B \-zrnorm <norma> (\-vo zr solamente)
-Especifica la norma de TV PAL o NTSC (por defecto: no la cambia).
+Especifica la norma de TV PAL o NTSC (por defecto: sin cambios).
 .
 .TP
 .B \-zrquality <1\-20> (\-vo zr solamente)
@@ -3036,7 +3012,7 @@ Un número de 1 (mejor) a 20 (peor) representando la calidad de codificación
 JPEG.
 .
 .TP
-.B \-zrvdec <1,2,4> (\-vo zr solamente)
+.B \-zrvdec <1|2|4> (\-vo zr solamente)
 Decimación vertical: Pide al controlador que envíe solo cada 2 o 4
 líneas/\:pixels de la imagen de entrada a la tarjeta MJPEG y usa el
 escalador de la tarjeta MJPEG para ajustar el tamaño de la imagen a su
@@ -3053,6 +3029,7 @@ la pantalla (por defecto: centrado).
 Si la película es menor que la pantalla de TV, esta opción especifica
 la posición y de la película relativa a la esquina superior izquierda de
 la pantalla (por defecto: centrado).
+.
 .
 .
 .SH "CONTROLADORES DE SALIDA DE VIDEO (SOLAMENTE MPLAYER)"
