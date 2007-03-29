@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "mp_fifo.h"
 #include "x11_common.h"
 
 #ifdef X11_FULLSCREEN
@@ -556,8 +557,6 @@ void vo_uninit(void)
 
 #include "osdep/keycodes.h"
 #include "wskeys.h"
-
-extern void mplayer_put_key(int code);
 
 #ifdef XF86XK_AudioPause
 static void vo_x11_putkey_ext(int keysym)

@@ -125,6 +125,7 @@
 #include "input/input.h"
 #include "input/mouse.h"
 #include "subopt-helper.h"
+#include "mp_fifo.h"
 
 static vo_info_t info = 
 {
@@ -1160,7 +1161,6 @@ static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
  **/
 
 #include "osdep/keycodes.h"
-extern void mplayer_put_key(int code);
 
 #define shift_key (event.key.keysym.mod==(KMOD_LSHIFT||KMOD_RSHIFT)) 
 static void check_events (void)

@@ -34,6 +34,7 @@
 #include "mp_msg.h"
 #include "aspect.h"
 #include "geometry.h"
+#include "mp_fifo.h"
 
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
@@ -85,7 +86,6 @@ static float window_aspect;
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO) = NULL;
 static RECT last_rect = {0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE};
 
-extern void mplayer_put_key(int code);              //let mplayer handel the keyevents 
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 extern int vidmode;
 

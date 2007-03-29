@@ -28,6 +28,7 @@
 #include <shlobj.h>
 #include <version.h>
 #include <mplayer.h>
+#include <mp_fifo.h>
 #include <mp_msg.h>
 #include <help_mp.h>
 #include <input/input.h>

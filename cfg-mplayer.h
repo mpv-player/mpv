@@ -4,6 +4,8 @@
 
 #include "cfg-common.h"
 
+extern int key_fifo_size;
+extern unsigned doubleclick_time;
 extern int noconsolecontrols;
 
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA)

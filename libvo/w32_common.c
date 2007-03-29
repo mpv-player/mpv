@@ -10,8 +10,8 @@
 #include "video_out.h"
 #include "aspect.h"
 #include "w32_common.h"
+#include "mp_fifo.h"
 
-extern void mplayer_put_key(int code);
 extern int enable_mouse_movements;
 
 #ifndef MONITOR_DEFAULTTOPRIMARY

@@ -47,6 +47,7 @@
 #include "mp_msg.h"
 #include "aspect.h"
 #include "subopt-helper.h"
+#include "mp_fifo.h"
 
 #ifndef min
 #define min(x,y) (((x)<(y))?(x):(y))
@@ -891,8 +892,6 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 return 0;
 }
-
-extern void mplayer_put_key(int code);
 
 #include "osdep/keycodes.h"
 

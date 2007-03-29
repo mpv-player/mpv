@@ -41,6 +41,7 @@ SRCS_COMMON-$(UNRARLIB) += unrarlib.c
 
 SRCS_MPLAYER = mplayer.c \
                m_property.c \
+               mp_fifo.c \
                mp_msg.c \
                mixer.c \
                parser-mpcmd.c \

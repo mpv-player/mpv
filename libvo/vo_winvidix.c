@@ -22,11 +22,11 @@
 
 #include "aspect.h"
 #include "mp_msg.h"
+#include "mp_fifo.h"
 
 #include "vosub_vidix.h"
 #include "vidix/vidixlib.h"
 
-extern void mplayer_put_key(int code);
 
 static vo_info_t info = 
 {

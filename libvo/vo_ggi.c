@@ -26,6 +26,7 @@
 #include "video_out_internal.h"
 
 #include "fastmemcpy.h"
+#include "mp_fifo.h"
 
 #include <ggi/ggi.h>
 
@@ -471,7 +472,6 @@ static int control(uint32_t request, void *data, ...)
 
 /* EVENT handling */
 #include "osdep/keycodes.h"
-extern void mplayer_put_key(int code);
 
 static void check_events(void)
 {

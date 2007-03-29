@@ -26,6 +26,7 @@
 
 #include "osdep/keycodes.h"
 #include "mp_msg.h"
+#include "mp_fifo.h"
 
 #include <caca.h>
 #ifdef CACA_API_VERSION_1

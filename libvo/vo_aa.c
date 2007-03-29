@@ -37,6 +37,7 @@
 #include "subopt-helper.h"
 #include "help_mp.h"
 #include "mp_msg.h"
+#include "mp_fifo.h"
 
 
 #define MESSAGE_DURATION 3
@@ -82,8 +83,6 @@ font_desc_t* vo_font_save = NULL;
 static struct SwsContext *sws=NULL;
 
 /* our version of the playmodes :) */
-
-extern void mplayer_put_key(int code);
 
 /* to disable stdout outputs when curses/linux mode */
 extern int quiet;

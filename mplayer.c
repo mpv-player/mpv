@@ -188,7 +188,7 @@ static int max_framesize=0;
 //**************************************************************************//
 
 // Common FIFO functions, and keyboard/event FIFO code
-#include "fifo.c"
+#include "mp_fifo.h"
 int noconsolecontrols=0;
 //**************************************************************************//
 

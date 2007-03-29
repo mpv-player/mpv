@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include "osdep/timer.h"
+#include "input/input.h"
 #include "input/mouse.h"
 
 
@@ -33,7 +36,7 @@ int mplayer_get_key(int fd){
 }
 
 
-static unsigned doubleclick_time = 300;
+unsigned doubleclick_time = 300;
 
 static void put_double(int code) {
   if (code >= MOUSE_BTN0 && code <= MOUSE_BTN9)
