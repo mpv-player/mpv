@@ -1,9 +1,9 @@
 .\" synced with 1.685
 .\" Encoding: iso-8859-1
-.\" MPlayer (C) 2000-2004 El equipo de MPlayer 
+.\" MPlayer (C) 2000-2004 El equipo de MPlayer
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun,
 .\" Jonas Jermann y traducida al español por Juan Martín López.
-.\" 
+.\"
 .\" FIXME: break lines longer than 80 characters; remove trailing whitespaces
 .\" FIXME: New sentences need to start on new lines.
 .
@@ -11,7 +11,7 @@
 .\" los espacios finales.
 .\" FIXME: Las nuevas frases deben comenzar en nuevas líneas.
 .\" Arreglado hasta la línea 804.
-.\" 
+.\"
 .\" Traducido hasta la línea 3035 hay que revisar también las anteriores para
 .\" detectar algunos pequeños cambios.
 .
@@ -20,7 +20,7 @@
 .\" --------------------------------------------------------------------------
 .
 .\" define la indentación para las subopciones
-.nr SS 5 
+.nr SS 5
 .\" añade una nueva subopción
 .de IPs
 .IP "\\$1" \n(SS
@@ -156,14 +156,14 @@ smb://[usuario:contraseña@]host/ruta_al_fichero]
 .hy
 .
 .\" --------------------------------------------------------------------------
-.\" Descripción 
+.\" Descripción
 .\" --------------------------------------------------------------------------
 .
 .SH DESCRIPCIÓN
 .B mplayer
 es un reproductor de películas para Linux (funciona en muchas otras plataformas
 y arquitecturas de CPU, vea la documentación).
-Reproduce la mayoría de los ficheros MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, 
+Reproduce la mayoría de los ficheros MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM,
 QT/\:MOV/\:MP4, ogg/\:OGM, MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ,
 soportados de forma nativa y otros codecs binarios.
 Además puede ver VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 e incluso películas
@@ -913,7 +913,7 @@ Inhabilita la entrada de pulsar/\:soltar botón del ratón (el menú
 contextual de mozplayerxp se basa en esta opción).
 .
 .TP
-.B \-rtc (RTC solamente) 
+.B \-rtc (RTC solamente)
 Activa el uso del RTC de Linux (realtime clock \- /dev/\:rtc) como mecanismo
 de sincronización.
 Esto despierta el proceso cada 1/1024 para comprobar el tiempo actual.
@@ -956,7 +956,7 @@ Reproduce archivos en orden aleatorio.
 Carga un skin del directorio dado como parámetro bajo el directorio
 por defecto para los skins, /usr/\:local/\:share/\:mplayer/ y
 ~/.mplayer/\:skins/.
-.sp 1 
+.sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
@@ -1019,7 +1019,7 @@ Selecciona el idioma de audio para el DVD y siempre intenta reproducir pistas
 cuyo lenguaje coincide con el código dado.
 MPlayer muestra una lista de los idiomas disponibles cuando se ejecuta
 en modo prolijo (\-v).
-.sp 1 
+.sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
@@ -1035,7 +1035,7 @@ Reproduce un fichero Matroska en japonés.
 Fuerza el tipo de audio demuxer para \-audiofile.
 Use un '+' delante del nombre para forzarlo, ¡esto evitará algunos chequeos!.
 Pásele al demuxer uno de los nombres de la lista imprimida por \-audio-demuxer help.
-Por compatibilidad con versiones anteriores también acepta el ID del demuxer como 
+Por compatibilidad con versiones anteriores también acepta el ID del demuxer como
 se define en libmpdemux/\:demuxer.h \-audio-demuxer audio o \-audio-demuxer 17 fuerza MP3.
 .
 .TP
@@ -1087,7 +1087,7 @@ la reproducción de cualquier cosa excepto la primera pista.
 .RSss
 0: desactiva la comprobación (por defecto)
 .br
-1: solapa la comprobación solamente 
+1: solapa la comprobación solamente
 .br
 2: corrección y verificación completa
 .REss
@@ -1185,14 +1185,14 @@ primero.
 Fuerza el tipo de demuxer.
 Use un '+' delante del nombre para forzarlo, ¡esto evitará algunas comprobaciones!.
 Pásele al demuxer uno de los nombres de la lista imprimida por \-demuxer help.
-Por compatibilidad con versiones anteriores también acepta el ID del demuxer como 
+Por compatibilidad con versiones anteriores también acepta el ID del demuxer como
 se define en libmpdemux/\:demuxer.h \-demuxer audio o \-demuxer 17 fuerza MP3.
 .
 .TP
 .B \-dumpaudio (MPlayer solamente)
 Vuelca audio comprimido raw a ./stream.dump (útil con MPEG/\:AC3), en la mayoría del
 resto de casos el fichero resultante no será reproducible si utiliza más de un -dumpaudio,
--dumpvideo, -dumpstream en la línea de comandos sólo funcionará el último que haya sido 
+-dumpvideo, -dumpstream en la línea de comandos sólo funcionará el último que haya sido
 especificado.
 .
 .TP
@@ -1237,7 +1237,7 @@ de darse por vencido (por defecto: 30).
 Especifica el dispositivo de DVD (por defecto: /dev/\:dvd).
 También puede especificar un directorio que contenga los ficheros copiados
 previamente directamente de un DVD (con p.e.\& vobcopy).
-Tenga en cuenta que usar \-dumpstream es normalmente una forma mejor 
+Tenga en cuenta que usar \-dumpstream es normalmente una forma mejor
 para copiar los títulos del DVD en primer lugar (vea los ejemplos).
 .
 .TP
@@ -1409,7 +1409,7 @@ por el driver V4L2.
 Se conoce que funciona con Hauppauge WinTV PVR\-150/250/350/500
 y todas las tarjetas basadas en IVTV. Tenga en cuenta que sólo los kernels de Linux
 2.6.18 y superiores pueden manejar flujos MPEG a través de la capa V4L2.
-Para la captura y visionado de un flujo MPEG por hardware con MPlayer,MEncoder 
+Para la captura y visionado de un flujo MPEG por hardware con MPlayer,MEncoder
 use 'pvr://' como la url de la película.
 .sp 1
 Las opciones disponibles son:
@@ -1617,7 +1617,7 @@ Puede ser usada con \-vid y \-aid.
 Esta opción ajusta varias propiedades del módulo de captura de radio.
 Para oír la radio con MPlayer use 'radio://frecuencia' (si la opción
 de canales no está dada) o 'radio://<número_canal>' (si la opción de
-canales está dada) como una URL de película. Puede ver el rango de 
+canales está dada) como una URL de película. Puede ver el rango de
 frecuencias permitidas ejecutando MPlayer con la opción '\-v'.
 Para iniciar el subsistema de grabación, use 'radio://<frecuencia
 o canal>/capture'. Si no se usa la palabra clave capture usted sólo
@@ -1649,7 +1649,7 @@ en la lista de canales.
 .I EJEMPLO:
 radio://1, radio://104.4, radio_set_channel 1
 .IPs adevice=<valor> (con la opción de radio capture habilitada)
-Nombre del dispositivo desde el que grabar. Sin este valor la grabación estará 
+Nombre del dispositivo desde el que grabar. Sin este valor la grabación estará
 desactivada incluso si la palabra clave capture aparece en la URL.
 Para dispositivos ALSA use el nombre en la forma de hw=<tarjeta>.<dispositivo>.
 Si el nombre del dispositivo contiene un '=', el módulo usará ALSA para grabar,
@@ -2121,7 +2121,7 @@ la intensidad del color.
 Fuerza el tipo de demuxer de subtítulos para \-subfile.
 Use un '+' delante del nombre para forzarlo, ¡esto evitará algunos chequeos!.
 Pásele al demuxer uno de los nombres de la lista imprimida por \-sub-demuxer help.
-Por compatibilidad con versiones anteriores también acepta el ID del demuxer como 
+Por compatibilidad con versiones anteriores también acepta el ID del demuxer como
 se define en subreader.h.
 .
 .TP
@@ -2142,7 +2142,7 @@ Carga todos los subtítulos en el directorio actual.
 .B \-sub-no-text-pp
 Inhabilita todo tipo de postproceso de texto después de cargar los
 subtítulos.
-Usado para pruebas. 
+Usado para pruebas.
 .
 .TP
 .B \-subalign <0\-2>
@@ -3698,7 +3698,7 @@ elasticidad de errores:
 .br
 2: normal (por defecto) (funciona con codificadores que lo cumplan)
 .br
-3: agresivo (más comprobaciones pero puede causar problemas incluso 
+3: agresivo (más comprobaciones pero puede causar problemas incluso
 para flujos válidos)
 .br
 4: muy agresivo
@@ -3754,10 +3754,10 @@ corrige manualmente errores en el codificador:
 .br
 1: autodetectar errores (por defecto)
 .br
-2 (msmpeg4v3): algunos archivos antiguos msmpeg4v3 generados con lavc 
+2 (msmpeg4v3): algunos archivos antiguos msmpeg4v3 generados con lavc
 (no autodetectado)
 .br
-4 (mpeg4): error de entrelazado de XviD (autodetectado si fourcc==XVIX) 
+4 (mpeg4): error de entrelazado de XviD (autodetectado si fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (autodetectado si fourcc==UMP4)
 .br
@@ -3807,7 +3807,7 @@ No reproduce/\:codifica sonido.
 No reproduce/\:codifica video.
 .
 .TP
-.B \-oldpp <calidad> (OpenDivX solamente) (OBSOLETO) 
+.B \-oldpp <calidad> (OpenDivX solamente) (OBSOLETO)
 Usa el código de postprocesado opendivx en lugar del interno.
 Ahora ha pasado a ser \-pp, el postprocesado interno ofrece mejor
 calidad y rendimiento.
@@ -4548,7 +4548,7 @@ ancho y alto de la matriz, tamaño impar en ambas direcciones
 Cantidad relativa de perfilado/\:difuminado a añadir a la imagen
 (un rango correcto está entre -1.5\-1.5).
 .RSss
-<0: difumina 
+<0: difumina
 .br
 >0: perfila
 .REss
@@ -4649,7 +4649,7 @@ debe especificar la relación de imágenes por segundo correcta (\-ofps 23.976)
 cuando use MEncoder.
 El desarrollo de ivtc se ha parado, ya que los filtros pullup y filmdint
 parecen ser mucho más precisos.
-.B pullup[=jl:jr:jt:jb:sb] 
+.B pullup[=jl:jr:jt:jb:sb]
 Filtro de pulldown inverso de tercera generación (telecine inverso),
 capaz de manejar contenido de telecine-duro mezclado, 24 fps progresivo,
 y 30 fps progresivo.
@@ -4879,7 +4879,7 @@ Aplica proceso de "telecine" 3:2 para incrementar las imágenes por segundo
 en un 20%. Esto la mayoría de las veces no funciona correctamente con MPlayer,
 pero puede usarse con 'mencoder \-fps 29.97 \-ofps 29.97 \-vf telecine'. ¡Ambas
 opciones son esenciales! (la sincronización A/\:V puede romperse si se ponen
-mal). El parámetro opcional inicio le dice al filtro donde iniciar el 
+mal). El parámetro opcional inicio le dice al filtro donde iniciar el
 patrón de telecine (0\-3).
 .TP
 .B tinterlace[=modo]
@@ -4909,7 +4909,7 @@ negro, las imágenes por segundo no cambian
 Separación temporal de campo \- separa campos en imágenes, doblando el
 número de imágenes por segundo de salida. Como el filtro de
 telecine, 'tfields' solo funciona correctamente con mencoder, y solo si ambas
-opciones \-fps y \-ofps están establecidas al deseao (doble) número de 
+opciones \-fps y \-ofps están establecidas al deseao (doble) número de
 imágenes por segundo! Los modos disponibles son:
 .PD 0
 .RSs
@@ -5061,7 +5061,7 @@ limpia el framebuffer antes de comenzar.
 de datos RGBA32 todo el tiempo ya que solo una pequeña parte de la pantalla
 es actualizada.
 .br
-1: limpiar 
+1: limpiar
 .REss
 .RE
 .PD 1
@@ -5444,7 +5444,7 @@ mtrh
 .B "abr\ \ \ \ "
 bitrate medio
 .TP
-.B cbr\ \ \ \  
+.B "cbr\ \ \ \ "
 bitrate constante.
 .br
 Fuerza también codificación en modo CBR en los modos preestablecidos
@@ -5640,7 +5640,7 @@ usar un valor igual o menor que vqmin. (por defecto: 2.0).
 .RE
 .TP
 .B lmax=<0.01\-255.0>
-multiplicador de lagrange máximo para control de tasa de bits 
+multiplicador de lagrange máximo para control de tasa de bits
 (por defecto: 31.0)
 .RE
 .TP
@@ -5880,7 +5880,7 @@ Cuantizador difuminado, valores mayores hacen media del cuantizador
 sobre más tiempo (cambios lentos).
 .RSs
 .IPs 0.0
-qblur desactivado 
+qblur desactivado
 .IPs 0.5
 (por defecto)
 .IPs 1.0
@@ -5941,7 +5941,7 @@ complejidad espacial
 .IPs mcVar
 complejidad temporal
 .IPs qComp
-qcomp desde la línea de órdenes 
+qcomp desde la línea de órdenes
 .IPs isI, isP, isB
 es 1 si el tipo de imagen es I/\:P/\:B si no 0
 .IPs "Pi,E\ "
@@ -6174,7 +6174,7 @@ rango correcto
 .B p_mask=<0.0\-1.0>
 inter MB máscara (por defecto: 0.0 (deshabilitado))
 .TP
-.B naq\ \ \ \  
+.B "naq\ \ \ \ "
 Cuantización adaptativa normalizada (experimental).
 Cuando se usa cuantización adaptativa (*_mask), la media por-MB del cuantizador
 puede no volver a coincidir con el nivel de marco del cuantizador requerido.
@@ -6325,20 +6325,20 @@ experimental
 tamaño normal=1 diamante (por defecto) =tipo de diamante EPZS
 .nf
 .ne
-      0 
+      0
      000
-      0 
+      0
 .fi
 .br
 .IPs 2
-tamaño normal=2 diamantes 
+tamaño normal=2 diamantes
 .nf
 .ne
-      0  
-     000 
+      0
+     000
     00000
-     000 
-      0  
+     000
+      0
 .fi
 .RE
 .TP
@@ -6385,7 +6385,7 @@ de movimiento desde el marco anterior
 .RE
 .PD 1
 .TP
-.B preme=<0\-2> 
+.B preme=<0\-2>
 pre-pasada de estimación de movimiento
 .PD 0
 .RSs
@@ -6551,7 +6551,7 @@ Active esta opción para contenido entrelazado.
 .I Nota:
 Esta opción no desentrelaza video, lo codifica basado en campos.
 .TP
-.B 4mv\ \ \ \  
+.B "4mv\ \ \ \ "
 Usa 4 vectores de movimiento por macro-bloque.
 Obtiene mejor compresión, pero ralentiza la codificación.
 .br
@@ -6659,7 +6659,7 @@ veces la tasa de bits más alta hace que no se pueda obtener una mejor
 calidad de imagen con ésta fija.
 Es mejor probar con y sin esta opción y ver si es mejor o peor activarla.
 .TP
-.B gmc\ \ \ \  
+.B "gmc\ \ \ \ "
 Activa la Compensación Global de Movimiento, lo cual hace que XviD genere
 marcos especiales (marcos GMC) que describen mejor las imágenes de
 Pan/\:Zoom/\:Rotación.
@@ -6916,7 +6916,7 @@ Muestra estadísticas de la relación señal ruido.
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Archivos 
+.\" Archivos
 .\" --------------------------------------------------------------------------
 .
 .SH ARCHIVOS
@@ -6947,7 +6947,7 @@ con extensión .RAW.)
 .
 .TP
 ~/.mplayer/\:DVDkeys/
-claves CSS en caché 
+claves CSS en caché
 .
 .TP
 Los archivos sub son buscados en este orden (por ejemplo /mnt/\:cdrom/\:pelicula.avi):
@@ -6962,7 +6962,7 @@ Los archivos sub son buscados en este orden (por ejemplo /mnt/\:cdrom/\:pelicula
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Ejemplos 
+.\" Ejemplos
 .\" --------------------------------------------------------------------------
 .
 .SH EJEMPLOS
