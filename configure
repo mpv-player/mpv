@@ -8005,6 +8005,10 @@ $_def_libavutil_so
 /* Use libavformat's muxers */
 $_def_muxers
 
+/* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
+#define CONFIG_EBX_AVAILABLE 1
+#define CONFIG_EBP_AVAILABLE 1
+
 #define CONFIG_GPL 1
 
 /* Use amr codecs from libavcodec (requires amr sources) */
