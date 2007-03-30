@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21154 -->
+<!-- synced with r21155 -->
 
 <chapter id="install">
 <title>Installation</title>
@@ -17,12 +17,6 @@ Si vous observez un comportement différent de celui de ces explications,
 cherchez dans la doc et vous trouverez les réponses adéquates.
 </para>
 
-<para>
-Vous aurez besoin d'un système relativement récent. Sous Linux, les noyaux 2.4.x sont
-recommandés.
-</para>
-
-
 <sect1 id="softreq">
 <title>Logiciels nécessaires</title>
 
@@ -34,11 +28,11 @@ recommandés.
   <emphasis role="bold">gcc</emphasis> - les versions conseillées sont les
   versions 2.95 et 3.4 ou plus récentes.
   Les versions 2.96 et 3.0.x sont connues pour générer du code incorrect.
-  Des problèmes existent avec les versions 3.1 et 3.2.
+  Des problèmes plus ou moins graves existent avec les versions 3.1, 3.2 et 3.3.
   Sur les plateformes PowerPC, utilisez GCC 4.x.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - la version conseillée est 4.3 ou
+  <emphasis role="bold">Xorg/XFree86</emphasis> - la version conseillée est la 4.3 ou
   plus récente.
   Assurez-vous que ses <emphasis role="bold">paquets de développement</emphasis>
   sont également installés, sinon cela ne fonctionnera pas.
@@ -56,20 +50,20 @@ recommandés.
   </para></listitem>  
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - décodeur JPEG optionnel, utilisé
-    par l'option <option>-mf</option> et le pilote de sortie vidéo JPEG.
+    par le pilote de sortie vidéo JPEG.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - Décodeur (M)PNG optionnel,
   requis pour l'interface graphique et le pilote de sortie vidéo PNG.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">lame</emphasis> - version 3.90 ou plus récente est
+  <emphasis role="bold">lame</emphasis> - La version 3.90 ou plus récente est
   recommandé, requis pour l'encodage MP3 audio avec
   <application>MEncoder</application>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - recommandé, nécessaire pour les
-  entêtes MOV compressées et le support PNG.
+  en-têtes MOV compressés et le support PNG.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
@@ -91,7 +85,7 @@ recommandés.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - optionnel, pour le support de sortie audio ALSA.
-  La version 0.9.0rc4 est le minimal requis.
+  La version 0.9.0rc4 est le minimum requis.
   </para></listitem>
 </itemizedlist>
 </sect1>
@@ -125,7 +119,7 @@ recommandés.
 </itemizedlist>
 
 <para>
-Ensuite compilez <application>MPlayer</application>:
+Ensuite compilez <application>MPlayer</application> :
 <screen>
 ./configure
 make
@@ -202,16 +196,16 @@ le binaire <command>gmplayer</command>.
 
 <para>
 <application>MPlayer</application> n'ayant pas de skin par défaut, vous
-devrez la télécharger si vous voulez utiliser la GUI. Voir la <ulink url="http://www.mplayerhq.hu/dload.html">page des téléchargements</ulink>.
-Elles pourront se placer dans le répertoire commun 
+devrez en télécharger si vous voulez utiliser la GUI. Voir la <ulink url="http://www.mplayerhq.hu/dload.html">page des téléchargements</ulink>.
+Ils devront être placés dans le répertoire commun habituel
 (<filename class="directory">$PREFIX/share/mplayer/skins</filename>),
  ou dans <filename class="directory">
 $HOME/.mplayer/skins</filename>.
 Par défaut, <application>MPlayer</application> consulte ces répertoires à la
 recherche d'un répertoire nommé <filename class="directory">default</filename>,
-mais vous pouvez utiliser l'option <option>-skin <replaceable>nouvelleskin</replaceable></option>,
-ou placer <literal>skin=nouvelleskin</literal> dans votre fichier de configuration
-pour utiliser la skin dans le répertoire <filename class="directory">*/skins/newskin</filename>.
+mais vous pouvez utiliser l'option <option>-skin <replaceable>nouveauskin</replaceable></option>,
+ou placer <literal>skin=nouveauskin</literal> dans votre fichier de configuration
+pour utiliser le skin dans le répertoire <filename class="directory">*/skins/nouveauskin</filename>.
 </para>
 </sect1>
 
@@ -236,9 +230,9 @@ les différents jeux de caractères.
 <para>
 Il y a deux façons de rendre les polices TrueType opérationnelles. La première
 est de spécifier le nom du fichier de la police TrueType à utiliser grâce à l'option 
-<option>-font</option>. Il peut être interessant de placer
+<option>-font</option>. Il peut être intéressant de placer
 cette option dans votre fichier de configuration (voir la page de manuel pour plus de détails).
-La seconde façon est de créer un symlink baptisé <filename>subfont.ttf</filename> pointant vers le fichier
+La seconde façon est de créer un lien symbolique (symlink) baptisé <filename>subfont.ttf</filename> pointant vers le fichier
 contenant la police de votre choix. Pour choisir une police commune à tous les utilisateurs, tapez 
 <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
 Pour définir une police propre à chaque utilisateur, tapez
@@ -249,8 +243,9 @@ Pour définir une police propre à chaque utilisateur, tapez
 La compilation de <application>MPlayer</application> avec le support pour
 <systemitem class="library">fontconfig</systemitem> rend les méthodes ci-dessus inopérantes.
 En effet, <application>MPlayer</application> s'attend à ce que <option>-font</option> soit
-suivi d'un nom de police compatible avec <systemitem class="library">fontconfig</systemitem>.
-Un exemple:
+suivi d'un nom de police compatible avec <systemitem class="library">fontconfig</systemitem>
+et utilisera sans-serif par défaut.
+Un exemple :
 <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
 
@@ -275,16 +270,16 @@ supportant plusieurs encodages.
 Décompressez le fichier que vous avez téléchargé dans le répertoire
 <filename class="directory">~/.mplayer</filename> ou dans
 <filename class="directory">$PREFIX/share/mplayer</filename>.
-Ensuite, renommez ou symlinkez l'un des répertoire ainsi créé vers
+Ensuite, renommez ou créez un mien symbolique de l'un des répertoires ainsi créés vers
 le sous-repertoire 
-<filename class="directory">font</filename>. Exemple:
+<filename class="directory">font</filename>. Exemple :
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
 <screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
 </para>
 
 <para>
 Les polices doivent disposer d'un fichier <filename>font.desc</filename>
-associant les positions des caractères unicode à l'encodage (NdT: code page) utilisé par le sous-titre.
+associant les positions des caractères unicode à l'encodage (NdT: code page) utilisés par le sous-titre.
 Une autre solution est d'encoder les sous-titres en UTF-8 et
 d'utiliser l'option <option>-utf8</option> ou de donner au fichier sous-titre
 le même nom qu'au fichier video avec une extension <filename>.utf</filename> et de le placer
@@ -325,14 +320,14 @@ Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant!
   </para></listitem>
 <listitem><para>
   trouvez et éditez <filename>input.conf</filename> pour activer les touches
-  correspondants aux mouvements dans le menu (c'est décrit sur place).
+  correspondant aux mouvements dans le menu (c'est décrit sur place).
   </para></listitem>
 <listitem><para>
-  lancez <application>MPlayer</application> avec par exemple:
+  lancez <application>MPlayer</application> avec par exemple :
   <screen>$ mplayer -menu <replaceable>fichier.avi</replaceable></screen>
   </para></listitem>
 <listitem><para>
-  pressez n'importe laquelle des touches menu que vous avez défini
+  pressez n'importe laquelle des touches menu que vous avez définies
   </para></listitem>
 </orderedlist>
 
@@ -348,20 +343,20 @@ Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant!
 Il y a trois méthodes de synchro dans <application>MPlayer</application>.
 
 <itemizedlist>
-<listitem><para>
+<listitem><simpara>
 <emphasis role="bold">Pour utiliser l'ancienne méthode</emphasis>, vous n'avez
 rien à faire. Elle utilise <systemitem>usleep()</systemitem> pour régler la
 synchro A/V, avec une précision de +/- 10ms. Cependant parfois la synchro doit être
-réglé encore plus finement.
-  </para></listitem>
+réglée encore plus finement.
+  </simpara></listitem>
 <listitem><para>
 <emphasis role="bold">Le nouveau code de synchro</emphasis> utilise la RTC
-(Real Time Clock) du PC pour cette tâche, car elle à des timers précis à 1ms près.
-Utilisez l'option <option>-rtc</option> pour l'activer. Notez d'un noyau correctement
+(Real Time Clock) du PC pour cette tâche, car elle possède des timers précis à 1ms près.
+Utilisez l'option <option>-rtc</option> pour l'activer. Notez qu'un noyau correctement
 configuré est requis. Si vous executez une version du noyau supérieure ou égale à 2.4.19pre8,
 vous pouvez ajuster la fréquence maximale (de la RTC) accessible aux utilisateurs normaux grace au système
 de fichiers  <systemitem class="systemname">/proc </systemitem>. Pour ceci, les commandes suivantes sont à
-votre disposition:
+votre disposition :
 <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
 ou  <screen>sysctl dev/rtc/max-user-freq=1024</screen>
 Vous pouvez rendre ce réglagle permanant en ajoutant la seconde commande au fichier 
@@ -374,14 +369,14 @@ Vous pouvez rendre ce réglagle permanant en ajoutant la seconde commande au fic
 	avec des processeurs supportant SpeedStep ne font pas bon ménage avec la RTC.
 	Le son et les images risquent d'être désynchronisés. Brancher le portable sur
 	le secteur avant de le démarrer semble régler le problème dans la plupart des cas.
-	Avec certaines combinaisons de matériels (particulièrement: lecteurs DVD ne supportant pas
-	le DMA et cartes-mère basé sur le chipset ALi1541), l'utilisation du timer RTC rend la lecture
-	irrégulière (NdT: skippy).
+	Avec certaines configurations matérielles (confirmé par l'utilisation de lecteurs DVD ne supportant pas
+	le DMA avec une carte-mère basée sur le chipset ALi1541), l'utilisation du timer RTC rend la lecture
+	irrégulière (NdT: skippy). Il est recommandé d'utiliser la troisième méthode dans ce cas.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">La troisième méthode de synchro</emphasis> est activée par l'option
-  <option>-softsleep</option>. Il à la précision de la RTC, mais n'utilise pas la RTC.
-  D'un autre côté, il nécessite plus de CPU.
+  <option>-softsleep</option>. Elle a la précision de la RTC, mais n'utilise pas la RTC.
+  D'un autre côté, elle nécessite plus de CPU.
   </para></listitem>
 </itemizedlist>
 </para>
