@@ -8,7 +8,6 @@ OBJS = alaw-gen$(EXESUF) \
 	avisubdump$(EXESUF) \
 	dump_mp4$(EXESUF) \
 	movinfo$(EXESUF) \
-	png2raw$(EXESUF) \
 	subrip$(EXESUF) \
 #	vivodump$(EXESUF) \
 
@@ -17,9 +16,6 @@ OBJS += cpuinfo$(EXESUF) fastmemcpybench
 endif
 
 all: $(OBJS)
-
-png2raw$(EXESUF): png2raw.c
-	$(CC) $< -o $@ -lpng
 
 subrip$(EXESUF): subrip.c
 	$(CC) $(CFLAGS) -g -o $@ $< ../vobsub.o ../spudec.o ../mp_msg.o \

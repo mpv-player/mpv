@@ -391,15 +391,6 @@ Description:  Show QuickTime MOV file structure.
 Usage:        movinfo <filename.mov>
 
 
-png2raw
-
-Author:       Arpi
-
-Description:  PNG to RAW image converter, used by .raw font creators.
-
-Usage:        png2raw <file1> [file2...]
-
-
 vivodump
 
 Author:       Arpi
