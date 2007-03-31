@@ -11,10 +11,6 @@ OBJS = alaw-gen$(EXESUF) \
 	subrip$(EXESUF) \
 #	vivodump$(EXESUF) \
 
-ifeq ($(TARGET_ARCH_X86),yes)
-OBJS += cpuinfo$(EXESUF) fastmemcpybench
-endif
-
 all: $(OBJS)
 
 subrip$(EXESUF): subrip.c
