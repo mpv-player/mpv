@@ -1,3 +1,0 @@
-
-fbset/fbset -fb /dev/fb1 -db fbset.db 640x400-60
-

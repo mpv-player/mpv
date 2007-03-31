@@ -136,13 +136,6 @@ Directory:  libmpdemux/genres.h
 Copyright:  2001 Jason Carter
 License:    GNU General Public License
 
-Name:       matroxset
-Version:    0.3
-Homepage:   ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/
-Directory:  TOOLS/TVout/matroxset/
-Copyright:  2001 Petr Vandrovec
-License:    GNU General Public License
-
 Name:       unrarlib
 Version:    0.4.0 + patches
 Homepage:   http://www.unrarlib.org/
