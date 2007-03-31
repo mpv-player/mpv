@@ -1,4 +1,4 @@
-.\" Synced with r22461
+.\" Synced with r22845
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 03. 05." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 03. 31." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -282,7 +282,7 @@ Képernyõmentések készítésének elindítása/leállítása.
 Fájlnév megjelenítése az OSD-n.
 .IPs "! és @"
 Ugrás az elõzõ/következõ fejezet elejére.
-.IPs "D (csak \-vo xvmc, \-vf yadif mellett)"
+.IPs "D (csak \-vo xvmc, \-vf yadif, \-vf kerndeint mellett)"
 Deinterlacer aktiválása/deaktiválása.
 .RE
 .PD 1
@@ -1056,7 +1056,7 @@ Japánul játszik le egy Matroska fájlt.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <[+]név> (csak \-audiofile)
+.B \-audio-demuxer <[+]név> (csak \-audiofile mellett)
 Audió demuxer-t ír elõ az \-audiofile -hoz.
 A név elé írt '+' jellel kényszerítheted, így elmarad pár ellenõrzés!
 A demuxer nevét kell megadni a \-audio-demuxer help listának megfelelõen.
@@ -1073,6 +1073,10 @@ nézése közben.
 .B \-audiofile-cache <kByte>
 Az \-audiofile opcióval megadott folyam beolvasásának cache-elése, a megadott
 mennyiségû memória használatával.
+.
+.TP
+.B \-reuse-socket (csak udp:// mellett)
+Engedélyezi a socket használtatát más folyamatoknak, amint az bezárul.
 .
 .TP
 .B \-bandwidth <érték> (csak hálózatnál)
@@ -1758,7 +1762,11 @@ Beállítja a tunert az <érték> csatornára.
 elérhetõ: europe-east, europe-west, us-bcast, us-cable, stb.
 .IPs channels=<csatorna>\-<név>,<csatorna>\-<név>,...
 Csatornák neveinek beállítása.
-Használj _ jelet a szóköz helyett a nevekben (vagy játsz le idézõjelezéssel ;-).
+.I MEGJEGYZÉS:
+Ha a <csatorna> 1000-nél nagyobb egész, frekvenciaként lesz értelmezve (kHz-ben)
+a frekvenciatáblázatban szereplõ csatornanév helyett.
+.br
+Használj _ jelet a szóköz helyett a nevekben (vagy játsz az idézõjelezéssel ;-).
 A csatorna nevek ezután az OSD segítségével megjelennek és a tv_step_channel,
 tv_set_channel és tv_last_channel szolga módú parancsok használhatóak lesznek
 távirányítóval (lásd LIRC).
@@ -2968,7 +2976,8 @@ kiterjesztéssel).
 .B \-xineramascreen <\-2\-...> (csak X11)
 Xinerama konfigurációkban (tehát amikor egy desktop több kijelzõn látható),
 ezzel az opcióval adható meg hogy melyik kijelzõn történjen a lejátszás.
-A \-2 érték teljes képernyõt jelent az egész virtuális képernyõn, a \-1
+A \-2 érték teljes képernyõt jelent az egész virtuális képernyõn (ebben az
+esetben a Xinerama információk teljesen figyelmen kívül maradnak), a \-1
 teljes képernyõs lejátszás azon a képernyõn, amelyiken az ablak épp van.
 A kezdeti pozíció a \-geometry opcióval állítható be a megadott képernyõhöz
 relatívan.
@@ -3346,7 +3355,8 @@ Ha engedélyezed, sokkal inkább a másik kimeneti videó vezérlõre hasonlít,
 ami jobb fix méretû betûtípusoknál.
 Letiltva sokkal jobban néznek ki FreeType betûtípusokkal és a határokat
 használja teljes képernyõs módban.
-Nem mûködik jól ass feliratokkal (lásd \-ass).
+Nem mûködik jól ass feliratokkal (lásd \-ass), helyettük OpenGL támogatás
+nélkül is renderelheted a \-vf ass kapcsolóval.
 .IPs osdcolor=<0xRRGGBB>
 OSD színe (alapértelmezett: 0xffffff, ez megfelel a fehérnek).
 .IPs rectangle=<0,1,2>
@@ -3426,6 +3436,9 @@ Csak a 2-es, 3-as, 4-es és 6-os yuv módoknál helyes.
 1: Bicubic szûrõ használata (jobb minõség).
 További egy textúra egység kell hozzá.
 A régi kártyák nem tudják használni ezt a telítettséget, legalábbis teljes képernyõnél.
+.br
+2: Köbös szûrés vízszintes, lineáris szûrés függõleges irányban.
+Egy kicsit több kártyán mûködik, mint az 1.
 .RE
 .IPs cscale=<n>
 Kiválasztja a használandó méretezõ függvényt a színességhez.
