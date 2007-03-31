@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22704 -->
+<!-- synced with r22800 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1558,8 +1558,7 @@ Alternatívaként használhatsz egy speciális kernel modult, így:
   <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>-be.
 </para></step>
 <step><para>
-  Szükséges, ha a forrást az svgalib oldaláról szerezted be: töröld a megjegyzést
-  az "svgalib_helper"-t tartalmazó CFLAGS sor elől a
+  Töröld a megjegyzést az "svgalib_helper"-t tartalmazó CFLAGS sor elől a
   <filename class="directory">libdha/Makefile</filename>-ban.
 </para></step>
 <step><para>
