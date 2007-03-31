@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22413 -->
+<!-- synced with r22753 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2426,6 +2426,26 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   <entry>veszteségmentes JPEG</entry>
 </row>
 <row>
+  <entry>jpegls</entry>
+  <entry>JPEG LS</entry>
+</row>
+<row>
+  <entry>targa</entry>
+  <entry>Targa kép</entry>
+</row>
+<row>
+  <entry>gif</entry>
+  <entry>GIF kép</entry>
+</row>
+<row>
+  <entry>bmp</entry>
+  <entry>BMP kép</entry>
+</row>
+<row>
+  <entry>png</entry>
+  <entry>PNG kép</entry>
+</row>
+<row>
   <entry>h261</entry>
   <entry>H.261</entry>
 </row>
@@ -2443,11 +2463,11 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
 </row>
 <row>
   <entry>msmpeg4</entry>
-  <entry>Szabvány előtti MPEG-4 variáns az MS-től, v3 (AKA DivX3)</entry>
+  <entry>szabvány előtti MPEG-4 variáns az MS-től, v3 (AKA DivX3)</entry>
 </row>
 <row>
   <entry>msmpeg4v2</entry>
-  <entry>Szabvány előtti MPEG-4 az MS-től, v2 (régi ASF fájlokban használják)</entry>
+  <entry>szabvány előtti MPEG-4 az MS-től, v2 (régi ASF fájlokban használják)</entry>
 </row>
 <row>
   <entry>wmv1</entry>
@@ -2478,6 +2498,10 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   <entry>veszteségmentes tömörítés</entry>
 </row>
 <row>
+  <entry>ffvhuff</entry>
+  <entry>FFmpeg által módosított veszteségmentes huffyuv</entry>
+</row>
+<row>
   <entry>asv1</entry>
   <entry>ASUS Video v1</entry>
 </row>
@@ -2498,12 +2522,20 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   <entry>Flash Videókban használt Sorenson H.263</entry>
 </row>
 <row>
+  <entry>flashsv</entry>
+  <entry>Flash Screen Video</entry>
+</row>
+<row>
   <entry>dvvideo</entry>
   <entry>Sony Digital Video</entry>
 </row>
 <row>
   <entry>snow</entry>
   <entry>az FFmpeg kísérleti wavelet-alapú codecja</entry>
+</row>
+<row>
+  <entry>zbmv</entry>
+  <entry>Zip Blocks Motion Video</entry>
 </row>
 </tbody>
 </tgroup>
@@ -2549,7 +2581,23 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 </row>
 <row>
   <entry>sonic</entry>
-  <entry>kísérleti veszteséges/veszteségmentes codec</entry>
+  <entry>kísérleti FFmpeg veszteséges codec</entry>
+</row>
+<row>
+  <entry>sonicls</entry>
+  <entry>kísérleti FFmpeg veszteségmentes codec</entry>
+</row>
+<row>
+  <entry>vorbis</entry>
+  <entry>Xiph Ogg Vorbis codec</entry>
+</row>
+<row>
+  <entry>wmav1</entry>
+  <entry>Windows Media Audio v1 codec</entry>
+</row>
+<row>
+  <entry>wmav2</entry>
+  <entry>Windows Media Audio v2 codec</entry>
 </row>
 </tbody>
 </tgroup>
@@ -4254,15 +4302,18 @@ bitrátát és egyéb opciókat. x86-on ez működik mind *NIX, mind Windows ala
 </para>
 <para>
 Először is le kell fordítanod a <application>vfw2menc</application> programot.
-A <filename class="directory">/TOOLS/</filename> alkönyvtárban található az MPlayer forrásában.
+A <filename class="directory">TOOLS</filename> alkönyvtárban található
+az MPlayer forrásában.
 A Linux alatti elkészítéséhez a <application>Wine</application>-t kell használni:
 <screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
 
-Windows alatt <application>MinGW</application> vagy <application>Cygwin</application> használatával:
+Windows alatt <application>MinGW</application> vagy
+<application>Cygwin</application> használatával:
 <screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
 
 Az <application>MSVC</application>-vel történő fordításhoz szükséges a getopt.
-A getopt megtalálható az eredeti <application>vfw2menc</application> archivban itt:
+A getopt megtalálható az eredeti <application>vfw2menc</application>
+archivban itt:
 The <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer win32 alatt</ulink> projekt.
 </para>
 <informalexample>
@@ -4271,12 +4322,14 @@ Az alábbi példa VP6 codec-kel működik.
 <screen>
 vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf
 </screen>
-Ez megnyitja a VP6 codec dialógus ablakot. Ismételd meg ezt a második lépéshez is
+Ez megnyitja a VP6 codec dialógus ablakot.
+Ismételd meg ezt a második lépéshez is
 és használd a <option>-s <replaceable>secondpass.mcf</replaceable></option> kapcsolót.
 </para>
 </informalexample>
 <para>
-A Windows használók a <option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option>
+A Windows használók a
+<option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option>
 kapcsolóval a kódolás megkezdése előtt jeleníthetik meg a codec dialógust.
 </para>
 </sect2>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22402 -->
+<!-- synced with r22704 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -823,10 +823,18 @@ framebufferrel és ne is kérd, hogy működjön, mivel ez nem az
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
-Ez egy videó kimeneti vezérlő és egy a Matrox G200/G400/G450/G550 BES
-(Back-End Scaler)-hez tartozó Linux kernel modul kombinációja.
-Van benne hardveres VSYNC támogatás tripla buffereléssel. Működik mind
-framebufferes konzolon, mind X alatt, de csak 2.4.x-es Linux-szal.
+Az <systemitem>mga_vid</systemitem> egy videó kimeneti vezérlő és egy
+kernel modul kombinációja, ami felhasználja a Matrox G200/G400/G450/G550
+videó méretező/overlay egységét a YUV->RGB színtér átalakításhoz és tetszés
+szerinti videó méretezéshez.
+Az <systemitem>mga_vid</systemitem>-ben van hardveres VSYNC támogatás tripla
+buffereléssel. Működik mind a framebuffer konzolon, mind X alatt, de csak
+2.4.x-es Linux-szal.
+</para>
+
+<para>
+Ezen vezérlő Linux 2.6.x alatti verziója itt található:
+<ulink url="http://attila.kinali.ch/mga/"/>.
 </para>
 
 <procedure>
@@ -839,9 +847,10 @@ make<!--
 --></screen>
 </para></step>
 <step><para>
-  Majd hozd létre a <filename>/dev/mga_vid</filename> eszközt:
-  <screen>mknod /dev/mga_vid c 178 0</screen>
-  és töltsd be a vezérlőt
+  Ezután futtasd (<systemitem class="username">root</systemitem>-ként) a
+  <screen>make install</screen>
+  parancsot, ami telepíti a modult és létrehozza az eszköz node-ját neked.
+  Töltsd be a vezérlőt
   <screen>insmod mga_vid.o</screen>
 </para></step>
 <step><para>
@@ -857,18 +866,10 @@ make<!--
   <filename>/etc/modules.conf</filename> fájlod végére:
 
   <programlisting>alias char-major-178 mga_vid</programlisting>
-
-  Majd másold be a <filename>mga_vid.o</filename> modult a megfelelő
-  helyre a <filename>/lib/modules/<replaceable>kernel
-  verzió</replaceable>/<replaceable>valahol</replaceable></filename> könyvtárba.
-  </para><para>
-  Ezután futtasd le a
-  <screen>depmod -a</screen>
-  parancsot.
 </para></step>
 <step><para>
   Ezekután le kell fordítanod (újra) az <application>MPlayer</application>t, a
-  <filename>./configure</filename> meg fogja találni a
+  <command>./configure</command> meg fogja találni a
   <filename>/dev/mga_vid</filename>-et és elkészíti az 'mga' vezérlőt. Az
   <application>MPlayer</application>ben a <option>-vo mga</option> kapcsolóval
   használhatod, ha matroxfb konzolod van vagy a <option>-vo xmga</option>-val
@@ -887,6 +888,12 @@ például a
 segítségével és beállíthatod a fényerősséget:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
+
+<para>
+Van egy <command>mga_vid_test</command> nevű teszt alkalmazás ugyan ebben a
+könyvtárban. Ha minden jól működik, akkor 256x256-os képeket rajzol a képernyőre.
+</para>
+
 </sect2>
 
 <!-- ********** -->
@@ -924,12 +931,13 @@ az alábbi utasítások alapján.
   Fordítsd le a <filename>tdfx_vid.o</filename> fájlt:
   <screen>
 cd drivers
-make tdfx_vid.o</screen>
+make</screen>
 </para></step>
 <step><para>
-  Ezután hozd létre a <filename>/dev/tdfx_vid</filename> eszközt:
-  <screen>mknod /dev/tdfx_vid c 178 0</screen>
-  és töltsd be a vezérlőt
+  Ezután futtasd (<systemitem class="username">root</systemitem>-ként) a
+  <screen>make install</screen>
+  parancsot, ami telepíti a modult és létrehozza az eszköz node-ját neked.
+  Töltsd be a vezérlőt
   <screen>insmod tdfx_vid.o</screen>
 </para></step>
 <step><para>
@@ -937,15 +945,13 @@ make tdfx_vid.o</screen>
   be ezt a sort a <filename>/etc/modules.conf</filename> fájl végére:
 
   <programlisting>alias char-major-178 tdfx_vid</programlisting>
-
-  Majd másold át a <filename>tdfx_vid.o</filename> modult a megfelelő helyre
-  a <filename>/lib/modules/<replaceable>kernel
-  verzió</replaceable>/<replaceable>valahova</replaceable></filename>
-  könyvtárba, majd futtasd a
-  <screen>depmod -a</screen>
-  parancsot.
 </para></step>
 </procedure>
+
+<para>
+Van egy <command>tdfx_vid_test</command> nevű teszt alkalmazás ugyan ebben a
+könyvtárban. Ha minden jól működik, néhány hasznos információt jelenít meg.
+</para>
 
 </sect2>
 

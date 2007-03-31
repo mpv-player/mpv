@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21624 -->
+<!-- synced with r22499 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -60,9 +60,9 @@ a bináris codec csomagokból, melyek akár az apt-get segítségével is telep�
 <title>RedHat csomagolás</title>
 
 <para>
-Dominik Mierzejewski készítette el és tartja karban az <application>MPlayer</application>
+Dominik Mierzejewski tartja karban az <application>MPlayer</application>
 hivatalos RPM csomagjait a Fedora Core-hoz. Elérhetőek
-ezen a <ulink url="http://rpm.greysector.net/mplayer/">helyen</ulink>.
+a <ulink url="http://rpm.livna.org/">Livna repository</ulink>-ban.
 </para>
 
 <para>
@@ -858,7 +858,8 @@ Először a main és main_noaltivec-et kell lefordítanod.
 </para>
 
 <para>
-Ezután állíts be egy globális változót:
+Kezdetnek a maximális kompatibilítás biztosítása érdekében állíts be egy
+környezeti változót:
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
 
@@ -869,12 +870,11 @@ Majd konfigurálj:
 <para>
 Ha a G4 vagy későbbi, AltiVec támogatással rendelkező CPU-ra konfigurálsz:
 <screen>
-./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+./configure --disable-gl --disable-x11
 </screen>
 Ha G3-as, AltiVec nélküli gépre:
 <screen>
-./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
---disable-altivec
+./configure --disable-gl --disable-x11 --disable-altivec
 </screen>
 Lehet, hogy szerkesztened kell a <filename>config.mak</filename> fájlt és
 át kell írnod az <systemitem>-mcpu</systemitem>-t és <systemitem>-mtune</systemitem>-t
