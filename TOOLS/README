@@ -8,18 +8,9 @@ In this directory you can find some nice scripts and code that makes
 using MPlayer and MEncoder easier, for example scripts for DVD track
 encoding in three pass mode or creating SVCDs from a movie.
 
-FIXME: Document all the stuff in the subdirectories:
+FIXME: Document the following tools:
 
-mpfc
-benchmark
 bmovl-test
-mwallp
-subfont-c
-GL-test
-TVout
-TVout/matroxset
-TVout/con2fb
-benchmark-gab
 netstream
 
 
