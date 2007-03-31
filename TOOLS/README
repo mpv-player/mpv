@@ -81,32 +81,6 @@ Usage:        subsearch.sh [directory]
               mplayer -sub `subsearch.sh` movie
 
 
-x2mpsub.sh
-
-Author:       Gabucino
-
-Description:  Converts the subtitles in the current directory into MPsub
-              format (subtitles go in ./converted-subtitles/).
-
-Usage:        x2mpsub.sh
-
-
-mp.pl
-
-Author:       Felix Bünemann
-
-Description:  Small helper script that allows to play multiple files with
-              MPlayer. Wildcards are supported.
-
-Usage:        mp.pl <parameters> <files>
-              Where <parameters> are all possible command line switches
-              for MPlayer and <files> can be either a list of files,
-              like file1 file2 file3 and/or a wildcard definition,
-              like *.avi.
-
-              example: mp.pl -vo x11 /dvd/VIDEO_TS/VTS_05_*.VOB movie.asf
-
-
 wma2ogg.pl
 
 Author:       Peter Simon
@@ -135,17 +109,6 @@ Description:  A simple utility that creates an SVCD from a video in an AVI
 
 Usage:        divx2svcd <input_avi> [options]
               see 'divx2svcd -h' for more info
-
-
-menc2pass
-
-Author:       Felix Bünemann
-
-Description:  Helper script to ease MEncoder two pass encoding. Give it all
-              the encoding parameters you would pass to mencoder, but leave
-              out the (v)pass=<n> suboption.
-
-Usage:        menc2pass <options>
 
 
 mencvcd
@@ -239,27 +202,6 @@ Note:         This script uses only MEncode/MPlayer. Check the final log
 Tech scripts in the TOOLS dir
 -----------------------------
 
-fastmem.sh
-
-Author:       Arpi
-
-Description:  benchmark/testbed for fastmemcpy stuff
-
-Usage:        fastmem.sh
-
-
-sws-test
-
-Author:       Michael Niedermayer
-
-Description:  Very simple script to generate PNG images from a video with all
-              -sws methods.
-
-Usage:        sws-test <video-file> <start-pos> <res>
-
-              example: sws-test abc.avi 10 160:120
-
-
 calcbpp.pl
 
 Author:       Moritz Bunkus
@@ -294,15 +236,6 @@ Usage:        countquant.pl < divx2pass.log
               It will print out which quantizer was used how often. If you see
               that e.g. the lowest quantizer (vqmin=2) gets used for > 95% of
               the frames then you can safely increase your picture size.
-
-
-perlbench.pl
-
-Author:       Felix Bünemann
-
-Description:  fastmemcpy benchmark script
-
-Usage:        perlbench.pl
 
 
 plotpsnr.pl
@@ -399,20 +332,6 @@ Note:         It does not check or fix the index, to do this use
               'mencoder -forceidx -oac copy -ovc copy'.
 
 
-bios2dump
-
-Author:       Nick Kurshev
-
-Description:  Extract your PC BIOS and save it to file.
-
-Usage:        As argument requires DOS interrupt number in hexadecimal form.
-              As output - will write 64KB file which will named:
-              SSSS_OOOO.intXX
-      where:  SSSS - segment of BIOS interrupt handler
-              OOOO - offset of BIOS interrupt handler
-              XX   - interrupt number which was passed as argument
-
-
 checktree.sh
 
 Author:       Ivo van Poorten
@@ -461,20 +380,6 @@ Author:       Felix Bünemann
 Description:  benchmark/testbed for fastmemcpy stuff
 
 Note:         Also see fastmem.sh.
-
-
-mem2dump
-
-Author:   Nick Kurshev
-
-Description:  Dump memory block to file.
-
-Usage:        As argument requires absolute address of memory dump and its
-              length (in hexadecimal form).
-              As output - will write file which will be named:
-              memADDR_LEN.dump
-       where: ADDR - given address of memory
-              LEN  - given length of memory
 
 
 movinfo

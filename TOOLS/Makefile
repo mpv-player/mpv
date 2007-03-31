@@ -6,9 +6,7 @@ OBJS = alaw-gen$(EXESUF) \
 	asfinfo$(EXESUF) \
 	avi-fix$(EXESUF) \
 	avisubdump$(EXESUF) \
-	bios2dump$(EXESUF) \
 	dump_mp4$(EXESUF) \
-	mem2dump$(EXESUF) \
 	movinfo$(EXESUF) \
 	png2raw$(EXESUF) \
 	subrip$(EXESUF) \
