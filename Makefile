@@ -110,7 +110,6 @@ MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(LIBS_MENCODER) $(COMMON_LIBS)
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
-INSTALL_TARGETS-$(VIDIX)    += install-vidix
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 PARTS = libmpdemux \
@@ -137,7 +136,6 @@ PARTS = libmpdemux \
         tremor \
         libdha \
         vidix \
-        vidix/drivers \
         dvdread \
         libdvdcss \
         libass \
@@ -218,7 +216,6 @@ libdha/libdha.a:
 
 vidix/libvidix.a: libdha/libdha.a
 	$(MAKE) -C vidix
-	$(MAKE) -C vidix/drivers
 
 Gui/libgui.a:
 	$(MAKE) -C Gui
@@ -297,10 +294,6 @@ install-gui:
 	$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
 
-install-vidix:
-	mkdir -p $(LIBDIR)/mplayer/vidix
-	$(INSTALL) -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
-
 uninstall:
 	-rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
 	-rm -f $(BINDIR)/mencoder$(EXESUF)
@@ -314,8 +307,6 @@ uninstall:
 	          $(MANDIR)/$$l/man1/gmplayer.1 ; \
 	  fi ; \
 	done
-	rm -f $(LIBDIR)/mplayer/vidix/*.so
-	-rmdir -p $(LIBDIR)/mplayer/vidix
 
 dep depend: help_mp.h version.h codecs.conf.h
 	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) $(SRCS_MENCODER) $(SRCS_COMMON) 1>.depend
