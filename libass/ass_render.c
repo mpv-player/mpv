@@ -1277,7 +1277,7 @@ static void get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 
 	if (render_context.stroker) {
 		info->outline_glyph = info->glyph;
-		error = FT_Glyph_Stroke( &(info->outline_glyph), render_context.stroker, 0 ); // don't destroy original
+		error = FT_Glyph_StrokeBorder( &(info->outline_glyph), render_context.stroker, 0 , 0 ); // don't destroy original
 		if (error) {
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_Stroke_Error, error);
 		}
