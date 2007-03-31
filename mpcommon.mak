@@ -2,9 +2,9 @@ SRCS_COMMON          += $(SRCS_COMMON-yes)
 SRCS_MPLAYER         += $(SRCS_MPLAYER-yes)
 SRCS_MENCODER        += $(SRCS_MENCODER-yes)
 
-OBJS_COMMON    = $(addsuffix .o, $(basename $(SRCS_COMMON)) )
-OBJS_MPLAYER   = $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
-OBJS_MENCODER  = $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
+OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)) )
+OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
+OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
 
 CFLAGS-$(CONFIG_LIBAVCODEC)     += -I../libavcodec
 CFLAGS-$(CONFIG_LIBAVFORMAT)    += -I../libavformat
