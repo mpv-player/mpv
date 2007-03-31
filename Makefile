@@ -213,10 +213,10 @@ mp3lib/libmp3.a:
 tremor/libvorbisidec.a:
 	$(MAKE) -C tremor
 
-libdha/libdha.so:
+libdha/libdha.a:
 	$(MAKE) -C libdha
 
-vidix/libvidix.a: libdha/libdha.so
+vidix/libvidix.a: libdha/libdha.a
 	$(MAKE) -C vidix
 	$(MAKE) -C vidix/drivers
 
@@ -298,7 +298,6 @@ install-gui:
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
 
 install-vidix:
-	$(MAKE) -C libdha install
 	mkdir -p $(LIBDIR)/mplayer/vidix
 	$(INSTALL) -m 755 $(INSTALLSTRIP) -p vidix/drivers/*.so $(LIBDIR)/mplayer/vidix
 
@@ -315,7 +314,6 @@ uninstall:
 	          $(MANDIR)/$$l/man1/gmplayer.1 ; \
 	  fi ; \
 	done
-	$(MAKE) -C libdha uninstall
 	rm -f $(LIBDIR)/mplayer/vidix/*.so
 	-rmdir -p $(LIBDIR)/mplayer/vidix
 
@@ -418,7 +416,7 @@ mp3lib/libmp3.a: .norecurse $(wildcard mp3lib/*.[ch])
 libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 
 loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
-libdha/libdha.so: .norecurse $(wildcard libdha/*.[ch])
+libdha/libdha.a: .norecurse $(wildcard libdha/*.[ch])
 vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
 Gui/libgui.a: .norecurse $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
 

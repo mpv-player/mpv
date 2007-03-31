@@ -1,33 +1,22 @@
 include ../config.mak
 
-MAJOR_VERSION = 1
-MINOR_VERSION = 0
-VERSION = $(MAJOR_VERSION).$(MINOR_VERSION)
-
-LIBNAME = libdha.so
+LIBNAME_MPLAYER = libdha.a
 
 SRCS_MPLAYER = libdha.c \
                mtrr.c \
                pci.c \
                pci_names.c \
 
-CFLAGS = -fPIC
-
 # If you want libdha to use svgalib_helper for hardware access,
 # uncomment this statement, and change the -I to the correct directory
 # that includes svgalib_helper.o:
 #CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
 
-all: $(LIBNAME)
+libs: pci_names.c
 
 dep depend:: pci_names.c
 
 include ../mpcommon.mak
-
-$(LIBNAME): $(OBJS_MPLAYER)
-	$(CC) -shared -Wl,-soname -Wl,$@ -o $@ $^ $(EXTRALIBS)
-	ln -sf $@ $@.$(VERSION)
-	ln -sf $@ $@.$(MAJOR_VERSION)
 
 pci_names.c:	oth/pci.db
 	LC_ALL=C $(AWK) -f pci_db2c.awk $<
@@ -36,14 +25,4 @@ test: pci.o
 	$(CC) test.c -o $@ $^
 
 clean::
-	rm -f *.so *.so.* pci_*.c pci_*.h pci.db
-
-install:
-	-mkdir -p $(LIBDIR)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
-	ln -sf $(LIBNAME) $(LIBDIR)/$(LIBNAME).$(MAJOR_VERSION)
-	-$(LDCONFIG)
-
-uninstall:
-	rm -f $(LIBDIR)/$(LIBNAME) $(LIBDIR)/$(LIBNAME).$(MAJOR_VERSION) $(LIBDIR)/$(LIBNAME).$(VERSION)
-	-$(LDCONFIG)
+	rm -f pci_*.c pci_*.h pci.db
