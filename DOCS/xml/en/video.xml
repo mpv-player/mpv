@@ -89,10 +89,7 @@ stepping 0) CPUs don't have MTRRs, but stepping 12 does
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="output-trad">
-<title>Video outputs for traditional video cards</title>
-
-<sect2 id="xv">
+<sect1 id="xv">
 <title>Xv</title>
 
 <para>
@@ -165,7 +162,7 @@ screen #0
 </para>
 
 
-<sect3 id="tdfx">
+<sect2 id="tdfx">
 <title>3dfx cards</title>
 
 <para>
@@ -183,10 +180,10 @@ If you experience strange effects using <option>-vo xv</option>, try SDL
 <option>-vo tdfxfb</option> driver! See the <link linkend="tdfxfb">tdfxfb</link>
 section.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="s3">
+<sect2 id="s3">
 <title>S3 cards</title>
 
 <para>
@@ -208,10 +205,10 @@ It's currently unclear which Savage models lack YV12 support, and convert by
 driver (slow). If you suspect your card, get a newer driver, or ask politely
 on the MPlayer-users mailing list for an MMX/3DNow! enabled driver.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="nvidia">
+<sect2 id="nvidia">
 <title>nVidia cards</title>
 
 <para>
@@ -233,10 +230,10 @@ However, <application>MPlayer</application> contains a
 is in beta stage, and has some drawbacks. For more information, see
 <link linkend="vidix-nvidia">nVidia VIDIX</link> section.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ati">
+<sect2 id="ati">
 <title>ATI cards</title>
 
 <para>
@@ -255,10 +252,10 @@ without <emphasis role="bold">TV output</emphasis>, and no libraries or X are
 needed.
 Read the <link linkend="vidix">VIDIX</link> section.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="neomagic">
+<sect2 id="neomagic">
 <title>NeoMagic cards</title>
 
 <para>
@@ -287,10 +284,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="trident">
+<sect2 id="trident">
 <title>Trident cards</title>
 
 <para>
@@ -303,10 +300,10 @@ support with the Cyberblade XP card.
 Alternatively, <application>MPlayer</application> contains a
 <link linkend="vidix">VIDIX</link> driver for the Cyberblade/i1 card.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="kyro">
+<sect2 id="kyro">
 <title>Kyro/PowerVR cards</title>
 
 <para>
@@ -314,12 +311,12 @@ If you want to use Xv with a Kyro based card (for example Hercules
 Prophet 4000XT), you should download the drivers from the
 <ulink url="http://www.powervr.com/">PowerVR site</ulink>
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dga">
+<sect1 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -603,11 +600,11 @@ with every chipset driver for XFree out there.
 </para></listitem>
 </itemizedlist>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="sdl">
+<sect1 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -636,11 +633,11 @@ system problem), or audio is lagging.
 SDL video output supports displaying subtitles under the movie, on the (if
 present) black bar.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="svgalib">
+<sect1 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -712,11 +709,11 @@ samplerate on my box, because the sound was broken on 44kHz:
 You can turn on OSD and subtitles only with the <option>expand</option>
 filter, see the man page for exact parameters.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="fbdev">
+<sect1 id="fbdev">
 <title>Framebuffer output (FBdev)</title>
 
 <para>
@@ -808,11 +805,11 @@ FBdev video mode changing <emphasis>does not work</emphasis> with the VESA
 framebuffer, and don't ask for it, since it's not an
 <application>MPlayer</application> limitation.
 </para></note>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="mga_vid">
+<sect1 id="mga_vid">
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
@@ -887,11 +884,11 @@ There is a test application called <command>mga_vid_test</command> in the same
 directory. It should draw 256x256 images on the screen if all is working well.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect1 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>3Dfx YUV support</title>
 
 <para>
@@ -900,11 +897,11 @@ YUV acceleration. You'll need a kernel with tdfxfb support, and recompile
 with
 <screen>./configure --enable-tdfxfb</screen>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tdfx_vid">
+<sect1 id="tdfx_vid">
 <title>tdfx_vid</title>
 
 <para>
@@ -945,11 +942,11 @@ There is a test application called <command>tdfx_vid_test</command> in the same
 directory. It should print out some useful information if all is working well.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="opengl">
+<sect1 id="opengl">
 <title>OpenGL output</title>
 
 <para>
@@ -983,11 +980,11 @@ least on nVidia):
 <para>
 <command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="aalib">
+<sect1 id="aalib">
 <title>AAlib &ndash; text mode displaying</title>
 
 <para>
@@ -1111,11 +1108,11 @@ That isn't autodetected by aalib, but vo_aa tries to find the best mode.
 See <ulink url="http://aa-project.sf.net/tune"/> for further
 tuning issues.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="caca">
+<sect1 id="caca">
 <title>
 <systemitem class="library">libcaca</systemitem> &ndash; Color ASCII Art library
 </title>
@@ -1208,11 +1205,11 @@ Use the <option>-framedrop</option> option if your computer is not fast
 enough to render all frames.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="vesa">
+<sect1 id="vesa">
 <title>VESA - output to VESA BIOS</title>
 
 <para>
@@ -1347,11 +1344,11 @@ It won't work!
   itself only once during POST procedure.
 </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="x11">
+<sect1 id="x11">
 <title>X11</title>
 
 <para>
@@ -1396,11 +1393,11 @@ If you can't find the modes you inserted, browse XFree86's output. Some
 drivers can't use low pixelclocks that are needed for low resolution
 video modes.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="vidix">
+<sect1 id="vidix">
 <title>VIDIX</title>
 
 <formalpara><title>PREAMBLE</title>
@@ -1561,7 +1558,7 @@ Alternatively, you can use a special kernel module, like this:
 </procedure>
 
 
-<sect3 id="vidix-ati">
+<sect2 id="vidix-ati">
 <title>ATI cards</title>
 
 <para>
@@ -1574,10 +1571,10 @@ There are two compiled binaries: <filename>radeon_vid</filename> for Radeon and
 <filename>rage128_vid</filename> for Rage 128 cards. You may force one or let
 the VIDIX system autoprobe all available drivers.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-mga">
+<sect2 id="vidix-mga">
 <title>Matrox cards</title>
 
 <para>
@@ -1588,10 +1585,10 @@ Matrox G200, G400, G450 and G550 have been reported to work.
 The driver supports video equalizers and should be nearly as fast as the
 <link linkend="mga_vid">Matrox framebuffer</link>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-trident">
+<sect2 id="vidix-trident">
 <title>Trident cards</title>
 
 <para>
@@ -1603,20 +1600,20 @@ can be found on VIA Epia motherboards.
 The driver was written and is maintained by
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-3dlabs">
+<sect2 id="vidix-3dlabs">
 <title>3DLabs cards</title>
 
 <para>
 Although there is a driver for the 3DLabs GLINT R3 and Permedia3 chips, no one
 has tested it, so reports are welcome.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-nvidia">
+<sect2 id="vidix-nvidia">
 <title>nVidia cards</title>
 
 <para>
@@ -1626,10 +1623,10 @@ framebuffer or X magic whatsoever. For this purpose, we'll have to use the
 <option>cvidix</option> video output, as the following example shows:
 <screen>mplayer -vo cvidix <replaceable>example.avi</replaceable></screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-sis">
+<sect2 id="vidix-sis">
 <title>SiS cards</title>
 
 <para>
@@ -1644,12 +1641,12 @@ SiS versions of the "Shuttle XPC" barebones boxes out there)
 <para>
 Reports awaited!
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="directfb">
+<sect1 id="directfb">
 <title>DirectFB</title>
 
 <blockquote><para>
@@ -1674,11 +1671,11 @@ on the command line, using the <option>-dfbopts</option> option. Layer
 selection can be done by the subdevice method, e.g.:
 <option>-vo directfb:2</option> (layer -1 is default: autodetect)
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dfbmga">
+<sect1 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 
 <para>
@@ -1707,7 +1704,6 @@ patch from the URL above). Porting the CRTC2 code to
 <link linkend="mga_vid">mga_vid</link> has been planned for years,
 <ulink url="../../tech/patches.txt">patches</ulink> are welcome.
 </para></note>
-</sect2>
 </sect1>
 
 
