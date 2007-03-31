@@ -91,16 +91,16 @@ OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
+OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
+OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
+OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
+
 SRCS_COMMON  += $(SRCS_COMMON-yes)
 COMMON_LIBS  += $(COMMON_LIBS-yes)
 LIBS_MPLAYER += $(LIBS_MPLAYER-yes)
 OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
 PARTS        += $(PARTS-yes)
 ALL_PRG      += $(ALL_PRG-yes)
-
-OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
-OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
-OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 
 COMMON_LIBS += osdep/libosdep.a
 
