@@ -3558,7 +3558,7 @@ if(rel_seek_secs || abs_seek_pos){
           guiIntfStruct.Position=demuxer_get_percent_pos(mpctx->demuxer);
 	}
 	if ( mpctx->sh_video ) guiIntfStruct.TimeSec=mpctx->sh_video->pts;
-	  else if ( mpctx->sh_audio ) guiIntfStruct.TimeSec=mpctx->delay;
+	  else if ( mpctx->sh_audio ) guiIntfStruct.TimeSec=playing_audio_pts(mpctx->sh_audio, mpctx->d_audio, mpctx->audio_out);
 	guiIntfStruct.LengthInSec=demuxer_get_time_length(mpctx->demuxer);
 	guiGetEvent( guiReDraw,NULL );
 	guiGetEvent( guiSetVolume,NULL );
