@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r22428 (2007. 03. 05.)
+// Sync'ed with help_mp-en.h r22772 (2007. 03. 31.)
 
 // ========================= MPlayer help ===========================
 
@@ -1981,11 +1981,11 @@ static char help_text[]=
 #define MSGTR_RADIO_CaptureStarting "[radio] Mentés kezdése.\n"
 #define MSGTR_RADIO_ClearBufferFailed "[radio] Buffer kiürítése sikertelen: %s\n"
 #define MSGTR_RADIO_StreamEnableCacheFailed "[radio] stream_enable_cache hívás sikertelen: %s\n"
-#define MSGTR_RADIO_DriverUnknownId "[radio] Ismeretlen eszköz id: %d\n"
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Ismeretlen vezérlő név: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] V4Lv2 rádió interfész használata.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] V4Lv1 rádió interfész használata.\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[radio] *BSD BT848 rádió interfész használata.\n"
+#define MSGTR_RADIO_AvailableDrivers "[radio] Használható vezérlők: "
 
 // ================================== LIBASS ====================================
 
