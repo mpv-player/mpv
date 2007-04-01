@@ -10,6 +10,11 @@ extern "C" {
 #ifndef __DEMUXER_H
 #include "demuxer.h"
 #endif
+#ifdef USE_LIBAVCODEC_SO
+#include <ffmpeg/avcodec.h>
+#elif defined(USE_LIBAVCODEC)
+#include "libavcodec/avcodec.h"
+#endif
 }
 
 #ifndef _LIVEMEDIA_HH

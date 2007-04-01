@@ -44,6 +44,9 @@ public:
   void savePendingBuffer(demux_packet_t* dp);
   demux_packet_t* getPendingBuffer();
 
+  // For H264 over rtsp using AVParser, the next packet has to be saved
+  demux_packet_t* nextpacket;
+
 private:
   demux_packet_t* pendingDPHead;
   demux_packet_t* pendingDPTail;
@@ -377,6 +380,13 @@ static void afterReading(void* clientData, unsigned frameSize,
 
   if (bufferQueue->readSource()->isAMRAudioSource())
     headersize = 1;
+  else if (bufferQueue == rtpState->videoBufferQueue &&
+      ((sh_video_t*)demuxer->video->sh)->format == mmioFOURCC('H','2','6','4')) {
+    dp->buffer[0]=0x00;
+    dp->buffer[1]=0x00;
+    dp->buffer[2]=0x01;
+    headersize = 3;
+  }
 
   resize_demux_packet(dp, frameSize + headersize);
 
@@ -440,6 +450,8 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   int headersize = 0;
   if (ds == demuxer->video) {
     bufferQueue = rtpState->videoBufferQueue;
+    if (((sh_video_t*)ds->sh)->format == mmioFOURCC('H','2','6','4'))
+      headersize = 3;
   } else if (ds == demuxer->audio) {
     bufferQueue = rtpState->audioBufferQueue;
     if (bufferQueue->readSource()->isAMRAudioSource())
@@ -465,10 +477,21 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   }
 
   // Allocate a new packet buffer, and arrange to read into it:
+    if (!bufferQueue->nextpacket) {
   dp = new_demux_packet(MAX_RTP_FRAME_SIZE);
   bufferQueue->dp = dp;
   if (dp == NULL) return NULL;
+    }
 
+#ifdef USE_LIBAVCODEC
+  extern AVCodecParserContext * h264parserctx;
+  int consumed, poutbuf_size = 1;
+  uint8_t *poutbuf = NULL;
+  float lastpts;
+
+  do {
+    if (!bufferQueue->nextpacket) {
+#endif
   // Schedule the read operation:
   bufferQueue->blockingFlag = 0;
   bufferQueue->readSource()->getNextFrame(&dp->buffer[headersize], MAX_RTP_FRAME_SIZE - headersize,
@@ -482,6 +505,33 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   if (headersize == 1) // amr
     dp->buffer[0] =
         ((AMRAudioSource*)bufferQueue->readSource())->lastFrameHeader();
+#ifdef USE_LIBAVCODEC
+    } else {
+      bufferQueue->dp = dp = bufferQueue->nextpacket;
+      bufferQueue->nextpacket = NULL;
+    }
+    if (headersize == 3 && h264parserctx) { // h264
+      consumed = h264parserctx->parser->parser_parse(h264parserctx,
+                               NULL,
+                               &poutbuf, &poutbuf_size,
+                               dp->buffer, dp->len);
+
+      if (!consumed && !poutbuf_size)
+        return NULL;
+
+      if (!poutbuf_size) {
+        lastpts=dp->pts;
+        free_demux_packet(dp);
+        bufferQueue->dp = dp = new_demux_packet(MAX_RTP_FRAME_SIZE);
+      } else {
+        bufferQueue->nextpacket = dp;
+        bufferQueue->dp = dp = new_demux_packet(poutbuf_size);
+        memcpy(dp->buffer, poutbuf, poutbuf_size);
+        dp->pts=lastpts;
+      }
+    }
+  } while (!poutbuf_size);
+#endif
 
   // Set the "ptsBehind" result parameter:
   if (bufferQueue->prevPacketPTS != 0.0
@@ -523,6 +573,7 @@ static void teardownRTSPorSIPSession(RTPState* rtpState) {
 ReadBufferQueue::ReadBufferQueue(MediaSubsession* subsession,
 				 demuxer_t* demuxer, char const* tag)
   : prevPacketWasSynchronized(False), prevPacketPTS(0.0), otherQueue(NULL),
+    nextpacket(NULL),
     dp(NULL), pendingDPHead(NULL), pendingDPTail(NULL),
     fReadSource(subsession == NULL ? NULL : subsession->readSource()),
     fRTPSource(subsession == NULL ? NULL : subsession->rtpSource()),

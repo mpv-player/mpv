@@ -6,6 +6,54 @@ extern "C" {
 #include <limits.h>
 #include <math.h>
 #include "stheader.h"
+#include "base64.h"
+}
+
+#ifdef USE_LIBAVCODEC
+AVCodecParserContext * h264parserctx;
+#endif
+
+// Copied from vlc
+static unsigned char* parseH264ConfigStr( char const* configStr,
+                                          unsigned int& configSize )
+{
+
+    char *dup, *psz;
+    int i, i_records = 1;
+
+    if( configSize )
+    configSize = 0;
+    if( configStr == NULL || *configStr == '\0' )
+        return NULL;
+    psz = dup = strdup( configStr );
+
+ /* Count the number of comma's */
+    for( psz = dup; *psz != '\0'; ++psz )
+    {
+        if( *psz == ',')
+        {
+            ++i_records;
+            *psz = '\0';
+        }
+    }
+
+    unsigned char *cfg = new unsigned char[5 * strlen(dup)];
+    psz = dup;
+    for( i = 0; i < i_records; i++ )
+    {
+
+        cfg[configSize++] = 0x00;
+        cfg[configSize++] = 0x00;
+        cfg[configSize++] = 0x01;
+        configSize += av_base64_decode( (uint8_t*)&cfg[configSize],
+                                        psz,
+                                        5 * strlen(dup) - 3 );
+
+    psz += strlen(psz)+1;
+    }
+    if( dup ) free( dup );
+
+    return cfg;
 }
 
 static void
@@ -63,6 +111,15 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
   } else if (strcmp(subsession->codecName(), "H264") == 0) {
     bih->biCompression = sh_video->format
       = mmioFOURCC('H','2','6','4');
+    unsigned int configLen = 0;
+    unsigned char* configData
+      = parseH264ConfigStr(subsession->fmtp_spropparametersets(), configLen);
+    sh_video->bih = bih = insertVideoExtradata(bih, configData, configLen);
+    delete[] configData;
+#ifdef USE_LIBAVCODEC
+    av_register_codec_parser(&h264_parser);
+    h264parserctx = av_parser_init(CODEC_ID_H264);
+#endif
     needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "H261") == 0) {
     bih->biCompression = sh_video->format
