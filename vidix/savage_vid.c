@@ -130,12 +130,6 @@ void SavageStreamsOn(void);
  */
 pciinfo_t pci_info;
 
-/**
- * @brief Unichrome driver colorkey settings.
- */
-static vidix_grkey_t savage_grkey;
-
-static int frames[VID_PLAY_MAXFRAMES];
 uint8_t *vio;
 uint8_t mclk_save[3];
 
@@ -670,7 +664,6 @@ SavageStreamsOn(void)
 
 static void savage_getscreenproperties(struct savage_info *info){
   unsigned char bpp=0;
-  uint32_t width=0;
 
   uint32_t vgaIOBase, vgaCRIndex, vgaCRReg;
 
@@ -842,14 +835,14 @@ static int
 savage_init (void)
 {
 	int mtrr;
-  unsigned char config1, m, n, n1, n2, sr8, cr3f, cr66 = 0, tmp;
+  unsigned char config1, tmp;
 
   static unsigned char RamSavage3D[] = { 8, 4, 4, 2 };
   static unsigned char RamSavage4[] =  { 2, 4, 8, 12, 16, 32, 64, 32 };
   static unsigned char RamSavageMX[] = { 2, 8, 4, 16, 8, 16, 4, 16 };
   static unsigned char RamSavageNB[] = { 0, 2, 4, 8, 16, 32, 16, 2 };
 
-  int videoRam, videoRambytes;
+  int videoRam;
 
   uint32_t   vgaIOBase, vgaCRIndex, vgaCRReg ;
 
@@ -973,7 +966,7 @@ savage_init (void)
   udelay (10000);
 
   VGAOUT8 (0x3d4, 0x66);
-  VGAOUT8 (0x3d5, cr66 & ~0x02); /* clear reset flag */
+  VGAOUT8 (0x3d5, cr66 & ~0x02); */ // clear reset flag
  /* udelay (10000); */
 
 	/* This maps framebuffer @6MB, thus 2MB are left for video. */
@@ -986,7 +979,7 @@ savage_init (void)
 		info->picture_offset = info->chip.fbsize - FRAMEBUFFER_SIZE;
 //			info->picture_offset = 1024*1024* 4 * 2;
 	}
-	if ( info->video_base < 0 ){
+	if ( info->video_base == NULL){
 		printf("errno = %s\n",  strerror(errno));
 		return -1; 
 	}
@@ -1179,11 +1172,6 @@ savage_set_eq (const vidix_video_eq_t * eq)
 }
 
 /**
- * @brief Y, U, V offsets.
- */
-static int YOffs, UOffs, VOffs;
-
-/**
  * @brief Configure driver for playback. Driver should prepare BES.
  *
  * @param info configuration description for playback.
@@ -1196,15 +1184,6 @@ savage_config_playback (vidix_playback_t * vinfo)
 {
   int uv_size, swap_uv;
   unsigned int i;
-  int extfifo_on;
-  int srcPitch,srcPitch2;
-
-  /* Overlay register settings */
-  uint32_t win_start, win_end;
-  uint32_t zoom, mini;
-  uint32_t dcount, falign, qwfetch;
-  uint32_t y_start, u_start, v_start;
-  uint32_t v_ctrl, fifo_ctrl;
 
   if (!is_supported_fourcc (vinfo->fourcc))
     return -1;
