@@ -151,7 +151,7 @@ find_chip (unsigned chip_id)
  *       See ddover.c, DDOVER_HQVCalcZoomHeight()
  */
 static int
-uc_ovl_map_vzoom (int sh, int dh, uint32_t * zoom, uint32_t * mini)
+uc_ovl_map_vzoom (uint32_t sh, uint32_t dh, uint32_t * zoom, uint32_t * mini)
 {
   uint32_t sh1, tmp, d;
   int zoom_ok = 1;
@@ -215,7 +215,7 @@ uc_ovl_map_vzoom (int sh, int dh, uint32_t * zoom, uint32_t * mini)
  *       See ddover.c, DDOVER_HQVCalcZoomWidth() and DDOver_GetDisplayCount()
  */
 static int
-uc_ovl_map_hzoom (int sw, int dw, uint32_t * zoom, uint32_t * mini,
+uc_ovl_map_hzoom (uint32_t sw, uint32_t dw, uint32_t * zoom, uint32_t * mini,
 		  int *falign, int *dcount)
 {
   uint32_t tmp, sw1, d;
@@ -757,8 +757,8 @@ unichrome_config_playback (vidix_playback_t * info)
 {
   int src_w, drw_w;
   int src_h, drw_h;
-  long base0, pitch;
-  int uv_size, swap_uv;
+  long base0, pitch = 0;
+  int uv_size = 0, swap_uv;
   unsigned int i;
   int extfifo_on;
 
@@ -766,7 +766,6 @@ unichrome_config_playback (vidix_playback_t * info)
   uint32_t win_start, win_end;
   uint32_t zoom, mini;
   uint32_t dcount, falign, qwfetch;
-  uint32_t y_start, u_start, v_start;
   uint32_t v_ctrl, fifo_ctrl;
 
   if (!is_supported_fourcc (info->fourcc))
@@ -793,7 +792,7 @@ unichrome_config_playback (vidix_playback_t * info)
   zoom = 0;
   mini = 0;
   uc_ovl_map_vzoom (src_h, drw_h, &zoom, &mini);
-  uc_ovl_map_hzoom (src_w, drw_w, &zoom, &mini, &falign, &dcount);
+  uc_ovl_map_hzoom (src_w, drw_w, &zoom, &mini, (int *) &falign, (int *) &dcount);
   qwfetch = uc_ovl_map_qwfetch (info->fourcc, src_w);
 
   /* Calculate buffer sizes */
