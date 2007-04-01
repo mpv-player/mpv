@@ -65,12 +65,6 @@ static vidix_capability_t pm3_cap =
     { 0, 0, 0, 0 }
 };
 
-
-static unsigned int pm3_get_version(void)
-{
-    return(VIDIX_VERSION);
-}
-
 static unsigned short pm3_card_ids[] = 
 {
     DEVICE_3DLABS_GLINT_R3
@@ -379,7 +373,6 @@ VDXDriver pm3_drv = {
   "pm3",
   NULL,
   .probe = pm3_probe,
-  .get_version = pm3_get_version,
   .get_caps = pm3_get_caps,
   .query_fourcc = pm3_query_fourcc,
   .init = pm3_init,

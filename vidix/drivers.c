@@ -56,16 +56,6 @@ static int vidix_probe_driver (VDXContext *ctx, VDXDriver *drv,
   if (verbose)
     printf ("vidixlib: PROBING: %s\n", drv->name);
 
-  if (!drv->get_version)
-    return 0;
-  
-  if (drv->get_version () != VIDIX_VERSION)
-  {
-    if (verbose)
-      printf ("vidixlib: %s has wrong version\n", drv->name);
-    return 0;
-  }
-
   if (!drv->probe || drv->probe (verbose, PROBE_NORMAL) != 0)
     return 0;
 

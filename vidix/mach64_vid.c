@@ -339,11 +339,6 @@ static void mach64_vid_dump_regs( void )
 }
 
 
-static unsigned int mach64_get_version(void)
-{
-    return(VIDIX_VERSION);
-}
-
 static unsigned short ati_card_ids[] = 
 {
  DEVICE_ATI_215CT_MACH64_CT,
@@ -1069,7 +1064,6 @@ VDXDriver mach64_drv = {
   "mach64",
   NULL,
   .probe = mach64_probe,
-  .get_version = mach64_get_version,
   .get_caps = mach64_get_caps,
   .query_fourcc = mach64_query_fourcc,
   .init = mach64_init,

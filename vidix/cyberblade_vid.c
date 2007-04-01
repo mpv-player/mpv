@@ -135,13 +135,6 @@ static vidix_capability_t cyberblade_cap =
 	{ 0, 0, 0, 0 }
 };
 
-
-static unsigned int cyberblade_get_version(void)
-{
-	return(VIDIX_VERSION);
-}
-
-
 static unsigned short cyberblade_card_ids[] =
 {
 	DEVICE_TRIDENT_CYBERBLADE_I7,
@@ -649,7 +642,6 @@ VDXDriver cyberblade_drv = {
   "cyberblade",
   NULL,
   .probe = cyberblade_probe,
-  .get_version = cyberblade_get_version,
   .get_caps = cyberblade_get_caps,
   .query_fourcc = cyberblade_query_fourcc,
   .init = cyberblade_init,

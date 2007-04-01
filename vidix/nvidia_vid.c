@@ -52,12 +52,6 @@ static vidix_capability_t nvidia_cap = {
     { 0, 0, 0, 0 }
 };
 
-
-static unsigned int nv_get_version(void){
-    return(VIDIX_VERSION);
-}
-
-
 #define NV_ARCH_03  0x03
 #define NV_ARCH_04  0x04
 #define NV_ARCH_10  0x10
@@ -938,7 +932,6 @@ VDXDriver nvidia_drv = {
   "nvidia",
   NULL,
   .probe = nv_probe,
-  .get_version = nv_get_version,
   .get_caps = nv_get_caps,
   .query_fourcc = nv_query_fourcc,
   .init = nv_init,

@@ -1436,11 +1436,6 @@ static int mga_query_fourcc(vidix_fourcc_t *to)
     return(0);
 }
 
-static unsigned int mga_get_version(void)
-{
-    return(VIDIX_VERSION);
-}
-
 static int mga_get_caps(vidix_capability_t *to)
 {
     memcpy(to, &mga_cap, sizeof(vidix_capability_t));
@@ -1518,7 +1513,6 @@ VDXDriver mga_crtc2_drv = {
   NULL,
     
   .probe = mga_probe,
-  .get_version = mga_get_version,
   .get_caps = mga_get_caps,
   .query_fourcc = mga_query_fourcc,
   .init = mga_init,

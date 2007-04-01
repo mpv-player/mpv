@@ -237,12 +237,6 @@ static uint8_t vblank_active_CRT2(void)
     return ((ret & 0x02) ^ 0x02);
 }
 
-
-static unsigned int sis_get_version(void)
-{
-    return (VIDIX_VERSION);
-}
-
 static int find_chip(unsigned chip_id)
 {
     unsigned i;
@@ -1567,7 +1561,6 @@ VDXDriver sis_drv = {
   NULL,
     
   .probe = sis_probe,
-  .get_version = sis_get_version,
   .get_caps = sis_get_caps,
   .query_fourcc = sis_query_fourcc,
   .init = sis_init,

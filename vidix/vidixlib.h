@@ -29,7 +29,6 @@ typedef struct VDXDriver {
   const char *name;
   struct VDXDriver *next;
   int (* probe) (int verbose, int force);
-  unsigned int (* get_version)(void);
   int (* get_caps) (vidix_capability_t *cap);
   int (*query_fourcc)(vidix_fourcc_t *);
   int (*init)(void);

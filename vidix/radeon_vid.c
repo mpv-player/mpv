@@ -794,9 +794,6 @@ static void radeon_vid_make_default(void)
   besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_TRUE|CMP_MIX_AND;
 }
 
-
-static unsigned int radeon_get_version( void ) { return VIDIX_VERSION; }
-
 static unsigned short ati_card_ids[] = 
 {
 #ifdef RAGE128
@@ -2111,7 +2108,6 @@ VDXDriver radeon_drv = {
   NULL,
     
   .probe = radeon_probe,
-  .get_version = radeon_get_version,
   .get_caps = radeon_get_caps,
   .query_fourcc = radeon_query_fourcc,
   .init = radeon_init,

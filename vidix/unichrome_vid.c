@@ -117,17 +117,6 @@ static unsigned short uc_card_ids[] = {
 };
 
 /**
- * @brief Check age of driver.
- *
- * @return vidix version number.
- */
-static unsigned int
-unichrome_get_version (void)
-{
-  return (VIDIX_VERSION);
-}
-
-/**
  * @brief Find chip index in Unichrome compliant devices list.
  *
  * @param chip_id PCI device ID.
@@ -982,7 +971,6 @@ VDXDriver unichrome_drv = {
   "unichrome",
   NULL,
   .probe = unichrome_probe,
-  .get_version = unichrome_get_version,
   .get_caps = unichrome_get_caps,
   .query_fourcc = unichrome_query_fourcc,
   .init = unichrome_init,

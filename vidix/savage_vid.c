@@ -763,18 +763,6 @@ static void SavageStreamsOff(void)
     info->videoFlags &= ~VF_STREAMS_ON;
 }
 
-
-/**
- * @brief Check age of driver.
- *
- * @return vidix version number.
- */
-static unsigned int
-savage_get_version (void)
-{
-  return (VIDIX_VERSION);
-}
-
 /**
  * @brief Find chip index in Unichrome compliant devices list.
  *
@@ -1477,7 +1465,6 @@ VDXDriver savage_drv = {
   "savage",
   NULL,
   .probe = savage_probe,
-  .get_version = savage_get_version,
   .get_caps = savage_get_caps,
   .query_fourcc = savage_query_fourcc,
   .init = savage_init,
