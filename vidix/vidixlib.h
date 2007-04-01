@@ -55,7 +55,7 @@ typedef struct VDXContext {
   /* might be filled in by much more info later on */
 } VDXContext;
 
-typedef void * VDL_HANDLE;
+typedef VDXContext * VDL_HANDLE;
 
 			/* returns library version */
 unsigned   vdlGetVersion( void );
@@ -70,7 +70,7 @@ unsigned   vdlGetVersion( void );
 			   */
 VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose);
 			/* Closes stream and corresponded driver. */
-void	  vdlClose(VDL_HANDLE stream);
+void	  vdlClose(VDL_HANDLE ctx);
 
 			/* Queries driver capabilities. Return 0 if ok else errno */
 int	  vdlGetCapability(VDL_HANDLE, vidix_capability_t *);
