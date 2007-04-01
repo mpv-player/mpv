@@ -9792,17 +9792,15 @@ If dvdauthor complains with a message like "..audio sector out of range...",
 you probably did not enable this option.
 .
 .TP
-.B init_vpts=<100\-700>
-initial video pts, in milliseconds (default: 200)
-.
-.TP
-.B init_apts=<100\-700>
-initial audio pts, in milliseconds (default: 200)
-.
-.TP
 .B vdelay=<1\-32760>
 Initial video delay time, in milliseconds (default: 0),
 use it if you want to delay video with respect to audio.
+It doesn't work with :drop.
+.
+.TP
+.B adelay=<1\-32760>
+Initial audio delay time, in milliseconds (default: 0),
+use it if you want to delay audio with respect to video.
 .
 .TP
 .B "drop\ \ \ "
