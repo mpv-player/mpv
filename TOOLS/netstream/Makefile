@@ -13,21 +13,17 @@ DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
 	$(MPROOT)/stream/stream.a \
 	$(MPROOT)/dvdread/libdvdread.a \
 	$(MPROOT)/libdvdcss/libdvdcss.a \
-	$(MPROOT)/libvo/aclib.o \
-	$(MPROOT)/libmpcodecs/img_format.o \
+	$(MPROOT)/libavutil/libavutil.a \
 	$(MPROOT)/liba52/liba52.a \
 	$(MPROOT)/m_option.o \
 	$(MPROOT)/m_struct.o \
 	$(MPROOT)/subreader.o \
 	$(MPROOT)/mp_msg.o \
-	$(MPROOT)/osdep/shmem.o \
-	$(MPROOT)/osdep/timer-*.o \
-	$(MPROOT)/osdep/strlcpy.o \
-	$(MPROOT)/osdep/getch2.o \
+	$(MPROOT)/osdep/libosdep.a \
 	-ltermcap -lm \
 
 ifeq ($(TARGET_WIN32),yes)
-DEPS += $(MPROOT)/osdep/glob-win.o -lwsock32
+DEPS += -lwsock32
 endif
 
 netstream: $(DEPS)
