@@ -78,7 +78,7 @@ static uint32_t conf_vwidth = 0, conf_vheight = 0, conf_panscan_width = 0, conf_
 static uint32_t conf_vbitrate = 0;
 static int conf_init_vpts = 200, conf_init_apts = 200;
 static int conf_ts_allframes = 0;
-static int conf_init_adelay = 0;
+static int conf_init_adelay = 0, conf_init_vdelay = 0;
 static int conf_abuf_size = 0;
 static int conf_vbuf_size = 0;
 static int conf_drop = 0;
@@ -197,9 +197,8 @@ m_option_t mpegopts_conf[] = {
 	{"vpswidth", &(conf_panscan_width), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 16383, NULL},
 	{"vpsheight", &(conf_panscan_height), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 16383, NULL},
 	{"vbitrate", &(conf_vbitrate), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 104857599, NULL},
-	{"init_vpts", &(conf_init_vpts), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 100, 700, NULL},	//2*frametime at 60fps
-	{"init_apts", &(conf_init_apts), CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 100, 700, NULL},
-	{"vdelay", &conf_init_adelay, CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 1, 32760, NULL},
+	{"vdelay", &conf_init_vdelay, CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 0, 32760, NULL},
+	{"adelay", &conf_init_adelay, CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 0, 32760, NULL},
 	{"vbuf_size", &conf_vbuf_size, CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 40, 1194, NULL},
 	{"abuf_size", &conf_abuf_size, CONF_TYPE_INT, M_OPT_GLOBAL|M_OPT_RANGE, 4, 64, NULL},
 	{"drop", &conf_drop, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, 1, NULL},
@@ -394,6 +393,10 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
   if (type == MUXER_TYPE_VIDEO) {
     spriv->type = 1;
     spriv->last_pts = conf_init_vpts * 90 * 300;
+    if(conf_init_vdelay) {
+      spriv->last_dts += conf_init_vdelay * 90 * 300;
+      spriv->last_pts += conf_init_vdelay * 90 * 300;
+    }
     spriv->id = 0xe0 + muxer->num_videos;
     s->ckid = be2me_32 (0x100 + spriv->id);
     if(priv->is_genmpeg1 || priv->is_genmpeg2) {
@@ -428,8 +431,8 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
     spriv->type = 0;
     spriv->drop_delayed_frames = conf_drop;
     spriv->last_pts = conf_init_apts * 90 * 300;
-    if(conf_init_adelay < 0 && ! spriv->drop_delayed_frames)
-      spriv->last_pts += (-conf_init_adelay) * 90 * 300;
+    if(conf_init_adelay && ! spriv->drop_delayed_frames)
+      spriv->last_pts += conf_init_adelay * 90 * 300;
     spriv->pts = spriv->last_pts;
     spriv->id = 0xc0 + muxer->num_audios;
     s->ckid = be2me_32 (0x100 + spriv->id);
@@ -2645,6 +2648,11 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   muxer->sysrate = priv->muxrate; 		// initial muxrate = constrained stream parameter
   priv->scr = muxer->file_end = 0;
 
+  if(conf_init_vdelay && conf_drop)
+  {
+	mp_msg(MSGT_MUXER, MSGL_ERR, "\nmuxer_mpg, :drop and :vdelay used together are not supported, exiting\n");
+	return 0;
+  }
   if(conf_init_adelay)
   	priv->init_adelay = - (double) conf_init_adelay / (double) 1000.0;
 
