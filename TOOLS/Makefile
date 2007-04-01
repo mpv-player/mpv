@@ -65,11 +65,11 @@ ifeq ($(TARGET_WIN32),yes)
 NETSTREAM_DEPS += -lwsock32
 endif
 
-netstream: $(NETSTREAM_DEPS)
-	$(CC) -o $@ netstream.o $^
+netstream: netstream.o $(NETSTREAM_DEPS)
+	$(CC) -o $@ $^
 
 clean distclean:
-	rm -f $(OBJS)
-	rm -f fastmem-* fastmem2-* fastmemcpybench
+	rm -f *.o *~ $(OBJS)
+	rm -f fastmem-* fastmem2-* fastmemcpybench netstream
 	rm -f cpuinfo$(EXESUF) bmovl-test$(EXESUF) vfw2menc$(EXESUF)
 	rm -f $(REAL_TARGETS)
