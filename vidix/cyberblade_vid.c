@@ -67,26 +67,10 @@ FILE *logfile=0;
 
 /* Helper functions for reading registers. */    
 
-static int CRINW(int reg)
-{
-	int result;
-	result=CRINB(reg);
-	result|=CRINB(reg+1)<<8;
-	return(result);
-}
-
 static void CROUTW(int reg,int val)
 {
 	CROUTB(reg,val&255);
 	CROUTB(reg+1,(val>>8)&255);
-}
-
-static int SRINW(int reg)
-{
-	int result;
-	result=SRINB(reg);
-	result|=SRINB(reg+1)<<8;
-	return(result);
 }
 
 static void SROUTW(int reg,int val)
@@ -97,8 +81,8 @@ static void SROUTW(int reg,int val)
 
 void DumpRegisters(void)
 {
-        int reg,val;
 #ifdef DEBUG_LOGFILE
+        int reg,val;
         if(logfile)
         {
                 LOGWRITE("CRTC Register Dump:\n")
@@ -377,12 +361,11 @@ static int YOffs,UOffs,VOffs;
 
 static int cyberblade_config_playback(vidix_playback_t *info)
 {
-	int shrink, zoom;
 	int src_w, drw_w;
 	int src_h, drw_h;
 	int hscale,vscale;
 	long base0;
-	int y_pitch, uv_pitch;
+	int y_pitch = 0, uv_pitch = 0;
 	int protect=0;
 	int layout=0;
 	unsigned int i;
