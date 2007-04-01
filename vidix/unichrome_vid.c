@@ -113,7 +113,8 @@ static vidix_capability_t uc_cap = {
  * @brief list of card IDs compliant with the Unichrome driver .
  */
 static unsigned short uc_card_ids[] = {
-  DEVICE_VIA2_VT8623_CLE266_AGP
+  DEVICE_VIA2_VT8623_APOLLO_CLE266,
+  DEVICE_VIA2_VT8378_S3_UNICHROME
 };
 
 /**

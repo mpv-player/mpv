@@ -1228,7 +1228,7 @@ static int mga_probe(int verbose,int force)
 			printf("[mga] Found MGA G550\n");
 			is_g400 = 1;
 			goto card_found;
-		    case DEVICE_MATROX_MGA_G400_AGP:
+		    case DEVICE_MATROX_MGA_G400_G450:
 			printf("[mga] Found MGA G400/G450\n");
 			is_g400 = 1;
 			goto card_found;
