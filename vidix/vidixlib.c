@@ -128,55 +128,55 @@ int  vdlPlaybackOff(VDL_HANDLE ctx)
 
 int  vdlPlaybackFrameSelect(VDL_HANDLE ctx, unsigned frame_idx )
 {
-  return (ctx->drv->frame_sel) ? ctx->drv->frame_sel (frame_idx) : ENOSYS;
+  return ctx->drv->frame_sel ? ctx->drv->frame_sel (frame_idx) : ENOSYS;
 }
 
 int  vdlPlaybackGetEq(VDL_HANDLE ctx, vidix_video_eq_t * e)
 {
-  return (ctx->drv->get_eq) ? ctx->drv->get_eq (e) : ENOSYS;
+  return ctx->drv->get_eq ? ctx->drv->get_eq (e) : ENOSYS;
 }
 
 int  vdlPlaybackSetEq(VDL_HANDLE ctx, const vidix_video_eq_t * e)
 {
-  return (ctx->drv->set_eq) ? ctx->drv->set_eq (e) : ENOSYS;
+  return ctx->drv->set_eq ? ctx->drv->set_eq (e) : ENOSYS;
 }
 
 int  vdlPlaybackCopyFrame(VDL_HANDLE ctx, const vidix_dma_t * f)
 {
-  return (ctx->drv->copy_frame) ? ctx->drv->copy_frame (f) : ENOSYS;
+  return ctx->drv->copy_frame ? ctx->drv->copy_frame (f) : ENOSYS;
 }
 
 int 	  vdlGetGrKeys(VDL_HANDLE ctx, vidix_grkey_t * k)
 {
-  return (ctx->drv->get_gkey) ? ctx->drv->get_gkey (k) : ENOSYS;
+  return ctx->drv->get_gkey ? ctx->drv->get_gkey (k) : ENOSYS;
 }
 
 int 	  vdlSetGrKeys(VDL_HANDLE ctx, const vidix_grkey_t * k)
 {
-  return (ctx->drv->set_gkey) ? ctx->drv->set_gkey (k) : ENOSYS;
+  return ctx->drv->set_gkey ? ctx->drv->set_gkey (k) : ENOSYS;
 }
 
 int	  vdlPlaybackGetDeint(VDL_HANDLE ctx, vidix_deinterlace_t * d)
 {
-  return (ctx->drv->get_deint) ? ctx->drv->get_deint (d) : ENOSYS;
+  return ctx->drv->get_deint ? ctx->drv->get_deint (d) : ENOSYS;
 }
 
 int 	  vdlPlaybackSetDeint(VDL_HANDLE ctx, const vidix_deinterlace_t * d)
 {
-  return (ctx->drv->set_deint) ? ctx->drv->set_deint (d) : ENOSYS;
+  return ctx->drv->set_deint ? ctx->drv->set_deint (d) : ENOSYS;
 }
 
 int	  vdlQueryNumOemEffects(VDL_HANDLE ctx, unsigned * number )
 {
-  return (ctx->drv->get_num_fx) ? ctx->drv->get_num_fx (number) : ENOSYS;
+  return ctx->drv->get_num_fx ? ctx->drv->get_num_fx (number) : ENOSYS;
 }
 
 int	  vdlGetOemEffect(VDL_HANDLE ctx, vidix_oem_fx_t * f)
 {
-  return (ctx->drv->get_fx) ? ctx->drv->get_fx (f) : ENOSYS;
+  return ctx->drv->get_fx ? ctx->drv->get_fx (f) : ENOSYS;
 }
 
 int	  vdlSetOemEffect(VDL_HANDLE ctx, const vidix_oem_fx_t * f)
 {
-  return (ctx->drv->set_fx) ? ctx->drv->set_fx (f) : ENOSYS;
+  return ctx->drv->set_fx ? ctx->drv->set_fx (f) : ENOSYS;
 }
