@@ -13,17 +13,17 @@
 #include <inttypes.h>
 #include <fcntl.h>
 
-#include "../../config.h"
-#include "../../libavutil/common.h"
-#include "../../mpbswap.h"
-#include "../vidix.h"
-#include "../fourcc.h"
-#include "../../libdha/libdha.h"
-#include "../../libdha/pci_ids.h"
-#include "../../libdha/pci_names.h"
+#include "../config.h"
+#include "../libavutil/common.h"
+#include "../mpbswap.h"
+#include "vidix.h"
+#include "fourcc.h"
+#include "../libdha/libdha.h"
+#include "../libdha/pci_ids.h"
+#include "../libdha/pci_names.h"
 
 #include "mach64.h"
-#include "../../version.h"
+#include "../version.h"
 
 #define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 

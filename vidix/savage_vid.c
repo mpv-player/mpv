@@ -38,12 +38,12 @@
 #include <unistd.h>
 #include <math.h>
 
-#include "../vidix.h"
-#include "../fourcc.h"
-#include "../../libdha/libdha.h"
-#include "../../libdha/pci_ids.h"
-#include "../../libdha/pci_names.h"
-#include "../../config.h"
+#include "vidix.h"
+#include "fourcc.h"
+#include "../libdha/libdha.h"
+#include "../libdha/pci_ids.h"
+#include "../libdha/pci_names.h"
+#include "../config.h"
 
 #include "savage_regs.h"
 

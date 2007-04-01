@@ -3,18 +3,15 @@ include ../config.mak
 LIBNAME_MPLAYER = libvidix.a
 
 SRCS_MPLAYER    = vidixlib.c \
-                  $(wildcard drivers/*.c)
+                  $(wildcard *.c)
 
-OBJS_MPLAYER    = drivers/mga_crtc2_vid.o \
-                  drivers/rage128_vid.o \
+OBJS_MPLAYER    = mga_crtc2_vid.o \
+                  rage128_vid.o \
 
 include ../mpcommon.mak
 
-drivers/mga_crtc2_vid.o: drivers/mga_vid.c
+mga_crtc2_vid.o: mga_vid.c
 	$(CC) -c $(CFLAGS) -DCRTC2 -o $@ $<
 
-drivers/rage128_vid.o: drivers/radeon_vid.c
+rage128_vid.o: radeon_vid.c
 	$(CC) -c $(CFLAGS) -DRAGE128 -o $@ $<
-
-clean::
-	rm -f drivers/*.o drivers/*~

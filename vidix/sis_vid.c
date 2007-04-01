@@ -30,12 +30,12 @@
 #include <inttypes.h>
 #include <unistd.h>
 
-#include "../vidix.h"
-#include "../fourcc.h"
-#include "../../libdha/libdha.h"
-#include "../../libdha/pci_ids.h"
-#include "../../libdha/pci_names.h"
-#include "../../config.h"
+#include "vidix.h"
+#include "fourcc.h"
+#include "../libdha/libdha.h"
+#include "../libdha/pci_ids.h"
+#include "../libdha/pci_names.h"
+#include "../config.h"
 
 #include "sis_regs.h"
 #include "sis_defs.h"
