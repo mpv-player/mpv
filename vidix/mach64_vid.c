@@ -17,13 +17,13 @@
 #include "../libavutil/common.h"
 #include "../mpbswap.h"
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "../libdha/pci_ids.h"
 #include "../libdha/pci_names.h"
 
 #include "mach64.h"
-#include "../version.h"
 
 #define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
@@ -339,7 +339,7 @@ static void mach64_vid_dump_regs( void )
 }
 
 
-unsigned int vixGetVersion(void)
+static unsigned int mach64_get_version(void)
 {
     return(VIDIX_VERSION);
 }
@@ -396,7 +396,7 @@ static int find_chip(unsigned chip_id)
   return -1;
 }
 
-int vixProbe(int verbose,int force)
+static int mach64_probe(int verbose,int force)
 {
   pciinfo_t lst[MAX_PCI_DEVICES];
   unsigned i,num_pci;
@@ -456,7 +456,7 @@ static void reset_regs( void )
 }
 
 
-int vixInit(void)
+static int mach64_init(void)
 {
   int err;
   if(!probed)
@@ -464,7 +464,7 @@ int vixInit(void)
     printf("[mach64] Driver was not probed but is being initializing\n");
     return EINTR;
   }
-  if(__verbose>0) printf("[mach64] version %s\n", VERSION);
+  if(__verbose>0) printf("[mach64] version %d\n", VIDIX_VERSION);
   
   if((mach64_mmio_base = map_phys_mem(pci_info.base2,0x1000))==(void *)-1) return ENOMEM;
   mach64_wait_for_idle();
@@ -516,7 +516,7 @@ int vixInit(void)
   return 0;
 }
 
-void vixDestroy(void)
+static void mach64_destroy(void)
 {
   /*restore this*/
   mach64_wait_for_idle();
@@ -526,7 +526,7 @@ void vixDestroy(void)
   unmap_phys_mem(mach64_mmio_base,0x1000);
 }
 
-int vixGetCapability(vidix_capability_t *to)
+static int mach64_get_caps(vidix_capability_t *to)
 {
     memcpy(to, &mach64_cap, sizeof(vidix_capability_t));
     return 0;
@@ -872,7 +872,7 @@ static int is_supported_fourcc(uint32_t fourcc)
     }
 }
 
-int vixQueryFourcc(vidix_fourcc_t *to)
+static int mach64_query_fourcc(vidix_fourcc_t *to)
 {
     if(is_supported_fourcc(to->fourcc))
     {
@@ -888,7 +888,7 @@ int vixQueryFourcc(vidix_fourcc_t *to)
     return ENOSYS;
 }
 
-int vixConfigPlayback(vidix_playback_t *info)
+static int mach64_config_playback(vidix_playback_t *info)
 {
   if(!is_supported_fourcc(info->fourcc)) return ENOSYS;
 
@@ -908,19 +908,19 @@ int vixConfigPlayback(vidix_playback_t *info)
   return 0;
 }
 
-int vixPlaybackOn(void)
+static int mach64_playback_on(void)
 {
   mach64_vid_display_video();
   return 0;
 }
 
-int vixPlaybackOff(void)
+static int mach64_playback_off(void)
 {
   mach64_vid_stop_video();
   return 0;
 }
 
-int vixPlaybackFrameSelect(unsigned int frame)
+static int mach64_frame_sel(unsigned int frame)
 {
     uint32_t off[6];
     int i;
@@ -960,19 +960,19 @@ for(i=0; i<10000000; i++);
     return 0;
 }
 
-vidix_video_eq_t equal =
+static vidix_video_eq_t equal =
 {
  VEQ_CAP_BRIGHTNESS | VEQ_CAP_SATURATION
  ,
  0, 0, 0, 0, 0, 0, 0, 0 };
 
-int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
+static int mach64_get_eq( vidix_video_eq_t * eq)
 {
   memcpy(eq,&equal,sizeof(vidix_video_eq_t));
   return 0;
 }
 
-int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
+static int mach64_set_eq( const vidix_video_eq_t * eq)
 {
   int br,sat;
     if(eq->cap & VEQ_CAP_BRIGHTNESS) equal.brightness = eq->brightness;
@@ -994,13 +994,13 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
   return 0;
 }
 
-int vixGetGrKeys(vidix_grkey_t *grkey)
+static int mach64_get_gkeys(vidix_grkey_t *grkey)
 {
     memcpy(grkey, &mach64_grkey, sizeof(vidix_grkey_t));
     return(0);
 }
 
-int vixSetGrKeys(const vidix_grkey_t *grkey)
+static int mach64_set_gkeys(const vidix_grkey_t *grkey)
 {
     memcpy(&mach64_grkey, grkey, sizeof(vidix_grkey_t));
 
@@ -1064,3 +1064,22 @@ int vixSetGrKeys(const vidix_grkey_t *grkey)
 
     return(0);
 }
+
+VDXDriver mach64_drv = {
+  "mach64",
+  NULL,
+  .probe = mach64_probe,
+  .get_version = mach64_get_version,
+  .get_caps = mach64_get_caps,
+  .query_fourcc = mach64_query_fourcc,
+  .init = mach64_init,
+  .destroy = mach64_destroy,
+  .config_playback = mach64_config_playback,
+  .playback_on = mach64_playback_on,
+  .playback_off = mach64_playback_off,
+  .frame_sel = mach64_frame_sel,
+  .get_eq = mach64_get_eq,
+  .set_eq = mach64_set_eq,
+  .get_gkey = mach64_get_gkeys,
+  .set_gkey = mach64_set_gkeys,
+};

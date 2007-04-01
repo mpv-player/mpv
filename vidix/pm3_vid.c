@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "../libdha/pci_ids.h"
@@ -65,7 +66,7 @@ static vidix_capability_t pm3_cap =
 };
 
 
-unsigned int vixGetVersion(void)
+static unsigned int pm3_get_version(void)
 {
     return(VIDIX_VERSION);
 }
@@ -85,7 +86,7 @@ static int find_chip(unsigned chip_id)
   return -1;
 }
 
-int vixProbe(int verbose, int force)
+static int pm3_probe(int verbose, int force)
 {
     pciinfo_t lst[MAX_PCI_DEVICES];
     unsigned i,num_pci;
@@ -134,20 +135,20 @@ int vixProbe(int verbose, int force)
     printf("[pm3] " #reg " (%x) = %#lx (%li)\n", reg, _foo, _foo);	\
 }
 
-int vixInit(void)
+static int pm3_init(void)
 {
     pm3_reg_base = map_phys_mem(pci_info.base0, 0x20000);
     pm3_mem = map_phys_mem(pci_info.base2, 0x2000000);
     return 0;
 }
 
-void vixDestroy(void)
+static void pm3_destroy(void)
 {
     unmap_phys_mem(pm3_reg_base, 0x20000);
     unmap_phys_mem(pm3_mem, 0x2000000);
 }
 
-int vixGetCapability(vidix_capability_t *to)
+static int pm3_get_caps(vidix_capability_t *to)
 {
     memcpy(to, &pm3_cap, sizeof(vidix_capability_t));
     return 0;
@@ -164,7 +165,7 @@ static int is_supported_fourcc(uint32_t fourcc)
     }
 }
 
-int vixQueryFourcc(vidix_fourcc_t *to)
+static int pm3_query_fourcc(vidix_fourcc_t *to)
 {
     if(is_supported_fourcc(to->fourcc))
     {
@@ -228,7 +229,7 @@ static int frames[VID_PLAY_MAXFRAMES];
 
 static long overlay_mode, overlay_control;
 
-int vixConfigPlayback(vidix_playback_t *info)
+static int pm3_config_playback(vidix_playback_t *info)
 {
     int shrink, zoom;
     short src_w, drw_w;
@@ -339,7 +340,7 @@ int vixConfigPlayback(vidix_playback_t *info)
     return 0;
 }
 
-int vixPlaybackOn(void)
+static int pm3_playback_on(void)
 {
     TRACE_ENTER();
 
@@ -354,7 +355,7 @@ int vixPlaybackOn(void)
     return 0;
 }
 
-int vixPlaybackOff(void)
+static int pm3_playback_off(void)
 {
     RAMDAC_SET_REG(PM3RD_VideoOverlayControl,
 		   PM3RD_VideoOverlayControl_DISABLE);
@@ -368,8 +369,23 @@ int vixPlaybackOff(void)
     return 0;
 }
 
-int vixPlaybackFrameSelect(unsigned int frame)
+static int pm3_frame_select(unsigned int frame)
 {
     WRITE_REG(PM3VideoOverlayBase0, frames[frame]);
     return 0;
 }
+
+VDXDriver pm3_drv = {
+  "pm3",
+  NULL,
+  .probe = pm3_probe,
+  .get_version = pm3_get_version,
+  .get_caps = pm3_get_caps,
+  .query_fourcc = pm3_query_fourcc,
+  .init = pm3_init,
+  .destroy = pm3_destroy,
+  .config_playback = pm3_config_playback,
+  .playback_on = pm3_playback_on,
+  .playback_off = pm3_playback_off,
+  .frame_sel = pm3_frame_select,
+};

@@ -55,6 +55,7 @@
 #include <inttypes.h>
 
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "../libdha/pci_ids.h"
@@ -343,7 +344,7 @@ case 3:
 }
 #endif
 
-int vixPlaybackFrameSelect(unsigned int frame)
+static int mga_frame_select(unsigned int frame)
 {
     mga_next_frame = frame;
     if (mga_verbose>1) printf("[mga] frameselect: %d\n", mga_next_frame);
@@ -696,7 +697,7 @@ void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
 }
 #endif /* MGA_ALLOW_IRQ */
 
-int vixConfigPlayback(vidix_playback_t *config)
+static int mga_config_playback(vidix_playback_t *config)
 {
 	unsigned int i;
 	int x, y, sw, sh, dw, dh;
@@ -1152,7 +1153,7 @@ switch(config->fourcc){
     return(0);
 }
 
-int vixPlaybackOn(void)
+static int mga_playback_on(void)
 {
     if (mga_verbose) printf("[mga] playback on\n");
 
@@ -1171,7 +1172,7 @@ int vixPlaybackOn(void)
     return(0);
 }
 
-int vixPlaybackOff(void)
+static int mga_playback_off(void)
 {
     if (mga_verbose) printf("[mga] playback off\n");
 
@@ -1187,7 +1188,7 @@ int vixPlaybackOff(void)
     return(0);
 }
 
-int vixProbe(int verbose,int force)
+static int mga_probe(int verbose,int force)
 {
 	pciinfo_t lst[MAX_PCI_DEVICES];
 	unsigned int i, num_pci;
@@ -1258,7 +1259,7 @@ card_found:
 	return(0);
 }
 
-int vixInit(void)
+static int mga_init(void)
 {
     unsigned int card_option = 0;
     int err;
@@ -1387,7 +1388,7 @@ int vixInit(void)
     return(0);
 }
 
-void vixDestroy(void)
+static void mga_destroy(void)
 {
     if (mga_verbose) printf("[mga] destroy\n");
 
@@ -1411,7 +1412,7 @@ void vixDestroy(void)
     return;
 }
 
-int vixQueryFourcc(vidix_fourcc_t *to)
+static int mga_query_fourcc(vidix_fourcc_t *to)
 {
     if (mga_verbose) printf("[mga] query fourcc (%x)\n", to->fourcc);
 
@@ -1435,31 +1436,31 @@ int vixQueryFourcc(vidix_fourcc_t *to)
     return(0);
 }
 
-unsigned int vixGetVersion(void)
+static unsigned int mga_get_version(void)
 {
     return(VIDIX_VERSION);
 }
 
-int vixGetCapability(vidix_capability_t *to)
+static int mga_get_caps(vidix_capability_t *to)
 {
     memcpy(to, &mga_cap, sizeof(vidix_capability_t));
     return(0);
 }
 
-int vixGetGrKeys(vidix_grkey_t *grkey)
+static int mga_get_gkeys(vidix_grkey_t *grkey)
 {
     memcpy(grkey, &mga_grkey, sizeof(vidix_grkey_t));
     return(0);
 }
 
-int vixSetGrKeys(const vidix_grkey_t *grkey)
+static int mga_set_gkeys(const vidix_grkey_t *grkey)
 {
     memcpy(&mga_grkey, grkey, sizeof(vidix_grkey_t));
     mga_vid_write_regs(0);
     return(0);
 }
 
-int vixPlaybackSetEq( const vidix_video_eq_t * eq)
+static int mga_set_eq( const vidix_video_eq_t * eq)
 {
     /* contrast and brightness control isn't supported on G200 - alex */
     if (!is_g400)
@@ -1487,7 +1488,7 @@ int vixPlaybackSetEq( const vidix_video_eq_t * eq)
     return(0);
 }
 
-int vixPlaybackGetEq( vidix_video_eq_t * eq)
+static int mga_get_eq( vidix_video_eq_t * eq)
 {
     /* contrast and brightness control isn't supported on G200 - alex */
     if (!is_g400)
@@ -1506,3 +1507,28 @@ int vixPlaybackGetEq( vidix_video_eq_t * eq)
 
     return(0);
 }
+
+#ifndef CRTC2
+VDXDriver mga_drv = {
+  "mga",
+#else
+VDXDriver mga_crtc2_drv = {
+  "mga_crtc2",
+#endif
+  NULL,
+    
+  .probe = mga_probe,
+  .get_version = mga_get_version,
+  .get_caps = mga_get_caps,
+  .query_fourcc = mga_query_fourcc,
+  .init = mga_init,
+  .destroy = mga_destroy,
+  .config_playback = mga_config_playback,
+  .playback_on = mga_playback_on,
+  .playback_off = mga_playback_off,
+  .frame_sel = mga_frame_select,
+  .get_eq = mga_get_eq,
+  .set_eq = mga_set_eq,
+  .get_gkey = mga_get_gkeys,
+  .set_gkey = mga_set_gkeys,
+};

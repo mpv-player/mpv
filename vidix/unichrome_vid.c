@@ -40,6 +40,7 @@
 #include <unistd.h>
 
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "../libdha/pci_ids.h"
@@ -120,8 +121,8 @@ static unsigned short uc_card_ids[] = {
  *
  * @return vidix version number.
  */
-unsigned int
-vixGetVersion (void)
+static unsigned int
+unichrome_get_version (void)
 {
   return (VIDIX_VERSION);
 }
@@ -474,8 +475,8 @@ uc_ovl_vcmd_wait (volatile uint8_t * vio)
  * @returns 0 if it can handle something in PC.
  *          a negative error code otherwise.
  */
-int
-vixProbe (int verbose, int force)
+static int
+unichrome_probe (int verbose, int force)
 {
   pciinfo_t lst[MAX_PCI_DEVICES];
   unsigned i, num_pci;
@@ -526,8 +527,8 @@ vixProbe (int verbose, int force)
  * @returns 0 if ok.
  *          a negative error code otherwise.
  */
-int
-vixInit (void)
+static int
+unichrome_init (void)
 {
   long tmp;
   uc_mem = map_phys_mem (pci_info.base0, VIDEOMEMORY_SIZE);
@@ -576,8 +577,8 @@ vixInit (void)
 /**
  * @brief Destroys driver.
  */
-void
-vixDestroy (void)
+static void
+unichrome_destroy (void)
 {
 #ifdef DEBUG_LOGFILE
   if (logfile)
@@ -602,8 +603,8 @@ vixDestroy (void)
  *
  * @returns 0.
  */
-int
-vixGetCapability (vidix_capability_t * to)
+static int
+unichrome_get_caps (vidix_capability_t * to)
 {
   memcpy (to, &uc_cap, sizeof (vidix_capability_t));
   return 0;
@@ -644,8 +645,8 @@ is_supported_fourcc (uint32_t fourcc)
  * @returns 0 if ok.
  *          errno otherwise.
  */
-int
-vixQueryFourcc (vidix_fourcc_t * to)
+static int
+unichrome_query_fourcc (vidix_fourcc_t * to)
 {
   if (is_supported_fourcc (to->fourcc))
     {
@@ -668,8 +669,8 @@ vixQueryFourcc (vidix_fourcc_t * to)
  *
  * @return 0.
  */
-int
-vixGetGrKeys (vidix_grkey_t * grkey)
+static int
+unichrome_get_gkey (vidix_grkey_t * grkey)
 {
   memcpy (grkey, &uc_grkey, sizeof (vidix_grkey_t));
   return (0);
@@ -682,8 +683,8 @@ vixGetGrKeys (vidix_grkey_t * grkey)
  *
  * @return 0.
  */
-int
-vixSetGrKeys (const vidix_grkey_t * grkey)
+static int
+unichrome_set_gkey (const vidix_grkey_t * grkey)
 {
   unsigned long dwCompose = VIDEO_IN (vio, V_COMPOSE_MODE) & ~0x0f;
   memcpy (&uc_grkey, grkey, sizeof (vidix_grkey_t));
@@ -714,7 +715,7 @@ vixSetGrKeys (const vidix_grkey_t * grkey)
 /**
  * @brief Unichrome driver equalizer capabilities.
  */
-vidix_video_eq_t equal = {
+static vidix_video_eq_t equal = {
   VEQ_CAP_BRIGHTNESS | VEQ_CAP_SATURATION | VEQ_CAP_HUE,
   300, 100, 0, 0, 0, 0, 0, 0
 };
@@ -727,8 +728,8 @@ vidix_video_eq_t equal = {
  *
  * @return 0.
  */
-int
-vixPlaybackGetEq (vidix_video_eq_t * eq)
+static int
+unichrome_get_eq (vidix_video_eq_t * eq)
 {
   memcpy (eq, &equal, sizeof (vidix_video_eq_t));
   return 0;
@@ -741,8 +742,8 @@ vixPlaybackGetEq (vidix_video_eq_t * eq)
  *
  * @return 0.
  */
-int
-vixPlaybackSetEq (const vidix_video_eq_t * eq)
+static int
+unichrome_set_eq (const vidix_video_eq_t * eq)
 {
   return 0;
 }
@@ -752,6 +753,8 @@ vixPlaybackSetEq (const vidix_video_eq_t * eq)
  */
 static int YOffs, UOffs, VOffs;
 
+static int unichrome_frame_select (unsigned int frame);
+
 /**
  * @brief Configure driver for playback. Driver should prepare BES.
  *
@@ -760,8 +763,8 @@ static int YOffs, UOffs, VOffs;
  * @returns  0 in case of success.
  *          -1 otherwise.
  */
-int
-vixConfigPlayback (vidix_playback_t * info)
+static int
+unichrome_config_playback (vidix_playback_t * info)
 {
   int src_w, drw_w;
   int src_h, drw_h;
@@ -896,7 +899,7 @@ vixConfigPlayback (vidix_playback_t * info)
   VIDEO_OUT (vio, V1_ZOOM_CONTROL, zoom);
 
   /* Configure buffer address and execute the changes now! */
-  vixPlaybackFrameSelect (0);
+  unichrome_frame_select (0);
 
   return 0;
 }
@@ -906,8 +909,8 @@ vixConfigPlayback (vidix_playback_t * info)
  *
  * @return 0.
  */
-int
-vixPlaybackOn (void)
+static int
+unichrome_playback_on (void)
 {
   LOGWRITE ("Enable overlay\n");
 
@@ -926,8 +929,8 @@ vixPlaybackOn (void)
  *
  * @return 0.
  */
-int
-vixPlaybackOff (void)
+static int
+unichrome_playback_off (void)
 {
   LOGWRITE ("Disable overlay\n");
 
@@ -956,8 +959,8 @@ vixPlaybackOff (void)
  * @note This function is used only for double and triple buffering
  *       and never used for single buffering playback.
  */
-int
-vixPlaybackFrameSelect (unsigned int frame)
+static int
+unichrome_frame_select (unsigned int frame)
 {
   LOGWRITE ("Frame select\n");
 
@@ -974,3 +977,22 @@ vixPlaybackFrameSelect (unsigned int frame)
 
   return 0;
 }
+
+VDXDriver unichrome_drv = {
+  "unichrome",
+  NULL,
+  .probe = unichrome_probe,
+  .get_version = unichrome_get_version,
+  .get_caps = unichrome_get_caps,
+  .query_fourcc = unichrome_query_fourcc,
+  .init = unichrome_init,
+  .destroy = unichrome_destroy,
+  .config_playback = unichrome_config_playback,
+  .playback_on = unichrome_playback_on,
+  .playback_off = unichrome_playback_off,
+  .frame_sel = unichrome_frame_select,
+  .get_eq = unichrome_get_eq,
+  .set_eq = unichrome_set_eq,
+  .get_gkey = unichrome_get_gkey,
+  .set_gkey = unichrome_set_gkey,
+};

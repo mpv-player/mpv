@@ -25,6 +25,37 @@ extern "C" {
 
 #include "vidix.h"
 
+typedef struct VDXDriver {
+  const char *name;
+  struct VDXDriver *next;
+  int (* probe) (int verbose, int force);
+  unsigned int (* get_version)(void);
+  int (* get_caps) (vidix_capability_t *cap);
+  int (*query_fourcc)(vidix_fourcc_t *);
+  int (*init)(void);
+  void (*destroy)(void);
+  int (*config_playback)(vidix_playback_t *);
+  int (*playback_on)( void );
+  int (*playback_off)( void );
+  /* Functions below can be missed in driver ;) */
+  int (*frame_sel)( unsigned frame_idx );
+  int (*get_eq)( vidix_video_eq_t * );
+  int (*set_eq)( const vidix_video_eq_t * );
+  int (*get_deint)( vidix_deinterlace_t * );
+  int (*set_deint)( const vidix_deinterlace_t * );
+  int (*copy_frame)( const vidix_dma_t * );
+  int (*get_gkey)( vidix_grkey_t * );
+  int (*set_gkey)( const vidix_grkey_t * );
+  int (*get_num_fx)( unsigned * );
+  int (*get_fx)( vidix_oem_fx_t * );
+  int (*set_fx)( const vidix_oem_fx_t * );
+} VDXDriver;
+
+typedef struct VDXContext {
+  VDXDriver *drv;
+  /* might be filled in by much more info later on */
+} VDXContext;
+
 typedef void * VDL_HANDLE;
 
 			/* returns library version */

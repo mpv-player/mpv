@@ -39,6 +39,7 @@
 #include <math.h>
 
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "../libdha/pci_ids.h"
@@ -768,8 +769,8 @@ static void SavageStreamsOff(void)
  *
  * @return vidix version number.
  */
-unsigned int
-vixGetVersion (void)
+static unsigned int
+savage_get_version (void)
 {
   return (VIDIX_VERSION);
 }
@@ -803,7 +804,7 @@ static int find_chip(unsigned chip_id){
  *          a negative error code otherwise.
  */
 
-int vixProbe(int verbose, int force){
+static int savage_probe(int verbose, int force){
     pciinfo_t lst[MAX_PCI_DEVICES];
     unsigned i,num_pci;
     int err;
@@ -849,8 +850,8 @@ int vixProbe(int verbose, int force){
  * @returns 0 if ok.
  *          a negative error code otherwise.
  */
-int
-vixInit (void)
+static int
+savage_init (void)
 {
 	int mtrr;
   unsigned char config1, m, n, n1, n2, sr8, cr3f, cr66 = 0, tmp;
@@ -1033,8 +1034,8 @@ vixInit (void)
 /**
  * @brief Destroys driver.
  */
-void
-vixDestroy (void)
+static void
+savage_destroy (void)
 {
 	unmap_phys_mem(info->video_base, info->chip.fbsize);
 	unmap_phys_mem(info->control_base, SAVAGE_NEWMMIO_REGSIZE);
@@ -1048,8 +1049,8 @@ vixDestroy (void)
  *
  * @returns 0.
  */
-int
-vixGetCapability (vidix_capability_t * to)
+static int
+savage_get_caps (vidix_capability_t * to)
 {
   memcpy (to, &savage_cap, sizeof (vidix_capability_t));
   return 0;
@@ -1091,8 +1092,8 @@ is_supported_fourcc (uint32_t fourcc)
  * @returns 0 if ok.
  *          errno otherwise.
  */
-int
-vixQueryFourcc (vidix_fourcc_t * to)
+static int
+savage_query_fourcc (vidix_fourcc_t * to)
 {
   if (is_supported_fourcc (to->fourcc))
     {
@@ -1133,8 +1134,8 @@ vixGetGrKeys (vidix_grkey_t * grkey)
  *
  * @return 0.
  */
-int
-vixSetGrKeys (const vidix_grkey_t * grkey)
+static int
+savage_set_gkeys (const vidix_grkey_t * grkey)
 {
   if (grkey->ckey.op == CKEY_FALSE)
   {
@@ -1156,7 +1157,7 @@ vixSetGrKeys (const vidix_grkey_t * grkey)
 /**
  * @brief Unichrome driver equalizer capabilities.
  */
-vidix_video_eq_t equal = {
+static vidix_video_eq_t equal = {
   VEQ_CAP_BRIGHTNESS | VEQ_CAP_SATURATION | VEQ_CAP_HUE,
   300, 100, 0, 0, 0, 0, 0, 0
 };
@@ -1169,8 +1170,8 @@ vidix_video_eq_t equal = {
  *
  * @return 0.
  */
-int
-vixPlaybackGetEq (vidix_video_eq_t * eq)
+static int
+savage_get_eq (vidix_video_eq_t * eq)
 {
   memcpy (eq, &equal, sizeof (vidix_video_eq_t));
   return 0;
@@ -1183,8 +1184,8 @@ vixPlaybackGetEq (vidix_video_eq_t * eq)
  *
  * @return 0.
  */
-int
-vixPlaybackSetEq (const vidix_video_eq_t * eq)
+static int
+savage_set_eq (const vidix_video_eq_t * eq)
 {
   return 0;
 }
@@ -1202,8 +1203,8 @@ static int YOffs, UOffs, VOffs;
  * @returns  0 in case of success.
  *          -1 otherwise.
  */
-int
-vixConfigPlayback (vidix_playback_t * vinfo)
+static int
+savage_config_playback (vidix_playback_t * vinfo)
 {
   int uv_size, swap_uv;
   unsigned int i;
@@ -1325,8 +1326,8 @@ vixConfigPlayback (vidix_playback_t * vinfo)
  *
  * @return 0.
  */
-int
-vixPlaybackOn (void)
+static int
+savage_playback_on (void)
 {
  // FIXME: enable
   SavageDisplayVideoOld();
@@ -1339,8 +1340,8 @@ vixPlaybackOn (void)
  *
  * @return 0.
  */
-int
-vixPlaybackOff (void)
+static int
+savage_playback_off (void)
 {
 	// otherwise we wont disable streams properly in new xorg
 	// FIXME: shouldnt this be enabled?
@@ -1365,8 +1366,8 @@ vixPlaybackOff (void)
  *       and never used for single buffering playback.
  */
 #if 0
-int
-vixPlaybackFrameSelect (unsigned int frame)
+static int
+savage_frame_select (unsigned int frame)
 {
 ////FIXME ADD
 //    savage_overlay_start(info, frame);
@@ -1472,4 +1473,22 @@ void debugout(unsigned int addr, unsigned int val){
     fprintf(stderr,":\t\t 0x%08X = %u\n",val,val);
 }
 
-
+VDXDriver savage_drv = {
+  "savage",
+  NULL,
+  .probe = savage_probe,
+  .get_version = savage_get_version,
+  .get_caps = savage_get_caps,
+  .query_fourcc = savage_query_fourcc,
+  .init = savage_init,
+  .destroy = savage_destroy,
+  .config_playback = savage_config_playback,
+  .playback_on = savage_playback_on,
+  .playback_off = savage_playback_off,
+#if 0
+  .frame_sel = savage_frame_select,
+#endif
+  .get_eq = savage_get_eq,
+  .set_eq = savage_set_eq,
+  .set_gkey = savage_set_gkeys,
+};

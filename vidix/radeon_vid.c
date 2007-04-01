@@ -22,6 +22,7 @@
 #include "../libdha/pci_ids.h"
 #include "../libdha/pci_names.h"
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "radeon.h"
@@ -794,7 +795,7 @@ static void radeon_vid_make_default(void)
 }
 
 
-unsigned vixGetVersion( void ) { return VIDIX_VERSION; }
+static unsigned int radeon_get_version( void ) { return VIDIX_VERSION; }
 
 static unsigned short ati_card_ids[] = 
 {
@@ -930,7 +931,7 @@ static int find_chip(unsigned chip_id)
 static pciinfo_t pci_info;
 static int probed=0;
 
-vidix_capability_t def_cap = 
+static vidix_capability_t def_cap = 
 {
 #ifdef RAGE128
     "BES driver for Rage128 cards",
@@ -981,7 +982,7 @@ static void probe_fireGL_driver(void) {
 }
 #endif
 
-int vixProbe( int verbose,int force )
+static int radeon_probe( int verbose,int force )
 {
   pciinfo_t lst[MAX_PCI_DEVICES];
   unsigned i,num_pci;
@@ -1139,7 +1140,7 @@ int vixProbe( int verbose,int force )
 
 static void radeon_vid_dump_regs( void ); /* forward declaration */
 
-int vixInit( void )
+static int radeon_init( void )
 {
   int err;
   if(!probed) 
@@ -1239,7 +1240,7 @@ int vixInit( void )
   return 0;  
 }
 
-void vixDestroy( void )
+static void radeon_destroy( void )
 {
   /* remove colorkeying */
   radeon_fifo_wait(3);
@@ -1264,7 +1265,7 @@ void vixDestroy( void )
   unmap_phys_mem(radeon_mmio_base,0xFFFF);
 }
 
-int vixGetCapability(vidix_capability_t *to)
+static int radeon_get_caps(vidix_capability_t *to)
 {
   memcpy(to,&def_cap,sizeof(vidix_capability_t));
   return 0; 
@@ -1275,7 +1276,7 @@ int vixGetCapability(vidix_capability_t *to)
   YUY2, UYVY, DDES, OGLT, OGL2, OGLS, OGLB, OGNT, OGNZ, OGNS,
   IF09, YVU9, IMC4, M2IA, IYUV, VBID, DXT1, DXT2, DXT3, DXT4, DXT5
 */
-uint32_t supported_fourcc[] = 
+static uint32_t supported_fourcc[] = 
 {
   IMGFMT_Y800, IMGFMT_Y8, IMGFMT_YVU9, IMGFMT_IF09,
   IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 
@@ -1295,7 +1296,7 @@ inline static int is_supported_fourcc(uint32_t fourcc)
   return 0;
 }
 
-int vixQueryFourcc(vidix_fourcc_t *to)
+static int radeon_query_fourcc(vidix_fourcc_t *to)
 {
     if(is_supported_fourcc(to->fourcc))
     {
@@ -1803,7 +1804,7 @@ static void radeon_compute_framesize(vidix_playback_t *info)
   }
 }
 
-int vixConfigPlayback(vidix_playback_t *info)
+static int radeon_config_playback(vidix_playback_t *info)
 {
   unsigned rgb_size,nfr;
   if(!is_supported_fourcc(info->fourcc)) return ENOSYS;
@@ -1844,19 +1845,19 @@ int vixConfigPlayback(vidix_playback_t *info)
   return 0;
 }
 
-int vixPlaybackOn( void )
+static int radeon_playback_on( void )
 {
   radeon_vid_display_video();
   return 0;
 }
 
-int vixPlaybackOff( void )
+static int radeon_playback_off( void )
 {
   radeon_vid_stop_video();
   return 0;
 }
 
-int vixPlaybackFrameSelect(unsigned frame)
+static int radeon_frame_select(unsigned frame)
 {
     uint32_t off[6];
     int prev_frame= (frame-1+besr.vid_nbufs) % besr.vid_nbufs;
@@ -1889,7 +1890,7 @@ int vixPlaybackFrameSelect(unsigned frame)
     return 0;
 }
 
-vidix_video_eq_t equal =
+static vidix_video_eq_t equal =
 {
  VEQ_CAP_BRIGHTNESS | VEQ_CAP_SATURATION
 #ifndef RAGE128
@@ -1898,7 +1899,7 @@ vidix_video_eq_t equal =
  ,
  0, 0, 0, 0, 0, 0, 0, 0 };
 
-int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
+static int radeon_get_eq( vidix_video_eq_t * eq)
 {
   memcpy(eq,&equal,sizeof(vidix_video_eq_t));
   return 0;
@@ -1913,7 +1914,7 @@ int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
 #define RTFCheckParam(a) {if((a)<-1000) (a)=-1000; if((a)>1000) (a)=1000;}
 #endif
 
-int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
+static int radeon_set_eq( const vidix_video_eq_t * eq)
 {
 #ifdef RAGE128
   int br,sat;
@@ -1958,7 +1959,7 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
   return 0;
 }
 
-int 	vixPlaybackSetDeint( const vidix_deinterlace_t * info)
+static int radeon_playback_set_deint (const vidix_deinterlace_t * info)
 {
   unsigned sflg;
   switch(info->flags)
@@ -1996,7 +1997,7 @@ int 	vixPlaybackSetDeint( const vidix_deinterlace_t * info)
   return 0;  
 }
 
-int 	vixPlaybackGetDeint( vidix_deinterlace_t * info)
+static int radeon_playback_get_deint (vidix_deinterlace_t * info)
 {
   if(!besr.deinterlace_on) info->flags = CFG_NON_INTERLACED;
   else
@@ -2087,15 +2088,42 @@ static void set_gr_key( void )
     OUTREG(OV0_KEY_CNTL,besr.ckey_cntl);
 }
 
-int vixGetGrKeys(vidix_grkey_t *grkey)
+static int radeon_get_gkey(vidix_grkey_t *grkey)
 {
     memcpy(grkey, &radeon_grkey, sizeof(vidix_grkey_t));
     return(0);
 }
 
-int vixSetGrKeys(const vidix_grkey_t *grkey)
+static int radeon_set_gkey(const vidix_grkey_t *grkey)
 {
     memcpy(&radeon_grkey, grkey, sizeof(vidix_grkey_t));
     set_gr_key();
     return(0);
 }
+
+#ifdef RAGE128
+VDXDriver rage128_drv = {
+  "rage128",
+#else
+VDXDriver radeon_drv = {
+  "radeon",
+#endif
+  NULL,
+    
+  .probe = radeon_probe,
+  .get_version = radeon_get_version,
+  .get_caps = radeon_get_caps,
+  .query_fourcc = radeon_query_fourcc,
+  .init = radeon_init,
+  .destroy = radeon_destroy,
+  .config_playback = radeon_config_playback,
+  .playback_on = radeon_playback_on,
+  .playback_off = radeon_playback_off,
+  .frame_sel = radeon_frame_select,
+  .get_eq = radeon_get_eq,
+  .set_eq = radeon_set_eq,
+  .get_deint = radeon_playback_get_deint,
+  .set_deint = radeon_playback_set_deint,
+  .get_gkey = radeon_get_gkey,
+  .set_gkey = radeon_set_gkey,
+};

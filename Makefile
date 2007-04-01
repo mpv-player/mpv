@@ -78,7 +78,7 @@ LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
                input/libinput.a \
 
-LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
+LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a libdha/libdha.a
 LIBS_MPLAYER-$(GUI)               += Gui/libgui.a
 LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
 

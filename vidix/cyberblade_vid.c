@@ -44,6 +44,7 @@
 #include <unistd.h>
 
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "../libdha/pci_ids.h"
@@ -135,7 +136,7 @@ static vidix_capability_t cyberblade_cap =
 };
 
 
-unsigned int vixGetVersion(void)
+static unsigned int cyberblade_get_version(void)
 {
 	return(VIDIX_VERSION);
 }
@@ -162,7 +163,7 @@ static int find_chip(unsigned chip_id)
   return -1;
 }
 
-int vixProbe(int verbose, int force)
+static int cyberblade_probe(int verbose, int force)
 {
 	pciinfo_t lst[MAX_PCI_DEVICES];
 	unsigned i,num_pci;
@@ -206,7 +207,7 @@ int vixProbe(int verbose, int force)
 }
 
 
-int vixInit(void)
+static int cyberblade_init(void)
 {
 	cyberblade_mem = map_phys_mem(pci_info.base0, 0x800000); 
 	enable_app_io();
@@ -222,7 +223,7 @@ int vixInit(void)
 	return 0;
 }
 
-void vixDestroy(void)
+static void cyberblade_destroy(void)
 {
 	int protect;
 #ifdef DEBUG_LOGFILE
@@ -244,7 +245,7 @@ void vixDestroy(void)
 }
 
 
-int vixGetCapability(vidix_capability_t *to)
+static int cyberblade_get_caps(vidix_capability_t *to)
 {
 	memcpy(to, &cyberblade_cap, sizeof(vidix_capability_t));
 	return 0;
@@ -266,7 +267,7 @@ static int is_supported_fourcc(uint32_t fourcc)
 	}
 }
 
-int vixQueryFourcc(vidix_fourcc_t *to)
+static int cyberblade_query_fourcc(vidix_fourcc_t *to)
 {
 	if(is_supported_fourcc(to->fourcc))
 	{
@@ -288,13 +289,13 @@ static int frames[VID_PLAY_MAXFRAMES];
 
 static vidix_grkey_t cyberblade_grkey;
 
-int vixGetGrKeys(vidix_grkey_t *grkey)
+static int cyberblade_get_gkeys(vidix_grkey_t *grkey)
 {
 	memcpy(grkey, &cyberblade_grkey, sizeof(vidix_grkey_t));
 	return(0);
 }
 
-int vixSetGrKeys(const vidix_grkey_t *grkey)
+static int cyberblade_set_gkeys(const vidix_grkey_t *grkey)
 {
 	int pixfmt=CRINB(0x38);
 	int protect;
@@ -329,19 +330,19 @@ int vixSetGrKeys(const vidix_grkey_t *grkey)
 }
 
 
-vidix_video_eq_t equal =
+static vidix_video_eq_t equal =
 {
 	VEQ_CAP_BRIGHTNESS | VEQ_CAP_SATURATION | VEQ_CAP_HUE,
 	300, 100, 0, 0, 0, 0, 0, 0
 };
 
-int vixPlaybackGetEq( vidix_video_eq_t * eq)
+static int cyberblade_get_eq( vidix_video_eq_t * eq)
 {
   memcpy(eq,&equal,sizeof(vidix_video_eq_t));
   return 0;
 }
 
-int vixPlaybackSetEq( const vidix_video_eq_t * eq)
+static int cyberblade_set_eq( const vidix_video_eq_t * eq)
 {
 	int br,sat,cr,protect;
 	if(eq->cap & VEQ_CAP_BRIGHTNESS) equal.brightness = eq->brightness;
@@ -381,7 +382,7 @@ int vixPlaybackSetEq( const vidix_video_eq_t * eq)
 
 static int YOffs,UOffs,VOffs;
 
-int vixConfigPlayback(vidix_playback_t *info)
+static int cyberblade_config_playback(vidix_playback_t *info)
 {
 	int shrink, zoom;
 	int src_w, drw_w;
@@ -465,7 +466,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 	SROUTB(0x21, 0x34); /* Signature control */
 	SROUTB(0x37, 0x30); /* Video key mode */
 
-        vixSetGrKeys(&cyberblade_grkey);
+        cyberblade_set_gkeys(&cyberblade_grkey);
 
 	/* compute_scale_factor(&src_w, &drw_w, &shrink, &zoom); */
 	{
@@ -598,7 +599,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 		SROUTB(0x85, ((base0+info->offset.u) >> 19) &0xf); /* Upper 4 bits of start address */
 	}
 
-	vixPlaybackSetEq(&equal);
+	cyberblade_set_eq(&equal);
 
 	/* Protect hardware registers again */
 	SROUTB(0x11, protect);
@@ -606,7 +607,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 }
 
 
-int vixPlaybackOn(void)
+static int cyberblade_playback_on(void)
 {
 	LOGWRITE("Enable overlay\n");
 	CROUTB(0x8E, 0xd4); /* VDE Flags*/
@@ -615,7 +616,7 @@ int vixPlaybackOn(void)
 }
 
 
-int vixPlaybackOff(void)
+static int cyberblade_playback_off(void)
 {
         LOGWRITE("Disable overlay\n"); 
 	CROUTB(0x8E, 0xc4); /* VDE Flags*/
@@ -624,7 +625,7 @@ int vixPlaybackOff(void)
 }
 
 
-int vixPlaybackFrameSelect(unsigned int frame)
+static int cyberblade_frame_sel(unsigned int frame)
 {
 	int protect;
         LOGWRITE("Frame select\n"); 
@@ -644,4 +645,21 @@ int vixPlaybackFrameSelect(unsigned int frame)
 	return 0;
 }
 
-
+VDXDriver cyberblade_drv = {
+  "cyberblade",
+  NULL,
+  .probe = cyberblade_probe,
+  .get_version = cyberblade_get_version,
+  .get_caps = cyberblade_get_caps,
+  .query_fourcc = cyberblade_query_fourcc,
+  .init = cyberblade_init,
+  .destroy = cyberblade_destroy,
+  .config_playback = cyberblade_config_playback,
+  .playback_on = cyberblade_playback_on,
+  .playback_off = cyberblade_playback_off,
+  .frame_sel = cyberblade_frame_sel,
+  .get_eq = cyberblade_get_eq,
+  .set_eq = cyberblade_set_eq,
+  .get_gkey = cyberblade_get_gkeys,
+  .set_gkey = cyberblade_set_gkeys,
+};

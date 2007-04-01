@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "../libdha/pci_ids.h"
@@ -148,7 +149,7 @@ static vidix_capability_t sis_cap = {
     {0, 0, 0, 0}
 };
 
-vidix_video_eq_t sis_equal = {
+static vidix_video_eq_t sis_equal = {
     VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST,
     200, 0, 0, 0, 0, 0, 0, 0
 };
@@ -237,7 +238,7 @@ static uint8_t vblank_active_CRT2(void)
 }
 
 
-unsigned int vixGetVersion(void)
+static unsigned int sis_get_version(void)
 {
     return (VIDIX_VERSION);
 }
@@ -252,7 +253,7 @@ static int find_chip(unsigned chip_id)
     return -1;
 }
 
-int vixProbe(int verbose, int force)
+static int sis_probe(int verbose, int force)
 {
     pciinfo_t lst[MAX_PCI_DEVICES];
     unsigned i, num_pci;
@@ -343,7 +344,7 @@ int vixProbe(int verbose, int force)
     return err;
 }
 
-int vixInit(void)
+static int sis_init(void)
 {
     uint8_t sr_data, cr_data, cr_data2;
     char *env_overlay_crt;
@@ -406,14 +407,14 @@ int vixInit(void)
     return 0;
 }
 
-void vixDestroy(void)
+static void sis_destroy(void)
 {
     /* unmap_phys_mem(sis_reg_base, 0x20000); */
     /* JCP: see above, hence also a hack. */
     unmap_phys_mem(sis_mem_base, 0x1000000);
 }
 
-int vixGetCapability(vidix_capability_t * to)
+static int sis_get_caps(vidix_capability_t * to)
 {
     memcpy(to, &sis_cap, sizeof(vidix_capability_t));
     return 0;
@@ -434,7 +435,7 @@ static int is_supported_fourcc(uint32_t fourcc)
     }
 }
 
-int vixQueryFourcc(vidix_fourcc_t * to)
+static int sis_query_fourcc(vidix_fourcc_t * to)
 {
     if (is_supported_fourcc(to->fourcc)) {
 	to->depth = VID_DEPTH_8BPP | VID_DEPTH_16BPP | VID_DEPTH_32BPP;
@@ -595,7 +596,9 @@ static void init_overlay(void)
     }
 }
 
-int vixConfigPlayback(vidix_playback_t * info)
+static int sis_set_eq(const vidix_video_eq_t * eq);
+
+static int sis_config_playback(vidix_playback_t * info)
 {
     SISOverlayRec overlay;
     int srcOffsetX = 0, srcOffsetY = 0;
@@ -822,7 +825,7 @@ int vixConfigPlayback(vidix_playback_t * info)
 
     set_colorkey();
 
-    vixPlaybackSetEq(&sis_equal);
+    sis_set_eq(&sis_equal);
 
     /* set up video overlay registers */
     set_overlay(&overlay, index);
@@ -837,13 +840,13 @@ int vixConfigPlayback(vidix_playback_t * info)
     return 0;
 }
 
-int vixPlaybackOn(void)
+static int sis_playback_on(void)
 {
     setvideoregmask(Index_VI_Control_Misc0, 0x02, 0x02);
     return 0;
 }
 
-int vixPlaybackOff(void)
+static int sis_playback_off(void)
 {
     unsigned char sridx, cridx;
     sridx = inSISREG(SISSR);
@@ -855,7 +858,7 @@ int vixPlaybackOff(void)
     return 0;
 }
 
-int vixPlaybackFrameSelect(unsigned int frame)
+static int sis_frame_select(unsigned int frame)
 {
     uint8_t data;
     int index = 0;
@@ -925,26 +928,26 @@ int vixPlaybackFrameSelect(unsigned int frame)
     return 0;
 }
 
-int vixGetGrKeys(vidix_grkey_t * grkey)
+static int sis_get_gkeys(vidix_grkey_t * grkey)
 {
     memcpy(grkey, &sis_grkey, sizeof(vidix_grkey_t));
     return 0;
 }
 
-int vixSetGrKeys(const vidix_grkey_t * grkey)
+static int sis_set_gkeys(const vidix_grkey_t * grkey)
 {
     memcpy(&sis_grkey, grkey, sizeof(vidix_grkey_t));
     set_colorkey();
     return 0;
 }
 
-int vixPlaybackGetEq(vidix_video_eq_t * eq)
+static int sis_get_eq(vidix_video_eq_t * eq)
 {
     memcpy(eq, &sis_equal, sizeof(vidix_video_eq_t));
     return 0;
 }
 
-int vixPlaybackSetEq(const vidix_video_eq_t * eq)
+static int sis_set_eq(const vidix_video_eq_t * eq)
 {
     int br, sat, cr, hue;
     if (eq->cap & VEQ_CAP_BRIGHTNESS)
@@ -1558,3 +1561,23 @@ static void set_alpha(uint8_t alpha)
     setvideoreg(Index_VI_Key_Overlay_OP, data | (alpha << 4));
 }
 #endif
+
+VDXDriver sis_drv = {
+  "sis",
+  NULL,
+    
+  .probe = sis_probe,
+  .get_version = sis_get_version,
+  .get_caps = sis_get_caps,
+  .query_fourcc = sis_query_fourcc,
+  .init = sis_init,
+  .destroy = sis_destroy,
+  .config_playback = sis_config_playback,
+  .playback_on = sis_playback_on,
+  .playback_off = sis_playback_off,
+  .frame_sel = sis_frame_select,
+  .get_eq = sis_get_eq,
+  .set_eq = sis_set_eq,
+  .get_gkey = sis_get_gkeys,
+  .set_gkey = sis_set_gkeys,
+};

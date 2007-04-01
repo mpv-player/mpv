@@ -19,6 +19,7 @@
 
 
 #include "vidix.h"
+#include "vidixlib.h"
 #include "fourcc.h"
 #include "../libdha/libdha.h"
 #include "../libdha/pci_ids.h"
@@ -52,7 +53,7 @@ static vidix_capability_t nvidia_cap = {
 };
 
 
-unsigned int vixGetVersion(void){
+static unsigned int nv_get_version(void){
     return(VIDIX_VERSION);
 }
 
@@ -164,7 +165,7 @@ static int find_chip(unsigned chip_id){
   return -1;
 }
 
-int vixProbe(int verbose, int force){
+static int nv_probe(int verbose, int force){
     pciinfo_t lst[MAX_PCI_DEVICES];
     unsigned i,num_pci;
     int err;
@@ -703,7 +704,7 @@ static rivatv_info* info;
 
       
       
-int vixInit(void){
+static int nv_init(void){
 	int mtrr;
   info = calloc(1,sizeof(rivatv_info));
   info->control_base = map_phys_mem(pci_info.base0, 0x00C00000 + 0x00008000);
@@ -793,13 +794,13 @@ int vixInit(void){
   return 0;
 }
 
-void vixDestroy(void){
+static void nv_destroy(void){
   unmap_phys_mem(info->control_base ,0x00C00000 + 0x00008000);
   unmap_phys_mem(info->video_base, info->chip.fbsize);
   free(info);
 }
 
-int vixGetCapability(vidix_capability_t *to){
+static int nv_get_caps(vidix_capability_t *to){
     memcpy(to, &nvidia_cap, sizeof(vidix_capability_t));
     return 0;
 }
@@ -812,7 +813,7 @@ inline static int is_supported_fourcc(uint32_t fourcc)
 		return 0;
 }
 
-int vixQueryFourcc(vidix_fourcc_t *to){
+static int nv_query_fourcc(vidix_fourcc_t *to){
     if(is_supported_fourcc(to->fourcc)){
 	to->depth = VID_DEPTH_1BPP | VID_DEPTH_2BPP |
 		    VID_DEPTH_4BPP | VID_DEPTH_8BPP |
@@ -826,7 +827,7 @@ int vixQueryFourcc(vidix_fourcc_t *to){
     return ENOSYS;
 }
 
-int vixConfigPlayback(vidix_playback_t *vinfo){
+static int nv_config_playback(vidix_playback_t *vinfo){
     uint32_t i;
     printf("called %s\n", __FUNCTION__);
     if (! is_supported_fourcc(vinfo->fourcc))
@@ -872,17 +873,17 @@ int vixConfigPlayback(vidix_playback_t *vinfo){
     return 0;
 }
 
-int vixPlaybackOn(void){
+static int nv_playback_on(void){
     rivatv_overlay_start(info,info->cur_frame);
     return 0;
 }
 
-int vixPlaybackOff(void){
+static int nv_playback_off(void){
     rivatv_overlay_stop(info);
     return 0;
 }
 
-int vixSetGrKeys( const vidix_grkey_t * grkey){
+static int nv_set_gkeys( const vidix_grkey_t * grkey){
   if (grkey->ckey.op == CKEY_FALSE)
   {
     info->use_colorkey = 0;
@@ -897,7 +898,7 @@ int vixSetGrKeys( const vidix_grkey_t * grkey){
   return 0;
 }
 
-int vixPlaybackFrameSelect(unsigned int frame){
+static int nv_frame_sel(unsigned int frame){
 //  printf("selecting buffer %d\n", frame);
   rivatv_overlay_start(info, frame);
   if (info->num_frames >= 1)
@@ -905,7 +906,7 @@ int vixPlaybackFrameSelect(unsigned int frame){
   return 0;
 }
 
-int vixPlaybackSetEq(const vidix_video_eq_t *eq_parm) {
+static int nv_set_eq(const vidix_video_eq_t *eq_parm) {
   double angle;
   int16_t chrom_cos, chrom_sin;
   if (eq_parm->cap & VEQ_CAP_BRIGHTNESS)
@@ -928,8 +929,25 @@ int vixPlaybackSetEq(const vidix_video_eq_t *eq_parm) {
   return 0;
 }
 
-int vixPlaybackGetEq(vidix_video_eq_t *eq_parm) {
+static int nv_get_eq(vidix_video_eq_t *eq_parm) {
   memcpy(eq_parm, &eq.vals, sizeof(vidix_video_eq_t));
   return 0;
 }
 
+VDXDriver nvidia_drv = {
+  "nvidia",
+  NULL,
+  .probe = nv_probe,
+  .get_version = nv_get_version,
+  .get_caps = nv_get_caps,
+  .query_fourcc = nv_query_fourcc,
+  .init = nv_init,
+  .destroy = nv_destroy,
+  .config_playback = nv_config_playback,
+  .playback_on = nv_playback_on,
+  .playback_off = nv_playback_off,
+  .frame_sel = nv_frame_sel,
+  .get_eq = nv_get_eq,
+  .set_eq = nv_set_eq,
+  .set_gkey = nv_set_gkeys,
+};
