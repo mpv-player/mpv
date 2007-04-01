@@ -244,7 +244,7 @@ void getch2_disable(void){
 }
 
 #ifdef USE_ICONV
-char* get_term_charset()
+char* get_term_charset(void)
 {
     char* charset = NULL;
 #ifdef USE_LANGINFO

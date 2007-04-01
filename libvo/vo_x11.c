@@ -93,7 +93,7 @@ static int aspect;              // 1<<16 based fixed point aspect, so that the a
 static int old_vo_dwidth = -1;
 static int old_vo_dheight = -1;
 
-static void check_events()
+static void check_events(void)
 {
     int ret = vo_x11_check_events(mDisplay);
 

@@ -109,7 +109,7 @@ LIBVO_EXTERN(svga)
 
 
 //return number of 1'st free page or -1 if no free one
-static inline int page_find_free(){
+static inline int page_find_free(void){
 int i;
   for(i=0;i<max_pages;i++)
     if(PageStore[i].locks == PAGE_EMPTY) return i;

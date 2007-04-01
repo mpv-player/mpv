@@ -42,7 +42,7 @@ ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double 
 
 void ass_configure(ass_renderer_t* priv, int w, int h);
 void ass_configure_fonts(ass_renderer_t* priv);
-ass_library_t* ass_init();
+ass_library_t* ass_init(void);
 
 typedef struct {
 	ass_image_t* imgs;

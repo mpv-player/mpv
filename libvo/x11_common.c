@@ -2287,7 +2287,7 @@ static Atom xv_intern_atom_if_exists( char const * atom_name )
  * \brief Try to enable vsync for xv.
  * \return Returns -1 if not available, 0 on failure and 1 on success.
  */
-int vo_xv_enable_vsync()
+int vo_xv_enable_vsync(void)
 {
   Atom xv_atom = xv_intern_atom_if_exists("XV_SYNC_TO_VBLANK");
   if (xv_atom == None)
@@ -2343,7 +2343,7 @@ void vo_xv_get_max_img_dim( uint32_t * width, uint32_t * height )
  * Outputs the content of |ck_handling| as a readable message.
  *
  */
-void vo_xv_print_ck_info()
+void vo_xv_print_ck_info(void)
 {
   mp_msg( MSGT_VO, MSGL_V, "[xv common] " );
 
@@ -2411,7 +2411,7 @@ void vo_xv_print_ck_info()
  * NOTE: If vo_colorkey has bits set after the first 3 low order bytes
  *       we don't draw anything as this means it was forced to off.
  */
-int vo_xv_init_colorkey()
+int vo_xv_init_colorkey(void)
 {
   Atom xv_atom;
   int rez;

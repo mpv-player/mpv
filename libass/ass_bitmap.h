@@ -23,7 +23,7 @@
 
 typedef struct ass_synth_priv_s ass_synth_priv_t;
 
-ass_synth_priv_t* ass_synth_init();
+ass_synth_priv_t* ass_synth_init(void);
 void ass_synth_done(ass_synth_priv_t* priv);
 
 typedef struct bitmap_s {

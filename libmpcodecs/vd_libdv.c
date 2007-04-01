@@ -36,7 +36,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 static dv_decoder_t* global_rawdv_decoder=NULL;
 
-dv_decoder_t* init_global_rawdv_decoder()
+dv_decoder_t* init_global_rawdv_decoder(void)
 {
  if(!global_rawdv_decoder){
    global_rawdv_decoder=dv_decoder_new(TRUE,TRUE,FALSE);

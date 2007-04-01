@@ -157,7 +157,7 @@ static const struct {
     { 0, NULL }
 };
  
-char* get_term_charset()
+char* get_term_charset(void)
 {
     static char codepage[10];
     unsigned i, cpno = GetConsoleOutputCP();

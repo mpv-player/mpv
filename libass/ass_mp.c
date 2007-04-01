@@ -240,7 +240,7 @@ void ass_configure_fonts(ass_renderer_t* priv) {
 	free(family);
 }
 
-ass_library_t* ass_init() {
+ass_library_t* ass_init(void) {
 	ass_library_t* priv;
 	char* path = get_path("fonts");
 	priv = ass_library_init();

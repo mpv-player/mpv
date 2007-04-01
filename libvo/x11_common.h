@@ -74,7 +74,7 @@ extern unsigned int xv_port;
 extern int vo_xv_set_eq(uint32_t xv_port, char * name, int value);
 extern int vo_xv_get_eq(uint32_t xv_port, char * name, int *value);
 
-extern int vo_xv_enable_vsync();
+extern int vo_xv_enable_vsync(void);
 
 extern void vo_xv_get_max_img_dim( uint32_t * width, uint32_t * height );
 
@@ -96,7 +96,7 @@ typedef struct xv_ck_info_s
 extern xv_ck_info_t xv_ck_info;
 extern unsigned long xv_colorkey;
 
-extern int vo_xv_init_colorkey();
+extern int vo_xv_init_colorkey(void);
 extern void vo_xv_draw_colorkey(int32_t x, int32_t y, int32_t w, int32_t h);
 extern void xv_setup_colorkeyhandling(char const * ck_method_str, char const * ck_str);
 

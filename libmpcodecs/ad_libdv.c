@@ -32,7 +32,7 @@ static ad_info_t info =
 LIBAD_EXTERN(libdv)
 
 // defined in vd_libdv.c:
-dv_decoder_t*  init_global_rawdv_decoder();
+dv_decoder_t*  init_global_rawdv_decoder(void);
 
 static int preinit(sh_audio_t *sh_audio)
 {

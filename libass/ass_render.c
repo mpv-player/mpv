@@ -680,7 +680,7 @@ static unsigned interpolate_alpha(long long now,
 	return a;
 }
 
-static void reset_render_context();
+static void reset_render_context(void);
 
 /**
  * \brief Parse style override tag.
@@ -1293,7 +1293,7 @@ static void get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
  *   lines[].asc
  *   lines[].desc
  */
-static void measure_text()
+static void measure_text(void)
 {
 	int cur_line = 0, max_asc = 0, max_desc = 0;
 	int i;

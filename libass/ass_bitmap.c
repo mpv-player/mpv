@@ -104,7 +104,7 @@ static void resize_tmp(ass_synth_priv_t* priv, int w, int h)
 	priv->tmp = malloc((priv->tmp_w + 1) * priv->tmp_h * sizeof(short));
 }
 
-ass_synth_priv_t* ass_synth_init()
+ass_synth_priv_t* ass_synth_init(void)
 {
 	ass_synth_priv_t* priv = calloc(1, sizeof(ass_synth_priv_t));
 	generate_tables(priv, blur_radius);

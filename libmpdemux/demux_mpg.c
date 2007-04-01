@@ -576,7 +576,7 @@ static int num_h264_pps=0;
 
 static int num_mp3audio_packets=0;
 
-static void clear_stats()
+static void clear_stats(void)
 {
   num_elementary_packets100=0;
   num_elementary_packets101=0;

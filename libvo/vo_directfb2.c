@@ -139,7 +139,7 @@ static int field_parity = -1;
 *	   implementation     *
 ******************************/
 
-void unlock() {
+void unlock(void) {
 if (frame && framelocked) frame->Unlock(frame);
 if (primary && primarylocked) primary->Unlock(primary);
 }

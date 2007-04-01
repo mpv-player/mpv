@@ -356,12 +356,12 @@ void XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
 }
 
 
-unsigned long XA_Time_Read()
+unsigned long XA_Time_Read(void)
 {
     return GetTimer(); //(GetRelativeTime());
 }
 
-void XA_dummy()
+void XA_dummy(void)
 {
     XA_Print("dummy() called");
 }
