@@ -22,27 +22,9 @@ extern "C" {
 
 #define VIDIX_VERSION 100
 
-/* returns driver version */
-extern unsigned vixGetVersion (void);
-
-#define PROBE_NORMAL	0 /* normal probing */
-#define PROBE_FORCE	1 /* ignore device_id but recognize device if it's known */
-
-/* Probes video hw.
-   verbose - specifies verbose level.
-   force   - specifies force mode - driver should ignore
-   device_id (danger but useful for new devices)
-   Returns 0 if ok else errno */
-extern int vixProbe (int verbose, int force);
-
-/* Initializes driver.
-   args	    - specifies driver specific parameters
-   Returns 0 if ok else errno */
-extern int vixInit (const char *args);
-
-/* Destroys driver */
-extern void vixDestroy (void);
-
+#define PROBE_NORMAL    0 /* normal probing */
+#define PROBE_FORCE     1 /* ignore device_id but recognize device if it's known */
+  
 typedef enum vidix_dev_type {
   TYPE_OUTPUT  =        0x00000000,	/* Is a video playback device */
   TYPE_CAPTURE =	0x00000001,	/* Is a capture device */
@@ -79,10 +61,6 @@ typedef struct vidix_capability_s
   unsigned short device_id;
   unsigned reserved1[4];
 } vidix_capability_t;
-
-/* Should fill at least type before init.
-   Returns 0 if ok else errno */
-extern int vixGetCapability (vidix_capability_t *);
 
 typedef enum vidix_depth {
   VID_DEPTH_NONE  =		0x0000,
@@ -134,9 +112,6 @@ typedef struct vidix_fourcc_s
   vidix_depth_t depth;	/* output: screen depth for given fourcc */
   vidix_cap_t flags;	/* output: capability */
 } vidix_fourcc_t;
-
-/* Returns 0 if ok else errno */
-extern int vixQueryFourcc (vidix_fourcc_t *);
 
 typedef struct vidix_yuv_s
 {
@@ -205,18 +180,6 @@ typedef struct vidix_playback_s
   void *dga_addr;		/* driver -> app: linear address */
 } vidix_playback_t;
 
-/* Returns 0 if ok else errno */
-extern int vixConfigPlayback (vidix_playback_t *);
-
-/* Returns 0 if ok else errno */
-extern int vixPlaybackOn (void);
-
-/* Returns 0 if ok else errno */
-extern int vixPlaybackOff (void);
-
-/* Returns 0 if ok else errno */
-extern int vixPlaybackFrameSelect (unsigned frame_idx);
-
 typedef enum vidix_key_op {
   KEYS_PUT =	0,
   KEYS_AND =	1,
@@ -230,12 +193,6 @@ typedef struct vidix_grkey_s
   vidix_vkey_t vkey;		/* app -> driver: video key */
   vidix_key_op_t key_op;	/* app -> driver: keys operations */
 } vidix_grkey_t;
-
-/* Returns 0 if ok else errno */
-extern int vixGetGrKeys (vidix_grkey_t *);
-
-/* Returns 0 if ok else errno */
-extern int vixSetGrKeys (const vidix_grkey_t *);
 
 typedef enum vidix_veq_cap {
   VEQ_CAP_NONE		=	0x00000000UL,
@@ -267,12 +224,6 @@ typedef struct vidix_video_eq_s {
                                    space to use */
 } vidix_video_eq_t;
 
-/* Returns 0 if ok else errno */
-extern int vixPlaybackGetEq (vidix_video_eq_t *);
-
-/* Returns 0 if ok else errno */
-extern int vixPlaybackSetEq (const vidix_video_eq_t *);
-
 typedef enum vidix_interlace_flag {
   /* stream is not interlaced */
   CFG_NON_INTERLACED       =	0x00000000,
@@ -294,12 +245,6 @@ typedef struct vidix_deinterlace_s {
                                    flag CFG_UNIQUE_INTERLACING is set */
 } vidix_deinterlace_t;
 
-/* Returns 0 if ok else errno */
-extern int vixPlaybackGetDeint (vidix_deinterlace_t *);
-
-/* Returns 0 if ok else errno */
-extern int vixPlaybackSetDeint (const vidix_deinterlace_t *);
-
 typedef struct vidix_slice_s {
   void *address;		/* app -> driver */
   unsigned size;		/* app -> driver */
@@ -318,12 +263,6 @@ typedef struct vidix_dma_s
   vidix_slice_t	dest;			/* app -> driver */
   vidix_dma_flag_t flags;		/* app -> driver */
 } vidix_dma_t;
-
-/* Returns 0 if ok else errno */
-extern int vixPlaybackCopyFrame (vidix_dma_t *);
-
-/* Returns 0 if DMA is available else errno (EBUSY) */
-extern int vixQueryDMAStatus (void);
 
 typedef enum vidix_fx_type {
   FX_TYPE_BOOLEAN =		0x00000000,
@@ -350,15 +289,6 @@ typedef struct vidix_oem_fx_s
   int value;   	        /* current value of effect on get; required on set */
   char *name[80];	/* effect name to display */
 } vidix_oem_fx_t;
-
-/* Returns 0 if ok else errno */
-extern int vixQueryNumOemEffects (unsigned * number);
-
-/* Returns 0 if ok else errno */
-extern int vixGetOemEffect (vidix_oem_fx_t *);
-
-/* Returns 0 if ok else errno */
-extern int vixSetOemEffect (const vidix_oem_fx_t *);
 
 #ifdef __cplusplus
 }
