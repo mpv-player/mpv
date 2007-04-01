@@ -14,10 +14,8 @@ DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
 	$(MPROOT)/dvdread/libdvdread.a \
 	$(MPROOT)/libdvdcss/libdvdcss.a \
 	$(MPROOT)/libavutil/libavutil.a \
-	$(MPROOT)/liba52/liba52.a \
 	$(MPROOT)/m_option.o \
 	$(MPROOT)/m_struct.o \
-	$(MPROOT)/subreader.o \
 	$(MPROOT)/mp_msg.o \
 	$(MPROOT)/osdep/libosdep.a \
 	-ltermcap -lm \
