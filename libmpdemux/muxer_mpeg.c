@@ -1457,8 +1457,6 @@ static int flush_buffers(muxer_t *muxer, int finalize)
 	muxer_stream_t *s, *vs, *as;
 	muxer_headers_t *vpriv = NULL, *apriv = NULL;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
-	double duration;
-	uint64_t iduration, iaduration;
 	
 	/* 
 		analyzes all streams and decides what to flush
@@ -1494,30 +1492,11 @@ static int flush_buffers(muxer_t *muxer, int finalize)
 		mp_msg(MSGT_MUXER, MSGL_DBG2, "\nVIDEO, FLUSH %d frames (of %d), 0 to %d\n", n, vpriv->framebuf_used, n-1);
 
 		vpriv = (muxer_headers_t*) vs->priv;
-		
-		duration = 0;
-		iduration = 0;
-		for(i = 0; i < n; i++)
-			iduration += vpriv->framebuf[i].idur;
-		duration = (double) (iduration / 27000000.0);
-		
-		if(as != NULL)
-		{
-			apriv = (muxer_headers_t*) as->priv;
-			iaduration = 0;
-			for(i = 0; i < apriv->framebuf_used; i++)
-			{
-				iaduration += apriv->framebuf[i].idur;
-			}
-			if(iaduration < iduration)
-			{
-				mp_msg(MSGT_MUXER, MSGL_DBG2, "Not enough audio data exit\n");
-				return 0;
-			}
-		}
-		
+
+		if(as != NULL) apriv = (muxer_headers_t*) as->priv;
 		if(as != NULL && (apriv->size == 0))
 		{
+			apriv = (muxer_headers_t*) as->priv;
 			init_delay = vpriv->framebuf[0].pts - vpriv->framebuf[0].dts;
 		
 			for(i = 0; i < apriv->framebuf_cnt; i++)
