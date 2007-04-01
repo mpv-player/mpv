@@ -949,6 +949,7 @@ static vidix_capability_t def_cap =
     { 0, 0, 0, 0}
 };
 
+#ifndef RAGE128
 #ifdef HAVE_X11
 static void probe_fireGL_driver(void) {
   Display *dp = XOpenDisplay ((void*)0);
@@ -977,6 +978,7 @@ static void probe_fireGL_driver(void) {
     }
   }
 }
+#endif
 #endif
 
 static int radeon_probe( int verbose,int force )
