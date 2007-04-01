@@ -373,10 +373,11 @@ static void afterReading(void* clientData, unsigned frameSize,
 
   if (frameSize > 0) demuxer->stream->eof = 0;
 
+  demux_packet_t* dp = bufferQueue->dp;
+
   if (bufferQueue->readSource()->isAMRAudioSource())
     headersize = 1;
 
-  demux_packet_t* dp = bufferQueue->dp;
   resize_demux_packet(dp, frameSize + headersize);
 
   // Set the packet's presentation time stamp, depending on whether or
