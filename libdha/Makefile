@@ -18,7 +18,7 @@ dep depend:: pci_names.c
 
 include ../mpcommon.mak
 
-pci_names.c:	oth/pci.db
+pci_names.c: pci.db
 	LC_ALL=C $(AWK) -f pci_db2c.awk $<
 
 test: pci.o
