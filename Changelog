@@ -38,8 +38,13 @@ MPlayer (1.0)
     * authentication for Real RTSP streams
     * near-precise seeking in dvd://
     * speed selection when playing dvd:// streams, to make drive quieter
-    * SVQ3 and H.264 RTSP fixes, now RTSP Apple keynotes are playable
+    * support SVQ3 and H.264 in X-QT over RTSP,
+      now RTSP Apple keynotes are playable
     * smil playlist over Real RTSP
+    * support H.263-2000 over RTSP
+    * fix AAC-LATM over RTSP
+    * support AMR over RTSP
+    * support H.264 over RTSP
 
     FFmpeg/libavcodec:
     * Intel Music coder audio decoder
