@@ -48,6 +48,26 @@ realcodecs: CFLAGS += -g
 %.so.6.0: %.o
 	ld -shared -o $@ $< -ldl -lc
 
+# FIXME: netstream linking is a mess that should be fixed properly some day.
+# It does not work with either GUI, LIVE555, libavformat, cdparanoia enabled.
+NETSTREAM_DEPS = ../libmpdemux/libmpdemux.a \
+                 ../stream/stream.a \
+                 ../dvdread/libdvdread.a \
+                 ../libdvdcss/libdvdcss.a \
+                 ../libavutil/libavutil.a \
+                 ../m_option.o \
+                 ../m_struct.o \
+                 ../mp_msg.o \
+                 ../osdep/libosdep.a \
+                 -ltermcap -lm \
+
+ifeq ($(TARGET_WIN32),yes)
+NETSTREAM_DEPS += -lwsock32
+endif
+
+netstream: $(NETSTREAM_DEPS)
+	$(CC) -o $@ netstream.o $^
+
 clean distclean:
 	rm -f $(OBJS)
 	rm -f fastmem-* fastmem2-* fastmemcpybench
