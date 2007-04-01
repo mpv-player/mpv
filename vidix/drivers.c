@@ -98,7 +98,7 @@ int vidix_find_driver (VDXContext *ctx, const char *name,
 {
   VDXDriver *drv;
 
-  if (!strcmp (name, "help"))
+  if (name && !strcmp (name, "help"))
   {
     vidix_list_drivers ();
     ctx->drv = NULL;
