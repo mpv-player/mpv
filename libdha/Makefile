@@ -25,4 +25,4 @@ test: pci.o
 	$(CC) test.c -o $@ $^
 
 clean::
-	rm -f pci_*.c pci_*.h pci.db
+	rm -f pci_*.c pci_*.h
