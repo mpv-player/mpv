@@ -117,10 +117,10 @@ static unsigned int sis_shift_value = 1;
 static unsigned int sis_vmode = 0;
 unsigned int sis_vbflags = DISPTYPE_DISP1;
 unsigned int sis_overlay_on_crt1 = 1;
-unsigned int sis_crt1_off = -1;
+int sis_crt1_off = -1;
 unsigned int sis_detected_crt2_devices;
 unsigned int sis_force_crt2_type = CRT2_DEFAULT;
-unsigned int sis_device_id = -1;
+int sis_device_id = -1;
 
 static int sis_format;
 static int sis_Yoff = 0;

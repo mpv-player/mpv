@@ -98,9 +98,9 @@ extern unsigned short sis_iobase;
 extern unsigned int sis_vga_engine;
 extern unsigned int sis_vbflags;
 extern unsigned int sis_overlay_on_crt1;
-extern unsigned int sis_crt1_off;
+extern int sis_crt1_off;
 extern unsigned int sis_detected_crt2_devices;
 extern unsigned int sis_force_crt2_type;
-extern unsigned int sis_device_id;
+extern int sis_device_id;
 
 #endif				/* VIDIX_SIS_DEFS_H */

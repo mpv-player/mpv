@@ -70,7 +70,6 @@ static void sis_sense_30x(void)
     unsigned char testvga2_tempbl, testvga2_tempbh;
     unsigned char testvga2_tempcl, testvga2_tempch;
     int myflag, result = 0, i, j, haveresult;
-    unsigned short temp;
 
     inSISIDXREG(SISPART4, 0x0d, backupP4_0d);
     outSISIDXREG(SISPART4, 0x0d, (backupP4_0d | 0x04));
@@ -392,26 +391,6 @@ static void sis_detect_crt1(void)
 	       sis_crt1_off ? "No " : "");
     }
 }
-
-
-static void sis_detect_lcd(void)
-{
-    unsigned char CR32, CR36, CR37;
-
-    if (!(sis_vbflags & VB_VIDEOBRIDGE)) {
-	return;
-    }
-
-    inSISIDXREG(SISCR, 0x32, CR32);
-
-    if (CR32 & 0x08)
-	sis_vbflags |= CRT2_LCD;
-
-    /* DDC detection of LCD - not supported yet */
-
-    /* Get other misc info about LCD - not supported */
-}
-
 
 static void sis_detect_tv(void)
 {
