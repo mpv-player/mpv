@@ -195,7 +195,7 @@ static int pm3_query_fourcc(vidix_fourcc_t *to)
 static void
 compute_scale_factor(
     short* src_w, short* dst_w,
-    unsigned int* shrink_delta, unsigned int* zoom_delta)
+    uint32_t* shrink_delta, uint32_t* zoom_delta)
 {
     /* NOTE: If we don't return reasonable values here then the video
      * unit can potential shut off and won't display an image until re-enabled.
@@ -225,7 +225,7 @@ static long overlay_mode, overlay_control;
 
 static int pm3_config_playback(vidix_playback_t *info)
 {
-    int shrink, zoom;
+    uint32_t shrink, zoom;
     short src_w, drw_w;
     short src_h, drw_h;
     long base0;
