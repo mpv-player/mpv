@@ -4280,7 +4280,7 @@ static void expsrand(int seed)
 
 #if 1
 
-// prefered compilation with  -O2 -ffast-math !
+// preferred compilation with  -O2 -ffast-math !
 
 static double explog10(double x)
 {

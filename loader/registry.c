@@ -312,7 +312,7 @@ static void init_registry(void)
 #else
 	// regpathname is an external pointer
         //
-	// registry.c is holding it's own internal pointer
+	// registry.c is holding its own internal pointer
 	// localregpathname  - which is being allocate/deallocated
 
 	if (localregpathname == 0)
