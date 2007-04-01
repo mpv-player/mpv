@@ -390,7 +390,7 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
   s->type=type;
   s->id=muxer->avih.dwStreams;
   s->muxer=muxer;
-  
+
   if (type == MUXER_TYPE_VIDEO) {
     spriv->type = 1;
     spriv->last_pts = conf_init_vpts * 90 * 300;
@@ -400,7 +400,7 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
       int v = (conf_vbuf_size ? conf_vbuf_size*1024 :
         (s->h.dwSuggestedBufferSize ? s->h.dwSuggestedBufferSize : 46*1024));
       int n = priv->sys_info.cnt;
-      
+
       priv->sys_info.streams[n].id = spriv->id;
       priv->sys_info.streams[n].type = 1;
       priv->sys_info.streams[n].bufsize = v;
@@ -437,7 +437,7 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
       int a1 = (conf_abuf_size ? conf_abuf_size*1024 :
         (s->h.dwSuggestedBufferSize ? s->h.dwSuggestedBufferSize : 4*1024));
       int n = priv->sys_info.cnt;
-      
+
       priv->sys_info.streams[n].id = spriv->id;
       priv->sys_info.streams[n].type = 0;
       priv->sys_info.streams[n].bufsize = a1;
@@ -447,7 +447,7 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
       spriv->min_pes_hlen = 13;
     else if(priv->is_xsvcd)
       spriv->min_pes_hlen = 17;
-    
+
     muxer->num_audios++;
     priv->has_audio++;
     s->h.fccType=streamtypeAUDIO;
