@@ -77,11 +77,34 @@ static int vidix_probe_driver (VDXContext *ctx, VDXDriver *drv,
   return 1;
 }
 
+static void vidix_list_drivers (void)
+{
+  VDXDriver *drv;
+
+  printf ("Available VIDIX drivers:\n");
+
+  drv = first_driver;
+  while (drv)
+  {
+    vidix_capability_t cap;
+    drv->get_caps (&cap);
+    printf (" * %s - %s\n", drv->name, cap.name);
+    drv = drv->next; 
+  }
+}
+
 int vidix_find_driver (VDXContext *ctx, const char *name,
                        unsigned int cap, int verbose)
 {
   VDXDriver *drv;
 
+  if (!strcmp (name, "help"))
+  {
+    vidix_list_drivers ();
+    ctx->drv = NULL;
+    return 0;
+  }
+  
   drv = first_driver;
   while (drv)
   {
