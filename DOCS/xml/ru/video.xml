@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22800 -->
+<!-- synced with r22854 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -88,10 +88,7 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="output-trad">
-<title>Видео вывод для традиционных видео карт</title>
-
-<sect2 id="xv">
+<sect1 id="xv">
 <title>Xv</title>
 
 <para>
@@ -171,7 +168,7 @@ screen #0
 </para>
 
 
-<sect3 id="tdfx">
+<sect2 id="tdfx">
 <title>3dfx карты</title>
 
 <para>
@@ -189,10 +186,10 @@ screen #0
 <emphasis role="bold">ИЛИ</emphasis>, попробуйте НОВЫЙ
 <option>-vo tdfxfb</option> драйвер! Смотрите раздел <link linkend="tdfxfb">tdfxfb</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="s3">
+<sect2 id="s3">
 <title>S3 карты</title>
 
 <para>
@@ -216,10 +213,10 @@ tdfxfb. Настройте ваш фреймбуфер (например, ука
 свежий драйвер иди вежливо спросите в списке рассылки MPlayer-users 
 о драйвере с поддержкой MMX/3DNow!.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="nvidia">
+<sect2 id="nvidia">
 <title>nVidia карты</title>
 
 <para>
@@ -242,10 +239,10 @@ nVidia под Linux - не всегда хороший выбор ... Откры
 в стадии беты и имеет некоторые недостатки. За подробостями обращайтесь
 к разделу <link linkend="vidix-nvidia">nVidia VIDIX</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ati">
+<sect2 id="ati">
 <title>ATI карты</title>
 
 <para>
@@ -263,10 +260,10 @@ Radeon VE - если нужен X, используйте XFree86 4.2.0 или �
 <emphasis role="bold">TV-выхода</emphasis>, без каких-либо библиотек X.
 Читайте раздел <link linkend="vidix">VIDIX</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="neomagic">
+<sect2 id="neomagic">
 <title>NeoMagic карты</title>
 
 <para>
@@ -295,10 +292,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="trident">
+<sect2 id="trident">
 <title>Trident карты</title>
 
 <para>
@@ -311,10 +308,10 @@ EndSection<!--
 Другой вариант: <application>MPlayer</application> имеет 
 <link linkend="vidix">VIDIX</link> драйвер для карт Cyberblade/i1.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="kyro">
+<sect2 id="kyro">
 <title>Kyro/PowerVR карты</title>
 
 <para>
@@ -322,12 +319,12 @@ EndSection<!--
 Hercules Prophet 4000XT), следует скачать драйверы с
 <ulink url="http://www.powervr.com/">сайта PowerVR</ulink>
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dga">
+<sect1 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -614,11 +611,11 @@ AMD K6-2 CPU может работать начиная с 400 МГц и выш�
 </para></listitem>
 </itemizedlist>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="sdl">
+<sect1 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -654,11 +651,11 @@ SDL'вских X11 драйверов, пока не написали наш с�
 <para>
 SDL видео вывод поддерживает отображения субтитров внизу, на черной полосе (если она есть).
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="svgalib">
+<sect1 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -729,11 +726,11 @@ or
 ВЫ можете включить OSD и субтитры только с плагином <option>expand</option>,
 смотрите страницу руководства man для точных параметров.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="fbdev">
+<sect1 id="fbdev">
 <title>Вывод во фреймбуфер (FBdev)</title>
 
 <para>
@@ -824,11 +821,11 @@ mplayer -vm -fbmode <replaceable>название_режима</replaceable> <re
 Смена режимов FBdev <emphasis>не работает</emphasis> с VESA фреймбуфером.
 Не просите об этом, т.к. это не ограничения <application>MPlayer</application>.
 </para></note>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="mga_vid">
+<sect1 id="mga_vid">
 <title>Matrox фреймбуфер (mga_vid)</title>
 
 <para>
@@ -904,22 +901,22 @@ make<!--
 рисовать на экране изображения 256x256.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect1 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>Поддержка 3Dfx YUV</title>
 <para>
 Этот драйвер использует ядерный драйвер фреймбуфера tdfx для воспроизведения
 фильмой с YUV ускорением. Вам потребуется ядро с поддержкой tdfxfb и перекомпиляция с
 <screen>./configure --enable-tdfxfb</screen>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tdfx_vid">
+<sect1 id="tdfx_vid">
 <title>tdfx_vid</title>
 
 <para>
@@ -960,11 +957,11 @@ make</screen>
 информацию, если все работает нормально.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="opengl">
+<sect1 id="opengl">
 <title>OpenGL вывод</title>
 
 <para>
@@ -996,11 +993,11 @@ XFree86(DRI) 4.0.3 или новее поддерживает OpenGL с карт
 <command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="aalib">
+<sect1 id="aalib">
 <title>AAlib - отображение в текстовом режиме</title>
 
 <para>
@@ -1124,11 +1121,11 @@ rock] :) ), но, IMHO, вы можете использовать опцию  <
 лучший режим. Смотрите <ulink url="http://aa-project.sf.net/tune"/> для 
 дальнейших задач тюнинга.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="caca">
+<sect1 id="caca">
 <title>
 <systemitem class="library">libcaca</systemitem> - Цветная ASCII Art библиотека
 </title>
@@ -1221,11 +1218,11 @@ rock] :) ), но, IMHO, вы можете использовать опцию  <
 рендеринга всех кадров.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="vesa">
+<sect1 id="vesa">
 <title>VESA - вывод в VESA BIOS</title>
 
 <para>
@@ -1360,11 +1357,11 @@ BIOS ROM на той же карте, то возможно скрыть от п
   инициализирует себя только один раз во время POST процедуры.
 </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="x11">
+<sect1 id="x11">
 <title>X11</title>
 
 <para>
@@ -1411,11 +1408,11 @@ BIOS ROM на той же карте, то возможно скрыть от п
 Некоторые драйверы не могут использовать низкие частоты пикселизации (количество 
 отрисовываемых пикселей в секунду), необходимые для видео режимов с низким разрешением.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="vidix">
+<sect1 id="vidix">
 <title>VIDIX</title>
 
 <formalpara><title>ПРЕАМБУЛА</title><para>
@@ -1572,7 +1569,7 @@ VIDIX без аргументов для задействования автоо
 </procedure>
 
 
-<sect3 id="vidix-ati">
+<sect2 id="vidix-ati">
 <title>ATI карты</title>
 
 <para>
@@ -1586,10 +1583,10 @@ Radeon и <filename>rage128_vid</filename> для карт Rage 128. Вы мож
 использовать один из них или позволить VIDIX автоматически опробовать все доступные 
 драйверы.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-mga">
+<sect2 id="vidix-mga">
 <title>Matrox карты</title>
 
 <para>
@@ -1601,10 +1598,10 @@ Radeon и <filename>rage128_vid</filename> для карт Rage 128. Вы мож
 Драйвер поддерживает видео эквалайзеры и должем быть столь же быстр, как и 
 <link linkend="mga_vid">Matrox фреймбуфер</link>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-trident">
+<sect2 id="vidix-trident">
 <title>Trident карты</title>
 
 <para>
@@ -1616,20 +1613,20 @@ Radeon и <filename>rage128_vid</filename> для карт Rage 128. Вы мож
 Драйвер написан и поддерживается 
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-3dlabs">
+<sect2 id="vidix-3dlabs">
 <title>3DLabs карты</title>
 
 <para>
 Хотя драйвер для чипов 3DLabs GLINT R3 и Permedia3 существует, никто его не
 тестировал, так что отчеты приветствуются.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-nvidia">
+<sect2 id="vidix-nvidia">
 <title>nVidia карты</title>
 
 <para>
@@ -1639,10 +1636,10 @@ Radeon и <filename>rage128_vid</filename> для карт Rage 128. Вы мож
 драйвер вывода видео <option>cvidix</option>, как показывет следующий пример:
 <screen>mplayer -vo cvidix <replaceable>example.avi</replaceable></screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-sis">
+<sect2 id="vidix-sis">
 <title>SiS карты</title>
 
 <para>
@@ -1657,12 +1654,12 @@ SiS версиях байрбонов[barebones] "Shuttle XPC")
 <para>
 Отчеты ожидаются!
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="directfb">
+<sect1 id="directfb">
 <title>DirectFB</title>
 
 <blockquote><para>
@@ -1687,11 +1684,11 @@ DirectFB в командной строке, при помощи <option>-dfbopt
 производится методом подустройства, например.: <option>-vo directfb:2</option>
 (по-умолчанию -1: автоопределение)
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dfbmga">
+<sect1 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
 Прочтите <link linkend="directfb">основной DirectFB</link> раздел для общей информации.
@@ -1718,7 +1715,6 @@ Ville Syrjala имеет
 <link linkend="mga_vid">mga_vid</link> планируется уже несколько лет,
 <ulink url="../../tech/patches.txt">патчи</ulink> приветствуются.
 </para></note>
-</sect2>
 </sect1>
 
 
