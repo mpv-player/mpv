@@ -491,11 +491,14 @@ static DWORD WINAPI GuiThread(void)
 
 void guiInit(void)
 {
+    DWORD threadId;
     memset(&guiIntfStruct, 0, sizeof(guiIntfStruct));
     /* Create The gui thread */
     if (!mygui)
-        mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] Creating GUI Thread 0x%04x\n",
-              (int) CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) GuiThread, NULL, 0, NULL));
+    {
+        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) GuiThread, NULL, 0, &threadId);
+        mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] Creating GUI Thread 0x%04x\n", threadId);
+    }
 
     /* Wait until the gui is created */
     while(!mygui) Sleep(100);
