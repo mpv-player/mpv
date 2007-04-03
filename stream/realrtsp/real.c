@@ -352,7 +352,8 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer, int rdt_rawdata) {
       header[0]);
     return 0;
   }
-  size=(header[1]<<16)+(header[2]<<8)+(header[3]);
+  /* header[1] is channel, normally 0, ignored */
+  size=(header[2]<<8)+header[3];
   flags1=header[4];
   if ((flags1!=0x40)&&(flags1!=0x42)&&(flags1!=0x41))
   {
