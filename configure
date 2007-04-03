@@ -1767,10 +1767,10 @@ EOF
       _optimizing="$proc"
     fi
   else # if test "$_runtime_cpudetection" = no
-    # i686 is probably the most common CPU - optimize for it
-    _mcpu="$cpuopt=i686"
+    _mcpu="$cpuopt=generic"
     # at least i486 required, for bswap instruction
     _march="-march=i486"
+    cc_check $_mcpu || _mcpu="$cpuopt=i686"
     cc_check $_mcpu || _mcpu=""
     cc_check $_march $_mcpu || _march=""
   fi
@@ -1889,7 +1889,8 @@ EOF
     else # if test "$_runtime_cpudetection" = no
       # x86-64 is an undocumented option, an intersection of k8 and nocona.
       _march="-march=x86-64"
-      _mcpu="$cpuopt=x86-64"
+      _mcpu="$cpuopt=generic"
+      cc_check $_mcpu || _mcpu="x86-64"
       cc_check $_mcpu || _mcpu=""
       cc_check $_march $_mcpu || _march=""
     fi
