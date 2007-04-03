@@ -39,7 +39,10 @@ are performed.
 Mirrors should provide their data over HTTP or FTP or both. Each official
 mirror will be assigned a mirror number (wwwXXX.mplayerhq.hu or
 ftpXXX.mplayerhq.hu where XXX is the mirror number). This mirror
-number determines the hostname over which it will be reached.
+number determines the hostname over which it can be reached directly.
+
+All mirrors are put into our DNS round-robin for the www.mplayerhq.hu and
+ftp.mplayerhq.hu names and should be set up to respond to these names as well.
 
 
 Getting the data, mirroring script and cron setup
@@ -155,9 +158,20 @@ Here is an example stanza to paste into your Apache configuration:
         AddDefaultCharset off
 </VirtualHost>
 
+<VirtualHost www.mplayerhq.hu>
+        DocumentRoot /path/to/htdocs
+        Options FollowSymLinks Indexes
+        Alias /homepage /path/to/htdocs
+        Alias /MPlayer  /path/to/MPlayer
+        Alias /DOCS     /path/to/MPlayer/DOCS
+        AddDefaultCharset off
+</VirtualHost>
+
 The AddDefaultCharset directive is necessary because newer versions of Apache
 appear to default to defining a standard charset. This breaks our documentation
 translations, which are written in different encodings.
+
+The second VirtualHost is necessary for the DNS round-robin address.
 
 
 Setting up an FTP server
