@@ -557,12 +557,7 @@ static void teardownRTSPorSIPSession(RTPState* rtpState) {
   MediaSession* mediaSession = rtpState->mediaSession;
   if (mediaSession == NULL) return;
   if (rtpState->rtspClient != NULL) {
-    MediaSubsessionIterator iter(*mediaSession);
-    MediaSubsession* subsession;
-
-    while ((subsession = iter.next()) != NULL) {
-      rtpState->rtspClient->teardownMediaSubsession(*subsession);
-    }
+    rtpState->rtspClient->teardownMediaSession(*mediaSession);
   } else if (rtpState->sipClient != NULL) {
     rtpState->sipClient->sendBYE();
   }
