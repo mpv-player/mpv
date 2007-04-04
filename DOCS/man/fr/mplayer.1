@@ -3141,7 +3141,8 @@ par exemple).
 .B \-xineramascreen <-2\-...> (X11 uniquement)
 Dans les configurations xinerama (c'est à dire un bureau unique s'étendant sur
 plusieurs écrans, cette option dit à MPlayer sur quel écran afficher le film.
-La valeur \-2 signifie plein écran sur la totalité de l'écran virtuel, la valeur
+La valeur \-2 signifie plein écran sur la totalité de l'écran virtuel, (dans ce
+cas l'information Xinerama est complètement ignorée, la valeur
 \-1 signifie plein écran sur l'écran où se trouve la fenêtre.
 La position initiale définie par l'option \-geometry est relative à l'écran
 défini.
@@ -10371,17 +10372,14 @@ Si dvdauthor indique un message du type "..audio sector out of range...",
 c'est que vous devez activer cette option.
 .
 .TP
-.B init_vpts=<100\-700>
-pts vidéo initial, en millisecondes (par défaut\ : 200)
-.
-.TP
-.B init_apts=<100\-700>
-pts audio initial, in millisecondes (par défaut\ : 200)
-.
-.TP
 .B vdelay=<1\-32760>
 Retard vidéo initial, en millisecondes (par défaut\ : 0),
 à utiliser si vous voulez retarder la vidéo par rapport au son.
+.
+.TP
+.B adelay=<1\-32760>
+Retard audio initial, en millisecondes (par défaut\ : 0),
+à utiliser si vous voulez retarder l'audio par rapport à la vidéo.
 .
 .TP
 .B "drop\ \ \ "
