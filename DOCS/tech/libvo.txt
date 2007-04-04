@@ -77,7 +77,7 @@ Each vo driver _has_ to implement these:
 	0x08	- flipping (-flip)
       They're defined as VOFLAG_* (see libvo/video_out.h)
       
-      IMPORTAMT NOTE: config() may be called 0 (zero), 1 or more (2,3...)
+      IMPORTANT NOTE: config() may be called 0 (zero), 1 or more (2,3...)
       times between preinit() and uninit() calls. You MUST handle it, and
       you shouldn't crash at second config() call or at uninit() without
       any config() call! To make your life easier, vo_config_count is
