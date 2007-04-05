@@ -173,7 +173,46 @@ return;
 /* handler creator - entry point ! */
 static tvi_handle_t *tvi_init_bsdbt848(char *device,char* adevice)
 {
-    return(new_handle());
+    char* sep ;
+    tvi_handle_t* tvh;
+    priv_t* priv;
+
+    tvh=new_handle();
+    if(!tvh)
+        return NULL;
+    priv=(priv_t*)tvh->priv;
+    /* 
+    if user needs to specify both /dev/bktr<n> and /dev/tuner<n>
+    it can do this with "-tv device=/dev/bktr1,/dev/tuner1"
+    */
+
+    /* set video device name */
+    if (!device){
+        priv->btdev = strdup("/dev/bktr0");
+        priv->tunerdev = strdup("/dev/tuner0");
+    }else{
+        sep = strchr(device,',');
+        if(sep){
+            // tuner device is also passed
+            priv->tunerdev = strdup(sep+1);
+            priv->btdev = strndup(device,sep-device);
+        }else{
+            priv->tunerdev = strdup("/dev/tuner0");
+            priv->btdev = strdup(device);
+        }
+    }
+
+    /* set audio device name */
+    if (!adevice)
+#ifdef __NetBSD__
+        priv->dspdev = strdup("/dev/sound");
+#else
+        priv->dspdev = strdup("/dev/dsp");
+#endif
+    else
+        priv->dspdev = strdup(adevice);
+
+    return tvh;
 }
 
 static int control(priv_t *priv, int cmd, void *arg)
@@ -479,7 +518,6 @@ G_private = priv; /* Oooh, sick */
 /* Video Configuration */
 
 priv->videoready = TRUE;
-priv->btdev = strdup("/dev/bktr0");
 priv->immediatemode = FALSE;
 priv->iformat = METEOR_FMT_PAL;
 priv->maxheight = PAL_HEIGHT;
@@ -561,7 +599,6 @@ if(priv->videoready == TRUE)
 
 /* Tuner Configuration */
 
-priv->tunerdev = strdup("/dev/tuner0");
 priv->tunerready = TRUE;
 
 priv->tunerfd = open(priv->tunerdev, O_RDONLY);
@@ -575,11 +612,6 @@ if(priv->tunerfd < 0)
 /* Audio Configuration */
 
 priv->dspready = TRUE;
-#ifdef __NetBSD__
-priv->dspdev = strdup("/dev/sound");
-#else
-priv->dspdev = strdup("/dev/dsp");
-#endif
 priv->dspsamplesize = 16;
 priv->dspstereo = 1;
 priv->dspspeed = 44100;

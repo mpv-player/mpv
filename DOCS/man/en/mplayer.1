@@ -1719,6 +1719,10 @@ See \-tv driver=help for a list of compiled-in TV input drivers.
 available: dummy, v4l, v4l2, bsdbt848
 .IPs device=<value>
 Specify TV device (default: /dev/\:video0).
+.I NOTE: 
+For bsdbt848 driver you can provide both bktr and tuner device names
+separating them with comma, tuner after 
+bktr (e.g.\& -tv device=/dev/bktr1,/dev/tuner1)
 .IPs input=<value>
 Specify input (default: 0 (TV), see console output for available inputs).
 .IPs freq=<value>
