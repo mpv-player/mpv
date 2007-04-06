@@ -19,12 +19,12 @@
 #include "../config.h"
 #include "../libavutil/common.h"
 #include "../mpbswap.h"
-#include "../libdha/pci_ids.h"
-#include "../libdha/pci_names.h"
+#include "pci_ids.h"
+#include "pci_names.h"
 #include "vidix.h"
 #include "vidixlib.h"
 #include "fourcc.h"
-#include "../libdha/libdha.h"
+#include "libdha.h"
 #include "radeon.h"
 
 #ifdef HAVE_X11

@@ -57,9 +57,9 @@
 #include "vidix.h"
 #include "vidixlib.h"
 #include "fourcc.h"
-#include "../libdha/libdha.h"
-#include "../libdha/pci_ids.h"
-#include "../libdha/pci_names.h"
+#include "libdha.h"
+#include "pci_ids.h"
+#include "pci_names.h"
 
 #ifdef __MINGW32__
 #define ENOTSUP 134

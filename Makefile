@@ -78,7 +78,7 @@ LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
                input/libinput.a \
 
-LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a libdha/libdha.a
+LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
 LIBS_MPLAYER-$(GUI)               += Gui/libgui.a
 LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
 
@@ -134,7 +134,6 @@ PARTS = libmpdemux \
         libmpeg2 \
         libfaad2 \
         tremor \
-        libdha \
         vidix \
         dvdread \
         libdvdcss \
@@ -211,10 +210,7 @@ mp3lib/libmp3.a:
 tremor/libvorbisidec.a:
 	$(MAKE) -C tremor
 
-libdha/libdha.a:
-	$(MAKE) -C libdha
-
-vidix/libvidix.a: libdha/libdha.a
+vidix/libvidix.a:
 	$(MAKE) -C vidix
 
 Gui/libgui.a:
@@ -407,7 +403,6 @@ mp3lib/libmp3.a: .norecurse $(wildcard mp3lib/*.[ch])
 libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 
 loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
-libdha/libdha.a: .norecurse $(wildcard libdha/*.[ch])
 vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
 Gui/libgui.a: .norecurse $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
 
