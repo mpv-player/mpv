@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "libdha.h"
+#include "dha.h"
 #include "sis_regs.h"
 #include "sis_defs.h"
 

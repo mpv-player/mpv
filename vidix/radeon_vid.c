@@ -24,7 +24,7 @@
 #include "vidix.h"
 #include "vidixlib.h"
 #include "fourcc.h"
-#include "libdha.h"
+#include "dha.h"
 #include "radeon.h"
 
 #ifdef HAVE_X11

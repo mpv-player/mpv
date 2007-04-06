@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include "libdha.h"
+#include "dha.h"
 #include "AsmMacros.h"
 
 #if defined (__i386__) && defined (__NetBSD__)

@@ -28,7 +28,7 @@
 #include "vidix.h"
 #include "vidixlib.h"
 #include "fourcc.h"
-#include "libdha.h"
+#include "dha.h"
 #include "pci_ids.h"
 #include "pci_names.h"
 #include "../config.h"

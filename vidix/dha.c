@@ -19,7 +19,7 @@
 
 #include "config.h"
 
-#include "libdha.h"
+#include "dha.h"
 #include "AsmMacros.h"
 #include <stdio.h>
 #include <stdlib.h>

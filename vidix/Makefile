@@ -3,7 +3,7 @@ include ../config.mak
 LIBNAME_MPLAYER = libvidix.a
 
 SRCS_MPLAYER    = vidixlib.c \
-		  libdha.c \
+		  dha.c \
 		  mtrr.c \
 		  pci.c \
 		  pci_names.c \

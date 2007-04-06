@@ -51,7 +51,7 @@
  *
  */
  
-#include "libdha.h"
+#include "dha.h"
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
