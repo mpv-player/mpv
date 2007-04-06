@@ -36,7 +36,7 @@
 #include "dha.h"
 #include "pci_ids.h"
 #include "pci_names.h"
-#include "../config.h"
+#include "config.h"
 
 #include "sis_regs.h"
 #include "sis_defs.h"

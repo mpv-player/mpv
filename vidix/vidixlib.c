@@ -23,9 +23,9 @@
 
 #include "vidixlib.h"
 #include "drivers.h"
-#include "../config.h"
-#include "../libavutil/common.h"
-#include "../mpbswap.h"
+#include "config.h"
+#include "libavutil/common.h"
+#include "mpbswap.h"
 
 extern unsigned int  vdlGetVersion( void )
 {

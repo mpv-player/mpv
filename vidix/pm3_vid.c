@@ -31,7 +31,7 @@
 #include "dha.h"
 #include "pci_ids.h"
 #include "pci_names.h"
-#include "../config.h"
+#include "config.h"
 
 #include "pm3_regs.h"
 

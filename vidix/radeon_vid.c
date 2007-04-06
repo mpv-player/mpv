@@ -16,9 +16,9 @@
 #include <math.h>
 #include <inttypes.h>
 
-#include "../config.h"
-#include "../libavutil/common.h"
-#include "../mpbswap.h"
+#include "config.h"
+#include "libavutil/common.h"
+#include "mpbswap.h"
 #include "pci_ids.h"
 #include "pci_names.h"
 #include "vidix.h"

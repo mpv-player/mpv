@@ -13,9 +13,9 @@
 #include <inttypes.h>
 #include <fcntl.h>
 
-#include "../config.h"
-#include "../libavutil/common.h"
-#include "../mpbswap.h"
+#include "config.h"
+#include "libavutil/common.h"
+#include "mpbswap.h"
 #include "vidix.h"
 #include "vidixlib.h"
 #include "fourcc.h"
