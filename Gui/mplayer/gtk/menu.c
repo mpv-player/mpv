@@ -5,7 +5,6 @@
 
 #include "config.h"
 #include "help_mp.h"
-#include "mplayer.h"
 #include "access_mpcontext.h"
 #include "mixer.h"
 

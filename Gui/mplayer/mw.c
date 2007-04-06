@@ -20,7 +20,6 @@
 #include "../stream/stream.h"
 #include "../mixer.h"
 #include "../libvo/sub.h"
-#include "../mplayer.h"
 #include "../access_mpcontext.h"
 
 #include "../libmpdemux/demuxer.h"
