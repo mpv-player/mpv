@@ -4,8 +4,6 @@
 
 #include "../config.h"
 
-#include "./mplayer.h"
-
 extern int mplGotoTheNext;
 
 extern void mplEnd( void );

@@ -16,8 +16,6 @@
 #include <gtk/gtk.h>
 
 #include "widgets.h"
-
-#include "./mplayer.h"
 #include "app.h"
 #include "wm/ws.h"
 
