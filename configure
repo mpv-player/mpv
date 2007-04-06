@@ -5820,7 +5820,7 @@ if test "$_theora" = yes ; then
   _codecmodules="libtheora $_codecmodules"
   # when --enable-theora is forced, we'd better provide a probably sane
   # $_ld_theora than nothing
-  test -z "$_ld_theora" && _ld_theora="-ltheora -logg"
+  test -z "$_ld_theora" && _ld_extra="$_ld_extra -ltheora -logg"
 else
   _def_theora='#undef HAVE_OGGTHEORA'
   _nocodecmodules="libtheora $_nocodecmodules"
