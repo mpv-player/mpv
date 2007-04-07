@@ -65,6 +65,7 @@ static struct {
         { "26l", DEMUXER_TYPE_H264_ES },
 	{ "ac3", DEMUXER_TYPE_LAVF },
 	{ "wv",  DEMUXER_TYPE_LAVF },
+	{ "dxa",  DEMUXER_TYPE_LAVF },
 };
 
 int demuxer_type_by_filename(char* filename){
