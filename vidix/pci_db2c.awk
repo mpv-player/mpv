@@ -29,6 +29,7 @@ BEGIN {
     print_head(name_file);
     print_head(name_h_file);
     print_head(dev_ids_file);
+    print_includes(dev_ids_file);
     print "#ifndef PCI_VENDORS_INCLUDED" >vendor_file
     print "#define PCI_VENDORS_INCLUDED 1">vendor_file
     print "" >vendor_file
@@ -106,6 +107,13 @@ BEGIN {
     print "{ 0xFFFF,  NULL }" >dev_ids_file;
     print "};">dev_ids_file
     print_func_bodies(name_file);
+}
+
+function print_includes(out_file)
+{
+    print "#include <stdlib.h>" >out_file;
+    print "#include \"pci_names.h\"" >out_file;
+    return;
 }
 
 function print_head( out_file)
