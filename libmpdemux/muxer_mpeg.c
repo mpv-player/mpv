@@ -2359,7 +2359,10 @@ static void mpegfile_write_index(muxer_t *muxer)
 	while(flush_buffers(muxer, 0) > 0);
 	flush_buffers(muxer, 1);
 	if(priv->is_genmpeg1 || priv->is_genmpeg2)
+	{
+		priv->scr = 0;
 		write_mpeg_pack(muxer, NULL, muxer->stream, 1);	//insert fake Nav Packet
+	}
 		
 	mp_msg(MSGT_MUXER, MSGL_INFO, "\nOverhead: %.3lf%% (%"PRIu64" / %"PRIu64")\n", 100.0 * (double)priv->headers_size / (double)priv->data_size, priv->headers_size, priv->data_size);
 }
