@@ -14,7 +14,6 @@ in detail so that anyone wishing to build an official or an unofficial
 mirror can do that without much trouble.
 
 
-
 A note on performance issues
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -43,6 +42,23 @@ number determines the hostname over which it can be reached directly.
 
 All mirrors are put into our DNS round-robin for the www.mplayerhq.hu and
 ftp.mplayerhq.hu names and should be set up to respond to these names as well.
+
+
+Requirements
+~~~~~~~~~~~~
+The requirements for any (official) mirror are:
+1) rsync installed and some way to run the sync script periodicaly (eg cron)
+2) subscribing to the mplayer-mirror mailinglist (see below)
+
+The requirements for a full website mirror are:
+1) 500MB of free disk space (for the ftp and homepage directories).
+2) A network connection with about 5Mbit/s sustained bandwidth.
+3) A simple webserver that allows redirections and virtual server,
+   no PHP or CGI needed as all pages are static.
+
+The requirements for a full ftp mirror are:
+1) 500MB of free disk space (for the ftp directory).
+2) (No bandwidth data for a ftp only server available)
 
 
 Getting the data, mirroring script and cron setup
@@ -186,4 +202,7 @@ downloadable files.
 Mailinglist
 ~~~~~~~~~~~
 
-TO BE DONE
+All official mirror admins are required to subscribe to the mplayer-mirror
+mailinglist. It's used to coordinate the efforts and distribute information
+among all admins. It is also very low traffic. Please use the webinterface
+on http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mirror to subscribe.
