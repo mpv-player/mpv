@@ -1385,6 +1385,11 @@ static void wrap_lines_smart(int max_text_width)
 		
 		if (cur->symbol == ' ')
 			last_space = i;
+
+		// make sure the hard linebreak is not forgotten when
+		// there was a new soft linebreak just inserted
+		if (cur->symbol == '\n' && break_type == 1)
+			i--;
 	}
 #define DIFF(x,y) (((x) < (y)) ? (y - x) : (x - y))
 	exit = 0;
