@@ -65,6 +65,11 @@ static struct {
         { "26l", DEMUXER_TYPE_H264_ES },
 	{ "ac3", DEMUXER_TYPE_LAVF },
 	{ "wv",  DEMUXER_TYPE_LAVF },
+
+// At least the following are hacks against broken autodetection
+// that should not be there
+
+// demux_audio is too greedy
 	{ "dxa",  DEMUXER_TYPE_LAVF },
 };
 
