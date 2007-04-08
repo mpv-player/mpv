@@ -499,7 +499,7 @@ static void write_mpeg_ts(unsigned char *b, uint64_t ts, uint8_t mod) {
 
 static void write_mpeg_rate(int type, unsigned char *b, unsigned int rate) 
 {
-	rate = (rate+49) / 50;
+	rate = ((rate*8)+399) / 400;
 	
 	if(type == MUX_MPEG1)
 	{
