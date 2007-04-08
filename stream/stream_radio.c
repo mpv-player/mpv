@@ -653,14 +653,14 @@ static int get_volume_bsdbt848(radio_priv_t* priv,int* volume){
 }
 
 /* bsdbt848 driver info structure */
-static const radio_driver_t radio_driver_bstbt848={
+static const radio_driver_t radio_driver_bsdbt848={
     "bsdbt848",
-    MSGTR_RADIO_DriverBSTBT848,
-    init_frac_bstbt848,
-    set_volume_bstbt848,
-    get_volume_bstbt848,
-    set_frequency_bstbt848,
-    get_frequency_bstbt848
+    MSGTR_RADIO_DriverBSDBT848,
+    init_frac_bsdbt848,
+    set_volume_bsdbt848,
+    get_volume_bsdbt848,
+    set_frequency_bsdbt848,
+    get_frequency_bsdbt848
 };
 #endif //RADIO_BSDBT848_HDR
 
@@ -1088,7 +1088,7 @@ static int fill_buffer_s(struct stream_st *s, char* buffer, int max_len){
  */
 static const radio_driver_t* radio_drivers[]={
 #ifdef RADIO_BSDBT848_HDR
-    &radio_driver_bstbt848,
+    &radio_driver_bsdbt848,
 #endif
 #ifdef HAVE_RADIO_V4L2
     &radio_driver_v4l2,
