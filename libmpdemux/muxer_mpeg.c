@@ -83,6 +83,7 @@ static int conf_abuf_size = 0;
 static int conf_vbuf_size = 0;
 static int conf_drop = 0;
 static int conf_telecine = 0;
+static int conf_interleaving2 = 0;
 static float conf_telecine_src = 0;
 static float conf_telecine_dest = 0;
 
@@ -204,6 +205,7 @@ m_option_t mpegopts_conf[] = {
 	{"drop", &conf_drop, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, 1, NULL},
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, 1, NULL},
 	{"telecine", &conf_telecine, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, PULLDOWN32, NULL},
+	{"interleaving2", &conf_interleaving2, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, 1, NULL},
 	{"film2pal", &conf_telecine, CONF_TYPE_FLAG, M_OPT_GLOBAL, 0, TELECINE_FILM2PAL, NULL},
 	{"tele_src", &(conf_telecine_src), CONF_TYPE_FLOAT, M_OPT_GLOBAL, 0, 0, NULL},
 	{"tele_dest", &(conf_telecine_dest), CONF_TYPE_FLOAT, M_OPT_GLOBAL, 0, 0, NULL},
@@ -1286,8 +1288,10 @@ static inline int find_best_stream(muxer_t *muxer)
 	muxer_priv_t *priv = muxer->priv;
 	muxer_headers_t *spriv;
 	pack_stats_t p;
+	unsigned int perc, sperc;
 
 	ndts = -1;
+	perc = -1;
 	
 	//THIS RULE MUST ALWAYS apply: dts  <= SCR + 0.7 seconds
 	for(i = 0; i < muxer->avih.dwStreams; i++)
@@ -1306,6 +1310,16 @@ static inline int find_best_stream(muxer_t *muxer)
 		{
 			dts = spriv->framebuf[0].dts;
 			ndts = i;
+		}
+
+		if(conf_interleaving2)
+		{
+			sperc = (spriv->track_bufsize * 1024) / spriv->max_buffer_size;
+			if(sperc < perc)
+			{
+				ndts = i;
+				perc = sperc;
+			}
 		}
 	}
 
