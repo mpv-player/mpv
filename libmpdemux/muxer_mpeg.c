@@ -591,7 +591,11 @@ static int write_mpeg_system_header(muxer_t *muxer, char *buff)
 	len += 3;
 		
 	buff[len++] = 0x4 | (priv->is_xvcd ? 1 : 0); 	//1 audio stream bound, no fixed, CSPS only for xvcd
+	//stolen from libavformat
+	if(priv->is_xvcd || priv->is_dvd)
 	buff[len++] = 0xe1;	//system_audio_lock, system_video_lock, marker, 1 video stream bound
+	else
+	buff[len++] = 0x21;	//marker, 1 video stream bound
 	
 	buff[len++] = ((priv->mux == MUX_MPEG1) ? 0xff : 0x7f);	//in mpeg2 there's the packet rate restriction
 	
