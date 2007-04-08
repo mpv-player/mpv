@@ -9798,8 +9798,8 @@ you probably did not enable this option.
 .TP
 .B "interleaving2\ \ \ "
 Uses a better algorithm to interleave audio and video packets, based on the
-principle that the muxer will try to keep the percentage of buffer fullness
-of the individual streams as fair as possible.
+principle that the muxer will always try to fill the stream with the largest
+percentage of free space.
 .
 .TP
 .B vdelay=<1\-32760>
