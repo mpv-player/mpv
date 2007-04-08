@@ -9796,6 +9796,12 @@ If dvdauthor complains with a message like "..audio sector out of range...",
 you probably did not enable this option.
 .
 .TP
+.B "interleaving2\ \ \ "
+Uses a better algorithm to interleave audio and video packets, based on the
+principle that the muxer will try to keep the percentage of buffer fullness
+of the individual streams as fair as possible.
+.
+.TP
 .B vdelay=<1\-32760>
 Initial video delay time, in milliseconds (default: 0),
 use it if you want to delay video with respect to audio.
