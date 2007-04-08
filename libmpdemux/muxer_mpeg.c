@@ -2379,16 +2379,6 @@ static void mpegfile_write_header(muxer_t *muxer)
 	
 	priv->headers_cnt++;
 	
-	if((priv->is_genmpeg1 || priv->is_genmpeg2) && (priv->headers_cnt == muxer->avih.dwStreams))
-	{
-		int i;
-		for(i = 0; i < muxer->avih.dwStreams; i++)
-		{
-			priv->sys_info.streams[i].bufsize = muxer->streams[i]->h.dwSuggestedBufferSize;
-			mp_msg(MSGT_MUXER, MSGL_DBG2, "IDX: %d, BUFSIZE: %u\n", i, priv->sys_info.streams[i].bufsize);
-		}
-	}
-	
 	//write the first system header only for generic mpeg1/2 muxes, and only when we have collected all necessary infos
 	if(priv->is_genmpeg1 || priv->is_genmpeg2 || ((priv->is_xvcd || priv->is_xsvcd) && (priv->headers_cnt == 1)))
 	{
