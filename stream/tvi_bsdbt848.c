@@ -38,18 +38,16 @@
 #include <string.h>
 
 #include <sys/param.h>
-#ifdef __NetBSD__
-#include <dev/ic/bt8xx.h>
+#ifdef USE_SUN_AUDIO
 #include <sys/audioio.h>
-#elif defined(__DragonFly__)
-#include <dev/video/meteor/ioctl_meteor.h>
-#include <dev/video/bktr/ioctl_bt848.h>
-#elif (__FreeBSD_version >= 502100) || defined(__FreeBSD_kernel__)
-#include <dev/bktr/ioctl_meteor.h>
-#include <dev/bktr/ioctl_bt848.h>
-#else
-#include <machine/ioctl_meteor.h>
-#include <machine/ioctl_bt848.h>
+#endif
+
+#ifdef IOCTL_METEOR_H_NAME
+#include IOCTL_METEOR_H_NAME
+#endif
+
+#ifdef IOCTL_BT848_H_NAME
+#include IOCTL_BT848_H_NAME
 #endif
 
 #ifdef HAVE_SYS_SOUNDCARD_H
@@ -204,7 +202,7 @@ static tvi_handle_t *tvi_init_bsdbt848(char *device,char* adevice)
 
     /* set audio device name */
     if (!adevice)
-#ifdef __NetBSD__
+#ifdef USE_SUN_AUDIO
         priv->dspdev = strdup("/dev/sound");
 #else
         priv->dspdev = strdup("/dev/dsp");
@@ -834,13 +832,13 @@ return(priv->dspbytesread * 1.0 / priv->dsprate);
 static int get_audio_framesize(priv_t *priv)
 {
 int bytesavail;
-#ifdef __NetBSD__
+#ifdef USE_SUN_AUDIO
 struct audio_info auinf;
 #endif
 
 if(priv->dspready == FALSE) return 0;
 
-#ifdef __NetBSD__
+#ifdef USE_SUN_AUDIO
 if(ioctl(priv->dspfd, AUDIO_GETINFO, &auinf) < 0) 
     {
     perror("AUDIO_GETINFO");

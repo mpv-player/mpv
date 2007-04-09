@@ -6676,18 +6676,80 @@ echores "$_tv"
 
 
 if bsd; then
+echocheck "*BSD BT848 bt8xx header"
+_ioctl_bt848_h=no
+for file in "machine/ioctl_bt848.h" \
+            "dev/bktr/ioctl_bt848.h" \
+            "dev/video/bktr/ioctl_bt848.h" \
+            "dev/ic/bt8xx.h" ; do
+    cat > $TMPC <<EOF
+#include <sys/types.h>
+#include <$file>
+int main(void) {
+ ioctl(0, TVTUNER_GETFREQ, 0);
+ return 0;
+}
+EOF
+    if cc_check ; then
+     _ioctl_bt848_h=yes
+     _ioctl_bt848_h_name="$file"
+     break;
+    fi
+done
+if test "$_ioctl_bt848_h" = yes ; then
+  _def_ioctl_bt848_h_name="#define IOCTL_BT848_H_NAME <$_ioctl_bt848_h_name>"
+  _res_comment="using $_ioctl_bt848_h_name"
+else
+  _def_ioctl_bt848_h_name="#undef IOCTL_BT848_H_NAME"
+fi
+echores "$_ioctl_bt848_h"
+
+echocheck "*BSD ioctl_meteor.h"
+_ioctl_meteor_h=no
+for file in "machine/ioctl_meteor.h" \
+            "dev/bktr/ioctl_meteor.h" \
+            "dev/video/bktr/ioctl_meteor.h" ; do
+    cat > $TMPC <<EOF
+#include <sys/types.h>
+#include <$file>
+int main(void) { 
+ ioctl(0, METEORSINPUT, 0);
+ return 0; 
+}
+EOF
+    if cc_check ; then
+     _ioctl_meteor_h=yes
+     _ioctl_meteor_h_name="$file"
+     break;
+    fi
+done
+if test "$_ioctl_meteor_h" = yes ; then
+  _def_ioctl_meteor_h_name="#define IOCTL_METEOR_H_NAME <$_ioctl_meteor_h_name>"
+  _res_comment="using $_ioctl_meteor_h_name"
+else
+  _def_ioctl_meteor_h_name="#undef IOCTL_METEOR_H_NAME"
+fi
+echores "$_ioctl_meteor_h"
+
 echocheck "*BSD BrookTree 848 TV interface"
 if test "$_tv_bsdbt848" = auto ; then
  _tv_bsdbt848=no
  if test "$_tv" = yes ; then
     cat > $TMPC <<EOF
 #include <sys/types.h>
-#if defined(__NetBSD__)
-#include <dev/ic/bt8xx.h>
-#else
-#include <machine/ioctl_bt848.h>
+$_def_ioctl_meteor_h_name
+$_def_ioctl_bt848_h_name
+#ifdef IOCTL_METEOR_H_NAME
+#include IOCTL_METEOR_H_NAME
 #endif
-int main(void) { return 0; }
+#ifdef IOCTL_BT848_H_NAME
+#include IOCTL_BT848_H_NAME
+#endif
+int main(void){
+ ioctl(0, METEORSINPUT, 0);
+ ioctl(0, TVTUNER_GETFREQ, 0);
+ return 0; 
+}
 EOF
     cc_check && _tv_bsdbt848=yes
  fi
@@ -8094,6 +8156,10 @@ $_def_tv_v4l1
 
 /* Enable Video 4 Linux 2 TV interface support */
 $_def_tv_v4l2
+
+/* *BSD BrookTree headers */
+$_def_ioctl_meteor_h_name
+$_def_ioctl_bt848_h_name
 
 /* Enable *BSD BrookTree TV interface support */
 $_def_tv_bsdbt848
