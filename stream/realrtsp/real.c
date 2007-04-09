@@ -86,21 +86,14 @@ static void hexdump (const char *buf, int length) {
 
 static void calc_response_string (char *result, char *challenge) {
  
-  char zres[16];
+  unsigned char zres[16];
   int  i;
       
   av_md5_sum(zres, challenge, 64);
  
   /* convert zres to ascii string */
-  for (i=0; i<16; i++ ) {
-    char a, b;
-    
-    a = (zres[i] >> 4) & 15;
-    b = zres[i] & 15;
-
-    result[i*2]   = ((a<10) ? (a+48) : (a+87)) & 255;
-    result[i*2+1] = ((b<10) ? (b+48) : (b+87)) & 255;
-  }
+  for (i=0; i<16; i++ )
+    sprintf(result+i*2, "%02x", zres[i]);
 }
 
 static void real_calc_response_and_checksum (char *response, char *chksum, char *challenge) {
