@@ -36,7 +36,7 @@ MPlayer (1.0)
 
     Streaming:
     * authentication for Real RTSP streams
-    * near-precise seeking in dvd://
+    * near-precise seeking in dvd:// and dvdnav:// (this last one requires libdvdnav from mphq)
     * speed selection when playing dvd:// streams, to make drive quieter
     * support SVQ3 and H.264 in X-QT over RTSP,
       now RTSP Apple keynotes are playable
