@@ -84,24 +84,13 @@ static void hexdump (const char *buf, int length) {
 #endif
 
 
-static void calc_response_string (char *result, char *challenge) {
- 
-  unsigned char zres[16];
-  int  i;
-      
-  av_md5_sum(zres, challenge, 64);
- 
-  /* convert zres to ascii string */
-  for (i=0; i<16; i++ )
-    sprintf(result+i*2, "%02x", zres[i]);
-}
-
 static void real_calc_response_and_checksum (char *response, char *chksum, char *challenge) {
 
   int   ch_len;
   int   i;
   char *ptr;
   char  buf[128];
+  unsigned char zres[16];
 
   /* initialize return values */
   memset(response, 0, 64);
@@ -135,7 +124,11 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
     for (i=0; i<XOR_TABLE_SIZE; i++)
       ptr[i] = ptr[i] ^ xor_table[i];
 
-  calc_response_string (response, buf);
+  av_md5_sum(zres, buf, 64);
+ 
+  /* convert zres to ascii string */
+  for (i=0; i<16; i++ )
+    sprintf(response+i*2, "%02x", zres[i]);
 
   /* add tail */
   strcpy (&response[32], "01d0a8e3");
