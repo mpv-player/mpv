@@ -88,9 +88,7 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
 
   int   ch_len;
   int   i;
-  char *ptr;
-  char  buf[128];
-  unsigned char zres[16];
+  unsigned char zres[16], buf[128];
 
   /* initialize return values */
   memset(response, 0, 64);
@@ -98,11 +96,8 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
 
   /* initialize buffer */
   memset(buf, 0, 128);
-  ptr=buf;
-  AV_WB32(ptr, 0xa1e9149d);
-  ptr+=4;
-  AV_WB32(ptr, 0x0e6b3b59);
-  ptr+=4;
+  AV_WB32(buf, 0xa1e9149d);
+  AV_WB32(buf+4, 0x0e6b3b59);
 
   /* some (length) checks */
   if (challenge != NULL)
@@ -117,12 +112,12 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
     if ( ch_len > 56 ) ch_len=56;
     
     /* copy challenge to buf */
-    memcpy(ptr, challenge, ch_len);
+    memcpy(buf+8, challenge, ch_len);
   }
   
     /* xor challenge bytewise with xor_table */
     for (i=0; i<XOR_TABLE_SIZE; i++)
-      ptr[i] = ptr[i] ^ xor_table[i];
+      buf[8+i] ^= xor_table[i];
 
   av_md5_sum(zres, buf, 64);
  
