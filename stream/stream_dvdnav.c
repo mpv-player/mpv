@@ -328,6 +328,26 @@ static int control(stream_t *stream, int cmd, void* arg) {
       }
       break;
     }
+#ifdef MP_DVDNAV
+    case STREAM_CTRL_GET_CURRENT_TIME:
+    {
+      double tm;
+      tm = dvdnav_get_current_time(priv->dvdnav)/90000.0f;
+      if(tm != -1)
+      {
+        *((double *)arg) = tm;
+        return 1;
+      }
+      break;
+    }
+    case STREAM_CTRL_SEEK_TO_TIME:
+    {
+      uint64_t tm = (uint64_t) (*((double*)arg) * 90000);
+      if(dvdnav_time_search(priv->dvdnav, tm) == DVDNAV_STATUS_OK)
+        return 1;
+      break;
+    }
+#endif
   }
 
   return STREAM_UNSUPORTED;
