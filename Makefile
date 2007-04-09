@@ -311,7 +311,7 @@ dep depend: help_mp.h version.h codecs.conf.h
 clean:
 	-rm -f *.o *.a *~
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
-	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
+	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo(EXESUF) \
 	  codecs.conf.h help_mp.h version.h
 	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
 
