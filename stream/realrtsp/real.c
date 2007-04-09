@@ -49,12 +49,14 @@
 #define LOG
 */
 
-static const unsigned char xor_table[] = {
+#define XOR_TABLE_SIZE 45
+
+static const unsigned char xor_table[XOR_TABLE_SIZE] = {
     0x05, 0x18, 0x74, 0xd0, 0x0d, 0x09, 0x02, 0x53,
     0xc0, 0x01, 0x05, 0x05, 0x67, 0x03, 0x19, 0x70,
     0x08, 0x27, 0x66, 0x10, 0x10, 0x72, 0x08, 0x09,
     0x63, 0x11, 0x03, 0x71, 0x08, 0x08, 0x70, 0x02,
-    0x10, 0x57, 0x05, 0x18, 0x54, 0x00, 0x00, 0x00 };
+    0x10, 0x57, 0x05, 0x18, 0x54 };
 
 
 #define BUF_SIZE 4096
@@ -103,7 +105,7 @@ static void calc_response_string (char *result, char *challenge) {
 
 static void real_calc_response_and_checksum (char *response, char *chksum, char *challenge) {
 
-  int   ch_len, table_len, resp_len;
+  int   ch_len, resp_len;
   int   i;
   char *ptr;
   char  buf[128];
@@ -136,12 +138,8 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
     memcpy(ptr, challenge, ch_len);
   }
   
-    table_len = strlen(xor_table);
-
-    if (table_len > 56) table_len=56;
-
     /* xor challenge bytewise with xor_table */
-    for (i=0; i<table_len; i++)
+    for (i=0; i<XOR_TABLE_SIZE; i++)
       ptr[i] = ptr[i] ^ xor_table[i];
 
   calc_response_string (response, buf);
