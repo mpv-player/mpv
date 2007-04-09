@@ -49,7 +49,7 @@
 #define LOG
 */
 
-#define XOR_TABLE_SIZE 45
+#define XOR_TABLE_SIZE 37
 
 static const unsigned char xor_table[XOR_TABLE_SIZE] = {
     0x05, 0x18, 0x74, 0xd0, 0x0d, 0x09, 0x02, 0x53,
