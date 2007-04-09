@@ -105,7 +105,7 @@ static void calc_response_string (char *result, char *challenge) {
 
 static void real_calc_response_and_checksum (char *response, char *chksum, char *challenge) {
 
-  int   ch_len, resp_len;
+  int   ch_len;
   int   i;
   char *ptr;
   char  buf[128];
@@ -145,11 +145,10 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
   calc_response_string (response, buf);
 
   /* add tail */
-  resp_len = strlen (response);
-  strcpy (&response[resp_len], "01d0a8e3");
+  strcpy (&response[32], "01d0a8e3");
 
   /* calculate checksum */
-  for (i=0; i<resp_len/4; i++)
+  for (i=0; i<8; i++)
     chksum[i] = response[i*4];
 }
 
