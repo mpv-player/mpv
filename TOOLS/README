@@ -11,7 +11,6 @@ encoding in three pass mode or creating SVCDs from a movie.
 FIXME: Document the following tools:
 
 bmovl-test
-netstream
 
 
 MPlayer scripts in the TOOLS dir
@@ -517,3 +516,35 @@ Usage:        - Set the path to the RealPlayer codecs directory in the C files.
               - Put the wrappers in the RealPlayer codecs directory.
 
 Notes:        Known to work at least on Linux x86 with RealPlayer8.
+
+
+
+netstream - access remote streams
+---------------------------------
+
+NOTE: netstream does not link at the moment - help welcome.
+
+netstream allows you to access most MPlayer stream types from a remote host.
+The main purpose of this feature is to make it possible to directly use the
+CD or DVD drive of another computer on the network (provided you have the
+required bandwidth). On the downside some stream types (currently TV and MF)
+are not usable remotely because they are implemented at the demuxer level.
+
+Be aware that currently the server is not secure at all.
+
+Compile the server by running 'make netstream' and then copy the netstream
+binary to the right place on your system (usually /usr/local/bin on Unix).
+Start the netstream server on the computer you intend to access remotely.
+There are no command line arguments.
+
+Play the second track of a VCD on the server with:
+
+  mplayer -cache 5000 mpst://servername/vcd://2
+
+Access files on this server with:
+
+  mplayer -cache 5000 mpst://servername//usr/local/movies/lol.avi
+
+Note that paths which do not start with a / will be interpreted as relative to
+the directory where the server is running. The '-cache' option is not needed
+but highly recommended.

@@ -429,68 +429,6 @@ This works with all protocols supported by
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="mpst" xreflabel="Remote streams">
-<title>Remote streams</title>
-
-<para>
-Remote streams allow you to access most <application>MPlayer</application>
-stream type from a remote host. The main purpose of this feature is to make
-it possible to directly use the CD or DVD drive of another computer on the
-network (provided you have the required bandwidth). On the downside some
-stream type (currently TV and MF) are not usable remotely because they are
-implemented at the demuxer level. It is sad for MF but TV stream would anyway
-require an insane amount of bandwidth.
-</para>
-
-<!-- ********** -->
-
-<sect2 id="compile_mpst_server">
-<title>Compiling the server</title>
-
-<para>
-After having compiled <application>MPlayer</application> go to the
-<filename>TOOLS/netstream</filename> directory and enter
-<application>make</application> to build the server binary.
-You can then copy the <application>netstream</application> binary
-to the right place on your system (usually
-<filename class="directory">/usr/local/bin</filename> on Linux).
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="use_mpst">
-<title>Using remote streams</title>
-
-<para>
-First you have to start the server on the computer you intend to remotely
-access. Currently the server is very basic and does not have any commands
-line arguments so just enter <filename>netstream</filename>. Now you can
-for example play the second track of a VCD on the server with :
-<screen>
-mplayer -cache 5000 <replaceable>mpst://servername/vcd://2</replaceable>
-</screen>
-You can also access files on this server :
-<screen>
-mplayer -cache 5000 <replaceable>mpst://servername//usr/local/movies/lol.avi</replaceable>
-</screen>
-Note that paths which aren't starting with a / will be relative to
-the directory where the server is running. The <option>-cache</option> option
-is not needed but highly recommended.
-</para>
-
-<para>
-Be aware that currently the server is not secure at all. So do not complain
-about the numerous exploits which are possible through this. Instead send
-some (good) patch to make it better or start writing your own server.
-</para>
-</sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
 <sect1 id="edl" xreflabel="Edit Decision Lists (EDL)">
 <title>Edit Decision Lists (EDL)</title>
 
