@@ -22,8 +22,6 @@
 
 #include <stdlib.h>
 #include <inttypes.h>
-#include <sys/time.h>
-#include <time.h>
 
 #include "mputils.h"
 #include "ass_utils.h"
