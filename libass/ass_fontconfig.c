@@ -383,13 +383,8 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	}
 
 	priv->family_default = family ? strdup(family) : 0;
+	priv->path_default = path ? strdup(path) : 0;
 	priv->index_default = 0;
-	
-	rc = stat(path, &st);
-	if (!rc && S_ISREG(st.st_mode))
-		priv->path_default = path ? strdup(path) : 0;
-	else
-		priv->path_default = 0;
 
 	return priv;
 }
