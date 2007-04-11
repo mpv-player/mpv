@@ -7,12 +7,11 @@
 .\" FIXME: break lines longer than 80 characters; remove trailing whitespaces
 .\" FIXME: New sentences need to start on new lines.
 .
-.\" FIXME: Partir las líneas que contienen más de 80 caracteres; borrar
-.\" los espacios finales.
+.\" FIXME: Partir las líneas que contienen más de 80 caracteres;
 .\" FIXME: Las nuevas frases deben comenzar en nuevas líneas.
-.\" Arreglado hasta la línea 804.
+.\" Arreglado hasta la línea 1131.
 .\"
-.\" Traducido hasta la línea 3035 hay que revisar también las anteriores para
+.\" Traducido hasta la línea 3938 hay que revisar también las anteriores para
 .\" detectar algunos pequeños cambios.
 .
 .\" --------------------------------------------------------------------------
@@ -1012,11 +1011,11 @@ Cuando se reproducen flujos MPEG-TS, MPlayer/\:MEncoder usará el primer programa
 .B \-alang <código de país,[código de país, ...]> (vea también \-aid)
 Especifica una lista de prioridades de lenguaje de audio a usar.
 Diferentes formatos de contención usan diferentes códigos de lenguaje.
-Los DVDs usan ISO 639-1 códigos de lenguaje de dos letras, Matroska, MPEG-TS and NUT
-use ISO 639-2 códigos de lenguaje de tres letras, mientras OGM usa un identificador libre
-Mplayer imprime los lenguajes disponibles cuando se ejecuta en modo prolijo
-Selecciona el idioma de audio para el DVD y siempre intenta reproducir pistas
-cuyo lenguaje coincide con el código dado.
+Los DVDs usan ISO 639-1 códigos de lenguaje de dos letras, Matroska, MPEG-TS y
+NUT use ISO 639-2 códigos de lenguaje de tres letras, mientras OGM usa un
+identificador libre Mplayer imprime los lenguajes disponibles cuando se ejecuta
+en modo prolijo Selecciona el idioma de audio para el DVD y siempre intenta
+reproducir pistas cuyo lenguaje coincide con el código dado.
 MPlayer muestra una lista de los idiomas disponibles cuando se ejecuta
 en modo prolijo (\-v).
 .sp 1
@@ -1034,9 +1033,10 @@ Reproduce un fichero Matroska en japonés.
 .B \-audio-demuxer <número> (\-audiofile sólo)
 Fuerza el tipo de audio demuxer para \-audiofile.
 Use un '+' delante del nombre para forzarlo, ¡esto evitará algunos chequeos!.
-Pásele al demuxer uno de los nombres de la lista imprimida por \-audio-demuxer help.
-Por compatibilidad con versiones anteriores también acepta el ID del demuxer como
-se define en libmpdemux/\:demuxer.h \-audio-demuxer audio o \-audio-demuxer 17 fuerza MP3.
+Pásele al demuxer uno de los nombres de la lista imprimida por \-audio-demuxer
+help. Por compatibilidad con versiones anteriores también acepta el ID del
+demuxer como se define en libmpdemux/\:demuxer.h \-audio-demuxer audio o
+\-audio-demuxer 17 fuerza MP3.
 .
 .TP
 .B \-audiofile <nombredearchivo>
@@ -1069,9 +1069,10 @@ con esta opción se alcance.
 .
 .TP
 .B \-cache-seek-min <porcentaje>
-Si se tiene que realizar una búsqueda a una posición dentro de porcentaje del tamaño
-de la cache desde la posición actual, MPlayer esperará a que se llene la cache hasta
-esa posición en vez de realizar una búsqueda en el flujo (por defecto: 50).
+Si se tiene que realizar una búsqueda a una posición dentro de porcentaje del
+tamaño de la cache desde la posición actual, MPlayer esperará a que se llene la
+cache hasta esa posición en vez de realizar una búsqueda en el flujo
+(por defecto: 50).
 .
 .TP
 .B \-cdda <opción1:opción2> (CDDA solamente)
@@ -2934,7 +2935,7 @@ al finalizar.
 .TP
 .B "\-vm \ \ \ "
 Intenta cambiar a un modo de vídeo diferente.
-Soportado por los controladores de salida de video dga, x11, xv, sdl y
+Soportado por los controladores de salida de vídeo dga, x11, xv, sdl y
 directx.
 Si se usa con el controlador de salida de vídeo de directx las opciones
 \-screenw, \-screenh, \-bpp y \-refreshrate pueden usarse para establecer
@@ -3032,21 +3033,21 @@ la pantalla (por defecto: centrado).
 .
 .
 .
-.SH "CONTROLADORES DE SALIDA DE VIDEO (SOLAMENTE MPLAYER)"
-.
-Los controladores de salida de video con interfaces para las distintas
-facilidades de salida de video.
+.SH "CONTROLADORES DE SALIDA DE VÍDEO (SOLAMENTE MPLAYER)"
+Los controladores de salida de vídeo son interfaces para las distintas
+facilidades de salida de vídeo.
 La sintaxis es:
+.
 .TP
 .B \-vo <controlador1[:subopción1[=valor]:...],controlador2,...[,]>
-Especifica una lista de controladores de video prioritarios para usar.
+Especifica una lista prioritaria de controladores de vídeo.
 .PP
-Si la lista tiene la ',' restante se probarán después otros controladores
+Si la lista tiene una ',' al final se probarán después otros controladores
 no listados en la línea de órdenes.
-Las subopciones son opcionales y la mayoría pueden omitirse.
+Las subopciones son opcionales y en su mayoría pueden omitirse.
 .br
 .I NOTA:
-Vea \-vo help para una lista de controladores compilados.
+Vea \-vo help para una lista de controladores de vídeo compilados.
 .sp 1
 .I EJEMPLO:
 .PD 0
@@ -3058,82 +3059,136 @@ Usa el controlador DirectX con las características de aceleración
 desactivadas.
 .RE
 .PD 1
-.
 .sp 1
-FIXME: Documentar subopciones para x11, xover, xvmc, dga, sdl, vidix,
-xvidix, cvidix, winvidix, fbdev, fbdev2, vesa, null, aa, bl, ggi,
-mga, xmga, syncfb, 3dfx, tdfx_vid, tdfxfb, dxr2, dxr3, mpegpes, zr, zr2,
-yuv4mpeg, gif89a, jpeg, pgm, png, tga.
-.
 Los controladores de salida disponibles son:
 .
 .TP
 .B xv (solamente X11)
-Usa la extensión XVideo de XFree86 4.x para activar la reproducción acelarada
+Usa la extensión XVideo de XFree86 4.x para activar la reproducción acelerada
 por hardware.
-Si no puede usar un controlador de video específico para su hardware,
-probablemente sea esta la mejor opción.
+Si no puede usar un controlador de vídeo específico para su hardware,
+probablemente esta sea la mejor opción.
+Para obtener información a cerca de lo que es la clave de color y como se dibuja
+ejecute MPlayer con la opción \-v y mire las líneas marcadas con [xv common] al
+comienzo.
 .PD 0
 .RSs
 .IPs port=<número>
 Selecciona el puerto de XVideo específico.
+.IPs ck=<cur|use|set>
+Selecciona el origen del que se obtiene la clave de color (por defecto: cur).
+.RSss
+.IPs cur
+Por defecto obtiene la clave de color seleccionada en Xv.
+.IPs use
+Usa pero no establece la clave de color de MPlayer (use la opción \-colorkey
+para cambiarla).
+.IPs set
+Lo mismo que use pero también establece la clave de color proporcionada.
+.RE
+.IPs ck-method=<man|bg|auto>
+Establece el método de dibujado de la clave de color (por defecto: man).
+.RSss
+.IPs man
+Dibuja la clave de color manualmente (reduce el parpadeo en algunos casos).
+.IPs bg
+Establece la clave de color como la ventana de fondo.
+.IPs auto
+Deja que Xv dibuje la clave de color.
+.RE
 .RE
 .PD 1
+.
 .TP
 .B x11 (solamente X11)
-Controlador de salida de video de memoria compartida sin aceleración hardware
+Controlador de salida de vídeo de memoria compartida sin aceleración hardware
 que funciona en cualquier X11 que esté presente.
+.
 .TP
 .B xover (solamente X11)
-Añade soporte X11 a todos los controladores de salida de video basado
-en overlay.
-Actualmente solo soportado por tdfx_vid.
+Añade soporte X11 a todos los controladores de salida de vídeo basados
+en recubrimiento.
+Actualmente sólo soportado por tdfx_vid.
+.PD 0
+.RSs
+.IPs <vo_driver>
+Selecciona el controlador como fuente para usarlo como recubrimiento de X11
+.RE
+.PD 1
+.
 .TP
 .B xvmc (X11, \-vc ffmpeg12mc solamente)
-Este controlador de salida de video usa la extensión XvMC (X Video
+Este controlador de salida de vídeo usa la extensión XvMC (X Video
 Motion Compensation) de XFree86 4.x para acelerar la decodificación
 MPEG1/\:2 y VCR2.
 .PD 0
 .RSs
-.IPs benchmark
-Deshabilita el mostrado de imágenes.
+.IPs port=<número>
+Selecciona un puerto específico de XVideo.
+.IPs (no)benchmark
+Inhabilita el visionado de imágenes.
 Necesario para hacer bien las pruebas de rendimiento de controladores
-que cambian los buffers de imagen en el retrazo del monitor solamente
+que cambian los almacenes de imagen en el trazo del monitor solamente
 (nVidia).
-.IPs queue
+La opción por defecto es no inhabilitar el visionado de imágenes (nobenchmark).
+.IPs (no)bobdeint
+Un desentrelazador muy simple.
+Puede que no se vea mejor que \-vf tfields=1,
+pero es el único desentrelazador para xvmc (por defecto: nobobdeint).
+.IPs (no)queue
 Encola imágenes para mostrar para permitir más trabajo paralelo del
-hardware de video.
-Puede añadir una pequeña (no notable) desincronización de A/\:V.
-.IPs sleep
+hardware de vídeo.
+Puede añadir una pequeña (no apreciable) desincronización de A/\:V
+(por defecto: noqueue).
+.IPs (no)sleep
 Usa la función sleep mientras espera a que termine el renderizado (no
-recomendado en Linux).
-.IPs "wait\ "
-No usa la función sleep mientras espera que el renderizado termine (por
-defecto).
+recomendado en Linux). (por defecto: nosleep).
+.IPs ck=cur|use|set
+Lo mismo que \-vo xv:ck (vea \-vo xv).
+.IPs ck-method=man|bg|auto
+Lo mismo que \-vo xv:ck-method (vea \-vo xv).
 .RE
 .PD 1
+.
 .TP
 .B dga (solamente X11)
-Reproduce video a través de la extensión XFree86 Direct Graphics Access.
-Considerado obsoleto.
+Reproduce vídeo a través de la extensión XFree86 Direct Graphics Access.
+Se considera obsoleto.
+.
 .TP
 .B sdl (SDL solamente)
-Biblioteca de controlador de salida de video SDL (Simple Directmedia Layer)
+Biblioteca de controlador de salida de vídeo SDL (Simple Directmedia Layer)
 altamente independiente de la plataforma.
+Dado que SDL usa su propia capa para acceder a X11, las opciones X11 de MPlayer
+no tienen ningún efecto sobre sdl.
+.PD 0
+.RSs
+.IPs driver=<controlador>
+Especifica el controlador que usará SDL.
+.IPs (no)forcexv
+Usa XVideo a través del controlador de salida de vídeo sdl (por defecto:
+forcexv).
+.IPs (no)hwaccel
+Usa el escalador acelerado por hardware (por defecto: hwaccel).
+.RE
+.PD 1
+.
 .TP
 .B "vidix\ \ "
 VIDIX (VIDeo Interface for *niX) es una interfaz para las características
-de aceleración de video de las diferentes tarjetas gráficas.
-Controlador de salida de video muy rápido en tarjetas que lo soporten.
+de aceleración de vídeo de las diferentes tarjetas gráficas.
+Controlador de salida de vídeo muy rápido en tarjetas que lo soporten.
 .PD 0
 .RSs
 .IPs <subdevice>
-Elige explícitamente el subdispositivo VIDIX en el controlador que se
+Elige explícitamente el dispositivo VIDIX en el controlador que se
 está usando.
-Los subcontroladores disponibles son cyberblade_vid, mach64_vid, mga_crtc2_vid,
-mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid y sis_vid.
+Los controladores disponibles son cyberblade_vid, mach64_vid, mga_crtc2_vid,
+mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid y
+unichrome_vid.so.
 .RE
 .PD 1
+.
 .TP
 .B xvidix (solamente X11)
 Frontend X11 para VIDIX
@@ -3143,6 +3198,7 @@ Frontend X11 para VIDIX
 lo mismo que vidix
 .RE
 .PD 1
+.
 .TP
 .B "cvidix\ "
 Frontend genérico e independiente de plataforma para VIDIX, puede incluso
@@ -3162,9 +3218,10 @@ Frontend de Windows para VIDIX
 lo mismo que vidix
 .RE
 .PD 1
+.
 .TP
 .B directx (solamente Windows)
-Controlador de salida de video que usa la interfaz DirectX.
+Controlador de salida de vídeo que usa la interfaz DirectX.
 .PD 0
 .RSs
 .IPs noaccel
@@ -3174,111 +3231,327 @@ Pruebe esta opción si tiene problemas con la representación en pantalla.
 .PD 1
 .TP
 .B quartz (Mac OS X solamente)
-Controlador de salida de video Mac OS X Quartz.
+Controlador de salida de vídeo Mac OS X Quartz.
 Bajo algunas circunstancias, puede ser más eficiente forzar un formato
 de salida YUV empaquetado, con p.e.\& \-vf format=yuy2.
 .PD 0
 .RSs
 .IPs device_id=<número>
 Elige el dispositivo de salida a usar en pantalla completa.
+.IPs fs_res=<ancho>:<alto>
+Especifica la resolución a pantalla completa (útil en sistemas lentos).
 .RE
 .PD 1
+.
+.TP
+.B macosx (Mac OS X 10.4 o 10.3.9 con QuickTime 7)
+Controlador de salida de vídeo Mac OS X CoreVideo.
+.PD 0
+.RSs
+.IPs device_id=<número>
+Elige el dispositivo de salida a usar en pantalla completa.
+.RE
+.PD 1
+.
 .TP
 .B fbdev (solamente Linux)
-Usa el framebuffer del kernel para la reproducir video.
+Usa el framebuffer del kernel para la reproducir vídeo.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifica el nombre del dispositivo fbdev a usar (p.e.\& /dev/\:fb0) o el 
+nombre del dispositivo VIDIX si el nombre del dispositivo comienza con 'vidix'
+(p.e.\& 'vidixsis_vid' para el controlador sis).
+.RE
+.PD 1
 .
 .TP
 .B fbdev2 (solamente Linux)
-Usa el framebuffer del kernel para reproducir video,
+Usa el framebuffer del kernel para reproducir vídeo,
 implementación alternativa.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifica el nombre del dispositivo fbdev a usar (p.e.\& /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B "vesa\ \ \ "
-Controlador de salida de video muy general que debe funcionar en cualquier
+Controlador de salida de vídeo muy general que debe funcionar en cualquier
 tarjeta compatible con VESA VBE 2.0.
 .PD 0
 .RSs
-.IPs "dga\ \ "
-Activa el modo DGA.
-.IPs nodga
-Desactiva el modo DGA.
+.IPs (no)dga
+Activa o desactiva el modo DGA (por defecto: activado).
+.IPs neotv_pal
+Activa la salida NeoMagic TV y establece el modo PAL.
+.IPs neotv_ntsc
+Activa la salida NeoMagic TV y establece el modo NTSC.
 .IPs vidix
-FIXME: documentar esto.
+Usa el controlador VIDIX.
 .IPs "lvo\ \ "
-FIXME: documentar esto.
+Activa el recubrimiento de Vídeo Linux para el modo VESA.
 .RE
 .PD 1
+.
 .TP
 .B "svga\ \ \ "
-Reproduce video usando la biblioteca SVGA.
+Reproduce vídeo usando la biblioteca SVGA.
 .PD 0
 .RSs
-.IPs "<modo de video>"
-Especifica el modo de video a usar.
-El modo de video se puede dar en la forma <ancho>x<alto>x<colores>,
-por ejemplo 640x480x16M o por un número de modo de video como por ejemplo 84.
+.IPs "<modo de vídeo>"
+Especifica el modo de vídeo.
+El modo de vídeo se puede dar en la forma <ancho>x<alto>x<colores>,
+por ejemplo 640x480x16M o por un número de modo de vídeo como por ejemplo 84.
 .IPs bbosd
 Dibuja OSD dentro de las bandas negras bajo la película (más lento).
 .IPs native
-Usa solo las funciones de dibujo nativas.
+Utiliza sólo las funciones de dibujo nativas.
 Evita renderizado directo, OSD y aceleración hardware.
 .IPs retrace
 Fuerza el cambio de imagen en el repintado vertical.
-Usable solo con \-double.
+Sólo se puede usar con \-double.
 Tiene el mismo efecto que la opción \-vsync.
 .IPs "sq\ \ \ "
-Prueba el modo de video con pixels cuadrados.
+Prueba el modo de vídeo con pixels cuadrados.
 .IPs vidix
 Usa svga con VIDIX.
 .RE
 .PD 1
+.
 .TP
 .B "gl\ \ \ \ \ "
-Controlador de salida de video OpenGL.
-Versión muy simple, sin soporte OSD y el tamaño del video debe ser menor
-que el tamaño máximo de la textura de su implementación OpenGL.
-Está hecho para que trabaje incluso con las implementaciones OpenGL más simples.
+Controlador de salida de vídeo OpenGL, es una versión muy simple.
+El tamaño del vídeo debe ser menor que el tamaño máximo de la textura
+de su implementación OpenGL.
+Está hecho para que trabaje incluso con las implementaciones de OpenGL
+más simples, pero también hace uso de las nuevas extensiones, que permite
+soporte para mas espacios de color y renderizado directo.
+Por favor use \-dr si funciona con su implementación OpenGL, dado que para
+mayores resoluciones esto supone una
+.B gran
+mejora de la velocidad.
+El código realiza muy pocas comprobaciones, así que si una característica no
+funciona puede ser debido a que no está soportada por su tarjeta/implementación
+OpenGL incluso si no obtiene ningún mensaje de error.
+Use glxinfo o una herramienta similar para comprobar las extensiones OpenGL que
+soporta su sistema.
 .PD 0
 .RSs
-.IPs manyfmts
-Activa soporte para más (RGB y BGR) formatos de color.
-Necesita versión >= 1.2 de OpenGL, NO FUNCIONA correctamente todavía.
+.IPs (no)scaled-osd
+Cambia la manera en la que se comporta el OSD cuando cambia el tamaño de
+la ventana (por defecto: desactivado).
+Cuando se activa se comporta de forma parecida al resto de controladores, lo
+cual es mejor para las fuentes fixed-size.
+Cuando se desactiva se ve mucho mejor con las fuentes FreeType, además usa los
+bordes en el modo de pantalla completa.
+No funciona correctamente con el formato de subtítulos ass (vea \-ass), puede
+renderizarlos sin soporte de OpenGL usando \-vf ass.
+.IPs osdcolor=<0xRRGGBB>
+Color para el OSD (por defecto: 0xffffff, corresponde al color blanco).
+.IPs rectangle=<0,1,2>
+Selecciona el uso de texturas rectangulares que ahorran RAM, pero a menudo es
+más lento (por defecto: 0).
+.RSss
+0: Usa texturas potencias-de-dos (por defecto).
+.br
+1: Usa la extensión GL_ARB_texture_rectangle.
+.br
+2: Usa la extensión GL_ARB_texture_non_power_of_two.
+En algunos casos esta extensión sólo se soporta por software y por lo tanto es
+muy lenta.
+.RE
+.IPs swapinterval=<n>
+Intervalo mínimo entre dos intercambios de memoria, se cuenta en frames
+mostrados (por defecto: 1).
+1 es equivalente a activar VSYNC, 0 para desactivar VSYNC.
+Valores por debajo de 0 la dejarán al valor por defecto del sistema.
+Esto limita el ratio de imágenes a (tasa de refresco horizontal / n).
+Requiere el soporte GLX_SGI_swap_control para funcionar.
+Con algunas (casi todas?) implementaciones esto sólo funciona en el modo de
+pantalla completa.
+.IPs yuv=<n>
+Selecciona el tipo de conversión de YUV a RGB.
+.RSss
+0: Usa conversión por software (por defecto).
+Compatible con todas las versiones de OpenGL.
+Provee control para el brillo, contraste y saturación.
+.br
+1: Usa register combiners.
+Esto usa una extensión específica de nVidia (GL_NV_register_combiners).
+Al menos se necesitan tres unidades de texturas.
+Provee control para la saturación y la tonalidad.
+Este método es rápido pero inexacto.
+.br
+2: Usa un fragment program.
+Necesita la extensión GL_ARB_fragment_program y al menos tres unidades de
+textura.
+Provee control para brillo, contraste, saturación y tonalidad.
+.br
+3: Usa un fragment program utilizando la instrucción POW.
+Necesita la extensión GL_ARB_fragment_program y al menos tres unidades de
+textura.
+Provee control para brillo, contraste, saturación, tonalidad y gamma.
+La opción gamma se puede establecer independientemente para el rojo, verde y
+azul.
+El método número 4 es normalmente más rápido.
+.br
+4: Usa un fragment program con búsqueda adicional.
+Necesita la extensión GL_ARB_fragment_program y al menos tres unidades de
+textura.
+Provee control para brillo, contraste, saturación, tonalidad y gamma.
+La opción gamma se puede establecer independientemente para el rojo, verde y
+azul.
+.br
+5: Usa un método específico de ATI (para tarjetas antiguas).
+Esto usa una extensión específica de ATI (GL_ATI_fragment_shader - no
+GL_ARB_fragment_shader!).
+Al menos se necesitan tres unidades de textura.
+Provee control de saturación y tonalidad.
+Este método es rápido pero inexacto.
+.br
+6: Usa una textura 3D para hacer una conversión por búsqueda.
+Necesita la extensión GL_ARB_fragment_program y al menos cuatro unidades de
+textura.
+Extremadamente lento (emulación por software) en algunas (¿todas?) las tarjetas
+ATI dado que usan una textura con border pixels.
+Provee control para brillo, contraste, saturación, tonalidad y gamma.
+La opción gamma se puede establecer independientemente para el rojo, verde y
+azul.
+La velocidad depende más del ancho de banda de la memoria de la GPU que el resto
+de métodos.
+.RE
+.IPs lscale=<n>
+Selecciona la función de escalado a usar para el escalado luminiscente.
+Únicamente válido para los modos yuv 2, 3, 4 y 6.
+.RSss
+0: Usa un simple filtro linear (por defecto).
+.br
+1: Usa un filtro bicúbico (mayor calidad).
+Necesita una unidad de textura adicional.
+Las tarjetas antiguas no serán capaces de manejarlo para el chroma al menos en
+el modo de pantalla completa.
+.br
+2: Usa un método de filtrado cúbico en horizontal y lineal en vertical.
+Funciona en algunas tarjetas más que el método 1.
+.RE
+.IPs cscale=<n>
+Selecciona la función de escalado a usar para el escalado del chroma.
+Para más detalles vea lscale.
+.IPs customprog=<nombre fichero>
+Carga un fragmento de programa propio desde <nombre fichero>.
+Vea TOOLS/edgedect.fp para un ejemplo.
+.IPs customtex=<nombre fichero>
+Carga una textura "gamma ramp" propia desde <nombre fichero>.
+Esto se puede usar junto con yuv=4 o con la opción customprog.
+.IPs (no)customtlin
+Si se activa (por defecto) usa la interpolación GL_LINEAR, en otro caso usa
+GL_NEAREST para la textura customtex.
+.IPs (no)customtrect
+Si se activa usa texture_rectangle para la textura customtex.
+Por defecto está desactivada.
+.RE
+.sp 1
+.RS
+Normalmente no hay razón para usar las siguientes opciones, únicamente existen
+con propósitos de prueba.
+.RE
+.sp 1
+.RSs
+.IPs (no)glfinish
+LLama a glFinish() antes de intercambiar las zonas de memoria.
+Más lento pero en algunos casos da una salida mejor (por defecto: desactivado).
+.IPs (no)manyfmts
+Activa soporte para más (RGB y BGR) formatos de color (por defecto: activado).
+Necesita una versión de OpenGL >= 1.2.
 .IPs slice-height=<0\-...>
 Número de líneas copiadas a la textura en una pieza (por defecto: 4).
 0 para la imagen entera.
+.br
+.I NOTA:
+Si se usa el espacio de color YUV (vea la opción yuv), se aplican las siguientes
+reglas especiales:
+.RSss
+Si el decodificador usa el renderizado por partes (vea \-noslices), esta opción
+no tiene efecto, se utiliza el tamaño de las partes proporcionado por el
+decodificador.
+.br
+Si el decodificador no usa el renderizado por partes, por defecto se usan 16.
+.RE
+.IPs (no)osd
+Activa o desactiva el soporte para el renderizado OSD usando OpenGL (por defecto:
+activado).
+Esta opción se usa para pruebas; para desactivar el OSD use \-osdlevel 0.
+.IPs (no)aspect
+Activa o desactiva el aspecto del escalado y el soporte pan-and-scan (por
+defecto: activado).
+Desactivarlo puede incrementar la velocidad.
+.REss
 .RE
 .PD 1
+.
 .TP
 .B "gl2\ \ \ \ "
-Controlador de salida de video de OpenGL, segunda generación.
-Soporta OSD y videos más grandes que el tamaño máximo de la textura.
+Controlador de salida de vídeo de OpenGL, segunda generación.
+Soporta OSD y vídeos más grandes que el tamaño máximo de la textura.
+.PD 0
+.RSs
+.IPs (no)glfinish
+lo mismo que gl (por defecto: activado)
+.IPs yuv=<n>
+Selecciona el tipo de conversión de YUV a RGB.
+Si se configura a algo que no sea 0, el OSD estará desactivado y las opciones de
+brillo, contraste y gamma sólo serán accesibles a través de la configuración
+global del servidor X.
+Exceptuando estos casos tiene el mismo significado que para \-vo gl.
+.REss
 .
 .TP
 .B "null\ \ \ "
-No produce salida de video.
+No produce salida de vídeo.
 Útil para pruebas de rendimiento.
 .
 .TP
 .B "aa\ \ \ \ \ "
-Controlador de salida de video ASCII art que funciona en una consola de texto.
+Controlador de salida de vídeo ASCII art que funciona en una consola de texto.
+Puede obtener una lista y una explicación de las opciones disponibles para el
+controlador ejecutando
+.I mplayer \-vo aa:help
 .
 .TP
 .B "caca\ \ \ "
-Controlador de salida de video ASCII art coloreado que funciona en una
+Controlador de salida de vídeo ASCII art coloreado que funciona en una
 consola de texto.
 .
 .TP
 .B "bl\ \ \ \ \ "
-Reproducción de video usando el protocolo UDP Blinkenlights.
-Este controlador es altamente para hardware específico.
+Reproducción de vídeo usando el protocolo UDP Blinkenlights.
+Este controlador es altamente dependiente de hardware específico.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifica el dispositivo Blinkenlights que se usará.
+es algo como arcade:host=localhost:2323 o
+hdl:file=name1,file=name2.
+Debe especificar un dispositivo.
+.RE
+.PD 1
 .
 .TP
 .B "ggi\ \ \ \ "
-Controlador de salida de video del sistema gráfico GGI.
+Controlador de salida de vídeo del sistema gráfico GGI.
+.PD 0
+.RSs
+.IPs <controlador>
+Especifica el controlador GGI que se usará.
+Reemplace cualquier ',' que aparezca en la cadena del driver por un '.'.
+.RE
+.PD 1
 .
 .TP
 .B directfb
-Reproduce video usando la biblioteca DirectFB.
+Reproduce vídeo usando la biblioteca DirectFB.
 .PD 0
 .RSs
 .IPs (no)input
@@ -3287,58 +3560,50 @@ Usa el código de teclado de DirectFB en lugar del de MPlayer
 .IPs buffermode=single|double|triple
 Doble y triple buffer da mejores resultados si quiere evitar problemas de
 desgarros de imagen. El buffer triple es más eficiente que el doble buffer
-ya que no bloquea MPlayer mientras se espera al refresco vertial.
+ya que no bloquea MPlayer mientras se espera al refresco vertical.
 El buffer simple debe evitarse (por defecto: single).
 .IPs fieldparity=top|bottom
 Controla el orden de salida de los marcos entrelazados (por defecto: desactivado).
 Valores válidos son top = campos superiores primero, bottom = campos
 inferiores primero.
-Esta opción no tiene ningún efecto en material filmográfico progresivo como
+Esta opción no tiene ningún efecto en material fílmico progresivo como
 lo son la mayoría de las películas MPEG.
 Necesitará activar esta opción si tiene problemas de desgarros de
 imagen/\:movimientos
 no suaves mientras visualiza material entrelazado.
 .IPs layer=N
 Forzará la capa con id N para la reproducción (por defecto: -1 - auto).
+.IPs dfbopts=<list>
+Especifica una lista de parámetros para DirectFB.
 .RE
 .PD 1
+.
 .TP
 .B "dfbmga\ "
-Controlador específico de salida de video de Matrox G400/\:G450/\:G550 que usa
+Controlador específico de salida de vídeo de Matrox G400/\:G450/\:G550 que usa
 la biblioteca DirectFB para poder usar las características especiales de
 hardware.
-Activa CRTC2 (segundo monitor), mostrando el video independientemente
+Activa CRTC2 (segundo monitor), mostrando el vídeo independientemente
 del primer monitor.
 .PD 0
 .RSs
+.IPs (no)input
+lo mismo que directfb (por defecto: desactivado).
+.IPs buffermode=single|double|triple
+lo mismo que directfb (por defecto: triple).
+.IPs fieldparity=top|bottom
+lo mismo que directfb.
 .IPs (no)bes
 Activa el uso de Matrox BES (backend scaler) (por defecto: desactivado).
 Obtiene resultados muy buenos en lo que concierne a velocidad y calidad
 de la salida como procesado interpolado de la imagen hecho mediante hardware.
-Funciona solo en el monitor primario.
+Funciona sólo en el monitor primario.
 .IPs (no)spic
 Hace uso de la capa sub imagen de Matrox para mostrar el OSD (por defecto: activado).
 .IPs (no)crtc2
 Activa la salida TV en el segundo monitor (por defecto: activado).
 La calidad de la salida es muy buena y es una imagen completamente
 entrelazada con sincronización correcta en cada campo par/\:impar.
-.IPs (no)input
-Usa el código de teclado de DirectFB en lugar del código de teclado normal de
-MPlayer (por defecto: desactivado).
-.IPs buffermode=single|double|triple
-Doble y triple buffer da mejores resultados si quiere evitar problemas de desgarramiento.
-Triple buffer es más eficiente que el doble buffer ya que no bloquea MPlayer
-mientras se espera al refresco vertical.
-El buffer simple debe evitarse (por defecto: triple).
-.IPs fieldparity=top|bottom
-Controla el orden de salida de los marcos entrelazados (por defecto:
-desactivado).
-Los valores válidos son top = primero los campos superiores,
-bottom = primero los campos inferiores.
-Esta opción no tiene ningún efecto en material de película progresivo como
-lo son las películas MPEG.
-Necesitará habilitar esta opción si tiene problemas de desgarros de
-imagen/\:movimiento no suave mientras ve material entrelazado.
 .IPs tvnorm=pal|ntsc|auto
 Establece la norma TV de la tarjeta Matrox sin la necesidad de modificar
 /etc/\:directfbrc (por defecto: desactivado).
@@ -3347,52 +3612,96 @@ es auto (auto-ajusta el uso de PAL/\:NTSC) porque decide qué norma se usa
 mirando la tasa de marcos de imagen de la película.
 .RE
 .PD 1
+.
 .TP
 .B mga (solamente Linux)
-Controlador de salida de video específico de Matrox que hace uso del backend
+Controlador de salida de vídeo específico de Matrox que hace uso del backend
 scaler YUV en tarjetas Gxxx a través del módulo del kernel.
 Si tiene una tarjeta Matrox, esta es la opción más rápida.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifica el nombre de dispositivo Matrox que se usará (por defecto:
+/dev/\:mga_vid).
+.RE
+.PD 1
+.
 .TP
 .B xmga (solamente Linux, X11)
-El controlador de salida de video mga, funcionando en una ventana X11.
+El controlador de salida de vídeo mga, funcionando en una ventana X11.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifica el nombre de dispositivo Matrox que se usará (por defecto:
+/dev/\:mga_vid).
+.RE
+.PD 1
+.
 .TP
 .B "syncfb\ "
-Controlador de salida de video para el módulo del kernel SyncFB, que provee
+Controlador de salida de vídeo para el módulo del kernel SyncFB, que provee
 características de hardware especiales para las tarjetas Matrox Gxxx como
-desentrelazado por hardware, escalado y sincronización de la salida de video
+desentrelazado por hardware, escalado y sincronización de la salida de vídeo
 con el refresco vertical de su monitor.
+.
+.TP
+.B s3fb (solamente Linux) (vea también \-vf yuv2 y \-dr)
+Controlador de salida de vídeo específico para S3 Virge.
+Este controlador soporta las características de conversión y escalado YUV de
+la tarjeta, doble almacenamiento de memoria y renderizado directo.
+Use \-vf yuy2 para obtener renderizado YUY2 acelerado por hardware que es mucho
+más rápido que YV12 en esta tarjeta.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifica el nombre de dispositivo fbdev que se usará
+(por defecto: /dev/\:fb0).
+.RE
+.PD 1
+.
 .TP
 .B 3dfx (solamente Linux)
-Controlador de salida de video específico para 3Dfx.
-FIXME: ¿Cuál es la diferencia entre 3dfx, tdfxfb y tdfx_vid?
+Controlador de salida de vídeo específico para 3Dfx que usa directamente el
+hardware por encima de X11.
+Únicamente se soportan 16 bpp.
+.
 .TP
 .B tdfxfb (solamente Linux)
 Este controlador emplea el framebuffer tdfx para reproducir las películas
-con aceleración YUV.
-FIXME: ¿Cuál es la diferencia entre 3dfx, tdfxfb y tdfx_vid?
-.B tdfx_vid (solamente Linux)
-Controlador de salida de video específico para 3Dfx.
-FIXME: ¿Cuál es la diferencia entre 3dfx, tdfxfb y tdfx_vid?
+con aceleración YUV en las tarjetas 3dfx.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifica el nombre de dispositivo fbdev que se usará
+(por defecto: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B tdfx_vid (solamente Linux)
-Controlador de salida de video específico para 3Dfx.
+Controlador de salida de vídeo específico para 3Dfx.
 Funciona conjuntamente con el módulo del kernel.
+.PD 0
+.RSs
+.IPs <dispositivo>
+Especifica el nombre de dispositivo fbdev que se usará
+(por defecto: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B dxr2 (vea también \-dxr2) (DXR2 solamente)
-Controlador de salida de video específico para Creative DXR2.
+Controlador de salida de vídeo específico para Creative DXR2.
 .PD 0
 .RSs
-.IPs x11
-Activa overlay.
-.IPs xv
-Activa overlay.
+.IPs <controlador vídeo>
+Controlador de vídeo para usar como overlay (x11, xv).
 .RE
 .PD 1
+.
 .TP
 .B dxr3 (DXR3 solamente)
-Controlador de salida de video específico para el chip decodificador Sigma
+Controlador de salida de vídeo específico para el chip decodificador Sigma
 Design em8300 MPEG (Creative DXR3, Sigma Designs Hollywood Plus).
 Vea también el filtro de video lavc.
 .PD 0
@@ -3401,8 +3710,8 @@ Vea también el filtro de video lavc.
 Activa overlay en lugar de TVOut.
 .IPs prebuf
 Activa prebuffering.
-.IPs sync
-Debe activar el nuevo motor de sincronización.
+.IPs "sync\ "
+Activa el nuevo motor de sincronización.
 .IPs norm=<norm>
 Especifica la norma de TV.
 .RSss
@@ -3418,75 +3727,214 @@ Especifica la norma de TV.
 .br
 5: NTSC
 .REss
-.IPs device=<número>
+.IPs <0\-3>
 Especifica el número de dispositivo a usar si su hardware tiene más de una
 tarjeta em8300.
 .RE
 .PD 1
+.
+.TP
+.B ivtv (IVTV only)
+Conexant CX23415 (iCompression iTVC15) o Conexant CX23416 (iCompression
+iTVC16) chip de decodificación MPEG (Hauppauge WinTV PVR-150/250/350/500)
+controlador de vídeo específico para salida de TV.
+Vea también el filtro de vídeo lavc.
+.PD 0
+.RSs
+.IPs dispositivo
+Especifica el nombre del dispositivo (por defecto: /dev/video16).
+.IPs salida
+Especifica la salida de TV para la señal de vídeo.
+.RE
+.PD 1
+.
 .TP
 .B mpegpes (DVB solamente)
-Controlador de salida de video específico para DVB.
+Controlador de salida de vídeo específico para DVB que escribe la salida en un
+fichero MPEG-PES si no hay ninguna tarjeta DVB instalada.
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Especifica el número de dispositivo a usar si tiene más de una tarjeta con
-salida DVB (solo API V3, tales como la serie de controladores 1.x.y).
+salida DVB (sólo API V3, tales como la serie de controladores 1.x.y).
+.IPs <fichero>
+fichero de salida (por defecto: ./grab.mpg)
 .RE
 .PD 1
+.
 .TP
 .B zr (vea también \-zr* y \-zhelp)
-Controlador de salida de video para unas cuantas tarjetas
+Controlador de salida de vídeo para unas cuantas tarjetas
 capturadoras/\:reproductoras de MJPEG.
 .
 .TP
-.B "zr2\ \ \ \ "
-Controlador de salida de video para unas cuantas tarjetas
+.B zr2 (vea también el filtro de vídeo zrmjpeg)
+Controlador de salida de vídeo para unas cuantas tarjetas
 capturadoras/\:reproductoras de MJPEG, segunda generación.
-Vea también el filtro de video zrmjpeg.
+.PD 0
+.RSs
+.IPs dev=<dispositivo>
+Especifica el dispositivo de vídeo.
+.IPs norm=<PAL|NTSC|SECAM|auto>
+Especifica la norma de vídeo (por defecto: auto).
+.IPs (no)prebuf
+Activa o desactiva el prebuffering, todavía no está soportado.
+.RE
+.PD 1
 .
 .TP
 .B "md5\ \ \ \ "
-Genera imágenes de cada marco con la ayuda de \-vo pgm y escribe su suma
-MD5 en un archivo.
-Útil para debug.
+Calcula las sumas MD5 de cada frame y las escribe en un fichero.
+Soporta los espacios de color RGB24 y YV12.
+Útil para depurar.
 .PD 0
 .RSs
-.IPs filename
+.IPs outfile=<valor>
 Permite especificar el nombre del archivo de salida (por defecto: ./md5).
 .RE
 .PD 1
+.
 .TP
 .B yuv4mpeg
-Transforma el flujo de video en una secuencia de imágenes YUV 4:2:0 sin
-comprimir y las almacena en un archivo llamado 'stream.yuv' en el directorio
-actual.
+Transforma el flujo de vídeo en una secuencia de imágenes YUV 4:2:0 sin
+comprimir y las almacena en un fichero (por defecto: ./stream.yuv).
 El formato es el mismo que el empleado por mjpegtools, por lo que le será
-útil si quiere procesar el video con la suite de mjpegtools.
+útil si quiere procesar el vídeo con la suite de mjpegtools.
+Soporta los formatos YV12, RGB (24 bpp) y BGR (24 bpp).
+Puede combinar la opción con el parámetro \-fixed-vo para concatenar ficheros
+con las mismas dimensiones y valor de fps.
+.PD 0
+.RSs
+.IPs interlaced
+Escribe la salida como frames entrelazados, el campo de arriba primero.
+.IPs interlaced_bf
+Escribe la salida como frames entrelazados, el campo de abajo primero.
+.IPs file=<fichero>
+Escribe la salida a <fichero> en vez de a stream.yuv.
+.REss
+.PD 1
+.RS
+.sp 1
+.I NOTA:
+Si no especifica ninguna opción la salida es progresiva
+(p.e.\& no entrelazada).
+.RE
 .
 .TP
 .B "gif89a\ "
-Saca cada marco de imagen en un archivo GIF en el diretorio actual.
-Cada archivo toma el número de marco rellenado con ceros como nombre.
+Guarda cada frame en un fichero gif animado en el actual directorio.
+Sólo soporta el formato RGB con 24 bpp y la salida se convierte a 256 colores.
+.PD 0
+.RSs
+.IPs <fps>
+Numero real para especificar el framerate (por defecto: 5.0).
+.IPs <fichero>
+Especifica el fichero de salida (por defecto: ./out.gif).
+.REss
+.PD 1
+.RS
+.sp 1
+.I NOTA:
+Debe especificar el framerate antes que el nombre del fichero o el framerate
+formará parte del nombre del fichero.
+.sp 1
+.I EJEMPLO:
+.RE
+.PD 0
+.RSs
+mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
+.RE
+.PD 1
 .
 .TP
 .B "jpeg\ \ \ "
-Saca cada marco de imagen en un archivo JPEG en el directorio actual.
-Cada archivo toma el número de marco rellenado con ceros como nombre.
+Guarda cada frame en un archivo JPEG en el directorio actual.
+Cada archivo toma el número de frame completado con ceros como nombre.
+.PD 0
+.RSs
+.IPs [no]progressive
+Especifica JPEG estándar o progresivo (por defecto: noprogressive)
+.IPs [no]baseline
+Especifica el uso o no de línea base (por defecto: baseline)
+.IPs optimize=<0\-100>
+factor de optimización (por defecto: 100)
+.IPs smooth=<0\-100>
+factor de suavizado (por defecto: 0)
+.IPs quality=<0\-100>
+factor de calidad (por defecto: 75)
+.IPs outdir=<valor>
+Especifica el directorio donde se guardarán los archivos JPEG (por defecto: ./).
+.IP subdirs=<valor>
+Crea subdirectorios numerados con el prefijo dado para guardar
+los ficheros en vez de usar el directorio actual.
+.IP maxfiles=<valor>
+Número máximo de archivos JPEG que se guardarán en cada subdirectorio.
+Debe ser igual o mayor que 1 (por defecto: 1000).
+.RE
+.PD 1
 .
 .TP
-.B "pgm\ \ \ \ "
-Saca cada marco de imagen en un archivo PGM en el directorio actual.
-Cada archivo toma el número de marco rellenado con ceros como nombre.
+.B "pnm\ \ \ \ "
+Guarda cada frame en un fichero PNM en el directorio actual.
+Cada archivo toma el número de frame completado con ceros como nombre.
+Soporta ficheros PPM, PGM and PGMYUV tanto en modo crudo como modo ASCII.
+Vea también pnm(5), ppm(5) y pgm(5).
+.PD 0
+.RSs
+.IPs "ppm\ \ "
+Escribre ficheros PPM (por defecto).
+.IPs "pgm\ \ "
+Escribre ficheros PGM.
+.IPs pgmyuv
+Escribre ficheros PGMYUV.
+PGMYUV es como PGM pero también contiene los planos U y V añadidos al fondo 
+de la imagen.
+.IPs "raw\ \ "
+Escribe ficheros PNM en modo crudo (por defecto).
+.IPs ascii
+Escribe ficheros PNM en modo crudo ASCII.
+.IPs outdir=<directorio>
+Especifica el directorio en el que guardar los ficheros PNM (por defecto: ./).
+.IPs subdirs=<prefijo>
+Crea subdirectorios numerados con el prefijo dado para guardar
+los ficheros en vez de usar el directorio actual.
+.IPs maxfiles=<valor> (solamente subdirs)
+Número máximo de archivos que se guardarán en cada subdirectorio.
+Debe ser igual o mayor que 1 (por defecto: 1000).
+.RE
+.PD 1
 .
 .TP
 .B "png\ \ \ \ "
-Saca cada marco de imagen en un archivo PNG en el directorio actual.
-Cada archivo toma el número de marco rellenado con ceros como nombre.
+Guarda cada frame en un fichero PNG en el directorio actual.
+Cada archivo toma el número de frame completado con ceros como nombre.
+se soportan los formatos 24bpp RGB y BGR.
+.PD 0
+.RSs
+.IPs z=<0-9>
+Especifica el nivel de compresión.
+0 si no hay compresión, 9 para la máxima compresión.
+.RE
+.PD 1
+.
 .
 .TP
 .B "tga\ \ \ \ "
-Saca cada marco de imagen en un archivo Targa en el directorio actual.
-Cada archivo toma el número de marco rellenado con ceros como nombre.
+Guarda cada frame en un fichero Targa en el directorio actual.
+Cada archivo toma el número de frame completado con ceros como nombre.
+El propósito de este controlador de vídeo de salida es tener un escritor de 
+imágenes sin pérdidas, sencillo, que no necesite ninguna librería externa.
+Soporta el formato de color BGR[A] con 15, 24 y 32 bpp.
+Puede forzar un formato particular con el filtro de vídeo de formato.
+.sp 1
+.I EJEMPLO:
+.RE
+.PD 0
+.RSs
+mplayer video.nut \-vf format=bgr15 \-vo tga
+.RE
+.PD 1
+.
 .
 .
 .SH "OPCIONES DE DECODIFICADO/\:FILTRADO"
