@@ -69,6 +69,9 @@ static int set_format(struct vf_instance_s *vf, unsigned int fmt) {
     case IMGFMT_YUY2:
 	mux_v->bih->biBitCount = 16;
 	break;
+    case IMGFMT_Y8:
+        mux_v->bih->biBitCount = 8;
+        break;
     default:
 	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_OutputWithFourccNotSupported, fmt);
 	mux_v->bih->biCompression = 0;
@@ -111,6 +114,7 @@ static int query_format(struct vf_instance_s *vf, unsigned int fmt) {
     case IMGFMT_YUY2:
     case IMGFMT_YVU9:
     case IMGFMT_IF09:
+    case IMGFMT_Y8:
 	return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     }
 
