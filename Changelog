@@ -13,10 +13,11 @@ MPlayer (1.0)
     Decoders:
     * Intel Music Coder audio decoding via lavc
     * Fraps v2/v4 video decoding via lavc
-    * Video game codecs: 4XM audio, Electronic Arts ADPCM audio, Delphine CIN audio
-      and video, Interplay DPCM audio, Sierra VMD video, Tiertex SEQ video,
-      Westwood IMA ADPCM audio, XAN wc3 video, Id CIN video, Interplay video,
-      XAN ADPCM audio, Westwood SND1 audio, Feeble Files DXA video via lavc
+    * Video game codecs: 4XM audio, Electronic Arts ADPCM audio, Delphine CIN
+      audio and video, Interplay DPCM audio, Sierra VMD video, Tiertex SEQ
+      video, Westwood IMA ADPCM audio, XAN wc3 video, Id CIN video, Interplay
+      video, XAN ADPCM audio, Westwood SND1 audio, Feeble Files DXA video, THP
+      audio and video via lavc
     * libmpeg2 updated to 0.4.1
     * fixed resolution switching with libmpeg2
     * handle resolution switching for Real codecs
