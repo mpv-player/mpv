@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22779
+.\" In sync with r22975
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1822,6 +1822,10 @@ Siehe \-tv driver=help für eine Liste eincompilierter TV-Eingabetreiber.
 mögliche Werte: dummy, v4l, v4l2, bsdbt848
 .IPs device=<Wert>
 Gibt ein anderes TV-Gerät als /dev/\:video0 an.
+.I ANMERKUNG:
+Dem bsdbt848-Treiber kannst du sowohl bktr- als tuner-Gerätenamen übergeben,
+indem du sie durch Komma trennst, tuner hinter bktr (z.B.\& -tv 
+device=/dev/bktr1,/dev/tuner1).
 .IPs input=<Wert>
 Gibt den Eingang an (Standard: 0 (TV), siehe Ausgaben in der Konsole für
 mögliche Eingänge).
@@ -3108,7 +3112,8 @@ mit der plugger-Erweiterung).
 Bei Xinerama-Konfigurationen (z.B.\& bei einem einzigen Desktop, der sich
 über mehrere Monitore erstreckt) gibt diese Option an, auf welchem Schirm
 das Video angezeigt werden soll.
-Wert \-2 steht für die Wiedergabe auf dem gesamten virtuellen Display, \-1
+Wert \-2 steht für die Wiedergabe auf dem gesamten virtuellen Display (in
+diesem Falle werden Xinerama-Informationen komplett ignoriert), \-1
 steht für Vollbildwiedergabe auf dem Display, das das aktuelle Fenster anzeigt.
 Die mit der Option \-geometry gesetzte Initialposition ist relativ zum
 angegebenen Bildschirm.
@@ -10270,18 +10275,21 @@ Wenn sich dvdauthor beschwert mit einer Meldung wie "..audio sector out of
 range...", hast du diese Option vermutlich nicht aktiviert.
 .
 .TP
-.B init_vpts=<100\-700>
-initiales Video pts in Millisekunden (Standard: 200)
-.
-.TP
-.B init_apts=<100\-700>
-initiales Audio pts in Millisekunden (Standard: 200)
-.
+.B "interleaving2\ \ \ "
+Verwendet einen besseren Algorithmus für das Interleaving von Audio- und
+Videopaketen, basierend auf dem Prinzip, dass der Muxer immer versuchen wird,
+den Stream mit dem größten Prozentanteil des verfügbaren Platzes zu füllen.
 .
 .TP
 .B vdelay=<1\-32760>
 Initiale Zeit, um die das Video verzögert wird, in Millisekunden (Standard:
 0), benutze dies, um Video bezüglich Audio zu verzögern.
+Dies funktioniert nicht mit :drop.
+.
+.TP
+.B adelay=<1\-32760>
+Initiale Zeit, um die der Ton verzögert wird, in Millisekunden (Standard: 0),
+benutze dies, um Ton bezüglich Video zu verzögern.
 .
 .TP
 .B "drop\ \ \ "
