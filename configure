@@ -6876,29 +6876,31 @@ fi
 echores "$_radio_v4l"
 
 if bsd && test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
-echocheck "*BSD BrookTree 848 Radio interface header"
-  for file in "dev/ic/bt8xx.h" \
-              "machine/ioctl_bt848.h" \
-              "dev/bktr/ioctl_bt848.h" \
-              "dev/video/bktr/ioctl_bt848.h" ; do
+echocheck "*BSD BrookTree 848 Radio interface"
+   _radio_bsdbt848=no
     cat > $TMPC <<EOF
 #include <sys/types.h>
-#include <$file>
-int main(void) { return 0; }
+$_def_ioctl_bt848_h_name
+#ifdef IOCTL_BT848_H_NAME
+#include IOCTL_BT848_H_NAME
+#endif
+int main(void){
+ ioctl(0, RADIO_GETFREQ, 0);
+ return 0; 
+}
 EOF
-    cc_check && _radio_bsdbt848_hdr=$file
-  done
-echores "$_radio_bsdbt848_hdr"
+    cc_check && _radio_bsdbt848=yes
+echores "$_radio_bsdbt848"
 fi #if bsd && radio && radio_bsdbt848
 
-if test -n "$_radio_bsdbt848_hdr"  ; then
-  _def_radio_bsdbt848="#define RADIO_BSDBT848_HDR <$_radio_bsdbt848_hdr>"
+if test "$_radio_bsdbt848" = yes ; then
+  _def_radio_bsdbt848='#define HAVE_RADIO_BSDBT848 1'
 else
-  _def_radio_bsdbt848='#undef RADIO_BSDBT848_HDR '
+  _def_radio_bsdbt848='#undef HAVE_RADIO_BSDBT848'
 fi
 
 if test "$_radio_v4l" = no && test "$_radio_v4l2" = no && \
-   test -z "$_radio_bsdbt848_hdr" && test "$_radio" = yes ; then
+   test "$_radio_bsdbt848" = no && test "$_radio" = yes ; then
     die "Radio driver requires BSD BT848,  V4L or V4L2!"
 fi
 
