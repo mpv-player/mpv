@@ -172,19 +172,19 @@ libmpcodecs/libmpcodecs.a:
 	$(MAKE) -C libmpcodecs
 
 libavutil/libavutil.a:
-	$(MAKE) -C libavutil LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libavutil
 
 libavcodec/libavcodec.a:
-	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libavcodec
 
 libpostproc/libpostproc.a:
-	$(MAKE) -C libpostproc LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libpostproc
 
 libavformat/libavformat.a:
-	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libavformat
 
 libswscale/libswscale.a:
-	$(MAKE) -C libswscale LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libswscale
 
 libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
