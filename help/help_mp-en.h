@@ -2052,3 +2052,38 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Error opening memory font: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] font face with no charmaps\n"
 #define MSGTR_LIBASS_NoCharmapAutodetected "[ass] no charmap autodetected, trying the first one\n"
+
+//tv.c
+#define MSGTR_TV_BogusNormParameter "tv.c: norm_from_string(%s): Bogus norm parameter, setting %s.\n"
+#define MSGTR_TV_NoVideoInputPresent "Error: No video input present!\n"
+#define MSGTR_TV_UnknownImageFormat ""\
+"==================================================================\n"\
+" WARNING: UNTESTED OR UNKNOWN OUTPUT IMAGE FORMAT REQUESTED (0x%x)\n"\
+" This may cause buggy playback or program crash! Bug reports will\n"\
+" be ignored! You should try again with YV12 (which is the default\n"\
+" colorspace) and read the documentation!\n"\
+"==================================================================\n"
+#define MSGTR_TV_SelectedNormId "Selected norm id: %d\n"
+#define MSGTR_TV_SelectedNorm "Selected norm : %s\n"
+#define MSGTR_TV_CannotSetNorm "Error: Cannot set norm!\n"
+#define MSGTR_TV_MJP_WidthHeight "  MJP: width %d height %d\n"
+#define MSGTR_TV_UnableToSetWidth "Unable to set requested width: %d\n"
+#define MSGTR_TV_UnableToSetHeight "Unable to set requested height: %d\n"
+#define MSGTR_TV_NoTuner "Selected input hasn't got a tuner!\n"
+#define MSGTR_TV_UnableFindChanlist "Unable to find selected channel list! (%s)\n"
+#define MSGTR_TV_SelectedChanlist "Selected channel list: %s (including %d channels)\n"
+#define MSGTR_TV_ChannelFreqParamConflict "You can't set frequency and channel simultaneously!\n"
+#define MSGTR_TV_ChannelNamesDetected "TV channel names detected.\n"
+#define MSGTR_TV_NoFreqForChannel "Couldn't find frequency for channel %s (%s)\n"
+#define MSGTR_TV_SelectedChannel3 "Selected channel: %s - %s (freq: %.3f)\n"
+#define MSGTR_TV_SelectedChannel2 "Selected channel: %s (freq: %.3f)\n"
+#define MSGTR_TV_SelectedFrequency "Selected frequency: %lu (%.3f)\n"
+#define MSGTR_TV_RequestedChannel "Requested channel: %s\n"
+#define MSGTR_TV_UnsupportedAudioType "Audio type '%s (%x)' unsupported!\n"
+#define MSGTR_TV_AudioFormat "  TV audio: %d channels, %d bits, %d Hz\n"
+#define MSGTR_TV_AvailableDrivers "Available drivers:\n"
+#define MSGTR_TV_DriverInfo "Selected driver: %s\n name: %s\n author: %s\n comment: %s\n"
+#define MSGTR_TV_NoSuchDriver "No such driver: %s\n"
+#define MSGTR_TV_UnknownColorOption "Unknown color option (%d) specified!\n"
+#define MSGTR_TV_CurrentFrequency "Current frequency: %lu (%.3f)\n"
+#define MSGTR_TV_CannotSetNorm "Error: Cannot set norm!\n"
