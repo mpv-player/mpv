@@ -35,6 +35,7 @@ extern VDXDriver mach64_drv;
 extern VDXDriver mga_drv;
 extern VDXDriver mga_crtc2_drv;
 extern VDXDriver nvidia_drv;
+extern VDXDriver pm2_drv;
 extern VDXDriver pm3_drv;
 extern VDXDriver radeon_drv;
 extern VDXDriver rage128_drv;
@@ -69,6 +70,9 @@ void vidix_register_all_drivers (void)
 #endif
 #ifdef CONFIG_VIDIX_DRV_NVIDIA
   vidix_register_driver (&nvidia_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_PM2
+  vidix_register_driver (&pm2_drv);
 #endif
 #ifdef CONFIG_VIDIX_DRV_PM3
   vidix_register_driver (&pm3_drv);

@@ -336,7 +336,7 @@ Video output:
   --disable-vidix-external disable external VIDIX [for x86 *nix]
   --with-vidix-drivers[=*] list of VIDIX drivers to be compiled in
                            Available: all,cyberblade,mach64,mga,mga_crtc2,
-                           nvidia,pm3,radeon,rage128,savage,sis,unichrome
+                           nvidia,pm2,pm3,radeon,rage128,savage,sis,unichrome
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-dga[=n]         enable DGA [n in {1, 2} ] support [autodetect]
   --enable-vesa            enable VESA video output [autodetect]
@@ -7363,6 +7363,13 @@ if test "$_vidix" = yes ; then
     _def_vidix_drv_nvidia='#undef CONFIG_VIDIX_DRV_NVIDIA'
     _vidix_drv_nvidia=no
   fi
+  if test "$_vidix_drivers" = all || test `echo "$_vidix_drivers" | grep -e pm2`; then
+    _def_vidix_drv_pm2='#define CONFIG_VIDIX_DRV_PM2 1'
+    _vidix_drv_pm2=yes
+  else
+    _def_vidix_drv_pm2='#undef CONFIG_VIDIX_DRV_PM2'
+    _vidix_drv_pm2=no
+  fi
   if test "$_vidix_drivers" = all || test `echo "$_vidix_drivers" | grep -e pm3`; then
     _def_vidix_drv_pm3='#define CONFIG_VIDIX_DRV_PM3 1'
     _vidix_drv_pm3=yes
@@ -7785,6 +7792,7 @@ CONFIG_VIDIX_MACH64=$_vidix_drv_mach64
 CONFIG_VIDIX_MGA=$_vidix_drv_mga
 CONFIG_VIDIX_MGA_CRTC2=$_vidix_drv_mga_crtc2
 CONFIG_VIDIX_NVIDIA=$_vidix_drv_nvidia
+CONFIG_VIDIX_PM2=$_vidix_drv_pm2
 CONFIG_VIDIX_PM3=$_vidix_drv_pm3
 CONFIG_VIDIX_RADEON=$_vidix_drv_radeon
 CONFIG_VIDIX_RAGE128=$_vidix_drv_rage128
