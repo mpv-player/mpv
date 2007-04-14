@@ -64,6 +64,7 @@ extern demuxer_desc_t demuxer_desc_xmms;
 extern demuxer_desc_t demuxer_desc_mpeg_ty;
 extern demuxer_desc_t demuxer_desc_rtp;
 extern demuxer_desc_t demuxer_desc_lavf;
+extern demuxer_desc_t demuxer_desc_lavf_preferred;
 extern demuxer_desc_t demuxer_desc_aac;
 extern demuxer_desc_t demuxer_desc_nut;
 
@@ -74,6 +75,7 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_tv,
 #endif
   &demuxer_desc_mf,
+  &demuxer_desc_lavf_preferred,
   &demuxer_desc_avi,
   &demuxer_desc_y4m,
   &demuxer_desc_asf,

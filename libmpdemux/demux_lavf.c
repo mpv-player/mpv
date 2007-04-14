@@ -210,6 +210,29 @@ static int lavf_check_file(demuxer_t *demuxer){
 
     return DEMUXER_TYPE_LAVF;
 }
+
+static const char *preferred_list[] = {
+    "dxa",
+    "wv",
+    "nuv",
+    "nut",
+    "gxf",
+    "mxf",
+    NULL
+};
+
+static int lavf_check_preferred_file(demuxer_t *demuxer){
+    if (lavf_check_file(demuxer)) {
+        char **p = preferred_list;
+        lavf_priv_t *priv = demuxer->priv;
+        while (*p) {
+            if (strcmp(*p, priv->avif->name) == 0)
+                return DEMUXER_TYPE_LAVF_PREFERRED;
+            p++;
+        }
+    }
+    return 0;
+}
     
 static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     AVFormatContext *avfc;
@@ -609,3 +632,18 @@ demuxer_desc_t demuxer_desc_lavf = {
   demux_lavf_control
 };
 
+demuxer_desc_t demuxer_desc_lavf_preferred = {
+  "libavformat preferred demuxer",
+  "lavfpref",
+  "libavformat",
+  "Michael Niedermayer",
+  "supports many formats, requires libavformat",
+  DEMUXER_TYPE_LAVF_PREFERRED,
+  0, // Check after other demuxer
+  lavf_check_preferred_file,
+  demux_lavf_fill_buffer,
+  demux_open_lavf,
+  demux_close_lavf,
+  demux_seek_lavf,
+  demux_lavf_control
+};
