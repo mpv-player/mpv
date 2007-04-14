@@ -26,6 +26,7 @@
 #include "config.h"
 #include "libavutil/common.h"
 #include "mpbswap.h"
+#include "config.h"
 
 VDXDriver *first_driver = NULL;
 
@@ -54,17 +55,39 @@ static void vidix_register_driver (VDXDriver *drv)
 
 void vidix_register_all_drivers (void)
 {
+#ifdef CONFIG_VIDIX_DRV_CYBERBLADE
   vidix_register_driver (&cyberblade_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_MACH64
   vidix_register_driver (&mach64_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_MGA
   vidix_register_driver (&mga_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_MGA_CRTC2
   vidix_register_driver (&mga_crtc2_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_NVIDIA
   vidix_register_driver (&nvidia_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_PM3
   vidix_register_driver (&pm3_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_RADEON
   vidix_register_driver (&radeon_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_RAGE128
   vidix_register_driver (&rage128_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_SAVAGE
   vidix_register_driver (&savage_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_SIS
   vidix_register_driver (&sis_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_UNICHROME
   vidix_register_driver (&unichrome_drv);
+#endif
 }
 
 static int vidix_probe_driver (VDXContext *ctx, VDXDriver *drv,
