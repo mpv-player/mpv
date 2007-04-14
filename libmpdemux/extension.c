@@ -20,8 +20,6 @@ static struct {
 //        { "mpe", DEMUXER_TYPE_MPEG_PS },
         { "vob", DEMUXER_TYPE_MPEG_PS },
         { "m2v", DEMUXER_TYPE_MPEG_PS },
-        { "gxf", DEMUXER_TYPE_LAVF },
-        { "mxf", DEMUXER_TYPE_LAVF },
         { "avi", DEMUXER_TYPE_AVI },
         { "mp4", DEMUXER_TYPE_MOV },
         { "mov", DEMUXER_TYPE_MOV },
@@ -57,8 +55,6 @@ static struct {
 #ifdef USE_WIN32DLL
         { "avs", DEMUXER_TYPE_AVS },
 #endif
-	{ "swf", DEMUXER_TYPE_LAVF },
-	{ "flv", DEMUXER_TYPE_LAVF },
 	{ "302", DEMUXER_TYPE_LAVF },
         { "264", DEMUXER_TYPE_H264_ES },
         { "26l", DEMUXER_TYPE_H264_ES },

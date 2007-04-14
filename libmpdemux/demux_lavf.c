@@ -218,6 +218,8 @@ static const char *preferred_list[] = {
     "nut",
     "gxf",
     "mxf",
+    "flv",
+    "swf",
     NULL
 };
 
