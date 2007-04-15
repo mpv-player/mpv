@@ -133,7 +133,7 @@ static int pm2_probe(int verbose, int force __attribute__ ((unused)))
     printf("[pm2] " #reg " (%x) = %#lx (%li)\n", reg, _foo, _foo);	\
 }
 
-static int pm2_init(const char *args __attribute__ ((unused)))
+static int pm2_init(void)
 {
     char *vm;
     pm2_reg_base = map_phys_mem(pci_info.base0, 0x10000);
