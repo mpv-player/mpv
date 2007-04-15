@@ -5266,13 +5266,19 @@ fi
 if test "$_dvdread_internal" = yes; then
   _def_dvdread_internal="#define USE_DVDREAD_INTERNAL 1"
   _def_dvdread='#define USE_DVDREAD 1'
-  _inputmodules="dvdread $_inputmodules"
+  _inputmodules="dvdread(internal) $_inputmodules"
   _largefiles=yes
 elif test "$_dvdread" = yes; then
   _def_dvdread='#define USE_DVDREAD 1'
-  _inputmodules="dvdread $_inputmodules"
   _largefiles=yes
-  test "$_dvdnav" != yes && _ld_extra="$_ld_extra -ldvdread"
+  if test "$_dvdnav" != yes; then
+    _ld_extra="$_ld_extra -ldvdread"
+    _inputmodules="dvdread(external) $_inputmodules"
+    _res_comment="external"
+  else
+    _inputmodules="dvdread(from dvdnav) $_inputmodules"
+    _res_comment="from dvdnav"
+  fi
 else
   _def_dvdread_internal="#undef USE_DVDREAD_INTERNAL"
   _def_dvdread='#undef USE_DVDREAD'
@@ -5296,10 +5302,10 @@ if test "$_libdvdcss_internal" = yes ; then
     _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
     _ld_extra="$_ld_extra -framework IOKit"
   fi
-  _inputmodules="libdvdcss $_inputmodules"
+  _inputmodules="libdvdcss(internal) $_inputmodules"
   _largefiles=yes
 else
-  _noinputmodules="libdvdcss $_noinputmodules"
+  _noinputmodules="libdvdcss(internal) $_noinputmodules"
 fi
 echores "$_libdvdcss_internal"
 
