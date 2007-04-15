@@ -405,7 +405,6 @@ int decoded_frameno=0;
 int next_frameno=-1;
 int curfile=0;
 int new_srate=0;
-int fformat=DEMUXER_TYPE_UNKNOWN;
 
 unsigned int timer_start=0;
 ao_data_t ao_data = {0,0,0,0,OUTBURST,-1,0};
