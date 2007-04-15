@@ -56,6 +56,7 @@ MPlayer (1.0)
     * NUT muxing and demuxing support via libnut
     * WMA encoder
     * fix MJPEGB on big-endian systems
+    * lowres support for some H.264 files
 
     Filters:
     * obsolete fame filter removed
