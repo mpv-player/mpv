@@ -46,6 +46,7 @@ MPlayer (1.0)
     * fix AAC-LATM over RTSP
     * support AMR over RTSP
     * support H.264 over RTSP
+    * "device" and "adevice" suboptions now works for *BSD BT848 tv driver too
 
     FFmpeg/libavcodec:
     * Intel Music coder audio decoder
