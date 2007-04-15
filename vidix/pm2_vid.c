@@ -76,17 +76,17 @@ static vidix_capability_t pm2_cap =
     { 0, 0, 0, 0 }
 };
 
-static u_int pm2_card_ids[] =
+static uint32_t pm2_card_ids[] =
 {
     (VENDOR_3DLABS << 16) | DEVICE_3DLABS_PERMEDIA2,
     (VENDOR_TEXAS << 16) | DEVICE_TEXAS_TVP4020_PERMEDIA_2
 };
 
-static int find_chip(u_int vendor, u_int chip_id)
+static int find_chip(uint32_t vendor, uint32_t chip_id)
 {
-    u_int vci = (vendor << 16) | chip_id;
+    uint32_t vci = (vendor << 16) | chip_id;
     unsigned i;
-    for(i = 0; i < sizeof(pm2_card_ids)/sizeof(u_int); i++){
+    for(i = 0; i < sizeof(pm2_card_ids)/sizeof(uint32_t); i++){
 	if(vci == pm2_card_ids[i]) return i;
     }
     return -1;
@@ -186,7 +186,7 @@ static int pm2_query_fourcc(vidix_fourcc_t *to)
 
 #define PPROD(a,b,c) (a | (b << 3) | (c << 6))
 
-static u_int ppcodes[][2] = {
+static uint32_t ppcodes[][2] = {
     {0, 0},
     {32, PPROD(1, 0, 0)},
     {64, PPROD(1, 1, 0)},
@@ -226,14 +226,14 @@ static int frames[VID_PLAY_MAXFRAMES];
 
 static int pm2_config_playback(vidix_playback_t *info)
 {
-    u_int src_w, drw_w;
-    u_int src_h, drw_h;
+    uint32_t src_w, drw_w;
+    uint32_t src_h, drw_h;
     long base0;
-    u_int stride, sstr;
-    u_int format;
+    uint32_t stride, sstr;
+    uint32_t format;
     unsigned int i;
-    u_int ppcode = 0, sppc = 0;
-    u_int pitch = 0;
+    uint32_t ppcode = 0, sppc = 0;
+    uint32_t pitch = 0;
 
     TRACE_ENTER();
 
