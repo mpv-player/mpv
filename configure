@@ -6372,16 +6372,19 @@ echores "$_md5sum"
 echocheck "AMR narrowband"
 if test "$_amr_nb" = auto ; then
   _amr_nb=no
-  if test -f libavcodec/amr_float/sp_dec.c ; then
-    if test "$_libavcodec" = yes ; then
-      _amr_nb=yes
-    else
-      _res_comment="libavcodec (static) is required by amr_nb, sorry"
-    fi
+  cat > $TMPC << EOF
+#include <amrnb/interf_dec.h>
+int main(void) { Speech_Decode_Frame_init(); return 0; }
+EOF
+  cc_check -lamrnb && _amr_nb=yes
+  if test "$_libavcodec" != yes ; then
+    _amr_nb=no
+    _res_comment="libavcodec (static) is required by amr_nb, sorry"
   fi
 fi
 if test "$_amr_nb" = yes ; then
   _amr=yes
+  _ld_extra="$_ld_extra -lamrnb"
   _def_amr='#define CONFIG_AMR 1'
   _def_amr_nb='#define CONFIG_AMR_NB 1'
 else
@@ -6422,16 +6425,19 @@ fi
 echocheck "AMR wideband"
 if test "$_amr_wb" = auto ; then
   _amr_wb=no
-  if test -f libavcodec/amrwb_float/dec_dtx.c ; then
-    if test "$_libavcodec" = yes ; then
-      _amr_wb=yes
-    else
-      _res_comment="libavcodec (static) is required by amr_wb, sorry"
-    fi
+  cat > $TMPC << EOF
+#include <amrwb/dec_if.h>
+int main(void) { D_IF_init(); return 0; }
+EOF
+  cc_check -lamrwb && _amr_wb=yes
+  if test "$_libavcodec" != yes ; then
+    _amr_wb=no
+    _res_comment="libavcodec (static) is required by amr_wb, sorry"
   fi
 fi
 if test "$_amr_wb" = yes ; then
   _amr=yes
+  _ld_extra="$_ld_extra -lamrwb"
   _def_amr='#define CONFIG_AMR 1'
   _def_amr_wb='#define CONFIG_AMR_WB 1'
   _codecmodules="amr_wb $_codecmodules"
