@@ -309,6 +309,9 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
                 break;
             priv->astreams[priv->audio_streams] = i;
             priv->audio_streams++;
+            // mp4a tag is used for all mp4 files no matter what they actually contain
+            if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
+                codec->codec_tag= 0;
             if(!codec->codec_tag)
                 codec->codec_tag= av_codec_get_tag(mp_wav_taglists, codec->codec_id);
             wf->wFormatTag= codec->codec_tag;
