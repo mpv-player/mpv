@@ -2122,7 +2122,7 @@ static char help_text[]=
 " Dies kann zu fehlerhafter Wiedergabe oder einem Absturz führen!\n"\
 " Fehlerberichte werden ignoriert werden! Du solltest erneut versuchen\n"\
 " mit YV12 (was der Standardfarbraum ist) und die Dokumentation lesen!\n"\
-"==================================================================\n"
+"=====================================================================\n"
 #define MSGTR_TV_SelectedNormId "Gewählte Norm-ID: %d\n"
 #define MSGTR_TV_SelectedNorm "Gewählte Norm : %s\n"
 #define MSGTR_TV_CannotSetNorm "Fehler: Kann Norm nicht setzen!\n"
@@ -2134,15 +2134,15 @@ static char help_text[]=
 #define MSGTR_TV_SelectedChanlist "Gewählte Kanalliste: %s (enthält %d Kanäle)\n"
 #define MSGTR_TV_ChannelFreqParamConflict "Du kannst Frequenz und Kanal nicht gleichzeitig setzen!\n"
 #define MSGTR_TV_ChannelNamesDetected "TV-Kanalnamen erkannt.\n"
-#define MSGTR_TV_NoFreqForChannel "Konnte Frequent für Kanal %s nicht finden (%s)\n"
+#define MSGTR_TV_NoFreqForChannel "Konnte Frequenz für Kanal %s nicht finden (%s)\n"
 #define MSGTR_TV_SelectedChannel3 "Gewählter Kanal: %s - %s (Freq: %.3f)\n"
-#define MSGTR_TV_SelectedChannel2 "Gewählter Kanal: %s (Ffreq: %.3f)\n"
+#define MSGTR_TV_SelectedChannel2 "Gewählter Kanal: %s (Freq: %.3f)\n"
 #define MSGTR_TV_SelectedFrequency "Gewählte Frequenz: %lu (%.3f)\n"
 #define MSGTR_TV_RequestedChannel "Angeforderter Kanal: %s\n"
 #define MSGTR_TV_UnsupportedAudioType "Audiotyp '%s (%x)' nicht unterstützt!\n"
 #define MSGTR_TV_AudioFormat "  TV-Audio: %d Kanäle, %d Bits, %d Hz\n"
 #define MSGTR_TV_AvailableDrivers "Verfügbare Treiber:\n"
-#define MSGTR_TV_DriverInfo "Ausgewählter Treiber: %s\n Name: %s\n Author: %s\n Kommentar: %s\n"
+#define MSGTR_TV_DriverInfo "Ausgewählter Treiber: %s\n Name: %s\n Autor: %s\n Kommentar: %s\n"
 #define MSGTR_TV_NoSuchDriver "Kein Treiber: %s\n"
 #define MSGTR_TV_UnknownColorOption "Unbekannte Farboption (%d) angegeben!\n"
 #define MSGTR_TV_CurrentFrequency "Momentane Frequenz: %lu (%.3f)\n"
