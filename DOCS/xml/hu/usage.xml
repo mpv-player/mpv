@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r22951 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -427,68 +427,6 @@ Ez el fogja menteni a
 tartalmat a <replaceable>stream.asf</replaceable> fájlba.
 Ez működik az <application>MPlayer</application> által támogatott
 összes protokollal, mint MMS, RSTP és így tovább.
-</para>
-</sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
-<sect1 id="mpst" xreflabel="Remote streams">
-<title>Távoli stream-ek</title>
-
-<para>
-A távoli stream-ek segítségévela legtöbb <application>MPlayer</application>
-által ismert stream típust elérheted egy távoli hoszt segítségével is. A fő
-célja ennek, hogy direkt módon használhasd egy másik számítógép CD vagy DVD
-meghajtóját hálózaton keresztül (feltéve, hogy megvan a megfelelő sávszélesség).
-Letöltési oldalon pár stream típus (jelenleg a TV és az MF) nem használhatóak
-távolról, mert a demuxer szintjén vannak implementálva. Ez sajnálatos az MF
-esetében, de a TV stream-hez úgyis eszeveszettül nagy sávszélesség kellene.
-</para>
-
-<!-- ********** -->
-
-<sect2 id="compile_mpst_server">
-<title>A szerver fordítása</title>
-
-<para>
-Miután lefordítottad az <application>MPlayer</application>t, menj a
-<filename>TOOLS/netstream</filename> könyvtárba és add ki a
-<application>make</application> parancsot a szerver bináris
-elkészítéséhez. Ezután a <application>netstream</application> binárist
-bemásolhatod a megfelelő helyre (általában <filename class="directory">/usr/local/bin</filename>
-Linuxon).
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="use_mpst">
-<title>Távoli stream-ek használata</title>
-
-<para>
-Először el kell indítanod a szervert azon a gépen, amit távolról el akarsz
-érni. Jelenleg a szerver nagyon kezdetleges és nincs parancssori kapcsolója,
-csak írd be a <filename>netstream</filename> parancsot. Ezután például
-le tudod játszani a szerverben lévő VCD második sávját:
-<screen>
-mplayer -cache 5000 <replaceable>mpst://servername/vcd://2</replaceable>
-</screen>
-A szerveren lévő fájlokat is elérheted:
-<screen>
-mplayer -cache 5000 <replaceable>mpst://servername//usr/local/movies/lol.avi</replaceable>
-</screen>
-Figyelj arra, hogy ha egy elérési útvonal nem / jellel kezdődik, akkor az a szerver
-futási helyéhez képest lesz relatív. A <option>-cache</option> kapcsoló nem szükséges,
-de nagyon ajánlott.
-</para>
-
-<para>
-Vigyázz, a jelenlegi szerver semennyire sem biztonságos. Tehát ne panaszkodj
-a számos exploit miatt, ami esetleg kihasználhatja ezt. Inkább küldj néhány
-(jó) javítást, hogy jobb legyen vagy kezd el írni a saját szervered.
 </para>
 </sect2>
 </sect1>

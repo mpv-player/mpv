@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22800 -->
+<!-- synced with r22854 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -92,10 +92,7 @@ stepping 0) CPU-kban nincs MTRR, de a stepping 12-ben van
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="output-trad">
-<title>Videó kimenet tradícionális videó kártyákhoz</title>
-
-<sect2 id="xv">
+<sect1 id="xv">
 <title>Xv</title>
 
 <para>
@@ -168,7 +165,7 @@ screen #0
 </para>
 
 
-<sect3 id="tdfx">
+<sect2 id="tdfx">
 <title>3dfx kártyák</title>
 
 <para>
@@ -186,10 +183,10 @@ próbáld ki az SDL-t (ebben is van XVideo) és nézd meg, hogy ez segít-e. Lá
 <option>-vo tdfxfb</option> vezérlőt! Lásd a <link linkend="tdfxfb">tdfxfb</link>
 részt.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="s3">
+<sect2 id="s3">
 <title>S3 kártyák</title>
 
 <para>
@@ -211,10 +208,10 @@ Jelenleg nem tisztázott, hogy mely Savage modellekből hiányzik a YV12 támoga
 konvertál a vezérlő (lassú). Ha a kártyára gyanakodsz, szerezz be egy újabb vezérlőt,
 vagy udvariasan kérj az MPlayer-users levelezési listán egy MMX/3DNow! támogatású vezérlőt.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="nvidia">
+<sect2 id="nvidia">
 <title>nVidia kártyák</title>
 
 <para>
@@ -236,10 +233,10 @@ rendelkezik <link linkend="vidix">VIDIX</link> vezérlővel. Jelenleg még
 béta állapotú, és van pár bökkenője. További információkért lásd az
 <link linkend="vidix-nvidia">nVidia VIDIX</link> részt.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ati">
+<sect2 id="ati">
 <title>ATI kártyák</title>
 
 <para>
@@ -259,10 +256,10 @@ simán is <emphasis role="bold">gyorsított</emphasis> megjelenítést kapsz,
 függvénykönyvtárra sem X-re nincs szükség.
 Olvasd el a <link linkend="vidix">VIDIX</link> részt.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="neomagic">
+<sect2 id="neomagic">
 <title>NeoMagic kártyák</title>
 
 <para>
@@ -291,10 +288,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="trident">
+<sect2 id="trident">
 <title>Trident kártyák</title>
 
 <para>
@@ -307,10 +304,10 @@ a Cyberblade XP kártyával.
 Alternatívaként az <application>MPlayer</application> is tartalmaz egy
 <link linkend="vidix">VIDIX</link> vezérlőt a Cyberblade/i1 kártyához.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="kyro">
+<sect2 id="kyro">
 <title>Kyro/PowerVR kártyák</title>
 
 <para>
@@ -318,12 +315,12 @@ Ha az Xv-t Kyro alapú kártyával akarod használni (például Hercules
 Prophet 4000XT-vel), akkor le kell töltened a vezérlőt a
 <ulink url="http://www.powervr.com/">PowerVR oldaláról</ulink>
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dga">
+<sect1 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -608,11 +605,11 @@ tartozó chipset vezérlőkkel.
 </para></listitem>
 </itemizedlist>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="sdl">
+<sect1 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -643,11 +640,11 @@ rendszer miatt) vagy az audió késett.
 Az SDL videó kimenet támogatja a feliratok megjelenítését a film alatt, a
 (ha van) fekete soron.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="svgalib">
+<sect1 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -719,11 +716,11 @@ ráta csökkentése is, mert a hang szétesett 44kHz-en:
 Csak az <option>expand</option> szűrő segítségével tudod bekapcsolni a
 feliratokat és az OSD-t, lásd a man oldalt a megfelelő paraméterekért.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="fbdev">
+<sect1 id="fbdev">
 <title>Framebuffer kimenet (FBdev)</title>
 
 <para>
@@ -815,11 +812,11 @@ Az FBdev videó mód váltása <emphasis>nem működik</emphasis> a VESA
 framebufferrel és ne is kérd, hogy működjön, mivel ez nem az
 <application>MPlayer</application> korlátja.
 </para></note>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="mga_vid">
+<sect1 id="mga_vid">
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
@@ -894,11 +891,11 @@ Van egy <command>mga_vid_test</command> nevű teszt alkalmazás ugyan ebben a
 könyvtárban. Ha minden jól működik, akkor 256x256-os képeket rajzol a képernyőre.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect1 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>3Dfx YUV támogatás</title>
 
 <para>
@@ -908,11 +905,11 @@ támogatással, és egy újrafordítás a
 <screen>./configure --enable-tdfxfb</screen>
 paranccsal.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tdfx_vid">
+<sect1 id="tdfx_vid">
 <title>tdfx_vid</title>
 
 <para>
@@ -953,11 +950,11 @@ Van egy <command>tdfx_vid_test</command> nevű teszt alkalmazás ugyan ebben a
 könyvtárban. Ha minden jól működik, néhány hasznos információt jelenít meg.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="opengl">
+<sect1 id="opengl">
 <title>OpenGL kimenet</title>
 
 <para>
@@ -990,11 +987,11 @@ környezeti változót (legalábbis az nVidia-n):
 <para>
 <command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="aalib">
+<sect1 id="aalib">
 <title>AAlib &ndash; szöveges módú megjelenítés</title>
 
 <para>
@@ -1118,11 +1115,11 @@ megtalálni a legjobb módot.
 Lásd a <ulink url="http://aa-project.sf.net/tune"/> oldalt a további
 tuningolási dolgokhoz.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="caca">
+<sect1 id="caca">
 <title>
 <systemitem class="library">libcaca</systemitem> - Színes ASCII Art függvénykönyvtár
 </title>
@@ -1215,11 +1212,11 @@ Használd a <option>-framedrop</option> kapcsolót ha a számítógéped nem el�
 gyors az összes képkocka rendeléséhez.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="vesa">
+<sect1 id="vesa">
 <title>VESA - kimenet a VESA BIOS-hoz</title>
 
 <para>
@@ -1351,11 +1348,11 @@ Nem fog menni!
   a POST eljárás során inicializálja magát.
 </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="x11">
+<sect1 id="x11">
 <title>X11</title>
 
 <para>
@@ -1403,11 +1400,11 @@ Ha nem találod a beszúrt módokat, nézd át az XFree86 kimenetét. Néhány
 vezérlő nem tud alacsony pixelclock-ot használni, ami szükséges az alacsony
 felbontású videó módokhoz.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="vidix">
+<sect1 id="vidix">
 <title>VIDIX</title>
 
 <formalpara><title>BEVEZETÉS</title>
@@ -1567,7 +1564,7 @@ Alternatívaként használhatsz egy speciális kernel modult, így:
 </procedure>
 
 
-<sect3 id="vidix-ati">
+<sect2 id="vidix-ati">
 <title>ATI kártyák</title>
 
 <para>
@@ -1580,10 +1577,10 @@ Két lefordított bináris van: <filename>radeon_vid</filename> a Radeonhoz és
 <filename>rage128_vid</filename> a Rage 128 kártyákhoz. Előírhatsz egyet vagy
 hagyhatod a VIDIX rendszernek automatikusan kipróbálni az összes elérhető vezérlőt.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-mga">
+<sect2 id="vidix-mga">
 <title>Matrox kártyák</title>
 
 <para>
@@ -1594,10 +1591,10 @@ A Matrox G200, G400, G450 és G550 működik a jelentések szerint.
 A vezérlő támogatja a videó equalizereket és majdnem olyan gyors, mint a
 <link linkend="mga_vid">Matrox framebuffer</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-trident">
+<sect2 id="vidix-trident">
 <title>Trident kártyák</title>
 
 <para>
@@ -1610,20 +1607,20 @@ A vezérlőt
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>
 írta és tartja karban.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-3dlabs">
+<sect2 id="vidix-3dlabs">
 <title>3DLabs kártyák</title>
 
 <para>
 Habár van vezérlő a 3DLabs GLINT R3 és Permedia3 chip-ekhez, senki sem
 tesztelte le, így örömmel fogadjuk a jelentéseket.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-nvidia">
+<sect2 id="vidix-nvidia">
 <title>nVidia kártya</title>
 
 <para>
@@ -1633,10 +1630,10 @@ videó megjelenítés - framebuffer vagy X varázslat és egyebek nélkül. Ehhe
 <option>cvidix</option> videó kimenetet kell használni, amint az itt látható:
 <screen>mplayer -vo cvidix <replaceable>pelda.avi</replaceable></screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-sis">
+<sect2 id="vidix-sis">
 <title>SiS kártyák</title>
 
 <para>
@@ -1651,12 +1648,12 @@ a "Shuttle XPC" dobozokban).
 <para>
 Várjuk a visszajelzéseket!
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="directfb">
+<sect1 id="directfb">
 <title>DirectFB</title>
 
 <blockquote><para>
@@ -1681,11 +1678,11 @@ DirectFB opciókat a parancssorban a <option>-dfbopts</option> kapcsoló haszná
 A réteg választás egy aleszköz módszerével történhet, pl.: <option>-vo directfb:2</option>
 (-1-es réteg az alapértelmezett: automatikus keresés)
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dfbmga">
+<sect1 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 
 <para>
@@ -1714,7 +1711,6 @@ javítás a fenti URL-ről). A CRTC2 kód portolását az
 <link linkend="mga_vid">mga_vid</link>-be évekig terveztük, a
 <ulink url="../../tech/patches.txt">javításokat</ulink> szívesen fogadjuk.
 </para></note>
-</sect2>
 </sect1>
 
 

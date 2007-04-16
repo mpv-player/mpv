@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r22772 (2007. 03. 31.)
+// Sync'ed with help_mp-en.h r23003 (2007. 04. 16.)
 
 // ========================= MPlayer help ===========================
 
@@ -2051,3 +2051,37 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Hiba a betűtípus memóriában történő megnyitásakor: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] betűtípus leírás karaktertábla nélkül\n"
 #define MSGTR_LIBASS_NoCharmapAutodetected "[ass] nincs alapértelmezetten megtalált karaktertábla, az elsőt próbálom\n"
+
+//tv.c
+#define MSGTR_TV_BogusNormParameter "tv.c: norm_from_string(%s): Hibás norma paraméter, beállított: %s.\n"
+#define MSGTR_TV_NoVideoInputPresent "Hiba: Nincs videó bemenet!\n"
+#define MSGTR_TV_UnknownImageFormat ""\
+"==================================================================\n"\
+" FIGYELEM: NEM TESZTELT VAGY ISMERETLEN KIMENETI KÉPFORMÁTUM (0x%x)\n"\
+" Ez hibás lejátszást vagy összeomlást okozhat! A hibajelentéseket\n"\
+" figyelmen kívül hagyjuk! Próbáld újra YV12-vel (az alapértelmezett\n"\
+" színtérrel) és olvasd el a dokumentációt!\n"\
+"==================================================================\n"
+#define MSGTR_TV_SelectedNormId "Kiválasztott norma id: %d\n"
+#define MSGTR_TV_SelectedNorm "Kiválasztott norma: %s\n"
+#define MSGTR_TV_CannotSetNorm "Hiba: Nem lehet beállítani a normát!\n"
+#define MSGTR_TV_MJP_WidthHeight "  MJP: %d szélesség %d magasság\n"
+#define MSGTR_TV_UnableToSetWidth "Nem lehet beállítani a kívánt szélességet: %d\n"
+#define MSGTR_TV_UnableToSetHeight "Nem lehet beállítani a kívánt magasságot: %d\n"
+#define MSGTR_TV_NoTuner "A kiválasztott bemeneten nincs tuner!\n"
+#define MSGTR_TV_UnableFindChanlist "Nem található a kiválasztott csatorna lista! (%s)\n"
+#define MSGTR_TV_SelectedChanlist "Kiválasztott csatorna lista: %s (%d csatorna)\n"
+#define MSGTR_TV_ChannelFreqParamConflict "Nem állíthatod be a frekvenciát és a csatornát egy időben!\n"
+#define MSGTR_TV_ChannelNamesDetected "TV csatornák nevének keresése.\n"
+#define MSGTR_TV_NoFreqForChannel "Nem található frekvencia a(z) %s csatornához (%s)\n"
+#define MSGTR_TV_SelectedChannel3 "Kiválasztott csatorna: %s - %s (frekv: %.3f)\n"
+#define MSGTR_TV_SelectedChannel2 "Kiválasztott csatorna: %s (frekv: %.3f)\n"
+#define MSGTR_TV_SelectedFrequency "Kiválasztott frekvencia: %lu (%.3f)\n"
+#define MSGTR_TV_RequestedChannel "Kért csatorna: %s\n"
+#define MSGTR_TV_UnsupportedAudioType "A(z) '%s (%x)' audió típus nem támogatott!\n"
+#define MSGTR_TV_AudioFormat "  TV audió: %d csatorna, %d bit, %d Hz\n"
+#define MSGTR_TV_AvailableDrivers "Elérhető vezérlők:\n"
+#define MSGTR_TV_DriverInfo "Kiválasztott vezérlő: %s\n név: %s\n szerző: %s\n megjegyzés: %s\n"
+#define MSGTR_TV_NoSuchDriver "Nincs ilyen vezérlő: %s\n"
+#define MSGTR_TV_UnknownColorOption "Ismeretlen szín opció (%d) van megadva!\n"
+#define MSGTR_TV_CurrentFrequency "Aktuális frekvencia: %lu (%.3f)\n"

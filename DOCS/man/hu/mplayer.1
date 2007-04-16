@@ -1,4 +1,4 @@
-.\" Synced with r22845
+.\" Synced with r22975
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 03. 31." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 04. 16." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1730,6 +1730,10 @@ Lásd a \-tv driver=help-et a befordított TV bemeneti vezérlõk listájához.
 elérhetõek: dummy, v4l, v4l2, bsdbt848
 .IPs device=<érték>
 TV eszköz megadása (alapértelmezett: /dev/\:video0).
+.I MEGJEGYZÉS:
+A bsdbt848 vezérlõnek megadhatod mind a bktr, mind a tuner eszköz nevét
+vesszõvel elválasztva, tuner a bktr után
+(pl.\& -tv device=/dev/bktr1,/dev/tuner1).
 .IPs input=<érték>
 Input megadása (alapértelmezett: 0 (TV), lásd a konzol kimenetet az elérhetõ inputokért).
 .IPs freq=<érték>
@@ -9811,17 +9815,21 @@ Ha a dvdauthor egy "..audio sector out of range..." típusú üzentet küld,
 valószínûleg nem engedélyezted ezt az opciót.
 .
 .TP
-.B init_vpts=<100\-700>
-kezdeti videó pts milliszekundumokban (alapértelmezett: 200)
-.
-.TP
-.B init_apts=<100\-700>
-kezdeti audió pts milliszekundumokban (alapértelmezett: 200)
+.B "interleaving2\ \ \ "
+Egy jobb algoritmust használ az audió és videó csomagok átlapolásához,
+kihasználva azt az alapvetõ tulajdonságot, hogy a muxer a folyamot mindig
+a lehetõ legnagyobb százalékban próbálja meg kitölteni szabad területtel.
 .
 .TP
 .B vdelay=<1\-32760>
-Initial video delay time, in milliseconds (alapértelmezett: 0),
-use it if you want to delay video with respect to audio.
+A kezdeti videó késleltetés ideje milliszekundumban (alapértelmezett: 0),
+akkor használatos, ha a videót késleltetni kell a hanghoz képest.
+Nem mûködik a :drop-pal.
+.
+.TP
+.B adelay=<1\-32760>
+A kezdeti audió késleltetés ideje milliszekundumban (alapértelmezett: 0),
+akkor használhatos, ha az audiót késleltetni kell a videóhoz képest.
 .
 .TP
 .B "drop\ \ \ "
