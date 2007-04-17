@@ -193,7 +193,7 @@ int noconsolecontrols=0;
 //**************************************************************************//
 
 // Not all functions in mplayer.c take the context as an argument yet
-static MPContext *mpctx = &(MPContext){
+static MPContext mpctx_s = {
     .osd_function = OSD_PLAY,
     .begin_skip = MP_NOPTS_VALUE,
     .play_tree_step = 1,
@@ -204,6 +204,8 @@ static MPContext *mpctx = &(MPContext){
     .last_dvb_step = 1,
 #endif
 };
+
+static MPContext *mpctx = &mpctx_s;
 
 int fixed_vo=0;
 
