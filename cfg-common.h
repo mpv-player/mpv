@@ -27,7 +27,7 @@
 	{"vcd", "-vcd N has been removed, use vcd://N instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
 	{"cuefile", "-cuefile has been removed, use cue://filename:N where N is the track number.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#if defined(USE_DVDREAD) || defined(USE_DVDNAV)
+#ifdef USE_DVDREAD
 	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 	{"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
 #else
@@ -374,7 +374,7 @@ extern int reuse_socket;
 
 #endif
 
-#if defined(USE_DVDREAD) || defined(USE_DVDNAV)
+#ifdef USE_DVDREAD
 extern int dvd_speed; /* stream/stream_dvd.c */
 #endif
 
