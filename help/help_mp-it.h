@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r22772
+// Updated to help_mp-en.h r23003
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -2039,3 +2039,37 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Errore aprendo il font in memoria: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] font face senza alcuna mappa caratteri\n"
 #define MSGTR_LIBASS_NoCharmapAutodetected "[ass] nessuna mappa caratteri rilevata automaticamente, provo la prima\n"
+
+//tv.c
+#define MSGTR_TV_BogusNormParameter "tv.c: norm_from_string(%s): Parametro norm invalido, lo imposto a %s.\n"
+#define MSGTR_TV_NoVideoInputPresent "Errore: Nessuna entrata video presente!\n"
+#define MSGTR_TV_UnknownImageFormat ""\
+"========================================================================\n"\
+" ATTENZIONE: FORMATO IMMAGINE DI USCITA NON TESTATO O SCONOSCIUTO (0x%x)\n"\
+" Ciò potrebbe causare una riproduzione errata o bloccare il programma!\n"\
+" I bug report saranno ignorati! Dovresti riprovare con YV12 (che è lo\n"\
+" spazio colore di default) e leggere la documentazione!\n"\
+"========================================================================\n"
+#define MSGTR_TV_SelectedNormId "Selezionato id norma: %d\n"
+#define MSGTR_TV_SelectedNorm "Selezionata norma : %s\n"
+#define MSGTR_TV_CannotSetNorm "Errore: Impossibile impostare la norma!\n"
+#define MSGTR_TV_MJP_WidthHeight "  MJP: larghezza (width) %d altezza (height) %d\n"
+#define MSGTR_TV_UnableToSetWidth "Non riesco ad impostare la larghezza richiesta: %d\n"
+#define MSGTR_TV_UnableToSetHeight "Non riesco ad impostare l'altezza richiesta: %d\n"
+#define MSGTR_TV_NoTuner "L'input scelto non ha un sintonizzatore/tuner!\n"
+#define MSGTR_TV_UnableFindChanlist "Impossibile trovare la lista di canali indicata! (%s)\n"
+#define MSGTR_TV_SelectedChanlist "Selezionata lista canali: %s (contenente %d canali)\n"
+#define MSGTR_TV_ChannelFreqParamConflict "Non puoi impostare frequenza e canale contemporaneamente!\n"
+#define MSGTR_TV_ChannelNamesDetected "Rilevati nomi dei canali TV.\n"
+#define MSGTR_TV_NoFreqForChannel "Non riesco a trovare la frequenza per il canale %s (%s)\n"
+#define MSGTR_TV_SelectedChannel3 "Scelto canale: %s - %s (freq: %.3f)\n"
+#define MSGTR_TV_SelectedChannel2 "Scelto canale: %s (freq: %.3f)\n"
+#define MSGTR_TV_SelectedFrequency "Scelta frequenza: %lu (%.3f)\n"
+#define MSGTR_TV_RequestedChannel "Canale richiesto: %s\n"
+#define MSGTR_TV_UnsupportedAudioType "Tipo audio '%s (%x)' non supportato!\n"
+#define MSGTR_TV_AudioFormat "  TV audio: %d canali, %d bit, %d Hz\n"
+#define MSGTR_TV_AvailableDrivers "Driver disponibili:\n"
+#define MSGTR_TV_DriverInfo "Scelto driver: %s\n nome: %s\n autore: %s\n commento: %s\n"
+#define MSGTR_TV_NoSuchDriver "Driver non trovato: %s\n"
+#define MSGTR_TV_UnknownColorOption "Specificata un'opzione colore (%d) sonosciuta!\n"
+#define MSGTR_TV_CurrentFrequency "Frequenza attuale: %lu (%.3f)\n"
