@@ -27,8 +27,8 @@ void ass_font_cache_add(ass_font_t* font);
 void ass_font_cache_done(void);
 
 
-// describes a glyph; glyphs with equivalents structs are considered identical
-typedef struct glyph_hash_key_s {
+// describes a bitmap; bitmaps with equivalents structs are considered identical
+typedef struct bitmap_hash_key_s {
 	char bitmap; // bool : true = bitmap, false = outline
 	ass_font_t* font;
 	int size; // font size
@@ -37,28 +37,27 @@ typedef struct glyph_hash_key_s {
 	int bold, italic;
 	char be; // blur edges
 
-	// the following affects bitmap glyphs only
 	unsigned scale_x, scale_y; // 16.16
 	int frx, fry, frz; // signed 16.16
 	
 	FT_Vector advance; // subpixel shift vector
-} glyph_hash_key_t;
+} bitmap_hash_key_t;
 
-typedef struct glyph_hash_val_s {
-	bitmap_t* bm; // the actual glyph bitmaps
+typedef struct bitmap_hash_val_s {
+	bitmap_t* bm; // the actual bitmaps
 	bitmap_t* bm_o;
 	bitmap_t* bm_s;
 	FT_BBox bbox_scaled; // bbox after scaling, but before rotation
-	FT_Vector advance; // 26.6, advance distance to the next glyph in line
-} glyph_hash_val_t;
+	FT_Vector advance; // 26.6, advance distance to the next bitmap in line
+} bitmap_hash_val_t;
 
-void ass_glyph_cache_init(void);
-void cache_add_glyph(glyph_hash_key_t* key, glyph_hash_val_t* val);
-glyph_hash_val_t* cache_find_glyph(glyph_hash_key_t* key);
-void ass_glyph_cache_reset(void);
-void ass_glyph_cache_done(void);
+void ass_bitmap_cache_init(void);
+void cache_add_bitmap(bitmap_hash_key_t* key, bitmap_hash_val_t* val);
+bitmap_hash_val_t* cache_find_bitmap(bitmap_hash_key_t* key);
+void ass_bitmap_cache_reset(void);
+void ass_bitmap_cache_done(void);
 
-typedef struct hashmap_s hashmap_t;
+typedef struct hashmap_s hashmap_t; 
 typedef void (*hashmap_item_dtor_t)(void* key, size_t key_size, void* value, size_t value_size);
 typedef int (*hashmap_key_compare_t)(void* key1, void* key2, size_t key_size);
 typedef unsigned (*hashmap_hash_t)(void* key, size_t key_size);

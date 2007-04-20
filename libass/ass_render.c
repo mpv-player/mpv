@@ -112,7 +112,7 @@ typedef struct glyph_info_s {
 	int shadow;
 	double frx, fry, frz; // rotation
 	
-	glyph_hash_key_t hash_key;
+	bitmap_hash_key_t hash_key;
 } glyph_info_t;
 
 typedef struct line_info_s {
@@ -252,7 +252,7 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 	// images_root and related stuff is zero-filled in calloc
 	
 	ass_font_cache_init();
-	ass_glyph_cache_init();
+	ass_bitmap_cache_init();
 
 	text_info.glyphs = calloc(MAX_GLYPHS, sizeof(glyph_info_t));
 	
@@ -266,7 +266,7 @@ ass_init_exit:
 void ass_renderer_done(ass_renderer_t* priv)
 {
 	ass_font_cache_done();
-	ass_glyph_cache_done();
+	ass_bitmap_cache_done();
 	if (render_context.stroker) {
 		FT_Stroker_Done(render_context.stroker);
 		render_context.stroker = 0;
@@ -386,7 +386,7 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 	int pen_x, pen_y;
 	int i, error;
 	bitmap_t* bm;
-	glyph_hash_val_t hash_val;
+	bitmap_hash_val_t hash_val;
 	ass_image_t* head;
 	ass_image_t** tail = &head;
 
@@ -414,7 +414,7 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 				hash_val.bm_s = text_info->glyphs[i].bm_s;
 				hash_val.advance.x = text_info->glyphs[i].advance.x;
 				hash_val.advance.y = text_info->glyphs[i].advance.y;
-				cache_add_glyph(&(text_info->glyphs[i].hash_key), &hash_val);
+				cache_add_bitmap(&(text_info->glyphs[i].hash_key), &hash_val);
 			}
 
 		}
@@ -1233,8 +1233,8 @@ static void free_render_context(void)
 static void get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 {
 	int error;
-	glyph_hash_val_t* val;
-	glyph_hash_key_t* key = &(info->hash_key);
+	bitmap_hash_val_t* val;
+	bitmap_hash_key_t* key = &(info->hash_key);
 	
 	key->font = render_context.font;
 	key->size = render_context.font_size;
@@ -1250,7 +1250,7 @@ static void get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 	key->italic = render_context.italic;
 	key->be = render_context.be;
 
-	val = cache_find_glyph(key);
+	val = cache_find_bitmap(key);
 /* 	val = 0; */
 	
 	if (val) {
@@ -1968,7 +1968,7 @@ void ass_free_images(ass_image_t* img)
 static void ass_reconfigure(ass_renderer_t* priv)
 {
 	priv->render_id = ++last_render_id;
-	ass_glyph_cache_reset();
+	ass_bitmap_cache_reset();
 	ass_free_images(priv->prev_images_root);
 	priv->prev_images_root = 0;
 }
