@@ -1936,8 +1936,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		}
 
 		for (i = 0; i < text_info.length; ++i) {
-			FT_Vector start;
-			FT_Vector start_old;
 			FT_Vector shift;
 			glyph_info_t* info = text_info.glyphs + i;
 
