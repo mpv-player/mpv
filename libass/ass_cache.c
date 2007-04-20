@@ -113,7 +113,7 @@ void hashmap_done(hashmap_t* map)
 	int i;
 	// print stats
 	if (map->count > 0 || map->hit_count + map->miss_count > 0)
-		mp_msg(MSGT_ASS, MSGL_DBG, "cache statistics: \n  total accesses: %d\n  hits: %d\n  misses: %d\n  object count: %d\n",
+		mp_msg(MSGT_ASS, MSGL_V, "cache statistics: \n  total accesses: %d\n  hits: %d\n  misses: %d\n  object count: %d\n",
 		       map->hit_count + map->miss_count, map->hit_count, map->miss_count, map->count);
 	
 	for (i = 0; i < map->nbuckets; ++i) {
