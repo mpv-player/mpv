@@ -1277,25 +1277,11 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
  * \param advance advance vector of the extracted glyph
  * \return 0 on success
  */
-static void get_bitmap_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
+static void get_bitmap_glyph(glyph_info_t* info)
 {
 	bitmap_hash_val_t* val;
 	bitmap_hash_key_t* key = &(info->hash_key);
 	
-	key->font = render_context.font;
-	key->size = render_context.font_size;
-	key->ch = symbol;
-	key->outline = (render_context.border * 0xFFFF); // convert to 16.16
-	key->scale_x = (render_context.scale_x * 0xFFFF);
-	key->scale_y = (render_context.scale_y * 0xFFFF);
-	key->frx = (render_context.frx * 0xFFFF);
-	key->fry = (render_context.fry * 0xFFFF);
-	key->frz = (render_context.frz * 0xFFFF);
-	key->advance = *advance;
-	key->bold = render_context.bold;
-	key->italic = render_context.italic;
-	key->be = render_context.be;
-
 	val = cache_find_bitmap(key);
 /* 	val = 0; */
 	
@@ -1760,7 +1746,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		}
 
 		get_outline_glyph(code, text_info.glyphs + text_info.length, &shift);
-		get_bitmap_glyph(code, text_info.glyphs + text_info.length, &shift);
 		
 		text_info.glyphs[text_info.length].pos.x = pen.x >> 6;
 		text_info.glyphs[text_info.length].pos.y = pen.y >> 6;
@@ -1791,6 +1776,21 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 				      &text_info.glyphs[text_info.length].desc);
 		text_info.glyphs[text_info.length].asc *= render_context.scale_y;
 		text_info.glyphs[text_info.length].desc *= render_context.scale_y;
+
+		// fill bitmap_hash_key
+		text_info.glyphs[text_info.length].hash_key.font = render_context.font;
+		text_info.glyphs[text_info.length].hash_key.size = render_context.font_size;
+		text_info.glyphs[text_info.length].hash_key.outline = render_context.border * 0xFFFF;
+		text_info.glyphs[text_info.length].hash_key.scale_x = render_context.scale_x * 0xFFFF;
+		text_info.glyphs[text_info.length].hash_key.scale_y = render_context.scale_y * 0xFFFF;
+		text_info.glyphs[text_info.length].hash_key.frx = render_context.frx * 0xFFFF;
+		text_info.glyphs[text_info.length].hash_key.fry = render_context.fry * 0xFFFF;
+		text_info.glyphs[text_info.length].hash_key.frz = render_context.frz * 0xFFFF;
+		text_info.glyphs[text_info.length].hash_key.bold = render_context.bold;
+		text_info.glyphs[text_info.length].hash_key.italic = render_context.italic;
+		text_info.glyphs[text_info.length].hash_key.ch = code;
+		text_info.glyphs[text_info.length].hash_key.advance = shift;
+		text_info.glyphs[text_info.length].hash_key.be = render_context.be;
 
 		text_info.length++;
 
@@ -1925,6 +1925,9 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		render_context.clip_y0 = y2scr(render_context.clip_y0);
 		render_context.clip_y1 = y2scr(render_context.clip_y1);
 	}
+
+	for (i = 0; i < text_info.length; ++i)
+		get_bitmap_glyph(text_info.glyphs + i);
 
 	// rotate glyphs if needed
 	{
