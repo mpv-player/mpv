@@ -1251,7 +1251,7 @@ static void get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 	key->be = render_context.be;
 
 	val = cache_find_glyph(key);
-//	val = 0;
+/* 	val = 0; */
 	
 	if (val) {
 		info->glyph = info->outline_glyph = 0;
