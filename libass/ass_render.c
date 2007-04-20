@@ -1926,9 +1926,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		render_context.clip_y1 = y2scr(render_context.clip_y1);
 	}
 
-	for (i = 0; i < text_info.length; ++i)
-		get_bitmap_glyph(text_info.glyphs + i);
-
 	// rotate glyphs if needed
 	{
 		FT_Vector center;
@@ -1948,6 +1945,15 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			FT_Vector start_old;
 			FT_Vector shift;
 			glyph_info_t* info = text_info.glyphs + i;
+
+			if (info->hash_key.frx || info->hash_key.fry || info->hash_key.frz) {
+				info->hash_key.shift_x = info->pos.x + device_x - center.x;
+				info->hash_key.shift_y = - (info->pos.y + device_y - center.y);
+			} else {
+				info->hash_key.shift_x = 0;
+				info->hash_key.shift_y = 0;
+			}
+			get_bitmap_glyph(info);
 
 			if (info->bm == 0) {
 				// calculating shift vector

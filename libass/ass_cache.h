@@ -39,6 +39,9 @@ typedef struct bitmap_hash_key_s {
 
 	unsigned scale_x, scale_y; // 16.16
 	int frx, fry, frz; // signed 16.16
+	int shift_x, shift_y; // shift vector that was added to glyph before applying rotation
+	                      // = 0, if frx = fry = frx = 0
+	                      // = (glyph base point) - (rotation origin), otherwise
 	
 	FT_Vector advance; // subpixel shift vector
 } bitmap_hash_key_t;
