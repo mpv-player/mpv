@@ -1602,27 +1602,33 @@ static inline void transform_vector_3d(FT_Vector* v, double *m) {
  * Transforms glyph by m, projects the result back to the screen plane
  * Result is returned in glyph.
  */
-static inline void transform_glyph_3d(FT_Glyph glyph, double *m) {
+static inline void transform_glyph_3d(FT_Glyph glyph, double *m, FT_Vector shift) {
 	int i;
 	FT_Outline* outline = &((FT_OutlineGlyph)glyph)->outline;
+	FT_Vector* p = outline->points;
 
-	for (i=0; i<outline->n_points; i++)
-		transform_vector_3d(outline->points + i, m);
+	for (i=0; i<outline->n_points; i++) {
+		p[i].x += shift.x;
+		p[i].y += shift.y;
+		transform_vector_3d(p + i, m);
+		p[i].x -= shift.x;
+		p[i].y -= shift.y;
+	}
 
-	transform_vector_3d(&glyph->advance, m);
+	//transform_vector_3d(&glyph->advance, m);
 }
 
 /**
  * \brief Apply 3d transformation to several objects
- * \param vec FreeType vector
+ * \param shift FreeType vector
  * \param glyph FreeType glyph
  * \param glyph2 FreeType glyph
  * \param frx x-axis rotation angle
  * \param fry y-axis rotation angle
  * \param frz z-axis rotation angle
- * Rotates the given vector and both glyphs by frx, fry and frz.
+ * Rotates both glyphs by frx, fry and frz. Shift vector is added before rotation and subtracted after it.
  */
-void transform_3d(FT_Vector* vec, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz)
+void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz)
 {
 	if (frx != 0. || fry != 0. || frz != 0.) {
 		double m[16];
@@ -1638,13 +1644,10 @@ void transform_3d(FT_Vector* vec, FT_Glyph* glyph, FT_Glyph* glyph2, double frx,
 		m[12] = 0.0;      m[13] = 0.0;               m[14] = 0.0;                m[15] = 1.0;
 
 		if (glyph && *glyph)
-			transform_glyph_3d(*glyph, m);
+			transform_glyph_3d(*glyph, m, shift);
 
 		if (glyph2 && *glyph2)
-			transform_glyph_3d(*glyph2, m);
-
-		if (vec)
-			transform_vector_3d(vec, m);
+			transform_glyph_3d(*glyph2, m, shift);
 	}
 }
 
@@ -1914,23 +1917,14 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		for (i = 0; i < text_info.length; ++i) {
 			FT_Vector start;
 			FT_Vector start_old;
+			FT_Vector shift;
 			glyph_info_t* info = text_info.glyphs + i;
 
 			// calculating shift vector
-			// shift = (position - center)*M - (position - center)
-			start.x = int_to_d6(info->pos.x + device_x - center.x);
-			start.y = - int_to_d6(info->pos.y + device_y - center.y);
-			start_old.x = start.x;
-			start_old.y = start.y;
+			shift.x = int_to_d6(info->pos.x + device_x - center.x);
+			shift.y = - int_to_d6(info->pos.y + device_y - center.y);
 
-			transform_3d(&start, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
-			
-			start.x -= start_old.x;
-			start.y -= start_old.y;
-
-			info->pos.x += d6_to_int(start.x);
-			info->pos.y -= d6_to_int(start.y);
-
+			transform_3d(shift, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
 		}
 	}
 
