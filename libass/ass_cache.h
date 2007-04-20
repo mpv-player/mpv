@@ -47,8 +47,6 @@ typedef struct bitmap_hash_val_s {
 	bitmap_t* bm; // the actual bitmaps
 	bitmap_t* bm_o;
 	bitmap_t* bm_s;
-	FT_BBox bbox_scaled; // bbox after scaling, but before rotation
-	FT_Vector advance; // 26.6, advance distance to the next bitmap in line
 } bitmap_hash_val_t;
 
 void ass_bitmap_cache_init(void);
