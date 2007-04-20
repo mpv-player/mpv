@@ -1589,6 +1589,18 @@ static inline void transform_vector_3d(FT_Vector* v, double *m) {
 	a[2] = 0.;
 	a[3] = 1.;
 	transform_point_3d(a, m, b);
+	/* Apply perspective projection with the following matrix:
+	   2500     0     0     0
+	      0  2500     0     0
+	      0     0     0     0
+	      0     0     8     2500
+	   where 2500 is camera distance, 8 - z-axis scale.
+	   Camera is always located in (org_x, org_y, -2500). This means
+	   that different subtitle events can be displayed at the same time
+	   using different cameras. */
+	b[0] *= 2500;
+	b[1] *= 2500;
+	b[3] = 8 * b[2] + 2500;
 	if (b[3] < 0.001 && b[3] > -0.001)
 		b[3] = b[3] < 0. ? -0.001 : 0.001;
 	v->x = double_to_d6(b[0] / b[3]);
