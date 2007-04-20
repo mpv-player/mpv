@@ -407,11 +407,10 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 				FT_Done_Glyph(text_info->glyphs[i].outline_glyph);
 
 			// cache
-				hash_val.bm_o = text_info->glyphs[i].bm_o;
-				hash_val.bm = text_info->glyphs[i].bm;
-				hash_val.bm_s = text_info->glyphs[i].bm_s;
-				cache_add_bitmap(&(text_info->glyphs[i].hash_key), &hash_val);
-
+			hash_val.bm_o = text_info->glyphs[i].bm_o;
+			hash_val.bm = text_info->glyphs[i].bm;
+			hash_val.bm_s = text_info->glyphs[i].bm_s;
+			cache_add_bitmap(&(text_info->glyphs[i].hash_key), &hash_val);
 		}
 	}
 
@@ -1276,7 +1275,7 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 static void get_bitmap_glyph(glyph_info_t* info)
 {
 	bitmap_hash_val_t* val;
-	bitmap_hash_key_t* key = &(info->hash_key);
+	bitmap_hash_key_t* key = &info->hash_key;
 	
 	val = cache_find_bitmap(key);
 /* 	val = 0; */
