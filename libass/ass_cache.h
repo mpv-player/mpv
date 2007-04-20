@@ -57,6 +57,28 @@ bitmap_hash_val_t* cache_find_bitmap(bitmap_hash_key_t* key);
 void ass_bitmap_cache_reset(void);
 void ass_bitmap_cache_done(void);
 
+// describes an outline glyph
+typedef struct glyph_hash_key_s {
+	ass_font_t* font;
+	int size; // font size
+	uint32_t ch; // character code
+	int bold, italic;
+	unsigned scale_x, scale_y; // 16.16
+	FT_Vector advance; // subpixel shift vector
+} glyph_hash_key_t;
+
+typedef struct glyph_hash_val_s {
+	FT_Glyph glyph;
+	FT_BBox bbox_scaled; // bbox after scaling, but before rotation
+	FT_Vector advance; // 26.6, advance distance to the next bitmap in line
+} glyph_hash_val_t;
+
+void ass_glyph_cache_init(void);
+void cache_add_glyph(glyph_hash_key_t* key, glyph_hash_val_t* val);
+glyph_hash_val_t* cache_find_glyph(glyph_hash_key_t* key);
+void ass_glyph_cache_reset(void);
+void ass_glyph_cache_done(void);
+
 typedef struct hashmap_s hashmap_t; 
 typedef void (*hashmap_item_dtor_t)(void* key, size_t key_size, void* value, size_t value_size);
 typedef int (*hashmap_key_compare_t)(void* key1, void* key2, size_t key_size);
