@@ -634,6 +634,10 @@ static char help_text[]=
 #define MSGTR_NoBindFound "No bind found for key '%s'."
 #define MSGTR_FailedToOpen "Failed to open %s.\n"
 
+#define MSGTR_VideoID "[%s] Video stream found, -vid %d\n"
+#define MSGTR_AudioID "[%s] Audio stream found, -aid %d\n"
+#define MSGTR_SubtitleID "[%s] Subtitle stream found, -sid %d\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Could not open codec.\n"
 #define MSGTR_CantCloseCodec "Could not close codec.\n"

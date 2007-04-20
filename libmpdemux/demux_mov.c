@@ -659,6 +659,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int version, adjust;
 		int is_vorbis = 0;
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "mov", priv->track_db);
 		sh->format=trak->fourcc;
 
 		// crude audio delay from editlist0 hack ::atm
@@ -982,6 +983,7 @@ quit_vorbis_block:
 		int hdr_ptr = 76;  // the byte just after depth
 		unsigned char *palette_map;
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "mov", priv->track_db);
 		int depth;
 		sh->format=trak->fourcc;
 
@@ -1311,6 +1313,7 @@ quit_vorbis_block:
 		    trak->fourcc == mmioFOURCC('t','x','3','g') ||
 		    trak->fourcc == mmioFOURCC('t','e','x','t')) {
 			sh_sub_t *sh = new_sh_sub(demuxer, priv->track_db);
+			mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "mov", priv->track_db);
 			if (trak->fourcc == mmioFOURCC('m','p','4','s'))
 				init_vobsub(sh, trak);
 			else

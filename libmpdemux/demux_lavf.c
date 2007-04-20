@@ -23,7 +23,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
-// #include "help_mp.h"
+#include "help_mp.h"
 
 #include "stream/stream.h"
 #include "demuxer.h"
@@ -305,6 +305,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             if(priv->audio_streams >= MAX_A_STREAMS)
                 break;
             sh_audio=new_sh_audio(demuxer, i);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", i);
             if(!sh_audio)
                 break;
             priv->astreams[priv->audio_streams] = i;
@@ -379,6 +380,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             if(priv->video_streams >= MAX_V_STREAMS)
                 break;
             sh_video=new_sh_video(demuxer, i);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", i);
             if(!sh_video) break;
             priv->vstreams[priv->video_streams] = i;
             priv->video_streams++;

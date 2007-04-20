@@ -417,6 +417,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
       audio_pos += 64; //16+16+4+4+4+16+4;
       buffer = &hdr[audio_pos];
       sh_audio=new_sh_audio(demuxer,streamh->stream_no & 0x7F);
+      mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "asfheader", streamh->stream_no & 0x7F);
       ++audio_streams;
       if (!asf_init_audio_stream(demuxer, asf, sh_audio, streamh, &audio_pos, &buffer, hdr, hdr_len))
         goto len_err_out;
@@ -451,6 +452,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
     switch(ASF_LOAD_GUID_PREFIX(streamh->type)){
       case ASF_GUID_PREFIX_audio_stream: {
         sh_audio_t* sh_audio=new_sh_audio(demuxer,streamh->stream_no & 0x7F);
+        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "asfheader", streamh->stream_no & 0x7F);
         ++audio_streams;
         if (!asf_init_audio_stream(demuxer, asf, sh_audio, streamh, &pos, &buffer, hdr, hdr_len))
           goto len_err_out;
@@ -459,6 +461,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
         }
       case ASF_GUID_PREFIX_video_stream: {
         sh_video_t* sh_video=new_sh_video(demuxer,streamh->stream_no & 0x7F);
+        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "asfheader", streamh->stream_no & 0x7F);
         unsigned int len=streamh->type_size-(4+4+1+2);
         float asp_ratio;
 	++video_streams;

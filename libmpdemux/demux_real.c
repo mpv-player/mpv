@@ -1271,6 +1271,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		} else {
 		    /* audio header */
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
+		    mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "real", stream_id);
 		    char buf[128]; /* for codec name */
 		    int frame_size;
 		    int sub_packet_size;
@@ -1483,6 +1484,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		}
 	  } else if (strstr(mimet,"X-MP3-draft-00")) {
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
+    		    mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "real", stream_id);
 
 		    /* Emulate WAVEFORMATEX struct: */
 		    sh->wf = malloc(sizeof(WAVEFORMATEX));
@@ -1516,6 +1518,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		} else {
 		    /* video header */
 		    sh_video_t *sh = new_sh_video(demuxer, stream_id);
+		    mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "real", stream_id);
 
 		    sh->format = stream_read_dword_le(demuxer->stream); /* fourcc */
 		    mp_msg(MSGT_DEMUX,MSGL_V,"video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);

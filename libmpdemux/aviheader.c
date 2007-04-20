@@ -192,11 +192,13 @@ while(1){
       ++stream_id;
       if(h.fccType==streamtypeVIDEO){
         sh_video=new_sh_video(demuxer,stream_id);
+        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "aviheader", stream_id);
         memcpy(&sh_video->video,&h,sizeof(h));
         sh_video->stream_delay = (float)sh_video->video.dwStart * sh_video->video.dwScale/sh_video->video.dwRate;
       } else
       if(h.fccType==streamtypeAUDIO){
         sh_audio=new_sh_audio(demuxer,stream_id);
+        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "aviheader", stream_id);
         memcpy(&sh_audio->audio,&h,sizeof(h));
         sh_audio->stream_delay = (float)sh_audio->audio.dwStart * sh_audio->audio.dwScale/sh_audio->audio.dwRate;
       }
