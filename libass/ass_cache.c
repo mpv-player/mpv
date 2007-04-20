@@ -283,6 +283,7 @@ static void glyph_hash_dtor(void* key, size_t key_size, void* value, size_t valu
 {
 	glyph_hash_val_t* v = value;
 	if (v->glyph) FT_Done_Glyph(v->glyph);
+	if (v->outline_glyph) FT_Done_Glyph(v->outline_glyph);
 	free(key);
 	free(value);
 }

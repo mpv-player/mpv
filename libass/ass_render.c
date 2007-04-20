@@ -1243,6 +1243,7 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 	val = cache_find_glyph(&key);
 	if (val) {
 		FT_Glyph_Copy(val->glyph, &info->glyph);
+		FT_Glyph_Copy(val->outline_glyph, &info->outline_glyph);
 		info->bbox = val->bbox_scaled;
 		info->advance.x = val->advance.x;
 		info->advance.y = val->advance.y;
@@ -1255,18 +1256,19 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 		info->advance.y = d16_to_d6(info->glyph->advance.y);
 		FT_Glyph_Get_CBox( info->glyph, FT_GLYPH_BBOX_PIXELS, &info->bbox);
 
+		if (render_context.stroker) {
+			info->outline_glyph = info->glyph;
+			error = FT_Glyph_StrokeBorder( &(info->outline_glyph), render_context.stroker, 0 , 0 ); // don't destroy original
+			if (error) {
+				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_Stroke_Error, error);
+			}
+		}
+
 		FT_Glyph_Copy(info->glyph, &v.glyph);
+		FT_Glyph_Copy(info->outline_glyph, &v.outline_glyph);
 		v.advance = info->advance;
 		v.bbox_scaled = info->bbox;
 		cache_add_glyph(&key, &v);
-	}
-
-	if (render_context.stroker) {
-		info->outline_glyph = info->glyph;
-		error = FT_Glyph_StrokeBorder( &(info->outline_glyph), render_context.stroker, 0 , 0 ); // don't destroy original
-		if (error) {
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_Stroke_Error, error);
-		}
 	}
 }
 
