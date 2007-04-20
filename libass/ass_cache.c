@@ -46,10 +46,13 @@ struct hashmap_s {
 	int nbuckets;
 	size_t key_size, value_size;
 	hashmap_item_p* root;
-	int count;
 	hashmap_item_dtor_t item_dtor; // a destructor for hashmap key/value pairs
 	hashmap_key_compare_t key_compare;
 	hashmap_hash_t hash;
+	// stats
+	int hit_count;
+	int miss_count;
+	int count;
 };
 
 #define FNV1_32A_INIT (unsigned)0x811c9dc5
@@ -98,7 +101,6 @@ hashmap_t* hashmap_init(size_t key_size, size_t value_size, int nbuckets,
 	map->nbuckets = nbuckets;
 	map->key_size = key_size;
 	map->value_size = value_size;
-	map->count = 0;
 	map->root = calloc(nbuckets, sizeof(hashmap_item_p));
 	map->item_dtor = item_dtor ? item_dtor : hashmap_item_dtor;
 	map->key_compare = key_compare ? key_compare : hashmap_key_compare;
@@ -109,6 +111,11 @@ hashmap_t* hashmap_init(size_t key_size, size_t value_size, int nbuckets,
 void hashmap_done(hashmap_t* map)
 {
 	int i;
+	// print stats
+	if (map->count > 0 || map->hit_count + map->miss_count > 0)
+		mp_msg(MSGT_ASS, MSGL_DBG, "cache statistics: \n  total accesses: %d\n  hits: %d\n  misses: %d\n  object count: %d\n",
+		       map->hit_count + map->miss_count, map->hit_count, map->miss_count, map->count);
+	
 	for (i = 0; i < map->nbuckets; ++i) {
 		hashmap_item_t* item = map->root[i];
 		while (item) {
@@ -149,10 +156,12 @@ void* hashmap_find(hashmap_t* map, void* key)
 	hashmap_item_t* item = map->root[hash % map->nbuckets];
 	while (item) {
 		if (map->key_compare(key, item->key, map->key_size)) {
+			map->hit_count++;
 			return item->value;
 		}
 		item = item->next;
 	}
+	map->miss_count++;
 	return 0;
 }
 
