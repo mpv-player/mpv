@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r22772
+// Synced with help_mp-en.h: r23003
 
 // ========================= MPlayer help ===========================
 
@@ -2048,3 +2048,39 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/ru/video.html#xv!\n"\
 "[VO_XV] Другие (не-xv) драйверы ищите в выводе 'mplayer -vo help'.\n"\
 "[VO_XV] Попробуйте -vo x11.\n"
+
+//tv.c
+#define MSGTR_TV_BogusNormParameter "tv.c: norm_from_string(%s): Неизвестный параметр norm, устанавливается %s.\n"
+#define MSGTR_TV_NoVideoInputPresent "Ошибка: Видео вход отсутствует!\n"
+#define MSGTR_TV_UnknownImageFormat ""\
+"==================================================================\n"\
+" ВНИМАНИЕ:\n"\
+" ЗАПРОШЕН НЕПРОТЕСТИРОВАННЫЙ ИЛИ НЕИЗВЕСТНЫЙ ФОРМАТ ИЗОБРАЖЕНИЯ (0x%x)\n"\
+" Это может привести к неверному воспроизведению или краху программы!\n"\
+" Отчеты об ошибках приниматься не будут! Вам следует попытаться еще раз \n"\
+" с YV12 (пространство цветов по умолчанию) и прочесть документацию!\n"\
+"==================================================================\n"
+#define MSGTR_TV_SelectedNormId "Выбран id стандарта: %d\n"
+#define MSGTR_TV_SelectedNorm "Выбран стандарт : %s\n"
+#define MSGTR_TV_CannotSetNorm "Ошибка: Невозможно установить norm!\n"
+#define MSGTR_TV_MJP_WidthHeight "  MJP: ширина %d высота %d\n"
+#define MSGTR_TV_UnableToSetWidth "Невозможно установить запрошенную ширину: %d\n"
+#define MSGTR_TV_UnableToSetHeight "Невозможно установить запрошенную высоту: %d\n"
+#define MSGTR_TV_NoTuner "Выбранный вход не имеет тюнера!\n"
+#define MSGTR_TV_UnableFindChanlist "Невозможно найти выбранный список каналов! (%s)\n"
+#define MSGTR_TV_SelectedChanlist "Выбран список каналов: %s (содержит каналов: %d)\n"
+#define MSGTR_TV_ChannelFreqParamConflict "Вы не можете указать частоту и канал одновременно!\n"
+#define MSGTR_TV_ChannelNamesDetected "Обнаружены названия TV каналов.\n"
+#define MSGTR_TV_NoFreqForChannel "Невозможно найти частоту для канала %s (%s)\n"
+#define MSGTR_TV_SelectedChannel3 "Выбран канал: %s - %s (частота: %.3f)\n"
+#define MSGTR_TV_SelectedChannel2 "Выбран канал: %s (частота: %.3f)\n"
+#define MSGTR_TV_SelectedFrequency "Выбрана частота: %lu (%.3f)\n"
+#define MSGTR_TV_RequestedChannel "Запрошен канал: %s\n"
+#define MSGTR_TV_UnsupportedAudioType "Тип аудио '%s (%x)' не поддерживается!\n"
+#define MSGTR_TV_AudioFormat "  TV аудио: %d каналов, %d бит, %d Гц\n"
+#define MSGTR_TV_AvailableDrivers "Доступные драйверы:\n"
+#define MSGTR_TV_DriverInfo "Выбран драйвер: %s\n название: %s\n автор: %s\n комментарий %s\n"
+#define MSGTR_TV_NoSuchDriver "Нет такого драйвера: %s\n"
+#define MSGTR_TV_UnknownColorOption "Указана неизвестная опция цвета (%d)!\n"
+#define MSGTR_TV_CurrentFrequency "Текущая частота: %lu (%.3f)\n"
+
