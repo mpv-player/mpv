@@ -393,7 +393,7 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 	ass_image_t** tail = &head;
 
 	for (i = 0; i < text_info->length; ++i) {
-		if (text_info->glyphs[i].glyph) {
+		if (text_info->glyphs[i].glyph && text_info->glyphs[i].bm == 0) {
 			if ((text_info->glyphs[i].symbol == '\n') || (text_info->glyphs[i].symbol == 0))
 				continue;
 			error = glyph_to_bitmap(ass_renderer->synth_priv,
@@ -1950,11 +1950,13 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			FT_Vector shift;
 			glyph_info_t* info = text_info.glyphs + i;
 
+			if (info->bm == 0) {
 			// calculating shift vector
 			shift.x = int_to_d6(info->pos.x + device_x - center.x);
 			shift.y = - int_to_d6(info->pos.y + device_y - center.y);
 
 			transform_3d(shift, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
+			}
 		}
 	}
 
