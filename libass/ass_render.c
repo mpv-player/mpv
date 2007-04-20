@@ -1224,7 +1224,7 @@ static void free_render_context(void)
 {
 }
 
-static int get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
+static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 {
 	int error;
 	glyph_hash_val_t* val;
@@ -1250,7 +1250,7 @@ static int get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 		glyph_hash_val_t v;
 		info->glyph = ass_font_get_glyph(frame_context.ass_priv->fontconfig_priv, render_context.font, symbol);
 		if (!info->glyph)
-			return 0;
+			return;
 		info->advance.x = d16_to_d6(info->glyph->advance.x);
 		info->advance.y = d16_to_d6(info->glyph->advance.y);
 		FT_Glyph_Get_CBox( info->glyph, FT_GLYPH_BBOX_PIXELS, &info->bbox);
@@ -1268,7 +1268,6 @@ static int get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_Stroke_Error, error);
 		}
 	}
-	return 0;
 }
 
 /**
@@ -1279,9 +1278,8 @@ static int get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
  * \param advance advance vector of the extracted glyph
  * \return 0 on success
  */
-static int get_bitmap_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
+static void get_bitmap_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 {
-	int error;
 	bitmap_hash_val_t* val;
 	bitmap_hash_key_t* key = &(info->hash_key);
 	
@@ -1311,8 +1309,6 @@ static int get_bitmap_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 		info->advance.y = val->advance.y;
 	} else
 		info->bm = info->bm_o = info->bm_s = 0;
-
-	return 0;
 }
 
 /**
@@ -1767,12 +1763,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			ass_font_set_transform(render_context.font, &matrix, &shift );
 		}
 
-		error = get_outline_glyph(code, text_info.glyphs + text_info.length, &shift);
-		error |= get_bitmap_glyph(code, text_info.glyphs + text_info.length, &shift);
-
-		if (error) {
-			continue;
-		}
+		get_outline_glyph(code, text_info.glyphs + text_info.length, &shift);
+		get_bitmap_glyph(code, text_info.glyphs + text_info.length, &shift);
 		
 		text_info.glyphs[text_info.length].pos.x = pen.x >> 6;
 		text_info.glyphs[text_info.length].pos.y = pen.y >> 6;
