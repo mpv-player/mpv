@@ -253,6 +253,7 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 	
 	ass_font_cache_init();
 	ass_bitmap_cache_init();
+	ass_glyph_cache_init();
 
 	text_info.glyphs = calloc(MAX_GLYPHS, sizeof(glyph_info_t));
 	
@@ -267,6 +268,7 @@ void ass_renderer_done(ass_renderer_t* priv)
 {
 	ass_font_cache_done();
 	ass_bitmap_cache_done();
+	ass_glyph_cache_done();
 	if (render_context.stroker) {
 		FT_Stroker_Done(render_context.stroker);
 		render_context.stroker = 0;
@@ -1222,6 +1224,53 @@ static void free_render_context(void)
 {
 }
 
+static int get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
+{
+	int error;
+	glyph_hash_val_t* val;
+	glyph_hash_key_t key;
+	key.font = render_context.font;
+	key.size = render_context.font_size;
+	key.ch = symbol;
+	key.scale_x = (render_context.scale_x * 0xFFFF);
+	key.scale_y = (render_context.scale_y * 0xFFFF);
+	key.advance = *advance;
+	key.bold = render_context.bold;
+	key.italic = render_context.italic;
+
+	info->glyph = info->outline_glyph = 0;
+
+	val = cache_find_glyph(&key);
+	if (val) {
+		FT_Glyph_Copy(val->glyph, &info->glyph);
+		info->bbox = val->bbox_scaled;
+		info->advance.x = val->advance.x;
+		info->advance.y = val->advance.y;
+	} else {
+		glyph_hash_val_t v;
+		info->glyph = ass_font_get_glyph(frame_context.ass_priv->fontconfig_priv, render_context.font, symbol);
+		if (!info->glyph)
+			return 0;
+		info->advance.x = d16_to_d6(info->glyph->advance.x);
+		info->advance.y = d16_to_d6(info->glyph->advance.y);
+		FT_Glyph_Get_CBox( info->glyph, FT_GLYPH_BBOX_PIXELS, &info->bbox);
+
+		FT_Glyph_Copy(info->glyph, &v.glyph);
+		v.advance = info->advance;
+		v.bbox_scaled = info->bbox;
+		cache_add_glyph(&key, &v);
+	}
+
+	if (render_context.stroker) {
+		info->outline_glyph = info->glyph;
+		error = FT_Glyph_StrokeBorder( &(info->outline_glyph), render_context.stroker, 0 , 0 ); // don't destroy original
+		if (error) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_Stroke_Error, error);
+		}
+	}
+	return 0;
+}
+
 /**
  * \brief Get normal and outline glyphs from cache (if possible) or font face
  * \param index face glyph index
@@ -1230,7 +1279,7 @@ static void free_render_context(void)
  * \param advance advance vector of the extracted glyph
  * \return 0 on success
  */
-static void get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
+static int get_bitmap_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 {
 	int error;
 	bitmap_hash_val_t* val;
@@ -1254,39 +1303,16 @@ static void get_glyph(int symbol, glyph_info_t* info, FT_Vector* advance)
 /* 	val = 0; */
 	
 	if (val) {
-		info->glyph = info->outline_glyph = 0;
 		info->bm = val->bm;
 		info->bm_o = val->bm_o;
 		info->bm_s = val->bm_s;
 		info->bbox = val->bbox_scaled;
 		info->advance.x = val->advance.x;
 		info->advance.y = val->advance.y;
+	} else
+		info->bm = info->bm_o = info->bm_s = 0;
 
-		return;
-	}
-
-	// not found, get a new outline glyph from face
-//	mp_msg(MSGT_ASS, MSGL_INFO, "miss, index = %d, symbol = %c, adv = (%d, %d)\n", index, symbol, advance->x, advance->y);
-
-	info->outline_glyph = 0;
-	info->bm = info->bm_o = info->bm_s = 0;
-	info->bbox.xMin = info->bbox.xMax = info->bbox.yMin = info->bbox.yMax = 0;
-	info->advance.x = info->advance.y = 0;
-	
-	info->glyph = ass_font_get_glyph(frame_context.ass_priv->fontconfig_priv, render_context.font, symbol);
-	if (!info->glyph)
-		return;
-
-	info->advance.x = d16_to_d6(info->glyph->advance.x);
-	info->advance.y = d16_to_d6(info->glyph->advance.y);
-
-	if (render_context.stroker) {
-		info->outline_glyph = info->glyph;
-		error = FT_Glyph_StrokeBorder( &(info->outline_glyph), render_context.stroker, 0 , 0 ); // don't destroy original
-		if (error) {
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_Stroke_Error, error);
-		}
-	}
+	return 0;
 }
 
 /**
@@ -1740,8 +1766,13 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 
 			ass_font_set_transform(render_context.font, &matrix, &shift );
 		}
-		
-		get_glyph(code, text_info.glyphs + text_info.length, &shift);
+
+		error = get_outline_glyph(code, text_info.glyphs + text_info.length, &shift);
+		error |= get_bitmap_glyph(code, text_info.glyphs + text_info.length, &shift);
+
+		if (error) {
+			continue;
+		}
 		
 		text_info.glyphs[text_info.length].pos.x = pen.x >> 6;
 		text_info.glyphs[text_info.length].pos.y = pen.y >> 6;
@@ -1750,11 +1781,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		pen.x += double_to_d6(render_context.hspacing);
 		pen.y += text_info.glyphs[text_info.length].advance.y;
 		
-		// if it's an outline glyph, we still need to fill the bbox
-		if (text_info.glyphs[text_info.length].glyph) {
-			FT_Glyph_Get_CBox( text_info.glyphs[text_info.length].glyph, FT_GLYPH_BBOX_PIXELS, &(text_info.glyphs[text_info.length].bbox) );
-		}
-
 		previous = code;
 
 		text_info.glyphs[text_info.length].symbol = code;
