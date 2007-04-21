@@ -48,7 +48,7 @@
 #endif
 
 #define WRITE_REG(offset,val)						\
-    *(volatile u_long *)(((u_char *)(pm2_reg_base)) + offset) = (val)
+    *(volatile u_long *)(((unsigned char *)(pm2_reg_base)) + offset) = (val)
 #define READ_REG(offset)						    \
     *(volatile unsigned long *)(((unsigned char *)(pm2_reg_base)) + offset)
 
