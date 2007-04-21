@@ -129,6 +129,7 @@ typedef enum vidix_color_key_op {
   CKEY_TRUE  =	1,
   CKEY_EQ    =	2,
   CKEY_NEQ   =	3,
+  CKEY_ALPHA =	4,
 } vidix_color_key_op_t;
 
 typedef struct vidix_color_key_s
