@@ -413,7 +413,7 @@ audio_encoding_params_t aparams;
 audio_encoder_t *aencoder = NULL;
 
   mp_msg_init();
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2006 MPlayer Team\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2007 MPlayer Team\n");
 
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
