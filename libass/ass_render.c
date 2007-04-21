@@ -1987,6 +1987,7 @@ void ass_free_images(ass_image_t* img)
 static void ass_reconfigure(ass_renderer_t* priv)
 {
 	priv->render_id = ++last_render_id;
+	ass_glyph_cache_reset();
 	ass_bitmap_cache_reset();
 	ass_free_images(priv->prev_images_root);
 	priv->prev_images_root = 0;
