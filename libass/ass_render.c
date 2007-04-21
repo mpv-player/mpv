@@ -402,9 +402,6 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 					&text_info->glyphs[i].bm_s, text_info->glyphs[i].be);
 			if (error)
 				text_info->glyphs[i].symbol = 0;
-			FT_Done_Glyph(text_info->glyphs[i].glyph);
-			if (text_info->glyphs[i].outline_glyph)
-				FT_Done_Glyph(text_info->glyphs[i].outline_glyph);
 
 			// cache
 			hash_val.bm_o = text_info->glyphs[i].bm_o;
@@ -412,6 +409,10 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 			hash_val.bm_s = text_info->glyphs[i].bm_s;
 			cache_add_bitmap(&(text_info->glyphs[i].hash_key), &hash_val);
 		}
+		if (text_info->glyphs[i].glyph)
+			FT_Done_Glyph(text_info->glyphs[i].glyph);
+		if (text_info->glyphs[i].outline_glyph)
+			FT_Done_Glyph(text_info->glyphs[i].outline_glyph);
 	}
 
 	for (i = 0; i < text_info->length; ++i) {
