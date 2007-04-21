@@ -1582,6 +1582,7 @@ static inline void transform_point_3d(double *a, double *m, double *b)
  * Result is returned in v.
  */
 static inline void transform_vector_3d(FT_Vector* v, double *m) {
+	const double camera = 2500 * frame_context.border_scale; // camera distance
 	double a[4], b[4];
 	a[0] = d6_to_double(v->x);
 	a[1] = d6_to_double(v->y);
@@ -1597,9 +1598,9 @@ static inline void transform_vector_3d(FT_Vector* v, double *m) {
 	   Camera is always located in (org_x, org_y, -2500). This means
 	   that different subtitle events can be displayed at the same time
 	   using different cameras. */
-	b[0] *= 2500;
-	b[1] *= 2500;
-	b[3] = 8 * b[2] + 2500;
+	b[0] *= camera;
+	b[1] *= camera;
+	b[3] = 8 * b[2] + camera;
 	if (b[3] < 0.001 && b[3] > -0.001)
 		b[3] = b[3] < 0. ? -0.001 : 0.001;
 	v->x = double_to_d6(b[0] / b[3]);
