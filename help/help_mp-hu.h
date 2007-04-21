@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r23003 (2007. 04. 16.)
+// Sync'ed with help_mp-en.h r23028 (2007. 04. 21.)
 
 // ========================= MPlayer help ===========================
 
@@ -632,6 +632,10 @@ static char help_text[]=
 #define MSGTR_CacheFill "\rCache feltöltés: %5.2f%% (%"PRId64" bytes)   "
 #define MSGTR_NoBindFound "Nincs semmi sem összerendelve a(z) '%s' gombbal."
 #define MSGTR_FailedToOpen "Nem lehet megnyitni: %s.\n"
+
+#define MSGTR_VideoID "[%s] Megtalált videó folyam, -vid %d\n"
+#define MSGTR_AudioID "[%s] Megtalált audió folyam, -aid %d\n"
+#define MSGTR_SubtitleID "[%s] Megtalált felirat folyam, -sid %d\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nem tudom megnyitni a codec-et.\n"
