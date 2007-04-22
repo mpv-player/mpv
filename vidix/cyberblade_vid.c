@@ -53,13 +53,13 @@
 
 #include "cyberblade_regs.h"
 
-pciinfo_t pci_info;
+static pciinfo_t pci_info;
 
-char save_colourkey[6];
-char *cyberblade_mem;
+static char save_colourkey[6];
+static char *cyberblade_mem;
 
 #ifdef DEBUG_LOGFILE
-FILE *logfile=0;
+static FILE *logfile=0;
 #define LOGWRITE(x) {if(logfile) fprintf(logfile,x);}
 #else
 #define LOGWRITE(x)
@@ -79,7 +79,7 @@ static void SROUTW(int reg,int val)
 	SROUTB(reg+1,(val>>8)&255);
 }
 
-void DumpRegisters(void)
+static void DumpRegisters(void)
 {
 #ifdef DEBUG_LOGFILE
         int reg,val;
