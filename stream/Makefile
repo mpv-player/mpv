@@ -54,13 +54,7 @@ SRCS_COMMON-$(TV_V4L2)           += tvi_v4l2.c audio_in.c
 SRCS_COMMON-$(VCD)               += stream_vcd.c
 SRCS_COMMON-$(VSTREAM)           += stream_vstream.c
 
-#FIXME: These should have variables assigned in configure.
-ifeq ($(TV_V4L),yes)
-SRCS_COMMON-$(ALSA1X)            += ai_alsa1x.c
-SRCS_COMMON-$(ALSA9)             += ai_alsa.c
-SRCS_COMMON-$(OSS)               += ai_oss.c
-endif
-ifeq ($(RADIO_CAPTURE),yes)
+ifeq ($(AUDIO_INPUT),yes)
 SRCS_COMMON-$(ALSA1X)            += ai_alsa1x.c
 SRCS_COMMON-$(ALSA9)             += ai_alsa.c
 SRCS_COMMON-$(OSS)               += ai_oss.c

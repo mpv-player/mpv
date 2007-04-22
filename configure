@@ -6794,6 +6794,7 @@ EOF
  fi
 fi
 if test "$_tv_v4l1" = yes ; then
+  _audio_input=yes
   _tv_v4l=yes
   _def_tv_v4l='#define HAVE_TV_V4L 1'
   _def_tv_v4l1='#define HAVE_TV_V4L1 1'
@@ -6838,6 +6839,7 @@ if test "$_radio" = yes ; then
     _radio_capture=no
   fi
   if test "$_radio_capture" = yes ; then
+    _audio_input=yes
     _def_radio_capture="#define USE_RADIO_CAPTURE 1"
   else
     _def_radio_capture="#undef USE_RADIO_CAPTURE"
@@ -7736,6 +7738,7 @@ TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
 TV_V4L2 = $_tv_v4l2
 TV_BSDBT848 = $_tv_bsdbt848
+AUDIO_INPUT = $_audio_input
 PVR = $_pvr
 VCD = $_vcd
 DVDREAD = $_dvdread
