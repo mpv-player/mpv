@@ -380,9 +380,6 @@ static void mga_vid_write_regs(int restore)
 	    // restore it
 	    colkey_saved=0;
 
-//		printf("[mga] Restoring colorkey (ON: %d  %02X:%02X:%02X)\n",
-//			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
-
 		// Set color key registers:
 		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
 		writeb( colkey_on, mga_mmio_base + X_DATAREG);
@@ -429,10 +426,6 @@ static void mga_vid_write_regs(int restore)
 		colkey_mask[2]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
 		writeb( XCOLMSK, mga_mmio_base + PALWTADD);
 		colkey_mask[3]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
-
-//		printf("[mga] Saved colorkey (ON: %d  %02X:%02X:%02X)\n",
-//			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
-
 	}
 	
 if(!restore){
@@ -557,45 +550,19 @@ if(!restore){
 			readl(mga_mmio_base + BESSTATUS));
 	}
 #ifdef CRTC2
-//	printf("c2ctl:0x%08x c2datactl:0x%08x\n",readl(mga_mmio_base + C2CTL),readl(mga_mmio_base + C2DATACTL));
-//	printf("c2misc:0x%08x\n",readl(mga_mmio_base + C2MISC));
-//	printf("c2ctl:0x%08x c2datactl:0x%08x\n",cregs.c2ctl,cregs.c2datactl);
-
-//	writel(cregs.c2ctl,	mga_mmio_base + C2CTL);
-
 	writel(((readl(mga_mmio_base + C2CTL) & ~0x03e00000) + (cregs.c2ctl & 0x03e00000)),	mga_mmio_base + C2CTL);
 	writel(((readl(mga_mmio_base + C2DATACTL) & ~0x000000ff) + (cregs.c2datactl & 0x000000ff)), mga_mmio_base + C2DATACTL);
 	// ctrc2
 	// disable CRTC2 acording to specs
-//	writel(cregs.c2ctl & 0xfffffff0,	mga_mmio_base + C2CTL);
- // je to treba ???
-//	writeb((readb(mga_mmio_base + XMISCCTRL) & 0x19) | 0xa2, mga_mmio_base + XMISCCTRL); // MAFC - mfcsel & vdoutsel
-//	writeb((readb(mga_mmio_base + XMISCCTRL) & 0x19) | 0x92, mga_mmio_base + XMISCCTRL);
-//	writeb((readb(mga_mmio_base + XMISCCTRL) & ~0xe9) + 0xa2, mga_mmio_base + XMISCCTRL);
-//	writel(cregs.c2datactl, mga_mmio_base + C2DATACTL);
-//	writel(cregs.c2hparam, mga_mmio_base + C2HPARAM);
-//	writel(cregs.c2hsync, mga_mmio_base + C2HSYNC);
-//	writel(cregs.c2vparam, mga_mmio_base + C2VPARAM);
-//	writel(cregs.c2vsync, mga_mmio_base + C2VSYNC);
 	writel(cregs.c2misc, mga_mmio_base + C2MISC);
 
 	if (mga_verbose > 1) printf("[mga] c2offset = %d\n",cregs.c2offset);
 
 	writel(cregs.c2offset, mga_mmio_base + C2OFFSET);
 	writel(cregs.c2startadd0, mga_mmio_base + C2STARTADD0);
-//	writel(cregs.c2startadd1, mga_mmio_base + C2STARTADD1);
 	writel(cregs.c2pl2startadd0, mga_mmio_base + C2PL2STARTADD0);
-//	writel(cregs.c2pl2startadd1, mga_mmio_base + C2PL2STARTADD1);
 	writel(cregs.c2pl3startadd0, mga_mmio_base + C2PL3STARTADD0);
-//	writel(cregs.c2pl3startadd1, mga_mmio_base + C2PL3STARTADD1);
 	writel(cregs.c2spicstartadd0, mga_mmio_base + C2SPICSTARTADD0);
-//	writel(cregs.c2spicstartadd1, mga_mmio_base + C2SPICSTARTADD1);
-//	writel(cregs.c2subpiclut, mga_mmio_base + C2SUBPICLUT);
-//	writel(cregs.c2preload, mga_mmio_base + C2PRELOAD);
-	// finaly enable everything
-//	writel(cregs.c2ctl,	mga_mmio_base + C2CTL);
-//	printf("c2ctl:0x%08x c2datactl:0x%08x\n",readl(mga_mmio_base + C2CTL),readl(mga_mmio_base + C2DATACTL));
-//	printf("c2misc:0x%08x\n", readl(mga_mmio_base + C2MISC));
 #endif	
 }
 
@@ -604,7 +571,6 @@ static void enable_irq(){
 	long int cc;
 
 	cc = readl(mga_mmio_base + IEN);
-//	printf("*** !!! IRQREG = %d\n", (int)(cc&0xff));
 
 	writeb( 0x11, mga_mmio_base + CRTCX);
 	
@@ -626,43 +592,14 @@ static void disable_irq()
 }
 
 void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
-//	static int frame=0;
-//	static int counter=0;
 	long int cc;
-//	if ( ! mga_enabled_flag ) return;
-
-//	printf("vcount = %d\n",readl(mga_mmio_base + VCOUNT));
-
-	//printf("mga_interrupt #%d\n", irq);
 
 	if ( irq != -1 ) {
 
 		cc = readl(mga_mmio_base + STATUS);
 		if ( ! (cc & 0x10) ) return;  /* vsyncpen */
-// 		debug_irqcnt++;
 	} 
 
-//    if ( debug_irqignore ) {
-//	debug_irqignore = 0;
-
-
-/*
-	if ( mga_conf_deinterlace ) {
-		if ( mga_first_field ) {
-			// printf("mga_interrupt first field\n");
-			if ( syncfb_interrupt() )
-				mga_first_field = 0;
-		} else {
-			// printf("mga_interrupt second field\n");
-			mga_select_buffer( mga_current_field | 2 );
-			mga_first_field = 1;
-		}
-	} else {
-		syncfb_interrupt();
-	}
-*/
-
-//	frame=(frame+1)&1;
 	regs.besctl = (regs.besctl & ~0x07000000) + (mga_next_frame << 25);
 	writel( regs.besctl, mga_mmio_base + BESCTL ); 
 
@@ -671,18 +608,11 @@ void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
 	crtc2_frame_sel(mga_next_frame);
 #endif
 	
-//    } else {
-//	debug_irqignore = 1;
-//    }
-
 	if ( irq != -1 ) {
 		writeb( 0x11, mga_mmio_base + CRTCX);
 		writeb( 0, mga_mmio_base + CRTCD );
 		writeb( 0x10, mga_mmio_base + CRTCD );
 	}
-
-//	writel( regs.besglobctl, mga_mmio_base + BESGLOBCTL);
-
 
 	return;
 
@@ -740,8 +670,6 @@ static int mga_config_playback(vidix_playback_t *config)
 
     //FIXME check that window is valid and inside desktop
 
-//    printf("[mga] vcount = %d\n", readl(mga_mmio_base + VCOUNT));
-
     sw+=sw&1;
     switch(config->fourcc)
     {
@@ -761,9 +689,6 @@ static int mga_config_playback(vidix_playback_t *config)
     }
 
     config->offsets[0] = 0;
-//    config->offsets[1] = config->frame_size;
-//    config->offsets[2] = 2*config->frame_size;
-//    config->offsets[3] = 3*config->frame_size;
     for (i = 1; i < config->num_frames+1; i++)
 	config->offsets[i] = i*config->frame_size;
 
@@ -777,11 +702,6 @@ static int mga_config_playback(vidix_playback_t *config)
 	config->offset.v=((sw + 31) & ~31) * sh;
 	config->offset.u=config->offset.v+((sw + 31) & ~31) * sh /4;
     }
-
-    //FIXME figure out a better way to allocate memory on card
-    //allocate 2 megs
-    //mga_src_base = mga_mem_base + (MGA_VIDMEM_SIZE-2) * 0x100000;
-    //mga_src_base = (MGA_VIDMEM_SIZE-3) * 0x100000;
 
     mga_src_base = (mga_ram_size*0x100000-config->num_frames*config->frame_size);
     if (mga_src_base < 0)
@@ -872,7 +792,6 @@ static int mga_config_playback(vidix_playback_t *config)
 	regs.besviscal = ifactor<<2;
 
 	baseadrofs = ((ofstop*regs.besviscal)>>16)*regs.bespitch;
-	//frame_size = ((sw + 31) & ~31) * sh + (((sw + 31) & ~31) * sh) / 2;
 	regs.besa1org = (uint32_t) mga_src_base + baseadrofs;
 	regs.besa2org = (uint32_t) mga_src_base + baseadrofs + 1*config->frame_size;
 	regs.besb1org = (uint32_t) mga_src_base + baseadrofs + 2*config->frame_size;
@@ -1109,17 +1028,13 @@ switch(config->fourcc){
 	cregs.c2offset=(regs.bespitch << 1);
 
 	cregs.c2pl2startadd0=regs.besa1corg;
-//	cregs.c2pl2startadd1=regs.besa2corg;
 	cregs.c2pl3startadd0=regs.besa1c3org;
-//	cregs.c2pl3startadd1=regs.besa2c3org;
 		    
 	cregs.c2preload=(vsyncstart << 16) | (hsyncstart); // from 
 	
 	cregs.c2spicstartadd0=0; // not used
-//	cregs.c2spicstartadd1=0; // not used
 	
     cregs.c2startadd0=regs.besa1org;
-//    cregs.c2startadd1=regs.besa2org;
 	
     cregs.c2subpiclut=0; //not used
 	
@@ -1296,8 +1211,6 @@ static int mga_init(void)
 	{
 	    switch((card_option>>10)&0x17)
 	    {
-//    		case 0x10:
-//		case 0x13:  mga_ram_size = 8; break;
 		default: mga_ram_size = 8;
 	    }
 	} 
@@ -1360,7 +1273,6 @@ static void mga_destroy(void)
     vid_src_ready = 0;   
     regs.besctl &= ~1;
     regs.besglobctl &= ~(1<<6);  // UYVY format selected
-//    mga_config.colkey_on=0; //!!!
     mga_vid_write_regs(1);
     mga_vid_in_use = 0;
 
@@ -1433,7 +1345,6 @@ static int mga_set_eq( const vidix_video_eq_t * eq)
 	return(ENOTSUP);
     
     //regs.beslumactl = readl(mga_mmio_base + BESLUMACTL);
-//    printf("LUMA = %08X   \n",regs.beslumactl);
     if (eq->cap & VEQ_CAP_BRIGHTNESS) { 
 	regs.beslumactl &= 0xFFFF;
 	regs.beslumactl |= (eq->brightness*255/2000)<<16;
@@ -1455,8 +1366,6 @@ static int mga_get_eq( vidix_video_eq_t * eq)
 	if (mga_verbose) printf("[mga] equalizer isn't supported with G200\n");
 	return(ENOTSUP);
     }
-
-//    regs.beslumactl = readl(mga_mmio_base + BESLUMACTL);
 
     eq->brightness = (signed short int)(regs.beslumactl >> 16) * 1000 / 128;
     eq->contrast = (signed short int)(regs.beslumactl & 0xFFFF) * 1000 / 128 - 1000;
