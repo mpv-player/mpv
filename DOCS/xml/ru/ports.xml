@@ -568,10 +568,11 @@ Messages in the GTK-2 interface will be broken then.<!--
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
 за помощью и дополнительной информацией. 
 Официальные бинарники под Windows могут быть найдены на 
-<ulink url="http://www.mplayerhq.hu/design7/dload.html">странице закачки</ulink>.
+<ulink url="http://www.mplayerhq.hu/design7/dload.html">странице загрузки</ulink>.
 Пакеты установки и простые GUI фронтенды доступны из внешних
-источников, мы собрали их в разделе Windows 
-<ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">страницы нашего проекта</ulink>.
+источников, мы собрали их в разделе Windows на  
+<ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">нашей
+странице проектов</ulink>.
 </para>
 
 <para>
@@ -634,7 +635,7 @@ mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>colorspace</repl
 </para>
 
 <para>Существуют специальные пакеты кодеков для Windows, доступные на нашей
-  <ulink url="http://www.mplayerhq.hu/design7/dload.html">странице закачки</ulink>,
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">странице загрузки</ulink>,
   позволяющие воспроизводить форматы, для которых пока нет родной поддержки.
   Поместите их куда-нибудь в пути или укажите
   <filename>configure</filename> опцию
@@ -814,7 +815,7 @@ PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure
 <para>
 К счастью, <application>MPlayerOSX</application> был подхвачен членом команды 
 <application>MPlayer</application>. Предварительные релизы доступны с нашей
-<ulink url="http://mplayerhq.hu/dload.html">страницы закачки</ulink>
+<ulink url="http://mplayerhq.hu/dload.html">страницы загрузки</ulink>
 и скоро ожидается официальный релиз.
 </para>
 
