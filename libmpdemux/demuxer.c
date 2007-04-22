@@ -75,7 +75,9 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_tv,
 #endif
   &demuxer_desc_mf,
+#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
   &demuxer_desc_lavf_preferred,
+#endif
   &demuxer_desc_avi,
   &demuxer_desc_y4m,
   &demuxer_desc_asf,
