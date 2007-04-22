@@ -79,29 +79,6 @@ static void SROUTW(int reg,int val)
 	SROUTB(reg+1,(val>>8)&255);
 }
 
-static void DumpRegisters(void)
-{
-#ifdef DEBUG_LOGFILE
-        int reg,val;
-        if(logfile)
-        {
-                LOGWRITE("CRTC Register Dump:\n")
-                for(reg=0;reg<256;++reg)
-                {
-                        val=CRINB(reg);
-                        fprintf(logfile,"CR0x%2x: 0x%2x\n",reg,val);
-                }
-                LOGWRITE("SR Register Dump:\n")
-                for(reg=0;reg<256;++reg)
-                {
-                        val=SRINB(reg);
-                        fprintf(logfile,"SR0x%2x: 0x%2x\n",reg,val);
-                }
-        }
-#endif
-}
-/* --- */
-
 static vidix_capability_t cyberblade_cap =
 {
 	"Trident CyberBlade i1 driver",
