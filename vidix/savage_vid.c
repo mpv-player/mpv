@@ -74,7 +74,7 @@
 /* CR69[0] = 1 : Mem-mapped regs */
 #define USE_MM_FOR_PRI_STREAM_OLD   0x01
 
-void SavageStreamsOn(void);
+static void SavageStreamsOn(void);
 
 /*
  * There are two different streams engines used in the Savage line.
@@ -119,10 +119,10 @@ void SavageStreamsOn(void);
 /**
  * @brief Information on PCI device.
  */
-pciinfo_t pci_info;
+static pciinfo_t pci_info;
 
-uint8_t *vio;
-uint8_t mclk_save[3];
+static uint8_t *vio;
+static uint8_t mclk_save[3];
 
 #define outb(reg,val)	OUTPORT8(reg,val)
 #define inb(reg)	INPORT8(reg)
@@ -189,7 +189,7 @@ uint8_t mclk_save[3];
 #define ALIGN_TO(v, n) (((v) + (n-1)) & ~(n-1))
 
 
-void debugout(unsigned int addr, unsigned int val);
+static void debugout(unsigned int addr, unsigned int val);
 
 
 struct savage_chip {
@@ -567,7 +567,7 @@ static void SavageInitStreamsOld(void)
 
 }
 
-void 
+static void 
 SavageStreamsOn(void)
 {
      unsigned char jStreamsControl;
@@ -1313,7 +1313,7 @@ savage_playback_off (void)
   return 0;
 }
 
-void debugout(unsigned int addr, unsigned int val){
+static void debugout(unsigned int addr, unsigned int val){
 	return ;
     switch ( addr ){
 	case PSTREAM_CONTROL_REG:
