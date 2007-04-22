@@ -261,6 +261,8 @@ static int fill_buffer(stream_t *s, char *but, int len)
           return len;
         case DVDNAV_VTS_CHANGE: {
           int tit = 0, part = 0;
+          dvdnav_vts_change_event_t *vts_event = (dvdnav_vts_change_event_t *)s->buffer;
+          mp_msg(MSGT_CPLAYER,MSGL_INFO, "DVDNAV, switched to title: %d\r\n", vts_event->new_vtsN);
           s->end_pos = 0;
           update_title_len(s);
           if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
