@@ -75,7 +75,7 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_tv,
 #endif
   &demuxer_desc_mf,
-#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
+#if defined(USE_LIBAVFORMAT) || defined(USE_LIBAVFORMAT_SO)
   &demuxer_desc_lavf_preferred,
 #endif
   &demuxer_desc_avi,
@@ -119,7 +119,7 @@ demuxer_desc_t* demuxer_list[] = {
 #ifdef STREAMING_LIVE555
   &demuxer_desc_rtp,
 #endif
-#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
+#if defined(USE_LIBAVFORMAT) || defined(USE_LIBAVFORMAT_SO)
   &demuxer_desc_lavf,
 #endif
 #ifdef HAVE_LIBDV095
