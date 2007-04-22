@@ -164,11 +164,7 @@ static int pm3_query_fourcc(vidix_fourcc_t *to)
 {
     if(is_supported_fourcc(to->fourcc))
     {
-	to->depth = VID_DEPTH_1BPP | VID_DEPTH_2BPP |
-		    VID_DEPTH_4BPP | VID_DEPTH_8BPP |
-		    VID_DEPTH_12BPP| VID_DEPTH_15BPP|
-		    VID_DEPTH_16BPP| VID_DEPTH_24BPP|
-		    VID_DEPTH_32BPP;
+	to->depth = VID_DEPTH_ALL;
 	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK | VID_CAP_COLORKEY;
 	return 0;
     }
