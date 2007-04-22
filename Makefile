@@ -112,31 +112,31 @@ INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
-PARTS = libmpdemux \
-        stream \
-        libmpcodecs \
-        libavutil \
-        libswscale \
-        libao2 \
-        osdep \
+PARTS = dvdread \
+        Gui \
         input \
-        libvo \
-        libaf \
         liba52 \
+        libaf \
+        libao2 \
+        libass \
         libavcodec \
         libavformat \
+        libavutil \
+        libdvdcss \
+        libfaad2 \
+        libmenu \
+        libmpcodecs \
+        libmpdemux \
+        libmpeg2 \
         libpostproc \
+        libswscale \
+        libvo \
         loader \
         mp3lib \
-        libmpeg2 \
-        libfaad2 \
+        osdep \
+        stream \
         tremor \
         vidix \
-        dvdread \
-        libdvdcss \
-        libass \
-        Gui \
-        libmenu \
 
 
 all:	$(ALL_PRG)
