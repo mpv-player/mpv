@@ -122,7 +122,9 @@ dha_helper_way:
   }
 #endif
 
+#ifdef CONFIG_DHAHELPER
 dev_mem_way:
+#endif
 #ifdef DEV_APERTURE
   if ((mem_fd = open(DEV_APERTURE, O_RDWR)) == -1)
 	perror("libdha: opening aperture failed");
@@ -143,7 +145,9 @@ dev_mem_way:
     return MAP_FAILED;
   }
 
+#ifdef CONFIG_DHAHELPER
 mmap:
+#endif
   return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem_fd,base);
 }
 
