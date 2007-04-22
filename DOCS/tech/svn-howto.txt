@@ -102,6 +102,10 @@ I. BASICS:
   It's very easy for stray debug output or cosmetic modifications to slip in,
   please avoid problems through this extra level of scrutiny.
 
+  For cosmetics-only commits you should get (almost) empty output from
+
+    svn diff --diff-cmd diff -x '-duwbB' <filename(s)>
+
   Also check the output of
 
     svn status
