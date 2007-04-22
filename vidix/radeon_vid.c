@@ -2283,7 +2283,7 @@ static void ComputeBorders( vidix_playback_t *config, int VertUVSubSample )
 
 	TopUVLine = ((int)(config->src.y/VertUVSubSample) < 0)	?  0: (int)(config->src.y/VertUVSubSample);   /* Round rSrcTop down */
 	BottomUVLine = (ceil(((config->src.y+config->src.h)/VertUVSubSample)) > (config->src.h/VertUVSubSample))
-	? (config->src.h/VertUVSubSample)-1 : (u_int)ceil(((config->src.y+config->src.h)/VertUVSubSample))-1;
+	? (config->src.h/VertUVSubSample)-1 : (unsigned int)ceil(((config->src.y+config->src.h)/VertUVSubSample))-1;
 
 	if (BottomUVLine >= TopUVLine)
 	{
