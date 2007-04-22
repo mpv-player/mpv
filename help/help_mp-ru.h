@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r23003
+// Synced with help_mp-en.h: r23028
 
 // ========================= MPlayer help ===========================
 
@@ -628,6 +628,10 @@ static char help_text[]=
 #define MSGTR_CacheFill "\rЗаполнение кэша: %5.2f%% (%"PRId64" байт(а))   "
 #define MSGTR_NoBindFound "Не найдена привязка к клавише '%s'."
 #define MSGTR_FailedToOpen "Не могу открыть %s.\n"
+
+#define MSGTR_VideoID "[%s] Найден видео поток, -vid %d\n"
+#define MSGTR_AudioID "[%s] Найден аудио поток, -aid %d\n"
+#define MSGTR_SubtitleID "[%s] Найден поток субтитров, -sid %d\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Не могу открыть кодек.\n"
