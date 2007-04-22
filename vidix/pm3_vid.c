@@ -44,10 +44,10 @@
 #define TRACE_EXIT()
 #endif
 
-pciinfo_t pci_info;
+static pciinfo_t pci_info;
 
 void *pm3_reg_base;
-void *pm3_mem;
+static void *pm3_mem;
 
 static vidix_capability_t pm3_cap =
 {
