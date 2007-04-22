@@ -45,7 +45,7 @@ char * fsVideoFilterNames[][2] =
            { "VOB files (*.vob)",  				  	"*.vob" },
            { "AVI files (*.avi)",  				  	"*.avi" },
 	   { "DiVX files (*.divx)",					"*.divx" },
-           { "QuickTime files (*.mov,*.qt)",			  	"*.mov,*.qt" },
+           { "QuickTime files (*.mov,*.qt,*.mp4)",		  	"*.mov,*.qt,*.mp4" },
            { "ASF files (*.asf)",  				  	"*.asf" },
            { "VIVO files (*.viv)", 				  	"*.viv" },
 	   { "RealVideo files (*.rm)",					"*.rm"  },
@@ -59,7 +59,7 @@ char * fsVideoFilterNames[][2] =
 	   { "WMA files (*.wma)",					"*.wma" },
 	   { "Matroska Audio files (*.mka)",			  	"*.mka" },
 	   { "Audio files",						"*.wav,*.ogg,*.mp2,*.mp3,*.wma,*.mka" },
-	   { "Video files", 						"*.asf,*.avi,*.divx,*.fli,*.flc,*.ogm,*.mpg,*.mpeg,*.m1v,*.mov,*.nuv,*.qt,*.rm,*.vob,*.viv,*.wmv,*.mkv,*.bin" },
+	   { "Video files", 						"*.asf,*.avi,*.divx,*.fli,*.flc,*.ogm,*.mpg,*.mpeg,*.m1v,*.mov,*.mp4,*.nuv,*.qt,*.rm,*.vob,*.viv,*.wmv,*.mkv,*.bin" },
            { "All files",	      					"*" },
 	   { NULL,NULL }
 	 };
