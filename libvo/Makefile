@@ -23,3 +23,6 @@ SRCS_COMMON-$(BITMAP_FONT) +=  font_load.c
 SRCS_COMMON-$(FREETYPE)    +=  font_load_ft.c
 
 include ../mpcommon.mak
+
+%.o: %.m
+	$(CC) $(CFLAGS) -c -o $@ $<
