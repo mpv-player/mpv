@@ -53,7 +53,7 @@ static int num_mach64_buffers=-1;
 static int supports_planar=0;
 static int supports_lcd_v_stretch=0;
 
-pciinfo_t pci_info;
+static pciinfo_t pci_info;
 static int probed = 0;
 static int __verbose = 0;
 
