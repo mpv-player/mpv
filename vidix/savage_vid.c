@@ -1313,38 +1313,6 @@ savage_playback_off (void)
   return 0;
 }
 
-/**
- * @brief Driver should prepare and activate corresponded frame.
- *
- * @param frame the frame index.
- *
- * @return 0.
- *
- * @note This function is used only for double and triple buffering
- *       and never used for single buffering playback.
- */
-#if 0
-static int
-savage_frame_select (unsigned int frame)
-{
-////FIXME ADD
-//    savage_overlay_start(info, frame);
-    //if (info->num_frames >= 1)
-//	    info->cur_frame = frame//(frame+1)%info->num_frames;
-//
-//	savage4_waitidle(info); 
- 	
-   printf("vixPlaybackFrameSelect Leave\n" );
-	 // FIXME: does this work to avoid tearing?
-//   VerticalRetraceWait();
-   
-  return 0;
-}
-
-#endif 
-
-
-
 void debugout(unsigned int addr, unsigned int val){
 	return ;
     switch ( addr ){
@@ -1442,9 +1410,6 @@ VDXDriver savage_drv = {
   .config_playback = savage_config_playback,
   .playback_on = savage_playback_on,
   .playback_off = savage_playback_off,
-#if 0
-  .frame_sel = savage_frame_select,
-#endif
   .get_eq = savage_get_eq,
   .set_eq = savage_set_eq,
   .set_gkey = savage_set_gkeys,

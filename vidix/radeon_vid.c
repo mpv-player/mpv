@@ -1070,16 +1070,6 @@ static void radeon_set_transform(float bright, float cont, float sat,
 	CAdjBCb = sat * OvHueCos * trans[ref].RefBCb;
 	CAdjBCr = sat * OvHueSin * trans[ref].RefBCb;
     
-#if 0 /* default constants */
-	CAdjLuma = 1.16455078125;
-
-	CAdjRCb = 0.0;
-	CAdjRCr = 1.59619140625;
-	CAdjGCb = -0.39111328125;
-	CAdjGCr = -0.8125;
-	CAdjBCb = 2.01708984375;
-	CAdjBCr = 0;
-#endif
 	OvLuma = CAdjLuma;
 	OvRCb = CAdjRCb;
 	OvRCr = CAdjRCr;
@@ -1093,21 +1083,13 @@ static void radeon_set_transform(float bright, float cont, float sat,
 		OvLuma * Loff - (OvGCb + OvGCr) * Coff;
 	OvBOff = BlueAdj + CAdjOff - 
 		OvLuma * Loff - (OvBCb + OvBCr) * Coff;
-#if 0 /* default constants */
-	OvROff = -888.5;
-	OvGOff = 545;
-	OvBOff = -1104;
-#endif 
    
 	dwOvROff = ((int)(OvROff * 2.0)) & 0x1fff;
 	dwOvGOff = (int)(OvGOff * 2.0) & 0x1fff;
 	dwOvBOff = (int)(OvBOff * 2.0) & 0x1fff;
 	/* Whatever docs say about R200 having 3.8 format instead of 3.11
 	   as in Radeon is a lie */
-#if 0
-	if(!IsR200)
-	{
-#endif
+
 		dwOvLuma =(((int)(OvLuma * 2048.0))&0x7fff)<<17;
 		dwOvRCb = (((int)(OvRCb * 2048.0))&0x7fff)<<1;
 		dwOvRCr = (((int)(OvRCr * 2048.0))&0x7fff)<<17;
@@ -1115,19 +1097,7 @@ static void radeon_set_transform(float bright, float cont, float sat,
 		dwOvGCr = (((int)(OvGCr * 2048.0))&0x7fff)<<17;
 		dwOvBCb = (((int)(OvBCb * 2048.0))&0x7fff)<<1;
 		dwOvBCr = (((int)(OvBCr * 2048.0))&0x7fff)<<17;
-#if 0
-	}
-	else
-	{
-		dwOvLuma = (((int)(OvLuma * 256.0))&0x7ff)<<20;
-		dwOvRCb = (((int)(OvRCb * 256.0))&0x7ff)<<4;
-		dwOvRCr = (((int)(OvRCr * 256.0))&0x7ff)<<20;
-		dwOvGCb = (((int)(OvGCb * 256.0))&0x7ff)<<4;
-		dwOvGCr = (((int)(OvGCr * 256.0))&0x7ff)<<20;
-		dwOvBCb = (((int)(OvBCb * 256.0))&0x7ff)<<4;
-		dwOvBCr = (((int)(OvBCr * 256.0))&0x7ff)<<20;
-	}
-#endif
+
 	OUTREG(OV0_LIN_TRANS_A, dwOvRCb | dwOvLuma);
 	OUTREG(OV0_LIN_TRANS_B, dwOvROff | dwOvRCr);
 	OUTREG(OV0_LIN_TRANS_C, dwOvGCb | dwOvLuma);
@@ -1559,15 +1529,7 @@ static void radeon_vid_display_video( void )
     radeon_fifo_wait(15);
 
     force_second=0;
-#if 0 /* Warning: for now we have black screen only! :( */
-#ifndef RAGE128
-    if(rinfo.hasCRTC2 && 
-       (rinfo.dviDispType == MT_CTV || rinfo.dviDispType == MT_STV))
-    {
-	force_second=1;
-    }
-#endif
-#endif
+
     /* Shutdown capturing */
     OUTREG(FCP_CNTL, FCP_CNTL__GND);
     OUTREG(CAP0_TRIG_CNTL, 0);

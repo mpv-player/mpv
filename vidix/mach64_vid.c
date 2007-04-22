@@ -770,14 +770,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     dest_h = config->dest.h;
     besr.fourcc = config->fourcc;
     ecp = (INPLL(PLL_VCLK_CNTL) & PLL_ECP_DIV) >> 4;
-#if 0
-{
-int i;
-for(i=0; i<32; i++){
-    printf("%X ", INPLL(i));
-}
-}
-#endif
+
     if(__verbose>0) printf("[mach64] ecp: %d\n", ecp);
     v_inc = src_h * mach64_get_vert_stretch();
     
@@ -949,13 +942,6 @@ static int mach64_frame_sel(unsigned int frame)
     	off[i]  = mach64_buffer_base[frame][i];
     	off[i+3]= mach64_buffer_base[last_frame][i];
     }
-
-#if 0 // delay routine so the individual frames can be ssen better
-{
-volatile int i=0;
-for(i=0; i<10000000; i++);
-}
-#endif
 
     mach64_wait_for_idle();
     mach64_fifo_wait(7);

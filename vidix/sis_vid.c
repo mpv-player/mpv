@@ -184,9 +184,6 @@ static void set_brightness(uint8_t brightness);
 static void set_contrast(uint8_t contrast);
 static void set_saturation(char saturation);
 static void set_hue(uint8_t hue);
-#if 0
-static void set_alpha(uint8_t alpha);
-#endif
 
 /* IO Port access functions */
 static uint8_t getvideoreg(uint8_t reg)
@@ -371,14 +368,6 @@ static int sis_init(void)
     inSISIDXREG(SISSR, Index_SR_Graphic_Mode, sr_data);
     if (sr_data & 0x20)		/* interlaced mode */
 	sis_vmode |= VMODE_INTERLACED;
-
-#if 0				/* getting back false data here... */
-    /* CR9 bit 7 set = double scan active */
-    inSISIDXREG(SISCR, 0x09, cr_data);
-    if (cr_data & 0x40) {
-	sis_vmode |= VMODE_DOUBLESCAN;
-    }
-#endif
 
     /* JCP: eventually I'd like to replace this with a call to sisfb
        SISFB_GET_INFO ioctl to get video bridge info.  Not for now,
@@ -767,20 +756,6 @@ static int sis_config_playback(vidix_playback_t * info)
     /* FIXME: is it possible that srcW < 0? */
     overlay.srcW = src_w - (sx - src_x);
     overlay.srcH = src_h - (sy - src_y);
-
-    /* JCP: what to do about this? */
-#if 0
-    if ((pPriv->oldx1 != overlay.dstBox.x1) ||
-	(pPriv->oldx2 != overlay.dstBox.x2) ||
-	(pPriv->oldy1 != overlay.dstBox.y1) ||
-	(pPriv->oldy2 != overlay.dstBox.y2)) {
-	pPriv->mustwait = 1;
-	pPriv->oldx1 = overlay.dstBox.x1;
-	pPriv->oldx2 = overlay.dstBox.x2;
-	pPriv->oldy1 = overlay.dstBox.y1;
-	pPriv->oldy2 = overlay.dstBox.y2;
-    }
-#endif
 
     /* set merge line buffer */
     merge_line_buf(overlay.srcW > 384);
@@ -1215,35 +1190,6 @@ calc_scale_factor(SISOverlayPtr pOverlay, int index, int iscrt2)
     index = index;
     iscrt2 = iscrt2;
 
-#if 0				/* JCP: don't bother with this for now. */
-    /* TW: Stretch image due to idiotic LCD "auto"-scaling on LVDS (and 630+301B) */
-    if (pSiS->VBFlags & CRT2_LCD) {
-	if (sis_bridge_is_slave) {
-	    if (pSiS->VBFlags & VB_LVDS) {
-		dstH = (dstH * LCDheight) / pOverlay->SCREENheight;
-	    } else if ((sis_vga_engine == SIS_300_VGA) &&
-		       (pSiS->
-			VBFlags & (VB_301B | VB_302B | VB_301LV |
-				   VB_302LV))) {
-		dstH = (dstH * LCDheight) / pOverlay->SCREENheight;
-	    }
-	} else if (iscrt2) {
-	    if (pSiS->VBFlags & VB_LVDS) {
-		dstH = (dstH * LCDheight) / pOverlay->SCREENheight;
-		if (sis_displaymode == DISPMODE_MIRROR)
-		    flag = 1;
-	    } else if ((sis_vga_engine == SIS_300_VGA) &&
-		       (pSiS->
-			VBFlags & (VB_301B | VB_302B | VB_301LV |
-				   VB_302LV))) {
-		dstH = (dstH * LCDheight) / pOverlay->SCREENheight;
-		if (sis_displaymode == DISPMODE_MIRROR)
-		    flag = 1;
-	    }
-	}
-    }
-#endif
-
     /* TW: For double scan modes, we need to double the height
      *     (Perhaps we also need to scale LVDS, but I'm not sure.)
      *     On 310/325 series, we need to double the width as well.
@@ -1319,13 +1265,6 @@ calc_scale_factor(SISOverlayPtr pOverlay, int index, int iscrt2)
 	    if ((flag) && (mult = (srcH / origdstH)) >= 2)
 		pOverlay->pitch /= mult;
 	} else {
-#if 0
-	    if (((pOverlay->bobEnable & 0x08) == 0x00) &&
-		(((srcPitch * i) >> 2) > 0xFFF)) {
-		pOverlay->bobEnable |= 0x08;
-		srcPitch >>= 1;
-	    }
-#endif
 	    if (((srcPitch * i) >> 2) > 0xFFF) {
 		i = (0xFFF * 2 / srcPitch);
 		pOverlay->VUSF = 0xFFFF;
@@ -1543,18 +1482,6 @@ static void set_hue(uint8_t hue)
 {
     setvideoreg(Index_VI_Hue, (hue & 0x08) ? (hue ^ 0x07) : hue);
 }
-
-#if 0
-/* JCP: not used (I don't think it's correct anyway) */
-static void set_alpha(uint8_t alpha)
-{
-    uint8_t data;
-
-    data = getvideoreg(Index_VI_Key_Overlay_OP);
-    data &= 0x0F;
-    setvideoreg(Index_VI_Key_Overlay_OP, data | (alpha << 4));
-}
-#endif
 
 VDXDriver sis_drv = {
   "sis",

@@ -671,13 +671,6 @@ void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
 	crtc2_frame_sel(mga_next_frame);
 #endif
 	
-#if 0
-	++counter;
-	if(!(counter&63)){
-	    printf("mga irq counter = %d\n",counter);
-	}
-#endif
-
 //    } else {
 //	debug_irqignore = 1;
 //    }
@@ -821,20 +814,6 @@ static int mga_config_playback(vidix_playback_t *config)
                     + (1<<16)   // chroma upsampling
                     + (1<<17)   // 4:2:0 mode
                     + (1<<18);  // dither enabled
-#if 0
-	if(is_g400)
-	{
-		//zoom disabled, zoom filter disabled, 420 3 plane format, proc amp
-		//disabled, rgb mode disabled 
-		regs.besglobctl = (1<<5);
-	}
-	else
-	{
-		//zoom disabled, zoom filter disabled, Cb samples in 0246, Cr
-		//in 1357, BES register update on besvcnt
-	        regs.besglobctl = 0;
-	}
-#endif
         break;
 
     case IMGFMT_YUY2:	
@@ -1322,20 +1301,6 @@ static int mga_init(void)
 		default: mga_ram_size = 8;
 	    }
 	} 
-
-#if 0
-//	    printf("List resources -----------\n");
-	    for(temp=0;temp<DEVICE_COUNT_RESOURCE;temp++){
-	        struct resource *res=&pci_dev->resource[temp];
-	        if(res->flags){
-	          int size=(1+res->end-res->start)>>20;
-	          printf("res %d:  start: 0x%X   end: 0x%X  (%d MB) flags=0x%X\n",temp,res->start,res->end,size,res->flags);
-	          if(res->flags&(IORESOURCE_MEM|IORESOURCE_PREFETCH)){
-	              if(size>mga_ram_size && size<=64) mga_ram_size=size;
-	          }
-	        }
-	    }
-#endif
 
         printf("[mga] detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 #endif

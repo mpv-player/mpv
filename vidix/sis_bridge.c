@@ -80,42 +80,7 @@ static void sis_sense_30x(void)
 
     sis_do_sense(0, 0, 0, 0);
 
-    if ((sis_vga_engine == SIS_315_VGA) ||
-	(sis_device_id == DEVICE_SIS_300)) {
-#if 0
-	if (0 /*pSiS->sishw_ext.UseROM */ ) {
-	    if (sis_vga_engine == SIS_300_VGA)
-		temp = 0xfe;
-	    else {
-		temp = 0xf3;
-		if (sis_device_id == DEVICE_SIS_330)
-		    temp = 0x11b;
-	    }
-	    if (pSiS->BIOS[temp] & 0x08) {
-		if (sis_verbose > 1) {
-		    printf
-			("[SiS] SiS30x: Video bridge has DVI-I TMDS/VGA combo connector\n");
-		}
-		orSISIDXREG(SISCR, 0x32, 0x80);
-	    } else {
-		andSISIDXREG(SISCR, 0x32, 0x7f);
-	    }
-	}
-#endif
-    }
-
     if (sis_vga_engine == SIS_300_VGA) {
-	if (0 /*pSiS->sishw_ext.UseROM */ ) {
-#if 0
-	    testvga2_tempbh = pSiS->BIOS[0xf9];
-	    testvga2_tempbl = pSiS->BIOS[0xf8];
-	    testsvhs_tempbh = pSiS->BIOS[0xfb];
-	    testsvhs_tempbl = pSiS->BIOS[0xfa];
-	    testcvbs_tempbh = pSiS->BIOS[0xfd];
-	    testcvbs_tempbl = pSiS->BIOS[0xfc];
-	    biosflag = pSiS->BIOS[0xfe];
-#endif
-	} else {
 	    testvga2_tempbh = 0x00;
 	    testvga2_tempbl = 0xd1;
 	    testsvhs_tempbh = 0x00;
@@ -123,7 +88,7 @@ static void sis_sense_30x(void)
 	    testcvbs_tempbh = 0x00;
 	    testcvbs_tempbl = 0xb3;
 	    biosflag = 0;
-	}
+
 	if (sis_vbflags & (VB_301B | VB_302B | VB_301LV | VB_302LV)) {
 	    testvga2_tempbh = 0x01;
 	    testvga2_tempbl = 0x90;
@@ -158,27 +123,6 @@ static void sis_sense_30x(void)
 	    }
 	}
     } else {
-	if (0 /*pSiS->sishw_ext.UseROM */ ) {
-#if 0
-	    if (sis_device_id == DEVICE_SIS_330) {
-		testvga2_tempbh = pSiS->BIOS[0xe6];
-		testvga2_tempbl = pSiS->BIOS[0xe5];
-		testsvhs_tempbh = pSiS->BIOS[0xe8];
-		testsvhs_tempbl = pSiS->BIOS[0xe7];
-		testcvbs_tempbh = pSiS->BIOS[0xea];
-		testcvbs_tempbl = pSiS->BIOS[0xe9];
-		biosflag = pSiS->BIOS[0x11b];
-	    } else {
-		testvga2_tempbh = pSiS->BIOS[0xbe];
-		testvga2_tempbl = pSiS->BIOS[0xbd];
-		testsvhs_tempbh = pSiS->BIOS[0xc0];
-		testsvhs_tempbl = pSiS->BIOS[0xbf];
-		testcvbs_tempbh = pSiS->BIOS[0xc2];
-		testcvbs_tempbl = pSiS->BIOS[0xc1];
-		biosflag = pSiS->BIOS[0xf3];
-	    }
-#endif
-	} else {
 	    testvga2_tempbh = 0x00;
 	    testvga2_tempbl = 0xd1;
 	    testsvhs_tempbh = 0x00;
@@ -186,28 +130,8 @@ static void sis_sense_30x(void)
 	    testcvbs_tempbh = 0x00;
 	    testcvbs_tempbl = 0xb3;
 	    biosflag = 0;
-	}
 
 	if (sis_vbflags & (VB_301B | VB_302B | VB_301LV | VB_302LV)) {
-	    if (0 /*pSiS->sishw_ext.UseROM */ ) {
-#if 0
-		if (sis_device_id == DEVICE_SIS_330) {
-		    testvga2_tempbh = pSiS->BIOS[0xec];
-		    testvga2_tempbl = pSiS->BIOS[0xeb];
-		    testsvhs_tempbh = pSiS->BIOS[0xee];
-		    testsvhs_tempbl = pSiS->BIOS[0xed];
-		    testcvbs_tempbh = pSiS->BIOS[0xf0];
-		    testcvbs_tempbl = pSiS->BIOS[0xef];
-		} else {
-		    testvga2_tempbh = pSiS->BIOS[0xc4];
-		    testvga2_tempbl = pSiS->BIOS[0xc3];
-		    testsvhs_tempbh = pSiS->BIOS[0xc6];
-		    testsvhs_tempbl = pSiS->BIOS[0xc5];
-		    testcvbs_tempbh = pSiS->BIOS[0xc8];
-		    testcvbs_tempbl = pSiS->BIOS[0xc7];
-		}
-#endif
-	    } else {
 		if (sis_vbflags & (VB_301B | VB_302B)) {
 		    testvga2_tempbh = 0x01;
 		    testvga2_tempbl = 0x90;
@@ -223,7 +147,6 @@ static void sis_sense_30x(void)
 		    testcvbs_tempbh = 0x01;
 		    testcvbs_tempbl = 0x00;
 		}
-	    }
 	}
 	if (sis_vbflags & (VB_301 | VB_301B | VB_302B)) {
 	    inSISIDXREG(SISPART4, 0x01, myflag);
@@ -512,33 +435,6 @@ static void sis_detect_crt2(void)
 
     if (CR32 & 0x10)
 	sis_vbflags |= CRT2_VGA;
-
-#if 0
-    if (!(pSiS->nocrt2ddcdetection)) {
-	if (sis_vbflags & (VB_301B | VB_302B)) {
-	    if (!(sis_vbflags & (CRT2_VGA | CRT2_LCD))) {
-		printf
-		    ("[SiS] BIOS detected no secondary VGA, sensing via DDC\n");
-		if (SiS_SenseVGA2DDC(pSiS->SiS_Pr, pSiS)) {
-		    printf
-			("[SiS] DDC error during secondary VGA detection\n");
-		} else {
-		    inSISIDXREG(SISCR, 0x32, CR32);
-		    if (CR32 & 0x10) {
-			sis_vbflags |= CRT2_VGA;
-			/*pSiS->postVBCR32 |= 0x10; */
-			printf
-			    ("[SiS] Detected secondary VGA connection\n");
-		    } else {
-			printf
-			    ("[SiS] No secondary VGA connection detected\n");
-		    }
-		}
-	    }
-	}
-    }
-#endif
-
 }
 
 
@@ -650,15 +546,6 @@ static void sis_detect_video_bridge(void)
     /* detects if brdige uses LCDA for low res text modes */
     if (sis_vga_engine == SIS_315_VGA) {
 	if (sis_vbflags & (VB_302B | VB_301LV | VB_302LV)) {
-#if 0
-	    if (pSiS->sisfblcda != 0xff) {
-		if ((pSiS->sisfblcda & 0x03) == 0x03) {
-		    //pSiS->SiS_Pr->SiS_UseLCDA = TRUE;
-		    sis_vbflags |= VB_USELCDA;
-		}
-	    } else
-#endif
-	    {
 		inSISIDXREG(SISCR, 0x34, temp);
 		if (temp <= 0x13) {
 		    inSISIDXREG(SISCR, 0x38, temp);
@@ -676,7 +563,6 @@ static void sis_detect_video_bridge(void)
 			}
 		    }
 		}
-	    }
 	    if (sis_vbflags & VB_USELCDA) {
 		/* printf("Bridge uses LCDA for low resolution and text modes\n"); */
 	    }

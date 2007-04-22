@@ -94,15 +94,6 @@
 #endif
 #endif
 
-#if 0
-#if defined(__SUNPRO_C) || defined(sun) || defined(__sun)
-#include <sys/psw.h>
-#else
-#include <sys/seg.h>
-#endif
-#include <sys/v86.h>
-#endif
- 
 #if defined(Lynx) && defined(__powerpc__)
 /* let's mimick the Linux Alpha stuff for LynxOS so we don't have
  * to change too much code
