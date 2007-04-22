@@ -1,35 +1,34 @@
 /*
-    Matrox MGA driver
-    
-    ported to VIDIX by Alex Beregszaszi
-
-    YUY2 support (see config.format) added by A'rpi/ESP-team
-    double buffering added by A'rpi/ESP-team
-
-    Brightness/contrast support by Nick Kurshev/Dariush Pietrzak (eyck) and me
-
-    TODO:
-	* fix memory size detection (current reading pci userconfig isn't
-	    working as requested - returns the max avail. ram on arch?)
-	* translate all non-english comments to english
-*/
-
-/*
- * Original copyright:
+ * VIDIX driver for Matrox chipsets.
+ * Copyright (C) 2002 Alex Beregszaszi
  *
- * mga_vid.c
+ * This file is part of MPlayer.
  *
- * Copyright (C) 1999 Aaron Holtzman
- * 
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with MPlayer; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ *
+ * Original sources from Aaron Holtzman (C) 1999.
  * Module skeleton based on gutted agpgart module by Jeff Hartmann 
- * <slicer@ionet.net>
+ *   <slicer@ionet.net>
+ * YUY2 support added by A'rpi/ESP-team
+     double buffering added by A'rpi/ESP-team
+ * Brightness/contrast support by Nick Kurshev/Dariush Pietrzak (eyck)
  *
- * Matrox MGA G200/G400 YUV Video Interface module Version 0.1.0
- * 
- * BES == Back End Scaler
- * 
- * This software has been released under the terms of the GNU Public
- * license. See http://www.gnu.org/copyleft/gpl.html for details.
+ * TODO:
+ *   - fix memory size detection (current reading pci userconfig isn't
+ *     working as requested - returns the max avail. ram on arch?)
+ *   - translate all non-english comments to english
  */
 
 //#define CRTC2

@@ -1,26 +1,27 @@
-/**
-    Video bridge detection for SiS 300 and 310/325 series chips.
-
-    Copyright 2003 Jake Page, Sugar Media.
-
-    Based on SiS Xv driver:
-    Copyright 2002-2003 by Thomas Winischhofer, Vienna, Austria.
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-**/
+/*
+ * VIDIX driver for SiS chipsets.
+ * Video bridge detection for SiS 300 and 310/325 series.
+ * Copyright (C) 2003 Jake Page, Sugar Media.
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with MPlayer; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ *
+ * Based on SiS Xv driver
+ * Copyright 2002-2003 by Thomas Winischhofer, Vienna, Austria.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

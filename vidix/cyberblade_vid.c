@@ -1,40 +1,40 @@
 /*
-    Driver for CyberBlade/i1 - Version 0.1.4
-
-    Copyright (C) 2002 by Alastair M. Robinson.
-    Official homepage: http://www.blackfiveservices.co.uk/EPIAVidix.shtml
-
-    Based on Permedia 3 driver by Måns Rullgård
-
-    Thanks to Gilles Frattini for bugfixes
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-    Changes:
-    18/01/03
-      MMIO is no longer used, sidestepping cache issues on EPIA-800
-      TV-Out modes are now better supported - this should be the end
-        of the magenta stripes :)
-      Brightness/Contrast controls disabled for the time being - they were
-        seriously degrading picture quality, especially with TV-Out.
-
-    To Do:
-    Implement Hue/Saturation controls
-    Support / Test multiple frames
-    Test colour-key code more extensively
-*/
+ * VIDIX driver for VIA Cyberblade/i1 chipsets.
+ * Copyright (C) 2002 Alastair M. Robinson
+ * http://www.blackfiveservices.co.uk/EPIAVidix.shtml
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with MPlayer; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ *
+ * Based on Permedia 3 driver by Måns Rullgård
+ * Thanks to Gilles Frattini for bugfixes.
+ *
+ * Changes:
+ *   18/01/03
+ *     MMIO is no longer used, sidestepping cache issues on EPIA-800
+ *     TV-Out modes are now better supported - this should be the end
+ *       of the magenta stripes :)
+ *     Brightness/Contrast controls disabled for the time being - they were
+ *       seriously degrading picture quality, especially with TV-Out.
+ *
+ * To Do:
+ *   Implement Hue/Saturation controls
+ *   Support / Test multiple frames
+ *   Test colour-key code more extensively
+ */
 
 #include <errno.h>
 #include <stdio.h>
