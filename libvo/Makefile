@@ -12,7 +12,6 @@ SRCS_MPLAYER = aspect.c \
                vo_yuv4mpeg.c \
                $(VO_SRCS) \
 
-SRCS_MPLAYER-$(EXTERNAL_VIDIX) +=  vosub_vidix.c
 SRCS_MPLAYER-$(VIDIX)          +=  vosub_vidix.c
 
 SRCS_COMMON = aclib.c \
