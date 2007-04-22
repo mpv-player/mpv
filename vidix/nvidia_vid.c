@@ -42,7 +42,7 @@
 #include "mpbswap.h"
 
 
-pciinfo_t pci_info;
+static pciinfo_t pci_info;
 
 
 #define MAX_FRAMES 3
