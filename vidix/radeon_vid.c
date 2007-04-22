@@ -35,7 +35,6 @@
 #include <string.h>
 #include <math.h>
 #include <inttypes.h>
-#include <sys/mman.h>
 
 #include "config.h"
 #include "libavutil/common.h"
