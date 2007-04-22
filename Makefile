@@ -116,9 +116,6 @@ PARTS = libmpdemux \
         stream \
         libmpcodecs \
         libavutil \
-        libavcodec \
-        libpostproc \
-        libavformat \
         libswscale \
         libao2 \
         osdep \
