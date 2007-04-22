@@ -138,7 +138,7 @@ dha_helper_way:
   }
 #endif
 
-#ifdef CONFIG_DHAHELPER
+#if defined(CONFIG_DHAHELPER) || defined (CONFIG_SVGAHELPER)
 dev_mem_way:
 #endif
 #ifdef DEV_APERTURE
@@ -161,7 +161,7 @@ dev_mem_way:
     return MAP_FAILED;
   }
 
-#ifdef CONFIG_DHAHELPER
+#if defined(CONFIG_DHAHELPER) || defined (CONFIG_SVGAHELPER)
 mmap:
 #endif
   return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem_fd,base);
