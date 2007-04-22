@@ -121,9 +121,6 @@ static void SavageStreamsOn(void);
  */
 static pciinfo_t pci_info;
 
-static uint8_t *vio;
-static uint8_t mclk_save[3];
-
 #define outb(reg,val)	OUTPORT8(reg,val)
 #define inb(reg)	INPORT8(reg)
 #define outw(reg,val)	OUTPORT16(reg,val)
