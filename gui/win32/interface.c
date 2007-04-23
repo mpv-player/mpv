@@ -1,5 +1,5 @@
 /*
-  MPlayer Gui for win32
+  MPlayer GUI for Win32
   Copyright (c) 2003 Sascha Sommer <saschasommer@freenet.de>
   Copyright (c) 2006 Erik Augustson <erik_27can@yahoo.com>
   Copyright (c) 2006 Gianluigi Tiesi <sherpya@netfarm.it>
@@ -470,7 +470,7 @@ static DWORD WINAPI GuiThread(void)
 
     if(!skinName) skinName = strdup("Blue");
     if(!mygui) mygui = create_gui(get_path("skins"), skinName, guiSetEvent);
-    if(!mygui) exit_player("Unable to load gui");
+    if(!mygui) exit_player("Unable to load GUI.");
 
     if(autosync && autosync != gtkAutoSync)
     {
@@ -484,7 +484,7 @@ static DWORD WINAPI GuiThread(void)
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    fprintf(stderr, "[GUI] Gui Thread Terminated\n");
+    fprintf(stderr, "[GUI] GUI thread terminated.\n");
     fflush(stderr);
     return 0;
 }
@@ -502,7 +502,7 @@ void guiInit(void)
 
     /* Wait until the gui is created */
     while(!mygui) Sleep(100);
-    mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] Gui Thread started\n");
+    mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] GUI thread started.\n");
 }
 
 void guiDone(void)

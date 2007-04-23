@@ -1,5 +1,5 @@
 /*
-  MPlayer Gui for win32
+  MPlayer GUI for Win32
   Copyright (c) 2003 Sascha Sommer <saschasommer@freenet.de>
   Copyright (c) 2006 Erik Augustson <erik_27can@yahoo.com>
   Copyright (c) 2006 Gianluigi Tiesi <sherpya@netfarm.it>
