@@ -6820,6 +6820,7 @@ EOF
  fi
 fi
 if test "$_tv_v4l2" = yes ; then
+  _audio_input=yes
   _tv_v4l=yes
   _def_tv_v4l='#define HAVE_TV_V4L 1'
   _def_tv_v4l2='#define HAVE_TV_V4L2 1'
