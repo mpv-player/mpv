@@ -139,7 +139,7 @@ x86() {
 
 ppc() {
   case "$host_arch" in
-    ppc) return 0;;
+    ppc|powerpc) return 0;;
     *) return 1;;
   esac
 }
@@ -1950,7 +1950,7 @@ EOF
     _optimizing=''
     ;;
 
-  ppc)
+  ppc|powerpc)
     _def_arch='#define ARCH_POWERPC 1'
     _def_dcbzl='#define NO_DCBZL 1'
     _target_arch='TARGET_ARCH_POWERPC = yes'
