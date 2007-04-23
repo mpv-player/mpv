@@ -534,25 +534,9 @@ phones.
 Reference implementation is available from
 <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
 (free for private use).
-</para>
-
-<para>
-To enable support, download the sources for
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
-and
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
-codecs, put them in the directory where you unpacked the
-<application>MPlayer</application> source and run the following commands:
-<screen>
-unzip 26104-610.zip
-unzip 26104-610_ANSI_C_source_code.zip
-mv c-code libavcodec/amr_float
-unzip 26204-600.zip
-unzip 26204-600_ANSI-C_source_code.zip
-mv c-code libavcodec/amrwb_float
-</screen>
-After that, follow the usual <application>MPlayer</application>
-<link linkend="features">build procedure</link>.
+To enable support, download and install support libraries for
+<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB and AMR-WB</ulink>
+following the instructions on that page.
 </para>
 </sect2>
 
