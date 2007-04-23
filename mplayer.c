@@ -76,7 +76,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 #include "cpudetect.h"
 
 #ifdef HAVE_NEW_GUI
-#include "Gui/interface.h"
+#include "gui/interface.h"
 #endif
 
 #include "input/input.h"

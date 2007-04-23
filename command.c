@@ -46,7 +46,7 @@
 #include "libass/ass_mp.h"
 #endif
 #ifdef HAVE_NEW_GUI
-#include "Gui/interface.h"
+#include "gui/interface.h"
 #endif
 
 #include "mp_core.h"

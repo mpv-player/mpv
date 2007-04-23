@@ -14,7 +14,7 @@
 #include "gl_common.h"
 #include "aspect.h"
 #ifdef HAVE_NEW_GUI
-#include "Gui/interface.h"
+#include "gui/interface.h"
 #endif
 #include "libass/ass.h"
 #include "libass/ass_mp.h"

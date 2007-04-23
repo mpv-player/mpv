@@ -37,7 +37,7 @@
 #include "mp_fifo.h"
 
 #ifdef HAVE_NEW_GUI
-#include "Gui/interface.h"
+#include "gui/interface.h"
 #endif
 
 #ifndef WM_XBUTTONDOWN

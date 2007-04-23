@@ -117,7 +117,7 @@ int vo_flags=0;
 int vd_use_slices=1;
 
 /** global variables for gamma, brightness, contrast, saturation and hue 
-    modified by mplayer.c and Gui/mplayer/gtk/eq.c:
+    modified by mplayer.c and gui/mplayer/gtk/eq.c:
     ranges -100 - 100
     1000 if the vo default should be used
 */   

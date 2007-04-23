@@ -33,7 +33,7 @@
 #include "mp_msg.h"
 
 #ifdef HAVE_NEW_GUI
-#include "Gui/interface.h"
+#include "gui/interface.h"
 #endif
 
 

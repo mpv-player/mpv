@@ -79,7 +79,7 @@ LIBS_MPLAYER = libvo/libvo.a \
                input/libinput.a \
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
-LIBS_MPLAYER-$(GUI)               += Gui/libgui.a
+LIBS_MPLAYER-$(GUI)               += gui/libgui.a
 LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
@@ -113,7 +113,7 @@ INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 PARTS = dvdread \
-        Gui \
+        gui \
         input \
         liba52 \
         libaf \
@@ -210,8 +210,8 @@ tremor/libvorbisidec.a:
 vidix/libvidix.a:
 	$(MAKE) -C vidix
 
-Gui/libgui.a:
-	$(MAKE) -C Gui
+gui/libgui.a:
+	$(MAKE) -C gui
 
 osdep/libosdep.a:
 	$(MAKE) -C osdep
@@ -401,7 +401,7 @@ libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 
 loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
 vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
-Gui/libgui.a: .norecurse $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
+gui/libgui.a: .norecurse $(wildcard gui/*.[ch] gui/*/*.[ch] gui/*/*/*.[ch])
 
 libass/libass.a: .norecurse $(wildcard libass/*.[ch])
 

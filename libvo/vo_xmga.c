@@ -44,7 +44,7 @@ static unsigned int timerd = 0;
 #endif
 
 #ifdef HAVE_NEW_GUI
-#include "Gui/interface.h"
+#include "gui/interface.h"
 #endif
 
 static vo_info_t info = {

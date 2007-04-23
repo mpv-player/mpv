@@ -40,7 +40,7 @@ Buffer allocation:
 #include "subopt-helper.h"
 
 #ifdef HAVE_NEW_GUI
-#include "Gui/interface.h"
+#include "gui/interface.h"
 #endif
 
 #include "libavutil/common.h"

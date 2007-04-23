@@ -54,7 +54,7 @@
 #include "input/mouse.h"
 
 #ifdef HAVE_NEW_GUI
-#include "Gui/interface.h"
+#include "gui/interface.h"
 #include "mplayer.h"
 #endif
 
