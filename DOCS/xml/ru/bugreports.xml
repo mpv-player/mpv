@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21760 -- no, this needs a review -->
+<!-- synced with r21760 -->
 <appendix id="bugreports">
 <title>Как сообщать об ошибках</title>
 
@@ -60,7 +60,7 @@
 <para>
 Иногда возникает проблема 'раньше это работало, а теперь - нет'. Здесь представлена 
 пошаговая процедура определения момента возникновения ошибки.
-Не она <emphasis role="bold">не для</emphasis> рядовых пользователей.
+Но она <emphasis role="bold">не для</emphasis> рядовых пользователей.
 </para>
 
 <para>
@@ -355,20 +355,13 @@ ld -v<!--
 </para>
 </sect2>
 
-<sect2 id="bugreports_conpilation">
+<sect2 id="bugreports_compilation">
 <title>Проблемы компиляции</title>
 <para>
 Пожалуйста, включите эти файлы:
 <itemizedlist>
   <listitem><para>config.h</para></listitem>
   <listitem><para>config.mak</para></listitem>
-</itemizedlist>
-Если компиляция ломается в одном из этих каталогов, включите эти файлы:
-<!-- FIXME: This is outdated. -->
-<itemizedlist>
-<listitem><para>Gui/config.mak</para></listitem>
-<listitem><para>libvo/config.mak</para></listitem>
-<listitem><para>libao2/config.mak</para></listitem>
 </itemizedlist>
 </para>
 </sect2>
