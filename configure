@@ -8190,8 +8190,8 @@ $_def_libavutil_so
 $_def_muxers
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
-#define CONFIG_EBX_AVAILABLE 1
-#define CONFIG_EBP_AVAILABLE 1
+#define HAVE_EBX_AVAILABLE 1
+#define HAVE_EBP_AVAILABLE 1
 
 #define CONFIG_GPL 1
 
