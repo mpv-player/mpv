@@ -1239,7 +1239,8 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 	val = cache_find_glyph(&key);
 	if (val) {
 		FT_Glyph_Copy(val->glyph, &info->glyph);
-		FT_Glyph_Copy(val->outline_glyph, &info->outline_glyph);
+		if (val->outline_glyph)
+			FT_Glyph_Copy(val->outline_glyph, &info->outline_glyph);
 		info->bbox = val->bbox_scaled;
 		info->advance.x = val->advance.x;
 		info->advance.y = val->advance.y;
@@ -1260,8 +1261,10 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 			}
 		}
 
+		memset(&v, 0, sizeof(v));
 		FT_Glyph_Copy(info->glyph, &v.glyph);
-		FT_Glyph_Copy(info->outline_glyph, &v.outline_glyph);
+		if (info->outline_glyph)
+			FT_Glyph_Copy(info->outline_glyph, &v.outline_glyph);
 		v.advance = info->advance;
 		v.bbox_scaled = info->bbox;
 		cache_add_glyph(&key, &v);
