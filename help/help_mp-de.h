@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r23003
+// In sync with r23028
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -648,6 +648,10 @@ static char help_text[]=
 #define MSGTR_CacheFill "\rFülle Zwischenpuffer: %5.2f%% (%"PRId64" Bytes)   "
 #define MSGTR_NoBindFound "Bindung für Taste '%s' nicht gefunden."
 #define MSGTR_FailedToOpen "Konnte '%s' nicht öffnen.\n"
+
+#define MSGTR_VideoID "[%s] Videostream gefunden, -vid %d\n"
+#define MSGTR_AudioID "[%s] Audiostream gefunden, -aid %d\n"
+#define MSGTR_SubtitleID "[%s] Untertitelstream gefunden, -sid %d\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Konnte Codec nicht öffnen.\n"
