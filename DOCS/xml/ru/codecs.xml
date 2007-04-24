@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r23100 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -516,27 +516,10 @@ Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHa
 Исходная реализация доступна с 
 <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
 (бесплатна для личного использования).
+Чтобы включить поддержку, скачайте и установите библиотеки поддержки для
+<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB и AMR-WB</ulink>, следуя
+инструкциям на указанной странице.
 </para>
-<para>
-Чтобы включить поддержку, скачайте исходники для
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
-и
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
-кодеков, поместите их в каталог, где распакованы исходники 
-<application>MPlayer</application> и выполните следующие команды:
-<screen>
-unzip 26104-610.zip
-unzip 26104-610_ANSI_C_source_code.zip
-mv c-code libavcodec/amr_float
-unzip 26204-600.zip
-unzip 26204-600_ANSI-C_source_code.zip
-mv c-code libavcodec/amrwb_float
-</screen>
-После этого следуйте обычной <link linkend="features">процедуре сборки</link>
-<application>MPlayer</application>.
-
-</para>
-
 </sect2>
 
 </sect1>
