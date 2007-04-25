@@ -26,11 +26,10 @@
 #include <windows.h>
 #include <png.h>
 
-#include <mp_msg.h>
-#include <cpudetect.h>
-#include <libswscale/rgb2rgb.h>
-#include <libswscale/swscale.h>
-
+#include "mp_msg.h"
+#include "cpudetect.h"
+#include "libswscale/rgb2rgb.h"
+#include "libswscale/swscale.h"
 #include "gui.h"
 
 #define MAX_LINESIZE 256

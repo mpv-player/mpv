@@ -23,9 +23,9 @@
 
 #ifndef _GUI_H
 #define _GUI_H
-#include <config.h>
-#include <playtree.h>
-#include <m_config.h>
+#include "config.h"
+#include "playtree.h"
+#include "m_config.h"
 #include "skinload.h"
 #include "playlist.h"
 

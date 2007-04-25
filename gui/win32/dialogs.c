@@ -23,12 +23,13 @@
 
 #include <windows.h>
 #include <commctrl.h>
-#include <interface.h>
-#include <mp_msg.h>
-#include <help_mp.h>
-#include <stream/stream.h>
-#include <libmpdemux/demuxer.h>
-#include <libmpdemux/stheader.h>
+
+#include "interface.h"
+#include "mp_msg.h"
+#include "help_mp.h"
+#include "stream/stream.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
 #include "gui.h"
 #include "wincfg.h"
 #include "dialogs.h"

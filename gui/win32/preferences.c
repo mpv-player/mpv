@@ -26,9 +26,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libvo/video_out.h>
-#include <libao2/audio_out.h>
-#include <mixer.h>
+
+#include "libvo/video_out.h"
+#include "libao2/audio_out.h"
+#include "mixer.h"
 #include "interface.h"
 #include "gui.h"
 #include "mp_msg.h"

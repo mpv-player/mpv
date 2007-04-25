@@ -22,7 +22,8 @@
  */
 
 #include <windows.h>
-#include <mp_msg.h>
+
+#include "mp_msg.h"
 #include "playlist.h"
 
 /* TODO: implement sort_playlist */

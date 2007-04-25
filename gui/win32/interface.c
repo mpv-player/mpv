@@ -22,22 +22,23 @@
  */
 
 #include <windows.h>
-#include <interface.h>
-#include <m_option.h>
-#include <mixer.h>
-#include <mp_msg.h>
-#include <help_mp.h>
-#include <codec-cfg.h>
-#include <stream/stream.h>
-#include <libmpdemux/demuxer.h>
-#include <libmpdemux/stheader.h>
+
+#include "interface.h"
+#include "m_option.h"
+#include "mixer.h"
+#include "mp_msg.h"
+#include "help_mp.h"
+#include "codec-cfg.h"
+#include "stream/stream.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
 #ifdef USE_DVDREAD
-#include <stream/stream_dvd.h>
+#include "stream/stream_dvd.h"
 #endif
-#include <input/input.h>
-#include <libvo/video_out.h>
-#include <libao2/audio_out.h>
-#include <access_mpcontext.h>
+#include "input/input.h"
+#include "libvo/video_out.h"
+#include "libao2/audio_out.h"
+#include "access_mpcontext.h"
 #include "gui.h"
 #include "dialogs.h"
 #include "wincfg.h"
