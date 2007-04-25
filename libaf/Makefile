@@ -28,8 +28,8 @@ SRCS_COMMON = af.c \
               window.c \
               $(AF_SRCS) \
 
-SRCS_COMMON-$(CONFIG_LIBAVCODEC)    += af_lavcresample.c
-SRCS_COMMON-$(CONFIG_LIBAVCODEC_SO) += af_lavcresample.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)      += af_export.c
+SRCS_COMMON-$(LIBAVCODEC)           += af_lavcresample.c
+SRCS_COMMON-$(LIBAVCODEC_SO)        += af_lavcresample.c
 
 include ../mpcommon.mak

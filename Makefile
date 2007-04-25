@@ -8,7 +8,7 @@ include config.mak
 
 CFLAGS = -I. -I./libavutil $(OPTFLAGS)
 
-CFLAGS-$(CONFIG_LIBAVCODEC) += -I./libavcodec
+CFLAGS-$(LIBAVCODEC)        += -I./libavcodec
 CFLAGS                      += $(CFLAGS-yes)
 
 COMMON_LDFLAGS += $(EXTRA_LIB)\
@@ -60,10 +60,10 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libswscale/libswscale.a \
               libvo/libosd.a \
 
-COMMON_LIBS-$(CONFIG_LIBAVFORMAT) += libavformat/libavformat.a
-COMMON_LIBS-$(CONFIG_LIBAVCODEC)  += libavcodec/libavcodec.a
-COMMON_LIBS-$(CONFIG_LIBAVUTIL)   += libavutil/libavutil.a
-COMMON_LIBS-$(CONFIG_LIBPOSTPROC) += libpostproc/libpostproc.a
+COMMON_LIBS-$(LIBAVFORMAT)        += libavformat/libavformat.a
+COMMON_LIBS-$(LIBAVCODEC)         += libavcodec/libavcodec.a
+COMMON_LIBS-$(LIBAVUTIL)          += libavutil/libavutil.a
+COMMON_LIBS-$(LIBPOSTPROC)        += libpostproc/libpostproc.a
 COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
 COMMON_LIBS-$(MP3LIB)             += mp3lib/libmp3.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a

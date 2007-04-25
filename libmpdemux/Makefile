@@ -45,9 +45,9 @@ SRCS_COMMON = asfheader.c \
               yuv4mpeg.c \
               yuv4mpeg_ratio.c \
 
-SRCS_COMMON-$(CONFIG_LIBAVFORMAT)      += demux_lavf.c
-SRCS_COMMON-$(CONFIG_LIBAVFORMAT_SO)   += demux_lavf.c
 SRCS_COMMON-$(GIF)                     += demux_gif.c
+SRCS_COMMON-$(LIBAVFORMAT)             += demux_lavf.c
+SRCS_COMMON-$(LIBAVFORMAT_SO)          += demux_lavf.c
 SRCS_COMMON-$(LIBDV)                   += demux_rawdv.c
 SRCS_COMMON-$(LIBNUT)                  += demux_nut.c
 SRCS_COMMON-$(LIBVORBIS)               += demux_ogg.c
@@ -62,7 +62,7 @@ SRCS_MENCODER = muxer.c \
                 muxer_rawaudio.c \
                 muxer_rawvideo.c \
 
-SRCS_MENCODER-$(CONFIG_LIBAVFORMAT)     += muxer_lavf.c
-SRCS_MENCODER-$(CONFIG_LIBAVFORMAT_SO)  += muxer_lavf.c
+SRCS_MENCODER-$(LIBAVFORMAT)           += muxer_lavf.c
+SRCS_MENCODER-$(LIBAVFORMAT_SO)        += muxer_lavf.c
 
 include ../mpcommon.mak
