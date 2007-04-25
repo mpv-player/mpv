@@ -72,7 +72,7 @@ COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
 COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
 COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
-COMMON_LIBS-$(CONFIG_ASS)         += libass/libass.a
+COMMON_LIBS-$(ASS)                += libass/libass.a
 
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
