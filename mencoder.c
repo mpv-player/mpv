@@ -413,6 +413,11 @@ audio_encoding_params_t aparams;
 audio_encoder_t *aencoder = NULL;
 
   mp_msg_init();
+
+  for(i=1; i<argc; i++)
+    if(!strcmp(argv[i], "-really-quiet"))
+      verbose= -10;
+
   mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2007 MPlayer Team\n");
 
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
