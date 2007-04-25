@@ -93,6 +93,7 @@ static const AVCodecTag mp_wav_tags[] = {
 const struct AVCodecTag *mp_wav_taglists[] = {codec_wav_tags, mp_wav_tags, 0};
 
 static const AVCodecTag mp_bmp_tags[] = {
+    { CODEC_ID_BETHSOFTVID,       MKTAG('B', 'E', 'T', 'H')},
     { CODEC_ID_C93,               MKTAG('C', '9', '3', 'V')},
     { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
     { CODEC_ID_DXA,               MKTAG('D', 'X', 'A', '1')},    
