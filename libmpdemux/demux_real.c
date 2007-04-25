@@ -1271,7 +1271,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		} else {
 		    /* audio header */
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
-		    mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "real", stream_id);
 		    char buf[128]; /* for codec name */
 		    int frame_size;
 		    int sub_packet_size;
@@ -1283,7 +1282,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    int i;
 		    char *buft;
 		    int hdr_size;
-		    
+		    mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "real", stream_id);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"version: %d\n", version);

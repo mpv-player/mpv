@@ -460,10 +460,11 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
         break;
         }
       case ASF_GUID_PREFIX_video_stream: {
+        unsigned int len;
+        float asp_ratio;
         sh_video_t* sh_video=new_sh_video(demuxer,streamh->stream_no & 0x7F);
         mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "asfheader", streamh->stream_no & 0x7F);
-        unsigned int len=streamh->type_size-(4+4+1+2);
-        float asp_ratio;
+        len=streamh->type_size-(4+4+1+2);
 	++video_streams;
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
         sh_video->bih=calloc((len<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):len,1);

@@ -978,13 +978,12 @@ quit_vorbis_block:
 		break;
 	    }
 	    case MOV_TRAK_VIDEO: {
-		int i, entry;
+		int depth, i, entry;
 		int flag, start, count_flag, end, palette_count, gray;
 		int hdr_ptr = 76;  // the byte just after depth
 		unsigned char *palette_map;
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
 		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "mov", priv->track_db);
-		int depth;
 		sh->format=trak->fourcc;
 
 		// crude video delay from editlist0 hack ::atm
