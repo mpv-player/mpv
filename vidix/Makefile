@@ -10,21 +10,21 @@ SRCS_MPLAYER    = vidixlib.c \
                   pci_names.c \
                   pci_dev_ids.c\
 
-SRCS_MPLAYER-$(CONFIG_VIDIX_CYBERBLADE)         += cyberblade_vid.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_MACH64)             += mach64_vid.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_MGA)                += mga_vid.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_NVIDIA)             += nvidia_vid.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_PM2)                += pm2_vid.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_PM3)                += pm3_vid.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_RADEON)             += radeon_vid.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_SAVAGE)             += savage_vid.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_SIS)                += sis_vid.c sis_bridge.c
-SRCS_MPLAYER-$(CONFIG_VIDIX_UNICHROME)          += unichrome_vid.c
+SRCS_MPLAYER-$(VIDIX_CYBERBLADE)           += cyberblade_vid.c
+SRCS_MPLAYER-$(VIDIX_MACH64)               += mach64_vid.c
+SRCS_MPLAYER-$(VIDIX_MGA)                  += mga_vid.c
+SRCS_MPLAYER-$(VIDIX_NVIDIA)               += nvidia_vid.c
+SRCS_MPLAYER-$(VIDIX_PM2)                  += pm2_vid.c
+SRCS_MPLAYER-$(VIDIX_PM3)                  += pm3_vid.c
+SRCS_MPLAYER-$(VIDIX_RADEON)               += radeon_vid.c
+SRCS_MPLAYER-$(VIDIX_SAVAGE)               += savage_vid.c
+SRCS_MPLAYER-$(VIDIX_SIS)                  += sis_vid.c sis_bridge.c
+SRCS_MPLAYER-$(VIDIX_UNICHROME)            += unichrome_vid.c
 
-ifeq ($(CONFIG_VIDIX_MGA_CRTC2), yes)
+ifeq ($(VIDIX_MGA_CRTC2), yes)
 OBJS_MPLAYER += mga_crtc2_vid.o
 endif
-ifeq ($(CONFIG_VIDIX_RAGE128),yes)
+ifeq ($(VIDIX_RAGE128),yes)
 OBJS_MPLAYER += rage128_vid.o
 endif
 

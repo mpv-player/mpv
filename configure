@@ -7805,18 +7805,18 @@ CONFIG_ENCODERS=$_mencoder
 CONFIG_MUXERS=$_mencoder
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
-CONFIG_VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
-CONFIG_VIDIX_MACH64=$_vidix_drv_mach64
-CONFIG_VIDIX_MGA=$_vidix_drv_mga
-CONFIG_VIDIX_MGA_CRTC2=$_vidix_drv_mga_crtc2
-CONFIG_VIDIX_NVIDIA=$_vidix_drv_nvidia
-CONFIG_VIDIX_PM2=$_vidix_drv_pm2
-CONFIG_VIDIX_PM3=$_vidix_drv_pm3
-CONFIG_VIDIX_RADEON=$_vidix_drv_radeon
-CONFIG_VIDIX_RAGE128=$_vidix_drv_rage128
-CONFIG_VIDIX_SAVAGE=$_vidix_drv_savage
-CONFIG_VIDIX_SIS=$_vidix_drv_sis
-CONFIG_VIDIX_UNICHROME=$_vidix_drv_unichrome
+VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
+VIDIX_MACH64=$_vidix_drv_mach64
+VIDIX_MGA=$_vidix_drv_mga
+VIDIX_MGA_CRTC2=$_vidix_drv_mga_crtc2
+VIDIX_NVIDIA=$_vidix_drv_nvidia
+VIDIX_PM2=$_vidix_drv_pm2
+VIDIX_PM3=$_vidix_drv_pm3
+VIDIX_RADEON=$_vidix_drv_radeon
+VIDIX_RAGE128=$_vidix_drv_rage128
+VIDIX_SAVAGE=$_vidix_drv_savage
+VIDIX_SIS=$_vidix_drv_sis
+VIDIX_UNICHROME=$_vidix_drv_unichrome
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
