@@ -318,7 +318,6 @@ Codecs:
   --disable-libmpeg2        disable builtin libmpeg2 [enabled]
   --disable-musepack        disable musepack support [autodetect]
   --disable-amr_nb          disable AMR narrowband, floating-point [autodetect]
-  --disable-amr_nb-fixed    disable AMR narrowband, fixed-point [autodetect]
   --disable-amr_wb          disable AMR wideband, floating-point [autodetect]
   --disable-decoder=DECODER disable specified FFmpeg decoder
   --enable-decoder=DECODER  enable specified FFmpeg decoder
@@ -478,7 +477,6 @@ _libavutil=auto
 _libavutil_so=auto
 _libavcodec=auto
 _amr_nb=auto
-_amr_nb_fixed=auto
 _amr_wb=auto
 _libavdecoders_all=`sed -n 's/^[^#]*DEC.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavdecoders=` echo $_libavdecoders_all | sed -e s/AAC_DECODER// -e s/MPEG4AAC_DECODER//  -e s/LIBA52_DECODER// -e s/LIBGSM_DECODER// -e s/LIBGSM_MS_DECODER// -e s/LIBVORBIS_DECODER// `
@@ -980,8 +978,6 @@ for ac_option do
   --disable-libavcodec_so)	_libavcodec_so=no	;;
   --enable-amr_nb)	_amr_nb=yes	;;
   --disable-amr_nb)	_amr_nb=no	;;
-  --enable-amr_nb-fixed)	_amr_nb_fixed=yes ;;
-  --disable-amr_nb-fixed)	_amr_nb_fixed=no ;;
   --enable-amr_wb)	_amr_wb=yes	;;
   --disable-amr_wb)	_amr_wb=no	;;
   --enable-decoder=*)	_libavdecoders="$_libavdecoders `echo $ac_option | cut -d '=' -f 2`" ;;
@@ -6399,31 +6395,7 @@ else
 fi
 echores "$_amr_nb"
 
-echocheck "AMR narrowband, fixed point"
-if test "$_amr_nb_fixed" = auto ; then
-  _amr_nb_fixed=no
-  if test -f libavcodec/amr/dtx_dec.c ; then
-    if test "$_libavcodec" = yes ; then
-      if test "$_amr_nb" = no ; then
-        _amr_nb_fixed=yes
-      else
-        _res_comment="disabled by amr_nb"
-      fi
-    else
-      _res_comment="libavcodec (static) is required by amr_nb-fixed, sorry"
-    fi
-  fi
-fi
-if test "$_amr_nb_fixed" = yes ; then
-  _amr=yes
-  _def_amr='#define CONFIG_AMR 1'
-  _def_amr_nb_fixed='#define CONFIG_AMR_NB_FIXED 1'
-else
-  _def_amr_nb_fixed='#undef CONFIG_AMR_NB_FIXED'
-fi
-echores "$_amr_nb_fixed"
-
-if test "$_amr_nb" = yes || test "$_amr_nb_fixed" = yes ; then
+if test "$_amr_nb" = yes ; then
   _codecmodules="amr_nb $_codecmodules"
 else
   _nocodecmodules="amr_nb $_nocodecmodules"
@@ -7595,7 +7567,7 @@ if test "$_zlib" = no ; then
   _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// `
   _libavencoders=`echo $_libavencoders | sed -e s/FLASHSV_ENCODER// -e s/PNG_ENCODER// -e s/ZMBV_ENCODER// `
 fi
-if test "$_amr_nb" = no && test "$_amr_nb_fixed" = no ; then
+if test "$_amr_nb" = no ; then
   _libavdecoders=`echo $_libavdecoders | sed -e s/AMR_NB_DECODER// `
   _libavencoders=`echo $_libavencoders | sed -e s/AMR_NB_ENCODER// `
 fi
@@ -7788,7 +7760,6 @@ TWOLAME=$_twolame
 FAAC=$_faac
 CONFIG_AMR=$_amr
 CONFIG_AMR_NB=$_amr_nb
-CONFIG_AMR_NB_FIXED=$_amr_nb_fixed
 CONFIG_AMR_WB=$_amr_wb
 `echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
@@ -8195,10 +8166,9 @@ $_def_muxers
 
 #define CONFIG_GPL 1
 
-/* Use amr codecs from libavcodec (requires amr sources) */
+/* Use AMR codecs from libavcodec. */
 $_def_amr
 $_def_amr_nb
-$_def_amr_nb_fixed
 $_def_amr_wb
 
 /* Use specific parts from FFmpeg. */
