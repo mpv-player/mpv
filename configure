@@ -6184,7 +6184,6 @@ echores "$_libavutil"
 
 echocheck "FFmpeg libavcodec"
 if test "$_libavcodec_a" = auto ; then
-  # Note: static linking is preferred to dynamic linking
   _libavcodec_a=no
   if test -d libavcodec && test -f libavcodec/utils.c ; then
         _libavcodec_a="yes"
@@ -6193,7 +6192,6 @@ if test "$_libavcodec_a" = auto ; then
 elif test "$_libavcodec_so" = auto ; then
   _libavcodec_so=no
   _res_comment="libavcodec.so is discouraged over static libavcodec"
-# FIXME : check for avcodec_find_encoder_by_name() for mencoder
   cat > $TMPC << EOF
 #include <ffmpeg/avcodec.h>
 int main(void) { avcodec_find_encoder_by_name(""); return 0; }
@@ -6215,7 +6213,6 @@ echores "$_libavcodec"
 
 echocheck "FFmpeg libavformat"
 if test "$_libavformat_a" = auto ; then
-  # Note: static linking is preferred to dynamic linking
   _libavformat_a=no
   if test -d libavformat && test -f libavformat/utils.c ; then
     _libavformat_a=yes
