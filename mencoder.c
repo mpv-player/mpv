@@ -79,12 +79,10 @@
 #include "stream/stream_dvd.h"
 #endif
 
-#ifdef USE_LIBAVCODEC
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
-#else
+#elif USE_LIBAVCODEC_A
 #include "avcodec.h"
-#endif
 #endif
 
 #include "libmpcodecs/ae.h"
