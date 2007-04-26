@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mplayer.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "m_config.h"

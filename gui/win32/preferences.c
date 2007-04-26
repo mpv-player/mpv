@@ -37,13 +37,6 @@
 #include "dialogs.h"
 #include "wincfg.h"
 
-extern int   vo_doublebuffering;
-extern int   vo_directrendering;
-extern int   frame_dropping;
-extern int   soft_vol;
-extern float audio_delay;
-extern int   osd_level;
-extern char  *dvd_device, *cdrom_device;
 extern char  *proc_priority;
 
 static void set_defaults(void);

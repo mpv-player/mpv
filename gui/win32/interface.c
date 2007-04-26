@@ -46,20 +46,9 @@
 #include <cdio/cdio.h>
 #endif
 
-extern m_obj_settings_t *vf_settings;
-extern void exit_player(const char *how);
-extern char *filename;
 extern int abs_seek_pos;
 extern float rel_seek_secs;
-extern int audio_id;
-extern int video_id;
-extern int dvdsub_id;
-extern int vobsub_id;
-extern int stream_cache_size;
-extern int autosync;
 extern int vcd_track;
-extern int dvd_title;
-extern float force_fps;
 extern af_cfg_t af_cfg;
 int guiWinID = 0;
 
