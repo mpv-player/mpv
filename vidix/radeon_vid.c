@@ -1383,6 +1383,13 @@ static int radeon_init(void)
       printf(RADEON_MSG" Workarounding buggy Radeon Mobility M6 (0 vs. 8MB ram)\n");
       radeon_ram_size = 8192*1024;
   }
+  else if (radeon_ram_size == 0 &&
+           (def_cap.device_id == DEVICE_ATI_RS482_RADEON_XPRESS))
+  {
+      printf(RADEON_MSG" Workarounding buggy RS482 Radeon Xpress 200 (0 vs. >32MB ram)\n");
+      /* Minimal selectable shared memory from bios 32M */
+      radeon_ram_size = 32768*1024;
+  } 
 #else
   /* Rage Mobility (rage128) also has memsize bug */
   if (radeon_ram_size == 0 &&
