@@ -6187,27 +6187,8 @@ if test "$_libavcodec_a" = auto ; then
   # Note: static linking is preferred to dynamic linking
   _libavcodec_a=no
   if test -d libavcodec && test -f libavcodec/utils.c ; then
-    _res_comment="old ffmpeg version, use CVS !"
-    if grep avcodec_find_encoder_by_name libavcodec/utils.c > /dev/null 2>&1 ; then
-      # check if libavutil is a required
-      cat > $TMPC << EOF
-#include "libavcodec/avcodec.h"
-#if LIBAVCODEC_BUILD >= 3211265
-#error We need libavutil!
-#endif
-int main(void) { return 0; }
-EOF
-      if cc_check -I. -I./libavutil; then
-        _libavutil_required="no"
-      else
-        _libavutil_required="yes"
-      fi
-      _res_comment="libavutil availability does not fit libavcodec version"
-      if test "$_libavutil_required" = "$_libavutil_a"; then
         _libavcodec_a="yes"
         _res_comment="static"
-      fi
-    fi
   fi
 elif test "$_libavcodec_so" = auto ; then
   _libavcodec_so=no
