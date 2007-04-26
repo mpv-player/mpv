@@ -6212,7 +6212,25 @@ EOF
   fi
 fi
 _libavcodec=no
+_def_libavcodec='#undef USE_LIBAVCODEC'
+_def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
+_def_lavc_dsputil='#undef USE_LIBAVCODEC_DSPUTIL'
 test "$_libavcodec_a" = yes || test "$_libavcodec_so" = yes && _libavcodec=yes
+test "$_libavcodec_a" = yes \
+  && _def_lavc_dsputil='#define USE_LIBAVCODEC_DSPUTIL'
+test "$_libavcodec_so" = yes \
+  && _def_lavc_dsputil='#define USE_LIBAVCODEC_SO 1'
+test "$_libavcodec" = yes \
+  && _def_lavc_dsputil='#define USE_LIBAVCODEC 1'
+test "$_libavcodec_mpegaudio_hp" = yes \
+  && _def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
+if test "$_libavcodec_a" = yes ; then
+  _codecmodules="libavcodec $_codecmodules"
+elif test "$_libavcodec_so" = yes ; then
+  _codecmodules="libavcodec.so $_codecmodules"
+else
+  _nocodecmodules="libavcodec $_nocodecmodules"
+fi
 echores "$_libavcodec"
 
 echocheck "FFmpeg libavformat"
@@ -6268,24 +6286,6 @@ fi
 _libpostproc=no
 test "$_libpostproc_a" = yes || test "$_libpostproc_so" = yes && _libpostproc=yes
 echores "$_libpostproc"
-
-_def_libavcodec='#undef USE_LIBAVCODEC'
-_def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
-_def_lavc_dsputil='#undef USE_LIBAVCODEC_DSPUTIL'
-if test "$_libavcodec_mpegaudio_hp" = yes ; then
-  _def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
-fi
-if test "$_libavcodec_a" = yes ; then
-  _def_libavcodec='#define USE_LIBAVCODEC 1'
-  _def_lavc_dsputil='#define USE_LIBAVCODEC_DSPUTIL'
-  _codecmodules="libavcodec $_codecmodules"
-elif test "$_libavcodec_so" = yes ; then
-  _def_libavcodec='#define USE_LIBAVCODEC 1'
-  _def_libavcodec_so='#define USE_LIBAVCODEC_SO 1'
-  _codecmodules="libavcodec.so $_codecmodules"
-else
-  _nocodecmodules="libavcodec $_nocodecmodules"
-fi
 
 _def_libavformat='#undef USE_LIBAVFORMAT'
 _def_libavformat_so='#undef USE_LIBAVFORMAT_SO'
