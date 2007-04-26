@@ -6266,7 +6266,6 @@ test "$_libavformat"    = yes && _def_libavformat='#define USE_LIBAVFORMAT 1'
 test "$_libavformat_a"  = yes && _def_libavformat='#define USE_LIBAVFORMAT_A 1'
 test "$_libavformat_so" = yes \
   && _def_libavformat_so='#define USE_LIBAVFORMAT_SO 1'
-fi
 echores "$_libavformat"
 
 echocheck "FFmpeg libpostproc"
