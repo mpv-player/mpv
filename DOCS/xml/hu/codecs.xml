@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r23100 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -534,25 +534,9 @@ használják.
 A referencia implementáció elérhető
 <ulink url="http://www.3gpp.org">A 3. Generációs Együttműködés Projekt</ulink>
 oldalán (személyes felhasználásra ingyenes).
-</para>
-
-<para>
-A támogatás engedélyezéséhez töltsd le az
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
-és
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
-codec-ek forrását, tedd be abba a könyvtárba, ahol az
-<application>MPlayer</application> forrása van és futtasd az alábbi parancsokat:
-<screen>
-unzip 26104-610.zip
-unzip 26104-610_ANSI_C_source_code.zip
-mv c-code libavcodec/amr_float
-unzip 26204-600.zip
-unzip 26204-600_ANSI-C_source_code.zip
-mv c-code libavcodec/amrwb_float
-</screen>
-Ezután kövesd a szokásos <application>MPlayer</application>
-<link linkend="features">fordítási lépéseket</link>.
+A támogatás bekapcsolásához töltsd le és telepítsd a függvénykönyvtárakat az
+<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB és AMR-WB</ulink>-hez
+az oldal utasításait követve.
 </para>
 </sect2>
 
