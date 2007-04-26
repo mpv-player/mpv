@@ -91,7 +91,7 @@ Imported libs/projects:
     * libavcodec, libavformat: Michael Niedermayer
     * VIDIX core, libdha: Sascha Sommer
     * mp3lib: None
-    * loader: Alex Beregszaszi
+    * loader: None
     * liba52: None
     * libmpeg2: None
     * libdvdcss: Diego Biurrun
