@@ -6186,8 +6186,8 @@ echocheck "FFmpeg libavcodec"
 if test "$_libavcodec_a" = auto ; then
   _libavcodec_a=no
   if test -d libavcodec && test -f libavcodec/utils.c ; then
-        _libavcodec_a="yes"
-        _res_comment="static"
+    _libavcodec_a="yes"
+    _res_comment="static"
   fi
 elif test "$_libavcodec_so" = auto ; then
   _libavcodec_so=no
