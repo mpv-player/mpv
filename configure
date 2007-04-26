@@ -6218,10 +6218,8 @@ _def_lavc_dsputil='#undef USE_LIBAVCODEC_DSPUTIL'
 test "$_libavcodec_a" = yes || test "$_libavcodec_so" = yes && _libavcodec=yes
 test "$_libavcodec_a" = yes \
   && _def_lavc_dsputil='#define USE_LIBAVCODEC_DSPUTIL'
-test "$_libavcodec_so" = yes \
-  && _def_lavc_dsputil='#define USE_LIBAVCODEC_SO 1'
-test "$_libavcodec" = yes \
-  && _def_lavc_dsputil='#define USE_LIBAVCODEC 1'
+test "$_libavcodec"    = yes && _def_libavcodec='#define USE_LIBAVCODEC 1'
+test "$_libavcodec_so" = yes && _def_libavcodec='#define USE_LIBAVCODEC_SO 1'
 test "$_libavcodec_mpegaudio_hp" = yes \
   && _def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
 if test "$_libavcodec_a" = yes ; then
