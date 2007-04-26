@@ -286,10 +286,10 @@ Codecs:
   --disable-xvid            disable XviD [autodetect]
   --disable-x264            disable x264 [autodetect]
   --disable-nut             disable libnut [autodetect]
-  --disable-libavutil       disable libavutil [autodetect]
-  --disable-libavcodec      disable libavcodec [autodetect]
-  --disable-libavformat     disable libavformat [autodetect]
-  --disable-libpostproc     disable libpostproc [autodetect]
+  --disable-libavutil       disable static libavutil [autodetect]
+  --disable-libavcodec_a    disable static libavcodec [autodetect]
+  --disable-libavformat_a   disable static libavformat [autodetect]
+  --disable-libpostproc_a   disable static libpostproc [autodetect]
   --disable-libavutil_so    disable shared libavutil [autodetect]
   --disable-libavcodec_so   disable shared libavcodec [autodetect]
   --disable-libavformat_so  disable shared libavformat [autodetect]
@@ -473,9 +473,9 @@ _as=auto
 _runtime_cpudetection=no
 _cross_compile=auto
 _prefix="/usr/local"
-_libavutil=auto
+_libavutil_a=auto
 _libavutil_so=auto
-_libavcodec=auto
+_libavcodec_a=auto
 _amr_nb=auto
 _amr_wb=auto
 _libavdecoders_all=`sed -n 's/^[^#]*DEC.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
@@ -489,9 +489,9 @@ _libavdemuxers=`echo $_libavdemuxers_all | sed -e s/AUDIO_DEMUXER// -e s/DC1394_
 _libavmuxers_all=`sed -n 's/^[^#]*_MUX.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavmuxers=`echo $_libavmuxers_all | sed -e s/AUDIO_MUXER// -e s/RTP_MUXER// `
 _libavcodec_so=auto
-_libavformat=auto
+_libavformat_a=auto
 _libavformat_so=auto
-_libpostproc=auto
+_libpostproc_a=auto
 _libpostproc_so=auto
 _libavcodec_mpegaudio_hp=yes
 _mencoder=yes
@@ -968,12 +968,12 @@ for ac_option do
   --disable-x264)       _x264=no        ;;
   --enable-nut)		_nut=yes	;;
   --disable-nut)	_nut=no		;;
-  --enable-libavutil)	_libavutil=yes	;;
-  --disable-libavutil)	_libavutil=no	;;
+  --enable-libavutil_a)		_libavutil_a=yes	;;
+  --disable-libavutil_a)	_libavutil_a=no		;;
   --enable-libavutil_so)	_libavutil_so=yes	;;
   --disable-libavutil_so)	_libavutil_so=no	;;
-  --enable-libavcodec)	_libavcodec=yes	;;
-  --disable-libavcodec)	_libavcodec=no	;;
+  --enable-libavcodec_a)	_libavcodec_a=yes	;;
+  --disable-libavcodec_a)	_libavcodec_a=no	;;
   --enable-libavcodec_so)	_libavcodec_so=yes	;;
   --disable-libavcodec_so)	_libavcodec_so=no	;;
   --enable-amr_nb)	_amr_nb=yes	;;
@@ -990,12 +990,12 @@ for ac_option do
   --disable-demuxer=*)	_libavdemuxers=`echo $_libavdemuxers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
   --enable-muxer=*)	_libavmuxers="$_libavmuxers `echo $ac_option | cut -d '=' -f 2`" ;;
   --disable-muxer=*)	_libavmuxers=`echo $_libavmuxers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
-  --enable-libavformat)	_libavformat=yes;;
-  --disable-libavformat)	_libavformat=no	;;
+  --enable-libavformat_a)	_libavformat_a=yes	;;
+  --disable-libavformat_a)	_libavformat_a=no	;;
   --enable-libavformat_so)	_libavformat_so=yes	;;
   --disable-libavformat_so)	_libavformat_so=no	;;
-  --enable-libpostproc)		_libpostproc=yes	;;
-  --disable-libpostproc)	_libpostproc=no		;;
+  --enable-libpostproc_a)	_libpostproc_a=yes	;;
+  --disable-libpostproc_a)	_libpostproc_a=no	;;
   --enable-libpostproc_so)	_libpostproc_so=yes	;;
   --disable-libpostproc_so)	_libpostproc_so=no	;;
   --enable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=yes	;;
@@ -6150,17 +6150,17 @@ echores "$_live"
 
 
 echocheck "FFmpeg libavutil (static)"
-if test "$_libavutil" = auto ; then
+if test "$_libavutil_a" = auto ; then
   if test -d libavutil ; then
-    _libavutil=yes
+    _libavutil_a=yes
   else
     die "MPlayer will not compile without libavutil in the source tree."
   fi
 fi
-echores "$_libavutil"
+echores "$_libavutil_a"
 
 echocheck "FFmpeg libavcodec (static)"
-if test "$_libavcodec" = auto ; then
+if test "$_libavcodec_a" = auto ; then
   # Note: static linking is preferred to dynamic linking
   _libavcodec=no
   _res_comment="see DOCS/HTML/$_doc_lang/codecs.html"
@@ -6182,36 +6182,36 @@ EOF
         _libavutil_required="yes"
       fi
       _res_comment="libavutil availability does not fit libavcodec version"
-      if test "$_libavutil_required" = "$_libavutil"; then
-        _libavcodec="yes"
+      if test "$_libavutil_required" = "$_libavutil_a"; then
+        _libavcodec_a="yes"
         _res_comment=""
       fi
     fi
   fi
 fi
-echores "$_libavcodec"
+echores "$_libavcodec_a"
 
 echocheck "FFmpeg libavformat (static)"
-if test "$_libavformat" = auto ; then
+if test "$_libavformat_a" = auto ; then
   # Note: static linking is preferred to dynamic linking
-  _libavformat=no
+  _libavformat_a=no
   if test -d libavformat && test -f libavformat/utils.c ; then
-    _libavformat=yes
+    _libavformat_a=yes
   fi
 fi
-echores "$_libavformat"
+echores "$_libavformat_a"
 
 echocheck "FFmpeg libpostproc (static)"
-if test "$_libpostproc" = auto ; then
-_libpostproc=no
+if test "$_libpostproc_a" = auto ; then
+_libpostproc_a=no
 if test -d libpostproc && test -f libpostproc/postprocess.h ; then
-   _libpostproc='yes'
+   _libpostproc_a='yes'
 fi
 fi
-echores "$_libpostproc"
+echores "$_libpostproc_a"
 
 
-if test "$_libavutil" != yes ; then
+if test "$_libavutil_a" != yes ; then
 echocheck "FFmpeg libavutil (dynamic)"
 if test "$_libavutil_so" = auto ; then
   _libavutil_so=no
@@ -6237,7 +6237,7 @@ fi
 echores "$_libavutil_so"
 fi #if test "$_libavutil" != yes ; then
 
-if test "$_libavcodec" != yes ; then
+if test "$_libavcodec_a" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
 if test "$_libavcodec_so" = auto ; then
   _libavcodec_so=no
@@ -6264,7 +6264,7 @@ fi
 echores "$_libavcodec_so"
 fi #if test "$_libavcodec" != yes ; then
 
-if test "$_libavformat" != yes ; then
+if test "$_libavformat_a" != yes ; then
 echocheck "FFmpeg libavformat (dynamic)"
 if test "$_libavformat_so" = auto ; then
   _libavformat_so=no
@@ -6287,7 +6287,7 @@ fi
 echores "$_libavformat_so"
 fi #if test "$_libavformat" != yes ; then
 
-if test "$_libpostproc" != yes ; then
+if test "$_libpostproc_a" != yes ; then
 echocheck "FFmpeg libpostproc (dynamic)"
 if test "$_libpostproc_so" = auto ; then
   _libpostproc_so=no
@@ -6310,7 +6310,7 @@ fi #if test "$_libpostproc" != yes ; then
 
 _def_libavutil='#undef USE_LIBAVUTIL'
 _def_libavutil_so='#undef USE_LIBAVUTIL_SO'
-if test "$_libavutil" = yes ; then
+if test "$_libavutil_a" = yes ; then
   _def_libavutil='#define USE_LIBAVUTIL 1'
 elif test "$_libavutil_so" = yes ; then
   _def_libavutil_so='#define USE_LIBAVUTIL_SO 1'
@@ -6322,7 +6322,7 @@ _def_lavc_dsputil='#undef USE_LIBAVCODEC_DSPUTIL'
 if test "$_libavcodec_mpegaudio_hp" = yes ; then
   _def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
 fi
-if test "$_libavcodec" = yes ; then
+if test "$_libavcodec_a" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_lavc_dsputil='#define USE_LIBAVCODEC_DSPUTIL'
   _codecmodules="libavcodec $_codecmodules"
@@ -6337,7 +6337,7 @@ fi
 _def_libavformat='#undef USE_LIBAVFORMAT'
 _def_libavformat_so='#undef USE_LIBAVFORMAT_SO'
 _def_libavformat_win32='#undef CONFIG_WIN32'
-if test "$_libavformat" = yes ; then
+if test "$_libavformat_a" = yes ; then
   _def_libavformat='#define USE_LIBAVFORMAT 1'
   if win32 ; then
     _def_libavformat_win32='#define CONFIG_WIN32 1'
@@ -6353,7 +6353,7 @@ fi
 
 _def_libpostproc='#undef USE_LIBPOSTPROC'
 _def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
-if test "$_libpostproc" = yes ; then
+if test "$_libpostproc_a" = yes ; then
   _def_libpostproc='#define USE_LIBPOSTPROC 1'
 else
   if test "$_libpostproc_so" = yes ; then
@@ -6380,7 +6380,7 @@ if test "$_amr_nb" = auto ; then
 int main(void) { Speech_Decode_Frame_init(); return 0; }
 EOF
   cc_check -lamrnb && _amr_nb=yes
-  if test "$_libavcodec" != yes ; then
+  if test "$_libavcodec_a" != yes ; then
     _amr_nb=no
     _res_comment="libavcodec (static) is required by amr_nb, sorry"
   fi
@@ -6409,7 +6409,7 @@ if test "$_amr_wb" = auto ; then
 int main(void) { D_IF_init(); return 0; }
 EOF
   cc_check -lamrwb && _amr_wb=yes
-  if test "$_libavcodec" != yes ; then
+  if test "$_libavcodec_a" != yes ; then
     _amr_wb=no
     _res_comment="libavcodec (static) is required by amr_wb, sorry"
   fi
@@ -6456,7 +6456,7 @@ if test "$_zr" = auto ; then
   fi
 fi
 if test "$_zr" = yes ; then
-  if test "$_libavcodec" = yes ; then
+  if test "$_libavcodec_a" = yes ; then
     _def_zr='#define HAVE_ZR 1'
     _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
     _vomodules="zr zr2 $_vomodules"
@@ -7722,13 +7722,13 @@ WIN32DLL = $_win32dll
 QTX_CODECS = $_qtx
 REAL_CODECS = $_real
 XANIM_CODECS = $_xanim
-LIBAVUTIL = $_libavutil
+LIBAVUTIL = $_libavutil_a
 LIBAVUTIL_SO = $_libavutil_so
-LIBAVCODEC = $_libavcodec
+LIBAVCODEC = $_libavcodec_a
 LIBAVCODEC_SO = $_libavcodec_so
-LIBAVFORMAT = $_libavformat
+LIBAVFORMAT = $_libavformat_a
 LIBAVFORMAT_SO = $_libavformat_so
-LIBPOSTPROC = $_libpostproc
+LIBPOSTPROC = $_libpostproc_a
 LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
 LIBLZO = $_liblzo
