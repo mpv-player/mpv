@@ -168,7 +168,7 @@ static vf_info_t* filter_list[]={
     &vf_info_delogo,
     &vf_info_remove_logo,
     &vf_info_hue,
-#ifdef USE_LIBAVCODEC_DSPUTIL
+#ifdef USE_LIBAVCODEC_A
     &vf_info_spp,
     &vf_info_uspp,
     &vf_info_fspp,
