@@ -6182,11 +6182,11 @@ if test "$_libavutil" = no ; then
 fi
 echores "$_libavutil"
 
-echocheck "FFmpeg libavcodec (static)"
+echocheck "FFmpeg libavcodec"
 if test "$_libavcodec_a" = auto ; then
   # Note: static linking is preferred to dynamic linking
   _libavcodec=no
-  _res_comment="see DOCS/HTML/$_doc_lang/codecs.html"
+  _res_comment="static"
   if test -d libavcodec && test -f libavcodec/utils.c ; then
     _res_comment="old ffmpeg version, use CVS !"
     if grep avcodec_find_encoder_by_name libavcodec/utils.c > /dev/null 2>&1 ; then
@@ -6206,14 +6206,35 @@ EOF
       fi
       _res_comment="libavutil availability does not fit libavcodec version"
       if test "$_libavutil_required" = "$_libavutil_a"; then
-        _libavcodec="yes"
         _libavcodec_a="yes"
         _res_comment=""
       fi
     fi
   fi
+elif test "$_libavcodec_so" = auto ; then
+  _libavcodec_so=no
+  _res_comment="libavcodec.so is discouraged over static libavcodec"
+# FIXME : check for avcodec_find_encoder_by_name() for mencoder
+  cat > $TMPC << EOF
+#include <ffmpeg/avcodec.h>
+int main(void) {
+    avcodec_find_encoder_by_name("");
+    return 0; }
+EOF
+  if $_pkg_config --exists libavcodec ; then
+    _inc_libavcodec=`$_pkg_config --cflags libavcodec`
+    _ld_tmp=`$_pkg_config --libs libavcodec`
+    cc_check $_inc_libavcodec $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+      && _libavcodec_so=yes
+  elif cc_check -lavcodec $_ld_lm ; then
+    _ld_extra="$_ld_extra -lavcodec"
+    _libavcodec_so=yes
+    _res_comment="using libavcodec.so, but static libavcodec is recommended"
+  fi
 fi
-echores "$_libavcodec_a"
+_libavcodec=no
+test "$_libavcodec_a" = yes || test "$_libavcodec_so" = yes && _libavcodec=yes
+echores "$_libavcodec"
 
 echocheck "FFmpeg libavformat (static)"
 if test "$_libavformat_a" = auto ; then
@@ -6236,34 +6257,6 @@ fi
 fi
 echores "$_libpostproc_a"
 
-
-if test "$_libavcodec_a" != yes ; then
-echocheck "FFmpeg libavcodec (dynamic)"
-if test "$_libavcodec_so" = auto ; then
-  _libavcodec_so=no
-  _res_comment="libavcodec.so is discouraged over static libavcodec"
-# FIXME : check for avcodec_find_encoder_by_name() for mencoder
-  cat > $TMPC << EOF
-#include <ffmpeg/avcodec.h>
-int main(void) { 
-    avcodec_find_encoder_by_name("");
-    return 0; 
-}
-EOF
-  if $_pkg_config --exists libavcodec ; then
-    _inc_libavcodec=`$_pkg_config --cflags libavcodec`
-    _ld_tmp=`$_pkg_config --libs libavcodec`
-    cc_check $_inc_libavcodec $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
-      && _libavcodec=yes && _libavcodec_so=yes
-  elif cc_check -lavcodec $_ld_lm ; then
-    _ld_extra="$_ld_extra -lavcodec"
-    _libavcodec=yes
-    _libavcodec_so=yes
-    _res_comment="using libavcodec.so, but static libavcodec is recommended"
-  fi
-fi
-echores "$_libavcodec_so"
-fi #if test "$_libavcodec" != yes ; then
 
 if test "$_libavformat_a" != yes ; then
 echocheck "FFmpeg libavformat (dynamic)"
