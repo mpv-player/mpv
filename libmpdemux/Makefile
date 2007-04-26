@@ -66,3 +66,5 @@ SRCS_MENCODER-$(LIBAVFORMAT)           += muxer_lavf.c
 SRCS_MENCODER-$(LIBAVFORMAT_SO)        += muxer_lavf.c
 
 include ../mpcommon.mak
+
+dep depend: CFLAGS += $(EXTRAXX_INC)
