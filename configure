@@ -6152,6 +6152,7 @@ echores "$_live"
 echocheck "FFmpeg libavutil (static)"
 if test "$_libavutil_a" = auto ; then
   if test -d libavutil ; then
+    _libavutil=yes
     _libavutil_a=yes
   else
     die "MPlayer will not compile without libavutil in the source tree."
@@ -6183,6 +6184,7 @@ EOF
       fi
       _res_comment="libavutil availability does not fit libavcodec version"
       if test "$_libavutil_required" = "$_libavutil_a"; then
+        _libavcodec="yes"
         _libavcodec_a="yes"
         _res_comment=""
       fi
@@ -6196,6 +6198,7 @@ if test "$_libavformat_a" = auto ; then
   # Note: static linking is preferred to dynamic linking
   _libavformat_a=no
   if test -d libavformat && test -f libavformat/utils.c ; then
+    _libavformat=yes
     _libavformat_a=yes
   fi
 fi
@@ -6205,6 +6208,7 @@ echocheck "FFmpeg libpostproc (static)"
 if test "$_libpostproc_a" = auto ; then
 _libpostproc_a=no
 if test -d libpostproc && test -f libpostproc/postprocess.h ; then
+   _libpostproc='yes'
    _libpostproc_a='yes'
 fi
 fi
@@ -6223,9 +6227,10 @@ EOF
     _inc_libavutil=`$_pkg_config --cflags libavutil`
     _ld_tmp=`$_pkg_config --libs libavutil`
     cc_check $_inc_libavutil $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
-      && _libavutil_so=yes
+      && _libavutil=yes && _libavutil_so=yes
   elif cc_check -lavutil $_ld_lm ; then
     _ld_extra="$_ld_extra -lavutil"
+    _libavutil=yes
     _libavutil_so=yes
     _res_comment="using libavutil.so, but static libavutil is recommended"
   fi
@@ -6254,9 +6259,10 @@ EOF
     _inc_libavcodec=`$_pkg_config --cflags libavcodec`
     _ld_tmp=`$_pkg_config --libs libavcodec`
     cc_check $_inc_libavcodec $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
-      && _libavcodec_so=yes
+      && _libavcodec=yes && _libavcodec_so=yes
   elif cc_check -lavcodec $_ld_lm ; then
     _ld_extra="$_ld_extra -lavcodec"
+    _libavcodec=yes
     _libavcodec_so=yes
     _res_comment="using libavcodec.so, but static libavcodec is recommended"
   fi
@@ -6277,9 +6283,10 @@ EOF
     _inc_libavformat=`$_pkg_config --cflags libavformat`
     _ld_tmp=`$_pkg_config --libs libavformat`
     cc_check $_inc_libavformat $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
-      && _libavformat_so=yes
+      && _libavformat=yes && _libavformat_so=yes
   elif cc_check $_ld_lm -lavformat ; then
     _ld_extra="$_ld_extra -lavformat"
+    _libavformat=yes
     _libavformat_so=yes
     _res_comment="using libavformat.so, but static libavformat is recommended"
   fi
@@ -6301,6 +6308,7 @@ if test "$_libpostproc_so" = auto ; then
 EOF
   if cc_check -lpostproc $_ld_lm ; then
     _ld_extra="$_ld_extra -lpostproc"
+    _libpostproc=yes
     _libpostproc_so=yes
     _res_comment="using libpostproc.so, but static libpostproc is recommended"
   fi
@@ -7722,13 +7730,17 @@ WIN32DLL = $_win32dll
 QTX_CODECS = $_qtx
 REAL_CODECS = $_real
 XANIM_CODECS = $_xanim
-LIBAVUTIL = $_libavutil_a
+LIBAVUTIL = $_libavutil
+LIBAVUTIL_A = $_libavutil_a
 LIBAVUTIL_SO = $_libavutil_so
-LIBAVCODEC = $_libavcodec_a
+LIBAVCODEC = $_libavcodec
+LIBAVCODEC_A = $_libavcodec_a
 LIBAVCODEC_SO = $_libavcodec_so
-LIBAVFORMAT = $_libavformat_a
+LIBAVFORMAT = $_libavformat
+LIBAVFORMAT_A = $_libavformat_a
 LIBAVFORMAT_SO = $_libavformat_so
-LIBPOSTPROC = $_libpostproc_a
+LIBPOSTPROC = $_libpostproc
+LIBPOSTPROC_A = $_libpostproc_a
 LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
 LIBLZO = $_liblzo

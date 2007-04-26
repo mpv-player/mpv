@@ -47,7 +47,6 @@ SRCS_COMMON = asfheader.c \
 
 SRCS_COMMON-$(GIF)                     += demux_gif.c
 SRCS_COMMON-$(LIBAVFORMAT)             += demux_lavf.c
-SRCS_COMMON-$(LIBAVFORMAT_SO)          += demux_lavf.c
 SRCS_COMMON-$(LIBDV)                   += demux_rawdv.c
 SRCS_COMMON-$(LIBNUT)                  += demux_nut.c
 SRCS_COMMON-$(LIBVORBIS)               += demux_ogg.c
@@ -63,7 +62,6 @@ SRCS_MENCODER = muxer.c \
                 muxer_rawvideo.c \
 
 SRCS_MENCODER-$(LIBAVFORMAT)           += muxer_lavf.c
-SRCS_MENCODER-$(LIBAVFORMAT_SO)        += muxer_lavf.c
 
 include ../mpcommon.mak
 

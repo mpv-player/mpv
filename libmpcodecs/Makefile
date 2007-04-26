@@ -94,7 +94,7 @@ SRCS_COMMON = native/nuppelvideo.c \
               vf_yvu9.c \
 
 # These filters use private headers and do not work with shared libavcodec.
-SRCS_COMMON-$(LIBAVCODEC)            += vf_fspp.c \
+SRCS_COMMON-$(LIBAVCODEC_A)          += vf_fspp.c \
                                         vf_geq.c \
                                         vf_mcdeint.c \
                                         vf_qp.c \
@@ -107,12 +107,10 @@ SRCS_COMMON-$(HAVE_POSIX_SELECT)     += vf_bmovl.c
 SRCS_COMMON-$(JPEG)                  += vd_ijpg.c
 SRCS_COMMON-$(LIBA52)                += ad_liba52.c
 SRCS_COMMON-$(LIBAVCODEC)            += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
-SRCS_COMMON-$(LIBAVCODEC_SO)         += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
 SRCS_COMMON-$(LIBDV)                 += ad_libdv.c vd_libdv.c
 SRCS_COMMON-$(LIBMAD)                += ad_libmad.c
 SRCS_COMMON-$(LIBMPEG2)              += vd_libmpeg2.c
 SRCS_COMMON-$(LIBPOSTPROC)           += vf_pp.c
-SRCS_COMMON-$(LIBPOSTPROC_SO)        += vf_pp.c
 SRCS_COMMON-$(LIBTHEORA)             += vd_theora.c
 SRCS_COMMON-$(LIBVORBIS)             += ad_libvorbis.c
 SRCS_COMMON-$(MP3LIB)                += ad_mp3lib.c
@@ -134,7 +132,6 @@ SRCS_MENCODER = ae.c \
                 ve_raw.c \
 
 SRCS_MENCODER-$(LIBAVCODEC)           += ae_lavc.c ve_lavc.c
-SRCS_MENCODER-$(LIBAVCODEC_SO)        += ae_lavc.c ve_lavc.c
 SRCS_MENCODER-$(LIBDV)                += ve_libdv.c
 SRCS_MENCODER-$(LIBLZO)               += ve_nuv.c
 SRCS_MENCODER-$(QTX_CODECS)           += ve_qtvideo.c
