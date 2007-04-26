@@ -6295,7 +6295,7 @@ _def_libpostproc_a='#undef USE_LIBPOSTPROC_A'
 _def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
 test "$_libpostproc_a" = yes || test "$_libpostproc_so" = yes && _libpostproc=yes
 test "$_libpostproc"    = yes && _def_libpostproc='#define USE_LIBPOSTPROC 1'
-test "$_libpostproc_a"  = yes && _def_libpostproc='#define USE_LIBPOSTPROC_A 1'
+test "$_libpostproc_a"  = yes && _def_libpostproc_a='#define USE_LIBPOSTPROC_A 1'
 test "$_libpostproc_so" = yes \
   && _def_libpostproc_so='#define USE_LIBPOSTPROC_SO 1'
 echores "$_libpostproc"
