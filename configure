@@ -6157,7 +6157,7 @@ if test "$_libavutil_a" = auto ; then
   else
     die "MPlayer will not compile without libavutil in the source tree."
   fi
-elif test "$_libavutil_so" = auto
+elif test "$_libavutil_so" = auto ; then
   _libavutil_so=no
   cat > $TMPC << EOF
 #include <ffmpeg/common.h>
