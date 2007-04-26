@@ -36,7 +36,7 @@ muxer_t *muxer_new_muxer(int type,stream_t *stream){
         if(! muxer_init_muxer_rawaudio(muxer))
 	  goto fail;
         break;
-#if defined(USE_LIBAVFORMAT) || defined(USE_LIBAVFORMAT_SO)
+#ifdef USE_LIBAVFORMAT
       case MUXER_TYPE_LAVF:
         if(! muxer_init_muxer_lavf(muxer))
 	  goto fail;

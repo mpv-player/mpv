@@ -107,7 +107,7 @@ static vf_info_t* filter_list[]={
 #endif
     &vf_info_crop,
     &vf_info_expand,
-#if defined(USE_LIBPOSTPROC) || defined(USE_LIBPOSTPROC_SO)
+#ifdef USE_LIBPOSTPROC
     &vf_info_pp,
 #endif
     &vf_info_scale,

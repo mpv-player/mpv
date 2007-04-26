@@ -28,7 +28,7 @@ extern int  lavc_param_atag;
 extern int  lavc_param_audio_global_header;
 extern int  avcodec_inited;
 static int compressed_frame_size = 0;
-#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
+#ifdef USE_LIBAVFORMAT
 #ifdef USE_LIBAVFORMAT_SO
 #include <ffmpeg/avformat.h>
 #else
@@ -179,7 +179,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 	}
 	if(lavc_param_atag == 0)
 	{
-#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
+#ifdef USE_LIBAVFORMAT
 		lavc_param_atag = av_codec_get_tag(mp_wav_taglists, lavc_acodec->id);
 #else
 		lavc_param_atag = lavc_find_atag(lavc_param_acodec);
