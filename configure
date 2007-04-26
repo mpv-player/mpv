@@ -6175,7 +6175,11 @@ EOF
   fi
 fi
 _libavutil=no
+_def_libavutil='#undef USE_LIBAVUTIL'
+_def_libavutil_so='#undef USE_LIBAVUTIL_SO'
 test "$_libavutil_a" = yes || test "$_libavutil_so" = yes && _libavutil=yes
+test "$_libavutil_a"  = yes && _def_libavutil='#define USE_LIBAVUTIL 1'
+test "$_libavutil_so" = yes && _def_libavutil='#define USE_LIBAVUTIL_SO 1'
 # neither static nor shared libavutil is available, but it is mandatory ...
 if test "$_libavutil" = no ; then
   die "You need static or shared libavutil, MPlayer will not compile without!"
@@ -6264,14 +6268,6 @@ fi
 _libpostproc=no
 test "$_libpostproc_a" = yes || test "$_libpostproc_so" = yes && _libpostproc=yes
 echores "$_libpostproc"
-
-_def_libavutil='#undef USE_LIBAVUTIL'
-_def_libavutil_so='#undef USE_LIBAVUTIL_SO'
-if test "$_libavutil_a" = yes ; then
-  _def_libavutil='#define USE_LIBAVUTIL 1'
-elif test "$_libavutil_so" = yes ; then
-  _def_libavutil_so='#define USE_LIBAVUTIL_SO 1'
-fi
 
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
