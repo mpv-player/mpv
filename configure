@@ -6149,16 +6149,38 @@ fi
 echores "$_live"
 
 
-echocheck "FFmpeg libavutil (static)"
+echocheck "FFmpeg libavutil"
 if test "$_libavutil_a" = auto ; then
   if test -d libavutil ; then
-    _libavutil=yes
     _libavutil_a=yes
+    _res_comment="static"
   else
     die "MPlayer will not compile without libavutil in the source tree."
   fi
+elif test "$_libavutil_so" = auto
+  _libavutil_so=no
+  cat > $TMPC << EOF
+#include <ffmpeg/common.h>
+int main(void) { ff_gcd(1,1); return 0; }
+EOF
+  if $_pkg_config --exists libavutil ; then
+    _inc_libavutil=`$_pkg_config --cflags libavutil`
+    _ld_tmp=`$_pkg_config --libs libavutil`
+    cc_check $_inc_libavutil $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+      && _libavutil_so=yes
+  elif cc_check -lavutil $_ld_lm ; then
+    _ld_extra="$_ld_extra -lavutil"
+    _libavutil_so=yes
+    _res_comment="using libavutil.so, but static libavutil is recommended"
+  fi
 fi
-echores "$_libavutil_a"
+_libavutil=no
+test "$_libavutil_a" = yes || test "$_libavutil_so" = yes && _libavutil=yes
+# neither static nor shared libavutil is available, but it is mandatory ...
+if test "$_libavutil" = no ; then
+  die "You need static or shared libavutil, MPlayer will not compile without!"
+fi
+echores "$_libavutil"
 
 echocheck "FFmpeg libavcodec (static)"
 if test "$_libavcodec_a" = auto ; then
@@ -6214,33 +6236,6 @@ fi
 fi
 echores "$_libpostproc_a"
 
-
-if test "$_libavutil_a" != yes ; then
-echocheck "FFmpeg libavutil (dynamic)"
-if test "$_libavutil_so" = auto ; then
-  _libavutil_so=no
-  cat > $TMPC << EOF
-#include <ffmpeg/common.h>
-int main(void) { ff_gcd(1,1); return 0; }
-EOF
-  if $_pkg_config --exists libavutil ; then
-    _inc_libavutil=`$_pkg_config --cflags libavutil`
-    _ld_tmp=`$_pkg_config --libs libavutil`
-    cc_check $_inc_libavutil $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
-      && _libavutil=yes && _libavutil_so=yes
-  elif cc_check -lavutil $_ld_lm ; then
-    _ld_extra="$_ld_extra -lavutil"
-    _libavutil=yes
-    _libavutil_so=yes
-    _res_comment="using libavutil.so, but static libavutil is recommended"
-  fi
-fi
-# neither static nor shared libavutil is available, but it is mandatory ...
-if test "$_libavutil_so" = no ; then
-  die "You need static or shared libavutil, MPlayer will not compile without!"
-fi
-echores "$_libavutil_so"
-fi #if test "$_libavutil" != yes ; then
 
 if test "$_libavcodec_a" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
