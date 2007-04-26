@@ -6290,18 +6290,14 @@ EOF
   fi
 fi
 _libpostproc=no
-test "$_libpostproc_a" = yes || test "$_libpostproc_so" = yes && _libpostproc=yes
-echores "$_libpostproc"
-
 _def_libpostproc='#undef USE_LIBPOSTPROC'
 _def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
-if test "$_libpostproc_a" = yes ; then
-  _def_libpostproc='#define USE_LIBPOSTPROC 1'
-else
-  if test "$_libpostproc_so" = yes ; then
-    _def_libpostproc_so='#define USE_LIBPOSTPROC_SO 1'
-  fi
-fi
+test "$_libpostproc_a" = yes || test "$_libpostproc_so" = yes && _libpostproc=yes
+test "$_libpostproc_a"  = yes && _def_libpostproc='#define USE_LIBPOSTPROC 1'
+test "$_libpostproc_so" = yes \
+  && _def_libpostproc_so='#define USE_LIBPOSTPROC_SO 1'
+echores "$_libpostproc"
+
 
 echocheck "md5sum support"
 if test "$_md5sum" = yes; then
