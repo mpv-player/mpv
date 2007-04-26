@@ -6259,7 +6259,15 @@ EOF
   fi
 fi
 _libavformat=no
+_def_libavformat='#undef USE_LIBAVFORMAT'
+_def_libavformat_so='#undef USE_LIBAVFORMAT_SO'
+_def_libavformat_win32='#undef CONFIG_WIN32'
 test "$_libavformat_a" = yes || test "$_libavformat_so" = yes && _libavformat=yes
+test "$_libavformat_a"  = yes && _def_libavformat='#define USE_LIBAVFORMAT 1'
+test "$_libavformat_so" = yes \
+  && _def_libavformat_so='#define USE_LIBAVFORMAT_SO 1'
+fi
+win32 && _def_libavformat_win32='#define CONFIG_WIN32 1'
 echores "$_libavformat"
 
 echocheck "FFmpeg libpostproc"
@@ -6286,23 +6294,6 @@ fi
 _libpostproc=no
 test "$_libpostproc_a" = yes || test "$_libpostproc_so" = yes && _libpostproc=yes
 echores "$_libpostproc"
-
-_def_libavformat='#undef USE_LIBAVFORMAT'
-_def_libavformat_so='#undef USE_LIBAVFORMAT_SO'
-_def_libavformat_win32='#undef CONFIG_WIN32'
-if test "$_libavformat_a" = yes ; then
-  _def_libavformat='#define USE_LIBAVFORMAT 1'
-  if win32 ; then
-    _def_libavformat_win32='#define CONFIG_WIN32 1'
-  fi
-else
-  if test "$_libavformat_so" = yes ; then
-    _def_libavformat_so='#define USE_LIBAVFORMAT_SO 1'
-    if win32 ; then
-      _def_libavformat_win32='#define CONFIG_WIN32 1'
-    fi
-  fi
-fi
 
 _def_libpostproc='#undef USE_LIBPOSTPROC'
 _def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
