@@ -2991,6 +2991,8 @@ Gibt den Bereich für den vertikalen Frequenzbereich des Monitors an.
 .TP
 .B \-monitoraspect <Verhältnis> (siehe auch \-aspect)
 Gibt das Höhen-/\:Breitenverhältnis deines Monitors oder Fernsehers an.
+Der Wert 0 schaltet frühere Einstellungen (z.B. in der config Datei) aus.
+Überschreibt bei Verwendung die Einstellung von \-monitorpixelaspect.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -3005,9 +3007,7 @@ Gibt das Höhen-/\:Breitenverhältnis deines Monitors oder Fernsehers an.
 .B \-monitorpixelaspect <ratio> (siehe auch \-aspect)
 Setze den Aspekt eines einzelnen Pixels deines Monitors oder TV-Schirms
 (Standard: deaktiviert).
-Überschreibt die Einstellung \-monitoraspect.
-Ein Wert von 0 deaktiviert, Wert von 1 bedeutet quadratische Pixel (korrekt
-für (fast?) alle LCDs).
+Ein Wert von 1 bedeutet quadratische Pixel (korrekt für (fast?) alle LCDs).
 .
 .TP
 .B \-nodouble

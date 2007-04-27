@@ -2880,6 +2880,8 @@ Specify the vertical frequency range of the monitor.
 .TP
 .B \-monitoraspect <ratio> (also see \-aspect)
 Set the aspect ratio of your monitor or TV screen.
+A value of 0 disables previous monitoraspect setting (e.g. in config file).
+Overrides the \-monitorpixelaspect setting if enabled.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -2893,8 +2895,7 @@ Set the aspect ratio of your monitor or TV screen.
 .TP
 .B \-monitorpixelaspect <ratio> (also see \-aspect)
 Set the aspect of a single pixel of your monitor or TV screen (default: disabled).
-Overrides the \-monitoraspect setting.
-A value of 0 disables, a value of 1 means square pixels
+A value of 1 means square pixels
 (correct for (almost?) all LCDs).
 .
 .TP
