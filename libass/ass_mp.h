@@ -35,12 +35,13 @@ extern int ass_use_margins;
 extern char* ass_color;
 extern char* ass_border_color;
 extern char* ass_styles_file;
+extern int ass_hinting;
 
 ass_track_t* ass_default_track(ass_library_t* library);
 int ass_process_subtitle(ass_track_t* track, subtitle* sub);
 ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double fps);
 
-void ass_configure(ass_renderer_t* priv, int w, int h);
+void ass_configure(ass_renderer_t* priv, int w, int h, int hinting);
 void ass_configure_fonts(ass_renderer_t* priv);
 ass_library_t* ass_init(void);
 

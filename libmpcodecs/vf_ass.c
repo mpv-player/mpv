@@ -92,7 +92,7 @@ static int config(struct vf_instance_s* vf,
 	vf->priv->dirty_rows = malloc(vf->priv->outh);
 	
 	if (vf->priv->ass_priv) {
-		ass_configure(vf->priv->ass_priv, vf->priv->outw, vf->priv->outh);
+		ass_configure(vf->priv->ass_priv, vf->priv->outw, vf->priv->outh, 0);
 		ass_set_aspect_ratio(vf->priv->ass_priv, ((double)d_width) / d_height);
 	}
 

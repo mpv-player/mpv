@@ -1902,6 +1902,27 @@ Override some style parameters.
 .PD 1
 .
 .TP
+.B \-ass-hinting <type>
+Set hinting type.
+.PD 0
+.RSs
+.IPs <type>
+0: No hinting.
+.br
+1: FreeType autohinter, light mode.
+.br
+2: FreeType autohinter, normal mode.
+.br
+3: Font native hinter.
+.br
+0-3 + 4: The same, but hinting will only be performed if OSD is rendered at
+screen resolution and, therefore, will not be scaled.
+.br
+The default value is 7 (use native hinter for unscaled OSD and no hinting otherwise).
+.RE
+.PD 1
+.
+.TP
 .B \-ass-line-spacing <value>
 Set line spacing value for SSA/ASS renderer.
 .

@@ -229,13 +229,14 @@ void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
  * \brief Get a glyph
  * \param ch character code
  **/
-FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch)
+FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch, ass_hinting_t hinting)
 {
 	int error;
 	int index = 0;
 	int i;
 	FT_Glyph glyph;
 	FT_Face face = 0;
+	int flags = 0;
 
 	if (ch < 0x20)
 		return 0;
@@ -264,7 +265,14 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 	}
 #endif
 
-	error = FT_Load_Glyph(face, index, FT_LOAD_NO_BITMAP );
+	switch (hinting) {
+	case ASS_HINTING_NONE: flags = FT_LOAD_NO_HINTING; break;
+	case ASS_HINTING_LIGHT: flags = FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT; break;
+	case ASS_HINTING_NORMAL: flags = FT_LOAD_FORCE_AUTOHINT; break;
+	case ASS_HINTING_NATIVE: flags = 0; break;
+	}
+	
+	error = FT_Load_Glyph(face, index, FT_LOAD_NO_BITMAP | flags);
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return 0;

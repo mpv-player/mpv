@@ -56,6 +56,7 @@ typedef struct ass_settings_s {
 	int use_margins; // 0 - place all subtitles inside original frame
 	                 // 1 - use margins for placing toptitles and subtitles
 	double aspect; // frame aspect ratio, d_width / d_height.
+	ass_hinting_t hinting;
 
 	char* default_font;
 	char* default_family;
@@ -1249,7 +1250,7 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 		info->advance.y = val->advance.y;
 	} else {
 		glyph_hash_val_t v;
-		info->glyph = ass_font_get_glyph(frame_context.ass_priv->fontconfig_priv, render_context.font, symbol);
+		info->glyph = ass_font_get_glyph(frame_context.ass_priv->fontconfig_priv, render_context.font, symbol, global_settings->hinting);
 		if (!info->glyph)
 			return;
 		info->advance.x = d16_to_d6(info->glyph->advance.x);
@@ -2045,6 +2046,14 @@ void ass_set_font_scale(ass_renderer_t* priv, double font_scale)
 {
 	if (priv->settings.font_size_coeff != font_scale) {
 		priv->settings.font_size_coeff = font_scale;
+		ass_reconfigure(priv);
+	}
+}
+
+void ass_set_hinting(ass_renderer_t* priv, ass_hinting_t ht)
+{
+	if (priv->settings.hinting != ht) {
+		priv->settings.hinting = ht;
 		ass_reconfigure(priv);
 	}
 }

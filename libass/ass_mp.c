@@ -50,6 +50,7 @@ int ass_use_margins = 0;
 char* ass_color = NULL;
 char* ass_border_color = NULL;
 char* ass_styles_file = NULL;
+int ass_hinting = ASS_HINTING_NATIVE + 4; // native hinting for unscaled osd
 
 #ifdef HAVE_FONTCONFIG
 extern int font_fontconfig;
@@ -218,11 +219,17 @@ ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double 
 
 char *get_path(char *);
 
-void ass_configure(ass_renderer_t* priv, int w, int h) {
+void ass_configure(ass_renderer_t* priv, int w, int h, int unscaled) {
+	int hinting;
 	ass_set_frame_size(priv, w, h);
 	ass_set_margins(priv, ass_top_margin, ass_bottom_margin, 0, 0);
 	ass_set_use_margins(priv, ass_use_margins);
 	ass_set_font_scale(priv, ass_font_scale);
+	if (!unscaled && (ass_hinting & 4))
+		hinting = 0;
+	else
+		hinting = ass_hinting & 3;
+	ass_set_hinting(priv, hinting);
 }
 
 void ass_configure_fonts(ass_renderer_t* priv) {

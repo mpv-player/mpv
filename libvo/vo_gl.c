@@ -792,7 +792,7 @@ query_format(uint32_t format)
                VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     if (use_osd)
-      caps |= VFCAP_OSD | VFCAP_EOSD;
+      caps |= VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_UNSCALED;
     if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGBA))
         return caps;
     if (use_yuv && format == IMGFMT_YV12)

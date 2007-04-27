@@ -37,6 +37,13 @@ typedef struct ass_image_s {
 	struct ass_image_s* next; // linked list
 } ass_image_t;
 
+/// Hinting type
+typedef enum {ASS_HINTING_NONE = 0,
+	      ASS_HINTING_LIGHT,
+	      ASS_HINTING_NORMAL,
+	      ASS_HINTING_NATIVE
+} ass_hinting_t;
+
 /**
  * \brief initialize the library
  * \return library handle or NULL if failed
@@ -77,6 +84,7 @@ void ass_set_margins(ass_renderer_t* priv, int t, int b, int l, int r);
 void ass_set_use_margins(ass_renderer_t* priv, int use);
 void ass_set_aspect_ratio(ass_renderer_t* priv, double ar);
 void ass_set_font_scale(ass_renderer_t* priv, double font_scale);
+void ass_set_hinting(ass_renderer_t* priv, ass_hinting_t ht);
 
 /**
  * \brief set font lookup defaults

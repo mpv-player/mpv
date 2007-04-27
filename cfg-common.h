@@ -322,6 +322,7 @@
 	{"ass-color", &ass_color, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"ass-border-color", &ass_border_color, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"ass-styles", &ass_styles_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"ass-hinting", &ass_hinting, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
 #endif
 #ifdef HAVE_FONTCONFIG
 	{"fontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, 0, 1, NULL},

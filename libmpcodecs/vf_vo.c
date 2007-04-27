@@ -60,14 +60,14 @@ static int config(struct vf_instance_s* vf,
   }
 
     // save vo's stride capability for the wanted colorspace:
-    vf->default_caps=query_format(vf,outfmt) & VFCAP_ACCEPT_STRIDE;
+    vf->default_caps=query_format(vf,outfmt);
 
     if(config_video_out(video_out,width,height,d_width,d_height,flags,"MPlayer",outfmt))
 	return 0;
 
 #ifdef USE_ASS
     if (vf->priv->ass_priv)
-	ass_configure(vf->priv->ass_priv, width, height);
+	ass_configure(vf->priv->ass_priv, width, height, !!(vf->default_caps & VFCAP_EOSD_UNSCALED));
 #endif
 
     ++vo_config_count;
