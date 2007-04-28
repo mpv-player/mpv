@@ -75,6 +75,7 @@ MPlayer (1.0)
       if the user-specified default device name tries to clear it
     * fixed internal vidix in Solaris/x86, also auto-enabled
     * rework of internal vidix API which is now a fully static library with built-in drivers 
+    * VIDIX now also supports ATI R350 (Radeon 9600) to R520 (Radeon X1900)
 
     Others:
     * monitorpixelaspect=1 is now default. Set monitoraspect=4/3 to get the old
