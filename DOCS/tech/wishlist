@@ -68,11 +68,15 @@ Filters:
 
  * insert af volnorm during playback
 
+ * allow frame insertion & removal in video filters (with timestamps)
+
+ * xinerama video filter that splits movie to 2 screens (like zr)
+
+ * mixing of multiple videos (picture in picture, ...)
+
 Enhancements:
 
- * merge VIDIX from MPlayerXP/sourceforge
-
- * support for VirtualDub and Winamp plugins
+ * support for VirtualDub and Winamp plugins (apply af_wadspa patch!)
 
  * implement xawtv config file parser (for channels, etc)
 
@@ -91,6 +95,7 @@ Enhancements:
  * hardware MPEG encoding support (Ati cards)
 
  * make -ass-use-margins work on widescreen video only! (not 4/3 video)
+   (automagically put subtitles in black bars)
 
  * nsc playlist support
 
@@ -109,21 +114,19 @@ Enhancements:
 
  * left/right channel playback (-af pan=1:1 or -stereo) (in gui too)
 
+ * ability to turn loop on/off while playing
+
  * rotate/position osd
 
- * timeout and reconnect options for streaming
+ * reconnect option for streaming
 
- * support all image formats in mf:// (bmp)
+ * support all image formats in mf:// (tiff)
 
 Difficult stuff:
 
  * RE all closed source codecs (QDMC, WMA9, RV30, RV40, sipr, ...)
 
- * support for Bink/Smacker codecs
-
- * allow frame insertion & removal in video filters (with timestamps)
-
- * mixing of multiple videos (picture in picture, ...)
+ * support for Bink codec
 
  * write something like mptv to replace xawtv
 
@@ -134,8 +137,6 @@ Difficult stuff:
  * real mmsu:// support
 
  * MEncoder output support for OGM, MKV, NUT
-
- * xinerama video filter that splits movie to 2 screens (like zr)
 
  * top notch DVD navigation like a hardware player
 
