@@ -77,6 +77,8 @@ MPlayer (1.0)
     * rework of internal vidix API which is now a fully static library with built-in drivers 
 
     Others:
+    * monitorpixelaspect=1 is now default. Set monitoraspect=4/3 to get the old
+      behaviour (if you have non-square pixels).
     * libdvdcss updated to Subversion HEAD, now same as upstream version
     * libmpdvdkit split into libdvdread and libdvdcss
     * obsolete Xvid 3 support removed
