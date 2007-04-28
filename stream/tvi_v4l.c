@@ -517,17 +517,17 @@ static int init(priv_t *priv)
                bparm.decimation, bparm.quality);
 
         if (ioctl(priv->video_fd, MJPIOC_S_PARAMS, &bparm) < 0)
-         {
+        {
             mp_msg(MSGT_TV, MSGL_ERR,
                    "  MJP: Error setting video parameters: %s\n", strerror(errno));
             goto err;
-         }
+        }
 
         if (ioctl(priv->video_fd, MJPIOC_G_PARAMS, &bparm) < 0)
         {
-           mp_msg(MSGT_TV, MSGL_ERR,
-                  "  MJP: Error getting video parameters: %s\n", strerror(errno));
-           goto err;
+            mp_msg(MSGT_TV, MSGL_ERR,
+                   "  MJP: Error getting video parameters: %s\n", strerror(errno));
+            goto err;
         }
 
         mp_msg(MSGT_TV, MSGL_INFO,
@@ -549,9 +549,9 @@ static int init(priv_t *priv)
         breq.size  = priv -> mjpeg_bufsize;
         if (ioctl(priv->video_fd, MJPIOC_REQBUFS,&(breq)) < 0)
         {
-            mp_msg (MSGT_TV, MSGL_ERR,
-                    "  MJP: Error requesting video buffers: %s\n", strerror(errno));
-            goto err;
+           mp_msg (MSGT_TV, MSGL_ERR,
+              "  MJP: Error requesting video buffers: %s\n", strerror(errno));
+           goto err;
         }
         mp_msg(MSGT_TV, MSGL_INFO,
                "  MJP: Got %ld buffers of size %ld KB\n",
@@ -599,32 +599,32 @@ static int init(priv_t *priv)
 
     if ( !tv_param_mjpeg )
     {
-    /* map grab buffer */
-    if (ioctl(priv->video_fd, VIDIOCGMBUF, &priv->mbuf) == -1)
-    {
-        mp_msg(MSGT_TV, MSGL_ERR, "ioctl get mbuf failed: %s\n", strerror(errno));
-        goto err;
-    }
+        /* map grab buffer */
+        if (ioctl(priv->video_fd, VIDIOCGMBUF, &priv->mbuf) == -1)
+        {
+            mp_msg(MSGT_TV, MSGL_ERR, "ioctl get mbuf failed: %s\n", strerror(errno));
+            goto err;
+        }
 
-    mp_msg(MSGT_TV, MSGL_V, "mbuf: size=%d, frames=%d\n",
-        priv->mbuf.size, priv->mbuf.frames);
-    priv->mmap = mmap(0, priv->mbuf.size, PROT_READ|PROT_WRITE,
-                      MAP_SHARED, priv->video_fd, 0);
-    if (priv->mmap == (unsigned char *)-1)
-    {
-        mp_msg(MSGT_TV, MSGL_ERR, "Unable to map memory for buffers: %s\n", strerror(errno));
-        goto err;
-    }
-    mp_msg(MSGT_TV, MSGL_DBG2, "our buffer: %p\n", priv->mmap);
+        mp_msg(MSGT_TV, MSGL_V, "mbuf: size=%d, frames=%d\n",
+            priv->mbuf.size, priv->mbuf.frames);
+        priv->mmap = mmap(0, priv->mbuf.size, PROT_READ|PROT_WRITE,
+                          MAP_SHARED, priv->video_fd, 0);
+        if (priv->mmap == (unsigned char *)-1)
+        {
+            mp_msg(MSGT_TV, MSGL_ERR, "Unable to map memory for buffers: %s\n", strerror(errno));
+            goto err;
+        }
+        mp_msg(MSGT_TV, MSGL_DBG2, "our buffer: %p\n", priv->mmap);
 
-    /* num of buffers */
-    priv->nbuf = priv->mbuf.frames;
+        /* num of buffers */
+        priv->nbuf = priv->mbuf.frames;
 
-    /* video buffers */
-    priv->buf = calloc(priv->nbuf, sizeof(struct video_mmap));
-    if (!priv->buf)
-        goto malloc_failed;
-    memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
+        /* video buffers */
+        priv->buf = calloc(priv->nbuf, sizeof(struct video_mmap));
+        if (!priv->buf)
+            goto malloc_failed;
+        memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
     }
 
     /* init v4l audio even when we don't capture */
@@ -793,7 +793,6 @@ static int start(priv_t *priv)
         priv->picture.brightness, priv->picture.hue,
         priv->picture.colour, priv->picture.contrast);
 
-
     if (ioctl(priv->video_fd, VIDIOCSPICT, &priv->picture) == -1)
     {
         mp_msg(MSGT_TV, MSGL_ERR, "ioctl set picture failed: %s\n", strerror(errno));
@@ -801,15 +800,15 @@ static int start(priv_t *priv)
 
     if ( !tv_param_mjpeg )
     {
-    priv->nbuf = priv->mbuf.frames;
-    for (i=0; i < priv->nbuf; i++)
-    {
-        priv->buf[i].format = priv->picture.palette;
-        priv->buf[i].frame = i;
-        priv->buf[i].width = priv->width;
-        priv->buf[i].height = priv->height;
-        mp_msg(MSGT_TV, MSGL_DBG2, "buffer: %d => %p\n", i, &priv->buf[i]);
-    }
+        priv->nbuf = priv->mbuf.frames;
+        for (i=0; i < priv->nbuf; i++)
+        {
+            priv->buf[i].format = priv->picture.palette;
+            priv->buf[i].frame = i;
+            priv->buf[i].width = priv->width;
+            priv->buf[i].height = priv->height;
+            mp_msg(MSGT_TV, MSGL_DBG2, "buffer: %d => %p\n", i, &priv->buf[i]);
+        }
     }
 
 #if 0
@@ -822,7 +821,7 @@ static int start(priv_t *priv)
         if (ioctl(priv->video_fd, VIDIOCSPLAYMODE, &pmode) == -1)
         {
             mp_msg(MSGT_TV, MSGL_ERR, "ioctl set play mode failed: %s\n", strerror(errno));
-//            return(0);
+//          return(0);
         }
     }
 #endif
@@ -985,7 +984,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             return(TVI_CONTROL_FALSE);
         case TVI_CONTROL_IS_TUNER:
         {
-//            if (priv->capability.type & VID_TYPE_TUNER)
+//          if (priv->capability.type & VID_TYPE_TUNER)
             if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER)
                 return(TVI_CONTROL_TRUE);
             return(TVI_CONTROL_FALSE);
@@ -1007,8 +1006,8 @@ static int control(priv_t *priv, int cmd, void *arg)
             }
             else
             {
-            *(int *)arg = output_fmt;
-            mp_msg(MSGT_TV, MSGL_V, "Output format: %s\n", vo_format_name(output_fmt));
+                *(int *)arg = output_fmt;
+                mp_msg(MSGT_TV, MSGL_V, "Output format: %s\n", vo_format_name(output_fmt));
             }
             return(TVI_CONTROL_TRUE);
         }
@@ -1119,8 +1118,8 @@ static int control(priv_t *priv, int cmd, void *arg)
             }
 
             /* tuner uses khz not mhz ! */
-//            if (priv->tuner.flags & VIDEO_TUNER_LOW)
-//                freq /= 1000;
+//          if (priv->tuner.flags & VIDEO_TUNER_LOW)
+//              freq /= 1000;
             *(unsigned long *)arg = freq;
             return(TVI_CONTROL_TRUE);
         }
@@ -1137,9 +1136,9 @@ static int control(priv_t *priv, int cmd, void *arg)
             mp_msg(MSGT_TV, MSGL_V, "requested frequency: %.3f\n", (float)freq/16);
 
             /* tuner uses khz not mhz ! */
-//            if (priv->tuner.flags & VIDEO_TUNER_LOW)
-//                freq *= 1000;
-//            mp_msg(MSGT_TV, MSGL_V, " requesting from driver: freq=%.3f\n", (float)freq/16);
+//          if (priv->tuner.flags & VIDEO_TUNER_LOW)
+//              freq *= 1000;
+//          mp_msg(MSGT_TV, MSGL_V, " requesting from driver: freq=%.3f\n", (float)freq/16);
             if (ioctl(priv->video_fd, VIDIOCSFREQ, &freq) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl set freq failed: %s\n", strerror(errno));
@@ -1364,7 +1363,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             priv->act_channel = i;
 
             /* update tuner state */
-//            if (priv->capability.type & VID_TYPE_TUNER)
+//          if (priv->capability.type & VID_TYPE_TUNER)
             if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER)
                 control(priv, TVI_CONTROL_TUN_GET_TUNER, 0);
 
@@ -1480,14 +1479,13 @@ static void *video_grabber(void *data)
 
             if ( tv_param_mjpeg )
             {
-            while (ioctl(priv->video_fd, MJPIOC_SYNC, &priv->buf[frame].frame) < 0 &&
-                   (errno == EAGAIN || errno == EINTR));
-
+                while (ioctl(priv->video_fd, MJPIOC_SYNC, &priv->buf[frame].frame) < 0 &&
+                       (errno == EAGAIN || errno == EINTR));
             }
             else
             {
-            while (ioctl(priv->video_fd, VIDIOCSYNC, &priv->buf[frame].frame) < 0 &&
-                   (errno == EAGAIN || errno == EINTR));
+                while (ioctl(priv->video_fd, VIDIOCSYNC, &priv->buf[frame].frame) < 0 &&
+                       (errno == EAGAIN || errno == EINTR));
             }
             mp_dbg(MSGT_TV, MSGL_DBG3, "\npicture sync failed\n");
 
@@ -1535,7 +1533,7 @@ static void *video_grabber(void *data)
                 priv->video_interval_sum += orig_interval-prev_interval;
                 if (priv->video_avg_ptr >= VIDEO_AVG_BUFFER_SIZE) priv->video_avg_ptr = 0;
 
-//                fprintf(stderr, "fps: %lf\n", (double)1e6*VIDEO_AVG_BUFFER_SIZE/priv->video_interval_sum);
+//              fprintf(stderr, "fps: %lf\n", (double)1e6*VIDEO_AVG_BUFFER_SIZE/priv->video_interval_sum);
 
                 // interpolate the skew in time
                 pthread_mutex_lock(&priv->skew_mutex);
@@ -1619,9 +1617,7 @@ static void *video_grabber(void *data)
                     continue;
                 }
             }
-
         }
-
     }
     mp_msg(MSGT_TV, MSGL_INFO, "  MJP: returning! \n");
     return NULL;
