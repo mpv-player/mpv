@@ -144,6 +144,7 @@ static void guiSetEvent(int event)
     {
         case evPlay:
         case evPlaySwitchToPause:
+        case evPauseSwitchToPlay:
             mplPlay();
             break;
         case evPause:
