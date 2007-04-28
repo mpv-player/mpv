@@ -134,26 +134,10 @@ make install
 </para>
 
 <para>
-At this point, <application>MPlayer</application> is ready to use. The
-directory <filename class="directory">$PREFIX/share/mplayer</filename>
-contains the <filename>codecs.conf</filename> file, which is used to tell
-the program all the codecs and their capabilities. This file is needed only
-when you want to change its properties, as the main binary contains an internal
-copy of it. Check if you have
-<filename>codecs.conf</filename> in your home directory
-(<filename>~/.mplayer/codecs.conf</filename>) left from old
-<application>MPlayer</application> versions, and remove it.
-</para>
-
-<para>
-Note that if you have a <filename>codecs.conf</filename> in
-<filename>~/.mplayer/</filename>,  the builtin and system
-<filename>codecs.conf</filename> will be ignored completely.
-Do not do this unless you want to fiddle with <application>MPlayer</application>
-internals as this can can cause many problems. If you want to change the codecs
-search order, use the <option>-vc</option>, <option>-ac</option>,
-<option>-vfm</option>, or <option>-afm</option> options either on the command
-line or in your config file (see the manual page).
+At this point, <application>MPlayer</application> is ready to use.
+Check if you have a <filename>codecs.conf</filename> file in your home
+directory at (<filename>~/.mplayer/codecs.conf</filename>) left from old
+<application>MPlayer</application> versions. If you find one, remove it.
 </para>
 
 <para>
