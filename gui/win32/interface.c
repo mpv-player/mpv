@@ -271,6 +271,7 @@ static void guiSetEvent(int event)
         {
             switch(guiIntfStruct.StreamType)
             {
+#ifdef USE_DVDREAD
                 case STREAMTYPE_DVD:
                 {
                     guiIntfStruct.Title = guiIntfStruct.DVD.current_title;
@@ -280,6 +281,7 @@ static void guiSetEvent(int event)
                     guiGetEvent(guiCEvent, (void *) guiSetPlay);
                     break;
                 }
+#endif
                 default:
                 {
                     guiIntfStruct.FilenameChanged = guiIntfStruct.NewPlay = 1;

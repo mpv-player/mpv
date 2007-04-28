@@ -1005,29 +1005,27 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                     {
                         if(LOWORD(wParam) - IDPLAYDISK == cdromdrive)
                         {
-#ifdef USE_DVDREAD
                             sprintf(searchpath, "%sVIDEO_TS", device + pos);
                             if(GetFileAttributes(searchpath) != INVALID_FILE_ATTRIBUTES)
                             {
+#ifdef USE_DVDREAD
                                 if (dvd_device) free(dvd_device);
                                 dvd_device = strdup(device + pos);
                                 dvd_title = dvd_chapter = dvd_angle = 1;
                                 handlemsg(hWnd, evPlayDVD);
-                            }
 #endif
-#ifdef HAVE_LIBCDIO
+                            }
                             sprintf(searchpath, "%sTrack01.cda", device + pos);
                             if(GetFileAttributes(searchpath) != INVALID_FILE_ATTRIBUTES)
                             {
+#ifdef HAVE_LIBCDIO
                                 if (cdrom_device) free(cdrom_device);
                                 cdrom_device = strdup(device + pos);
                                 /* mplayer doesn't seem to like the trailing \ after the device name */
                                 cdrom_device[2]=0;
                                 handlemsg(hWnd, evPlayCD);
-                            }
 #endif
-                            else
-                            {
+                            } else {
                                 HANDLE searchhndl;
                                 WIN32_FIND_DATA finddata;
                                 sprintf(searchpath, "%smpegav\\*.dat", device + pos);
