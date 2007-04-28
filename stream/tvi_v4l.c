@@ -546,7 +546,7 @@ static int init(priv_t *priv)
         priv->mjpeg_bufsize = 256*1024;
         if (tv_param_buffer_size >= 0)
             priv->mjpeg_bufsize = tv_param_buffer_size*1024;
-          breq.size  = priv -> mjpeg_bufsize;
+        breq.size  = priv -> mjpeg_bufsize;
         if (ioctl(priv->video_fd, MJPIOC_REQBUFS,&(breq)) < 0)
         {
             mp_msg (MSGT_TV, MSGL_ERR,
