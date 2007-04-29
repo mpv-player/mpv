@@ -8,8 +8,6 @@
 #include "access_mpcontext.h"
 #include "mixer.h"
 
-#include "app.h"
-
 #include "menu.h"
 #include "../widgets.h"
 #include "app.h"
