@@ -24,6 +24,7 @@
 #include "../libmpdemux/demuxer.h"
 #include "../libmpdemux/stheader.h"
 #include "../codec-cfg.h"
+#include "../access_mpcontext.h"
 
 
 #include "play.h"

@@ -14,6 +14,7 @@
 #include "interface.h"
 #include "app.h"
 #include "../widgets.h"
+#include "../gmplayer.h"
 #include "help_mp.h"
 
 GtkWidget * URL = NULL;

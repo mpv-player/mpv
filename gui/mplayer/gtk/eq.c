@@ -15,6 +15,10 @@
 #include "help_mp.h"
 #include "libaf/equalizer.h"
 #include "libvo/video_out.h"
+#include "stream/stream.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+#include "libmpcodecs/dec_video.h"
 #include "../widgets.h"
 
 #include "eq.h"

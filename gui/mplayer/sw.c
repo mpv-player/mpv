@@ -7,6 +7,7 @@
 #include "../libvo/x11_common.h"
 #include "../libvo/fastmemcpy.h"
 
+#include "gmplayer.h"
 #include "app.h"
 #include "interface.h"
 #include "../help_mp.h"

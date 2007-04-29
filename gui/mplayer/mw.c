@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "gmplayer.h"
 #include "app.h"
 #include "skin/font.h"
 #include "skin/skin.h"

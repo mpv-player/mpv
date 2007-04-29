@@ -46,6 +46,11 @@ extern af_cfg_t af_cfg;
 #include "stream/stream_dvd.h"
 #endif
 
+#ifdef HAVE_VCD
+#include <sys/ioctl.h>
+#include <errno.h>
+#include "stream/vcd_read.h"
+#endif
 
 #include "m_config.h"
 #include "m_option.h"

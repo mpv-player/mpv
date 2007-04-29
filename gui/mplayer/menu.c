@@ -4,6 +4,7 @@
 #include <inttypes.h>
 
 #include "app.h"
+#include "gmplayer.h"
 #include "../config.h"
 #include "../help_mp.h"
 #include "../mp_msg.h"
