@@ -1070,7 +1070,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         case TVI_CONTROL_VID_SET_PICTURE:
             if (ioctl(priv->video_fd, VIDIOCSPICT, &priv->picture) == -1)
             {
-                mp_msg(MSGT_TV, MSGL_ERR, "ioctl get picture failed: %s\n", strerror(errno));
+                mp_msg(MSGT_TV, MSGL_ERR, "ioctl set picture failed: %s\n", strerror(errno));
                 return(TVI_CONTROL_FALSE);
             }
             return(TVI_CONTROL_TRUE);
