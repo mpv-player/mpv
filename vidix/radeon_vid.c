@@ -1396,7 +1396,7 @@ static int radeon_init(void)
       (def_cap.device_id == DEVICE_ATI_RAGE_MOBILITY_M3 ||
        def_cap.device_id == DEVICE_ATI_RAGE_MOBILITY_M32))
   {
-      printf(RADEON_MSG" Workarounding buggy Rage Mobility M3 (0 vs. 8MB ram)\n");
+      printf(RADEON_MSG" Working around Rage Mobility M3 (0 vs. 8MB ram)\n");
       radeon_ram_size = 8192*1024;
   }
 #endif
