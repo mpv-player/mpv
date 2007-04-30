@@ -1386,9 +1386,9 @@ static int radeon_init(void)
   else if (radeon_ram_size == 0 &&
            (def_cap.device_id == DEVICE_ATI_RS482_RADEON_XPRESS))
   {
-      printf(RADEON_MSG" Working around buggy RS482 Radeon Xpress 200 (0 vs. >32MB ram)\n");
-      /* Minimal selectable shared memory from bios 32M */
-      radeon_ram_size = 32768*1024;
+      printf(RADEON_MSG" Working around buggy RS482 Radeon Xpress 200 Memory Detection\n");
+      radeon_ram_size = (INREG(CONFIG_MEMSIZE) + 0x100000) << 2;
+      radeon_ram_size &=  CONFIG_MEMSIZE_MASK;
   } 
 #else
   /* Rage Mobility (rage128) also has memsize bug */
