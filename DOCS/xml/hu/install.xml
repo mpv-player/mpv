@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21741 -->
+<!-- synced with r23161 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -135,25 +135,10 @@ make install
 
 <para>
 Ezek után az <application>MPlayer</application> máris használatra kész.
-A <filename class="directory">$PREFIX/share/mplayer</filename> könyvtárban
-van a <filename>codecs.conf</filename> fájl, ami a codec-eket és azok
-tulajdonságait írja le a programnak. Ez a fájl csak akkor kell, ha meg
-akarod változtatni a képességeit, egyébként nem, mert a binárisban van egy
-másolat róla. Ellenőrizd le, hogy van-e <filename>codecs.conf</filename>
-nevű fájlod a home könyvtáradban
-(<filename>~/.mplayer/codecs.conf</filename>), melyet régebbi
-<application>MPlayer</application> verziók hagyhattak ott, és ha van, töröld le!
-</para>
-
-<para>
-Vedd figyelembe, hogy ha van egy <filename>codecs.conf</filename> fájlod a
-<filename>~/.mplayer/</filename> könyvtárban, a beépített és a fő
-<filename>codecs.conf</filename> teljesen figyelmen kívül lesz hagyva.
-Ne használd ezt, hacsak nem akarsz trükközni az <application>MPlayer</application>rel,
-mivel ez sok problémát okozhat. Ha meg akarod változtatni a codec-ek keresési sorrendjét,
-használd a <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
-vagy <option>-afm</option> kapcsolókat akár a parancssorban akár a konfigurációs fájlban
-(lásd man oldal).
+Ellenőrizd le, hogy van-e <filename>codecs.conf</filename> nevű fájlod
+a home könyvtáradban (<filename>~/.mplayer/codecs.conf</filename>), melyet
+régebbi <application>MPlayer</application> verziók hagyhattak ott. Ha van,
+töröld le!
 </para>
 
 <para>

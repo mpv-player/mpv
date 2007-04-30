@@ -1,4 +1,4 @@
-.\" Synced with r22975
+.\" Synced with r23162
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 04. 16." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 04. 30." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1910,6 +1910,27 @@ Felülír pár stílus paramétert.
 .PD 1
 .
 .TP
+.B \-ass-hinting <típus>
+A hint típusát állítja be.
+.PD 0
+.RSs
+.IPs <típus>
+0: Nincs hint.
+.br
+1: FreeType autohinter, könnyû mód.
+.br
+2: FreeType autohinter, normális mód.
+.br
+3: Betûtípus natív hinter-e.
+.br
+0-3 + 4: Ugyan az, de a hint csak akkor hajtódik végre, ha az OSD a képernyõ
+felbontásában kerül renderelésre, vagyis nem lesz méretezve.
+.br
+Az alapértelmezett érték a 7 (natív hinter használata nem méretezett OSD-hez, különben nincs hint).
+.RE
+.PD 1
+.
+.TP
 .B \-ass-line-spacing <érték>
 Beállítja a sor kihagyás értékét az SSA/ASS renderelõben.
 .
@@ -2868,6 +2889,8 @@ A monitor függõleges képfrissítési frekvenciatartományának megadása.
 .TP
 .B \-monitoraspect <arány> (lásd még \-aspect)
 A monitor vagy TV képernyõ képarányának megadása.
+A 0 letiltja az elõzõ képarány beállítást (pl. a konfigurációs fájlét).
+Felülbírálja a \-monitorpixelaspect beállítást, amennyiben az meg van adva.
 .sp 1
 .I PÉLDA:
 .PD 0
@@ -2881,8 +2904,7 @@ A monitor vagy TV képernyõ képarányának megadása.
 .TP
 .B \-monitorpixelaspect <ráta> (lásd még \-aspect)
 Beállítja egy pixel arányát a monitorodon vagy TV képernyõdön (alapértelmezett: letiltva).
-Felülbírálja a \-monitoraspect beállítást.
-A 0 érték letiltja, az 1 négyzetes pixeleket jelent
+Az 1 négyzetes pixeleket jelent
 (megfelelõ a (legtöbb?) LCD képernyõn).
 .
 .TP

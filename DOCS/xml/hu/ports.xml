@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22499 -->
+<!-- synced with r23161 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -352,20 +352,14 @@ path-ba) megadni a helyét:
 <para>
 Lehet az alap IRIX 6.5-ös install-t is használni, de ebben az esetben
 a <filename>Makefile</filename> egy kis kézi átírásra szorul. A következő
-két sort kell átírni:
+sort kell átírni:
 <programlisting>
 $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-
-$(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 </programlisting>
 erre:
 <programlisting>
 $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-
-$(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
-Add ki a következő parancsokat (az <application>MPlayer</application> forrás könyvtárában):
-<screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 ezután símán fordíts és telepíts.
 </para>
 </sect2>
