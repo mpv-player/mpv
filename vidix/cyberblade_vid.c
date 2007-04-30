@@ -143,11 +143,13 @@ static int cyberblade_probe(int verbose, int force)
 				dname = pci_device_name(VENDOR_TRIDENT, lst[i].device);
 				dname = dname ? dname : "Unknown chip";
 				printf("[cyberblade] Found chip: %s\n", dname);
-				if ((lst[i].command & PCI_COMMAND_IO) == 0)
+#if 0
+                                if ((lst[i].command & PCI_COMMAND_IO) == 0)
 				{
 					printf("[cyberblade] Device is disabled, ignoring\n");
 					continue;
 				}
+#endif
 				cyberblade_cap.device_id = lst[i].device;
 				err = 0;
 				memcpy(&pci_info, &lst[i], sizeof(pciinfo_t));

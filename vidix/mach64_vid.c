@@ -434,11 +434,13 @@ static int mach64_probe(int verbose,int force)
 	dname = pci_device_name(VENDOR_ATI,lst[i].device);
 	dname = dname ? dname : "Unknown chip";
 	printf("[mach64] Found chip: %s\n",dname);
+#if 0
 	if ((lst[i].command & PCI_COMMAND_IO) == 0)
 	{
 		printf("[mach64] Device is disabled, ignoring\n");
 		continue;
 	}
+#endif
 	if(force > PROBE_NORMAL)
 	{
 	    printf("[mach64] Driver was forced. Was found %sknown chip\n",idx == -1 ? "un" : "");
