@@ -489,8 +489,6 @@ set_encoder_settings (struct pvr_t *pvr)
   return 0;
 }
 
-/* V4L2 layer */
-
 static void
 parse_v4l2_tv_options (struct pvr_t *pvr)
 {
