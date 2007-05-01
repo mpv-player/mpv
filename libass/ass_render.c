@@ -394,29 +394,31 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 	ass_image_t** tail = &head;
 
 	for (i = 0; i < text_info->length; ++i) {
-		if (text_info->glyphs[i].glyph && text_info->glyphs[i].bm == 0) {
-			if ((text_info->glyphs[i].symbol == '\n') || (text_info->glyphs[i].symbol == 0))
+		glyph_info_t* info = text_info->glyphs + i;
+		if (info->glyph && info->bm == 0) {
+			if ((info->symbol == '\n') || (info->symbol == 0))
 				continue;
 			error = glyph_to_bitmap(ass_renderer->synth_priv,
-					text_info->glyphs[i].glyph, text_info->glyphs[i].outline_glyph,
-					&text_info->glyphs[i].bm, &text_info->glyphs[i].bm_o,
-					&text_info->glyphs[i].bm_s, text_info->glyphs[i].be);
+					info->glyph, info->outline_glyph,
+					&info->bm, &info->bm_o,
+					&info->bm_s, info->be);
 			if (error)
-				text_info->glyphs[i].symbol = 0;
+				info->symbol = 0;
 
 			// cache
-			hash_val.bm_o = text_info->glyphs[i].bm_o;
-			hash_val.bm = text_info->glyphs[i].bm;
-			hash_val.bm_s = text_info->glyphs[i].bm_s;
-			cache_add_bitmap(&(text_info->glyphs[i].hash_key), &hash_val);
+			hash_val.bm_o = info->bm_o;
+			hash_val.bm = info->bm;
+			hash_val.bm_s = info->bm_s;
+			cache_add_bitmap(&(info->hash_key), &hash_val);
 		}
 	}
 
 	for (i = 0; i < text_info->length; ++i) {
-		if (text_info->glyphs[i].glyph)
-			FT_Done_Glyph(text_info->glyphs[i].glyph);
-		if (text_info->glyphs[i].outline_glyph)
-			FT_Done_Glyph(text_info->glyphs[i].outline_glyph);
+		glyph_info_t* info = text_info->glyphs + i;
+		if (info->glyph)
+			FT_Done_Glyph(info->glyph);
+		if (info->outline_glyph)
+			FT_Done_Glyph(info->outline_glyph);
 	}
 
 	for (i = 0; i < text_info->length; ++i) {
