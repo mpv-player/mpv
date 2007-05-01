@@ -1963,8 +1963,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 
 			if (info->bm == 0) {
 				// calculating shift vector
-				shift.x = int_to_d6(info->pos.x + device_x - center.x);
-				shift.y = - int_to_d6(info->pos.y + device_y - center.y);
+				shift.x = int_to_d6(info->hash_key.shift_x);
+				shift.y = int_to_d6(info->hash_key.shift_y);
 
 				transform_3d(shift, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
 			}
