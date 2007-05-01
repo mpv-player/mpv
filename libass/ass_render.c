@@ -387,39 +387,10 @@ static ass_image_t** render_glyph(bitmap_t* bm, int dst_x, int dst_y, uint32_t c
 static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 {
 	int pen_x, pen_y;
-	int i, error;
+	int i;
 	bitmap_t* bm;
-	bitmap_hash_val_t hash_val;
 	ass_image_t* head;
 	ass_image_t** tail = &head;
-
-	for (i = 0; i < text_info->length; ++i) {
-		glyph_info_t* info = text_info->glyphs + i;
-		if (info->glyph && info->bm == 0) {
-			if ((info->symbol == '\n') || (info->symbol == 0))
-				continue;
-			error = glyph_to_bitmap(ass_renderer->synth_priv,
-					info->glyph, info->outline_glyph,
-					&info->bm, &info->bm_o,
-					&info->bm_s, info->be);
-			if (error)
-				info->symbol = 0;
-
-			// cache
-			hash_val.bm_o = info->bm_o;
-			hash_val.bm = info->bm;
-			hash_val.bm_s = info->bm_s;
-			cache_add_bitmap(&(info->hash_key), &hash_val);
-		}
-	}
-
-	for (i = 0; i < text_info->length; ++i) {
-		glyph_info_t* info = text_info->glyphs + i;
-		if (info->glyph)
-			FT_Done_Glyph(info->glyph);
-		if (info->outline_glyph)
-			FT_Done_Glyph(info->outline_glyph);
-	}
 
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
@@ -1302,11 +1273,32 @@ static void get_bitmap_glyph(glyph_info_t* info)
 		info->bm_s = val->bm_s;
 	} else {
 		FT_Vector shift;
+		bitmap_hash_val_t hash_val;
+		int error;
 		info->bm = info->bm_o = info->bm_s = 0;
+		if (info->glyph && info->symbol != '\n' && info->symbol != 0) {
 		// calculating shift vector
 		shift.x = int_to_d6(info->hash_key.shift_x);
 		shift.y = int_to_d6(info->hash_key.shift_y);
 		transform_3d(shift, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
+
+			error = glyph_to_bitmap(ass_renderer->synth_priv,
+					info->glyph, info->outline_glyph,
+					&info->bm, &info->bm_o,
+					&info->bm_s, info->be);
+			if (error)
+				info->symbol = 0;
+
+			// cache
+			hash_val.bm_o = info->bm_o;
+			hash_val.bm = info->bm;
+			hash_val.bm_s = info->bm_s;
+			cache_add_bitmap(&(info->hash_key), &hash_val);
+		}
+		if (info->glyph)
+			FT_Done_Glyph(info->glyph);
+		if (info->outline_glyph)
+			FT_Done_Glyph(info->outline_glyph);
 	}
 }
 
