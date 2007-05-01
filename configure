@@ -4014,6 +4014,7 @@ if test "$_xvmc" = yes ; then
 else
   _def_xvmc='#undef HAVE_XVMC'
   _novomodules="xvmc $_novomodules"
+  _libavdecoders=`echo $_libavdecoders | sed -e s/MPEG_XVMC_DECODER// `
 fi
 echores "$_xvmc"
 
@@ -5592,6 +5593,8 @@ if test "$_zlib" = yes ; then
   _ld_extra="$_ld_extra -lz"
 else
   _def_zlib='#undef HAVE_ZLIB'
+  _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// `
+  _libavencoders=`echo $_libavencoders | sed -e s/FLASHSV_ENCODER// -e s/PNG_ENCODER// -e s/ZMBV_ENCODER// `
 fi
 echores "$_zlib"
 
@@ -5749,6 +5752,10 @@ else
   _vorbis=no
   _nocodecmodules="libvorbis $_nocodecmodules"
 fi
+if test "$_libvorbis" = no ; then
+  _libavencoders=`echo $_libavencoders | sed -e s/LIBVORBIS_ENCODER// `
+  _libavmuxers=`echo $_libavmuxers | sed -e s/OGG_MUXER// `
+fi
 echores "$_vorbis"
 
 echocheck "libspeex (version >= 1.1 required)"
@@ -5871,6 +5878,7 @@ if test "$_libdts" = yes ; then
 else
   _def_libdts='#undef CONFIG_LIBDTS'
   _nocodecmodules="libdts $_nocodecmodules"
+  _libavdecoders=`echo $_libavdecoders | sed -e s/DTS_DECODER// `
 fi
 echores "$_libdts"
 
@@ -5935,6 +5943,7 @@ if test "$_faac" = yes ; then
 else
   _def_faac="#undef HAVE_FAAC"
   _nocodecmodules="faac $_nocodecmodules"
+  _libavencoders=`echo $_libavencoders | sed -e s/FAAC_ENCODER// `
 fi
 echores "$_faac (in libavcodec: $_lavc_faac)"
 
@@ -6333,6 +6342,8 @@ if test "$_amr_nb" = yes ; then
   _def_amr_nb='#define CONFIG_AMR_NB 1'
 else
   _def_amr_nb='#undef CONFIG_AMR_NB'
+  _libavdecoders=`echo $_libavdecoders | sed -e s/AMR_NB_DECODER// `
+  _libavencoders=`echo $_libavencoders | sed -e s/AMR_NB_ENCODER// `
 fi
 echores "$_amr_nb"
 
@@ -6364,6 +6375,8 @@ if test "$_amr_wb" = yes ; then
 else
   _def_amr_wb='#undef CONFIG_AMR_WB'
   _nocodecmodules="amr_wb $_nocodecmodules"
+  _libavdecoders=`echo $_libavdecoders | sed -e s/AMR_WB_DECODER// `
+  _libavencoders=`echo $_libavencoders | sed -e s/AMR_WB_ENCODER// `
 fi
 echores "$_amr_wb"
 
@@ -6442,6 +6455,7 @@ if test "$_xvid" = yes ; then
 else
   _def_xvid='#undef HAVE_XVID4'
   _nocodecmodules="xvid $_nocodecmodules"
+  _libavencoders=`echo $_libavencoders | sed -e s/XVID_ENCODER// `
 fi
 echores "$_xvid"
 
@@ -6496,6 +6510,7 @@ else
   _def_x264='#undef HAVE_X264'
   _def_lavc_x264='#undef CONFIG_X264'
   _nocodecmodules="x264 $_nocodecmodules"
+  _libavencoders=`echo $_libavencoders | sed -e s/X264_ENCODER// `
 fi
 echores "$_x264 (in libavcodec: $_lavc_x264)"
 
@@ -6518,6 +6533,7 @@ if test "$_nut" = yes ; then
   _ld_extra="$_ld_extra -lnut"
 else
   _def_nut='#undef HAVE_LIBNUT'
+  _libavmuxers=`echo $_libavmuxers | sed -e s/LIBNUT_MUXER// `
 fi
 echores "$_nut"
 
@@ -6559,6 +6575,7 @@ EOF
   fi
 else
   _def_mp3lame='#undef HAVE_MP3LAME'
+  _libavencoders=`echo $_libavencoders | sed -e s/MP3LAME_ENCODER// `
 fi
 echores "$_mp3lame"
 
@@ -7502,45 +7519,6 @@ if cc_check -Wdeclaration-after-statement ; then
   CFLAGS="-Wdeclaration-after-statement $CFLAGS"
 fi
 
-#############################################################################
-# Take care of ffmpeg dependencies
-if test "$_zlib" = no ; then
-  _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// `
-  _libavencoders=`echo $_libavencoders | sed -e s/FLASHSV_ENCODER// -e s/PNG_ENCODER// -e s/ZMBV_ENCODER// `
-fi
-if test "$_amr_nb" = no ; then
-  _libavdecoders=`echo $_libavdecoders | sed -e s/AMR_NB_DECODER// `
-  _libavencoders=`echo $_libavencoders | sed -e s/AMR_NB_ENCODER// `
-fi
-if test "$_amr_wb" = no ; then
-  _libavdecoders=`echo $_libavdecoders | sed -e s/AMR_WB_DECODER// `
-  _libavencoders=`echo $_libavencoders | sed -e s/AMR_WB_ENCODER// `
-fi
-if test "$_libdts" = no ; then
-  _libavdecoders=`echo $_libavdecoders | sed -e s/DTS_DECODER// `
-fi
-if test "$_xvmc" = no ; then
-  _libavdecoders=`echo $_libavdecoders | sed -e s/MPEG_XVMC_DECODER// `
-fi
-if test "$_x264" = no || test "$_lavc_x264" = no ; then
-  _libavencoders=`echo $_libavencoders | sed -e s/X264_ENCODER// `
-fi
-if test "$_xvid" = no || test "$_lavc_xvid" = no ; then
-  _libavencoders=`echo $_libavencoders | sed -e s/XVID_ENCODER// `
-fi
-if test "$_faac" = no || test "$_lavc_faac" = no ; then
-  _libavencoders=`echo $_libavencoders | sed -e s/FAAC_ENCODER// `
-fi
-if test "$_mp3lame" = no || test "$_lavc_mp3lame" = no ; then
-  _libavencoders=`echo $_libavencoders | sed -e s/MP3LAME_ENCODER// `
-fi
-if test "$_libvorbis" = no ; then
-  _libavencoders=`echo $_libavencoders | sed -e s/LIBVORBIS_ENCODER// `
-  _libavmuxers=`echo $_libavmuxers | sed -e s/OGG_MUXER// `
-fi
-if test "$_nut" = no ; then
-  _libavmuxers=`echo $_libavmuxers | sed -e s/LIBNUT_MUXER// `
-fi
 
 #############################################################################
 echo "Creating config.mak"
