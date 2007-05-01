@@ -141,6 +141,10 @@ PARTS = dvdread \
 
 all:	$(ALL_PRG)
 
+dep depend: help_mp.h version.h codecs.conf.h
+	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) $(SRCS_MENCODER) $(SRCS_COMMON) 1>.depend
+	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
+
 libaf/libaf.a:
 	$(MAKE) -C libaf
 
@@ -300,10 +304,6 @@ uninstall:
 	          $(MANDIR)/$$l/man1/gmplayer.1 ; \
 	  fi ; \
 	done
-
-dep depend: help_mp.h version.h codecs.conf.h
-	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) $(SRCS_MENCODER) $(SRCS_COMMON) 1>.depend
-	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
 clean:
 	-rm -f *.o *.a *~
