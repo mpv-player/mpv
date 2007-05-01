@@ -66,6 +66,7 @@ typedef struct glyph_hash_key_s {
 	int bold, italic;
 	unsigned scale_x, scale_y; // 16.16
 	FT_Vector advance; // subpixel shift vector
+	unsigned outline; // border width, 16.16
 } glyph_hash_key_t;
 
 typedef struct glyph_hash_val_s {

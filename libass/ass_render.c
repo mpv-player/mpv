@@ -1237,6 +1237,7 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 	key.advance = *advance;
 	key.bold = render_context.bold;
 	key.italic = render_context.italic;
+	key.outline = render_context.border * 0xFFFF;
 
 	info->glyph = info->outline_glyph = 0;
 
