@@ -6,11 +6,6 @@
 
 include config.mak
 
-CFLAGS = -I. -I./libavutil $(OPTFLAGS)
-
-CFLAGS-$(LIBAVCODEC)        += -I./libavcodec
-CFLAGS                      += $(CFLAGS-yes)
-
 COMMON_LDFLAGS += $(EXTRA_LIB)\
                   $(EXTRALIBS) \
 
@@ -91,11 +86,6 @@ OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
-OBJS_COMMON   = $(SRCS_COMMON:.c=.o)
-OBJS_MPLAYER  = $(SRCS_MPLAYER:.c=.o)
-OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
-
-SRCS_COMMON  += $(SRCS_COMMON-yes)
 COMMON_LIBS  += $(COMMON_LIBS-yes)
 LIBS_MPLAYER += $(LIBS_MPLAYER-yes)
 OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
@@ -141,9 +131,12 @@ PARTS = dvdread \
 
 all:	$(ALL_PRG)
 
-dep depend: help_mp.h version.h codecs.conf.h
-	$(CC) -MM $(CFLAGS) $(SRCS_MPLAYER) $(SRCS_MENCODER) $(SRCS_COMMON) 1>.depend
+dep depend:: help_mp.h version.h codecs.conf.h
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
+
+include mpcommon.mak
+
+CFLAGS := $(subst -I..,-I.,$(CFLAGS))
 
 libaf/libaf.a:
 	$(MAKE) -C libaf
@@ -305,16 +298,15 @@ uninstall:
 	  fi ; \
 	done
 
-clean:
-	-rm -f *.o *.a *~
+clean::
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h
 	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
 
-distclean: clean doxygen_clean
+distclean:: doxygen_clean
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
-	-rm -f .depend configure.log config.mak config.h
+	-rm -f configure.log config.mak config.h
 
 strip:
 	strip -s $(ALL_PRG)
@@ -405,7 +397,4 @@ gui/libgui.a: .norecurse $(wildcard gui/*.[ch] gui/*/*.[ch] gui/*/*/*.[ch])
 
 libass/libass.a: .norecurse $(wildcard libass/*.[ch])
 
--include .depend
-
-.PHONY: all install* uninstall clean distclean strip dep depend
-.PHONY: doxygen doxygen_clean
+.PHONY: all install* uninstall strip doxygen doxygen_clean
