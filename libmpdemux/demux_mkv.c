@@ -3738,7 +3738,7 @@ demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   mkv_track_t *track = demux_mkv_find_track_by_num (mkv_d, track_num, MATROSKA_TRACK_SUBTITLE);
-  if (track->language && strcmp(track->language, "und"))
+  if (track && track->language && strcmp(track->language, "und"))
     strlcpy(lang, track->language, maxlen);
 }
 
@@ -3758,7 +3758,7 @@ demux_mkv_get_audio_lang(demuxer_t *demuxer, int track_num, char *lang,
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   mkv_track_t *track = demux_mkv_find_track_by_num (mkv_d, track_num, MATROSKA_TRACK_AUDIO);
-  if (track->language && strcmp(track->language, "und"))
+  if (track && track->language && strcmp(track->language, "und"))
     strlcpy(lang, track->language, maxlen);
 }
 
