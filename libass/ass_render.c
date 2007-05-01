@@ -1277,10 +1277,10 @@ static void get_bitmap_glyph(glyph_info_t* info)
 		int error;
 		info->bm = info->bm_o = info->bm_s = 0;
 		if (info->glyph && info->symbol != '\n' && info->symbol != 0) {
-		// calculating shift vector
-		shift.x = int_to_d6(info->hash_key.shift_x);
-		shift.y = int_to_d6(info->hash_key.shift_y);
-		transform_3d(shift, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
+			// calculating shift vector
+			shift.x = int_to_d6(info->hash_key.shift_x);
+			shift.y = int_to_d6(info->hash_key.shift_y);
+			transform_3d(shift, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
 
 			error = glyph_to_bitmap(ass_renderer->synth_priv,
 					info->glyph, info->outline_glyph,
