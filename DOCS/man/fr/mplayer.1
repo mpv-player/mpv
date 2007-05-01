@@ -1,4 +1,4 @@
-.\" synced with r22779
+.\" synced with r23152
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -1814,7 +1814,11 @@ aucun son
 Voir \-tv driver=help pour avoir la liste des pilotes d'entrée TV activés à la compilation.
 disponibles: dummy, v4l, v4l2, bsdbt848
 .IPs device=<valeur>
-Spécifie un autre périphérique que celui par défaut /dev/\:video0.
+Défini un périphérique TV (par défaut /dev/\:video0).
+.I NOTE\ :
+Pour le pilote bsdbt848 vous pouvez donner autant bktr que tuner en tant que nom
+de périphérique, séparé par une virgule, en plaçant tuner après bktr
+(ex\ : -tv device=/dev/bktr1,/dev/tuner1).
 .IPs input=<valeur>
 Défini une autre entrée que celle par défaut 0 (Télévision) (voir
 la sortie console pour en obtenir la liste)
@@ -1995,6 +1999,28 @@ Force les paramètres de style.
 .PD 0
 .RSs
 \-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
+.
+.TP
+.B \-ass-hinting <type>
+Défini le type de d'indice (hinting).
+.PD 0
+.RSs
+.IPs <type>
+0: pas d'indice.
+.br
+1: indice auto de FreeType, mode léger.
+.br
+2: indice auto de FreeType, mode normal.
+.br
+3: indice natif de la police.
+.br
+0-3 + 4: Idem, sauf que les indices ne seront pris en compte que si l'OSD
+est rendu à la résolution de l'écran, c-à-d qui non redimensionné.
+.br
+La valeur par défaut est 7 (indice natif pour l'OSD non redimensionné et pas
+d'utilisation des indices dans le cas contraire).
 .RE
 .PD 1
 .
@@ -10364,12 +10390,17 @@ paquets headers (par défaut\ : 1800 kb/s).
 Sera mis à jour si nécessaire dans le cas où 'format=mpeg1' ou 'mpeg2'.
 .
 .TP
-.B "tsaf\ \ \ "
+.B tsaf
 Place des marques d'horodatage (timestamps) dans chaque trame, si possible;
 recommandé lorsque format=dvd.
 Si dvdauthor indique un message du type "..audio sector out of range...",
 c'est que vous devez activer cette option.
 .
+.TP
+.B interleaving2
+Utilise un meilleur algorithme pour entrelacer les paquets audio et vidéo,
+basé sur le principe que le multiplexeur essayera de toujours remplir le flux
+le moins rempli.
 .TP
 .B vdelay=<1\-32760>
 Retard vidéo initial, en millisecondes (par défaut\ : 0),
@@ -10381,7 +10412,7 @@ Retard audio initial, en millisecondes (par défaut\ : 0),
 à utiliser si vous voulez retarder l'audio par rapport à la vidéo.
 .
 .TP
-.B "drop\ \ \ "
+.B drop
 Lorsque utilisé en même temps que vdelay, le multiplexeur élimine
 le début de la piste sonore qui n'aurait pas été jouée si elle commençait
 avant la vidéo.
