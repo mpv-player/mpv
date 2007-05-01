@@ -5235,9 +5235,9 @@ if test "$_dvdread_internal" = yes; then
 elif test "$_dvdread" = yes; then
   _def_dvdread='#define USE_DVDREAD 1'
   _largefiles=yes
-    _ld_extra="$_ld_extra -ldvdread"
-    _inputmodules="dvdread(external) $_inputmodules"
-    _res_comment="external"
+  _ld_extra="$_ld_extra -ldvdread"
+  _inputmodules="dvdread(external) $_inputmodules"
+  _res_comment="external"
 else
   _def_dvdread_internal="#undef USE_DVDREAD_INTERNAL"
   _def_dvdread='#undef USE_DVDREAD'
