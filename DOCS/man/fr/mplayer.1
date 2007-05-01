@@ -1,4 +1,4 @@
-.\" synced with r23152
+.\" synced with r23162
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -3042,6 +3042,9 @@ Définit l'intervalle de rafraichissement vertical du moniteur.
 .TP
 .B \-monitoraspect <rapport> (Voir aussi \-aspect)
 Fixe le rapport hauteur/\:largeur de votre moniteur ou de votre TV.
+La valeur 0 désactive le dernier paramètres de monitoraspect (ex: celle
+du fichier de configuration).
+Passe outre \-monitorpixelaspect si activé.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -3057,8 +3060,7 @@ Fixe le rapport hauteur/\:largeur de votre moniteur ou de votre TV.
 Défini l'aspect d'un seul pixel de votre moniteur ou écran TB
 (par défaut\ : désactivé).
 Écrase le paramétrage de \-monitoraspect.
-+Overrides the \-monitoraspect setting.
-La valeur 0 désactive, la valeur 1 signifie des pixels carrés (correct
+La valeur 1 signifie des pixels carrés (correct
 pour presque tous les écrans LCD).
 .
 .TP
