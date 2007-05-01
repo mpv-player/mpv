@@ -1276,6 +1276,8 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 	}
 }
 
+static void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz);
+
 /**
  * \brief Get normal and outline glyphs from cache (if possible) or font face
  * \param index face glyph index
@@ -1296,8 +1298,14 @@ static void get_bitmap_glyph(glyph_info_t* info)
 		info->bm = val->bm;
 		info->bm_o = val->bm_o;
 		info->bm_s = val->bm_s;
-	} else
+	} else {
+		FT_Vector shift;
 		info->bm = info->bm_o = info->bm_s = 0;
+		// calculating shift vector
+		shift.x = int_to_d6(info->hash_key.shift_x);
+		shift.y = int_to_d6(info->hash_key.shift_y);
+		transform_3d(shift, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
+	}
 }
 
 /**
@@ -1949,7 +1957,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		}
 
 		for (i = 0; i < text_info.length; ++i) {
-			FT_Vector shift;
 			glyph_info_t* info = text_info.glyphs + i;
 
 			if (info->hash_key.frx || info->hash_key.fry || info->hash_key.frz) {
@@ -1960,14 +1967,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 				info->hash_key.shift_y = 0;
 			}
 			get_bitmap_glyph(info);
-
-			if (info->bm == 0) {
-				// calculating shift vector
-				shift.x = int_to_d6(info->hash_key.shift_x);
-				shift.y = int_to_d6(info->hash_key.shift_y);
-
-				transform_3d(shift, &info->glyph, &info->outline_glyph, info->frx, info->fry, info->frz);
-			}
 		}
 	}
 
