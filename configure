@@ -6525,42 +6525,42 @@ echores "$_nut"
 # mencoder requires (optional) those libs: libmp3lame
 if test "$_mencoder" != no ; then
 
-  echocheck "libmp3lame (for mencoder)"
-  _mp3lame=no
-  _def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
-  _def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
-  cat > $TMPC <<EOF
+echocheck "libmp3lame (for mencoder)"
+_mp3lame=no
+_def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
+_def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
+cat > $TMPC <<EOF
 #include <lame/lame.h>
 int main(void) { lame_version_t lv; (void) lame_init(); get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor); return 0; }
 EOF
-  # Note: libmp3lame usually depends on vorbis
-  cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
-  if test "$_mp3lame" = yes ; then
-    _def_mp3lame="#define HAVE_MP3LAME"
-    _ld_mp3lame=-lmp3lame
-    _libs_mencoder="$_libs_mencoder $_ld_mp3lame"
-    cat > $TMPC << EOF
+# Note: libmp3lame usually depends on vorbis
+cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
+if test "$_mp3lame" = yes ; then
+  _def_mp3lame="#define HAVE_MP3LAME"
+  _ld_mp3lame=-lmp3lame
+  _libs_mencoder="$_libs_mencoder $_ld_mp3lame"
+  cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, STANDARD_FAST); return 0; }
 EOF
-    cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset="#define HAVE_MP3LAME_PRESET"
-    cat > $TMPC << EOF
+  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset="#define HAVE_MP3LAME_PRESET"
+  cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
-    cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
-    if echo $_libavencoders | grep -q MP3LAME ; then
-      _lavc_mp3lame=yes
-      _def_lavc_mp3lame="#define CONFIG_LIBMP3LAME 1"
-      _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
-    else
-      _lavc_mp3lame=no
-      _def_lavc_mp3lame="#undef CONFIG_LIBMP3LAME"
-    fi
+  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
+  if echo $_libavencoders | grep -q MP3LAME ; then
+    _lavc_mp3lame=yes
+    _def_lavc_mp3lame="#define CONFIG_LIBMP3LAME 1"
+    _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
   else
-    _def_mp3lame='#undef HAVE_MP3LAME'
+    _lavc_mp3lame=no
+    _def_lavc_mp3lame="#undef CONFIG_LIBMP3LAME"
   fi
-  echores "$_mp3lame"
+else
+  _def_mp3lame='#undef HAVE_MP3LAME'
+fi
+echores "$_mp3lame"
 
 fi
 
