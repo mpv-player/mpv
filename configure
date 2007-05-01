@@ -5198,41 +5198,6 @@ else
 fi
 echores "$_vcd"
 
-echocheck "DVD support (libdvdnav)"
-if test "$_dvdnav" = auto ; then
-  $_dvdnavconfig --version >> $TMPLOG 2>&1 || _dvdnav=no
-fi
-if test "$_dvdnav" = auto ; then
-  cat > $TMPC <<EOF
-#include <inttypes.h>
-#include <dvdnav.h>
-int main(void) { dvdnav_t *dvd=0; return 0; }
-EOF
-  _dvdnav=no
-  _dvdnavdir=`$_dvdnavconfig --cflags`
-  _dvdnavlibs=`$_dvdnavconfig --libs`
-  _dvdnavvsn=`$_dvdnavconfig --version | sed "s/\.//g"`
-  _dvdnavmajor=`echo $_dvdnavvsn | cut -d. -f2`
-  test "$_dvdnavmajor" -ge 2 -o "$_dvdnavvsn" -ge 0110 && \
-       cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
-fi
-if test "$_dvdnav" = yes ; then
-  _largefiles=yes
-  _def_dvdnav='#define USE_DVDNAV 1'
-  _ld_extra="$_ld_extra `$_dvdnavconfig --libs`"
-  _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
-  _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
-  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
-  _inputmodules="dvdnav $_inputmodules"
-  
-  #disable dvdread checks: dvdread will be enabled using dvdnav's version of dvdread
-  _dvdread_internal=no
-  _dvdread=yes
-else
-  _def_dvdnav='#undef USE_DVDNAV'
-  _noinputmodules="dvdnav $_noinputmodules"
-fi
-echores "$_dvdnav"
 
 
 echocheck "dvdread"
@@ -5270,14 +5235,9 @@ if test "$_dvdread_internal" = yes; then
 elif test "$_dvdread" = yes; then
   _def_dvdread='#define USE_DVDREAD 1'
   _largefiles=yes
-  if test "$_dvdnav" != yes; then
     _ld_extra="$_ld_extra -ldvdread"
     _inputmodules="dvdread(external) $_inputmodules"
     _res_comment="external"
-  else
-    _inputmodules="dvdread(from dvdnav) $_inputmodules"
-    _res_comment="from dvdnav"
-  fi
 else
   _def_dvdread_internal="#undef USE_DVDREAD_INTERNAL"
   _def_dvdread='#undef USE_DVDREAD'
@@ -7519,6 +7479,41 @@ if cc_check -Wdeclaration-after-statement ; then
   CFLAGS="-Wdeclaration-after-statement $CFLAGS"
 fi
 
+
+#this must be the last test to be performed or the ones following it will likely fail
+#because libdvdnavmini is intentionally not linked against libdvdread (to permit mplayer
+# to use its own copy of the library)
+echocheck "DVD support (libdvdnav)"
+if test "$_dvdnav" = auto ; then
+  $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
+fi
+if test "$_dvdnav" = auto ; then
+  cat > $TMPC <<EOF
+#include <inttypes.h>
+#include <dvdnav.h>
+int main(void) { dvdnav_t *dvd=0; return 0; }
+EOF
+  _dvdnav=no
+  _dvdnavdir=`$_dvdnavconfig --cflags`
+  _dvdnavlibs=`$_dvdnavconfig --libs`
+  _dvdnavvsn=`$_dvdnavconfig --version | sed "s/\.//g"`
+  _dvdnavmajor=`echo $_dvdnavvsn | cut -d. -f2`
+  test "$_dvdnavmajor" -ge 2 -o "$_dvdnavvsn" -ge 0110 && \
+       cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
+fi
+if test "$_dvdnav" = yes ; then
+  _largefiles=yes
+  _def_dvdnav='#define USE_DVDNAV 1'
+  _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
+  _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
+  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
+  _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+  _inputmodules="dvdnav $_inputmodules"
+else
+  _def_dvdnav='#undef USE_DVDNAV'
+  _noinputmodules="dvdnav $_noinputmodules"
+fi
+echores "$_dvdnav"
 
 #############################################################################
 echo "Creating config.mak"
