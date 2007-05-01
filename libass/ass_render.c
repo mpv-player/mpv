@@ -1652,7 +1652,7 @@ static inline void transform_glyph_3d(FT_Glyph glyph, double *m, FT_Vector shift
  * \param frz z-axis rotation angle
  * Rotates both glyphs by frx, fry and frz. Shift vector is added before rotation and subtracted after it.
  */
-void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz)
+static void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz)
 {
 	if (frx != 0. || fry != 0. || frz != 0.) {
 		double m[16];
