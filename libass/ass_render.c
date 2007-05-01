@@ -1966,9 +1966,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 				info->hash_key.shift_x = 0;
 				info->hash_key.shift_y = 0;
 			}
-			get_bitmap_glyph(info);
 		}
 	}
+
+	for (i = 0; i < text_info.length; ++i)
+		get_bitmap_glyph(text_info.glyphs + i);
 
 	event_images->top = device_y - d6_to_int(text_info.lines[0].asc);
 	event_images->height = d6_to_int(text_info.height);
