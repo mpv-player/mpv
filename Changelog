@@ -47,6 +47,7 @@ MPlayer (1.0)
     * support AMR over RTSP
     * support H.264 over RTSP
     * "device" and "adevice" suboptions now works for *BSD BT848 tv driver too
+    * dvdnav:// now depends on mplayer's fork of libdvdnav
 
     FFmpeg/libavcodec:
     * Intel Music coder audio decoder
