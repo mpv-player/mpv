@@ -80,7 +80,7 @@ int conv24to32( txSample * bf )
      return 1;
     }
    memset( bf->Image,0,bf->ImageSize );
-   for ( c=0,i=0;i < (int)(bf->Width * bf->Height * 3); )
+   for ( c=0,i=0; c < bf->ImageSize; )
     {
      bf->Image[c++]=tmpImage[i++];	//red
      bf->Image[c++]=tmpImage[i++];	//green
