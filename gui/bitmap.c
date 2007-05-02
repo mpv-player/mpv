@@ -12,7 +12,7 @@
 #endif
 #include "libvo/fastmemcpy.h"
 
-int pngRead( unsigned char * fname,txSample * bf )
+static int pngRead( unsigned char * fname,txSample * bf )
 {
  int             decode_ok;
  void           *data;
@@ -64,7 +64,7 @@ int pngRead( unsigned char * fname,txSample * bf )
  return !(decode_ok && bf->BPP);
 }
 
-int conv24to32( txSample * bf )
+static int conv24to32( txSample * bf )
 {
  unsigned char * tmpImage;
  int             i,c;
@@ -91,7 +91,7 @@ int conv24to32( txSample * bf )
  return 0;
 }
 
-void bgr2rgb( txSample * bf )
+static void bgr2rgb( txSample * bf )
 {
  unsigned char c;
  int           i;
@@ -104,7 +104,7 @@ void bgr2rgb( txSample * bf )
   }
 }
 
-void Normalize( txSample * bf )
+static void Normalize( txSample * bf )
 {
  int           i;
 #ifndef WORDS_BIGENDIAN 
@@ -114,9 +114,9 @@ void Normalize( txSample * bf )
 #endif
 }
 
-unsigned char tmp[512];
+static unsigned char tmp[512];
 
-unsigned char * fExist( unsigned char * fname )
+static unsigned char * fExist( unsigned char * fname )
 {
  FILE          * fl;
  unsigned char   ext[][6] = { ".png\0",".PNG\0" };
@@ -187,7 +187,7 @@ void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
  }
 }
 
-void Convert1to32( txSample * in,txSample * out )
+static void Convert1to32( txSample * in,txSample * out )
 {
  if ( in->Image == NULL ) return;
  out->Width=in->Width;
