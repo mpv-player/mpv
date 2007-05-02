@@ -93,15 +93,10 @@ static int conv24to32( txSample * bf )
 
 static void bgr2rgb( txSample * bf )
 {
- unsigned char c;
  int           i;
 
  for ( i=0;i < (int)bf->ImageSize;i+=4 )
-  {
-   c=bf->Image[i];
-   bf->Image[i]=bf->Image[i+2];
-   bf->Image[i+2]=c;
-  }
+   FFSWAP(uint8_t, bf->Image[i], bf->Image[i+2]);
 }
 
 static void Normalize( txSample * bf )
