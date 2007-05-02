@@ -74,13 +74,12 @@ static int conv24to32( txSample * bf )
    tmpImage=bf->Image;
    bf->ImageSize=bf->Width * bf->Height * 4;
    bf->BPP=32;
-   if ( ( bf->Image=malloc( bf->ImageSize ) ) == NULL )
+   if ( ( bf->Image=calloc( 1, bf->ImageSize ) ) == NULL )
     {
      free( tmpImage );
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] not enough memory for image\n" );
      return 1;
     }
-   memset( bf->Image,0,bf->ImageSize );
    for ( c=0,i=0; c < bf->ImageSize; )
     {
      bf->Image[c++]=tmpImage[i++];	//red
