@@ -186,29 +186,3 @@ void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
   if ( nothaveshape ) { free( out->Image ); out->Image=NULL; }
  }
 }
-
-static void Convert1to32( txSample * in,txSample * out )
-{
- if ( in->Image == NULL ) return;
- out->Width=in->Width;
- out->Height=in->Height;
- out->BPP=32;
- out->ImageSize=out->Width * out->Height * 4;
- out->Image=calloc( 1,out->ImageSize );
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c1to32] imagesize: %d\n",out->ImageSize );
- if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_WARN,MSGTR_NotEnoughMemoryC1To32 );
- {
-  int i,b,c=0; unsigned int * buf = NULL; unsigned char tmp = 0;
-  buf=(unsigned int *)out->Image;
-  for ( c=0,i=0;i < (int)(in->Width * in->Height / 8);i++ )
-   {
-    tmp=in->Image[i];
-    for ( b=0;b<8;b++ )
-     {
-      buf[c]=0;
-      if ( tmp&0x1 ) buf[c]=0xffffffff;
-      c++; tmp=tmp>>1;
-     }
-   }
- }
-}
