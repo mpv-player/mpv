@@ -2499,7 +2499,8 @@ if test "$_vidix_internal" = auto ; then
   _vidix_internal=no
   # should check for x86 systems supporting VIDIX (does QNX have VIDIX?)
   x86 && _vidix_internal=yes
-  ppc && linux && _vidix_internal=yes
+# this is broken currently, undefined references to inw, outw etc.
+#  ppc && linux && _vidix_internal=yes
   alpha && linux && _vidix_internal=yes
   qnx && _vidix_internal=no
   sunos && not x86 && _vidix_internal=no
