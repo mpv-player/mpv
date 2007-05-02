@@ -1307,12 +1307,12 @@ static void get_bitmap_glyph(glyph_info_t* info)
 			hash_val.bm_s = info->bm_s;
 			cache_add_bitmap(&(info->hash_key), &hash_val);
 		}
-		// deallocate glyphs
-		if (info->glyph)
-			FT_Done_Glyph(info->glyph);
-		if (info->outline_glyph)
-			FT_Done_Glyph(info->outline_glyph);
 	}
+	// deallocate glyphs
+	if (info->glyph)
+		FT_Done_Glyph(info->glyph);
+	if (info->outline_glyph)
+		FT_Done_Glyph(info->outline_glyph);
 }
 
 /**
