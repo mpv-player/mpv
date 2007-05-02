@@ -2,22 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <png.h>
-
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "bitmap.h"
+#ifdef USE_LIBAVCODEC_SO
+#include <ffmpeg/avcodec.h>
+#else
+#include "libavcodec/avcodec.h"
+#endif
+#include "libvo/fastmemcpy.h"
 
 int pngRead( unsigned char * fname,txSample * bf )
 {
- unsigned char   header[8];
- png_structp     png;
- png_infop       info;
- png_infop       endinfo;
- png_bytep     * row_p;
- png_bytep       palette = NULL;
- int             color;
- png_uint_32     i;
+ int             decode_ok;
+ void           *data;
+ int             len;
+ AVCodecContext *avctx;
+ AVFrame        *frame;
  
  FILE *fp=fopen( fname,"rb" );
  if ( !fp ) 
@@ -26,69 +27,41 @@ int pngRead( unsigned char * fname,txSample * bf )
    return 1;
   }
 
- fread( header,1,8,fp );
- if ( !png_check_sig( header,8 ) ) return 1;
-
- png=png_create_read_struct( PNG_LIBPNG_VER_STRING,NULL,NULL,NULL );
- info=png_create_info_struct( png );
- endinfo=png_create_info_struct( png );
-
- png_init_io( png,fp );
- png_set_sig_bytes( png,8 );
- png_read_info( png,info );
- png_get_IHDR( png,info,&bf->Width,&bf->Height,&bf->BPP,&color,NULL,NULL,NULL );
-
- row_p=malloc( sizeof( png_bytep ) * bf->Height );
- if ( !row_p )
-  {
-   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png]  not enough memory for row buffer\n" );
-   return 2;
-  }
- bf->Image=(png_bytep)malloc( png_get_rowbytes( png,info ) * bf->Height );
- if ( !bf->Image )
-  {
-   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png]  not enough memory for image buffer\n" );
-   return 2;
-  }
- for ( i=0; i < bf->Height; i++ ) row_p[i]=&bf->Image[png_get_rowbytes( png,info ) * i];
-
- png_read_image( png,row_p );
- free( row_p );
-
-#if 0
- if ( color == PNG_COLOR_TYPE_PALETTE )
-  {
-   int cols;
-   png_get_PLTE( png,info,(png_colorp *)&palette,&cols );
-  }
-#endif
-
- if ( color&PNG_COLOR_MASK_ALPHA )
-  {
-   if ( color&PNG_COLOR_MASK_PALETTE || color == PNG_COLOR_TYPE_GRAY_ALPHA ) bf->BPP*=2;
-     else bf->BPP*=4;
-  }
-  else
-   {
-    if ( color&PNG_COLOR_MASK_PALETTE || color == PNG_COLOR_TYPE_GRAY ) bf->BPP*=1;
-      else bf->BPP*=3;
-   }
-
- png_read_end( png,endinfo );
- png_destroy_read_struct( &png,&info,&endinfo );
-
- if ( fclose( fp ) != 0 )
-  {
-   free( bf->Image );
-   free( palette );
-   return 1;
-  }
- bf->ImageSize=bf->Width * bf->Height * ( bf->BPP / 8 );
+ fseek(fp, 0, SEEK_END);
+ len = ftell(fp);
+ if (len > 50 * 1024 * 1024) return 2;
+ data = malloc(len + FF_INPUT_BUFFER_PADDING_SIZE);
+ fseek(fp, 0, SEEK_SET);
+ fread(data, len, 1, fp);
+ fclose(fp);
+ avctx = avcodec_alloc_context();
+ frame = avcodec_alloc_frame();
+ avcodec_open(avctx, &png_decoder);
+ avcodec_decode_video(avctx, frame, &decode_ok, data, len);
+ memset(bf, 0, sizeof(*bf));
+ switch (avctx->pix_fmt) {
+   case PIX_FMT_GRAY8:    bf->BPP =  8; break;
+   case PIX_FMT_GRAY16BE: bf->BPP = 16; break;
+   case PIX_FMT_RGB24:    bf->BPP = 24; break;
+   case PIX_FMT_RGB32:    bf->BPP = 32; break;
+   default:               bf->BPP =  0; break;
+ }
+ if (decode_ok && bf->BPP) {
+   int bpl;
+   bf->Width = avctx->width; bf->Height = avctx->height;
+   bpl = bf->Width * (bf->BPP / 8);
+   bf->ImageSize = bpl * bf->Height;
+   bf->Image = malloc(bf->ImageSize);
+   memcpy_pic(bf->Image, frame->data[0], bpl, bf->Height, bpl, frame->linesize[0]);
+ }
+ avcodec_close(avctx);
+ av_freep(&frame);
+ av_freep(&avctx);
 
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png] filename: %s.\n",fname );
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png]  size: %dx%d bits: %d\n",bf->Width,bf->Height,bf->BPP );
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png]  imagesize: %lu\n",bf->ImageSize );
- return 0;
+ return !(decode_ok && bf->BPP);
 }
 
 int conv24to32( txSample * bf )
