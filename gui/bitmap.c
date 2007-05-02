@@ -76,6 +76,7 @@ static int conv24to32( txSample * bf )
    bf->BPP=32;
    if ( ( bf->Image=malloc( bf->ImageSize ) ) == NULL )
     {
+     free( tmpImage );
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] not enough memory for image\n" );
      return 1;
     }
