@@ -476,8 +476,8 @@ _prefix="/usr/local"
 _libavutil_a=auto
 _libavutil_so=auto
 _libavcodec_a=auto
-_amr_nb=auto
-_amr_wb=auto
+_libamr_nb=auto
+_libamr_wb=auto
 _libavdecoders_all=`sed -n 's/^[^#]*DEC.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavdecoders=` echo $_libavdecoders_all | sed -e s/AAC_DECODER// -e s/MPEG4AAC_DECODER//  -e s/LIBA52_DECODER// -e s/LIBGSM_DECODER// -e s/LIBGSM_MS_DECODER// -e s/LIBVORBIS_DECODER// `
 _libavencoders_all=`sed -n 's/^[^#]*ENC.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
@@ -977,10 +977,10 @@ for ac_option do
   --disable-libavcodec_a)	_libavcodec_a=no	;;
   --enable-libavcodec_so)	_libavcodec_so=yes	;;
   --disable-libavcodec_so)	_libavcodec_so=no	;;
-  --enable-amr_nb)	_amr_nb=yes	;;
-  --disable-amr_nb)	_amr_nb=no	;;
-  --enable-amr_wb)	_amr_wb=yes	;;
-  --disable-amr_wb)	_amr_wb=no	;;
+  --enable-amr_nb)	_libamr_nb=yes	;;
+  --disable-amr_nb)	_libamr_nb=no	;;
+  --enable-amr_wb)	_libamr_wb=yes	;;
+  --disable-amr_wb)	_libamr_wb=no	;;
   --enable-decoder=*)	_libavdecoders="$_libavdecoders `echo $ac_option | cut -d '=' -f 2`" ;;
   --disable-decoder=*)	_libavdecoders=`echo $_libavdecoders | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
   --enable-encoder=*)	_libavencoders="$_libavencoders `echo $ac_option | cut -d '=' -f 2`" ;;
@@ -6284,62 +6284,62 @@ fi
 echores "$_md5sum"
 
 echocheck "AMR narrowband"
-if test "$_amr_nb" = auto ; then
-  _amr_nb=no
+if test "$_libamr_nb" = auto ; then
+  _libamr_nb=no
   cat > $TMPC << EOF
 #include <amrnb/interf_dec.h>
 int main(void) { Speech_Decode_Frame_init(); return 0; }
 EOF
-  cc_check -lamrnb && _amr_nb=yes
+  cc_check -lamrnb && _libamr_nb=yes
   if test "$_libavcodec_a" != yes ; then
-    _amr_nb=no
+    _libamr_nb=no
     _res_comment="libavcodec (static) is required by amr_nb, sorry"
   fi
 fi
-if test "$_amr_nb" = yes ; then
-  _amr=yes
+if test "$_libamr_nb" = yes ; then
+  _libamr=yes
   _ld_extra="$_ld_extra -lamrnb"
-  _def_amr='#define CONFIG_AMR 1'
-  _def_amr_nb='#define CONFIG_AMR_NB 1'
+  _def_libamr='#define CONFIG_AMR 1'
+  _def_libamr_nb='#define CONFIG_AMR_NB 1'
 else
-  _def_amr_nb='#undef CONFIG_AMR_NB'
+  _def_libamr_nb='#undef CONFIG_AMR_NB'
   _libavdecoders=`echo $_libavdecoders | sed -e s/AMR_NB_DECODER// `
   _libavencoders=`echo $_libavencoders | sed -e s/AMR_NB_ENCODER// `
 fi
-echores "$_amr_nb"
+echores "$_libamr_nb"
 
-if test "$_amr_nb" = yes ; then
+if test "$_libamr_nb" = yes ; then
   _codecmodules="amr_nb $_codecmodules"
 else
   _nocodecmodules="amr_nb $_nocodecmodules"
 fi
 
 echocheck "AMR wideband"
-if test "$_amr_wb" = auto ; then
-  _amr_wb=no
+if test "$_libamr_wb" = auto ; then
+  _libamr_wb=no
   cat > $TMPC << EOF
 #include <amrwb/dec_if.h>
 int main(void) { D_IF_init(); return 0; }
 EOF
-  cc_check -lamrwb && _amr_wb=yes
+  cc_check -lamrwb && _libamr_wb=yes
   if test "$_libavcodec_a" != yes ; then
-    _amr_wb=no
+    _libamr_wb=no
     _res_comment="libavcodec (static) is required by amr_wb, sorry"
   fi
 fi
-if test "$_amr_wb" = yes ; then
-  _amr=yes
+if test "$_libamr_wb" = yes ; then
+  _libamr=yes
   _ld_extra="$_ld_extra -lamrwb"
-  _def_amr='#define CONFIG_AMR 1'
-  _def_amr_wb='#define CONFIG_AMR_WB 1'
+  _def_libamr='#define CONFIG_AMR 1'
+  _def_libamr_wb='#define CONFIG_AMR_WB 1'
   _codecmodules="amr_wb $_codecmodules"
 else
-  _def_amr_wb='#undef CONFIG_AMR_WB'
+  _def_libamr_wb='#undef CONFIG_AMR_WB'
   _nocodecmodules="amr_wb $_nocodecmodules"
   _libavdecoders=`echo $_libavdecoders | sed -e s/AMR_WB_DECODER// `
   _libavencoders=`echo $_libavencoders | sed -e s/AMR_WB_ENCODER// `
 fi
-echores "$_amr_wb"
+echores "$_libamr_wb"
 
 echocheck "libdv-0.9.5+"
 if test "$_libdv" = auto ; then
@@ -7677,9 +7677,9 @@ MACOSX_COREVIDEO = $_macosx_corevideo
 TOOLAME=$_toolame
 TWOLAME=$_twolame
 FAAC=$_faac
-CONFIG_AMR=$_amr
-CONFIG_AMR_NB=$_amr_nb
-CONFIG_AMR_WB=$_amr_wb
+CONFIG_AMR=$_libamr
+CONFIG_AMR_NB=$_libamr_nb
+CONFIG_AMR_WB=$_libamr_wb
 `echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
@@ -8088,9 +8088,9 @@ $_def_muxers
 #define CONFIG_GPL 1
 
 /* Use AMR codecs from libavcodec. */
-$_def_amr
-$_def_amr_nb
-$_def_amr_wb
+$_def_libamr
+$_def_libamr_nb
+$_def_libamr_wb
 
 /* Use specific parts from FFmpeg. */
 `ff_config_enable "$_libavdecoders_all" "$_libavdecoders"`
