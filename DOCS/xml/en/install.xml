@@ -51,7 +51,7 @@ answers.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - optional JPEG en/decoder,
-  required for the JPEG video output driver and decoding MJPEG video
+  required for the JPEG video output driver
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - optional (M)PNG en/decoder,
