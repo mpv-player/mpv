@@ -317,8 +317,8 @@ Codecs:
   --disable-liba52          disable builtin liba52 [enabled]
   --disable-libmpeg2        disable builtin libmpeg2 [enabled]
   --disable-musepack        disable musepack support [autodetect]
-  --disable-amr_nb          disable AMR narrowband, floating-point [autodetect]
-  --disable-amr_wb          disable AMR wideband, floating-point [autodetect]
+  --disable-libamr_nb       disable libamr narrowband [autodetect]
+  --disable-libamr_wb       disable libamr wideband [autodetect]
   --disable-decoder=DECODER disable specified FFmpeg decoder
   --enable-decoder=DECODER  enable specified FFmpeg decoder
   --disable-encoder=ENCODER disable specified FFmpeg encoder
@@ -977,10 +977,10 @@ for ac_option do
   --disable-libavcodec_a)	_libavcodec_a=no	;;
   --enable-libavcodec_so)	_libavcodec_so=yes	;;
   --disable-libavcodec_so)	_libavcodec_so=no	;;
-  --enable-amr_nb)	_libamr_nb=yes	;;
-  --disable-amr_nb)	_libamr_nb=no	;;
-  --enable-amr_wb)	_libamr_wb=yes	;;
-  --disable-amr_wb)	_libamr_wb=no	;;
+  --enable-libamr_nb)	_libamr_nb=yes	;;
+  --disable-libamr_nb)	_libamr_nb=no	;;
+  --enable-libamr_wb)	_libamr_wb=yes	;;
+  --disable-libamr_wb)	_libamr_wb=no	;;
   --enable-decoder=*)	_libavdecoders="$_libavdecoders `echo $ac_option | cut -d '=' -f 2`" ;;
   --disable-decoder=*)	_libavdecoders=`echo $_libavdecoders | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
   --enable-encoder=*)	_libavencoders="$_libavencoders `echo $ac_option | cut -d '=' -f 2`" ;;
