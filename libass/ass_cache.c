@@ -130,7 +130,7 @@ void hashmap_done(hashmap_t* map)
 }
 
 // does nothing if key already exists
-void hashmap_insert(hashmap_t* map, void* key, void* value)
+void* hashmap_insert(hashmap_t* map, void* key, void* value)
 {
 	unsigned hash = map->hash(key, map->key_size);
 	hashmap_item_t** next = map->root + (hash % map->nbuckets);
@@ -148,6 +148,7 @@ void hashmap_insert(hashmap_t* map, void* key, void* value)
 	(*next)->next = 0;
 
 	map->count ++;
+	return (*next)->value;
 }
 
 void* hashmap_find(hashmap_t* map, void* key)
@@ -207,9 +208,9 @@ ass_font_t* ass_font_cache_find(ass_font_desc_t* desc)
  * \brief Add a face struct to cache.
  * \param font font struct
 */
-void ass_font_cache_add(ass_font_t* font)
+void* ass_font_cache_add(ass_font_t* font)
 {
-	hashmap_insert(font_cache, &(font->desc), font);
+	return hashmap_insert(font_cache, &(font->desc), font);
 }
 
 void ass_font_cache_init(void)
@@ -240,9 +241,9 @@ static void bitmap_hash_dtor(void* key, size_t key_size, void* value, size_t val
 	free(value);
 }
 
-void cache_add_bitmap(bitmap_hash_key_t* key, bitmap_hash_val_t* val)
+void* cache_add_bitmap(bitmap_hash_key_t* key, bitmap_hash_val_t* val)
 {
-	hashmap_insert(bitmap_cache, key, val);
+	return hashmap_insert(bitmap_cache, key, val);
 }
 
 /**
@@ -288,9 +289,9 @@ static void glyph_hash_dtor(void* key, size_t key_size, void* value, size_t valu
 	free(value);
 }
 
-void cache_add_glyph(glyph_hash_key_t* key, glyph_hash_val_t* val)
+void* cache_add_glyph(glyph_hash_key_t* key, glyph_hash_val_t* val)
 {
-	hashmap_insert(glyph_cache, key, val);
+	return hashmap_insert(glyph_cache, key, val);
 }
 
 /**

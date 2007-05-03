@@ -23,7 +23,7 @@
 
 void ass_font_cache_init(void);
 ass_font_t* ass_font_cache_find(ass_font_desc_t* desc);
-void ass_font_cache_add(ass_font_t* font);
+void* ass_font_cache_add(ass_font_t* font);
 void ass_font_cache_done(void);
 
 
@@ -53,7 +53,7 @@ typedef struct bitmap_hash_val_s {
 } bitmap_hash_val_t;
 
 void ass_bitmap_cache_init(void);
-void cache_add_bitmap(bitmap_hash_key_t* key, bitmap_hash_val_t* val);
+void* cache_add_bitmap(bitmap_hash_key_t* key, bitmap_hash_val_t* val);
 bitmap_hash_val_t* cache_find_bitmap(bitmap_hash_key_t* key);
 void ass_bitmap_cache_reset(void);
 void ass_bitmap_cache_done(void);
@@ -77,7 +77,7 @@ typedef struct glyph_hash_val_s {
 } glyph_hash_val_t;
 
 void ass_glyph_cache_init(void);
-void cache_add_glyph(glyph_hash_key_t* key, glyph_hash_val_t* val);
+void* cache_add_glyph(glyph_hash_key_t* key, glyph_hash_val_t* val);
 glyph_hash_val_t* cache_find_glyph(glyph_hash_key_t* key);
 void ass_glyph_cache_reset(void);
 void ass_glyph_cache_done(void);
@@ -91,7 +91,7 @@ hashmap_t* hashmap_init(size_t key_size, size_t value_size, int nbuckets,
 			hashmap_item_dtor_t item_dtor, hashmap_key_compare_t key_compare,
 			hashmap_hash_t hash);
 void hashmap_done(hashmap_t* map);
-void hashmap_insert(hashmap_t* map, void* key, void* value);
+void* hashmap_insert(hashmap_t* map, void* key, void* value);
 void* hashmap_find(hashmap_t* map, void* key);
 
 #endif
