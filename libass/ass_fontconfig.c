@@ -65,19 +65,20 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 {
 	FcBool rc;
 	FcResult result;
-	FcPattern *pat, *rpat;
+	FcPattern *pat = 0, *rpat;
 	int val_i;
 	FcChar8* val_s;
 	FcBool val_b;
 	FcCharSet* val_cs;
-	FcFontSet* fset;
+	FcFontSet* fset = 0;
 	int curf, bestf, bestdiff = 0;
+	char* retval = 0;
 	
 	*index = 0;
 
 	pat = FcPatternCreate();
 	if (!pat)
-		return 0;
+		goto error;
 	
 	FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)family);
 	FcPatternAddBool(pat, FC_OUTLINE, FcTrue);
@@ -88,7 +89,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	
 	rc = FcConfigSubstitute(priv->config, pat, FcMatchPattern);
 	if (!rc)
-		return 0;
+		goto error;
 
 	fset = FcFontSort(priv->config, pat, FcTrue, NULL, &result);
 
@@ -123,18 +124,18 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	}
 
 	if (bestf < 0)
-		return 0;
+		goto error;
 
 	rpat = fset->fonts[bestf];
 	
 	result = FcPatternGetInteger(rpat, FC_INDEX, 0, &val_i);
 	if (result != FcResultMatch)
-		return 0;
+		goto error;
 	*index = val_i;
 
 	result = FcPatternGetString(rpat, FC_FAMILY, 0, &val_s);
 	if (result != FcResultMatch)
-		return 0;
+		goto error;
 
 	if (strcasecmp((const char*)val_s, family) != 0)
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
@@ -142,9 +143,13 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 
 	result = FcPatternGetString(rpat, FC_FILE, 0, &val_s);
 	if (result != FcResultMatch)
-		return 0;
+		goto error;
 	
-	return strdup((const char*)val_s);
+	retval = strdup((const char*)val_s);
+ error:
+	if (pat) FcPatternDestroy(pat);
+	if (fset) FcFontSetDestroy(fset);
+	return retval;
 }
 
 /**
