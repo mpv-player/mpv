@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23161 -->
+<!-- synced with r23226 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -51,11 +51,11 @@ a dokumentációt és megtalálod a válaszokat.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - választható JPEG kódoló/dekódoló,
-  a JPEG videó kimeneti vezérlőhöz és az MJPEG videó dekódolóhoz szükséges.
+  a JPEG videó kimeneti vezérlőhöz szükséges
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - választható (M)PNG dekóder,
-  a GUI-hoz és a PNG videó kimeneti vezérlőhöz szükséges.
+  a PNG videó kimeneti vezérlőhöz szükséges
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - 3.90 vagy későbbi javasolt,

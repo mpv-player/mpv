@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21760 -->
+<!-- synced with r23225 -->
 <appendix id="bugreports">
 <title>Hogyan jelentsd a hibákat</title>
 
@@ -295,7 +295,6 @@ ld -v<!--
   <itemizedlist>
     <listitem><para>GTK verziója</para></listitem>
     <listitem><para>GLIB verziója</para></listitem>
-    <listitem><para>libpng verziója</para></listitem>
     <listitem><para>GUI szituáció, ahol a hiba előjön</para></listitem>
   </itemizedlist>
 </para></listitem>
