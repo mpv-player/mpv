@@ -295,7 +295,6 @@ ld -v<!--
   <itemizedlist>
     <listitem><para>GTK version</para></listitem>
     <listitem><para>GLIB version</para></listitem>
-    <listitem><para>libpng version</para></listitem>
     <listitem><para>GUI situation in which the bug occurs</para></listitem>
   </itemizedlist>
 </para></listitem>

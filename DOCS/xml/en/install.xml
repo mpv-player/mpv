@@ -55,7 +55,7 @@ answers.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - optional (M)PNG en/decoder,
-  required for the GUI and the PNG video output driver
+  required for the PNG video output driver
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - 3.90 or later is recommended,

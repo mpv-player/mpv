@@ -21,7 +21,7 @@ Requirements:
   package(s) installed.
 - To compile MPlayer with X11 support, you need to have the X Window System
   development packages (like for XFree86 or X.Org) installed.
-- For the GUI you need the libpng and GTK development packages.
+- For the GUI you need the GTK development packages.
 
 
 Before you start...
