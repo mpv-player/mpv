@@ -83,12 +83,13 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	int index;
 	FT_Face face;
 	int error;
-	ass_font_t* font;
+	ass_font_t* fontp;
+	ass_font_t font;
 	int mem_idx;
 
-	font = ass_font_cache_find(desc);
-	if (font)
-		return font;
+	fontp = ass_font_cache_find(desc);
+	if (fontp)
+		return fontp;
 	
 	path = fontconfig_select(fc_priv, desc->family, desc->bold, desc->italic, &index);
 	
@@ -110,26 +111,23 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 
 	charmap_magic(face);
 	
-	font = calloc(1, sizeof(ass_font_t));
-	font->ftlibrary = ftlibrary;
-	font->faces[0] = face;
-	font->n_faces = 1;
-	font->desc.family = strdup(desc->family);
-	font->desc.bold = desc->bold;
-	font->desc.italic = desc->italic;
+	font.ftlibrary = ftlibrary;
+	font.faces[0] = face;
+	font.n_faces = 1;
+	font.desc.family = strdup(desc->family);
+	font.desc.bold = desc->bold;
+	font.desc.italic = desc->italic;
 
-	font->m.xx = font->m.yy = (FT_Fixed)0x10000L;
-	font->m.xy = font->m.yy = 0;
-	font->v.x = font->v.y = 0;
-	font->size = 0;
+	font.m.xx = font.m.yy = (FT_Fixed)0x10000L;
+	font.m.xy = font.m.yy = 0;
+	font.v.x = font.v.y = 0;
+	font.size = 0;
 
 #ifdef HAVE_FONTCONFIG
-	font->charset = FcCharSetCreate();
+	font.charset = FcCharSetCreate();
 #endif
 
-	ass_font_cache_add(font);
-	
-	return font;
+	return ass_font_cache_add(&font);
 }
 
 /**
