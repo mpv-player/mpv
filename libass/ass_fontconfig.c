@@ -197,6 +197,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 	return fontconfig_select_with_charset(priv, family, bold, italic, index, 0);
 }
 
+#if (FC_VERSION < 20402)
 static char* validate_fname(char* name)
 {
 	char* fname;
@@ -232,6 +233,7 @@ static char* validate_fname(char* name)
 	*q = 0;
 	return fname;
 }
+#endif
 
 /**
  * \brief Process memory font.
@@ -244,21 +246,18 @@ static char* validate_fname(char* name)
 */ 
 static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Library ftlibrary, int idx)
 {
-	char buf[1000];
-	FILE* fp = 0;
 	int rc;
-	struct stat st;
-	char* fname;
 	const char* name = library->fontdata[idx].name;
 	const char* data = library->fontdata[idx].data;
 	int data_size = library->fontdata[idx].size;
-	const char* fonts_dir = library->fonts_dir;
-	FT_Face face;
-	FcPattern* pattern;
-	FcFontSet* fset;
-	FcBool res;
 
 #if (FC_VERSION < 20402)
+	struct stat st;
+	char* fname;
+	const char* fonts_dir = library->fonts_dir;
+	char buf[1000];
+	FILE* fp = 0;
+
 	if (!fonts_dir)
 		return;
 	rc = stat(fonts_dir, &st);
@@ -288,6 +287,10 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 	fclose(fp);
 
 #else // (FC_VERSION >= 20402)
+	FT_Face face;
+	FcPattern* pattern;
+	FcFontSet* fset;
+	FcBool res;
 
 	rc = FT_New_Memory_Face(ftlibrary, (unsigned char*)data, data_size, 0, &face);
 	if (rc) {
@@ -331,7 +334,6 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path)
 {
 	int rc;
-	struct stat st;
 	fc_instance_t* priv = calloc(1, sizeof(fc_instance_t));
 	const char* dir = library->fonts_dir;
 	int i;
