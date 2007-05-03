@@ -136,7 +136,7 @@ void* hashmap_insert(hashmap_t* map, void* key, void* value)
 	hashmap_item_t** next = map->root + (hash % map->nbuckets);
 	while (*next) {
 		if (map->key_compare(key, (*next)->key, map->key_size))
-			return;
+			return (*next)->value;
 		next = &((*next)->next);
 		assert(next);
 	}
