@@ -79,7 +79,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
 
-static double inline getpix(struct vf_instance_s* vf, double x, double y, int plane){
+static inline double getpix(struct vf_instance_s* vf, double x, double y, int plane){
     int xi, yi;
     mp_image_t *mpi= vf->priv->mpi;
     int stride= mpi->stride[plane];
