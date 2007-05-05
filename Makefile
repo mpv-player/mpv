@@ -213,7 +213,7 @@ gui/libgui.a:
 osdep/libosdep.a:
 	$(MAKE) -C osdep
 
-osdep/mplayer-rc.o:
+osdep/mplayer-rc.o: version.h
 	$(MAKE) -C osdep mplayer-rc.o
 
 input/libinput.a:
