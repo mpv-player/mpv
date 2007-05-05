@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21760 -->
+<!-- synced with r23225 -->
 <appendix id="bugreports">
 <title>Как сообщать об ошибках</title>
 
@@ -291,7 +291,6 @@ ld -v<!--
   <itemizedlist>
     <listitem><para>версия GTK</para></listitem>
     <listitem><para>версия GLIB</para></listitem>
-    <listitem><para>версия libpng</para></listitem>
     <listitem><para>ситуация с GUI, в которых проявляется проблема</para></listitem>
   </itemizedlist>
 </para></listitem>

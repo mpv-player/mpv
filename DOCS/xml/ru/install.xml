@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23161 -->
+<!-- synced with r23226 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -55,11 +55,11 @@
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - необязательный кодер/декодер JPEG,
-  требуется для драйвера вывода видео JPEG и декодирования MJPEG видео.
+  требуется для драйвера вывода видео JPEG.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - необязательный (M)PNG кодер/декодер,
-  требуется для GUI и драйвера вывода видео PNG.
+  требуется для драйвера вывода видео PNG.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - рекомендуется 3.90 или новее,
