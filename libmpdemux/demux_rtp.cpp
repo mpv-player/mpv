@@ -486,7 +486,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
 #ifdef USE_LIBAVCODEC
   extern AVCodecParserContext * h264parserctx;
   int consumed, poutbuf_size = 1;
-  uint8_t *poutbuf = NULL;
+  const uint8_t *poutbuf = NULL;
   float lastpts;
 
   do {
