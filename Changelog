@@ -92,6 +92,7 @@ MPlayer (1.0)
     * select libavformat demuxer (-lavfdopts format=)
     * internal minilzo removed in favor of FFmpeg implementation,
       use liblzo2 for encoding
+    * change Gui dependency from libpng to libavcodec
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
