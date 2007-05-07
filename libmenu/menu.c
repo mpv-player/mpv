@@ -11,6 +11,7 @@
 
 #include "libvo/osd.h"
 #include "libvo/font_load.h"
+#include "libvo/sub.h"
 #include "osdep/keycodes.h"
 #include "asxparser.h"
 #include "stream/stream.h"
@@ -304,14 +305,9 @@ static int get_next_char(char **txt)
   int c;
   c = (unsigned char)*(*txt)++;
   if (c >= 0x80) {
-    if (menu_utf8){
-      if ((c & 0xe0) == 0xc0)    /* 2 bytes U+00080..U+0007FF*/
-        c = (c & 0x1f)<<6 | ((unsigned char)*(*txt)++ & 0x3f);
-      else if((c & 0xf0) == 0xe0){ /* 3 bytes U+00800..U+00FFFF*/
-        c = (((c & 0x0f)<<6) | ((unsigned char)*(*txt)++ & 0x3f))<<6;
-        c |= ((unsigned char)*(*txt)++ & 0x3f);
-      }
-    } else if (menu_unicode)
+    if (menu_utf8)
+      c = utf8_get_char((const char*)txt);
+    else if (menu_unicode)
       c = (c<<8) + (unsigned char)*(*txt)++;
   }
   if (!c) c++; // avoid UCS 0
