@@ -328,6 +328,7 @@ static void render_txt(char *txt)
 
 #ifdef USE_FRIBIDI
 #include <fribidi/fribidi.h>
+#include "libavutil/common.h"
 static char *menu_fribidi_charset = NULL;
 static int menu_flip_hebrew = 0;
 static int menu_fribidi_flip_commas = 0;
@@ -353,7 +354,7 @@ static char *menu_fribidi(char *txt)
       } else {
         char_set_num = fribidi_parse_charset("UTF-8");
       }
-      buffer_size = 1024 > (len+1) ? 1024 : (len+1);
+      buffer_size = FFMAX(1024,len+1);
       logical = malloc(buffer_size);
       visual = malloc(buffer_size);
       outputstr = malloc(buffer_size);
