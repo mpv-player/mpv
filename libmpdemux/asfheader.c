@@ -37,6 +37,8 @@
 #define	ASF_GUID_PREFIX_stream_group	0x7bf875ce
 #define ASF_GUID_PREFIX_ext_audio_stream	0x31178C9D
 #define ASF_GUID_PREFIX_ext_stream_embed_stream_header	0x3AFB65E2
+#define ASF_GUID_PREFIX_dvr_ms_timing_rep_data	0xFD3CC02A
+#define ASF_GUID_PREFIX_dvr_ms_vid_frame_rep_data	0xDD6432CC
 
 /*
 const char asf_audio_stream_guid[16] = {0x40, 0x9e, 0x69, 0xf8,
@@ -64,6 +66,10 @@ const char asf_metadata_header[16] = {0xea, 0xcb, 0xf8, 0xc5,
   0xaf, 0x5b, 0x77, 0x48, 0x84, 0x67, 0xaa, 0x8c, 0x44, 0xfa, 0x4c, 0xca};
 const char asf_content_encryption[16] = {0xfb, 0xb3, 0x11, 0x22,
   0x23, 0xbd, 0xd2, 0x11, 0xb4, 0xb7, 0x00, 0xa0, 0xc9, 0x55, 0xfc, 0x6e};
+const char asf_dvr_ms_timing_rep_data[16] = {0x2a, 0xc0, 0x3c,0xfd,  
+  0xdb, 0x06, 0xfa, 0x4c, 0x80, 0x1c, 0x72, 0x12, 0xd3, 0x87, 0x45, 0xe4};
+const char asf_dvr_ms_vid_frame_rep_data[16] = {0xcc, 0x32, 0x64, 0xdd, 
+  0x29, 0xe2, 0xdb, 0x40, 0x80, 0xf6, 0xd2, 0x63, 0x28, 0xd2, 0x76, 0x1f};
 
 typedef struct {
   // must be 0 for metadata record, might be non-zero for metadata lib record
@@ -126,6 +132,10 @@ static const char* asf_chunk_type(unsigned char* guid) {
       return "guid_file_header";
     case ASF_GUID_PREFIX_content_desc:
       return "guid_content_desc";
+    case ASF_GUID_PREFIX_dvr_ms_timing_rep_data:
+      return "guid_dvr_ms_timing_rep_data";
+    case ASF_GUID_PREFIX_dvr_ms_vid_frame_rep_data:
+      return "guid_dvr_ms_vid_frame_rep_data";
     default:
       strcpy(tmp, "unknown guid ");
       p = tmp + strlen(tmp);
@@ -183,16 +193,16 @@ static int find_backwards_asf_guid(char *buf, const char *guid, int cur_pos)
   return -1;
 }
 
-static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, double* avg_frame_time)
+static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, struct asf_priv* asf, int is_video)
 {
-  // this function currently only gets the average frame time if available
-
   int pos=0;
   uint8_t *buffer = &buf[0];
   uint64_t avg_ft;
 
   while ((pos = find_asf_guid(buf, asf_ext_stream_header, pos, buf_len)) >= 0) {
     int this_stream_num, stnamect, payct, i, objlen;
+    int buf_max_index=pos+50;
+    if (buf_max_index > buf_len) return 0;
     buffer = &buf[pos];
 
     // the following info is available
@@ -207,13 +217,70 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, dou
     this_stream_num=AV_RL16(buffer);buffer+=2;
 
     if (this_stream_num == stream_num) {
+      buf_max_index+=14;
+      if (buf_max_index > buf_len) return 0;
       buffer+=2; //skip stream-language-id-index
       avg_ft = AV_RL32(buffer) | (uint64_t)AV_RL32(buffer + 4) << 32; // provided in 100ns units
-      *avg_frame_time = avg_ft/10000000.0f;
+      buffer+=8;
 
       // after this are values for stream-name-count and
       // payload-extension-system-count
       // followed by associated info for each
+      stnamect = AV_RL16(buffer);buffer+=2;
+      payct = AV_RL16(buffer);buffer+=2;
+
+      // need to read stream names if present in order 
+      // to get lengths - values are ignored for now
+      for (i=0; i<stnamect; i++) {
+        int stream_name_len;
+        buf_max_index+=4;
+        if (buf_max_index > buf_len) return 0;
+        buffer+=2; //language_id_index
+        stream_name_len = AV_RL16(buffer);buffer+=2;
+        buffer+=stream_name_len; //stream_name
+        buf_max_index+=stream_name_len;
+        if (buf_max_index > buf_len) return 0;
+      }
+
+      if (is_video) {
+        asf->vid_repdata_count = payct;
+        asf->vid_repdata_sizes = malloc(payct*sizeof(int));
+      } else {
+        asf->aud_repdata_count = payct;
+        asf->aud_repdata_sizes = malloc(payct*sizeof(int));
+      }
+
+      for (i=0; i<payct; i++) {
+        int payload_len;
+        buf_max_index+=22;
+        if (buf_max_index > buf_len) return 0;
+        // Each payload extension definition starts with a GUID.
+        // In dvr-ms files one of these indicates the presence an
+        // extension that contains pts values and this is always present
+        // in the video and audio streams.
+        // Another GUID indicates the presence of an extension
+        // that contains useful video frame demuxing information.
+        // Note that the extension data in each packet does not contain
+        // these GUIDs and that this header section defines the order the data
+        // will appear in.
+        if (memcmp(buffer, asf_dvr_ms_timing_rep_data, 16) == 0) {
+          if (is_video)
+            asf->vid_ext_timing_index = i;
+          else
+            asf->aud_ext_timing_index = i;
+        } else if (is_video && memcmp(buffer, asf_dvr_ms_vid_frame_rep_data, 16) == 0)
+          asf->vid_ext_frame_index = i;
+        buffer+=16;
+
+        payload_len = AV_RL16(buffer);buffer+=2;
+
+        if (is_video)
+          asf->vid_repdata_sizes[i] = payload_len;
+        else
+          asf->aud_repdata_sizes[i] = payload_len;
+        buffer+=4;//sys_len
+      }
+
       return 1;
     }
   }
@@ -421,6 +488,8 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
       ++audio_streams;
       if (!asf_init_audio_stream(demuxer, asf, sh_audio, streamh, &audio_pos, &buffer, hdr, hdr_len))
         goto len_err_out;
+      if (!get_ext_stream_properties(hdr, hdr_len, streamh->stream_no, asf, 0))
+        goto len_err_out;
     }
   }
   // find stream headers
@@ -481,14 +550,8 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
           asf->asf_is_dvr_ms=1;
           asf->dvr_last_vid_pts=0.0;
         } else asf->asf_is_dvr_ms=0;
-        if (get_ext_stream_properties(hdr, hdr_len, streamh->stream_no, &asf->avg_vid_frame_time)) {
-	  sh_video->frametime=(float)asf->avg_vid_frame_time;
-	  sh_video->fps=1.0f/sh_video->frametime; 
-        } else {
-	  asf->avg_vid_frame_time=0.0; // only used for dvr-ms when > 0.0
-	  sh_video->fps=1000.0f;
-	  sh_video->frametime=0.001f;
-        }
+        if (!get_ext_stream_properties(hdr, hdr_len, streamh->stream_no, asf, 1))
+            goto len_err_out;
         if (get_meta(hdr, hdr_len, streamh->stream_no, &asp_ratio)) {
           sh_video->aspect = asp_ratio * sh_video->bih->biWidth /
             sh_video->bih->biHeight;

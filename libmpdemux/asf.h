@@ -219,11 +219,28 @@ struct asf_priv {
     unsigned packetsize;
     double   packetrate;
     unsigned movielength;
-    double avg_vid_frame_time;
     int asf_is_dvr_ms;
     uint32_t asf_frame_state;
     int asf_frame_start_found;
     double dvr_last_vid_pts;
+    uint64_t vid_frame_ct;
+    uint64_t play_duration;
+    uint64_t num_packets;
+    int new_vid_frame_seg;
+    int *vid_repdata_sizes;
+    int *aud_repdata_sizes;
+    int vid_repdata_count;
+    int aud_repdata_count;
+    uint64_t avg_vid_frame_time;
+    uint64_t last_key_payload_time;
+    uint64_t last_aud_pts;
+    uint64_t last_aud_diff;
+    int found_first_key_frame;
+    uint32_t last_vid_seq;
+    int vid_ext_timing_index;
+    int aud_ext_timing_index;
+    int vid_ext_frame_index;
+    int know_frame_time;
 };
 
 #endif
