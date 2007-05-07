@@ -303,6 +303,7 @@ if [ "$_stupid" = "yes" ]; then
     # avoid false-positives in xpm files, docs, etc, only check .c and .h files
     chfilelist=`echo $filelist | tr ' ' '\n' | grep "[\.][ch]$"`
 
+  if [ -n "$chfilelist" ]; then
     for i in calloc malloc realloc memalign av_malloc av_mallocz faad_malloc \
              lzo_malloc safe_malloc mpeg2_malloc _ogg_malloc; do
         printhead "--> casting of void* $i()"
@@ -337,6 +338,7 @@ if [ "$_stupid" = "yes" ]; then
 
     printhead "--> usage of -0"
     grep $_grepopts "[a-zA-Z0-9)]\+[ 	]*-[ 	]*0[^.0-9xa-fA-F_]" $chfilelist
+  fi
 fi
 
 # -----------------------------------------------------------------------------
