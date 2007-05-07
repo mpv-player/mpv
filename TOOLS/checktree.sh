@@ -19,6 +19,7 @@
 _spaces=yes
 _extensions=yes
 _crlf=yes
+_tabs=no
 _trailws=no
 _rcsid=no
 _oll=no
@@ -45,6 +46,7 @@ enable_all_tests() {
     _spaces=yes
     _extensions=yes
     _crlf=yes
+    _tabs=yes
     _trailws=yes
     _rcsid=yes
     _oll=yes
@@ -56,6 +58,7 @@ disable_all_tests() {
     _spaces=no
     _extensions=no
     _crlf=no
+    _tabs=no
     _trailws=no
     _rcsid=no
     _oll=no
@@ -96,6 +99,7 @@ for i in "$@"; do
         printoption "spaces    " "test for spaces in filenames" "$_spaces"
         printoption "extensions" "test for uppercase extensions" "$_extensions"
         printoption "crlf      " "test for MSDOS line endings" "$_crlf"
+        printoption "tabs      " "test for tab characters" "$_tabs"
         printoption "trailws   " "test for trailing whitespace" "$_trailws"
         printoption "rcsid     " "test for missing RCS Id's" "$_rcsid"
         printoption "oll       " "test for overly long lines" "$_oll"
@@ -169,6 +173,12 @@ for i in "$@"; do
         ;;
     -nocrlf)
         _crlf=no
+        ;;
+    -tabs)
+        _tabs=yes
+        ;;
+    -notabs)
+        _tabs=no
         ;;
     -trailws)
         _trailws=yes
@@ -255,6 +265,14 @@ if [ "$_crlf" = "yes" ]; then
     printhead "checking for MSDOS line endings ..."
     CR=`echo " " | tr ' ' '\015'`
     grep $_grepopts "$CR" $filelist
+fi
+
+# -----------------------------------------------------------------------------
+
+if [ "$_tabs" = "yes" ]; then
+    printhead "checking for TAB characters ..."
+    TAB=`echo " " | tr ' ' '\011'`
+    grep $_grepopts "$TAB" $filelist
 fi
 
 # -----------------------------------------------------------------------------
