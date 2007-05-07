@@ -10,6 +10,7 @@
 #else
 #include "libavcodec/avcodec.h"
 #endif
+#include "libavutil/intreadwrite.h"
 #include "libvo/fastmemcpy.h"
 
 static int pngRead( unsigned char * fname,txSample * bf )
@@ -80,11 +81,9 @@ static int conv24to32( txSample * bf )
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] not enough memory for image\n" );
      return 1;
     }
-   for ( c=0,i=0; c < bf->ImageSize; )
+   for ( c=0,i=0; c < bf->ImageSize; c += 4, i += 3)
     {
-     bf->Image[c++]=tmpImage[i++];	//red
-     bf->Image[c++]=tmpImage[i++];	//green
-     bf->Image[c++]=tmpImage[i++]; c++;	//blue
+     *(uint32_t *)&bf->Image[c] = AV_RB24(&tmpImage[i]);
     }
    free( tmpImage );
   }
@@ -151,10 +150,6 @@ int bpRead( char * fname, txSample * bf )
    return -1;
   }
  if ( conv24to32( bf ) ) return -8;
-#ifdef WORDS_BIGENDIAN
- swab(bf->Image, bf->Image, bf->ImageSize);
-#endif
- bgr2rgb( bf );
  Normalize( bf );
  return 0;
 }
