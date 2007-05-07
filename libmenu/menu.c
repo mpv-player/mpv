@@ -306,7 +306,7 @@ static int get_next_char(char **txt)
   c = (unsigned char)*(*txt)++;
   if (c >= 0x80) {
     if (menu_utf8)
-      c = utf8_get_char((const char*)txt);
+      c = utf8_get_char((const char**)txt);
     else if (menu_unicode)
       c = (c<<8) + (unsigned char)*(*txt)++;
   }
