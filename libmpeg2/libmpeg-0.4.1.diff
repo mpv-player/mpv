@@ -321,9 +321,9 @@
      else
  #endif
 +#ifdef ARCH_ARM
-+    if (accel & MPEG2_ACCEL_ARM) {
++    if (1 /*accel & MPEG2_ACCEL_ARM*/) {
 +#ifdef HAVE_IWMMXT
-+	if (accel & MPEG2_ACCEL_ARM_IWMMXT)
++	if (1 /*accel & MPEG2_ACCEL_ARM_IWMMXT*/)
 +	    mpeg2_mc = mpeg2_mc_iwmmxt;
 +	else
 +#endif
@@ -1075,6 +1075,6 @@ Index: libmpeg2/Makefile
  SRCS_COMMON-$(TARGET_ALTIVEC)    += motion_comp_altivec.c idct_altivec.c
  SRCS_COMMON-$(TARGET_VIS)        += motion_comp_vis.c
  SRCS_COMMON-$(TARGET_ARCH_ALPHA) += idct_alpha.c motion_comp_alpha.c
-+SRCS_COMMON-$(TARGET_ARCH_ARMV4l) += motion_comp_arm.c motion_comp_iwmmxt.c motion_comp_arm_s.S
++SRCS_COMMON-$(TARGET_ARCH_ARMV4L) += motion_comp_arm.c motion_comp_iwmmxt.c motion_comp_arm_s.S
  
  include ../mpcommon.mak
