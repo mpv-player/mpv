@@ -72,6 +72,11 @@ extern int WinID;
 extern int menu_startup;
 extern int menu_utf8;
 extern int menu_unicode;
+#ifdef  USE_FRIBIDI
+extern char *menu_fribidi_charset;
+extern int menu_flip_hebrew;
+extern int menu_fribidi_flip_commas;
+#endif
 #endif
 
 #ifdef HAVE_ZR
@@ -295,6 +300,13 @@ m_option_t mplayer_opts[]={
 	{"menu-startup", &menu_startup, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"menu-utf8", &menu_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"menu-unicode", &menu_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#ifdef USE_FRIBIDI
+	{"menu-fribidi-charset", &menu_fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"menu-flip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"menu-noflip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"menu-flip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"menu-noflip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#endif
 #else
 	{"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
 #endif

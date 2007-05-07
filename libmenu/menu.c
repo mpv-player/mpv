@@ -326,6 +326,56 @@ static void render_txt(char *txt)
   }
 }
 
+#ifdef USE_FRIBIDI
+#include <fribidi/fribidi.h>
+static char *menu_fribidi_charset = NULL;
+static int menu_flip_hebrew = 0;
+static int menu_fribidi_flip_commas = 0;
+
+static char *menu_fribidi(char *txt)
+{
+  static int char_set_num = -1;
+  static FriBidiChar *logical, *visual;
+  static size_t buffer_size = 1024;
+  static char *outputstr;
+
+  FriBidiCharType base;
+  fribidi_boolean log2vis;
+  size_t len;
+
+  if (menu_flip_hebrew) {
+    len = strlen(txt);
+    if (char_set_num == -1) {
+      fribidi_set_mirroring (1);
+      fribidi_set_reorder_nsm (0);
+      if (menu_utf8 == 0) {
+        char_set_num = fribidi_parse_charset(menu_fribidi_charset ? menu_fribidi_charset : "ISO8859-8");
+      } else {
+        char_set_num = fribidi_parse_charset("UTF-8");
+      }
+      buffer_size = 1024 > (len+1) ? 1024 : (len+1);
+      logical = (FriBidiChar*) malloc(buffer_size);
+      visual = (FriBidiChar*) malloc(buffer_size);
+      outputstr = (char*) malloc(buffer_size);
+    } else if (len+1 > buffer_size) {
+      buffer_size = len+1;
+      logical = (FriBidiChar*) realloc(logical, buffer_size);
+      visual = (FriBidiChar*) realloc(visual, buffer_size);
+      outputstr = (char*) realloc(outputstr, buffer_size);
+    }
+    len = fribidi_charset_to_unicode (char_set_num, txt, len, logical);
+    base = menu_fribidi_flip_commas?FRIBIDI_TYPE_ON:FRIBIDI_TYPE_L;
+    log2vis = fribidi_log2vis (logical, len, &base, visual, NULL, NULL, NULL);
+    if (log2vis) {
+      len = fribidi_remove_bidi_marks (visual, len, NULL, NULL, NULL);
+      fribidi_unicode_to_charset (char_set_num, visual, len, outputstr);
+      return outputstr;
+    }
+  }
+  return txt;
+}
+#endif
+
 void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
   draw_alpha_f draw_alpha = get_draw_alpha(mpi->imgfmt);
   int font;
@@ -335,6 +385,9 @@ void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
     return;
   }
 
+#ifdef USE_FRIBIDI
+  txt = menu_fribidi(txt);
+#endif
   render_txt(txt);
 
   while (*txt) {
@@ -366,6 +419,9 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
     return;
   }
 
+#ifdef USE_FRIBIDI
+  txt = menu_fribidi(txt);
+#endif
   render_txt(txt);
 
   if(x > mpi->w || y > mpi->h)
