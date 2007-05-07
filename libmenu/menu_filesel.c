@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <limits.h>
@@ -25,6 +26,10 @@
 #include "menu_list.h"
 #include "input/input.h"
 #include "osdep/keycodes.h"
+
+#define MENU_KEEP_PATH "/tmp/mp_current_path"
+
+int menu_keepdir = 0;
 
 struct list_entry_s {
   struct list_entry p;
@@ -179,6 +184,7 @@ static int open_dir(menu_t* menu,char* args) {
   struct dirent *dp;
   struct stat st;
   int n;
+  int path_fp;
   char* p = NULL;
   list_entry_t* e;
   DIR* dirp;
@@ -199,6 +205,14 @@ static int open_dir(menu_t* menu,char* args) {
   if ((dirp = opendir (mpriv->dir)) == NULL){
     mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_OpendirError, strerror(errno));
     return 0;
+  }
+
+  if (menu_keepdir) {
+    path_fp = open (MENU_KEEP_PATH, O_CREAT | O_WRONLY | O_TRUNC, 0666);
+    if (path_fp >= 0) {
+      write (path_fp, mpriv->dir, strlen (mpriv->dir));
+      close (path_fp);
+    }
   }
 
   namelist = (char **) malloc(sizeof(char *));
@@ -370,7 +384,7 @@ static void clos(menu_t* menu) {
 }
 
 static int open_fs(menu_t* menu, char* args) {
-  char *path = mpriv->path;
+  char *path = mpriv->path, *freepath = NULL;
   int r = 0;
   char wd[PATH_MAX+1];
   args = NULL; // Warning kill
@@ -380,6 +394,29 @@ static int open_fs(menu_t* menu, char* args) {
   menu->read_key = read_key;
   menu->close = clos;
 
+  if (menu_keepdir) {
+    if (!path || path[0] == '\0') {
+      struct stat st;
+      int path_fp;
+      
+      path_fp = open (MENU_KEEP_PATH, O_RDONLY);
+      if (path_fp >= 0) {
+        if (!fstat (path_fp, &st) && (st.st_size > 0)) {
+          path = malloc(st.st_size+1);
+          if ((read(path_fp, path, st.st_size) == st.st_size) && path[0] != '\0'){
+            freepath = path;
+            path[st.st_size] = '\0';
+          }
+          else {
+            free(path);
+            path = NULL;
+          }
+        }
+        close (path_fp);
+      }
+    }
+  }
+  
   getcwd(wd,PATH_MAX);
   if(!path || path[0] == '\0') {
     int l = strlen(wd) + 2;
@@ -398,6 +435,9 @@ static int open_fs(menu_t* menu, char* args) {
   } else
     r = open_dir(menu,path);
 
+  if (freepath)
+    free(freepath);
+  
   return r;
 }
   
