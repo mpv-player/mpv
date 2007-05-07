@@ -325,9 +325,9 @@ static void render_txt(char *txt)
 #ifdef USE_FRIBIDI
 #include <fribidi/fribidi.h>
 #include "libavutil/common.h"
-static char *menu_fribidi_charset = NULL;
-static int menu_flip_hebrew = 0;
-static int menu_fribidi_flip_commas = 0;
+char *menu_fribidi_charset = NULL;
+int menu_flip_hebrew = 0;
+int menu_fribidi_flip_commas = 0;
 
 static char *menu_fribidi(char *txt)
 {
