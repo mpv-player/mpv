@@ -354,14 +354,14 @@ static char *menu_fribidi(char *txt)
         char_set_num = fribidi_parse_charset("UTF-8");
       }
       buffer_size = 1024 > (len+1) ? 1024 : (len+1);
-      logical = (FriBidiChar*) malloc(buffer_size);
-      visual = (FriBidiChar*) malloc(buffer_size);
-      outputstr = (char*) malloc(buffer_size);
+      logical = malloc(buffer_size);
+      visual = malloc(buffer_size);
+      outputstr = malloc(buffer_size);
     } else if (len+1 > buffer_size) {
       buffer_size = len+1;
-      logical = (FriBidiChar*) realloc(logical, buffer_size);
-      visual = (FriBidiChar*) realloc(visual, buffer_size);
-      outputstr = (char*) realloc(outputstr, buffer_size);
+      logical = realloc(logical, buffer_size);
+      visual = realloc(visual, buffer_size);
+      outputstr = realloc(outputstr, buffer_size);
     }
     len = fribidi_charset_to_unicode (char_set_num, txt, len, logical);
     base = menu_fribidi_flip_commas?FRIBIDI_TYPE_ON:FRIBIDI_TYPE_L;
