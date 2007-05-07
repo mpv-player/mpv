@@ -296,12 +296,35 @@ static inline int get_height(int c,int h){
     return h;
 }
 
-#ifdef HAVE_FREETYPE
-#define render_txt(t)  { unsigned char* p = t;  while(*p) render_one_glyph(vo_font,*p++); }
-#else
-#define render_txt(t)
-#endif
-    
+int menu_utf8 = 0;
+int menu_unicode = 0;
+
+static int get_next_char(char **txt)
+{
+  int c;
+  c = (unsigned char)*(*txt)++;
+  if (c >= 0x80) {
+    if (menu_utf8){
+      if ((c & 0xe0) == 0xc0)    /* 2 bytes U+00080..U+0007FF*/
+        c = (c & 0x1f)<<6 | ((unsigned char)*(*txt)++ & 0x3f);
+      else if((c & 0xf0) == 0xe0){ /* 3 bytes U+00800..U+00FFFF*/
+        c = (((c & 0x0f)<<6) | ((unsigned char)*(*txt)++ & 0x3f))<<6;
+        c |= ((unsigned char)*(*txt)++ & 0x3f);
+      }
+    } else if (menu_unicode)
+      c = (c<<8) + (unsigned char)*(*txt)++;
+  }
+  if (!c) c++; // avoid UCS 0
+  return c;
+}
+
+static void render_txt(char *txt)
+{
+  while (*txt) {
+    int c = get_next_char(&txt);
+    render_one_glyph(vo_font, c);
+  }
+}
 
 void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
   draw_alpha_f draw_alpha = get_draw_alpha(mpi->imgfmt);
@@ -315,7 +338,7 @@ void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
   render_txt(txt);
 
   while (*txt) {
-    unsigned char c=*txt++;
+    int c=get_next_char(&txt);
     if ((font=vo_font->font[c])>=0 && (x + vo_font->width[c] <= mpi->w) && (y + vo_font->pic_a[font]->h <= mpi->h))
       draw_alpha(vo_font->width[c], vo_font->pic_a[font]->h,
 		 vo_font->pic_b[font]->bmp+vo_font->start[c],
@@ -405,7 +428,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
   
   // Jump some the beginnig text if needed
   while(sy < ymin && *txt) {
-    unsigned char c=*txt++;
+    int c=get_next_char(&txt);
     if(c == '\n' || (warp && ll + vo_font->width[c] > w)) {
       ll = 0;
       sy += vo_font->height + vspace;
@@ -479,7 +502,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
     }
 
     while(sx < xmax && txt != line_end) {
-      unsigned char c = *txt++;
+      int c=get_next_char(&txt);
       font = vo_font->font[c];
       if(font >= 0) {
  	int cs = (vo_font->pic_a[font]->h - vo_font->height) / 2;
@@ -507,7 +530,7 @@ int menu_text_length(char* txt) {
   int l = 0;
   render_txt(txt);
   while (*txt) {
-    unsigned char c=*txt++;
+    int c=get_next_char(&txt);
     l += vo_font->width[c]+vo_font->charspace;
   }
   return l - vo_font->charspace;
@@ -519,7 +542,7 @@ void menu_text_size(char* txt,int max_width, int vspace, int warp, int* _w, int*
 
   render_txt(txt);
   while (*txt) {
-    unsigned char c=*txt++;
+    int c=get_next_char(&txt);
     if(c == '\n' || (warp && i + vo_font->width[c] >= max_width)) {
       if(*txt)
 	l++;
@@ -539,7 +562,7 @@ int menu_text_num_lines(char* txt, int max_width) {
   int l = 1, i = 0;
   render_txt(txt);
   while (*txt) {
-    unsigned char c=*txt++;
+    int c=get_next_char(&txt);
     if(c == '\n' || i + vo_font->width[c] > max_width) {
       l++;
       i = 0;
@@ -554,7 +577,7 @@ char* menu_text_get_next_line(char* txt, int max_width) {
   int i = 0;
   render_txt(txt);
   while (*txt) {
-    unsigned char c=*txt;
+    int c=get_next_char(&txt);
     if(c == '\n') {
       txt++;
       break;

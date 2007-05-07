@@ -70,6 +70,8 @@ extern int WinID;
 
 #ifdef HAVE_MENU
 extern int menu_startup;
+extern int menu_utf8;
+extern int menu_unicode;
 #endif
 
 #ifdef HAVE_ZR
@@ -291,6 +293,8 @@ m_option_t mplayer_opts[]={
 	{"menu-root", &menu_root, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"menu-cfg", &menu_cfg, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"menu-startup", &menu_startup, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"menu-utf8", &menu_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"menu-unicode", &menu_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
 	{"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
 #endif
