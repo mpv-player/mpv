@@ -59,6 +59,9 @@ MPlayer (1.0)
     * fix MJPEGB on big-endian systems
     * lowres support for some H.264 files
 
+    libmpeg2:
+    * iWMMXt-accelerated DCT and motion compensation for ARM processors
+
     Filters:
     * obsolete fame filter removed
     * vf_geq speed-ups

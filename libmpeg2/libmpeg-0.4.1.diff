@@ -316,6 +316,23 @@
      if (accel & MPEG2_ACCEL_SPARC_VIS)
  	mpeg2_mc = mpeg2_mc_vis;
      else
+@@ -67,6 +67,16 @@
+ 	mpeg2_mc = mpeg2_mc_vis;
+     else
+ #endif
++#ifdef ARCH_ARM
++    if (accel & MPEG2_ACCEL_ARM) {
++#ifdef HAVE_IWMMXT
++	if (accel & MPEG2_ACCEL_ARM_IWMMXT)
++	    mpeg2_mc = mpeg2_mc_iwmmxt;
++	else
++#endif
++	    mpeg2_mc = mpeg2_mc_arm;
++    } else
++#endif
+ 	mpeg2_mc = mpeg2_mc_c;
+ }
+ 
 --- libmpeg2/motion_comp_mmx.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/motion_comp_mmx.c	2006-06-16 20:12:50.000000000 +0200
 @@ -23,7 +27,7 @@
@@ -371,6 +388,12 @@
  };
  
  typedef struct {
+@@ -312,3 +312,5 @@
+ extern mpeg2_mc_t mpeg2_mc_altivec;
+ extern mpeg2_mc_t mpeg2_mc_alpha;
+ extern mpeg2_mc_t mpeg2_mc_vis;
++extern mpeg2_mc_t mpeg2_mc_arm;
++extern mpeg2_mc_t mpeg2_mc_iwmmxt;
 --- libmpeg2/slice.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/slice.c	2006-06-16 20:12:50.000000000 +0200
 @@ -142,6 +146,7 @@
@@ -459,3 +482,599 @@
  #endif
  
  static const vector_s16_t constants ATTR_ALIGN(16) =
+Index: libmpeg2/motion_comp_arm.c
+===================================================================
+--- libmpeg2/motion_comp_arm.c	(revision 0)
++++ libmpeg2/motion_comp_arm.c	(revision 0)
+@@ -0,0 +1,187 @@
++/*
++ * motion_comp_arm.c
++ * Copyright (C) 2004 AGAWA Koji <i (AT) atty (DOT) jp>
++ *
++ * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
++ * See http://libmpeg2.sourceforge.net/ for updates.
++ *
++ * mpeg2dec is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * mpeg2dec is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#include "config.h"
++
++#ifdef ARCH_ARM
++
++#include <inttypes.h>
++
++#include "mpeg2.h"
++#include "attributes.h"
++#include "mpeg2_internal.h"
++
++#define avg2(a,b) ((a+b+1)>>1)
++#define avg4(a,b,c,d) ((a+b+c+d+2)>>2)
++
++#define predict_o(i) (ref[i])
++#define predict_x(i) (avg2 (ref[i], ref[i+1]))
++#define predict_y(i) (avg2 (ref[i], (ref+stride)[i]))
++#define predict_xy(i) (avg4 (ref[i], ref[i+1], \
++			     (ref+stride)[i], (ref+stride)[i+1]))
++
++#define put(predictor,i) dest[i] = predictor (i)
++#define avg(predictor,i) dest[i] = avg2 (predictor (i), dest[i])
++
++/* mc function template */
++
++#define MC_FUNC(op,xy)							\
++static void inline MC_##op##_##xy##_16_c (uint8_t * dest, const uint8_t * ref,	\
++				   const int stride, int height)	\
++{									\
++    do {								\
++	op (predict_##xy, 0);						\
++	op (predict_##xy, 1);						\
++	op (predict_##xy, 2);						\
++	op (predict_##xy, 3);						\
++	op (predict_##xy, 4);						\
++	op (predict_##xy, 5);						\
++	op (predict_##xy, 6);						\
++	op (predict_##xy, 7);						\
++	op (predict_##xy, 8);						\
++	op (predict_##xy, 9);						\
++	op (predict_##xy, 10);						\
++	op (predict_##xy, 11);						\
++	op (predict_##xy, 12);						\
++	op (predict_##xy, 13);						\
++	op (predict_##xy, 14);						\
++	op (predict_##xy, 15);						\
++	ref += stride;							\
++	dest += stride;							\
++    } while (--height);							\
++}									\
++static void MC_##op##_##xy##_8_c (uint8_t * dest, const uint8_t * ref,	\
++				  const int stride, int height)		\
++{									\
++    do {								\
++	op (predict_##xy, 0);						\
++	op (predict_##xy, 1);						\
++	op (predict_##xy, 2);						\
++	op (predict_##xy, 3);						\
++	op (predict_##xy, 4);						\
++	op (predict_##xy, 5);						\
++	op (predict_##xy, 6);						\
++	op (predict_##xy, 7);						\
++	ref += stride;							\
++	dest += stride;							\
++    } while (--height);							\
++}									\
++/* definitions of the actual mc functions */
++
++MC_FUNC (put,o)
++MC_FUNC (avg,o)
++MC_FUNC (put,x)
++MC_FUNC (avg,x)
++MC_FUNC (put,y)
++MC_FUNC (avg,y)
++MC_FUNC (put,xy)
++MC_FUNC (avg,xy)
++
++
++extern void MC_put_o_16_arm (uint8_t * dest, const uint8_t * ref,
++			     int stride, int height);
++
++extern void MC_put_x_16_arm (uint8_t * dest, const uint8_t * ref,
++			     int stride, int height);
++
++
++static void MC_put_y_16_arm (uint8_t * dest, const uint8_t * ref,
++			      int stride, int height)
++{
++    MC_put_y_16_c(dest, ref, stride, height);
++}
++
++static void MC_put_xy_16_arm (uint8_t * dest, const uint8_t * ref,
++			       int stride, int height)
++{
++    MC_put_xy_16_c(dest, ref, stride, height);
++}
++
++extern void MC_put_o_8_arm (uint8_t * dest, const uint8_t * ref,
++				int stride, int height);
++
++extern void MC_put_x_8_arm (uint8_t * dest, const uint8_t * ref,
++			    int stride, int height);
++
++static void MC_put_y_8_arm (uint8_t * dest, const uint8_t * ref,
++			     int stride, int height)
++{
++    MC_put_y_8_c(dest, ref, stride, height);
++}
++
++static void MC_put_xy_8_arm (uint8_t * dest, const uint8_t * ref,
++			      int stride, int height)
++{
++    MC_put_xy_8_c(dest, ref, stride, height);
++}
++
++static void MC_avg_o_16_arm (uint8_t * dest, const uint8_t * ref,
++			      int stride, int height)
++{
++    MC_avg_o_16_c(dest, ref, stride, height);
++}
++
++static void MC_avg_x_16_arm (uint8_t * dest, const uint8_t * ref,
++			      int stride, int height)
++{
++    MC_avg_x_16_c(dest, ref, stride, height);
++}
++
++static void MC_avg_y_16_arm (uint8_t * dest, const uint8_t * ref,
++			      int stride, int height)
++{
++    MC_avg_y_16_c(dest, ref, stride, height);
++}
++
++static void MC_avg_xy_16_arm (uint8_t * dest, const uint8_t * ref,
++			       int stride, int height)
++{
++    MC_avg_xy_16_c(dest, ref, stride, height);
++}
++
++static void MC_avg_o_8_arm (uint8_t * dest, const uint8_t * ref,
++			     int stride, int height)
++{
++    MC_avg_o_8_c(dest, ref, stride, height);
++}
++
++static void MC_avg_x_8_arm (uint8_t * dest, const uint8_t * ref,
++			     int stride, int height)
++{
++    MC_avg_x_8_c(dest, ref, stride, height);
++}
++
++static void MC_avg_y_8_arm (uint8_t * dest, const uint8_t * ref,
++			     int stride, int height)
++{
++    MC_avg_y_8_c(dest, ref, stride, height);
++}
++
++static void MC_avg_xy_8_arm (uint8_t * dest, const uint8_t * ref,
++			      int stride, int height)
++{
++    MC_avg_xy_8_c(dest, ref, stride, height);
++}
++
++MPEG2_MC_EXTERN (arm)
++
++#endif
+Index: libmpeg2/motion_comp_arm_s.S
+===================================================================
+--- libmpeg2/motion_comp_arm_s.S	(revision 0)
++++ libmpeg2/motion_comp_arm_s.S	(revision 0)
+@@ -0,0 +1,322 @@
++@ motion_comp_arm_s.S
++@ Copyright (C) 2004 AGAWA Koji <i (AT) atty (DOT) jp>
++@
++@ This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
++@ See http://libmpeg2.sourceforge.net/ for updates.
++@
++@ mpeg2dec is free software; you can redistribute it and/or modify
++@ it under the terms of the GNU General Public License as published by
++@ the Free Software Foundation; either version 2 of the License, or
++@ (at your option) any later version.
++@
++@ mpeg2dec is distributed in the hope that it will be useful,
++@ but WITHOUT ANY WARRANTY; without even the implied warranty of
++@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++@ GNU General Public License for more details.
++@
++@ You should have received a copy of the GNU General Public License
++@ along with this program; if not, write to the Free Software
++@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++
++	.text
++	
++@ ----------------------------------------------------------------
++	.align
++	.global MC_put_o_16_arm
++MC_put_o_16_arm:
++	@@ void func(uint8_t * dest, const uint8_t * ref, int stride, int height)
++	pld [r1]
++        stmfd sp!, {r4-r11, lr} @ R14 is also called LR
++	and r4, r1, #3
++	adr r5, MC_put_o_16_arm_align_jt
++	add r5, r5, r4, lsl #2
++	ldr pc, [r5]
++
++MC_put_o_16_arm_align0:
++	ldmia r1, {r4-r7}
++	add r1, r1, r2
++	pld [r1]
++	stmia r0, {r4-r7}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne MC_put_o_16_arm_align0
++        ldmfd sp!, {r4-r11, pc} @@ update PC with LR content.
++
++.macro	PROC shift
++	ldmia r1, {r4-r8}
++	add r1, r1, r2
++	mov r9, r4, lsr #(\shift)
++	pld [r1]
++	mov r10, r5, lsr #(\shift)
++	orr r9, r9, r5, lsl #(32-\shift)
++	mov r11, r6, lsr #(\shift)
++	orr r10, r10, r6, lsl #(32-\shift)
++	mov r12, r7, lsr #(\shift)
++	orr r11, r11, r7, lsl #(32-\shift)
++	orr r12, r12, r8, lsl #(32-\shift)
++	stmia r0, {r9-r12}
++	subs r3, r3, #1
++	add r0, r0, r2
++.endm
++
++MC_put_o_16_arm_align1:
++	and r1, r1, #0xFFFFFFFC
++1:	PROC(8)
++	bne 1b
++        ldmfd sp!, {r4-r11, pc} @@ update PC with LR content.
++MC_put_o_16_arm_align2:
++	and r1, r1, #0xFFFFFFFC
++1:	PROC(16)
++	bne 1b
++        ldmfd sp!, {r4-r11, pc} @@ update PC with LR content.
++MC_put_o_16_arm_align3:
++	and r1, r1, #0xFFFFFFFC
++1:	PROC(24)
++	bne 1b
++        ldmfd sp!, {r4-r11, pc} @@ update PC with LR content.
++MC_put_o_16_arm_align_jt:
++	.word MC_put_o_16_arm_align0
++	.word MC_put_o_16_arm_align1
++	.word MC_put_o_16_arm_align2
++	.word MC_put_o_16_arm_align3
++
++@ ----------------------------------------------------------------
++	.align
++	.global MC_put_o_8_arm
++MC_put_o_8_arm:
++	@@ void func(uint8_t * dest, const uint8_t * ref, int stride, int height)
++	pld [r1]
++        stmfd sp!, {r4-r10, lr} @ R14 is also called LR
++	and r4, r1, #3
++	adr r5, MC_put_o_8_arm_align_jt
++	add r5, r5, r4, lsl #2
++	ldr pc, [r5]
++MC_put_o_8_arm_align0:
++	ldmia r1, {r4-r5}
++	add r1, r1, r2
++	pld [r1]
++	stmia r0, {r4-r5}
++	add r0, r0, r2
++	subs r3, r3, #1
++	bne MC_put_o_8_arm_align0
++        ldmfd sp!, {r4-r10, pc} @@ update PC with LR content.
++
++.macro	PROC8 shift
++	ldmia r1, {r4-r6}
++	add r1, r1, r2
++	mov r9, r4, lsr #(\shift)
++	pld [r1]
++	mov r10, r5, lsr #(\shift)
++	orr r9, r9, r5, lsl #(32-\shift)
++	orr r10, r10, r6, lsl #(32-\shift)
++	stmia r0, {r9-r10}
++	subs r3, r3, #1
++	add r0, r0, r2
++.endm
++
++MC_put_o_8_arm_align1:
++	and r1, r1, #0xFFFFFFFC
++1:	PROC8(8)
++	bne 1b
++        ldmfd sp!, {r4-r10, pc} @@ update PC with LR content.
++
++MC_put_o_8_arm_align2:
++	and r1, r1, #0xFFFFFFFC
++1:	PROC8(16)
++	bne 1b
++        ldmfd sp!, {r4-r10, pc} @@ update PC with LR content.
++
++MC_put_o_8_arm_align3:
++	and r1, r1, #0xFFFFFFFC
++1:	PROC8(24)
++	bne 1b
++        ldmfd sp!, {r4-r10, pc} @@ update PC with LR content.
++
++MC_put_o_8_arm_align_jt:
++	.word MC_put_o_8_arm_align0
++	.word MC_put_o_8_arm_align1
++	.word MC_put_o_8_arm_align2
++	.word MC_put_o_8_arm_align3
++
++@ ----------------------------------------------------------------
++.macro	AVG_PW rW1, rW2
++	mov \rW2, \rW2, lsl #24
++	orr \rW2, \rW2, \rW1, lsr #8
++	eor r9, \rW1, \rW2
++	and \rW2, \rW1, \rW2
++	and r10, r9, r12
++	add \rW2, \rW2, r10, lsr #1
++	and r10, r9, r11
++	add \rW2, \rW2, r10
++.endm
++
++	.align
++	.global MC_put_x_16_arm
++MC_put_x_16_arm:
++	@@ void func(uint8_t * dest, const uint8_t * ref, int stride, int height)
++	pld [r1]
++        stmfd sp!, {r4-r11,lr} @ R14 is also called LR
++	and r4, r1, #3
++	adr r5, MC_put_x_16_arm_align_jt
++	ldr r11, [r5]
++	mvn r12, r11
++	add r5, r5, r4, lsl #2
++	ldr pc, [r5, #4]
++
++.macro	ADJ_ALIGN_QW shift, R0, R1, R2, R3, R4
++	mov \R0, \R0, lsr #(\shift)
++	orr \R0, \R0, \R1, lsl #(32 - \shift)
++	mov \R1, \R1, lsr #(\shift)
++	orr \R1, \R1, \R2, lsl #(32 - \shift)
++	mov \R2, \R2, lsr #(\shift)
++	orr \R2, \R2, \R3, lsl #(32 - \shift)
++	mov \R3, \R3, lsr #(\shift)
++	orr \R3, \R3, \R4, lsl #(32 - \shift)
++	mov \R4, \R4, lsr #(\shift)
++@	and \R4, \R4, #0xFF
++.endm
++
++MC_put_x_16_arm_align0:
++	ldmia r1, {r4-r8}
++	add r1, r1, r2
++	pld [r1]
++	AVG_PW r7, r8
++	AVG_PW r6, r7
++	AVG_PW r5, r6
++	AVG_PW r4, r5
++	stmia r0, {r5-r8}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne MC_put_x_16_arm_align0
++        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
++MC_put_x_16_arm_align1:
++	and r1, r1, #0xFFFFFFFC
++1:	ldmia r1, {r4-r8}
++	add r1, r1, r2
++	pld [r1]
++	ADJ_ALIGN_QW 8, r4, r5, r6, r7, r8
++	AVG_PW r7, r8
++	AVG_PW r6, r7
++	AVG_PW r5, r6
++	AVG_PW r4, r5
++	stmia r0, {r5-r8}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne 1b
++        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
++MC_put_x_16_arm_align2:
++	and r1, r1, #0xFFFFFFFC
++1:	ldmia r1, {r4-r8}
++	add r1, r1, r2
++	pld [r1]
++	ADJ_ALIGN_QW 16, r4, r5, r6, r7, r8
++	AVG_PW r7, r8
++	AVG_PW r6, r7
++	AVG_PW r5, r6
++	AVG_PW r4, r5
++	stmia r0, {r5-r8}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne 1b
++        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
++MC_put_x_16_arm_align3:
++	and r1, r1, #0xFFFFFFFC
++1:	ldmia r1, {r4-r8}
++	add r1, r1, r2
++	pld [r1]
++	ADJ_ALIGN_QW 24, r4, r5, r6, r7, r8
++	AVG_PW r7, r8
++	AVG_PW r6, r7
++	AVG_PW r5, r6
++	AVG_PW r4, r5
++	stmia r0, {r5-r8}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne 1b
++        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
++MC_put_x_16_arm_align_jt:
++	.word 0x01010101
++	.word MC_put_x_16_arm_align0
++	.word MC_put_x_16_arm_align1
++	.word MC_put_x_16_arm_align2
++	.word MC_put_x_16_arm_align3
++
++@ ----------------------------------------------------------------
++	.align
++	.global MC_put_x_8_arm
++MC_put_x_8_arm:
++	@@ void func(uint8_t * dest, const uint8_t * ref, int stride, int height)
++	pld [r1]
++        stmfd sp!, {r4-r11,lr} @ R14 is also called LR
++	and r4, r1, #3
++	adr r5, MC_put_x_8_arm_align_jt
++	ldr r11, [r5]
++	mvn r12, r11
++	add r5, r5, r4, lsl #2
++	ldr pc, [r5, #4]
++
++.macro	ADJ_ALIGN_DW shift, R0, R1, R2
++	mov \R0, \R0, lsr #(\shift)
++	orr \R0, \R0, \R1, lsl #(32 - \shift)
++	mov \R1, \R1, lsr #(\shift)
++	orr \R1, \R1, \R2, lsl #(32 - \shift)
++	mov \R2, \R2, lsr #(\shift)
++@	and \R4, \R4, #0xFF
++.endm
++
++MC_put_x_8_arm_align0:
++	ldmia r1, {r4-r6}
++	add r1, r1, r2
++	pld [r1]
++	AVG_PW r5, r6
++	AVG_PW r4, r5
++	stmia r0, {r5-r6}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne MC_put_x_8_arm_align0
++        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
++MC_put_x_8_arm_align1:
++	and r1, r1, #0xFFFFFFFC
++1:	ldmia r1, {r4-r6}
++	add r1, r1, r2
++	pld [r1]
++	ADJ_ALIGN_DW 8, r4, r5, r6
++	AVG_PW r5, r6
++	AVG_PW r4, r5
++	stmia r0, {r5-r6}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne 1b
++        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
++MC_put_x_8_arm_align2:
++	and r1, r1, #0xFFFFFFFC
++1:	ldmia r1, {r4-r6}
++	add r1, r1, r2
++	pld [r1]
++	ADJ_ALIGN_DW 16, r4, r5, r6
++	AVG_PW r5, r6
++	AVG_PW r4, r5
++	stmia r0, {r5-r6}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne 1b
++        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
++MC_put_x_8_arm_align3:
++	and r1, r1, #0xFFFFFFFC
++1:	ldmia r1, {r4-r6}
++	add r1, r1, r2
++	pld [r1]
++	ADJ_ALIGN_DW 24, r4, r5, r6
++	AVG_PW r5, r6
++	AVG_PW r4, r5
++	stmia r0, {r5-r6}
++	subs r3, r3, #1
++	add r0, r0, r2
++	bne 1b
++        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
++MC_put_x_8_arm_align_jt:
++	.word 0x01010101
++	.word MC_put_x_8_arm_align0
++	.word MC_put_x_8_arm_align1
++	.word MC_put_x_8_arm_align2
++	.word MC_put_x_8_arm_align3
+Index: libmpeg2/motion_comp_iwmmxt.c
+===================================================================
+--- libmpeg2/motion_comp_iwmmxt.c	(revision 0)
++++ libmpeg2/motion_comp_iwmmxt.c	(revision 0)
+@@ -0,0 +1,61 @@
++/*
++ * motion_comp_iwmmxt.c
++ * Copyright (C) 2004 AGAWA Koji <i (AT) atty (DOT) jp>
++ *
++ * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
++ * See http://libmpeg2.sourceforge.net/ for updates.
++ *
++ * mpeg2dec is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * mpeg2dec is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#include "config.h"
++
++#ifdef ARCH_ARM
++#ifdef HAVE_IWMMXT
++
++#include <inttypes.h>
++
++#include "mpeg2.h"
++#include "attributes.h"
++#include "mpeg2_internal.h"
++
++/* defined in libavcodec */
++
++extern void put_pixels16_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels16_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels16_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels16_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels8_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels8_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels8_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels8_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels16_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels16_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels16_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels16_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels8_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels8_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels8_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels8_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++
++mpeg2_mc_t mpeg2_mc_iwmmxt = {
++    {put_pixels16_iwmmxt, put_pixels16_x2_iwmmxt, put_pixels16_y2_iwmmxt, put_pixels16_xy2_iwmmxt,
++     put_pixels8_iwmmxt, put_pixels8_x2_iwmmxt,  put_pixels8_y2_iwmmxt,  put_pixels8_xy2_iwmmxt}, \
++    {avg_pixels16_iwmmxt, avg_pixels16_x2_iwmmxt, avg_pixels16_y2_iwmmxt, avg_pixels16_xy2_iwmmxt,
++     avg_pixels8_iwmmxt, avg_pixels8_x2_iwmmxt,  avg_pixels8_y2_iwmmxt,  avg_pixels8_xy2_iwmmxt}, \
++};
++
++#endif
++#endif
+Index: libmpeg2/Makefile
+===================================================================
+--- libmpeg2/Makefile	(revision 23253)
++++ libmpeg2/Makefile	(working copy)
+@@ -15,5 +15,6 @@
+ SRCS_COMMON-$(TARGET_ALTIVEC)    += motion_comp_altivec.c idct_altivec.c
+ SRCS_COMMON-$(TARGET_VIS)        += motion_comp_vis.c
+ SRCS_COMMON-$(TARGET_ARCH_ALPHA) += idct_alpha.c motion_comp_alpha.c
++SRCS_COMMON-$(TARGET_ARCH_ARMV4l) += motion_comp_arm.c motion_comp_iwmmxt.c motion_comp_arm_s.S
+ 
+ include ../mpcommon.mak

@@ -1,7 +1,6 @@
 /*
- * motion_comp.c
- * Copyright (C) 2000-2003 Michel Lespinasse <walken@zoy.org>
- * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+ * motion_comp_arm.c
+ * Copyright (C) 2004 AGAWA Koji <i (AT) atty (DOT) jp>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
  * See http://libmpeg2.sourceforge.net/ for updates.
@@ -19,66 +18,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Modified for use with MPlayer, see libmpeg-0.4.1.diff for the exact changes.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
  */
 
 #include "config.h"
+
+#ifdef ARCH_ARM
 
 #include <inttypes.h>
 
 #include "mpeg2.h"
 #include "attributes.h"
 #include "mpeg2_internal.h"
-
-mpeg2_mc_t mpeg2_mc;
-
-void mpeg2_mc_init (uint32_t accel)
-{
-#ifdef HAVE_MMX2
-    if (accel & MPEG2_ACCEL_X86_MMXEXT)
-	mpeg2_mc = mpeg2_mc_mmxext;
-    else
-#endif
-#ifdef HAVE_3DNOW
-    if (accel & MPEG2_ACCEL_X86_3DNOW)
-	mpeg2_mc = mpeg2_mc_3dnow;
-    else
-#endif
-#ifdef HAVE_MMX
-    if (accel & MPEG2_ACCEL_X86_MMX)
-	mpeg2_mc = mpeg2_mc_mmx;
-    else
-#endif
-#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
-    if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
-	mpeg2_mc = mpeg2_mc_altivec;
-    else
-#endif
-#ifdef ARCH_ALPHA
-    if (accel & MPEG2_ACCEL_ALPHA)
-	mpeg2_mc = mpeg2_mc_alpha;
-    else
-#endif
-#if defined(ARCH_SPARC) && defined(HAVE_VIS)
-    if (accel & MPEG2_ACCEL_SPARC_VIS)
-	mpeg2_mc = mpeg2_mc_vis;
-    else
-#endif
-#ifdef ARCH_ARM
-    if (accel & MPEG2_ACCEL_ARM) {
-#ifdef HAVE_IWMMXT
-	if (accel & MPEG2_ACCEL_ARM_IWMMXT)
-	    mpeg2_mc = mpeg2_mc_iwmmxt;
-	else
-#endif
-	    mpeg2_mc = mpeg2_mc_arm;
-    } else
-#endif
-	mpeg2_mc = mpeg2_mc_c;
-}
 
 #define avg2(a,b) ((a+b+1)>>1)
 #define avg4(a,b,c,d) ((a+b+c+d+2)>>2)
@@ -95,7 +45,7 @@ void mpeg2_mc_init (uint32_t accel)
 /* mc function template */
 
 #define MC_FUNC(op,xy)							\
-static void MC_##op##_##xy##_16_c (uint8_t * dest, const uint8_t * ref,	\
+static void inline MC_##op##_##xy##_16_c (uint8_t * dest, const uint8_t * ref,	\
 				   const int stride, int height)	\
 {									\
     do {								\
@@ -134,8 +84,7 @@ static void MC_##op##_##xy##_8_c (uint8_t * dest, const uint8_t * ref,	\
 	ref += stride;							\
 	dest += stride;							\
     } while (--height);							\
-}
-
+}									\
 /* definitions of the actual mc functions */
 
 MC_FUNC (put,o)
@@ -147,4 +96,92 @@ MC_FUNC (avg,y)
 MC_FUNC (put,xy)
 MC_FUNC (avg,xy)
 
-MPEG2_MC_EXTERN (c)
+
+extern void MC_put_o_16_arm (uint8_t * dest, const uint8_t * ref,
+			     int stride, int height);
+
+extern void MC_put_x_16_arm (uint8_t * dest, const uint8_t * ref,
+			     int stride, int height);
+
+
+static void MC_put_y_16_arm (uint8_t * dest, const uint8_t * ref,
+			      int stride, int height)
+{
+    MC_put_y_16_c(dest, ref, stride, height);
+}
+
+static void MC_put_xy_16_arm (uint8_t * dest, const uint8_t * ref,
+			       int stride, int height)
+{
+    MC_put_xy_16_c(dest, ref, stride, height);
+}
+
+extern void MC_put_o_8_arm (uint8_t * dest, const uint8_t * ref,
+				int stride, int height);
+
+extern void MC_put_x_8_arm (uint8_t * dest, const uint8_t * ref,
+			    int stride, int height);
+
+static void MC_put_y_8_arm (uint8_t * dest, const uint8_t * ref,
+			     int stride, int height)
+{
+    MC_put_y_8_c(dest, ref, stride, height);
+}
+
+static void MC_put_xy_8_arm (uint8_t * dest, const uint8_t * ref,
+			      int stride, int height)
+{
+    MC_put_xy_8_c(dest, ref, stride, height);
+}
+
+static void MC_avg_o_16_arm (uint8_t * dest, const uint8_t * ref,
+			      int stride, int height)
+{
+    MC_avg_o_16_c(dest, ref, stride, height);
+}
+
+static void MC_avg_x_16_arm (uint8_t * dest, const uint8_t * ref,
+			      int stride, int height)
+{
+    MC_avg_x_16_c(dest, ref, stride, height);
+}
+
+static void MC_avg_y_16_arm (uint8_t * dest, const uint8_t * ref,
+			      int stride, int height)
+{
+    MC_avg_y_16_c(dest, ref, stride, height);
+}
+
+static void MC_avg_xy_16_arm (uint8_t * dest, const uint8_t * ref,
+			       int stride, int height)
+{
+    MC_avg_xy_16_c(dest, ref, stride, height);
+}
+
+static void MC_avg_o_8_arm (uint8_t * dest, const uint8_t * ref,
+			     int stride, int height)
+{
+    MC_avg_o_8_c(dest, ref, stride, height);
+}
+
+static void MC_avg_x_8_arm (uint8_t * dest, const uint8_t * ref,
+			     int stride, int height)
+{
+    MC_avg_x_8_c(dest, ref, stride, height);
+}
+
+static void MC_avg_y_8_arm (uint8_t * dest, const uint8_t * ref,
+			     int stride, int height)
+{
+    MC_avg_y_8_c(dest, ref, stride, height);
+}
+
+static void MC_avg_xy_8_arm (uint8_t * dest, const uint8_t * ref,
+			      int stride, int height)
+{
+    MC_avg_xy_8_c(dest, ref, stride, height);
+}
+
+MPEG2_MC_EXTERN (arm)
+
+#endif
