@@ -40,7 +40,10 @@
 #include "help_mp.h"
 
 #include "stream.h"
-#include "tv.h"
+#include "pvr.h"
+
+#include "frequencies.h"
+#include "libavutil/common.h"
 
 #define PVR_DEFAULT_DEVICE "/dev/video0"
 #define PVR_MAX_CONTROLS 10
@@ -68,6 +71,8 @@
 #define PVR_VIDEO_STREAM_TYPE_VCD                              "vcd"
 #define PVR_VIDEO_STREAM_TYPE_SVCD                             "svcd"
 
+#define PVR_STATION_NAME_SIZE 256
+
 /* command line arguments */
 int pvr_param_aspect_ratio = 0;
 int pvr_param_sample_rate = 0;
@@ -78,6 +83,21 @@ int pvr_param_bitrate = 0;
 char *pvr_param_bitrate_mode = NULL;
 int pvr_param_bitrate_peak = 0;
 char *pvr_param_stream_type = NULL;
+
+typedef struct station_elem_s {
+  char name[8];
+  int freq;
+  char station[PVR_STATION_NAME_SIZE];
+  int enabled;
+} station_elem_t;
+
+typedef struct stationlist_s {
+  char name[PVR_STATION_NAME_SIZE];
+  station_elem_t *list;
+  int total; /* total number */
+  int used; /* used number */
+  int enabled; /* enabled number */
+} stationlist_t;
 
 struct pvr_t {
   int dev_fd;
@@ -93,7 +113,12 @@ struct pvr_t {
   int saturation;
   int width;
   int height;
-  char *freq;
+  int freq;
+  int chan_idx;
+  int chan_idx_last;
+  stationlist_t stationlist;
+  /* dups the tv_param_channel, or the url's channel param */
+  char *param_channel;
 
   /* encoder params */
   int aspect;
@@ -112,7 +137,7 @@ pvr_init (void)
 {
   struct pvr_t *pvr = NULL;
 
-  pvr = malloc (sizeof (struct pvr_t)); 
+  pvr = calloc (1, sizeof (struct pvr_t)); 
   pvr->dev_fd = -1;
   pvr->video_dev = strdup (PVR_DEFAULT_DEVICE);
 
@@ -126,7 +151,9 @@ pvr_init (void)
   pvr->saturation = 0;
   pvr->width = -1;
   pvr->height = -1;
-  pvr->freq = NULL;
+  pvr->freq = -1;
+  pvr->chan_idx = -1;
+  pvr->chan_idx_last = -1;
 
   /* set default encoding settings
    * may be overlapped by user parameters
@@ -158,9 +185,600 @@ pvr_uninit (struct pvr_t *pvr)
   
   if (pvr->video_dev)
     free (pvr->video_dev);
-  if (pvr->freq)
-    free (pvr->freq);
+
+  if (pvr->stationlist.list)
+    free (pvr->stationlist.list);
+
+  if (pvr->param_channel)
+    free (pvr->param_channel);
+  
   free (pvr);
+}
+
+/**
+ * @brief Copy Constructor for stationlist
+ *
+ * @see parse_setup_stationlist
+ */
+static int
+copycreate_stationlist (stationlist_t *stationlist, int num)
+{
+  int i;
+
+  if (chantab < 0 || !stationlist)
+    return -1;
+
+  num = FFMAX (num, chanlists[chantab].count);
+
+  if (stationlist->list)
+  {
+    free (stationlist->list);
+    stationlist->list = NULL;
+  }
+  
+  stationlist->total = 0;
+  stationlist->enabled = 0;
+  stationlist->used = 0;
+  stationlist->list = calloc (num, sizeof (station_elem_t));
+
+  if (!stationlist->list)
+  {
+    mp_msg (MSGT_OPEN, MSGL_ERR,
+            "%s No memory allocated for station list, giving up\n",
+            LOG_LEVEL_V4L2);
+    return -1;
+  }
+  
+  /* transport the channel list data to our extented struct */
+  stationlist->total = num;
+  strlcpy (stationlist->name, chanlists[chantab].name, PVR_STATION_NAME_SIZE);
+
+  for (i = 0; i < chanlists[chantab].count; i++)
+  {
+    stationlist->list[i].station[0]= '\0'; /* no station name yet */
+    strlcpy (stationlist->list[i].name,
+             chanlists[chantab].list[i].name, PVR_STATION_NAME_SIZE);
+    stationlist->list[i].freq = chanlists[chantab].list[i].freq;
+    stationlist->list[i].enabled = 1; /* default enabled */
+    stationlist->enabled++;
+    stationlist->used++;
+  }
+
+  return 0;
+}
+
+static int
+print_all_stations (struct pvr_t *pvr)
+{
+  int i;
+
+  if (!pvr || !pvr->stationlist.list) 
+    return -1;
+
+  for (i = 0; i < pvr->stationlist.total; i++)
+  {
+    mp_msg (MSGT_OPEN, MSGL_V,
+            "%s %3d: [%c] channel: %8s - freq: %8d - station: %s\n",
+            LOG_LEVEL_V4L2, i, (pvr->stationlist.list[i].enabled) ? 'X' : ' ',
+            pvr->stationlist.list[i].name, pvr->stationlist.list[i].freq,
+            pvr->stationlist.list[i].station);
+  }
+
+  return 0;
+}
+
+/**
+ * Disables all stations
+ *
+ * @see parse_setup_stationlist
+ */
+static void
+disable_all_stations (struct pvr_t *pvr)
+{
+  int i;
+
+  for (i = 0; i < pvr->stationlist.total; i++)
+    pvr->stationlist.list[i].enabled = 0;
+  pvr->stationlist.enabled = 0;
+}
+
+/**
+ * Update or add a station
+ *
+ * @see parse_setup_stationlist
+ */
+static int
+set_station (struct pvr_t *pvr, const char *station,
+             const char *channel, int freq)
+{
+  int i;
+
+  if (!pvr || !pvr->stationlist.list) 
+    return -1;
+
+  if (0 >= pvr->stationlist.total || (!channel && !freq))
+    return -1;
+
+  /* select channel */
+  for (i = 0; i < pvr->stationlist.used; i++)
+  {
+    if (channel && !strcasecmp (pvr->stationlist.list[i].name, channel))
+      break; /* found existing channel entry */
+
+    if (freq > 0 && pvr->stationlist.list[i].freq == freq)
+      break; /* found existing frequency entry */
+  }
+
+  if (i < pvr->stationlist.used)
+  {
+    /**
+     * found an existing entry,
+     * which is about to change with the user data.
+     * it is also enabled ..
+     */
+    if (!pvr->stationlist.list[i].enabled)
+    {
+      pvr->stationlist.list[i].enabled = 1;
+      pvr->stationlist.enabled++;
+    }
+    
+    if (station)
+      strlcpy (pvr->stationlist.list[i].station,
+               station, PVR_STATION_NAME_SIZE);
+    else if (channel)
+      strlcpy (pvr->stationlist.list[i].station,
+               channel, PVR_STATION_NAME_SIZE);
+    else
+      snprintf (pvr->stationlist.list[i].station,
+                PVR_STATION_NAME_SIZE, "F %d", freq);
+
+    mp_msg (MSGT_OPEN, MSGL_DBG2,
+            "%s Set user station channel: %8s - freq: %8d - station: %s\n",
+            LOG_LEVEL_V4L2, pvr->stationlist.list[i].name,
+            pvr->stationlist.list[i].freq,
+            pvr->stationlist.list[i].station);
+    return 0;
+  }
+
+  /* from here on, we have to create a new entry, frequency is mandatory */
+  if (freq < 0)
+  {
+    mp_msg (MSGT_OPEN, MSGL_ERR,
+            "%s Cannot add new station/channel without frequency\n",
+            LOG_LEVEL_V4L2);
+    return -1;
+  }
+
+  if (pvr->stationlist.total < i)
+  {
+    /**
+     * we have to extend the stationlist about 
+     * an arbitrary size, even though this path is not performance critical
+     */
+    pvr->stationlist.total += 10;
+    pvr->stationlist.list =
+      realloc (pvr->stationlist.list,
+               pvr->stationlist.total * sizeof (station_elem_t));
+
+    if (!pvr->stationlist.list)
+    {
+      mp_msg (MSGT_OPEN, MSGL_ERR,
+              "%s No memory allocated for station list, giving up\n",
+              LOG_LEVEL_V4L2);
+      return -1;
+    }
+
+    /* clear the new space ..*/
+    memset (&(pvr->stationlist.list[pvr->stationlist.used]), 0,
+            (pvr->stationlist.total - pvr->stationlist.used)
+            * sizeof (station_elem_t));
+  }
+
+  /* here we go, our actual new entry */
+  pvr->stationlist.used++;
+  pvr->stationlist.list[i].enabled = 1;
+  pvr->stationlist.enabled++;
+
+  if (station)
+    strlcpy (pvr->stationlist.list[i].station,
+             station, PVR_STATION_NAME_SIZE);
+  if (channel)
+    strlcpy (pvr->stationlist.list[i].name, channel, PVR_STATION_NAME_SIZE);
+  else
+    snprintf (pvr->stationlist.list[i].name,
+              PVR_STATION_NAME_SIZE, "F %d", freq);
+
+  pvr->stationlist.list[i].freq = freq;
+
+  mp_msg (MSGT_OPEN, MSGL_DBG2,
+          "%s Add user station channel: %8s - freq: %8d - station: %s\n",
+          LOG_LEVEL_V4L2, pvr->stationlist.list[i].name,
+          pvr->stationlist.list[i].freq,
+          pvr->stationlist.list[i].station);
+
+  return 0;
+}
+
+/**
+ * Here we set our stationlist, as follow
+ *  - choose the frequency channel table, e.g. ntsc-cable
+ *  - create our stationlist, same element size as the channellist
+ *  - copy the channellist content to our stationlist
+ *  - IF the user provides his channel-mapping, THEN:
+ *    - disable all stations
+ *    - update and/or create entries in the stationlist and enable them
+ */
+static int
+parse_setup_stationlist (struct pvr_t *pvr)
+{
+  int i;
+
+  if (!pvr) 
+    return -1;
+
+  /* Create our station/channel list */
+  if (tv_param_chanlist)
+  {
+    /* select channel list */
+    for (i = 0; chanlists[i].name != NULL; i++)
+    {
+      if (!strcasecmp (chanlists[i].name, tv_param_chanlist))
+      {
+        chantab = i;
+        break;
+      }
+    }
+    if (!chanlists[i].name)
+    {
+      mp_msg (MSGT_OPEN, MSGL_ERR,
+              "%s unable to find channel list %s, using default %s\n",
+              LOG_LEVEL_V4L2, tv_param_chanlist, chanlists[chantab].name);
+    }
+    else
+    {
+      mp_msg (MSGT_OPEN, MSGL_INFO,
+              "%s select channel list %s, entries %d\n", LOG_LEVEL_V4L2, 
+              chanlists[chantab].name, chanlists[chantab].count);
+    }
+  }
+  
+  if (0 > chantab)
+  {
+    mp_msg (MSGT_OPEN, MSGL_FATAL,
+            "%s No channel list selected, giving up\n", LOG_LEVEL_V4L2);
+    return -1;
+  }
+
+  if (copycreate_stationlist (&(pvr->stationlist), -1) < 0)
+  {
+    mp_msg (MSGT_OPEN, MSGL_FATAL,
+            "%s No memory allocated for station list, giving up\n",
+            LOG_LEVEL_V4L2);
+    return -1;
+  }
+
+  /* Handle user channel mappings */
+  if (tv_param_channels) 
+  {
+    char channel[PVR_STATION_NAME_SIZE];
+    char station[PVR_STATION_NAME_SIZE];
+    char **channels = tv_param_channels;
+
+    disable_all_stations (pvr);
+
+    while (*channels) 
+    {
+      char *tmp = *(channels++);
+      char *sep = strchr (tmp, '-');
+      int freq=-1;
+
+      if (!sep)
+        continue; /* Wrong syntax, but mplayer should not crash */
+
+      strlcpy (station, sep + 1, PVR_STATION_NAME_SIZE);
+
+      sep[0] = '\0';
+      strlcpy (channel, tmp, PVR_STATION_NAME_SIZE);
+
+      while ((sep = strchr (station, '_')))
+        sep[0] = ' ';
+
+      /* if channel number is a number and larger than 1000 treat it as
+       * frequency tmp still contain pointer to null-terminated string with
+       * channel number here
+       */
+      if ((freq = atoi (channel)) <= 1000)
+        freq = -1; 
+
+      if (set_station (pvr, station, (freq <= 0) ? channel : NULL, freq) < 0)
+      {
+        mp_msg (MSGT_OPEN, MSGL_ERR,
+                "%s Unable to set user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2, 
+                channel, freq, station);
+      }
+    }
+  }
+  
+  return print_all_stations (pvr);
+}
+
+static int
+get_v4l2_freq (struct pvr_t *pvr)
+{
+  int freq;
+  struct v4l2_frequency vf;
+  struct v4l2_tuner vt;
+
+  if (!pvr)
+    return -1;
+  
+  if (pvr->dev_fd < 0)
+    return -1;
+
+  memset (&vt, 0, sizeof (vt));
+  memset (&vf, 0, sizeof (vf));
+
+  if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
+  {
+    mp_msg (MSGT_OPEN, MSGL_ERR, "%s can't set tuner (%s).\n",
+            LOG_LEVEL_V4L2, strerror (errno));
+    return -1;
+  }
+
+  if (ioctl (pvr->dev_fd, VIDIOC_G_FREQUENCY, &vf) < 0)
+  {
+    mp_msg (MSGT_OPEN, MSGL_ERR, "%s can't get frequency %d.\n",
+            LOG_LEVEL_V4L2, errno);
+    return -1;
+  }
+  freq = vf.frequency;
+  if (!(vt.capability & V4L2_TUNER_CAP_LOW))
+    freq *= 1000;
+  freq /= 16;
+
+  return freq;
+}
+
+static int
+set_v4l2_freq (struct pvr_t *pvr)
+{
+  struct v4l2_frequency vf;
+  struct v4l2_tuner vt;
+  
+  if (!pvr)
+    return -1;
+  
+  if (0 >= pvr->freq)
+  {
+    mp_msg (MSGT_OPEN, MSGL_ERR,
+            "%s Frequency invalid %d !!!\n", LOG_LEVEL_V4L2, pvr->freq);
+    return -1;
+  }
+
+  /* don't set the frequency, if it's already set.
+   * setting it here would interrupt the stream.
+   */
+  if (get_v4l2_freq (pvr) == pvr->freq)
+  {
+    mp_msg (MSGT_OPEN, MSGL_STATUS,
+            "%s Frequency %d already set.\n", LOG_LEVEL_V4L2, pvr->freq);
+    return 0;
+  }
+
+  if (pvr->dev_fd < 0)
+    return -1;
+
+  memset (&vf, 0, sizeof (vf));
+  memset (&vt, 0, sizeof (vt));
+
+  if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
+  {
+    mp_msg (MSGT_OPEN, MSGL_ERR, "%s can't get tuner (%s).\n",
+            LOG_LEVEL_V4L2, strerror (errno));
+    return -1;
+  }
+
+  vf.type = vt.type;
+  vf.frequency = pvr->freq * 16;
+
+  if (!(vt.capability & V4L2_TUNER_CAP_LOW))
+    vf.frequency /= 1000;
+
+  if (ioctl (pvr->dev_fd, VIDIOC_S_FREQUENCY, &vf) < 0)
+  {
+    mp_msg (MSGT_OPEN, MSGL_ERR, "%s can't set frequency (%s).\n",
+            LOG_LEVEL_V4L2, strerror (errno));
+    return -1;
+  }
+
+  memset (&vt, 0, sizeof(vt));
+  if (ioctl (pvr->dev_fd, VIDIOC_G_TUNER, &vt) < 0)
+  {
+    mp_msg (MSGT_OPEN, MSGL_ERR, "%s can't set tuner (%s).\n",
+            LOG_LEVEL_V4L2, strerror (errno));
+    return -1;
+  }
+
+  /* just a notification */
+  if (!vt.signal)
+    mp_msg (MSGT_OPEN, MSGL_ERR, "%s NO SIGNAL at frequency %d (%d)\n",
+            LOG_LEVEL_V4L2, pvr->freq, vf.frequency);
+  else
+    mp_msg (MSGT_OPEN, MSGL_STATUS, "%s Got signal at frequency %d (%d)\n",
+            LOG_LEVEL_V4L2, pvr->freq, vf.frequency);
+
+  return 0;
+}
+
+static int
+set_station_by_step (struct pvr_t *pvr, int step, int v4lAction) 
+{
+  if (!pvr || !pvr->stationlist.list) 
+    return -1;
+
+  if (pvr->stationlist.enabled >= abs (step))
+  {
+    int gotcha = 0;
+    int chidx = pvr->chan_idx + step;
+
+    while (!gotcha)
+    {
+      chidx = (chidx + pvr->stationlist.used) % pvr->stationlist.used;
+
+      mp_msg (MSGT_OPEN, MSGL_DBG2,
+              "%s Offset switch: current %d, enabled %d, step %d -> %d\n",
+              LOG_LEVEL_V4L2, pvr->chan_idx,
+              pvr->stationlist.enabled, step, chidx);
+
+      if (!pvr->stationlist.list[chidx].enabled)
+      {
+        mp_msg (MSGT_OPEN, MSGL_DBG2,
+                "%s Switch disabled to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2, 
+                pvr->stationlist.list[chidx].name,
+                pvr->stationlist.list[chidx].freq,
+                pvr->stationlist.list[chidx].station);
+        chidx += FFSIGN (step);
+      }
+      else
+        gotcha = 1;
+    }
+
+    pvr->freq = pvr->stationlist.list[chidx].freq;
+    pvr->chan_idx_last = pvr->chan_idx;
+    pvr->chan_idx = chidx;
+
+    mp_msg (MSGT_OPEN, MSGL_INFO,
+            "%s Switch to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2, 
+            pvr->stationlist.list[chidx].name,
+            pvr->stationlist.list[chidx].freq,
+            pvr->stationlist.list[chidx].station);
+
+    if (v4lAction)
+      return set_v4l2_freq (pvr);
+
+    return (pvr->freq > 0) ? 0 : -1;
+  }
+
+  mp_msg (MSGT_OPEN, MSGL_ERR,
+          "%s Ooops couldn't set freq by channel entry step %d to current %d, enabled %d\n", LOG_LEVEL_V4L2, 
+          step, pvr->chan_idx, pvr->stationlist.enabled);
+
+  return -1;
+}
+
+static int
+set_station_by_channelname_or_freq (struct pvr_t *pvr, const char *channel,
+                                    int freq, int v4lAction)
+{
+  int i = 0;
+
+  if (!pvr || !pvr->stationlist.list) 
+    return -1;
+
+  if (0 >= pvr->stationlist.enabled)
+  {
+    mp_msg (MSGT_OPEN, MSGL_WARN,
+            "%s No enabled station, cannot switch channel/frequency\n",
+            LOG_LEVEL_V4L2);
+    return -1;
+  }
+
+  if (channel)
+  {
+    /* select by channel */
+    for (i = 0; i < pvr->stationlist.used ; i++)
+    {
+      if (!strcasecmp (pvr->stationlist.list[i].name, channel))
+      {
+        if (!pvr->stationlist.list[i].enabled)
+        {
+          mp_msg (MSGT_OPEN, MSGL_WARN,
+                  "%s Switch disabled to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2, 
+                  pvr->stationlist.list[i].name,
+                  pvr->stationlist.list[i].freq,
+                  pvr->stationlist.list[i].station);
+
+          return -1;
+        }
+
+        pvr->freq = pvr->stationlist.list[i].freq;
+        pvr->chan_idx_last = pvr->chan_idx;
+        pvr->chan_idx = i;
+        break;
+      }
+    }
+  }
+  else if (freq >= 0)
+  {
+    /* select by freq */
+    for (i = 0; i < pvr->stationlist.used; i++)
+    {
+      if (pvr->stationlist.list[i].freq == freq)
+      {
+        if (!pvr->stationlist.list[i].enabled)
+        {
+          mp_msg (MSGT_OPEN, MSGL_WARN,
+                  "%s Switch disabled to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2, 
+                  pvr->stationlist.list[i].name,
+                  pvr->stationlist.list[i].freq,
+                  pvr->stationlist.list[i].station);
+          
+          return -1;
+        }
+
+        pvr->freq = pvr->stationlist.list[i].freq;
+        pvr->chan_idx_last = pvr->chan_idx;
+        pvr->chan_idx = i;
+        break;
+      }
+    }
+  }
+
+  if (i >= pvr->stationlist.used)
+  {
+    if (channel)
+      mp_msg (MSGT_OPEN, MSGL_WARN,
+              "%s unable to find channel %s\n", LOG_LEVEL_V4L2, channel);
+    else
+      mp_msg (MSGT_OPEN, MSGL_WARN,
+              "%s unable to find frequency %d\n", LOG_LEVEL_V4L2, freq);
+    return -1;
+  }
+
+  mp_msg (MSGT_OPEN, MSGL_INFO,
+          "%s Switch to user station channel: %8s - freq: %8d - station: %s\n", LOG_LEVEL_V4L2, 
+          pvr->stationlist.list[i].name,
+          pvr->stationlist.list[i].freq,
+          pvr->stationlist.list[i].station);
+
+  if (v4lAction)
+    return set_v4l2_freq (pvr);
+
+  return (pvr->freq > 0) ? 0 : -1;
+}
+
+static int 
+force_freq_step (struct pvr_t *pvr, int step)
+{
+  int freq;
+
+  if (!pvr) 
+    return -1;
+
+  freq = pvr->freq+step;
+
+  if (freq)
+  {
+    mp_msg (MSGT_OPEN, MSGL_INFO,
+            "%s Force Frequency %d + %d = %d \n", LOG_LEVEL_V4L2, 
+            pvr->freq, step, freq);
+
+    pvr->freq = freq;
+
+    return set_v4l2_freq (pvr);
+  }
+  
+  return -1;
 }
 
 static void
@@ -494,6 +1112,37 @@ parse_v4l2_tv_options (struct pvr_t *pvr)
 {
   if (!pvr)
     return;
+
+  /* Create our station/channel list */
+  parse_setup_stationlist (pvr);
+
+  if (pvr->param_channel)
+  {
+    if (set_station_by_channelname_or_freq (pvr, pvr->param_channel,
+                                            -1, 0) >= 0)
+    {
+      if (tv_param_freq)
+      {
+        mp_msg (MSGT_OPEN, MSGL_HINT,
+                "%s tv param freq %s is overwritten by channel setting freq %d\n", LOG_LEVEL_V4L2, 
+                tv_param_freq, pvr->freq);
+      }
+    }
+  }
+  
+  if (pvr->freq < 0 && tv_param_freq)
+  {
+    mp_msg (MSGT_OPEN, MSGL_HINT, "%s tv param freq %s is used directly\n",
+            LOG_LEVEL_V4L2, tv_param_freq);
+
+    if (set_station_by_channelname_or_freq (pvr, NULL,
+                                            atoi (tv_param_freq), 0)<0)
+      {
+        mp_msg (MSGT_OPEN, MSGL_WARN,
+                "%s tv param freq %s invalid to set station\n",
+                LOG_LEVEL_V4L2, tv_param_freq);
+      }
+  }
   
   if (tv_param_device)
   {
@@ -528,9 +1177,6 @@ parse_v4l2_tv_options (struct pvr_t *pvr)
 
   if (tv_param_height)
     pvr->height = tv_param_height;
-
-  if (tv_param_freq)
-    pvr->freq = strdup (tv_param_freq);
 }
 
 static int
@@ -692,24 +1338,20 @@ set_v4l2_settings (struct pvr_t *pvr)
     }
   }
 
-  /* -tv freq=x */
-  if (pvr->freq)
+  if (pvr->freq < 0)
   {
-    struct v4l2_frequency vf;
-    vf.tuner = 0;
-    vf.type = 0;
-    vf.frequency = strtol (pvr->freq, 0L, 0);
+    int freq = get_v4l2_freq (pvr);
     mp_msg (MSGT_OPEN, MSGL_INFO,
-            "%s setting frequency to %d\n", LOG_LEVEL_V4L2, vf.frequency);
-    
-    if (ioctl (pvr->dev_fd, VIDIOC_S_FREQUENCY, &vf) < 0)
-    {
-      mp_msg (MSGT_OPEN, MSGL_ERR, "%s can't set frequency (%s).\n",
-              LOG_LEVEL_V4L2, strerror (errno));
-      return -1;
-    }
+            "%s Using current set frequency %d, to set channel\n",
+            LOG_LEVEL_V4L2, freq);
+
+    if (0 < freq)
+      return set_station_by_channelname_or_freq (pvr, NULL, freq, 1);
   }
 
+  if (0 < pvr->freq)
+    return set_v4l2_freq (pvr) ;
+  
   return 0;
 }
 
@@ -933,6 +1575,15 @@ pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   
   pvr = pvr_init ();
 
+  /**
+   * if the url, i.e. 'pvr://8', contains the channel, use it,
+   * else use the tv parameter.
+   */
+  if (stream->url && strlen (stream->url) > 6 && stream->url[6] != '\0')
+    pvr->param_channel = strdup (stream->url + 6);
+  else if (tv_param_channel && strlen (tv_param_channel))
+    pvr->param_channel = strdup (tv_param_channel);
+  
   parse_v4l2_tv_options (pvr);
   parse_encoder_options (pvr);
   
@@ -1025,6 +1676,92 @@ pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   stream->close = pvr_stream_close;
   
   return STREAM_OK;
+}
+
+/* PVR Public API access */
+
+const char *
+pvr_get_current_stationname (stream_t *stream)
+{
+  struct pvr_t *pvr;
+
+  if (!stream || stream->type != STREAMTYPE_PVR)
+    return NULL;
+  
+  pvr = (struct pvr_t *) stream->priv;
+
+  if (pvr->stationlist.list &&
+      pvr->stationlist.used > pvr->chan_idx &&
+      pvr->chan_idx >= 0)
+    return pvr->stationlist.list[pvr->chan_idx].station;
+
+  return NULL;
+}
+
+const char *
+pvr_get_current_channelname (stream_t *stream)
+{
+  struct pvr_t *pvr = (struct pvr_t *) stream->priv;
+
+  if (pvr->stationlist.list &&
+      pvr->stationlist.used > pvr->chan_idx &&
+      pvr->chan_idx >= 0)
+    return pvr->stationlist.list[pvr->chan_idx].name;
+
+  return NULL;
+}
+
+int
+pvr_get_current_frequency (stream_t *stream)
+{
+  struct pvr_t *pvr = (struct pvr_t *) stream->priv;
+
+  return pvr->freq;
+}
+
+int
+pvr_set_channel (stream_t *stream, const char * channel)
+{
+  struct pvr_t *pvr = (struct pvr_t *) stream->priv;
+
+  return set_station_by_channelname_or_freq (pvr, channel, -1, 1);
+}
+
+int
+pvr_set_lastchannel (stream_t *stream)
+{
+  struct pvr_t *pvr = (struct pvr_t *) stream->priv;
+
+  if (pvr->stationlist.list &&
+      pvr->stationlist.used > pvr->chan_idx_last &&
+      pvr->chan_idx_last >= 0)
+    return set_station_by_channelname_or_freq (pvr, pvr->stationlist.list[pvr->chan_idx_last].name, -1, 1);
+
+  return -1;
+}
+
+int
+pvr_set_freq (stream_t *stream, int freq)
+{
+  struct pvr_t *pvr = (struct pvr_t *) stream->priv;
+
+  return set_station_by_channelname_or_freq (pvr, NULL, freq, 1);
+}
+
+int
+pvr_set_channel_step (stream_t *stream, int step)
+{
+  struct pvr_t *pvr = (struct pvr_t *) stream->priv;
+
+  return set_station_by_step (pvr, step, 1);
+}
+
+int
+pvr_force_freq_step (stream_t *stream, int step)
+{
+  struct pvr_t *pvr = (struct pvr_t *) stream->priv;
+
+  return force_freq_step (pvr, step);
 }
 
 stream_info_t stream_info_pvr = {

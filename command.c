@@ -32,6 +32,9 @@
 #ifdef USE_RADIO
 #include "stream/stream_radio.h"
 #endif
+#ifdef HAVE_PVR
+#include "stream/pvr.h"
+#endif
 #ifdef HAS_DVBIN_SUPPORT
 #include "stream/dvbin.h"
 #endif
@@ -1939,12 +1942,30 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_set_freq((tvi_handle_t *) (mpctx->demuxer->priv),
 			    cmd->args[0].v.f * 16.0);
+#ifdef HAVE_PVR
+            else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR)
+            {
+              pvr_set_freq (mpctx->stream, ROUND (cmd->args[0].v.f));
+              set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
+                           pvr_get_current_channelname (mpctx->stream),
+                           pvr_get_current_stationname (mpctx->stream));
+        }
+#endif /* HAVE_PVR */
 	    break;
 
 	case MP_CMD_TV_STEP_FREQ:
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_step_freq((tvi_handle_t *) (mpctx->demuxer->priv),
 			    cmd->args[0].v.f * 16.0);
+#ifdef HAVE_PVR
+            else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR)
+            {
+              pvr_force_freq_step (mpctx->stream, ROUND (cmd->args[0].v.f));
+              set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: f %d",
+                           pvr_get_current_channelname (mpctx->stream),
+                           pvr_get_current_frequency (mpctx->stream));
+            }
+#endif /* HAVE_PVR */
 	    break;
 
 	case MP_CMD_TV_SET_NORM:
@@ -1971,6 +1992,16 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			//vo_osd_changed(OSDTYPE_SUBTITLE);
 		    }
 		}
+#ifdef HAVE_PVR
+                else if (mpctx->stream &&
+                         mpctx->stream->type == STREAMTYPE_PVR)
+                {
+                  pvr_set_channel_step (mpctx->stream, cmd->args[0].v.i);
+                  set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
+                               pvr_get_current_channelname (mpctx->stream),
+                               pvr_get_current_stationname (mpctx->stream));
+                }
+#endif /* HAVE_PVR */
 	    }
 #ifdef HAS_DVBIN_SUPPORT
 	    if ((mpctx->stream->type == STREAMTYPE_DVB)
@@ -2004,6 +2035,15 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    //vo_osd_changed(OSDTYPE_SUBTITLE);
 		}
 	    }
+#ifdef HAVE_PVR
+            else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR)
+            {
+              pvr_set_channel (mpctx->stream, cmd->args[0].v.s);
+              set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
+                           pvr_get_current_channelname (mpctx->stream),
+                           pvr_get_current_stationname (mpctx->stream));
+            }
+#endif /* HAVE_PVR */
 	    break;
 
 #ifdef HAS_DVBIN_SUPPORT
@@ -2034,6 +2074,15 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    //vo_osd_changed(OSDTYPE_SUBTITLE);
 		}
 	    }
+#ifdef HAVE_PVR
+            else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR)
+            {
+              pvr_set_lastchannel (mpctx->stream);
+              set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
+                           pvr_get_current_channelname (mpctx->stream),
+                           pvr_get_current_stationname (mpctx->stream));
+            }
+#endif /* HAVE_PVR */
 	    break;
 
 	case MP_CMD_TV_STEP_NORM:
