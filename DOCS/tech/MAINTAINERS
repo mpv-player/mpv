@@ -198,14 +198,6 @@ libvo drivers:
     * x11_common.c - Alexander Strasser
     * w32_common.c - Reimar Döffinger
 
-VIDIX drivers:
-    * mach64_vid - None
-    * mga_vid - None
-    * nvidia_vid - Sascha Sommer
-    * radeon_vid - Sascha Sommer
-    * rage128_vid - None
-    * sis_vid - Jake Page
-
 libao2 drivers:
     * ao_alsa5.c - None
     * ao_alsa.c - Clemens Ladisch
