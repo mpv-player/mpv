@@ -601,7 +601,7 @@ DirectX 7 or later installed for the DirectX video output driver to work.
 and needs a bit of manual setup. Download
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> or
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (with MTRR support)</ulink>
-and copy it to the <filename class="directory">libdha/dhahelperwin</filename>
+and copy it to the <filename class="directory">vidix/dhahelperwin</filename>
 directory in your <application>MPlayer</application> source tree.
 Open a console and change to that directory. Then type
 <screen>gcc -o dhasetup.exe dhasetup.c</screen>

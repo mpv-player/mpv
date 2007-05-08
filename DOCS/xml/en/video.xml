@@ -1546,14 +1546,14 @@ Alternatively, you can use a special kernel module, like this:
 </para></step>
 <step><para>
   Move the <filename class="directory">svgalib_helper</filename> directory to
-  <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
-</para></step>
+  the <filename class="directory">vidix</filename> subdirectory of the
+  <application>MPlayer</application> source tree.
 <step><para>
   Remove the comment before the CFLAGS line containing the "svgalib_helper"
-  string from the <filename class="directory">libdha/Makefile</filename>.
+  string from <filename class="directory">vidix/Makefile</filename>.
 </para></step>
 <step><para>
-  Recompile and install libdha.
+  Recompile.
 </para></step>
 </procedure>
 
