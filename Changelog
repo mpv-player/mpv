@@ -34,6 +34,7 @@ MPlayer (1.0)
     * support for VC1 in MPEG-TS and MPEG-PS files (bd,hd)-dvd
     * support for EVO demuxing
     * support -noidx with -demuxer lavf
+    * support for channel navigation with PVR input
 
     Streaming:
     * authentication for Real RTSP streams
