@@ -830,6 +830,7 @@ Zores, Benjamin (ben) <ben@geexbox.org>
     * PVR input layer for IVTV based cards.
     * IVTV h/w MPEG decoder ao/vo driver.
     * split of stream layer from libmpdemux to stream.
+    * VIDIX core and drivers.
 
 ________________
 The codecs, libs
