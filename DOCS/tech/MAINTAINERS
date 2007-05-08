@@ -89,7 +89,7 @@ MPlayer code:
 
 Imported libs/projects:
     * libavcodec, libavformat: Michael Niedermayer
-    * VIDIX core: Sascha Sommer
+    * VIDIX core: Sascha Sommer, Benjamin Zores
     * mp3lib: None
     * loader: None
     * liba52: None
