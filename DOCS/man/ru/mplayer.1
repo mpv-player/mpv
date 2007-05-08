@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r23162
+.\" synced with r23261
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -847,6 +847,10 @@ FIFO размера n может буферизовать (n-1) событие.
 .TP
 .B \-menu-cfg <имя_файла> (только OSD меню)
 Указывает использовать другой файл вместо menu.conf.
+.
+.TP
++.B \-menu-keepdir (только OSD меню)
+Диалог выбора файла открывается в последнем известном каталоге вместо текущего.
 .
 .TP
 .B \-menu-root <значение> (только OSD меню)
@@ -8734,6 +8738,11 @@ MPEG MMX квантователь не может обрабатывать отрицательные отклонения (установите
 .TP
 .B aglobal=<0\-3>
 То же, что и vglobal для аудио заголовков.
+.
+.TP
+.B level=<значение>
+Устанавливает CodecContext Level.
+Используйте 31 или 41 для воспроизведения видео на Playstation 3.
 .
 .
 .SS nuv (\-nuvopts)
