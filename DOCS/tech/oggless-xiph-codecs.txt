@@ -1,0 +1,5 @@
+oggless-xiph-codecs.txt has been moved to another svn repo you can find it at:
+http://svn.mplayerhq.hu/nut.merged/docs/oggless-xiph-codecs.txt?view=markup
+
+its future location will be in a git repository, ill update this file
+here when its location changes again
