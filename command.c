@@ -1948,7 +1948,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
               set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
                            pvr_get_current_channelname (mpctx->stream),
                            pvr_get_current_stationname (mpctx->stream));
-        }
+            }
 #endif /* HAVE_PVR */
 	    break;
 
