@@ -455,7 +455,8 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
     else {
 	for (i = 0; table[i].ogg; i++)
 	{
-	    if (!strncasecmp(*cmt, table[i].ogg, strlen(table[i].ogg)))
+	    if (!strncasecmp(*cmt, table[i].ogg, strlen(table[i].ogg)) &&
+	        (*cmt)[strlen(table[i].ogg)] == '=')
 	    {
 		hdr = table[i].mp;
 		val = *cmt + strlen(table[i].ogg) + 1;
