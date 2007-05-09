@@ -572,8 +572,10 @@ static int decode_font(ass_track_t* track)
 	dsize = q - buf;
 	assert(dsize <= size / 4 * 3 + 2);
 	
-	if (track->library->extract_fonts)
+	if (track->library->extract_fonts) {
 		ass_add_font(track->library, track->parser_priv->fontname, (char*)buf, dsize);
+		buf = 0;
+	}
 
 error_decode_font:
 	if (buf) free(buf);
