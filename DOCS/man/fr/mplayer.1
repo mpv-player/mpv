@@ -1,4 +1,4 @@
-.\" synced with r23162
+.\" synced with r23283
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -952,7 +952,7 @@ Utilise le menu.conf indiqué.
 .
 .TP
 .B \-menu-keepdir (OSD menu uniquement)
-Force le navigateur de fichiers a toujours démarré depuis son ancienne
+Force le navigateur de fichiers a toujours démarrer depuis son ancienne
 position plutôt que depuis le répertoire courant.
 .
 .TP
@@ -4053,7 +4053,7 @@ sortie à 256 couleurs.
 .IPs <fps>
 Valeur flottante pour définir le nombre de trames/sec (framerate)
 (par défaut\ : 5.0).
-.IPs <nom_fichier>
+.IPs <output>
 Définit le nom du fichier de sortie (par défaut\ : ./out.gif).
 .REss
 .PD 1
@@ -4067,7 +4067,7 @@ le framerate ne soit pas inclus dans le nom du fichier.
 .RE
 .PD 0
 .RSs
-mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
+mplayer video.nut \-vo gif89a:fps=15:output=test.gif
 .RE
 .PD 1
 .
