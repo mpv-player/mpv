@@ -114,7 +114,7 @@ read_toc(const char *dev) {
 	{
 	struct ioc_toc_header tochdr;
 	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
-	first = tochdr.starting_track; last = tochdr.ending_track;
+	first = tochdr.starting_track - 1; last = tochdr.ending_track;
 	}
 	for (i = first; i <= last; i++) {
 		struct ioc_read_toc_single_entry tocentry;
