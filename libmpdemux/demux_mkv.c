@@ -1811,6 +1811,7 @@ static const videocodec_info_t vinfo[] = {
   { MKV_V_MPEG4_ASP, mmioFOURCC('m', 'p', '4', 'v'), 1 },
   { MKV_V_MPEG4_AP,  mmioFOURCC('m', 'p', '4', 'v'), 1 },
   { MKV_V_MPEG4_AVC, mmioFOURCC('a', 'v', 'c', '1'), 1 },
+  { MKV_V_THEORA,    mmioFOURCC('t', 'h', 'e', 'o'), 1 },
   { NULL, 0, 0 }
 };
 
