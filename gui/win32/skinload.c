@@ -24,13 +24,13 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <windows.h>
-#include <png.h>
 
 #include "mp_msg.h"
 #include "cpudetect.h"
 #include "libswscale/rgb2rgb.h"
 #include "libswscale/swscale.h"
 #include "gui.h"
+#include "bitmap.h"
 
 #define MAX_LINESIZE 256
 
@@ -113,18 +113,10 @@ static inline int get_sws_cpuflags(void)
 /* reads a complete image as is into image buffer */
 static image *pngRead(skin_t *skin, unsigned char *fname)
 {
-    unsigned char header[8];
-    png_structp png;
-    png_infop info;
-    png_infop endinfo;
-    png_bytep *row_p;
-    int color, h;
-    png_uint_32 i;
-    int BPP;
-    char *img;
-    unsigned int imgsize;
+    int i;
+    txSample bmp;
     image *bf;
-    char *filename;
+    char *filename = NULL;
     FILE *fp;
 
     if(!stricmp(fname, "NULL")) return 0;
@@ -140,8 +132,8 @@ static image *pngRead(skin_t *skin, unsigned char *fname)
             free(filename);
             return 0;
         }
-        free(filename);
     }
+    fclose(fp);
 
     for (i=0; i < skin->imagecount; i++)
         if(!strcmp(fname, skin->images[i]->name))
@@ -149,44 +141,16 @@ static image *pngRead(skin_t *skin, unsigned char *fname)
 #ifdef DEBUG
             mp_msg(MSGT_GPLAYER, MSGL_DBG4, "[png] skinfile %s already exists\n", fname);
 #endif
+            free(filename);
             return skin->images[i];
         }
     (skin->imagecount)++;
     skin->images = realloc(skin->images, sizeof(image *) * skin->imagecount);
     bf = skin->images[(skin->imagecount) - 1] = calloc(1, sizeof(image));
     bf->name = strdup(fname);
-    fread(header,1,8,fp);
-    if (!png_check_sig(header, 8)) return 0;
-    png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    info = png_create_info_struct(png);
-    endinfo = png_create_info_struct(png);
-
-    png_init_io(png, fp);
-    png_set_sig_bytes(png, 8);
-    png_read_info(png, info);
-    png_get_IHDR(png, info, (png_uint_32*) &bf->width, (png_uint_32*) &bf->height, &BPP, &color, NULL, NULL, NULL);
-
-    if(color & PNG_COLOR_MASK_ALPHA)
-    {
-        if(color & PNG_COLOR_MASK_PALETTE || color == PNG_COLOR_TYPE_GRAY_ALPHA ) BPP *= 2;
-        else BPP *= 4;
-    }
-    else
-    {
-        if(color & PNG_COLOR_MASK_PALETTE || color == PNG_COLOR_TYPE_GRAY ) BPP *= 1;
-        else BPP *= 3;
-    }
-    row_p = (png_bytep *) malloc (sizeof(png_bytep) * bf->height);
-    img = (png_bytep) calloc(png_get_rowbytes(png, info), bf->height);
-    for (h=0; h < bf->height; h++)
-        row_p[h] = &img[png_get_rowbytes(png, info) * h];
-    png_read_image(png, row_p);
-    free(row_p);
-
-    png_read_end(png, endinfo);
-    png_destroy_read_struct(&png, &info, &endinfo);
-    fclose(fp);
-    imgsize=bf->width * bf->height * (BPP / 8);
+    bpRead(filename ? filename : fname, &bmp);
+    free(filename);
+    bf->width = bmp.Width; bf->height = bmp.Height;
 
 #ifdef DEBUG
     mp_msg(MSGT_GPLAYER, MSGL_DBG4, "[png] loaded image %s\n", fname);
@@ -195,14 +159,15 @@ static image *pngRead(skin_t *skin, unsigned char *fname)
 #endif
 
     bf->size = bf->width * bf->height * skin->desktopbpp / 8;
-    bf->data = malloc(bf->size);
-    if(skin->desktopbpp == 16 && BPP == 24) rgb24tobgr15(img, bf->data, imgsize);
-    else if(skin->desktopbpp == 16 && BPP == 32) rgb32tobgr15(img, bf->data, imgsize);
-    else if(skin->desktopbpp == 24 && BPP == 24) rgb24tobgr24(img, bf->data, imgsize);
-    else if(skin->desktopbpp == 24 && BPP == 32) rgb32tobgr24(img, bf->data, imgsize);
-    else if(skin->desktopbpp == 32 && BPP == 24) rgb24tobgr32(img, bf->data, imgsize);
-    else if(skin->desktopbpp == 32 && BPP == 32) rgb32tobgr32(img, bf->data, imgsize);
-    free(img);
+    if (skin->desktopbpp == 32)
+      bf->data = bmp.Image;
+    else {
+      bf->data = malloc(bf->size);
+      rgb32tobgr32(bmp.Image, bmp.Image, bmp.ImageSize);
+      if(skin->desktopbpp == 16) rgb32tobgr15(bmp.Image, bf->data, bmp.ImageSize);
+      else if(skin->desktopbpp == 24) rgb32tobgr24(bmp.Image, bf->data, bmp.ImageSize);
+      free(bmp.Image);
+    }
     return bf;
 }
 

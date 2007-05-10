@@ -13,6 +13,7 @@ SRCS_MPLAYER = win32/dialogs.c \
                win32/skinload.c \
                win32/widgetrender.c \
                win32/wincfg.c \
+               bitmap.c \
 
 else
 SRCS_MPLAYER = wm/ws.c \
