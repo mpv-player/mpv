@@ -1932,10 +1932,10 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
             }
           track->reorder_timecodes = !correct_pts;
           if (!vi->id) {
-          mp_msg (MSGT_DEMUX,MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownCodecID,
-                  track->codec_id, track->tnum);
-          free(bih);
-          return 1;
+              mp_msg (MSGT_DEMUX,MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownCodecID,
+                      track->codec_id, track->tnum);
+              free(bih);
+              return 1;
           }
         }
     }
