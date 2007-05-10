@@ -103,7 +103,7 @@ read_toc(const char *dev) {
 	}
 	for (i = first; i <= last; i++) {
 		struct cdrom_tocentry tocentry;
-		tocentry.cdte_track = (i == last) ? 0xAA : i;
+		tocentry.cdte_track = (i == last) ? 0xAA : i + 1;
 		tocentry.cdte_format = CDROM_MSF;
 		ioctl(drive, CDROMREADTOCENTRY, &tocentry);
 		cdtoc[i].min = tocentry.cdte_addr.msf.minute;
@@ -118,7 +118,7 @@ read_toc(const char *dev) {
 	}
 	for (i = first; i <= last; i++) {
 		struct ioc_read_toc_single_entry tocentry;
-		tocentry.track = (i == last) ? 0xAA : i;
+		tocentry.track = (i == last) ? 0xAA : i + 1;
 		tocentry.address_format = CD_MSF_FORMAT;
 		ioctl(drive, CDIOREADTOCENTRY, &tocentry);
 		cdtoc[i].min = tocentry.entry.addr.msf.minute;
@@ -134,7 +134,7 @@ read_toc(const char *dev) {
 	for (i = first; i <= last; i++) {
 		struct ioc_read_toc_entry tocentry;
 		struct cd_toc_entry toc_buffer;
-		tocentry.starting_track = (i == last) ? 0xAA : i;
+		tocentry.starting_track = (i == last) ? 0xAA : i + 1;
 		tocentry.address_format = CD_MSF_FORMAT;
 		tocentry.data = &toc_buffer;
 		tocentry.data_len = sizeof(toc_buffer);
