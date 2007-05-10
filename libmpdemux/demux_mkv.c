@@ -1798,6 +1798,22 @@ display_create_tracks (demuxer_t *demuxer)
     }
 }
 
+typedef struct {
+  char *id;
+  int fourcc;
+  int extradata;
+} videocodec_info_t;
+
+static const videocodec_info_t vinfo[] = {
+  { MKV_V_MPEG1,     mmioFOURCC('m', 'p', 'g', '1'), 0 },
+  { MKV_V_MPEG2,     mmioFOURCC('m', 'p', 'g', '2'), 0 },
+  { MKV_V_MPEG4_SP,  mmioFOURCC('m', 'p', '4', 'v'), 1 },
+  { MKV_V_MPEG4_ASP, mmioFOURCC('m', 'p', '4', 'v'), 1 },
+  { MKV_V_MPEG4_AP,  mmioFOURCC('m', 'p', '4', 'v'), 1 },
+  { MKV_V_MPEG4_AVC, mmioFOURCC('a', 'v', 'c', '1'), 1 },
+  { NULL, 0, 0 }
+};
+
 static int
 demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
 {
@@ -1902,46 +1918,24 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
 #endif /* USE_QTX_CODECS */
 
         }
-      else if (!strcmp(track->codec_id, MKV_V_MPEG1))
-        {
-          bih->biCompression = mmioFOURCC('m', 'p', 'g', '1');
-          track->reorder_timecodes = !correct_pts;
-        }
-      else if (!strcmp(track->codec_id, MKV_V_MPEG2))
-        {
-          bih->biCompression = mmioFOURCC('m', 'p', 'g', '2');
-          track->reorder_timecodes = !correct_pts;
-        }
-      else if (!strcmp(track->codec_id, MKV_V_MPEG4_SP) ||
-               !strcmp(track->codec_id, MKV_V_MPEG4_ASP) ||
-               !strcmp(track->codec_id, MKV_V_MPEG4_AP))
-        {
-          bih->biCompression = mmioFOURCC('m', 'p', '4', 'v');
-          if (track->private_data && (track->private_size > 0))
-            {
-              bih->biSize += track->private_size;
-              bih = realloc (bih, bih->biSize);
-              memcpy (bih + 1, track->private_data, track->private_size);
-            }
-          track->reorder_timecodes = !correct_pts;
-        }
-      else if (!strcmp(track->codec_id, MKV_V_MPEG4_AVC))
-        {
-          bih->biCompression = mmioFOURCC('a', 'v', 'c', '1');
-          if (track->private_data && (track->private_size > 0))
-            {
-              bih->biSize += track->private_size;
-              bih = realloc (bih, bih->biSize);
-              memcpy (bih + 1, track->private_data, track->private_size);
-            }
-          track->reorder_timecodes = !correct_pts;
-        }
       else
         {
+          const videocodec_info_t *vi = vinfo;
+          while (vi->id && strcmp(vi->id, track->codec_id)) vi++;
+          bih->biCompression = vi->fourcc;
+          if (vi->extradata && track->private_data && (track->private_size > 0))
+            {
+              bih->biSize += track->private_size;
+              bih = realloc (bih, bih->biSize);
+              memcpy (bih + 1, track->private_data, track->private_size);
+            }
+          track->reorder_timecodes = !correct_pts;
+          if (!vi->id) {
           mp_msg (MSGT_DEMUX,MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownCodecID,
                   track->codec_id, track->tnum);
           free(bih);
           return 1;
+          }
         }
     }
 
