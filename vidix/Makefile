@@ -11,6 +11,7 @@ SRCS_MPLAYER    = vidixlib.c \
                   pci_dev_ids.c\
 
 SRCS_MPLAYER-$(VIDIX_CYBERBLADE)           += cyberblade_vid.c
+SRCS_MPLAYER-$(VIDIX_IVTV)                 += ivtv_vid.c
 SRCS_MPLAYER-$(VIDIX_MACH64)               += mach64_vid.c
 SRCS_MPLAYER-$(VIDIX_MGA)                  += mga_vid.c
 SRCS_MPLAYER-$(VIDIX_NVIDIA)               += nvidia_vid.c

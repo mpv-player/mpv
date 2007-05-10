@@ -334,7 +334,7 @@ Video output:
   --disable-vidix-internal disable internal VIDIX [for x86 *nix]
   --disable-vidix-external disable external VIDIX [for x86 *nix]
   --with-vidix-drivers[=*] list of VIDIX drivers to be compiled in
-                           Available: all,cyberblade,mach64,mga,mga_crtc2,
+                           Available: all,cyberblade,ivtv,mach64,mga,mga_crtc2,
                            nvidia,pm2,pm3,radeon,rage128,savage,sis,unichrome
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-dga[=n]         enable DGA [n in {1, 2} ] support [autodetect]
@@ -7239,6 +7239,26 @@ if test "$_vidix" = yes ; then
     _def_vidix_drv_cyberblade='#undef CONFIG_VIDIX_DRV_CYBERBLADE'
     _vidix_drv_cyberblade=no
   fi
+  if test "$_vidix_drivers" = all || test `echo "$_vidix_drivers" | grep -e ivtv`; then
+    cat > $TMPC << EOF
+#include <linux/types.h>
+#include <linux/ivtv.h>
+int main(void) { return 0; }
+EOF
+    _vidix_ivtv=no
+    cc_check && _vidix_ivtv=yes
+
+    if test "$_vidix_ivtv" = yes; then
+      _def_vidix_drv_ivtv='#define CONFIG_VIDIX_DRV_IVTV 1'
+      _vidix_drv_ivtv=yes
+    else
+      _def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
+      _vidix_drv_ivtv=no
+    fi
+  else
+    _def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
+    _vidix_drv_ivtv=no
+  fi
   if test "$_vidix_drivers" = all || test `echo "$_vidix_drivers" | grep -e mach64`; then
     _def_vidix_drv_mach64='#define CONFIG_VIDIX_DRV_MACH64 1'
     _vidix_drv_mach64=yes
@@ -7693,6 +7713,7 @@ CONFIG_MUXERS=$_mencoder
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
+VIDIX_IVTV=$_vidix_drv_ivtv
 VIDIX_MACH64=$_vidix_drv_mach64
 VIDIX_MGA=$_vidix_drv_mga
 VIDIX_MGA_CRTC2=$_vidix_drv_mga_crtc2
@@ -8381,6 +8402,7 @@ $_def_cddb
 /* enables / disables VIDIX usage */
 $_def_vidix
 $_def_vidix_drv_cyberblade
+$_def_vidix_drv_ivtv
 $_def_vidix_drv_mach64
 $_def_vidix_drv_mga
 $_def_vidix_drv_mga_crtc2

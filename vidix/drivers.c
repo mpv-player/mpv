@@ -33,6 +33,7 @@
 VDXDriver *first_driver = NULL;
 
 extern VDXDriver cyberblade_drv;
+extern VDXDriver ivtv_drv;
 extern VDXDriver mach64_drv;
 extern VDXDriver mga_drv;
 extern VDXDriver mga_crtc2_drv;
@@ -60,6 +61,9 @@ void vidix_register_all_drivers (void)
 {
 #ifdef CONFIG_VIDIX_DRV_CYBERBLADE
   vidix_register_driver (&cyberblade_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_IVTV
+  vidix_register_driver (&ivtv_drv);
 #endif
 #ifdef CONFIG_VIDIX_DRV_MACH64
   vidix_register_driver (&mach64_drv);
