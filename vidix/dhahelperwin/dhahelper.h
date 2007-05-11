@@ -13,28 +13,28 @@
 
 #define DHAHELPER_IOCTL_INDEX 0x810
 
-#define IOCTL_DHAHELPER_MAPPHYSTOLIN     CTL_CODE(FILE_DEVICE_DHAHELPER,  \
-                                     DHAHELPER_IOCTL_INDEX,      \
-                                     METHOD_BUFFERED,        \
-                                     FILE_ANY_ACCESS)
+#define IOCTL_DHAHELPER_MAPPHYSTOLIN     CTL_CODE(FILE_DEVICE_DHAHELPER,     \
+                                                  DHAHELPER_IOCTL_INDEX,     \
+                                                  METHOD_BUFFERED,           \
+                                                  FILE_ANY_ACCESS)
 
-#define IOCTL_DHAHELPER_UNMAPPHYSADDR    CTL_CODE(FILE_DEVICE_DHAHELPER,  \
-                                     DHAHELPER_IOCTL_INDEX + 1,  \
-                                     METHOD_BUFFERED,        \
-                                     FILE_ANY_ACCESS)
+#define IOCTL_DHAHELPER_UNMAPPHYSADDR    CTL_CODE(FILE_DEVICE_DHAHELPER,     \
+                                                  DHAHELPER_IOCTL_INDEX + 1, \
+                                                  METHOD_BUFFERED,           \
+                                                  FILE_ANY_ACCESS)
 
-#define IOCTL_DHAHELPER_ENABLEDIRECTIO   CTL_CODE(FILE_DEVICE_DHAHELPER,  \
-                                     DHAHELPER_IOCTL_INDEX + 2,   \
-                                     METHOD_BUFFERED,         \
-                                     FILE_ANY_ACCESS)
+#define IOCTL_DHAHELPER_ENABLEDIRECTIO   CTL_CODE(FILE_DEVICE_DHAHELPER,     \
+                                                  DHAHELPER_IOCTL_INDEX + 2, \
+                                                  METHOD_BUFFERED,           \
+                                                  FILE_ANY_ACCESS)
 
-#define IOCTL_DHAHELPER_DISABLEDIRECTIO  CTL_CODE(FILE_DEVICE_DHAHELPER,  \
-                                     DHAHELPER_IOCTL_INDEX + 3,   \
-                                     METHOD_BUFFERED,         \
-                                     FILE_ANY_ACCESS)
-         
-         
-#if !defined(__MINGW32__) && !defined(__CYGWIN__) 
+#define IOCTL_DHAHELPER_DISABLEDIRECTIO  CTL_CODE(FILE_DEVICE_DHAHELPER,     \
+                                                  DHAHELPER_IOCTL_INDEX + 3, \
+                                                  METHOD_BUFFERED,           \
+                                                  FILE_ANY_ACCESS)
+
+
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
 #pragma pack(1)
 typedef struct dhahelper_t {
 #else
