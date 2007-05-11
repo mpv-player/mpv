@@ -55,10 +55,10 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libswscale/libswscale.a \
               libvo/libosd.a \
 
-COMMON_LIBS-$(LIBAVFORMAT)        += libavformat/libavformat.a
-COMMON_LIBS-$(LIBAVCODEC)         += libavcodec/libavcodec.a
-COMMON_LIBS-$(LIBAVUTIL)          += libavutil/libavutil.a
-COMMON_LIBS-$(LIBPOSTPROC)        += libpostproc/libpostproc.a
+COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
+COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
+COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
+COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
 COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
 COMMON_LIBS-$(MP3LIB)             += mp3lib/libmp3.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
