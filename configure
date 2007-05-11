@@ -286,7 +286,7 @@ Codecs:
   --disable-xvid            disable XviD [autodetect]
   --disable-x264            disable x264 [autodetect]
   --disable-nut             disable libnut [autodetect]
-  --disable-libavutil       disable static libavutil [autodetect]
+  --disable-libavutil_a     disable static libavutil [autodetect]
   --disable-libavcodec_a    disable static libavcodec [autodetect]
   --disable-libavformat_a   disable static libavformat [autodetect]
   --disable-libpostproc_a   disable static libpostproc [autodetect]
