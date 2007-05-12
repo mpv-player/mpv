@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r23261
+.\" synced with r23291
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -3815,7 +3815,7 @@ iTVC16),  (Hauppauge WinTV PVR-150/250/350/500).
 .RSs
 .IPs <fps>
 Вещественное число, указывающее частоту кадров (по умолчанию: 5.0).
-.IPs <файл>
+.IPs <output>
 Указывает имя файла для вывода (по умолчанию: ./out.gif).
 .REss
 .PD 1
@@ -3829,7 +3829,7 @@ iTVC16),  (Hauppauge WinTV PVR-150/250/350/500).
 .RE
 .PD 0
 .RSs
-mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
+mplayer video.nut \-vo gif89a:fps=15:output=test.gif
 .RE
 .PD 1
 .
@@ -10732,7 +10732,7 @@ rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \
 MPlayer изначально был написан Arpad Gereoffy.
 Смотрите файл AUTHORS, чтобы получить список некоторых из множества других разработчиков.
 .PP
-MPlayer is (C) 2000\-2006 The MPlayer Team
+MPlayer is (C) 2000\-2007 The MPlayer Team
 .PP
 Оригинальная английская версия этого руководства в основном была написана Gabucino, 
 Jonas Jermann и Diego Biurrun. Сейчас она поддерживается Diego Biurrun.
