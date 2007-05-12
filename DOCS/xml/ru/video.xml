@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22854 -->
+<!-- synced with r23272 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -1557,14 +1557,15 @@ VIDIX без аргументов для задействования автоо
 </para></step>
 <step><para>
   Переместите каталог <filename class="directory">svgalib_helper</filename> в
-  <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
+  подкаталог <filename class="directory">vidix</filename> дерева исходных текстов
+  <application>MPlayer</application>.
 </para></step>
 <step><para>
   Удалите комментарий перед строкой CFLAGS, содержащий строку "svgalib_helper" 
-  в файле <filename class="directory">libdha/Makefile</filename>.
+  в файле <filename class="directory">vidix/Makefile</filename>.
 </para></step>
 <step><para>
-  Перекомпилируйте и установите libdha.
+  Перекомпилируйте.
   </para></step>
 </procedure>
 
