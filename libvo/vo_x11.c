@@ -650,14 +650,12 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
     dstStride[1] = dstStride[2] = 0;
     dst[1] = dst[2] = NULL;
 
+    dstStride[0] = image_width * ((bpp + 7) / 8);
+    dst[0] = ImageData;
     if (Flip_Flag)
     {
-        dstStride[0] = -image_width * ((bpp + 7) / 8);
-        dst[0] = ImageData - (long)dstStride[0] * (image_height - 1);
-    } else
-    {
-        dstStride[0] = image_width * ((bpp + 7) / 8);
-        dst[0] = ImageData;
+        dst[0] += dstStride[0] * (image_height - 1);
+        dstStride[0] = -dstStride[0];
     }
     sws_scale_ordered(swsContext, src, stride, y, h, dst, dstStride);
     return 0;
