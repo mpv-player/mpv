@@ -654,13 +654,12 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
     {
         dstStride[0] = -image_width * ((bpp + 7) / 8);
         dst[0] = ImageData - dstStride[0] * (image_height - 1);
-        sws_scale_ordered(swsContext, src, stride, y, h, dst, dstStride);
     } else
     {
         dstStride[0] = image_width * ((bpp + 7) / 8);
         dst[0] = ImageData;
-        sws_scale_ordered(swsContext, src, stride, y, h, dst, dstStride);
     }
+    sws_scale_ordered(swsContext, src, stride, y, h, dst, dstStride);
     return 0;
 }
 
