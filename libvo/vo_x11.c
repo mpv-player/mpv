@@ -653,7 +653,7 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
     if (Flip_Flag)
     {
         dstStride[0] = -image_width * ((bpp + 7) / 8);
-        dst[0] = ImageData - dstStride[0] * (image_height - 1);
+        dst[0] = ImageData - (long)dstStride[0] * (image_height - 1);
     } else
     {
         dstStride[0] = image_width * ((bpp + 7) / 8);
