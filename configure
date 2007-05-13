@@ -413,6 +413,7 @@ Advanced options:
   --enable-shm              enable shm [autodetect]
   --enable-altivec          enable AltiVec (PowerPC) [autodetect]
   --enable-armv5te          enable DSP extensions (ARM) [autodetect]
+  --enable-armv6            enable ARMv6 (ARM) [autodetect]
   --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
   --disable-fastmemcpy      disable 3DNow!/SSE/MMX optimized memcpy [enable]
   --enable-big-endian       force byte order to big-endian [autodetect]
@@ -461,6 +462,7 @@ _sse2=auto
 _cmov=auto
 _fast_cmov=auto
 _armv5te=auto
+_armv6=auto
 _iwmmxt=auto
 _mtrr=auto
 _install=install
@@ -1129,6 +1131,8 @@ for ac_option do
   --disable-altivec) _altivec=no ;;
   --enable-armv5te) _armv5te=yes ;;
   --disable-armv5te) _armv5te=no ;;
+  --enable-armv6) _armv6=yes ;;
+  --disable-armv6) _armv6=no ;;
   --enable-iwmmxt) _iwmmxt=yes ;;
   --disable-iwmmxt) _iwmmxt=no ;;
   --enable-mmx)	_mmx=yes ;;
@@ -2437,6 +2441,16 @@ EOF
   fi
   echores "$_armv5te"
 
+  echocheck "ARMv6 (SIMD instructions)"
+  if test $_armv6 = "auto" ; then
+    cat > $TMPC << EOF
+int main(void) { __asm__ __volatile__ ("sadd16 r0, r0, r0"); }
+EOF
+    _armv6=no
+    cc_check && _armv6=yes
+  fi
+  echores "$_armv6"
+
   echocheck "iWMMXt (Intel XScale SIMD instructions)"
   if test $_iwmmxt = "auto" ; then
     cat > $TMPC << EOF
@@ -2468,6 +2482,8 @@ _def_fast_cmov='#undef HAVE_FAST_CMOV'
 test "$_fast_cmov" = yes && _def_fast_cmov='#define HAVE_FAST_CMOV 1'
 _def_armv5te='#undef HAVE_ARMV5TE'
 test "$_armv5te" = yes && _def_armv5te='#define HAVE_ARMV5TE 1'
+_def_armv6='#undef HAVE_ARMV6'
+test "$_armv6" = yes && _def_armv6='#define HAVE_ARMV6 1'
 _def_iwmmxt='#undef HAVE_IWMMXT'
 test "$_iwmmxt" = yes && _def_iwmmxt='#define HAVE_IWMMXT 1'
 
@@ -7741,6 +7757,7 @@ TARGET_SSE = $_sse
 TARGET_CMOV = $_cmov
 TARGET_ALTIVEC = $_altivec
 TARGET_ARMV5TE = $_armv5te
+TARGET_ARMV6 = $_armv6
 TARGET_IWMMXT = $_iwmmxt
 TARGET_VIS = $_vis
 TARGET_BUILTIN_VECTOR = $_builtin_vector
@@ -8451,6 +8468,7 @@ $_def_cmov	// only define if you have CMOV (i686+, without VIA C3)
 $_def_fast_cmov	// only define if CMOV is fast
 $_def_altivec	// only define if you have Altivec (G4)
 $_def_armv5te	// only define if you have Enhanced DSP Extensions (ARM)
+$_def_armv6 	// only define if you have ARMv6
 $_def_iwmmxt	// only define if you have XScale IWMMX (ARM)
 
 $_def_altivec_h	// enables usage of altivec.h
