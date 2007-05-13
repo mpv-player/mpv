@@ -484,6 +484,8 @@ _libavencoders_all=`sed -n 's/^[^#]*ENC.*, *\(.*\)).*/\1_encoder/p' libavcodec/a
 _libavencoders=` echo $_libavencoders_all | sed -e s/LIBGSM_ENCODER// -e s/LIBGSM_MS_ENCODER// -e s/LIBTHEORA_ENCODER// `
 _libavparsers_all=`sed -n 's/^[^#]*PARSER.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavparsers=$_libavparsers_all
+_libavbsfs_all=`sed -n 's/^[^#]*BSF.*, *\(.*\)).*/\1_bsf/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
+_libavbsfs=$_libavbsfs_all
 _libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavdemuxers=`echo $_libavdemuxers_all | sed -e s/AUDIO_DEMUXER// -e s/DC1394_DEMUXER// -e s/DV1394_DEMUXER// -e s/REDIR_DEMUXER// -e s/RTSP_DEMUXER// -e s/SDP_DEMUXER// -e s/VIDEO_GRAB_V4L_DEMUXER// -e s/VIDEO_GRAB_BKTR_DEMUXER// -e s/X11_GRAB_DEVICE_DEMUXER// -e s/V4L2_DEMUXER// -e s/LIBNUT_DEMUXER// `
 _libavmuxers_all=`sed -n 's/^[^#]*_MUX.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
@@ -8117,6 +8119,7 @@ $_def_libamr_wb
 `ff_config_enable "$_libavdemuxers_all" "$_libavdemuxers"`
 `ff_config_enable "$_libavmuxers_all"   "$_libavmuxers"`
 `ff_config_enable "$_libavprotocols_all" "$_libavprotocols"`
+`ff_config_enable "$_libavbsfs_all" "$_libavbsfs"`
 
 $_def_lavc_faac
 $_def_lavc_xvid
