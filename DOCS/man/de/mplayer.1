@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r22975
+.\" In sync with r23314
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -950,6 +950,11 @@ Aktiviere das OSD-Menü.
 .TP
 .B \-menu-cfg <Dateiname>
 Benutze eine andere menu.conf.
+.
+.TP
+.B \-menu-keepdir (nur bei OSD-Menü)
+Der Datei-Browser startet von der zuletzt bekannten Stelle anstatt dem
+aktuellen Verzeichniss.
 .
 .TP
 .B \-menu-root <Wert>
@@ -2005,6 +2010,28 @@ SSA/ASS-Renderer verwendet werden soll.
 .PD 0
 .RSs
 \-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
+.
+.TP
+.B \-ass-hinting <Typ>
+Setze den Typ für das Hinting.
+.PD 0
+.RSs
+.IPs <Typ>
+0: Kein Hinting.
+.br
+1: Autohinter von FreeType, light-Modus.
+.br
+2: Autohinter von FreeType, normaler Modus.
+.br
+3: Nativer Hinter der Schrift.
+.br
+0-3 + 4: Das gleiche, Hinting wird jedoch nur durchgeführt, wenn das OSD auf
+Bildschirmauflösung gezeichnet wird und daher nicht skaliert wird.
+.br
+Der Standardwert ist 7 (benutze nativen Hinter für unskaliertes OSD und sonst
+kein Hinting).
 .RE
 .PD 1
 .
@@ -3985,7 +4012,7 @@ konvertiert.
 .RSs
 .IPs <fps>
 Fließkommawert, der die Framerate angibt (Standard: 5.0).
-.IPs <Dateiname>
+.IPs <output>
 Gibt den Ausgabedateinamen an (Standard: ./out.gif).
 .REss
 .PD 1
@@ -3999,7 +4026,7 @@ Teil des Dateinamens.
 .RE
 .PD 0
 .RSs
-mplayer video.nut \-vo gif89a:15.0:filename=test.gif
+mplayer video.nut \-vo gif89a:15:output=test.gif
 .RE
 .PD 1
 .
@@ -8508,10 +8535,12 @@ Standard
 .IPs "444P\ "
 für ffv1
 .IPs "422P\ "
-für HuffYUV, verlustfreies JPEG und ffv1
-.IPs 411P,YVU9
-für verlustfreies JPEG und ffv1
-.IPs BGR32
+für HuffYUV, verlustfreies JPEG, dv und ffv1
+.IPs "411P\ "
+für verlustfreies JPEG, dv und ffv1
+.IPs "YVU9\ "
+für verlustfreies JPEG, dv, ffv1 und svq1
+.IPs "BGR32\ "
 für verlustfreies JPEG und ffv1
 .RE
 .PD 1
@@ -11004,7 +11033,7 @@ erstellt.
 MPlayer wurde ursprünglich von Arpad Gereöffy geschrieben.
 Siehe Datei AUTHORS für eine Liste einiger der vielen anderen Beitragenden.
 .PP
-MPlayer is (C) 2000\-2006 The MPlayer Team
+MPlayer is (C) 2000\-2007 The MPlayer Team
 .PP
 Diese Manpage wurde zum größten Teil von Gabucino, Diego Biurrun und
 Jonas Jermann geschrieben und von Moritz Bunkus und Sebastian Krämer
