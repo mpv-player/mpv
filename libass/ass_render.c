@@ -1759,15 +1759,10 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		shift.x = pen.x & 63;
 		shift.y = pen.y & 63;
 
-		{
-			FT_Matrix matrix;
-			matrix.xx = (FT_Fixed)( render_context.scale_x * frame_context.font_scale_x * 0x10000L );
-			matrix.xy = (FT_Fixed)( 0 * 0x10000L );
-			matrix.yx = (FT_Fixed)( 0 * 0x10000L );
-			matrix.yy = (FT_Fixed)( render_context.scale_y * 0x10000L );
-
-			ass_font_set_transform(render_context.font, &matrix, &shift );
-		}
+		ass_font_set_transform(render_context.font,
+				       render_context.scale_x * frame_context.font_scale_x,
+				       render_context.scale_y,
+				       &shift );
 
 		get_outline_glyph(code, text_info.glyphs + text_info.length, &shift);
 		

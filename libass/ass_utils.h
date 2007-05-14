@@ -50,6 +50,12 @@ static inline double d6_to_double(int x) {
 static inline int double_to_d6(double x) {
 	return (int)(x * 64);
 }
+static inline double d16_to_double(int x) {
+	return ((double)x) / 0x10000;
+}
+static inline int double_to_d16(double x) {
+	return (int)(x * 0x10000);
+}
 
 #endif
 

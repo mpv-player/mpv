@@ -32,6 +32,7 @@
 #include "ass_bitmap.h"
 #include "ass_cache.h"
 #include "ass_fontconfig.h"
+#include "ass_utils.h"
 #include "mputils.h"
 
 /**
@@ -60,6 +61,17 @@ static void charmap_magic(FT_Face face)
 		FT_Set_Charmap(face, face->charmaps[0]);
 		return;
 	}
+}
+
+static void update_transform(ass_font_t* font)
+{
+	int i;
+	FT_Matrix m;
+	m.xx = double_to_d16(font->scale_x);
+	m.yy = double_to_d16(font->scale_y);
+	m.xy = m.yx = 0;
+	for (i = 0; i < font->n_faces; ++i)
+		FT_Set_Transform(font->faces[i], &m, &font->v);
 }
 
 /**
@@ -118,8 +130,7 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	font.desc.bold = desc->bold;
 	font.desc.italic = desc->italic;
 
-	font.m.xx = font.m.yy = (FT_Fixed)0x10000L;
-	font.m.xy = font.m.yy = 0;
+	font.scale_x = font.scale_y = 1.;
 	font.v.x = font.v.y = 0;
 	font.size = 0;
 
@@ -133,17 +144,13 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 /**
  * \brief Set font transformation matrix and shift vector
  **/
-void ass_font_set_transform(ass_font_t* font, FT_Matrix* m, FT_Vector* v)
+void ass_font_set_transform(ass_font_t* font, double scale_x, double scale_y, FT_Vector* v)
 {
-	int i;
-	font->m.xx = m->xx;
-	font->m.xy = m->xy;
-	font->m.yx = m->yx;
-	font->m.yy = m->yy;
+	font->scale_x = scale_x;
+	font->scale_y = scale_y;
 	font->v.x = v->x;
 	font->v.y = v->y;
-	for (i = 0; i < font->n_faces; ++i)
-		FT_Set_Transform(font->faces[i], &font->m, &font->v);
+	update_transform(font);
 }
 
 /**
@@ -191,8 +198,7 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t 
 	}
 
 	font->faces[font->n_faces++] = face;
-	
-	FT_Set_Transform(face, &font->m, &font->v);
+	update_transform(font);
 	FT_Set_Pixel_Sizes(face, 0, font->size);
 }
 #endif
