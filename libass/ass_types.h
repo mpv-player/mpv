@@ -32,7 +32,7 @@
 typedef struct ass_style_s {
 	char* Name;
 	char* FontName;
-	int FontSize;
+	double FontSize;
 	uint32_t PrimaryColour;
 	uint32_t SecondaryColour;
 	uint32_t OutlineColour;

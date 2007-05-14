@@ -137,7 +137,7 @@ typedef struct render_context_s {
 	
 	ass_font_t* font;
 	char* font_path;
-	int font_size;
+	double font_size;
 	
 	FT_Stroker stroker;
 	int alignment; // alignment overrides go here; if zero, style value will be used
@@ -508,7 +508,7 @@ static inline int mystrcmp(char** p, const char* sample) {
 
 double ass_internal_font_size_coeff = 0.8;
 
-static void change_font_size(int sz)
+static void change_font_size(double sz)
 {
 	double size = sz * frame_context.font_scale;
 
@@ -696,8 +696,8 @@ static char* parse_tag(char* p, double pwr) {
 		else
 			render_context.hspacing = render_context.style->Spacing;
 	} else if (mystrcmp(&p, "fs")) {
-		int val;
-		if (mystrtoi(&p, 10, &val))
+		double val;
+		if (mystrtod(&p, &val))
 			val = render_context.font_size * ( 1 - pwr ) + val * pwr;
 		else
 			val = render_context.style->FontSize;

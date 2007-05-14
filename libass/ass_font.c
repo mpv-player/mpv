@@ -67,8 +67,9 @@ static void update_transform(ass_font_t* font)
 {
 	int i;
 	FT_Matrix m;
-	m.xx = double_to_d16(font->scale_x);
-	m.yy = double_to_d16(font->scale_y);
+	double size_scale = font->size / (int)font->size;
+	m.xx = double_to_d16(font->scale_x * size_scale);
+	m.yy = double_to_d16(font->scale_y * size_scale);
 	m.xy = m.yx = 0;
 	for (i = 0; i < font->n_faces; ++i)
 		FT_Set_Transform(font->faces[i], &m, &font->v);
@@ -132,7 +133,7 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 
 	font.scale_x = font.scale_y = 1.;
 	font.v.x = font.v.y = 0;
-	font.size = 0;
+	font.size = 0.;
 
 #ifdef HAVE_FONTCONFIG
 	font.charset = FcCharSetCreate();
@@ -156,13 +157,14 @@ void ass_font_set_transform(ass_font_t* font, double scale_x, double scale_y, FT
 /**
  * \brief Set font size
  **/
-void ass_font_set_size(ass_font_t* font, int size)
+void ass_font_set_size(ass_font_t* font, double size)
 {
 	int i;
 	if (font->size != size) {
 		font->size = size;
 		for (i = 0; i < font->n_faces; ++i)
-			FT_Set_Pixel_Sizes(font->faces[i], 0, size);
+			FT_Set_Pixel_Sizes(font->faces[i], 0, (int)size);
+		update_transform(font);
 	}
 }
 
@@ -199,7 +201,7 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t 
 
 	font->faces[font->n_faces++] = face;
 	update_transform(font);
-	FT_Set_Pixel_Sizes(face, 0, font->size);
+	FT_Set_Pixel_Sizes(face, 0, (int)font->size);
 }
 #endif
 

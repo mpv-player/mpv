@@ -31,7 +31,7 @@ void ass_font_cache_done(void);
 typedef struct bitmap_hash_key_s {
 	char bitmap; // bool : true = bitmap, false = outline
 	ass_font_t* font;
-	int size; // font size
+	double size; // font size
 	uint32_t ch; // character code
 	unsigned outline; // border width, 16.16 fixed point value
 	int bold, italic;
@@ -61,7 +61,7 @@ void ass_bitmap_cache_done(void);
 // describes an outline glyph
 typedef struct glyph_hash_key_s {
 	ass_font_t* font;
-	int size; // font size
+	double size; // font size
 	uint32_t ch; // character code
 	int bold, italic;
 	unsigned scale_x, scale_y; // 16.16

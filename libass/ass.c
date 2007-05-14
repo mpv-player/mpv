@@ -347,7 +347,7 @@ void process_force_style(ass_track_t* track) {
 					COLORVAL(SecondaryColour)
 					COLORVAL(OutlineColour)
 					COLORVAL(BackColour)
-					INTVAL(FontSize)
+					FPVAL(FontSize)
 					INTVAL(Bold)
 					INTVAL(Italic)
 					INTVAL(Underline)
@@ -435,7 +435,7 @@ static int process_style(ass_track_t* track, char *str)
 				// this will destroy SSA's TertiaryColour, but i'm not going to use it anyway
 				if (track->track_type == TRACK_TYPE_SSA)
 					target->OutlineColour = target->BackColour;
-			INTVAL(FontSize)
+			FPVAL(FontSize)
 			INTVAL(Bold)
 			INTVAL(Italic)
 			INTVAL(Underline)
