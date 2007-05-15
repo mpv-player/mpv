@@ -1510,7 +1510,7 @@ if x86 ; then
                            -e s/xmm/sse/ -e s/kni/sse/`
 
   for ext in $pparam ; do
-    eval test \$_$ext = auto 2>/dev/null && eval _$ext=kernel_check
+    eval test \"\$_$ext\" = auto 2>/dev/null && eval _$ext=kernel_check
   done
 
   # SSE implies MMX2, but not all SSE processors report the mmxext CPU flag.
