@@ -6,6 +6,7 @@
 #include <inttypes.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "app.h"
 #include "skin/font.h"

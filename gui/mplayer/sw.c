@@ -2,6 +2,7 @@
 // sub window
 
 #include <inttypes.h>
+#include <string.h>
 
 #include "../config.h"
 #include "../libvo/x11_common.h"

@@ -6,6 +6,7 @@
 #include <inttypes.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "gmplayer.h"
 #include "app.h"
