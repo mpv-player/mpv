@@ -2952,7 +2952,6 @@ handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
   hdr->timestamp = mkv_d->last_pts * 1000;
   hdr->chunktab = sizeof(*hdr) + isize;
 
-  dp->len = sizeof(*hdr) + size;
   if (mkv_d->v_skip_to_keyframe)
     {
       dp->pts = mkv_d->last_pts;
