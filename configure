@@ -2509,41 +2509,6 @@ if x86_32 && linux ; then
   fi
 fi
 
-if test "$_vidix_internal" = auto ; then
-  _vidix_internal=no
-  # should check for x86 systems supporting VIDIX (does QNX have VIDIX?)
-  x86 && _vidix_internal=yes
-# this is broken currently, undefined references to inw, outw etc.
-#  ppc && linux && _vidix_internal=yes
-  alpha && linux && _vidix_internal=yes
-  qnx && _vidix_internal=no
-  beos && _vidix_internal=no
-  darwin && _vidix_internal=no
-fi
-
-
-# checking for a working awk, I'm using mawk first, because it's fastest - atmos
-_awk=awk
-if test "$_vidix_internal" = yes ; then
-_awk_verc_fail=yes
-echocheck "awk"
-for _awk in mawk gawk nawk; do
-  if ( $_awk 'BEGIN{testme();}function testme(){print"";}' ) >> "$TMPLOG" 2>&1; then
-    _awk_verc_fail=no
-    break
-  fi
-done
-test "$_awk_verc_fail" = yes && _awk=no
-echores "$_awk"
-if test "$_awk_verc_fail" = yes; then
-echo "VIDIX needs awk, but no working implementation was found!"
-echo "Try the GNU version, which can be downloaded from:"
-echo "ftp://ftp.gnu.org/gnu/gawk/"
-echo "If you don't need VIDIX, you can use configure --disable-vidix instead."
-die "no awk"
-fi
-fi
-
 ######################
 # MAIN TESTS GO HERE #
 ######################
@@ -7203,6 +7168,40 @@ linux && _def_linux='#define TARGET_LINUX 1'
 
 # TODO cleanup the VIDIX stuff here
 echocheck "VIDIX"
+if test "$_vidix_internal" = auto ; then
+  _vidix_internal=no
+  # should check for x86 systems supporting VIDIX (does QNX have VIDIX?)
+  x86 && _vidix_internal=yes
+# this is broken currently, undefined references to inw, outw etc.
+#  ppc && linux && _vidix_internal=yes
+  alpha && linux && _vidix_internal=yes
+  qnx && _vidix_internal=no
+  beos && _vidix_internal=no
+  darwin && _vidix_internal=no
+fi
+
+# checking for a working awk, I'm using mawk first, because it's fastest - atmos
+_awk=awk
+if test "$_vidix_internal" = yes ; then
+_awk_verc_fail=yes
+echocheck "awk"
+for _awk in mawk gawk nawk; do
+  if ( $_awk 'BEGIN{testme();}function testme(){print"";}' ) >> "$TMPLOG" 2>&1; then
+    _awk_verc_fail=no
+    break
+  fi
+done
+test "$_awk_verc_fail" = yes && _awk=no
+echores "$_awk"
+if test "$_awk_verc_fail" = yes; then
+echo "VIDIX needs awk, but no working implementation was found!"
+echo "Try the GNU version, which can be downloaded from:"
+echo "ftp://ftp.gnu.org/gnu/gawk/"
+echo "If you don't need VIDIX, you can use configure --disable-vidix instead."
+die "no awk"
+fi
+fi
+
 if test "$_vidix_internal" = yes; then
   _res_comment="internal"
   _vidix_external=no
