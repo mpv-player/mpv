@@ -13,6 +13,7 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "libavutil/intreadwrite.h"
 
 #define FOURCC_VORBIS mmioFOURCC('v', 'r', 'b', 's')
 #define FOURCC_SPEEX  mmioFOURCC('s', 'p', 'x', ' ')
@@ -159,55 +160,9 @@ static subtitle ogg_sub;
 extern subtitle* vo_sub;
 //FILE* subout;
 
-static
-uint16_t get_uint16 (const void *buf)
-{
-  uint16_t      ret;
-  unsigned char *tmp;
-
-  tmp = (unsigned char *) buf;
-
-  ret = tmp[1] & 0xff;
-  ret = (ret << 8) + (tmp[0] & 0xff);
-
-  return (ret);
-}
-
-static
-uint32_t get_uint32 (const void *buf)
-{
-  uint32_t      ret;
-  unsigned char *tmp;
-
-  tmp = (unsigned char *) buf;
-
-  ret = tmp[3] & 0xff;
-  ret = (ret << 8) + (tmp[2] & 0xff);
-  ret = (ret << 8) + (tmp[1] & 0xff);
-  ret = (ret << 8) + (tmp[0] & 0xff);
-
-  return (ret);
-}
-
-static
-uint64_t get_uint64 (const void *buf)
-{
-  uint64_t      ret;
-  unsigned char *tmp;
-
-  tmp = (unsigned char *) buf;
-
-  ret = tmp[7] & 0xff;
-  ret = (ret << 8) + (tmp[6] & 0xff);
-  ret = (ret << 8) + (tmp[5] & 0xff);
-  ret = (ret << 8) + (tmp[4] & 0xff);
-  ret = (ret << 8) + (tmp[3] & 0xff);
-  ret = (ret << 8) + (tmp[2] & 0xff);
-  ret = (ret << 8) + (tmp[1] & 0xff);
-  ret = (ret << 8) + (tmp[0] & 0xff);
-
-  return (ret);
-}
+#define get_uint16(b) AV_RL16(b)
+#define get_uint32(b) AV_RL32(b)
+#define get_uint64(b) AV_RL64(b)
 
 void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
   int lcv;
