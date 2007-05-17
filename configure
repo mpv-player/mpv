@@ -7179,28 +7179,7 @@ if test "$_vidix_internal" = auto ; then
   beos && _vidix_internal=no
   darwin && _vidix_internal=no
 fi
-
-# checking for a working awk, I'm using mawk first, because it's fastest - atmos
-_awk=awk
 if test "$_vidix_internal" = yes ; then
-_awk_verc_fail=yes
-echocheck "awk"
-for _awk in mawk gawk nawk; do
-  if ( $_awk 'BEGIN{testme();}function testme(){print"";}' ) >> "$TMPLOG" 2>&1; then
-    _awk_verc_fail=no
-    break
-  fi
-done
-test "$_awk_verc_fail" = yes && _awk=no
-echores "$_awk"
-if test "$_awk_verc_fail" = yes; then
-echo "VIDIX needs awk, but no working implementation was found!"
-echo "Try the GNU version, which can be downloaded from:"
-echo "ftp://ftp.gnu.org/gnu/gawk/"
-echo "If you don't need VIDIX, you can use configure --disable-vidix instead."
-die "no awk"
-fi
-fi
 
 if test "$_vidix_internal" = yes; then
   _res_comment="internal"
@@ -7544,7 +7523,6 @@ libdir = \$(LIBDIR)
 #AR = ar
 CC = $_cc
 HOST_CC = $_host_cc
-AWK = $_awk
 RANLIB = $_ranlib
 LDCONFIG = $_ldconfig
 INSTALL = $_install
