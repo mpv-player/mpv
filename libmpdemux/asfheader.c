@@ -220,7 +220,7 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, str
       buf_max_index+=14;
       if (buf_max_index > buf_len) return 0;
       buffer+=2; //skip stream-language-id-index
-      avg_ft = AV_RL32(buffer) | (uint64_t)AV_RL32(buffer + 4) << 32; // provided in 100ns units
+      avg_ft = AV_RL64(buffer); // provided in 100ns units
       buffer+=8;
 
       // after this are values for stream-name-count and
