@@ -566,6 +566,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->b_sensitivity = lavc_param_b_sensitivity;
     lavc_venc_context->level = lavc_param_level;
 
+    mux_v->imgfmt = lavc_param_format;
     switch(lavc_param_format)
     {
 	case IMGFMT_YV12:
