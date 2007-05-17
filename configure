@@ -312,7 +312,6 @@ Codecs:
   --disable-toolame         disable Toolame (MPEG layer 2) encoding [autodetect]
   --disable-twolame         disable Twolame (MPEG layer 2) encoding [autodetect]
   --enable-xmms             enable XMMS input plugin support [disabled]
-  --enable-libdts           enable libdts support [autodetect]
   --disable-mp3lib          disable builtin mp3lib [enabled]
   --disable-liba52          disable builtin liba52 [enabled]
   --disable-libmpeg2        disable builtin libmpeg2 [enabled]
@@ -550,7 +549,6 @@ _speex=auto
 _theora=auto
 _mp3lib=yes
 _liba52=yes
-_libdts=auto
 _libmpeg2=yes
 _faad_internal=auto
 _faad_external=auto
@@ -880,8 +878,6 @@ for ac_option do
   --disable-mp3lib)	_mp3lib=no	;;
   --enable-liba52)	_liba52=yes	;;
   --disable-liba52)	_liba52=no	;;
-  --enable-libdts)	_libdts=yes     ;;
-  --disable-libdts)	_libdts=no      ;;
   --enable-libmpeg2)	_libmpeg2=yes	;;
   --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-musepack)	_musepack=yes	;;
@@ -5840,26 +5836,6 @@ else
 fi
 echores "$_liba52"
 
-echocheck "libdts support"
-if test "$_libdts" = auto ; then
-  _libdts=no
-  cat > $TMPC << EOF
-#include <inttypes.h>
-#include <dts.h>
-int main(void) { dts_init (0); return 0; }
-EOF
-  cc_check -ldts $_ld_lm && _libdts=yes
-fi
-if test "$_libdts" = yes ; then
-  _def_libdts='#define CONFIG_LIBDTS 1'
-  _ld_extra="$_ld_extra -ldts"
-  _codecmodules="libdts $_codecmodules"
-else
-  _def_libdts='#undef CONFIG_LIBDTS'
-  _nocodecmodules="libdts $_nocodecmodules"
-  _libavdecoders=`echo $_libavdecoders | sed -e s/LIBDTS_DECODER// `
-fi
-echores "$_libdts"
 
 echocheck "libmpeg2 support"
 if test "$_libmpeg2" = yes ; then
@@ -7690,7 +7666,6 @@ LIBDV = $_libdv
 XVID4 = $_xvid
 X264 = $_x264
 LIBNUT = $_nut
-CONFIG_LIBDTS = $_libdts
 MPLAYER = $_mplayer
 MENCODER = $_mencoder
 CDDA = $_cdda
@@ -8146,7 +8121,6 @@ $_def_lavc_x264
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
 $_def_liba52
-$_def_libdts
 $_def_libmpeg2
 
 /* XAnim DLL support */
