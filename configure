@@ -7179,8 +7179,6 @@ if test "$_vidix_internal" = auto ; then
   beos && _vidix_internal=no
   darwin && _vidix_internal=no
 fi
-if test "$_vidix_internal" = yes ; then
-
 if test "$_vidix_internal" = yes; then
   _res_comment="internal"
   _vidix_external=no
