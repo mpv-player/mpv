@@ -2517,7 +2517,6 @@ if test "$_vidix_internal" = auto ; then
 #  ppc && linux && _vidix_internal=yes
   alpha && linux && _vidix_internal=yes
   qnx && _vidix_internal=no
-  sunos && not x86 && _vidix_internal=no
   beos && _vidix_internal=no
   darwin && _vidix_internal=no
 fi
