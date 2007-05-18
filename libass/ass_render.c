@@ -1670,6 +1670,7 @@ static inline void transform_glyph_3d(FT_Glyph glyph, double *m, FT_Vector shift
  */
 static void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz)
 {
+	fry = - fry; // FreeType's y axis goes in the opposite direction
 	if (frx != 0. || fry != 0. || frz != 0.) {
 		double m[16];
 		double sx = sin(frx);
@@ -1678,10 +1679,10 @@ static void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, dou
 		double cx = cos(frx);
 		double cy = cos(fry);
 		double cz = cos(frz);
-		m[0] = cy * cz;   m[1] = cz*sx*sy + sz*cx;   m[2]  = sz*sx - cz*cx*sy;   m[3] = 0.0;
-		m[4] = -sz*cy;    m[5] = cz*cx - sz*sy*sx;   m[6]  = sz*sy*cx + cz*sx;   m[7] = 0.0;
-		m[8] = sy;        m[9] = -sx*cy;             m[10] = cx*cy;              m[11] = 0.0;
-		m[12] = 0.0;      m[13] = 0.0;               m[14] = 0.0;                m[15] = 1.0;
+		m[0] = cy * cz;            m[1] = cy*sz;              m[2]  = -sy;    m[3] = 0.0;
+		m[4] = -cx*sz + sx*sy*cz;  m[5] = cx*cz + sx*sy*sz;   m[6]  = sx*cy;  m[7] = 0.0;
+		m[8] = sx*sz + cx*sy*cz;   m[9] = -sx*cz + cx*sy*sz;  m[10] = cx*cy;  m[11] = 0.0;
+		m[12] = 0.0;               m[13] = 0.0;               m[14] = 0.0;    m[15] = 1.0;
 
 		if (glyph && *glyph)
 			transform_glyph_3d(*glyph, m, shift);
