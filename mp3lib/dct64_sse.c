@@ -274,7 +274,7 @@ void dct64_sse(real *a,real *b,real *c)
     out0[32] = (short)(b1[14] + b1[9]);
     out1[32] = (short)(b1[9] + b1[13]);
     out1[96] = (short)(b1[13] + b1[11]);
-    out1[222] = (short)b1[15];
+    out1[224] = (short)b1[15];
     out1[160] = (short)(b1[15] + b1[11]);
     out0[240] = (short)(b1[24] + b1[28] + b1[16]);
     out0[208] = (short)(b1[24] + b1[28] + b1[20]);
