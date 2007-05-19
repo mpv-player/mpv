@@ -7592,6 +7592,7 @@ CONFIG_LIBAMR_WB=$_libamr_wb
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 CONFIG_LIBFAAC=$_lavc_faac
 CONFIG_LIBMP3LAME=$_lavc_mp3lame
 CONFIG_XVID=$_lavc_xvid
