@@ -25,6 +25,7 @@
 #include FT_FREETYPE_H
 #include FT_SYNTHESIS_H
 #include FT_GLYPH_H
+#include FT_TRUETYPE_TABLES_H
 
 #include "ass.h"
 #include "ass_library.h"
@@ -67,9 +68,8 @@ static void update_transform(ass_font_t* font)
 {
 	int i;
 	FT_Matrix m;
-	double size_scale = font->size / (int)font->size;
-	m.xx = double_to_d16(font->scale_x * size_scale);
-	m.yy = double_to_d16(font->scale_y * size_scale);
+	m.xx = double_to_d16(font->scale_x);
+	m.yy = double_to_d16(font->scale_y);
 	m.xy = m.yx = 0;
 	for (i = 0; i < font->n_faces; ++i)
 		FT_Set_Transform(font->faces[i], &m, &font->v);
@@ -154,6 +154,28 @@ void ass_font_set_transform(ass_font_t* font, double scale_x, double scale_y, FT
 	update_transform(font);
 }
 
+static void face_set_size(FT_Face face, double size)
+{
+	TT_HoriHeader *hori = FT_Get_Sfnt_Table(face, ft_sfnt_hhea);
+	TT_OS2 *os2 = FT_Get_Sfnt_Table(face, ft_sfnt_os2);
+	double mscale = 1.;
+	FT_Size_RequestRec rq;
+	FT_Size_Metrics *m = &face->size->metrics;
+	// VSFilter uses metrics from TrueType OS/2 table
+	// The idea was borrowed from asa (http://asa.diac24.net)
+	if (hori && os2)
+		mscale = ((double)(hori->Ascender - hori->Descender)) / (os2->usWinAscent + os2->usWinDescent);
+	memset(&rq, 0, sizeof(rq));
+	rq.type = FT_SIZE_REQUEST_TYPE_REAL_DIM;
+	rq.width = 0;
+	rq.height = double_to_d6(size * mscale);
+	rq.horiResolution = rq.vertResolution = 0;
+	FT_Request_Size(face, &rq);
+	m->ascender /= mscale;
+	m->descender /= mscale;
+	m->height /= mscale;
+}
+
 /**
  * \brief Set font size
  **/
@@ -163,8 +185,7 @@ void ass_font_set_size(ass_font_t* font, double size)
 	if (font->size != size) {
 		font->size = size;
 		for (i = 0; i < font->n_faces; ++i)
-			FT_Set_Pixel_Sizes(font->faces[i], 0, (int)size);
-		update_transform(font);
+			face_set_size(font->faces[i], size);
 	}
 }
 

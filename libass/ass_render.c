@@ -506,8 +506,6 @@ static inline int mystrcmp(char** p, const char* sample) {
 		return 0;
 }
 
-double ass_internal_font_size_coeff = 0.8;
-
 static void change_font_size(double sz)
 {
 	double size = sz * frame_context.font_scale;
@@ -2103,7 +2101,7 @@ static int ass_start_frame(ass_renderer_t *priv, ass_track_t* track, long long n
 
 	ass_lazy_track_init();
 	
-	frame_context.font_scale = global_settings->font_size_coeff * ass_internal_font_size_coeff *
+	frame_context.font_scale = global_settings->font_size_coeff *
 	                           frame_context.orig_height / frame_context.track->PlayResY;
 	frame_context.border_scale = ((double)frame_context.orig_height) / frame_context.track->PlayResY;
 

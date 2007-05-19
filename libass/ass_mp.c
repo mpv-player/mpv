@@ -67,7 +67,6 @@ extern char* sub_cp;
 static char* sub_cp = 0;
 #endif
 
-extern double ass_internal_font_size_coeff; 
 extern void process_force_style(ass_track_t* track);
 
 ass_track_t* ass_default_track(ass_library_t* library) {
@@ -92,7 +91,7 @@ ass_track_t* ass_default_track(ass_library_t* library) {
 		style->Name = strdup("Default");
 		style->FontName = (font_fontconfig && font_name) ? strdup(font_name) : strdup("Sans");
 
-		fs = track->PlayResY * text_font_scale_factor / 100. / ass_internal_font_size_coeff;
+		fs = track->PlayResY * text_font_scale_factor / 100.;
 		// approximate autoscale coefficients
 		if (subtitle_autoscale == 2)
 			fs *= 1.3;
