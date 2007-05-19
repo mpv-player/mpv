@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22129 -->
+<!-- synced with r23342 -->
 <chapter id="mencoder">
 <title>Основы использования <application>MEncoder</application></title>
 
@@ -247,7 +247,7 @@ AVI является родным форматом для  <application>MEncoder
 файл воспроизводится не только в <application>MPlayer</application>.
 </para>
 
-<example>
+<example id="encode_to_macromedia_flash_format">
 <title>Кодирование в формат Macromedia Flash</title>
 <para>
 Создание видео Macromedia Flash, подходящего для воспроизведения в веб браузере плагином
