@@ -247,7 +247,7 @@ and that the file can be played correctly by players other than
 <application>MPlayer</application>.
 </para>
 
-<example>
+<example id="encode_to_macromedia_flash_format">
 <title>encode to Macromedia Flash format</title>
 <para>
 Creating a Macromedia Flash video suitable for playback in a web browser
