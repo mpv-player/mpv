@@ -66,7 +66,6 @@ int mp_input_joystick_init(char* dev) {
 	mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_LoosingBytes,l);	  
       break;
     }
-    ev.type &= ~JS_EVENT_INIT;
     if(ev.type == JS_EVENT_BUTTON)
       btns |= (ev.value << ev.number);
     if(ev.type == JS_EVENT_AXIS)
