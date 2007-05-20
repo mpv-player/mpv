@@ -156,6 +156,7 @@ void ass_font_set_transform(ass_font_t* font, double scale_x, double scale_y, FT
 
 static void face_set_size(FT_Face face, double size)
 {
+#if (FREETYPE_MAJOR >= 2)
 	TT_HoriHeader *hori = FT_Get_Sfnt_Table(face, ft_sfnt_hhea);
 	TT_OS2 *os2 = FT_Get_Sfnt_Table(face, ft_sfnt_os2);
 	double mscale = 1.;
@@ -174,6 +175,9 @@ static void face_set_size(FT_Face face, double size)
 	m->ascender /= mscale;
 	m->descender /= mscale;
 	m->height /= mscale;
+#else
+	FT_Set_Char_Size(face, 0, double_to_d6(size), 0, 0);
+#endif
 }
 
 /**
