@@ -65,6 +65,13 @@ static enum {
 } enable_sample_timing;
 
 
+static void flush_audio(int fd) {
+#ifdef AUDIO_FLUSH
+  ioctl(fd, AUDIO_FLUSH, 0);
+#elif defined(__svr4__)
+  ioctl(fd, I_FLUSH, FLUSHW);
+#endif
+}
 
 // convert an OSS audio format specification into a sun audio encoding
 static int af2sunfmt(int format)
@@ -203,12 +210,9 @@ static int realtime_samplecounter_available(char *dev)
 error:
     if (silence != NULL) free(silence);
     if (fd >= 0) {
-#ifdef	__svr4__
 	// remove the 0 bytes from the above measurement from the
 	// audio driver's STREAMS queue
-	ioctl(fd, I_FLUSH, FLUSHW);
-#endif
-	//ioctl(fd, AUDIO_DRAIN, 0);
+        flush_audio(fd);
 	close(fd);
     }
 
@@ -576,11 +580,9 @@ static int init(int rate,int channels,int format,int flags){
 
 // close audio device
 static void uninit(int immed){
-#ifdef	__svr4__
     // throw away buffered data in the audio driver's STREAMS queue
     if (immed)
-	ioctl(audio_fd, I_FLUSH, FLUSHW);
-#endif
+	flush_audio(audio_fd);
     close(audio_fd);
 }
 
