@@ -655,13 +655,9 @@ static int get_space(void){
     ioctl(audio_fd, AUDIO_GETINFO, &info);
     if (queued_bursts - info.play.eof > 2)
 	return 0;
-#endif
-
-#if defined(__NetBSD__) || defined(__OpenBSD__)
+#else
     ioctl(audio_fd, AUDIO_GETINFO, &info);
     return info.hiwat * info.blocksize - info.play.seek;
-#else
-    return ao_data.outburst;
 #endif
 
 }
