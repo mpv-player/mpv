@@ -322,6 +322,7 @@ extern int vo_flags;
 
 // sub:
 char *font_name=NULL;
+char *sub_font_name=NULL;
 #ifdef HAVE_FONTCONFIG
 extern int font_fontconfig;
 #endif
@@ -2533,6 +2534,10 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
        if(!vo_font)
        vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
   }
+  if (sub_font_name)
+    sub_font = read_font_desc(sub_font_name, font_factor, verbose>1);
+  else
+    sub_font = vo_font;
 #endif
 #ifdef HAVE_FONTCONFIG
   }

@@ -19,6 +19,7 @@ extern int osd_level;
 extern unsigned int osd_visible;
 
 extern char * font_name;
+extern char * sub_font_name;
 extern float  font_factor;
 extern float movie_aspect;
 extern float force_fps;

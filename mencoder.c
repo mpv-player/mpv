@@ -186,6 +186,7 @@ static int play_n_frames_mf=-1;
 
 // sub:
 char *font_name=NULL;
+char *sub_font_name=NULL;
 #ifdef HAVE_FONTCONFIG
 extern int font_fontconfig;
 #endif

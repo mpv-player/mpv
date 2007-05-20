@@ -62,6 +62,7 @@ typedef struct {
 } font_desc_t;
 
 extern font_desc_t* vo_font;
+extern font_desc_t* sub_font;
 
 #ifdef HAVE_FREETYPE
 
@@ -86,7 +87,7 @@ void free_font_desc(font_desc_t *desc);
 void render_one_glyph(font_desc_t *desc, int c);
 int kerning(font_desc_t *desc, int prevc, int c);
 
-void load_font_ft(int width, int height);
+void load_font_ft(int width, int height, font_desc_t **desc, const char *name);
 
 void blur(unsigned char *buffer, unsigned short *tmp2, int width, int height,
           int stride, int *m2, int r, int mwidth);

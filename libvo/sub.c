@@ -14,6 +14,7 @@
 #define OSD_NAV_BOX_ALPHA 0x7f
 #endif
 
+#include "mplayer.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "video_out.h"
@@ -63,6 +64,7 @@ char * __sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "",
 
 //static int vo_font_loaded=-1;
 font_desc_t* vo_font=NULL;
+font_desc_t* sub_font=NULL;
 
 unsigned char* vo_osd_text=NULL;
 int sub_unicode=0;
@@ -392,7 +394,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    
    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
 
-   if(!vo_sub || !vo_font || !sub_visibility || (vo_font->font[40]<0)){
+   if(!vo_sub || !sub_font || !sub_visibility || (sub_font->font[40]<0)){
        obj->flags&=~OSDFLAG_VISIBLE;
        return;
    }
@@ -402,7 +404,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 
       // too long lines divide into a smaller ones
       i=k=lasth=0;
-      h=vo_font->height;
+      h=sub_font->height;
       lastStripPosition=-1;
       l=vo_sub->lines;
 
@@ -413,7 +415,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	int *char_seq, char_position, xlimit = dxs * sub_width_p / 100, counter;
 
       while (l) {
-	    xsize = -vo_font->charspace;
+	    xsize = -sub_font->charspace;
 	  l--;
 	  t=vo_sub->text[i++];	  
 	    char_position = 0;
@@ -436,7 +438,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		 mp_msg(MSGT_OSD,MSGL_WARN,"\nMAX_UCS exceeded!\n");
 	      }
 	      if (!c) c++; // avoid UCS 0
-	      render_one_glyph(vo_font, c);
+	      render_one_glyph(sub_font, c);
 
 		if (c == ' ') {
 		    struct osd_text_t *tmp_ott = (struct osd_text_t *) calloc(1, sizeof(struct osd_text_t));
@@ -447,7 +449,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 			tmp_ott->prev = cp_ott;
 			cp_ott->next = tmp_ott;
 			tmp_ott->osd_kerning =
-			    vo_font->charspace + vo_font->width[' '];
+			    sub_font->charspace + sub_font->width[' '];
 			cp_ott = tmp_ott;
 		    }
 		    tmp_ott->osd_length = xsize;
@@ -459,16 +461,16 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		    xsize = 0;
 		    prevc = c;
 		} else {
-		    int delta_xsize = vo_font->width[c] + vo_font->charspace + kerning(vo_font, prevc, c);
+		    int delta_xsize = sub_font->width[c] + sub_font->charspace + kerning(sub_font, prevc, c);
 		    
 		    if (xsize + delta_xsize <= dxs) {
 			if (!x) x = 1;
 			prevc = c;
 			char_seq[char_position++] = c;
 			xsize += delta_xsize;
-			if ((!suboverlap_enabled) && ((font = vo_font->font[c]) >= 0)) {
-			    if (vo_font->pic_a[font]->h > h) {
-				h = vo_font->pic_a[font]->h;
+			if ((!suboverlap_enabled) && ((font = sub_font->font[c]) >= 0)) {
+			    if (sub_font->pic_a[font]->h > h) {
+				h = sub_font->pic_a[font]->h;
 			    }
 			}
 		    } else {
@@ -490,7 +492,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		    tmp_ott->prev = cp_ott;
 		    cp_ott->next = tmp_ott;
 		    tmp_ott->osd_kerning =
-			vo_font->charspace + vo_font->width[' '];
+			sub_font->charspace + sub_font->width[' '];
 		    cp_ott = tmp_ott;
 		}
 		tmp_ott->osd_length = xsize;
@@ -499,7 +501,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		for (counter = 0; counter < char_position; ++counter)
 		    tmp_ott->text[counter] = char_seq[counter];
 		char_position = 0;
-		xsize = -vo_font->charspace;
+		xsize = -sub_font->charspace;
 	    }
 	    free(char_seq);
 
@@ -522,7 +524,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 			tmp->prev = tmp_otp;
 			tmp_otp = tmp;
 			tmp_otp->ott = tmp_ott;
-			value = -2 * vo_font->charspace - vo_font->width[' '];
+			value = -2 * sub_font->charspace - sub_font->width[' '];
 		    } else {
 			tmp_otp->value = value;
 			exit = 1;
@@ -623,7 +625,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		break;
 
 	    if (h > obj->y) {	// out of the screen so end parsing
-		obj->y -= lasth - vo_font->height;	// correct the y position
+		obj->y -= lasth - sub_font->height;	// correct the y position
 		break;
 	    }
 	    xsize = tmp_otp->value;
@@ -640,17 +642,17 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 			break;
 		    }
 		    c = tmp_ott->text[counter];
-		    render_one_glyph(vo_font, c);
+		    render_one_glyph(sub_font, c);
 		    obj->params.subtitle.utbl[utblc++] = c;
 		    k++;
 		}
 		obj->params.subtitle.utbl[utblc++] = ' ';
 	    }
 	    obj->params.subtitle.utbl[utblc - 1] = 0;
-	    obj->y -= vo_font->height;
+	    obj->y -= sub_font->height;
 	}
 	if(obj->params.subtitle.lines)
-	    obj->y = dys - ((obj->params.subtitle.lines - 1) * vo_font->height + vo_font->pic_a[vo_font->font[40]]->h);
+	    obj->y = dys - ((obj->params.subtitle.lines - 1) * sub_font->height + sub_font->pic_a[sub_font->font[40]]->h);
 	
 	// free memory
 	if (otp_sub != NULL) {
@@ -689,7 +691,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
     obj->bbox.x1=xmin;
     obj->bbox.x2=xmax;
     obj->bbox.y1=obj->y;
-//    obj->bbox.y2=obj->y+obj->params.subtitle.lines*vo_font->height;
+//    obj->bbox.y2=obj->y+obj->params.subtitle.lines*sub_font->height;
     obj->flags|=OSDFLAG_BBOX;
 
     alloc_buf(obj);
@@ -735,18 +737,18 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	    }
 	 prevc = -1;
 	 while ((c=obj->params.subtitle.utbl[j++])){
-	       x += kerning(vo_font,prevc,c);
-	       if ((font=vo_font->font[c])>=0)
+	       x += kerning(sub_font,prevc,c);
+	       if ((font=sub_font->font[c])>=0)
 		  draw_alpha_buf(obj,x,y,
-			     vo_font->width[c],
-			     vo_font->pic_a[font]->h+y<obj->dys ? vo_font->pic_a[font]->h : obj->dys-y,
-			     vo_font->pic_b[font]->bmp+vo_font->start[c],
-			     vo_font->pic_a[font]->bmp+vo_font->start[c],
-			     vo_font->pic_a[font]->w);
-	       x+=vo_font->width[c]+vo_font->charspace;
+			     sub_font->width[c],
+			     sub_font->pic_a[font]->h+y<obj->dys ? sub_font->pic_a[font]->h : obj->dys-y,
+			     sub_font->pic_b[font]->bmp+sub_font->start[c],
+			     sub_font->pic_a[font]->bmp+sub_font->start[c],
+			     sub_font->pic_a[font]->w);
+	       x+=sub_font->width[c]+sub_font->charspace;
                prevc = c;
 	    }
-         y+=vo_font->height;
+         y+=sub_font->height;
 	}
     }
     
@@ -829,12 +831,18 @@ int vo_update_osd(int dxs,int dys){
 	if (defer_counter >= FONT_LOAD_DEFER) force_load_font = 1;
     }
 
-    if (!vo_font || force_load_font) {
+    if (force_load_font) {
 	force_load_font = 0;
-	load_font_ft(dxs, dys);
+        load_font_ft(dxs, dys, &vo_font, font_name);
+        load_font_ft(dxs, dys, &sub_font, sub_font_name);
 	prev_dxs = dxs;
 	prev_dys = dys;
 	defer_counter = 0;
+    } else {
+       if (!vo_font) 
+           load_font_ft(dxs, dys, &vo_font, font_name);
+       if (!sub_font) 
+           load_font_ft(dxs, dys, &sub_font, sub_font_name);
     }
 #endif
 

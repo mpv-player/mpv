@@ -942,7 +942,7 @@ int kerning(font_desc_t *desc, int prevc, int c)
 {
     FT_Vector kern;
     
-    if (!vo_font->dynamic) return 0;
+    if (!desc->dynamic) return 0;
     if (prevc < 0 || c < 0) return 0;
     if (desc->font[prevc] != desc->font[c]) return 0;
     if (desc->font[prevc] == -1 || desc->font[c] == -1) return 0;
@@ -1137,7 +1137,7 @@ int done_freetype(void)
     return 0;
 }
 
-void load_font_ft(int width, int height) 
+void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_name) 
 {
 #ifdef HAVE_FONTCONFIG
     FcPattern *fc_pattern;
@@ -1145,6 +1145,7 @@ void load_font_ft(int width, int height)
     FcChar8 *s;
     FcBool scalable;
 #endif
+    font_desc_t *vo_font = *fontp;
     vo_image_width = width;
     vo_image_height = height;
 
@@ -1177,10 +1178,10 @@ void load_font_ft(int width, int height)
 	}
 	// s doesn't need to be freed according to fontconfig docs
 	FcPatternGetString(fc_pattern, FC_FILE, 0, &s);
-	vo_font=read_font_desc_ft(s, width, height);
+	*fontp=read_font_desc_ft(s, width, height);
 	FcPatternDestroy(fc_pattern);
     }
     else
 #endif
-    vo_font=read_font_desc_ft(font_name, width, height);
+    *fontp=read_font_desc_ft(font_name, width, height);
 }

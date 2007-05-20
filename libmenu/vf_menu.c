@@ -11,6 +11,7 @@
 #include <malloc.h>
 #endif
 
+#include "mplayer.h"
 #include "mp_msg.h"
 
 #include "libmpcodecs/img_format.h"
@@ -267,7 +268,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
   // here is the right place to get screen dimensions
   if (force_load_font) {
     force_load_font = 0;
-    load_font_ft(width,height);
+    load_font_ft(width,height,&vo_font,font_name);
   }
 #endif
   if(outfmt == IMGFMT_MPEGPES)
