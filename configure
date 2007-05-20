@@ -409,6 +409,7 @@ Advanced options:
   --enable-3dnowext         enable extended 3DNow! [autodetect]
   --enable-sse              enable SSE [autodetect]
   --enable-sse2             enable SSE2 [autodetect]
+  --enable-ssse3            enable SSSE3 [autodetect]
   --enable-shm              enable shm [autodetect]
   --enable-altivec          enable AltiVec (PowerPC) [autodetect]
   --enable-armv5te          enable DSP extensions (ARM) [autodetect]
@@ -458,6 +459,7 @@ _3dnowext=auto
 _mmxext=auto
 _sse=auto
 _sse2=auto
+_ssse3=auto
 _cmov=auto
 _fast_cmov=auto
 _armv5te=auto
@@ -1112,6 +1114,8 @@ for ac_option do
   --disable-sse) _sse=no ;;
   --enable-sse2) _sse2=yes ;;
   --disable-sse2) _sse2=no ;;
+  --enable-ssse3) _ssse3=yes ;;
+  --disable-ssse3) _ssse3=no ;;
   --enable-mmxext) _mmxext=yes ;;
   --disable-mmxext) _mmxext=no ;;
   --enable-3dnow) _3dnow=yes ;;
@@ -1555,6 +1559,7 @@ EOF
   extcheck $_3dnowext "3dnowext" "pswapd %%mm0, %%mm0"
   extcheck $_sse      "sse"      "xorps %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse"
   extcheck $_sse2     "sse2"     "xorpd %%xmm0, %%xmm0" || _gcc3_ext="$_gcc3_ext -mno-sse2"
+  extcheck $_ssse3    "ssse3"    "pabsd %%xmm0, %%xmm0"
   extcheck $_cmov     "cmov"     "cmovb %%eax,%%ebx"
 
   echocheck "mtrr support"
@@ -2207,6 +2212,7 @@ if test "$_runtime_cpudetection" = yes ; then
     _mmxext=yes
     _sse=yes
     _sse2=yes
+    _ssse3=yes
     _mtrr=yes
   fi
   if ppc; then
@@ -2300,6 +2306,10 @@ if x86_32 ; then
   if test "$_cmov" = yes ; then
     _pref_as_version='2.10.1'
     echo 'cmovb %eax, %ebx' >> $TMPS
+  fi
+  if test "$_ssse3" = yes ; then
+    _pref_as_version='2.16.92'
+    echo 'pabsd %xmm0, %xmm1' >> $TMPS
   fi
   $_as $TMPS -o $TMPO > /dev/null 2>&1 || as_verc_fail=yes
 
@@ -2471,6 +2481,8 @@ _def_sse='#undef HAVE_SSE'
 test "$_sse" = yes && _def_sse='#define HAVE_SSE 1'
 _def_sse2='#undef HAVE_SSE2'
 test "$_sse2" = yes && _def_sse2='#define HAVE_SSE2 1'
+_def_ssse3='#undef HAVE_SSSE3'
+test "$_ssse3" = yes && _def_ssse3='#define HAVE_SSSE3 1'
 _def_cmov='#undef HAVE_CMOV'
 test "$_cmov" = yes && _def_cmov='#define HAVE_CMOV 1'
 _def_fast_cmov='#undef HAVE_FAST_CMOV'
@@ -8336,6 +8348,7 @@ $_def_mmx	// only define if you have MMX (newer x86 chips, not P54C/PPro)
 $_def_mmxext	// only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
 $_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
+$_def_ssse3	// only define if you have SSSE3 (Intel Core 2)
 $_def_cmov	// only define if you have CMOV (i686+, without VIA C3)
 $_def_fast_cmov	// only define if CMOV is fast
 $_def_altivec	// only define if you have Altivec (G4)
