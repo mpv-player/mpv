@@ -190,13 +190,13 @@ static tvi_handle_t *tvi_init_bsdbt848(char *device,char* adevice)
         priv->tunerdev = strdup("/dev/tuner0");
     }else{
         sep = strchr(device,',');
+        priv->btdev = strdup(device);
         if(sep){
             // tuner device is also passed
             priv->tunerdev = strdup(sep+1);
-            priv->btdev = strndup(device,sep-device);
+            priv->btdev[sep - device] = 0;
         }else{
             priv->tunerdev = strdup("/dev/tuner0");
-            priv->btdev = strdup(device);
         }
     }
 
