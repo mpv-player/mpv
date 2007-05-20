@@ -71,8 +71,6 @@ extern int WinID;
 #ifdef HAVE_MENU
 extern int menu_startup;
 extern int menu_keepdir;
-extern int menu_utf8;
-extern int menu_unicode;
 #ifdef  USE_FRIBIDI
 extern char *menu_fribidi_charset;
 extern int menu_flip_hebrew;
@@ -300,8 +298,6 @@ m_option_t mplayer_opts[]={
 	{"menu-cfg", &menu_cfg, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"menu-startup", &menu_startup, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"menu-keepdir", &menu_keepdir, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-	{"menu-utf8", &menu_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"menu-unicode", &menu_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #ifdef USE_FRIBIDI
 	{"menu-fribidi-charset", &menu_fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"menu-flip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},

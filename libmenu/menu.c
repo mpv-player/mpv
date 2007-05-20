@@ -297,27 +297,10 @@ static inline int get_height(int c,int h){
     return h;
 }
 
-int menu_utf8 = 0;
-int menu_unicode = 0;
-
-static int get_next_char(char **txt)
-{
-  int c;
-  c = (unsigned char)*(*txt)++;
-  if (c >= 0x80) {
-    if (menu_utf8)
-      c = utf8_get_char((const char**)txt);
-    else if (menu_unicode)
-      c = (c<<8) + (unsigned char)*(*txt)++;
-  }
-  if (!c) c++; // avoid UCS 0
-  return c;
-}
-
 static void render_txt(char *txt)
 {
   while (*txt) {
-    int c = get_next_char(&txt);
+    int c = utf8_get_char(&txt);
     render_one_glyph(vo_font, c);
   }
 }
@@ -345,11 +328,7 @@ static char *menu_fribidi(char *txt)
     if (char_set_num == -1) {
       fribidi_set_mirroring (1);
       fribidi_set_reorder_nsm (0);
-      if (menu_utf8 == 0) {
-        char_set_num = fribidi_parse_charset(menu_fribidi_charset ? menu_fribidi_charset : "ISO8859-8");
-      } else {
-        char_set_num = fribidi_parse_charset("UTF-8");
-      }
+      char_set_num = fribidi_parse_charset("UTF-8");
       buffer_size = FFMAX(1024,len+1);
       logical = malloc(buffer_size);
       visual = malloc(buffer_size);
@@ -388,7 +367,7 @@ void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
   render_txt(txt);
 
   while (*txt) {
-    int c=get_next_char(&txt);
+    int c=utf8_get_char(&txt);
     if ((font=vo_font->font[c])>=0 && (x + vo_font->width[c] <= mpi->w) && (y + vo_font->pic_a[font]->h <= mpi->h))
       draw_alpha(vo_font->width[c], vo_font->pic_a[font]->h,
 		 vo_font->pic_b[font]->bmp+vo_font->start[c],
@@ -481,7 +460,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
   
   // Jump some the beginnig text if needed
   while(sy < ymin && *txt) {
-    int c=get_next_char(&txt);
+    int c=utf8_get_char(&txt);
     if(c == '\n' || (warp && ll + vo_font->width[c] > w)) {
       ll = 0;
       sy += vo_font->height + vspace;
@@ -555,7 +534,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
     }
 
     while(sx < xmax && txt != line_end) {
-      int c=get_next_char(&txt);
+      int c=utf8_get_char(&txt);
       font = vo_font->font[c];
       if(font >= 0) {
  	int cs = (vo_font->pic_a[font]->h - vo_font->height) / 2;
@@ -583,7 +562,7 @@ int menu_text_length(char* txt) {
   int l = 0;
   render_txt(txt);
   while (*txt) {
-    int c=get_next_char(&txt);
+    int c=utf8_get_char(&txt);
     l += vo_font->width[c]+vo_font->charspace;
   }
   return l - vo_font->charspace;
@@ -595,7 +574,7 @@ void menu_text_size(char* txt,int max_width, int vspace, int warp, int* _w, int*
 
   render_txt(txt);
   while (*txt) {
-    int c=get_next_char(&txt);
+    int c=utf8_get_char(&txt);
     if(c == '\n' || (warp && i + vo_font->width[c] >= max_width)) {
       if(*txt)
 	l++;
@@ -615,7 +594,7 @@ int menu_text_num_lines(char* txt, int max_width) {
   int l = 1, i = 0;
   render_txt(txt);
   while (*txt) {
-    int c=get_next_char(&txt);
+    int c=utf8_get_char(&txt);
     if(c == '\n' || i + vo_font->width[c] > max_width) {
       l++;
       i = 0;
@@ -630,7 +609,7 @@ char* menu_text_get_next_line(char* txt, int max_width) {
   int i = 0;
   render_txt(txt);
   while (*txt) {
-    int c=get_next_char(&txt);
+    int c=utf8_get_char(&txt);
     if(c == '\n') {
       txt++;
       break;
