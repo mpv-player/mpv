@@ -5579,7 +5579,7 @@ while higher values make the image smoother but also blurrier (default:
 Variant of the spp filter, similar to spp=6 with 7 point DCT where
 only the center sample is used after IDCT.
 .RSs
-.IPs <qp>
+.IPs "<qp>\ "
 Force quantization parameter (default: 0, use QP from video).
 .IPs <mode>
 0: hard thresholding
@@ -5635,11 +5635,9 @@ You should see a red, green and blue stripe from top to bottom.
 Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3/\:IVTV.
 .RSs
 .IPs <quality>
-.RSss
 1\-31: fixed qscale
 .br
 32\-:  fixed bitrate in kbits
-.REss
 .IPs <fps>
 force output fps (float value) (default: 0, autodetect based on height)
 .RE
