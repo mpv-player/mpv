@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r23003
+// Updated to help_mp-en.h r23028
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -635,6 +635,10 @@ static char help_text[]=
 #define MSGTR_NoBindFound "Nessun controllo legato al tasto '%s'."
 #define MSGTR_FailedToOpen "Apertura di '%s' fallita.\n"
 							       //
+#define MSGTR_VideoID "[%s] Trovato flusso video, -vid %d\n"
+#define MSGTR_AudioID "[%s] Trovato flusso audio, -aid %d\n"
+#define MSGTR_SubtitleID "[%s] Trovato flusso sottotitoli, -sid %d\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "impossibile aprire il codec\n"
 #define MSGTR_CantCloseCodec "impossibile chiudere il codec\n"
