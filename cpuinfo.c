@@ -205,7 +205,11 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(10, "cid", "L1 Context ID"),
       CPUID_FEATURE_DEF(13, "cx16", "CMPXCHG16B Available"),
       CPUID_FEATURE_DEF(14, "xtpr", "xTPR Disable"), 
+      CPUID_FEATURE_DEF(15, "pdcm", "Perf/Debug Capability MSR"), 
       CPUID_FEATURE_DEF(18, "dca", "Direct Cache Access"), 
+      CPUID_FEATURE_DEF(19, "sse41", "SSE4.1 Extensions"), 
+      CPUID_FEATURE_DEF(20, "sse42", "SSE4.2 Extensions"), 
+      CPUID_FEATURE_DEF(23, "popcnt", "Pop Count Instruction"), 
       { -1 }
     };
     static struct {
@@ -217,6 +221,7 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(20, "nx", "No-Execute Page Protection"),
       CPUID_FEATURE_DEF(22, "mmxext", "MMX Technology (AMD Extensions)"),
       CPUID_FEATURE_DEF(25, "fxsr_opt", "Fast FXSAVE/FXRSTOR"),
+      CPUID_FEATURE_DEF(26, "pdpe1gb", "PDP Entry for 1GiB Page"),
       CPUID_FEATURE_DEF(27, "rdtscp", "RDTSCP Instruction"),
       CPUID_FEATURE_DEF(29, "lm", "Long Mode Capable"),
       CPUID_FEATURE_DEF(30, "3dnowext", "3DNow! Extensions"),
@@ -230,7 +235,14 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(0, "lahf_lm", "LAHF/SAHF Supported in 64-bit Mode"),
       CPUID_FEATURE_DEF(1, "cmp_legacy", "Chip Multi-Core"),
       CPUID_FEATURE_DEF(2, "svm", "Secure Virtual Machine"),
+      CPUID_FEATURE_DEF(3, "extapic", "Extended APIC Space"),
       CPUID_FEATURE_DEF(4, "cr8legacy", "CR8 Available in Legacy Mode"),
+      CPUID_FEATURE_DEF(5, "abm", "Advanced Bit Manipulation"),
+      CPUID_FEATURE_DEF(6, "sse4a", "SSE4A Extensions"),
+      CPUID_FEATURE_DEF(7, "misalignsse", "Misaligned SSE Mode"),
+      CPUID_FEATURE_DEF(8, "3dnowprefetch", "3DNow! Prefetch/PrefetchW"),
+      CPUID_FEATURE_DEF(9, "osvw", "OS Visible Workaround"),
+      CPUID_FEATURE_DEF(10, "ibs", ""),
       { -1 }
     };
     unsigned int family, model, stepping;
