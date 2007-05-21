@@ -597,35 +597,6 @@ static int init(priv_t *priv)
         goto err;
     }
 
-    if ( !tv_param_mjpeg )
-    {
-        /* map grab buffer */
-        if (ioctl(priv->video_fd, VIDIOCGMBUF, &priv->mbuf) == -1)
-        {
-            mp_msg(MSGT_TV, MSGL_ERR, "ioctl get mbuf failed: %s\n", strerror(errno));
-            goto err;
-        }
-
-        mp_msg(MSGT_TV, MSGL_V, "mbuf: size=%d, frames=%d\n",
-            priv->mbuf.size, priv->mbuf.frames);
-        priv->mmap = mmap(0, priv->mbuf.size, PROT_READ|PROT_WRITE,
-                          MAP_SHARED, priv->video_fd, 0);
-        if (priv->mmap == (unsigned char *)-1)
-        {
-            mp_msg(MSGT_TV, MSGL_ERR, "Unable to map memory for buffers: %s\n", strerror(errno));
-            goto err;
-        }
-        mp_msg(MSGT_TV, MSGL_DBG2, "our buffer: %p\n", priv->mmap);
-
-        /* num of buffers */
-        priv->nbuf = priv->mbuf.frames;
-
-        /* video buffers */
-        priv->buf = calloc(priv->nbuf, sizeof(struct video_mmap));
-        if (!priv->buf)
-            goto malloc_failed;
-        memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
-    }
 
     /* init v4l audio even when we don't capture */
     init_v4l_audio(priv);
@@ -770,6 +741,7 @@ static int start(priv_t *priv)
 {
     int i;
     int bytes_per_sample;
+    struct video_window win;
 
     if (ioctl(priv->video_fd, VIDIOCGPICT, &priv->picture) == -1)
     {
@@ -796,6 +768,50 @@ static int start(priv_t *priv)
     if (ioctl(priv->video_fd, VIDIOCSPICT, &priv->picture) == -1)
     {
         mp_msg(MSGT_TV, MSGL_ERR, "ioctl set picture failed: %s\n", strerror(errno));
+        mp_msg(MSGT_TV, MSGL_ERR, "The 'outfmt' of '%s' is likely not supported by your card\n",
+               vo_format_name(priv->format));
+        return 0;
+    }
+
+    /* Set capture size */
+    win.x = 0;
+    win.y = 0;
+    win.width = priv->width;
+    win.height = priv->height;
+    win.chromakey = -1;
+    win.flags = 0;
+    win.clipcount = 0;
+    if (ioctl(priv->video_fd, VIDIOCSWIN, &win) == -1)
+        mp_msg(MSGT_TV, MSGL_ERR, "ioctl set window failed: %s\n", strerror(errno));
+
+    if ( !tv_param_mjpeg )
+    {
+        /* map grab buffer */
+        if (ioctl(priv->video_fd, VIDIOCGMBUF, &priv->mbuf) == -1)
+        {
+            mp_msg(MSGT_TV, MSGL_ERR, "ioctl get mbuf failed: %s\n", strerror(errno));
+            return 0;
+        }
+
+        mp_msg(MSGT_TV, MSGL_V, "mbuf: size=%d, frames=%d\n",
+            priv->mbuf.size, priv->mbuf.frames);
+        priv->mmap = mmap(0, priv->mbuf.size, PROT_READ|PROT_WRITE,
+                          MAP_SHARED, priv->video_fd, 0);
+        if (priv->mmap == (unsigned char *)-1)
+        {
+            mp_msg(MSGT_TV, MSGL_ERR, "Unable to map memory for buffers: %s\n", strerror(errno));
+            return 0;
+        }
+        mp_msg(MSGT_TV, MSGL_DBG2, "our buffer: %p\n", priv->mmap);
+
+        /* num of buffers */
+        priv->nbuf = priv->mbuf.frames;
+
+        /* video buffers */
+        priv->buf = calloc(priv->nbuf, sizeof(struct video_mmap));
+        if (!priv->buf)
+            return 0;
+        memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
     }
 
     if ( !tv_param_mjpeg )
@@ -827,20 +843,6 @@ static int start(priv_t *priv)
 #endif
 
 #if 0
-    {
-        struct video_window win;
-
-        win.x = 0;
-        win.y = 0;
-        win.width = priv->width;
-        win.height = priv->height;
-        win.chromakey = -1;
-        win.flags = 0;
-        //win.clipcount = 0;
-
-        ioctl(priv->video_fd, VIDIOCSWIN, &win);
-    }
-
     // initialize video capture
     if (ioctl(priv->video_fd, VIDIOCCAPTURE, &one) == -1)
     {
