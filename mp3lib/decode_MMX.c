@@ -11,6 +11,8 @@
 #include "mangle.h"
 #define real float /* ugly - but only way */
 
+extern short mp3lib_decwins[];
+extern void (*dct64_MMX_func)(short*, short*, real*);
 static unsigned long long attribute_used __attribute__((aligned(8))) null_one = 0x0000ffff0000ffffULL;
 static unsigned long long attribute_used __attribute__((aligned(8))) one_null = 0xffff0000ffff0000ULL;
 unsigned long __attribute__((aligned(16))) costab_mmx[] =
@@ -48,49 +50,38 @@ unsigned long __attribute__((aligned(16))) costab_mmx[] =
 	1060439283,
 };
 
-static int temp; // buggy gcc 3.x fails if this is moved into the function :(
-void synth_1to1_MMX_s(real *bandPtr, int channel, short *samples,
-                      short *buffs, int *bo)
+int synth_1to1_MMX(real *bandPtr, int channel, short *samples)
 {
+    static short buffs[2][2][0x110] __attribute__((aligned(8)));
+    static int bo = 1;
+    short *b0, (*buf)[0x110], *a, *b;
+    short* window;
+    int bo1, i = 8;
 
+    if (channel == 0) {
+	bo = (bo - 1) & 0xf;
+	buf = buffs[1];
+    } else {
+	samples++;
+	buf = buffs[0];
+    }
+
+    if (bo & 1) {
+	b0 = buf[1];
+	bo1 = bo + 1;
+       	a = buf[0] + bo;
+	b = buf[1] + ((bo + 1) & 0xf);
+    } else {
+	b0 = buf[0];
+	bo1 = bo;
+	b = buf[0] + bo;
+       	a = buf[1] + ((bo + 1) & 0xf);
+    }
+
+    dct64_MMX_func(a, b, bandPtr);
+    window = mp3lib_decwins + 16 - bo1;
+    //printf("DEBUG: channel %d, bo %d, off %d\n", channel, bo, 16 - bo1);
 __asm __volatile(
-        "movl %1,%%ecx\n\t"
-        "movl %2,%%edi\n\t"
-        "movl $15,%%ebx\n\t"
-        "movl %4,%%edx\n\t"
-        "leal (%%edi,%%ecx,2),%%edi\n\t"
-	"decl %%ecx\n\t"
-        "movl %3,%%esi\n\t"
-        "movl (%%edx),%%eax\n\t"
-        "jecxz .L01\n\t"
-        "decl %%eax\n\t"
-        "andl %%ebx,%%eax\n\t"
-        "leal 1088(%%esi),%%esi\n\t"
-        "movl %%eax,(%%edx)\n\t"
-".L01:\n\t"
-        "leal (%%esi,%%eax,2),%%edx\n\t"
-        "movl %%eax,%5\n\t"
-        "incl %%eax\n\t"
-        "andl %%ebx,%%eax\n\t"
-        "leal 544(%%esi,%%eax,2),%%ecx\n\t"
-	"incl %%ebx\n\t"
-	"testl $1, %%eax\n\t"
-	"jnz .L02\n\t"
-        "xchgl %%edx,%%ecx\n\t"
-	"incl %5\n\t"
-        "leal 544(%%esi),%%esi\n\t"
-".L02:\n\t"
-	"emms\n\t"
-        "pushl %0\n\t"
-        "pushl %%edx\n\t"
-        "pushl %%ecx\n\t"
-        "call *"MANGLE(dct64_MMX_func)"\n\t"
-	"addl $12, %%esp\n\t"
-	"leal 1(%%ebx), %%ecx\n\t"
-        "subl %5,%%ebx\n\t"
-	"pushl %%ecx\n\t"
-	"leal "MANGLE(mp3lib_decwins)"(%%ebx,%%ebx,1), %%edx\n\t"
-	"shrl $1, %%ecx\n\t"
 ASMALIGN(4)
 ".L03:\n\t"
         "movq  (%%edx),%%mm0\n\t"
@@ -140,10 +131,6 @@ ASMALIGN(4)
 	"decl %%ecx\n\t"
         "jnz  .L03\n\t"
 
-	"popl %%ecx\n\t"
-	"andl $1, %%ecx\n\t"
-	"jecxz .next_loop\n\t"
-
         "movq  (%%edx),%%mm0\n\t"
         "pmaddwd (%%esi),%%mm0\n\t"
         "movq  8(%%edx),%%mm1\n\t"
@@ -166,7 +153,6 @@ ASMALIGN(4)
         "leal 64(%%edx),%%edx\n\t"
         "leal 4(%%edi),%%edi\n\t"               
 	
-".next_loop:\n\t"
         "subl $64,%%esi\n\t"
         "movl $7,%%ecx\n\t"
 ASMALIGN(4)
@@ -242,7 +228,9 @@ ASMALIGN(4)
         "movd %%mm0,%%eax\n\t"
 	"movw %%ax,(%%edi)\n\t"
 	"emms\n\t"
-        :
-	:"m"(bandPtr),"m"(channel),"m"(samples),"m"(buffs),"m"(bo), "m"(temp)
-	:"memory","%edi","%esi","%eax","%ebx","%ecx","%edx","%esp");
+	:"+c"(i), "+d"(window), "+S"(b0), "+D"(samples)
+	:
+	:"memory", "%eax");
+    return 0;
 }
+
