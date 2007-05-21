@@ -1,4 +1,4 @@
-.\" synced with r21452
+.\" synced with r21561
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
@@ -297,7 +297,7 @@ Salva un'istantanea ("screenshot").
 Inizia/smette di salvare istantanee.
 .IPs "I\ \ \ \ "
 Mostra il nome del file sull'OSD.
-.IPs "! and @"
+.IPs "! e @"
 Va all'inizio del precedente/\:prossimo capitolo.
 .IPs "D (\-vo xvmc, \-vf yadif, \-vf kerndeint only)"
 Attiva/disattiva deinterlacciatore.
@@ -5738,6 +5738,31 @@ qualche equazione tipo "2+2*sin(PI*qp)"
 .RE
 .
 .TP
+.B geq=equazione
+filtro fd modifica con equazione generica 
+.RSs
+.IPs <equazione>
+Una qualche equazione, per es.\& 'p(W-X\,Y)' per ribaltare l'immagine
+orizzontalmente.
+Puoi utilizzare spazi bianchi per rendere più leggibile l'equazione.
+Ci sono un paio di costanti che possono essere utilizzate nell'equazione:
+.RSss
+PI: il numero pi
+.br
+E: il numero e
+.br
+X / Y: le coordinate del campione corrente
+.br
+W / H: larghezza e altezza dell'immagine
+.br
+SW / SH: la scala larghezza/altezza in dipendenza dal piano filtrato corrente,
+per es.\& 1,1 e 0.5,0.5 per YUV 4:2:0.
+.br
+p(x,y): restituisce il valore del pixel alla posizione x/y del piano corrente.
+.REss
+.RE
+.
+.TP
 .B "test\ \ \ "
 Genera varie figure di test.
 .
@@ -6192,23 +6217,29 @@ Come ivtc, pullup è 'stateless', nel senso che non si blocca su un modello
 da seguire, ma invece guarda avanti ai campi (field) successivi in modo da
 identificare delle corrispondenze e ricreare i fotogrammi progressivi.
 E' ancora sotto sviluppo ma si crede che sia abbastanza preciso.
-Le opzioni jl, jr, jt e jb selezionano l'ammontare di cianfrusaglie ('junk')
+
+.RSs
+.IPs "jl, jr, jt, e jb"
+Queste opzioni selezionano l'ammontare di cianfrusaglie ('junk')
 da ignorare, rispettivamente, a sinistra, destra, alto e basso dell'immagine.
 Destra/\:sinistra sono in unità di 8 pixel mentre alto/\:basso sono in unità
 di 2 linee.
 Il default è 8 pixel per ogni lato.
-Attivare l'opzione sb (strict breaks, interruzioni rigorose) ponendola ad 1
-ridurrà la possibilità di generare una errata interpretazione del
-fotogramma, ma potrebbe anche causare l'eliminazione di un eccessivo numero
-di fotogrammi durante sequenze con molto movimento.
+.br
+.IPs "sb (strict breaks, interruzioni rigorose)"
+Impostare questa opzione ad 1 ridurrà la possibilità di generare
+un'interpretazione errata del fotogramma, ma potrebbe anche causare
+l'eliminazione di un numero eccessivo di fotogrammi durante sequenze con
+molto movimento.
 Al contrario, ponendo questa opzione a -1 si permetterà al filtro pullup di
 riconoscere i fotogrammi più facilmente.
 Questo può aiutare l'elaborazione di video dove c'è un certo sfocamento
 tra i campi ma può anche causare la conversione in fotogrammi interlacciati
 sull'uscita.
-L' opzione mp (metric plane, piano di metrica) può essere caricata a 1 o 2
-per usare un piano della crominanza invece che quello della luminanza per
-effettuare i calcoli del filtro pullup.
+.br
+.IPs "mp (metric plane, piano di metrica)"
+Questa opzione può essere impostata a 1 o 2 per usare un piano di crominanza
+invece che quello della luminanza per effettuare i calcoli del filtro pullup.
 Questo può migliorare la precisione nel caso di materiale molto pulito, ma
 normalmente la peggiorerà, specialmente se abbiamo del disturbo nel piano di
 crominanza (effetto arcobaleno) oppure se alcuni pezzi del video sono in
@@ -6216,13 +6247,16 @@ bianco e nero.
 Lo scopo principale di forzare il filtro pullup ad usare un piano di
 crominanza è quello di abbassare l'utilizzo di CPU e rendere il filtro
 utilizzabile in tempo reale su macchine lente.
-.br
+.REss
+.RS
+.sp 1
 .I NOTA:
 Postponi sempre al filtro pullup il filtro softskip quando codifichi,
 per assicurarti che pullup possa vedere tutti i fotogrammi.
 Non farlo porterà ad avere un filmato non corretto e normalmente porterà
 a dei blocchi, dovuti alle limitazioni di progetto del livello dei
 codec/\:filtri.
+.REss
 .
 .TP
 .B filmdint[=opzioni]
@@ -7265,7 +7299,7 @@ per persone con orecchie estremamente buone e apparecchi similari.
 .PD 1
 .
 .
-.SS toolame and twolame (\-toolameopts e \-twolameopts rispettivamente)
+.SS toolame e twolame (\-toolameopts e \-twolameopts rispettivamente)
 .
 .TP
 .B br=<32\-384>
@@ -10150,20 +10184,38 @@ Questa opzione è ignorata se utilizzata con l'opzione telecine.
 .
 .TP
 .B telecine
-Abilità la modalità soft telecine pulldown 3:2 : il programma modificherà il
-flusso video in modo da farlo sembrare codificato a 30000/1001 oppure 30 fps
+Abilita la modalità soft telecine pulldown 3:2 : il programma modificherà il
+flusso video in modo da farlo sembrare codificato a 30000/1001 fps
 (frame per second, fotogrammi al secondo).
-Funziona solo con video in formato MPEG-2 quando il framerate di uscita,
-eventualmente convertito con \-ofps, è 24000/1001 oppure 24 fps.
+Funziona solo con video in formato MPEG-2 quando il framerate di uscita è
+24000/1001 fps, da convertire se necessario con \-ofps.
 Qualsiasi altro valore di velocità è incompatibile con questa opzione.
 .
 .TP
 .B film2pal
 Abilita la modalità soft telecine da FILM a PAL e da NTSC a PAL: il programma
 modificherà il flusso video in modo da farlo sembrare codificato a 25 fps.
-Funziona solo  con video in formato MPEG-2 quando il framerate di uscita,
+Funziona solo con video in formato MPEG-2 quando il framerate di uscita,
 eventualmente convertito con \-ofps, è 24000/1001 oppure 24 fps.
 Qualsiasi altro valore di velocità è incompatibile con questa opzione.
+.
+.TP
+.B tele_src e tele_dest
+Abilita un telecine arbitrario usando il codice DGPulldown di Donald Graft.
+Devi specificare il framerate originario e quello voluto; il muxer farà
+sì che il flusso video sembri sia stato codificato al framerate voluto.
+Funziona solo con video in formato MPEG-2 quando il framerate di entrata è
+minore di quello di uscita e l'aumento del framerate è <= 1.5.
+.sp 1
+.RS
+.I ESEMPIO:
+.RE
+.PD 0
+.RSs
+.IPs tele_src=25,tele_dest=30000/1001
+telecine da PAL a NTSC
+.RE
+.PD 1
 .
 .TP
 .B vbuf_size=<40\-1194>
@@ -10659,8 +10711,15 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
 .fi
 .br
-Puoi voler giocare un poco con il valore di pan (p.e. moltiplica con un valore) per
-incrementare il volume o per evitare il clipping.
+Puoi voler giocare un po' con il valore di pan (p.e.\& moltiplica con un valore)
+per incrementare il volume o per evitare il clipping.
+.
+.PP
+.B inversione a scacchiera col filtro geq:
+.nf
+mplayer \-vf geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+.fi
+.
 .
 .SH ESEMPI DELL'UTILIZZO DI MENCODER
 .
