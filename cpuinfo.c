@@ -51,7 +51,7 @@ cpuid(int func) {
 #ifdef __x86_64__
   asm("mov %%rbx, %%rsi\n\t"
 #else
-  asm("mov %%ebx, %%esi\n\t" 
+  asm("mov %%ebx, %%esi\n\t"
 #endif
       CPUID"\n\t"
 #ifdef __x86_64__
@@ -125,7 +125,7 @@ main(int argc, char **argv)
   store32(idstr+4, regs.edx);
   store32(idstr+8, regs.ecx);
   idstr[12] = 0;
-  printf("vendor_id\t: %s\n", idstr); 
+  printf("vendor_id\t: %s\n", idstr);
 
   regs_ext = cpuid((1<<31) + 0);
   max_ext_cpuid = regs_ext.eax;
@@ -269,7 +269,7 @@ main(int argc, char **argv)
         model_name = "Intel (R) Celeron (R) processor";
       else
         model_name = brandname(regs.ebx & 0xf);
-    }   
+    }
 
     printf("flags\t\t:");
     for (i = 0; cap[i].bit >= 0; i++) {
@@ -286,7 +286,7 @@ main(int argc, char **argv)
        it is not indicated by a CPUID feature bit, so we
        have to check the family, model and stepping instead. */
     if (strstr(idstr, "AMD") &&
-        family == 5 && 
+        family == 5 &&
         (model >= 9 || model == 8 && stepping >= 8))
       printf(" %s", "k6_mtrr");
     /* similar for cyrix_arr. */
@@ -297,7 +297,7 @@ main(int argc, char **argv)
     if (strstr(idstr, "Centaur") &&
         family == 5)
       printf(" %s", "centaur_mcr");
- 
+
     for (i = 0; cap_amd[i].bit >= 0; i++) {
       if (amd_flags & (1 << cap_amd[i].bit)) {
         printf(" %s", cap_amd[i].desc);
@@ -337,5 +337,5 @@ main(int argc, char **argv)
   if (model_name)
     printf("%s\n", model_name);
   else
-    printf("Unknown %s CPU\n", idstr); 
+    printf("Unknown %s CPU\n", idstr);
 }
