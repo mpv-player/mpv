@@ -5018,7 +5018,7 @@ Le aree mappate contengono una intestazione:
 .nf
 int nch                      /* numero di canali */
 int size                     /* dimensione del buffer */
-unsigned long long counter   /* Usato per mantenere la sincronizzazione,
+unsigned long long counter   /* Usato per mantenere la sincronia,
                                 aggiornato ogni volta che vengono
                                 esportati nuovi dati */
 .fi
@@ -5718,7 +5718,7 @@ più sfocata (default: 0 \- ottimale per PSNR).
 Variante del filtro spp, simile a spp=6 con DCT a 7 punti, dove solo la
 campionatura centrale viene usata dopo IDCT.
 .RSs
-.IPs <qp>
+.IPs "<qp>\ "
 Forza il parametro di quantizzazione (default: 0, usa QP dal filmato).
 .IPs <modo>
 0: controllo della soglia rigido
@@ -5753,11 +5753,9 @@ Conversione software veloce da YV12 a MPEG-1 da usare con DVB/\:DXR3/\:IVTV.
 Veloce e di migliore qualità rispetto a \-vf fame.
 .RSs
 .IPs <qualità>
-.RSss
 1\-31: qscale (scala di quantizzazione) fissa
 .br
 32\-:  bitrate fisso in kbit
-.REss
 .IPs <fps>
 forza il numero di fps (frame per second, fotogrammi al secondo) di uscita (valore
 decimale) (default: 0, trovato automaticamente basandosi sull'altezza)
