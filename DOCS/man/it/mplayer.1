@@ -1,4 +1,4 @@
-.\" synced with r21561
+.\" synced with r21654
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
@@ -1079,8 +1079,8 @@ programma (se presente) con il flusso audio scelto.
 .B \-alang <codice linguaggio[,codice linguaggio,...]> (vedi anche \-aid)
 Specifica una lista di priorità dei linguaggi audio da utilizzare.
 Formati contenitore diversi utilizzano diversi codici.
-I DVD utilizzano i codici a due lettere ISO 639-1, Matroska e NUT usano
-i codici a tre lettere ISO 639-2 mentre OGM usa un identificatore libero.
+I DVD utilizzano i codici a due lettere ISO 639-1, Matroska, MPEG-TS e NUT
+usano i codici a tre lettere ISO 639-2 mentre OGM usa un identificatore libero.
 MPlayer stampa i linguaggi disponibili se viene lanciato in
 modalità verbosa (\-v).
 .sp 1
@@ -1313,6 +1313,20 @@ Puoi anche specificare una directory che contiene una serie di file copiati
 direttamente da un DVD (p.es.\& con vobcopy).
 Nota che usare \-dumpstream è generalmente un metodo migliore per copiare
 titoli DVD (vedi gli esempi).
+.
+.TP
+.B \-dvd-speed <fattore di velocità in KB/s> (solo DVD)
+Prova a limitare la velocità del DVD (default: 0, nessuna modifica).
+La velocità base dei DVD è circa 1350KB/s, per cui un lettore 8x può leggere
+fino a 10800KB/s.
+Velocità più basse rendono più silenzioso il lettore, per guardare un DVD
+una velocità di 2700KB/s dovrebbe essere silenziosa e veloce a sufficienza.
+MPlayer reimposta in uscita la velocità originaria del lettore.
+Valori minori di 100 indicano multipli di 1350KB/s, per es.\& \-dvd-speed 8
+seleziona 10800KB/s.
+.br
+.I NOTA:
+Per modificare la velocità devi avere accesso in scrittura al dispositivo DVD.
 .
 .TP
 .B \-dvdangle <ID angolo> (solo DVD)
@@ -1997,10 +2011,15 @@ Estrae il flusso dei sottotitoli dai file VOB.
 Vedi anche le opzioni \-dump*sub e \-vobsubout* .
 .
 .TP
-.B \-embeddedfonts (solo FreeType)
-Abilita l'estrazione di font embedded in file Matroska.
+.B \-(no)embeddedfonts (solo FreeType)
+Abilita l'estrazione di font embedded in file Matroska (default: disabilitato).
 Questi font possono essere usati per renderizzare sottotitoli SSA/ASS
 (opzione \-ass).
+I file dei font vengono creati nella directory ~/.mplayer/\:fonts .
+.br
+.I NOTA:
+Con FontConfig 2.4.2 o superiore, i font embedded sono aperti direttamente dalla
+memoria, e questa opzione viene abilitata di default.
 .
 .TP
 .B \-ffactor <numero>
@@ -10195,8 +10214,8 @@ Qualsiasi altro valore di velocità è incompatibile con questa opzione.
 .B film2pal
 Abilita la modalità soft telecine da FILM a PAL e da NTSC a PAL: il programma
 modificherà il flusso video in modo da farlo sembrare codificato a 25 fps.
-Funziona solo con video in formato MPEG-2 quando il framerate di uscita,
-eventualmente convertito con \-ofps, è 24000/1001 oppure 24 fps.
+Funziona solo con video in formato MPEG-2 quando il framerate di uscita è
+24000/1001 fps, da convertire se necessario con \-ofps.
 Qualsiasi altro valore di velocità è incompatibile con questa opzione.
 .
 .TP
