@@ -204,12 +204,12 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(9, "ssse3", "Supplemental SSE3"),
       CPUID_FEATURE_DEF(10, "cid", "L1 Context ID"),
       CPUID_FEATURE_DEF(13, "cx16", "CMPXCHG16B Available"),
-      CPUID_FEATURE_DEF(14, "xtpr", "xTPR Disable"), 
-      CPUID_FEATURE_DEF(15, "pdcm", "Perf/Debug Capability MSR"), 
-      CPUID_FEATURE_DEF(18, "dca", "Direct Cache Access"), 
-      CPUID_FEATURE_DEF(19, "sse41", "SSE4.1 Extensions"), 
-      CPUID_FEATURE_DEF(20, "sse42", "SSE4.2 Extensions"), 
-      CPUID_FEATURE_DEF(23, "popcnt", "Pop Count Instruction"), 
+      CPUID_FEATURE_DEF(14, "xtpr", "xTPR Disable"),
+      CPUID_FEATURE_DEF(15, "pdcm", "Perf/Debug Capability MSR"),
+      CPUID_FEATURE_DEF(18, "dca", "Direct Cache Access"),
+      CPUID_FEATURE_DEF(19, "sse41", "SSE4.1 Extensions"),
+      CPUID_FEATURE_DEF(20, "sse42", "SSE4.2 Extensions"),
+      CPUID_FEATURE_DEF(23, "popcnt", "Pop Count Instruction"),
       { -1 }
     };
     static struct {
@@ -328,7 +328,7 @@ main(int argc, char **argv)
       usec_delay = 1000000 * (tv_end.tv_sec - tv_start.tv_sec)
         + (tv_end.tv_usec - tv_start.tv_usec);
 
-      printf("cpu MHz\t\t: %.3f\n", 
+      printf("cpu MHz\t\t: %.3f\n",
              (double)(tsc_end-tsc_start) / usec_delay);
     }
   }
