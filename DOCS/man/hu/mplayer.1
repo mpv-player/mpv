@@ -1,4 +1,4 @@
-.\" Synced with r23162
+.\" Synced with r23370
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 04. 30." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 05. 22." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -897,6 +897,10 @@ OSD menu támogatás bekapcsolása.
 .TP
 .B \-menu-cfg <fájlnév> (csak OSD menü)
 Alternatív menu.conf fájl használata.
+.
+.TP
+.B \-menu-keepdir (csak OSD menü)
+A fájl böngészõ az utolsó ismert helyrõl indul az aktuális könyvtár helyett.
 .
 .TP
 .B \-menu-root <érték> (csak OSD menü)
@@ -3858,7 +3862,7 @@ A framerátát a fájlnév elõtt kell megadnod, különben a fájlnév része lesz.
 .RE
 .PD 0
 .RSs
-mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
+mplayer video.nut \-vo gif89a:fps=15:output=test.gif
 .RE
 .PD 1
 .
@@ -5598,7 +5602,7 @@ míg a nagy érték simábbá teszi a képet, de homályosabbá is (alapértelmezett:
 Az spp szûrõ veriánsa, hasonló az spp=6-hoz 7 pontos DCT-vel,
 ahol csak a középsõ minta lesz használva az IDCT után.
 .RSs
-.IPs <qp>
+.IPs "<qp>\ "
 Kvantálási paraméter kényszerítése (alapértelmezett: 0, videó QP használata).
 .IPs <mód>
 0: erõs küszöb
@@ -5654,11 +5658,9 @@ Egy vörös, zöld és kék csíkot kell látnod fentrõl lefelé.
 Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/\:IVTV-hez.
 .RSs
 .IPs <minõség>
-.RSss
 1\-31: fix qscale
 .br
 32\-:  fix bitráta kbit-ben
-.REss
 .IPs <fps>
 kimeneti fps kényszerítése (lebegõpontos érték) (alapértelmezett: 0, automatikus
 detektálás a magasság alapján)
@@ -8150,10 +8152,12 @@ alapértelmezett
 .IPs "444P\ "
 ffv1-hez
 .IPs "422P\ "
-HuffYUV-hoz, veszteségmentes JPEG-hez és ffv1-hez
-.IPs 411P,YVU9
-veszteségmentes JPEG-hez és ffv1-hez
-.IPs BGR32
+HuffYUV-hoz, veszteségmentes JPEG-hez, dv-hez és ffv1-hez
+.IPs "411P\ "
+veszteségmentes JPEG-hez, dv-hez és ffv1-hez
+.IPs "YVU9\ "
+veszteségmentes JPEG-hez, ffv1-hez és svq1-hez
+.IPs "BGR32\ "
 veszteségmentes JPEG-hez és ffv1-hez
 .RE
 .PD 1
@@ -8565,6 +8569,11 @@ Az 1 és a 2 kombinációja.
 .TP
 .B aglobal=<0\-3>
 Ugyan az, mint a vglobal, csak audió fejlécekhez.
+.
+.TP
+.B level=<érték>
+Beállítja a CodecContext szintjét.
+31 vagy 41 kell a Playstation 3-as videó lejátszáshoz.
 .
 .
 .SS nuv (\-nuvopts)
@@ -9882,7 +9891,7 @@ Ez az opció figyelmen kívül lesz hagyva, ha a telecine opcióval használod.
 .TP
 .B telecine
 Engedélyezi a 3:2-es pulldown soft telecine módot: a muxer úgy trükköz a
-videó folyammal, hogy 30000/1001-en kódoltnak tûnik.
+videó folyammal, hogy 30000/1001 fps-en kódoltnak tûnik.
 Csak akkor mûködik MPEG-2 videóval ha a kimeneti frameráta 24000/1001 fps,
 szükség esetén konvertálj az \-ofps kapcsolóval.
 Bármelyik más frameráta inkompatibilis ezzel az opcióval.
@@ -10489,7 +10498,7 @@ leírja, hogyan készíthetsz hasznos hibajelentést.
 Az MPlayert eredetileg Gereöffy Árpád írta.
 Lásd az AUTHORS fájlt a többi közremûködõ listájához.
 .PP
-MPlayer (C) 2000\-2006 Az MPlayer Csapat
+MPlayer (C) 2000\-2007 Az MPlayer Csapat
 .PP
 Ezt a man oldalt nagyrészt Gabucino, Jonas Jermann és Diego Biurrun írta.
 A karbantartó Diego Biurrun.
