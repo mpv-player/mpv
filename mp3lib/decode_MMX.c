@@ -124,9 +124,9 @@ ASMALIGN(4)
 	"por    %%mm0, %%mm1\n\t"
 	"movq   %%mm1,(%%edi)\n\t"
 
-        "leal 64(%%esi),%%esi\n\t"
-        "leal 128(%%edx),%%edx\n\t"
-        "leal 8(%%edi),%%edi\n\t"
+        "add $64,%%esi\n\t"
+        "add $128,%%edx\n\t"
+        "add $8,%%edi\n\t"
 
 	"decl %%ecx\n\t"
         "jnz  .L03\n\t"
@@ -149,11 +149,10 @@ ASMALIGN(4)
         "packssdw %%mm0,%%mm0\n\t"
         "movd %%mm0,%%eax\n\t"
 	"movw %%ax, (%%edi)\n\t"
-        "leal 32(%%esi),%%esi\n\t"
-        "leal 64(%%edx),%%edx\n\t"
-        "leal 4(%%edi),%%edi\n\t"               
-	
-        "subl $64,%%esi\n\t"
+        "sub $32,%%esi\n\t"
+        "add $64,%%edx\n\t"
+        "add $4,%%edi\n\t"               
+
         "movl $7,%%ecx\n\t"
 ASMALIGN(4)
 ".L04:\n\t"
@@ -201,9 +200,9 @@ ASMALIGN(4)
 	"por    %%mm0, %%mm1\n\t"
 	"movq   %%mm1,(%%edi)\n\t"
 
-        "subl $64,%%esi\n\t"
-        "addl $128,%%edx\n\t"
-        "leal 8(%%edi),%%edi\n\t"
+        "sub $64,%%esi\n\t"
+        "add $128,%%edx\n\t"
+        "add $8,%%edi\n\t"
         "decl %%ecx\n\t"
 	"jnz  .L04\n\t"
 
