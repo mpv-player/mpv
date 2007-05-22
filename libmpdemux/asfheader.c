@@ -198,6 +198,7 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, str
   int pos=0;
   uint8_t *buffer = &buf[0];
   uint64_t avg_ft;
+  unsigned bitrate;
 
   while ((pos = find_asf_guid(buf, asf_ext_stream_header, pos, buf_len)) >= 0) {
     int this_stream_num, stnamect, payct, i, objlen;
@@ -213,7 +214,9 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, str
     // max-object-size(4),
     // flags(4) (reliable,seekable,no_cleanpoints?,resend-live-cleanpoints, rest of bits reserved)
 
-    buffer +=8+8+4+4+4+4+4+4+4+4;
+    buffer += 8+8;
+    bitrate = AV_RL32(buffer);
+    buffer += 8*4;
     this_stream_num=AV_RL16(buffer);buffer+=2;
 
     if (this_stream_num == stream_num) {
@@ -222,6 +225,7 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, str
       buffer+=2; //skip stream-language-id-index
       avg_ft = AV_RL64(buffer); // provided in 100ns units
       buffer+=8;
+      asf->bps = bitrate / 8;
 
       // after this are values for stream-name-count and
       // payload-extension-system-count
@@ -556,6 +560,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
           sh_video->aspect = asp_ratio * sh_video->bih->biWidth /
             sh_video->bih->biHeight;
         }
+        sh_video->i_bps = asf->bps;
 
         if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_video_header(sh_video->bih, MSGL_V);
         //asf_video_id=streamh.stream_no & 0x7F;

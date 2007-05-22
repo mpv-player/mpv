@@ -241,6 +241,7 @@ struct asf_priv {
     int aud_ext_timing_index;
     int vid_ext_frame_index;
     int know_frame_time;
+    unsigned bps;
 };
 
 #endif
