@@ -1313,15 +1313,6 @@ static int start(priv_t *priv)
     return 1;
 }
 
-
-#ifdef HAVE_TV_BSDBT848
-static double grabimmediate_video_frame(priv_t *priv, char *buffer, int len)
-{
-    memset(buffer, 0xCC, len);
-    return(1);
-}
-#endif /* HAVE_TV_BSDBT848 */
-
 // copies a video frame
 static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *source)
 {

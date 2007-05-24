@@ -90,14 +90,6 @@ static int control(priv_t *priv, int cmd, void *arg)
     return(TVI_CONTROL_UNKNOWN);
 }
 
-#ifdef HAVE_TV_BSDBT848
-static double grabimmediate_video_frame(priv_t *priv, char *buffer, int len)
-{
-    memset(buffer, 0xCC, len);
-    return(1);
-}
-#endif
-
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
     memset(buffer, 0x42, len);

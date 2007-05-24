@@ -66,9 +66,6 @@ typedef struct tvi_functions_s
     int (*control)();
     int (*start)();
     double (*grab_video_frame)();
-#ifdef HAVE_TV_BSDBT848
-    double (*grabimmediate_video_frame)();
-#endif
     int (*get_video_framesize)();
     double (*grab_audio_frame)();
     int (*get_audio_framesize)();
