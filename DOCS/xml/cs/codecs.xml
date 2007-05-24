@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21748 -->
 <chapter id="codecs">
 <title>Kodeky</title>
 
@@ -22,54 +22,54 @@ Nejdůležitější ze všech jsou:
 <listitem><para>
   <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) a
   <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) video
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   nativní dekodéry pro <emphasis role="bold">všechny DivX varianty,
   3ivX, MS MPEG-4</emphasis> v1, v2 a ostatní MPEG-4 varianty
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   nativní dekodér pro <emphasis role="bold">Windows Media Video 7/8</emphasis>
   (<emphasis role="bold">WMV1/WMV2</emphasis>), a Win32 DLL dekodér
   pro <emphasis role="bold">Windows Media Video 9</emphasis>
-  (<emphasis role="bold">WMV3</emphasis>), obojí používané ve <filename>.wmv</filename>
-  souborech
-  </para></listitem>
+  (<emphasis role="bold">WMV3</emphasis>),
+  obojí používané ve <filename>.wmv</filename> souborech
+</para></listitem>
 <listitem><para>
   nativní <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> dekodér
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   nativní <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> dekodér
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">3ivx</emphasis> v1, v2 dekodér
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Cinepak a <emphasis role="bold">Intel Indeo</emphasis> kodeky
   (3.1,3.2,4.1,5.0)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 a další hardwarové
   formáty
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   VIVO 1.0, 2.0, I263 a další <emphasis role="bold">H.263(+)</emphasis>
   varianty
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   FLI/FLC
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> z
   <systemitem class="library">libavcodec</systemitem>, a
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> kodeky používající
   knihovny z RealPlayeru
-  </para></listitem>
-<listitem><para>
+ </para></listitem>
+ <listitem><para>
   nativní dekodér pro HuffYUV
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Různé staré a jednoduché formáty podobné RLE
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -79,6 +79,7 @@ přečtěte si
 a pomozte nám přidat pro něj podporu.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
@@ -88,7 +89,7 @@ a pomozte nám přidat pro něj podporu.
 <systemitem class="library">libavcodec</systemitem>, vedoucí
 open source video a audio kodekovou knihovnu. Ta je schopna
 dekódovat většinu formátů multimédií, obvykle vyšší rychlostí
-než alternativy, a plánuje se nakonec přidat podporu všech.
+než alternativy a plánuje se nakonec přidat podporu všech.
 Je to výchozí dekodér pro většinu kodeků, které
 <application>MPlayer</application> podporuje.
 Pro některé formáty je k dispozici také enkódování podporované
@@ -96,59 +97,61 @@ v <application>MEncoder</application>u.
 </para>
 
 <para>
-Úplný seznam podporovaných kodeků naleznete na domácí stránce FFmpeg.
-Podporované <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
-a <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> kodeky.
+Úplný seznam podporovaných
+<ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
+a <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>
+kodeků naleznete na domácí stránce FFmpeg.
 </para>
 
 <para>
 <application>MPlayer</application> obsahuje
 <systemitem class="library">libavcodec</systemitem>.
-Jen spusťte <filename>configure</filename> a kompilujte.
+Jen spusťte <filename>./configure</filename> a kompilujte.
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="xvid">
-<title>XviD</title>
+<title>Xvid</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> je free software MPEG-4 ASP
+<ulink url="http://www.xvid.org">Xvid</ulink> je free software MPEG-4 ASP
 kompatibilní video kodec, jenž má podporu pro dvouprůchodové enkódování a
 plně podporuje MPEG-4 ASP, což jej činí mnohem efektivnějším, než je
 dobře známý DivX kodek.
 Dosahuje velmi dobré kvality videa a dobrý vákon díky CPU optimalizacím
 pro většinu moderních procesorů.
 </para>
+
 <para>
 Jeho vývoj je odvozen od OpenDivX kodeku.
 To se stalo poté co ProjectMayo uzavřel zdrojový kód kodeku,
 vydal jej jako DivX4 a lidé mimo ProjectMayo pracující na kodeku
-OpenDivX se naštvali a založili XviD. Oba projekty tedy mají stejný základ.
+OpenDivX se naštvali a založili Xvid. Oba projekty tedy mají stejný základ.
 </para>
 
 <para>
-Poznamenejme, že XviD není nutný pro dekódování XviDem enkódovaného videa.
+Poznamenejme, že Xvid není nutný pro dekódování Xvidem enkódovaného videa.
 Jako výchozí je používán <systemitem class="library">libavcodec</systemitem>,
 jelikož poskytuje vyšší rychlost.
 </para>
 
 <procedure>
-<title>Instalace <systemitem class="library">XviD</systemitem></title>
+<title>Instalace <systemitem class="library">Xvid</systemitem></title>
 <para>
   Stejně jako většina svobodného software je dostupný ve dvou verzích:
   <ulink url="http://www.xvid.org/downloads.html">oficiálně uvolněné verzi</ulink>
   a verzi CVS.
   V současnosti je CVS verze obvykle dostatečně stabilní pro použití, jelikož
   většinou obsahuje opravy chyb, které zůstaly po vydání.
-  Zde uvádíme postup pro zprovoznění <systemitem class="library">XviD</systemitem>
+  Zde uvádíme postup pro zprovoznění <systemitem class="library">Xvid</systemitem>
   CVS v <application>MEncoder</application>u (budete potřebovat alespoň
   autoconf 2.50, automake a libtool):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
-  </para></step>
+</para></step>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
 </para></step>
@@ -157,38 +160,39 @@ jelikož poskytuje vyšší rychlost.
 </para></step>
 <step><para>
   <screen>./bootstrap.sh</screen>
-  </para></step>
+</para></step>
 <step><para>
   <screen>./configure</screen>
   Zde můžete přidat nějaké volby (prostudujte si výstup příkazu
   <command>./configure --help</command>).
-  </para></step>
+</para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
-  </para></step>
+</para></step>
 <step><para>
   Pokud jste zadali <option>--enable-divxcompat</option>,
   zkopírujte <filename>../../src/divx4.h</filename> do adresáře
   <filename class="directory">/usr/local/include/</filename>.
-  </para></step>
+</para></step>
 <step><para>
   Znovu zkompilujte <application>MPlayer</application> s volbami
   <option>--with-xvidlibdir=<replaceable>/cesta/k/</replaceable>libxvidcore.a</option>
   <option>--with-xvidincdir=<replaceable>/cesta/k/</replaceable>xvid.h</option>.
-  </para></step>
+</para></step>
 </procedure>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="codec-x264">
-<title>x264</title>
+<title><systemitem class="library">x264</systemitem></title>
 
 <sect3 id="codec-x264-whatis">
-<title>Co je x264?</title>
+<title>Co je <systemitem class="library">x264</systemitem>?</title>
+
 <para>
   <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
-  je knihovna pro tvorbu
-  H.264 video proudů.
+  je knihovna pro tvorbu H.264 video proudů.
   Není 100% dokončena, ale již má alespoň určitou podporu většiny H.264
   vlastností ovlivňujících kvalitu.
   Ve specifikaci H.264 je ovšem mnoho pokročilých funkcí, které nemají přímo
@@ -200,56 +204,67 @@ jelikož poskytuje vyšší rychlost.
 <title>Vlastnosti enkodéru</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Multi-reference</para></listitem>
-  <listitem><para>Intra: všechny typy makrobloků (16x16, 8x8 a 4x4 se všemi
-    predikcemi)</para></listitem>
-  <listitem><para>Inter P: všechna rozdělení (partitiony) (od 16x16 níže až do
-    4x4)</para></listitem>
-  <listitem><para>Inter B: rozdělení od 16x16 níže až do 8x8
-    (včetně SKIP/DIRECT)</para></listitem>
-  <listitem><para>Řízení datového toku: konstantní kvantizér, konstantní datový
-    tok nebo jedno či víceprůchodový ABR</para></listitem>
+  <listitem><para>
+  Intra: všechny typy makrobloků (16x16, 8x8 a 4x4 se všemi predikcemi)
+  </para></listitem>
+  <listitem><para>
+  Inter P: všechna rozdělení (partitiony) (od 16x16 níže až do 4x4)
+  </para></listitem>
+  <listitem><para>
+  Inter B: rozdělení od 16x16 níže až do 8x8 (včetně SKIP/DIRECT)
+  </para></listitem>
+  <listitem><para>
+  Řízení datového toku: konstantní kvantizér, konstantní datový
+  tok nebo jedno či víceprůchodový ABR
+  </para></listitem>
   <listitem><para>Detekce změny scény</para></listitem>
   <listitem><para>Adaptivní umísťování B-snímků</para></listitem>
-  <listitem><para>B-snímky jako referenční / libovolné řazení snímků
-    </para></listitem>
+  <listitem><para>
+  B-snímky jako referenční / libovolné řazení snímků
+  </para></listitem>
   <listitem><para>8x8 a 4x4 adaptivní prostorová transformace</para></listitem>
   <listitem><para>Bezstrátový režim</para></listitem>
   <listitem><para>Uživatelské kvantizační matice</para></listitem>
   <listitem><para>Paralelní enkódování několika políček</para></listitem>
+  <listitem><para>Prokládání (Interlacing)</para></listitem>
 </itemizedlist>
-
 </sect3>
+
 
 <sect3 id="codec-h264-whatis">
 <title>Co je H.264?</title>
+
 <para>
-  H.264 je jeden z názvů nového kodeku digitálního videa vyvíjeného společně skupinami
-  ITU a MPEG.
-  Rovněž může být zprávně nazýván těžkopádně jako
-  "ISO/IEC 14496-10" nebo "MPEG-4 Part 10".
-  Častěji je nazýván jako "MPEG-4 AVC" nebo jen "AVC".
+H.264 je jeden z názvů nového kodeku digitálního videa vyvíjeného společně
+skupinami ITU a MPEG.
+Rovněž může být zprávně nazýván těžkopádně jako
+"ISO/IEC 14496-10" nebo "MPEG-4 Part 10".
+Častěji je nazýván jako "MPEG-4 AVC" nebo jen "AVC".
 </para>
 <para>
-  Ať už mu říkáte jakkoli, H.264 stojí za vyzkoušení, protože obvykle
-  dosahuje kvality MPEG-4 ASP při datovém toku o 5%-30% nižším.
-  Konkrétní výsledky závisí jak na zdrojovém videu, tak na enkodéru.
-  Prospěch z použití H.264 není zadarmo: Zdá se, že dekódování H.264 datových
-  proudů má přemrštěné nároky na CPU a paměť.
-  Například na 1733 MHz Athlonu využije dekódování 1500kbps H.264 videa
-  v DVD rozlišení kolem 35% CPU.
-  Pro porovnání, dekódování 1500kbps MPEG-4 ASP proudu ve stejném rozlišení
-  vyžaduje okolo 10% CPU.
-  To znamená, že dekódování datových proudů je pro většinu uživatelů téměř
-  nemožné.
-  Rovněž to znamená, že dokonce i rozumný DVD rip se může občas zakousnout
-  na procesorech slabších než cca 2.0 GHz.
+Ať už mu říkáte jakkoli, H.264 stojí za vyzkoušení, protože obvykle
+dosahuje kvality MPEG-4 ASP při datovém toku o 5%-30% nižším.
+Konkrétní výsledky závisí jak na zdrojovém videu, tak na enkodéru.
+Prospěch z použití H.264 není zadarmo: Zdá se, že dekódování H.264 datových
+proudů má přemrštěné nároky na CPU a paměť.
+Například na 1733 MHz Athlonu využije dekódování 1500kbps H.264 videa
+v DVD rozlišení kolem 35% CPU.
+Pro porovnání, dekódování 1500kbps MPEG-4 ASP proudu ve stejném rozlišení
+vyžaduje okolo 10% CPU.
+To znamená, že dekódování datových proudů je pro většinu uživatelů téměř
+nemožné.
+Rovněž to znamená, že dokonce i rozumný DVD rip se může občas zakousnout
+na procesorech slabších než cca 2.0 GHz.
 </para>
+
 <para>
-  Alespoň s <systemitem class="library">x264</systemitem>,
-  nejsou požadavky ne enkódování o mnoho větší než ty, které vyžaduje MPEG-4 ASP.
-  Například na 1733 MHz Athlonu poběží typické DVD enkódování při 5-15 snímků
-  za sekundu.
+Alespoň s <systemitem class="library">x264</systemitem>,
+nejsou požadavky ne enkódování o mnoho větší než ty,
+které vyžaduje MPEG-4 ASP.
+Například na 1733 MHz Athlonu poběží typické DVD enkódování
+při 5-15 snímků za sekundu.
 </para>
+
 <para>
   Tento dokument se nesnaží vysvětlit detaily H.264, ale pokud máte zájem
   o stručný přehled, přečtěte si
@@ -257,66 +272,70 @@ jelikož poskytuje vyšší rychlost.
 </para>
 </sect3>
 
+
 <sect3 id="codec-x264-playback">
-<title>Jak mohu přehrávat H.264 videa <application>MPlayer</application>em?</title>
+<title>Jak mohu přehrávat H.264 videa
+  <application>MPlayer</application>em?</title>
+
 <para>
-  <application>MPlayer</application> používá H.264 dekodér z
-  <systemitem class="library">libavcodec</systemitem>u.
-  <systemitem class="library">libavcodec</systemitem> má alespoň
-  minimálně použitelný H.264 dekodér již asi od července 2004,
-  od té doby však byly provedeny velké změny a vylepšení jak v počtu funkčností,
-  tak ve vylepšení použití CPU.
-  Pro jistotu je vždy nejlepší používat aktuální Subversion verzi.
+<application>MPlayer</application> používá H.264 dekodér z
+<systemitem class="library">libavcodec</systemitem>u.
+<systemitem class="library">libavcodec</systemitem> má alespoň
+minimálně použitelný H.264 dekodér již asi od července 2004,
+od té doby však byly provedeny velké změny a vylepšení jak
+v počtu funkčností, tak ve vylepšení použití CPU.
+Pro jistotu je vždy nejlepší používat aktuální Subversion verzi.
 </para>
+
 <para>
-  Chcete-li se snadno a rychle dozvědět o změnách v H.264 dekódování
-  <systemitem class="library">libavcodec</systemitem>u, sledujte
-  <ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">webové FFmpeg Subversion rozhraní</ulink>.
+Chcete-li se snadno a rychle dozvědět o změnách v H.264 dekódování
+<systemitem class="library">libavcodec</systemitem>u, sledujte
+<ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">webové FFmpeg Subversion rozhraní</ulink>.
 </para>
 </sect3>
 
-<sect3 id="codec-x264-encode">
-<title>Jak mohu enkódovat video pomocí <application>MEncoder</application> a <systemitem class="library">x264</systemitem>?</title>
-<para>
-  Pokud máte nainstalován klient subversion, můžete si poslední x264
-  zdrojové kódy x264 opatřit tímto příkazem:
-  <screen>
-    svn co svn://svn.videolan.org/x264/trunk x264<!--
-  --></screen>
-  Zdrojové kódy <application>MPlayer</application>u jsou aktualizovány, kdykoli
-  nastane změna API v <systemitem class="library">x264</systemitem>, takže vždy
-  doporučujeme používat také Subversion verzi <application>MPlayer</application>u.
-  Tato situace se snad změní, až <systemitem class="library">x264</systemitem>
-  dospěje k "vydání".
-  Mezi tím by měla být <systemitem class="library">x264</systemitem> považována
-  za velmi nestabilní v tom smyslu, že se její programové rozhraní neustále
-  mění.
-</para>
-<para>
-  <systemitem class="library">x264</systemitem> je setavována a
-  instalována standardním postupem:
-  <screen>
-    ./configure &amp;&amp; make &amp;&amp; sudo make install
-  </screen>
-  To nainstaluje libx264.a do /usr/local/lib a x264.h je umístěn do
-  /usr/local/include.
 
-  S knihovnou <systemitem class="library">x264</systemitem> a jejím hlavičkovým
-  souborem umístěnými na standardních místech je sestavení
-  <application>MPlayer</application>u s podporou
-  <systemitem class="library">x264</systemitem> snadné.
-  Stačí spustir standardní:
-  <screen>
-    ./configure &amp;&amp; make &amp;&amp; sudo make install<!--
-  --></screen>
-  Skript configure automaticky detekuje, že jste splnili požadavky pro
-  <systemitem class="library">x264</systemitem>.
+<sect3 id="codec-x264-encode">
+<title>Jak mohu enkódovat video pomocí <application>MEncoder</application>
+a <systemitem class="library">x264</systemitem>?</title>
+<para>
+Pokud máte nainstalován klient subversion, můžete si poslední x264
+zdrojové kódy x264 opatřit tímto příkazem:
+<screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
+Zdrojové kódy <application>MPlayer</application>u jsou aktualizovány,
+kdykoli nastane změna API v <systemitem class="library">x264</systemitem>,
+takže vždy doporučujeme používat také Subversion verzi
+<application>MPlayer</application>u.
+Tato situace se snad změní, až
+<systemitem class="library">x264</systemitem> dospěje k "vydání".
+Mezi tím by měla být <systemitem class="library">x264</systemitem> považována
+za velmi nestabilní v tom smyslu, že se její programové rozhraní neustále
+mění.
+</para>
+
+<para>
+<systemitem class="library">x264</systemitem> je setavována a
+instalována standardním postupem:
+<screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
+To nainstaluje libx264.a do /usr/local/lib a x264.h je umístěn do
+/usr/local/include.
+
+S knihovnou <systemitem class="library">x264</systemitem> a jejím
+hlavičkovým souborem umístěnými na standardních místech je
+sestavení <application>MPlayer</application>u s podporou
+<systemitem class="library">x264</systemitem> snadné.
+Stačí spustir standardní:
+<screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
+Skript <filename>./configure</filename> automaticky detekuje, že jste splnili
+požadavky pro <systemitem class="library">x264</systemitem>.
 </para>
 </sect3>
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="audio-codecs">
 <title>Audio kodeky</title>
@@ -326,49 +345,50 @@ jelikož poskytuje vyšší rychlost.
 <listitem><para>
   MPEG layer 1/2/3 (MP1/2/3) audio (<emphasis role="bold">nativní</emphasis>
   kód, s MMX/SSE/3DNow! optimalizací)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Windows Media Audio 7 a 8 (ALIAS WMAv1 a WMAv2)
   (<emphasis role="bold">nativní</emphasis> kód, podpora v
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Windows Media Audio 9 (WMAv3) (používá DMO DLL)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   AC3 Dolby audio (<emphasis role="bold">nativní</emphasis> kód, s
   MMX/SSE/3DNow! optimalizací)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   AC3 tunelování přes hardware zvukové karty
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   AAC
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Ogg Vorbis audio kodek (<emphasis role="bold">nativní</emphasis> knihovna)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   RealAudio: DNET (AC3 s nízkým datovým tokem), Cook, Sipro a ATRAC3
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   QuickTime: Qualcomm a QDesign audio kodeky
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   VIVO audio (g723, Vivo Siren)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Voxware audio (používá DirectShow DLL)
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   alaw a ulaw, různé gsm, adpcm a pcm formáty a ostatní jednoduché starší
   audio kodeky
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Adaptivní Multi-Rate (AMR) kodeky pro mluvené slovo
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
+<!-- ********** -->
 
 <sect2 id="swac3">
 <title>Softwarové dekódování AC3</title>
@@ -392,7 +412,7 @@ Zadejte volbu <option>-channels 2</option> pro mixování na stereo. Chcete-li
 výstup), zadejte volbu <option>-channels 4</option>.  V tom případě bude
 jakýkoli středový kanál odpovídajícím způsobem namixován do čelních kanálů.
 Volbou <option>-channels 6</option> dostanete plný počet AC3 kanálů tak jak
-jsou enkódovány - v pořadí Levý, Pravý, Levý Surround, Pravý Surround, Střed a
+jsou enkódovány &ndash; v pořadí Levý, Pravý, Levý Surround, Pravý Surround, Střed a
 LFE.
 </para>
 
@@ -409,9 +429,11 @@ bude rovněž fungovat).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="hwac3">
 <title>Hardwarové dekódování AC3</title>
+
 <para>
 Potřebujete zvukovou kartu schopnou AC3, s digitálním výstupem(S/PDIF).
 Ovladač karty musí správně podporovat formát AFMT_AC3 (C-Media ano). Připojte
@@ -422,40 +444,46 @@ DXR3/Hollywood+ MPEG.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="libmad">
-<title>podpora libmad</title>
+<title>podpora <systemitem class="library">libmad</systemitem></title>
 
 <para>
-<ulink url="http://www.underbit.com/products/mad/">libmad</ulink> je
-multiplatformní, pouze celočíselná (interně 24bitový PCM)
+<ulink url="http://www.underbit.com/products/mad/"><systemitem class="library">libmad</systemitem></ulink>
+je multiplatformní, pouze celočíselná (interně 24bitový PCM)
 MPEG audio dekódovací knihovna. Neumí si dobře poradit s poškozenými soubory a
 občas má problémy s převíjením, ale může být výkonnější na platformách bez
-FPU (jako je <link linkend="arm">ARM</link>) než mp3lib.
+FPU (jako je <link linkend="arm">ARM</link>)
+než <systemitem class="library">mp3lib</systemitem>.
 </para>
 
 <para>
-Máte-li správně nainstalovánu libmad, <filename>configure</filename>
+Máte-li správně nainstalovánu libmad, <filename>./configure</filename>
 si toho všimne a podpora dekódování MPEG zvuku přes
 <systemitem class="library">libmad</systemitem> bude zakompilována automaticky.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="hwmpa">
 <title>Hardwarový MPEG audio kodek</title>
 
 <para>
-Tento kodek (zvolený pomocí -ac hwmpa) posílá MPEG audio pakety do hardwarových
-dekodérů dostupných např. v plně vybavených DVB kartách a
-DXR2 adaptérech.
+Tento kodek (zvolený pomocí <option>-ac hwmpa</option>) posílá MPEG audio
+pakety do hardwarových dekodérů dostupných např. v plně vybavených
+DVB kartách a DXR2 adaptérech.
 Nepoužívejte je v kombinaci s jinými výstupními audio rozhraními
 (jako OSS a ALSA), které je nedokáží dekódovat (uslyšíte pouze rušení).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="aac">
 <title>Kodek AAC</title>
+
 <para>
 AAC (Advanced Audio Coding) je audio kodek, který lze občas nalézt v MOV a
 MP4 souborech. Open source dekodér jménem FAAD je k dispozici na
@@ -469,7 +497,7 @@ Pokud používáte gcc 3.2 které nedokáže zkompilovat naši zabudovanou FAAD,
 nebo chcete použít externí knihovnu z jiných důvodů, stáhněte si ji z 
 <ulink url="http://www.audiocoding.com/modules/mydownloads/">download stránky</ulink>
 a předejte volbu <option>--enable-faad-external</option> skriptu
-<filename>configure</filename>.
+<filename>./configure</filename>.
 Pro dekódování AAC souborů nepotřebujete celou faad2, libfaad stačí.
 Zkompilujete ji takto:
 <screen>
@@ -481,15 +509,18 @@ make
 make install
 </screen>
 Binárky na audiocoding.com nenajdete, ale můžete si je opatřit v balíčcích pro
-Debian z <ulink url="http://www.debian-multimedia.org/">domácí stránky Christiana
-Marillata</ulink>, Mandrake/Mandriva RPM z
-<ulink url="http://plf.zarb.org">P.L.F</ulink> a RedHat RPM
-ze stránek <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
+Debian z
+<ulink url="http://www.debian-multimedia.org/">domácí stránky Christiana Marillata</ulink>,
+Mandrake/Mandriva RPM z <ulink url="http://plf.zarb.org">P.L.F</ulink>
+a Fedora RPM ze stránek <ulink url="http://rpm.livna.org/">Livna</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="amr">
 <title>AMR kodeky</title>
+
 <para>
 Adaptivní Multi-Rate kodek pro mluvené slovo je používán třetí generací (3G)
 mobilních telefonů.
@@ -497,6 +528,7 @@ Referenční implementace je dostupná od
 <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
 (zdarma pro osobní použití).
 </para>
+
 <para>
 Pro zapnutí podpory si stáhněte zdrojový kód
 <ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
@@ -520,7 +552,9 @@ Pak proveďte obvyklou <link linkend="features">kompilační proceduru</link>
 
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="codec-importing">
 <title>HOWTO: Import Win32 kodeků</title>
@@ -538,10 +572,6 @@ s hláškou typu:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
 nebo česky
 <screen>NEZNÁMÝ video kodek: HFYU (0x55594648)</screen>
-
-</para>
-
-<para>
 Pak to znamená, že máte AVI enkódované kodekem, který má HFYU fourcc (HFYU =
 HuffYUV kodek, DIV3 = DivX Low Motion, atd). Teď když to víte, měli byste
 zjistit kterou DLL Windows nahrává pro přehrávání tohoto souboru. V našem
@@ -560,17 +590,16 @@ audio kodeky jsou odlišeny předponou MSACM:
 To je kodek MP3. Nyní již máte všechny potřebné informace
 (fourcc, soubor kodeku, vzorek AVI). Pošlete požadavek na podporu vašeho
 kodeku mailem a nahrajte tyto soubory na FTP server:
-<systemitem role="url">
-ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
-</systemitem>
+<systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</replaceable>/</systemitem>
 </para>
 
 <note><para>Ve Windows NT/2000/XP hledejte tyto informace v registrech,
-zde hledáte &quot;VIDC.HFYU&quot;. Jak to udělat se dozvíte níže v sekci
+zde hledáte "VIDC.HFYU". Jak to udělat se dozvíte níže v sekci
 DirectShow Stará metoda.
 </para></note>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="dshow-codecs">
 <title>Kodeky DirectShow</title>
@@ -582,10 +611,10 @@ Pracuje se s ním hůře, protože
 <listitem><para>
   <filename>system.ini</filename> neobsahuje potřebné údaje,
   místo toho jsou uloženy v registrech a
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   potřebujeme GUID kodeku.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -600,37 +629,34 @@ Using <application>Microsoft GraphEdit</application> (rychlý)
   </para></step>
 <step><para>
   Spusťte <command>graphedit.exe</command>.
-  </para></step>
+</para></step>
 <step><para>
-  V menu vyberte Graph -> Insert Filters.
-  </para></step>
+  V menu vyberte
+  <menuchoice><guimenu>Graph</guimenu>
+  <guisubmenu>Insert Filters</guisubmenu></menuchoice>.
+</para></step>
 <step><para>
   Vyrolujte položku <systemitem>DirectShow Filters</systemitem>.
-  </para></step>
-
-
-
-
+</para></step>
 <step><para>
   Vyberte správný název kodeku a vyrolujte položku.
-  </para></step>
+</para></step>
 <step><para>
   Ve vstupu <systemitem>DisplayName</systemitem> pohlédněte na text ve
   dvojitých uvozovkách za zpětným lomítkem a opište si ho (pět lomítkem
   oddělených bloků, GUID).
-  </para></step>
+</para></step>
 <step><para>
-  Binárka kodeku je uvedena ve vstupu <systemitem>Filename</systemitem>.
-  </para></step>
+  Binárka kodeku je uvedena ve vstupu
+  <systemitem>Filename</systemitem>.
+</para></step>
 </procedure>
 
-<note>
-<para>
+<note><para>
 Pokud zde není <systemitem>Filename</systemitem> a
 <systemitem>DisplayName</systemitem> obsahuje něco jako
 <systemitem>device:dmo</systemitem>, pak se jedná o DMO-Kodek.
-</para>
-</note>
+</para></note>
 
 <procedure>
 <title>Stará Metoda:</title>
@@ -641,44 +667,42 @@ Zhluboka se nadechněte a začněte prohledávat registry...
   Spusťte <command>regedit</command>.
   </para></step>
 <step><para>
-  Stiskněte <keycap>Ctrl</keycap>+<keycap>F</keycap>, vypněte první dvě
-  zaškrtávací políčka a zapněte to třetí. Napište fourcc kodeku (např.
-  <userinput>TM20</userinput>).
-  </para></step>
+  Stiskněte
+  <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>,
+  vypněte první dvě zaškrtávací políčka a zapněte to třetí. Napište fourcc
+  kodeku (např. <userinput>TM20</userinput>).
+</para></step>
 <step><para>
   Měli byste uvidět pole obsahující cestu a jméno souboru (např.
   <filename>C:\WINDOWS\SYSTEM\TM20DEC.AX</filename>).
-  </para></step>
+</para></step>
 <step><para>
   Teď když máme soubor, potřebujeme GUID. Zkuste hledat znovu, ale tentokrát
   hledáme jméno kodeku, ne fourcc. Jeho jméno můžete zjistit během přehrávání
   Media Playerem v menu
-  <guimenu>File</guimenu> -&gt; <guisubmenu>Properties</guisubmenu> -&gt;
-  <guimenuitem>Advanced</guimenuitem>
-  (<guimenu>Soubor</guimenu> -&gt; <guisubmenu>Vlastnosti</guisubmenu> -&gt;
-  <guimenuitem>Pokročilé</guimenuitem>).
+  <menuchoice><guimenu>File</guimenu> <guisubmenu>Properties</guisubmenu>
+  <guimenuitem>Advanced</guimenuitem></menuchoice>.
+  (<menuchoice><guimenu>Soubor</guimenu><guisubmenu>Vlastnosti</guisubmenu>
+  <guimenuitem>Pokročilé</guimenuitem></menuchoice>).
   Pokud ne, máte smůlu. Zkoušejte to dál (např. hledejte text TrueMotion).
-  </para></step>
+</para></step>
 <step><para>
   Pokud naleznete GUID, měli byste vidět pole
   <guilabel>FriendlyName</guilabel> a <guilabel>CLSID</guilabel>.
   Opište si 16 bajtové CLSID, to je ono GUID, které potřebujeme.
-  </para></step>
+</para></step>
 </procedure>
 
-<note>
-<para>
+<note><para>
 Pokud vyhledávání selže, zkuste zapnout všechny zaškrtávátka. Nejspíš
 dostanete nesprávné výsledky, ale můžete mít štěstí...
-</para>
-</note>
+</para></note>
 
 <para>
 Nyní když máte všechny potřebné informace (fourcc, GUID, soubor kodeku,
 vzorek AVI), pošlete požadavek na podporu svého kodeku mailem a nahrajte
 tyto soubory na FTP server:
-<systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
-</systemitem>
+<systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</replaceable>/</systemitem>
 </para>
 
 <para>

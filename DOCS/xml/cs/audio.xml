@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21537 -->
 <chapter id="audio">
 <title>Výstupní zvuková zařízení</title>
 <sect1 id="sync">
@@ -36,23 +36,28 @@ viz man stránka.
 </para>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="troubleshooting">
 <title>Odstraňování problémů</title>
 
 <para>Několik poznámek:</para>
 
 <para>
-  Pokud máte ALSA verze 0.5, pak budete téměř vždy použít 
-  <option>-ao alsa5</option>, jelikož ALSA 0.5 má vadný kód OSS emulace a
-	<emphasis role="bold">zhavaruje <application>MPlayer</application></emphasis>
-  se zprávou podobnou této:
-  <screen>
-DEMUXER: Příliš mnoho (945 ve 8390980 bajtech) video paketů v bufferu!<!--
---></screen>
+Pokud máte ALSA verze 0.5, pak budete muset téměř vždy použít 
+<option>-ao alsa5</option>, jelikož ALSA 0.5 má vadný kód OSS emulace a
+<emphasis role="bold">zhavaruje <application>MPlayer</application></emphasis>
+se zprávou podobnou této:
+<screen>
+DEMUXER: Příliš mnoho (945 ve 8390980 bajtech) video paketů v bufferu!
+</screen>
 </para>
+
 <para>
-  Pokud vám zvuk klape při přehrávání z CD-ROM, zapněte odmaskování IRQ tak,
-	jak je to popsáno v sekci <link linkend="drives">CD-ROM</link>.
+Pokud vám zvuk klape při přehrávání z CD-ROM, zapněte odmaskování IRQ tak,
+jak je to popsáno v sekci <link linkend="drives">CD-ROM</link>.
 </para>
 </sect1>
 

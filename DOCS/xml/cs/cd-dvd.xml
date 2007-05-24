@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21612 -->
 <chapter id="cd-dvd">
 <title>Použití CD/DVD</title>
 
@@ -14,16 +14,18 @@ které byste mohli chtít změnit rychlost CD-ROM mechaniky:
 
 <itemizedlist>
 <listitem><para>
-Byly zprávy o chybách čtení při vysokých rychlostech, zvláště u špatně
-vylisovaných CD-ROMů. Z těchto důvodů může snížení rychlosti působit
-jako prevence ztráty dat.
+  Byly zprávy o chybách čtení při vysokých rychlostech, zvláště u špatně
+  vylisovaných CD-ROMů. Z těchto důvodů může snížení rychlosti působit
+  jako prevence ztráty dat.
 </para></listitem>
 
 <listitem><para>
-Mnoho CD-ROM mechanik je nechutně hlučných, nižší rychlost může omezit
-tento hluk.
+  Mnoho CD-ROM mechanik je nechutně hlučných, nižší rychlost může omezit
+  tento hluk.
 </para></listitem>
 </itemizedlist>
+
+<!-- ********** -->
 
 <sect2 id="drives_linux">
 <title>Linux</title>
@@ -60,18 +62,19 @@ programu <command>hdparm</command> pro podrobné vysvětlení).
 </para>
 
 <para>
-Prostudujte si &quot;<filename>/proc/ide/<replaceable>(cdrom zařízení)</replaceable>/settings</filename>&quot;
+Prostudujte si
+"<filename>/proc/ide/<replaceable>(cdrom zařízení)</replaceable>/settings</filename>"
 pro jemné doladění vaší CD-ROM.
 </para>
 
 <para>
-SCSI mechaniky nemají jednotný způsob pro nastavení těchto parametrů (Znáte nějaký?
-Řekněte nám jej!). Existuje nástroj, který pracuje se
+SCSI mechaniky nemají jednotný způsob pro nastavení těchto parametrů
+(Znáte nějaký? Řekněte nám jej!). Existuje nástroj, který pracuje se
 <ulink url="http://das.ist.org/~georg/">SCSI mechanikami Plextor</ulink>.
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="drives_freebsd">
 <title>FreeBSD</title>
@@ -92,12 +95,19 @@ sysctl hw.ata.atapi_dma=1
 
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="dvd">
 <title>Přehrávání DVD</title>
+
 <para>
 Úplný seznam dostupných voleb naleznete v man stránce.
 Syntaxe pro přehrání standardního DVD je následující:
-<screen>mplayer dvd://<replaceable>&lt;track&gt;</replaceable> [-dvd-device <replaceable>&lt;DVD_zařízení&gt;</replaceable>]</screen>
+<screen>
+mplayer dvd://<replaceable>&lt;track&gt;</replaceable> [-dvd-device <replaceable>&lt;DVD_zařízení&gt;</replaceable>]
+</screen>
 </para>
 
 <para>
@@ -119,8 +129,7 @@ pomocí volby <option>-dvd-device</option>.
 <para>
 <application>MPlayer</application> používá <systemitem>libdvdread</systemitem> a
 <systemitem>libdvdcss</systemitem> pro přehrávání a dekódování DVD. Tyto dvě
-knihovny jsou obsaženy v podadresáři
-<filename class="directory">libmpdvdkit2</filename> zdrojových kódů
+knihovny jsou obsaženy ve zdrojových kódech
 <application>MPlayer</application>u, nemusíte je tedy instalovat zvlášť.
 Můžete rovněž použít systémové verze těchto knihoven, ale toto řešení
 nedoporučujeme, protože může vést k chybám,
@@ -155,11 +164,11 @@ jeho obsah.
 Podpora DVD vyžaduje přímý sektorově-orientovaný přístup k zařízení. Naneštěstí
 musíte (pod Linuxem) být root, abyste dostali adresu sektoru souboru.
 To je důvod proč vůbec nepoužíváme modul souborového systému z kernelu a místo
-něj jej implementujeme v uživatelském prostoru. To zajišťují
-<systemitem>libdvdread</systemitem> 0.9.x a <systemitem>libmpdvdkit</systemitem>.
+něj jej implementujeme v uživatelském prostoru.
+To zajistí <systemitem>libdvdread</systemitem> 0.9.x.
 UDF ovladač z kernelu není potřeba, jelikož tyto knihovny mají zabudován svůj
 vlastní. Rovněž nemusí být DVD přimountováno vzhledem k tomu že používáme
-pouze přímý (raw) přístup.
+pouze přímý sektorově orientovaný přístup.
 </para>
 
 <para>
@@ -201,6 +210,8 @@ pětkrát.
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="vcd">
 <title>Přehrávání VCD</title>
@@ -232,50 +243,49 @@ a výsledný soubor přehrát v <application>MPlayer</application>u.
 
 <formalpara>
 <title>Struktura VCD</title>
-
 <para>
 Video CD (VCD) je tvořeno CD-ROM XA sektory, čili stopy CD-ROM mode 2
-třída 1 a 2:</para>
-</formalpara>
-
+třída 1 a 2:
 <itemizedlist>
 <listitem><para>
-První stopa je ve formátu mode 2 třída 2 což znamená, že používá L2
-korekci chyb. Stopa obsahuje souborový systém ISO-9660 s 2048
-bajty/sektor. Tento souborový systém obsahuje VCD metadata informace,
-stejně jako statické snímky často používané v menu. MPEG segmenty menu
-mohou být rovněž uloženy v této první stopě, ale tyto MPEGy musí být
-rozsekány na série 150 sektorových chunků. Souborový systém ISO-9660
-může obsahovat další soubory, které nejsou potřeba pro operace
-s VCD.
+  První stopa je ve formátu mode 2 třída 2 což znamená, že používá L2
+  korekci chyb. Stopa obsahuje souborový systém ISO-9660 s 2048
+  bajty/sektor. Tento souborový systém obsahuje VCD metadata informace,
+  spolu se statickými snímky často používanými v menu. MPEG segmenty menu
+  mohou být rovněž uloženy v této první stopě, ale tyto MPEGy musí být
+  rozsekány na série 150 sektorových chunků. Souborový systém ISO-9660
+  může obsahovat další soubory, které nejsou potřeba pro operace
+  s VCD.
 </para></listitem>
 
 <listitem><para>
-Druhá a ostatní stopy jsou všeobecně surovými MPEG (film) stopami
-s 2324 bajty/sektor, obsahující jeden MPEG PS datový paket na
-sektor. Ty jsou v mode 2 třída 1 formátu, takže obsahují více dat
-v každém sektoru za cenu omezení korekce chyb. Je rovněž možné mít
-CD-DA stopy na VCD za první stopou.
-V některých operačních systémech jsou triky, které umožňují zpřístupnit
-tyto ne-ISO-9660 stopy v systému souborů. V dalších operačních
-systémech jako GNU/Linux to není možné (zatím). Zde MPEG data
-<emphasis role="bold">nemohou být připojena</emphasis>. Protože většina
-filmů je uložena uvnitř tohoto druhu stopy, měli byste nejprve zkusit
-<option>vcd://2</option>.
+  Druhá a ostatní stopy jsou všeobecně surovými MPEG (film) stopami
+  s 2324 bajty/sektor, obsahující jeden MPEG PS datový paket na
+  sektor. Ty jsou v mode 2 třída 1 formátu, takže obsahují více dat
+  v každém sektoru za cenu omezení korekce chyb. Je rovněž možné mít
+  CD-DA stopy na VCD za první stopou.
+  V některých operačních systémech jsou triky, které umožňují zpřístupnit
+  tyto ne-ISO-9660 stopy v systému souborů. V dalších operačních
+  systémech jako GNU/Linux to není možné (zatím). Zde MPEG data
+  <emphasis role="bold">nemohou být připojena</emphasis>. Protože většina
+  filmů je uložena uvnitř tohoto druhu stopy, měli byste nejprve zkusit
+  <option>vcd://2</option>.
 </para></listitem>
 
 <listitem><para>
-Existují také VCD disky bez první stopy (jediná stopa bez systému souborů).
-Můžete je přehrát, ale nemohou být namountovány.
+  Existují také VCD disky bez první stopy (jediná stopa bez systému souborů).
+  Můžete je přehrát, ale nemohou být namountovány.
 </para></listitem>
 
-<listitem><para> Definice standardu Video CD se nazývá
-Philips "White Book" a není obecně přístupná online, ale musí být zakoupena
-od Philipsu. Podrobnější informace o Video CD můžete nalézt
-<ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">v dokumentaci programu vcdimager</ulink>.
+<listitem><para>
+  Definice standardu Video CD se nazývá
+  Philips "White Book" a není obecně přístupná online, ale musí být zakoupena
+  od Philipsu. Podrobnější informace o Video CD můžete nalézt
+  <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">v dokumentaci programu vcdimager</ulink>.
 </para></listitem>
-
 </itemizedlist>
+</para>
+</formalpara>
 
 <formalpara>
 <title>Pár slov o .DAT souborech</title>
@@ -295,9 +305,9 @@ s pomocí jejich ovladače, můžete kopírovat či dokonce přehrávat .DAT
 soubory <application>MPlayer</application>em. Ale nebude to fungovat
 se standardním iso9660 ovladačem z Linuxového kernelu! Místo toho
 použijte <option>vcd://</option>. Alternativou kopírování VCD je
-nový ovladač do kernelu jménem
+nový jaderný ovladač jménem
 <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink>
-(není součástí oficiálního kernelu), který zobrazuje CD sekce jako
+(není součástí oficiálního jádra), který zobrazuje CD sekce jako
 obrazové soubory a program
 <ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, který bit-po-bitu
 grabuje/kopíruje CD.

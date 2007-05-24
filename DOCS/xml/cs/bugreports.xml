@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21760 -->
 <appendix id="bugreports">
 <title>Jak hlásit chyby</title>
+
 <para>
 Dobrá hlášení chyb jsou velmi cenným příspěvkem do vývoje jakéhokoli
 softwarového projektu. Ale je to s nimi jako se psaním dobrého
@@ -13,8 +14,14 @@ pochopte, že musíte poskytnout <emphasis role="bold">veškeré</emphasis>
 informace které požadujeme a postupovat přesně podle instrukcí v tomto
 dokumentu.
 </para>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_security">
 <title>Hlášení bezpečnostních chyb</title>
+
 <para>
 V případě že jste nalezli exploitovatelnou chybu, chtěli byste udělat správnou
 věc a nechali nás ji opravit než ji odhalíte, budeme rádi, když nám pošlete
@@ -27,8 +34,14 @@ Prosíme neodkládejte hlášení do doby než vytvoříte 'dokazovací' exploit
 můžete zaslat dalším mailem.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_fix">
 <title>Jak napravovat chyby</title>
+
 <para>
 Pokud si myslíte, že máte potřebné schopnosti, pak vás vybízíme abyste
 opravil(a) chybu samostatně. Nebo jste to již udělal(a)? Přečtěte si prosím
@@ -39,19 +52,27 @@ Lidé z konference
 vám pomohou, pokud budete mít otázky.
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_regression_test">
 <title>Jak provádět regresní testování pomocí Subversion</title>
+
 <para>
 Občas nastane problém typu 'předtím to fungovalo, teď už ne...'.
 Zde přinášíme postup krok za krokem, jak vyhledat, kdy problém
 nastal. Toto <emphasis role="bold">není</emphasis> určeno příležitostným
 uživatelům.
 </para>
+
 <para>
 Nejprve si musíte opatřit zdrojové kódy MPlayeru ze Subversion.
-Instrukce lze nalést na konci
-<ulink url="http://www.mplayerhq.hu/dload.html">této stránky</ulink>.
+Instrukce lze nalést v
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#svn">sekci Subversion stránky download</ulink>.
 </para>
+
 <para>
 Tak dostanete v adresáři mplayer/ obraz Subversion stromu na straně klienta.
 Nyní aktualizujte tento obraz k datu, které chcete:
@@ -64,6 +85,7 @@ Požití tohoto datového formátu zajišťuje, že budete schopni extrahovat
 patche podle data, kdy byly zapsány (commit) stejně, jak jsou v
 <ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archivu</ulink>.
 </para>
+
 <para>
 A teď proveďte sestavení jako při normální aktualizaci:
 <screen>
@@ -71,6 +93,7 @@ A teď proveďte sestavení jako při normální aktualizaci:
 make
 </screen>
 </para>
+
 <para>
 Pokud to čte nějaký neprogramátor, nejrychlejší metodou, jak se dostat
 k bodu, kde problém nastal, je použití binárního vyhledávání &ndash; to je
@@ -80,6 +103,7 @@ Například pokud problém nastal v 2003, začneme v polovině roku a ptáme se,
 Pokud ano, vraťte se na prvního dubna; pokud ne, běžte na prvního října
 a tak dále.
 </para>
+
 <para>
 Pokud máte spoustu místa na disku (plná kompilace obvykle zabírá 100 MB
 a kolem 300&ndash;350 MB, pokud jsou zapnuty debugovací symboly), zkopírujte
@@ -89,6 +113,7 @@ pokud se budete vracet.
 takže pokud si neuděláte záložní kopii originálního zdrojového stromu,
 budete v něm muset rekompilovat vše, až se vrátíte do současnosti.)
 </para>
+
 <para>
 Pokud jste našli den, kdy k problému došlo, pokračujte v hledání pomocí
 archivu mplayer-cvslog (řazeného podle data) a preciznějším cvs update
@@ -98,6 +123,7 @@ cvs update -PAd -D "2004-08-23 15:17:25"
 </screen>
 To vám umožní lehce najít patch, který problém způsobil.
 </para>
+
 <para>
 Pokud jste našli patch, který je příčinou problému, máte téměř vyhráno;
 ohlaste to do
@@ -109,8 +135,14 @@ Je šance, že autor navrhne opravu.
 Rovněž si můžete patch rozpitvat, dokud z něj nevytlučete, kde je chyba :-).
 </para>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_report">
 <title>Jak oznamovat chyby</title>
+
 <para>
 Nejprve, prosím, vyzkoušejte poslední Subversion verzi
 <application>MPlayer</application>u, jelikož vaše chyba již mohla být
@@ -145,36 +177,40 @@ schopni stanovit příčinu problému.
 
 <para>
 Skvělá, dobře napsaná příručka jak se ptát ve veřejných konferencích je
-<ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">How To Ask
-Questions The Smart Way</ulink> od
+<ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">How To Ask Questions The Smart Way</ulink> od
 <ulink url="http://www.catb.org/~esr/">Erica S. Raymonda</ulink>.
 Další příručka je
-<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report
-Bugs Effectively</ulink> od
-<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simona Tathama</ulink>.
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report Bugs Effectively</ulink>
+od <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simona Tathama</ulink>.
 Pokud budete postupovat podle těchto rad, jistě se vám dostane pomoci. Pochopte
 však, že my všichni sledujeme konference dobrovolně ve svém volném čase. Máme
 mnoho práce a nemůžeme vám zaručit že vyřešíme váš problém nebo že vůbec
 dostanete odpověď.
 </para>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="bugreports_where">
 <title>Kam hlásit chyby</title>
+
 <para>
 Přihlaste se do e-mailové konference MPlayer-users:
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 a pošlete své hlášení o chybách na adresu
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/> kde o tom můžeme diskutovat.
 </para>
+
 <para>
 Pokud chcete, můžete místo toho použít zbrusu novou
 <ulink url="http://bugzilla.mplayerhq.hu/">Bugzillu</ulink>.
 </para>
+
 <para>
-Jazykem konference je <emphasis role="bold">Angličtina</emphasis>. Zachovávejte
-prosím
+Jazykem konference je <emphasis role="bold">Angličtina</emphasis>.
+Zachovávejte prosím
 <ulink url="http://www.ietf.org/rfc/rfc1855.txt">Pravidla Netikety</ulink> a
 <emphasis role="bold">neposílejte HTML mail</emphasis> do žádné z našich
 konferencí. Jinak můžete být ignorováni nebo vyhozeni. Pokud nevíte co je to
@@ -186,8 +222,13 @@ obdrželi svou odpověď.
 </para>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_what">
 <title>Co nahlásit</title>
+
 <para>
 Bude potřeba připojit log, konfiguraci nebo vzorky souborů ke svému hlášení chyb.
 Pokud jsou některé z nich opravdu velké, pak je raději nahrajte na náš
@@ -197,54 +238,56 @@ cestu a název souboru. Naše konference mají limit velikosti zprávy 80k, poku
 máte něco většího, musíte to zkomprimovat a nahrát na FTP.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_system">
 <title>Systémové informace</title>
+
 <para>
 <itemizedlist>
 <listitem><para>
-Vaše Linuxová distribuce nebo operační systém a jeho verze jako:
+  Vaše Linuxová distribuce nebo operační systém a jeho verze jako:
   <itemizedlist>
     <listitem><para>Red Hat 7.1</para></listitem>
     <listitem><para>Slackware 7.0 + devel packs from 7.1 ...</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-verze jádra:
-<screen>uname -a</screen>
+  verze jádra:
+  <screen>uname -a</screen>
 </para></listitem>
 <listitem><para>
-verze libc:
-<screen>ls -l /lib/libc[.-]*</screen>
+  verze libc:
+  <screen>ls -l /lib/libc[.-]*</screen>
 </para></listitem>
 <listitem><para>
-verze gcc a ld:
-<screen>
+  verze gcc a ld:
+  <screen>
 gcc -v
-ld -v
-</screen>
+ld -v<!--
+  --></screen>
 </para></listitem>
 <listitem><para>
-verze binutils:
-<screen>
-as --version
-</screen>
+  verze binutils:
+  <screen>as --version</screen>
 </para></listitem>
 <listitem><para>
-Pokud máte problémy s celoobrazovkovým režimem:
+  Pokud máte problémy s celoobrazovkovým režimem:
   <itemizedlist>
     <listitem><para>Druh Window manageru a jeho verze</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Pokud máte problémy s XVIDIX:
+  Pokud máte problémy s XVIDIX:
   <itemizedlist>
-    <listitem><para>Hloubka barev v X:
-<screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
-    </para></listitem>
+  <listitem><para>
+    Hloubka barev v X:
+    <screen>xdpyinfo | grep "depth of root"</screen>
+  </para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Pokud je chybné pouze GUI:
+  Pokud je chybné pouze GUI:
   <itemizedlist>
     <listitem><para>verze GTK</para></listitem>
     <listitem><para>verze GLIB</para></listitem>
@@ -256,48 +299,54 @@ Pokud je chybné pouze GUI:
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_hardware">
 <title>Hardware a rozhraní (ovladače)</title>
+
 <para>
 <itemizedlist>
 <listitem><para>
-CPU info (to funguje pouze v Linuxu):
-<screen>cat /proc/cpuinfo</screen>
+  CPU info (to funguje pouze v Linuxu):
+  <screen>cat /proc/cpuinfo</screen>
 </para></listitem>
 <listitem><para>
-Výrobce a model videokarty, např:
+  Výrobce a model videokarty, např:
   <itemizedlist>
     <listitem><para>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
     <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Video driver type &amp; version, e.g.:
+  Typ video ovladače a jeho verze, např.:
   <itemizedlist>
-    <listitem><para>X built-in driver</para></listitem>
+    <listitem><para>vestavěný ovladač z X</para></listitem>
     <listitem><para>nVidia 0.9.623</para></listitem>
     <listitem><para>Utah-GLX CVS 2001-02-17</para></listitem>
-    <listitem><para>DRI from X 4.0.3</para></listitem>
+    <listitem><para>DRI z X 4.0.3</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Sound card type &amp; driver, e.g.:
+  Typ zvukové karty a ovladač, např.:
   <itemizedlist>
-    <listitem><para>Creative SBLive! Gold with OSS driver from oss.creative.com</para></listitem>
-    <listitem><para>Creative SB16 with kernel OSS drivers</para></listitem>
-    <listitem><para>GUS PnP with ALSA OSS emulation</para></listitem>
+    <listitem><para>Creative SBLive! Gold s OSS ovladačem od oss.creative.com</para></listitem>
+    <listitem><para>Creative SB16 s OSS ovladači z jádra</para></listitem>
+    <listitem><para>GUS PnP s ALSA OSS emulací</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Pokud si nejste jisti, přidejte výstup z <command>lspci -vv</command>
-na systémech Linux.
+  Pokud si nejste jisti a používáte systém Linux, přidejte výstup
+  z <command>lspci -vv</command>.
 </para></listitem>
 </itemizedlist>
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_configure">
 <title>Problémy s konfigurací</title>
+
 <para>
 Pokud nastanou chyby během běhu <command>./configure</command>, nebo selže
 autodetekce něčeho, prostudujte <filename>configure.log</filename>. Možná
@@ -313,20 +362,26 @@ jste zapomněli nainstalovat vývojový (devel) balíček (to jsou ty s koncovko
 <para>
 Zahrňte prosím tyto soubory:
 <itemizedlist>
-<listitem><para>config.h</para></listitem>
-<listitem><para>config.mak</para></listitem>
+  <listitem><para>config.h</para></listitem>
+  <listitem><para>config.mak</para></listitem>
 </itemizedlist>
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_playback">
 <title>Problémy s přehráváním</title>
+
 <para>
-Zahrňte prosíme výstup <application>MPlayer</application>u v upovídaném režimu
-úrovně 1 ale dejte pozor, abyste jej <emphasis role="bold">nezkrátili</emphasis>
+Zahrňte prosíme výstup <application>MPlayer</application>u v upovídaném
+režimu úrovně 1 ale dejte pozor, abyste jej
+<emphasis role="bold">nezkrátili</emphasis>
 při kopírování do mailu. Vývojáři potřebují všechny zprávy pro dobrou diagnózu
 problému. Takto můžete přesměrovat výstup do souboru:
-<screen>mplayer -v <replaceable>volby</replaceable> <replaceable>film</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
+<screen>
+mplayer -v <replaceable>volby</replaceable> <replaceable>film</replaceable> &gt; mplayer.log 2&gt;&amp;1
+</screen>
 </para>
 
 <para>
@@ -341,7 +396,9 @@ Rovněž zde nahrajte malý textový soubor se stejným základním jménem a p�
 výstup <application>MPlayer</application>u v upovídaném režimu úrovně 1.
 Pro reprodukci problému stačí obvykle prvních 1-5 MB souboru, ale pro jistotu
 vás žádáme o:
-<screen>dd if=<replaceable>váš_soubor</replaceable> of=<replaceable>malý_soubor</replaceable> bs=1024k count=5</screen>
+<screen>
+dd if=<replaceable>váš_soubor</replaceable> of=<replaceable>malý_soubor</replaceable> bs=1024k count=5
+</screen>
 To vezme prvních pět megabajtů '<emphasis role="bold">vašeho_souboru</emphasis>'
 a zapíše je do '<emphasis role="bold">malého_souboru</emphasis>'. Pak znovu
 zkuste tento malý vzorek a pokud se na něm chyba projeví, pak je tento vzorek
@@ -353,8 +410,11 @@ serveru. Pokud je soubor přístupný na internetu, pak stačí poslat
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="bugreports_crash">
 <title>Pády</title>
+
 <para>
 Musíte spustit <application>MPlayer</application> z <command>gdb</command>
 a poslat nám úplný výstup nebo pokud máte <filename>core</filename> dump
@@ -362,8 +422,10 @@ z pádu, můžete nám vyextrahovat užitečné informace ze souboru Core.
 Jak to udělat:
 </para>
 
+
 <sect3 id="bugreports_debug">
 <title>Jak uchovat informace o zopakovatelném pádu</title>
+
 <para>
 Překompilujte <application>MPlayer</application> se zapnutým debugovacím kódem:
 <screen>
@@ -373,7 +435,9 @@ make
 a spusťte <application>MPlayer</application> z gdb pomocí:
 <screen>gdb ./mplayer</screen>
 Nyní jste v gdb. Zadejte:
-<screen>run -v <replaceable>volby-pro-mplayer</replaceable> <replaceable>soubor</replaceable></screen>
+<screen>
+run -v <replaceable>volby-pro-mplayer</replaceable> <replaceable>soubor</replaceable>
+</screen>
 a zopakujte pád. Jakmile to dokážete, vrátí se gdb do režimu příkazového řádku,
 kde musíte zadat
 <screen>
@@ -384,8 +448,10 @@ info all-registers
 </para>
 </sect3>
 
+
 <sect3 id="bugreports_core">
 <title>Jak získat smysluplné informace z core dump</title>
+
 <para>
 Vytvořte následující příkazový řádek:
 <screen>
@@ -394,32 +460,38 @@ disass $pc-32 $pc+32
 info all-registers
 </screen>
 Pak jednoduše spusťte tento příkaz:
-<screen>gdb mplayer --core=core -batch --command=<replaceable>příkazový_soubor</replaceable> &gt; mplayer.bug</screen>
+<screen>
+gdb mplayer --core=core -batch --command=příkazový_soubor &gt; mplayer.bug
+</screen>
 </para>
 </sect3>
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bugreports_advusers">
 <title>Vím co dělám...</title>
+
 <para>
-Pokud jste vytvořili příkladné hlášení chyby pomocí výšeuvedených kroků a jste
-si jisti, že chyba je v <application>MPlayer</application>u, nikoli chyba
-kompilátoru nebo poškozený soubor, již jste si přečetli dokumentaci ale nenalezli
-řešení, vaše ovladače zvuku jsou OK, pak byste se měli přihlásit do konference
-MPlayer-advusers a poslat hlášení chyb zde, abyste dostali lepší a rychlejší
-odpověď.
+Pokud jste vytvořili příkladné hlášení chyby pomocí výšeuvedených kroků a
+jste si jisti, že chyba je v <application>MPlayer</application>u, nikoli
+v kompilátoru nebo poškozený soubor, již jste si přečetli dokumentaci,
+ale nenalezli řešení, vaše ovladače zvuku jsou OK, pak byste se měli
+přihlásit do konference MPlayer-advusers a poslat hlášení chyb zde,
+abyste dostali lepší a rychlejší odpověď.
 </para>
 
 <para>
 Mějte na paměti, že pokud zde pošlete nováčkovské otázky nebo otázky zodpovězené
-v manuálu, budete ignorováni nebo vyhozeni, místo abyste dostali vhodnou odpověď.
+v manuálu, budete ignorováni nebo peskováni, místo abyste dostali vhodnou odpověď.
 Takže nám nenadávejte a přihlaste se do -advusers pouze pokud opravdu víte co
 děláte a cítíte se být pokročilým uživatelem <application>MPlayer</application>u,
 nebo vývojářem. Pokud splňujete tato kritéria, nebude pro vás těžké se
 přihlásit...
 </para>
-
 </sect1>
 
 </appendix>

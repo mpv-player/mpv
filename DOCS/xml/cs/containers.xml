@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21741 -->
 <chapter id="containers">
 <title>Nosné formáty (Containers)</title>
 
@@ -13,10 +13,10 @@ soubory <emphasis>mohou</emphasis> obsahovat MPEG-1 video.
 <para>
 Jak vidíte, <emphasis role="bold">kodek</emphasis> není to samé jako
 <emphasis role="bold">nosný formát</emphasis>.
-Příklady video <emphasis role="bold">kodeků</emphasis> jsou: MPEG-1, MPEG-2,
-MPEG-4 (DivX), Indeo5, 3ivx.
-Příklady nosných <emphasis role="bold">formátů</emphasis> jsou: MPG, AVI,
-ASF.
+Příklady video <emphasis role="bold">kodeků</emphasis> jsou:
+MPEG-1, MPEG-2, MPEG-4 (DivX), Indeo5, 3ivx.
+Příklady nosných <emphasis role="bold">formátů</emphasis> jsou:
+MPG, AVI, ASF.
 </para>
 
 <para>
@@ -27,9 +27,12 @@ však nepřehraje, jelikož zde očekávají MPEG-1 video a MP2 audio (narozdíl
 nemá potřebná pole k popisu svých video a audio datových proudů).
 Nebo můžete vložit MPEG-1 video do AVI souboru.
 <ulink url="http://ffmpeg.org/">FFmpeg</ulink> a
-<link linkend="mencoder"><application>MEncoder</application></link> mohou tyto
-soubory vytvořit.
+<link linkend="mencoder"><application>MEncoder</application></link>
+mohou tyto soubory vytvořit.
 </para>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="video-formats">
@@ -47,29 +50,29 @@ MPEG soubory se vyskytují v různých obálkách:
   MPG: Toto je <emphasis role="bold">nejjednodušší</emphasis> forma souborových
   formátů MPEG. Obsahuje MPEG-1 video a MP2 (MPEG-1 layer 2) nebo méně často
   MP1 audio.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   DAT: Toto je naprosto stejný formát jako MPG, jen s jinou příponou. Používá se
   na <emphasis role="bold">Video CD</emphasis>. Díky způsobu, jak jsou VCD
-	vytvářeny a Linux navržen, nemohou být DAT soubory přehrávány nebo kopírovány
-	z VCD jako běžné soubory. Musíte použít <option>vcd://</option>
+  vytvářeny a Linux navržen, nemohou být DAT soubory přehrávány nebo kopírovány
+  z VCD jako běžné soubory. Musíte použít <option>vcd://</option>
   pro přehrávání Video CD.
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   VOB: Toto je souborový formát MPEG na <emphasis role="bold">DVD</emphasis>.
   Je stejný jako MPG, plus schopnost obsahovat titulky nebo ne-MPEG
   (AC3) audio. Obsahuje video enkódované do MPEG-2 a obvykle AC3 audio, ale DTS,
   MP2 a nekomprimovaný LPCM jsou rovněž povoleny. <emphasis role="bold">Přečtěte
-	si <link linkend="dvd">DVD</link> sekci</emphasis>!
-  </para></listitem>
+  si <link linkend="dvd">DVD</link> sekci</emphasis>!
+</para></listitem>
 <listitem><para>
   TY: Toto je TiVo MPEG datový proud. Obsahuje MPEG PES data pro audio a
   video datové proudy, spolu s dodatečnými informacemi jako closed captions.
-	Kontejner není produktem MPEG programu, ale je to uzavřený formát vytvořený
-	firmou TiVo. Více informací o TiVo proudovém formátu naleznete na
+  Kontejner není produktem MPEG programu, ale je to uzavřený formát vytvořený
+  firmou TiVo. Více informací o TiVo proudovém formátu naleznete na
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   stránkách TyStudia</ulink>.
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <para>
@@ -88,14 +91,16 @@ nebo přehrávány s volbou <option>-aspect</option>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="avi">
 <title>AVI soubory</title>
 
 <para>
-Navrženy Microsoftem, <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
+Navrženy Microsoftem, 
+<emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
 je rozšířený víceúčelový formát. V současnosti je většinou používaný pro MPEG-4
-(DivX, XviD, DivX4, a další) video.
+(DivX a DivX4) video.
 Má mnoho známých nedostatků a nedokonalostí (například ve streamování).
 Podporuje jeden video datový proud a 0 až 99 audio proudů a může být veliký až
 2GB, avšak existuje rozšíření umožňující větší soubory nazývané
@@ -112,31 +117,30 @@ soubory se zmatenými hlavičkami. Naneštěstí jediný enkodér schopný vytvo
 soubory, <application>NanDub</application>, má tento problém.
 </para>
 
-<note>
-<para>
+<note><para>
 DV kamery vytváří surové DV datové proudy, které jsou konvertovány DV
 grabovacími utilitami do dvou odlišných AVI souborů. AVI pak obsahuje buď
 oddělené video a audio proudy které <application>MPlayer</application> umí
 přehrávat, nebo surový DV proud, jehož podpora je ve vývoji.
-</para>
-</note>
+</para></note>
 
 <para>
 Známe dva druhy AVI souborů:
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Prokládaný:</emphasis> Audio a video obsah je proložený.
-	Toto je obvyklé použití. Doporučené a většinou používané. Některé nástroje
-	vytvářejí AVI se špatnou synchronizací. <application>MPlayer</application>
-	detekuje tyto soubory jako prokládané a to vyvrcholí ztrátou
-	A/V synchronizace, pravděpodobně při přetáčení. Tyto soubory by měly být
-	přehrávány jako neprokládané (s volbou <option>-ni</option>).
-  </para></listitem>
+  <emphasis role="bold">Prokládaný:</emphasis> Audio a video obsah je
+  proložený. Toto je obvyklé použití. Doporučené a většinou používané. Některé
+  nástroje vytvářejí AVI se špatnou synchronizací.
+  <application>MPlayer</application> detekuje tyto soubory jako prokládané a to
+  vyvrcholí ztrátou A/V synchronizace, pravděpodobně při přetáčení.
+  Tyto soubory by měly být přehrávány jako neprokládané
+  (s volbou <option>-ni</option>).
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">Neprokládané:</emphasis> Nejprve jde celý video proud,
-	pak celý audio proud. To vyžaduje mnoho hledání, což činí přehrávání ze sítě
-	nebo CD-ROM obtížným.
-  </para></listitem>
+  pak celý audio proud. To vyžaduje mnoho hledání, což činí přehrávání ze sítě
+  nebo CD-ROM obtížným.
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -145,19 +149,19 @@ Známe dva druhy AVI souborů:
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">založený na bps:</emphasis> Vychází z bitové/vzorkové
-	rychlosti video/audio proudu. Tuto metodu používá většina přehrávačů,
-	včetně <ulink url="http://avifile.sf.net">avifile</ulink>
+  rychlosti video/audio proudu. Tuto metodu používá většina přehrávačů,
+  včetně <ulink url="http://avifile.sf.net">avifile</ulink>
   a <application>Windows Media Player</application>u. Soubory s poškozenými
-	hlavičkami a soubory obsahující VBR audio nevytvořené VBR slučitelným
-	enkodérem vyústí v rozejití zvuku a videa při použití této metody
-	(zpravidla při převíjení).
-  </para></listitem>
+  hlavičkami a soubory obsahující VBR audio nevytvořené VBR slučitelným
+  enkodérem vyústí v rozejití zvuku a videa při použití této metody
+  (zpravidla při převíjení).
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">založený na prokládání:</emphasis> Nepoužívá hodnotu
-	bitové rychlosti z hlavičky, místo toho využívá relativní pozici prokládaných
-	audio a video chunků, což umožňuje přehrávat špatně enkódované soubory s VBR
-	zvukem.
-  </para></listitem>
+  bitové rychlosti z hlavičky, místo toho využívá relativní pozici prokládaných
+  audio a video chunků, což umožňuje přehrávat špatně enkódované soubory s VBR
+  zvukem.
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -172,14 +176,16 @@ audio. Existují pouze dvě známé výjimky: <application>NanDub</application> 
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="asf-wmv">
 <title>ASF/WMV soubory</title>
+
 <para>
 ASF (Active Streaming Format) pochází z dílny Microsoftu. Tam vytvořili dvě
 varianty ASF, v1.0 a v2.0. v1.0 je používána jejich mediálními nástroji
-(<application>Windows Media Player</application> a
-<application>Windows Media Encoder</application>)
+(<application>Windows Media Player</application>em a
+<application>Windows Media Encoder</application>em)
 a je přísně tajný. v2.0 je publikován a patentován :). Samozřejmě se od sebe
 liší a nejsou vůbec kompatibilní (je to jen další právnická hra).
 <application>MPlayer</application> podporuje pouze v1.0, protože nikdo nikdy
@@ -188,6 +194,7 @@ s příponou <filename>.WMA</filename> nebo <filename>.WMV</filename>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="mov">
 <title>QuickTime/MOV soubory</title>
@@ -202,9 +209,9 @@ jejich MOV soubory mají příponu <filename>.MPG</filename> nebo
 souborech jsou skutečné MPG a AAC soubory. Dokonce je můžete extrahovat pomocí
 voleb <option>-dumpvideo</option> a <option>-dumpaudio</option>.).
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="vivo">
 <title>VIVO soubory</title>
@@ -224,12 +231,13 @@ Video kodekem VIVO/2.0 souborů je upravený, nestandardní
 <emphasis role="bold">g.723 (standard)</emphasis> nebo
 <emphasis role="bold">Vivo Siren</emphasis>.
 </para>
-
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="fli">
 <title>FLI soubory</title>
+
 <para>
 <emphasis role="bold">FLI</emphasis> je velmi starý souborový formát používaný
 Autodesk Animatorem, ale je běžným formátem pro krátké animace na netu.
@@ -240,6 +248,7 @@ ještě chvíli po převíjení roztříštěný.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="realmedia">
 <title>RealMedia (RM) soubory</title>
@@ -250,25 +259,29 @@ Ano, <application>MPlayer</application> umí číst (demux) RealMedia
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nuppelvideo">
 <title>NuppelVideo soubory</title>
+
 <para>
 NuppelVideo
 je nástroj pro zachytávání TV (AFAIK:). <application>MPlayer</application> umí
 číst tyto <filename>.NUV</filename> soubory (pouze NuppelVideo 5.0). Tyto
 soubory mohou obsahovat nekomprimované YV12, YV12+RTJpeg komprimované,
 YV12 RTJpeg+lzo komprimované a YV12+lzo komprimované snímky.
-<application>MPlayer</application> je dekóduje (a také je
-<emphasis role="bold">enkóduje</emphasis> <application>MEncoder</application>em
-do MPEG-4 (DivX)/atd.!) všechny.
-Seeking works.
+<application>MPlayer</application> je dekóduje (a také je všechny
+<emphasis role="bold">enkóduje</emphasis>
+<application>MEncoder</application>em do MPEG-4 (DivX)/atd.!).
+Převíjení funguje.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="yuv4mpeg">
 <title>yuv4mpeg soubory</title>
+
 <para>
 <ulink url="http://mjpeg.sf.net">yuv4mpeg / yuv4mpeg2</ulink>
 je souborový formát používaný
@@ -279,26 +292,32 @@ nekomprimovaných YUV 4:2:0 obrázků.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="film">
 <title>FILM soubory</title>
+
 <para>
 Tento formát používaly staré CD-ROM hry pro Sega Saturn.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="roq">
 <title>RoQ soubory</title>
+
 <para>
 RoQ soubory jsou multimediální soubory používané v některých hrách od ID, jako
 Quake III a Return to Castle Wolfenstein.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="ogg">
 <title>OGG/OGM soubory</title>
+
 <para>
 Toto je nový souborový formát od
 <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
@@ -309,30 +328,36 @@ Může obsahovat jakýkoli video nebo audio kodek, CBR nebo VBR. Budete potřebo
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="sdp">
 <title>SDP soubory</title>
+
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> je
 IETF standardní formát pro popis video a/nebo audio RTP datových proudů.
 (Vyžaduje
-&quot;<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>&quot;.)
+"<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>".)
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="pva">
 <title>PVA soubory</title>
+
 <para>
 PVA je formát podobný MPEG, používaný softwarem pro DVB TV desky (např.:
-<application>MultiDec</application>, <application>WinTV</application>
-pod Windows).
+<application>MultiDec</application>,
+<application>WinTV</application> pod Windows).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nsv">
 <title>NSV soubory</title>
+
 <para>
 NSV (NullSoft Video) je souborový formát používaný přehrávačem
 <application>Winamp</application> pro streamování audia a videa.
@@ -347,18 +372,22 @@ nepřehratelné, protože mají VLB audio).
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="matroska">
 <title>Soubory Matroska</title>
+
 <para>
 Matroska je otevřený nosný (container) formát.
 Více se dozvíte na <ulink url="http://www.matroska.org/">oficiálním serveru</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="nut">
 <title>Soubory NUT</title>
+
 <para>
 NUT je nosný formát vyvíjený týmy <application>MPlayer</application> a
 <application>FFmpeg</application>. Oba projekty jej podporují.
@@ -366,9 +395,11 @@ Více se dozvíte na <ulink url="http://www.nut.hu/">oficiálním serveru</ulink
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="gif">
 <title>GIF soubory</title>
+
 <para>
 Formát <emphasis role="bold">GIF</emphasis> je obecný formát pro webovou
 grafiku. Existují dvě verze GIF specifikace, GIF87a a GIF89a. Hlavní rozdíl
@@ -405,7 +436,9 @@ stáhněte si ji z
 </sect2>
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="audio-formats">
 <title>Audio formáty</title>
@@ -418,8 +451,11 @@ Toto není doporučené použití <application>MPlayer</application>u, raději
 použijte <ulink url="http://www.xmms.org">XMMS</ulink>.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="mp3">
 <title>MP3 soubory</title>
+
 <para>
 Můžete mít problémy s přehráním určitých MP3 souborů, které
 <application>MPlayer</application> nesprávně detekuje jako MPEGy a přehrává je
@@ -429,8 +465,11 @@ poškozené MPEG soubory, proto to tak v dohledné době zůstane. Příznak
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="ogg-vorbis">
 <title>OGG/OGM soubory (Vorbis)</title>
+
 <para>
 Vyžaduje správně nainstalované
 <systemitem class="library">libogg</systemitem> a
@@ -438,8 +477,11 @@ Vyžaduje správně nainstalované
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="cdda">
 <title>CD audio</title>
+
 <para>
 <application>MPlayer</application> umí použít <application>cdparanoia</application>
 pro přehrávání CDDA (Audio CD). Zaměření této části nezahrnuje výčet vlastností
@@ -452,8 +494,11 @@ propašování voleb do <application>cdparanoia</application>.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="xmms">
 <title>XMMS</title>
+
 <para>
 <application>MPlayer</application> může použít vstupní pluginy pro
 <application>XMMS</application> pro přehrávání mnoha souborových formátů.
@@ -465,7 +510,8 @@ Můžete je najít na
 
 <para>
 Pro tuto vlastnost musíte mít <application>XMMS</application> a zkompilovat
-<application>MPlayer</application> s <filename>./configure --enable-xmms</filename>.
+<application>MPlayer</application> s
+<filename>./configure --enable-xmms</filename>.
 Pokud to nebude fungovat, budete muset nastavit cestu k
 <application>XMMS</application> pluginu a knihovně explicitně konfiguračními
 volbami <option>--with-xmmsplugindir</option> a

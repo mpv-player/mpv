@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r20614  -->
+<!-- Synced with r21930  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -68,15 +68,19 @@ nástroje, stejně jako
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
+
 <qandadiv id="faq-compilation-installation">
 <title>Kompilace a instalace</title>
+
 <qandaentry>
 <question><para>
 Kompilace skončí s chybou a <application>gcc</application> vypíše nějakou
 záhadnou zprávu obsahující frázi
 <systemitem>internal compiler error</systemitem> nebo
-<systemitem>unable to find a register to spill</systemitem>.
-</para></question>
+<systemitem>unable to find a register to spill</systemitem> nebo
+<systemitem>can't find a register in class `GENERAL_REGS'
+while reloading `asm'</systemitem>.</para></question>
 <answer><para>
 Právě jste narazili na chybu v <application>gcc</application>.
 <ulink url="http://gcc.gnu.org/bugs.html">Nahlaste ji prosím týmu gcc</ulink>,
@@ -138,7 +142,7 @@ X11 knihovny. Tomu nerozumím, vždyť <emphasis>mám</emphasis> nainstalovány 
 </para></question>
 <answer><para>
 ... ale nemáte nainstalován vývojářský (dev/devel) balíček pro X11.
-Nebo ne správně.
+Nebo ne zprávně.
 V Red Hatu se nazývá <filename>XFree86-devel*</filename>,
 v Debianu Woody je to <filename>xlibs-dev</filename>,
 v Debianu Sarge je to <filename>libx11-dev</filename>. Také se přesvědčte,
@@ -148,11 +152,11 @@ problém v systémech Mandrake).
 </para></answer>
 </qandaentry>
 
-
 <qandaentry>
 <question><para>
 Kompilace na Mac OS 10.3 vede k několika linkovacím chybám</para></question>
-<answer><para>
+<answer>
+<para>
 Chyba linkování, kterou zakoušíte vypadá nejspíš takto:
 <screen>
 ld: Undefined symbols:
@@ -166,32 +170,36 @@ Nedefinované symboly jsou přítomny v Mac OS 10.4,
 ale nikoli 10.3.
 Jedním z řešení může být downgrade na QuickTime 7.0.1.
 Následující řešení je však lepší.
-</para><para>
-Stáhněte si <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">starší verzi framevorků</ulink>.
+</para>
+<para>
+Získejte
+<ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">starší verzi frameworků</ulink>.
 Získáte zde komprimovaný soubor obsahující QuickTime
 7.0.1 Framework a 10.3.9 QuartzCore Framework.
-</para><para>
+</para>
+<para>
 Rozbalte soubory někde mimo adresář System.
 (čili neinstalujte tyto frameworky do svého
 <filename class="directory">/System/Library/Frameworks</filename>!
 Použití těchto starších verzí slouží jen k obejití linkovacích chyb!)
-<screen>
-gunzip &lt; CompatFrameworks.tgz | tar xvf -
-</screen>
+<screen>gunzip &lt; CompatFrameworks.tgz | tar xvf -</screen>
 V config.mak byste měli přidat
 <systemitem>-F/cesta/kam/jste/to/rozbalili</systemitem>
 do proměnné <systemitem>OPTFLAGS</systemitem>.
 Pokud používáte <application>X-Code</application>, můžete prostě zvolit tyto
 frameworky místo systémových.
-</para><para>
+</para>
+<para>
 Výsledná binárka <application>MPlayer</application>u bude využívat
 framework nainstalovaný na vašem systému přes dynamické linkování
 prováděné za běhu.
 (Můžete si to ověřit pomocí <systemitem>otool -l</systemitem>).
-</para></answer>
+</para>
+</answer>
 </qandaentry>
-
 </qandadiv>
+
+<!-- ********** -->
 
 <qandadiv id="faq-general">
 <title>Obecné dotazy</title>
@@ -210,11 +218,10 @@ naší domácí stránky.
 <qandaentry>
 <question><para>
 Našel/našla jsem odpornou chybu když jsem chtěl(a) přehrát svůj oblíbený film!
-Jak mám dát zprávu?
+Komu to mám oznámit?
 </para></question>
 <answer><para>
-Přečtěte si prosím
-<link linkend="bugreports">postupy hlášení chyb</link>
+Přečtěte si prosím <link linkend="bugreports">postupy hlášení chyb</link>
 a následujte instrukce.
 </para></answer>
 </qandaentry>
@@ -227,9 +234,8 @@ Mám potíže s přehráváním souborů s ... kodekem. Mohu je používat?
 Prověřte
 <ulink url="../../codecs-status.html">stav kodeku</ulink>,
 pokud neobsahuje váš kodek, přečtěte si
-<link linkend="codecs">kodekovou dokumentaci</link>,
-zvláště <link linkend="codec-importing">codec importing HOWTO</link>
-a kontaktujte nás.
+<link linkend="codecs">kodekovou dokumentaci</link>, zvláště
+<link linkend="codec-importing">codec importing HOWTO</link> a kontaktujte nás.
 </para></answer>
 </qandaentry>
 
@@ -268,46 +274,61 @@ Co znamenají čísla na stavovém řádku?
 </para></question>
 <answer><para>
 Příklad:
-<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
+<screen>
+A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>A: 2.1</systemitem></term>
-<listitem><para>pozice zvukové stopy v sekundách</para></listitem>
+<varlistentry>
+  <term><systemitem>A: 2.1</systemitem></term>
+  <listitem><para>pozice zvukové stopy v sekundách</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>V: 2.2</systemitem></term>
-<listitem><para>pozice videa v sekundách</para></listitem>
+<varlistentry>
+  <term><systemitem>V: 2.2</systemitem></term>
+  <listitem><para>pozice videa v sekundách</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
-<listitem><para>odchylka audio-video v sekundách (zpoždění (delay))</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V: -0.167</systemitem></term>
+  <listitem><para>odchylka audio-video v sekundách (zpoždění (delay))</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>ct: 0.042</systemitem></term>
-<listitem><para>celková provedená korekce A-V synchronizace</para></listitem>
+<varlistentry>
+  <term><systemitem>ct: 0.042</systemitem></term>
+  <listitem><para>celková provedená korekce A-V synchronizace</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>57/57</systemitem></term>
-<listitem><para>snímků přehráno/dekódováno (počítáno od posledního převíjení)</para></listitem>
+<varlistentry>
+  <term><systemitem>57/57</systemitem></term>
+  <listitem><para>snímků přehráno/dekódováno (počítáno od posledního převíjení)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>41%</systemitem></term>
-<listitem><para>zatížení CPU video kodekem v procentech
-  (při slice renderování a direct renderování zahrnuje i
-  video_out)</para></listitem>
+<varlistentry>
+  <term><systemitem>41%</systemitem></term>
+  <listitem><para>
+  zatížení CPU video kodekem v procentech
+  (při slice renderování a direct renderování zahrnuje i video_out)
+  </para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0%</systemitem></term>
-<listitem><para>video_out zatížení CPU</para></listitem>
+<varlistentry>
+  <term><systemitem>0%</systemitem></term>
+  <listitem><para>video_out zatížení CPU</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2.6%</systemitem></term>
-<listitem><para>procentuální zatížení CPU audio kodekem</para></listitem>
+<varlistentry>
+  <term><systemitem>2.6%</systemitem></term>
+  <listitem><para>procentuální zatížení CPU audio kodekem</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0</systemitem></term>
-<listitem><para>počet zahozených snímků pro zachování A-V synchronizace</para></listitem>
+<varlistentry>
+  <term><systemitem>0</systemitem></term>
+  <listitem><para>počet zahozených snímků pro zachování A-V synchronizace</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>4</systemitem></term>
-<listitem><para>aktuální úroveň postprocesingu obrazu (při použití
+<varlistentry>
+  <term><systemitem>4</systemitem></term>
+  <listitem><para>aktuální úroveň postprocesingu obrazu (při použití
 <option>-autoq</option>)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>49%</systemitem></term>
-<listitem><para>aktuální naplnění vyrovnávací paměti (běžně okolo 50%)</para></listitem>
+<varlistentry>
+  <term><systemitem>49%</systemitem></term>
+  <listitem><para>aktuální naplnění vyrovnávací paměti (běžně okolo 50%)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>1.00x</systemitem></term>
-<listitem><para>rychlost přehrávání v násobcích původní rychlosti</para></listitem>
+<varlistentry>
+  <term><systemitem>1.00x</systemitem></term>
+  <listitem><para>rychlost přehrávání v násobcích původní rychlosti</para></listitem>
 </varlistentry>
 </variablelist>
 Většina z nich je určena pro ladění chyb. Použijte volbu <option>-quiet</option>,
@@ -321,7 +342,8 @@ do <option>-vo null</option> a do obvyklého video výstupního zařízení.
 
 <qandaentry>
 <question><para>
-Objevuje se chybová zpráva o chybějícím souboru <filename>/usr/local/lib/codecs/</filename> ...
+Objevuje se chybová zpráva o chybějícím souboru
+<filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
 Stáhněte si a nainstalujte binární kodeky z naší
@@ -347,8 +369,9 @@ Titulky jsou hezké, nejkrásnější jaké jsem viděl, ale zpomalují přehrá
 Vím že je to nepravděpodobné ...
 </para></question>
 <answer><para>
-Poté co provedete <filename>./configure</filename>, vyeditujte <filename>config.h</filename>
-a nahraďte <systemitem>#undef FAST_OSD</systemitem> za
+Poté co provedete <filename>./configure</filename>,
+vyeditujte <filename>config.h</filename> a nahraďte
+<systemitem>#undef FAST_OSD</systemitem> za
 <systemitem>#define FAST_OSD</systemitem>. Pak rekompilujte.
 </para></answer>
 </qandaentry>
@@ -361,9 +384,15 @@ k žádné z položek!
 <answer><para>
 Používáte FVWM? Zkuste následující:
 <orderedlist>
-<listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
-<listitem><para>Set <systemitem>Use Applications position hints</systemitem>
-to <systemitem>Yes</systemitem></para></listitem>
+<listitem><para>
+  <menuchoice><guimenu>Start</guimenu><guisubmenu>Settings</guisubmenu>
+    <guisubmenu>Configuration</guisubmenu>
+    <guimenuitem>Base Configuration</guimenuitem></menuchoice>
+</para></listitem>
+<listitem><para>
+  Set <systemitem>Use Applications position hints</systemitem>
+  to <systemitem>Yes</systemitem>
+</para></listitem>
 </orderedlist>
 </para></answer>
 </qandaentry>
@@ -373,11 +402,15 @@ to <systemitem>Yes</systemitem></para></listitem>
 Jak mohu spustit <application>MPlayer</application> na pozadí?
 </para></question>
 <answer><para>
-Use:
-<screen>mplayer <replaceable>volby</replaceable> <replaceable>soubor</replaceable> &lt; /dev/null &amp;</screen>
+Použijte:
+<screen>
+mplayer <replaceable>volby</replaceable> <replaceable>soubor</replaceable> &lt; /dev/null &amp;
+</screen>
 </para></answer>
 </qandaentry>
 </qandadiv>
+
+<!-- ********** -->
 
 <qandadiv id="faq-playback">
 <title>Potíže s přehráváním</title>
@@ -409,11 +442,10 @@ Jak dostanu titulky do černých okrajů kolem filmu?
 Použijte video filtr <systemitem>expand</systemitem> pro rozšíření vertikálního
 rozměru oblasti do které je film renderován a umístěte film do její horní části,
 například:
-<screen>
-mplayer -vf expand=0:-100:0:0 -slang de dvd://1
-</screen>
+<screen>mplayer -vf expand=0:-100:0:0 -slang de dvd://1</screen>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Jak mohu vybrat audio/titulkové stopy z DVD, OGM, Matroska nebo NUT souboru?
@@ -493,36 +525,31 @@ Windows Media 9 souborů.)
 <para>
 Pokud narazíte na tento problém, máte dvě možnosti:
 <itemizedlist>
-<listitem><para>Počkat dva týdny. Možná to bude opět fungovat.</para></listitem>
-<listitem><para>Přelinkovat všechny knihovny systému s odlišnými prelink
-volbami.
-Zde jsou instrukce krok za krokem:</para>
-<para>
-<orderedlist>
-<listitem><para>Vyeditujte <filename>/etc/syconfig/prelink</filename> a změňte</para>
-<para>
-<programlisting>
-PRELINK_OPTS=-mR
-</programlisting>
-</para>
-<para>
-na
-<programlisting>
-PRELINK_OPTS="-mR --no-exec-shield"
-</programlisting>
-</para>
-</listitem>
-<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
-<listitem><para><command>/etc/cron.daily/prelink</command>
-(To přelinkuje všechny aplikace a bude to trvat opravdu dlouho.)
+<listitem><para>
+  Počkat dva týdny. Možná to bude opět fungovat.
 </para></listitem>
-<listitem>
-<para><command>execstack -s <replaceable>/cesta/k/</replaceable>mplayer</command>
-(Tohle vypne exec-shield pro binárku <application>MPlayer</application>u.)
-</para>
-</listitem>
-</orderedlist>
-</para>
+<listitem><para>
+  Přelinkovat všechny knihovny systému s odlišnými prelink
+  volbami. Zde jsou instrukce krok za krokem:
+  </para>
+  <procedure>
+  <step><para>
+    Vyeditujte <filename>/etc/syconfig/prelink</filename> a změňte
+    <programlisting>PRELINK_OPTS=-mR</programlisting> na
+    <programlisting>PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
+  </para></step>
+  <step><para>
+    <command>touch /var/lib/misc/prelink.force</command>
+  </para></step>
+  <step><para>
+    <command>/etc/cron.daily/prelink</command>
+    (To přelinkuje všechny aplikace a bude to trvat opravdu dlouho.)
+  </para></step>
+  <step><para>
+    <command>execstack -s <replaceable>/cesta/k/</replaceable>mplayer</command>
+    (Tohle vypne exec-shield pro binárku <application>MPlayer</application>u.)
+  </para></step>
+  </procedure>
 </listitem>
 </itemizedlist>
 </para></answer>
@@ -556,7 +583,8 @@ YV12 (viz sekci <link linkend="tv-input">TV</link>).
 
 <qandaentry>
 <question><para>
-Dostávám podivné procentní hodnoty (příliš velké) při přehrávání na notebooku.
+Dostávám podivné procentní hodnoty (příliš velké)
+při přehrávání na notebooku.
 </para></question>
 <answer><para>
 To je práce power managementu / systému šetřícímu energií vašeho notebooku
@@ -571,8 +599,9 @@ zkusit zda vám pomůže
 <qandaentry>
 <question><para>
 Synchronizace zvuku a videa se úplně rozpadne když spustím
-<application>MPlayer</application> jako root na notebooku.
-Když jej spustí jako uživatel, pracuje normálně.
+<application>MPlayer</application> jako
+<systemitem class="username">root</systemitem> na notebooku.
+Když jej spustím jako uživatel, pracuje normálně.
 </para></question>
 <answer><para>
 Toto je opět práce power managementu (viz výš). Zapněte externí napájení
@@ -595,6 +624,8 @@ Zkuste <option>-nocache</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
+
+<!-- ********** -->
 
 <qandadiv id="faq-driver">
 <title>Potíže video/audio ovaldače (vo/ao)</title>
@@ -620,9 +651,7 @@ explicitně zapne softwarové škálování.
 <question><para>
 Právě jsem nainstaloval <application>MPlayer</application>. Když chci však
 otevřít video soubor, nastane fatální chyba:
-<screen>
-Error opening/initializing the selected video_out (-vo) device.
-</screen>
+<screen>Error opening/initializing the selected video_out (-vo) device.</screen>
 nebo
 <screen>
 Selhalo otevření/inicializace vybraného video_out (-vo) rozhraní.
@@ -632,13 +661,11 @@ Jak mohu vyřašit své problémy?
 <answer><para>
 Změňte své video výstupní zařízení. Spusťte následující příkaz, abyste
 dostali seznam dostupných video rozhraní:
-<screen>
-mplayer -vo help
-</screen>
+<screen>mplayer -vo help</screen>
 Jakmile jste si vybrali správné video výstupní rozhraní, přidejte jej
 do svého konfiguračního souboru. Přidejte
 <programlisting>
- vo = <replaceable>vybraný_vo</replaceable>
+vo = <replaceable>vybraný_vo</replaceable>
 </programlisting>
 do <filename>~/.mplayer/config</filename> a/nebo
 <programlisting>
@@ -675,8 +702,8 @@ a nahrejte soubor na FTP.
 <qandaentry>
 <question><para>
 Můj počítač přehrává MS DivX AVI s rozlišeními ~ 640x300 a stereo MP3 zvukem
-příliš pomalu. Když použiji volbu <option>-nosound</option>, vše je v pořádku
-(jen bez zvuku).
+příliš pomalu.
+Když použiji volbu <option>-nosound</option>, vše je v pořádku (jen bez zvuku).
 </para></question>
 <answer><para>
 Váš počítač je příliš pomalý, nebo máte vadný ovladač zvukové karty. Prostudujte
@@ -700,11 +727,11 @@ musíte použít <option>-ao alsa:device=dmix</option>.
 <question><para>
 Nemám zvuk při přehrávání videa a dostanu chybovou zprávu podobnou této:
 <screen>
-    AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
-    audio_setup: Nelze otevřít audio zařízení /dev/dsp: Zařízení nebo rozhraní je již používáno
-    nelze otevřít/inicializovat audio zařízení -> BEZ ZVUKU
-    Audio: bez zvuku!!!
-    Začínám přehrávat...
+AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+audio_setup: Nelze otevřít audio zařízení /dev/dsp: Zařízení nebo rozhraní je již používáno
+nelze otevřít/inicializovat audio zařízení -> BEZ ZVUKU
+Audio: bez zvuku!!!
+Začínám přehrávat...
 </screen>
 </para></question>
 <answer><para>
@@ -735,8 +762,8 @@ zvukem. Další možností je spustit <application>MPlayer</application> s artsd
 
 <qandaentry>
 <question><para>
-Mám problémy s A/V synchronizací. Některé mé AVI hrají dobře, ale některé
-s dvojnásobnou rychlostí!
+Mám problémy s A/V synchronizací.
+Některé mé AVI hrají dobře, ale některé s dvojnásobnou rychlostí!
 </para></question>
 <answer><para>
 Máte vadnou zvukovou kartu nebo její ovladač. Nejspíš je pevně nastavena na
@@ -749,9 +776,13 @@ Máte vadnou zvukovou kartu nebo její ovladač. Nejspíš je pevně nastavena n
 <question><para>
 Když přehrávám tento soubor, rozjede se mi zvuk s obrazem a/nebo
 <application>MPlayer</application> havaruje s hláškou:
-<screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
+<screen>
+DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!
+</screen>
 nebo
-<screen>DEMUXER: Příliš mnoho (945 v 8390980 bytech) video paketů ve vyrovnávací paměti!</screen>
+<screen>
+DEMUXER: Příliš mnoho (945 v 8390980 bytech) video paketů ve vyrovnávací paměti!
+</screen>
 </para></question>
 <answer><para>
 To může mít několik příčin.
@@ -768,7 +799,8 @@ Nebo může mít špatnou hlavičku, v tom případě může pomoci
 <option>-nobps</option> a/nebo <option>-mc 0</option>.
 </para></listitem>
 <listitem><para>
-Ovladač vaší zvukové karty je vadný. Viz <link linkend="audio">sekce audio</link>.
+Ovladač vaší zvukové karty je vadný.
+Viz <link linkend="audio">sekce audio</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -776,7 +808,8 @@ Ovladač vaší zvukové karty je vadný. Viz <link linkend="audio">sekce audio<
 
 <qandaentry>
 <question><para>
-Jak se zbavím A/V desynchronizace při převíjení v RealMedia proudech?
+Jak se zbavím A/V desynchronizace
+při převíjení v RealMedia proudech?
 </para></question>
 <answer><para>
 <option>-mc 0.1</option> může pomoci.
@@ -784,8 +817,11 @@ Jak se zbavím A/V desynchronizace při převíjení v RealMedia proudech?
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
+
 <qandadiv id="faq-dvd">
 <title>Přehrávání DVD</title>
+
 <qandaentry>
 <question><para>
 Což takhle DVD navigace/nabídky?
@@ -830,7 +866,8 @@ Ano. Viz <link linkend="dvd">kapitola DVD</link>.
 Jak nastavím kód regionu na mé DVD mechanice? Nemám Windows!
 </para></question>
 <answer><para>
-Použijte nástroj <ulink url="http://linvdr.org/projects/regionset/">regionset</ulink>.
+Použijte nástroj
+<ulink url="http://linvdr.org/projects/regionset/">regionset</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -889,8 +926,10 @@ mplayer dvd://1 -dvd-device <replaceable>/cesta/do/adresáře</replaceable>
 </qandaentry>
 </qandadiv>
 
+
 <qandadiv id="faq-features">
 <title>Požadavky na vlastnosti</title>
+
 <qandaentry>
 <question><para>
 Pokud je <application>MPlayer</application> v pauze a já se pokusím převíjet,
@@ -915,8 +954,11 @@ Krokování zpět pravděpodobně nebude v dohledné době implementováno.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
+
 <qandadiv id="faq-encoding">
 <title>Enkódování</title>
+
 <qandaentry>
 <question><para>
 Jak mohu enkódovat?
@@ -949,8 +991,9 @@ Jak vytvořím (S)VCD automaticky?
 </para></question>
 <answer><para>
 Zkuste skript <filename>mencvcd</filename> z podadresáře
-<filename class="directory">TOOLS</filename>. Pomocí něj můžete enkódovat DVD
-nebo jiné filmy do VCD nebo SVCD formátu a dokonce je vypálit přímo na CD.
+<filename class="directory">TOOLS</filename>.
+Pomocí něj můžete enkódovat DVD nebo jiné filmy do VCD
+nebo SVCD formátu a dokonce je vypálit přímo na CD.
 </para></answer>
 </qandaentry>
 
@@ -1057,7 +1100,8 @@ Musíte správně nastavit volbu <option>-sid</option>.
 Jak mohu enkódovat pouze některé kapitoly z DVD?
 </para></question>
 <answer><para>
-Použijte správně volbu <option>-chapter</option>, jako: <option>-chapter 5-7</option>.
+Použijte správně volbu <option>-chapter</option>,
+jako: <option>-chapter 5-7</option>.
 </para></answer>
 </qandaentry>
 
@@ -1076,32 +1120,43 @@ Co znamenají čísla na stavovém řádku během enkódování?
 </para></question>
 <answer><para>
 Příklad:
-<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+<screen>
+Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
-<listitem><para>časová značka (pozice) v enkódovaném proudu</para></listitem>
+  <varlistentry>
+  <term><systemitem>Pos: 264.5s</systemitem></term>
+  <listitem><para>časová značka (pozice) v enkódovaném proudu</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>6612f</systemitem></term>
-<listitem><para>počet dokončených video snímků</para></listitem>
+<varlistentry>
+  <term><systemitem>6612f</systemitem></term>
+  <listitem><para>počet dokončených video snímků</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>( 2%)</systemitem></term>
-<listitem><para>enkódovaná část vstupního proudu</para></listitem>
+<varlistentry>
+  <term><systemitem>( 2%)</systemitem></term>
+  <listitem><para>enkódovaná část vstupního proudu</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>7.12fps</systemitem></term>
-<listitem><para>rychlost enkódování</para></listitem>
+<varlistentry>
+  <term><systemitem>7.12fps</systemitem></term>
+  <listitem><para>rychlost enkódování</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
-<listitem><para>odhadovaný čas potřebný pro dokončení enkódování</para></listitem>
+<varlistentry>
+  <term><systemitem>Trem: 576min</systemitem></term>
+  <listitem><para>odhadovaný čas potřebný pro dokončení enkódování</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2856mb</systemitem></term>
-<listitem><para>odhadovaná velikost výsledného souboru</para></listitem>
+<varlistentry>
+  <term><systemitem>2856mb</systemitem></term>
+  <listitem><para>odhadovaná velikost výsledného souboru</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
-<listitem><para>aktuální odchylka datových proudů zvuku a videa</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V:0.065</systemitem></term>
+  <listitem><para>aktuální odchylka datových proudů zvuku a videa</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>[2126:192]</systemitem></term>
-<listitem>
-<para>průměrný datový tok videa (v Mb/s) a průměrný datový tok zvuku (v Mb/s)</para></listitem>
+<varlistentry>
+  <term><systemitem>[2126:192]</systemitem></term>
+  <listitem><para>
+  průměrný datový tok videa (v Mb/s) a průměrný datový tok zvuku (v Mb/s)
+  </para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
@@ -1109,8 +1164,8 @@ Příklad:
 
 <qandaentry>
 <question><para>
-Jakto že je doporučený datový tok vypisovaný <application>MEncoder</application>em
-záporný?
+Jakto že je doporučený datový tok vypisovaný
+<application>MEncoder</application>em záporný?
 </para></question>
 <answer><para>
 Protože datový tok při kterém enkódujete audio je příliš velký, aby se film
@@ -1127,7 +1182,6 @@ Protože ASF používá variabilní snímkovou rychlost zatímco AVI pevnou, mus
 ji nastavit ručně pomocí volby <option>-ofps</option>.
 </para></answer>
 </qandaentry>
-
 
 <qandaentry>
 <question><para>
@@ -1149,10 +1203,10 @@ Přímo to není možné, ale můžete zkusit toto (všimněte si
 <emphasis role="bold">&amp;</emphasis> na konci příkazu
 <command>mplayer</command>):
 <screen>
-    mkfifo encode
-    mplayer -ao pcm -aofile encode dvd://1 &amp;
-    lame <replaceable>vaše_volby</replaceable> encode hudba.mp3
-    rm encode
+mkfifo <replaceable>encode</replaceable>
+mplayer -ao pcm -aofile <replaceable>encode</replaceable> dvd://1 &amp;
+lame <replaceable>your_opts</replaceable> <replaceable>encode</replaceable> <replaceable>music.mp3</replaceable>
+rm <replaceable>encode</replaceable>
 </screen>
 Toto vám umožňuje použít jakýkoli enkodér, ne jen <application>LAME</application>,
 jen zaměňte <command>lame</command> svým oblíbeným enkodérem zvuku v příkazu
@@ -1165,7 +1219,6 @@ výše.
 Proč přehrávače třetích stran selhávají při přehrávání MPEG-4 filmů enkódovaných
 <application>MEncoder</application>em pozdější verze než 1.0pre7?
 </para></question>
-
 <answer><para>
 <systemitem class="library">libavcodec</systemitem>, nativní knihovna pro
 enkódování MPEG-4, obvykle přibalovaná k <application>MEncoder</application>u,
@@ -1183,7 +1236,7 @@ můžete změnit použitím volby <option>-ffourcc</option> v
 <application>MEncoder</application>u.
 Rovněž můžete změnit FourCC existujících souborů stejným způsobem:
 <screen>
-  mencoder <replaceable>vstupní.avi</replaceable> -o <replaceable>výstupní.avi</replaceable> -ffourcc XVID
+mencoder <replaceable>vstupní.avi</replaceable> -o <replaceable>výstupní.avi</replaceable> -ffourcc XVID
 </screen>
 Poznamenejme, že takto nastavíte FourCC na XVID spíše než DIVX.
 Toto doporučujeme, protože DIVX FourCC znamená DivX4, což je velmi jednoduchý
@@ -1191,7 +1244,7 @@ MPEG-4 kodek, zatímco jak DX50, tak XVID jsou plnohodnotné MPEG-4 (ASP).
 Takže pokud nastavíte FourCC na DIVX, nekteré špatné softwarové nebo
 hardwarové přehrávače si mohou vylámat zuby na pokročilýchvlastnostech, které
 <systemitem class="library">libavcodec</systemitem> podporuje, ale DivX
-nikoli; naproti tomu je <systemitem class="library">XviD</systemitem>
+nikoli; naproti tomu je <systemitem class="library">Xvid</systemitem>
 blíže <systemitem class="library">libavcodec</systemitem>u z hlediska funkčnosti
 a je podporován všemi dobrými přehrávači.
 </para></answer>
@@ -1229,8 +1282,8 @@ ve kterém naleznete řadu skriptů a udělátek. Dokumentaci k nim naleznete
 v souboru <filename>TOOLS/README</filename>.
 </para></answer>
 </qandaentry>
-
 </qandadiv>
+
 </qandaset>
 
 </chapter>

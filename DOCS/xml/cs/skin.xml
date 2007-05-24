@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20551 -->
+<!-- synced with r21612 -->
 <appendix id="skin">
 <title>Formát skinů <application>MPlayer</application>u</title>
 
 <sect1 id="skin-overview">
 <title>Přehled</title>
+
 <para>
 Nemá to sice nic společného s formátem skinu, ale měli byste vědět, že
 <application>MPlayer</application> <emphasis role="bold">nemá</emphasis>
@@ -12,19 +13,22 @@ vestavěný skin, takže <emphasis role="bold">si musíte alespoň jeden skin
 nainstalovat, chcete-li používat GUI.</emphasis>
 </para>
 
+<!-- ********** -->
+
 <sect2 id="skin-overview-directories">
 <title>Adresáře</title>
+
 <para>
 Adresáře prohledávané na skiny jsou (v tomto pořadí):
 <orderedlist>
 <listitem><para>
-<filename class="directory">$(DATADIR)/skins/</filename>
+  <filename class="directory">$(DATADIR)/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
+  <filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">~/.mplayer/skins/</filename>
+  <filename class="directory">~/.mplayer/skins/</filename>
 </para></listitem>
 </orderedlist>
 </para>
@@ -42,8 +46,11 @@ Například:
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="skin-overview-formats">
 <title>Formáty obrázků</title>
+
 <para>Obrázky musí být truecolor (24 nebo 32 bpp) PNG.</para>
 <para>
 V hlavním okně a v přehrávači (viz níž) můžete použít obrázky s 'průhledností':
@@ -55,6 +62,7 @@ tvarovaná okna, pokud má váš X server XShape rozšíření.
 
 <sect2 id="skin-overview-components">
 <title>Součásti skinu</title>
+
 <para>
 Skiny mají poměrně volný formát (narozdíl například od pevného formátu skinů
 <application>Winamp</application>u/<application>XMMS</application>),
@@ -70,7 +78,8 @@ V současnosti jsou zde čtyři okna, která můžete dekorovat:
 pravým myšítkem).
 
 <itemizedlist>
-<listitem><para>
+<listitem>
+  <para>
   <application>MPlayer</application> je ovládán v
   <emphasis role="bold">hlavním okně</emphasis> a/nebo v
   <emphasis role="bold">ovládacím panelu</emphasis>. Pozadím okna je obrázek.
@@ -78,17 +87,23 @@ pravým myšítkem).
   <emphasis>tlačítka</emphasis>, <emphasis>potenciometry</emphasis> (šoupátka)
   a <emphasis>popisky</emphasis>.
   Každé součásti musíte nastavit pozici a velikost.
-</para><para>
+  </para>
+
+  <para>
   A <emphasis role="bold">tlačítko</emphasis> má tři stavy (stisknuto, puštěno a
   zakázáno), proto musí být jeho obraz svisle rozdělen do tří částí.
   Detaily viz součást <link linkend="skin-button">tlačítko</link>.
-</para><para>
+  </para>
+
+  <para>
   A <emphasis role="bold">potenciometr</emphasis> (hlavně používaný pro
   lištu převíjení a ovládání hlasitosti/stereováhy) může mít libovolný počet
   fází dělících jeho obraz na jednotlivé části pod sebou. Detaily viz
   <link linkend="skin-hpotmeter">hpotenciometr</link> a
   <link linkend="skin-potmeter">potenciometr</link>.
-</para><para>
+  </para>
+
+  <para>
   <emphasis role="bold">Popisky</emphasis> jsou poněkud zvláštní: Znaky potřebné
   pro jejich vykreslení jsou brány z obrazového souboru a znaky v obrázku jsou
   popsány <link linkend="skin-fonts">souborem popisu fontu</link>.
@@ -96,13 +111,15 @@ pravým myšítkem).
   velikost každého znaku v obrázku (obrázkový soubor a soubor popisu fontu
   <emphasis>spolu</emphasis> tvoří font). Detaily viz
   <link linkend="skin-dlabel">dlabel</link>.
-</para>
-<note><para>Všechny obrázky mohou mít plnou průhlednost, jak je popsána v sekci
+  </para>
+
+  <note><para>
+  Všechny obrázky mohou mít plnou průhlednost, jak je popsána v sekci
   o <link linkend="skin-overview-formats">formátech obrázků</link>. Pokud X
   server nepodporuje rozšíření XShape, budou průhledné části černé. Pokud byste
   chtěli využít tuto vlastnost, musí být šířka pozadí hlavního okna celočíselně
   dělitelná 8.
-</para></note>
+  </para></note>
 </listitem>
 
 <listitem><para>
@@ -110,34 +127,40 @@ pravým myšítkem).
   Může v něm být zobrazen určený obrázek, pokud není načten žádný film (je
   docela únavné, pokud zde není nic :-)).
   <emphasis role="bold">Poznámka:</emphasis> průhlednost zde
-  is <emphasis role="bold">není povolena</emphasis>.
+  <emphasis role="bold">není povolena</emphasis>.
 </para></listitem>
 
-<listitem><para>
+<listitem>
+  <para>
   <emphasis role="bold">Nabídka</emphasis> je jen způsob, jak ovládat
   <application>MPlayer</application> položkami menu. Vyžadovány jsou dva
   obrázky: jeden z nich jako menu v normálním stavu a druhý se zvýrazněnými
   položkami. Když pak vyvoláte menu, je zobrazen první obrázek. Při pohybu myší
   přes položky, je zkopírována aktuálně vybraná položka z druhého obrázku přes
   ten první pod kursorem (druhý obrázek není nikdy zobrazen celý).
-</para><para>
+  </para>
+  <para>
   Položka menu je definována svou pozicí a velikostí v obrázku (detaily viz
   sekce <link linkend="skin-file-menu">nabídka</link>).
-</para></listitem>
+  </para>
+</listitem>
 </itemizedlist>
 </para>
 
 <para>
-  Jednu důležitou věc jsme ještě nezmínili: Mají-li tlačítka,
-  potenciometry a položky menu pracovat, musí <application>MPlayer</application>
-  vědět, co má udělat, pokud je na ně kliknuto. To je zajištěno pomocí
-  <link linkend="skin-gui">zpráv</link> (událostí). Pro tyto členy tedy musíte
-  definovat zprávy, které budou při kliku generovány.
+Jednu důležitou věc jsme ještě nezmínili: Mají-li tlačítka,
+potenciometry a položky menu pracovat, musí <application>MPlayer</application>
+vědět, co má udělat, pokud je na ně kliknuto. To je zajištěno pomocí
+<link linkend="skin-gui">zpráv</link> (událostí). Pro tyto členy tedy musíte
+definovat zprávy, které budou při kliku generovány.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="skin-files">
 <title>Soubory</title>
+
 <para>
 Pro výrobu skinu budete potřebovat následující:
 <itemizedlist>
@@ -167,12 +190,17 @@ Pro výrobu skinu budete potřebovat následující:
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="skin-file">
 <title>Soubor skin</title>
+
 <para>
 Jak jsme již řekli, je to konfigurační soubor skinu. Soubor je řádkově
-orientován; řádky s komentářem začínají znakem '<literal>;</literal>' (před ním
-jsou povoleny jen mezery a tabulátory).
+orientován; řádky s komentářem začínají znakem '<literal>;</literal>'
+(před ním jsou povoleny jen mezery a tabulátory).
 </para>
 
 <para>
@@ -206,10 +234,18 @@ end
 <para>
 kde <replaceable>název okna</replaceable> může být jeden z těchto řetězců:
 <itemizedlist>
-<listitem><para><emphasis role="bold">main</emphasis> - pro hlavní okno</para></listitem>
-<listitem><para><emphasis role="bold">sub</emphasis> - pro podokno</para></listitem>
-<listitem><para><emphasis role="bold">menu</emphasis> - pro nabídku</para></listitem>
-<listitem><para><emphasis role="bold">playbar</emphasis> - ovládací panel</para></listitem>
+<listitem><para>
+  <emphasis role="bold">main</emphasis> - pro hlavní okno
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">sub</emphasis> - pro podokno
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">menu</emphasis> - pro nabídku
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">playbar</emphasis> - ovládací panel
+</para></listitem>
 </itemizedlist>
 </para>
 
@@ -260,12 +296,19 @@ a <literal>PNG</literal> (v tomto pořadí). Použitý bude první vyhovující 
 </para>
 
 <para>
-Nakonec ještě pár slov k umísťování. Hlavní okno a podokno mohou být umístěny
-v různých rozích obrazovky zadáním souřadnic <literal>X</literal> a
-<literal>Y</literal>. <literal>0</literal> je nahoře nebo vlevo,
+Aby bylo vše jasné, uvedeme příklad. Řekněme, že máte obrázek jménem
+<filename>main.png</filename>, který použijeme pro hlavní okno:
+<programlisting>base = main, -1, -1</programlisting>
+<application>MPlayer</application> se pokusí nahrát soubory
+<filename>main</filename>, <filename>main.png</filename>, <filename>main.PNG</filename>.
+</para>
+
+<para>
+Nakonec několik slov o pozicování. Hlavní okno a podokno lze
+umístit do odlišných rohů obrazovky zadáním souřadnic <literal>X</literal>
+a <literal>Y</literal>. <literal>0</literal> horní nebo levý,
 <literal>-1</literal> je střed a <literal>-2</literal> je vpravo nebo dole, jak
 je vidět na obrázku:
-</para>
 <informalfigure>
 <screen>
 (0, 0)----(-1, 0)----(-2, 0)
@@ -277,18 +320,13 @@ je vidět na obrázku:
 (0,-2)----(-1,-2)----(-2,-2)
 </screen>
 </informalfigure>
-
-<para>
-Aby bylo vše jasné, uvádíme příklad. Řekněme, že máte obrázek jménem
-<filename>main.png</filename>, který použijete pro hlavní okno:
-<programlisting>base = main, -1, -1</programlisting>
-<application>MPlayer</application> zkusí načíst soubory <filename>main</filename>,
-<filename>main.png</filename>, <filename>main.PNG</filename>.
 </para>
 
+<!-- ********** -->
 
 <sect2 id="skin-file-main">
 <title>Hlavní okno a ovládací panel</title>
+
 <para>
 Níže uvádíme seznam položek, které mohou být použity v blocích
 '<literal>window = main</literal>' ... '<literal>end</literal>',
@@ -304,12 +342,14 @@ a '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   Umožňuje nastavit obrázek pozadí hlavního okna. Okno bude vykresleno na
   zadaných souřadnicích <literal>X,Y</literal> na obrazovce a bude mít velikost
   obrázku.
-    </para>
-    <note><para>Tyto koordináty zatím nefungují pro okno display.</para></note>
-    <warning><para>Průhledné oblasti v obrázku (obarvené #FF00FF) budou černé
-    na X serverech bez XShape rozšíření. Šířka obrázku musí být celočíselně
-    dělitelná 8.</para></warning>
-    </listitem>
+  </para>
+  <note><para>
+  Tyto koordináty zatím nefungují pro okno display.
+  </para></note>
+  <warning><para>Průhledné oblasti v obrázku (obarvené #FF00FF) budou černé
+  na X serverech bez XShape rozšíření. Šířka obrázku musí být celočíselně
+  dělitelná 8.</para></warning>
+  </listitem>
 </varlistentry>
 
 <varlistentry>
@@ -321,18 +361,18 @@ a '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   na pozici <literal>X,Y</literal>. Zadaná <literal>zpráva</literal> je
   generována při kliku na tlačítko. Zadaný <literal>obrázek</literal> musí
   mít tři části pod sebou (odpovídající možným stavům tlačítka) takto:
-</para>
-<informalfigure>
-<screen>
+  </para>
+  <informalfigure>
+  <screen>
 +------------+
 | stisknuto  |
 +------------+
 |  uvolněno  |
 +------------+
 |  zakázáno  |
-+------------+
-</screen>
-</informalfigure>
++------------+<!--
+  --></screen>
+  </informalfigure>
   </listitem>
 </varlistentry>
 
@@ -343,8 +383,10 @@ a '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   <listitem><para>
   Zapne (enable) nebo vypne (disable) dekoraci hlavního okna, produkovanou
   okenním manažerem. Výchozí je <emphasis role="bold">disable</emphasis>.
-    </para>
-    <note><para>V okně display to nefunguje, není to potřeba.</para></note>
+  </para>
+  <note><para>
+  V okně display to nefunguje, není to potřeba.
+  </para></note>
   </listitem>
 </varlistentry>
 
@@ -353,8 +395,7 @@ a '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   <anchor id="skin-hpotmeter"/>hpotmeter = tlačítko, tšířka, tvýška, fáze, počet_fází, výchozí, X, Y, šířka, výška, zpráva
   </literal></term>
   <listitem><para>
-
-    </para></listitem>
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -363,28 +404,28 @@ a '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   </literal></term>
   <listitem><para>
   Umístí vodorovný (hpotmeter) nebo svislý (vpotmeter) potenciometr velikosti
-<literal>šířka</literal> * <literal>výška</literal> na pozici
-<literal>X,Y</literal>. Obrázek může být rozdělen do různých částí pro různé
-fáze potenciometru (Například můžete mít potenciometr pro nastavení hlasitosti,
-jehož dráha se barví ze zelené na červenou, jak se jeho hodnota mění od nejmenší
-do největší.). <literal>hpotmeter</literal> může mít táhlo, které může být
-vodorovně taženo. Význam parametrů:
-    </para>
-    <itemizedlist>
-    <listitem><para><literal>tlačítko</literal> - obrázek, ktrý se použije pro
+  <literal>šířka</literal> * <literal>výška</literal> na pozici
+  <literal>X,Y</literal>. Obrázek může být rozdělen do různých částí pro různé
+  fáze potenciometru (Například můžete mít potenciometr pro nastavení hlasitosti,
+  jehož dráha se barví ze zelené na červenou, jak se jeho hodnota mění od nejmenší
+  do největší.). <literal>hpotmeter</literal> může mít táhlo, které může být
+  vodorovně taženo. Význam parametrů:
+  <itemizedlist>
+  <listitem><para>
+    <literal>tlačítko</literal> - obrázek, který se použije pro
     tlačítko (musí mít tři části pod sebou, stejně jako v případě tohoto
     <link linkend="skin-button">tlačítka</link>)
-    </para></listitem>
-    <listitem><para><literal>tšířka</literal>, <literal>tvýška</literal> - 
+  </para></listitem>
+  <listitem><para>
+    <literal>tšířka</literal>, <literal>tvýška</literal> - 
     velikost tlačítka
-    </para></listitem>
-   <listitem><para><literal>fáze</literal> - obrázek použitý pro různé fáze
-   hpotmetru. Pokud žádný obrázek nechcete, můžete použít speciální hodnotu
-   <literal>NULL</literal>. Obrázek musí být rozdělen svisle na
-   <literal>počet_fází</literal> částí takto:
-    </para>
-<informalfigure>
-<screen>
+  </para></listitem>
+  <listitem><para>
+    <literal>fáze</literal> - obrázek použitý pro různé fáze
+    hpotmetru. Pokud žádný obrázek nechcete, můžete použít speciální hodnotu
+    <literal>NULL</literal>. Obrázek musí být rozdělen svisle na
+    <literal>počet_fází</literal> částí takto:
+    <informalfigure><screen>
 +------------+
 |   fáze #1  |
 +------------+
@@ -393,27 +434,31 @@ vodorovně taženo. Význam parametrů:
      ...
 +------------+
 |   fáze #n  |
-+------------+
-</screen>
-</informalfigure>
-    </listitem>
-    <listitem><para><literal>počet_fází</literal> - počet fází uložených v
++------------+<!--
+    --></screen></informalfigure>
+  </para></listitem>
+  <listitem><para>
+    <literal>numphases</literal> - number of phases stored in the
+    <literal>počet_fází</literal> - počet fází uložených v
     obrázku <literal>fáze</literal>
     </para></listitem>
-    <listitem><para><literal>výchozí</literal> - výchozí hodnota pro hpotmeter
-    (v rozsahu <literal>0</literal> až <literal>100</literal>)
+    <listitem><para>
+      <literal>výchozí</literal> - výchozí hodnota pro hpotmeter
+      (v rozsahu <literal>0</literal> až <literal>100</literal>)
+      </para></listitem>
+    <listitem><para>
+      <literal>X</literal>, <literal>Y</literal> - pozice pro hpotmeter
     </para></listitem>
-    <listitem><para><literal>X</literal>, <literal>Y</literal> - pozice pro hpotmeter
+    <listitem><para>
+      <literal>šířka</literal>, <literal>výška</literal> - šířka a výška
+      <literal>hpotmeter</literal>u
     </para></listitem>
-    <listitem><para><literal>šířka</literal>, <literal>výška</literal> - šířka a výška
-    <literal>hpotmeter</literal>u
-    </para></listitem>
-    <listitem><para><literal>zpráva</literal> - zpráva generovaná při změně
-    hodnoty <literal>hpotmeter</literal>u
-    </para></listitem>
-    </itemizedlist>
-
-    </listitem>
+    <listitem><para>
+      <literal>zpráva</literal> - zpráva generovaná při změně
+      hodnoty <literal>hpotmeter</literal>u
+  </para></listitem>
+  </itemizedlist>
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -421,12 +466,12 @@ vodorovně taženo. Význam parametrů:
   <anchor id="skin-potmeter"/>potmeter = fáze, počet_fází, výchozí, X, Y, šířka, výška, zpráva
   </literal></term>
   <listitem><para>
-<literal>hpotmeter</literal> bez tlačítka. (soudil bych, že byl míněn jako
-otočný, ale reaguje pouze na horizontální tažení.) Popis parametrů je stejný
-jako v <link linkend="skin-hpotmeter">hpotmeter</link>.
-<literal>fáze</literal> mohou být <literal>NULL</literal>, ale je to vcelku
-k ničemu, jelikož nemůžete vidět, jak je nastaven <literal>potmeter</literal>.
-    </para></listitem>
+  <literal>hpotmeter</literal> bez tlačítka. (soudil bych, že byl míněn jako
+  otočný, ale reaguje pouze na horizontální tažení.) Popis parametrů je stejný
+  jako v <link linkend="skin-hpotmeter">hpotmeter</link>.
+  <literal>fáze</literal> mohou být <literal>NULL</literal>, ale je to vcelku
+  k ničemu, jelikož nemůžete vidět, jak je nastaven <literal>potmeter</literal>.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -434,180 +479,184 @@ k ničemu, jelikož nemůžete vidět, jak je nastaven <literal>potmeter</litera
   <anchor id="skin-font"/>font = soubor_fontu, id_fontu
   </literal></term>
   <listitem><para>
-Definuje font. <literal>soubor_fontu</literal> je jméno souboru popisu fontu
-s příponou <filename>.fnt</filename> (zde příponu nezadávejte).
-<literal>id_fontu</literal> je použit jako ukazatel na font
-(viz <link linkend="skin-dlabel">dlabel</link>
-a <link linkend="skin-slabel">slabel</link>). Definováno může být více než 25 fontů.
-    </para></listitem>
+  Definuje font. <literal>soubor_fontu</literal> je jméno souboru popisu fontu
+  s příponou <filename>.fnt</filename> (zde příponu nezadávejte).
+  <literal>id_fontu</literal> je použit jako ukazatel na font
+  (viz <link linkend="skin-dlabel">dlabel</link>
+  a <link linkend="skin-slabel">slabel</link>). Definováno může být více než 25 fontů.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-slabel"/>slabel = X, Y, id_fontu, &quot;text&quot;
+    <anchor id="skin-slabel"/>slabel = X, Y, id_fontu, "text";
   </literal></term>
   <listitem><para>
-Umístí statický popisek na pozici <literal>X,Y</literal>. <literal>text</literal>
-je zobrazen fontem identifikovaným pomocí <literal>id_fontu</literal>. Text je
-surový řetězec (<literal>$x</literal> proměnné nefungují), který musí být uzavřen
-ve dvojitých uvozovkách (ale znak &quot; nesmí být součástí textu).
-Popisek je zobrazen fontem identifikovaným pomocí <literal>id_fontu</literal>.
-    </para></listitem>
+  Umístí statický popisek na pozici <literal>X,Y</literal>.
+  <literal>text</literal> je zobrazen fontem identifikovaným pomocí
+  <literal>id_fontu</literal>. Text je surový řetězec
+  (<literal>$x</literal> proměnné nefungují), který musí být uzavřen
+  ve dvojitých uvozovkách (ale znak " nesmí být součástí textu).
+  Popisek je zobrazen fontem identifikovaným pomocí <literal>id_fontu</literal>.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-dlabel"/>dlabel = X, Y, délka, zarovnání, id_fontu, &quot;text&quot;
+    <anchor id="skin-dlabel"/>dlabel = X, Y, délka, zarovnání, id_fontu, "text"
   </literal></term>
   <listitem>
-<para>
-Umístí dynamický popisek na pozici <literal>X,Y</literal>. Popisek je
-dynamický proto, že je jeho text periodicky obnovován. Maximální délka
-popisku je nastavena na <literal>délka</literal> (jeho výškou je výška znaku).
-Pokud je zobrazovaný text širší, pak bude rolován,
-jinak bude zarovnán do určeného prostoru podle hodnoty parametru
-<literal>zarovnání</literal>: <literal>0</literal> je zarovnání vpravo,
-<literal>1</literal> na střed, <literal>2</literal> vlevo.
-</para>
-<para>
-Text k zobrazení je zadán parametrem <literal>text</literal>: Musí být uzavřen
-do dvojitých uvozovek (ale znak &quot; nesmí být součástí textu).
-Popisek je zobrazen fontem identifikovaným pomocí <literal>id_fontu</literal>.
-V textu můžete použít tyto proměnné:
-</para>
+  <para>
+  Umístí dynamický popisek na pozici <literal>X,Y</literal>. Popisek je
+  dynamický proto, že je jeho text periodicky obnovován. Maximální délka
+  popisku je nastavena na <literal>délka</literal> (jeho výškou je výška
+  znaku). Pokud je zobrazovaný text širší, pak bude rolován,
+  jinak bude zarovnán do určeného prostoru podle hodnoty parametru
+  <literal>zarovnání</literal>: <literal>0</literal> je zarovnání vpravo,
+  <literal>1</literal> na střed, <literal>2</literal> vlevo.
+  </para>
+  <para>
+  Text k zobrazení je zadán parametrem <literal>text</literal>: Musí být uzavřen
+  do dvojitých uvozovek (ale znak " nesmí být součástí textu).
+  Popisek je zobrazen fontem identifikovaným pomocí <literal>id_fontu</literal>.
+  V textu můžete použít tyto proměnné:
+  </para>
 
-<informaltable>
-<tgroup cols="2">
-<thead>
-  <row><entry>Proměnná</entry><entry>Význam</entry></row>
-</thead>
-<tbody>
-<row>
-<entry>$1</entry>
-<entry>čas přehrávání ve formátu <emphasis>hh:mm:ss</emphasis></entry>
-</row>
-<row>
-<entry>$2</entry>
-<entry>čas přehrávání ve formátu <emphasis>mmmm:ss</emphasis></entry>
-</row>
-<row>
-<entry>$3</entry>
-<entry>čas přehrávání ve formátu <emphasis>hh</emphasis> (hodiny)</entry>
-</row>
-<row>
-<entry>$4</entry>
-<entry>čas přehrávání ve formátu <emphasis>mm</emphasis> (minuty)</entry>
-</row>
-<row>
-<entry>$5</entry>
-<entry>čas přehrávání ve formátu <emphasis>ss</emphasis> (sekundy)</entry>
-</row>
-<row>
-<entry>$6</entry>
-<entry>délka filmu ve formátu <emphasis>hh:mm:ss</emphasis></entry>
-</row>
-<row>
-<entry>$7</entry>
-<entry>délka filmu ve formátu <emphasis>mmmm:ss</emphasis></entry>
-</row>
-<row>
-<entry>$8</entry>
-<entry>čas přehrávání ve formátu <emphasis>h:mm:ss</emphasis></entry>
-</row>
-<row>
-<entry>$v</entry>
-<entry>hlasitost ve formátu <emphasis>xxx.xx</emphasis>%</entry>
-</row>
-<row>
-<entry>$V</entry>
-<entry>hlasitost ve formátu <emphasis>xxx.xx</emphasis></entry>
-</row>
-<row>
-<entry>$b</entry>
-<entry>stereováha ve formátu <emphasis>xxx.xx</emphasis>%</entry>
-</row>
-<row>
-<entry>$B</entry>
-<entry>stereováha ve formátu <emphasis>xxx.xx</emphasis></entry>
-</row>
-<row>
-<entry>$$</entry>
-<entry>znak $</entry>
-</row>
-<row>
-<entry>$a</entry>
-<entry>znak podle typu audia (žádné: <literal>n</literal>,
-mono: <literal>m</literal>, stereo: <literal>t</literal>)</entry>
-</row>
-<row>
-<entry>$t</entry>
-<entry>číslo stopy (v playlistu)</entry>
-</row>
-<row>
-<entry>$o</entry>
-<entry>název souboru</entry>
-</row>
-<row>
-<entry>$f</entry>
-<entry>název souboru malými písmeny</entry>
-</row>
-<row>
-<entry>$F</entry>
-<entry>název souboru velkými písmeny</entry>
-</row>
-<row>
-<entry>$T</entry>
-<entry>znak podle typu datového proudu (soubor: <literal>f</literal>,
-Video CD: <literal>v</literal>, DVD: <literal>d</literal>, URL: <literal>u</literal>)</entry>
-</row>
-<row>
-<entry>$p</entry>
-<entry>znak <keycap>p</keycap> (pokud přehráváte soubor a font obsahuje
-znak <keycap>p</keycap>)</entry>
-</row>
-<row>
-<entry>$s</entry>
-<entry>znak <keycap>s</keycap> character (pokud přehráváte soubor a font obsahuje
-znak <keycap>s</keycap>)</entry>
-</row>
-<row>
-<entry>$e</entry>
-<entry>znak <keycap>e</keycap> (pokud je přehrávání pozastaveno a font obsahuje
-znak <keycap>e</keycap>)</entry>
-</row>
-<row>
-<entry>$x</entry>
-<entry>šířka filmu</entry>
-</row>
-<row>
-<entry>$y</entry>
-<entry>výška filmu</entry>
-</row>
-<row>
-<entry>$C</entry>
-<entry>název použitého kodeku</entry>
-</row>
+  <informaltable>
+  <tgroup cols="2">
+  <thead>
+    <row><entry>Proměnná</entry><entry>Význam</entry></row>
+  </thead>
+  <tbody>
+  <row>
+    <entry>$1</entry>
+    <entry>čas přehrávání ve formátu <emphasis>hh:mm:ss</emphasis></entry>
+  </row>
+  <row>
+    <entry>$2</entry>
+    <entry>čas přehrávání ve formátu <emphasis>mmmm:ss</emphasis></entry>
+  </row>
+  <row>
+    <entry>$3</entry>
+    <entry>čas přehrávání ve formátu <emphasis>hh</emphasis> (hodiny)</entry>
+  </row>
+  <row>
+    <entry>$4</entry>
+    <entry>čas přehrávání ve formátu <emphasis>mm</emphasis> (minuty)</entry>
+  </row>
+  <row>
+    <entry>$5</entry>
+    <entry>čas přehrávání ve formátu <emphasis>ss</emphasis> (sekundy)</entry>
+  </row>
+  <row>
+    <entry>$6</entry>
+    <entry>délka filmu ve formátu <emphasis>hh:mm:ss</emphasis></entry>
+  </row>
+  <row>
+    <entry>$7</entry>
+    <entry>délka filmu ve formátu <emphasis>mmmm:ss</emphasis></entry>
+  </row>
+  <row>
+    <entry>$8</entry>
+    <entry>čas přehrávání ve formátu <emphasis>h:mm:ss</emphasis></entry>
+  </row>
+  <row>
+    <entry>$v</entry>
+    <entry>hlasitost ve formátu <emphasis>xxx.xx</emphasis>%</entry>
+  </row>
+  <row>
+    <entry>$V</entry>
+    <entry>hlasitost ve formátu <emphasis>xxx.xx</emphasis></entry>
+  </row>
+  <row>
+    <entry>$b</entry>
+    <entry>stereováha ve formátu <emphasis>xxx.xx</emphasis>%</entry>
+  </row>
+  <row>
+    <entry>$B</entry>
+    <entry>stereováha ve formátu <emphasis>xxx.xx</emphasis></entry>
+  </row>
+  <row>
+    <entry>$$</entry>
+    <entry>znak $</entry>
+  </row>
+  <row>
+    <entry>$a</entry>
+    <entry>znak podle typu audia (žádné: <literal>n</literal>,
+    mono: <literal>m</literal>, stereo: <literal>t</literal>)</entry>
+  </row>
+  <row>
+    <entry>$t</entry>
+    <entry>číslo stopy (v playlistu)</entry>
+  </row>
+  <row>
+    <entry>$o</entry>
+    <entry>název souboru</entry>
+  </row>
+  <row>
+    <entry>$f</entry>
+    <entry>název souboru malými písmeny</entry>
+  </row>
+  <row>
+    <entry>$F</entry>
+    <entry>název souboru velkými písmeny</entry>
+  </row>
+  <row>
+    <entry>$T</entry>
+    <entry>znak podle typu datového proudu (soubor: <literal>f</literal>,
+    Video CD: <literal>v</literal>, DVD: <literal>d</literal>, 
+    URL: <literal>u</literal>)
+    </entry>
+  </row>
+  <row>
+    <entry>$p</entry>
+    <entry>znak <keycap>p</keycap> (pokud přehráváte soubor a font obsahuje
+    znak <keycap>p</keycap>)</entry>
+  </row>
+  <row>
+    <entry>$s</entry>
+    <entry>znak <keycap>s</keycap> character (pokud přehráváte soubor a font obsahuje
+    znak <keycap>s</keycap>)</entry>
+  </row>
+  <row>
+    <entry>$e</entry>
+    <entry>znak <keycap>e</keycap> (pokud je přehrávání pozastaveno a font obsahuje
+    znak <keycap>e</keycap>)</entry>
+  </row>
+  <row>
+    <entry>$x</entry>
+    <entry>šířka filmu</entry>
+  </row>
+  <row>
+    <entry>$y</entry>
+    <entry>výška filmu</entry>
+  </row>
+  <row>
+    <entry>$C</entry>
+    <entry>název použitého kodeku</entry>
+  </row>
+  </tbody>
+  </tgroup>
+  </informaltable>
 
-</tbody>
-</tgroup>
-</informaltable>
-</listitem>
-
+  <note><para>
+  Proměnné <literal>$a, $T, $p, $s</literal> a <literal>$e</literal>
+  vracejí znaky, které by měly být zobrazovány jako speciální symboly
+  (například, <keycap>e</keycap> vrací symbol pauza, který obvykle vypadá
+  jako ||). Měli byste mít font pro normální znaky a
+  jiný font pro symboly. Více informací viz sekce o
+  <link linkend="skin-fonts-symbols">symbolech</link>.
+  </para></note>
+  </listitem>
 </varlistentry>
 </variablelist>
-
-<note><para>
-Proměnné <literal>$a, $T, $p, $s</literal> a <literal>$e</literal>
-vracejí znaky, které by se měly zobrazit jako speciální symboly (například
-<keycap>e</keycap> je symbol pro pauzu, který obvykle vypadá asi takto
-||). Měli byste mít font pro normální znaky a jiný font pro
-symboly. Pro více informací viz sekci
-<link linkend="skin-fonts-symbols">symboly</link>.
-</para></note>
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="skin-file-subwindow">
 <title>Ovládací panel</title>
+
 <para>
 Následující vstupy mohou být použity v bloku
 '<literal>window = sub</literal>' . . . '<literal>end</literal>'.
@@ -619,14 +668,15 @@ Následující vstupy mohou být použity v bloku
   <anchor id="skin-sub-base"/>base = obrázek, X, Y, šířka, výška
   </literal></term>
   <listitem><para>
-Obrázek, který bude zobrazen v okně. Okno se zobrazí na pozici zadané
-souřadnicemi <literal>X,Y</literal> na obrazovce (<literal>0,0</literal> je
-levý horní roh). Můžete nastavit <literal>-1</literal> pro střed a <literal>-2</literal>
-pro vpravo (<literal>X</literal>) a dole (<literal>Y</literal>). Okno bude
-stejně velké jako obrázek. <literal>šířka</literal> a <literal>výška</literal>
-udávají velikost okna; jsou volitelné (pokud chybí, má okno rozměry shodné
-s obrázkem).
-    </para></listitem>
+  Obrázek, který bude zobrazen v okně. Okno se zobrazí na pozici zadané
+  souřadnicemi <literal>X,Y</literal> na obrazovce (<literal>0,0</literal> je
+  levý horní roh). Můžete nastavit <literal>-1</literal> pro střed a
+  <literal>-2</literal> pro vpravo (<literal>X</literal>) a dole
+  (<literal>Y</literal>). Okno bude stejně velké jako obrázek.
+  <literal>šířka</literal> a <literal>výška</literal>
+  udávají velikost okna; jsou volitelné (pokud chybí, má okno
+  rozměry shodné  s obrázkem).
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -634,17 +684,20 @@ s obrázkem).
   <anchor id="skin-background"/>background = R, G, B
   </literal></term>
   <listitem><para>
-Umožňuje nastavit barvu pozadí. To je užitečné, pokud je obrázek menší než
-okno. <literal>R</literal>, <literal>G</literal> a <literal>B</literal>
-označují červenou, zelenou a modrou složku barvy (každá z nich je dekadická
-hodnota 0 až 255).
-    </para></listitem>
+  Umožňuje nastavit barvu pozadí. To je užitečné, pokud je obrázek menší než
+  okno. <literal>R</literal>, <literal>G</literal> a <literal>B</literal>
+  označují červenou, zelenou a modrou složku barvy
+  (každá z nich je dekadická hodnota 0 až 255).
+  </para></listitem>
 </varlistentry>
 </variablelist>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="skin-file-menu">
 <title>Nabídka</title>
+
 <para>
 Jak již bylo dříve řečeno, nabídka je zobrazena pomocí dvou obrázků. Normální
 položky nabídky jsou brány z obrázku určeného položkou <literal>base</literal>,
@@ -664,8 +717,8 @@ Následující vstupy mohou být použity v bloku
   <anchor id="skin-menu-base"/>base = obrázek
   </literal></term>
   <listitem><para>
-Obrázek normálních položek nabídky.
-    </para></listitem>
+  Obrázek normálních položek nabídky.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -673,8 +726,8 @@ Obrázek normálních položek nabídky.
   <anchor id="skin-selected"/>selected = obrázek
   </literal></term>
   <listitem><para>
-Obrázek nabídky kde jsou všechny položky vybrány.
-    </para></listitem>
+  Obrázek nabídky kde jsou všechny položky vybrány.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -682,21 +735,25 @@ Obrázek nabídky kde jsou všechny položky vybrány.
   <anchor id="skin-menu"/>menu = X, Y, šířka, výška, zpráva
   </literal></term>
   <listitem><para>
-Definuje pozici <literal>X,Y</literal> a rozměr položky nabídky v obrázku.
-<literal>zpráva</literal> je zpráva, generovaná jakmile je uvolněno tlačítko
-myši nad položkou.
-    </para></listitem>
+  Definuje pozici <literal>X,Y</literal> a rozměr položky nabídky v obrázku.
+  <literal>zpráva</literal> je zpráva, generovaná jakmile je uvolněno tlačítko
+  myši nad položkou.
+  </para></listitem>
 </varlistentry>
 </variablelist>
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="skin-fonts">
 <title>Fonty</title>
 <para>
 Jak jsme již zmínili v sekci o částech skinu, font je definován obrázkem a
-souborem popisu. Můžete rozmístit znaky v obrázku libovolně, ale ujistěte se, že
-je jejich velikost a pozice je uvedena v souboru popisu přesně.
+souborem popisu. Můžete rozmístit znaky v obrázku libovolně, ale ujistěte
+se, že je jejich velikost a pozice je uvedena v souboru popisu přesně.
 </para>
 
 <para>
@@ -708,7 +765,7 @@ Soubor popisu fontu (s příponou <filename>.fnt</filename>) může obsahovat
 Kde <literal><replaceable>obrázek</replaceable></literal> je název obrázku
 použitého pro font (nemusíte zadávat příponu).
 <anchor id="skin-font-char"/>
-<programlisting>&quot;char&quot; = X, Y, šířka, výška</programlisting>
+<programlisting>"char" = X, Y, šířka, výška</programlisting>
 Zde <literal>X</literal> a <literal>Y</literal> udávají pozici
 <literal>char</literal> znaku v obrázku (<literal>0,0</literal> je levý
 horní roh). <literal>šířka</literal> a <literal>výška</literal> jsou
@@ -718,24 +775,28 @@ rozměry znaku v pixelech.
 <para>
 Tento příklad definuje znaky A, B, C s použítím <filename>font.png</filename>.
 <programlisting>
-; Zde může být jen &quot;font&quot; místo &quot;font.png&quot;.
+; Zde může být jen "font" místo "font.png".
 image = font.png
 
 ; Tři znaky pro ilustraci stačí :-)
-&quot;A&quot; =  0,0, 7,13
-&quot;B&quot; =  7,0, 7,13
-&quot;C&quot; = 14,0, 7,13
+"A" =  0,0, 7,13
+"B" =  7,0, 7,13
+"C" = 14,0, 7,13
 </programlisting>
 </para>
 
+<!-- ********** -->
+
 <sect2 id="skin-fonts-symbols">
 <title>Symboly</title>
+
 <para>
 Některé znaky mají speciální význam, jsou-li vráceny některou z proměnných
 použitých v <link linkend="skin-dlabel">dlabel</link>. Tyto znaky mají být
 zobrazovány jako symboly, takže mohou být zobrazeny věci jako pěkné DVD logo
  místo znaku '<literal>d</literal>' pro DVD datový proud.
 </para>
+
 <para>
 Následující tabulka obsahuje znaky, které mohou být použity k zobrazení
 symbolů (a tudíž vyžadují odlišný font).
@@ -747,24 +808,29 @@ symbolů (a tudíž vyžadují odlišný font).
   <row><entry>Znak</entry><entry>Symbol</entry></row>
 </thead>
 <tbody>
-<row><entry><keycap>p</keycap></entry><entry>play</entry></row>
-<row><entry><keycap>s</keycap></entry><entry>stop</entry></row>
-<row><entry><keycap>e</keycap></entry><entry>pause</entry></row>
-<row><entry><keycap>n</keycap></entry><entry>bez zvuku</entry></row>
-<row><entry><keycap>m</keycap></entry><entry>mono zvuk</entry></row>
-<row><entry><keycap>t</keycap></entry><entry>stereo zvuk</entry></row>
-<row><entry><keycap>f</keycap></entry><entry>datový proud je soubor</entry></row>
-<row><entry><keycap>v</keycap></entry><entry>datový proud je Video CD</entry></row>
-<row><entry><keycap>d</keycap></entry><entry>datový proud je DVD</entry></row>
-<row><entry><keycap>u</keycap></entry><entry>datový proud je URL</entry></row>
+  <row><entry><keycap>p</keycap></entry><entry>play</entry></row>
+  <row><entry><keycap>s</keycap></entry><entry>stop</entry></row>
+  <row><entry><keycap>e</keycap></entry><entry>pauza</entry></row>
+  <row><entry><keycap>n</keycap></entry><entry>bez zvuku</entry></row>
+  <row><entry><keycap>m</keycap></entry><entry>mono zvuk</entry></row>
+  <row><entry><keycap>t</keycap></entry><entry>stereo zvuk</entry></row>
+  <row><entry><keycap>f</keycap></entry><entry>datový proud je soubor</entry></row>
+  <row><entry><keycap>v</keycap></entry><entry>datový proud je Video CD</entry></row>
+  <row><entry><keycap>d</keycap></entry><entry>datový proud je DVD</entry></row>
+  <row><entry><keycap>u</keycap></entry><entry>datový proud je URL</entry></row>
 </tbody>
 </tgroup>
 </informaltable>
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="skin-gui">
 <title>GUI zprávy</title>
+
 <para>
 Tyto zprávy mohou být generovány tlačítky, potenciometry a položkami
 nabídky.
@@ -775,49 +841,50 @@ nabídky.
 <varlistentry>
   <term><emphasis role="bold">evNext</emphasis></term>
   <listitem><para>
-Skočí na následující stopu v playlistu.
-    </para></listitem>
+  Skočí na následující stopu v playlistu.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPause</emphasis></term>
   <listitem><para>
-Tvoří přepínač společně s <literal>evPlaySwitchToPause</literal>. Ty mohou
-být použity k vytvoření tradičního play/pauza tlačítka. Obě zprávy by měly
-být přiřazeny tlačítkům umístěným na stejné pozici. Tato zpráva pozastaví
-přehrávání a zobrazen bude obrázek pro <literal>evPlaySwitchToPause</literal>
-talčítko (pro indikaci, že tlačítko může být stisknuto pro obnovení přehrávání).
-    </para></listitem>
+  Tvoří přepínač společně s <literal>evPlaySwitchToPause</literal>. Ty mohou
+  být použity k vytvoření tradičního play/pauza tlačítka. Obě zprávy by měly
+  být přiřazeny tlačítkům umístěným na stejné pozici v okně. Tato zpráva
+  pozastaví přehrávání a zobrazen bude obrázek pro
+  <literal>evPlaySwitchToPause</literal> talčítko (pro indikaci, že tlačítko
+  může být stisknuto pro obnovení přehrávání).
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPlay</emphasis></term>
   <listitem><para>
-Zahájí přehrávání.
-    </para></listitem>
+  Zahájí přehrávání.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPlaySwitchToPause</emphasis></term>
   <listitem><para>
-Protiklad <literal>evPauseSwitchToPlay</literal>. Tato zpráva zahájí přehrávání
-a zobrazí obrázek pro tlačítko <literal>evPauseSwitchToPlay</literal>
-(pro indikaci, že tlačítko může být stisknuto pro pozastavení přehrávání).
-    </para></listitem>
+  Protiklad <literal>evPauseSwitchToPlay</literal>. Tato zpráva zahájí přehrávání
+  a zobrazí obrázek pro tlačítko <literal>evPauseSwitchToPlay</literal>
+  (pro indikaci, že tlačítko může být stisknuto pro pozastavení přehrávání).
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPrev</emphasis></term>
   <listitem><para>
-Skočí na předchozí stopu v playlistu.
-    </para></listitem>
+  Skočí na předchozí stopu v playlistu.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evStop</emphasis></term>
   <listitem><para>
-Zastaví přehrávání.
-    </para></listitem>
+  Zastaví přehrávání.
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -826,51 +893,51 @@ Zastaví přehrávání.
 <varlistentry>
   <term><emphasis role="bold">evBackward10sec</emphasis></term>
   <listitem><para>
-Převine zpět o 10 sekund.
-    </para></listitem>
+  Převine zpět o 10 sekund.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evBackward1min</emphasis></term>
   <listitem><para>
-Převine zpět o 1 minutu.
-    </para></listitem>
+  Převine zpět o 1 minutu.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evBackward10min</emphasis></term>
   <listitem><para>
-Převine zpět o 10 minut.
-    </para></listitem>
+  Převine zpět o 10 minut.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evForward10sec</emphasis></term>
   <listitem><para>
-Převine vpřed o 10 sekund.
-    </para></listitem>
+  Převine vpřed o 10 sekund.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evForward1min</emphasis></term>
   <listitem><para>
-Převine vpřed o 1 minutu.
-    </para></listitem>
+  Převine vpřed o 1 minutu.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evForward10min</emphasis></term>
   <listitem><para>
-Převine vpřed o 10 minut.
-    </para></listitem>
+  Převine vpřed o 10 minut.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetMoviePosition</emphasis></term>
   <listitem><para>
-Převine na danou pozici (může být přiřazeno potenciometru; použije se
-relativní hodnota (0-100%) potenciometru).
-    </para></listitem>
+  Převine na danou pozici (může být přiřazeno potenciometru; použije se
+  relativní hodnota (0-100%) potenciometru).
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -879,26 +946,26 @@ relativní hodnota (0-100%) potenciometru).
 <varlistentry>
   <term><emphasis role="bold">evHalfSize</emphasis></term>
   <listitem><para>
-Nastaví velikost okna filmu na poloviční velikost.
-    </para></listitem>
+  Nastaví velikost okna filmu na poloviční velikost.
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><emphasis role="bold">evDoubleSize</emphasis></term>
   <listitem><para>
-Nastaví velikost okna filmu na dvojnásobnou velikost.
-    </para></listitem>
+  Nastaví velikost okna filmu na dvojnásobnou velikost.
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><emphasis role="bold">evFullScreen</emphasis></term>
   <listitem><para>
-Přepíná do celoobrazovkového režimu a zpět.
-    </para></listitem>
+  Přepíná do celoobrazovkového režimu a zpět.
+  </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><emphasis role="bold">evNormalSize</emphasis></term>
   <listitem><para>
-Nastaví velikost okna na normální velikost.
-    </para></listitem>
+  Nastaví velikost okna na normální velikost.
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -907,66 +974,66 @@ Nastaví velikost okna na normální velikost.
 <varlistentry>
   <term><emphasis role="bold">evDecAudioBufDelay</emphasis></term>
   <listitem><para>
-Sníží zpoždění vyrovnávací paměti zvuku.
-    </para></listitem>
+  Sníží zpoždění vyrovnávací paměti zvuku.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evDecBalance</emphasis></term>
   <listitem><para>
-Sníží hodnotu stereováhy.
-    </para></listitem>
+  Sníží hodnotu stereováhy.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evDecVolume</emphasis></term>
   <listitem><para>
-Sníží hlasitost.
-    </para></listitem>
+  Sníží hlasitost.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evIncAudioBufDelay</emphasis></term>
   <listitem><para>
-Zvýší zpoždění vyrovnávací paměti zvuku.
-    </para></listitem>
+  Zvýší zpoždění vyrovnávací paměti zvuku.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evIncBalance</emphasis></term>
   <listitem><para>
-Zvýší hodnotu stereováhy.
-    </para></listitem>
+  Zvýší hodnotu stereováhy.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evIncVolume</emphasis></term>
   <listitem><para>
-Zvýší hlasitost.
-    </para></listitem>
+  Zvýší hlasitost.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evMute</emphasis></term>
   <listitem><para>
-Vypne/zapne zvuk.
-    </para></listitem>
+  Vypne/zapne zvuk.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetBalance</emphasis></term>
   <listitem><para>
-Nastaví stereováhu (může být sdruženo s potenciometrem; použije se
-relativní hodnota potenciometru (0-100%)).
-    </para></listitem>
+  Nastaví stereováhu (může být sdruženo s potenciometrem; použije se
+  relativní hodnota potenciometru (0-100%)).
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetVolume</emphasis></term>
   <listitem><para>
-Nastaví hlasitost (může být sdruženo s potenciometrem; použije se
-relativní hodnota potenciometru (0-100%)).
-    </para></listitem>
+  Nastaví hlasitost (může být sdruženo s potenciometrem; použije se
+  relativní hodnota potenciometru (0-100%)).
+  </para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -975,125 +1042,128 @@ relativní hodnota potenciometru (0-100%)).
 <varlistentry>
   <term><emphasis role="bold">evAbout</emphasis></term>
   <listitem><para>
-Otevře okno o aplikaci.
-    </para></listitem>
+  Otevře okno o aplikaci.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evDropSubtitle</emphasis></term>
   <listitem><para>
-Vypne aktuálně použité titulky.
-    </para></listitem>
+  Vypne aktuálně použité titulky.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evEqualizer</emphasis></term>
   <listitem><para>
-Zapne/vypne ekvalizér.
-    </para></listitem>
+  Zapne/vypne ekvalizér.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evExit</emphasis></term>
   <listitem><para>
-Ukončí program.
-    </para></listitem>
+  Ukončí program.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evIconify</emphasis></term>
   <listitem><para>
-Minimalizuje okno.
-    </para></listitem>
+  Minimalizuje okno.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoad</emphasis></term>
   <listitem><para>
-Otevře soubor (otevřením okna prohlížeče souborů, kde si soubor vyberete).
-    </para></listitem>
+  Otevře soubor (otevřením okna prohlížeče souborů, kde si soubor vyberete).
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoadPlay</emphasis></term>
   <listitem><para>
-Stejné jako <literal>evLoad</literal>, ale navíc se okamžitě spustí přehrávání
-otevřeného souboru.
-    </para></listitem>
+  Stejné jako <literal>evLoad</literal>, ale navíc se okamžitě spustí přehrávání
+  otevřeného souboru.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoadSubtitle</emphasis></term>
   <listitem><para>
-Otevře soubor s titulky (pomocí prohlížeče souborů)
-    </para></listitem>
+  Otevře soubor s titulky (pomocí prohlížeče souborů)
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoadAudioFile</emphasis></term>
   <listitem><para>
-Otevře soubor se zvukem (pomocí prohlížeče souborů)
-    </para></listitem>
+  Otevře soubor se zvukem (pomocí prohlížeče souborů)
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evNone</emphasis></term>
   <listitem><para>
-Prázdná zpráva, nemá žádný efekt (možná s výjimkou Subversion verzí :-)).
-    </para></listitem>
+  Prázdná zpráva, nemá žádný efekt (možná s výjimkou Subversion verzí :-)).
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPlaylist</emphasis></term>
   <listitem><para>
-Otevře/zavře okno playlistu.
-    </para></listitem>
+  Otevře/zavře okno playlistu.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPlayDVD</emphasis></term>
   <listitem><para>
-Zkusí otevřít disk v zadané DVD-ROM mechanice.
-    </para></listitem>
+  Zkusí otevřít disk v zadané DVD-ROM mechanice.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPlayVCD</emphasis></term>
   <listitem><para>
-Zkusí otevřít disk v zadané CD-ROM mechanice.
-    </para></listitem>
+  Zkusí otevřít disk v zadané CD-ROM mechanice.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evPreferences</emphasis></term>
   <listitem><para>
-Otevře okno předvoleb.
-    </para></listitem>
+  Otevře okno předvoleb.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetAspect</emphasis></term>
   <listitem><para>
-Nastaví poměr stran zobrazovaného obrázku.
-    </para></listitem>
+  Nastaví poměr stran zobrazovaného obrázku.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetURL</emphasis></term>
   <listitem><para>
-Zobrazí dialogové okno pro volbu URL.
-    </para></listitem>
+  Zobrazí dialogové okno pro volbu URL.
+  </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSkinBrowser</emphasis></term>
   <listitem><para>
-Otevře okno voliče skinů.
-    </para></listitem>
+  Otevře okno voliče skinů.
+  </para></listitem>
 </varlistentry>
 </variablelist>
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="skin-quality">
 <title>Tvorba kvalitních skinů</title>
@@ -1118,33 +1188,37 @@ Ten splňuje všechna kritéria od verze 1.5.
 </para>
 
 <itemizedlist>
-  <listitem><para>Ke každému skinu by měl být soubor
+  <listitem><para>
+  Ke každému skinu by měl být soubor
   <filename>README</filename>, obsahující informace o vás jako autorovi,
   o copyrightu a licenci a vše ostatní, co chcete dodat.
   Chcete-li mít changelog, tento soubor je dobrým místem.
   </para></listitem>
 
-  <listitem><para>Mel by tu být soubor <filename>VERSION</filename>
+  <listitem><para>
+  Měl by tu být soubor <filename>VERSION</filename>
   neobsahující nic jiného, než číslo verze na jediném řádku (např. 1.0).
   </para></listitem>
 
-  <listitem><para>Horizontální a vertikální ovládání (posuvníky jako hlasitost
+  <listitem><para>
+  Horizontální a vertikální ovládání (posuvníky jako hlasitost
   nebo pozice) by měly mít střed knoflíku správně zarovnán na stred posuvníku.
   Mělo by být možné posouvat knoflík na oba konce posuvníku, ale ne za ně.
   </para></listitem>
 
-  <listitem><para>Jednotlivé součásti skinu by měly mít správné rozměry
+  <listitem><para>
+  Jednotlivé součásti skinu by měly mít správné rozměry
   deklarované v souboru skin. Pokud to tak není, můžete kliknout mimo např.
   tlačítko a to se stejně stiskne, nebo kliknout na jeho plochu a nestisknout
   jej.
   </para></listitem>
 
-  <listitem><para>Soubor <filename>skin</filename> by měl být srovnán na znaky
+  <listitem><para>
+  Soubor <filename>skin</filename> by měl být srovnán na znaky
   a neobsahovat tabulátory. Srovnán na znaky znamená, že se čísla budou rovnat
   do úhledných sloupců.
   </para></listitem>
 </itemizedlist>
 
 </sect1>
-
 </appendix>
