@@ -421,8 +421,6 @@ void MP3_Init(){
     if (gCpuCaps.hasMMX)
     {
 	_has_mmx = 1;
-	make_decode_tables_MMX(outscale);
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: made decode tables with MMX optimization\n");
 	synth_func = synth_1to1_MMX;
     }
 #endif
