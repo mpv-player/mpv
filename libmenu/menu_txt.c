@@ -61,6 +61,7 @@ static void read_cmd(menu_t* menu,int cmd) {
     if(mpriv->cur_line >= mpriv->num_lines)
       mpriv->cur_line = mpriv->num_lines - 1;
     break;
+  case MENU_CMD_LEFT:
   case MENU_CMD_CANCEL:
     menu->show = 0;
     menu->cl = 1;
