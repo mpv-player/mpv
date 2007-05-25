@@ -280,7 +280,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
   return (vf_next_query_format(vf,fmt));
 }
 
-static int open(vf_instance_t *vf, char* args){
+static int open_vf(vf_instance_t *vf, char* args){
   if(!st_priv) {
     st_priv = calloc(1,sizeof(struct vf_priv_s));
     st_priv->root = st_priv->current = menu_open(args);
@@ -310,7 +310,7 @@ vf_info_t vf_info_menu  = {
   "menu",
   "Albeu",
   "",
-  open,
+  open_vf,
   NULL
 };
 

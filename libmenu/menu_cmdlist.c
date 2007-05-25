@@ -149,7 +149,7 @@ static int parse_args(menu_t* menu,char* args) {
   }
 }
 
-static int open(menu_t* menu, char* args) {
+static int open_cmdlist(menu_t* menu, char* args) {
   menu->draw = menu_list_draw;
   menu->read_cmd = read_cmd;
   menu->read_key = read_key;
@@ -177,5 +177,5 @@ const menu_info_t menu_info_cmdlist = {
     &cfg_dflt,
     cfg_fields
   },
-  open
+  open_cmdlist
 };
