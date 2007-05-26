@@ -614,12 +614,12 @@ static void list_chapters(pgc_t *pgc)
        return;
 
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "CHAPTERS: ");
-    for(i=0; i<pgc->nr_of_programs-1; i++)
+    for(i=0; i<pgc->nr_of_programs; i++)
     {
         cell = pgc->program_map[i]; //here the cell is 1-based
         t2 = t/1000;
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d,", t2/3600, (t2/60)%60, t2%60);
-        while(cell < pgc->program_map[i+1]) {
+        while(i+1<pgc->nr_of_programs && cell < pgc->program_map[i+1]) {
             if(!(pgc->cell_playback[cell-1].block_type == BLOCK_TYPE_ANGLE_BLOCK &&
                  pgc->cell_playback[cell-1].block_mode != BLOCK_MODE_FIRST_CELL)
             )
