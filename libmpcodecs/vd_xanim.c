@@ -40,7 +40,6 @@ LIBVD_EXTERN(xanim)
 #include "bswap.h"
 
 #include "osdep/timer.h"
-#include "libvo/fastmemcpy.h"
 
 #if 0
 /* this should be removed */

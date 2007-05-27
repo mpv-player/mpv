@@ -14,7 +14,6 @@
 
 #include "libavutil/common.h"
 #include "mpbswap.h"
-#include "libvo/fastmemcpy.h"
 
 #include "vd_internal.h"
 
