@@ -453,7 +453,6 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	j->s->height = h;
 	j->s->qscale = q;		// Encoding quality
 
-	j->s->mjpeg_data_only_frames = 0;
 	j->s->out_format = FMT_MJPEG;
 	j->s->intra_only = 1;		// Generate only intra pictures for jpeg
 	j->s->encoding = 1;		// Set mode to encode
@@ -469,7 +468,7 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	 * The current setup is simply YUV422, with two horizontal Y components
 	 * for every UV component.
 	 */
-	j->s->mjpeg_write_tables = 1;	// setup to write tables
+	//FIXME j->s->mjpeg_write_tables = 1;	// setup to write tables
 	j->s->mjpeg_vsample[0] = 1;	// 1 appearance of Y vertically
 	j->s->mjpeg_vsample[1] = 1;	// 1 appearance of U vertically
 	j->s->mjpeg_vsample[2] = 1;	// 1 appearance of V vertically
@@ -491,7 +490,7 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	}
 
 	// Build mjpeg huffman code tables, setting up j->s->mjpeg_ctx
-	if (mjpeg_init(j->s) < 0) {
+	if (ff_mjpeg_encode_init(j->s) < 0) {
 		av_free(j->s);
 		av_free(j);
 		return NULL;
@@ -575,7 +574,7 @@ static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
 	init_put_bits(&j->s->pb, bufr, 1024*256);
 
 	// Emit the mjpeg header blocks
-	mjpeg_picture_header(j->s);
+	ff_mjpeg_encode_picture_header(j->s);
 
 	j->s->header_bits = put_bits_count(&j->s->pb);
 
@@ -619,11 +618,12 @@ static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
 		}
 	}
 	emms_c();
-	mjpeg_picture_trailer(j->s);
+	ff_mjpeg_encode_picture_trailer(j->s);
 	flush_put_bits(&j->s->pb);
 
-	if (j->s->mjpeg_write_tables == 1)
-		j->s->mjpeg_write_tables = 0;
+	//FIXME
+	//if (j->s->mjpeg_write_tables == 1)
+	//	j->s->mjpeg_write_tables = 0;
 
 	return pbBufPtr(&(j->s->pb)) - j->s->pb.buf;
 }
@@ -635,7 +635,7 @@ static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
  * \param j pointer to jpeg_enc structure
  */
 static void jpeg_enc_uninit(jpeg_enc_t *j) {
-	mjpeg_close(j->s);
+	ff_mjpeg_encode_close(j->s);
 	av_free(j->s);
 	av_free(j);
 }

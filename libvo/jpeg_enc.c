@@ -314,7 +314,6 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->s->height = h;
 	j->s->qscale = q;
 
-	j->s->mjpeg_data_only_frames = 0;
 	j->s->out_format = FMT_MJPEG;
 	j->s->intra_only = 1;
 	j->s->encoding = 1;
@@ -322,7 +321,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->s->y_dc_scale = 8;
 	j->s->c_dc_scale = 8;
 
-	j->s->mjpeg_write_tables = 1;
+	//FIXME j->s->mjpeg_write_tables = 1;
 	j->s->mjpeg_vsample[0] = 1;
 	j->s->mjpeg_vsample[1] = 1;
 	j->s->mjpeg_vsample[2] = 1;
@@ -343,7 +342,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 		avcodec_inited=1;
 	}
 
-	if (mjpeg_init(j->s) < 0) {
+	if (ff_mjpeg_encode_init(j->s) < 0) {
 		av_free(j->s);
 		av_free(j);
 		return NULL;
@@ -385,7 +384,7 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 
 	init_put_bits(&j->s->pb, bufr, 1024*256);
 
-	mjpeg_picture_header(j->s);
+	ff_mjpeg_encode_picture_header(j->s);
 
 	j->s->header_bits = put_bits_count(&j->s->pb);
 
@@ -490,17 +489,18 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 		}
 	}
 	emms_c();
-	mjpeg_picture_trailer(j->s);
+	ff_mjpeg_encode_picture_trailer(j->s);
 	flush_put_bits(&j->s->pb);	
 
-	if (j->s->mjpeg_write_tables == 1)
-		j->s->mjpeg_write_tables = 0;
+	//FIXME
+	//if (j->s->mjpeg_write_tables == 1)
+	//	j->s->mjpeg_write_tables = 0;
 	
 	return pbBufPtr(&(j->s->pb)) - j->s->pb.buf;
 }
 
 void jpeg_enc_uninit(jpeg_enc_t *j) {
-	mjpeg_close(j->s);
+	ff_mjpeg_encode_close(j->s);
 	av_free(j->s);
 	av_free(j);
 }
