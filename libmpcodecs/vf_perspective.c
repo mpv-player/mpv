@@ -33,7 +33,6 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "libvo/fastmemcpy.h"
 
 #define SUB_PIXEL_BITS 8
 #define SUB_PIXELS (1<<SUB_PIXEL_BITS)

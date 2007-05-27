@@ -21,7 +21,6 @@
 #include "vf.h"
 #include "vf_scale.h"
 
-#include "libvo/fastmemcpy.h"
 #include "libswscale/swscale.h"
 
 struct vf_priv_s {

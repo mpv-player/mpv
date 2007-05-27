@@ -47,7 +47,6 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "libvo/fastmemcpy.h"
 
 
 struct vf_priv_s {

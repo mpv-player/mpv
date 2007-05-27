@@ -37,7 +37,6 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "libvo/fastmemcpy.h"
 #include "libswscale/swscale.h"
 #include "vf_scale.h"
 

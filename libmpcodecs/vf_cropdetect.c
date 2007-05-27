@@ -11,8 +11,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#include "libvo/fastmemcpy.h"
-
 struct vf_priv_s {
     int x1,y1,x2,y2;
     int limit;

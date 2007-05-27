@@ -60,8 +60,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#include "libvo/fastmemcpy.h"
-
 /* Uncomment if you want to print some info on the format */
 // #define DUMP_FORMAT_DATA
 

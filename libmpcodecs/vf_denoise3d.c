@@ -32,7 +32,6 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "libvo/fastmemcpy.h"
 
 #define PARAM1_DEFAULT 4.0
 #define PARAM2_DEFAULT 3.0

@@ -12,7 +12,6 @@
 #include "vf.h"
 
 #include "libvo/video_out.h"
-#include "libvo/fastmemcpy.h"
 
 #include "m_option.h"
 #include "m_struct.h"

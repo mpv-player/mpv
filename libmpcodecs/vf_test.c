@@ -29,8 +29,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#include "libvo/fastmemcpy.h"
-
 //===========================================================================//
 
 #include <inttypes.h>

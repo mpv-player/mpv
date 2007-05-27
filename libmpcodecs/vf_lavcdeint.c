@@ -11,8 +11,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-//#include "libvo/fastmemcpy.h"
-
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
 #else
