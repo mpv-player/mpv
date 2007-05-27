@@ -30,7 +30,6 @@ int tv_param_on = 0;
 
 #include "libaf/af_format.h"
 #include "libmpcodecs/img_format.h"
-#include "libvo/fastmemcpy.h"
 
 #include "tv.h"
 
