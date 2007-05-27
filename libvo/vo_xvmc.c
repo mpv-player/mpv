@@ -7,7 +7,6 @@
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "fastmemcpy.h"
 #include "osdep/timer.h"
 
 #include <X11/Xlib.h>

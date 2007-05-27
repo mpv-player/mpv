@@ -25,7 +25,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-#include "fastmemcpy.h"
 #include "mp_fifo.h"
 
 #include <ggi/ggi.h>

@@ -35,7 +35,6 @@ static int CompletionType = -1;
 int XShmGetEventBase(Display *);
 #endif
 
-#include "fastmemcpy.h"
 #include "sub.h"
 
 #include "libswscale/swscale.h"
