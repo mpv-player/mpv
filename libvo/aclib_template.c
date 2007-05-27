@@ -64,14 +64,14 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 //  by Pontscho/fresh!mindworkz
 
 
-#undef HAVE_MMX1
+#undef HAVE_ONLY_MMX1
 #if defined(HAVE_MMX) && !defined(HAVE_MMX2) && !defined(HAVE_3DNOW) && !defined(HAVE_SSE)
 /*  means: mmx v.1. Note: Since we added alignment of destinition it speedups
     of memory copying on PentMMX, Celeron-1 and P2 upto 12% versus
     standard (non MMX-optimized) version.
     Note: on K6-2+ it speedups memory copying upto 25% and
           on K7 and P3 about 500% (5 times). */
-#define HAVE_MMX1
+#define HAVE_ONLY_MMX1
 #endif
 
 
@@ -127,7 +127,7 @@ __asm__ __volatile__(\
 #endif
 
 #undef MIN_LEN
-#ifdef HAVE_MMX1
+#ifdef HAVE_ONLY_MMX1
 #define MIN_LEN 0x800  /* 2K blocks */
 #else
 #define MIN_LEN 0x40  /* 64-byte blocks */
@@ -151,7 +151,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 				printf("freq < %8d %4d\n", 1<<i, freq[i]);
 	}
 #endif
-#ifndef HAVE_MMX1
+#ifndef HAVE_ONLY_MMX1
         /* PREFETCH has effect even for MOVSB instruction ;) */
 	__asm__ __volatile__ (
 	        PREFETCH" (%0)\n"
@@ -229,7 +229,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	for(; ((int)to & (BLOCK_SIZE-1)) && i>0; i--)
 	{
 		__asm__ __volatile__ (
-#ifndef HAVE_MMX1
+#ifndef HAVE_ONLY_MMX1
         	PREFETCH" 320(%0)\n"
 #endif
 		"movq (%0), %%mm0\n"
@@ -318,7 +318,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	for(; i>0; i--)
 	{
 		__asm__ __volatile__ (
-#ifndef HAVE_MMX1
+#ifndef HAVE_ONLY_MMX1
         	PREFETCH" 320(%0)\n"
 #endif
 		"movq (%0), %%mm0\n"
