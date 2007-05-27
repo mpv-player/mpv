@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22129 -->
+<!-- synced with r23342 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -248,7 +248,7 @@ fájl lejátszható-e más lejátszókkal is az
 <application>MPlayer</application>-en kívül.
 </para>
 
-<example>
+<example id="encode_to_macromedia_flash_format">
 <title>kódolás Macromedia Flash formátumba</title>
 <para>
 Egy Macromedia Flash videó létrehozása, mely lejátszható web böngészőben
