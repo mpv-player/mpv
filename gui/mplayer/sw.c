@@ -6,7 +6,6 @@
 
 #include "../config.h"
 #include "../libvo/x11_common.h"
-#include "../libvo/fastmemcpy.h"
 
 #include "gmplayer.h"
 #include "app.h"
