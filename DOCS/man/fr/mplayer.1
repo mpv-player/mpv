@@ -1,4 +1,4 @@
-.\" synced with r23283
+.\" synced with r23370
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -33,7 +33,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "22 Octobre 2006" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "27 Mai 2007" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -5946,11 +5946,9 @@ avec DVB/\:DXR3/\:IVTV.
 Plus rapide et de meilleure qualité que \-vf fame.
 .RSs
 .IPs <qualité>
-.RSss
 1\-31: qscale fixe
 .br
 32\-: débit binaire fixe en kbits
-.REss
 .IPs <fps>
 force le nombre de trames par seconde en sortie (nombre flottant)
 (par défaut\ : 0, autodétection basée sur la hauteur)
@@ -8604,10 +8602,12 @@ par défaut
 .IPs "444P\ "
 pour ffv1
 .IPs "422P\ "
-pour HuffYUV, JPEG sans perte (lossless) et ffv1
-.IPs 411P,YVU9
-pour JPEG sans perte et ffv1
-.IPs BGR32
+pour HuffYUV, JPEG sans perte (lossless), dv et ffv1
+.IPs "411P\ "
+pour JPEG sans perte, dv et ffv1
+.IPs "YVU9\ "
+pour JPEG sans perte, ffv1 et svq1
+.IPs "BGR32\ "
 pour JPEG sans perte et ffv1
 .RE
 .PD 1
@@ -10451,7 +10451,7 @@ temps que l'option téléciné.
 .TP
 .B telecine
 Active le mode pulldown 3:2 logiciel\ : Le multiplexeur va faire comme
-si la vidéo avait été encodée à 30000/1001.
+si la vidéo avait été encodée à 30000/1001 images par seconde.
 Ne fonctionne qu'avec les vidéos MPEG-2 dont le nombre de trames par
 seconde est 24000/1001, convertissez-le avec l'option \-ofps si
 nécessaire.
@@ -11025,7 +11025,7 @@ MPlayer était écrit à l'origine par Arpad Gereoffy.
 Voir le fichier AUTHORS pour la liste de certains des nombreux autres
 contributeurs.
 .TP
-MPlayer est (C) 2000\-2006 The MPlayer Team
+MPlayer est (C) 2000\-2007 The MPlayer Team
 .TP
 Cette page de man est basée sur sa version en langue anglaise, écrite et
 maintenue par Gabucino, Jonas Jermann et Diego Biurrun
