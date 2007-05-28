@@ -201,7 +201,7 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, str
   unsigned bitrate;
 
   while ((pos = find_asf_guid(buf, asf_ext_stream_header, pos, buf_len)) >= 0) {
-    int this_stream_num, stnamect, payct, i, objlen;
+    int this_stream_num, stnamect, payct, i;
     int buf_max_index=pos+50;
     if (buf_max_index > buf_len) return 0;
     buffer = &buf[pos];

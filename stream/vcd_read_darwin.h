@@ -45,7 +45,6 @@ return 0;
 
 int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 {
-	dk_cd_read_track_info_t tocentry;
 	struct CDTrackInfo entry;
 
 	memset( &vcd->entry, 0, sizeof(vcd->entry));
@@ -69,7 +68,6 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 	dk_cd_read_disc_info_t tochdr;
 	struct CDDiscInfo hdr;
 	
-	dk_cd_read_track_info_t tocentry;
 	struct CDTrackInfo entry;
 	
 	//read toc header

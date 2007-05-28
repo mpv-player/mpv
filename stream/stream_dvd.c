@@ -652,7 +652,7 @@ static double dvd_get_current_time(stream_t *stream, int cell)
 static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec)
 {
     unsigned int i, j, k, timeunit, ac_time, tmap_sector=0, cell_sector=0, vobu_sector=0;
-    int t=0, t2=0;
+    int t=0;
     double tm, duration;
     off_t pos = -1;
     dvd_priv_t *d = stream->priv;

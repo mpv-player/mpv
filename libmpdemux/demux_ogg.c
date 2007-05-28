@@ -166,8 +166,6 @@ extern subtitle* vo_sub;
 
 void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
   int lcv;
-  int line_pos = 0;
-  int ignoring = 0;
   char *packet = pack->packet;
 
   if (pack->bytes < 4)
@@ -247,7 +245,6 @@ static  int demux_ogg_get_page_stream(ogg_demuxer_t* ogg_d,ogg_stream_state** os
 
 static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,void *context,float* pts,int* flags, int samplesize) {
   unsigned char* data = pack->packet;
-  ogg_demuxer_t *ogg_d = os->ogg_d;
 
   *pts = 0;
   *flags = 0;

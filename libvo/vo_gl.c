@@ -261,7 +261,6 @@ static void genEOSD(mp_eosd_images_t *imgs) {
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
   ass_image_t *img = imgs->imgs;
   ass_image_t *i;
-  int cnt;
 
   if (imgs->changed == 0) // there are elements, but they are unchanged
       return;

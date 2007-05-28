@@ -71,7 +71,7 @@ static unsigned char *ImageDataOrig;
 
 /* X11 related variables */
 static XImage *myximage = NULL;
-static int depth, bpp, mode;
+static int depth, bpp;
 static XWindowAttributes attribs;
 
 static int int_pause;

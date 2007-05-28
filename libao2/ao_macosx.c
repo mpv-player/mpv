@@ -173,7 +173,7 @@ int req=(inNumFrames)*ao->packetSize;
 static int control(int cmd,void *arg){
 ao_control_vol_t *control_vol;
 OSStatus err;
-Float32 pan, vol;
+Float32 vol;
 	switch (cmd) {
 	case AOCONTROL_GET_VOLUME:
 		control_vol = (ao_control_vol_t*)arg;
@@ -237,7 +237,7 @@ static void print_format(const char* str,AudioStreamBasicDescription *f){
 
 static int init(int rate,int channels,int format,int flags)
 {
-AudioStreamBasicDescription inDesc, outDesc;
+AudioStreamBasicDescription inDesc;
 ComponentDescription desc; 
 Component comp; 
 AURenderCallbackStruct renderCallback;
@@ -402,8 +402,6 @@ static float get_delay(void)
 /* unload plugin and deregister from coreaudio */
 static void uninit(int immed)
 {
-  int i;
-  OSErr status;
 
   if (!immed) {
     long long timeleft=(1000000LL*buf_used())/ao_data.bps;

@@ -691,7 +691,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                
                if ( tivo->tmf != 1 )
                {
-                  off_t size;
                   off_t offset;
 
                   numberParts = demux->stream->end_pos / TIVO_PART_LENGTH;

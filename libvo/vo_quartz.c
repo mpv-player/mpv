@@ -99,7 +99,6 @@ static CGRect bounds;
 static GDHandle deviceHdl;
 
 static CGDataProviderRef dataProviderRef;
-static CGImageAlphaInfo alphaInfo;
 static CGImageRef image;
 
 static Rect imgRect; // size of the original image (unscaled)

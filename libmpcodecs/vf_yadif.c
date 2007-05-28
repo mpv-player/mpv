@@ -347,7 +347,7 @@ static void filter_line_c(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint
 }
 
 static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int width, int height, int parity, int tff){
-    int x, y, i;
+    int y, i;
 
     for(i=0; i<3; i++){
         int is_chroma= !!i;

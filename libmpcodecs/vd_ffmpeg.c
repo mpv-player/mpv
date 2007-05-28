@@ -735,7 +735,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     AVCodecContext *avctx = ctx->avctx;
     mp_image_t* mpi=NULL;
     int dr1= ctx->do_dr1;
-    unsigned char *buf = NULL;
 
     if(len<=0) return NULL; // skipped frame
 
