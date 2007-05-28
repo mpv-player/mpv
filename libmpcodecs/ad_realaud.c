@@ -202,8 +202,6 @@ static int preinit(sh_audio_t *sh){
   // let's check if the driver is available, return 0 if not.
   // (you should do that if you use external lib(s) which is optional)
   unsigned int result;
-  int len=0;
-  void* prop;
   char *path;
 
   path = malloc(strlen(REALCODEC_PATH)+strlen(sh->codec->dll)+2);
