@@ -40,8 +40,10 @@
 
 #ifdef USE_LIBAVUTIL_SO
 #include <ffmpeg/lzo.h>
+#include <ffmpeg/intreadwrite.h>
 #else
 #include "libavutil/lzo.h"
+#include "libavutil/intreadwrite.h"
 #endif
 
 static unsigned char sipr_swaps[38][2]={
@@ -187,80 +189,10 @@ typedef struct mkv_demuxer
   int num_attachments;
 } mkv_demuxer_t;
 
-
-typedef struct
-{
-  uint32_t chunks;              /* number of chunks */
-  uint32_t timestamp;           /* timestamp from packet header */
-  uint32_t len;                 /* length of actual data */
-  uint32_t chunktab;            /* offset to chunk offset array */
-} dp_hdr_t;
-
-typedef struct __attribute__((__packed__))
-{
-  uint32_t size;
-  uint32_t fourcc1;
-  uint32_t fourcc2;
-  uint16_t width;
-  uint16_t height;
-  uint16_t bpp;
-  uint32_t unknown1;
-  uint32_t fps;
-  uint32_t type1;
-  uint32_t type2;
-} real_video_props_t;
-
-typedef struct __attribute__((__packed__))
-{
-  uint32_t fourcc1;             /* '.', 'r', 'a', 0xfd */
-  uint16_t version1;            /* 4 or 5 */
-  uint16_t unknown1;            /* 00 000 */
-  uint32_t fourcc2;             /* .ra4 or .ra5 */
-  uint32_t unknown2;            /* ??? */
-  uint16_t version2;            /* 4 or 5 */
-  uint32_t header_size;         /* == 0x4e */
-  uint16_t flavor;              /* codec flavor id */
-  uint32_t coded_frame_size;    /* coded frame size */
-  uint32_t unknown3;            /* big number */
-  uint32_t unknown4;            /* bigger number */
-  uint32_t unknown5;            /* yet another number */
-  uint16_t sub_packet_h;
-  uint16_t frame_size;
-  uint16_t sub_packet_size;
-  uint16_t unknown6;            /* 00 00 */
-  uint16_t sample_rate;
-  uint16_t unknown8;            /* 0 */
-  uint16_t sample_size;
-  uint16_t channels;
-} real_audio_v4_props_t;
-
-typedef struct __attribute__((__packed__))
-{
-  uint32_t fourcc1;             /* '.', 'r', 'a', 0xfd */
-  uint16_t version1;            /* 4 or 5 */
-  uint16_t unknown1;            /* 00 000 */
-  uint32_t fourcc2;             /* .ra4 or .ra5 */
-  uint32_t unknown2;            /* ??? */
-  uint16_t version2;            /* 4 or 5 */
-  uint32_t header_size;         /* == 0x4e */
-  uint16_t flavor;              /* codec flavor id */
-  uint32_t coded_frame_size;    /* coded frame size */
-  uint32_t unknown3;            /* big number */
-  uint32_t unknown4;            /* bigger number */
-  uint32_t unknown5;            /* yet another number */
-  uint16_t sub_packet_h;
-  uint16_t frame_size;
-  uint16_t sub_packet_size;
-  uint16_t unknown6;            /* 00 00 */
-  uint8_t unknown7[6];          /* 0, srate, 0 */
-  uint16_t sample_rate;
-  uint16_t unknown8;            /* 0 */
-  uint16_t sample_size;
-  uint16_t channels;
-  uint32_t genr;                /* "genr" */
-  uint32_t fourcc3;             /* fourcc */
-} real_audio_v5_props_t;
-
+#define REALHEADER_SIZE    16
+#define RVPROPERTIES_SIZE  34
+#define RAPROPERTIES4_SIZE 56
+#define RAPROPERTIES5_SIZE 70
 
 /* for e.g. "-slang ger" */
 extern char *dvdsub_lang;
@@ -1861,32 +1793,30 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
       bih->biBitCount = 24;
       bih->biSizeImage = bih->biWidth * bih->biHeight * bih->biBitCount/8;
 
-      if (track->private_size >= sizeof (real_video_props_t)
+      if (track->private_size >= RVPROPERTIES_SIZE
           && (!strcmp (track->codec_id, MKV_V_REALV10)
               || !strcmp (track->codec_id, MKV_V_REALV20)
               || !strcmp (track->codec_id, MKV_V_REALV30)
               || !strcmp (track->codec_id, MKV_V_REALV40)))
         {
           unsigned char *dst, *src;
-          real_video_props_t *rvp;
           uint32_t type2;
           unsigned int cnt;
 
-          rvp = (real_video_props_t *) track->private_data;
-          src = (unsigned char *) (rvp + 1);
+          src = track->private_data + RVPROPERTIES_SIZE;
 
-          cnt = track->private_size - sizeof (real_video_props_t);
+          cnt = track->private_size - RVPROPERTIES_SIZE;
           bih = realloc(bih, sizeof (BITMAPINFOHEADER)+8+cnt);
           bih->biSize = 48+cnt;
           bih->biPlanes = 1;
-          type2 = be2me_32 (rvp->type2);
+          type2 = AV_RB32(src - 4);
           if (type2 == 0x10003000 || type2 == 0x10003001)
             bih->biCompression=mmioFOURCC('R','V','1','3');
           else
             bih->biCompression=mmioFOURCC('R','V',track->codec_id[9],'0');
           dst = (unsigned char *) (bih + 1);
-          ((unsigned int *) dst)[0] = rvp->type1;
-          ((unsigned int *) dst)[1] = rvp->type2;
+          // copy type1 and type2 info from rv properties
+          memcpy(dst, src - 8, 8);
           stream_read(demuxer->stream, dst+8, cnt);
           track->realmedia = 1;
 
@@ -2047,7 +1977,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
             }
           track->a_formattag = mmioFOURCC ('f', 'L', 'a', 'C');
         }
-      else if (track->private_size >= sizeof (real_audio_v4_props_t))
+      else if (track->private_size >= RAPROPERTIES4_SIZE)
         {
           if (!strcmp(track->codec_id, MKV_A_REAL28))
             track->a_formattag = mmioFOURCC('2', '8', '_', '8');
@@ -2175,46 +2105,36 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
       sh_a->wf = realloc(sh_a->wf, sizeof(WAVEFORMATEX) + sh_a->wf->cbSize);
       memcpy((unsigned char *) (sh_a->wf+1), track->private_data, sh_a->wf->cbSize);
     }
-  else if (track->private_size >= sizeof(real_audio_v4_props_t)
+  else if (track->private_size >= RAPROPERTIES4_SIZE
            && !strncmp (track->codec_id, MKV_A_REALATRC, 7))
     {
       /* Common initialization for all RealAudio codecs */
-      real_audio_v4_props_t *ra4p;
-      real_audio_v5_props_t *ra5p;
-      unsigned char *src;
+      unsigned char *src = track->private_data;
       int codecdata_length, version;
-
-      ra4p = (real_audio_v4_props_t *) track->private_data;
-      ra5p = (real_audio_v5_props_t *) track->private_data;
+      int flavor;
 
       sh_a->wf->nAvgBytesPerSec = 0;  /* FIXME !? */
-      sh_a->wf->nBlockAlign = be2me_16 (ra4p->frame_size);
 
-      version = be2me_16 (ra4p->version1);
-
+      version = AV_RB16(src + 4);
+      flavor = AV_RB16(src + 22);
+      track->coded_framesize = AV_RB32(src + 24);
+      track->sub_packet_h = AV_RB16(src + 40);
+      sh_a->wf->nBlockAlign =
+      track->audiopk_size = AV_RB16(src + 42);
+      track->sub_packet_size = AV_RB16(src + 44);
       if (version == 4)
         {
-          src = (unsigned char *) (ra4p + 1);
+          src += RAPROPERTIES4_SIZE;
           src += src[0] + 1;
           src += src[0] + 1;
-          track->sub_packet_size = be2me_16 (ra4p->sub_packet_size);
-          track->sub_packet_h = be2me_16 (ra4p->sub_packet_h);
-          track->coded_framesize = be2me_32 (ra4p->coded_frame_size);
-          track->audiopk_size = be2me_16 (ra4p->frame_size);
         }
       else
-        {
-        src = (unsigned char *) (ra5p + 1);
-        track->sub_packet_size = be2me_16 (ra5p->sub_packet_size);
-        track->sub_packet_h = be2me_16 (ra5p->sub_packet_h);
-        track->coded_framesize = be2me_32 (ra5p->coded_frame_size);
-        track->audiopk_size = be2me_16 (ra5p->frame_size);
-        }
+        src += RAPROPERTIES5_SIZE;
 
       src += 3;
       if (version == 5)
         src++;
-      codecdata_length = be2me_32 (*(uint32_t *)src);
+      codecdata_length = AV_RB32(src);
       src += 4;
       sh_a->wf->cbSize = codecdata_length;
       sh_a->wf = realloc (sh_a->wf,
@@ -2224,19 +2144,19 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
 
       switch (track->a_formattag) {
         case mmioFOURCC('a', 't', 'r', 'c'):
-          sh_a->wf->nAvgBytesPerSec = atrc_fl2bps[be2me_16 (ra4p->flavor)];
+          sh_a->wf->nAvgBytesPerSec = atrc_fl2bps[flavor];
           sh_a->wf->nBlockAlign = track->sub_packet_size;
           track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
           track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
           break;
         case mmioFOURCC('c', 'o', 'o', 'k'):
-          sh_a->wf->nAvgBytesPerSec = cook_fl2bps[be2me_16 (ra4p->flavor)];
+          sh_a->wf->nAvgBytesPerSec = cook_fl2bps[flavor];
           sh_a->wf->nBlockAlign = track->sub_packet_size;
           track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
           track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
           break;
         case mmioFOURCC('s', 'i', 'p', 'r'):
-          sh_a->wf->nAvgBytesPerSec = sipr_fl2bps[be2me_16 (ra4p->flavor)];
+          sh_a->wf->nAvgBytesPerSec = sipr_fl2bps[flavor];
           sh_a->wf->nBlockAlign = track->coded_framesize;
           track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
           track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
@@ -2922,7 +2842,8 @@ handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   demux_packet_t *dp;
-  dp_hdr_t *hdr;
+  uint32_t timestamp = mkv_d->last_pts * 1000;
+  uint32_t *hdr;
   uint8_t chunks;
   int isize;
 #ifdef WORDS_BIGENDIAN
@@ -2932,10 +2853,10 @@ handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
 
   chunks = *buffer++;
   isize = --size - (chunks+1)*8;
-  dp = new_demux_packet (sizeof (*hdr) + size);
-  memcpy (dp->buffer + sizeof(*hdr), buffer + (chunks+1)*8, isize);
+  dp = new_demux_packet (REALHEADER_SIZE + size);
+  memcpy (dp->buffer + REALHEADER_SIZE, buffer + (chunks+1)*8, isize);
 #ifdef WORDS_BIGENDIAN
-  p = (uint8_t *)(dp->buffer + sizeof(*hdr) + isize);
+  p = (uint8_t *)(dp->buffer + REALHEADER_SIZE + isize);
   for (i = 0; i<(chunks+1)*8; i+=4) {
     p[i] = *((uint8_t *)buffer+i+3);
     p[i+1] = *((uint8_t *)buffer+i+2);
@@ -2943,24 +2864,24 @@ handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
     p[i+3] = *((uint8_t *)buffer+i);
   }
 #else
-  memcpy (dp->buffer + sizeof(*hdr) + isize, buffer, (chunks+1)*8);
+  memcpy (dp->buffer + REALHEADER_SIZE + isize, buffer, (chunks+1)*8);
 #endif
 
-  hdr = (dp_hdr_t *) dp->buffer;
-  hdr->len = isize;
-  hdr->chunks = chunks;
-  hdr->timestamp = mkv_d->last_pts * 1000;
-  hdr->chunktab = sizeof(*hdr) + isize;
+  hdr = dp->buffer;
+  *hdr++ = chunks;                 // number of chunks
+  *hdr++ = timestamp;              // timestamp from packet header
+  *hdr++ = isize;                  // length of actual data
+  *hdr++ = REALHEADER_SIZE + isize;    // offset to chunk offset array
 
   if (mkv_d->v_skip_to_keyframe)
     {
       dp->pts = mkv_d->last_pts;
       track->rv_kf_base = 0;
-      track->rv_kf_pts = hdr->timestamp;
+      track->rv_kf_pts = timestamp;
     }
   else
-    dp->pts = real_fix_timestamp (track, dp->buffer + sizeof(*hdr),
-                                  hdr->timestamp);
+    dp->pts = real_fix_timestamp (track, dp->buffer + REALHEADER_SIZE,
+                                  timestamp);
   dp->pos = demuxer->filepos;
   dp->flags = block_bref ? 0 : 0x10;
 
