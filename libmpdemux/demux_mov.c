@@ -434,6 +434,7 @@ static int mov_check_file(demuxer_t* demuxer){
 		  case MOV_FOURCC('r','m','d','a'):
 		      continue;
 		  case MOV_FOURCC('r','d','r','f'): {
+		      int tmp=stream_read_dword(demuxer->stream);
 		      int type=stream_read_dword_le(demuxer->stream);
 	              int slen=stream_read_dword(demuxer->stream);
 		      //char* s=malloc(slen+1);
@@ -454,6 +455,7 @@ static int mov_check_file(demuxer_t* demuxer){
 		      len-=12+slen;i-=12+slen; break;
 		    }
 		  case MOV_FOURCC('r','m','d','r'): {
+		      int flags=stream_read_dword(demuxer->stream);
 		      int rate=stream_read_dword(demuxer->stream);
 		      mp_msg(MSGT_DEMUX,MSGL_V,"  min. data rate: %d bits/sec\n",rate);
 		      len-=8; i-=8; break;
@@ -1636,9 +1638,12 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       break;
     }
     case MOV_FOURCC('h','d','l','r'): {
+      unsigned int tmp = stream_read_dword(demuxer->stream);
       unsigned int type = stream_read_dword_le(demuxer->stream);
       unsigned int subtype = stream_read_dword_le(demuxer->stream);
       unsigned int manufact = stream_read_dword_le(demuxer->stream);
+      unsigned int comp_flags = stream_read_dword(demuxer->stream);
+      unsigned int comp_mask = stream_read_dword(demuxer->stream);
       int len = stream_read_char(demuxer->stream);
       char* str = malloc(len + 1);
       stream_read(demuxer->stream, str, len);
@@ -1718,6 +1723,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       break;
     }
     case MOV_FOURCC('s','t','t','s'): {
+      int temp = stream_read_dword(demuxer->stream);
       int len = stream_read_dword(demuxer->stream);
       int i;
       unsigned int pts = 0;
@@ -1776,6 +1782,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       break;
     }
     case MOV_FOURCC('s','t','c','o'): {
+      int temp = stream_read_dword(demuxer->stream);
       int len = stream_read_dword(demuxer->stream);
       int i;
       mp_msg(MSGT_DEMUX, MSGL_V, 
@@ -1792,6 +1799,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       break;
     }
     case MOV_FOURCC('c','o','6','4'): {
+      int temp = stream_read_dword(demuxer->stream);
       int len = stream_read_dword(demuxer->stream);
       int i;
       mp_msg(MSGT_DEMUX, MSGL_V,
