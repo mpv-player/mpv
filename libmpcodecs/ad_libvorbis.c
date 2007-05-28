@@ -220,9 +220,9 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 #ifdef TREMOR
         ogg_int32_t **pcm;
 #else
+        float scale;
         float **pcm;
 #endif
-        float scale;
         struct ov_struct_st *ov = sh->context;
 	while(len < minlen) {
 	  while((samples=vorbis_synthesis_pcmout(&ov->vd,&pcm))<=0){
