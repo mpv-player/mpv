@@ -188,6 +188,9 @@ int m_property_double_ro(m_option_t* prop,int action,
 /// get/print the string
 int m_property_string_ro(m_option_t* prop,int action,void* arg, char* str);
 
+/// get/print a bitrate
+int m_property_bitrate(m_option_t* prop,int action,void* arg,int rate);
+
 ///@}
 
 ///@}

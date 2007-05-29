@@ -331,3 +331,15 @@ int m_property_string_ro(m_option_t* prop,int action,void* arg,char* str) {
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
+
+int m_property_bitrate(m_option_t* prop,int action,void* arg,int rate) {
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if (!arg)
+	    return M_PROPERTY_ERROR;
+        *(char**)arg = malloc (16);
+        sprintf(*(char**)arg, "%d kbps", rate*8/1000);
+        return M_PROPERTY_OK;
+    }
+    return m_property_int_ro(prop, action, arg, rate);
+}

@@ -8,6 +8,7 @@
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
+#include "codec-cfg.h"
 #include "mplayer.h"
 #include "libvo/sub.h"
 #include "m_option.h"
@@ -306,6 +307,41 @@ static int mp_property_length(m_option_t * prop, int action, void *arg,
     return m_property_double_ro(prop, action, arg, len);
 }
 
+/// Demuxer meta data
+static int mp_property_metadata(m_option_t * prop, int action, void *arg,
+                                MPContext * mpctx) {
+    m_property_action_t* ka;
+    char* meta;
+    static m_option_t key_type =
+        { "metadata", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL };
+    if (!mpctx->demuxer)
+	return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_GET:
+        if(!arg) return M_PROPERTY_ERROR;
+        *(char***)arg = mpctx->demuxer->info;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_KEY_ACTION:
+        if(!arg) return M_PROPERTY_ERROR;
+        ka = arg;
+        if(!(meta = demux_info_get(mpctx->demuxer,ka->key)))
+            return M_PROPERTY_UNKNOWN;
+        switch(ka->action) {
+        case M_PROPERTY_GET:
+            if(!ka->arg) return M_PROPERTY_ERROR;
+            *(char**)ka->arg = meta;
+            return M_PROPERTY_OK;
+        case M_PROPERTY_GET_TYPE:
+            if(!ka->arg) return M_PROPERTY_ERROR;
+            *(m_option_t**)ka->arg = &key_type;
+            return M_PROPERTY_OK;
+        }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+
 ///@}
 
 /// \defgroup AudioProperties Audio properties
@@ -439,13 +475,22 @@ static int mp_property_audio_format(m_option_t * prop, int action,
     return m_property_int_ro(prop, action, arg, mpctx->sh_audio->format);
 }
 
+/// Audio codec name (RO)
+static int mp_property_audio_codec(m_option_t * prop, int action,
+                                   void *arg, MPContext * mpctx)
+{
+    if (!mpctx->sh_audio || !mpctx->sh_audio->codec)
+	return M_PROPERTY_UNAVAILABLE;
+    return m_property_string_ro(prop, action, arg, mpctx->sh_audio->codec->name);
+}
+
 /// Audio bitrate (RO)
 static int mp_property_audio_bitrate(m_option_t * prop, int action,
 				     void *arg, MPContext * mpctx)
 {
     if (!mpctx->sh_audio)
 	return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(prop, action, arg, mpctx->sh_audio->i_bps);
+    return m_property_bitrate(prop, action, arg, mpctx->sh_audio->i_bps);
 }
 
 /// Samplerate (RO)
@@ -880,10 +925,46 @@ static int mp_property_vsync(m_option_t * prop, int action, void *arg,
 static int mp_property_video_format(m_option_t * prop, int action,
 				    void *arg, MPContext * mpctx)
 {
+    char* meta;
     if (!mpctx->sh_video)
 	return M_PROPERTY_UNAVAILABLE;
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if (!arg)
+	    return M_PROPERTY_ERROR;
+        switch(mpctx->sh_video->format) {
+        case 0x10000001:
+            meta = strdup ("mpeg1"); break;
+        case 0x10000002:
+            meta = strdup ("mpeg2"); break;
+        case 0x10000004:
+            meta = strdup ("mpeg4"); break;
+        case 0x10000005:
+            meta = strdup ("h264"); break;
+        default:
+            if(mpctx->sh_video->format >= 0x20202020) {
+                meta = malloc(5);
+                sprintf (meta, "%.4s", (char *) &mpctx->sh_video->format);
+            } else   {
+                meta = malloc(20);
+                sprintf (meta, "0x%08X", mpctx->sh_video->format);
+            }
+        }
+        *(char**)arg = meta;
+        return M_PROPERTY_OK;
+    }
     return m_property_int_ro(prop, action, arg, mpctx->sh_video->format);
 }
+
+/// Video codec name (RO)
+static int mp_property_video_codec(m_option_t * prop, int action,
+                                   void *arg, MPContext * mpctx)
+{
+    if (!mpctx->sh_video || !mpctx->sh_video->codec)
+	return M_PROPERTY_UNAVAILABLE;
+    return m_property_string_ro(prop, action, arg, mpctx->sh_video->codec->name);
+}
+
 
 /// Video bitrate (RO)
 static int mp_property_video_bitrate(m_option_t * prop, int action,
@@ -891,7 +972,7 @@ static int mp_property_video_bitrate(m_option_t * prop, int action,
 {
     if (!mpctx->sh_video)
 	return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(prop, action, arg, mpctx->sh_video->i_bps);
+    return m_property_bitrate(prop, action, arg, mpctx->sh_video->i_bps);
 }
 
 /// Video display width (RO)
@@ -1318,6 +1399,8 @@ static m_option_t mp_properties[] = {
      M_OPT_MIN, 0, 0, NULL },
     { "length", mp_property_length, CONF_TYPE_DOUBLE,
      0, 0, 0, NULL },
+    { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
+     0, 0, 0, NULL },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
@@ -1327,6 +1410,8 @@ static m_option_t mp_properties[] = {
     { "audio_delay", mp_property_audio_delay, CONF_TYPE_FLOAT,
      M_OPT_RANGE, -100, 100, NULL },
     { "audio_format", mp_property_audio_format, CONF_TYPE_INT,
+     0, 0, 0, NULL },
+    { "audio_codec", mp_property_audio_codec, CONF_TYPE_STRING,
      0, 0, 0, NULL },
     { "audio_bitrate", mp_property_audio_bitrate, CONF_TYPE_INT,
      0, 0, 0, NULL },
@@ -1365,6 +1450,8 @@ static m_option_t mp_properties[] = {
     { "vsync", mp_property_vsync, CONF_TYPE_FLAG,
      M_OPT_RANGE, 0, 1, NULL },
     { "video_format", mp_property_video_format, CONF_TYPE_INT,
+     0, 0, 0, NULL },
+    { "video_codec", mp_property_video_codec, CONF_TYPE_STRING,
      0, 0, 0, NULL },
     { "video_bitrate", mp_property_video_bitrate, CONF_TYPE_INT,
      0, 0, 0, NULL },
