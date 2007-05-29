@@ -30,6 +30,7 @@
 #define MENU_KEEP_PATH "/tmp/mp_current_path"
 
 int menu_keepdir = 0;
+char *menu_chroot = NULL;
 
 struct list_entry_s {
   struct list_entry p;
@@ -222,6 +223,12 @@ static int open_dir(menu_t* menu,char* args) {
   while ((dp = readdir(dirp)) != NULL) {
     if(dp->d_name[0] == '.' && strcmp(dp->d_name,"..") != 0)
       continue;
+    if (menu_chroot && !strcmp (dp->d_name,"..")) {
+      int len = strlen (menu_chroot);
+      if ((strlen (mpriv->dir) == len || strlen (mpriv->dir) == len + 1)
+          && !strncmp (mpriv->dir, menu_chroot, len))
+        continue;
+    }
     mylstat(args,dp->d_name,&st);
     if (file_filter && extensions && !S_ISDIR(st.st_mode)) {
       if((ext = strrchr(dp->d_name,'.')) == NULL)
