@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r23314
+.\" In sync with r23370
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -5848,7 +5848,7 @@ Artefakte, während höhere Werte das Bild glatter und unschärfer machen
 Variante des spp-Filters, vergleichbar mit spp=6 mit 7-Punkt DCT, wobei
 nur der Wert aus der Mitte nach der IDCT weiterbenutzt wird.
 .RSs
-.IPs <qp>
+.IPs "<qp>\ "
 Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .IPs <Modus>
 0: harte Schwellwerte
@@ -5905,11 +5905,9 @@ Schnelle Softwarekonvertierung von YV12 nach MPEG-1 mit libavcodec
 für die Benutzung mit DVB/\:DXR3/\:IVTV.
 .RSs
 .IPs <Qualität>
-.RSss
 1\-31: fester Quantisierungsfaktor
 .br
 32\-:  feste Bitrate in kBit
-.REss
 .IPs <fps>
 Erzwinge Ausgabe-fps (Fließkommawert) (Standard: 0, automatische
 Erkennung basierend auf Höhe)
@@ -8539,7 +8537,7 @@ für HuffYUV, verlustfreies JPEG, dv und ffv1
 .IPs "411P\ "
 für verlustfreies JPEG, dv und ffv1
 .IPs "YVU9\ "
-für verlustfreies JPEG, dv, ffv1 und svq1
+für verlustfreies JPEG, ffv1 und svq1
 .IPs "BGR32\ "
 für verlustfreies JPEG und ffv1
 .RE
