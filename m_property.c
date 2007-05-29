@@ -17,55 +17,84 @@
 
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 
-int m_property_do(m_option_t* prop, int action, void* arg, void *ctx) {
-    if(!prop) return M_PROPERTY_UNKNOWN;
-    return ((m_property_ctrl_f)prop->p)(prop,action,arg,ctx);
-}
-
-
-char* m_property_print(m_option_t* prop, void *ctx) {
-    m_property_ctrl_f ctrl;
-    void* val;
-    char* ret;
-    
-    if(!prop) return NULL;
-
-    ctrl = prop->p;
-    // look if the property have it's own print func
-    if(ctrl(prop,M_PROPERTY_PRINT,&ret, ctx) >= 0)
-        return ret;
-    // fallback on the default print for this type
-    val = calloc(1,prop->type->size);    
-    if(ctrl(prop,M_PROPERTY_GET,val,ctx) <= 0) {
-        free(val);
-        return NULL;
-    }
-    ret = m_option_print(prop,val);
-    free(val);
-    return ret == (char*)-1 ? NULL : ret;
-}
-
-int m_property_parse(m_option_t* prop, char* txt, void *ctx) {
-    m_property_ctrl_f ctrl;
-    void* val;
+static int do_action(m_option_t* prop_list, const char* name,
+                     int action, void* arg, void *ctx) {
+    const char* sep;
+    m_option_t* prop;
+    m_property_action_t ka;
     int r;
-    
+    if((sep = strchr(name,'/')) && sep[1]) {
+        int len = sep-name;
+        char base[len+1];
+        memcpy(base,name,len);
+        base[len] = 0;
+        prop = m_option_list_find(prop_list, base);
+        ka.key = sep+1;
+        ka.action = action;
+        ka.arg = arg;
+        action = M_PROPERTY_KEY_ACTION;
+        arg = &ka;
+    } else
+        prop = m_option_list_find(prop_list, name);
     if(!prop) return M_PROPERTY_UNKNOWN;
+    r = ((m_property_ctrl_f)prop->p)(prop,action,arg,ctx);
+    if(action == M_PROPERTY_GET_TYPE && r == M_PROPERTY_NOT_IMPLEMENTED) {
+        if(!arg) return M_PROPERTY_ERROR;
+        *(m_option_t**)arg = prop;
+        return M_PROPERTY_OK;
+    }
+    return r;
+}
 
-    ctrl = prop->p;
-    // try the property own parsing func
-    if((r = ctrl(prop,M_PROPERTY_PARSE,txt,ctx)) !=  M_PROPERTY_NOT_IMPLEMENTED)
-        return r;
-    // fallback on the default
-    val = calloc(1,prop->type->size);
-    if((r = m_option_parse(prop,prop->name,txt,val,M_CONFIG_FILE)) <= 0) {
+int m_property_do(m_option_t* prop_list, const char* name,
+                  int action, void* arg, void *ctx) {
+    m_option_t* opt;
+    void* val;
+    char* str;
+    int r;
+
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if((r = do_action(prop_list,name,M_PROPERTY_PRINT,arg,ctx)) >= 0)
+            return r;
+        // fallback on the default print for this type
+    case M_PROPERTY_TO_STRING:
+        if((r = do_action(prop_list,name,M_PROPERTY_TO_STRING,arg,ctx)) !=
+           M_PROPERTY_NOT_IMPLEMENTED)
+            return r;
+        // fallback on the options API. Get the type, value and print.
+        if((r = do_action(prop_list,name,M_PROPERTY_GET_TYPE,&opt,ctx)) <= 0)
+            return r;
+        val = calloc(1,opt->type->size);
+        if((r = do_action(prop_list,name,M_PROPERTY_GET,val,ctx)) <= 0) {
+            free(val);
+            return r;
+        }
+        if(!arg) return M_PROPERTY_ERROR;
+        str = m_option_print(opt,val);
+        free(val);
+        *(char**)arg = str == (char*)-1 ? NULL : str;
+        return str != (char*)-1;
+    case M_PROPERTY_PARSE:
+        // try the property own parsing func
+        if((r = do_action(prop_list,name,M_PROPERTY_PARSE,arg,ctx)) !=
+           M_PROPERTY_NOT_IMPLEMENTED)
+            return r;
+        // fallback on the options API, get the type and parse.
+        if((r = do_action(prop_list,name,M_PROPERTY_GET_TYPE,&opt,ctx)) <= 0)
+            return r;
+        if(!arg) return M_PROPERTY_ERROR;
+        val = calloc(1,opt->type->size);
+        if((r = m_option_parse(opt,opt->name,arg,val,M_CONFIG_FILE)) <= 0) {
+            free(val);
+            return r;
+        }
+        r = do_action(prop_list,name,M_PROPERTY_SET,val,ctx);
+        m_option_free(opt,val);
         free(val);
         return r;
     }
-    r = ctrl(prop,M_PROPERTY_SET,val,ctx);
-    m_option_free(prop,val);
-    free(val);
-    return r;
+    return do_action(prop_list,name,action,arg,ctx);
 }
 
 char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx) {
@@ -106,11 +135,10 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx) {
         } else if(str[0] == '$' && str[1] == '{' && (e = strchr(str+2,'}'))) {
             int pl = e-str-2;
             char pname[pl+1];
-            m_option_t* prop;
             memcpy(pname,str+2,pl);
             pname[pl] = 0;
-            if((prop = m_option_list_find(prop_list,pname)) &&
-               (p = m_property_print(prop, ctx)))
+            if(m_property_do(prop_list, pname,
+                             M_PROPERTY_PRINT, &p, ctx) >= 0 && p)
                 l = strlen(p), fr = 1;
             else
                 l = 0;
@@ -118,13 +146,11 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx) {
         } else if(str[0] == '?' && str[1] == '(' && (e = strchr(str+2,':'))) {
             int pl = e-str-2;
             char pname[pl+1];
-            m_option_t* prop;
             lvl++;
             if(!skip) {            
                 memcpy(pname,str+2,pl);
                 pname[pl] = 0;
-                if(!(prop = m_option_list_find(prop_list,pname)) ||
-                   m_property_do(prop,M_PROPERTY_GET,NULL, ctx) < 0)
+                if(m_property_do(prop_list,pname,M_PROPERTY_GET,NULL,ctx) < 0)
                     skip = 1, skip_lvl = lvl;
             }
             str = e+1, l = 0;

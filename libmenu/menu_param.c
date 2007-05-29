@@ -30,6 +30,7 @@
 struct list_entry_s {
   struct list_entry p;
   char* name;
+  char* prop;
   m_option_t* opt;
   char* menu;
 };
@@ -76,10 +77,8 @@ static m_option_t cfg_fields[] = {
 #define OPT_INFO_TRACK "track"
 #define OPT_INFO_GENRE "genre"
 
-m_option_t*  mp_property_find(const char* name);
-
 static void entry_set_text(menu_t* menu, list_entry_t* e) {
-  char* val = m_property_print(e->opt, menu->ctx);
+  char* val = mp_property_print(e->prop, menu->ctx);
   int l,edit = (mpriv->edit && e == mpriv->p.current);
   if(!val) {
     if(mpriv->hide_na) {
@@ -99,7 +98,7 @@ static void entry_set_text(menu_t* menu, list_entry_t* e) {
 static void update_entries(menu_t* menu) {
   list_entry_t* e;
   for(e = mpriv->p.menu ; e ; e = e->p.next)
-    if(e->opt) entry_set_text(menu,e);
+    if(e->prop) entry_set_text(menu,e);
 }
 
 static int parse_args(menu_t* menu,char* args) {
@@ -195,13 +194,13 @@ static int parse_args(menu_t* menu,char* args) {
     }
     
     name = asx_get_attrib("property",attribs);
-    opt = name ? mp_property_find(name) : NULL;
-    if(!opt) {
+    if(!name || mp_property_do(name,M_PROPERTY_GET_TYPE,&opt,menu->ctx) <= 0) {
       mp_msg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed,parser->line);
       goto next_element;
     }
     m = calloc(1,sizeof(struct list_entry_s));
     m->opt = opt;
+    m->prop = strdup(name);
     m->name = asx_get_attrib("name",attribs);
     if(!m->name) m->name = strdup(opt->name);
     entry_set_text(menu,m);
@@ -227,22 +226,22 @@ static void read_cmd(menu_t* menu,int cmd) {
     case MENU_CMD_UP:
       if(!mpriv->edit) break;
     case MENU_CMD_RIGHT:
-      if(m_property_do(e->opt,M_PROPERTY_STEP_UP,NULL,menu->ctx) > 0)
+      if(mp_property_do(e->prop,M_PROPERTY_STEP_UP,NULL,menu->ctx) > 0)
         update_entries(menu);
       return;
     case MENU_CMD_DOWN:
       if(!mpriv->edit) break;
     case MENU_CMD_LEFT:
-      if(m_property_do(e->opt,M_PROPERTY_STEP_DOWN,NULL,menu->ctx) > 0)
+      if(mp_property_do(e->prop,M_PROPERTY_STEP_DOWN,NULL,menu->ctx) > 0)
         update_entries(menu);
       return;
       
     case MENU_CMD_OK:
       // check that the property is writable
-      if(m_property_do(e->opt,M_PROPERTY_SET,NULL,menu->ctx) < 0) return;
+      if(mp_property_do(e->prop,M_PROPERTY_SET,NULL,menu->ctx) < 0) return;
       // shortcut for flags
       if(e->opt->type == CONF_TYPE_FLAG) {
-	if(m_property_do(e->opt,M_PROPERTY_STEP_UP,NULL,menu->ctx) > 0)
+	if(mp_property_do(e->prop,M_PROPERTY_STEP_UP,NULL,menu->ctx) > 0)
           update_entries(menu);
         return;
       }
@@ -291,6 +290,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 static void free_entry(list_entry_t* entry) {
   free(entry->p.txt);
   if(entry->name) free(entry->name);
+  if(entry->prop) free(entry->prop);
   if(entry->menu) free(entry->menu);
   free(entry);
 }

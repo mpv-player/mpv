@@ -1410,17 +1410,17 @@ static m_option_t mp_properties[] = {
 };
 
 
-m_option_t *mp_property_find(const char *name)
-{
-    return m_option_list_find(mp_properties, name);
-}
-
 int mp_property_do(const char *name, int action, void *val, void *ctx)
 {
-    m_option_t *p = mp_property_find(name);
-    if (!p)
-	return M_PROPERTY_UNAVAILABLE;
-    return m_property_do(p, action, val, ctx);
+    return m_property_do(mp_properties, name, action, val, ctx);
+}
+
+char* mp_property_print(const char *name, void* ctx)
+{
+    char* ret = NULL;
+    if(mp_property_do(name,M_PROPERTY_PRINT,&ret,ctx) <= 0)
+        return NULL;
+    return ret;
 }
 
 char *property_expand_string(MPContext * mpctx, char *str)
@@ -1511,43 +1511,42 @@ static struct {
 static int set_property_command(MPContext * mpctx, mp_cmd_t * cmd)
 {
     int i, r;
-    m_option_t *prop;
+    m_option_t* prop;
+    const char *pname;
 
     // look for the command
     for (i = 0; set_prop_cmd[i].name; i++)
 	if (set_prop_cmd[i].cmd == cmd->id)
 	    break;
-    if (!set_prop_cmd[i].name)
+    if (!(pname = set_prop_cmd[i].name))
 	return 0;
 
-    // get the property
-    prop = mp_property_find(set_prop_cmd[i].name);
-    if (!prop)
-	return 0;
+    if (mp_property_do(pname,M_PROPERTY_GET_TYPE,&prop,mpctx) <= 0 || !prop)
+        return 0;
 
     // toggle command
     if (set_prop_cmd[i].toggle) {
 	// set to value
 	if (cmd->nargs > 0 && cmd->args[0].v.i >= prop->min)
-	    r = m_property_do(prop, M_PROPERTY_SET, &cmd->args[0].v.i, mpctx);
+	    r = mp_property_do(pname, M_PROPERTY_SET, &cmd->args[0].v.i, mpctx);
 	else
-	    r = m_property_do(prop, M_PROPERTY_STEP_UP, NULL, mpctx);
+	    r = mp_property_do(pname, M_PROPERTY_STEP_UP, NULL, mpctx);
     } else if (cmd->args[1].v.i)	//set
-	r = m_property_do(prop, M_PROPERTY_SET, &cmd->args[0].v, mpctx);
+	r = mp_property_do(pname, M_PROPERTY_SET, &cmd->args[0].v, mpctx);
     else			// adjust
-	r = m_property_do(prop, M_PROPERTY_STEP_UP, &cmd->args[0].v, mpctx);
+	r = mp_property_do(pname, M_PROPERTY_STEP_UP, &cmd->args[0].v, mpctx);
 
     if (r <= 0)
 	return 1;
 
     if (set_prop_cmd[i].osd_progbar) {
 	if (prop->type == CONF_TYPE_INT) {
-	    if (m_property_do(prop, M_PROPERTY_GET, &r, mpctx) > 0)
+	    if (mp_property_do(pname, M_PROPERTY_GET, &r, mpctx) > 0)
 		set_osd_bar(set_prop_cmd[i].osd_progbar,
 			    set_prop_cmd[i].osd_msg, prop->min, prop->max, r);
 	} else if (prop->type == CONF_TYPE_FLOAT) {
 	    float f;
-	    if (m_property_do(prop, M_PROPERTY_GET, &f, mpctx) > 0)
+	    if (mp_property_do(pname, M_PROPERTY_GET, &f, mpctx) > 0)
 		set_osd_bar(set_prop_cmd[i].osd_progbar,
 			    set_prop_cmd[i].osd_msg, prop->min, prop->max, f);
 	} else
@@ -1557,7 +1556,7 @@ static int set_property_command(MPContext * mpctx, mp_cmd_t * cmd)
     }
 
     if (set_prop_cmd[i].osd_msg) {
-	char *val = m_property_print(prop, mpctx);
+	char *val = mp_property_print(pname, mpctx);
 	if (val) {
 	    set_osd_msg(set_prop_cmd[i].osd_id >=
 			0 ? set_prop_cmd[i].osd_id : OSD_MSG_PROPERTY + i,
@@ -1603,11 +1602,12 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_SET_PROPERTY:{
-		m_option_t *prop = mp_property_find(cmd->args[0].v.s);
-		if (!prop)
+		int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_PARSE,
+				       cmd->args[1].v.s, mpctx);
+		if (r == M_PROPERTY_UNKNOWN)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Unknown property: '%s'\n", cmd->args[0].v.s);
-		else if (m_property_parse(prop, cmd->args[1].v.s, mpctx) <= 0)
+		else if (r <= 0)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to set property '%s' to '%s'.\n",
 			   cmd->args[0].v.s, cmd->args[1].v.s);
@@ -1615,14 +1615,14 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_STEP_PROPERTY:{
-		m_option_t *prop = mp_property_find(cmd->args[0].v.s);
 		float arg = cmd->args[1].v.f;
-		if (!prop)
+		int r = mp_property_do
+			 (cmd->args[0].v.s, M_PROPERTY_STEP_UP,
+			  arg ? &arg : NULL, mpctx);
+		if (r == M_PROPERTY_UNKNOWN)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Unknown property: '%s'\n", cmd->args[0].v.s);
-		else if (m_property_do
-			 (prop, M_PROPERTY_STEP_UP,
-			  arg ? &arg : NULL, mpctx) <= 0)
+		else if (r <= 0)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to increment property '%s' by %f.\n",
 			   cmd->args[0].v.s, arg);
@@ -1630,27 +1630,11 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_PROPERTY:{
-		m_option_t *prop;
-		void *val;
 		char *tmp;
-		prop = mp_property_find(cmd->args[0].v.s);
-		if (!prop) {
-		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
-			   "Unknown property: '%s'\n", cmd->args[0].v.s);
-		    break;
-		}
-		/* Use m_option_print directly to get easily parseable values. */
-		val = calloc(1, prop->type->size);
-		if (m_property_do(prop, M_PROPERTY_GET, val, mpctx) <= 0) {
+		if (mp_property_do(cmd->args[0].v.s, M_PROPERTY_TO_STRING,
+				   &tmp, mpctx) <= 0) {
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to get value of property '%s'.\n",
-			   cmd->args[0].v.s);
-		    break;
-		}
-		tmp = m_option_print(prop, val);
-		if (!tmp || tmp == (char *) -1) {
-		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
-			   "Failed to print value of property '%s'.\n",
 			   cmd->args[0].v.s);
 		    break;
 		}
