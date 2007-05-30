@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r23028
+// Updated to help_mp-en.h r23416
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -1603,7 +1603,8 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] per le definizioni di Submenu serve un attributo 'menu'.\n"
-#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] per le definizioni di Menu Pref serve un attributo 'property' valido (riga %d).\n"
+#define MSGTR_LIBMENU_InvalidProperty "[MENU] Proprietà '%s' non valida nella definizione di Menu Pref. (riga %d).\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] per le definizioni di Menu Pref serve un attributo 'property' o 'txt' valido (riga %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] per i Menu Pref serve un argomento.\n"
 
 // libmenu/menu_pt.c
