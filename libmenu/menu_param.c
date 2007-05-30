@@ -25,11 +25,12 @@
 #include "menu_list.h"
 #include "input/input.h"
 #include "osdep/keycodes.h"
-#include "metadata.h"
+#include "command.h"
 
 struct list_entry_s {
   struct list_entry p;
   char* name;
+  char* txt;
   char* prop;
   m_option_t* opt;
   char* menu;
@@ -62,25 +63,12 @@ static m_option_t cfg_fields[] = {
 
 #define mpriv (menu->priv)
 
-#define OPT_NAME "name"
-#define OPT_VCODEC "vcodec"
-#define OPT_VBITRATE "vbitrate"
-#define OPT_RESOLUTION "resolution"
-#define OPT_ACODEC "acodec"
-#define OPT_ABITRATE "abitrate"
-#define OPT_SAMPLES "asamples"
-#define OPT_INFO_TITLE "title"
-#define OPT_INFO_ARTIST "artist"
-#define OPT_INFO_ALBUM "album"
-#define OPT_INFO_YEAR "year"
-#define OPT_INFO_COMMENT "comment"
-#define OPT_INFO_TRACK "track"
-#define OPT_INFO_GENRE "genre"
-
 static void entry_set_text(menu_t* menu, list_entry_t* e) {
-  char* val = mp_property_print(e->prop, menu->ctx);
+  char* val = e->txt ? property_expand_string(menu->ctx, e->txt) :
+    mp_property_print(e->prop, menu->ctx);
   int l,edit = (mpriv->edit && e == mpriv->p.current);
-  if(!val) {
+  if(!val || !val[0]) {
+    if(val) free(val);
     if(mpriv->hide_na) {
       e->p.hide = 1;
       return;
@@ -98,11 +86,11 @@ static void entry_set_text(menu_t* menu, list_entry_t* e) {
 static void update_entries(menu_t* menu) {
   list_entry_t* e;
   for(e = mpriv->p.menu ; e ; e = e->p.next)
-    if(e->prop) entry_set_text(menu,e);
+    if(e->txt || e->prop) entry_set_text(menu,e);
 }
 
 static int parse_args(menu_t* menu,char* args) {
-  char *element,*body, **attribs, *name, *meta, *val;
+  char *element,*body, **attribs, *name, *txt;
   list_entry_t* m = NULL;
   int r;
   m_option_t* opt;
@@ -139,70 +127,25 @@ static int parse_args(menu_t* menu,char* args) {
       goto next_element;
     }
 
-    meta = asx_get_attrib("meta",attribs);
-    val = NULL;
-    if(meta) {
-      if (!strcmp (meta, OPT_NAME))
-        val = get_metadata (META_NAME);
-      else if (!strcmp (meta, OPT_VCODEC))
-        val = get_metadata (META_VIDEO_CODEC);
-      else if (!strcmp(meta, OPT_VBITRATE))
-        val = get_metadata (META_VIDEO_BITRATE);
-      else if(!strcmp(meta, OPT_RESOLUTION))
-      val = get_metadata (META_VIDEO_RESOLUTION);
-      else if (!strcmp(meta, OPT_ACODEC))
-        val = get_metadata (META_AUDIO_CODEC);
-      else if(!strcmp(meta, OPT_ABITRATE))
-        val = get_metadata (META_AUDIO_BITRATE);
-      else if(!strcmp(meta, OPT_SAMPLES))
-        val = get_metadata (META_AUDIO_SAMPLES);
-      else if (!strcmp (meta, OPT_INFO_TITLE))
-        val = get_metadata (META_INFO_TITLE);
-      else if (!strcmp (meta, OPT_INFO_ARTIST))
-        val = get_metadata (META_INFO_ARTIST);
-      else if (!strcmp (meta, OPT_INFO_ALBUM))
-        val = get_metadata (META_INFO_ALBUM);
-      else if (!strcmp (meta, OPT_INFO_YEAR))
-        val = get_metadata (META_INFO_YEAR);
-      else if (!strcmp (meta, OPT_INFO_COMMENT))
-        val = get_metadata (META_INFO_COMMENT);
-      else if (!strcmp (meta, OPT_INFO_TRACK))
-        val = get_metadata (META_INFO_TRACK);
-      else if (!strcmp (meta, OPT_INFO_GENRE))
-      val = get_metadata (META_INFO_GENRE);
-    if (val) {
-      char *item = asx_get_attrib("name",attribs);
-      int l;
-
-      if (!item)
-        item = strdup (meta);
-      l = strlen(item) + 2 + strlen(val) + 1;
-      m = calloc(1,sizeof(struct list_entry_s));
-      m->p.txt = malloc(l);
-      sprintf(m->p.txt,"%s: %s",item,val);
-      free(val);
-      free(item);
-      menu_list_add_entry(menu,m);
-    }
-    free (meta);
-    if (element)
-      free(element);
-    if(body)
-      free(body);
-    asx_free_attribs(attribs);
-    continue;
-    }
-    
     name = asx_get_attrib("property",attribs);
-    if(!name || mp_property_do(name,M_PROPERTY_GET_TYPE,&opt,menu->ctx) <= 0) {
+    opt = NULL;
+    if(name && mp_property_do(name,M_PROPERTY_GET_TYPE,&opt,menu->ctx) <= 0) {
+      mp_msg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_InvalidProperty,
+             name,parser->line);
+      goto next_element;
+    }
+    txt = asx_get_attrib("txt",attribs);
+    if(!(name || txt)) {
       mp_msg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed,parser->line);
+      if(txt) free(txt), txt = NULL;
       goto next_element;
     }
     m = calloc(1,sizeof(struct list_entry_s));
     m->opt = opt;
-    m->prop = strdup(name);
+    m->txt = txt; txt = NULL;
+    m->prop = name; name = NULL;
     m->name = asx_get_attrib("name",attribs);
-    if(!m->name) m->name = strdup(opt->name);
+    if(!m->name) m->name = strdup(opt ? opt->name : "-");
     entry_set_text(menu,m);
     menu_list_add_entry(menu,m);
 
@@ -290,6 +233,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 static void free_entry(list_entry_t* entry) {
   free(entry->p.txt);
   if(entry->name) free(entry->name);
+  if(entry->txt)  free(entry->txt);
   if(entry->prop) free(entry->prop);
   if(entry->menu) free(entry->menu);
   free(entry);

@@ -1606,7 +1606,8 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Submenu definition needs a 'menu' attribute.\n"
-#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menu entry definitions need a valid 'property' attribute (line %d).\n"
+#define MSGTR_LIBMENU_InvalidProperty "[MENU] Invalid property '%s' in pref menu entry. (line %d).\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menu entry definitions need a valid 'property' or 'txt' attribute (line %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref menu needs an argument.\n"
 
 // libmenu/menu_pt.c
