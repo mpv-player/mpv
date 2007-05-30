@@ -499,6 +499,13 @@ static int mp_property_samplerate(m_option_t * prop, int action, void *arg,
 {
     if (!mpctx->sh_audio)
 	return M_PROPERTY_UNAVAILABLE;
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if(!arg) return M_PROPERTY_ERROR;
+        *(char**)arg = malloc(16);
+        sprintf(*(char**)arg,"%d kHz",mpctx->sh_audio->samplerate/1000);
+        return M_PROPERTY_OK;
+    }
     return m_property_int_ro(prop, action, arg, mpctx->sh_audio->samplerate);
 }
 
