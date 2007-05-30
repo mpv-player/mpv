@@ -38,7 +38,7 @@ static int do_action(m_option_t* prop_list, const char* name,
         prop = m_option_list_find(prop_list, name);
     if(!prop) return M_PROPERTY_UNKNOWN;
     r = ((m_property_ctrl_f)prop->p)(prop,action,arg,ctx);
-    if(action == M_PROPERTY_GET_TYPE && r == M_PROPERTY_NOT_IMPLEMENTED) {
+    if(action == M_PROPERTY_GET_TYPE && r < 0) {
         if(!arg) return M_PROPERTY_ERROR;
         *(m_option_t**)arg = prop;
         return M_PROPERTY_OK;
