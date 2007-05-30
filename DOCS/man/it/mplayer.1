@@ -1,4 +1,4 @@
-.\" synced with r21654
+.\" synced with r22845
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
@@ -110,7 +110,7 @@ cue://file[:traccia]
 .
 .br
 .B mplayer
-[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv]://
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
 [utente:password@]URL[:porta] [opzioni]
 .
 .br
@@ -136,7 +136,7 @@ tivo://host/[list|llist|fsid]
 .br
 .B mencoder
 [opzioni] file
-[file|URL|\-] [\-o file]
+[file|URL|\-] [\-o file | file://file | smb://[utente:password@]host/percorso]
 .
 .br
 .B mencoder
@@ -259,7 +259,7 @@ Diminuisce/\:aumenta il volume.
 Suono muto.
 .IPs "_ (solo MPEG-TS e libavformat)"
 Passa attraverso tutte le tracce video disponibili.
-.IPs "# (solo MPEG, Matroska, AVI e libavformat)" 
+.IPs "# (solo DVD, MPEG, Matroska, AVI e libavformat)" 
 Passa attraverso tutte le tracce audio disponibili.
 .IPs "TAB (solo MPEG-TS)"
 Passa attraverso tutti i programmi disponibili.
@@ -299,7 +299,7 @@ Inizia/smette di salvare istantanee.
 Mostra il nome del file sull'OSD.
 .IPs "! e @"
 Va all'inizio del precedente/\:prossimo capitolo.
-.IPs "D (\-vo xvmc, \-vf yadif, \-vf kerndeint only)"
+.IPs "D (solo \-vo xvmc, \-vf yadif, \-vf kerndeint)"
 Attiva/disattiva deinterlacciatore.
 .RE
 .PD 1
@@ -795,6 +795,17 @@ Il supporto deve essere compilato all'interno del programma, configurandolo
 con \-\-enable-crash-debug.
 .
 .TP
+.B \-doubleclick-time (solo \-vo directx)
+Tempo in millisecondi per considerare due click consecutivi come un doppio click
+(default: 300).
+Impostalo a 0 per far in modo che sia usata l'impostazione del gestore di
+finestre.
+.br
+.I NOTA:
+Otterrai risultati leggermente diversi a seconda che tu abbia o no collegato un
+comando a MOUSE_BTN0_DBL o MOUSE_BTN0\-MOUSE_BTN0_DBL.
+.
+.TP
 .B \-edlout <nomefile>
 Crea un nuovo file e scrive comandi della lista di decisione di modifica (EDL)
 in questo file.
@@ -900,7 +911,7 @@ così puoi dare molti 'echo "seek 10" > mp_pipe' e la pipe rimarrà valida.
 .TP
 .B \-key-fifo-size <2\-65000>
 Specifica la dimensione del FIFO che memorizza gli eventi della tastiera
-(default: 10).
+(default: 7).
 Un FIFO di dimensione n può bufferizzare (n-1) eventi.
 Se è troppo piccolo alcuni eventi potrebbero venir persi (portando ad
 effetti di 'bottoni del mouse ignorati' o simili).
@@ -1237,6 +1248,9 @@ Il file viene considerato in formato Netscape.
 .B \-delay <secondi>
 Ritardo audio in secondi (valore decimale positivo o negativo)
 .br
+Valori negativi ritardano l'audio, quelli positivi ritardano il video.
+Nota che questo è l'esatto opposto dell'opzione \-audio-delay di MEncoder.
+.br
 .I NOTA:
 Quando viene usato con MEncoder, non è detto che funzioni correttamente
 con \-ovc copy; al suo posto usa \-audio-delay.
@@ -1259,7 +1273,6 @@ Forza il nome del demuxer audio, come indicato da \-demuxer help.
 Usa un '+' prima del nome per forzarlo, il che eviterà alcuni controlli!
 Per retrocompatibilità accetta anche l'ID del demuxer come definito in
 libmpdemux/\:demuxer.h.
-\-demuxer audio o \-demuxer 17 forza il formato MP3.
 .
 .TP
 .B \-dumpaudio (solo MPlayer)
@@ -1409,6 +1422,11 @@ Questa opzione funziona solo se il mezzo di trasporto sottostante supporta il
 posizionamento (cioè non con stdin, pipe, etc).
 .
 .TP
+.B \-noidx
+Evita la ricostruzione dell'indice del file.
+MEncoder salta la scrittura dell'indice, usando questa opzione.
+.
+.TP
 .B \-ipv4-only-proxy (solo rete)
 Ignora il proxy per gli indirizzi IPv6.
 Viene comunque usato per connessioni IPv4.
@@ -1479,6 +1497,13 @@ Utilizza IPv4 per le connessioni di rete.
 .B \-prefer-ipv6 (solo rete IPv6)
 Utilizza IPv6 per le connessioni di rete.
 Passa automaticamente a IPv4 se necessario.
+.
+.TP
+.B \-psprobe <posizione in byte>
+Riproducendo un flusso MPEG-PS, questa opzione ti permette di specificare
+quanti byte del flusso vuoi che MPlayer legga per poter identificare il codec
+video usato.
+Questa opzione è necessaria per riprodurre file EVO contenenti flussi H.264.
 .
 .TP
 .B \-pvr <opzione1:opzione2:...> (solo PVR)
@@ -1553,6 +1578,56 @@ dvd:   flusso compatibile DVD
 .REss
 .RE
 .PD 1
+.
+.TP
+.B \-radio <opzione1:opzione2:...> (solo radio)
+Queste opzioni impostano svariati parametri per il modulo di cattura radio.
+Per ascoltare la radio con MPlayer usa 'radio://<frequenza>' (se non viene
+fornita l'opzione channels) o 'radio://<numero_canale>' (se viene fornita
+l'opzione channels) come URL del filmato.
+Per avviare il sottosistema di cattura, usa 'radio://<frequenza o canale>/capture'.
+Se la parola chiave capture non viene fornita, puoi ascoltare la radio usando
+solo l'entrata line-in.
+Usare capture per ascoltare non è consigliato, a causa di problemi di
+sincronizzazione, che rendono spiacevole l'attività.
+.sp 1
+Le opzioni disponibili sono:
+.RSs
+.IPs device=<valore>
+Dispositivo radio da usare (default: /dev/radio0).
+.IPs driver=<valore>
+Driver radio da usare (default: v4l2 se disponibile, altrimenti v4l).
+Attualmente sono supportati i driver v4l e v4l2.
+.IPs volume=<0..100>
+volume audio del dispositivo radio (default: 100)
+.IPs channels=<frequenza>\-<nome>,<frequenza>\-<nome>,...
+Imposta la lista dei canali.
+Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
+I nomi dei canali verranno scritti usando l'OSD e i comandi slave
+radio_step_channel e radio_set_channel saranno utilizzabili da un controllo
+remoto (dai un'occhiata a LIRC).
+Quando fornito, un numero nell'URL del filmato sarà trattato come la posizione
+del canale nella lista dei canali.
+.br
+.I ESEMPIO:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<valore> (con cattura (capture) radio abilitata)
+Nome del dispositivo da cui catturare l'audio.
+Senza tale nome la cattura sarà disabilitata anche se la parola
+chiave 'capture' appare nell'URL.
+Per i dispositivi ALSA deve essere usato nella forma hw=<scheda>.<dispositivo>.
+Se il nome contiene un '=', il modulo userà ALSA per la cattura, se no OSS.
+.IPs arate=<valore> (con cattura radio abilitata)
+Frequenza in campioni per secondo (default: 44100).
+.br
+.I NOTA:
+Quando usi la cattura audio, imposta anche l'opzione \-rawaudio rate=<valore>
+con lo stesso valore di arate.
+Se hai problemi colla velocità audio (va troppo veloce), prova la riproduzione
+con valori di frequenza differenti (per es.\& 48000,44100,32000,...).
+.IPs achannels=<valore> (con cattura radio abilitata)
+Numero di canali audio da catturare.
+.RE
 .
 .TP
 .B \-rawaudio <opzione1:opzione2:...>
@@ -1699,56 +1774,6 @@ desiderati.
 Nella riproduzione di un flusso MPEG-TS puoi specificare con questa opzione
 quale programma (se presente) vuoi usare.
 Può essere usato con \-vid e \-aid.
-.
-.TP
-.B \-radio <opzione1:opzione2:...> (solo radio)
-Queste opzioni impostano svariati parametri per il modulo di cattura radio.
-Per ascoltare la radio con MPlayer usa 'radio://<frequenza>' (se non viene
-fornita l'opzione channels) o 'radio://<numero_canale>' (se viene fornita
-l'opzione channels) come URL del filmato.
-Per avviare il sottosistema di cattura, usa 'radio://<frequenza o canale>/capture'.
-Se la parola chiave capture non viene fornita, puoi ascoltare la radio usando
-solo l'entrata line-in.
-Usare capture per ascoltare non è consigliato, a causa di problemi di
-sincronizzazione, che rendono spiacevole l'attività.
-.sp 1
-Le opzioni disponibili sono:
-.RSs
-.IPs device=<valore>
-Dispositivo radio da usare (default: /dev/radio0).
-.IPs driver=<valore>
-Driver radio da usare (default: v4l2 se disponibile, altrimenti v4l).
-Attualmente sono supportati i driver v4l e v4l2.
-.IPs volume=<0..100>
-volume audio del dispositivo radio (default: 100)
-.IPs channels=<frequenza>\-<nome>,<frequenza>\-<nome>,...
-Imposta la lista dei canali.
-Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
-I nomi dei canali verranno scritti usando l'OSD e i comandi slave
-radio_step_channel e radio_set_channel saranno utilizzabili da un controllo
-remoto (dai un'occhiata a LIRC).
-Quando fornito, un numero nell'URL del filmato sarà trattato come la posizione
-del canale nella lista dei canali.
-.br
-.I ESEMPIO:
-radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<valore> (con cattura (capture) radio abilitata)
-Nome del dispositivo da cui catturare l'audio.
-Senza tale nome la cattura sarà disabilitata anche se la parola
-chiave 'capture' appare nell'URL.
-Per i dispositivi ALSA deve essere usato nella forma hw=<scheda>.<dispositivo>.
-Se il nome contiene un '=', il modulo userà ALSA per la cattura, se no OSS.
-.IPs arate=<valore> (con cattura radio abilitata)
-Frequenza in campioni per secondo (default: 44100).
-.br
-.I NOTA:
-Quando usi la cattura audio, imposta anche l'opzione \-rawaudio rate=<valore>
-con lo stesso valore di arate.
-Se hai problemi colla velocità audio (va troppo veloce), prova la riproduzione
-con valori di frequenza differenti (per es.\& 48000,44100,32000,...).
-.IPs achannels=<valore> (con cattura radio abilitata)
-Numero di canali audio da catturare.
-.RE
 .
 .TP
 .B \-tv <opzione1:opzione2:...> (solo TV/\:PVR)
@@ -3058,10 +3083,11 @@ plugger).
 .TP
 .B \-xineramascreen <\-2\-...> (solo X11)
 In configurazioni con Xinerama (p.es.\& un singolo desktop che si espande su
-monitor multipli) questa opzione indica a MPlayer su quale schermo deve visualizzare
-il filmato.
-Un valore di \-2 significa a schermo intero su tutto lo schermo virtuale,
-\-1 significa a schermo intero sullo schermo su cui è attualmente posizionata
+monitor multipli) questa opzione indica a MPlayer su quale schermo deve
+visualizzare il filmato.
+Un valore di \-2 significa a schermo intero su tutto lo schermo virtuale (in
+questo caso l'informazione Xinerama viene completamente ignorata),
+\-1 significa a schermo intero sullo schermo in cui è attualmente posizionata
 la finestra.
 La posizione iniziale selezionata con l'opzione \-geometry è relativa allo
 schermo specificato.
@@ -3450,40 +3476,17 @@ Utilizza glxinfo oppure uno strumento simile per visualizzare le estensioni
 supportate dalla vostra implementazione OpenGL.
 .PD 0
 .RSs
-.IPs (no)manyfmts
-Abilita il supporto per più formati colore (RGB e BGR) (default: abilitato).
-Necessita di OpenGL con versione >= 1.2.
-.IPs slice-height=<0\-...>
-Numero di linee copiate sulla texture in un blocco unico (default: 4).
-0 per l'immagine intera.
-.br
-.I NOTA:
-Se è usato lo spazio colore YUV (vedi sottopzione yuv), vigono speciali regole:
-.RSss
-Se il decodificatore usa lo "slice rendering" (vedi \-noslices), questa
-impostazione non ha effetto, e viene usata la dimensione slice fornita dal
-decodificatore.
-.br
-Se il decodificatore non usa "slice rendering", il default è 16.
-.RE
-.IPs (no)osd
-Abilita o disabilita il supporto per il rendering dell'OSD via OpenGL
-(default: abilitato).
-Questa opzione è utile per test, usa \-osdlevel 0 per disabilitare l'OSD.
 .IPs (no)scaled-osd
 Cambia il modo in cui l'OSD si comporta quando cambia la dimensione della
 finestra (default: disabilitato).
-Se abilitato si comporta più come gli altri driver di uscita video,
-il che è migliore per font di dimensione fissa.
+Se abilitato si comporta di più come gli altri driver di uscita video,
+il che è meglio per font di dimensione fissa.
 Se disabilitato appare molto meglio con i font FreeType ed utilizza
 i bordi nella modalità a schermo intero.
-Non funziona correttamente con sottotitoli ass (vedi \-ass).
+Non funziona correttamente con sottotitoli ass (vedi \-ass), puoi tuttavia
+renderizzarli senza il supporto OpenGL attraverso \-vf ass.
 .IPs osdcolor=<0xRRGGBB>
 Colore per l'OSD (default: 0xffffff, che corrisponde al bianco).
-.IPs (no)aspect
-Abilita o disabilita la scalatura dell'aspetto ed il supporto per il
-pan-and-scan (default: abilitato).
-Disabilitarlo può incrementare la velocità.
 .IPs rectangle=<0,1,2>
 Abilita l'utilizzo di texture rettangolari, fatto che risparmia RAM video 
 ma è spesso più lento (default: 0).
@@ -3497,9 +3500,6 @@ compatibile con conversione YUV hardware.
 GL_ARB_texture_non_power_of_two).
 In alcuni casi è supportato solo via software, quindi molto lento.
 .RE
-.IPs (no)glfinish
-Invoca glFinish() prima di invertire i buffer.
-Più lento ma in alcuni casi l'uscita è più corretta (default: disabilitato).
 .IPs swapinterval=<n>
 Intervallo minimo, in fotogrammi visualizzati, tra due scambi di buffer
 (default: 1).
@@ -3582,6 +3582,41 @@ GL_NEAREST per la texture 'customtex'.
 .IPs (no)customtrect
 Se abilitata, usa texture_rectangle per la texture 'customtex'.
 Disabilitata di default.
+.RE
+.sp 1
+.RS
+Normalmente non c'è ragione alcuna di utilizzare le opzioni seguenti, esse
+esistono principalmente per finalità di debug.
+.RE
+.sp 1
+.RSs
+.IPs (no)glfinish
+Invoca glFinish() prima di invertire i buffer.
+Più lento ma in alcuni casi l'uscita è più corretta (default: disabilitato).
+.IPs (no)manyfmts
+Abilita il supporto per più formati colore (RGB e BGR) (default: abilitato).
+Necessita di OpenGL con versione >= 1.2.
+.IPs slice-height=<0\-...>
+Numero di linee copiate sulla texture in un blocco unico (default: 4).
+0 per l'immagine intera.
+.br
+.I NOTA:
+Se è usato lo spazio colore YUV (vedi sottopzione yuv), vigono speciali regole:
+.RSss
+Se il decodificatore usa lo "slice rendering" (vedi \-noslices), questa
+impostazione non ha effetto, e viene usata la dimensione slice fornita dal
+decodificatore.
+.br
+Se il decodificatore non usa "slice rendering", il default è 16.
+.RE
+.IPs (no)osd
+Abilita o disabilita il supporto per il rendering dell'OSD via OpenGL
+(default: abilitato).
+Questa opzione è utile per test, usa \-osdlevel 0 per disabilitare l'OSD.
+.IPs (no)aspect
+Abilita o disabilita la scalatura dell'aspetto ed il supporto per il
+pan-and-scan (default: abilitato).
+Disabilitarlo può incrementare la velocità.
 .REss
 .RE
 .PD 1
@@ -3753,17 +3788,14 @@ Seleziona esplicitamente il nome del dispositivo fbdev da usare
 .
 .TP
 .B 3dfx (solo Linux)
-Driver di uscita video specifico per 3dfx.
-Questo driver utilizza direttamente l'hardware della scheda 3dfx sopra a
-X11.
+Driver di uscita video specifico per 3dfx che utilizza direttamente l'hardware
+della scheda sopra a X11.
 Sono supportati solo 16 bpp.
-FIXME: E' ok la differenza tra 3dfx, tdfxfb e tdfx_vid?
 .
 .TP
 .B tdfxfb (solo Linux)
 Questo driver utilizza il driver del framebuffer tdfx per riprodurre
 filmati con accelerazione YUV su schede 3dfx.
-FIXME: E' ok la differenza tra 3dfx, tdfxfb e tdfx_vid?
 .PD 0
 .RSs
 .IPs <dispositivo>
@@ -3774,9 +3806,8 @@ Seleziona esplicitamente il nome del dispositivo fbdev da usare
 .
 .TP
 .B tdfx_vid (solo Linux)
-Driver specifico di uscita video 3dfx.
-Questo driver utilizza direttamente il modulo del kernel tdfx_vid.
-FIXME: E' ok la differenza tra 3dfx, tdfxfb e tdfx_vid?
+Driver specifico di uscita video 3dfx che funziona in combinazione col modulo
+del kernel tdfx_vid.
 .PD 0
 .RSs
 .IPs <dispositivo>
@@ -4146,6 +4177,23 @@ sta visualizzando.
 Disabilita la compensazione automatica del rapporto di aspetto del film.
 .
 .TP
+.B "\-field-dominance <-1\-1>"
+Imposta il primo campo per contenuti interlacciati.
+Utile per deinterlacciatori che raddoppiano la frequenza: \-vf tfields=1,
+\-vf yadif=1 e \-vo xvmc:bobdeint.
+.PD 0
+.RSs
+.IPs -1
+automatico (default): Se il decodificatore non esporta l'informazione corretta,
+si reimposta automaticamente su 0 (prima il campo superiore).
+.IPs 0
+prima il campo superiore (top field first)
+.IPs 1
+prima il campo inferiore (bottom field first)
+.RE
+.PD 1
+.
+.TP
 .B "\-flip \ "
 Ribalta l'immagine alto / basso.
 .
@@ -4255,12 +4303,12 @@ Seleziona la strategia di recupero degli errori.
 .br
 4: molto aggressivo
 .REss
-.IPs "fast (MPEG-2 only)"
+.IPs "fast (solo MPEG-2, MPEG-4, e H.264)"
 Abilita ottimizzazioni che non rispettano completamente le specifiche
 e potrebbero potenzialmente causare problemi, come una dequantizzazione
-più semplice, presumere l'utilizzo della matrice di quantizzazione di
-default, presumere YUV 4:2:0 ed evitare qualche controllo per riconoscere
-flussi danneggiati.
+più semplice, una compensazione di movimento più semplice, presumere l'utilizzo
+della matrice di quantizzazione di default, presumere YUV 4:2:0 ed evitare
+qualche controllo per riconoscere flussi danneggiati.
 .IPs "gray\ "
 decodifica a scala di grigi (un poco più veloce che a colori).
 .IPs "idct=<0\-99> (vedi anche \-lavcopts)"
@@ -5853,23 +5901,26 @@ miscela disturbo casuale con un aspetto (semi)regolare
 .PD 1
 .
 .TP
-.B denoise3d[=luminanza:crominanza:tempo]
+.B denoise3d[=luminanza_spaziale:crominanza_spaziale:luminanza_temporale:crominanza_temporale]
 Questo filtro cerca di ridurre il disturbo dell'immagine per produrre immagini
 più morbide rendendo le immagini ferme realmente ferme (questo dovrebbe
 aumentare la compressibilità).
 .PD 0
 .RSs
-.IPs <luminanza>
+.IPs <luminanza_spaziale>
 intensità spaziale della luminanza (default: 4)
-.IPs <crominanza>
+.IPs <crominanza_spaziale>
 intensità spaziale della crominanza (default: 3)
-.IPs <tempo>
-intensità temporale (default: 6)
+.IPs <luminanza_temporale>
+intensità temporale della luminanza (default: 6)
+.IPs <crominanza_temporale>
+intensità temporale della crominanza
+(default: luminanza_temporale*crominanza_spaziale/luminanza_spaziale)
 .RE
 .PD 1
 .
 .TP
-.B hqdn3d[=luminanza:crominanza:tempo]
+.B hqdn3d[=luminanza_spaziale:crominanza_spaziale:luminanza_temporale:crominanza_temporale]
 Versione ad alta precisione/\:qualità del filtro denoise3d.
 Parametri ed uso sono gli stessi.
 .
@@ -6530,7 +6581,7 @@ con il colore nero. Il framerate non viene cambiato.
 .IPs 4
 Inframezza le linee pari di ogni fotogramma pari con le linee dispari dei
 fotogrammi dispari.
-Genera un fotogramma ad altezza completa a metà della frequenza (framerate).
+Altezza completa a metà della frequenza (framerate).
 .RE
 .PD 1
 .
@@ -6552,7 +6603,7 @@ così buono).
 2: Trasla i campi di 1/4 di pixel con interpolazione lineare (niente salti).
 .br
 4: Trasla i campi di 1/4 di pixel con un filtro 4tap (qualità più alta). (default)
-.IPs <posizione_campo>
+.IPs <posizione_campo>\ (DEPRECATA)
 -1: automatica (default)
 Funziona solo se il decodificatore esporta le informazioni appropriate e
 nessun altro filtro che scarti queste informazioni viene prima di tfields
@@ -6561,6 +6612,10 @@ nella catena dei filtri, in caso contrario passa a 0 (top-first).
 0: prima il campo superiore
 .br
 1: prima il campo inferiore
+.br
+.I NOTA:
+Questa opzione possibilmente verrà rimossa in una delle prossime versioni.
+Utilizza al suo posto \-field-dominance.
 .RE
 .PD 1
 .
@@ -6577,8 +6632,12 @@ Ancora un filtro di deinterlacciamento
 2: Come 0, ma salta il controllo di interlacciamento spaziale.
 .br
 3: Come 1, ma salta il controllo di interlacciamento spaziale.
-.IPs <posizione_campo>
+.IPs <posizione_campo>\ (DEPRECATA)
 Funziona come in tfields.
+.br
+.I NOTA:
+Questa opzione possibilmente verrà rimossa in una delle prossime versioni.
+Utilizza al suo posto \-field-dominance.
 .RE
 .PD 1
 .
@@ -7494,14 +7553,14 @@ MPEG-1 video
 MPEG-2 video
 .IPs huffyuv
 HuffYUV
-.IPs ffvhuff (vedi anche vstrict)
+.IPs ffvhuff
 codifica HuffYUV non standard che utilizza YV12 ed ottiene file
 più piccoli del 20%
 .IPs "asv1\ "
 ASUS Video v1
 .IPs "asv2\ "
 ASUS Video v2
-.IPs "ffv1 (vedi anche: vstrict)"
+.IPs "ffv1\ "
 codec video di FFmpeg senza perdita
 .IPs "flv\ \ "
 Sorenson H.263 usato nei Flash Video
@@ -7571,10 +7630,10 @@ controllo della frequenza (default: 31.0).
 Quantizzazione costante /\: codifica a qualità costante (seleziona una modalità
 di quantizzazione fissa).
 Valori minori indicano migliore qualità ma file di dimensioni maggiori
-(default: 0).
+(default: -1).
 Nel caso del codec snow, un valore 0 indica codifica senza perdita.
-Visto che gli altri codec non lo supportano, vqscale=0 sarà ignorato e verranno
-utilizzati quantizzatori variabili, che è il default.
+Visto che gli altri codec non lo supportano, vqscale=0 avrà un effetto
+indefinito.
 1 non è raccomandato (controlla vqmin per i dettagli).
 .
 .TP
@@ -7643,15 +7702,22 @@ perciò la qualità può essere bassa.
 raggio di ricerca per la stima del movimento (default: 0 (illimitato))
 .
 .TP
-.B mbd=<0\-2>
+.B mbd=<0\-2> (vedi anche *cmp, qpel)
 Algoritmo di decisione dei macroblock (modalità ad alta qualità),
 codifica ogni macroblocco in tutte le modalità e seleziona la migliore.
 Questa opzione rallenta la codifica ma si ottiene una qualità migliore
 e minori dimensioni del file finale.
+Quando mbd è impostato a 1 o 2, il valore di mbcmp viene ignorato quando si
+confrontano i macroblocchi.
+Se un'impostazione di comparazione (precmp, subcmp, cmp, o mbcmp) non è zero,
+tuttavia, verrà usata una ricerca di movimento half-pel, più lenta ma migliore,
+senza considerare l'impostazione di mbd.
+Se qpel è impostata, verrà usata la ricerca di movimento quarter-pel, senza
+altre considerazioni.
 .PD 0
 .RSs
 .IPs 0
-Utilizza mbcmp (default).
+Utilizza la funzione di comparazione riportata da mbcmp (default).
 .IPs 1
 Seleziona il modo MB che necessità della minor quantità di bit (=vhq).
 .IPs 2
@@ -7692,7 +7758,7 @@ l'accumulo di errori dovuti alle diverse implementazioni/precisioni di DCT
 ed iDCT.
 I keyframe sono necessari anche per il posizionamento visto che il
 posizionamento è possibile solo su un keyframe. 
-Bisogna pero' tener presente che i keyframe hanno bisogno di più spazio
+Bisogna però tener presente che i keyframe hanno bisogno di più spazio
 rispetto agli altri tipi di fotogrammi, perciò un numero alto comporta
 file di dimensione leggermente minore ma un posizionamento meno preciso.
 Il valore 0 è equivalente a 1, che rende tutti i fotogrammi dei fotogrammi chiave.
@@ -8149,7 +8215,7 @@ riferimento MPEG-4.
 Permette alcune estensioni specifiche di libavcodec (default).
 .IPs -2
 Abilita codec e funzioni sperimentali che potrebbero poi non essere
-riproducibili con versioni future di MPlayer (snow, ffvhuff, ffv1).
+riproducibili con versioni future di MPlayer (snow).
 .RE
 .PD 1
 .
@@ -9453,7 +9519,7 @@ La mappatura è approssimativamente H264QP = 12 + 6*log2(MPEGQP).
 Per esempio MPEG a QP=2 è equivalente ad H.264 con QP=18.
 .
 .TP
-.B crf=<1\-50>
+.B crf=<1.0\-50.0>
 Attiva la modalità a qualità constante, e imposta la qualità.
 La scala è simile a QP.
 Come la modalità basata sul bitrate, questa permette ad ogni fotogramma di
@@ -10026,12 +10092,10 @@ bisogno di usarlo.
 .
 .TP
 .B threads=<1\-4>
-Divide ogni fotogramma in fette (slice) e le codifica in parallelo (default: 1).
-Permette inoltre la decodifica multithreaded se supportata (lavc non la supporta).
+Genera diversi thread per codificare in parallelo su CPU multiple (default: 1).
 Si ottiene una leggera penalizzazione della compressione.
-Richiede che libx264 sia compilata con il supporto per i pthread; se non lo
-è questa opzione manda un avvertimento ed abilita le slice ma non il 
-multithreading.
+0 oppure 'auto' dicono a x264 di rilevare il numero delle CPU ed utilizzare un
+appropriato numero di thread.
 .
 .TP
 .B (no)global_header
@@ -10176,7 +10240,7 @@ se vuoi ritardare il video rispetto all'audio.
 .
 .TP
 .B "drop\ \ \ "
-Quando viene utilizzato con init_adelay il programma ignora la parte di audio
+Quando viene utilizzato con vdelay il muxer ignora la parte di audio
 in anticipo.
 .
 .TP
