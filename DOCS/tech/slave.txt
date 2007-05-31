@@ -401,10 +401,13 @@ stream_start       pos       0               X            start pos in stream
 stream_end         pos       0               X            end pos in stream
 stream_length      pos       0               X            (end - start)
 length             double                    X            length of file in seconds
+metadata           str list                  X            list of metadata key/value
+metadata/*         string                    X            metadata values
 volume             float     0       100     X   X   X    change volume
 mute               flag      0       1       X   X   X
 audio_delay        float     -100    100     X   X   X
 audio_format       int                       X
+audio_codec        string                    X
 audio_bitrate      int                       X
 samplerate         int                       X
 channels           int                       X
@@ -423,6 +426,7 @@ hue                int       -100    100     X   X   X
 panscan            float     0       1       X   X   X
 vsync              flag      0       1       X   X   X
 video_format       int                       X
+video_codec        string                    X
 video_bitrate      int                       X
 width              int                       X            "display" width
 height             int                       X            "display" height
