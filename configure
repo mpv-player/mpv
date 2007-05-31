@@ -7645,8 +7645,6 @@ TARGET_ARMV5TE = $_armv5te
 TARGET_ARMV6 = $_armv6
 TARGET_IWMMXT = $_iwmmxt
 TARGET_VIS = $_vis
-TARGET_BUILTIN_VECTOR = $_builtin_vector
-TARGET_BUILTIN_3DNOW  = $_mm3dnow
 
 # --- GUI stuff ---
 GUI = $_gui
