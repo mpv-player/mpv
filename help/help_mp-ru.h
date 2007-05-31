@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r23028
+// Synced with help_mp-en.h: r23416
 
 // ========================= MPlayer help ===========================
 
@@ -1717,7 +1717,8 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[МЕНЮ] Описаниям подменю нужен атрибут 'menu'.\n"
-#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[МЕНЮ] Описаниям вхождений меню предпочтений нужен допустимый атрибут 'property'\n(строка %d).\n"
+#define MSGTR_LIBMENU_InvalidProperty "[MENU] Неверное свойство '%s' в элементе меню предпочтений. (строка %d).\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[МЕНЮ] Описаниям элемента меню предпочтений нужен допустимый \nатрибут 'property' или 'txt' (строка %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[МЕНЮ] Меню предпочтений нужен аргумент.\n"
 
 // libmenu/menu_pt.c
