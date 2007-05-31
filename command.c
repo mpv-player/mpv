@@ -1709,17 +1709,42 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_STEP_PROPERTY:{
-		float arg = cmd->args[1].v.f;
-		int r = mp_property_do
-			 (cmd->args[0].v.s, M_PROPERTY_STEP_UP,
-			  arg ? &arg : NULL, mpctx);
+		void* arg = NULL;
+		int r,i;
+		double d;
+		off_t o;
+		if (cmd->args[1].v.f) {
+		    m_option_t* prop;
+		    if((r = mp_property_do(cmd->args[0].v.s,
+		                           M_PROPERTY_GET_TYPE,
+		                           &prop, mpctx)) <= 0)
+		        goto step_prop_err;
+		    if(prop->type == CONF_TYPE_INT ||
+		       prop->type == CONF_TYPE_FLAG)
+		        i = cmd->args[1].v.f, arg = &i;
+		    else if(prop->type == CONF_TYPE_FLOAT)
+		        arg = &cmd->args[1].v.f;
+		    else if(prop->type == CONF_TYPE_DOUBLE ||
+		            prop->type == CONF_TYPE_TIME)
+		        d = cmd->args[1].v.f, arg = &d;
+		    else if(prop->type == CONF_TYPE_POSITION)
+		        o = cmd->args[1].v.f, arg = &o;
+		    else
+		        mp_msg(MSGT_CPLAYER, MSGL_WARN,
+		               "Ignoring step size stepping property '%s'.\n",
+		               cmd->args[0].v.s);
+		}
+		r = mp_property_do(cmd->args[0].v.s,
+		                   M_PROPERTY_STEP_UP,
+		                   arg, mpctx);
+	    step_prop_err:
 		if (r == M_PROPERTY_UNKNOWN)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Unknown property: '%s'\n", cmd->args[0].v.s);
 		else if (r <= 0)
 		    mp_msg(MSGT_CPLAYER, MSGL_WARN,
 			   "Failed to increment property '%s' by %f.\n",
-			   cmd->args[0].v.s, arg);
+			   cmd->args[0].v.s, cmd->args[1].v.f);
 	    }
 	    break;
 
