@@ -283,28 +283,7 @@ static int mp_property_length(m_option_t * prop, int action, void *arg,
 	!(int) (len = demuxer_get_time_length(mpctx->demuxer)))
 	return M_PROPERTY_UNAVAILABLE;
 
-    switch (action) {
-    case M_PROPERTY_PRINT:
-	if (!arg)
-	    return M_PROPERTY_ERROR;
-	else {
-	    int h, m, s = len;
-	    h = s / 3600;
-	    s -= h * 3600;
-	    m = s / 60;
-	    s -= m * 60;
-	    *(char **) arg = malloc(20);
-	    if (h > 0)
-		sprintf(*(char **) arg, "%d:%02d:%02d", h, m, s);
-	    else if (m > 0)
-		sprintf(*(char **) arg, "%d:%02d", m, s);
-	    else
-		sprintf(*(char **) arg, "%d", s);
-	    return M_PROPERTY_OK;
-	}
-	break;
-    }
-    return m_property_double_ro(prop, action, arg, len);
+    return m_property_time_ro(prop, action, arg, len);
 }
 
 /// Demuxer meta data

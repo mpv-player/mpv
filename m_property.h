@@ -185,6 +185,10 @@ int m_property_delay(m_option_t* prop,int action,
 int m_property_double_ro(m_option_t* prop,int action,
                          void* arg,double var);
 
+/// Implement print
+int m_property_time_ro(m_option_t* prop,int action,
+                       void* arg,double var);
+
 /// get/print the string
 int m_property_string_ro(m_option_t* prop,int action,void* arg, char* str);
 

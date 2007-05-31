@@ -318,6 +318,31 @@ int m_property_double_ro(m_option_t* prop,int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+int m_property_time_ro(m_option_t* prop,int action,
+                       void* arg,double var) {
+    switch(action) {
+    case M_PROPERTY_PRINT:
+	if (!arg)
+	    return M_PROPERTY_ERROR;
+	else {
+	    int h, m, s = var;
+	    h = s / 3600;
+	    s -= h * 3600;
+	    m = s / 60;
+	    s -= m * 60;
+	    *(char **) arg = malloc(20);
+	    if (h > 0)
+		sprintf(*(char **) arg, "%d:%02d:%02d", h, m, s);
+	    else if (m > 0)
+		sprintf(*(char **) arg, "%d:%02d", m, s);
+	    else
+		sprintf(*(char **) arg, "%d", s);
+	    return M_PROPERTY_OK;
+        }
+    }
+    return m_property_double_ro(prop,action,arg,var);
+}
+
 int m_property_string_ro(m_option_t* prop,int action,void* arg,char* str) {
     switch(action) {
     case M_PROPERTY_GET:
