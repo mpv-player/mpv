@@ -1227,7 +1227,7 @@ m_option_type_t m_option_type_time = {
   sizeof(double),
   0,
   parse_time,
-  NULL,
+  print_double,
   copy_opt,
   copy_opt,
   NULL,
