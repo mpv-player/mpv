@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r23367
+.\" synced with r23425
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -849,7 +849,11 @@ FIFO размера n может буферизовать (n-1) событие.
 Указывает использовать другой файл вместо menu.conf.
 .
 .TP
-+.B \-menu-keepdir (только OSD меню)
+.B \-menu-chroot <путь> (только OSD меню)
+Сделать указанный каталог корневым для меню выбора файлов.
+.
+.TP
+.B \-menu-keepdir (только OSD меню)
 Диалог выбора файла открывается в последнем известном каталоге вместо текущего.
 .
 .TP
@@ -7407,7 +7411,7 @@ HuffYUV
 ASUS Video v1
 .IPs "asv2\ "
 ASUS Video v2
-.IPs "ffv1"
+.IPs "ffv1\ "
 FFmpeg видео кодек без потерь 
 .IPs "flv\ \ "
 Sorenson H.263, использующийся в Flash Video
@@ -8315,8 +8319,8 @@ Naq попытается исправить квантователи уровня MB для сохранения должного
 .IPs "411P\ "
 для JPEG без потерь, dv и ffv1
 .IPs "YVU9\ "
-для JPEG без потерь, ffv1, и svq1
-.IPs "BGR32\ "
+для JPEG без потерь, ffv1 и svq1
+.IPs "BGR32"
 для JPEG без потерь и ffv1
 .RE
 .PD 1
