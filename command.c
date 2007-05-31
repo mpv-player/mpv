@@ -286,6 +286,63 @@ static int mp_property_length(m_option_t * prop, int action, void *arg,
     return m_property_time_ro(prop, action, arg, len);
 }
 
+/// Current position in percent (RW)
+static int mp_property_percent_pos(m_option_t * prop, int action,
+                                   void *arg, MPContext * mpctx) {
+    int pos;
+
+    if (!mpctx->demuxer)
+	return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return M_PROPERTY_ERROR;
+        M_PROPERTY_CLAMP(prop, *(int*)arg);
+        pos = *(int*)arg;
+        break;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        pos = demuxer_get_percent_pos(mpctx->demuxer);
+        pos += (arg ? *(int*)arg : 10) *
+            (action == M_PROPERTY_STEP_UP ? 1 : -1);
+        M_PROPERTY_CLAMP(prop, pos);
+        break;
+    default:
+        return m_property_int_ro(prop, action, arg,
+                                 demuxer_get_percent_pos(mpctx->demuxer));
+    }
+
+    abs_seek_pos = 3;
+    rel_seek_secs = pos / 100.0;
+    return M_PROPERTY_OK;
+}
+
+/// Current position in seconds (RW)
+static int mp_property_time_pos(m_option_t * prop, int action,
+                                void *arg, MPContext * mpctx) {
+    if (!(mpctx->sh_video || (mpctx->sh_audio && mpctx->audio_out)))
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return M_PROPERTY_ERROR;
+        M_PROPERTY_CLAMP(prop, *(double*)arg);
+        abs_seek_pos = 1;
+        rel_seek_secs = *(double*)arg;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        rel_seek_secs += (arg ? *(double*)arg : 10.0) *
+            (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
+        return M_PROPERTY_OK;
+    }
+    return m_property_time_ro(prop, action, arg,
+                              mpctx->sh_video ? mpctx->sh_video->pts :
+                              playing_audio_pts(mpctx->sh_audio,
+                                                mpctx->d_audio,
+                                                mpctx->audio_out));
+}
+
 /// Demuxer meta data
 static int mp_property_metadata(m_option_t * prop, int action, void *arg,
                                 MPContext * mpctx) {
@@ -1384,6 +1441,10 @@ static m_option_t mp_properties[] = {
     { "stream_length", mp_property_stream_length, CONF_TYPE_POSITION,
      M_OPT_MIN, 0, 0, NULL },
     { "length", mp_property_length, CONF_TYPE_TIME,
+     M_OPT_MIN, 0, 0, NULL },
+    { "percent_pos", mp_property_percent_pos, CONF_TYPE_INT,
+     M_OPT_RANGE, 0, 100, NULL },
+    { "time_pos", mp_property_time_pos, CONF_TYPE_TIME,
      M_OPT_MIN, 0, 0, NULL },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
      0, 0, 0, NULL },
