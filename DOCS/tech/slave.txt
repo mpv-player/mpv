@@ -400,7 +400,7 @@ stream_pos         pos       0               X   X        position in stream
 stream_start       pos       0               X            start pos in stream
 stream_end         pos       0               X            end pos in stream
 stream_length      pos       0               X            (end - start)
-length             double                    X            length of file in seconds
+length             time                      X            length of file in seconds
 metadata           str list                  X            list of metadata key/value
 metadata/*         string                    X            metadata values
 volume             float     0       100     X   X   X    change volume

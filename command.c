@@ -1383,8 +1383,8 @@ static m_option_t mp_properties[] = {
      M_OPT_MIN, 0, 0, NULL },
     { "stream_length", mp_property_stream_length, CONF_TYPE_POSITION,
      M_OPT_MIN, 0, 0, NULL },
-    { "length", mp_property_length, CONF_TYPE_DOUBLE,
-     0, 0, 0, NULL },
+    { "length", mp_property_length, CONF_TYPE_TIME,
+     M_OPT_MIN, 0, 0, NULL },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
      0, 0, 0, NULL },
 
