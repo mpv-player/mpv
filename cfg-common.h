@@ -429,6 +429,7 @@ m_option_t tvopts_conf[]={
 	{"channel", &tv_param_channel, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"chanlist", &tv_param_chanlist, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"norm", &tv_param_norm, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"automute", &tv_param_automute, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
 #ifdef HAVE_TV_V4L2
 	{"normid", &tv_param_normid, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif

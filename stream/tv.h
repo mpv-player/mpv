@@ -12,6 +12,7 @@ extern char *tv_param_freq;
 extern char *tv_param_channel;
 extern char *tv_param_chanlist;
 extern char *tv_param_norm;
+extern int tv_param_automute;
 #ifdef HAVE_TV_V4L2
 extern int tv_param_normid;
 #endif

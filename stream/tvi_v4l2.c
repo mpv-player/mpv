@@ -1321,6 +1321,16 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
     int d = pixfmt2depth(priv->format.fmt.pix.pixelformat);
     int bytesperline = w*d/8;
 
+    if(tv_param_automute>0){
+        if (ioctl(priv->video_fd, VIDIOC_G_TUNER, &priv->tuner) >= 0) {
+            if(tv_param_automute<<8>priv->tuner.signal){
+	        fill_blank_frame(dest,bytesperline * h,fcc_vl2mp(priv->format.fmt.pix.pixelformat));
+	        set_mute(priv,1);
+	        return;
+	    }
+        }
+        set_mute(priv,0);
+    }
     memcpy(dest, source, bytesperline * h);
 }
 

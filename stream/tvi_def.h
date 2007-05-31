@@ -52,3 +52,41 @@ static void free_handle(tvi_handle_t *h)
 	free(h);
     }
 }
+
+/**
+ Fills video frame in given buffer with blue color for yv12,i420,uyvy,yuy2.
+ Other formats will be filled with 0xC0 
+*/
+static inline void fill_blank_frame(char* buffer,int len,int fmt){
+    int i;
+
+    switch(fmt){
+    case IMGFMT_YV12:
+        memset(buffer, 0xFF,5*len/6);
+        memset(buffer+5*len/6, 0xFF,len/6);
+        break;
+    case IMGFMT_I420:
+        memset(buffer, 0xFF,4*len/6);
+        memset(buffer+4*len/6, 0xFF,len/6);
+        memset(buffer+5*len/6, 0xFF,len/6);
+        break;
+    case IMGFMT_UYVY:
+        for(i=0;i<len;i+=4){
+            buffer[i]=0xFF;
+            buffer[i+1]=0;
+            buffer[i+2]=0;
+            buffer[i+3]=0;
+	}
+        break;
+    case IMGFMT_YUY2:
+        for(i=0;i<len;i+=4){
+            buffer[i]=0;
+            buffer[i+1]=0xFF;
+            buffer[i+2]=0;
+            buffer[i+3]=0;
+	}
+        break;
+    default:
+        memset(buffer,0xC0,len);
+    }
+}

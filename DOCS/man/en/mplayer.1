@@ -1722,6 +1722,10 @@ Available options are:
 .RSs
 .IPs noaudio
 no sound
+.IPs automute=<0-255> (v4l and v4l2 only)
+If signal strength reported by device is less then this value,
+audio and video will be muted. In most cases automute=100 will be enough.
+Default is 0 (automute disabled).
 .IPs driver=<value>
 See \-tv driver=help for a list of compiled-in TV input drivers.
 available: dummy, v4l, v4l2, bsdbt848

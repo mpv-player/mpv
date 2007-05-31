@@ -1381,6 +1381,21 @@ static int control(priv_t *priv, int cmd, void *arg)
     return(TVI_CONTROL_UNKNOWN);
 }
 
+static int set_mute(priv_t* priv,int value)
+{
+    if (!priv->capability.audios) {
+        return 0;
+	
+    if(value)
+        priv->audio[priv->audio_id].flags |=VIDEO_AUDIO_MUTE;
+    else
+        priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
+    }
+    if(ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id])<0)
+        return 0;
+    return 1;
+}
+
 // copies a video frame
 // for RGB (i.e. BGR in mplayer) flips the image upside down
 // for YV12 swaps the 2nd and 3rd plane
@@ -1389,6 +1404,16 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
     int i;
     unsigned char *sptr;
 
+    if(tv_param_automute>0){
+        if (ioctl(priv->video_fd, VIDIOCGTUNER, &priv->tuner) >= 0) {
+            if(tv_param_automute<<8>priv->tuner.signal){
+                fill_blank_frame(dest,priv->bytesperline * priv->height,priv->format);
+                set_mute(priv,1);
+                return;
+            }
+        }
+        set_mute(priv,0);
+    }
     // YV12 uses VIDEO_PALETTE_YUV420P, but the planes are swapped
     if (priv->format == IMGFMT_YV12) {
         memcpy(dest, source, priv->width * priv->height);
