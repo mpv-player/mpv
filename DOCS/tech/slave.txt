@@ -249,8 +249,10 @@ speed_mult <value>
 speed_set <value>
     Set the speed to <value>.
 
-step_property <property> [<value>]
-    Change property by value, or increase by a default if value is not given.
+step_property <property> [value] [direction]
+    Change a property by value, or increase by a default if value is
+    not given or zero. The direction is reversed if direction is less
+    than zero.
 
 sub_alignment [value]
     Toggle/set subtitle alignment.

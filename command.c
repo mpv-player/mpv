@@ -1735,7 +1735,8 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		               cmd->args[0].v.s);
 		}
 		r = mp_property_do(cmd->args[0].v.s,
-		                   M_PROPERTY_STEP_UP,
+		                   cmd->args[2].v.i < 0 ?
+		                   M_PROPERTY_STEP_DOWN : M_PROPERTY_STEP_UP,
 		                   arg, mpctx);
 	    step_prop_err:
 		if (r == M_PROPERTY_UNKNOWN)
