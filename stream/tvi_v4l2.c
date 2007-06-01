@@ -65,6 +65,13 @@ struct map {
 
 #define BUFFER_COUNT 6
 
+/** video ringbuffer entry */
+typedef struct {
+    unsigned char               *data;     ///< frame contents
+    long long                   timestamp; ///< frame timestamp
+    int                         framesize; ///< actual frame size 
+} video_buffer_entry;
+
 /* private data */
 typedef struct {
     /* video */
@@ -92,8 +99,7 @@ typedef struct {
 
     int                         video_buffer_size_max;
     volatile int                video_buffer_size_current;
-    unsigned char                **video_ringbuffer;
-    long long                   *video_timebuffer;
+    video_buffer_entry          *video_ringbuffer;
     volatile int                video_head;
     volatile int                video_tail;
     volatile int                video_cnt;
@@ -185,6 +191,7 @@ static int fcc_mp2vl(int fcc)
     case IMGFMT_YUY2:   return V4L2_PIX_FMT_YUYV;
     case IMGFMT_YV12:   return V4L2_PIX_FMT_YVU420;
     case IMGFMT_UYVY:   return V4L2_PIX_FMT_UYVY;
+    case IMGFMT_MJPEG:   return V4L2_PIX_FMT_MJPEG;
     }
     return fcc;
 }
@@ -208,6 +215,7 @@ static int fcc_vl2mp(int fcc)
     case V4L2_PIX_FMT_YVU420:   return IMGFMT_YV12;
     case V4L2_PIX_FMT_YUYV:     return IMGFMT_YUY2;
     case V4L2_PIX_FMT_UYVY:     return IMGFMT_UYVY;
+    case V4L2_PIX_FMT_MJPEG:     return IMGFMT_MJPEG;
     }
     return fcc;
 }
@@ -247,6 +255,7 @@ static const char *pixfmt2name(int pixfmt)
     case V4L2_PIX_FMT_YYUV:         return "YYUV";
     case V4L2_PIX_FMT_HI240:        return "HI240";
     case V4L2_PIX_FMT_WNVA:         return "WNVA";
+    case V4L2_PIX_FMT_MJPEG:        return "MJPEG";
     }
     sprintf(unknown, "unknown (0x%x)", pixfmt);
     return unknown;
@@ -909,12 +918,10 @@ static int uninit(priv_t *priv)
     if (priv->video_ringbuffer) {
         int i;
         for (i = 0; i < priv->video_buffer_size_current; i++) {
-            free(priv->video_ringbuffer[i]);
+            free(priv->video_ringbuffer[i].data);
         }
         free(priv->video_ringbuffer);
     }
-    if (priv->video_timebuffer)
-        free(priv->video_timebuffer);
     if (!tv_param_noaudio) {
         if (priv->audio_ringbuffer)
             free(priv->audio_ringbuffer);
@@ -1123,10 +1130,6 @@ static int init(priv_t *priv)
 static int get_capture_buffer_size(priv_t *priv)
 {
     int bufsize, cnt;
-    int w = priv->format.fmt.pix.width;
-    int h = priv->format.fmt.pix.height;
-    int d = pixfmt2depth(priv->format.fmt.pix.pixelformat);
-    int bytesperline = w*d/8;
 
     if (tv_param_buffer_size >= 0) {
         bufsize = tv_param_buffer_size*1024*1024;
@@ -1145,7 +1148,7 @@ static int get_capture_buffer_size(priv_t *priv)
 #endif
     }
     
-    cnt = bufsize/(h*bytesperline);
+    cnt = bufsize/priv->format.fmt.pix.sizeimage;
     if (cnt < 2) cnt = 2;
     
     return cnt;
@@ -1228,18 +1231,12 @@ static int start(priv_t *priv)
                priv->video_buffer_size_max*priv->format.fmt.pix.height*bytesperline/(1024*1024));
     }
 
-    priv->video_ringbuffer = calloc(priv->video_buffer_size_max, sizeof(unsigned char*));
+    priv->video_ringbuffer = calloc(priv->video_buffer_size_max, sizeof(video_buffer_entry));
     if (!priv->video_ringbuffer) {
         mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate video buffer: %s\n", strerror(errno));
         return 0;
     }
-    for (i = 0; i < priv->video_buffer_size_max; i++)
-        priv->video_ringbuffer[i] = NULL;
-    priv->video_timebuffer = calloc(priv->video_buffer_size_max, sizeof(long long));
-    if (!priv->video_timebuffer) {
-        mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate time buffer: %s\n", strerror(errno));
-        return 0;
-    }
+    memset(priv->video_ringbuffer,0,priv->video_buffer_size_max * sizeof(video_buffer_entry));
 
     pthread_mutex_init(&priv->video_buffer_mutex, NULL);
 
@@ -1314,24 +1311,20 @@ static int start(priv_t *priv)
 }
 
 // copies a video frame
-static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *source)
+static inline void copy_frame(priv_t *priv, video_buffer_entry *dest, unsigned char *source,int len)
 {
-    int w = priv->format.fmt.pix.width;
-    int h = priv->format.fmt.pix.height;
-    int d = pixfmt2depth(priv->format.fmt.pix.pixelformat);
-    int bytesperline = w*d/8;
-
+    dest->framesize=len;
     if(tv_param_automute>0){
         if (ioctl(priv->video_fd, VIDIOC_G_TUNER, &priv->tuner) >= 0) {
             if(tv_param_automute<<8>priv->tuner.signal){
-	        fill_blank_frame(dest,bytesperline * h,fcc_vl2mp(priv->format.fmt.pix.pixelformat));
+	        fill_blank_frame(dest->data,dest->framesize,fcc_vl2mp(priv->format.fmt.pix.pixelformat));
 	        set_mute(priv,1);
 	        return;
 	    }
         }
         set_mute(priv,0);
     }
-    memcpy(dest, source, bytesperline * h);
+    memcpy(dest->data, source, len);
 }
 
 // maximum skew change, in frames
@@ -1341,8 +1334,7 @@ static void *video_grabber(void *data)
     priv_t *priv = (priv_t*)data;
     long long skew, prev_skew, xskew, interval, prev_interval, delta;
     int i;
-    int framesize = priv->format.fmt.pix.height*priv->format.fmt.pix.width*
-        pixfmt2depth(priv->format.fmt.pix.pixelformat)/8;
+    int framesize = priv->format.fmt.pix.sizeimage;
     fd_set rdset;
     struct timeval timeout;
     struct v4l2_buffer buf;
@@ -1478,10 +1470,8 @@ static void *video_grabber(void *data)
                 unsigned char *newbuf = malloc(framesize);
                 if (newbuf) {
                     memmove(priv->video_ringbuffer+priv->video_tail+1, priv->video_ringbuffer+priv->video_tail,
-                            (priv->video_buffer_size_current-priv->video_tail)*sizeof(unsigned char *));
-                    memmove(priv->video_timebuffer+priv->video_tail+1, priv->video_timebuffer+priv->video_tail,
-                            (priv->video_buffer_size_current-priv->video_tail)*sizeof(long long));
-                    priv->video_ringbuffer[priv->video_tail] = newbuf;
+                            (priv->video_buffer_size_current-priv->video_tail)*sizeof(video_buffer_entry));
+                    priv->video_ringbuffer[priv->video_tail].data = newbuf;
                     if ((priv->video_head >= priv->video_tail) && (priv->video_cnt > 0)) priv->video_head++;
                     priv->video_buffer_size_current++;
                 }
@@ -1500,23 +1490,22 @@ static void *video_grabber(void *data)
             }
         } else {
             if (priv->immediate_mode) {
-                priv->video_timebuffer[priv->video_tail] = 0;
+                priv->video_ringbuffer[priv->video_tail].timestamp = 0;
             } else {
                 // compensate for audio skew
                 // negative skew => there are more audio samples, increase interval
                 // positive skew => less samples, shorten the interval
-                priv->video_timebuffer[priv->video_tail] = interval - skew;
-                if (priv->audio_insert_null_samples && priv->video_timebuffer[priv->video_tail] > 0) {
+                priv->video_ringbuffer[priv->video_tail].timestamp = interval - skew;
+                if (priv->audio_insert_null_samples && priv->video_ringbuffer[priv->video_tail].timestamp > 0) {
                     pthread_mutex_lock(&priv->audio_mutex);
-                    priv->video_timebuffer[priv->video_tail] += 
+                    priv->video_ringbuffer[priv->video_tail].timestamp += 
                         (priv->audio_null_blocks_inserted
                          - priv->dropped_frames_timeshift/priv->audio_usecs_per_block)
                         *priv->audio_usecs_per_block;
                     pthread_mutex_unlock(&priv->audio_mutex);
                 }
             }
-
-            copy_frame(priv, priv->video_ringbuffer[priv->video_tail], priv->map[buf.index].addr);
+            copy_frame(priv, priv->video_ringbuffer+priv->video_tail, priv->map[buf.index].addr,buf.bytesused);
             priv->video_tail = (priv->video_tail+1)%priv->video_buffer_size_current;
             priv->video_cnt++;
         }
@@ -1546,8 +1535,8 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
     }
 
     pthread_mutex_lock(&priv->video_buffer_mutex);
-    interval = (double)priv->video_timebuffer[priv->video_head]*1e-6;
-    memcpy(buffer, priv->video_ringbuffer[priv->video_head], len);
+    interval = (double)priv->video_ringbuffer[priv->video_head].timestamp*1e-6;
+    memcpy(buffer, priv->video_ringbuffer[priv->video_head].data, len);
     priv->video_cnt--;
     priv->video_head = (priv->video_head+1)%priv->video_buffer_size_current;
     pthread_mutex_unlock(&priv->video_buffer_mutex);
@@ -1557,6 +1546,17 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 
 static int get_video_framesize(priv_t *priv)
 {
+    /* 
+      this routine will be called before grab_video_frame 
+      thus let's return topmost frame's size
+    */
+    if (priv->video_cnt)
+        return priv->video_ringbuffer[priv->video_head].framesize;
+    /*
+      no video frames yet available. i don't know what to do in this case,
+      thus let's return some fallback result (for compressed format this will be
+      maximum allowed frame size.
+    */
     return priv->format.fmt.pix.sizeimage;
 }
 

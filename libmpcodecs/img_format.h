@@ -93,6 +93,7 @@
 
 /* Compressed Formats */
 #define IMGFMT_MPEGPES (('M'<<24)|('P'<<16)|('E'<<8)|('S'))
+#define IMGFMT_MJPEG (('M')|('J'<<8)|('P'<<16)|('G'<<24))
 /* Formats that are understood by zoran chips, we include
  * non-interlaced, interlaced top-first, interlaced bottom-first */
 #define IMGFMT_ZRMJPEGNI  (('Z'<<24)|('R'<<16)|('N'<<8)|('I'))

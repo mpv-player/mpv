@@ -86,6 +86,12 @@ static inline void fill_blank_frame(char* buffer,int len,int fmt){
             buffer[i+3]=0;
 	}
         break;
+    case IMGFMT_MJPEG:
+        /*
+	This is compressed format. I don't know yet how to fill such frame with blue color.
+	Keeping frame unchanged.
+	*/
+        break;
     default:
         memset(buffer,0xC0,len);
     }
