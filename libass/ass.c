@@ -982,17 +982,9 @@ ass_track_t* ass_read_memory(ass_library_t* library, char* buf, size_t bufsize, 
 	return track;
 }
 
-/**
- * \brief Read subtitles from file.
- * \param library libass library object
- * \param fname file name
- * \param codepage recode buffer contents from given codepage
- * \return newly allocated track
-*/ 
-ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage)
+char* read_file_recode(char* fname, char* codepage, int* size)
 {
 	char* buf;
-	ass_track_t* track;
 	size_t bufsize;
 	
 	buf = read_file(fname, &bufsize);
@@ -1007,6 +999,26 @@ ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage)
 	if (!buf)
 		return 0;
 #endif
+	*size = bufsize;
+	return buf;
+}
+
+/**
+ * \brief Read subtitles from file.
+ * \param library libass library object
+ * \param fname file name
+ * \param codepage recode buffer contents from given codepage
+ * \return newly allocated track
+*/ 
+ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage)
+{
+	char* buf;
+	ass_track_t* track;
+	size_t bufsize;
+
+	buf = read_file_recode(fname, codepage, &bufsize);
+	if (!buf)
+		return 0;
 	track = parse_memory(library, buf);
 	free(buf);
 	if (!track)
