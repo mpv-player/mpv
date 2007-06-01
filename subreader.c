@@ -19,6 +19,7 @@
 #include "mp_msg.h"
 #include "subreader.h"
 #include "stream/stream.h"
+#include "libass/ass.h"
 
 #ifdef HAVE_ENCA
 #include <enca.h>
@@ -1336,6 +1337,8 @@ void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
 
 sub_data* sub_read_file (char *filename, float fps) {
     stream_t* fd;
+    unsigned char* subfile_buf;
+    size_t subfile_size;
     int n_max, n_first, i, j, sub_first, sub_orig;
     subtitle *first, *second, *sub, *return_sub;
     sub_data *subt_data;
@@ -1360,8 +1363,15 @@ sub_data* sub_read_file (char *filename, float fps) {
     struct subreader *srp;
     
     if(filename==NULL) return NULL; //qnx segfault
+
     i = 0;
-    fd=open_stream (filename, NULL, &i); if (!fd) return NULL;
+    subfile_buf = read_file_recode(filename, sub_cp, &subfile_size);
+    if (!subfile_buf) return 0;
+    fd = new_memory_stream(subfile_buf, subfile_size);
+    if (!fd) {
+      free(subfile_buf);
+      return 0;
+    }
     
     sub_format=sub_autodetect (fd, &uses_time);
     mpsub_multiplier = (uses_time ? 100.0 : 1.0);
@@ -1372,30 +1382,14 @@ sub_data* sub_read_file (char *filename, float fps) {
     stream_reset(fd);
     stream_seek(fd,0);
 
-#ifdef USE_ICONV
     sub_utf8_prev=sub_utf8;
-    {
-	    int l,k;
-	    k = -1;
-	    if ((l=strlen(filename))>4){
-		    char *exts[] = {".utf", ".utf8", ".utf-8" };
-		    for (k=3;--k>=0;)
-			if (l >= strlen(exts[k]) && !strcasecmp(filename+(l - strlen(exts[k])), exts[k])){
-			    sub_utf8 = 1;
-			    break;
-			}
-	    }
-	    if (k<0) subcp_open(fd);
-    }
-#endif
+    sub_utf8 = 1;
 
     sub_num=0;n_max=32;
     first=malloc(n_max*sizeof(subtitle));
     if(!first){
-#ifdef USE_ICONV
-	  subcp_close();
-          sub_utf8=sub_utf8_prev;
-#endif
+      sub_utf8 = sub_utf8_prev;
+      free(subfile_buf);
 	    return NULL;
     }
     
@@ -1416,18 +1410,13 @@ sub_data* sub_read_file (char *filename, float fps) {
 	memset(sub, '\0', sizeof(subtitle));
         sub=srp->read(fd,sub);
         if(!sub) break;   // EOF
-#ifdef USE_ICONV
-	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
-#endif
 #ifdef USE_FRIBIDI
 	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8);
 #endif
 	if ( sub == ERR )
 	 {
-#ifdef USE_ICONV
-          subcp_close();
-#endif
     	  if ( first ) free(first);
+	  free(subfile_buf);
 	  return NULL; 
 	 }
         // Apply any post processing that needs recoding first
@@ -1476,10 +1465,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     }
     
     free_stream(fd);
-
-#ifdef USE_ICONV
-    subcp_close();
-#endif
+    free(subfile_buf);
 
 //    printf ("SUB: Subtitle format %s time.\n", uses_time?"uses":"doesn't use");
     mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Read %i subtitles", sub_num);
