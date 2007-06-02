@@ -6,12 +6,7 @@
 *********************************************************/
 #include "config.h"
 
-#ifndef NOAVIFILE_HEADERS
-#include "audiodecoder.h"
-#include "except.h"
-#else
 #include "libwin32.h"
-#endif
 
 #include "DS_Filter.h"
 

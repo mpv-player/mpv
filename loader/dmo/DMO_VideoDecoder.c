@@ -12,11 +12,7 @@
 #include "../ldt_keeper.h"
 #endif
 
-#ifndef NOAVIFILE_HEADERS
-#include "videodecoder.h"
-#else
 #include "dshow/libwin32.h"
-#endif
 #include "DMO_Filter.h"
 
 #include "DMO_VideoDecoder.h"
@@ -38,12 +34,6 @@ struct _DMO_VideoDecoder
 //#include "DMO_VideoDecoder.h"
 
 #include "../wine/winerror.h"
-
-#ifndef NOAVIFILE_HEADERS
-#define VFW_E_NOT_RUNNING               0x80040226
-#include "fourcc.h"
-#include "except.h"
-#endif
 
 #include <unistd.h>
 #include <fcntl.h>

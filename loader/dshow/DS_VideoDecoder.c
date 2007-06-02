@@ -8,12 +8,7 @@
 #include "guids.h"
 #include "interfaces.h"
 #include "registry.h"
-
-#ifndef NOAVIFILE_HEADERS
-#include "videodecoder.h"
-#else
 #include "libwin32.h"
-#endif
 #include "DS_Filter.h"
 
 struct _DS_VideoDecoder
@@ -38,12 +33,6 @@ static SampleProcUserData sampleProcData;
 #include "../wine/winerror.h"
 #ifdef WIN32_LOADER
 #include "../ldt_keeper.h"
-#endif
-
-#ifndef NOAVIFILE_HEADERS
-#define VFW_E_NOT_RUNNING               0x80040226
-#include "fourcc.h"
-#include "except.h"
 #endif
 
 #include <unistd.h>

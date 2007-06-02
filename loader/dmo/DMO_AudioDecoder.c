@@ -5,14 +5,9 @@
 
 *********************************************************/
 #include "config.h"
-#ifndef NOAVIFILE_HEADERS
-#include "audiodecoder.h"
-#include "except.h"
-#else
 #include "dshow/libwin32.h"
 #ifdef WIN32_LOADER
 #include "ldt_keeper.h"
-#endif
 #endif
 
 #include "DMO_Filter.h"

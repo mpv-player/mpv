@@ -24,14 +24,7 @@
 #include "mp_msg.h"
 #include "wine/winerror.h"
 #include "com.h"
-
-
-#ifndef NOAVIFILE_HEADERS
-#include "audiodecoder.h"
-#include "except.h"
-#else
 #include "libwin32.h"
-#endif
 
 void DisplayMediaType(const char * label,const AM_MEDIA_TYPE* pmt){
     WAVEFORMATEX* pWF;
