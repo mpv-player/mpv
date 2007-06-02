@@ -12,10 +12,7 @@
 #ifndef __WINE_WINDEF_H
 #define __WINE_WINDEF_H
 
-#ifdef __WINE__
 # include "config.h"
-# undef UNICODE
-#endif
 
 #ifdef _EGCS_
 #define __stdcall
@@ -43,37 +40,20 @@ extern "C" {
 #define NULL  0
 
 /* Macros to map Winelib names to the correct implementation name */
-/* depending on __WINE__ and UNICODE macros.                      */
 /* Note that Winelib is purely Win32.                             */
 
-#ifdef __WINE__
 # define WINELIB_NAME_AW(func) \
     func##_must_be_suffixed_with_W_or_A_in_this_context \
     func##_must_be_suffixed_with_W_or_A_in_this_context
-#else  /* __WINE__ */
-# ifdef UNICODE
-#  define WINELIB_NAME_AW(func) func##W
-# else
-#  define WINELIB_NAME_AW(func) func##A
-# endif  /* UNICODE */
-#endif  /* __WINE__ */
 
-#ifdef __WINE__
 # define DECL_WINELIB_TYPE_AW(type)  /* nothing */
-#else   /* __WINE__ */
-# define DECL_WINELIB_TYPE_AW(type)  typedef WINELIB_NAME_AW(type) type;
-#endif  /* __WINE__ */
 
 #ifndef NONAMELESSSTRUCT
-# if defined(__WINE__) || !defined(_FORCENAMELESSSTRUCT)
 #  define NONAMELESSSTRUCT
-# endif
 #endif /* !defined(NONAMELESSSTRUCT) */
 
 #ifndef NONAMELESSUNION
-# if defined(__WINE__) || !defined(_FORCENAMELESSUNION) || !defined(__cplusplus)
 #  define NONAMELESSUNION
-# endif
 #endif /* !defined(NONAMELESSUNION) */
 
 #ifndef NONAMELESSSTRUCT
@@ -250,11 +230,7 @@ typedef WIN_BOOL           *LPWIN_BOOL;
 
 /* Special case: a segmented pointer is just a pointer in the user's code. */
 
-#ifdef __WINE__
 typedef DWORD SEGPTR;
-#else
-typedef void* SEGPTR;
-#endif /* __WINE__ */
 
 /* Handle types that exist both in Win16 and Win32. */
 
@@ -482,18 +458,6 @@ typedef LRESULT CALLBACK (*WNDPROC16)(HWND16,UINT16,WPARAM16,LPARAM);
 
 /* Define some empty macros for compatibility with Windows code. */
 
-#ifndef __WINE__
-#define NEAR
-#define FAR
-#define near
-#define far
-#define _near
-#define _far
-#define IN
-#define OUT
-#define OPTIONAL
-#endif  /* __WINE__ */
-
 /* Macro for structure packing. */
 
 #ifdef __GNUC__
@@ -529,13 +493,11 @@ typedef LRESULT CALLBACK (*WNDPROC16)(HWND16,UINT16,WPARAM16,LPARAM);
 #define SELECTOROF(ptr)     (HIWORD(ptr))
 #define OFFSETOF(ptr)       (LOWORD(ptr))
 
-#ifdef __WINE__
 /* macros to set parts of a DWORD (not in the Windows API) */
 #define SET_LOWORD(dw,val)  ((dw) = ((dw) & 0xffff0000) | LOWORD(val))
 #define SET_LOBYTE(dw,val)  ((dw) = ((dw) & 0xffffff00) | LOBYTE(val))
 #define SET_HIBYTE(dw,val)  ((dw) = ((dw) & 0xffff00ff) | (LOWORD(val) & 0xff00))
 #define ADD_LOWORD(dw,val)  ((dw) = ((dw) & 0xffff0000) | LOWORD((DWORD)(dw)+(val)))
-#endif
 
 /* Macros to access unaligned or wrong-endian WORDs and DWORDs. */
 /* Note: These macros are semantically broken, at least for wrc.  wrc

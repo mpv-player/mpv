@@ -2,7 +2,6 @@ include ../config.mak
 
 LIBNAME_COMMON = libloader.a
 
-CFLAGS= -D__WINE__
 #CFLAGS+=-Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
 
 SRCS_COMMON  = driver.c afl.c vfl.c

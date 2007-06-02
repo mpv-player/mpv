@@ -909,9 +909,7 @@ typedef DWORD WINAPI (*LPPROGRESS_ROUTINE)(LARGE_INTEGER, LARGE_INTEGER, LARGE_I
 #define MEM_PRIVATE             0x00020000
 #define MEM_MAPPED              0x00040000
 #define MEM_TOP_DOWN            0x00100000
-#ifdef __WINE__
 #define MEM_SYSTEM              0x80000000
-#endif
 
 #define SEC_FILE                0x00800000
 #define SEC_IMAGE               0x01000000
@@ -995,9 +993,7 @@ typedef struct {
 	DWORD Reserved;
 }CRITICAL_SECTION;
 
-#ifdef __WINE__
 #define CRITICAL_SECTION_INIT { 0, -1, 0, 0, 0, 0 }
-#endif
 
 typedef struct {
         DWORD dwOSVersionInfoSize;
@@ -1779,10 +1775,8 @@ LONG        WINAPI InterlockedExchangeAdd(PLONG,LONG);
 LONG        WINAPI InterlockedIncrement(PLONG);
 VOID        WINAPI SetLastError(DWORD);
 
-#ifdef __WINE__
 #define GetCurrentProcess() ((HANDLE)0xffffffff)
 #define GetCurrentThread()  ((HANDLE)0xfffffffe)
-#endif
 
 #ifdef __cplusplus
 }

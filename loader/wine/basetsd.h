@@ -12,9 +12,7 @@
 #ifndef __WINE_BASETSD_H
 #define __WINE_BASETSD_H
 
-#ifdef __WINE__
 #include "config.h"
-#endif /* defined(__WINE__) */
 
 #ifdef __cplusplus
 extern "C" {

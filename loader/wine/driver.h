@@ -101,12 +101,10 @@ HMODULE16 WINAPI GetDriverModuleHandle16(HDRVR16 hDriver);
 HMODULE WINAPI GetDriverModuleHandle(HDRVR hDriver);
 
 DWORD WINAPI GetDriverFlags( HDRVR hDriver );
-#ifdef __WINE__
 /* this call (GetDriverFlags) is not documented, nor the flags returned.
  * here are Wine only definitions
  */
 #define WINE_GDF_EXIST	0x80000000
 #define WINE_GDF_16BIT	0x10000000
-#endif
 
 #endif  /* __WINE_DRIVER_H */
