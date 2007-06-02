@@ -1,13 +1,6 @@
 #ifndef __LIBWIN32_H
 #define __LIBWIN32_H
 
-#ifndef NOAVIFILE_HEADERS
-#error this header file should not be used without -DNOAVIFILE_HEADERS
-#endif
-
-// this file is only included when NOAVIFILE_HEADERS are defined
-// serves mainly for mplayer
-
 #define VFW_E_NOT_RUNNING               0x80040226
 
 #include <inttypes.h>
