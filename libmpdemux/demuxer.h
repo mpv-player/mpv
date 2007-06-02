@@ -275,7 +275,7 @@ inline static void free_demux_packet(demux_packet_t* dp){
 #define SIZE_MAX ((size_t)-1)
 #endif
 
-static void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
+inline static void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
   if (nmemb > SIZE_MAX / size) {
     free(ptr);
     return NULL;
