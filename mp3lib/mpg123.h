@@ -71,7 +71,7 @@ struct frame {
     int lay;
     int error_protection;
     int bitrate_index;
-    long sampling_frequency;
+    int sampling_frequency;
     int padding;
     int extension;
     int mode;
@@ -79,7 +79,7 @@ struct frame {
     int copyright;
          int original;
          int emphasis;
-         long framesize; /* computed framesize */
+         int framesize; /* computed framesize */
 };
 
 

@@ -33,9 +33,9 @@
 #include "mangle.h"
 #define real float /* ugly - but only way */
 
-static long attribute_used buffs[1088]={0};
-static long attribute_used bo=1;
-static long attribute_used saved_ebp=0;
+static int attribute_used buffs[1088]={0};
+static int attribute_used bo=1;
+static int attribute_used saved_ebp=0;
 
 int synth_1to1_pent(real *bandPtr, int channel, short *samples)
 {

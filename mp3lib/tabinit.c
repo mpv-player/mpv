@@ -8,7 +8,7 @@ real mp3lib_decwin[(512+32)];
 static real cos64[32], cos32[16], cos16[8], cos8[4], cos4[2];
 real *mp3lib_pnts[]={ cos64,cos32,cos16,cos8,cos4 };
 
-static long intwinbase[] = {
+static int intwinbase[] = {
      0,    -1,    -1,    -1,    -1,    -1,    -1,    -2,    -2,    -2,
     -2,    -3,    -3,    -4,    -4,    -5,    -5,    -6,    -7,    -7,
     -8,    -9,   -10,   -11,   -13,   -14,   -16,   -17,   -19,   -21,

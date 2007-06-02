@@ -108,11 +108,11 @@ static int tabsel_123[2][3][16] = {
      {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,} }
 };
 
-static long freqs[9] = { 44100, 48000, 32000, 22050, 24000, 16000 , 11025 , 12000 , 8000 };
+static int freqs[9] = { 44100, 48000, 32000, 22050, 24000, 16000 , 11025 , 12000 , 8000 };
 
 LOCAL unsigned int getbits(short number_of_bits)
 {
-  unsigned long rval;
+  unsigned rval;
 //  if(MP3_frames>=7741) printf("getbits: bits=%d  bitsleft=%d  wordptr=%x\n",number_of_bits,bitsleft,wordpointer);
   if((bitsleft-=number_of_bits)<0) return 0;
   if(!number_of_bits) return 0;
@@ -133,12 +133,12 @@ LOCAL unsigned int getbits(short number_of_bits)
 
 LOCAL unsigned int getbits_fast(short number_of_bits)
 {
-  unsigned long rval;
+  unsigned rval;
 //  if(MP3_frames>=7741) printf("getbits_fast: bits=%d  bitsleft=%d  wordptr=%x\n",number_of_bits,bitsleft,wordpointer);
   if((bitsleft-=number_of_bits)<0) return 0;
   if(!number_of_bits) return 0;
 #if defined(CAN_COMPILE_X86_ASM)
-  rval = bswap_16(*((unsigned short *)wordpointer));
+  rval = bswap_16(*((uint16_t *)wordpointer));
 #else
   /*
    * we may not be able to address unaligned 16-bit data on non-x86 cpus.
@@ -167,7 +167,7 @@ LOCAL unsigned int get1bit(void)
   return ((rval>>7)&1);
 }
 
-LOCAL void set_pointer(long backstep)
+LOCAL void set_pointer(int backstep)
 {
 //  if(backstep!=512 && backstep>fsizeold)
 //    printf("\rWarning! backstep (%d>%d)                                         \n",backstep,fsizeold);
@@ -178,10 +178,10 @@ LOCAL void set_pointer(long backstep)
 //  printf("Backstep %d  (bitsleft=%d)\n",backstep,bitsleft);
 }
 
-LOCAL int stream_head_read(unsigned char *hbuf,unsigned long *newhead){
+LOCAL int stream_head_read(unsigned char *hbuf,uint32_t *newhead){
   if(mp3_read(hbuf,4) != 4) return FALSE;
 #if defined(CAN_COMPILE_X86_ASM)
-  *newhead = bswap_32(*((unsigned long *)hbuf));
+  *newhead = bswap_32(*((uint32_t*)hbuf));
 #else
   /*
    * we may not be able to address unaligned 32-bit data on non-x86 cpus.
@@ -196,8 +196,8 @@ LOCAL int stream_head_read(unsigned char *hbuf,unsigned long *newhead){
   return TRUE;
 }
 
-LOCAL int stream_head_shift(unsigned char *hbuf,unsigned long *head){
-  *((unsigned long *)hbuf) >>= 8;
+LOCAL int stream_head_shift(unsigned char *hbuf,uint32_t *head){
+  *((uint32_t*)hbuf) >>= 8;
   if(mp3_read(hbuf+3,1) != 1) return 0;
   *head <<= 8;
   *head |= hbuf[3];
@@ -208,7 +208,7 @@ LOCAL int stream_head_shift(unsigned char *hbuf,unsigned long *head){
  * decode a header and write the information
  * into the frame structure
  */
-LOCAL int decode_header(struct frame *fr,unsigned long newhead){
+LOCAL int decode_header(struct frame *fr,uint32_t newhead){
 
     // head_check:
     if( (newhead & 0xffe00000) != 0xffe00000 ||  
@@ -217,8 +217,8 @@ LOCAL int decode_header(struct frame *fr,unsigned long newhead){
     fr->lay = 4-((newhead>>17)&3);
 //    if(fr->lay!=3) return FALSE;
 
-    if( newhead & ((long)1<<20) ) {
-      fr->lsf = (newhead & ((long)1<<19)) ? 0x0 : 0x1;
+    if( newhead & (1<<20) ) {
+      fr->lsf = (newhead & (1<<19)) ? 0x0 : 0x1;
       fr->mpeg25 = 0;
     } else {
       fr->lsf = 1;
@@ -253,7 +253,7 @@ switch(fr->lay){
   case 2:
     MP3_bitrate=tabsel_123[fr->lsf][1][fr->bitrate_index];
     MP3_samplerate=freqs[fr->sampling_frequency];
-    fr->framesize = (long) MP3_bitrate * 144000;
+    fr->framesize = MP3_bitrate * 144000;
     fr->framesize /= MP3_samplerate;
     MP3_framesize=fr->framesize;
     fr->framesize += fr->padding - 4;
@@ -267,7 +267,7 @@ switch(fr->lay){
 
     MP3_bitrate=tabsel_123[fr->lsf][2][fr->bitrate_index];
     MP3_samplerate=freqs[fr->sampling_frequency];
-    fr->framesize  = (long) MP3_bitrate * 144000;
+    fr->framesize  = MP3_bitrate * 144000;
     fr->framesize /= MP3_samplerate<<(fr->lsf);
     MP3_framesize=fr->framesize;
     fr->framesize += fr->padding - 4;
@@ -276,7 +276,7 @@ switch(fr->lay){
 //    fr->jsbound = (fr->mode == MPG_MD_JOINT_STEREO) ? (fr->mode_ext<<2)+4 : 32;
     MP3_bitrate=tabsel_123[fr->lsf][0][fr->bitrate_index];
     MP3_samplerate=freqs[fr->sampling_frequency];
-    fr->framesize  = (long) MP3_bitrate * 12000;
+    fr->framesize  = MP3_bitrate * 12000;
     fr->framesize /= MP3_samplerate;
     MP3_framesize  = ((fr->framesize+fr->padding)<<2);
     fr->framesize  = MP3_framesize-4;
@@ -314,7 +314,7 @@ LOCAL int stream_read_frame_body(int size){
  * read next frame     return number of frames read.
  */
 LOCAL int read_frame(struct frame *fr){
-  unsigned long newhead;
+  uint32_t newhead;
   union {
     unsigned char buf[8];
     unsigned long dummy; // for alignment
