@@ -540,7 +540,7 @@ typedef struct {
 	int32_t atype, vtype, stype;	//types
 	int32_t apid, vpid, spid;	//stream ids
 	char slang[4], alang[4];	//languages
-	int16_t prog;
+	uint16_t prog;
 	off_t probe;
 } tsdemux_init_t;
 
