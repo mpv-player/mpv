@@ -20,13 +20,11 @@ for DLL to know too much about its environment.
 #include "config.h"
 #include "mangle.h"
 
-#ifdef MPLAYER
 #ifdef USE_QTX_CODECS
 #define QTX
 #endif
 #define REALPLAYER
 //#define LOADLIB_TRY_NATIVE
-#endif
 
 #ifdef QTX
 #define PSEUDO_SCREEN_WIDTH	/*640*/800
@@ -192,9 +190,7 @@ static void longcount_stub(long long* z)
     longcount(z);
 }
 
-#ifdef MPLAYER
 #include "mp_msg.h"
-#endif
 int LOADER_DEBUG=1; // active only if compiled with -DDETAILED_OUT
 //#define DETAILED_OUT
 static inline void dbgprintf(char* fmt, ...)
@@ -217,7 +213,6 @@ static inline void dbgprintf(char* fmt, ...)
 	va_end(va);
     }
 #endif
-#ifdef MPLAYER
     if ( mp_msg_test(MSGT_WIN32,MSGL_DBG3) )
     {
 	va_list va;
@@ -228,7 +223,6 @@ static inline void dbgprintf(char* fmt, ...)
 	va_end(va);
     }
   fflush(stdout);
-#endif
 }
 
 
@@ -960,7 +954,6 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
     cachedsi.wProcessorLevel		= 5; /* pentium */
     cachedsi.wProcessorRevision		= 0x0101;
 
-#ifdef MPLAYER
     /* mplayer's way to detect PF's */
     {
 #include "cpudetect.h"
@@ -993,41 +986,6 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	    cachedsi.wProcessorRevision = gCpuCaps.cpuStepping;
     	    cachedsi.dwNumberOfProcessors = 1;	/* hardcoded */
     }
-#endif
-
-/* disable cpuid based detection (mplayer's cpudetect.c does this - see above) */
-#ifndef MPLAYER
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__svr4__) || defined(__DragonFly__)
-    do_cpuid(1, regs);
-    switch ((regs[0] >> 8) & 0xf) {			// cpu family
-    case 3: cachedsi.dwProcessorType = PROCESSOR_INTEL_386;
-    cachedsi.wProcessorLevel= 3;
-    break;
-    case 4: cachedsi.dwProcessorType = PROCESSOR_INTEL_486;
-    cachedsi.wProcessorLevel= 4;
-    break;
-    case 5: cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
-    cachedsi.wProcessorLevel= 5;
-    break;
-    case 6: cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
-    cachedsi.wProcessorLevel= 5;
-    break;
-    default:cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
-    cachedsi.wProcessorLevel= 5;
-    break;
-    }
-    cachedsi.wProcessorRevision = regs[0] & 0xf;	// stepping
-    if (regs[3] & (1 <<  8))
-	PF[PF_COMPARE_EXCHANGE_DOUBLE] = TRUE;
-    if (regs[3] & (1 << 23))
-	PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
-    if (regs[3] & (1 << 25))
-	PF[PF_XMMI_INSTRUCTIONS_AVAILABLE] = TRUE;
-    if (regs[3] & (1 << 31))
-	PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
-    cachedsi.dwNumberOfProcessors=1;
-#endif
-#endif /* MPLAYER */
 
 /* MPlayer: linux detection enabled (based on proc/cpuinfo) for checking
    fdiv_bug and fpu emulation flags -- alex/MPlayer */
@@ -1039,11 +997,9 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 
 	if (!f)
 	{
-#ifdef MPLAYER
 	  mp_msg(MSGT_WIN32, MSGL_WARN, "expGetSystemInfo: "
 	                     "/proc/cpuinfo not readable! "
 	                     "Expect bad performance and/or weird behaviour\n");
-#endif
 	  goto exit;
 	}
 	while (fgets(line,200,f)!=NULL) {
@@ -5080,9 +5036,7 @@ struct exports exp_msvcrt[]={
 /* needed by frapsvid.dll */
     {"strstr",-1,(char *)&strstr},
     {"qsort",-1,(void *)&qsort},
-#ifdef MPLAYER
     FF(_EH_prolog,-1)
-#endif
     FF(calloc,-1)
     {"ceil",-1,(void*)&ceil},
 /* needed by imagepower mjpeg2k */

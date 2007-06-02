@@ -306,31 +306,8 @@ static void init_registry(void)
 	// can't be free-ed - it's static and probably thread
 	// unsafe structure which is stored in glibc
 
-#ifdef MPLAYER
 	regpathname = get_path("registry");
 	localregpathname = regpathname;
-#else
-	// regpathname is an external pointer
-        //
-	// registry.c is holding its own internal pointer
-	// localregpathname  - which is being allocate/deallocated
-
-	if (localregpathname == 0)
-	{
-            const char* pthn = regpathname;
-	    if (!regpathname)
-	    {
-		// avifile - for now reading data from user's home
-		struct passwd* pwent;
-		pwent = getpwuid(geteuid());
-                pthn = pwent->pw_dir;
-	    }
-
-	    localregpathname = malloc(strlen(pthn)+20);
-	    strcpy(localregpathname, pthn);
-	    strcat(localregpathname, "/.registry");
-	}
-#endif
 
 	open_registry();
 	insert_handle(HKEY_LOCAL_MACHINE, "HKLM");
