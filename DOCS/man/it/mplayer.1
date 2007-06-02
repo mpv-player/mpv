@@ -1795,6 +1795,11 @@ Le opzioni disponibili sono:
 .RSs
 .IPs noaudio
 niente suono
+.IPs automute=<0-255> (solo v4l e v4l2)
+Se la potenza del segnale riportata dal dispositivo è minore di questo valore,
+l'audio ed il video verranno disattivati.
+Nella maggior parte dei casi automute=100 sarà sufficente.
+Il valore di default è 0 (automute disabilitato).
 .IPs driver=<valore>
 Vedi \-tv driver=help per una lista dei driver di ingresso TV compilati.
 disponibili: dummy, v4l, v4l2, bsdbt848
@@ -1849,8 +1854,9 @@ a partire da 1.
 .br
 .I ESEMPIO:
 tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
-.IPs [luminosità|contrasto|tonalità|saturazione]=<-100\-100>
-Regola l'equalizzazione dell'immagine sulla scheda.
+.IPs [brightness|contrast|hue|saturation]=<-100\-100>
+Regola l'equalizzazione dell'immagine sulla scheda
+(luminosità|contrasto|tonalità|saturazione).
 .IPs audiorate=<valore>
 Seleziona il bitrate di cattura audio.
 .IPs forceaudio
