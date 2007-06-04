@@ -174,7 +174,6 @@ void CheckDir( GtkWidget * list,char * directory )
  clist_append_fname(list, "..", dpixmap, dmask);
 
  glob( "*",0,NULL,&gg );
-// glob( ".*",GLOB_NOSORT | GLOB_APPEND,NULL,&gg );
  for(  i=0;(unsigned)i<gg.gl_pathc;i++ )
   {
    stat( gg.gl_pathv[i],&fs );
@@ -187,37 +186,18 @@ void CheckDir( GtkWidget * list,char * directory )
   {
    char tmp[8];
    int  i,c,glob_param = 0;
-//printf( "sub item detected.\n" );   
    for ( i=0,c=0;i<(int)strlen( fsFilter ) + 1;i++,c++ )
     {
      tmp[c]=fsFilter[i];
      if ( ( tmp[c] == ',' )||( tmp[c] == '\0' ) )
       {
        tmp[c]=0; c=-1;
-//       printf( "substr: %s\n",tmp );
        glob( Filter( tmp ),glob_param,NULL,&gg ); 
        glob_param=GLOB_APPEND;
       }
     }
   } else glob( Filter( fsFilter ),0,NULL,&gg );
 
-#if 0
- if ( !strcmp( fsFilter,"*" ) )
- {
-  char * f = strdup( fsFilter );
-  int    i;
-  for( i=0;i<strlen( f );i++ )
-   if ( ( f[i] >= 'A' )&&( f[i] <= 'Z' ) ) f[i]+=32;
-  glob( f,GLOB_APPEND,NULL,&gg );
-
-  for( i=0;i<strlen( f );i++ )
-   if ( ( f[i] >= 'a' )&&( f[i] <= 'z' ) ) f[i]-=32;
-  glob( f,GLOB_APPEND,NULL,&gg );
-  free( f );
- }
-#endif
-
-// glob( ".*",GLOB_NOSORT | GLOB_APPEND,NULL,&gg );
  for(  i=0;(unsigned)i<gg.gl_pathc;i++ )
   {
    stat( gg.gl_pathv[i],&fs );
