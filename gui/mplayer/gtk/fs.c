@@ -163,7 +163,6 @@ void CheckDir( GtkWidget * list,char * directory )
  str[0][0]=NULL;
 
  pixmap=dpixmap; mask=dmask;
- str[0][0]=NULL;
  str[0][1]=".";  gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),0,0,pixmap,mask );
  str[0][1]=".."; gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),1,0,pixmap,mask );
 
@@ -175,7 +174,6 @@ void CheckDir( GtkWidget * list,char * directory )
    if( !S_ISDIR( fs.st_mode ) ) continue;
 
    str[0][1]=gg.gl_pathv[i];
-   pixmap=dpixmap; mask=dmask;
    gtk_clist_append( GTK_CLIST( list ),str[0] );
    gtk_clist_set_pixmap( GTK_CLIST( list ),c++,0,pixmap,mask );
   }
