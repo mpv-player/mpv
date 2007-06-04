@@ -15,7 +15,7 @@
 static unsigned long long int attribute_used __attribute__((aligned(8))) x_plus_minus_3dnow = 0x8000000000000000ULL;
 static float attribute_used plus_1f = 1.0;
 
-void dct64_MMX_3dnow(real *a,real *b,real *c)
+void dct64_MMX_3dnow(short *a,short *b,real *c)
 {
   char tmp[256];
     __asm __volatile(

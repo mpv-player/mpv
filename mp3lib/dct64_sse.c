@@ -30,14 +30,11 @@ static const int pnpn[4] __attribute__((aligned(16))) =
 static const int nnnn[4] __attribute__((aligned(16))) =
 { 1 << 31, 1 << 31, 1 << 31, 1 << 31 };
 
-void dct64_sse(real *a,real *b,real *c)
+void dct64_sse(short *out0,short *out1,real *c)
 {
     static real __attribute__ ((aligned(16))) b1[0x20];
     static real __attribute__ ((aligned(16))) b2[0x20];
     static real const one = 1.f;
-
-    short *out0 = (short*)a;
-    short *out1 = (short*)b;
 
     {
         real *costab = costab_mmx;
@@ -428,7 +425,7 @@ void dct64_sse(real *a,real *b,real *c)
         "fistp 416(%4)\n\t"
         ".byte 0xdf, 0xc0\n\t" // ffreep %%st(0)
         :
-        :"m"(costab_mmx[30]), "r"(b1), "r"(b2), "r"(a), "r"(b)
+        :"m"(costab_mmx[30]), "r"(b1), "r"(b2), "r"(out0), "r"(out1)
         :"memory"
         );
 #endif
