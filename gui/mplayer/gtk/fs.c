@@ -147,11 +147,20 @@ static char * Filter( char * name )
  return tmp;
 }
 
+static void clist_append_fname(GtkWidget * list, char *fname,
+                               GdkPixmap *pixmap, GdkPixmap *mask) {
+  gint pos;
+  gchar *str[2];
+  str[0] = NULL;
+  str[1] = fname;
+  pos = gtk_clist_append(GTK_CLIST(list), str);
+  gtk_clist_set_pixmap(GTK_CLIST(list), pos, 0, pixmap, mask);
+}
+
 void CheckDir( GtkWidget * list,char * directory )
 {
  struct stat     fs;
- int             i,c=2;
- gchar         * str[1][2];
+ int             i;
  GdkPixmap     * pixmap;
  GdkBitmap     * mask;
  glob_t          gg;
@@ -160,11 +169,9 @@ void CheckDir( GtkWidget * list,char * directory )
 
  gtk_widget_hide( list );
  gtk_clist_clear( GTK_CLIST( list ) );
- str[0][0]=NULL;
 
- pixmap=dpixmap; mask=dmask;
- str[0][1]=".";  gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),0,0,pixmap,mask );
- str[0][1]=".."; gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),1,0,pixmap,mask );
+ clist_append_fname(list, ".",  dpixmap, dmask);
+ clist_append_fname(list, "..", dpixmap, dmask);
 
  glob( "*",0,NULL,&gg );
 // glob( ".*",GLOB_NOSORT | GLOB_APPEND,NULL,&gg );
@@ -172,10 +179,7 @@ void CheckDir( GtkWidget * list,char * directory )
   {
    stat( gg.gl_pathv[i],&fs );
    if( !S_ISDIR( fs.st_mode ) ) continue;
-
-   str[0][1]=gg.gl_pathv[i];
-   gtk_clist_append( GTK_CLIST( list ),str[0] );
-   gtk_clist_set_pixmap( GTK_CLIST( list ),c++,0,pixmap,mask );
+   clist_append_fname(list, gg.gl_pathv[i], dpixmap, dmask);
   }
  globfree( &gg );
 
@@ -214,15 +218,11 @@ void CheckDir( GtkWidget * list,char * directory )
 #endif
 
 // glob( ".*",GLOB_NOSORT | GLOB_APPEND,NULL,&gg );
- pixmap=fpixmap; mask=fmask;
  for(  i=0;(unsigned)i<gg.gl_pathc;i++ )
   {
    stat( gg.gl_pathv[i],&fs );
    if(  S_ISDIR( fs.st_mode ) ) continue;
-
-   str[0][1]=gg.gl_pathv[i];
-   gtk_clist_append( GTK_CLIST( list ),str[0] );
-   gtk_clist_set_pixmap( GTK_CLIST( list ),c++,0,pixmap,mask );
+   clist_append_fname(list, gg.gl_pathv[i], fpixmap, fmask);
   }
  globfree( &gg );
 
