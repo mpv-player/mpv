@@ -207,7 +207,7 @@ typedef struct {
   int aid, vid, sid; //audio, video and subtitle id
 } demux_program_t;
 
-inline static demux_packet_t* new_demux_packet(int len){
+static inline demux_packet_t* new_demux_packet(int len){
   demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
   dp->len=len;
   dp->next=NULL;
@@ -228,7 +228,7 @@ inline static demux_packet_t* new_demux_packet(int len){
   return dp;
 }
 
-inline static void resize_demux_packet(demux_packet_t* dp, int len)
+static inline void resize_demux_packet(demux_packet_t* dp, int len)
 {
   if(len > 0)
   {
@@ -246,7 +246,7 @@ inline static void resize_demux_packet(demux_packet_t* dp, int len)
      dp->len = 0;
 }
 
-inline static demux_packet_t* clone_demux_packet(demux_packet_t* pack){
+static inline demux_packet_t* clone_demux_packet(demux_packet_t* pack){
   demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
   while(pack->master) pack=pack->master; // find the master
   memcpy(dp,pack,sizeof(demux_packet_t));
@@ -257,7 +257,7 @@ inline static demux_packet_t* clone_demux_packet(demux_packet_t* pack){
   return dp;
 }
 
-inline static void free_demux_packet(demux_packet_t* dp){
+static inline void free_demux_packet(demux_packet_t* dp){
   if (dp->master==NULL){  //dp is a master packet
     dp->refcount--;
     if (dp->refcount==0){
@@ -275,7 +275,7 @@ inline static void free_demux_packet(demux_packet_t* dp){
 #define SIZE_MAX ((size_t)-1)
 #endif
 
-inline static void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
+static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
   if (nmemb > SIZE_MAX / size) {
     free(ptr);
     return NULL;
@@ -294,11 +294,11 @@ void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len, double pts, o
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 int ds_fill_buffer(demux_stream_t *ds);
 
-inline static off_t ds_tell(demux_stream_t *ds){
+static inline off_t ds_tell(demux_stream_t *ds){
   return (ds->dpos-ds->buffer_size)+ds->buffer_pos;
 }
 
-inline static int ds_tell_pts(demux_stream_t *ds){
+static inline int ds_tell_pts(demux_stream_t *ds){
   return (ds->pts_bytes-ds->buffer_size)+ds->buffer_pos;
 }
 
@@ -315,7 +315,7 @@ int demux_pattern_3(demux_stream_t *ds, unsigned char *mem, int maxlen,
      (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos++] \
      :((unlikely(!ds_fill_buffer(ds)))? (-1) : ds->buffer[ds->buffer_pos++] ) )
 #else
-inline static int demux_getc(demux_stream_t *ds){
+static inline int demux_getc(demux_stream_t *ds){
   if(ds->buffer_pos>=ds->buffer_size){
     if(!ds_fill_buffer(ds)){
 //      printf("DEMUX_GETC: EOF reached!\n");
