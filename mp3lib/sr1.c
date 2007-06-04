@@ -553,7 +553,7 @@ void MP3_PrintHeader(void){
         static char *modes[4] = { "Stereo", "Joint-Stereo", "Dual-Channel", "Single-Channel" };
         static char *layers[4] = { "???" , "I", "II", "III" };
 
-        mp_msg(MSGT_DECAUDIO,MSGL_V,"\rMPEG %s, Layer %s, %ld Hz %d kbit %s, BPF: %ld\n",
+        mp_msg(MSGT_DECAUDIO,MSGL_V,"\rMPEG %s, Layer %s, %d Hz %d kbit %s, BPF: %d\n",
                 fr.mpeg25 ? "2.5" : (fr.lsf ? "2.0" : "1.0"),
                 layers[fr.lay],freqs[fr.sampling_frequency],
     tabsel_123[fr.lsf][fr.lay-1][fr.bitrate_index],
