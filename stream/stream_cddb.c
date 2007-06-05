@@ -377,7 +377,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 
 	switch(status) {
 		case 210:
-			ret = sscanf( http_hdr->body, "%d %s %08lx", &status, category, &disc_id);
+			ret = sscanf( http_hdr->body, "%d %99s %08lx", &status, category, &disc_id);
 			if( ret!=3 ) {
 				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
@@ -438,7 +438,7 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	ptr++;
 	// We have a list of exact/inexact matches, so which one do we use?
 	// So let's take the first one.
-	ret = sscanf(ptr, "%s %08lx %s", cddb_data->category, &(cddb_data->disc_id), album_title);
+	ret = sscanf(ptr, "%99s %08lx %99s", cddb_data->category, &(cddb_data->disc_id), album_title);
 	if( ret!=3 ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
@@ -475,7 +475,7 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	switch(status) {
 		case 200:
 			// Found exact match
-			ret = sscanf(http_hdr->body, "%d %s %08lx %s", &status, cddb_data->category, &(cddb_data->disc_id), album_title);
+			ret = sscanf(http_hdr->body, "%d %99s %08lx %99s", &status, cddb_data->category, &(cddb_data->disc_id), album_title);
 			if( ret!=4 ) {
 				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
