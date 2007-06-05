@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r23370
+.\" In sync with r23467
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -34,7 +34,7 @@
 .\" Titel
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006-10-15" "Das MPlayer Projekt"
+.TH MPlayer 1 "01.06.2007" "Das MPlayer Projekt"
 .
 .SH NAME
 mplayer  \- Movie Player
@@ -952,6 +952,10 @@ Aktiviere das OSD-Menü.
 Benutze eine andere menu.conf.
 .
 .TP
+.B \-menu-chroot <Pfad> (nur bei OSD-Menü)
+Chroot auf das angegebene Verzeichnis für den Datei-Auswahldialog
+.
+.TP
 .B \-menu-keepdir (nur bei OSD-Menü)
 Der Datei-Browser startet von der zuletzt bekannten Stelle anstatt dem
 aktuellen Verzeichnis.
@@ -1822,6 +1826,11 @@ Verfügbare Optionen:
 .RSs
 .IPs noaudio
 kein Sound
+.IPs automute=<0-255> (nur bei v4l und v4l2)
+Wenn die vom Gerät gemeldete Signalstärke geringer ist als dieser Wert,
+werden Ton und Video stummgeschaltet.
+In den meisten Fällen wird automute=100 ausreichen.
+Standardwert ist 0 (automute deaktiviert).
 .IPs driver=<Wert>
 Siehe \-tv driver=help für eine Liste eincompilierter TV-Eingabetreiber.
 mögliche Werte: dummy, v4l, v4l2, bsdbt848
@@ -3018,7 +3027,7 @@ Gibt den Bereich für den vertikalen Frequenzbereich des Monitors an.
 .TP
 .B \-monitoraspect <Verhältnis> (siehe auch \-aspect)
 Gibt das Höhen-/\:Breitenverhältnis deines Monitors oder Fernsehers an.
-Der Wert 0 schaltet frühere Einstellungen (z.B. in der config Datei) aus.
+Der Wert 0 schaltet frühere Einstellungen (z.B.\& in der config Datei) aus.
 Überschreibt bei Verwendung die Einstellung von \-monitorpixelaspect.
 .sp 1
 .I BEISPIEL:
@@ -7609,7 +7618,7 @@ nicht-standardkonformes, 20% kleineres HuffYUV, benutzt YV12
 ASUS Video v1
 .IPs "asv2\ "
 ASUS Video v2
-.IPs "ffv1"
+.IPs "ffv1\ "
 FFmpegs verlustfreier Videocodec
 .IPs "flv\ \ "
 Sorenson H.263, der in Flash Videodateien benutzt wird
@@ -8538,7 +8547,7 @@ für HuffYUV, verlustfreies JPEG, dv und ffv1
 für verlustfreies JPEG, dv und ffv1
 .IPs "YVU9\ "
 für verlustfreies JPEG, ffv1 und svq1
-.IPs "BGR32\ "
+.IPs "BGR32"
 für verlustfreies JPEG und ffv1
 .RE
 .PD 1
