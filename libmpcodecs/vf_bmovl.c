@@ -388,14 +388,14 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 
 	if(vf->priv->opaque) {	// Just copy buffer memory to screen
 		for( ypos=vf->priv->y1 ; ypos < vf->priv->y2 ; ypos++ ) {
-			memcpy( dmpi->planes[0] + (ypos*dmpi->stride[0]) + vf->priv->x1,
+			fast_memcpy( dmpi->planes[0] + (ypos*dmpi->stride[0]) + vf->priv->x1,
 			        vf->priv->bitmap.y + (ypos*vf->priv->w) + vf->priv->x1,
 					vf->priv->x2 - vf->priv->x1 );
 			if(ypos%2) {
-				memcpy( dmpi->planes[1] + ((ypos/2)*dmpi->stride[1]) + (vf->priv->x1/2),
+				fast_memcpy( dmpi->planes[1] + ((ypos/2)*dmpi->stride[1]) + (vf->priv->x1/2),
 				        vf->priv->bitmap.u + (((ypos/2)*(vf->priv->w)/2)) + (vf->priv->x1/2),
 				        (vf->priv->x2 - vf->priv->x1)/2 );
-				memcpy( dmpi->planes[2] + ((ypos/2)*dmpi->stride[2]) + (vf->priv->x1/2),
+				fast_memcpy( dmpi->planes[2] + ((ypos/2)*dmpi->stride[2]) + (vf->priv->x1/2),
 				        vf->priv->bitmap.v + (((ypos/2)*(vf->priv->w)/2)) + (vf->priv->x1/2),
 				        (vf->priv->x2 - vf->priv->x1)/2 );
 			}

@@ -338,10 +338,10 @@ static int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
 		    if(ret>0) sh_audio->a_out_buffer_len+=ret; else at_eof=1;
 		}
 		if(len>sh_audio->a_out_buffer_len) len=sh_audio->a_out_buffer_len;
-		memcpy(buffer+size,sh_audio->a_out_buffer,len);
+		fast_memcpy(buffer+size,sh_audio->a_out_buffer,len);
 		sh_audio->a_out_buffer_len-=len; size+=len;
 		if(sh_audio->a_out_buffer_len>0)
-		    memcpy(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[len],sh_audio->a_out_buffer_len);
+		    fast_memcpy(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[len],sh_audio->a_out_buffer_len);
     }
     return size;
 }
@@ -771,7 +771,7 @@ case VCODEC_COPY:
 	if (!curfile) {
 		if (sh_video->bih) {
 			mux_v->bih=malloc(sh_video->bih->biSize);
-			memcpy(mux_v->bih, sh_video->bih, sh_video->bih->biSize);
+			fast_memcpy(mux_v->bih, sh_video->bih, sh_video->bih->biSize);
 		}
     else
     {
@@ -941,7 +941,7 @@ case ACODEC_COPY:
     }
     if (sh_audio->wf){
 	mux_a->wf=malloc(sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
-	memcpy(mux_a->wf, sh_audio->wf, sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
+	fast_memcpy(mux_a->wf, sh_audio->wf, sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
 	if(!sh_audio->i_bps) sh_audio->i_bps=mux_a->wf->nAvgBytesPerSec;
     } else {
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX));
@@ -1222,7 +1222,7 @@ if(sh_audio){
 	    mux_a->wf->nAvgBytesPerSec=0.5f+(double)mux_a->size/mux_a->timer; // avg bps (VBR)
 	if(mux_a->buffer_len>=len){
 	    mux_a->buffer_len-=len;
-	    memcpy(mux_a->buffer,mux_a->buffer+len,mux_a->buffer_len);
+	    fast_memcpy(mux_a->buffer,mux_a->buffer+len,mux_a->buffer_len);
 	}
 
 
@@ -1573,9 +1573,9 @@ static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
     int i;
 
     for(i = 0; i < height/2; i++) {
-        memcpy(tmp, &src[i*width], width);
-        memcpy(&dst[i * width], &src[(height - i) * width], width);
-        memcpy(&dst[(height - i) * width], tmp, width);
+        fast_memcpy(tmp, &src[i*width], width);
+        fast_memcpy(&dst[i * width], &src[(height - i) * width], width);
+        fast_memcpy(&dst[(height - i) * width], tmp, width);
     }
 
     free(tmp);

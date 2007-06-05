@@ -175,9 +175,9 @@ static void swap_fields(uint8_t *ptr, const int h, const int stride)
 	
 	for (i=0; i<h; i +=2)
 	{
-		memcpy(rgb_line_buffer     , ptr + stride *  i   , stride);
-		memcpy(ptr + stride *  i   , ptr + stride * (i+1), stride);
-		memcpy(ptr + stride * (i+1), rgb_line_buffer     , stride);
+		fast_memcpy(rgb_line_buffer     , ptr + stride *  i   , stride);
+		fast_memcpy(ptr + stride *  i   , ptr + stride * (i+1), stride);
+		fast_memcpy(ptr + stride * (i+1), rgb_line_buffer     , stride);
 	}
 }
 
@@ -227,16 +227,16 @@ static void deinterleave_fields(uint8_t *ptr, const int stride,
 	while(k_start < modv)
 	{
 		i = j = k_start;
-		memcpy(rgb_line_buffer, ptr + stride * i, stride);
+		fast_memcpy(rgb_line_buffer, ptr + stride * i, stride);
 
 		while (!line_state[j])
 		{
 			line_state[j] = 1;
 			i = j;
 			j = j * 2 % modv;
-			memcpy(ptr + stride * i, ptr + stride * j, stride);
+			fast_memcpy(ptr + stride * i, ptr + stride * j, stride);
 		}
-		memcpy(ptr + stride * i, rgb_line_buffer, stride);
+		fast_memcpy(ptr + stride * i, rgb_line_buffer, stride);
 		
 		while(k_start < modv && line_state[k_start])
 			k_start++;
@@ -377,7 +377,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
 		dst = image_y + image_width * y + x;
 		for (i = 0; i < h; i++)
 		{
-			memcpy(dst, src, w);
+			fast_memcpy(dst, src, w);
 			src += stride[0];
 			dst += image_width;
 		}
@@ -390,8 +390,8 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
 			uint8_t *dstv = image_v + imgstride * (y >> 1) + (x >> 1);
 			for (i = 0; i < h / 2; i++)
 			{
-				memcpy(dstu, src1 , w >> 1);
-				memcpy(dstv, src2, w >> 1);
+				fast_memcpy(dstu, src1 , w >> 1);
+				fast_memcpy(dstv, src2, w >> 1);
 				src1 += stride[1];
 				src2 += stride[2];
 				dstu += imgstride;
@@ -405,7 +405,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
 			dst = rgb_buffer + (image_width * y + x) * 3;
 			for (i = 0; i < h; i++)
 			{
-				memcpy(dst, src, w * 3);
+				fast_memcpy(dst, src, w * 3);
 				src += stride[0];
 				dst += image_width * 3;
 			}
@@ -424,7 +424,7 @@ static int draw_frame(uint8_t * src[])
 
 		case IMGFMT_BGR24:
 		case IMGFMT_RGB24:
-			memcpy(rgb_buffer, src[0], image_width * image_height * 3);
+			fast_memcpy(rgb_buffer, src[0], image_width * image_height * 3);
 			break;
 	}
     return 0;

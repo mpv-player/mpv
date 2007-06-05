@@ -97,7 +97,7 @@ static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int 
 
     for(i=0; i<height; i++)
     {
-	memcpy(dst, src, bytesPerLine);
+	fast_memcpy(dst, src, bytesPerLine);
 	src+= srcStride;
 	dst+= dstStride;
     }
@@ -711,7 +711,7 @@ dint_copy_plane(unsigned char *d, unsigned char *a, unsigned char *b,
     long bos = b - a;
     long cos = c - a;
     if (field) {
-	memcpy(d, b, w);
+	fast_memcpy(d, b, w);
 	h--;
 	d += ds;
 	a += ss;
@@ -720,8 +720,8 @@ dint_copy_plane(unsigned char *d, unsigned char *a, unsigned char *b,
     cos += ss;
     while (h > 2) {
 	if (threshold >= 128) {
-	    memcpy(d, a, w);
-	    memcpy(d+ds, a+bos, w);
+	    fast_memcpy(d, a, w);
+	    fast_memcpy(d+ds, a+bos, w);
 	} else if (mmx2 == 1) {
 	    ret += dint_copy_line_mmx2(d, a, bos, cos, ds, ss, w, threshold);
 	} else
@@ -730,9 +730,9 @@ dint_copy_plane(unsigned char *d, unsigned char *a, unsigned char *b,
 	d += 2*ds;
 	a += 2*ss;
     }
-    memcpy(d, a, w);
+    fast_memcpy(d, a, w);
     if (h == 2)
-	memcpy(d+ds, a+bos, w);
+	fast_memcpy(d+ds, a+bos, w);
     return ret;
 }
 

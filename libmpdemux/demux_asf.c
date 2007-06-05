@@ -56,12 +56,12 @@ static void asf_descrambling(unsigned char **src,unsigned len, struct asf_priv* 
 	//i+=asf_scrambling_h*asf_scrambling_w;
 	for(x=0;x<asf->scrambling_w;x++)
 	  for(y=0;y<asf->scrambling_h;y++){
-	    memcpy(dst+i,s2+(y*asf->scrambling_w+x)*asf->scrambling_b,asf->scrambling_b);
+	    fast_memcpy(dst+i,s2+(y*asf->scrambling_w+x)*asf->scrambling_b,asf->scrambling_b);
 		i+=asf->scrambling_b;
 	  }
 	s2+=asf->scrambling_h*asf->scrambling_w*asf->scrambling_b;
   }
-  //if(i<len) memcpy(dst+i,src+i,len-i);
+  //if(i<len) fast_memcpy(dst+i,src+i,len-i);
   free(*src);
   *src = dst;
 }
@@ -154,7 +154,7 @@ static void demux_asf_append_to_packet(demux_packet_t* dp,unsigned char *data,in
 {
   if(dp->len!=offs && offs!=-1) mp_msg(MSGT_DEMUX,MSGL_V,"warning! fragment.len=%d BUT next fragment offset=%d  \n",dp->len,offs);
   dp->buffer=realloc(dp->buffer,dp->len+len+FF_INPUT_BUFFER_PADDING_SIZE);
-  memcpy(dp->buffer+dp->len,data,len);
+  fast_memcpy(dp->buffer+dp->len,data,len);
   memset(dp->buffer+dp->len+len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
   mp_dbg(MSGT_DEMUX,MSGL_DBG4,"data appended! %d+%d\n",dp->len,len);
   dp->len+=len;
@@ -224,7 +224,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
         return 0;
       }
       dp=new_demux_packet(len);
-      memcpy(dp->buffer,data,len);
+      fast_memcpy(dp->buffer,data,len);
       if (asf->asf_is_dvr_ms)
         dp->pts=time*0.0000001f;
       else

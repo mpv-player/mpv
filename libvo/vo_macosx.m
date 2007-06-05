@@ -202,7 +202,7 @@ static int draw_frame(uint8_t *src[])
 	{
 		case IMGFMT_BGR32:
 		case IMGFMT_RGB32:
-			memcpy(image_data, src[0], image_width*image_height*image_bytes);
+			fast_memcpy(image_data, src[0], image_width*image_height*image_bytes);
 			break;
 
 		case IMGFMT_YUY2:

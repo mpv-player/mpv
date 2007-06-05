@@ -45,8 +45,8 @@ static void do_plane(unsigned char *to, unsigned char *from,
 
    for(end=to+h*ts, buf=*bufp, top=1; to<end; from+=fs, to+=ts, buf+=w, top^=1)
       {
-      memcpy(to, mode==(top?BOTTOM_FIRST:TOP_FIRST)?buf:from, w);
-      memcpy(buf, from, w);
+      fast_memcpy(to, mode==(top?BOTTOM_FIRST:TOP_FIRST)?buf:from, w);
+      fast_memcpy(buf, from, w);
       }
    }
 

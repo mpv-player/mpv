@@ -174,7 +174,7 @@ static int udp_init(bl_host_t *h) {
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(h->port);
 
-	memcpy(&addr.sin_addr.s_addr, dest->h_addr_list[0], dest->h_length);
+	fast_memcpy(&addr.sin_addr.s_addr, dest->h_addr_list[0], dest->h_length);
 
 	h->fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (h->fd < 0) {
@@ -283,7 +283,7 @@ static void flip_page (void) {
 
 	if (prevpts >= 0) for (i = 0; i < no_bl_files; i++)
 		bl->write_frame(&bl_files[i], tmp, (vo_pts - prevpts)/90);
-	memcpy(tmp, image, bl->width*bl->height*bl->channels);
+	fast_memcpy(tmp, image, bl->width*bl->height*bl->channels);
 	prevpts = vo_pts;
 
 	for (i = 0; i < no_bl_hosts; i++) bl->send_frame(&bl_hosts[i]);
@@ -331,7 +331,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[],
 	dst=image; /* + zr->off_y + zr->image_width*(y/zr->vdec)+x;*/
 	// copy Y:
 	for (i = 0; i < h; i++) {
-		memcpy(dst,src,w);
+		fast_memcpy(dst,src,w);
 		dst+=bl->width;
 		src+=stride[0];
 

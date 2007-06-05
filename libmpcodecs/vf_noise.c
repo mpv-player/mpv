@@ -278,12 +278,12 @@ static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int 
 	{
 		if(src==dst) return;
 
-		if(dstStride==srcStride) memcpy(dst, src, srcStride*height);
+		if(dstStride==srcStride) fast_memcpy(dst, src, srcStride*height);
 		else
 		{
 			for(y=0; y<height; y++)
 			{
-				memcpy(dst, src, width);
+				fast_memcpy(dst, src, width);
 				dst+= dstStride;
 				src+= srcStride;
 			}

@@ -429,7 +429,7 @@ while(len>0){
     if(!ds_fill_buffer(ds)) return bytes;
   } else {
     if(x>len) x=len;
-    if(mem) memcpy(mem+bytes,&ds->buffer[ds->buffer_pos],x);
+    if(mem) fast_memcpy(mem+bytes,&ds->buffer[ds->buffer_pos],x);
     bytes+=x;len-=x;ds->buffer_pos+=x;
   }
 }
@@ -445,7 +445,7 @@ while(len>0){
     if(!ds_fill_buffer(ds)) return bytes;
   } else {
     if(x>len) x=len;
-    if(mem) memcpy(mem+bytes,&ds->buffer[ds->buffer_pos],x);
+    if(mem) fast_memcpy(mem+bytes,&ds->buffer[ds->buffer_pos],x);
     bytes+=x;len-=x;ds->buffer_pos+=x;
     return bytes; // stop at end of package! (for correct timestamping)
   }

@@ -1052,11 +1052,11 @@ static int draw_frame(uint8_t *src[])
 	    	mysrc+=priv->framePlaneYUY;
 		for(i = 0; i < priv->height; i++) {
 			mysrc-=priv->stridePlaneYUY;
-			memcpy (dst, mysrc, priv->stridePlaneYUY);
+			fast_memcpy (dst, mysrc, priv->stridePlaneYUY);
                 dst+=priv->overlay->pitches[0];
 		}
 	    }
-	    else memcpy (dst, src[0], priv->framePlaneYUY);
+	    else fast_memcpy (dst, src[0], priv->framePlaneYUY);
 	    SDL_OVR_UNLOCK
             break;
 	
@@ -1075,11 +1075,11 @@ static int draw_frame(uint8_t *src[])
 				mysrc+=priv->framePlaneRGB;
 				for(i = 0; i < priv->height; i++) {
 					mysrc-=priv->stridePlaneRGB;
-					memcpy (dst, mysrc, priv->stridePlaneRGB);
+					fast_memcpy (dst, mysrc, priv->stridePlaneRGB);
 					dst += priv->surface->pitch;
 				}
 			}
-			else memcpy (dst, src[0], priv->framePlaneRGB);
+			else fast_memcpy (dst, src[0], priv->framePlaneRGB);
 			SDL_SRF_UNLOCK(priv->surface)
 		} else {
 			SDL_SRF_LOCK(priv->rgbsurface, -1)
@@ -1088,11 +1088,11 @@ static int draw_frame(uint8_t *src[])
 				mysrc+=priv->framePlaneRGB;
 				for(i = 0; i < priv->height; i++) {
 					mysrc-=priv->stridePlaneRGB;
-					memcpy (dst, mysrc, priv->stridePlaneRGB);
+					fast_memcpy (dst, mysrc, priv->stridePlaneRGB);
 					dst += priv->rgbsurface->pitch;
 				}
 			}
-			else memcpy (dst, src[0], priv->framePlaneRGB);
+			else fast_memcpy (dst, src[0], priv->framePlaneRGB);
 			SDL_SRF_UNLOCK(priv->rgbsurface)
 		}
 		break;

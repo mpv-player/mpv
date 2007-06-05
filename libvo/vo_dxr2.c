@@ -165,13 +165,13 @@ int write_dxr2(unsigned char *data, int len)
   }
   
   while (len>0) if ((dxr2bufpos+len) <= BUF_SIZE) {
-    memcpy(dxr2buf+dxr2bufpos, data, len);
+    fast_memcpy(dxr2buf+dxr2bufpos, data, len);
     dxr2bufpos+=len;
     len=0;
   } else {
     int copylen=BUF_SIZE-dxr2bufpos;
     if(copylen > 0) {
-      memcpy(dxr2buf+dxr2bufpos, data, copylen);
+      fast_memcpy(dxr2buf+dxr2bufpos, data, copylen);
       dxr2bufpos += copylen;
       data+=copylen;
       len-=copylen;

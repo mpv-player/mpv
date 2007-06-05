@@ -154,15 +154,15 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
             continue; // HACK avoid crash for Y8 colourspace
         for(y=0; y<h; y++){
             int index= block + block*stride + y*stride;
-            memcpy(p->src[i] + index, src[i] + y*src_stride[i], w);
+            fast_memcpy(p->src[i] + index, src[i] + y*src_stride[i], w);
             for(x=0; x<block; x++){ 
                 p->src[i][index     - x - 1]= p->src[i][index +     x    ];
                 p->src[i][index + w + x    ]= p->src[i][index + w - x - 1];
             }
         }
         for(y=0; y<block; y++){
-            memcpy(p->src[i] + (  block-1-y)*stride, p->src[i] + (  y+block  )*stride, stride);
-            memcpy(p->src[i] + (h+block  +y)*stride, p->src[i] + (h-y+block-1)*stride, stride);
+            fast_memcpy(p->src[i] + (  block-1-y)*stride, p->src[i] + (  y+block  )*stride, stride);
+            fast_memcpy(p->src[i] + (h+block  +y)*stride, p->src[i] + (h-y+block-1)*stride, stride);
         }
 
         p->frame->linesize[i]= stride;

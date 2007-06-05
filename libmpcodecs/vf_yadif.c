@@ -62,7 +62,7 @@ static void (*filter_line)(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uin
 static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], int width, int height){
     int i;
 
-    memcpy (p->ref[3], p->ref[0], sizeof(uint8_t *)*3);
+    fast_memcpy (p->ref[3], p->ref[0], sizeof(uint8_t *)*3);
     memmove(p->ref[0], p->ref[1], sizeof(uint8_t *)*3*3);
 
     for(i=0; i<3; i++){
@@ -363,7 +363,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
                 uint8_t *dst2= &dst[i][y*dst_stride[i]];
                 filter_line(p, dst2, prev, cur, next, w, refs, parity ^ tff);
             }else{
-                memcpy(&dst[i][y*dst_stride[i]], &p->ref[1][i][y*refs], w);
+                fast_memcpy(&dst[i][y*dst_stride[i]], &p->ref[1][i][y*refs], w);
             }
         }
     }

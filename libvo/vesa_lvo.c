@@ -167,7 +167,7 @@ uint32_t vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,i
     dest = lvo_mem + bespitch * y + x;
     src = image[0];
     for(i=0;i<h;i++){
-        memcpy(dest,src,w);
+        fast_memcpy(dest,src,w);
         src+=stride[0];
         dest += bespitch;
     }
@@ -177,7 +177,7 @@ uint32_t vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,i
     dest = lvo_mem + bespitch*mga_vid_config.src_height + bespitch2 * y + x;
     src = image[1];
     for(i=0;i<h;i++){
-        memcpy(dest,src,w);
+        fast_memcpy(dest,src,w);
         src+=stride[1];
         dest += bespitch2;
     }
@@ -187,7 +187,7 @@ uint32_t vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,i
                    + bespitch2 * y + x;
     src = image[2];
     for(i=0;i<h;i++){
-        memcpy(dest,src,w);
+        fast_memcpy(dest,src,w);
         src+=stride[2];
         dest += bespitch2;
     }
@@ -207,7 +207,7 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
 	bytpp = (image_bpp+7)/8;
 	dst = lvo_mem + (image_width * y + x)*bytpp;
 	/* vlvo_draw_slice_422(image,stride,w,h,x,y); just for speed */
-	memcpy(dst,image[0],mga_vid_config.frame_size);
+	fast_memcpy(dst,image[0],mga_vid_config.frame_size);
     }
  return 0;
 }
@@ -215,7 +215,7 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
 uint32_t vlvo_draw_frame(uint8_t *image[])
 {
 /* Note it's very strange but sometime for YUY2 draw_frame is called */
-  memcpy(lvo_mem,image[0],mga_vid_config.frame_size);
+  fast_memcpy(lvo_mem,image[0],mga_vid_config.frame_size);
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vesa_lvo: vlvo_flip_page() was called\n");}
   return 0;

@@ -29,14 +29,15 @@
 
 extern void * fast_memcpy(void * to, const void * from, size_t len);
 extern void * mem2agpcpy(void * to, const void * from, size_t len);
-#define memcpy(a,b,c) fast_memcpy(a,b,c)
 
 #else /* HAVE_MMX/MMX2/3DNOW/SSE/SSE2 */
 #define mem2agpcpy(a,b,c) memcpy(a,b,c)
+#define fast_memcpy(a,b,c) memcpy(a,b,c)
 #endif
 
 #else /* USE_FASTMEMCPY */
 #define mem2agpcpy(a,b,c) memcpy(a,b,c)
+#define fast_memcpy(a,b,c) memcpy(a,b,c)
 #endif
 
 static inline void * mem2agpcpy_pic(void * dst, const void * src, int bytesPerLine, int height, int dstStride, int srcStride)
@@ -80,13 +81,13 @@ static inline void * memcpy_pic(void * dst, const void * src, int bytesPerLine, 
 	    		srcStride = -srcStride;
 		}
 
-		memcpy(dst, src, srcStride*height);
+		fast_memcpy(dst, src, srcStride*height);
 	}
 	else
 	{
 		for(i=0; i<height; i++)
 		{
-			memcpy(dst, src, bytesPerLine);
+			fast_memcpy(dst, src, bytesPerLine);
 			src = (uint8_t*)src + srcStride;
 			dst = (uint8_t*)dst + dstStride;
 		}

@@ -127,7 +127,7 @@ write_frame_YUV420P2(uint_8 *y,uint_8 *cr, uint_8 *cb)
 
 	for(h=0; h < _config.src_height; h++)
 	{
-		memcpy(dest, y, _config.src_width);
+		fast_memcpy(dest, y, _config.src_width);
 		y += _config.src_width;
 		dest += bespitch;
 	}
@@ -161,7 +161,7 @@ write_slice_YUV420P2(uint_8 *y,uint_8 *cr, uint_8 *cb,uint_32 slice_num)
 
 	for(h=0; h < 16; h++)
 	{
-		memcpy(dest, y, _config.src_width);
+		fast_memcpy(dest, y, _config.src_width);
 		y += _config.src_width;
 		dest += bespitch;
 	}
@@ -190,7 +190,7 @@ write_slice_YUV420P3(uint_8 *y,uint_8 *cr, uint_8 *cb,int stride[],uint_32 ypos,
 	dest = frame_mem + bufinfo.offset + (bespitch * ypos);
 	for(h=0; h < ysize; h++)
 	{
-		memcpy(dest, y, xsize);
+		fast_memcpy(dest, y, xsize);
 		y += stride[0];
 		dest += bespitch;
 	}
@@ -201,7 +201,7 @@ write_slice_YUV420P3(uint_8 *y,uint_8 *cr, uint_8 *cb,int stride[],uint_32 ypos,
 	dest = frame_mem + bufinfo.offset_p2 + (bespitch * ypos)/4;
 	for(h=0; h < ysize; h++)
 	{
-		memcpy(dest, cr, xsize);
+		fast_memcpy(dest, cr, xsize);
 		cr += stride[1];
 		dest += bespitch/2;
 	}
@@ -209,7 +209,7 @@ write_slice_YUV420P3(uint_8 *y,uint_8 *cr, uint_8 *cb,int stride[],uint_32 ypos,
 	dest = frame_mem + bufinfo.offset_p3 + (bespitch * ypos)/4;
 	for(h=0; h < ysize; h++)
 	{
-		memcpy(dest, cb, xsize);
+		fast_memcpy(dest, cb, xsize);
 		cb += stride[2];
 		dest += bespitch/2;
 	}

@@ -65,7 +65,7 @@ void mplMainDraw( void )
    btnModify( evSetMoviePosition,guiIntfStruct.Position );
    btnModify( evSetVolume,guiIntfStruct.Volume );
 
-   memcpy( mplDrawBuffer,appMPlayer.main.Bitmap.Image,appMPlayer.main.Bitmap.ImageSize );
+   fast_memcpy( mplDrawBuffer,appMPlayer.main.Bitmap.Image,appMPlayer.main.Bitmap.ImageSize );
    Render( &appMPlayer.mainWindow,appMPlayer.Items,appMPlayer.NumberOfItems,mplDrawBuffer,appMPlayer.main.Bitmap.ImageSize );
    mplMainRender=0;
   }

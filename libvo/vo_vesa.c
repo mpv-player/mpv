@@ -217,7 +217,7 @@ static void __vbeSetPixel(int x, int y, int r, int g, int b)
 	color = (r << shift_r) | (g << shift_g) | (b << shift_b);
 	offset = y * bpl + (x * pixel_size);
         if(!VALID_WIN_FRAME(offset)) __vbeSwitchBank(offset);
-	memcpy(VIDEO_PTR(offset), &color, pixel_size);
+	fast_memcpy(VIDEO_PTR(offset), &color, pixel_size);
 }
 
 /*
@@ -226,7 +226,7 @@ static void __vbeSetPixel(int x, int y, int r, int g, int b)
 */
 static void __vbeCopyBlockFast(unsigned long offset,uint8_t *image,unsigned long size)
 {
-  memcpy(&win.ptr[offset],image,size);
+  fast_memcpy(&win.ptr[offset],image,size);
 }
 
 static void __vbeCopyBlock(unsigned long offset,uint8_t *image,unsigned long size)
@@ -236,7 +236,7 @@ static void __vbeCopyBlock(unsigned long offset,uint8_t *image,unsigned long siz
    {
 	if(!VALID_WIN_FRAME(offset)) __vbeSwitchBank(offset);
 	delta = min(size,win.high - offset);
-	memcpy(VIDEO_PTR(offset),&image[src_idx],delta);
+	fast_memcpy(VIDEO_PTR(offset),&image[src_idx],delta);
 	src_idx += delta;
 	offset += delta;
 	size -= delta;
@@ -649,7 +649,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	  else          fs_mode = 1;
 	} 
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
-	memcpy(vib.VESASignature,"VBE2",4);
+	fast_memcpy(vib.VESASignature,"VBE2",4);
 	if(!vib_set && (err=vbeGetControllerInfo(&vib)) != VBE_OK)
 	{
 	  PRINT_VBE_ERR("vbeGetControllerInfo",err);

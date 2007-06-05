@@ -128,16 +128,16 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 		dstp = dstp_saved + (1-order) * dst_pitch;
 
 		for (y=0; y<h; y+=2) {
-			memcpy(dstp, srcp, w);
+			fast_memcpy(dstp, srcp, w);
 			srcp += 2*src_pitch;
 			dstp += 2*dst_pitch;
 		}
 
 		// Copy through the lines that will be missed below.
-		memcpy(dstp_saved + order*dst_pitch, srcp_saved + (1-order)*src_pitch, w);
-		memcpy(dstp_saved + (2+order)*dst_pitch, srcp_saved + (3-order)*src_pitch, w);
-		memcpy(dstp_saved + (h-2+order)*dst_pitch, srcp_saved + (h-1-order)*src_pitch, w);
-		memcpy(dstp_saved + (h-4+order)*dst_pitch, srcp_saved + (h-3-order)*src_pitch, w);
+		fast_memcpy(dstp_saved + order*dst_pitch, srcp_saved + (1-order)*src_pitch, w);
+		fast_memcpy(dstp_saved + (2+order)*dst_pitch, srcp_saved + (3-order)*src_pitch, w);
+		fast_memcpy(dstp_saved + (h-2+order)*dst_pitch, srcp_saved + (h-1-order)*src_pitch, w);
+		fast_memcpy(dstp_saved + (h-4+order)*dst_pitch, srcp_saved + (h-3-order)*src_pitch, w);
 		/* For the other field choose adaptively between using the previous field
 		   or the interpolant from the current field. */
 
@@ -270,7 +270,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 		srcp = mpi->planes[z];
 		dstp = pmpi->planes[z];
 		for (y=0; y<h; y++) {
-			memcpy(dstp, srcp, w);
+			fast_memcpy(dstp, srcp, w);
 			srcp += src_pitch;
 			dstp += psrc_pitch;
 		}

@@ -58,20 +58,20 @@ static void interleave(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, 
 	switch(interleave){
 	case -1:
 		for(y=0; y < m; y++){
-			memcpy(dst + dstStride* y     , src + srcStride*(y*2 + a), w);
-			memcpy(dst + dstStride*(y + m), src + srcStride*(y*2 + b), w);
+			fast_memcpy(dst + dstStride* y     , src + srcStride*(y*2 + a), w);
+			fast_memcpy(dst + dstStride*(y + m), src + srcStride*(y*2 + b), w);
 		}
 		break;
 	case 0:
 		for(y=0; y < m; y++){
-			memcpy(dst + dstStride* y*2   , src + srcStride*(y*2 + a), w);
-			memcpy(dst + dstStride*(y*2+1), src + srcStride*(y*2 + b), w);
+			fast_memcpy(dst + dstStride* y*2   , src + srcStride*(y*2 + a), w);
+			fast_memcpy(dst + dstStride*(y*2+1), src + srcStride*(y*2 + b), w);
 		}
 		break;
 	case 1:
 		for(y=0; y < m; y++){
-			memcpy(dst + dstStride*(y*2+a), src + srcStride* y     , w);
-			memcpy(dst + dstStride*(y*2+b), src + srcStride*(y + m), w);
+			fast_memcpy(dst + dstStride*(y*2+a), src + srcStride* y     , w);
+			fast_memcpy(dst + dstStride*(y*2+b), src + srcStride*(y + m), w);
 		}
 		break;
 	}

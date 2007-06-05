@@ -727,7 +727,7 @@ static void draw_osd(void)
 		    if ( !cleared )
 		     {
 		      spued->count=spubuf->count;
-		      memcpy( spued->data,spubuf->data,DATASIZE );
+		      fast_memcpy( spued->data,spubuf->data,DATASIZE );
 		      cleared=1;
 		     }
 		   }
@@ -1106,7 +1106,7 @@ static struct lut_entry *new_lookuptable(overlay_t *o)
     },*p;
 
     p = malloc(sizeof(m));
-    memcpy(p,m,sizeof(m));
+    fast_memcpy(p,m,sizeof(m));
     return p;
 }
 

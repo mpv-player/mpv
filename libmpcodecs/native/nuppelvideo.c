@@ -67,7 +67,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		switch(encodedh->comptype)
 		{
 		    case '0': /* raw YUV420 */
-			memcpy(decoded, encoded + 12, out_len);
+			fast_memcpy(decoded, encoded + 12, out_len);
 			break;
 		    case '1': /* RTJpeg */
 			RTjpeg_decompressYUV420 ( ( __s8 * ) encoded + 12, decoded );
@@ -102,13 +102,13 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			break;
 		    case 'L': /* copy last frame */
 #ifdef KEEP_BUFFER
-			memcpy ( decoded, previous_buffer, width*height*3/2);
+			fast_memcpy ( decoded, previous_buffer, width*height*3/2);
 #endif
 			break;
 		}
 
 #ifdef KEEP_BUFFER
-		memcpy(previous_buffer, decoded, width*height*3/2);
+		fast_memcpy(previous_buffer, decoded, width*height*3/2);
 #endif
 		break;
 	    }

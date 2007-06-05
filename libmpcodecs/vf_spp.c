@@ -380,15 +380,15 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 	if (!src || !dst) return; // HACK avoid crash for Y8 colourspace
 	for(y=0; y<height; y++){
 		int index= 8 + 8*stride + y*stride;
-		memcpy(p->src + index, src + y*src_stride, width);
+		fast_memcpy(p->src + index, src + y*src_stride, width);
 		for(x=0; x<8; x++){ 
 			p->src[index         - x - 1]= p->src[index +         x    ];
 			p->src[index + width + x    ]= p->src[index + width - x - 1];
 		}
 	}
 	for(y=0; y<8; y++){
-		memcpy(p->src + (      7-y)*stride, p->src + (      y+8)*stride, stride);
-		memcpy(p->src + (height+8+y)*stride, p->src + (height-y+7)*stride, stride);
+		fast_memcpy(p->src + (      7-y)*stride, p->src + (      y+8)*stride, stride);
+		fast_memcpy(p->src + (height+8+y)*stride, p->src + (height-y+7)*stride, stride);
 	}
 	//FIXME (try edge emu)
 
@@ -478,7 +478,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
         if(mpi->pict_type != 3 && mpi->qscale && !vf->priv->qp){
             if(!vf->priv->non_b_qp)
                 vf->priv->non_b_qp= malloc(mpi->qstride * ((mpi->h + 15) >> 4));
-            memcpy(vf->priv->non_b_qp, mpi->qscale, mpi->qstride * ((mpi->h + 15) >> 4));
+            fast_memcpy(vf->priv->non_b_qp, mpi->qscale, mpi->qstride * ((mpi->h + 15) >> 4));
         }
 	if(vf->priv->log2_count || !(mpi->flags&MP_IMGFLAG_DIRECT)){
             char *qp_tab= vf->priv->non_b_qp;

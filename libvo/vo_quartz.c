@@ -1021,7 +1021,7 @@ static int draw_frame(uint8_t *src[])
 	switch (image_format)
 	{
 		case IMGFMT_RGB32:
-			memcpy(image_data,src[0],image_size);
+			fast_memcpy(image_data,src[0],image_size);
 			return 0;
 			
 		case IMGFMT_UYVY:

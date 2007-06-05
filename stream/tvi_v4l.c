@@ -1416,9 +1416,9 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
     }
     // YV12 uses VIDEO_PALETTE_YUV420P, but the planes are swapped
     if (priv->format == IMGFMT_YV12) {
-        memcpy(dest, source, priv->width * priv->height);
-        memcpy(dest+priv->width * priv->height*5/4, source+priv->width * priv->height, priv->width * priv->height/4);
-        memcpy(dest+priv->width * priv->height, source+priv->width * priv->height*5/4, priv->width * priv->height/4);
+        fast_memcpy(dest, source, priv->width * priv->height);
+        fast_memcpy(dest+priv->width * priv->height*5/4, source+priv->width * priv->height, priv->width * priv->height/4);
+        fast_memcpy(dest+priv->width * priv->height, source+priv->width * priv->height*5/4, priv->width * priv->height/4);
         return;
     }
 
@@ -1429,7 +1429,7 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
     case VIDEO_PALETTE_RGB565:
         sptr = source + (priv->height-1)*priv->bytesperline;
         for (i = 0; i < priv->height; i++) {
-            memcpy(dest, sptr, priv->bytesperline);
+            fast_memcpy(dest, sptr, priv->bytesperline);
             dest += priv->bytesperline;
             sptr -= priv->bytesperline;
         }
@@ -1437,7 +1437,7 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
     case VIDEO_PALETTE_UYVY:
     case VIDEO_PALETTE_YUV420P:
     default:
-        memcpy(dest, source, priv->bytesperline * priv->height);
+        fast_memcpy(dest, source, priv->bytesperline * priv->height);
     }
 
 }
@@ -1665,7 +1665,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 
     pthread_mutex_lock(&priv->video_buffer_mutex);
     interval = (double)priv->video_timebuffer[priv->video_head]*1e-6;
-    memcpy(buffer, priv->video_ringbuffer[priv->video_head], len);
+    fast_memcpy(buffer, priv->video_ringbuffer[priv->video_head], len);
     priv->video_cnt--;
     priv->video_head = (priv->video_head+1)%priv->video_buffer_size_current;
     pthread_mutex_unlock(&priv->video_buffer_mutex);
@@ -1766,7 +1766,7 @@ static double grab_audio_frame(priv_t *priv, char *buffer, int len)
     while (priv->audio_head == priv->audio_tail) {
         usleep(10000);
     }
-    memcpy(buffer, priv->audio_ringbuffer+priv->audio_head*priv->audio_in.blocksize, len);
+    fast_memcpy(buffer, priv->audio_ringbuffer+priv->audio_head*priv->audio_in.blocksize, len);
     priv->audio_head = (priv->audio_head+1) % priv->audio_buffer_size;
     priv->audio_cnt--;
     priv->audio_sent_blocks_total++;

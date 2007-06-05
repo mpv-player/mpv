@@ -27,7 +27,7 @@ static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int 
 
 	for(i=0; i<height; i++)
 	{
-		memcpy(dst, src, bytesPerLine);
+		fast_memcpy(dst, src, bytesPerLine);
 		src+= srcStride;
 		dst+= dstStride;
 	}
@@ -68,7 +68,7 @@ static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int 
 	long crap1, crap2;
 	if (up) {
 		ssd = -ss;
-		memcpy(d, s, w);
+		fast_memcpy(d, s, w);
 		d += ds;
 		s += ss;
 	}
@@ -92,7 +92,7 @@ static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int 
 		d += ds;
 		s += ss;
 	}
-	if (!up) memcpy(d, s, w);
+	if (!up) fast_memcpy(d, s, w);
 	asm volatile("emms \n\t" : : : "memory");
 }
 #endif
@@ -104,7 +104,7 @@ static void qpel_li_MMX2(unsigned char *d, unsigned char *s, int w, int h, int d
 	long crap1, crap2;
 	if (up) {
 		ssd = -ss;
-		memcpy(d, s, w);
+		fast_memcpy(d, s, w);
 		d += ds;
 		s += ss;
 	}
@@ -129,7 +129,7 @@ static void qpel_li_MMX2(unsigned char *d, unsigned char *s, int w, int h, int d
 		d += ds;
 		s += ss;
 	}
-	if (!up) memcpy(d, s, w);
+	if (!up) fast_memcpy(d, s, w);
 	asm volatile("emms \n\t" : : : "memory");
 }
 #endif
@@ -141,7 +141,7 @@ static void qpel_li_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds
 	int crap1, crap2;
 	if (up) {
 		ssd = -ss;
-		memcpy(d, s, w);
+		fast_memcpy(d, s, w);
 		d += ds;
 		s += ss;
 	}
@@ -179,7 +179,7 @@ static void qpel_li_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds
 		d += ds;
 		s += ss;
 	}
-	if (!up) memcpy(d, s, w);
+	if (!up) fast_memcpy(d, s, w);
 	asm volatile("emms \n\t" : : : "memory");
 }
 
@@ -193,7 +193,7 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 	int crap1, crap2;
 	if (up) {
 		ssd = -ss;
-		memcpy(d, s, w);
+		fast_memcpy(d, s, w);
 		d += ds; s += ss;
 	}
 	for (j=0; j<w; j++)
@@ -259,7 +259,7 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 	for (j=0; j<w; j++)
 		d[j] = (s[j+ssd] + 3*s[j])>>2;
 	d += ds; s += ss;
-	if (!up) memcpy(d, s, w);
+	if (!up) fast_memcpy(d, s, w);
 	asm volatile("emms \n\t" : : : "memory");
 }
 #endif
@@ -276,7 +276,7 @@ static void qpel_li_C(unsigned char *d, unsigned char *s, int w, int h, int ds, 
 	int i, j, ssd=ss;
 	if (up) {
 		ssd = -ss;
-		memcpy(d, s, w);
+		fast_memcpy(d, s, w);
 		d += ds;
 		s += ss;
 	}
@@ -286,7 +286,7 @@ static void qpel_li_C(unsigned char *d, unsigned char *s, int w, int h, int ds, 
 		d += ds;
 		s += ss;
 	}
-	if (!up) memcpy(d, s, w);
+	if (!up) fast_memcpy(d, s, w);
 }
 
 static void qpel_4tap_C(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
@@ -294,7 +294,7 @@ static void qpel_4tap_C(unsigned char *d, unsigned char *s, int w, int h, int ds
 	int i, j, ssd=ss;
 	if (up) {
 		ssd = -ss;
-		memcpy(d, s, w);
+		fast_memcpy(d, s, w);
 		d += ds; s += ss;
 	}
 	for (j=0; j<w; j++)
@@ -308,7 +308,7 @@ static void qpel_4tap_C(unsigned char *d, unsigned char *s, int w, int h, int ds
 	for (j=0; j<w; j++)
 		d[j] = (s[j+ssd] + 3*s[j] + 2)>>2;
 	d += ds; s += ss;
-	if (!up) memcpy(d, s, w);
+	if (!up) fast_memcpy(d, s, w);
 }
 
 static void (*qpel_li)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);

@@ -299,7 +299,7 @@ static int write_waveOutBuffer(unsigned char* data,int len){
            waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 	x=BUFFER_SIZE-buf_write_pos;          
     if(x>len) x=len;                   
-    memcpy(current->lpData+buf_write_pos,data+len2,x); 
+    fast_memcpy(current->lpData+buf_write_pos,data+len2,x); 
     if(buf_write_pos==0)full_buffers++;
     len2+=x; len-=x;                 
 	buffered_bytes+=x; buf_write_pos+=x; 

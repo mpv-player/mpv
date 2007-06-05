@@ -354,7 +354,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 	int i;
 
 	for (i = 0; i < h; i++) {
-		memcpy(dest, in, w * fb_pixel_size);
+		fast_memcpy(dest, in, w * fb_pixel_size);
 		dest += next;
 		in += stride[0];
 	}
@@ -371,7 +371,7 @@ static void flip_page(void)
 	int i, out_offset = 0, in_offset = 0;
 
 	for (i = 0; i < in_height; i++) {
-		memcpy(center + out_offset, next_frame + in_offset,
+		fast_memcpy(center + out_offset, next_frame + in_offset,
 				in_width * fb_pixel_size);
 		out_offset += fb_line_len;
 		in_offset += in_width * fb_pixel_size;

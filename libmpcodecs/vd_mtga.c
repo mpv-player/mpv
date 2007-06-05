@@ -110,20 +110,20 @@ static void decode_rle_tga(TGAInfo *info, unsigned char *data, mp_image_t *mpi)
 	    
 	    if (packet_header & 0x80) /* runlength encoded packet */
 	    {
-		memcpy(final, data, num_bytes);
+		fast_memcpy(final, data, num_bytes);
 		
 		// Note: this will be slow when DR to vram!
 		i=num_bytes;
 		while(2*i<=replen){
-		    memcpy(final+i,final,i);
+		    fast_memcpy(final+i,final,i);
 		    i*=2;
 		}
-		memcpy(final+i,final,replen-i);
+		fast_memcpy(final+i,final,replen-i);
 		data += num_bytes;
 	    }
 	    else /* raw packet */
 	    {
-		memcpy(final, data, replen);
+		fast_memcpy(final, data, replen);
 		data += replen;
 	    }
 	    
@@ -144,7 +144,7 @@ static void decode_uncompressed_tga(TGAInfo *info, unsigned char *data, mp_image
     for (row = info->start_row; (!info->origin && row) || (info->origin && row < info->height); row += info->increment)
     {
 	final = mpi->planes[0] + mpi->stride[0] * row;
-	memcpy(final, data, info->width * num_bytes);
+	fast_memcpy(final, data, info->width * num_bytes);
 	data += info->width * num_bytes;
     }
 

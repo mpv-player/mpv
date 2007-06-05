@@ -1075,7 +1075,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 
 	s = src[0];
 	while (h) {
-		memcpy(d, s, w * fb_pixel_size);
+		fast_memcpy(d, s, w * fb_pixel_size);
 		d += fb_line_len;
 		s += stride[0];
 		h--;

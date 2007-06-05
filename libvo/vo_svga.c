@@ -206,7 +206,7 @@ int i;
     rgbplane=PageStore[0].vbase + (y*mode_stride) + (x*modeinfo->bytesperpixel);
     for(i=0;i<h;i++){
 //i'm afraid that memcpy is better optimized than memset;)
-      memcpy(rgbplane,zerobuf,w*modeinfo->bytesperpixel);
+      fast_memcpy(rgbplane,zerobuf,w*modeinfo->bytesperpixel);
 //    memset(rgbplane,0,w*modeinfo->bytesperpixel);
       rgbplane+=mode_stride;
     }

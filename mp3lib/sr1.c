@@ -172,7 +172,7 @@ LOCAL void set_pointer(int backstep)
 //  if(backstep!=512 && backstep>fsizeold)
 //    printf("\rWarning! backstep (%d>%d)                                         \n",backstep,fsizeold);
   wordpointer = bsbuf + ssize - backstep;
-  if (backstep) memcpy(wordpointer,bsbufold+fsizeold-backstep,backstep);
+  if (backstep) fast_memcpy(wordpointer,bsbufold+fsizeold-backstep,backstep);
   bitindex = 0;
   bitsleft+=8*backstep;
 //  printf("Backstep %d  (bitsleft=%d)\n",backstep,bitsleft);

@@ -287,7 +287,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
       if(c->bps != l->bps)
 	change_bps(c->audio,l->audio,len,c->bps,l->bps);
       else
-	memcpy(l->audio,c->audio,len*c->bps);
+	fast_memcpy(l->audio,c->audio,len*c->bps);
       break;
     }
   }

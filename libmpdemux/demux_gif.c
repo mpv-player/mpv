@@ -145,7 +145,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
   dp = new_demux_packet(priv->w * priv->h);
   buf = calloc(gif->Image.Width, gif->Image.Height);
   if (priv->useref)
-    memcpy(dp->buffer, priv->refimg, priv->w * priv->h);
+    fast_memcpy(dp->buffer, priv->refimg, priv->w * priv->h);
   else
     memset(dp->buffer, gif->SBackGroundColor, priv->w * priv->h);
   
@@ -199,7 +199,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       memcpy_transp_pic(dest, buf, w, h, priv->w, gif->Image.Width,
                         transparency, transparent_col);
 
-    if (refmode == 1) memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
+    if (refmode == 1) fast_memcpy(priv->refimg, dp->buffer, priv->w * priv->h);
     if (refmode == 2 && priv->useref) {
       dest = priv->refimg + priv->w * t + l;
       memset(buf, gif->SBackGroundColor, len);

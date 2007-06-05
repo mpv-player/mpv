@@ -31,7 +31,7 @@ static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int 
 
 	for(i=0; i<height; i++)
 	{
-		memcpy(dst, src, bytesPerLine);
+		fast_memcpy(dst, src, bytesPerLine);
 		src+= srcStride;
 		dst+= dstStride;
 	}
@@ -47,10 +47,10 @@ static inline void *il_memcpy_pic(void *dst, void *src0, void *src1, int w, int 
 
 	for(i=h>>1; i; i--)
 	{
-		memcpy(dst, src0, w);
+		fast_memcpy(dst, src0, w);
 		src0 += ss;
 		dst += ds;
-		memcpy(dst, src1, w);
+		fast_memcpy(dst, src1, w);
 		src1 += ss;
 		dst += ds;
 	}
@@ -153,8 +153,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 		}
 	}
 	if (mpi->qscale) {
-		memcpy(b->planes[3], mpi->qscale, c->w[3]);
-		memcpy(b->planes[3]+c->w[3], mpi->qscale, c->w[3]);
+		fast_memcpy(b->planes[3], mpi->qscale, c->w[3]);
+		fast_memcpy(b->planes[3]+c->w[3], mpi->qscale, c->w[3]);
 	}
 
 	p = mpi->fields & MP_IMGFIELD_TOP_FIRST ? 0 :

@@ -1179,7 +1179,7 @@ static void flip_page(void)
 
 static int draw_frame(uint8_t *src[])
 {
-  	memcpy( image, *src, dstride * image_height );
+  	fast_memcpy( image, *src, dstride * image_height );
 	return 0;
 }
 
@@ -1262,7 +1262,7 @@ static uint32_t put_image(mp_image_t *mpi){
 	}
 	else //packed
 	{
-        memcpy( image, mpi->planes[0], image_height * dstride);
+        fast_memcpy( image, mpi->planes[0], image_height * dstride);
 	}
 	return VO_TRUE;
 }

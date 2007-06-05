@@ -37,7 +37,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	mpi->w, mpi->h);
 
     for(y=0;y<mpi->h;y++)
-	memcpy(dmpi->planes[0]+dmpi->stride[0]*y,
+	fast_memcpy(dmpi->planes[0]+dmpi->stride[0]*y,
 	       mpi->planes[0]+mpi->stride[0]*y,
 	       mpi->w);
 

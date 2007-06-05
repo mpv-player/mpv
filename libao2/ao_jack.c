@@ -111,10 +111,10 @@ static int write_buffer(unsigned char* data, int len) {
   if (len > free) len = free;
   if (first_len > len) first_len = len;
   // till end of buffer
-  memcpy (&buffer[write_pos], data, first_len);
+  fast_memcpy (&buffer[write_pos], data, first_len);
   if (len > first_len) { // we have to wrap around
     // remaining part from beginning of buffer
-    memcpy (buffer, &data[first_len], len - first_len);
+    fast_memcpy (buffer, &data[first_len], len - first_len);
   }
   write_pos = (write_pos + len) % BUFFSIZE;
   return len;

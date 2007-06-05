@@ -546,7 +546,7 @@ static int draw_frame(uint8_t * src[]) {
 		source = src[0] + 2*g->yoff*zr->vdec*zr->stride + 2*g->xoff;
 		dest = zr->image + 2*zr->off_y;
 		for (i = 0; i < g->height/zr->vdec; i++) {
-			memcpy(dest, source, zr->image_width*2);
+			fast_memcpy(dest, source, zr->image_width*2);
 			dest += 2*zr->image_width;
 			source += zr->vdec*zr->stride;
 		}
@@ -619,7 +619,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[],
 		// copy Y:
 		for (i = 0; i < h; i++) {
 			if ((i + x)%zr->vdec == 0) {
-				memcpy(dst,src,w);
+				fast_memcpy(dst,src,w);
 				dst+=zr->image_width;
 			}
 			src+=stride[0];
@@ -633,8 +633,8 @@ static int draw_slice(uint8_t *srcimg[], int stride[],
 					zr->image_width/2+(x/2);
 			for (i = 0; i< h/2; i++) {
 				if ((i+x/2)%zr->vdec == 0) {
-					memcpy(dst1,src1,w/2);
-					memcpy(dst2,src2,w/2);
+					fast_memcpy(dst1,src1,w/2);
+					fast_memcpy(dst2,src2,w/2);
 					dst1+=zr->image_width/2;
 					dst2+=zr->image_width/2;
 				}

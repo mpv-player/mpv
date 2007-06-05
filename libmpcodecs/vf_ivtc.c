@@ -47,7 +47,7 @@ static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int 
 
 	for(i=0; i<height; i++)
 	{
-		memcpy(dst, src, bytesPerLine);
+		fast_memcpy(dst, src, bytesPerLine);
 		src+= srcStride;
 		dst+= dstStride;
 	}
