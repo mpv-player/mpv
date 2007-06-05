@@ -199,7 +199,7 @@ static BOOL CALLBACK DirectSoundEnum(LPGUID guid,LPCSTR desc,LPCSTR module,LPVOI
     if(device_num==*device_index){
         mp_msg(MSGT_AO, MSGL_V,"<--");
         if(guid){
-            fast_memcpy(&device,guid,sizeof(GUID));
+            memcpy(&device,guid,sizeof(GUID));
         }
     }
     mp_msg(MSGT_AO, MSGL_V,"\n");
@@ -337,14 +337,14 @@ static int write_buffer(unsigned char *data, int len)
   	    numsamp = dwBytes1 / (ao_data.channels * sampsize);  // number of samples for each channel in this buffer
 
   	    for( i = 0; i < numsamp; i++ ) for( j = 0; j < ao_data.channels; j++ ) {
-  	        fast_memcpy(lpvPtr1+(i*ao_data.channels*sampsize)+(chantable[j]*sampsize),data+(i*ao_data.channels*sampsize)+(j*sampsize),sampsize);
+  	        memcpy(lpvPtr1+(i*ao_data.channels*sampsize)+(chantable[j]*sampsize),data+(i*ao_data.channels*sampsize)+(j*sampsize),sampsize);
   	    }
 
   	    if (NULL != lpvPtr2 )
   	    {
   	        numsamp = dwBytes2 / (ao_data.channels * sampsize);
   	        for( i = 0; i < numsamp; i++ ) for( j = 0; j < ao_data.channels; j++ ) {
-  	            fast_memcpy(lpvPtr2+(i*ao_data.channels*sampsize)+(chantable[j]*sampsize),data+dwBytes1+(i*ao_data.channels*sampsize)+(j*sampsize),sampsize);
+  	            memcpy(lpvPtr2+(i*ao_data.channels*sampsize)+(chantable[j]*sampsize),data+dwBytes1+(i*ao_data.channels*sampsize)+(j*sampsize),sampsize);
   	        }
   	    }
 

@@ -771,7 +771,7 @@ case VCODEC_COPY:
 	if (!curfile) {
 		if (sh_video->bih) {
 			mux_v->bih=malloc(sh_video->bih->biSize);
-			fast_memcpy(mux_v->bih, sh_video->bih, sh_video->bih->biSize);
+			memcpy(mux_v->bih, sh_video->bih, sh_video->bih->biSize);
 		}
     else
     {
@@ -941,7 +941,7 @@ case ACODEC_COPY:
     }
     if (sh_audio->wf){
 	mux_a->wf=malloc(sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
-	fast_memcpy(mux_a->wf, sh_audio->wf, sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
+	memcpy(mux_a->wf, sh_audio->wf, sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
 	if(!sh_audio->i_bps) sh_audio->i_bps=mux_a->wf->nAvgBytesPerSec;
     } else {
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX));

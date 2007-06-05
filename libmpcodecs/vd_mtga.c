@@ -110,7 +110,7 @@ static void decode_rle_tga(TGAInfo *info, unsigned char *data, mp_image_t *mpi)
 	    
 	    if (packet_header & 0x80) /* runlength encoded packet */
 	    {
-		fast_memcpy(final, data, num_bytes);
+		memcpy(final, data, num_bytes);
 		
 		// Note: this will be slow when DR to vram!
 		i=num_bytes;

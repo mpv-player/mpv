@@ -146,8 +146,8 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
   if(mpi->type == MP_IMGTYPE_TEMP && (!(mpi->flags&MP_IMGFLAG_PRESERVE)) ) {
     dmpi = vf_get_image(vf->next,mpi->imgfmt,mpi->type, mpi->flags, mpi->w, mpi->h);
-    fast_memcpy(mpi->planes,dmpi->planes,MP_MAX_PLANES*sizeof(unsigned char*));
-    fast_memcpy(mpi->stride,dmpi->stride,MP_MAX_PLANES*sizeof(unsigned int));
+    memcpy(mpi->planes,dmpi->planes,MP_MAX_PLANES*sizeof(unsigned char*));
+    memcpy(mpi->stride,dmpi->stride,MP_MAX_PLANES*sizeof(unsigned int));
     mpi->flags|=MP_IMGFLAG_DIRECT;
     mpi->priv=(void*)dmpi;
     return;

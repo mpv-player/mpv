@@ -394,7 +394,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	 * We make configuration changes to a temporary params structure,
 	 * compare it with the old params structure and only apply the new
 	 * config if it is different from the old one. */
-	fast_memcpy(&zptmp, &p->zp, sizeof(zptmp));
+	memcpy(&zptmp, &p->zp, sizeof(zptmp));
 
 	/* translate the configuration to zoran understandable format */
 	zptmp.decimation = 0;
@@ -423,7 +423,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 	if (memcmp(&zptmp, &p->zp, sizeof(zptmp))) {
 		/* config differs, we must update */
-		fast_memcpy(&p->zp, &zptmp, sizeof(zptmp));
+		memcpy(&p->zp, &zptmp, sizeof(zptmp));
 		stop_playing(p);
 		if (ioctl(p->vdes, MJPIOC_S_PARAMS, &p->zp) < 0) {
 			ERROR("error writing display params to card\n");

@@ -217,7 +217,7 @@ static void __vbeSetPixel(int x, int y, int r, int g, int b)
 	color = (r << shift_r) | (g << shift_g) | (b << shift_b);
 	offset = y * bpl + (x * pixel_size);
         if(!VALID_WIN_FRAME(offset)) __vbeSwitchBank(offset);
-	fast_memcpy(VIDEO_PTR(offset), &color, pixel_size);
+	memcpy(VIDEO_PTR(offset), &color, pixel_size);
 }
 
 /*
@@ -649,7 +649,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	  else          fs_mode = 1;
 	} 
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
-	fast_memcpy(vib.VESASignature,"VBE2",4);
+	memcpy(vib.VESASignature,"VBE2",4);
 	if(!vib_set && (err=vbeGetControllerInfo(&vib)) != VBE_OK)
 	{
 	  PRINT_VBE_ERR("vbeGetControllerInfo",err);

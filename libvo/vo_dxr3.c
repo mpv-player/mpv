@@ -1106,7 +1106,7 @@ static struct lut_entry *new_lookuptable(overlay_t *o)
     },*p;
 
     p = malloc(sizeof(m));
-    fast_memcpy(p,m,sizeof(m));
+    memcpy(p,m,sizeof(m));
     return p;
 }
 

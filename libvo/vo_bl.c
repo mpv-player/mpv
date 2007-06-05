@@ -174,7 +174,7 @@ static int udp_init(bl_host_t *h) {
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(h->port);
 
-	fast_memcpy(&addr.sin_addr.s_addr, dest->h_addr_list[0], dest->h_length);
+	memcpy(&addr.sin_addr.s_addr, dest->h_addr_list[0], dest->h_length);
 
 	h->fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (h->fd < 0) {
