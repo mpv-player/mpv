@@ -2244,9 +2244,6 @@ echores $_named_asm_args
 _install_strip="-s"
 if test "$_profile" != "" || test "$_debug" != "" ; then
   CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
-  if test "$_cc_major" -ge "3" ; then
-    CFLAGS=`echo "$CFLAGS" | sed -e 's/\(-Wall\)/\1 -Wno-unused-parameter/'`
-  fi
   _install_strip=
 elif test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
