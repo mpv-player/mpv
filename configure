@@ -2243,7 +2243,7 @@ echores $_named_asm_args
 # Checking for CFLAGS
 _install_strip="-s"
 if test "$_profile" != "" || test "$_debug" != "" ; then
-  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
+  CFLAGS="-W -Wall -O2 $_march $_mcpu $_pipe $_debug $_profile"
   _install_strip=
 elif test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
