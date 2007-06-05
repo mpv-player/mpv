@@ -30,6 +30,7 @@
 #include "../mp_msg.h"
 #include "../help_mp.h"
 #include "../mplayer.h"
+#include "../mpbswap.h"
 
 #include <X11/extensions/XShm.h>
 #ifdef HAVE_XSHAPE
@@ -84,6 +85,7 @@ int                  wsRedMask = 0;
 int                  wsGreenMask = 0;
 int                  wsBlueMask = 0;
 int                  wsOutMask = 0;
+int                  wsNonNativeOrder = 0;
 
 int                  wsTrue    = True;
 
@@ -845,7 +847,29 @@ void wsDoExit( void )
 //    Put 'Image' to window.
 // ----------------------------------------------------------------------------------------------
 void wsConvert( wsTWindow * win,unsigned char * Image,unsigned int Size )
-{ if ( wsConvFunc ) wsConvFunc( Image,win->ImageData,win->xImage->width * win->xImage->height * 4 ); }
+{
+  int i;
+  if ( wsConvFunc )
+    wsConvFunc( Image,win->ImageData,win->xImage->width * win->xImage->height * 4 );
+  if (!wsNonNativeOrder) return;
+  switch (win->xImage->bits_per_pixel) {
+    case 32:
+    {
+      uint32_t *d = win->ImageData;
+      for (i = 0; i < win->xImage->width * win->xImage->height; i++)
+        d[i] = bswap_32(d[i]);
+      break;
+    }
+    case 16:
+    case 15:
+    {
+      uint16_t *d = win->ImageData;
+      for (i = 0; i < win->xImage->width * win->xImage->height; i++)
+        d[i] = bswap_16(d[i]);
+      break;
+    }
+  }
+}
 
 void wsPutImage( wsTWindow * win )
 {
@@ -1048,6 +1072,11 @@ int wsGetDepthOnScreen( void )
    wsRedMask=mXImage->red_mask;
    wsGreenMask=mXImage->green_mask;
    wsBlueMask=mXImage->blue_mask;
+#ifdef WORDS_BIGENDIAN
+   wsNonNativeOrder = mXImage->byte_order == LSBFirst;
+#else
+   wsNonNativeOrder = mXImage->byte_order == MSBFirst;
+#endif
    XDestroyImage( mXImage );
   }
  else
