@@ -191,6 +191,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
                                 "RADIO",
                                 "ASS",
                                 "LOADER",
+                                "STATUSLINE",
         };
 
         int c=v_colors[lev];

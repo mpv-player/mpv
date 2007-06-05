@@ -1439,8 +1439,8 @@ if(sh_audio && !demuxer2){
 	    (int)demuxer->movi_end);
 #else
       if(!quiet) {
-	if( mp_msg_test(MSGT_AVSYNC,MSGL_V) ) {
-		mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/B/S %d/%d/%d \r",
+	if( mp_msg_test(MSGT_STATUSLINE,MSGL_V) ) {
+		mp_msg(MSGT_STATUSLINE,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/B/S %d/%d/%d \r",
 	    	mux_v->timer, decoded_frameno, (int)(p*100),
 	    	(t>1) ? (int)(decoded_frameno/t+0.5) : 0,
 	    	(p>0.001) ? (int)((t/p-t)/60) : 0, 
@@ -1452,7 +1452,7 @@ if(sh_audio && !demuxer2){
 			duplicatedframes, badframes, skippedframes
 		);
 	} else
-	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %5.2ffps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d]\r",
+	mp_msg(MSGT_STATUSLINE,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %5.2ffps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d]\r",
 	    mux_v->timer, decoded_frameno, (int)(p*100),
 	    (t>1) ? (float)(decoded_frameno/t) : 0,
 	    (p>0.001) ? (int)((t/p-t)/60) : 0, 

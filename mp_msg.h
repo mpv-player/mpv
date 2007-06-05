@@ -103,6 +103,8 @@ extern int verbose;
 
 #define MSGT_LOADER 44 // dll loader messages
 
+#define MSGT_STATUSLINE 45 // playback/encoding status line
+
 #define MSGT_MAX 64
 
 void mp_msg_init(void);
