@@ -5945,28 +5945,28 @@ miscela disturbo casuale con un aspetto (semi)regolare
 .PD 1
 .
 .TP
-.B denoise3d[=luminanza_spaziale:crominanza_spaziale:luminanza_temporale:crominanza_temporale]
+.B denoise3d[=lumin_spaziale:cromin_spaziale:lumin_temp:cromin_temp]
 Questo filtro cerca di ridurre il disturbo dell'immagine per produrre immagini
 più morbide rendendo le immagini ferme realmente ferme (questo dovrebbe
 aumentare la compressibilità).
 .PD 0
 .RSs
-.IPs <luminanza_spaziale>
+.IPs <lumin_spaziale>
 intensità spaziale della luminanza (default: 4)
-.IPs <crominanza_spaziale>
+.IPs <cromin_spaziale>
 intensità spaziale della crominanza (default: 3)
-.IPs <luminanza_temporale>
+.IPs <lumin_temp>
 intensità temporale della luminanza (default: 6)
-.IPs <crominanza_temporale>
+.IPs <cromin_temp>
 intensità temporale della crominanza
-(default: luminanza_temporale*crominanza_spaziale/luminanza_spaziale)
+(default: lumin_temp*cromin_spaziale/lumin_spaziale)
 .RE
 .PD 1
 .
 .TP
-.B hqdn3d[=luminanza_spaziale:crominanza_spaziale:luminanza_temporale:crominanza_temporale]
+.B hqdn3d[=lumin_spaziale:cromin_spaziale:lumin_temp:cromin_temp]
 Versione ad alta precisione/\:qualità del filtro denoise3d.
-Parametri ed uso sono gli stessi.
+Parametri ed utilizzo sono gli stessi.
 .
 .TP
 .B eq[=luminosità:contrasto] (OBSOLETO)
