@@ -115,10 +115,10 @@ static void decode_rle_tga(TGAInfo *info, unsigned char *data, mp_image_t *mpi)
 		// Note: this will be slow when DR to vram!
 		i=num_bytes;
 		while(2*i<=replen){
-		    fast_memcpy(final+i,final,i);
+		    memcpy(final+i,final,i);
 		    i*=2;
 		}
-		fast_memcpy(final+i,final,replen-i);
+		memcpy(final+i,final,replen-i);
 		data += num_bytes;
 	    }
 	    else /* raw packet */
