@@ -1,4 +1,4 @@
-//Synced with help_mp-en.h r23028
+//Synced with help_mp-en.h r23416
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -1598,7 +1598,8 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] 子菜单定义需要 'menu' 属性。\n"
-#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] 首选项菜单条目的定义需要有效的 'property' 属性 (行 %d)。\n"
+#define MSGTR_LIBMENU_InvalidProperty "[MENU] 首选项菜单中存在无效的属性值'%s'。（行%d）。\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] 首选项菜单条目的定义需一个有效的'property'或'txt'属性（行%d）。\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] 首选项菜单需要参数。\n"
 
 // libmenu/menu_pt.c
