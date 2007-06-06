@@ -285,7 +285,7 @@ static int do_layer2(struct frame *fr,int outmode)
   int clip=0;
   int i,j;
   int stereo = fr->stereo;
-  real fraction[2][4][SBLIMIT]; /* pick_table clears unused subbands */
+  DECLARE_ALIGNED(16, real, fraction[2][4][SBLIMIT]); /* pick_table clears unused subbands */
   unsigned int bit_alloc[64];
   int scale[192];
   int single = fr->single;

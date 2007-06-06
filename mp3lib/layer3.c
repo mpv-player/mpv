@@ -1260,8 +1260,8 @@ static int do_layer3(struct frame *fr,int single){
 
   granules = (fr->lsf) ? 1 : 2;
   for (gr=0;gr<granules;gr++){
-    static real hybridIn[2][SBLIMIT][SSLIMIT];
-    static real hybridOut[2][SSLIMIT][SBLIMIT];
+    static DECLARE_ALIGNED(16, real, hybridIn[2][SBLIMIT][SSLIMIT]);
+    static DECLARE_ALIGNED(16, real, hybridOut[2][SSLIMIT][SBLIMIT]);
 
     { struct gr_info_s *gr_info = &(sideinfo.ch[0].gr[gr]);
       int part2bits;

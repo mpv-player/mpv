@@ -5,17 +5,7 @@
  * and mp3lib/dct64_MMX.c
  */
 
-/* NOTE: The following code is suboptimal! It can be improved (at least) by
-
-   1. Replace all movups by movaps. (Can Parameter c be always aligned on 
-      a 16-byte boundary?)
-
-   2. Rewritten using intrinsics. (GCC generally optimizes intrinsics
-      better. However, when __m128 locals are involved, GCC may
-      produce bad code that uses movaps to access a stack not aligned
-      on a 16-byte boundary, which leads to run-time crashes.)
-
-*/
+#include <libavutil/mem.h>
 
 typedef float real;
 
@@ -32,8 +22,8 @@ static const int nnnn[4] __attribute__((aligned(16))) =
 
 void dct64_sse(short *out0,short *out1,real *c)
 {
-    static real __attribute__ ((aligned(16))) b1[0x20];
-    static real __attribute__ ((aligned(16))) b2[0x20];
+    static DECLARE_ALIGNED(16, real, b1[0x20]);
+    static DECLARE_ALIGNED(16, real, b2[0x20]);
     static real const one = 1.f;
 
     {
@@ -45,9 +35,9 @@ void dct64_sse(short *out0,short *out1,real *c)
             asm(
                 "movaps    %2, %%xmm3\n\t"
                 "shufps    $27, %%xmm3, %%xmm3\n\t"
-                "movups    %3, %%xmm1\n\t"
+                "movaps    %3, %%xmm1\n\t"
                 "movaps    %%xmm1, %%xmm4\n\t"
-                "movups    %4, %%xmm2\n\t"
+                "movaps    %4, %%xmm2\n\t"
                 "shufps    $27, %%xmm4, %%xmm4\n\t"
                 "movaps    %%xmm2, %%xmm0\n\t"
                 "shufps    $27, %%xmm0, %%xmm0\n\t"

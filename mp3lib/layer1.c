@@ -131,7 +131,7 @@ static int do_layer1(struct frame *fr,int single)
   int i,stereo = fr->stereo;
   unsigned int balloc[2*SBLIMIT];
   unsigned int scale_index[2][SBLIMIT];
-  real fraction[2][SBLIMIT];
+  DECLARE_ALIGNED(16, real, fraction[2][SBLIMIT]);
 //  int single = fr->single;
 
 //  printf("do_layer1(0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X )\n",
