@@ -22,8 +22,8 @@ static const int nnnn[4] __attribute__((aligned(16))) =
 
 void dct64_sse(short *out0,short *out1,real *c)
 {
-    static DECLARE_ALIGNED(16, real, b1[0x20]);
-    static DECLARE_ALIGNED(16, real, b2[0x20]);
+    DECLARE_ALIGNED(16, real, b1[0x20]);
+    DECLARE_ALIGNED(16, real, b2[0x20]);
     static real const one = 1.f;
 
     {
