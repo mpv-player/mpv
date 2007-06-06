@@ -1,4 +1,4 @@
-.\" Partial sync with en/mplayer.1 r23370
+.\" Partial sync with en/mplayer.1 r23455
 .\" Encoding: utf-8
 .\" Only 1 section unfinished: "CODEC SPECIFIC ENCODING OPTIONS",
 .\"   also see line 4560.
@@ -12,7 +12,7 @@
 .\" 本(英文)手册页由 Gabucino, Diego Biurrun, Jonas Jermann 编写
 .\" 参于翻译本中文手册页的有: 
 .\"   Lu Ran <hephooey@fastmail.fm>,
-.\"   Sheldon Jin <jinsh2 AT yahoo.com>,
+.\"   Sheldon Jin <jinsh2 AT yahoo.com>, JRaSH <jrash06 AT 163.com>
 .
 .\" --------------------------------------------------------------------------
 .\" 宏定义
@@ -43,7 +43,7 @@
 .\" 名称
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006-10-15" "MPlayer 项目" "电影播放器"
+.TH MPlayer 1 "2007-06-01" "MPlayer 项目" "电影播放器"
 .
 .SH 名称
 mplayer  \- 电影播放器
@@ -855,8 +855,8 @@ n 大小的 FIFO 能容纳 (n-1) 缓冲事件。
 使用另一种的 menu.conf。
 .
 .TP
-.B \-menu-keepdir （仅用于OSD菜单)
-文件浏览器的起始位置为上一次记录的位置而不是当前目录。
+.B \-menu-keepdir（仅用于OSD菜单）
+文件浏览器从最近浏览位置开始浏览，而不是当前目录。
 .
 .TP
 .B \-menu-root <参数值> (仅适用于 OSD 菜单)
@@ -1611,6 +1611,10 @@ radio://1, radio://104.4, radio_set_channel 1
 .RSs
 .IPs noaudio
 没有声音
+.IPs automute=<0-255>（仅适用于v4l和v4l2）
+如果设备报告的信号强度小于这个值，那么音频和视频将静音。
+大多数情况下automute=100就足够用了。
+默认值为0（禁用automute）。
 .IPs driver=<参数值>
 参见\-tv driver=help以获取内置TV输入驱动的列表。
 可用参数: dummy, v4l, bsdbt848
@@ -2703,8 +2707,8 @@ gl, gl2, directx 和 tdfxfb 视频输出驱动支持。
 .TP
 .B \-monitoraspect <宽高比> (也请参见 \-aspect)
 设置监视器或电视屏幕的宽高比。
-值 0 将禁用先前的屏幕宽高比设置（例如在配置文件中的设置）。如果激活了，此选项
-将屏蔽\-monitorpixelaspect中的设置。
+值 0 将禁用先前的屏幕宽高比设置（例如，\&在配置文件中的设置）。如果激活了，此
+选项将屏蔽\-monitorpixelaspect中的设置。
 .sp 1
 .I 示例:
 .PD 0
@@ -7677,7 +7681,7 @@ MPlayer 是 (C) 2000\-2007 The MPlayer Team (MPlayer 团队) 所有
 本(英文)手册页主要由 Gabucino, Jonas Jermann 和 Diego Biurrun 编写, 
 由 Diego Biurrun 维护。
 参于翻译本中文手册页的有: Lu Ran <hephooey AT fastmail.fm>, 
-Sheldon Jin <jinsh2 AT yahoo.com> 等。
+Sheldon Jin <jinsh2 AT yahoo.com>, JRaSH<jrash06 At 163.com> 等。
 有关本文的联系请发送邮件到 MPlayer-DOCS 邮件列表。
 与翻译相关的邮件属于 MPlayer-translations 邮件列表。
 .\" end of file
