@@ -7237,7 +7237,7 @@ if test "$_vidix" = yes ; then
   test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
 
   for driver in $_vidix_drivers ; do
-    uc_driver=`echo $driver | tr [a-z] [A-Z]`
+    uc_driver=`echo $driver | tr '[a-z]' '[A-Z]'`
     eval _vidix_drv_${driver}=yes
     eval _def_vidix_drv_${driver}=\"\#define CONFIG_VIDIX_DRV_${uc_driver} 1\"
   done
