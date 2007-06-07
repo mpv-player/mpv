@@ -226,9 +226,9 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
       dp=new_demux_packet(len);
       fast_memcpy(dp->buffer,data,len);
       if (asf->asf_is_dvr_ms)
-        dp->pts=time*0.0000001f;
+        dp->pts=time*0.0000001;
       else
-        dp->pts=time*0.001f;
+        dp->pts=time*0.001;
       dp->flags=keyframe;
 //      if(ds==demux->video) printf("ASF time: %8d  dur: %5d  \n",time,dur);
       dp->pos=demux->filepos;
