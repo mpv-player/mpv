@@ -1845,7 +1845,7 @@ EOF
       AuthenticAMD)
         proc=k8;;
       GenuineIntel)
-        case "$pmodel" in
+        case "$pfamily" in
         6) proc=core2;;
         *)
           # 64-bit prescotts exist, but as far as GCC is concerned they
