@@ -124,6 +124,7 @@ static int config(struct vf_instance_s* vf,
 	return 0;
     }
     sfmt = imgfmt2pixfmt(outfmt);
+    if (outfmt == IMGFMT_RGB8 || outfmt == IMGFMT_BGR8) sfmt = PIX_FMT_PAL8;
     dfmt = imgfmt2pixfmt(best);
     
     vo_flags=vf->next->query_format(vf->next,best);
@@ -605,6 +606,7 @@ struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, 
 
 	dfmt = imgfmt2pixfmt(dstFormat);
 	sfmt = imgfmt2pixfmt(srcFormat);
+	if (outfmt == IMGFMT_RGB8 || outfmt == IMGFMT_BGR8) sfmt = PIX_FMT_PAL8;
 	sws_getFlagsAndFilterFromCmdLine(&flags, &srcFilterParam, &dstFilterParam);
 
 	return sws_getContext(srcW, srcH, sfmt, dstW, dstH, dfmt, flags | get_sws_cpuflags(), srcFilterParam, dstFilterParam, NULL);
