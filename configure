@@ -2251,7 +2251,7 @@ elif test -z "$CFLAGS" ; then
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
-    CFLAGS="-O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="-Wall -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
   fi
 else
   _warn_CFLAGS=yes
