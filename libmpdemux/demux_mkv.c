@@ -1533,7 +1533,8 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
                      "[mkv] Attachment: %s, %s, %u bytes\n",
                      name, mime, data_size);
 #ifdef USE_ASS
-              if (extract_embedded_fonts && name && data && data_size &&
+              if (ass_library &&
+                  extract_embedded_fonts && name && data && data_size &&
                   mime && (strcmp(mime, "application/x-truetype-font") == 0 ||
                   strcmp(mime, "application/x-font") == 0))
                 ass_add_font(ass_library, name, data, data_size);
