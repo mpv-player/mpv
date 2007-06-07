@@ -6379,7 +6379,7 @@ if test "$_xvid" = yes ; then
 else
   _def_xvid='#undef HAVE_XVID4'
   _nocodecmodules="xvid $_nocodecmodules"
-  _libavencoders=`echo $_libavencoders | sed -e s/XVID_ENCODER// `
+  _libavencoders=`echo $_libavencoders | sed -e s/LIBXVID_ENCODER// `
 fi
 echores "$_xvid"
 
@@ -6434,7 +6434,7 @@ else
   _def_x264='#undef HAVE_X264'
   _def_lavc_x264='#undef CONFIG_X264'
   _nocodecmodules="x264 $_nocodecmodules"
-  _libavencoders=`echo $_libavencoders | sed -e s/X264_ENCODER// `
+  _libavencoders=`echo $_libavencoders | sed -e s/LIBX264_ENCODER// `
 fi
 echores "$_x264 (in libavcodec: $_lavc_x264)"
 
@@ -7604,8 +7604,8 @@ CONFIG_LIBAMR_WB=$_libamr_wb
 `echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 CONFIG_LIBFAAC=$_lavc_faac
 CONFIG_LIBMP3LAME=$_lavc_mp3lame
-CONFIG_XVID=$_lavc_xvid
-CONFIG_X264=$_lavc_x264
+CONFIG_LIBXVID=$_lavc_xvid
+CONFIG_LIBX264=$_lavc_x264
 CONFIG_ZLIB=$_zlib
 CONFIG_GPL=yes
 CONFIG_ENCODERS=$_mencoder
