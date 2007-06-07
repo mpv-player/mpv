@@ -22,6 +22,7 @@ MPlayer (1.0)
     * fixed resolution switching with libmpeg2
     * handle resolution switching for Real codecs
     * ffmpeg video decoder handles aspect ratio changes
+    * amr now handled via libamr wrapper (http://www.penguin.cz/~utx/amr)
 
     Demuxers:
     * implemented switch_video and switch_program consistently with switch_audio
