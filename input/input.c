@@ -475,8 +475,19 @@ struct mp_cmd_filter_st {
   mp_cmd_filter_t* next;
 };
 
+typedef struct mp_cmd_bind_section_st mp_cmd_bind_section_t;
+
+struct mp_cmd_bind_section_st {
+  mp_cmd_bind_t* cmd_binds;
+  char* section;
+  mp_cmd_bind_section_t* next;
+};
+
 // These are the user defined binds
+static mp_cmd_bind_section_t* cmd_binds_section = NULL;
+static char* section = NULL;
 static mp_cmd_bind_t* cmd_binds = NULL;
+static mp_cmd_bind_t* cmd_binds_default = NULL;
 static mp_cmd_filter_t* cmd_filters = NULL;
 
 // Callback to allow the menu filter to grab the incoming keys
@@ -898,6 +909,29 @@ mp_input_find_bind_for_key(mp_cmd_bind_t* binds, int n,int* keys) {
   return binds[j].cmd;
 }
 
+static mp_cmd_bind_section_t*
+mp_input_get_bind_section(char *section) {
+  mp_cmd_bind_section_t* bind_section = cmd_binds_section;
+
+  if (section==NULL) section="default";
+  while (bind_section) {
+    if(strcmp(section,bind_section->section)==0) return bind_section;
+    if(bind_section->next==NULL) break;
+    bind_section=bind_section->next;
+  }
+  if(bind_section) {
+    bind_section->next=malloc(sizeof(mp_cmd_bind_section_t));
+    bind_section=bind_section->next;
+  } else {
+    cmd_binds_section=malloc(sizeof(mp_cmd_bind_section_t));
+    bind_section=cmd_binds_section;
+  }
+  bind_section->cmd_binds=NULL;
+  bind_section->section=strdup(section);
+  bind_section->next=NULL;
+  return bind_section;
+}
+
 static mp_cmd_t*
 mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
   char* cmd = NULL;
@@ -905,6 +939,8 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
 
   if(cmd_binds)
     cmd = mp_input_find_bind_for_key(cmd_binds,n,keys);
+  if(cmd_binds_default && cmd == NULL)
+    cmd = mp_input_find_bind_for_key(cmd_binds_default,n,keys);
   if(cmd == NULL)
     cmd = mp_input_find_bind_for_key(def_cmd_binds,n,keys);
 
@@ -1378,31 +1414,46 @@ mp_input_get_input_from_name(char* name,int* keys) {
   return 1;
 }
 
+#define BS_MAX 256
+#define SPACE_CHAR " \n\r\t"
+
 void
 mp_input_bind_keys(int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
   int i = 0,j;
   mp_cmd_bind_t* bind = NULL;
+  mp_cmd_bind_section_t* bind_section = NULL;
+  char *section=NULL, *p;
 
 #ifdef MP_DEBUG
   assert(keys != NULL);
   assert(cmd != NULL);
 #endif
 
-  if(cmd_binds) {
-    for(i = 0; cmd_binds[i].cmd != NULL ; i++) {
-      for(j = 0 ; cmd_binds[i].input[j] == keys[j]  && keys[j] != 0 ; j++)
+  if(*cmd=='{' && (p=strchr(cmd,'}'))) {
+    *p=0;
+    section=++cmd;
+    cmd=++p;
+    // Jump beginning space
+    for(  ; cmd[0] != '\0' && strchr(SPACE_CHAR,cmd[0]) != NULL ; cmd++)
+      /* NOTHING */;
+  }
+  bind_section=mp_input_get_bind_section(section);
+
+  if(bind_section->cmd_binds) {
+    for(i = 0; bind_section->cmd_binds[i].cmd != NULL ; i++) {
+      for(j = 0 ; bind_section->cmd_binds[i].input[j] == keys[j]  && keys[j] != 0 ; j++)
 	/* NOTHING */;
-      if(keys[j] == 0 && cmd_binds[i].input[j] == 0 ) {
-	bind = &cmd_binds[i];
+      if(keys[j] == 0 && bind_section->cmd_binds[i].input[j] == 0 ) {
+	bind = &bind_section->cmd_binds[i];
 	break;
       }
     }
   }
   
   if(!bind) {
-    cmd_binds = (mp_cmd_bind_t*)realloc(cmd_binds,(i+2)*sizeof(mp_cmd_bind_t));
-    memset(&cmd_binds[i],0,2*sizeof(mp_cmd_bind_t));
-    bind = &cmd_binds[i];
+    bind_section->cmd_binds = (mp_cmd_bind_t*)realloc(bind_section->cmd_binds,(i+2)*sizeof(mp_cmd_bind_t));
+    memset(&bind_section->cmd_binds[i],0,2*sizeof(mp_cmd_bind_t));
+    bind = &bind_section->cmd_binds[i];
   }
   if(bind->cmd)
     free(bind->cmd);
@@ -1431,10 +1482,6 @@ mp_input_free_binds(mp_cmd_bind_t* binds) {
 
 }
   
-
-#define BS_MAX 256
-#define SPACE_CHAR " \n\r\t"
-
 static int
 mp_input_parse_config(char *file) {
   int fd;
@@ -1584,7 +1631,28 @@ mp_input_parse_config(char *file) {
   }
   mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrWhyHere);
   close(fd);
+  mp_input_set_section(NULL);
   return 0;
+}
+
+void
+mp_input_set_section(char *name) {
+  mp_cmd_bind_section_t* bind_section = NULL;
+
+  cmd_binds=NULL;
+  cmd_binds_default=NULL;
+  if(section) free(section);
+  if(name) section=strdup(name); else section=strdup("default");
+  if(bind_section=mp_input_get_bind_section(section))
+    cmd_binds=bind_section->cmd_binds;
+  if(strcmp(section,"default")==0) return;
+  if(bind_section=mp_input_get_bind_section(NULL))
+    cmd_binds_default=bind_section->cmd_binds;
+}
+
+char*
+mp_input_get_section(void) {
+  return section;
 }
 
 extern char *get_path(const char *filename);
@@ -1665,6 +1733,7 @@ mp_input_init(int use_gui) {
 void
 mp_input_uninit(void) {
   unsigned int i;
+  mp_cmd_bind_section_t* bind_section;
 
   for(i=0; i < num_key_fd; i++) {
     if(key_fds[i].close_func)
@@ -1675,9 +1744,14 @@ mp_input_uninit(void) {
     if(cmd_fds[i].close_func)
       cmd_fds[i].close_func(cmd_fds[i].fd);
   }
-  mp_input_free_binds(cmd_binds);
-  cmd_binds=NULL;
-  
+  while (cmd_binds_section) {
+    mp_input_free_binds(cmd_binds_section->cmd_binds);
+    free(cmd_binds_section->section);
+    bind_section=cmd_binds_section->next;
+    free(cmd_binds_section);
+    cmd_binds_section=bind_section;
+  }
+  cmd_binds_section=NULL;
 }
 
 void

@@ -3320,6 +3320,10 @@ if ( use_gui ) {
 }
 #endif
 
+mp_input_set_section(NULL);
+//TODO: add desired (stream-based) sections here
+if (mpctx->stream->type==STREAMTYPE_TV) mp_input_set_section("tv");
+
 //==================== START PLAYING =======================
 
 if(loop_times>1) loop_times--; else

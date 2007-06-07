@@ -252,6 +252,14 @@ mp_cmd_free(mp_cmd_t* cmd);
 mp_cmd_t*
 mp_cmd_clone(mp_cmd_t* cmd);
 
+// Set current input section
+void
+mp_input_set_section(char *name);
+
+// Get current input section
+char*
+mp_input_get_section(void);
+
 // When you create a new driver you should add it in these 2 functions.
 void
 mp_input_init(int use_gui);
