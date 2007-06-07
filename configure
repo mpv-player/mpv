@@ -2251,7 +2251,7 @@ elif test -z "$CFLAGS" ; then
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
-    CFLAGS="-Wall -Wno-switch -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="-Wall -Wno-switch -Wpointer-arith -Wredundant-decls -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
   fi
 else
   _warn_CFLAGS=yes
@@ -7398,6 +7398,7 @@ if cc_check -Wdeclaration-after-statement ; then
   CFLAGS="-Wdeclaration-after-statement $CFLAGS"
 fi
 cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
+cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
 
 
 #this must be the last test to be performed or the ones following it will likely fail
