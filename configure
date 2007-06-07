@@ -5870,7 +5870,7 @@ if test "$_faac" = yes ; then
 else
   _def_faac="#undef HAVE_FAAC"
   _nocodecmodules="faac $_nocodecmodules"
-  _libavencoders=`echo $_libavencoders | sed -e s/FAAC_ENCODER// `
+  _libavencoders=`echo $_libavencoders | sed -e s/LIBFAAC_ENCODER// `
 fi
 echores "$_faac (in libavcodec: $_lavc_faac)"
 
