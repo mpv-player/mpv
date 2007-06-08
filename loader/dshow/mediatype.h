@@ -3,6 +3,8 @@
     AM_MEDIA_TYPE service functions declarations
 -------------------------------------------------------------------
 */
+#ifndef DS_MEDIATYPE_H
+#define DS_MEDIATYPE_H
 #include "guids.h"
                   
 /**
@@ -75,3 +77,5 @@ AM_MEDIA_TYPE* CreateMediaType(const AM_MEDIA_TYPE* pSrc);
  *
  */
 int CompareMediaTypes(const AM_MEDIA_TYPE * pmt1, const AM_MEDIA_TYPE * pmt2, int bWildcards);
+
+#endif // DS_MEDIA_TYPE_H
