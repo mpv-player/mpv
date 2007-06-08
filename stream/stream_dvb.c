@@ -444,8 +444,8 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 		rk = size - pos;
 		if(poll(pfds, 1, 500) <= 0)
 		{
-			errno = 0;
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "dvb_streaming_read, attempt N. %d failed with errno %d when reading %d bytes\n", tries, errno, size-pos);
+			errno = 0;
 			if(--tries > 0)
 				continue;
 			else
