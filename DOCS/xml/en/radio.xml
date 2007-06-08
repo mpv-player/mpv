@@ -43,7 +43,7 @@ Here are just a few tips:
 <listitem><para>
   Use the <option>channels</option> option. An example:
   <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
-  Explanation: with this option, only the 104.4 and 103.9 radio stations
+  Explanation: With this option, only the 104.4 and 103.9 radio stations
   will be usable. There will be a nice OSD text upon channel switching,
   displaying the channel's name. Spaces in the channel name must be
   replaced by the "_" character.
