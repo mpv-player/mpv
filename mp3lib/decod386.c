@@ -102,7 +102,7 @@ static int synth_1to1_mono2stereo(real *bandPtr,unsigned char *samples,int *pnt)
 
 static synth_func_t synth_func;
 
-#if defined(CAN_COMPILE_X86_ASM) && defined(HAVE_MMX)
+#ifdef HAVE_MMX
 extern int synth_1to1_MMX( real *bandPtr,int channel,short * samples);
 #endif
 
@@ -125,7 +125,7 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   *pnt += 128;
 
 /* optimized for x86 */
-#if defined(CAN_COMPILE_X86_ASM)
+#ifdef ARCH_X86
   if ( synth_func )
    {
 //    printf("Calling %p, bandPtr=%p channel=%d samples=%p\n",synth_func,bandPtr,channel,samples);
