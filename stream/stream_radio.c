@@ -1071,10 +1071,11 @@ char* radio_get_channel_name(struct stream_st *stream){
  * \return number of bytes, written into buffer
  */
 static int fill_buffer_s(struct stream_st *s, char* buffer, int max_len){
-    radio_priv_t* priv=(radio_priv_t*)s->priv;
     int len=max_len;
 
 #ifdef USE_RADIO_CAPTURE
+    radio_priv_t* priv=(radio_priv_t*)s->priv;
+
     if (priv->do_capture){
         len=grab_audio_frame(priv, buffer,max_len);
     }

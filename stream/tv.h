@@ -1,8 +1,6 @@
 #ifndef TV_H
 #define TV_H
 
-extern int tv_param_on;
-
 #ifdef USE_TV
 //#include "libao2/afmt.h"
 //#include "libmpcodecs/img_format.h"

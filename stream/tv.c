@@ -19,7 +19,6 @@
 
 #include "config.h"
 
-int tv_param_on = 0;
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -668,7 +667,6 @@ static void demux_close_tv(demuxer_t *demuxer)
 tvi_handle_t *tv_begin(void)
 {
     int i;
-    tvi_info_t* info;
     tvi_handle_t* h;
     if(!strcmp(tv_param_driver,"help")){
         mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_AvailableDrivers);
