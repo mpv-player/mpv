@@ -1,4 +1,4 @@
-.\" synced with r23467
+.\" synced with r23504
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
@@ -4408,7 +4408,7 @@ nonkey: Salta tutti i fotogrammi eccetto quelli chiave (i keyframe).
 .br
 all: Salta tutti i fotogrammi.
 .REss
-.IPs skipidct=<valore_salto> (solo MPEG1/2)
+.IPs "skipidct=<valore_salto> (solo MPEG-1/2)"
 Salta il passaggio IDCT.
 Questo diminuisce molto la qualità in quasi tutti i casi
 (vedi skiploopfilter per i valori_salto disponibili).
@@ -4416,7 +4416,7 @@ Questo diminuisce molto la qualità in quasi tutti i casi
 Salta completamente la decodifica dei fotogrammi.
 Accelera molto, ma porta movimenti scattosi e ogni tanto brutti artefatti
 (vedi skiploopfilter per i valori_salto disponibili).
-.IPs threads=<1\-8>
+.IPs "threads=<1\-8> (solo MPEG-1/2)"
 numero di thread da usare per la decodifica (default: 1)
 .IPs vismv=<valore>
 Visualizza i vettori di movimento.
