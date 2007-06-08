@@ -136,7 +136,7 @@ m_option_t mplayer_opts[]={
 	{"vo", &video_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"ao", &audio_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"fixed-vo", &fixed_vo, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
-	{"nofixed-vo", &fixed_vo, CONF_TYPE_FLAG,CONF_GLOBAL, 0, 0, NULL},
+	{"nofixed-vo", &fixed_vo, CONF_TYPE_FLAG,CONF_GLOBAL, 1, 0, NULL},
 	{"ontop", &vo_ontop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noontop", &vo_ontop, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -250,7 +250,8 @@ m_option_t mplayer_opts[]={
 	{"stop_xscreensaver", "Use -stop-xscreensaver instead, options with _ have been obsoleted.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 #endif
-	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0,0,-1,NULL},
+	{"mouseinput", &vo_nomouse_input, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0, 0, 1, NULL},
 
 	{"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, -2, 32, NULL},
 
@@ -348,7 +349,7 @@ m_option_t mplayer_opts[]={
 #ifdef HAVE_NEW_GUI
 	{"skin", &skinName, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"enqueue", &enqueue, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noenqueue", &enqueue, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"noenqueue", &enqueue, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"guiwid", &guiWinID, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
 
@@ -367,24 +368,24 @@ m_option_t mplayer_opts[]={
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #ifdef HAVE_RTC
 	{"nortc", &nortc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"rtc", &nortc, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"rtc", &nortc, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"rtc-device", &rtc_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 
 	{"term-osd", &term_osd, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noterm-osd", &term_osd, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"noterm-osd", &term_osd, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     	{"term-osd-esc", &term_osd_esc, CONF_TYPE_STRING, 0, 0, 1, NULL},
 	{"playing-msg", &playing_msg, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	{"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
 	{"idle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
-	{"noidle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 0, NULL},
+	{"noidle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 1, 0, NULL},
 	{"use-stdin", "-use-stdin has been renamed to -noconsolecontrols, use that instead.", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"key-fifo-size", &key_fifo_size, CONF_TYPE_INT, CONF_RANGE, 2, 65000, NULL},
 	{"noconsolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-	{"consolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 0, NULL},
+	{"consolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"mouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-	{"nomouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 0, NULL},
+	{"nomouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"doubleclick-time", &doubleclick_time, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
 
 #define MAIN_CONF
