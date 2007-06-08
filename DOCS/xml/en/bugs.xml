@@ -113,7 +113,7 @@
   <listitem>
     <para>
 	<option>-delay</option> or <keycap>+</keycap>/<keycap>-</keycap>
-    keys at runtime to adjust delay
+        keys at runtime to adjust delay
 	</para>
   </listitem>
   </itemizedlist>
