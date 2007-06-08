@@ -25,9 +25,9 @@
   su cui lo utilizzerai!
   </para>
   <para>
-  Workaround: Puoi dimenticarti di tutto cio' usando in configurazione
+  Workaround: Puoi dimenticarti di tutto ciò usando in configurazione
   l'opzione <option>--enable-runtime-cpudetection</option> oppure puoi
-  disabilitare gruppi particolari di istruzioni per la CPU con opzioni piu'
+  disabilitare gruppi particolari di istruzioni per la CPU con opzioni più
   specifiche (come <option>--disable-mmx</option>,
   <option>--disable-3dnow</option>, etc).
   </para>
@@ -36,7 +36,7 @@
 <listitem>
   <para>Va in crash durante la scrittura grezza (dump) dei flussi:</para>
   <para>Problema: core dump</para>
-  <para>Soluzione: Don't panic. Assicurati di sapere dov'e' il tuo
+  <para>Soluzione: Don't panic. Assicurati di sapere dov'è il tuo
   asciugamano.</para>
 </listitem>
 </itemizedlist>
@@ -55,7 +55,7 @@
 
 <itemizedlist>
 <listitem><para>
-  il piu' comune: driver audio bacato! - prova ad usare driver diversi, prova
+  il più comune: driver audio bacato! - prova ad usare driver diversi, prova
   l'emulazione OSS di ALSA con <option>-ao oss</option>, prova anche
   <option>-ao sdl</option>, a volte aiuta. Se il file viene letto bene con
   <option>-nosound</option>, allora puoi essere certo che sia un problema
@@ -82,7 +82,7 @@
   scheda/il driver VGA lenta/o
   </para>
   <para>
-  Workaround: compra una scheda piu' veloce o leggi questa documentazione
+  Workaround: compra una scheda più veloce o leggi questa documentazione
   su come velocizzare le cose
   </para>
   <para>Also try <option>-framedrop</option></para>
@@ -122,7 +122,7 @@
 	</para>
   </listitem>
   </itemizedlist>
-  Se nulla di cio' aiuta, per favore mandaci il file,
+  Se nulla di ciò aiuta, per favore mandaci il file,
   controlleremo (e correggeremo).
   </para>
 </listitem>
@@ -138,7 +138,7 @@
 
 <listitem>
   <para>
-  macchina lenta (se A-V non e' intorno a 0,
+  macchina lenta (se A-V non è intorno a 0,
   e l'ultimo numero nella riga di stato aumenta)
   </para>
   <para>Workaround: <option>-framedrop</option></para>
@@ -200,7 +200,7 @@ hardware.
 <title>Sfarfallio OSD/sub</title>
 <para>
 <itemizedlist>
-  <listitem><para>driver x11: spiacenti, non puo' venir corretto ora</para></listitem>
+  <listitem><para>driver x11: spiacenti, non può venir corretto ora</para></listitem>
   <listitem><para>driver xv: usa l'opzione <option>-double</option></para></listitem>
 </itemizedlist>
 </para>
@@ -212,7 +212,7 @@ hardware.
 <para>
 <itemizedlist>
 <listitem><para>
-  mga_vid ha rilevato male la quantita' di RAM della tua scheda,
+  mga_vid ha rilevato male la quantità di RAM della tua scheda,
   ricaricalo usando l'opzione <option>mga_ram_size</option>.
 </para></listitem>
 </itemizedlist>

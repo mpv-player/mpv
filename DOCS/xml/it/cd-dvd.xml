@@ -7,21 +7,21 @@
 <title>Lettori CD/DVD</title>
 
 <para>
-I lettori CD-ROM recenti possono raggiungere velocita' molto alte, ma molti
-lettori sono capaci di girare a velocita' ridotte. Ci sono diversi motivi che
-possono farti pensare di cambiare la velocita' di un'unita' CD-ROM:
+I lettori CD-ROM recenti possono raggiungere velocità molto alte, ma molti
+lettori sono capaci di girare a velocità ridotte. Ci sono diversi motivi che
+possono farti pensare di cambiare la velocità di un'unità CD-ROM:
 </para>
 
 <itemizedlist>
 <listitem><para>
-  Ci sono state notifiche di errori di lettura ad alte velocita', specialmente
-  con CD-ROM malamente pressati. Ridurre la velocita' puo' prevenire la
+  Ci sono state notifiche di errori di lettura ad alte velocità, specialmente
+  con CD-ROM malamente pressati. Ridurre la velocità può prevenire la
   perdita di dati in queste circostanze.
 </para></listitem>
 
 <listitem><para>
-  Molti lettori CD-ROM sono fastidiosamente rumorosi, una minor velocita'
-  puo' ridurre il rumore.
+  Molti lettori CD-ROM sono fastidiosamente rumorosi, una minor velocità
+  può ridurre il rumore.
 </para></listitem>
 </itemizedlist>
 
@@ -31,12 +31,12 @@ possono farti pensare di cambiare la velocita' di un'unita' CD-ROM:
 <title>Linux</title>
 
 <para>
-Puoi diminuire la velocita' delle unita' CD-ROM IDE con
+Puoi diminuire la velocità delle unità CD-ROM IDE con
 <command>hdparm</command>, <command>setcd</command> o <command>cdctl</command>.
-Funziona cosi':
-<screen>hdparm -E <replaceable>[velocita']</replaceable> <replaceable>[dispositivo cdrom device]</replaceable></screen>
-<screen>setcd -x <replaceable>[velocita']</replaceable> <replaceable>[dispositivo cdrom]</replaceable></screen>
-<screen>cdctl -bS <replaceable>[velocita']</replaceable></screen>
+Funziona così:
+<screen>hdparm -E <replaceable>[velocità]</replaceable> <replaceable>[dispositivo cdrom device]</replaceable></screen>
+<screen>setcd -x <replaceable>[velocità]</replaceable> <replaceable>[dispositivo cdrom]</replaceable></screen>
+<screen>cdctl -bS <replaceable>[velocità]</replaceable></screen>
 </para>
 
 <para>
@@ -45,15 +45,15 @@ lettore IDE reale, e non al dispositivo emulato come SCSI.
 </para>
 
 <para>
-Se hai i privilegi di root puoi' essere di aiuto anche il comando seguente:
+Se hai i privilegi di root può essere di aiuto anche il comando seguente:
 <screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[dispositivo cdrom]</replaceable>/settings</screen>
 </para>
 
 <para>
 <screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom device]</replaceable></screen>
-Cio' imposta la lettura in prefetch dei file a 2MB, che aiuta con CD-ROM
-graffiati. Se la imposti troppo alta, il lettore continuera' ad aumentare e
-diminuire la velocita', e le prestazioni diminuiranno drasticamente.
+Ciò imposta la lettura in prefetch dei file a 2MB, che aiuta con CD-ROM
+graffiati. Se la imposti troppo alta, il lettore continuerà ad aumentare e
+diminuire la velocità, e le prestazioni diminuiranno drasticamente.
 Si raccomanda di regolare il tuo lettore CD-ROM anche con
 <command>hdparm</command>:
 <screen>hdparm -d1 -a8 -u1 <replaceable>[dispositivo cdrom]</replaceable></screen>
@@ -72,7 +72,7 @@ per regolare con precisione il tuo CD-ROM.
 
 <para>
 I lettori SCSI non hanno un modo uniforme di impostare questi parametri (Ne
-conosci uno? diccelo!) C'e' uno strumento che funziona con i
+conosci uno? diccelo!) C'è uno strumento che funziona con i
 <ulink url="http://das.ist.org/~georg/">lettori SCSI Plextor</ulink>.
 </para>
 </sect2>
@@ -82,9 +82,9 @@ conosci uno? diccelo!) C'e' uno strumento che funziona con i
 <sect2 id="drives_freebsd">
 <title>FreeBSD</title>
 
-<para>velocita':
+<para>velocità:
 <screen>
-cdcontrol [-f <replaceable>dispositivo</replaceable>] speed <replaceable>[velocita']</replaceable>
+cdcontrol [-f <replaceable>dispositivo</replaceable>] speed <replaceable>[velocità]</replaceable>
 </screen>
 </para>
 
@@ -107,7 +107,7 @@ sysctl hw.ata.atapi_dma=1
 
 <para>
 Per una lista completa delle opzioni disponibili per favore leggi la pagina man.
-La sintassi per riprodurre un DVD normale e' la seguente:
+La sintassi per riprodurre un DVD normale è la seguente:
 <screen>
 mplayer dvd://<replaceable>&lt;traccia&gt;</replaceable> [-dvd-device <replaceable>&lt;dispositivo&gt;</replaceable>]
 </screen>
@@ -120,12 +120,12 @@ Esempio:
 
 <para>
 Se hai compilato <application>MPlayer</application> con il supporto per dvdnav,
-la sintassi e' la stessa, tranne che devi usare dvdnav:// invece di dvd://.
+la sintassi è la stessa, tranne che devi usare dvdnav:// invece di dvd://.
 </para>
 
 <para>
-Il dispositivo DVD di default e' <filename>/dev/dvd</filename>. Se la tua
-impostazione e' diversa, crea un collegamento simbolico o indica il dispositivo
+Il dispositivo DVD di default è <filename>/dev/dvd</filename>. Se la tua
+impostazione è diversa, crea un collegamento simbolico o indica il dispositivo
 giusto dalla riga comando con l'opzione <option>-dvd-device</option>.
 </para>
 
@@ -135,13 +135,13 @@ giusto dalla riga comando con l'opzione <option>-dvd-device</option>.
 DVD. Queste due librerie sono contenute nei sorgenti di
 <application>MPlayer</application>, non hai bisogno di installarle
 separatamente. Puoi anche usare le controparti di sistema delle due librerie,
-ma questa non e' la soluzione raccomandata, in quanto puo' portare a bachi,
-incompatibilita' di librerie e minor velocita'.
+ma questa non è la soluzione raccomandata, in quanto può portare a bachi,
+incompatibilità di librerie e minor velocità.
 </para>
 
 <note><para>
 Nel caso di problemi di decodifica di DVD, prova a disabilitare il supermount,
-o qualsiasi altra utilita'. Alcuni lettori RPC-2 possono anche aver bisogno di
+o qualsiasi altra utilità. Alcuni lettori RPC-2 possono anche aver bisogno di
 impostare il codice di zona.
 </para></note>
 
@@ -169,15 +169,15 @@ Il supporto per DVD ha bisogno di un accesso di basso livello basato su settori
 al dispositivo. Sfortunatamente devi (sotto Linux) essere root per ottenere
 l'indirizzamento del settore in un file. Per questo non usiamo proprio il
 filesystem del kernel, piuttosto lo reimplementiamo nello spazio utente di
-esecuzione. <systemitem>libdvdread</systemitem> 0.9.x fa cio'. Non serve il
-driver del kernel per il filesystem UDF visto che ha gia' il suo driver
+esecuzione. <systemitem>libdvdread</systemitem> 0.9.x fa ciò. Non serve il
+driver del kernel per il filesystem UDF visto che ha già il suo driver
 integrato per il filesystem UDF. Inoltre non serve che il DVD sia montato visto
 che viene utilizzato solo l'accesso di basso livello a settori.
 </para>
 
 <para>
-Alcune volte <filename>/dev/dvd</filename> non puo' esser letto dagli utenti,
-percio' gli autori di <systemitem>libdvdread</systemitem> hanno implementato un
+Alcune volte <filename>/dev/dvd</filename> non può esser letto dagli utenti,
+perciò gli autori di <systemitem>libdvdread</systemitem> hanno implementato un
 livello di emulazione che traduce gli indirizzi dei settori in
 nomifile+posizioni relative, per emulare un accesso di basso livello su di un
 filesystem montato o anche su un disco fisso.
@@ -195,7 +195,7 @@ dinamicamente.
 <title>Decrittazione DVD</title>
 <para>
 La decrittazione dei DVD viene fatta da <systemitem>libdvdcss</systemitem>. La
-modalita' puo' esser specificata attraverso la variabile d'ambiente
+modalità può esser specificata attraverso la variabile d'ambiente
 <envar>DVDCSS_METHOD</envar>, vedi la pagina di manuale per i dettagli.
 </para>
 </formalpara>
@@ -204,12 +204,12 @@ modalita' puo' esser specificata attraverso la variabile d'ambiente
 <emphasis role="bold">Warning</emphasis>: You can only set the region 5 times.
 I lettori DVD RPC-1 proteggono le impostazioni di zona solo via software. I
 lettori RPC-2 hanno invece una protezione hardware che permette solo 5
-modifiche. Puo' esser necessario/consigliato aggiornare il firmware a RPC-1 se
+modifiche. Può esser necessario/consigliato aggiornare il firmware a RPC-1 se
 hai un lettore DVD RPC-2. Puoi provare a cercare aggiornamenti di firmware per
 il tuo lettore su internet,
 <ulink url="http://forum.rpc-1.com/dl_all.php">questo forum su firmware</ulink>
 potrebbe essere un buon punto di partenza per la tua ricerca.
-Se non c'e' alcun aggiornamento di firmware disponibile per il tuo dispositivo,
+Se non c'è alcun aggiornamento di firmware disponibile per il tuo dispositivo,
 usa lo strumento
 <ulink url="http://linvdr.org/projects/regionset/">regionset</ulink> per
 impostare la zona del tuo lettore DVD (sotto Linux).
@@ -225,19 +225,19 @@ impostare la zona del tuo lettore DVD (sotto Linux).
 
 <para>
 Per una lista completa delle opzioni disponibili per favore leggi la pagina man.
-La sintassi per riprodurre un Video CD (VCD) normale e' la seguente:
+La sintassi per riprodurre un Video CD (VCD) normale è la seguente:
 <screen>mplayer vcd://<replaceable>&lt;traccia&gt;</replaceable> [-cdrom-device <replaceable>&lt;dispositivo&gt;</replaceable>]</screen>
 Esempio:
 <screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
-Il dispositivo VCD di default e' <filename>/dev/cdrom</filename>. Se la tua
-impostazione e' diversa, crea un collegamento simbolico o indica il dispositivo
+Il dispositivo VCD di default è <filename>/dev/cdrom</filename>. Se la tua
+impostazione è diversa, crea un collegamento simbolico o indica il dispositivo
 giusto dalla riga comando con l'opzione <option>-cdrom-device</option>.
 </para>
 
 <note><para>
 Perlomeno i lettori CD-ROM Plextor e alcuni Toshiba SCSI hanno prestazioni
-orribili leggendo i VCD. Questo perche' l'<systemitem>ioctl</systemitem>
-CDROMREADRAW non e' implementata appieno per questi lettori. Se hai una qualche
+orribili leggendo i VCD. Questo perché l'<systemitem>ioctl</systemitem>
+CDROMREADRAW non è implementata appieno per questi lettori. Se hai una qualche
 conoscenza della programmazione SCSI, per favore
 <ulink url="../../tech/patches.txt">aiutaci</ulink> ad implementare un supporto
 SCSI generico per i VCD.
@@ -246,35 +246,35 @@ SCSI generico per i VCD.
 <para>
 Nel frattempo puoi estrarre i dati dal VCD con
 <ulink url="http://ftp.ntut.edu.tw/ftp/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
-e riprodurre con <application>MPlayer</application> il file cosi' ricavato.
+e riprodurre con <application>MPlayer</application> il file così ricavato.
 </para>
 
 <formalpara>
 <title>Struttura VCD</title>
 <para>
-Un Video CD (VCD) e' fatto di settori CD-ROM XA, per es. tracce CD-ROM mode 2
+Un Video CD (VCD) è fatto di settori CD-ROM XA, per es. tracce CD-ROM mode 2
 form 1 e 2:
 <itemizedlist>
 <listitem><para>
-  La prima traccia e' in formato mode 2 form 2 il che significa che usa una
+  La prima traccia è in formato mode 2 form 2 il che significa che usa una
   correzione errori L2. La traccia contiene un filesystem ISO-9660 con 2048
-  byte/settore. Il filesystem contiene delle informazioni metadati VCD, cosi'
+  byte/settore. Il filesystem contiene delle informazioni metadati VCD, così
   come fermi-immagine spesso usati nei menu. I segmenti MPEG per i menu possono
   anche essere salvati nella prima traccia, ma gli MPEG devono essere
   spezzettati in una serie di blocchi di 150 settori. Il filesystem ISO-9660
-  puo' contenere altri file o programmi che non sono essenziali per le
+  può contenere altri file o programmi che non sono essenziali per le
   operazioni VCD.
 </para></listitem>
 
 <listitem><para>
   Le seconde e rimanenti tracce spesso sono tracce MPEG (filmato) di basso
   livello di 2324 byte/settore, contenenti un pacchetto dati MPEG PS per
-  settore. Queste sono in formato mode 2 form 1, cosi' da poter archiviare piu'
+  settore. Queste sono in formato mode 2 form 1, così da poter archiviare più
   dati per settore con la perdita di qualche correzione di errore. E' anche
   valido avere tracce CD-DA in un VCD dopo la prima traccia.
-  In alcuni sistemi operativi c'e' qualche trucchetto che fa apparire queste
+  In alcuni sistemi operativi c'è qualche trucchetto che fa apparire queste
   tracce non ISO-9660 in un filesystem. In altri sistemi operativi come
-  GNU/Linux non e' (ancora) cosi'. Qui i dati MPEG
+  GNU/Linux non è (ancora) così. Qui i dati MPEG
   <emphasis role="bold">non possono venir montati</emphasis>. Siccome molti
   film sono dentro questo tipo di tracce, dovresti provare prima
   <option>vcd://2</option>.
@@ -287,8 +287,8 @@ form 1 e 2:
 
 <listitem><para>
   La definizione dello standard VCD viene chiamato il "White Book" Philips, e
-  non e' disponibile on-line visto che deve essere acquistato da Philips.
-  Informazioni piu' dettagliate sui Video CD si possono trovare nella
+  non è disponibile on-line visto che deve essere acquistato da Philips.
+  Informazioni più dettagliate sui Video CD si possono trovare nella
   <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">documentazione di vcdimager</ulink>.
 </para></listitem>
 </itemizedlist>
@@ -299,17 +299,17 @@ form 1 e 2:
 <title>Riguardo i file .DAT</title>
 <para>
 Il file .DAT da ~600MB visibile sulla prima traccia del filsystem VCD montato
-non e' un vero file! Viene anche detto "ISO gateway", creato per permettere a
+non è un vero file! Viene anche detto "ISO gateway", creato per permettere a
 Windows di gestire tali tracce (Windows non permette alle applicazioni alcun
-accesso di basso livello ai dispositivi). Sotto Linux non puoi' copiare o
-riprodurre questi file (contengono spazzatura). Sotto Windows e' possibile
+accesso di basso livello ai dispositivi). Sotto Linux non puoì copiare o
+riprodurre questi file (contengono spazzatura). Sotto Windows è possibile
 che il driver iso9660 emuli la lettura a basso livello delle tracce nel file.
-Per riprodurre un file .DAT ti serve il driver per il kernel che si puo'
+Per riprodurre un file .DAT ti serve il driver per il kernel che si può
 trovare nella versione per Linux di PowerDVD. Esso ha un driver modificato per
-il filesystem iso9660 (<filename>vcdfs/isofs-2.4.X.o</filename>), che e' in
+il filesystem iso9660 (<filename>vcdfs/isofs-2.4.X.o</filename>), che è in
 grado di emulare le tracce di basso livello attraverso quel file fantasma .DAT.
 Se monti il disco usando il loro driver, puoi poi copiare e anche riprodurre i
-file .DAT con <application>MPlayer</application>. Ma non funzionera' col driver
+file .DAT con <application>MPlayer</application>. Ma non funzionerà col driver
 iso9660 standard del kernel Linux! Usa invece <option>vcd://</option>.
 Alternative per copiare i VCD sono il nuovo driver del kernel
 <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> (non incluso

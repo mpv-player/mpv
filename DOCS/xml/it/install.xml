@@ -4,15 +4,15 @@
 <title>Installazione</title>
 
 <para>
-Una rapida guida di installazione si puo' trovare nel file
+Una rapida guida di installazione si può trovare nel file
 <filename>README</filename>.
 Perfavore prime leggi quello, poi torna qui per il resto dei dettagli scabrosi.
 </para>
 
 <para>
 In questa sezione sarai guidato attraverso il processo di compilazione e di
-configurazione di <application>MPlayer</application>. Non e' semplice, ma non
-sara' necessariamente difficile. Se ti si presenta un'esperienza diversa da
+configurazione di <application>MPlayer</application>. Non è semplice, ma non
+sarà necessariamente difficile. Se ti si presenta un'esperienza diversa da
 quella descritta, perfavore cerca in questa documentazione e troverai le
 risposte.
 </para>
@@ -26,7 +26,7 @@ risposte.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - la versione consigliata e'
+  <emphasis role="bold">binutils</emphasis> - la versione consigliata è
   <emphasis role="bold">2.11.x</emphasis>.
 </para></listitem>
 <listitem><para>
@@ -36,15 +36,15 @@ risposte.
   Su architettura PowerPC, usa le 4.x.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Xorg/XFree86</emphasis> - la versione consigliata e'
+  <emphasis role="bold">Xorg/XFree86</emphasis> - la versione consigliata è
   4.3 o successiva. Assicurati che anche i
   <emphasis role="bold">pacchetti di sviluppo</emphasis> (dev) siano installati,
-  altrimenti non funzionera'.
+  altrimenti non funzionerà.
   Non hai assolutamente bisogno di X, alcuni driver di uscita video funzionano
   senza.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - la versione consigliata e'
+  <emphasis role="bold">make</emphasis> - la versione consigliata è
   3.79.x o successiva. Per creare la documentazione XML ti serve la 3.80.
 </para></listitem>
 <listitem><para>
@@ -103,7 +103,7 @@ risposte.
 
 <itemizedlist>
 <listitem><para>
-  Decidi se ti serve la GUI (interfaccia grafica). Se si', vedi la sezione
+  Decidi se ti serve la GUI (interfaccia grafica). Se sì, vedi la sezione
   <link linkend="gui">GUI</link> prima di compilare.
 </para></listitem>
 <listitem><para>
@@ -124,7 +124,7 @@ risposte.
   <link linkend="radio">radio</link>.
 </para></listitem>
 <listitem><para>
-  C'e' un buon supporto per <emphasis role="bold">Menu OSD</emphasis>
+  C'è un buon supporto per <emphasis role="bold">Menu OSD</emphasis>
   pronto per l'uso. Controlla la sezione <link linkend="subosd">Menu OSD</link>.
 </para></listitem>
 </itemizedlist>
@@ -139,14 +139,14 @@ make install
 </para>
 
 <para>
-A questo punto, <application>MPlayer</application> e' pronto per l'utilizzo.
+A questo punto, <application>MPlayer</application> è pronto per l'utilizzo.
 Controlla se hai un file <filename>codecs.conf</filename> nella tua directory
 utente (<filename>~/.mplayer/codecs.conf</filename>) rimasto da precedenti
 versioni di <application>MPlayer</application>. Se lo trovi, cancellalo.
 </para>
 
 <para>
-Gli utenti Debian possono costruirsi un pacchetto .deb per conto loro, e' molto
+Gli utenti Debian possono costruirsi un pacchetto .deb per conto loro, è molto
 semplice.
 Basta eseguire
 <screen>fakeroot debian/rules binary</screen>
@@ -158,7 +158,7 @@ nella directory radice di <application>MPlayer</application>. Vedi
 <emphasis role="bold">Controlla sempre l'output di</emphasis>
 <filename>./configure</filename>, e il file
 <filename>configure.log</filename>, essi contengono informazioni su cosa
-sara' compilato, e cosa no. Puoi anche voler guardare i file
+sarà compilato, e cosa no. Puoi anche voler guardare i file
 <filename>config.h</filename> e <filename>config.mak</filename>.
 Se hai alcune librerie installate, ma non rilevate da
 <filename>./configure</filename>, allora controlla di avere anche i file
@@ -167,8 +167,8 @@ Il file <filename>configure.log</filename> solitamente ti dice cosa manca.
 </para>
 
 <para>
-Anche se non obbligatorio, i font dovrebbero essere installti, per avere l'OSD
-e la funzione sottotitoli. Il metodo consigliato e' di installare un file di
+Anche se non obbligatorio, i font dovrebbero essere installati, per avere l'OSD
+e la funzione sottotitoli. Il metodo consigliato è di installare un file di
 font TTF e dire a <application>MPlayer</application> di usarlo.
 Vedi la sezione <link linkend="subosd">Sottotitoli e OSD</link> per i dettagli.
 </para>
@@ -182,9 +182,9 @@ Vedi la sezione <link linkend="subosd">Sottotitoli e OSD</link> per i dettagli.
 <title>E riguardo la GUI?</title>
 
 <para>
-La GUI abbisogna di GTK 1.2.x o GTK 2.0 (non e' completamente in GTK, ma i
+La GUI abbisogna di GTK 1.2.x o GTK 2.0 (non è completamente in GTK, ma i
 pannelli lo sono).
-Le skin sono salvate in formato PNG, cosi' GTK,
+Le skin sono salvate in formato PNG, così GTK,
 <systemitem class="library">libpng</systemitem> (e le loro controparti di
 sviluppo, solitamente chiamate <systemitem class="library">gtk-dev</systemitem>
 e <systemitem class="library">libpng-dev</systemitem>) vanno installate.
@@ -219,7 +219,7 @@ utilizzare la skin nella directory
 <para>
 Devi dire a <application>MPlayer</application> quale font usare per usufruire
 dell'OSD e dei sottotitoli. Un qualsiasi font TrueType o basato su bitmap 
-funzionera'. Tuttavia, i font TrueType sono consigliati in quanto appaiono piu'
+funzionerà. Tuttavia, i font TrueType sono consigliati in quanto appaiono più
 belli, possono essere ridimensionati correttamente alla dimensione del filmato
 e gestiscono meglio differenti codifiche.
 </para>
@@ -232,9 +232,9 @@ e gestiscono meglio differenti codifiche.
 <para>
 Ci sono due modi di far funzionare i font TrueType. Il primo consiste nel
 passare l'opzione <option>-font</option> sulla riga comando per specificare un
-file di font TrueType. Questa opzione sara' una buona candidata da mettere nel
+file di font TrueType. Questa opzione sarà una buona candidata da mettere nel
 tuo file di configurazione (vedi la pagina di manuale per i dettagli).
-Il secondo e' creare un collegamento simbolico al font di tua scelta
+Il secondo è creare un collegamento simbolico al font di tua scelta
 con nome <filename>subfont.ttf</filename>. Sia
 <screen>
 ln -s <replaceable>/percorso/del/font_di_esempio.ttf</replaceable> ~/.mplayer/subfont.ttf
@@ -246,11 +246,11 @@ ln -s <replaceable>/percorso/del/font_di_esempio.ttf</replaceable> $PREFIX/share
 </para>
 
 <para>
-Se <application>MPlayer</application> e' compilato con il supporto per
+Se <application>MPlayer</application> è compilato con il supporto per
 <systemitem class="library">fontconfig</systemitem>, i metodi precedenti
-non funzioneranno, piuttosto <option>-font</option> si aspettera' un nome di
+non funzioneranno, piuttosto <option>-font</option> si aspetterà un nome di
 font <systemitem class="library">fontconfig</systemitem> e il
-suo default sara' il font sans-serif. Esempio:
+suo default sarà il font sans-serif. Esempio:
 <screen>
 mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable>
 </screen>
@@ -336,7 +336,7 @@ il menu Preferenze attualmente NON E' IMPLEMENTATO!
 </para></listitem>
 <listitem><para>
   controlla e modifica <filename>input.conf</filename> per abilitare i tasti
-  di movimento nel menu (e' li' spiegato)
+  di movimento nel menu (è lì spiegato)
 </para></listitem>
 <listitem><para>
   avvia <application>MPlayer</application> come nell'esempio seguente:
@@ -364,13 +364,13 @@ Ci sono tre metodi di temporizzazione in <application>MPlayer</application>.
   <emphasis role="bold">Per utilizzare il vecchio metodo</emphasis>, non devi
   fare nulla. Utilizza <systemitem>usleep()</systemitem> per gestire la
   sincronizzazione A/V, con una precisione di +/- 10ms.
-  Tuttavia delle volte la sincronizzazione serve che sia ancora piu' precisa.
+  Tuttavia delle volte la sincronizzazione serve che sia ancora più precisa.
 </para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">Il nuovo codice per la temporizzazione</emphasis> usa
-  l'RTC (RealTime Clock) per il suo compito, poiche' ha timer precisi di 1ms.
-  L'opzione <option>-rtc</option> lo abilita, ma e' richiesto un kernel
+  l'RTC (RealTime Clock) per il suo compito, poiché ha timer precisi di 1ms.
+  L'opzione <option>-rtc</option> lo abilita, ma è richiesto un kernel
   adeguatamente preparato.
   Se stai utilizzando un kernel 2.4.19pre8 o successivo, puoi impostare
   la frequenza massima dell'RTC per gli utenti normali attraverso il
@@ -387,7 +387,7 @@ Ci sono tre metodi di temporizzazione in <application>MPlayer</application>.
   speedstep interagiscono male con l'RTC. Audio e video possono perdere di
   sincronia. Collegare il cavo di alimentazione prima di accendere il portatile
   pare esser di aiuto. In alcune combinazioni hardware (confermato usando DVD
-  non DMA su una scheda ALi1541) l'utilizzo dell'RTC puo' portare una
+  non DMA su una scheda ALi1541) l'utilizzo dell'RTC può portare una
   riproduzione saltellante. In questi casi si raccomanda di utilizzare il terzo
   metodo.
   </para>
@@ -395,7 +395,7 @@ Ci sono tre metodi di temporizzazione in <application>MPlayer</application>.
 <listitem><para>
   <emphasis role="bold">Il terzo codice di temporizzazione</emphasis> viene
   abilitato tramite l'opzione <option>-softsleep</option>. Ha l'efficenza
-  dell'RTC, ma non lo utilizza. D'altro canto, richiede piu' CPU.
+  dell'RTC, ma non lo utilizza. D'altro canto, richiede più CPU.
 </para></listitem>
 </itemizedlist>
 </para>

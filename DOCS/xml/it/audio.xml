@@ -6,26 +6,26 @@
 <title>Sincronizzazione Audio/Video</title>
 
 <para>
-I driver Linux per le schede audio hanno problemi di compatibilita'.
-Questo perche' <application>MPlayer</application> fa affidamento su una
+I driver Linux per le schede audio hanno problemi di compatibilità.
+Questo perché <application>MPlayer</application> fa affidamento su una
 caratteristica insita dei driver audio scritti
 <emphasis>correttamente</emphasis> che permette loro di mantenere la sincronia
 audio/video. Purtroppo, alcuni autori di driver non si preoccupano di questa
-funzione, dato che non e' necessaria per leggere MP3 o per gli effetti sonori.
+funzione, dato che non è necessaria per leggere MP3 o per gli effetti sonori.
 </para>
 
 <para>
 E' possibile che altri lettori multimediali come
 <ulink url="http://avifile.sf.net">aviplay</ulink> o
 <ulink url="http://xinehq.de">xine</ulink> funzionino bene anche con questi
-driver perche' usano dei metodi "semplici" con temporizzazione interna.
+driver perché usano dei metodi "semplici" con temporizzazione interna.
 Misurazioni hanno dimostrato che i loro metodi non sono efficienti come quello
 di <application>MPlayer</application>.
 </para>
 
 <para>
 Usare <application>MPlayer</application> con un driver audio scritto
-correttamente non ti dara' mai una desincronizzazione A/V relativa all'audio,
+correttamente non ti darà mai una desincronizzazione A/V relativa all'audio,
 tranne che con file fatti davvero male (controlla la pagina man per aggirare
 questi problemi).
 </para>
@@ -49,7 +49,7 @@ la pagina di man per informazioni dettagliate.
 <para>
 Se hai ALSA versione 0.5, allora devi quasi sempre usare
 <option>-ao alsa5</option>, dato che la 0.5 ha un codice di emulazione OSS
-bucato, e mandera' in <emphasis role="bold">crash
+bucato, e manderà in <emphasis role="bold">crash
 <application>MPlayer</application></emphasis> con un messaggio tipo questo:
 <screen>
 DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!
