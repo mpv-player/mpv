@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- synced with r21867 -->
+
+<bookinfo id="toc">
+<title><application>MPlayer</application> - Il Visualizzatore di film</title>
+<subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
+<date>24 marzo 2003</date>
+<copyright>
+  <year>2000</year>
+  <year>2001</year>
+  <year>2002</year>
+  <year>2003</year>
+  <year>2004</year>
+  <year>2005</year>
+  <year>2006</year>
+  <year>2007</year>
+  <holder>MPlayer team</holder>
+</copyright>
+<!--
+<legalnotice>
+  <title>License</title>
+  <para>This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by the
+  Free Software Foundation; either version 2 of the License, or (at your
+  option) any later version.</para>
+
+  <para>This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  for more details.</para>
+
+  <para>You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.</para>
+</legalnotice>
+-->
+</bookinfo>
+
+
+<preface id="howtoread">
+<title>Come leggere questa documentazione</title>
+
+<para>
+Se installi per la prima volta: assicurati di leggere tutto da qui fino alla
+fine della sezione sull'installazione, e segui i link che troverai. Se
+hai altre domande, ritorna alla <link linkend="toc">Tabella dei Contenuti</link>
+e cerca l'argomento, leggi le <xref linkend="faq"/>, o prova a ricercare nei
+file (con grep, per esempio). Molte domande possono avere risposta da qualche
+parte qui e le restanti probabilmente sono gia' state poste nelle nostre
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">mailing list</ulink>.
+<!-- FIXME: This refers to nonexistent links
+Controlla gli
+<ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archivi</ulink>, ci
+sono un sacco di valide informazioni da trovare.
+-->
+</para>
+</preface>
+
+
+<chapter id="intro">
+<title>Introduzione</title>
+
+<para>
+<application>MPlayer</application> e' un visualizzatore di filmati per Linux
+(gira su molte altre piattaforme Unix e architetture di CPU
+<emphasis role="bold">non-x86</emphasis>, vedi <xref linkend="ports"/>).
+Riproduce la maggior parte dei file del tipo MPEG, VOB, AVI, OGG/OGM, VIVO,
+ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA,
+file Matroska, aiutato da molti codec nativi, di Xanim, RealPlayer, o codec DLL
+binari di Win32. Puoi guardare
+<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
+e anche filmati <emphasis role="bold">MPEG-4 (DivX)</emphasis>.
+Un'altra importante caratteristica di <application>MPlayer</application> e' il
+supporto per un'ampia gamma di driver di uscita. Funziona con X11, Xv, DGA,
+OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, ma puoi anche usare GGI e SDL
+(e in questo modo tutti i loro driver) e pure alcuni driver specifici di basso
+livello (per Matrox, 3Dfx e Radeon, Mach64, Permedia3)!
+La maggior parte di essi supporta il ridimensionamento via software o hardware,
+cosi' puoi gustarti i filmati a schermo intero.
+<application>MPlayer</application> supporta la riproduzione attraverso alcune
+schede di decodifica MPEG hardware, come <link linkend="dvb">DVB</link> e
+<link linkend="dxr3">DXR3/Hollywood+</link>. E cosa dire dei grandi e bei
+sottotitoli sfumati con antialias (<emphasis role="bold">14 tipi supportati</emphasis>)
+con font europei/ISO 8859-1,2 (ungherese, inglese, ceco, etc), cirillici,
+coreani, e del visualizzatore su schermo (OnScreen Display, OSD)?
+</para>
+
+<para>
+Il riproduttore e' decisamente solido nella riproduzione di file MPEG rovinati
+(utile per alcuni VCD), e riproduce file AVI non corretti, che sono illegibili
+con il famoso windows media player. Anche gli AVI non indicizzati possono
+essere letti, e puoi ricostruire il loro indice temporaneamente con l'opzione
+<option>-idx</option>, o permanentemente con
+<application>MEncoder</application>, abilitando cosi' la ricerca!
+Come puoi vedere, la stabilita' e la qualita' sono lo cose piu' importanti,
+ma anche la velocita' e' impressionante. C'e' anche un potente sistema di filtri
+per la manipolazione audio e video.
+</para>
+
+<para>
+<application>MEncoder</application> (<application>MPlayer</application>'s Movie
+Encoder, Codificatore di film di MPlayer) e' un semplice codificatore di film,
+progettato per codificare tutti i filmati visualizzabili da
+<application>MPlayer</application>
+(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+in altri formati sempre visualizzabili da <application>MPlayer</application>
+(vedi sotto). Puo' codificare con vari codec, come
+<emphasis role="bold">MPEG-4 (DivX4)</emphasis>
+(uno o due passi), <systemitem class="library">libavcodec</systemitem>, audio
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
+</para>
+
+<itemizedlist>
+<title>Caratteristiche di <application>MEncoder</application></title>
+<listitem><para>
+  Codifica da un'ampia gamma di formati e decodificatori di
+  <application>MPlayer</application>
+</para></listitem>
+<listitem><para>
+  Codifica in tutti i formati di
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+  di FFmpeg
+</para></listitem>
+<listitem><para>
+  Codifica video da <emphasis role="bold">sintonizzatori TV compatibili V4L</emphasis>
+</para></listitem>
+<listitem><para>
+  Codifica/multiplex in file interlacciati AVI con indici corretti
+</para></listitem>
+<listitem><para>
+  Creazione di file da flussi audio esterni
+</para></listitem>
+<listitem><para>
+  Codifica in 1, 2 o 3 passi
+</para></listitem>
+<listitem><para>
+  Audio MP3 <emphasis role="bold">VBR</emphasis>
+  <important><para>
+  L'audio MP3 VBR non sempre suona bene nei riproduttori per windows!
+  </para></important>
+</para></listitem>
+<listitem><para>
+  Audio PCM
+</para></listitem>
+<listitem><para>
+  Copia dei flussi
+</para></listitem>
+<listitem><para>
+  Sincronizzazione A/V dell'input (basata su PTS, puo' esser disabilitata con
+  l'opzione <option>-mc 0</option>)
+</para></listitem>
+<listitem><para>
+  Correzione dei fps con l'opzione <option>-ofps</option> (utile codificando
+  VOB a 30000/1001 fps in AVI a 24000/1001 fps)
+</para></listitem>
+<listitem><para>
+  Usa il nostro potentissimo sistema di filtri (crop, expand, flip, postprocess,
+  rotate, scale, conversione rgb/yuv)
+</para></listitem>
+<listitem><para>
+  Puo' codificare sottotitoli DVD/VOBsub <emphasis role="bold">E</emphasis>
+  sottotitoli testuali nel file di uscita
+</para></listitem>
+<listitem><para>
+  Puo' codificare sottotitoli DVD in formato VOBsub
+</para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Caratteristiche pianificate</title>
+<listitem><para>
+  Ancora una maggior varieta' di formati/codec di de/codifica
+  (creazione di file VOB con flussi DivX4/Indeo5/VIVO :).
+</para></listitem>
+</itemizedlist>
+
+<!-- FIXME: the license should be in bookinfo -->
+<para>
+<application>MPlayer</application> e <application>MEncoder</application>
+possono esser distribuiti nei termini della GNU General Public License Version 2.
+</para>
+
+</chapter>
+
+&install.xml;
+
+&usage.xml;
+&cd-dvd.xml;
+&faq.xml;
+
+&containers.xml;
+&codecs.xml;
+&video.xml;
+&audio.xml;
+&tvinput.xml;
+&radio.xml;
+
+&ports.xml;
+&mencoder.xml;
+&encoding-guide.xml;
+&bugreports.xml;
+&bugs.xml;
+&skin.xml;
+&history.xml;
