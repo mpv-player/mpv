@@ -1351,7 +1351,7 @@ if test "$_gcc_check" = yes ; then
       cc_version="v. ?.??, bad"
       cc_verc_fail=yes
       ;;
-    8.0|9.1)
+    8.0|9.1|10.0)
       cc_version="$cc_version, ok"
       cc_verc_fail=no
       ;;
