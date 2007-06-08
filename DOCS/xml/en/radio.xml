@@ -19,9 +19,9 @@ description of radio options and keyboard controls.
 
 <procedure>
 <step><para>
-  First, you have to recompile MPlayer using <filename>./configure</filename>
-  with <option>--enable-radio</option> and (if you want capture support)
-  <option>--enable-radio-capture</option>.
+  First, you have to recompile <application>MPlayer</application> using
+  <filename>./configure</filename> with <option>--enable-radio</option> and
+  (if you want capture support) <option>--enable-radio-capture</option>.
 </para></step>
 <step><para>
   Make sure your tuner works with another radio software in Linux, for
@@ -43,7 +43,7 @@ Here are just a few tips:
 <listitem><para>
   Use the <option>channels</option> option. An example:
   <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
-  Explanation: With this option, only the 104.4 and 103.9 radio stations
+  Explanation: with this option, only the 104.4 and 103.9 radio stations
   will be usable. There will be a nice OSD text upon channel switching,
   displaying the channel's name. Spaces in the channel name must be
   replaced by the "_" character.
@@ -53,7 +53,7 @@ Here are just a few tips:
   your sound card via an external cable connection between video card and
   line-in, or using the built-in ADC in the saa7134 chip. In the latter case,
   you have to load the <systemitem>saa7134-alsa</systemitem> or
-<systemitem>saa7134-oss</systemitem> driver.
+  <systemitem>saa7134-oss</systemitem> driver.
 </para></listitem>
 <listitem><para>
   <application>MEncoder</application> cannot be used for audio capture,
@@ -93,12 +93,14 @@ Playing second channel from channel list:
 Passing sound over the PCI bus from the radio card's internal ADC.
 In this example the tuner is used as a second sound card
 (ALSA device hw:1,0). For saa7134-based cards either the
-saa7134-alsa or saa7134-oss module must be loaded.
+<systemitem>saa7134-alsa</systemitem> or <systemitem>saa7134-oss</systemitem>
+module must be loaded.
 <screen>
 mplayer -rawaudio rate=32000 radio://2/capture \
     -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm
 </screen>
-<note><para>When using ALSA device names colons must be replaced
+<note><para>
+When using ALSA device names colons must be replaced
 by equal signs, commas by periods.
 </para></note>
 </para>
