@@ -7455,6 +7455,7 @@ LIBDIR = \$(DESTDIR)$_libdir
 libdir = \$(LIBDIR)
 #AR = ar
 CC = $_cc
+CXX = $_cc
 HOST_CC = $_host_cc
 RANLIB = $_ranlib
 LDCONFIG = $_ldconfig
