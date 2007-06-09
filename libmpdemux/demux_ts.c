@@ -59,7 +59,7 @@
 
 int ts_prog;
 int ts_keep_broken=0;
-off_t ts_probe = TS_MAX_PROBE_SIZE;
+off_t ts_probe = 0;
 extern char *dvdsub_lang, *audio_lang;	//for -alang
 
 typedef enum
@@ -621,7 +621,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 	int video_found = 0, audio_found = 0, sub_found = 0, i, num_packets = 0, req_apid, req_vpid, req_spid;
 	int is_audio, is_video, is_sub, has_tables;
 	int32_t p, chosen_pid = 0;
-	off_t pos=0, ret = 0, init_pos;
+	off_t pos=0, ret = 0, init_pos, end_pos;
 	ES_stream_t es;
 	unsigned char tmp[TS_FEC_PACKET_SIZE];
 	ts_priv_t *priv = (ts_priv_t*) demuxer->priv;
@@ -641,7 +641,8 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 	memset(pes_priv1, 0, sizeof(pes_priv1));
 	init_pos = stream_tell(demuxer->stream);
 	mp_msg(MSGT_DEMUXER, MSGL_V, "PROBING UP TO %"PRIu64", PROG: %d\n", (uint64_t) param->probe, param->prog);
-	while((pos <= init_pos + param->probe) && (! demuxer->stream->eof))
+	end_pos = init_pos + (param->probe ? param->probe : TS_MAX_PROBE_SIZE);
+	while((pos <= end_pos) && (! demuxer->stream->eof))
 	{
 		pos = stream_tell(demuxer->stream);
 		if(ts_parse(demuxer, &es, tmp, 1))
@@ -777,7 +778,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			}
 
 
-			if(((req_vpid == -2) || (num_packets >= NUM_CONSECUTIVE_AUDIO_PACKETS)) && audio_found)
+			if(((req_vpid == -2) || (num_packets >= NUM_CONSECUTIVE_AUDIO_PACKETS)) && audio_found && !param->probe)
 			{
 				//novideo or we have at least 348 audio packets (64 KB) without video (TS with audio only)
 				param->vtype = 0;
