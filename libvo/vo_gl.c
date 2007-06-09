@@ -506,6 +506,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     XSelectInput(mDisplay, vo_window, StructureNotifyMask);
     /* Tell other applications about this window */
     XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
+    /* Set the size hints. */
+    vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height, 0);
     /* Map window. */
     XMapWindow(mDisplay, vo_window);
 
