@@ -2204,7 +2204,7 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 				}
 				else if(d[0] == 'V' && d[1] == 'C' && d[2] == '-' && d[3] == '1')
 				{
-					es->type = AUDIO_DTS;
+					es->type = VIDEO_VC1;
 				}
 				else
 					es->type = UNKNOWN;
