@@ -2198,6 +2198,10 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 				{
 					es->type = AUDIO_A52;
 				}
+				else if(d[0] == 'D' && d[1] == 'T' && d[2] == 'S' && d[3] == '1')
+				{
+					es->type = AUDIO_DTS;
+				}
 				else if(d[0] == 'D' && d[1] == 'T' && d[2] == 'S' && d[3] == '2')
 				{
 					es->type = AUDIO_DTS;
