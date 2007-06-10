@@ -132,17 +132,17 @@ oppure file di flusso grezzo DV per il quale il supporto è sotto sviluppo.
 Ci sono due tipi di file AVI:
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Interlacciati:</emphasis> Il contenuto audio e video
-  è interlacciato. Questo è l'utilizzo standard. Raccomandato e usato
-  diffusamente. Alcuni strumenti creano file AVI interlacciati con una
+  <emphasis role="bold">Con interleave:</emphasis> Il contenuto audio e video
+  è interconnesso. Questo è l'utilizzo standard. Raccomandato e usato
+  diffusamente. Alcuni strumenti creano file AVI con interleave con una
   sincronizzazione errata.
-  <application>MPlayer</application> li rileva come interlacciati, per cui
+  <application>MPlayer</application> li rileva come con interleave, per cui
   aumenta progressivamente la perdita di sincronia A/V, probabilmente durante
-  la ricerca. Questi file dovrebbero esser riprodotti come non-interlacciati
+  la ricerca. Questi file dovrebbero esser riprodotti come senza interleave
   (con l'opzione <option>-ni</option>).
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Non-interlacciati:</emphasis> Prima si trova tutto il
+  <emphasis role="bold">Senza interleave:</emphasis> Prima si trova tutto il
   flusso video, poi tutto il flusso audio. Ciò implica un sacco di ricerca,
   rendendo difficile la riproduzione da rete o da CD-ROM.
 </para></listitem>
@@ -164,9 +164,9 @@ file AVI:
   in ricerca).
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">basati sull'interlacciamento:</emphasis> Non usa il
+  <emphasis role="bold">basati sull'interleave:</emphasis> Non usa il
   valore di frequenza dall'intestazione, usa invece la posizione relativa dei
-  segmenti audio e video intelacciati, rendendo riproducibili file con audio
+  segmenti audio e video interconnessi, rendendo riproducibili file con audio
   VBR mal codificati.
 </para></listitem>
 </itemizedlist>

@@ -125,7 +125,7 @@ in altri formati sempre visualizzabili da <application>MPlayer</application>
   Codifica video da <emphasis role="bold">sintonizzatori TV compatibili V4L</emphasis>
 </para></listitem>
 <listitem><para>
-  Codifica/multiplex in file interlacciati AVI con indici corretti
+  Codifica/multiplex in file AVI con interleave con indici corretti
 </para></listitem>
 <listitem><para>
   Creazione di file da flussi audio esterni

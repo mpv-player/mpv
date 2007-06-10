@@ -104,14 +104,14 @@
   <listitem>
     <para>
         opzioni <option>-ni</option> o <option>-nobps</option>
-	(per file danneggiati o non-interlacciati)
+	(per file danneggiati o senza interleave)
 	</para>
     <para>e/o</para>
   </listitem>
   <listitem>
     <para>
 	<option>-mc 0</option>
-	(richiesta per file con audio VBR mal interlacciato)
+	(richiesta per file con audio VBR interleave scorretto)
 	</para>
     <para>e/o</para>
   </listitem>
