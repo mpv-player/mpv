@@ -1,4 +1,4 @@
-.\" Synced with r23370
+.\" Synced with r23530
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 05. 22." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 06. 10." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -414,6 +414,26 @@ Visszatérés a fõmenübe.
 Visszatérés a legközelebbi menübe (a sorrend: fejezet->cím->fõmenü).
 .IPs "keypad ENTER"
 Választás jóváhagyása.
+.RE
+.PD 1
+.PP
+.RS
+.
+(A következõ gombok csak akkor mûködnek, ha a teletext támogatás engedélyezve
+lett a fordításkor: a TV teletext vezérlésére használatosak)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "X"
+Váltás a teletext bekapcsolt, kikapcsolt és átlátszó módja között.
+.IPs "Q"
+Következõ teletext oldal.
+.IPs "W"
+Elõzõ teletext oldal.
+.IPs "E"
+Szöveges módban megfordítja az oldalt, különben kinagytja:
+fent vagy lent vagy normál.
 .RE
 .PD 1
 .PP
@@ -897,6 +917,10 @@ OSD menu támogatás bekapcsolása.
 .TP
 .B \-menu-cfg <fájlnév> (csak OSD menü)
 Alternatív menu.conf fájl használata.
+.
+.TP
+.B \-menu-chroot <elérési út> (csak OSD menü)
+A fájl kiválasztó menü könyvtárát a megadott könyvtárra állítja.
 .
 .TP
 .B \-menu-keepdir (csak OSD menü)
@@ -1729,6 +1753,11 @@ Használható opciók:
 .RSs
 .IPs noaudio
 hang kikapcsolása
+.IPs automute=<0-255> (csak v4l és v4l2)
+Ha az eszköz által jelzett jelerõsség kisebb, mint ez az érték,
+az audió és a videó el lesz némítva.
+A legtöbb esetben az automute=100 elég.
+Alapértelmezett a 0 (automute letiltva).
 .IPs driver=<érték>
 Lásd a \-tv driver=help-et a befordított TV bemeneti vezérlõk listájához.
 elérhetõek: dummy, v4l, v4l2, bsdbt848
@@ -1848,8 +1877,14 @@ a tömörítendõ kép méretének meghatározása hardveres MJPEG tömörítéshez:
     176x120    NTSC
 .REss
 .IPs quality=<0\-100>
-A JPEG tömörítés minõségének beállítása (teljes mérethez 60 vagy afölötti
-használandó).
+A JPEG tömörítés minõségének beállítása
+(< 60 javasolt a teljes mérethez).
+.IPs tdevice=<érték> (alapértelmezett: nincs)
+Megadja a TV teletext eszközt (például: /dev/\:vbi0).
+.IPs tformat=<text|bw|gray|color> (alapértelmezett: gray)
+Megadja a TV teletext megjelnítési módját. (Megjegyzés: a színes módhoz színes SPU támogatás kell.)
+.IPs tpage=<100-999> (alapértelmezett: 100)
+Megadja a kezdõ TV teletext oldal számát.
 .RE
 .
 .TP
@@ -2893,7 +2928,7 @@ A monitor függõleges képfrissítési frekvenciatartományának megadása.
 .TP
 .B \-monitoraspect <arány> (lásd még \-aspect)
 A monitor vagy TV képernyõ képarányának megadása.
-A 0 letiltja az elõzõ képarány beállítást (pl. a konfigurációs fájlét).
+A 0 letiltja az elõzõ képarány beállítást (pl.\& a konfigurációs fájlét).
 Felülbírálja a \-monitorpixelaspect beállítást, amennyiben az meg van adva.
 .sp 1
 .I PÉLDA:
@@ -4242,7 +4277,7 @@ nonkey: Hagyjon ki minden kockát, kivéve a kulcs kockákat.
 .br
 all: Hagyjon ki minden kockát.
 .REss
-.IPs skipidct=<kihagyási érték> (csak MPEG1/2)
+.IPs "skipidct=<kihagyási érték> (csak MPEG-1/2)"
 Kihagyja az IDCT lépést.
 Ez nagy arányú minõségromlást okoz a legtöbb esetben
 (lásd a skiploopfilter-t a használható kihagyási értékekért).
@@ -4250,7 +4285,7 @@ Ez nagy arányú minõségromlást okoz a legtöbb esetben
 Teljesen kihagyja a kocka dekódolását.
 Nagy sebességnövekedés, de ugráló mozgás és rossz mellékhatások
 (lásd a skiploopfilter-t a használható kihagyási értékekért).
-.IPs threads=<0\-8>
+.IPs "threads=<1\-8> (csak MPEG-1/2)"
 dekódoláshoz használandó szálak száma (alapértelmezett: 1)
 .IPs vismv=<érték>
 Mozgás vektorok vizualizációja.
@@ -7281,7 +7316,7 @@ nem szabványos 20%-kal kisebb HuffYUV YV12 használattal
 ASUS Video v1
 .IPs "asv2\ "
 ASUS Video v2
-.IPs "ffv1"
+.IPs "ffv1\ "
 FFmpeg veszteségmentes videó codec-je
 .IPs "flv\ \ "
 Flash videókban használt Sorenson H.263
@@ -8157,7 +8192,7 @@ HuffYUV-hoz, veszteségmentes JPEG-hez, dv-hez és ffv1-hez
 veszteségmentes JPEG-hez, dv-hez és ffv1-hez
 .IPs "YVU9\ "
 veszteségmentes JPEG-hez, ffv1-hez és svq1-hez
-.IPs "BGR32\ "
+.IPs "BGR32"
 veszteségmentes JPEG-hez és ffv1-hez
 .RE
 .PD 1
@@ -9160,7 +9195,7 @@ jelentõs minõségromlás árán.
 Ez kiválasztja a P-kockákhoz használt kvantálót.
 Az I- és B-kockák gyakran ebbõl az értékbõl számítódnak az ip_factor és
 pb_factor segítségével.
-20\-40 a használható tartomány (alapértelmezett: 26).
+20\-40 a használható tartomány.
 Alacsonyabb értékek nagyobb hûséget, de nagyobb bitrátát eredményeznek.
 A 0 a veszteségmentes tömörítés.
 Figyelj rá, hogy a kvantálás a H.264-ben máshogy mûködik, mint az MPEG-1/2/4-ben:

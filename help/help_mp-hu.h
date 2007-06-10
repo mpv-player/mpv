@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r23028 (2007. 04. 21.)
+// Sync'ed with help_mp-en.h r23416 (2007. 06. 10.)
 
 // ========================= MPlayer help ===========================
 
@@ -1605,7 +1605,8 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Az almenü definíciókba kell egy 'menu' attribútum.\n"
-#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menü bejegyzés definícióihoz egy jó 'property' attribútum kell (%d. sor).\n"
+#define MSGTR_LIBMENU_InvalidProperty "[MENU] Érvénytelen tulajdonság '%s' a pref menü bejegyzésben. (%d. sor).\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menü bejegyzés definícióihoz egy jó 'property' vagy 'txt' attribútum kell (%d. sor).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref menühöz egy argumentum kell.\n"
 
 // libmenu/menu_pt.c
