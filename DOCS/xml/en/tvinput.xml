@@ -44,7 +44,7 @@ Here are just a few tips:
 <listitem><para>
   Use the <option>channels</option> option. An example:
   <screen>-tv channels=26-MTV1,23-TV2</screen>
-  Explanation: using this option, only the 26 and 23 channels will be usable,
+  Explanation: Using this option, only the 26 and 23 channels will be usable,
   and there will be a nice OSD text upon channel switching, displaying the
   channel's name. Spaces in the channel name must be replaced by the
   "_" character.
