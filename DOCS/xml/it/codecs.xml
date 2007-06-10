@@ -7,9 +7,6 @@
 <title>Codec video</title>
 
 <para>
-Some binary codecs for use with MPlayer are available in the
-<ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">download section</ulink>
-of our homepage.
 La <ulink url="../../codecs-status.html">tabella di stato dei codec</ulink> è
 un elenco completo di tutti i codec supportati, aggiornata giornalmente.
 Nella <ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">sezione download</ulink>
@@ -202,7 +199,7 @@ sono ancora implementate in <systemitem class="library">x264</systemitem>.
 </para>
 
 <itemizedlist>
-<title>Carattersitche del codificatore</title>
+<title>Caratteristiche del codificatore</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Multi-referenza</para></listitem>
   <listitem><para>
@@ -219,11 +216,11 @@ sono ancora implementate in <systemitem class="library">x264</systemitem>.
   passaggio singolo o multiplo, VBV facoltativo
   </para></listitem>
   <listitem><para>Rilevazione cambi scena</para></listitem>
-  <listitem><para>Posizionamento fotogrammi B adattativo</para></listitem>
+  <listitem><para>Posizionamento fotogrammi B adattivo</para></listitem>
   <listitem><para>
   Fotogrammi B come referenza / ordine arbitrario dei fotogrammi
   </para></listitem>
-  <listitem><para>Trasformazione spaziale adattiva 8x8 e 4x4</para></listitem>
+  <listitem><para>Trasformazione spaziale adattivo 8x8 e 4x4</para></listitem>
   <listitem><para>Modalità senza perdita (lossless)</para></listitem>
   <listitem><para>Matrici di quantizzazione personalizzate</para></listitem>
   <listitem><para>Codifica parallela di sezioni multiple</para></listitem>
@@ -333,7 +330,7 @@ percorsi standard, compilare il supporto per
 <application>MPlayer</application> è facile.
 Lancia semplicemente il comando:
 <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-Lo script <filename>./configure</filename> rileverà automaticamente che tu
+Lo script <filename>./configure</filename> controllerà automaticamente che tu
 abbia i requisiti richiesti per <systemitem class="library">x264</systemitem>.
 </para>
 </sect3>
@@ -348,7 +345,7 @@ abbia i requisiti richiesti per <systemitem class="library">x264</systemitem>.
 <title>Codec audio</title>
 
 <itemizedlist>
-<title>I codec più inmportanti su tutti:</title>
+<title>I codec più importanti su tutti:</title>
 <listitem><para>
   audio MPEG layer 1/2/3 (MP1/2/3) (codice
   <emphasis role="bold">nativo</emphasis>, con ottimizzazione MMX/SSE/3DNow!)
@@ -542,7 +539,7 @@ e gli RPM per Fedora RPMs da <ulink url="http://rpm.livna.org/">Livna</ulink>.
 <para>
 Il codec voce Adaptive Multi-Rate è usato nei telefoni cellulari di terza
 generazione (3G).
-La referenze per l'implementazione è disponibile da 
+La referenza per l'implementazione è disponibile da 
 <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
 (gratuita per uso personale).
 Per abilitarne il supporto, scarica e installa le librerie per 
@@ -685,9 +682,9 @@ Fai un grosso respiro e inizia a cercare nel registro...
   Se non c'è, sei sfortunato. Prova ad indovinarlo (per es. cerca TrueMotion).
 </para></step>
 <step><para>
-  Se trovi il GUID, dovresti trovare un campo <guilabel>FriendlyName</guilabel>
-  e un <guilabel>CLSID</guilabel>. Segnati il CLSID di 16 caratteri, questo è
-  il GUID che ci serve.
+  Se trovi il GUID, dovresti trovare un campo
+  "<guilabel>FriendlyName</guilabel>" e un "<guilabel>CLSID</guilabel>".
+  Segnati il CLSID di 16 caratteri, questo è il GUID che ci serve.
 </para></step>
 </procedure>
 
