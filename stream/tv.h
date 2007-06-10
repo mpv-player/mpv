@@ -43,6 +43,11 @@ extern int tv_param_alsa;
 #endif
 extern char* tv_param_adevice;
 #endif
+#ifdef HAVE_TV_TELETEXT
+extern char* tv_param_tdevice;        ///< teletext vbi device
+extern char* tv_param_tformat;        ///< format: text,bw,gray,color
+extern int tv_param_tpage;            ///< page number
+#endif
 extern int tv_param_brightness;
 extern int tv_param_contrast;
 extern int tv_param_hue;
@@ -72,6 +77,9 @@ typedef struct tvi_functions_s
 typedef struct tvi_handle_s {
     tvi_functions_t	*functions;
     void		*priv;
+#ifdef HAVE_TV_TELETEXT
+    void                *priv_vbi;
+#endif
     int 		seq;
 
     /* specific */
@@ -89,6 +97,18 @@ typedef struct tv_channels_s {
     struct tv_channels_s *next;
     struct tv_channels_s *prev;
 } tv_channels_t;
+
+#ifdef HAVE_TV_TELETEXT
+typedef struct tv_teletext_img_s {
+    void*    canvas;
+    int        tformat;
+    int        columns;
+    int        rows;
+    int        height;
+    int        width;
+    int        half;
+} tv_teletext_img_t;
+#endif
 
 extern tv_channels_t *tv_channel_list;
 extern tv_channels_t *tv_channel_current, *tv_channel_last;
@@ -153,6 +173,31 @@ extern char *tv_channel_last_real;
 #define TVI_CONTROL_SPC_SET_INPUT	0x402	/* set input channel (tv,s-video,composite..) */
 #define TVI_CONTROL_SPC_GET_NORMID	0x403	/* get normid from norm name */
 
+/* TELETEXT controls */
+#define TVI_CONTROL_VBI_SET_MODE        0x501   ///< on/off grab teletext
+#define TVI_CONTROL_VBI_GET_MODE        0x502   ///< get current mode teletext
+#define TVI_CONTROL_VBI_STEP_MODE       0x503  ///< step teletext mode
+
+#define TVI_CONTROL_VBI_SET_PAGE        0x504   ///< set grab teletext page number
+#define TVI_CONTROL_VBI_STEP_PAGE       0x505   ///< step grab teletext page number
+#define TVI_CONTROL_VBI_GET_PAGE        0x506   ///< get grabbed teletext page
+
+#define TVI_CONTROL_VBI_SET_FORMAT      0x507   ///< set teletext format
+#define TVI_CONTROL_VBI_STEP_FORMAT     0x508   ///< step teletext format
+#define TVI_CONTROL_VBI_GET_FORMAT      0x509   ///< get eletext format
+
+#define TVI_CONTROL_VBI_GET_HALF_PAGE   0x50a   ///< get current half page
+#define TVI_CONTROL_VBI_STEP_HALF_PAGE  0x50b   ///< switch half page
+#define TVI_CONTROL_VBI_SET_HALF_PAGE   0x50c   ///< switch half page
+
+#define TVI_CONTROL_VBI_ADD_DEC         0x50d   ///< add page number with dec
+#define TVI_CONTROL_VBI_GO_LINK         0x50e   ///< go link (1..6)
+#define TVI_CONTROL_VBI_GET_TXTPAGE     0x50f   ///< get grabbed text teletext page
+#define TVI_CONTROL_VBI_GET_IMGPAGE     0x510   ///< get grabbed image teletext page
+#define TVI_CONTROL_VBI_GET_VBIPAGE     0x511   ///< get vbi_image for grabbed teletext page
+#define TVI_CONTROL_VBI_RESET           0x512   ///< vbi reset
+#define TVI_CONTROL_VBI_START           0x513   ///< vbi start
+
 extern tvi_handle_t *tv_begin(void);
 extern int tv_init(tvi_handle_t *tvh);
 extern int tv_uninit(tvi_handle_t *tvh);
@@ -182,6 +227,20 @@ int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq);
 int tv_step_freq(tvi_handle_t *tvh, float step_interval);
 
 int tv_set_norm(tvi_handle_t *tvh, char* norm);
+
+#ifdef HAVE_TV_TELETEXT
+int tv_teletext_control(tvi_handle_t* tvh, int control,void* arg);
+/// add dec to pageno
+int tv_teletext_add_dec(tvi_handle_t *tvh, char *dec);
+/// go link
+int tv_teletext_go_link(tvi_handle_t *tvh, int linkno);
+/// get current vbi_page
+void* tv_get_teletext_vbipage(tvi_handle_t *tvh);
+/// get current page text
+char* tv_get_teletext_txtpage(tvi_handle_t *tvh);
+/// get current page image (RGB32_LB format)
+tv_teletext_img_t* tv_get_teletext_imgpage(tvi_handle_t *tvh);
+#endif
 
 #define TV_NORM_PAL		1
 #define TV_NORM_NTSC		2

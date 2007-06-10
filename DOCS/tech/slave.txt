@@ -314,6 +314,19 @@ switch_vsync [value]
     Toggle vsync (1 == on, 0 == off). If [value] is not provided,
     vsync status is inverted.
 
+teletext_add_dec <value>
+    On/off teletext page number editing mode and append given digit to
+    previously entered one
+    0..9 - append apropriate digit (enables editing mode if called from normal mode, and
+           switches to normal mode when third digit is entered.
+    -    - delete last digit from page number (backspace amulation, works only in page number
+           editing mode)
+
+teletext_go_link <value>
+    Follow given links on current teletext page
+    0    - go to initial page (specified by -tv tpage= parameter)
+    1..6 - follow given link
+
 tv_step_channel <channel>
     Select next/previous TV channel.
 
@@ -446,4 +459,8 @@ tv_brightness      int       -100    100     X   X   X
 tv_contrast        int       -100    100     X   X   X
 tv_saturation      int       -100    100     X   X   X
 tv_hue             int       -100    100     X   X   X
-
+teletext_page      int       100     999     X   X   X
+teletext_mode      int       0       3       X   X   X    0 - off, 1 - opaque, 2 - transparent,
+                                                          3 - transparent inverted (bw format)
+teletext_format    int       0       3       X            0 - text, 1 - b/w, 2 - gray, 3 - color
+teletext_half_page int       0       2       X   X   X    0 - off, 1 - top half, 2- bottom half

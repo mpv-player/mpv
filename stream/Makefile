@@ -51,6 +51,7 @@ SRCS_COMMON-$(TV)                += stream_tv.c tv.c frequencies.c tvi_dummy.c
 SRCS_COMMON-$(TV_BSDBT848)       += tvi_bsdbt848.c
 SRCS_COMMON-$(TV_V4L1)           += tvi_v4l.c  audio_in.c
 SRCS_COMMON-$(TV_V4L2)           += tvi_v4l2.c audio_in.c
+SRCS_COMMON-$(TV_TELETEXT)       += tvi_vbi.c
 SRCS_COMMON-$(VCD)               += stream_vcd.c
 SRCS_COMMON-$(VSTREAM)           += stream_vstream.c
 

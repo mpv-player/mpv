@@ -67,6 +67,10 @@ font_desc_t* vo_font=NULL;
 font_desc_t* sub_font=NULL;
 
 unsigned char* vo_osd_text=NULL;
+#ifdef HAVE_TV_TELETEXT
+unsigned char* vo_osd_teletex_text=NULL;
+int vo_osd_teletext_flip = 0;
+#endif
 int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
@@ -226,6 +230,121 @@ inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
   obj->flags |= OSDFLAG_BBOX | OSDFLAG_CHANGED;
   if (obj->bbox.y2 > obj->bbox.y1 && obj->bbox.x2 > obj->bbox.x1)
     obj->flags |= OSDFLAG_VISIBLE;
+}
+#endif
+
+#ifdef HAVE_TV_TELETEXT
+inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
+{
+    char *p,*pe;
+    char line[256];
+    int h=0,w=0,i,c,w1,font,lines,endline;
+    int x1,y1,x2,y2;
+    unsigned char *t;
+
+    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
+
+    if (vo_osd_teletex_text==NULL) {
+        obj->flags&=~OSDFLAG_VISIBLE;
+        return;
+    }
+    p=vo_osd_teletex_text;
+    lines=0;
+    endline=0;
+    do {    // calculate teletext size
+        memset(line,0,sizeof(line));
+        if(pe=strchr(p,'\n')) {
+            if(pe-p>sizeof(line))
+                strncpy(line,p,sizeof(line));
+            else
+                strncpy(line,p,pe-p);
+        }
+        else
+            strncpy(line,p,sizeof(line));
+
+        t=line;
+        w1=0;
+        while (*t) {
+            c = utf8_get_char(&t);
+            if (!c) c++; // avoid UCS 0
+            render_one_glyph(vo_font, c);
+            w1+=vo_font->width[c]+vo_font->charspace;
+        }
+        h+=vo_font->height;
+        if(w1>w) w=w1;
+        if(pe) pe++;
+        p=pe;
+        lines++;
+        if(h+vo_font->height*2>dys && endline==0) endline=lines;
+    } while (pe!=NULL);
+    h=h+vo_font->height;
+    w=w-vo_font->charspace;
+    if (w>dxs){
+        // calculate bbox size
+        x1=0; 
+        x2=dxs;
+    } 
+    else 
+    {
+        x1=(dxs-w)/2; 
+        x2=x1+w+1;
+    }
+    if (h>dys){
+        y1=0;
+        y2=dys;
+    }
+    else {
+        y1=0;
+        y2=y1+h+1;
+    }
+    obj->bbox.x1 = obj->x = x1;
+    obj->bbox.y1 = obj->y = y1;
+    obj->bbox.x2 = x2;
+    obj->bbox.y2 = y2;
+    obj->flags |= OSDFLAG_BBOX;
+    alloc_buf(obj);
+    p=vo_osd_teletex_text;
+    h=y1;
+    if (vo_osd_teletext_flip)
+        endline=lines-endline;    // bottom page
+    else
+        endline=0;                // top page
+    lines=0;
+    do {    // show teletext page
+        memset(line,0,sizeof(line));
+        if(pe=strchr(p,'\n')) {
+            if(pe-p>sizeof(line))
+                strncpy(line,p,sizeof(line));
+            else
+                strncpy(line,p,pe-p);}
+        else
+            strncpy(line,p,sizeof(line));
+
+        t=line;
+
+        w1=x1;
+        if(lines==0 || endline==0 || lines>endline) {
+            while (*t) {
+                c = utf8_get_char(&t);
+                if (!c) c++; // avoid UCS 0
+                render_one_glyph(vo_font, c);
+                if(w1+vo_font->width[c]>=x2) break;
+                    if ((font=vo_font->font[c])>=0)
+                        draw_alpha_buf(obj,w1,h,
+                            vo_font->width[c],
+                            vo_font->pic_a[font]->h,
+                            vo_font->pic_b[font]->bmp+vo_font->start[c],
+                            vo_font->pic_a[font]->bmp+vo_font->start[c],
+                            vo_font->pic_a[font]->w);
+                    w1+=vo_font->width[c]+vo_font->charspace;
+            }
+            h+=vo_font->height;
+        }
+        if(pe) pe++;
+        p=pe;
+        if(h+vo_font->height*2>dys) pe=NULL;
+        lines++;
+    } while (pe!=NULL);
 }
 #endif
 
@@ -859,6 +978,11 @@ int vo_update_osd(int dxs,int dys){
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(obj,dxs,dys);
 	    break;
+#ifdef HAVE_TV_TELETEXT
+        case OSDTYPE_TELETEXT:
+            vo_update_text_teletext(obj,dxs,dys);
+            break;
+#endif
 	case OSDTYPE_PROGBAR:
 	    vo_update_text_progbar(obj,dxs,dys);
 	    break;
@@ -926,6 +1050,9 @@ void vo_init_osd(void){
 #ifdef USE_DVDNAV
     new_osd_obj(OSDTYPE_DVDNAV);
 #endif
+#if HAVE_TV_TELETEXT
+    new_osd_obj(OSDTYPE_TELETEXT);
+#endif
 #ifdef HAVE_FREETYPE
     force_load_font = 1;
 #endif
@@ -963,6 +1090,9 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	    break;
 #ifdef USE_DVDNAV
         case OSDTYPE_DVDNAV:
+#endif
+#ifdef HAVE_TV_TELETEXT
+        case OSDTYPE_TELETEXT:
 #endif
 	case OSDTYPE_OSD:
 	case OSDTYPE_SUBTITLE:

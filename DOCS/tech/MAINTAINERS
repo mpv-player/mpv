@@ -77,6 +77,7 @@ MPlayer code:
     * libmpdemux: Roberto Togni, Nico Sabbi
     * libmpcodecs: Roberto Togni
     * TV input/capture: Vladimir Voroshilov
+    * TV teletext: Vladimir Voroshilov
     * network streaming: Roberto Togni, Nico Sabbi, Benjamin Zores
     * DVD/VOB subtitles: None
     * config files & commandline parser: Alban Bedel

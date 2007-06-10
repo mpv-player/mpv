@@ -421,6 +421,26 @@ Confirm choice.
 .PP
 .RS
 .
+(The following keys are only valid if teletext support is enabled during
+compilation: they are used for controlling TV teletext)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "X"
+Switch teletext between on, off and transparent mode.
+.IPs "Q"
+Next teletext page.
+.IPs "W"
+Previous teletext page.
+.IPs "E"
+In text mode flips top or bottom piece of page otherwise
+zooms teletext page: top or bottom or normal.
+.RE
+.PD 1
+.PP
+.RS
+.
 .TP
 .B mouse control
 .PD 0
@@ -1851,6 +1871,12 @@ MJPEG compression:
 .IPs quality=<0\-100>
 Choose the quality of the JPEG compression
 (< 60 recommended for full size).
+.IPs tdevice=<value>  (default: none)
+Specify TV teletext device (example: /dev/\:vbi0).
+.IPs tformat=<text|bw|gray|color> (default: gray)
+Specify TV teletext display mode. (Note: color mode requires color SPU support.)
+.IPs tpage=<100-999> (default: 100)
+Specify starting TV teletext page number .
 .RE
 .
 .TP

@@ -29,6 +29,9 @@
 #include "avutil.h"
 #endif
 #include "libswscale/swscale.h"
+#ifdef HAVE_TV_TELETEXT
+#include "stream/tv.h"
+#endif
 
 /* Valid values for spu_aamode:
    0: none (fastest, most ugly)
@@ -1185,3 +1188,115 @@ void spudec_set_hw_spu(void *this, vo_functions_t *hw_spu)
   spu->hw_spu = hw_spu;
   hw_spu->control(VOCTRL_SET_SPU_PALETTE,spu->global_palette);
 }
+
+#ifdef HAVE_TV_TELETEXT
+#define VBI_R(rgba) (((rgba) >> 0) & 0xFF)
+#define VBI_G(rgba) (((rgba) >> 8) & 0xFF)
+#define VBI_B(rgba) (((rgba) >> 16) & 0xFF)
+#define VBI_A(rgba) (((rgba) >> 24) & 0xFF)
+
+
+static unsigned char rgbtoy(int r, int g, int b) {
+    int ret=(257*r+504*g+98*b+16000)/1000;
+    return ret & 0xff;
+}
+
+/// correction u and v planes half size
+#define SPU_DOUBLE_SIZE    1
+
+void alloc_images(spudec_handle_t* spu, int cmode) {
+
+    if (spu->image_size < spu->stride * spu->height) {
+        if (spu->image != NULL) {
+            free(spu->image);
+            spu->image_size = 0;
+        }
+        spu->image = malloc(2 * spu->stride * spu->height);
+        if (spu->image) {
+            spu->image_size = spu->stride * spu->height;
+            spu->aimage = spu->image + spu->image_size;
+        }
+    }
+}
+
+/**
+    Render from VBI_PIXFMT_RGBA32_LE to spu
+**/
+void spudec_heartbeat_teletext(void *this, void *imgptr)
+{
+    int px,py;
+    int grey,alpha,cy,cu,cv,alphauv;
+    uint32_t *canvas;
+    uint32_t *pin;
+    spudec_handle_t *spu = (spudec_handle_t*)this;
+    tv_teletext_img_t *img = (tv_teletext_img_t*)imgptr;
+    unsigned char *iptr;
+    unsigned char *aptr;
+    int h1 = 10;
+    int hs = 0;
+
+    if(!spu || !img)
+        return;
+    if(img->canvas==NULL) {
+        spudec_reset(spu);
+        if (spu->image)
+            free(spu->image);
+        spu->image=NULL;
+        spu->image_size = 0;
+        return;
+    }
+
+    if(img->half) h1=5;                // top half page
+    if(img->half==2) hs=5;             // bottom half page
+
+    spu->start_pts=0;
+    spu->end_pts=0;
+    spu->now_pts=1;
+    spu->orig_frame_width = img->columns*12;    // 1 char width 12 pixel
+    spu->orig_frame_height = img->rows*h1;      // 1 char height 10 pixel
+    spu->scaled_frame_width = 0;
+    spu->scaled_frame_height = 0;
+    spu->start_col = 0;
+    spu->end_col = img->columns*12;
+    spu->start_row = 0;
+    spu->end_row = img->rows*h1;
+    spu->height = img->rows*h1;
+    spu->width = img->columns*12;
+    spu->height = (spu->height+3)&(~3);         // round to 4
+    spu->stride = (spu->width+7)&(~7);          // round to 8
+
+    alloc_images(spu,img->tformat);             // alloc images buffer
+    if (spu->image == NULL) {
+        spudec_reset(spu);
+        return;
+    }
+    canvas=img->canvas;                         // RGBA32_LE image
+    pin=canvas+(hs*img->columns*12*img->rows);
+    memset(spu->image,0,spu->image_size*2);
+
+    for(py=0;py<img->rows*h1;py++) {
+        iptr=spu->image+(py-hs)*spu->stride;    // image ptr
+        aptr=spu->aimage+(py-hs)*spu->stride;   // alpha ptr
+        for(px=0;px<img->columns*12;px++) {
+            grey=rgbtoy(VBI_R(*pin),VBI_G(*pin),VBI_B(*pin));    // RGB to Y
+            if(grey<=0x10) grey=0;
+            alpha=VBI_A(*pin);
+            switch (img->tformat) {
+                case 0x01:    // BW
+                case 0x02:    // Gray
+                case 0x03:    // Color (not supported)
+                    alpha=0x100-alpha;
+                    if (grey + alpha > 255) grey = 256 - alpha;
+                    break;
+            }
+            *iptr=grey;    // store Y plane
+            *aptr=alpha;   // store alpha
+            iptr++;
+            aptr++;
+            pin++;
+        }
+    }
+    spu->start_pts=0;
+    spu->end_pts=UINT_MAX;
+}
+#endif

@@ -34,6 +34,10 @@
 
 #include "frequencies.h"
 
+#ifdef HAVE_TV_TELETEXT
+#include "tvi_vbi.h"
+#endif
+
 /* some default values */
 int tv_param_audiorate = 44100;
 int tv_param_noaudio = 0;
@@ -518,6 +522,9 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 	tv_uninit(tvh);
 	return NULL;
     }
+#ifdef HAVE_TV_TELETEXT
+    if(tvh->priv_vbi) teletext_control(tvh->priv_vbi,TVI_CONTROL_VBI_START,1); //arg must be not null
+#endif
     funcs = tvh->functions;
     demuxer->priv=tvh;
     
@@ -657,6 +664,12 @@ no_audio:
 static void demux_close_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
+#ifdef HAVE_TV_TELETEXT
+    if(tvh->priv_vbi) {
+        teletext_uninit(tvh->priv_vbi);
+        tvh->priv_vbi=NULL;
+    }
+#endif
     if (!tvh) return;
     tvh->functions->uninit(tvh->priv);
     demuxer->priv=NULL;
@@ -688,6 +701,10 @@ tvi_handle_t *tv_begin(void)
             tvi_driver_list[i]->name,
             tvi_driver_list[i]->author,
             tvi_driver_list[i]->comment?tvi_driver_list[i]->comment:"");
+#ifdef HAVE_TV_TELETEXT
+            h->priv_vbi=teletext_init();
+#endif
+
             return h;
         }
     }
@@ -773,6 +790,9 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_CurrentFrequency,
 	    freq, (float)freq/16);
     }
+#ifdef HAVE_TV_TELETEXT
+    if (tvh->priv_vbi) teletext_control(tvh->priv_vbi,TVI_CONTROL_VBI_RESET,1); //arg must be not null
+#endif
     return(1);
 }
 
@@ -932,6 +952,9 @@ int tv_step_norm(tvi_handle_t *tvh)
       return 0;
     }
   }
+#ifdef HAVE_TV_TELETEXT
+    if (tvh->priv_vbi) teletext_control(tvh->priv_vbi,TVI_CONTROL_VBI_RESET,1); //arg must be not null
+#endif
     return(1);
 }
 
@@ -949,8 +972,60 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
 	return 0;
     }
+#ifdef HAVE_TV_TELETEXT
+    if (tvh->priv_vbi) teletext_control(tvh->priv_vbi,TVI_CONTROL_VBI_RESET,1); //arg must be not null
+#endif
     return(1);
 }
+
+#ifdef HAVE_TV_TELETEXT
+int tv_teletext_control(tvi_handle_t* tvh, int control, void* arg)
+{
+    if (!tvh || !tvh->priv_vbi)
+        return TVI_CONTROL_FALSE;
+
+    return teletext_control(tvh->priv_vbi,control,arg);
+}
+
+int tv_teletext_add_dec(tvi_handle_t *tvh, char *dec)
+{
+    if(!dec) return 0;
+    if (teletext_control(tvh->priv_vbi, TVI_CONTROL_VBI_ADD_DEC, &dec)!= TVI_CONTROL_TRUE)
+        return 0;
+    return 1;
+}
+
+int tv_teletext_go_link(tvi_handle_t *tvh, int linkno)
+{
+    if (teletext_control(tvh->priv_vbi, TVI_CONTROL_VBI_GO_LINK, &linkno)!= TVI_CONTROL_TRUE)
+        return 0;
+    return 1;
+}
+
+void* tv_get_teletext_vbipage(tvi_handle_t *tvh)
+{
+    void* page = NULL;
+    if (teletext_control(tvh->priv_vbi, TVI_CONTROL_VBI_GET_VBIPAGE, &page)!= TVI_CONTROL_TRUE)
+        return NULL;
+    return page;
+}
+
+char* tv_get_teletext_txtpage(tvi_handle_t *tvh)
+{
+    char* page = NULL;
+    if (teletext_control(tvh->priv_vbi, TVI_CONTROL_VBI_GET_TXTPAGE, &page)!= TVI_CONTROL_TRUE)
+        return NULL;
+    return page;
+}
+
+tv_teletext_img_t* tv_get_teletext_imgpage(tvi_handle_t *tvh)
+{
+    tv_teletext_img_t* tv_teletext_img = NULL;
+    if (teletext_control(tvh->priv_vbi, TVI_CONTROL_VBI_GET_IMGPAGE, &tv_teletext_img)!= TVI_CONTROL_TRUE)
+        return NULL;
+    return tv_teletext_img;
+}
+#endif
 
 demuxer_desc_t demuxer_desc_tv = {
   "Tv card demuxer",

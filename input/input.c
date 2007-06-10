@@ -136,6 +136,10 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_LOADLIST, "loadlist", 1, { {MP_CMD_ARG_STRING, {0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_RUN, "run", 1, { {MP_CMD_ARG_STRING,{0}}, {-1,{0}} } },
   { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", 2, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}}}},
+#ifdef HAVE_TV_TELETEXT
+  { MP_CMD_TV_TELETEXT_ADD_DEC, "teletext_add_dec", 1, { {MP_CMD_ARG_STRING,{0}}, {-1,{0}} } },
+  { MP_CMD_TV_TELETEXT_GO_LINK, "teletext_go_link",1, { { MP_CMD_ARG_INT ,{0}}, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
+#endif
 
 #ifdef HAVE_NEW_GUI  
   { MP_CMD_GUI_LOADFILE, "gui_loadfile", 0, { {-1,{0}} } },
@@ -385,6 +389,12 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'k', 0 }, "tv_step_channel -1" },
   { { 'n', 0 }, "tv_step_norm" },
   { { 'u', 0 }, "tv_step_chanlist" },
+#endif
+#ifdef HAVE_TV_TELETEXT
+  { { 'X', 0 }, "step_property teletext_mode 1" },
+  { { 'E', 0 }, "step_property teletext_half_page 1" },
+  { { 'W', 0 }, "step_property teletext_page 1" },
+  { { 'Q', 0 }, "step_property teletext_page -1" },
 #endif
 #ifdef HAVE_JOYSTICK
   { { JOY_AXIS0_PLUS, 0 }, "seek 10" },
