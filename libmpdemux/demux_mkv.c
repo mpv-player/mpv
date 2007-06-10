@@ -2024,8 +2024,8 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
   else if ((track->a_formattag == 0x2000) || /* AC3 */
            (track->a_formattag == 0x2001)) /* DTS */
     {
-      sh_a->wf->nAvgBytesPerSec = 16000;
-      sh_a->wf->nBlockAlign = 1536;
+      free(sh_a->wf);
+      sh_a->wf = NULL;
     }
   else if (track->a_formattag == 0x0001)  /* PCM || PCM_BE */
     {
