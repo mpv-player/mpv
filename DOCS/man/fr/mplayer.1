@@ -1,4 +1,4 @@
-.\" synced with r23504
+.\" synced with r23530
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -436,6 +436,27 @@ Retourne au menu principal.
 Retourne au menu le plus près (dans l'ordre: chapitre->titre->racine).
 .IPs "touche ENTRÉE"
 Confirme le choix.
+.RE
+.PD 1
+.PP
+.RS
+.
+.
+(Les touches suivantes ne sont valides que si MPlayer a été
+compilé avec le support télétexte\ : elles peuvent être utilisées pour contrôler le télétexte de la TV.)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "X"
+Bascule entre le télétexte activé, désactivé, ou transparent.
+.IPs "Q"
+page télétexte suivante
+.IPs "W"
+page télétexte précédente
+.IPs "E"
+En mode texte, échange la partie basse ou haute de la page, sinon
+zoome sur la page télétexte\ : haut, bas ou normal.
 .RE
 .PD 1
 .PP
@@ -1950,9 +1971,15 @@ choisit la taille de l'image qui sera compressée matériellement\ :
     176x120    NTSC
 .REss
 .IPs quality=<0\-100>
-choisit la qualité de la compression jpeg
-.br
-(quality < 60 recommandé pour la pleine résolution)
+Choisit la qualité de la compression jpeg
+(< 60 recommandé en pleine résolution).
+.IPs tdevice=<valeur>  (par défaut\ : aucun)
+Défini le périphérique télétexte (exemple\ : /dev/\:vbi0).
+.IPs tformat=<text|bw|gray|color> (default: gray)
+Défini le mode d'affichage télétexte.
+(Note\ : le mode couleur requière le support SPU couleur.)
+.IPs tpage=<100-999> (par défaut\ : 100)
+Défini le numéro de page de télétexte au démarage.
 .RE
 .
 .TP
@@ -9652,9 +9679,8 @@ significativement moins bonne.
 .
 .TP
 .B qp=<0\-51>
-Définit le quantum à utiliser.
-Une valeur comprise dans l'intervalle 20-40 semble convenir
-(par défaut\ : 26).
+Définit le quantum à utiliser pour les trames-B.
+Une valeur comprise dans l'intervalle 20-40 semble convenir.
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
 0 est le mode sans perte (lossless).
 Notez que la quantification dans H.264 fonctionne différemment de MPEG-1/2/4\ :
