@@ -4,7 +4,7 @@
 <title>Contenitori</title>
 
 <para>
-E' imporante chiarire un errore comune. Quando le persone vedono un file
+E' importante chiarire un errore comune. Quando le persone vedono un file
 con un'estensione <filename>.AVI</filename>, subito arrivano alla conclusione
 che non sia un file MPEG. Questo non è giusto. Perlomeno non del tutto.
 Contrariamente al credo popolare, un file di questo tipo
@@ -208,8 +208,8 @@ mai visto file v2.0 :). Nota che i file ASF a tutt'oggi usano l'estensione
 <title>File QuickTime/MOV</title>
 
 <para>
-Questi formati sono stati progettati da Apple e possono contere qualsiasi codec,
-CBR o VBR. Solitamente hanno un'estensione <filename>.QT</filename> o
+Questi formati sono stati progettati da Apple e possono contenere qualsiasi
+codec, CBR o VBR. Solitamente hanno un'estensione <filename>.QT</filename> o
 <filename>.MOV</filename>. Nota che visto che il gruppo MPEG-4 ha scelto
 QuickTime come il formato consigliato per MPEG-4, i loro file MOV hanno
 un'estensione <filename>.MPG</filename> o <filename>.MP4</filename> (è
@@ -252,7 +252,7 @@ Per l'audio è lo stesso, può essere
 Autodesk Animator, ma è un formato file diffuso per brevi animazioni in rete.
 <application>MPlayer</application> decodifica i filmati FLI ed è anche in
 grado di fare la ricerca in essi (utile quando stai ripetendoli con l'opzione
-<option>-loop</option>). I file FLI non hanno fotogrammi chieve, perciò
+<option>-loop</option>). I file FLI non hanno fotogrammi chiave, perciò
 l'immagine sarà incasinata per un breve periodo dopo la ricerca.
 </para>
 </sect2>
@@ -329,10 +329,10 @@ Quake III e Return to Castle Wolfenstein.
 <para>
 Questo è un nuovo formato file fornito da
 <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
-Può contenere qualsiasi codec video o audio, CBR o VBR. Ti servirà avere
-<systemitem class="library">libogg</systemitem> e
+Può contenere qualsiasi codec video o audio, CBR o VBR. Per poterlo riprodurre
+Ti servirà avere <systemitem class="library">libogg</systemitem> e
 <systemitem class="library">libvorbis</systemitem> installate prima di
-compilare <application>MPlayer</application> per poterlo riprodurre.
+compilare <application>MPlayer</application>.
 </para>
 </sect2>
 
@@ -344,8 +344,8 @@ compilare <application>MPlayer</application> per poterlo riprodurre.
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> è un
 formato file standard di IETF per descrivere flussi RTP video e/o audio.
-(E' richiesto
-"<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>".)
+(è richiesto
+"<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>")
 </para>
 </sect2>
 
@@ -443,7 +443,7 @@ problemi di brevetti con la compressione LZW.
 Se la tua distribuzione non è fornita di
 <systemitem class="library">libungif</systemitem>, scaricane una copia dalla
 <ulink url="http://sourceforge.net/projects/libungif">pagina principale di
-libungif</ulink>. Per informazioni tecniche rettagliate, dai un'occhiata alle
+libungif</ulink>. Per informazioni tecniche dettagliate, dai un'occhiata alle
 <ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">specifiche GIF89a
 </ulink>.
 </para>
