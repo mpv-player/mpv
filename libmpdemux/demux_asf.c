@@ -14,11 +14,6 @@
 
 #include "libvo/fastmemcpy.h"
 
-#define ASFMIN(a,b) ((a) > (b) ? (b) : (a))
-#define SLICE_MIN_START_CODE    0x00000101
-#define SLICE_MAX_START_CODE    0x000001af
-#define END_NOT_FOUND -100
-
 /*
  * Load 16/32-bit values in little endian byte order
  * from an unaligned address
@@ -85,70 +80,6 @@ static void init_priv (struct asf_priv* asf){
 #define FF_INPUT_BUFFER_PADDING_SIZE 8
 #endif
 
-static const uint8_t *find_start_code(const uint8_t * restrict p, const uint8_t *end, uint32_t * restrict state){
-  int i;
-  if(p>=end)
-    return end;
-
-  for(i=0; i<3; i++){
-    uint32_t tmp= *state << 8;
-    *state= tmp + *(p++);
-    if(tmp == 0x100 || p==end)
-      return p;
-  }
-
-  while(p<end){
-    if     (p[-1] > 1      ) p+= 3;
-    else if(p[-2]          ) p+= 2;
-    else if(p[-3]|(p[-1]-1)) p++;
-    else{
-      p++;
-      break;
-    }
-  }
-
-  p= ASFMIN(p, end)-4;
-  *state=  LOAD_BE32(p);
-
-  return p+4;
-}
-
-static int mpeg1_find_frame_end(demuxer_t *demux, const uint8_t *buf, int buf_size)
-{
-  int i;
-  struct asf_priv* asf = demux->priv;
-
-  i=0;
-   if(!asf->asf_frame_start_found){
-    for(i=0; i<buf_size; i++){
-      i= find_start_code(buf+i, buf+buf_size, &asf->asf_frame_state) - buf - 1;
-      if(asf->asf_frame_state >= SLICE_MIN_START_CODE && asf->asf_frame_state <= SLICE_MAX_START_CODE){
-        i++;
-        asf->asf_frame_start_found=1;
-        break;
-      }
-    }
-  }
-
-  if(asf->asf_frame_start_found){
-    /* EOF considered as end of frame */
-      if (buf_size == 0)
-          return 0;
-            
-    for(; i<buf_size; i++){
-      i= find_start_code(buf+i, buf+buf_size, &asf->asf_frame_state) - buf - 1;
-      if((asf->asf_frame_state&0xFFFFFF00) == 0x100){
-        //if NOT in range 257 - 431
-        if(asf->asf_frame_state < SLICE_MIN_START_CODE || asf->asf_frame_state > SLICE_MAX_START_CODE){
-          asf->asf_frame_start_found=0;
-          asf->asf_frame_state=-1;
-          return i-3;
-        }
-      }
-    }
-  }
-  return END_NOT_FOUND;
-}
 
 static void demux_asf_append_to_packet(demux_packet_t* dp,unsigned char *data,int len,int offs)
 {
