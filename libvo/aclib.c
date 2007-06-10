@@ -112,6 +112,7 @@
 #endif // CAN_COMPILE_X86_ASM
 
 
+#undef fast_memcpy
 void * fast_memcpy(void * to, const void * from, size_t len)
 {
 #ifdef RUNTIME_CPUDETECT
