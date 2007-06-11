@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r23520 -->
 <chapter id="radio">
 <title>Радио</title>
 
@@ -94,13 +94,15 @@ V4Lv1):
 <para>
 Получение звука через шину pci с внутреннего ADC радио тюнера. В этом примере
 тюнер используется как вторая звуковая карта (ALSA устройство hw:1,0). 
-Для карт, основанных на saa7134, либо saa7134-alsa, либо  saa7134-oss модуль должен быть
-загружен. 
+Для карт, основанных на saa7134, либо
+<systemitem>saa7134-alsa</systemitem>, либо <systemitem>saa7134-oss</systemitem>
+модуль должен быть загружен. 
 <screen>
 mplayer -rawaudio rate=32000 radio://2/capture \
     -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm
 </screen>
-<note><para>При использовании имен устройств ALSA, двоеточия необходимо заменить на
+<note><para>
+При использовании имен устройств ALSA, двоеточия необходимо заменить на
 равенства, запятые - на точки. 
 </para></note>
 </para>

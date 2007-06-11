@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21741 -->
+<!-- synced with r23538 -->
 <chapter id="containers">
 <title>Поддерживаемые форматы</title>
 
@@ -206,9 +206,9 @@ CBR или VBR. Обычно у них расширение <filename>.QT</filen
 <filename>.MOV</filename>. Заметьте, что поскольку MPEG4 Group выбрала
 QuickTime в качестве рекомендованного формата для MPEG4, их MOV файлы
 идут с расширением <filename>.MPG</filename> или <filename>.MP4</filename>
-(Интересно, что видео и аудио потоки в этих файлах - настоящие
+(интересно, что видео и аудио потоки в этих файлах - настоящие
 MPG и AAC файлы. Вы даже можете извлечь их, используя опции
-<option>-dumpvideo</option> и <option>-dumpaudio</option>.).
+<option>-dumpvideo</option> и <option>-dumpaudio</option>).
 </para>
 </sect2>
 
