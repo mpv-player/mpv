@@ -414,7 +414,8 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       
       // AID:
       // 0x20..0x3F  subtitle
-      // 0x80..0x9F  AC3 audio
+      // 0x80..0x87 and 0xC0..0xCF  AC3 audio
+      // 0x88..0x8F and 0x98..0x9F  DTS audio
       // 0xA0..0xBF  PCM audio
       
       if((aid & 0xE0) == 0x20){
@@ -434,7 +435,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
             ds=demux->sub;
         }
           
-      } else if((aid & 0xC0) == 0x80 || (aid & 0xE0) == 0x00 || (aid & 0xC0) == 0xC0) {
+      } else if((aid >= 0x80 && aid <= 0x8F) || (aid >= 0x98 && aid <= 0xAF) || (aid >= 0xC0 && aid <= 0xCF)) {
 
 //        aid=128+(aid&0x7F);
         // aid=0x80..0xBF
