@@ -66,14 +66,14 @@ I più importanti su tutti:
   decodificatore nativo per HuffYUV
 </para></listitem>
 <listitem><para>
-  Vari vecchi formati semplici tipo RLE
+  vari vecchi formati semplici tipo RLE
 </para></listitem>
 </itemizedlist>
 
 <para>
 Se hai un codec Win32 non elencato qui che non è ancora supportato, leggi per
 favore l'HOWTO sull'<link linkend="codec-importing">importazione codec</link>
-e aiutaci ad aggiungerne il supporto.
+e aiutaci ad aggiungerne il decodificatore relativo.
 </para>
 
 <!-- ********** -->
@@ -86,9 +86,9 @@ e aiutaci ad aggiungerne il supporto.
 <systemitem class="library">libavcodec</systemitem>, la libreria open source
 dominante di codec audio e video. E' in grado di decodificare molti formati
 multimediali, di solito a velocità più elevate delle alternative, e punta ad
-aggiungere prima o poi il supporto per i restanti.
-E' il decodificatore di default che <application>MPlayer</application> supporta.
-Anche la codifica è possibile per alcuni formati, ed è supportata da
+aggiungere prima o poi il supporto di decodifica per i restanti.
+E' il decodificatore di default usato da <application>MPlayer</application>.
+Anche la codifica è possibile per alcuni formati, ed è permessa da
 <application>MEncoder</application>.
 </para>
 
@@ -194,7 +194,7 @@ visto che ha maggior velocità.
 Non è completa al 100%, ma attualmente ha perlomeno qualche tipo di supporto
 per la maggior parte delle caratteristiche di H.264 che influenzano la qualità.
 Ci sono anche molte caratteristiche avanzate nelle specifiche H.264 che non
-hanno nulla ha che fare colla qualità video di per se; molte di queste non
+hanno nulla ha che fare colla qualità video di per sé; molte di queste non
 sono ancora implementate in <systemitem class="library">x264</systemitem>.
 </para>
 
@@ -248,7 +248,7 @@ I risultati reali dipenderanno sia dal materiale sorgente che dal codificatore.
 I guadagni ottenuti usando H.264 non arrivano senza un costo: per decodificare
 flussi H.264 pare richiedere CPU potenti e memoria.
 Per esempio, su un Athlon 1733 MHz, un H.264 a risoluzione video DVD a 1500kbps
-richiede circa il 35% della PCU, per la decodifica.
+richiede circa il 35% della CPU, per la decodifica.
 Per contronto, decodificare un flusso MPEG-4 ASP a risoluzione video DVD a
 1500kbps richiede circa il 10% della CPU.
 Ciò significa che anche un DVD rip decente può delle volte saltellare su CPU
