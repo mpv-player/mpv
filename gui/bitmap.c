@@ -37,7 +37,8 @@ static int pngRead( unsigned char * fname,txSample * bf )
  fclose(fp);
  avctx = avcodec_alloc_context();
  frame = avcodec_alloc_frame();
- avcodec_open(avctx, &png_decoder);
+ avcodec_register_all();
+ avcodec_open(avctx, avcodec_find_decoder(CODEC_ID_PNG));
  avcodec_decode_video(avctx, frame, &decode_ok, data, len);
  memset(bf, 0, sizeof(*bf));
  switch (avctx->pix_fmt) {
