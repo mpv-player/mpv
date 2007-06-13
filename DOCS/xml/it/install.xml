@@ -281,7 +281,7 @@ in varie codifiche.
 Decomprimi il file che hai scaricato, in
 <filename class="directory">~/.mplayer</filename> o
 <filename class="directory">$PREFIX/share/mplayer</filename>.
-Poi rinomina o crea un collagamento simbolico ad una delle directory
+Poi rinomina o crea un collegamento simbolico ad una delle directory
 <filename class="directory">font</filename>, per esempio:
 <screen>
 ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font
