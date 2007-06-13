@@ -22,6 +22,7 @@
 // Data for specific instances of this filter
 typedef struct af_pan_s
 {
+  int nch; // Number of output channels; zero means same as input
   float level[AF_NCH][AF_NCH];	// Gain level for each channel
 }af_pan_t;
 
@@ -38,6 +39,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->format = AF_FORMAT_FLOAT_NE;
     af->data->bps    = 4;
+    af->data->nch    = s->nch ? s->nch: ((af_data_t*)arg)->nch;
     af->mul.n        = af->data->nch;
     af->mul.d	     = ((af_data_t*)arg)->nch;
     af_frac_cancel(&af->mul);
@@ -48,7 +50,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       ((af_data_t*)arg)->bps = af->data->bps;
       return AF_FALSE;
     }
-    return control(af,AF_CONTROL_PAN_NOUT | AF_CONTROL_SET, &af->data->nch);
+    return AF_OK;
   case AF_CONTROL_COMMAND_LINE:{
     int   nch = 0;
     int   n = 0;
@@ -104,7 +106,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	     " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
       return AF_ERROR;
     }
-    af->data->nch=((int*)arg)[0];
+    s->nch=((int*)arg)[0];
     return AF_OK;
   case AF_CONTROL_PAN_NOUT | AF_CONTROL_GET:
     *(int*)arg = af->data->nch;
