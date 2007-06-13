@@ -175,7 +175,6 @@ static int af_open(af_instance_t* af){
   af->setup=calloc(1,sizeof(af_pan_t));
   if(af->data == NULL || af->setup == NULL)
     return AF_ERROR;
-  // Set initial pan to pass-through.
   return AF_OK;
 }
 
