@@ -183,6 +183,6 @@ af_info_t af_info_pan = {
     "pan",
     "Anders",
     "",
-    AF_FLAGS_NOT_REENTRANT,
+    AF_FLAGS_REENTRANT,
     af_open
 };
