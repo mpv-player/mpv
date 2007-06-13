@@ -6997,7 +6997,10 @@ echo "$_gui"
 if test "$_gui" = yes ; then
 
   # Required libraries
-  test "$_libavcodec" != yes && die "The GUI requires libavcodec with PNG support."
+  if test "$_libavcodec" != yes ||
+      not "echo $_libavdecoders | grep PNG_DECODER >/dev/null 2>&1" ; then
+    die "The GUI requires libavcodec with PNG support."
+  fi
 if not win32 ; then
   test "$_x11" != yes && die "X11 support required for GUI compilation."
 
