@@ -271,6 +271,14 @@ static int process_event_tail(ass_track_t* track, ass_event_t* event, char* str,
 	char* format = strdup(track->event_format);
 	char* q = format; // format scanning pointer
 
+	if (track->n_styles == 0) {
+		// add "Default" style to the end
+		// will be used if track does not contain a default style (or even does not contain styles at all)
+		int sid = ass_alloc_style(track);
+		track->styles[sid].Name = strdup("Default");
+		track->styles[sid].FontName = strdup("Arial");
+	}
+
 	for (i = 0; i < n_ignored; ++i) {
 		NEXT(q, tname);
 	}
@@ -697,7 +705,6 @@ static int process_text(ass_track_t* track, char* str)
 void ass_process_codec_private(ass_track_t* track, char *data, int size)
 {
 	char* str = malloc(size + 1);
-	int sid;
 
 	memcpy(str, data, size);
 	str[size] = '\0';
@@ -705,12 +712,6 @@ void ass_process_codec_private(ass_track_t* track, char *data, int size)
 	process_text(track, str);
 	free(str);
 
-	// add "Default" style to the end
-	// will be used if track does not contain a default style (or even does not contain styles at all)
-	sid = ass_alloc_style(track);
-	track->styles[sid].Name = strdup("Default");
-	track->styles[sid].FontName = strdup("Arial");
-	
 	if (!track->event_format) {
 		// probably an mkv produced by ancient mkvtoolnix
 		// such files don't have [Events] and Format: headers
