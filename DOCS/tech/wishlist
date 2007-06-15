@@ -21,6 +21,7 @@ Documentation:
 
  * continue ipod/embedded device encoding guide
 
+ * document channels.conf syntax
 
 Small improvements:
 
@@ -58,6 +59,8 @@ Cleanup:
 
 Filters:
 
+ * get filters to work in more colorspaces
+
  * eq filter should support RGB in addition to YUV
 
  * pitch audio filter
@@ -73,6 +76,8 @@ Filters:
  * xinerama video filter that splits movie to 2 screens (like zr)
 
  * mixing of multiple videos (picture in picture, ...)
+
+ * video watermark/logo filter (apply vf_overlay patch?)
 
 Enhancements:
 
@@ -112,15 +117,17 @@ Enhancements:
 
  * get -ass working in mencoder
 
- * left/right channel playback (-af pan=1:1 or -stereo) (in gui too)
+ * audio balance button in gui
 
- * ability to turn loop on/off while playing
+ * ability to turn loop on/off while playing (button in gui too)
 
  * rotate/position osd
 
- * reconnect option for streaming
-
  * support all image formats in mf:// (tiff)
+
+ * make -noborder work with all video outputs
+
+ * add option to use ffmpeg network code (rtsp, http, mms etc)
 
 Difficult stuff:
 
