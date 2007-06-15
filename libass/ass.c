@@ -331,13 +331,13 @@ void process_force_style(ass_track_t* track) {
 	if (!list) return;
 	
 	for (fs = list; *fs; ++fs) {
-		eq = strchr(*fs, '=');
+		eq = strrchr(*fs, '=');
 		if (!eq)
 			continue;
 		*eq = '\0';
 		token = eq + 1;
 
-		dt = strchr(*fs, '.');
+		dt = strrchr(*fs, '.');
 		if (dt) {
 			*dt = '\0';
 			style = *fs;
