@@ -8403,6 +8403,41 @@ $_def_altivec_h	// enables usage of altivec.h
 $_def_mlib  // Sun mediaLib, available only on solaris
 $_def_vis	// only define if you have VIS ( ultrasparc )
 
+/* lavc extensions */
+#ifdef HAVE_MMX
+#define ENABLE_MMX 1
+#else
+#define ENABLE_MMX 0
+#endif
+#ifdef ARCH_ARMV4L
+#define ENABLE_ARMV4L 1
+#else
+#define ENABLE_ARMV4L 0
+#endif
+#ifdef HAVE_MLIB
+#define ENABLE_MLIB 1
+#else
+#define ENABLE_MLIB 0
+#endif
+#ifdef ARCH_SPARC
+#define ENABLE_SPARC 1
+#else
+#define ENABLE_SPARC 0
+#endif
+#ifdef ARCH_ALPHA
+#define ENABLE_ALPHA 1
+#else
+#define ENABLE_ALPHA 0
+#endif
+#ifdef ARCH_POWERPC
+#define ENABLE_POWERPC 1
+#else
+#define ENABLE_POWERPC 0
+#endif
+#define ENABLE_MMI 0
+#define ENABLE_SH4 0
+#define ENABLE_BFIN 0
+
 /* libmpeg2 uses a different feature test macro for mediaLib */
 #ifdef HAVE_MLIB
 #define LIBMPEG2_MLIB 1
