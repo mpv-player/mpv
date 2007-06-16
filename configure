@@ -1588,9 +1588,9 @@ fi
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _def_arch_x86="#define ARCH_X86 1"
-  _target_arch_x86="TARGET_ARCH_X86 = yes"
+  _target_arch_x86="ARCH_X86 = yes"
   _def_arch="#define ARCH_X86_32 1"
-  _target_arch="TARGET_ARCH_X86_32 = yes"
+  _target_arch="ARCH_X86_32 = yes"
   iproc=486
   proc=i486
 
@@ -1823,7 +1823,7 @@ EOF
 
   ia64)
     _def_arch='#define ARCH_IA64 1'
-    _target_arch='TARGET_ARCH_IA64 = yes'
+    _target_arch='ARCH_IA64 = yes'
     iproc='ia64'
     proc=''
     _march=''
@@ -1833,9 +1833,9 @@ EOF
 
   x86_64|amd64)
     _def_arch='#define ARCH_X86_64 1'
-    _target_arch='TARGET_ARCH_X86_64 = yes'
+    _target_arch='ARCH_X86_64 = yes'
     _def_arch_x86="#define ARCH_X86 1"
-    _target_arch_x86="TARGET_ARCH_X86 = yes"
+    _target_arch_x86="ARCH_X86 = yes"
     iproc='x86_64'
 
     # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
@@ -1912,7 +1912,7 @@ EOF
 
   sparc)
     _def_arch='#define ARCH_SPARC 1'
-    _target_arch='TARGET_ARCH_SPARC = yes'
+    _target_arch='ARCH_SPARC = yes'
     iproc='sparc'
     if sunos ; then
 	echocheck "CPU type"
@@ -1937,7 +1937,7 @@ EOF
 
   sparc64)
     _def_arch='#define ARCH_SPARC 1'
-    _target_arch='TARGET_ARCH_SPARC = yes'
+    _target_arch='ARCH_SPARC = yes'
     _vis='yes'
     _def_vis='#define HAVE_VIS = yes'
     iproc='sparc'
@@ -1949,7 +1949,7 @@ EOF
 
   arm|armv4l|armv5tel)
     _def_arch='#define ARCH_ARMV4L 1'
-    _target_arch='TARGET_ARCH_ARMV4L = yes'
+    _target_arch='ARCH_ARMV4L = yes'
     iproc='arm'
     proc=''
     _march=''
@@ -1960,7 +1960,7 @@ EOF
   ppc|powerpc)
     _def_arch='#define ARCH_POWERPC 1'
     _def_dcbzl='#define NO_DCBZL 1'
-    _target_arch='TARGET_ARCH_POWERPC = yes'
+    _target_arch='ARCH_POWERPC = yes'
     iproc='ppc'
     proc=''
     _march=''
@@ -2071,7 +2071,7 @@ EOF
 
   alpha)
     _def_arch='#define ARCH_ALPHA 1'
-    _target_arch='TARGET_ARCH_ALPHA = yes'
+    _target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
     _march=''
     
@@ -2122,7 +2122,7 @@ EOF
 
   mips)
     _def_arch='#define ARCH_SGI_MIPS 1'
-    _target_arch='TARGET_ARCH_SGI_MIPS = yes'
+    _target_arch='ARCH_SGI_MIPS = yes'
     iproc='sgi-mips'
     proc=''
     _march=''
@@ -2151,7 +2151,7 @@ EOF
 
   hppa)
     _def_arch='#define ARCH_PA_RISC 1'
-    _target_arch='TARGET_ARCH_PA_RISC = yes'
+    _target_arch='ARCH_PA_RISC = yes'
     iproc='PA-RISC'
     proc=''
     _march=''
@@ -2161,7 +2161,7 @@ EOF
 
   s390)
     _def_arch='#define ARCH_S390 1'
-    _target_arch='TARGET_ARCH_S390 = yes'
+    _target_arch='ARCH_S390 = yes'
     iproc='390'
     proc=''
     _march=''
@@ -2171,7 +2171,7 @@ EOF
 
   s390x)
     _def_arch='#define ARCH_S390X 1'
-    _target_arch='TARGET_ARCH_S390X = yes'
+    _target_arch='ARCH_S390X = yes'
     iproc='390x'
     proc=''
     _march=''
@@ -2181,7 +2181,7 @@ EOF
 
   vax)
     _def_arch='#define ARCH_VAX 1'
-    _target_arch='TARGET_ARCH_VAX = yes'
+    _target_arch='ARCH_VAX = yes'
     iproc='vax'
     proc=''
     _march=''
@@ -2191,7 +2191,7 @@ EOF
 
   generic)
     _def_arch='#define ARCH_GENERIC 1'
-    _target_arch='TARGET_ARCH_GENERIC = yes'
+    _target_arch='ARCH_GENERIC = yes'
     iproc=''
     proc=''
     _march=''
