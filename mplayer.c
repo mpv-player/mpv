@@ -3540,9 +3540,6 @@ if(step_sec>0) {
 
   /* Looping. */
   if(mpctx->eof==1 && loop_times>=0) {
-    int l = loop_times;
-    play_tree_iter_step(mpctx->playtree_iter,0,0);
-    loop_times = l;
     mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d, eof = %d\n", loop_times,mpctx->eof);
 
     if(loop_times>1) loop_times--; else
