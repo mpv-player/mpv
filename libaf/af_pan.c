@@ -111,6 +111,23 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_PAN_NOUT | AF_CONTROL_GET:
     *(int*)arg = af->data->nch;
     return AF_OK;
+  case AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET:{
+    float val = *(float*)arg;
+    if (s->nch)
+      return AF_ERROR;
+    if (af->data->nch >= 2) {
+      s->level[0][0] = min(1.f, 1.f - val);
+      s->level[0][1] = max(0.f, val);
+      s->level[1][0] = max(0.f, -val);
+      s->level[1][1] = min(1.f, 1.f + val);
+    }
+    return AF_OK;
+  }
+  case AF_CONTROL_PAN_BALANCE | AF_CONTROL_GET:
+    if (s->nch)
+      return AF_ERROR;
+    *(float*)arg = s->level[0][1] - s->level[1][0];
+    return AF_OK;
   }
   return AF_UNKNOWN;
 }

@@ -193,6 +193,8 @@ typedef struct af_control_ext_s{
 // Number of outputs from pan, arg is int*
 #define AF_CONTROL_PAN_NOUT	 	0x00001B00 | AF_CONTROL_FILTER_SPECIFIC
  
+// Balance, arg is float*; range -1 (left) to 1 (right), 0 center
+#define AF_CONTROL_PAN_BALANCE	 	0x00002500 | AF_CONTROL_FILTER_SPECIFIC
 
 // Set equalizer gain, arg is a control_ext with a float* 
 #define AF_CONTROL_EQUALIZER_GAIN 	0x00001C00 | AF_CONTROL_FILTER_SPECIFIC
