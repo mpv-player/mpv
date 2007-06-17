@@ -423,8 +423,9 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         aid&=0x1F;
 
         if(!demux->s_streams[aid]){
+            sh_sub_t *sh = new_sh_sub(demux, aid);
+            if (sh) sh->type = 'v';
             mp_msg(MSGT_DEMUX,MSGL_V,"==> Found subtitle: %d\n",aid);
-            new_sh_sub(demux, aid);
         }
 
         if(demux->sub->id > -1)
