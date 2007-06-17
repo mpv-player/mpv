@@ -1257,14 +1257,16 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	    if (mpctx->stream->type != STREAMTYPE_DVD
 		&& mpctx->stream->type != STREAMTYPE_DVDNAV) {
 		int i = 0;
+		d_sub->sh = NULL;
 		for (d_sub->id = 0; d_sub->id < MAX_S_STREAMS; d_sub->id++) {
 		    if (mpctx->demuxer->s_streams[d_sub->id]) {
-			if (i == dvdsub_id)
+			if (i == dvdsub_id) {
+			    d_sub->sh = mpctx->demuxer->s_streams[d_sub->id];
 			    break;
+			}
 			i++;
 		    }
 		}
-		d_sub->sh = mpctx->demuxer->s_streams[d_sub->id];
 	    }
 	    if (mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA)
 		d_sub->id = demux_mkv_change_subs(mpctx->demuxer, dvdsub_id);
