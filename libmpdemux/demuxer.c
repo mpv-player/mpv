@@ -1038,7 +1038,9 @@ double demuxer_get_time_length(demuxer_t *demuxer){
     sh_audio_t *sh_audio = demuxer->audio->sh;
     // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
     if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,(void *)&get_time_ans)<=0)  {
-      if (sh_video && sh_video->i_bps)
+      if (sh_video && sh_video->i_bps && sh_audio && sh_audio->i_bps)
+        get_time_ans = (double)(demuxer->movi_end-demuxer->movi_start)/(sh_video->i_bps+sh_audio->i_bps);
+      else if (sh_video && sh_video->i_bps)
         get_time_ans = (double)(demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
       else if (sh_audio && sh_audio->i_bps)
         get_time_ans = (double)(demuxer->movi_end-demuxer->movi_start)/sh_audio->i_bps;
