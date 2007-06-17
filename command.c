@@ -1243,17 +1243,6 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	dvdsub_id =
 	    mpctx->global_sub_pos - mpctx->global_sub_indices[SUB_SOURCE_DEMUX];
 	if (d_sub) {
-#ifdef USE_DVDREAD
-	    if (vo_spudec && mpctx->stream->type == STREAMTYPE_DVD) {
-		d_sub->id = dvdsub_id;
-	    }
-#endif
-
-#ifdef USE_DVDNAV
-	    if (vo_spudec && mpctx->stream->type == STREAMTYPE_DVDNAV) {
-		d_sub->id = dvdsub_id;
-	    }
-#endif
 	    if (mpctx->stream->type != STREAMTYPE_DVD
 		&& mpctx->stream->type != STREAMTYPE_DVDNAV) {
 		int i = 0;
@@ -1268,6 +1257,8 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 		    }
 		}
 	    }
+	    else if (vo_spudec)
+		d_sub->id = dvdsub_id;
 	    if (mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA)
 		d_sub->id = demux_mkv_change_subs(mpctx->demuxer, dvdsub_id);
 	    if (d_sub->sh && d_sub->id >= 0) {
