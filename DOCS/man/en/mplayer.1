@@ -1762,8 +1762,8 @@ available: dummy, v4l, v4l2, bsdbt848
 .IPs device=<value>
 Specify TV device (default: /dev/\:video0).
 .I NOTE:
-For bsdbt848 driver you can provide both bktr and tuner device names
-separating them with comma, tuner after 
+For the bsdbt848 driver you can provide both bktr and tuner device
+names separating them with a comma, tuner after
 bktr (e.g.\& -tv device=/dev/bktr1,/dev/tuner1).
 .IPs input=<value>
 Specify input (default: 0 (TV), see console output for available inputs).
@@ -2928,7 +2928,7 @@ Specify the vertical frequency range of the monitor.
 .TP
 .B \-monitoraspect <ratio> (also see \-aspect)
 Set the aspect ratio of your monitor or TV screen.
-A value of 0 disables previous monitoraspect setting (e.g.\& in config file).
+A value of 0 disables a previous setting (e.g.\& in the config file).
 Overrides the \-monitorpixelaspect setting if enabled.
 .sp 1
 .I EXAMPLE:
@@ -7539,7 +7539,7 @@ option brd_scale.
 .TP
 .B b_sensitivity=<any integer greater than 0>
 Adjusts how sensitively vb_strategy=1 detects motion and avoids using
-B-frames (default: 40). 
+B-frames (default: 40).
 Lower sensitivities will result in more B-frames.
 Using more B-frames usually improves PSNR, but too many B-frames can
 hurt quality in high-motion scenes.
@@ -7949,7 +7949,7 @@ details
 .RE
 .PD 1
 .RS
-MV & DC are most important, loosing them looks far worse than loosing
+MV & DC are most important, losing them looks far worse than losing
 the AC and the 1. & 2. partition.
 (MV & DC) are far smaller than the 3. partition (AC) meaning that errors
 will hit the AC partition much more often than the MV & DC partitions.
@@ -9886,7 +9886,7 @@ If dvdauthor complains with a message like "..audio sector out of range...",
 you probably did not enable this option.
 .
 .TP
-.B "interleaving2\ \ \ "
+.B interleaving2
 Uses a better algorithm to interleave audio and video packets, based on the
 principle that the muxer will always try to fill the stream with the largest
 percentage of free space.
