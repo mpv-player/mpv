@@ -1,4 +1,4 @@
-.\" synced with r23530
+.\" synced with r23561
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -33,7 +33,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "8 Juin 2007" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "18 Juin 2007" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -974,6 +974,16 @@ Utilise le menu.conf indiqué.
 .TP
 .B \-menu-chroot <path> (OSD menu only)
 Cloître le menu de sélection de fichiers à un emplacement spécifique.
+.sp 1
+.I EXEMPLE\ :
+.PD 0
+.RSs
+.IPs "\-menu-chroot=/home"
+Limite au répertoire et sous-répertoire /\:home/ le menu de sélection de fichier
+(c-à-d qu'il ne sera pas possible d'accéder à /, tandis que /\:home/\:user_name/
+sera accessible).
+.RE
+.PD 1
 .
 .TP
 .B \-menu-keepdir (OSD menu uniquement)
@@ -8480,6 +8490,22 @@ arm
 Altivec
 .IPs 9
 sh4
+.IPs 10
+simplearm
+.IPs 11
+H.264
+.IPs 12
+VP3
+.IPs 13
+IPP
+.IPs 14
+xvidmmx
+.IPs 15
+CAVS
+.IPs 16
+simplearmv5te
+.IPs 17
+simplearmv6
 .RE
 .PD 1
 .
