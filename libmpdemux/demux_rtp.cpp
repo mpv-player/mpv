@@ -448,6 +448,10 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   RTPState* rtpState = (RTPState*)(demuxer->priv);
   ReadBufferQueue* bufferQueue = NULL;
   int headersize = 0;
+  TaskToken task;
+
+  if (demuxer->stream->eof) return NULL;
+
   if (ds == demuxer->video) {
     bufferQueue = rtpState->videoBufferQueue;
     if (((sh_video_t*)ds->sh)->format == mmioFOURCC('H','2','6','4'))
@@ -500,7 +504,15 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   // Block ourselves until data becomes available:
   TaskScheduler& scheduler
     = bufferQueue->readSource()->envir().taskScheduler();
+  int delay = bufferQueue->prevPacketPTS * 1.05 >
+      rtpState->mediaSession->playEndTime() ? 1000000 : 10000000;
+  task = scheduler.scheduleDelayedTask(delay, onSourceClosure, bufferQueue);
   scheduler.doEventLoop(&bufferQueue->blockingFlag);
+  scheduler.unscheduleDelayedTask(task);
+  if (demuxer->stream->eof) {
+    free_demux_packet(dp);
+    return NULL;
+  }
 
   if (headersize == 1) // amr
     dp->buffer[0] =
