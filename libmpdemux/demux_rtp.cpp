@@ -470,7 +470,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
     return NULL;
   }
   
-  demux_packet_t* dp;
+  demux_packet_t* dp = NULL;
   if (!mustGetNewData) {
     // Check whether we have a previously-saved buffer that we can use:
     dp = bufferQueue->getPendingBuffer();
@@ -491,7 +491,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   extern AVCodecParserContext * h264parserctx;
   int consumed, poutbuf_size = 1;
   const uint8_t *poutbuf = NULL;
-  float lastpts;
+  float lastpts = 0.0;
 
   do {
     if (!bufferQueue->nextpacket) {
@@ -580,8 +580,8 @@ static void teardownRTSPorSIPSession(RTPState* rtpState) {
 ReadBufferQueue::ReadBufferQueue(MediaSubsession* subsession,
 				 demuxer_t* demuxer, char const* tag)
   : prevPacketWasSynchronized(False), prevPacketPTS(0.0), otherQueue(NULL),
-    nextpacket(NULL),
-    dp(NULL), pendingDPHead(NULL), pendingDPTail(NULL),
+    dp(NULL), nextpacket(NULL),
+    pendingDPHead(NULL), pendingDPTail(NULL),
     fReadSource(subsession == NULL ? NULL : subsession->readSource()),
     fRTPSource(subsession == NULL ? NULL : subsession->rtpSource()),
     fOurDemuxer(demuxer), fTag(strdup(tag)) {
