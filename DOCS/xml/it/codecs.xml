@@ -194,7 +194,7 @@ visto che ha maggior velocità.
 Non è completa al 100%, ma attualmente ha perlomeno qualche tipo di supporto
 per la maggior parte delle caratteristiche di H.264 che influenzano la qualità.
 Ci sono anche molte caratteristiche avanzate nelle specifiche H.264 che non
-hanno nulla ha che fare colla qualità video di per sé; molte di queste non
+hanno nulla ha che fare con la qualità video di per sé; molte di queste non
 sono ancora implementate in <systemitem class="library">x264</systemitem>.
 </para>
 
