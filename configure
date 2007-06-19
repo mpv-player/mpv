@@ -2208,16 +2208,16 @@ esac # case "$host_arch" in
 
 if test "$_runtime_cpudetection" = yes ; then
   if x86 ; then
-    _cmov=yes
+    test "$_cmov"     != no && _cmov=yes
     x86_32 && _cmov=no
-    _mmx=yes
-    _3dnow=yes
-    _3dnowext=yes
-    _mmxext=yes
-    _sse=yes
-    _sse2=yes
-    _ssse3=yes
-    _mtrr=yes
+    test "$_mmx"      != no && _mmx=yes
+    test "$_3dnow"    != no && _3dnow=yes
+    test "$_3dnowext" != no && _3dnowext=yes
+    test "$_mmxext"   != no && _mmxext=yes
+    test "$_sse"      != no && _sse=yes
+    test "$_sse2"     != no && _sse2=yes
+    test "$_ssse3"    != no && _ssse3=yes
+    test "$_mtrr"     != no && _mtrr=yes
   fi
   if ppc; then
     _altivec=yes
