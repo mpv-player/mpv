@@ -79,6 +79,10 @@ Filters:
 
  * video watermark/logo filter (apply vf_overlay patch?)
 
+ * fade to black filter
+
+ * crossfade filter (audio and video)
+
 Enhancements:
 
  * support for VirtualDub and Winamp plugins (apply af_wadspa patch!)
@@ -116,8 +120,6 @@ Enhancements:
  * scale osd when video window changes size
 
  * get -ass working in mencoder
-
- * audio balance button in gui
 
  * ability to turn loop on/off while playing (button in gui too)
 
