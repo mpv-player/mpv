@@ -2470,30 +2470,19 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_def_mmx='#undef HAVE_MMX'
-test "$_mmx" = yes && _def_mmx='#define HAVE_MMX 1'
-_def_mmxext='#undef HAVE_MMX2'
-test "$_mmxext" = yes && _def_mmxext='#define HAVE_MMX2 1'
-_def_3dnow='#undef HAVE_3DNOW'
-test "$_3dnow" = yes && _def_3dnow='#define HAVE_3DNOW 1'
-_def_3dnowext='#undef HAVE_3DNOWEX'
-test "$_3dnowext" = yes && _def_3dnowext='#define HAVE_3DNOWEX 1'
-_def_sse='#undef HAVE_SSE'
-test "$_sse" = yes && _def_sse='#define HAVE_SSE 1'
-_def_sse2='#undef HAVE_SSE2'
-test "$_sse2" = yes && _def_sse2='#define HAVE_SSE2 1'
-_def_ssse3='#undef HAVE_SSSE3'
-test "$_ssse3" = yes && _def_ssse3='#define HAVE_SSSE3 1'
-_def_cmov='#undef HAVE_CMOV'
-test "$_cmov" = yes && _def_cmov='#define HAVE_CMOV 1'
-_def_fast_cmov='#undef HAVE_FAST_CMOV'
-test "$_fast_cmov" = yes && _def_fast_cmov='#define HAVE_FAST_CMOV 1'
-_def_armv5te='#undef HAVE_ARMV5TE'
-test "$_armv5te" = yes && _def_armv5te='#define HAVE_ARMV5TE 1'
-_def_armv6='#undef HAVE_ARMV6'
-test "$_armv6" = yes && _def_armv6='#define HAVE_ARMV6 1'
-_def_iwmmxt='#undef HAVE_IWMMXT'
-test "$_iwmmxt" = yes && _def_iwmmxt='#define HAVE_IWMMXT 1'
+_cpuexts_all='MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 IWMMXT MLIB MMI SH4 BFIN'
+test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
+test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
+test "$_3dnow"     = yes && _cpuexts="3DNOW $_cpuexts"
+test "$_3dnowext"  = yes && _cpuexts="3DNOWEX $_cpuexts"
+test "$_sse"       = yes && _cpuexts="SSE $_cpuexts"
+test "$_sse2"      = yes && _cpuexts="SSE2 $_cpuexts"
+test "$_ssse3"     = yes && _cpuexts="SSSE3 $_cpuexts"
+test "$_cmov"      = yes && _cpuexts="CMOV $_cpuexts"
+test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
+test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
+test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
+test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 
 # Checking kernel version...
 if x86_32 && linux ; then
@@ -5143,11 +5132,7 @@ int main(void) { mlib_VideoColorYUV2ABGR420(0,0,0,0,0,0,0,0,0); return 0; }
 EOF
   cc_check -lmlib && _mlib=yes
 fi
-if test "$_mlib" = yes ; then
-  _def_mlib='#define HAVE_MLIB 1'
-else
-  _def_mlib='#undef HAVE_MLIB'
-fi
+test "$_mlib" = yes && _cpuexts="MLIB $_cpuexts"
 echores "$_mlib"
 fi #if sunos
 
@@ -8373,39 +8358,11 @@ $_def_inet6
 $_def_gethostbyname2
 
 /* Extension defines */
-$_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
-$_def_3dnowext	// only define if you have 3DNOWEXT (AMD Athlon, etc.)
-$_def_mmx	// only define if you have MMX (newer x86 chips, not P54C/PPro)
-$_def_mmxext	// only define if you have MMX2 (Athlon/PIII/4/CelII)
-$_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
-$_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
-$_def_ssse3	// only define if you have SSSE3 (Intel Core 2)
-$_def_cmov	// only define if you have CMOV (i686+, without VIA C3)
-$_def_fast_cmov	// only define if CMOV is fast
-$_def_altivec	// only define if you have Altivec (G4)
-$_def_armv5te	// only define if you have Enhanced DSP Extensions (ARM)
-$_def_armv6 	// only define if you have ARMv6
-$_def_iwmmxt	// only define if you have XScale IWMMX (ARM)
+`ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE"`
 
 $_def_altivec_h	// enables usage of altivec.h
 
-$_def_mlib  // Sun mediaLib, available only on solaris
 $_def_vis	// only define if you have VIS ( ultrasparc )
-
-/* lavc extensions */
-#ifdef HAVE_MMX
-#define ENABLE_MMX 1
-#else
-#define ENABLE_MMX 0
-#endif
-#ifdef HAVE_MLIB
-#define ENABLE_MLIB 1
-#else
-#define ENABLE_MLIB 0
-#endif
-#define ENABLE_MMI 0
-#define ENABLE_SH4 0
-#define ENABLE_BFIN 0
 
 /* libmpeg2 uses a different feature test macro for mediaLib */
 #ifdef HAVE_MLIB
