@@ -1585,11 +1585,12 @@ EOF
 
 fi
 
+
+_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM ARMV4L POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  _def_arch_x86="#define ARCH_X86 1"
+  _arch='X86 X86_32'
   _target_arch_x86="ARCH_X86 = yes"
-  _def_arch="#define ARCH_X86_32 1"
   _target_arch="ARCH_X86_32 = yes"
   iproc=486
   proc=i486
@@ -1822,7 +1823,7 @@ EOF
     ;;
 
   ia64)
-    _def_arch='#define ARCH_IA64 1'
+    _arch='IA64'
     _target_arch='ARCH_IA64 = yes'
     iproc='ia64'
     proc=''
@@ -1832,9 +1833,8 @@ EOF
     ;;
 
   x86_64|amd64)
-    _def_arch='#define ARCH_X86_64 1'
+    _arch='X86 X86_64'
     _target_arch='ARCH_X86_64 = yes'
-    _def_arch_x86="#define ARCH_X86 1"
     _target_arch_x86="ARCH_X86 = yes"
     iproc='x86_64'
 
@@ -1911,7 +1911,7 @@ EOF
     ;;
 
   sparc)
-    _def_arch='#define ARCH_SPARC 1'
+    _arch='SPARC'
     _target_arch='ARCH_SPARC = yes'
     iproc='sparc'
     if sunos ; then
@@ -1936,7 +1936,7 @@ EOF
     ;;
 
   sparc64)
-    _def_arch='#define ARCH_SPARC 1'
+    _arch='SPARC'
     _target_arch='ARCH_SPARC = yes'
     _vis='yes'
     _def_vis='#define HAVE_VIS = yes'
@@ -1948,7 +1948,7 @@ EOF
     ;;
 
   arm|armv4l|armv5tel)
-    _def_arch='#define ARCH_ARMV4L 1'
+    _arch='ARM ARMV4L'
     _target_arch='ARCH_ARMV4L = yes'
     iproc='arm'
     proc=''
@@ -1958,7 +1958,7 @@ EOF
     ;;
 
   ppc|powerpc)
-    _def_arch='#define ARCH_POWERPC 1'
+    _arch='POWERPC PPC'
     _def_dcbzl='#define NO_DCBZL 1'
     _target_arch='ARCH_POWERPC = yes'
     iproc='ppc'
@@ -2070,7 +2070,7 @@ EOF
     ;;
 
   alpha)
-    _def_arch='#define ARCH_ALPHA 1'
+    _arch='ALPHA'
     _target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
     _march=''
@@ -2121,7 +2121,7 @@ EOF
     ;;
 
   mips)
-    _def_arch='#define ARCH_SGI_MIPS 1'
+    _arch='SGI_MIPS'
     _target_arch='ARCH_SGI_MIPS = yes'
     iproc='sgi-mips'
     proc=''
@@ -2150,7 +2150,7 @@ EOF
     ;;
 
   hppa)
-    _def_arch='#define ARCH_PA_RISC 1'
+    _arch='PA_RISC'
     _target_arch='ARCH_PA_RISC = yes'
     iproc='PA-RISC'
     proc=''
@@ -2160,7 +2160,7 @@ EOF
     ;;
 
   s390)
-    _def_arch='#define ARCH_S390 1'
+    _arch='S390'
     _target_arch='ARCH_S390 = yes'
     iproc='390'
     proc=''
@@ -2170,7 +2170,7 @@ EOF
     ;;
 
   s390x)
-    _def_arch='#define ARCH_S390X 1'
+    _arch='S390X'
     _target_arch='ARCH_S390X = yes'
     iproc='390x'
     proc=''
@@ -2180,7 +2180,7 @@ EOF
     ;;
 
   vax)
-    _def_arch='#define ARCH_VAX 1'
+    _arch='VAX'
     _target_arch='ARCH_VAX = yes'
     iproc='vax'
     proc=''
@@ -2190,7 +2190,7 @@ EOF
     ;;
 
   generic)
-    _def_arch='#define ARCH_GENERIC 1'
+    _arch='GENERIC'
     _target_arch='ARCH_GENERIC = yes'
     iproc=''
     proc=''
@@ -8166,24 +8166,11 @@ $_def_pvr
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 $_def_words_endian
 
-$_def_arch
-$_def_arch_x86
+`ff_config_enable "$_arch_all" "$_arch" "ARCH"`
 
 /* For the PPC.  G5 has the dcbzl when in 64bit mode but G4s and earlier do not
    have the instruction. */
 $_def_dcbzl
-
-/* libmpeg2 wants ARCH_PPC and the rest of mplayer use ARCH_POWERPC,
- * define ARCH_PPC if ARCH_POWERPC is set to cope with that.
- */
-#ifdef ARCH_POWERPC
-#define ARCH_PPC 1
-#endif
-
-/* the same issue as with ARCH_POWERPC but with ffmpeg/libavcodec */
-#ifdef ARCH_ARMV4L
-#define ARCH_ARM 1
-#endif
 
 /* only gcc3 can compile mvi instructions */
 $_def_gcc_mvi_support
@@ -8411,30 +8398,10 @@ $_def_vis	// only define if you have VIS ( ultrasparc )
 #else
 #define ENABLE_MMX 0
 #endif
-#ifdef ARCH_ARMV4L
-#define ENABLE_ARMV4L 1
-#else
-#define ENABLE_ARMV4L 0
-#endif
 #ifdef HAVE_MLIB
 #define ENABLE_MLIB 1
 #else
 #define ENABLE_MLIB 0
-#endif
-#ifdef ARCH_SPARC
-#define ENABLE_SPARC 1
-#else
-#define ENABLE_SPARC 0
-#endif
-#ifdef ARCH_ALPHA
-#define ENABLE_ALPHA 1
-#else
-#define ENABLE_ALPHA 0
-#endif
-#ifdef ARCH_POWERPC
-#define ENABLE_POWERPC 1
-#else
-#define ENABLE_POWERPC 0
 #endif
 #define ENABLE_MMI 0
 #define ENABLE_SH4 0
