@@ -3394,7 +3394,7 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
     {
       mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
       stream_t *s = demuxer->stream;
-      int64_t target_timecode = 0, diff, min_diff=0xFFFFFFFL;
+      int64_t target_timecode = 0, diff, min_diff=0xFFFFFFFFFFFFFFFLL;
       int i;
 
       if (!(flags & 1))  /* relative seek */
