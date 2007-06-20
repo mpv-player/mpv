@@ -504,8 +504,9 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   // Block ourselves until data becomes available:
   TaskScheduler& scheduler
     = bufferQueue->readSource()->envir().taskScheduler();
-  int delay = bufferQueue->prevPacketPTS * 1.05 >
-      rtpState->mediaSession->playEndTime() ? 1000000 : 10000000;
+  int delay = 10000000;
+  if (bufferQueue->prevPacketPTS * 1.05 > rtpState->mediaSession->playEndTime())
+    delay /= 10;
   task = scheduler.scheduleDelayedTask(delay, onSourceClosure, bufferQueue);
   scheduler.doEventLoop(&bufferQueue->blockingFlag);
   scheduler.unscheduleDelayedTask(task);
