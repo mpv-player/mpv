@@ -372,8 +372,6 @@ int demux_ogg_sub_id(demuxer_t *demuxer, int index);
 char *demux_ogg_sub_lang(demuxer_t *demuxer, int index);
 #endif
 
-#endif
-
 extern int demuxer_get_current_time(demuxer_t *demuxer);
 extern double demuxer_get_time_length(demuxer_t *demuxer);
 extern int demuxer_get_percent_pos(demuxer_t *demuxer);
@@ -388,3 +386,5 @@ extern int get_demuxer_type_from_name(char *demuxer_name, int *force);
 int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end);
 int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts, int *num_chapters, char **chapter_name);
 
+
+#endif /* __DEMUXER_H */
