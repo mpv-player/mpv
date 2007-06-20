@@ -231,6 +231,7 @@ static char help_text[]=
 #define MSGTR_Contrast "Contrast"
 #define MSGTR_Saturation "Saturation"
 #define MSGTR_Hue "Hue"
+#define MSGTR_Balance "Balance"
 
 // property state
 #define MSGTR_MuteStatus "Mute: %s"
@@ -706,6 +707,7 @@ static char help_text[]=
 
 #define MSGTR_InsertingAfVolume "[Mixer] No hardware mixing, inserting volume filter.\n"
 #define MSGTR_NoVolume "[Mixer] No volume control available.\n"
+#define MSGTR_NoBalance "[Mixer] No balance control available.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -1077,6 +1079,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Volume "Volume"
 #define MSGTR_VO_SUB_Brightness "Brightness"
 #define MSGTR_VO_SUB_Hue "Hue"
+#define MSGTR_VO_SUB_Balance "Balance"
 
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "Source image dimensions are too high: %ux%u (maximum is %ux%u)\n"

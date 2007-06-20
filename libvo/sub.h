@@ -91,6 +91,7 @@ extern void* vo_vobsub;
 #define OSD_VOLUME 0x09
 #define OSD_BRIGHTNESS 0x0A
 #define OSD_HUE 0x0B
+#define OSD_BALANCE 0x0C
 #define OSD_PANSCAN 0x50
 
 #define OSD_PB_START 0x10

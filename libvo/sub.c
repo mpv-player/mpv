@@ -58,9 +58,10 @@ char * __sub_osd_names[]={
     MSGTR_VO_SUB_Saturation,
     MSGTR_VO_SUB_Volume,
     MSGTR_VO_SUB_Brightness,
-    MSGTR_VO_SUB_Hue
+    MSGTR_VO_SUB_Hue,
+    MSGTR_VO_SUB_Balance
 };
-char * __sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", ""};
+char * __sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", "", "" };
 
 //static int vo_font_loaded=-1;
 font_desc_t* vo_font=NULL;

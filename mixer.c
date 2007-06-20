@@ -118,3 +118,46 @@ void mixer_mute(mixer_t *mixer)
     mixer->muted=1;
    }
 }
+
+void mixer_getbalance(mixer_t *mixer, float *val)
+{
+  *val = 0.f;
+  if(!mixer->afilter)
+    return;
+  af_control_any_rev(mixer->afilter,
+      AF_CONTROL_PAN_BALANCE | AF_CONTROL_GET, val);
+}
+
+void mixer_setbalance(mixer_t *mixer, float val)
+{
+  float level[AF_NCH];
+  int i;
+  af_control_ext_t arg_ext = { .arg = level };
+  af_instance_t* af_pan_balance;
+
+  if(!mixer->afilter)
+    return;
+  if (af_control_any_rev(mixer->afilter,
+	AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val))
+    return;
+
+  if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {
+    mp_msg(MSGT_GLOBAL, MSGL_ERR, MSGTR_NoBalance);
+    return;
+  }
+
+  af_init(mixer->afilter);
+  /* make all other channels pass thru since by default pan blocks all */
+  memset(level, 0, sizeof(level));
+  for (i = 2; i < AF_NCH; i++) {
+    arg_ext.ch = i;
+    level[i] = 1.f;
+    af_pan_balance->control(af_pan_balance,
+	AF_CONTROL_PAN_LEVEL | AF_CONTROL_SET, &arg_ext);
+    level[i] = 0.f;
+  }
+
+  af_pan_balance->control(af_pan_balance,
+      AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val);
+}
+

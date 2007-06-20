@@ -571,6 +571,57 @@ static int mp_property_channels(m_option_t * prop, int action, void *arg,
     return m_property_int_ro(prop, action, arg, mpctx->sh_audio->channels);
 }
 
+/// Balance (RW)
+static int mp_property_balance(m_option_t * prop, int action, void *arg,
+			      MPContext * mpctx)
+{
+    float bal;
+
+    if (!mpctx->sh_audio || mpctx->sh_audio->channels < 2)
+	return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET:
+	if (!arg)
+	    return M_PROPERTY_ERROR;
+	mixer_getbalance(&mpctx->mixer, arg);
+	return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+	    char** str = arg;
+	    if (!arg)
+		return M_PROPERTY_ERROR;
+	    mixer_getbalance(&mpctx->mixer, &bal);
+	    if (bal == 0.f)
+		*str = strdup("center");
+	    else if (bal == -1.f)
+		*str = strdup("left only");
+	    else if (bal == 1.f)
+		*str = strdup("right only");
+	    else {
+		unsigned right = (bal + 1.f) / 2.f * 100.f;
+		*str = malloc(sizeof("left xxx%, right xxx%"));
+		sprintf(*str, "left %d%%, right %d%%", 100 - right, right);
+	    }
+	    return M_PROPERTY_OK;
+	}
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+	mixer_getbalance(&mpctx->mixer, &bal);
+	bal += (arg ? *(float*)arg : .1f) *
+	    (action == M_PROPERTY_STEP_UP ? 1.f : -1.f);
+	M_PROPERTY_CLAMP(prop, bal);
+	mixer_setbalance(&mpctx->mixer, bal);
+	return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+	if (!arg)
+	    return M_PROPERTY_ERROR;
+	M_PROPERTY_CLAMP(prop, *(float*)arg);
+	mixer_setbalance(&mpctx->mixer, *(float*)arg);
+	return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 /// Selected audio id (RW)
 static int mp_property_audio(m_option_t * prop, int action, void *arg,
 			     MPContext * mpctx)
@@ -1589,6 +1640,8 @@ static m_option_t mp_properties[] = {
      0, 0, 0, NULL },
     { "switch_audio", mp_property_audio, CONF_TYPE_INT,
      CONF_RANGE, -2, MAX_A_STREAMS - 1, NULL },
+    { "balance", mp_property_balance, CONF_TYPE_FLOAT,
+     M_OPT_RANGE, -1, 1, NULL },
 
     // Video
     { "fullscreen", mp_property_fullscreen, CONF_TYPE_FLAG,
@@ -1743,6 +1796,7 @@ static struct {
     { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
     { "audio_delay", MP_CMD_AUDIO_DELAY, 0, 0, -1, MSGTR_AVDelayStatus },
     { "switch_audio", MP_CMD_SWITCH_AUDIO, 1, 0, -1, MSGTR_OSDAudio },
+    { "balance", MP_CMD_BALANCE, 0, OSD_BALANCE, -1, MSGTR_Balance },
     // video
     { "fullscreen", MP_CMD_VO_FULLSCREEN, 1, 0, -1, NULL },
     { "panscan", MP_CMD_PANSCAN, 0, OSD_PANSCAN, -1, MSGTR_Panscan },

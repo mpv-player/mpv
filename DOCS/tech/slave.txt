@@ -419,6 +419,7 @@ time_pos           time      0               X   X   X    position in seconds
 metadata           str list                  X            list of metadata key/value
 metadata/*         string                    X            metadata values
 volume             float     0       100     X   X   X    change volume
+balance            float     -1      1       X   X   X    change audio balance
 mute               flag      0       1       X   X   X
 audio_delay        float     -100    100     X   X   X
 audio_format       int                       X
