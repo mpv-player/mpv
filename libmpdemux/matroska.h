@@ -7,8 +7,6 @@
 #ifndef __MATROSKA_H
 #define __MATROSKA_H
 
-#include "demuxer.h"
-
 #define MKV_A_AAC_2MAIN  "A_AAC/MPEG2/MAIN"
 #define MKV_A_AAC_2LC    "A_AAC/MPEG2/LC"
 #define MKV_A_AAC_2SBR   "A_AAC/MPEG2/LC/SBR"
