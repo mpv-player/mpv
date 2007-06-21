@@ -81,7 +81,8 @@ with some cryptic message containing the phrase
 <systemitem>internal compiler error</systemitem> or
 <systemitem>unable to find a register to spill</systemitem> or
 <systemitem>can't find a register in class `GENERAL_REGS'
-while reloading `asm'</systemitem>.</para></question>
+while reloading `asm'</systemitem>.
+</para></question>
 <answer><para>
 You have stumbled over a bug in <application>gcc</application>. Please
 <ulink url="http://gcc.gnu.org/bugs.html">report it to the gcc team</ulink>
@@ -155,7 +156,8 @@ can be a problem on Mandrake systems).
 
 <qandaentry>
 <question><para>
-Building on Mac OS 10.3 leads to several link errors</para></question>
+Building on Mac OS 10.3 leads to several link errors.
+</para></question>
 <answer>
 <para>
 The link error you're experiencing most likely looks like this:
@@ -787,7 +789,7 @@ This can have multiple reasons.
 </para></listitem>
 <listitem><para>
   If it is an AVI, maybe it has bad interleaving, try the
-  <option>-ni</option> to work around this.
+  <option>-ni</option> option to work around this.
   Or it may have a bad header, in this case <option>-nobps</option>
   and/or <option>-mc 0</option> can help.
 </para></listitem>
