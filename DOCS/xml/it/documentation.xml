@@ -42,7 +42,7 @@
 
 <para>
 Se installi per la prima volta: assicurati di leggere tutto da qui fino alla
-fine della sezione sull'installazione, e segui i link che troverai. Se
+fine della sezione sull'installazione e segui i collegamenti che troverai. Se
 hai altre domande, ritorna alla <link linkend="toc">Tabella dei Contenuti</link>
 e cerca l'argomento, leggi le <xref linkend="faq"/>, o prova a ricercare nei
 file (con grep, per esempio). Molte domande possono avere risposta da qualche
@@ -86,11 +86,11 @@ coreani, e del visualizzatore su schermo (OnScreen Display, OSD)?
 </para>
 
 <para>
-Il riproduttore è decisamente solido nella riproduzione di file MPEG rovinati
-(utile per alcuni VCD), e riproduce file AVI non corretti, che sono illegibili
-con il famoso windows media player. Anche gli AVI non indicizzati possono
-essere letti, e puoi ricostruire il loro indice temporaneamente con l'opzione
-<option>-idx</option>, o permanentemente con
+Il riproduttore è decisamente robusto nella riproduzione di file MPEG rovinati
+(utile per alcuni VCD) e riproduce file AVI imperfetti, che sono illegibili
+con il famoso windows media player. Possono venir letti anche gli AVI non
+indicizzati e puoi ricostruire il loro indice temporaneamente con l'opzione
+<option>-idx</option> o permanentemente con
 <application>MEncoder</application>, abilitando così la ricerca!
 Come puoi vedere, la stabilità e la qualità sono lo cose più importanti,
 ma anche la velocità è impressionante. C'è anche un potente sistema di
