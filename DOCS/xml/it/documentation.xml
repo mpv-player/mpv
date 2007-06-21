@@ -87,7 +87,7 @@ coreani, e del visualizzatore su schermo (OnScreen Display, OSD)?
 
 <para>
 Il riproduttore è decisamente robusto nella riproduzione di file MPEG rovinati
-(utile per alcuni VCD) e riproduce file AVI imperfetti, che sono illegibili
+(utile per alcuni VCD) e riproduce file AVI imperfetti, che sono illeggibili
 con il famoso windows media player. Possono venir letti anche gli AVI non
 indicizzati e puoi ricostruire il loro indice temporaneamente con l'opzione
 <option>-idx</option> o permanentemente con
