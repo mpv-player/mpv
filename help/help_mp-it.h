@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r23416
+// Updated to help_mp-en.h r23588
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -230,6 +230,7 @@ static char help_text[]=
 #define MSGTR_Contrast "Contrasto"
 #define MSGTR_Saturation "Saturazione"
 #define MSGTR_Hue "Tonalità"
+#define MSGTR_Balance "Bilanciamento"
 
 // property state
 #define MSGTR_MuteStatus "Muto: %so"
@@ -706,7 +707,8 @@ static char help_text[]=
 #define MSGTR_SelectedVideoMode "XF86VM: Scelta modalità video %dx%d per la dimensione immagine %dx%d.\n"
 
 #define MSGTR_InsertingAfVolume "[Mixer] Nessun mixer hardware, filtro volume inserito automaticamente.\n"
-#define MSGTR_NoVolume "[Mixer] Nessuna regolazione di volume disponibile.\n"
+#define MSGTR_NoVolume "[Mixer] Regolazione del volume non disponibile.\n"
+#define MSGTR_NoBalance "[Mixer] Controllo del bilanciamento non disponibile.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -1081,6 +1083,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Volume "Volume"
 #define MSGTR_VO_SUB_Brightness "Luminosità"
 #define MSGTR_VO_SUB_Hue "Tonalità"
+#define MSGTR_VO_SUB_Balance "Bilanciamento"
 
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "Dimensioni dell'immagine origine troppo grandi: %ux%u (il massimo è %ux%u)\n"
