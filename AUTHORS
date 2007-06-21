@@ -782,6 +782,7 @@ Togni, Roberto (rxt) <r_togni@tiscali.it>
 Tresoldi, Paolo "PaulTT" (ptt) <paultt@hackerjournal.it>
     * mplayer -endpos option
     * Italian man page and console messages translations
+    * Italian documentation translation
 
 Tropea, Salvador Eduardo <salvador@inti.gov.ar>
     * subtitle parsing/displaying related patches
@@ -923,7 +924,7 @@ López, Juan Martin (nauj27) <nauj27@teleline.es>
     * Spanish documentation translation
 
 Mizda, Gábor (Gabrov) <gabrov@freemail.hu>
-	* Hungarian translation
+    * Hungarian translation
 
 MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
     * Wacław Schiller (Torinthiel) <torinthiel@wp.pl>
