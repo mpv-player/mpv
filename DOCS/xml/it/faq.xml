@@ -62,7 +62,7 @@ Perché non usate autoconf/automake?
 </para></question>
 <answer><para>
 Abbiamo un nostro sistema di compilazione modulare, autoprodotto. Fa
-ragionevolmente un buon lavoro, perciò, perché cambiarlo? E poi, non ci
+un lavoro ragionevolmente buono, perciò, perché cambiarlo? E poi, non ci
 piacciono gli auto* strumenti, proprio come ad
 <ulink url="http://freshmeat.net/articles/view/889/">altre persone</ulink>.
 </para></answer>
@@ -90,7 +90,7 @@ e non a noi. Per qualche ragione <application>MPlayer</application> pare
 riuscire ad attivare bachi del compilatore frequentemente. Tuttavia non
 possiamo correggerli e neanche aggiungere workaround nei nostri sorgenti per i
 bachi nel compilatore. Per evitare questi problemi, o ti affidi a una versione
-del compilatore ritenuta affidabile, o aggiorni spesso.
+del compilatore ritenuta affidabile, o lo aggiorni spesso.
 </para></answer>
 </qandaentry>
 
@@ -143,7 +143,8 @@ Durante il 'make', <application>MPlayer</application> si lamenta che mancano le
 librerie di X11. Non capisco, io <emphasis>ho</emphasis> X11 installato!?
 </para></question>
 <answer><para>
-... ma non hai il pacchetto di sviluppo di X11 installato. O non correttamente.
+... ma non hai il pacchetto di sviluppo di X11 installato, o non è installato
+correttamente.
 Si chiama <filename>XFree86-devel*</filename> sotto Red Hat,
 <filename>xlibs-dev</filename> in Debian Woody e
 <filename>libx11-dev</filename> in Debian Sarge. Controlla anche se esistono i
@@ -156,11 +157,11 @@ problema nei sistemi Mandrake).
 
 <qandaentry>
 <question><para>
-La compilazione sotto Mac OS 10.3 dà molti errori di link
+La compilazione sotto Mac OS 10.3 dà molti errori di link.
 </para></question>
 <answer>
 <para>
-L'errore di link che subisci molto probabilmente è tipo questo:
+L'errore di link che ricevi molto probabilmente è simile a questo:
 <screen>
 ld: Undefined symbols:
 _LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
@@ -192,10 +193,10 @@ Se stai usando <application>X-Code</application>, devi semplicemente
 selezionare questi framework al posto di quelli di sistema.
 </para>
 <para>
-Il binario di <application>MPlayer</application> risultante userè
+Il binario di <application>MPlayer</application> risultante userà
 effettivamente il framework installato sul tuo sistema attraverso i link
-dinamici risolti in esecuzione
-(Puoi verificare ciò usando <systemitem>otool -l</systemitem>).
+dinamici risolti durante l'esecuzione
+(Puoi verificarlo usando <systemitem>otool -l</systemitem>).
 </para>
 </answer>
 </qandaentry>
@@ -231,7 +232,6 @@ istruzioni.
 
 <qandaentry>
 <question><para>
-I have problems playing files with the ... codec. Can I use them?
 Ho dei problemi a leggere dei file col codec ... . Posso usarli?
 </para></question>
 <answer><para>
@@ -252,7 +252,7 @@ Quando avvio la riproduzione, esce questo messaggio, ma tutto sembra a posto:
 <answer><para>
 Ti serve un kernel appositamente impostato per usare il codice di
 temporizzazione per RTC.
-Per i dettagli vedi la sezione della documentazione su
+Per i dettagli leggi la sezione della documentazione su
 <link linkend="rtc">RTC</link>.
 </para></answer>
 </qandaentry>
@@ -262,9 +262,9 @@ Per i dettagli vedi la sezione della documentazione su
 Come posso salvare un'istantanea (screenshot)?
 </para></question>
 <answer><para>
-Per poter salvare un'istananea devi usare un dirver di uscita video che non
-utilizzi un overlay. Sotto X11, <option>-vo x11</option> fara ciò, sotto
-Windows funziona <option>-vo directx:noaccel</option>.
+Per poter salvare un'istananea devi usare un driver di uscita video che non
+utilizzi un sistema di overlay. Sotto X11, <option>-vo x11</option> fara ciò,
+sotto Windows funziona <option>-vo directx:noaccel</option>.
 </para>
 <para>
 Alternativamente puoi eseguire <application>MPlayer</application> con il filtro
@@ -297,29 +297,29 @@ A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
 </varlistentry>
 <varlistentry>
   <term><systemitem>ct: 0.042</systemitem></term>
-  <listitem><para>totale della sincronizzazione A/V eseguita</para></listitem>
+  <listitem><para>sincronizzazione A/V totale eseguita</para></listitem>
 </varlistentry>
 <varlistentry>
   <term><systemitem>57/57</systemitem></term>
   <listitem><para>
-  fotogrammi riprodotti/decodificati (contando dall'ultima ricerca)
+  fotogrammi riprodotti/decodificati (contando dall'ultimo posizionamento)
   </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><systemitem>41%</systemitem></term>
   <listitem><para>
-  utilizzo CPU da parte del codec video, in percentuale
+  utilizzo di CPU da parte del codec video, in percentuale
   (per lo slice rendering e il direct rendering include video_out)
   </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><systemitem>0%</systemitem></term>
-  <listitem><para>utilizzo CPU da parte del video_out</para></listitem>
+  <listitem><para>utilizzo di CPU da parte del video_out</para></listitem>
 </varlistentry>
 <varlistentry>
   <term><systemitem>2.6%</systemitem></term>
   <listitem><para>
-  utilizzo CPU da parte del codec audio, in percentuale
+  utilizzo di CPU da parte del codec audio, in percentuale
   </para></listitem>
 </varlistentry>
 <varlistentry>
@@ -331,7 +331,7 @@ A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
 <varlistentry>
   <term><systemitem>4</systemitem></term>
   <listitem><para>
-  livello corrente della post elaborazione dell'immagine
+  livello corrente della post-elaborazione dell'immagine
   (quando si usa <option>-autoq</option>)
   </para></listitem>
 </varlistentry>
@@ -448,8 +448,8 @@ problemi ed è usabile solo dagli sviluppatori che stanno lavorando sul
 supporto codec. Ha più importanza delle impostazioni codec interne di
 <application>MPlayer</application>, il che crea macello se vengono fatte delle
 modifiche incompatibili in nuove versioni del programma. A meno che non sia
-usato da esperti, è la ricetta del disastro, nella forma di crash e problemi
-di riproduzione apparentemente casuali difficili e da localizzare. Se lo hai
+usato da esperti, è la ricetta per il disastro, nella forma di crash e problemi
+di riproduzione apparentemente casuali e difficili da localizzare. Se lo hai
 ancora in qualche dove sul tuo sistema, dovresti cancellarlo.
 </para></answer>
 </qandaentry>
@@ -489,7 +489,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>nomefile</replaceable> | gre
 
 <qandaentry>
 <question><para>
-Sto cercando di riprodurre un file qualsiasi da internet ma non ce la fa.
+Sto cercando di riprodurre un qualche file da internet ma non ce la fa.
 </para></question>
 <answer><para>
 Prova a riprodurre il flusso con l'opzione <option>-playlist</option>.
@@ -509,7 +509,7 @@ avuto da un amico e lui dice che si vede, prova a confrontarne gli hash
 
 <qandaentry>
 <question><para>
-Ho problemi cercando di vedere i miei sottotitoli, aiuto!!
+Ho problemi con la visualizzazione dei miei sottotitoli, aiuto!!
 </para></question>
 <answer><para>
 Assicurati di avere i font correttamente installati. Ripeti di nuovo i passaggi
@@ -590,11 +590,11 @@ l'esecuzione (<command>./configure --enable-runtime-cpudetection</command>).
 
 <qandaentry>
 <question><para>
-Quando cerco di acquisire dal mio sintonizzatore, funziona, ma i colori sono
+Quando cerco di acquisire dal mio sintonizzatore, ci riesco, ma i colori sono
 strani. Con altre applicazioni è OK.
 </para></question>
 <answer><para>
-Probabilmente la tua scheda riporta come supportati alcuni spazi colore mentre
+Probabilmente la tua scheda riporta alcuni spazi colore come supportati mentre
 in verità non li supporta. Prova con YUY2 al posto dello YV12 di default
 (vedi la sezione <link linkend="tv-input">TV</link>).
 </para></answer>
@@ -619,7 +619,7 @@ può esserti d'aiuto (un'interfaccia SpeedStep per Linux).
 <question><para>
 Quando eseguo <application>MPlayer</application> da utente
 <systemitem class="username">root</systemitem> sul mio portatile,
-l'audio/video vanno totalmente fuori sincronia.
+l'audio e il video vanno totalmente fuori sincronia.
 Funziona normalmente quando lo eseguo da utente normale.
 </para></question>
 <answer><para>
@@ -631,7 +631,8 @@ tuo portatile o usa l'opzione <option>-nortc</option>.
 
 <qandaentry>
 <question><para>
-Riproducendo un film di colpo diventa scattoso e ottengo il messaggio seguente:
+Riproducendo un film, questo di colpo diventa scattoso e ottengo il messaggio
+seguente:
 <screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
 </para></question>
 <answer><para>
@@ -648,11 +649,11 @@ insieme. Prova con <option>-nocache</option>.
 
 <qandaentry>
 <question><para>
-Quando vado a schermo intero ottengo solo bordi neri intorno all'immagine e
+Quando riproduco a schermo intero ottengo solo bordi neri intorno all'immagine e
 nessun vero ridimensionamento in modalità a schermo intero.
 </para></question>
 <answer><para>
-Il tuo driver di uscita video non supporta il ridimensionamento via hardware e
+Il tuo driver di uscita video non gestisce il ridimensionamento via hardware e
 dato che il ridimensionamento software può essere incredibilmente lento,
 <application>MPlayer</application> non lo abilita in automatico. Molto
 probabilmente stai usando il driver di uscita video
