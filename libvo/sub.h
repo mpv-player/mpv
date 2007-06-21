@@ -2,10 +2,6 @@
 #ifndef __MPLAYER_SUB_H
 #define __MPLAYER_SUB_H
 
-#ifdef HAVE_TV_TELETEXT
-#include "libmpcodecs/mp_image.h"
-#endif
-
 typedef struct mp_osd_bbox_s {
     int x1,y1,x2,y2;
 } mp_osd_bbox_t;
@@ -15,7 +11,6 @@ typedef struct mp_osd_bbox_s {
 #define OSDTYPE_PROGBAR 3
 #define OSDTYPE_SPU 4
 #define OSDTYPE_DVDNAV 5
-#define OSDTYPE_TELETEXT 6
 
 #define OSDFLAG_VISIBLE 1
 #define OSDFLAG_CHANGED 2
@@ -68,11 +63,6 @@ extern sub_data* subdata; //currently used subtitles
 extern subtitle* vo_sub;
 
 extern unsigned char* vo_osd_text;
-
-#ifdef HAVE_TV_TELETEXT
-extern unsigned char* vo_osd_teletex_text;
-extern int vo_osd_teletext_flip;
-#endif
 
 extern int vo_osd_progbar_type;
 extern int vo_osd_progbar_value;   // 0..255

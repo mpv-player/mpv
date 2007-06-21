@@ -460,11 +460,6 @@ m_option_t tvopts_conf[]={
 #endif
 	{"adevice", &tv_param_adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-#ifdef HAVE_TV_TELETEXT
-    {"tdevice", &tv_param_tdevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"tformat", &tv_param_tformat, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"tpage", &tv_param_tpage, CONF_TYPE_INT, CONF_RANGE, 100, 999, NULL},
-#endif
 	{"audioid", &tv_param_audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };

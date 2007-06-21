@@ -20,8 +20,5 @@ int spudec_changed(void *this);
 void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox);
 void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 void spudec_set_forced_subs_only(void * const this, const unsigned int flag);
-#ifdef HAVE_TV_TELETEXT
-void spudec_heartbeat_teletext(void *this, void *imgptr);
-#endif
 #endif
 

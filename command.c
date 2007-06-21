@@ -1459,134 +1459,6 @@ static int mp_property_tv_color(m_option_t * prop, int action, void *arg,
 
 #endif
 
-#ifdef HAVE_TV_TELETEXT
-/// teletext page (RW)
-static int mp_property_teletext_page(m_option_t * prop, int action, void *arg,
-                  MPContext * mpctx)
-{
-    int val,result;
-    tvi_handle_t *tvh = mpctx->demuxer->priv;
-    if (mpctx->demuxer->type != DEMUXER_TYPE_TV || !tvh || !tvh->priv_vbi)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_SET_PAGE, arg);
-	break;
-    case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_GET_PAGE, arg);
-	break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        val = (arg ? *(int *) arg : 1) * (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_STEP_PAGE, &val);
-	break;
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-    return (result==TVI_CONTROL_TRUE?M_PROPERTY_OK:M_PROPERTY_ERROR);
-}
-/// VBI teletext mode (RW)
-static int mp_property_teletext_mode(m_option_t * prop, int action, void *arg,
-                  MPContext * mpctx)
-{
-    int val,result;
-    tvi_handle_t *tvh = mpctx->demuxer->priv;
-    if (mpctx->demuxer->type != DEMUXER_TYPE_TV || !tvh || !tvh->priv_vbi)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_SET_MODE, arg);
-	break;
-    case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_GET_MODE, arg);
-	break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:    
-        val = (arg ? *(int *) arg : 1) * (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_STEP_MODE, &val);
-	break;
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-    return (result==TVI_CONTROL_TRUE?M_PROPERTY_OK:M_PROPERTY_ERROR);
-}
-/// VBI teletext format (R)
-static int mp_property_teletext_format(m_option_t * prop, int action, void *arg,
-                  MPContext * mpctx)
-{
-    int val,result;
-    tvi_handle_t *tvh = mpctx->demuxer->priv;
-    if (mpctx->demuxer->type != DEMUXER_TYPE_TV || !tvh || !tvh->priv_vbi)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_GET_FORMAT, arg);
-	break;
-    case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_SET_FORMAT, arg);
-	break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        val = (arg ? *(int *) arg : 1) * (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_STEP_FORMAT, &val);
-	break;
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-    return (result==TVI_CONTROL_TRUE?M_PROPERTY_OK:M_PROPERTY_ERROR);
-}
-
-/// VBI teletext half-page mode (RW)
-static int mp_property_teletext_half_page(m_option_t * prop, int action, void *arg,
-                  MPContext * mpctx)
-{
-    int val,result;
-    tvi_handle_t *tvh = mpctx->demuxer->priv;
-    if (mpctx->demuxer->type != DEMUXER_TYPE_TV || !tvh || !tvh->priv_vbi)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_GET_HALF_PAGE, arg);
-	break;
-    case M_PROPERTY_SET:
-        if (!arg)
-            return M_PROPERTY_ERROR;
-        M_PROPERTY_CLAMP(prop, *(int *) arg);
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_SET_HALF_PAGE, arg);
-	break;
-    case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-        val = (arg ? *(int *) arg : 1) * (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-        result=tv_teletext_control(tvh, TVI_CONTROL_VBI_STEP_HALF_PAGE, &val);
-	break;
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
-    }
-    return (result==TVI_CONTROL_TRUE?M_PROPERTY_OK:M_PROPERTY_ERROR);
-}
-#endif /* HAVE_TV_TELETEXT */
-
 ///@}
 
 /// All properties available in MPlayer.
@@ -1712,17 +1584,6 @@ static m_option_t mp_properties[] = {
      M_OPT_RANGE, -100, 100, (void *) TV_COLOR_SATURATION },
     { "tv_hue", mp_property_tv_color, CONF_TYPE_INT,
      M_OPT_RANGE, -100, 100, (void *) TV_COLOR_HUE },
-#endif
-
-#ifdef HAVE_TV_TELETEXT
-    { "teletext_page", mp_property_teletext_page, CONF_TYPE_INT,
-     M_OPT_RANGE, -999, 999, NULL },
-    { "teletext_mode", mp_property_teletext_mode, CONF_TYPE_INT,
-     M_OPT_RANGE, 0, 3, NULL },
-    { "teletext_format", mp_property_teletext_format, CONF_TYPE_INT,
-     M_OPT_RANGE, 0, 3, NULL },
-    { "teletext_half_page", mp_property_teletext_half_page, CONF_TYPE_INT,
-     M_OPT_RANGE, 0, 2, NULL },
 #endif
 
     { NULL, NULL, NULL, 0, 0, 0, NULL }
@@ -2419,16 +2280,6 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_step_chanlist((tvi_handle_t *) (mpctx->demuxer->priv));
 	    break;
-#ifdef HAVE_TV_TELETEXT
-        case MP_CMD_TV_TELETEXT_ADD_DEC:
-            if (mpctx->file_format == DEMUXER_TYPE_TV)
-                tv_teletext_add_dec((tvi_handle_t *) (mpctx->demuxer->priv),cmd->args[0].v.s);
-            break;
-        case MP_CMD_TV_TELETEXT_GO_LINK:
-            if (mpctx->file_format == DEMUXER_TYPE_TV)
-                tv_teletext_go_link((tvi_handle_t *) (mpctx->demuxer->priv),cmd->args[0].v.i);
-            break;
-#endif /* HAVE_TV_TELETEXT */
 #endif				/* USE_TV */
 
 	case MP_CMD_SUB_LOAD:
