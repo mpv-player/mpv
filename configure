@@ -2478,7 +2478,7 @@ test "$_ssse3"     = yes && _cpuexts="SSSE3 $_cpuexts"
 test "$_cmov"      = yes && _cpuexts="CMOV $_cpuexts"
 test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
 test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
-test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"Y
+test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 
 # Checking kernel version...
