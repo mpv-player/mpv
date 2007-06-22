@@ -277,6 +277,9 @@ static int createRenderingContext(void) {
         vo_dx = xinerama_x;
         vo_dy = xinerama_y;
     } else {
+        // make sure there are no "stale" resize events
+        // that would set vo_d* to wrong values
+        vo_w32_check_events();
         vo_dwidth = prev_width;
         vo_dheight = prev_height;
         vo_dx = prev_x;
