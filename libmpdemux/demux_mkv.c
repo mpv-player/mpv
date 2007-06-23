@@ -292,7 +292,7 @@ aac_get_sample_rate_index (uint32_t sample_rate)
 static int
 vobsub_parse_size (sh_sub_t *sh, const char *start)
 {
-  if (sscanf(&start[6], "%dx%d", sh->width, sh->height) == 2)
+  if (sscanf(&start[6], "%dx%d", &sh->width, &sh->height) == 2)
     {
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub size: %ux%u\n",
              sh->width, sh->height);
