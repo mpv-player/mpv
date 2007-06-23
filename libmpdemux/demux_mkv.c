@@ -290,19 +290,19 @@ aac_get_sample_rate_index (uint32_t sample_rate)
 
 
 static int
-vobsub_parse_size (mkv_track_t *t, const char *start)
+vobsub_parse_size (sh_sub_t *sh, const char *start)
 {
-  if (sscanf(&start[6], "%dx%d", &t->sh_sub.width, &t->sh_sub.height) == 2)
+  if (sscanf(&start[6], "%dx%d", sh->width, sh->height) == 2)
     {
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub size: %ux%u\n",
-             t->sh_sub.width, t->sh_sub.height);
+             sh->width, sh->height);
       return 1;
     }
   return 0;
 }
 
 static int
-vobsub_parse_palette (mkv_track_t *t, const char *start)
+vobsub_parse_palette (sh_sub_t *sh, const char *start)
 {
   int i, r, g, b, y, u, v, tmp;
 
@@ -319,7 +319,7 @@ vobsub_parse_palette (mkv_track_t *t, const char *start)
       y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
       u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
       v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
-      t->sh_sub.palette[i] = y << 16 | u << 8 | v;
+      sh->palette[i] = y << 16 | u << 8 | v;
       start += 6;
       while ((*start == ',') || isspace(*start))
         start++;
@@ -328,23 +328,23 @@ vobsub_parse_palette (mkv_track_t *t, const char *start)
     {
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub palette: %06x,%06x,"
              "%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,"
-             "%06x,%06x,%06x\n", t->sh_sub.palette[0],
-             t->sh_sub.palette[1], t->sh_sub.palette[2],
-             t->sh_sub.palette[3], t->sh_sub.palette[4],
-             t->sh_sub.palette[5], t->sh_sub.palette[6],
-             t->sh_sub.palette[7], t->sh_sub.palette[8],
-             t->sh_sub.palette[9], t->sh_sub.palette[10],
-             t->sh_sub.palette[11], t->sh_sub.palette[12],
-             t->sh_sub.palette[13], t->sh_sub.palette[14],
-             t->sh_sub.palette[15]);
-      t->sh_sub.has_palette = 1;
+             "%06x,%06x,%06x\n", sh->palette[0],
+             sh->palette[1], sh->palette[2],
+             sh->palette[3], sh->palette[4],
+             sh->palette[5], sh->palette[6],
+             sh->palette[7], sh->palette[8],
+             sh->palette[9], sh->palette[10],
+             sh->palette[11], sh->palette[12],
+             sh->palette[13], sh->palette[14],
+             sh->palette[15]);
+      sh->has_palette = 1;
       return 2;
     }
   return 0;
 }
 
 static int
-vobsub_parse_custom_colors (mkv_track_t *t, const char *start)
+vobsub_parse_custom_colors (sh_sub_t *sh, const char *start)
 {
   int use_custom_colors, i;
 
@@ -365,7 +365,7 @@ vobsub_parse_custom_colors (mkv_track_t *t, const char *start)
          start++;
        for (i = 0; i < 4; i++)
          {
-           if (sscanf(start, "%06x", &t->sh_sub.colors[i]) != 1)
+           if (sscanf(start, "%06x", &sh->colors[i]) != 1)
              break;
            start += 6;
            while ((*start == ',') || isspace(*start))
@@ -373,32 +373,32 @@ vobsub_parse_custom_colors (mkv_track_t *t, const char *start)
          }
        if (i == 4)
          {
-           t->sh_sub.custom_colors = 4;
+           sh->custom_colors = 4;
            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub colors: %06x,"
-                  "%06x,%06x,%06x\n", t->sh_sub.colors[0],
-                  t->sh_sub.colors[1], t->sh_sub.colors[2],
-                  t->sh_sub.colors[3]);
+                  "%06x,%06x,%06x\n", sh->colors[0],
+                  sh->colors[1], sh->colors[2],
+                  sh->colors[3]);
          }
      }
    if (!use_custom_colors)
-     t->sh_sub.custom_colors = 0;
+     sh->custom_colors = 0;
    return 4;
 }
 
 static int
-vobsub_parse_forced_subs (mkv_track_t *t, const char *start)
+vobsub_parse_forced_subs (sh_sub_t *sh, const char *start)
 {
   start += 12;
   while (isspace(*start))
     start++;
   if (!strncasecmp(start, "on", 2) || (*start == '1'))
-    t->sh_sub.forced_subs_only = 1;
+    sh->forced_subs_only = 1;
   else if (!strncasecmp(start, "off", 3) || (*start == '0'))
-    t->sh_sub.forced_subs_only = 0;
+    sh->forced_subs_only = 0;
   else
     return 0;
   mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub forced subs: %d\n",
-         t->sh_sub.forced_subs_only);
+         sh->forced_subs_only);
   return 8;
 }
 
@@ -459,13 +459,13 @@ demux_mkv_parse_idx (mkv_track_t *t)
           *pos = 0;
 
           if (!strncasecmp(start, "size: ", 6))
-            things_found |= vobsub_parse_size(t, start);
+            things_found |= vobsub_parse_size(&t->sh_sub, start);
           else if (!strncasecmp(start, "palette:", 8))
-            things_found |= vobsub_parse_palette(t, start);
+            things_found |= vobsub_parse_palette(&t->sh_sub, start);
           else if (!strncasecmp(start, "custom colors:", 14))
-            things_found |= vobsub_parse_custom_colors(t, start);
+            things_found |= vobsub_parse_custom_colors(&t->sh_sub, start);
           else if (!strncasecmp(start, "forced subs:", 12))
-            things_found |= vobsub_parse_forced_subs(t, start);
+            things_found |= vobsub_parse_forced_subs(&t->sh_sub, start);
 
           if (last)
             break;
