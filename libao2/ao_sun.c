@@ -655,6 +655,7 @@ static int get_space(void){
 #if !defined (__OpenBSD__) && !defined(__NetBSD__)
     if (queued_bursts - info.play.eof > 2)
 	return 0;
+    return ao_data.outburst;
 #else
     return info.hiwat * info.blocksize - info.play.seek;
 #endif
