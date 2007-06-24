@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23272 -->
+<!-- synced with r23594 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -317,7 +317,7 @@ EndSection<!--
 <para>
 Если хотите использовать Xv с картами на базе Kyro (например,
 Hercules Prophet 4000XT), следует скачать драйверы с
-<ulink url="http://www.powervr.com/">сайта PowerVR</ulink>
+<ulink url="http://www.powervr.com/">сайта PowerVR</ulink>.
 </para>
 </sect2>
 </sect1>

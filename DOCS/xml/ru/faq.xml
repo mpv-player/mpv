@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with  r21930  -->
+<!-- synced with  r23608  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -146,14 +146,14 @@ Configure завершается с указанным сообщением, и 
 <filename>xlibs-dev</filename> в Debian Woody и 
 <filename>libx11-dev</filename> в Debian Sarge. Также проверьте существуют ли
 символические ссылки <filename class="directory">/usr/X11</filename> и
-<filename class="directory">/usr/include/X11</filename> (это может быть 
-проблемой в Mandrake).
+<filename class="directory">/usr/include/X11</filename>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Сборка в Mac OS 10.3 приводит к нескольким ошибкам линковки</para></question>
+Сборка в Mac OS 10.3 приводит к нескольким ошибкам линковки
+</para></question>
 <answer>
 <para>
 Как правило, ошибка линковки выглядит так:
