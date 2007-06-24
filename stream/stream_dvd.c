@@ -262,20 +262,26 @@ int dvd_aid_from_lang(stream_t *stream, unsigned char* lang) {
 }
 
 int dvd_number_of_subs(stream_t *stream) {
+  int i;
+  int maxid = -1;
   dvd_priv_t *d;
   if (!stream) return -1;
   d = stream->priv;
   if (!d) return -1;
-  return d->nr_of_subtitles;
+  for (i = 0; i < d->nr_of_subtitles; i++)
+    if (d->subtitles[i].id > maxid) maxid = d->subtitles[i].id;
+  return maxid + 1;
 }
 
 int dvd_lang_from_sid(stream_t *stream, int id) {
+  int i;
   dvd_priv_t *d;
   if (!stream) return 0;
   d = stream->priv;
   if (!d) return 0;
-  if (id >= d->nr_of_subtitles) return 0;
-  return d->subtitles[id].language;
+  for (i = 0; i < d->nr_of_subtitles; i++)
+    if (d->subtitles[i].id == id && d->subtitles[i].language) return d->subtitles[i].language;
+  return 0;
 }
 
 int dvd_sid_from_lang(stream_t *stream, unsigned char* lang) {
@@ -286,7 +292,7 @@ int dvd_sid_from_lang(stream_t *stream, unsigned char* lang) {
     for(i=0;i<d->nr_of_subtitles;i++) {
       if(d->subtitles[i].language==code) {
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDsubtitleChannel, i, lang[0],lang[1]);
-        return i;
+        return d->subtitles[i].id;
       }
     }
     lang+=2; 
@@ -1067,10 +1073,10 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
           sub_stream->id = pgc->subp_control[i] >> 8 & 31;
 #endif
 
-        mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, d->nr_of_subtitles, tmp);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", d->nr_of_subtitles);
+        mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, sub_stream->id, tmp);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sub_stream->id);
         if(language && tmp[0])
-          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", d->nr_of_subtitles, tmp);
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sub_stream->id, tmp);
         d->nr_of_subtitles++;
       }
       mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDnumSubtitles,d->nr_of_subtitles);
