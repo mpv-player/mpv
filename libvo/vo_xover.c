@@ -67,10 +67,6 @@ static uint32_t window_width, window_height;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight;
 
-#ifdef HAVE_XINERAMA
-extern int xinerama_screen;
-#endif
-
 static vo_functions_t* sub_vo = NULL;
 
 
