@@ -1017,7 +1017,7 @@ int demux_info_print(demuxer_t *demuxer)
     return 0;
 }
 
-char* demux_info_get(demuxer_t *demuxer, char *opt) {
+char* demux_info_get(demuxer_t *demuxer, const char *opt) {
   int i;
   char **info = demuxer->info;
 
