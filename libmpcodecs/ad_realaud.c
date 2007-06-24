@@ -229,7 +229,6 @@ static int preinit(sh_audio_t *sh){
 #else
   if(raSetDLLAccessPath){
 #endif
-      int i;
       // used by 'SIPR'
       path = realloc(path, strlen(REALCODEC_PATH) + 13);
       sprintf(path, "DT_Codecs=" REALCODEC_PATH);
@@ -241,6 +240,7 @@ static int preinit(sh_audio_t *sh){
 #ifdef USE_WIN32DLL
     if (dll_type == 1)
     {
+      int i;
       for (i=0; i < strlen(path); i++)
         if (path[i] == '/') path[i] = '\\';
       wraSetDLLAccessPath(path);
