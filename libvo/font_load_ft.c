@@ -454,22 +454,6 @@ void blur(
     }
 }
 
-// Gaussian matrix
-static unsigned gmatrix(unsigned char *m, int r, int w, double const A) {
-    unsigned volume = 0;		// volume under Gaussian area is exactly -pi*base/A
-    int mx, my;
-
-    for (my = 0; my<w; ++my) {
-	for (mx = 0; mx<w; ++mx) {
-	    m[mx+my*w] = (exp(A * ((mx-r)*(mx-r)+(my-r)*(my-r))) * base + .5);
-	    volume+= m[mx+my*w];
-	}
-    }
-    mp_msg(MSGT_OSD, MSGL_DBG2, "A= %f\n", A);
-    mp_msg(MSGT_OSD, MSGL_DBG2, "volume: %i; exact: %.0f; volume/exact: %.6f\n\n", volume, -M_PI*base/A, volume/(-M_PI*base/A));
-    return volume;
-}
-
 static void resample_alpha(unsigned char *abuf, unsigned char *bbuf, int width, int height, int stride, float factor)
 {
         int f=factor*256.0f;
