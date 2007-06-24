@@ -1687,11 +1687,11 @@ static uint32_t get_image(mp_image_t *mpi)
                 if(mpi->type == MP_IMGTYPE_STATIC && (priv->surface->flags & SDL_DOUBLEBUF))
                     return VO_FALSE;
                 
-                mpi->planes[0] = priv->surface->pixels + priv->y*priv->surface->pitch;
+                mpi->planes[0] = (uint8_t *)priv->surface->pixels + priv->y*priv->surface->pitch;
                 mpi->stride[0] = priv->surface->pitch;
             }
             else {
-                mpi->planes[0] = priv->rgbsurface->pixels + priv->y*priv->rgbsurface->pitch;
+                mpi->planes[0] = (uint8_t *)priv->rgbsurface->pixels + priv->y*priv->rgbsurface->pitch;
                 mpi->stride[0] = priv->rgbsurface->pitch;
             }
         }
