@@ -22,7 +22,7 @@ play_tree_t*
 play_tree_new(void) {
   play_tree_t* r = calloc(1,sizeof(play_tree_t));
   if(r == NULL)
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",sizeof(play_tree_t));
+    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",(int)sizeof(play_tree_t));
   r->entry_type = PLAY_TREE_ENTRY_NODE;
   return r;
 }
@@ -266,7 +266,7 @@ play_tree_add_file(play_tree_t* pt,char* file) {
   }
   pt->files = (char**)realloc(pt->files,(n+2)*sizeof(char*));
   if(pt->files ==NULL) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",(n+2)*sizeof(char*));
+    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",(n+2)*(int)sizeof(char*));
     return;
   }
 
@@ -305,7 +305,7 @@ play_tree_remove_file(play_tree_t* pt,char* file) {
     memmove(&pt->files[f],&pt->files[f+1],(n-f)*sizeof(char*));
     pt->files = (char**)realloc(pt->files,n*sizeof(char*));
     if(pt->files == NULL) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",(n+2)*sizeof(char*));
+      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",(n+2)*(int)sizeof(char*));
       return -1;
     }
   } else {
@@ -340,7 +340,7 @@ play_tree_set_param(play_tree_t* pt, char* name, char* val) {
 
   pt->params = (play_tree_param_t*)realloc(pt->params,(n+2)*sizeof(play_tree_param_t));
   if(pt->params == NULL) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't realloc params (%d bytes of memory)\n",(n+2)*sizeof(play_tree_param_t));
+      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't realloc params (%d bytes of memory)\n",(n+2)*(int)sizeof(play_tree_param_t));
       return;
   }
   pt->params[n].name = strdup(name);
@@ -375,7 +375,7 @@ play_tree_unset_param(play_tree_t* pt, char* name) {
     memmove(&pt->params[ni],&pt->params[ni+1],(n-ni)*sizeof(play_tree_param_t));
     pt->params = (play_tree_param_t*)realloc(pt->params,n*sizeof(play_tree_param_t));
     if(pt->params == NULL) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",n*sizeof(play_tree_param_t));
+      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",n*(int)sizeof(play_tree_param_t));
       return -1;
     }
   } else {
@@ -482,7 +482,7 @@ play_tree_iter_new(play_tree_t* pt,m_config_t* config) {
 
   iter = calloc(1,sizeof(play_tree_iter_t));
   if(! iter) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate new iterator (%d bytes of memory)\n",sizeof(play_tree_iter_t));
+      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate new iterator (%d bytes of memory)\n",(int)sizeof(play_tree_iter_t));
       return NULL;
   }
   iter->root = pt;
@@ -704,7 +704,7 @@ play_tree_iter_up_step(play_tree_iter_t* iter, int d,int with_nodes) {
     iter->status_stack = NULL;
   }
   if(iter->stack_size > 0 && iter->status_stack == NULL) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",iter->stack_size*sizeof(char*));
+    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",iter->stack_size*(int)sizeof(char*));
     return PLAY_TREE_ITER_ERROR;
   }
   iter->tree = iter->tree->parent;
@@ -738,7 +738,7 @@ play_tree_iter_down_step(play_tree_iter_t* iter, int d,int with_nodes) {
   iter->stack_size++;
   iter->status_stack = (int*)realloc(iter->status_stack,iter->stack_size*sizeof(int));
   if(iter->status_stack == NULL) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",iter->stack_size*sizeof(int));
+    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",iter->stack_size*(int)sizeof(int));
     return PLAY_TREE_ITER_ERROR;
   }
   iter->status_stack[iter->stack_size-1] = iter->loop;
@@ -831,7 +831,7 @@ play_tree_iter_new_copy(play_tree_iter_t* old) {
 
   iter = malloc(sizeof(play_tree_iter_t));
   if(iter == NULL) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",sizeof(play_tree_iter_t));
+    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",(int)sizeof(play_tree_iter_t));
     return NULL;
   }
 ;
@@ -839,7 +839,7 @@ play_tree_iter_new_copy(play_tree_iter_t* old) {
   if(old->status_stack) {
     iter->status_stack = malloc(old->stack_size * sizeof(int));
     if(iter->status_stack == NULL) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",old->stack_size * sizeof(int));
+      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",old->stack_size * (int)sizeof(int));
       free(iter);
       return NULL;
     }
