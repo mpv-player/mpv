@@ -11,9 +11,6 @@
 static void set_window( void );		/* forward declaration to kill warnings */
 #ifdef VO_XMGA
 static void mDrawColorKey( void );	/* forward declaration to kill warnings */
-#ifdef HAVE_XINERAMA
-extern int xinerama_screen;
-#endif
 #endif
 
 static int mga_next_frame=0;
