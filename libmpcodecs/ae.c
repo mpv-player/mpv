@@ -5,12 +5,12 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <math.h>
+#include "config.h"
 #include "libmpdemux/aviheader.h"
 #include "libmpdemux/ms_hdr.h"
 #include "stream/stream.h"
 #include "libmpdemux/muxer.h"
 #include "ae.h"
-#include "config.h"
 
 #include "ae_pcm.h"
 
