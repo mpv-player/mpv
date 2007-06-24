@@ -1175,8 +1175,6 @@ demux_mkv_read_tracks (demuxer_t *demuxer)
   return 0;
 }
 
-extern int index_mode;
-
 static int
 demux_mkv_read_cues (demuxer_t *demuxer)
 {
