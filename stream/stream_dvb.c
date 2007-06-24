@@ -173,7 +173,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			k = colon - line;
 			if(!k)
 				continue;
-			ptr->name = (char*) malloc(k+1);
+			ptr->name = malloc(k+1);
 			if(! ptr->name)
 				continue;
 			strlcpy(ptr->name, line, k+1);
@@ -396,7 +396,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			else	ptr->hier = HIERARCHY_NONE;
 		}
 
-		tmp = (dvb_channel_t*)realloc(list->channels, sizeof(dvb_channel_t) * (list->NUM_CHANNELS + 1));
+		tmp = realloc(list->channels, sizeof(dvb_channel_t) * (list->NUM_CHANNELS + 1));
 		if(tmp == NULL)
 			break;
 
@@ -668,7 +668,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	if(mode != STREAM_READ)
 		return STREAM_UNSUPORTED;
 
-	stream->priv = (dvb_priv_t*) calloc(1, sizeof(dvb_priv_t));
+	stream->priv = calloc(1, sizeof(dvb_priv_t));
 	if(stream->priv ==  NULL)
 		return STREAM_ERROR;
 
@@ -754,7 +754,7 @@ dvb_config_t *dvb_get_config(void)
 	if(dvb_config != NULL)
 		return dvb_config;
 			
-	conf = (dvb_config_t*) malloc(sizeof(dvb_config_t));
+	conf = malloc(sizeof(dvb_config_t));
 	if(conf == NULL)
 		return NULL;
 
@@ -812,7 +812,7 @@ dvb_config_t *dvb_get_config(void)
 		}
 		cards = tmp;
 
-		name = (char*) malloc(20);
+		name = malloc(20);
 		if(name==NULL)
 		{
 			fprintf(stderr, "DVB_CONFIG, can't realloc 20 bytes, skipping\n");
