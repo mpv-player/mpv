@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "config.h"
 
@@ -16,7 +17,7 @@
 //#include "stheader.h"
 
 void print_avih_flags(MainAVIHeader *h, int verbose_level){
-  mp_msg(MSGT_HEADER, verbose_level, "MainAVIHeader.dwFlags: (%ld)%s%s%s%s%s%s\n",h->dwFlags,
+  mp_msg(MSGT_HEADER, verbose_level, "MainAVIHeader.dwFlags: (%"PRId32")%s%s%s%s%s%s\n",h->dwFlags,
     (h->dwFlags&AVIF_HASINDEX)?" HAS_INDEX":"",
     (h->dwFlags&AVIF_MUSTUSEINDEX)?" MUST_USE_INDEX":"",
     (h->dwFlags&AVIF_ISINTERLEAVED)?" IS_INTERLEAVED":"",
@@ -28,28 +29,28 @@ void print_avih_flags(MainAVIHeader *h, int verbose_level){
 
 void print_avih(MainAVIHeader *h, int verbose_level){
   mp_msg(MSGT_HEADER, verbose_level, "======= AVI Header =======\n");
-  mp_msg(MSGT_HEADER, verbose_level, "us/frame: %ld  (fps=%5.3f)\n",h->dwMicroSecPerFrame,1000000.0f/(float)h->dwMicroSecPerFrame);
-  mp_msg(MSGT_HEADER, verbose_level, "max bytes/sec: %ld\n",h->dwMaxBytesPerSec);
-  mp_msg(MSGT_HEADER, verbose_level, "padding: %ld\n",h->dwPaddingGranularity);
+  mp_msg(MSGT_HEADER, verbose_level, "us/frame: %"PRId32"  (fps=%5.3f)\n",h->dwMicroSecPerFrame,1000000.0f/(float)h->dwMicroSecPerFrame);
+  mp_msg(MSGT_HEADER, verbose_level, "max bytes/sec: %"PRId32"\n",h->dwMaxBytesPerSec);
+  mp_msg(MSGT_HEADER, verbose_level, "padding: %"PRId32"\n",h->dwPaddingGranularity);
   print_avih_flags(h, verbose_level);
-  mp_msg(MSGT_HEADER, verbose_level, "frames  total: %ld   initial: %ld\n",h->dwTotalFrames,h->dwInitialFrames);
-  mp_msg(MSGT_HEADER, verbose_level, "streams: %ld\n",h->dwStreams);
-  mp_msg(MSGT_HEADER, verbose_level, "Suggested BufferSize: %ld\n",h->dwSuggestedBufferSize);
-  mp_msg(MSGT_HEADER, verbose_level, "Size:  %ld x %ld\n",h->dwWidth,h->dwHeight);
+  mp_msg(MSGT_HEADER, verbose_level, "frames  total: %"PRId32"   initial: %"PRId32"\n",h->dwTotalFrames,h->dwInitialFrames);
+  mp_msg(MSGT_HEADER, verbose_level, "streams: %"PRId32"\n",h->dwStreams);
+  mp_msg(MSGT_HEADER, verbose_level, "Suggested BufferSize: %"PRId32"\n",h->dwSuggestedBufferSize);
+  mp_msg(MSGT_HEADER, verbose_level, "Size:  %"PRId32" x %"PRId32"\n",h->dwWidth,h->dwHeight);
   mp_msg(MSGT_HEADER, verbose_level, "==========================\n");
 }
 
 void print_strh(AVIStreamHeader *h, int verbose_level){
   mp_msg(MSGT_HEADER, verbose_level, "====== STREAM Header =====\n");
   mp_msg(MSGT_HEADER, verbose_level, "Type: %.4s   FCC: %.4s (%X)\n",(char *)&h->fccType,(char *)&h->fccHandler,(unsigned int)h->fccHandler);
-  mp_msg(MSGT_HEADER, verbose_level, "Flags: %ld\n",h->dwFlags);
+  mp_msg(MSGT_HEADER, verbose_level, "Flags: %"PRId32"\n",h->dwFlags);
   mp_msg(MSGT_HEADER, verbose_level, "Priority: %d   Language: %d\n",h->wPriority,h->wLanguage);
-  mp_msg(MSGT_HEADER, verbose_level, "InitialFrames: %ld\n",h->dwInitialFrames);
-  mp_msg(MSGT_HEADER, verbose_level, "Rate: %ld/%ld = %5.3f\n",h->dwRate,h->dwScale,(float)h->dwRate/(float)h->dwScale);
-  mp_msg(MSGT_HEADER, verbose_level, "Start: %ld   Len: %ld\n",h->dwStart,h->dwLength);
-  mp_msg(MSGT_HEADER, verbose_level, "Suggested BufferSize: %ld\n",h->dwSuggestedBufferSize);
-  mp_msg(MSGT_HEADER, verbose_level, "Quality %ld\n",h->dwQuality);
-  mp_msg(MSGT_HEADER, verbose_level, "Sample size: %ld\n",h->dwSampleSize);
+  mp_msg(MSGT_HEADER, verbose_level, "InitialFrames: %"PRId32"\n",h->dwInitialFrames);
+  mp_msg(MSGT_HEADER, verbose_level, "Rate: %"PRId32"/%"PRId32" = %5.3f\n",h->dwRate,h->dwScale,(float)h->dwRate/(float)h->dwScale);
+  mp_msg(MSGT_HEADER, verbose_level, "Start: %"PRId32"   Len: %"PRId32"\n",h->dwStart,h->dwLength);
+  mp_msg(MSGT_HEADER, verbose_level, "Suggested BufferSize: %"PRId32"\n",h->dwSuggestedBufferSize);
+  mp_msg(MSGT_HEADER, verbose_level, "Quality %"PRId32"\n",h->dwQuality);
+  mp_msg(MSGT_HEADER, verbose_level, "Sample size: %"PRId32"\n",h->dwSampleSize);
   mp_msg(MSGT_HEADER, verbose_level, "==========================\n");
 }
 
@@ -57,15 +58,15 @@ void print_wave_header(WAVEFORMATEX *h, int verbose_level){
   mp_msg(MSGT_HEADER, verbose_level, "======= WAVE Format =======\n");
   mp_msg(MSGT_HEADER, verbose_level, "Format Tag: %d (0x%X)\n",h->wFormatTag,h->wFormatTag);
   mp_msg(MSGT_HEADER, verbose_level, "Channels: %d\n",h->nChannels);
-  mp_msg(MSGT_HEADER, verbose_level, "Samplerate: %ld\n",h->nSamplesPerSec);
-  mp_msg(MSGT_HEADER, verbose_level, "avg byte/sec: %ld\n",h->nAvgBytesPerSec);
+  mp_msg(MSGT_HEADER, verbose_level, "Samplerate: %"PRId32"\n",h->nSamplesPerSec);
+  mp_msg(MSGT_HEADER, verbose_level, "avg byte/sec: %"PRId32"\n",h->nAvgBytesPerSec);
   mp_msg(MSGT_HEADER, verbose_level, "Block align: %d\n",h->nBlockAlign);
   mp_msg(MSGT_HEADER, verbose_level, "bits/sample: %d\n",h->wBitsPerSample);
   mp_msg(MSGT_HEADER, verbose_level, "cbSize: %d\n",h->cbSize);
   if(h->wFormatTag==0x55 && h->cbSize>=12){
       MPEGLAYER3WAVEFORMAT* h2=(MPEGLAYER3WAVEFORMAT *)h;
       mp_msg(MSGT_HEADER, verbose_level, "mp3.wID=%d\n",h2->wID);
-      mp_msg(MSGT_HEADER, verbose_level, "mp3.fdwFlags=0x%lX\n",h2->fdwFlags);
+      mp_msg(MSGT_HEADER, verbose_level, "mp3.fdwFlags=0x%"PRIX32"\n",h2->fdwFlags);
       mp_msg(MSGT_HEADER, verbose_level, "mp3.nBlockSize=%d\n",h2->nBlockSize);
       mp_msg(MSGT_HEADER, verbose_level, "mp3.nFramesPerBlock=%d\n",h2->nFramesPerBlock);
       mp_msg(MSGT_HEADER, verbose_level, "mp3.nCodecDelay=%d\n",h2->nCodecDelay);
@@ -138,7 +139,7 @@ void print_index(AVIINDEXENTRY *idx, int idx_size, int verbose_level){
   for(i=0;i<idx_size;i++){
     int id=avi_stream_id(idx[i].ckid);
     if(id<0 || id>255) id=255;
-    mp_msg(MSGT_HEADER, verbose_level, "%5d:  %.4s  %4X  %016llX  len:%6ld  pos:%7d->%7.3f %7d->%7.3f\n",i,
+    mp_msg(MSGT_HEADER, verbose_level, "%5d:  %.4s  %4X  %016"PRIX64"  len:%6"PRId32"  pos:%7d->%7.3f %7d->%7.3f\n",i,
       (char *)&idx[i].ckid,
       (unsigned int)idx[i].dwFlags&0xffff,
       (uint64_t)AVI_IDX_OFFSET(&idx[i]),
