@@ -23,6 +23,7 @@ Video codecs: (supported by RealPlayer8 for Linux)
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -519,7 +520,7 @@ static double real_fix_timestamp(real_priv_t* priv, unsigned char* s, unsigned i
     if(pict_type<=1){
       // I frame, sync timestamps:
       priv->kf_base=(int64_t)timestamp-kf;
-      mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: base=%08X\n",priv->kf_base);
+      mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: base=%08"PRIX64"\n",priv->kf_base);
       kf=timestamp;
     } else {
       // P/B frame, merge timestamps:
