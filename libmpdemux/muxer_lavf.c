@@ -22,6 +22,7 @@
 #else
 #include "avformat.h"
 #endif
+#include "libavutil/avstring.h"
 
 extern const struct AVCodecTag *mp_wav_taglists[];
 extern const struct AVCodecTag *mp_bmp_taglists[];
@@ -33,8 +34,6 @@ extern char *info_subject;
 extern char *info_copyright;
 extern char *info_sourceform;
 extern char *info_comment;
-
-void pstrcpy(char *buf, int buf_size, const char *str);
 
 typedef struct {
 	//AVInputFormat *avif;
@@ -396,15 +395,15 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
         priv->oc->preload= (int)(mux_preload*AV_TIME_BASE);
         priv->oc->max_delay= (int)(mux_max_delay*AV_TIME_BASE);
         if (info_name)
-            pstrcpy(priv->oc->title    , sizeof(priv->oc->title    ), info_name     );
+            av_strlcpy(priv->oc->title    , info_name,      sizeof(priv->oc->title    ));
         if (info_artist)
-            pstrcpy(priv->oc->author   , sizeof(priv->oc->author   ), info_artist   );
+            av_strlcpy(priv->oc->author   , info_artist,    sizeof(priv->oc->author   ));
         if (info_genre)
-            pstrcpy(priv->oc->genre    , sizeof(priv->oc->genre    ), info_genre    );
+            av_strlcpy(priv->oc->genre    , info_genre,     sizeof(priv->oc->genre    ));
         if (info_copyright)
-            pstrcpy(priv->oc->copyright, sizeof(priv->oc->copyright), info_copyright);
+            av_strlcpy(priv->oc->copyright, info_copyright, sizeof(priv->oc->copyright));
         if (info_comment)
-            pstrcpy(priv->oc->comment  , sizeof(priv->oc->comment  ), info_comment  );
+            av_strlcpy(priv->oc->comment  , info_comment,   sizeof(priv->oc->comment  ));
 	register_protocol(&mp_protocol);
 
 	if(url_fopen(&priv->oc->pb, mp_filename, URL_WRONLY))
