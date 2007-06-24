@@ -132,7 +132,7 @@ typedef struct mkv_track
   int num_encodings;
 
   /* For VobSubs and SSA/ASS */
-  sh_sub_t sh_sub;
+  sh_sub_t *sh_sub;
 } mkv_track_t;
 
 typedef struct mkv_index
@@ -445,7 +445,7 @@ demux_mkv_parse_idx (mkv_track_t *t)
     return 0;
   memcpy(buf, t->private_data, t->private_size);
   buf[t->private_size] = 0;
-  t->sh_sub.has_palette = 0;
+  t->sh_sub->has_palette = 0;
 
   pos = buf;
   start = buf;
@@ -459,13 +459,13 @@ demux_mkv_parse_idx (mkv_track_t *t)
           *pos = 0;
 
           if (!strncasecmp(start, "size: ", 6))
-            things_found |= vobsub_parse_size(&t->sh_sub, start);
+            things_found |= vobsub_parse_size(t->sh_sub, start);
           else if (!strncasecmp(start, "palette:", 8))
-            things_found |= vobsub_parse_palette(&t->sh_sub, start);
+            things_found |= vobsub_parse_palette(t->sh_sub, start);
           else if (!strncasecmp(start, "custom colors:", 14))
-            things_found |= vobsub_parse_custom_colors(&t->sh_sub, start);
+            things_found |= vobsub_parse_custom_colors(t->sh_sub, start);
           else if (!strncasecmp(start, "forced subs:", 12))
-            things_found |= vobsub_parse_forced_subs(&t->sh_sub, start);
+            things_found |= vobsub_parse_forced_subs(t->sh_sub, start);
 
           if (last)
             break;
@@ -952,8 +952,8 @@ demux_mkv_free_trackentry(mkv_track_t *track) {
   if (track->audio_timestamp)
     free (track->audio_timestamp);
 #ifdef USE_ASS
-  if (track->sh_sub.ass_track)
-    ass_free_track (track->sh_sub.ass_track);
+  if (track->sh_sub && track->sh_sub->ass_track)
+    ass_free_track (track->sh_sub->ass_track);
 #endif
   demux_mkv_free_encodings(track->encodings, track->num_encodings);
   free(track);
@@ -2283,7 +2283,7 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
 
       if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
         {
-          track->sh_sub.ass_track = ass_new_track(ass_library);
+          track->sh_sub->ass_track = ass_new_track(ass_library);
           size = track->private_size;
           m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
           if (buffer && m)
@@ -2292,7 +2292,7 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
               track->private_data = buffer;
               track->private_size = size;
             }
-          ass_process_codec_private(track->sh_sub.ass_track, track->private_data, track->private_size);
+          ass_process_codec_private(track->sh_sub->ass_track, track->private_data, track->private_size);
         }
     }
 }
@@ -2304,13 +2304,12 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
   if (track->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN)
     {
       sh_sub_t *sh = new_sh_sub_sid(demuxer, track->tnum, sid);
-      track->sh_sub.type = 't';
+      track->sh_sub = sh;
+      sh->type = 't';
       if (track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB)
-        track->sh_sub.type = 'v';
+        sh->type = 'v';
       if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
-        track->sh_sub.type = 'a';
-              if (sh)
-                memcpy(sh, &track->sh_sub, sizeof(sh_sub_t));
+        sh->type = 'a';
     }
   else
     {
@@ -2568,10 +2567,7 @@ demux_mkv_open (demuxer_t *demuxer)
                     MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack, track->tnum);
 	    dvdsub_id = demux_mkv_reverse_id(mkv_d, track->tnum, MATROSKA_TRACK_SUBTITLE);
             demuxer->sub->id = track->tnum;
-            if (demuxer->sub->sh == NULL)
-              demuxer->sub->sh = malloc(sizeof(sh_sub_t));
-            if (demuxer->sub->sh != NULL)
-              memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(sh_sub_t));
+            demuxer->sub->sh = demuxer->s_streams[track->tnum];
           }
   else
     demuxer->sub->id = -2;
@@ -2756,7 +2752,7 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
 
 #ifdef USE_ASS
   if (ass_enabled && track->subtitle_type == MATROSKA_SUBTYPE_SSA) {
-    ass_process_chunk(track->sh_sub.ass_track, block, size, (long long)timecode, (long long)block_duration);
+    ass_process_chunk(track->sh_sub->ass_track, block, size, (long long)timecode, (long long)block_duration);
     return;
   }
 #endif
@@ -3630,10 +3626,7 @@ demux_mkv_change_subs (demuxer_t *demuxer, int new_num)
   if (track == NULL)
     return -1;
 
-  if (demuxer->sub->sh == NULL)
-    demuxer->sub->sh = malloc(sizeof(sh_sub_t));
-  if (demuxer->sub->sh != NULL)
-    memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(sh_sub_t));
+  demuxer->sub->sh = demuxer->s_streams[track->tnum];
 
   return track->tnum;
 }
