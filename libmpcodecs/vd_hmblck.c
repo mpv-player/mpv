@@ -59,7 +59,7 @@ static void de_macro_uv(unsigned char* dstu,unsigned char* dstv,unsigned char* s
 /*************************************************************************
  * convert a nv12 buffer to yv12
  */
-static int nv12_to_yv12(void *data, int len, mp_image_t* mpi, int swapped) {
+static int nv12_to_yv12(unsigned char *data, int len, mp_image_t* mpi, int swapped) {
     unsigned int Y_size  = mpi->width * mpi->height;
     unsigned int UV_size = mpi->chroma_width * mpi->chroma_height;
     unsigned int idx;
@@ -128,7 +128,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if(sh->format == IMGFMT_HM12) {
         //if(!de_macro(sh, data, len, flags, mpi)) return NULL;
 	de_macro_y(mpi->planes[0],data,mpi->stride[0],mpi->w,mpi->h);
-	de_macro_uv(mpi->planes[1],mpi->planes[2],data+mpi->w*mpi->h,mpi->stride[1],mpi->w/2,mpi->h/2);
+	de_macro_uv(mpi->planes[1],mpi->planes[2],
+                    (unsigned char *)data+mpi->w*mpi->h,mpi->stride[1],
+                    mpi->w/2,mpi->h/2);
     } else {
 	if(!nv12_to_yv12(data, len, mpi,(sh->format == IMGFMT_NV21))) return NULL;
     }
