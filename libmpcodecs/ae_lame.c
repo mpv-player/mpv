@@ -37,7 +37,6 @@ static int lame_param_br_max = 0; //not specified
 int lame_param_fast=0; // unset
 static char* lame_param_preset=NULL; // unset
 static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_name );
-static void  lame_presets_longinfo_dm ( FILE* msgfp );
 #endif
 
 
