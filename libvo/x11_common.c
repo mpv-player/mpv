@@ -211,6 +211,7 @@ static int x11_errorhandler(Display * display, XErrorEvent * event)
 
 //    abort();
     //exit_player("X11 error");
+    return 0;
 #undef MSGLEN
 }
 
