@@ -10,6 +10,7 @@
 #include "stheader.h"
 #include "genres.h"
 #include "mp3_hdr.h"
+#include "libavutil/intreadwrite.h"
 
 #include <string.h>
 #ifdef MP_DEBUG
@@ -219,18 +220,18 @@ get_flac_metadata (demuxer_t* demuxer)
       if (stream_read (s, comments, blk_len) == blk_len)
       {
         uint8_t *p = ptr;
-        length = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+        length = AV_RL32(p);
         ptr += 4 + length;
 
         p = ptr;
-        comment_list_len = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+        comment_list_len = AV_RL32(p);
         ptr += 4;
 
         cn = 0;
         for (; cn < comment_list_len; cn++)
         {
           p = ptr;
-          length = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+          length = AV_RL32(p);
           ptr += 4;
 
           comment = (char *) ptr;
