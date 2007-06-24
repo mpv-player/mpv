@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -1256,7 +1257,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 
 	spriv->track_bufsize += len;
 	if(spriv->track_bufsize > spriv->max_buffer_size)
-		mp_msg(MSGT_MUXER, MSGL_ERR, "\r\nBUFFER OVERFLOW: %d > %d, pts: %llu\r\n", spriv->track_bufsize, spriv->max_buffer_size, spriv->pts);
+		mp_msg(MSGT_MUXER, MSGL_ERR, "\r\nBUFFER OVERFLOW: %d > %d, pts: %"PRIu64"\r\n", spriv->track_bufsize, spriv->max_buffer_size, spriv->pts);
 
 	if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
 		fix_a52_headers(s);
@@ -1418,7 +1419,7 @@ static void update_scr(muxer_t *muxer)
 			muxer->sysrate = (muxer->sysrate * 11) / 10;	//raise by 10%
 			d = (double) priv->packet_size / (double)muxer->sysrate;
 			priv->delta_scr = (uint64_t) (d * 27000000.0f);
-			mp_msg(MSGT_MUXER, MSGL_INFO, "\r\nBUFFER UNDEFLOW at stream %d, raising muxrate to %d kb/s, delta_scr: %llu\r\n", i, muxer->sysrate/125, priv->delta_scr);
+			mp_msg(MSGT_MUXER, MSGL_INFO, "\r\nBUFFER UNDEFLOW at stream %d, raising muxrate to %d kb/s, delta_scr: %"PRIu64"\r\n", i, muxer->sysrate/125, priv->delta_scr);
 			spriv->track_bufsize = 0;
 		}
 
@@ -1781,7 +1782,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 					adj++;
 				}
 			}
-			mp_msg(MSGT_MUXER, MSGL_V, "\r\nResynced B-frame by %d units, DIFF: %lld (%.3lf),[pd]ts=%.3lf\r\n",
+			mp_msg(MSGT_MUXER, MSGL_V, "\r\nResynced B-frame by %d units, DIFF: %"PRId64" (%.3lf),[pd]ts=%.3lf\r\n",
 				n, diff, (double) diff/27000000.0f, (double) spriv->last_pts/27000000.0f);
 			spriv->last_pts = spriv->last_dts;
 		}
@@ -2011,7 +2012,7 @@ static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int le
 	spriv->framebuf[idx].dts = dts;
 	spriv->framebuf[idx].pts = pts;
 	spriv->framebuf_used++;
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "\r\nAdded frame, size: %u, idur: %llu, dts: %llu, pts: %llu, used: %u\r\n", len, idur, dts, pts, spriv->framebuf_used);
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "\r\nAdded frame, size: %u, idur: %"PRIu64", dts: %"PRIu64", pts: %"PRIu64", used: %u\r\n", len, idur, dts, pts, spriv->framebuf_used);
 
 	return idx;
 }
@@ -2547,7 +2548,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   if(conf_packet_size)
   	priv->packet_size = conf_packet_size;
   priv->delta_scr = (uint64_t) (90000.0f*300.0f*(double)priv->packet_size/(double)priv->muxrate);
-  mp_msg(MSGT_MUXER, MSGL_INFO, "PACKET SIZE: %u bytes, deltascr: %llu\n", priv->packet_size, priv->delta_scr);
+  mp_msg(MSGT_MUXER, MSGL_INFO, "PACKET SIZE: %u bytes, deltascr: %"PRIu64"\n", priv->packet_size, priv->delta_scr);
   setup_sys_params(priv);
 
   if(conf_vaspect > 0)
