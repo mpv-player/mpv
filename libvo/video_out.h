@@ -177,7 +177,6 @@ typedef struct vo_functions_s
 
 } vo_functions_t;
 
-const char *vo_format_name(int format);
 int vo_init(void);
 
 vo_functions_t* init_best_video_out(char** vo_list);
