@@ -177,8 +177,6 @@ typedef struct vo_functions_s
 
 } vo_functions_t;
 
-int vo_init(void);
-
 vo_functions_t* init_best_video_out(char** vo_list);
 int config_video_out(vo_functions_t *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
