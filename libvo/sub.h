@@ -103,7 +103,6 @@ extern int sub_pos;
 extern int sub_width_p;
 extern int sub_alignment;
 extern int sub_visibility;
-extern int suboverlap_enabled;
 extern int sub_bg_color; /* subtitles background color */
 extern int sub_bg_alpha;
 extern int spu_alignment;
