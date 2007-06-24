@@ -3592,45 +3592,6 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
     }
 }
 
-/** \brief Change the current subtitle track and return its ID.
-
-  Changes the current subtitle track. If the new subtitle track is a
-  VobSub track then the SPU decoder will be re-initialized.
-
-  \param demuxer The demuxer whose subtitle track will be changed.
-  \param new_num The number of the new subtitle track. The number must be
-  between 0 and demux_mkv_num_subs - 1.
-
-  \returns The Matroska track number of the newly selected track.
-*/
-int
-demux_mkv_change_subs (demuxer_t *demuxer, int new_num)
-{
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  mkv_track_t *track;
-  int i, num;
-
-  num = 0;
-  track = NULL;
-  for (i = 0; i < mkv_d->num_tracks; i++)
-    {
-      if ((mkv_d->tracks[i]->type == MATROSKA_TRACK_SUBTITLE) &&
-          (mkv_d->tracks[i]->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN))
-        num++;
-      if (num == (new_num + 1))
-        {
-          track = mkv_d->tracks[i];
-          break;
-        }
-    }
-  if (track == NULL)
-    return -1;
-
-  demuxer->sub->sh = demuxer->s_streams[track->tnum];
-
-  return track->tnum;
-}
-
 /** \brief Get the language code for a subtitle track.
 
   Retrieves the language code for a subtitle track if it is known.
