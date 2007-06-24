@@ -70,8 +70,6 @@ int evBoxs = sizeof( evNames ) / sizeof( evName );
 
 // ---
 
-extern char *get_path(const char *);
-
 listItems   appMPlayer;
 
 /* FIXME: Eventually remove the obsolete directory names. */
