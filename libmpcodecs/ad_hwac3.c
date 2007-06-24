@@ -15,6 +15,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "mpbswap.h"
 
 #include "ad_internal.h"
 
