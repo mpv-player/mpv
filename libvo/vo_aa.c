@@ -633,7 +633,7 @@ static int parse_suboptions(const char *arg) {
                 pseudoargv[1] = strings_list[i];
                 pseudoargv[2] = strings[i];
                 aa_parseoptions(&aa_defparams, &aa_defrenderparams,
-                                                &pseudoargc, pseudoargv) != 1;
+                                                &pseudoargc, pseudoargv);
             }
         }
         pseudoargv[2] = NULL;
@@ -642,7 +642,7 @@ static int parse_suboptions(const char *arg) {
             if (booleans[i]) pseudoargv[1] = booleans_list[i];
             else pseudoargv[1] = nobooleans_list[i];
             aa_parseoptions(&aa_defparams, &aa_defrenderparams,
-                                                &pseudoargc, pseudoargv) != 1;
+                                                &pseudoargc, pseudoargv);
         }
         if (osdcolor) aaopt_osdcolor = getcolor(osdcolor);
         if (subcolor) aaopt_subcolor = getcolor(subcolor);
