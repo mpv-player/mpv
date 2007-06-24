@@ -1293,25 +1293,19 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
     } else if (source == SUB_SOURCE_DEMUX) {
 	dvdsub_id =
 	    mpctx->global_sub_pos - mpctx->global_sub_indices[SUB_SOURCE_DEMUX];
-	if (d_sub) {
-	    if (mpctx->stream->type != STREAMTYPE_DVD
-		&& mpctx->stream->type != STREAMTYPE_DVDNAV) {
-		int i = 0;
-		d_sub->sh = NULL;
-		for (d_sub->id = 0; d_sub->id < MAX_S_STREAMS; d_sub->id++) {
-		    if (mpctx->demuxer->s_streams[d_sub->id]) {
-			if (i == dvdsub_id) {
-			    d_sub->sh = mpctx->demuxer->s_streams[d_sub->id];
-			    break;
-			}
-			i++;
-		    }
+	if (d_sub && dvdsub_id < MAX_S_STREAMS) {
+	    int i = 0;
+	    // default: assume 1:1 mapping of sid and stream id
+	    d_sub->id = dvdsub_id;
+	    d_sub->sh = mpctx->demuxer->s_streams[d_sub->id];
+	    for (i = 0; i < MAX_S_STREAMS; i++) {
+		sh_sub_t *sh = mpctx->demuxer->s_streams[i];
+		if (sh && sh->sid == dvdsub_id) {
+		    d_sub->id = i;
+		    d_sub->sh = sh;
+		    break;
 		}
 	    }
-	    else if (vo_spudec)
-		d_sub->id = dvdsub_id;
-	    if (mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA)
-		d_sub->id = demux_mkv_change_subs(mpctx->demuxer, dvdsub_id);
 	    if (d_sub->sh && d_sub->id >= 0) {
 		sh_sub_t *sh = d_sub->sh;
 		if (sh->type == 'v')
