@@ -42,7 +42,7 @@ typedef struct m_struct_st {
  *  \return Pointer to the struct field.
  */
 #define M_ST_MB_P(struct_p, struct_offset)   \
-    ((void*) (struct_p) + (unsigned long) (struct_offset))
+    ((void *)((char *)(struct_p) + (unsigned long)(struct_offset)))
 
 /// Access a struct field at a given offset.
 /** \param member_type Type of the field.
