@@ -404,6 +404,11 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer, int rdt_rawdata) {
 
 static int convert_timestamp(char *str, int *sec, int *msec) {
   int hh, mm, ss, ms = 0;
+
+  // Timestamp may be optionally quoted with ", skip it
+  // Since the url is escaped when we get here, we skip the string "%22"
+  if (!strncmp(str, "%22", 3))
+    str += 3;
   if (sscanf(str, "%d:%d:%d.%d", &hh, &mm, &ss, &ms) < 3) {
     hh = 0;
     if (sscanf(str, "%d:%d.%d", &mm, &ss, &ms) < 2) {
