@@ -46,6 +46,7 @@ extern af_cfg_t af_cfg;
 #include "stream/stream_dvd.h"
 #endif
 
+int vcd_seek_to_track(void *vcd, int track);
 
 #include "m_config.h"
 #include "m_option.h"
