@@ -64,7 +64,6 @@ typedef struct {
     int bottom_margin;
 } gtkASS_t;
 extern gtkASS_t gtkASS;
-extern int ass_enabled;
 extern int ass_use_margins;
 extern int ass_top_margin;
 extern int ass_bottom_margin;
