@@ -17,8 +17,6 @@
 #include "rational.h"
 #endif
 
-int64_t ff_gcd(int64_t a, int64_t b);
-
 // Data for specific instances of this filter
 typedef struct af_resample_s{
     struct AVResampleContext *avrctx;
