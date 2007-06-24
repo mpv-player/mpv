@@ -212,29 +212,26 @@ get_flac_metadata (demuxer_t* demuxer)
 
       uint32_t length, comment_list_len;
       char comments[blk_len];
-      void *ptr = comments;
+      uint8_t *ptr = comments;
       char *comment;
       int cn;
       char c;
 
       if (stream_read (s, comments, blk_len) == blk_len)
       {
-        uint8_t *p = ptr;
-        length = AV_RL32(p);
+        length = AV_RL32(ptr);
         ptr += 4 + length;
 
-        p = ptr;
-        comment_list_len = AV_RL32(p);
+        comment_list_len = AV_RL32(ptr);
         ptr += 4;
 
         cn = 0;
         for (; cn < comment_list_len; cn++)
         {
-          p = ptr;
-          length = AV_RL32(p);
+          length = AV_RL32(ptr);
           ptr += 4;
 
-          comment = (char *) ptr;
+          comment = ptr;
           c = comment[length];
           comment[length] = 0;
 
