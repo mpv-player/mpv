@@ -476,7 +476,7 @@ void HidePreferences( void )
 #if defined( HAVE_FREETYPE ) || defined( USE_ICONV )
 static void prEntry( GtkContainer * container,gpointer user_data )
 {	
- char * comment;
+ const char * comment;
  int    i;
 
  switch( (int)user_data )
@@ -581,7 +581,7 @@ void prButton( GtkButton * button,gpointer user_data )
 
 	{
 	 int i;
-	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EVFM ) );
+	 const char * tmp = gtk_entry_get_text( GTK_ENTRY( EVFM ) );
          for( i=0;mpcodecs_vd_drivers[i];i++ )
           if ( !gstrcmp( tmp,(char *)mpcodecs_vd_drivers[i]->info->name ) ) 
 	   { gaddlist( &video_fm_list,(char *)mpcodecs_vd_drivers[i]->info->short_name ); break; }
@@ -589,7 +589,7 @@ void prButton( GtkButton * button,gpointer user_data )
 
 	{
 	 int i;
-	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EAFM ) );
+	 const char * tmp = gtk_entry_get_text( GTK_ENTRY( EAFM ) );
          for( i=0;mpcodecs_ad_drivers[i];i++ )
           if ( !gstrcmp( tmp,(char *)mpcodecs_ad_drivers[i]->info->name ) )
 	   { gaddlist( &audio_fm_list,(char *)mpcodecs_ad_drivers[i]->info->short_name ); break; }
@@ -1454,7 +1454,7 @@ GList *appendESDDevices(GList *l) {
 // Gets text string from a gtk entry, interpreting 
 // MSGTR_PREFERENCES_DriverDefault as null string.
 char *getGtkEntryText(GtkWidget *from) {
-  char *tmp = gtk_entry_get_text(GTK_ENTRY(from));
+  const char *tmp = gtk_entry_get_text(GTK_ENTRY(from));
   if (strcmp(tmp, MSGTR_PREFERENCES_DriverDefault) == 0) {
     tmp = NULL;
   }
