@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r23416
+// Synced with help_mp-en.h: r23588
 
 // ========================= MPlayer help ===========================
 
@@ -226,6 +226,7 @@ static char help_text[]=
 #define MSGTR_Contrast "Контрастность"
 #define MSGTR_Saturation "Насыщенность"
 #define MSGTR_Hue "Цвет"
+#define MSGTR_Balance "Баланс"
 
 // property state
 #define MSGTR_MuteStatus "Приглушить: %s"
@@ -701,6 +702,7 @@ static char help_text[]=
 
 #define MSGTR_InsertingAfVolume "[Микшер] Нет аппаратного микширования, вставляю фильтр громкости.\n"
 #define MSGTR_NoVolume "[Микшер] Контроль громкости не доступен.\n"
+#define MSGTR_NoBalance "[Микшер] Управление балансом недоступно.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -1072,6 +1074,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Volume "Громкость"
 #define MSGTR_VO_SUB_Brightness "Яркость"
 #define MSGTR_VO_SUB_Hue "Цвет"
+#define MSGTR_VO_SUB_Balance "Баланс"
 
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "Размеры изображения источника слишком велики: %ux%u (максимум %ux%u)\n"
