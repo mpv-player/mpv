@@ -105,50 +105,6 @@ asx_attrib_to_enum(const char* val,char** valid_vals) {
   return -1;
 }
 
-static void
-asx_warning_attrib_invalid(ASX_Parser_t* parser, char* elem, char* attrib,
-			   char** valid_vals,const char* val) {
-  char *str,*vals,**ptr;
-  int len;
-
-  if(valid_vals == NULL || valid_vals[0] == NULL) return;
-  
-  len = strlen(valid_vals[0]) + 1;
-  for(ptr = valid_vals+1 ; ptr[0] != NULL; ptr++) {
-    len += strlen(ptr[0]);
-    len += ((ptr[1] == NULL) ? 4 : 2);
-  }
-  str = vals = malloc(len);
-  vals += sprintf(vals,"%s",valid_vals[0]);
-  for(ptr = valid_vals + 1 ; ptr[0] != NULL ; ptr++) {
-    if(ptr[1] == NULL)
-      vals += sprintf(vals," or %s",ptr[0]);
-    else
-      vals += sprintf(vals,", %s",ptr[0]);
-  }
-  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"at line %d : attribute %s of element %s is invalid (%s). Valid values are %s",
-	      parser->line,attrib,elem,val,str);
-  free(str);
-}
-
-static int
-asx_get_yes_no_attrib(ASX_Parser_t* parser, char* element, char* attrib,char** attribs,int def) {
-  char* val = asx_get_attrib(attrib,attribs);
-  char* valids[] = { "NO", "YES", NULL };
-  int r;
-
-  if(val == NULL) return def;
-  r = asx_attrib_to_enum(val,valids);
-
-  if(r < 0) {
-    asx_warning_attrib_invalid(parser,element,attrib,valids,val);
-    r = def;
-  }
-
-  free(val);
-  return r;
-}
-
 #define asx_warning_attrib_required(p,e,a) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : element %s don't have the required attribute %s",p->line,e,a)
 #define asx_warning_body_parse_error(p,e) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : error while parsing %s body",p->line,e)
 
