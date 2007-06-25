@@ -18,7 +18,7 @@ There are different ways to access the hardware, normally only ROOT can do that.
 With root privileges libdha will run fine, but there are some others ways
 to use it as a normal user:
 1, set the SUID bit on the binary (in this way it runs with root privileges)
-2, use svgalib kernel helper
+2, use svgalib kernel helper (please read the comment in the Makefile)
 3, use dhahelper (not yet finished)
 
 The library is based on XFree86 and gfxdump (a utility from the GATOS project)
