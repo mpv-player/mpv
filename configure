@@ -2315,7 +2315,7 @@ if x86_32 ; then
   if test "$as_verc_fail" != yes ; then
     echores "ok"
   else
-    _res_comment="Upgrade binutils to ${_pref_as_version} ..."
+    _res_comment="Upgrade binutils to ${_pref_as_version} or use --disable-ssse3 etc."
     echores "failed"
     die "obsolete binutils version"
   fi
