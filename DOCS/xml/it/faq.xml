@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21930 -->
+<!-- synced with r23608 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Frequently Asked Questions</title>
 
@@ -150,8 +150,7 @@ Si chiama <filename>XFree86-devel*</filename> sotto Red Hat,
 <filename>libx11-dev</filename> in Debian Sarge. Controlla anche se esistono i
 collegamenti simbolici
 <filename class="directory">/usr/X11</filename> e
-<filename class="directory">/usr/include/X11</filename> (questo può essere un
-problema nei sistemi Mandrake).
+<filename class="directory">/usr/include/X11</filename>.
 </para></answer>
 </qandaentry>
 
@@ -161,7 +160,7 @@ La compilazione sotto Mac OS 10.3 dà molti errori di link.
 </para></question>
 <answer>
 <para>
-L'errore di link che ricevi molto probabilmente è simile a questo:
+L'errore che riscontri nella fase di link probabilmente è simile a questo:
 <screen>
 ld: Undefined symbols:
 _LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
