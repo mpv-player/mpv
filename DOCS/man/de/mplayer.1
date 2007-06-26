@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r23467
+.\" In sync with r23609
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -251,6 +251,8 @@ Passt die Audioverzögerung um +/- 0.1 Sekunde an.
 Verringert/\:erhöht die Lautstärke.
 .IPs "9 und 0"
 Verringert/\:erhöht die Lautstärke.
+.IPs "( und )"
+Passt Ton-Balance an bezüglich dem linken/\:rechten Kanal.
 .IPs "m\ \ \ \ "
 Ton-Stummschaltung.
 .IPs "_ (nur bei MPEG-TS und libavformat)"
@@ -701,6 +703,7 @@ Liste der definierten Profile aus.
 .TP
 .B \-really-quiet (siehe auch \-quiet)
 Zeige noch weniger Ausgaben und Statusmeldungen an als mit \-quiet.
+Verhindert außerdem Dialoge mit Fehlermeldungen in der GUI.
 .
 .TP
 .B \-show-profile <Profil>
@@ -954,6 +957,15 @@ Benutze eine andere menu.conf.
 .TP
 .B \-menu-chroot <Pfad> (nur bei OSD-Menü)
 Chroot auf das angegebene Verzeichnis für den Datei-Auswahldialog
+.sp 1
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs "\-menu-chroot=/home"
+Wird den Datei-Auswahldialog auf /\:home und darunter beschränken (z.B.\&
+wird kein Zugriff auf / möglich sein, auf /home/benutzer_name jedoch schon).
+.RE
+.PD 1
 .
 .TP
 .B \-menu-keepdir (nur bei OSD-Menü)
@@ -4441,7 +4453,7 @@ nonkey: Alle Bilder außer Keyframes überspringen.
 .br
 all: Alle Bilder überspringen.
 .REss
-.IPs skipidct=<skipvalue> (nur MPEG-1/\:-2)
+.IPs "skipidct=<skipvalue> (nur bei MPEG-1/2)"
 Überspringt den IDCT-Schritt.
 Verringert die Qualität in fast allen Fällen stark (siehe skiploopfilter
 für mögliche Werte).
@@ -4449,7 +4461,7 @@ für mögliche Werte).
 Überspringt die Dekodierung von Bildern komplett.
 Hoher Geschwindigkeitsgewinn, aber ruckelige Bewegungen und manchmal
 schlimme Artefakte (siehe skiploopfilter für mögliche Werte).
-.IPs threads=<1\-8>
+.IPs "threads=<1\-8> (nur bei MPEG-1/2)"
 Anzahl der für die Decodierung zu benutzenden Threads (Standard: 1).
 .IPs vismv=<Wert>
 Visualisiere Motion-Vectors.
@@ -8384,6 +8396,22 @@ arm
 AltiVec
 .IPs 9
 sh4
+.IPs 10
+simplearm
+.IPs 11
+H.264
+.IPs 12
+VP3
+.IPs 13
+IPP
+.IPs 14
+xvidmmx
+.IPs 15
+CAVS
+.IPs 16
+simplearmv5te
+.IPs 17
+simplearmv6
 .RE
 .PD 1
 .
@@ -9609,7 +9637,7 @@ vbv_maxrate kombiniert, allerdings vermindert das die Qualität signifikant.
 Diese Option wählt den Quantizer für P-Frames.
 Intra- und B-Frames werden mit diesem Wert jeweils durch ip_factor und
 pb_factor verrechnet.
-20\-40 ist ein brauchbarer Bereich (Standard: 26).
+20\-40 ist ein brauchbarer Bereich.
 Niedrigere Werte bewirken geringere Verlusten bei höheren Bitraten.
 0 ist verlustfrei.
 Beachte, dass die Quantisierung bei H.264 anders funktioniert als bei
@@ -10314,7 +10342,7 @@ Wenn sich dvdauthor beschwert mit einer Meldung wie "..audio sector out of
 range...", hast du diese Option vermutlich nicht aktiviert.
 .
 .TP
-.B "interleaving2\ \ \ "
+.B interleaving2"
 Verwendet einen besseren Algorithmus für das Interleaving von Audio- und
 Videopaketen, basierend auf dem Prinzip, dass der Muxer immer versuchen wird,
 den Stream mit dem größten Prozentanteil des verfügbaren Platzes zu füllen.
