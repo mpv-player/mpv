@@ -228,8 +228,7 @@ static int initTextures(void)
 
   if (texgrid)
     free(texgrid);
-  texgrid = (struct TexSquare *)
-    calloc (texnumx * texnumy, sizeof (struct TexSquare));
+  texgrid = calloc (texnumx * texnumy, sizeof (struct TexSquare));
 
   raw_line_len = image_width * image_bytes;
 
