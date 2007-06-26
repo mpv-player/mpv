@@ -21,9 +21,6 @@
 #include "gui/interface.h"
 #endif
 
-#define NDEBUG
-//#undef NDEBUG
-
 #undef TEXTUREFORMAT_ALWAYS
 #ifdef SYS_DARWIN
 #define TEXTUREFORMAT_ALWAYS GL_RGBA8
@@ -268,19 +265,7 @@ static int initTextures(void)
         glBindTexture (GL_TEXTURE_2D, tsq->uvtexobjs[1]);
         ActiveTexture(GL_TEXTURE0);
       }
-      err = glGetError ();
-      if(err==GL_INVALID_ENUM)
-      {
-	mp_msg (MSGT_VO, MSGL_ERR, "GLERROR glBindTexture (glGenText) := GL_INVALID_ENUM, texnum x=%d, y=%d, texture=%d\n", x, y, tsq->texobj);
-      } 
-
-      if(glIsTexture(tsq->texobj) == GL_FALSE)
-      {
-	mp_msg (MSGT_VO, MSGL_ERR, "GLERROR ain't a texture (glGenText): texnum x=%d, y=%d, texture=%d\n",
-		x, y, tsq->texobj);
-      } else {
         tsq->isTexture=GL_TRUE;
-      }
 
       glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
                        texture_width, texture_height, 0);
@@ -362,13 +347,6 @@ static void setupTextureDirtyArea(int x, int y, int w,int h)
 
 		hh=(hdecr<ht)?hdecr:ht-yh;
 		if(hh<0) hh=0;
-
-/*
-#ifndef NDEBUG
-     printf("\t %dx%d, %d/%d (%dx%d): %d/%d (%dx%d)\n", 
-	xi, yi, xh, yh, wdecr, hdecr, xh, yh, wh, hh);
-#endif
-*/
 
 		if(xh<square->dirtyXoff)
 			square->dirtyXoff=xh;
@@ -472,7 +450,7 @@ static void gl_set_antialias (int val)
 static void drawTextureDisplay (void)
 {
   struct TexSquare *square = texgrid;
-  int x, y/*, xoff=0, yoff=0, wd, ht*/;
+  int x, y;
   GLenum err;
 
   glColor3f(1.0,1.0,1.0);
@@ -483,13 +461,6 @@ static void drawTextureDisplay (void)
   {
     for (x = 0; x < texnumx; x++)
     {
-      if(square->isTexture==GL_FALSE)
-      {
-        mp_msg (MSGT_VO, MSGL_V, "[gl2] ain't a texture(update): texnum x=%d, y=%d, texture=%d\n",
-	  	x, y, square->texobj);
-      	continue;
-      }
-
       glBindTexture (GL_TEXTURE_2D, square->texobj);
       if (image_format == IMGFMT_YV12) {
         ActiveTexture(GL_TEXTURE1);
@@ -498,23 +469,6 @@ static void drawTextureDisplay (void)
         glBindTexture (GL_TEXTURE_2D, square->uvtexobjs[1]);
         ActiveTexture(GL_TEXTURE0);
       }
-      err = glGetError ();
-      if(err==GL_INVALID_ENUM)
-      {
-	mp_msg (MSGT_VO, MSGL_ERR, "GLERROR glBindTexture := GL_INVALID_ENUM, texnum x=%d, y=%d, texture=%d\n", x, y, square->texobj);
-      }
-	      else if(err==GL_INVALID_OPERATION) {
-		mp_msg (MSGT_VO, MSGL_V, "GLERROR glBindTexture := GL_INVALID_OPERATION, texnum x=%d, y=%d, texture=%d\n", x, y, square->texobj);
-	      }
-
-#ifndef NDEBUG
-      if(glIsTexture(square->texobj) == GL_FALSE)
-      {
-        square->isTexture=GL_FALSE;
-	mp_msg (MSGT_VO, MSGL_ERR, "GLERROR ain't a texture(update): texnum x=%d, y=%d, texture=%d\n",
-		x, y, square->texobj);
-      }
-#endif
 
       if(square->isDirty)
       {
@@ -540,10 +494,6 @@ static void drawTextureDisplay (void)
   } /* for all texnumy */
   if (image_format == IMGFMT_YV12)
     glDisableYUVConversion(GL_TEXTURE_2D, use_yuv);
-
-  /* YES - let's catch this error ... 
-   */
-  (void) glGetError ();
 }
 
 
@@ -685,10 +635,6 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 		hint.flags = PPosition | PSize;
 
 	/* Make the window */
-
-//	XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
-
-//	XMatchVisualInfo(mDisplay, screen, depth, TrueColor, &vinfo);
   vinfo = choose_glx_visual(mDisplay,mScreen,&vinfo_buf) < 0 ? NULL : &vinfo_buf;
   if (vinfo == NULL)
   {
@@ -945,7 +891,6 @@ flip_page(void)
     glClear (GL_COLOR_BUFFER_BIT);
 }
 
-//static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
   uint8_t *yptr = src[0], *uptr = src[1], *vptr = src[2];
