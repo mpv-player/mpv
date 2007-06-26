@@ -93,7 +93,6 @@ struct TexSquare
   GLubyte *texture;
   GLuint texobj;
   GLuint uvtexobjs[2];
-  int isTexture;
   GLfloat fx, fy, fw, fh;
   int isDirty;
   int dirtyXoff, dirtyYoff, dirtyWidth, dirtyHeight;
@@ -248,7 +247,6 @@ static int initTextures(void)
       tsq->fh = texpercy;
 
       tsq->isDirty=GL_FALSE;
-      tsq->isTexture=GL_FALSE;
       tsq->texobj=0;
       tsq->uvtexobjs[0] = tsq->uvtexobjs[1] = 0;
       tsq->dirtyXoff=0; tsq->dirtyYoff=0; tsq->dirtyWidth=-1; tsq->dirtyHeight=-1;
@@ -264,7 +262,6 @@ static int initTextures(void)
         glBindTexture (GL_TEXTURE_2D, tsq->uvtexobjs[1]);
         ActiveTexture(GL_TEXTURE0);
       }
-        tsq->isTexture=GL_TRUE;
 
       glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
                        texture_width, texture_height, 0);
