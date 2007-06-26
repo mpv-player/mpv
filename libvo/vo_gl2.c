@@ -68,6 +68,7 @@ static int int_pause;
 static uint32_t texture_width;
 static uint32_t texture_height;
 static int texnumx, texnumy, raw_line_len;
+static int texdirty;
 static struct TexSquare * texgrid = NULL;
 static GLuint   fragprog;
 static GLuint   lookupTex;
@@ -94,8 +95,6 @@ struct TexSquare
   GLuint texobj;
   GLuint uvtexobjs[2];
   GLfloat fx, fy, fw, fh;
-  int isDirty;
-  int dirtyXoff, dirtyYoff, dirtyWidth, dirtyHeight;
 };
 
 static GLint getInternalFormat(void)
@@ -246,10 +245,8 @@ static int initTextures(void)
       tsq->fw = texpercx;
       tsq->fh = texpercy;
 
-      tsq->isDirty=GL_FALSE;
       tsq->texobj=0;
       tsq->uvtexobjs[0] = tsq->uvtexobjs[1] = 0;
-      tsq->dirtyXoff=0; tsq->dirtyYoff=0; tsq->dirtyWidth=-1; tsq->dirtyHeight=-1;
 
       glGenTextures (1, &(tsq->texobj));
 
@@ -303,68 +300,6 @@ static void resetTexturePointers(unsigned char *imageSource)
     }	/* for all texnumx */
     line_start += texture_height * raw_line_len;
   }  /* for all texnumy */
-}
-
-static void setupTextureDirtyArea(int x, int y, int w,int h)
-{
-  struct TexSquare *square;
-  int xi, yi, wd, ht, wh, hh;
-  int wdecr, hdecr, xh, yh;
-    
-  wdecr=w; hdecr=h; xh=x; yh=y;
-
-  for (yi = 0; hdecr>0 && yi < texnumy; yi++)
-  {
-    if (yi < texnumy - 1)
-      ht = texture_height;
-    else
-      ht = image_height - texture_height * yi;
-
-    xh =x;
-    wdecr =w;
-
-    for (xi = 0; wdecr>0 && xi < texnumx; xi++)
-    {
-        square = texgrid + yi * texnumx + xi;
-
-	if (xi < texnumx - 1)
-	  wd = texture_width;
-	else
-	  wd = image_width - texture_width * xi;
-
-	if( 0 <= xh && xh < wd &&
-            0 <= yh && yh < ht
-          )
-        {
-        	square->isDirty=GL_TRUE;
-
-		wh=(wdecr<wd)?wdecr:wd-xh;
-		if(wh<0) wh=0;
-
-		hh=(hdecr<ht)?hdecr:ht-yh;
-		if(hh<0) hh=0;
-
-		if(xh<square->dirtyXoff)
-			square->dirtyXoff=xh;
-
-		if(yh<square->dirtyYoff)
-			square->dirtyYoff=yh;
-
-		square->dirtyWidth = wd-square->dirtyXoff;
-		square->dirtyHeight = ht-square->dirtyYoff;
-		
-		wdecr-=wh;
-
-		if ( xi == texnumx - 1 )
-			hdecr-=hh;
-        }
-
-	xh-=wd;
-	if(xh<0) xh=0;
-    }
-    yh-=ht;
-    if(yh<0) yh=0;
-  }
 }
 
 static void gl_set_bilinear (int val)
@@ -455,8 +390,14 @@ static void drawTextureDisplay (void)
     glEnableYUVConversion(GL_TEXTURE_2D, use_yuv);
   for (y = 0; y < texnumy; y++)
   {
+    int thish = texture_height;
+    if (y == texnumy - 1 && image_height % texture_height)
+      thish = image_height % texture_height;
     for (x = 0; x < texnumx; x++)
     {
+      int thisw = texture_width;
+      if (x == texnumx - 1 && image_width % texture_width)
+        thisw = image_width % texture_width;
       glBindTexture (GL_TEXTURE_2D, square->texobj);
       if (image_format == IMGFMT_YV12) {
         ActiveTexture(GL_TEXTURE1);
@@ -466,20 +407,13 @@ static void drawTextureDisplay (void)
         ActiveTexture(GL_TEXTURE0);
       }
 
-      if(square->isDirty)
-      {
+      if (texdirty) {
 	glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
 		 square->texture, image_width * image_bytes,
-		 square->dirtyXoff, square->dirtyYoff,
-		 square->dirtyWidth, square->dirtyHeight,
+		 0, 0,
+		 thisw, thish,
 		 0);
-
-        square->isDirty=GL_FALSE;
-        square->dirtyXoff=0; square->dirtyYoff=0; square->dirtyWidth=-1; square->dirtyHeight=-1;
       }
-
-        mp_msg (MSGT_VO, MSGL_DBG2, "[gl2] glTexSubImage2D texnum x=%d, y=%d, %d/%d - %d/%d\n", 
-		x, y, square->dirtyXoff, square->dirtyYoff, square->dirtyWidth, square->dirtyHeight);
 
       glDrawTex(square->fx, square->fy, square->fw, square->fh,
                 0, 0, texture_width, texture_height,
@@ -490,6 +424,7 @@ static void drawTextureDisplay (void)
   } /* for all texnumy */
   if (image_format == IMGFMT_YV12)
     glDisableYUVConversion(GL_TEXTURE_2D, use_yuv);
+  texdirty = 0;
 }
 
 
@@ -947,7 +882,7 @@ draw_frame(uint8_t *src[])
   }
   ImageData=(unsigned char *)src[0];
   resetTexturePointers(ImageData);
-  setupTextureDirtyArea(0, 0, image_width, image_height);
+  texdirty = 1;
   return 0;
 }
 
