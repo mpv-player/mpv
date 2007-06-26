@@ -1,4 +1,4 @@
-.\" synced with r23504
+.\" synced with r23609
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
@@ -700,6 +700,7 @@ profili definiti.
 .TP
 .B \-really-quiet (vedi anche \-quiet)
 Emette ancora meno messaggi di output e di stato che con \-quiet.
+Disattiva anche le finestre di errore della GUI.
 .
 .TP
 .B \-show-profile <profilo>
@@ -944,6 +945,15 @@ Usa un file alternativo per menu.conf.
 .TP
 .B \-menu-chroot <percorso> (solo menu OSD)
 Restringe (chroot) il menu di selezione file a uno specifico percorso.
+.sp 1
+.I ESEMPIO:
+.PD 0
+.RSs
+.IPs "\-menu-chroot=/home"
+Restringe il menu di selezione /\:home and downward (per es.\& non sarà
+possibile alcun accesso a /, ma a /home/nome_utente sì).
+.RE
+.PD 1
 .
 .TP
 .B \-menu-keepdir (solo menu OSD)
@@ -3007,7 +3017,7 @@ Specifica la gamma di frequenze verticali del monitor.
 .B \-monitoraspect <rapporto> (vedi anche \-aspect)
 Seleziona il rapporto di aspetto (aspect ratio) del tuo monitor
 o dello schermo TV.
-Un valore di 0 disabilita l'impostazione precedente di monitoraspect
+Un valore di 0 disabilita un'impostazione precedente
 (per es.\& nel file di configurazione).
 Sovrascrive l'impostazione \-monitorpixelaspect, se abilitata.
 .sp 1
@@ -8360,6 +8370,22 @@ arm
 AltiVec
 .IPs 9
 sh4
+.IPs 10
+simplearm
+.IPs 11
+H.264
+.IPs 12
+VP3
+.IPs 13
+IPP
+.IPs 14
+xvidmmx
+.IPs 15
+CAVS
+.IPs 16
+simplearmv5te
+.IPs 17
+simplearmv6
 .RE
 .PD 1
 .
@@ -9561,7 +9587,7 @@ vbv_maxrate ottenendo però una significativa riduzione della qualità.
 Questo seleziona il quantizzatore da usare.
 I fotogrammi I e B sono spostati di questo valore rispettivamente da ip_factor
 e pb_factor.
-Una gamma utilizzabile è 20\-40 (default: 26).
+Una gamma utilizzabile è 20\-40.
 Valori più bassi generano una miglior fedeltà ma bitrate più alti.
 0 significa senza perdita.
 Nota che la quantizzazione in H.264 funziona diversamente che in MPEG-1/2/4:
@@ -10277,7 +10303,7 @@ Se dvdauthor si lamenta con messaggi del tipo "..audio sector out of range...",
 probabilmente non hai abilitato questa opzione.
 .
 .TP
-.B "interleaving2\ \ \ "
+.B interleaving2
 Usa un miglior algoritmo per interlacciare i pacchetti audio e video, basato
 sul principio che il muxer cercherà sempre di riempire il flusso con la
 massima percentuale di spazio libero.
