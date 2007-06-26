@@ -154,7 +154,6 @@ static int initTextures(void)
   int s;
   int x=0, y=0;
   GLint format=0;
-  GLenum err;
 
   // textures smaller than 64x64 might not be supported
   s=64;
@@ -382,7 +381,6 @@ static void drawTextureDisplay (void)
 {
   struct TexSquare *square = texgrid;
   int x, y;
-  GLenum err;
 
   glColor3f(1.0,1.0,1.0);
 
