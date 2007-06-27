@@ -7611,27 +7611,16 @@ $_target_arch
 $_target_arch_x86
 $_confwin32
 TARGET_CPU=$iproc
-TARGET_MMX = $_mmx
 HAVE_MMX   = $_mmx
-TARGET_MMX2 = $_mmxext
 HAVE_MMX2   = $_mmxext
-TARGET_3DNOW = $_3dnow
 HAVE_3DNOW   = $_3dnow
-TARGET_3DNOWEX = $_3dnowext
 HAVE_3DNOWEX   = $_3dnowext
-TARGET_SSE = $_sse
 HAVE_SSE   = $_sse
-TARGET_CMOV = $_cmov
 HAVE_CMOV   = $_cmov
-TARGET_ALTIVEC = $_altivec
 HAVE_ALTIVEC   = $_altivec
-TARGET_ARMV5TE = $_armv5te
 HAVE_ARMV5TE   = $_armv5te
-TARGET_ARMV6 = $_armv6
 HAVE_ARMV6   = $_armv6
-TARGET_IWMMXT = $_iwmmxt
 HAVE_IWMMXT   = $_iwmmxt
-TARGET_VIS = $_vis
 HAVE_VIS   = $_vis
 
 # --- GUI stuff ---
