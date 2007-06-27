@@ -68,7 +68,7 @@ void *video_stream_info(FILE *f, int len)
   int orig_pos = ftell(f);
   unsigned char data[len-8];
   int i;
-  char codec[len-8];
+//  char codec[len-8];
 
   len -= 8;
   for (i=0; i<len; i++)
@@ -101,8 +101,6 @@ void *audio_stream_info(FILE *f, int len)
 void *userdata_info(FILE *f, int len, int pos, int level)
 {
   int orig_pos = pos; /*ftell(f);*/
-  unsigned char data[len-8];
-  int i;
   unsigned int atom_size = 1;
   unsigned int atom_type;
 
