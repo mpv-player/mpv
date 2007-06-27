@@ -1347,7 +1347,7 @@ void vo_x11_clearwindow_part(Display * mDisplay, Window vo_window,
         XFillRectangle(mDisplay, vo_window, f_gc, 0, left_ov, left_ov2,
                        img_height);
         XFillRectangle(mDisplay, vo_window, f_gc, u_dwidth - left_ov2 - 1,
-                       left_ov, left_ov2, img_height);
+                       left_ov, left_ov2 + 1, img_height);
     }
 
     XFlush(mDisplay);
