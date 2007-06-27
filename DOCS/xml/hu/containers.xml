@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21741 -->
+<!-- synced with r23538 -->
 <chapter id="containers">
 <title>Konténerek</title>
 
@@ -207,7 +207,7 @@ tartalmazhatnak, CBR-t vagy VBR-t. Legtöbbször <filename>.QT</filename> vagy
 <filename>.MOV</filename> kiterjesztésük van. Megjegyzendő, hogy mióta az
 MPEG-4 csapat a QuickTime-ot választotta az MPEG-4 javasolt fájlformátumának,
 a MOV fájlaik <filename>.MPG</filename> vagy <filename>.MP4</filename>
-kiterjesztéssel jönnek (Érdekes módon a videó és audió folyamok ezekben a
+kiterjesztéssel jönnek (érdekes módon a videó és audió folyamok ezekben a
 fájlokban igazi MPG és AAC fájlok. Még ki is tudod őket csomagolni a
 <option>-dumpvideo</option> és <option>-dumpaudio</option> kapcsolókkal.).
 </para>

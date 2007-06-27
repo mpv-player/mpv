@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21930 -->
+<!-- synced with r23608 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -80,7 +80,7 @@ titokzatos üzenetet ad ki magából, ami a
 <systemitem>internal compiler error</systemitem> vagy
 <systemitem>unable to find a register to spill</systemitem> vagy
 <systemitem>can't find a register in class `GENERAL_REGS'
-while reloading `asm'</systemitem>.
+while reloading `asm'</systemitem>
 sorokat tartalmazza.
 </para></question>
 <answer><para>
@@ -149,13 +149,14 @@ panaszkodik. Nem értem, <emphasis>van</emphasis> telepítve X11-em!?
 <filename>libx11-dev</filename> Debian Sarge alatt. Nézd meg azt is, hogy
 a <filename class="directory">/usr/X11</filename> és a
 <filename class="directory">/usr/include/X11</filename> szimbolikus linkek
-léteznek-e (ez Mandrake rendszereken lehet probléma).
+léteznek-e.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-A Mac OS 10.3 alatti fordítás számos szerkesztési hibát okoz</para></question>
+A Mac OS 10.3 alatti fordítás számos szerkesztési hibát okoz.
+</para></question>
 <answer>
 <para>
 A szerkesztési hiba, amit tapasztalhatsz, valószínűleg így néz ki:

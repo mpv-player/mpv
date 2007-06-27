@@ -1,4 +1,4 @@
-.\" Synced with r23530
+.\" Synced with r23609
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 06. 10." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 06. 27." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -239,6 +239,9 @@ Audió késleltetés állítása ± 0.1 másodperccel.
 Hangerõ csökkentése/\:növelése.
 .IPs "9 és 0"
 Hangerõ csökkentése/\:növelése.
+.IPs "( és )"
+Beállítja az audió egyensúlyt a bal/\:jobb csatornának megfelelõen.
+Beállítja az audió egyensúlyt a bal/\:jobb csatornának megfelelõen.
 .IPs "m\ \ \ \ "
 Hang elnémítása.
 .IPs "_ (csak MPEG-TS és libavformat mellett)"
@@ -414,26 +417,6 @@ Visszatérés a fõmenübe.
 Visszatérés a legközelebbi menübe (a sorrend: fejezet->cím->fõmenü).
 .IPs "keypad ENTER"
 Választás jóváhagyása.
-.RE
-.PD 1
-.PP
-.RS
-.
-(A következõ gombok csak akkor mûködnek, ha a teletext támogatás engedélyezve
-lett a fordításkor: a TV teletext vezérlésére használatosak)
-.RE
-.PP
-.PD 0
-.RS
-.IPs "X"
-Váltás a teletext bekapcsolt, kikapcsolt és átlátszó módja között.
-.IPs "Q"
-Következõ teletext oldal.
-.IPs "W"
-Elõzõ teletext oldal.
-.IPs "E"
-Szöveges módban megfordítja az oldalt, különben kinagytja:
-fent vagy lent vagy normál.
 .RE
 .PD 1
 .PP
@@ -692,6 +675,7 @@ A megadott profil(ok) használata, \-profile help kiírja a definiált profilokat.
 .TP
 .B \-really-quiet (lásd még \-quiet)
 Még kevesebb kimenet és státusz üzenet kiírása, mint a \-quiet esetén.
+Elnyomja a GUI hibaüzeneteket is.
 .
 .TP
 .B \-show-profile <profil>
@@ -921,6 +905,15 @@ Alternatív menu.conf fájl használata.
 .TP
 .B \-menu-chroot <elérési út> (csak OSD menü)
 A fájl kiválasztó menü könyvtárát a megadott könyvtárra állítja.
+.sp 1
+.I PÉLDA:
+.PD 0
+.RSs
+.IPs "\-menu-chroot=/home"
+Lekorlátozza a fájl kiválasztó menüt a /\:home könyvtárra és annak alkönyvtáraira
+(pl.\& nincs hozzáférés a / könyvtárhoz, de van a /home/user_name könyvtárhoz).
+.RE
+.PD 1
 .
 .TP
 .B \-menu-keepdir (csak OSD menü)
@@ -8036,6 +8029,22 @@ arm
 AltiVec
 .IPs 9
 sh4
+.IPs 10
+simplearm
+.IPs 11
+H.264
+.IPs 12
+VP3
+.IPs 13
+IPP
+.IPs 14
+xvidmmx
+.IPs 15
+CAVS
+.IPs 16
+simplearmv5te
+.IPs 17
+simplearmv6
 .RE
 .PD 1
 .
@@ -9880,7 +9889,7 @@ Ha a dvdauthor egy "..audio sector out of range..." típusú üzentet küld,
 valószínûleg nem engedélyezted ezt az opciót.
 .
 .TP
-.B "interleaving2\ \ \ "
+.B interleaving2
 Egy jobb algoritmust használ az audió és videó csomagok átlapolásához,
 kihasználva azt az alapvetõ tulajdonságot, hogy a muxer a folyamot mindig
 a lehetõ legnagyobb százalékban próbálja meg kitölteni szabad területtel.

@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r23416 (2007. 06. 10.)
+// Sync'ed with help_mp-en.h r23588 (2007. 06. 27.)
 
 // ========================= MPlayer help ===========================
 
@@ -230,6 +230,7 @@ static char help_text[]=
 #define MSGTR_Contrast "Kontraszt"
 #define MSGTR_Saturation "Telítettség"
 #define MSGTR_Hue "Árnyalat"
+#define MSGTR_Balance "Egyensúly"
 
 // property state
 #define MSGTR_MuteStatus "Némít: %s"
@@ -705,6 +706,7 @@ static char help_text[]=
 
 #define MSGTR_InsertingAfVolume "[Mixer] Nincs hardveres keverés, hangerő szűrő használata.\n"
 #define MSGTR_NoVolume "[Mixer] Hangerő állítás nem lehetséges.\n"
+#define MSGTR_NoBalance "[Mixer] Nincs elérhető egyensúly vezérlő.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -1076,6 +1078,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Volume "Hangerő"
 #define MSGTR_VO_SUB_Brightness "Fényerő"
 #define MSGTR_VO_SUB_Hue "Színárnyalat"
+#define MSGTR_VO_SUB_Balance "Egyensúly"
 
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "A forrás kép méretei túl nagyok: %ux%u (maximum %ux%u)\n"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r23536 -->
 <chapter id="tv">
 <title>TV</title>
 
@@ -44,7 +44,7 @@ Itt csak pár tippet említünk meg:
 <listitem><para>
   Használd a <option>channels</option> kapcsolót. Például:
   <screen>-tv channels=26-MTV1,23-TV2</screen>
-  Magyarázat: ha ezt a kapcsolót használod, akkor csak a 26-os és a 23-as
+  Magyarázat: Ha ezt a kapcsolót használod, akkor csak a 26-os és a 23-as
   csatorna lesz használható, és szép OSD szöveg lesz csatorna váltáskor,
   mely a csatorna nevét jelzi ki. A csatorna nevében lévő szóközöket a
   "_" karakterrel kell kicserélni.

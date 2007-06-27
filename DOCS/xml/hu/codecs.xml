@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23100 -->
+<!-- synced with r23537 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -581,7 +581,8 @@ levélben és töltsd fel ezket a fájlokat az FTP-re:
 <systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</replaceable>/</systemitem>
 </para>
 
-<note><para>Windows NT/2000/XP alatt a regisztrációs adatbázisban keresd
+<note><para>
+Windows NT/2000/XP alatt a regisztrációs adatbázisban keresd
 ezeket az információkat, pl. keress rá a "VIDC.HFYU"-ra. Hogy ezt
 hogy tudod megcsinálni, nézd meg a régi DirectShow módszert lejjebb.
 </para></note>

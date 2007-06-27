@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23272 -->
+<!-- synced with r23594 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -313,7 +313,7 @@ Alternatívaként az <application>MPlayer</application> is tartalmaz egy
 <para>
 Ha az Xv-t Kyro alapú kártyával akarod használni (például Hercules
 Prophet 4000XT-vel), akkor le kell töltened a vezérlőt a
-<ulink url="http://www.powervr.com/">PowerVR oldaláról</ulink>
+<ulink url="http://www.powervr.com/">PowerVR oldaláról</ulink>.
 </para>
 </sect2>
 </sect1>
