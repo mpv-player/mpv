@@ -146,7 +146,7 @@ int mp_input_joystick_read(int fd) {
   return MP_INPUT_NOTHING;
 }
 
-#else
+#else /* TARGET_LINUX */
 
 // dummy function
 
@@ -159,4 +159,4 @@ int mp_input_joystick_read(int fd) {
   return MP_INPUT_NOTHING;
 }
 
-#endif
+#endif /* TARGET_LINUX */
