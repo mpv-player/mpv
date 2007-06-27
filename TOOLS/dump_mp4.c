@@ -43,4 +43,5 @@ while((c=getchar())>=0){
     ++pos;
 }
 
+return 0;
 }

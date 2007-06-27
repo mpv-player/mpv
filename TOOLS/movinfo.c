@@ -334,4 +334,6 @@ int main(int argc,char* argv[])
     lschunks(f, 0, 0);
 
     printf("\nSummary: streams: %d video/%d audio\n", v_stream, a_stream);
+
+    return 0;
 }

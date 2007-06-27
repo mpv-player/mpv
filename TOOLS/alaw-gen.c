@@ -43,5 +43,5 @@ for(i=0;i<256;i++){
 fclose(f);
 printf("};\n");
 
-
+return 0;
 }

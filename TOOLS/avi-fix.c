@@ -138,6 +138,5 @@ faszom:
     offset=0;
 }
 
-
+return 0;
 }
-

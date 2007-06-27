@@ -250,6 +250,6 @@ while(fread(&objh,sizeof(objh),1,f)>0){
   fseek(f,pos+objh.size-sizeof(objh),SEEK_SET);
 }
 
-
+return 0;
 }
 
