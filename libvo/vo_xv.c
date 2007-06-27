@@ -301,47 +301,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 if (vo_dheight <= 0) vo_dheight = d_height;
                 aspect_save_prescale(vo_dwidth, vo_dheight);
             }
-        } else if (vo_window == None)
-        {
-            vo_window =
-                vo_x11_create_smooth_window(mDisplay, mRootWin,
-                                            vinfo.visual, hint.x, hint.y,
-                                            hint.width, hint.height, depth,
-                                            CopyFromParent);
-            XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
-
-            vo_x11_classhint(mDisplay, vo_window, "xv");
-            vo_hidecursor(mDisplay, vo_window);
-
-            vo_x11_selectinput_witherr(mDisplay, vo_window,
-                                       StructureNotifyMask | KeyPressMask |
-                                       PropertyChangeMask | ((WinID == 0) ?
-                                                             0
-                                                             :
-                                                             (PointerMotionMask
-                                                              |
-                                                              ButtonPressMask
-                                                              |
-                                                              ButtonReleaseMask
-                                                              |
-                                                              ExposureMask)));
-            XSetStandardProperties(mDisplay, vo_window, hello, hello, None,
-                                   NULL, 0, &hint);
-            vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height, 0);
-            XMapWindow(mDisplay, vo_window);
-            vo_x11_nofs_sizepos(hint.x, hint.y, hint.width, hint.height);
-            if (flags & VOFLAG_FULLSCREEN)
-                vo_x11_fullscreen();
         } else
         {
-            // vo_fs set means we were already at fullscreen
-            vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height, 0);
-            vo_x11_nofs_sizepos(hint.x, hint.y, hint.width, hint.height);
-            if (flags & VOFLAG_FULLSCREEN && !vo_fs)
-                vo_x11_fullscreen();    // handle -fs on non-first file
+            vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
+                   flags, CopyFromParent, "xv", title);
+            XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
         }
-
-//    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );   
 
         if (vo_gc != None)
             XFreeGC(mDisplay, vo_gc);

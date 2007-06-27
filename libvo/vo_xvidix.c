@@ -335,28 +335,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 XSelectInput(mDisplay, vo_window, ExposureMask);
         } else
         {
-            if (vo_window == None)
-            {
-                vo_window =
-                    XCreateWindow(mDisplay, RootWindow(mDisplay, mScreen),
-                                  vo_dx, vo_dy, window_width,
-                                  window_height, xswa.border_pixel,
-                                  vinfo.depth, InputOutput, vinfo.visual,
-                                  xswamask, &xswa);
-
-                vo_x11_classhint(mDisplay, vo_window, "xvidix");
-                vo_hidecursor(mDisplay, vo_window);
-                vo_x11_sizehint(vo_dx, vo_dy, vo_dwidth, vo_dheight, 0);
-
-                XStoreName(mDisplay, vo_window, title);
-                XMapWindow(mDisplay, vo_window);
-                vo_x11_nofs_sizepos(vo_dx, vo_dy, vo_dwidth, vo_dheight);
-
-                if (flags & VOFLAG_FULLSCREEN)
-                    vo_x11_fullscreen();
-
-            } else
-                vo_x11_nofs_sizepos(vo_dx, vo_dy, vo_dwidth, vo_dheight);
+            vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy,
+                    window_width, window_height, flags,
+                    CopyFromParent, "xvidix", title);
+            XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
         }
 
         if (vo_gc != None)

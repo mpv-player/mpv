@@ -440,38 +440,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 XSelectInput(mDisplay, vo_window, ExposureMask);
         } else
         {
-            if (vo_window == None)
-            {
-                vo_window =
-                    vo_x11_create_smooth_window(mDisplay, mRootWin,
-                                                vinfo.visual, vo_dx, vo_dy,
-                                                vo_dwidth, vo_dheight,
-                                                depth, theCmap);
-
-                vo_x11_classhint(mDisplay, vo_window, "x11");
-                vo_hidecursor(mDisplay, vo_window);
-                vo_x11_sizehint(vo_dx, vo_dy, vo_dwidth, vo_dheight, 0);
-                XSelectInput(mDisplay, vo_window, StructureNotifyMask);
-                XStoreName(mDisplay, vo_window, title);
-                XMapWindow(mDisplay, vo_window);
-//      if(WinID!=0)
-                do
-                {
-                    XNextEvent(mDisplay, &xev);
-                }
-                while (xev.type != MapNotify
-                       || xev.xmap.event != vo_window);
-
-                vo_x11_nofs_sizepos(vo_dx, vo_dy, vo_dwidth, vo_dheight);
-                if (fullscreen)
-                    vo_x11_fullscreen();
-            } else
-                vo_x11_nofs_sizepos(vo_dx, vo_dy, vo_dwidth, vo_dheight);
+            vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
+                    flags, theCmap, "x11", title);
         }
 
         XSync(mDisplay, False);
 
-        // we cannot grab mouse events on root window :(
         vo_x11_selectinput_witherr(mDisplay, vo_window,
                                    StructureNotifyMask | KeyPressMask |
                                    PropertyChangeMask | ExposureMask |

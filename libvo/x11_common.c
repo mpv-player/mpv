@@ -1265,6 +1265,62 @@ Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
     return ret_win;
 }
 
+/**
+ * \brief create and setup a window suitable for display
+ * \param vis Visual to use for creating the window
+ * \param x x position of window
+ * \param y y position of window
+ * \param width width of window
+ * \param height height of window
+ * \param flags flags for window creation.
+ *              Only VOFLAG_FULLSCREEN is supported so far.
+ * \param col_map Colourmap for window
+ * \param classname name to use for the classhint
+ * \param title title for the window
+ *
+ * This also does the grunt-work like setting Window Manager hints etc.
+ * If vo_window is already set it just moves and resizes it.
+ */
+void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
+                             unsigned int width, unsigned int height, int flags,
+                             Colormap col_map,
+                             const char *classname, const char *title)
+{
+  if (vo_window == None) {
+    XSizeHints hint;
+    XEvent xev;
+    vo_fs = 0;
+    vo_dwidth = width;
+    vo_dheight = height;
+    vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vis->visual,
+                      x, y, width, height, vis->depth, col_map);
+    vo_x11_classhint(mDisplay, vo_window, classname);
+    XStoreName(mDisplay, vo_window, title);
+    vo_hidecursor(mDisplay, vo_window);
+    XSelectInput(mDisplay, vo_window, StructureNotifyMask);
+    hint.x = x; hint.y = y;
+    hint.width = width; hint.height = height;
+    hint.flags = PPosition | PSize;
+    XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
+    vo_x11_sizehint(x, y, width, height, 0);
+    // map window
+    XMapWindow(mDisplay, vo_window);
+    XClearWindow(mDisplay, vo_window);
+    // wait for map
+    do {
+      XNextEvent(mDisplay, &xev);
+    } while (xev.type != MapNotify || xev.xmap.event != vo_window);
+    XSelectInput(mDisplay, vo_window, NoEventMask);
+    XSync(mDisplay, False);
+    vo_x11_selectinput_witherr(mDisplay, vo_window,
+          StructureNotifyMask | KeyPressMask | PointerMotionMask |
+          ButtonPressMask | ButtonReleaseMask | ExposureMask);
+  }
+  if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+  vo_x11_nofs_sizepos(vo_dx, vo_dy, width, height);
+  if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
+    vo_x11_fullscreen();
+}
 
 void vo_x11_clearwindow_part(Display * mDisplay, Window vo_window,
                              int img_width, int img_height, int use_fs)

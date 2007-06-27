@@ -616,22 +616,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 				depth = 24;
 			}
 			XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
+			vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy,
+				d_width, d_height, flags,
+				CopyFromParent, "Viewing Window", title);
 			xswa.background_pixel = KEY_COLOR;
 			xswa.border_pixel = 0;
 			xswamask = CWBackPixel | CWBorderPixel;
-			hint.y = vo_dy;
-			hint.x = vo_dx;
-			hint.base_width = hint.width = vo_dwidth;
-			hint.base_height = hint.height = vo_dheight;
-			hint.flags = PPosition | PSize;
-			vo_window = XCreateWindow(mDisplay, mRootWin, hint.x, hint.y, hint.width, hint.height, 0, depth, CopyFromParent, vinfo.visual, xswamask, &xswa);
-			vo_x11_classhint(mDisplay, vo_window, "Viewing Window");
-			vo_hidecursor(mDisplay, vo_window);
-			vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask);
-			XSetStandardProperties(mDisplay, vo_window, "DXR3 Overlay", "DXR3 Overlay", None, NULL, 0, &hint);
-			XSetWMNormalHints(mDisplay, vo_window, &hint);
-			XMapWindow(mDisplay, vo_window);
-			XSync(mDisplay, False);
+			XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
 		}
 		
 		/* Start setting up overlay */

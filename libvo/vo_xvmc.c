@@ -695,33 +695,9 @@ skip_surface_allocation:
          aspect_save_prescale(vo_dwidth, vo_dheight);
       }
    } else 
-      if ( vo_window == None ){
-         vo_window = XCreateWindow(mDisplay, mRootWin,
-              hint.x, hint.y, hint.width, hint.height,
-              0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
-
-         vo_x11_classhint( mDisplay,vo_window,"xvmc" );
-         vo_hidecursor(mDisplay,vo_window);
-
-         vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask | ExposureMask |
-	      ((WinID==0) ? 0 : (PointerMotionMask
-		| ButtonPressMask | ButtonReleaseMask)) );
-         XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
-         XSetWMNormalHints( mDisplay,vo_window,&hint );
-	 XMapWindow(mDisplay, vo_window);
-	 vo_x11_nofs_sizepos(hint.x, hint.y, hint.width, hint.height);
-	 if ( flags&VOFLAG_FULLSCREEN ) vo_x11_fullscreen();
-	 else {
-	    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
-	 }
-      } else {
-	// vo_fs set means we were already at fullscreen
-	 vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
-	 vo_x11_nofs_sizepos(hint.x, hint.y, hint.width, hint.height);
-	 if ( flags&VOFLAG_FULLSCREEN && !vo_fs ) vo_x11_fullscreen(); // handle -fs on non-first file
-      }
-
-//    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );   
+      vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height, flags,
+              CopyFromParent, "xvmc", title);
+      XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
 
       if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
       vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &xgcv);

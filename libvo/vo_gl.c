@@ -470,65 +470,18 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
              ButtonPressMask | ButtonReleaseMask | ExposureMask);
     goto glconfig;
   }
-  if ( vo_window == None ) {
-    unsigned int fg, bg;
-    XSizeHints hint;
-    XVisualInfo *vinfo;
-    XEvent xev;
-
-    vo_fs = VO_FALSE;
-
-    hint.x = vo_dx;
-    hint.y = vo_dy;
-    hint.width = d_width;
-    hint.height = d_height;
-    hint.flags = PPosition | PSize;
-
-    /* Get some colors */
-    bg = WhitePixel(mDisplay, mScreen);
-    fg = BlackPixel(mDisplay, mScreen);
-
-    /* Make the window */
-    vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
+  {
+    XVisualInfo *vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
     if (vinfo == NULL)
     {
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
       return -1;
     }
 
-    vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vinfo->visual,
-                  hint.x, hint.y, hint.width, hint.height, vinfo->depth,
-                  XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone));
-
-    vo_x11_classhint( mDisplay,vo_window,"gl" );
-    vo_hidecursor(mDisplay,vo_window);
-
-    XSelectInput(mDisplay, vo_window, StructureNotifyMask);
-    /* Tell other applications about this window */
-    XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
-    /* Set the size hints. */
-    vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height, 0);
-    /* Map window. */
-    XMapWindow(mDisplay, vo_window);
-
-    /* Wait for map. */
-    do {
-      XNextEvent(mDisplay, &xev);
-    } while (xev.type != MapNotify || xev.xmap.event != vo_window);
-
-    XSelectInput(mDisplay, vo_window, NoEventMask);
-
-    XSync(mDisplay, False);
-
-    vo_x11_selectinput_witherr(mDisplay, vo_window,
-        StructureNotifyMask | KeyPressMask | PointerMotionMask |
-        ButtonPressMask | ButtonReleaseMask | ExposureMask);
+    vo_x11_create_vo_window(vinfo, vo_dx, vo_dy, d_width, d_height, flags,
+            XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone),
+            "gl", title);
   }
-  if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
-
-  vo_x11_nofs_sizepos(vo_dx, vo_dy, d_width, d_height);
-  if (vo_fs ^ (flags & VOFLAG_FULLSCREEN))
-    vo_x11_fullscreen();
 #endif
 
 glconfig:

@@ -55,6 +55,9 @@ extern void fstype_help(void);
 extern Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot,
 	Visual *vis, int x, int y, unsigned int width, unsigned int height,
 	int depth, Colormap col_map);
+extern void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
+	unsigned int width, unsigned int height, int flags,
+	Colormap col_map, const char *classname, const char *title);
 extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
 	int img_width, int img_height, int use_fs);
 extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );

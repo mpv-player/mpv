@@ -518,6 +518,7 @@ static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 }
 
 static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
+  XVisualInfo *vinfo, vinfo_buf;
   if (WinID >= 0) {
     vo_window = WinID ? (Window)WinID : mRootWin;
     vo_x11_selectinput_witherr(mDisplay, vo_window,
@@ -525,56 +526,14 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
              ButtonPressMask | ButtonReleaseMask | ExposureMask);
     return 0;
   }
-  if ( vo_window == None ) {
-    XSizeHints hint;
-    XVisualInfo *vinfo, vinfo_buf;
-    XEvent xev;
-
-    hint.x = vo_dx;
-    hint.y = vo_dy;
-    hint.width = d_width;
-    hint.height = d_height;
-    hint.flags = PPosition | PSize;
-
-    /* Make the window */
     vinfo = choose_glx_visual(mDisplay,mScreen,&vinfo_buf) < 0 ? NULL : &vinfo_buf;
     if (vinfo == NULL) {
       mp_msg(MSGT_VO, MSGL_FATAL, "[gl2] no GLX support present\n");
       return -1;
     }
 
-    vo_fs = VO_FALSE;
-    vo_window = vo_x11_create_smooth_window(mDisplay, RootWindow(mDisplay,mScreen),
-                            vinfo->visual, hint.x, hint.y, hint.width, hint.height, vinfo->depth, vo_x11_create_colormap(vinfo));
-
-    vo_x11_classhint( mDisplay,vo_window,"gl2" );
-    vo_hidecursor(mDisplay,vo_window);
-
-    XSelectInput(mDisplay, vo_window, StructureNotifyMask);
-
-    /* Tell other applications about this window */
-
-    XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
-
-    /* Map window. */
-    XMapWindow(mDisplay, vo_window);
-    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
-    XClearWindow(mDisplay,vo_window);
-
-    /* Wait for map. */
-    do {
-      XNextEvent(mDisplay, &xev);
-    } while (xev.type != MapNotify || xev.xmap.event != vo_window);
-
-    XSync(mDisplay, False);
-
-    //XSelectInput(mDisplay, vo_window, StructureNotifyMask); // !!!!
-    vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask |
-                               ButtonPressMask | ButtonReleaseMask | ExposureMask);
-  }
-  vo_x11_nofs_sizepos(vo_dx, vo_dy, d_width, d_height);
-  if (vo_fs ^ (flags & VOFLAG_FULLSCREEN))
-    vo_x11_fullscreen();
+  vo_x11_create_vo_window(vinfo, vo_dx, vo_dy, d_width, d_height,
+          flags, vo_x11_create_colormap(vinfo), "gl2", title);
 
   return 0;
 }
