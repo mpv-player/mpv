@@ -450,7 +450,6 @@ int i,mode_id,rez;
 int numblocks,blocks_per_macroblock;//bpmb we have 6,8,12
 
 //from vo_xv
-char *hello = (title == NULL) ? "XvMC render" : title;
 XSizeHints hint;
 XVisualInfo vinfo;
 XGCValues xgcv;
