@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int main(){
 int c;
 unsigned int head=-1;

@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include <string.h>
+#include <string.h>
 
 #define FCC(a,b,c,d)  (((a)<<24)|((b)<<16)|((c)<<8)|(d))
 
