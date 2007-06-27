@@ -3,7 +3,7 @@
 
 // sox -t raw -A -r 8000 -b alaw.alaw -t sw alaw.out
 
-int main(){
+int main(void){
 int i;
 FILE *f;
 

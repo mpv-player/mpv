@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main(){
+int main(void){
 int c;
 unsigned int head=-1;
 int pos=-3;
