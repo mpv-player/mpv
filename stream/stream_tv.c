@@ -24,17 +24,48 @@
 
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
+#include "m_option.h"
+#include "m_struct.h"
+
+#include <stdio.h>
+
+static struct stream_priv_s {
+    /* if channels parameter exist here will be channel number otherwise - frequency */
+    int input;
+    char* channel;
+} stream_priv_dflts = {
+    0,
+    NULL
+};
+
+#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
+static m_option_t stream_opts_fields[] = {
+    {"hostname", ST_OFF(channel), CONF_TYPE_STRING, 0, 0 ,0, NULL},
+    {"filename", ST_OFF(input), CONF_TYPE_INT, 0, 0 ,0, NULL},
+    { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static struct m_struct_st stream_opts = {
+    "tv",
+    sizeof(struct stream_priv_s),
+    &stream_priv_dflts,
+    stream_opts_fields
+};
 
 static int
 tv_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
   extern char* tv_param_channel;
+  extern int tv_param_input;
+  struct stream_priv_s* p=(struct stream_priv_s*)opts;
   
   stream->type = STREAMTYPE_TV;
   *file_format =  DEMUXER_TYPE_TV;
-  if (strlen (stream->url) > 5 && stream->url[5] != '\0')
-    tv_param_channel = strdup (stream->url + 5);
   
+  tv_param_input=p->input;
+  if (p->channel)
+      tv_param_channel=strdup (p->channel);
+fprintf(stderr,"%p\n",p->channel)  ;
   return STREAM_OK;
 }
 
@@ -45,6 +76,6 @@ stream_info_t stream_info_tv = {
   "",
   tv_stream_open, 			
   { "tv", NULL },
-  NULL,
+  &stream_opts,
   1
 };
