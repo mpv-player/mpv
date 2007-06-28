@@ -24,21 +24,6 @@ struct vf_priv_s {
 	char *qbuf;
 };
 
-static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
-{
-	int i;
-	void *retval=dst;
-
-	for(i=0; i<height; i++)
-	{
-		fast_memcpy(dst, src, bytesPerLine);
-		src+= srcStride;
-		dst+= dstStride;
-	}
-
-	return retval;
-}
-
 static inline void *il_memcpy_pic(void *dst, void *src0, void *src1, int w, int h, int ds, int ss)
 {
 	int i;

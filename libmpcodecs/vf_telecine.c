@@ -15,21 +15,6 @@ struct vf_priv_s {
 	int frame;
 };
 
-static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
-{
-	int i;
-	void *retval=dst;
-
-	for(i=0; i<height; i++)
-	{
-		fast_memcpy(dst, src, bytesPerLine);
-		src+= srcStride;
-		dst+= dstStride;
-	}
-
-	return retval;
-}
-
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;

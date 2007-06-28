@@ -68,12 +68,21 @@ static inline void * mem2agpcpy_pic(void * dst, const void * src, int bytesPerLi
 	return retval;
 }
 
-static inline void * memcpy_pic(void * dst, const void * src, int bytesPerLine, int height, int dstStride, int srcStride)
+#define memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 0)
+#define my_memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 1)
+
+/**
+ * \param limit2width always skip data between end of line and start of next
+ *                    instead of copying the full block when strides are the same
+ */
+static inline void * memcpy_pic2(void * dst, const void * src,
+                                 int bytesPerLine, int height,
+                                 int dstStride, int srcStride, int limit2width)
 {
 	int i;
 	void *retval=dst;
 
-	if(dstStride == srcStride)
+	if(!limit2width && dstStride == srcStride)
 	{
 		if (srcStride < 0) {
 	    		src = (uint8_t*)src + (height-1)*srcStride;

@@ -20,21 +20,6 @@ struct vf_priv_s {
 	double buffered_pts;
 };
 
-static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
-{
-	int i;
-	void *retval=dst;
-
-	for(i=0; i<height; i++)
-	{
-		fast_memcpy(dst, src, bytesPerLine);
-		src+= srcStride;
-		dst+= dstStride;
-	}
-
-	return retval;
-}
-
 static void deint(unsigned char *dest, int ds, unsigned char *src, int ss, int w, int h, int field)
 {
 	int x, y;

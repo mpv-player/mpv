@@ -40,21 +40,6 @@ enum {
 	F_SHOW
 };
 
-static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
-{
-	int i;
-	void *retval=dst;
-
-	for(i=0; i<height; i++)
-	{
-		fast_memcpy(dst, src, bytesPerLine);
-		src+= srcStride;
-		dst+= dstStride;
-	}
-
-	return retval;
-}
-
 #ifdef HAVE_MMX
 static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char *new, int os, int ns)
 {

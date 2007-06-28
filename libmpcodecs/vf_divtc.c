@@ -170,6 +170,11 @@ static int deghost_plane(unsigned char *d, unsigned char *s,
    return 0;
    }
 
+static int copyop(unsigned char *d, unsigned char *s, int bpl, int h, int dstride, int sstride, int dummy) {
+  memcpy_pic(d, s, bpl, h, dstride, sstride);
+  return 0;
+}
+
 static int imgop(int(*planeop)(unsigned char *, unsigned char *,
 			       int, int, int, int, int),
 		 mp_image_t *dst, mp_image_t *src, int arg)
@@ -336,7 +341,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
    switch((p->frameno++-p->phase+10)%5)
       {
       case 0:
-	 imgop((void *)memcpy_pic, dmpi, mpi, 0);
+	 imgop(copyop, dmpi, mpi, 0);
 	 return 0;
 
       case 4:
@@ -348,14 +353,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 			      mpi->width, mpi->height);
 	    vf_clone_mpi_attributes(tmpi, mpi);
 
-	    imgop((void *)memcpy_pic, tmpi, mpi, 0);
+	    imgop(copyop, tmpi, mpi, 0);
 	    imgop(deghost_plane, tmpi, dmpi, p->deghost);
-	    imgop((void *)memcpy_pic, dmpi, mpi, 0);
+	    imgop(copyop, dmpi, mpi, 0);
 	    return vf_next_put_image(vf, tmpi, MP_NOPTS_VALUE);
 	    }
       }
 
-   imgop((void *)memcpy_pic, dmpi, mpi, 0);
+   imgop(copyop, dmpi, mpi, 0);
    return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
    }
 

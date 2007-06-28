@@ -90,21 +90,6 @@ extern int opt_screen_size_y;
 #define        MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
-static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
-{
-    int i;
-    void *retval=dst;
-
-    for(i=0; i<height; i++)
-    {
-	fast_memcpy(dst, src, bytesPerLine);
-	src+= srcStride;
-	dst+= dstStride;
-    }
-
-    return retval;
-}
-
 #define PDIFFUB(X,Y,T) "movq "    #X "," #T "\n\t" \
 		       "psubusb " #Y "," #T "\n\t" \
 		       "psubusb " #X "," #Y "\n\t" \
