@@ -45,8 +45,8 @@ Se installi per la prima volta: assicurati di leggere tutto da qui fino alla
 fine della sezione sull'installazione e segui i collegamenti che troverai. Se
 hai altre domande, ritorna alla <link linkend="toc">Tabella dei Contenuti</link>
 e cerca l'argomento, leggi le <xref linkend="faq"/>, o prova a ricercare nei
-file (con grep, per esempio). Molte domande possono avere risposta da qualche
-parte qui e le restanti probabilmente sono già state poste nelle nostre
+file (con grep, per esempio). Molte domande possono avere una risposta qui da
+qualche parte e le restanti probabilmente sono già state poste nelle nostre
 <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">mailing list</ulink>.
 <!-- FIXME: This refers to nonexistent links
 Controlla gli
@@ -88,7 +88,7 @@ coreani, e del visualizzatore su schermo (OnScreen Display, OSD)?
 <para>
 Il riproduttore è decisamente robusto nella riproduzione di file MPEG rovinati
 (utile per alcuni VCD) e riproduce file AVI imperfetti, che sono illeggibili
-con il famoso windows media player. Possono venir letti anche gli AVI non
+con il famoso Windows Media Player. Possono venir letti anche gli AVI non
 indicizzati e puoi ricostruire il loro indice temporaneamente con l'opzione
 <option>-idx</option> o permanentemente con
 <application>MEncoder</application>, abilitando così la ricerca!
@@ -136,7 +136,7 @@ in altri formati sempre visualizzabili da <application>MPlayer</application>
 <listitem><para>
   Audio MP3 <emphasis role="bold">VBR</emphasis>
   <important><para>
-  L'audio MP3 VBR non sempre suona bene nei riproduttori per windows!
+  L'audio MP3 VBR non sempre suona bene nei riproduttori per Windows!
   </para></important>
 </para></listitem>
 <listitem><para>

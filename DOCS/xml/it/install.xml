@@ -6,14 +6,14 @@
 <para>
 Una rapida guida di installazione si può trovare nel file
 <filename>README</filename>.
-Perfavore prime leggi quello, poi torna qui per il resto dei dettagli scabrosi.
+Per favore leggi prima quello, poi torna qui per il resto dei dettagli scabrosi.
 </para>
 
 <para>
-In questa sezione sarai guidato attraverso il processo di compilazione e di
+In questa sezione verrai guidato attraverso il processo di compilazione e di
 configurazione di <application>MPlayer</application>. Non è semplice, ma non
 sarà necessariamente difficile. Se ti si presenta un'esperienza diversa da
-quella descritta, perfavore cerca in questa documentazione e troverai le
+quella descritta, per favore cerca in questa documentazione e troverai le
 risposte.
 </para>
 
@@ -112,14 +112,14 @@ risposte.
   <link linkend="mencoder"><application>MEncoder</application></link>.
 </para></listitem>
 <listitem><para>
-  Se hai un <emphasis role="bold">sintonizzatore TV</emphasis> compatibile V4L,
+  Se hai un <emphasis role="bold">sintonizzatore TV</emphasis> compatibile V4L
   e desideri vedere/catturare e codificare filmati con
   <application>MPlayer</application>, leggi la sezione
   <link linkend="tv-input">ingresso TV</link>.
 </para></listitem>
 <listitem><para>
   Se hai un <emphasis role="bold">sintonizzatore radio</emphasis> compatibile
-  V4L, e desideri sentire e catturare  il suono con
+  V4L e desideri sentire e catturare il suono con
   <application>MPlayer</application>, leggi la sezione
   <link linkend="radio">radio</link>.
 </para></listitem>
@@ -156,9 +156,9 @@ nella directory radice di <application>MPlayer</application>. Vedi
 
 <para>
 <emphasis role="bold">Controlla sempre l'output di</emphasis>
-<filename>./configure</filename>, e il file
+<filename>./configure</filename> e il file
 <filename>configure.log</filename>, essi contengono informazioni su cosa
-sarà compilato, e cosa no. Puoi anche voler guardare i file
+sarà compilato e cosa no. Puoi anche voler guardare i file
 <filename>config.h</filename> e <filename>config.mak</filename>.
 Se hai alcune librerie installate, ma non rilevate da
 <filename>./configure</filename>, allora controlla di avere anche i file
@@ -168,7 +168,7 @@ Il file <filename>configure.log</filename> solitamente ti dice cosa manca.
 
 <para>
 Anche se non obbligatorio, i font dovrebbero essere installati, per avere l'OSD
-e la funzione sottotitoli. Il metodo consigliato è di installare un file di
+e la funzione sottotitoli. Il metodo consigliato è installare un file di
 font TTF e dire a <application>MPlayer</application> di usarlo.
 Vedi la sezione <link linkend="subosd">Sottotitoli e OSD</link> per i dettagli.
 </para>
@@ -179,7 +179,7 @@ Vedi la sezione <link linkend="subosd">Sottotitoli e OSD</link> per i dettagli.
 
 
 <sect1 id="gui">
-<title>E riguardo la GUI?</title>
+<title>E relativamente alla GUI?</title>
 
 <para>
 La GUI abbisogna di GTK 1.2.x o GTK 2.0 (non è completamente in GTK, ma i
@@ -188,16 +188,16 @@ Le skin sono salvate in formato PNG, così GTK,
 <systemitem class="library">libpng</systemitem> (e le loro controparti di
 sviluppo, solitamente chiamate <systemitem class="library">gtk-dev</systemitem>
 e <systemitem class="library">libpng-dev</systemitem>) vanno installate.
-Puoi compilarla specificando <option>--enable-gui</option> lanciando
+Puoi compilarla specificando <option>--enable-gui</option> quando esegui
 <filename>./configure</filename>.
 Poi, per abilitare la GUI, devi lanciare il binario <command>gmplayer</command>.
 </para>
 
 <para>
 Siccome <application>MPlayer</application> non ha una skin inclusa, devi
-scarcarne una se vuoi usare la GUI. Vedi la
+scaricarne una se vuoi usare la GUI. Vedi la
 <ulink url="http://www.mplayerhq.hu/dload.html">pagina di download</ulink>.
-Esse devono essere scompattate nella directory di sistema (<filename
+Queste devono essere scompattate nella directory di sistema (<filename
 class="directory">$PREFIX/share/mplayer/skins</filename>) o dell'utente
 <filename class="directory">$HOME/.mplayer/skins</filename>.
 <application>MPlayer</application> di default cerca in questi percorsi una
@@ -219,7 +219,7 @@ utilizzare la skin nella directory
 <para>
 Devi dire a <application>MPlayer</application> quale font usare per usufruire
 dell'OSD e dei sottotitoli. Un qualsiasi font TrueType o basato su bitmap 
-funzionerà. Tuttavia, i font TrueType sono consigliati in quanto appaiono più
+funzionerà. Tuttavia si consigliano i font TrueType in quanto appaiono più
 belli, possono essere ridimensionati correttamente alla dimensione del filmato
 e gestiscono meglio differenti codifiche.
 </para>
@@ -234,7 +234,7 @@ Ci sono due modi di far funzionare i font TrueType. Il primo consiste nel
 passare l'opzione <option>-font</option> sulla riga comando per specificare un
 file di font TrueType. Questa opzione sarà una buona candidata da mettere nel
 tuo file di configurazione (vedi la pagina di manuale per i dettagli).
-Il secondo è creare un collegamento simbolico al font di tua scelta
+Il secondo è creare un collegamento simbolico al font di tua scelta,
 con nome <filename>subfont.ttf</filename>. Sia
 <screen>
 ln -s <replaceable>/percorso/del/font_di_esempio.ttf</replaceable> ~/.mplayer/subfont.ttf
@@ -293,8 +293,8 @@ ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mp
 
 <para>
 I font dovrebbero avere un file <filename>font.desc</filename> appropriato che
-rimappi le posizioni unicode alla pagina di codici corrente dei sottotitoli
-testuali. Un'altra soluzione sarebbe avere sottotitoli in UTF-8 e usare
+relazioni le posizioni unicode con la pagina di codici corrente dei sottotitoli
+di testo. Un'altra soluzione sarebbe avere sottotitoli in UTF-8 e usare
 l'opzione <option>-utf8</option> oppure dare al file dei sottotitoli lo stesso
 nome del tuo file video, con un'estensione <filename>.utf</filename> e
 posizionarlo nella stessa directory del file video stesso.
@@ -318,8 +318,8 @@ il menu Preferenze attualmente NON E' IMPLEMENTATO!
 <orderedlist>
 <title>Installazione</title>
 <listitem><para>
-  compila <application>MPlayer</application> passando l'opzione
-  <option>--enable-menu</option> a <filename>./configure</filename>
+  compila <application>MPlayer</application> passando
+  a <filename>./configure</filename> l'opzione <option>--enable-menu</option> 
 </para></listitem>
 <listitem><para>
   assicurati di avere un font OSD installato
@@ -382,7 +382,7 @@ Ci sono tre metodi di temporizzazione in <application>MPlayer</application>.
   <filename>/etc/sysctl.conf</filename>.
   </para>
   <para>
-  Puoi vedere l'efficenza del nuovo timer nella riga di stato.
+  Puoi verificare l'efficienza del nuovo temporizzatore nella riga di stato.
   Le funzioni di risparmio energetico dei BIOS di alcuni portatili con CPU
   speedstep interagiscono male con l'RTC. Audio e video possono perdere di
   sincronia. Collegare il cavo di alimentazione prima di accendere il portatile
@@ -394,7 +394,7 @@ Ci sono tre metodi di temporizzazione in <application>MPlayer</application>.
 </listitem>
 <listitem><para>
   <emphasis role="bold">Il terzo codice di temporizzazione</emphasis> viene
-  abilitato tramite l'opzione <option>-softsleep</option>. Ha l'efficenza
+  abilitato tramite l'opzione <option>-softsleep</option>. Ha l'efficienza
   dell'RTC, ma non lo utilizza. D'altro canto, richiede più CPU.
 </para></listitem>
 </itemizedlist>

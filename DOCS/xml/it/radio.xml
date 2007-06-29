@@ -36,10 +36,8 @@ opzioni e dei controlli di tastiera per la radio.
 <title>Consigli per l'uso</title>
 
 <para>
-The full listing of the options is available in the manual page.
-Here are just a few tips:
 La lista completa delle opzioni è disponibile nella pagina di manuale.
-Qui ci sono giustso alcuni consigli:
+Qui ci sono giusto alcuni consigli:
 
 <itemizedlist>
 <listitem><para>
@@ -92,7 +90,7 @@ Riprodurre il secondo canale della lista canali:
 
 <informalexample>
 <para>
-Ridirigere il souno sul bus PCI dall'ADC integrato della scheda radio.
+Ridirigere il suono sul bus PCI dall'ADC integrato della scheda radio.
 In questo esempio il sintonizzatore viene usato come una seconda scheda audio
 (ALSA device hw:1,0). Per schede basate su saa7134 deve esser caricato il modulo
 <systemitem>saa7134-alsa</systemitem> o <systemitem>saa7134-oss</systemitem>.

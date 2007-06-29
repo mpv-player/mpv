@@ -194,7 +194,7 @@ l'opzione <option>-sub <replaceable>esempio.txt</replaceable></option>
   <listitem><para>
     Differisce i sottotitoli di <option><replaceable>sec</replaceable></option>
     secondi.
-    Può essere un valore nevativo. Il valore viene aggiunto al contatore
+    Può essere un valore negativo. Il valore viene aggiunto al contatore
     della posizione nel filmato.
   </para></listitem>
 </varlistentry>
@@ -216,7 +216,7 @@ l'opzione <option>-sub <replaceable>esempio.txt</replaceable></option>
 <para>
 Se subisci un ritardo crescente tra il filmato e i sottotitoli quando usi un
 file sottotitoli MicroDVD, molto facilmente la frequenza del filmato e del file
-dei sottotitoli sono diverse. Perfavore nota che il formato sottotitoli
+dei sottotitoli sono diverse. Per favore nota che il formato sottotitoli
 MicroDVD usa numeri assoluti di fotogrammi per la sua temporizzazione, ma non
 vi è alcuna informazione sugli fps, per cui con tale formato bisognerebbe
 usare l'opzione <option>-subfps</option>. Se vuoi risolvere questo problema
@@ -261,7 +261,7 @@ tasto/bottone ad un qualsiasi comando di <application>MPlayer</application>
 usando un semplice file di configurazione.
 La sintassi consiste di un valore chiave seguito da un comando. Il percorso del
 file di configurazione di default è
-<filename>$HOME/.mplayer/input.conf</filename> ma può essere reimpostato
+<filename>$HOME/.mplayer/input.conf</filename>, ma può essere reimpostato
 usando l'opzione <option>-input <replaceable>conf</replaceable></option>
 (i percorsi sono relativi a <filename>$HOME/.mplayer</filename>).
 </para>
@@ -391,7 +391,7 @@ i protocolli HTTP, FTP, MMS o RTSP/RTP.
 La riproduzione funziona semplicemente passando l'URL sulla riga comando.
 <application>MPlayer</application> onora la variabile d'ambiente
 <envar>http_proxy</envar>, usando un proxy quando disponibile.
-Un proxy può anche venir forzato:
+Si può anche forzare l'uso di un proxy:
 <screen>
 mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable>
 </screen>
@@ -421,7 +421,7 @@ wget <replaceable>ftp://micorsops.com/qualcosa.avi</replaceable> -O - | mplayer 
 <para>
 Una volte che riesci nel far riprodurre a <application>MPlayer</application>
 il tuo flusso internet preferito, puoi usare l'opzione
-<option>-dumpstream</option> per salvere il flusso in un file.
+<option>-dumpstream</option> per salvare il flusso in un file.
 Per esempio:
 <screen>
 mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>stream.asf</replaceable>
@@ -451,13 +451,13 @@ basandosi su un file di configurazione EDL specifico per il filmato.
 <para>
 Questo torna utile per colore che vogliono guardare un film in modalità
 "amichevole per la famiglia". Puoi eliminare violenze, profanità,
-Jar-Jar Binks .. da un filmato, in accordo coi tuoi gusti personali. Oltre a
+Jar-Jar Binks... da un filmato, in accordo coi tuoi gusti personali. Oltre a
 ciò, ci sono altri utilizzi, come saltare automaticamente le pubblicità nei
 file video che guardi.
 </para>
 
 <para>
-Il formato del file EDL è piuttosto scarno. C'è un comando per riga che
+Il formato del file EDL è piuttosto scarno. C'è un comando per ogni riga che
 indica cosa fare (saltare/silenziare) e quando farlo (usando la posizione in
 secondi).
 </para>
@@ -521,7 +521,7 @@ saltare il blocco indicato da ogni riga.
 <title>DVD</title>
 
 <para>
-La maggior parte dei DVD e molti altri file includono souno in surround.
+La maggior parte dei DVD e molti altri file includono audio in surround.
 <application>MPlayer</application> supporta la riproduzione in surround, ma non
 la abilita di default poiché gli equipaggiamenti audio stereo sono molto più
 diffusi. Per riprodurre un file che ha più di due canali audio usa
@@ -642,14 +642,14 @@ Per usare questo codec:
 Questa sezione deve ancora essere scritta e non può esser completata finché
 qualcuno non ci fornisca audio di esempio da testare. Se hai un qualche file
 con audio matrix-encoded, sai dove trovarne uno, oppure hai una qualche
-informazione che possa aiutare, perfavore invia un messaggio alla mailing list
+informazione che possa aiutare, per favore invia un messaggio alla mailing list
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
 Scrivi "[matrix-encoded audio]" nell'oggetto.
 
 </para>
 
 <para>
-Se nessun file o nessuna informazione arriverà, questa sezione verrà tolta.
+Se nessun file o nessuna informazione arriverà, questa sezione sarà rimossa.
 </para>
 
 <para>
@@ -682,7 +682,7 @@ HRTF di <application>MPlayer</application> fornisce un audio con maggior
 immersione nello spazio attraverso cuffie a due canali. Il solito missaggio
 semplicemente combina tutti i canali in due; invece combinando i canali,
 <option>hrtf</option> genera leggere eco, aumenta leggermente le separazioni
-stereo, e altera il volume di alcune frequenze. Se HRTF souni meglio può
+stereo, e altera il volume di alcune frequenze. Se HRTF suoni meglio può
 dipendere dalla sorgente audio e da una questione di gusto personale, ma è
 sicuramente il caso di provarlo.
 </para>
@@ -709,7 +709,7 @@ mplayer <replaceable>nomefile</replaceable> -channels 6 -af resample=48000,hrtf
 
 <para>
 Se non senti nessuno suono uscire dai tuoi canali surround, controlla le
-impostazioni del tuo mixer con un programma apposito com
+impostazioni del tuo mixer con un programma apposito come
 <application>alsamixer</application>; le uscite audio sono spesso silenziate
 (mute) e il volume impostato a zero di default.
 </para>
@@ -778,7 +778,7 @@ dallo 0.
 </para>
 
 <para>
-L'opzione <option>-channels</option> viene usate per richieder il numero di
+L'opzione <option>-channels</option> viene usata per richiedere il numero di
 canali al decodificatore audio, Alcuni codec audio usano il numero di canali
 specificato per decidere se sottomiscelare la sorgente, se necessario.
 Nota che ciò non sempre influenza il numero dei canali di uscita. Per esempio,
@@ -812,9 +812,9 @@ che entrambi gli altoparlanti emettano lo stesso audio è il filtro
 
 <para>
 Ciò equilibra ambedue i canali, portando al risultato di entrambi i canali
-alla metà del volume dell'originario. La seguente sezione ha esempi di altri
-modi di far ciò senza un decremento del volume, ma sono molto complessi e
-richiedono varie opsioni a seconda del canale che vuoi mantenere. Se davvero
+alla metà del volume di quello originario. La seguente sezione ha esempi di
+altri modi di far ciò senza un decremento del volume, ma sono molto complessi
+e richiedono varie opzioni a seconda del canale che vuoi mantenere. Se davvero
 devi mantenere il volume, potrebbe essere più semplice sperimentare con il
 filtro <option>volume</option> e trovare il valore giusto. Per esempio:
 <screen>
@@ -1057,8 +1057,9 @@ modificarle.
 Se hai un paio di grossi altoparlanti puoi non voler sprecare dei soldi per
 compare un subwoofer per un sistema audio 5.1 completo. Se usi
 <option>-channels 5</option> per richiedere che liba52 decodifichi audio 5.1
-in 5.0, il canale del subwoofer viene semplicemente scartato. SE vuoi distribuire il canale del subwoofer per conto tuo devi sottomiscelarlo a mano con
-<option>pan</option>:
+in 5.0, il canale del subwoofer viene semplicemente scartato. Se vuoi
+distribuire il canale del subwoofer per conto tuo devi sottomiscelarlo a mano
+con <option>pan</option>:
 <orderedlist>
 <listitem><para>
   Since <option>pan</option> needs to examine all six channels, specify
@@ -1146,7 +1147,7 @@ L'opzione <option>-softvol</option> funziona controllando il filtro audio
 <option>volume</option>. Se vuoi riprodurre un file a un dato volume sin
 dall'avvio puoi specificare <option>volume</option> manualmente:
 <screen>mplayer <replaceable>file-silente</replaceable> -af volume=10</screen>
-Questo riprodurrà il file con una guadagno di 10 decibel. Stai attento quando
+Questo riprodurrà il file con un guadagno di 10 decibel. Stai attento quando
 usi il filtro <option>volume</option> - puoi facilmente farti male alle
 orecchie se usi un valore troppo alto. Parti dal basso e sali gradualmente fino
 a quando capisci quanta regolazione è richiesta. Inoltre, se tu specifichi
