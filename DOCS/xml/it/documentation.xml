@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21867 -->
+<!-- synced with r23579 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Il Visualizzatore di film</title>
@@ -16,24 +16,22 @@
   <year>2007</year>
   <holder>MPlayer team</holder>
 </copyright>
-<!--
 <legalnotice>
   <title>License</title>
-  <para>This program is free software; you can redistribute it and/or modify
+  <para>MPlayer is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by the
   Free Software Foundation; either version 2 of the License, or (at your
   option) any later version.</para>
 
-  <para>This program is distributed in the hope that it will be useful, but
+  <para>MPlayer is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
   or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
   for more details.</para>
 
   <para>You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
+  along with MPlayer; if not, write to the Free Software Foundation,
   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.</para>
 </legalnotice>
--->
 </bookinfo>
 
 
