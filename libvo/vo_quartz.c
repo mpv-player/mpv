@@ -31,6 +31,7 @@
 #include "mp_msg.h"
 #include "m_option.h"
 #include "mp_fifo.h"
+#include "mpbswap.h"
 
 #include "input/input.h"
 #include "input/mouse.h"
@@ -203,7 +204,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
-			vo_draw_alpha_yv12(w,h,src,srca,stride, ((char*)P) + P->componentInfoY.offset + x0 + y0 * imgRect.right, imgRect.right);
+			vo_draw_alpha_yv12(w,h,src,srca,stride, ((char*)P) + be2me_32(P->componentInfoY.offset) + x0 + y0 * imgRect.right, imgRect.right);
 			break;
 		case IMGFMT_UYVY:
 			vo_draw_alpha_uyvy(w,h,src,srca,stride,((char*)P) + (x0 + y0 * imgRect.right) * 2,imgRect.right*2);
@@ -812,12 +813,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 				case IMGFMT_YV12:
 				case IMGFMT_IYUV:
 				case IMGFMT_I420:
-					P->componentInfoY.offset = sizeof(PlanarPixmapInfoYUV420);
-					P->componentInfoCb.offset = P->componentInfoY.offset + image_size / 2;
-					P->componentInfoCr.offset = P->componentInfoCb.offset + image_size / 4;
-					P->componentInfoY.rowBytes = imgRect.right;
-					P->componentInfoCb.rowBytes =  imgRect.right / 2;
-					P->componentInfoCr.rowBytes =  imgRect.right / 2;
+					P->componentInfoY.offset = be2me_32(sizeof(PlanarPixmapInfoYUV420));
+					P->componentInfoCb.offset = be2me_32(be2me_32(P->componentInfoY.offset) + image_size / 2);
+					P->componentInfoCr.offset = be2me_32(be2me_32(P->componentInfoCb.offset) + image_size / 4);
+					P->componentInfoY.rowBytes = be2me_32(imgRect.right);
+					P->componentInfoCb.rowBytes =  be2me_32(imgRect.right / 2);
+					P->componentInfoCr.rowBytes =  be2me_32(imgRect.right / 2);
 					image_buffer_size = image_size + sizeof(PlanarPixmapInfoYUV420);
 					break;
 				case IMGFMT_UYVY:
@@ -998,19 +999,19 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 	{
   		case IMGFMT_YV12:
   		case IMGFMT_I420:
- 			memcpy_pic(((char*)P) + P->componentInfoY.offset + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
+ 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoY.offset) + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
   			x=x/2;y=y/2;w=w/2;h=h/2;
   
- 			memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
- 			memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
+ 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCb.offset) + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
+ 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCr.offset) + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
   			return 0;
   
   		case IMGFMT_IYUV:
- 			memcpy_pic(((char*)P) + P->componentInfoY.offset + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
+ 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoY.offset) + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
   			x=x/2;y=y/2;w=w/2;h=h/2;
   			
- 			memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
- 			memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
+ 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCr.offset) + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
+ 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCb.offset) + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
   			return 0;
 	}
 	return -1;
@@ -1164,23 +1165,23 @@ static uint32_t get_yuv_image(mp_image_t *mpi)
 			return VO_FALSE;
 		}
 
-		mpi->planes[0]=((char*)P) + P->componentInfoY.offset;
+		mpi->planes[0]=((char*)P) + be2me_32(P->componentInfoY.offset);
 		mpi->stride[0]=imgRect.right;
 		mpi->width=imgRect.right;
 
 		if(mpi->flags&MP_IMGFLAG_SWAPPED)
 		{
 			// I420
-			mpi->planes[1]=((char*)P) + P->componentInfoCb.offset;
-			mpi->planes[2]=((char*)P) + P->componentInfoCr.offset;
+			mpi->planes[1]=((char*)P) + be2me_32(P->componentInfoCb.offset);
+			mpi->planes[2]=((char*)P) + be2me_32(P->componentInfoCr.offset);
 			mpi->stride[1]=imgRect.right/2;
 			mpi->stride[2]=imgRect.right/2;
 		} 
 		else 
 		{
 			// YV12
-			mpi->planes[1]=((char*)P) + P->componentInfoCr.offset;
-			mpi->planes[2]=((char*)P) + P->componentInfoCb.offset;
+			mpi->planes[1]=((char*)P) + be2me_32(P->componentInfoCr.offset);
+			mpi->planes[2]=((char*)P) + be2me_32(P->componentInfoCb.offset);
 			mpi->stride[1]=imgRect.right/2;
 			mpi->stride[2]=imgRect.right/2;
 		}
