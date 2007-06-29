@@ -150,7 +150,7 @@ avere il codice di zona impostato.
 <para>
 I dischi DVD hanno 2048 byte per settore con ECC/CRC. Di solito hanno un
 filesystem UDF su una sola traccia, contenente svariati file (piccoli file
-.IFO e .BUK e grossi (1GB) file .VOB). Questi sono file veri e possono esser
+.IFO e .BUP e grossi (1GB) file .VOB). Questi sono file veri e possono esser
 copiati/riprodotti dal filesystem montato di un DVD non criptato.
 </para>
 </formalpara>
@@ -158,7 +158,7 @@ copiati/riprodotti dal filesystem montato di un DVD non criptato.
 <para>
 I file .IFO contengono le informazioni per navigare nel film
 (capitoli/titoli/angolazioni, tabella lingue, etc) e sono necessari per leggere
-ed interpretare il contenuto .VOB (il film). I file .BUK sono dei loro backup.
+ed interpretare il contenuto .VOB (il film). I file .BUP sono dei loro backup.
 Usano <emphasis role="bold">sectors</emphasis> dappertutto, per cui hai bisogno
 di usare un indirizzamento dei settori del disco a basso livello per
 implementare la navigazione DVD o decrittarne il contenuto.

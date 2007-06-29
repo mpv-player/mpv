@@ -451,7 +451,7 @@ basandosi su un file di configurazione EDL specifico per il filmato.
 <para>
 Questo torna utile per colore che vogliono guardare un film in modalità
 "amichevole per la famiglia". Puoi eliminare violenze, profanità,
-Jar-Jar Binks... da un filmato, in accordo coi tuoi gusti personali. Oltre a
+Jar-Jar Binks... da un filmato, secondo i tuoi gusti personali. Oltre a
 ciò, ci sono altri utilizzi, come saltare automaticamente le pubblicità nei
 file video che guardi.
 </para>
@@ -812,8 +812,8 @@ che entrambi gli altoparlanti emettano lo stesso audio è il filtro
 
 <para>
 Ciò equilibra ambedue i canali, portando al risultato di entrambi i canali
-alla metà del volume di quello originario. La seguente sezione ha esempi di
-altri modi di far ciò senza un decremento del volume, ma sono molto complessi
+alla metà del volume di quello originario. La sezione seguente ha esempi di
+altri modi di far ciò senza una riduzione del volume, ma sono molto complessi
 e richiedono varie opzioni a seconda del canale che vuoi mantenere. Se davvero
 devi mantenere il volume, potrebbe essere più semplice sperimentare con il
 filtro <option>volume</option> e trovare il valore giusto. Per esempio:

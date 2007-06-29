@@ -119,7 +119,7 @@ risposte.
 </para></listitem>
 <listitem><para>
   Se hai un <emphasis role="bold">sintonizzatore radio</emphasis> compatibile
-  V4L e desideri sentire e catturare il suono con
+  V4L e desideri sentire e registrare il suono con
   <application>MPlayer</application>, leggi la sezione
   <link linkend="radio">radio</link>.
 </para></listitem>
@@ -197,7 +197,7 @@ Poi, per abilitare la GUI, devi lanciare il binario <command>gmplayer</command>.
 Siccome <application>MPlayer</application> non ha una skin inclusa, devi
 scaricarne una se vuoi usare la GUI. Vedi la
 <ulink url="http://www.mplayerhq.hu/dload.html">pagina di download</ulink>.
-Queste devono essere scompattate nella directory di sistema (<filename
+Queste devono essere decompresse nella directory di sistema (<filename
 class="directory">$PREFIX/share/mplayer/skins</filename>) o dell'utente
 <filename class="directory">$HOME/.mplayer/skins</filename>.
 <application>MPlayer</application> di default cerca in questi percorsi una
@@ -219,9 +219,9 @@ utilizzare la skin nella directory
 <para>
 Devi dire a <application>MPlayer</application> quale font usare per usufruire
 dell'OSD e dei sottotitoli. Un qualsiasi font TrueType o basato su bitmap 
-funzionerà. Tuttavia si consigliano i font TrueType in quanto appaiono più
-belli, possono essere ridimensionati correttamente alla dimensione del filmato
-e gestiscono meglio differenti codifiche.
+funzionerà. Tuttavia si consigliano i font TrueType in quanto hanno una resa
+grafica migliore, possono essere ridimensionati correttamente rispetto alla
+dimensione del filmato e gestiscono meglio differenti codifiche.
 </para>
 
 <!-- ********** -->

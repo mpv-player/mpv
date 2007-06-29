@@ -90,7 +90,7 @@ Riprodurre il secondo canale della lista canali:
 
 <informalexample>
 <para>
-Ridirigere il suono sul bus PCI dall'ADC integrato della scheda radio.
+Ridirigere il suono dall'ADC integrato della scheda radio al bus PCI.
 In questo esempio il sintonizzatore viene usato come una seconda scheda audio
 (ALSA device hw:1,0). Per schede basate su saa7134 deve esser caricato il modulo
 <systemitem>saa7134-alsa</systemitem> o <systemitem>saa7134-oss</systemitem>.
