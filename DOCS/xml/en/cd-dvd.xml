@@ -145,7 +145,7 @@ facilities. Some RPC-2 drives may also require setting the region code.
 <title>DVD structure</title>
 <para>
 DVD disks have 2048 bytes per sector with ECC/CRC. They usually have an UDF
-filesystem on a single track, containing various files (small .IFO and .BUK
+filesystem on a single track, containing various files (small .IFO and .BUP
 files and big (1GB) .VOB files). They are real files and can be copied/played
 from the mounted filesystem of an unencrypted DVD.
 </para>
@@ -154,7 +154,7 @@ from the mounted filesystem of an unencrypted DVD.
 <para>
 The .IFO files contain the movie navigation information (chapter/title/angle
 map, language table, etc) and are needed to read and interpret the .VOB content
-(movie). The .BUK files are backups of them. They use
+(movie). The .BUP files are backups of them. They use
 <emphasis role="bold">sectors</emphasis> everywhere, so you need to use raw
 addressing of sectors of the disc to implement DVD navigation or decrypt the
 content.
