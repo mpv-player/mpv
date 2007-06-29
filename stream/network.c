@@ -69,7 +69,6 @@ mime_struct_t mime_type_table[] = {
 	{ "audio/x-ms-wma", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-asf", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-afs", DEMUXER_TYPE_ASF },
-	{ "video/x-ms-wvx", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-wmv", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-wma", DEMUXER_TYPE_ASF },
 	{ "application/x-mms-framed", DEMUXER_TYPE_ASF },
@@ -77,6 +76,7 @@ mime_struct_t mime_type_table[] = {
 	{ "application/octet-stream", DEMUXER_TYPE_UNKNOWN },
 	// Playlists
 	{ "video/x-ms-wmx", DEMUXER_TYPE_PLAYLIST },
+	{ "video/x-ms-wvx", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-scpls", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-mpegurl", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-pls", DEMUXER_TYPE_PLAYLIST },

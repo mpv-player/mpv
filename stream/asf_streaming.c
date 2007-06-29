@@ -534,7 +534,6 @@ static int asf_http_streaming_type(char *content_type, char *features, HTTP_head
 				(!strcasecmp(content_type, "audio/x-ms-wma")) ||
 				(!strcasecmp(content_type, "video/x-ms-asf")) ||
 				(!strcasecmp(content_type, "video/x-ms-afs")) ||
-				(!strcasecmp(content_type, "video/x-ms-wvx")) ||
 				(!strcasecmp(content_type, "video/x-ms-wmv")) ||
 				(!strcasecmp(content_type, "video/x-ms-wma")) ) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ASFRedirector);
