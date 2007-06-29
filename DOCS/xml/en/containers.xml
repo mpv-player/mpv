@@ -205,9 +205,9 @@ These formats were designed by Apple and can contain any codec, CBR or VBR.
 They usually have a <filename>.QT</filename> or <filename>.MOV</filename>
 extension. Note that since the MPEG-4 group chose QuickTime as the recommended
 file format for MPEG-4, their MOV files come with a <filename>.MPG</filename> or
-<filename>.MP4</filename> extension (interestingly the video and audio
+<filename>.MP4</filename> extension (Interestingly the video and audio
 streams in these files are real MPG and AAC files. You can even extract them
-with the <option>-dumpvideo</option> and <option>-dumpaudio</option> options).
+with the <option>-dumpvideo</option> and <option>-dumpaudio</option> options.).
 </para>
 </sect2>
 
