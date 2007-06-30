@@ -58,14 +58,14 @@ tv_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   extern char* tv_param_channel;
   extern int tv_param_input;
   struct stream_priv_s* p=(struct stream_priv_s*)opts;
-  
+
   stream->type = STREAMTYPE_TV;
   *file_format =  DEMUXER_TYPE_TV;
-  
+
   /* don't override input= option value if no input id is
      passed in tv:// url */
   if(p->input!=-1)
-  tv_param_input=p->input;
+      tv_param_input=p->input;
   if (p->channel)
       tv_param_channel=strdup (p->channel);
   return STREAM_OK;
