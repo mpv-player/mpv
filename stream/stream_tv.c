@@ -34,7 +34,7 @@ static struct stream_priv_s {
     int input;
     char* channel;
 } stream_priv_dflts = {
-    0,
+    -1,
     NULL
 };
 
@@ -62,10 +62,12 @@ tv_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   stream->type = STREAMTYPE_TV;
   *file_format =  DEMUXER_TYPE_TV;
   
+  /* don't override input= option value if no input id is
+     passed in tv:// url */
+  if(p->input!=-1)
   tv_param_input=p->input;
   if (p->channel)
       tv_param_channel=strdup (p->channel);
-fprintf(stderr,"%p\n",p->channel)  ;
   return STREAM_OK;
 }
 
