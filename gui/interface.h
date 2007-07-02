@@ -1,6 +1,6 @@
 
-#ifndef _INTERFACE_H
-#define _INTERFACE_H
+#ifndef _GUI_INTERFACE_H
+#define _GUI_INTERFACE_H
 
 #include "../config.h"
 #include "mplayer/play.h"

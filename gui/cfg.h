@@ -1,6 +1,6 @@
 
-#ifndef __CFG_H
-#define __CFG_H
+#ifndef __GUI_CFG_H
+#define __GUI_CFG_H
 
 extern int gtkEnableAudioEqualizer;
 

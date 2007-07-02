@@ -1,6 +1,6 @@
 
-#ifndef __SKIN_H
-#define __SKIN_H
+#ifndef __GUI_SKIN_H
+#define __GUI_SKIN_H
 
 #include "app.h"
 

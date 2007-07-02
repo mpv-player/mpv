@@ -4,8 +4,8 @@
 //   Writed by pontscho / fresh!mindworkz
 // ----------------------------------------------------------------------------------------------
 
-#ifndef __WS_H
-#define __WS_H
+#ifndef __GUI_WS_H
+#define __GUI_WS_H
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

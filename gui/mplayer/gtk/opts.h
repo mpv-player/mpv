@@ -1,6 +1,6 @@
 
-#ifndef __OPTS_H
-#define __OPTS_H
+#ifndef __GUI_OPTS_H
+#define __GUI_OPTS_H
 
 #include <gtk/gtk.h>
 

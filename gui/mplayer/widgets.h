@@ -1,6 +1,6 @@
 
-#ifndef __WIDGETS_H
-#define __WIDGETS_H
+#ifndef __GUI_WIDGETS_H
+#define __GUI_WIDGETS_H
 
 #include <stdio.h>
 #include <stdlib.h>

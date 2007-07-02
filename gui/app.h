@@ -1,6 +1,6 @@
 
-#ifndef __APP_H
-#define __APP_H
+#ifndef __GUI_APP_H
+#define __GUI_APP_H
 
 #include "bitmap.h"
 #include "wm/ws.h"
