@@ -1,6 +1,6 @@
 
-#ifndef __MYMPLAYERHANDLER
-#define __MYMPLAYERHANDLER
+#ifndef __GMPLAYER_H
+#define __GMPLAYER_H
 
 extern int             mplSubRender;
 extern int             mplMainRender;

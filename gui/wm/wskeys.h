@@ -1,6 +1,6 @@
 
-#ifndef _MY_WSKEY
-#define _MY_WSKEY
+#ifndef _WSKEYS_H
+#define _WSKEYS_H
 
 #define wsKeyNone -1
 

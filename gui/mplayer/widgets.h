@@ -1,6 +1,6 @@
 
-#ifndef __MY_WIDGET
-#define __MY_WIDGET
+#ifndef __WIDGETS_H
+#define __WIDGETS_H
 
 #include <stdio.h>
 #include <stdlib.h>

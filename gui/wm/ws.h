@@ -4,8 +4,8 @@
 //   Writed by pontscho / fresh!mindworkz
 // ----------------------------------------------------------------------------------------------
 
-#ifndef __MY_WS
-#define __MY_WS
+#ifndef __WS_H
+#define __WS_H
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

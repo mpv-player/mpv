@@ -1,6 +1,6 @@
 
-#ifndef __PREFERENCES_H
-#define __PREFERENCES_H
+#ifndef __OPTS_H
+#define __OPTS_H
 
 #include <gtk/gtk.h>
 

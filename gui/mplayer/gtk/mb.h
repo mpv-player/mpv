@@ -1,6 +1,6 @@
 
-#ifndef __GUI_MESSAGEBOX_H
-#define __GUI_MESSAGEBOX_H
+#ifndef __GUI_MB_H
+#define __GUI_MB_H
 
 #include <gtk/gtk.h>
 

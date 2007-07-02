@@ -1,6 +1,6 @@
 
-#ifndef _XDND_H_
-#define _XDND_H_
+#ifndef _WSXDND_H
+#define _WSXDND_H
 
 
 void wsXDNDInitialize(void);
