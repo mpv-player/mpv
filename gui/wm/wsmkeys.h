@@ -1,3 +1,5 @@
+#ifndef GUI_WSMKEYS_H
+#define GUI_WSMKEYS_H
 
 #include "wskeys.h"
 
@@ -62,3 +64,5 @@ TwsKeyNames wsKeyNames[ wsKeyNumber ] =
 
   { wsKeyNone, "None" }
  };
+
+#endif /* GUI_WSMKEYS_H */
