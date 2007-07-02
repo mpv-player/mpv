@@ -9,8 +9,8 @@
  * This file contains vo_vesa interface to Linux Video Overlay.
  */
 
-#ifndef __VESA_LVO_INCLUDED
-#define __VESA_LVO_INCLUDED
+#ifndef __VESA_LVO_H
+#define __VESA_LVO_H
 
 int	 vlvo_preinit(const char *drvname);
 int      vlvo_init(unsigned src_width,unsigned src_height,
