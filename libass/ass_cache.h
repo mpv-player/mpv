@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __ASS_CACHE_H__
-#define __ASS_CACHE_H__
+#ifndef ASS_CACHE_H
+#define ASS_CACHE_H
 
 void ass_font_cache_init(void);
 ass_font_t* ass_font_cache_find(ass_font_desc_t* desc);

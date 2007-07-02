@@ -1,5 +1,5 @@
-#ifndef __MS_HDR_H
-#define __MS_HDR_H
+#ifndef MS_HDR_H
+#define MS_HDR_H
 
 #ifndef _WAVEFORMATEX_
 #define _WAVEFORMATEX_

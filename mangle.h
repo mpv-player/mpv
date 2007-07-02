@@ -4,8 +4,8 @@
  * File licensed under the GPL, see http://www.fsf.org/ for more info.
  */
 
-#ifndef __MANGLE_H
-#define __MANGLE_H
+#ifndef MANGLE_H
+#define MANGLE_H
 
 /* Feel free to add more to the list, eg. a.out IMO */
 #if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__OS2__) || \
@@ -15,5 +15,5 @@
 #define MANGLE(a) #a
 #endif
 
-#endif /* !__MANGLE_H */
+#endif /* !MANGLE_H */
 

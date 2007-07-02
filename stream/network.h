@@ -4,8 +4,8 @@
  * (C) 2001, MPlayer team.
  */
 
-#ifndef __NETWORK_H
-#define __NETWORK_H
+#ifndef NETWORK_H
+#define NETWORK_H
 
 #include <fcntl.h>
 #include <sys/time.h>

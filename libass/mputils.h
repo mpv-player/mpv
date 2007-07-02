@@ -1,5 +1,5 @@
-#ifndef __ASS_MPUTILS_H__
-#define __ASS_MPUTILS_H__
+#ifndef ASS_MPUTILS_H
+#define ASS_MPUTILS_H
 
 #include "mp_msg.h"
 #include "help_mp.h"

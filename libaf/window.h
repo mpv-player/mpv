@@ -15,12 +15,12 @@
    coefficients will be stored.
 */
 
-#if !defined _DSP_H
+#if !defined DSP_H
 # error "Never use <window.h> directly; include <dsp.h> instead"
 #endif
 
-#ifndef _WINDOW_H
-#define _WINDOW_H	1
+#ifndef WINDOW_H
+#define WINDOW_H
 
 extern void af_window_boxcar(int n, _ftype_t* w);
 extern void af_window_triang(int n, _ftype_t* w);

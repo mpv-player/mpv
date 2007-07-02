@@ -1,6 +1,6 @@
 
-#ifndef __IMG_FORMAT_H
-#define __IMG_FORMAT_H
+#ifndef IMG_FORMAT_H
+#define IMG_FORMAT_H
 
 /* RGB/BGR Formats */
 

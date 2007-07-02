@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __ASS_UTILS_H__
-#define __ASS_UTILS_H__
+#ifndef ASS_UTILS_H
+#define ASS_UTILS_H
 
 int mystrtoi(char** p, int base, int* res);
 int mystrtou32(char** p, int base, uint32_t* res);

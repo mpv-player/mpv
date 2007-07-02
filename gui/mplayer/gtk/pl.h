@@ -1,6 +1,6 @@
 
-#ifndef __GUI_PL_H
-#define __GUI_PL_H
+#ifndef GUI_PL_H
+#define GUI_PL_H
 
 #include <gtk/gtk.h>
 

@@ -8,8 +8,8 @@
 //=============================================================================
 */
 
-#ifndef	_DSP_H
-#define	_DSP_H 	1
+#ifndef	DSP_H
+#define	DSP_H
 
 /* Implementation of routines used for DSP */
 

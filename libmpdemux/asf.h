@@ -1,5 +1,5 @@
-#ifndef __ASF_H
-#define __ASF_H
+#ifndef ASF_H
+#define ASF_H
 
 //#include "config.h"	/* for WORDS_BIGENDIAN */
 #include <inttypes.h>

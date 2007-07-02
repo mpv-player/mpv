@@ -1,5 +1,5 @@
-#ifndef _cache2_h
-#define _cache2_h
+#ifndef CACHE2_H
+#define CACHE2_H
 
 extern void cache_uninit(stream_t *s);
 

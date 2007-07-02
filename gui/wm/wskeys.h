@@ -1,6 +1,6 @@
 
-#ifndef _GUI_WSKEYS_H
-#define _GUI_WSKEYS_H
+#ifndef GUI_WSKEYS_H
+#define GUI_WSKEYS_H
 
 #define wsKeyNone -1
 

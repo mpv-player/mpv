@@ -1,6 +1,6 @@
 
-#ifndef __GUI_GMPLAYER_H
-#define __GUI_GMPLAYER_H
+#ifndef GUI_GMPLAYER_H
+#define GUI_GMPLAYER_H
 
 extern int             mplSubRender;
 extern int             mplMainRender;

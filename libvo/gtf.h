@@ -1,5 +1,5 @@
-#ifndef __GTF_H
-#define __GTF_H
+#ifndef GTF_H
+#define GTF_H
 
 #include <vbe.h>
 

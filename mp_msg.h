@@ -1,6 +1,6 @@
 
-#ifndef _MP_MSG_H
-#define _MP_MSG_H
+#ifndef MP_MSG_H
+#define MP_MSG_H
 
 // defined in mplayer.c and mencoder.c
 extern int verbose;

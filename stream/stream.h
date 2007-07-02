@@ -1,5 +1,5 @@
-#ifndef __STREAM_H
-#define __STREAM_H
+#ifndef STREAM_H
+#define STREAM_H
 
 #include "mp_msg.h"
 #include <string.h>
@@ -312,4 +312,4 @@ typedef struct {
  int channels;
 } stream_language_t;
 
-#endif // __STREAM_H
+#endif // STREAM_H

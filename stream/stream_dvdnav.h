@@ -1,5 +1,5 @@
-#ifndef _MPLAYER_DVDNAV_STREAM_H
-#define _MPLAYER_DVDNAV_STREAM_H
+#ifndef MPLAYER_STREAM_DVDNAV_H
+#define MPLAYER_STREAM_DVDNAV_H
 
 #include <dvdnav.h>
 

@@ -1,5 +1,5 @@
-#ifndef _audio_in_h 
-#define _audio_in_h 
+#ifndef AUDIO_IN_H
+#define AUDIO_IN_H
 
 #define AUDIO_IN_ALSA 1
 #define AUDIO_IN_OSS 2
@@ -72,4 +72,4 @@ int ai_oss_set_channels(audio_in_t *ai);
 int ai_oss_init(audio_in_t *ai);
 #endif
 
-#endif /* _audio_in_h */
+#endif /* AUDIO_IN_H */

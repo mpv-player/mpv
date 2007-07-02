@@ -4,8 +4,8 @@
  * File licensed under the GPL, see http://www.fsf.org/ for more info.
  */
 
-#ifndef __PARSE_MP4_H
-#define __PARSE_MP4_H 1
+#ifndef PARSE_MP4_H
+#define PARSE_MP4_H
 
 #include <inttypes.h>
 
@@ -107,5 +107,5 @@ typedef struct {
 int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds);
 void mp4_free_esds(esds_t *esds); 
 
-#endif /* !__PARSE_MP4_H */
+#endif /* !PARSE_MP4_H */
 

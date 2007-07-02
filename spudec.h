@@ -1,5 +1,5 @@
-#ifndef _MPLAYER_SPUDEC_H
-#define _MPLAYER_SPUDEC_H
+#ifndef MPLAYER_SPUDEC_H
+#define MPLAYER_SPUDEC_H
 
 #include "libvo/video_out.h"
 

@@ -1,5 +1,5 @@
-#ifndef __STHEADER_H__
-#define __STHEADER_H__
+#ifndef STHEADER_H
+#define STHEADER_H
 
 #include "aviheader.h"
 #include "ms_hdr.h"

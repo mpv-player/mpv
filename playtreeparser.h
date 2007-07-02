@@ -8,8 +8,8 @@
 
 /// \file
 
-#ifndef __PLAYTREEPARSER_H
-#define __PLAYTREEPARSER_H
+#ifndef PLAYTREEPARSER_H
+#define PLAYTREEPARSER_H
 
 struct stream_st;
 

@@ -4,10 +4,10 @@
  * (C) 2001, MPlayer team.
  */
 
-#ifndef __URL_H
-#define __URL_H
+#ifndef URL_H
+#define URL_H
 
-//#define __URL_DEBUG
+//#define URL_DEBUG
 
 typedef struct {
 	char *url;
@@ -26,8 +26,8 @@ void   url_free(URL_t* url);
 void url_unescape_string(char *outbuf, const char *inbuf);
 void url_escape_string(char *outbuf, const char *inbuf);
 
-#ifdef __URL_DEBUG
+#ifdef URL_DEBUG
 void url_debug(const URL_t* url);
-#endif // __URL_DEBUG
+#endif /* URL_DEBUG */
 
-#endif // __URL_H
+#endif /* URL_H */

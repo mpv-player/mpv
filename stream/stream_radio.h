@@ -1,5 +1,5 @@
-#ifndef _H_STREAM_RADIO_
-#define _H_STREAM_RADIO_
+#ifndef STREAM_RADIO_H
+#define STREAM_RADIO_H
 
 #ifdef USE_RADIO
 #define RADIO_CHANNEL_LOWER 1

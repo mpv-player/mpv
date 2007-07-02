@@ -24,8 +24,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef __YUV4MPEG_H__
-#define __YUV4MPEG_H__
+#ifndef YUV4MPEG_H
+#define YUV4MPEG_H
 
 #include <stdlib.h>
 //#include "mp_msg.h"
@@ -449,6 +449,6 @@ int y4m_allow_unknown_tags(int yn);
  ************************************************************************
  ************************************************************************/
 
-#endif /* __YUV4MPEG_H__ */
+#endif /* YUV4MPEG_H */
 
 

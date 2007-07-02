@@ -1,6 +1,6 @@
 
-#ifndef _GUI_WSXDND_H
-#define _GUI_WSXDND_H
+#ifndef GUI_WSXDND_H
+#define GUI_WSXDND_H
 
 
 void wsXDNDInitialize(void);

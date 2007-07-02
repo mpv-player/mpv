@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __ASS_H__
-#define __ASS_H__
+#ifndef ASS_H
+#define ASS_H
 
 #include "ass_types.h"
 

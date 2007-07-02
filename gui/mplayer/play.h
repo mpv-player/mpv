@@ -1,6 +1,6 @@
 
-#ifndef __GUI_PLAY_H
-#define __GUI_PLAY_H
+#ifndef GUI_PLAY_H
+#define GUI_PLAY_H
 
 #include "../config.h"
 

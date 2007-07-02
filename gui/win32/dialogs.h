@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _GUI_DIALOGS_H
-#define _GUI_DIALOGS_H
+#ifndef GUI_DIALOGS_H
+#define GUI_DIALOGS_H
 
 #define TBS_TOOLTIPS   0x0100
 #define WM_SYSTRAY     (WM_USER+1)

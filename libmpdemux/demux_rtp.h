@@ -1,13 +1,13 @@
-#ifndef _DEMUX_RTP_H
-#define _DEMUX_RTP_H
+#ifndef DEMUX_RTP_H
+#define DEMUX_RTP_H
 
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifndef __STREAM_H
+#ifndef STREAM_H
 #include "stream/stream.h"
 #endif
-#ifndef __DEMUXER_H
+#ifndef DEMUXER_H
 #include "demuxer.h"
 #endif
 

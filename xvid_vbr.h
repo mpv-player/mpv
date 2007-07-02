@@ -23,8 +23,8 @@
  *
  *****************************************************************************/
 
-#ifndef __XVID_VBR_H__
-#define __XVID_VBR_H__
+#ifndef XVID_VBR_H
+#define XVID_VBR_H
 
 #define VBR_VERSION 0
 

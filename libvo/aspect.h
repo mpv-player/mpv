@@ -1,5 +1,5 @@
-#ifndef __ASPECT_H
-#define __ASPECT_H
+#ifndef ASPECT_H
+#define ASPECT_H
 /* Stuff for correct aspect scaling. */
 
 extern int vo_panscan_x;

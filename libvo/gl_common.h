@@ -1,5 +1,5 @@
-#ifndef __GL_COMMON_H__
-#define __GL_COMMON_H__
+#ifndef GL_COMMON_H
+#define GL_COMMON_H
 
 #include "mp_msg.h"
 #include "config.h"

@@ -1,5 +1,5 @@
-#ifndef __MP_IMAGE_H
-#define __MP_IMAGE_H 1
+#ifndef MP_IMAGE_H
+#define MP_IMAGE_H
 
 //--------- codec's requirements (filled by the codec/vf) ---------
 

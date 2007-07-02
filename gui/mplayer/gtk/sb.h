@@ -1,5 +1,5 @@
-#ifndef __GUI_SB_H
-#define __GUI_SB_H
+#ifndef GUI_SB_H
+#define GUI_SB_H
 
 #include <gtk/gtk.h>
 

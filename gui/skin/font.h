@@ -1,6 +1,6 @@
 
-#ifndef _GUI_FONT_H
-#define _GUI_FONT_H
+#ifndef GUI_FONT_H
+#define GUI_FONT_H
 
 #include "bitmap.h"
 #include "app.h"

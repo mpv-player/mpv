@@ -1,13 +1,13 @@
-#ifndef _DEMUX_RTP_INTERNAL_H
-#define _DEMUX_RTP_INTERNAL_H
+#ifndef DEMUX_RTP_INTERNAL_H
+#define DEMUX_RTP_INTERNAL_H
 
 #include <stdlib.h>
 
 extern "C" {
-#ifndef __STREAM_H
+#ifndef STREAM_H
 #include "stream/stream.h"
 #endif
-#ifndef __DEMUXER_H
+#ifndef DEMUXER_H
 #include "demuxer.h"
 #endif
 #ifdef USE_LIBAVCODEC_SO

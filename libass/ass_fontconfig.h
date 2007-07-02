@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __ASS_FONTCONFIG_H__
-#define __ASS_FONTCONFIG_H__
+#ifndef ASS_FONTCONFIG_H
+#define ASS_FONTCONFIG_H
 
 #ifdef HAVE_FONTCONFIG
 #include <fontconfig/fontconfig.h>

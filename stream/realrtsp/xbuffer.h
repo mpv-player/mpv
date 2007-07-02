@@ -14,8 +14,8 @@
  */
 
 
-#ifndef _XCL_H_
-#define _XCL_H_
+#ifndef XCL_H
+#define XCL_H
 
 void *xbuffer_init(int chunk_size);
 void *xbuffer_free(void *buf);

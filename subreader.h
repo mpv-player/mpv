@@ -1,5 +1,5 @@
-#ifndef __MPLAYER_SUBREADER_H
-#define __MPLAYER_SUBREADER_H
+#ifndef MPLAYER_SUBREADER_H
+#define MPLAYER_SUBREADER_H
 
 #include <stdio.h>
 

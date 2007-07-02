@@ -1,6 +1,6 @@
 
-#ifndef __GUI_COMMON_H
-#define __GUI_COMMON_H
+#ifndef GUI_COMMON_H
+#define GUI_COMMON_H
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>

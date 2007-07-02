@@ -1,6 +1,6 @@
 
-#ifndef _MF_H
-#define _MF_H
+#ifndef MF_H
+#define MF_H
 
 extern int    mf_w;
 extern int    mf_h;

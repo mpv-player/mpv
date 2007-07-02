@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __ASS_BITMAP_H__
-#define __ASS_BITMAP_H__
+#ifndef ASS_BITMAP_H
+#define ASS_BITMAP_H
 
 typedef struct ass_synth_priv_s ass_synth_priv_t;
 

@@ -1,6 +1,6 @@
 
-#ifndef __GUI_EQ_H
-#define __GUI_EQ_H
+#ifndef GUI_EQ_H
+#define GUI_EQ_H
 
 #include <gtk/gtk.h>
 

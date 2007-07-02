@@ -1,5 +1,5 @@
-#ifndef __GUI_BITMAP_H
-#define __GUI_BITMAP_H
+#ifndef GUI_BITMAP_H
+#define GUI_BITMAP_H
 
 typedef struct _txSample
 {
@@ -13,4 +13,4 @@ typedef struct _txSample
 int bpRead( char * fname, txSample * bf );
 void Convert32to1( txSample * in,txSample * out,int adaptivlimit );
 
-#endif /* __GUI_BITMAP_H */
+#endif /* GUI_BITMAP_H */

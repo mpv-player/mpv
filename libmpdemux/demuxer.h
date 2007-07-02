@@ -1,5 +1,5 @@
-#ifndef __DEMUXER_H
-#define __DEMUXER_H 1
+#ifndef DEMUXER_H
+#define DEMUXER_H
 
 #ifdef USE_ASS
 #include "libass/ass_types.h"
@@ -387,4 +387,4 @@ int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, ui
 int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts, int *num_chapters, char **chapter_name);
 
 
-#endif /* __DEMUXER_H */
+#endif /* DEMUXER_H */

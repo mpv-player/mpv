@@ -5,8 +5,8 @@
  * by Dave Lambley <mplayer@davel.me.uk>
  */
 
-#ifndef __COOKIES_H
-#define __COOKIES_H
+#ifndef COOKIES_H
+#define COOKIES_H
 
 #include "http.h"
 

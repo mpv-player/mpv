@@ -1,6 +1,6 @@
 
-#ifndef __GUI_ABOUT_H
-#define __GUI_ABOUT_H
+#ifndef GUI_ABOUT_H
+#define GUI_ABOUT_H
 
 #include <gtk/gtk.h>
 

@@ -1,5 +1,5 @@
-#ifndef _M_CONFIG_H
-#define _M_CONFIG_H
+#ifndef M_CONFIG_H
+#define M_CONFIG_H
 
 /// \defgroup Config Config manager
 ///
@@ -197,4 +197,4 @@ m_config_set_profile_option(m_config_t* config, m_profile_t* p,
 
 ///@}
 
-#endif /* _M_CONFIG_H */
+#endif /* M_CONFIG_H */

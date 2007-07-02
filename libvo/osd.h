@@ -1,6 +1,6 @@
 
-#ifndef __MPLAYER_OSD_H
-#define __MPLAYER_OSD_H
+#ifndef MPLAYER_OSD_H
+#define MPLAYER_OSD_H
 
 // Generic alpha renderers for all YUV modes and RGB depths.
 // These are "reference implementations", should be optimized later (MMX, etc)

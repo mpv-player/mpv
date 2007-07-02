@@ -1,6 +1,6 @@
 
-#ifndef __MPAE_H__
-#define __MPAE_H__
+#ifndef MPAE_H
+#define MPAE_H
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1

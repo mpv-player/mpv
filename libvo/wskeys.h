@@ -1,6 +1,6 @@
 
-#ifndef _WSKEYS_H
-#define _WSKEYS_H
+#ifndef WSKEYS_H
+#define WSKEYS_H
 
 #define wsosbrackets '['
 #define wscsbrackets ']'

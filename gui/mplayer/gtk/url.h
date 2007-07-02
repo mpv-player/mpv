@@ -1,6 +1,6 @@
 
-#ifndef _GUI_URL_H
-#define _GUI_URL_H
+#ifndef GUI_URL_H
+#define GUI_URL_H
 
 extern GtkWidget * URL;
 extern int         gtkVURLDialogBox;

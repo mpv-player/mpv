@@ -1,6 +1,6 @@
 
-#ifndef __AUDIO_OUT_H
-#define __AUDIO_OUT_H
+#ifndef AUDIO_OUT_H
+#define AUDIO_OUT_H
 
 typedef struct ao_info_s
 {

@@ -5,8 +5,8 @@
  * $Id$
  */
 
-#ifndef _RTP_H
-#define _RTP_H
+#ifndef RTP_H
+#define RTP_H
 
 int read_rtp_from_server(int fd, char *buffer, int length);
 

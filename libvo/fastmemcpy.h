@@ -16,8 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef __FASTMEMCPY_H
-#define __FASTMEMCPY_H
+#ifndef FASTMEMCPY_H
+#define FASTMEMCPY_H
 
 #include "config.h"
 #include <inttypes.h>

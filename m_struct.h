@@ -1,5 +1,5 @@
-#ifndef _M_STRUCT_H
-#define _M_STRUCT_H
+#ifndef M_STRUCT_H
+#define M_STRUCT_H
 
 /// \defgroup OptionsStruct Options struct
 /// \ingroup Options
@@ -105,4 +105,4 @@ m_struct_get_field(m_struct_t* st,const char* f);
 
 ///@}
 
-#endif /* _M_STRUCT_H */
+#endif /* M_STRUCT_H */

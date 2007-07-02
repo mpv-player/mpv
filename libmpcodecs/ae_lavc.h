@@ -1,5 +1,5 @@
-#ifndef __AE_LAVC_H_
-#define __AE_LAVC_H_
+#ifndef AE_LAVC_H
+#define AE_LAVC_H
 
 #include "ae.h"
 

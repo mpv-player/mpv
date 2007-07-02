@@ -1,6 +1,6 @@
 
-#ifndef __MPLAYER_SUB_H
-#define __MPLAYER_SUB_H
+#ifndef MPLAYER_SUB_H
+#define MPLAYER_SUB_H
 
 typedef struct mp_osd_bbox_s {
     int x1,y1,x2,y2;

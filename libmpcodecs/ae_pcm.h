@@ -1,5 +1,5 @@
-#ifndef __AE_PCM_H_
-#define __AE_PCM_H_
+#ifndef AE_PCM_H
+#define AE_PCM_H
 
 #include "ae.h"
 

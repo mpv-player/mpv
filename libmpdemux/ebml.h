@@ -1,5 +1,5 @@
-#ifndef __EBML_H
-#define __EBML_H
+#ifndef EBML_H
+#define EBML_H
 
 #include <inttypes.h>
 
@@ -188,4 +188,4 @@ int ebml_read_skip (stream_t *s, uint64_t *length);
 uint32_t ebml_read_master (stream_t *s, uint64_t *length);
 char *ebml_read_header (stream_t *s, int *version);
 
-#endif /* __EBML_H */
+#endif /* EBML_H */

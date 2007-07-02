@@ -2,8 +2,8 @@
 /// \file
 /// \ingroup Playtree
 
-#ifndef __PLAYTREE_H
-#define __PLAYTREE_H
+#ifndef PLAYTREE_H
+#define PLAYTREE_H
 
 struct stream_st;
 struct m_config;

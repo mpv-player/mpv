@@ -4,8 +4,8 @@
  * Author: Zoltan Hidvegi
  */
 
-#ifndef __CMMX_H
-#define __CMMX_H
+#ifndef CMMX_H
+#define CMMX_H
 
 typedef unsigned long cmmx_t;
 

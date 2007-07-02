@@ -19,8 +19,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef __YUV4MPEG_INTERN_H__
-#define __YUV4MPEG_INTERN_H__
+#ifndef YUV4MPEG_INTERN_H
+#define YUV4MPEG_INTERN_H
 
 
 #define Y4M_MAGIC "YUV4MPEG2"
@@ -75,4 +75,4 @@
 #define Y4M_DAR_MPEG2_3 { 16, 9 }
 #define Y4M_DAR_MPEG2_4 { 221, 100 }
 
-#endif /* __YUV4MPEG_INTERN_H__ */
+#endif /* YUV4MPEG_INTERN_H */

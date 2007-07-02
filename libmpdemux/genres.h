@@ -14,8 +14,8 @@
  */
 
 
-#ifndef _GENRES_H
-#define _GENRES_H
+#ifndef GENRES_H
+#define GENRES_H
 
 
 char *genres[] = {
@@ -278,4 +278,4 @@ char *genres[] = {
 };
 
 
-#endif /* _GENRES_H */
+#endif /* GENRES_H */

@@ -1,6 +1,6 @@
 
-#ifndef __GUI_MB_H
-#define __GUI_MB_H
+#ifndef GUI_MB_H
+#define GUI_MB_H
 
 #include <gtk/gtk.h>
 

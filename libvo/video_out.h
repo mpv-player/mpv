@@ -7,8 +7,8 @@
  *
  */
  
-#ifndef __VIDEO_OUT_H
-#define __VIDEO_OUT_H 1
+#ifndef VIDEO_OUT_H
+#define VIDEO_OUT_H
 
 #include <inttypes.h>
 #include <stdarg.h>

@@ -8,12 +8,12 @@
 //=============================================================================
 */
 
-#if !defined _DSP_H
+#if !defined DSP_H
 # error "Never use <filter.h> directly; include <dsp.h> instead"
 #endif
 
-#ifndef _FILTER_H
-#define _FILTER_H	1
+#ifndef FILTER_H
+#define FILTER_H
 
 
 // Design and implementation of different types of digital filters 

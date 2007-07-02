@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _GUI_WINCFG_H
-#define _GUI_WINCFG_H
+#ifndef GUI_WINCFG_H
+#define GUI_WINCFG_H
 
 extern char *skinName;
 extern int sub_window;

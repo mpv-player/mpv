@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _GUI_SKINLOAD_H
-#define _GUI_SKINLOAD_H
+#ifndef GUI_SKINLOAD_H
+#define GUI_SKINLOAD_H
 
 typedef struct
 {

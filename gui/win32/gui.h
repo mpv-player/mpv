@@ -21,8 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _GUI_GUI_H
-#define _GUI_GUI_H
+#ifndef GUI_GUI_H
+#define GUI_GUI_H
+
 #include "config.h"
 #include "mplayer.h"
 #include "playtree.h"

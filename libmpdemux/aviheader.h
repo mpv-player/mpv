@@ -1,5 +1,5 @@
-#ifndef _aviheader_h
-#define	_aviheader_h
+#ifndef AVIHEADER_H
+#define AVIHEADER_H
 
 //#include "config.h"	/* get correct definition WORDS_BIGENDIAN */
 #include "libavutil/common.h"
