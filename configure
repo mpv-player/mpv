@@ -2249,7 +2249,7 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
   _install_strip=
 elif test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
-    CFLAGS="-O2 $_march $_mcpu $_pipe -fomit-frame-pointer"
+    CFLAGS="-O2 $_march $_mcpu $_pipe -fomit-frame-pointer -wd167"
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
