@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __ASS_OPTIONS_H__
-#define __ASS_OPTIONS_H__
+#ifndef __ASS_MP_H__
+#define __ASS_MP_H__
 
 #include "subreader.h"
 
