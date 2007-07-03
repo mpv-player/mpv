@@ -6365,10 +6365,10 @@ int main(void) { xvid_plugin_2pass2_t s; s.vbv_size=0; return 0; }
 EOF
   if cc_check ; then
     _lavc_xvid=yes
-    _def_lavc_xvid='#define CONFIG_XVID 1'
+    _def_lavc_xvid='#define CONFIG_LIBXVID 1'
   else
     _lavc_xvid=no
-    _def_lavc_xvid='#undef CONFIG_XVID'
+    _def_lavc_xvid='#undef CONFIG_LIBXVID'
   fi
   echores "$_lavc_xvid"
 fi
@@ -6396,17 +6396,17 @@ if test "$_x264" = yes ; then
   _codecmodules="x264 $_codecmodules"
   if echo $_libavencoders | grep -q X264 ; then
     _lavc_x264=yes
-    _def_lavc_x264='#define CONFIG_X264 1'
+    _def_lavc_x264='#define CONFIG_LIBX264 1'
     _libs_mplayer="$_libs_mplayer $_ld_x264"
   else
     _lavc_x264=no
-    _def_lavc_x264='#undef CONFIG_X264'
+    _def_lavc_x264='#undef CONFIG_LIBX264'
   fi
 else
   _x264=no
   _lavc_x264=no
   _def_x264='#undef HAVE_X264'
-  _def_lavc_x264='#undef CONFIG_X264'
+  _def_lavc_x264='#undef CONFIG_LIBX264'
   _nocodecmodules="x264 $_nocodecmodules"
   _libavencoders=`echo $_libavencoders | sed -e s/LIBX264_ENCODER// `
 fi
