@@ -121,7 +121,6 @@ static void dvd_set_speed(char *device, unsigned speed)
 #endif
 }
 
-#ifdef USE_DVDREAD
 #define	LIBDVDREAD_VERSION(maj,min,micro)	((maj)*10000 + (min)*100 + (micro))
 /*
  * Try to autodetect the libdvd-0.9.0 library
@@ -139,7 +138,6 @@ static void dvd_set_speed(char *device, unsigned speed)
 
 char * dvd_audio_stream_types[8] = { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
 char * dvd_audio_stream_channels[6] = { "mono", "stereo", "unknown", "unknown", "5.1/6.1", "5.1" };
-#endif /* #ifdef USE_DVDREAD */
 
 
 static struct stream_priv_s {
@@ -197,7 +195,6 @@ int dvd_parse_chapter_range(m_option_t *conf, const char *range) {
   return 0;
 }
 
-#ifdef USE_DVDREAD
 int dvd_chapter_from_cell(dvd_priv_t* dvd,int title,int cell)
 {
   pgc_t * cur_pgc;
@@ -493,11 +490,8 @@ void dvd_close(dvd_priv_t *d) {
   dvd_set_speed(dvd_device, -1); /* -1 => restore default */
 }
 
-#endif /* #ifdef USE_DVDREAD */
-
 static int fill_buffer(stream_t *s, char *but, int len)
 {
-#ifdef USE_DVDREAD
   if(s->type == STREAMTYPE_DVD) {
     off_t pos=dvd_read_sector(s->priv,s->buffer);
     if(pos>=0) {
@@ -505,22 +499,17 @@ static int fill_buffer(stream_t *s, char *but, int len)
       s->pos=2048*pos-len;
     } else len=-1; // error
   }
-#endif
   return len;
 }
 
 static int seek(stream_t *s, off_t newpos) {
-#ifdef USE_DVDREAD
   s->pos=newpos; // real seek
   dvd_seek(s->priv,s->pos/2048);
-#endif
   return 1;
 }
 
 static void stream_dvd_close(stream_t *s) {
-#ifdef USE_DVDREAD
   dvd_close(s->priv);
-#endif
 }
 
 /** 
@@ -782,7 +771,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   filename = strdup(stream->url);
   mp_msg(MSGT_OPEN,MSGL_V,"URL: %s\n", filename);
   dvd_title = p->title;
-#ifdef USE_DVDREAD
   if(1){
     //int ret,ret2;
     dvd_priv_t *d;
@@ -1130,7 +1118,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     stream->priv = (void*)d;
     return STREAM_OK;
   }
-#endif /* #ifdef USE_DVDREAD */
   mp_msg(MSGT_DVD,MSGL_ERR,MSGTR_NoDVDSupport);
   m_struct_free(&stream_opts,opts);
   return STREAM_UNSUPORTED;
