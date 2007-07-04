@@ -1259,6 +1259,9 @@ TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
 TMPO="$I/mplayer-conf-$RANDOM-$$.o"
 TMPS="$I/mplayer-conf-$RANDOM-$$.S"
 
+echo configuration: $_configuration > "$TMPLOG"
+echo >> "$TMPLOG"
+
 # config files
 
 # FIXME: A lot of stuff is installed under /usr/local
