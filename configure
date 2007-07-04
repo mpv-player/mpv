@@ -6372,6 +6372,7 @@ EOF
   else
     _lavc_xvid=no
     _def_lavc_xvid='#undef CONFIG_LIBXVID'
+    _libavencoders=`echo $_libavencoders | sed -e s/LIBXVID_ENCODER// `
   fi
   echores "$_lavc_xvid"
 fi
