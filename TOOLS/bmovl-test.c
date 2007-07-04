@@ -55,7 +55,7 @@ paint(unsigned char* bitmap, int size, int red, int green, int blue, int alpha) 
 int main(int argc, char **argv) {
 
 	int fifo=-1;
-	int width=0, height=0, xpos=0, ypos=0, alpha=0, clear=0;
+	int width=0, height=0;
 	unsigned char *bitmap;
 	SDL_Surface *image;
 	int i;
