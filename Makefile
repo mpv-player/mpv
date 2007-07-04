@@ -306,6 +306,7 @@ clean::
 
 distclean:: doxygen_clean
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
+	$(MAKE) -C TOOLS distclean
 	-rm -f configure.log config.mak config.h
 
 strip:
