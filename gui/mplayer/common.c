@@ -25,6 +25,7 @@
 #include "../libmpdemux/stheader.h"
 #include "../codec-cfg.h"
 #include "../access_mpcontext.h"
+#include "../libavutil/avstring.h"
 
 
 #include "play.h"
@@ -40,23 +41,23 @@ inline void TranslateFilename( int c,char * tmp,size_t tmplen )
  switch ( guiIntfStruct.StreamType )
   {
    case STREAMTYPE_STREAM:
-        strlcpy(tmp, guiIntfStruct.Filename, tmplen);
+        av_strlcpy(tmp, guiIntfStruct.Filename, tmplen);
         break;
    case STREAMTYPE_FILE:
           if ( ( guiIntfStruct.Filename )&&( guiIntfStruct.Filename[0] ) )
            {
             if ( (p = strrchr(guiIntfStruct.Filename, '/')) )
-              strlcpy(tmp, p + 1, tmplen);
+              av_strlcpy(tmp, p + 1, tmplen);
             else
-              strlcpy(tmp, guiIntfStruct.Filename, tmplen);
+              av_strlcpy(tmp, guiIntfStruct.Filename, tmplen);
             if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
             if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
-           } else strlcpy( tmp,MSGTR_NoFileLoaded,tmplen );
+           } else av_strlcpy( tmp,MSGTR_NoFileLoaded,tmplen );
           break;
 #ifdef USE_DVDREAD
    case STREAMTYPE_DVD:
           if ( guiIntfStruct.DVD.current_chapter ) snprintf(tmp,tmplen,MSGTR_Chapter,guiIntfStruct.DVD.current_chapter );
-            else strlcat( tmp,MSGTR_NoChapter,tmplen );
+            else av_strlcat( tmp,MSGTR_NoChapter,tmplen );
           break;
 #endif
 #ifdef HAVE_VCD
@@ -64,7 +65,7 @@ inline void TranslateFilename( int c,char * tmp,size_t tmplen )
         snprintf( tmp,tmplen,MSGTR_VCDTrack,guiIntfStruct.Track );
 	break;
 #endif
-   default: strlcpy( tmp,MSGTR_NoMediaOpened,tmplen );
+   default: av_strlcpy( tmp,MSGTR_NoMediaOpened,tmplen );
   }
  if ( c )
   {
@@ -98,75 +99,75 @@ char * Translate( char * str )
      switch ( str[++i] )
       {
        case 't': snprintf( tmp,sizeof( tmp ),"%02d",guiIntfStruct.Track );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'o': TranslateFilename( 0,tmp,sizeof( tmp ) );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'f': TranslateFilename( 1,tmp,sizeof( tmp ) );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'F': TranslateFilename( 2,tmp,sizeof( tmp ) );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case '6': t=guiIntfStruct.LengthInSec; goto calclengthhhmmss;
        case '1': t=guiIntfStruct.TimeSec;
 calclengthhhmmss:
             snprintf( tmp,sizeof( tmp ),"%02d:%02d:%02d",t/3600,t/60%60,t%60 );
-            strlcat( trbuf,tmp,sizeof( trbuf ) );
+            av_strlcat( trbuf,tmp,sizeof( trbuf ) );
             break;
        case '7': t=guiIntfStruct.LengthInSec; goto calclengthmmmmss;
        case '2': t=guiIntfStruct.TimeSec;
 calclengthmmmmss:
             snprintf( tmp,sizeof( tmp ),"%04d:%02d",t/60,t%60 );
-            strlcat( trbuf,tmp,sizeof( trbuf ) );
+            av_strlcat( trbuf,tmp,sizeof( trbuf ) );
             break;
        case '3': snprintf( tmp,sizeof( tmp ),"%02d",guiIntfStruct.TimeSec / 3600 );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case '4': snprintf( tmp,sizeof( tmp ),"%02d",( ( guiIntfStruct.TimeSec / 60 ) % 60 ) );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case '5': snprintf( tmp,sizeof( tmp ),"%02d",guiIntfStruct.TimeSec % 60 );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
-       case '8': snprintf( tmp,sizeof( tmp ),"%01d:%02d:%02d",guiIntfStruct.TimeSec / 3600,( guiIntfStruct.TimeSec / 60 ) % 60,guiIntfStruct.TimeSec % 60 ); strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+       case '8': snprintf( tmp,sizeof( tmp ),"%01d:%02d:%02d",guiIntfStruct.TimeSec / 3600,( guiIntfStruct.TimeSec / 60 ) % 60,guiIntfStruct.TimeSec % 60 ); av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'v': snprintf( tmp,sizeof( tmp ),"%3.2f%%",guiIntfStruct.Volume );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'V': snprintf( tmp,sizeof( tmp ),"%3.1f",guiIntfStruct.Volume );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'b': snprintf( tmp,sizeof( tmp ),"%3.2f%%",guiIntfStruct.Balance );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'B': snprintf( tmp,sizeof( tmp ),"%3.1f",guiIntfStruct.Balance );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'd': snprintf( tmp,sizeof( tmp ),"%d",guiIntfStruct.FrameDrop );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'x': snprintf( tmp,sizeof( tmp ),"%d",guiIntfStruct.MovieWidth );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'y': snprintf( tmp,sizeof( tmp ),"%d",guiIntfStruct.MovieHeight );
-		 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+		 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
        case 'C': snprintf( tmp,sizeof( tmp ),"%s", guiIntfStruct.sh_video? ((sh_video_t *)guiIntfStruct.sh_video)->codec->name : "");
-                 strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
-       case 's': if ( guiIntfStruct.Playing == 0 ) strlcat( trbuf,"s",sizeof( trbuf ) ); break;
-       case 'l': if ( guiIntfStruct.Playing == 1 ) strlcat( trbuf,"p",sizeof( trbuf ) ); break;
-       case 'e': if ( guiIntfStruct.Playing == 2 ) strlcat( trbuf,"e",sizeof( trbuf ) ); break;
+                 av_strlcat( trbuf,tmp,sizeof( trbuf ) ); break;
+       case 's': if ( guiIntfStruct.Playing == 0 ) av_strlcat( trbuf,"s",sizeof( trbuf ) ); break;
+       case 'l': if ( guiIntfStruct.Playing == 1 ) av_strlcat( trbuf,"p",sizeof( trbuf ) ); break;
+       case 'e': if ( guiIntfStruct.Playing == 2 ) av_strlcat( trbuf,"e",sizeof( trbuf ) ); break;
        case 'a':
-            if ( mixer->muted ) { strlcat( trbuf,"n",sizeof( trbuf ) ); break; }
+            if ( mixer->muted ) { av_strlcat( trbuf,"n",sizeof( trbuf ) ); break; }
             switch ( guiIntfStruct.AudioType )
              {
-              case 0: strlcat( trbuf,"n",sizeof( trbuf ) ); break;
-              case 1: strlcat( trbuf,"m",sizeof( trbuf ) ); break;
-              case 2: strlcat( trbuf,"t",sizeof( trbuf ) ); break;
+              case 0: av_strlcat( trbuf,"n",sizeof( trbuf ) ); break;
+              case 1: av_strlcat( trbuf,"m",sizeof( trbuf ) ); break;
+              case 2: av_strlcat( trbuf,"t",sizeof( trbuf ) ); break;
              }
             break;
        case 'T':
            switch ( guiIntfStruct.StreamType )
             {
-             case STREAMTYPE_FILE:   strlcat( trbuf,"f",sizeof( trbuf ) ); break;
+             case STREAMTYPE_FILE:   av_strlcat( trbuf,"f",sizeof( trbuf ) ); break;
 #ifdef HAVE_VCD
-             case STREAMTYPE_VCD:    strlcat( trbuf,"v",sizeof( trbuf ) ); break;
+             case STREAMTYPE_VCD:    av_strlcat( trbuf,"v",sizeof( trbuf ) ); break;
 #endif
-             case STREAMTYPE_STREAM: strlcat( trbuf,"u",sizeof( trbuf ) ); break;
+             case STREAMTYPE_STREAM: av_strlcat( trbuf,"u",sizeof( trbuf ) ); break;
 #ifdef USE_DVDREAD
-             case STREAMTYPE_DVD:    strlcat( trbuf,"d",sizeof( trbuf ) ); break;
+             case STREAMTYPE_DVD:    av_strlcat( trbuf,"d",sizeof( trbuf ) ); break;
 #endif
-             default:                strlcat( trbuf," ",sizeof( trbuf ) ); break;
+             default:                av_strlcat( trbuf," ",sizeof( trbuf ) ); break;
             }
            break;
-       case '$': strlcat( trbuf,"$",sizeof( trbuf ) ); break;
+       case '$': av_strlcat( trbuf,"$",sizeof( trbuf ) ); break;
        default: continue;
       }
      c=strlen( trbuf );

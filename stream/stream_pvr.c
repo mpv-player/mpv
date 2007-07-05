@@ -45,6 +45,7 @@
 
 #include "frequencies.h"
 #include "libavutil/common.h"
+#include "libavutil/avstring.h"
 
 #define PVR_DEFAULT_DEVICE "/dev/video0"
 #define PVR_MAX_CONTROLS 10
@@ -232,12 +233,12 @@ copycreate_stationlist (stationlist_t *stationlist, int num)
   
   /* transport the channel list data to our extented struct */
   stationlist->total = num;
-  strlcpy (stationlist->name, chanlists[chantab].name, PVR_STATION_NAME_SIZE);
+  av_strlcpy (stationlist->name, chanlists[chantab].name, PVR_STATION_NAME_SIZE);
 
   for (i = 0; i < chanlists[chantab].count; i++)
   {
     stationlist->list[i].station[0]= '\0'; /* no station name yet */
-    strlcpy (stationlist->list[i].name,
+    av_strlcpy (stationlist->list[i].name,
              chanlists[chantab].list[i].name, PVR_STATION_NAME_SIZE);
     stationlist->list[i].freq = chanlists[chantab].list[i].freq;
     stationlist->list[i].enabled = 1; /* default enabled */
@@ -324,10 +325,10 @@ set_station (struct pvr_t *pvr, const char *station,
     }
     
     if (station)
-      strlcpy (pvr->stationlist.list[i].station,
+      av_strlcpy (pvr->stationlist.list[i].station,
                station, PVR_STATION_NAME_SIZE);
     else if (channel)
-      strlcpy (pvr->stationlist.list[i].station,
+      av_strlcpy (pvr->stationlist.list[i].station,
                channel, PVR_STATION_NAME_SIZE);
     else
       snprintf (pvr->stationlist.list[i].station,
@@ -381,10 +382,10 @@ set_station (struct pvr_t *pvr, const char *station,
   pvr->stationlist.enabled++;
 
   if (station)
-    strlcpy (pvr->stationlist.list[i].station,
+    av_strlcpy (pvr->stationlist.list[i].station,
              station, PVR_STATION_NAME_SIZE);
   if (channel)
-    strlcpy (pvr->stationlist.list[i].name, channel, PVR_STATION_NAME_SIZE);
+    av_strlcpy (pvr->stationlist.list[i].name, channel, PVR_STATION_NAME_SIZE);
   else
     snprintf (pvr->stationlist.list[i].name,
               PVR_STATION_NAME_SIZE, "F %d", freq);
@@ -476,10 +477,10 @@ parse_setup_stationlist (struct pvr_t *pvr)
       if (!sep)
         continue; /* Wrong syntax, but mplayer should not crash */
 
-      strlcpy (station, sep + 1, PVR_STATION_NAME_SIZE);
+      av_strlcpy (station, sep + 1, PVR_STATION_NAME_SIZE);
 
       sep[0] = '\0';
-      strlcpy (channel, tmp, PVR_STATION_NAME_SIZE);
+      av_strlcpy (channel, tmp, PVR_STATION_NAME_SIZE);
 
       while ((sep = strchr (station, '_')))
         sep[0] = ' ';

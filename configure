@@ -3394,38 +3394,6 @@ else
 fi
 echores "$_strsep"
 
-echocheck "strlcpy()"
-cat > $TMPC << EOF
-#include <string.h>
-int main (void) { char *s = "Hello, world!", t[20]; (void) strlcpy(t, s, sizeof( t )); return 0; }
-EOF
-_strlcpy=no
-cc_check && _strlcpy=yes
-if test "$_strlcpy" = yes ; then
- _def_strlcpy='#define HAVE_STRLCPY 1'
- _need_strlcpy=no
-else
- _def_strlcpy='#undef HAVE_STRLCPY'
- _need_strlcpy=yes
-fi
-echores "$_strlcpy"
-
-echocheck "strlcat()"
-cat > $TMPC << EOF
-#include <string.h>
-int main (void) { char *s = "Hello, world!", t[20]; (void) strlcat(t, s, sizeof( t )); return 0; }
-EOF
-_strlcat=no
-cc_check && _strlcat=yes
-if test "$_strlcat" = yes ; then
- _def_strlcat='#define HAVE_STRLCAT 1'
- _need_strlcat=no
-else
- _def_strlcat='#undef HAVE_STRLCAT'
- _need_strlcat=yes
-fi
-echores "$_strlcat"
-
 echocheck "fseeko()"
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -7499,8 +7467,6 @@ NEED_GLOB    = $_need_glob
 NEED_SCANDIR = $_need_scandir
 NEED_SETENV  = $_need_setenv
 NEED_SHMEM   = $_need_shmem
-NEED_STRLCAT = $_need_strlcat
-NEED_STRLCPY = $_need_strlcpy
 NEED_STRSEP  = $_need_strsep
 NEED_SWAB    = $_need_swab
 NEED_VSSCANF = $_need_vsscanf
@@ -7867,18 +7833,6 @@ $_def_scandir
 
 /* Define this if your system has strsep */
 $_def_strsep
-
-/* Define this if your system has strlcpy */
-$_def_strlcpy
-#ifndef HAVE_STRLCPY
-unsigned int strlcpy (char *dest, const char *src, unsigned int size);
-#endif
-
-/* Define this if your system has strlcat */
-$_def_strlcat
-#ifndef HAVE_STRLCAT
-unsigned int strlcat (char *dest, const char *src, unsigned int size);
-#endif
 
 /* Define this if your system has fseeko */
 $_def_fseeko

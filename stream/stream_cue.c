@@ -18,6 +18,7 @@
 #include "help_mp.h"
 #include "m_option.h"
 #include "m_struct.h"
+#include "libavutil/avstring.h"
 
 #define byte    unsigned char
 #define SIZERAW 2352
@@ -325,15 +326,15 @@ static int cue_read_cue (char *in_cue_filename)
        strcpy(t, "/");
   }
   
-  strlcpy(bincue_path,t,sizeof( bincue_path ));
+  av_strlcpy(bincue_path,t,sizeof( bincue_path ));
   mp_msg(MSGT_OPEN,MSGL_V,"dirname: %s, cuepath: %s\n", t, bincue_path);
 
   /* no path at all? */
   if (strcmp(bincue_path, ".") == 0) {
     mp_msg(MSGT_OPEN,MSGL_V,"bincue_path: %s\n", bincue_path);
-    strlcpy(cue_filename,in_cue_filename,sizeof( cue_filename ));
+    av_strlcpy(cue_filename,in_cue_filename,sizeof( cue_filename ));
   } else {
-    strlcpy(cue_filename,in_cue_filename + strlen(bincue_path) + 1,
+    av_strlcpy(cue_filename,in_cue_filename + strlen(bincue_path) + 1,
             sizeof( cue_filename ));
   }
 

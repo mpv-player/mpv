@@ -44,6 +44,7 @@
 #include "parse_es.h"
 #include "stheader.h"
 #include "sub_cc.h"
+#include "libavutil/avstring.h"
 
 extern void skip_audio_frame( sh_audio_t *sh_audio );
 extern int sub_justify;
@@ -201,8 +202,8 @@ int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          error = 1;
          break;
       }
-      strlcpy( name, &header[ 0 ], 100 );
-      strlcpy( sizestr, &header[ 124 ], 12 );
+      av_strlcpy( name, &header[ 0 ], 100 );
+      av_strlcpy( sizestr, &header[ 124 ], 12 );
       size = ty_octaltodecimal( sizestr );
 
       blocks = size / 512;

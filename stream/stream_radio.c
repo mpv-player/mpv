@@ -63,6 +63,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "stream_radio.h"
+#include "libavutil/avstring.h"
 
 #ifdef USE_RADIO_CAPTURE
 #include "audio_in.h"
@@ -207,7 +208,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
             char* tmp = *(channels++);
             char* sep = strchr(tmp,'-');
             if (!sep) continue; // Wrong syntax, but mplayer should not crash
-            strlcpy(priv->radio_channel_current->name, sep + 1,sizeof(priv->radio_channel_current->name)-1);
+            av_strlcpy(priv->radio_channel_current->name, sep + 1,sizeof(priv->radio_channel_current->name)-1);
 
             sep[0] = '\0';
 

@@ -148,6 +148,7 @@
 #ifdef HAVE_X11
 #include "x11_common.h"
 #endif
+#include "libavutil/avstring.h"
 
 #define SPU_SUPPORT
 
@@ -1125,13 +1126,13 @@ static int overlay_read_state(overlay_t *o, char *p)
     int j;
 	
     if(!p) {
-	strlcpy(fname, getenv("HOME"), sizeof( fname ));
-	strlcat(fname,"/.overlay", sizeof( fname ));	    
+	av_strlcpy(fname, getenv("HOME"), sizeof( fname ));
+	av_strlcat(fname,"/.overlay", sizeof( fname ));	    
     } else
-	strlcpy(fname, p, sizeof( fname ));
+	av_strlcpy(fname, p, sizeof( fname ));
     
     sprintf(tmp,"/res_%dx%dx%d",o->xres,o->yres,o->depth);
-    strlcat(fname, tmp, sizeof( fname ));
+    av_strlcat(fname, tmp, sizeof( fname ));
 
     if(!(fp=fopen(fname,"r")))
 	return -1;
@@ -1188,10 +1189,10 @@ static int overlay_write_state(overlay_t *o, char *p)
     int i,j;
 	
     if(!p) {
-	strlcpy(fname, getenv("HOME"), sizeof( fname ));
-	strlcat(fname,"/.overlay", sizeof( fname ));	    
+	av_strlcpy(fname, getenv("HOME"), sizeof( fname ));
+	av_strlcat(fname,"/.overlay", sizeof( fname ));	    
     } else
-	strlcpy(fname, p, sizeof( fname ));
+	av_strlcpy(fname, p, sizeof( fname ));
 
     if(access(fname, W_OK|X_OK|R_OK)) {
 	if(mkdir(fname,0766))
@@ -1199,7 +1200,7 @@ static int overlay_write_state(overlay_t *o, char *p)
     }	
     
     sprintf(tmp,"/res_%dx%dx%d",o->xres,o->yres,o->depth);
-    strlcat(fname, tmp, sizeof( fname ));
+    av_strlcat(fname, tmp, sizeof( fname ));
     
     if(!(fp=fopen(fname,"w")))
 	return -1;

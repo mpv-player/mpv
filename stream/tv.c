@@ -29,6 +29,7 @@
 
 #include "libaf/af_format.h"
 #include "libmpcodecs/img_format.h"
+#include "libavutil/avstring.h"
 
 #include "tv.h"
 
@@ -354,7 +355,7 @@ static int open_tv(tvi_handle_t *tvh)
 
 		if (!sep) continue; // Wrong syntax, but mplayer should not crash
 
-		strlcpy(tv_channel_current->name, sep + 1,
+		av_strlcpy(tv_channel_current->name, sep + 1,
 		        sizeof(tv_channel_current->name));
 		sep[0] = '\0';
 		strncpy(tv_channel_current->number, tmp, 5);

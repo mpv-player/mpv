@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "help_mp.h"
 #include "m_option.h"
 #include "m_struct.h"
+#include "libavutil/avstring.h"
 
 #include "dvbin.h"
 
@@ -176,7 +177,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			ptr->name = malloc(k+1);
 			if(! ptr->name)
 				continue;
-			strlcpy(ptr->name, line, k+1);
+			av_strlcpy(ptr->name, line, k+1);
 		}
 		else
 			continue;
