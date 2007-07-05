@@ -3261,8 +3261,10 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                 case MATROSKA_ID_BLOCKDURATION:
                   {
                     block_duration = ebml_read_uint (s, &l);
-                    if (block_duration == EBML_UINT_INVALID)
+                    if (block_duration == EBML_UINT_INVALID) {
+                      free(block);
                       return 0;
+                    }
                     block_duration *= mkv_d->tc_scale / 1000000.0;
                     break;
                   }
@@ -3284,8 +3286,10 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                 case MATROSKA_ID_REFERENCEBLOCK:
                   {
                     int64_t num = ebml_read_int (s, &l);
-                    if (num == EBML_INT_INVALID)
+                    if (num == EBML_INT_INVALID) {
+                      free(block);
                       return 0;
+                    }
                     if (num <= 0)
                       block_bref = num;
                     else
@@ -3294,6 +3298,7 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                   }
 
                 case EBML_ID_INVALID:
+                  free(block);
                   return 0;
 
                 default:
