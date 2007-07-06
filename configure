@@ -7873,6 +7873,11 @@ $_def_pthreads
 
 /* Define this if you enabled thread support for libavcodec */
 $_def_threads
+#ifdef HAVE_THREADS
+#define ENABLE_THREADS 1
+#else
+#define ENABLE_THREADS 0
+#endif
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_def_lirc
@@ -7941,6 +7946,7 @@ $_def_muxers
 #define HAVE_EBP_AVAILABLE 1
 
 #define CONFIG_GPL 1
+#define ENABLE_SMALL 0
 
 /* Use AMR codecs from libavcodec. */
 $_def_libamr
