@@ -404,7 +404,8 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
         uint8_t p_sector[DVDCSS_BLOCK_SIZE];
         char psz_debug[PATH_MAX + 30];
         char psz_key[1 + KEY_SIZE * 2 + 1];
-        char *psz_title, *psz_serial;
+        char *psz_title;
+        uint8_t *psz_serial;
         int i;
 
         /* We read sector 0. If it starts with 0x000001ba (BE), we are
@@ -462,7 +463,7 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
         }
 
         /* Get the date + serial */
-        psz_serial = (char *)p_sector + 813;
+        psz_serial = p_sector + 813;
         psz_serial[16] = '\0';
 
         /* Check that all characters are digits, otherwise convert. */
