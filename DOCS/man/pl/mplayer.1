@@ -219,7 +219,7 @@ i napisów DVD (strumienie SPU, VOBSub i Closed Captions).
 (Koder Filmów MPlayera) jest to prosty koder (kompresor) filmów, zaprojektowany
 do kodowania filmów otwieralnych MPlayerem (patrz wy¿ej) do innych obs³ugiwanych
 formatów (patrz ni¿ej).
-Potrafi kodowaæ do MPEG-4 (DivX4/XviD), kodeków libavcodec, a d¼wiêk do
+Potrafi kodowaæ do MPEG-4 (DivX4/Xvid), kodeków libavcodec, a d¼wiêk do
 PCM/\:MP3/\:VBRMP3 w 1, 2 lub 3-przebiegach.
 Potrafi równie¿ kopiowaæ strumieniowo, posiada potê¿ny system filtrów
 (kadrowanie, powiêkszanie, odwracanie, postprocesing, obracanie, skalowanie,
@@ -3349,7 +3349,7 @@ Rêczne obej¶cie b³êdów kodera.
 .br
 2 (msmpeg4v3): stare pliki msmpeg4v3 wygenerowane przez lavc (bez autodetekcji)
 .br
-4 (mpeg4): b³±d przeplotu XviD (automatycznie wykrywany, je¶li fourcc==XVIX)
+4 (mpeg4): b³±d przeplotu Xvid (automatycznie wykrywany, je¶li fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (automatycznie wykrywanany, je¶li fourcc==UMP4)
 .br
@@ -3357,7 +3357,7 @@ Rêczne obej¶cie b³êdów kodera.
 .br
 32 (mpeg4): b³±d niedozwolonego vlc (automatycznie wykrywany przez fourcc)
 .br
-64 (mpeg4): b³±d qpel w XviD i DivX (automatycznie wykrywany przez fourcc/\:wersjê)
+64 (mpeg4): b³±d qpel w Xvid i DivX (automatycznie wykrywany przez fourcc/\:wersjê)
 .br
 128 (mpeg4): qpel w starym standardzie (automatycznie wykrywany przez fourcc/\:wersjê)
 .br
@@ -3682,13 +3682,13 @@ Wy³±cza przeliczania proporcji.
 .
 .TP
 .B \-xvidopts <opcja1:opcja2:...>
-Podaje dodatkowe parametry przy dekodowaniu XviD.
+Podaje dodatkowe parametry przy dekodowaniu Xvid.
 .br
 .I INFORMACJA:
-Jako ¿e dekodowanie przy pomocy libavcodec jest szybsze ni¿ XviD mo¿esz chcieæ
+Jako ¿e dekodowanie przy pomocy libavcodec jest szybsze ni¿ Xvid mo¿esz chcieæ
 u¿ywaæ postprocesingu z libavcodec (\-vf pp) i jej dekodera (\-vfm ffmpeg).
 .sp 1
-Wewnêtrzne filtry postprocesingu XviD:
+Wewnêtrzne filtry postprocesingu Xvid:
 .PD 0
 .RSs
 .IPs deblock-chroma (zobacz tak¿e \-vf pp)
@@ -6150,7 +6150,7 @@ pó¼niej koduj jeszcze raz z tymi samymi parametrami i pass=2.
 .
 .TP
 .B vbrpass=<0\-2>
-Nadpisuje argument pass i wykorzystuje bibliotekê XviD VBR zamiast DivX4 VBR.
+Nadpisuje argument pass i wykorzystuje bibliotekê Xvid VBR zamiast DivX4 VBR.
 Dostêpne s± nastêpuj±ce opcje:
 .RSs
 .IPs 0
@@ -7703,7 +7703,7 @@ zmieni typy pojedynczych klatek i trochê bardziej ich PSNR.
 .B bitrate=<warto¶æ> (tryb CBR lub dwuprzebiegowy)
 Ustawia ¿±dany bitrate w kbit/\:sekundê je¿eli <16000
 lub w bit/\:sekundê je¿eli >16000.
-Je¶li <warto¶æ> jest ujemna, XviD u¿yje jej warto¶ci bezwzglêdnej jako
+Je¶li <warto¶æ> jest ujemna, Xvid u¿yje jej warto¶ci bezwzglêdnej jako
 docelowej wielko¶ci zbioru (w kilobajtach) i automatycznie wyliczy bitrate
 (domy¶lnie: 687 kbits/\:s).
 .
@@ -7765,7 +7765,7 @@ Korzysta z 4 wektorów ruchu na makroblok.
 Mo¿e daæ lepsz± kompresjê kosztem wolniejszego kodowania.
 .br
 .I UWAGA:
-Pocz±wszy od XviD-1.0.x opcja ta nie jest dostêpna niezale¿nie,
+Pocz±wszy od Xvid-1.0.x opcja ta nie jest dostêpna niezale¿nie,
 a jej funkcjonalno¶æ jest w³±czona w opcjê me_quality.
 Kiedy me_quality > 4, 4mv jest uruchamiane.
 .
@@ -7780,9 +7780,9 @@ tak aby uzyskaæ sta³y bitrate na u¶redniaj±cym zakresie klatek.
 Prawdziwe CBR jest trudne do osi±gniêcia.
 Zale¿nie od materia³u filmowego, bitrate mo¿e byæ zmienny i trudny do
 przewidzenia.
-Dlatego XviD wykorzystuje okres u¶redniaj±cy, dla którego gwarantuje zadan±
+Dlatego Xvid wykorzystuje okres u¶redniaj±cy, dla którego gwarantuje zadan±
 ilo¶æ bitów (minus ma³a ró¿nica).
-To ustawienie wyra¿a "ilo¶æ klatek", dla których XviD u¶rednia bitrate i próbuje
+To ustawienie wyra¿a "ilo¶æ klatek", dla których Xvid u¶rednia bitrate i próbuje
 osi±gn±æ CBR.
 .
 .TP
@@ -7797,7 +7797,7 @@ Tryb dwuprzebiegowy: min.\& i maks.\& kwantyzator dla klatek typu I/P
 (domy¶lnie: 2\-31/\:2\-31)
 .br
 .I UWAGA:
-Pocz±wszy od XviD-1.0.x opcja ta jest zast±piona przez
+Pocz±wszy od Xvid-1.0.x opcja ta jest zast±piona przez
 opcje [min|max]_[i|p|b]quant.
 .
 .TP
@@ -7819,7 +7819,7 @@ Kiedy wykorzystywane s± okre¶lone przez u¿ytkownika matryce, musi byæ
 wykorzystywany MPEG.
 .br
 .I UWAGA:
-Pocz±wszy od XviD-1.0.x opcja ta jest zast±piona przez opcjê quant_type.
+Pocz±wszy od Xvid-1.0.x opcja ta jest zast±piona przez opcjê quant_type.
 .
 .TP
 .B mod_quant
@@ -7828,10 +7828,10 @@ klatka po klatce (tylko tryb dwuprzebiegowy).
 .br
 .I UWAGA:
 Wygeneruje to nieprawid³owy stumieñ bitów, którego prawdopodobnie nie jest
-w stanie zdekodowaæ ¿aden dekoder MPEG-4 poza libavcodec albo XviD.
+w stanie zdekodowaæ ¿aden dekoder MPEG-4 poza libavcodec albo Xvid.
 .br
 .I UWAGA:
-Pocz±wszy od XviD-1.0.x opcja ta nie jest dostêpna.
+Pocz±wszy od Xvid-1.0.x opcja ta nie jest dostêpna.
 .
 .TP
 .B keyframe_boost=<0\-1000> (tylko tryb dwuprzebiegowy)
@@ -7861,11 +7861,11 @@ Wygeneruje kompatybilne z DivX5 ramki B (domy¶lnie: w³±czone).
 Wygl±da na to, ¿e jest to obowi±zkowe tylko dla starszych wersji dekodera DivX.
 .br
 .I UWAGA:
-Pocz±wszy od XviD-1.0.x, opcja ta jest zast±piona przez opcjê closed_gop.
+Pocz±wszy od Xvid-1.0.x, opcja ta jest zast±piona przez opcjê closed_gop.
 .
 .TP
 .B (no)greyscale
-Sprawia, ¿e XviD ignoruje przestrzeñ kolorów, wiêc wynikowy film jest
+Sprawia, ¿e Xvid ignoruje przestrzeñ kolorów, wiêc wynikowy film jest
 w skali szaro¶ci.
 Zauwa¿, ¿e nie przyspiesza to kodowania, zapobiega to tylko zapisaniu
 danych kolorów w ostatniej fazie kodowania.
@@ -7879,7 +7879,7 @@ Zapisuje statystyki ka¿dej ramki w ./xvid.dbg.
 .PP
 .sp 1
 Poni¿sze opcje s± dostêpne tylko w najnowszych stabilnych
-wersjach XviD 1.0.x (api4).
+wersjach Xvid 1.0.x (api4).
 .
 .TP
 .B (no)packed
@@ -7892,7 +7892,7 @@ robisz.
 .br
 .I UWAGA:
 Stworzy to niepoprawny strumieñ bitów i nie bêdzie on odtwarzany przez
-dekodery ISO-MPEG-4 poza DivX/\:libavcodec/\:XviD.
+dekodery ISO-MPEG-4 poza DivX/\:libavcodec/\:Xvid.
 .br
 .I UWAGA:
 Zapisuje to tak¿e fa³szyw± wersjê DivX do pliku,
@@ -7922,7 +7922,7 @@ wiêc intensywne ich stosowanie mo¿e daæ ni¿sz± jako¶æ wizualn±.
 .
 .TP
 .B (no)closed_gop
-Ta opcja mówi XviD, ¿eby zamyka³ ka¿dy GOP (Group Of Pictures, grupa obrazów
+Ta opcja mówi Xvid, ¿eby zamyka³ ka¿dy GOP (Group Of Pictures, grupa obrazów
 ograniczona dwiema ramkami typu I), dziêki czemu GOP'y s± niezale¿ne od siebie.
 To jedynie implikuje ¿e ostatni± ramk± GOP'u jest albo ramka typu P albo
 typu N, ale nie typu B.
@@ -7954,7 +7954,7 @@ jest warta w³±czenia.
 .
 .TP
 .B (no)gmc
-W³±cza Globaln± Kompensacjê Ruchu, która sprawia, ¿e XviD generuje specjalne
+W³±cza Globaln± Kompensacjê Ruchu, która sprawia, ¿e Xvid generuje specjalne
 ramki (ramki GMC), które s± dobrze przystosowane do
 przesuwania/\:przybli¿onia/\:obracania obrazów.
 To, czy w³±czenie tej opcji zaoszczêdzi bity zale¿y od materia³u filmowego.
@@ -7972,7 +7972,7 @@ obci±¿eniu ni¿ VHQ (domy¶lnie: w³±czone).
 .TP
 .B (no)cartoon
 W³±cz tê opcjê, je¿eli kodowana sekwencja jest rysunkowa.
-Modyfikuje ona kilka wewnêtrznych progów XviD, tak ¿e te podejmuje
+Modyfikuje ona kilka wewnêtrznych progów Xvid, tak ¿e te podejmuje
 lepsze decyzje o typie ramek i wektorach ruchu dla p³askich rysunków.
 .
 .TP
@@ -8014,7 +8014,7 @@ W³±cza lepsze przewidywania sk³adowych AC z s±siednich bloków dla ramek intra
 Algorytm wyszukiwania ruchu jest oparty na szukaniu w zwyk³ej domenie koloru i
 próbuje znale¼æ wektor ruchu, który zminimalizuje ró¿nice miêdzy klatk±
 odniesienia a zakodowan±.
-Z tym parametrem XviD u¿yje równie¿ domenê czêstotliwo¶ci (DCT),
+Z tym parametrem Xvid u¿yje równie¿ domenê czêstotliwo¶ci (DCT),
 aby szukaæ wektora ruchu, który nie tylko zminimalizuje ró¿nicê przestrzenn±,
 ale równie¿ d³ugo¶æ kodowania bloku.
 Od najszybszego do najwolniejszego:
@@ -8079,7 +8079,7 @@ Mo¿esz stworzyæ taki plik edytorem macierzy xvid4conf.
 .
 .TP
 .B curve_compression_high=<0\-100>
-Ten parametr pozwala XviD'owi na przekazanie okre¶lonego procentu bitów ze scen
+Ten parametr pozwala Xvid'owi na przekazanie okre¶lonego procentu bitów ze scen
 o wysokiej warto¶ci bitrate do rezerwy bitowej.
 Mo¿esz równie¿ skorzystaæ z tej opcji, je¶li masz klip z tak du¿± ilo¶ci±
 bitów przeznaczon± na sceny o wysokiej warto¶ci bitrate, ¿e sceny z ni¿sz± warto¶ci±
@@ -8087,7 +8087,7 @@ wygl±daj± ¼le (domyslnie: 0).
 .
 .TP
 .B curve_compression_low=<0\-100>
-Ten parametr pozwala XviD'owi na przekazanie okre¶lonego procentu dodatkowych
+Ten parametr pozwala Xvid'owi na przekazanie okre¶lonego procentu dodatkowych
 bitów do scen z nisk± warto¶ci± bitrate z ca³ego klipu.
 Opcja ta mo¿e byæ przydatna, je¿eli masz kilka scen z nisk± warto¶ci± bitrate,
 które s± ci±gle blokowe (domy¶lnie: 0).
@@ -8133,10 +8133,10 @@ Przewa¿nie u¿ytkownicy okre¶laj± ¿±dany bitrate bez brania pod uwagê
 nadwy¿ki na ramkê video.
 Ta ma³a ale (przewa¿nie) sta³a nadwy¿ka mo¿e spowodowaæ, ¿e docelowy rozmiar
 pliku zostanie przekroczony.
-XviD pozwala u¿ytkownikom na ustawienie wielko¶ci nadwy¿ki
+Xvid pozwala u¿ytkownikom na ustawienie wielko¶ci nadwy¿ki
 przypadaj±cej na ramkê, któr± generuje klatka video (podaj tylko
 u¶rednion± warto¶æ na ramkê).
-0 ma specjalne znaczenie, pozwala XviD'owi na u¿ycie jego w³asnych
+0 ma specjalne znaczenie, pozwala Xvid'owi na u¿ycie jego w³asnych
 warto¶ci domy¶lnych (domy¶lnie: 24 - ¶rednia nadwy¿ka AVI).
 .
 .TP
@@ -8186,7 +8186,7 @@ profil DXN HDTV
 .RS
 .I INFORMACJA:
 Te profile powinny byæ u¿ywane w po³±czeniu z odpowiednim \-ffourcc.
-Dobre jest DX50, poniewa¿ niektóre odtwarzacze nie rozpoznaj± XviD ale
+Dobre jest DX50, poniewa¿ niektóre odtwarzacze nie rozpoznaj± Xvid ale
 wiêkszo¶æ rozpoznaje DivX.
 .RE
 .
@@ -8255,7 +8255,7 @@ Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
 .
 .PP
 .sp 1
-Nastêpna opcja jest dostêpna tylko w rozwojowych wersjach XviD 1.1.x.
+Nastêpna opcja jest dostêpna tylko w rozwojowych wersjach Xvid 1.1.x.
 .
 .TP
 .B bvhq=<0|1>
