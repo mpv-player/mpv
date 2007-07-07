@@ -365,8 +365,41 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       else if(hdrlen>=3) {
         c=stream_read_char(demux->stream);
         hdrlen--;
-        if(c != 0x1F && c!= 0x0F) { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: invalid pes_extension field  \n"); return -1;}
-        if(c == 0x1F) {
+
+        if((c & 0x0F) != 0x0F) {
+          mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: pes_extension_flag2 not set, discarding pes packet\n");
+          return -1;
+        }
+        if(c & 0x80) { //pes_private_data_flag
+          if(hdrlen<16) {
+            mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough pes_private_data bytes: %d < 16, discarding pes packet\n", hdrlen);
+            return -1;
+          }
+          stream_skip(demux->stream, 16);
+          hdrlen-=16;
+        }
+        if(c & 0x40) { //pack_header_field_flag
+          int l = stream_read_char(demux->stream);
+          if(l < 0) //couldn't read from the stream?
+            return -1;
+          hdrlen--;
+          if(l < 0 || hdrlen < l) {
+            mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough pack_header bytes: hdrlen: %d < skip: %d, discarding pes packet\n",
+                                     hdrlen, l);
+            return -1;
+          }
+          stream_skip(demux->stream, l);
+          hdrlen-=l;
+        }
+        if(c & 0x20) { //program_packet_sequence_counter_flag
+            if(hdrlen < 2) {
+            mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough program_packet bytes: hdrlen: %d, discarding pes packet\n", hdrlen);
+            return -1;
+          }
+          stream_skip(demux->stream, 2);
+          hdrlen-=2;
+        }
+        if(c & 0x10) {
           //STD
           stream_skip(demux->stream, 2);
           hdrlen-=2;
