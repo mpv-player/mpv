@@ -411,8 +411,10 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         hdrlen--;
         if(c!=0x81)  { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown pes_extension2 format, len is > 1  \n"); return -1;}
         c=stream_read_char(demux->stream); //pes_extension2 payload === substream id
+        hdrlen--;
         if(c<0x55 || c>0x5F)   { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown vc1 substream_id: 0x%x  \n", c); return -1;}
         pes_ext2_subid=c;
+        if(hdrlen>0) stream_skip(demux->stream, hdrlen);
       }
     }
     
