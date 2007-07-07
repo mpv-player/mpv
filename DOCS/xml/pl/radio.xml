@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r23520 -->
 <chapter id="radio">
 <title>Radio</title>
 
@@ -19,7 +19,7 @@ na stronie man.
 
 <procedure>
 <step><para>
-  Najpierw, musisz przekompilować MPlayera używając
+  Najpierw, musisz przekompilować <application>MPlayera</application> używając
   <filename>./configure</filename> z opcją <option>--enable-radio</option>
   i (jeśli chcesz móc przechwytywać radio)
   <option>--enable-radio-capture</option>.
@@ -97,14 +97,15 @@ mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
 
 <informalexample><para>
 Przesyłanie dźwięku szyną PCI z wewnętrznego konwertera ADC na karcie radiowej.
-W tym przykładzie tuner jest używany jako druga karta dźwiękowa (urządzenia alsa
-hw:1,0). Dla kart opartych na saa7134 musi być załadowany moduł saa7134-alsa
-lub saa7134-oss.
+W tym przykładzie tuner jest używany jako druga karta dźwiękowa (urządzenia
+alsa hw:1,0). Dla kart opartych na saa7134 musi być załadowany moduł
+<systemitem>saa7134-alsa</systemitem> lub <systemitem>saa7134-oss</systemitem>.
 <screen>
 mplayer -rawaudio rate=32000 radio://2/capture \
   -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm
 </screen>
-<note><para>Jeśli używasz nazw urządzeń ALSA dwukropki muszą być zastąpione
+<note><para>
+Jeśli używasz nazw urządzeń ALSA dwukropki muszą być zastąpione
 znakami równości a przecinki kropkami.
 </para></note>
 </para>
