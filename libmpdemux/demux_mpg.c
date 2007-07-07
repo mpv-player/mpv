@@ -309,7 +309,8 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   }
 
   while(len>0){   // Skip stuFFing bytes
-    c=stream_read_char(demux->stream);--len;
+    c=stream_read_char(demux->stream);
+    --len;
     if(c!=0xFF)break;
   }
   if((c>>6)==1){  // Read (skip) STD scale & size value
@@ -338,9 +339,11 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     int hdrlen;
     int parse_ext2;
     // System-2 (.VOB) stream:
-    c=stream_read_char(demux->stream); pts_flags=c>>6;
+    c=stream_read_char(demux->stream);
+    pts_flags=c>>6;
     parse_ext2 = (id == 0x1FD) && ((c & 0x3F) == 1);
-    c=stream_read_char(demux->stream); hdrlen=c;
+    c=stream_read_char(demux->stream);
+    hdrlen=c;
     len-=2;
     mp_dbg(MSGT_DEMUX,MSGL_DBG3,"  hdrlen=%d  (len=%d)",hdrlen,len);
     if(hdrlen>len){ mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: invalid header length  \n"); return -1;}
