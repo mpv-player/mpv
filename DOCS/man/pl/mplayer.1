@@ -5826,7 +5826,7 @@ Parametr fd nakazuje filtrowi zawsze stosowaæ dziesi±tkowanie (okropne).
 .B screenshot
 Pozwala na otrzymywanie zrzutów klatek z filmu u¿ywaj±c polecenia screenshot
 (domy¶lnie przypisanego do klawisza "s").
-Zapisuje zbiory o nazwach "shotNNNN.png" w bierz±cym katalogu, u¿ywaj±c
+Zapisuje zbiory o nazwach "shotNNNN.png" w bie¿±cym katalogu, u¿ywaj±c
 pierwszego dostêpnego numeru - nie zama¿e ¿adnych zbiorów.
 Filtr nie ma ¿adnego narzutu je¶li nie jest u¿ywany i akceptuje dowolne
 przestrzenie kolorów, wiêc mo¿na go bezpiecznie dodaæ do pliku
@@ -5902,7 +5902,7 @@ Da plik wyj¶ciowy zawieraj±cy "div3" jako video fourcc.
 .
 .TP
 .B \-force-avi-aspect <0.2\-3.0>
-Nadpisuje aspekt zawarty nag³ówku vprp AVI OpenDML.
+Nadpisuje aspekt zawarty w nag³ówku vprp AVI OpenDML.
 Opcja ta mo¿e byæ u¿yta do zmiany proporcji przy "\-ovc copy".
 .
 .TP
@@ -5918,7 +5918,7 @@ i przypuszczalnie zostanie usuniêta w przysz³ych wydaniach.
 .TP
 .B \-hr-edl-seek (tylko EDL)
 U¿ywa dok³adniejszej, ale o wiele wolniejszej metody przeskakiwania.
-OBszary przeznaczone do pominiêdzia nie s± przeskakiwane, zamiat tego
+Obszary przeznaczone do pominiêcia nie s± przeskakiwane, zamiat tego
 dekodowane s± wszystkie ramki ale tylko potrzebne s± kodowane.
 Pozwala to na zaczynanie nie na klatkach kluczowych.
 .br
@@ -5958,8 +5958,8 @@ podczas w³±czania napisów na sztywno do filmu.
 .TP
 .B \-noencodedups
 Nie koduje zduplikowanych klatek w duplikacie; w wyj¶ciu umieszcza
-ramki zero bajtowe do wskazania duplikatów.
-Klatki zero bajtowe bêd±, tak czy inaczej, zapisane, chyba ¿e filtr lub koder
+ramki zerobajtowe do wskazania duplikatów.
+Klatki zerobajtowe bêd±, tak czy inaczej, zapisane, chyba ¿e filtr lub koder
 zdolny do kodowania zduplikowanego jest za³adowany.
 Obecnie nadaje siê do tego tylko filtr harddup.
 .
@@ -8270,7 +8270,7 @@ Daje to ³adniejsze ramki B prawie bez spadku wydajno¶ci (domy¶lnie: 1).
 .TP
 .B bitrate=<warto¶æ>
 Ustawia ¶redni u¿ywany bitrate w kbit/\:sekundê (domy¶lnie: wy³±czone).
-Poniewa¿ lokalny bitrate mo¿e siê wachaæ, ta ¶rednia mo¿e byæ niedok³adna dla
+Poniewa¿ lokalny bitrate mo¿e siê wahaæ, ta ¶rednia mo¿e byæ niedok³adna dla
 bardzo krótkich filmów (zobacz tak¿e opcjê ratetol).
 Sta³y bitrate mo¿na osi±gn±æ ³±cz±c tê opcjê z vbv_maxrate,
 za cenê powa¿nego spadku jako¶ci.
