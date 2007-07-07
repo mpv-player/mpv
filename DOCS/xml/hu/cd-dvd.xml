@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r23690 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -146,7 +146,7 @@ bármilyen más hasonló dolgot. Néhány RPC-2 vezérlő régió kód beállít
 <para>
 A DVD lemezeken 2048 bájtos szektorok vannak ECC/CRC-vel. Legtöbbször UDF
 fájlrendszer van egyetlen sávon, ami különböző fájlokat tartalmaz (kicsi
-.IFO és .BUK fájlok, valamint nagy (1 GB) .VOB fájlok). Ezek igazi fájlok,
+.IFO és .BUP fájlok, valamint nagy (1 GB) .VOB fájlok). Ezek igazi fájlok,
 amik másolhatóak/lejátszhatóak egy nem titkosított DVD mountolt fájlrendszeréről.
 </para>
 </formalpara>
@@ -154,7 +154,7 @@ amik másolhatóak/lejátszhatóak egy nem titkosított DVD mountolt fájlrendsz
 <para>
 Az .IFO fájlok a filmben történő navígációhoz tartalmaznak információkat
 (fejezet/cím/szög térkép, nyelvtáblázat, stb.) és szökségesek a .VOB
-tartalmának olvasásához és értelmezéséhez (film). A .BUK fájlok ezek
+tartalmának olvasásához és értelmezéséhez (film). A .BUP fájlok ezek
 biztonsági mentései. <emphasis role="bold">Szektorokat</emphasis> használnak
 mindenhol, így a lemezen nyers szektor címzést kell használni a DVD
 navigáláshoz és a tartalom dekódolásához.
