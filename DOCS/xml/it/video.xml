@@ -234,7 +234,7 @@ Lamentati con nVidia.
 <para>
 Tuttavia, <application>MPlayer</application> contiene un driver
 <link linkend="vidix">VIDIX</link> per la maggior parte delle schede nVidia.
-Attualmente è a livello di sviluppo beta, è ha alcuni problemi. Per
+Attualmente è a livello di sviluppo beta, e ha alcuni problemi. Per
 ulteriori informazioni, vedi la sezione
 <link linkend="vidix-nvidia">VIDIX nVidia</link>.
 </para>
