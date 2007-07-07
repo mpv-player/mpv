@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r23536 -->
 <!-- Opiekun: Cobra -->
 <chapter id="tv">
 <title>TV</title>
@@ -45,7 +45,7 @@ Tu jest tylko kilka wskazówek:
 <listitem><para>
   Używaj opcji <option>channels</option>. Przykład:
   <screen>-tv channels=26-MTV1,23-TV2</screen>
-  Wyjaśnienie: jeśli użyjesz tej opcji, dostępne będą tylko kanały 23 i 26 oraz
+  Wyjaśnienie: Jeśli użyjesz tej opcji, dostępne będą tylko kanały 23 i 26 oraz
   przy zmianie kanału pojawi się ładny napis na OSD, wyświetlający jego nazwę.
   Odstępy w nazwie kanału muszą zostać zastąpione znakiem "_".
 </para></listitem>
