@@ -1397,13 +1397,9 @@ static int set_mute(priv_t* priv,int value)
 }
 
 // copies a video frame
-// for RGB (i.e. BGR in mplayer) flips the image upside down
 // for YV12 swaps the 2nd and 3rd plane
 static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *source)
 {
-    int i;
-    unsigned char *sptr;
-
     if(tv_param_automute>0){
         if (ioctl(priv->video_fd, VIDIOCGTUNER, &priv->tuner) >= 0) {
             if(tv_param_automute<<8>priv->tuner.signal){
@@ -1422,24 +1418,7 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
         return;
     }
 
-    switch (priv->picture.palette) {
-    case VIDEO_PALETTE_RGB24:
-    case VIDEO_PALETTE_RGB32:
-    case VIDEO_PALETTE_RGB555:
-    case VIDEO_PALETTE_RGB565:
-        sptr = source + (priv->height-1)*priv->bytesperline;
-        for (i = 0; i < priv->height; i++) {
-            fast_memcpy(dest, sptr, priv->bytesperline);
-            dest += priv->bytesperline;
-            sptr -= priv->bytesperline;
-        }
-        break;
-    case VIDEO_PALETTE_UYVY:
-    case VIDEO_PALETTE_YUV420P:
-    default:
-        fast_memcpy(dest, source, priv->bytesperline * priv->height);
-    }
-
+    fast_memcpy(dest, source, priv->bytesperline * priv->height);
 }
 
 // maximum skew change, in frames
