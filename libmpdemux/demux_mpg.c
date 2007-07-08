@@ -362,10 +362,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       len-=10;hdrlen-=10;
     }
     len-=hdrlen;
-    if(hdrlen>0) {
-      if(!parse_ext2)
-        stream_skip(demux->stream,hdrlen); // skip header bytes
-      else if(hdrlen>=3) {
+      if(parse_ext2 && hdrlen>=3) {
         c=stream_read_char(demux->stream);
         hdrlen--;
 
@@ -414,9 +411,9 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         hdrlen--;
         if(c<0x55 || c>0x5F)   { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown vc1 substream_id: 0x%x  \n", c); return -1;}
         pes_ext2_subid=c;
-        if(hdrlen>0) stream_skip(demux->stream, hdrlen);
       }
-    }
+    if(hdrlen>0)
+      stream_skip(demux->stream,hdrlen); // skip header and stuffing bytes
     
     if(id==0x1FD && pes_ext2_subid!=-1) {
       //==== EVO VC1 STREAMS ===//
