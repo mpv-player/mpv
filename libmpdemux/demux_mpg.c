@@ -280,7 +280,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   demux_stream_t *ds=NULL;
   demux_packet_t* dp;
   mpg_demuxer_t *priv = (mpg_demuxer_t *) demux->priv;
-  
+
   mp_dbg(MSGT_DEMUX,MSGL_DBG3,"demux_read_packet: %X\n",id);
 
 //  if(id==0x1F0){
@@ -362,59 +362,59 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       len-=10;hdrlen-=10;
     }
     len-=hdrlen;
-      if(parse_ext2 && hdrlen>=3) {
-        c=stream_read_char(demux->stream);
-        hdrlen--;
+    if(parse_ext2 && hdrlen>=3) {
+      c=stream_read_char(demux->stream);
+      hdrlen--;
 
-        if((c & 0x0F) != 0x0F) {
-          mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: pes_extension_flag2 not set, discarding pes packet\n");
+      if((c & 0x0F) != 0x0F) {
+        mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: pes_extension_flag2 not set, discarding pes packet\n");
+        return -1;
+      }
+      if(c & 0x80) { //pes_private_data_flag
+        if(hdrlen<16) {
+          mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough pes_private_data bytes: %d < 16, discarding pes packet\n", hdrlen);
           return -1;
         }
-        if(c & 0x80) { //pes_private_data_flag
-          if(hdrlen<16) {
-            mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough pes_private_data bytes: %d < 16, discarding pes packet\n", hdrlen);
-            return -1;
-          }
-          stream_skip(demux->stream, 16);
-          hdrlen-=16;
-        }
-        if(c & 0x40) { //pack_header_field_flag
-          int l = stream_read_char(demux->stream);
-          if(l < 0) //couldn't read from the stream?
-            return -1;
-          hdrlen--;
-          if(l < 0 || hdrlen < l) {
-            mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough pack_header bytes: hdrlen: %d < skip: %d, discarding pes packet\n",
-                                     hdrlen, l);
-            return -1;
-          }
-          stream_skip(demux->stream, l);
-          hdrlen-=l;
-        }
-        if(c & 0x20) { //program_packet_sequence_counter_flag
-            if(hdrlen < 2) {
-            mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough program_packet bytes: hdrlen: %d, discarding pes packet\n", hdrlen);
-            return -1;
-          }
-          stream_skip(demux->stream, 2);
-          hdrlen-=2;
-        }
-        if(c & 0x10) {
-          //STD
-          stream_skip(demux->stream, 2);
-          hdrlen-=2;
-        }
-        c=stream_read_char(demux->stream); //pes_extension2 flag
-        hdrlen--;
-        if(c!=0x81)  { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown pes_extension2 format, len is > 1  \n"); return -1;}
-        c=stream_read_char(demux->stream); //pes_extension2 payload === substream id
-        hdrlen--;
-        if(c<0x55 || c>0x5F)   { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown vc1 substream_id: 0x%x  \n", c); return -1;}
-        pes_ext2_subid=c;
+        stream_skip(demux->stream, 16);
+        hdrlen-=16;
       }
+      if(c & 0x40) { //pack_header_field_flag
+        int l = stream_read_char(demux->stream);
+        if(l < 0) //couldn't read from the stream?
+          return -1;
+        hdrlen--;
+        if(l < 0 || hdrlen < l) {
+          mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough pack_header bytes: hdrlen: %d < skip: %d, discarding pes packet\n",
+                                   hdrlen, l);
+          return -1;
+        }
+        stream_skip(demux->stream, l);
+        hdrlen-=l;
+      }
+      if(c & 0x20) { //program_packet_sequence_counter_flag
+        if(hdrlen < 2) {
+          mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: not enough program_packet bytes: hdrlen: %d, discarding pes packet\n", hdrlen);
+          return -1;
+        }
+        stream_skip(demux->stream, 2);
+        hdrlen-=2;
+      }
+      if(c & 0x10) {
+        //STD
+        stream_skip(demux->stream, 2);
+        hdrlen-=2;
+      }
+      c=stream_read_char(demux->stream); //pes_extension2 flag
+      hdrlen--;
+      if(c!=0x81)  { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown pes_extension2 format, len is > 1  \n"); return -1;}
+      c=stream_read_char(demux->stream); //pes_extension2 payload === substream id
+      hdrlen--;
+      if(c<0x55 || c>0x5F)   { mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: unknown vc1 substream_id: 0x%x  \n", c); return -1;}
+      pes_ext2_subid=c;
+    }
     if(hdrlen>0)
       stream_skip(demux->stream,hdrlen); // skip header and stuffing bytes
-    
+
     if(id==0x1FD && pes_ext2_subid!=-1) {
       //==== EVO VC1 STREAMS ===//
       if(!demux->v_streams[pes_ext2_subid]) new_sh_video(demux,pes_ext2_subid);
@@ -446,13 +446,13 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         aid=stream_read_char(demux->stream);--len;
         if(len<3) return -1; // invalid audio packet
       }
-      
+
       // AID:
       // 0x20..0x3F  subtitle
       // 0x80..0x87 and 0xC0..0xCF  AC3 audio
       // 0x88..0x8F and 0x98..0x9F  DTS audio
       // 0xA0..0xBF  PCM audio
-      
+
       if((aid & 0xE0) == 0x20){
         // subtitle:
         aid&=0x1F;
@@ -470,7 +470,6 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         if(demux->sub->id==aid){
             ds=demux->sub;
         }
-          
       } else if((aid >= 0x80 && aid <= 0x8F) || (aid >= 0x98 && aid <= 0xAF) || (aid >= 0xC0 && aid <= 0xCF)) {
 
 //        aid=128+(aid&0x7F);
@@ -513,9 +512,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       } //  if(demux->audio->id==aid)
 
       } else mp_msg(MSGT_DEMUX,MSGL_V,"Unknown 0x1BD substream: 0x%02X  \n",aid);
-
     } //if(id==0x1BD)
-
   } else {
     if(c!=0x0f){
       mp_msg(MSGT_DEMUX,MSGL_V,"  {ERROR5,c=%d}  \n",c);
@@ -530,7 +527,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Invalid PS data len: %d\n",len);
     return -1;  // invalid packet !!!!!!
   }
-  
+
   if(id>=0x1C0 && id<=0x1DF){
     // mpeg audio
     int aid=id-0x1C0;
