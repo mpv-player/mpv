@@ -17,7 +17,8 @@ MPlayer (1.0)
       audio and video, Interplay DPCM audio, Sierra VMD video, Tiertex SEQ
       video, Westwood IMA ADPCM audio, XAN wc3 video, Id CIN video, Interplay
       video, XAN ADPCM audio, Westwood SND1 audio, Feeble Files DXA video, THP
-      audio and video, Renderware TeXture Dictionary video via lavc
+      audio and video, Renderware TeXture Dictionary video, Bethesda Software
+      VID video via lavc
     * libmpeg2 updated to 0.4.1
     * fixed resolution switching with libmpeg2
     * handle resolution switching for Real codecs
@@ -61,6 +62,7 @@ MPlayer (1.0)
     * WMA encoder
     * fix MJPEGB on big-endian systems
     * lowres support for some H.264 files
+    * Atrac 3 decoder
 
     libmpeg2:
     * iWMMXt-accelerated DCT and motion compensation for ARM processors
