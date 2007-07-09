@@ -99,6 +99,8 @@ MPlayer (1.0)
     * internal minilzo removed in favor of FFmpeg implementation,
       use liblzo2 for encoding
     * change GUI dependency from libpng to libavcodec
+    * ability to change subtitle size during playback
+    * ability to turn loop on/off during playback
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
