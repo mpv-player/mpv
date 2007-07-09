@@ -234,6 +234,7 @@ static char help_text[]=
 #define MSGTR_Balance "Balance"
 
 // property state
+#define MSGTR_LoopStatus "Loop: %s"
 #define MSGTR_MuteStatus "Mute: %s"
 #define MSGTR_AVDelayStatus "A-V delay: %s"
 #define MSGTR_OnTopStatus "Stay on top: %s"

@@ -157,6 +157,24 @@ static int mp_property_osdlevel(m_option_t * prop, int action, void *arg,
     return m_property_choice(prop, action, arg, &osd_level);
 }
 
+/// Loop (RW)
+static int mp_property_loop(m_option_t * prop, int action, void *arg,
+                            MPContext * mpctx)
+{
+    switch (action) {
+    case M_PROPERTY_PRINT:
+        if (!arg) return M_PROPERTY_ERROR;
+        if (mpctx->loop_times < 0)
+            *(char**)arg = strdup("off");
+        else if (mpctx->loop_times == 0)
+            *(char**)arg = strdup("inf");
+        else
+            break;
+        return M_PROPERTY_OK;
+    }
+    return m_property_int_range(prop, action, arg, &mpctx->loop_times);
+}
+
 /// Playback speed (RW)
 static int mp_property_playback_speed(m_option_t * prop, int action,
 				      void *arg, MPContext * mpctx)
@@ -1488,6 +1506,8 @@ static m_option_t mp_properties[] = {
     // General
     { "osdlevel", mp_property_osdlevel, CONF_TYPE_INT,
      M_OPT_RANGE, 0, 3, NULL },
+    { "loop", mp_property_loop, CONF_TYPE_INT,
+     M_OPT_MIN, -1, 0, NULL },
     { "speed", mp_property_playback_speed, CONF_TYPE_FLOAT,
      M_OPT_RANGE, 0.01, 100.0, NULL },
     { "filename", mp_property_filename, CONF_TYPE_STRING,
@@ -1674,6 +1694,8 @@ static struct {
     /// osd msg template
     const char *osd_msg;
 } set_prop_cmd[] = {
+    // general
+    { "loop", MP_CMD_LOOP, 0, 0, -1, MSGTR_LoopStatus },
     // audio
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
     { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },

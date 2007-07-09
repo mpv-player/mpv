@@ -157,6 +157,10 @@ loadlist <file> <append>
     If <append> is nonzero playback continues and the playlist file is
     appended to the current playlist instead.
 
+loop <value> [abs]
+    Adjust/set how many times the movie should be looped. -1 means no loop,
+    and 0 forever.
+
 menu <command>
     Execute an OSD menu command.
         up     Move cursor up.
@@ -397,6 +401,7 @@ name               type      min     max     get set step comment
 
 osdlevel           int       0       3       X   X   X    as -osdlevel
 speed              float     0.01    100     X   X   X    as -speed
+loop               int       -1              X   X   X    as -loop
 filename           string                    X            file playing wo path
 path               string                    X            file playing
 demuxer            string                    X            demuxer used
