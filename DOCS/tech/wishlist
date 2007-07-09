@@ -121,8 +121,6 @@ Enhancements:
 
  * get -ass working in mencoder
 
- * ability to turn loop on/off while playing (button in gui too)
-
  * rotate/position osd
 
  * support all image formats in mf:// (tiff)
