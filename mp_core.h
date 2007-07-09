@@ -51,6 +51,7 @@ typedef struct MPContext {
     play_tree_iter_t *playtree_iter;
     int eof;
     int play_tree_step;
+    int loop_times;
 
     stream_t *stream;
     demuxer_t *demuxer;

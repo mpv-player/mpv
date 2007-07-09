@@ -200,6 +200,7 @@ static MPContext mpctx_s = {
     .global_sub_pos = -1,
     .set_of_sub_pos = -1,
     .file_format = DEMUXER_TYPE_UNKNOWN,
+    .loop_times = -1,
 #ifdef HAS_DVBIN_SUPPORT
     .last_dvb_step = 1,
 #endif
@@ -244,7 +245,6 @@ static char* playing_msg = NULL;
 static double seek_to_sec;
 static off_t seek_to_byte=0;
 static off_t step_sec=0;
-static int loop_times=-1;
 static int loop_seek=0;
 
 static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
@@ -3326,8 +3326,8 @@ if (mpctx->stream->type==STREAMTYPE_TV) mp_input_set_section("tv");
 
 //==================== START PLAYING =======================
 
-if(loop_times>1) loop_times--; else
-if(loop_times==1) loop_times = -1;
+if(mpctx->loop_times>1) mpctx->loop_times--; else
+if(mpctx->loop_times==1) mpctx->loop_times = -1;
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);
 
@@ -3528,11 +3528,11 @@ if(step_sec>0) {
   mpctx->was_paused = 0;
 
   /* Looping. */
-  if(mpctx->eof==1 && loop_times>=0) {
-    mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d, eof = %d\n", loop_times,mpctx->eof);
+  if(mpctx->eof==1 && mpctx->loop_times>=0) {
+    mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d, eof = %d\n", mpctx->loop_times,mpctx->eof);
 
-    if(loop_times>1) loop_times--; else
-    if(loop_times==1) loop_times=-1;
+    if(mpctx->loop_times>1) mpctx->loop_times--; else
+    if(mpctx->loop_times==1) mpctx->loop_times=-1;
     play_n_frames=play_n_frames_mf;
     mpctx->eof=0;
     abs_seek_pos=1; rel_seek_secs=seek_to_sec;
