@@ -245,6 +245,7 @@ static char help_text[]=
 #define MSGTR_SubPosStatus "Sub position: %s/100"
 #define MSGTR_SubAlignStatus "Sub alignment: %s"
 #define MSGTR_SubDelayStatus "Sub delay: %s"
+#define MSGTR_SubScale "Sub Scale: %s"
 #define MSGTR_SubVisibleStatus "Subtitles: %s"
 #define MSGTR_SubForcedOnlyStatus "Forced sub only: %s"
 

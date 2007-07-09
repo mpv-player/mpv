@@ -288,6 +288,10 @@ sub_select [value]
     than -1. Supported subtitle sources are -sub options on the command
     line, VOBsubs, DVD subtitles, and Ogg and Matroska text streams.
 
+sub_scale <value> [abs]
+    Adjust the subtitle size by +/- <value> or set it to <value> when [abs]
+    is nonzero.
+
 vobsub_lang
     This is a stub linked to sub_select for backwards compatibility.
 
@@ -443,6 +447,7 @@ sub_pos            int       0       100     X   X   X    subtitle position
 sub_alignment      int       0       2       X   X   X    subtitle alignment
 sub_visibility     flag      0       1       X   X   X    show/hide subtitles
 sub_forced_only    flag      0       1       X   X   X
+sub_scale          float     0       100     X   X   X    subtitles font size
 tv_brightness      int       -100    100     X   X   X
 tv_contrast        int       -100    100     X   X   X
 tv_saturation      int       -100    100     X   X   X

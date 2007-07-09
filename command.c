@@ -19,6 +19,7 @@
 #include "libmpcodecs/vf.h"
 #include "libmpcodecs/vd.h"
 #include "libvo/video_out.h"
+#include "libvo/font_load.h"
 #include "playtree.h"
 #include "libao2/audio_out.h"
 #include "mpcommon.h"
@@ -1411,6 +1412,31 @@ static int mp_property_sub_forced_only(m_option_t * prop, int action,
 
 }
 
+/// Subtitle scale (RW)
+static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
+			      MPContext * mpctx)
+{
+
+    switch (action) {
+        case M_PROPERTY_SET:
+            if (!arg)
+                return M_PROPERTY_ERROR;
+            M_PROPERTY_CLAMP(prop, *(float *) arg);
+            text_font_scale_factor = *(float *) arg;
+            force_load_font = 1;
+            return M_PROPERTY_OK;
+        case M_PROPERTY_STEP_UP:
+        case M_PROPERTY_STEP_DOWN:
+            text_font_scale_factor += (arg ? *(float *) arg : 0.1)*
+                (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
+            M_PROPERTY_CLAMP(prop, text_font_scale_factor);
+            force_load_font = 1;
+            return M_PROPERTY_OK;
+        default:
+            return m_property_float_ro(prop, action, arg, text_font_scale_factor);
+    }
+}
+
 ///@}
 
 /// \defgroup TVProperties TV properties
@@ -1568,6 +1594,8 @@ static m_option_t mp_properties[] = {
      M_OPT_RANGE, 0, 1, NULL },
     { "sub_forced_only", mp_property_sub_forced_only, CONF_TYPE_FLAG,
      M_OPT_RANGE, 0, 1, NULL },
+    { "sub_scale", mp_property_sub_scale, CONF_TYPE_FLOAT,
+     M_OPT_RANGE, 0, 100, NULL },
 
 #ifdef USE_TV
     { "tv_brightness", mp_property_tv_color, CONF_TYPE_INT,
@@ -1672,6 +1700,7 @@ static struct {
     { "sub_delay", MP_CMD_SUB_DELAY, 0, 0, OSD_MSG_SUB_DELAY, MSGTR_SubDelayStatus },
     { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1, 0, -1, MSGTR_SubVisibleStatus },
     { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1, 0, -1, MSGTR_SubForcedOnlyStatus },
+    { "sub_scale", MP_CMD_SUB_SCALE, 0, 0, -1, MSGTR_SubScale},
 #ifdef USE_TV
     { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, MSGTR_Brightness },
     { "tv_hue", MP_CMD_TV_SET_HUE, 0, OSD_HUE, -1, MSGTR_Hue },
