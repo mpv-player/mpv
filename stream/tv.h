@@ -1,7 +1,6 @@
 #ifndef TV_H
 #define TV_H
 
-#ifdef USE_TV
 //#include "libao2/afmt.h"
 //#include "libmpcodecs/img_format.h"
 //#include "mp_msg.h"
@@ -190,7 +189,5 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm);
 #define TV_NORM_PALM		5
 #define TV_NORM_PALN		6
 #define TV_NORM_NTSCJP		7
-
-#endif /* USE_TV */
 
 #endif /* TV_H */
