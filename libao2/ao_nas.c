@@ -6,7 +6,7 @@
  *
  * xmms plugin by Willem Monsuwe
  * adapted for libaudiooss by Jon Trulson
- * further modified by Erik Inge Bolsø
+ * further modified by Erik Inge BolsÃ¸
  * largely rewritten and used for this
  * plugin by Tobias Diedrich
  *

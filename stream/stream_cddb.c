@@ -595,7 +595,7 @@ cddb_create_hello(cddb_data_t *cddb_data) {
 	char *user_name;
 	
 	if( cddb_data->anonymous ) {	// Default is anonymous
-		/* Note from Eduardo Pérez Ureta <eperez@it.uc3m.es> : 
+		/* Note from Eduardo PÃ©rez Ureta <eperez@it.uc3m.es> : 
 		 * We don't send current user/host name in hello to prevent spam.
 		 * Software that sends this is considered spyware
 		 * that most people don't like.

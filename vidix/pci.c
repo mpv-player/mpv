@@ -1,6 +1,6 @@
 /*
    (C) 2002 - library implementation by Nick Kyrshev
-   XFree86 3.3.3 scanpci.c, modified for GATOS/win/gfxdump by Øyvind Aabling.
+   XFree86 3.3.3 scanpci.c, modified for GATOS/win/gfxdump by Ã˜yvind Aabling.
  */
 /* $XConsortium: scanpci.c /main/25 1996/10/27 11:48:40 kaleb $ */
 /*

@@ -342,7 +342,7 @@ In my experience, don't try to go below a width of 576 without closely
 watching what's going on.
 
 -- 
-Rémi
+RÃ©mi
 
 ===========
 TIPS FOR ENCODING
@@ -602,7 +602,7 @@ done
 
 (and yes, I've a DVD with 12 subtitles)
 --                                                                              
-Rémi
+RÃ©mi
 
 
 ================================================================================
@@ -644,7 +644,7 @@ a red/yellow cloud (explosion, cloud of fire).  But may not with a grey and
 very fuzzy cloud like in the chocolat scene. Note that I don't know exactly
 why ;)
 
-A = Rémi
+A = RÃ©mi
 
 
 ================================================================================

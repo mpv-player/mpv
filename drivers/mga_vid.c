@@ -1147,7 +1147,7 @@ static void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
 
 #ifdef CRTC2
 // sem pridat vyber obrazku !!!!	
-// i han echt kei ahnig was das obe heisse söll
+// i han echt kei ahnig was das obe heisse sÃ¶ll
 	crtc2_frame_sel(card->next_frame);
 #endif
 	

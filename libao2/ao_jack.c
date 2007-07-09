@@ -4,8 +4,8 @@
  * This driver is under the same license as MPlayer.
  * (http://www.mplayerhq.hu)
  *
- * Copyleft 2001 by Felix Bünemann (atmosfear@users.sf.net)
- * and Reimar Döffinger (Reimar.Doeffinger@stud.uni-karlsruhe.de)
+ * Copyleft 2001 by Felix BÃ¼nemann (atmosfear@users.sf.net)
+ * and Reimar DÃ¶ffinger (Reimar.Doeffinger@stud.uni-karlsruhe.de)
  */
 
 #include <stdio.h>
@@ -31,7 +31,7 @@ static ao_info_t info =
 {
   "JACK audio output",
   "jack",
-  "Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>",
+  "Reimar DÃ¶ffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>",
   "based on ao_sdl.c"
 };
 

@@ -4,7 +4,7 @@
  * This driver is under the same license as MPlayer.
  * (http://www.mplayerhq.hu)
  *
- * Copyleft 2006 by Reimar Döffinger (Reimar.Doeffinger@stud.uni-karlsruhe.de)
+ * Copyleft 2006 by Reimar DÃ¶ffinger (Reimar.Doeffinger@stud.uni-karlsruhe.de)
  */
 
 #include "config.h"
@@ -33,7 +33,7 @@ static ao_info_t info =
 {
   "OpenAL audio output",
   "openal",
-  "Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>",
+  "Reimar DÃ¶ffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>",
   ""
 };
 

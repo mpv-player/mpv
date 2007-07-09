@@ -19,7 +19,7 @@
  * along with MPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
- * Based on Permedia 3 driver by Måns Rullgård
+ * Based on Permedia 3 driver by MÃ¥ns RullgÃ¥rd
  * Thanks to Gilles Frattini for bugfixes.
  *
  * Changes:

@@ -28,7 +28,7 @@ static ad_info_t info =
 {
   "AC3/DTS pass-through S/PDIF",
   "hwac3",
-  "Nick Kurshev/Peter Schüller",
+  "Nick Kurshev/Peter SchÃ¼ller",
   "???",
   ""
 };

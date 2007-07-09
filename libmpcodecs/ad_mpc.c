@@ -1,7 +1,7 @@
 /**
  * Musepack audio files decoder for MPlayer
  * by Reza Jelveh <reza.jelveh@tuhh.de> and
- * Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
+ * Reimar DÃ¶ffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
  * License: GPL
  * This code may be be relicensed under the terms of the GNU LGPL when it
  * becomes part of the FFmpeg project (ffmpeg.org)
@@ -20,7 +20,7 @@ static ad_info_t info =
 {
 	"Musepack audio decoder",
 	"mpcdec",
-	"Reza Jelveh and Reimar Döffinger",
+	"Reza Jelveh and Reimar DÃ¶ffinger",
 	"",
 	""
 };

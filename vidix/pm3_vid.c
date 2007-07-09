@@ -1,6 +1,6 @@
 /*
  * VIDIX driver for 3DLabs Glint R3 and Permedia 3 chipsets.
- * Copyright (C) 2002 Måns Rullgård
+ * Copyright (C) 2002 MÃ¥ns RullgÃ¥rd
  *
  * This file is part of MPlayer.
  *
@@ -52,7 +52,7 @@ static void *pm3_mem;
 static vidix_capability_t pm3_cap =
 {
     "3DLabs GLINT R3/Permedia3 driver",
-    "Måns Rullgård <mru@users.sf.net>",
+    "MÃ¥ns RullgÃ¥rd <mru@users.sf.net>",
     TYPE_OUTPUT,
     { 0, 0, 0, 0 },
     2048,

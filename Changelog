@@ -2312,7 +2312,7 @@ MPlayer v0.11-pre16: Feb 4, 2001
     at low bitrates (usually used for ASF files with DivX audio)
     Input and output buffer sizes are now queryed, problem solved :)
   - SDL support compiling hint by Michael Durller added to the FAQ
-  - opendivx support in ASF files   [Gérard Lantau]
+  - opendivx support in ASF files   [GÃ©rard Lantau]
   - ./configure & Makefiles patch by Aaron Hope applied.
     (adds --with-win32libdir and fixes --with-x11libdir)
   - ./configure fixed, now it defaults to /usr/lib/win32 if detection failed

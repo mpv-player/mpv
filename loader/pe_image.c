@@ -1,6 +1,6 @@
 /* 
  *  Copyright	1994	Eric Youndale & Erik Bos
- *  Copyright	1995	Martin von Löwis
+ *  Copyright	1995	Martin von LÃ¶wis
  *  Copyright   1996-98 Marcus Meissner
  *
  *	based on Eric Youndale's pe-test and:

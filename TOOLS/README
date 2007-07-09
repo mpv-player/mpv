@@ -18,7 +18,7 @@ MPlayer scripts in the TOOLS dir
 
 edgedetect.fp, emboss.fp
 
-Author:       Reimar Döffinger
+Author:       Reimar DÃ¶ffinger
 
 Description:  Examples of custom fragment program for OpenGL video out driver
 
@@ -47,7 +47,7 @@ Usage:        mpconsole [mplayer options]
 
 mplmult.sh
 
-Author:       Reimar Döffinger
+Author:       Reimar DÃ¶ffinger
 
 Description:  Example how to output video on multiple windows in sync. Might
               be even more useful in combination with -vo ggi to distribute
@@ -103,7 +103,7 @@ Usage:        divx2svcd <input_avi> [options]
 
 mencvcd
 
-Author:       Jürgen Hammelmann
+Author:       JÃ¼rgen Hammelmann
 
 Description:  Converts DVD (or anything else that MPlayer plays) to (S)VCD
 
@@ -349,7 +349,7 @@ Note:         Compares MPlayer translation files against a master file and
 
 cpuinfo
 
-Author:       Jürgen Keil
+Author:       JÃ¼rgen Keil
 
 Description:  the prototype ../cpuinfo.c
 
@@ -365,7 +365,7 @@ Description:  MPEG4-ES stream inspector, dumps the stream startcodes.
 
 fastmemcpybench
 
-Author:       Felix Bünemann
+Author:       Felix BÃ¼nemann
 
 Description:  benchmark/testbed for fastmemcpy stuff
 
@@ -442,7 +442,7 @@ Usage:        install-w32codecs.sh install
 
 vobshift.py
 
-Author:       Gábor Farkas
+Author:       GÃ¡bor Farkas
 
 Description:  Adjust the time-info in vobsub files
 

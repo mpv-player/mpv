@@ -4,7 +4,7 @@
  * This driver is under the same license as MPlayer.
  * (http://www.mplayerhq.hu)
  *
- * Copyleft 2001 by Felix Bünemann (atmosfear@users.sf.net)
+ * Copyleft 2001 by Felix BÃ¼nemann (atmosfear@users.sf.net)
  *
  * Thanks to Arpi for nice ringbuffer-code!
  *
