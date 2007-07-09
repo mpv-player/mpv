@@ -69,6 +69,8 @@ MPlayer (1.0)
     * obsolete fame filter removed
     * vf_geq speed-ups
     * vf_yadif green frame fixed
+    * fix af_pan when switching audio streams
+    * add audio left/right balance feature to af_pan
 
     MEncoder:
     * write to output streams (currently only file:// and smb://)
