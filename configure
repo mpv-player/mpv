@@ -6453,12 +6453,13 @@ fi
 
 echocheck "mencoder"
 _mencoder_flag='#undef HAVE_MENCODER'
+_def_encoders='#undef CONFIG_ENCODERS'
 if test "$_mencoder" = yes ; then
   _mencoder_flag='#define HAVE_MENCODER'
   _def_muxers='#define CONFIG_MUXERS 1'
+  _def_encoders='#define CONFIG_ENCODERS 1'
 else
-  # mpeg1video for vf_lavc, snow for vf_uspp and vf_mcdeint
-  _libavencoders="MPEG1VIDEO_ENCODER SNOW_ENCODER"
+  _libavencoders=""
   _libavmuxers=""
 fi
 echores "$_mencoder"
@@ -7934,7 +7935,7 @@ $_def_libavutil_so
 /* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
 /* Use libavcodec's encoders */
-#define CONFIG_ENCODERS 1
+$_def_encoders
 
 /* Use libavformat's demuxers */
 #define CONFIG_DEMUXERS 1
