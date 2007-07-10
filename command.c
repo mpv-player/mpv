@@ -1430,6 +1430,7 @@ static int mp_property_sub_forced_only(m_option_t * prop, int action,
 
 }
 
+#ifdef HAVE_FREETYPE
 /// Subtitle scale (RW)
 static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
 			      MPContext * mpctx)
@@ -1454,6 +1455,7 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
             return m_property_float_ro(prop, action, arg, text_font_scale_factor);
     }
 }
+#endif
 
 ///@}
 
@@ -1614,8 +1616,10 @@ static m_option_t mp_properties[] = {
      M_OPT_RANGE, 0, 1, NULL },
     { "sub_forced_only", mp_property_sub_forced_only, CONF_TYPE_FLAG,
      M_OPT_RANGE, 0, 1, NULL },
+#ifdef HAVE_FREETYPE
     { "sub_scale", mp_property_sub_scale, CONF_TYPE_FLOAT,
      M_OPT_RANGE, 0, 100, NULL },
+#endif
 
 #ifdef USE_TV
     { "tv_brightness", mp_property_tv_color, CONF_TYPE_INT,
@@ -1722,7 +1726,9 @@ static struct {
     { "sub_delay", MP_CMD_SUB_DELAY, 0, 0, OSD_MSG_SUB_DELAY, MSGTR_SubDelayStatus },
     { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1, 0, -1, MSGTR_SubVisibleStatus },
     { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1, 0, -1, MSGTR_SubForcedOnlyStatus },
+#ifdef HAVE_FREETYPE
     { "sub_scale", MP_CMD_SUB_SCALE, 0, 0, -1, MSGTR_SubScale},
+#endif
 #ifdef USE_TV
     { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, MSGTR_Brightness },
     { "tv_hue", MP_CMD_TV_SET_HUE, 0, OSD_HUE, -1, MSGTR_Hue },
