@@ -95,7 +95,7 @@ static char* get_ucs2str(const uint16_t* inbuf, uint16_t inlen)
   q = outbuf;
   for (i = 0; i < inlen / 2; i++) {
     uint8_t tmp;
-    PUT_UTF8(le2me_16(inbuf[i]), tmp, *q++ = tmp;)
+    PUT_UTF8(AV_RL16(&inbuf[i]), tmp, *q++ = tmp;)
   }
   return outbuf;
 }
