@@ -835,7 +835,10 @@ int vo_update_osd(int dxs,int dys){
     if (force_load_font) {
 	force_load_font = 0;
         load_font_ft(dxs, dys, &vo_font, font_name);
-        load_font_ft(dxs, dys, &sub_font, sub_font_name);
+	if (sub_font_name)
+	    load_font_ft(dxs, dys, &sub_font, sub_font_name);
+	else
+	    sub_font = vo_font;
 	prev_dxs = dxs;
 	prev_dys = dys;
 	defer_counter = 0;
@@ -843,7 +846,10 @@ int vo_update_osd(int dxs,int dys){
        if (!vo_font) 
            load_font_ft(dxs, dys, &vo_font, font_name);
        if (!sub_font) 
-           load_font_ft(dxs, dys, &sub_font, sub_font_name);
+           if (sub_font_name)
+               load_font_ft(dxs, dys, &sub_font, sub_font_name);
+           else
+               sub_font = vo_font;
     }
 #endif
 
