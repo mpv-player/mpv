@@ -2891,21 +2891,6 @@ cc_check && _wordsize=`$TMPO` && _mp_wordsize="#define MP_WORDSIZE $_wordsize"
 echores "$_wordsize"
 
 
-echocheck "stddef.h"
-cat > $TMPC << EOF
-#include <stddef.h>
-int main(void) { return 0; }
-EOF
-_stddef=no
-cc_check && _stddef=yes
-if test "$_stddef" = yes ; then
-  _def_stddef='#define HAVE_STDDEF_H 1'
-else
-  _def_stddef='#undef HAVE_STDDEF_H'
-fi
-echores "$_stddef"
-
-
 echocheck "malloc.h"
 cat > $TMPC << EOF
 #include <malloc.h>
@@ -7689,7 +7674,6 @@ $_dev_dvd_openbsd
 $_def_dvd_darwin
 $_def_sol_scsi_h
 $_def_hpux_scsi_h
-$_def_stddef
 
 /* Common data directory (for fonts, etc) */
 #define MPLAYER_DATADIR "$_datadir"
