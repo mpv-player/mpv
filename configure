@@ -3118,47 +3118,26 @@ fi
 echores "$_iconv"
 
 
-echocheck "sys/soundcard.h"
-cat > $TMPC << EOF
-#include <sys/soundcard.h>
-int main(void) { return 0; }
-EOF
-_sys_soundcard=no
-cc_check && _sys_soundcard=yes
-if test "$_sys_soundcard" = yes ; then
-  _def_sys_soundcard='#define HAVE_SYS_SOUNDCARD_H 1'
-  _include_soundcard='#include <sys/soundcard.h>'
-else
-  _def_sys_soundcard='#undef HAVE_SYS_SOUNDCARD_H'
-fi
-echores "$_sys_soundcard"
-
-if test "$_sys_soundcard" != yes ; then
 echocheck "soundcard.h"
-cat > $TMPC << EOF
-#include <soundcard.h>
+_soundcard_h=no
+_def_soundcard='#undef HAVE_SOUNDCARD_H'
+_def_sys_soundcard='#undef HAVE_SYS_SOUNDCARD_H'
+for _soundcard_header in "sys/soundcard.h" "soundcard.h"; do
+  cat > $TMPC << EOF
+#include <$_soundcard_header>
 int main(void) { return 0; }
 EOF
-_soundcard=no
-cc_check && _soundcard=yes
-if linux || test "$_ossaudio" != no ; then
-  # use soundcard.h on Linux, or when OSS support is enabled
-  echores "$_soundcard"
-else
-  # we don't want to use soundcard.h on non-Linux if OSS support not enabled!
-  _res_comment= "but ignored!"
-  echores "$_soundcard"
-  _soundcard=no
+  cc_check && _soundcard_h=yes && _res_comment="$header" && break
+done
+
+if test "$_soundcard_h" = yes ; then
+  if test $_soundcard_header = "sys/soundcard.h"; then
+    _def_sys_soundcard='#define HAVE_SYS_SOUNDCARD_H 1'
+  else
+    _def_soundcard='#define HAVE_SOUNDCARD_H 1'
+  fi
 fi
-if test "$_soundcard" = yes ; then
-  _def_soundcard='#define HAVE_SOUNDCARD_H 1'
-  _include_soundcard='#include <soundcard.h>'
-else
-  _def_soundcard='#undef HAVE_SOUNDCARD_H'
-fi
-else
-  _def_soundcard='#undef HAVE_SOUNDCARD_H'
-fi
+echores "$_soundcard_h"
 
 
 echocheck "sys/dvdio.h"
@@ -4767,7 +4746,7 @@ echocheck "OSS Audio"
 if test "$_ossaudio" = auto ; then
   cat > $TMPC << EOF
 #include <sys/ioctl.h>
-$_include_soundcard
+#include <$_soundcard_header>
 int main(void) { int arg = SNDCTL_DSP_SETFRAGMENT; return 0; }
 EOF
   _ossaudio=no
@@ -4783,7 +4762,7 @@ if test "$_ossaudio" = yes ; then
   else
      cat > $TMPC << EOF
 #include <sys/ioctl.h>
-$_include_soundcard
+#include <$_soundcard_header>
 #ifdef OPEN_SOUND_SYSTEM
 int main(void) { return 0; }
 #else
