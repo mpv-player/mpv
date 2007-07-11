@@ -110,7 +110,6 @@ struct vf_priv_s {
     int outbuf_size;
     uint8_t *outbuf;
     AVCodecContext *avctx_enc[BLOCK*BLOCK];
-    AVCodecContext *avctx_dec[BLOCK*BLOCK];
     AVFrame *frame;
     AVFrame *frame_dec;
 };
@@ -212,7 +211,6 @@ static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
         int i;
-        AVCodec *dec= avcodec_find_decoder(CODEC_ID_SNOW);
         AVCodec *enc= avcodec_find_encoder(CODEC_ID_SNOW);
 
         for(i=0; i<3; i++){
@@ -225,15 +223,11 @@ static int config(struct vf_instance_s* vf,
             vf->priv->src [i]= malloc(vf->priv->temp_stride[i]*h*sizeof(uint8_t));
         }
         for(i=0; i< (1<<vf->priv->log2_count); i++){
-            AVCodecContext *avctx_enc, *avctx_dec;
+            AVCodecContext *avctx_enc;
 
             avctx_enc=
             vf->priv->avctx_enc[i]= avcodec_alloc_context();
-            avctx_dec=
-            vf->priv->avctx_dec[i]= avcodec_alloc_context();
-            avctx_dec->width =
             avctx_enc->width = width + BLOCK;
-            avctx_dec->height =
             avctx_enc->height = height + BLOCK;
             avctx_enc->time_base= (AVRational){1,25};  // meaningless
             avctx_enc->gop_size = 300;
@@ -243,7 +237,6 @@ static int config(struct vf_instance_s* vf,
             avctx_enc->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
             avctx_enc->global_quality= 123;
             avcodec_open(avctx_enc, enc);
-            avcodec_open(vf->priv->avctx_dec[i], dec);
             assert(avctx_enc->codec);
         }
         vf->priv->frame= avcodec_alloc_frame();
@@ -319,7 +312,6 @@ static void uninit(struct vf_instance_s* vf){
     }
     for(i=0; i<BLOCK*BLOCK; i++){
         av_freep(&vf->priv->avctx_enc[i]);
-        av_freep(&vf->priv->avctx_dec[i]);
     }
 
     free(vf->priv);
