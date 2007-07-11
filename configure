@@ -2702,6 +2702,21 @@ fi
 echores "$_lrintf"
 
 
+echocheck "mkstemp"
+cat > $TMPC << EOF
+#include <stdlib.h>
+int main(void) { char a;  mkstemp(&a); return 0; }
+EOF
+_mkstemp=no
+cc_check && _mkstemp=yes
+if test "$_mkstemp" = yes ; then
+  _def_mkstemp='#define HAVE_MKSTEMP 1'
+else
+  _def_mkstemp='#undef HAVE_MKSTEMP'
+fi
+echores "$_mkstemp"
+
+
 echocheck "nanosleep"
 # also check for nanosleep
 cat > $TMPC << EOF
@@ -8077,6 +8092,9 @@ $_def_lrintf
 
 /* int_fastXY_t emulation */
 $_def_fast_inttypes
+
+/* mkstemp support */
+$_def_mkstemp
 
 /* nanosleep support */
 $_def_nanosleep
