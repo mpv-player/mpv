@@ -3300,7 +3300,6 @@ if test "$_termios" = yes ; then
 else
   _def_termios='#undef HAVE_TERMIOS'
   _def_termios_h_name=''
-  _termios=no
 fi
 echores "$_termios"
 
