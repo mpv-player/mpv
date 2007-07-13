@@ -3264,40 +3264,27 @@ echores "$_termcap"
 
 
 echocheck "termios"
+_def_termios='#undef HAVE_TERMIOS'
+_def_termios_h='#undef HAVE_TERMIOS_H'
+_def_termios_sys_h='#undef HAVE_SYS_TERMIOS_H'
 if test "$_termios" = auto ; then
-  cat > $TMPC <<EOF
-#include <sys/termios.h>
-int main(void) { return 0; }
-EOF
-  _termios=auto
-  cc_check && _termios=yes
-  _def_termios_h_name='sys/termios.h'
-fi
-# second test:
-if test "$_termios" = auto ; then
-  cat > $TMPC <<EOF
-#include <termios.h>
-int main(void) { return 0; }
-EOF
   _termios=no
-  cc_check && _termios=yes
-  _def_termios_h_name='termios.h'
+  for _termios_header in "sys/termios.h" "termios.h"; do
+  cat > $TMPC <<EOF
+#include <$_termios_header>
+int main(void) { return 0; }
+EOF
+  cc_check && _termios=yes && _res_comment="$_termios_header" && break
+done
 fi
 
 if test "$_termios" = yes ; then
   _def_termios='#define HAVE_TERMIOS 1'
-  _def_termios_h='#undef HAVE_TERMIOS_H'
-  _def_termios_sys_h='#undef HAVE_SYS_TERMIOS_H'
-
-  if test "$_def_termios_h_name" = 'sys/termios.h' ; then
-    _def_termios_sys_h='#define HAVE_SYS_TERMIOS_H 1'
-  elif test "$_def_termios_h_name" = 'termios.h' ; then
+  if test "$_termios_header" = "termios.h" ; then
     _def_termios_h='#define HAVE_TERMIOS_H 1'
+  else
+    _def_termios_sys_h='#define HAVE_SYS_TERMIOS_H 1'
   fi
-  _res_comment="using $_def_termios_h_name"
-else
-  _def_termios='#undef HAVE_TERMIOS'
-  _def_termios_h_name=''
 fi
 echores "$_termios"
 
