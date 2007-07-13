@@ -1149,6 +1149,8 @@ static int mp_property_sub_pos(m_option_t * prop, int action, void *arg,
     }
 }
 
+char *demux_lavf_sub_lang(demuxer_t *demuxer, int track_num);
+
 /// Selected subtitles (RW)
 static int mp_property_sub(m_option_t * prop, int action, void *arg,
 			   MPContext * mpctx)
@@ -1203,6 +1205,13 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	}
 #endif
 
+#ifdef USE_LIBAVFORMAT
+	if (mpctx->demuxer->type == DEMUXER_TYPE_LAVF && dvdsub_id >= 0) {
+	    char *lang = demux_lavf_sub_lang(mpctx->demuxer, dvdsub_id);
+	    snprintf(*(char **) arg, 63, "(%d) %s", dvdsub_id, lang);
+	    return M_PROPERTY_OK;
+	}
+#endif
 	if (mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA && dvdsub_id >= 0) {
 	    char lang[40] = MSGTR_Unknown;
 	    demux_mkv_get_sub_lang(mpctx->demuxer, dvdsub_id, lang, 9);

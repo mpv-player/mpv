@@ -29,6 +29,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
+#include "libvo/sub.h"
 
 #ifdef USE_LIBAVFORMAT_SO
 #include <ffmpeg/avformat.h>
@@ -61,9 +62,11 @@ typedef struct lavf_priv_t{
     ByteIOContext pb;
     int audio_streams;
     int video_streams;
+    int sub_streams;
     int64_t last_pts;
     int astreams[MAX_A_STREAMS];
     int vstreams[MAX_V_STREAMS];
+    int sstreams[MAX_S_STREAMS];
 }lavf_priv_t;
 
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
@@ -432,6 +435,20 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
                 demuxer->video->sh= demuxer->v_streams[i];
             }
             break;}
+        case CODEC_TYPE_SUBTITLE:{
+            sh_sub_t* sh_sub;
+            if(priv->sub_streams >= MAX_S_STREAMS)
+                break;
+            /* only support text subtitles for now */
+            if(codec->codec_id != CODEC_ID_TEXT)
+                break;
+            sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "lavf", priv->sub_streams);
+            if(!sh_sub) break;
+            priv->sstreams[priv->sub_streams] = i;
+            sh_sub->type = 't';
+            demuxer->sub->sh = demuxer->s_streams[priv->sub_streams++];
+            break;}
         default:
             st->discard= AVDISCARD_ALL;
         }
@@ -481,6 +498,10 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
             ds->sh=demux->v_streams[id];
             mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected LAVF video ID = %d\n",ds->id);
         }
+    } else if(id==demux->sub->id){
+        // subtitle
+        ds=demux->sub;
+        sub_utf8=1;
     } else {
         av_free_packet(&pkt);
         return 1;
@@ -504,6 +525,8 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     if(pkt.pts != AV_NOPTS_VALUE){
         dp->pts=pkt.pts * av_q2d(priv->avfc->streams[id]->time_base);
         priv->last_pts= dp->pts * AV_TIME_BASE;
+        if(pkt.duration)
+            dp->endpts = dp->pts + pkt.duration * av_q2d(priv->avfc->streams[id]->time_base);
     }
     dp->pos=demux->filepos;
     dp->flags= !!(pkt.flags&PKT_FLAG_KEY);
@@ -610,6 +633,19 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }
+}
+
+/** \brief Get the language code for a subtitle track.
+
+  Retrieves the language code for a subtitle track.
+
+  \param demuxer The demuxer to work on
+  \param track_num The subtitle track number to get the language from
+*/
+char *demux_lavf_sub_lang(demuxer_t *demuxer, int track_num)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    return priv->avfc->streams[priv->sstreams[track_num]]->language;
 }
 
 static void demux_close_lavf(demuxer_t *demuxer)
