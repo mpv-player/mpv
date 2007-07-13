@@ -3602,7 +3602,7 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
   If the language code is "und" then do not copy it ("und" = "undefined").
 
   \param demuxer The demuxer to work on
-  \param track_num The n'th subtitle track to get the language from
+  \param track_num The subtitle track number to get the language from
   \param lang Store the language here
   \param maxlen The maximum number of characters to copy into lang
 */
