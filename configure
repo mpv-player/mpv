@@ -285,7 +285,7 @@ Codecs:
   --disable-real            disable RealPlayer codecs support [enabled]
   --disable-xvid            disable XviD [autodetect]
   --disable-x264            disable x264 [autodetect]
-  --disable-nut             disable libnut [autodetect]
+  --disable-libnut          disable libnut [autodetect]
   --disable-libavutil_a     disable static libavutil [autodetect]
   --disable-libavcodec_a    disable static libavcodec [autodetect]
   --disable-libavformat_a   disable static libavformat [autodetect]
@@ -597,7 +597,7 @@ _vidix_external=auto
 _joystick=no
 _xvid=auto
 _x264=auto
-_nut=auto
+_libnut=auto
 _lirc=auto
 _lircc=auto
 _gui=no
@@ -968,8 +968,8 @@ for ac_option do
   --disable-xvid)	_xvid=no	;;
   --enable-x264)        _x264=yes       ;;
   --disable-x264)       _x264=no        ;;
-  --enable-nut)		_nut=yes	;;
-  --disable-nut)	_nut=no		;;
+  --enable-libnut)	_libnut=yes	;;
+  --disable-libnut)	_libnut=no	;;
   --enable-libavutil_a)		_libavutil_a=yes	;;
   --disable-libavutil_a)	_libavutil_a=no		;;
   --enable-libavutil_so)	_libavutil_so=yes	;;
@@ -6348,8 +6348,8 @@ fi
 echores "$_x264 (in libavcodec: $_lavc_x264)"
 
 
-echocheck "nut"
-if test "$_nut" = auto ; then
+echocheck "libnut"
+if test "$_libnut" = auto ; then
   cat > $TMPC << EOF
 #include <stdio.h>
 #include <stdlib.h>
@@ -6357,18 +6357,18 @@ if test "$_nut" = auto ; then
 #include <libnut.h>
 int main(void) { (void)nut_error(0); return 0; }
 EOF
-  _nut=no
-   cc_check -lnut && _nut=yes
+  _libnut=no
+   cc_check -lnut && _libnut=yes
 fi
 
-if test "$_nut" = yes ; then
-  _def_nut='#define HAVE_LIBNUT 1'
+if test "$_libnut" = yes ; then
+  _def_libnut='#define HAVE_LIBNUT 1'
   _ld_extra="$_ld_extra -lnut"
 else
-  _def_nut='#undef HAVE_LIBNUT'
+  _def_libnut='#undef HAVE_LIBNUT'
   _libavmuxers=`echo $_libavmuxers | sed -e s/LIBNUT_MUXER// `
 fi
-echores "$_nut"
+echores "$_libnut"
 
 
 # mencoder requires (optional) those libs: libmp3lame
@@ -7483,7 +7483,7 @@ LIBLZO = $_liblzo
 LIBDV = $_libdv
 XVID4 = $_xvid
 X264 = $_x264
-LIBNUT = $_nut
+LIBNUT = $_libnut
 MPLAYER = $_mplayer
 MENCODER = $_mencoder
 CDDA = $_cdda
@@ -7690,7 +7690,7 @@ $_def_xvid
 $_def_x264
 
 /* Define if you are using libnut */
-$_def_nut
+$_def_libnut
 
 /* Define to include support for libdv-0.9.5 */
 $_def_libdv
