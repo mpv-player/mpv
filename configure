@@ -3058,12 +3058,10 @@ echores "$_rpath"
 
 echocheck "iconv"
 if test "$_iconv" = auto ; then
-  _iconv_tmp='#include <iconv.h>'
-
   cat > $TMPC << EOF
 #include <stdio.h>
 #include <unistd.h>
-$_iconv_tmp
+#include <iconv.h>
 #define INBUFSIZE 1024
 #define OUTBUFSIZE 4096
 
