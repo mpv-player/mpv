@@ -3112,7 +3112,7 @@ for _soundcard_header in "sys/soundcard.h" "soundcard.h"; do
 #include <$_soundcard_header>
 int main(void) { return 0; }
 EOF
-  cc_check && _soundcard_h=yes && _res_comment="$header" && break
+  cc_check && _soundcard_h=yes && _res_comment="$_soundcard_header" && break
 done
 
 if test "$_soundcard_h" = yes ; then
