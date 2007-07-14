@@ -247,8 +247,7 @@ while(1){
       // now the real index of indices
       for (i=0; i<s->nEntriesInUse; i++) {
 	  chunksize-=16;
-	  s->aIndex[i].qwOffset = stream_read_dword_le(demuxer->stream) & 0xffffffff;
-	  s->aIndex[i].qwOffset |= ((uint64_t)stream_read_dword_le(demuxer->stream) & 0xffffffff)<<32;
+	  s->aIndex[i].qwOffset = stream_read_qword_le(demuxer->stream);
 	  s->aIndex[i].dwSize = stream_read_dword_le(demuxer->stream);
 	  s->aIndex[i].dwDuration = stream_read_dword_le(demuxer->stream);
 	  mp_msg (MSGT_HEADER, MSGL_V, "ODML (%.4s): [%d] 0x%016"PRIx64" 0x%04x %u\n", 
