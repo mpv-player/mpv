@@ -5827,7 +5827,7 @@ else
 fi
 echores "$_theora"
 
-echocheck "mp3lib support"
+echocheck "internal mp3lib support"
 if test "$_mp3lib" = yes ; then
   _def_mp3lib='#define USE_MP3LIB 1'
   _codecmodules="mp3lib $_codecmodules"
@@ -5837,7 +5837,7 @@ else
 fi
 echores "$_mp3lib"
 
-echocheck "liba52 support"
+echocheck "internal liba52 support"
 if test "$_liba52" = yes ; then
   _def_liba52='#define USE_LIBA52 1'
   _codecmodules="liba52 $_codecmodules"
@@ -5848,7 +5848,7 @@ fi
 echores "$_liba52"
 
 
-echocheck "libmpeg2 support"
+echocheck "internal libmpeg2 support"
 if test "$_libmpeg2" = yes ; then
   _def_libmpeg2='#define USE_LIBMPEG2 1'
   _codecmodules="libmpeg2 $_codecmodules"
