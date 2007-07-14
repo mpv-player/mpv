@@ -3307,11 +3307,6 @@ fi
 echores "$_shm"
 
 
-# XXX: FIXME, add runtime checking
-echocheck "linux devfs"
-echores "$_linux_devfs"
-
-
 echocheck "scandir()"
 cat > $TMPC << EOF
 int main (void) { scandir("", 0, 0, 0); alphasort(0, 0); return 0; }
