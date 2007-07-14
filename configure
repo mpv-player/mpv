@@ -3688,6 +3688,30 @@ fi
 echores "$_tga"
 
 
+echocheck "md5sum support"
+if test "$_md5sum" = yes; then
+  _def_md5sum="#define HAVE_MD5SUM"
+  _vosrc="$_vosrc vo_md5sum.c"
+  _vomodules="md5sum $_vomodules"
+else
+  _def_md5sum="#undef HAVE_MD5SUM"
+  _novomodules="md5sum $_novomodules"
+fi
+echores "$_md5sum"
+
+
+echocheck "bl"
+if test "$_bl" = yes ; then
+  _def_bl='#define HAVE_BL 1'
+  _vosrc="$_vosrc vo_bl.c"
+  _vomodules="bl $_vomodules"
+else
+  _def_bl='#undef HAVE_BL'
+  _novomodules="bl $_novomodules"
+fi
+echores "$_bl"
+
+
 echocheck "DirectFB"
 if test "$_directfb" = auto ; then
   _directfb=no
@@ -4050,6 +4074,98 @@ fi
 echores "$_gl"
 
 
+echocheck "VIDIX"
+_vidix=no
+_def_vidix='#undef CONFIG_VIDIX'
+_def_vidix_drv_cyberblade='#undef CONFIG_VIDIX_DRV_CYBERBLADE'
+_vidix_drv_cyberblade=no
+_def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
+_vidix_drv_ivtv=no
+_def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
+_vidix_drv_ivtv=no
+_def_vidix_drv_mach64='#undef CONFIG_VIDIX_DRV_MACH64'
+_vidix_drv_mach64=no
+_def_vidix_drv_mga='#undef CONFIG_VIDIX_DRV_MGA'
+_vidix_drv_mga=no
+_def_vidix_drv_mga_crtc2='#undef CONFIG_VIDIX_DRV_MGA_CRTC2'
+_vidix_drv_mga_crtc2=no
+_def_vidix_drv_nvidia='#undef CONFIG_VIDIX_DRV_NVIDIA'
+_vidix_drv_nvidia=no
+_def_vidix_drv_pm2='#undef CONFIG_VIDIX_DRV_PM2'
+_vidix_drv_pm2=no
+_def_vidix_drv_pm3='#undef CONFIG_VIDIX_DRV_PM3'
+_vidix_drv_pm3=no
+_def_vidix_drv_radeon='#undef CONFIG_VIDIX_DRV_RADEON'
+_vidix_drv_radeon=no
+_def_vidix_drv_rage128='#undef CONFIG_VIDIX_DRV_RAGE128'
+_vidix_drv_rage128=no
+_def_vidix_drv_savage='#undef CONFIG_VIDIX_DRV_SAVAGE'
+_vidix_drv_savage=no
+_def_vidix_drv_sis='#undef CONFIG_VIDIX_DRV_SIS'
+_vidix_drv_sis=no
+_def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
+_vidix_drv_unichrome=no
+if test "$_vidix_internal" = auto ; then
+  _vidix_internal=no
+  x86 && _vidix_internal=yes
+  # this is broken currently, undefined references to inw, outw etc.
+  #ppc && linux && _vidix_internal=yes
+  alpha && linux && _vidix_internal=yes
+  qnx || beos || darwin && _vidix_internal=no
+fi
+if test "$_vidix_internal" = yes; then
+  _res_comment="internal"
+  _vidix_external=no
+  _vidix=yes
+elif test "$_vidix_external" = auto; then
+ _vidix_external=no
+ cat > $TMPC <<EOF
+#include <vidix/vidix.h>
+int main(void) { return 0; }
+EOF
+  cc_check -lvidix && _vidix_external=yes && _res_comment="external" \
+                   && _vidix=yes
+fi
+echores "$_vidix"
+
+if test "$_vidix" = yes ; then
+  _def_vidix='#define CONFIG_VIDIX 1'
+  _vosrc="$_vosrc vo_cvidix.c"
+  _vomodules="cvidix $_vomodules"
+  test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 savage sis unichrome"
+  test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
+
+  for driver in $_vidix_drivers ; do
+    uc_driver=`echo $driver | tr '[a-z]' '[A-Z]'`
+    eval _vidix_drv_${driver}=yes
+    eval _def_vidix_drv_${driver}=\"\#define CONFIG_VIDIX_DRV_${uc_driver} 1\"
+  done
+else
+  _novomodules="cvidix $_novomodules"
+fi
+
+if test "$_vidix_internal" = yes ; then
+  _def_vidix_pfx="#define MP_VIDIX_PFX \"$_libdir\" \"/mplayer/vidix/\" "
+elif test "$_vidix_external" = yes ; then
+  _libs_mplayer="$_libs_mplayer -lvidix"
+  _def_vidix_pfx='#define MP_VIDIX_PFX "" '
+fi
+
+if test "$_vidix" = yes && win32; then
+  _vosrc="$_vosrc vo_winvidix.c"
+  _vomodules="winvidix $_vomodules"
+  _libs_mplayer="$_libs_mplayer -lgdi32"
+else
+  _novomodules="winvidix $_novomodules"
+fi
+if test "$_vidix" = yes && test "$_x11" = yes; then
+  _vosrc="$_vosrc vo_xvidix.c"
+  _vomodules="xvidix $_vomodules"
+else
+  _novomodules="xvidix $_novomodules"
+fi
+
+
 echocheck "/dev/mga_vid"
 if test "$_mga" = auto ; then
   _mga=no
@@ -4309,6 +4425,34 @@ else
     _dvbin=no
     _noinputmodules="dvb $_noinputmodules"
 fi
+
+
+echocheck "zr"
+if test "$_zr" = auto ; then
+  #36067's seem to identify themselves as 36057PQC's, so the line
+  #below should work for 36067's and 36057's.
+  if grep -e "Multimedia video controller: Zoran Corporation ZR36057" /proc/pci > /dev/null 2>&1; then
+    _zr=yes
+  else
+    _zr=no
+  fi
+fi
+if test "$_zr" = yes ; then
+  if test "$_libavcodec_a" = yes ; then
+    _def_zr='#define HAVE_ZR 1'
+    _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
+    _vomodules="zr zr2 $_vomodules"
+  else
+    _res_comment="libavcodec (static) is required by zr, sorry"
+    _novomodules="zr $_novomodules"
+    _def_zr='#undef HAVE_ZR'
+  fi
+else
+  _def_zr='#undef HAVE_ZR'
+  _novomodules="zr zr2 $_novomodules"
+fi
+echores "$_zr"
+
 
 echocheck "PNG support"
 if test "$_png" = auto ; then
@@ -6147,17 +6291,6 @@ test "$_libpostproc_so" = yes \
 echores "$_libpostproc"
 
 
-echocheck "md5sum support"
-if test "$_md5sum" = yes; then
-  _def_md5sum="#define HAVE_MD5SUM"
-  _vosrc="$_vosrc vo_md5sum.c"
-  _vomodules="md5sum $_vomodules"
-else
-  _def_md5sum="#undef HAVE_MD5SUM"
-  _novomodules="md5sum $_novomodules"
-fi
-echores "$_md5sum"
-
 echocheck "libamr narrowband"
 if test "$_libamr_nb" = auto ; then
   _libamr_nb=no
@@ -6231,43 +6364,6 @@ else
   _nocodecmodules="libdv $_nocodecmodules"
 fi
 echores "$_libdv"
-
-echocheck "zr"
-if test "$_zr" = auto ; then
-  #36067's seem to identify themselves as 36057PQC's, so the line 
-  #below should work for 36067's and 36057's. 
-  if grep -e "Multimedia video controller: Zoran Corporation ZR36057" /proc/pci > /dev/null 2>&1; then
-    _zr=yes 
-  else
-    _zr=no
-  fi
-fi
-if test "$_zr" = yes ; then
-  if test "$_libavcodec_a" = yes ; then
-    _def_zr='#define HAVE_ZR 1'
-    _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
-    _vomodules="zr zr2 $_vomodules"
-  else
-    _res_comment="libavcodec (static) is required by zr, sorry"
-    _novomodules="zr $_novomodules"
-    _def_zr='#undef HAVE_ZR'
-  fi
-else
-  _def_zr='#undef HAVE_ZR'
-  _novomodules="zr zr2 $_novomodules"
-fi
-echores "$_zr"
-
-echocheck "bl"
-if test "$_bl" = yes ; then
-  _def_bl='#define HAVE_BL 1'
-  _vosrc="$_vosrc vo_bl.c"
-  _vomodules="bl $_vomodules"
-else
-  _def_bl='#undef HAVE_BL'
-  _novomodules="bl $_novomodules"
-fi
-echores "$_bl"
 
 
 echocheck "XviD"
@@ -7073,97 +7169,6 @@ test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'
 _def_linux='#undef TARGET_LINUX'
 linux && _def_linux='#define TARGET_LINUX 1'
 
-
-echocheck "VIDIX"
-_vidix=no
-_def_vidix='#undef CONFIG_VIDIX'
-_def_vidix_drv_cyberblade='#undef CONFIG_VIDIX_DRV_CYBERBLADE'
-_vidix_drv_cyberblade=no
-_def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
-_vidix_drv_ivtv=no
-_def_vidix_drv_ivtv='#undef CONFIG_VIDIX_DRV_IVTV'
-_vidix_drv_ivtv=no
-_def_vidix_drv_mach64='#undef CONFIG_VIDIX_DRV_MACH64'
-_vidix_drv_mach64=no
-_def_vidix_drv_mga='#undef CONFIG_VIDIX_DRV_MGA'
-_vidix_drv_mga=no
-_def_vidix_drv_mga_crtc2='#undef CONFIG_VIDIX_DRV_MGA_CRTC2'
-_vidix_drv_mga_crtc2=no
-_def_vidix_drv_nvidia='#undef CONFIG_VIDIX_DRV_NVIDIA'
-_vidix_drv_nvidia=no
-_def_vidix_drv_pm2='#undef CONFIG_VIDIX_DRV_PM2'
-_vidix_drv_pm2=no
-_def_vidix_drv_pm3='#undef CONFIG_VIDIX_DRV_PM3'
-_vidix_drv_pm3=no
-_def_vidix_drv_radeon='#undef CONFIG_VIDIX_DRV_RADEON'
-_vidix_drv_radeon=no
-_def_vidix_drv_rage128='#undef CONFIG_VIDIX_DRV_RAGE128'
-_vidix_drv_rage128=no
-_def_vidix_drv_savage='#undef CONFIG_VIDIX_DRV_SAVAGE'
-_vidix_drv_savage=no
-_def_vidix_drv_sis='#undef CONFIG_VIDIX_DRV_SIS'
-_vidix_drv_sis=no
-_def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
-_vidix_drv_unichrome=no
-if test "$_vidix_internal" = auto ; then
-  _vidix_internal=no
-  x86 && _vidix_internal=yes
-  # this is broken currently, undefined references to inw, outw etc.
-  #ppc && linux && _vidix_internal=yes
-  alpha && linux && _vidix_internal=yes
-  qnx || beos || darwin && _vidix_internal=no
-fi
-if test "$_vidix_internal" = yes; then
-  _res_comment="internal"
-  _vidix_external=no
-  _vidix=yes
-elif test "$_vidix_external" = auto; then
- _vidix_external=no
- cat > $TMPC <<EOF
-#include <vidix/vidix.h>
-int main(void) { return 0; }
-EOF
-  cc_check -lvidix && _vidix_external=yes && _res_comment="external" \
-                   && _vidix=yes
-fi
-echores "$_vidix"
-
-if test "$_vidix" = yes ; then
-  _def_vidix='#define CONFIG_VIDIX 1'
-  _vosrc="$_vosrc vo_cvidix.c"
-  _vomodules="cvidix $_vomodules"
-  test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 savage sis unichrome"
-  test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
-
-  for driver in $_vidix_drivers ; do
-    uc_driver=`echo $driver | tr '[a-z]' '[A-Z]'`
-    eval _vidix_drv_${driver}=yes
-    eval _def_vidix_drv_${driver}=\"\#define CONFIG_VIDIX_DRV_${uc_driver} 1\"
-  done
-else
-  _novomodules="cvidix $_novomodules"
-fi
-
-if test "$_vidix_internal" = yes ; then
-  _def_vidix_pfx="#define MP_VIDIX_PFX \"$_libdir\" \"/mplayer/vidix/\" "
-elif test "$_vidix_external" = yes ; then
-  _libs_mplayer="$_libs_mplayer -lvidix"
-  _def_vidix_pfx='#define MP_VIDIX_PFX "" '
-fi
-
-if test "$_vidix" = yes && win32; then
-  _vosrc="$_vosrc vo_winvidix.c"
-  _vomodules="winvidix $_vomodules"
-  _libs_mplayer="$_libs_mplayer -lgdi32"
-else
-  _novomodules="winvidix $_novomodules"
-fi
-if test "$_vidix" = yes && test "$_x11" = yes; then
-  _vosrc="$_vosrc vo_xvidix.c"
-  _vomodules="xvidix $_vomodules"
-else
-  _novomodules="xvidix $_novomodules"
-fi
 
 echocheck "joystick"
 _def_joystick='#undef HAVE_JOYSTICK'
