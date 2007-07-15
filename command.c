@@ -1342,6 +1342,9 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 		else if (ass_enabled && sh->type == 'a')
 		    ass_track = sh->ass_track;
 #endif
+            } else {
+              d_sub->id = -2;
+              d_sub->sh = NULL;
 	    }
 	}
     }
