@@ -38,6 +38,7 @@ MPlayer (1.0)
     * support for EVO demuxing
     * support -noidx with -demuxer lavf
     * support for channel navigation with PVR input
+    * text subtitles should now work with -demuxer lavf
 
     Streaming:
     * authentication for Real RTSP streams
