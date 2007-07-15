@@ -580,6 +580,13 @@ if(stream->type==STREAMTYPE_DVD){
 }
 #endif
 
+#ifdef USE_DVDNAV
+if(stream->type==STREAMTYPE_DVDNAV){
+  if(audio_lang && audio_id==-1) audio_id=dvdnav_aid_from_lang(stream,audio_lang);
+  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=dvdnav_sid_from_lang(stream,dvdsub_lang);
+}
+#endif
+
   stream->start_pos+=seek_to_byte;
 
   if(stream_cache_size>0) stream_enable_cache(stream,stream_cache_size*1024,0,0);
