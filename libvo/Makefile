@@ -25,5 +25,3 @@ include ../mpcommon.mak
 
 %.o: %.m
 	$(CC) $(CFLAGS) -c -o $@ $<
-
-vo_png.o: CFLAGS := $(filter-out -I../libavcodec,$(CFLAGS))
