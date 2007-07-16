@@ -532,8 +532,12 @@ parse_smil(play_tree_parser_t* p) {
       pos = strstr(pos,"src=");   // Is source present on this line
       if (pos != NULL) {
         entrymode=0;
+        if (pos[4] != '"' && pos[4] != '\'') {
+          mp_msg(MSGT_PLAYTREE,MSGL_V,"Unknown delimiter %c in source line %s\n", pos[4], line);
+          break;
+        }
         s_start=pos+5;
-        s_end=strchr(s_start,'"');
+        s_end=strchr(s_start,pos[4]);
         if (s_end == NULL) {
           mp_msg(MSGT_PLAYTREE,MSGL_V,"Error parsing this source line %s\n",line);
           break;
