@@ -270,6 +270,7 @@ Optional features:
   --disable-ftp          disable FTP support [enabled]
   --disable-vstream      disable TiVo vstream client support [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
+  --disable-w32threads   disable Win32 threads support [autodetect]
   --disable-ass          disable internal SSA/ASS subtitle support [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
 
@@ -644,6 +645,7 @@ _ftp=yes
 _musepack=auto
 _vstream=auto
 _pthreads=auto
+_w32threads=auto
 _ass=auto
 _rpath=no
 _asmalign_pot=auto
@@ -1061,6 +1063,8 @@ for ac_option do
   --disable-vstream)    _vstream=no     ;;
   --enable-pthreads)    _pthreads=yes   ;;
   --disable-pthreads)   _pthreads=no    ;;
+  --enable-w32threads)  _w32threads=yes ;;
+  --disable-w32threads) _w32threads=no  ;;
   --enable-ass)         _ass=yes        ;;
   --disable-ass)        _ass=no         ;;
   --enable-rpath)       _rpath=yes      ;;
@@ -3045,6 +3049,18 @@ else
   fi
 fi
 echores "$_pthreads"
+
+echocheck "w32threads"
+if test "$_pthreads" = yes ; then
+  _res_comment="using pthread instead"
+  _w32threads=no
+fi
+if test "$_w32threads" = auto ; then
+  _w32threads=no
+  mingw32 && _w32threads=yes
+fi
+test "$_w32threads" = yes && _def_threads='#define HAVE_THREADS 1'
+echores "$_w32threads"
 
 echocheck "rpath"
 netbsd &&_rpath=yes
@@ -7403,6 +7419,7 @@ EXTRALIBS_MENCODER = $_libs_mencoder
 
 HAVE_MLIB = $_mlib
 HAVE_PTHREADS = $_pthreads
+HAVE_W32THREADS = $_w32threads
 
 HAVE_XVMC_ACCEL = $_xvmc
 
