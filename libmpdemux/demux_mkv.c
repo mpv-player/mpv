@@ -2520,6 +2520,11 @@ demux_mkv_open (demuxer_t *demuxer)
   else if (demuxer->audio->id != -2)  /* -2 = no audio at all */
     track = demux_mkv_find_track_by_num (mkv_d, demuxer->audio->id,
                                          MATROSKA_TRACK_AUDIO);
+  if (track && demuxer->a_streams[track->tnum])
+    {
+      demuxer->audio->id = track->tnum;
+      demuxer->audio->sh = demuxer->a_streams[track->tnum];
+    }
   else
     {
       mp_msg (MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_NoAudioTrackFound);
@@ -2534,11 +2539,6 @@ demux_mkv_open (demuxer_t *demuxer)
           continue;
       if(demuxer->a_streams[track->tnum])
         {
-          if(track && mkv_d->tracks[i] == track)
-            {
-              demuxer->audio->id = track->tnum;
-              demuxer->audio->sh = demuxer->a_streams[track->tnum];
-            }
           mkv_d->last_aid++;
           if(mkv_d->last_aid == MAX_A_STREAMS)
             break;
