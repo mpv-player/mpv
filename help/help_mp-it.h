@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r23588
+// Updated to help_mp-en.h r23747
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -233,6 +233,7 @@ static char help_text[]=
 #define MSGTR_Balance "Bilanciamento"
 
 // property state
+#define MSGTR_LoopStatus "Ripetizione: %s"
 #define MSGTR_MuteStatus "Muto: %so"
 #define MSGTR_AVDelayStatus "Ritardo A-V: %s"
 #define MSGTR_OnTopStatus "Resta in primo piano: %so"
@@ -244,6 +245,7 @@ static char help_text[]=
 #define MSGTR_SubPosStatus "Posizione sottotitoli: %s/100"
 #define MSGTR_SubAlignStatus "Allineamento sottotitoli: %s"
 #define MSGTR_SubDelayStatus "Ritardo sottotitoli: %s"
+#define MSGTR_SubScale "Dimensione sottotitoli: %s"
 #define MSGTR_SubVisibleStatus "Sottotitoli: %si"
 #define MSGTR_SubForcedOnlyStatus "Solo sottotitoli forzati: %si"
 
