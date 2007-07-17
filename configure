@@ -3355,21 +3355,6 @@ else
 fi
 echores "$_strsep"
 
-echocheck "fseeko()"
-cat > $TMPC << EOF
-#include <stdio.h>
-int main (void) { int i; i = fseeko(stdin, 0, 0); return 0; }
-EOF
-_fseeko=no
-cc_check && _fseeko=yes
-if test "$_fseeko" = yes ; then
- _def_fseeko='#define HAVE_FSEEKO 1'
- _need_fseeko=no
-else
- _def_fseeko='#undef HAVE_FSEEKO'
- _need_fseeko=yes
-fi
-echores "$_fseeko"
 
 echocheck "vsscanf()"
 cat > $TMPC << EOF
@@ -7426,7 +7411,6 @@ HAVE_XVMC_ACCEL = $_xvmc
 HAVE_SYS_MMAN_H = $_mman
 HAVE_POSIX_SELECT = $_posix_select
 
-NEED_FSEEKO  = $_need_fseeko
 NEED_FTELLO  = $_need_ftello
 NEED_GETTIMEOFDAY    = $_need_gettimeofday
 NEED_GLOB    = $_need_glob
@@ -7798,15 +7782,6 @@ $_def_scandir
 
 /* Define this if your system has strsep */
 $_def_strsep
-
-/* Define this if your system has fseeko */
-$_def_fseeko
-#ifndef HAVE_FSEEKO
-/* Need these for FILE and off_t an config.h is usually before other includes*/
-#include <stdio.h>
-#include <sys/types.h>
-int fseeko(FILE *, off_t, int);
-#endif
 
 /* Define this if your system has vsscanf */
 $_def_vsscanf

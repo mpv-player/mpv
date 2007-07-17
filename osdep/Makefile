@@ -5,7 +5,6 @@ LIBNAME_COMMON = libosdep.a
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += mmap_anon.c
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += macosx_finder_args.c
 
-SRCS_COMMON-$(NEED_FSEEKO)           += fseeko.c
 SRCS_COMMON-$(NEED_FTELLO)           += ftello.c
 SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += gettimeofday.c
 SRCS_COMMON-$(NEED_GLOB)             += glob-win.c
