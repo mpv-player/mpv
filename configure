@@ -3685,7 +3685,7 @@ if test "$_directfb" = auto ; then
 int main(void) { IDirectFB *foo; DirectFBInit(0,0); return 0; }
 EOF
   for _inc_tmp in "" -I/usr/local/include/directfb \
-      -I/usr/include/directfb -I/usr/local/include -I/usr/include; do
+      -I/usr/include/directfb -I/usr/local/include; do
     cc_check $_inc_tmp -ldirectfb && _directfb=yes && \
       _inc_extra="$_inc_extra $_inc_tmp" && break
   done
