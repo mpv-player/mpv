@@ -2521,21 +2521,6 @@ fi
 ######################
 
 
-echocheck "extra headers"
-if test "$_inc_extra" ; then
-  echores "$_inc_extra"
-else
-  echores "none"
-fi
-
-
-echocheck "extra libs"
-if test "$_ld_extra" ; then
-  echores "$_ld_extra"
-else
-  echores "none"
-fi
-
 echocheck "-lposix"
 cat > $TMPC <<EOF
 int main(void) { return 0; }
