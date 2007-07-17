@@ -3748,24 +3748,28 @@ fi
 
 
 echocheck "X11 headers presence"
-  for I in `echo $_inc_extra | sed s/-I//g` /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/include /usr/openwin/include ; do
+  _x11_headers="no"
+  _res_comment="check if the dev(el) packages are installed"
+  for I in `echo $_inc_extra | sed s/-I//g` /usr/include ; do
     if test -f "$I/X11/Xlib.h" ; then
-      _inc_x11="-I$I"
+      _x11_headers="yes"
+      _res_comment=""
+      break
+    fi
+  done
+  for I in /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/openwin/include ; do
+    if test -f "$I/X11/Xlib.h" ; then
+      _inc_extra="$_inc_extra -I$I"
       _x11_headers="yes"
       _res_comment="using $I"
       break
     fi
   done
-  if test -z "$_inc_x11" ; then
-    _x11=no
-    _x11_headers="no"
-    _res_comment="check if the dev(el) packages are installed"
-  fi
 echores "$_x11_headers"
 
 
 echocheck "X11"
-if test "$_x11" != no ; then
+if test "$_x11" = auto && test "$_x11_headers" = yes ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -3778,13 +3782,11 @@ EOF
     else
       _ld_tmp="$I -lXext -lX11 $_ld_pthread"
     fi
-    cc_check $_inc_x11 $_ld_tmp && _libs_mplayer="$_libs_mplayer $_ld_tmp" \
+    cc_check $_ld_tmp && _libs_mplayer="$_libs_mplayer $_ld_tmp" \
                       && _x11=yes && break
   done
 fi
 if test "$_x11" = yes ; then
-  #FIXME: This is ugly as it can duplicate a -I parameter..
-  _inc_extra="$_inc_extra $_inc_x11"
   _def_x11='#define HAVE_X11 1'
   _vosrc="$_vosrc x11_common.c vo_x11.c vo_xover.c"
   _vomodules="x11 xover $_vomodules"
