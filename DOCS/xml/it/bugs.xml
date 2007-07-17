@@ -36,7 +36,7 @@
 <listitem>
   <para>Va in crash durante la scrittura grezza (dump) dei flussi:</para>
   <para>Problema: core dump</para>
-  <para>Soluzione: Don't panic. Assicurati di sapere dov'è il tuo
+  <para>Soluzione: Niente panico. Accertati di sapere dov'è il tuo
   asciugamano.</para>
 </listitem>
 </itemizedlist>
