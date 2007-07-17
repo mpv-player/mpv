@@ -568,7 +568,7 @@ _xanim=auto
 _real=auto
 _live=auto
 _xinerama=auto
-_mga=auto
+_mga=yes
 _xmga=auto
 _vm=auto
 _xf86keysym=auto
@@ -4134,10 +4134,6 @@ fi
 
 
 echocheck "/dev/mga_vid"
-if test "$_mga" = auto ; then
-  _mga=no
-  test -c /dev/mga_vid && _mga=yes
-fi
 if test "$_mga" = yes ; then
   _def_mga='#define HAVE_MGA 1'
   _vosrc="$_vosrc vo_mga.c"
@@ -4304,7 +4300,7 @@ echores "$_svga"
 echocheck "FBDev"
 if test "$_fbdev" = auto ; then
   _fbdev=no
-  linux && test -c /dev/fb0 && _fbdev=yes
+  linux && _fbdev=yes
 fi
 if test "$_fbdev" = yes ; then
   _def_fbdev='#define HAVE_FBDEV 1'
