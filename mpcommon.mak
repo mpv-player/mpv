@@ -8,7 +8,7 @@ OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
 
 CFLAGS-$(LIBAVCODEC)     += -I../libavcodec
 CFLAGS-$(LIBAVFORMAT)    += -I../libavformat
-CFLAGS += $(OPTFLAGS) $(CFLAGS-yes) 
+CFLAGS += $(CFLAGS-yes) $(OPTFLAGS)
 
 LIBS-$(MPLAYER)  += $(LIBNAME_MPLAYER)
 LIBS-$(MENCODER) += $(LIBNAME_MENCODER)
