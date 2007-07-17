@@ -7128,23 +7128,6 @@ else
   echores "no"
 fi
 
-echocheck "ftello()"
-# if we don't have ftello use the osdep/ compatibility module
-cat > $TMPC << EOF
-#include <stdio.h>
-#include <sys/types.h>
-int main (void) { ftello(stdin); return 0; }
-EOF
-_ftello=no
-cc_check && _ftello=yes
-if test "$_ftello" = yes ; then
- _def_ftello='#define HAVE_FTELLO 1'
- _need_ftello=no
-else
- _def_ftello='#undef HAVE_FTELLO'
- _need_ftello=yes
-fi
-echores "$_ftello"
 
 # Dynamic linking flags 
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
@@ -7411,7 +7394,6 @@ HAVE_XVMC_ACCEL = $_xvmc
 HAVE_SYS_MMAN_H = $_mman
 HAVE_POSIX_SELECT = $_posix_select
 
-NEED_FTELLO  = $_need_ftello
 NEED_GETTIMEOFDAY    = $_need_gettimeofday
 NEED_GLOB    = $_need_glob
 NEED_SCANDIR = $_need_scandir
@@ -7733,16 +7715,6 @@ $_def_soundcard
 
 /* Define this if your system has the sysinfo header */
 $_def_sys_sysinfo
-
-/* Define this if your system has ftello() */
-
-$_def_ftello
-#ifndef HAVE_FTELLO
-/* Need these for FILE and off_t an config.h is usually before other includes*/
-#include <stdio.h>
-#include <sys/types.h>
-off_t ftello(FILE *);
-#endif
 
 /* Define this if your system has the "malloc.h" header file */
 $_def_malloc
