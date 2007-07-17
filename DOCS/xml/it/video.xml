@@ -8,7 +8,7 @@
 
 <para>
 Si consiglia vivamente di controllare che i registri MTRR siano impostati
-correttamente, poiché possono aumentare di molto le prestazioni.
+correttamente, al fine di migliorare molto le prestazioni.
 </para>
 
 <para>
@@ -110,7 +110,7 @@ Per far sì che funzioni, assicurati di controllare le seguenti:
   Che tu usi XFree86 4.0.2 o superiore (le versioni precedenti non hanno XVideo)
 </para></listitem>
 <listitem><para>
-  Che la tua scheda supporti l'accellerazione hardware (le schede moderne
+  Che la tua scheda supporti l'accelerazione hardware (le schede moderne
   la supportano)
 </para></listitem>
 <listitem><para>
@@ -120,7 +120,7 @@ Per far sì che funzioni, assicurati di controllare le seguenti:
   <note><para>
    Questo carica solo l'estensione per XFree86. In una buona installazione
    viene sempre caricata, e non significa che il supporto per l'XVideo della
-   <emphasis role="bold">scheda</emphasis> sia supportato!
+   <emphasis role="bold">scheda</emphasis> sia presente!
   </para></note>
 </para></listitem>
 <listitem><para>
@@ -170,13 +170,13 @@ screen #0
 <title>Schede 3dfx</title>
 
 <para>
-I vecchi driver 3dfx erano conosciuti per aver problemi con l'accellerazione
-XVideo, non supportavano gli spazi colore YUY2 o YV12. Verifica di avere XFree86
-4.2.0 o superiore, può gestire YV12 e YUY2, mentre le versioni precedenti,
-4.1.0 incluso, <emphasis role="bold">vanno in crash con YV12</emphasis>.
-Se hai degli strani risultati usando <option>-vo xv</option>, prova SDL
-(anch'essa ha XVideo) e vedi se aiuta. Controlla la sezione su
-<link linkend="sdl">SDL</link> per i dettagli.
+I vecchi driver 3dfx avevano notoriamente dei problemi con l'accelerazione
+XVideo, non erano compatibili con gli spazi colore YV12 e YUY2. Verifica di
+avere XFree86 4.2.0 o superiore, può gestire YV12 e YUY2, mentre le versioni
+precedenti, 4.1.0 incluso,
+<emphasis role="bold">vanno in crash con YV12</emphasis>. Se hai degli strani
+risultati usando <option>-vo xv</option>, prova SDL (anch'essa ha XVideo) e vedi
+se aiuta. Controlla la sezione su <link linkend="sdl">SDL</link> per i dettagli.
 </para>
 
 <para>
@@ -208,7 +208,7 @@ aiutano).
 <note><para>
 Non è ben chiaro il perché i modelli Savage non abbiano il supporto YV12 e
 facciano la conversione con il driver (lento). Se pensi sia colpa della scheda,
-cerca un driver più nuovo, o chiedi gentilmente di un driver abilitato
+cerca un driver più recente, o chiedi gentilmente di un driver abilitato
 MMX/3DNow! sulla mailing list MPlayer-users.
 </para></note>
 </sect2>
@@ -218,11 +218,12 @@ MMX/3DNow! sulla mailing list MPlayer-users.
 <title>Schede nVidia</title>
 
 <para>
-nVidia non è sempre una scelta molto buona sotto Linux ... Il driver
+nVidia non è sempre una scelta molto buona sotto Linux... Il driver
 open-source di XFree86 supporta la maggior parte di queste schede, ma in alcuni
-casi, dovrai usare il driver a sorgenti chiusi di nVidia, disponibile sul
+casi, dovrai usare il driver proprietario a sorgenti chiusi di nVidia,
+disponibile sul
 <ulink url="http://www.nvidia.com/object/linux.html">sito nVidia</ulink>.
-Ti servirà sempre questo driver anche se vuoi l'accellerazione 3D.
+Ti servirà sempre questo driver anche se vuoi l'accelerazione 3D.
 </para>
 
 <para>
@@ -234,7 +235,7 @@ Lamentati con nVidia.
 <para>
 Tuttavia, <application>MPlayer</application> contiene un driver
 <link linkend="vidix">VIDIX</link> per la maggior parte delle schede nVidia.
-Attualmente è a livello di sviluppo beta, e ha alcuni problemi. Per
+Attualmente è a livello di sviluppo beta e ha alcuni problemi. Per
 ulteriori informazioni, vedi la sezione
 <link linkend="vidix-nvidia">VIDIX nVidia</link>.
 </para>
@@ -257,7 +258,7 @@ impostare la frequenza di aggiornamento a n*(fps del film) Hz.
 Read the <link linkend="vidix">VIDIX</link> section.
 Radeon VE - se ti serve X, per questa scheda usa XFree86 4.2.0 o superiore.
 Il TV out non è supportato. Ovviamente con <application>MPlayer</application>
-puoi felicemente avere un display <emphasis role="bold">accellerato</emphasis>,
+puoi felicemente avere un display <emphasis role="bold">accelerato</emphasis>,
 con o senza l'<emphasis role="bold">uscita TV</emphasis>, e non servono
 librerie né X.
 Leggi la sezione <link linkend="vidix">VIDIX</link>.
@@ -279,7 +280,7 @@ Scegli semplicemente quello che ti serve in base alla tua versione di XFree86.
 <para>
 XFree86 4.3.0 include il supporto per Xv, caomunque Bohdan Horst ha postato
 una piccola <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</ulink> ai sorgenti di XFree86 che velocizza fino a
-quattro volte tanto le operazioni sul framebuffer (quindi XVideo).
+quattro volte le operazioni sul framebuffer (quindi XVideo).
 La patch è stata poi incorporata in XFree86 CVS e dovrebbe esserci nei rilasci
 successivi al 4.3.0.
 </para>
@@ -345,7 +346,7 @@ fare (e cosa no) il driver di uscita video DGA di
 <para>
 <acronym>DGA</acronym> è il nome breve di <emphasis>Direct Graphics
 Access</emphasis> (accesso grafico diretto) ed è un modo per fa sì
-che un programma oltrepassi l'X server e modifichi direttamente la memoria
+che un programma scavalchi l'X server e modifichi direttamente la memoria
 del framebuffer. In termini tecnici la memoria del framebuffer viene
 rimappata nello spazio di memoria del tuo processo.
 Questo è permesso dal kernel solo se hai provilegi di superutente. Puoi averli
@@ -367,9 +368,9 @@ XVidMode.
 
 <para>
 DGA2 include le funzionalità dell'estensione XVidMode e inoltre permette la
-modifica della profondità colore del display. Così, anche se stai facendo
+modifica della profondità di colore del display. Così, anche se stai facendo
 girare un X server con profondità di 32 bit, puoi passare a una di 15 e
-__viceversa__.
+viceversa.
 </para>
 
 <para>
@@ -922,7 +923,7 @@ immagini di 256x256 sullo schermo.
 
 <para>
 Questo driver usa il driver tdfx del kernel per il framebuffer per riprodurre
-filmati con accellerazione YUV. Ti serve un kernel con supporto per tdfxfb e
+filmati con accelerazione YUV. Ti serve un kernel con supporto per tdfxfb e
 ricompilare con
 <screen>./configure --enable-tdfxfb</screen>
 </para>
@@ -1310,7 +1311,7 @@ stante).
 </para></listitem>
 <listitem><para>
   Con esso puoi usare VIDIX, potendo ottenere contemporaneamente un'uscita
-  video accellerata <emphasis role="bold">e</emphasis> e l'uscita TV!
+  video accelerata <emphasis role="bold">e</emphasis> e l'uscita TV!
   (consigliato per schede ATI)
   </para></listitem>
 <listitem><para>
@@ -1397,46 +1398,49 @@ Non funzionerà!
 <title>X11</title>
 
 <para>
-Avoid if possible. Outputs to X11 (uses shared memory extension), with no
-hardware acceleration at all. Supports (MMX/3DNow/SSE accelerated, but
-still slow) software scaling, use the options <option>-fs -zoom</option>.
-Most cards have hardware scaling support, use the <option>-vo xv</option>
-output for them, or <option>-vo xmga</option> for Matrox cards.
+Da evitare se possibile. Uscita su X11 (utilizza l'estensione della memoria
+condivisa), senza alcuna accelerazione hardware. Gestisce il ridimensionamento
+software (accelerato MMX/3DNow/SSE, ma sempre lento), usa le opzioni
+<option>-fs -zoom</option>. La maggior parte delle schede gestisce un
+ridimensionamento hardware, usa per queste l'uscita <option>-vo xv</option>,
+oppure <option>-vo xmga</option> per le schede Matrox.
 </para>
 
 <para>
-The problem is that most cards' driver doesn't support hardware
-acceleration on the second head/TV. In those cases, you see green/blue
-colored window instead of the movie. This is where this driver comes in
-handy, but you need powerful CPU to use software scaling. Don't use the SDL
-driver's software output+scaler, it has worse image quality!
+Il problema è che i driver di molte schede non supportano l'accelerazione
+hardware sulla seconda uscita o TV. In quei casi, vedi delle finestre blu/verdi
+al posto del film. In questi casi torna utile questo driver, ma ti serve una
+CPU potente per effettuare il ridimensionamento software. Non usare il driver
+di uscita SDL + ridimensionamento software, ha una peggior qualità
+dell'immagine.
 </para>
 
 <para>
-Software scaling is very slow, you better try changing video modes instead.
-It's very simple. See the <link linkend="dga-modelines">DGA section's
-modelines</link>, and insert them into your <filename>XF86Config</filename>.
+Il ridimensionamento software è molto lento, ti conviene piuttosto cambiare la
+modalità video. E' molto facile. Guarda le
+<link linkend="dga-modelines">modeline della sezione DGA</link>, e inseriscile
+nel tuo <filename>XF86Config</filename>.
 
 <itemizedlist spacing="compact">
 <listitem><para>
-  If you have XFree86 4.x.x: use the <option>-vm</option> option. It will
-  change to a resolution your movie fits in. If it doesn't:
+  Se hai XFree86 4.x.x: usa l'opzione <option>-vm</option>. Passerà alla
+  risoluzione che meglio si adatta al tuo film. Se non lo fa:
 </para></listitem>
 <listitem><para>
   With XFree86 3.x.x: you have to cycle through available resolutions
-  with the
+  Con XFree86 3.x.x: devi passare attraverso le risoluzioni disponibili con i
+  tasti
   <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad +</keycap></keycombo>
-  and
-  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>
-  keys.
+  e
+  <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>.
 </para></listitem>
 </itemizedlist>
 </para>
 
 <para>
-If you can't find the modes you inserted, browse XFree86's output. Some
-drivers can't use low pixelclocks that are needed for low resolution
-video modes.
+Se non trovi le modalità che hai aggiunto, controlla l'emissione di XFree86.
+Alcuni driver non possono usare dei pixelclock che servono per modalità a
+bassa risoluzione.
 </para>
 </sect1>
 
@@ -1445,247 +1449,253 @@ video modes.
 <sect1 id="vidix">
 <title>VIDIX</title>
 
-<formalpara><title>PREAMBLE</title>
+<formalpara><title>PREAMBOLO</title>
 <para>
-<acronym>VIDIX</acronym> is the abbreviation for
+<acronym>VIDIX</acronym> è un nome breve che sta per 
 <emphasis role="bold">VID</emphasis>eo
 <emphasis role="bold">I</emphasis>nterface
-for *ni<emphasis role="bold">X</emphasis>.
-VIDIX was designed and introduced as an interface for fast user-space drivers
-providing such video performance as mga_vid does for Matrox cards. It's also
-very portable.
+per *ni<emphasis role="bold">X</emphasis>.
+VIDIX è stato progettato ed introdotto com un'interfaccia per driver veloci
+nello spazio utente, fornendo delle prestazioni video come quelle che fornisce
+mga_vid per le schede Matrox. E' anche molto portabile.
 </para>
 </formalpara>
 
 <para>
-This interface was designed as an attempt to fit existing video
-acceleration interfaces (known as mga_vid, rage128_vid, radeon_vid,
-pm3_vid) into a fixed scheme. It provides a high level interface to chips
-which are known as BES (BackEnd scalers) or OV (Video Overlays). It doesn't
-provide low level interface to things which are known as graphics servers.
-(I don't want to compete with X11 team in graphics mode switching). I.e.
-main goal of this interface is to maximize the speed of video playback.
+Quest'interfaccia è stata progettata come un tentativo di riunire le
+interfacce di accelerazione video già esistenti (conosciute come mga_vid,
+rage128_vid, radeon_vid, pm3_vid) in uno schema fissato. Fornisce un'interfaccia
+di alto livello a chip conosciuti come BES (BackEnd scalers) o OV (Video
+Overlays). Non fornisce un'interfaccia a basso livello a cose conosciute come
+server grafici (non voglio entrare in competizione con il gruppo di X11 per le
+modifiche alla modalità grafica). Per es. l'obiettivo principale di
+quest'intarfaccia è quello di velocizzare la riproduzione video.
 </para>
 
 <itemizedlist spacing="compact">
-<title>USAGE</title>
+<title>USO</title>
 <listitem><para>
-  You can use standalone video output driver: <option>-vo xvidix</option>.
-  This driver was developed as X11's front end to VIDIX technology. It
-  requires X server and can work only under X server. Note that, as it directly
-  accesses the hardware and circumvents the X driver, pixmaps cached in the
-  graphics card's memory may be corrupted. You can prevent this by limiting
-  the amount of video memory used by X with the XF86Config option "VideoRam"
-  in the device section. You should set this to the amount of memory installed
-  on your card minus 4MB. If you have less than 8MB of video ram, you can use
-  the option "XaaNoPixmapCache" in the screen section instead.
+  Puoi usare un driver di uscita video a sé stante: <option>-vo xvidix</option>.
+  Questo driver è stato sviluppato come un front-end tra X11 e la tecnologia
+  VIDIX. Richiede l'X server e può funzionare solo dentro all'X server stesso.
+  Nota che, visto che accede direttamente all'hardware e oltrepassa il driver X,
+  le immagini memorizzate nella memoria della scheda video possono venir
+  corrotte. Puoi evitarlo limitando la dimensione della memoria video usata da
+  X con l'opzine "VideoRam" nella sezione device di XF86Config. Dovresti
+  impostare tale opzione alla quantità di memoria della tua scheda meno 4MB.
+  Se hai meno di 8MB di ram video, puoi usare invece l'opzione
+  "XaaNoPixmapCache" nella sezione screen.
 </para></listitem>
 <listitem>
   <para>
-  There is a console VIDIX driver: <option>-vo cvidix</option>.
-  This requires a working and initialized framebuffer for most cards (or else
-  you'll just mess up the screen), and you'll have a similar effect as with
-  <option>-vo mga</option> or <option>-vo fbdev</option>. nVidia cards however
-  are able to output truly graphical video on a real text console. See the
-  <link linkend="vidix-nvidia">nvidia_vid</link> section for more information.
-  To get rid of text on the borders and the blinking cursor, try something like
+  C'è poi un driver VIDIX per la console: <option>-vo cvidix</option>.
+  Questo richiede per la maggior parte delle schede un framebuffer
+  inizializzato e funzionante  (altrimenti incasinerai solamente lo schermo), e
+  otterrai un effetto simile a <option>-vo mga</option> o
+  <option>-vo fbdev</option>. Le schede nVidia tuttavia sono in grado di
+  emettere video completamente grafico su vere console di testo. Vedi la sezione
+  <link linkend="vidix-nvidia">nvidia_vid</link> per ulteriori informazioni.
+  Per evitare il testo sui bordi e il cursore lampeggiante, prova qualcosa tipo
   </para>
 
   <screen>setterm -cursor off > /dev/tty9</screen>
 
   <para>
-  (assuming <systemitem>tty9</systemitem> is unused so far) and then
-  switch to <systemitem>tty9</systemitem>.
-  On the other hand, <option>-colorkey 0</option> should give you a video
-  running in the "background", though this depends on the colorkey
-  functionality to work right.
+  (presumendo che <systemitem>tty9</systemitem> non venga utilizzata) e poi
+  passa a <systemitem>tty9</systemitem>.
+  D'altro canto, <option>-colorkey 0</option> dovrebbe mostrarti il video sullo
+  "sfondo", anche se questo dipende dal fatto che colorkey funzioni bene o no.
   </para>
 </listitem>
 <listitem><para>
-  You can use VIDIX subdevice which was applied to several video output
-  drivers, such as: <option>-vo vesa:vidix</option>
-  (<emphasis role="bold">Linux only</emphasis>) and
+  Puoi usare un sotto-dispositivo VIDIX che sia stato applicato a vari driver
+  di uscita video, così: <option>-vo vesa:vidix</option>
+  (<emphasis role="bold">solo per Linux</emphasis>) e
   <option>-vo fbdev:vidix</option>.
 </para></listitem>
 </itemizedlist>
 
 <para>
-Indeed it doesn't matter which video output driver is used with
+In verità non conta quale driver di uscita video venga usato con
 <emphasis role="bold">VIDIX</emphasis>.
 </para>
 
 <itemizedlist spacing="compact">
-<title>REQUIREMENTS</title>
+<title>PREREQUISITI</title>
 <listitem><para>
-  Video card should be in graphics mode (except nVidia cards with the
-  <option>-vo cvidix</option> output driver).
+  La scheda video dovrebbe essere in modalità grafica (tranne le schede nVidia
+  con il driver di uscita <option>-vo cvidix</option>).
 </para></listitem>
 <listitem><para>
-  <application>MPlayer</application>'s video output driver should know
-  active video mode and be able to tell to VIDIX subdevice some video
-  characteristics of server.
+  Il driver di uscita video di <application>MPlayer</application> dovrebbe
+  conoscere la modalità video attiva ed essere in grado di fornire al
+  sotto-dispositivo VIDIX alcune caratteristiche video del server.
 </para></listitem>
 </itemizedlist>
 
-<formalpara><title>USAGE METHODS</title>
+<formalpara><title>MODI DI UTILIZZO</title>
 <para>
-When VIDIX is used as <emphasis role="bold">subdevice</emphasis> (<option>-vo
-vesa:vidix</option>) then video mode configuration is performed by video
-output device (<emphasis role="bold">vo_server</emphasis> in short). Therefore you can
-pass into command line of <application>MPlayer</application> the same keys
-as for vo_server. In addition it understands <option>-double</option> key
-as globally visible parameter. (I recommend using this key with VIDIX at
-least for ATI's card). As for <option>-vo xvidix</option>, currently it
-recognizes the following options: <option>-fs -zoom -x -y -double</option>.
+Quando VIDIX viene usato come un
+<emphasis role="bold">sotto-dispositivo</emphasis> (<option>-vo
+vesa:vidix</option>) allora la configurazione della modalità video viene
+eseguita dal dispositivo di uscita video
+(<emphasis role="bold">vo_server</emphasis>, in breve). Perciò puoi passare
+sulla riga comando di <application>MPlayer</application> le stesse chiavi per
+vo_server. Inoltre accetta <option>-double</option> come un parametro globale
+(si consiglia di usare questa opzione con VIDIX almeno per le schede ATI).
+Come <option>-vo xvidix</option>, attualmente riconosce le seguenti opzioni:
+<option>-fs -zoom -x -y -double</option>.
 </para>
 </formalpara>
 
 <para>
-Also you can specify VIDIX's driver directly as third subargument in
-command line:
+Poi puoi specificare il driver VIDIX direttamente sulla riga comando come una
+terza sotto-opzione:
 <screen>
 mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>file.avi</replaceable>
 </screen>
-or
+o
 <screen>
 mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>file.avi</replaceable>
 </screen>
-But it's dangerous, and you shouldn't do that. In this case given driver
-will be forced and result is unpredictable (it may
-<emphasis role="bold">freeze</emphasis> your computer). You should do that
-ONLY if you are absolutely sure it will work, and
-<application>MPlayer</application> doesn't do it automatically. Please tell
-about it to the developers. The right way is to use VIDIX without arguments
-to enable driver autodetection.
+ma è pericoloso e non dovresti farlo. In questo caso il driver indicato verrà
+forzato e i risultati sono imprevedibili (potrebbe mandarti il computer in
+<emphasis role="bold">freeze</emphasis>). Dovresti farlo SOLO se sei
+assolutamente sicuro che funzionerà e <application>MPlayer</application> non
+lo farà automaticamente. Per favore dillo agli sviluppatori. Il modo corretto
+è utilizzare VIDIX senza argomenti per abilitare la rilevazione automatica del
+driver.
 </para>
 
 <para>
-Since VIDIX requires direct hardware access you can either run it as root
-or set the SUID bit on the <application>MPlayer</application> binary
-(<emphasis role="bold">Warning: This is a security risk!</emphasis>).
-Alternatively, you can use a special kernel module, like this:
+Visto che VIDIX richiede un accesso diretto all'hardware puoi sia eseguirlo come
+root, sia impostare il bit SUID sull'eseguibile di
+<application>MPlayer</application>.
+(<emphasis role="bold">Attenzione: questo è un rischio di sicurezza!</emphasis>)
+Alternativamente puoi usare uno modulo del kernel speciale, come questo:
 </para>
 
 <procedure>
 <step><para>
-  Download the
-  <ulink url="http://www.arava.co.il/matan/svgalib/">development version</ulink>
-  of svgalib (for example 1.9.17), <emphasis role="bold">OR</emphasis>
-  download a version made by Alex especially for usage with
-  <application>MPlayer</application> (it doesn't need the svgalib source to
-  compile) from
-  <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">here</ulink>.
+  Scarica la <ulink url="http://www.arava.co.il/matan/svgalib/">versione di
+  sviluppo</ulink> di svgalib (per esempio la 1.9.17),
+  <emphasis role="bold">OPPURE</emphasis> scarica una versione fatta da Alex
+  appositamente per essere usata con <application>MPlayer</application> (non ha
+  bisogno dei sorgenti di svgalib per la compilazione) da
+  <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9
+  .17-mplayer.tar.bz2">qui</ulink>.
 </para></step>
 <step><para>
-  Compile the module in the
-  <filename class="directory">svgalib_helper</filename> directory (it can be
-  found inside the
-  <filename class="directory">svgalib-1.9.17/kernel/</filename> directory if
-  you've downloaded the source from the svgalib site) and insmod it.
+  Compila il modulo nella directory
+  <filename class="directory">svgalib_helper</filename> (si trova dentro la
+  directory <filename class="directory">svgalib-1.9.17/kernel/</filename> se hai
+  scaricato i sorgenti dal sito di svgalib) e caricalo nel kernel.
 </para></step>
 <step><para>
-  To create the necessary devices in the
-  <filename class="directory">/dev</filename> directory, do a
-  <screen>make device</screen> in the
-  <filename class="directory">svgalib_helper</filename> dir, as root.
+  Per creare i dispositivi necessari nella directory
+  <filename class="directory">/dev</filename>, esegui, come root,
+  <screen>make device</screen> nella directory
+  <filename class="directory">svgalib_helper</filename>.
 </para></step>
 <step><para>
-  Move the <filename class="directory">svgalib_helper</filename> directory to
-  the <filename class="directory">vidix</filename> subdirectory of the
-  <application>MPlayer</application> source tree.
+  Sposta la directory <filename class="directory">svgalib_helper</filename>
+  nella sotto-directory <filename class="directory">vidix</filename> nei
+  sorgenti di <application>MPlayer</application>.
 </para></step>
 <step><para>
-  Remove the comment before the CFLAGS line containing the "svgalib_helper"
-  string from <filename class="directory">vidix/Makefile</filename>.
+  Togli il commento prima della riga con CFLAGS che contiene "svgalib_helper"
+  dal file <filename class="directory">vidix/Makefile</filename>.
 </para></step>
 <step><para>
-  Recompile.
+  Ricompila.
 </para></step>
 </procedure>
 
 
 <sect2 id="vidix-ati">
-<title>ATI cards</title>
+<title>Schede ATI</title>
 
 <para>
-Currently most ATI cards are supported natively, from Mach64 to the
-newest Radeons.
+Attualmente la maggior parte delle schede ATI è supportata nativamente, dalle
+Mach64 alle più recenti Radeon.
 </para>
 
 <para>
-There are two compiled binaries: <filename>radeon_vid</filename> for Radeon and
-<filename>rage128_vid</filename> for Rage 128 cards. You may force one or let
-the VIDIX system autoprobe all available drivers.
+Ci sono due binari compilati: <filename>radeon_vid</filename> per le Radeon e
+<filename>rage128_vid</filename> per le schede Rage 128. Puoi forzare
+l'utilizzo di uno dei due, oppure lasciare che il sistema VIDIX provi tutti i
+driver disponibili.
 </para>
 </sect2>
 
 
 <sect2 id="vidix-mga">
-<title>Matrox cards</title>
+<title>Schede Matrox</title>
 
 <para>
-Matrox G200, G400, G450 and G550 have been reported to work.
+Le Matrox G200, G400, G450 and G550 sono state riportate come funzionanti.
 </para>
 
 <para>
-The driver supports video equalizers and should be nearly as fast as the
-<link linkend="mga_vid">Matrox framebuffer</link>
+Il driver supporta gli equalizzatori video e dovrebbe essere veloce quasi quanto
+il <link linkend="mga_vid">framebuffer Matrox</link>.
 </para>
 </sect2>
 
 
 <sect2 id="vidix-trident">
-<title>Trident cards</title>
+<title>Schede Trident</title>
 
 <para>
-There is a driver available for the Trident Cyberblade/i1 chipset, which
-can be found on VIA Epia motherboards.
+C'è un driver disponibile per il chipset Trident Cyberblade/i1, che si può
+trovare sulle schede madri VIA Epia.
 </para>
 
 <para>
-The driver was written and is maintained by
+Il driver è scritto e mantenuto da
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>.
 </para>
 </sect2>
 
 
 <sect2 id="vidix-3dlabs">
-<title>3DLabs cards</title>
+<title>Schede 3DLabs</title>
 
 <para>
-Although there is a driver for the 3DLabs GLINT R3 and Permedia3 chips, no one
-has tested it, so reports are welcome.
+Anche se esiste un driver per i chip 3DLabs GLINT R3 e Permedia3, nessuno lo ha
+provato, perciò delle informazioni sono benvenute.
 </para>
 </sect2>
 
 
 <sect2 id="vidix-nvidia">
-<title>nVidia cards</title>
+<title>Schede nVidia</title>
 
 <para>
-An unique feature of the nvidia_vid driver is its ability to display video on
-<emphasis role="bold">plain, pure, text-only console</emphasis> - with no
-framebuffer or X magic whatsoever. For this purpose, we'll have to use the
-<option>cvidix</option> video output, as the following example shows:
-<screen>mplayer -vo cvidix <replaceable>example.avi</replaceable></screen>
+Una caratteristica unica del driver nvidia_vid è la sua abilità nel mostrare
+video su di una
+<emphasis role="bold">semplice, pura, console di testo</emphasis> - senza alcun
+framebuffer o qualche magia di X. Per questo fine, dovremo usare il driver di
+uscita video <option>cvidix</option>, come mostrato nell'esempio che segue:
+<screen>mplayer -vo cvidix <replaceable>esempio.avi</replaceable></screen>
 </para>
 </sect2>
 
 
 <sect2 id="vidix-sis">
-<title>SiS cards</title>
+<title>Schede SiS</title>
 
 <para>
-This is very experimental code, just like nvidia_vid.
+Questo codice è davvero sperimentale, proprio come nvidia_vid.
 </para>
 
 <para>
-It's been tested on SiS 650/651/740 (the most common chipsets used in the
-SiS versions of the "Shuttle XPC" barebones boxes out there)
+E' stato testato su SiS 650/651/740 (i chipset più diffusi usati nelle versioni
+SiS dello "Shuttle XPC").
 </para>
 
 <para>
-Reports awaited!
+Si attendono resoconti!
 </para>
 </sect2>
 </sect1>
@@ -1698,24 +1708,26 @@ Reports awaited!
 <blockquote><para>
 "DirectFB is a graphics library which was designed with embedded systems
 in mind. It offers maximum hardware accelerated performance at a minimum
-of resource usage and overhead." - quoted from
+of resource usage and overhead." - citazione da
 <ulink url="http://www.directfb.org"/>
 </para></blockquote>
 
 <para>I'll exclude DirectFB features from this section.</para>
+<para>Ometterò le caratteristiche di DirectFB da questa sezione.</para>
 
 <para>
-Though <application>MPlayer</application> is not supported as a "video
-provider" in DirectFB, this output driver will enable video playback
-through DirectFB. It will - of course - be accelerated, on my Matrox G400
-DirectFB's speed was the same as XVideo.
+Anche se <application>MPlayer</application> non è supportato come un "provider
+video" in DirectFB, questo driver di uscita video abiliterà la riproduzione
+video tramite DirectFB. Sarà - ovviamente - accelerata, la velocità di
+DirectFB sulla mia Matrox G400 è la stessa di XVideo.
 </para>
 
 <para>
-Always try to use the newest version of DirectFB. You can use DirectFB options
-on the command line, using the <option>-dfbopts</option> option. Layer
-selection can be done by the subdevice method, e.g.:
-<option>-vo directfb:2</option> (layer -1 is default: autodetect)
+Cerca sempre di utilizzare la versione più recente di DirectFB. Sulla riga
+comando puoi usare le opzioni di DirectFB, usando <option>-dfbopts</option>.
+La scelta del livello può essere fatta con il metodo del sotto-dispositivo,
+per es.:
+<option>-vo directfb:2</option> (il livello -1 è il default: autorilevazione)
 </para>
 </sect1>
 
@@ -1725,30 +1737,31 @@ selection can be done by the subdevice method, e.g.:
 <title>DirectFB/Matrox (dfbmga)</title>
 
 <para>
-Please read the <link linkend="directfb">main DirectFB</link> section for
-general information.
+Leggi per favore la sezione <link linkend="directfb">principale di DirectFB</link>
+per le informazioni generali.
 </para>
 
 <para>
-This video output driver will enable CRTC2 (on the second head) on Matrox
-G400/G450/G550 cards, displaying video
-<emphasis role="bold">independent</emphasis> of the first head.
+Questo driver di uscita video abiliterà il CRTC2 (sulla seconda uscita) delle
+schede Matrox G400/G450/G550, mostrando il video
+<emphasis role="bold">independentemente</emphasis> rispetto alla prima uscita.
 </para>
 
 <para>
-Ville Syrjala's has a
+Ville Syrjala's ha un
 <ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">README</ulink>
-and a
+e un
 <ulink url="http://www.sci.fi/~syrjala/directfb/matrox-tv-out-howto">HOWTO</ulink>
-on his homepage that explain how to make DirectFB TV output run on Matrox cards.
+sul suo sito, che spiegano come far funzionare l'uscita TV DirectFB sulle schede
+Matrox.
 </para>
 
 <note><para>
-the first DirectFB version with which we could get this working was
-0.9.17 (it's buggy, needs that <systemitem>surfacemanager</systemitem>
-patch from the URL above). Porting the CRTC2 code to
-<link linkend="mga_vid">mga_vid</link> has been planned for years,
-<ulink url="../../tech/patches.txt">patches</ulink> are welcome.
+La prima versione di DirectFB con cui siamo riusciti a farlo funzionare è la
+0.9.17 (ha problemi, gli serve la patch <systemitem>surfacemanager</systemitem>
+dal sito suddetto). Portare il codice per CRTC2 in
+<link linkend="mga_vid">mga_vid</link> è in progetto da anni,
+sono benvenute delle <ulink url="../../tech/patches.txt">patch</ulink>.
 </para></note>
 </sect1>
 
@@ -1757,32 +1770,32 @@ patch from the URL above). Porting the CRTC2 code to
 
 
 <sect1 id="mpeg_decoders">
-<title>MPEG decoders</title>
+<title>Decodificatori MPEG</title>
 
 <sect2 id="dvb">
-<title>DVB output and input</title>
+<title>Uscita e ingresso DVB</title>
 
 <para>
-<application>MPlayer</application> supports cards with the Siemens DVB chipset
-from vendors like Siemens, Technotrend, Galaxis or Hauppauge. The latest DVB
-drivers are available from the
-<ulink url="http://www.linuxtv.org">Linux TV site</ulink>.
-If you want to do software transcoding you should have at least a 1GHz CPU.
+<application>MPlayer</application> supporta le schede con chipset DVB Siemens
+di produttori come Siemens, Technotrend, Galaxis o Hauppauge. I driver DVB più
+recenti sono disponibili sul
+<ulink url="http://www.linuxtv.org">sito di Linux TV</ulink>.
+Se vuoi eseguire la transcodifica software dovresti avere almeno una CPU a 1GHz.
 </para>
 
 <para>
-Configure should detect your DVB card. If it did not, force detection with
+Configure dovrebbe rilevare la tua scheda DVB. Se non lo fa, forzalo con
 <screen>./configure --enable-dvb</screen>
-If you have ost headers at a non-standard path, set the path with
+Se hai gli header ost in un percorso non standard, imposta il percorso con
 <screen>
-./configure --with-extraincdir=<replaceable>DVB source directory</replaceable>/ost/include
+./configure --with-extraincdir=<replaceable>directory sorgenti DVB</replaceable>/ost/include
 </screen>
-Then compile and install as usual.</para>
+Poi compila ed installa come al solito.</para>
 
-<formalpara><title>USAGE</title>
+<formalpara><title>USO</title>
 <para>
-Hardware decoding of streams containing MPEG-1/2 video and/or MPEG audio can be done with this
-command:
+La decodifica hardware di flussi contententi video MPEG-1/2 e/o audio MPEG puà
+essere effettuata con questo comando:
 <screen>
 mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable>
 </screen>
@@ -1790,181 +1803,186 @@ mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable>
 </formalpara>
 
 <para>
-Decoding of any other type of video stream requires transcoding to MPEG-1, thus it's slow
-and may not be worth the trouble, especially if your computer is slow.
-It can be achieved using a command like this:
+La decodfica di qualsiasi altro tipo di flusso video richiede la transcodifica
+in MPEG-1, indi è lenta a potrebbe non valerne la pena, specialmente se il tuo
+computer è lento.
+Si puà ottenere usando un comando come questo:
 <screen>
-mplayer -ao mpegpes -vo mpegpes <replaceable>yourfile.ext</replaceable>
-mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>yourfile.ext</replaceable>
+mplayer -ao mpegpes -vo mpegpes <replaceable>tuofile.ext</replaceable>
+mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>tuofile.ext</replaceable>
 </screen></para>
 
 <para>
-Note that DVB cards only support heights 288 and 576 for PAL or 240 and 480 for
-NTSC. You <emphasis role="bold">must</emphasis> rescale for other heights by
-adding <option>scale=width:height</option> with the width and height you want
-to the <option>-vf</option> option. DVB cards accept various widths, like 720,
-704, 640, 512, 480, 352 etc. and do hardware scaling in horizontal direction,
-so you do not need to scale horizontally in most cases.
-For a 512x384 (aspect 4:3) MPEG-4 (DivX) try:
+Fai attenzione che le schede DVB supportano solo le altezze 288 e 576 per PAL
+oppure 240 e 480 per NTSC. <emphasis role="bold">Devi</emphasis> ridimensionare
+le altre altezze aggiungendo <option>scale=larghezza:altezza</option>, con la
+larghezza e l'altezza volute, all'opzione <option>-vf</option>. Le schede DVB
+accettano diverse larghezze, come 720, 704, 640, 512, 480, 352 etc. ed
+effettuano il ridimensionamento hardware sulla direzione orizzontale, perciò
+nella maggior parte deiu casi non ti serve ridimensionare in orizzontale.
+Per un MPEG-4 (DivX) a 512x384 (aspetto 4:3), prova:
 <screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen>
 </para>
 
 <para>
-If you have a widescreen movie and you do not want to scale it to full height,
-you can use the <option>expand=w:h</option> filter to add black bands. To view a
-640x384 MPEG-4 (DivX), try:
+Se hai un film in widescreen e non vuoi ridimensionarlo ad altezza piena,
+puoi usare il filtro <option>expand=w:h</option> per aggiungere delle bande
+nere. Per guardare un MPEG-4 (DivX) a 640x384, prova:
 <screen>
 mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 <replaceable>file.avi</replaceable>
 </screen>
 </para>
 
 <para>
-If your CPU is too slow for a full size 720x576 MPEG-4 (DivX), try downscaling:
+Se la tua CPU è troppo lenta per un MPEG-4 (DivX) intero a 720x576, prova a
+rimpicciolirlo:
 <screen>
 mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 <replaceable>file.avi</replaceable>
 </screen>
 </para>
 
-<para>If speed does not improve, try vertical downscaling, too:
+<para>
+Se la velocità non migliora, prova a rimpicciolirlo anche in verticale:
 <screen>
 mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 <replaceable>file.avi</replaceable>
 </screen>
 </para>
 
 <para>
-For OSD and subtitles use the OSD feature of the expand filter. So, instead of
-<option>expand=w:h</option> or <option>expand=w:h:x:y</option>, use
-<option>expand=w:h:x:y:1</option> (the 5th parameter <option>:1</option>
-at the end will enable OSD rendering). You may want to move the image up a bit
-to get a bigger black zone for subtitles. You may also want to move subtitles
-up, if they are outside your TV screen, use the
-<option>-subpos &lt;0-100&gt;</option>
-option to adjust this (<option>-subpos 80</option> is a good choice).
+Per l'OSD e i sottotitoli usa la caratteristica OSD del filtro expand. Quindi,
+al posto di <option>expand=w:h</option> o <option>expand=w:h:x:y</option>, usa
+<option>expand=w:h:x:y:1</option> (il quinto parametro <option>:1</option> alla
+fine abiliterà il rendering dell'OSD). Potresti voler spostare leggermente
+verso l'alto l'immagine per ottenere una banda nera più ampia per i
+sottotitoli. Potresti anche voler spostare più in alto i sottotitoli, se sono
+al di fuori dello schermo della tua TV, usa l'opzione
+<option>-subpos &lt;0-100&gt;</option> (<option>-subpos 80</option> è una
+buona scelta).
 </para>
 
 <para>
-In order to play non-25fps movies on a PAL TV or with a slow CPU, add the
-<option>-framedrop</option> option.
+Per poter riprodurre un film non a 25fps su una TV PAL ovvero con una CPU
+lenta, aggiungi l'opzione <option>-framedrop</option>.
 </para>
 
 <para>
-To keep the aspect ratio of MPEG-4 (DivX) files and get the optimal scaling
-parameters (hardware horizontal scaling and software vertical scaling
-while keeping the right aspect ratio), use the new dvbscale filter:
+Per mantenere il rapporto di aspetto dei file MPEG-4 (DivX) e ottenere i
+parametri ottimali per il ridimensionamento (ridimensionamento orizzontale
+hardware e verticale software mantenendo il giusto rapporto di aspetto), usa il
+nuovo filtro dvbscale:
 <screen>
-for a  4:3 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
-for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
+per una TV a  4:3: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+per una TV a 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 </para>
 
-<formalpara><title>Digital TV (DVB input module)</title>
-<para>You can use your DVB card for watching Digital TV.</para>
+<formalpara><title>TV Digitale (modulo d'ingresso DVB)</title>
+<para>Puoi usare la tua scheda TV per guardare la TV Digitale.</para>
 </formalpara>
 
 <para>
-You should have the programs <command>scan</command> and
-<command>szap/tzap/czap/azap</command> installed; they are all included in
-the drivers package.
+Dovresti avere installati i programmi <command>scan</command> e
+<command>szap/tzap/czap/azap</command>; essi sono inclusi nel pacchetto dei
+driver.
 </para>
 
 <para>
-Verify that your drivers are working properly with a program such as
+Verifica che i tuoi driver funzionino correttamente attraverso un programma tipo
 <ulink url="http://sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
-(that is the base of the DVB input module).
+(che è la base del modulo d'ingresso DVB).
 </para>
 
 <para>
-Now you should compile a <filename>~/.mplayer/channels.conf</filename>
-file, with the syntax accepted by <command>szap/tzap/czap/azap</command>, or
-have <command>scan</command> compile it for you.
+Ora dovresti riempire un file <filename>~/.mplayer/channels.conf</filename>,
+con la sintassi accettata da <command>szap/tzap/czap/azap</command>, o fare in
+modo che <command>scan</command> lo riempia per te.
 </para>
 
 <para>
-If you have more than one card type (e.g. Satellitar, Terrestrial, Cable and ATSC)
-you can save your channels files as
+Se hai più di un tipo di scheda (per es. Satellitare, Terrestre, Via Cavo e
+ATSC) puoi salvare i tuoi file dei canali come
 <filename>~/.mplayer/channels.conf.sat</filename>,
 <filename>~/.mplayer/channels.conf.ter</filename>,
 <filename>~/.mplayer/channels.conf.cbl</filename>,
-and <filename>~/.mplayer/channels.conf.atsc</filename>,
-respectively, so as to implicitly hint <application>MPlayer</application>
-to use these files rather than <filename>~/.mplayer/channels.conf</filename>,
-and you only need to specify which card to use.
+e <filename>~/.mplayer/channels.conf.atsc</filename>,
+rispettivamente, per spingere implicitamente <application>MPlayer</application>
+ad usare questi file invece che <filename>~/.mplayer/channels.conf</filename>,
+e devi solamente specificare quale scheda usare.
 </para>
 
 <para>
-Make sure that you have have <emphasis>only</emphasis> Free to Air
-channels in your <filename>channels.conf</filename> file, or
-<application>MPlayer</application> will try to skip to the next visible one,
-but it may take long if there are many consecutive encrypted channels.
+Assicurati di avere <emphasis>solo</emphasis> canali in chiaro nel tuo file
+<filename>channels.conf</filename>, altrimenti
+<application>MPlayer</application> cercherà di saltare al canale visibile
+successivo, ma potrebbe impiegarci molto se ci fossero tanti canali criptati
+consecutivi.
 </para>
 
 <para>
-In your audio and video fields you can use an extended syntax:
-<option>...:pid[+pid]:...</option> (for a maximum of 6 pids each);
-in this case <application>MPlayer</application> will include in the
-stream all the indicated pids, plus pid 0 (that contains the PAT).
-You are encouraged to include in each row the PMT pid for the
-corresponding channel (if you know it).
-You can also specify 8192, this will select all pids on this frequency
-and you can then switch between the programs with TAB.
-This might need more bandwidth, though cheap cards always transfer all
-channels at least to the kernel so it does not make much of a difference
-for these.
-Other possible uses are: televideo pid, second audio track, etc.
+Nei tuoi campi audio e video puoi usare una sintassi espansa:
+<option>...:pid[+pid]:...</option> (fino ad un massimo di 6 pid ciascuno);
+in questo caso <application>MPlayer</application> includerà nel flusso tutti
+i pid indicati, oltre al pid 0 (che contiene il PAT).
+Si consiglia di includere in ogni riga il pid PMT per il canale corrispondente
+(se conosciuto).
+Puoi anche specificare 8192, che seleziona tutti i pid su quella frequenza e
+puoi anche passare con TAB attraverso i programmi.
+Potrebbe aver bisogno di più banda, anche se le schede economiche passano
+sempre tutti canali al kernel, per cui non fa molta differenza per queste.
+Altri utilizzi possibili sono: pid televideo, seconda traccia audio, etc...
 </para>
 
 <para>
-If <application>MPlayer</application> complains frequently about
-<screen>Too many video/audio packets in the buffer</screen> or
-if you notice a growing desynchronization between audio and
-video try to use the libavformat MPEG-TS demuxer by adding
-<option>-demuxer lavf -lavfdopts probesize=128</option>
-to your command line.
+Se <application>MPlayer</application> si lamenta frequentemente di
+<screen>Troppi pacchetti video/audio nel buffer</screen> oppure noti una
+desincronizzazione crescente tra l'audio e il video, prova ad usare il demuxer
+MPEG-TS di libavformat aggiungendo 
+<option>-demuxer lavf -lavfdopts probesize=128</option> alla tua riga comando.
 </para>
 
 <para>
-To show the first of the channels present in your list, run
+Per vedere il primo dei canali presenti nella tua lista, esegui
 <screen>mplayer dvb://</screen>
 </para>
 
 <para>
-If you want to watch a specific channel, such as R1, run
+Se vuoi guardare un canale in particolare, come R1, esegui
 <screen>mplayer dvb://<replaceable>R1</replaceable></screen>
 </para>
 
 <para>
-If you have more than one card you also need to specify the number of the card
-where the channel is visible (e.g. 2) with the syntax:
+Se hai più di una scheda puoi anche dover specificare il numero della scheda
+dove il canale si vede (per es. 2) con la sintassi:
 <screen>mplayer dvb://<replaceable>2@R1</replaceable></screen>
 </para>
 
 <para>
-To change channels press the <keycap>h</keycap> (next) and
-<keycap>k</keycap> (previous) keys, or use the
-<link linkend="osdmenu">OSD menu</link>.
+Per cambiare canale premi i tasti <keycap>h</keycap> (successivo) e
+<keycap>k</keycap> (precedente), oppure usa il
+<link linkend="osdmenu">menu OSD</link>.
 </para>
 
 <para>
-If your <filename>~/.mplayer/menu.conf</filename> contains a
-<literal>&lt;dvbsel&gt;</literal> entry, such as the one in the example
-file <filename>etc/dvb-menu.conf</filename> (that you can use to overwrite
-<filename>~/.mplayer/menu.conf</filename>), the main menu will show a
-sub-menu entry that will permit you to choose one of the channels present
-in your <filename>channels.conf</filename>, possibly preceded by a menu
-with the list of cards available if more than one is usable by
+Se il tuo <filename>~/.mplayer/menu.conf</filename> contiene una voce
+<literal>&lt;dvbsel&gt;</literal>, come quella nel file di esempio
+<filename>etc/dvb-menu.conf</filename> (che puoi usare per sovrascrivere
+<filename>~/.mplayer/menu.conf</filename>), il menu principale mostrerà una
+voce di sotto-menu che ti lascerà scegliere uno dei canali presenti nel tuo
+<filename>channels.conf</filename>, possibilmente preceduto da un menu con la
+lista delle schede disponibili, se ve ne è più di una utilizzabile da
 <application>MPlayer</application>.
 </para>
 
 <para>
-If you want to save a program to disk you can use
+Se vuoi salvare su disco un programma puoi usare
 <screen>
 mplayer -dumpfile <replaceable>r1.ts</replaceable> -dumpstream dvb://<replaceable>R1</replaceable>
 </screen>
 </para>
 
 <para>
-If you want to record it in a different format (re-encoding it) instead
-you can run a command such as
+Se vuoi registrarlo in un formato diverso (ri-codificandolo) puoi invece
+lanciare un comando come
 <screen>
 mencoder -o <replaceable>r1.avi</replaceable> -ovc xvid -xvidencopts bitrate=800 \
     -oac mp3lame -lameopts cbr:br=128 -pp=ci dvb://<replaceable>R1</replaceable>
@@ -1972,24 +1990,25 @@ mencoder -o <replaceable>r1.avi</replaceable> -ovc xvid -xvidencopts bitrate=800
 </para>
 
 <para>
-Read the man page for a list of options that you can pass to the
-DVB input module.
+Leggi la pagina man per una lista di opzioni che puoi passare al modulo di
+ingresso DVB.
 </para>
 
-<formalpara><title>FUTURE</title>
+<formalpara><title>FUTURO</title>
 <para>
-If you have questions or want to hear feature announcements and take part in
-discussions on this subject, join our
-<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
-mailing list. Please remember that the list language is English.
+Se hai domande o vuoi ricevere gli annunci di nuove caratteristiche e vuoi
+partecipare a discussioni su questo argomento, iscriviti alla nostra mailing
+list
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>.
+Per favore tieni presente che la lingua della lista è l'inglese.
 </para>
 </formalpara>
 
 <para>
-In the future you may expect the ability to display OSD and subtitles using
-the native OSD feature of DVB cards, as well as more fluent playback of
-non-25fps movies and realtime transcoding between MPEG-2 and MPEG-4 (partial
-decompression).
+In futuro puoi aspettarti la possibilità di mostrare OSD e sottotitoli usando
+la caratteristica nativa delle schede DVB, così come una riproduzione più
+fluida di film non a 25fps e transcodifica in tempo reale tra MPEG-2 e MPEG-4
+(decompressione parziale).
 </para>
 </sect2>
 
@@ -1999,43 +2018,44 @@ decompression).
 <title>DXR2</title>
 
 <para>
-<application>MPlayer</application> supports hardware accelerated playback
-with the Creative DXR2 card.
+<application>MPlayer</application> fornisce una riproduzione accelerata
+hardware con la scheda Creative DXR2.
 </para>
   
 <para>
-First of all you will need properly installed DXR2 drivers. You can find
-the drivers and installation instructions at the
-<ulink url="http://dxr2.sf.net/">DXR2 Resource Center</ulink> site.
+Prima di tutto ti serviranno dei driver DXR2 correttamente installati. Puoi
+trovare i driver e le istruzioni per l'installazione sul sito
+<ulink url="http://dxr2.sf.net/">DXR2 Resource Center</ulink>.
 </para>
 
-<variablelist><title>USAGE</title>
+<variablelist><title>USO</title>
 <varlistentry>
   <term><option>-vo dxr2</option></term>
-  <listitem><para>Enable TV output.</para></listitem>
+  <listitem><para>Abilita l'uscita TV.</para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-vo dxr2:x11</option> or <option>-vo dxr2:xv</option></term>
-  <listitem><para>Enable Overlay output in X11.</para></listitem>
+  <listitem><para>Abilita in X11 l'uscita su Overlay.</para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-dxr2 &lt;option1:option2:...&gt;</option></term>
   <listitem><para>
-  This option is used to control the DXR2 driver.
+  Questa opzione viene usata per controllare il driver DXR2.
   </para></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-The overlay chipset used on the DXR2 is of pretty bad quality but the
-default settings should work for everybody. The OSD may be usable with the
-overlay (not on TV) by drawing it in the colorkey. With the default colorkey
-settings you may get variable results, usually you will see the colorkey
-around the characters or some other funny effect. But if you properly adjust
-the colorkey settings you should be able to get acceptable results.
+Il chipset di overlay usato sulla DXR2 ha una qualità piuttosto bassa, ma le
+impostazioni di default dovrebbero funzionare per chiunque. L'OSD potrebbe
+essre utilizzabile con l'overlay (non sulla TV) disegnandolo nella chiave
+colore. Con le impostazioni di default della chiave colore puoi ottenere
+risultati variabili, spesso vedrai la chiave colore attorno ai caratteri o
+qualche altro effetto strambo. Ma se imposti correttamente le opzioni della
+chiave colore dovresti ricavare dei risultati accettabili.
 </para>
 
-<para>Please see the man page for available options.</para>
+<para>Per favore vedi nella pagina man le opzioni disponibili.</para>
 </sect2>
 
 <!-- ********** -->
@@ -2044,22 +2064,23 @@ the colorkey settings you should be able to get acceptable results.
 <title>DXR3/Hollywood+</title>
 
 <para>
-<application>MPlayer</application> supports hardware accelerated playback
-with the Creative DXR3 and Sigma Designs Hollywood Plus cards. These cards
-both use the em8300 MPEG decoder chip from Sigma Designs.
+<application>MPlayer</application> fornisce una riproduzione accelerata con le
+schede Creative DXR3 e Sigma Designs Hollywood Plus. Queste schede usano
+entrambe il chip em8300 di decodifica MPEG di Sigma Designs.
 </para>
 
 <para>
-First of all you will need properly installed DXR3/H+ drivers, version 0.12.0
-or later. You can find the drivers and installation instructions at the
-<ulink url="http://dxr3.sf.net/">DXR3 &amp; Hollywood Plus for Linux</ulink>
-site. <filename>configure</filename> should detect your card automatically,
-compilation should go without problems.
+Prima di tutto ti serviranno dei driver DXR3/H+ correttamente installati,
+versione 0.12.0 o successiva. Puoi trovare i driver e le istruzioni per
+l'installazione sul sito
+<ulink url="http://dxr3.sf.net/">DXR3 &amp; Hollywood Plus per Linux</ulink>.
+<filename>configure</filename> dovrebbe rilevare automaticamente la tua scheda,
+la compilazione dovrebbe concludersi senza problemi.
 </para>
 
 <!-- FIXME: find a more clear presentation -->
 <variablelist>
-<title>USAGE</title>
+<title>USO</title>
 <varlistentry>
 <term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>device</replaceable></option></term>
 <listitem><para>
@@ -2175,7 +2196,7 @@ problems, or DVD subtitle problems, give <option>:sync</option> a try.
 
 
 <sect1 id="other">
-<title>Other visualization hardware</title>
+<title>Altri dispositivi di visualizzazione</title>
 
 <sect2 id="zr">
 <title>Zr</title>
@@ -2301,10 +2322,10 @@ action at 00:07:50.
 
 
 <sect1 id="tvout">
-<title>TV-out support</title>
+<title>Gestione uscita TV-out</title>
 
 <sect2 id="tvout-mga-g400">
-<title>Matrox G400 cards</title>
+<title>Schede Matrox G400</title>
 
 <para>
 Under Linux you have two methods to get G400 TV out working:
@@ -2451,7 +2472,7 @@ pins. (info contributed from Balázs Kerekes)
 <!-- ********** -->
 
 <sect2 id="tv-out_matrox_g450">
-<title>Matrox G450/G550 cards</title>
+<title>Schede Matrox G450/G550</title>
 
 <para>
 TV output support for these cards has only been recently introduced, and is
@@ -2481,7 +2502,7 @@ The necessary kernel patch and the detailed HOWTO is downloadable from
 <!-- ********** -->
 
 <sect2 id="tvout-ati">
-<title>ATI cards</title>
+<title>Schede ATI</title>
 
 <formalpara><title>PREAMBLE</title>
 <para>
