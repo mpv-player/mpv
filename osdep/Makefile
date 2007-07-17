@@ -7,7 +7,6 @@ SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += macosx_finder_args.c
 
 SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += gettimeofday.c
 SRCS_COMMON-$(NEED_GLOB)             += glob-win.c
-SRCS_COMMON-$(NEED_SCANDIR)          += scandir.c
 SRCS_COMMON-$(NEED_SETENV)           += setenv.c
 SRCS_COMMON-$(NEED_SHMEM)            += shmem.c
 SRCS_COMMON-$(NEED_STRSEP)           += strsep.c
