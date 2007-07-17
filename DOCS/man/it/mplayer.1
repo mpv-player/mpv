@@ -1,4 +1,4 @@
-.\" synced with r23609
+.\" synced with r23748
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
@@ -75,7 +75,7 @@ vcd://traccia[/device]
 .
 .br
 .B mplayer
-tv://[canale]
+tv://[canale]/[id_ingresso]
 [opzioni]
 .
 .br
@@ -1800,6 +1800,8 @@ Questa opzione regola varie proprietà del modulo di cattura TV.
 Per guardare la TV con MPlayer usa 'tv://' o 'tv://<numero_canale>'
 o anche 'tv://<nome_canale> (cerca channel_name sotto l'opzione channels più giù)
 come URL del film.
+Puoi anche usare tv:///<id_ingresso>' per avviare la riproduzione di un film da
+un ingresso composito o S-Video (vedi l'opzione input per i dettagli).
 .sp 1
 Le opzioni disponibili sono:
 .RSs
@@ -2041,9 +2043,9 @@ Aggiunge un bordo nero nella parte alta del fotogramma.
 Il renderizzatore SSA/ASS può metter lì i sottotitoli (con \-ass-use-margins).
 .
 .TP
-.B \-(no)ass-use-margins
+.B \-ass-use-margins
 Abilita/disabilita il posizionamento dei sottotitoli nei bordi neri, quando
-disponibili (default: no).
+questi sono disponibili.
 .
 .TP
 .B \-dumpjacosub (solo MPlayer)
@@ -2088,7 +2090,7 @@ Estrae il flusso dei sottotitoli dai file VOB.
 Vedi anche le opzioni \-dump*sub e \-vobsubout* .
 .
 .TP
-.B \-(no)embeddedfonts (solo FreeType)
+.B \-embeddedfonts (solo FreeType)
 Abilita l'estrazione di font embedded in file Matroska (default: disabilitato).
 Questi font possono essere usati per renderizzare sottotitoli SSA/ASS
 (opzione \-ass).
