@@ -629,7 +629,7 @@ static char help_text[]=
 #define MSGTR_TVInputNotSeekable "Impossibile spostarsi in un programma TV!\n"\
 "(Probabilmente lo spostamento sarà usato per cambiare canale ;)\n"
 #define MSGTR_DemuxerInfoChanged "Info demuxer %s cambiate a %s\n"
-#define MSGTR_ClipInfo "Informazioni filmato: \n"
+#define MSGTR_ClipInfo "Informazioni file multimediale:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Rilevato formato NTSC 30000/1001fps, cambio framerate.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: Rilevato formato NTSC 24000/1001fps progressivo, cambio framerate.\n"
