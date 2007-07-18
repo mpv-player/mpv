@@ -288,7 +288,7 @@ static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, str
       return 1;
     }
   }
-  return 0;
+  return 1;
 }
 
 #define CHECKDEC(l, n) if (((l) -= (n)) < 0) return 0
