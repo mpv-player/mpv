@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r23588 (2007. 06. 27.)
+// Sync'ed with help_mp-en.h r23747 (2007. 07. 18.)
 
 // ========================= MPlayer help ===========================
 
@@ -11,11 +11,11 @@
 static char help_text[]=
 "Indítás:   mplayer [opciók] [url|útvonal/]fájlnév\n"
 "\n"
-"Alapvető opciók: (az összes opció listájához lásd a man lapot!)\n"
+"Alapvető opciók: (az összes opció listájához lásd a man lapot)\n"
 " -vo <drv>        kimeneti videó meghajtó kiválasztása (lista: '-vo help')\n"
 " -ao <drv>        kimeneti audió meghajtó kiválasztása (lista: '-ao help')\n"
 #ifdef HAVE_VCD
-" vcd://<sávszám>  lejátszás (S)VCD (Super Video CD) sávból (közvetlen, nincs mount)\n"
+" vcd://<sávszám>  (S)VCD (Super Video CD) sáv lejátszás (nyers, nincs mount)\n"
 #endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  a megadott DVD sáv lejátszása, fájl helyett\n"
@@ -23,16 +23,16 @@ static char help_text[]=
 #endif
 " -ss <pozíció>    a megadott (másodperc v. óra:perc:mperc) pozícióra tekerés\n"
 " -nosound         hanglejátszás kikapcsolása\n"
-" -fs              teljesképernyős lejátszás (vagy -vm, -zoom, bővebben lásd man)\n"
+" -fs              teljesképernyős lejátszás (vagy -vm, -zoom, lásd man lapot)\n"
 " -x <x> -y <y>    felbontás beállítása (-vm vagy -zoom használata esetén)\n"
-" -sub <fájl>      felhasználandó felirat-fájl megadása (lásd -subfps, -subdelay)\n"
+" -sub <fájl>      használandó felirat-fájl megadása (lásd -subfps, -subdelay)\n"
 " -playlist <fájl> lejátszási lista fájl megadása\n"
 " -vid x -aid y    lejátszandó video- (x) és audio- (y) streamek kiválasztása\n"
 " -fps x -srate y  video (x képkocka/mp) és audio (y Hz) ráta megadása\n"
 " -pp <minőség>    képjavítás fokozatainak beállítása (lásd a man lapot)\n"
 " -framedrop       képkockák eldobásának engedélyezése (lassú gépekhez)\n"
 "\n"
-"Fontosabb billentyűk: (a teljes lista a man-ban és nézd meg az input.conf fájlt)\n"
+"Fontosabb billentyűk: (teljes lista a man-ban és nézd meg az input.conf fájlt)\n"
 " <-  vagy  ->     10 másodperces hátra/előre ugrás\n"
 " le vagy fel      1 percnyi hátra/előre ugrás\n"
 " pgdown v. pgup   10 percnyi hátra/előre ugrás\n"
@@ -233,6 +233,7 @@ static char help_text[]=
 #define MSGTR_Balance "Egyensúly"
 
 // property state
+#define MSGTR_LoopStatus "Ismétlés: %s"
 #define MSGTR_MuteStatus "Némít: %s"
 #define MSGTR_AVDelayStatus "A-V késés: %s ms"
 #define MSGTR_OnTopStatus "Mindig felül: %s"
@@ -244,6 +245,7 @@ static char help_text[]=
 #define MSGTR_SubPosStatus "Felirat helye: %s/100"
 #define MSGTR_SubAlignStatus "Felirat illesztés: %s"
 #define MSGTR_SubDelayStatus "Felirat késés: %s"
+#define MSGTR_SubScale "Felirat arány: %s"
 #define MSGTR_SubVisibleStatus "Feliratok: %s"
 #define MSGTR_SubForcedOnlyStatus "Csak kényszerített felirat: %s"
 
