@@ -24,7 +24,6 @@
 #define	SIGKILL	9	/* kill (cannot be caught or ignored) */
 #define	SIGBUS	10	/* bus error */
 #define	SIGPIPE	13	/* broken pipe */
-extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 #endif
 
 #include <sys/time.h>

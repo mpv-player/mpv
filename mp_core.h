@@ -113,7 +113,6 @@ extern int osd_duration;
 extern int term_osd;
 extern int fixed_vo;
 extern int ass_enabled;
-extern int fixed_vo;
 extern int forced_subs_only;
 
 // These were listed as externs in mplayer.c, should be in some other header
