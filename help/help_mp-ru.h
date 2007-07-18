@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r23588
+// Synced with help_mp-en.h: r23747
 
 // ========================= MPlayer help ===========================
 
@@ -229,6 +229,7 @@ static char help_text[]=
 #define MSGTR_Balance "Баланс"
 
 // property state
+#define MSGTR_LoopStatus "Повторять: %s"
 #define MSGTR_MuteStatus "Приглушить: %s"
 #define MSGTR_AVDelayStatus "A-V задержка: %s"
 #define MSGTR_OnTopStatus "Поверх остальных: %s"
@@ -240,6 +241,7 @@ static char help_text[]=
 #define MSGTR_SubPosStatus "Позиция субтитров: %s/100"
 #define MSGTR_SubAlignStatus "Выравнивание субтитров: %s"
 #define MSGTR_SubDelayStatus "Задержка субтитров: %s"
+#define MSGTR_SubScale "Масштаб субтитров: %s"
 #define MSGTR_SubVisibleStatus "Субтитры: %s"
 #define MSGTR_SubForcedOnlyStatus "Форсированы только субтитры: %s"
 
