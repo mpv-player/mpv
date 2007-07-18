@@ -161,8 +161,6 @@ void CheckDir( GtkWidget * list,char * directory )
 {
  struct stat     fs;
  int             i;
- GdkPixmap     * pixmap;
- GdkBitmap     * mask;
  glob_t          gg;
 
  if ( !fsFilter[0] ) return;
