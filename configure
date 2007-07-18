@@ -4118,7 +4118,7 @@ else
 fi
 
 
-echocheck "/dev/mga_vid"
+echocheck "mga_vid"
 if test "$_mga" = auto ; then
   _mga=no
   linux && _mga=yes
