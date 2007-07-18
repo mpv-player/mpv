@@ -50,10 +50,6 @@
 
 #undef ENABLE_DPMS 
 
-#ifdef HAVE_XINERAMA
-extern int xinerama_screen;
-#endif
-
 typedef struct
 {
  unsigned long flags;
@@ -97,7 +93,6 @@ unsigned long        wsKeyTable[512];
 int                  wsUseXShm = 1;
 int                  wsUseXShape = 1;
 
-int XShmGetEventBase( Display* );
 inline int wsSearch( Window win );
 
 // ---

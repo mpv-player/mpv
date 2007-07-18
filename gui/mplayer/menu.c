@@ -18,8 +18,6 @@ int             mplOldMenuItem = -1;
 int             mplMenuX,mplMenuY;
 static int      mplMenuIsInitialized = 0;
 
-void mplHideMenu( int mx,int my,int w );
-
 void mplMenuDraw( void )
 {
  uint32_t * buf = NULL;

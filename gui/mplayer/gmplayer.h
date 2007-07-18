@@ -13,7 +13,6 @@ extern int             mplMainAutoPlay;
 extern int             mplMiddleMenu;
 
 extern void mplInit( void * disp );
-extern void mplEventHandling( int msg,float param );
 
 extern void mplMainDraw( void );
 extern void mplEventHandling( int msg,float param );

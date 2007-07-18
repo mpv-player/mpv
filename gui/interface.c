@@ -419,7 +419,6 @@ int guiCMDArray[] =
   evSkinBrowser
  };
 
-extern int    		frame_dropping;
 extern int              stream_dump_type;
 extern int  		vcd_track;
 extern m_obj_settings_t * vf_settings;

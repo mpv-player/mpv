@@ -76,9 +76,6 @@ gtkASS_t gtkASS;
 #endif
 // ---
 
-extern char * get_path( const char * filename );
-extern int    flip;
-extern int    frame_dropping;
 extern int    stop_xscreensaver;
 extern int    m_config_parse_config_file(m_config_t* config, char *conffile);
 

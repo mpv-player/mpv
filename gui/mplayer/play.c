@@ -63,8 +63,6 @@ void mplFullScreen( void )
   else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.sub.R,appMPlayer.sub.G,appMPlayer.sub.B );
 }
 
-extern int mplSubRender;
-
 void mplEnd( void )
 {
  plItem * next;

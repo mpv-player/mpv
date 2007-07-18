@@ -4,8 +4,6 @@
 
 #include <gtk/gtk.h>
 
-extern GtkWidget * PlayList;
-
 extern void ShowPlayList( void );
 extern void HidePlayList( void );
 
