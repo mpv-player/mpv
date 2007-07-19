@@ -147,6 +147,7 @@ static int oss2format(int format)
 static char *dsp=PATH_DEV_DSP;
 static audio_buf_info zz;
 static int audio_fd=-1;
+static int prepause_space;
 
 static const char *oss_mixer_device = PATH_DEV_MIXER;
 static int oss_mixer_channel = SOUND_MIXER_PCM;
@@ -448,13 +449,21 @@ static void reset(void){
 // stop playing, keep buffers (for pause)
 static void audio_pause(void)
 {
+    prepause_space = get_space();
     uninit(1);
 }
 
 // resume playing, after audio_pause()
 static void audio_resume(void)
 {
+    int fillcnt;
     reset();
+    fillcnt = get_space() - prepause_space;
+    if (fillcnt > 0) {
+      void *silence = calloc(fillcnt, 1);
+      play(silence, fillcnt, 0);
+      free(silence);
+    }
 }
 
 
