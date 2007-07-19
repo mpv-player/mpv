@@ -199,7 +199,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
   // Fill in the full name
   if(prefix && strlen(prefix) > 0) {
     int l = strlen(prefix) + 1 + strlen(arg->name) + 1;
-    co->name = (char*) malloc(l);
+    co->name = malloc(l);
     sprintf(co->name,"%s:%s",prefix,arg->name);
   } else
     co->name = arg->name;

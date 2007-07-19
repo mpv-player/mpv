@@ -53,12 +53,12 @@ char *get_path(const char *filename){
 #endif       
 	len = strlen(homedir) + strlen(config_dir) + 1;
 	if (filename == NULL) {
-		if ((buff = (char *) malloc(len)) == NULL)
+		if ((buff = malloc(len)) == NULL)
 			return NULL;
 		sprintf(buff, "%s%s", homedir, config_dir);
 	} else {
 		len += strlen(filename) + 1;
-		if ((buff = (char *) malloc(len)) == NULL)
+		if ((buff = malloc(len)) == NULL)
 			return NULL;
 		sprintf(buff, "%s%s/%s", homedir, config_dir, filename);
 	}
@@ -95,7 +95,7 @@ char *get_path(const char *filename){
 				maxlen=strlen(filename)+strlen(res_url_path)+2;
 			}
 			free(buff);
-			buff = (char *) malloc(maxlen);
+			buff = malloc(maxlen);
 			strcpy(buff, res_url_path);
 				
 			strcat(buff,"/");

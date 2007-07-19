@@ -378,7 +378,7 @@ static int add_comment(char *s, char **d)
 		pos = strlen(*d);
 		(*d)[pos++] = '\n';
 	}
-	if (!(*d = (char *) realloc(*d, pos + strlen(s) + 1))) {
+	if (!(*d = realloc(*d, pos + strlen(s) + 1))) {
 		mp_msg(MSGT_CODECCFG,MSGL_FATAL,MSGTR_CantAllocateComment);
 		return 0;
 	}
@@ -519,7 +519,7 @@ int parse_codec_cfg(const char *cfgfile)
 		return 0;
 	}
 
-	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
+	if ((line = malloc(MAX_LINE_LEN + 1)) == NULL) {
 		mp_msg(MSGT_CODECCFG,MSGL_FATAL,MSGTR_CantGetMemoryForLine, strerror(errno));
 		return 0;
 	}
@@ -576,7 +576,7 @@ int parse_codec_cfg(const char *cfgfile)
 				goto err_out;
 #endif
 			}
-		        if (!(*codecsp = (codecs_t *) realloc(*codecsp,
+		        if (!(*codecsp = realloc(*codecsp,
 				sizeof(codecs_t) * (*nr_codecsp + 2)))) {
 			    mp_msg(MSGT_CODECCFG,MSGL_FATAL,MSGTR_CantReallocCodecsp, strerror(errno));
 			    goto err_out;
