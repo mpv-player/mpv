@@ -493,12 +493,12 @@ char *get_metadata (metadata_t type) {
       meta = strdup ("h264");
     else if (sh_video->format >= 0x20202020)
     {
-      meta = (char *) malloc (8);
+      meta = malloc (8);
       sprintf (meta, "%.4s", (char *) &sh_video->format);
     }
     else
     {
-      meta = (char *) malloc (8);
+      meta = malloc (8);
       sprintf (meta, "0x%08X", sh_video->format);
     }
     return meta;
@@ -506,14 +506,14 @@ char *get_metadata (metadata_t type) {
   
   case META_VIDEO_BITRATE:
   {
-    meta = (char *) malloc (16);
+    meta = malloc (16);
     sprintf (meta, "%d kbps", (int) (sh_video->i_bps * 8 / 1024));
     return meta;
   }
   
   case META_VIDEO_RESOLUTION:
   {
-    meta = (char *) malloc (16);
+    meta = malloc (16);
     sprintf (meta, "%d x %d", sh_video->disp_w, sh_video->disp_h);
     return meta;
   }
@@ -527,14 +527,14 @@ char *get_metadata (metadata_t type) {
   
   case META_AUDIO_BITRATE:
   {
-    meta = (char *) malloc (16);
+    meta = malloc (16);
     sprintf (meta, "%d kbps", (int) (sh_audio->i_bps * 8/1000));
     return meta;
   }
   
   case META_AUDIO_SAMPLES:
   {
-    meta = (char *) malloc (16);
+    meta = malloc (16);
     sprintf (meta, "%d Hz, %d ch.", sh_audio->samplerate, sh_audio->channels);
     return meta;
   }
