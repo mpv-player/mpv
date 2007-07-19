@@ -1,4 +1,4 @@
-//Synced with help_mp-en.h r23416
+//Synced with help_mp-en.h r23747
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -228,13 +228,15 @@ static char help_text[]=
 // osd bar names
 #define MSGTR_Volume "音量"
 #define MSGTR_Panscan "摇移"
-#define MSGTR_Gamma "Gamma"
+#define MSGTR_Gamma "伽玛值"
 #define MSGTR_Brightness "亮度"
 #define MSGTR_Contrast "对比度"
 #define MSGTR_Saturation "饱和度"
 #define MSGTR_Hue "色调"
+#define MSGTR_Balance "均衡"
 
 // property state
+#define MSGTR_LoopStatus "循环方式: %s"
 #define MSGTR_MuteStatus "静音: %s"
 #define MSGTR_AVDelayStatus "A-V 延迟: %s"
 #define MSGTR_OnTopStatus "总在最前: %s"
@@ -246,6 +248,7 @@ static char help_text[]=
 #define MSGTR_SubPosStatus "字幕位置: %s/100"
 #define MSGTR_SubAlignStatus "字幕对齐: %s"
 #define MSGTR_SubDelayStatus "字幕延迟: %s"
+#define MSGTR_SubScale "字幕大小: %s"
 #define MSGTR_SubVisibleStatus "显示字幕: %s"
 #define MSGTR_SubForcedOnlyStatus "只用锁定的字幕: %s"
 
@@ -698,6 +701,7 @@ static char help_text[]=
 
 #define MSGTR_InsertingAfVolume "[混音器] 没有硬件混音, 插入音量过滤器。\n"
 #define MSGTR_NoVolume "[混音器] 没有可用的音量控制。\n"
+#define MSGTR_NoBalance "[混音器] 没有可用的均衡控制。\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -1069,6 +1073,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Volume "音量"
 #define MSGTR_VO_SUB_Brightness "亮度"
 #define MSGTR_VO_SUB_Hue "色调"
+#define MSGTR_VO_SUB_Balance "均衡"
 
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "源图像尺寸太大: %ux%u (上限是 %ux%u)\n"
