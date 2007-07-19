@@ -242,7 +242,7 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(7, "misalignsse", "Misaligned SSE Mode"),
       CPUID_FEATURE_DEF(8, "3dnowprefetch", "3DNow! Prefetch/PrefetchW"),
       CPUID_FEATURE_DEF(9, "osvw", "OS Visible Workaround"),
-      CPUID_FEATURE_DEF(10, "ibs", ""),
+      CPUID_FEATURE_DEF(10, "ibs", "Instruction Based Sampling"),
       { -1 }
     };
     unsigned int family, model, stepping;
