@@ -3543,6 +3543,9 @@ fi #if darwin
 echocheck "pkg-config"
 _pkg_config=pkg-config
 if `$_pkg_config --version > /dev/null 2>&1`; then
+  if test "$_ld_static"; then
+    _pkg_config="$_pkg_config --static"
+  fi
   echores "yes"
 else
   _pkg_config=false
