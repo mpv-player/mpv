@@ -4154,7 +4154,7 @@ echocheck "GGI"
 if test "$_ggi" = auto ; then
   cat > $TMPC << EOF
 #include <ggi/ggi.h>
-int main(void) { return 0; }
+int main(void) { ggiInit(); ggiWmhInit(); return 0; }
 EOF
   _ggi=no
   cc_check -lggi && _ggi=yes
@@ -4606,7 +4606,10 @@ fi
 if test "$_sdl" = auto || test "$_sdl" = yes ; then
   cat > $TMPC << EOF
 #include <SDL.h>
-int main(int argc, char *argv[]) { return 0; }
+int main(int argc, char *argv[]) {
+  SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE);
+  return 0;
+}
 EOF
   _sdl=no
   if "$_sdlconfig" --version >>"$TMPLOG" 2>&1 ; then
