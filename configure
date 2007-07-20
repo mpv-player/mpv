@@ -4154,7 +4154,7 @@ echocheck "GGI"
 if test "$_ggi" = auto ; then
   cat > $TMPC << EOF
 #include <ggi/ggi.h>
-int main(void) { ggiInit(); ggiWmhInit(); return 0; }
+int main(void) { ggiInit(); return 0; }
 EOF
   _ggi=no
   cc_check -lggi && _ggi=yes
@@ -4176,7 +4176,7 @@ if test "$_ggiwmh" = auto ; then
   cat > $TMPC << EOF
 #include <ggi/ggi.h>
 #include <ggi/wmh.h>
-int main(void) { return 0; }
+int main(void) { ggiInit(); ggiWmhInit(); return 0; }
 EOF
   cc_check -lggi -lggiwmh && _ggiwmh=yes
 fi
