@@ -1825,19 +1825,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] 图像居中。始于 (%d,%d)\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] 使用 VIDIX. w=%i h=%i  mw=%i mh=%i\n"
 
-// libvo/vo_syncfb.c
-
-#define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] 打不开 /dev/syncfb 或 /dev/mga_vid。\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] 使用 YUV420P3 调色板。\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] 使用 YUV420P2 调色板。\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] 使用 YUV420 调色板。\n"
-#define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] 找不到支持的调色板。\n"
-#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] BES sourcer 尺寸: %d x %d。\n"
-#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] 帧缓冲内存: %ld 在 %ld 缓冲。\n"
-#define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] 申请第一个缓冲 #%d。\n"
-#define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] 获得第一个缓冲 #%d。\n"
-#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] 未知子设备: %s。\n"
-
 // libvo/vo_tdfxfb.c
 
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] 打不开 %s: %s。\n"

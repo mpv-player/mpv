@@ -1832,19 +1832,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Kép középre igazítása. Kezdőpont (%d,%d)\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] VIDIX használata. w=%i h=%i  mw=%i mh=%i\n"
 
-// libvo/vo_syncfb.c
-
-#define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] A /dev/syncfb vagy a /dev/mga_vid nem nyitható meg.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] YUV420P3 paletta használata.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] YUV420P2 paletta használata.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] YUV420 paletta használata.\n"
-#define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] Nem találtam támogatott palettát.\n"
-#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] BES sourcer méret: %d x %d.\n"
-#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] framebuffer memória: %ld, %ld bufferben.\n"
-#define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] #%d. számú első buffer igénylése.\n"
-#define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] #%d. számú első buffer megvan.\n"
-#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] ismeretlen aleszköz: %s.\n"
-
 // libvo/vo_tdfxfb.c
 
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Nem nyitható meg %s: %s.\n"

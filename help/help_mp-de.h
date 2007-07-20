@@ -1883,19 +1883,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Zentriere Bild. Starte bei (%d,%d)\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Benutze VIDIX. b=%i h=%i  mb=%i mh=%i\n"
 
-// libvo/vo_syncfb.c
-
-#define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] Konnte /dev/syncfb oder /dev/mga_vid nicht öffnen.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] Benutze Palette YUV420P3.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] Benutze Palette YUV420P2.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] Benutze Palette YUV420.\n"
-#define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] Keine unterstützte Palette gefunden.\n"
-#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] Größe des BES sourcer: %d x %d.\n"
-#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] Framebuffer-Speicher: %ld in %ld Buffern.\n"
-#define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] Fordere ersten Buffer #%d.\n"
-#define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] Ersten Buffer #%d erhalten.\n"
-#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] unbekanntes Subgerät: %s.\n"
-
 // libvo/vo_tdfxfb.c
 
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Konnte %s nicht öffnen: %s.\n"

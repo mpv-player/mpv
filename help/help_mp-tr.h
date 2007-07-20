@@ -1697,19 +1697,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Ortalanan görüntü. (%d,%d) ile başlatılıyor.\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] VIDIX kullanılıyor. w=%i h=%i  mw=%i mh=%i\n"
 
-// libvo/vo_syncfb.c
-
-#define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] /dev/syncfb veya /dev/mga_vid  açılamadı.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] YUV420P3 paleti kullanılıyor.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] YUV420P2 paleti kullanılıyor.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] YUV420 paleti kullanılıyor.\n"
-#define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] Desteklenen palet bulunamadı.\n"
-#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] BES kaynaklayıcı boyutu: %d x %d.\n"
-#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] kare tamponu belleği: %ld in %ld buffers.\n"
-#define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] #%d ilk tampon sorgulanıyor.\n"
-#define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] #%d ilk tampona ulaşıldı.\n"
-#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] bilinmeyen altaygıt: %s.\n"
-
 // libvo/vo_tdfxfb.c
 
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] %s açılamıyor: %s.\n"

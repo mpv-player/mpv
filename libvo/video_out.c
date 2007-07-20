@@ -84,7 +84,6 @@ extern vo_functions_t video_out_null;
 extern vo_functions_t video_out_zr;
 extern vo_functions_t video_out_zr2;
 extern vo_functions_t video_out_bl;
-extern vo_functions_t video_out_syncfb;
 extern vo_functions_t video_out_fbdev;
 extern vo_functions_t video_out_fbdev2;
 extern vo_functions_t video_out_svga;
@@ -162,9 +161,6 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_MGA
         &video_out_mga,
-#endif
-#ifdef HAVE_SYNCFB
-        &video_out_syncfb,
 #endif
 #ifdef HAVE_TDFXFB
         &video_out_tdfxfb,

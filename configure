@@ -4134,18 +4134,6 @@ fi
 echores "$_mga"
 
 
-# echocheck "syncfb"
-# _syncfb=no
-# test "$_mga" = yes && _syncfb=yes
-# if test "$_syncfb" = yes ; then
-#   _def_syncfb='#define HAVE_SYNCFB 1'
-#   _vosrc="$_vosrc vo_syncfb.c"
-# else
-#   _def_syncfb='#undef HAVE_SYNCFB'
-# fi
-# echores "$_syncfb"
-
-
 echocheck "xmga"
 if test "$_xmga" = auto ; then
   _xmga=no
@@ -8176,7 +8164,6 @@ $_def_zr
 $_def_bl
 $_def_mga
 $_def_xmga
-$_def_syncfb
 $_def_fbdev
 $_def_dxr2
 $_def_dxr3
