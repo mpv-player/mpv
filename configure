@@ -7557,8 +7557,6 @@ $_def_builtin_expect
 /* compiler support for named assembler arguments */
 $_def_named_asm_args
 
-#define PREFIX "$_prefix"
-
 /* enable/disable SIGHANDLER */
 $_def_sighandler
 
