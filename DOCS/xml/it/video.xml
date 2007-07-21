@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 52% synced with r23272 -->
+<!-- synced with r23272 -->
 <chapter id="video">
 <title>Dispositivi di uscita video</title>
 
@@ -1712,7 +1712,6 @@ of resource usage and overhead." - citazione da
 <ulink url="http://www.directfb.org"/>
 </para></blockquote>
 
-<para>I'll exclude DirectFB features from this section.</para>
 <para>Ometterò le caratteristiche di DirectFB da questa sezione.</para>
 
 <para>
@@ -2082,109 +2081,116 @@ la compilazione dovrebbe concludersi senza problemi.
 <variablelist>
 <title>USO</title>
 <varlistentry>
-<term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>device</replaceable></option></term>
+<term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>dispositivo</replaceable></option></term>
 <listitem><para>
-<option>overlay</option> activates the overlay instead of TVOut. It requires
-that you have a properly configured overlay setup to work right. The easiest
-way to configure the overlay is to first run autocal. Then run mplayer with
-dxr3 output and without overlay turned on, run dxr3view. In dxr3view you can
-tweak the overlay settings and see the effects in realtime, perhaps this feature
-will be supported by the <application>MPlayer</application> GUI in the future.
-When overlay is properly set up you will no longer need to use dxr3view.
-<option>prebuf</option> turns on prebuffering. Prebuffering is a feature of the
-em8300 chip that enables it to hold more than one frame of video at a time.
-This means that when you are running with prebuffering
-<application>MPlayer</application> will try to keep the video buffer filled
-with data at all times.
-If you are on a slow machine <application>MPlayer</application> will probably
-use close to, or precisely 100% of CPU.
-This is especially common if you play pure MPEG streams
-(like DVDs, SVCDs a.s.o.) since <application>MPlayer</application> will not have
-to reencode it to MPEG it will fill the buffer very fast.
-With prebuffering video playback is <emphasis role="bold">much</emphasis>
-less sensitive to other programs hogging the CPU, it will not drop frames unless
-applications hog the CPU for a long time.
-When running without prebuffering the em8300 is much more sensitive to CPU load,
-so it is highly suggested that you turn on <application>MPlayer</application>'s
-<option>-framedrop</option> option to avoid further loss of sync.
-<option>sync</option> will turn on the new sync-engine. This is currently an
-experimental feature. With the sync feature turned on the em8300's internal
-clock will be monitored at all times, if it starts to deviate from
-<application>MPlayer</application>'s clock it will be reset causing the em8300
-to drop any frames that are lagging behind.
-<option>norm=x</option> will set the TV norm of the DXR3 card without the need
-for external tools like em8300setup. Valid norms are 5 = NTSC, 4 = PAL-60,
-3 = PAL. Special norms are 2 (auto-adjust using PAL/PAL-60) and 1 (auto-adjust
-using PAL/NTSC) because they decide which norm to use by looking at the frame
-rate of the movie. norm = 0 (default) does not change the current norm.
-<option><replaceable>device</replaceable></option> = device number to use if
-you have more than one em8300 card. Any of these options may be left out.
-<option>:prebuf:sync</option> seems to work great when playing MPEG-4 (DivX)
-movies. People have reported problems using the prebuf option when playing
-MPEG-1/2 files.
-You might want to try running without any options first, if you have sync
-problems, or DVD subtitle problems, give <option>:sync</option> a try.
+<option>overlay</option> attiva l'overlay (sovrapposizione) invece che l'uscita
+TV. Per funzionare richiede un'impostazione dell'overlay adeguatamente
+configurata. Il modo più semplice di configurare l'overlay è eseguire prima
+autocal. Poi lanciare mplayer con l'uscita dxr3 e, senza l'overlay abilitato,
+eseguire dxr3view. In dxr3view puoi giocherellare con le impostazioni
+dell'overlay e vederne il risultato in tempo reale, forse questa funzionalità
+sarà utilizzabile in futueo dalla GUI di <application>MPlayer</application>.
+Una volta che l'overlay sarà correttamente configurato, non ti servirà più
+dxr3view.
+<option>prebuf</option> abilita il pre-buffering. Il pre-buffering è una
+funzionalità del chip em8300 che gli permette di contenere più di un
+fotogramma video per volta. Questo significa che quando stai usando il
+pre-buffering, <application>MPlayer</application> cercherà di mantenere il
+buffer video constantemente pieno di dati.
+Se sei su una macchina lenta, l'uso della CPU di
+<application>MPlayer</application> sarà vicino, o pari, al 100%.
+Questo è particolarmente vero se riproduci flussi MPEG puri (come DVD, SVCD e
+così via), visto che <application>MPlayer</application> non dovrà
+ricodificarli in MPEG riempirà il buffer molto velocemente.
+Con il pre-buffering la riproduzione video è
+<emphasis role="bold">molto</emphasis> meno sensibile all'utilizzo della CPU da
+parte di altri programmi, non scarterà fotogrammi a meno che tale applicazione
+prenda possesso della CPU per un tempo lungo.
+Quando viene usato senza pre-buffering, l'em8300 è molto più sensibile al
+carico della CPU, per cui si consiglia caldamente di abilitare l'opzione
+<option>-framedrop</option> di <application>MPlayer</application> per evitare
+un'ulteriore perdita di sincronia.
+<option>sync</option> abiliterà il nuovo motore di sincronizzazione.
+Questa attualmente è una caratteristica sperimentale. Con il motore di
+sincronizzazione abilitato, l'orologio interno dell'em8300 verrà tenuto
+constantemente sotto controllo, se inizia a spostarsi dall'orologio di
+<application>MPlayer</application> verrà resettato causando lo scarto da parte
+dell'em8300 di tutti i fotogrammi rimasti indietro.
+<option>norm=x</option> imposterà la norma TV della scheda DXR3 senza il
+bisogno di strumenti esterni come em8300setup. Norme valide sono 5 = NTSC,
+4 = PAL-60, 3 = PAL. Norme speciali sono 2 (auto-impostazione usando PAL/PAL-60)
+e 1 (auto-impostazione usando PAL/NTSC) poiché decidono quale norma usare
+in base alla frequenza fotogrammi del filmato. norm = 0 (default) non modifica
+la norma corrente.
+<option><replaceable>dispositivo</replaceable></option> = numero del dipositivo da usare se hai più di una scheda em8300. Ognuna di queste opzioni può essere
+tralasciata.
+<option>:prebuf:sync</option> sembra funzionare molto bene riproducendo filmati
+MPEG-4 (DivX). Alcune persone hanno notificato problemi usando l'opzione prebuf
+riproducendo file MPEG-1/2.
+Potresti voler provare dapprima l'esecuzione senza alcuna opzione, se hai
+problemi di sincronizzazione, o problemi coi sottotitoli DVD, fai un tentativo
+con <option>:sync</option>.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><option>-ao oss:/dev/em8300_ma-<replaceable>X</replaceable></option></term>
   <listitem><para>
-  For audio output, where <replaceable>X</replaceable> is the device number
-  (0 if one card).
+  Per l'uscita audio, dove <replaceable>X</replaceable> è il numero del
+  dispositivo (0 per una scheda sola).
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><option>-af resample=<replaceable>xxxxx</replaceable></option></term>
   <listitem><para>
-  The em8300 cannot play back samplerates lower than 44100Hz. If the sample
-  rate is below 44100Hz select either 44100Hz or 48000Hz depending on which
-  one matches closest. I.e. if the movie uses 22050Hz use 44100Hz as
-  44100 / 2 = 22050, if it is 24000Hz use 48000Hz as 48000 / 2 = 24000
-  and so on.
   This does not work with digital audio output (<option>-ac hwac3</option>).
+  L'em8300 non può riprodurre frequenze inferiori a 44100Hz. Se la frequenza
+  è minore di 44100Hz imposta 44100Hz oppure 48000Hz a seconda di quale sia la
+  più prossima. Per es. se il film usa 22050Hz allora usa 44100Hz come
+  44100 / 2 = 22050, se è 24000Hz usa 48000Hz come 48000 / 2 = 24000 e così
+  via.
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><option>-vf lavc</option></term>
   <listitem><para>
-  To watch non-MPEG content on the em8300 (i.e. MPEG-4 (DivX) or RealVideo)
-  you have to specify an MPEG-1 video filter such as
+  Per visualizzare contenuti non MPEG sull'em8300 (per es. MPEG-4 (DivX) o
+  RealVideo) devi specificare un filtro video MPEG-1 come
   <systemitem class="library">libavcodec</systemitem> (lavc).
-  See the man page for further info about <option>-vf lavc</option>.
-  Currently there is no way of setting the fps of the em8300 which means that
-  it is fixed to 30000/1001 fps.
-  Because of this it is highly recommended that you use
-  <option>-vf lavc=<replaceable>quality</replaceable>:25</option>
-  especially if you are using prebuffering. Then why 25 and not 30000/1001?
-  Well, the thing is that when you use 30000/1001 the picture becomes a bit
-  jumpy.
-  The reason for this is unknown to us.
-  If you set it to somewhere between 25 and 27 the picture becomes stable.
-  For now all we can do is accept this for a fact.
+  Vedi la pagina man per ulteriori informazioni circa <option>-vf lavc</option>.
+  Attualmente non c'è modo di impostare gli fps dell'em8300, il che significa
+  che sono fissati a 30000/1001 fps.
+  A causa di ciò si raccomanda caldamente di usare 
+  <option>-vf lavc=<replaceable>qualità</replaceable>:25</option> soprattutto
+  se stai usando il pre-buffering. Allora perché 25 e non 30000/1001?
+  Bene, il fatto è che quando usi 30000/1001 l'immagine diventa un pochino
+  saltellante. La ragione di ciò ci è sconosciuta.
+  Se li imposti a qualcosa tra 25 e 27 l'immagine diventa stabile.
+  Per adesso tutto quello che possiamo fare è accettarlo empiricamente.
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><option>-vf expand=-1:-1:-1:-1:1</option></term>
   <listitem><para>
-  Although the DXR3 driver can put some OSD onto the MPEG-1/2/4 video, it has
-  much lower quality than <application>MPlayer</application>'s traditional OSD,
-  and has several refresh problems as well. The command line above will firstly
-  convert the input video to MPEG-4 (this is mandatory, sorry), then apply an
-  expand filter which won't expand anything (-1: default), but apply the normal
-  OSD onto the picture (that's what the "1" at the end does).
+  Anche se il driver DXR3 può posizionare qualche OSD sul video MPEG-1/2/4, ha
+  una qualità decisamente inferiore del tipico OSD di
+  <application>MPlayer</application>, e ha anche molti problemi di
+  aggiornamento. La riga comando suddetta dapprima converte il video in ingresso
+  a MPEG-4 (questo è obbligatorio, scusa), poi applica un filtro expand che non
+  espande nulla (-1: default), ma aggiunge all'immagine l'OSD normale
+  (questo è ciò che fa l'"1" alla fine).
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><option>-ac hwac3</option></term>
   <listitem><para>
-  The em8300 supports playing back AC3 audio (surround sound) through the
-  digital audio output of the card. See the <option>-ao oss</option> option
-  above, it must be used to specify the DXR3's output instead of a sound card.
+  L'em8300 supporta la riproduzione audio AC3 (in surround) attraverso l'uscita
+  digitale della scheda. Vedi l'opzione <option>-ao oss</option> più sopra,
+  deve essere usata per specificare l'uscita DXR3 al posto di una scheda audio.
   </para></listitem>
 </varlistentry>
 </variablelist>
@@ -2202,98 +2208,97 @@ problems, or DVD subtitle problems, give <option>:sync</option> a try.
 <title>Zr</title>
 
 <para>
-This is a display-driver (<option>-vo zr</option>) for a number of MJPEG
-capture/playback cards (tested for DC10+ and Buz, and it should work for the
-LML33, the DC10). The driver works by encoding the frame to JPEG and then
-sending it to the card. For the JPEG encoding
-<systemitem class="library">libavcodec</systemitem>
-is used, and required. With the special <emphasis>cinerama</emphasis> mode,
-you can watch movies in true wide screen provided that you have two beamers
-and two MJPEG cards. Depending on resolution and quality settings, this driver
-may require a lot of CPU power, remember to specify <option>-framedrop</option>
-if your machine is too slow. Note: My AMD K6-2 350MHz is (with
-<option>-framedrop</option>) quite adequate for watching VCD sized material and
-downscaled movies.
+Questo è un driver video (<option>-vo zr</option>) per un buon numero di schede
+di cattura/riproduzione MJPEG (provato con DC10+ e Buz, e dovrebbe funzionare
+per LML33, la DC10). Il driver lavora codificando il fotogramma in JPEG e poi
+inviandolo alla scheda. Per la codifica JPEG viene usata, e richiesta,
+<systemitem class="library">libavcodec</systemitem>.
+Con la modalità speciale <emphasis>cinerama</emphasis>, puoi guardare filmati
+in verà modalità widescreen a patto che tu abbia due proiettori e due
+schede MJPEG. Proporzionalmente alla risoluzione e alle impostazioni della
+qualità, questo driver può richiedere molta potenza di CPU, ricordati di
+specificare <option>-framedrop</option> se la tua macchina è troppo lenta.
+Nota: il mio AMD K6-2 350MHz è (con <option>-framedrop</option>) abbastanza
+adeguato per riprodurre materiale VCD e film rimpiccioliti.
 </para>
 
 <para>
-This driver talks to the kernel driver available at
-<ulink url="http://mjpeg.sf.net"/>, so
-you must get it working first. The presence of an MJPEG card is autodetected by
-the <filename>configure</filename> script, if autodetection fails, force
-detection with
+Il driver comunica col driver del kernel disponibile su
+<ulink url="http://mjpeg.sf.net"/>, indi devi avere per prima cosa questo
+funzionante. La presenza di una scheda MJPEG è autorilevata dallo script
+<filename>configure</filename>, se la rilevazione fallisce, forzala con
 <screen>./configure --enable-zr</screen>
 </para>
 
 <para>
-The output can be controlled by several options, a long description of the
-options can be found in the man page, a short list of options can be viewed
-by running
+L'uscita può essere controllata con varie opzioni, una descrizione dettagliata
+delle opzioni si trova nella pagina man, una lista breve delle opzioni si può
+avere eseguendo
 <screen>mplayer -zrhelp</screen>
 </para>
 
 <para>
-Things like scaling and the OSD (on screen display) are not handled by
-this driver but can be done using the video filters. For example, suppose
-that you have a movie with a resolution of 512x272 and you want to view it
-fullscreen on your DC10+. There are three main possibilities, you may scale
-the movie to a width of 768, 384 or 192. For performance and quality reasons,
-I would choose to scale the movie to 384x204 using the fast bilinear software
-scaler. The command line is
+Cose come il ridimensionamento e l'OSD (on screen display) non sono gestite da
+questo driver ma possono essere ottenute usado dei filtri video. Per esempio,
+supponi di avere un film a una risoluzione di 512x272 e vuoi vederlo a schermo
+intero con un'ampiezza di 768, 384 o 192. Per ragioni di prestazioni e di
+qualità, io sceglierei di ridimensionare il film a 384x204 usando il
+ridimensionatore software bilineae veloce. La riga comando diventa
 <screen>
-mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>movie.avi</replaceable>
+mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>filmato.avi</replaceable>
 </screen>
 </para>
 
 <para>
-Cropping can be done by the <option>crop</option> filter and by this
-driver itself. Suppose that a movie is too wide for display on your Buz and
-that you want to use <option>-zrcrop</option> to make the movie less wide,
-then you would issue the following command
+Il ritaglio può essere eseguito dal filtro <option>crop</option> e da questo
+driver di per sé. Supponi che un film sia troppo ampio per vedersi dal tuo
+Buz e che tu voglia usare <option>-zrcrop</option> per ridurre l'ampiezza del
+film, allora dovrai lanciare il comando seguente
 <screen>
 mplayer -vo zr -zrcrop 720x320+80+0 <replaceable>benhur.avi</replaceable>
 </screen>
 </para>
 
 <para>
-if you want to use the <option>crop</option> filter, you would do
+Se vuoi usare il filtro <option>crop</option>, dovresti lanciare
 <screen>
 mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
 </screen>
 </para>
 
 <para>
-Extra occurrences of <option>-zrcrop</option> invoke
-<emphasis>cinerama</emphasis> mode, i.e. you can distribute the movie over
-several TV's or beamers to create a larger screen.
-Suppose you have two beamers. The left one is connected to your
-Buz at <filename>/dev/video1</filename> and the right one is connected to
-your DC10+ at <filename>/dev/video0</filename>. The movie has a resolution
-of 704x288. Suppose also that you want the right beamer in black and white and
-that the left beamer should have JPEG frames at quality 10, then you would
-issue the following command
+Ulteriori presenze di <option>-zrcrop</option> evocano la modalità
+<emphasis>cinerama</emphasis>, per es. puoi distribuire il filmato su varie TV
+o proiettori per creare uno schermo più grande.
+Supponi di avere due proiettori. Quello di sinistra è collegato al tuo Buz su
+<filename>/dev/video1</filename> e quello di destra è connesso al tuo DC10+ su
+<filename>/dev/video0</filename>. Il film ha una risoluzione di 704x288.
+Supponi inoltre di volere il proiettore di destra in bianco e nero e che quello
+di sinistra debba avere fotogrammi JPEG con una qualità 10, allora dovrai
+eseguire il comando seguente
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
     -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
-	<replaceable>movie.avi</replaceable>
+	<replaceable>film.avi</replaceable>
 </screen>
 </para>
 
 <para>
-You see that the options appearing before the second <option>-zrcrop</option>
-only apply to the DC10+ and that the options after the second
-<option>-zrcrop</option> apply to the Buz. The maximum number of MJPEG cards
-participating in <emphasis>cinerama</emphasis> is four, so you can build a
-2x2 vidiwall.
+Vedi che le opzioni che ci sono prima della seconda <option>-zrcrop</option> si
+applicano solo al DC10+ e che le opzioni dopo la seconda
+<option>-zrcrop</option> si applicano al Buz. Il massino numero di schede MJPEG
+contemporanee in <emphasis>cinerama</emphasis> è quattro, per cui puoi
+costruire un muro video di 2x2.
 </para>
 
 <para>
-Finally an important remark: Do not start or stop XawTV on the playback device
-during playback, it will crash your computer. It is, however, fine to
-<emphasis role="bold">FIRST</emphasis> start XawTV,
-<emphasis role="bold">THEN</emphasis> start <application>MPlayer</application>,
-wait for <application>MPlayer</application>
-to finish and <emphasis role="bold">THEN</emphasis> stop XawTV.
+Infine una nota importante: non avviare o fermare XawTV sul dispoitivo di
+riproduzione durante la riproduzione stessa, o ti manderà in crash il
+computer. Va tuttavia bene <emphasis role="bold">PRIMA</emphasis> lanciare 
+XawTV, <emphasis role="bold">POI</emphasis> avviare
+<application>MPlayer</application>, attendere l'uscita di
+<application>MPlayer</application>, e <emphasis role="bold">DOPO</emphasis>
+fermare XawTV.
 </para>
 </sect2>
 
@@ -2303,16 +2308,17 @@ to finish and <emphasis role="bold">THEN</emphasis> stop XawTV.
 <title>Blinkenlights</title>
 
 <para>
-This driver is capable of playback using the Blinkenlights UDP protocol. If you
-don't know what <ulink url="http://www.blinkenlights.de/">Blinkenlights</ulink>
-or its successor
-<ulink url="http://www.blinkenlights.de/arcade/">Arcade</ulink>
-are, find it out. Although this is most probably the least used video output
-driver, without a doubt it is the coolest <application>MPlayer</application>
-has to offer. Just watch some of the
-<ulink url="http://www.blinkenlights.de/video.en.html">Blinkenlights documentation videos</ulink>.
-On the Arcade video you can see the Blinkenlights output driver in
-action at 00:07:50.
+Il driver è in grado di riprodurre usando il protocollo UDP Blinkenlights. Se
+non sai cosa siano
+<ulink url="http://www.blinkenlights.de/">Blinkenlights</ulink> o il suo
+successore  <ulink url="http://www.blinkenlights.de/arcade/">Arcade</ulink>,
+scoprilo. Anche se probabilmente questo è uno degli ultimi driver video usati,
+senza dubbio è il più figo che <application>MPlayer</application> abbia da
+offrire. Guarda solo alcuni dei
+<ulink url="http://www.blinkenlights.de/video.en.html">video documentali di
+Blinkenlights</ulink>.
+Sul video Arcade puoi vedere il driver di uscita video Blinkenlights in azione
+alla posizione 00:07:50.
 </para>
 </sect2>
 </sect1>
@@ -2328,12 +2334,13 @@ action at 00:07:50.
 <title>Schede Matrox G400</title>
 
 <para>
-Under Linux you have two methods to get G400 TV out working:
+Sotto Linux hai due modi per far funzionare l'uscita TV delle G400:
 </para>
 
 <important>
 <para>
-for Matrox G450/G550 TV-out instructions, please see the next section!
+Per le istruzioni per l'uscita TV-out su Matrox G450/G550, vedi per favore la
+sezione successiva!
 </para>
 </important>
 
@@ -2342,22 +2349,23 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
   <term>XFree86</term>
   <listitem>
     <para>
-    Using the driver and the HAL module, available from the <ulink
-    url="http://www.matrox.com">Matrox site</ulink>. This will give you X
-    on the TV.
+    Usando il driver e il modulo HAL, disponibile dal
+    <ulink url="http://www.matrox.com">sito Matrox</ulink>. Questo ti farò
+    avere X sulla TV.
     </para>
     <para>
-    <emphasis role="bold">This method doesn't give you accelerated playback</emphasis>
-    as under Windows! The second head has only YUV framebuffer, the
-    <emphasis>BES</emphasis> (Back End Scaler, the YUV scaler on
-    G200/G400/G450/G550 cards) doesn't work on it! The windows driver somehow
-    workarounds this, probably by using the 3D engine to zoom, and the YUV
-    framebuffer to display the zoomed image. If you really want to use X, use
-    the <option>-vo x11 -fs -zoom</option> options, but it will be
-    <emphasis role="bold">SLOW</emphasis>, and has
-    <emphasis role="bold">Macrovision</emphasis> copy protection enabled
-    (you can "workaround" Macrovision using this
-    <ulink url="http://avifile.sf.net/mgamacro.pl">perl script</ulink>).
+    <emphasis role="bold">Questo metodo non ti fornirà una riproduzione
+    accelerate</emphasis> come sotto Windows! La seconda uscita ha solo il
+    framebuffer YUV, il <emphasis>BES</emphasis> (Back End Scaler, il
+    ridimensionatore sulle schede G200/G400/G450/G550) non funziona su di esso!
+    Il driver per Windows in qualche modo aggira il problema, probabilmente
+    usando il motore 3D per ridimensionare, e il framebuffer YUV per mostrare
+    l'immagine ridimensionata. Se vuoi davvero usare X, uitlizza le opzioni
+    <option>-vo x11 -fs -zoom</option>, ma sarà
+    <emphasis role="bold">LENTO</emphasis>, e avrà la protezione di copia
+    <emphasis role="bold">Macrovision</emphasis> abilitata (puoi "correggere"
+    Macrovision usando questo
+    <ulink url="http://avifile.sf.net/mgamacro.pl">script perl</ulink>).
     </para>
   </listitem>
 </varlistentry>
@@ -2365,50 +2373,50 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
   <term>Framebuffer</term>
   <listitem>
     <para>
-    Using the <emphasis role="bold">matroxfb modules</emphasis> in the 2.4
-    kernels. 2.2 kernels don't have the TVout feature in them, thus unusable
-    for this. You have to enable ALL matroxfb-specific feature during
-    compilation (except MultiHead), and compile them into
-    <emphasis role="bold">modules</emphasis>!
-    You'll also need I2C enabled.
+    Usando i <emphasis role="bold">moduli matroxfb</emphasis> nei kernel 2.4.
+    I kernel 2.2 non hanno in sé la funzionalità TVout, indi sono
+    inutilizzabili per questo fine. Devi abilitare TUTTE le caratteristiche
+    specifiche per matroxfb durante la compilazione (tranne MultiHead), e
+    compilarle dentro ai <emphasis role="bold">moduli</emphasis>!
+    Devi anche avere I2C abilitato.
     </para>
 
     <procedure>
     <step><para>
-      Enter <filename class="directory">TVout</filename> and type
-      <command>./compile.sh</command>. Install
+      Entra in <filename class="directory">TVout</filename> e scrivi
+      <command>./compile.sh</command>. Installa
       <filename>TVout/matroxset/matroxset</filename>
-      somewhere into your <envar>PATH</envar>.
+      da qualche parte nella tua <envar>PATH</envar>.
     </para></step>
     <step><para>
-      If you don't have <command>fbset</command> installed, put
+      Se non hai <command>fbset</command> installato, metti
       <filename>TVout/fbset/fbset</filename>
-      somewhere into your <envar>PATH</envar>.
+      in qualche dove nella tua <envar>PATH</envar>.
     </para></step>
     <step><para>
-      If you don't have <command>con2fb</command> installed, put
+      Se non hai <command>con2fb</command> installato, metti
       <filename>TVout/con2fb/con2fb</filename>
-      somewhere into your <envar>PATH</envar>.
+      da qualche parte nella tua <envar>PATH</envar>.
     </para></step>
     <step><para>
-      Then enter into the <filename class="directory">TVout/</filename>
-      directory in the <application>MPlayer</application> source, and execute
-      <filename>./modules</filename> as root. Your text-mode console will
-      enter into framebuffer mode (no way back!).
+      Poi entra nella directory <filename class="directory">TVout/</filename>
+      nei sorgenti di <application>MPlayer</application>, ed esegui
+      <filename>./modules</filename> come root. La tua console in modalità
+      testuale entrerà in modalità framebuffer (nessuna via di ritorno!).
     </para></step>
     <step><para>
-      Next, EDIT and run the <filename>./matroxtv</filename> script. This will
-      present you to a very simple menu. Press <keycap>2</keycap> and
-      <keycap>Enter</keycap>. Now you should have the same picture on your
-      monitor, and TV. If the TV (PAL by default)
-      picture has some weird stripes on it, the script wasn't able to set the
-      resolution correctly (to 640x512 by default). Try other resolutions
-      from the menu and/or experiment with fbset.
+      Poi, MODIFICA ed esegui lo script <filename>./matroxtv</filename>. Questo
+      ti presenterà un menu molto semplice. Premi <keycap>2</keycap> e
+      <keycap>Enter</keycap>. Ora dovresti avere la stessa immmagine sul tuo
+      monitor e sulla TV. se l'immagine sulla TV (di default PAL) mostra alcune
+      strane strisce, lo script non è stato in grado di impostare
+      adeguatamente la risoluzione (a 640x512 di default). Prova altre
+      risoluzioni dal menu e/o fai dei tentativi con fbset.
     </para></step>
     <step><para>
-      Yoh. Next task is to make the cursor on tty1 (or whatever) to
-      disappear, and turn off screen blanking. Execute the following
-      commands:
+      Evvai. L'operazione successiva è far sparire il cursore a blocco di tty1
+      (o quello che è) e disabilitare lo spegnimento dello schermo. Esegui i
+      comandi seguenti:
 
       <screen>
 echo -e '\033[?25l'
@@ -2420,51 +2428,50 @@ setterm -cursor off
 setterm -blank 0<!--
    --></screen>
 
-      You possibly want to put the above into a script, and also clear the
-      screen. To turn the cursor back:
-      <screen>echo -e '\033[?25h'</screen> or
+      Probabilmente vuoi mettere i suddetti in uno script e anche vuotare lo
+      schermo. Per ripristinare il cursore:
+      <screen>echo -e '\033[?25h'</screen> o
       <screen>setterm -cursor on</screen>
     </para></step>
     <step><para>
-      Yeah kewl. Start movie playing with
+      Yeah kewl. Avvia la riproduzione del film con
       <screen>
-mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable><!--
+mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>nomefile</replaceable><!--
    --></screen>
 
-      (If you use X, now change to matroxfb with for example
+      (se usi X, adesso passa alla matroxfb con per esempio
       <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>F1</keycap></keycombo>.)
-      Change <literal>640</literal> and <literal>512</literal> if you set
-      the resolution to other...
+      Sostituisci <literal>640</literal> e <literal>512</literal> se imposti la
+      risoluzione ad un'altra...
     </para></step>
     <step><para>
-      <emphasis role="bold">Enjoy the ultra-fast ultra-featured Matrox TV
-      output (better than Xv)!</emphasis>
+      <emphasis role="bold">Goditi la ultra-veloce ultra-accessoriata uscita TV
+      Matrox (megli di Xv)!</emphasis>
     </para></step>
     </procedure>
   </listitem>
 </varlistentry>
 </variablelist>
 
-<formalpara><title>Building a Matrox TV-out cable</title>
+<formalpara><title>Costruire un cavo per uscita TV-out Matrox</title>
 <para>
-No one takes any responsibility, nor guarantee for any damage caused
-by this documentation.
+Nessuno si assume alcuna responsabilità, né risponde di alcuna danno causato
+da questa documentazione.
 </para>
 </formalpara>
 
-<formalpara><title>Cable for G400</title>
+<formalpara><title>Cavo per G400</title>
 <para>
-The CRTC2 connector's fourth pin is the composite video signal. The
-ground are the sixth, seventh and eighth pins. (info contributed
-from Balázs Rácz)
+Il quarto pin del connettore CRTC2 è il segnale video composito. La terra sono
+il sesto, settimo e ottavo pin (informazioni fornite da Balázs Rácz).
 </para>
 </formalpara>
 
-<formalpara><title>Cable for G450</title>
+<formalpara><title>Cavo per G450</title>
 <para>
-The CRTC2 connector's first pin is the composite video signal. The
-ground are the fifth, sixth, seventh, and fifteenth (5, 6, 7, 15)
-pins. (info contributed from Balázs Kerekes)
+Il primo pin del connettore CRTC2 è il segnale video composito. La terra sono
+il quinto, sesto, settimo e quindicesimo pin (5, 6, 7, 15) (informazioni
+fornite da Balázs Rácz).
 </para>
 </formalpara>
 </sect2>
@@ -2475,15 +2482,15 @@ pins. (info contributed from Balázs Kerekes)
 <title>Schede Matrox G450/G550</title>
 
 <para>
-TV output support for these cards has only been recently introduced, and is
-not yet in the mainstream kernel.
-Currently the <emphasis role="bold">mga_vid</emphasis> module can't be used
-AFAIK, because the G450/G550 driver works only in one configuration: the first
-CRTC chip (with much more features) on the first display (on monitor),
-and the second CRTC (no <emphasis role="bold">BES</emphasis> - for
-explanation on BES, please see the G400 section above) on TV. So you can only
-use <application>MPlayer</application>'s <emphasis>fbdev</emphasis> output
-driver at the present.
+La gestione dell'uscita TV per queste schede è stata aggiunta solo
+recentemente e non è ancora nel kernel ufficiale.
+Attualmente il modulo <emphasis role="bold">mga_vid</emphasis> non può essere
+utilizzato, per quanto ne so, perché il driver G450/G550 funziona solo in una
+modalità: il primo chip CRTC (con molte più funzioni) sul primo schermo (sul
+monitor), e il secondo CRTC (niente <emphasis role="bold">BES</emphasis> - per
+chiarimenti su BES, vedi la sezione sopra sulla G400) sulla TV. Perciò per ora
+puoi usare solo il driver di uscita <emphasis>fbdev</emphasis> di
+<application>MPlayer</application>.
 </para>
 
 <para>
@@ -2494,7 +2501,7 @@ recommended for G400, see the section above.
 </para>
 
 <para>
-The necessary kernel patch and the detailed HOWTO is downloadable from
+La patch necessaria per il kernel e l'HOWTO dettagliato sono scaricabili da
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
 </sect2>
@@ -2504,45 +2511,45 @@ The necessary kernel patch and the detailed HOWTO is downloadable from
 <sect2 id="tvout-ati">
 <title>Schede ATI</title>
 
-<formalpara><title>PREAMBLE</title>
+<formalpara><title>PREAMBOLO</title>
 <para>
-Currently ATI doesn't want to support any of its TV-out chips under Linux,
-because of their licensed Macrovision technology.
+Attualmente ATI non vuole supportare alcuno dei suoi chip TV-out sotto Linux a
+causa della loro tecnologia Macrovision sotto licenza.
 </para>
 </formalpara>
 
 <itemizedlist>
-<title>ATI CARDS TV-OUT STATUS ON LINUX</title>
+<title>SITUAZIONE USCITA TV DELLE SCHEDE ATI IN LINUX</title>
 <listitem><para>
   <emphasis role="bold">ATI Mach64</emphasis>:
-  supported by <ulink url="http://gatos.sf.net">GATOS</ulink>.
+  supportata da <ulink url="http://gatos.sf.net">GATOS</ulink>.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
-  supported by <ulink url="http://gatos.sf.net">GATOS</ulink>.
+  supportata da <ulink url="http://gatos.sf.net">GATOS</ulink>.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Radeon</emphasis> and <emphasis role="bold">Rage128</emphasis>:
-  supported by <application>MPlayer</application>!
-  Check <link linkend="vesa">VESA driver</link> and
-  <link linkend="vidix">VIDIX</link> sections.
+  <emphasis role="bold">Radeon</emphasis> e <emphasis role="bold">Rage128</emphasis>:
+  supportate da <application>MPlayer</application>!
+  Controlla le sezioni <link linkend="vesa">driver VESA</link> e
+  <link linkend="vidix">VIDIX</link>.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</emphasis>:
-  supported by
+  supportate da
   <ulink url="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</ulink>.
 </para></listitem>
 </itemizedlist>
 
 <para>
-On other cards, just use the <link linkend="vesa">VESA</link> driver,
-without VIDIX. Powerful CPU is needed, though.
+Con le altre schede usa semplicemente il driver <link linkend="vesa">VESA</link>
+senza VIDIX. Tuttavia ti serve una CPU potente.
 </para>
 
 <para>
-Only thing you need to do - <emphasis role="bold">Have the TV connector
-plugged in before booting your PC</emphasis> since video BIOS initializes
-itself only once during POST procedure.
+Un'unica cosa ti serve fare - <emphasis role="bold">Assicurati di avere il
+connettore TV collegato prima di avviare il tuo PC</emphasis> dato che il BIOS
+video si inizializza solamente durante il passaggio POST.
 </para>
 </sect2>
 
@@ -2552,16 +2559,17 @@ itself only once during POST procedure.
 <title>nVidia</title>
 
 <para>
-First, you MUST download the closed-source drivers from
+Per prima cosa, DEVI scaricare i driver proprietari a sorgenti chiusi da
 <ulink url="http://nvidia.com"/>.
-I will not describe the installation and configuration process because it does
-not cover the scope of this documentation.
+Non sarà spiegato il processo di installazione e configurazione visto che non
+esula lo scopo di questa documentazione.
 </para>
 
 <para>
-After XFree86, XVideo, and 3D acceleration is properly working, edit your
-card's Device section in the <filename>XF86Config</filename> file, according
-to the following example (adapt for your card/TV):
+Dopo che XFree86, XVideo, e l'accelerazione 3D funzionano correttamente,
+modifica la sezione Device della tua scheda nel file
+<filename>XF86Config</filename>, secondo l'esempio seguente (adattalo alla tua
+scheda/TV):
 
 <programlisting>
 Section "Device"
@@ -2584,7 +2592,7 @@ EndSection
 </para>
 
 <para>
-Of course the important thing is the TwinView part.
+Sicuramente la cosa importante è la parte TwinView.
 </para>
 </sect2>
 
@@ -2594,53 +2602,55 @@ Of course the important thing is the TwinView part.
 <title>NeoMagic</title>
 
 <para>
-The NeoMagic chip is found in a variety of laptops, some of them are equipped
-with a simple analog TV encoder, some have a more advanced one.
+Il chip NeoMagic si trova in unìampia gamma di portatili, alcuni dei quali sono
+equipaggiati con un codificatore TV analogico semplice, alcuni ne hanno uno
+avanzato.
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Analog encoder chip</emphasis>:
-  It has been reported that reliable TV out can be obtained by using
-  <option>-vo fbdev</option> or <option>-vo fbdev2</option>.
-  You need to have vesafb compiled in your kernel and pass
-  the following parameters on the kernel command line:
+  E' stato riportato che si può ottenere un'uscita TV affidabile usando
+  <option>-vo fbdev</option> o <option>-vo fbdev2</option>.
+  Devi avere vesafb compilato nel kernel e passare i seguenti parametri sulla
+  riga di avvio del kernel:
   <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
-  You should start <application>X</application>, then switch to console mode
-  with e.g.
+  Dovresti far partire <application>X</application>, poi passare alla modalità
+  in console con per es.
   <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>F1</keycap></keycombo>.
-  If you fail to start <application>X</application> before running
-  <application>MPlayer</application> from the console, the video
-  becomes slow and choppy (explanations are welcome).
-  Login to your console, then initiate the following command:
+  Se non avvii <application>X</application> prima di lanciare
+  <application>MPlayer</application> dalla console, il video diventa lento e
+  frammentato (chiarimenti sono benvenuti).
+  Collegati in console, poi lancia il comando seguente:
 
   <screen>clear; mplayer -vo fbdev -zoom -cache 8192 dvd://</screen>
 
-  Now you should see the movie running in console mode filling up about
-  half your laptop's LCD screen. To switch to TV hit
-  <keycombo><keycap>Fn</keycap><keycap>F5</keycap></keycombo> three times.
-  Tested on a Tecra 8000, 2.6.15 kernel with vesafb, ALSA v1.0.10.
+  Ora dovresti vedere il filmato in console, che riempie circa la metà dello
+  schermo LCD del tuo portatile. Per passare alla TV premi per tre volte
+  <keycombo><keycap>Fn</keycap><keycap>F5</keycap></keycombo>.
+  Provato su un Tecra 8000, kernel 2.6.15 con vesafb, ALSA v1.0.10.
 </para></listitem>
 <listitem>
   <para>
-  <emphasis role="bold">Chrontel 70xx encoder chip</emphasis>:
-  Found in IBM Thinkpad 390E and possibly other Thinkpads or notebooks.
+  <emphasis role="bold">Chip di codifica Chrontel 70xx</emphasis>:
+  Si trova negli IBM Thinkpad 390E e facilmente altri Thinkpad o portatili.
   </para><para>
-  You must use <option>-vo vesa:neotv_pal</option> for PAL or
-  <option>-vo vesa:neotv_ntsc</option> for NTSC.
-  It will provide TV output function in the following 16 bpp and 8 bpp modes:
+  Devi usare <option>-vo vesa:neotv_pal</option> per PAL o
+  <option>-vo vesa:neotv_ntsc</option> per NTSC.
+  Fornirà la funzione di uscita TV nelle modalità a 16 e 8 bpp seguenti:
   </para>
   <itemizedlist>
-    <listitem><para>NTSC 320x240, 640x480 and maybe 800x600 too.</para></listitem>
+    <listitem><para>NTSC 320x240, 640x480 e forse anche 800x600.</para></listitem>
     <listitem><para>PAL  320x240, 400x300, 640x480, 800x600.</para></listitem>
   </itemizedlist>
-  <para>Mode 512x384 is not supported in BIOS. You must scale the image
-  to a different resolution to activate TV out. If you can see an image on the
-  screen in 640x480 or in 800x600 but not in 320x240 or other smaller
-  resolution you need to replace two tables in <filename>vbelib.c</filename>.
-  See the vbeSetTV function for details. Please contact the author in this case.
+  <para>
+  La modalità 512x384 non è supportata dal BIOS. Per attivare l'uscita TV
+  devi ridimensionare l'immagine a una risoluzione diversa. Se riesci a vedere
+  un immagine sullo schermo a 640x480 o a 800x600 ma non a 320x240 o ad altre
+  risoluzioni inferiori devi sostituire due tabelle in
+  <filename>vbelib.c</filename>. Vedi la funzione vbeSetTV per i dettagli.
+  In questo caso per favore contatta l'autore.
   </para>
   <para>
-  Known issues: VESA-only, no other controls such as brightness, contrast,
-  blacklevel, flickfilter are implemented.
+  Problemi conosciuti: solo VESA, non è implementato alcun controllo come
+  luminosità, contrasto, livello del nero, filtro per lo sfarfallio.
   </para>
 </listitem>
 </itemizedlist>
