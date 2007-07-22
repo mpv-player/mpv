@@ -220,7 +220,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         } else
         {
             vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
-                    flags, InputOutput, "xmga", title);
+                    flags, xWAttribs.colormap, "xmga", title);
         }
 
         if (vo_gc != None)

@@ -302,7 +302,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	{
 	    vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy,
                   window_width, window_height, flags,
-	          InputOutput, "xvidix", title);
+	          xswa.colormap, "xvidix", title);
 	    XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
 	}
 	 
