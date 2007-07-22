@@ -1931,7 +1931,7 @@ EOF
 	    sun4c) proc=v7 ;; 
 	    sun4d) proc=v8 ;;
 	    sun4m) proc=v8 ;;
-	    sun4u) proc=v9 _vis='yes' _def_vis='#define HAVE_VIS = yes' ;;
+	    sun4u) proc=ultrasparc _vis='yes' _def_vis='#define HAVE_VIS = yes' ;;
 	    sun4v) proc=v9 ;;
 	    *) proc=v8 ;;
 	esac
