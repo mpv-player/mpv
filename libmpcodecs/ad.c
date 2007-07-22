@@ -41,6 +41,7 @@ extern ad_functions_t mpcodecs_ad_libdv;
 extern ad_functions_t mpcodecs_ad_qtaudio;
 extern ad_functions_t mpcodecs_ad_twin;
 extern ad_functions_t mpcodecs_ad_libmusepack;
+extern ad_functions_t mpcodecs_ad_libdca;
 
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
@@ -92,6 +93,9 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #endif
 #ifdef HAVE_MUSEPACK
   &mpcodecs_ad_libmusepack,
+#endif
+#ifdef USE_LIBDCA
+  &mpcodecs_ad_libdca,
 #endif
   NULL
 };

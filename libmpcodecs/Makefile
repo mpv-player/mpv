@@ -107,6 +107,7 @@ SRCS_COMMON-$(HAVE_POSIX_SELECT)     += vf_bmovl.c
 SRCS_COMMON-$(JPEG)                  += vd_ijpg.c
 SRCS_COMMON-$(LIBA52)                += ad_liba52.c
 SRCS_COMMON-$(LIBAVCODEC)            += ad_ffmpeg.c vd_ffmpeg.c vf_lavc.c vf_lavcdeint.c
+SRCS_COMMON-$(LIBDCA)                += ad_libdca.c
 SRCS_COMMON-$(LIBDV)                 += ad_libdv.c vd_libdv.c
 SRCS_COMMON-$(LIBMAD)                += ad_libmad.c
 SRCS_COMMON-$(LIBMPEG2)              += vd_libmpeg2.c
