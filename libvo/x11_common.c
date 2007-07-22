@@ -1274,7 +1274,7 @@ Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
  * \param height height of window
  * \param flags flags for window creation.
  *              Only VOFLAG_FULLSCREEN is supported so far.
- * \param col_map Colourmap for window
+ * \param col_map Colourmap for window or CopyFromParent if a specific colormap isn't needed
  * \param classname name to use for the classhint
  * \param title title for the window
  *
