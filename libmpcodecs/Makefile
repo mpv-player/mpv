@@ -151,4 +151,4 @@ clean::
 	rm -f native/*.o native/*.a native/*~
 
 
-vd_mpng.o vf_screenshot.o: CFLAGS := $(filter-out -I../libavcodec,$(CFLAGS))
+ad_libdca.o vd_mpng.o vf_screenshot.o: CFLAGS := $(filter-out -I../libavcodec,$(CFLAGS))
