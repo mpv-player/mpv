@@ -5,9 +5,9 @@
 
 <para>
 Per la lista completa delle opzioni disponibili ed esempi per
-<application>MEncoder</application>, leggi per favore la pagina man. Per una
-serie di esempi pronti all'uso e guide dettagliate sull'utilizzo di svariati
-parametri di codifica leggi le
+<application>MEncoder</application>, leggi per favore la pagina di manuale. Per
+una serie di esempi pronti all'uso e guide dettagliate sull'utilizzo di
+svariati parametri di codifica leggi le
 <ulink url="../../tech/encoding-tips.txt">indicazioni per la codifica</ulink>
 che sono stati selezionati da vari thread sulla mailing list MPlayer-users.
 Cerca
@@ -28,10 +28,10 @@ relativi alla codifica con <application>MEncoder</application>.
 <para>
 I codec audio e video per la codifica vengono selezionati rispettivamente con
 le opzioni <option>-oac</option> e <option>-ovc</option>.
-Scrivi per esempio:
+Esegui per esempio:
 <screen>mencoder -ovc help</screen>
 per elencare tutti i codec video supportati dalla versione di
-<application>MEncoder</application> sulla tua macchina.
+<application>MEncoder</application> sul tuo sistema.
 Sono disponibili le scelte seguenti:
 </para>
 
@@ -45,7 +45,7 @@ Codec audio:
 <tbody>
 <row>
   <entry>mp3lame</entry>
-  <entry>codifica in MP3 VBR, ABR o CBR MP3 con LAME</entry>
+  <entry>codifica in MP3 VBR, ABR o CBR MP3 tramite LAME</entry>
 </row>
 <row>
   <entry>lavc</entry>
@@ -124,7 +124,7 @@ I formati contenitore di uscita si selezionano con l'opzione
 Scrivi:
 <screen>mencoder -of help</screen>
 per elencare tutti i contenitori supportati dalla versione di
-<application>MEncoder</application> sulla tua macchina.
+<application>MEncoder</application> sul tuo sistema.
 Sono disponibili le scelte seguenti:
 </para>
 
@@ -175,7 +175,7 @@ Contenitori <systemitem class="library">libavformat</systemitem>:
 <para>
 Se hai impostato <systemitem class="library">libavformat</systemitem> per fare
 il mux del file di uscita (usando <option>-of lavf</option>), il giusto formato
-contenitore verràdeterminato dall'estensione del file di uscita.
+contenitore verrà determinato dall'estensione del file di uscita.
 Puoi forzare un formato contenitore specifico con l'opzione
 <option>format</option> di <systemitem class="library">libavformat</systemitem>.
 
@@ -220,7 +220,7 @@ Puoi forzare un formato contenitore specifico con l'opzione
 </row>
 <row>
   <entry>nut</entry>
-  <entry>contenitore aperto NUT (sperimentale e non ancora spec-compliant)</entry>
+  <entry>contenitore "aperto" NUT (sperimentale e non ancora spec-compliant)</entry>
 </row>
 <row>
   <entry>mov</entry>
@@ -273,11 +273,11 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
 <para>
 <application>MEncoder</application> può codificare da file o direttamente da
 un disco DVD o VCD.
-Includi semplicemente nella riga comando il nome file per codificare da file,
-oppure <option>dvd://</option><replaceable>numero_titolo</replaceable> o
-<option>vcd://</option><replaceable>numero_traccia</replaceable> per codificare
-da un titolo DVD o da un disco VCD.
-Se hai già copiato un DVD sul tuo disco fisso (puoi usare uno strumento tipo
+Includi semplicemente nella riga comando il nome file per codificare dal file
+stesso, oppure <option>dvd://</option><replaceable>numero_titolo</replaceable>
+o <option>vcd://</option><replaceable>numero_traccia</replaceable> per
+codificare da un titolo DVD o da una traccia VCD.
+Se hai già copiato un DVD sul tuo disco fisso (puoi usare uno strumento come
 <application>dvdbackup</application>, disponibile per la maggior parte dei
 sistemi) e desideri codificare da tale copia, dovresti ancora usare la sintassi
 <option>dvd://</option>, insieme con <option>-dvd-device</option> seguita dal
@@ -321,12 +321,14 @@ L'ingresso DVB funziona in modo simile.
 La definizione viene dal fatto che questo metodo codifica il file
 <emphasis>due volte</emphasis>. La prima codifica (dubbed pass) genera alcuni
 file temporanei (<filename>*.log</filename>) con una dimensione di pochi
-megabyte, per ora non cancellarli (puoi cancellare l'AVI o meglio ancora non
-creare alcun video ridirezionandolo verso <filename>/dev/null</filename>).
-Nel secondo passaggio viene creato il secondo file di uscita, usando i dati
-della frequenza bit presi dai file temporanei. Il file risultante avrà una
-qualità dell'immagine decisamente migliore. Se questa è la prima volta che
-senti parlare di ciò dovresti consultare alcune guide disponibili in rete.
+megabyte, non cancellarli dopo il primo passaggio (puoi cancellare l'AVI o
+meglio ancora non creare alcun video ridirezionandolo verso
+<filename>/dev/null</filename>).
+Nel secondo passaggio viene creato il secondo file di output, usando i dati
+del bitrate presi dai file temporanei. Il file risultante avrà una qualità
+dell'immagine decisamente migliore. Se questa è la prima volta che senti
+parlare di quasta cosa ti conviene leggere qualcuna delle guide disponibili su
+internet.
 </para>
 
 <example id="copy_audio_track">
@@ -347,7 +349,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 <para>
 La codifica in due passaggi della seconda traccia di un DVD in un AVI MPEG-4
 ("DivX") codificando la traccia audio in MP3.
-Fai attenzione ad usare questo metodo dato che in alcuni casi può portare
+Fai attenzione se usi questo metodo, dato che in alcuni casi può portare
 desincronizzazione audio/video.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
@@ -373,7 +375,7 @@ essere diverse.
 Dovresti accertarti di rispettare i seguenti vincoli:
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Frequenza bit</emphasis>: non dovrebbe oltrepassare i
+  <emphasis role="bold">Bitrate</emphasis>: non dovrebbe oltrepassare i
   1500kbps, tuttavia, versioni precedenti supportavano quasi ogni frequenza a
   patto che l'intestazione non dicesse che era troppo alta.
 </para></listitem>
@@ -381,7 +383,7 @@ Dovresti accertarti di rispettare i seguenti vincoli:
   <emphasis role="bold">Dimensioni</emphasis>: la larghezza e l'altezza del
   video PSP dovrebbero essere multipli di 16 e il prodotto larghezza * altezza
   dovrebbe essere &lt;= 64000.
-  In alcune circostanze, puotrebbe essere possibile che la PSP riproduca
+  In alcune circostanze, potrebbe essere possibile che la PSP riproduca
   risoluzioni più grandi.
 </para></listitem>
 <listitem><para>
@@ -414,7 +416,7 @@ Nota che puoi impostare il titolo del video con
 <title>Codificare in formato MPEG</title>
 
 <para>
-<application>MEncoder</application> può generare file nel formato di uscita
+<application>MEncoder</application> può generare file nel formato di output
 MPEG (MPEG-PS).
 Di solito, quando stai usando video MPEG-1 o MPEG-2, è perché stai codificando
 per un formato vincolato come SVCD, VCD, o DVD.
@@ -455,12 +457,12 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>VCD.mpg</replaceab
 <note><title>Consiglio:</title>
 <para>
 Se per qualche motivo la qualità video del secondo passaggio non ti soddisfa,
-puoi rilanciare la tua codifica video con una diversa frequenza di uscita,
-sempre che tu abbia tenuto i file statistici del passaggio precedente.
+puoi rilanciare la tua codifica video con un diverso bitrate di uscita,
+sempre che tu abbia tenuto i file con le statistiche del passaggio precedente.
 Questo è possbilie dato che l'obiettivo principale del file delle statistiche
 è registrarsi la complessità di ciascun frame, che non dipende direttamente
-dalla frequenza. Dovresti tuttavia fare attenzione che otterrai i risultati
-migliori se tutti i passaggi sono eseguiti con frequenze non troppo diverse tra
+dal bitrate. Dovresti tuttavia essere consapevole che otterrai i risultati
+migliori se tutti i passaggi sono eseguiti con bitrate non troppo diversi tra
 loro.
 </para>
 </note>
