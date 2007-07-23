@@ -243,8 +243,8 @@ di contenitori.
 Sfortunatamente, dato che <application>MEncoder</application> non è stato
 progettato dall'inizio per supportare formati contenitore diversi da AVI,
 dovresti essere piuttosto paranoici riguardo al file risultante.
-Assicurati per favore che la sincronizzazione audio/video sia OK e che il file
-possa essere riprodotto correttamente da altri programmi oltre a
+Assicurati per favore che la sincronizzazione audio/video sia a posto e che il
+file possa essere riprodotto correttamente da altri programmi oltre a
 <application>MPlayer</application>.
 </para>
 
