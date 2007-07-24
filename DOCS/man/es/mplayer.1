@@ -11,7 +11,7 @@
 .\" FIXME: Las nuevas frases deben comenzar en nuevas líneas.
 .\" Arreglado hasta la línea 1131.
 .\"
-.\" Traducido hasta la línea 3938 hay que revisar también las anteriores para
+.\" Traducido hasta la línea 4483 hay que revisar también las anteriores para
 .\" detectar algunos pequeños cambios.
 .
 .\" --------------------------------------------------------------------------
@@ -1872,7 +1872,7 @@ Añade una banda negra en la parte superior de la imagen.
 El renderizador SSA/ASS puede poner los subtítulos ahí (con \-ass-use-margins).
 .
 .TP
-.B \-(no)ass-use-margins
+.B \-ass-use-margins
 Habilita/Inhabilita el uso de subtítulos inferiores y superiores en los
 bordes negros cuando estan disponibles (por defecto: no).
 .
@@ -1919,7 +1919,7 @@ Vuelca el flujo de subtítulo desde archivos VOB
 Vea también las opciones \-dump*sub y \-vobsubout*.
 .
 .TP
-.B \-(no)embeddedfonts (solamente FreeType)
+.B \-embeddedfonts (solamente FreeType)
 Habilita la extracción de las fuentes incrustadas Matroska (por defecto: desactivado)
 Estas fuentes pueden ser usadas para el renderizado de subtítulos SSA/ASS (opción \-ass)
 Los ficheros de las fuentes se crean en el directorio ~/.mplayer/\:fonts
@@ -3932,133 +3932,73 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .SH "OPCIONES DE DECODIFICADO/\:FILTRADO"
 .
 .TP
-.B \-ac <[-]codec1,[-]codec2,...[,]>
-Especifica una lista de prioridades de codecs de audio para ser usados,
-de acuerdo con su nombre del codec en codecs.conf.
+.B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
+Especifica una lista de prioridades de los codecs de audio,
+de acuerdo a su nombre en codecs.conf.
 Use un '-' antes del nombre del codec para omitirlo.
+Use un '+' antes del nombre del codec para forzar su uso, ¡esto probablemente
+cause el fallo del programa!.
+Si la lista al final tiene una ',' MPlayer probará los codecs no listados.
 .br
 .I NOTA:
 Vea \-ac help para una lista completa de los codecs disponibles.
-.br
-Si la lista tiene una ',' al final se vuelve a los codecs no listados.
 .sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
 .IPs "\-ac mp3acm"
-fuerza el codec MP3 l3codeca.acm
+Fuerza el codec MP3 l3codeca.acm.
 .IPs "\-ac mad,"
-prueba libmad primero, después vuelve a los otros
+Prueba libmad primero, después los demás.
 .IPs "\-ac hwac3,a52,"
-prueba pasar a través de hardware AC3, luego el codec por software
-AC3, y finalmente otros
+Prueba pasar a través del hardware AC3, luego el codec por software
+AC3, y finalmente los demás.
+.IPs "\-ac hwdts,"
+Prueba el codec por hardware DTS, luego los demás.
 .IPs "\-ac -ffmp3,"
-prueba otros codecs excepto el decodificador de MP3 FFmpeg
+Se salta el decodificador MP3 de FFmpeg.
 .RE
 .PD 1
 .
 .TP
-.B \-af <filtro1[=opción1:opción2:...],filtro2,...>
-Activa una lista separada por comas de filtros de audio y sus opciones.
-.br
-Los filtros disponibles son:
-.
+.B \-af-adv <force=(0\-7):list=(filtros)> (vea también la opción \-af)
+Especifica opciones avanzadas de los filtros de audio:
 .RSs
-.IPs resample[=srate[:sloppy][:tipo]]
-Cambia la frecuencia de muestreo del flujo de audio a un srate entero (Hz).
-Solo suporta el formato little-endian de 16-bit.
-.IPs channels[=nch]
-Cambia el número de canales a nch canales de salida.
-Si el número de canales de canales de salida es mayor que el número de canales
-de entrada se insertan canales vacíos (excepto para la mezcla de mono a estéreo,
-en cuyo caso el canal mono se repite en ambos canales de salida).
-Si el número de canales de salida es menor que el número de canales de entrada
-los canales excedentes son truncados.
-.IPs format[=bps:f]
-Selecciona el formato f y los bytes por muestra bps usados para la salida
-de la capa de filtro.
-La opción bps es un entero y denota Bytes por muestra.
-El formato f es una cadena de texto conteniendo una mezcla concatenada de:
-.br
-alaw, mulaw o imaadpcm
-.br
-float o int
-.br
-unsigned o signed
-.br
-le o be (little o big-endian)
-.br
-.IPs volume[=v:sc]
-Selecciona el nivel del volumen de salida.
-El filtro no es reentrante y puede ser solo activado una vez para cada flujo
-de audio.
-.RSss
-v: ganancia deseada en dB para todos los canales en el flujo de audio.
-La ganancia puede ser establecida desde -200dB hasta +60dB (donde -200dB
-silencia el sonido completamente y +60dB es igual a una ganancia de 1000).
-.br
-sc: activa recortado por software.
-.REss
-.IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
-Mezcla canales arbitrariamente, vea DOCS/\:HTML/\:es/\:audio.html
-para detalles.
-.RSss
-n: número de canales de salida (1\-6).
-.br
-lij: Cuánto del canal de entrada j es mezclado con el canal de salida i.
-.REss
-.IPs sub[=fc:ch]
-Añade canal de sub-woofer.
-.RSss
-fc: frecuencia de corte para el filtro paso-baja (20Hz a 300Hz) (por
-defecto: 60Hz)
-.br
-ch: número de canal para el sub-canal.
-.REss
-.IPs surround[=d]
-Decodificador para el surround de matriz de codificación, funciona en
-cualesquiera archivos de 2 canales.
-.RSss
-d: tiempo de retardo en ms para los altavoces traseros (0ms a 1000ms) (por
-defecto: 15ms)
-.REss
-.IPs delay[=ch1:ch2:...]
-Retarda la salida de sonido.
-Especifica el retardo separadamente para cada canal en milisegundos (número real
-entre 0 y 1000).
-.IPs export[=mmapped_file[:nsamples]]
-Exporta la señal entrante a otro proceso usando mapeado de memoria (mmap()).
-.RSss
-mmapped_file: Archivo con los datos a mapear (por defecto:
-~/.mplayer/\:mplayer-af_export).
-.br
-nsamples: número de muestras por canal (por defecto: 512)
-.REss
-.RE
-.
-.TP
-.B \-af-adv <force=(0\-3):list=(filtros)> (vea también la opción \-af)
-Especifica opciones avanzadas de filtros de audio:
-.
-.RSs
-.IPs force=<0\-3>
+.IPs force=<0\-7>
 Fuerza la inserción de filtros de audio de una de las siguientes maneras:
 .RSss
-0: Inserción de filtros completamente automática (por defecto)
+0: Inserción de filtros completamente automática.
 .br
-1: Optimizada para precisión.
+1: Optimizada para precisión (por defecto).
 .br
 2: Optimizada para velocidad.
+.I Aviso:
+Algunas de las características de los filtros de audio pueden fallar
+silenciosamente y la calidad del sonido puede bajar.
 .br
-3: Desactiva auto.
+3: No usar ni la inserción automática de filtros ni las optimizaciones.
+.I Aviso:
+Es posible que MPlayer falle usando esta opción.
+.br
+4: Inserción automática de filtros de acuerdo con la opción 0,
+pero se hace uso del proceso en coma flotante cuando sea posible.
+.br
+5: Inserción automática de filtros de acuerdo con la opción 1,
+pero se hace uso del proceso en coma flotante cuando sea posible.
+.br
+6: Inserción automática de filtros de acuerdo con la opción 2,
+pero se hace uso del proceso en coma flotante cuando sea posible.
+.br
+7: Inserción automática de filtros de acuerdo con la opción 3,
+pero se hace uso del proceso en coma flotante cuando sea posible.
 .REss
 .IPs list=<filtros>
-Lo mismo que \-af (vea también la opción \-af).
+Lo mismo que \-af.
 .RE
 .
 .TP
 .B \-afm <driver1,driver2,...>
-Especifica una lista de prioridades de familia de codecs de audio, de
+Especifica una lista de prioridades de familias de codecs de audio, de
 acuerdo a su nombre en codecs.conf.
 Se queda en el que tiene por defecto si ninguno funciona bien.
 .br
@@ -4069,17 +4009,16 @@ Vea \-afm help para una lista completa de los controladores disponibles.
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-Prueba codecs FFmpeg libavcodec (mp1/\:2/\:3) primero.
+Prueba los codecs libavcodec de FFmpeg primero.
 .IPs "\-afm acm,dshow"
 prueba los codecs Win32 primero
 .RE
 .PD 1
 .
 .TP
-.B \-aspect <razón>
-Sobreescribe la razón de aspecto de las películas
-Es autodetectada en archivos MPEG, pero puede no ser autodetectada en la
-mayoría de los archivos AVI.
+.B \-aspect <razón> (vea también \-zoom)
+Sobreescribe la razón de aspecto de las películas en el caso de que la
+información del aspecto sea incorrecta o falte.
 .sp 1
 .I EJEMPLO:
 .PD 0
@@ -4096,52 +4035,71 @@ Desactiva la compensación automática de la relación de aspecto de la
 película.
 .
 .TP
+.B "\-field-dominance <-1\-1>"
+Estblece el primer campo para el contenido entrelazado.
+Útil para desentrelazadores que doblan el framerate: \-vf tfields=1,
+\-vf yadif=1 y \-vo xvmc:bobdeint.
+.PD 0
+.RSs
+.IPs -1
+auto (por defecto): Si el decodificador no exporta la información adecuada
+vuelve a 0 (el campo de arriba primero).
+.IPs 0
+el campo de arriba primero
+.IPs 1
+el campo de abajo primero
+.RE
+.PD 1
+.
+.TP
 .B "\-flip \ "
 Voltea la imagen arriba-abajo.
 .
 .TP
-.B \-lavdopts <opción1:opción2:...> (CÓDIGO DE PRUEBA)
-Si se decodifica con libavcodec, puede especificar parámetros aquí.
+.B \-lavdopts <opción1:opción2:...> (CÓDIGO DE DEPURACIÓN)
+Especifica los parámetros de decodificado de libavcodec.
+Separe las opciones múltiples con una coma.
 .sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
-\-lavdopts bug=1
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
-
+.sp 1
 .RS
-.I NOTA:
-Simplemente añade los valores de las cosas que quiere habilitar.
-.br
 Las opciones disponibles son:
 .RE
-.
 .RSs
-.IPs "ec\ \ \ "
-ocultación de errores:
+.IPs bitexact
+Usar únicamente los algoritmos bit-exact en todos los pasos de decodificación
+(para la comprobación de codecs).
+.IPs bug=<valor>
+Corrección manual para los fallos de codificador.
 .RSss
-1: usa un filtro debloqueador fuerte para MBs dañados
+0: nada
 .br
-2: búsqueda MV iterativa (lento)
+1: detectar automáticamente errores (por defecto)
 .br
-3: todos (por defecto)
-.REss
-.IPs er=<valor>
-.sp 1
-elasticidad de errores:
-.RSss
+2 (msmpeg4v3): algunos viejos ficheros lavc msmpeg4v3 (sin detección)
 .br
-0: deshabilitado
+4 (mpeg4): error de entrelazado de XviD (detección si fourcc==XVIX)
 .br
-1: cuidadoso (debe funcionar con codificadores en mal estado)
+8 (mpeg4): UMP4 (detección si fourcc==UMP4)
 .br
-2: normal (por defecto) (funciona con codificadores que lo cumplan)
+16 (mpeg4): error de rellenado (detectado automáticamente)
 .br
-3: agresivo (más comprobaciones pero puede causar problemas incluso
-para flujos válidos)
+32 (mpeg4): error vlc ilegal (detectado para fourcc)
 .br
-4: muy agresivo
+64 (mpeg4): error qpel de Xvid y DivX (detectado para fourcc/\:version)
+.br
+128 (mpeg4): antiguo estándar qpel (detectado para fourcc/\:version)
+.br
+256 (mpeg4): otro fallo qpel (detectado para fourcc/\:version)
+.br
+512 (mpeg4): error direct-qpel-blocksize (detectado para fourcc/\:version)
+.br
+1024 (mpeg4): error de rellenado de bordes (detectado para fourcc/\:version)
 .REss
 .IPs debug=<valor>
 debug:
@@ -4153,7 +4111,7 @@ debug:
 .br
 2: control de tasa
 .br
-4: bitstream
+4: flujo de bits
 .br
 8: tipo de MB
 .br
@@ -4169,17 +4127,117 @@ debug:
 .br
 0x0200: PTS
 .br
-0x0400: error resilience
+0x0400: error de resistencia
 .br
 0x0800: operaciones de control de manejo de memoria (H.264)
 .br
 0x1000: fallos
+.br
+0x2000: Visualización del parámetro de cuantización (QP), valores bajos producen
+un tinte verde.
+.br
+0x4000: Visualización del tipo de bloques.
 .REss
-.IPs vismv=<valor>
-vismv:
+.IPs ec=<valor>
+Estrategia para la ocultación de errores:
+.RSss
+1: usa un filtro desbloqueador fuerte para MBs dañados
+.br
+2: búsqueda MV iterativa (lento)
+.br
+3: todos (por defecto)
+.REss dequantization
+.IPs er=<valor>
+Estrategia para la resistencia de errores:
 .RSss
 .br
-0: deshabilitado
+0: desactivado
+.br
+1: cuidadoso (debe funcionar con codificadores en mal estado)
+.br
+2: normal (por defecto) (funciona con codificadores que lo cumplan)
+.br
+3: agresivo (más comprobaciones pero puede causar problemas incluso
+para flujos válidos)
+.br
+4: muy agresivo
+.REss
+.IPs "fast (MPEG-2, MPEG-4, y H.264 solamente)"
+Activar algunas optimizaciones que no cumplen las especificaciones y que
+potencialmente pueden causar problemas, como decuantización simple, compensación
+de movimiento simple, asume el uso de la matriz de cuantización por defecto,
+asume YUV 4:2:0 y saltar algunas comprobaciones de detección de flujos de
+bits dañados
+.IPs "gray\ "
+decodificación solo en escala de grises (un poco más rápida que con color)
+.IPs "idct=<0\-99> (vea \-lavcopts)"
+Para una mejor calidad de la decodificación use el mismo algoritmo para
+decodificar y codificar. Esto, sin embargo, hace que se pague un precio
+en precisión.
+.IPs lowres=<número>[,<w>]
+Decodifica a resoluciones más bajas.
+La decodificación a resoluciones más bajas no esta soportada por todos los 
+codecs y a menudo producirá artefactos no deseados.
+Esto no es un fallo, sino un efecto secundario de no decodificar a resolución
+completa.
+.RSss
+.br
+0: desactivado
+.br
+1: 1/2 resolución
+.br
+2: 1/4 resolución
+.br
+3: 1/8 resolución
+.REss
+.RS
+Si se especifica <w> la decodificación a resoluciones más bajas sólo se usará si
+la anchura del vídeo es mayor o igual que <w>.
+.RE
+.IPs "sb=<número> (sólo MPEG2)"
+Salta el número de filas de macrobloque especificadas en la parte de abajo.
+.IPs "st=<número> (sólo MPEG2)"
+Salta el número de filas de macrobloque especificadas en la parte de arriba.
+.IPs skiploopfilter=<valor\ de\ salto>\ (sólo\ H.264)
+Salta el filtro de bucle (desbloqueo) durante la decodificación H.264.
+Como se supone que el marco filtrado debe usarse como referencia
+para decodificar marcos dependientes esto tiene un efecto peor en la calidad
+que no hacer el desbloqueo en p.e.\& MPEG-2 vídeo.
+Pero al menos para ficheros HDTV con una alta tasa de bits produce una gran
+aceleración sin una visible pérdida de calidad.
+.sp 1
+<valor de salto> puede ser uno de los siguientes valores:
+.RSss
+.br
+none: No saltar nunca.
+.br
+default: Saltar pasos de proceso inútiles (p.e.\& paquetes de tamaño 0 en AVI).
+.br
+nonref: Saltar marcos que no están referenciados (p.e.\& no se usa para
+decodificar otros marcos, el error no se puede "acumular").
+.br
+bidir: Salta Marcos-B.
+.br
+nonkey: Salta todos los marcos excepto los marcos clave.
+.br
+all: Salta todos los marcos.
+.REss
+.IPs "skipidct=<valor de salto> (sólo MPEG-1/2)"
+Salta el paso IDCT.
+Esto degrada mucho la calidad en la mayoría de los casos
+(vea skiploopfilter para obtener los valores de salto disponibles).
+.IPs skipframe=<valor\ de\ salto>
+Salta la decodificación de marcos por completo.
+Produce una gran aceleración, pero también un movimiento desigual y a veces
+artefactos
+(vea skiploopfilter para obtener los valores de salto disponibles).
+.IPs "threads=<1\-8> (sólo MPEG-1/2)"
+número de hilos que se usarán para la decodificación (por defecto: 1)
+.IPs vismv=<valor>
+Visualiza los vectores de movimiento.
+.RSss
+.br
+0: desactivado
 .br
 1: visualiza MVs de marcos de imagen P previstos en adelante
 .br
@@ -4187,55 +4245,16 @@ vismv:
 .br
 4: visualiza MVs de marcos de imagen B previstos hacia atrás
 .REss
-.IPs bug=<valor>
-corrige manualmente errores en el codificador:
-.RSss
-0: nada
-.br
-1: autodetectar errores (por defecto)
-.br
-2 (msmpeg4v3): algunos archivos antiguos msmpeg4v3 generados con lavc
-(no autodetectado)
-.br
-4 (mpeg4): error de entrelazado de XviD (autodetectado si fourcc==XVIX)
-.br
-8 (mpeg4): UMP4 (autodetectado si fourcc==UMP4)
-.br
-16 (mpeg4): error de rellenado (autodetectado)
-.br
-32 (mpeg4): error de vlc ilegal (autodetectado para fourcc)
-.br
-64 (mpeg4): error qpel XviD y DivX (autodetectado para fourcc/\:ver)
-.br
-128 (mpeg4): qpel estandar antiguo (autodetectado para fourcc/\:ver)
-.br
-256 (mpeg4): otro error qpel (autodetectado para fourcc/\:ver)
-.br
-512 (mpeg4): error direct-qpel-blocksize (autodetectado para fourcc/\:ver)
-.br
-1024 (mpeg4): error de rellenado de bordes (autodetectado para fourcc/\:ver)
-.REss
-.IPs idct=<0\-99>
-(vea lavcopts)
-Para una mejor calidad de la decodificación usa el mismo algoritmo para
-decodificar y codificar. Esto, sin embargo, hace que se pague un precio
-en precisión.
-.IPs "gray\ "
-decodificación solo en escala de grises (un poco más rápida que con color)
-.IPs "sb=<número> (solo MPEG2)"
-Salta el número de filas de macrobloque especificadas en la parte de abajo.
-.IPs "st=<número> (solo MPEG2)"
-Salta el número de filas de macrobloque especificadas en la parte de arriba.
 .IPs vstats
 Muestra algunas estadísticas y las almacena en ./vstats_*.log.
 .RE
 .
 .TP
 .B \-noslices
-Desactiva el dibujado de video por bandas/\:rebanadas de altura de 16-pixels,
+Desactiva el dibujado de vídeo por bandas/\:rebanadas de altura de 16-pixels,
 en lugar de dibujar la imagen entera de una pasada.
 Puede ser más rápido o más lento, dependiendo de la cache/\:tarjeta.
-Solo tiene efecto con los codecs libmpeg2 y libavcodec.
+Sólo tiene efecto con los codecs libmpeg2 y libavcodec.
 .
 .TP
 .B \-nosound
@@ -4244,41 +4263,32 @@ No reproduce/\:codifica sonido.
 .
 .TP
 .B \-novideo
-No reproduce/\:codifica video.
-.
-.TP
-.B \-oldpp <calidad> (OpenDivX solamente) (OBSOLETO)
-Usa el código de postprocesado opendivx en lugar del interno.
-Ahora ha pasado a ser \-pp, el postprocesado interno ofrece mejor
-calidad y rendimiento.
-.
-El rango válido de los valores para \-oldpp varían con el codec,
-la mayoría de las veces es 0\-6, donde 0=desactivado 6=lento/\:el mejor.
+No reproduce/\:codifica vídeo.
+En muchos casos no funcionará, use \-vc null \-vo null en su lugar.
 .
 .TP
 .B \-pp <calidad> (¡vea también la opción \-vf pp!)
-Establece el nivel de postprocesado de la DLL.
-Esta opción NO VOLVERÁ A SER USABLE con filtros de postprocesado de
-MPlayer, si no tan solo con DLLs Win32 DirectShow con rutinas internas
-de postprocesado.
+Establece el nivel de procesado de la DLL.
+Esta opción ya no se puede usar con \-vf pp.
+Sólo funciona con DLLs Win32 DirectShow con rutinas internas
+de procesado.
 El rango válido de valores para \-pp varía con el codec, la mayoría
 tienen de 0\-6, donde 0=desactivado 6=lento/\:mejor.
 .
 .TP
 .B \-pphelp (vea también la opción \-vf pp)
-Muestra un resumen sobre los filtros de postprocesado disponibles y su uso.
+Muestra un resumen sobre los filtros de procesado disponibles y su uso.
 .
 .TP
 .B \-ssf <modo>
-Especifica los parámetros de SwScaler.
+Especifica los parámetros del escalador por software.
 .sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
-\-vf escale \-ssf lgb=3.0
+\-vf scale \-ssf lgb=3.0
 .RE
 .PD 1
-.
 .PD 0
 .RSs
 .IPs lgb=<0\-100>
@@ -4312,32 +4322,28 @@ Canal derecho
 .PD 1
 .
 .TP
-.B \-sws <tipo\ de\ escalador\ software> (vea también la opción \-vf)
-Esta opción establece la calidad (y velocidad, respectivamente) del escalador
-de software con la opción \-zoom.
-Por ejemplo con x11 u otras salidas de video que no tengan aceleración por
-hardware.
+.B \-sws <tipo\ de\ escalador\ software> (vea también la opción \-vf y \-zoom)
+Especifica el algoritmo que usará el escalador por software con la opción
+\-zoom.
+Esto afecta a los drivers de salida de vídeo que no tienen aceleración por
+hardware p.e.\& x11.
+.sp 1
 Las configuraciones posibles son:
-.br
-.I NOTA:
-Para \-sws\ 2 y 7, el perfilado puede ser establecido con el parámetro de escalado
-(p) de \-vf scale (0 (suave) \- 100 (perfiles marcados)), para \-sws 9, especifica
-la longitud del filtro (1 \- 10).
 .sp 1
 .PD 0
 .RSs
 .IPs 0
-bilineal rápido (por defecto)
+bilineal rápido
 .IPs 1
 bilineal
 .IPs 2
-bicúbico (calidad buena)
+bicúbico (calidad buena) (por defecto)
 .IPs 3
 experimental
 .IPs 4
 entorno cercano (calidad mala)
 .IPs 5
-area
+área
 .IPs 6
 luma bicúbico / croma bilineal
 .IPs 7
@@ -4347,91 +4353,104 @@ sincR
 .IPs 9
 lanczos
 .IPs 10
-spline bicúbico
+spline bicúbico natural
 .RE
 .PD 1
+.sp 1
+.RS
+.I NOTA:
+Algunas opciones de \-sws son configurables.
+La descripción del filtro de escalado de vídeo tiene más información.
+.RE
 .
 .TP
-.B \-vc <[-]codec1,[-]codec2,...[,]>
+.B \-vc <[-|+]codec1,[-|+]codec2,...[,]>
 Especifica una lista prioritaria de codecs para usarse, de acuerdo a sus
 nombres del codec en codecs.conf.
 Use un '-' antes del nombre del codec para omitirlo.
+Use un '+' antes del nombre del codec para forzarlo, esto probablemente falle.
+Si la lista tiene una ',' final, se probarán los codecs no listados.
 .br
 .I NOTA:
 Vea \-vc help para una lista completa de codecs disponibles.
-.br
-Si la lista tiene una ',' final, se probarán otros codecs no listados.
 .sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
 .IPs "\-vc divx"
-Fuerza codec DivX Win32/\:VFW, y no otros.
-.IPs "\-vc divx4,"
-Prueba primero el codec divx4linux, y luego prueba otros.
+Fuerza codec Win32/\:VfW DivX, y no otros.
 .IPs "\-vc -divxds,-divx,"
-Prueba otros codecs excepto los Win32 DivX.
+Prueba codecs excepto los Win32 DivX.
 .IPs "\-vc ffmpeg12,mpeg12,"
-Prueba el codec libavcodec MPEG1/\:2, luego libmpeg2, y otros.
+Prueba el codec libavcodec MPEG1/\:2, después libmpeg2 y luego el resto.
 .RE
 .PD 1
 .
 .TP
 .B \-vfm <driver1,driver2,...>
-Especifica una lista prioritaria de familia de codecs de video a ser usados,
+Especifica una lista prioritaria de familia de codecs de vídeo a ser usados,
 de acuerdo a sus nombres en codecs.conf.
 Regresa al que haya por defecto si no funciona ninguno.
 .br
 .I NOTA:
-Si ha sido compilado soporte para libdivxdecore, entonces odivx y divx4 ahora
-contienen justamente el mismo codec DivX4, pero diferentes APIs para usarlos.
-Por diferencias entre estos cuando se cambia, compruebe la sección DivX4 en
-la documentación.
-.br
 Vea \-vfm help para una lista completa de controladores disponibles.
 .sp 1
 .I EJEMPLO:
 .PD 0
 .RSs
 .IPs "\-vfm ffmpeg,dshow,vfw"
-Prueba los codecs libavcodec, luego Direcshow, después VFW y regresa a
-otros, si todavía no funciona con ninguno.
+Prueba los codecs libavcodec, luego Direcshow, después VFW y luego el resto
+, si no funcionan.
 .IPs "\-vfm xanim"
 prueba primero los codecs XAnim
 .RE
 .PD 1
 .
 .TP
-.B \-x <x> (MPlayer solamente)
+.B \-x <x> (vea también \-zoom) (MPlayer solamente)
 Escala la imagen a ancho x (si hay escalado sw/\:hw disponible).
-Deshabilita cálculos de aspecto.
+Inhabilita cálculos de aspecto.
 .
 .TP
 .B \-xvidopts <opción1:opción2:...>
 Especifica parámetros adicionales cuando se decodifica con XviD.
-.
+.br
+.I NOTA:
+Dado que libavcodec es más rápida que Xvid quizá prefiera usar el filtro de
+procesado libavcodec (\-vf pp) y decodificador (\-vfm ffmpeg).
+.sp 1
+Filtros de procesado internos de Xvid:
 .PD 0
 .RSs
-.IPs deblock-chroma
-Activa el filtro de postprocesado interno de XviD: filtro de debloque de croma.
-Vea también \-vf pp, que es más rápido que el propio filtro de XviD.
-.IPs deblock-luma
-Activa el filtro de postprocesado interno de XviD: filtro de debloque de luminancia.
-Vea también \-vf pp, que es más rápido que el propio filtro de XviD.
+.IPs deblock-chroma (vea también \-vf pp)
+filtro de debloque de croma
+.IPs deblock-luma (vea también \-vf pp)
+filtro de debloque de luminancia
+.IPs dering-luma (vea también \-vf pp)
+filtro de desanillado lumínico
+filtro 
+.IPs dering-chroma (vea también \-vf pp)
+filtro de desanillado de croma
+.IPs filmeffect (vea también \-vf noise)
+Añade grano de película artificial al vídeo.
+Puede incrementar la calidad percibida, mientras que disminuye un poco la
+calidad real.
+.RE
+.sp 1
+.RS
+métodos de renderizado:
+.RE
+.PD 0
+.RSs
 .IPs "dr2\ \ "
 Activa el método 2 de renderizado directo.
 .IPs nodr2
 Desactiva el método 2 de renderizado directo.
-.IPs filmeffect
-Activa el efecto de grano de película interno de XviD.
-Añade grano de película artificial al video.
-Puede incrementar la calidad percibida, mientras que disminuye un poco la calidad real.
-Vea también \-vf noise.
 .RE
 .PD 1
 .
 .TP
-.B \-xy <valor>
+.B \-xy <valor> (vea también \-zoom)
 .PD 0
 .RSs
 .IPs valor<=8
@@ -4445,14 +4464,14 @@ de aspecto correcta.
 .TP
 .B \-y <y> (MPlayer solamente)
 Escala la imagen a altura y (si hay escalado sw/\:hw disponible).
-Deshabilita cálculos de aspecto.
+Inabilita cálculos de aspecto.
 .TP
 .B "\-zoom \ "
 Permite escalar por software, cuando esté disponible.
-Puede ser usado para forzar escalado con \-vf scale.
-.br
-.I NOTA:
-\-vf scale IGNORA opciones \-x / \-y / \-xy / \-fs / \-aspect sin \-zoom.
+Esto permite el escalado con drivers de salida (como x11, fbdev) que no
+soportan escalado por hardware en los que MPlayer desactiva el escalado
+por defecto por razones de rendimiento
+.
 .
 .
 .SH "FILTROS DE VIDEO"
