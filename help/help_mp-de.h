@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r23028
+// In sync with r23834
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -236,8 +236,10 @@ static char help_text[]=
 #define MSGTR_Contrast "Kontrast"
 #define MSGTR_Saturation "Sättigung"
 #define MSGTR_Hue "Farbton"
+#define MSGTR_Balance "Balance"
 
 // property state
+#define MSGTR_LoopStatus "Endloswiederholung: %s"
 #define MSGTR_MuteStatus "Stumm: %s"
 #define MSGTR_AVDelayStatus "A/V-Verzögerung: %s"
 #define MSGTR_OnTopStatus "Immer im Vordergrund: %s"
@@ -249,6 +251,7 @@ static char help_text[]=
 #define MSGTR_SubPosStatus "Untertitelposition: %s/100"
 #define MSGTR_SubAlignStatus "Untertitelausrichtung: %s"
 #define MSGTR_SubDelayStatus "Untertitelverzögerung: %s"
+#define MSGTR_SubScale "Untertitelskalierung: %s"
 #define MSGTR_SubVisibleStatus "Untertitel: %s"
 #define MSGTR_SubForcedOnlyStatus "Erzwungene Untertitel: %s"
 
@@ -721,6 +724,7 @@ static char help_text[]=
 
 #define MSGTR_InsertingAfVolume "[Mixer] Kein Hardware-Mixing, füge Lautstärkefilter ein.\n"
 #define MSGTR_NoVolume "[Mixer] Keine Lautstärkeregelung verfügbar.\n"
+#define MSGTR_NoBalance "[Mixer] Keine Regelung für Balance verfügbar.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -1101,6 +1105,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Volume "Lautstärke"
 #define MSGTR_VO_SUB_Brightness "Helligkeit"
 #define MSGTR_VO_SUB_Hue "Farbwertkorrektur"
+#define MSGTR_VO_SUB_Balance "Balance"
 
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "Dimensionen des Quellbildes sind zu groß: %ux%u (Maximalgröße ist %ux%u)\n"
@@ -1644,7 +1649,8 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Definition des Untermenüs benötigt ein 'menu'-Attribut.\n"
-#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Definitionen für Konfigurationsmenüeinträge benötigen ein\n       gültiges 'property'-Attribut (Zeile %d).\n"
+#define MSGTR_LIBMENU_InvalidProperty "[MENU] Ungültige Eigenschaft '%s' im Einstellungsmenüeintrag. (Zeile %d).\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Definitionen für Konfigurationsmenüeinträge benötigen ein\n       gültiges 'property'- oder 'txt'Attribut (Zeile %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Konfigurationsmenü benötigt einen Parameter.\n"
 
 // libmenu/menu_pt.c
