@@ -698,7 +698,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 					if(! chosen_pid)
 						continue;
 				}
-				else if(param->alang[0] > 0)
+				else if(param->alang[0] > 0 && es.lang[0] > 0)
 				{
 					if(pid_match_lang(priv, es.pid, param->alang) == -1)
 						continue;
