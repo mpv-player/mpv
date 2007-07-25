@@ -2375,6 +2375,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    mpctx->set_of_sub_size = 0;
 		    if (mpctx->set_of_sub_pos >= 0) {
 			mpctx->global_sub_pos = -2;
+			subdata = NULL;
 			mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
 		    }
 		} else if (v < mpctx->set_of_sub_size) {
@@ -2385,6 +2386,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    sub_free(subd);
 		    if (mpctx->set_of_sub_pos == v) {
 			mpctx->global_sub_pos = -2;
+			subdata = NULL;
 			mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
 		    } else if (mpctx->set_of_sub_pos > v) {
 			--mpctx->set_of_sub_pos;
