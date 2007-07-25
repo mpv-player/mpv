@@ -170,8 +170,8 @@ int asf_check_header(demuxer_t *demuxer){
   return DEMUXER_TYPE_ASF;
 }
 
-extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
-extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 int find_asf_guid(char *buf, const char *guid, int cur_pos, int buf_len)
 {
