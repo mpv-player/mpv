@@ -258,7 +258,7 @@ while(1){
       break; }
     case ckidSTREAMFORMAT: {      // read 'strf'
       if(last_fccType==streamtypeVIDEO){
-        sh_video->bih=calloc((chunksize<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):chunksize,1);
+        sh_video->bih=calloc(FFMAX(chunksize, sizeof(BITMAPINFOHEADER)), 1);
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
         mp_msg(MSGT_HEADER,MSGL_V,MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader,chunksize,sizeof(BITMAPINFOHEADER));
         stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
