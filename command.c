@@ -1289,7 +1289,6 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 
     mpctx->set_of_sub_pos = -1;
     subdata = NULL;
-    vo_sub_last = vo_sub = NULL;
 
     vobsub_id = -1;
     dvdsub_id = -1;
@@ -2376,9 +2375,6 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    mpctx->set_of_sub_size = 0;
 		    if (mpctx->set_of_sub_pos >= 0) {
 			mpctx->global_sub_pos = -2;
-			vo_sub_last = vo_sub = NULL;
-			vo_osd_changed(OSDTYPE_SUBTITLE);
-			vo_update_osd(sh_video->disp_w, sh_video->disp_h);
 			mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
 		    }
 		} else if (v < mpctx->set_of_sub_size) {
@@ -2389,9 +2385,6 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    sub_free(subd);
 		    if (mpctx->set_of_sub_pos == v) {
 			mpctx->global_sub_pos = -2;
-			vo_sub_last = vo_sub = NULL;
-			vo_osd_changed(OSDTYPE_SUBTITLE);
-			vo_update_osd(sh_video->disp_w, sh_video->disp_h);
 			mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
 		    } else if (mpctx->set_of_sub_pos > v) {
 			--mpctx->set_of_sub_pos;
