@@ -359,7 +359,7 @@ Video output:
   --enable-ivtv            enable IVTV TV-Out video output [autodetect]
   --enable-dvb             enable DVB video output [autodetect]
   --enable-dvbhead         enable DVB video output (HEAD version) [autodetect]
-  --enable-mga             enable mga_vid video output [autodetect]
+  --enable-mga             enable mga_vid video output [disable]
   --enable-xmga            enable mga_vid X11 video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
   --enable-xvmc            enable XvMC acceleration [disable]
@@ -577,7 +577,7 @@ _xanim=auto
 _real=auto
 _live=auto
 _xinerama=auto
-_mga=auto
+_mga=no
 _xmga=auto
 _vm=auto
 _xf86keysym=auto
