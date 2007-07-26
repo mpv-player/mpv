@@ -80,7 +80,7 @@ MPlayer (1.0)
     * support -ffourcc with -of lavf
 
     Ports:
-    * further Intel Mac fixes
+    * Complete Intel Mac support
     * Hitachi SuperH (SH3) support
 
     Drivers:
