@@ -15,7 +15,7 @@ typedef struct mp_vcd_priv_st {
   struct cd_toc_entry entry_data;
 } mp_vcd_priv_t;
 
-static inline void 
+static inline void
 vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect)
 {
   vcd->entry.data = &vcd->entry_data;
@@ -41,16 +41,16 @@ vcd_inc_msf(mp_vcd_priv_t* vcd)
   }
 }
 
-static inline unsigned int 
+static inline unsigned int
 vcd_get_msf(mp_vcd_priv_t* vcd)
 {
   vcd->entry.data = &vcd->entry_data;
   return TOCADDR(vcd->entry).msf.frame +
-  (TOCADDR(vcd->entry).msf.second +
-   TOCADDR(vcd->entry).msf.minute * 60) * 75;
+        (TOCADDR(vcd->entry).msf.second +
+         TOCADDR(vcd->entry).msf.minute * 60) * 75;
 }
 
-int 
+int
 vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 {
   vcd->entry.address_format = CD_MSF_FORMAT;
@@ -64,7 +64,7 @@ vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
   return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
-int 
+int
 vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
   struct ioc_toc_header tochdr;
@@ -108,15 +108,16 @@ vcd_read_toc(int fd)
       mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
       return NULL;
     }
+
     if (i <= tochdr.ending_track)
     mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
-	   (int) tocentry.starting_track,
-	   (int) tocentry.data->addr_type,
-	   (int) tocentry.data->control,
-	   (int) tocentry.address_format,
-	   (int) TOCADDR(tocentry).msf.minute,
-	   (int) TOCADDR(tocentry).msf.second,
-	   (int) TOCADDR(tocentry).msf.frame
+          (int)tocentry.starting_track,
+          (int)tocentry.data->addr_type,
+          (int)tocentry.data->control,
+          (int)tocentry.address_format,
+          (int)TOCADDR(tocentry).msf.minute,
+          (int)TOCADDR(tocentry).msf.second,
+          (int)TOCADDR(tocentry).msf.frame
       );
 
     if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
@@ -148,7 +149,7 @@ vcd_read_toc(int fd)
   return vcd;
 }
 
-static int 
+static int
 vcd_read(mp_vcd_priv_t* vcd, char *mem)
 {
   struct scsireq  sc;

@@ -19,33 +19,41 @@ typedef struct mp_vcd_priv_st {
   cdsector_t buf;
 } mp_vcd_priv_t;
 
-static inline void vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect){
-  TOCADDR(vcd->entry).msf.frame=sect%75;
-  sect=sect/75;
-  TOCADDR(vcd->entry).msf.second=sect%60;
-  sect=sect/60;
-  TOCADDR(vcd->entry).msf.minute=sect;
+static inline void
+vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect)
+{
+  TOCADDR(vcd->entry).msf.frame = sect % 75;
+  sect = sect / 75;
+  TOCADDR(vcd->entry).msf.second = sect % 60;
+  sect = sect / 60;
+  TOCADDR(vcd->entry).msf.minute = sect;
 }
 
-static inline unsigned int vcd_get_msf(mp_vcd_priv_t* vcd){
+static inline unsigned int
+vcd_get_msf(mp_vcd_priv_t* vcd)
+{
   return TOCADDR(vcd->entry).msf.frame +
-        (TOCADDR(vcd->entry).msf.second+
-         TOCADDR(vcd->entry).msf.minute*60)*75;
+        (TOCADDR(vcd->entry).msf.second +
+         TOCADDR(vcd->entry).msf.minute * 60) * 75;
 }
 
-int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track){
+int
+vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
+{
   vcd->entry.address_format = CD_MSF_FORMAT;
   vcd->entry.track  = track;
   if (ioctl(vcd->fd, CDIOREADTOCENTRY, &vcd->entry)) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif1: %s\n",strerror(errno));
     return -1;
   }
-  return VCD_SECTOR_DATA*vcd_get_msf(vcd);
+  return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
-int vcd_get_track_end(mp_vcd_priv_t* vcd, int track){
+int
+vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
+{
   struct ioc_toc_header tochdr;
-  if (ioctl(vcd->fd,CDIOREADTOCHEADER,&tochdr)==-1) {
+  if (ioctl(vcd->fd, CDIOREADTOCHEADER, &tochdr)==-1) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return -1;
   }
@@ -55,32 +63,34 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track){
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
     return -1;
   }
-  return VCD_SECTOR_DATA*vcd_get_msf(vcd);
+  return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
-mp_vcd_priv_t* vcd_read_toc(int fd){
+mp_vcd_priv_t*
+vcd_read_toc(int fd)
+{
   struct ioc_toc_header tochdr;
   mp_vcd_priv_t* vcd;
   int i, min = 0, sec = 0, frame = 0;
-  if (ioctl(fd,CDIOREADTOCHEADER,&tochdr)==-1) {
+  if (ioctl(fd, CDIOREADTOCHEADER, &tochdr) == -1) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return NULL;
   }
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", tochdr.starting_track);
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", tochdr.ending_track);
-  for (i=tochdr.starting_track ; i<=tochdr.ending_track + 1; i++){
-      struct ioc_read_toc_single_entry tocentry;
+  for (i = tochdr.starting_track; i <= tochdr.ending_track + 1; i++) {
+    struct ioc_read_toc_single_entry tocentry;
 
-      tocentry.track  = i<=tochdr.ending_track ? i : CDROM_LEADOUT;
-      tocentry.address_format = CD_MSF_FORMAT;
+    tocentry.track  = i<=tochdr.ending_track ? i : CDROM_LEADOUT;
+    tocentry.address_format = CD_MSF_FORMAT;
 
-      if (ioctl(fd,CDIOREADTOCENTRY,&tocentry)==-1) {
-	mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
-	return NULL;
-      }
+    if (ioctl(fd,CDIOREADTOCENTRY,&tocentry)==-1) {
+      mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
+      return NULL;
+    }
         
-      if (i<=tochdr.ending_track)
-      mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
+    if (i <= tochdr.ending_track)
+    mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
           (int)tocentry.track,
           (int)tocentry.entry.addr_type,
           (int)tocentry.entry.control,
@@ -90,36 +100,38 @@ mp_vcd_priv_t* vcd_read_toc(int fd){
           (int)TOCADDR(tocentry).msf.frame
       );
 
-      if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
+    if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
+    {
+      if (i > tochdr.starting_track)
       {
-        if (i > tochdr.starting_track)
+        min = TOCADDR(tocentry).msf.minute - min;
+        sec = TOCADDR(tocentry).msf.second - sec;
+        frame = TOCADDR(tocentry).msf.frame - frame;
+        if ( frame < 0 )
         {
-          min = TOCADDR(tocentry).msf.minute - min;
-          sec = TOCADDR(tocentry).msf.second - sec;
-          frame = TOCADDR(tocentry).msf.frame - frame;
-          if ( frame < 0 )
-          {
-            frame += 75;
-            sec --;
-          }
-          if ( sec < 0 )
-          {
-            sec += 60;
-            min --;
-          }
-          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
+          frame += 75;
+          sec --;
         }
-        min = TOCADDR(tocentry).msf.minute;
-        sec = TOCADDR(tocentry).msf.second;
-        frame = TOCADDR(tocentry).msf.frame;
+        if ( sec < 0 )
+        {
+          sec += 60;
+          min --;
+        }
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
       }
+      min = TOCADDR(tocentry).msf.minute;
+      sec = TOCADDR(tocentry).msf.second;
+      frame = TOCADDR(tocentry).msf.frame;
     }
+  }
   vcd = malloc(sizeof(mp_vcd_priv_t));
   vcd->fd = fd;
-  return vcd;  
+  return vcd;
 }
 
-static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
+static int
+vcd_read(mp_vcd_priv_t* vcd, char *mem)
+{
 
       if (pread(vcd->fd,&vcd->buf,VCD_SECTOR_SIZE,vcd_get_msf(vcd)*VCD_SECTOR_SIZE)
 	 != VCD_SECTOR_SIZE) return 0;  // EOF?
