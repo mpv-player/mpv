@@ -81,6 +81,7 @@ MPlayer (1.0)
 
     Ports:
     * further Intel Mac fixes
+    * Hitachi SuperH (SH3) support
 
     Drivers:
     * ALSA audio output now sets the non-audio bit for AC3 passthrough even
