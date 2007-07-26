@@ -91,7 +91,7 @@ vcd_read_toc(int fd)
   int i, min = 0, sec = 0, frame = 0;
   if (ioctl(fd, CDIOREADTOCHEADER, &tochdr) == -1) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
-    return;
+    return NULL;
   }
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", tochdr.starting_track);
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", tochdr.ending_track);
