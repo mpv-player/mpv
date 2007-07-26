@@ -111,7 +111,7 @@ vcd_read_toc(int fd)
     if (i <= tochdr.ending_track)
     mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
 	   (int) tocentry.starting_track,
-	   (int) TOCADDR(tocentry)_type,
+	   (int) tocentry.data->addr_type,
 	   (int) tocentry.data->control,
 	   (int) tocentry.address_format,
 	   (int) TOCADDR(tocentry).msf.minute,
