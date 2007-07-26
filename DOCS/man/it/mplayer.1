@@ -1,4 +1,4 @@
-.\" synced with r23748
+.\" synced with r23856
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
@@ -4893,6 +4893,8 @@ canali 2 e 3 conterranno solo silenzio ma lo 0 e 1 verrano scambiati.
 Cambierà il numero di canali a 5 e attiverà 4 indirizzamenti che copieranno
 il canale 0 sui canali da 0 a 3.
 I canali 4 e 5 conterranno silenzio.
+.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
+Dovrebbe far sì che l'uscita ffdca a 6 canali (DTS) funzioni bene con ALSA.
 .RE
 .PD 1
 .
