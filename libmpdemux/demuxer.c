@@ -678,7 +678,7 @@ demuxer_t *demuxer=NULL;
 sh_video_t *sh_video=NULL;
 
 demuxer_desc_t *demuxer_desc;
-int fformat;
+int fformat = 0;
 int i;
 
 //printf("demux_open(%p,%d,%d,%d,%d)  \n",stream,file_format,audio_id,video_id,dvdsub_id);
