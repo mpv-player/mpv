@@ -4,6 +4,7 @@
 //=================== VideoCD ==========================
 #define	CDROM_LEADOUT	0xAA
 #define TOCADDR(te) ((te).entry.addr)
+#define READ_TOC CDIOREADTOCENTRY
 
 typedef struct {
 	uint8_t sync            [12];
@@ -56,7 +57,7 @@ vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 {
   vcd->entry.address_format = CD_MSF_FORMAT;
   vcd->entry.track  = track;
-  if (ioctl(vcd->fd, CDIOREADTOCENTRY, &vcd->entry)) {
+  if (ioctl(vcd->fd, READ_TOC, &vcd->entry)) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif1: %s\n",strerror(errno));
     return -1;
   }
@@ -73,7 +74,7 @@ vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
   }
   vcd->entry.address_format = CD_MSF_FORMAT;
   vcd->entry.track  = track<tochdr.ending_track?(track+1):CDROM_LEADOUT;
-  if (ioctl(vcd->fd, CDIOREADTOCENTRY, &vcd->entry)) {
+  if (ioctl(vcd->fd, READ_TOC, &vcd->entry)) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
     return -1;
   }
@@ -98,7 +99,7 @@ vcd_read_toc(int fd)
     tocentry.track  = i<=tochdr.ending_track ? i : CDROM_LEADOUT;
     tocentry.address_format = CD_MSF_FORMAT;
 
-    if (ioctl(fd, CDIOREADTOCENTRY, &tocentry) == -1) {
+    if (ioctl(fd, READ_TOC, &tocentry) == -1) {
       mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
       return NULL;
     }

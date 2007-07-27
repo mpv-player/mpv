@@ -7,6 +7,7 @@
 
 #define	CDROM_LEADOUT	0xAA
 #define TOCADDR(te) ((te).data->addr)
+#define READ_TOC CDIOREADTOCENTRYS
 
 typedef struct mp_vcd_priv_st {
   int fd;
@@ -56,7 +57,7 @@ vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
   vcd->entry.starting_track = track;
   vcd->entry.data_len = sizeof(struct cd_toc_entry);
   vcd->entry.data = &vcd->entry_data;
-  if (ioctl(vcd->fd, CDIOREADTOCENTRIES, &vcd->entry)) {
+  if (ioctl(vcd->fd, READ_TOC, &vcd->entry)) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif1: %s\n",strerror(errno));
     return -1;
   }
@@ -75,7 +76,7 @@ vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
   vcd->entry.starting_track = track < tochdr.ending_track ? (track + 1) : CDROM_LEADOUT;
   vcd->entry.data_len = sizeof(struct cd_toc_entry);
   vcd->entry.data = &vcd->entry_data;
-  if (ioctl(vcd->fd, CDIOREADTOCENTRYS, &vcd->entry)) {
+  if (ioctl(vcd->fd, READ_TOC, &vcd->entry)) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
     return -1;
   }
@@ -103,7 +104,7 @@ vcd_read_toc(int fd)
     tocentry.data_len = sizeof(struct cd_toc_entry);
     tocentry.data = &tocentry_data;
 
-    if (ioctl(fd, CDIOREADTOCENTRYS, &tocentry) == -1) {
+    if (ioctl(fd, READ_TOC, &tocentry) == -1) {
       mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
       return NULL;
     }
