@@ -3,6 +3,7 @@
 #ifdef __NetBSD__
 #include <sys/inttypes.h>
 #endif
+#include "libavutil/intreadwrite.h"
 #include <sys/cdio.h>
 #include <sys/scsiio.h>
 
@@ -155,33 +156,17 @@ vcd_read(mp_vcd_priv_t* vcd, char *mem)
   struct scsireq  sc;
   int             lba = vcd_get_msf(vcd);
   int             blocks;
-  int             sector_type;
-  int             sync, header_code, user_data, edc_ecc, error_field;
-  int             sub_channel;
   int             rc;
 
   blocks = 1;
-  sector_type = 5;		/* mode2/form2 */
-  sync = 0;
-  header_code = 0;
-  user_data = 1;
-  edc_ecc = 0;
-  error_field = 0;
-  sub_channel = 0;
 
   memset(&sc, 0, sizeof(sc));
   sc.cmd[0] = 0xBE;
-  sc.cmd[1] = (sector_type) << 2;
-  sc.cmd[2] = (lba >> 24) & 0xff;
-  sc.cmd[3] = (lba >> 16) & 0xff;
-  sc.cmd[4] = (lba >> 8) & 0xff;
-  sc.cmd[5] = lba & 0xff;
-  sc.cmd[6] = (blocks >> 16) & 0xff;
-  sc.cmd[7] = (blocks >> 8) & 0xff;
-  sc.cmd[8] = blocks & 0xff;
-  sc.cmd[9] = (sync << 7) | (header_code << 5) | (user_data << 4) |
-    (edc_ecc << 3) | (error_field << 1);
-  sc.cmd[10] = sub_channel;
+  sc.cmd[1] = 5 << 2; // mode2/form2
+  AV_WB32(&sc.cmd[2], lba);
+  AV_WB24(&sc.cmd[6], blocks);
+  sc.cmd[9] = 1 << 4; // user data only
+  sc.cmd[10] = 0;     // no subchannel
   sc.cmdlen = 12;
   sc.databuf = (caddr_t) mem;
   sc.datalen = 2328;
