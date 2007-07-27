@@ -144,8 +144,6 @@ typedef struct ogg_demuxer {
 #define PACKET_LEN_BITS2         0x02
 #define PACKET_IS_SYNCPOINT  0x08
 
-extern int index_mode;
-
 extern char *dvdsub_lang, *audio_lang;
 extern int dvdsub_id;
 
