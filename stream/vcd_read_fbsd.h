@@ -53,7 +53,7 @@ int
 vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
   struct ioc_toc_header tochdr;
-  if (ioctl(vcd->fd, CDIOREADTOCHEADER, &tochdr)==-1) {
+  if (ioctl(vcd->fd, CDIOREADTOCHEADER, &tochdr) == -1) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return -1;
   }
@@ -84,11 +84,11 @@ vcd_read_toc(int fd)
     tocentry.track  = i<=tochdr.ending_track ? i : CDROM_LEADOUT;
     tocentry.address_format = CD_MSF_FORMAT;
 
-    if (ioctl(fd,CDIOREADTOCENTRY,&tocentry)==-1) {
+    if (ioctl(fd, CDIOREADTOCENTRY, &tocentry) == -1) {
       mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
       return NULL;
     }
-        
+
     if (i <= tochdr.ending_track)
     mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
           (int)tocentry.track,
@@ -133,19 +133,19 @@ static int
 vcd_read(mp_vcd_priv_t* vcd, char *mem)
 {
 
-      if (pread(vcd->fd,&vcd->buf,VCD_SECTOR_SIZE,vcd_get_msf(vcd)*VCD_SECTOR_SIZE)
-	 != VCD_SECTOR_SIZE) return 0;  // EOF?
+  if (pread(vcd->fd,&vcd->buf,VCD_SECTOR_SIZE,vcd_get_msf(vcd)*VCD_SECTOR_SIZE)
+     != VCD_SECTOR_SIZE) return 0;  // EOF?
 
-      TOCADDR(vcd->entry).msf.frame++;
-      if (TOCADDR(vcd->entry).msf.frame==75){
-        TOCADDR(vcd->entry).msf.frame=0;
-        TOCADDR(vcd->entry).msf.second++;
-        if (TOCADDR(vcd->entry).msf.second==60){
-          TOCADDR(vcd->entry).msf.second=0;
-          TOCADDR(vcd->entry).msf.minute++;
-        }
-      }
-      memcpy(mem,vcd->buf.data,VCD_SECTOR_DATA);
-      return VCD_SECTOR_DATA;
+  TOCADDR(vcd->entry).msf.frame++;
+  if (TOCADDR(vcd->entry).msf.frame==75){
+    TOCADDR(vcd->entry).msf.frame=0;
+    TOCADDR(vcd->entry).msf.second++;
+    if (TOCADDR(vcd->entry).msf.second==60){
+      TOCADDR(vcd->entry).msf.second=0;
+      TOCADDR(vcd->entry).msf.minute++;
+    }
+  }
+  memcpy(mem,vcd->buf.data,VCD_SECTOR_DATA);
+  return VCD_SECTOR_DATA;
 }
 
