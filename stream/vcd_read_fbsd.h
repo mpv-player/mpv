@@ -26,13 +26,18 @@ typedef struct {
 	uint8_t spare           [4];
 } cdsector_t;
 
+#ifdef VCD_NETBSD
+typedef struct ioc_read_toc_entry vcd_tocentry
+#else
+typedef struct ioc_read_toc_single_entry vcd_tocentry
+#endif
+
 typedef struct mp_vcd_priv_st {
   int fd;
+  vcd_tocentry entry;
 #ifdef VCD_NETBSD
-  struct ioc_read_toc_entry entry;
   struct cd_toc_entry entry_data;
 #else
-  struct ioc_read_toc_single_entry entry;
   cdsector_t buf;
 #endif
 } mp_vcd_priv_t;
@@ -78,21 +83,38 @@ vcd_get_msf(mp_vcd_priv_t* vcd)
          TOCADDR(vcd->entry).msf.minute * 60) * 75;
 }
 
+/**
+ * \brief read a TOC entry
+ * \param fd device to read from
+ * \param dst buffer to read data into
+ * \param nr track number to read info for
+ * \return 1 on success, 0 on failure
+ */
+static int
+read_toc_entry(int fd, vcd_tocentry *dst, int nr)
+{
+  dst->address_format = CD_MSF_FORMAT;
+#ifdef VCD_NETBSD
+  dst->starting_track = nr;
+#else
+  dst->track = nr;
+#endif
+  if (ioctl(fd, READ_TOC, dst) == -1) {
+    mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
+    return 0;
+  }
+  return 1;
+}
+
 int
 vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 {
-  vcd->entry.address_format = CD_MSF_FORMAT;
 #ifdef VCD_NETBSD
-  vcd->entry.starting_track = track;
   vcd->entry.data_len = sizeof(struct cd_toc_entry);
   vcd->entry.data = &vcd->entry_data;
-#else
-  vcd->entry.track  = track;
 #endif
-  if (ioctl(vcd->fd, READ_TOC, &vcd->entry)) {
-    mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif1: %s\n",strerror(errno));
+  if (!read_toc_entry(vcd->fd, &vcd->entry, track))
     return -1;
-  }
   return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
@@ -104,18 +126,13 @@ vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
     mp_msg(MSGT_STREAM,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return -1;
   }
-  vcd->entry.address_format = CD_MSF_FORMAT;
 #ifdef VCD_NETBSD
-  vcd->entry.starting_track = track < tochdr.ending_track ? (track + 1) : CDROM_LEADOUT;
   vcd->entry.data_len = sizeof(struct cd_toc_entry);
   vcd->entry.data = &vcd->entry_data;
-#else
-  vcd->entry.track  = track<tochdr.ending_track?(track+1):CDROM_LEADOUT;
 #endif
-  if (ioctl(vcd->fd, READ_TOC, &vcd->entry)) {
-    mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
+  if (!read_toc_entry(vcd->fd, &vcd->entry,
+          track < tochdr.ending_track ? track + 1 : CDROM_LEADOUT))
     return -1;
-  }
   return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
@@ -132,24 +149,15 @@ vcd_read_toc(int fd)
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", tochdr.starting_track);
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", tochdr.ending_track);
   for (i = tochdr.starting_track; i <= tochdr.ending_track + 1; i++) {
+    vcd_tocentry tocentry;
 #ifdef VCD_NETBSD
-    struct ioc_read_toc_entry tocentry;
     struct cd_toc_entry tocentry_data;
-
-    tocentry.starting_track = i<=tochdr.ending_track ? i : CDROM_LEADOUT;
     tocentry.data_len = sizeof(struct cd_toc_entry);
     tocentry.data = &tocentry_data;
-#else
-    struct ioc_read_toc_single_entry tocentry;
-
-    tocentry.track  = i<=tochdr.ending_track ? i : CDROM_LEADOUT;
 #endif
-    tocentry.address_format = CD_MSF_FORMAT;
-
-    if (ioctl(fd, READ_TOC, &tocentry) == -1) {
-      mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
+    if (!read_toc_entry(fd, &tocentry,
+          i <= tochdr.ending_track ? i : CDROM_LEADOUT));
       return NULL;
-    }
 
     if (i <= tochdr.ending_track)
     mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
