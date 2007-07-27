@@ -27,9 +27,9 @@ typedef struct {
 } cdsector_t;
 
 #ifdef VCD_NETBSD
-typedef struct ioc_read_toc_entry vcd_tocentry
+typedef struct ioc_read_toc_entry vcd_tocentry;
 #else
-typedef struct ioc_read_toc_single_entry vcd_tocentry
+typedef struct ioc_read_toc_single_entry vcd_tocentry;
 #endif
 
 typedef struct mp_vcd_priv_st {
@@ -156,7 +156,7 @@ vcd_read_toc(int fd)
     tocentry.data = &tocentry_data;
 #endif
     if (!read_toc_entry(fd, &tocentry,
-          i <= tochdr.ending_track ? i : CDROM_LEADOUT));
+          i <= tochdr.ending_track ? i : CDROM_LEADOUT))
       return NULL;
 
     if (i <= tochdr.ending_track)
