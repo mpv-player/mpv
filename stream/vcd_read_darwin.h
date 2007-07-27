@@ -39,8 +39,6 @@ static inline unsigned int vcd_get_msf(mp_vcd_priv_t* vcd)
   return vcd->msf.frame +
         (vcd->msf.second+
          vcd->msf.minute*60)*75;
-
-return 0;
 }
 
 int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
@@ -59,8 +57,6 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 		return -1;
 	}
 	return VCD_SECTOR_DATA*vcd_get_msf(vcd);
-  
-return -1;
 }
 
 int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
@@ -94,8 +90,6 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 		return -1;
 	}
 	return VCD_SECTOR_DATA*vcd_get_msf(vcd);
-
-return -1;
 }
 
 mp_vcd_priv_t* vcd_read_toc(int fd)
@@ -181,8 +175,6 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 	vcd->fd = fd;
 	vcd->msf = trackMSF;
 	return vcd;
-
-	return NULL;
 }
 
 static int vcd_read(mp_vcd_priv_t* vcd,char *mem)
@@ -205,6 +197,5 @@ static int vcd_read(mp_vcd_priv_t* vcd,char *mem)
 	  
       memcpy(mem,vcd->buf.data,VCD_SECTOR_DATA);
       return VCD_SECTOR_DATA;
-return 0;
 }
 
