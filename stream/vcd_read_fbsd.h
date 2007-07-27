@@ -29,6 +29,20 @@ vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect)
   TOCADDR(vcd->entry).msf.minute = sect;
 }
 
+static inline void
+vcd_inc_msf(mp_vcd_priv_t* vcd)
+{
+  TOCADDR(vcd->entry).msf.frame++;
+  if (TOCADDR(vcd->entry).msf.frame==75){
+    TOCADDR(vcd->entry).msf.frame=0;
+    TOCADDR(vcd->entry).msf.second++;
+    if (TOCADDR(vcd->entry).msf.second==60){
+      TOCADDR(vcd->entry).msf.second=0;
+      TOCADDR(vcd->entry).msf.minute++;
+    }
+  }
+}
+
 static inline unsigned int
 vcd_get_msf(mp_vcd_priv_t* vcd)
 {
@@ -136,15 +150,7 @@ vcd_read(mp_vcd_priv_t* vcd, char *mem)
   if (pread(vcd->fd,&vcd->buf,VCD_SECTOR_SIZE,vcd_get_msf(vcd)*VCD_SECTOR_SIZE)
      != VCD_SECTOR_SIZE) return 0;  // EOF?
 
-  TOCADDR(vcd->entry).msf.frame++;
-  if (TOCADDR(vcd->entry).msf.frame==75){
-    TOCADDR(vcd->entry).msf.frame=0;
-    TOCADDR(vcd->entry).msf.second++;
-    if (TOCADDR(vcd->entry).msf.second==60){
-      TOCADDR(vcd->entry).msf.second=0;
-      TOCADDR(vcd->entry).msf.minute++;
-    }
-  }
+  vcd_inc_msf(vcd);
   memcpy(mem,vcd->buf.data,VCD_SECTOR_DATA);
   return VCD_SECTOR_DATA;
 }
