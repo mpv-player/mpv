@@ -19,11 +19,8 @@
 #endif
 #include <errno.h>
 
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
-#include <sys/cdrio.h>
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "vcd_read_fbsd.h" 
-#elif defined(__NetBSD__) || defined (__OpenBSD__)
-#include "vcd_read_nbsd.h"
 #elif defined(SYS_DARWIN)
 #include "vcd_read_darwin.h" 
 #elif defined(WIN32)
