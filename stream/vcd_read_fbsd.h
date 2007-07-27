@@ -48,6 +48,7 @@ vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect)
 #ifdef VCD_NETBSD
   vcd->entry.data = &vcd->entry_data;
 #endif
+  sect += 150;
   TOCADDR(vcd->entry).msf.frame = sect % 75;
   sect = sect / 75;
   TOCADDR(vcd->entry).msf.second = sect % 60;
@@ -80,7 +81,7 @@ vcd_get_msf(mp_vcd_priv_t* vcd)
 #endif
   return TOCADDR(vcd->entry).msf.frame +
         (TOCADDR(vcd->entry).msf.second +
-         TOCADDR(vcd->entry).msf.minute * 60) * 75;
+         TOCADDR(vcd->entry).msf.minute * 60) * 75 - 150;
 }
 
 /**
