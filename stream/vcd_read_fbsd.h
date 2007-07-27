@@ -135,7 +135,7 @@ vcd_read_toc(int fd)
 {
   struct ioc_toc_header tochdr;
   mp_vcd_priv_t* vcd;
-  int i, min = 0, sec = 0, frame = 0;
+  int i, last_startsect;
   if (ioctl(fd, CDIOREADTOCHEADER, &tochdr) == -1) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return NULL;
@@ -170,26 +170,19 @@ vcd_read_toc(int fd)
 
     if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
     {
+      int startsect = vcd_get_msf(vcd);
       if (i > tochdr.starting_track)
       {
-        min = TOCADDR(vcd->entry).msf.minute - min;
-        sec = TOCADDR(vcd->entry).msf.second - sec;
-        frame = TOCADDR(vcd->entry).msf.frame - frame;
-        if ( frame < 0 )
-        {
-          frame += 75;
-          sec --;
-        }
-        if ( sec < 0 )
-        {
-          sec += 60;
-          min --;
-        }
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
+        // convert duraion to MSF
+        vcd_set_msf(vcd, startsect - last_startsect);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
+               "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n",
+               i - 1,
+               TOCADDR(vcd->entry).msf.minute,
+               TOCADDR(vcd->entry).msf.second,
+               TOCADDR(vcd->entry).msf.frame);
       }
-      min = TOCADDR(vcd->entry).msf.minute;
-      sec = TOCADDR(vcd->entry).msf.second;
-      frame = TOCADDR(vcd->entry).msf.frame;
+      last_startsect = startsect;
     }
   }
   return vcd;
