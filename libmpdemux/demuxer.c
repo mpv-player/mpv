@@ -594,14 +594,6 @@ double ds_get_next_pts(demux_stream_t *ds)
 
 // ====================================================================
 
-// commandline options, flags:
-extern int force_ni;
-extern int pts_from_bps;
-
-//extern int audio_id;
-//extern int video_id;
-//extern int dvdsub_id;
-
 void demuxer_help(void)
 {
   int i;
