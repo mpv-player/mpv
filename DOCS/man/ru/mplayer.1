@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r23834
+.\" synced with r23856
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -4698,6 +4698,8 @@ log2 от количества многофазных элементов
 Устанавливает количество каналов равным 6, и настраивает 4
 маршрута, копирующих канал 0 в 0 и 3. 
 Каналы 4 и 5 будут содержать тишину.
+.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
+Должна заставить 6-канальный ffdca (DTS) вывод работать корректно с ALSA.
 .RE
 .PD 1
 .
