@@ -28,14 +28,14 @@ play_tree_new(void) {
 }
 
 void
-play_tree_free(play_tree_t* pt, int childs) {
+play_tree_free(play_tree_t* pt, int children) {
   play_tree_t* iter;
 
 #ifdef MP_DEBUG
   assert(pt != NULL);
 #endif
 
-  if(childs) {    
+  if(children) {    
     for(iter = pt->child; iter != NULL; ) {
       play_tree_t* nxt=iter->next;
       play_tree_free(iter,1);
@@ -61,7 +61,7 @@ play_tree_free(play_tree_t* pt, int childs) {
 }
 
 void
-play_tree_free_list(play_tree_t* pt, int childs) {
+play_tree_free_list(play_tree_t* pt, int children) {
   play_tree_t* iter;
 
 #ifdef MP_DEBUG
@@ -73,7 +73,7 @@ play_tree_free_list(play_tree_t* pt, int childs) {
 
   while(iter) {
     play_tree_t* nxt = iter->next;
-    play_tree_free(iter,childs);
+    play_tree_free(iter, children);
     iter = nxt;
   }
     
@@ -149,7 +149,7 @@ play_tree_insert_entry(play_tree_t* pt, play_tree_t* entry) {
 }
     
 void
-play_tree_remove(play_tree_t* pt, int free_it,int with_childs) {
+play_tree_remove(play_tree_t* pt, int free_it, int with_children) {
 
 #ifdef MP_DEBUG
   assert(pt != NULL);
@@ -191,7 +191,7 @@ play_tree_remove(play_tree_t* pt, int free_it,int with_childs) {
 
   pt->prev = pt->next = pt->parent = NULL;
   if(free_it)
-    play_tree_free(pt,with_childs);
+    play_tree_free(pt,with_children);
 
 }
 
@@ -204,7 +204,7 @@ play_tree_set_child(play_tree_t* pt, play_tree_t* child) {
   assert(pt->entry_type == PLAY_TREE_ENTRY_NODE);
 #endif
 
-  //DEBUG_FF: Where are the childs freed ?
+  //DEBUG_FF: Where are the children freed?
   // Attention in using this function!
   for(iter = pt->child ; iter != NULL ; iter = iter->next)
     iter->parent = NULL;
@@ -405,7 +405,7 @@ play_tree_set_params_from(play_tree_t* dest,play_tree_t* src) {
 
 }
 
-// all childs if deep < 0
+// all children if deep < 0
 void
 play_tree_set_flag(play_tree_t* pt, int flags , int deep) {
   play_tree_t*  i;
@@ -614,7 +614,7 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
 
   }
 
-  // Is there any valid childs ?
+  // Is there any valid child?
   if(pt->child && play_tree_is_valid(pt->child)) {
     iter->tree = pt;
     if(with_nodes) { // Stop on the node      
@@ -623,7 +623,7 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
       return play_tree_iter_down_step(iter,d,with_nodes);
   }
 
-  // Is it a valid enty ?
+  // Is it a valid entry?
   if(! play_tree_is_valid(pt)) {
     if(d == 0) { // Can this happen ? FF: Yes!
       mp_msg(MSGT_PLAYTREE,MSGL_ERR,"What to do now ???? Infinite loop if we continue\n");

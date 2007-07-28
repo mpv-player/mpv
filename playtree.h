@@ -31,7 +31,7 @@ struct m_config;
 /// \defgroup PlaytreeEntryFlags Playtree flags
 /// \ingroup Playtree
 ///@{
-/// Play the item childs in random order.
+/// Play the item children in random order.
 #define PLAY_TREE_RND  (1<<0)
 /// Playtree flags used by the iterator to mark items already "randomly" played.
 #define PLAY_TREE_RND_PLAYED  (1<<8)
@@ -121,21 +121,21 @@ play_tree_new(void);
 
 /// Free a playtree item.
 /** \param pt Item to free.
- *  \param childs If non-zero the item's childs are recursively freed.
+ *  \param children If non-zero the item's children are recursively freed.
  */
 void
-play_tree_free(play_tree_t* pt, int childs);
+play_tree_free(play_tree_t* pt, int children);
 
 
 /// Free an item and its siblings.
 /** \param pt Item to free.
- *  \param childs If non-zero the items' childs are recursively freed.
+ *  \param children If non-zero the items' children are recursively freed.
  */
 void
-play_tree_free_list(play_tree_t* pt, int childs);
+play_tree_free_list(play_tree_t* pt, int children);
 
 
-/// Set the childs of a playtree item.
+/// Set the children of a playtree item.
 void
 play_tree_set_child(play_tree_t* pt, play_tree_t* child);
 
@@ -158,7 +158,7 @@ play_tree_insert_entry(play_tree_t* pt, play_tree_t* entry);
 
 /// Detach an item from the tree.
 void
-play_tree_remove(play_tree_t* pt, int free_it,int with_childs);
+play_tree_remove(play_tree_t* pt, int free_it,int with_children);
 
 /// Add a file to an item.
 void
@@ -199,7 +199,7 @@ play_tree_iter_free(play_tree_iter_t* iter);
 /// Step an iterator.
 /** \param iter The iterator.
  *  \param d The direction: d > 0 == next , d < 0 == prev
- *  \param with_node TRUE == stop on nodes with childs, FALSE == go directly to the next child
+ *  \param with_node TRUE == stop on nodes with children, FALSE == go directly to the next child
  *  \return See \ref PlaytreeIterReturn.
  */
 int 
@@ -208,7 +208,7 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes);
 /// Step up, useful to break a loop, etc.
 /** \param iter The iterator.
  *  \param d The direction: d > 0 == next , d < 0 == prev
- *  \param with_node TRUE == stop on nodes with childs, FALSE == go directly to the next child
+ *  \param with_node TRUE == stop on nodes with children, FALSE == go directly to the next child
  *  \return See \ref PlaytreeIterReturn.
  */
 int
