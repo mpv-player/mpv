@@ -1568,7 +1568,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Error Waitpid: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Error en Select.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Error de lectura en el descriptor de archivo hijo: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildren "[MENU] Error de lectura en el descriptor de archivo hijo: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Consola corriendo: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Ya hay un hijo/child corriendo.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Falló el Fork!!!\n"

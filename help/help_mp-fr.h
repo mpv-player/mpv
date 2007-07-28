@@ -1565,7 +1565,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Erreur attente identificateur processus : %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Erreur sélection.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Erreur lecture sur processus enfant : %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildren "[MENU] Erreur lecture sur processus enfant : %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Console run : %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Processus enfant déjà en cours.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Échec branchement !!!\n"

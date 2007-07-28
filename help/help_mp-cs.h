@@ -1573,7 +1573,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Chyba při čekání na PID: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Chyba výběru.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Chyba čtení na popisovači souboru potomka: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildren "[MENU] Chyba čtení na popisovači souboru potomka: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Spuštění v konsoli: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Potomek už běží.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Forkování selhalo!!!\n"

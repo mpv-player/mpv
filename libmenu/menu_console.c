@@ -255,7 +255,7 @@ static void check_child(menu_t* menu) {
   if(r == 0) {
     r = waitpid(mpriv->child,&child_status,WNOHANG);
     if(r < 0){
-      if(errno==ECHILD){  ///exiting childs get handled in mplayer.c
+      if(errno==ECHILD){  ///exiting children get handled in mplayer.c
         for(i = 0 ; i < 3 ; i++) 
           close(mpriv->child_fd[i]);
         mpriv->child = 0;
@@ -275,7 +275,7 @@ static void check_child(menu_t* menu) {
       if(w) mpriv->add_line = 1;
       r = read(mpriv->child_fd[i],buffer,255);
       if(r < 0)
-	mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReadErrorOnChilds, i == 1 ? "stdout":"stderr");
+	mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReadErrorOnChildren, i == 1 ? "stdout":"stderr");
       else if(r>0) {
 	buffer[r] = '\0';
 	add_string(mpriv,buffer);

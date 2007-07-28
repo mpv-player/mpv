@@ -1573,7 +1573,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid 錯誤: %s。\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Select 錯誤。\n"
-#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] 子進程的文件描述符讀取錯誤: %s。\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildren "[MENU] 子進程的文件描述符讀取錯誤: %s。\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] 終端運行: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] 子進程已經運行。\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Fork 失敗!!!\n"
