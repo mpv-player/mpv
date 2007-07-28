@@ -808,7 +808,7 @@ static int preinit(const char *arg)
     use_rectangle = 0;
     use_glFinish = 0;
     swap_interval = 1;
-    slice_height = -1;
+    slice_height = 0;
     custom_prog = NULL;
     custom_tex = NULL;
     custom_tlin = 1;
@@ -868,8 +868,6 @@ static int preinit(const char *arg)
       gl_target = GL_TEXTURE_RECTANGLE;
     else
       gl_target = GL_TEXTURE_2D;
-    if (slice_height == -1)
-      slice_height = use_yuv ? 16 : 4;
     yuvconvtype = use_yuv | lscale << YUV_LUM_SCALER_SHIFT | cscale << YUV_CHROM_SCALER_SHIFT;
     if (many_fmts)
       mp_msg (MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
