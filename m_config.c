@@ -204,7 +204,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
   } else
     co->name = arg->name;
 
-  // Option with childs -> add them
+  // Option with children -> add them
   if(arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
     m_option_t *ol = arg->p;
     int i;
@@ -213,7 +213,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
       m_config_add_option(config,&ol[i], co->name);
   } else {
     m_config_option_t *i;
-    // Check if there is alredy an option pointing to this address
+    // Check if there is already an option pointing to this address
     if(arg->p) {
       for(i = config->opts ; i ; i = i->next ) {
 	if(i->opt->p == arg->p) { // So we don't save the same vars more than 1 time
@@ -227,7 +227,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
     // Allocate a slot for the defaults
     sl = calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
     m_option_save(arg,sl->data,(void**)arg->p);
-    // Hack to avoid too much trouble with dynamicly allocated data :
+    // Hack to avoid too much trouble with dynamically allocated data :
     // We always use a dynamic version
     if((arg->type->flags & M_OPT_TYPE_DYNAMIC) && arg->p && (*(void**)arg->p)) {
       *(void**)arg->p = NULL;
@@ -299,7 +299,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
   assert(co->opt->type->parse);
 #endif
 
-  // Check if this option isn't forbiden in the current mode
+  // Check if this option isn't forbidden in the current mode
   if((config->mode == M_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_InvalidCfgfileOption,arg);
     return M_OPT_INVALID;
@@ -309,7 +309,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
     return M_OPT_INVALID;
   }
 
-  // Option with childs are a bit different to parse
+  // Option with children are a bit different to parse
   if(co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
     char** lst = NULL;
     int i,sr;
