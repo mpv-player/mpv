@@ -19,6 +19,7 @@ float vo_panscanrange = 1.0;
 
 #include "video_out.h"
 
+float force_monitor_aspect=0;
 float monitor_aspect=0;
 float monitor_pixel_aspect=1;
 extern float movie_aspect;
@@ -55,7 +56,9 @@ void aspect_save_screenres(int scrw, int scrh){
 #endif
   aspdat.scrw = scrw;
   aspdat.scrh = scrh;
-  if (!monitor_aspect)
+  if (force_monitor_aspect)
+    monitor_aspect = force_monitor_aspect;
+  else
     monitor_aspect = monitor_pixel_aspect * scrw / scrh;
 }
 

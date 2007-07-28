@@ -99,7 +99,7 @@ extern int xinerama_screen;
 #endif
 
 /* from libvo/aspect.c */
-extern float monitor_aspect;
+extern float force_monitor_aspect;
 extern float monitor_pixel_aspect;
 
 extern int sws_flags;
@@ -213,7 +213,7 @@ m_option_t mplayer_opts[]={
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - useful for 16:9 TVout
-	{"monitoraspect", &monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9.0, NULL},
+	{"monitoraspect", &force_monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9.0, NULL},
 	{"monitorpixelaspect", &monitor_pixel_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 9.0, NULL},
 	// video mode switching: (x11,xv,dga)
         {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
