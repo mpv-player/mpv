@@ -233,7 +233,7 @@ m_option_t mplayer_opts[]={
 	// wait for v-sync (vesa)
 	{"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"novsync", &vo_vsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	{"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
+	{"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
 	{"panscanrange", &vo_panscanrange, CONF_TYPE_FLOAT, CONF_RANGE, -19.0, 99.0, NULL},
 
 	{"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
