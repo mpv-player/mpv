@@ -1595,7 +1595,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid hiba: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Kiválasztási hiba.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChildren "[MENU] Olvasási hiba a gyerek fájlleírójában: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildFD "[MENU] Olvasási hiba a gyerek fájlleírójában: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Konzol futtatás: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Egy gyermek már fut.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Fork sikertelen !!!\n"

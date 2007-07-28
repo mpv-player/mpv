@@ -1707,7 +1707,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[МЕНЮ] Ошибка вызова waitpid: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[МЕНЮ] Ошибка вызова select.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChildren "[МЕНЮ] Ошибка чтения дочернего файлового описателя: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildFD "[МЕНЮ] Ошибка чтения дочернего файлового описателя: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[МЕНЮ] Запуск консоли: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[МЕНЮ] Дочерний процесс уже запущен.\n"
 #define MSGTR_LIBMENU_ForkFailed "[МЕНЮ] Вызов fork не удался !!!\n"

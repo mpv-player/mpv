@@ -1465,7 +1465,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid hatası: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Seçim hatası.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChildren "[MENU] Alt süreçte okuma hatası: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildFD "[MENU] Alt süreçte okuma hatası: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Console işlemi: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Bir alt süreç zaten çalışıyor.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Çatallama başarısız !!!\n"

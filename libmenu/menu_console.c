@@ -275,7 +275,7 @@ static void check_child(menu_t* menu) {
       if(w) mpriv->add_line = 1;
       r = read(mpriv->child_fd[i],buffer,255);
       if(r < 0)
-	mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReadErrorOnChildren, i == 1 ? "stdout":"stderr");
+	mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReadErrorOnChildFD, i == 1 ? "stdout":"stderr");
       else if(r>0) {
 	buffer[r] = '\0';
 	add_string(mpriv,buffer);

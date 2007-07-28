@@ -1588,7 +1588,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid 错误: %s。\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Select 错误。\n"
-#define MSGTR_LIBMENU_ReadErrorOnChildren "[MENU] 子进程的文件描述符读取错误: %s。\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildFD "[MENU] 子进程的文件描述符读取错误: %s。\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] 终端运行: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] 子进程已经运行。\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Fork 失败!!!\n"

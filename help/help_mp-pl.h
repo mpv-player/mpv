@@ -1476,7 +1476,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] błąd waitpid: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Błąd wyboru.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChildren "[MENU] Błąd odczytu deskryptora pliku potomnego: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChildFD "[MENU] Błąd odczytu deskryptora pliku potomnego: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Uruchom: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Proces potomny już działa.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Fork nie powiodło się !!!\n"
