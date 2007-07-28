@@ -1533,12 +1533,12 @@ void vo_x11_fullscreen(void)
             vo_old_y = vo_dy;
             vo_old_width = vo_dwidth;
             vo_old_height = vo_dheight;
+        }
             update_xinerama_info();
             x = xinerama_x;
             y = xinerama_y;
             w = vo_screenwidth;
             h = vo_screenheight;
-        }
     }
     {
         long dummy;
