@@ -682,8 +682,8 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
 static int tdfx_vid_overlay_on(void) {
   uint32_t vidcfg = tdfx_inl(VIDPROCCFG);
   //return 0;
-  if(vidcfg & (1<<8)) { // Overlay is alredy on
-    //printk(KERN_DEBUG "tdfx_vid: Overlay is alredy on\n");
+  if(vidcfg & (1<<8)) { // Overlay is already on
+    //printk(KERN_DEBUG "tdfx_vid: Overlay is already on.\n");
     return (-EFAULT); 
   }
   vidcfg |= (1<<8);
@@ -700,7 +700,7 @@ static int tdfx_vid_overlay_off(void) {
     return 0;
   }
 
-  printk(KERN_DEBUG "tdfx_vid: Overlay is alredy off\n");
+  printk(KERN_DEBUG "tdfx_vid: Overlay is already off.\n");
   return (-EFAULT); 
 }
 

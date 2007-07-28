@@ -313,7 +313,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
     // Calculate the timestamp
     if(pack->granulepos == -1)
       pack->granulepos = os->lastpos + (os->lastsize ? os->lastsize : 1);
-    // If we alredy have a timestamp it can be a syncpoint
+    // If we already have a timestamp it can be a syncpoint
     if(*pack->packet & PACKET_IS_SYNCPOINT)
       *flags = 1;
     *pts =  pack->granulepos/os->samplerate;

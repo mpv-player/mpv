@@ -51,7 +51,7 @@ no need that it's the first one. The same apply when you set the child of a node
 the child argument can be any entry in a list.
 To remove an entry from the tree use play_tree_remove. If the second arg (free_it)
 is true it will also free it, if the entry should be freed and the third
-arg is true it will also free the childs.
+arg is true it will also free the children.
 
 When your tree is ready you can then use play_tree_cleanup to remove all unuseful
 entries.

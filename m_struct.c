@@ -34,7 +34,7 @@ m_struct_alloc(m_struct_t* st) {
   // Check the struct fields
   for(i = 0 ; st->fields[i].name ; i++) {
     if(st->fields[i].type->flags & M_OPT_TYPE_INDIRECT) {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s->%s: option type with the indirect flag are forbiden\n",st->name,st->fields[i].name);
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s->%s: Option types with the indirect flag are forbidden.\n",st->name,st->fields[i].name);
       return NULL;
     }
   }

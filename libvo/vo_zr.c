@@ -186,12 +186,12 @@ int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
 	/* center the image, and stretch it as far as possible (try to keep
 	 * aspect) and check if it fits */
 	if (zr->image_width > zr->vc.maxwidth) {
-		mp_msg(MSGT_VO, MSGL_ERR, "zr: movie to be played is too wide, max width currenty %d\n", zr->vc.maxwidth);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: movie to be played is too wide, max width currently %d\n", zr->vc.maxwidth);
 		return 1;
 	}
 
 	if (zr->image_height > zr->vc.maxheight) {
-		mp_msg(MSGT_VO, MSGL_ERR, "zr: movie to be played is too high, max height currenty %d\n", zr->vc.maxheight);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: movie to be played is too high, max height currently %d\n", zr->vc.maxheight);
 		return 1;
 	}
 

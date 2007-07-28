@@ -149,7 +149,7 @@ flip_page(void)
   printf("Flip\n");
 #endif
   if(use_overlay) {
-    // TDFX_VID_OVERLAY_ON does nothing if the overlay is alredy on
+    // TDFX_VID_OVERLAY_ON does nothing if the overlay is already on
     if(!ioctl(tdfx_fd,TDFX_VID_OVERLAY_ON)) { // X11 killed the overlay :(
       if(ioctl(tdfx_fd,TDFX_VID_SET_OVERLAY,&tdfx_ov))
 	mp_msg(MSGT_VO, MSGL_ERR, "tdfx_vid: set_overlay failed\n");

@@ -302,10 +302,10 @@ static int seek(stream_t *s,off_t newpos) {
     return 0;
   }
 
-  // Check to see if the server doesn't alredy terminated the transfert
+  // Check to see if the server did not already terminate the transfer
   if(fd_can_read(p->handle, 0)) {
     if(readresp(p,rsp_txt) != 2)
-      mp_msg(MSGT_OPEN,MSGL_WARN, "[ftp] Warning the server didn't finished the transfert correctly: %s\n",rsp_txt);
+      mp_msg(MSGT_OPEN,MSGL_WARN, "[ftp] Warning the server didn't finished the transfer correctly: %s\n",rsp_txt);
     closesocket(s->fd);
     s->fd = -1;
   }
@@ -423,7 +423,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     return STREAM_ERROR;
   }
     
-  // Set the transfert type
+  // Set the transfer type
   resp = FtpSendCmd("TYPE I",p,rsp_txt);
   if(resp != 2) {
     mp_msg(MSGT_OPEN,MSGL_WARN, "[ftp] command 'TYPE I' failed: %s\n",rsp_txt);
