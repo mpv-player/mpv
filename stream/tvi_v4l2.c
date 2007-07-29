@@ -47,7 +47,7 @@ known issues:
 #include "audio_in.h"
 
 #define info tvi_info_v4l2
-static tvi_handle_t *tvi_init_v4l2(char *video_dev, char *audio_dev);
+static tvi_handle_t *tvi_init_v4l2(tv_param_t* tv_param);
 /* information about this file */
 tvi_info_t tvi_info_v4l2 = {
     tvi_init_v4l2,
@@ -137,6 +137,8 @@ typedef struct {
     volatile long               audio_null_blocks_inserted;
     volatile long long          dropped_frames_timeshift;
     long long                   dropped_frames_compensated;
+
+    tv_param_t                  *tv_param;
 } priv_t;
 
 #include "tvi_def.h"
@@ -826,7 +828,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 #define PRIV ((priv_t *) (tvi_handle->priv))
 
 /* handler creator - entry point ! */
-static tvi_handle_t *tvi_init_v4l2(char *video_dev, char *audio_dev)
+static tvi_handle_t *tvi_init_v4l2(tv_param_t* tv_param)
 {
     tvi_handle_t *tvi_handle;
 
@@ -837,14 +839,14 @@ static tvi_handle_t *tvi_init_v4l2(char *video_dev, char *audio_dev)
     }
     PRIV->video_fd = -1;
 
-    PRIV->video_dev = strdup(video_dev? video_dev: "/dev/video0");
+    PRIV->video_dev = strdup(tv_param->device? tv_param->device: "/dev/video0");
     if (!PRIV->video_dev) {
         free_handle(tvi_handle);
         return NULL;
     }
 
-    if (audio_dev) {
-        PRIV->audio_dev = strdup(audio_dev);
+    if (tv_param->adevice) {
+        PRIV->audio_dev = strdup(tv_param->adevice);
         if (!PRIV->audio_dev) {
             free(PRIV->video_dev);
             free_handle(tvi_handle);
@@ -852,6 +854,7 @@ static tvi_handle_t *tvi_init_v4l2(char *video_dev, char *audio_dev)
         }
     }
 
+    PRIV->tv_param=tv_param;
     return tvi_handle;
 }
 

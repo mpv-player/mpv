@@ -48,7 +48,7 @@
 
 #include "audio_in.h"
 
-static tvi_handle_t *tvi_init_v4l(char *device, char *adevice);
+static tvi_handle_t *tvi_init_v4l(tv_param_t* tv_param);
 
 tvi_info_t tvi_info_v4l = {
     tvi_init_v4l,
@@ -143,6 +143,7 @@ typedef struct {
     long                        audio_sent_blocks_total;
     long                        mjpeg_bufsize;
 
+    tv_param_t                  *tv_param;
 } priv_t;
 
 #include "tvi_def.h"
@@ -269,7 +270,7 @@ static void setup_audio_buffer_sizes(priv_t *priv)
            priv->audio_buffer_size, priv->audio_in.blocksize, priv->aud_skew_cnt);
 }
 
-static tvi_handle_t *tvi_init_v4l(char *device, char *adevice)
+static tvi_handle_t *tvi_init_v4l(tv_param_t* tv_param)
 {
     tvi_handle_t *h;
     priv_t *priv;
@@ -281,16 +282,16 @@ static tvi_handle_t *tvi_init_v4l(char *device, char *adevice)
     priv = h->priv;
 
     /* set video device name */
-    if (!device)
+    if (!tv_param->device)
         priv->video_device = strdup("/dev/video0");
     else
-        priv->video_device = strdup(device);
+        priv->video_device = strdup(tv_param->device);
 
     /* set video device name */
-    if (!adevice)
+    if (!tv_param->adevice)
         priv->audio_device = NULL;
     else {
-        priv->audio_device = strdup(adevice);
+        priv->audio_device = strdup(tv_param->adevice);
     }
 
     /* allocation failed */
@@ -299,6 +300,7 @@ static tvi_handle_t *tvi_init_v4l(char *device, char *adevice)
         return(NULL);
     }
 
+    h->tv_param=tv_param;
     return(h);
 }
 

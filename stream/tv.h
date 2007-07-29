@@ -95,7 +95,7 @@ extern tv_param_t stream_tv_defaults;
  
 typedef struct tvi_info_s
 {
-    struct tvi_handle_s * (*tvi_init)(char *device,char *adevice);
+    struct tvi_handle_s * (*tvi_init)(tv_param_t* tv_param);
     const char *name;
     const char *short_name;
     const char *author;

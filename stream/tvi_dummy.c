@@ -8,7 +8,7 @@
 #include "libmpcodecs/img_format.h"
 #include "tv.h"
 
-static tvi_handle_t *tvi_init_dummy(char *device,char *adevice);
+static tvi_handle_t *tvi_init_dummy(tv_param_t* tv_param);
 /* information about this file */
 tvi_info_t tvi_info_dummy = {
 	tvi_init_dummy,
@@ -27,7 +27,7 @@ typedef struct {
 #include "tvi_def.h"
 
 /* handler creator - entry point ! */
-static tvi_handle_t *tvi_init_dummy(char *device,char *adevice)
+static tvi_handle_t *tvi_init_dummy(tv_param_t* tv_param)
 {
     return(new_handle());
 }

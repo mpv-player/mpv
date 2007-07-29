@@ -505,11 +505,11 @@ done:
 	return 1;
 }
 
-static tvi_handle_t *tv_begin(void)
+static tvi_handle_t *tv_begin(tv_param_t* tv_param)
 {
     int i;
     tvi_handle_t* h;
-    if(!strcmp(tv_param_driver,"help")){
+    if(!strcmp(tv_param->driver,"help")){
         mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_AvailableDrivers);
         for(i=0;tvi_driver_list[i];i++){
 	    mp_msg(MSGT_TV,MSGL_INFO," %s\t%s",tvi_driver_list[i]->short_name,tvi_driver_list[i]->name);
@@ -521,10 +521,11 @@ static tvi_handle_t *tv_begin(void)
     }
 
     for(i=0;tvi_driver_list[i];i++){
-        if (!strcmp(tvi_driver_list[i]->short_name, tv_param_driver)){
-            h=tvi_driver_list[i]->tvi_init(tv_param_device,tv_param_adevice);
+        if (!strcmp(tvi_driver_list[i]->short_name, tv_param->driver)){
+            h=tvi_driver_list[i]->tvi_init(tv_param);
             if(!h) return NULL;
 
+            h->tv_param=tv_param;
             mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_DriverInfo, tvi_driver_list[i]->short_name,
             tvi_driver_list[i]->name,
             tvi_driver_list[i]->author,
@@ -533,7 +534,7 @@ static tvi_handle_t *tv_begin(void)
         }
     }
     
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_NoSuchDriver, tv_param_driver); 
+    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_NoSuchDriver, tv_param->driver); 
     return(NULL);
 }
 
@@ -555,7 +556,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     tvi_functions_t *funcs;
     
     demuxer->priv=NULL;
-    if(!(tvh=tv_begin())) return NULL;
+    if(!(tvh=tv_begin(demuxer->stream->priv))) return NULL;
     if (!tvh->functions->init(tvh->priv)) return NULL;
     if (!open_tv(tvh)){
 	tv_uninit(tvh);

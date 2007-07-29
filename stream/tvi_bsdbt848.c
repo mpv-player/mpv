@@ -64,7 +64,7 @@
 #include "libmpcodecs/img_format.h"
 #include "tv.h"
 
-static tvi_handle_t *tvi_init_bsdbt848(char *device, char *adevice);
+static tvi_handle_t *tvi_init_bsdbt848(tv_param_t* tv_param);
 /* information about this file */
 tvi_info_t tvi_info_bsdbt848 = {
     tvi_init_bsdbt848,
@@ -134,6 +134,7 @@ typedef struct {
     int immediatemode;
     double starttime;
 
+    tv_param_t *tv_param;
 } priv_t;
 
 #include "tvi_def.h"
@@ -169,7 +170,7 @@ return;
 }
 
 /* handler creator - entry point ! */
-static tvi_handle_t *tvi_init_bsdbt848(char *device,char* adevice)
+static tvi_handle_t *tvi_init_bsdbt848(tv_param_t* tv_param)
 {
     char* sep ;
     tvi_handle_t* tvh;
@@ -185,31 +186,32 @@ static tvi_handle_t *tvi_init_bsdbt848(char *device,char* adevice)
     */
 
     /* set video device name */
-    if (!device){
+    if (!tv_param->device){
         priv->btdev = strdup("/dev/bktr0");
         priv->tunerdev = strdup("/dev/tuner0");
     }else{
-        sep = strchr(device,',');
-        priv->btdev = strdup(device);
+        sep = strchr(tv_param->device,',');
+        priv->btdev = strdup(tv_param->device);
         if(sep){
             // tuner device is also passed
             priv->tunerdev = strdup(sep+1);
-            priv->btdev[sep - device] = 0;
+            priv->btdev[sep - tv_param->device] = 0;
         }else{
             priv->tunerdev = strdup("/dev/tuner0");
         }
     }
 
     /* set audio device name */
-    if (!adevice)
+    if (!tv_param->adevice)
 #ifdef USE_SUN_AUDIO
         priv->dspdev = strdup("/dev/sound");
 #else
         priv->dspdev = strdup("/dev/dsp");
 #endif
     else
-        priv->dspdev = strdup(adevice);
+        priv->dspdev = strdup(tv_param->adevice);
 
+    tvh->tv_param=tv_param;
     return tvh;
 }
 
