@@ -419,12 +419,12 @@ parse_setup_stationlist (struct pvr_t *pvr)
     return -1;
 
   /* Create our station/channel list */
-  if (tv_param_chanlist)
+  if (stream_tv_defaults.chanlist)
   {
     /* select channel list */
     for (i = 0; chanlists[i].name != NULL; i++)
     {
-      if (!strcasecmp (chanlists[i].name, tv_param_chanlist))
+      if (!strcasecmp (chanlists[i].name, stream_tv_defaults.chanlist))
       {
         chantab = i;
         break;
@@ -434,7 +434,7 @@ parse_setup_stationlist (struct pvr_t *pvr)
     {
       mp_msg (MSGT_OPEN, MSGL_ERR,
               "%s unable to find channel list %s, using default %s\n",
-              LOG_LEVEL_V4L2, tv_param_chanlist, chanlists[chantab].name);
+              LOG_LEVEL_V4L2, stream_tv_defaults.chanlist, chanlists[chantab].name);
     }
     else
     {
@@ -460,11 +460,11 @@ parse_setup_stationlist (struct pvr_t *pvr)
   }
 
   /* Handle user channel mappings */
-  if (tv_param_channels) 
+  if (stream_tv_defaults.channels) 
   {
     char channel[PVR_STATION_NAME_SIZE];
     char station[PVR_STATION_NAME_SIZE];
-    char **channels = tv_param_channels;
+    char **channels = stream_tv_defaults.channels;
 
     disable_all_stations (pvr);
 
@@ -1123,62 +1123,62 @@ parse_v4l2_tv_options (struct pvr_t *pvr)
     if (set_station_by_channelname_or_freq (pvr, pvr->param_channel,
                                             -1, 0) >= 0)
     {
-      if (tv_param_freq)
+      if (stream_tv_defaults.freq)
       {
         mp_msg (MSGT_OPEN, MSGL_HINT,
                 "%s tv param freq %s is overwritten by channel setting freq %d\n", LOG_LEVEL_V4L2, 
-                tv_param_freq, pvr->freq);
+                stream_tv_defaults.freq, pvr->freq);
       }
     }
   }
   
-  if (pvr->freq < 0 && tv_param_freq)
+  if (pvr->freq < 0 && stream_tv_defaults.freq)
   {
     mp_msg (MSGT_OPEN, MSGL_HINT, "%s tv param freq %s is used directly\n",
-            LOG_LEVEL_V4L2, tv_param_freq);
+            LOG_LEVEL_V4L2, stream_tv_defaults.freq);
 
     if (set_station_by_channelname_or_freq (pvr, NULL,
-                                            atoi (tv_param_freq), 0)<0)
+                                            atoi (stream_tv_defaults.freq), 0)<0)
       {
         mp_msg (MSGT_OPEN, MSGL_WARN,
                 "%s tv param freq %s invalid to set station\n",
-                LOG_LEVEL_V4L2, tv_param_freq);
+                LOG_LEVEL_V4L2, stream_tv_defaults.freq);
       }
   }
   
-  if (tv_param_device)
+  if (stream_tv_defaults.device)
   {
     if (pvr->video_dev)
       free (pvr->video_dev);
-    pvr->video_dev = strdup (tv_param_device);
+    pvr->video_dev = strdup (stream_tv_defaults.device);
   }
   
-  if (tv_param_noaudio)
-    pvr->mute = tv_param_noaudio;
+  if (stream_tv_defaults.noaudio)
+    pvr->mute = stream_tv_defaults.noaudio;
 
-  if (tv_param_input)
-    pvr->input = tv_param_input;
+  if (stream_tv_defaults.input)
+    pvr->input = stream_tv_defaults.input;
   
-  if (tv_param_normid)
-    pvr->normid = tv_param_normid;
+  if (stream_tv_defaults.normid)
+    pvr->normid = stream_tv_defaults.normid;
   
-  if (tv_param_brightness)
-    pvr->brightness = tv_param_brightness;
+  if (stream_tv_defaults.brightness)
+    pvr->brightness = stream_tv_defaults.brightness;
   
-  if (tv_param_contrast)
-    pvr->contrast = tv_param_contrast;
+  if (stream_tv_defaults.contrast)
+    pvr->contrast = stream_tv_defaults.contrast;
   
-  if (tv_param_hue)
-    pvr->hue = tv_param_hue;
+  if (stream_tv_defaults.hue)
+    pvr->hue = stream_tv_defaults.hue;
   
-  if (tv_param_saturation)
-    pvr->saturation = tv_param_saturation;
+  if (stream_tv_defaults.saturation)
+    pvr->saturation = stream_tv_defaults.saturation;
 
-  if (tv_param_width)
-    pvr->width = tv_param_width;
+  if (stream_tv_defaults.width)
+    pvr->width = stream_tv_defaults.width;
 
-  if (tv_param_height)
-    pvr->height = tv_param_height;
+  if (stream_tv_defaults.height)
+    pvr->height = stream_tv_defaults.height;
 }
 
 static int
@@ -1583,8 +1583,8 @@ pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
    */
   if (stream->url && strlen (stream->url) > 6 && stream->url[6] != '\0')
     pvr->param_channel = strdup (stream->url + 6);
-  else if (tv_param_channel && strlen (tv_param_channel))
-    pvr->param_channel = strdup (tv_param_channel);
+  else if (stream_tv_defaults.channel && strlen (stream_tv_defaults.channel))
+    pvr->param_channel = strdup (stream_tv_defaults.channel);
   
   parse_v4l2_tv_options (pvr);
   parse_encoder_options (pvr);
