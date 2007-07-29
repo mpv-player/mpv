@@ -627,12 +627,22 @@ int dvdnav_number_of_subs(stream_t *stream) {
   return n;
 }
 
+/**
+ * \brief mp_dvdnav_get_spu_clut() returns the spu clut
+ * \param stream: - stream pointer
+ * \return spu clut pointer
+ */
 unsigned int *mp_dvdnav_get_spu_clut(stream_t *stream) {
     dvdnav_priv_t *priv=(dvdnav_priv_t*)stream->priv;
     if(!priv->spu_set) return NULL;
     return priv->spu_clut;
 }
 
+/**
+ * \brief mp_dvdnav_get_highlight() get dvdnav highlight struct
+ * \param stream: - stream pointer
+ * \param hl    : - highlight struct pointer
+ */
 void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
   dvdnav_priv_t *priv = (dvdnav_priv_t *) stream->priv;
   dvdnav_highlight_event_t hlev = priv->hlev;
