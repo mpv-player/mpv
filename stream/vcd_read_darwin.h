@@ -56,6 +56,7 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 		mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif1: %s\n",strerror(errno));
 		return -1;
 	}
+	vcd->msf = CDConvertLBAToMSF(entry.trackStartAddress);
 	return VCD_SECTOR_DATA*vcd_get_msf(vcd);
 }
 
@@ -89,6 +90,7 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 		mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
 		return -1;
 	}
+	vcd->msf = CDConvertLBAToMSF(entry.trackStartAddress);
 	return VCD_SECTOR_DATA*vcd_get_msf(vcd);
 }
 
