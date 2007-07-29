@@ -28,18 +28,12 @@ typedef struct mp_vcd_priv_st
 
 static inline void vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect)
 {
-  vcd->msf.frame=sect%75;
-  sect=sect/75;
-  vcd->msf.second=sect%60;
-  sect=sect/60;
-  vcd->msf.minute=sect;
+  vcd->msf = CDConvertLBAToMSF(sect);
 }
 
 static inline unsigned int vcd_get_msf(mp_vcd_priv_t* vcd)
 {
-  return vcd->msf.frame +
-        (vcd->msf.second+
-         vcd->msf.minute*60)*75;
+  return CDConvertMSFToLBA(vcd->msf);
 }
 
 int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
