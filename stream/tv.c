@@ -539,6 +539,16 @@ tvi_handle_t *tv_begin(void)
     return(NULL);
 }
 
+int tv_uninit(tvi_handle_t *tvh)
+{
+    int res;
+    if(!tvh) return 1;
+    if (!tvh->priv) return 1;
+    res=tvh->functions->uninit(tvh->priv);
+    if(res) tvh->priv=NULL;
+    return res;
+}
+
 static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh;
@@ -695,16 +705,6 @@ static void demux_close_tv(demuxer_t *demuxer)
     if (!tvh) return;
     tvh->functions->uninit(tvh->priv);
     demuxer->priv=NULL;
-}
-
-int tv_uninit(tvi_handle_t *tvh)
-{
-    int res;
-    if(!tvh) return 1;
-    if (!tvh->priv) return 1;
-    res=tvh->functions->uninit(tvh->priv);
-    if(res) tvh->priv=NULL;
-    return res;
 }
 
 /* utilities for mplayer (not mencoder!!) */
