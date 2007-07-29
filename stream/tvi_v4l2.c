@@ -359,9 +359,9 @@ static void init_audio(priv_t *priv)
 {
     if (priv->audio_inited) return;
 
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
-        if (tv_param_alsa)
+        if (priv->tv_param->alsa)
             audio_in_init(&priv->audio_in, AUDIO_IN_ALSA);
         else
             audio_in_init(&priv->audio_in, AUDIO_IN_OSS);
@@ -381,8 +381,8 @@ static void init_audio(priv_t *priv)
                 audio_in_set_channels(&priv->audio_in, 1);
             }
         } else {
-            if (tv_param_forcechan >= 0) {
-                audio_in_set_channels(&priv->audio_in, tv_param_forcechan);
+            if (priv->tv_param->forcechan >= 0) {
+                audio_in_set_channels(&priv->audio_in, priv->tv_param->forcechan);
             } else {
                 audio_in_set_channels(&priv->audio_in, 2);
             }
@@ -561,7 +561,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         return priv->capability.capabilities & V4L2_CAP_VIDEO_CAPTURE?
             TVI_CONTROL_TRUE: TVI_CONTROL_FALSE;
     case TVI_CONTROL_IS_AUDIO:
-        if (tv_param_force_audio) return TVI_CONTROL_TRUE;
+        if (priv->tv_param->force_audio) return TVI_CONTROL_TRUE;
     case TVI_CONTROL_IS_TUNER:
         return priv->capability.capabilities & V4L2_CAP_TUNER?
             TVI_CONTROL_TRUE: TVI_CONTROL_FALSE;
@@ -904,7 +904,7 @@ static int uninit(priv_t *priv)
     }
 
     /* stop audio thread */
-    if (!tv_param_noaudio && priv->audio_grabber_thread) {
+    if (!priv->tv_param->noaudio && priv->audio_grabber_thread) {
         pthread_join(priv->audio_grabber_thread, NULL);
         pthread_mutex_destroy(&priv->skew_mutex);
         pthread_mutex_destroy(&priv->audio_mutex);
@@ -925,7 +925,7 @@ static int uninit(priv_t *priv)
         }
         free(priv->video_ringbuffer);
     }
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         if (priv->audio_ringbuffer)
             free(priv->audio_ringbuffer);
         if (priv->audio_skew_buffer)
@@ -1086,13 +1086,13 @@ static int init(priv_t *priv)
         return 0;
     }
 
-//    if (!(priv->capability.capabilities & V4L2_CAP_AUDIO) && !tv_param_force_audio) tv_param_noaudio = 1;
+//    if (!(priv->capability.capabilities & V4L2_CAP_AUDIO) && !priv->tv_param->force_audio) priv->tv_param->noaudio = 1;
 
     if (priv->capability.capabilities & V4L2_CAP_TUNER) {
         struct v4l2_control control;
-        if (tv_param_amode >= 0) {
+        if (priv->tv_param->amode >= 0) {
             mp_msg(MSGT_TV, MSGL_V, "%s: setting audio mode\n", info.short_name);
-            priv->tuner.audmode = amode2v4l(tv_param_amode);
+            priv->tuner.audmode = amode2v4l(priv->tv_param->amode);
             if (ioctl(priv->video_fd, VIDIOC_S_TUNER, &priv->tuner) < 0) {
                 mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl set tuner failed: %s\n",
                        info.short_name, strerror(errno));
@@ -1105,24 +1105,24 @@ static int init(priv_t *priv)
                 (priv->tuner.audmode == V4L2_TUNER_MODE_LANG1)  ? " LANG1"  : "",
                 (priv->tuner.audmode == V4L2_TUNER_MODE_LANG2)  ? " LANG2"  : "");
 
-        if (tv_param_volume >= 0) {
+        if (priv->tv_param->volume >= 0) {
             control.id = V4L2_CID_AUDIO_VOLUME;
-            control.value = tv_param_volume;
+            control.value = priv->tv_param->volume;
             set_control(priv, &control, 0);
         }
-        if (tv_param_bass >= 0) {
+        if (priv->tv_param->bass >= 0) {
             control.id = V4L2_CID_AUDIO_BASS;
-            control.value = tv_param_bass;
+            control.value = priv->tv_param->bass;
             set_control(priv, &control, 0);
         }
-        if (tv_param_treble >= 0) {
+        if (priv->tv_param->treble >= 0) {
             control.id = V4L2_CID_AUDIO_TREBLE;
-            control.value = tv_param_treble;
+            control.value = priv->tv_param->treble;
             set_control(priv, &control, 0);
         }
-        if (tv_param_balance >= 0) {
+        if (priv->tv_param->balance >= 0) {
             control.id = V4L2_CID_AUDIO_BALANCE;
-            control.value = tv_param_balance;
+            control.value = priv->tv_param->balance;
             set_control(priv, &control, 0);
         }
     }
@@ -1134,8 +1134,8 @@ static int get_capture_buffer_size(priv_t *priv)
 {
     int bufsize, cnt;
 
-    if (tv_param_buffer_size >= 0) {
-        bufsize = tv_param_buffer_size*1024*1024;
+    if (priv->tv_param->buffer_size >= 0) {
+        bufsize = priv->tv_param->buffer_size*1024*1024;
     } else {
 #ifdef HAVE_SYS_SYSINFO_H
         struct sysinfo si;
@@ -1166,7 +1166,7 @@ static int start(priv_t *priv)
     /* setup audio parameters */
 
     init_audio(priv);
-    if (!tv_param_noaudio && !priv->audio_inited) return 0;
+    if (!priv->tv_param->noaudio && !priv->audio_inited) return 0;
 
     /* we need this to size the audio buffer properly */
     if (priv->immediate_mode) {
@@ -1175,7 +1175,7 @@ static int start(priv_t *priv)
         priv->video_buffer_size_max = get_capture_buffer_size(priv);
     }
     
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         setup_audio_buffer_sizes(priv);
         priv->audio_skew_buffer = calloc(priv->aud_skew_cnt, sizeof(long long));
         if (!priv->audio_skew_buffer) {
@@ -1217,7 +1217,7 @@ static int start(priv_t *priv)
     }
 
     /* setup video parameters */
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         if (priv->video_buffer_size_max < (3*priv->standard.frameperiod.denominator) /
                                                priv->standard.frameperiod.numerator
             *priv->audio_secs_per_block) {
@@ -1317,9 +1317,9 @@ static int start(priv_t *priv)
 static inline void copy_frame(priv_t *priv, video_buffer_entry *dest, unsigned char *source,int len)
 {
     dest->framesize=len;
-    if(tv_param_automute>0){
+    if(priv->tv_param->automute>0){
         if (ioctl(priv->video_fd, VIDIOC_G_TUNER, &priv->tuner) >= 0) {
-            if(tv_param_automute<<8>priv->tuner.signal){
+            if(priv->tv_param->automute<<8>priv->tuner.signal){
 	        fill_blank_frame(dest->data,dest->framesize,fcc_vl2mp(priv->format.fmt.pix.pixelformat));
 	        set_mute(priv,1);
 	        return;
@@ -1356,7 +1356,7 @@ static void *video_grabber(void *data)
     }
     priv->streamon = 1;
 
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         pthread_create(&priv->audio_grabber_thread, NULL, audio_grabber, priv);
     }
 
@@ -1433,9 +1433,9 @@ static void *video_grabber(void *data)
 
         /* store the timestamp of the very first frame as reference */
         if (!priv->frames++) {
-            if (!tv_param_noaudio) pthread_mutex_lock(&priv->skew_mutex);
+            if (!priv->tv_param->noaudio) pthread_mutex_lock(&priv->skew_mutex);
             priv->first_frame = (long long)1e6*buf.timestamp.tv_sec + buf.timestamp.tv_usec;
-            if (!tv_param_noaudio) pthread_mutex_unlock(&priv->skew_mutex);
+            if (!priv->tv_param->noaudio) pthread_mutex_unlock(&priv->skew_mutex);
         }
         priv->curr_frame = (long long)buf.timestamp.tv_sec*1e6+buf.timestamp.tv_usec;
 //        fprintf(stderr, "idx = %d, ts = %lf\n", buf.index, (double)(priv->curr_frame) / 1e6);
@@ -1445,9 +1445,9 @@ static void *video_grabber(void *data)
 
         if (!priv->immediate_mode) {
             // interpolate the skew in time
-            if (!tv_param_noaudio) pthread_mutex_lock(&priv->skew_mutex);
+            if (!priv->tv_param->noaudio) pthread_mutex_lock(&priv->skew_mutex);
             xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
-            if (!tv_param_noaudio) pthread_mutex_unlock(&priv->skew_mutex);
+            if (!priv->tv_param->noaudio) pthread_mutex_unlock(&priv->skew_mutex);
              // correct extreme skew changes to avoid (especially) moving backwards in time
             if (xskew - prev_skew > delta*MAX_SKEW_DELTA) {
                 skew = prev_skew + delta*MAX_SKEW_DELTA;
