@@ -81,7 +81,7 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 	//read track info
 	memset( &vcd->entry, 0, sizeof(vcd->entry));
 	vcd->entry.addressType = kCDTrackInfoAddressTypeTrackNumber;
-	vcd->entry.address = track<(hdr.lastTrackNumberInLastSessionLSB+1)?(track):CDROM_LEADOUT;
+	vcd->entry.address = track<hdr.lastTrackNumberInLastSessionLSB?track+1:CDROM_LEADOUT;
 	vcd->entry.bufferLength = sizeof(entry);
 	vcd->entry.buffer = &entry;
   
