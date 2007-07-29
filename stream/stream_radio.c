@@ -88,39 +88,23 @@ typedef struct radio_channels_s {
     struct radio_channels_s * prev;
 } radio_channels_t;
 
+/// default values for options
+radio_param_t stream_radio_defaults={
 #ifdef HAVE_RADIO_BSDBT848
-/** (device,string, "/dev/tuner0") name of radio device file */
-char*   radio_param_device="/dev/tuner0";
-/** radio_param_freq_min (freq_min,float,87.5) minimal allowed frequency */
-float radio_param_freq_min=87.50;
-/** radio_param_freq_min (freq_min,float,108.0) maximal allowed frequency */
-float radio_param_freq_max=108.00;
+    "/dev/tuner0", //device
+    87.50,         //freq_min
+    108.00,        //freq_max
 #else
-/** (device,string, "/dev/radio0") name of radio device file */
-char*   radio_param_device="/dev/radio0";
+    "/dev/radio0", //device;
 #endif
-/** (driver,string, "v4l2") radio driver (v4l,v4l2) */
-char*   radio_param_driver="default";
-/** radio_param_channels (channels,string,NULL) channels list (see man page) */
-char**  radio_param_channels;
-/** radio_param_volume (volume,number,100) initial volume for radio device */
-int     radio_param_volume=100;
-/** radio_param_adevice (adevice,string,NULL) name of audio device file to grab data from */
-char*   radio_param_adevice;
-/** radio_param_arate (arate,number,44100) audio framerate
-(please also set -rawaudio rate parameter to the same value) */
-int     radio_param_arate=44100;
-/** radio_param_achannels (achannels,number,2) number of audio channels */
-int     radio_param_achannels=2;
-extern int demux_rawaudio_packs_per_sec;
-
-static struct stream_priv_s {
-    /* if channels parameter exist here will be channel number otherwise - frequency */
-    float radio_param_freq_channel;
-    char* capture;
-} stream_priv_dflts = {
-    0,
-    NULL
+    "default",     //driver
+    NULL,          //channels
+    100,           //volume
+    NULL,          //adevice
+    44100,         //arate
+    2,             //achannels
+    0,             //freq_channel
+    NULL,          //capture
 };
 
 typedef struct radio_priv_s {
@@ -143,6 +127,7 @@ typedef struct radio_priv_s {
     int                 audio_drop;        ///< number of dropped bytes
     int                 audio_inited;
 #endif
+    radio_param_t       *radio_param;
 } radio_priv_t;
 
 typedef struct radio_driver_s {
@@ -155,17 +140,17 @@ typedef struct radio_driver_s {
     int (*get_frequency)(radio_priv_t* priv,float* frequency);
 } radio_driver_t;
 
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
+#define ST_OFF(f) M_ST_OFF(radio_param_t,f)
 static m_option_t stream_opts_fields[] = {
-    {"hostname", ST_OFF(radio_param_freq_channel), CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
+    {"hostname", ST_OFF(freq_channel), CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
     {"filename", ST_OFF(capture), CONF_TYPE_STRING, 0, 0 ,0, NULL},
     { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
 static struct m_struct_st stream_opts = {
     "radio",
-    sizeof(struct stream_priv_s),
-    &stream_priv_dflts,
+    sizeof(radio_param_t),
+    &stream_radio_defaults,
     stream_opts_fields
 };
 
@@ -176,26 +161,26 @@ static int clear_buffer(radio_priv_t* priv);
 
 
 /*****************************************************************
- * \brief parse radio_param_channels parameter and store result into list
- * \param freq_channel if radio_param_channels!=NULL this mean channel number, otherwise - frequency
+ * \brief parse channels parameter and store result into list
+ * \param freq_channel if channels!=NULL this mean channel number, otherwise - frequency
  * \param pfreq selected frequency (from selected channel or from URL)
  * \result STREAM_OK if success, STREAM_ERROR otherwise
  *
- *  radio_param_channels (channels options) must be in the following format
+ *  channels option must be in the following format
  *  <frequency>-<name>,<frequency>-<name>,...
  *
  *  '_' will be replaced with spaces.
  *
- *  If radio_param_channels is not null, number in movie URL will be treated as
+ *  If channels option is not null, number in movie URL will be treated as
  *  channel position in channel list.
  */
 static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
     char** channels;
     int i;
     int channel = 0;
-    if (radio_param_channels){
+    if (priv->radio_param->channels){
         /*parsing channels string*/
-        channels =radio_param_channels;
+        channels=priv->radio_param->channels;
 
         mp_msg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_ChannelNamesDetected);
         priv->radio_channel_list = malloc(sizeof(radio_channels_t));
@@ -289,7 +274,7 @@ static int init_frac_v4l2(radio_priv_t* priv){
         return  STREAM_ERROR;
     }
     if(tuner.type!=V4L2_TUNER_RADIO){
-        mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_NotRadioDevice,radio_param_device);
+        mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_NotRadioDevice,priv->radio_param->device);
         return STREAM_ERROR;
     }
     if(tuner.capability & V4L2_TUNER_CAP_LOW){
@@ -576,8 +561,8 @@ static const radio_driver_t radio_driver_v4l={
 */
 static int init_frac_bsdbt848(radio_priv_t* priv){
     priv->frac=100;
-    priv->rangelow=radio_param_freq_min;
-    priv->rangehigh=radio_param_freq_max;
+    priv->rangelow=priv->radio_param->freq_min;
+    priv->rangehigh=priv->radio_param->freq_max;
     return STREAM_OK;
 }
 
@@ -843,7 +828,7 @@ static int init_audio(radio_priv_t *priv)
     if(!priv->do_capture)
         return STREAM_OK;
 
-    if (!radio_param_adevice){
+    if (!priv->radio_param->adevice){
         priv->do_capture=0;
         return STREAM_OK;
     }
@@ -851,12 +836,12 @@ static int init_audio(radio_priv_t *priv)
     priv->do_capture=1;
     mp_msg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_CaptureStarting);
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
-    while ((tmp = strrchr(radio_param_adevice, '='))){
+    while ((tmp = strrchr(priv->radio_param->adevice, '='))){
         tmp[0] = ':';
-        //radio_param_adevice looks like ALSA device name. Switching to ALSA
+        //adevice option looks like ALSA device name. Switching to ALSA
         is_oss=0;
     }
-    while ((tmp = strrchr(radio_param_adevice, '.')))
+    while ((tmp = strrchr(priv->radio_param->adevice, '.')))
         tmp[0] = ',';
 #endif
 
@@ -864,9 +849,9 @@ static int init_audio(radio_priv_t *priv)
         mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AudioInInitFailed,strerror(errno));
     }
 
-    audio_in_set_device(&priv->audio_in, radio_param_adevice);
-    audio_in_set_channels(&priv->audio_in, radio_param_achannels);
-    audio_in_set_samplerate(&priv->audio_in, radio_param_arate);
+    audio_in_set_device(&priv->audio_in, priv->radio_param->adevice);
+    audio_in_set_channels(&priv->audio_in, priv->radio_param->achannels);
+    audio_in_set_samplerate(&priv->audio_in, priv->radio_param->arate);
 
     if (audio_in_setup(&priv->audio_in) < 0) {
         mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AudioInSetupFailed, strerror(errno));
@@ -966,7 +951,7 @@ int radio_step_freq(struct stream_st *stream, float step_interval){
  * \parameter direction RADIO_CHANNEL_LOWER - go to prev channel,RADIO_CHANNEL_HIGHER - to next
  * \return 1 if success,0 - otherwise
  *
- *  if radio_param_channel is NULL function prints error message and does nothing, otherwise
+ *  if channel parameter is NULL function prints error message and does nothing, otherwise
  *  changes channel to prev or next in list
  */
 int radio_step_channel(struct stream_st *stream, int direction) {
@@ -1008,7 +993,7 @@ int radio_step_channel(struct stream_st *stream, int direction) {
  * \parameter channel string, containing channel number
  * \return 1 if success,0 - otherwise
  *
- *  if radio_param_channel is NULL function prints error message and does nothing, otherwise
+ *  if channel parameter is NULL function prints error message and does nothing, otherwise
  *  changes channel to given
  */
 int radio_set_channel(struct stream_st *stream, char *channel) {
@@ -1109,7 +1094,6 @@ static const radio_driver_t* radio_drivers[]={
  * \return STREAM_OK if success, STREAM_ERROR otherwise
  */
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
-    struct stream_priv_s* p=(struct stream_priv_s*)opts;
     radio_priv_t* priv;
     float frequency=0;
     int i;
@@ -1120,16 +1104,16 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     if(mode != STREAM_READ)
         return STREAM_UNSUPORTED;
 
-    priv=malloc(sizeof(radio_priv_t));
+    priv=calloc(1,sizeof(radio_priv_t));
 
     if (!priv)
         return STREAM_ERROR;
 
 
-    memset(priv,0,sizeof(radio_priv_t));
+    priv->radio_param=opts;
 
 #ifdef USE_RADIO_CAPTURE
-    if (p->capture && strncmp("capture",p->capture,7)==0)
+    if (priv->radio_param->capture && strncmp("capture",priv->radio_param->capture,7)==0)
         priv->do_capture=1;
     else
         priv->do_capture=0;
@@ -1137,7 +1121,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
 
 
-    if (strncmp(radio_param_driver,"default",7)==0)
+    if (strncmp(priv->radio_param->driver,"default",7)==0)
         priv->driver=radio_drivers[0];
     else
         priv->driver=NULL;
@@ -1145,7 +1129,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_AvailableDrivers);
     for(i=0;radio_drivers[i];i++){
         mp_msg(MSGT_RADIO,MSGL_V,"%s, ",radio_drivers[i]->name);
-        if(strcmp(radio_param_driver,radio_drivers[i]->name)==0)
+        if(strcmp(priv->radio_param->driver,radio_drivers[i]->name)==0)
             priv->driver=radio_drivers[i];
     }
     mp_msg(MSGT_RADIO,MSGL_V,"\n");
@@ -1153,7 +1137,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     if(priv->driver)
         mp_msg(MSGT_RADIO, MSGL_INFO, priv->driver->info);
     else{
-        mp_msg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_DriverUnknownStr,radio_param_driver);
+        mp_msg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_DriverUnknownStr,priv->radio_param->driver);
         close_s(stream);
         return STREAM_ERROR;
     }
@@ -1171,14 +1155,14 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     stream->close=close_s;
     stream->fill_buffer=fill_buffer_s;
 
-    priv->radio_fd = open(radio_param_device, O_RDONLY);
+    priv->radio_fd = open(priv->radio_param->device, O_RDONLY);
     if (priv->radio_fd < 0) {
         mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_UnableOpenDevice,
-            radio_param_device, strerror(errno));
+            priv->radio_param->device, strerror(errno));
         close_s(stream);
         return STREAM_ERROR;
     }
-    mp_msg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_RadioDevice, priv->radio_fd,radio_param_device);
+    mp_msg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_RadioDevice, priv->radio_fd,priv->radio_param->device);
     fcntl(priv->radio_fd, F_SETFD, FD_CLOEXEC);
 
     get_volume(priv, &priv->old_snd_volume);
@@ -1189,7 +1173,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         return STREAM_ERROR;
     };
 
-    if (parse_channels(priv,p->radio_param_freq_channel,&frequency)!=STREAM_OK){
+    if (parse_channels(priv,priv->radio_param->freq_channel,&frequency)!=STREAM_OK){
         close_s(stream);
         return STREAM_ERROR;
     }
@@ -1225,7 +1209,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     }
 #endif
 
-    set_volume(priv,radio_param_volume);
+    set_volume(priv,priv->radio_param->volume);
 
     return STREAM_OK;
 }
@@ -1260,6 +1244,8 @@ static void close_s(struct stream_st * stream){
         close(priv->radio_fd);
     }
 
+    if(priv->radio_param)
+        m_struct_free(&stream_opts,priv->radio_param);
     free(priv);
     stream->priv=NULL;
 }

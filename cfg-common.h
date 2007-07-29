@@ -402,17 +402,17 @@ extern char* edl_output_filename;
 
 #ifdef USE_RADIO
 m_option_t radioopts_conf[]={
-    {"device", &radio_param_device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    {"driver", &radio_param_driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+    {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+    {"driver", &stream_radio_defaults.driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
 #ifdef RADIO_BSDBT848_HDR
-    {"freq_min", &radio_param_freq_min, CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
-    {"freq_max", &radio_param_freq_max, CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
+    {"freq_min", &stream_radio_defaults.freq_min, CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
+    {"freq_max", &stream_radio_defaults.freq_max, CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
 #endif
-    {"channels", &radio_param_channels, CONF_TYPE_STRING_LIST, 0, 0 ,0, NULL},
-    {"volume", &radio_param_volume, CONF_TYPE_INT, CONF_RANGE, 0 ,100, NULL},
-    {"adevice", &radio_param_adevice, CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    {"arate", &radio_param_arate, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
-    {"achannels", &radio_param_achannels, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
+    {"channels", &stream_radio_defaults.channels, CONF_TYPE_STRING_LIST, 0, 0 ,0, NULL},
+    {"volume", &stream_radio_defaults.volume, CONF_TYPE_INT, CONF_RANGE, 0 ,100, NULL},
+    {"adevice", &stream_radio_defaults.adevice, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+    {"arate", &stream_radio_defaults.arate, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
+    {"achannels", &stream_radio_defaults.achannels, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif

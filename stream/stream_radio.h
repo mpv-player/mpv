@@ -4,17 +4,35 @@
 #define RADIO_CHANNEL_LOWER 1
 #define RADIO_CHANNEL_HIGHER 2
 
-extern char *radio_param_device;
-extern char *radio_param_driver;
-#ifdef RADIO_BSDBT848_HDR
-extern float radio_param_freq_min;
-extern float radio_param_freq_max;
+typedef struct radio_param_s{
+    /** name of radio device file */
+    char*   device;
+#ifdef HAVE_RADIO_BSDBT848
+    /** minimal allowed frequency */
+    float   freq_min;
+    /** maximal allowed frequency */
+    float   freq_max;
 #endif
-extern char **radio_param_channels;
-extern int radio_param_volume;
-extern char* radio_param_adevice;
-extern int radio_param_arate;
-extern int radio_param_achannels;
+    /** radio driver (v4l,v4l2) */
+    char*   driver;
+    /** channels list (see man page) */
+    char**  channels;
+    /** initial volume for radio device */
+    int     volume;
+    /** name of audio device file to grab data from */
+    char*   adevice;
+    /** audio framerate (please also set -rawaudio rate
+        parameter to the same value) */
+    int     arate;
+    /** number of audio channels */
+    int     achannels;
+    /** if channels parameter exist, here will be channel
+        number otherwise - frequency */
+    float   freq_channel;
+    char*   capture;
+} radio_param_t;
+
+extern radio_param_t stream_radio_defaults;
 
 int radio_set_freq(struct stream_st *stream, float freq);
 int radio_get_freq(struct stream_st *stream, float* freq);
