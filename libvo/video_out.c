@@ -103,6 +103,9 @@ extern vo_functions_t video_out_dxr3;
 #ifdef HAVE_IVTV
 extern vo_functions_t video_out_ivtv;
 #endif
+#ifdef HAVE_V4L2_DECODER
+extern vo_functions_t video_out_v4l2;
+#endif
 #ifdef HAVE_JPEG
 extern vo_functions_t video_out_jpeg;
 #endif
@@ -213,6 +216,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_IVTV
         &video_out_ivtv,
+#endif
+#ifdef HAVE_V4L2_DECODER
+        &video_out_v4l2,
 #endif
 #ifdef HAVE_ZR
 	&video_out_zr,

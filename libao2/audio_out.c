@@ -68,6 +68,9 @@ extern ao_functions_t audio_out_dxr2;
 #ifdef HAVE_IVTV
 extern ao_functions_t audio_out_ivtv;
 #endif
+#ifdef HAVE_V4L2_DECODER
+extern ao_functions_t audio_out_v4l2;
+#endif
 extern ao_functions_t audio_out_mpegpes;
 extern ao_functions_t audio_out_pcm;
 extern ao_functions_t audio_out_pss;
@@ -130,6 +133,9 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef HAVE_IVTV
         &audio_out_ivtv,
+#endif
+#ifdef HAVE_V4L2_DECODER
+        &audio_out_v4l2,
 #endif
         &audio_out_null,
 // should not be auto-selected:

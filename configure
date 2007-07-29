@@ -358,6 +358,7 @@ Video output:
   --enable-dxr2            enable DXR2 video output [autodetect]
   --enable-dxr3            enable DXR3/H+ video output [autodetect]
   --enable-ivtv            enable IVTV TV-Out video output [autodetect]
+  --enable-v4l2            enable V4L2 Decoder audio/video output [autodetect]
   --enable-dvb             enable DVB video output [autodetect]
   --enable-dvbhead         enable DVB video output (HEAD version) [autodetect]
   --enable-mga             enable mga_vid video output [disable]
@@ -539,6 +540,7 @@ _dvbhead=auto
 _dxr2=auto
 _dxr3=auto
 _ivtv=auto
+_v4l2=auto
 _iconv=auto
 _langinfo=auto
 _rtc=auto
@@ -846,6 +848,8 @@ for ac_option do
   --disable-dxr3)	_dxr3=no	;;
   --enable-ivtv)        _ivtv=yes       ;;
   --disable-ivtv)       _ivtv=no        ;;
+  --enable-v4l2)        _v4l2=yes       ;;
+  --disable-v4l2)       _v4l2=no        ;;
   --enable-iconv)	_iconv=yes	;;
   --disable-iconv)	_iconv=no	;;
   --enable-langinfo)	_langinfo=yes	;;
@@ -4823,6 +4827,39 @@ fi
 echores "$_ivtv"
 
 
+echocheck "V4L2 MPEG Decoder"
+if test "$_v4l2" = auto ; then
+  cat > $TMPC << EOF
+#include <stdlib.h>
+#include <inttypes.h>
+#include <linux/types.h>
+#include <linux/videodev2.h>
+#include <linux/version.h>
+int main(void) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+  return 0;
+#else
+  return -1;
+#endif
+}
+EOF
+  _v4l2=no
+  cc_check && _v4l2=yes
+fi
+if test "$_v4l2" = yes ; then
+  _def_v4l2='#define HAVE_V4L2_DECODER 1'
+  _vosrc="$_vosrc vo_v4l2.c"
+  _vomodules="v4l2 $_vomodules"
+  _aosrc="$_aosrc ao_v4l2.c"
+  _aomodules="v4l2 $_aomodules"
+else
+  _def_v4l2='#undef HAVE_V4L2_DECODER'
+  _novomodules="v4l2 $_novomodules"
+  _noaomodules="v4l2 $_noaomodules"
+fi
+echores "$_v4l2"
+
+
 
 #########
 # AUDIO #
@@ -8241,6 +8278,7 @@ $_def_fbdev
 $_def_dxr2
 $_def_dxr3
 $_def_ivtv
+$_def_v4l2
 $_def_dvb
 $_def_dvb_in
 $_def_svga
