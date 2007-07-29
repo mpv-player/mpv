@@ -516,6 +516,9 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     demuxer->priv=NULL;
     if(!(tvh=tv_begin(demuxer->stream->priv))) return NULL;
     if (!tvh->functions->init(tvh->priv)) return NULL;
+
+    tvh->functions->control(tvh->priv,TVI_CONTROL_VBI_INIT,&(tvh->tv_param->tdevice));
+
     if (!open_tv(tvh)){
 	tv_uninit(tvh);
 	return NULL;
@@ -731,6 +734,7 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_CurrentFrequency,
 	    freq, (float)freq/16);
     }
+    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
     return(1);
 }
 
@@ -890,6 +894,7 @@ int tv_step_norm(tvi_handle_t *tvh)
       return 0;
     }
   }
+    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
     return(1);
 }
 
@@ -907,6 +912,7 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
 	return 0;
     }
+    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
     return(1);
 }
 

@@ -460,6 +460,11 @@ m_option_t tvopts_conf[]={
 #endif
 	{"adevice", &stream_tv_defaults.adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
+#ifdef HAVE_TV_TELETEXT
+	{"tdevice", &stream_tv_defaults.tdevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"tpage", &stream_tv_defaults.tpage, CONF_TYPE_INT, CONF_RANGE, 100, 899, NULL},
+	{"tformat", &stream_tv_defaults.tformat, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
+#endif
 	{"audioid", &stream_tv_defaults.audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };

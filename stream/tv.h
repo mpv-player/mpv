@@ -47,6 +47,9 @@ typedef struct tv_param_s {
     int contrast;
     int hue;
     int saturation;
+    char *tdevice;  ///< teletext device
+    int tformat;    ///< teletext display format
+    int tpage;      ///< start teletext page
 } tv_param_t;
   
 extern tv_param_t stream_tv_defaults;
@@ -157,6 +160,39 @@ extern char *tv_channel_last_real;
 #define TVI_CONTROL_SPC_SET_INPUT	0x402	/* set input channel (tv,s-video,composite..) */
 #define TVI_CONTROL_SPC_GET_NORMID	0x403	/* get normid from norm name */
 
+//tvi_* ioctl (not tvi_vbi.c !!!)
+#define TVI_CONTROL_VBI_INIT           0x501   ///< vbi init
+
+/* 
+  TELETEXT controls (through tv_teletext_control() ) 
+   NOTE: 
+    _SET_ should be _GET_ +1
+   _STEP_ should be _GET_ +2
+*/
+#define TV_VBI_CONTROL_GET_MODE        0x510   ///< get current mode teletext
+#define TV_VBI_CONTROL_SET_MODE        0x511   ///< on/off grab teletext
+
+#define TV_VBI_CONTROL_GET_PAGE        0x513   ///< get grabbed teletext page
+#define TV_VBI_CONTROL_SET_PAGE        0x514   ///< set grab teletext page number
+#define TV_VBI_CONTROL_STEP_PAGE       0x515   ///< step grab teletext page number
+
+#define TV_VBI_CONTROL_GET_SUBPAGE     0x516   ///< get grabbed teletext page
+#define TV_VBI_CONTROL_SET_SUBPAGE     0x517   ///< set grab teletext page number
+
+#define TV_VBI_CONTROL_GET_FORMAT      0x519   ///< get eletext format
+#define TV_VBI_CONTROL_SET_FORMAT      0x51a   ///< set teletext format
+
+#define TV_VBI_CONTROL_GET_HALF_PAGE   0x51c   ///< get current half page
+#define TV_VBI_CONTROL_SET_HALF_PAGE   0x51d   ///< switch half page
+
+#define TV_VBI_CONTROL_ADD_DEC         0x550   ///< add page number with dec
+#define TV_VBI_CONTROL_GO_LINK         0x551   ///< go link (1..6) NYI
+#define TV_VBI_CONTROL_GET_VBIPAGE     0x552   ///< get vbi_image for grabbed teletext page
+#define TV_VBI_CONTROL_RESET           0x553   ///< vbi reset
+#define TV_VBI_CONTROL_START           0x554   ///< vbi start
+#define TV_VBI_CONTROL_STOP            0x555   ///< vbi stop
+#define TV_VBI_CONTROL_DECODE_PAGE     0x556   ///< decode vbi page
+
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
 int tv_get_color_options(tvi_handle_t *tvh, int opt, int* val);
 #define TV_COLOR_BRIGHTNESS	1
@@ -190,5 +226,61 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm);
 #define TV_NORM_PALM		5
 #define TV_NORM_PALN		6
 #define TV_NORM_NTSCJP		7
+
+#define VBI_TFORMAT_TEXT    0               ///< text mode
+#define VBI_TFORMAT_BW      1               ///< back&white mode
+#define VBI_TFORMAT_GRAY    2               ///< grayscale mode
+#define VBI_TFORMAT_COLOR   3               ///< color mode (require color_spu patch!)
+
+#define VBI_MAX_PAGES      0x800            ///< max sub pages number
+#define VBI_MAX_SUBPAGES   64               ///< max sub pages number
+
+#define VBI_ROWS    24                      ///< teletext page width in chars
+#define VBI_COLUMNS 40                      ///< teletext page height in chars
+#define VBI_TIME_LINEPOS    26              ///< time line pos in page header
+
+typedef
+enum{
+    TT_FORMAT_OPAQUE=0,       ///< opaque
+    TT_FORMAT_TRANSPARENT,    ///< translarent
+    TT_FORMAT_OPAQUE_INV,     ///< opaque with inverted colors
+    TT_FORMAT_TRANSPARENT_INV ///< translarent with inverted colors
+} teletext_format;
+
+typedef
+enum{
+    TT_ZOOM_NORMAL=0,
+    TT_ZOOM_TOP_HALF,
+    TT_ZOOM_BOTTOM_HALF
+} teletext_zoom;
+
+typedef struct tt_char_s{
+    unsigned int unicode; ///< unicode (utf8) character
+    unsigned char fg;  ///< foreground color
+    unsigned char bg;  ///< background color
+    unsigned char gfx; ///< 0-no gfx, 1-solid gfx, 2-separated gfx
+    unsigned char ctl; ///< control character
+    unsigned char lng; ///< lang: 0-lating,1-national
+    unsigned char raw; ///< raw character (as received from device)
+} tt_char;
+
+typedef struct tt_page_s{
+    int pagenum;          ///< page number
+    int subpagenum;       ///< subpage number
+    unsigned char lang;   ///< language code
+    unsigned char active; ///< page is complete and ready for rendering
+    unsigned char flags;  ///< page flags, not used
+    unsigned char raw[VBI_ROWS*VBI_COLUMNS]; ///< page data
+    struct tt_page_s* next_subpage;
+}  tt_page;
+
+typedef struct tt_stream_props_s{
+    int sampling_rate;
+    int samples_per_line;
+    int offset;
+    int count[2];     ///< number of lines in first and second fields
+    int interlaced;   ///< vbi data are interlaced
+    int bufsize;      ///< required buffer size
+} tt_stream_props;
 
 #endif /* TV_H */

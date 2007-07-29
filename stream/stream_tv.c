@@ -72,6 +72,9 @@ tv_param_t stream_tv_defaults = {
     0,             //contrast
     0,             //hue
     0,             //saturation
+    NULL,          //tdevice
+    0,             //tformat
+    100            //tpage
 };
 
 #define ST_OFF(f) M_ST_OFF(tv_param_t,f)
