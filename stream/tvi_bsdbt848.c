@@ -410,7 +410,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
 #ifdef BT848_SAUDIO
 	if(priv->tunerready == TRUE &&
-	    ioctl(priv->tunerfd, BT848_SAUDIO, &tv_param_audio_id) < 0)
+	    ioctl(priv->tunerfd, BT848_SAUDIO, &priv->tv_param->audio_id) < 0)
 	    {
 	    perror("audioid:ioctl");
 	    }
