@@ -505,9 +505,7 @@ done:
 	return 1;
 }
 
-/* ================== STREAM_TV ===================== */
-
-tvi_handle_t *tv_begin(void)
+static tvi_handle_t *tv_begin(void)
 {
     int i;
     tvi_handle_t* h;
@@ -539,7 +537,7 @@ tvi_handle_t *tv_begin(void)
     return(NULL);
 }
 
-int tv_uninit(tvi_handle_t *tvh)
+static int tv_uninit(tvi_handle_t *tvh)
 {
     int res;
     if(!tvh) return 1;

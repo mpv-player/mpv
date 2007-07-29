@@ -152,10 +152,6 @@ extern char *tv_channel_last_real;
 #define TVI_CONTROL_SPC_SET_INPUT	0x402	/* set input channel (tv,s-video,composite..) */
 #define TVI_CONTROL_SPC_GET_NORMID	0x403	/* get normid from norm name */
 
-extern tvi_handle_t *tv_begin(void);
-extern int tv_init(tvi_handle_t *tvh);
-extern int tv_uninit(tvi_handle_t *tvh);
-
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
 int tv_get_color_options(tvi_handle_t *tvh, int opt, int* val);
 #define TV_COLOR_BRIGHTNESS	1
