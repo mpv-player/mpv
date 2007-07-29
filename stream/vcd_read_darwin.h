@@ -74,7 +74,7 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
     if (ioctl(vcd->fd, DKIOCCDREADDISCINFO, &tochdr) < 0)
 	{
 		mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
-		return NULL;
+		return -1;
     }
 	
 	//read track info
