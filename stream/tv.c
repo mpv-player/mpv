@@ -124,7 +124,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 
     /* ================== ADD AUDIO PACKET =================== */
 
-    if (ds==demux->audio && tv_param_noaudio == 0 && 
+    if (ds==demux->audio && tvh->tv_param->noaudio == 0 && 
         tvh->functions->control(tvh->priv, 
                                 TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
         {
@@ -154,7 +154,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 static int norm_from_string(tvi_handle_t *tvh, char* norm)
 {
 #ifdef HAVE_TV_V4L2
-    if (strcmp(tv_param_driver, "v4l2") != 0) {
+    if (strcmp(tvh->tv_param->driver, "v4l2") != 0) {
 #endif
     if (!strcasecmp(norm, "pal"))
 	return TV_NORM_PAL;
@@ -211,17 +211,17 @@ static int open_tv(tvi_handle_t *tvh)
 	return 0;
     }
 
-    if (tv_param_outfmt == -1)
+    if (tvh->tv_param->outfmt == -1)
       for (i = 0; i < sizeof (tv_fmt_list) / sizeof (*tv_fmt_list); i++)
         {
-          tv_param_outfmt = tv_fmt_list[i];
+          tvh->tv_param->outfmt = tv_fmt_list[i];
           if (funcs->control (tvh->priv, TVI_CONTROL_VID_SET_FORMAT,
-                              &tv_param_outfmt) == TVI_CONTROL_TRUE)
+                              &tvh->tv_param->outfmt) == TVI_CONTROL_TRUE)
             break;
         }
     else
     {
-    switch(tv_param_outfmt)
+    switch(tvh->tv_param->outfmt)
     {
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
@@ -235,26 +235,26 @@ static int open_tv(tvi_handle_t *tvh)
 	case IMGFMT_BGR15:
 	    break;
 	default:
-	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_UnknownImageFormat,tv_param_outfmt);
+	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_UnknownImageFormat,tvh->tv_param->outfmt);
     }
-    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &tv_param_outfmt);
+    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &tvh->tv_param->outfmt);
     }
 
     /* set some params got from cmdline */
-    funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
+    funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tvh->tv_param->input);
 
 #ifdef HAVE_TV_V4L2
-    if (!strcmp(tv_param_driver, "v4l2") && tv_param_normid >= 0) {
-	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNormId, tv_param_normid);
-	if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tv_param_normid) != TVI_CONTROL_TRUE) {
+    if (!strcmp(tvh->tv_param->driver, "v4l2") && tvh->tv_param->normid >= 0) {
+	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNormId, tvh->tv_param->normid);
+	if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->tv_param->normid) != TVI_CONTROL_TRUE) {
 	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
 	}
     } else {
 #endif
     /* select video norm */
-    tvh->norm = norm_from_string(tvh, tv_param_norm);
+    tvh->norm = norm_from_string(tvh, tvh->tv_param->norm);
 
-    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, tv_param_norm);
+    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, tvh->tv_param->norm);
     if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
     }
@@ -263,47 +263,47 @@ static int open_tv(tvi_handle_t *tvh)
 #endif
 
 #ifdef HAVE_TV_V4L1
-    if ( tv_param_mjpeg )
+    if ( tvh->tv_param->mjpeg )
     {
       /* set width to expected value */
-      if (tv_param_width == -1)
+      if (tvh->tv_param->width == -1)
         {
-          tv_param_width = 704/tv_param_decimation;
+          tvh->tv_param->width = 704/tvh->tv_param->decimation;
         }
-      if (tv_param_height == -1)
+      if (tvh->tv_param->height == -1)
         {
 	  if ( tvh->norm != TV_NORM_NTSC )
-            tv_param_height = 576/tv_param_decimation; 
+            tvh->tv_param->height = 576/tvh->tv_param->decimation; 
 	  else
-            tv_param_height = 480/tv_param_decimation; 
+            tvh->tv_param->height = 480/tvh->tv_param->decimation; 
         }
       mp_msg(MSGT_TV, MSGL_INFO, 
-	       MSGTR_TV_MJP_WidthHeight, tv_param_width, tv_param_height);
+	       MSGTR_TV_MJP_WidthHeight, tvh->tv_param->width, tvh->tv_param->height);
     }
 #endif
 
     /* limits on w&h are norm-dependent -- JM */
     /* set width */
-    if (tv_param_width != -1)
+    if (tvh->tv_param->width != -1)
     {
-	if (funcs->control(tvh->priv, TVI_CONTROL_VID_CHK_WIDTH, &tv_param_width) == TVI_CONTROL_TRUE)
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_WIDTH, &tv_param_width);
+	if (funcs->control(tvh->priv, TVI_CONTROL_VID_CHK_WIDTH, &tvh->tv_param->width) == TVI_CONTROL_TRUE)
+	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_WIDTH, &tvh->tv_param->width);
 	else
 	{
-	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_UnableToSetWidth, tv_param_width);
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &tv_param_width);
+	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_UnableToSetWidth, tvh->tv_param->width);
+	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &tvh->tv_param->width);
 	}    
     }
 
     /* set height */
-    if (tv_param_height != -1)
+    if (tvh->tv_param->height != -1)
     {
-	if (funcs->control(tvh->priv, TVI_CONTROL_VID_CHK_HEIGHT, &tv_param_height) == TVI_CONTROL_TRUE)
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HEIGHT, &tv_param_height);
+	if (funcs->control(tvh->priv, TVI_CONTROL_VID_CHK_HEIGHT, &tvh->tv_param->height) == TVI_CONTROL_TRUE)
+	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HEIGHT, &tvh->tv_param->height);
 	else
 	{
-	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_UnableToSetHeight, tv_param_height);
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &tv_param_height);
+	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_UnableToSetHeight, tvh->tv_param->height);
+	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &tvh->tv_param->height);
 	}    
     }
 
@@ -316,7 +316,7 @@ static int open_tv(tvi_handle_t *tvh)
     /* select channel list */
     for (i = 0; chanlists[i].name != NULL; i++)
     {
-	if (!strcasecmp(chanlists[i].name, tv_param_chanlist))
+	if (!strcasecmp(chanlists[i].name, tvh->tv_param->chanlist))
 	{
 	    tvh->chanlist = i;
 	    tvh->chanlist_s = chanlists[i].list;
@@ -326,20 +326,20 @@ static int open_tv(tvi_handle_t *tvh)
 
     if (tvh->chanlist == -1)
 	mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_UnableFindChanlist,
-	    tv_param_chanlist);
+	    tvh->tv_param->chanlist);
     else
 	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedChanlist,
 	    chanlists[tvh->chanlist].name, chanlists[tvh->chanlist].count);
 
-    if (tv_param_freq && tv_param_channel)
+    if (tvh->tv_param->freq && tvh->tv_param->channel)
     {
 	mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_ChannelFreqParamConflict);
 	goto done;
     }
 
     /* Handle channel names */
-    if (tv_param_channels) {
-	char** channels = tv_param_channels;
+    if (tvh->tv_param->channels) {
+	char** channels = tvh->tv_param->channels;
 	mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_ChannelNamesDetected);
 	tv_channel_list = malloc(sizeof(tv_channels_t));
 	tv_channel_list->index=1;
@@ -412,19 +412,19 @@ static int open_tv(tvi_handle_t *tvh)
     if (tv_channel_list) {
 	int i;
 	int channel = 0;
-	if (tv_param_channel)
+	if (tvh->tv_param->channel)
 	 {
-	   if (isdigit(*tv_param_channel))
-		/* if tv_param_channel begins with a digit interpret it as a number */
-		channel = atoi(tv_param_channel);
+	   if (isdigit(*tvh->tv_param->channel))
+		/* if tvh->tv_param->channel begins with a digit interpret it as a number */
+		channel = atoi(tvh->tv_param->channel);
 	   else
 	      {
-		/* if tv_param_channel does not begin with a digit 
-		   set the first channel that contains tv_param_channel in its name */
+		/* if tvh->tv_param->channel does not begin with a digit 
+		   set the first channel that contains tvh->tv_param->channel in its name */
 
 		tv_channel_current = tv_channel_list;
 		while ( tv_channel_current ) {
-			if ( strstr(tv_channel_current->name, tv_param_channel) )
+			if ( strstr(tv_channel_current->name, tvh->tv_param->channel) )
 			  break;
 			tv_channel_current = tv_channel_current->next;
 			}
@@ -447,9 +447,9 @@ static int open_tv(tvi_handle_t *tvh)
 	tv_channel_last = tv_channel_current;
     } else {
     /* we need to set frequency */
-    if (tv_param_freq)
+    if (tvh->tv_param->freq)
     {
-	unsigned long freq = atof(tv_param_freq)*16;
+	unsigned long freq = atof(tvh->tv_param->freq)*16;
 
         /* set freq in MHz */
 	funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
@@ -459,16 +459,16 @@ static int open_tv(tvi_handle_t *tvh)
 	    freq, (float)freq/16);
     }
 
-	    if (tv_param_channel) {
+	    if (tvh->tv_param->channel) {
 	struct CHANLIST cl;
 
-	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_RequestedChannel, tv_param_channel);
+	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_RequestedChannel, tvh->tv_param->channel);
 	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
 	{
 	    cl = tvh->chanlist_s[i];
 		    //  printf("count%d: name: %s, freq: %d\n",
 		    //	i, cl.name, cl.freq);
-	    if (!strcasecmp(cl.name, tv_param_channel))
+	    if (!strcasecmp(cl.name, tvh->tv_param->channel))
 	    {
 			strcpy(tv_channel_last_real, cl.name);
 		tvh->channel = i;
@@ -582,21 +582,21 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
         else sh_video->fps = tmp;
     }
 
-    if (tv_param_fps != -1.0f)
-        sh_video->fps = tv_param_fps;
+    if (tvh->tv_param->fps != -1.0f)
+        sh_video->fps = tvh->tv_param->fps;
 
     sh_video->frametime = 1.0f/sh_video->fps;
 
     /* If playback only mode, go to immediate mode, fail silently */
-    if(tv_param_immediate == 1)
+    if(tvh->tv_param->immediate == 1)
         {
         funcs->control(tvh->priv, TVI_CONTROL_IMMEDIATE, 0);
-        tv_param_noaudio = 1; 
+        tvh->tv_param->noaudio = 1; 
         }
 
     /* disable TV audio if -nosound is present */
     if (!demuxer->audio || demuxer->audio->id == -2) {
-        tv_param_noaudio = 1; 
+        tvh->tv_param->noaudio = 1; 
     }
 
     /* set width */
@@ -611,7 +611,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     demuxer->seekable = 0;
 
     /* here comes audio init */
-    if (tv_param_noaudio == 0 && funcs->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
+    if (tvh->tv_param->noaudio == 0 && funcs->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
     {
 	int audio_format;
 	int sh_audio_format;
@@ -620,7 +620,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 	/* yeah, audio is present */
 
 	funcs->control(tvh->priv, TVI_CONTROL_AUD_SET_SAMPLERATE, 
-				  &tv_param_audiorate);
+				  &tvh->tv_param->audiorate);
 
 	if (funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_FORMAT, &audio_format) != TVI_CONTROL_TRUE)
 	    goto no_audio;
@@ -690,10 +690,10 @@ no_audio:
     }
 
     /* set color eq */
-    tv_set_color_options(tvh, TV_COLOR_BRIGHTNESS, tv_param_brightness);
-    tv_set_color_options(tvh, TV_COLOR_HUE, tv_param_hue);
-    tv_set_color_options(tvh, TV_COLOR_SATURATION, tv_param_saturation);
-    tv_set_color_options(tvh, TV_COLOR_CONTRAST, tv_param_contrast);
+    tv_set_color_options(tvh, TV_COLOR_BRIGHTNESS, tvh->tv_param->brightness);
+    tv_set_color_options(tvh, TV_COLOR_HUE, tvh->tv_param->hue);
+    tv_set_color_options(tvh, TV_COLOR_SATURATION, tvh->tv_param->saturation);
+    tv_set_color_options(tvh, TV_COLOR_CONTRAST, tvh->tv_param->contrast);
 
     return demuxer;
 }
@@ -764,7 +764,7 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 {
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) == TVI_CONTROL_TRUE)
     {
-//	unsigned long freq = atof(tv_param_freq)*16;
+//	unsigned long freq = atof(tvh->tv_param->freq)*16;
 
         /* set freq in MHz */
 	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
@@ -944,7 +944,7 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 {
     tvh->norm = norm_from_string(tvh, norm);
 
-    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, tv_param_norm);
+    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, tvh->tv_param->norm);
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
 	return 0;
