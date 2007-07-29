@@ -7,6 +7,9 @@
 #include "libvo/video_out.h"
 #include "spudec.h"
 #include "vobsub.h"
+#ifdef HAVE_TV_TELETEXT
+#include "stream/tv.h"
+#endif
 
 double sub_last_pts = -303;
 
@@ -137,4 +140,22 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
 	    vo_osd_changed(OSDTYPE_SUBTITLE);
     }
     current_module=NULL;
+}
+
+void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
+{
+#ifdef HAVE_TV_TELETEXT
+    tvi_handle_t* tvh=demuxer->priv;
+    if (demuxer->type != DEMUXER_TYPE_TV || !tvh) return;
+
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_VBIPAGE,&vo_osd_teletext_page)!=TVI_CONTROL_TRUE)
+        vo_osd_teletext_page=NULL;
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_HALF_PAGE,&vo_osd_teletext_half)!=TVI_CONTROL_TRUE)
+        vo_osd_teletext_half=0;
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_MODE,&vo_osd_teletext_mode)!=TVI_CONTROL_TRUE)
+        vo_osd_teletext_mode=0;
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_FORMAT,&vo_osd_teletext_format)!=TVI_CONTROL_TRUE)
+        vo_osd_teletext_format=0;
+    vo_osd_changed(OSDTYPE_TELETEXT);
+#endif
 }

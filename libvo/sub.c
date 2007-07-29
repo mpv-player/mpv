@@ -14,6 +14,10 @@
 #define OSD_NAV_BOX_ALPHA 0x7f
 #endif
 
+#ifdef HAVE_TV_TELETEXT
+#include "stream/tv.h"
+#endif
+
 #include "mplayer.h"
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -68,6 +72,13 @@ font_desc_t* vo_font=NULL;
 font_desc_t* sub_font=NULL;
 
 unsigned char* vo_osd_text=NULL;
+#ifdef HAVE_TV_TELETEXT
+void* vo_osd_teletext_page=NULL;
+int vo_osd_teletext_half = 0;
+int vo_osd_teletext_mode=0;
+int vo_osd_teletext_format=0;
+int vo_osd_teletext_scale=0;
+#endif
 int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
@@ -227,6 +238,247 @@ inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
   obj->flags |= OSDFLAG_BBOX | OSDFLAG_CHANGED;
   if (obj->bbox.y2 > obj->bbox.y1 && obj->bbox.x2 > obj->bbox.x1)
     obj->flags |= OSDFLAG_VISIBLE;
+}
+#endif
+
+#ifdef HAVE_TV_TELETEXT
+// renders char to a big per-object buffer where alpha and bitmap are separated
+static void tt_draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsigned char* src, int stride,int fg,int bg,int alpha)
+{
+    int dststride = obj->stride;
+    int dstskip = obj->stride-w;
+    int srcskip = stride-w;
+    int i, j;
+    unsigned char *b = obj->bitmap_buffer + (y0-obj->bbox.y1)*dststride + (x0-obj->bbox.x1);
+    unsigned char *a = obj->alpha_buffer  + (y0-obj->bbox.y1)*dststride + (x0-obj->bbox.x1);
+    unsigned char *bs = src;
+    if (x0 < obj->bbox.x1 || x0+w > obj->bbox.x2 || y0 < obj->bbox.y1 || y0+h > obj->bbox.y2) {
+	mp_msg(MSGT_OSD,MSGL_ERR,"tt osd text out of range: bbox [%d %d %d %d], txt [%d %d %d %d]\n",
+		obj->bbox.x1, obj->bbox.x2, obj->bbox.y1, obj->bbox.y2,
+		x0, x0+w, y0, y0+h);
+	return;
+    }
+    for (i = 0; i < h; i++) {
+	for (j = 0; j < w; j++, b++, a++, bs++) {
+            *b=(fg-bg)*(*bs)/255+bg;
+            *a=alpha;
+	}
+	b+= dstskip;
+	a+= dstskip;
+	bs+= srcskip;
+    }
+}
+inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
+{
+    int h=0,w=0,i,j,font;
+    int wm,hm;
+    int color;
+    int x,y,x0,y0;
+    int cols,rows;
+    int wm12;
+    int hm13;
+    int hm23;
+    int start_row,max_rows;
+    int b,ax[6],ay[6],aw[6],ah[6];
+    tt_char tc;
+    tt_char* tdp=vo_osd_teletext_page;
+    unsigned char colors[8]={1,85,150,226,70,105,179,254};
+    unsigned char* buf[9];
+
+    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
+    if (!tdp || !vo_osd_teletext_mode) {
+        obj->flags&=~OSDFLAG_VISIBLE;
+        return;
+    }
+    switch(vo_osd_teletext_half){
+    case TT_ZOOM_TOP_HALF:
+        start_row=0;
+        max_rows=VBI_ROWS/2;
+        break;
+    case TT_ZOOM_BOTTOM_HALF:
+        start_row=VBI_ROWS/2;
+        max_rows=VBI_ROWS/2;
+        break;
+    default:
+        start_row=0;
+        max_rows=VBI_ROWS;
+        break;
+    }
+    wm=0;
+    for(i=start_row;i<max_rows;i++){
+        for(j=0;j<VBI_COLUMNS;j++){
+            tc=tdp[i*VBI_COLUMNS+j];
+            if(!tc.ctl && !tc.gfx)
+            {
+                render_one_glyph(vo_font, tc.unicode);
+                if (wm<vo_font->width[tc.unicode])
+                    wm=vo_font->width[tc.unicode];
+            }
+        }
+    }
+
+    hm=vo_font->height+1;
+    wm=dxs*hm*max_rows/(dys*VBI_COLUMNS);
+
+    //very simple teletext font auto scaling
+    if(!vo_osd_teletext_scale && hm*(max_rows+1)>dys){
+        text_font_scale_factor*=1.0*(dys)/((max_rows+1)*hm);
+        force_load_font=1;
+        vo_osd_teletext_scale=text_font_scale_factor;
+        obj->flags&=~OSDFLAG_VISIBLE;
+        return;
+    }
+
+    cols=dxs/wm;
+    rows=dys/hm;
+
+    if(cols>VBI_COLUMNS)
+        cols=VBI_COLUMNS;
+    if(rows>max_rows)
+        rows=max_rows;
+    w=cols*wm-vo_font->charspace;
+    h=rows*hm-vo_font->charspace;
+
+    if(w<dxs)
+        x0=(dxs-w)/2;
+    else
+        x0=0;
+    if(h<dys)
+        y0=(dys-h)/2;
+    else
+        y0=0;
+
+    wm12=wm>>1;
+    hm13=(hm+1)/3;
+    hm23=hm13<<1;
+
+    for(i=0;i<6;i+=2){
+        ax[i+0]=0;
+        aw[i+0]=wm12;
+
+        ax[i+1]=wm12;
+        aw[i+1]=wm-wm12;
+    }
+
+    for(i=0;i<2;i++){
+        ay[i+0]=0;
+        ah[i+0]=hm13;
+
+        ay[i+2]=hm13;
+        ah[i+2]=hm-hm23;
+
+        ay[i+4]=hm-hm13;
+        ah[i+4]=hm13;
+    }
+
+    obj->x = 0;
+    obj->y = 0;
+    obj->bbox.x1 = x0;
+    obj->bbox.y1 = y0;
+    obj->bbox.x2 = x0+w;
+    obj->bbox.y2 = y0+h;
+    obj->flags |= OSDFLAG_BBOX;
+    alloc_buf(obj);
+
+    for(i=0;i<9;i++)
+        buf[i]=malloc(wm*hm);
+
+    //alpha
+    if(vo_osd_teletext_format==TT_FORMAT_OPAQUE ||vo_osd_teletext_format==TT_FORMAT_OPAQUE_INV)
+        color=1;
+    else
+        color=200;
+    memset(buf[8],color,wm*hm);
+    //colors
+    if(vo_osd_teletext_format==TT_FORMAT_OPAQUE ||vo_osd_teletext_format==TT_FORMAT_TRANSPARENT){
+        for(i=0;i<8;i++){
+            memset(buf[i],(unsigned char)(1.0*(255-color)*colors[i]/255),wm*hm);
+        }
+    }else{
+        for(i=0;i<8;i++)
+            memset(buf[i],(unsigned char)(1.0*(255-color)*colors[7-i]/255),wm*hm);
+    }
+
+    y=y0;
+    for(i=0;i<rows;i++){
+        x=x0;
+        for(j=0;j<cols;j++){
+            tc=tdp[(i+start_row)*VBI_COLUMNS+j];
+            if(!tc.gfx){
+                /* Rendering one text character */
+                draw_alpha_buf(obj,x,y,wm,hm,buf[tc.bg],buf[8],wm);
+                if(tc.unicode!=0x20 && tc.unicode!=0x00 && !tc.ctl &&
+                    (font=vo_font->font[tc.unicode])>=0 && y+hm<dys){
+                        tt_draw_alpha_buf(obj,x,y,vo_font->width[tc.unicode],vo_font->height,
+                            vo_font->pic_b[font]->bmp+vo_font->start[tc.unicode]-vo_font->charspace*vo_font->pic_a[font]->w,
+                            vo_font->pic_b[font]->w,
+			    buf[tc.fg][0],buf[tc.bg][0],buf[8][0]);
+                }
+            }else{
+/*
+Rendering one graphics character
+TODO: support for separated graphics symbols (where six rectangles does not touch each other)
+
+    +--+    +--+    87654321
+    |01|    |12|    --------
+    |10| <= |34| <= 00100110 <= 0x26
+    |01|    |56|
+    +--+    +--+
+
+(0:wm/2)    (wm/2:wm-wm/2)
+
+********** *********** (0:hm/3)
+***   **** ****   ****
+*** 1 **** **** 2 **** 
+***   **** ****   ****
+********** ***********
+********** ***********
+
+********** *********** (hm/3:hm-2*hm/3)
+********** ***********
+***   **** ****   ****
+*** 3 **** **** 4 ****
+***   **** ****   ****
+********** ***********
+********** ***********
+********** ***********
+
+********** *********** (hm-hm/3:hm/3)
+***   **** ****   ****
+*** 5 **** **** 6 ****
+***   **** ****   **** 
+********** ***********   
+********** ***********
+
+*/              
+                if(tc.gfx>1){ //separated gfx
+                    for(b=0;b<6;b++){
+                        color=(tc.unicode>>b)&1?tc.fg:tc.bg;
+                        draw_alpha_buf(obj,x+ax[b]+1,y+ay[b]+1,aw[b]-2,ah[b]-2,buf[color],buf[8],wm);
+                    }
+                    //separated gfx (background borders)
+                    //vertical
+                    draw_alpha_buf(obj,x        ,y,1,hm,buf[tc.bg],buf[8],wm);
+                    draw_alpha_buf(obj,x+ax[1]-1,y,2,hm,buf[tc.bg],buf[8],wm);
+                    draw_alpha_buf(obj,x+ax[1]+aw[1]-1,y,wm-ax[1]-aw[1]+1,hm,buf[tc.bg],buf[8],wm);
+                    //horizontal
+                    draw_alpha_buf(obj,x,y      ,wm,1,buf[tc.bg],buf[8],wm);
+                    draw_alpha_buf(obj,x,y+ay[0]+ah[0]-1,wm,2,buf[tc.bg],buf[8],wm);
+                    draw_alpha_buf(obj,x,y+ay[2]+ah[2]-1,wm,2,buf[tc.bg],buf[8],wm);
+                    draw_alpha_buf(obj,x,y+ay[4]+ah[4]-1,wm,hm-ay[4]-ah[4]+1,buf[tc.bg],buf[8],wm);
+                }else{
+                    for(b=0;b<6;b++){
+                        color=(tc.unicode>>b)&1?tc.fg:tc.bg;
+                        draw_alpha_buf(obj,x+ax[b],y+ay[b],aw[b],ah[b],buf[color],buf[8],wm);
+                    }
+                }
+            }
+            x+=wm;
+        }
+        y+=hm;
+    }
+    for(i=0;i<9;i++)
+        free(buf[i]);
 }
 #endif
 
@@ -866,6 +1118,11 @@ int vo_update_osd(int dxs,int dys){
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(obj,dxs,dys);
 	    break;
+#ifdef HAVE_TV_TELETEXT
+	case OSDTYPE_TELETEXT:
+	    vo_update_text_teletext(obj,dxs,dys);
+	    break;
+#endif
 	case OSDTYPE_PROGBAR:
 	    vo_update_text_progbar(obj,dxs,dys);
 	    break;
@@ -933,6 +1190,9 @@ void vo_init_osd(void){
 #ifdef USE_DVDNAV
     new_osd_obj(OSDTYPE_DVDNAV);
 #endif
+#if HAVE_TV_TELETEXT
+    new_osd_obj(OSDTYPE_TELETEXT);
+#endif
 #ifdef HAVE_FREETYPE
     force_load_font = 1;
 #endif
@@ -970,6 +1230,9 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	    break;
 #ifdef USE_DVDNAV
         case OSDTYPE_DVDNAV:
+#endif
+#ifdef HAVE_TV_TELETEXT
+	case OSDTYPE_TELETEXT:
 #endif
 	case OSDTYPE_OSD:
 	case OSDTYPE_SUBTITLE:

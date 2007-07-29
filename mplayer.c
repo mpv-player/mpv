@@ -1621,6 +1621,7 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	decoded_frame = decode_video(sh_video, start, in_size, 0, pts);
 	if (decoded_frame) {
 	    update_subtitles(sh_video, mpctx->d_sub, 0);
+	    update_teletext(sh_video, mpctx->demuxer, 0);
 	    update_osd_msg();
 	    current_module = "filter video";
 	    if (filter_video(sh_video, decoded_frame, sh_video->pts))
@@ -2035,6 +2036,7 @@ static double update_video(int *blit_frame)
 	    ++total_frame_cnt;
 	}
 	update_subtitles(sh_video, mpctx->d_sub, 0);
+	update_teletext(sh_video, mpctx->demuxer, 0);
 	update_osd_msg();
 	current_module = "decode_video";
 	decoded_frame = decode_video(sh_video, start, in_size, drop_frame,
@@ -2248,6 +2250,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 	// be completely wrong (probably 0).
 	mpctx->sh_video->pts = mpctx->d_video->pts;
 	update_subtitles(mpctx->sh_video, mpctx->d_sub, 1);
+	update_teletext(mpctx->sh_video, mpctx->demuxer, 1);
     }
       
     if (mpctx->sh_audio) {
