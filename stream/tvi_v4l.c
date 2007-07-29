@@ -337,8 +337,8 @@ static void init_v4l_audio(priv_t *priv)
         /* mute all channels */
         priv->audio[i].flags |= VIDEO_AUDIO_MUTE;
         reqmode = -1;
-        if (tv_param_amode >= 0) {
-            switch (tv_param_amode) {
+        if (priv->tv_param->amode >= 0) {
+            switch (priv->tv_param->amode) {
             case 0:
                 reqmode = VIDEO_SOUND_MONO;
                 break;
@@ -402,8 +402,8 @@ static void init_v4l_audio(priv_t *priv)
                priv->audio[i].balance, audio_mode2name(priv->audio[i].mode));
         mp_msg(MSGT_TV, MSGL_V, " chan=%d\n", priv->audio_channels[i]);
 
-        if (tv_param_forcechan >= 0)
-            priv->audio_channels[i] = tv_param_forcechan;
+        if (priv->tv_param->forcechan >= 0)
+            priv->audio_channels[i] = priv->tv_param->forcechan;
 
         // we'll call VIDIOCSAUDIO again when starting capture
         // let's set audio mode to requested mode again for the case
@@ -430,8 +430,8 @@ static int init(priv_t *priv)
 {
     int i;
 
-    if (tv_param_immediate == 1)
-        tv_param_noaudio = 1;
+    if (priv->tv_param->immediate == 1)
+        priv->tv_param->noaudio = 1;
 
     priv->video_ringbuffer = NULL;
     priv->video_timebuffer = NULL;
@@ -481,10 +481,10 @@ static int init(priv_t *priv)
     priv->width = priv->capability.minwidth;
     priv->height = priv->capability.minheight;
 
-    /* somewhere here could disable tv_param_mjpeg, if it is not a capability */
+    /* somewhere here could disable priv->tv_param->mjpeg, if it is not a capability */
 
     /* initialize if necessary */
-    if ( tv_param_mjpeg )
+    if ( priv->tv_param->mjpeg )
     {
         struct mjpeg_params bparm;
         struct mjpeg_requestbuffers breq;          /* buffer requests */
@@ -505,15 +505,15 @@ static int init(priv_t *priv)
                "  MJP: HorDcm: %d, VerDcm: %d, TmpDcm: %d\n",
                bparm.HorDcm, bparm.VerDcm, bparm.TmpDcm);
 
-        bparm.input = tv_param_input; /* tv */
-        if (!strcasecmp(tv_param_norm, "pal"))
+        bparm.input = priv->tv_param->input; /* tv */
+        if (!strcasecmp(priv->tv_param->norm, "pal"))
             bparm.norm =  0; /* PAL */
-        else if (!strcasecmp(tv_param_norm, "ntsc"))
+        else if (!strcasecmp(priv->tv_param->norm, "ntsc"))
             bparm.norm =  1; /* NTSC */
-        else if (!strcasecmp(tv_param_norm, "secam"))
+        else if (!strcasecmp(priv->tv_param->norm, "secam"))
             bparm.norm =  2; /* SECAM */
-        bparm.quality = tv_param_quality;
-        bparm.decimation = tv_param_decimation;
+        bparm.quality = priv->tv_param->quality;
+        bparm.decimation = priv->tv_param->decimation;
 
         mp_msg(MSGT_TV, MSGL_INFO, "  MJP: setting params to decimation: %d, quality: %d\n",
                bparm.decimation, bparm.quality);
@@ -546,8 +546,8 @@ static int init(priv_t *priv)
         priv -> nbuf = breq.count;
         priv->mbuf.frames = priv -> nbuf;
         priv->mjpeg_bufsize = 256*1024;
-        if (tv_param_buffer_size >= 0)
-            priv->mjpeg_bufsize = tv_param_buffer_size*1024;
+        if (priv->tv_param->buffer_size >= 0)
+            priv->mjpeg_bufsize = priv->tv_param->buffer_size*1024;
         breq.size  = priv -> mjpeg_bufsize;
         if (ioctl(priv->video_fd, MJPIOC_REQBUFS,&(breq)) < 0)
         {
@@ -603,13 +603,13 @@ static int init(priv_t *priv)
     /* init v4l audio even when we don't capture */
     init_v4l_audio(priv);
 
-    if (!priv->capability.audios && !tv_param_force_audio) tv_param_noaudio = 1;
+    if (!priv->capability.audios && !priv->tv_param->force_audio) priv->tv_param->noaudio = 1;
 
     /* audio init */
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
 
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
-        if (tv_param_alsa)
+        if (priv->tv_param->alsa)
             audio_in_init(&priv->audio_in, AUDIO_IN_ALSA);
         else
             audio_in_init(&priv->audio_in, AUDIO_IN_OSS);
@@ -621,16 +621,16 @@ static int init(priv_t *priv)
             audio_in_set_device(&priv->audio_in, priv->audio_device);
         }
 
-        if (tv_param_audio_id < priv->capability.audios)
-            priv->audio_id = tv_param_audio_id;
+        if (priv->tv_param->audio_id < priv->capability.audios)
+            priv->audio_id = priv->tv_param->audio_id;
         else
             priv->audio_id = 0;
         audio_in_set_samplerate(&priv->audio_in, 44100);
         if (priv->capability.audios) {
             audio_in_set_channels(&priv->audio_in, priv->audio_channels[priv->audio_id]);
         } else {
-            if (tv_param_forcechan >= 0) {
-                audio_in_set_channels(&priv->audio_in, tv_param_forcechan);
+            if (priv->tv_param->forcechan >= 0) {
+                audio_in_set_channels(&priv->audio_in, priv->tv_param->forcechan);
             } else {
                 audio_in_set_channels(&priv->audio_in, 2);
             }
@@ -658,7 +658,7 @@ static int uninit(priv_t *priv)
     priv->shutdown = 1;
 
     mp_msg(MSGT_TV, MSGL_V, "Waiting for threads to finish... ");
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         pthread_join(priv->audio_grabber_thread, NULL);
         pthread_mutex_destroy(&priv->audio_starter);
         pthread_mutex_destroy(&priv->skew_mutex);
@@ -672,7 +672,7 @@ static int uninit(priv_t *priv)
         ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
     }
 
-    if ( tv_param_mjpeg )
+    if ( priv->tv_param->mjpeg )
     {
         num = -1;
         if (ioctl(priv->video_fd, MJPIOC_QBUF_CAPT, &num) < 0)
@@ -702,7 +702,7 @@ static int uninit(priv_t *priv)
         free(priv->video_timebuffer);
     if (priv->video_avg_buffer)
         free(priv->video_avg_buffer);
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         if (priv->audio_ringbuffer)
             free(priv->audio_ringbuffer);
         if (priv->audio_skew_buffer)
@@ -716,8 +716,8 @@ static int get_capture_buffer_size(priv_t *priv)
 {
     int bufsize, cnt;
 
-    if (tv_param_buffer_size >= 0) {
-        bufsize = tv_param_buffer_size*1024*1024;
+    if (priv->tv_param->buffer_size >= 0) {
+        bufsize = priv->tv_param->buffer_size*1024*1024;
     } else {
 #ifdef HAVE_SYS_SYSINFO_H
         struct sysinfo si;
@@ -786,7 +786,7 @@ static int start(priv_t *priv)
     if (ioctl(priv->video_fd, VIDIOCSWIN, &win) == -1)
         mp_msg(MSGT_TV, MSGL_ERR, "ioctl set window failed: %s\n", strerror(errno));
 
-    if ( !tv_param_mjpeg )
+    if ( !priv->tv_param->mjpeg )
     {
         /* map grab buffer */
         if (ioctl(priv->video_fd, VIDIOCGMBUF, &priv->mbuf) == -1)
@@ -816,7 +816,7 @@ static int start(priv_t *priv)
         memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
     }
 
-    if ( !tv_param_mjpeg )
+    if ( !priv->tv_param->mjpeg )
     {
         priv->nbuf = priv->mbuf.frames;
         for (i=0; i < priv->nbuf; i++)
@@ -854,7 +854,7 @@ static int start(priv_t *priv)
 #endif
 
     /* setup audio parameters */
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         setup_audio_buffer_sizes(priv);
         bytes_per_sample = priv->audio_in.bytes_per_sample;
         priv->audio_skew_buffer = calloc(priv->aud_skew_cnt, sizeof(long long));
@@ -890,7 +890,7 @@ static int start(priv_t *priv)
     }
     priv->video_buffer_size_current = 0;
 
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         if (priv->video_buffer_size_max < 3.0*priv->fps*priv->audio_secs_per_block) {
             mp_msg(MSGT_TV, MSGL_ERR, "Video buffer shorter than 3 times audio frame duration.\n"
                    "You will probably experience heavy framedrops.\n");
@@ -933,14 +933,14 @@ static int start(priv_t *priv)
 
     if (priv->capability.audios) {
         /* enable audio */
-        if (tv_param_volume >= 0)
-            priv->audio[priv->audio_id].volume = tv_param_volume;
-        if (tv_param_bass >= 0)
-            priv->audio[priv->audio_id].bass = tv_param_bass;
-        if (tv_param_treble >= 0)
-            priv->audio[priv->audio_id].treble = tv_param_treble;
-        if (tv_param_balance >= 0)
-            priv->audio[priv->audio_id].balance = tv_param_balance;
+        if (priv->tv_param->volume >= 0)
+            priv->audio[priv->audio_id].volume = priv->tv_param->volume;
+        if (priv->tv_param->bass >= 0)
+            priv->audio[priv->audio_id].bass = priv->tv_param->bass;
+        if (priv->tv_param->treble >= 0)
+            priv->audio[priv->audio_id].treble = priv->tv_param->treble;
+        if (priv->tv_param->balance >= 0)
+            priv->audio[priv->audio_id].balance = priv->tv_param->balance;
         priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
         mp_msg(MSGT_TV, MSGL_V, "Enabling tv audio. Requested setup is:\n");
         mp_msg(MSGT_TV, MSGL_V, "id=%d vol=%d bass=%d treble=%d balance=%d mode=%s",
@@ -953,7 +953,7 @@ static int start(priv_t *priv)
 
     /* launch capture threads */
     priv->shutdown = 0;
-    if (!tv_param_noaudio) {
+    if (!priv->tv_param->noaudio) {
         pthread_mutex_init(&priv->audio_starter, NULL);
         pthread_mutex_init(&priv->skew_mutex, NULL);
         pthread_mutex_lock(&priv->audio_starter);
@@ -980,7 +980,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             return(TVI_CONTROL_FALSE);
         }
         case TVI_CONTROL_IS_AUDIO:
-            if (tv_param_force_audio) return(TVI_CONTROL_TRUE);
+            if (priv->tv_param->force_audio) return(TVI_CONTROL_TRUE);
             if (priv->channels[priv->act_channel].flags & VIDEO_VC_AUDIO)
             {
                 return(TVI_CONTROL_TRUE);
@@ -1000,7 +1000,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             int output_fmt = -1;
 
             output_fmt = priv->format;
-            if ( tv_param_mjpeg )
+            if ( priv->tv_param->mjpeg )
             {
                 mp_msg(MSGT_TV, MSGL_INFO, "  MJP: setting sh_video->format to mjpg\n");
                 output_fmt = 0x47504a4d;
@@ -1402,9 +1402,9 @@ static int set_mute(priv_t* priv,int value)
 // for YV12 swaps the 2nd and 3rd plane
 static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *source)
 {
-    if(tv_param_automute>0){
+    if(priv->tv_param->automute>0){
         if (ioctl(priv->video_fd, VIDIOCGTUNER, &priv->tuner) >= 0) {
-            if(tv_param_automute<<8>priv->tuner.signal){
+            if(priv->tv_param->automute<<8>priv->tuner.signal){
                 fill_blank_frame(dest,priv->bytesperline * priv->height,priv->format);
                 set_mute(priv,1);
                 return;
@@ -1439,7 +1439,7 @@ static void *video_grabber(void *data)
 
     /* start the capture process */
 
-    if ( tv_param_mjpeg )
+    if ( priv->tv_param->mjpeg )
     {
         mp_msg(MSGT_TV, MSGL_INFO, "  MJP: gonna capture ! \n");
         for (i=0; i < priv->nbuf; i++) {
@@ -1485,7 +1485,7 @@ static void *video_grabber(void *data)
 
             frame = i;
 
-            if ( tv_param_mjpeg )
+            if ( priv->tv_param->mjpeg )
             {
                 while (ioctl(priv->video_fd, MJPIOC_SYNC, &priv->buf[frame].frame) < 0 &&
                        (errno == EAGAIN || errno == EINTR));
@@ -1597,7 +1597,7 @@ static void *video_grabber(void *data)
                     priv->video_timebuffer[priv->video_tail] = interval - skew;
                 }
 
-                if ( tv_param_mjpeg )
+                if ( priv->tv_param->mjpeg )
                     copy_frame(priv, priv->video_ringbuffer[priv->video_tail],
                                priv->mmap+(priv->mjpeg_bufsize)*i);
                 else
@@ -1607,7 +1607,7 @@ static void *video_grabber(void *data)
                 priv->video_cnt++;
             }
 
-            if ( tv_param_mjpeg )
+            if ( priv->tv_param->mjpeg )
             {
                 num = frame;
                 if (ioctl(priv->video_fd, MJPIOC_QBUF_CAPT, &num) < 0)
