@@ -26,19 +26,55 @@
 #include "libmpdemux/demuxer.h"
 #include "m_option.h"
 #include "m_struct.h"
+#include "tv.h"
 
 #include <stdio.h>
 
-static struct stream_priv_s {
-    /* if channels parameter exist here will be channel number otherwise - frequency */
-    int input;
-    char* channel;
-} stream_priv_dflts = {
-    -1,
-    NULL
+tv_param_t stream_tv_defaults = {
+    NULL,          //freq
+    NULL,          //channel
+    "europe-east", //chanlist
+    "pal",         //norm
+    0,             //automute
+#ifdef HAVE_TV_V4L2
+    -1,            //normid
+#endif
+    NULL,          //device
+    "dummy",       //driver
+    -1,            //width
+    -1,            //height
+    0,             //input, used in v4l and bttv
+    -1,            //outfmt
+    -1.0,          //fps
+    NULL,          //channels
+    0,             //noaudio;
+    0,             //immediate;
+    44100,         //audiorate;
+    0,             //audio_id
+#if defined(HAVE_TV_V4L)
+    -1,            //amode
+    -1,            //volume
+    -1,            //bass
+    -1,            //treble
+    -1,            //balance
+    -1,            //forcechan
+    0,             //force_audio
+    -1,            //buffer_size
+    0,             //mjpeg
+    2,             //decimation
+    90,            //quality
+#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+    0,             //alsa
+#endif
+    NULL,          //adevice
+#endif
+    0,             //brightness
+    0,             //contrast
+    0,             //hue
+    0,             //saturation
 };
 
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
+#define ST_OFF(f) M_ST_OFF(tv_param_t,f)
 static m_option_t stream_opts_fields[] = {
     {"hostname", ST_OFF(channel), CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"filename", ST_OFF(input), CONF_TYPE_INT, 0, 0 ,0, NULL},
@@ -47,27 +83,27 @@ static m_option_t stream_opts_fields[] = {
 
 static struct m_struct_st stream_opts = {
     "tv",
-    sizeof(struct stream_priv_s),
-    &stream_priv_dflts,
+    sizeof(tv_param_t),
+    &stream_tv_defaults,
     stream_opts_fields
 };
 
+static void
+tv_stream_close (stream_t *stream)
+{
+  if(stream->priv)
+    m_struct_free(&stream_opts,stream->priv);
+  stream->priv=NULL;
+}
 static int
 tv_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
-  extern char* tv_param_channel;
-  extern int tv_param_input;
-  struct stream_priv_s* p=(struct stream_priv_s*)opts;
 
   stream->type = STREAMTYPE_TV;
+  stream->priv = opts;
+  stream->close=tv_stream_close;
   *file_format =  DEMUXER_TYPE_TV;
 
-  /* don't override input= option value if no input id is
-     passed in tv:// url */
-  if(p->input!=-1)
-      tv_param_input=p->input;
-  if (p->channel)
-      tv_param_channel=strdup (p->channel);
   return STREAM_OK;
 }
 

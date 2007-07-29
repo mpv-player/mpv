@@ -47,6 +47,52 @@ extern int tv_param_contrast;
 extern int tv_param_hue;
 extern int tv_param_saturation;
 
+typedef struct tv_param_s {
+    char *freq;
+    char *channel;
+    char *chanlist;
+    char *norm;
+    int automute;
+#ifdef HAVE_TV_V4L2
+    int normid;
+#endif
+    char *device;
+    char *driver;
+    int width;
+    int height;
+    int input;
+    int outfmt;
+    float fps;
+    char **channels;
+    int noaudio;
+    int immediate;
+    int audiorate;
+    int audio_id;
+#if defined(HAVE_TV_V4L)
+    int amode;
+    int volume;
+    int bass;
+    int treble;
+    int balance;
+    int forcechan;
+    int force_audio;
+    int buffer_size;
+    int mjpeg;
+    int decimation;
+    int quality;
+#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+    int alsa;
+#endif
+    char* adevice;
+#endif
+    int brightness;
+    int contrast;
+    int hue;
+    int saturation;
+} tv_param_t;
+  
+extern tv_param_t stream_tv_defaults;
+ 
 typedef struct tvi_info_s
 {
     struct tvi_handle_s * (*tvi_init)(char *device,char *adevice);
@@ -78,6 +124,7 @@ typedef struct tvi_handle_s {
     int			chanlist;
     const struct CHANLIST *chanlist_s;
     int			channel;
+    tv_param_t          * tv_param;
 } tvi_handle_t;
 
 typedef struct tv_channels_s {
