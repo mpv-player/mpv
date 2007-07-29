@@ -2305,7 +2305,7 @@ int gui_no_filename=0;
 #endif /*WIN32 && USE_WIN32DLL*/
 
 #ifdef USE_TV
-  tv_param_immediate = 1;
+  stream_tv_defaults.immediate = 1;
 #endif
 
   if (argc > 1 && argv[1] &&

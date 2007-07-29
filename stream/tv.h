@@ -5,48 +5,6 @@
 //#include "libmpcodecs/img_format.h"
 //#include "mp_msg.h"
 
-extern char *tv_param_freq;
-extern char *tv_param_channel;
-extern char *tv_param_chanlist;
-extern char *tv_param_norm;
-extern int tv_param_automute;
-#ifdef HAVE_TV_V4L2
-extern int tv_param_normid;
-#endif
-extern char *tv_param_device;
-extern char *tv_param_driver;
-extern int tv_param_width;
-extern int tv_param_height;
-extern int tv_param_input;
-extern int tv_param_outfmt;
-extern float tv_param_fps;
-extern char **tv_param_channels;
-extern int tv_param_noaudio;
-extern int tv_param_immediate;
-extern int tv_param_audiorate;
-extern int tv_param_audio_id;
-#if defined(HAVE_TV_V4L)
-extern int tv_param_amode;
-extern int tv_param_volume;
-extern int tv_param_bass;
-extern int tv_param_treble;
-extern int tv_param_balance;
-extern int tv_param_forcechan;
-extern int tv_param_force_audio;
-extern int tv_param_buffer_size;
-extern int tv_param_mjpeg;
-extern int tv_param_decimation;
-extern int tv_param_quality;
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
-extern int tv_param_alsa;
-#endif
-extern char* tv_param_adevice;
-#endif
-extern int tv_param_brightness;
-extern int tv_param_contrast;
-extern int tv_param_hue;
-extern int tv_param_saturation;
-
 typedef struct tv_param_s {
     char *freq;
     char *channel;

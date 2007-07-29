@@ -35,48 +35,6 @@
 
 #include "frequencies.h"
 
-/* some default values */
-int tv_param_audiorate = 44100;
-int tv_param_noaudio = 0;
-int tv_param_immediate = 0;
-char *tv_param_freq = NULL;
-char *tv_param_channel = NULL;
-char *tv_param_norm = "pal";
-#ifdef HAVE_TV_V4L2
-int tv_param_normid = -1;
-#endif
-char *tv_param_chanlist = "europe-east";
-char *tv_param_device = NULL;
-char *tv_param_driver = "dummy";
-int tv_param_width = -1;
-int tv_param_height = -1;
-int tv_param_input = 0; /* used in v4l and bttv */
-int tv_param_outfmt = -1;
-float tv_param_fps = -1.0;
-char **tv_param_channels = NULL;
-int tv_param_audio_id = 0;
-int tv_param_automute = 0;
-#if defined(HAVE_TV_V4L)
-int tv_param_amode = -1;
-int tv_param_volume = -1;
-int tv_param_bass = -1;
-int tv_param_treble = -1;
-int tv_param_balance = -1;
-int tv_param_forcechan = -1;
-int tv_param_force_audio = 0;
-int tv_param_buffer_size = -1;
-int tv_param_mjpeg = 0;
-int tv_param_decimation = 2;
-int tv_param_quality = 90;
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
-int tv_param_alsa = 0;
-#endif
-#endif
-char* tv_param_adevice = NULL;
-int tv_param_brightness = 0;
-int tv_param_contrast = 0;
-int tv_param_hue = 0;
-int tv_param_saturation = 0;
 tv_channels_t *tv_channel_list;
 tv_channels_t *tv_channel_current, *tv_channel_last;
 char *tv_channel_last_real;
