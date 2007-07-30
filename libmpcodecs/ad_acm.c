@@ -146,7 +146,8 @@ static void uninit(sh_audio_t *sh)
 	case ACMERR_CANCELED:
 	    mp_msg(MSGT_WIN32, MSGL_DBG2, "ACM_Decoder: stream busy, waiting..\n");
 	    usec_sleep(100000000);
-	    return(uninit(sh));
+	    uninit(sh);
+	    return;
 	case ACMERR_UNPREPARED:
 	case ACMERR_NOTPOSSIBLE:
 	    return;
