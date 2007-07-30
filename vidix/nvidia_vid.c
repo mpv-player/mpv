@@ -995,7 +995,7 @@ static int nv_query_fourcc(vidix_fourcc_t *to){
 
 static int nv_config_playback(vidix_playback_t *vinfo){
     uint32_t i;
-    printf("called %s\n", __FUNCTION__);
+//    printf("called %s\n", __FUNCTION__);
     if (! is_supported_fourcc(vinfo->fourcc))
 	    return ENOSYS;
 
