@@ -20,6 +20,7 @@ struct mp_vcd_priv_st {
 };
 
 static inline void vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect){
+  sect += 150;
   vcd->entry.cdte_addr.msf.frame=sect%75;
   sect=sect/75;
   vcd->entry.cdte_addr.msf.second=sect%60;
@@ -30,7 +31,7 @@ static inline void vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect){
 static inline unsigned int vcd_get_msf(mp_vcd_priv_t* vcd){
   return vcd->entry.cdte_addr.msf.frame +
         (vcd->entry.cdte_addr.msf.second+
-         vcd->entry.cdte_addr.msf.minute*60)*75;
+         vcd->entry.cdte_addr.msf.minute*60)*75 - 150;
 }
 
 int vcd_seek_to_track(mp_vcd_priv_t* vcd,int track){
