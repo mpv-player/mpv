@@ -8,6 +8,7 @@
 
 #include "ad.h"
 
+extern int audio_output_channels;
 static int init(sh_audio_t *sh);
 static int preinit(sh_audio_t *sh);
 static void uninit(sh_audio_t *sh);

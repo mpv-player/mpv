@@ -7,7 +7,6 @@
 #include "help_mp.h"
 
 #include "ad_internal.h"
-extern int audio_output_channels;
 
 #include "mpbswap.h"
 

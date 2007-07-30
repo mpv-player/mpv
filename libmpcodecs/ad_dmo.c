@@ -26,8 +26,6 @@ static int init(sh_audio_t *sh)
   return 1;
 }
 
-extern int audio_output_channels;
-
 static int preinit(sh_audio_t *sh_audio)
 {
   DMO_AudioDecoder* ds_adec;

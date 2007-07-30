@@ -51,8 +51,6 @@ static ad_info_t info =
 
 LIBAD_EXTERN(liba52)
 
-extern int audio_output_channels;
-
 int a52_fillbuff(sh_audio_t *sh_audio){
 int length=0;
 int flags=0;

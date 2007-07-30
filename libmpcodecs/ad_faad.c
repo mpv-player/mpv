@@ -64,7 +64,6 @@ static int aac_probe(unsigned char *buffer, int len)
   return pos;
 }
 	
-extern int audio_output_channels;
 static int init(sh_audio_t *sh)
 {
   unsigned long faac_samplerate;

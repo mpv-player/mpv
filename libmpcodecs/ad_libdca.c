@@ -58,9 +58,6 @@ static const char ch2flags[6] = {
     DTS_3F2R | DTS_LFE
 };
 
-extern int audio_output_channels;
-
-
 static inline int16_t convert(sample_t s)
 {
     int i = s * 0x7fff;
