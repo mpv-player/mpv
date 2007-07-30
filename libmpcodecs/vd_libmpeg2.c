@@ -149,7 +149,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if (mpeg2dec->pending_length) {
 	mpeg2_buffer (mpeg2dec, mpeg2dec->pending_buffer, mpeg2dec->pending_buffer + mpeg2dec->pending_length);
     } else {
-        mpeg2_buffer (mpeg2dec, data, data+len);
+        mpeg2_buffer (mpeg2dec, data, (uint8_t *)data+len);
     }
     
     while(1){
@@ -163,7 +163,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    if (mpeg2dec->pending_length) {
 		// just finished the pending data, continue with processing of the passed buffer
 		mpeg2dec->pending_length = 0;
-    		mpeg2_buffer (mpeg2dec, data, data+len);
+    		mpeg2_buffer (mpeg2dec, data, (uint8_t *)data+len);
     	    } else {
 	        // parsing of the passed buffer finished, return.
 		return 0;
