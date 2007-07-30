@@ -211,7 +211,7 @@ static tvi_handle_t *tvi_init_bsdbt848(tv_param_t* tv_param)
     else
         priv->dspdev = strdup(tv_param->adevice);
 
-    tvh->tv_param=tv_param;
+    priv->tv_param=tv_param;
     return tvh;
 }
 

@@ -300,7 +300,7 @@ static tvi_handle_t *tvi_init_v4l(tv_param_t* tv_param)
         return(NULL);
     }
 
-    h->tv_param=tv_param;
+    priv->tv_param=tv_param;
     return(h);
 }
 
