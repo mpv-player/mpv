@@ -26,6 +26,7 @@ _oll=no
 _charset=no
 _stupid=no
 _showcont=no
+_gnu=no
 
 _color=yes
 _head=yes
@@ -52,6 +53,7 @@ enable_all_tests() {
     _oll=yes
     _charset=yes
     _stupid=yes
+    _gnu=yes
 }
 
 disable_all_tests() {
@@ -64,6 +66,7 @@ disable_all_tests() {
     _oll=no
     _charset=no
     _stupid=no
+    _gnu=no
 }
 
 printoption() {
@@ -105,6 +108,7 @@ for i in "$@"; do
         printoption "oll       " "test for overly long lines" "$_oll"
         printoption "charset   " "test for wrong charset" "$_charset"
         printoption "stupid    " "test for stupid code" "$_stupid"
+        printoption "gnu       " "test for GNUisms" "$_gnu"
         echo
         printoption "all       " "enable all tests" "no"
         echo  "                   (-noall can be specified as -none)"
@@ -207,6 +211,12 @@ for i in "$@"; do
     -noshowcont)
         _showcont=no
         ;;
+    -gnu)
+        _gnu=yes
+        ;;
+    -nognu)
+        _gnu=no
+        ;;
     -*)
         echo "unknown option: $i" >&2
         exit 0
@@ -294,6 +304,13 @@ fi
 if [ "$_oll" = "yes" ]; then
     printhead "checking for overly long lines (over 79 characters) ..."
     grep $_grepopts "^[[:print:]]\{80,\}$" $filelist
+fi
+
+# -----------------------------------------------------------------------------
+
+if [ "$_gnu" = "yes" ]; then
+    printhead "checking for GNUisms ..."
+    grep $_grepopts "case.*\.\.\..*:" $filelist
 fi
 
 # -----------------------------------------------------------------------------
