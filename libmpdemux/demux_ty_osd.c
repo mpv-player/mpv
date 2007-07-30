@@ -756,7 +756,14 @@ static int ty_XDSdecode( char b1, char b2 )
                break;
             }
 
-            case 0x0110 ... 0x0117:         // program description
+            case 0x0110:         // program description
+            case 0x0111:
+            case 0x0112:
+            case 0x0113:
+            case 0x0114:
+            case 0x0115:
+            case 0x0116:
+            case 0x0117:
             {
                ty_AddXDSToDisplay( "DESCRIP: %s", TY_XDS_ptr ); 
                break;
