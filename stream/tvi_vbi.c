@@ -529,7 +529,7 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
  * background thread to top line of current page). Displays "No teletext"
  * string if no vbi data available.
  */
-#define PRINT_HEX(dp,i,h) dp[i].unicode=((h)&0xf)>9?'A'+((h-10)&0xf):'0'+((h)&0xf)
+#define PRINT_HEX(dp,i,h) dp[i].unicode=((h)&0xf)>9?'A'+((h)&0xf)-10:'0'+((h)&0xf)
 static void prepare_visible_page(priv_vbi_t* priv){
     tt_page *pg,*curr_pg;
     unsigned char *p;
