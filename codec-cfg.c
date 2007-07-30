@@ -31,7 +31,7 @@
 #ifdef __GNUC__
 #define mp_msg(t, l, m, args...) fprintf(stderr, m, ##args)
 #else
-#define mp_msg(t, l, m, ...) fprintf(stderr, m, __VA_ARGS__)
+#define mp_msg(t, l, ...) fprintf(stderr, __VA_ARGS__)
 #endif
 #endif
 
