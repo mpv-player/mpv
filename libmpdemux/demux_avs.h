@@ -116,42 +116,42 @@ typedef struct AVS_VideoFrame {
   int offset, pitch, row_size, height, offsetU, offsetV, pitchUV;  // U&V offsets are from top of picture.
 } AVS_VideoFrame;
 
-static __inline AVS_Value avs_new_value_string(const char * v0)
+static inline AVS_Value avs_new_value_string(const char * v0)
 { AVS_Value v; v.type = 's'; v.d.string = v0; return v; }
 
-static __inline AVS_Value avs_new_value_array(AVS_Value * v0, int size)
+static inline AVS_Value avs_new_value_array(AVS_Value * v0, int size)
 { AVS_Value v; v.type = 'a'; v.d.array = v0; v.array_size = size; return v; }
 
 
-static __inline int avs_is_error(AVS_Value v) { return v.type == 'e'; }
-static __inline int avs_is_clip(AVS_Value v) { return v.type == 'c'; }
-static __inline int avs_is_string(AVS_Value v) { return v.type == 's'; }
-static __inline int avs_has_video(const AVS_VideoInfo * p) { return (p->width!=0); }
-static __inline int avs_has_audio(const AVS_VideoInfo * p) { return (p->audio_samples_per_second!=0); }
+static inline int avs_is_error(AVS_Value v) { return v.type == 'e'; }
+static inline int avs_is_clip(AVS_Value v) { return v.type == 'c'; }
+static inline int avs_is_string(AVS_Value v) { return v.type == 's'; }
+static inline int avs_has_video(const AVS_VideoInfo * p) { return (p->width!=0); }
+static inline int avs_has_audio(const AVS_VideoInfo * p) { return (p->audio_samples_per_second!=0); }
 
-static __inline const char * avs_as_string(AVS_Value v)
+static inline const char * avs_as_string(AVS_Value v)
 { return avs_is_error(v) || avs_is_string(v) ? v.d.string : 0; }
 
 /* Color spaces */
-static __inline int avs_is_rgb(const AVS_VideoInfo * p)
+static inline int avs_is_rgb(const AVS_VideoInfo * p)
 { return (p->pixel_type&AVS_CS_BGR); }
 
-static __inline int avs_is_rgb24(const AVS_VideoInfo * p)
+static inline int avs_is_rgb24(const AVS_VideoInfo * p)
 { return (p->pixel_type&AVS_CS_BGR24)==AVS_CS_BGR24; } // Clear out additional properties
 
-static __inline int avs_is_rgb32(const AVS_VideoInfo * p)
+static inline int avs_is_rgb32(const AVS_VideoInfo * p)
 { return (p->pixel_type & AVS_CS_BGR32) == AVS_CS_BGR32 ; }
 
-static __inline int avs_is_yuy(const AVS_VideoInfo * p)
+static inline int avs_is_yuy(const AVS_VideoInfo * p)
 { return (p->pixel_type&AVS_CS_YUV ); }
 
-static __inline int avs_is_yuy2(const AVS_VideoInfo * p)
+static inline int avs_is_yuy2(const AVS_VideoInfo * p)
 { return (p->pixel_type & AVS_CS_YUY2) == AVS_CS_YUY2; }  
 
-static __inline int avs_is_yv12(const AVS_VideoInfo * p)
+static inline int avs_is_yv12(const AVS_VideoInfo * p)
 { return ((p->pixel_type & AVS_CS_YV12) == AVS_CS_YV12)||((p->pixel_type & AVS_CS_I420) == AVS_CS_I420); }       
 
-static __inline int avs_bits_per_pixel(const AVS_VideoInfo * p) 
+static inline int avs_bits_per_pixel(const AVS_VideoInfo * p) 
 { 
   switch (p->pixel_type) {
       case AVS_CS_BGR24: return 24;
