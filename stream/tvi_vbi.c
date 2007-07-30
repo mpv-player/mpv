@@ -645,21 +645,14 @@ static void render2text(tt_page* pt,FILE* f,int colored){
         for(j=0;j<VBI_COLUMNS;j++)
         {
              u=dp[i*VBI_COLUMNS+j].unicode;
-              switch(dp[i*VBI_COLUMNS+j].fg){
-              case 0 ... 7:
+              if(dp[i*VBI_COLUMNS+j].fg <= 7)
                 c1=30+dp[i*VBI_COLUMNS+j].fg;
-                break;
-              default:
+              else
                 c1=38;
-                  break;
-              }
-              switch(dp[i*VBI_COLUMNS+j].bg){
-              case 0 ... 7:
+              if(dp[i*VBI_COLUMNS+j].bg <= 7)
                   b1=40+dp[i*VBI_COLUMNS+j].bg;
-                break;
-              default:
+              else
                 b1=40;
-              }
             if (b1!=bkg  && colored){
                 fprintf(f,"\033[%dm",b1);
                 bkg=b1;
