@@ -142,6 +142,14 @@ typedef struct {
     long                        audio_recv_blocks_total;
     long                        audio_sent_blocks_total;
     long                        mjpeg_bufsize;
+#ifdef HAVE_TV_TELETEXT
+    char                        *vbi_dev;
+    int                         vbi_fd;
+    int                         vbi_bufsize;
+    int                         vbi_shutdown;
+    pthread_t                   vbi_grabber_thread;
+    void                        *priv_vbi;
+#endif
 
     tv_param_t                  *tv_param;
 } priv_t;
@@ -655,6 +663,27 @@ err:
 static int uninit(priv_t *priv)
 {
     unsigned long num;
+
+#ifdef HAVE_TV_TELETEXT
+    priv->vbi_shutdown=1;
+    if(priv->vbi_grabber_thread)
+        pthread_join(priv->vbi_grabber_thread, NULL);
+
+    teletext_control(priv->priv_vbi,TV_VBI_CONTROL_STOP,(void*)1);
+    priv->priv_vbi=NULL;
+
+    if(priv->vbi_fd){
+        close(priv->vbi_fd);
+        priv->vbi_fd=0;
+    }
+
+    if(priv->vbi_dev){
+        free(priv->vbi_dev);
+        priv->vbi_dev=0;
+    }
+
+#endif
+
     priv->shutdown = 1;
 
     mp_msg(MSGT_TV, MSGL_V, "Waiting for threads to finish... ");
@@ -738,6 +767,122 @@ static int get_capture_buffer_size(priv_t *priv)
 
     return cnt;
 }
+
+#ifdef HAVE_TV_TELETEXT
+static int vbi_init(priv_t* priv,char* device)
+{
+    int vbi_fd=0;
+    struct video_capability cap;
+
+    if(!device)
+        return TVI_CONTROL_FALSE;
+
+    priv->vbi_dev=strdup(device);
+
+    vbi_fd=open(priv->vbi_dev,O_RDWR);
+    if(vbi_fd<0){
+        mp_msg(MSGT_TV,MSGL_ERR,"vbi: could not open device %s\n",priv->vbi_dev);
+        return  TVI_CONTROL_FALSE;
+    }
+    
+    if(ioctl(vbi_fd,VIDIOCGCAP,&cap)<0){
+        mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query capatibilities failed for %s\n",priv->vbi_dev);
+        close(vbi_fd);
+        return  TVI_CONTROL_FALSE;
+    }
+    if(!cap.type & VID_TYPE_CAPTURE){
+        mp_msg(MSGT_TV,MSGL_ERR,"vbi: %s is not capture device\n",priv->vbi_dev);
+        close(vbi_fd);
+        return  TVI_CONTROL_FALSE;
+    }
+
+    priv->vbi_fd=vbi_fd;
+    mp_msg(MSGT_TV,MSGL_DBG3,"vbi: init ok\n");
+    return TVI_CONTROL_TRUE;
+}
+
+static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
+{
+    struct vbi_format fmt;
+    int res;
+    if(!priv || !ptsp)
+        return TVI_CONTROL_FALSE;
+
+    memset(&fmt,0,sizeof(struct vbi_format));
+    if((res=ioctl(priv->vbi_fd,VIDIOCGVBIFMT,&fmt))<0){
+        mp_msg(MSGT_TV,MSGL_ERR,"vbi_get_props: Query format failed: %x\n",res);
+        return  TVI_CONTROL_FALSE;
+    }
+
+    ptsp->interlaced=(fmt.flags& VBI_INTERLACED?1:0);
+    if(fmt.start[1]>0 && fmt.count[1]){
+        if(fmt.start[1]>=286)
+            //625
+            ptsp->offset=10.2e-6*fmt.sampling_rate;
+        else
+            //525
+            ptsp->offset=9.2e-6*fmt.sampling_rate;
+    }else
+        ptsp->offset=9.7e-6*fmt.sampling_rate;
+
+    ptsp->sampling_rate=fmt.sampling_rate;
+    ptsp->samples_per_line=fmt.samples_per_line,
+
+    ptsp->count[0]=fmt.count[0];
+    ptsp->count[1]=fmt.count[1];
+    ptsp->bufsize = ptsp->samples_per_line * (ptsp->count[0] + ptsp->count[1]);
+
+    mp_msg(MSGT_TV,MSGL_V,"vbi_get_props: sampling_rate=%d,offset:%d,samples_per_line: %d\n interlaced:%s, count=[%d,%d]\n",    
+        ptsp->sampling_rate,
+        ptsp->offset,
+        ptsp->samples_per_line,
+        ptsp->interlaced?"Yes":"No",
+        ptsp->count[0],
+        ptsp->count[1]);
+
+    return TVI_CONTROL_TRUE;
+}
+
+static void *vbi_grabber(void *data)
+{
+    priv_t *priv = (priv_t *) data;
+    int bytes,seq,prev_seq;
+    unsigned char* buf;
+    tt_stream_props tsp;
+
+    if(!priv->priv_vbi){
+        mp_msg(MSGT_TV,MSGL_WARN,"vbi: vbi not initialized. stopping thread.\n");
+        return NULL;
+    }
+
+    if(vbi_get_props(priv,&tsp)!=TVI_CONTROL_TRUE)
+        return NULL;
+
+    buf=malloc(tsp.bufsize);
+    seq=0;
+    prev_seq=0;
+    mp_msg(MSGT_TV,MSGL_V,"vbi: vbi capture thread started.\n");
+
+    while (!priv->vbi_shutdown){
+        bytes=read(priv->vbi_fd,buf,tsp.bufsize);
+        if (bytes!=tsp.bufsize){
+            mp_msg(MSGT_TV,MSGL_WARN,"vbi: expecting bytes: %d, got: %d",tsp.bufsize,bytes);
+            break;
+        }
+        seq=*(int*)(buf+bytes-4);
+        if(seq<=1) continue;
+        if (prev_seq && seq!=prev_seq+1){
+            prev_seq=0;
+            seq=0;
+        }
+        prev_seq=seq;
+        teletext_control(priv->priv_vbi,TV_VBI_CONTROL_DECODE_PAGE,&buf);
+        mp_msg(MSGT_TV,MSGL_DBG3,"grabber: seq:%d\n",seq);
+    }
+    free(buf);
+    return NULL;
+}
+#endif //HAVE_TV_TELETEXT
 
 static int start(priv_t *priv)
 {
@@ -950,6 +1095,14 @@ static int start(priv_t *priv)
         mp_msg(MSGT_TV, MSGL_V, " chan=%d\n", priv->audio_channels[priv->audio_id]);
         ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
     }
+
+#ifdef HAVE_TV_TELETEXT
+    /* start vbi thread */
+    if(priv->priv_vbi){
+        priv->vbi_shutdown = 0;
+        pthread_create(&priv->vbi_grabber_thread, NULL, vbi_grabber, priv);
+    }
+#endif
 
     /* launch capture threads */
     priv->shutdown = 0;
@@ -1378,6 +1531,27 @@ static int control(priv_t *priv, int cmd, void *arg)
             priv->immediate_mode = 1;
             return(TVI_CONTROL_TRUE);
         }
+#ifdef HAVE_TV_TELETEXT
+        case TVI_CONTROL_VBI_INIT:
+        {
+            void* ptr;
+            tt_stream_props tsp;
+
+            if (vbi_init(priv,*(char**)arg)!=TVI_CONTROL_TRUE)
+                return TVI_CONTROL_FALSE;
+            if(vbi_get_props(priv,&tsp)==TVI_CONTROL_TRUE)
+            {
+                ptr=&tsp;
+                if(teletext_control(NULL,TV_VBI_CONTROL_START,&ptr)==TVI_CONTROL_TRUE)
+                    priv->priv_vbi=ptr;
+                else
+                    priv->priv_vbi=NULL;
+            }
+            return TVI_CONTROL_TRUE;
+        }
+        default:
+            return teletext_control(priv->priv_vbi,cmd,arg);
+#endif
     }
 
     return(TVI_CONTROL_UNKNOWN);
