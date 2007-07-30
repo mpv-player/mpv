@@ -4836,11 +4836,13 @@ if test "$_v4l2" = auto ; then
 #include <linux/videodev2.h>
 #include <linux/version.h>
 int main(void) {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
-  return 0;
-#else
-  return -1;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
+#error kernel headers too old, need 2.6.22
+  bad_kernel_version();
 #endif
+  struct v4l2_ext_controls ctrls;
+  ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG;
+  return 0;
 }
 EOF
   _v4l2=no
