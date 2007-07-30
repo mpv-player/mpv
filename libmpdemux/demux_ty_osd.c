@@ -363,7 +363,9 @@ static int ty_CCdecode( char b1, char b2 )
                      break;
                   }
               
-                  case 0x25 ... 0x27:       // 2-4 row captions
+                  case 0x25:       // 2-4 row captions
+                  case 0x26:
+                  case 0x27:
                   {
                      if ( TY_CC_stat == TY_CCPOPUP ) ty_ClearOSD( 1 );
                      TY_CC_stat = b2 - 0x23;
