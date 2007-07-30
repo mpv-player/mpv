@@ -4025,7 +4025,23 @@ echocheck "OpenGL"
 if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #include <GL/gl.h>
-int main(void) { return 0; }
+#ifdef GL_WIN32
+#include <windows.h>
+#include <GL/glext.h>
+#else
+#include <X11/Xlib.h>
+#include <GL/glx.h>
+#endif
+int main(void) {
+#ifdef GL_WIN32
+  HDC dc;
+  wglCreateContext(dc);
+#else
+  glXCreateContext(NULL, NULL, NULL, True);
+#endif
+  glFinish();
+  return 0;
+}
 EOF
   _gl=no
   if cc_check -lGL $_ld_lm ; then
