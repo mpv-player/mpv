@@ -7,6 +7,7 @@
 #include "help_mp.h"
 
 #include "ad_internal.h"
+extern int audio_output_channels;
 
 #include "mpbswap.h"
 
@@ -105,6 +106,8 @@ static int init(sh_audio_t *sh_audio)
        sh_audio->ds->ss_mul = 2*sh_audio->wf->nChannels; // 1 byte*ch/packet
    }
 
+   // Set desired number of channels
+   lavc_context->channels = audio_output_channels;
    // Decode at least 1 byte:  (to get header filled)
    x=decode_audio(sh_audio,sh_audio->a_buffer,1,sh_audio->a_buffer_size);
    if(x>0) sh_audio->a_buffer_len=x;
