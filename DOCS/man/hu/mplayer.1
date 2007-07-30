@@ -1,4 +1,4 @@
-.\" Synced with r23748
+.\" Synced with r23926
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 07. 18." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 07. 30." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -398,7 +398,7 @@ Csatornalista átváltása.
 .PP
 .RS
 (A következõ gombok csak akkor mûködnek, ha dvdnav támogatással fordítottál:
-a menüben való navigációra használatosak)
+a menüben való navigációra használatosak.)
 .RE
 .PP
 .PD 0
@@ -417,6 +417,21 @@ Visszatérés a fõmenübe.
 Visszatérés a legközelebbi menübe (a sorrend: fejezet->cím->fõmenü).
 .IPs "keypad ENTER"
 Választás jóváhagyása.
+.RE
+.PD 1
+.PP
+.RS
+.
+(A következõ gombok csak akkor mûködnek, ha teletext támogatással fordítottál:
+a TV teletext irányítására szolgálnak.)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "X"
+Teletext ki/\:bekapcsolása.
+.IPs "Q and W"
+Ugrás a következõ/\:elõzõ teletext oldalra.
 .RE
 .PD 1
 .PP
@@ -1637,7 +1652,8 @@ kép magassága pixelben
 .IPs i420|yv12|yuy2|y8
 színtér beállítása
 .IPs format=<érték>
-színtér (fourcc) hexában
+Színtér (fourcc) hexában vagy karakter konstansban.
+A \-rawvideo format=help kiírja a lehetséges karakterek listáját.
 .IPs size=<érték>
 képkockák mérete bájtban
 .REss
@@ -2628,6 +2644,10 @@ Speciális IVTV MPEG kimeneti audió vezérlõ.
 Csak a \-ac hwmpa kapcsolóval mûködik.
 .
 .TP
+.B v4l2 (Linux 2.6.22+ kernel kell hozzá)
+Audió kimeneti vezérlõ a V4L2 kártyákhoz hardveres MPEG dekóderrel.
+.
+.TP
 .B mpegpes (csak DVB)
 DVB kártyákhoz tartozó kimeneti audió vezérlõ, ami a kimenetet egy MPEG-PES
 fájlba írja ha nincs telepített DVB kártya.
@@ -2972,6 +2992,11 @@ levágása, hogy elférjen egy 4:3 arányú képernyõn fekete sávok nélkül)
 A tartomány vezérli, hogy a képbõl mennyi kerül levágásra.
 Ez a funkció csak az xv, xmga, mga, gl, gl2, quartz, macosx és xvidix videó
 kimeneti meghajtókkal mûködik.
+.br
+.I MEGJEGYZÉS:
+A -1 és 0 közötti értékek is engedélyezettek, de csak kísérleti jelleggel
+és összeomlást vagy még rosszabbat okozhatnak.
+Csak saját felelõsségre használd!
 .
 .TP
 .B \-panscanrange <-19.0\-99.0> (kísérleti)
@@ -3529,7 +3554,7 @@ Lassabb, de a legtöbb esetben jobb kimenetet biztosít (alapértelmezett: kikapcso
 Több szín formátum (RGB és BGR) támogatása (alapértelmezett: engedélyezve).
 OpenGL verzió >= 1.2 szükséges hozzá.
 .IPs slice-height=<0\-...>
-Az egy darabban a textúrára másolandó sorok száma (alapértelmezett: 4).
+Az egy darabban a textúrára másolandó sorok száma (alapértelmezett: 0).
 0 a teljes kép.
 .br
 .I MEGJEGYZÉS:
@@ -3789,6 +3814,19 @@ Lásd még a lavc videó szûrõt.
 Explicit kiválasztja a használni kívánt MPEG dekódoló eszköz nevét (alapértelmezett: /dev/video16).
 .IPs kimenet
 Explicit kiválasztja a TV kimenet videó jelhez használt kimenetét.
+.RE
+.PD 1
+.
+.TP
+.B v4l2 (Linux 2.6.22+ kernel kell hozzá)
+Videó kimeneti vezérlõ a V4L2-t ismerõ kártyákhoz beépített hardveres MPEG dekódolóval.
+Lásd még a lavc videó szûrõt.
+.PD 0
+.RSs
+.IPs eszköz
+Explicit kiválasztja a használni kívánt MPEG dekódoló eszköz nevét (alapértelmezett: /dev/video16).
+.IPs kimenet
+Explicit kiválasztja a használni kívánt TV-Out kimenetet a videó jelnek.
 .RE
 .PD 1
 .
@@ -4718,6 +4756,8 @@ csatornát tartalmaz, akkor a 2. és 3. csatorna elnémul, de a 0.
 A csatornák számát 6-ra módosítja és beállít 4 útvonalat, ami
 a 0. csatornát átmásolja a 0. és a 3. csatornára.
 A 4. és 5. csatorna elnémul.
+.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
+A 6-csatornás ffdca (DTS) kimenet helyes mûködése ALSA-val.
 .RE
 .PD 1
 .
@@ -5678,7 +5718,7 @@ Egy vörös, zöld és kék csíkot kell látnod fentrõl lefelé.
 .
 .TP
 .B lavc[=minõség:fps]
-Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/\:IVTV-hez.
+Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/\:IVTV/V4L2-höz.
 .RSs
 .IPs <minõség>
 1\-31: fix qscale

@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r23747 (2007. 07. 18.)
+// Sync'ed with help_mp-en.h r23920 (2007. 07. 30.)
 
 // ========================= MPlayer help ===========================
 
@@ -2082,3 +2082,4 @@ static char help_text[]=
 #define MSGTR_TV_NoSuchDriver "Nincs ilyen vezérlő: %s\n"
 #define MSGTR_TV_UnknownColorOption "Ismeretlen szín opció (%d) van megadva!\n"
 #define MSGTR_TV_CurrentFrequency "Aktuális frekvencia: %lu (%.3f)\n"
+#define MSGTR_TV_NoTeletext "Nincs teletext"
