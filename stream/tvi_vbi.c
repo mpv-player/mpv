@@ -529,7 +529,7 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
  * background thread to top line of current page). Displays "No teletext"
  * string if no vbi data available.
  */
-#define PRINT_HEX(dp,i,h) dp[i].unicode=((h)&0xf)>9?'A'+((h)&0xf):'0'+((h)&0xf)
+#define PRINT_HEX(dp,i,h) dp[i].unicode=((h)&0xf)>9?'A'+((h-10)&0xf):'0'+((h)&0xf)
 static void prepare_visible_page(priv_vbi_t* priv){
     tt_page *pg,*curr_pg;
     unsigned char *p;
@@ -1234,7 +1234,6 @@ int teletext_control(void* p, int cmd, void *arg)
     case TV_VBI_CONTROL_RESET:
     {
         tv_param_t* tv_param=arg;
-fprintf(stderr,"%d\n",tv_param->tpage);
         pthread_mutex_lock(&(priv->buffer_mutex));
         priv->pagenumdec=0;
         clear_cache(priv);
