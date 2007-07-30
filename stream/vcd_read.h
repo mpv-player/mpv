@@ -127,7 +127,7 @@ static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
 #elif	defined(sun)
   {
     int offset;
-    if (sun_vcd_read(vcd->fd, &offset) <= 0) return 0;
+    if (sun_vcd_read(vcd, &offset) <= 0) return 0;
     memcpy(mem,&vcd->buf[offset],VCD_SECTOR_DATA);
   }
 #endif
