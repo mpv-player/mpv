@@ -137,6 +137,7 @@ static void uninit(sh_audio_t *sh)
     HRESULT ret;
     acm_context_t *priv = sh->context;
     
+retry:
     ret = acmStreamClose(priv->handle, 0);
     
     if (ret)
@@ -146,8 +147,7 @@ static void uninit(sh_audio_t *sh)
 	case ACMERR_CANCELED:
 	    mp_msg(MSGT_WIN32, MSGL_DBG2, "ACM_Decoder: stream busy, waiting..\n");
 	    usec_sleep(100000000);
-	    uninit(sh);
-	    return;
+	    goto retry;
 	case ACMERR_UNPREPARED:
 	case ACMERR_NOTPOSSIBLE:
 	    return;
