@@ -6740,7 +6740,7 @@ echores "$_tv_v4l2"
 
 echocheck "TV teletext interface"
 if test "$_tv_teletext" = auto ; then
- if test "$_tv_v4l2" = yes; then
+ if test "$_tv_v4l2" = yes && test "$_freetype" = yes ; then
   _tv_teletext=yes
  else
   _tv_teletext=no
