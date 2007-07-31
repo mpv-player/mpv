@@ -70,7 +70,8 @@ set_all_tests() {
 }
 
 printoption() {
-    echo "  -(no)$1  $2 [default: $3]"
+    test -n "$3" && def=$3 || eval def=\$_$1
+    echo "  -(no)$1  $2 [default: $def]"
 }
 
 printhead() {
@@ -99,28 +100,27 @@ for i in "$@"; do
     -help|--help|-h|-\?)
         echo -e "\n$0 [options] [files]\n"
         echo -e "options:\n"
-        printoption "spaces    " "test for spaces in filenames" "$_spaces"
-        printoption "extensions" "test for uppercase extensions" "$_extensions"
-        printoption "crlf      " "test for MSDOS line endings" "$_crlf"
-        printoption "tabs      " "test for tab characters" "$_tabs"
-        printoption "trailws   " "test for trailing whitespace" "$_trailws"
-        printoption "rcsid     " "test for missing RCS Id's" "$_rcsid"
-        printoption "oll       " "test for overly long lines" "$_oll"
-        printoption "charset   " "test for wrong charset" "$_charset"
-        printoption "stupid    " "test for stupid code" "$_stupid"
-        printoption "gnu       " "test for GNUisms" "$_gnu"
-        printoption "res       " "test for reserved identifiers" "$_res"
+        printoption "spaces    " "test for spaces in filenames"
+        printoption "extensions" "test for uppercase extensions"
+        printoption "crlf      " "test for MSDOS line endings"
+        printoption "tabs      " "test for tab characters"
+        printoption "trailws   " "test for trailing whitespace"
+        printoption "rcsid     " "test for missing RCS Id's"
+        printoption "oll       " "test for overly long lines"
+        printoption "charset   " "test for wrong charset"
+        printoption "stupid    " "test for stupid code"
+        printoption "gnu       " "test for GNUisms"
+        printoption "res       " "test for reserved identifiers"
         echo
         printoption "all       " "enable all tests" "no"
         echo  "                   (-noall can be specified as -none)"
         echo
-        printoption "showcont  " "show offending content of file(s)" \
-                                                                   "$_showcont"
+        printoption "showcont  " "show offending content of file(s)"
         echo
-        printoption "color     " "colored output" "$_color"
-        printoption "head      " "print heading for each test" "$_head"
+        printoption "color     " "colored output"
+        printoption "head      " "print heading for each test"
         printoption "svn       " \
-                    "use svn info to determine which files to check" "$_svn"
+                    "use svn info to determine which files to check"
         echo -e "\nIf no files are specified, the whole tree is traversed."
         echo -e "If there are, -(no)svn has no effect.\n"
         exit
