@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r23747
+// Updated to help_mp-en.h r23920
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -2070,3 +2070,4 @@ static char help_text[]=
 #define MSGTR_TV_NoSuchDriver "Driver non trovato: %s\n"
 #define MSGTR_TV_UnknownColorOption "Specificata un'opzione colore (%d) sonosciuta!\n"
 #define MSGTR_TV_CurrentFrequency "Frequenza attuale: %lu (%.3f)\n"
+#define MSGTR_TV_NoTeletext "Nessun televideo"
