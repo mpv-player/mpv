@@ -50,7 +50,6 @@ typedef struct {
 } muxer_stream_priv_t;
 
 static char *conf_format = NULL;
-static int conf_allow_lavf = 0;
 static int mux_rate= 0;
 static int mux_packet_size= 0;
 static float mux_preload= 0.5;
@@ -58,7 +57,6 @@ static float mux_max_delay= 0.7;
 
 m_option_t lavfopts_conf[] = {
 	{"format", &(conf_format), CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"i_certify_that_my_video_stream_does_not_use_b_frames", &conf_allow_lavf, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"muxrate", &mux_rate, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"packetsize", &mux_packet_size, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"preload", &mux_preload, CONF_TYPE_FLOAT, CONF_RANGE, 0, INT_MAX, NULL},
@@ -344,22 +342,11 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 	}
 
 	mp_msg(MSGT_MUXER, MSGL_WARN, "** MUXER_LAVF *****************************************************************\n");
-	if (!conf_allow_lavf) {
-		mp_msg(MSGT_MUXER, MSGL_FATAL,
-"If you wish to use libavformat muxing, you must ensure that your video stream\n"
-"does not contain B frames (out of order decoding) and specify:\n"
-"    -lavfopts i_certify_that_my_video_stream_does_not_use_b_frames\n"
-"on the command line.\n");
-	} else {
-		mp_msg(MSGT_MUXER, MSGL_WARN,
-"You have certified that your video stream does not contain B frames.\n");
-	}
 	mp_msg(MSGT_MUXER, MSGL_WARN,
-"REMEMBER: MEncoder's libavformat muxing is presently broken and will generate\n"
+"REMEMBER: MEncoder's libavformat muxing is presently broken and can generate\n"
 "INCORRECT files in the presence of B frames. Moreover, due to bugs MPlayer\n"
 "will play these INCORRECT files as if nothing were wrong!\n"
 "*******************************************************************************\n");
-	if (!conf_allow_lavf) return 0;
 	
 	priv = (muxer_priv_t *) calloc(1, sizeof(muxer_priv_t));
 	if(priv == NULL)
