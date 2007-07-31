@@ -27,6 +27,7 @@ _charset=no
 _stupid=no
 _showcont=no
 _gnu=no
+_res=no
 
 _color=yes
 _head=yes
@@ -54,6 +55,7 @@ enable_all_tests() {
     _charset=yes
     _stupid=yes
     _gnu=yes
+    _res=yes
 }
 
 disable_all_tests() {
@@ -67,6 +69,7 @@ disable_all_tests() {
     _charset=no
     _stupid=no
     _gnu=no
+    _res=no
 }
 
 printoption() {
@@ -109,6 +112,7 @@ for i in "$@"; do
         printoption "charset   " "test for wrong charset" "$_charset"
         printoption "stupid    " "test for stupid code" "$_stupid"
         printoption "gnu       " "test for GNUisms" "$_gnu"
+        printoption "res       " "test for reserved identifiers" "$_res"
         echo
         printoption "all       " "enable all tests" "no"
         echo  "                   (-noall can be specified as -none)"
@@ -217,6 +221,12 @@ for i in "$@"; do
     -nognu)
         _gnu=no
         ;;
+    -res)
+        _res=yes
+        ;;
+    -nores)
+        _res=no
+        ;;
     -*)
         echo "unknown option: $i" >&2
         exit 0
@@ -242,6 +252,12 @@ fi
 # Generate filelist once so -svn isn't _that_ much slower than -nosvn anymore
 
 filelist=`all_filenames`
+
+if [ "$_stupid" = "yes" -o "$_res" = "yes" ] ; then
+    # generate 'shortlist' to avoid false positives in xpm files, docs, etc,
+    # when one only needs to check .c and .h files
+    chfilelist=`echo $filelist | tr ' ' '\n' | grep "[\.][ch]$"`
+fi
 
 if [ "$_showcont" = "yes" ]; then
   _diffopts="-u"
@@ -315,6 +331,14 @@ fi
 
 # -----------------------------------------------------------------------------
 
+if [ "$_res" = "yes" ]; then
+    printhead "checking for reserved identifiers ..."
+    grep $_grepopts "#[ $TAB]*define[ $TAB]\+_[[:upper:]].*" $chfilelist
+    grep $_grepopts "#[ $TAB]*define[ $TAB]\+__.*" $chfilelist
+fi
+
+# -----------------------------------------------------------------------------
+
 if [ "$_charset" = "yes" ]; then
     printhead "checking bad charsets ..."
     for I in $filelist ; do
@@ -334,9 +358,6 @@ fi
 
 if [ "$_stupid" = "yes" ]; then
     printhead "checking for stupid code ..."
-
-    # avoid false-positives in xpm files, docs, etc, only check .c and .h files
-    chfilelist=`echo $filelist | tr ' ' '\n' | grep "[\.][ch]$"`
 
   if [ -n "$chfilelist" ]; then
     for i in calloc malloc realloc memalign av_malloc av_mallocz faad_malloc \
