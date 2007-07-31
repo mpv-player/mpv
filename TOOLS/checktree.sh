@@ -27,6 +27,12 @@
 
 # -----------------------------------------------------------------------------
 
+# All yes/no flags. Spaces around flagnames are important!
+
+testflags=" spaces extensions crlf tabs trailws rcsid oll charset stupid gnu \
+res "
+allflags="$testflags showcont color head svn "
+
 # Default settings
 
 _spaces=yes
@@ -141,78 +147,6 @@ for i in "$@"; do
         echo -e "If there are, -(no)svn has no effect.\n"
         exit
         ;;
-    -stupid)
-        _stupid=yes
-        ;;
-    -nostupid)
-        _stupid=no
-        ;;
-    -charset)
-        _charset=yes
-        ;;
-    -nocharset)
-        _charset=no
-        ;;
-    -oll)
-        _oll=yes
-        ;;
-    -nooll)
-        _oll=no
-        ;;
-    -svn)
-        _svn=yes
-        ;;
-    -nosvn)
-        _svn=no
-        ;;
-    -head)
-        _head=yes
-        ;;
-    -nohead)
-        _head=no
-        ;;
-    -color)
-        _color=yes
-        ;;
-    -nocolor)
-        _color=no
-        ;;
-    -spaces)
-        _spaces=yes
-        ;;
-    -nospaces)
-        _spaces=no
-        ;;
-    -extensions)
-        _extensions=yes
-        ;;
-    -noextensions)
-        _extensions=no
-        ;;
-    -crlf)
-        _crlf=yes
-        ;;
-    -nocrlf)
-        _crlf=no
-        ;;
-    -tabs)
-        _tabs=yes
-        ;;
-    -notabs)
-        _tabs=no
-        ;;
-    -trailws)
-        _trailws=yes
-        ;;
-    -notrailws)
-        _trailws=no
-        ;;
-    -rcsid)
-        _rcsid=yes
-        ;;
-    -norcsid)
-        _rcsid=no
-        ;;
     -all)
         enable_all_tests
         ;;
@@ -222,27 +156,24 @@ for i in "$@"; do
     -none)
         disable_all_tests
         ;;
-    -showcont)
-        _showcont=yes
-        ;;
-    -noshowcont)
-        _showcont=no
-        ;;
-    -gnu)
-        _gnu=yes
-        ;;
-    -nognu)
-        _gnu=no
-        ;;
-    -res)
-        _res=yes
-        ;;
-    -nores)
-        _res=no
-        ;;
     -*)
+        var=`echo X$i | sed 's/^X-//'`
+        val=yes
+        case "$var" in
+            no*)
+                var=`echo "$var" | cut -c 3-`
+                val=no
+                ;;
+        esac
+        case "$allflags" in
+            *\ $var\ *)
+                eval _$var=$val
+                ;;
+            *)
         echo "unknown option: $i" >&2
         exit 0
+        ;;
+        esac
         ;;
     *)
         _files="$_files $i"
