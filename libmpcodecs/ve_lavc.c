@@ -781,6 +781,9 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
     int out_size;
     double dts;
 
+    if(pts == MP_NOPTS_VALUE)
+        pts= lavc_venc_context->frame_number * av_q2d(lavc_venc_context->time_base);
+
     if(pic){
 #if 0
         pic->opaque= malloc(sizeof(pts));
