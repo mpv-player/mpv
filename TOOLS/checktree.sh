@@ -267,6 +267,8 @@ else
   _grepopts="-l -I"
 fi
 
+TAB=`echo " " | tr ' ' '\011'`
+
 # -----------------------------------------------------------------------------
 
 # DO CHECKS
@@ -297,7 +299,6 @@ fi
 
 if [ "$_tabs" = "yes" ]; then
     printhead "checking for TAB characters ..."
-    TAB=`echo " " | tr ' ' '\011'`
     grep $_grepopts "$TAB" $filelist
 fi
 
