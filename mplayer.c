@@ -584,6 +584,7 @@ void uninit_player(unsigned int mask){
     if (use_gui) guiGetEvent(guiSetAfilter, (char *)NULL);
 #endif
     mpctx->sh_audio=NULL;
+    mpctx->mixer.afilter = NULL;
   }
 
   if(mask&INITED_VCODEC){
