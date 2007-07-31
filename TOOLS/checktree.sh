@@ -63,32 +63,10 @@ export LC_ALL=C
 
 # Helper functions
 
-enable_all_tests() {
-    _spaces=yes
-    _extensions=yes
-    _crlf=yes
-    _tabs=yes
-    _trailws=yes
-    _rcsid=yes
-    _oll=yes
-    _charset=yes
-    _stupid=yes
-    _gnu=yes
-    _res=yes
-}
-
-disable_all_tests() {
-    _spaces=no
-    _extensions=no
-    _crlf=no
-    _tabs=no
-    _trailws=no
-    _rcsid=no
-    _oll=no
-    _charset=no
-    _stupid=no
-    _gnu=no
-    _res=no
+set_all_tests() {
+    for i in $testflags ; do
+        eval _$i=$1
+    done
 }
 
 printoption() {
@@ -148,13 +126,13 @@ for i in "$@"; do
         exit
         ;;
     -all)
-        enable_all_tests
+        set_all_tests yes
         ;;
     -noall)
-        disable_all_tests
+        set_all_tests no
         ;;
     -none)
-        disable_all_tests
+        set_all_tests no
         ;;
     -*)
         var=`echo X$i | sed 's/^X-//'`
