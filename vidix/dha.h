@@ -20,7 +20,7 @@
  *
  *   1996/10/27	- Robin Cutshaw (robin@xfree86.org)
  *		  XFree86 3.3.3 implementation
- *   1999	- Øyvind Aabling.
+ *   1999	- Ã˜yvind Aabling.
  *   		  Modified for GATOS/win/gfxdump.
  *		  
  *   2002	- library implementation by Nick Kurshev
