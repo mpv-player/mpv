@@ -1,7 +1,7 @@
-.\" synced with r23856
+.\" synced with r23962
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
-.\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
+.\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
 .\" Traduzione in italiano di Daniele Forghieri, aggiornamenti PaulTT
 .
@@ -298,7 +298,7 @@ Inizia/smette di salvare istantanee.
 .IPs "I\ \ \ \ "
 Mostra il nome del file sull'OSD.
 .IPs "! e @"
-Va all'inizio del precedente/\:prossimo capitolo.
+Va all'inizio del precedente/\:successivo capitolo.
 .IPs "D (solo \-vo xvmc, \-vf yadif, \-vf kerndeint)"
 Attiva/disattiva deinterlacciatore.
 .RE
@@ -435,6 +435,21 @@ Ritorna al menu più prossimo (l'ordine di preferenza è:
 capitolo->titolo->principale).
 .IPs "ENTER tastierino numerico"
 Conferma la scelta.
+.RE
+.PD 1
+.PP
+.RS
+.
+(I seguenti tasti sono validi solo se MPlayer è stato compilato col supporto
+per televideo (teletext): vengono usati per controllare il televideo della TV)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "X"
+Attiva/disattiva il televideo.
+.IPs "Q and W"
+Va alla pagina televideo successiva/\:precedente.
 .RE
 .PD 1
 .PP
@@ -1694,7 +1709,8 @@ altezza immagine in pixel
 .IPs i420|yv12|yuy2|y8
 seleziona lo spazio colore
 .IPs format=<valore>
-spazio colore (fourcc) in esadecimale
+spazio colore (fourcc) in esadecimale o in stringa costante.
+Usa \-rawvideo format=help per una lista delle stringhe possibili.
 .IPs size=<valore>
 dimensione di un fotogramma in Byte
 .REss
@@ -1937,6 +1953,21 @@ di compressione MJPEG.
 .IPs quality=<0\-100>
 Seleziona la qualità della compressione JPEG
 (per la dimensione completa è raccomandato un valore < 60).
+.IPs tdevice=<valore>  (default: nessuno)
+Specifica il dispositivo televideo (esempio: /dev/\:vbi0).
+.IPs tformat=<formato> (default: 0)
+Specificare il formato di visualizzazion del televideo:
+.RSss
+0: opaco
+.br
+1: trasparente
+.br
+2: opaco a colori invertiti
+.br
+3: trasparente a colori invertiti
+.REss
+.IPs tpage=<100-899> (default: 100)
+Specifica la pagina iniziale del televideo TV.
 .RE
 .
 .TP
@@ -2712,6 +2743,10 @@ Driver di uscita audio specifico MPEG per schede IVTV.
 Funziona solo con \-ac hwmpa.
 .
 .TP
+.B v4l2 (richiede un kernel Linux 2.6.22+)
+Driver di uscita audio per schede V4L2 con decodificatore MPEG hardware.
+.
+.TP
 .B mpegpes (solo DVB)
 Driver di uscita audio per schede DVB che scrive l'uscita su un file MPEG-PES
 se non c'è alcuna scheda DVB presente.
@@ -3074,6 +3109,11 @@ nere)
 Il parametro controlla quanto dell'immagine viene tagliato.
 Questa opzione funziona solo con i driver di uscita video xv, xmga, mga,
 gl, gl2, quartz, macosx e xvidix.
+.br
+.I NOTA:
+Sono permessi anche valori compresi tra -1 e 0, ma sono altamente sperimentali
+e possono portare a crash o peggio.
+Usali a tuo rischio!
 .
 .TP
 .B \-panscanrange <-19.0\-99.0> (sperimentale)
@@ -3653,7 +3693,7 @@ Più lento ma in alcuni casi l'uscita è più corretta (default: disabilitato).
 Abilita il supporto per più formati colore (RGB e BGR) (default: abilitato).
 Necessita di OpenGL con versione >= 1.2.
 .IPs slice-height=<0\-...>
-Numero di linee copiate sulla texture in un blocco unico (default: 4).
+Numero di linee copiate sulla texture in un blocco unico (default: 0).
 0 per l'immagine intera.
 .br
 .I NOTA:
@@ -3913,6 +3953,22 @@ Specifica il numero di dispositivo se hai più di una scheda em8300.
 Driver di uscita video specifico per uscita TV-Out con chip di decodifica MPEG
 Conexant CX23415 (iCompression iTVC15) o Conexant CX23416 (iCompression iTVC16)
 (Hauppauge WinTV PVR-150/250/350/500)
+Vedi anche il filtro video lavc.
+.PD 0
+.RSs
+.IPs device
+Seleziona esplicitamente il dispositivo del decodificatore MPEG da usare
+(default: /dev/video16).
+.IPs output
+Seleziona esplicitamente l'uscita TV-Out da usare per il segnale video.
+.RE
+.PD 1
+.
+.TP
+.B v4l2 (richiede un kernel Linux 2.6.22+)
+Video output driver for V4L2 compliant cards with built-in hardware MPEG decoder.
+Driver di uscita video per schede compatibili V4L2 con decodificatore MPEG
+hardware integrato.
 Vedi anche il filtro video lavc.
 .PD 0
 .RSs
@@ -5892,7 +5948,8 @@ Dovresti vedere delle strisce rosse, verdi e blu dall'alto al basso.
 .
 .TP
 .B lavc[=qualità:fps]
-Conversione software veloce da YV12 a MPEG-1 da usare con DVB/\:DXR3/\:IVTV.
+Conversione software veloce da YV12 a MPEG-1 da usare con
+DVB/\:DXR3/\:IVTV/\:V4L2.
 Veloce e di migliore qualità rispetto a \-vf fame.
 .RSs
 .IPs <qualità>
