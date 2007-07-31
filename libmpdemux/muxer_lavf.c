@@ -280,10 +280,9 @@ static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags, 
 		pkt.flags |= PKT_FLAG_KEY;
 	else
 		pkt.flags = 0;
-	
-	
-	//pkt.pts = AV_NOPTS_VALUE; 
-	pkt.pts = (stream->timer / av_q2d(priv->oc->streams[pkt.stream_index]->time_base) + 0.5);
+
+	pkt.dts = (dts / av_q2d(priv->oc->streams[pkt.stream_index]->time_base) + 0.5);
+	pkt.pts = (pts / av_q2d(priv->oc->streams[pkt.stream_index]->time_base) + 0.5);
 //fprintf(stderr, "%Ld %Ld id:%d tb:%f %f\n", pkt.dts, pkt.pts, pkt.stream_index, av_q2d(priv->oc->streams[pkt.stream_index]->time_base), stream->timer);
 	
 	if(av_interleaved_write_frame(priv->oc, &pkt) != 0) //av_write_frame(priv->oc, &pkt)
