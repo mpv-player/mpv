@@ -1,6 +1,6 @@
 
-#ifndef __MPLAYER_MAIN
-#define __MPLAYER_MAIN
+#ifndef MPLAYER_H
+#define MPLAYER_H
 
 extern char* current_module;
 
@@ -56,4 +56,4 @@ extern int vobsub_id;
 extern void exit_player(const char* how);
 extern void update_set_of_subtitles(void);
 
-#endif
+#endif /* MPLAYER_H */

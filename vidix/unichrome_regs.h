@@ -23,8 +23,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _VIA_H_
-#define _VIA_H_ 1
+#ifndef UNICHROME_REGS_H
+#define UNICHROME_REGS_H
 
 /* Video status flag */
 
@@ -632,4 +632,4 @@
 
 
 
-#endif /* _VIA_H_ */
+#endif /* UNICHROME_REGS_H */

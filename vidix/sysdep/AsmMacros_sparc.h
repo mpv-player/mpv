@@ -4,8 +4,8 @@
    Modified for readability by Nick Kurshev
 */
 
-#ifndef __ASM_MACROS_SPARC_H
-#define __ASM_MACROS_SPARC_H
+#ifndef ASMMACROS_SPARC_H
+#define ASMMACROS_SPARC_H
 
 #ifndef ASI_PL
 #define ASI_PL 0x88
@@ -50,4 +50,4 @@ static __inline__ unsigned int inl(unsigned long port)
 #define intr_disable()
 #define intr_enable()
 
-#endif
+#endif /* ASMMACROS_SPARC_H */

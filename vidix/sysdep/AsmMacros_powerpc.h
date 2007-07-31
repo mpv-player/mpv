@@ -4,8 +4,8 @@
    Modified for readability by Nick Kurshev
 */
 
-#ifndef __ASM_MACROS_POWERPC_H
-#define __ASM_MACROS_POWERPC_H
+#ifndef ASMMACROS_POWERPC_H
+#define ASMMACROS_POWERPC_H
 
 #if defined(Lynx) || defined(__OpenBSD__)
 
@@ -57,4 +57,4 @@ static __inline__ unsigned long inl(short port)
 
 #endif
 
-#endif
+#endif /* ASMMACROS_POWERPC_H */

@@ -4,8 +4,8 @@
    Modified for readability by Nick Kurshev
 */
 
-#ifndef __ASM_MACROS_X86_H
-#define __ASM_MACROS_X86_H
+#ifndef ASMMACROS_X86_H
+#define ASMMACROS_X86_H
 
 //#if defined (WINNT)
 //#error This stuff is not ported on your system
@@ -290,4 +290,4 @@ static __inline__ void intr_enable()
 
 #endif
 
-//#endif
+//#endif /* ASMMACROS_X86_H */

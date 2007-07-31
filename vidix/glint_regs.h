@@ -14,8 +14,8 @@
  *
  */ 
 
-#ifndef _GLINTREG_H_
-#define _GLINTREG_H_
+#ifndef GLINT_REGS_H
+#define GLINT_REGS_H
 
 /**********************************************
 *  GLINT 500TX Configuration Region Registers *
@@ -1301,4 +1301,4 @@ do{								\
 #define ACCESSCHIP2()						\
     pGlint->IOOffset = 0x10000;
 
-#endif
+#endif /* GLINT_REGS_H */

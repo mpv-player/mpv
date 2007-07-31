@@ -22,8 +22,8 @@
  * and partly compatible with Rage128 set (in OV0, CAP0, CAP1 parts)
  */
 
-#ifndef	_RADEON_H
-#define	_RADEON_H
+#ifndef	RADEON_H
+#define	RADEON_H
 
 #define	RADEON_REGSIZE			0x4000
 #define	MM_INDEX			0x0000

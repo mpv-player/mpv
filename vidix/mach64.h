@@ -22,8 +22,8 @@
  *  radeonfb, GATOS (gatos.sf.net) and X11 (www.xfree86.org)
  */
 
-#ifndef __MACH64_INCLUDED
-#define __MACH64_INCLUDED 1
+#ifndef MACH64_H
+#define MACH64_H
 
 /* Note: this model of accessing to IO space is based on MMIO technology.
 This means that this sources don't support ISA and VLB cards */
@@ -2494,4 +2494,4 @@ This means that this sources don't support ISA and VLB cards */
 #define MIX_FN_PAINT			MIX_SRC
 
 
-#endif
+#endif /* MACH64_H */

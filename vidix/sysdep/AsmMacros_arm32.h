@@ -4,8 +4,8 @@
    Modified for readability by Nick Kurshev
 */
 
-#ifndef __ASM_MACROS_ARM32_H
-#define __ASM_MACROS_ARM32_H
+#ifndef ASMMACROS_ARM32_H
+#define ASMMACROS_ARM32_H
 unsigned int IOPortBase;  /* Memory mapped I/O port area */
 
 static __inline__ void outb(short port,char val)
@@ -47,4 +47,4 @@ static __inline__ unsigned int inl(short port)
 #define intr_disable()
 #define intr_enable()
 
-#endif
+#endif /* ASMMACROS_ARM32_H */

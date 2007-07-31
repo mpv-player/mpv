@@ -1,7 +1,7 @@
 /* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/savage/savage_regs.h,v 1.10 2001/11/04 22:17:48 alanh Exp $ */
 
-#ifndef _SAVAGE_REGS_H
-#define _SAVAGE_REGS_H
+#ifndef SAVAGE_REGS_H
+#define SAVAGE_REGS_H
 
 /* These are here until xf86PciInfo.h is updated. */
 
@@ -300,4 +300,4 @@ do {                                    \
                            & VSCALING_Mask)
 
 
-#endif /* _SAVAGE_REGS_H */
+#endif /* SAVAGE_REGS_H */

@@ -4,8 +4,8 @@
    Modified for readability by Nick Kurshev
 */
 
-#ifndef __ASM_MACROS_IA64_H
-#define __ASM_MACROS_IA64_H
+#ifndef ASMMACROS_IA64_H
+#define ASMMACROS_IA64_H
 
 #if defined(linux)
 #include <sys/io.h>
@@ -13,4 +13,4 @@
 #error This stuff is not ported on your system
 #endif
 
-#endif
+#endif /* ASMMACROS_IA64_H */
