@@ -143,6 +143,10 @@ static int lavc_param_closed_gop = 0;
 static int lavc_param_dc_precision = 8;
 static int lavc_param_threads= 1;
 static int lavc_param_turbo = 0;
+static int lavc_param_skip_threshold=0;
+static int lavc_param_skip_factor=0;
+static int lavc_param_skip_exp=0;
+static int lavc_param_skip_cmp=0;
 static int lavc_param_brd_scale = 0;
 static int lavc_param_bidir_refine = 0;
 static int lavc_param_sc_factor = 1;
@@ -229,6 +233,7 @@ m_option_t lavcopts_conf[]={
         {"cmp", &lavc_param_me_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"subcmp", &lavc_param_me_sub_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"mbcmp", &lavc_param_mb_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+        {"skipcmp", &lavc_param_skip_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 #ifdef FF_CMP_VSAD
         {"ildctcmp", &lavc_param_ildct_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 #endif
@@ -287,6 +292,9 @@ m_option_t lavcopts_conf[]={
         {"nssew", &lavc_param_nssew, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
 	{"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
 	{"turbo", &lavc_param_turbo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"skip_threshold", &lavc_param_skip_threshold, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
+        {"skip_factor", &lavc_param_skip_factor, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
+        {"skip_exp", &lavc_param_skip_exp, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
 	{"brd_scale", &lavc_param_brd_scale, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 	{"bidir_refine", &lavc_param_bidir_refine, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
 	{"sc_factor", &lavc_param_sc_factor, CONF_TYPE_INT, CONF_RANGE, 1, INT_MAX, NULL},
@@ -397,6 +405,11 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->quantizer_noise_shaping= lavc_param_qns;
     lavc_venc_context->inter_threshold= lavc_param_inter_threshold;
     lavc_venc_context->nsse_weight= lavc_param_nssew;
+    lavc_venc_context->frame_skip_threshold= lavc_param_skip_threshold;
+    lavc_venc_context->frame_skip_factor= lavc_param_skip_factor;
+    lavc_venc_context->frame_skip_exp= lavc_param_skip_exp;
+    lavc_venc_context->frame_skip_cmp= lavc_param_skip_cmp;
+
     if (lavc_param_intra_matrix)
     {
 	char *tmp;
@@ -798,7 +811,7 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
     assert(MP_NOPTS_VALUE == AV_NOPTS_VALUE);
 #endif
 //fprintf(stderr, "ve_lavc %f/%f\n", dts, pts);
-    if(out_size == 0) {
+    if(out_size == 0 && lavc_param_skip_threshold==0 && lavc_param_skip_factor==0){
         ++mux_v->encoder_delay;
         return 0;
     }
