@@ -363,12 +363,14 @@ if [ "$_stupid" = "yes" -a -n "$chfilelist" ]; then
     for i in calloc malloc realloc memalign av_malloc av_mallocz faad_malloc \
              lzo_malloc safe_malloc mpeg2_malloc _ogg_malloc; do
         printhead "--> casting of void* $i()"
-        grep $_grepopts "([ $TAB]*[a-zA-Z_]\+[ $TAB]*\*.*)[ $TAB]*$i" $chfilelist
+        grep $_grepopts "([ $TAB]*[a-zA-Z_]\+[ $TAB]*\*.*)[ $TAB]*$i" \
+                                                                    $chfilelist
     done
 
     for i in "" signed unsigned; do
         printhead "--> usage of sizeof($i char)"
-        grep $_grepopts "sizeof[ $TAB]*([ $TAB]*$i[ $TAB]*char[ $TAB]*)" $chfilelist
+        grep $_grepopts "sizeof[ $TAB]*([ $TAB]*$i[ $TAB]*char[ $TAB]*)" \
+                                                                    $chfilelist
     done
 
     for i in int8_t uint8_t; do
@@ -384,16 +386,20 @@ if [ "$_stupid" = "yes" -a -n "$chfilelist" ]; then
 
     # added a-fA-F_ to eliminate some false positives
     printhead "--> usage of *0"
-    grep $_grepopts "[a-zA-Z0-9)]\+[ $TAB]*\*[ $TAB]*0[^.0-9xa-fA-F_]" $chfilelist
+    grep $_grepopts "[a-zA-Z0-9)]\+[ $TAB]*\*[ $TAB]*0[^.0-9xa-fA-F_]" \
+                                                                    $chfilelist
 
     printhead "--> usage of *1"
-    grep $_grepopts "[a-zA-Z0-9)]\+[ $TAB]*\*[ $TAB]*1[^.0-9ea-fA-F_]" $chfilelist
+    grep $_grepopts "[a-zA-Z0-9)]\+[ $TAB]*\*[ $TAB]*1[^.0-9ea-fA-F_]" \
+                                                                    $chfilelist
 
     printhead "--> usage of +0"
-    grep $_grepopts "[a-zA-Z0-9)]\+[ $TAB]*+[ $TAB]*0[^.0-9xa-fA-F_]" $chfilelist
+    grep $_grepopts "[a-zA-Z0-9)]\+[ $TAB]*+[ $TAB]*0[^.0-9xa-fA-F_]" \
+                                                                    $chfilelist
 
     printhead "--> usage of -0"
-    grep $_grepopts "[a-zA-Z0-9)]\+[ $TAB]*-[ $TAB]*0[^.0-9xa-fA-F_]" $chfilelist
+    grep $_grepopts "[a-zA-Z0-9)]\+[ $TAB]*-[ $TAB]*0[^.0-9xa-fA-F_]" \
+                                                                    $chfilelist
 fi
 
 # -----------------------------------------------------------------------------
