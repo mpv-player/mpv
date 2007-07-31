@@ -332,7 +332,7 @@ fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_res" = "yes" ]; then
+if [ "$_res" = "yes" -a -n "$chfilelist" ]; then
     printhead "checking for reserved identifiers ..."
     grep $_grepopts "#[ $TAB]*define[ $TAB]\+_[[:upper:]].*" $chfilelist
     grep $_grepopts "#[ $TAB]*define[ $TAB]\+__.*" $chfilelist
@@ -357,10 +357,9 @@ fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_stupid" = "yes" ]; then
+if [ "$_stupid" = "yes" -a -n "$chfilelist" ]; then
     printhead "checking for stupid code ..."
 
-  if [ -n "$chfilelist" ]; then
     for i in calloc malloc realloc memalign av_malloc av_mallocz faad_malloc \
              lzo_malloc safe_malloc mpeg2_malloc _ogg_malloc; do
         printhead "--> casting of void* $i()"
@@ -395,7 +394,6 @@ if [ "$_stupid" = "yes" ]; then
 
     printhead "--> usage of -0"
     grep $_grepopts "[a-zA-Z0-9)]\+[ 	]*-[ 	]*0[^.0-9xa-fA-F_]" $chfilelist
-  fi
 fi
 
 # -----------------------------------------------------------------------------
