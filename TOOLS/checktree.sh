@@ -148,9 +148,9 @@ for i in "$@"; do
                 eval _$var=$val
                 ;;
             *)
-        echo "unknown option: $i" >&2
-        exit 0
-        ;;
+                echo "unknown option: $i" >&2
+                exit 0
+                ;;
         esac
         ;;
     *)
