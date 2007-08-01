@@ -546,7 +546,8 @@ HMODULE PE_LoadImage( int handle, LPCSTR filename, WORD *version )
      *         to work (until we support shared sections properly).
      */
 
-    if ( nt->OptionalHeader.ImageBase & 0x80000000 )
+    if ( nt->OptionalHeader.ImageBase & 0x80000000 &&
+        !strstr(filename, "xanlib.dll"))
     {
         HMODULE sharedMod = (HMODULE)nt->OptionalHeader.ImageBase; 
         IMAGE_NT_HEADERS *sharedNt = (PIMAGE_NT_HEADERS)
