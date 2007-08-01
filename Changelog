@@ -25,6 +25,7 @@ MPlayer (1.0)
     * ffmpeg video decoder handles aspect ratio changes
     * amr now handled via libamr wrapper (http://www.penguin.cz/~utx/amr)
     * SIMD optimizations for mp3lib under AMD64
+    * XAN wc4 video decoding via binary codec
 
     Demuxers:
     * implemented switch_video and switch_program consistently with switch_audio
@@ -79,6 +80,7 @@ MPlayer (1.0)
     MEncoder:
     * write to output streams (currently only file:// and smb://)
     * support -ffourcc with -of lavf
+    * removed bframe warning message
 
     Ports:
     * Complete Intel Mac support
