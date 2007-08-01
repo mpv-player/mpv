@@ -86,6 +86,8 @@ static int init(sh_audio_t *sh_audio)
                lavc_context->extradata_size);	
     }
 
+    // Set desired number of channels
+    lavc_context->channels = audio_output_channels;
     /* open it */
     if (avcodec_open(lavc_context, lavc_codec) < 0) {
         mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_CantOpenCodec);
@@ -105,8 +107,6 @@ static int init(sh_audio_t *sh_audio)
        sh_audio->ds->ss_mul = 2*sh_audio->wf->nChannels; // 1 byte*ch/packet
    }
 
-   // Set desired number of channels
-   lavc_context->channels = audio_output_channels;
    // Decode at least 1 byte:  (to get header filled)
    x=decode_audio(sh_audio,sh_audio->a_buffer,1,sh_audio->a_buffer_size);
    if(x>0) sh_audio->a_buffer_len=x;
