@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r23609
+.\" In sync with r23984
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -73,7 +73,7 @@ vcd://Titel[/Gerät]
 .
 .br
 .B mplayer
-tv://[Kanal]
+tv://[Kanal][/input_id]
 [Optionen]
 .
 .br
@@ -433,6 +433,22 @@ Kehre zum nächsten Menü zurück (Vorzug erhält Kapitel->Titel->Ursprung, in
 dieser Reihenfolge).
 .IPs "Tastenfeld ENTER"
 Bestätige die Auswahl.
+.RE
+.PD 1
+.PP
+.RS
+.
+(Die folgenden Tasten sind nur gültig, falls Unterstützung für Videotext
+bei der Compilierung aktiviert wurde: Sie werden verwendet, um TV-Videotext
+zu steuern.)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "X"
+Schaltet Videotext an/\:aus.
+.IPs "Q und W"
+Gehe zur nächsten/\:vorigen Videotextseite.
 .RE
 .PD 1
 .PP
@@ -1699,7 +1715,8 @@ Rate in Samples pro Sekunde
 .IPs samplesize=<Wert>
 Sample-Größe in Bytes
 .IPs format=<Wert>
-FourCC als Hexadezimalwert
+FourCC als Hexadezimalwert oder String-Konstante.
+Verwende \-rawvideo format=help für eine Liste gültiger Zeichenketten.
 .RE
 .PD 1
 .
@@ -1833,6 +1850,8 @@ Diese Option steuert verschiedene Einstellungen des TV-Empfang-Moduls.
 Um mit MPlayer fernzusehen, benutze die Optionen 'tv://'
 oder 'tv://<Kanalnummer>' oder sogar 'tv://<Kanalname>' (siehe unten die
 Option channels für die Kanalnamen) als Film-URL.
+Du kannst auch 'tv:///<input_id>' verwenden, um ein Video vom Composite- oder
+S-Video-Eingang zu schauen (siehe Option input für Details).
 .sp 1
 Verfügbare Optionen:
 .RSs
@@ -1970,6 +1989,21 @@ Wählt die Bildgröße für die Hardware-MJPEG-Kompression:
 .IPs quality=<0\-100>
 Wählt die Qualität der JPEG-Kompression.
 (< 60 für volle Größe empfohlen)
+.IPs tdevice=<Wert>  (Standard: kein)
+Gib Gerät für TV-Videotext an (Beispiel: /dev/\:vbi0).
+.IPs tformat=<Format> (Standard: 0)
+Gib das Anzeigeformat für TV-Videotext an:
+.RSss
+0: opak
+.br
+1: transparent
+.br
+2: opak mit invertierten Farben
+.br
+3: transparent mit invertierten Farben
+.REss
+.IPs tpage=<100-899> (Standard: 100)
+Gib initiale Seitenzahl für TV-Videotext an.
 .RE
 .
 .TP
@@ -2073,9 +2107,9 @@ Fügt einen schwarzen Streifen oben ins Bild hinzu.
 Der SSA/ASS-Renderer kann Obertitel dorthin legen (mit \-ass-use-margins).
 .
 .TP
-.B \-(no)ass-use-margins
-Aktiviert/deaktiviert die Platzierung der Ober- und Untertitel in schwarzen
-Rändern, wenn sie verfügbar sind (Standard: nein).
+.B \-ass-use-margins
+Aktiviert die Platzierung der Ober- und Untertitel in schwarzen
+Rändern, wenn sie verfügbar sind.
 .
 .TP
 .B \-dumpjacosub (nur bei MPlayer)
@@ -2120,7 +2154,7 @@ Speichert den Untertitel-Substream eines VOB-Streams.
 Siehe auch die Optionen \-dump*sub und \-vobsubout*.
 .
 .TP
-.B \-(no)embeddedfonts (nur bei FreeType)
+.B \-embeddedfonts (nur bei FreeType)
 Aktiviert die Extraktion von in Matroska eingebetteten Schriften (Standard:
 deaktiviert).
 Diese Schriften können für das Rendern von SSA/ASS-Untertiteln verwendet werden
@@ -2419,6 +2453,11 @@ Kann negativ sein.
 .B \-subfile <Dateiname> (BETA CODE)
 Zur Zeit unbrauchbar.
 Das gleiche wie \-audiofile, jedoch für Untertitel-Streams (OggDS?).
+.
+.TP
+.B \-subfont <Dateiname> (nur bei FreeType)
+Setzt die Schriftart für Untertitel.
+Wenn kein \-subfont gegeben ist, wird \-font verwendet.
 .
 .TP
 .B \-subfont-autoscale <0\-3> (nur bei FreeType)
@@ -2730,6 +2769,10 @@ Geräte angezeigt.
 .TP
 .B dxr2 (siehe auch \-dxr2) (nur bei DXR2)
 DXR2-spezifischer Ausgabetreiber von Creative.
+.
+.TP
+.B v4l2 (benötigt Linux-Kernel 2.6.22+)
+Audioausgabetreiber für V4L2-Karten mit Hardware-MPEG-Decoder.
 .
 .TP
 .B mpegpes (nur bei DVB)
@@ -3094,6 +3137,11 @@ abgeschnitten, damit der komplette Bildbereich ausgefüllt wird.
 Der Bereich kontrolliert, wieviel vom Bild abgeschnitten wird.
 Dies funktioniert nur mit den xv-, xmga-, mga-, gl-, gl2, quartz-, macosx- und
 xvidix-Videoausgabetreibern.
+.br
+.I ANMERKUNG:
+Werte zwischen -1 und 0 sind auch erlaubt, jedoch höchst experimentell
+und können zu Abstürzen oder schlimmerem führen.
+Benutzung auf eigenes Risiko!
 .
 .TP
 .B \-panscanrange <-19.0\-99.0> (experimentell)
@@ -3675,7 +3723,7 @@ Langsamer, aber sorgt manchmal für korrektere Ausgabe (Standard: aus).
 Schaltet die Unterstütztung für mehr (RGB und BGR) Farbformate.
 Benötigt eine OpenGL-Version >= 1.2.
 .IPs slice-height=<0\-...>
-Anzahl der Linien, die an einem Stück zur Textur kopiert werden (Standard: 4).
+Anzahl der Linien, die an einem Stück zur Textur kopiert werden (Standard: 0).
 0 für ganzes Bild.
 .br
 .I ANMERKUNG:
@@ -3940,6 +3988,21 @@ Siehe auch den Videofilter lavc.
 Wählt den zu verwendenden MPEG-Decoder explizit (Standard: /dev/video16).
 .IPs Ausgabe
 Wählt die für das Videosignal zu verwendende TV-Out-Ausgabe.
+.RE
+.PD 1
+.
+.TP
+.B v4l2 (benötigt Linux-Kernel 2.6.22+)
+Videoausgabetreiber für V4L2-kompatible Karten mit eingebautem
+Hardware-MPEG-Decoder.
+Siehe auch lavc-Videofilter.
+.PD 0
+.RSs
+.IPs device
+Wähle den Gerätenamen des zu verwendenden MPEG-Decoders explizit
+(Standard: /dev/video16).
+.IPs output
+Wähle die für das Videosignal zu verwendende TV-Out-Ausgabe explizit.
 .RE
 .PD 1
 .
@@ -4920,6 +4983,9 @@ Beachte, dass bei der Wiedergabe eines Mediums mit nur zwei Känalen die Kanäle
 Würde die Anzahl der Kanäle auf 6 setzen und 4 Routen aufsetzen, die den Kanal
 0 nach Kanal 0 und 3 kopieren.
 Kanäle 4 und 5 werden keinen Ton enthalten.
+.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
+Sollte dafür sorgen, dass die 6-Kanal-Ausgabe mit ffcda (DTS) mit ALSA
+richtig funktioniert.
 .RE
 .PD 1
 .
@@ -5916,7 +5982,7 @@ Du solltest einen roten, grünen und blauen Streifen von oben nach unten sehen.
 .TP
 .B lavc[=Qualität:fps]
 Schnelle Softwarekonvertierung von YV12 nach MPEG-1 mit libavcodec
-für die Benutzung mit DVB/\:DXR3/\:IVTV.
+für die Benutzung mit DVB/\:DXR3/\:IVTV/\:V4L2.
 .RSs
 .IPs <Qualität>
 1\-31: fester Quantisierungsfaktor
@@ -8708,6 +8774,10 @@ Setzt die Vergleichsfunktion für "sub pel"-Bewegungsabschätzung (siehe mbcmp
 für eine Liste der verfügbaren Vergleichsfunktionen) (Standard: 0).
 .
 .TP
+.B skipcmp=<0\-2000>
+FIXME: Dokumentiere diese Option.
+.
+.TP
 .B nssew=<0\-1000000>
 Diese Einstellung kontrolliert die NSSE-Gewichtung, wobei eine höhere
 Gewichtung stärkeres Rauschen erzeugt.
@@ -9010,6 +9080,19 @@ Das gleiche wie vglobal für Audioheader.
 .B level=<Wert>
 Setze CodecContext Level.
 Benutze 31 oder 41, um das Video auf einer Playstation 3 abspielen zu können.
+.
+.TP
+.B skip_exp=<0\-1000000>
+FIXME: Dokumentiere diese Option.
+.
+.TP
+.B skip_factor=<0\-1000000>
+FIXME: Dokumentiere diese Option.
+.
+.TP
+.B skip_threshold=<0\-1000000>
+FIXME: Dokumentiere diese Option.
+.
 .
 .
 .SS nuv (\-nuvopts)
@@ -10490,14 +10573,6 @@ MPEG-4-Format
 Sony Digital Video Container
 .RE
 .PD 1
-.TP
-.B i_certify_that_my_video_stream_does_not_use_b_frames
-MEncoder kann Zeitstempel nicht korrekt zuweisen, wenn im Videostream B-Frames
-vorhanden sind, was zu kaputten Encodierungen führt.
-Wenn du den lavf-Muxer verwenden möchtest, darfst du den Videocodec keine
-B-Frames verwenden lassen (siehe entsprechende Dokumentation des jeweiligen
-Codecs), und du musst außerdem diese Option angeben.
-.
 .TP
 .B muxrate=<Rate>
 Nominale Bitrate des Multiplex in Bits pro Sekunde;

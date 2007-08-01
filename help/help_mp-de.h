@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r23834
+// In sync with r23902
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -2143,4 +2143,5 @@ static char help_text[]=
 #define MSGTR_TV_NoSuchDriver "Kein Treiber: %s\n"
 #define MSGTR_TV_UnknownColorOption "Unbekannte Farboption (%d) angegeben!\n"
 #define MSGTR_TV_CurrentFrequency "Momentane Frequenz: %lu (%.3f)\n"
+#define MSGTR_TV_NoTeletext "Kein Videotext"
 
