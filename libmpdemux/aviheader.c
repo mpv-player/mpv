@@ -64,6 +64,7 @@ while(1){
   int id=stream_read_dword_le(demuxer->stream);
   unsigned chunksize,size2;
   static int last_fccType=0;
+  static int last_fccHandler=0;
   char* hdr=NULL;
   //
   if(stream_eof(demuxer->stream)) break;
@@ -203,6 +204,7 @@ while(1){
         sh_audio->stream_delay = (float)sh_audio->audio.dwStart * sh_audio->audio.dwScale/sh_audio->audio.dwRate;
       }
       last_fccType=h.fccType;
+      last_fccHandler=h.fccHandler;
       if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_strh(&h,MSGL_V);
       break; }
     case mmioFOURCC('i', 'n', 'd', 'x'): {
@@ -323,6 +325,9 @@ while(1){
 	    sh_audio->wf=realloc(sh_audio->wf, sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize);
 	}
 	sh_audio->format=sh_audio->wf->wFormatTag;
+	if (sh_audio->format == 1 &&
+	    last_fccHandler == mmioFOURCC('A', 'x', 'a', 'n'))
+	    sh_audio->format = last_fccHandler;
 	sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
         chunksize=0;
         if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf,MSGL_V);
