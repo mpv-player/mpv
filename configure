@@ -6598,9 +6598,9 @@ echores "$_tv"
 
 
 if bsd; then
-echocheck "*BSD BT848 bt8xx header"
-_ioctl_bt848_h=no
-for file in "machine/ioctl_bt848.h" \
+  echocheck "*BSD BT848 bt8xx header"
+  _ioctl_bt848_h=no
+  for file in "machine/ioctl_bt848.h" \
             "dev/bktr/ioctl_bt848.h" \
             "dev/video/bktr/ioctl_bt848.h" \
             "dev/ic/bt8xx.h" ; do
@@ -6617,18 +6617,18 @@ EOF
      _ioctl_bt848_h_name="$file"
      break;
     fi
-done
-if test "$_ioctl_bt848_h" = yes ; then
-  _def_ioctl_bt848_h_name="#define IOCTL_BT848_H_NAME <$_ioctl_bt848_h_name>"
-  _res_comment="using $_ioctl_bt848_h_name"
-else
-  _def_ioctl_bt848_h_name="#undef IOCTL_BT848_H_NAME"
-fi
-echores "$_ioctl_bt848_h"
+  done
+  if test "$_ioctl_bt848_h" = yes ; then
+    _def_ioctl_bt848_h_name="#define IOCTL_BT848_H_NAME <$_ioctl_bt848_h_name>"
+    _res_comment="using $_ioctl_bt848_h_name"
+  else
+    _def_ioctl_bt848_h_name="#undef IOCTL_BT848_H_NAME"
+  fi
+  echores "$_ioctl_bt848_h"
 
-echocheck "*BSD ioctl_meteor.h"
-_ioctl_meteor_h=no
-for file in "machine/ioctl_meteor.h" \
+  echocheck "*BSD ioctl_meteor.h"
+  _ioctl_meteor_h=no
+  for file in "machine/ioctl_meteor.h" \
             "dev/bktr/ioctl_meteor.h" \
             "dev/video/bktr/ioctl_meteor.h" ; do
     cat > $TMPC <<EOF
@@ -6644,20 +6644,20 @@ EOF
      _ioctl_meteor_h_name="$file"
      break;
     fi
-done
-if test "$_ioctl_meteor_h" = yes ; then
-  _def_ioctl_meteor_h_name="#define IOCTL_METEOR_H_NAME <$_ioctl_meteor_h_name>"
-  _res_comment="using $_ioctl_meteor_h_name"
-else
-  _def_ioctl_meteor_h_name="#undef IOCTL_METEOR_H_NAME"
-fi
-echores "$_ioctl_meteor_h"
+  done
+  if test "$_ioctl_meteor_h" = yes ; then
+    _def_ioctl_meteor_h_name="#define IOCTL_METEOR_H_NAME <$_ioctl_meteor_h_name>"
+    _res_comment="using $_ioctl_meteor_h_name"
+  else
+    _def_ioctl_meteor_h_name="#undef IOCTL_METEOR_H_NAME"
+  fi
+  echores "$_ioctl_meteor_h"
 
-echocheck "*BSD BrookTree 848 TV interface"
-if test "$_tv_bsdbt848" = auto ; then
- _tv_bsdbt848=no
- if test "$_tv" = yes ; then
-    cat > $TMPC <<EOF
+  echocheck "*BSD BrookTree 848 TV interface"
+  if test "$_tv_bsdbt848" = auto ; then
+    _tv_bsdbt848=no
+    if test "$_tv" = yes ; then
+      cat > $TMPC <<EOF
 #include <sys/types.h>
 $_def_ioctl_meteor_h_name
 $_def_ioctl_bt848_h_name
@@ -6673,31 +6673,31 @@ int main(void){
  return 0; 
 }
 EOF
-    cc_check && _tv_bsdbt848=yes
- fi
-fi
-if test "$_tv_bsdbt848" = yes ; then
-  _def_tv_bsdbt848='#define HAVE_TV_BSDBT848 1'
-  _inputmodules="tv-bsdbt848 $_inputmodules"
-else
-  _def_tv_bsdbt848='#undef HAVE_TV_BSDBT848'
-  _noinputmodules="tv-bsdbt848 $_noinputmodules"
-fi
-echores "$_tv_bsdbt848"
+      cc_check && _tv_bsdbt848=yes
+    fi
+  fi
+  if test "$_tv_bsdbt848" = yes ; then
+    _def_tv_bsdbt848='#define HAVE_TV_BSDBT848 1'
+    _inputmodules="tv-bsdbt848 $_inputmodules"
+  else
+    _def_tv_bsdbt848='#undef HAVE_TV_BSDBT848'
+    _noinputmodules="tv-bsdbt848 $_noinputmodules"
+  fi
+  echores "$_tv_bsdbt848"
 fi #if bsd
 
 
 echocheck "Video 4 Linux TV interface"
 if test "$_tv_v4l1" = auto ; then
- _tv_v4l1=no
- if test "$_tv" = yes && linux ; then
-  cat > $TMPC <<EOF
+  _tv_v4l1=no
+  if test "$_tv" = yes && linux ; then
+    cat > $TMPC <<EOF
 #include <stdlib.h>
 #include <linux/videodev.h>
 int main(void) { return 0; }
 EOF
-  cc_check && _tv_v4l1=yes
- fi
+    cc_check && _tv_v4l1=yes
+  fi
 fi
 if test "$_tv_v4l1" = yes ; then
   _audio_input=yes
@@ -6714,16 +6714,16 @@ echores "$_tv_v4l1"
 
 echocheck "Video 4 Linux 2 TV interface"
 if test "$_tv_v4l2" = auto ; then
- _tv_v4l2=no
- if test "$_tv" = yes && linux ; then
-  cat > $TMPC <<EOF
+  _tv_v4l2=no
+  if test "$_tv" = yes && linux ; then
+    cat > $TMPC <<EOF
 #include <stdlib.h>
 #include <linux/types.h>
 #include <linux/videodev2.h>
 int main(void) { return 0; }
 EOF
-  cc_check && _tv_v4l2=yes
- fi
+    cc_check && _tv_v4l2=yes
+  fi
 fi
 if test "$_tv_v4l2" = yes ; then
   _audio_input=yes
