@@ -6740,11 +6740,12 @@ echores "$_tv_v4l2"
 
 echocheck "TV teletext interface"
 if test "$_tv_teletext" = auto ; then
- if test "$_tv_v4l2" = yes && test "$_freetype" = yes ; then
-  _tv_teletext=yes
- else
   _tv_teletext=no
- fi
+  if "$_freetype" = yes ; then
+    if test "$_tv_v4l2" = yes || test "$_v4l" = yes ; then
+      _tv_teletext=yes
+    fi
+  fi
 fi
 if test "$_tv_teletext" = yes ; then
   _def_tv_teletext='#define HAVE_TV_TELETEXT 1'
