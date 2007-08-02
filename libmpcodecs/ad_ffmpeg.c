@@ -86,8 +86,6 @@ static int init(sh_audio_t *sh_audio)
                lavc_context->extradata_size);	
     }
 
-    // Set desired number of channels
-    lavc_context->channels = audio_output_channels;
     /* open it */
     if (avcodec_open(lavc_context, lavc_codec) < 0) {
         mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_CantOpenCodec);
