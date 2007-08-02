@@ -66,6 +66,7 @@ MPlayer (1.0)
     * fix MJPEGB on big-endian systems
     * lowres support for some H.264 files
     * Atrac 3 decoder
+    * MPEG-1/2 speedups
 
     libmpeg2:
     * iWMMXt-accelerated DCT and motion compensation for ARM processors
@@ -80,7 +81,7 @@ MPlayer (1.0)
     MEncoder:
     * write to output streams (currently only file:// and smb://)
     * support -ffourcc with -of lavf
-    * removed bframe warning message
+    * removed B-frame warning message
 
     Ports:
     * Complete Intel Mac support
