@@ -28,12 +28,8 @@
 typedef struct fc_instance_s fc_instance_t;
 
 fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path);
-char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index);
+char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index, uint32_t code);
 void fontconfig_done(fc_instance_t* priv);
-
-#ifdef HAVE_FONTCONFIG
-char* fontconfig_select_with_charset(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index, FcCharSet* charset);
-#endif
 
 #endif
 

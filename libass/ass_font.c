@@ -104,7 +104,7 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	if (fontp)
 		return fontp;
 	
-	path = fontconfig_select(fc_priv, desc->family, desc->bold, desc->italic, &index);
+	path = fontconfig_select(fc_priv, desc->family, desc->bold, desc->italic, &index, 0);
 	
 	mem_idx = find_font(library, path);
 	if (mem_idx >= 0) {
@@ -134,10 +134,6 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	font.scale_x = font.scale_y = 1.;
 	font.v.x = font.v.y = 0;
 	font.size = 0.;
-
-#ifdef HAVE_FONTCONFIG
-	font.charset = FcCharSetCreate();
-#endif
 
 	return ass_font_cache_add(&font);
 }
@@ -208,8 +204,8 @@ static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t 
 	if (font->n_faces == ASS_FONT_MAX_FACES)
 		return;
 	
-	path = fontconfig_select_with_charset(fontconfig_priv, font->desc.family, font->desc.bold,
-					      font->desc.italic, &index, font->charset);
+	path = fontconfig_select(fontconfig_priv, font->desc.family, font->desc.bold,
+					      font->desc.italic, &index, ch);
 
 	error = FT_New_Face(font->ftlibrary, path, index, &face);
 	if (error) {
@@ -282,7 +278,6 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 	}
 
 #ifdef HAVE_FONTCONFIG
-	FcCharSetAddChar(font->charset, ch);
 	if (index == 0) {
 		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_GlyphNotFoundReselectingFont,
 		       ch, font->desc.family, font->desc.bold, font->desc.italic);
@@ -359,8 +354,5 @@ void ass_font_free(ass_font_t* font)
 	for (i = 0; i < font->n_faces; ++i)
 		if (font->faces[i]) FT_Done_Face(font->faces[i]);
 	if (font->desc.family) free(font->desc.family);
-#ifdef HAVE_FONTCONFIG
-	if (font->charset) FcCharSetDestroy(font->charset);
-#endif
 	free(font);
 }
