@@ -88,6 +88,7 @@ static GLenum gl_format;
 static GLenum gl_type;
 static GLuint gl_buffer;
 static int gl_buffersize;
+static void *gl_bufferptr;
 static GLuint fragprog;
 static GLuint default_texs[22];
 static char *custom_prog;
@@ -371,6 +372,7 @@ static void uninitGl(void) {
   if (DeleteBuffers && gl_buffer)
     DeleteBuffers(1, &gl_buffer);
   gl_buffer = 0; gl_buffersize = 0;
+  gl_bufferptr = NULL;
   err_shown = 0;
 }
 
@@ -677,7 +679,9 @@ static uint32_t get_image(mp_image_t *mpi) {
                NULL, GL_DYNAMIC_DRAW);
     gl_buffersize = mpi->stride[0] * mpi->h;
   }
-  mpi->planes[0] = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+  if (!gl_bufferptr)
+    gl_bufferptr = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+  mpi->planes[0] = gl_bufferptr;
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   if (mpi->planes[0] == NULL) {
     if (!err_shown)
@@ -715,6 +719,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
     planes[2] -= base;
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
     UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    gl_bufferptr = NULL;
     slice = 0; // always "upload" full texture
   }
   glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
