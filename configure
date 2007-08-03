@@ -1522,8 +1522,8 @@ elif aix; then
 elif x86; then
   # all other OSes try to extract CPU information from a small helper
   # program cpuinfo instead
-  $_cc -o cpuinfo cpuinfo.c
-  _cpuinfo="./cpuinfo"
+  $_cc -o cpuinfo$_exesuf cpuinfo.c
+  _cpuinfo="./cpuinfo$_exesuf"
 fi
 
 if x86 ; then
