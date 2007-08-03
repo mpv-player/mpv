@@ -89,6 +89,25 @@ static int find_font(ass_library_t* library, char* name)
 
 static void face_set_size(FT_Face face, double size);
 
+static void buggy_font_workaround(FT_Face face)
+{
+	// Some fonts have zero Ascender/Descender fields in 'hhea' table.
+	// In this case, get the information from 'os2' table or, as
+	// a last resort, from face.bbox.
+	if (face->ascender + face->descender == 0 || face->height == 0) {
+		TT_OS2 *os2 = FT_Get_Sfnt_Table(face, ft_sfnt_os2);
+		if (os2) {
+			face->ascender = os2->sTypoAscender;
+			face->descender = os2->sTypoDescender;
+			face->height = face->ascender - face->descender;
+		} else {
+			face->ascender = face->bbox.yMax;
+			face->descender = face->bbox.yMin;
+			face->height = face->ascender - face->descender;
+		}
+	}
+}
+
 /**
  * \brief Select a face with the given charcode and add it to ass_font_t
  * \return index of the new face in font->faces, -1 if failed
@@ -123,6 +142,7 @@ static int add_face(void* fc_priv, ass_font_t* font, uint32_t ch)
 		}
 	}
 	charmap_magic(face);
+	buggy_font_workaround(face);
 	
 	font->faces[font->n_faces++] = face;
 	update_transform(font);
