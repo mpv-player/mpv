@@ -87,46 +87,65 @@ static int find_font(ass_library_t* library, char* name)
 	return -1;
 }
 
+static void face_set_size(FT_Face face, double size);
+
 /**
- * \brief Create a new ass_font_t according to "desc" argument
+ * \brief Select a face with the given charcode and add it to ass_font_t
+ * \return index of the new face in font->faces, -1 if failed
  */
-ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* desc)
+static int add_face(void* fc_priv, ass_font_t* font, uint32_t ch)
 {
 	char* path;
 	int index;
 	FT_Face face;
 	int error;
+	int mem_idx;
+	
+	if (font->n_faces == ASS_FONT_MAX_FACES)
+		return -1;
+	
+	path = fontconfig_select(fc_priv, font->desc.family, font->desc.bold,
+					      font->desc.italic, &index, ch);
+
+	mem_idx = find_font(font->library, path);
+	if (mem_idx >= 0) {
+		error = FT_New_Memory_Face(font->ftlibrary, (unsigned char*)font->library->fontdata[mem_idx].data,
+					   font->library->fontdata[mem_idx].size, 0, &face);
+		if (error) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, path);
+			return -1;
+		}
+	} else {
+		error = FT_New_Face(font->ftlibrary, path, index, &face);
+		if (error) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
+			return -1;
+		}
+	}
+	charmap_magic(face);
+	
+	font->faces[font->n_faces++] = face;
+	update_transform(font);
+	face_set_size(face, font->size);
+	return font->n_faces - 1;
+}
+
+/**
+ * \brief Create a new ass_font_t according to "desc" argument
+ */
+ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_priv, ass_font_desc_t* desc)
+{
+	int error;
 	ass_font_t* fontp;
 	ass_font_t font;
-	int mem_idx;
 
 	fontp = ass_font_cache_find(desc);
 	if (fontp)
 		return fontp;
 	
-	path = fontconfig_select(fc_priv, desc->family, desc->bold, desc->italic, &index, 0);
-	
-	mem_idx = find_font(library, path);
-	if (mem_idx >= 0) {
-		error = FT_New_Memory_Face(ftlibrary, (unsigned char*)library->fontdata[mem_idx].data,
-					   library->fontdata[mem_idx].size, 0, &face);
-		if (error) {
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, path);
-			return 0;
-		}
-	} else {
-		error = FT_New_Face(ftlibrary, path, index, &face);
-		if (error) {
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
-			return 0;
-		}
-	}
-
-	charmap_magic(face);
-	
+	font.library = library;
 	font.ftlibrary = ftlibrary;
-	font.faces[0] = face;
-	font.n_faces = 1;
+	font.n_faces = 0;
 	font.desc.family = strdup(desc->family);
 	font.desc.bold = desc->bold;
 	font.desc.italic = desc->italic;
@@ -135,7 +154,12 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	font.v.x = font.v.y = 0;
 	font.size = 0.;
 
-	return ass_font_cache_add(&font);
+	error = add_face(fc_priv, &font, 0);
+	if (error == -1) {
+		free(font.desc.family);
+		return 0;
+	} else
+		return ass_font_cache_add(&font);
 }
 
 /**
@@ -188,43 +212,6 @@ void ass_font_set_size(ass_font_t* font, double size)
 			face_set_size(font->faces[i], size);
 	}
 }
-
-#ifdef HAVE_FONTCONFIG
-/**
- * \brief Select a new FT_Face with the given character
- * The new face is added to the end of font->faces.
- **/
-static void ass_font_reselect(void* fontconfig_priv, ass_font_t* font, uint32_t ch)
-{
-	char* path;
-	int index;
-	FT_Face face;
-	int error;
-
-	if (font->n_faces == ASS_FONT_MAX_FACES)
-		return;
-	
-	path = fontconfig_select(fontconfig_priv, font->desc.family, font->desc.bold,
-					      font->desc.italic, &index, ch);
-
-	error = FT_New_Face(font->ftlibrary, path, index, &face);
-	if (error) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningFont, path, index);
-		return;
-	}
-	charmap_magic(face);
-
-	error = FT_Get_Char_Index(face, ch);
-	if (error == 0) { // the new font face is not better then the old one
-		FT_Done_Face(face);
-		return;
-	}
-
-	font->faces[font->n_faces++] = face;
-	update_transform(font);
-	FT_Set_Pixel_Sizes(face, 0, (int)font->size);
-}
-#endif
 
 /**
  * \brief Get maximal font ascender and descender.
@@ -279,10 +266,11 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 
 #ifdef HAVE_FONTCONFIG
 	if (index == 0) {
+		int face_idx;
 		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_GlyphNotFoundReselectingFont,
 		       ch, font->desc.family, font->desc.bold, font->desc.italic);
-		ass_font_reselect(fontconfig_priv, font, ch);
-		face = font->faces[font->n_faces - 1];
+		face_idx = add_face(fontconfig_priv, font, ch);
+		face = font->faces[face_idx];
 		index = FT_Get_Char_Index(face, ch);
 		if (index == 0) {
 			mp_msg(MSGT_ASS, MSGL_ERR, MSGTR_LIBASS_GlyphNotFound,

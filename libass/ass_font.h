@@ -31,6 +31,7 @@ typedef struct ass_font_desc_s {
 
 typedef struct ass_font_s {
 	ass_font_desc_t desc;
+	ass_library_t* library;
 	FT_Library ftlibrary;
 	FT_Face faces[ASS_FONT_MAX_FACES];
 	int n_faces;
