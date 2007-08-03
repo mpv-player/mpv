@@ -204,8 +204,12 @@ static void face_set_size(FT_Face face, double size)
 	FT_Size_Metrics *m = &face->size->metrics;
 	// VSFilter uses metrics from TrueType OS/2 table
 	// The idea was borrowed from asa (http://asa.diac24.net)
-	if (hori && os2)
-		mscale = ((double)(hori->Ascender - hori->Descender)) / (os2->usWinAscent + os2->usWinDescent);
+	if (hori && os2) {
+		int hori_height = hori->Ascender - hori->Descender;
+		int os2_height = os2->usWinAscent + os2->usWinDescent;
+		if (hori_height && os2_height)
+			mscale = (double)hori_height / os2_height;
+	}
 	memset(&rq, 0, sizeof(rq));
 	rq.type = FT_SIZE_REQUEST_TYPE_REAL_DIM;
 	rq.width = 0;
