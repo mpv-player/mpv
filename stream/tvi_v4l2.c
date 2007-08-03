@@ -664,7 +664,7 @@ static void *vbi_grabber(void *data)
     while (!priv->vbi_shutdown){
         bytes=read(priv->vbi_fd,buf,tsp.bufsize);	
 	if (bytes!=tsp.bufsize){
-	    mp_msg(MSGT_TV,MSGL_WARN,"vbi: expecting bytes: %d, got: %d",tsp.bufsize,bytes);
+	    mp_msg(MSGT_TV,MSGL_WARN,"vbi: expecting bytes: %d, got: %d\n",tsp.bufsize,bytes);
 	    break;
 	}
         seq=*(int*)(buf+bytes-4);
