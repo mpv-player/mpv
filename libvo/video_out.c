@@ -129,6 +129,9 @@ extern vo_functions_t video_out_cvidix;
 #ifdef HAVE_TDFX_VID
 extern vo_functions_t video_out_tdfx_vid;
 #endif
+#ifdef HAVE_XVR100
+extern vo_functions_t video_out_xvr100;
+#endif
 #ifdef HAVE_TGA
 extern vo_functions_t video_out_tga;
 #endif
@@ -147,6 +150,9 @@ extern vo_functions_t video_out_md5sum;
 
 vo_functions_t* video_out_drivers[] =
 {
+#ifdef HAVE_XVR100
+        &video_out_xvr100,
+#endif
 #ifdef HAVE_TDFX_VID
         &video_out_tdfx_vid,
 #endif

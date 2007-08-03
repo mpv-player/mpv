@@ -378,6 +378,7 @@ Video output:
   --enable-zr              enable ZR360[56]7/ZR36060 video output [autodetect]
   --enable-bl		   enable Blinkenlights video output [disable]
   --enable-tdfxvid         enable tdfx_vid video output [disable]
+  --enable-xvr100          enable SUN XVR-100 video output [autodetect]
   --disable-tga            disable Targa video output [enable]
   --disable-pnm		   disable PNM video output [enable]
   --disable-md5sum	   disable md5sum video output [enable]
@@ -622,6 +623,7 @@ _3dfx=no
 _s3fb=no
 _tdfxfb=no
 _tdfxvid=no
+_xvr100=auto
 _tga=yes
 _directfb=auto
 _zr=auto
@@ -1044,6 +1046,8 @@ for ac_option do
   --disable-tdfxfb)	_tdfxfb=no	;;
   --disable-tdfxvid)	_tdfxvid=no	;;
   --enable-tdfxvid)	_tdfxvid=yes	;;
+  --disable-xvr100)	_xvr100=no	;;
+  --enable-xvr100)	_xvr100=yes	;;
   --disable-tga)	_tga=no	  	;;
   --enable-tga)		_tga=yes	;;
   --enable-directfb)	_directfb=yes	;;
@@ -3658,6 +3662,33 @@ else
   _novomodules="tdfx_vid $_novomodules"
 fi
 echores "$_tdfxvid"
+
+echocheck "xvr100"
+if test "$_xvr100" = auto ; then
+cat > $TMPC << EOF
+#include <unistd.h>
+#include <sys/fbio.h>
+#include <sys/visual_io.h>
+int main(void) {
+struct vis_identifier ident;
+struct fbgattr attr;
+
+ioctl(0, VIS_GETIDENTIFIER, &ident);
+ioctl(0, FBIOGATTR, &attr);
+}
+EOF
+  _xvr100=no
+  cc_check && _xvr100=yes
+fi
+if test "$_xvr100" = yes ; then
+  _def_xvr100='#define HAVE_XVR100 1'
+  _vosrc="$_vosrc vo_xvr100.c"
+  _vomodules="xvr100 $_vomodules"
+else
+  _def_tdfxvid='#undef HAVE_XVR100'
+  _novomodules="xvr100 $_novomodules"
+fi
+echores "$_xvr100"
 
 echocheck "tga"
 if test "$_tga" = yes ; then
@@ -8289,6 +8320,7 @@ $_def_3dfx
 $_def_s3fb
 $_def_tdfxfb
 $_def_tdfxvid
+$_def_xvr100
 $_def_directfb
 $_def_directfb_version
 $_def_dfbmga
