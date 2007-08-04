@@ -34,6 +34,7 @@
 #include "m_struct.h"
 
 #include "stream_dvd.h"
+#include "stream_dvd_common.h"
 #include "libmpdemux/demuxer.h"
 
 extern int stream_cache_size;
@@ -512,23 +513,6 @@ static void stream_dvd_close(stream_t *s) {
   dvd_close(s->priv);
 }
 
-/** 
-\brief Converts DVD time structure to milliseconds.
-\param *dev the DVD time structure to convert
-\return returns the time in milliseconds
-*/
-static int dvdtimetomsec(dvd_time_t *dt)
-{
-  static int framerates[4] = {0, 2500, 0, 2997};
-  int framerate = framerates[(dt->frame_u & 0xc0) >> 6];
-  int msec = (((dt->hour & 0xf0) >> 3) * 5 + (dt->hour & 0x0f)) * 3600000;
-  msec += (((dt->minute & 0xf0) >> 3) * 5 + (dt->minute & 0x0f)) * 60000;
-  msec += (((dt->second & 0xf0) >> 3) * 5 + (dt->second & 0x0f)) * 1000;
-  if(framerate > 0)
-    msec += (((dt->frame_u & 0x30) >> 3) * 5 + (dt->frame_u & 0x0f)) * 100000 / framerate;
-  return msec;
-}
-
 static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no)
 {
     int vts_ttn;  ///< title number within video title set
@@ -543,7 +527,7 @@ static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, in
     {
             vts_ttn = tt_srpt->title[title_no].vts_ttn - 1;
             pgc_no = vts_file->vts_ptt_srpt->title[vts_ttn].ptt[0].pgcn - 1;
-            msec = dvdtimetomsec(&vts_file->vts_pgcit->pgci_srp[pgc_no].pgc->playback_time);
+            msec = mp_dvdtimetomsec(&vts_file->vts_pgcit->pgci_srp[pgc_no].pgc->playback_time);
     }
     return msec;
 }
@@ -618,7 +602,7 @@ static void list_chapters(pgc_t *pgc)
             if(!(pgc->cell_playback[cell-1].block_type == BLOCK_TYPE_ANGLE_BLOCK &&
                  pgc->cell_playback[cell-1].block_mode != BLOCK_MODE_FIRST_CELL)
             )
-                t += dvdtimetomsec(&pgc->cell_playback[cell-1].playback_time);
+                t += mp_dvdtimetomsec(&pgc->cell_playback[cell-1].playback_time);
             cell++;
         }
     }
@@ -639,7 +623,7 @@ static double dvd_get_current_time(stream_t *stream, int cell)
           continue;
         tm += d->cell_times_table[i];
     }
-    tm += dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
+    tm += mp_dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
 
     return (double)tm/1000.0;
 }
@@ -680,7 +664,7 @@ static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec
     stream_seek(stream, pos);
     do {
       stream_skip(stream, 2048);
-      t = dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
+      t = mp_dvdtimetomsec(&d->dsi_pack.dsi_gi.c_eltm);
     } while(!t);
     tm = dvd_get_current_time(stream, 0);
 
@@ -1099,7 +1083,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     if(d->cell_times_table == NULL)
       return STREAM_UNSUPORTED;
     for(k=0; k<d->cur_pgc->nr_of_cells; k++)
-      d->cell_times_table[k] = dvdtimetomsec(&d->cur_pgc->cell_playback[k].playback_time);
+      d->cell_times_table[k] = mp_dvdtimetomsec(&d->cur_pgc->cell_playback[k].playback_time);
     list_chapters(d->cur_pgc);
 
     // ... (unimplemented)
