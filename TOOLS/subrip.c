@@ -22,6 +22,8 @@
 #include "vobsub.h"
 #include "spudec.h"
 
+void guiMessageBox(int level, char * str) {};
+
 /* XXX Kludge ahead, this MUST be the same as the definitions found in ../spudec.c */
 typedef struct packet_t packet_t;
 struct packet_t {
