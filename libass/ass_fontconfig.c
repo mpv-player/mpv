@@ -380,7 +380,8 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 
 #else // HAVE_FONTCONFIG
 
-char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index)
+char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
+			uint32_t code)
 {
 	*index = priv->index_default;
 	return priv->path_default;
