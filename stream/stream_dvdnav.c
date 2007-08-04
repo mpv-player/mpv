@@ -162,7 +162,6 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
       case DVDNAV_NAV_PACKET:
         return event;
       case DVDNAV_STILL_FRAME: {
-        dvdnav_still_event_t *still_event = (dvdnav_still_event_t*)(buf);
         //if (priv->started) dvd_nav_still=1;
         //else
           dvdnav_still_skip(priv->dvdnav); // don't let dvdnav stall on this image
@@ -211,7 +210,7 @@ static void update_title_len(stream_t *stream) {
 
 
 static int seek(stream_t *s, off_t newpos) {
-  uint32_t pos = 0, len = 0, sector = 0;
+  uint32_t sector = 0;
   dvdnav_priv_t *priv = s->priv;
 
   if(s->end_pos && newpos > s->end_pos) 
@@ -358,8 +357,6 @@ static int control(stream_t *stream, int cmd, void* arg) {
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
-  int event,len,tmplen=0;
-  uint32_t pos, l2;
   dvdnav_priv_t *priv;
   dvdnav_status_t status;
 
@@ -570,7 +567,7 @@ int dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
  */
 int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
-  uint8_t format, lg, k;
+  uint8_t lg, k;
   uint16_t lang, lcode;
 
   while(language && strlen(language)>=2) {
@@ -597,7 +594,7 @@ int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
  * \return 0 on error, 1 if successful
  */
 int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
-    uint8_t lg, k;
+    uint8_t lg;
     uint16_t lang;
     dvdnav_priv_t *priv=(dvdnav_priv_t*)stream->priv;
     if(sid < 0) return 0;
