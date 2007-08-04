@@ -7,6 +7,7 @@ SRCS_COMMON = native/nuppelvideo.c \
               native/RTjpegN.c \
               native/xa_gsm.c \
               img_format.c \
+              mp_image.c \
               dec_audio.c \
               ad.c \
               ad_alaw.c \

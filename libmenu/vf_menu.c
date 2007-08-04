@@ -42,41 +42,6 @@ struct vf_priv_s {
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts);
 
-static mp_image_t* alloc_mpi(int w, int h, uint32_t fmt) {
-  mp_image_t* mpi = new_mp_image(w,h);
-
-  mp_image_setfmt(mpi,fmt);
-  // IF09 - allocate space for 4. plane delta info - unused
-  if (mpi->imgfmt == IMGFMT_IF09)
-    {
-      mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8+
-			      mpi->chroma_width*mpi->chroma_height);
-      /* delta table, just for fun ;) */
-      mpi->planes[3]=mpi->planes[0]+2*(mpi->chroma_width*mpi->chroma_height);
-    }
-  else
-    mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
-  if(mpi->flags&MP_IMGFLAG_PLANAR){
-    // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
-    if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
-    if(!mpi->stride[1]) mpi->stride[1]=mpi->stride[2]=mpi->chroma_width;
-    if(mpi->flags&MP_IMGFLAG_SWAPPED){
-      // I420/IYUV  (Y,U,V)
-      mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
-      mpi->planes[2]=mpi->planes[1]+mpi->chroma_width*mpi->chroma_height;
-    } else {
-      // YV12,YVU9,IF09  (Y,V,U)
-      mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
-      mpi->planes[1]=mpi->planes[2]+mpi->chroma_width*mpi->chroma_height;
-    }
-  } else {
-    if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
-  }
-  mpi->flags|=MP_IMGFLAG_ALLOCATED;
-  
-  return mpi;
-}
-
 void vf_menu_pause_update(struct vf_instance_s* vf) {
   vo_functions_t *video_out = mpctx_get_video_out(vf->priv->current->ctx);
   if(pause_mpi) {
@@ -157,25 +122,6 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 static void key_cb(int code) {
   menu_read_key(st_priv->current,code);
 }
-
-
-
-inline static void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) {
-  if(mpi->flags&MP_IMGFLAG_PLANAR){
-    memcpy_pic(dmpi->planes[0],mpi->planes[0], mpi->w, mpi->h,
-	       dmpi->stride[0],mpi->stride[0]);
-    memcpy_pic(dmpi->planes[1],mpi->planes[1], mpi->chroma_width, mpi->chroma_height,
-	       dmpi->stride[1],mpi->stride[1]);
-    memcpy_pic(dmpi->planes[2], mpi->planes[2], mpi->chroma_width, mpi->chroma_height,
-	       dmpi->stride[2],mpi->stride[2]);
-  } else {
-    memcpy_pic(dmpi->planes[0],mpi->planes[0], 
-	       mpi->w*(dmpi->bpp/8), mpi->h,
-	       dmpi->stride[0],mpi->stride[0]);
-  }
-}
-
-
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
   mp_image_t *dmpi = NULL;
