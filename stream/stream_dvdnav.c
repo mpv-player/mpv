@@ -162,10 +162,7 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
       case DVDNAV_NAV_PACKET:
         return event;
       case DVDNAV_STILL_FRAME: {
-        //if (priv->started) dvd_nav_still=1;
-        //else
-          dvdnav_still_skip(priv->dvdnav); // don't let dvdnav stall on this image
-
+        dvdnav_still_skip(priv->dvdnav); // don't let dvdnav stall on this image
         break;
       }
       case DVDNAV_HIGHLIGHT: {
