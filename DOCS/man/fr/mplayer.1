@@ -1,4 +1,4 @@
-.\" synced with r23588
+.\" synced with r23996
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -73,7 +73,7 @@ vcd://piste[/périphérique]
 .
 .br
 .B mplayer
-tv://[canal]
+tv://[canal][/identifiant de l'entrée]
 [options]
 .
 .br
@@ -93,7 +93,7 @@ dvb://[numero_de_carte@]canal
 .
 .br
 .B mplayer
-mf://filemask
+mf://[masque de fichier|@liste de fichiers]
 [options \-mf] [options]
 .
 .br
@@ -445,20 +445,16 @@ Confirme le choix.
 .
 .
 (Les touches suivantes ne sont valides que si MPlayer a été
-compilé avec le support télétexte\ : elles peuvent être utilisées pour contrôler le télétexte de la TV.)
+compilé avec le support télétexte\ : elles peuvent être utilisées pour contrôler
+le télétexte de la TV.)
 .RE
 .PP
 .PD 0
 .RS
 .IPs "X"
-Bascule entre le télétexte activé, désactivé, ou transparent.
-.IPs "Q"
-page télétexte suivante
-.IPs "W"
-page télétexte précédente
-.IPs "E"
-En mode texte, échange la partie basse ou haute de la page, sinon
-zoome sur la page télétexte\ : haut, bas ou normal.
+Bascule entre le télétexte activé ou désactivé.
+.IPs "Q at W"
+Aller à la page télétexte suivante/précédente.
 .RE
 .PD 1
 .PP
@@ -729,6 +725,7 @@ Utilise le profil donné, \-profile help affichant la liste des profils définis.
 .TP
 .B \-really-quiet (voir aussi \-quiet)
 Affiche encore moins de messages d'état que \-quiet.
+Supprime aussi les boîtes de dialogue d'erreur de l'interface graphique.
 .
 .B \-show-profile <profile>
 Affiche la description et le contenu du profil donné..
@@ -1727,7 +1724,8 @@ hauteur de l'image en pixels
 .IPs i420|yv12|yuy2|y8
 défini l'espace de couleurs
 .IPs format=<valeur>
-espace de couleur (fourcc) en hexa
+Espace de couleur (fourcc) en hexadécimal ou chaîne constante.
+Spécifiez \-rawvideo format=help pour avoir une liste des chaînes possibles.
 .IPs size=<valeur>
 taille de trame en octets
 .REss
@@ -1836,6 +1834,9 @@ Cette option active les facultés de capture TV de MPlayer.
 Pour regarder la TV avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>'
 ou même 'tv://<nom_canal>' (voir l'option channels pour numéro_canal
 plus bas) comme URL de film.
+Vous pouvez aussi spécifier 'tv:///<identifiant de l'entrée>' pour avoir
+directement l'image donnée par l'entrée Composite ou S-Video input (voir les
+options d'entrées pour plus de détails).
 .\" FIXME: Le texte suivant ne doit pas etre ici...
 .I NOTE:
 .br
@@ -1987,9 +1988,17 @@ Choisit la qualité de la compression jpeg
 (< 60 recommandé en pleine résolution).
 .IPs tdevice=<valeur>  (par défaut\ : aucun)
 Défini le périphérique télétexte (exemple\ : /dev/\:vbi0).
-.IPs tformat=<text|bw|gray|color> (default: gray)
+.IPs tformat=<format> (par défaut\ : 0)
 Défini le mode d'affichage télétexte.
-(Note\ : le mode couleur requière le support SPU couleur.)
+.RSss
+0: opaque
+.br
+1: transparent
+.br
+2: opaque en couleurs inverse
+.br
+3: transparent en couleur inverse
+.REss
 .IPs tpage=<100-999> (par défaut\ : 100)
 Défini le numéro de page de télétexte au démarage.
 .RE
@@ -2094,7 +2103,7 @@ Ajoute une bande noire en haut de la trame.
 Les titres pourront y être affichés lors du rendu SSA/ASS
 (avec \-ass-use-margins).
 .TP
-.B \-(no)ass-use-margins
+.B \-ass-use-margins
 Active/désactive le placement des sous-titres et sur-titres dans
 les bandes noires quand elles sont disponibles (par défaut\ : non).
 .
@@ -2140,7 +2149,7 @@ Extrait les sous-titres d'un flux VOB.
 Voir également les options \-dump*sub et \-vobsubout*.
 .
 .TP
-.B \-(no)embeddedfonts (FreeType uniquement)
+.B \-embeddedfonts (FreeType uniquement)
 Active l'extraction des polices embarquées dans les fichiers Matroska.
 Ces polices peuvent être utilisées pour l'affichage des sous-titres
 SSA/ASS (option \-ass).
@@ -2435,6 +2444,11 @@ Peut être négatif.
 .B \-subfile <nomfichier> (CODE BÉTA)
 Inutile actuellement.
 Identique à \-audiofile, mais pour les flux de sous-titres (OggDS ?).
+.
+.TP
+.B \-subfont <filename> (FreeType uniquement)
+Spécifie la police des sous-titres.
+Si \-subfont n'est pas spécifié, \-font est utilisé.
 .
 .TP
 .B \-subfont-autoscale <0\-3> (FreeType uniquement)
@@ -2785,6 +2799,10 @@ pilote de sortie de la Créative DXR2
 .B ivtv (IVTV uniquement)
 pilote de sortie MPEG audio des cartes IVTV.
 Ne fonctionne qu'avec l'option \-ac hwmpa.
+.
+.TP
+.B v4l2 (requière un kernel Linux 2.6.22 ou supérieur)
+pilote de sortie audio pour les cartes V4L2 à décodeur MPEG matériel.
 .
 .TP
 .B mpegpes (DVB uniquement)
@@ -3153,6 +3171,11 @@ film 16/\:9e pour qu'il tienne sans bords noirs sur un écran 4/\:3)
 L'intervalle définit à quel point l'image sera coupée.
 Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga,
 gl, gl2, quartz, macosx et xvidix.
+.br
+.I NOTE\ :
+Des valeurs compris entre -1 et 0 sont aussi permises, mais très expérimentale,
+et peuvent faire planter MPlayer et pire encore.
+A utiliser à vos risques et périls!
 .
 .TP
 .B \-panscanrange <-19.0\-99.0> (expérimental)
@@ -3722,7 +3745,7 @@ Active la gestion de plus de formats de couleurs (RGB and BGR)
 (par défaut\ : activé).
 Nécessite une version d'OpenGL >= 1.2.
 .IPs slice-height=<0\-...>
-Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
+Nombre de lignes de texture à copier à la fois (par défaut\ : 0).
 0 pour l'image entière.
 .br
 .I NOTE\ :
@@ -4009,6 +4032,19 @@ Choisit explicitement le périphérique de décodage MPEG à utiliser
 .IPs output
 Choisit explicitement le type de connecteur signal vidéo à utiliser
 pour la sortie TV.
+.RE
+.PD 1
+.
+.TP
+.B v4l2 (requière un kernel Linux 2.6.22 ou supérieur)
+Périphérique de sortie vidéo pour les cartes V4L2 à décodeur MPEG matériel.
+Voir aussi le vidéo lavc.
+.PD 0
+.RSs
+.IPs device
+Spécifie le nom du périphérique décodeur MPEG à utiliser (par defaut\ : /dev/video16).
+.IPs output
+Spécifie la sortie TV à utiliser pour envoyer le signal vidéo.
 .RE
 .PD 1
 .
@@ -4975,6 +5011,9 @@ quand même échangés.
 Changerait le nombre de canaux à 6 et construit 4 routes copiant
 les canaux 0 vers les canaux 0 et 3
 Les canaux 4 et 5 contiendront du silence.
+.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
+Devrait permettre un rendu correct des flux à 6 canaux décodés avec ffdca (DTS)
+et envoyés vers ALSA.
 .RE
 .PD 1
 .
@@ -5983,7 +6022,7 @@ Vous devriez voir une frise rouge, verte et bleue du haut vers le bas.
 .TP
 .B lavc[=qualité:fps]
 Conversion logicielle rapide YV12 vers MPEG-1 avec libavcodec pour utilisation
-avec DVB/\:DXR3/\:IVTV.
+avec DVB/\:DXR3/\:IVTV/\:V4L2.
 Plus rapide et de meilleure qualité que \-vf fame.
 .RSs
 .IPs <qualité>
@@ -8803,6 +8842,9 @@ Choisit la fonction de comparaison pour l'estimation de mouvement full pel
 Choisit la fonction de comparaison pour l'estimation de mouvement sub pel
 (voir mbcmp pour les fonctions de comparaison disponibles).
 .
+.B skipcmp=<0\-2000>
+FIXME: Document this.
+.
 .TP
 .B nssew=<0\-1000000>
 Si vous préférez garder du bruit dans votre vidéo encodée au lieu
@@ -9090,6 +9132,22 @@ Combine 1 et 2.
 .TP
 .B aglobal=<0\-3>
 Pareil que vglobal pour les en-têtes audios.
+.
+.TP level=<valeur>
+Spécifie le niveau CodecContext Level.
+Utilisez 31 ou 41 pour pouvoir lire la vidéo sur une Playstation 3.
+.
+.TP
+.B skip_exp=<0\-1000000>
+FIXME: Document this.
+.
+.TP
+.B skip_factor=<0\-1000000>
+FIXME: Document this.
+.
+.TP
+.B skip_threshold=<0\-1000000>
+FIXME: Document this.
 .
 .
 .SS nuv (\-nuvopts)
@@ -10605,15 +10663,6 @@ MPEG-4 format
 Sony Digital Video container
 .RE
 .PD 1
-.TP
-.B i_certify_that_my_video_stream_does_not_use_b_frames
-MEncoder ne peut pas assigner les marques d'horodatage (timestamps) correctes
-quand il y a des trames-B dans le flux vidéo, ce qui donne des encodes
-dont l'audio et la vidéo sont désynchronisés.
-Si vous voulez utiliser le multiplexeur lavf, vous devez configurer le codec
-vidéo de telle sorte qu'il n'utilise pas de trames-B (voir les sections
-correspondantes de chaque codec dans la documentation), et vous devez aussi
-utiliser cette option.
 .
 .TP
 .B muxrate=<débit>
