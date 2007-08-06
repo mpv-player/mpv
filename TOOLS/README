@@ -501,6 +501,24 @@ Usage:        vfw2menc -f <fourcc> -d <codec.dll> -s <settingsfile.mcf>
 Notes:        Works on x86 only.
 
 
+modify_reg.c
+
+Author:       Alan Nisota
+
+Description:  Modifies registry file (usually ~/.mplayer/registry)
+
+Usage:        modify_reg -r <registry_file> -l
+              modify_reg -r <registry_file> -k <key> [-d|-v <value>[-t <type>]]
+              -r|--registry - path to registry file
+              -l|--list     - shows all keys and values
+              -k|--key      - registry key
+              -d|--del      - delete key
+              -v|--value    - new value for key
+              -t|--type     - key type: string (default) or dword
+
+Notes:        Necessary to use CoreAVC with MPlayer
+
+
 realcodecs/
 
 Author:       miscellaneous

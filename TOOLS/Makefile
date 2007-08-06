@@ -7,6 +7,7 @@ OBJS = alaw-gen$(EXESUF) \
 	avi-fix$(EXESUF) \
 	avisubdump$(EXESUF) \
 	dump_mp4$(EXESUF) \
+	modify_reg$(EXESUF) \
 	movinfo$(EXESUF) \
 	subrip$(EXESUF) \
 #	vivodump$(EXESUF) \
