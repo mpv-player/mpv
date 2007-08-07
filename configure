@@ -7674,6 +7674,12 @@ cat > config.h << EOF
 */
 #define HAVE_SYS_POLL_H 1
 
+/* yes, we have inttypes.h */
+#define HAVE_INTTYPES_H 1
+
+/* int_fastXY_t emulation */
+$_def_fast_inttypes
+
 /* use GNU internationalization */
 $_def_i18n
 
@@ -8137,12 +8143,6 @@ $_def_vcd
 
 /* C99 lrintf function available */
 $_def_lrintf
-
-/* yes, we have inttypes.h */
-#define HAVE_INTTYPES_H 1
-
-/* int_fastXY_t emulation */
-$_def_fast_inttypes
 
 /* mkstemp support */
 $_def_mkstemp
