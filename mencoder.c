@@ -79,6 +79,10 @@
 #include "stream/stream_dvd.h"
 #endif
 
+#ifdef USE_DVDNAV
+#include "stream/stream_dvdnav.h"
+#endif
+
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
 #elif USE_LIBAVCODEC_A
