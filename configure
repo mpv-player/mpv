@@ -2874,7 +2874,7 @@ EOF
   if test "$_inttypes" = yes ; then
     die "You don't have inttypes.h, but sys/bitypes.h is present. Please copy etc/inttypes.h into the include path, and re-run configure."
   else
-    die "Cannot find header either inttypes.h or bitypes.h (see DOCS/HTML/$_doc_lang/faq.html)."
+    die "Cannot find header either inttypes.h or bitypes.h. There is no chance for compilation to succeed."
   fi
 fi
 
