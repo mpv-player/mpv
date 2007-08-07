@@ -1,4 +1,4 @@
-.\" synced with r23962
+.\" synced with r23982
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -2419,6 +2419,11 @@ Può essere negativo.
 .B \-subfile <nomefile> (CODICE BETA)
 Attualmente inutile.
 E' lo stesso che \-audiofile, ma per il flusso dei sottotitoli (OggDS?).
+.
+.TP
+.B \-subfont <nomefile> (solo FreeType)
+Seleziona il font per i sottotitoli.
+Se \-subfont non è specificato, viene usato \-font.
 .
 .TP
 .B \-subfont-autoscale <0\-3> (solo FreeType)
@@ -10503,15 +10508,6 @@ Formato MPEG-4
 Formato contenitore Sony Digital Video
 .RE
 .PD 1
-.TP
-.B i_certify_that_my_video_stream_does_not_use_b_frames
-MEncoder non può assegnare valori corretti di timestamps (marcatori di tempo)
-quando ci sono dei fotogrammi di tipo B nel flusso video, ottenendo così
-delle codifiche errate.
-Se desideri utilizzare il muxer lavf, devi impedire che il codec video utilizzi
-fotogrammi B (vedi la relativa documentazione di ciascun codec) e devi anche
-specificare questa opzione.
-.
 .TP
 .B muxrate=<velocità>
 Valore nominale del flusso multiplexato, in bit per secondo;
