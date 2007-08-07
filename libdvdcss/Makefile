@@ -10,6 +10,6 @@ SRCS_COMMON = css.c \
               #bsdi_ioctl \
 
 CFLAGS = -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\" \
-         -DHAVE_LIMITS_H -DHAVE_ERRNO_H -DHAVE_INTTYPES_H -DHAVE_UNISTD_H
+         -DHAVE_LIMITS_H -DHAVE_ERRNO_H -DHAVE_UNISTD_H
 
 include ../mpcommon.mak
