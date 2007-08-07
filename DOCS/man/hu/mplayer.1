@@ -1,4 +1,4 @@
-.\" Synced with r23926
+.\" Synced with r23996
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 07. 30." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 08. 07." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -92,7 +92,7 @@ dvb://[kártya_szám@]csatorna
 .
 .br
 .B mplayer
-mf://fájlmaszk
+mf://[fájlmaszk|@listafájl]
 [\-mf opciók] [opciók]
 .
 .br
@@ -2331,6 +2331,11 @@ Lehet negatív is.
 .B \-subfile <fájlnév> (BÉTA KÓD)
 Jelenleg haszontalan.
 Ugyan az, mint az \-audiofile, de felirat folyamokra (OggDS?).
+.
+.TP
+.B \-subfont <fájlnév> (csak FreeType)
+Beállítja a felirat betûtípusát.
+Ha nincs megafva a \-subfont, a \-font lesz használva.
 .
 .TP
 .B \-subfont-autoscale <0\-3> (csak FreeType)
@@ -5718,7 +5723,7 @@ Egy vörös, zöld és kék csíkot kell látnod fentrõl lefelé.
 .
 .TP
 .B lavc[=minõség:fps]
-Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/\:IVTV/V4L2-höz.
+Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/\:IVTV/\:V4L2-höz.
 .RSs
 .IPs <minõség>
 1\-31: fix qscale
@@ -8374,6 +8379,10 @@ Beállítja az összehasonlító függvényt a sub pel mozgásbecsléshez
 (lásd az mbcmp-t a használható összehasonlító függvényekhez) (alapértelmezett: 0).
 .
 .TP
+.B skipcmp=<0\-2000>
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
 .B nssew=<0\-1000000>
 Ez a beállítás az NSSE szélességet állítja be, ahol a nagyobb szélesség nagyobb
 zajt eredményez.
@@ -8653,6 +8662,18 @@ Ugyan az, mint a vglobal, csak audió fejlécekhez.
 .B level=<érték>
 Beállítja a CodecContext szintjét.
 31 vagy 41 kell a Playstation 3-as videó lejátszáshoz.
+.
+.TP
+.B skip_exp=<0\-1000000>
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B skip_factor=<0\-1000000>
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B skip_threshold=<0\-1000000>
+FIXME: Ezt még dokumentálni kell.
 .
 .
 .SS nuv (\-nuvopts)
@@ -10070,14 +10091,6 @@ MPEG-4 formátum
 Sony Digital Video konténer
 .RE
 .PD 1
-.TP
-.B i_certify_that_my_video_stream_does_not_use_b_frames
-A MEncoder nem tud megfelelõ idõbélyegeket elõállítani, ha
-B-kockák vannak a videó folyamban, hibás kódolást eredményezve.
-Ha a lavf muxer-t szeretnéd használni, nem szabad hagyni a videó codec-nek,
-hogy B-kockákat használjon (lásd az egyes codec-ek megfelelõ dokumentációját)
-és neked is meg kell adnod ezt az opciót.
-.
 .TP
 .B muxrate=<ráta>
 A multiplex névleges bitrátája bit/másodpercben;

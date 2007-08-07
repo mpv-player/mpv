@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23342 -->
+<!-- synced with r23983 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -397,12 +397,12 @@ Nyugodt lehetsz, ha a következő korlátokat figyelembe veszed:
 <para>
 <screen>
 mencoder -ofps 30000/1001 -af resample=24000 -vf harddup -of lavf \
-	-oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
-	-lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
-	<replaceable>bemenet.video</replaceable> -o <replaceable>kimenet.psp</replaceable>
+    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+    -lavfopts format=psp \
+    <replaceable>bemenet.video</replaceable> -o <replaceable>kimenet.psp</replaceable>
 </screen>
-Note that you can set the title of the video with
-<option>-info name=<replaceable>MovieTitle</replaceable></option>.
+Figyelj rá, hogy beállíthatod a videó címét a
+<option>-info name=<replaceable>FilmCime</replaceable></option> kapcsolóval.
 </para>
 </example>
 </sect1>
@@ -446,9 +446,8 @@ mencoder <replaceable>bemenet.avi</replaceable> -of mpeg -mpegopts format=mpeg1:
 </screen>
 Ugyan ez a <systemitem class="library">libavformat</systemitem> MPEG muxer-ének használatával:
 <screen>
-mencoder <replaceable>bemenet.avi</replaceable> -o <replaceable>VCD.mpg</replaceable> -ofps 25 -vf scale=352:288,harddup -of lavf \
-    -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
-    -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>VCD.mpg</replaceable> -ofps 25 -vf scale=352:288,harddup -of lavf \
+    -lavfopts format=mpg -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
     -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0
 </screen>
 </para>
