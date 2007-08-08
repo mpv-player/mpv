@@ -2,10 +2,6 @@
 #ifndef MPLAYER_SUB_H
 #define MPLAYER_SUB_H
 
-#ifdef HAVE_TV_TELETEXT
-#include "libmpcodecs/mp_image.h"
-#endif
-
 typedef struct mp_osd_bbox_s {
     int x1,y1,x2,y2;
 } mp_osd_bbox_t;
