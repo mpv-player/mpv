@@ -659,7 +659,6 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
     case 1:
       if (sub_pos < 50) {
         bbox[2] = dys*sub_pos/100 - spu->height * scaley / 0x200;
-        if (bbox[2] < 0) bbox[2] = 0;
         bbox[3] = bbox[2] + spu->height;
       } else {
         bbox[3] = dys*sub_pos/100 + spu->height * scaley / 0x200;
@@ -669,7 +668,6 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
       break;
     case 2:
       bbox[2] = dys*sub_pos/100 - spu->height * scaley / 0x100;
-      if (bbox[2] < 0) bbox[2] = 0;
       bbox[3] = bbox[2] + spu->height;
       break;
     default: /* -1 */
@@ -1077,7 +1075,6 @@ nothing_to_do:
 	case 1:
           spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height/2;
           if (sub_pos < 50) {
-	    if (spu->scaled_start_row < 0) spu->scaled_start_row = 0;
 	  } else {
 	    if (spu->scaled_start_row + spu->scaled_height > dys)
 	      spu->scaled_start_row = dys - spu->scaled_height;
@@ -1085,7 +1082,6 @@ nothing_to_do:
 	  break;
         case 2:
           spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height;
-	  if (spu->scaled_start_row < 0) spu->scaled_start_row = 0;
 	  break;
 	}
 	draw_alpha(spu->scaled_start_col, spu->scaled_start_row, spu->scaled_width, spu->scaled_height,
