@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23608 -->
+<!-- synced with r24030 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Frequently Asked Questions</title>
 
@@ -809,6 +809,13 @@ Questo può avere varie motivazioni.
   <option>-ni</option> per aggirare il problema.
   Oppure potrebbe avere un'intestazione malformata, in questo caso possono
   aiutare <option>-nobps</option> e/o <option>-mc 0</option>.
+</para></listitem>
+<listitem><para>
+  Molti file FLV saranno riprodotti correttamente solo con
+  <option>-correct-pts</option>.
+  Sfortunatamente <application>MEncoder</application> non ha questa opzione, ma
+  puoi provare a specificare manualmente <option>-fps</option> con il valore
+  giusto, se lo conosci.
 </para></listitem>
 <listitem><para>
   Il tuo driver audio è bacato.
