@@ -1,4 +1,4 @@
-.\" synced with r23982
+.\" synced with r23996
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -95,7 +95,7 @@ dvb://[numero_scheda@]canale
 .
 .br
 .B mplayer
-mf://mascherafile
+mf://[mascherafile|@listafile]
 [\-mf opzioni] [opzioni]
 .
 .br
@@ -8743,6 +8743,10 @@ Seleziona la funzione di comparazione per la stima del movimento inferiore al pe
 (vedi mbcmp per le funzioni di comparazione disponibili) (default: 0).
 .
 .TP
+.B skipcmp=<0\-2000>
+FIXME: Da documentare.
+.
+.TP
 .B nssew=<0\-1000000>
 Questa opzione controlla il peso di NSSE, dove con peso maggiore otterrai
 più disturbo.
@@ -9027,6 +9031,18 @@ Analogo a vglobal ma per l'intestazione audio.
 .B level=<valore>
 Imposta il livello di CodecContext.
 Usa 31 o 41 per riprodurre video su una Playstation 3.
+.
+.TP
+.B skip_exp=<0\-1000000>
+FIXME: Da documentare.
+.
+.TP
+.B skip_factor=<0\-1000000>
+FIXME: Da documentare.
+.
+.TP
+.B skip_threshold=<0\-1000000>
+FIXME: Da documentare.
 .
 .
 .SS nuv (\-nuvopts)
