@@ -178,15 +178,6 @@ typedef float float32_t;
 
 #else
 
-/* Define if you have the `memcpy' function. */
-#define HAVE_MEMCPY 1
-
-/* Define if you have the `strchr' function. */
-#define HAVE_STRCHR 1
-
-/* Define if you have the ANSI C header files. */
-#define STDC_HEADERS 1
-
 #include <stdio.h>
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>

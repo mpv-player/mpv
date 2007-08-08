@@ -7680,6 +7680,18 @@ cat > config.h << EOF
 /* int_fastXY_t emulation */
 $_def_fast_inttypes
 
+/* libdvdcss */
+#define HAVE_ERRNO_H 1
+#define HAVE_LIMITS_H 1
+
+/* libdvdcss + libfaad2 */
+#define HAVE_UNISTD_H 1
+
+/* libfaad2 */
+#define STDC_HEADERS 1
+#define HAVE_MEMCPY 1
+#define HAVE_STRCHR 1
+
 /* use GNU internationalization */
 $_def_i18n
 
