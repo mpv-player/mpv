@@ -1,11 +1,13 @@
-//Synced with help_mp-en.h r23747
+//Synced with help_mp-en.h r23920
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
 //   AGP move failed on Y plane;  
-//   profile? demuxer? drain? flush? 
-// 
-// Translated by Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2 AT yahoo.com>
+//   profile? demuxer? drain? flush?
+//
+// Translated by JRaSH <jrash06@163.com> 
+// (Translator before 2007-05-01)
+// Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2 AT yahoo.com>
 // (Translator before 2006-04-24)
 // Emfox Zhou <EmfoxZhou@gmail.com>
 // (Translator before 2005-10-12)
@@ -2074,3 +2076,4 @@ static char help_text[]=
 #define MSGTR_TV_NoSuchDriver "没有这种驱动：%s\n"
 #define MSGTR_TV_UnknownColorOption "使用了未知色彩选项（%d）！\n"
 #define MSGTR_TV_CurrentFrequency "当前频率：%lu（%.3f）\n"
+#define MSGTR_TV_NoTeletext "无电视字幕"
