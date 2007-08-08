@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r23748
+.\" sync with en/mplayer.1 r23996
 .\" Encoding: utf-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -102,7 +102,7 @@ dvb://[卡号@]频道
 .
 .br
 .B mplayer
-mf://文件掩码
+mf://[文件掩码|@列表文件]
 [\-mf 选项] [选项]
 .
 .br
@@ -414,6 +414,21 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 返回最近的菜单(先后次序是: 章节->标题->根)。
 .IPs "keypad ENTER"
 确定。
+.RE
+.PD 1
+.PP
+.RS
+.
+（以下按键只有当编译时启用对于电视字幕的支持（teletext）时才有效：这些按键用于控制电
+视字幕。）
+.RE
+.PP
+.PD 0
+.RS
+.IPs "X"
+打开/\:关闭电视字幕。
+.IPs "Q和W"
+切换至下一个/\:上一个电视字幕页面。
 .RE
 .PD 1
 .PP
@@ -1526,7 +1541,8 @@ radio://1, radio://104.4, radio_set_channel 1
 .IPs i420|yv12|yuy2|y8
 设置色彩空间
 .IPs format=<参数值>
-16-进制的色彩空间(fourcc)
+16-进制或字符串常量形式的色彩空间值(fourcc)
+使用\-rawvideo format=help以获取可用字符串的列表。
 .IPs size=<参数值>
 帧大小(以字节为单位)
 .REss
@@ -1741,6 +1757,21 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .REss
 .IPs quality=<0\-100>
 选择 JPEG 压缩的质量(全尺寸推荐值 < 60)。
+.IPs tdevice=<值>（默认值：none）
+指定电视字幕设备（示例：/dev/\:vbi0）。
+.IPs tformat=<格式>（默认值：0）
+指定电视字幕的显示格式：
+.RSss
+0：不透明
+.br
+1：透明
+.br
+2：不透明且反色
+.br
+3：透明且反色
+.REss
+.IPs tpage=<100-899>（默认值：100）
+指定初始电视字幕的页面号。
 .RE
 .
 .TP
@@ -2146,6 +2177,11 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 与 \-audiofile 一样, 但用于字幕流(OggDS?)。
 .
 .TP
+.B \-subfont <文件名>（仅用于FreeType字体）
+设置字幕字体。
+如果没有给出\-subfont，则使用\-font。
+.
+.TP
 .B \-subfont-autoscale <0\-3> (仅用于 FreeType)
 设置自动缩放模式。
 .br
@@ -2436,6 +2472,10 @@ Creative DXR2 专用的输出驱动
 .B ivtv (仅用于 IVTV)
 IVTV 专用的 MPEG 音频输出驱动。
 只能与 \-ac hwmpa 一起用。
+.
+.TP
+.B v4l2（需要Linux 2.6.22+的内核）
+带有硬件MPEG解码器的V4L2卡的音频输出驱动。
 .
 .TP
 .B mpegpes (仅用于 DVB)
@@ -2769,6 +2809,10 @@ ggi 和 gl2 的都支持此功能。
 范围参数值用来控制裁减多少图像。
 只能与 xv, xmga, mga, gl, gl2, quartz, macosx 和 xvidix 的
 视频输出驱动一起工作。
+.br
+.I 注意：
+也允许-1和0间的值，但这些值处于高度试验阶段，从而可能导致崩溃或更糟。
+使用后果自负！
 .
 .TP
 .B \-panscanrange <-19.0\-99.0> (试验)
@@ -3268,7 +3312,7 @@ GL_ARB_fragment_shader!)。至少需要三个纹理单位。提供饱和度和�
 允许支持更多的色彩格式（RGB和BGR）（默认：允许）。
 要求OpenGL版本>=1.2。
 .IPs slice-height=<0\-...>
-所复制的单片纹理中包含多少行内容（默认值：4）。
+所复制的单片纹理中包含多少行内容（默认值：0）。
 0代表整幅图像。
 .br
 .I 注意：
@@ -3509,6 +3553,19 @@ iTVC16) MPEG 解码器芯片 (Hauppauge WinTV PVR-150/250/350/500)
 显式选择 MPEG 解码器设备名 (默认是: /dev/video16)。
 .IPs output
 显式选择电视输出用于视频信号。
+.RE
+.PD 1
+.
+.TP
+.B v4l2（需要Linux 2.6.22+的内核）
+带有内建硬件MPEG解码器的V4L2标准扩展卡的视频输出驱动。
+另参见lavc视频滤镜。
+.PD 0
+.RSs
+.IPs device
+明确选定所使用的MPEG解码设备的名称（默认值：/dev/video16）。
+.IPs output
+明确选定用于视频信号的电视输出输出口。
 .RE
 .PD 1
 .
@@ -4389,6 +4446,8 @@ delta 的正弦, 使用非常低的值听此扫听(sweep)。
 会观察到如果回放媒体含有两个声道, 声道 2 和 3 无声, 但声道 0 和 1 仍要交换。
 .IPs "mplayer \-af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
 改成 6 声道并设置 4 对路由: 拷贝声道 0 到声道 0 至 3。声道 4 和 5 无声。
+.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
+应该能使6声道ffdca（DTS）输出正确地与ALSA协同工作。
 .RE
 .PD 1
 .
@@ -5282,7 +5341,7 @@ p(x,y)：返回当前平面x/y位置上像素的值。
 .
 .TP
 .B lavc[=quality:fps]
-使用libavcodec的YV12至MPEG-1的快速软件转换，用于与DVB/\:DXR3/\:IVTV一同使用。
+使用libavcodec的YV12至MPEG-1的快速软件转换，用于与DVB/\:DXR3/\:IVTV/\:V4L2一同使用。
 .RSs
 .IPs <quality>
 1\-31：固定的量化尺度
@@ -7793,6 +7852,10 @@ DCT变换后绝对值差的合
 值：0）。
 .
 .TP
+.B skipcmp=<0\-2000>
+FIXME：为这个选项写说明文档。
+.
+.TP
 .B nssew=<0\-1000000>
 该设置控制NSSE的权重，其中较大的权重将导致较多的噪声。
 0 NSSE与SSE是一样的
@@ -8057,6 +8120,18 @@ denoise3d或hqdn3d之类的视频滤镜来过滤噪声。
 .B level=<value>
 设置编解码器环境等级。
 使用31或41以在Playstation 3上播放视频。
+.
+.TP
+.B skip_exp=<0\-1000000>
+FIXME：为这个选项写说明文档。
+.
+.TP
+.B skip_factor=<0\-1000000>
+FIXME：为这个选项写说明文档。
+.
+.TP
+.B skip_threshold=<0\-1000000>
+FIXME：为这个选项写说明文档。
 .
 .
 .SS nuv（\-nuvopts）
@@ -9330,12 +9405,6 @@ MPEG-4格式
 Sony数字视频容器格式
 .RE
 .PD 1
-.TP
-.B i_certify_that_my_video_stream_does_not_use_b_frames
-当视频流中有B帧时，MEncoder不能正确设置时间戳，从而导致编码问题。
-如果你希望使用lavf流合并器，那么你必须不让视频编解码器使用B帧（参见每个编解码器
-的相关文档），并且你也必须指定这个选项。
-.
 .TP
 .B muxrate=<rate>
 流合流时的标称比特率，单位为比特每秒；
