@@ -794,8 +794,9 @@ This can have multiple reasons.
 </para></listitem>
 <listitem><para>
   Many FLV files will only play correctly with <option>-correct-pts</option>.
-  Unfortunately MEncoder does not have this option, but you can try setting
-  <option>-fps</option> to the correct value manually if you know it.
+  Unfortunately <application>MEncoder</application> does not have this option,
+  but you can try setting <option>-fps</option> to the correct value manually
+  if you know it.
 </para></listitem>
 <listitem><para>
   Your sound driver is buggy.
