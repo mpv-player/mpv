@@ -41,10 +41,10 @@ double ff_eval(char *s, double *const_value, const char **const_name,
 #include "libavcodec/dsputil.h"
 #include "libavutil/common.h"
 
-/* FIXME: common.h defines printf away when HAVE_AV_CONFIG
- * is defined, but mp_image.h needs printf.
+/* FIXME: common.h defines fprintf away when HAVE_AV_CONFIG
+ * is defined, but mp_image.h needs fprintf.
  */
-#undef printf
+#undef fprintf
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
