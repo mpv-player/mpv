@@ -1074,11 +1074,8 @@ nothing_to_do:
 	  break;
 	case 1:
           spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height/2;
-          if (sub_pos < 50) {
-	  } else {
-	    if (spu->scaled_start_row + spu->scaled_height > dys)
+	  if (sub_pos >= 50 && spu->scaled_start_row + spu->scaled_height > dys)
 	      spu->scaled_start_row = dys - spu->scaled_height;
-	  }
 	  break;
         case 2:
           spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height;
