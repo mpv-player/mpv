@@ -846,7 +846,7 @@ static int init_audio(radio_priv_t *priv)
 #endif
 
     if(audio_in_init(&priv->audio_in, is_oss?AUDIO_IN_OSS:AUDIO_IN_ALSA)<0){
-        mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AudioInInitFailed,strerror(errno));
+        mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AudioInInitFailed);
     }
 
     audio_in_set_device(&priv->audio_in, priv->radio_param->adevice);
