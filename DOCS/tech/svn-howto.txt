@@ -171,7 +171,6 @@ I. BASICS:
     the change is committed as if it were a new change.
   The svn copy method
     svn rm <file>
-    svn ci <file>
     svn cp -r<good revision> svn://svn.mplayerhq.hu/mplayer/trunk/[<path>/]<file> <file>
     svn ci <file>
     This simply removes the file and then copies the last good version with
