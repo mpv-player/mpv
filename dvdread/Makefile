@@ -11,7 +11,7 @@ SRCS_COMMON = dvd_input.c \
               nav_read.c \
               md5.c \
 
-CFLAGS = -D__USE_UNIX98 -D_GNU_SOURCE -DSTDC_HEADERS -DHAVE_LIMITS_H
+CFLAGS = -D__USE_UNIX98 -D_GNU_SOURCE
 
 CFLAGS-$(DVDCSS_INTERNAL) += -I../libdvdcss -DHAVE_DVDCSS_DVDCSS_H
 

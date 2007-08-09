@@ -7371,6 +7371,11 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
+# Make sure config.h gets included.
+if test "$_dvdread_internal" = yes || test "$_faad_internal" = yes ; then
+  CFLAGS="$CFLAGS -DHAVE_CONFIG_H"
+fi
+
 CFLAGS="-I. -I.. -I../libavutil $CFLAGS"
 CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
@@ -7682,13 +7687,17 @@ $_def_fast_inttypes
 
 /* libdvdcss */
 #define HAVE_ERRNO_H 1
+
+/* libdvdcss + libdvdread */
 #define HAVE_LIMITS_H 1
 
 /* libdvdcss + libfaad2 */
 #define HAVE_UNISTD_H 1
 
-/* libfaad2 */
+/* libfaad2 + libdvdread */
 #define STDC_HEADERS 1
+
+/* libfaad2 */
 #define HAVE_MEMCPY 1
 #define HAVE_STRCHR 1
 
