@@ -209,6 +209,8 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char
   return d;
 }
 
+extern int dvdsub_id;
+
 sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid) {
   if (id > MAX_S_STREAMS - 1 || id < 0) {
     mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested sub stream id overflow (%d > %d)\n",
@@ -222,6 +224,10 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid) {
     demuxer->s_streams[id] = sh;
     sh->sid = sid;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
+    if (dvdsub_id == id) {
+      demuxer->sub->id = id;
+      demuxer->sub->sh = sh;
+    }
   }
   return demuxer->s_streams[id];
 }
