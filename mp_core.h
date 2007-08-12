@@ -115,14 +115,6 @@ extern int fixed_vo;
 extern int ass_enabled;
 extern int forced_subs_only;
 
-// These were listed as externs in mplayer.c, should be in some other header
-extern int vo_gamma_gamma;
-extern int vo_gamma_brightness;
-extern int vo_gamma_contrast;
-extern int vo_gamma_saturation;
-extern int vo_gamma_hue;
-
-
 
 int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data);
 void uninit_player(unsigned int mask);

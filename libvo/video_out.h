@@ -220,6 +220,7 @@ extern int vo_rootwin;
 extern int vo_ontop;
 extern int vo_border;
 
+extern int vo_gamma_gamma;
 extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
 extern int vo_gamma_contrast;
