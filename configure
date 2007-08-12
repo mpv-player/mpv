@@ -7797,11 +7797,6 @@ $_def_mp3lame
 $_def_mp3lame_preset
 $_def_mp3lame_preset_medium
 
-/* Define this to enable avg. byte/sec-based AVI sync method by default:
-   (use -bps or -nobps commandline option for run-time method selection)
-   -bps gives better sync for vbr mp3 audio, it is now default */
-#define AVI_SYNC_BPS 1
-
 /* Undefine this if you do not want to select mono audio (left or right)
    with a stereo MPEG layer 2/3 audio stream. The command line option
    -stereo has three possible values (0 for stereo, 1 for left-only, 2 for
