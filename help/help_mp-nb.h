@@ -16,9 +16,6 @@ static char help_text[]=
 #endif
 " -ss <timepos>   søk til gitt (sekunder eller hh:mm:ss) posisjon\n"
 " -nosound        ikke spill av lyd\n"
-#ifdef USE_FAKE_MONO
-" -stereo <mode>  velg MPEG1 stereo output (0:stereo 1:venstre 2:høyre)\n"
-#endif
 " -channels <n>   målnummer for lyd output kanaler\n"
 " -fs -vm -zoom   fullskjerm avspillings valg (fullscr,vidmode chg,softw.scale)\n"
 " -x <x> -y <y>   skaler bildet til <x> * <y> oppløsning [hvis -vo driver støtter det!]\n"
