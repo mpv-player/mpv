@@ -163,8 +163,8 @@ udp_open_socket (URL_t *url)
     }
   }
 
-  tv.tv_sec = 0;
-  tv.tv_usec = (1 * 1000000);	/* 1 second timeout */
+  tv.tv_sec = 1; /* 1 second timeout */
+  tv.tv_usec = 0;
 
   FD_ZERO (&set);
   FD_SET (socket_server_fd, &set);
