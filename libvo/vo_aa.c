@@ -393,12 +393,12 @@ flip_page(void) {
       {
 	if (time(NULL)>=stoposd ) {
 	  showosdmessage=0;
-	  if(osdmessagetext) {
+	  if(*osdmessagetext) {
 	    memset(c->textbuffer + osdy * aa_scrwidth(c) + osdx,' ',strlen(osdmessagetext));
 	    memset(c->attrbuffer + osdy * aa_scrwidth(c) + osdx ,0,strlen(osdmessagetext));
 	    osdmessagetext[0] = '\0';
 	  }
-	  if(posbar) {
+	  if(*posbar) {
 	    memset(c->textbuffer + (osdy+1) * aa_scrwidth(c),' ',strlen(posbar));
 	    memset(c->attrbuffer + (osdy+1) * aa_scrwidth(c),0,strlen(posbar));
 	  }

@@ -177,12 +177,12 @@ static void flip_page(void)
 	if (time(NULL) >= stoposd)
 	{
 	    showosdmessage = 0;
-	    if (posbar)
+	    if (*posbar)
 		posbar[0] = '\0';
 	} else {
 	    caca_putstr(osdx, osdy, osdmessagetext);
 	    
-	    if (posbar)
+	    if (*posbar)
 		caca_putstr(0, posbary, posbar);
 	}
     }
