@@ -541,10 +541,10 @@ explanation.
 
 
 <sect3 id="advaudio-surround-passthrough">
-<title>AC3/DTS Passthrough</title>
+<title>AC-3/DTS Passthrough</title>
 
 <para>
-DVDs usually have surround audio encoded in AC3 (Dolby Digital) or DTS
+DVDs usually have surround audio encoded in AC-3 (Dolby Digital) or DTS
 (Digital Theater System) format. Some modern audio equipment is capable of
 decoding these formats internally. <application>MPlayer</application> can be
 configured to relay the audio data without decoding it. This will only work if
@@ -552,7 +552,7 @@ you have a S/PDIF (Sony/Philips Digital Interface) jack in your sound card.
 </para>
 
 <para>
-If your audio equipment can decode both AC3 and DTS, you can safely enable
+If your audio equipment can decode both AC-3 and DTS, you can safely enable
 passthrough for both formats. Otherwise, enable passthrough for only the format
 your equipment supports.
 </para>
@@ -560,13 +560,13 @@ your equipment supports.
 <itemizedlist>
 <title>To enable passthrough on the command line:</title>
 <listitem><para>
-  For AC3 only, use <option>-ac hwac3</option>
+  For AC-3 only, use <option>-ac hwac3</option>
 </para></listitem>
 <listitem><para>
   For DTS only, use <option>-ac hwdts</option>
 </para></listitem>
 <listitem><para>
-  For both AC3 and DTS, use <option>-afm hwac3</option>
+  For both AC-3 and DTS, use <option>-afm hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -574,13 +574,13 @@ your equipment supports.
 <title>To enable passthrough in the <application>MPlayer</application>
   configuration file: </title>
 <listitem><para>
-  For AC3 only, use <option>ac=hwac3,</option>
+  For AC-3 only, use <option>ac=hwac3,</option>
 </para></listitem>
 <listitem><para>
   For DTS only, use <option>ac=hwdts,</option>
 </para></listitem>
 <listitem><para>
-  For both AC3 and DTS, use <option>afm=hwac3</option>
+  For both AC-3 and DTS, use <option>afm=hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -588,7 +588,7 @@ your equipment supports.
 Note that there is a comma (",") at the end of
 <option>ac=hwac3,</option> and <option>ac=hwdts,</option>. This will make
 <application>MPlayer</application> fall back on the codecs it normally uses when
-playing a file that does not have AC3 or DTS audio.
+playing a file that does not have AC-3 or DTS audio.
 <option>afm=hwac3</option> does not need a comma;
 <application>MPlayer</application> will fall back anyway when an audio family
 is specified.
@@ -708,7 +708,7 @@ audio outputs are often muted and set to zero volume by default.
 
 <para>
 Unfortunately, there is no standard for how channels are ordered. The orders
-listed below are those of AC3 and are fairly typical; try them and see if your
+listed below are those of AC-3 and are fairly typical; try them and see if your
 source matches. Channels are numbered starting with 0.
 
 <orderedlist spacing="compact">
@@ -996,7 +996,7 @@ downmixing. Here is a way to downmix PCM using <option>pan</option>:
   since we only care about the output of the first two channels, we only need to
   make two sets; the remaining four sets can be omitted. Beware that not all
   multichannel audio files have the same channel order! This example
-  demonstrates downmixing a file with the same channels as AC3 5.1:
+  demonstrates downmixing a file with the same channels as AC-3 5.1:
   <programlisting>
 0 - front left
 1 - front right

@@ -359,11 +359,11 @@ satisfied the requirements for <systemitem class="library">x264</systemitem>.
   Windows Media Audio 9 (WMAv3) (using DMO DLL)
 </para></listitem>
 <listitem><para>
-  AC3 Dolby audio (<emphasis role="bold">native</emphasis> code, with
+  AC-3 Dolby audio (<emphasis role="bold">native</emphasis> code, with
   MMX/SSE/3DNow! optimization)
 </para></listitem>
 <listitem><para>
-  AC3 passing through sound card hardware
+  AC-3 passing through sound card hardware
 </para></listitem>
 <listitem><para>
   AAC
@@ -372,7 +372,7 @@ satisfied the requirements for <systemitem class="library">x264</systemitem>.
   Ogg Vorbis audio codec (<emphasis role="bold">native</emphasis> library)
 </para></listitem>
 <listitem><para>
-  RealAudio: DNET (low bitrate AC3), Cook, Sipro and ATRAC3
+  RealAudio: DNET (low bitrate AC-3), Cook, Sipro and ATRAC3
 </para></listitem>
 <listitem><para>
   QuickTime: Qualcomm and QDesign audio codecs
@@ -395,17 +395,17 @@ satisfied the requirements for <systemitem class="library">x264</systemitem>.
 <!-- ********** -->
 
 <sect2 id="swac3">
-<title>Software AC3 decoding</title>
+<title>Software AC-3 decoding</title>
 
 <para>
-This is the default decoder used for files with AC3 audio.
+This is the default decoder used for files with AC-3 audio.
 </para>
 
 <para>
-The AC3 decoder can create audio output mixes for 2, 4, or 6 speakers.
+The AC-3 decoder can create audio output mixes for 2, 4, or 6 speakers.
 When configured for 6 speakers, this decoder provides separate output of
-all the AC3 channels to the sound driver, allowing for full "surround
-sound" experience without the external AC3 decoder required to use the
+all the AC-3 channels to the sound driver, allowing for full "surround
+sound" experience without the external AC-3 decoder required to use the
 hwac3 codec.
 </para>
 
@@ -415,7 +415,7 @@ channels.  Use <option>-channels 2</option> for a stereo downmix.  For a 4
 channel downmix (Left Front, Right Front, Left Surround and Right Surround
 outputs), use <option>-channels 4</option>.  In this case, any center
 channel will be mixed equally to the front channels.
-<option>-channels 6</option> will output all the AC3 channels as they are
+<option>-channels 6</option> will output all the AC-3 channels as they are
 encoded - in the order Left, Right, Left Surround, Right Surround, Center and
 LFE.
 </para>
@@ -436,12 +436,12 @@ also supposed to work).
 <!-- ********** -->
 
 <sect2 id="hwac3">
-<title>Hardware AC3 decoding</title>
+<title>Hardware AC-3 decoding</title>
 
 <para>
-You need an AC3 capable sound card, with digital out (S/PDIF). The card's
+You need an AC-3 capable sound card, with digital out (S/PDIF). The card's
 driver must properly support the AFMT_AC3 format (C-Media does).  Connect
-your AC3 decoder to the S/PDIF output, and use the <option>-ac
+your AC-3 decoder to the S/PDIF output, and use the <option>-ac
 hwac3</option> option. It is experimental but known to work with C-Media
 cards and Soundblaster Live! + ALSA (but not OSS) drivers and DXR3/Hollywood+
 MPEG decoder cards.

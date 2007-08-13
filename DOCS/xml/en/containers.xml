@@ -61,7 +61,7 @@ MPEG files come in different guises:
 <listitem><para>
   VOB: This is the MPEG file format on <emphasis role="bold">DVDs</emphasis>.
   It is the same as MPG, plus the capability to contain subtitles or non-MPEG
-  (AC3) audio. It contains encoded MPEG-2 video and usually AC3 audio, but DTS,
+  (AC-3) audio. It contains encoded MPEG-2 video and usually AC-3 audio, but DTS,
   MP2 and uncompressed LPCM are allowed, too. <emphasis role="bold">Read the
   <link linkend="dvd">DVD</link> section</emphasis>!
 </para></listitem>

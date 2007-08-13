@@ -1052,17 +1052,17 @@ Since MPlayer can only seek to the next keyframe this may be inexact.
 .
 .TP
 .B \-a52drc <level>
-Select the Dynamic Range Compression level for AC3 audio streams.
+Select the Dynamic Range Compression level for AC-3 audio streams.
 <level> is a float value ranging from 0 to 1, where 0 means no compression
 and 1 (which is the default) means full compression (make loud passages more
 silent and vice versa).
-This option only shows an effect if the AC3 stream contains the required range
+This option only shows an effect if the AC-3 stream contains the required range
 compression information.
 .
 .TP
 .B \-aid <ID> (also see \-alang)
 Select audio channel (MPEG: 0\-31, AVI/\:OGM: 1\-99, ASF/\:RM: 0\-127,
-VOB(AC3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
+VOB(AC-3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
 MPlayer prints the available audio IDs when run in verbose (\-v) mode.
 When playing an MPEG-TS stream, MPlayer/\:MEncoder will use the first program
 (if present) with the chosen audio stream.
@@ -1183,14 +1183,14 @@ Request the number of playback channels (default: 2).
 MPlayer asks the decoder to decode the audio into as many channels as
 specified.
 Then it is up to the decoder to fulfill the requirement.
-This is usually only important when playing videos with AC3 audio (like DVDs).
+This is usually only important when playing videos with AC-3 audio (like DVDs).
 In that case liba52 does the decoding by default and correctly downmixes the
 audio into the requested number of channels.
 To directly control the number of output channels independently of how many
 channels are decoded, use the channels filter.
 .br
 .I NOTE:
-This option is honored by codecs (AC3 only), filters (surround) and audio
+This option is honored by codecs (AC-3 only), filters (surround) and audio
 output drivers (OSS at least).
 .sp 1
 Available options are:
@@ -1254,7 +1254,7 @@ libmpdemux/\:demuxer.h.
 .
 .TP
 .B \-dumpaudio (MPlayer only)
-Dumps raw compressed audio stream to ./stream.dump (useful with MPEG/\:AC3,
+Dumps raw compressed audio stream to ./stream.dump (useful with MPEG/\:AC-3,
 in most other cases the resulting file will not be playable).
 If you give more than one of \-dumpaudio, \-dumpvideo, \-dumpstream
 on the command line only the last one will work.
@@ -1601,7 +1601,7 @@ Number of audio channels to capture.
 This option lets you play raw audio files.
 You have to use \-demuxer rawaudio as well.
 It may also be used to play audio CDs which are not 44kHz 16-bit stereo.
-For playing raw AC3 streams use \-rawaudio format=0x2000 \-demuxer rawaudio.
+For playing raw AC-3 streams use \-rawaudio format=0x2000 \-demuxer rawaudio.
 .sp 1
 Available options are:
 .sp 1
@@ -4027,7 +4027,7 @@ Force the l3codeca.acm MP3 codec.
 .IPs "\-ac mad,"
 Try libmad first, then fall back on others.
 .IPs "\-ac hwac3,a52,"
-Try hardware AC3 passthrough, software AC3, then others.
+Try hardware AC-3 passthrough, software AC-3, then others.
 .IPs "\-ac hwdts,"
 Try hardware DTS passthrough, then fall back on others.
 .IPs "\-ac -ffmp3,"

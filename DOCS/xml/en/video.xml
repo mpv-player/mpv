@@ -2116,7 +2116,7 @@ problems, or DVD subtitle problems, give <option>:sync</option> a try.
 <varlistentry>
   <term><option>-ac hwac3</option></term>
   <listitem><para>
-  The em8300 supports playing back AC3 audio (surround sound) through the
+  The em8300 supports playing back AC-3 audio (surround sound) through the
   digital audio output of the card. See the <option>-ao oss</option> option
   above, it must be used to specify the DXR3's output instead of a sound card.
   </para></listitem>
