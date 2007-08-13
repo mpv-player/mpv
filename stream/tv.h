@@ -41,8 +41,8 @@ typedef struct tv_param_s {
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
     int alsa;
 #endif
-    char* adevice;
 #endif
+    char* adevice;
     int brightness;
     int contrast;
     int hue;
