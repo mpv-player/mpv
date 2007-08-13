@@ -723,7 +723,6 @@ return(1);
 
 static double grabimmediate_video_frame(priv_t *priv, char *buffer, int len)
 {
-struct timeval curtime;
 sigset_t sa_mask;
 
 if(priv->videoready == FALSE) return(0);
@@ -746,7 +745,6 @@ return(0);
 
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
-struct timeval curtime;
 double timestamp=0;
 sigset_t sa_mask;
 
@@ -785,7 +783,6 @@ static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 struct timeval curtime;
 double curpts;
 double timeskew;
-int bytesavail;
 int bytesread;
 int ret;
 
