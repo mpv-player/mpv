@@ -58,8 +58,8 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
 <listitem><para>
   VOB: C'est le format de fichier MPEG des <emphasis role="bold">DVDs</emphasis>.
   C'est le même que MPG, plus la capacité de contenir des sous-titres et de
-  l'audio non-MPEG (AC3). Il contient de la vidéo encodée en MPEG2 et généralement
-  de l'audio AC3, mais DTS, MP2 et LPCM non-compressé sont également autorisés.
+  l'audio non-MPEG (AC-3). Il contient de la vidéo encodée en MPEG2 et généralement
+  de l'audio AC-3, mais DTS, MP2 et LPCM non-compressé sont également autorisés.
   Lisez la section <link linkend="dvd">DVD</link>!
   </para></listitem>
 <listitem><para>

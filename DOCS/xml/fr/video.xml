@@ -2059,7 +2059,7 @@ l'image (c'est ce que fait le "1" à la fin).
 <varlistentry>
 <term><option>-ac hwac3</option></term>
 <listitem><para>
-L'em8300 supporte la lecture audio AC3 (son surround) au travers de la sortie audio
+L'em8300 supporte la lecture audio AC-3 (son surround) au travers de la sortie audio
 numérique de la carte. Voir l'option <option>-ao oss</option> plus haut, elle doit
 être utilisé pour spécifier la sortie DXR3 au lieu d'une carte son.
 </para></listitem>

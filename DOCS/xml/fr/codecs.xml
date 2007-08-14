@@ -335,11 +335,11 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
   Windows Media Audio 9 (WMAv3) (en utilisant la DLL DMO)
   </para></listitem>
 <listitem><para>
-  AC3 Dolby audio (code <emphasis role="bold">natif</emphasis>, avec
+  AC-3 Dolby audio (code <emphasis role="bold">natif</emphasis>, avec
   optimisation MMX/SSE/3DNow!)
   </para></listitem>
 <listitem><para>
-  AC3 par l'intermédiaire de la carte son
+  AC-3 par l'intermédiaire de la carte son
   </para></listitem>
 <listitem><para>
   AAC
@@ -348,7 +348,7 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
   codec audio Ogg Vorbis (librairie <emphasis role="bold">native</emphasis>)
   </para></listitem>
 <listitem><para>
-  RealAudio: DNET (AC3 bas débit), Cook, Sipro et ATRAC3
+  RealAudio: DNET (AC-3 bas débit), Cook, Sipro et ATRAC3
   </para></listitem>
 <listitem><para>
   QuickTime: codecs audio Qualcomm et QDesign
@@ -370,17 +370,17 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
 
 
 <sect2 id="swac3">
-<title>Décodage logiciel AC3</title>
+<title>Décodage logiciel AC-3</title>
 
 <para>
-C'est le décodeur utilisé par défaut pour les fichiers avec de l'audio AC3.
+C'est le décodeur utilisé par défaut pour les fichiers avec de l'audio AC-3.
 </para>
 
 <para>
-Le décodeur AC3 peut créer des sorties audio mixées pour 2, 4 ou 6 haut-parleurs.
+Le décodeur AC-3 peut créer des sorties audio mixées pour 2, 4 ou 6 haut-parleurs.
 Quand il est configuré pour 6 haut-parleurs, ce décodeur fournit des sorties
-séparées pour tous les canaux AC3 du pilote son, autorisant la pleine expérience
-du &quot;son surround&quot; sans le décodeur AC3 externe requis pour l'usage du
+séparées pour tous les canaux AC-3 du pilote son, autorisant la pleine expérience
+du &quot;son surround&quot; sans le décodeur AC-3 externe requis pour l'usage du
 codec hwac3.
 </para>
 
@@ -390,7 +390,7 @@ de sortie. Utilisez <option>-channels 2</option> pour un mix stéréo. Pour un
 mix 4 canaux (Avant Gauche, Avant Droite, Surround Gauche et Surround Droit),
 utilisez<option>-channels 4</option>. Dans ce cas, un éventuel canal central
 sera mixé à part égale sur les canaux de devant. <option>-channels 6</option>
-sortira tous les canaux AC3 tels qu'ils ont été encodés - dans l'ordre Gauche,
+sortira tous les canaux AC-3 tels qu'ils ont été encodés - dans l'ordre Gauche,
 Droite, Surround Gauche, Surround Droit, Centre et LFE.
 </para>
 
@@ -409,11 +409,11 @@ est également sensé fonctionner).
 
 
 <sect2 id="hwac3">
-<title>Décodage matériel AC3</title>
+<title>Décodage matériel AC-3</title>
 <para>
-Vous avez besoin d'une carte son gérant l'AC3, avec une sortie numérique
+Vous avez besoin d'une carte son gérant l'AC-3, avec une sortie numérique
 (S/PDIF). Le pilote de la carte doit supporter correctement le format AFMT_AC3
-(C-Media le fait). Connectez le décodeur AC3 à la sortie S/PDIF, et utilisez
+(C-Media le fait). Connectez le décodeur AC-3 à la sortie S/PDIF, et utilisez
 l'option <option>-ac hwac3</option>. C'est expérimental mais cela fonctionne
 avec les cartes C-Media et Soundblaster Live! + le pilote ALSA (mais
 pas OSS) et DXR3/Hollywood + les cartes décodeurs MPEG.

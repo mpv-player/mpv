@@ -573,10 +573,10 @@ explication.
 
 
 <sect3 id="advaudio-surround-passthrough">
-<title>AC3/DTS Passthrough</title>
+<title>AC-3/DTS Passthrough</title>
 
 <para>
-Les DVDs ont habituellement l'audio surround encodé en format AC3 (Dolby Digital) ou DTS
+Les DVDs ont habituellement l'audio surround encodé en format AC-3 (Dolby Digital) ou DTS
 (Digital Theater System). Certains équipements audio moderne sont capables de
 décoder ces formats de façon interne. <application>MPlayer</application> peut être
 configuré pour relayer les données audio sans le décodé. Cela ne marchera que si
@@ -585,7 +585,7 @@ votre carte son.
 </para>
 
 <para>
-Si votre équipement audio peux décoder AC3 et DTS, vous pouvez sans risque activer
+Si votre équipement audio peux décoder AC-3 et DTS, vous pouvez sans risque activer
 le passthrough pour les deux formats. Autrement, activez le passthrough pour le seul format
 votre équipement supporte.
 </para>
@@ -593,13 +593,13 @@ votre équipement supporte.
 <itemizedlist>
 <title>Pour activer le passthrough en ligne de commande:</title>
 <listitem><para>
-Pour l'AC3 seul, utilisez <option>-ac hwac3</option>
+Pour l'AC-3 seul, utilisez <option>-ac hwac3</option>
 </para></listitem>
 <listitem><para>
 Pour le DTS seul, utilisez <option>-ac hwdts</option>
 </para></listitem>
 <listitem><para>
-Pour l'ensemble AC3 et DTS, utilisez <option>-afm hwac3</option>
+Pour l'ensemble AC-3 et DTS, utilisez <option>-afm hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -607,13 +607,13 @@ Pour l'ensemble AC3 et DTS, utilisez <option>-afm hwac3</option>
 <title>Pour activer le passthrough dans le fichier de configuration
 de <application>MPlayer</application>: </title>
 <listitem><para>
-Pour l'AC3 seul, utilisez <option>ac=hwac3,</option>
+Pour l'AC-3 seul, utilisez <option>ac=hwac3,</option>
 </para></listitem>
 <listitem><para>
 Pour le DTS seul, utilisez <option>ac=hwdts,</option>
 </para></listitem>
 <listitem><para>
-Pour l'ensemble AC3 et DTS, utilisez <option>afm=hwac3</option>
+Pour l'ensemble AC-3 et DTS, utilisez <option>afm=hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -622,7 +622,7 @@ Notez qu'il y a une virgule (",") à la fin de
 <option>ac=hwac3,</option> et <option>ac=hwdts,</option>.
 Cela permettra à <application>MPlayer</application> de retomber sur les
 codecs qu'il utilise normalement lors de la lecture d'un fichier qui n'a
-pas l'audio en AC3 ou DTS.
+pas l'audio en AC-3 ou DTS.
 <option>afm=hwac3</option> n'a pas besoin d'une virgule; de toute façon
 <application>MPlayer</application> reviendra en arrière lorsqu'une famille
 d'audio est spécifiée.
@@ -748,7 +748,7 @@ et le volume réglé à zéro par défaut.
 
 <para>
 Malheureusement, il n'y a pas de standard qui montrent comment les canaux sont ordonnés.
-Les ordres listés ci-dessous sont ceux de l'AC3 et sont assez typiques;
+Les ordres listés ci-dessous sont ceux de l'AC-3 et sont assez typiques;
 essayez-les et voyez si votre source correspond.
 Les canaux sont numérotés à partir de par 0.
 
@@ -1062,7 +1062,7 @@ puisque nous nous inquiétons seulement de la sortir des deux premiers canaux,
 nous devons seulement faire deux ensembles; les quatres ensembles restants peuvent
 être omis. Prenez garde que tous les fichiers audio multi-canaux n'aient le même
 ordre de canaux! Cette exemple démontre le mixage (downmixing) d'un fichier avec les
-même canaux que l'AC3 5.1:
+même canaux que l'AC-3 5.1:
 <programlisting>
 0 - avant gauche
 1 - avant droit

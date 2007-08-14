@@ -1422,11 +1422,11 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <para>
   Le son est un problème bien plus simple à résoudre : si la qualité vous intéresse,
   laissez le flux audio tel quel.
-  Même les flux AC3 5.1 utilisent au plus 448Kbit/s, et tous ces bits sont utiles.
+  Même les flux AC-3 5.1 utilisent au plus 448Kbit/s, et tous ces bits sont utiles.
   Vous pourriez être tenté de convertir le son en Ogg Vorbis de haute qualité,
-  mais le fait que vous n'ayez pas d'entrée AC3 (dolby digital) sur votre chaîne HIFI
+  mais le fait que vous n'ayez pas d'entrée AC-3 (dolby digital) sur votre chaîne HIFI
   aujourd'hui ne signifie pas que vous n'en n'aurez pas demain.
-  Pensez au futur en conservant le flux AC3.
+  Pensez au futur en conservant le flux AC-3.
   Vous pouvez le garder en le copiant directement dans le flux vidéo
   <link linkend="menc-feat-mpeg4">pendant l'encodage</link>. Vous pouvez aussi l'extraire
   avec l'intention de l'inclure dans des conteneurs tels que NUT ou Matroska.
@@ -1469,7 +1469,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   façon de gérer ce type de problèmes est d'insérer un silence ou bien de couper l'audio
   à ces emplacements.
   Cependant, <application>MPlayer</application> ne sait pas le faire, donc si vous
-  dé-multiplexez l'AC3 et l'encodez avec une autre application (ou le sortez en PCM
+  dé-multiplexez l'AC-3 et l'encodez avec une autre application (ou le sortez en PCM
   avec <application>MPlayer</application>), les discontinuités subsistent et la seule
   façon de les corriger est de supprimer ou de rajouter des trames.
   Tant que <application>MEncoder</application> voit la piste son pendant qu'il
@@ -1611,7 +1611,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   nombre d'échantillons).
   Malheureusement, le codec le plus efficace, Vorbis, ne satisfait aucun de ces critères.
   Donc, si vous envisagez de stocker un fichier en AVI, vous devrez utiliser un
-  codec moins performant comme le MP3 ou l'AC3.
+  codec moins performant comme le MP3 ou l'AC-3.
 </para>
 </listitem>
 </orderedlist>
@@ -2362,7 +2362,7 @@ Un exemple avec la compression MJPEG:
   </row>
   <row>
     <entry>ac3</entry>
-    <entry>AC3, AKA Dolby Digital</entry>
+    <entry>AC-3, AKA Dolby Digital</entry>
   </row>
   <row>
     <entry>adpcm_ima_wav</entry>
@@ -2382,7 +2382,7 @@ La première colonne contient les noms de codec qui doivent être donnés après
 
 <informalexample>
 <para>
-Un exemple avec compression AC3:
+Un exemple avec compression AC-3:
 <screen>mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy</screen>
 </para>
 </informalexample>
@@ -4060,7 +4060,7 @@ Exemple de compression VP3:
         <entry>MPEG-2</entry>
         <entry>9800</entry>
         <entry>48000 Hz</entry>
-        <entry>AC3,PCM</entry>
+        <entry>AC-3,PCM</entry>
         <entry>1536 (max)</entry>
         <entry>30000/1001, 24000/1001</entry>
         <entry>4:3, 16:9 (seulement pour 720x480)</entry>
@@ -4073,7 +4073,7 @@ Exemple de compression VP3:
         <entry>MPEG-1</entry>
         <entry>1856</entry>
         <entry>48000 Hz</entry>
-        <entry>AC3,PCM</entry>
+        <entry>AC-3,PCM</entry>
         <entry>1536 (max)</entry>
         <entry>30000/1001, 24000/1001</entry>
         <entry>4:3, 16:9</entry>
@@ -4106,7 +4106,7 @@ Exemple de compression VP3:
         <entry>MPEG-2</entry>
         <entry>9800</entry>
         <entry>48000 Hz</entry>
-        <entry>MP2,AC3,PCM</entry>
+        <entry>MP2,AC-3,PCM</entry>
         <entry>1536 (max)</entry>
         <entry>25</entry>
         <entry>4:3, 16:9 (seulement pour 720x576)</entry>
@@ -4117,7 +4117,7 @@ Exemple de compression VP3:
         <entry>MPEG-1</entry>
         <entry>1856</entry>
         <entry>48000 Hz</entry>
-        <entry>MP2,AC3,PCM</entry>
+        <entry>MP2,AC-3,PCM</entry>
         <entry>1536 (max)</entry>
         <entry>25</entry>
         <entry>4:3, 16:9</entry>
@@ -4482,7 +4482,7 @@ Exemple de compression VP3:
 </para>
 
 <para>
-  Pour l'audio DVD, le codec AC3 de <systemitem class="library">libavcodec</systemitem>
+  Pour l'audio DVD, le codec AC-3 de <systemitem class="library">libavcodec</systemitem>
   est utilisé.
 </para>
 
@@ -4564,9 +4564,9 @@ Exemple de compression VP3:
 </sect3>
 
 <sect3 id="menc-feat-vcd-dvd-all-pal-ac3-copy">
-<title>AVI PAL Contenant Audio AC3 vers DVD</title>
+<title>AVI PAL Contenant Audio AC-3 vers DVD</title>
 <para>
-  Si la source a déjà l'audio en AC3, utilisez <option>-oac copy</option> au lieu de la réencoder.
+  Si la source a déjà l'audio en AC-3, utilisez <option>-oac copy</option> au lieu de la réencoder.
   <screen>
   mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:576,\
   harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
@@ -4577,9 +4577,9 @@ Exemple de compression VP3:
 </sect3>
 
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
-<title>AVI NTSC Contenant Audio AC3 vers DVD</title>
+<title>AVI NTSC Contenant Audio AC-3 vers DVD</title>
 <para>
-  Si la source a déjà l'audio en AC3, et est en NTSC @ 24000/1001 fps:
+  Si la source a déjà l'audio en AC-3, et est en NTSC @ 24000/1001 fps:
   <screen>
   mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
   -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\

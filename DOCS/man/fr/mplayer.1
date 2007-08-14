@@ -1118,17 +1118,17 @@ trame-clé en trame-clé, cet intervalle ne sera pas scrupuleusement respecté.
 .
 .TP
 .B \-a52drc <niveau>
-Active le contrôle de volume dynamique des flux audios AC3.
+Active le contrôle de volume dynamique des flux audios AC-3.
 <niveau> est un flottant compris entre 0 et 1, où 0 signifie aucun contrôle
 et 1 (defaut) signifie un contrôle total (rendre les passages bruyants plus
 calmes et vice versa).
-Cette option ne fonctionne uniquement si le flux AC3 comporte ce genre
+Cette option ne fonctionne uniquement si le flux AC-3 comporte ce genre
 d'information de contrôle.
 .
 .TP
 .B \-aid <ID> (voir aussi \-alang)
 Sélectionne le canal audio (MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
-VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190).
+VOB(AC-3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190).
 MPlayer affiche les IDs audios disponibles quand il est lancé en mode
 bavard (-v).
 Pour jouer des flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
@@ -1262,14 +1262,14 @@ Définit le nombre de canaux audio à utiliser. (défaut\ : 2).
 MPlayer demande au décodeur de décoder l'audio sur le nombre requis de canaux.
 Maintenant c'est au décodeur de satisfaire cette demande.
 Généralement, c'est important seulement pour la lecture des vidéos avec de
-l'audio AC3 (comme les DVDs).
+l'audio AC-3 (comme les DVDs).
 Dans ce cas liba52 fait le décodage par défaut et fusionne
 correctement l'audio dans le nombre requis de canaux.
 Pour contrôler directement le nombre de canaux de sortie quelque soit le
 nombre de canaux décodés, utilisez le filtre channels.
 .br
 .I NOTE:
-Cette option est comprise par les codecs (AC3 uniquement), filtres (surround)
+Cette option est comprise par les codecs (AC-3 uniquement), filtres (surround)
 et pilotes de sortie audio (OSS au moins).
 .sp 1
 Les options disponibles sont:
@@ -1336,7 +1336,7 @@ l'ID du démultiplexeur comme définit dans libmpdemux/\:demuxer.h.
 .TP
 .B \-dumpaudio (MPlayer uniquement)
 Décharge le flux audio brut dans ./stream.dump (utile avec
-mpeg/\:ac3), dans la plupart des autres cas, le fichier résultant ne
+MPEG/\:AC-3), dans la plupart des autres cas, le fichier résultant ne
 sera pas lisible).
 Si vous spécifiez plus qu'une des options \-dumpaudio, \-dumpvideo,
 \-dumpstream, seule la dernière de la ligne de commande sera prise en
@@ -1686,7 +1686,7 @@ Cette option vous permet de lire des fichiers audio bruts.
 Vous devez aussi utiliser \-demuxer rawaudio.
 Il peut aussi être utilisé pour lire des CD audio qui ne sont pas 44kKHz
 16-bit stéréo.
-Pour lire un flux AC3 brut, utilisez \-rawaudio format=0x2000
+Pour lire un flux AC-3 brut, utilisez \-rawaudio format=0x2000
 \-demuxer rawaudio.
 .sp 1
 Les options disponibles sont:
@@ -2585,7 +2585,7 @@ Ima-ADPCM
 .IPs " 512"
 MPEG (2) audio
 .IPs 1024
-AC3
+AC-3
 .IPs 4096
 32-bit signé (little-endian)
 .IPs 8192
@@ -4264,8 +4264,8 @@ Force le codec MP3 l3codeca.acm.
 .IPs "\-ac mad,"
 Essaie d'abord libmad, puis se rabat sur les autres.
 .IPs "\-ac hwac3,a52,"
-Essaie le transfert matériel AC3 (vers un décodeur externe par ex.\&),
-le codec logiciel AC3, puis les autres.
+Essaie le transfert matériel AC-3 (vers un décodeur externe par ex.\&),
+le codec logiciel AC-3, puis les autres.
 .IPs "\-ac hwdts,"
 Essaye le transfert matériel DTS, puis se rabat sur les autres.
 .IPs "\-ac -ffmp3,"
@@ -7687,7 +7687,7 @@ MPEG Layer 2
 .IPs "mp3\ \ "
 MPEG Layer 3
 .IPs "ac3\ \ "
-AC3
+AC-3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits par échantillon, compression 4:1)
 .IPs sonic\
