@@ -62,9 +62,9 @@ compile_check() {
   echo >> "$TMPLOG"
   cat "$1" >> "$TMPLOG"
   echo >> "$TMPLOG"
-  echo "$_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o $TMPO $@" >> "$TMPLOG"
-  rm -f "$TMPO"
-  $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o "$TMPO" "$@" >> "$TMPLOG" 2>&1
+  echo "$_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o $TMPEXE $@" >> "$TMPLOG"
+  rm -f "$TMPEXE"
+  $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
   echo >> "$TMPLOG"
@@ -80,7 +80,7 @@ cxx_check() {
 }
 
 tmp_run() {
-  "$TMPO" >> "$TMPLOG" 2>&1
+  "$TMPEXE" >> "$TMPLOG" 2>&1
 }
 
 # Display error message, flushes tempfile, exit
@@ -88,7 +88,7 @@ die () {
   echo
   echo "Error: $@" >&2
   echo >&2
-  rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
+  rm -f "$TMPEXE" "$TMPC" "$TMPS" "$TMPCPP"
   echo "Check \"$TMPLOG\" if you do not understand why it failed."
   exit 1
 }
@@ -1288,7 +1288,7 @@ TMPLOG="configure.log"
 rm -f "$TMPLOG"
 TMPC="$I/mplayer-conf-$RANDOM-$$.c"
 TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
-TMPO="$I/mplayer-conf-$RANDOM-$$.o"
+TMPEXE="$I/mplayer-conf-$RANDOM-$$"
 TMPS="$I/mplayer-conf-$RANDOM-$$.S"
 
 echo configuration: $_configuration > "$TMPLOG"
@@ -1484,7 +1484,7 @@ if test $_cross_compile = auto ; then
 int main() { return 0; }
 EOF
   _cross_compile=yes
-  cc_check && "$TMPO" && _cross_compile=no
+  cc_check && "$TMPEXE" && _cross_compile=no
 fi
 echores $_cross_compile
 
@@ -2128,8 +2128,8 @@ int main() {
     return 0;
 }
 EOF
-    $_cc -o "$TMPO" "$TMPC"
-    case `"$TMPO"` in
+    $_cc -o "$TMPEXE" "$TMPC"
+    case `"$TMPEXE"` in
 
         0-0)    proc="ev4";   cpu_understands_mvi="0";;
         1-0)    proc="ev5";   cpu_understands_mvi="0";;
@@ -2355,7 +2355,7 @@ if x86_32 ; then
     _pref_as_version='2.16.92'
     echo 'pabsd %xmm0, %xmm1' >> $TMPS
   fi
-  $_as $TMPS -o $TMPO > /dev/null 2>&1 || as_verc_fail=yes
+  $_as $TMPS -o $TMPEXE > /dev/null 2>&1 || as_verc_fail=yes
 
   if test "$as_verc_fail" != yes ; then
     echores "ok"
@@ -2916,7 +2916,7 @@ cat > $TMPC << EOF
 #include <sys/types.h>
 int main(void) { printf("%d\n", sizeof(size_t)*8); return 0; }
 EOF
-cc_check && _wordsize=`$TMPO` && _mp_wordsize="#define MP_WORDSIZE $_wordsize"
+cc_check && _wordsize=`$TMPEXE` && _mp_wordsize="#define MP_WORDSIZE $_wordsize"
 echores "$_wordsize"
 
 
@@ -3793,8 +3793,8 @@ int
 dfb_ver = DIRECTFB_MAJOR_VERSION.DIRECTFB_MINOR_VERSION.DIRECTFB_MICRO_VERSION
 ;
 EOF
-  if $_cc -E $TMPC $_inc_extra > "$TMPO"; then
-    _directfb_version=`sed -n 's/^dfb_ver[^0-9]*\(.*\)/\1/p' "$TMPO" | tr -d '()'`
+  if $_cc -E $TMPC $_inc_extra > "$TMPEXE"; then
+    _directfb_version=`sed -n 's/^dfb_ver[^0-9]*\(.*\)/\1/p' "$TMPEXE" | tr -d '()'`
     _dfb_major=`echo $_directfb_version | cut -d . -f 1`
     _dfb_minor=`echo $_directfb_version | cut -d . -f 2`
     _dfb_micro=`echo $_directfb_version | cut -d . -f 3`
@@ -6995,7 +6995,7 @@ int main(){
 } 
 EOF
   if cc_check ; then 
-    if strings $TMPO | grep -l MPlayerBigEndian >/dev/null ; then 
+    if strings $TMPEXE | grep -l MPlayerBigEndian >/dev/null ; then 
       _big_endian=yes
     else
       _big_endian=no
@@ -8505,4 +8505,4 @@ EOF
 fi
 
 # Last move:
-rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
+rm -f "$TMPEXE" "$TMPC" "$TMPS" "$TMPCPP"
