@@ -237,6 +237,7 @@ Optional features:
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
   --enable-joystick      enable joystick support [disable]
+  --enable-apple-remote  enable Apple Remote input (Mac OS X only) [autodetect]
   --disable-vm           disable X video mode extensions [autodetect]
   --disable-xf86keysym   disable support for multimedia keys [autodetect]
   --enable-radio         enable radio interface [disable]
@@ -615,6 +616,7 @@ _x264=auto
 _libnut=auto
 _lirc=auto
 _lircc=auto
+_apple_remote=auto
 _gui=no
 _gtk1=no
 _termcap=auto
@@ -1030,6 +1032,8 @@ for ac_option do
   --disable-lirc)	_lirc=no	;;
   --enable-lircc)	_lircc=yes	;;
   --disable-lircc)	_lircc=no	;;
+  --enable-apple-remote) _apple_remote=yes ;;
+  --disable-apple-remote) _apple_remote=no ;;
   --enable-gui)		_gui=yes	;;
   --disable-gui)	_gui=no		;;
   --enable-gtk1)	_gtk1=yes	;;
@@ -3570,6 +3574,44 @@ else
   _macosx_bundle=no
 fi 
 echores "$_macosx_bundle"
+
+echocheck "Apple Remote"
+if test "$_apple_remote" = auto ; then
+  _apple_remote=no
+  cat > $TMPC <<EOF
+#include <stdio.h>
+#include <IOKit/IOCFPlugIn.h>
+int main (int argc, const char * argv[])
+{
+  io_iterator_t hidObjectIterator = (io_iterator_t)NULL;
+  CFMutableDictionaryRef hidMatchDictionary;
+  IOReturn ioReturnValue;
+
+  // Set up a matching dictionary to search the I/O Registry by class.
+  // name for all HID class devices
+  hidMatchDictionary = IOServiceMatching("AppleIRController");
+
+  // Now search I/O Registry for matching devices.
+  ioReturnValue = IOServiceGetMatchingServices(kIOMasterPortDefault,
+                      hidMatchDictionary, &hidObjectIterator);
+
+  // If search is unsuccessful, return nonzero.
+  if (ioReturnValue != kIOReturnSuccess ||
+                       !IOIteratorIsValid(hidObjectIterator)) {
+    return 1;
+  }
+  return 0;
+}
+EOF
+  cc_check -framework IOKit && tmp_run && _apple_remote=yes
+fi
+if test "$_apple_remote" = yes ; then
+  _def_apple_remote='#define HAVE_APPLE_REMOTE 1'
+  _ld_extra="$_ld_extra -framework IOKit"
+else
+  _def_apple_remote='#undef HAVE_APPLE_REMOTE'
+fi
+echores "$_apple_remote"
 
 fi #if darwin
 
@@ -7524,6 +7566,7 @@ ALSA1X = $_alsa1x
 # input/demuxer/codecs
 JOYSTICK = $_joystick
 LIRC = $_lirc
+APPLE_REMOTE = $_apple_remote
 TV = $_tv
 TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
@@ -7908,6 +7951,9 @@ $_def_threads
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_def_lirc
+
+/* Apple Remote (remote control, see http://docs.info.apple.com/article.html?artnum=302504) support: */
+$_def_apple_remote
 
 /* Support for maemo (http://www.maemo.org) */
 $_def_maemo

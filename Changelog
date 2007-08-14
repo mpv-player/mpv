@@ -111,6 +111,7 @@ MPlayer (1.0)
     * change GUI dependency from libpng to libavcodec
     * ability to change subtitle size during playback
     * ability to turn loop on/off during playback
+    * Apple Remote support
 
 
   rc1: "Codename intentionally left blank" October 22, 2006

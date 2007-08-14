@@ -1425,6 +1425,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Не могу инициализировать джойстик ввода\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "Не могу выполнить stat %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Не могу выполнить open %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Не могу инициализировать Пульт ДУ Apple Remote.\n"
 
 // ========================== LIBMPDEMUX ===================================
 

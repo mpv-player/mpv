@@ -1286,6 +1286,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Impossible d'initier manette entrée\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "Impossible lire %s : %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Impossible ouvrir %s : %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Impossible d'initier télécommande Apple Remote.\n"
 
 // ========================== LIBMPDEMUX ===================================
 

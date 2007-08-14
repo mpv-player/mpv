@@ -1348,6 +1348,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Konnte Joystick nicht initialisieren.\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "Stat auf Datei '%s' fehlgeschlagen: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Konnte Datei '%s' nicht öffnen: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Konnte Apple Remote Fernbedienung nicht initialisieren.\n"
 
 // ========================== LIBMPDEMUX ===================================
 

@@ -1308,6 +1308,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "不能初始华输入法操纵杆\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "不能统计(stat) %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "打不开 %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "不能初始化 Apple Remote 遥控器。\n"
 
 // ========================== LIBMPDEMUX ===================================
 

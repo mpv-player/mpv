@@ -1209,6 +1209,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Kumanda kolu girdisi açılamıyor\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile " %s sabitlenemiyor: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "%s açılamıyor: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Apple Remote açılamıyor.\n"
 
 // ========================== LIBMPDEMUX ===================================
 

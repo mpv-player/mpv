@@ -35,6 +35,8 @@
 #include <lirc/lircc.h>
 #endif
 
+#include "ar.h"
+
 /// This array defines all known commands.
 /// The first field is an id used to recognize the command without too many strcmp.
 /// The second is obviously the command name.
@@ -283,6 +285,17 @@ static mp_key_name_t key_names[] = {
   { JOY_BTN8, "JOY_BTN8" },
   { JOY_BTN9, "JOY_BTN9" },
 
+  { AR_PLAY, "AR_PLAY" },
+  { AR_PLAY_HOLD, "AR_PLAY_HOLD" },
+  { AR_NEXT, "AR_NEXT" },
+  { AR_NEXT_HOLD, "AR_NEXT_HOLD" },
+  { AR_PREV, "AR_PREV" },
+  { AR_PREV_HOLD, "AR_PREV_HOLD" },
+  { AR_MENU, "AR_MENU" },
+  { AR_MENU_HOLD, "AR_MENU_HOLD" },
+  { AR_VUP, "AR_VUP" },
+  { AR_VDOWN, "AR_VDOWN" },
+
   { KEY_POWER, "POWER" },
   { KEY_MENU, "MENU" },
   { KEY_PLAY, "PLAY" },
@@ -409,6 +422,18 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { JOY_BTN2, 0 }, "volume 1"},
   { { JOY_BTN3, 0 }, "volume -1"},
 #endif
+#ifdef HAVE_APPLE_REMOTE
+  { { AR_PLAY, 0}, "pause" },
+  { { AR_PLAY_HOLD, 0}, "quit" },
+  { { AR_NEXT, 0 }, "seek 30" },
+  { { AR_NEXT_HOLD, 0 }, "seek 120" },
+  { { AR_PREV, 0 }, "seek -10" },
+  { { AR_PREV_HOLD, 0 }, "seek -120" },
+  { { AR_MENU, 0 }, "osd" },
+  { { AR_MENU_HOLD, 0 }, "mute" },
+  { { AR_VUP, 0 }, "volume 1"},
+  { { AR_VDOWN, 0 }, "volume -1"},
+#endif
   { { 'T', 0 }, "vo_ontop" },
   { { 'f', 0 }, "vo_fullscreen" },
   { { 's', 0 }, "screenshot 0" },
@@ -525,6 +550,9 @@ static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
 static int use_joystick = 1, use_lirc = 1, use_lircc = 1;
 static char* config_file = "input.conf";
 
+/* Apple Remote */
+static int use_ar = 1;
+
 static char* js_dev = NULL;
 
 static char* in_file = NULL;
@@ -553,6 +581,8 @@ static m_option_t mp_input_opts[] = {
   { "lirc", &use_lirc, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
   { "nolircc", &use_lircc, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
   { "lircc", &use_lircc, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
+  { "noar", &use_ar, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
+  { "ar", &use_ar, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1725,6 +1755,15 @@ mp_input_init(int use_gui) {
     int fd = lircc_init("mplayer", NULL);
     if(fd >= 0)
       mp_input_add_cmd_fd(fd,1,NULL,(mp_close_func_t)lircc_cleanup);
+  }
+#endif
+
+#ifdef HAVE_APPLE_REMOTE
+  if(use_ar) {
+    if(mp_input_ar_init() < 0)
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
+    else
+      mp_input_add_key_fd(-1,0,mp_input_ar_read,mp_input_ar_close);
   }
 #endif
 

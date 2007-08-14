@@ -1313,6 +1313,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "A bemeneti borkormány inicializálása nem sikerült\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "Nem stat-olható %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Nem nyitható meg %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Apple Remote inicializálása nem sikerült.\n"
 
 // ========================== LIBMPDEMUX ===================================
 
