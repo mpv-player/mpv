@@ -287,7 +287,7 @@ static void draw_osd(void)
 {
     if (vo_osd_progbar_type != -1)
 	osdpercent(MESSAGE_DURATION, 0, 255,
-		  vo_osd_progbar_value, __sub_osd_names[vo_osd_progbar_type],
+		  vo_osd_progbar_value, sub_osd_names[vo_osd_progbar_type],
 		  "");
 }
 

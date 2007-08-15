@@ -201,8 +201,8 @@ printosdtext(void)
   if (vo_osd_text && vo_osd_text[0] != 0) {
     int len;
     if(vo_osd_text[0] < 32) {
-      len = strlen(__sub_osd_names_short[vo_osd_text[0]]) + strlen(vo_osd_text+1) + 2;
-      aa_printf(c, 0, 0 , aaopt_osdcolor, "%s %s ", __sub_osd_names_short[vo_osd_text[0]], vo_osd_text+1);
+      len = strlen(sub_osd_names_short[vo_osd_text[0]]) + strlen(vo_osd_text+1) + 2;
+      aa_printf(c, 0, 0 , aaopt_osdcolor, "%s %s ", sub_osd_names_short[vo_osd_text[0]], vo_osd_text+1);
     } else {
       len = strlen(vo_osd_text) + 1;
       aa_printf(c, 0, 0 , aaopt_osdcolor, "%s ",vo_osd_text);
@@ -221,7 +221,7 @@ static void
 printosdprogbar(void){
     /* print mplayer osd-progbar */
     if (vo_osd_progbar_type!=-1){
-	osdpercent(1,1,0,255,vo_osd_progbar_value, __sub_osd_names[vo_osd_progbar_type], "");	
+        osdpercent(1,1,0,255,vo_osd_progbar_value, sub_osd_names[vo_osd_progbar_type], "");
     }
 }
 static int
