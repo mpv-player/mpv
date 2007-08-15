@@ -31,9 +31,14 @@
  */
 
 /**
- * The current version.
+ * The current version. (0.9.4 => 904, 1.2.3 => 10203)
  */
-#define DVDREAD_VERSION 904
+#define DVDREAD_VERSION 905
+
+/**
+ * Returns the compiled version. (DVDREAD_VERSION as an int)
+ */
+int DVDVersion(void);
 
 /**
  * The length of one Logical Block of a DVD.
@@ -80,6 +85,10 @@ typedef struct dvd_file_s dvd_file_t;
  * @return If successful a a read handle is returned. Otherwise 0 is returned.
  *
  * dvd = DVDOpen(path);
+ *
+ * Threads: this function uses chdir() and getcwd().
+ * The current working directory is global to all threads,
+ * so using chdir/getcwd in another thread could give unexpected results.
  */
 dvd_reader_t *DVDOpen( const char * );
 
@@ -93,6 +102,35 @@ dvd_reader_t *DVDOpen( const char * );
  * DVDClose(dvd);
  */
 void DVDClose( dvd_reader_t * );
+
+/**
+ * Initializes libdvdread to be used with multithreading apps.
+ *
+ * You must call this function before using any other functions of libdvdread
+ * if you are going to use libdvdread in multiple threads in your program.
+ * If you are not using threads, or using libdvdread from just one thread,
+ * you do not need to call this, but you are allowed to do so anyway.
+ * 
+ * There are several restrictions on how you can use libdvdread in
+ * multithreading apps, see further documentation.
+ *
+ * If you have called DVDFinish() you need to call DVDInit again to use
+ * libdvdread in multiple threads.
+ *
+ * DVDInit(void);
+ */
+void DVDInit(void);
+
+/**
+ * frees any dlopened objects.
+ *
+ * You must DVDClose all handles opened with DVDOpen before calling this.
+ * Use this function if you need to close the dlopened libs and any other
+ * objects that have been dynamically allocated by libdvdread.
+ * 
+ * DVDFinish(void);
+ */
+void DVDFinish(void);
 
 /**
  * 
@@ -141,6 +179,8 @@ void DVDCloseFile( dvd_file_t * );
  * @param offset Block offset from the start of the file to start reading at.
  * @param block_count Number of block to read.
  * @param data Pointer to a buffer to write the data into.
+ *             It must be aligned to the logical block size of the device when
+ *             reading from a raw/O_DIRECT device (2048 bytes for DVD)
  * @return Returns number of blocks read on success, -1 on error.
  *
  * blocks_read = DVDReadBlocks(dvd_file, offset, block_count, data);

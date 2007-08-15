@@ -40,6 +40,13 @@ extern int         (*dvdinput_read)  (dvd_input_t, void *, int, int);
 extern char *      (*dvdinput_error) (dvd_input_t);
 
 /**
+ * Free any objects allocated by dvdinput_setup.
+ * Should only be called when libdvdread is not to be used any more.
+ * Closes dlopened libraries.
+ */
+void dvdinput_free(void);
+
+/**
  * Setup function accessed by dvd_reader.c.  Returns 1 if there is CSS support.
  */
 int dvdinput_setup(void);

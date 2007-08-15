@@ -20,7 +20,11 @@
 
 #include <stdio.h>
 #include <string.h>
+#if defined(HAVE_INTTYPES_H)
 #include <inttypes.h>
+#elif defined(HAVE_STDINT_H)
+#include <stdint.h>
+#endif
 
 #include "bswap.h"
 #include "nav_types.h"

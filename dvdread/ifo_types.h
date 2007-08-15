@@ -24,9 +24,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <inttypes.h>
 #include <dvdread/dvd_reader.h>
 
+#if defined(__BEOS__)
+#if !defined(_INTTYPES_H_) && !defined(_INTTYPES_H) && !defined(_STDINT_H_) && !defined(_STDINT_H)
+#error "Must include <inttypes.h> or <stdint.h> before any libdvdread header."
+#endif
+#else
+#if !defined(UINT8_MAX) || !defined(UINT16_MAX) || !defined(INT32_MAX)
+#error "Must include <inttypes.h> or <stdint.h> before any libdvdread header."
+#endif
+#endif
 
 #undef ATTRIBUTE_PACKED
 #undef PRAGMA_PACK_BEGIN 
@@ -72,7 +80,7 @@ typedef struct {
 typedef struct {
   uint8_t bytes[8];
 } ATTRIBUTE_PACKED vm_cmd_t;
-#define COMMAND_DATA_SIZE 8
+#define COMMAND_DATA_SIZE 8U
 
 
 /**
@@ -140,7 +148,7 @@ typedef struct {
   uint8_t  code_extension;
   uint8_t unknown3;
   union {
-    struct ATTRIBUTE_PACKED {
+    struct {
 #ifdef WORDS_BIGENDIAN
       unsigned int unknown4           : 1;
       unsigned int channel_assignment : 3;
@@ -154,8 +162,8 @@ typedef struct {
       unsigned int channel_assignment : 3;
       unsigned int unknown4           : 1;
 #endif
-    } karaoke;
-    struct ATTRIBUTE_PACKED {
+    } ATTRIBUTE_PACKED karaoke;
+    struct {
 #ifdef WORDS_BIGENDIAN
       unsigned int unknown5           : 4;
       unsigned int dolby_encoded      : 1; /* suitable for surround decoding */
@@ -165,7 +173,7 @@ typedef struct {
       unsigned int dolby_encoded      : 1;
       unsigned int unknown5           : 4;
 #endif
-    } surround;
+    } ATTRIBUTE_PACKED surround;
   } app_info;
 } ATTRIBUTE_PACKED audio_attr_t;
 
@@ -265,12 +273,12 @@ typedef struct {
   uint16_t nr_of_pre;
   uint16_t nr_of_post;
   uint16_t nr_of_cell;
-  uint16_t zero_1;
+  uint16_t last_byte;
   vm_cmd_t *pre_cmds;
   vm_cmd_t *post_cmds;
   vm_cmd_t *cell_cmds;
 } ATTRIBUTE_PACKED pgc_command_tbl_t;
-#define PGC_COMMAND_TBL_SIZE 8
+#define PGC_COMMAND_TBL_SIZE 8U
 
 /**
  * PGC Program Map
@@ -460,8 +468,8 @@ typedef struct {
   uint16_t next_pgc_nr;
   uint16_t prev_pgc_nr;
   uint16_t goup_pgc_nr;
-  uint8_t  still_time;
   uint8_t  pg_playback_mode;
+  uint8_t  still_time;
   uint32_t palette[16]; /* New type struct {zero_1, Y, Cr, Cb} ? */
   uint16_t command_tbl_offset;
   uint16_t program_map_offset;
@@ -472,7 +480,7 @@ typedef struct {
   cell_playback_t *cell_playback;
   cell_position_t *cell_position;
 } ATTRIBUTE_PACKED pgc_t;
-#define PGC_SIZE 236
+#define PGC_SIZE 236U
 
 /**
  * Program Chain Information Search Pointer.
@@ -492,7 +500,7 @@ typedef struct {
   uint32_t pgc_start_byte;
   pgc_t *pgc;
 } ATTRIBUTE_PACKED pgci_srp_t;
-#define PGCI_SRP_SIZE 8
+#define PGCI_SRP_SIZE 8U
 
 /**
  * Program Chain Information Table.
@@ -503,7 +511,7 @@ typedef struct {
   uint32_t last_byte;
   pgci_srp_t *pgci_srp;
 } ATTRIBUTE_PACKED pgcit_t;
-#define PGCIT_SIZE 8
+#define PGCIT_SIZE 8U
 
 /**
  * Menu PGCI Language Unit.
@@ -515,7 +523,7 @@ typedef struct {
   uint32_t lang_start_byte;
   pgcit_t *pgcit;
 } ATTRIBUTE_PACKED pgci_lu_t;
-#define PGCI_LU_SIZE 8
+#define PGCI_LU_SIZE 8U
 
 /**
  * Menu PGCI Unit Table.
@@ -526,7 +534,7 @@ typedef struct {
   uint32_t last_byte;
   pgci_lu_t *lu;
 } ATTRIBUTE_PACKED pgci_ut_t;
-#define PGCI_UT_SIZE 8
+#define PGCI_UT_SIZE 8U
 
 /**
  * Cell Address Information.
@@ -548,7 +556,7 @@ typedef struct {
   uint32_t last_byte;
   cell_adr_t *cell_adr_table;  /* No explicit size given. */
 } ATTRIBUTE_PACKED c_adt_t;
-#define C_ADT_SIZE 8
+#define C_ADT_SIZE 8U
 
 /**
  * VOBU Address Map.
@@ -557,7 +565,7 @@ typedef struct {
   uint32_t last_byte;
   uint32_t *vobu_start_sectors;
 } ATTRIBUTE_PACKED vobu_admap_t;
-#define VOBU_ADMAP_SIZE 4
+#define VOBU_ADMAP_SIZE 4U
 
 
 
@@ -655,7 +663,7 @@ typedef struct {
   uint32_t last_byte;
   title_info_t *title;
 } ATTRIBUTE_PACKED tt_srpt_t;
-#define TT_SRPT_SIZE 8
+#define TT_SRPT_SIZE 8U
 
 
 /**
@@ -674,7 +682,7 @@ typedef struct {
   uint16_t zero_2;
   pf_level_t *pf_ptl_mai; /* table of (nr_of_vtss + 1), video_ts is first */
 } ATTRIBUTE_PACKED ptl_mait_country_t;
-#define PTL_MAIT_COUNTRY_SIZE 8
+#define PTL_MAIT_COUNTRY_SIZE 8U
 
 /**
  * Parental Management Information Table.
@@ -685,7 +693,7 @@ typedef struct {
   uint32_t last_byte;
   ptl_mait_country_t *countries;
 } ATTRIBUTE_PACKED ptl_mait_t;
-#define PTL_MAIT_SIZE 8
+#define PTL_MAIT_SIZE 8U
 
 /**
  * Video Title Set Attributes.
@@ -716,8 +724,8 @@ typedef struct {
   uint8_t  nr_of_vtstt_subp_streams;
   subp_attr_t vtstt_subp_attr[32];
 } ATTRIBUTE_PACKED vts_attributes_t;
-#define VTS_ATTRIBUTES_SIZE 542
-#define VTS_ATTRIBUTES_MIN_SIZE 356
+#define VTS_ATTRIBUTES_SIZE 542U
+#define VTS_ATTRIBUTES_MIN_SIZE 356U
 
 /**
  * Video Title Set Attribute Table.
@@ -729,7 +737,7 @@ typedef struct {
   vts_attributes_t *vts;
   uint32_t *vts_atrt_offsets; /* offsets table for each vts_attributes */
 } ATTRIBUTE_PACKED vts_atrt_t;
-#define VTS_ATRT_SIZE 8
+#define VTS_ATRT_SIZE 8U
 
 /**
  * Text Data. (Incomplete)
@@ -762,7 +770,7 @@ typedef struct {
   uint32_t txtdt_start_byte;  /* prt, rel start of vmg_txtdt_mgi  */
   txtdt_t  *txtdt;
 } ATTRIBUTE_PACKED txtdt_lu_t;
-#define TXTDT_LU_SIZE 8
+#define TXTDT_LU_SIZE 8U
 
 /**
  * Text Data Manager Information. (Incomplete)
@@ -773,7 +781,7 @@ typedef struct {
   uint32_t last_byte;
   txtdt_lu_t *lu;
 } ATTRIBUTE_PACKED txtdt_mgi_t;
-#define TXTDT_MGI_SIZE 20
+#define TXTDT_MGI_SIZE 20U
 
 
 /**
@@ -865,7 +873,7 @@ typedef struct {
   ttu_t  *title;
   uint32_t *ttu_offset; /* offset table for each ttu */
 } ATTRIBUTE_PACKED vts_ptt_srpt_t;
-#define VTS_PTT_SRPT_SIZE 8
+#define VTS_PTT_SRPT_SIZE 8U
 
 
 /**
@@ -883,7 +891,7 @@ typedef struct {
   uint16_t nr_of_entries;
   map_ent_t *map_ent;
 } ATTRIBUTE_PACKED vts_tmap_t;
-#define VTS_TMAP_SIZE 4
+#define VTS_TMAP_SIZE 4U
 
 /**
  * Time Map Table.
@@ -895,7 +903,7 @@ typedef struct {
   vts_tmap_t *tmap;
   uint32_t *tmap_offset; /* offset table for each tmap */
 } ATTRIBUTE_PACKED vts_tmapt_t;
-#define VTS_TMAPT_SIZE 8
+#define VTS_TMAPT_SIZE 8U
 
 
 #if PRAGMA_PACK

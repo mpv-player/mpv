@@ -27,13 +27,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <inttypes.h>
 #include <string.h>
 #include <ctype.h>
+
+#if defined(HAVE_INTTYPES_H)
+#include <inttypes.h>
+#elif defined(HAVE_STDINT_H)
+#include <stdint.h>
+#endif
 
 #include "ifo_types.h"
 #include "ifo_read.h"
 #include "ifo_print.h"
+#include "cmd_print.h"
 #include "dvdread_internal.h"
 
 /* Put this in some other file / package?  It's used in nav_print too. */
@@ -65,20 +71,6 @@ static void ifoPrint_time(dvd_time_t *dtime) {
     break;
   } 
   printf(" @ %s fps", rate);
-}
-
-/* Put this in some other file / package?  It's used in nav_print too.
-   Possibly also by the vm / navigator. */
-static void ifoPrint_CMD(int row, vm_cmd_t *command) {
-  int i;
-
-  printf("(%03d) ", row + 1);
-  for(i=0;i<8;i++)
-    printf("%02x ", command->bytes[i]);
-  printf("| ");
-
-  //vmcmd(command);
-  printf("\n");
 }
 
 static void ifoPrint_video_attributes(video_attr_t *attr) {
@@ -261,6 +253,9 @@ static void ifoPrint_audio_attributes(audio_attr_t *attr) {
   case 1:
     printf("%c%c (%c) ", attr->lang_code>>8, attr->lang_code & 0xff,
            attr->lang_extension ? attr->lang_extension : ' ');
+    if(attr->lang_extension) {
+      printf("(please send a bug report) lang_extension != 0");
+    }
     break;
   default:
     printf("(please send a bug report) ");
@@ -280,6 +275,29 @@ static void ifoPrint_audio_attributes(audio_attr_t *attr) {
     printf("(please send a bug report) ");
   }
   
+  switch(attr->audio_format) {
+  case 0: //ac3
+    if(attr->quantization != 3) {
+      printf("(please send a bug report) ac3 quant/drc not 3 (%d)",
+             attr->quantization);
+    }
+    break;
+  case 2: //mpeg 1 or mpeg 2 without extension stream
+  case 3: //mpeg 2 with extension stream
+    switch(attr->quantization) {
+    case 0: //no drc
+      printf("no drc ");
+      break;
+    case 1:
+      printf("drc ");
+      break;
+    default:
+      printf("(please send a bug report) mpeg reserved quant/drc  (%d)",
+             attr->quantization);
+      break;
+    }
+    break;
+  case 4:
   switch(attr->quantization) {
   case 0:
     printf("16bit ");
@@ -291,10 +309,19 @@ static void ifoPrint_audio_attributes(audio_attr_t *attr) {
     printf("24bit ");
     break;
   case 3:
-    printf("drc ");
+      printf("(please send a bug report) lpcm reserved quant/drc  (%d)",
+             attr->quantization);
+      break;
+    }
+    break;
+  case 6: //dts
+    if(attr->quantization != 3) {
+      printf("(please send a bug report) dts quant/drc not 3 (%d)",
+             attr->quantization);
+    }
     break;
   default:
-    printf("(please send a bug report) ");
+    break;
   }
   
   switch(attr->sample_frequency) {
@@ -302,7 +329,7 @@ static void ifoPrint_audio_attributes(audio_attr_t *attr) {
     printf("48kHz ");
     break;
   case 1:
-    printf("??kHz ");
+    printf("96kHz ");
     break;
   default:
     printf("sample_frequency %i (please send a bug report) ", 
@@ -387,10 +414,9 @@ static void ifoPrint_subp_attributes(subp_attr_t *attr) {
   
   printf("%d ", attr->zero1);
   printf("%d ", attr->zero2);
-  printf("%d ", attr->code_extension);
+  printf("%d ", attr->lang_extension);
   
-  /* Is this correct?  should it not be subp_code_ext here instead? */
-  switch(attr->lang_extension) {
+  switch(attr->code_extension) {
   case 0:
     printf("Not specified ");
     break;
@@ -640,17 +666,17 @@ static void ifoPrint_PGC_COMMAND_TBL(pgc_command_tbl_t *cmd_tbl) {
   
   printf("Number of Pre commands: %i\n", cmd_tbl->nr_of_pre);
   for(i = 0; i < cmd_tbl->nr_of_pre; i++) {
-    ifoPrint_CMD(i, &cmd_tbl->pre_cmds[i]);
+    cmdPrint_CMD(i, &cmd_tbl->pre_cmds[i]);
   }
 
   printf("Number of Post commands: %i\n", cmd_tbl->nr_of_post);
   for(i = 0; i < cmd_tbl->nr_of_post; i++) {
-    ifoPrint_CMD(i, &cmd_tbl->post_cmds[i]);
+    cmdPrint_CMD(i, &cmd_tbl->post_cmds[i]);
   }
 
   printf("Number of Cell commands: %i\n", cmd_tbl->nr_of_cell);
   for(i = 0; i < cmd_tbl->nr_of_cell; i++) {
-    ifoPrint_CMD(i, &cmd_tbl->cell_cmds[i]);
+    cmdPrint_CMD(i, &cmd_tbl->cell_cmds[i]);
   }
 }
 
@@ -754,6 +780,11 @@ static void ifoPrint_CELL_POSITION(cell_position_t *cell_position, int nr) {
 void ifoPrint_PGC(pgc_t *pgc) {
   int i;
   
+  if(pgc == NULL) {
+    printf("Error: No PGC present\n");
+    return;
+  }
+
   printf("Number of Programs: %i\n", pgc->nr_of_programs);
   printf("Number of Cells: %i\n", pgc->nr_of_cells);
   /* Check that time is 0:0:0:0 also if nr_of_programs==0 */
@@ -765,14 +796,14 @@ void ifoPrint_PGC(pgc_t *pgc) {
   ifoPrint_USER_OPS(&pgc->prohibited_ops);
   
     for(i = 0; i < 8; i++) {
-      if(pgc->audio_control[i].present) {
+    if(pgc->audio_control[i].present) { /* The 'is present' bit */
 	printf("Audio stream %i control: %04x\n", 
 	       i, pgc->audio_control[i]);
       }
     }
   
   for(i = 0; i < 32; i++) {
-    if(pgc->subp_control[i].present) {
+    if(pgc->subp_control[i].present) { /* The 'is present' bit */
       printf("Subpicture stream %2i control: %08x\n", 
 	     i, pgc->subp_control[i]);
     }
@@ -918,7 +949,7 @@ void ifoPrint_C_ADT(c_adt_t *c_adt) {
   
   printf("Number of VOBs in this VOBS: %i\n", c_adt->nr_of_vobs);
   //entries = c_adt->nr_of_vobs;
-  entries = (c_adt->last_byte + 1 - C_ADT_SIZE)/sizeof(c_adt_t);
+  entries = (c_adt->last_byte + 1 - C_ADT_SIZE)/sizeof(cell_adr_t);
   
   for(i = 0; i < entries; i++) {
     printf("VOB ID: %3i, Cell ID: %3i   ", 
@@ -1030,7 +1061,9 @@ void ifoPrint(dvd_reader_t *dvd, int title) {
 
   ifohandle = ifoOpen(dvd, title);
   if(!ifohandle) {
+    if(dvdread_verbose(dvd) >= 0) {
     fprintf(stderr, "Can't open info file for title %d\n", title);
+    }
     return;
   }
   
@@ -1041,7 +1074,11 @@ void ifoPrint(dvd_reader_t *dvd, int title) {
     ifoPrint_VMGI_MAT(ifohandle->vmgi_mat);
 
     printf("\nFirst Play PGC\n--------------\n");
+    if(ifohandle->first_play_pgc) {
     ifoPrint_PGC(ifohandle->first_play_pgc);
+    } else {
+      printf("No First Play PGC present\n");
+    }
 
     printf("\nTitle Track search pointer table\n");
     printf(  "------------------------------------------------\n");

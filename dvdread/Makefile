@@ -10,6 +10,7 @@ SRCS_COMMON = dvd_input.c \
               nav_print.c \
               nav_read.c \
               md5.c \
+              cmd_print.c \
 
 CFLAGS = -D__USE_UNIX98 -D_GNU_SOURCE
 

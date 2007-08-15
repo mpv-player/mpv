@@ -37,23 +37,173 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef __MINGW32__
-#include <sys/ioctl.h>
-#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
+
+#if defined(HAVE_INTTYPES_H)
 #include <inttypes.h>
+#elif defined(HAVE_STDINT_H)
+#include <stdint.h>
+#endif
 
 #include "dvd_reader.h"
 #include "dvd_udf.h"
+#include "dvdread_internal.h"
+
+#ifndef EMEDIUMTYPE
+#define EMEDIUMTYPE ENOENT
+#endif
+
+#ifndef HAVE_UINTPTR_T
+#warning "Assuming that (unsigned long) can hold (void *)"
+typedef unsigned long uintptr_t;
+#endif
+
+#define DVD_ALIGN(ptr) (void *)((((uintptr_t)(ptr)) + (DVD_VIDEO_LB_LEN-1)) \
+                                / DVD_VIDEO_LB_LEN * DVD_VIDEO_LB_LEN)
+
+typedef struct {
+  void *start;
+  void *aligned;
+} dvdalign_ptrs_t;
+
+typedef struct {
+  dvdalign_ptrs_t *ptrs;
+  uint32_t ptrs_in_use;
+  uint32_t ptrs_max;
+} dvdalign_t;
+
+extern void *GetAlignHandle(dvd_reader_t *device);
+extern void SetAlignHandle(dvd_reader_t *device, void *align);
+
+/**
+ * Allocates aligned memory (for use with reads from raw/O_DIRECT devices).
+ * This memory must be freed with dvdalign_free()
+ * The size of the memory that is allocate is num_lbs*2048 bytes.
+ * The memory will be suitably aligned for use with
+ * block reads from raw/O_DIRECT device.
+ * @param num_lbs Number of logical blocks (2048 bytes) to allocate.
+ * @return Returns pointer to allocated memory, or NULL on failure
+ * This isn't supposed to be fast/efficient, if that is needed
+ * this function should be rewritten to use posix_memalign or similar.
+ * It's just needed for aligning memory for small block reads from
+ * raw/O_DIRECT devices. 
+ * We assume that 2048 is enough alignment for all systems at the moment.
+ * Not thread safe. Only use this from one thread.
+ * Depends on sizeof(unsigned long) being at least as large as sizeof(void *)
+ */
+static void *dvdalign_lbmalloc(dvd_reader_t *device, uint32_t num_lbs)
+{
+  void *m;
+  int n;
+  dvdalign_t *a;
+  
+  m = malloc((num_lbs+1)*DVD_VIDEO_LB_LEN);
+  if(m == NULL) {
+    return m;
+  }
+  a = (dvdalign_t *)GetAlignHandle(device);
+  if(a == NULL) {
+    a = malloc(sizeof(dvdalign_t));
+    if(a == NULL) {
+      return a;
+    }
+    a->ptrs = NULL;
+    a->ptrs_in_use = 0;
+    a->ptrs_max = 0;
+    SetAlignHandle(device, (void *)a);
+  }
+  
+  if(a->ptrs_in_use >= a->ptrs_max) {
+    a->ptrs = realloc(a->ptrs, (a->ptrs_max+10)*sizeof(dvdalign_ptrs_t));
+    if(a->ptrs == NULL) {
+      free(m);
+      return NULL;
+    }
+    a->ptrs_max+=10;
+    for(n = a->ptrs_in_use; n < a->ptrs_max; n++) {
+      a->ptrs[n].start = NULL;
+      a->ptrs[n].aligned = NULL;
+    }
+    n = a->ptrs_in_use;
+  } else {
+    for(n = 0; n < a->ptrs_max; n++) {
+      if(a->ptrs[n].start == NULL) {
+        break;
+      }
+    }
+  }
+
+  a->ptrs[n].start = m;
+  a->ptrs[n].aligned = DVD_ALIGN(m);
+
+  a->ptrs_in_use++;
+
+  /* If this function starts to be used too much print a warning.
+     Either there is a memory leak somewhere or we need to rewrite this to
+     a more efficient version.
+  */
+  if(a->ptrs_in_use > 50) {
+    if(dvdread_verbose(device) >= 0) {
+      fprintf(stderr, "libdvdread: dvdalign_lbmalloc(), more allocs than supposed: %u\n", a->ptrs_in_use);
+    }
+  }
+
+  return  a->ptrs[n].aligned;
+}
+
+/**
+ * Frees memory allocated with dvdalign_lbmemory() 
+ * @param ptr Pointer to memory space to free
+ * Not thread safe.
+ */
+static void dvdalign_lbfree(dvd_reader_t *device, void *ptr)
+{
+  int n;
+  dvdalign_t *a;
+
+  a = (dvdalign_t *)GetAlignHandle(device);
+  if(a && a->ptrs) {
+    for(n = 0; n < a->ptrs_max; n++) {
+      if(a->ptrs[n].aligned == ptr) {
+        free(a->ptrs[n].start);
+        a->ptrs[n].start = NULL;
+        a->ptrs[n].aligned = NULL;
+        a->ptrs_in_use--;
+        if(a->ptrs_in_use == 0) {
+          free(a->ptrs);
+          a->ptrs = NULL;
+          a->ptrs_max = 0;
+          free(a);
+          a = NULL;
+          SetAlignHandle(device, (void *)a);
+        }
+        return;
+      }
+    }
+  }
+  if(dvdread_verbose(device) >= 0) {
+    fprintf(stderr, "libdvdread: dvdalign_lbfree(), error trying to free mem: %08lx (%u)\n", (unsigned long)ptr, a ? a->ptrs_in_use : 0);
+  }
+}
+
 
 /* Private but located in/shared with dvd_reader.c */
 extern int UDFReadBlocksRaw( dvd_reader_t *device, uint32_t lb_number,
 				size_t block_count, unsigned char *data, 
 				int encrypted );
 
-/* It's required to either fail or deliver all the blocks asked for. */
+/** @internal
+ * Its required to either fail or deliver all the blocks asked for. 
+ *
+ * @param data Pointer to a buffer where data is returned. This must be large
+ *   enough to hold lb_number*2048 bytes.
+ *   It must be aligned to system specific (2048) logical blocks size when
+ *   reading from raw/O_DIRECT device.
+ */
 static int DVDReadLBUDF( dvd_reader_t *device, uint32_t lb_number,
 			 size_t block_count, unsigned char *data, 
 			 int encrypted )
@@ -149,12 +299,24 @@ typedef enum {
 extern void *GetUDFCacheHandle(dvd_reader_t *device);
 extern void SetUDFCacheHandle(dvd_reader_t *device, void *cache);
 
-void FreeUDFCache(void *cache)
+
+void FreeUDFCache(dvd_reader_t *device, void *cache)
 {
+  int n;
+  
   struct udf_cache *c = (struct udf_cache *)cache;
   if(c == NULL) {
     return;
   }
+
+  for(n = 0; n < c->lb_num; n++) {
+    if(c->lbs[n].data) {
+      /* free data */
+      dvdalign_lbfree(device, c->lbs[n].data);
+    }
+  }
+  c->lb_num = 0;
+
   if(c->lbs) {
     free(c->lbs);
   }
@@ -493,7 +655,7 @@ static int UDFFileIdentifier( uint8_t *data, uint8_t *FileCharacteristics,
 static int UDFMapICB( dvd_reader_t *device, struct AD ICB, uint8_t *FileType,
 		      struct Partition *partition, struct AD *File ) 
 {
-    uint8_t LogBlock[DVD_VIDEO_LB_LEN];
+  uint8_t *LogBlock;
     uint32_t lbnum;
     uint16_t TagID;
     struct icbmap tmpmap;
@@ -506,6 +668,11 @@ static int UDFMapICB( dvd_reader_t *device, struct AD ICB, uint8_t *FileType,
       return 1;
     }
 
+  LogBlock = dvdalign_lbmalloc(device, 1);
+  if(!LogBlock) {
+    return 0;
+  }
+    
     do {
         if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
             TagID = 0;
@@ -518,11 +685,13 @@ static int UDFMapICB( dvd_reader_t *device, struct AD ICB, uint8_t *FileType,
            tmpmap.file = *File;
            tmpmap.filetype = *FileType;
            SetUDFCache(device, MapCache, tmpmap.lbn, &tmpmap);
+      dvdalign_lbfree(device, LogBlock);
             return 1;
         };
     } while( ( lbnum <= partition->Start + ICB.Location + ( ICB.Length - 1 )
              / DVD_VIDEO_LB_LEN ) && ( TagID != 261 ) );
 
+  dvdalign_lbfree(device, LogBlock);
     return 0;
 }
 
@@ -537,7 +706,7 @@ static int UDFScanDir( dvd_reader_t *device, struct AD Dir, char *FileName,
 		       int cache_file_info) 
 {
     char filename[ MAX_UDF_FILE_NAME_LEN ];
-    uint8_t directory[ 2 * DVD_VIDEO_LB_LEN ];
+  uint8_t *directory;
     uint32_t lbnum;
     uint16_t TagID;
     uint8_t filechar;
@@ -556,19 +725,13 @@ static int UDFScanDir( dvd_reader_t *device, struct AD Dir, char *FileName,
       
       if(!GetUDFCache(device, LBUDFCache, lbnum, &cached_dir)) {
 	dir_lba = (Dir.Length + DVD_VIDEO_LB_LEN) / DVD_VIDEO_LB_LEN;
-	if((cached_dir = malloc(dir_lba * DVD_VIDEO_LB_LEN)) == NULL) {
+      if((cached_dir = dvdalign_lbmalloc(device, dir_lba)) == NULL) {
 	  return 0;
 	}
 	if( DVDReadLBUDF( device, lbnum, dir_lba, cached_dir, 0) <= 0 ) {
-	  free(cached_dir);
+        dvdalign_lbfree(device, cached_dir);
 	  cached_dir = NULL;
 	}
-	/*
-	if(cached_dir) {
-	  fprintf(stderr, "malloc dir: %d\n",
-		  dir_lba * DVD_VIDEO_LB_LEN);
-	}
-	*/
 	SetUDFCache(device, LBUDFCache, lbnum, &cached_dir);
       } else {
 	in_cache = 1;
@@ -615,7 +778,12 @@ static int UDFScanDir( dvd_reader_t *device, struct AD Dir, char *FileName,
       return 0;
     }
 
+  directory = dvdalign_lbmalloc(device, 2);
+  if(!directory) {
+    return 0;
+  }
     if( DVDReadLBUDF( device, lbnum, 2, directory, 0 ) <= 0 ) {
+    dvdalign_lbfree(device, directory);
         return 0;
     }
 
@@ -626,6 +794,7 @@ static int UDFScanDir( dvd_reader_t *device, struct AD Dir, char *FileName,
             p -= DVD_VIDEO_LB_LEN;
             Dir.Length -= DVD_VIDEO_LB_LEN;
             if( DVDReadLBUDF( device, lbnum, 2, directory, 0 ) <= 0 ) {
+        dvdalign_lbfree(device, directory);
                 return 0;
             }
         }
@@ -634,13 +803,16 @@ static int UDFScanDir( dvd_reader_t *device, struct AD Dir, char *FileName,
             p += UDFFileIdentifier( &directory[ p ], &filechar,
                                     filename, FileICB );
             if( !strcasecmp( FileName, filename ) ) {
+        dvdalign_lbfree(device, directory);
                 return 1;
             }
         } else {
+      dvdalign_lbfree(device, directory);
             return 0;
         }
     }
 
+  dvdalign_lbfree(device, directory);
     return 0;
 }
 
@@ -648,7 +820,7 @@ static int UDFScanDir( dvd_reader_t *device, struct AD Dir, char *FileName,
 static int UDFGetAVDP( dvd_reader_t *device,
 		       struct avdp_t *avdp)
 {
-  uint8_t Anchor[ DVD_VIDEO_LB_LEN ];
+  uint8_t *Anchor;
   uint32_t lbnum, MVDS_location, MVDS_length;
   uint16_t TagID;
   uint32_t lastsector;
@@ -664,6 +836,10 @@ static int UDFGetAVDP( dvd_reader_t *device,
   lbnum = 256;   /* Try #1, prime anchor */
   terminate = 0;
   
+  Anchor = dvdalign_lbmalloc(device, 1);
+  if(!Anchor) {
+    return 0;
+  }
   for(;;) {
     if( DVDReadLBUDF( device, lbnum, 1, Anchor, 0 ) > 0 ) {
       UDFDescriptor( Anchor, &TagID );
@@ -672,10 +848,13 @@ static int UDFGetAVDP( dvd_reader_t *device,
     }
     if (TagID != 2) {
       /* Not an anchor */
-      if( terminate ) return 0; /* Final try failed */
+      if( terminate ) {
+        dvdalign_lbfree(device, Anchor);
+        errno = EMEDIUMTYPE;
+        return 0; /* Final try failed */
+      } 
       
       if( lastsector ) {
-	
 	/* We already found the last sector.  Try #3, alternative
 	 * backup anchor.  If that fails, don't try again.
 	 */
@@ -688,6 +867,8 @@ static int UDFGetAVDP( dvd_reader_t *device,
 	  lbnum = lastsector - 256;
 	} else {
 	  /* Unable to find last sector */
+          dvdalign_lbfree(device, Anchor);
+          errno = EMEDIUMTYPE;
 	  return 0;
 	}
       }
@@ -708,6 +889,7 @@ static int UDFGetAVDP( dvd_reader_t *device,
   
   SetUDFCache(device, AVDPCache, 0, avdp);
   
+  dvdalign_lbfree(device, Anchor);
   return 1;
 }
 
@@ -719,7 +901,7 @@ static int UDFGetAVDP( dvd_reader_t *device,
 static int UDFFindPartition( dvd_reader_t *device, int partnum,
 			     struct Partition *part ) 
 {
-    uint8_t LogBlock[ DVD_VIDEO_LB_LEN ];
+  uint8_t *LogBlock;
     uint32_t lbnum, MVDS_location, MVDS_length;
     uint16_t TagID;
     int i, volvalid;
@@ -730,6 +912,10 @@ static int UDFFindPartition( dvd_reader_t *device, int partnum,
       return 0;
     }
 
+  LogBlock = dvdalign_lbmalloc(device, 1);
+  if(!LogBlock) {
+    return 0;
+  }
     /* Main volume descriptor */
     MVDS_location = avdp.mvds.location;
     MVDS_length = avdp.mvds.length;
@@ -774,6 +960,7 @@ static int UDFFindPartition( dvd_reader_t *device, int partnum,
         }
     } while( i-- && ( ( !part->valid ) || ( !volvalid ) ) );
 
+  dvdalign_lbfree(device, LogBlock);
     /* We only care for the partition, not the volume */
     return part->valid;
 }
@@ -781,7 +968,7 @@ static int UDFFindPartition( dvd_reader_t *device, int partnum,
 uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
 		      uint32_t *filesize )
 {
-    uint8_t LogBlock[ DVD_VIDEO_LB_LEN ];
+  uint8_t *LogBlock;
     uint32_t lbnum;
     uint16_t TagID;
     struct Partition partition;
@@ -790,7 +977,9 @@ uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
     char *token;
     uint8_t filetype;
 
+  if(filesize) {
     *filesize = 0;
+  }
     tokenline[0] = '\0';
     strcat( tokenline, filename );
 
@@ -798,9 +987,15 @@ uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
     if(!(GetUDFCache(device, PartitionCache, 0, &partition) &&
         GetUDFCache(device, RootICBCache, 0, &RootICB))) {
       /* Find partition, 0 is the standard location for DVD Video.*/
-      if( !UDFFindPartition( device, 0, &partition ) ) return 0;
+    if( !UDFFindPartition( device, 0, &partition ) ) {
+      return 0;
+    }
       SetUDFCache(device, PartitionCache, 0, &partition);
       
+    LogBlock = dvdalign_lbmalloc(device, 1);
+    if(!LogBlock) {
+      return 0;
+    }
       /* Find root dir ICB */
       lbnum = partition.Start;
       do {
@@ -817,16 +1012,25 @@ uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
     } while( ( lbnum < partition.Start + partition.Length )
              && ( TagID != 8 ) && ( TagID != 256 ) );
 
+    dvdalign_lbfree(device, LogBlock);
+      
     /* Sanity checks. */
-    if( TagID != 256 ) return 0;
-    if( RootICB.Partition != 0 ) return 0;
+    if( TagID != 256 ) {
+      return 0;
+    }
+    if( RootICB.Partition != 0 ) {
+      return 0;
+    }
     SetUDFCache(device, RootICBCache, 0, &RootICB);
     }
 
     /* Find root dir */
-    if( !UDFMapICB( device, RootICB, &filetype, &partition, &File ) ) return 0;
-    if( filetype != 4 ) return 0;  /* Root dir should be dir */
-
+  if( !UDFMapICB( device, RootICB, &filetype, &partition, &File ) ) {
+    return 0;
+  }
+  if( filetype != 4 ) {
+    return 0;  /* Root dir should be dir */
+  }
     {
       int cache_file_info = 0;
       /* Tokenize filepath */
@@ -849,14 +1053,19 @@ uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
     } 
 
     /* Sanity check. */
-    if( File.Partition != 0 ) return 0;
+  if( File.Partition != 0 ) {
+    return 0;
+  }
    
+  if(filesize) {
     *filesize = File.Length;
+  }
     /* Hack to not return partition.Start for empty files. */
-    if( !File.Location )
+  if( !File.Location ) {
       return 0;
-    else
+  } else {
       return partition.Start + File.Location;
+}
 }
 
 
@@ -865,7 +1074,8 @@ uint32_t UDFFindFile( dvd_reader_t *device, char *filename,
  * Gets a Descriptor .
  * Returns 1 if descriptor found, 0 on error.
  * id, tagid of descriptor
- * bufsize, size of BlockBuf (must be >= DVD_VIDEO_LB_LEN).
+ * bufsize, size of BlockBuf (must be >= DVD_VIDEO_LB_LEN)
+ * and aligned for raw/O_DIRECT read.
  */
 static int UDFGetDescriptor( dvd_reader_t *device, int id,
 			     uint8_t *descriptor, int bufsize) 
@@ -919,19 +1129,25 @@ static int UDFGetDescriptor( dvd_reader_t *device, int id,
     }
   } while( i-- && ( !desc_found )  );
   
+  
   return desc_found;
 }
 
 
 static int UDFGetPVD(dvd_reader_t *device, struct pvd_t *pvd)
 {
-  uint8_t pvd_buf[DVD_VIDEO_LB_LEN];
+  uint8_t *pvd_buf;
   
   if(GetUDFCache(device, PVDCache, 0, pvd)) {
     return 1;
   }
 
-  if(!UDFGetDescriptor( device, 1, pvd_buf, sizeof(pvd_buf))) {
+  pvd_buf = dvdalign_lbmalloc(device, 1);
+  if(!pvd_buf) {
+    return 0;
+  }
+  if(!UDFGetDescriptor( device, 1, pvd_buf, 1*DVD_VIDEO_LB_LEN)) {
+    dvdalign_lbfree(device, pvd_buf);
     return 0;
   }
   
@@ -939,6 +1155,8 @@ static int UDFGetPVD(dvd_reader_t *device, struct pvd_t *pvd)
   memcpy(pvd->VolumeSetIdentifier, &pvd_buf[72], 128);
   SetUDFCache(device, PVDCache, 0, pvd);
   
+  dvdalign_lbfree(device, pvd_buf);
+
   return 1;
 }
 
