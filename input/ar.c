@@ -270,8 +270,8 @@ int mp_input_ar_init(void)
     // Create the queue.
     (*queue)->create(queue, 0, MAX_QUEUE_SIZE);
 
-    // Add elements to the queue to make the queue work
-    // on tiger. It's a sequence from 1 to 21,
+    // Add elements to the queue to make the queue work.
+    // On tiger, it's a sequence from 1 to 21,
     // maybe it's the range of cookie values.
     for (i = 0;i < nr_cookies;i++)
         (*queue)->addElement(queue, cookies[i], 0);
