@@ -953,7 +953,7 @@ int ifoRead_TT_SRPT(ifo_handle_t *ifofile) {
   
   info_length = tt_srpt->last_byte + 1 - TT_SRPT_SIZE;
 
-  tt_srpt->title = malloc(info_length); 
+  tt_srpt->title = malloc(info_length);
   if(!tt_srpt->title) {
     free(tt_srpt);
     ifofile->tt_srpt = 0;
@@ -1063,7 +1063,7 @@ int ifoRead_VTS_PTT_SRPT(ifo_handle_t *ifofile) {
   
   info_length = vts_ptt_srpt->last_byte + 1 - VTS_PTT_SRPT_SIZE;
   
-  data = malloc(info_length); 
+  data = malloc(info_length);
   if(!data) {
     free(vts_ptt_srpt);
     ifofile->vts_ptt_srpt = 0;
@@ -1673,7 +1673,7 @@ static int ifoRead_VOBU_ADMAP_internal(ifo_handle_t *ifofile,
      Titles with a VOBS that has no VOBUs. */
   CHECK_VALUE(info_length % sizeof(uint32_t) == 0);
   
-  vobu_admap->vobu_start_sectors = malloc(info_length); 
+  vobu_admap->vobu_start_sectors = malloc(info_length);
   if(!vobu_admap->vobu_start_sectors) {
     return 0;
   }
