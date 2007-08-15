@@ -1,3 +1,4 @@
+/* -*- c-basic-offset: 2; indent-tabs-mode: nil -*- */
 /* 
  * Copyright (C) 2000, 2001, 2002, 2003
  *               Björn Englund <d4bjorn@dtek.chalmers.se>, 
@@ -51,10 +52,10 @@ static void ifoPrint_time(dvd_time_t *dtime) {
   CHECK_VALUE((dtime->frame_u&0xf) < 0xa);
   
   printf("%02x:%02x:%02x.%02x", 
-	 dtime->hour,
-	 dtime->minute,
-	 dtime->second,
-	 dtime->frame_u & 0x3f);
+         dtime->hour,
+         dtime->minute,
+         dtime->second,
+         dtime->frame_u & 0x3f);
   switch((dtime->frame_u & 0xc0) >> 6) {
   case 1:
     rate = "25.00";
@@ -155,14 +156,14 @@ static void ifoPrint_video_attributes(video_attr_t *attr) {
   }
 
   switch(attr->bit_rate) {
-    case 0:
-      printf("Variable Bit Rate ");
-      break;
-    case 1:
-      printf("Constant Bit Rate ");
-      break;
-    default:
-      printf("(please send a bug report)");
+  case 0:
+    printf("Variable Bit Rate ");
+    break;
+  case 1:
+    printf("Constant Bit Rate ");
+    break;
+  default:
+    printf("(please send a bug report)");
   }
   
   {
@@ -298,17 +299,17 @@ static void ifoPrint_audio_attributes(audio_attr_t *attr) {
     }
     break;
   case 4:
-  switch(attr->quantization) {
-  case 0:
-    printf("16bit ");
-    break;
-  case 1:
-    printf("20bit ");
-    break;
-  case 2:
-    printf("24bit ");
-    break;
-  case 3:
+    switch(attr->quantization) {
+    case 0:
+      printf("16bit ");
+      break;
+    case 1:
+      printf("20bit ");
+      break;
+    case 2:
+      printf("24bit ");
+      break;
+    case 3:
       printf("(please send a bug report) lpcm reserved quant/drc  (%d)",
              attr->quantization);
       break;
@@ -323,7 +324,7 @@ static void ifoPrint_audio_attributes(audio_attr_t *attr) {
   default:
     break;
   }
-  
+
   switch(attr->sample_frequency) {
   case 0:
     printf("48kHz ");
@@ -333,7 +334,7 @@ static void ifoPrint_audio_attributes(audio_attr_t *attr) {
     break;
   default:
     printf("sample_frequency %i (please send a bug report) ", 
-	   attr->sample_frequency);
+           attr->sample_frequency);
   }
   
   printf("%dCh ", attr->channels + 1);
@@ -409,7 +410,7 @@ static void ifoPrint_subp_attributes(subp_attr_t *attr) {
       printf("%02x%02x ", attr->lang_code >> 8, attr->lang_code & 0xff);
     }
   } else {
-      printf("lang not specified ");
+    printf("lang not specified ");
   }
   
   printf("%d ", attr->zero1);
@@ -547,8 +548,8 @@ void ifoPrint_VMGI_MAT(vmgi_mat_t *vmgi_mat) {
   printf("Last Sector of VMG: %08x\n", vmgi_mat->vmg_last_sector);
   printf("Last Sector of VMGI: %08x\n", vmgi_mat->vmgi_last_sector);
   printf("Specification version number: %01x.%01x\n", 
-	 vmgi_mat->specification_version >> 4, 
-	 vmgi_mat->specification_version & 0xf);
+         vmgi_mat->specification_version >> 4, 
+         vmgi_mat->specification_version & 0xf);
   /* Byte 2 of 'VMG Category' (00xx0000) is the Region Code */
   printf("VMG Category: %08x\n", vmgi_mat->vmg_category);
   printf("VMG Number of Volumes: %i\n", vmgi_mat->vmg_nr_of_volumes);
@@ -560,7 +561,7 @@ void ifoPrint_VMGI_MAT(vmgi_mat_t *vmgi_mat) {
   printf("%08x\n", (uint32_t)vmgi_mat->vmg_pos_code);
   printf("End byte of VMGI_MAT: %08x\n", vmgi_mat->vmgi_last_byte);
   printf("Start byte of First Play PGC FP PGC: %08x\n", 
-	 vmgi_mat->first_play_pgc);
+         vmgi_mat->first_play_pgc);
   printf("Start sector of VMGM_VOBS: %08x\n", vmgi_mat->vmgm_vobs);
   printf("Start sector of TT_SRPT: %08x\n", vmgi_mat->tt_srpt);
   printf("Start sector of VMGM_PGCI_UT: %08x\n", vmgi_mat->vmgm_pgci_ut);
@@ -569,19 +570,19 @@ void ifoPrint_VMGI_MAT(vmgi_mat_t *vmgi_mat) {
   printf("Start sector of TXTDT_MG: %08x\n", vmgi_mat->txtdt_mgi);
   printf("Start sector of VMGM_C_ADT: %08x\n", vmgi_mat->vmgm_c_adt);
   printf("Start sector of VMGM_VOBU_ADMAP: %08x\n", 
-	 vmgi_mat->vmgm_vobu_admap);
+         vmgi_mat->vmgm_vobu_admap);
   printf("Video attributes of VMGM_VOBS: ");
   ifoPrint_video_attributes(&vmgi_mat->vmgm_video_attr);
   printf("\n");
   printf("VMGM Number of Audio attributes: %i\n", 
-	 vmgi_mat->nr_of_vmgm_audio_streams);
+         vmgi_mat->nr_of_vmgm_audio_streams);
   if(vmgi_mat->nr_of_vmgm_audio_streams > 0) {
     printf("\tstream %i status: ", 1);
     ifoPrint_audio_attributes(&vmgi_mat->vmgm_audio_attr);
     printf("\n");
   }
   printf("VMGM Number of Sub-picture attributes: %i\n", 
-	 vmgi_mat->nr_of_vmgm_subp_streams);
+         vmgi_mat->nr_of_vmgm_subp_streams);
   if(vmgi_mat->nr_of_vmgm_subp_streams > 0) {
     printf("\tstream %2i status: ", 1);
     ifoPrint_subp_attributes(&vmgi_mat->vmgm_subp_attr);
@@ -597,8 +598,8 @@ void ifoPrint_VTSI_MAT(vtsi_mat_t *vtsi_mat) {
   printf("Last Sector of VTS: %08x\n", vtsi_mat->vts_last_sector);
   printf("Last Sector of VTSI: %08x\n", vtsi_mat->vtsi_last_sector);
   printf("Specification version number: %01x.%01x\n", 
-	 vtsi_mat->specification_version>>4, 
-	 vtsi_mat->specification_version&0xf);
+         vtsi_mat->specification_version>>4, 
+         vtsi_mat->specification_version&0xf);
   printf("VTS Category: %08x\n", vtsi_mat->vts_category);
   printf("End byte of VTSI_MAT: %08x\n", vtsi_mat->vtsi_last_byte);
   printf("Start sector of VTSM_VOBS:  %08x\n", vtsi_mat->vtsm_vobs);
@@ -617,7 +618,7 @@ void ifoPrint_VTSI_MAT(vtsi_mat_t *vtsi_mat) {
   printf("\n");
   
   printf("VTSM Number of Audio attributes: %i\n", 
-	 vtsi_mat->nr_of_vtsm_audio_streams);
+         vtsi_mat->nr_of_vtsm_audio_streams);
   if(vtsi_mat->nr_of_vtsm_audio_streams > 0) {
     printf("\tstream %i status: ", 1);
     ifoPrint_audio_attributes(&vtsi_mat->vtsm_audio_attr);
@@ -625,7 +626,7 @@ void ifoPrint_VTSI_MAT(vtsi_mat_t *vtsi_mat) {
   }
   
   printf("VTSM Number of Sub-picture attributes: %i\n", 
-	 vtsi_mat->nr_of_vtsm_subp_streams);
+         vtsi_mat->nr_of_vtsm_subp_streams);
   if(vtsi_mat->nr_of_vtsm_subp_streams > 0) {
     printf("\tstream %2i status: ", 1);
     ifoPrint_subp_attributes(&vtsi_mat->vtsm_subp_attr);
@@ -637,7 +638,7 @@ void ifoPrint_VTSI_MAT(vtsi_mat_t *vtsi_mat) {
   printf("\n");
   
   printf("VTS Number of Audio attributes: %i\n", 
-	 vtsi_mat->nr_of_vts_audio_streams);
+         vtsi_mat->nr_of_vts_audio_streams);
   for(i = 0; i < vtsi_mat->nr_of_vts_audio_streams; i++) {
     printf("\tstream %i status: ", i);
     ifoPrint_audio_attributes(&vtsi_mat->vts_audio_attr[i]);
@@ -645,7 +646,7 @@ void ifoPrint_VTSI_MAT(vtsi_mat_t *vtsi_mat) {
   }
   
   printf("VTS Number of Subpicture attributes: %i\n", 
-	 vtsi_mat->nr_of_vts_subp_streams);
+         vtsi_mat->nr_of_vts_subp_streams);
   for(i = 0; i < vtsi_mat->nr_of_vts_subp_streams; i++) {
     printf("\tstream %2i status: ", i);
     ifoPrint_subp_attributes(&vtsi_mat->vts_subp_attr[i]);
@@ -713,28 +714,28 @@ static void ifoPrint_CELL_PLAYBACK(cell_playback_t *cell_playback, int nr) {
       const char *s;
       switch(cell_playback[i].block_mode) {
       case 0:
-	s = "not a"; break;
+        s = "not a"; break;
       case 1:
-	s = "the first"; break;
+        s = "the first"; break;
       case 2:
       default:
-	s = ""; break;
+        s = ""; break;
       case 3:
-	s = "last"; break;
+        s = "last"; break;
       }
       printf("%s cell in the block ", s);
       
       switch(cell_playback[i].block_type) {
       case 0:
-	printf("not part of the block ");
-	break;
+        printf("not part of the block ");
+        break;
       case 1:
-	printf("angle block ");
-	break;
+        printf("angle block ");
+        break;
       case 2:
       case 3:
-	printf("(send bug repport) ");
-	break;
+        printf("(send bug repport) ");
+        break;
       }
     }
     if(cell_playback[i].seamless_play)
@@ -754,11 +755,11 @@ static void ifoPrint_CELL_PLAYBACK(cell_playback_t *cell_playback, int nr) {
       printf("cell command %d", cell_playback[i].cell_cmd_nr);
     
     printf("\n\tStart sector: %08x\tFirst ILVU end  sector: %08x\n", 
-	   cell_playback[i].first_sector, 
-	   cell_playback[i].first_ilvu_end_sector);
+           cell_playback[i].first_sector, 
+           cell_playback[i].first_ilvu_end_sector);
     printf("\tEnd   sector: %08x\tLast VOBU start sector: %08x\n", 
-	   cell_playback[i].last_sector, 
-	   cell_playback[i].last_vobu_start_sector);
+           cell_playback[i].last_sector, 
+           cell_playback[i].last_vobu_start_sector);
   }
 }
 
@@ -772,7 +773,7 @@ static void ifoPrint_CELL_POSITION(cell_position_t *cell_position, int nr) {
   
   for(i=0;i<nr;i++) {
     printf("Cell: %3i has VOB ID: %3i, Cell ID: %3i\n", i + 1, 
-	   cell_position[i].vob_id_nr, cell_position[i].cell_nr);
+           cell_position[i].vob_id_nr, cell_position[i].cell_nr);
   }
 }
 
@@ -795,17 +796,17 @@ void ifoPrint_PGC(pgc_t *pgc) {
   printf("Prohibited user operations: ");
   ifoPrint_USER_OPS(&pgc->prohibited_ops);
   
-    for(i = 0; i < 8; i++) {
+  for(i = 0; i < 8; i++) {
     if(pgc->audio_control[i].present) { /* The 'is present' bit */
-	printf("Audio stream %i control: %04x\n", 
-	       i, pgc->audio_control[i]);
-      }
+      printf("Audio stream %i control: %04x\n", 
+             i, pgc->audio_control[i]);
     }
+  }
   
   for(i = 0; i < 32; i++) {
     if(pgc->subp_control[i].present) { /* The 'is present' bit */
       printf("Subpicture stream %2i control: %08x\n", 
-	     i, pgc->subp_control[i]);
+             i, pgc->subp_control[i]);
     }
   }
   
@@ -840,36 +841,36 @@ void ifoPrint_TT_SRPT(tt_srpt_t *tt_srpt) {
   int i;
   
   printf("Number of TitleTrack search pointers: %i\n",
-	 tt_srpt->nr_of_srpts);
+         tt_srpt->nr_of_srpts);
   for(i=0;i<tt_srpt->nr_of_srpts;i++) {
     printf("Title Track index %i\n", i + 1);
     printf("\tTitle set number (VTS): %i", 
-	   tt_srpt->title[i].title_set_nr);
+           tt_srpt->title[i].title_set_nr);
     printf("\tVTS_TTN: %i\n", tt_srpt->title[i].vts_ttn);
     printf("\tNumber of PTTs: %i\n", tt_srpt->title[i].nr_of_ptts);
     printf("\tNumber of angles: %i\n", 
-	   tt_srpt->title[i].nr_of_angles);
+           tt_srpt->title[i].nr_of_angles);
     printf("\tTitle playback type: %s%s%s%s%s%s%s\n",
-	   tt_srpt->title[i].pb_ty.multi_or_random_pgc_title ? 
-	   " One Random PGC Title or Multi PGC Title" : 
-	   " One Sequential PGC Title",
-	   tt_srpt->title[i].pb_ty.jlc_exists_in_cell_cmd ?
-	   "" : ", No Link/Jump/Call exists in Cell command",
-	   tt_srpt->title[i].pb_ty.jlc_exists_in_prepost_cmd ?
-	   "" : ", No Link/Jump/Call exists in Pre- and/or Post-command",
-	   tt_srpt->title[i].pb_ty.jlc_exists_in_button_cmd ?
-	   "" : ", No Link/Jump/Call exists in Button command",
-	   tt_srpt->title[i].pb_ty.jlc_exists_in_tt_dom ?
-	   "" : ", No Link/Jump/Call exists in TT_DOM",
-	   tt_srpt->title[i].pb_ty.chapter_search_or_play ?
-	   ", UOP1 (TT_Play and PTT_Search) prohibited" : "",
-	   tt_srpt->title[i].pb_ty.title_or_time_play ?
-	   ", UOP0 (Time_Play and Time_Search) prohibited" : ""
-	   );    
+           tt_srpt->title[i].pb_ty.multi_or_random_pgc_title ? 
+           " One Random PGC Title or Multi PGC Title" : 
+           " One Sequential PGC Title",
+           tt_srpt->title[i].pb_ty.jlc_exists_in_cell_cmd ?
+           "" : ", No Link/Jump/Call exists in Cell command",
+           tt_srpt->title[i].pb_ty.jlc_exists_in_prepost_cmd ?
+           "" : ", No Link/Jump/Call exists in Pre- and/or Post-command",
+           tt_srpt->title[i].pb_ty.jlc_exists_in_button_cmd ?
+           "" : ", No Link/Jump/Call exists in Button command",
+           tt_srpt->title[i].pb_ty.jlc_exists_in_tt_dom ?
+           "" : ", No Link/Jump/Call exists in TT_DOM",
+           tt_srpt->title[i].pb_ty.chapter_search_or_play ?
+           ", UOP1 (TT_Play and PTT_Search) prohibited" : "",
+           tt_srpt->title[i].pb_ty.title_or_time_play ?
+           ", UOP0 (Time_Play and Time_Search) prohibited" : ""
+           );    
     printf("\tParental ID field: %04x\n",
-	   tt_srpt->title[i].parental_id);
+           tt_srpt->title[i].parental_id);
     printf("\tTitle set starting sector %08x\n", 
-	   tt_srpt->title[i].title_set_sector);
+           tt_srpt->title[i].title_set_sector);
   }
 }
 
@@ -877,16 +878,16 @@ void ifoPrint_TT_SRPT(tt_srpt_t *tt_srpt) {
 void ifoPrint_VTS_PTT_SRPT(vts_ptt_srpt_t *vts_ptt_srpt) {
   int i, j;
   printf(" nr_of_srpts %i last byte %i\n", 
-	 vts_ptt_srpt->nr_of_srpts, 
-	 vts_ptt_srpt->last_byte);
+         vts_ptt_srpt->nr_of_srpts, 
+         vts_ptt_srpt->last_byte);
   for(i=0;i<vts_ptt_srpt->nr_of_srpts;i++) {
     printf("\nVTS_PTT number %d has a offset %d relative to VTS_PTT_SRPT\n", 
-				i + 1, vts_ptt_srpt->ttu_offset[i]);
+           i + 1, vts_ptt_srpt->ttu_offset[i]);
     for(j=0;j<vts_ptt_srpt->title[i].nr_of_ptts;j++) {
       printf("VTS_PTT_SRPT - Title %3i part %3i: PGC: %3i PG: %3i\n",
-	     i + 1, j + 1, 
-	     vts_ptt_srpt->title[i].ptt[j].pgcn,
-	     vts_ptt_srpt->title[i].ptt[j].pgn );
+             i + 1, j + 1, 
+             vts_ptt_srpt->title[i].ptt[j].pgcn,
+             vts_ptt_srpt->title[i].ptt[j].pgn );
     }
   }
 }
@@ -903,18 +904,18 @@ void ifoPrint_PTL_MAIT(ptl_mait_t *ptl_mait) {
     
     printf("Start byte: %i\n", ptl_mait->countries[i].pf_ptl_mai_start_byte);
     printf("Parental Masks for country: %c%c\n",
-	   ptl_mait->countries[i].country_code >> 8,
-	   ptl_mait->countries[i].country_code & 0xff);
+           ptl_mait->countries[i].country_code >> 8,
+           ptl_mait->countries[i].country_code & 0xff);
     
     for(vts = 0; vts <= ptl_mait->nr_of_vtss; vts++) {
       if( vts == 0 ) {
-	printf("VMG    "); 
+        printf("VMG    "); 
       } else {
-	printf("VTS %2d ", vts);
+        printf("VTS %2d ", vts);
       }
       for(level = 0; level < 8; level++) {
-	printf("%d: %04x  ", level,
-	       ptl_mait->countries[i].pf_ptl_mai[vts][level] );
+        printf("%d: %04x  ", level,
+               ptl_mait->countries[i].pf_ptl_mai[vts][level] );
       }
       printf("\n");
     }
@@ -937,9 +938,9 @@ void ifoPrint_VTS_TMAPT(vts_tmapt_t *vts_tmapt) {
     for(j = 0; j < vts_tmapt->tmap[i].nr_of_entries; j++) {
       unsigned int ac_time = timeunit * (j + 1);
       printf("Time: %2i:%02i:%02i  VOBU Sector: 0x%08x %s\n", 
-	     ac_time / (60 * 60), (ac_time / 60) % 60, ac_time % 60,
-	     vts_tmapt->tmap[i].map_ent[j] & 0x7fffffff,
-	     (vts_tmapt->tmap[i].map_ent[j] >> 31) ? "discontinuity" : "");
+             ac_time / (60 * 60), (ac_time / 60) % 60, ac_time % 60,
+             vts_tmapt->tmap[i].map_ent[j] & 0x7fffffff,
+             (vts_tmapt->tmap[i].map_ent[j] >> 31) ? "discontinuity" : "");
     }
   }
 }
@@ -953,10 +954,10 @@ void ifoPrint_C_ADT(c_adt_t *c_adt) {
   
   for(i = 0; i < entries; i++) {
     printf("VOB ID: %3i, Cell ID: %3i   ", 
-	   c_adt->cell_adr_table[i].vob_id, c_adt->cell_adr_table[i].cell_id);
+           c_adt->cell_adr_table[i].vob_id, c_adt->cell_adr_table[i].cell_id);
     printf("Sector (first): 0x%08x   (last): 0x%08x\n",
-	   c_adt->cell_adr_table[i].start_sector, 
-	   c_adt->cell_adr_table[i].last_sector);
+           c_adt->cell_adr_table[i].start_sector, 
+           c_adt->cell_adr_table[i].last_sector);
   }
 }
 
@@ -967,7 +968,7 @@ void ifoPrint_VOBU_ADMAP(vobu_admap_t *vobu_admap) {
   entries = (vobu_admap->last_byte + 1 - VOBU_ADMAP_SIZE)/4;
   for(i = 0; i < entries; i++) {
     printf("VOBU %5i  First sector: 0x%08x\n", i + 1,
-	   vobu_admap->vobu_start_sectors[i]);
+           vobu_admap->vobu_start_sectors[i]);
   }
 }
 
@@ -990,9 +991,9 @@ void ifoPrint_PGCI_UT(pgci_ut_t *pgci_ut) {
   printf("Number of Menu Language Units (PGCI_LU): %3i\n", pgci_ut->nr_of_lus);
   for(i = 0; i < pgci_ut->nr_of_lus; i++) {
     printf("\nMenu Language Code: %c%c (%c)\n",
-	   pgci_ut->lu[i].lang_code >> 8,
-	   pgci_ut->lu[i].lang_code & 0xff,
-	   pgci_ut->lu[i].lang_extension ? pgci_ut->lu[i].lang_extension :' ');
+           pgci_ut->lu[i].lang_code >> 8,
+           pgci_ut->lu[i].lang_code & 0xff,
+           pgci_ut->lu[i].lang_extension ? pgci_ut->lu[i].lang_extension :' ');
     printf("Menu Existence: %02x\n", pgci_ut->lu[i].exists);
     ifoPrint_PGCIT(pgci_ut->lu[i].pgcit);
   }
@@ -1008,14 +1009,14 @@ static void ifoPrint_VTS_ATTRIBUTES(vts_attributes_t *vts_attributes) {
   ifoPrint_video_attributes(&vts_attributes->vtsm_vobs_attr);
   printf("\n");
   printf("Number of Audio streams: %i\n", 
-	 vts_attributes->nr_of_vtsm_audio_streams);
+         vts_attributes->nr_of_vtsm_audio_streams);
   if(vts_attributes->nr_of_vtsm_audio_streams > 0) {
     printf("\tstream %i attributes: ", 1);
     ifoPrint_audio_attributes(&vts_attributes->vtsm_audio_attr);
     printf("\n");
   }
   printf("Number of Subpicture streams: %i\n", 
-	 vts_attributes->nr_of_vtsm_subp_streams);
+         vts_attributes->nr_of_vtsm_subp_streams);
   if(vts_attributes->nr_of_vtsm_subp_streams > 0) {
     printf("\tstream %2i attributes: ", 1);
     ifoPrint_subp_attributes(&vts_attributes->vtsm_subp_attr);
@@ -1026,7 +1027,7 @@ static void ifoPrint_VTS_ATTRIBUTES(vts_attributes_t *vts_attributes) {
   ifoPrint_video_attributes(&vts_attributes->vtstt_vobs_video_attr);
   printf("\n");
   printf("Number of Audio streams: %i\n", 
-	 vts_attributes->nr_of_vtstt_audio_streams);
+         vts_attributes->nr_of_vtstt_audio_streams);
   for(i = 0; i < vts_attributes->nr_of_vtstt_audio_streams; i++) {
     printf("\tstream %i attributes: ", i);
     ifoPrint_audio_attributes(&vts_attributes->vtstt_audio_attr[i]);
@@ -1034,7 +1035,7 @@ static void ifoPrint_VTS_ATTRIBUTES(vts_attributes_t *vts_attributes) {
   }
   
   printf("Number of Subpicture streams: %i\n", 
-	 vts_attributes->nr_of_vtstt_subp_streams);
+         vts_attributes->nr_of_vtstt_subp_streams);
   for(i = 0; i < vts_attributes->nr_of_vtstt_subp_streams; i++) {
     printf("\tstream %2i attributes: ", i);    
     ifoPrint_subp_attributes(&vts_attributes->vtstt_subp_attr[i]);
@@ -1050,7 +1051,7 @@ void ifoPrint_VTS_ATRT(vts_atrt_t *vts_atrt) {
   for(i = 0; i < vts_atrt->nr_of_vtss; i++) {
     printf("\nVideo Title Set %i\n", i + 1);
     printf("  offset %d relative to VMG_VTS_ATRT\n", 
-	   vts_atrt->vts_atrt_offsets[i]);
+           vts_atrt->vts_atrt_offsets[i]);
     ifoPrint_VTS_ATTRIBUTES(&vts_atrt->vts[i]);
   }
 }
@@ -1062,7 +1063,7 @@ void ifoPrint(dvd_reader_t *dvd, int title) {
   ifohandle = ifoOpen(dvd, title);
   if(!ifohandle) {
     if(dvdread_verbose(dvd) >= 0) {
-    fprintf(stderr, "Can't open info file for title %d\n", title);
+      fprintf(stderr, "Can't open info file for title %d\n", title);
     }
     return;
   }
@@ -1075,7 +1076,7 @@ void ifoPrint(dvd_reader_t *dvd, int title) {
 
     printf("\nFirst Play PGC\n--------------\n");
     if(ifohandle->first_play_pgc) {
-    ifoPrint_PGC(ifohandle->first_play_pgc);
+      ifoPrint_PGC(ifohandle->first_play_pgc);
     } else {
       printf("No First Play PGC present\n");
     }

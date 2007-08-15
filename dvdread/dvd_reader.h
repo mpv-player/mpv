@@ -1,3 +1,4 @@
+/* -*- c-basic-offset: 2; indent-tabs-mode: nil -*- */
 #ifndef DVD_READER_H_INCLUDED
 #define DVD_READER_H_INCLUDED
 
@@ -140,8 +141,8 @@ typedef enum {
   DVD_READ_INFO_BACKUP_FILE, /**< VIDEO_TS.BUP  or VTS_XX_0.BUP (title) */
   DVD_READ_MENU_VOBS,        /**< VIDEO_TS.VOB  or VTS_XX_0.VOB (title) */
   DVD_READ_TITLE_VOBS        /**< VTS_XX_[1-9].VOB (title).  All files in 
-				  the title set are opened and read as a
-				  single file. */
+                                the title set are opened and read as a
+                                single file. */
 } dvd_read_domain_t;
 
 /**
@@ -214,7 +215,7 @@ int DVDFileSeek( dvd_file_t *, int );
  * bytes_read = DVDReadBytes(dvd_file, data, bytes);
  */
 ssize_t DVDReadBytes( dvd_file_t *, void *, size_t );
-
+  
 /**
  * Returns the file size in blocks.
  *
@@ -224,7 +225,7 @@ ssize_t DVDReadBytes( dvd_file_t *, void *, size_t );
  * blocks = DVDFileSize(dvd_file);
  */
 ssize_t DVDFileSize( dvd_file_t * );
-
+  
 /**
  * Get a unique 128 bit disc ID.
  * This is the MD5 sum of VIDEO_TS.IFO and the VTS_0?_0.IFO files
@@ -259,7 +260,7 @@ int DVDDiscID( dvd_reader_t *, unsigned char * );
  * @return 0 on success, -1 on error.
  */
 int DVDUDFVolumeInfo( dvd_reader_t *, char *, unsigned int,
-		      unsigned char *, unsigned int );
+                      unsigned char *, unsigned int );
 
 /**
  * Get the ISO9660 VolumeIdentifier and VolumeSetIdentifier
@@ -283,7 +284,7 @@ int DVDUDFVolumeInfo( dvd_reader_t *, char *, unsigned int,
  * @return 0 on success, -1 on error.
  */
 int DVDISOVolumeInfo( dvd_reader_t *, char *, unsigned int,
-		      unsigned char *, unsigned int );
+                      unsigned char *, unsigned int );
 
 /**
  * Sets the level of caching that is done when reading from a device
@@ -298,7 +299,7 @@ int DVDISOVolumeInfo( dvd_reader_t *, char *, unsigned int,
  * @return The level of caching.
  */
 int DVDUDFCacheLevel( dvd_reader_t *, int );
-
+  
 #ifdef __cplusplus
 };
 #endif

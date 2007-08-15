@@ -1,3 +1,4 @@
+/* -*- c-basic-offset: 2; indent-tabs-mode: nil -*- */
 #ifndef DVD_INPUT_H_INCLUDED
 #define DVD_INPUT_H_INCLUDED
 

@@ -1,3 +1,4 @@
+/* -*- c-basic-offset: 2; indent-tabs-mode: nil -*- */
 #ifndef DVD_UDF_H_INCLUDED
 #define DVD_UDF_H_INCLUDED
 
@@ -51,12 +52,12 @@ extern "C" {
  * the file in bytes.
  */
 uint32_t UDFFindFile( dvd_reader_t *device, char *filename, uint32_t *size );
-
+  
 void FreeUDFCache(dvd_reader_t *device, void *cache);
 int UDFGetVolumeIdentifier(dvd_reader_t *device,
-			   char *volid, unsigned int volid_size);
+                           char *volid, unsigned int volid_size);
 int UDFGetVolumeSetIdentifier(dvd_reader_t *device,
-			      uint8_t *volsetid, unsigned int volsetid_size);
+                              uint8_t *volsetid, unsigned int volsetid_size);
 #ifdef __cplusplus
 };
 #endif

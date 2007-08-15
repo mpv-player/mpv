@@ -1,3 +1,4 @@
+/* -*- c-basic-offset: 2; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2000, 2001, 2002, 2003 Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
@@ -109,7 +110,7 @@ void navRead_PCI(pci_t *pci, unsigned char *buffer) {
     CHECK_VALUE(pci->hli.hl_gi.btngr_ns != 0); 
   } else {
     CHECK_VALUE((pci->hli.hl_gi.btn_ns != 0 && pci->hli.hl_gi.btngr_ns != 0) 
-	   || (pci->hli.hl_gi.btn_ns == 0 && pci->hli.hl_gi.btngr_ns == 0));
+                || (pci->hli.hl_gi.btn_ns == 0 && pci->hli.hl_gi.btngr_ns == 0));
   }
 
   /* pci hli btnit */
@@ -123,28 +124,28 @@ void navRead_PCI(pci_t *pci, unsigned char *buffer) {
       CHECK_VALUE(pci->hli.btnit[n].zero5 == 0);
       CHECK_VALUE(pci->hli.btnit[n].zero6 == 0);
       
-      if (j < pci->hli.hl_gi.btn_ns) {	
-	CHECK_VALUE(pci->hli.btnit[n].x_start <= pci->hli.btnit[n].x_end);
-	CHECK_VALUE(pci->hli.btnit[n].y_start <= pci->hli.btnit[n].y_end);
-	CHECK_VALUE(pci->hli.btnit[n].up <= pci->hli.hl_gi.btn_ns);
-	CHECK_VALUE(pci->hli.btnit[n].down <= pci->hli.hl_gi.btn_ns);
-	CHECK_VALUE(pci->hli.btnit[n].left <= pci->hli.hl_gi.btn_ns);
-	CHECK_VALUE(pci->hli.btnit[n].right <= pci->hli.hl_gi.btn_ns);
-	//vmcmd_verify(pci->hli.btnit[n].cmd);
+      if (j < pci->hli.hl_gi.btn_ns) {  
+        CHECK_VALUE(pci->hli.btnit[n].x_start <= pci->hli.btnit[n].x_end);
+        CHECK_VALUE(pci->hli.btnit[n].y_start <= pci->hli.btnit[n].y_end);
+        CHECK_VALUE(pci->hli.btnit[n].up <= pci->hli.hl_gi.btn_ns);
+        CHECK_VALUE(pci->hli.btnit[n].down <= pci->hli.hl_gi.btn_ns);
+        CHECK_VALUE(pci->hli.btnit[n].left <= pci->hli.hl_gi.btn_ns);
+        CHECK_VALUE(pci->hli.btnit[n].right <= pci->hli.hl_gi.btn_ns);
+        //vmcmd_verify(pci->hli.btnit[n].cmd);
       } else {
-	int k;
-	CHECK_VALUE(pci->hli.btnit[n].btn_coln == 0);
-	CHECK_VALUE(pci->hli.btnit[n].auto_action_mode == 0);
-	CHECK_VALUE(pci->hli.btnit[n].x_start == 0);
-	CHECK_VALUE(pci->hli.btnit[n].y_start == 0);
-	CHECK_VALUE(pci->hli.btnit[n].x_end == 0);
-	CHECK_VALUE(pci->hli.btnit[n].y_end == 0);
-	CHECK_VALUE(pci->hli.btnit[n].up == 0);
-	CHECK_VALUE(pci->hli.btnit[n].down == 0);
-	CHECK_VALUE(pci->hli.btnit[n].left == 0);
-	CHECK_VALUE(pci->hli.btnit[n].right == 0);
-	for (k = 0; k < 8; k++)
-	  CHECK_VALUE(pci->hli.btnit[n].cmd.bytes[k] == 0); //CHECK_ZERO?
+        int k;
+        CHECK_VALUE(pci->hli.btnit[n].btn_coln == 0);
+        CHECK_VALUE(pci->hli.btnit[n].auto_action_mode == 0);
+        CHECK_VALUE(pci->hli.btnit[n].x_start == 0);
+        CHECK_VALUE(pci->hli.btnit[n].y_start == 0);
+        CHECK_VALUE(pci->hli.btnit[n].x_end == 0);
+        CHECK_VALUE(pci->hli.btnit[n].y_end == 0);
+        CHECK_VALUE(pci->hli.btnit[n].up == 0);
+        CHECK_VALUE(pci->hli.btnit[n].down == 0);
+        CHECK_VALUE(pci->hli.btnit[n].left == 0);
+        CHECK_VALUE(pci->hli.btnit[n].right == 0);
+        for (k = 0; k < 8; k++)
+          CHECK_VALUE(pci->hli.btnit[n].cmd.bytes[k] == 0); //CHECK_ZERO?
       }
     }
   }

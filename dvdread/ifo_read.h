@@ -1,3 +1,4 @@
+/* -*- c-basic-offset: 2; indent-tabs-mode: nil -*- */
 #ifndef IFO_READ_H_INCLUDED
 #define IFO_READ_H_INCLUDED
 

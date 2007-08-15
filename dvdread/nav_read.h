@@ -1,3 +1,4 @@
+/* -*- c-basic-offset: 2; indent-tabs-mode: nil -*- */
 #ifndef NAV_READ_H_INCLUDED
 #define NAV_READ_H_INCLUDED
 

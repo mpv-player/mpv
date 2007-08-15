@@ -1,3 +1,4 @@
+/* -*- c-basic-offset: 2; indent-tabs-mode: nil -*- */
 #ifndef DVDREAD_INTERNAL_H
 #define DVDREAD_INTERNAL_H
 
