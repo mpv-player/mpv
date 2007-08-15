@@ -7267,16 +7267,26 @@ audio codec (default: mp2)
 .RSs
 .IPs "ac3\ \ "
 Dolby Digital (AC-3)
-.IPs adpcm_ima_wav
-IMA Adaptive PCM (4bits per sample, 4:1 compression)
+.IPs adpcm_*
+Adaptive PCM formats - see libavcodec/adpcm.c for details.
 .IPs "flac\ "
 Free Lossless Audio Codec (FLAC)
+.IPs "g726\ "
+G.726 ADPCM
+.IPs libamr_nb
+3GPP Adaptive Multi-Rate (AMR) narrow-band
+.IPs libamr_wb
+3GPP Adaptive Multi-Rate (AMR) wide-band
 .IPs libfaac
 Advanced Audio Coding (AAC) - using FAAC
 .IPs libmp3lame
 MPEG-1 audio layer 3 (MP3) - using LAME
 .IPs "mp2\ \ "
 MPEG-1 audio layer 2 (MP2)
+.IPs pcm_*
+PCM formats - see libavcodec/pcm.c for details.
+.IPs roq_dpcm
+Id Software's RoQ DPCM
 .IPs sonic
 experimental simple lossy codec
 .IPs sonicls
