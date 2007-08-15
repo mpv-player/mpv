@@ -1,16 +1,9 @@
-diff -Naur dvdread.orig/bswap.h dvdread/bswap.h
---- dvdread.orig/bswap.h	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/bswap.h	2005-06-23 00:19:10.000000000 +0200
-@@ -59,13 +63,57 @@
+--- dvdread.orig/bswap.h	2005-09-19 16:14:34.000000000 +0200
++++ dvdread/bswap.h	2007-08-06 12:45:06.000000000 +0200
+@@ -76,13 +80,51 @@
  #define B2N_32(x) x = be32toh(x)
  #define B2N_64(x) x = be64toh(x)
  
-+#elif defined(__DragonFly__)
-+#include <sys/endian.h>
-+#define B2N_16(x) x = be16toh(x)
-+#define B2N_32(x) x = be32toh(x)
-+#define B2N_64(x) x = be64toh(x)
-+
 +#elif defined(ARCH_X86)
 +inline static unsigned short bswap_16(unsigned short x)
 +{
@@ -55,53 +48,19 @@ diff -Naur dvdread.orig/bswap.h dvdread/bswap.h
   * functionality! 
   */
  
--#elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__)
-+#elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(__CYGWIN__)
- #define B2N_16(x) \
-  x = ((((x) & 0xff00) >> 8) | \
-       (((x) & 0x00ff) << 8))
-diff -Naur dvdread.orig/.cvsignore dvdread/.cvsignore
-diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
---- dvdread.orig/dvd_input.c	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/dvd_input.c	2005-06-23 00:30:23.000000000 +0200
-@@ -74,7 +78,7 @@
-   dvd_input_t dev;
-     
-   /* Allocate the handle structure */
--  dev = (dvd_input_t) malloc(sizeof(dvd_input_t));
-+  dev = (dvd_input_t) malloc(sizeof(struct dvd_input_s));
-   if(dev == NULL) {
-     fprintf(stderr, "libdvdread: Could not allocate memory.\n");
-     return NULL;
-@@ -154,7 +158,7 @@
-   dvd_input_t dev;
-   
-   /* Allocate the library structure */
--  dev = (dvd_input_t) malloc(sizeof(dvd_input_t));
-+  dev = (dvd_input_t) malloc(sizeof(struct dvd_input_s));
-   if(dev == NULL) {
-     fprintf(stderr, "libdvdread: Could not allocate memory.\n");
-     return NULL;
-@@ -320,8 +324,10 @@
-     fprintf(stderr, "DVDCSS_METHOD %s\n", psz_method);
-     fprintf(stderr, "DVDCSS_VERBOSE %s\n", psz_verbose);
-     */
-+    /*
-     fprintf(stderr, "libdvdread: Using libdvdcss version %s for DVD access\n",
- 	    *dvdcss_version);
-+    */
-     
-     /* libdvdcss wrapper functions */
-     dvdinput_open  = css_open;
-diff -Naur dvdread.orig/dvd_input.h dvdread/dvd_input.h
-diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
---- dvdread.orig/dvd_reader.c	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/dvd_reader.c	2005-06-23 00:19:10.000000000 +0200
-@@ -32,24 +36,36 @@
+-#elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(WIN32) || defined(__BEOS__) || defined(__INTERIX)
++#elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(WIN32) || defined(__BEOS__) || defined(__INTERIX) || defined(__CYGWIN__)
+ #define B2N_16(x)                               \
+   x = ((((x) & 0xff00) >> 8) |                  \
+        (((x) & 0x00ff) << 8))
+
+--- dvdread.orig/dvd_reader.c	2007-08-06 13:34:37.000000000 +0200
++++ dvdread/dvd_reader.c	2007-08-06 13:35:19.000000000 +0200
+@@ -33,18 +37,30 @@
  #include <limits.h>
  #include <dirent.h>
   
--#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__)|| defined(__DARWIN__)
+-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__) || defined(__DARWIN__)
 +#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__) || defined(__DARWIN__) || defined(__DragonFly__)
  #define SYS_BSD 1
  #endif
@@ -127,17 +86,19 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
 +}
 +#endif
 +
- #include "dvd_udf.h"
- #include "dvd_input.h"
  #include "dvd_reader.h"
- #include "md5.h"
+ #include "dvd_input.h"
+ #include "dvd_udf.h"
+@@ -52,7 +68,7 @@
+ 
+ #include "dvdread_internal.h"
  
 -#define DEFAULT_UDF_CACHE_LEVEL 1
 +#define DEFAULT_UDF_CACHE_LEVEL 0
  
  struct dvd_reader_s {
-     /* Basic information. */
-@@ -278,11 +301,16 @@
+   /* Basic information. */
+@@ -402,6 +418,11 @@
     Darwin  /dev/rdisk0,  it needs to be the raw device
     BSD/OS  /dev/sr0c (if not mounted) or /dev/rsr0c ('c' any letter will do) */
  static char *bsd_block2char( const char *path )
@@ -147,187 +108,123 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
 +}
 +#else
  {
-     char *new_path;
+   char *new_path;
  
-     /* If it doesn't start with "/dev/" or does start with "/dev/r" exit */ 
--    if( !strncmp( path, "/dev/",  5 ) || strncmp( path, "/dev/r", 6 ) ) 
-+    if( strncmp( path, "/dev/",  5 ) || !strncmp( path, "/dev/r", 6 ) ) 
-       return (char *) strdup( path );
+@@ -416,6 +437,7 @@
  
-     /* Replace "/dev/" with "/dev/r" */
-@@ -292,6 +320,7 @@
- 
-     return new_path;
+   return new_path;
  }
 +#endif /* __FreeBSD__ */
  #endif
  
- dvd_reader_t *DVDOpen( const char *path )
-@@ -303,6 +332,16 @@
-     if( path == NULL )
-       return 0;
  
-+#ifdef WIN32
-+    /* Stat doesn't work on devices under mingwin/cygwin. */
-+    if( path[0] && path[1] == ':' && path[2] == '\0' )
-+    {
-+        /* Don't try to stat the file */
-+        fileinfo.st_mode = S_IFBLK;
-+    }
-+    else
-+#endif
-+    {
-     ret = stat( path, &fileinfo );
-     if( ret < 0 ) {
- 	/* If we can't stat the file, give up */
-@@ -310,6 +349,7 @@
- 	perror("");
- 	return 0;
-     }
-+    }
- 
-     /* Try to open libdvdcss or fall back to standard functions */
-     have_css = dvdinput_setup();
-@@ -335,7 +375,7 @@
- 	char *path_copy;
+@@ -481,7 +503,7 @@
+     char *path_copy;
  #if defined(SYS_BSD)
- 	struct fstab* fe;
+     struct fstab* fe;
 -#elif defined(__sun) || defined(__linux__)
 +#elif defined(__sun) || defined(__linux__) || defined(__CYGWIN__)
- 	FILE *mntfile;
+     FILE *mntfile;
  #endif
  
-@@ -350,7 +390,9 @@
- 	    if( cdir >= 0 ) {
- 		chdir( path_copy );
- 		new_path = getcwd( NULL, PATH_MAX );
-+#ifndef __MINGW32__       
- 		fchdir( cdir );
-+#endif       
- 		close( cdir );
- 		if( new_path ) {
- 		    free( path_copy );
-@@ -406,7 +448,7 @@
- 	    }
- 	    fclose( mntfile );
- 	}
+@@ -585,7 +607,7 @@
+       }
+       fclose( mntfile );
+     }
 -#elif defined(__linux__)
 +#elif defined(__linux__) || defined(__CYGWIN__)
-         mntfile = fopen( MOUNTED, "r" );
-         if( mntfile ) {
-             struct mntent *me;
-@@ -425,6 +467,9 @@
-             }
-             fclose( mntfile );
- 	}
-+#elif defined(__MINGW32__)	
-+	dev_name = strdup(path);
-+	auth_drive = DVDOpenImageFile( path, have_css );
+     mntfile = fopen( MOUNTED, "r" );
+     if( mntfile ) {
+       struct mntent *me;
+@@ -610,6 +632,9 @@
+       }
+       fclose( mntfile );
+     }
++#elif defined(__MINGW32__)
++    dev_name = strdup(path);
++    auth_drive = DVDOpenImageFile( path, have_css );
  #endif
- 	if( !dev_name ) {
- 	  fprintf( stderr, "libdvdread: Couldn't find device name.\n" );
-@@ -615,8 +660,8 @@
-     }
+     if( !dev_name ) {
+       if(verbose >= 1) {
+@@ -828,8 +853,8 @@
+   }
      
-     if( dvd->css_state == 1 /* Need key init */ ) {
--        initAllCSSKeys( dvd );
--	dvd->css_state = 2;
-+//        initAllCSSKeys( dvd );
-+//	dvd->css_state = 2;
-     }
-     /*    
-     if( dvdinput_title( dvd_file->dvd->dev, (int)start ) < 0 ) {
-@@ -915,7 +960,7 @@
-     return (ssize_t)ret;
- }
- 
--int32_t DVDFileSeek( dvd_file_t *dvd_file, int32_t offset )
-+int DVDFileSeek( dvd_file_t *dvd_file, int offset )
- {
-     /* Check arguments. */
-     if( dvd_file == NULL || offset < 0 )
-diff -Naur dvdread.orig/dvdread_internal.h dvdread/dvdread_internal.h
---- dvdread.orig/dvdread_internal.h	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/dvdread_internal.h	2005-06-23 00:19:10.000000000 +0200
-@@ -2,11 +2,7 @@
+   if( dvd->css_state == 1 /* Need key init */ ) {
+-    initAllCSSKeys( dvd );
+-    dvd->css_state = 2;
++//    initAllCSSKeys( dvd );
++//    dvd->css_state = 2;
+   }
+   /*    
+         if( dvdinput_title( dvd_file->dvd->dev, (int)start ) < 0 ) {
+
+--- dvdread.orig/dvdread_internal.h	2005-09-12 21:42:12.000000000 +0200
++++ dvdread/dvdread_internal.h	2007-08-06 12:57:08.000000000 +0200
+@@ -3,12 +3,7 @@
  #define DVDREAD_INTERNAL_H
  
  
--#define CHECK_VALUE(arg) \
-- if(!(arg)) { \
--   fprintf(stderr, "\n*** libdvdread: CHECK_VALUE failed in %s:%i ***" \
--                   "\n*** for %s ***\n\n", \
--                   __FILE__, __LINE__, # arg ); \
-- }
+-#define CHECK_VALUE(arg)                                                \
+-  if(!(arg)) {                                                          \
+-    fprintf(stderr, "\n*** libdvdread: CHECK_VALUE failed in %s:%i ***" \
+-            "\n*** for %s ***\n\n",                                     \
+-            __FILE__, __LINE__, # arg );                                \
+-  }
 +#define CHECK_VALUE(arg)
-+
  
- #endif /* DVDREAD_INTERNAL_H */
-diff -Naur dvdread.orig/dvd_udf.c dvdread/dvd_udf.c
---- dvdread.orig/dvd_udf.c	2005-06-23 00:18:54.000000000 +0200
-+++ dvdread/dvd_udf.c	2005-06-23 00:19:10.000000000 +0200
-@@ -33,7 +37,9 @@
- #include <stdio.h>
- #include <stdlib.h>
- #include <string.h>
-+#ifndef __MINGW32__
- #include <sys/ioctl.h>
-+#endif
- #include <sys/types.h>
- #include <sys/stat.h>
- #include <unistd.h>
-diff -Naur dvdread.orig/ifo_print.c dvdread/ifo_print.c
---- dvdread.orig/ifo_print.c	30 Jun 2005 22:48:26 -0000	1.4
-+++ dvdread/ifo_print.c	3 Oct 2005 14:29:01 -0000	1.5
-@@ -761,14 +761,14 @@
+ 
+ int get_verbose(void);
+
+--- dvdread.orig/ifo_print.c	2005-09-15 18:54:29.000000000 +0200
++++ dvdread/ifo_print.c	2007-08-06 12:52:32.000000000 +0200
+@@ -793,14 +797,14 @@
    ifoPrint_USER_OPS(&pgc->prohibited_ops);
    
-     for(i = 0; i < 8; i++) {
--      if(pgc->audio_control[i] & 0x8000) { /* The 'is present' bit */
-+      if(pgc->audio_control[i].present) {
- 	printf("Audio stream %i control: %04x\n", 
- 	       i, pgc->audio_control[i]);
-       }
+   for(i = 0; i < 8; i++) {
+-    if(pgc->audio_control[i] & 0x8000) { /* The 'is present' bit */
++    if(pgc->audio_control[i].present) { /* The 'is present' bit */
+       printf("Audio stream %i control: %04x\n", 
+              i, pgc->audio_control[i]);
      }
+   }
    
    for(i = 0; i < 32; i++) {
 -    if(pgc->subp_control[i] & 0x80000000) { /* The 'is present' bit */
-+    if(pgc->subp_control[i].present) {
++    if(pgc->subp_control[i].present) { /* The 'is present' bit */
        printf("Subpicture stream %2i control: %08x\n", 
- 	     i, pgc->subp_control[i]);
+              i, pgc->subp_control[i]);
      }
 
-diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
---- dvdread.orig/ifo_read.c	30 Jun 2005 22:48:26 -0000	1.4
-+++ dvdread/ifo_read.c	3 Oct 2005 14:29:01 -0000	1.5
-@@ -97,7 +101,7 @@
+--- dvdread.orig/ifo_read.c	2006-01-22 13:19:19.000000000 +0100
++++ dvdread/ifo_read.c	2007-08-06 13:15:55.000000000 +0200
+@@ -110,7 +114,7 @@
  ifo_handle_t *ifoOpen(dvd_reader_t *dvd, int title) {
    ifo_handle_t *ifofile;
  
 -  ifofile = (ifo_handle_t *)malloc(sizeof(ifo_handle_t));
 +  ifofile = malloc(sizeof(ifo_handle_t));
    if(!ifofile)
-     return 0;
+     return NULL;
  
-@@ -182,7 +186,7 @@
+@@ -240,7 +244,7 @@
  ifo_handle_t *ifoOpenVMGI(dvd_reader_t *dvd) {
    ifo_handle_t *ifofile;
  
 -  ifofile = (ifo_handle_t *)malloc(sizeof(ifo_handle_t));
 +  ifofile = malloc(sizeof(ifo_handle_t));
    if(!ifofile)
-     return 0;
+     return NULL;
  
-@@ -209,7 +213,7 @@
+@@ -292,7 +296,7 @@
  ifo_handle_t *ifoOpenVTSI(dvd_reader_t *dvd, int title) {
    ifo_handle_t *ifofile;
    
 -  ifofile = (ifo_handle_t *)malloc(sizeof(ifo_handle_t));
 +  ifofile = malloc(sizeof(ifo_handle_t));
    if(!ifofile)
-     return 0;
+     return NULL;
  
-@@ -274,7 +278,7 @@
+@@ -382,7 +386,7 @@
  static int ifoRead_VMG(ifo_handle_t *ifofile) {
    vmgi_mat_t *vmgi_mat;
  
@@ -336,7 +233,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!vmgi_mat)
      return 0;
  
-@@ -365,7 +369,7 @@
+@@ -473,7 +477,7 @@
    vtsi_mat_t *vtsi_mat;
    int i;
  
@@ -345,8 +242,8 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!vtsi_mat)
      return 0;
    
-@@ -493,7 +497,7 @@
-      
+@@ -606,7 +610,7 @@
+ 
    if(cmd_tbl->nr_of_pre != 0) {
      unsigned int pre_cmds_size  = cmd_tbl->nr_of_pre * COMMAND_DATA_SIZE;
 -    cmd_tbl->pre_cmds = (vm_cmd_t *)malloc(pre_cmds_size);
@@ -354,16 +251,16 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
      if(!cmd_tbl->pre_cmds)
        return 0;
  
-@@ -505,7 +509,7 @@
-   
+@@ -618,7 +622,7 @@
+ 
    if(cmd_tbl->nr_of_post != 0) {
      unsigned int post_cmds_size = cmd_tbl->nr_of_post * COMMAND_DATA_SIZE;
 -    cmd_tbl->post_cmds = (vm_cmd_t *)malloc(post_cmds_size);
 +    cmd_tbl->post_cmds = malloc(post_cmds_size);
      if(!cmd_tbl->post_cmds) {
        if(cmd_tbl->pre_cmds) 
- 	free(cmd_tbl->pre_cmds);
-@@ -521,7 +525,7 @@
+         free(cmd_tbl->pre_cmds);
+@@ -634,7 +638,7 @@
  
    if(cmd_tbl->nr_of_cell != 0) {
      unsigned int cell_cmds_size = cmd_tbl->nr_of_cell * COMMAND_DATA_SIZE;
@@ -371,8 +268,8 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
 +    cmd_tbl->cell_cmds = malloc(cell_cmds_size);
      if(!cmd_tbl->cell_cmds) {
        if(cmd_tbl->pre_cmds)
- 	free(cmd_tbl->pre_cmds);
-@@ -638,10 +642,6 @@
+         free(cmd_tbl->pre_cmds);
+@@ -751,10 +755,6 @@
    B2N_16(pgc->cell_playback_offset);
    B2N_16(pgc->cell_position_offset);
  
@@ -383,7 +280,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    for(i = 0; i < 16; i++)
      B2N_32(pgc->palette[i]);
    
-@@ -650,10 +650,10 @@
+@@ -763,10 +763,10 @@
  
    /* verify time (look at print_time) */
    for(i = 0; i < 8; i++)
@@ -396,7 +293,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
        CHECK_ZERO(pgc->subp_control[i]);
    
    /* Check that time is 0:0:0:0 also if nr_of_programs == 0 */
-@@ -752,7 +752,7 @@
+@@ -880,7 +880,7 @@
    if(ifofile->vmgi_mat->first_play_pgc == 0)
      return 1;
    
@@ -405,7 +302,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ifofile->first_play_pgc)
      return 0;
    
-@@ -806,7 +806,7 @@
+@@ -934,7 +934,7 @@
    if(!DVDFileSeek_(ifofile->file, ifofile->vmgi_mat->tt_srpt * DVD_BLOCK_LEN))
      return 0;
  
@@ -414,17 +311,17 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!tt_srpt)
      return 0;
  
-@@ -823,7 +823,7 @@
+@@ -953,7 +953,7 @@
    
    info_length = tt_srpt->last_byte + 1 - TT_SRPT_SIZE;
  
 -  tt_srpt->title = (title_info_t *)malloc(info_length); 
-+  tt_srpt->title = malloc(info_length); 
++  tt_srpt->title = malloc(info_length);
    if(!tt_srpt->title) {
      free(tt_srpt);
      ifofile->tt_srpt = 0;
-@@ -908,7 +908,7 @@
- 		   ifofile->vtsi_mat->vts_ptt_srpt * DVD_BLOCK_LEN))
+@@ -1040,7 +1040,7 @@
+                    ifofile->vtsi_mat->vts_ptt_srpt * DVD_BLOCK_LEN))
      return 0;
  
 -  vts_ptt_srpt = (vts_ptt_srpt_t *)malloc(sizeof(vts_ptt_srpt_t));
@@ -432,16 +329,16 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!vts_ptt_srpt)
      return 0;
  
-@@ -929,7 +929,7 @@
+@@ -1063,7 +1063,7 @@
    
    info_length = vts_ptt_srpt->last_byte + 1 - VTS_PTT_SRPT_SIZE;
    
 -  data = (uint32_t *)malloc(info_length); 
-+  data = malloc(info_length); 
++  data = malloc(info_length);
    if(!data) {
      free(vts_ptt_srpt);
      ifofile->vts_ptt_srpt = 0;
-@@ -1047,7 +1047,7 @@
+@@ -1183,7 +1183,7 @@
    if(!DVDFileSeek_(ifofile->file, ifofile->vmgi_mat->ptl_mait * DVD_BLOCK_LEN))
      return 0;
  
@@ -450,8 +347,8 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ptl_mait)
      return 0;
  
-@@ -1071,7 +1071,7 @@
- 	      <= ptl_mait->last_byte + 1 - PTL_MAIT_SIZE);
+@@ -1207,7 +1207,7 @@
+               <= ptl_mait->last_byte + 1 - PTL_MAIT_SIZE);
    
    info_length = ptl_mait->nr_of_countries * sizeof(ptl_mait_country_t);
 -  ptl_mait->countries = (ptl_mait_country_t *)malloc(info_length);
@@ -459,7 +356,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ptl_mait->countries) {
      free(ptl_mait);
      ifofile->ptl_mait = 0;
-@@ -1112,7 +1112,7 @@
+@@ -1252,7 +1252,7 @@
        return 0;
      }
      info_length = (ptl_mait->nr_of_vtss + 1) * sizeof(pf_level_t);
@@ -467,17 +364,17 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
 +    pf_temp = malloc(info_length);
      if(!pf_temp) {
        for(j = 0; j < i ; j++) {
-          free(ptl_mait->countries[j].pf_ptl_mai);
-@@ -1134,7 +1134,7 @@
+         free(ptl_mait->countries[j].pf_ptl_mai);
+@@ -1276,7 +1276,7 @@
      for (j = 0; j < ((ptl_mait->nr_of_vtss + 1) * 8); j++) {
-         B2N_16(pf_temp[j]);
+       B2N_16(pf_temp[j]);
      }
 -    ptl_mait->countries[i].pf_ptl_mai = (pf_level_t *)malloc(info_length);
 +    ptl_mait->countries[i].pf_ptl_mai = malloc(info_length);
      if(!ptl_mait->countries[i].pf_ptl_mai) {
        free(pf_temp);
        for(j = 0; j < i ; j++) {
-@@ -1198,7 +1198,7 @@
+@@ -1340,7 +1340,7 @@
    if(!DVDFileSeek_(ifofile->file, offset)) 
      return 0;
    
@@ -486,7 +383,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!vts_tmapt)
      return 0;
    
-@@ -1218,7 +1218,7 @@
+@@ -1362,7 +1362,7 @@
    
    info_length = vts_tmapt->nr_of_tmaps * 4;
    
@@ -495,7 +392,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!vts_tmap_srp) {
      free(vts_tmapt);
      ifofile->vts_tmapt = NULL;
-@@ -1242,7 +1242,7 @@
+@@ -1388,7 +1388,7 @@
    
    info_length = vts_tmapt->nr_of_tmaps * sizeof(vts_tmap_t);
    
@@ -504,7 +401,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!vts_tmapt->tmap) {
      free(vts_tmap_srp);
      free(vts_tmapt);
-@@ -1274,7 +1274,7 @@
+@@ -1422,7 +1422,7 @@
      
      info_length = vts_tmapt->tmap[i].nr_of_entries * sizeof(map_ent_t);
      
@@ -513,7 +410,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
      if(!vts_tmapt->tmap[i].map_ent) {
        ifoFree_VTS_TMAPT(ifofile);
        return 0;
-@@ -1322,7 +1322,7 @@
+@@ -1472,7 +1472,7 @@
    if(ifofile->vtsi_mat->vts_c_adt == 0) /* mandatory */
      return 0;
  
@@ -522,7 +419,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ifofile->vts_c_adt)
      return 0;
  
-@@ -1354,7 +1354,7 @@
+@@ -1504,7 +1504,7 @@
      return 0;
    }
    
@@ -531,7 +428,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ifofile->menu_c_adt)
      return 0;
  
-@@ -1396,7 +1396,7 @@
+@@ -1548,7 +1548,7 @@
      c_adt->nr_of_vobs = info_length / sizeof(cell_adr_t);
    }
    
@@ -540,7 +437,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!c_adt->cell_adr_table)
      return 0;
  
-@@ -1456,7 +1456,7 @@
+@@ -1608,7 +1608,7 @@
    if(ifofile->vtsi_mat->vts_vobu_admap == 0) /* mandatory */
      return 0;
    
@@ -549,7 +446,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ifofile->vts_vobu_admap)
      return 0;
  
-@@ -1488,7 +1488,7 @@
+@@ -1640,7 +1640,7 @@
      return 0;
    }
    
@@ -558,16 +455,16 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ifofile->menu_vobu_admap)
      return 0;
    
-@@ -1521,7 +1521,7 @@
+@@ -1673,7 +1673,7 @@
       Titles with a VOBS that has no VOBUs. */
    CHECK_VALUE(info_length % sizeof(uint32_t) == 0);
    
 -  vobu_admap->vobu_start_sectors = (uint32_t *)malloc(info_length); 
-+  vobu_admap->vobu_start_sectors = malloc(info_length); 
++  vobu_admap->vobu_start_sectors = malloc(info_length);
    if(!vobu_admap->vobu_start_sectors) {
      return 0;
    }
-@@ -1573,7 +1573,7 @@
+@@ -1725,7 +1725,7 @@
    if(ifofile->vtsi_mat->vts_pgcit == 0) /* mandatory */
      return 0;
    
@@ -576,7 +473,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ifofile->vts_pgcit)
      return 0;
  
-@@ -1703,7 +1703,7 @@
+@@ -1860,7 +1860,7 @@
      return 0;
    }
    
@@ -585,7 +482,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!ifofile->pgci_ut)
      return 0;
    
-@@ -1893,7 +1893,7 @@
+@@ -2050,7 +2050,7 @@
    if(!DVDFileSeek_(ifofile->file, sector * DVD_BLOCK_LEN))
      return 0;
  
@@ -594,8 +491,8 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!vts_atrt)
      return 0;
  
-@@ -1915,7 +1915,7 @@
-          VTS_ATRT_SIZE < vts_atrt->last_byte + 1);
+@@ -2072,7 +2072,7 @@
+               VTS_ATRT_SIZE < vts_atrt->last_byte + 1);
  
    info_length = vts_atrt->nr_of_vtss * sizeof(uint32_t);
 -  data = (uint32_t *)malloc(info_length);
@@ -603,7 +500,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!data) {
      free(vts_atrt);
      ifofile->vts_atrt = 0;
-@@ -1937,7 +1937,7 @@
+@@ -2094,7 +2094,7 @@
    }
    
    info_length = vts_atrt->nr_of_vtss * sizeof(vts_attributes_t);
@@ -612,8 +509,8 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
    if(!vts_atrt->vts) {
      free(data);
      free(vts_atrt);
-@@ -1993,7 +1993,7 @@
- 		   ifofile->vmgi_mat->txtdt_mgi * DVD_BLOCK_LEN))
+@@ -2150,7 +2150,7 @@
+                    ifofile->vmgi_mat->txtdt_mgi * DVD_BLOCK_LEN))
      return 0;
    
 -  txtdt_mgi = (txtdt_mgi_t *)malloc(sizeof(txtdt_mgi_t));
@@ -622,10 +519,9 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
      return 0;
    }
 
-diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
 --- dvdread.orig/ifo_types.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/ifo_types.h	2005-06-23 00:19:10.000000000 +0200
-@@ -394,6 +398,55 @@
+@@ -403,6 +407,55 @@
  } ATTRIBUTE_PACKED user_ops_t;
  
  /**
@@ -681,7 +577,7 @@ diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
   * Program Chain Information.
   */
  typedef struct {
-@@ -402,8 +455,8 @@
+@@ -411,8 +464,8 @@
    uint8_t  nr_of_cells;
    dvd_time_t playback_time;
    user_ops_t prohibited_ops;
