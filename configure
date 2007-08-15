@@ -6459,9 +6459,9 @@ if test "$_libamr_wb" = yes ; then
   _codecmodules="libamr_wb $_codecmodules"
 else
   _def_libamr_wb='#undef CONFIG_LIBAMR_WB'
-  _nocodecmodules="libamr_wb $_nocodecmodules"
   _libavdecoders=`echo $_libavdecoders | sed -e s/LIBAMR_WB_DECODER// `
   _libavencoders=`echo $_libavencoders | sed -e s/LIBAMR_WB_ENCODER// `
+  _nocodecmodules="libamr_wb $_nocodecmodules"
 fi
 echores "$_libamr_wb"
 
