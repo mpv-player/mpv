@@ -312,7 +312,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 // int interval, prefer_blank, allow_exp, nothing;
     unsigned int fg, bg;
-    XEvent xev;
     XGCValues xgcv;
     Colormap theCmap;
     XSetWindowAttributes xswa;
