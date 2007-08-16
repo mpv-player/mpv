@@ -34,12 +34,8 @@
 /**
  * The current version. (0.9.4 => 904, 1.2.3 => 10203)
  */
-#define DVDREAD_VERSION 905
+#define DVDREAD_VERSION 906
 
-/**
- * Returns the compiled version. (DVDREAD_VERSION as an int)
- */
-int DVDVersion(void);
 
 /**
  * The length of one Logical Block of a DVD.
@@ -64,6 +60,12 @@ typedef struct dvd_reader_s dvd_reader_t;
  * Opaque type for a file read handle, much like a normal fd or FILE *.
  */
 typedef struct dvd_file_s dvd_file_t;
+
+/**
+ * Returns the compiled version. (DVDREAD_VERSION as an int)
+ */
+int DVDVersion(void);
+
 
 /**
  * Opens a block device of a DVD-ROM file, or an image file, or a directory
@@ -145,6 +147,42 @@ typedef enum {
                                 single file. */
 } dvd_read_domain_t;
 
+/**
+ *
+ */
+typedef struct {
+  off_t size;          /**< Total size of file in bytes */
+  int nr_parts;           /**< Number of file parts */
+  off_t parts_size[9]; /**< Size of each part in bytes */
+} dvd_stat_t;
+
+/**
+ * Stats a file on the DVD given the title number and domain.
+ * The information about the file is stored in a dvd_stat_t
+ * which contains information about the size of the file and
+ * the number of parts in case of a multipart file and the respective
+ * sizes of the parts.
+ * A multipart file is for instance VTS_02_1.VOB, VTS_02_2.VOB, VTS_02_3.VOB
+ * The size of VTS_02_1.VOB will be stored in stat->parts_size[0],
+ * VTS_02_2.VOB in stat->parts_size[1], ...
+ * The total size (sum of all parts) is stored in stat->size and
+ * stat->nr_parts will hold the number of parts.
+ * Only DVD_READ_TITLE_VOBS (VTS_??_[1-9].VOB) can be multipart files.
+ * 
+ * This function is only of use if you want to get the size of each file
+ * in the filesystem. These sizes are not needed to use any other
+ * functions in libdvdread. 
+ *
+ * @param dvd  A dvd read handle.
+ * @param titlenum Which Video Title Set should be used, VIDEO_TS is 0.
+ * @param domain Which domain. 
+ * @param stat Pointer to where the result is stored.
+ * @return If successful 0, otherwise -1.
+ *
+ * int DVDFileStat(dvd, titlenum, domain, stat);
+ */
+int DVDFileStat(dvd_reader_t *, int, dvd_read_domain_t, dvd_stat_t *);
+  
 /**
  * Opens a file on the DVD given the title number and domain.
  *

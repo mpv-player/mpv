@@ -175,7 +175,7 @@ typedef struct {
       unsigned int unknown5           : 4;
 #endif
     } ATTRIBUTE_PACKED surround;
-  } app_info;
+  } ATTRIBUTE_PACKED app_info;
 } ATTRIBUTE_PACKED audio_attr_t;
 
 

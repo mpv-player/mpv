@@ -50,6 +50,8 @@ extern "C" {
  * absolute pathname on the UDF filesystem, starting with '/'.  For example,
  * '/VIDEO_TS/VTS_01_1.IFO'.  On success, filesize will be set to the size of
  * the file in bytes.
+ * This implementation relies on that the file size is less than 2^32
+ * A DVD file can at most be 2^30 (-2048 ?).
  */
 uint32_t UDFFindFile( dvd_reader_t *device, char *filename, uint32_t *size );
   
