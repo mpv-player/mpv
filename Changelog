@@ -19,53 +19,55 @@ MPlayer (1.0)
       video, XAN ADPCM audio, Westwood SND1 audio, Feeble Files DXA video, THP
       audio and video, Renderware TeXture Dictionary video, Bethesda Software
       VID video via lavc
+    * video game codecs: XAN wc4 video via binary DLL
     * libmpeg2 updated to 0.4.1
     * fixed resolution switching with libmpeg2
     * handle resolution switching for Real codecs
-    * ffmpeg video decoder handles aspect ratio changes
-    * amr now handled via libamr wrapper (http://www.penguin.cz/~utx/amr)
+    * FFmpeg video decoder can now handle aspect ratio changes
+    * AMR now handled via libamr wrapper (http://www.penguin.cz/~utx/amr)
     * SIMD optimizations for mp3lib under AMD64
-    * XAN wc4 video decoding via binary codec
 
     Demuxers:
-    * implemented switch_video and switch_program consistently with switch_audio
+    * Implemented switch_video and switch_program consistently with switch_audio
       (default keys are "_" and TAB, respectively). For the time being program
       switching is only available in TS streams handled by demux_ts.c (not
       lavf), while video switching is also handled by demux_lavf.c and
       demux_avi.c.
-    * audio and video switching for AVI demuxer (video switching untested)
+    * audio and video switching for the AVI demuxer (video switching untested)
     * GIF demuxer improvements, should work with all GIFs now
-    * support for VC1 in MPEG-TS and MPEG-PS files (bd,hd)-dvd
+    * support for VC1 in MPEG-TS and MPEG-PS files (BD,HD)-DVD
     * support for EVO demuxing
-    * support -noidx with -demuxer lavf
+    * support -noidx with libavformat demuxer
     * support for channel navigation with PVR input
-    * text subtitles should now work with -demuxer lavf
+    * text subtitles should now work with libavformat demuxer
 
     Streaming:
     * authentication for Real RTSP streams
-    * near-precise seeking in dvd:// and dvdnav:// (this last one requires libdvdnav from mphq)
+    * near-precise seeking in dvd:// and dvdnav://
+      (dvdnav:// requires libdvdnav from mphq)
     * speed selection when playing dvd:// streams, to make drive quieter
-    * support SVQ3 and H.264 in X-QT over RTSP,
-      now RTSP Apple keynotes are playable
-    * smil playlist over Real RTSP
+    * support SVQ3 and H.264 in X-QT over RTSP, now RTSP Apple keynotes work
+    * SMIL playlist over Real RTSP
     * support H.263-2000 over RTSP
     * fix AAC-LATM over RTSP
     * support AMR over RTSP
     * support H.264 over RTSP
-    * "device" and "adevice" suboptions now works for *BSD BT848 tv driver too
-    * dvdnav:// now depends on mplayer's fork of libdvdnav
+    * "device" and "adevice" suboptions now work for the *BSD BT848 TV driver
+    * dvdnav:// now depends on MPlayer's fork of libdvdnav
     * teletext support for tv:// (v4l and v4l2 only)
 
     FFmpeg/libavcodec:
     * Intel Music coder audio decoder
     * Fraps v2/v4 video decoder
     * H.264 decoding speedup
-    * Native NUT demuxer updated to spec
+    * native NUT demuxer updated to spec
+    * native NUT muxer
     * NUT muxing and demuxing support via libnut
     * WMA encoder
-    * fix MJPEGB on big-endian systems
+    * fix MJPEG-B on big-endian systems
     * lowres support for some H.264 files
-    * Atrac 3 decoder
+    * DTS/DCA audio decoder
+    * Atrac 3 audio decoder
     * MPEG-1/2 speedups
 
     libmpeg2:
@@ -86,25 +88,26 @@ MPlayer (1.0)
     Ports:
     * Complete Intel Mac support
     * Hitachi SuperH (SH3) support
+    * Blackfin optimizations
 
     Drivers:
     * ALSA audio output now sets the non-audio bit for AC3 passthrough even
       if the user-specified default device name tries to clear it
-    * fixed internal vidix in Solaris/x86, also auto-enabled
-    * rework of internal vidix API which is now a fully static library with built-in drivers 
+    * fixed internal VIDIX in Solaris/x86, also auto-enabled
+    * rework of internal VIDIX, now a fully static library with builtin drivers
     * VIDIX now also supports ATI R350 (Radeon 9600) to R520 (Radeon X1900)
 
     Others:
     * monitorpixelaspect=1 is now default. Set monitoraspect=4/3 to get the old
-      behaviour (if you have non-square pixels).
+      behavior (if you have non-square pixels).
     * libdvdcss updated to Subversion HEAD, now same as upstream version
     * libmpdvdkit split into libdvdread and libdvdcss
     * obsolete Xvid 3 support removed
     * long-deprecated -vop option removed
     * video stream switching
-    * dvdnav:// honour -alang and -slang
+    * dvdnav:// honor -alang and -slang
     * support for doubleclick as input event
-    * -really-quiet works fully now
+    * -really-quiet works as expected now
     * select libavformat demuxer (-lavfdopts format=)
     * internal minilzo removed in favor of FFmpeg implementation,
       use liblzo2 for encoding
