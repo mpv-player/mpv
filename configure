@@ -404,6 +404,8 @@ Miscellaneous options:
   --cc=COMPILER          C compiler to build MPlayer [gcc]
   --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
+  --ar=AR                librarian to build MPlayer [ar]
+  --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
   --charset=charset      convert the console messages to this character set
