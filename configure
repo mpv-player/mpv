@@ -764,6 +764,9 @@ for ac_option do
   --ar=*)
     _ar=`echo $ac_option | cut -d '=' -f 2`
     ;;
+  --ranlib=*)
+    _ranlib=`echo $ac_option | cut -d '=' -f 2`
+    ;;
   --charset=*)
     _charset=`echo $ac_option | cut -d '=' -f 2`
     ;;
