@@ -5342,7 +5342,6 @@ if test "$_dvdread_internal" = auto ; then
       test "$_hpux_scsi_h" = yes || darwin || win32 ; then
     _dvdread_internal=yes
     _dvdread=yes
-    _res_comment="internal"
   fi
 elif test "$_dvdread" = auto ; then
   _dvdread=no
@@ -5365,6 +5364,7 @@ if test "$_dvdread_internal" = yes; then
   _def_dvdread='#define USE_DVDREAD 1'
   _inputmodules="dvdread(internal) $_inputmodules"
   _largefiles=yes
+  _res_comment="internal"
 elif test "$_dvdread" = yes; then
   _def_dvdread='#define USE_DVDREAD 1'
   _largefiles=yes
