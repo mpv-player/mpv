@@ -56,14 +56,7 @@
 
 --- dvdread.orig/dvd_reader.c	2007-08-06 13:34:37.000000000 +0200
 +++ dvdread/dvd_reader.c	2007-08-06 13:35:19.000000000 +0200
-@@ -33,18 +37,30 @@
- #include <limits.h>
- #include <dirent.h>
-  
--#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__) || defined(__DARWIN__)
-+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__) || defined(__DARWIN__) || defined(__DragonFly__)
- #define SYS_BSD 1
- #endif
+@@ -39,12 +37,24 @@
  
  #if defined(__sun)
  #include <sys/mnttab.h>
@@ -98,27 +91,7 @@
  
  struct dvd_reader_s {
    /* Basic information. */
-@@ -402,6 +418,11 @@
-    Darwin  /dev/rdisk0,  it needs to be the raw device
-    BSD/OS  /dev/sr0c (if not mounted) or /dev/rsr0c ('c' any letter will do) */
- static char *bsd_block2char( const char *path )
-+#if defined(__FreeBSD__)
-+{
-+    return (char *) strdup( path );
-+}
-+#else
- {
-   char *new_path;
- 
-@@ -416,6 +437,7 @@
- 
-   return new_path;
- }
-+#endif /* __FreeBSD__ */
- #endif
- 
- 
-@@ -481,7 +503,7 @@
+@@ -494,7 +503,7 @@
      char *path_copy;
  #if defined(SYS_BSD)
      struct fstab* fe;
@@ -127,7 +100,7 @@
      FILE *mntfile;
  #endif
  
-@@ -585,7 +607,7 @@
+@@ -598,7 +607,7 @@
        }
        fclose( mntfile );
      }
@@ -136,7 +109,7 @@
      mntfile = fopen( MOUNTED, "r" );
      if( mntfile ) {
        struct mntent *me;
-@@ -610,6 +632,9 @@
+@@ -623,6 +632,9 @@
        }
        fclose( mntfile );
      }
@@ -146,7 +119,7 @@
  #endif
      if( !dev_name ) {
        if(verbose >= 1) {
-@@ -828,8 +853,8 @@
+@@ -841,8 +853,8 @@
    }
      
    if( dvd->css_state == 1 /* Need key init */ ) {
