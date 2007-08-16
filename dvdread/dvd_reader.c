@@ -51,16 +51,6 @@
 #include <mntent.h>
 #endif
 
-#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION <= 3) && (__MINGW32_MINOR_VERSION < 10)
-#include <sys/timeb.h>
-static void gettimeofday(struct timeval* t,void* timezone){
-    struct timeb timebuffer;
-    ftime( &timebuffer );
-    t->tv_sec=timebuffer.time;
-    t->tv_usec=1000*timebuffer.millitm;
-}
-#endif
-
 #include "dvd_reader.h"
 #include "dvd_input.h"
 #include "dvd_udf.h"
