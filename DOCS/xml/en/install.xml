@@ -46,16 +46,24 @@ answers.
   3.79.x or later. To build the XML documentation you need 3.80.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">FreeType</emphasis> - optional,
-  required to have a font for the OSD and subtitles. At least 2.0.9 is required.
+  <emphasis role="bold">FreeType</emphasis> - 2.0.9 or later is required
+  for the OSD and subtitles
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - optional JPEG en/decoder,
-  required for the JPEG video output driver
+  <emphasis role="bold">ALSA</emphasis> - optional, for ALSA audio output
+  support. At least 0.9.0rc4 is required.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - optional (M)PNG en/decoder,
-  required for the PNG video output driver
+  <emphasis role="bold">libjpeg</emphasis> -
+  required for the optional JPEG video output driver
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">libpng</emphasis> -
+  required for the optional PNG video output driver
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">directfb</emphasis> - optional, 0.9.13 or later
+  required for the directfb video output driver
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - 3.90 or later is recommended,
@@ -70,9 +78,6 @@ answers.
   - optional, needed for some RTSP/RTP streams
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> - optional, use 0.9.13 or later.
-</para></listitem>
-<listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - optional, for CDDA support
 </para></listitem>
 <listitem><para>
@@ -80,11 +85,7 @@ answers.
   support. At least 1.2.7 is required.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libsmb</emphasis> - optional, for smb networking support
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">ALSA</emphasis> - optional, for ALSA audio output
-  support. At least 0.9.0rc4 is required.
+  <emphasis role="bold">libsmb</emphasis> - optional, for SMB networking support
 </para></listitem>
 </itemizedlist>
 </sect1>
