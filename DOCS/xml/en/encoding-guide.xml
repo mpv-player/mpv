@@ -2595,16 +2595,56 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 </thead>
 <tbody>
 <row>
-  <entry>mp2</entry>
-  <entry>MPEG Layer 2</entry>
-</row>
-<row>
   <entry>ac3</entry>
-  <entry>AC-3, AKA Dolby Digital</entry>
+  <entry>Dolby Digital (AC-3)</entry>
 </row>
 <row>
-  <entry>adpcm_ima_wav</entry>
-  <entry>IMA adaptive PCM (4 bits per sample, 4:1 compression)</entry>
+  <entry>adpcm_*</entry>
+  <entry>Adaptive PCM formats - see supplementary table</entry>
+</row>
+<row>
+  <entry>flac</entry>
+  <entry>Free Lossless Audio Codec (FLAC)</entry>
+</row>
+<row>
+  <entry>g726</entry>
+  <entry>G.726 ADPCM</entry>
+</row>
+<row>
+  <entry>libamr_nb</entry>
+  <entry>3GPP Adaptive Multi-Rate (AMR) narrow-band</entry>
+</row>
+<row>
+  <entry>libamr_wb</entry>
+  <entry>3GPP Adaptive Multi-Rate (AMR) wide-band</entry>
+</row>
+<row>
+  <entry>libfaac</entry>
+  <entry>Advanced Audio Coding (AAC) - using FAAC</entry>
+</row>
+<row>
+  <entry>libgsm</entry>
+  <entry>ETSI GSM 06.10 full rate</entry>
+</row>
+<row>
+  <entry>libgsm_ms</entry>
+  <entry>Microsoft GSM</entry>
+</row>
+<row>
+  <entry>libmp3lame</entry>
+  <entry>MPEG-1 audio layer 3 (MP3) - using LAME</entry>
+</row>
+<row>
+  <entry>mp2</entry>
+  <entry>MPEG-1 audio layer 2 (MP2)</entry>
+</row>
+<row>
+  <entry>pcm_*</entry>
+  <entry>PCM formats - see supplementary table</entry>
+</row>
+<row>
+  <entry>roq_dpcm</entry>
+  <entry>Id Software RoQ DPCM</entry>
 </row>
 <row>
   <entry>sonic</entry>
@@ -2616,15 +2656,15 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 </row>
 <row>
   <entry>vorbis</entry>
-  <entry>Xiph Ogg Vorbis codec</entry>
+  <entry>Vorbis</entry>
 </row>
 <row>
   <entry>wmav1</entry>
-  <entry>Windows Media Audio v1 codec</entry>
+  <entry>Windows Media Audio v1</entry>
 </row>
 <row>
   <entry>wmav2</entry>
-  <entry>Windows Media Audio v2 codec</entry>
+  <entry>Windows Media Audio v2</entry>
 </row>
 </tbody>
 </tgroup>
@@ -2651,6 +2691,167 @@ out-of-the-box everywhere <application>MEncoder</application> has been
 compiled with <systemitem class="library">libavcodec</systemitem> (which
 is the case most of time), and do not depend on external libraries.
 </para>
+
+<sect3 id="menc-feat-enc-libavcodec-audio-codecs-pcmadpcm">
+<title>PCM/ADPCM format supplementary table</title>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>PCM/ADPCM codec name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>pcm_s32le</entry>
+  <entry>signed 32-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s32be</entry>
+  <entry>signed 32-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u32le</entry>
+  <entry>unsigned 32-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u32be</entry>
+  <entry>unsigned 32-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s24le</entry>
+  <entry>signed 24-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s24be</entry>
+  <entry>signed 24-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u24le</entry>
+  <entry>unsigned 24-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u24be</entry>
+  <entry>unsigned 24-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s16le</entry>
+  <entry>signed 16-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s16be</entry>
+  <entry>signed 16-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u16le</entry>
+  <entry>unsigned 16-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u16be</entry>
+  <entry>unsigned 16-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s8</entry>
+  <entry>signed 8-bit</entry>
+</row>
+<row>
+  <entry>pcm_u8</entry>
+  <entry>unsigned 8-bit</entry>
+</row>
+<row>
+  <entry>pcm_alaw</entry>
+  <entry>G.711 A-LAW </entry>
+</row>
+<row>
+  <entry>pcm_mulaw</entry>
+  <entry>G.711 &mu;-LAW</entry>
+</row>
+<row>
+  <entry>pcm_s24daud</entry>
+  <entry>signed 24-bit D-Cinema Audio format</entry>
+</row>
+<row>
+  <entry>pcm_zork</entry>
+  <entry>Activision Zork Nemesis</entry>
+</row>
+<row>
+  <entry>adpcm_ima_qt</entry>
+  <entry>Apple QuickTime</entry>
+</row>
+<row>
+  <entry>adpcm_ima_wav</entry>
+  <entry>Microsoft/IBM WAVE</entry>
+</row>
+<row>
+  <entry>adpcm_ima_dk3</entry>
+  <entry>Duck DK3</entry>
+</row>
+<row>
+  <entry>adpcm_ima_dk4</entry>
+  <entry>Duck DK4</entry>
+</row>
+<row>
+  <entry>adpcm_ima_ws</entry>
+  <entry>Westwood Studios</entry>
+</row>
+<row>
+  <entry>adpcm_ima_smjpeg</entry>
+  <entry>SDL Motion JPEG</entry>
+</row>
+<row>
+  <entry>adpcm_ms</entry>
+  <entry>Microsoft</entry>
+</row>
+<row>
+  <entry>adpcm_4xm</entry>
+  <entry>4X Technologies</entry>
+</row>
+<row>
+  <entry>adpcm_xa</entry>
+  <entry>Phillips Yellow Book CD-ROM eXtended Architecture</entry>
+</row>
+<row>
+  <entry>adpcm_ea</entry>
+  <entry>Electronic Arts</entry>
+</row>
+<row>
+  <entry>adpcm_ct</entry>
+  <entry>Creative 16->4-bit</entry>
+</row>
+<row>
+  <entry>adpcm_swf</entry>
+  <entry>Adobe Shockwave Flash</entry>
+</row>
+<row>
+  <entry>adpcm_yamaha</entry>
+  <entry>Yamaha</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_4</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->4-bit</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_3</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->2.6-bit</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_2</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->2-bit</entry>
+</row>
+<row>
+  <entry>adpcm_thp</entry>
+  <entry>Nintendo GameCube FMV THP</entry>
+</row>
+<row>
+  <entry>adpcm_adx</entry>
+  <entry>Sega/CRI ADX</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect3>
+
 </sect2>
 
 <!-- ********** -->
