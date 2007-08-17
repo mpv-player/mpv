@@ -115,7 +115,7 @@ MPlayer (1.0)
     * ability to change subtitle size during playback
     * ability to turn loop on/off during playback
     * Apple Remote support
-    * libdvdread updated to 0.9.6
+    * libdvdread updated to 0.9.7
 
 
   rc1: "Codename intentionally left blank" October 22, 2006

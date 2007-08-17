@@ -679,7 +679,7 @@ void DVDClose( dvd_reader_t *dvd )
         fprintf(stderr, "libdvdread: DVDClose(): Memory leak in align functions\n");
       }
     }
-    dvdinput_free();
+
     free( dvd );
   }
 }

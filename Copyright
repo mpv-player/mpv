@@ -49,7 +49,7 @@ Copyright:  1998-2006 VideoLAN
 License:    GNU General Public License
 
 Name:       libdvdread
-Version:    0.9.6 + patches
+Version:    0.9.7 + patches
 Homepage:   http://www.dtek.chalmers.se/groups/dvd/development.shtml
 Directory:  dvdread
 Copyright:  1998, 1999 Eric Smith <eric@brouhaha.com>

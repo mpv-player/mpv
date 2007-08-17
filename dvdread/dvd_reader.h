@@ -34,7 +34,7 @@
 /**
  * The current version. (0.9.4 => 904, 1.2.3 => 10203)
  */
-#define DVDREAD_VERSION 906
+#define DVDREAD_VERSION 907
 
 
 /**
