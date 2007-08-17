@@ -1,8 +1,8 @@
---- dvdread.orig/bswap.h	2005-09-19 16:14:34.000000000 +0200
-+++ dvdread/bswap.h	2007-08-06 12:45:06.000000000 +0200
-@@ -76,13 +80,51 @@
- #define B2N_32(x) x = be32toh(x)
- #define B2N_64(x) x = be64toh(x)
+--- dvdread.orig/bswap.h	2007-08-16 09:18:58.000000000 +0200
++++ dvdread/bswap.h	2007-08-16 09:19:02.000000000 +0200
+@@ -83,8 +87,46 @@
+ #define B2N_32(x) x = OSSwapBigToHostConstInt32(x)
+ #define B2N_64(x) x = OSSwapBigToHostConstInt64(x)
  
 +#elif defined(ARCH_X86)
 +inline static unsigned short bswap_16(unsigned short x)
@@ -20,7 +20,8 @@
 +#if __CPU__ != 386
 +      "bswap   %0":
 +      "=r" (x)     :
-+#else
+ #else
+-#if defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(WIN32) || defined(__BEOS__) || defined(__INTERIX)
 +      "xchgb   %b0,%h0\n"
 +      " rorl    $16,%0\n"
 +      " xchgb   %b0,%h0":
@@ -42,21 +43,14 @@
 +}
 +#define B2N_64(x) x = bswap_64(x)
 +
- /* This is a slow but portable implementation, it has multiple evaluation 
-  * problems so beware.
-  * Old FreeBSD's and Solaris don't have <byteswap.h> or any other such 
-  * functionality! 
-  */
- 
--#elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(WIN32) || defined(__BEOS__) || defined(__INTERIX)
-+#elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(WIN32) || defined(__BEOS__) || defined(__INTERIX) || defined(__CYGWIN__)
- #define B2N_16(x)                               \
-   x = ((((x) & 0xff00) >> 8) |                  \
-        (((x) & 0x00ff) << 8))
-
++#else
++#if defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(WIN32) || defined(__BEOS__) || defined(__INTERIX) || defined(__CYGWIN__)
+ /* These systems don't have swap macros */
+ #else
+ /* If there isn't a header provided with your system with this functionality
 --- dvdread.orig/dvd_reader.c	2007-08-06 13:34:37.000000000 +0200
 +++ dvdread/dvd_reader.c	2007-08-06 13:35:19.000000000 +0200
-@@ -39,9 +37,11 @@
+@@ -39,9 +43,11 @@
  
  #if defined(__sun)
  #include <sys/mnttab.h>
@@ -69,7 +63,7 @@
  #include <mntent.h>
  #endif
  
-@@ -52,7 +68,7 @@
+@@ -52,7 +58,7 @@
  
  #include "dvdread_internal.h"
  
@@ -78,7 +72,7 @@
  
  struct dvd_reader_s {
    /* Basic information. */
-@@ -494,7 +503,7 @@
+@@ -494,7 +500,7 @@
      char *path_copy;
  #if defined(SYS_BSD)
      struct fstab* fe;
@@ -87,7 +81,7 @@
      FILE *mntfile;
  #endif
  
-@@ -598,7 +607,7 @@
+@@ -598,7 +604,7 @@
        }
        fclose( mntfile );
      }
@@ -96,7 +90,7 @@
      mntfile = fopen( MOUNTED, "r" );
      if( mntfile ) {
        struct mntent *me;
-@@ -623,6 +632,9 @@
+@@ -623,6 +629,9 @@
        }
        fclose( mntfile );
      }
@@ -106,7 +100,7 @@
  #endif
      if( !dev_name ) {
        if(verbose >= 1) {
-@@ -841,8 +853,8 @@
+@@ -841,8 +850,8 @@
    }
      
    if( dvd->css_state == 1 /* Need key init */ ) {
