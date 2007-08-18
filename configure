@@ -7411,7 +7411,7 @@ elif bsd ; then
   CFLAGS="$CFLAGS -D_THREAD_SAFE"
 fi
 if cygwin ; then
-  CFLAGS="$CFLAGS -D__CYGWIN__ -DSYS_CYGWIN"
+  CFLAGS="$CFLAGS -D__CYGWIN__"
 fi
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
@@ -7419,6 +7419,7 @@ if test "$_largefiles" = yes || freebsd ; then
   if test "$_dvdread" = yes || test "$_libdvdcss_internal" = yes ; then
     # dvdread support requires this (for off64_t)
     CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
+    cygwin && CFLAGS="$CFLAGS -DSYS_CYGWIN"
   fi
 fi
 
