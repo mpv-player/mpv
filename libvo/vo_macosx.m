@@ -947,12 +947,27 @@ static int control(uint32_t request, void *data, ...)
 	[self mouseEvent: theEvent];
 }
 
+- (void) mouseUp: (NSEvent *) theEvent
+{
+	[self mouseEvent: theEvent];
+}
+
 - (void) rightMouseDown: (NSEvent *) theEvent
 {
 	[self mouseEvent: theEvent];
 }
 
+- (void) rightMouseUp: (NSEvent *) theEvent
+{
+	[self mouseEvent: theEvent];
+}
+
 - (void) otherMouseDown: (NSEvent *) theEvent
+{
+	[self mouseEvent: theEvent];
+}
+
+- (void) otherMouseUp: (NSEvent *) theEvent
 {
 	[self mouseEvent: theEvent];
 }
@@ -967,11 +982,21 @@ static int control(uint32_t request, void *data, ...)
 
 - (void) mouseEvent: (NSEvent *) theEvent
 {
-	switch( [theEvent buttonNumber] )
-	{ 
-		case 0: mplayer_put_key(MOUSE_BTN0);break;
-		case 1: mplayer_put_key(MOUSE_BTN1);break;
-		case 2: mplayer_put_key(MOUSE_BTN2);break;
+	if ( [theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9 )
+	{
+		switch([theEvent type])
+		{
+			case NSLeftMouseDown:
+			case NSRightMouseDown:
+			case NSOtherMouseDown:
+				mplayer_put_key((MOUSE_BTN0 + [theEvent buttonNumber]) | MP_KEY_DOWN);
+				break;
+			case NSLeftMouseUp:
+			case NSRightMouseUp:
+			case NSOtherMouseUp:
+				mplayer_put_key(MOUSE_BTN0 + [theEvent buttonNumber]);
+				break;
+		}
 	}
 }
 
