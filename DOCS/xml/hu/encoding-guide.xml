@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22753 -->
+<!-- synced with r24089 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1493,14 +1493,14 @@ szóló fejezetet a támogatott codec-ek listájához.
 <para>
 Az audió egy sokkal könnyebben megoldható probléma: ha számít a minőség,
 akkor egyszerűen hagyd úgy, ahogy van.
-Még az AC3 5.1 stream-ek is leginkább 448Kbit/s-osak és minden
+Még az AC-3 5.1 stream-ek is leginkább 448Kbit/s-osak és minden
 bitet megérnek. Csábító lehet az audió jó minőségű Vorbis-ba történő
-konvertálása, de az, hogy ma nincs egy A/V receiver-ed az AC3 áteresztéshez,
+konvertálása, de az, hogy ma nincs egy A/V receiver-ed az AC-3 áteresztéshez,
 nem jelenti azt, hogy holnap sem lesz. Készíts a jövőben is használható
-DVD rip-eket az AC3 stream megtartásával.
-Megtarthatod az AC3 stream-et a <link linkend="menc-feat-mpeg4">kódolás közben</link>
+DVD rip-eket az AC-3 stream megtartásával.
+Megtarthatod az AC-3 stream-et a <link linkend="menc-feat-mpeg4">kódolás közben</link>
 a videó stream-be történő közvetlen átmásolással.
-Vagy ki is szedheted az AC3 stream-et, hogy elkeverd valamilyen konténer
+Vagy ki is szedheted az AC-3 stream-et, hogy elkeverd valamilyen konténer
 formátumba, mint pl. a NUT vagy a Matroska.
 <screen>
 mplayer <replaceable>forras_fajl.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>hang.ac3</replaceable>
@@ -1543,7 +1543,7 @@ hiba/szakadás miatt hiányzó vagy extra audió keretek vannak a fájlban.
 A helyes megoldás ezen típusú problémák kezelésére csend beillesztése vagy
 az audió keretek vágása ezeken a pontokon.
 Azonban a <application>MPlayer</application> ezt nem tudja megtenni, így
-ha az AC3-at demuxálod és egy másik alkalmazással kódolod (vagy kimented
+ha az AC-3-at demuxálod és egy másik alkalmazással kódolod (vagy kimented
 PCM-be az <application>MPlayer</application>rel), a szeletek hibásan maradnak
 benne és csak képkocka eldobással/duplázással lehet javítani.
 Amíg a <application>MEncoder</application> látja az audiót a videó kódolása
@@ -1700,7 +1700,7 @@ Ezen hatalmas hátrány mellett az AVI-nak a következő fő korlátai vannak:
   Sajnos a leghatékonyabb codec, a Vorbis, egyik kívánalomnak sem
   felel meg.
   Ezért ha AVI-ban tárolod a filmjeidet, egy kevésbé hatékony
-  codec-et kell használnod, mint pl. az MP3 vagy az AC3.
+  codec-et kell használnod, mint pl. az MP3 vagy az AC-3.
 </para></listitem>
 </orderedlist>
 
@@ -2568,16 +2568,56 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 </thead>
 <tbody>
 <row>
-  <entry>mp2</entry>
-  <entry>MPEG Layer 2</entry>
-</row>
-<row>
   <entry>ac3</entry>
-  <entry>AC3, AKA Dolby Digital</entry>
+  <entry>Dolby Digital (AC-3)</entry>
 </row>
 <row>
-  <entry>adpcm_ima_wav</entry>
-  <entry>IMA adaptív PCM (4 bit mintánként, 4:1-es tömörítés)</entry>
+  <entry>adpcm_*</entry>
+  <entry>Adaptív PCM formátumok - lásd a mellékelt táblázatot</entry>
+</row>
+<row>
+  <entry>flac</entry>
+  <entry>Free Lossless Audio Codec (FLAC)</entry>
+</row>
+<row>
+  <entry>g726</entry>
+  <entry>G.726 ADPCM</entry>
+</row>
+<row>
+  <entry>libamr_nb</entry>
+  <entry>3GPP Adaptive Multi-Rate (AMR) narrow-band</entry>
+</row>
+<row>
+  <entry>libamr_wb</entry>
+  <entry>3GPP Adaptive Multi-Rate (AMR) wide-band</entry>
+</row>
+<row>
+  <entry>libfaac</entry>
+  <entry>Advanced Audio Coding (AAC) - FAAC használatával</entry>
+</row>
+<row>
+  <entry>libgsm</entry>
+  <entry>ETSI GSM 06.10 full rate</entry>
+</row>
+<row>
+  <entry>libgsm_ms</entry>
+  <entry>Microsoft GSM</entry>
+</row>
+<row>
+  <entry>libmp3lame</entry>
+  <entry>MPEG-1 audio layer 3 (MP3) - LAME használatával</entry>
+</row>
+<row>
+  <entry>mp2</entry>
+  <entry>MPEG-1 audio layer 2 (MP2)</entry>
+</row>
+<row>
+  <entry>pcm_*</entry>
+  <entry>PCM formats - lásd a mellékelt táblázatot</entry>
+</row>
+<row>
+  <entry>roq_dpcm</entry>
+  <entry>Id Software RoQ DPCM</entry>
 </row>
 <row>
   <entry>sonic</entry>
@@ -2593,11 +2633,11 @@ mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -ovc lavc -lavcopts vc
 </row>
 <row>
   <entry>wmav1</entry>
-  <entry>Windows Media Audio v1 codec</entry>
+  <entry>Windows Media Audio v1</entry>
 </row>
 <row>
   <entry>wmav2</entry>
-  <entry>Windows Media Audio v2 codec</entry>
+  <entry>Windows Media Audio v2</entry>
 </row>
 </tbody>
 </tgroup>
@@ -2608,7 +2648,7 @@ opció után kell megadni, például: <option>-lavcopts acodec=ac3</option>
 </para>
 
 <informalexample><para>
-Egy példa AC3 tömörítéssel:
+Egy példa AC-3 tömörítéssel:
 <screen>
 mencoder dvd://2 -o <replaceable>title2.avi</replaceable> -oac lavc -lavcopts acodec=ac3 -ovc copy
 </screen>
@@ -2624,6 +2664,167 @@ azonnal használhatóak bárhol, ahol a <application>MEncoder</application>t
 a <systemitem class="library">libavcodec</systemitem>-kel együtt fordították
 le (ami a legtöbb esetben így van), és nem függ külső függvénykönyvtáraktól.
 </para>
+
+<sect3 id="menc-feat-enc-libavcodec-audio-codecs-pcmadpcm">
+<title>PCM/ADPCM formátum kiegészítő táblázat</title>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>PCM/ADPCM codec neve</entry><entry>Leírás</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>pcm_s32le</entry>
+  <entry>előjeles 32-bit-es little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s32be</entry>
+  <entry>előjeles 32-bit-es big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u32le</entry>
+  <entry>előjel nélküli 32-bit-es little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u32be</entry>
+  <entry>előjel nélküli 32-bit-es big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s24le</entry>
+  <entry>előjeles 24-bit-es little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s24be</entry>
+  <entry>előjeles 24-bit-es big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u24le</entry>
+  <entry>előjel nélküli 24-bit-es little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u24be</entry>
+  <entry>előjel nélküli 24-bit-es big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s16le</entry>
+  <entry>előjeles 16-bit-es little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s16be</entry>
+  <entry>előjeles 16-bit-es big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u16le</entry>
+  <entry>előjel nélküli 16-bit-es little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u16be</entry>
+  <entry>előjel nélküli 16-bit-es big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s8</entry>
+  <entry>előjeles 8-bit-es</entry>
+</row>
+<row>
+  <entry>pcm_u8</entry>
+  <entry>előjel nélküli 8-bit-es</entry>
+</row>
+<row>
+  <entry>pcm_alaw</entry>
+  <entry>G.711 A-LAW </entry>
+</row>
+<row>
+  <entry>pcm_mulaw</entry>
+  <entry>G.711 &mu;-LAW</entry>
+</row>
+<row>
+  <entry>pcm_s24daud</entry>
+  <entry>előjeles 24-bit-es D-Cinema Audio formátum</entry>
+</row>
+<row>
+  <entry>pcm_zork</entry>
+  <entry>Activision Zork Nemesis</entry>
+</row>
+<row>
+  <entry>adpcm_ima_qt</entry>
+  <entry>Apple QuickTime</entry>
+</row>
+<row>
+  <entry>adpcm_ima_wav</entry>
+  <entry>Microsoft/IBM WAVE</entry>
+</row>
+<row>
+  <entry>adpcm_ima_dk3</entry>
+  <entry>Duck DK3</entry>
+</row>
+<row>
+  <entry>adpcm_ima_dk4</entry>
+  <entry>Duck DK4</entry>
+</row>
+<row>
+  <entry>adpcm_ima_ws</entry>
+  <entry>Westwood Studios</entry>
+</row>
+<row>
+  <entry>adpcm_ima_smjpeg</entry>
+  <entry>SDL Motion JPEG</entry>
+</row>
+<row>
+  <entry>adpcm_ms</entry>
+  <entry>Microsoft</entry>
+</row>
+<row>
+  <entry>adpcm_4xm</entry>
+  <entry>4X Technologies</entry>
+</row>
+<row>
+  <entry>adpcm_xa</entry>
+  <entry>Phillips Yellow Book CD-ROM eXtended Architecture</entry>
+</row>
+<row>
+  <entry>adpcm_ea</entry>
+  <entry>Electronic Arts</entry>
+</row>
+<row>
+  <entry>adpcm_ct</entry>
+  <entry>Creative 16->4-bit</entry>
+</row>
+<row>
+  <entry>adpcm_swf</entry>
+  <entry>Adobe Shockwave Flash</entry>
+</row>
+<row>
+  <entry>adpcm_yamaha</entry>
+  <entry>Yamaha</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_4</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->4-bit</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_3</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->2.6-bit</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_2</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->2-bit</entry>
+</row>
+<row>
+  <entry>adpcm_thp</entry>
+  <entry>Nintendo GameCube FMV THP</entry>
+</row>
+<row>
+  <entry>adpcm_adx</entry>
+  <entry>Sega/CRI ADX</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect3>
+
 </sect2>
 
 <!-- ********** -->
@@ -4533,7 +4734,7 @@ készítése a <application>MEncoder</application> használatával</title>
 -x264encopts pass=1:turbo:bitrate=900:bframes=1:\
 me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
 -vf crop=720:352:0:62,scale=-10:-1,harddup \
--oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-oac faac -faacopts br=192:mpeg=4:object=2 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 
   Ha több processzoros géped van, ne hagy ki a kódolás drasztikus módon történő
@@ -4552,7 +4753,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 -x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
 me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
 -vf crop=720:352:0:62,scale=-10:-1,harddup \
--oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-oac faac -faacopts br=192:mpeg=4:object=2 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 </para>
 
@@ -4711,7 +4912,7 @@ legyen.
   <entry>MPEG-2</entry>
   <entry>9800 kbps</entry>
   <entry>48000 Hz</entry>
-  <entry>AC3,PCM</entry>
+  <entry>AC-3,PCM</entry>
   <entry>1536 kbps (max)</entry>
   <entry>30000/1001, 24000/1001</entry>
   <entry>4:3, 16:9 (csak 720x480-nál)</entry>
@@ -4724,7 +4925,7 @@ legyen.
   <entry>MPEG-1</entry>
   <entry>1856 kbps</entry>
   <entry>48000 Hz</entry>
-  <entry>AC3,PCM</entry>
+  <entry>AC-3,PCM</entry>
   <entry>1536 kbps (max)</entry>
   <entry>30000/1001, 24000/1001</entry>
   <entry>4:3, 16:9</entry>
@@ -4757,7 +4958,7 @@ legyen.
   <entry>MPEG-2</entry>
   <entry>9800 kbps</entry>
   <entry>48000 Hz</entry>
-  <entry>MP2,AC3,PCM</entry>
+  <entry>MP2,AC-3,PCM</entry>
   <entry>1536 kbps (max)</entry>
   <entry>25</entry>
   <entry>4:3, 16:9 (csak 720x576-nál)</entry>
@@ -4768,7 +4969,7 @@ legyen.
   <entry>MPEG-1</entry>
   <entry>1856 kbps</entry>
   <entry>48000 Hz</entry>
-  <entry>MP2,AC3,PCM</entry>
+  <entry>MP2,AC-3,PCM</entry>
   <entry>1536 kbps (max)</entry>
   <entry>25</entry>
   <entry>4:3, 16:9</entry>
@@ -5135,7 +5336,7 @@ De vigyázz a VBR-rel, mert néhány hibás asztali lejátszó sem támogatja.
 
 <para>
 A DVD audióhoz a <systemitem class="library">libavcodec</systemitem>
-AC3 codec-je használható.
+AC-3 codec-je használható.
 </para>
 
 
@@ -5221,10 +5422,10 @@ keyint=18:vstrict=0:acodec=ac3:abitrate=192:aspect=16/9 -ofps 30000/1001 \
 
 
 <sect3 id="menc-feat-vcd-dvd-all-pal-ac3-copy">
-<title>AC3 Audiót tartalmazó PAL AVI DVD-re</title>
+<title>AC-3 Audiót tartalmazó PAL AVI DVD-re</title>
 
 <para>
-Ha a forrás már AC3 audióval rendelkezik, használd a -oac copy kapcsolót az
+Ha a forrás már AC-3 audióval rendelkezik, használd a -oac copy kapcsolót az
 újrakódolása helyett.
 <screen>
 mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf \
@@ -5237,10 +5438,10 @@ keyint=15:vstrict=0:aspect=16/9 -o <replaceable>movie.mpg</replaceable> <replace
 
 
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
-<title>AC3 Audiót tartalmazó NTSC AVI DVD-re</title>
+<title>AC-3 Audiót tartalmazó NTSC AVI DVD-re</title>
 
 <para>
-Ha a forrás már AC3 audiót tartalmaz és NTSC @ 24000/1001 fps:
+Ha a forrás már AC-3 audiót tartalmaz és NTSC @ 24000/1001 fps:
 <screen>
 mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
   -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\

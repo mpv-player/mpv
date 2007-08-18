@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23691 -->
+<!-- synced with r24056 -->
 <chapter id="containers">
 <title>Konténerek</title>
 
@@ -60,8 +60,8 @@ Az MPEG fájlok különböző alakúak lehetnek:
 </para></listitem>
 <listitem><para>
   VOB: Ez a <emphasis role="bold">DVD</emphasis>-ken használt MPEG fájl formátum.
-  Ugyan az, mint az MPG, plusz tartalmazhat feliratot és nem-MPEG (AC3) hangot.
-  Kódolt MPEG-2 videót és általában AC3 audiót tartalmaz, de DTS, MP2 és
+  Ugyan az, mint az MPG, plusz tartalmazhat feliratot és nem-MPEG (AC-3) hangot.
+  Kódolt MPEG-2 videót és általában AC-3 audiót tartalmaz, de DTS, MP2 és
   tömörítetlen LPCM is megengedett. <emphasis role="bold">Olvasd el a
   <link linkend="dvd">DVD</link> részt</emphasis>!
 </para></listitem>

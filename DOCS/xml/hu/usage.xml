@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22951 -->
+<!-- synced with r24056 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -548,10 +548,10 @@ szóló rész a magyarázatért.
 
 
 <sect3 id="advaudio-surround-passthrough">
-<title>AC3/DTS áteresztés</title>
+<title>AC-3/DTS áteresztés</title>
 
 <para>
-A DVD-k általában AC3 (Dolby Digital) vagy DTS (Digital Theater System) formátumban
+A DVD-k általában AC-3 (Dolby Digital) vagy DTS (Digital Theater System) formátumban
 kódolt térhatású hanggal rendelkeznek. Néhány modern audió berendezés képes ezen
 formátumok belső dekódolására. Az <application>MPlayer</application> beállítható
 úgy, hogy dekódolás nélkül adja át az audió adatot. Ez csak akkor fog működni, ha
@@ -559,7 +559,7 @@ van egy S/PDIF (Sony/Philips Digital Interface) jack dugó a hangkártyádon.
 </para>
 
 <para>
-Ha az audió berendezésed tudja dekódolni mind az AC3-at, mind a DTS-t, nyugodtan
+Ha az audió berendezésed tudja dekódolni mind az AC-3-at, mind a DTS-t, nyugodtan
 engedélyezheted az áteresztést mindkét formátumnál. Különben csak arra a formátumra
 engedélyezd, amelyiket a berendezésed támogatja.
 </para>
@@ -567,13 +567,13 @@ engedélyezd, amelyiket a berendezésed támogatja.
 <itemizedlist>
 <title>Áteresztés engedélyezése a parancssorban:</title>
 <listitem><para>
-  Csak AC3-hoz használd a <option>-ac hwac3</option> kapcsolót.
+  Csak AC-3-hoz használd a <option>-ac hwac3</option> kapcsolót.
 </para></listitem>
 <listitem><para>
   CSak DTS-hez használd a <option>-ac hwdts</option> kapcsolót
 </para></listitem>
 <listitem><para>
-  AC3 és DTS esetén használd a <option>-afm hwac3</option> kapcsolót.
+  AC-3 és DTS esetén használd a <option>-afm hwac3</option> kapcsolót.
 </para></listitem>
 </itemizedlist>
 
@@ -581,13 +581,13 @@ engedélyezd, amelyiket a berendezésed támogatja.
 <title>Áteresztés engedélyezése az <application>MPlayer</application>
   konfigurációs fájljában: </title>
 <listitem><para>
-  Csak AC3-hoz használd az <option>ac=hwac3,</option> sort.
+  Csak AC-3-hoz használd az <option>ac=hwac3,</option> sort.
 </para></listitem>
 <listitem><para>
   Csak DTS-hez használd az <option>ac=hwdts,</option> sort.
 </para></listitem>
 <listitem><para>
-  AC3 és DTS esetén használd az <option>afm=hwac3</option> sort.
+  AC-3 és DTS esetén használd az <option>afm=hwac3</option> sort.
 </para></listitem>
 </itemizedlist>
 
@@ -595,7 +595,7 @@ engedélyezd, amelyiket a berendezésed támogatja.
 Figyelj rá, hogy az <option>ac=hwac3,</option> és <option>ac=hwdts,</option>
 sorok végén van egy vessző (","). Ez arra utasítja az <application>MPlayer</application>t,
 hogy váltson vissza a normálisan használt codec-re, ha olyan fájlt játszasz le,
-amiben nincs AC3-as vagy DTS audió. Az <option>afm=hwac3</option>
+amiben nincs AC-3-as vagy DTS audió. Az <option>afm=hwac3</option>
 sorba nem kell vessző; az <application>MPlayer</application> mindenképpen vált
 ha egy audió család van megadva.
 </para>
@@ -714,7 +714,7 @@ az audió kimenetek gyakran le vannak némítva és nulla hangerőre vannak áll
 
 <para>
 Sajnos nincs szabvány a csatornák sorrendjére vonatkozóan. Az alábbi sorrend
-az AC3-é, ami eléggé tipikus; próbáld meg ezt és meglátod, hogy a forrásod
+az AC-3-é, ami eléggé tipikus; próbáld meg ezt és meglátod, hogy a forrásod
 megfelel-e neki. A csatornák számozása 0-tól indul.
 
 <orderedlist spacing="compact">
@@ -1000,7 +1000,7 @@ Itt egy módszer a PCM lekeverésre a <option>pan</option> használatával:
   két csatorna kimenetével foglalkozunk, csak két részt kell készítenünk; a
   maradék négy elhagyható. Vigyázz, nem mindig ugyan az a csatornák sorrendje a
   többcsatornás audió fájlokban! Ez a példa egy olyan fájl lekeverését szemlélteti,
-  amiben ugyan olyan csatornák vannak, mint az AC3 5.1 esetén:
+  amiben ugyan olyan csatornák vannak, mint az AC-3 5.1 esetén:
   <programlisting>
 0 - bal első
 1 - jobb első

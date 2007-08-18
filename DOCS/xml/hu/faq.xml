@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23608 -->
+<!-- synced with r24035 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -792,6 +792,12 @@ Ennek több oka lehet.
   <option>-ni</option> kapcsolót ennek elhárításához.
   Vagy talán hibás a fejléce, ebben az esetben a <option>-nobps</option>
   és/vagy a <option>-mc 0</option> segíthet.
+</para></listitem>
+<listitem><para>
+  Sok FLV fájl lejátszása csak a <option>-correct-pts</option> opcióval jó.
+  Sajnos a <application>MEncoder</application> nem rendelkezik ilyen opcióval,
+  de megpróbálhatod kézzel beállítani az <option>-fps</option> opciót,
+  ha tudod.
 </para></listitem>
 <listitem><para>
   A hang vezérlőd hibás.

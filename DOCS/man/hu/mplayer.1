@@ -1,4 +1,4 @@
-.\" Synced with r23996
+.\" Synced with r24084
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 08. 07." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 08. 18." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1056,17 +1056,17 @@ az MPlayer csak a következõ kulcs képkockára tud ugrani, ez pontatlan.
 .
 .TP
 .B \-a52drc <szint>
-A Dynamic Range Compression szintjét választja ki AC3 audió folyamokhoz.
+A Dynamic Range Compression szintjét választja ki AC-3 audió folyamokhoz.
 A <szint> egy 0 és 1 közötti lebegõpontos érték, ahol a 0 jelenti, hogy nincs
 tömörítés és az 1 (ami az alapértelmezett) a teljes tömörítést (a hangos
 átmeneteket sokkal halkabbá teszi és fordítva).
-Ez a kapcsoló csak akkor hatásos, ha az AC3 folyam tartalmazza a szükséges
+Ez a kapcsoló csak akkor hatásos, ha az AC-3 folyam tartalmazza a szükséges
 tartomány tömörítési információkat.
 .
 .TP
 .B \-aid <ID> (lásd még \-alang)
 Audió csatorna kiválasztása (MPEG: 0\-31, AVI/\:OGM: 1\-99, ASF/\:RM: 0\-127,
-VOB(AC3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
+VOB(AC-3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
 Az MPlayer kiírja a használható audió ID-ket, ha bõbeszédû (\-v) módban
 fut. Ha egy MPEG-TS folyamot játszol le, az MPlayer/\:MEncoder az elsõ
 programot (ha van) fogja használni a kiválaszott audió folyammal.
@@ -1192,14 +1192,14 @@ Lejátszási csatornák igénylése (alapértelmezett: 2).
 Az MPlayer megmondja a dekódernek hogy annyi csatornán dekódoljon,
 amennyit ez az opció megad.
 Innentõl a dekóderen múlik ennek teljesítése.
-Ez akkor fontos ha AC3-as hanggal ellátott videót nézel (pl. DVD).
+Ez akkor fontos ha AC-3-as hanggal ellátott videót nézel (pl. DVD).
 Ebben alapértelmezésként a liba52 dekódol és lemixeli az audiót a kért
 számú csatornára.
 A kimeneti csatornák dekódolt csatornák számától független, direkt
 megadásához használd a channels szûrõt.
 .br
 .I MEGJEGYZÉS:
-Ezt az opciót a codec-ek (csak AC3), a szûrõk (surround) és az audió
+Ezt az opciót a codec-ek (csak AC-3), a szûrõk (surround) és az audió
 kimeneti vezérlõk (legalábbis az OSS) is figyelembe veszik.
 .sp 1
 A rendelkezésre álló opciók:
@@ -1263,7 +1263,7 @@ az a libmpdemux/\:demuxer.h fájlban van.
 .
 .TP
 .B \-dumpaudio (csak MPlayer)
-Nyers, tömörített audio stream kiírása a ./stream.dump fájlba (MPEG/\:AC3-nál
+Nyers, tömörített audio stream kiírása a ./stream.dump fájlba (MPEG/\:AC-3-nál
 hasznos, egyébként a legtöbb esetben lejátszhatatlan fájlt eredményez).
 Ha egynél több \-dumpaudio, \-dumpvideo, \-dumpstream kapcsolót adsz
 meg a parancssorban, csak az utolsó fog mûködni.
@@ -1612,7 +1612,7 @@ A rögzítendõ audió csatornák száma.
 Ezzel az opcióval le lehet játszani nyers audió fájlokat.
 Használnod kell a \-demuxer rawaudio kapcsolót is.
 Használható olyan audió CD-k lejátszásához, melyek nem 44kHz 16-bit sztereók.
-Nyers AC3 folyamok lejátszásához használd a
+Nyers AC-3 folyamok lejátszásához használd a
 \-rawaudio format=0x2000 \-demuxer rawaudio kapcsolót.
 .sp 1
 A használható opciók:
@@ -4043,7 +4043,7 @@ l3codeca.acm MP3 codec kényszerítése.
 .IPs "\-ac mad,"
 Elsõsorban libmad, aztán mások használata.
 .IPs "\-ac hwac3,a52,"
-Elõször hardveres AC3 áteresztés, majd szoftveres AC3 codec, végül egyéb használata.
+Elõször hardveres AC-3 áteresztés, majd szoftveres AC-3 codec, végül egyéb használata.
 .IPs "\-ac hwdts,"
 Hardveres DTS áteresztés, majd visszalépés másra.
 .IPs "\-ac -ffmp3,"
@@ -7274,16 +7274,38 @@ Nézd meg a forrást a részletekért.
 audió codec (alapértelmezett: mp2)
 .PD 0
 .RSs
-.IPs "mp2\ \ "
-MPEG Layer 2
-.IPs "mp3\ \ "
-MPEG Layer 3
 .IPs "ac3\ \ "
-AC3
-.IPs adpcm_ima_wav
-IMA Adaptive PCM (4 bit mintánként, 4:1-es tömörítés)
-.IPs "sonic\ "
-Kísérleti veszteséges/veszteség mentes codec
+Dolby Digital (AC-3)
+.IPs adpcm_*
+Adaptív PCM formátumok - lásd a HTML dokumentációt a részletekért.
+.IPs "flac\ "
+Free Lossless Audio Codec (FLAC)
+.IPs "g726\ "
+G.726 ADPCM
+.IPs libamr_nb
+3GPP Adaptive Multi-Rate (AMR) narrow-band
+.IPs libamr_wb
+3GPP Adaptive Multi-Rate (AMR) wide-band
+.IPs libfaac
+Advanced Audio Coding (AAC) - FAAC használatával
+.IPs libmp3lame
+MPEG-1 audio layer 3 (MP3) - LAME használatával
+.IPs "mp2\ \ "
+MPEG-1 audio layer 2 (MP2)
+.IPs pcm_*
+PCM formátumok - lásd a HTML dokumentációt a részletekért.
+.IPs roq_dpcm
+Id Software RoQ DPCM
+.IPs sonic
+kísérleti egyszerû veszteséges codec
+.IPs sonicls
+kísérleti egyszerû veszteségmentes codec
+.IPs vorbis
+Vorbis
+.IPs wmav1
+Windows Media Audio v1
+.IPs wmav2
+Windows Media Audio v2
 .RE
 .PD 1
 .

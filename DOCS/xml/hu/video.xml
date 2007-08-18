@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23594 -->
+<!-- synced with r24056 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -2128,7 +2128,7 @@ meg, majd ha szinkron vagy DVD felirat problémáid vannak, adj egy esélyt a
 <varlistentry>
   <term><option>-ac hwac3</option></term>
   <listitem><para>
-  A em8300 támogatja az AC3 audió lejátszását (térhatású hang) a kártya
+  A em8300 támogatja az AC-3 audió lejátszását (térhatású hang) a kártya
   digitális audió kimenetén keresztül. Lásd a <option>-ao oss</option>
   kapcsolót fent, a DXR3 kimenetének meghatározására használható a
   hangkártya helyett.

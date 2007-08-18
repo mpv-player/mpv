@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23537 -->
+<!-- synced with r24082 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -361,11 +361,11 @@ eleget teszel az <systemitem class="library">x264</systemitem> követelményeine
   Windows Media Audio 9 (WMAv3) (DMO DLL-lel)
 </para></listitem>
 <listitem><para>
-  AC3 Dolby audió (<emphasis role="bold">natív</emphasis> kód,
+  AC-3 Dolby audió (<emphasis role="bold">natív</emphasis> kód,
   MMX/SSE/3DNow! optimalizációval)
 </para></listitem>
 <listitem><para>
-  hangkártyán áteresztő AC3
+  hangkártyán áteresztő AC-3
 </para></listitem>
 <listitem><para>
   AAC
@@ -374,7 +374,7 @@ eleget teszel az <systemitem class="library">x264</systemitem> követelményeine
   Ogg Vorbis audió codec (<emphasis role="bold">natív</emphasis> függvénykönyvtár)
 </para></listitem>
 <listitem><para>
-  RealAudio: DNET (alacsony bitrátájú AC3), Cook, Sipro és ATRAC3
+  RealAudio: DNET (alacsony bitrátájú AC-3), Cook, Sipro és ATRAC3
 </para></listitem>
 <listitem><para>
   QuickTime: Qualcomm és QDesign audió codec-ek
@@ -397,17 +397,17 @@ eleget teszel az <systemitem class="library">x264</systemitem> követelményeine
 <!-- ********** -->
 
 <sect2 id="swac3">
-<title>Szoftveres AC3 dekódolás</title>
+<title>Szoftveres AC-3 dekódolás</title>
 
 <para>
-Ez az alapértelmezésben használt dekódoló az AC3 audiójú fájlokhoz.
+Ez az alapértelmezésben használt dekódoló az AC-3 audiójú fájlokhoz.
 </para>
 
 <para>
-Az AC3 dekódoló 2, 4 vagy 6 csatornás hangkimenet keverést tud csinálni.
+Az AC-3 dekódoló 2, 4 vagy 6 csatornás hangkimenet keverést tud csinálni.
 Ha 6 hangszóróra van beállítva, ez a dekódoló külön kimenetet biztosít
-hang vezérlő összes AC3 csatornájának, létrehozva így a teljes "surround
-sound" hatást, a hwac3 codec-hez szükséges külső AC3 dekódoló nélkül.
+hang vezérlő összes AC-3 csatornájának, létrehozva így a teljes "surround
+sound" hatást, a hwac3 codec-hez szükséges külső AC-3 dekódoló nélkül.
 </para>
 
 <para>
@@ -416,7 +416,7 @@ megadásához. A <option>-channels 2</option> sztereo downmix-et produkál. Egy 
 csatornás downmixhez (bal elülső, jobb elülső, bal Surround és jobb Surround
 kimenet) használd a <option>-channels 4</option> kapcsolót. Ebben az esetben,
 bármelyik középső csatorna egyenlően lesz elkeverve az elülső csatornákhoz.
-A <option>-channels 6</option> kapcsoló minden AC3 csatornát úgy ad ki, ahogy
+A <option>-channels 6</option> kapcsoló minden AC-3 csatornát úgy ad ki, ahogy
 azok kódolva lettek - bal, jobb, bal Surround, jobb Surround, Center és LFE
 sorrendben.
 </para>
@@ -437,12 +437,12 @@ Live! kártyák használják, de az ALSA CVS is valószínűleg működik).
 <!-- ********** -->
 
 <sect2 id="hwac3">
-<title>Hardveres AC3 dekódolás</title>
+<title>Hardveres AC-3 dekódolás</title>
 
 <para>
-AC3-at támogató hangkártyára lesz szükséges, digitális kimenettel (S/PDIF).
+AC-3-at támogató hangkártyára lesz szükséges, digitális kimenettel (S/PDIF).
 A kártya vezérlőjének megfelelően támogatnia kell az AFMT_AC3 formátumot
-(a C-Media támogatja). Csatlakoztasd az AC3 dekódolódat az S/PDIF kimenethez
+(a C-Media támogatja). Csatlakoztasd az AC-3 dekódolódat az S/PDIF kimenethez
 és használd a <option>-ac hwac3</option> kapcsolót. Még kisérleti kód, de
 működik C-Media kártyákon és Soundblaster Live! + ALSA (de OSS-en nem)
 vezérlővel, valamint DXR3/Hollywood+ MPEG dekódoló kártyákon.
@@ -536,7 +536,7 @@ A referencia implementáció elérhető
 oldalán (személyes felhasználásra ingyenes).
 A támogatás bekapcsolásához töltsd le és telepítsd a függvénykönyvtárakat az
 <ulink url="http://www.penguin.cz/~utx/amr">AMR-NB és AMR-WB</ulink>-hez
-az oldal utasításait követve.
+az oldal utasításait követve. Utána forgasd újra az MPlayert!
 </para>
 </sect2>
 
