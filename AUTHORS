@@ -628,7 +628,7 @@ Pietrzak, Dariusz (Eyck) <eyck@ghost.anime.pl>
     * support for vplayer subtitle format
     * preliminary support for .RT subtitle format
 
-Plourde, Nicolas <nicolas.plourde@sympatico.ca>
+Plourde, Nicolas <nicolas.plourde@gmail.com>
     * quartz video output driver for Mac OS X
     * macosx CoreVideo output driver for Mac OS X
     * Darwin VCD/SVCD support
