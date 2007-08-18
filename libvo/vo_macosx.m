@@ -335,7 +335,7 @@ static int control(uint32_t request, void *data, ...)
 // NSOpenGLView Subclass
 //////////////////////////////////////////////////////////////////////////
 @implementation MPlayerOpenGLView
-- (id) preinit
+- (void) preinit
 {
 	//init menu
 	[self initMenu];
@@ -356,7 +356,7 @@ static int control(uint32_t request, void *data, ...)
 	winSizeMult = 1;
 }
 
-- (id) config
+- (void) config
 {
 	uint32_t d_width;
 	uint32_t d_height;
