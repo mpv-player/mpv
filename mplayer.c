@@ -1652,15 +1652,6 @@ static float timing_sleep(float time_frame)
 	}
     } else
 #endif
-#ifdef SYS_DARWIN
-	{
-	    current_module = "sleep_darwin";
-	    while (time_frame > 0.005) {
-		usec_sleep(1000000*time_frame);
-		time_frame -= GetRelativeTime();
-	    }
-	}
-#else
     {
 	// assume kernel HZ=100 for softsleep, works with larger HZ but with
 	// unnecessarily high CPU usage
@@ -1678,7 +1669,6 @@ static float timing_sleep(float time_frame)
 		time_frame-=GetRelativeTime(); // burn the CPU
 	}
     }
-#endif /* SYS_DARWIN */
     return time_frame;
 }
 
