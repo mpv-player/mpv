@@ -52,17 +52,12 @@ static uint32_t image_bytes;
 static uint32_t image_format;
 
 //vo
-extern int vo_rootwin;
-extern int vo_ontop;
-extern int vo_fs;
 static int isFullscreen;
 static int isOntop;
 static int isRootwin;
 extern float monitor_aspect;
-extern int vo_keepaspect;
 extern float movie_aspect;
 static float old_movie_aspect;
-extern float vo_panscan;
 
 static float winAlpha = 1;
 static int int_pause = 0;
