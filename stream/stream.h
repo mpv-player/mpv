@@ -186,14 +186,8 @@ inline static uint64_t stream_read_qword(stream_t *s){
 
 inline static uint64_t stream_read_qword_le(stream_t *s){
   uint64_t y;
-  y = stream_read_char(s);
-  y|=stream_read_char(s)<<8;
-  y|=stream_read_char(s)<<16;
-  y|=stream_read_char(s)<<24;
-  y|=(uint64_t)stream_read_char(s)<<32;
-  y|=(uint64_t)stream_read_char(s)<<40;
-  y|=(uint64_t)stream_read_char(s)<<48;
-  y|=(uint64_t)stream_read_char(s)<<56;
+  y = stream_read_dword_le(s);
+  y|=(uint64_t)stream_read_dword_le(s)<<32;
   return y;
 }
 
