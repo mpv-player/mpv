@@ -102,7 +102,6 @@ typedef struct {
   uint32_t hli_s_ptm;              /**< start ptm of hli */
   uint32_t hli_e_ptm;              /**< end ptm of hli */
   uint32_t btn_se_e_ptm;           /**< end ptm of button select */
-#ifdef WORDS_BIGENDIAN
   unsigned int zero1 : 2;          /**< reserved */
   unsigned int btngr_ns : 2;       /**< number of button groups 1, 2 or 3 with 36/18/12 buttons */
   unsigned int zero2 : 1;          /**< reserved */
@@ -111,16 +110,6 @@ typedef struct {
   unsigned int btngr2_dsp_ty : 3;  /**< display type of subpic stream for button group 2 */
   unsigned int zero4 : 1;          /**< reserved */
   unsigned int btngr3_dsp_ty : 3;  /**< display type of subpic stream for button group 3 */
-#else
-  unsigned int btngr1_dsp_ty : 3;
-  unsigned int zero2 : 1;
-  unsigned int btngr_ns : 2;
-  unsigned int zero1 : 2;
-  unsigned int btngr3_dsp_ty : 3;
-  unsigned int zero4 : 1;
-  unsigned int btngr2_dsp_ty : 3;
-  unsigned int zero3 : 1;
-#endif
   uint8_t btn_ofn;     /**< button offset number range 0-255 */
   uint8_t btn_ns;      /**< number of valid buttons  <= 36/18/12 (low 6 bits) */  
   uint8_t nsl_btn_ns;  /**< number of buttons selectable by U_BTNNi (low 6 bits)   nsl_btn_ns <= btn_ns */
@@ -150,47 +139,24 @@ typedef struct {
  * The 4 and 7 bytes are 'rotated' was: ABC DEF GHIJ  is: ABCG DEFH IJ
  */
 typedef struct {
-#ifdef WORDS_BIGENDIAN
   unsigned int btn_coln         : 2;  /**< button color number */
   unsigned int x_start          : 10; /**< x start offset within the overlay */
   unsigned int zero1            : 2;  /**< reserved */
   unsigned int x_end            : 10; /**< x end offset within the overlay */
-
-  unsigned int zero3            : 2;  /**< reserved */
-  unsigned int up               : 6;  /**< button index when pressing up */
 
   unsigned int auto_action_mode : 2;  /**< 0: no, 1: activated if selected */
   unsigned int y_start          : 10; /**< y start offset within the overlay */
   unsigned int zero2            : 2;  /**< reserved */
   unsigned int y_end            : 10; /**< y end offset within the overlay */
 
+  unsigned int zero3            : 2;  /**< reserved */
+  unsigned int up               : 6;  /**< button index when pressing up */
   unsigned int zero4            : 2;  /**< reserved */
   unsigned int down             : 6;  /**< button index when pressing down */
   unsigned int zero5            : 2;  /**< reserved */
   unsigned int left             : 6;  /**< button index when pressing left */
   unsigned int zero6            : 2;  /**< reserved */
   unsigned int right            : 6;  /**< button index when pressing right */
-#else
-  unsigned int x_end            : 10;
-  unsigned int zero1            : 2;
-  unsigned int x_start          : 10;
-  unsigned int btn_coln         : 2;
-
-  unsigned int up               : 6;
-  unsigned int zero3            : 2;
-
-  unsigned int y_end            : 10;
-  unsigned int zero2            : 2;
-  unsigned int y_start          : 10;
-  unsigned int auto_action_mode : 2;
-
-  unsigned int down             : 6;
-  unsigned int zero4            : 2;
-  unsigned int left             : 6;
-  unsigned int zero5            : 2;
-  unsigned int right            : 6;
-  unsigned int zero6            : 2;
-#endif
   vm_cmd_t cmd;
 } ATTRIBUTE_PACKED btni_t;
 
