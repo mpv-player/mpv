@@ -145,6 +145,8 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
         pos += stream->end_pos;
     else if(whence == SEEK_SET)
         pos += stream->start_pos;
+    else if(whence == AVSEEK_SIZE && stream->end_pos > 0)
+        return stream->end_pos - stream->start_pos;
     else
         return -1;
 
