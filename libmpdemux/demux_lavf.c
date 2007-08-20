@@ -141,7 +141,7 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
     mp_msg(MSGT_HEADER,MSGL_DBG2,"mp_seek(%p, %d, %d)\n", h, (int)pos, whence);
     if(whence == SEEK_CUR)
         pos +=stream_tell(stream);
-    else if(whence == SEEK_END)
+    else if(whence == SEEK_END && stream->end_pos > 0)
         pos += stream->end_pos;
     else if(whence == SEEK_SET)
         pos += stream->start_pos;
