@@ -152,6 +152,30 @@ void* WINAPI LoadLibraryA(char* name);
 void* WINAPI GetProcAddress(void* handle,char* func);
 int WINAPI FreeLibrary(void *handle);
 
+#ifndef WIN32_LOADER
+void * WINAPI GetModuleHandleA(char *);
+static int patch_dll(uint8_t *patchpos, const uint8_t *oldcode,
+                     const uint8_t *newcode, int codesize) {
+  void *handle = GetModuleHandleA("kernel32");
+  int WINAPI (*VirtProt)(void *, unsigned, int, int *);
+  int res = 0;
+  int prot, tmp;
+  VirtProt = GetProcAddress(handle, "VirtualProtect");
+  // change permissions to PAGE_WRITECOPY
+  if (!VirtProt ||
+      !VirtProt(patchpos, codesize, 0x08, &prot)) {
+    mp_msg(MSGT_DECVIDEO, MSGL_WARN, "VirtualProtect failed at %p\n", patchpos);
+    return 0;
+  }
+  if (memcmp(patchpos, oldcode, codesize) == 0) {
+    memcpy(patchpos, newcode, codesize);
+    res = 1;
+  }
+  VirtProt(patchpos, codesize, prot, &tmp);
+  return res;
+}
+#endif
+
 static int load_syms_windows(char *path) {
     void *handle;
 
@@ -178,6 +202,26 @@ static int load_syms_windows(char *path) {
     {
 	dll_type = 1;
 	rv_handle = handle;
+#ifndef WIN32_LOADER
+	{
+	    int patched = 0;
+	    // drv43260.dll
+	    if (wrvyuv_transform == (void *)0x634114d0) {
+		// patch away multithreaded decoding, it causes crashes
+		static const uint8_t oldcode[13] = {
+		    0x83, 0xbb, 0xf8, 0x05, 0x00, 0x00, 0x01,
+		    0x0f, 0x86, 0xd0, 0x00, 0x00, 0x00 };
+		static const uint8_t newcode[13] = {
+		    0x31, 0xc0,
+		    0x89, 0x83, 0xf8, 0x05, 0x00, 0x00,
+		    0xe9, 0xd0, 0x00, 0x00, 0x00 };
+		patched = patch_dll((void *)0x634132fa, oldcode, newcode,
+		                    sizeof(oldcode));
+	    }
+	    if (!patched)
+		mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Could not patch Real codec, this might crash on multi-CPU systems\n");
+	}
+#endif
 	return 1;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
