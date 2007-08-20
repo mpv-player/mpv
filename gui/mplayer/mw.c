@@ -20,6 +20,7 @@
 #include "../libvo/fastmemcpy.h"
 
 #include "../stream/stream.h"
+#include "stream/url.h"
 #include "../mixer.h"
 #include "../libvo/sub.h"
 #include "../access_mpcontext.h"
@@ -559,13 +560,7 @@ void mplDandDHandler(int num,char** files)
     char* str = strdup( files[f] );
     plItem* item;
 
-#ifdef USE_ICONV
-    if ( strchr( str,'%' ) )
-     {
-      char * tmp=gconvert_uri_to_filename( str );
-      free( str ); str=tmp;
-     }
-#endif
+    url_unescape_string(str, files[f]);
 
     if(stat(str,&buf) == 0 && S_ISDIR(buf.st_mode) == 0) {
       /* this is not a directory so try to play it */

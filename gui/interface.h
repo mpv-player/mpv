@@ -210,7 +210,6 @@ extern float gtkEquChannels[6][10];
 
 extern void * gtkSet( int cmd,float param, void * vparam );
 
-extern char * gconvert_uri_to_filename( char * str );
 extern char * gstrdup( const char * str );
 extern int    gstrcmp( const char * a,const char * b );
 extern void   gfree( void ** p );
