@@ -1255,7 +1255,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block,
 		 */
 
 		/* timed sub fps correction ::atmos */
-		if(sub_uses_time && sub_fps) {	
+		if(sub_fps) {	
 			sub->start *= sub_fps/fps;
 			sub->end   *= sub_fps/fps;
 		}
