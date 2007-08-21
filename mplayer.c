@@ -3537,8 +3537,6 @@ if(rel_seek_secs || abs_seek_pos){
 	if( !edl_decision )
           set_osd_bar(0,"Position",0,100,demuxer_get_percent_pos(mpctx->demuxer));
       }
-      // osd_function has been set (or not) by the code triggering the seek
-	osd_visible=(GetTimerMS() + 1000) | 1; // to revert to PLAY pointer after 1 sec
   }
 
   rel_seek_secs=0;
