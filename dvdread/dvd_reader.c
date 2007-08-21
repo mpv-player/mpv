@@ -189,18 +189,6 @@ void SetAlignHandle(dvd_reader_t *device, void *align)
   dev->align = align;
 }
 
-#ifdef WIN32 /* replacement gettimeofday implementation */
-#include <sys/timeb.h>
-static int gettimeofday( struct timeval *tv, void *tz )
-{
-  struct timeb t;
-  ftime( &t );
-  tv->tv_sec = t.time;
-  tv->tv_usec = t.millitm * 1000;
-  return 0;
-}
-#endif
-
 
 /* Loop over all titles and call dvdcss_title to crack the keys. */
 static int initAllCSSKeys( dvd_reader_t *dvd )

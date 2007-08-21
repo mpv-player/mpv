@@ -22,7 +22,27 @@
  
  struct dvd_reader_s {
    /* Basic information. */
-@@ -494,7 +500,7 @@
+@@ -183,19 +189,7 @@
+   dev->align = align;
+ }
+ 
+-#ifdef WIN32 /* replacement gettimeofday implementation */
+-#include <sys/timeb.h>
+-static int gettimeofday( struct timeval *tv, void *tz )
+-{
+-  struct timeb t;
+-  ftime( &t );
+-  tv->tv_sec = t.time;
+-  tv->tv_usec = t.millitm * 1000;
+-  return 0;
+-}
+-#endif
+ 
+-
+ /* Loop over all titles and call dvdcss_title to crack the keys. */
+ static int initAllCSSKeys( dvd_reader_t *dvd )
+ {
+@@ -494,7 +488,7 @@
      char *path_copy;
  #if defined(SYS_BSD)
      struct fstab* fe;
@@ -31,7 +51,7 @@
      FILE *mntfile;
  #endif
  
-@@ -598,7 +604,7 @@
+@@ -598,7 +592,7 @@
        }
        fclose( mntfile );
      }
@@ -40,7 +60,7 @@
      mntfile = fopen( MOUNTED, "r" );
      if( mntfile ) {
        struct mntent *me;
-@@ -623,6 +629,9 @@
+@@ -623,6 +617,9 @@
        }
        fclose( mntfile );
      }
@@ -50,7 +70,7 @@
  #endif
      if( !dev_name ) {
        if(verbose >= 1) {
-@@ -841,8 +850,8 @@
+@@ -841,8 +838,8 @@
    }
      
    if( dvd->css_state == 1 /* Need key init */ ) {
