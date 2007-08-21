@@ -769,6 +769,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      * Open the disc.
      */
     if(!dvd_device) dvd_device=strdup(DEFAULT_DVD_DEVICE);
+    dvd_set_speed(dvd_device, dvd_speed);
 #ifdef SYS_DARWIN
     /* Dynamic DVD drive selection on Darwin */
     if(!strcmp(dvd_device, "/dev/rdiskN")) {
@@ -810,7 +811,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
           return STREAM_UNSUPORTED;
         }
     }
-    dvd_set_speed(dvd_device, dvd_speed);
 
     mp_msg(MSGT_OPEN,MSGL_V,"Reading disc structure, please wait...\n");
 
