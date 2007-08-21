@@ -1333,7 +1333,19 @@ static mp_osd_msg_t* get_osd_msg(void) {
     unsigned now = GetTimerMS();
     unsigned diff;
     char hidden_dec_done = 0;
-    
+
+    if (osd_visible) {
+	// 36000000 means max timed visibility is 1 hour into the future, if
+	// the difference is greater assume it's wrapped around from below 0
+	if (osd_visible - now > 36000000) {
+	    osd_visible = 0;
+	    vo_osd_progbar_type = -1; // disable
+	    vo_osd_changed(OSDTYPE_PROGBAR);
+	    if (mpctx->osd_function != OSD_PAUSE)
+		mpctx->osd_function = OSD_PLAY;
+	}
+    }
+
     if(!last_update) last_update = now;
     diff = now >= last_update ? now - last_update : 0;
     
@@ -3476,18 +3488,6 @@ if(auto_quality>0){
 //============================ Handle PAUSE ===============================
 
   current_module="pause";
-
-  if(osd_visible){
-      // 36000000 means max timed visibility is 1 hour into the future, if
-      // the difference is greater assume it's wrapped around from below 0
-    if (osd_visible - GetTimerMS() > 36000000) {
-       osd_visible = 0;
-       vo_osd_progbar_type=-1; // disable
-       vo_osd_changed(OSDTYPE_PROGBAR);
-       if (mpctx->osd_function != OSD_PAUSE)
-	   mpctx->osd_function = OSD_PLAY;
-    }
-  }
 
   if (mpctx->osd_function == OSD_PAUSE) {
       pause_loop();
