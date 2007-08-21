@@ -1,4 +1,4 @@
-.\" Synced with r24084
+.\" Synced with r24110
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 08. 18." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 08. 21." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -7337,50 +7337,58 @@ Egy kis negatív hatása lehet a mozgás becslésre.
 A megadott codec-et alkalmazza (alapértelmezett: mpeg4).
 .PD 0
 .RSs
-.IPs mjpeg
-Motion JPEG
-.IPs ljpeg
-Veszteségmentes JPEG
+.IPs "asv1\ "
+ASUS Video v1
+.IPs "asv2\ "
+ASUS Video v2
+.IPs dvvideo
+Sony Digital Video
+.IPs "ffv1\ "
+FFmpeg veszteségmentes videó codec-je
+.IPs ffvhuff
+nem szabványos 20%-kal kisebb HuffYUV YV12 használattal
+.IPs "flv\ \ "
+Flash videókban használt Sorenson H.263
 .IPs "h261\ "
 H.261
 .IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
+.IPs huffyuv
+HuffYUV
+.IPs libtheora
+Theora
+.IPs libx264
+x264 H.264/AVC MPEG-4 Part 10
+.IPs libxvid
+Xvid MPEG-4 Part 2 (ASP)
+.IPs ljpeg
+Veszteségmentes JPEG
+.IPs mjpeg
+Motion JPEG
+.IPs mpeg1video
+MPEG-1 videó
+.IPs mpeg2video
+MPEG-2 videó
 .IPs mpeg4
 MPEG-4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
+.IPs roqvideo
+ID Software RoQ Video
+.IPs "rv10\ "
+egy régi RealVideo codec
+.IPs "snow (lásd még: vstrict)"
+FFmpeg kísérleti wavelet-alapú codec-je
+.IPs "svq1\ "
+Apple Sorenson Video 1
 .IPs "wmv1\ "
 Windows Media Video, 1-es verzió (WMV7)
 .IPs "wmv2\ "
 Windows Media Video, 2-es verzió (WMV8)
-.IPs "rv10\ "
-egy régi RealVideo codec
-.IPs mpeg1video
-MPEG-1 videó
-.IPs mpeg2video
-MPEG-2 videó
-.IPs huffyuv
-HuffYUV
-.IPs ffvhuff
-nem szabványos 20%-kal kisebb HuffYUV YV12 használattal
-.IPs "asv1\ "
-ASUS Video v1
-.IPs "asv2\ "
-ASUS Video v2
-.IPs "ffv1\ "
-FFmpeg veszteségmentes videó codec-je
-.IPs "flv\ \ "
-Flash videókban használt Sorenson H.263
-.IPs dvvideo
-Sony Digital Video
-.IPs "svq1\ "
-Apple Sorenson Video 1
-.IPs "snow (lásd még: vstrict)"
-FFmpeg kísérleti wavelet-alapú codec-je
 .RE
 .PD 1
 .
