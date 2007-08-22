@@ -8030,7 +8030,9 @@ $_def_muxers
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
 #define HAVE_EBX_AVAILABLE 1
+#ifndef MP_DEBUG
 #define HAVE_EBP_AVAILABLE 1
+#endif
 
 #define CONFIG_GPL 1
 #define ENABLE_SMALL 0
