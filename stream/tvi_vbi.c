@@ -22,6 +22,7 @@
  * Based on Attila Otvos' teletext patch, Michael Niedermayer's
  * proof-of-concept teletext capture utility and some parts
  * (decode_raw_line_runin,pll_add,pll_reset) of MythTV project.
+ * Code for calculating [soc:eoc] is based on aletv of Edgar Toernig.
  *
  *
  * Some implementation details:
@@ -277,10 +278,13 @@ static void init_vbi_consts(priv_vbi_t* priv){
     }
 
     priv->bpb=(priv->ptsp->sampling_rate/6937500.0)*ONE_FIXP+0.5;
-//FIXME: STUBS!!!!
-    priv->soc=0;
-    priv->eoc=92;
-//END STUBS!!!
+    priv->soc=FFMAX(9.2e-6*priv->ptsp->sampling_rate-priv->ptsp->offset, 0);
+    priv->eoc=FFMIN(12.9e-6*priv->ptsp->sampling_rate-priv->ptsp->offset,
+                    priv->ptsp->samples_per_line-43*8*priv->bpb/ONE_FIXP);
+    if (priv->eoc - priv->soc<16*priv->bpb/ONE_FIXP){ // invalid [soc:eoc]
+        priv->soc=0;
+        priv->eoc=92;
+    };
     priv->bp8bl=0.97*8*priv->bpb/ONE_FIXP; // -3% tolerance
     priv->bp8bh=1.03*8*priv->bpb/ONE_FIXP; // +3% tolerance
 }
@@ -913,8 +917,8 @@ static int decode_raw_line_runin(priv_vbi_t* priv,unsigned char* buf,unsigned ch
     int thr=0; //threshold
 
     //stubs
-    int soc=0;
-    int eoc=92;
+    int soc=priv->soc;
+    int eoc=priv->eoc;
 
     for(i=soc;i<eoc;i++)
         dt[i]=buf[i+priv->bpb/ONE_FIXP]-buf[i];    // amplifies the edges best.
