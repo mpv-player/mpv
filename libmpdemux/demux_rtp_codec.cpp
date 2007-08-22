@@ -117,7 +117,7 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     sh_video->bih = bih = insertVideoExtradata(bih, configData, configLen);
     delete[] configData;
 #ifdef USE_LIBAVCODEC
-    av_register_codec_parser(&h264_parser);
+    avcodec_register_all();
     h264parserctx = av_parser_init(CODEC_ID_H264);
 #endif
     needVideoFrameRate(demuxer, subsession);
