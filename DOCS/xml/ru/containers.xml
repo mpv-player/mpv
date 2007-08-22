@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23691 -->
+<!-- synced with r24056 -->
 <chapter id="containers">
 <title>Поддерживаемые форматы</title>
 
@@ -59,7 +59,7 @@ MPEG файлы бывают различных разновидностей:
 <listitem><para>
   VOB: Это формат MPEG файлов на <emphasis role="bold">DVD'шниках</emphasis>.
   Это такой же формат, как и MPG, плюс возможность содержать субтитры и
-  не-MPEG (AC3) аудио. Он содержит кодированное MPEG2 видео и обычно AC3
+  не-MPEG (AC-3) аудио. Он содержит кодированное MPEG2 видео и обычно AC-3
   аудио, но DTS, MP2 и не запакованный LPCM тоже возможны. <emphasis role="bold">
   Читайте секцию <link linkend="dvd">DVD</link></emphasis>!
 </para></listitem>

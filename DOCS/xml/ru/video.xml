@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23594 -->
+<!-- synced with r24056 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -2119,7 +2119,7 @@ em8300 карт.
 <varlistentry>
   <term><option>-ac hwac3</option></term>
   <listitem><para>
-  em8300 поддерживает воспроизведение звука AC3 (окружающий звук) через 
+  em8300 поддерживает воспроизведение звука AC-3 (окружающий звук) через 
   цифровой аудио выход карты.Смотрите опцию <option>-ao oss</option> выше,
   она должна использоваться для указания вывода через DXR3 вместо звуковой карты.
   </para></listitem>

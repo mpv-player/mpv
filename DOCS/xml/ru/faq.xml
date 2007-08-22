@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with  r23608  -->
+<!-- synced with  r24035  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -777,6 +777,12 @@ aRts блокирует звуковое устройство. Либо подо
   попробуйте опцию <option>-ni</option> для обхода проблемы. Или файл имеет
   неверный заголовок. В этом случае могут помочь опции <option>-nobps</option>
   и/или <option>-mc 0</option>.
+</para></listitem>
+<listitem><para>
+  Многие FLV файлы будут правильно воспроизводиться только с <option>-correct-pts</option>.
+  К сожалению, <application>MEncoder</application> такой опции не имеет,
+  но вы можете попробовать вручную указать правильное значение <option>-fps</option>,
+  если оно вам известно.
 </para></listitem>
 <listitem><para>
   У вас неверно работает звуковой драйвер. Смотрите 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22753 -->
+<!-- synced with r24089 -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
@@ -1606,15 +1606,15 @@ A/V рассинхронизацию.
 <para>
 Аудио &mdash; это гораздо более простая проблема: если Вы 
 беспокоитесь о качестве, просто оставьте всё как есть.
-Даже потоки AC3 5.1 не более чем 448 Кбит/с и они стоят каждого 
+Даже потоки AC-3 5.1 не более чем 448 Кбит/с и они стоят каждого 
 бита. Вы можете соблазниться перекодированием аудио в 
 высококачественный Vorbis (он же ogg формат), но лишь то, что 
-у Вас сегодня нет A/V приёмника для пропускания AC3, не означает,
+у Вас сегодня нет A/V приёмника для пропускания AC-3, не означает,
 что у Вас не будет его завтра. Для жизнеспособности Ваших DVD 
-рипов в будущем, сохраняйте поток AC3.
-Вы можете сохранить поток AC3, копируя его непосредственно в 
+рипов в будущем, сохраняйте поток AC-3.
+Вы можете сохранить поток AC-3, копируя его непосредственно в 
 видеопоток <link linkend="menc-feat-mpeg4">в процессе кодирования</link>.
-Вы также можете извлечь AC3 поток с целью мультиплексирования его 
+Вы также можете извлечь AC-3 поток с целью мультиплексирования его 
 в контейнеры наподобие NUT или Matroska (Матрёшка).
 <screen>
 mplayer <replaceable>файл_источника.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>звук.ac3</replaceable></screen>
@@ -1664,7 +1664,7 @@ Vorbis аудиокодеков.
 Правильным решением подобных проблем является вставка тишины или
 усечение аудио в таких точках.
 Однако, <application>MPlayer</application> не может это сделать
-и если Вы демультиплексируете AC3 аудио и кодируете его отдельным
+и если Вы демультиплексируете AC-3 аудио и кодируете его отдельным
 приложением (или создаёте дамп в PCM с помощью
 <application>MPlayer</application>), сшивания останутся 
 нескорректированными и единственный испособ их исправить &mdash;
@@ -1846,7 +1846,7 @@ MPEG-1,  он также обладает некоторыми существе�
   К сожалению, самый эффективный кодек, Vorbis, не удовлетворяет 
   ни одному из данных требований.
   Поэтому, если Вы планируете сохранять Ваш фильм в AVI, Вы должны
-  использовать менее эффективный кодек, такой как MP3 или AC3.
+  использовать менее эффективный кодек, такой как MP3 или AC-3.
 </para></listitem>
 </orderedlist>
 
@@ -2741,16 +2741,56 @@ mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy
 </thead>
 <tbody>
 <row>
-  <entry>mp2</entry>
-  <entry>MPEG Layer 2</entry>
-</row>
-<row>
   <entry>ac3</entry>
-  <entry>AC3, он же Dolby Digital</entry>
+  <entry>Dolby Digital (AC-3)</entry>
 </row>
 <row>
-  <entry>adpcm_ima_wav</entry>
-  <entry>IMA адаптивный PCM (4 бита на сэмпл, сжатие 4:1)</entry>
+  <entry>adpcm_*</entry>
+  <entry>Форматы Adaptive PCM, смотрите дополнительную таблицу</entry>
+</row>
+<row>
+  <entry>flac</entry>
+  <entry>Free Lossless Audio Codec (FLAC)</entry>
+</row>
+<row>
+  <entry>g726</entry>
+  <entry>G.726 ADPCM</entry>
+</row>
+<row>
+  <entry>libamr_nb</entry>
+  <entry>3GPP Adaptive Multi-Rate (AMR) узкополосный</entry>
+</row>
+<row>
+  <entry>libamr_wb</entry>
+  <entry>3GPP Adaptive Multi-Rate (AMR) широкополосный</entry>
+</row>
+<row>
+  <entry>libfaac</entry>
+  <entry>Advanced Audio Coding (AAC) - используя FAAC</entry>
+</row>
+<row>
+  <entry>libgsm</entry>
+  <entry>ETSI GSM 06.10 full rate</entry>
+</row>
+<row>
+  <entry>libgsm_ms</entry>
+  <entry>Microsoft GSM</entry>
+</row>
+<row>
+  <entry>libmp3lame</entry>
+  <entry>MPEG-1 audio layer 3 (MP3) - используя LAME</entry>
+</row>
+<row>
+  <entry>mp2</entry>
+  <entry>MPEG-1 audio layer 2 (MP2)</entry>
+</row>
+<row>
+  <entry>pcm_*</entry>
+  <entry>PCM форматы, смотрите дополнительную таблицу</entry>
+</row>
+<row>
+  <entry>roq_dpcm</entry>
+  <entry>Id Software RoQ DPCM</entry>
 </row>
 <row>
   <entry>sonic</entry>
@@ -2762,15 +2802,15 @@ mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy
 </row>
 <row>
   <entry>vorbis</entry>
-  <entry>Xiph Ogg Vorbis кодек</entry>
+  <entry>Vorbis</entry>
 </row>
 <row>
   <entry>wmav1</entry>
-  <entry>Windows Media Audio v1 кодек</entry>
+  <entry>Windows Media Audio v1</entry>
 </row>
 <row>
   <entry>wmav2</entry>
-  <entry>Windows Media Audio v2 кодек</entry>
+  <entry>Windows Media Audio v2</entry>
 </row>
 </tbody>
 </tgroup>
@@ -2781,7 +2821,7 @@ mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy
 </para>
 
 <informalexample><para>
-Пример с AC3 сжатием:
+Пример с AC-3 сжатием:
 <screen>
 mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy
 </screen>
@@ -2797,6 +2837,167 @@ mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy
 <systemitem class="library">libavcodec</systemitem> (а почти всегда так оно и
 есть), и не зависят от внешних библиотек.
 </para>
+
+<sect3 id="menc-feat-enc-libavcodec-audio-codecs-pcmadpcm">
+<title>Дополнительная таблица PCM/ADPCM форматов</title>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Название PCM/ADPCM кодека</entry><entry>Описание</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>pcm_s32le</entry>
+  <entry>signed 32-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s32be</entry>
+  <entry>signed 32-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u32le</entry>
+  <entry>unsigned 32-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u32be</entry>
+  <entry>unsigned 32-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s24le</entry>
+  <entry>signed 24-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s24be</entry>
+  <entry>signed 24-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u24le</entry>
+  <entry>unsigned 24-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u24be</entry>
+  <entry>unsigned 24-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s16le</entry>
+  <entry>signed 16-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s16be</entry>
+  <entry>signed 16-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u16le</entry>
+  <entry>unsigned 16-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u16be</entry>
+  <entry>unsigned 16-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s8</entry>
+  <entry>signed 8-bit</entry>
+</row>
+<row>
+  <entry>pcm_u8</entry>
+  <entry>unsigned 8-bit</entry>
+</row>
+<row>
+  <entry>pcm_alaw</entry>
+  <entry>G.711 A-LAW </entry>
+</row>
+<row>
+  <entry>pcm_mulaw</entry>
+  <entry>G.711 &mu;-LAW</entry>
+</row>
+<row>
+  <entry>pcm_s24daud</entry>
+  <entry>signed 24-bit D-Cinema Audio формат</entry>
+</row>
+<row>
+  <entry>pcm_zork</entry>
+  <entry>Activision Zork Nemesis</entry>
+</row>
+<row>
+  <entry>adpcm_ima_qt</entry>
+  <entry>Apple QuickTime</entry>
+</row>
+<row>
+  <entry>adpcm_ima_wav</entry>
+  <entry>Microsoft/IBM WAVE</entry>
+</row>
+<row>
+  <entry>adpcm_ima_dk3</entry>
+  <entry>Duck DK3</entry>
+</row>
+<row>
+  <entry>adpcm_ima_dk4</entry>
+  <entry>Duck DK4</entry>
+</row>
+<row>
+  <entry>adpcm_ima_ws</entry>
+  <entry>Westwood Studios</entry>
+</row>
+<row>
+  <entry>adpcm_ima_smjpeg</entry>
+  <entry>SDL Motion JPEG</entry>
+</row>
+<row>
+  <entry>adpcm_ms</entry>
+  <entry>Microsoft</entry>
+</row>
+<row>
+  <entry>adpcm_4xm</entry>
+  <entry>4X Technologies</entry>
+</row>
+<row>
+  <entry>adpcm_xa</entry>
+  <entry>Phillips Yellow Book CD-ROM eXtended Architecture</entry>
+</row>
+<row>
+  <entry>adpcm_ea</entry>
+  <entry>Electronic Arts</entry>
+</row>
+<row>
+  <entry>adpcm_ct</entry>
+  <entry>Creative 16->4-bit</entry>
+</row>
+<row>
+  <entry>adpcm_swf</entry>
+  <entry>Adobe Shockwave Flash</entry>
+</row>
+<row>
+  <entry>adpcm_yamaha</entry>
+  <entry>Yamaha</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_4</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->4-bit</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_3</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->2.6-bit</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_2</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->2-bit</entry>
+</row>
+<row>
+  <entry>adpcm_thp</entry>
+  <entry>Nintendo GameCube FMV THP</entry>
+</row>
+<row>
+  <entry>adpcm_adx</entry>
+  <entry>Sega/CRI ADX</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect3>
+
 </sect2>
 
 <!-- ********** -->
@@ -4723,7 +4924,7 @@ vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf
 -x264encopts pass=1:turbo:bitrate=900:bframes=1:\
 me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
 -vf crop=720:352:0:62,scale=-10:-1,harddup \
--oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-oac faac -faacopts br=192:mpeg=4:object=2 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 
   Если у Вас многопроцессорная машина, не упустите шанс значительно 
@@ -4742,7 +4943,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 -x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
 me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
 -vf crop=720:352:0:62,scale=-10:-1,harddup \
--oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-oac faac -faacopts br=192:mpeg=4:object=2 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 </para>
 
@@ -4904,7 +5105,7 @@ DVD, SVCD, и VCD форматы обладают жесткими ограни�
   <entry>MPEG-2</entry>
   <entry>9800 кбит/с</entry>
   <entry>48000 Гц</entry>
-  <entry>AC3,PCM</entry>
+  <entry>AC-3,PCM</entry>
   <entry>1536 кбит/с (макс.)</entry>
   <entry>30000/1001, 24000/1001</entry>
   <entry>4:3, 16:9 (только для 720x480)</entry>
@@ -4917,7 +5118,7 @@ DVD, SVCD, и VCD форматы обладают жесткими ограни�
   <entry>MPEG-1</entry>
   <entry>1856 кбит/с</entry>
   <entry>48000 Гц</entry>
-  <entry>AC3,PCM</entry>
+  <entry>AC-3,PCM</entry>
   <entry>1536 кбит/с (макс.)</entry>
   <entry>30000/1001, 24000/1001</entry>
   <entry>4:3, 16:9</entry>
@@ -4950,7 +5151,7 @@ DVD, SVCD, и VCD форматы обладают жесткими ограни�
   <entry>MPEG-2</entry>
   <entry>9800 кбит/с</entry>
   <entry>48000 Гц</entry>
-  <entry>MP2,AC3,PCM</entry>
+  <entry>MP2,AC-3,PCM</entry>
   <entry>1536 кбит/с (макс.)</entry>
   <entry>25</entry>
   <entry>4:3, 16:9 (только для 720x576)</entry>
@@ -4961,7 +5162,7 @@ DVD, SVCD, и VCD форматы обладают жесткими ограни�
    <entry>MPEG-1</entry>
    <entry>1856 кбит/с</entry>
    <entry>48000 Гц</entry>
-   <entry>MP2,AC3,PCM</entry>
+   <entry>MP2,AC-3,PCM</entry>
    <entry>1536 кбит/с (макс.)</entry>
    <entry>25</entry>
    <entry>4:3, 16:9</entry>
@@ -5320,7 +5521,7 @@ VCD поддерживает только звук с постоянным би�
 </para>
 
 <para>
-Для DVD звука используется AC3 кодек из <systemitem class="library">libavcodec</systemitem>.
+Для DVD звука используется AC-3 кодек из <systemitem class="library">libavcodec</systemitem>.
 </para>
 
 
@@ -5406,10 +5607,10 @@ keyint=18:vstrict=0:acodec=ac3:abitrate=192:aspect=16/9 -ofps 30000/1001 \
 
 
 <sect3 id="menc-feat-vcd-dvd-all-pal-ac3-copy">
-<title>PAL AVI, содержащий AC3 звук, в DVD</title>
+<title>PAL AVI, содержащий AC-3 звук, в DVD</title>
 
 <para>
-Если исходный материал уже содержит AC3 звук, используйте -oac copy вместо
+Если исходный материал уже содержит AC-3 звук, используйте -oac copy вместо
 перекодирования.
 <screen>
 mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf \
@@ -5422,10 +5623,10 @@ keyint=15:vstrict=0:aspect=16/9 -o <replaceable>фильм.mpg</replaceable> <re
 
 
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
-<title>NTSC AVI, содержащий AC3 звук, в DVD</title>
+<title>NTSC AVI, содержащий AC-3 звук, в DVD</title>
 
 <para>
-Если исходный материал уже содержит AC3 звук и является NTSC @ 24000/1001 fps:
+Если исходный материал уже содержит AC-3 звук и является NTSC @ 24000/1001 fps:
 <screen>
 mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
   -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\
