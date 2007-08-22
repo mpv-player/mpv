@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r23996
+.\" synced with r24110
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -1007,16 +1007,16 @@ FIXME: Это требует тщательного разъяснения и описания.
 .B \-a52drc <уровень>
 .\" нужен ли перевод DRC ?
 Выбирает уровень Dynamic Range Compression[Сжатие Динамического Диапазона] для 
-аудио потоков AC3. <уровень> - это вещественное число от 0 до 1, где 0 означает 
+аудио потоков AC-3. <уровень> - это вещественное число от 0 до 1, где 0 означает 
 отсутствие сжатия, а 1 (по умолчанию) означает полное сжатие (делает громкие звуки 
 более тихими и наоборот).
-Эта опция действует, только если AC3 поток содержит необходимую информацию  
+Эта опция действует, только если AC-3 поток содержит необходимую информацию  
 сжатия диапазона.
 .
 .TP
 .B \-aid <ID> (смотрите также \-alang)
 Выбирает  аудио канал (MPEG: 0\-31, AVI/\:OGM: 1\-99, ASF/\:RM: 0\-127,
-VOB(AC3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
+VOB(AC-3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
 MPlayer выводит все доступные аудио ID, когда запущен в режиме
 подробного вывода сообщений (\-v).
 При воспроизведении MPEG-TS потока, MPlayer/\:MEncoder будет использовать 
@@ -1139,14 +1139,14 @@ libmpdemux/\:demuxer.h.
 Запрашивает количество каналов воспроизведения (по умолчанию: 2).
 MPlayer просит декодер декодировать звук в указанное количество каналов.
 Выполнение задачи ложится на плечи декодера.
-Обычно это требуется только при воспроизведении видео с AC3 звуком (например DVD).
+Обычно это требуется только при воспроизведении видео с AC-3 звуком (например DVD).
 В этом случае liba52 выполняет декодирование как обычно и корректно сводит
 звук в запрошенное количество каналов.
 Для прямого управления количеством выходных каналов независимо от количества декодируемых,
 используйте фильтр channels.
 .br
 .I ЗАМЕЧАНИЕ:
-Эта опция учитывается кодеками (только AC3), фильтрами (surround) и драйверами вывода 
+Эта опция учитывается кодеками (только AC-3), фильтрами (surround) и драйверами вывода 
 звука (как минимум OSS).
 .sp 1
 Доступные опции:
@@ -1209,7 +1209,7 @@ libmpdemux/\:demuxer.h.
 .
 .TP
 .B \-dumpaudio (только MPlayer)
-Сохраняет сырой сжатый аудио поток в ./stream.dump (полезно с MPEG/\:AC3,
+Сохраняет сырой сжатый аудио поток в ./stream.dump (полезно с MPEG/\:AC-3,
 в большинстве остальных случаев полученный файл проигрываться не будет).
 Если вы укажете в командной строке более одной опции из \-dumpaudio, \-dumpvideo, 
 \-dumpstream, будет использоваться только последняя.
@@ -1554,7 +1554,7 @@ radio://1, radio://104.4, radio_set_channel 1
 Эта опция позволяет проигрывать сырые аудио файлы.
 Вам придется также указать \-demuxer rawaudio.
 Ее еще можно использовать для воспроизведения аудио CD, отличных от 44кГц 16-бит стерео.
-Для воспроизведения сырых AC3 потоков используйте \-rawaudio format=0x2000 \-demuxer rawaudio.
+Для воспроизведения сырых AC-3 потоков используйте \-rawaudio format=0x2000 \-demuxer rawaudio.
 .sp 1
 Доступные опции:
 .sp 1
@@ -4023,7 +4023,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .IPs "\-ac mad,"
 Сначала пробуется libmad, если не получилось - остальные.
 .IPs "\-ac hwac3,a52,"
-Пробуется AC3 транзит, программный AC4, затем - остальные.
+Пробуется AC-3 транзит, программный AC4, затем - остальные.
 .IPs "\-ac hwdts,"
 Пробуется аппаратный DTS транзит, если не получилось - остальные.
 .IPs "\-ac -ffmp3,"
@@ -7408,16 +7408,38 @@ LTP (ужасно медленно)
 аудио кодек (по умолчанию: mp2)
 .PD 0
 .RSs
-.IPs "mp2\ \ "
-MPEG Layer 2
-.IPs "mp3\ \ "
-MPEG Layer 3
 .IPs "ac3\ \ "
-AC3
-.IPs adpcm_ima_wav
-IMA Adaptive PCM (4bits на сэмпл, сжатие 4:1)
-.IPs "sonic\ "
-Экспериментальный кодек с/без потерь
+Dolby Digital (AC-3)
+.IPs adpcm_*
+Форматы Adaptive PCM - подробности смотрите в HTML документации.
+.IPs "flac\ "
+Free Lossless Audio Codec (FLAC)
+.IPs "g726\ "
+G.726 ADPCM
+.IPs libamr_nb
+3GPP Adaptive Multi-Rate (AMR) узкополосной
+.IPs libamr_wb
+3GPP Adaptive Multi-Rate (AMR) широкополосной
+.IPs libfaac
+Advanced Audio Coding (AAC) - используя FAAC
+.IPs libmp3lame
+MPEG-1 audio layer 3 (MP3) - используя LAME
+.IPs "mp2\ \ "
+MPEG-1 audio layer 2 (MP2)
+.IPs pcm_*
+PCM форматы - подробности смотрите в HTML документации.
+.IPs roq_dpcm
+Id Software RoQ DPCM
+.IPs sonic
+экспериментальный простой кодек с потерей качества
+.IPs sonicls
+экспериментальный простой кодек без потерь
+.IPs vorbis
+Vorbis
+.IPs wmav1
+Windows Media Audio v1
+.IPs wmav2
+Windows Media Audio v2
 .RE
 .PD 1
 .
@@ -7451,50 +7473,58 @@ IMA Adaptive PCM (4bits на сэмпл, сжатие 4:1)
 Задействует указанный кодек (по умолчанию: mpeg4).
 .PD 0
 .RSs
-.IPs mjpeg
-Motion JPEG
-.IPs ljpeg
-Lossless JPEG
+.IPs "asv1\ "
+ASUS Video v1
+.IPs "asv2\ "
+ASUS Video v2
+.IPs dvvideo
+Sony Digital Video
+.IPs "ffv1\ "
+FFmpeg видео кодек без потерь 
+.IPs ffvhuff
+нестандартный, меньший на 20% HuffYUV c использованием YV12
+.IPs "flv\ \ "
+Sorenson H.263, использующийся в Flash Video
 .IPs "h261\ "
 H.261
 .IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
+.IPs huffyuv
+HuffYUV
+.IPs libtheora
+Theora
+.IPs libx264
+x264 H.264/AVC MPEG-4 Part 10
+.IPs libxvid
+Xvid MPEG-4 Part 2 (ASP)
+.IPs ljpeg
+Lossless JPEG
+.IPs mjpeg
+Motion JPEG
+.IPs mpeg1video
+MPEG-1 видео
+.IPs mpeg2video
+MPEG-2 видео
 .IPs mpeg4
 MPEG-4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
+.IPs roqvideo
+ID Software RoQ Video
+.IPs "rv10\ "
+старый RealVideo кодек
+.IPs "snow (смотрите также: vstrict)"
+экспериментальный FFmpeg видео кодек, основанный на вейвлетах
+.IPs "svq1\ "
+Apple Sorenson Video 1
 .IPs "wmv1\ "
 Windows Media Video, версия 1 (Он же WMV7)
 .IPs "wmv2\ "
 Windows Media Video, версия 2 (Он же WMV8)
-.IPs "rv10\ "
-старый RealVideo кодек
-.IPs mpeg1video
-MPEG-1 видео
-.IPs mpeg2video
-MPEG-2 видео
-.IPs huffyuv
-HuffYUV
-.IPs ffvhuff
-нестандартный, меньший на 20% HuffYUV c использованием YV12
-.IPs "asv1\ "
-ASUS Video v1
-.IPs "asv2\ "
-ASUS Video v2
-.IPs "ffv1\ "
-FFmpeg видео кодек без потерь 
-.IPs "flv\ \ "
-Sorenson H.263, использующийся в Flash Video
-.IPs dvvideo
-Sony Digital Video
-.IPs "svq1\ "
-Apple Sorenson Video 1
-.IPs "snow (смотрите также: vstrict)"
-экспериментальный FFmpeg видео кодек, основанный на вейвлетах
 .RE
 .PD 1
 .
