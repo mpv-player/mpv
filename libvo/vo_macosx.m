@@ -913,7 +913,7 @@ static int control(uint32_t request, void *data, ...)
 		case 0x7E: key = KEY_UP; break;
 		case 0x43: key = '*'; break;
 		case 0x4B: key = '/'; break;
-		case 0x4C: key = KEY_ENTER; break;
+		case 0x4C: key = KEY_KPENTER; break;
 		case 0x41: key = KEY_KPDEC; break;
 		case 0x52: key = KEY_KP0; break;
 		case 0x53: key = KEY_KP1; break;
