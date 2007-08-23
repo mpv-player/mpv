@@ -355,7 +355,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
   dvdnav_priv_t *priv;
-  dvdnav_status_t status;
 
   if(p->device) filename = p->device; 
   else if(dvd_device) filename= dvd_device; 
@@ -398,7 +397,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
   update_title_len(stream);
   if(!stream->pos)
-    mp_msg(MSGT_OPEN,MSGL_ERR, "INIT ERROR: %d, couldn't get init pos %s\r\n", status, dvdnav_err_to_string(priv->dvdnav));
+    mp_msg(MSGT_OPEN,MSGL_ERR, "INIT ERROR: couldn't get init pos %s\r\n", dvdnav_err_to_string(priv->dvdnav));
 
   mp_msg(MSGT_OPEN,MSGL_INFO, "Remember to disable MPlayer's cache when playing dvdnav:// streams (adding -nocache to your command line)\r\n");
 
