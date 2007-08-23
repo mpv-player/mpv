@@ -66,6 +66,7 @@ static int init(sh_audio_t *sh_audio)
 	lavc_context->block_align = sh_audio->wf->nBlockAlign;
 	lavc_context->bits_per_sample = sh_audio->wf->wBitsPerSample;
     }
+    lavc_context->request_channels = audio_output_channels;
     lavc_context->codec_tag = sh_audio->format; //FOURCC
     lavc_context->codec_id = lavc_codec->id; // not sure if required, imho not --A'rpi
 
