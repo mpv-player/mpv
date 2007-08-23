@@ -43,6 +43,7 @@ static tvi_handle_t *new_handle(void)
     h->chanlist_s = NULL;
     h->norm = -1;
     h->channel = -1;
+    h->scan = NULL;
     return(h);
 }
 
@@ -51,6 +52,8 @@ static void free_handle(tvi_handle_t *h)
     if (h) {
 	if (h->priv)
 	    free(h->priv);
+	if (h->scan)
+	    free(h->scan);
 	free(h);
     }
 }

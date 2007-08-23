@@ -1441,6 +1441,16 @@ static int control(priv_t *priv, int cmd, void *arg)
 
             return(TVI_CONTROL_TRUE);
         }
+        case TVI_CONTROL_TUN_GET_SIGNAL:
+        {
+            if (ioctl(priv->video_fd, VIDIOCGTUNER, &priv->tuner) == -1)
+            {
+                mp_msg(MSGT_TV, MSGL_ERR, "ioctl get tuner failed: %s\n", strerror(errno));
+                return(TVI_CONTROL_FALSE);
+            }
+            *(int*)arg=100*(priv->tuner.signal>>8)/255;
+            return(TVI_CONTROL_TRUE);
+        }
 
         /* ========== AUDIO controls =========== */
         case TVI_CONTROL_AUD_GET_FORMAT:

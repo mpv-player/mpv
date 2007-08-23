@@ -864,6 +864,14 @@ static int control(priv_t *priv, int cmd, void *arg)
     case TVI_CONTROL_TUN_GET_NORM:
         *(int *)arg = priv->standard.index;
         return TVI_CONTROL_TRUE;
+    case TVI_CONTROL_TUN_GET_SIGNAL:
+        if (ioctl(priv->video_fd, VIDIOC_G_TUNER, &priv->tuner) < 0) {
+            mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl get tuner failed: %s\n",
+                   info.short_name, strerror(errno));
+            return TVI_CONTROL_FALSE;
+        }
+        *(int*)arg=100*(priv->tuner.signal>>8)/255;
+        return TVI_CONTROL_TRUE;
     case TVI_CONTROL_TUN_SET_NORM:
         priv->standard.index = *(int *)arg;
         if (ioctl(priv->video_fd, VIDIOC_ENUMSTD, &priv->standard) < 0) {

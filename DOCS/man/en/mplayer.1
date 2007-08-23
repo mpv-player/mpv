@@ -1899,6 +1899,26 @@ Specify initial TV teletext page number.
 .RE
 .
 .TP
+.B \-tvscan <option1:option2:...> (TV and MPlayer only)
+This option tunes various parameters for TV channel scanner.
+MPlayer will also print value for "-tv channels=" option,
+including existing and just found channels.
+.sp 1
+Available suboptions are:
+.RSs
+.IPs autostart (default: not set)
+Begin channel scanning immediately after MPlayer startup.
+.IPs period=<0.1-2.0> (default: 0.5)
+Specify delay in seconds before switching to next channel.
+Lower values will cause faster scanning, but can detect
+inactive TV channels as active.
+.IPs threshold=<1-100> (default: 50)
+Threshold value (in percent) for signal strength, reported by device.
+Signal strength higher than this value will indicate that
+currently scanning channel is active.
+.RE
+.
+.TP
 .B \-user <username> (also see \-passwd) (network only)
 Specify username for HTTP authentication.
 .

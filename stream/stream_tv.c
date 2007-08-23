@@ -74,7 +74,11 @@ tv_param_t stream_tv_defaults = {
     0,             //saturation
     NULL,          //tdevice
     0,             //tformat
-    100            //tpage
+    100,           //tpage
+
+    0,             //scan_autostart
+    50,            //scan_threshold
+    0.5            //scan_period
 };
 
 #define ST_OFF(f) M_ST_OFF(tv_param_t,f)

@@ -50,6 +50,10 @@ typedef struct tv_param_s {
     char *tdevice;  ///< teletext device
     int tformat;    ///< teletext display format
     int tpage;      ///< start teletext page
+
+    int scan;
+    int scan_threshold;
+    float scan_period;
 } tv_param_t;
   
 extern tv_param_t stream_tv_defaults;
@@ -86,6 +90,7 @@ typedef struct tvi_handle_s {
     const struct CHANLIST *chanlist_s;
     int			channel;
     tv_param_t          * tv_param;
+    void                * scan;
 } tvi_handle_t;
 
 typedef struct tv_channels_s {
@@ -100,6 +105,12 @@ typedef struct tv_channels_s {
 extern tv_channels_t *tv_channel_list;
 extern tv_channels_t *tv_channel_current, *tv_channel_last;
 extern char *tv_channel_last_real;
+
+typedef struct {
+    unsigned int     scan_timer;
+    int     channel_num;
+    int     new_channels;
+} tv_scan_t;
 
 #define TVI_CONTROL_FALSE		0
 #define TVI_CONTROL_TRUE		1
@@ -147,6 +158,7 @@ extern char *tv_channel_last_real;
 #define TVI_CONTROL_TUN_SET_TUNER	0x204	/* update priv->tuner struct for used input */
 #define TVI_CONTROL_TUN_GET_NORM	0x205
 #define TVI_CONTROL_TUN_SET_NORM	0x206
+#define TVI_CONTROL_TUN_GET_SIGNAL	0x207
 
 /* AUDIO controls */
 #define TVI_CONTROL_AUD_GET_FORMAT	0x301
@@ -215,9 +227,12 @@ int tv_step_chanlist(tvi_handle_t *tvh);
 
 int tv_set_freq(tvi_handle_t *tvh, unsigned long freq);
 int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq);
+int tv_get_signal(tvi_handle_t *tvh);
 int tv_step_freq(tvi_handle_t *tvh, float step_interval);
 
 int tv_set_norm(tvi_handle_t *tvh, char* norm);
+
+void tv_start_scan(tvi_handle_t *tvh, int start);
 
 #define TV_NORM_PAL		1
 #define TV_NORM_NTSC		2

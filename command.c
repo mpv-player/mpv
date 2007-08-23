@@ -2287,6 +2287,10 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 #endif
 
 #ifdef USE_TV
+	case MP_CMD_TV_START_SCAN:
+	    if (mpctx->file_format == DEMUXER_TYPE_TV)
+		tv_start_scan((tvi_handle_t *) (mpctx->demuxer->priv),1);
+	    break;
 	case MP_CMD_TV_SET_FREQ:
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_set_freq((tvi_handle_t *) (mpctx->demuxer->priv),

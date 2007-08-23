@@ -30,6 +30,7 @@
 #include "libaf/af_format.h"
 #include "libmpcodecs/img_format.h"
 #include "libavutil/avstring.h"
+#include "osdep/timer.h"
 
 #include "tv.h"
 
@@ -65,6 +66,92 @@ static const tvi_info_t* tvi_driver_list[]={
     NULL
 };
 
+void tv_start_scan(tvi_handle_t *tvh, int start)
+{
+    mp_msg(MSGT_TV,MSGL_INFO,"start scan\n");
+    tvh->tv_param->scan=start?1:0;
+}
+
+static void tv_scan(tvi_handle_t *tvh)
+{
+    unsigned int now;
+    struct CHANLIST cl;
+    tv_channels_t *tv_channel_tmp=NULL;
+    tv_channels_t *tv_channel_add=NULL;
+    tv_scan_t* scan;
+    int found=0, index=1;
+    
+    scan = tvh->scan;
+    now=GetTimer();
+    if (!scan) {
+        scan=calloc(1,sizeof(tv_scan_t));
+        tvh->scan=scan;
+        cl = tvh->chanlist_s[scan->channel_num];
+        tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
+        scan->scan_timer=now+1e6*tvh->tv_param->scan_period;
+    }
+    if(scan->scan_timer>now)
+        return;
+
+    if (tv_get_signal(tvh)>tvh->tv_param->scan_threshold) {
+        cl = tvh->chanlist_s[scan->channel_num];
+        tv_channel_tmp=tv_channel_list;
+        while (tv_channel_tmp) {
+            index++;
+            if (cl.freq==tv_channel_tmp->freq){
+                found=1;
+                break;
+            }
+            tv_channel_add=tv_channel_tmp;
+            tv_channel_tmp=tv_channel_tmp->next;
+        }
+        if (!found) {
+            mp_msg(MSGT_TV, MSGL_INFO, "Found new channel: %s (#%d). \n",cl.name,index);
+            scan->new_channels++;
+            tv_channel_tmp = malloc(sizeof(tv_channels_t));
+            tv_channel_tmp->index=index;
+            tv_channel_tmp->next=NULL;
+            tv_channel_tmp->prev=tv_channel_add;
+            tv_channel_tmp->freq=cl.freq;
+            snprintf(tv_channel_tmp->name,sizeof(tv_channel_tmp->name),"ch%d",index);
+            strncpy(tv_channel_tmp->number, cl.name, 5);
+            tv_channel_tmp->number[4]='\0';
+            if (!tv_channel_list)
+                tv_channel_list=tv_channel_tmp;
+            else {
+                tv_channel_add->next=tv_channel_tmp;
+                tv_channel_list->prev=tv_channel_tmp;
+            }
+        }else
+            mp_msg(MSGT_TV, MSGL_INFO, "Found existing channel: %s-%s.\n",
+                tv_channel_tmp->number,tv_channel_tmp->name);
+    }
+    scan->channel_num++;
+    scan->scan_timer=now+1e6*tvh->tv_param->scan_period;
+    if (scan->channel_num>=chanlists[tvh->chanlist].count) {
+        tvh->tv_param->scan=0;
+        mp_msg(MSGT_TV, MSGL_INFO, "TV scan end. Found %d new channels.\n", scan->new_channels);
+        tv_channel_tmp=tv_channel_list;
+        if(tv_channel_tmp){
+            mp_msg(MSGT_TV,MSGL_INFO,"channels=");
+            while(tv_channel_tmp){
+                mp_msg(MSGT_TV,MSGL_INFO,"%s-%s",tv_channel_tmp->number,tv_channel_tmp->name);
+                if(tv_channel_tmp->next)
+                    mp_msg(MSGT_TV,MSGL_INFO,",");
+                tv_channel_tmp=tv_channel_tmp->next;
+            }
+        }
+        if (!tv_channel_current) tv_channel_current=tv_channel_list;
+        if (tv_channel_current)
+            tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+        free(tvh->scan);
+        tvh->scan=NULL;
+    }else{
+        cl = tvh->chanlist_s[scan->channel_num];
+        tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
+        mp_msg(MSGT_TV, MSGL_INFO, "Trying: %s (%.2f). \n",cl.name,1e-3*cl.freq);
+    }
+}
 
 /* ================== DEMUX_TV ===================== */
 /*
@@ -106,6 +193,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
    		ds_add_packet(demux->video,dp);
 	 }
 
+    if (tvh->tv_param->scan) tv_scan(tvh);
     return 1;
 }
 
@@ -738,6 +826,16 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
     return(1);
 }
 
+int tv_get_signal(tvi_handle_t *tvh)
+{
+    int signal=0;
+    if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) != TVI_CONTROL_TRUE ||
+        tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_GET_SIGNAL, &signal)!=TVI_CONTROL_TRUE)
+        return 0;
+
+    return signal;
+}
+
 /*****************************************************************
  * \brief tune current frequency by step_interval value
  * \parameter step_interval increment value in 1/16 MHz
@@ -748,6 +846,7 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 int tv_step_freq(tvi_handle_t* tvh, float step_interval){
     unsigned long frequency;
 
+    tvh->tv_param->scan=0;
     tv_get_freq(tvh,&frequency);
     frequency+=step_interval;
     return tv_set_freq(tvh,frequency);
@@ -757,6 +856,7 @@ int tv_step_channel_real(tvi_handle_t *tvh, int direction)
 {
     struct CHANLIST cl;
 
+    tvh->tv_param->scan=0;
     if (direction == TV_CHANNEL_LOWER)
     {
 	if (tvh->channel-1 >= 0)
@@ -784,6 +884,7 @@ int tv_step_channel_real(tvi_handle_t *tvh, int direction)
 }
 
 int tv_step_channel(tvi_handle_t *tvh, int direction) {
+	tvh->tv_param->scan=0;
 	if (tv_channel_list) {
 		if (direction == TV_CHANNEL_HIGHER) {
 			tv_channel_last = tv_channel_current;
@@ -814,6 +915,7 @@ int tv_set_channel_real(tvi_handle_t *tvh, char *channel) {
 	int i;
 	struct CHANLIST cl;
 
+        tvh->tv_param->scan=0;
         strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
 	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
 	{
@@ -835,6 +937,7 @@ int tv_set_channel_real(tvi_handle_t *tvh, char *channel) {
 int tv_set_channel(tvi_handle_t *tvh, char *channel) {
 	int i, channel_int;
 
+	tvh->tv_param->scan=0;
 	if (tv_channel_list) {
 		tv_channel_last = tv_channel_current;
 		channel_int = atoi(channel);
@@ -851,6 +954,7 @@ int tv_set_channel(tvi_handle_t *tvh, char *channel) {
 
 int tv_last_channel(tvi_handle_t *tvh) {
 
+	tvh->tv_param->scan=0;
 	if (tv_channel_list) {
 		tv_channels_t *tmp;
 
