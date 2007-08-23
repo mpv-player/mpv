@@ -61,16 +61,18 @@ static void free_handle(tvi_handle_t *h)
 */
 static inline void fill_blank_frame(char* buffer,int len,int fmt){
     int i;
+    // RGB(0,0,255) <-> YVU(41,110,240) 
 
     switch(fmt){
     case IMGFMT_YV12:
-        memset(buffer, 0xFF,5*len/6);
-        memset(buffer+5*len/6, 0xFF,len/6);
+        memset(buffer, 41,4*len/6);       //Y
+        memset(buffer+4*len/6, 110,len/6);//V
+        memset(buffer+5*len/6, 240,len/6);//U
         break;
     case IMGFMT_I420:
-        memset(buffer, 0xFF,4*len/6);
-        memset(buffer+4*len/6, 0xFF,len/6);
-        memset(buffer+5*len/6, 0xFF,len/6);
+        memset(buffer, 41,4*len/6);       //Y
+        memset(buffer+4*len/6, 240,len/6);//U
+        memset(buffer+5*len/6, 110,len/6);//V
         break;
     case IMGFMT_UYVY:
         for(i=0;i<len;i+=4){
