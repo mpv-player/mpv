@@ -11,6 +11,8 @@ SRCS_COMMON += ldt_keeper.c pe_image.c module.c ext.c win32.c \
 # QTX emulation is not supported in Darwin
 ifneq ($(TARGET_OS),Darwin)
 SRCS_COMMON += wrapper.S
+else
+win32.o: CFLAGS += -mstackrealign
 endif
 endif
 
