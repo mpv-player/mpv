@@ -10,9 +10,6 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#define USE_LIBNUT
-#ifdef USE_LIBNUT
-
 #include <libnut.h>
 
 typedef struct {
@@ -310,6 +307,3 @@ demuxer_desc_t demuxer_desc_nut = {
 	demux_seek_nut,
 	demux_control_nut
 };
-
-#endif // USE_LIBNUT
-
