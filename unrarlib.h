@@ -34,8 +34,8 @@
 /* (C) 2000-2002 by Christian Scheurer aka. UniquE */
 /* multi-OS version (Win32, Linux and SUN)         */
 
-#ifndef __URARLIB_H
-#define __URARLIB_H
+#ifndef URARLIB_H
+#define URARLIB_H
 
 #ifdef __cplusplus
 extern "C"
@@ -200,5 +200,5 @@ extern void urarlib_freelist(ArchiveList_struct *list);
 };
 #endif
 
-#endif
+#endif /* URARLIB_H */
 
