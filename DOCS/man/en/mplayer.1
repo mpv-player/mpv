@@ -1562,9 +1562,9 @@ Radio driver to use (default: v4l2 if available, otherwise v4l).
 Currently, v4l and v4l2 drivers are supported.
 .IPs volume=<0..100>
 sound volume for radio device (default 100)
-.IPs freq_min=<value> (*BSD BT848 only)
+.IPs "freq_min=<value> (*BSD BT848 only)"
 minimum allowed frequency (default: 87.50)
-.IPs freq_max=<value> (*BSD BT848 only)
+.IPs "freq_max=<value> (*BSD BT848 only)"
 maximum allowed frequency (default: 108.00)
 .IPs channels=<frequency>\-<name>,<frequency>\-<name>,...
 Set channel list.
@@ -1577,14 +1577,14 @@ channel list.
 .br
 .I EXAMPLE:
 radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<value> (with radio capture enabled)
+.IPs "adevice=<value> (radio capture only)"
 Name of device to capture sound from.
 Without such a name capture will be disabled,
 even if the capture keyword appears in the URL.
 For ALSA devices use it in the form hw=<card>.<device>.
 If the device name contains a '=', the module will use
 ALSA to capture, otherwise OSS.
-.IPs arate=<value> (with radio capture enabled)
+.IPs "arate=<value> (radio capture only)"
 Rate in samples per second (default: 44100).
 .br
 .I NOTE:
@@ -1592,7 +1592,7 @@ When using audio capture set also \-rawaudio rate=<value> option
 with the same value as arate.
 If you have problems with sound speed (runs too quickly), try to play
 with different rate values (e.g.\& 48000,44100,32000,...).
-.IPs achannels=<value> (with radio capture enabled)
+.IPs "achannels=<value> (radio capture only)"
 Number of audio channels to capture.
 .RE
 .
@@ -1752,7 +1752,7 @@ Available options are:
 .RSs
 .IPs noaudio
 no sound
-.IPs automute=<0-255> (v4l and v4l2 only)
+.IPs "automute=<0-255> (v4l and v4l2 only)"
 If signal strength reported by device is less than this value,
 audio and video will be muted.
 In most cases automute=100 will be enough.
@@ -1881,10 +1881,10 @@ MJPEG compression:
 .IPs quality=<0\-100>
 Choose the quality of the JPEG compression
 (< 60 recommended for full size).
-.IPs tdevice=<value>  (default: none)
-Specify TV teletext device (example: /dev/\:vbi0).
-.IPs tformat=<format> (default: 0)
-Specify TV teletext display format:
+.IPs tdevice=<value>
+Specify TV teletext device (example: /dev/\:vbi0) (default: none).
+.IPs tformat=<format>
+Specify TV teletext display format (default: 0):
 .RSss
 0: opaque
 .br
@@ -1894,8 +1894,8 @@ Specify TV teletext display format:
 .br
 3: transparent with inverted colors
 .REss
-.IPs tpage=<100-899> (default: 100)
-Specify initial TV teletext page number.
+.IPs tpage=<100-899>
+Specify initial TV teletext page number (default: 100).
 .RE
 .
 .TP
@@ -3957,7 +3957,7 @@ Specify the directory to save the JPEG files to (default: ./).
 .IPs subdirs=<prefix>
 Create numbered subdirectories with the specified prefix to
 save the files in instead of the current directory.
-.IPs maxfiles=<value> (subdirs only)
+.IPs "maxfiles=<value> (subdirs only)"
 Maximum number of files to be saved per subdirectory.
 Must be equal to or larger than 1 (default: 1000).
 .RE
@@ -3988,7 +3988,7 @@ Specify the directory to save the PNM files to (default: ./).
 .IPs subdirs=<prefix>
 Create numbered subdirectories with the specified prefix to
 save the files in instead of the current directory.
-.IPs maxfiles=<value> (subdirs only)
+.IPs "maxfiles=<value> (subdirs only)"
 Maximum number of files to be saved per subdirectory.
 Must be equal to or larger than 1 (default: 1000).
 .RE
@@ -4287,7 +4287,7 @@ video is major than or equal to <w>.
 Skip the given number of macroblock rows at the bottom.
 .IPs "st=<number> (MPEG-2 only)"
 Skip the given number of macroblock rows at the top.
-.IPs skiploopfilter=<skipvalue> (H.264 only)
+.IPs "skiploopfilter=<skipvalue> (H.264 only)"
 Skips the loop filter (AKA deblocking) during H.264 decoding.
 Since the filtered frame is supposed to be used as reference
 for decoding dependent frames this has a worse effect on quality
@@ -4507,15 +4507,15 @@ postprocessing filter (\-vf pp) and decoder (\-vfm ffmpeg) instead.
 Xvid's internal postprocessing filters:
 .PD 0
 .RSs
-.IPs deblock-chroma (also see \-vf pp)
+.IPs "deblock-chroma (also see \-vf pp)"
 chroma deblock filter
-.IPs deblock-luma (also see \-vf pp)
+.IPs "deblock-luma (also see \-vf pp)"
 luma deblock filter
-.IPs dering-luma (also see \-vf pp)
+.IPs "dering-luma (also see \-vf pp)"
 luma deringing filter
-.IPs dering-chroma (also see \-vf pp)
+.IPs "dering-chroma (also see \-vf pp)"
 chroma deringing filter
-.IPs filmeffect (also see \-vf noise)
+.IPs "filmeffect (also see \-vf noise)"
 Adds artificial film grain to the video.
 May increase perceived quality, while lowering true quality.
 .RE
