@@ -74,7 +74,7 @@ void mplMainDraw( void )
 // XFlush( wsDisplay );
 }
 
-//extern void exit_player(const char* how);
+extern void exit_player(const char* how);
 extern int vcd_track;
 static unsigned last_redraw_time = 0;
 
