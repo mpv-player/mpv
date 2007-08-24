@@ -438,7 +438,6 @@ block_metrics_3dnow(unsigned char *a, unsigned char *b, int as, int bs,
     mp_msg(MSGT_VFILTER, MSGL_FATAL, "block_metrics_3dnow: internal error\n");
 #else
     static const unsigned long long ones = 0x0101010101010101ull;
-    unsigned long interlaced;
 
     BLOCK_METRICS_TEMPLATE();
     asm volatile("movq %%mm7, %0\n\temms" : "=m" (tm));
