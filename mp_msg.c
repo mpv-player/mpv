@@ -20,7 +20,6 @@ extern char* get_term_charset(void);
 
 #ifdef HAVE_NEW_GUI
 #include "gui/interface.h"
-extern int use_gui;
 #endif
 #include "mp_msg.h"
 
