@@ -25,13 +25,6 @@
 
 static GTF_constants GTF_given_constants = { 3.0,550.0,1,8,1.8,8,40,20,128,600 };
 
-#ifndef HAVE_ROUND
-static double round(double v) 
-{ 
-        return floor(v + 0.5); 
-} 
-#endif
-	
 static void GetRoundedConstants(GTF_constants *c)
     {
     c->Vsync_need = round(GTF_given_constants.Vsync_need);
