@@ -74,7 +74,6 @@ void mplMainDraw( void )
 // XFlush( wsDisplay );
 }
 
-extern int vcd_track;
 static unsigned last_redraw_time = 0;
 
 void mplEventHandling( int msg,float param )
