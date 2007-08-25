@@ -39,6 +39,8 @@ Buffer allocation:
 
 #include "subopt-helper.h"
 
+#include "input/input.h"
+
 #ifdef HAVE_NEW_GUI
 #include "gui/interface.h"
 #endif
@@ -713,6 +715,7 @@ static void uninit(void)
 #ifdef HAVE_XF86VM
     vo_vm_close(mDisplay);
 #endif
+    mp_input_rm_event_fd(ConnectionNumber(mDisplay));
     vo_x11_uninit();
 }
 
@@ -834,6 +837,7 @@ static int preinit(const char *arg)
 
     fo = XvListImageFormats(mDisplay, xv_port, (int *) &formats);
 
+    mp_input_add_event_fd(ConnectionNumber(mDisplay), check_events);
     return 0;
 }
 
