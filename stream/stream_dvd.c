@@ -38,10 +38,6 @@
 #include "libmpdemux/demuxer.h"
 
 extern int stream_cache_size;
-/// We keep these 2 for the gui atm, but they will be removed.
-extern int dvd_title;
-extern int dvd_chapter;
-extern int dvd_last_chapter;
 extern char* dvd_device;
 int dvd_angle=1;
 int dvd_speed=0; /* 0 => don't touch speed */
