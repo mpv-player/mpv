@@ -842,7 +842,7 @@ static int decode_pkt0(priv_vbi_t* priv,unsigned char* data,int magAddr)
     if (!priv->mag[magAddr].pt)
         priv->mag[magAddr].pt= malloc(sizeof(tt_page));
 
-    priv->mag[magAddr].lang=(d[7] & 0x7)>>1;
+    priv->mag[magAddr].lang=(d[7]>>1)&0x7;
     priv->mag[magAddr].pt->lang=priv->mag[magAddr].lang;
     priv->mag[magAddr].pt->subpagenum=(d[2]|(d[3]<<4)|(d[4]<<8)|(d[5]<<12))&0x3f7f;
     priv->mag[magAddr].pt->pagenum=(magAddr<<8) | d[0] | (d[1]<<4);
