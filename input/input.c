@@ -586,9 +586,6 @@ static m_option_t mp_input_opts[] = {
 };
 
 static int
-mp_input_default_key_func(int fd);
-
-static int
 mp_input_default_cmd_func(int fd,char* buf, int l);
 
 static char*
@@ -659,7 +656,7 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
 
   memset(&key_fds[num_key_fd],0,sizeof(mp_input_fd_t));
   key_fds[num_key_fd].fd = fd;
-  key_fds[num_key_fd].read_func = read_func ? read_func : mp_input_default_key_func;
+  key_fds[num_key_fd].read_func = read_func;
   key_fds[num_key_fd].close_func = close_func;
   key_fds[num_key_fd].no_select = !select;
   num_key_fd++;
@@ -801,20 +798,6 @@ mp_input_parse_cmd(char* str) {
     cmd->args[i].type = -1;
 
   return cmd;
-}
-
-static int
-mp_input_default_key_func(int fd) {
-  int r,code=0;
-  unsigned int l;
-  l = 0;
-  while(l < sizeof(int)) {
-    r = read(fd,((char *)&code)+l,sizeof(int)-l);
-    if(r <= 0)
-      break;
-    l +=r;
-  }
-  return code;
 }
 
 #define MP_CMD_MAX_SIZE 256
