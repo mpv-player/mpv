@@ -313,12 +313,6 @@ static int play_n_frames_mf=-1;
 char** video_driver_list=NULL;
 char** audio_driver_list=NULL;
 
-extern char *vo_subdevice;
-extern char *ao_subdevice;
-
-// codec outfmt flags (defined in libmpcodecs/vd.c)
-extern int vo_flags;
-
 // sub:
 char *font_name=NULL;
 char *sub_font_name=NULL;
