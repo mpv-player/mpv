@@ -991,126 +991,25 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
   return ret;
 }
 
-int
-mp_input_read_key_code(int time) {
-#ifdef HAVE_POSIX_SELECT
-  fd_set fds;
-  struct timeval tv,*time_val;
-#endif
-  int i,n=0,max_fd = 0, did_sleep = 0;
-  static int last_loop = 0;
-
-  if(num_key_fd == 0)
-  {
-    if (time)
-      usec_sleep(time * 1000);
-    return MP_INPUT_NOTHING;
-  }
-
-#ifdef HAVE_POSIX_SELECT
-  FD_ZERO(&fds);
-#endif
-  // Remove fd marked as dead and build the fd_set
-  // n == number of fd's to be select() checked
-  for(i = 0; (unsigned int)i < num_key_fd; i++) {
-    if (key_fds[i].dead) {
-      mp_input_rm_key_fd(key_fds[i].fd);
-      i--;
-      continue;
-    } else if (key_fds[i].no_select)
-      continue;
-    if(key_fds[i].fd > max_fd)
-      max_fd = key_fds[i].fd;
-#ifdef HAVE_POSIX_SELECT
-    FD_SET(key_fds[i].fd,&fds);
-#endif
-    n++;
-  }
-
-#ifdef HAVE_POSIX_SELECT
-// if we have fd's without MP_FD_NO_SELECT flag, call select():
-if(n>0){
-
-  if(time >= 0 ) {
-    tv.tv_sec=time/1000; 
-    tv.tv_usec = (time%1000)*1000;
-    time_val = &tv;
-  } else
-    time_val = NULL;
-  
-  while(1) {
-    if(select(max_fd+1,&fds,NULL,NULL,time_val) < 0) {
-      if(errno == EINTR)
-	continue;
-      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrSelect,strerror(errno));
-    }
-    break;
-  }
-  did_sleep = 1;
-
-}
-#endif
-
-  for(i = last_loop + 1 ; i != last_loop ; i++) {
-    int code = -1;
-    // This is to check all fds in turn
-    if((unsigned int)i >= num_key_fd) {
-      i = -1;
-      last_loop++;
-      last_loop %= (num_key_fd+1);
-      continue;
-    }
-#ifdef HAVE_POSIX_SELECT
-    // No input from this fd
-    if (!key_fds[i].no_select && !FD_ISSET(key_fds[i].fd, &fds))
-      continue;
-#endif
-    if(key_fds[i].fd == 0) { // stdin is handled by getch2
-      getch2();
-      code = mplayer_get_key(0);
-      if(code < 0)
-	code = MP_INPUT_NOTHING;
-    }
-    else
-      code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].fd);
-
-    if(code >= 0)
-      return code;
-
-    if(code == MP_INPUT_ERROR)
-      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrOnKeyInFd,key_fds[i].fd);
-    else if(code == MP_INPUT_DEAD) {
-      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrDeadKeyOnFd,key_fds[i].fd);
-      key_fds[i].dead = 1;
-    }
-  }
-  if (time && !did_sleep)
-    usec_sleep(time * 1000);
-  return MP_INPUT_NOTHING;
-}
-    
 
 static mp_cmd_t*
-mp_input_read_keys(int time,int paused) {
-  int code = mp_input_read_key_code(time);
+interpret_key(int code, int paused)
+{
   unsigned int j;
   mp_cmd_t* ret;
 
   if(mp_input_key_cb) {
-    for( ; code >= 0 ;   code = mp_input_read_key_code(0) ) {
-      if(code & MP_KEY_DOWN) continue;
+      if (code & MP_KEY_DOWN)
+	  return NULL;
       code &= ~(MP_KEY_DOWN|MP_NO_REPEAT_KEY);
       mp_input_key_cb(code);
-    }
     return NULL;
   }
 
-  for( ; code >= 0 ;   code = mp_input_read_key_code(0) ) {
-    // key pushed
     if(code & MP_KEY_DOWN) {
       if(num_key_down > MP_MAX_KEY_DOWN) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
-	continue;
+	return NULL;
       }
       code &= ~MP_KEY_DOWN;
       // Check if we don't already have this key as pushed
@@ -1119,12 +1018,12 @@ mp_input_read_keys(int time,int paused) {
 	  break;
       }
       if(j != num_key_down)
-	continue; 
+	return NULL;
       key_down[num_key_down] = code;
       num_key_down++;
       last_key_down = GetTimer();
       ar_state = 0;
-      continue;
+      return NULL;
     }
     // key released
     // Check if the key is in the down key, driver which can't send push event
@@ -1136,7 +1035,7 @@ mp_input_read_keys(int time,int paused) {
     if(j == num_key_down) { // key was not in the down keys : add it
       if(num_key_down > MP_MAX_KEY_DOWN) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
-	continue;
+	return NULL;
       }
       key_down[num_key_down] = code;
       num_key_down++;
@@ -1154,10 +1053,11 @@ mp_input_read_keys(int time,int paused) {
       mp_cmd_free(ar_cmd);
       ar_cmd = NULL;
     }
-    if(ret)
-      return ret;
-  }
+    return ret;
+}
 
+static mp_cmd_t *check_autorepeat(int paused)
+{
   // No input : autorepeat ?
   if(ar_rate > 0 && ar_state >=0 && num_key_down > 0 && ! (key_down[num_key_down-1] & MP_NO_REPEAT_KEY)) {
     unsigned int t = GetTimer();
@@ -1177,102 +1077,126 @@ mp_input_read_keys(int time,int paused) {
       return mp_cmd_clone(ar_cmd);
     }
   }
-
   return NULL;
 }
 
-static mp_cmd_t*
-mp_input_read_cmds(int time) {
-#ifdef HAVE_POSIX_SELECT
-  fd_set fds;
-  struct timeval tv,*time_val;
-#endif
-  int i,n = 0,max_fd = 0,got_cmd = 0;
-  mp_cmd_t* ret;
-  static int last_loop = 0;
 
-  if(num_cmd_fd == 0)
+static mp_cmd_t *read_events(int time, int paused)
+{
+    int i;
+    int got_cmd = 0;
+    for (i = 0; i < num_key_fd; i++)
+	if (key_fds[i].dead) {
+	    mp_input_rm_key_fd(key_fds[i].fd);
+	    i--;
+	}
+    for (i = 0; i < num_cmd_fd; i++)
+	if (cmd_fds[i].dead || cmd_fds[i].eof) {
+	    mp_input_rm_cmd_fd(cmd_fds[i].fd);
+	    i--;
+	}
+	else if (cmd_fds[i].got_cmd)
+	    got_cmd = 1;
+#ifdef HAVE_POSIX_SELECT
+    int max_fd = 0, num_fd = 0;
+    fd_set fds;
+    FD_ZERO(&fds);
+    if (!got_cmd) {
+	for (i = 0; i < num_key_fd; i++) {
+	    if (key_fds[i].no_select)
+		continue;
+	    if (key_fds[i].fd > max_fd)
+		max_fd = key_fds[i].fd;
+	    FD_SET(key_fds[i].fd, &fds);
+	    num_fd++;
+	}
+	for (i = 0; i < num_cmd_fd; i++) {
+	    if (cmd_fds[i].no_select)
+		continue;
+	    if (cmd_fds[i].fd > max_fd)
+		max_fd = cmd_fds[i].fd;
+	    FD_SET(cmd_fds[i].fd, &fds);
+	    num_fd++;
+	}
+	if (num_fd > 0) {
+	    struct timeval tv, *time_val;
+	    if (time >= 0) {
+		tv.tv_sec = time / 1000;
+		tv.tv_usec = (time % 1000) * 1000;
+		time_val = &tv;
+	    }
+	    else
+		time_val = NULL;
+	    if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
+		if (errno != EINTR)
+		    mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrSelect,
+			    strerror(errno));
+		FD_ZERO(&fds);
+	    }
+	}
+    }
+#else
+    if (!got_cmd)
+	usec_sleep(time * 1000);
+#endif
+
+
+    for (i = 0; i < num_key_fd; i++) {
+#ifdef HAVE_POSIX_SELECT
+	if (!key_fds[i].no_select && !FD_ISSET(key_fds[i].fd, &fds))
+	    continue;
+#endif
+
+	int code;
+	if (key_fds[i].fd == 0) {   // getch2 handler special-cased for now
+	    getch2();
+	    code = mplayer_get_key(0);
+	    if (code < 0)
+		code = MP_INPUT_NOTHING;
+	}
+	else
+	    code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].fd);
+	if (code >= 0) {
+	    mp_cmd_t *ret = interpret_key(code, paused);
+	    if (ret)
+		return ret;
+	}
+	else if (code == MP_INPUT_ERROR)
+	    mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrOnKeyInFd,
+		   key_fds[i].fd);
+	else if (code == MP_INPUT_DEAD) {
+	    mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrDeadKeyOnFd,
+		   key_fds[i].fd);
+	    key_fds[i].dead = 1;
+	}
+    }
+    mp_cmd_t *autorepeat_cmd = check_autorepeat(paused);
+    if (autorepeat_cmd)
+	return autorepeat_cmd;
+
+    for (i = 0; i < num_cmd_fd; i++) {
+#ifdef HAVE_POSIX_SELECT
+	if (!cmd_fds[i].no_select && !FD_ISSET(cmd_fds[i].fd, &fds))
+	    continue;
+#endif
+	char *cmd;
+	int r = mp_input_read_cmd(&cmd_fds[i], &cmd);
+	if (r >= 0) {
+	    mp_cmd_t *ret = mp_input_parse_cmd(cmd);
+	    free(cmd);
+	    if (ret)
+		return ret;
+	}
+	else if (r == MP_INPUT_ERROR)
+	    mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrOnCmdFd,
+		   cmd_fds[i].fd);
+	else if (r == MP_INPUT_DEAD)
+	    cmd_fds[i].dead = 1;
+    }
+
     return NULL;
-
-#ifdef HAVE_POSIX_SELECT
-  FD_ZERO(&fds);
-#endif
-  for(i = 0; (unsigned int)i < num_cmd_fd ; i++) {
-    if (cmd_fds[i].dead || cmd_fds[i].eof) {
-      mp_input_rm_cmd_fd(cmd_fds[i].fd);
-      i--;
-      continue;
-    } else if (cmd_fds[i].no_select)
-      continue;
-    if (cmd_fds[i].got_cmd)
-      got_cmd = 1;
-    if(cmd_fds[i].fd > max_fd)
-      max_fd = cmd_fds[i].fd;
-#ifdef HAVE_POSIX_SELECT
-    FD_SET(cmd_fds[i].fd,&fds);
-#endif
-    n++;
-  }
-
-  if(num_cmd_fd == 0)
-    return NULL;
-
-#ifdef HAVE_POSIX_SELECT
-  if(time >= 0) {
-    tv.tv_sec=time/1000; 
-    tv.tv_usec = (time%1000)*1000;
-    time_val = &tv;
-  } else
-    time_val = NULL;
-    
-  while(n > 0) {
-    if((i = select(max_fd+1,&fds,NULL,NULL,time_val)) <= 0) {
-      if(i < 0) {
-	if(errno == EINTR)
-	  continue;
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrSelect,strerror(errno));
-      }
-      if(!got_cmd)
-	return NULL;
-    }
-    break;
-  }
-#endif
-
-  for(i = last_loop + 1; i !=  last_loop ; i++) {
-    int r = 0;
-    char* cmd;
-    if((unsigned int)i >= num_cmd_fd) {
-      i = -1;
-      last_loop++;
-      last_loop %= (num_cmd_fd+1);
-      continue;
-    }
-#ifdef HAVE_POSIX_SELECT
-    if (!cmd_fds[i].no_select && ! FD_ISSET(cmd_fds[i].fd, &fds)
-        && !cmd_fds[i].got_cmd)
-      continue;
-#endif
-
-    r = mp_input_read_cmd(&cmd_fds[i],&cmd);
-    if(r < 0) {
-      if(r == MP_INPUT_ERROR)
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrOnCmdFd,cmd_fds[i].fd);
-      else if(r == MP_INPUT_DEAD)
-	cmd_fds[i].dead = 1;
-      continue;
-    }
-    ret = mp_input_parse_cmd(cmd);
-    free(cmd);
-    if(!ret)
-      continue;
-    last_loop = i;
-    return ret;
-  }
-  
-  last_loop = 0;
-  return NULL;  
 }
+
 
 int
 mp_input_queue_cmd(mp_cmd_t* cmd) {
@@ -1316,9 +1240,7 @@ mp_input_get_cmd(int time, int paused, int peek_only) {
     ret = mp_input_get_queued_cmd(peek_only);
     if(ret) break;
     from_queue = 0;
-    ret = mp_input_read_keys(time,paused);
-    if(ret) break;
-    ret = mp_input_read_cmds(time);
+    ret = read_events(time, paused);
     break;
   }
   if(!ret) return NULL;
