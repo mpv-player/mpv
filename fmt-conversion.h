@@ -1,3 +1,6 @@
+#ifndef FMT_CONVERSION_H
+#define FMT_CONVERSION_H
+
 #ifdef USE_LIBAVUTIL_SO
 #include <ffmpeg/avutil.h>
 #else
@@ -68,3 +71,5 @@ enum PixelFormat imgfmt2pixfmt(int fmt)
 
     return PIX_FMT_NONE;
 }
+
+#endif /* FMT_CONVERSION_H */
