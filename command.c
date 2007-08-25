@@ -2744,8 +2744,8 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		rescale_input_coordinates(pointer_x, pointer_y, &dx, &dy);
 #ifdef USE_DVDNAV
 		if (mpctx->stream->type == STREAMTYPE_DVDNAV
-		    int button = -1;
 		    && dx > 0.0 && dy > 0.0) {
+		    int button = -1;
 		    pointer_x = (int) (dx * (double) sh_video->disp_w);
 		    pointer_y = (int) (dy * (double) sh_video->disp_h);
 		    mp_dvdnav_update_mouse_pos(mpctx->stream,
