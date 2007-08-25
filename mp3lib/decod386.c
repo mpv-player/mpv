@@ -102,10 +102,6 @@ static int synth_1to1_mono2stereo(real *bandPtr,unsigned char *samples,int *pnt)
 
 static synth_func_t synth_func;
 
-#ifdef HAVE_MMX
-extern int synth_1to1_MMX( real *bandPtr,int channel,short * samples);
-#endif
-
 #ifdef HAVE_ALTIVEC
 #define dct64_base(a,b,c) if(gCpuCaps.hasAltiVec) dct64_altivec(a,b,c); else dct64(a,b,c)
 #else /* HAVE_ALTIVEC */
