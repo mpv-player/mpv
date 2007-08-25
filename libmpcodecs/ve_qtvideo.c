@@ -126,7 +126,7 @@ struct vf_priv_s {
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    OSErr cres;
+//    OSErr cres;
     ComponentDescription cdesc;
     mux_v->bih->biWidth=width;
     mux_v->bih->biHeight=height;
