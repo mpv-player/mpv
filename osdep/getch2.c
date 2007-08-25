@@ -35,6 +35,7 @@
 
 #include <unistd.h>
 
+#include "mp_fifo.h"
 #include "keycodes.h"
 
 #ifdef HAVE_TERMIOS
@@ -133,27 +134,19 @@ void get_screen_size(void){
 #endif
 }
 
-int getch2(int time){
+void getch2(void)
+{
   int len=0;
   int code=0;
   int i=0;
 
-  while(!getch2_len || (getch2_len==1 && getch2_buf[0]==27)){
-    fd_set rfds;
-    struct timeval tv;
     int retval;
-    /* Watch stdin (fd 0) to see when it has input. */
-    FD_ZERO(&rfds); FD_SET(0,&rfds);
-    /* Wait up to 'time' microseconds. */
-    tv.tv_sec=time/1000; tv.tv_usec = (time%1000)*1000;
-    retval=select(1, &rfds, NULL, NULL, &tv);
-    if(retval<=0) return -1;
-    /* Data is available now. */
     retval=read(0,&getch2_buf[getch2_len],BUF_LEN-getch2_len);
-    if(retval<1) return -1;
+    if (retval < 1)
+	return;
     getch2_len+=retval;
-  }
 
+    while (getch2_len > 0 && (getch2_len > 1 || getch2_buf[0] != 27)) {
     /* First find in the TERMCAP database: */
     for(i=0;i<getch2_key_db;i++){
       if((len=getch2_keys[i].len)<=getch2_len)
@@ -217,7 +210,8 @@ found:
     int i;
     for(i=0;i<getch2_len;i++) getch2_buf[i]=getch2_buf[len+i];
   }
-  return code;
+  mplayer_put_key(code);
+    }
 }
 
 static int getch2_status=0;

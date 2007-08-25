@@ -225,6 +225,10 @@ int mp_input_check_interrupt(int time) {
   usec_sleep(time);
   return 0;
 }
+// Needed by getch2
+void mplayer_put_key(int code)
+{
+}
 
 #ifdef USE_ASS
 #include "libass/ass.h"

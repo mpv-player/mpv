@@ -17,6 +17,7 @@
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
+#include "mp_fifo.h"
 #include "osdep/getch2.h"
 #include "osdep/keycodes.h"
 #include "osdep/timer.h"
@@ -1061,15 +1062,14 @@ if(n>0){
     }
 #ifdef HAVE_POSIX_SELECT
     // No input from this fd
-    if (!key_fds[i].no_select && !FD_ISSET(key_fds[i].fd, &fds)
-	&& key_fds[i].fd != 0)
+    if (!key_fds[i].no_select && !FD_ISSET(key_fds[i].fd, &fds))
       continue;
 #endif
     if(key_fds[i].fd == 0) { // stdin is handled by getch2
-      code = getch2(time);
+      getch2();
+      code = mplayer_get_key(0);
       if(code < 0)
 	code = MP_INPUT_NOTHING;
-      did_sleep = 1;
     }
     else
       code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].fd);

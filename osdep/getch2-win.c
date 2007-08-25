@@ -9,6 +9,7 @@
 #include <windows.h>
 #include "keycodes.h"
 #include "input/input.h"
+#include "mp_fifo.h"
 // HACK, stdin is used as something else below
 #undef stdin
 
@@ -34,13 +35,13 @@ void get_screen_size(){
 static HANDLE stdin;
 static int getch2_status=0;
 
-int getch2(int time){
+static int getch2_internal(void)
+{
 	INPUT_RECORD eventbuffer[128];
     DWORD retval;
    	int i=0;
     if(!getch2_status)return -1;    
     /*check if there are input events*/
-	WaitForSingleObject(stdin, time);
 	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
 	{
 		printf("getch2: can't get number of input events: %i\n",GetLastError());
@@ -118,6 +119,12 @@ int getch2(int time){
 	return -1;
 }
 
+void getch2(void)
+{
+    int r = getch2_internal();
+    if (r >= 0)
+	mplayer_put_key(r);
+}
 
 void getch2_enable(){
 	DWORD retval;
