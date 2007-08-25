@@ -41,7 +41,6 @@
 #include "stheader.h"
 
 #include "libvo/sub.h"
-extern subtitle *vo_sub;
 
 #include "qtpalette.h"
 #include "parse_mp4.h" // .MP4 specific stuff
