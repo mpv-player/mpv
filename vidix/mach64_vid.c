@@ -101,8 +101,6 @@ typedef struct video_registers_s
   uint32_t value;
 }video_registers_t;
 
-static bes_registers_t besr;
-
 /* Graphic keys */
 static vidix_grkey_t mach64_grkey;
 
