@@ -86,9 +86,6 @@ static struct SwsContext *sws=NULL;
 int aaopt_osdcolor = AA_SPECIAL;
 int aaopt_subcolor = AA_SPECIAL;
 
-extern struct aa_hardware_params aa_defparams;
-extern struct aa_renderparams aa_defrenderparams;
-
 void
 resize(void){
     /* 
