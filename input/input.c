@@ -488,19 +488,17 @@ static mp_cmd_bind_t gui_def_cmd_binds[] = {
 #define MP_MAX_CMD_FD 10
 #endif
 
-#define MP_FD_EOF (1<<0)
-#define MP_FD_DROP (1<<1)
-#define MP_FD_DEAD (1<<2)
-#define MP_FD_GOT_CMD (1<<3)
-#define MP_FD_NO_SELECT (1<<4)
-
 #define CMD_QUEUE_SIZE 100
 
 typedef struct mp_input_fd {
   int fd;
   void* read_func;
   mp_close_func_t close_func;
-  int flags;
+  int eof : 1;
+  int drop : 1;
+  int dead : 1;
+  int got_cmd : 1;
+  int no_select : 1;
   // These fields are for the cmd fds.
   char* buffer;
   int pos,size;
@@ -608,8 +606,7 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
   cmd_fds[num_cmd_fd].fd = fd;
   cmd_fds[num_cmd_fd].read_func = read_func ? read_func : mp_input_default_cmd_func;
   cmd_fds[num_cmd_fd].close_func = close_func;
-  if(!select)
-    cmd_fds[num_cmd_fd].flags = MP_FD_NO_SELECT;
+  cmd_fds[num_cmd_fd].no_select = !select;
   num_cmd_fd++;
 
   return 1;
@@ -664,8 +661,7 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
   key_fds[num_key_fd].fd = fd;
   key_fds[num_key_fd].read_func = read_func ? read_func : mp_input_default_key_func;
   key_fds[num_key_fd].close_func = close_func;
-  if(!select)
-    key_fds[num_key_fd].flags |= MP_FD_NO_SELECT;
+  key_fds[num_key_fd].no_select = !select;
   num_key_fd++;
 
   return 1;
@@ -836,7 +832,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
   } 
   
   // Get some data if needed/possible
-  while( !(mp_fd->flags & MP_FD_GOT_CMD) && !(mp_fd->flags & MP_FD_EOF) && (mp_fd->size - mp_fd->pos > 1) ) {
+  while (!mp_fd->got_cmd && !mp_fd->eof && (mp_fd->size - mp_fd->pos > 1) ) {
     int r = ((mp_cmd_func_t)mp_fd->read_func)(mp_fd->fd,mp_fd->buffer+mp_fd->pos,mp_fd->size - 1 - mp_fd->pos);
     // Error ?
     if(r < 0) {
@@ -851,15 +847,14 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
       }
       // EOF ?
     } else if(r == 0) {
-      mp_fd->flags |= MP_FD_EOF;
+      mp_fd->eof = 1;
       break;
     }
     mp_fd->pos += r;
     break;
   }
 
-  // Reset the got_cmd flag
-  mp_fd->flags &= ~MP_FD_GOT_CMD;
+  mp_fd->got_cmd = 0;
 
   while(1) {
     int l = 0;
@@ -872,25 +867,25 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
       if(mp_fd->size - mp_fd->pos <= 1) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent,mp_fd->fd);
 	mp_fd->pos = 0;
-	mp_fd->flags |= MP_FD_DROP;
+	mp_fd->drop = 1;
       }
       break;
     }
     // We already have a cmd : set the got_cmd flag
     else if((*ret)) {
-      mp_fd->flags |= MP_FD_GOT_CMD;
+      mp_fd->got_cmd = 1;
       break;
     }
 
     l = end - mp_fd->buffer;
 
     // Not dropping : put the cmd in ret
-    if( ! (mp_fd->flags & MP_FD_DROP)) {
+    if (!mp_fd->drop) {
       (*ret) = malloc(l+1);
       strncpy((*ret),mp_fd->buffer,l);
       (*ret)[l] = '\0';
     } else { // Remove the dropping flag
-      mp_fd->flags &= ~MP_FD_DROP;
+      mp_fd->drop = 0;
     }
     if( mp_fd->pos - (l+1) > 0)
       memmove(mp_fd->buffer,end+1,mp_fd->pos-(l+1));
@@ -1034,11 +1029,11 @@ mp_input_read_key_code(int time) {
   // Remove fd marked as dead and build the fd_set
   // n == number of fd's to be select() checked
   for(i = 0; (unsigned int)i < num_key_fd; i++) {
-    if( (key_fds[i].flags & MP_FD_DEAD) ) {
+    if (key_fds[i].dead) {
       mp_input_rm_key_fd(key_fds[i].fd);
       i--;
       continue;
-    } else if(key_fds[i].flags & MP_FD_NO_SELECT)
+    } else if (key_fds[i].no_select)
       continue;
     if(key_fds[i].fd > max_fd)
       max_fd = key_fds[i].fd;
@@ -1083,7 +1078,8 @@ if(n>0){
     }
 #ifdef HAVE_POSIX_SELECT
     // No input from this fd
-    if(! (key_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(key_fds[i].fd,&fds) && key_fds[i].fd != 0)
+    if (!key_fds[i].no_select && !FD_ISSET(key_fds[i].fd, &fds)
+	&& key_fds[i].fd != 0)
       continue;
 #endif
     if(key_fds[i].fd == 0) { // stdin is handled by getch2
@@ -1102,7 +1098,7 @@ if(n>0){
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrOnKeyInFd,key_fds[i].fd);
     else if(code == MP_INPUT_DEAD) {
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrDeadKeyOnFd,key_fds[i].fd);
-      key_fds[i].flags |= MP_FD_DEAD;
+      key_fds[i].dead = 1;
     }
   }
   if (time && !did_sleep)
@@ -1219,13 +1215,13 @@ mp_input_read_cmds(int time) {
   FD_ZERO(&fds);
 #endif
   for(i = 0; (unsigned int)i < num_cmd_fd ; i++) {
-    if( (cmd_fds[i].flags & MP_FD_DEAD) || (cmd_fds[i].flags & MP_FD_EOF) ) {
+    if (cmd_fds[i].dead || cmd_fds[i].eof) {
       mp_input_rm_cmd_fd(cmd_fds[i].fd);
       i--;
       continue;
-    } else if(cmd_fds[i].flags & MP_FD_NO_SELECT)
+    } else if (cmd_fds[i].no_select)
       continue;
-    if(cmd_fds[i].flags & MP_FD_GOT_CMD)
+    if (cmd_fds[i].got_cmd)
       got_cmd = 1;
     if(cmd_fds[i].fd > max_fd)
       max_fd = cmd_fds[i].fd;
@@ -1270,7 +1266,8 @@ mp_input_read_cmds(int time) {
       continue;
     }
 #ifdef HAVE_POSIX_SELECT
-    if( ! (cmd_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(cmd_fds[i].fd,&fds) && ! (cmd_fds[i].flags & MP_FD_GOT_CMD) )
+    if (!cmd_fds[i].no_select && ! FD_ISSET(cmd_fds[i].fd, &fds)
+        && !cmd_fds[i].got_cmd)
       continue;
 #endif
 
@@ -1279,7 +1276,7 @@ mp_input_read_cmds(int time) {
       if(r == MP_INPUT_ERROR)
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrOnCmdFd,cmd_fds[i].fd);
       else if(r == MP_INPUT_DEAD)
-	cmd_fds[i].flags |= MP_FD_DEAD;
+	cmd_fds[i].dead = 1;
       continue;
     }
     ret = mp_input_parse_cmd(cmd);
