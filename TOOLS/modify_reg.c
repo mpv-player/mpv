@@ -36,7 +36,7 @@
 
 static void remove_key(long handle, const char* name) {
     int i, len;
-    char *fullname, *tmp_val, *tmp_name;
+    char *fullname;
 
     fullname = build_keyname(handle, name);
     len = strlen(fullname);
