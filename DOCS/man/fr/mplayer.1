@@ -1,4 +1,4 @@
-.\" synced with r23996
+.\" synced with r24084
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -7682,16 +7682,38 @@ Pour avoir tous les détails lisez le source.
 codec audio (par défaut\ : mp2)
 .PD 0
 .RSs
-.IPs "mp2\ \ "
-MPEG Layer 2
-.IPs "mp3\ \ "
-MPEG Layer 3
 .IPs "ac3\ \ "
-AC-3
-.IPs adpcm_ima_wav
-IMA Adaptive PCM (4bits par échantillon, compression 4:1)
-.IPs sonic\
-codec à perte/sans perte expérimental
+Dolby Digital (AC-3)
+.IPs adpcm_*
+formats adaptatifs PCM - voir la documentation HTML pour plus de details.
+.IPs "flac\ "
+Free Lossless Audio Codec (FLAC)
+.IPs "g726\ "
+G.726 ADPCM
+.IPs libamr_nb
+3GPP Adaptive Multi-Rate (AMR) narrow-band (bande étroite)
+.IPs libamr_wb
+3GPP Adaptive Multi-Rate (AMR) wide-band (large bande)
+.IPs libfaac
+Advanced Audio Coding (AAC) - utilisant FAAC
+.IPs libmp3lame
+MPEG-1 audio layer 3 (MP3) - utilisant LAME
+.IPs "mp2\ \ "
+MPEG-1 audio layer 2 (MP2)
+.IPs pcm_*
+formats PCM - voir la documentation HTML pour plus de details.
+.IPs roq_dpcm
+RoQ DPCM de Id Software
+.IPs sonic
+codec à perte expérimental simple
+.IPs sonicls
+codec sans perte expérimental simple
+.IPs vorbis
+Vorbis
+.IPs wmav1
+Windows Media Audio v1
+.IPs wmav2
+Windows Media Audio v2
 .RE
 .PD 1
 .
