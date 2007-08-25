@@ -128,7 +128,6 @@ int vo_gamma_saturation = 1000;
 int vo_gamma_hue = 1000;
 
 extern vd_functions_t* mpvdec; // FIXME!
-extern int divx_quality;
 
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
     int i,j;

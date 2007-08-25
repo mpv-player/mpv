@@ -35,8 +35,6 @@ typedef struct {
     unsigned char *palette;
 } vd_vfw_ctx;
 
-extern int divx_quality;
-
 static int vfw_set_postproc(sh_video_t* sh, int quality)
 {
     vd_vfw_ctx *priv = sh->context;
