@@ -449,13 +449,13 @@ static void draw_slice(struct AVCodecContext *s,
                 	AVFrame *src, int offset[4],
                 	int y, int type, int height){
     sh_video_t * sh = s->opaque;
+    uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
+#if 0
     int start=0, i;
     int width= s->width;
     int skip_stride= ((width<<lavc_param_lowres)+15)>>4;
     uint8_t *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_frame->age;
-    uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
-#if 0
     if(s->pict_type!=B_TYPE){
         for(i=0; i*16<width+16; i++){ 
             if(i*16>=width || skip[i]>=threshold){
@@ -914,11 +914,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 static enum PixelFormat get_format(struct AVCodecContext * avctx, 
                                     const enum PixelFormat * fmt){
 sh_video_t * sh = avctx->opaque;
-vd_ffmpeg_ctx *ctx = sh->context;
 int i;
 
 #ifdef HAVE_XVMC
     if(avctx->xvmc_acceleration){
+        vd_ffmpeg_ctx *ctx = sh->context;
         avctx->get_buffer= mc_get_buffer;
         avctx->release_buffer= mc_release_buffer;
         avctx->draw_horiz_band = mc_render_slice;
