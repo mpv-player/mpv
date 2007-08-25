@@ -71,9 +71,6 @@ static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
 
 extern void set_video_eq(int cap);
 
-#ifdef HAVE_XINERAMA
-extern int xinerama_screen;
-#endif
 
 static void set_window(int force_update)
 {
