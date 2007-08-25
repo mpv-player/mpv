@@ -1291,9 +1291,9 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 static uint32_t put_image(mp_image_t *mpi){
 
 
-    static IDirectFBSurface *tmp = NULL;
-    DFBSurfaceDescription dsc;
-    DFBRectangle rect;
+//    static IDirectFBSurface *tmp = NULL;
+//    DFBSurfaceDescription dsc;
+//    DFBRectangle rect;
     
 //    if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image entered %i %i %i %i %i %i\n",mpi->x,mpi->y,mpi->w,mpi->h,mpi->width,mpi->height);
 
