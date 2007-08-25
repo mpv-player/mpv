@@ -1,4 +1,4 @@
-.\" Synced with r24110
+.\" Synced with r24137
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 08. 21." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 08. 25." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1573,9 +1573,9 @@ A használandó rádió vezérlõ (alapértelmezett: v4l2 ha van, különben v4l).
 Jelenleg a v4l és v4l2 vezérlõk támogatottak.
 .IPs volume=<0..100>
 A rádiós eszköz hangereje (alapértelmezett: 100)
-.IPs freq_min=<érték> (csak *BSD BT848)
+.IPs "freq_min=<érték> (csak *BSD BT848)"
 minimálisan engedélyezett frekvencia (alapértelmezett: 87.50)
-.IPs freq_max=<érték> (csak *BSD BT848)
+.IPs "freq_max=<érték> (csak *BSD BT848)"
 maximálisan engedélyezett frekvencia (alapértelmezett: 108.00)
 .IPs channels=<frekvencia>\-<név>,<frekvencia>\-<név>,...
 Beállítja a csatorna listát.
@@ -1588,14 +1588,14 @@ a csatorna listában.
 .br
 .I PÉLDA:
 radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<érték> (a rádió rögzítés bekapcsolásával)
+.IPs "adevice=<érték> (csak rádióról történõ rögzítésnél)"
 Annak az eszköznek a neve, melyrõl rögzíteni kell.
 Ezen mentési név megadása nélkül a mentés akkor is le lesz tiltva,
 ha a capture kulcsszó szerepel az URL-ben.
 ALSA eszközökhöz használd a hw=<kártya>.<eszköz> formát.
 Ha az eszköz neve '=' jelet tartalmaz, a modul az ALSA-t
 használja a rögzítésre, különben az OSS-t.
-.IPs arate=<érték> (a rádió rögzítés bekapcsolásával)
+.IPs "arate=<érték> (csak rádióról történõ rögzítésnél)"
 Mintavételi ráta (alapértelmezett: 44100).
 .br
 .I MEGJEGYZÉS:
@@ -1603,7 +1603,7 @@ Ha audió mentést végzel, állítsd be a \-rawaudio rate=<érték> opciót
 is ugyan arra az értékre, mint az arate-t.
 Ha problémád van a hang sebességével (túl gyors), próbáld meg
 lejátszani más ráta értékekkel (pl.\& 48000,44100,32000,...).
-.IPs achannels=<érték> (a rádió rögzítés bekapcsolásával)
+.IPs "achannels=<érték> (csak rádióról történõ rögzítésnél)"
 A rögzítendõ audió csatornák száma.
 .RE
 .
@@ -1764,7 +1764,7 @@ Használható opciók:
 .RSs
 .IPs noaudio
 hang kikapcsolása
-.IPs automute=<0-255> (csak v4l és v4l2)
+.IPs "automute=<0-255> (csak v4l és v4l2)"
 Ha az eszköz által jelzett jelerõsség kisebb, mint ez az érték,
 az audió és a videó el lesz némítva.
 A legtöbb esetben az automute=100 elég.
@@ -1890,12 +1890,43 @@ a tömörítendõ kép méretének meghatározása hardveres MJPEG tömörítéshez:
 .IPs quality=<0\-100>
 A JPEG tömörítés minõségének beállítása
 (< 60 javasolt a teljes mérethez).
-.IPs tdevice=<érték> (alapértelmezett: nincs)
-Megadja a TV teletext eszközt (például: /dev/\:vbi0).
-.IPs tformat=<text|bw|gray|color> (alapértelmezett: gray)
-Megadja a TV teletext megjelnítési módját. (Megjegyzés: a színes módhoz színes SPU támogatás kell.)
-.IPs tpage=<100-999> (alapértelmezett: 100)
-Megadja a kezdõ TV teletext oldal számát.
+.IPs tdevice=<érték>
+Megadja a TV teletext eszközt (például: /dev/\:vbi0) (alapértelmezett: nincs).
+.IPs tformat=<format>
+Megadja a TV teletext megjelenítési módját (alapértelmezett: 0):
+.RSss
+0: nem átlátszó
+.br
+1: átlátszó
+.br
+2: nem átlátszó inverz színekkel
+.br
+3: átlátszó inverz színekkel
+.REss
+.IPs tpage=<100-999>
+Megadja a kezdõ TV teletext oldal számát (alapértelmezett: 100).
+.RE
+.
+.TP
+.B \-tvscan <opció1:opció2:...> (csak TV és MPlayer)
+A TV csatorna keresõ finomhangolására használható opció.
+Az MPlayer kiírja az értékeket a "-tv channels=" opcióhoz,
+beleértve a már meglévõ és az épp megtalált csatornákat.
+.sp 1
+Az elérhetõ alopciók:
+.RSs
+.IPs autostart
+Indulás után azonnal megkezdi a csatornák keresését (alapértelmezett: nincs beállítva).
+.IPs period=<0.1-2.0>
+Megadja a késleltetést másodpercben a következõ csatornára
+történõ váltás elõtt (alapértelmezett: 0.5).
+A kisebb érték gyorsabb keresést eredményez, de inaktív
+TV csatornákat is aktívként detektálhat.
+.IPs threshold=<1-100>
+A jelerõsség határértéke (százalékban), melyet az eszköz ad
+át (alapértelmezett: 50).
+Az ennél nagyobb jelerõsség azt jelenti, hogy a jelenleg
+vizsgált csatorna aktív.
 .RE
 .
 .TP
@@ -3953,7 +3984,7 @@ A mentési könyvtár megadása (alapértelmezett: ./).
 .IPs subdirs=<prefix>
 A megadott prefix-szel kezdõdõ, számozott alkönyvtárak létrehozása
 a fájlok mentéséhez az aktuális könyvtár helyett.
-.IPs maxfiles=<érték> (csak subdirs-szel)
+.IPs "maxfiles=<érték> (csak subdirs-szel)"
 Az egy alkönyvtárba menthetõ fájlok maximális száma.
 Nagyobb vagy egyenlõ mint 1 (alapértelmezett: 1000).
 .RE
@@ -3983,7 +4014,7 @@ Megadja a PNM fájlok mentési könyvtárát (alapértelmezett: ./).
 .IPs subdirs=<prefix>
 A megadott prefix-szel kezdõdõ, számozott alkönyvtárak létrehozása
 a fájlok mentéséhez az aktuális könyvtár helyett.
-.IPs maxfiles=<érték> (csak subdirs-szel)
+.IPs "maxfiles=<érték> (csak subdirs-szel)"
 Az egy alkönyvtárba menthetõ fájlok maximális száma.
 Nagyobb vagy egyenlõ mint 1 (alapértelmezett: 1000).
 .RE
@@ -4284,7 +4315,7 @@ videó szélessége nagyobb vagy egyenlõ mint <w>.
 Kihagyja a megadott számú makroblokk sort a tetején.
 .IPs "st=<szám> (csak MPEG-2)"
 Kihagyja a megadott számú makroblokk sort az alján.
-.IPs skiploopfilter=<kihagyási érték> (csak H.264)
+.IPs "skiploopfilter=<kihagyási érték> (csak H.264)"
 Kihagyja a loop szûrõt (deblocking szûrõ) a H.264 dekódolás közben.
 Mivel a szûrt kocka referenciaként lesz felhasználva a függõ
 kockák dekódolásánál, ennek rosszabb hatása van a minõségre,
@@ -4504,15 +4535,15 @@ utófeldolgozó szûrõjét (\-vf pp) és dekóderét (\-vfm ffmpeg) használni.
 Xvid belsõ utófeldolgozó szûrõi:
 .PD 0
 .RSs
-.IPs deblock-chroma (lásd még \-vf pp)
+.IPs "deblock-chroma (lásd még \-vf pp)"
 chroma deblock szûrõ
-.IPs deblock-luma (lásd még \-vf pp)
+.IPs "deblock-luma (lásd még \-vf pp)"
 luma deblock szûrõ
-.IPs dering-luma (lásd még \-vf pp)
+.IPs "dering-luma (lásd még \-vf pp)"
 luma deringing szûrõ
-.IPs dering-chroma (lásd még \-vf pp)
+.IPs "dering-chroma (lásd még \-vf pp)"
 chroma deringing szûrõ
-.IPs filmeffect (lásd még \-vf noise)
+.IPs "filmeffect (lásd még \-vf noise)"
 Mesterséges film javítás.
 Javíthatja a látható minõséget, de csökkenti az igazit.
 .RE
