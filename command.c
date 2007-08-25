@@ -2736,12 +2736,13 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_SET_MOUSE_POS:{
-		int button = -1, pointer_x, pointer_y;
+		int pointer_x, pointer_y;
 		double dx, dy;
 		pointer_x = cmd->args[0].v.i;
 		pointer_y = cmd->args[1].v.i;
 		rescale_input_coordinates(pointer_x, pointer_y, &dx, &dy);
 #ifdef USE_DVDNAV
+		int button = -1;
 		if (mpctx->stream->type == STREAMTYPE_DVDNAV
 		    && dx > 0.0 && dy > 0.0) {
 		    pointer_x = (int) (dx * (double) sh_video->disp_w);
