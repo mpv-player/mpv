@@ -2742,8 +2742,8 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		pointer_y = cmd->args[1].v.i;
 		rescale_input_coordinates(pointer_x, pointer_y, &dx, &dy);
 #ifdef USE_DVDNAV
-		int button = -1;
 		if (mpctx->stream->type == STREAMTYPE_DVDNAV
+		    int button = -1;
 		    && dx > 0.0 && dy > 0.0) {
 		    pointer_x = (int) (dx * (double) sh_video->disp_w);
 		    pointer_y = (int) (dy * (double) sh_video->disp_h);
