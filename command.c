@@ -55,6 +55,7 @@
 #endif
 
 #include "mp_core.h"
+#include "mp_fifo.h"
 
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 

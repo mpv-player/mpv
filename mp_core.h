@@ -127,5 +127,4 @@ void exit_player_with_rc(const char* how, int rc);
 char *get_path(const char *filename);
 void rm_osd_msg(int id);
 void add_subtitles(char *filename, float fps, int silent);
-void mplayer_put_key(int code);
 int reinit_video_chain(void);
