@@ -28,6 +28,8 @@
 #include "mixer.h"
 #include "libaf/af.h"
 #include "libaf/equalizer.h"
+#include "libass/ass.h"
+#include "libass/ass_mp.h"
 
 extern af_cfg_t af_cfg;
 
