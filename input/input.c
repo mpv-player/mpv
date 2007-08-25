@@ -495,12 +495,12 @@ typedef struct mp_input_fd {
   int fd;
   void* read_func;
   mp_close_func_t close_func;
-  int eof : 1;
-  int drop : 1;
-  int dead : 1;
-  int got_cmd : 1;
-  int no_select : 1;
-  int no_readfunc_retval : 1;
+  unsigned eof : 1;
+  unsigned drop : 1;
+  unsigned dead : 1;
+  unsigned got_cmd : 1;
+  unsigned no_select : 1;
+  unsigned no_readfunc_retval : 1;
   // These fields are for the cmd fds.
   char* buffer;
   int pos,size;
