@@ -578,58 +578,7 @@ static void init_vobsub(sh_sub_t *sh, mov_track_t *trak) {
 static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
                            off_t pos, off_t len, mov_track_t* trak);
 
-static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak){
-    mov_priv_t* priv=demuxer->priv;
-//    printf("lschunks (level=%d,endpos=%x)\n", level, endpos);
-    while(1){
-	off_t pos;
-	off_t len;
-	unsigned int id;
-	//
-	pos=stream_tell(demuxer->stream);
-//	printf("stream_tell==%d\n",pos);
-	if(pos>=endpos) return; // END
-	len=stream_read_dword(demuxer->stream);
-//	printf("len==%d\n",len);
-	if(len<8) return; // error
-	len-=8;
-	id=stream_read_dword(demuxer->stream);
-	//
-	mp_msg(MSGT_DEMUX,MSGL_DBG2,"lschunks %.4s  %d\n",(char *)&id,(int)len);
-	//
-	if(trak){
-	  if (lschunks_intrak(demuxer, level, id, pos, len, trak) < 0)
-	    return;
-	} else { /* not in track */
-	  switch(id) {
-	    case MOV_FOURCC('m','v','h','d'): {
-		int version = stream_read_char(demuxer->stream);
-		stream_skip(demuxer->stream, (version == 1) ? 19 : 11);
-		priv->timescale=stream_read_dword(demuxer->stream);
-		if (version == 1)
-		    priv->duration=stream_read_qword(demuxer->stream);
-		else
-		    priv->duration=stream_read_dword(demuxer->stream);
-		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sMovie header (%d bytes): tscale=%d  dur=%d\n",level,"",(int)len,
-		    (int)priv->timescale,(int)priv->duration);
-		break;
-	    }
-	    case MOV_FOURCC('t','r','a','k'): {
-//	    if(trak) printf("MOV: Warning! trak in trak?\n");
-	    if(priv->track_db>=MOV_MAX_TRACKS){
-		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVtooManyTrk);
-		return;
-	    }
-	    if(!priv->track_db) mp_msg(MSGT_DEMUX, MSGL_V, "--------------\n");
-	    trak=malloc(sizeof(mov_track_t));
-	    memset(trak,0,sizeof(mov_track_t));
-	    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Track #%d:\n",priv->track_db);
-	    trak->id=priv->track_db;
-	    priv->tracks[priv->track_db]=trak;
-	    lschunks(demuxer,level+1,pos+len,trak);
-	    mov_build_index(trak,priv->timescale);
-	    switch(trak->type){
-	    case MOV_TRAK_AUDIO: {
+static int gen_sh_audio(sh_audio_t* sh, mov_track_t* trak, int timescale) {
 #if 0				   
 		struct {
 		   int16_t version;		// 0 or 1 (version 1 is qt3.0+)
@@ -657,14 +606,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 #endif		
 		int version, adjust;
 		int is_vorbis = 0;
-		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
-		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "mov", priv->track_db);
 		sh->format=trak->fourcc;
 
 		// crude audio delay from editlist0 hack ::atm
 		if(trak->editlist_size>=1) {
 		    if(trak->editlist[0].pos == -1) {
-			sh->stream_delay = (float)trak->editlist[0].dur/(float)priv->timescale;
+			sh->stream_delay = (float)trak->editlist[0].dur/(float)timescale;
 	    		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Initial Audio-Delay: %.3f sec\n", sh->stream_delay);
 		    }
 		}
@@ -974,21 +921,20 @@ quit_vorbis_block:
 //		    demuxer->audio->id=priv->track_db;
 //		    demuxer->audio->sh=sh; sh->ds=demuxer->audio;
 //		}
-		break;
-	    }
-	    case MOV_TRAK_VIDEO: {
+    return 1;
+}
+
+static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 		int depth, i, entry;
 		int flag, start, count_flag, end, palette_count, gray;
 		int hdr_ptr = 76;  // the byte just after depth
 		unsigned char *palette_map;
-		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
-		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "mov", priv->track_db);
 		sh->format=trak->fourcc;
 
 		// crude video delay from editlist0 hack ::atm
 		if(trak->editlist_size>=1) {
 		    if(trak->editlist[0].pos == -1) {
-			sh->stream_delay = (float)trak->editlist[0].dur/(float)priv->timescale;
+			sh->stream_delay = (float)trak->editlist[0].dur/(float)timescale;
 	    		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Initial Video-Delay: %.3f sec\n", sh->stream_delay);
 		    }
 		}
@@ -998,7 +944,7 @@ quit_vorbis_block:
 		  mp_msg(MSGT_DEMUXER, MSGL_WARN,
 		  "MOV: Invalid (%d bytes instead of >= 78) video trak desc\n",
 		  trak->stdata_len);
-		  break;
+		  return 0;
 		}
 		depth = trak->stdata[75] | (trak->stdata[74] << 8);
 //  stdata[]:
@@ -1304,6 +1250,70 @@ quit_vorbis_block:
 //		    demuxer->video->id=priv->track_db;
 //		    demuxer->video->sh=sh; sh->ds=demuxer->video;
 //		}
+    return 1;
+}
+
+static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak){
+    mov_priv_t* priv=demuxer->priv;
+//    printf("lschunks (level=%d,endpos=%x)\n", level, endpos);
+    while(1){
+	off_t pos;
+	off_t len;
+	unsigned int id;
+	//
+	pos=stream_tell(demuxer->stream);
+//	printf("stream_tell==%d\n",pos);
+	if(pos>=endpos) return; // END
+	len=stream_read_dword(demuxer->stream);
+//	printf("len==%d\n",len);
+	if(len<8) return; // error
+	len-=8;
+	id=stream_read_dword(demuxer->stream);
+	//
+	mp_msg(MSGT_DEMUX,MSGL_DBG2,"lschunks %.4s  %d\n",(char *)&id,(int)len);
+	//
+	if(trak){
+	  if (lschunks_intrak(demuxer, level, id, pos, len, trak) < 0)
+	    return;
+	} else { /* not in track */
+	  switch(id) {
+	    case MOV_FOURCC('m','v','h','d'): {
+		int version = stream_read_char(demuxer->stream);
+		stream_skip(demuxer->stream, (version == 1) ? 19 : 11);
+		priv->timescale=stream_read_dword(demuxer->stream);
+		if (version == 1)
+		    priv->duration=stream_read_qword(demuxer->stream);
+		else
+		    priv->duration=stream_read_dword(demuxer->stream);
+		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sMovie header (%d bytes): tscale=%d  dur=%d\n",level,"",(int)len,
+		    (int)priv->timescale,(int)priv->duration);
+		break;
+	    }
+	    case MOV_FOURCC('t','r','a','k'): {
+//	    if(trak) printf("MOV: Warning! trak in trak?\n");
+	    if(priv->track_db>=MOV_MAX_TRACKS){
+		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVtooManyTrk);
+		return;
+	    }
+	    if(!priv->track_db) mp_msg(MSGT_DEMUX, MSGL_V, "--------------\n");
+	    trak=malloc(sizeof(mov_track_t));
+	    memset(trak,0,sizeof(mov_track_t));
+	    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Track #%d:\n",priv->track_db);
+	    trak->id=priv->track_db;
+	    priv->tracks[priv->track_db]=trak;
+	    lschunks(demuxer,level+1,pos+len,trak);
+	    mov_build_index(trak,priv->timescale);
+	    switch(trak->type){
+	    case MOV_TRAK_AUDIO: {
+		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "mov", priv->track_db);
+		gen_sh_audio(sh, trak, priv->timescale);
+		break;
+	    }
+	    case MOV_TRAK_VIDEO: {
+		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "mov", priv->track_db);
+		gen_sh_video(sh, trak, priv->timescale);
 		break;
 	    }
 	    case MOV_TRAK_GENERIC:
