@@ -136,81 +136,114 @@ void get_screen_size(void){
 
 void getch2(void)
 {
-  int len=0;
-  int code=0;
-  int i=0;
-
-    int retval;
-    retval=read(0,&getch2_buf[getch2_len],BUF_LEN-getch2_len);
+    int retval = read(0, &getch2_buf[getch2_len], BUF_LEN-getch2_len);
     if (retval < 1)
-	return;
-    getch2_len+=retval;
+        return;
+    getch2_len += retval;
 
     while (getch2_len > 0 && (getch2_len > 1 || getch2_buf[0] != 27)) {
-    /* First find in the TERMCAP database: */
-    for(i=0;i<getch2_key_db;i++){
-      if((len=getch2_keys[i].len)<=getch2_len)
-        if(memcmp(getch2_keys[i].chars,getch2_buf,len)==0){
-          code=getch2_keys[i].code; goto found;
+        int i, len, code;
+
+        /* First find in the TERMCAP database: */
+        for (i = 0; i < getch2_key_db; i++) {
+            if ((len = getch2_keys[i].len) <= getch2_len)
+                if(memcmp(getch2_keys[i].chars, getch2_buf, len) == 0) {
+                    code = getch2_keys[i].code;
+                    goto found;
+                }
         }
-    }
-    len=1;code=getch2_buf[0];
-    /* Check the well-known codes... */
-    if(code!=27){
-      if(code=='A'-64){ code=KEY_HOME; goto found;}
-      if(code=='E'-64){ code=KEY_END; goto found;}
-      if(code=='D'-64){ code=KEY_DEL; goto found;}
-      if(code=='H'-64){ code=KEY_BS; goto found;}
-      if(code=='U'-64){ code=KEY_PGUP; goto found;}
-      if(code=='V'-64){ code=KEY_PGDWN; goto found;}
-      if(code==8 || code==127){ code=KEY_BS; goto found;}
-      if(code==10 || code==13){
-        if(getch2_len>1){
-          int c=getch2_buf[1];
-          if(c==10 || c==13) if(c!=code) len=2;
+        /* We always match some keypress here, with length 1 if nothing else.
+         * Since some of the cases explicitly test remaining buffer length
+         * having a keycode only partially read in the buffer could incorrectly
+         * use the first byte as an independent character.
+         * However the buffer is big enough that this shouldn't happen too
+         * easily, and it's been this way for years without many complaints.
+         * I see no simple fix as there's no easy test which would tell
+         * whether a string must be part of a longer keycode. */
+        len = 1;
+        code = getch2_buf[0];
+        /* Check the well-known codes... */
+        if (code != 27) {
+            if (code == 'A'-64) code = KEY_HOME;
+            else if (code == 'E'-64) code = KEY_END;
+            else if (code == 'D'-64) code = KEY_DEL;
+            else if (code == 'H'-64) code = KEY_BS;
+            else if (code == 'U'-64) code = KEY_PGUP;
+            else if (code == 'V'-64) code = KEY_PGDWN;
+            else if (code == 8 || code==127) code = KEY_BS;
+            else if (code == 10 || code==13) {
+                if (getch2_len > 1) {
+                    int c = getch2_buf[1];
+                    if ((c == 10 || c == 13) && (c != code))
+                        len = 2;
+                }
+                code = KEY_ENTER;
+            }
         }
-        code=KEY_ENTER;
-        goto found;
-      }
-    } else if(getch2_len>1){
-      int c=getch2_buf[1];
-      if(c==27){ code=KEY_ESC; len=2; goto found;}
-      if(c>='0' && c<='9'){ code=c-'0'+KEY_F; len=2; goto found;}
-      if(getch2_len>=4 && c=='[' && getch2_buf[2]=='['){
-        int c=getch2_buf[3];
-        if(c>='A' && c<'A'+12){ code=KEY_F+1+c-'A';len=4;goto found;}
-      }
-      if(c=='[' || c=='O') if(getch2_len>=3){
-        int c=getch2_buf[2];
-        static short int ctable[]={ KEY_UP,KEY_DOWN,KEY_RIGHT,KEY_LEFT,0,
-                       KEY_END,KEY_PGDWN,KEY_HOME,KEY_PGUP,0,0,KEY_INS,0,0,0,
-                       KEY_F+1,KEY_F+2,KEY_F+3,KEY_F+4};
-        if(c>='A' && c<='S')
-          if(ctable[c-'A']){ code=ctable[c-'A']; len=3; goto found;}
-      }
-      if(getch2_len>=4 && c=='[' && getch2_buf[3]=='~'){
-        int c=getch2_buf[2];
-        int ctable[8]={KEY_HOME,KEY_INS,KEY_DEL,KEY_END,KEY_PGUP,KEY_PGDWN,KEY_HOME,KEY_END};
-        if(c>='1' && c<='8'){ code=ctable[c-'1']; len=4; goto found;}
-      }
-      if(getch2_len>=5 && c=='[' && getch2_buf[4]=='~'){
-        int i=getch2_buf[2]-'0';
-        int j=getch2_buf[3]-'0';
-        if(i>=0 && i<=9 && j>=0 && j<=9){
-          static short int ftable[20]={
-            11,12,13,14,15, 17,18,19,20,21,
-            23,24,25,26,28, 29,31,32,33,34 };
-          int a=i*10+j;
-          for(i=0;i<20;i++) if(ftable[i]==a){ code=KEY_F+1+i;len=5;goto found;}
+        else if (getch2_len > 1) {
+            int c = getch2_buf[1];
+            if (c == 27) {
+                code = KEY_ESC;
+                len = 2;
+                goto found;
+            }
+            if (c >= '0' && c <= '9') {
+                code = c-'0'+KEY_F;
+                len = 2;
+                goto found;
+            }
+            if (getch2_len >= 4 && c == '[' && getch2_buf[2] == '[') {
+                int c = getch2_buf[3];
+                if (c >= 'A' && c < 'A'+12) {
+                    code = KEY_F+1 + c-'A';
+                    len = 4;
+                    goto found;
+                }
+            }
+            if (c == '[' || c == 'O' && getch2_len >= 3) {
+                int c = getch2_buf[2];
+                const short ctable[] = {
+                    KEY_UP, KEY_DOWN, KEY_RIGHT, KEY_LEFT, 0,
+                    KEY_END, KEY_PGDWN, KEY_HOME, KEY_PGUP, 0, 0, KEY_INS, 0, 0, 0,
+                    KEY_F+1, KEY_F+2, KEY_F+3, KEY_F+4};
+                if (c >= 'A' && c <= 'S')
+                    if (ctable[c - 'A']) {
+                        code = ctable[c - 'A'];
+                        len = 3;
+                        goto found;
+                    }
+            }
+            if (getch2_len >= 4 && c == '[' && getch2_buf[3] == '~') {
+                int c = getch2_buf[2];
+                const int ctable[8] = {KEY_HOME, KEY_INS, KEY_DEL, KEY_END, KEY_PGUP, KEY_PGDWN, KEY_HOME, KEY_END};
+                if (c >= '1' && c <= '8') {
+                    code = ctable[c - '1'];
+                    len = 4;
+                    goto found;
+                }
+            }
+            if (getch2_len >= 5 && c == '[' && getch2_buf[4] == '~') {
+                int i = getch2_buf[2] - '0';
+                int j = getch2_buf[3] - '0';
+                if (i >= 0 && i <= 9 && j >= 0 && j <= 9) {
+                    const short ftable[20] = {
+                        11,12,13,14,15, 17,18,19,20,21,
+                        23,24,25,26,28, 29,31,32,33,34 };
+                    int a = i*10 + j;
+                    for (i = 0; i < 20; i++)
+                        if (ftable[i] == a) {
+                            code = KEY_F+1 + i;
+                            len = 5;
+                            goto found;
+                        }
+                }
+            }
         }
-      }
-    }
-found:
-  if((getch2_len-=len)>0){
-    int i;
-    for(i=0;i<getch2_len;i++) getch2_buf[i]=getch2_buf[len+i];
-  }
-  mplayer_put_key(code);
+    found:
+        getch2_len -= len;
+        for (i = 0; i < getch2_len; i++)
+            getch2_buf[i] = getch2_buf[len+i];
+        mplayer_put_key(code);
     }
 }
 
