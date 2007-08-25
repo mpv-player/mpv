@@ -327,8 +327,6 @@ mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_SelectedVideoCodec,
 return 1; // success
 }
 
-extern int vo_directrendering;
-
 void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
 		   int drop_frame, double pts)
 {
