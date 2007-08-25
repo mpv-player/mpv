@@ -155,7 +155,6 @@ extern int dvdsub_id;
 #define OGG_SUB_MAX_LINE 128
 
 static subtitle ogg_sub;
-extern subtitle* vo_sub;
 //FILE* subout;
 
 #define get_uint16(b) AV_RL16(b)
