@@ -112,7 +112,6 @@ extern float playback_speed;
 extern int osd_duration;
 extern int term_osd;
 extern int fixed_vo;
-extern int ass_enabled;
 extern int forced_subs_only;
 
 
