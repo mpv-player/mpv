@@ -82,9 +82,6 @@ int aaconfigmode=1;
 font_desc_t* vo_font_save = NULL;
 static struct SwsContext *sws=NULL;
 
-/* to disable stdout outputs when curses/linux mode */
-extern int quiet;
-
 /* configuration */
 int aaopt_osdcolor = AA_SPECIAL;
 int aaopt_subcolor = AA_SPECIAL;
