@@ -600,7 +600,7 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds,fd);
     return 0;
   }
-  if (fd < 0) {
+  if (select && fd < 0) {
     mp_msg(MSGT_INPUT, MSGL_ERR, "Invalid fd %i in mp_input_add_cmd_fd", fd);
     return 0;
   }
@@ -659,7 +659,7 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
     return 0;
   }
-  if (fd < 0) {
+  if (select && fd < 0) {
     mp_msg(MSGT_INPUT, MSGL_ERR, "Invalid fd %i in mp_input_add_key_fd", fd);
     return 0;
   }
