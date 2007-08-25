@@ -10,8 +10,10 @@
 #include "mplayer.h"
 #include "m_config.h"
 #include "m_option.h"
-
+#include "libvo/sub.h"
 #include "libvo/video_out.h"
+#include "stream/stream.h"
+#include "libmpdemux/demuxer.h"
 
 #include "cfg.h"
 #include "app.h"

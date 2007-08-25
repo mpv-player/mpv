@@ -15,12 +15,10 @@
 #include "mplayer/gmplayer.h"
 #include "mplayer/play.h"
 
-#include "mplayer.h"
 #include "access_mpcontext.h"
 #include "app.h"
 #include "cfg.h"
 #include "help_mp.h"
-#include "subreader.h"
 #include "libvo/x11_common.h"
 #include "libvo/video_out.h"
 #include "libvo/font_load.h"

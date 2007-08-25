@@ -12,6 +12,7 @@
 #include "help_mp.h"
 #include "mixer.h"
 #include "libao2/audio_out.h"
+#include "libvo/sub.h"
 #include "libvo/video_out.h"
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
