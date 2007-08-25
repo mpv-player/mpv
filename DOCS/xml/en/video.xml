@@ -312,6 +312,30 @@ Prophet 4000XT), you should download the drivers from the
 <ulink url="http://www.powervr.com/">PowerVR site</ulink>.
 </para>
 </sect2>
+
+
+<sect2 id="intel">
+<title>Intel cards</title>
+
+<para>
+These cards can be found in many laptops. Recent Xorg is recommended.
+</para>
+
+<para>
+To allow playback of DVD sized (and larger) content change your XF86Config/xorg.conf like this:
+<programlisting>
+Section "Device"
+    [...]
+    Driver "intel"
+    <emphasis>Option "LinearAlloc" "6144"</emphasis>
+    [...]
+EndSection
+</programlisting>
+Lack of this option usually results in an error like
+<screen>X11 error: BadAlloc (insufficient resources for operation)</screen>
+when attempting to use <option>-vo xv</option>.
+</para>
+</sect2>
 </sect1>
 
 <!-- ********** -->
