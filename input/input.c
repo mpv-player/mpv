@@ -1173,6 +1173,8 @@ static mp_cmd_t *read_events(int time, int paused)
 	int code;
 	if (key_fds[i].no_readfunc_retval) {   // getch2 handler special-cased for now
 	    ((void (*)(void))key_fds[i].read_func)();
+	    if (cmd_queue_length)
+		return NULL;
 	    code = mplayer_get_key(0);
 	    if (code < 0)
 		code = MP_INPUT_NOTHING;
@@ -1264,6 +1266,10 @@ mp_input_get_cmd(int time, int paused, int peek_only) {
     if(ret) break;
     from_queue = 0;
     ret = read_events(time, paused);
+    if (!ret) {
+	from_queue = 1;
+	ret = mp_input_get_queued_cmd(peek_only);
+    }
     break;
   }
   if(!ret) return NULL;
