@@ -228,8 +228,6 @@ get_layer_by_name( DFBDisplayLayerID id,
      return DFENUM_OK;
 }
 
-static void uninit( void );
-
 static int
 preinit( const char *arg )
 {
