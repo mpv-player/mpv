@@ -17,12 +17,14 @@ all: $(OBJS)
 subrip$(EXESUF): subrip.c
 	$(CC) $(CFLAGS) -g -o $@ $< ../vobsub.o ../spudec.o ../mp_msg.o \
           ../unrarlib.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
-          ../libmpcodecs/img_format.o ../osdep/getch2.o -ltermcap -lm
+          ../libmpcodecs/img_format.o ../osdep/getch2.o ../osdep/timer-lx.o \
+          ../mp_fifo.o -ltermcap -lm
 
 #FIXME: Linking is broken, help welcome.
 vivodump$(EXESUF): vivodump.c
 	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a \
-           ../stream/stream.a ../osdep/getch2.o -ltermcap -lm
+           ../stream/stream.a ../osdep/getch2.o ../osdep/timer-lx.o \
+          ../mp_fifo.o -ltermcap -lm
 
 fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) -g $< -o fastmem-mmx$(EXESUF)  ../libvo/aclib.o -DNAME=\"mmx\"      -DHAVE_MMX
