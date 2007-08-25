@@ -31,7 +31,7 @@ typedef struct af_sinesuppress_s
 }af_sinesuppress_t;
 
 static af_data_t* play_s16(struct af_instance_s* af, af_data_t* data);
-static af_data_t* play_float(struct af_instance_s* af, af_data_t* data);
+//static af_data_t* play_float(struct af_instance_s* af, af_data_t* data);
 
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
