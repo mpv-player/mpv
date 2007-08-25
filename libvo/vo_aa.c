@@ -82,8 +82,6 @@ int aaconfigmode=1;
 font_desc_t* vo_font_save = NULL;
 static struct SwsContext *sws=NULL;
 
-/* our version of the playmodes :) */
-
 /* to disable stdout outputs when curses/linux mode */
 extern int quiet;
 
