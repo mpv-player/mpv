@@ -34,7 +34,6 @@
  */
 void *mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)
 {
-    int fd;
     void *result;
 
      /* From loader/ext.c:
@@ -50,6 +49,7 @@ void *mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)
     result = mmap(addr, len, prot, flags | MAP_ANONYMOUS, -1, offset);
 #else
     /* SysV-style anonymous mapping */
+    int fd;
     fd = open("/dev/zero", O_RDWR);
     if(fd < 0){
         perror( "Cannot open /dev/zero for READ+WRITE. Check permissions! error: ");
