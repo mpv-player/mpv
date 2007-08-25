@@ -600,6 +600,10 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds,fd);
     return 0;
   }
+  if (fd < 0) {
+    mp_msg(MSGT_INPUT, MSGL_ERR, "Invalid fd %i in mp_input_add_cmd_fd", fd);
+    return 0;
+  }
 
   memset(&cmd_fds[num_cmd_fd],0,sizeof(mp_input_fd_t));
   cmd_fds[num_cmd_fd].fd = fd;
@@ -655,6 +659,10 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
     return 0;
   }
+  if (fd < 0) {
+    mp_msg(MSGT_INPUT, MSGL_ERR, "Invalid fd %i in mp_input_add_key_fd", fd);
+    return 0;
+  }
 
   memset(&key_fds[num_key_fd],0,sizeof(mp_input_fd_t));
   key_fds[num_key_fd].fd = fd;
@@ -671,6 +679,10 @@ mp_input_add_event_fd(int fd, void (*read_func)(void))
 {
   if(num_key_fd == MP_MAX_KEY_FD) {
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
+    return 0;
+  }
+  if (fd < 0) {
+    mp_msg(MSGT_INPUT, MSGL_ERR, "Invalid fd %i in mp_input_add_event_fd", fd);
     return 0;
   }
 
