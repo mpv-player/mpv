@@ -397,7 +397,9 @@ int mp_input_check_interrupt(int time){
 // for libdvdread:
 #include "get_path.c"
 
+// linking hacks
 int stream_cache_size=0;
+int index_mode=0;
 
 // for demux_ogg:
 void* vo_sub=NULL;
