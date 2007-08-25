@@ -609,8 +609,7 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
   cmd_fds[num_cmd_fd].fd = fd;
   cmd_fds[num_cmd_fd].read_func = read_func ? read_func : mp_input_default_cmd_func;
   cmd_fds[num_cmd_fd].close_func = close_func;
-  if (!select)
-    cmd_fds[num_cmd_fd].no_select = 1;
+  cmd_fds[num_cmd_fd].no_select = !select;
   num_cmd_fd++;
 
   return 1;
@@ -669,8 +668,7 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
   key_fds[num_key_fd].fd = fd;
   key_fds[num_key_fd].read_func = read_func;
   key_fds[num_key_fd].close_func = close_func;
-  if (!select)
-    key_fds[num_key_fd].no_select = 1;
+  key_fds[num_key_fd].no_select = !select;
   num_key_fd++;
 
   return 1;
