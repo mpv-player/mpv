@@ -230,6 +230,10 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
 void
 mp_input_rm_key_fd(int fd);
 
+int mp_input_add_event_fd(int fd, void (*read_func)(void));
+
+void mp_input_rm_event_fd(int fd);
+
 // This function can be used to put a command in the system again. It's used by libmpdemux
 // when it performs a blocking operation to resend the command it received to the main
 // loop.

@@ -500,6 +500,7 @@ typedef struct mp_input_fd {
   int dead : 1;
   int got_cmd : 1;
   int no_select : 1;
+  int no_readfunc_retval : 1;
   // These fields are for the cmd fds.
   char* buffer;
   int pos,size;
@@ -665,6 +666,28 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
   return 1;
 }
 
+int
+mp_input_add_event_fd(int fd, void (*read_func)(void))
+{
+  if(num_key_fd == MP_MAX_KEY_FD) {
+    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
+    return 0;
+  }
+
+  memset(&key_fds[num_key_fd],0,sizeof(mp_input_fd_t));
+  key_fds[num_key_fd].fd = fd;
+  key_fds[num_key_fd].read_func = read_func;
+  key_fds[num_key_fd].close_func = NULL;
+  key_fds[num_key_fd].no_readfunc_retval = 1;
+  num_key_fd++;
+
+  return 1;
+}
+
+void mp_input_rm_event_fd(int fd)
+{
+    mp_input_rm_key_fd(fd);
+}
 
 
 mp_cmd_t*
@@ -1148,8 +1171,8 @@ static mp_cmd_t *read_events(int time, int paused)
 #endif
 
 	int code;
-	if (key_fds[i].fd == 0) {   // getch2 handler special-cased for now
-	    getch2();
+	if (key_fds[i].no_readfunc_retval) {   // getch2 handler special-cased for now
+	    ((void (*)(void))key_fds[i].read_func)();
 	    code = mplayer_get_key(0);
 	    if (code < 0)
 		code = MP_INPUT_NOTHING;

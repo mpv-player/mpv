@@ -2605,7 +2605,7 @@ if(slave_mode)
   mp_input_add_cmd_fd(0,0,mp_input_win32_slave_cmd_func,NULL);
 #endif
 else if(!noconsolecontrols)
-  mp_input_add_key_fd(0,1,NULL,NULL);
+    mp_input_add_event_fd(0, getch2);
 
 inited_flags|=INITED_INPUT;
 current_module = NULL;
