@@ -321,7 +321,7 @@ static void init_vbi_consts(priv_vbi_t* priv){
     if (priv->eoc - priv->soc<16*priv->bpb/ONE_FIXP){ // invalid [soc:eoc]
         priv->soc=0;
         priv->eoc=92;
-    };
+    }
     priv->bp8bl=0.97*8*priv->bpb/ONE_FIXP; // -3% tolerance
     priv->bp8bh=1.03*8*priv->bpb/ONE_FIXP; // +3% tolerance
 }
