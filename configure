@@ -1964,7 +1964,7 @@ EOF
 	    sun4c) proc=v7 ;; 
 	    sun4d) proc=v8 ;;
 	    sun4m) proc=v8 ;;
-	    sun4u) proc=ultrasparc _vis='yes' _def_vis='#define HAVE_VIS = yes' ;;
+	    sun4u) proc=ultrasparc _vis='yes' ;;
 	    sun4v) proc=v9 ;;
 	    *) proc=v8 ;;
 	esac
@@ -1981,7 +1981,6 @@ EOF
     _arch='SPARC'
     _target_arch='ARCH_SPARC = yes'
     _vis='yes'
-    _def_vis='#define HAVE_VIS = yes'
     iproc='sparc'
     proc='v9'
     _march=''
@@ -2522,7 +2521,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 IWMMXT MLIB MMI SH4 BFIN'
+_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 IWMMXT MLIB MMI SH4 BFIN VIS'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2536,6 +2535,7 @@ test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
 test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
 test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
+test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
 
 # Checking kernel version...
 if x86_32 && linux ; then
@@ -8364,8 +8364,6 @@ $_def_gethostbyname2
 `ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE"`
 
 $_def_altivec_h	// enables usage of altivec.h
-
-$_def_vis	// only define if you have VIS ( ultrasparc )
 
 /* libmpeg2 uses a different feature test macro for mediaLib */
 #ifdef HAVE_MLIB
