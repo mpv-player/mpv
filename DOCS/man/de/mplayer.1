@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r23996
+.\" In sync with r24137
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1115,11 +1115,11 @@ sein.
 .
 .TP
 .B \-a52drc <Level>
-Gibt das Level der Dynamic Range Compression für AC3-Audiostreams an.
+Gibt das Level der Dynamic Range Compression für AC-3-Audiostreams an.
 <Level> ist ein Fließkommawert im Bereich von 0 bis 1, wobei 0 keine
 Kompression
 und 1 volle Kompression bedeutet (laute Passagen werden leiser und umgekehrt).
-Diese Option zeigt nur Wirkung, wenn im AC3 Stream die Range Compression
+Diese Option zeigt nur Wirkung, wenn im AC-3-Stream die Range Compression
 Information vorhanden ist (Standard: 1).
 .
 .TP
@@ -1257,7 +1257,7 @@ Gibt das CD-ROM-Gerät an (Standard: /dev/\:cdrom).
 MPlayer weist den Decoder an, den Ton in soviele Kanäle wie angegeben zu
 decodieren.
 Dann liegt es am Decoder, diese Anforderung zu erfüllen.
-Dies ist normalerweise nur wichtig bei der Wiedergabe von AC3-Audio (wie bei
+Dies ist normalerweise nur wichtig bei der Wiedergabe von AC-3-Audio (wie bei
 DVDs).
 In diesem Falle erledigt bei der Standardeinstellung liba52 die Decodierung
 und mischt den Ton auf die angegebene Anzahl Kanäle herunter.
@@ -1266,7 +1266,7 @@ Kanäle zu kontrollieren, benutze den Filter channels.
 .br
 .I ANMERKUNG:
 .br
-Diese Option wird von den Codecs (nur AC3), den Filtern (surround)
+Diese Option wird von den Codecs (nur AC-3), den Filtern (surround)
 und den Audioausgabetreibern (zumindest von OSS) beachtet.
 .sp 1
 Verfügbare Optionen sind:
@@ -1334,7 +1334,7 @@ libmpdemux/\:demuxer.h definiert, akzeptiert.
 .TP
 .B \-dumpaudio (nur MPlayer)
 Schreibt den unbehandelten, komprimierten Audiostream nach ./\:stream.dump
-(nützlich bei MPEG/\:AC3), in den meisten anderen Fällen wird die
+(nützlich bei MPEG/\:AC-3), in den meisten anderen Fällen wird die
 resultierende Datei nicht abspielbar sein.
 .
 .TP
@@ -1661,9 +1661,9 @@ sonst).
 Momentan werden die Treiber v4l und v4l2 unterstützt.
 .IPs volume=<0..100>
 Lautstärke für das Radiogerät (Standard: 100)
-.IPs freq_min=<Wert> (nut bei *BSD BT848)
+.IPs "freq_min=<Wert> (nur bei *BSD BT848)"
 minimal erlaubte Frequenz (Standard: 87.50)
-.IPs freq_max=<Wert> (nur bei *BSD BT848)
+.IPs "freq_max=<Wert> (nur bei *BSD BT848)"
 maximal erlaubte Frequenz (Standard: 108.00)
 .IPs channels=<Frequenz>\-<Name>,<Frequenz>\-<Name>,...
 Setzt die Liste der Kanäle.
@@ -1676,14 +1676,14 @@ Kanalliste verstanden.
 .br
 .I BEISPIELE:
 radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<Wert> (mit Radio Capture aktiviert)
+.IPs "adevice=<Wert> (nur bei Radio Capture)"
 Name des Geräts, von dem der Ton aufgenommen werden soll.
 Ohne einen solchen Namen wird die Aufnahme deaktiviert, selbst wenn das
 Schlüsselwort capture in der URL auftaucht.
 Benutze dies für ALSA-Geräte in der Form hw=<Karte>.<Gerät>.
 Wenn der Gerätename ein '=' enthält, wird das Modul ALSA für die Aufnahme
 verwenden, sonst OSS.
-.IPs arate=<Wert> (mit Radio Capture aktiviert)
+.IPs "arate=<Wert> (nur bei Radio Capture)"
 Rate in Samples pro Sekunde (Standard: 44100).
 .br
 .I ANMERKUNG:
@@ -1692,7 +1692,7 @@ mit dem selben Wert wie für arate.
 Wenn du Probleme mit der Tongeschwindigkeit hast (zu schnell läuft), versuche
 es mit verschiedenen Werten für die Rate (z.B.\& 48000,44100,32000,...)
 abzuspielen.
-.IPs achannels=<Wert> (mit Radio Capture aktiviert)
+.IPs "achannels=<Wert> (nur bei Radio Capture)"
 Anzahl der aufzunehmenden Audiokanäle.
 .RE
 .
@@ -1701,7 +1701,7 @@ Anzahl der aufzunehmenden Audiokanäle.
 Mit dieser Option können raw-Audiodateien abgespielt werden.
 Sie kann auch verwendet werden, um Audio-CDs abzuspielen, die nicht mit 44KHz
 16-Bit Stereo aufgenommen wurden.
-Zum Abspielen von RAW-AC3-Streams benutze \-rawaudio format=0x2000 \-demuxer
+Benutze zum Abspielen von RAW-AC-3-Streams \-rawaudio format=0x2000 \-demuxer
 rawaudio.
 .sp 1
 Verfügbare Optionen sind folgende:
@@ -1857,7 +1857,7 @@ Verfügbare Optionen:
 .RSs
 .IPs noaudio
 kein Sound
-.IPs automute=<0-255> (nur bei v4l und v4l2)
+.IPs "automute=<0-255> (nur bei v4l und v4l2)"
 Wenn die vom Gerät gemeldete Signalstärke geringer ist als dieser Wert,
 werden Ton und Video stummgeschaltet.
 In den meisten Fällen wird automute=100 ausreichen.
@@ -1989,10 +1989,10 @@ Wählt die Bildgröße für die Hardware-MJPEG-Kompression:
 .IPs quality=<0\-100>
 Wählt die Qualität der JPEG-Kompression.
 (< 60 für volle Größe empfohlen)
-.IPs tdevice=<Wert>  (Standard: kein)
-Gib Gerät für TV-Videotext an (Beispiel: /dev/\:vbi0).
-.IPs tformat=<Format> (Standard: 0)
-Gib das Anzeigeformat für TV-Videotext an:
+.IPs tdevice=<Wert>
+Gib Gerät für TV-Videotext an (Beispiel: /dev/\:vbi0) (Standard: kein).
+.IPs tformat=<Format>
+Gib das Anzeigeformat für TV-Videotext an (Standard: 0):
 .RSss
 0: opak
 .br
@@ -2002,8 +2002,30 @@ Gib das Anzeigeformat für TV-Videotext an:
 .br
 3: transparent mit invertierten Farben
 .REss
-.IPs tpage=<100-899> (Standard: 100)
-Gib initiale Seitenzahl für TV-Videotext an.
+.IPs tpage=<100-899>
+Gib initiale Seitenzahl für TV-Videotext an (Standard: 100).
+.RE
+.
+.TP
+.B \-tvscan <Option1:Option2:...> (nur bei TV und MPlayer)
+Mache Einstellungen für den TV-Kanal-Scanner.
+MPlayer wird auch Werte für die Option "-tv channels=" ausgeben,
+inklusive der existierenden und der gerade gefundenen Kanäle.
+.sp 1
+Verfügbare Unteroptionen sind:
+.RSs
+.IPs autostart
+Beginne Kanal-Scan unmittelbar nach dem Start (Standard: deaktiviert).
+.IPs period=<0.1-2.0>
+Gib die Verzögerung an in Sekunden, bevor zum nächsten Kanal gewechselt wird
+(Standard: 0.5).
+Niedrigere Werte bewirken schnelleres Scannen, können inaktive TV-Kanäle
+jedoch als aktiv erkennen.
+.IPs threshold=<1-100>
+Schwellenwert für die Signalstärke (in Prozent), wie vom Gerät angegeben
+(Standard: 50).
+Eine Signalstärke höher als dieser Wert ist Anzeichen dafür, dass der
+momentan gescannte Kanal aktiv ist.
 .RE
 .
 .TP
@@ -4130,7 +4152,7 @@ Gib das Verzeichnis an, in das die JPEG-Bilder gespeichert werden
 .IPs subdirs=<Präfix>
 Erstellt nummerierte Unterverzeichnisse mit dem angegebenen Präfix, in
 welches die Dateien gespeichert werden anstatt in das aktuelle Verzeichnis.
-.IPs maxfiles=<Wert> (nur mit subdirs)
+.IPs "maxfiles=<Wert> (nur mit subdirs)"
 Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden.
 Muss größer oder gleich 1 sein (Standard: 1000).
 .RE
@@ -4164,7 +4186,7 @@ Gib das Verzeichnis an, in das die PNM-Dateien gespeichert werden
 .IPs subdirs=<Präfix>
 Erstellt nummerierte Unterverzeichnisse mit dem angegebenen Präfix, in
 welches die Dateien gespeichert werden anstatt in das aktuelle Verzeichnis.
-.IPs maxfiles=<Wert> (nur mit subdirs)
+.IPs "maxfiles=<Wert> (nur mit subdirs)"
 Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden.
 Muss größer oder gleich 1 sein (Standard: 1000).
 .RE
@@ -4227,8 +4249,8 @@ Erzwingt den l3codeca.acm-MP3-Codec.
 .IPs "\-ac mad,"
 Probiert zuerst libmad und dann andere Codecs.
 .IPs "\-ac hwac3,a52,"
-Probiere AC3-Passthrough, dann
-Software-AC3-Decodierung, danach andere Codecs.
+Probiere AC-3-Passthrough, dann
+Software-AC-3-Decodierung, danach andere Codecs.
 .IPs "\-ac hwdts,"
 Probiere Hardware-DTS-Passthrough, danach anderes.
 .IPs "\-ac -ffmp3,"
@@ -4483,7 +4505,7 @@ dann benutzt, falls die Breite des Videos größer oder gleich dem Wert <b> ist.
 Überspringe unten die angegebene Anzahl von Makroblockreihen.
 .IPs "st=<Nummer> (nur bei MPEG-2)"
 Überspringe oben die angegebene Anzahl von Makroblockreihen.
-.IPs skiploopfilter=<skipvalue> (nur H.264)
+.IPs "skiploopfilter=<skipvalue> (nur bei H.264)"
 Überspringt den Schleifenfilter (Deblocking) während der H.264-Decodierung.
 Da das gefilterte Bild als Referenz für darauf aufbauende Bilder benutzt wird,
 hat dies im Vergleich zum Weglassen des Deblocking-Filters bei z.B.\& MPEG-2
@@ -4716,15 +4738,15 @@ benutzen.
 Xvid's interne Nachbearbeitungsfilter:
 .PD 0
 .RSs
-.IPs deblock-chroma (siehe auch \-vf pp)
+.IPs "deblock-chroma (siehe auch \-vf pp)"
 Chrominanz-Deblock-Filter
-.IPs deblock-luma (siehe auch \-vf pp)
+.IPs "deblock-luma (siehe auch \-vf pp)"
 Luminanz-Deblock-Filter
-.IPs dering-luma (siehe auch \-vf pp)
+.IPs "dering-luma (siehe auch \-vf pp)"
 Luminanz-Deringing-Filter
-.IPs dering-chroma (siehe auch \-vf pp)
+.IPs "dering-chroma (siehe auch \-vf pp)"
 Chrominanz-Deringing-Filter
-.IPs filmeffect (siehe auch \-vf noise)
+.IPs "filmeffect (siehe auch \-vf noise)"
 Fügt dem Video künstlich Körnung hinzu.
 Kann die wahrgenommene Qualität erhöhen, während die eigentliche Qualität
 geringer ist.
@@ -7616,14 +7638,38 @@ Lies die Sourcen für alle Details.
 Audiocodec (Standard: mp2)
 .PD 0
 .RSs
-.IPs "mp2\ \ "
-MPEG Layer 2
-.IPs "mp3\ \ "
-MPEG Layer 3
 .IPs "ac3\ \ "
-AC3
-.IPs adpcm_ima_wav
-IMA Adaptive PCM (4 Bits pro Sample, 4:1-Kompression)
+Dolby Digital (AC-3)
+.IPs adpcm_*
+Adaptive PCM Formate - siehe HTML-Dokumentation für Details.
+.IPs "flac\ "
+Free Lossless Audio Codec (FLAC)
+.IPs "g726\ "
+G.726 ADPCM
+.IPs libamr_nb
+3GPP Adaptive Multi-Rate (AMR) narrow-band
+.IPs libamr_wb
+3GPP Adaptive Multi-Rate (AMR) wide-band
+.IPs libfaac
+Advanced Audio Coding (AAC) - benutzt FAAC
+.IPs libmp3lame
+MPEG-1 Audio Layer 3 (MP3) - benutzt LAME
+.IPs "mp2\ \ "
+MPEG-1 Audio Layer 2 (MP2)
+.IPs pcm_*
+PCM Formate - siehe HTML-Dokumentation für Details.
+.IPs roq_dpcm
+Id Software RoQ DPCM
+.IPs sonic
+experimenteller, einfacher, verlustbehafteter Codec
+.IPs sonicls
+experimenteller, einfacher, verlustfreier Codec
+.IPs vorbis
+Vorbis
+.IPs wmav1
+Windows Media Audio v1
+.IPs wmav2
+Windows Media Audio v2
 .RE
 .PD 1
 .
@@ -7655,51 +7701,58 @@ Kann einen leicht negativen Effekt auf die Bewegungsabschätzung haben.
 Verwende den angegebenen Codec (Standard: mpeg4).
 .PD 0
 .RSs
-.IPs mjpeg
-Motion-JPEG
-.IPs ljpeg
-Verlustfreies (lossless) JPEG
+.IPs "asv1\ "
+ASUS Video v1
+.IPs "asv2\ "
+ASUS Video v2
+.IPs dvvideo
+Sony Digital Video
+.IPs "ffv1\ "
+FFmpegs verlustfreier Videocodec
+.IPs ffvhuff
+nicht-standardkonformes, 20% kleineres HuffYUV, benutzt YV12
+.IPs "flv\ \ "
+Sorenson H.263, verwendet in Flash-Videos
 .IPs "h261\ "
 H.261
 .IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
+.IPs huffyuv
+HuffYUV
+.IPs libtheora
+Theora
+.IPs libx264
+x264 H.264/AVC MPEG-4 Part 10
+.IPs libxvid
+Xvid MPEG-4 Part 2 (ASP)
+.IPs ljpeg
+Lossless JPEG
+.IPs mjpeg
+Motion JPEG
+.IPs mpeg1video
+MPEG-1 Video
+.IPs mpeg2video
+MPEG-2 Video
 .IPs mpeg4
 MPEG-4 (DivX 4/\:5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
+.IPs roqvideo
+ID Software RoQ Video
+.IPs "rv10\ "
+ein alter RealVideo Codec
+.IPs "snow (siehe auch: vstrict)"
+FFmpegs experimenteller Wavelet-basierter Codec
+.IPs "svq1\ "
+Apple Sorenson Video 1
 .IPs "wmv1\ "
 Windows Media Video, Version 1 (WMV7)
 .IPs "wmv2\ "
 Windows Media Video, Version 2 (WMV8)
-.IPs "rv10\ "
-ein alter RealVideo-Codec
-.IPs mpeg1video
-MPEG-1 Video
-.IPs mpeg2video
-MPEG-2 Video
-.IPs huffyuv
-HuffYUV
-.IPs ffvhuff
-nicht-standardkonformes, 20% kleineres HuffYUV, benutzt YV12
-.IPs "asv1\ "
-ASUS Video v1
-.IPs "asv2\ "
-ASUS Video v2
-.IPs "ffv1\ "
-FFmpegs verlustfreier Videocodec
-.IPs "flv\ \ "
-Sorenson H.263, der in Flash Videodateien benutzt wird
-.IPs dvvideo
-Sony Digital Video
-.IPs "svq1\ "
-Apple Sorenson Video 1
-.IPs "snow (siehe auch: vstrict)"
-FFmpeg's experimenteller Wavelet-basierter Codec
-codec
 .RE
 .PD 1
 .
