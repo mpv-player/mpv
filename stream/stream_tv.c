@@ -66,8 +66,8 @@ tv_param_t stream_tv_defaults = {
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
     0,             //alsa
 #endif
-    NULL,          //adevice
 #endif
+    NULL,          //adevice
     0,             //brightness
     0,             //contrast
     0,             //hue
