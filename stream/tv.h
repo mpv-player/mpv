@@ -250,8 +250,8 @@ void tv_start_scan(tvi_handle_t *tvh, int start);
 #define VBI_MAX_PAGES      0x800            ///< max sub pages number
 #define VBI_MAX_SUBPAGES   64               ///< max sub pages number
 
-#define VBI_ROWS    24                      ///< teletext page width in chars
-#define VBI_COLUMNS 40                      ///< teletext page height in chars
+#define VBI_ROWS    25                      ///< teletext page height in rows
+#define VBI_COLUMNS 40                      ///< teletext page width in chars
 #define VBI_TIME_LINEPOS    26              ///< time line pos in page header
 
 typedef
