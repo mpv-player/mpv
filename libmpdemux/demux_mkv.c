@@ -1296,7 +1296,6 @@ demux_mkv_read_cues (demuxer_t *demuxer)
 static int
 demux_mkv_read_chapters (demuxer_t *demuxer)
 {
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   stream_t *s = demuxer->stream;
   uint64_t length, l;
   int il;
@@ -2737,7 +2736,6 @@ static void
 handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
                  int64_t size, uint64_t block_duration, uint64_t timecode)
 {
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   demux_packet_t *dp;
   char *ptr1;
   int i;
