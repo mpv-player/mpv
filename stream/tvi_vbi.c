@@ -288,7 +288,7 @@ static unsigned int conv2uni(unsigned int p,int lang)
             }else if (p==0x40){
                 return latin_subchars[lang][2];
             }else if (p>=0x5b && p<=0x60){
-                return latin_subchars[lang][p-0x5c+3];
+                return latin_subchars[lang][p-0x5b+3];
             }else if (p>=0x7b && p<=0x7e){
                 return latin_subchars[lang][p-0x7b+9];
 	    }
