@@ -2475,14 +2475,6 @@ EOF
         #_mcpu="$_mcpu $_altivec_gcc_flags"
         CFLAGS="$CFLAGS $_altivec_gcc_flags"
     fi
-
-    # setup _def_altivec correctly
-
-    if test "$_altivec" = yes ; then
-	_def_altivec='#define HAVE_ALTIVEC 1'
-    else
-	_def_altivec='#undef HAVE_ALTIVEC'
-    fi
 fi
 
 if arm ; then
