@@ -24,6 +24,9 @@
  * (decode_raw_line_runin,pll_add,pll_reset) of MythTV project.
  * Code for calculating [soc:eoc] is based on aletv of Edgar Toernig.
  *
+ * Teletext system is described in
+ * ETS 300 706 "Enhanced Teletext specification" : May 1997
+ * http://www.themm.net/~mihu/linux/saa7146/specs/ets_300706e01p.pdf
  *
  * Some implementation details:
  * How to port teletext to another tvi_* driver (see tvi_v4l2.c for example):
