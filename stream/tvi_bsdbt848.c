@@ -250,6 +250,17 @@ static int control(priv_t *priv, int cmd, void *arg)
 
         return(TVI_CONTROL_TRUE);        
         }
+    case TVI_CONTROL_TUN_GET_SIGNAL:
+        {
+        int status;
+        if(ioctl(priv->tunerfd, TVTUNER_GETSTATUS, &status) < 0)
+            {
+            perror("GETSTATUS:ioctl");
+            return(0);
+            }
+        *(int*)arg=(status & 0x02)? 100 : 0;
+        return (TVI_CONTROL_TRUE);
+        }
 
     case TVI_CONTROL_TUN_GET_TUNER:
     case TVI_CONTROL_TUN_SET_TUNER:
