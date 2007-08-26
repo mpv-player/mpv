@@ -262,17 +262,7 @@ static unsigned int latin_subchars[8][13]={
 };
 
 static int lang2id (int lang){
-  switch(lang){
-  case 0:
-      return LAT_UNI;
-  case 3: /* Stub. My teletext provider (1TV, Russia) sets this this language 
-             code for russian teletext pages
-             TODO: make this configurable
-           */
-      return RUS_UNI;
-  default:
-      return LAT_UNI;
-  }
+    return LAT_UNI;
 }
 
 /**
