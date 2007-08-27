@@ -12,18 +12,19 @@ OBJS = alaw-gen$(EXESUF) \
 	subrip$(EXESUF) \
 #	vivodump$(EXESUF) \
 
+COMMON_LIBS = ../mp_msg.o ../mp_fifo.o ../osdep/libosdep.a -ltermcap -lm
+
 all: $(OBJS)
 
 subrip$(EXESUF): subrip.c
-	$(CC) $(CFLAGS) -g -o $@ $< ../vobsub.o ../spudec.o ../mp_msg.o \
+	$(CC) $(CFLAGS) -g -o $@ $< ../vobsub.o ../spudec.o \
           ../unrarlib.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
-          ../libmpcodecs/img_format.o ../mp_fifo.o ../osdep/libosdep.a \
-          -ltermcap -lm
+          ../libmpcodecs/img_format.o $(COMMON_LIBS)
 
 #FIXME: Linking is broken, help welcome.
 vivodump$(EXESUF): vivodump.c
-	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a \
-           ../stream/stream.a ../mp_fifo.o ../osdep/libosdep.a -ltermcap -lm
+	$(CC) $(CFLAGS) -o $@ $< ../libmpdemux/libmpdemux.a \
+          ../stream/stream.a $(COMMON_LIBS)
 
 fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) -g $< -o fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
@@ -59,10 +60,7 @@ NETSTREAM_DEPS = ../libmpdemux/libmpdemux.a \
                  ../libavutil/libavutil.a \
                  ../m_option.o \
                  ../m_struct.o \
-                 ../mp_msg.o \
-                 ../mp_fifo.o \
-                 ../osdep/libosdep.a \
-                 -ltermcap -lm \
+                  $(COMMON_LIBS)
 
 ifeq ($(TARGET_WIN32),yes)
 NETSTREAM_DEPS += -lwsock32
