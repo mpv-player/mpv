@@ -1218,7 +1218,8 @@ static mp_cmd_t *read_events(int time, int paused)
 	char *cmd;
 	int r;
 #ifdef HAVE_POSIX_SELECT
-	if (!cmd_fds[i].no_select && !FD_ISSET(cmd_fds[i].fd, &fds))
+	if (!cmd_fds[i].no_select && !FD_ISSET(cmd_fds[i].fd, &fds) &&
+	    !cmd_fds[i].got_cmd)
 	    continue;
 #endif
 	r = mp_input_read_cmd(&cmd_fds[i], &cmd);
