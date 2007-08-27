@@ -17,8 +17,6 @@
 #include <sys/time.h>
 #include <inttypes.h>
 
-#include "libvo/fastmemcpy.h"
-
 //#define ARR_SIZE 100000
 #define ARR_SIZE (1024*768*2)
 
