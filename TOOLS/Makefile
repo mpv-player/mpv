@@ -26,15 +26,15 @@ vivodump$(EXESUF): vivodump.c
            ../stream/stream.a ../osdep/getch2.o ../osdep/timer-lx.o \
           ../mp_fifo.o -ltermcap -lm
 
-fastmemcpybench: fastmemcpybench.c
-	$(CC) $(CFLAGS) -g $< -o fastmem-mmx$(EXESUF)  ../libvo/aclib.o -DNAME=\"mmx\"      -DHAVE_MMX
-	$(CC) $(CFLAGS) -g $< -o fastmem-k6$(EXESUF)   ../libvo/aclib.o -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_3DNOW
-	$(CC) $(CFLAGS) -g $< -o fastmem-k7$(EXESUF)   ../libvo/aclib.o -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
-	$(CC) $(CFLAGS) -g $< -o fastmem-sse$(EXESUF)  ../libvo/aclib.o -DNAME=\"sse\"      -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
-	$(CC) $(CFLAGS) -g $< -o fastmem2-mmx$(EXESUF) ../libvo/aclib.o -DNAME=\"mga-mmx\"  -DHAVE_MGA -DHAVE_MMX
-	$(CC) $(CFLAGS) -g $< -o fastmem2-k6$(EXESUF)  ../libvo/aclib.o -DNAME=\"mga-k6\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW
-	$(CC) $(CFLAGS) -g $< -o fastmem2-k7$(EXESUF)  ../libvo/aclib.o -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
-	$(CC) $(CFLAGS) -g $< -o fastmem2-sse$(EXESUF) ../libvo/aclib.o -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+fastmemcpybench: fastmemcpybench.c ../libvo/aclib.o
+	$(CC) $(CFLAGS) -g $< -o fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
+	$(CC) $(CFLAGS) -g $< -o fastmem-k6$(EXESUF)   -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) -g $< -o fastmem-k7$(EXESUF)   -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) -g $< -o fastmem-sse$(EXESUF)  -DNAME=\"sse\"      -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+	$(CC) $(CFLAGS) -g $< -o fastmem2-mmx$(EXESUF) -DNAME=\"mga-mmx\"  -DHAVE_MGA -DHAVE_MMX
+	$(CC) $(CFLAGS) -g $< -o fastmem2-k6$(EXESUF)  -DNAME=\"mga-k6\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) -g $< -o fastmem2-k7$(EXESUF)  -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) -g $< -o fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
 
 bmovl-test$(EXESUF): bmovl-test.c
 	$(CC) -O3 $(EXTRA_INC) -o $@ $< -lSDL_image
