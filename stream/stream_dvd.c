@@ -866,18 +866,12 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_OPEN,MSGL_STATUS, MSGTR_DVDnumChapters, tt_srpt->title[dvd_title].nr_of_ptts);
     if(dvd_chapter<1 || dvd_chapter>tt_srpt->title[dvd_title].nr_of_ptts) {
       mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidChapter, dvd_chapter);
-      ifoClose( vmg_file );
-      DVDClose( dvd );
-      m_struct_free(&stream_opts,opts);
-      return STREAM_UNSUPORTED;
+      goto fail;
     }
     if(dvd_last_chapter>0) {
       if(dvd_last_chapter<dvd_chapter || dvd_last_chapter>tt_srpt->title[dvd_title].nr_of_ptts) {
         mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidLastChapter, dvd_last_chapter);
-        ifoClose( vmg_file );
-        DVDClose( dvd );
-        m_struct_free(&stream_opts,opts);
-        return STREAM_UNSUPORTED;
+        goto fail;
       }
     }
     --dvd_chapter; // remap 1.. -> 0..
@@ -888,10 +882,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_OPEN,MSGL_STATUS, MSGTR_DVDnumAngles, tt_srpt->title[dvd_title].nr_of_angles);
     if(dvd_angle<1 || dvd_angle>tt_srpt->title[dvd_title].nr_of_angles) {
       mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidAngle, dvd_angle);
-      ifoClose( vmg_file );
-      DVDClose( dvd );
-      m_struct_free(&stream_opts,opts);
-      return STREAM_UNSUPORTED;
+      goto fail;
     }
     --dvd_angle; // remap 1.. -> 0..
 
@@ -902,10 +893,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     vts_file = ifoOpen( dvd, tt_srpt->title[dvd_title].title_set_nr );
     if(!vts_file) {
       mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoIFO, tt_srpt->title[dvd_title].title_set_nr );
-      ifoClose( vmg_file );
-      DVDClose( dvd );
-      m_struct_free(&stream_opts,opts);
-      return STREAM_UNSUPORTED;
+      goto fail;
     }
     /**
      * We've got enough info, time to open the title set data.
@@ -914,10 +902,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     if(!title) {
       mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoVOBs, tt_srpt->title[dvd_title].title_set_nr);
       ifoClose( vts_file );
-      ifoClose( vmg_file );
-      DVDClose( dvd );
-      m_struct_free(&stream_opts,opts);
-      return STREAM_UNSUPORTED;
+      goto fail;
     }
 
     mp_msg(MSGT_OPEN,MSGL_V, "DVD successfully opened.\n");
@@ -1097,6 +1082,12 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_DVD,MSGL_V,"DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
     stream->priv = (void*)d;
     return STREAM_OK;
+
+fail:
+      ifoClose(vmg_file);
+      DVDClose(dvd);
+      m_struct_free(&stream_opts, opts);
+      return STREAM_UNSUPORTED;
   }
   mp_msg(MSGT_DVD,MSGL_ERR,MSGTR_NoDVDSupport);
   m_struct_free(&stream_opts,opts);
