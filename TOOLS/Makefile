@@ -60,8 +60,8 @@ NETSTREAM_DEPS = ../libmpdemux/libmpdemux.a \
                  ../m_option.o \
                  ../m_struct.o \
                  ../mp_msg.o \
-                 ../osdep/libosdep.a \
                  ../mp_fifo.o \
+                 ../osdep/libosdep.a \
                  -ltermcap -lm \
 
 ifeq ($(TARGET_WIN32),yes)
