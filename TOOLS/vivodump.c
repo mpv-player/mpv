@@ -290,4 +290,5 @@ muxer_write_index(avi);
 fseek(f2,0,SEEK_SET);
 muxer_write_header(avi);
 
+return 0;
 }
