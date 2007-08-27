@@ -77,3 +77,5 @@ clean distclean:
 	rm -f fastmem-* fastmem2-* fastmemcpybench netstream
 	rm -f bmovl-test$(EXESUF) vfw2menc$(EXESUF)
 	rm -f $(REAL_TARGETS)
+
+.PHONY: all fastmemcpybench realcodecs clean distclean
