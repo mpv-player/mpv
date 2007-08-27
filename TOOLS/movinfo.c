@@ -63,7 +63,7 @@ unsigned int read_dword(FILE *f){
  return (atom_size_b[0]<<24)|(atom_size_b[1]<<16)|(atom_size_b[2]<<8)|atom_size_b[3];
 }
 
-void *video_stream_info(FILE *f, int len)
+void video_stream_info(FILE *f, int len)
 {
   int orig_pos = ftell(f);
   unsigned char data[len-8];
@@ -79,7 +79,7 @@ void *video_stream_info(FILE *f, int len)
   fseek(f,orig_pos,SEEK_SET);
 }
 
-void *audio_stream_info(FILE *f, int len)
+void audio_stream_info(FILE *f, int len)
 {
   int orig_pos = ftell(f);
   unsigned char data[len-8];
@@ -98,7 +98,7 @@ void *audio_stream_info(FILE *f, int len)
   fseek(f,orig_pos,SEEK_SET);
 }
 
-void *userdata_info(FILE *f, int len, int pos, int level)
+void userdata_info(FILE *f, int len, int pos, int level)
 {
   int orig_pos = pos; /*ftell(f);*/
   unsigned int atom_size = 1;
