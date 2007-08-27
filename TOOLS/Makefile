@@ -26,7 +26,7 @@ vivodump$(EXESUF): vivodump.c
            ../stream/stream.a ../osdep/getch2.o ../osdep/timer-lx.o \
           ../mp_fifo.o -ltermcap -lm
 
-fastmemcpybench: fastmemcpybench.c ../libvo/aclib.o
+fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) -g $< -o fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
 	$(CC) $(CFLAGS) -g $< -o fastmem-k6$(EXESUF)   -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_3DNOW
 	$(CC) $(CFLAGS) -g $< -o fastmem-k7$(EXESUF)   -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
