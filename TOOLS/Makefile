@@ -37,7 +37,7 @@ fastmemcpybench: fastmemcpybench.c ../libvo/aclib.o
 	$(CC) $(CFLAGS) -g $< -o fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
 
 bmovl-test$(EXESUF): bmovl-test.c
-	$(CC) -O3 $(EXTRA_INC) -o $@ $< -lSDL_image
+	$(CC) $(CFLAGS) -o $@ $< -lSDL_image
 
 vfw2menc$(EXESUF): vfw2menc.c
 	$(CC) $< -o $@ -lwinmm -lole32
