@@ -288,7 +288,8 @@ ulong RV20toYUV420Init(ulong p1,ulong p2) {
 }
 
 unsigned long build_crc(unsigned char *pch, unsigned long len) {
-	unsigned long crc=0, a, b;
+	unsigned long crc=0, a;
+//	unsigned long b;
 	// it's not the real crc function, but so what...
 	while (len--) {
 		a=*(pch++);
@@ -320,7 +321,8 @@ ulong RV20toYUV420Transform(ulong p1,ulong p2,ulong p3,ulong p4,ulong p5) {
 	ulong temp[128];
 	int i;
 
-	unsigned long len,crc_src, crc0, crc1, crc2;
+	unsigned long crc_src, crc0;
+//	unsigned long len, crc1, crc2;
 	unsigned char *pch=(char *)p1;
 	fprintf(stderr, "#R# RV20toYUV420Transform(in=%p,out=%p,tin=%p,tout=%p,yuv=%p)\n",p1,p2,p3,p4,p5);
 	// input data, length=*p3
