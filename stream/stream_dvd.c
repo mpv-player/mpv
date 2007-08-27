@@ -732,7 +732,6 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_SEEK_TO_TIME:
         {
-            dvd_priv_t *d = stream->priv;
             if(stream_cache_size > 0) return STREAM_UNSUPORTED;
             if(dvd_seek_to_time(stream, d->vts_file, *((double*)arg)))
               return 1;
