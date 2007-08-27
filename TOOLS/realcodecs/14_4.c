@@ -234,8 +234,8 @@ ulong RAGetNumberOfFlavors(void) {
 
 ulong RAInitDecoder(ulong p1,ulong p2) {
 	ulong result;
-	int temp[256];
-	unsigned char temp2[256];
+//	int temp[256];
+//	unsigned char temp2[256];
 	fprintf(stderr, "RAInitDecoder(ulong p1=0x%0x(%d), ", p1, p1);
 	fprintf(stderr, "ulong p2=0x%0x(%d))\n", p2, p2);
 	hexdump((void*)p2, 4*7);
@@ -268,9 +268,9 @@ ulong RAOpenCodec2(ulong p1) {
 }
 
 ulong RASetFlavor(ulong p1) {
-	ulong result, numprop=0, result1=0;
-	ulong numflavors, flavor;
-	unsigned short property;
+	ulong result;
+//	ulong numflavors, flavor, numprop=0, result1=0;
+//	unsigned short property;
 	fprintf(stderr, "RASetFlavor(ulong p1=0x%0x(%d))\n", p1, p1);
 	hexdump((void*)p1, 44);
 //	hexdump((void*)p1, 44);
