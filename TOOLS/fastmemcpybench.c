@@ -26,8 +26,6 @@
 
 #include "drivers/mga_vid.h"
 
-static int mga_next_frame=0;
-
 static mga_vid_config_t mga_vid_config;
 static unsigned char* frame=NULL;
 static int f;
