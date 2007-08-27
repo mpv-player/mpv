@@ -584,7 +584,7 @@ static int parse_suboptions(const char *arg) {
         "-noboldfont", "-noinverse", "-noextended", "-noeight", "-nodither",
         "-nofloyd_steinberg", "-noerror_distribution"};
     const int nstrings = sizeof(strings_list) / sizeof(char*);
-    const int nbooleans = sizeof(booleans_list) / sizeof(int);
+    const int nbooleans = sizeof(booleans_list) / sizeof(char*);
     const int nextra_opts = sizeof(extra_opts) / sizeof(opt_t);
     const int nsubopts = nstrings + nbooleans + nextra_opts;
     int i, retval = 0;
