@@ -33,7 +33,6 @@ static unsigned char* frame=NULL;
 static int f;
 
 static int mga_init(){
-	char *frame_mem;
 
 	f = open("/dev/mga_vid",O_RDWR);
 	if(f == -1)
