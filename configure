@@ -2139,13 +2139,13 @@ EOF
     $_cc -o "$TMPEXE" "$TMPC"
     case `"$TMPEXE"` in
 
-        0-0)    proc="ev4";   cpu_understands_mvi="0";;
-        1-0)    proc="ev5";   cpu_understands_mvi="0";;
-        1-1)    proc="ev56";  cpu_understands_mvi="0";; 
-        1-101)  proc="pca56"; cpu_understands_mvi="1";;
-        2-303)  proc="ev6";   cpu_understands_mvi="1";;
-        2-307)  proc="ev67";  cpu_understands_mvi="1";;
-        2-1307) proc="ev68";  cpu_understands_mvi="1";;
+        0-0)    proc="ev4";   _mvi="0";;
+        1-0)    proc="ev5";   _mvi="0";;
+        1-1)    proc="ev56";  _mvi="0";;
+        1-101)  proc="pca56"; _mvi="1";;
+        2-303)  proc="ev6";   _mvi="1";;
+        2-307)  proc="ev67";  _mvi="1";;
+        2-1307) proc="ev68";  _mvi="1";;
     esac
     echores "$proc"
     
@@ -2162,7 +2162,7 @@ EOF
     _optimizing="$proc"
 
     echocheck "MVI instruction support in GCC"
-    if test "$_cc_major" -ge "3" && test "$cpu_understands_mvi" = "1" ; then
+    if test "$_cc_major" -ge "3" && test "$_mvi" = "1" ; then
         _def_gcc_mvi_support="#define CAN_COMPILE_ALPHA_MVI 1"
 	echores "yes"
     else
@@ -2513,7 +2513,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 IWMMXT MLIB MMI SH4 BFIN VIS'
+_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 IWMMXT MLIB MMI SH4 BFIN VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2528,6 +2528,7 @@ test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
 test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
+test "$_mvi"       = yes && _cpuexts="MVI $_cpuexts"
 
 # Checking kernel version...
 if x86_32 && linux ; then
@@ -8158,7 +8159,7 @@ $_def_fast_unaligned
    have the instruction. */
 $_def_dcbzl
 
-/* only gcc3 can compile mvi instructions */
+/* only gcc3 can compile mvi instructions (libmpeg2) */
 $_def_gcc_mvi_support
 
 /* Define this for Cygwin build for win32 */
