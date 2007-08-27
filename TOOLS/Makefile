@@ -17,7 +17,7 @@ COMMON_LIBS = ../mp_msg.o ../mp_fifo.o ../osdep/libosdep.a -ltermcap -lm
 all: $(OBJS)
 
 subrip$(EXESUF): subrip.c
-	$(CC) $(CFLAGS) -g -o $@ $< ../vobsub.o ../spudec.o \
+	$(CC) $(CFLAGS) -o $@ $< ../vobsub.o ../spudec.o \
           ../unrarlib.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
           ../libmpcodecs/img_format.o $(COMMON_LIBS)
 
@@ -27,14 +27,14 @@ vivodump$(EXESUF): vivodump.c
           ../stream/stream.a $(COMMON_LIBS)
 
 fastmemcpybench: fastmemcpybench.c
-	$(CC) $(CFLAGS) -g $< -o fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
-	$(CC) $(CFLAGS) -g $< -o fastmem-k6$(EXESUF)   -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_3DNOW
-	$(CC) $(CFLAGS) -g $< -o fastmem-k7$(EXESUF)   -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
-	$(CC) $(CFLAGS) -g $< -o fastmem-sse$(EXESUF)  -DNAME=\"sse\"      -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
-	$(CC) $(CFLAGS) -g $< -o fastmem2-mmx$(EXESUF) -DNAME=\"mga-mmx\"  -DHAVE_MGA -DHAVE_MMX
-	$(CC) $(CFLAGS) -g $< -o fastmem2-k6$(EXESUF)  -DNAME=\"mga-k6\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW
-	$(CC) $(CFLAGS) -g $< -o fastmem2-k7$(EXESUF)  -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
-	$(CC) $(CFLAGS) -g $< -o fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
+	$(CC) $(CFLAGS) $< -o fastmem-k6$(EXESUF)   -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) $< -o fastmem-k7$(EXESUF)   -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o fastmem-sse$(EXESUF)  -DNAME=\"sse\"      -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o fastmem2-mmx$(EXESUF) -DNAME=\"mga-mmx\"  -DHAVE_MGA -DHAVE_MMX
+	$(CC) $(CFLAGS) $< -o fastmem2-k6$(EXESUF)  -DNAME=\"mga-k6\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) $< -o fastmem2-k7$(EXESUF)  -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
 
 bmovl-test$(EXESUF): bmovl-test.c
 	$(CC) $(CFLAGS) -o $@ $< -lSDL_image
@@ -46,7 +46,8 @@ REAL_SRCS    = $(wildcard realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
 
 realcodecs: $(REAL_TARGETS)
-realcodecs: CFLAGS += -g
+
+subrip fastmemcpybench realcodecs: CFLAGS += -g
 
 %.so.6.0: %.o
 	ld -shared -o $@ $< -ldl -lc
