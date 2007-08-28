@@ -201,9 +201,6 @@ main(int argc, char **argv)
     void *vobsub;
     void *packet;
     int packet_len;
-#ifdef BAD
-    unsigned int prev_pts;
-#endif
     unsigned int pts100;
 
     if (argc < 2 || 4 < argc) {
