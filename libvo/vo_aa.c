@@ -661,7 +661,6 @@ static int preinit(const char *arg)
     int fd, vt, major, minor;
     FILE * fp;
     char fname[12];
-    extern aa_linkedlist *aa_displayrecommended;
 
     if(arg) 
     {
