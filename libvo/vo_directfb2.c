@@ -107,8 +107,6 @@ static IDirectFBSurface *frame = NULL;
 static int framelocked = 0;
 // flipping mode flag (layer/surface)
 static int flipping = 0; 
-// tvnorm
-static int tvnorm = -1;
 // scaling flag
 static int stretch = 0;
 // pictrure position
