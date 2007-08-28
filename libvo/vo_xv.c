@@ -59,8 +59,6 @@ LIBVO_EXTERN(xv)
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
-/* since it doesn't seem to be defined on some platforms */
-int XShmGetEventBase(Display *);
 
 static XShmSegmentInfo Shminfo[NUM_BUFFERS];
 static int Shmem_Flag;
