@@ -1456,7 +1456,7 @@ make<!--
   radeon_vid, pm3_vid) ein einheitliches Dach zu geben. Sie stellt einen
   einheitlichen Highlevel-Zugang zu BES- und OV-Chips zur Verfügung
   (BackEnd Scaler und Video Overlays). Sie stellt keine Lowlevel-Funktionen
-  für z.B. Grafikserver zur Verfügung. (Ich möchte nicht mit dem
+  für z.B. Grafikserver zur Verfügung. (Ich möchte nicht mit den
   X11-Leuten in Sachen Grafikmodusumschaltung konkurrieren.) Das Ziel dieser
   Schnittstelle liegt also einfach darin, die höchstmögliche
   Geschwindigkeit bei der Videowiedergabe zu erreichen.
