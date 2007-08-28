@@ -3411,7 +3411,7 @@ d	109e0351	Bt849A Video capture	0
 d	109e0369	Bt878 Video Capture	0	
 s	109e036910020001	TV-Wonder	0	
 s	109e036910020003	TV-Wonder/VE	0	
-d	109e036c	Bt879(??) Video Capture	0	
+d	109e036c	Bt879(?) Video Capture	0	
 s	109e036c13e90070	Win/TV (Video Section)	0	
 d	109e036e	Bt878 Video Capture	0	
 s	109e036e007013eb	WinTV Series	0	
@@ -9464,7 +9464,7 @@ v	1503	KAWASAKI LSI USA Inc	0
 v	1504	KAISER Electronics	0	
 v	1505	ITA INGENIEURBURO FUR TESTAUFGABEN GmbH	0	
 v	1506	CHAMELEON Systems Inc	0	
-v	1507	Motorola ?? / HTEC	0	Should be HTEC Ltd, but there are no known HTEC chips and 1507 is already used by mistake by Motorola (see vendor ID 1057).
+v	1507	Motorola ? / HTEC	0	Should be HTEC Ltd, but there are no known HTEC chips and 1507 is already used by mistake by Motorola (see vendor ID 1057).
 d	15070001	MPC105 [Eagle]	0	
 d	15070002	MPC106 [Grackle]	0	
 d	15070003	MPC8240 [Kahlua]	0	
@@ -10359,7 +10359,7 @@ v	2646	Kingston Technologies	0
 v	270b	Xantel Corporation	0	
 v	270f	Chaintech Computer Co. Ltd	0	
 v	2711	AVID Technology Inc.	0	
-v	2a15	3D Vision(???)	0	
+v	2a15	3D Vision(?)	0	
 v	3000	Hansol Electronics Inc.	0	
 v	3059		1	
 v	3136	Audiotrack	1	Audiotrack. a brand of Ego Systems
