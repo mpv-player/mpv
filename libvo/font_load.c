@@ -53,7 +53,7 @@ unsigned char sor2[1024];
 font_desc_t *desc;
 FILE *f = NULL;
 char *dn;
-struct stat fstate;
+//struct stat fstate;
 char section[64];
 int i,j;
 int chardb=0;
