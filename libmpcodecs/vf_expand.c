@@ -78,8 +78,22 @@ static void remove_func(int x0,int y0, int w,int h){
 	if(y0>=vf->priv->exp_y+orig_h) return;
 	h=y-y0;
     }
-    if(x0>=vf->priv->exp_x || x0+w<=vf->priv->exp_x+orig_w) return;
-    // TODO  clear left and right side of the image if needed
+    if(x0<vf->priv->exp_x){
+	// it has parts on the left side of the image:
+	int x=x0+w;
+	if(x>vf->priv->exp_x) x=vf->priv->exp_x;
+	remove_func_2(x0,y0,x-x0,h);
+	if(x0+w<=vf->priv->exp_x) return;
+	w-=x-x0;x0=x;
+    }
+    if(x0+w>vf->priv->exp_x+orig_w){
+	// it has parts on the right side of the image:
+	int x=x0;
+	if(x<vf->priv->exp_x+orig_w) x=vf->priv->exp_x+orig_w;
+	remove_func_2(x,y0,x0+w-x,h);
+	if(x0>=vf->priv->exp_x+orig_w) return;
+	w=x-x0;
+    }
 }
 
 static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
@@ -154,6 +168,10 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
 		remove_func_2(0,0,vf->priv->exp_w,vf->priv->exp_y);
 	    if (vf->priv->exp_y+h < vf->priv->exp_h)
 		remove_func_2(0,vf->priv->exp_y+h,vf->priv->exp_w,vf->priv->exp_h-h-vf->priv->exp_y);
+	    if (vf->priv->exp_x > 0)
+		remove_func_2(0,vf->priv->exp_y,vf->priv->exp_x,h);
+	    if (vf->priv->exp_x+w < vf->priv->exp_w)
+		remove_func_2(vf->priv->exp_x+w,vf->priv->exp_y,vf->priv->exp_w-w-vf->priv->exp_x,h);
 	} else {
 	    // partial clear:
 	    vo_remove_text(vf->priv->exp_w,vf->priv->exp_h,remove_func);
