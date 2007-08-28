@@ -106,7 +106,6 @@ static GWorldPtr frame_GWorld_prev = NULL;
 static Rect FrameRect;
 
 static CompressorComponent compressor;
-static DecompressorComponent decompressor;
 static ImageDescriptionHandle desc;
 static ImageSequence seq;
 
