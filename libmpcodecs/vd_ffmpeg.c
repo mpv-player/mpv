@@ -61,10 +61,10 @@ typedef struct {
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
-static enum PixelFormat get_format(struct AVCodecContext * avctx, 
-                                   const enum PixelFormat * pix_fmt);
 
 #ifdef HAVE_XVMC
+static enum PixelFormat get_format(struct AVCodecContext * avctx,
+                                   const enum PixelFormat * pix_fmt);
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_render_slice(struct AVCodecContext *s,
@@ -911,6 +911,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     return mpi;
 }
 
+#ifdef HAVE_XVMC
 static enum PixelFormat get_format(struct AVCodecContext * avctx, 
                                     const enum PixelFormat * fmt){
 sh_video_t * sh = avctx->opaque;
@@ -937,7 +938,6 @@ int i;
     return fmt[0];
 }
 
-#ifdef HAVE_XVMC
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     sh_video_t * sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
