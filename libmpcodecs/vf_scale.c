@@ -356,7 +356,7 @@ static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     mp_image_t *dmpi=vf->dmpi;
     if(!dmpi){
-	mp_msg(MSGT_VFILTER,MSGL_FATAL,"vf_scale: draw_slice() called with dmpi=NULL (no get_image??)\n");
+	mp_msg(MSGT_VFILTER,MSGL_FATAL,"vf_scale: draw_slice() called with dmpi=NULL (no get_image?)\n");
 	return;
     }
 //    printf("vf_scale::draw_slice() y=%d h=%d\n",y,h);
