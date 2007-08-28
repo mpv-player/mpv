@@ -204,6 +204,7 @@ typedef struct {
 #define TV_VBI_CONTROL_START           0x554   ///< vbi start
 #define TV_VBI_CONTROL_STOP            0x555   ///< vbi stop
 #define TV_VBI_CONTROL_DECODE_PAGE     0x556   ///< decode vbi page
+#define TV_VBI_CONTROL_GET_NETWORKNAME 0x557   ///< get current network name
 
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
 int tv_get_color_options(tvi_handle_t *tvh, int opt, int* val);

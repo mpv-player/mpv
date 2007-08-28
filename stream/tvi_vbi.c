@@ -140,6 +140,14 @@ typedef struct {
 
     tt_page** ptt_cache;
     unsigned char* ptt_cache_first_subpage;
+    /// network info
+    unsigned char initialpage;
+    unsigned int  initialsubpage;
+    unsigned int  networkid;
+    int           timeoffset; // timeoffset=realoffset*2
+    unsigned int  juliandate;
+    unsigned int  universaltime;
+    unsigned char networkname[21];
 } priv_vbi_t;
 
 static unsigned char fixParity[256];
@@ -462,6 +470,10 @@ static void clear_cache(priv_vbi_t* priv){
             free(tp);
         }
     }
+    priv->initialsubpage=priv->networkid=0;
+    priv->timeoffset=0;
+    priv->juliandate=priv->universaltime=0;
+    memset(priv->networkname,0,21);
 }
 
 /**
@@ -906,6 +918,73 @@ static int decode_pkt0(priv_vbi_t* priv,unsigned char* data,int magAddr)
 }
 
 /**
+ * \brief decode teletext 8/30 Format 1 packet
+ * \param priv private data structure
+ * \param data raw teletext data (with not applied hamm correction yet)
+ * \param magAddr teletext page's magazine address
+ *
+ * \remarks
+ * packet contains:
+ * 0      designation code
+ * 1..2   initial page
+ * 3..6   initial subpage & magazine address
+ * 7..8   network id
+ * 9      time offset
+ * 10..12 julian date
+ * 13..15 universal time
+ * 20..40 network name
+ *
+ * First 7 bytes are protected by Hamm 8/4 code.
+ * Bytes 20-40 has odd parity check.
+ *
+ * See subcaluse 9.8.1 of specification for details
+ */
+static int decode_pkt30(priv_vbi_t* priv,unsigned char* data,int magAddr)
+{
+    int d[8];
+    int i,err;
+
+    for(i=0;i<7;i++){
+        d[i]= corrHamm48[ data[i] ];
+        if(d[i]&0x80){
+            pll_add(priv,2,4);
+            return 0;
+        }
+        d[i]&=0xf;
+    }
+
+    err=0;
+    for(i=20; i<40; i++){
+        data[i]= fixParity[data[i]];
+        if(data[i]&0x80)//Unrecoverable error
+            err++;
+        pll_add(priv,1,err);
+    }
+    if (err) return 0;
+
+    if (d[0]&0xe) //This is not 8/30 Format 1 packet
+        return 1;
+
+    priv->initialpage=d[1] | d[2]<<4 | (d[6]&0xc)<<7 | (d[4]&1)<<8;
+    priv->initialsubpage=d[3] | d[4]<<4 | d[5]<<8 | d[6]<<12;
+    priv->networkid=data[7]<<8 | data[8];
+
+    priv->timeoffset=(data[9]>>1)&0xf;
+    if(data[9]&0x40)
+        priv->timeoffset=-priv->timeoffset;
+
+    priv->juliandate=(data[10]&0xf)<<16 | data[11]<<8 | data[12];
+    priv->juliandate-=0x11111;
+
+    priv->universaltime=data[13]<<16 | data[14]<<8 | data[15];
+    priv->universaltime-=0x111111;
+
+    snprintf(priv->networkname,21,"%s",data+20);
+
+    return 1;
+}
+
+/**
  * \brief decode packets 1..24 (teletext page header)
  * \param priv private data structure
  * \param data raw teletext data
@@ -1126,6 +1205,8 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
         }else if(pkt>0 && pkt<VBI_ROWS){
             if(!priv->mag[magAddr].pt) continue;
             decode_pkt_page(priv,data+2,magAddr,pkt);//skip MRGA
+        }else if(pkt==30){
+            decode_pkt30(priv,data+2,magAddr);
         } else {
             mp_msg(MSGT_TV,MSGL_DBG3,"unsupported packet:%d\n",pkt);
         }
@@ -1392,6 +1473,9 @@ int teletext_control(void* p, int cmd, void *arg)
             return TVI_CONTROL_FALSE;
         prepare_visible_page(priv);
         *(void **)arg=priv->display_page;
+        return TVI_CONTROL_TRUE;
+    case TV_VBI_CONTROL_GET_NETWORKNAME:
+        *(void **)arg=priv->networkname;
         return TVI_CONTROL_TRUE;
     }
     return TVI_CONTROL_UNKNOWN;
