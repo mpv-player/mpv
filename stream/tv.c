@@ -236,6 +236,77 @@ static int norm_from_string(tvi_handle_t *tvh, char* norm)
 #endif
 }
 
+static void parse_channels(tvi_handle_t *tvh)
+{
+    char** channels = tvh->tv_param->channels;
+
+    mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_ChannelNamesDetected);
+    tv_channel_list = malloc(sizeof(tv_channels_t));
+    tv_channel_list->index=1;
+    tv_channel_list->next=NULL;
+    tv_channel_list->prev=NULL;
+    tv_channel_current = tv_channel_list;
+
+    while (*channels) {
+        char* tmp = *(channels++);
+        char* sep = strchr(tmp,'-');
+        int i;
+        struct CHANLIST cl;
+
+        if (!sep) continue; // Wrong syntax, but mplayer should not crash
+
+        av_strlcpy(tv_channel_current->name, sep + 1,
+                        sizeof(tv_channel_current->name));
+        sep[0] = '\0';
+        strncpy(tv_channel_current->number, tmp, 5);
+        tv_channel_current->number[4]='\0';
+
+        while ((sep=strchr(tv_channel_current->name, '_')))
+            sep[0] = ' ';
+
+        // if channel number is a number and larger than 1000 threat it as frequency
+        // tmp still contain pointer to null-terminated string with channel number here
+        if (atoi(tmp)>1000){ 
+            tv_channel_current->freq=atoi(tmp);
+        }else{
+            tv_channel_current->freq = 0;
+            for (i = 0; i < chanlists[tvh->chanlist].count; i++) {
+                cl = tvh->chanlist_s[i];
+                if (!strcasecmp(cl.name, tv_channel_current->number)) {
+                    tv_channel_current->freq=cl.freq;
+                    break;
+                }
+            }
+        }
+        if (tv_channel_current->freq == 0)
+            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_NoFreqForChannel,
+                            tv_channel_current->number, tv_channel_current->name);
+        else {
+          sep = strchr(tv_channel_current->name, '-');
+          if ( !sep ) sep = strchr(tv_channel_current->name, '+');
+
+          if ( sep ) {
+            i = atoi (sep+1);
+            if ( sep[0] == '+' ) tv_channel_current->freq += i * 100;
+            if ( sep[0] == '-' ) tv_channel_current->freq -= i * 100;
+            sep[0] = '\0';
+          }
+        }
+
+        /*mp_msg(MSGT_TV, MSGL_INFO, "-- Detected channel %s - %s (%5.3f)\n",
+                        tv_channel_current->number, tv_channel_current->name,
+                        (float)tv_channel_current->freq/1000);*/
+
+        tv_channel_current->next = malloc(sizeof(tv_channels_t));
+        tv_channel_current->next->index = tv_channel_current->index + 1;
+        tv_channel_current->next->prev = tv_channel_current;
+        tv_channel_current->next->next = NULL;
+        tv_channel_current = tv_channel_current->next;
+    }
+    if (tv_channel_current->prev)
+        tv_channel_current->prev->next = NULL;
+    free(tv_channel_current);
+}
 static int open_tv(tvi_handle_t *tvh)
 {
     int i;
@@ -385,73 +456,7 @@ static int open_tv(tvi_handle_t *tvh)
 
     /* Handle channel names */
     if (tvh->tv_param->channels) {
-	char** channels = tvh->tv_param->channels;
-	mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_ChannelNamesDetected);
-	tv_channel_list = malloc(sizeof(tv_channels_t));
-	tv_channel_list->index=1;
-	tv_channel_list->next=NULL;
-	tv_channel_list->prev=NULL;
-	tv_channel_current = tv_channel_list;
-
-	while (*channels) {
-		char* tmp = *(channels++);
-		char* sep = strchr(tmp,'-');
-		int i;
-		struct CHANLIST cl;
-
-		if (!sep) continue; // Wrong syntax, but mplayer should not crash
-
-		av_strlcpy(tv_channel_current->name, sep + 1,
-		        sizeof(tv_channel_current->name));
-		sep[0] = '\0';
-		strncpy(tv_channel_current->number, tmp, 5);
-		tv_channel_current->number[4]='\0';
-
-		while ((sep=strchr(tv_channel_current->name, '_')))
-		    sep[0] = ' ';
-
-		// if channel number is a number and larger than 1000 threat it as frequency
-                // tmp still contain pointer to null-terminated string with channel number here
-		if (atoi(tmp)>1000){ 
-		    tv_channel_current->freq=atoi(tmp);
-		}else{
-		tv_channel_current->freq = 0;
-		for (i = 0; i < chanlists[tvh->chanlist].count; i++) {
-		    cl = tvh->chanlist_s[i];
-		    if (!strcasecmp(cl.name, tv_channel_current->number)) {
-			tv_channel_current->freq=cl.freq;
-			break;
-		    }
-		}
-		}
-	        if (tv_channel_current->freq == 0)
-		    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_NoFreqForChannel,
-				    tv_channel_current->number, tv_channel_current->name);
-		else {
-		  sep = strchr(tv_channel_current->name, '-');
-		  if ( !sep ) sep = strchr(tv_channel_current->name, '+');
-
-		  if ( sep ) {
-		    i = atoi (sep+1);
-		    if ( sep[0] == '+' ) tv_channel_current->freq += i * 100;
-		    if ( sep[0] == '-' ) tv_channel_current->freq -= i * 100;
-		    sep[0] = '\0';
-		  }
-		}
-
-		/*mp_msg(MSGT_TV, MSGL_INFO, "-- Detected channel %s - %s (%5.3f)\n",
-				tv_channel_current->number, tv_channel_current->name,
-				(float)tv_channel_current->freq/1000);*/
-
-		tv_channel_current->next = malloc(sizeof(tv_channels_t));
-		tv_channel_current->next->index = tv_channel_current->index + 1;
-		tv_channel_current->next->prev = tv_channel_current;
-		tv_channel_current->next->next = NULL;
-		tv_channel_current = tv_channel_current->next;
-	}
-	if (tv_channel_current->prev)
-  	  tv_channel_current->prev->next = NULL;
-	free(tv_channel_current);
+        parse_channels(tvh);
     } else 
 	    tv_channel_last_real = malloc(5);
 
