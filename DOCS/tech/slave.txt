@@ -331,10 +331,10 @@ teletext_add_digit <value>
            in page number editing mode.)
 
 teletext_go_link <1-6>
-    Follow given link on current teletext page
+    Follow given link on current teletext page.
 
 tv_start_scan
-    Start automatic tv channels scaning
+    Start automatic TV channel scanning.
 
 tv_step_channel <channel>
     Select next/previous TV channel.
