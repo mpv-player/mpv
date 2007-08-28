@@ -201,7 +201,7 @@ static const unsigned char corrHamm48[256]={
 
 enum {
   LAT_UNI=0,
-  CYRILLIC1
+  CYRILLIC1,
   RUS_UNI,
   CYRILLIC3,
   GREEK,
