@@ -494,7 +494,6 @@ static uint32_t draw_image(mp_image_t *mpi){
   tdfx_vid_yuv_t yuv;
   int p;
   uint8_t* planes[3];
-  int stride[3];
 
 #ifdef VERBOSE
   printf("Draw image %d\n",buf);
