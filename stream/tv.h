@@ -280,6 +280,11 @@ typedef struct tt_char_s{
     unsigned char raw; ///< raw character (as received from device)
 } tt_char;
 
+typedef struct tt_link_s{
+    int pagenum;          ///< page number
+    int subpagenum;       ///< subpage number
+} tt_link_t;    
+
 typedef struct tt_page_s{
     int pagenum;          ///< page number
     int subpagenum;       ///< subpage number
@@ -288,6 +293,7 @@ typedef struct tt_page_s{
     unsigned char flags;  ///< page flags, not used
     unsigned char raw[VBI_ROWS*VBI_COLUMNS]; ///< page data
     struct tt_page_s* next_subpage;
+    struct tt_link_s links[6];
 }  tt_page;
 
 typedef struct tt_stream_props_s{

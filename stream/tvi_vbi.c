@@ -376,7 +376,7 @@ static int steppage(int p, int direction, int skip_hidden)
  */
 static void put_to_cache(priv_vbi_t* priv,tt_page* pg,int line){
     tt_page* pgc; //page in cache
-    int i,count;
+    int i,j,count;
 
     if(line<0){
         i=0;
@@ -406,6 +406,8 @@ static void put_to_cache(priv_vbi_t* priv,tt_page* pg,int line){
     pgc->subpagenum=pg->subpagenum;
     pgc->lang=pg->lang;
     pgc->flags=pg->flags;
+    for(j=0;j<6;++j)
+        pgc->links[j]=pg->links[j];
     //instead of copying entire page into cache, copy only undamaged
     //symbols into cache
     for(;i<count;i++){
@@ -1015,6 +1017,42 @@ static void decode_pkt_page(priv_vbi_t* priv,unsigned char*data,int magAddr,int 
 }
 
 /**
+ * \brief decode packets 27 (teletext links)
+ * \param priv private data structure
+ * \param data raw teletext data
+ * \param magAddr teletext page's magazine address
+ */
+static int decode_pkt27(priv_vbi_t* priv,unsigned char* data,int magAddr){
+    int i,hpg;
+
+    if (!priv->mag[magAddr].pt)
+        return 0;
+    for(i=0;i<38;++i)
+        if ((data[i] = corrHamm48[ data[i] ]) & 0x80){
+            pll_add(priv,2,4);
+            return 0;
+        }
+
+    /* 
+      Not a X/27/0 Format 1 packet or
+      flag "show links on row 24" is not set.
+    */
+    if (data[0] || !(data[37] & 8))
+        return 1;
+    for(i=0;i<6;++i) {
+        hpg = (magAddr<<8) ^ ((data[4+i*6]&0x8)<<5 | (data[6+i*6]&0xc)<<7);
+        if (!hpg) hpg=0x800;
+        priv->mag[magAddr].pt->links[i].pagenum = (data[1+i*6] & 0xf) |
+                ((data[2+i*6] & 0xf) << 4) | hpg;
+        priv->mag[magAddr].pt->links[i].subpagenum = ((data[3+i*6] & 0xf) |
+                (data[4+i*6] & 0xf) << 4 | (data[5+i*6] & 0xf) << 8 |
+                (data[6+i*6] & 0xf) << 12) & 0x3f7f;
+    }
+    put_to_cache(priv,priv->mag[magAddr].pt,-1);
+    return 1;
+}
+
+/**
  * \brief decodes raw vbi data (signal amplitudes) into sequence of bytes
  * \param priv private data structure
  * \param buf raw vbi data (one line of frame)
@@ -1205,6 +1243,8 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
         }else if(pkt>0 && pkt<VBI_ROWS){
             if(!priv->mag[magAddr].pt) continue;
             decode_pkt_page(priv,data+2,magAddr,pkt);//skip MRGA
+        }else if(pkt==27) {
+            decode_pkt27(priv,data+2,magAddr);
         }else if(pkt==30){
             decode_pkt30(priv,data+2,magAddr);
         } else {
@@ -1339,6 +1379,7 @@ int teletext_control(void* p, int cmd, void *arg)
 {
     int fine_tune=99;
     priv_vbi_t* priv=(priv_vbi_t*)p;
+    tt_page* pgc;
 
     if (!priv && cmd!=TV_VBI_CONTROL_START)
         return TVI_CONTROL_FALSE;
@@ -1421,6 +1462,28 @@ int teletext_control(void* p, int cmd, void *arg)
             val+=3;
         pthread_mutex_lock(&(priv->buffer_mutex));
         priv->zoom=val;
+        pthread_mutex_unlock(&(priv->buffer_mutex));
+        return TVI_CONTROL_TRUE;
+    }
+    case TV_VBI_CONTROL_GO_LINK:
+    {
+        int val=*(int *) arg;
+        if(val<1 || val>6)
+            return TVI_CONTROL_FALSE;
+        pthread_mutex_lock(&(priv->buffer_mutex));
+        if (!(pgc = priv->ptt_cache[priv->pagenum])) {
+            pthread_mutex_unlock(&(priv->buffer_mutex));
+            return TVI_CONTROL_FALSE;
+        }
+        if (!pgc->links[val-1].pagenum || pgc->links[val-1].pagenum>0x7ff) {
+            pthread_mutex_unlock(&(priv->buffer_mutex));
+            return TVI_CONTROL_FALSE;
+        }
+        priv->pagenum=pgc->links[val-1].pagenum;
+        if(pgc->links[val-1].subpagenum!=0x3f7f)
+            priv->subpagenum=pgc->links[val-1].subpagenum;
+        else
+            priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
         pthread_mutex_unlock(&(priv->buffer_mutex));
         return TVI_CONTROL_TRUE;
     }

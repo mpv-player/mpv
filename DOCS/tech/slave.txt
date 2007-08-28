@@ -330,6 +330,9 @@ teletext_add_digit <value>
     -    - Delete last digit from page number. (Backspace emulation, works only
            in page number editing mode.)
 
+teletext_go_link <1-6>
+    Follow given link on current teletext page
+
 tv_start_scan
     Start automatic tv channels scaning
 

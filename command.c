@@ -2452,6 +2452,13 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		tvh->functions->control(tvh->priv,TV_VBI_CONTROL_ADD_DEC,&(cmd->args[0].v.s));
 	    break;
 	}
+	case MP_CMD_TV_TELETEXT_GO_LINK:
+	{
+	    tvi_handle_t* tvh=(tvi_handle_t *)(mpctx->demuxer->priv);
+	    if (mpctx->file_format == DEMUXER_TYPE_TV)
+		tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GO_LINK,&(cmd->args[0].v.i));
+	    break;
+	}
 #endif /* HAVE_TV_TELETEXT */
 #endif				/* USE_TV */
 
