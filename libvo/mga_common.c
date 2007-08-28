@@ -207,6 +207,7 @@ query_format(uint32_t format)
     return 0;
 }
 
+#ifndef VO_XMGA
 static void mga_fullscreen()
 {
 	uint32_t w,h;
@@ -226,6 +227,7 @@ static void mga_fullscreen()
 	if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
 		mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_ErrorInConfigIoctl );
 }
+#endif
 
 static int control(uint32_t request, void *data, ...)
 {
