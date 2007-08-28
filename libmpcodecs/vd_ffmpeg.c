@@ -917,7 +917,6 @@ static enum PixelFormat get_format(struct AVCodecContext * avctx,
 sh_video_t * sh = avctx->opaque;
 int i;
 
-#ifdef HAVE_XVMC
     if(avctx->xvmc_acceleration){
         vd_ffmpeg_ctx *ctx = sh->context;
         avctx->get_buffer= mc_get_buffer;
@@ -929,7 +928,6 @@ int i;
         avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
-#endif
     for(i=0;fmt[i]!=-1;i++){
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt,i);
         if( init_vo(sh,fmt[i]) >= 0)
