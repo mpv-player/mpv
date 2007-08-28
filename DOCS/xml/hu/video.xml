@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24056 -->
+<!-- synced with r24180 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -314,6 +314,31 @@ Alternatívaként az <application>MPlayer</application> is tartalmaz egy
 Ha az Xv-t Kyro alapú kártyával akarod használni (például Hercules
 Prophet 4000XT-vel), akkor le kell töltened a vezérlőt a
 <ulink url="http://www.powervr.com/">PowerVR oldaláról</ulink>.
+</para>
+</sect2>
+
+
+<sect2 id="intel">
+<title>Intel kártyák</title>
+
+<para>
+Ez a kártya sok laptopban megtalálható. A legújabb Xorg javasolt hozzá.
+</para>
+
+<para>
+A DVD méretű (és nagyobb) tartalom lejátszásának engedélyezéséhez módosítanod
+kell az XF86Config/xorg.conf fájlodat így:
+<programlisting>
+Section "Device"
+    [...]
+    Driver "intel"
+    <emphasis>Option "LinearAlloc" "6144"</emphasis>
+    [...]
+EndSection
+</programlisting>
+Ezen opció hiánya általában egy ehhez hasonló hibát eredményez:
+<screen>X11 error: BadAlloc (insufficient resources for operation)</screen>
+when attempting to use <option>-vo xv</option>.
 </para>
 </sect2>
 </sect1>
