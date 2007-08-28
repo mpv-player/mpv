@@ -30,6 +30,7 @@
 #include "help_mp.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "x11_common.h"
 
 #include <sys/ioctl.h>
 #include <unistd.h>
