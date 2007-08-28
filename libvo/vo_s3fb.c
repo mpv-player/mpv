@@ -128,6 +128,7 @@ int enable() {
     free(v);
     v = NULL;
   }
+  return 0;
 }
 
 void disable() {
