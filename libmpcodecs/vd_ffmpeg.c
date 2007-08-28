@@ -264,7 +264,7 @@ static int init(sh_video_t *sh){
     if(lavc_codec->capabilities & CODEC_CAP_HWACCEL){
 #else
     if(lavc_codec->id == CODEC_ID_MPEG2VIDEO_XVMC){
-#endif
+#endif /* CODEC_CAP_HWACCEL */
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedCodec);
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
@@ -275,7 +275,7 @@ static int init(sh_video_t *sh){
         avctx->draw_horiz_band = mc_render_slice;
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }else
-#endif
+#endif /* HAVE_XVMC */
     if(ctx->do_dr1){
         avctx->flags|= CODEC_FLAG_EMU_EDGE; 
         avctx->get_buffer= get_buffer;
