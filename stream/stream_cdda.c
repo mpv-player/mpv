@@ -114,7 +114,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 
   if(m != STREAM_READ) {
     m_struct_free(&stream_opts,opts);
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
 
   if(!p->device) {

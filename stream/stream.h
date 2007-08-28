@@ -45,7 +45,7 @@
 //////////// Open return code
 /// This can't open the requested protocol (used by stream wich have a
 /// * protocol when they don't know the requested protocol)
-#define STREAM_UNSUPORTED -1
+#define STREAM_UNSUPPORTED -1
 #define STREAM_ERROR 0
 #define STREAM_OK    1
 

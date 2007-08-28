@@ -92,7 +92,7 @@ static int open_live_sdp(stream_t *stream,int mode, void* opts, int* file_format
     *file_format = DEMUXER_TYPE_RTP;
     return STREAM_OK;
   }
-  return STREAM_UNSUPORTED;
+  return STREAM_UNSUPPORTED;
 }
 
 

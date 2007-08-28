@@ -220,7 +220,7 @@ stream_t* open_stream_full(char* filename,int mode, char** options, int* file_fo
 	*file_format = DEMUXER_TYPE_UNKNOWN;
 	s = open_stream_plugin(sinfo,filename,mode,options,file_format,&r);
 	if(s) return s;
-	if(r != STREAM_UNSUPORTED) {
+	if(r != STREAM_UNSUPPORTED) {
 	  mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_FailedToOpen,filename);
 	  return NULL;
 	}
@@ -383,7 +383,7 @@ void stream_reset(stream_t *s){
 }
 
 int stream_control(stream_t *s, int cmd, void *arg){
-  if(!s->control) return STREAM_UNSUPORTED;
+  if(!s->control) return STREAM_UNSUPPORTED;
   return s->control(s, cmd, arg);
 }
 

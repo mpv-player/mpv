@@ -219,7 +219,7 @@ static int control(struct stream_st *s,int cmd,void* arg) {
   case STREAM_CTRL_RESET:
     return net_stream_reset(s);
   }
-  return STREAM_UNSUPORTED;
+  return STREAM_UNSUPPORTED;
 }
 
 static void close_s(struct stream_st *s) {
@@ -237,7 +237,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   mp_net_stream_opened_t* opened;
 
   if(mode != STREAM_READ)
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
 
   if(!p->host) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "We need an host name (ex: mpst://server.net/cdda://5)\n");

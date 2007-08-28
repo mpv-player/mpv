@@ -547,12 +547,12 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
   if(mode != STREAM_READ || !p->filename) {
     m_struct_free(&stream_opts,opts);
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
   filename = strdup(p->filename);
   if(!filename) {
     m_struct_free(&stream_opts,opts);
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
   colon = strstr(filename, ":");
   if(colon) {
@@ -566,14 +566,14 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   f = cue_read_cue(filename);
   if(f < 0) {
     m_struct_free(&stream_opts,opts);
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
   cue_vcd_read_toc();
   ret2=cue_vcd_get_track_end(track);
   ret=cue_vcd_seek_to_track(track);
   if(ret<0){ 
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
   mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail, filename, track, ret, ret2);
 

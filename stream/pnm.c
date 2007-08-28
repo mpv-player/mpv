@@ -906,7 +906,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 fail:
   streaming_ctrl_free(stream->streaming_ctrl);
   stream->streaming_ctrl = NULL;
-  return STREAM_UNSUPORTED;
+  return STREAM_UNSUPPORTED;
 }
 
 

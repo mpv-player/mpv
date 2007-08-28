@@ -1573,7 +1573,7 @@ pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   struct pvr_t *pvr = NULL;
   
   if (mode != STREAM_READ)
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   
   pvr = pvr_init ();
 

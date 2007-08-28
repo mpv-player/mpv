@@ -376,7 +376,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   if(mode != STREAM_READ) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[ftp] Unknown open mode %d\n",mode);
     m_struct_free(&stream_opts,opts);
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
 
   if(!p->filename || !p->host) {

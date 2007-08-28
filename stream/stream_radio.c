@@ -1099,10 +1099,10 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     int i;
 
     if (strncmp("radio://",stream->url,8) != 0)
-        return STREAM_UNSUPORTED;
+        return STREAM_UNSUPPORTED;
 
     if(mode != STREAM_READ)
-        return STREAM_UNSUPORTED;
+        return STREAM_UNSUPPORTED;
 
     priv=calloc(1,sizeof(radio_priv_t));
 

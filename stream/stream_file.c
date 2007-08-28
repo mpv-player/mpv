@@ -81,7 +81,7 @@ static int control(stream_t *s, int cmd, void *arg) {
       }
     }
   }
-  return STREAM_UNSUPORTED;
+  return STREAM_UNSUPPORTED;
 }
 
 static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
@@ -98,7 +98,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   else {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[file] Unknown open mode %d\n",mode);
     m_struct_free(&stream_opts,opts);
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
 
   if(p->filename)

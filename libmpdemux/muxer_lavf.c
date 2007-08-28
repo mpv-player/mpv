@@ -103,7 +103,7 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence)
 	else if(whence == SEEK_END)
 	{
 		off_t size=0;
-		if(stream_control(muxer->stream, STREAM_CTRL_GET_SIZE, &size) == STREAM_UNSUPORTED || size < pos)
+		if(stream_control(muxer->stream, STREAM_CTRL_GET_SIZE, &size) == STREAM_UNSUPPORTED || size < pos)
 			return -1;
 		pos = size - pos;
 	}

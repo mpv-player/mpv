@@ -666,7 +666,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 
 
 	if(mode != STREAM_READ)
-		return STREAM_UNSUPORTED;
+		return STREAM_UNSUPPORTED;
 
 	stream->priv = calloc(1, sizeof(dvb_priv_t));
 	if(stream->priv ==  NULL)

@@ -85,7 +85,7 @@ rtp_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
     streaming_ctrl_free (stream->streaming_ctrl);
     stream->streaming_ctrl = NULL;
   
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
 
   if (rtp_streaming_start (stream) < 0)
@@ -94,7 +94,7 @@ rtp_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
     streaming_ctrl_free (stream->streaming_ctrl);
     stream->streaming_ctrl = NULL;
   
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
 
   stream->type = STREAMTYPE_STREAM;

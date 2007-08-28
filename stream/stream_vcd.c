@@ -92,7 +92,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 #endif
       ) {
     m_struct_free(&stream_opts,opts);
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
   }
 
   if (!p->device) {

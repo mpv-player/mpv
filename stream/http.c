@@ -853,7 +853,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 err_out:
 	if (fd > 0) closesocket( fd );
 	fd = -1;
-	res = STREAM_UNSUPORTED;
+	res = STREAM_UNSUPPORTED;
 	http_free( http_hdr );
 	http_hdr = NULL;
 out:
@@ -882,7 +882,7 @@ static int fixup_open(stream_t *stream,int seekable) {
 		stream->fd = -1;
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
-		return STREAM_UNSUPORTED;
+		return STREAM_UNSUPPORTED;
 	}
 
 	fixup_network_stream_cache(stream);
@@ -910,7 +910,7 @@ static int open_s1(stream_t *stream,int mode, void* opts, int* file_format) {
 		stream->fd = -1;
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
-		return STREAM_UNSUPORTED;
+		return STREAM_UNSUPPORTED;
 	}
 
 	return fixup_open(stream, seekable);
@@ -937,7 +937,7 @@ static int open_s2(stream_t *stream,int mode, void* opts, int* file_format) {
 		stream->fd = -1;
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
-		return STREAM_UNSUPORTED;
+		return STREAM_UNSUPPORTED;
 	}
 
 	return fixup_open(stream, seekable);

@@ -98,7 +98,7 @@ static int seek(stream_t *s,off_t newpos) {
 }
 
 static int control(struct stream_st *s,int cmd,void* arg) {
-  return STREAM_UNSUPORTED;
+  return STREAM_UNSUPPORTED;
 }
 
 static void close_s(struct stream_st *s) {
@@ -109,7 +109,7 @@ static int open_s(stream_t *stream, int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
 
   if(mode != STREAM_READ)
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
 
   if(!p->host) {
     mp_msg(MSGT_OPEN, MSGL_ERR, "We need a host name (ex: tivo://hostname/fsid)\n");

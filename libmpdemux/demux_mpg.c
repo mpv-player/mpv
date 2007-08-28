@@ -583,7 +583,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       (such as SWIII) will show strange alternations in the stream time, wildly going
       back and forth
     */
-    if(ds == demux->video && stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&stream_pts)!=STREAM_UNSUPORTED)
+    if(ds == demux->video && stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME,(void *)&stream_pts)!=STREAM_UNSUPPORTED)
       dp->stream_pts = stream_pts;
     ds_add_packet(ds,dp);
     if (demux->priv && set_pts) ((mpg_demuxer_t*)demux->priv)->last_pts = pts/90000.0f;
@@ -992,7 +992,7 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
 
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
-            if(stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, arg) != STREAM_UNSUPORTED) {
+            if(stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, arg) != STREAM_UNSUPPORTED) {
               mp_msg(MSGT_DEMUXER,MSGL_DBG2,"\r\nDEMUX_MPG_CTRL, (%.3lf)\r\n", *((double*)arg));
               return DEMUXER_CTRL_GUESS;
             }

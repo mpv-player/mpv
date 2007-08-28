@@ -700,29 +700,29 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_GET_NUM_CHAPTERS:
         {
-            if(! d->cur_pgc->nr_of_programs) return STREAM_UNSUPORTED;
+            if(! d->cur_pgc->nr_of_programs) return STREAM_UNSUPPORTED;
             *((unsigned int *)arg) = d->cur_pgc->nr_of_programs; 
             return 1;
         }
         case STREAM_CTRL_SEEK_TO_CHAPTER:
         {
             int r;
-            if(stream_cache_size > 0) return STREAM_UNSUPORTED;
+            if(stream_cache_size > 0) return STREAM_UNSUPPORTED;
             r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title-1, *((unsigned int *)arg));
-            if(! r) return STREAM_UNSUPORTED;
+            if(! r) return STREAM_UNSUPPORTED;
 
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_CHAPTER:
         {
-            if(stream_cache_size > 0) return STREAM_UNSUPORTED;
+            if(stream_cache_size > 0) return STREAM_UNSUPPORTED;
             *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title-1, d->cur_cell);
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_TIME:
         {
             double tm;
-            if(stream_cache_size > 0) return STREAM_UNSUPORTED;
+            if(stream_cache_size > 0) return STREAM_UNSUPPORTED;
             tm = dvd_get_current_time(stream, 0);
             if(tm != -1) {
               *((double *)arg) = tm;
@@ -732,13 +732,13 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_SEEK_TO_TIME:
         {
-            if(stream_cache_size > 0) return STREAM_UNSUPORTED;
+            if(stream_cache_size > 0) return STREAM_UNSUPPORTED;
             if(dvd_seek_to_time(stream, d->vts_file, *((double*)arg)))
               return 1;
             break;
         }
     }
-    return STREAM_UNSUPORTED;
+    return STREAM_UNSUPPORTED;
 }
 
 
@@ -794,7 +794,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
       if(!dvd) {
         m_struct_free(&stream_opts,opts);
-        return STREAM_UNSUPORTED;
+        return STREAM_UNSUPPORTED;
       }
     } else
 #endif /* SYS_DARWIN */
@@ -803,7 +803,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         if(!dvd) {
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device);
           m_struct_free(&stream_opts,opts);
-          return STREAM_UNSUPORTED;
+          return STREAM_UNSUPPORTED;
         }
     }
 
@@ -818,7 +818,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoVMG);
       DVDClose( dvd );
       m_struct_free(&stream_opts,opts);
-      return STREAM_UNSUPORTED;
+      return STREAM_UNSUPPORTED;
     }
     tt_srpt = vmg_file->tt_srpt;
     if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
@@ -855,7 +855,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       ifoClose( vmg_file );
       DVDClose( dvd );
       m_struct_free(&stream_opts,opts);
-      return STREAM_UNSUPORTED;
+      return STREAM_UNSUPPORTED;
     }
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_CURRENT_TITLE=%d\n", dvd_title);
     --dvd_title; // remap 1.. -> 0..
@@ -1061,7 +1061,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     //assign cell_times_table
     d->cell_times_table = malloc(sizeof(unsigned int) * d->cur_pgc->nr_of_cells);
     if(d->cell_times_table == NULL)
-      return STREAM_UNSUPORTED;
+      return STREAM_UNSUPPORTED;
     for(k=0; k<d->cur_pgc->nr_of_cells; k++)
       d->cell_times_table[k] = mp_dvdtimetomsec(&d->cur_pgc->cell_playback[k].playback_time);
     list_chapters(d->cur_pgc);
@@ -1086,11 +1086,11 @@ fail:
       ifoClose(vmg_file);
       DVDClose(dvd);
       m_struct_free(&stream_opts, opts);
-      return STREAM_UNSUPORTED;
+      return STREAM_UNSUPPORTED;
   }
   mp_msg(MSGT_DVD,MSGL_ERR,MSGTR_NoDVDSupport);
   m_struct_free(&stream_opts,opts);
-  return STREAM_UNSUPORTED;
+  return STREAM_UNSUPPORTED;
 }
 
 
