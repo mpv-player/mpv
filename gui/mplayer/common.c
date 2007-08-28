@@ -185,7 +185,7 @@ void PutImage( txSample * bf,int x,int y,int max,int ofs )
  uint32_t * buf = NULL;
  uint32_t * drw = NULL;
  register uint32_t tmp;
- register uint32_t yc;  
+ /* register uint32_t yc; */
 
  if ( ( !bf )||( bf->Image == NULL ) ) return;
 
