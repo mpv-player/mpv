@@ -18,6 +18,7 @@
 #include "mp_msg.h"
 #include "m_option.h"
 #include "sub.h"
+#include "get_path.h"
 #include "libmpdemux/mpeg_packetizer.h"
 
 #ifdef X11_FULLSCREEN
@@ -26,8 +27,6 @@
 
 #include <dxr2ioctl.h>
 
-
-extern char *get_path(const char *filename);
 
 extern float monitor_aspect;
 extern float movie_aspect;

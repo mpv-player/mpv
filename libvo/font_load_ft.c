@@ -33,13 +33,12 @@
 #include "font_load.h"
 #include "mp_msg.h"
 #include "mplayer.h"
+#include "get_path.h"
 #include "osd_font.h"
 
 #if (FREETYPE_MAJOR > 2) || (FREETYPE_MAJOR == 2 && FREETYPE_MINOR >= 1)
 #define HAVE_FREETYPE21
 #endif
-
-char *get_path(const char *filename);
 
 char *subtitle_font_encoding = NULL;
 float text_font_scale_factor = 5.0;

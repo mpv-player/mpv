@@ -8,14 +8,17 @@
  *   by the caller.
  *
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "mp_msg.h"
+
 #ifdef MACOSX_BUNDLE
 #include <CoreFoundation/CoreFoundation.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #endif
 
 char *get_path(const char *filename){

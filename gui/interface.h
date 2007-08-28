@@ -145,8 +145,6 @@ extern guiInterface_t guiIntfStruct;
 
 extern int use_gui;
 
-extern char *get_path(const char *filename); 
-
 extern void guiInit( void );
 extern void guiDone( void );
 extern int  guiGetEvent( int type,char * arg );

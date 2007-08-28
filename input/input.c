@@ -25,6 +25,7 @@
 #include "help_mp.h"
 #include "m_config.h"
 #include "m_option.h"
+#include "get_path.h"
 
 #include "joystick.h"
 
@@ -1646,8 +1647,6 @@ char*
 mp_input_get_section(void) {
   return section;
 }
-
-extern char *get_path(const char *filename);
 
 void
 mp_input_init(int use_gui) {

@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "help_mp.h"
 #include "m_option.h"
 #include "m_struct.h"
+#include "get_path.h"
 #include "libavutil/avstring.h"
 
 #include "dvbin.h"
@@ -583,8 +584,6 @@ int dvb_step_channel(dvb_priv_t *priv, int dir)
 
 
 
-
-extern char *get_path(const char *);
 
 static void dvbin_close(stream_t *stream)
 {

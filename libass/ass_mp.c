@@ -23,6 +23,7 @@
 #include <stdlib.h>
 
 #include "mp_msg.h"
+#include "get_path.h"
 
 #include "ass.h"
 #include "ass_utils.h"
@@ -215,8 +216,6 @@ ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double 
 	}
 	return track;
 }
-
-char *get_path(char *);
 
 void ass_configure(ass_renderer_t* priv, int w, int h, int unscaled) {
 	int hinting;

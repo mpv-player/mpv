@@ -124,7 +124,6 @@ void set_osd_msg(int id, int level, int time, const char* fmt, ...);
 double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 			 ao_functions_t *audio_out);
 void exit_player_with_rc(const char* how, int rc);
-char *get_path(const char *filename);
 void rm_osd_msg(int id);
 void add_subtitles(char *filename, float fps, int silent);
 int reinit_video_chain(void);

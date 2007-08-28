@@ -28,6 +28,7 @@
 #include "libmpcodecs/dec_video.h"
 #include "vobsub.h"
 #include "spudec.h"
+#include "get_path.h"
 #ifdef USE_TV
 #include "stream/tv.h"
 #endif

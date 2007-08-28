@@ -48,7 +48,7 @@
 #include "m_config.h"
 #include "parser-mecmd.h"
 
-#include "get_path.c"
+#include "get_path.h"
 
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"

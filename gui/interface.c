@@ -19,6 +19,7 @@
 #include "app.h"
 #include "cfg.h"
 #include "help_mp.h"
+#include "get_path.h"
 #include "libvo/x11_common.h"
 #include "libvo/video_out.h"
 #include "libvo/font_load.h"

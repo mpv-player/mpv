@@ -142,7 +142,7 @@ static int cfg_include(m_option_t *conf, char *filename){
 	return m_config_parse_config_file(mconfig, filename);
 }
 
-#include "get_path.c"
+#include "get_path.h"
 
 //**************************************************************************//
 //             XScreensaver
