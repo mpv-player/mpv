@@ -532,6 +532,15 @@ static void set_window( void ){
 				i = xinerama_screen;
 		 	}
 
+			if(xinerama_screen == -1)
+			{
+				// The default value of the xinerama_screen is
+				// still there. Which means we could never
+				// figure out on which screen we are.
+				// Choose the first screen as default
+				xinerama_screen = i = 0;
+			}
+
 		 	/* set drwcX and drwcY to the right values */
 		 	drwcX = drwcX - screens[i].x_org;
 		 	drwcY = drwcY - screens[i].y_org;
