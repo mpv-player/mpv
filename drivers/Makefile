@@ -17,9 +17,6 @@ rage128_vid.o: radeon_vid.c radeon.h radeon_vid.h
 radeon_vid.o rage128_vid.o:
   CFLAGS += -fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math
 
-%_test: %_test.c
-	$(CC) -O -o $@ $<
-
 install:
 	-mkdir -p $(MDIR)
 	install -m 644 $(OBJS) $(MDIR)
