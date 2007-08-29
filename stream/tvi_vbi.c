@@ -347,8 +347,8 @@ static unsigned int conv2uni(unsigned int p,int lang)
                 return latin_subchars[lang][p-0x5b+3];
             }else if (p>=0x7b && p<=0x7e){
                 return latin_subchars[lang][p-0x7b+9];
-	    }
-	}
+            }
+        }
         return lang_chars[charset][p-0x20];
     }else
         return 0x20;
@@ -428,7 +428,7 @@ static void put_to_cache(priv_vbi_t* priv,tt_page* pg,int line){
 
     if(line<0){
         i=0;
-	count=VBI_ROWS*VBI_COLUMNS;
+        count=VBI_ROWS*VBI_COLUMNS;
     }else if(line<VBI_ROWS){
         i=line*VBI_COLUMNS;
         count=(line+1)*VBI_COLUMNS;
@@ -1294,7 +1294,7 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
 #if 0
         /*
           This routine is alternative implementation of raw VBI data decoding.
-	  Unfortunately, it detects only about 20% of incoming data,
+          Unfortunately, it detects only about 20% of incoming data,
           but Michael says that this algorithm is better, and he wants to fix it.
         */
         if(decode_raw_line_sine(priv,linep,data)<=0){
