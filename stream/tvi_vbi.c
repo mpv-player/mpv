@@ -573,6 +573,8 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
     int row,col;
     int separated=0;
     int conceal;
+    int hold;
+    tt_char tt_held;
 
     for(row=0;row<VBI_ROWS;row++)   {
         lat=(lang==0);
@@ -581,6 +583,8 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
         bg_color=0;
         separated=0;
         conceal=0;
+        hold=0;
+        tt_held=tt_space;
         for(col=0;col<VBI_COLUMNS;col++){
             i=row*VBI_COLUMNS+col;
             c=raw[i];
@@ -610,6 +614,7 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
                     fg_color=c&0x0f;
                     gfx=c>>4;
                     conceal=0;
+                    if(!gfx) hold=0;
                 }else if (c<=0x18){
                     conceal=1;
                 }else if (c<=0x1a){ //Contiguous/Separated gfx
@@ -619,8 +624,15 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
                 }else if (c<=0x1d){
                     bg_color=(c&1)?fg_color:0;
                     p[i].bg=bg_color;
+                }else{ //Hold/Release Graphics
+                    hold=!(c&1);
                 }
                 p[i].ctl=1;
+                if(hold || c==0x1f){
+                    p[i]=tt_held;
+                    p[i].fg=fg_color;
+                    p[i].bg=bg_color;
+                }else
                 p[i].unicode=p[i].gfx?0:' ';
                 continue;
             }
@@ -631,6 +643,7 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
             }else if(gfx){
                 p[i].unicode=c-0x20;
                 if (p[i].unicode>0x3f) p[i].unicode-=0x20;
+                tt_held=p[i];
             }else
                 p[i].unicode=conv2uni(c,p[i].lng);
 
