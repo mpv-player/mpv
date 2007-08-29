@@ -161,14 +161,6 @@ audio.
 </para></listitem>
 </itemizedlist>
 
-<itemizedlist>
-<title>Planned features</title>
-<listitem><para>
-  Even wider variety of available en/decoding formats/codecs
-  (creating VOB files with DivX4/Indeo5/VIVO streams :).
-</para></listitem>
-</itemizedlist>
-
 <!-- FIXME: the license should be in bookinfo -->
 <para>
 <application>MPlayer</application> and <application>MEncoder</application>
