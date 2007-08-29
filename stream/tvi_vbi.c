@@ -601,10 +601,7 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
             
             if ((c&0x60)==0){ //control chars
                 if(c>=0x08 && c<=0x09){//Flash/Steady
-                    int tmp;
-                    tmp=bg_color;
-                    bg_color=fg_color;
-                    fg_color=tmp;
+                    FFSWAP(int,bg_color,fg_color);
                     if(c==0x09){
                         p[i].fg=fg_color;
                         p[i].bg=bg_color;
