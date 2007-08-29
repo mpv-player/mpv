@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23579 -->
+<!-- synced with r24293 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -159,14 +159,6 @@ alkotó codec-ekkel, audiót tekintve pedig
 </para></listitem>
 <listitem><para>
   DVD feliratok külső VOBsub fájlba történő rippelése
-</para></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>Tervezett funkciók</title>
-<listitem><para>
-  Még szélesebb skálája a be- és kimeneti formátumoknak és a codec-eknek
-  (VOB fájlok készítése DivX4/Indeo5/VIVO streammel :).
 </para></listitem>
 </itemizedlist>
 
