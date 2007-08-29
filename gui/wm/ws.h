@@ -187,7 +187,6 @@ extern int                  wsGreenMask;
 extern int                  wsBlueMask;
 
 extern int                  wsUseXShm;
-extern int                  wsUseDGA;
 
 // ----------------------------------------------------------------------------------------------
 //  wsKeyTable
