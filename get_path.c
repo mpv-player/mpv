@@ -21,6 +21,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 char *get_path(const char *filename){
 	char *homedir;
 	char *buff;
