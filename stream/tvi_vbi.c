@@ -633,7 +633,7 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
                     p[i].fg=fg_color;
                     p[i].bg=bg_color;
                 }else
-                p[i].unicode=p[i].gfx?0:' ';
+                    p[i].unicode=p[i].gfx?0:' ';
                 continue;
             }
 
