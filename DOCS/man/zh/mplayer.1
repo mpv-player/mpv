@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r23996
+.\" sync with en/mplayer.1 r24137
 .\" Encoding: utf-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -1000,15 +1000,15 @@ MPlayer 从标准输入读取以新行 (\\n) 分隔开的命令行,
 .
 .TP
 .B \-a52drc <级别>
-选择 AC3 音频流的动态范围压缩(DRC)级别。
+选择 AC-3 音频流的动态范围压缩(DRC)级别。
 <级别> 是 0 到 1 的浮点数, 其中 0 表示无压缩, 
 (默认值) 1 表示全压缩 (使得响亮的通路更安静或相反)。
-此选项仅当 AC3 流包含所需范围的压缩信息时显示效果。
+此选项仅当 AC-3 流包含所需范围的压缩信息时显示效果。
 .
 .TP
 .B \-aid <标识> (也请参见 \-alang)
 选择音频频道 (MPEG: 0\-31, AVI/\:OGM: 1\-99, ASF/\:RM: 0\-127, 
-VOB(AC3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190)。
+VOB(AC-3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190)。
 MPlayer 在 verbose (\-v) 模式下会打印可用的音频标识。
 当播放 MPEG-TS 流时, MPlayer/\:MEncoder 用第一个程序
 播放已选择的(如果有的话)音频流。
@@ -1118,12 +1118,12 @@ MPlayer 等待填充缓存到此位置而不是执行流查寻(默认是: 50)。
 请求播放的声道数 (默认是: 2)。
 MPlayer 要求解码器把音频解码到指定数量的声道。
 然后由解码器来实现这个要求。
-此选项通常只有在播放带 AC3 音频(比如 DVD)的视频时才显得重要。
+此选项通常只有在播放带 AC-3 音频(比如 DVD)的视频时才显得重要。
 在那时默认使用 liba52 解码并把音频正确地混合到需要的声道数。
 为了直接控制输出声道数独立于解码声道数, 使用声道过滤器。
 .br
 .I 注意:
-此选项可以被解码器(仅适用于 AC3), 过滤镜(环绕立体声), 和音频
+此选项可以被解码器(仅适用于 AC-3), 过滤镜(环绕立体声), 和音频
 输出驱动(至少 OSS 可以)接受。
 .sp 1
 可用选项有:
@@ -1182,7 +1182,7 @@ HTTP 请求时发送 cookies。
 .
 .TP
 .B \-dumpaudio (仅用于 MPlayer)
-转储原始的音频压缩流到 ./stream.dump (用于 MPEG/\:AC3, 
+转储原始的音频压缩流到 ./stream.dump (用于 MPEG/\:AC-3, 
 对大多数其它情形, 转储的文件不可播放)。
 如果你在命令行中指定多于其中 \-dumpaudio, \-dumpvideo, \-dumpstream
 的一个, 只有最后一个生效。
@@ -1468,9 +1468,9 @@ dvd:   DVD compatible stream (DVD 可兼容流)
 当前支持v41和v412驱动。
 .IPs volume=<0..100>
 收音设备的音量（默认为100）
-.IPs freq_min=<值>（仅适用于*BSD BT848）
+.IPs "freq_min=<值>（仅适用于*BSD BT848）"
 允许的最小频率（默认值：87.50）
-.IPs freq_max=<value>（仅适用于*BSD BT848）
+.IPs "freq_max=<value>（仅适用于*BSD BT848）"
 允许的最大频率（默认值：108.00）
 .IPs channels=<频率>\-<名称>,<频率>\-<名称>,...
 设置频道列表。
@@ -1481,19 +1481,19 @@ dvd:   DVD compatible stream (DVD 可兼容流)
 .br
 .I 示例:
 radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<值>（需要激活收音捕捉功能） 
+.IPs "adevice=<值>（仅用于录制无线电广播时）"
 作为所捕捉声音来源的设备的名字
 没有这样的名字将禁用捕捉功能，即便URL中出现capture关键字。
 如果设备名中含有一个‘=’，则模块将使用ALSA来捕捉，
 否则用OSS。
-.IPs arate=<参数值>（需要激活收音捕捉功能）
+.IPs "arate=<参数值>（仅用于录制无线电广播时）"
 以每秒采样数为单位的频率值（默认值：44100）。
 .br
 .I 注意：
 当使用音频捕捉时，也将\-rawaudio rate=<数值>选项设置为arate中一样的值。
 如果你存在声音播放速度的问题（播放太快），尝试以不同的速率值
 （例如4800，44100，32000……）播放 。
-.IPs achannels=<参数值>（需要激活收音捕捉功能）
+.IPs "achannels=<参数值>（仅用于录制无线电广播时）"
 捕捉声音的声道数。
 .RE
 .
@@ -1502,7 +1502,7 @@ radio://1, radio://104.4, radio_set_channel 1
 此选项可让你播放原始音频文件。
 你也不得不使用 \-demuxer rawaudio。
 也可以用来播放不是 44kHz 16-位 立体声的音频 CD。
-播放原始 AC3 流请使用 \-rawaudio format=0x2000 \-demuxer rawaudio。
+播放原始 AC-3 流请使用 \-rawaudio format=0x2000 \-demuxer rawaudio。
 .sp 1
 可用选项有:
 .sp 1
@@ -1643,7 +1643,7 @@ radio://1, radio://104.4, radio_set_channel 1
 .RSs
 .IPs noaudio
 没有声音
-.IPs automute=<0-255>（仅适用于v4l和v4l2）
+.IPs "automute=<0-255>（仅适用于v4l和v4l2）"
 如果设备报告的信号强度小于这个值，那么音频和视频将静音。
 大多数情况下automute=100就足够用了。
 默认值为0（禁用automute）。
@@ -1757,10 +1757,10 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .REss
 .IPs quality=<0\-100>
 选择 JPEG 压缩的质量(全尺寸推荐值 < 60)。
-.IPs tdevice=<值>（默认值：none）
-指定电视字幕设备（示例：/dev/\:vbi0）。
-.IPs tformat=<格式>（默认值：0）
-指定电视字幕的显示格式：
+.IPs tdevice=<值>
+指定电视字幕设备（示例：/dev/\:vbi0）（默认值：无设备）。
+.IPs tformat=<格式>
+指定电视字幕的显示格式（默认值：0）：
 .RSss
 0：不透明
 .br
@@ -1770,8 +1770,25 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .br
 3：透明且反色
 .REss
-.IPs tpage=<100-899>（默认值：100）
-指定初始电视字幕的页面号。
+.IPs tpage=<100-899>
+指定初始电视字幕的页面号（默认值：100）。
+.RE
+.
+.TP
+.B \-tvscan <选项1:选项2:...>（仅用于电视播放及MPlayer中）
+设置电视频道扫描器。
+MPlayer将同时打印“-tv channels=”选项中的值，包括已有的以及刚找到的频道。
+.sp 1
+可用子选项为：
+.RSs
+.IPs autostart
+在启动后立即开始频道的扫描（默认值：禁用）。
+.IPs period=<0.1-2.0>
+指定切换至下一个频道前延迟的时间，单位为秒（默认值：0.5）。
+较低的值将使扫描更快，但可能将无效的电视频道侦测为有效。
+.IPs threshold=<1-100>
+用于设备报告的信号强度的阈值（单位为百分比）（默认值：50）。
+高于该值的信号强度将代表当前扫描的频道是有效的。
 .RE
 .
 .TP
@@ -3679,7 +3696,7 @@ mplayer video.nut \-vo gif89a:fps=15.0:output=test.gif
 指定保存 JPEG 文件的目录 (默认是: ./)。
 .IPs subdirs=<前缀>
 创建编号的子目录保存文件, 用指定的前缀而不是用当前的目录。
-.IPs maxfiles=<参数值> (仅用于 subdirs)
+.IPs "maxfiles=<参数值>（仅用于 subdirs）"
 用于在每个子目录保存文件的最大编号。
 必须大于或等于 1 (默认是: 1000)。
 .RE
@@ -3765,9 +3782,9 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .IPs "\-ac mad,"
 先尝试 libmad, 其它作为后备。
 .IPs "\-ac hwac3,a52,"
-先尝试硬件 AC3 通透, 然后是软件 AC3, 最后是其它。
+先尝试通过硬件解码AC-3, 然后是软件AC-3, 最后是其它。
 .IPs "\-ac hwdts,"
-先尝试硬件 DTS 通透, 然后是其它。
+先尝试通过硬件解码DTS, 然后是其它。
 .IPs "\-ac -ffmp3,"
 跳过 FFmpeg 的 MP3 编解码器。
 .RE
@@ -3998,7 +4015,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 跳过宏块底部的制定行数。
 .IPs "st=<数值> (仅用于 MPEG-2)"
 跳过宏块顶部的制定行数。
-.IPs skiploopfilter=<跳略值> (仅用于 H.264)
+.IPs "skiploopfilter=<跳略值>（仅用于 H.264）"
 在 H.264 解码期间跳过循环过滤器(亦称为 "去块")。
 既然被过滤的帧被当作解码依赖帧的引用, 在品质上
 这比不进行去块步骤, 如不对 MPEG-2 视频去块, 效果更差。
@@ -4212,15 +4229,15 @@ libavcodec 后期处理过滤器 (\-vf pp) 和解码器 (\-vfm ffmpeg) 来替换
 Xvid 的内部后期处理过滤器有:
 .PD 0
 .RSs
-.IPs deblock-chroma (也请参见 \-vf pp)
+.IPs "deblock-chroma（也请参见 \-vf pp）"
 色度去块(deblock)过滤器
-.IPs deblock-luma (也请参见 \-vf pp)
+.IPs "deblock-luma（也请参见 \-vf pp）"
 亮度去块(deblock)过滤器
-.IPs dering-luma (也请参见 \-vf pp)
+.IPs "dering-luma（也请参见 \-vf pp）"
 亮度去环(deringing)过滤器
-.IPs dering-chroma (也请参见 \-vf pp)
+.IPs "dering-chroma（也请参见 \-vf pp）"
 色度去环(deringing)过滤器
-.IPs filmeffect (也请参见 \-vf noise)
+.IPs "filmeffect（也请参见 \-vf noise）"
 在视频中添加人工的胶片纹理。
 可能提高了视觉品质, 虽然降低了真实的品质。
 .RE
@@ -6805,16 +6822,38 @@ MPEG版本（默认值：4）
 音频编解码器（默认值：mp2）
 .PD 0
 .RSs
-.IPs "mp2\ \ "
-MPEG Layer 2
-.IPs "mp3\ \ "
-MPEG Layer 3
 .IPs "ac3\ \ "
-AC3
-.IPs adpcm_ima_wav
-IMA自适应PCM（每个采样占用4比特，4:1的压缩率）
-.IPs "sonic\ "
-试验性的有损/无损编解码器
+Dolby Digital（AC-3）
+.IPs adpcm_*
+自适应PCM格式——参见HTML文档以获取详细信息。
+.IPs "flac\ "
+Free Lossless Audio Codec（FLAC，免费无损音频编解码器）
+.IPs "g726\ "
+G.726 ADPCM
+.IPs libamr_nb
+3GPP的自适应多码率（AMR）窄频段格式
+.IPs libamr_wb
+3GPP的自适应多码率（AMR）宽频段格式
+.IPs libfaac
+Advanced Audio Coding（AAC，高级音频编码）——使用FAAC
+.IPs libmp3lame
+MPEG-1音频层次3（MP3）——使用LAME
+.IPs "mp2\ \ "
+MPEG-1音频层次2（MP2）
+.IPs pcm_*
+PCM格式——参见HTML文档以获取详细信息。
+.IPs roq_dpcm
+Id Software的RoQ DPCM
+.IPs sonic
+实验性的简易有损编解码器
+.IPs sonicls
+实验性的简易无损编解码器
+.IPs vorbis
+Vorbis
+.IPs wmav1
+Windows Media Audio v1
+.IPs wmav2
+Windows Media Audio v2
 .RE
 .PD 1
 .
@@ -6845,50 +6884,58 @@ IMA自适应PCM（每个采样占用4比特，4:1的压缩率）
 使用所指定的编解码器（默认值：mpeg4）。
 .PD 0
 .RSs
-.IPs mjpeg
-动态JPEG
-.IPs ljpeg
-无损JPEG
+.IPs "asv1\ "
+ASUS Video v1
+.IPs "asv2\ "
+ASUS Video v2
+.IPs dvvideo
+Sony Digital Video
+.IPs "ffv1\ "
+FFmpeg的无损视频编解码器
+.IPs ffvhuff
+非标准的使用YV12格式的20%提升的HuffYUV
+.IPs "flv\ \ "
+用在Flash视频中的Sorenson H.263
 .IPs "h261\ "
 H.261
 .IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
+.IPs huffyuv
+HuffYUV
+.IPs libtheora
+Theora
+.IPs libx264
+x264 H.264/AVC MPEG-4 Part 10
+.IPs libxvid
+Xvid MPEG-4 Part 2（ASP）
+.IPs ljpeg
+Lossless JPEG
+.IPs mjpeg
+Motion JPEG
+.IPs mpeg1video
+MPEG-1 video
+.IPs mpeg2video
+MPEG-2 video
 .IPs mpeg4
 MPEG-4（DivX 4/5）
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
 微软MPEG4v2
-.IPs "wmv1\ "
-Windows媒体视频，版本1（也就是WMV7）
-.IPs "wmv2\ "
-Windows媒体视频，版本2（也就是WMV8）
+.IPs roqvideo
+ID Software的RoQ Video
 .IPs "rv10\ "
 一个老旧的RealVideo编解码器
-.IPs mpeg1video
-MPEG-1视频
-.IPs mpeg2video
-MPEG-2视频
-.IPs huffyuv
-HuffYUV
-.IPs ffvhuff
-使用YV12格式的非标准压缩率提升20%的HuffYUV
-.IPs "asv1\ "
-华硕视频v1
-.IPs "asv2\ "
-华硕视频v2
-.IPs "ffv1\ "
-FFmpeg的无损视频编解码器
-.IPs "flv\ \ "
-用于Flash视频的Sorenson H.263
-.IPs dvvideo
-Sony数字视频
-.IPs "svq1\ "
-苹果Sorenson视频1
 .IPs "snow（另参见：vstrict）"
 FFmpeg实验性的基于小波变换的编解码器
+.IPs "svq1\ "
+Apple Sorenson Video 1
+.IPs "wmv1\ "
+Windows Media Video, version 1（也就是WMV7）
+.IPs "wmv2\ "
+Windows Media Video, version 2（也就是WMV8）
 .RE
 .PD 1
 .
