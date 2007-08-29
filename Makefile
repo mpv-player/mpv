@@ -314,7 +314,7 @@ strip:
 	strip -s $(ALL_PRG)
 
 # ./configure must be rerun if it changed
-config.h: configure
+config.mak: configure
 	@echo "############################################################"
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
