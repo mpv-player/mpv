@@ -24,8 +24,10 @@ static void print_tdfd_vid_cfg(tdfx_vid_config_t* cfg) {
      
 
 int main(int argc, char** argv) {
-  int fd,i;
-  unsigned char *mem,*ptr;
+  int fd;
+  unsigned char *mem;
+  /* int i; */
+  /* unsigned char *ptr; */
   tdfx_vid_agp_move_t move;
   tdfx_vid_config_t cfg;
   tdfx_vid_blit_t blit;
