@@ -200,9 +200,9 @@ static const unsigned char corrHamm48[256]={
 
 
 enum {
-  LAT_UNI=0,
+  LATIN=0,
   CYRILLIC1,
-  RUS_UNI,
+  CYRILLIC2,
   CYRILLIC3,
   GREEK,
   LANGS
@@ -321,7 +321,7 @@ static unsigned int latin_subchars[8][13]={
 };
 
 static int lang2id (int lang){
-    return LAT_UNI;
+    return LATIN;
 }
 
 /**
@@ -338,7 +338,7 @@ static unsigned int conv2uni(unsigned int p,int lang)
 {
     int charset=lang2id(lang);
     if(p<0x80 && p>=0x20){
-        if(charset==LAT_UNI){
+        if(charset==LATIN){
             if (p>=0x23 && p<=0x24){
                 return latin_subchars[lang][p-0x23];
             }else if (p==0x40){
