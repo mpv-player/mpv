@@ -58,7 +58,6 @@ static agp_memory *agp_mem = NULL;
 static __initdata int tdfx_map_io = 1;
 static __initdata unsigned long map_start = 0; //0x7300000;
 static __initdata unsigned long map_max = (10*1024*1024);
-static unsigned long map_base = 0;
 
 MODULE_PARM(tdfx_map_io,"i");
 MODULE_PARM_DESC(tdfx_map_io, "Set to 0 to use the page fault handler (you need to patch agpgart_be.c to allow the mapping in user space)\n");
