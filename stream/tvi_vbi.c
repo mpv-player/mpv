@@ -566,28 +566,20 @@ static void destroy_cache(priv_vbi_t* priv){
  */
 static void decode_page(tt_char* p,int lang,unsigned char* raw)
 {
-    int c,gfx=0,lat=0;
-    int i=0;
-    int fg_color=0;
-    int bg_color=0;
     int row,col;
-    int separated=0;
-    int conceal;
-    int hold;
-    tt_char tt_held;
 
     for(row=0;row<VBI_ROWS;row++)   {
-        lat=(lang==0);
-        gfx=0;
-        fg_color=7;
-        bg_color=0;
-        separated=0;
-        conceal=0;
-        hold=0;
-        tt_held=tt_space;
+        int lat=(lang==0);
+        int gfx=0;
+        int fg_color=7;
+        int bg_color=0;
+        int separated=0;
+        int conceal=0;
+        int hold=0;
+        tt_char tt_held=tt_space;
         for(col=0;col<VBI_COLUMNS;col++){
-            i=row*VBI_COLUMNS+col;
-            c=raw[i];
+            int i=row*VBI_COLUMNS+col;
+            int c=raw[i];
             p[i].raw=c;
             if(c&0x80){ //damaged char
                 p[i]=tt_error;
