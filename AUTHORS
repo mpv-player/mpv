@@ -33,9 +33,10 @@ Anholt, Eric <eanholt@gladstone.uoregon.edu>
 Ashberg, Folke <folke@ashberg.de>
     * native AAlib driver (-vo aa)
 
-Balatoni, Dénes <pnis@coder.hu>
+Balatoni, Dénes <dbalatoni@gmail.com>
     * XMMS inputplugin support
-    * minor features & fixes mostly to make MPlayer work better on a PDA
+    * minor features & fixes
+    * Sun XVR-100 VO driver port from xine
 
 Barat, Zsolt (joyping) <joy@streamminister.de>
     * ao_alsa9 fixes, AC3 passthrough support
