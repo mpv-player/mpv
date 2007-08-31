@@ -347,7 +347,8 @@ Video output:
                            Available: cyberblade,ivtv,mach64,mga,mga_crtc2,
                            nvidia,pm2,pm3,radeon,rage128,savage,sis,unichrome
   --enable-gl              enable OpenGL video output [autodetect]
-  --enable-dga[=n]         enable DGA [n in {1, 2} ] support [autodetect]
+  --enable-dga2            enable DGA 2 support [autodetect]
+  --enable-dga1            enable DGA 1 support [autodetect]
   --enable-vesa            enable VESA video output [autodetect]
   --enable-svga            enable SVGAlib video output [autodetect]
   --enable-sdl             enable SDL video output [autodetect]
@@ -520,7 +521,8 @@ _mencoder=yes
 _mplayer=yes
 _x11=auto
 _xshape=auto
-_dga=auto	# 1 2 no auto
+_dga1=auto
+_dga2=auto
 _xv=auto
 _xvmc=no  #auto when complete
 _sdl=auto
@@ -1120,9 +1122,10 @@ for ac_option do
   --enable-gethostbyname2)	_gethostbyname2=yes	;;
   --disable-gethostbyname2)	_gethostbyname2=no	;;
 
-  --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
-  --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
-  --disable-dga) _dga=no ;;
+  --enable-dga1) _dga1=yes ;;
+  --disable-dga1) _dga1=no ;;
+  --enable-dga2) _dga2=yes ;;
+  --disable-dga2) _dga2=no ;;
 
   --enable-menu) _menu=yes ;;
   --disable-menu) _menu=no ;;
@@ -3890,7 +3893,7 @@ else
   _novomodules="x11 $_novomodules"
   _res_comment="check if the dev(el) packages are installed"
   # disable stuff that depends on X
-  _xv=no ; _xvmc=no ; _xinerama=no ; _vm=no ; _xf86keysym=no ; _dga=no
+  _xv=no ; _xvmc=no ; _xinerama=no ; _vm=no ; _xf86keysym=no
 fi
 echores "$_x11"
 
@@ -4055,43 +4058,45 @@ fi
 echores "$_xf86keysym"
 
 echocheck "DGA"
-# Version 2 is preferred to version 1 if available
-if test "$_dga" = auto ; then
-  cat > $TMPC << EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/xf86dga.h>
-int main (void) { (void) XF86DGASetViewPort(0, 0, 0, 0); return 0; }
-EOF
-  _dga=no
-  cc_check -lXxf86dga -lXxf86vm && _dga=1
-
+if test "$_dga2" = auto && test "$_x11" = yes ; then
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
 int main (void) { (void) XDGASetViewport(0, 0, 0, 0, 0); return 0; }
 EOF
-  cc_check -lXxf86dga && _dga=2
+  _dga2=no
+  cc_check -lXxf86dga && _dga2=yes
+fi
+if test "$_dga1" = auto && test "$_dga2" = no && test "$_vm" = yes ; then
+  cat > $TMPC << EOF
+#include <X11/Xlib.h>
+#include <X11/extensions/xf86dga.h>
+int main (void) { (void) XF86DGASetViewPort(0, 0, 0, 0); return 0; }
+EOF
+  _dga1=no
+  cc_check -lXxf86dga -lXxf86vm && _dga1=yes
 fi
 
+_dga=no
 _def_dga='#undef HAVE_DGA'
+_def_dga1='#undef HAVE_DGA1'
 _def_dga2='#undef HAVE_DGA2'
-if test "$_dga" = 1 ; then
-  _def_dga='#define HAVE_DGA 1'
-  _libs_mplayer="$_libs_mplayer -lXxf86dga"
-  _vosrc="$_vosrc vo_dga.c"
-  _vomodules="dga $_vomodules"
+if test "$_dga1" = yes ; then
+  _dga=yes
+  _def_dga1='#define HAVE_DGA1 1'
   _res_comment="using DGA 1.0"
-elif test "$_dga" = 2 ; then
-  _def_dga='#define HAVE_DGA 1'
+elif test "$_dga2" = yes ; then
+  _dga=yes
   _def_dga2='#define HAVE_DGA2 1'
+  _res_comment="using DGA 2.0"
+fi
+if test "$_dga" = yes ; then
+  _def_dga='#define HAVE_DGA 1'
   _libs_mplayer="$_libs_mplayer -lXxf86dga"
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
-  _res_comment="using DGA 2.0"
-elif test "$_dga" = no ; then
-  _novomodules="dga $_novomodules"
 else
-  die "DGA version must be 1 or 2"
+  _novomodules="dga $_novomodules"
 fi
 echores "$_dga"
 
@@ -8376,6 +8381,7 @@ $_def_xinerama
 $_def_gl
 $_def_gl_win32
 $_def_dga
+$_def_dga1
 $_def_dga2
 $_def_sdl
 /* defined for SDLlib with keyrepeat bugs (before 1.2.1) */
