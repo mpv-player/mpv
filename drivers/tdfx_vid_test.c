@@ -23,7 +23,7 @@ static void print_tdfd_vid_cfg(tdfx_vid_config_t* cfg) {
 }
      
 
-int main(int argc, char** argv) {
+int main(void) {
   int fd;
   unsigned char *mem;
   /* int i; */

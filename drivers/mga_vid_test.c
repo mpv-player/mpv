@@ -154,7 +154,7 @@ draw_color_blend(void)
 
 
 int 
-main(int argc, char *argv[])
+main(void)
 {
 	int f;
 
