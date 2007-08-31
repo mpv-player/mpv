@@ -52,13 +52,6 @@ static vo_functions_t *   vo_server;
 static vidix_yuv_t	  dstrides;
 /*static uint32_t (*server_control)(uint32_t request, void *data, ...);*/
 
-static int  vidix_get_video_eq(vidix_video_eq_t *info);
-static int  vidix_set_video_eq(const vidix_video_eq_t *info);
-static int  vidix_get_num_fx(unsigned *info);
-static int  vidix_get_oem_fx(vidix_oem_fx_t *info);
-static int  vidix_set_oem_fx(const vidix_oem_fx_t *info);
-static int  vidix_set_deint(const vidix_deinterlace_t *info);
-
 int vidix_start(void)
 {
     int err;
