@@ -1,4 +1,4 @@
-.\" synced with r24084
+.\" synced with r24310
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -1642,9 +1642,9 @@ Le pilote radio à utiliser (par défaut\ : v4l2 si disponible,
 v4l sinon).
 .IPs volume=<0..100>
 volume du périphérique radio (par défaut\ : 100)
-.IPs freq_min=<valeur> (*BSD BT848 uniquement)
+.IPs "freq_min=<valeur> (*BSD BT848 uniquement)"
 fréquence minimale autorisée (par défaut\ : 87.50)
-.IPs freq_max=<valeur> (*BSD BT848 uniquement)
+.IPs "freq_max=<valeur> (*BSD BT848 uniquement)"
 fréquence maximale autorisée (default: 108.00)
 .IPs channels=<fréquence>\-<nom>,<fréquence>\-<nom>,...
 Défini la liste des canaux.
@@ -1661,14 +1661,14 @@ du canal dans la liste des canaux.
 .br
 .I EXEMPLE:
 radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<valeur> (avec la capture radio activée)
+.IPs "adevice=<valeur> (avec la capture radio activée)"
 Nom du périphérique depuis lequel enregistrer le son.
 Faute d'être spécifié, la capture sera désactivée, même
 si le mot-clef capture apparaît dans l'URL.
 Donnez les périphériques ALSA sous la forme hw=<card>.<device>.
 Si le nom contient un '=', la capture se fera avec ALSA, sinon
 avec OSS.
-.IPs arate=<value> (avec la capture radio activée)
+.IPs "arate=<value> (avec la capture radio activée)"
 Nombre d'échantillons par seconde (par défaut: 44100).
 .br
 .I NOTE:
@@ -1676,7 +1676,7 @@ Pendant les capture, utilisez aussi l'option \-rawaudio rate=<valeur>
 avec la même valeur que arate.
 Si vous avez des problèmes de vitesse du son (trop rapide), essayez
 différents taux d'échantillonnage (c-à-d 48000,44100,32000,...).
-.IPs achannels=<value> (avec la capture radio activée)
+.IPs "achannels=<value> (avec la capture radio activée)"
 Nombre de canaux audios à enregistrer.
 .RE
 .
@@ -1853,7 +1853,7 @@ Les options disponibles sont:
 .RSs
 .IPs noaudio
 aucun son
-.IPs automute=<0-255> (v4l et v4l2 uniquement)
+.IPs "automute=<0-255> (v4l et v4l2 uniquement)"
 Si la force du signal indiqué par le périphérique est moins que cette valeur,
 l'audio et la vidéo seront coupés (par défaut\ : 0, automute désactivée).
 Dans la plupart des cas, automute=100 devrait convenir.
@@ -1986,10 +1986,11 @@ choisit la taille de l'image qui sera compressée matériellement\ :
 .IPs quality=<0\-100>
 Choisit la qualité de la compression jpeg
 (< 60 recommandé en pleine résolution).
-.IPs tdevice=<valeur>  (par défaut\ : aucun)
-Défini le périphérique télétexte (exemple\ : /dev/\:vbi0).
-.IPs tformat=<format> (par défaut\ : 0)
-Défini le mode d'affichage télétexte.
+.IPs tdevice=<valeur>
+Défini le périphérique télétexte (exemple\ : /dev/\:vbi0)
+(par défaut\ : aucun).
+.IPs tformat=<format>
+Défini le mode d'affichage télétexte  (par défaut\ : 0).
 .RSss
 0: opaque
 .br
@@ -1999,8 +2000,39 @@ Défini le mode d'affichage télétexte.
 .br
 3: transparent en couleur inverse
 .REss
-.IPs tpage=<100-999> (par défaut\ : 100)
-Défini le numéro de page de télétexte au démarage.
+.IPs tpage=<100-999>
+Défini le numéro de page de télétexte au démarage (par défaut\ : 100).
+.IPs tlang=<\-1\-127>
+Défini le code du langage télétexte par défaut (par défaut\ : 0).
+La valeur donnée sera utilisée comme langue primaire jusqu'à ce que le
+paquet 28 est reçu.
+Utile lorsque le système télétexte utilise un ensemble de caractères non
+latins, et que le code du langage n'est pas transmis par le paquet
+télétexte 28 pour une raison quelconque.
+La liste des langues gérées et affichée lorsque cette option est mise
+à \-1.
+.RE
+.
+.TP
+.B \-tvscan <option1:option2:...> (TV et MPlayer uniquement)
+Ajuste le scanner de chaînes TV.
+MPlayer affichera aussi des informations avec l'option "-tv channels=",
+comprenant les chaînes existantes et celles nouvellement trouvées.
+.sp 1
+Les sous-options disponibles sont:
+.RSs
+.IPs autostart
+Commence le scan juste après le démarage.
+.IPs period=<0.1-2.0>
+Défini le délais en secondes avant de passer au canal suivant
+(par défaut\ : 0.5).
+Une valueur trop faible rend le scan plus rapide, mais peut conduire
+à la détection de certains canaux inactifs comme actives.
+.IPs threshold=<1-100>
+Seuil pour la force du signal (en pourcent), tel que renvoyé par le
+périphérique (par défaut\ : 50).
+Un seuil trop élevé peut conduire à la détection d'un canal actif comme
+inactif.
 .RE
 .
 .TP
@@ -2018,8 +2050,10 @@ Pour lire un flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 (si présent) avec le flux vidéo choisi.
 .
 .TP
-.B \-vivo <sub-options> (CODE DE DÉBOGAGE)
+.B \-vivo <sous-options> (CODE DE DÉBOGAGE)
 Force les paramètres audio du démultiplexeur VIVO (pour débogage).
+FIXME: Document this.
+.
 .
 .
 .SH "OPTIONS OSD/SOUS-TITRES"
@@ -4170,7 +4204,7 @@ Définit le répertoire où sauver les fichiers JPEG (par défaut\ ./).
 .IPs subdirs=<préfixe>
 Crée des sous-répertoires numérotés, avec le préfixe donné pour y écrire
 les fichiers au lieu de les mettre tous dans le même répertoire.
-.IPs maxfiles=<valeur> (subdir uniquement)
+.IPs "maxfiles=<valeur> (subdir uniquement)"
 Nombre maximum de fichier JPEG à créer par sous-répertoire.
 <valeur> doit être plus grand ou égal à 1 (par défaut\ : 1000).
 .RE
@@ -4512,7 +4546,7 @@ si la largeur de la vidéo est plus grande ou égale à <l>.
 Saute <valeur> lignes de macro-blocs au bas de l'image.
 .IPs "st=<valeur> (MPEG-2 uniquement)"
 Saute <valeur> lignes de macro-blocs en haut de l'image.
-.IPs skiploopfilter=<skipvalue> (H.264 uniquement)
+.IPs "skiploopfilter=<skipvalue> (H.264 uniquement)"
 Saute le loop filter (aussi connu sous le nom de deblocking) lors
 du décodage H.264.
 Étant donné que les trames filtrées sont supposées être utilisées
@@ -4745,15 +4779,15 @@ et le décodeur (\-vfm ffmpeg) à la place.
 Les filtres de post-traitement d'Xvid\ :
 .PD 0
 .RSs
-.IPs deblock-chroma
-filtre de déblocage chroma (voir aussi \-vf pp)
-.IPs deblock-luma
+.IPs "deblock-chroma (voir aussi \-vf pp)"
+filtre de déblocage chroma
+.IPs "deblock-luma (voir aussi \-vf pp)"
 filtre de déblocage luma (voir aussi \-vf pp)
-.IPs dering-luma (voir aussi \-vf pp)
+.IPs "dering-luma (voir aussi \-vf pp)"
 filtre de deringing luma
-.IPs dering-chroma (voir aussi \-vf pp)
+.IPs "dering-chroma (voir aussi \-vf pp)"
 filtre de deringing chroma
-.IPs filmeffect (voir aussi \-vf noise)
+.IPs "filmeffect (voir aussi \-vf noise)"
 Active le filtre d'ajout artificiel de grain d'Xvid.
 Peut accroître la qualité subjective, mais dans l'absolu dégrade l'image.
 .RE
@@ -7746,51 +7780,59 @@ Peut avoir un effet néfaste sur l'estimation du mouvement.
 Emploie le codec indiqué (par défaut\ : mpeg4).
 .PD 0
 .RSs
-.IPs mjpeg
-Motion JPEG
-.IPs ljpeg
-Lossless (sans perte) JPEG
+.IPs "asv1\ "
+ASUS Video v1
+.IPs "asv2\ "
+ASUS Video v2
+.IPs dvvideo
+Sony Digital Video
+.IPs "ffv1\ "
+codec vidéo sans perte de FFmpeg
+.IPs ffvhuff
+HuffYUV non-standard produisant des fichiers 20% plus petits en
+utilisant YV12
+.IPs "flv\ \ "
+Sorenson H.263 used in Flash Video
 .IPs "h261\ "
 H.261
 .IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
+.IPs huffyuv
+HuffYUV
+.IPs libtheora
+Theora
+.IPs libx264
+x264 H.264/AVC MPEG-4 Part 10
+.IPs libxvid
+Xvid MPEG-4 Part 2 (ASP)
+.IPs ljpeg
+Lossless (sans perte) JPEG
+.IPs mjpeg
+Motion JPEG
+.IPs mpeg1video
+MPEG-1 video
+.IPs mpeg2video
+MPEG-2 video
 .IPs mpeg4
 MPEG-4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
 MS MPEG-4v2
+.IPs roqvideo
+ID Software RoQ Video
+.IPs "rv10\ "
+un ancien codec RealVideo
+.IPs "snow (voir aussi\ : vstrict)"
+codec expérimental basé sur les wavelets de FFmpeg
+.IPs "svq1\ "
+Apple Sorenson Video 1
 .IPs "wmv1\ "
 Windows Media Video, version 1 (alias WMV7)
 .IPs wmv2
 Windows Media Video, version 2 (alias WMV8)
-.IPs "rv10\ "
-un ancien codec RealVideo
-.IPs mpeg1video
-MPEG-1 video
-.IPs mpeg2video
-MPEG-2 video
-.IPs huffyuv
-HuffYUV
-.IPs ffvhuff
-HuffYUV non-standard produisant des fichiers 20% plus petits en
-utilisant YV12
-.IPs "asv1\ "
-ASUS Video v1
-.IPs "asv2\ "
-ASUS Video v2
-.IPs "ffv1\ "
-codec vidéo sans perte de FFmpeg
-.IPs "flv\ \ "
-Sorenson H.263 used in Flash Video
-.IPs dvvideo
-Sony Digital Video
-.IPs "svq1\ "
-Apple Sorenson Video 1
-.IPs "snow (voir aussi\ : vstrict)"
-codec expérimental basé sur les wavelets de FFmpeg
 .RE
 .PD 1
 .
