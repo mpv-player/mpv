@@ -2097,3 +2097,5 @@ static char help_text[]=
 #define MSGTR_TV_Bt848ErrorSettingWidth "tvi_bsdbt848: Error setting picture width. Error: %s\n"
 #define MSGTR_TV_Bt848ErrorSettingHeight "tvi_bsdbt848: Error setting picture height. Error: %s\n"
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Unable to stop capture. Error: %s\n"
+#define MSGTR_TV_TTSupportedLanguages "Supported Teletext languages:\n"
+#define MSGTR_TV_TTSelectedLanguage "Selected default teletext language: %s\n"

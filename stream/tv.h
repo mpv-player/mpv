@@ -50,6 +50,7 @@ typedef struct tv_param_s {
     char *tdevice;  ///< teletext device
     int tformat;    ///< teletext display format
     int tpage;      ///< start teletext page
+    int tlang;      ///< primary language code
 
     int scan;
     int scan_threshold;
@@ -276,7 +277,7 @@ typedef struct tt_char_s{
     unsigned char bg;  ///< background color
     unsigned char gfx; ///< 0-no gfx, 1-solid gfx, 2-separated gfx
     unsigned char ctl; ///< control character
-    unsigned char lng; ///< lang: 0-lating,1-national
+    unsigned char lng; ///< lang: 0-secondary language,1-primary language
     unsigned char raw; ///< raw character (as received from device)
 } tt_char;
 
@@ -288,7 +289,8 @@ typedef struct tt_link_s{
 typedef struct tt_page_s{
     int pagenum;          ///< page number
     int subpagenum;       ///< subpage number
-    unsigned char lang;   ///< language code
+    unsigned char primary_lang;   ///< primary language code
+    unsigned char secondary_lang; ///< secondary language code
     unsigned char active; ///< page is complete and ready for rendering
     unsigned char flags;  ///< page flags, not used
     unsigned char raw[VBI_ROWS*VBI_COLUMNS]; ///< page data

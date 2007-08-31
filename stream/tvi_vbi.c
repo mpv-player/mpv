@@ -103,7 +103,6 @@
 typedef struct mag_s{
     tt_page* pt;
     int      order;
-    int      lang;
 } mag_t;
 
 typedef struct {
@@ -116,6 +115,8 @@ typedef struct {
     teletext_format tformat;       ///< see teletext_format enum
     teletext_zoom   zoom;          ///< see teletext_zoom enum
     mag_t*          mag;           ///< pages magazine (has 8 entities)
+    int             primary_language;      ///< primary character set
+    int             secondary_language;    ///< secondary character set
     /// Currently displayed page (with additional info, e.g current time)
     tt_char         display_page[VBI_ROWS*VBI_COLUMNS];
     /// number of raw bytes between two subsequent encoded bits
@@ -320,25 +321,132 @@ static unsigned int latin_subchars[8][13]={
   {0x23,0x24,0x40,0x5b,0x5c,0x5d,0x5e,0x5f,0x60,0x7b,0x7c,0x7d,0x7e}
 };
 
-static int lang2id (int lang){
-    return LATIN;
+/**
+ * List of supported languages.
+ *
+ * lang_code bits for primary Language:
+ * bits 7-4 corresponds to bits 14-11 of 28 packet's first triplet 
+ * bits 3-1 corresponds to bits C12-C14 of packet 0 (lang)
+ *
+ * lang_code bits for secondary Language:
+ * bits 7-5 corresponds to bits 3-1 of 28 packet's second triplet 
+ * bits 4,2 corresponds to bits 18,16 of 28 packet's first triplet
+ * bits 3,1 corresponds to bits 15,17 of 28 packet's first triplet
+ *
+ * For details see Tables 32 and 33 of specification (subclause 15.2)
+ */
+struct {
+    unsigned char lang_code;
+    unsigned char charset;
+    char* lang_name;
+} tt_languages[]=
+{
+  { 0x01, LATIN,     "French"},
+  { 0x02, LATIN,     "Swedish/Finnish/Hungarian"},
+  { 0x03, LATIN,     "Czech/Slovak"},
+  { 0x04, LATIN,     "German"},
+  { 0x05, LATIN,     "Portuguese/Spanish"},
+  { 0x06, LATIN,     "Italian"},
+
+  { 0x08, LATIN,     "Polish"},
+  { 0x09, LATIN,     "French"},
+  { 0x0a, LATIN,     "Swedish/Finnish/Hungarian"},
+  { 0x0b, LATIN,     "Czech/Slovak"},
+  { 0x0c, LATIN,     "German"},
+  { 0x0e, LATIN,     "Italian"},
+
+  { 0x10, LATIN,     "English"},
+  { 0x11, LATIN,     "French"},
+  { 0x12, LATIN,     "Swedish/Finnish/Hungarian"},
+  { 0x13, LATIN,     "Turkish"},
+  { 0x14, LATIN,     "German"},
+  { 0x15, LATIN,     "Portuguese/Spanish"},
+  { 0x16, LATIN,     "Italian"},
+
+  { 0x1d, LATIN,     "Serbian/Croatian/Slovenian (Latin)"},
+  
+  { 0x20, CYRILLIC1, "Serbian/Croatian (Cyrillic)"},
+  { 0x21, CYRILLIC2, "Russian, Bulgarian"},
+  { 0x22, LATIN,     "Estonian"},
+  { 0x23, LATIN,     "Czech/Slovak"},
+  { 0x24, LATIN,     "German"},
+  { 0x25, CYRILLIC3, "Ukrainian"},
+  { 0x26, LATIN,     "Lettish/Lithuanian"},
+
+  { 0x33, LATIN,     "Turkish"},
+  { 0x37, GREEK,     "Greek"},
+
+  { 0x40, LATIN,     "English"},
+  { 0x41, LATIN,     "French"},
+//  { 0x47, ARABIC,    "Arabic"},
+
+//  { 0x55, HEBREW,    "Hebrew"},
+//  { 0x57, ARABIC,    "Arabic"},
+
+  { 0x00, LATIN,     "English"},
+};
+
+/**
+ * \brief 24/18 Hamming code decoding
+ * \param data bytes with hamming code (array must be at least 3 bytes long)
+ * \return -1 if multiple bit error occured, D1-DI data bits - otherwise
+ *
+ * \note Bits must be correctly ordered, that is for 24/18 (lowest bit first)
+ * P1 P2 D1 P3 D2 D3 D4 P4  D5 D6 D7 D8 D9 DA DB P5  DC DD DE DF DG DH DI P6
+ */
+int corrHamm24(unsigned char *data){
+    unsigned char syndrom=0;
+    int cw=data[0] | (data[1]<<8) | (data[2]<<16);
+    int i;
+
+    for(i=0;i<23;i++)
+        syndrom^=((cw>>i)&1)*(i+33);
+
+    syndrom^=(cw>>11)&32;
+   
+    if(syndrom&31){
+        if(syndrom < 32 || syndrom > 55)
+            return -1;
+        cw ^= 1<<((syndrom&31)-1);
+   }
+
+   return (cw&4)>>2 |
+          (cw&0x70)>>3 |
+          (cw&0x3f00)>>4 |
+          (cw&0x3f0000)>>5;
+}
+
+/**
+ * \brief converts language bits to charset index
+ * \param lang language bits
+ * \return charset index in lang_chars array
+ */
+static int lang2charset (int lang){
+    int i;
+    for(i=0;tt_languages[i].lang_code;i++)
+        if(tt_languages[i].lang_code==lang)
+            break;
+
+    return tt_languages[i].charset;
 }
 
 /**
  * \brief convert chars from curent teletext codepage into MPlayer charset
  * \param p raw teletext char to decode
- * \param lang teletext internal language code (see lang2id)
+ * \param charset index on lang_chars
+ * \param lang index in substitution array (latin charset only)
  * \return UTF8 char
  *
  * \remarks
  * routine will analyze raw member of given tt_char structure and
  * fill unicode member of the same struct with appropriate utf8 code.
  */
-static unsigned int conv2uni(unsigned int p,int lang)
+static unsigned int conv2uni(unsigned int p,int charset,int lang)
 {
-    int charset=lang2id(lang);
+
     if(p<0x80 && p>=0x20){
         if(charset==LATIN){
+            lang&=7;
             if (p>=0x23 && p<=0x24){
                 return latin_subchars[lang][p-0x23];
             }else if (p==0x40){
@@ -452,7 +560,8 @@ static void put_to_cache(priv_vbi_t* priv,tt_page* pg,int line){
     }
     pgc->pagenum=pg->pagenum;
     pgc->subpagenum=pg->subpagenum;
-    pgc->lang=pg->lang;
+    pgc->primary_lang=pg->primary_lang;
+    pgc->secondary_lang=pg->secondary_lang;
     pgc->flags=pg->flags;
     for(j=0;j<6;++j)
         pgc->links[j]=pg->links[j];
@@ -559,17 +668,22 @@ static void destroy_cache(priv_vbi_t* priv){
 /**
  * \brief converts raw teletext page into useful format (1st rendering stage)
  * \param pg page to decode
- *
+ * \param raw raw data to decode page from
+ * \param primary_lang primary language code
+ * \param secondary_lang secondary language code
+*
  * Routine fills tt_char structure of each teletext_page character with proper
  * info about foreground and background colors, character
  * type (graphics/control/text).
  */
-static void decode_page(tt_char* p,int lang,unsigned char* raw)
+static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secondary_lang)
 {
     int row,col;
+    int prim_charset=lang2charset(primary_lang);
+    int sec_charset=lang2charset(secondary_lang);
 
     for(row=0;row<VBI_ROWS;row++)   {
-        int lat=(lang==0);
+        int prim_lang=1;
         int gfx=0;
         int fg_color=7;
         int bg_color=0;
@@ -586,7 +700,7 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
                 continue;
             }
             p[i].gfx=gfx?(separated?2:1):0;
-            p[i].lng=lat?0:lang;
+            p[i].lng=prim_lang;
             p[i].ctl=(c&0x60)==0?1:0;
             p[i].fg=fg_color;
             p[i].bg=bg_color;
@@ -609,7 +723,7 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
                 }else if (c<=0x1a){ //Contiguous/Separated gfx
                     separated=!(c&1);
                 }else if (c<=0x1b){
-                    lat=!lat;
+                    prim_lang=!prim_lang;
                 }else if (c<=0x1d){
                     bg_color=(c&1)?fg_color:0;
                     p[i].bg=bg_color;
@@ -633,9 +747,13 @@ static void decode_page(tt_char* p,int lang,unsigned char* raw)
                 p[i].unicode=c-0x20;
                 if (p[i].unicode>0x3f) p[i].unicode-=0x20;
                 tt_held=p[i];
-            }else
-                p[i].unicode=conv2uni(c,p[i].lng);
-
+            }else{
+                if(p[i].lng){
+                    p[i].unicode=conv2uni(c,prim_charset,primary_lang&7);
+                }else{
+                    p[i].unicode=conv2uni(c,sec_charset,secondary_lang&7);
+                }
+            }
             p[i].fg=fg_color;
             p[i].bg=bg_color;
         }
@@ -684,7 +802,7 @@ static void prepare_visible_page(priv_vbi_t* priv){
             priv->display_page[i]=tt_space;
         }
     }else{
-        decode_page(priv->display_page,pg->lang,pg->raw);
+        decode_page(priv->display_page,pg->raw,pg->primary_lang,pg->secondary_lang);
         mp_msg(MSGT_TV,MSGL_DBG3,"page #%x was decoded!\n",pg->pagenum);
     }
 
@@ -759,7 +877,7 @@ static void render2text(tt_page* pt,FILE* f,int colored){
     0);
     fprintf(f,"+----------------------------------------+\n");
 
-    decode_page(dp,pt->lang,pt->raw);
+    decode_page(dp,pt->raw,pt->primary_lang,pt->secondary_lang);
     for(i=0;i<VBI_ROWS;i++){
         fprintf(f,"|");
         if(colored) fprintf(f,"\033[40m");
@@ -959,8 +1077,11 @@ static int decode_pkt0(priv_vbi_t* priv,unsigned char* data,int magAddr)
     if (!priv->mag[magAddr].pt)
         priv->mag[magAddr].pt= malloc(sizeof(tt_page));
 
-    priv->mag[magAddr].lang=(d[7]>>1)&0x7;
-    priv->mag[magAddr].pt->lang=priv->mag[magAddr].lang;
+    if(priv->primary_language)
+        priv->mag[magAddr].pt->primary_lang=priv->primary_language;
+    else
+        priv->mag[magAddr].pt->primary_lang= (d[7]&7)>>1;
+    priv->mag[magAddr].pt->secondary_lang=priv->secondary_language;
     priv->mag[magAddr].pt->subpagenum=(d[2]|(d[3]<<4)|(d[4]<<8)|(d[5]<<12))&0x3f7f;
     priv->mag[magAddr].pt->pagenum=(magAddr<<8) | d[0] | (d[1]<<4);
     priv->mag[magAddr].pt->flags=( d[6] | (d[7]<<4));
@@ -1116,6 +1237,46 @@ static int decode_pkt27(priv_vbi_t* priv,unsigned char* data,int magAddr){
     }
     put_to_cache(priv,priv->mag[magAddr].pt,-1);
     return 1;
+}
+
+/**
+ * \brief Decode teletext X/28/0 Format 1 packet
+ * \param priv private data structure
+ * \param data raw teletext data
+ *
+ * Primary G0 charset is transmitted in bits 14-8 of Triplet 1
+ * See Table 32 of specification for details.
+ *
+ * Secondary G0 charset is transmitted in bits 3-1 of Triplet 2 and
+ * bits 18-15 of Triplet 1
+ * See Table 33 of specification for details.
+ *
+ */
+static void decode_pkt28(priv_vbi_t* priv,unsigned char*data){
+    int d;
+    int t1,t2;
+    d=corrHamm48[ data[0] ];
+    if(d) return; //this is not X/28/0 Format 1 packet or error occured
+
+    t1=corrHamm24(data+1);
+    t2=corrHamm24(data+4);
+    if (t1<0 || t2<0){
+        pll_add(priv,1,4);
+        return;
+    }
+
+    priv->primary_language=(t1>>7)&0x7f;
+    priv->secondary_language=((t2<<4) | (t1>>14))&0x7f;
+    if (priv->secondary_language==0x7f) 
+        //No secondary language required
+        priv->secondary_language=priv->primary_language;
+    else // Swapping bits 1 and 3
+        priv->secondary_language=(priv->secondary_language&0x7a) |
+                                (priv->secondary_language&4)>>2 |
+                                (priv->secondary_language&1)<<2;
+
+    mp_msg(MSGT_TV,MSGL_DBG2,"pkt28: language: primary=%02x secondary=0x%02x\n",
+        priv->primary_language,priv->secondary_language);
 }
 
 /**
@@ -1311,6 +1472,8 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
             decode_pkt_page(priv,data+2,magAddr,pkt);//skip MRGA
         }else if(pkt==27) {
             decode_pkt27(priv,data+2,magAddr);
+        }else if(pkt==28){
+            decode_pkt28(priv,data+2);
         }else if(pkt==30){
             decode_pkt30(priv,data+2,magAddr);
         } else {
@@ -1455,6 +1618,7 @@ int teletext_control(void* p, int cmd, void *arg)
     switch (cmd) {
     case TV_VBI_CONTROL_RESET:
     {
+        int i;
         tv_param_t* tv_param=arg;
         pthread_mutex_lock(&(priv->buffer_mutex));
         priv->pagenumdec=0;
@@ -1463,6 +1627,25 @@ int teletext_control(void* p, int cmd, void *arg)
         priv->tformat=tv_param->tformat;
         priv->subpagenum=0;
         pll_reset(priv,fine_tune);
+        if(tv_param->tlang==-1){
+            mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSupportedLanguages);
+            for(i=0; tt_languages[i].lang_code; i++){
+                mp_msg(MSGT_TV,MSGL_INFO,"  %3d  %s\n",
+                    tt_languages[i].lang_code, tt_languages[i].lang_name);
+            }
+            mp_msg(MSGT_TV,MSGL_INFO,"  %3d  %s\n",
+                tt_languages[i].lang_code, tt_languages[i].lang_name);
+        }else{
+            for(i=0; tt_languages[i].lang_code; i++){
+                if(tt_languages[i].lang_code==tv_param->tlang)
+                    break;
+            }
+            if (priv->primary_language!=tt_languages[i].lang_code){
+                mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSelectedLanguage,
+                    tt_languages[i].lang_name);
+                priv->primary_language=tt_languages[i].lang_code;
+            }
+        }
         pthread_mutex_unlock(&(priv->buffer_mutex));
         return TVI_CONTROL_TRUE;
     }

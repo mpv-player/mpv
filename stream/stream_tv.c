@@ -75,6 +75,7 @@ tv_param_t stream_tv_defaults = {
     NULL,          //tdevice
     0,             //tformat
     100,           //tpage
+    0,             //tlang
 
     0,             //scan_autostart
     50,            //scan_threshold

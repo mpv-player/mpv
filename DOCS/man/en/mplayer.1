@@ -1896,6 +1896,12 @@ Specify TV teletext display format (default: 0):
 .REss
 .IPs tpage=<100-899>
 Specify initial TV teletext page number (default: 100).
+.IPs tlang=<\-1\-127>
+Specify default teletext language code (default: 0).
+Given value will be used as primary language until 28 packet received.
+Useful when teletext system uses non-latin charset, but language codes
+are not transmitted via 28 teletext packets for some reason.
+To see list of supported language codes set this option to \-1.
 .RE
 .
 .TP
