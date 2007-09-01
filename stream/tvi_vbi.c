@@ -149,6 +149,7 @@ typedef struct {
     unsigned int  juliandate;
     unsigned int  universaltime;
     unsigned char networkname[21];
+    int           cache_reset;
 } priv_vbi_t;
 
 static unsigned char fixParity[256];
@@ -622,6 +623,8 @@ static inline tt_page* get_from_cache(priv_vbi_t* priv, int pagenum,int subpagen
 static void clear_cache(priv_vbi_t* priv){
     int i;
     tt_page* tp;
+    priv->cache_reset=1;
+    
     for(i=0;i<VBI_MAX_PAGES;i++){
         while(priv->ptt_cache[i]){
             tp=priv->ptt_cache[i];
@@ -1447,7 +1450,7 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
     int d0,d1;
     int i=0;
     mp_msg(MSGT_TV,MSGL_DBG3,"vbi: vbi_decode\n");
-    for(linep=buf; linep<buf+priv->ptsp->bufsize; linep+=priv->ptsp->samples_per_line,i++){
+    for(linep=buf; !priv->cache_reset && linep<buf+priv->ptsp->bufsize; linep+=priv->ptsp->samples_per_line,i++){
 #if 0
         /*
           This routine is alternative implementation of raw VBI data decoding.
@@ -1486,6 +1489,11 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
         } else {
             mp_msg(MSGT_TV,MSGL_DBG3,"unsupported packet:%d\n",pkt);
         }
+    }
+    if (priv->cache_reset){
+        pthread_mutex_lock(&(priv->buffer_mutex));
+        priv->cache_reset=0;
+        pthread_mutex_unlock(&(priv->buffer_mutex));
     }
 
 }
