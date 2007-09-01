@@ -246,6 +246,7 @@ csp_again:
     // time to do aspect ratio corrections...
 
   if(movie_aspect>-1.0) sh->aspect = movie_aspect; // cmdline overrides autodetect
+  else if(sh->stream_aspect!=0.0) sh->aspect = sh->stream_aspect;
 //  if(!sh->aspect) sh->aspect=1.0;
 
   if(opt_screen_size_x||opt_screen_size_y){
