@@ -780,7 +780,7 @@ static void prepare_visible_page(priv_vbi_t* priv){
     pthread_mutex_lock(&(priv->buffer_mutex));
     mp_msg(MSGT_TV,MSGL_DBG3,"tvi_vbi: prepare_visible_page pg:0x%x, sub:0x%x\n",
         priv->pagenum,priv->subpagenum);
-    if(priv->subpagenum==-1) //no page yet
+    if(priv->subpagenum==0x3f7f) //no page yet
         priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
 
     pg=get_from_cache(priv,priv->pagenum,priv->subpagenum);
@@ -1628,7 +1628,7 @@ int teletext_control(void* p, int cmd, void *arg)
         clear_cache(priv);
         priv->pagenum=steppage(0,tv_param->tpage&0x7ff,1);
         priv->tformat=tv_param->tformat;
-        priv->subpagenum=0;
+        priv->subpagenum=0x3f7f;
         pll_reset(priv,fine_tune);
         if(tv_param->tlang==-1){
             mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSupportedLanguages);
@@ -1666,7 +1666,7 @@ int teletext_control(void* p, int cmd, void *arg)
         memcpy(priv->ptsp,ptsp,sizeof(tt_stream_props));
         *(priv_vbi_t**)arg=priv;
 
-        priv->subpagenum=0;
+        priv->subpagenum=0x3f7f;
         pthread_mutex_init(&priv->buffer_mutex, NULL);
         priv->pagenumdec=0;
         for(i=0;i<VBI_ROWS*VBI_COLUMNS;i++)
@@ -1769,7 +1769,7 @@ int teletext_control(void* p, int cmd, void *arg)
         priv->pagenumdec=0;
         priv->subpagenum=*(int*)arg;
         if(priv->subpagenum<0)
-            priv->subpagenum=0;
+            priv->subpagenum=0x3f7f;
         if(priv->subpagenum>=VBI_MAX_SUBPAGES)
             priv->subpagenum=VBI_MAX_SUBPAGES-1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
