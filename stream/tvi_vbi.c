@@ -690,6 +690,7 @@ static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secon
         int separated=0;
         int conceal=0;
         int hold=0;
+        int flash=0;
         tt_char tt_held=tt_space;
         for(col=0;col<VBI_COLUMNS;col++){
             int i=row*VBI_COLUMNS+col;
@@ -704,10 +705,12 @@ static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secon
             p[i].ctl=(c&0x60)==0?1:0;
             p[i].fg=fg_color;
             p[i].bg=bg_color;
+            p[i].flh=flash;
             
             if ((c&0x60)==0){ //control chars
                 if(c>=0x08 && c<=0x09){//Flash/Steady
-                    FFSWAP(int,bg_color,fg_color);
+                    flash=c==0x08;
+                    p[i].flh=flash;
                     if(c==0x09){
                         p[i].fg=fg_color;
                         p[i].bg=bg_color;

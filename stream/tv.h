@@ -276,6 +276,7 @@ typedef struct tt_char_s{
     unsigned char fg;  ///< foreground color
     unsigned char bg;  ///< background color
     unsigned char gfx; ///< 0-no gfx, 1-solid gfx, 2-separated gfx
+    unsigned char flh; ///< 0-no flash, 1-flash
     unsigned char ctl; ///< control character
     unsigned char lng; ///< lang: 0-secondary language,1-primary language
     unsigned char raw; ///< raw character (as received from device)

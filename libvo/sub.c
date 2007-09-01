@@ -270,7 +270,7 @@ static void tt_draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, uns
 }
 inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
 {
-    int h=0,w=0,i,j,font;
+    int h=0,w=0,i,j,font,flashon;
     int wm,hm;
     int color;
     int x,y,x0,y0;
@@ -290,6 +290,7 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
         obj->flags&=~OSDFLAG_VISIBLE;
         return;
     }
+    flashon=(GetTimer()/1000000)%2;
     switch(vo_osd_teletext_half){
     case TT_ZOOM_TOP_HALF:
         start_row=0;
@@ -404,10 +405,11 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
         x=x0;
         for(j=0;j<cols;j++){
             tc=tdp[(i+start_row)*VBI_COLUMNS+j];
-            if(!tc.gfx){
+            if(!tc.gfx || (tc.flh && !flashon)){
                 /* Rendering one text character */
                 draw_alpha_buf(obj,x,y,wm,hm,buf[tc.bg],buf[8],wm);
                 if(tc.unicode!=0x20 && tc.unicode!=0x00 && !tc.ctl &&
+                    (!tc.flh || flashon) &&
                     (font=vo_font->font[tc.unicode])>=0 && y+hm<dys){
                         tt_draw_alpha_buf(obj,x,y,vo_font->width[tc.unicode],vo_font->height,
                             vo_font->pic_b[font]->bmp+vo_font->start[tc.unicode]-vo_font->charspace*vo_font->pic_a[font]->w,
