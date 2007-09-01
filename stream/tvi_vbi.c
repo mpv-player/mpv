@@ -840,9 +840,13 @@ static void prepare_visible_page(priv_vbi_t* priv){
         priv->display_page[10].unicode=' ';
     }
     priv->display_page[11].unicode=' ';
-    for(i=VBI_TIME_LINEPOS;i<VBI_COLUMNS;i++){
-        priv->display_page[i].unicode=curr_pg->raw[i];
-    }
+    for(i=VBI_COLUMNS;i>VBI_TIME_LINEPOS || 
+            ((curr_pg->raw[i]&0x60) && curr_pg->raw[i]!=0x20 && i>11);
+            --i)
+        if(curr_pg->raw[i]&0x60)
+            priv->display_page[i].unicode=curr_pg->raw[i];
+        else
+            priv->display_page[i].unicode=' ';
     pthread_mutex_unlock(&(priv->buffer_mutex));
 }
 /*
