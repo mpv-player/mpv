@@ -590,7 +590,7 @@ static void put_to_cache(priv_vbi_t* priv,tt_page* pg,int line){
  */
 static inline int get_subpagenum_from_cache(priv_vbi_t* priv, int pagenum){
     if (!priv->ptt_cache[pagenum])
-        return -1;
+        return 0x3f7f;
     else
         return priv->ptt_cache[pagenum]->subpagenum;
 }
@@ -830,7 +830,7 @@ static void prepare_visible_page(priv_vbi_t* priv){
         PRINT_HEX(priv->display_page,6,priv->pagenum>>4);
         PRINT_HEX(priv->display_page,7,priv->pagenum);
     }
-    if(priv->subpagenum!=-1){
+    if(priv->subpagenum!=0x3f7f){
         priv->display_page[8].unicode='.';
         PRINT_HEX(priv->display_page,9,priv->subpagenum>>4);
         PRINT_HEX(priv->display_page,10,priv->subpagenum);
