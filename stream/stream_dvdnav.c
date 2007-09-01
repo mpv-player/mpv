@@ -466,6 +466,7 @@ int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
         This last call always works well
       */
       status = dvdnav_mouse_activate(nav, pci, priv->mousex, priv->mousey);
+      if(status == DVDNAV_STATUS_OK) reset = 1;
       break;
     default:
       mp_msg(MSGT_CPLAYER, MSGL_V, "Unknown DVDNAV cmd %d\n", cmd);
