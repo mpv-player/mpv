@@ -56,6 +56,12 @@
 
 #include "m_option.h"
 
+#ifdef USE_LIBAVUTIL_SO
+#include <ffmpeg/avutil.h>
+#else
+#include "avutil.h"
+#endif
+
 #define FINE (!0)
 #define BAD (!FINE)
 
@@ -94,84 +100,6 @@ typedef struct
 	int dxn_max_bframes;         ///< dxn: max consecutive bframes
 	unsigned int flags;          ///< flags for allowed options/dxn note the definitions for PROFILE_S and PROFILE_AS
 } profile_t;
-
-// Code taken from Libavcodec and ve_lavc.c to handle Aspect Ratio calculation
-
-typedef struct xvid_rational_s{
-    int num; 
-    int den;
-} XVIDRational;
-
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-#define ABS(a) ((a) >= 0 ? (a) : (-(a)))
-
-
-static int64_t xvid_gcd(int64_t a, int64_t b){
-    if(b) return xvid_gcd(b, a%b);
-    else  return a;
-}
-
-static int xvid_reduce(int *dst_nom, int *dst_den, int64_t nom, int64_t den, int64_t max){
-    int exact=1, sign=0;
-    int64_t gcd;
-
-    assert(den != 0);
-
-    if(den < 0){
-        den= -den;
-        nom= -nom;
-    }
-    
-    if(nom < 0){
-        nom= -nom;
-        sign= 1;
-    }
-    
-    gcd = xvid_gcd(nom, den);
-    nom /= gcd;
-    den /= gcd;
-    
-    if(nom > max || den > max){
-        XVIDRational a0={0,1}, a1={1,0};
-        exact=0;
-
-        for(;;){
-            int64_t x= nom / den;
-            int64_t a2n= x*a1.num + a0.num;
-            int64_t a2d= x*a1.den + a0.den;
-
-            if(a2n > max || a2d > max) break;
-
-            nom %= den;
-        
-            a0= a1;
-            a1= (XVIDRational){a2n, a2d};
-            if(nom==0) break;
-            x= nom; nom=den; den=x;
-        }
-        nom= a1.num;
-        den= a1.den;
-    }
-    
-    assert(xvid_gcd(nom, den) == 1);
-    
-    if(sign) nom= -nom;
-    
-    *dst_nom = nom;
-    *dst_den = den;
-    
-    return exact;
-}
-
-
-static XVIDRational xvid_d2q(double d, int max){
-    XVIDRational a;
-    int exponent= MAX( (int)(log(ABS(d) + 1e-20)/log(2)), 0);
-    int64_t den= 1LL << (61 - exponent);
-    xvid_reduce(&a.num, &a.den, (int64_t)(d * den + 0.5), den, max);
-
-    return a;
-}
 
 // Code taken from XviD VfW source for profile support
 
@@ -734,7 +662,7 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 	xvid_enc_frame_t  *frame      = &mod->frame;
 	xvid_plugin_single_t *onepass = &mod->onepass;
 	xvid_plugin_2pass2_t *pass2   = &mod->pass2;
-	XVIDRational ar;
+	AVRational ar;
 
 	const int motion_presets[7] =
 		{
@@ -977,9 +905,9 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 	if( !(selected_profile->flags & PROFILE_DXN) )
 	{
 	if(xvidenc_dar_aspect > 0) 
-	    ar = xvid_d2q(xvidenc_dar_aspect * mod->mux->bih->biHeight / mod->mux->bih->biWidth, 255);
+	    ar = av_d2q(xvidenc_dar_aspect * mod->mux->bih->biHeight / mod->mux->bih->biWidth, 255);
 	else if(xvidenc_autoaspect)
-	    ar = xvid_d2q((float)mod->d_width / mod->d_height * mod->mux->bih->biHeight / mod->mux->bih->biWidth, 255);
+	    ar = av_d2q((float)mod->d_width / mod->d_height * mod->mux->bih->biHeight / mod->mux->bih->biWidth, 255);
 	else ar.num = ar.den = 0;
 	
 	if(ar.den != 0) {
@@ -1164,8 +1092,8 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 		/* Quantizer mode uses the same plugin, we have only to define
 		 * a constant quantizer zone beginning at frame 0 */
 		if(pass == MODE_QUANT) {
-                        XVIDRational squant;
-			squant = xvid_d2q(xvidenc_quantizer,128);
+                        AVRational squant;
+			squant = av_d2q(xvidenc_quantizer,128);
 
 			create->zones[create->num_zones].mode      = XVID_ZONE_QUANT;
 			create->zones[create->num_zones].frame     = 0;
