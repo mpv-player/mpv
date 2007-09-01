@@ -3067,6 +3067,7 @@ mpctx->sh_video=mpctx->d_video->sh;
 
 if(mpctx->sh_video){
 
+  double ar=-1.0;
   current_module="video_read_properties";
   if(!video_read_properties(mpctx->sh_video)) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotReadVideoProperties);
@@ -3088,6 +3089,8 @@ if(mpctx->sh_video){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_FPSnotspecified);
       mpctx->sh_video=mpctx->d_video->sh=NULL;
     }
+    if(stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
+      mpctx->sh_video->stream_aspect = ar;
   }
 
 }
