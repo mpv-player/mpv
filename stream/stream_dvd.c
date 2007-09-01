@@ -737,6 +737,11 @@ static int control(stream_t *stream,int cmd,void* arg)
               return 1;
             break;
         }
+        case STREAM_CTRL_GET_ASPECT_RATIO:
+        {
+            *((double *)arg) = !d->vts_file->vtsi_mat->vts_video_attr.display_aspect_ratio ? 4.0/3.0 : 16.0/9.0;
+            return 1;
+        }
     }
     return STREAM_UNSUPPORTED;
 }
