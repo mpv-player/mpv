@@ -1887,6 +1887,7 @@ static int sleep_until_update(float *time_frame, float *aq_sleep_time)
 
 int reinit_video_chain(void) {
     sh_video_t * const sh_video = mpctx->sh_video;
+    double ar=-1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if(!fixed_vo || !(inited_flags&INITED_VO)){
     current_module="preinit_libvo";
@@ -1902,6 +1903,8 @@ int reinit_video_chain(void) {
     inited_flags|=INITED_VO;
   }
 
+  if(stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
+      mpctx->sh_video->stream_aspect = ar;
   current_module="init_video_filters";
   {
     char* vf_arg[] = { "_oldargs_", (char*)mpctx->video_out , NULL };
@@ -3067,7 +3070,6 @@ mpctx->sh_video=mpctx->d_video->sh;
 
 if(mpctx->sh_video){
 
-  double ar=-1.0;
   current_module="video_read_properties";
   if(!video_read_properties(mpctx->sh_video)) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotReadVideoProperties);
@@ -3089,8 +3091,6 @@ if(mpctx->sh_video){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_FPSnotspecified);
       mpctx->sh_video=mpctx->d_video->sh=NULL;
     }
-    if(stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
-      mpctx->sh_video->stream_aspect = ar;
   }
 
 }
