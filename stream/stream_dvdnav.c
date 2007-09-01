@@ -326,6 +326,12 @@ static int control(stream_t *stream, int cmd, void* arg) {
       }
       break;
     }
+    case STREAM_CTRL_GET_ASPECT_RATIO:
+    {
+      uint8_t ar = dvdnav_get_video_aspect(priv->dvdnav);
+      *((double *)arg) = !ar ? 4.0/3.0 : 16.0/9.0;
+      return 1;
+    }
 #ifdef MP_DVDNAV
     case STREAM_CTRL_GET_CURRENT_TIME:
     {
