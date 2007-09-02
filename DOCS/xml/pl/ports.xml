@@ -689,7 +689,7 @@ Oznacza to, że <emphasis role="bold">AIX 5.2 i 5.3 nie potrafią aktualnie uży
 
 <para>Pełną instrukcję jak zbudować <application>MPlayera</application>
   i wszystkie potrzebne biblioteki znajdziesz w
-  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
 
 </sect2>
 

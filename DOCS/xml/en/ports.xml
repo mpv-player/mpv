@@ -728,7 +728,7 @@ it before compiling <application>MPlayer</application>.
 <para>
 Complete instructions for building <application>MPlayer</application>
 and necessary libraries can be found in the
-<ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
 </para>
 </sect2>
 </sect1>

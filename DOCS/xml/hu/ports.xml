@@ -728,7 +728,7 @@ telepítsd, mielőtt az <application>MPlayer</application>t fordítanád.
 <para>
 Az <application>MPlayer</application> és a szükséges függvénykönyvtárak
 elkészítésének módját elolvashatod az
-<ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.
 </para>
 </sect2>
 </sect1>

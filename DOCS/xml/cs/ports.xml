@@ -737,7 +737,7 @@ ji před kompilací <application>MPlayer</application>u.
 <para>
 Kompletní instrukce pro překlad <application>MPlayer</application>u
 a potřebné knihovny naleznete v
-<ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
 </para>
 </sect2>
 </sect1>

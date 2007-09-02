@@ -728,7 +728,7 @@ mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>
 <para>
 Полные инструкции по сборке <application>MPlayer</application> и необходимых 
 библиотек могут быть найдены на странице
-<ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
 </para>
 </sect2>
 </sect1>

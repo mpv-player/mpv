@@ -708,7 +708,7 @@ Segmentation fault</screen>
       <para>
         Komplette Anweisungen zum Erzeugen des <application>MPlayer</application>
         und der notwendigen Bibliotheken findest du in den
-        <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>s.
+        <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>s.
       </para>
       
     </sect2>
