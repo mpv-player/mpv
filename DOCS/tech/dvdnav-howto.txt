@@ -1,0 +1,29 @@
+How to compile mplayer with support for dvdnav:
+
+since the versions of dvdnav and dvdread generally shipped with most Linux
+distributions are generally outdated and unmaintained remove any piece of
+dvdnav and dvdread from your computer (something like the command below
+should suffice):
+$ rm -rf /usr/lib/libdvdnav* /usr/lib/libdvdread* /usr/include/dvdnav* \
+         /usr/include/dvdread* /usr/local/lib/libdvdnav* \
+         /usr/local/lib/libdvdread* /usr/local/include/dvdnav* \
+         /usr/local/include/dvdread* /usr/bin/dvdnav-config \
+         /usr/local/bin/dvdnav-config
+
+Now download dvdnav from MPHQ (dvdnav includes its own version of dvdread):
+$ svn co svn://svn.mplayerhq.hu/dvdnav/trunk/libdvdnav libdvdnav
+$ cd libdvdnav
+$ ./autogen.sh && ./configure && make
+install it as root with
+$ make install
+
+Cd to MPlyer's source tree and run ./configure with your preferred parameters.
+After ./configure is run it should say that support for dvdnav and dvdread was enabled,
+otherwise investigate in configure.log the sections relative to the two libraries
+and try to understand what went wrong; if you can't solve the problem yourself
+post to mplayer-users the two sections.
+
+Notice: animated menus are working, but still menus and still scenes are not yet supported.
+Also, audio and subtitle languages selection by means of menus don't work yet, but
+they can be switched as usual at any time during playback pressing '#' and 'j'
+(or with the keys you chose to override those two bindings).
