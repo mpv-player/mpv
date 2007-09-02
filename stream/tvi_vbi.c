@@ -623,8 +623,12 @@ static inline tt_page* get_from_cache(priv_vbi_t* priv, int pagenum,int subpagen
 static void clear_cache(priv_vbi_t* priv){
     int i;
     tt_page* tp;
-    priv->cache_reset=1;
     
+    /*
+      Skip next 5 buffers to avoid mixing teletext pages from different
+      channels during channel switch
+    */
+    priv->cache_reset=5;
     for(i=0;i<VBI_MAX_PAGES;i++){
         while(priv->ptt_cache[i]){
             tp=priv->ptt_cache[i];
@@ -1492,7 +1496,7 @@ static void vbi_decode(priv_vbi_t* priv,unsigned char*buf){
     }
     if (priv->cache_reset){
         pthread_mutex_lock(&(priv->buffer_mutex));
-        priv->cache_reset=0;
+        priv->cache_reset--;
         pthread_mutex_unlock(&(priv->buffer_mutex));
     }
 
