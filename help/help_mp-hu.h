@@ -2096,3 +2096,5 @@ static char help_text[]=
 #define MSGTR_TV_Bt848ErrorSettingWidth "tvi_bsdbt848: Hiba a kép szélesség beállításakor. Hiba: %s\n"
 #define MSGTR_TV_Bt848ErrorSettingHeight "tvi_bsdbt848: Hiba a kép magasság beállításakor. Hiba: %s\n"
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Nem lehet leállítani a mentést. Hiba: %s\n"
+#define MSGTR_TV_TTSupportedLanguages "Támogatott Teletext nyelvek:\n"
+#define MSGTR_TV_TTSelectedLanguage "Kiválasztott alapértelmezett teletext nyelv: %s\n"
