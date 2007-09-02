@@ -1179,7 +1179,7 @@ void vo_x11_nofs_sizepos(int x, int y, int width, int height)
 
 void vo_x11_sizehint(int x, int y, int width, int height, int max)
 {
-    vo_hint.flags = PPosition | PSize | PWinGravity;
+    vo_hint.flags = 0;
     if (vo_keepaspect)
     {
         vo_hint.flags |= PAspect;
@@ -1189,15 +1189,16 @@ void vo_x11_sizehint(int x, int y, int width, int height, int max)
         vo_hint.max_aspect.y = height;
     }
 
+    vo_hint.flags |= PPosition | PSize;
     vo_hint.x = x;
     vo_hint.y = y;
     vo_hint.width = width;
     vo_hint.height = height;
     if (max)
     {
+        vo_hint.flags |= PMaxSize;
         vo_hint.max_width = width;
         vo_hint.max_height = height;
-        vo_hint.flags |= PMaxSize;
     } else
     {
         vo_hint.max_width = 0;
@@ -1206,9 +1207,10 @@ void vo_x11_sizehint(int x, int y, int width, int height, int max)
 
     // Set minimum height/width to 4 to avoid off-by-one errors
     // and because mga_vid requires a minimal size of 4 pixels.
-    vo_hint.min_width = vo_hint.min_height = 4;
     vo_hint.flags |= PMinSize;
+    vo_hint.min_width = vo_hint.min_height = 4;
 
+    vo_hint.flags |= PWinGravity;
     vo_hint.win_gravity = StaticGravity;
     XSetWMNormalHints(mDisplay, vo_window, &vo_hint);
 }
