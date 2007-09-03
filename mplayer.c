@@ -642,7 +642,7 @@ void uninit_player(unsigned int mask){
   if(mask&INITED_AO){
     inited_flags&=~INITED_AO;
     current_module="uninit_ao";
-    if (mpctx->user_muted | mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
+    if (mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
     mpctx->audio_out->uninit(mpctx->eof?0:1); mpctx->audio_out=NULL;
   }
 
@@ -665,6 +665,7 @@ void uninit_player(unsigned int mask){
 
 void exit_player_with_rc(const char* how, int rc){
 
+  if (mpctx->user_muted && !mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
   uninit_player(INITED_ALL);
 #ifdef HAVE_X11
 #ifdef HAVE_NEW_GUI
