@@ -308,7 +308,7 @@ static int createRenderingContext(void) {
     pf = ChoosePixelFormat(vo_hdc, &pfd);
     if (!pf) {
             mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
-        ReleaseDC(vo_hdc);
+        ReleaseDC(vo_window, vo_hdc);
         return 0;
     }
 
@@ -316,7 +316,7 @@ static int createRenderingContext(void) {
     
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, vo_depthonscreen);
 
-    ReleaseDC(vo_hdc);
+    ReleaseDC(vo_window, vo_hdc);
     return 1;
 }
 

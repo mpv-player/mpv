@@ -1391,7 +1391,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
     res = SET_WINDOW_OK;
 
 out:
-  ReleaseDC(windc);
+  ReleaseDC(win, windc);
   return res;
 }
 
@@ -1407,7 +1407,7 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
 void swapGlBuffers() {
   HDC vo_hdc = GetDC(vo_w32_window);
   SwapBuffers(vo_hdc);
-  ReleaseDC(vo_hdc);
+  ReleaseDC(vo_w32_window, vo_hdc);
 }
 #else
 #ifdef HAVE_LIBDL
