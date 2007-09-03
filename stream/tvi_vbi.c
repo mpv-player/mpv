@@ -1379,6 +1379,9 @@ static int decode_raw_line_runin(priv_vbi_t* priv,unsigned char* buf,unsigned ch
     return 1;
 }
 
+#if 0
+//See comment in vbi_decode for a reason of commenting out this routine.
+
 /**
  * \brief decodes raw vbi data (signal amplitudes) into sequence of bytes
  * \param priv private data structure
@@ -1438,6 +1441,7 @@ static int decode_raw_line_sine(priv_vbi_t* priv,unsigned char* buf,unsigned cha
 
     return 1;
 }
+#endif
 
 /**
  * \brief decodes all vbi lines from one video frame
