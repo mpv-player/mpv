@@ -1163,6 +1163,7 @@ int vo_x11_check_events(Display * mydisplay)
  */
 void vo_x11_nofs_sizepos(int x, int y, int width, int height)
 {
+  vo_x11_sizehint(x, y, width, height, 0);
   if (vo_fs) {
     vo_old_x = x;
     vo_old_y = y;
