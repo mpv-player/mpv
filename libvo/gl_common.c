@@ -1341,6 +1341,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
   HDC windc = GetDC(win);
   HGLRC new_context = 0;
   int keep_context = 0;
+  int res = SET_WINDOW_FAILED;
 
   // should only be needed when keeping context, but not doing glFinish
   // can cause flickering even when we do not keep it.
@@ -1356,7 +1357,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
     new_context = wglCreateContext(windc);
     if (!new_context) {
       mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GL context!\n");
-      return SET_WINDOW_FAILED;
+      goto out;
     }
   }
 
@@ -1366,12 +1367,11 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
     if (!keep_context) {
       wglDeleteContext(new_context);
     }
-    return SET_WINDOW_FAILED;
+    goto out;
   }
 
   // set new values
   vo_w32_window = win;
-  vo_hdc = windc;
   {
     RECT rect;
     GetClientRect(win, &rect);
@@ -1386,9 +1386,13 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
     getFunctions(w32gpa, NULL);
 
     // and inform that reinit is neccessary
-    return SET_WINDOW_REINIT;
-  }
-  return SET_WINDOW_OK;
+    res = SET_WINDOW_REINIT;
+  } else
+    res = SET_WINDOW_OK;
+
+out:
+  ReleaseDC(windc);
+  return res;
 }
 
 void releaseGlContext(int *vinfo, HGLRC *context) {
@@ -1401,7 +1405,9 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
 }
 
 void swapGlBuffers() {
+  HDC vo_hdc = GetDC(vo_w32_window);
   SwapBuffers(vo_hdc);
+  ReleaseDC(vo_hdc);
 }
 #else
 #ifdef HAVE_LIBDL

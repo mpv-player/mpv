@@ -20,7 +20,6 @@ extern int enable_mouse_movements;
 
 static const char* classname = "MPlayer - Media player for Win32";
 int vo_vm = 0;
-HDC vo_hdc = 0;
 
 // last non-fullscreen extends
 int prev_width;
@@ -250,6 +249,7 @@ static void resetMode(void) {
 static int createRenderingContext(void) {
     HWND layer = HWND_NOTOPMOST;
     PIXELFORMATDESCRIPTOR pfd;
+    HDC vo_hdc = GetDC(vo_window);
     RECT r;
     int pf;
   if (WinID < 0) {
@@ -308,6 +308,7 @@ static int createRenderingContext(void) {
     pf = ChoosePixelFormat(vo_hdc, &pfd);
     if (!pf) {
             mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
+        ReleaseDC(vo_hdc);
         return 0;
     }
 
@@ -315,6 +316,7 @@ static int createRenderingContext(void) {
     
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, vo_depthonscreen);
 
+    ReleaseDC(vo_hdc);
     return 1;
 }
 
@@ -368,8 +370,6 @@ int vo_w32_init(void) {
         return 0;
     }
     }
-
-    vo_hdc = GetDC(vo_window);
 
     myMonitorFromWindow = NULL;
     myGetMonitorInfo = NULL;
