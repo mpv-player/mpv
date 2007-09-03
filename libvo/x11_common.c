@@ -1510,8 +1510,6 @@ void vo_x11_fullscreen(void)
         // fs->win
         if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
         {
-            if (vo_dwidth != vo_screenwidth && vo_dheight != vo_screenheight)
-                return;
             x = vo_old_x;
             y = vo_old_y;
             w = vo_old_width;
@@ -1528,10 +1526,6 @@ void vo_x11_fullscreen(void)
         vo_fs = VO_TRUE;
         if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
         {
-            if (vo_old_width &&
-                (vo_dwidth == vo_screenwidth && vo_dwidth != vo_old_width) &&
-                (vo_dheight == vo_screenheight && vo_dheight != vo_old_height))
-                return;
             vo_old_x = vo_dx;
             vo_old_y = vo_dy;
             vo_old_width = vo_dwidth;
