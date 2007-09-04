@@ -219,6 +219,7 @@ static int licomb_y(unsigned char *a, unsigned char *b, int s)
 	return diff;
 }
 
+#if 0
 static int qpcomb_y(unsigned char *a, unsigned char *b, int s)
 {
 	int i, j, diff=0;
@@ -230,7 +231,6 @@ static int qpcomb_y(unsigned char *a, unsigned char *b, int s)
 	return diff;
 }
 
-#if 0
 static int licomb_y_test(unsigned char *a, unsigned char *b, int s)
 {
 	int c = licomb_y(a,b,s);
