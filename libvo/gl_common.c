@@ -708,6 +708,34 @@ static const char *bicub_filt_template_RECT =
   "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};"
   BICUB_FILT_MAIN("RECT");
 
+#define CALCWEIGHTS(t, s) \
+  "MAD "t", {-0.5, 0.1666, 0.3333, -0.3333}, "s", {1, 0, -0.5, 0.5};" \
+  "MAD "t", "t", "s", {0, 0, -0.5, 0.5};" \
+  "MAD "t", "t", "s", {-0.6666, 0, 0.8333, 0.1666};" \
+  "RCP a.x, "t".z;" \
+  "RCP a.y, "t".w;" \
+  "MAD "t".xy, "t".xyxy, a.xyxy, {1, 1, 0, 0};" \
+  "ADD "t".x, "t".xxxx, "s";" \
+  "SUB "t".y, "t".yyyy, "s";"
+
+static const char *bicub_notex_filt_template_2D =
+  "MAD coord.xy, fragment.texcoord[%c], {%f, %f}, {0.5, 0.5};"
+  "FRC coord.xy, coord.xyxy;"
+  CALCWEIGHTS("parmx", "coord.xxxx")
+  "MUL cdelta.xz, parmx.rrgg, {-%f, 0, %f, 0};"
+  CALCWEIGHTS("parmy", "coord.yyyy")
+  "MUL cdelta.yw, parmy.rrgg, {0, -%f, 0, %f};"
+  BICUB_FILT_MAIN("2D");
+
+static const char *bicub_notex_filt_template_RECT =
+  "ADD coord, fragment.texcoord[%c], {0.5, 0.5};"
+  "FRC coord.xy, coord.xyxy;"
+  CALCWEIGHTS("parmx", "coord.xxxx")
+  "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};"
+  CALCWEIGHTS("parmy", "coord.yyyy")
+  "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};"
+  BICUB_FILT_MAIN("RECT");
+
 #define BICUB_X_FILT_MAIN(textype) \
   "ADD coord, fragment.texcoord[%c].xyxy, cdelta.xyxw;" \
   "ADD coord2, fragment.texcoord[%c].xyxy, cdelta.zyzw;" \
@@ -991,6 +1019,18 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                  in_tex, (float)texw, (float)texh,
                  texs[0], (float)1.0 / texw, (float)1.0 / texw,
                  in_tex, in_tex, in_tex, in_tex, out_comp);
+      break;
+    case YUV_SCALER_BICUB_NOTEX:
+      if (rect)
+        snprintf(*prog_pos, *remain, bicub_notex_filt_template_RECT,
+                 in_tex,
+                 in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
+      else
+        snprintf(*prog_pos, *remain, bicub_notex_filt_template_2D,
+                 in_tex, (float)texw, (float)texh,
+                 (float)1.0 / texw, (float)1.0 / texw,
+                 (float)1.0 / texh, (float)1.0 / texh,
+                 in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
       break;
   }
   *remain -= strlen(*prog_pos);
