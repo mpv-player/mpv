@@ -1806,7 +1806,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Ширина/высота экрана неизвестны!\n"
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] неверный выходной формат %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Версия вашего драйвера mga_vid несовместима с этой версией MPlayer!\n"
-#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] Использую %d буферов.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Не могу открыть: %s\n"
 #define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Разрешение источника, по крайней мере в одном измерении, больше чем\n1023x1023. Перемасштабируйте программно или используйте -lavdopts lowres=1\n"
 

@@ -418,7 +418,7 @@ static int mga_init(int width,int height,unsigned int format){
 		}
 	}
 	
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_MGA_UsingBuffers,mga_vid_config.num_frames);
+	mp_msg(MSGT_VO,MSGL_V,"[MGA] Using %d buffers.\n",mga_vid_config.num_frames);
 
 	frames[0] = (char*)mmap(0,mga_vid_config.frame_size*mga_vid_config.num_frames,PROT_WRITE,MAP_SHARED,f,0);
 	frames[1] = frames[0] + 1*mga_vid_config.frame_size;

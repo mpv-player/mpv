@@ -1694,7 +1694,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Képernyő szélesség/magasság ismeretlen!\n"
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Hibás kimeneti formátum %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Az mga_vid vezérlőd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
-#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d buffer használata.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nem nyitható meg: %s\n"
 #define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] A forrás felbontás legalább egy dimenzióban nagyobb, mint 1023x1023. Kérlek méretezd át szoftveresen vagy használd a -lavdopts lowres=1-t\n"
 

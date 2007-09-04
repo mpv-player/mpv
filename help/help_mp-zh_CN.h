@@ -1689,7 +1689,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] 屏幕宽度/高度未知!\n"
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] 无效的输出格式 %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] 你的 mga_vid 驱动版本与 MPlayer 的版本不兼容!\n"
-#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] 使用 %d 缓冲。\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] 打不开: %s\n"
 #define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] 原分辨率至少有一维大于 1023x1023。请用软件或用 -lavdopts lowres=1 重新缩放\n"
 
