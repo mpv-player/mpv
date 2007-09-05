@@ -233,6 +233,10 @@ You may force a particular container format with
   <entry>dv</entry>
   <entry>Sony Digital Video container</entry>
 </row>
+<row>
+  <entry>mkv</entry>
+  <entry>Matroska open audio/video container</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
