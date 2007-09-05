@@ -576,6 +576,12 @@ static void vo_x11_putkey_ext(int keysym)
         case XF86XK_AudioNext:
             mplayer_put_key(KEY_NEXT);
             break;
+        case XF86XK_AudioLowerVolume:
+            mplayer_put_key(KEY_VOLUME_DOWN);
+            break;
+        case XF86XK_AudioRaiseVolume:
+            mplayer_put_key(KEY_VOLUME_UP);
+            break;
         default:
             break;
     }
