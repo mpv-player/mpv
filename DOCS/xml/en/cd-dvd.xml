@@ -150,18 +150,36 @@ variable, see the manual page for details.
 </para>
 </formalpara>
 
+<sect2 id="region_code">
+<title>region code</title>
 <para>
-RPC-1 DVD drives only protect region settings through software. RPC-2 drives
-have a hardware protection that allows 5 changes only. It might be
-needed/recommended to upgrade the firmware to RPC-1 if you have a RPC-2 DVD
-drive. You can try finding firmware upgrades for your drive on the internet,
-<ulink url="http://forum.rpc-1.com/dl_all.php">this firmware forum</ulink>
-may be a good starting point for your search.
-If there is no firmware upgrade available for your device, use the
-<ulink url="http://linvdr.org/projects/regionset/">regionset tool</ulink>
-to set the region code of your DVD drive (under Linux).
-<emphasis role="bold">Warning</emphasis>: You can only set the region 5 times.
+DVD drives nowadays come with a nonsensical restriction labeled
+<ulink url="http://en.wikipedia.org/wiki/DVD_region_code">region code</ulink>.
+This is a scheme to force DVD drives to only accept DVDs produced for one of
+the six different regions into which the world was partitioned. How a group
+of people can sit around a table, come up with such an idea and expect the
+world of the 21st century to bow to their will is beyond anyone's guess.
 </para>
+
+<para>
+Drives that enforce region settings through software only are also known as
+RPC-1 drives, those that do it in hardware as RPC-2. RPC-2 drives allow
+changing the region code five times before it remains fixed.
+Under Linux you can use the
+<ulink url="http://linvdr.org/projects/regionset/">regionset</ulink> tool
+to set the region code of your DVD drive.
+</para>
+
+<para>
+Thankfully, it is possible to convert RPC-2 drives into RPC-1 drives through
+a firmware upgrade. Feed the model number of your DVD drive into your favorite
+search engine or have a look at the forum and download sections of
+<ulink url="http://www.rpc1.org/">"The firmware page"</ulink>.
+While the usual caveats for firmware upgrades apply, experience with
+getting rid of region code enforcement is generally positive.
+</para>
+</sect2>
+
 </sect1>
 
 
