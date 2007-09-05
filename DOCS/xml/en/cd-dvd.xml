@@ -142,50 +142,6 @@ facilities. Some RPC-2 drives may also require setting the region code.
 </para></note>
 
 <formalpara>
-<title>DVD structure</title>
-<para>
-DVD disks have 2048 bytes per sector with ECC/CRC. They usually have an UDF
-filesystem on a single track, containing various files (small .IFO and .BUP
-files and big (1GB) .VOB files). They are real files and can be copied/played
-from the mounted filesystem of an unencrypted DVD.
-</para>
-</formalpara>
-
-<para>
-The .IFO files contain the movie navigation information (chapter/title/angle
-map, language table, etc) and are needed to read and interpret the .VOB content
-(movie). The .BUP files are backups of them. They use
-<emphasis role="bold">sectors</emphasis> everywhere, so you need to use raw
-addressing of sectors of the disc to implement DVD navigation or decrypt the
-content.
-</para>
-
-<para>
-DVD support needs raw sector-based access to the device. Unfortunately you must
-(under Linux) be root to get the sector address of a file. That's why we don't
-use the kernel's filesystem driver at all, instead we reimplement it in
-userspace. <systemitem>libdvdread</systemitem> 0.9.x does this.
-The kernel UDF filesystem driver
-is not needed as they already have their own builtin UDF filesystem driver.
-Also the DVD does not have to be mounted as only the raw sector-based access is
-used.
-</para>
-
-<para>
-Sometimes <filename>/dev/dvd</filename> cannot be read by users, so the
-<systemitem>libdvdread</systemitem> authors implemented an emulation layer
-which transfers sector addresses to filenames+offsets, to emulate raw
-access on top of a mounted filesystem or even on a hard disk.
-</para>
-
-<para>
-<systemitem>libdvdread</systemitem> even accepts the mountpoint instead of
-the device name for raw access and checks <filename>/proc/mounts</filename>
-to get the device name. It was developed for Solaris, where device names
-are dynamically allocated.
-</para>
-
-<formalpara>
 <title>DVD decryption</title>
 <para>
 DVD decryption is done by <systemitem>libdvdcss</systemitem>. The method
