@@ -60,6 +60,7 @@ MPlayer (1.0)
     * Intel Music coder audio decoder
     * Fraps v2/v4 video decoder
     * H.264 decoding speedup
+    * Slice-based parallel H.264 decoding
     * native NUT demuxer updated to spec
     * native NUT muxer
     * NUT muxing and demuxing support via libnut
