@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23579 -->
+<!-- synced with r24293 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -165,14 +165,6 @@ windows media player. Даже AVI файлы без индекса являют
   может извлекать DVD субтитры в VOBsub формат
 </para></listitem>
 
-</itemizedlist>
-
-<itemizedlist>
-<title>Планируемые возможности</title>
-<listitem><para>
-  ещё большее количество доступных форматов кодирования.декодирования
-  (создание VOB файлов с DivX4/Indeo5/VIVO потоками :)
-</para></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->
