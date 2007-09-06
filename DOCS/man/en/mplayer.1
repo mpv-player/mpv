@@ -1897,10 +1897,10 @@ Specify TV teletext display format (default: 0):
 .IPs tpage=<100-899>
 Specify initial TV teletext page number (default: 100).
 .IPs tlang=<\-1\-127>
-Specify default teletext language code (default: 0).
-The given value will be used as primary language until 28 packet received.
-Useful when the teletext system uses a non-latin character set, but language codes
-are not transmitted via 28 teletext packets for some reason.
+Specify default teletext language code (default: 0), which will be used
+as primary language until a type 28 packet is received.
+Useful when the teletext system uses a non-latin character set, but language
+codes are not transmitted via teletext type 28 packets for some reason.
 To see a list of supported language codes set this option to \-1.
 .RE
 .
