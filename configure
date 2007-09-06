@@ -482,6 +482,7 @@ _armv5te=auto
 _armv6=auto
 _iwmmxt=auto
 _mtrr=auto
+_altivec=auto
 _install=install
 _ranlib=ranlib
 _ldconfig=ldconfig
@@ -2021,21 +2022,20 @@ EOF
     _march=''
     _mcpu=''
     _optimizing=''
-    _altivec=no
 
     echocheck "CPU type"
     case $system_name in
       Linux)
 	proc=`$_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | _head 1`
 	if test -n "`$_cpuinfo | grep altivec`"; then
-	    _altivec=yes
+	    test $_altivec = auto && _altivec=yes
 	fi
         ;;
       Darwin)
 	proc=`$_cpuinfo | grep "Processor type" | cut -f 3 -d ' ' | sed 's/ppc//'`
 	if [ `sysctl -n hw.vectorunit` -eq 1 -o \
 	    "`sysctl -n hw.optional.altivec 2> /dev/null`" = "1" ]; then
-	    _altivec=yes
+	    test $_altivec = auto && _altivec=yes
 	fi
         ;;
       NetBSD)
@@ -2045,7 +2045,7 @@ EOF
 		;;
 	    *)
 		if [ `sysctl -n machdep.altivec` -eq 1 ]; then
-		    _altivec=yes
+		    test $_altivec = auto && _altivec=yes
 		fi
 		;;
 	esac
@@ -2057,6 +2057,7 @@ EOF
     if test "$_altivec" = yes; then
         echores "$proc altivec"
     else
+        _altivec=no
         echores "$proc"
     fi
 
