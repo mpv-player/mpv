@@ -111,6 +111,7 @@ static int lavc_param_pre_dia_size= 0;
 static int lavc_param_dia_size= 0;
 static int lavc_param_qpel= 0;
 static int lavc_param_trell= 0;
+static int lavc_param_lowdelay= 0;
 static int lavc_param_bit_exact = 0;
 static int lavc_param_aic= 0;
 static int lavc_param_aiv= 0;
@@ -242,6 +243,7 @@ m_option_t lavcopts_conf[]={
         {"dia", &lavc_param_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
 	{"qpel", &lavc_param_qpel, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QPEL, NULL},
 	{"trell", &lavc_param_trell, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_TRELLIS_QUANT, NULL},
+	{"lowdelay", &lavc_param_lowdelay, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_LOW_DELAY, NULL},
 	{"last_pred", &lavc_param_last_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{"preme", &lavc_param_pre_me, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{"subq", &lavc_param_me_subpel_quality, CONF_TYPE_INT, CONF_RANGE, 0, 8, NULL},
@@ -540,6 +542,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->dia_size= lavc_param_dia_size;
     lavc_venc_context->flags|= lavc_param_qpel;
     lavc_venc_context->flags|= lavc_param_trell;
+    lavc_venc_context->flags|= lavc_param_lowdelay;
     lavc_venc_context->flags|= lavc_param_bit_exact;
     lavc_venc_context->flags|= lavc_param_aic;
     lavc_venc_context->flags|= lavc_param_aiv;
