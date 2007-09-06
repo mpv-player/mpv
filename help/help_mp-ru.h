@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r24057
+// Synced with help_mp-en.h: r24341
 
 // ========================= MPlayer help ===========================
 
@@ -2081,4 +2081,18 @@ static char help_text[]=
 #define MSGTR_TV_UnknownColorOption "Указана неизвестная опция цвета (%d)!\n"
 #define MSGTR_TV_CurrentFrequency "Текущая частота: %lu (%.3f)\n"
 #define MSGTR_TV_NoTeletext "Нет телетекста"
+#define MSGTR_TV_Bt848IoctlFailed "tvi_bsdbt848: Сбой %s ioctl. Ошибка: %s\n"
+#define MSGTR_TV_Bt848InvalidAudioRate "tvi_bsdbt848: Неверная величина аудио потока. Ошибка: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningBktrDev "tvi_bsdbt848: Невозможно открыть устройство bktr. Ошибка: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningTunerDev "tvi_bsdbt848: Невозможно открыть устройство tuner. Ошибка: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningDspDev "tvi_bsdbt848: Невозможно открыть устройство dsp. Ошибка: %s\n"
+#define MSGTR_TV_Bt848ErrorConfiguringDsp "tvi_bsdbt848: Сбой конфигурирования dsp. Ошибка: %s\n"
+#define MSGTR_TV_Bt848ErrorReadingAudio "tvi_bsdbt848: Ошибка чтения аудио данных. Ошибка: %s\n"
+#define MSGTR_TV_Bt848MmapFailed "tvi_bsdbt848: Сбой mmap. Ошибка: %s\n"
+#define MSGTR_TV_Bt848FrameBufAllocFailed "tvi_bsdbt848: Ошибка выделения памяти для кадрового буфера. Ошибка: %s\n"
+#define MSGTR_TV_Bt848ErrorSettingWidth "tvi_bsdbt848: Невозможно установить ширину изображения. Ошибка: %s\n"
+#define MSGTR_TV_Bt848ErrorSettingHeight "tvi_bsdbt848: Невозможно установить высоту изображения. Ошибка: %s\n"
+#define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Невозможно остановить захват. Ошибка: %s\n"
+#define MSGTR_TV_TTSupportedLanguages "Поддерживаемые языки Телетекста:\n"
+#define MSGTR_TV_TTSelectedLanguage "Выбран язык Телетекста по умолчанию: %s\n"
 
