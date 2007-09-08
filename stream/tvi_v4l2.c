@@ -1341,7 +1341,7 @@ static int get_capture_buffer_size(priv_t *priv)
 static int start(priv_t *priv)
 {
     struct v4l2_requestbuffers request;
-    int i;
+    unsigned int i;
 
     /* setup audio parameters */
 
