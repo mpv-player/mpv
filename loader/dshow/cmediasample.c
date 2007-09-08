@@ -526,6 +526,7 @@ CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int _size)
     This->vt = (IMediaSample_vt*) malloc(sizeof(IMediaSample_vt));
     This->own_block = (char*) malloc((size_t)_size + SAFETY_ACEL);
     This->media_type.pbFormat = 0;
+    This->media_type.pUnk = 0;
 
     if (!This->vt || !This->own_block)
     {
