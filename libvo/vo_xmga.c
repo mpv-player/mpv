@@ -221,6 +221,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         {
             vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
                     flags, xWAttribs.colormap, "xmga", title);
+            XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xWAttribs);
         }
 
         if (vo_gc != None)
