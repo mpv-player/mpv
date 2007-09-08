@@ -1714,6 +1714,7 @@ case "$host_arch" in
 	else
 		proc=pentium4
 	fi
+	test $_fast_cmov = "auto" && _fast_cmov=no
 	;;
     *) proc=prescott iproc=686 ;;
     esac
@@ -1858,10 +1859,6 @@ EOF
 
     if test $_cmov = "yes" && test $_fast_cmov = "auto" ; then
         _fast_cmov="yes"
-        case "$proc" in
-            pentium4|prescott|nocona)
-                _fast_cmov="no"
-        esac
     else
         _fast_cmov="no"
     fi
@@ -1902,7 +1899,9 @@ EOF
         *)
           # 64-bit prescotts exist, but as far as GCC is concerned they
           # have the same capabilities as a nocona.
-          proc=nocona;;
+          proc=nocona
+          test $_fast_cmov = "auto" && _fast_cmov=no
+          ;;
         esac
         ;;
       *)
