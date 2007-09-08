@@ -615,7 +615,8 @@ Ohm, Christian <chr.ohm@gmx.net>
     * various small bug fixes
 
 Ötvös, Attila <oattila@chello.hu>
-	* A huge pile of printf to mp_msg patches
+    * A huge pile of printf to mp_msg patches
+    * Various patches for Teletext
 
 Parrish, Joey <joey@nicewarrior.org>
     * various fixes
