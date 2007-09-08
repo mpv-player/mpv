@@ -198,6 +198,9 @@ typedef struct {
 #define TV_VBI_CONTROL_GET_HALF_PAGE   0x51c   ///< get current half page
 #define TV_VBI_CONTROL_SET_HALF_PAGE   0x51d   ///< switch half page
 
+#define TV_VBI_CONTROL_IS_CHANGED      0x540   ///< teletext page is changed
+#define TV_VBI_CONTROL_MARK_UNCHANGED  0x541   ///< teletext page is changed
+
 #define TV_VBI_CONTROL_ADD_DEC         0x550   ///< add page number with dec
 #define TV_VBI_CONTROL_GO_LINK         0x551   ///< go link (1..6) NYI
 #define TV_VBI_CONTROL_GET_VBIPAGE     0x552   ///< get vbi_image for grabbed teletext page

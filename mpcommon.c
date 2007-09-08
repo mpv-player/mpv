@@ -146,7 +146,16 @@ void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
 {
 #ifdef HAVE_TV_TELETEXT
     tvi_handle_t* tvh=demuxer->priv;
+    int page_changed;
+
     if (demuxer->type != DEMUXER_TYPE_TV || !tvh) return;
+
+    //Also forcing page update when such ioctl is not supported or call error occured
+    if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_IS_CHANGED,&page_changed)!=TVI_CONTROL_TRUE)
+        page_changed=1;
+
+    if(!page_changed)
+        return;
 
     if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_VBIPAGE,&vo_osd_teletext_page)!=TVI_CONTROL_TRUE)
         vo_osd_teletext_page=NULL;
@@ -157,5 +166,7 @@ void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
     if(tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GET_FORMAT,&vo_osd_teletext_format)!=TVI_CONTROL_TRUE)
         vo_osd_teletext_format=0;
     vo_osd_changed(OSDTYPE_TELETEXT);
+
+    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_MARK_UNCHANGED,NULL);
 #endif
 }

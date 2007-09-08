@@ -96,6 +96,7 @@
 #include "libmpcodecs/img_format.h"
 #include "libavutil/common.h"
 #include "input/input.h"
+#include "osdep/timer.h"
 
 //#define DEBUG_DUMP 1
 
@@ -150,6 +151,8 @@ typedef struct {
     unsigned int  universaltime;
     unsigned char networkname[21];
     int           cache_reset;
+    /// "page changed" flag: 0-unchanged, 1-entire page, 3-only header
+    int           page_changed;
 } priv_vbi_t;
 
 static unsigned char fixParity[256];
@@ -1635,7 +1638,7 @@ int teletext_control(void* p, int cmd, void *arg)
 
     if (!priv && cmd!=TV_VBI_CONTROL_START)
         return TVI_CONTROL_FALSE;
-    if (!arg && cmd!=TV_VBI_CONTROL_STOP)
+    if (!arg && cmd!=TV_VBI_CONTROL_STOP && cmd!=TV_VBI_CONTROL_MARK_UNCHANGED)
         return TVI_CONTROL_FALSE;
 
     switch (cmd) {
@@ -1669,6 +1672,7 @@ int teletext_control(void* p, int cmd, void *arg)
                 priv->primary_language=tt_languages[i].lang_code;
             }
         }
+        priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
         return TVI_CONTROL_TRUE;
     }
@@ -1696,6 +1700,7 @@ int teletext_control(void* p, int cmd, void *arg)
         init_cache(priv);
         init_vbi_consts(priv);
         pll_reset(priv,fine_tune);
+        priv->page_changed=1;
         return TVI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_STOP:
@@ -1705,16 +1710,19 @@ int teletext_control(void* p, int cmd, void *arg)
         if(priv->ptsp)
             free(priv->ptsp);
         destroy_cache(priv);
+        priv->page_changed=1;
         free(priv);
         return TVI_CONTROL_TRUE;
     }
     case TV_VBI_CONTROL_SET_MODE:
         priv->on=(*(int*)arg%2);
+        priv->page_changed=1;
         return TVI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_MODE:
         *(int*)arg=priv->on;
         return TVI_CONTROL_TRUE;
     case TV_VBI_CONTROL_SET_FORMAT:
+        priv->page_changed=1;
         return teletext_set_format(priv, *(int *) arg);
     case TV_VBI_CONTROL_GET_FORMAT:
         pthread_mutex_lock(&(priv->buffer_mutex));
@@ -1734,6 +1742,7 @@ int teletext_control(void* p, int cmd, void *arg)
             val+=3;
         pthread_mutex_lock(&(priv->buffer_mutex));
         priv->zoom=val;
+        priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
         return TVI_CONTROL_TRUE;
     }
@@ -1756,6 +1765,7 @@ int teletext_control(void* p, int cmd, void *arg)
             priv->subpagenum=pgc->links[val-1].subpagenum;
         else
             priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
+        priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
         return TVI_CONTROL_TRUE;
     }
@@ -1768,6 +1778,7 @@ int teletext_control(void* p, int cmd, void *arg)
         priv->pagenum=val&0x7ff;
         priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
         priv->pagenumdec=0;
+        priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
         return TVI_CONTROL_TRUE;
     }
@@ -1778,6 +1789,7 @@ int teletext_control(void* p, int cmd, void *arg)
         priv->pagenum=steppage(priv->pagenum, direction,1);
         priv->subpagenum=get_subpagenum_from_cache(priv,priv->pagenum);
         priv->pagenumdec=0;
+        priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
         return TVI_CONTROL_TRUE;
     }
@@ -1792,6 +1804,7 @@ int teletext_control(void* p, int cmd, void *arg)
             priv->subpagenum=0x3f7f;
         if(priv->subpagenum>=VBI_MAX_SUBPAGES)
             priv->subpagenum=VBI_MAX_SUBPAGES-1;
+        priv->page_changed=1;
         pthread_mutex_unlock(&(priv->buffer_mutex));
         return TVI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_SUBPAGE:
@@ -1799,6 +1812,7 @@ int teletext_control(void* p, int cmd, void *arg)
         return TVI_CONTROL_TRUE;
     case TV_VBI_CONTROL_ADD_DEC:
         vbi_add_dec(priv, *(char **) arg);
+        priv->page_changed=1;
         return TVI_CONTROL_TRUE;
     case TV_VBI_CONTROL_DECODE_PAGE:
         vbi_decode(priv,*(unsigned char**)arg);
@@ -1811,6 +1825,14 @@ int teletext_control(void* p, int cmd, void *arg)
         return TVI_CONTROL_TRUE;
     case TV_VBI_CONTROL_GET_NETWORKNAME:
         *(void **)arg=priv->networkname;
+        return TVI_CONTROL_TRUE;
+    case TV_VBI_CONTROL_MARK_UNCHANGED:
+        priv->page_changed=0;
+        return TVI_CONTROL_TRUE;
+    case TV_VBI_CONTROL_IS_CHANGED:
+        if((GetTimerMS()/250)%2)  //forcing page update every 1/4 sec
+            priv->page_changed=3; //mark that header update is enough
+        *(int*)arg=priv->page_changed;
         return TVI_CONTROL_TRUE;
     }
     return TVI_CONTROL_UNKNOWN;
