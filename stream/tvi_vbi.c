@@ -153,6 +153,7 @@ typedef struct {
     int           cache_reset;
     /// "page changed" flag: 0-unchanged, 1-entire page, 3-only header
     int           page_changed;
+    int           last_rendered;
 } priv_vbi_t;
 
 static unsigned char fixParity[256];
@@ -1836,9 +1837,10 @@ int teletext_control(void* p, int cmd, void *arg)
         return TVI_CONTROL_TRUE;
     case TV_VBI_CONTROL_MARK_UNCHANGED:
         priv->page_changed=0;
+        priv->last_rendered=GetTimerMS();
         return TVI_CONTROL_TRUE;
     case TV_VBI_CONTROL_IS_CHANGED:
-        if((GetTimerMS()/250)%2)  //forcing page update every 1/4 sec
+        if(GetTimerMS()-priv->last_rendered> 250)  //forcing page update every 1/4 sec
             priv->page_changed=3; //mark that header update is enough
         *(int*)arg=priv->page_changed;
         return TVI_CONTROL_TRUE;
