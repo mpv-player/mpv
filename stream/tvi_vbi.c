@@ -157,8 +157,8 @@ typedef struct {
 
 static unsigned char fixParity[256];
 
-static tt_char tt_space={0x20,7,0,0,0,0,0x20};
-static tt_char tt_error={'?',1,0,0,0,0,'?'}; // Red '?' on black background
+static tt_char tt_space={0x20,7,0,0,0,0,0,0,0x20};
+static tt_char tt_error={'?',1,0,0,0,0,0,0,'?'}; // Red '?' on black background
 static double si[12];
 static double co[12];
 
@@ -686,7 +686,7 @@ static void destroy_cache(priv_vbi_t* priv){
  * info about foreground and background colors, character
  * type (graphics/control/text).
  */
-static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secondary_lang)
+static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secondary_lang,int flags)
 {
     int row,col;
     int prim_charset=lang2charset(primary_lang);
@@ -701,6 +701,8 @@ static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secon
         int conceal=0;
         int hold=0;
         int flash=0;
+        int box=0;
+
         tt_char tt_held=tt_space;
         for(col=0;col<VBI_COLUMNS;col++){
             int i=row*VBI_COLUMNS+col;
@@ -710,6 +712,10 @@ static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secon
                 p[i]=tt_error;
                 continue;
             }
+            if((flags&TT_PGFL_SUBTITLE) || (flags&TT_PGFL_NEWFLASH))
+                p[i].hidden=!box;
+            else
+                p[i].hidden=0;
             p[i].gfx=gfx?(separated?2:1):0;
             p[i].lng=prim_lang;
             p[i].ctl=(c&0x60)==0?1:0;
@@ -725,7 +731,9 @@ static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secon
                         p[i].fg=fg_color;
                         p[i].bg=bg_color;
                     }
-                }else if(c>=0x0a && c<=0x0f){
+                }else if(c>=0x0a && c<=0x0b){
+                    box=c&1;
+                }else if(c>=0x0c && c<=0x0f){
                 }else if (c<=0x17){ //colors
                     fg_color=c&0x0f;
                     gfx=c>>4;
@@ -815,7 +823,7 @@ static void prepare_visible_page(priv_vbi_t* priv){
             priv->display_page[i]=tt_space;
         }
     }else{
-        decode_page(priv->display_page,pg->raw,pg->primary_lang,pg->secondary_lang);
+        decode_page(priv->display_page,pg->raw,pg->primary_lang,pg->secondary_lang,pg->flags);
         mp_msg(MSGT_TV,MSGL_DBG3,"page #%x was decoded!\n",pg->pagenum);
     }
 
@@ -894,7 +902,7 @@ static void render2text(tt_page* pt,FILE* f,int colored){
     0);
     fprintf(f,"+----------------------------------------+\n");
 
-    decode_page(dp,pt->raw,pt->primary_lang,pt->secondary_lang);
+    decode_page(dp,pt->raw,pt->primary_lang,pt->secondary_lang,pt->flags);
     for(i=0;i<VBI_ROWS;i++){
         fprintf(f,"|");
         if(colored) fprintf(f,"\033[40m");
@@ -1101,7 +1109,7 @@ static int decode_pkt0(priv_vbi_t* priv,unsigned char* data,int magAddr)
     priv->mag[magAddr].pt->secondary_lang=priv->secondary_language;
     priv->mag[magAddr].pt->subpagenum=(d[2]|(d[3]<<4)|(d[4]<<8)|(d[5]<<12))&0x3f7f;
     priv->mag[magAddr].pt->pagenum=(magAddr<<8) | d[0] | (d[1]<<4);
-    priv->mag[magAddr].pt->flags=( d[6] | (d[7]<<4));
+    priv->mag[magAddr].pt->flags=((d[7]&1)<<7) | ((d[3]&8)<<3) | ((d[5]&12)<<2) | d[6];
 
     memset(priv->mag[magAddr].pt->raw, 0x00, VBI_COLUMNS*VBI_ROWS);
     priv->mag[magAddr].order=0;

@@ -405,6 +405,7 @@ inline static void vo_update_text_teletext(mp_osd_obj_t *obj, int dxs, int dys)
         x=x0;
         for(j=0;j<cols;j++){
             tc=tdp[(i+start_row)*VBI_COLUMNS+j];
+            if (tc.hidden) { x+=wm; continue;}
             if(!tc.gfx || (tc.flh && !flashon)){
                 /* Rendering one text character */
                 draw_alpha_buf(obj,x,y,wm,hm,buf[tc.bg],buf[8],wm);

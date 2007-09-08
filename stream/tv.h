@@ -280,6 +280,7 @@ typedef struct tt_char_s{
     unsigned char bg;  ///< background color
     unsigned char gfx; ///< 0-no gfx, 1-solid gfx, 2-separated gfx
     unsigned char flh; ///< 0-no flash, 1-flash
+    unsigned char hidden; ///< char is hidden (for subtitle pages)
     unsigned char ctl; ///< control character
     unsigned char lng; ///< lang: 0-secondary language,1-primary language
     unsigned char raw; ///< raw character (as received from device)
@@ -296,11 +297,20 @@ typedef struct tt_page_s{
     unsigned char primary_lang;   ///< primary language code
     unsigned char secondary_lang; ///< secondary language code
     unsigned char active; ///< page is complete and ready for rendering
-    unsigned char flags;  ///< page flags, not used
+    unsigned char flags;  ///< page flags
     unsigned char raw[VBI_ROWS*VBI_COLUMNS]; ///< page data
     struct tt_page_s* next_subpage;
     struct tt_link_s links[6];
 }  tt_page;
+
+#define TT_PGFL_SUPPRESS_HEADER  0x01
+#define TT_PGFL_UPDATE_INDICATOR 0x02
+#define TT_PGFL_INTERRUPTED_SEQ  0x04
+#define TT_PGFL_INHIBIT_DISPLAY  0x08
+#define TT_PGFL_NEWFLASH         0x10
+#define TT_PGFL_SUBTITLE         0x20
+#define TT_PGFL_ERASE_PAGE       0x40
+#define TT_PGFL_MAGAZINE_SERIAL  0x80
 
 typedef struct tt_stream_props_s{
     int sampling_rate;
