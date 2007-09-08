@@ -82,6 +82,7 @@ void CMediaSample_Destroy(CMediaSample* This)
     Debug printf("CMediaSample_Destroy(%p) called (ref:%d)\n", This, This->refcount);
     free(This->vt);
     free(This->own_block);
+    if(((CMediaSample*)This)->type_valid)
     FreeMediaType(&(This->media_type));
     free(This);
 }
@@ -375,6 +376,7 @@ static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
     if (!pMediaType)
 	return E_INVALIDARG;
     t = &((CMediaSample*)This)->media_type;
+    if(((CMediaSample*)This)->type_valid)
     FreeMediaType(t);
     CopyMediaType(t,pMediaType);
     ((CMediaSample*) This)->type_valid=1;
