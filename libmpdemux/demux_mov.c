@@ -501,7 +501,7 @@ static int mov_check_file(demuxer_t* demuxer){
 	  id = be2me_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",(char *)&id,(int)len);
 	}
-skip_chunk:
+//skip_chunk:
 	if(!stream_skip(demuxer->stream,len-skipped)) break;
 	++no;
     }
