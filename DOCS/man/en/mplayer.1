@@ -8687,6 +8687,10 @@ Currently it only works if scene change detection is disabled
 (sc_threshold=1000000000).
 .
 .TP
+.B (no)lowdelay
+Sets the low delay flag for MPEG-1/2 (disables B-frames).
+.
+.TP
 .B vglobal=<0\-3>
 Control writing global video headers.
 .PD 0
@@ -8859,10 +8863,6 @@ compressible by the entropy encoder.
 Its impact on quality is good, and if VHQ uses too much CPU for you,
 this setting can be a good alternative to save a few bits (and gain
 quality at fixed bitrate) at a lesser cost than with VHQ (default: on).
-.
-.TP
-.B (no)lowdelay
-Sets the low delay flag for MPEG-1/2 (disables B-frames, default: off).
 .
 .TP
 .B (no)cartoon
