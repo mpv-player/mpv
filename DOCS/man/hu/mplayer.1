@@ -1,4 +1,4 @@
-.\" Synced with r24329
+.\" Synced with r24357
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 09. 02." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 09. 09." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1906,11 +1906,10 @@ Megadja a TV teletext megjelenítési módját (alapértelmezett: 0):
 .IPs tpage=<100-999>
 Megadja a kezdõ TV teletext oldal számát (alapértelmezett: 100).
 .IPs tlang=<\-1\-127>
-Megadja az alapértelmezett teletext nyelv kódot (alapértelmezett: 0).
-A megadott érték az elsõdleges nyelvként lesz használva, amíg 28 csomag
-megérkezik.
+Megadja az alapértelmezett teletext nyelv kódot (alapértelmezett: 0), amely
+az elsõdleges nyelvként lesz használva, amíg egy 28-as típusú csomag érkezik.
 Hasznos, ha a teletext rendszer nem-latin karakterkészletet használ,
-de a nyelv kód nem kerül átvitelre 28 teletext csomagon belül valamilyen okból.
+de valamiért a nyelv kód nem kerül átvitelre 28-as típusú teletext csomagon belül.
 A támogatott nyelvek listájához állítsd be ezt az opciót \-1 értékre.
 .RE
 .
@@ -8879,6 +8878,10 @@ lehetõvé téve az entrópia kódolónak azok jobb tömörítését.
 A minõségre gyakorolt hatása jó és ha a VHQ túl sok CPU-t eszik,
 ez a beállítás jó alternatíva lehet pár bit megmentéséhez (és minõség
 nyeréséhez fix bitrátánál) kisebb áldozattal, mint a VHQ (alapértelmezett: be).
+.
+.TP
+.B (no)lowdelay
+Beállítja az alacsony késleltetési jelzést az MPEG-1/2-nél (letiltja a B-kockákat, alapértelmezett: ki).
 .
 .TP
 .B (no)cartoon
