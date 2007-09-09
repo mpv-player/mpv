@@ -8,12 +8,6 @@ extern int key_fifo_size;
 extern unsigned doubleclick_time;
 extern int noconsolecontrols;
 
-#if defined(HAVE_FBDEV)||defined(HAVE_VESA)
-extern char *monitor_hfreq_str;
-extern char *monitor_vfreq_str;
-extern char *monitor_dotclock_str;
-#endif
-
 #ifdef HAVE_FBDEV
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
@@ -31,23 +25,9 @@ extern int volstep;
 extern char *lirc_configfile;
 #endif
 
-extern int vo_doublebuffering;
-extern int vo_vsync;
-extern int vo_fsmode;
-extern int vo_dbpp;
-extern int vo_directrendering;
-extern float vo_panscan;
 extern float vo_panscanrange;
 /* only used at startup (setting these values from configfile) */
-extern int vo_gamma_brightness;
-extern int vo_gamma_saturation;
-extern int vo_gamma_contrast;
-extern int vo_gamma_hue;
 extern char *vo_geometry;
-extern int vo_ontop;
-extern int vo_border;
-extern int vo_keepaspect;
-extern int vo_rootwin;
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;
@@ -65,8 +45,6 @@ extern int fs_layer;
 extern int stop_xscreensaver;
 extern char **vo_fstype_list;
 #endif
-extern int vo_nomouse_input;
-extern int WinID;
 
 #ifdef HAVE_MENU
 extern int menu_startup;
@@ -94,9 +72,6 @@ extern int enqueue;
 extern int guiWinID;
 #endif
 
-#ifdef HAVE_XINERAMA
-extern int xinerama_screen;
-#endif
 
 /* from libvo/aspect.c */
 extern float force_monitor_aspect;
@@ -106,7 +81,6 @@ extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
 extern char* pp_help;
-extern int enable_mouse_movements;
 extern int use_filedir_conf;
 
 m_option_t vd_conf[]={
