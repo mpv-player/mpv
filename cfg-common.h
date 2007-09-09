@@ -61,14 +61,14 @@
 	{"prefer-ipv6", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #else
 	{"prefer-ipv6", "MPlayer was compiled without IPv6 support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
+#endif /* HAVE_AF_INET6 */
 
 #else
 	{"user", "MPlayer was compiled without streaming (network) support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"passwd", "MPlayer was compiled without streaming (network) support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"bandwidth", "MPlayer was compiled without streaming (network) support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"user-agent", "MPlayer was compiled without streaming (network) support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* MPLAYER_NETWORK */
 
 #ifdef STREAMING_LIVE555
         {"sdp", "-sdp has been removed, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
@@ -415,7 +415,7 @@ m_option_t radioopts_conf[]={
     {"achannels", &stream_radio_defaults.achannels, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif
+#endif /* USE_RADIO */
 
 #ifdef USE_TV
 m_option_t tvopts_conf[]={
@@ -457,19 +457,19 @@ m_option_t tvopts_conf[]={
 	{"quality", &stream_tv_defaults.quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
 	{"alsa", &stream_tv_defaults.alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif
+#endif /* defined(HAVE_ALSA9) || defined(HAVE_ALSA1X) */
 	{"adevice", &stream_tv_defaults.adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
+#endif /* defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2) */
 #ifdef HAVE_TV_TELETEXT
 	{"tdevice", &stream_tv_defaults.tdevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"tpage", &stream_tv_defaults.tpage, CONF_TYPE_INT, CONF_RANGE, 100, 899, NULL},
 	{"tformat", &stream_tv_defaults.tformat, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 	{"tlang", &stream_tv_defaults.tlang, CONF_TYPE_INT, CONF_RANGE, -1, 0x7f, NULL},
-#endif
+#endif /* HAVE_TV_TELETEXT */
 	{"audioid", &stream_tv_defaults.audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif
+#endif /* USE_TV */
 
 #ifdef HAVE_PVR
 extern int pvr_param_aspect_ratio;
@@ -715,4 +715,4 @@ extern m_option_t xvid_dec_opts[];
 
 int dvd_parse_chapter_range(m_option_t*, const char*);
 
-#endif
+#endif /* MAIN_CONF */

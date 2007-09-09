@@ -77,7 +77,7 @@ extern char *menu_fribidi_charset;
 extern int menu_flip_hebrew;
 extern int menu_fribidi_flip_commas;
 #endif
-#endif
+#endif /* HAVE_MENU */
 
 #ifdef HAVE_ZR
 extern int vo_zr_parseoption(m_option_t* conf, char *opt, char * param);
@@ -315,10 +315,10 @@ m_option_t mplayer_opts[]={
 	{"menu-noflip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"menu-flip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"menu-noflip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif
+#endif /* USE_FRIBIDI */
 #else
 	{"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
-#endif
+#endif /* HAVE_MENU */
 
 	// these should be moved to -common, and supported in MEncoder
 	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
