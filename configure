@@ -3668,18 +3668,6 @@ echores "$_smbsupport"
 #########
 
 
-echocheck "3dfx"
-if test "$_3dfx" = yes ; then
-  _def_3dfx='#define HAVE_3DFX 1'
-  _vosrc="$_vosrc vo_3dfx.c"
-  _vomodules="3dfx $_vomodules"
-else
-  _def_3dfx='#undef HAVE_3DFX'
-  _novomodules="3dfx $_novomodules"
-fi
-echores "$_3dfx"
-
-
 echocheck "tdfxfb"
 if test "$_tdfxfb" = yes ; then
   _def_tdfxfb='#define HAVE_TDFXFB 1'
@@ -4101,6 +4089,18 @@ else
   _novomodules="dga $_novomodules"
 fi
 echores "$_dga"
+
+
+echocheck "3dfx"
+if test "$_3dfx" = yes && test "$_dga" = yes ; then
+  _def_3dfx='#define HAVE_3DFX 1'
+  _vosrc="$_vosrc vo_3dfx.c"
+  _vomodules="3dfx $_vomodules"
+else
+  _def_3dfx='#undef HAVE_3DFX'
+  _novomodules="3dfx $_novomodules"
+fi
+echores "$_3dfx"
 
 
 echocheck "OpenGL"
