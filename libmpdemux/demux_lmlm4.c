@@ -212,7 +212,7 @@ static int demux_lmlm4_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
     int id=1;
     int ret;
 
-hdr:
+//hdr:
     demux->filepos = stream_tell(demux->stream);
     mp_msg(MSGT_DEMUX, MSGL_DBG2, "fpos = %"PRId64"\n", (int64_t)demux->filepos);
     
