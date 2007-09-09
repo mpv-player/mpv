@@ -1,4 +1,4 @@
-.\" Synced with r24357
+.\" Synced with r24386
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -8707,6 +8707,10 @@ Jelenleg csak akkor mûködik, ha a jelenet váltás detektáló le van tiltva
 (sc_threshold=1000000000).
 .
 .TP
+.B (no)lowdelay
+Beállítja az alacsony késleltetési jelzést az MPEG-1/2-nél (letiltja a B-kockákat, alapértelmezett: ki).
+.
+.TP
 .B vglobal=<0\-3>
 Globális videó fejlécek írását szabályozza.
 .PD 0
@@ -8878,10 +8882,6 @@ lehetõvé téve az entrópia kódolónak azok jobb tömörítését.
 A minõségre gyakorolt hatása jó és ha a VHQ túl sok CPU-t eszik,
 ez a beállítás jó alternatíva lehet pár bit megmentéséhez (és minõség
 nyeréséhez fix bitrátánál) kisebb áldozattal, mint a VHQ (alapértelmezett: be).
-.
-.TP
-.B (no)lowdelay
-Beállítja az alacsony késleltetési jelzést az MPEG-1/2-nél (letiltja a B-kockákat, alapértelmezett: ki).
 .
 .TP
 .B (no)cartoon
