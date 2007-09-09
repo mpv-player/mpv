@@ -110,6 +110,7 @@ static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_VMDVIDEO,          MKTAG('V', 'M', 'D', 'V')},
     { CODEC_ID_WS_VQA,            MKTAG('V', 'Q', 'A', 'V')},
     { CODEC_ID_XAN_WC3,           MKTAG('W', 'C', '3', 'V')},
+    { CODEC_ID_NUV,               MKTAG('N', 'U', 'V', '1')},
     { 0, 0 },
 };
 
