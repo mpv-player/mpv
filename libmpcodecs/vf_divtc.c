@@ -203,8 +203,6 @@ static int imgop(int(*planeop)(unsigned char *, unsigned char *,
  * phases are tested.
  */
 
-static int cmp(int *a, int *b) { return *b-*a; }
-
 static int match(struct vf_priv_s *p, int *diffs,
 		 int phase1, int phase2, double *strength)
    {
