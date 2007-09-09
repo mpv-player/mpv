@@ -458,8 +458,8 @@ m_option_t tvopts_conf[]={
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
 	{"alsa", &stream_tv_defaults.alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif /* defined(HAVE_ALSA9) || defined(HAVE_ALSA1X) */
-	{"adevice", &stream_tv_defaults.adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif /* defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2) */
+	{"adevice", &stream_tv_defaults.adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #ifdef HAVE_TV_TELETEXT
 	{"tdevice", &stream_tv_defaults.tdevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"tpage", &stream_tv_defaults.tpage, CONF_TYPE_INT, CONF_RANGE, 100, 899, NULL},
