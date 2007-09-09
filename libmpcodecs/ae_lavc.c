@@ -130,6 +130,7 @@ static int get_frame_size(audio_encoder_t *encoder)
         return sz;
 }
 
+#ifndef USE_LIBAVFORMAT
 static uint32_t lavc_find_atag(char *codec)
 {
 	if(codec == NULL)
@@ -152,6 +153,7 @@ static uint32_t lavc_find_atag(char *codec)
 
 	return 0;
 }
+#endif
 
 
 int mpae_init_lavc(audio_encoder_t *encoder)
