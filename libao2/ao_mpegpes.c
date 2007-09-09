@@ -226,8 +226,7 @@ static int init(int rate,int channels,int format,int flags){
 	default:
 	    ao_data.format=AF_FORMAT_S16_BE;
     }
-    
-retry:
+
     switch(rate){
 	case 48000:	freq_id=0;break;
 	case 96000:	freq_id=1;break;
