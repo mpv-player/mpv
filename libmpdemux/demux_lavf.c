@@ -688,7 +688,7 @@ demuxer_desc_t demuxer_desc_lavf_preferred = {
   "Michael Niedermayer",
   "supports many formats, requires libavformat",
   DEMUXER_TYPE_LAVF_PREFERRED,
-  0, // Check after other demuxer
+  1,
   lavf_check_preferred_file,
   demux_lavf_fill_buffer,
   demux_open_lavf,
