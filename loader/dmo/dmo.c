@@ -115,7 +115,7 @@ DMO_Filter* DMO_FilterCreate(const char* dllname, const GUID* id,
 
 	if (0) {
 	    DMO_MEDIA_TYPE dmo;
-            VIDEOINFOHEADER* vi;
+            //VIDEOINFOHEADER* vi;
 	    memset(&dmo, 0, sizeof(dmo));
 	    i = This->m_pMedia->vt->GetOutputType(This->m_pMedia, 0, 2, &dmo);
 	    printf("GetOutputType %x \n", i);
