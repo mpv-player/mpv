@@ -394,8 +394,6 @@ extern off_t ps_probe;
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 
-extern char* edl_filename;
-extern char* edl_output_filename;
 
 
 #ifdef USE_RADIO
