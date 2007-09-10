@@ -313,7 +313,6 @@ int FILE_munmap( LPVOID start, DWORD size_high, DWORD size_low )
       printf("offsets larger than 4Gb not supported\n");
     return munmap( start, size_low );
 }
-static int mapping_size=0;
 
 struct file_mapping_s;
 typedef struct file_mapping_s
