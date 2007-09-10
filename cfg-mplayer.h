@@ -35,10 +35,8 @@ extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
 
 #ifdef HAVE_X11
-extern char *mDisplayName;
 extern int fs_layer;
 extern int stop_xscreensaver;
-extern char **vo_fstype_list;
 #endif
 
 #ifdef HAVE_MENU
