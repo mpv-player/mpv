@@ -263,7 +263,6 @@ static char* build_keyname(long key, const char* subkey)
 }
 static struct reg_value* insert_reg_value(int handle, const char* name, int type, const void* value, int len)
 {
-	reg_handle_t* t;
 	struct reg_value* v;
 	char* fullname;
 	if((fullname=build_keyname(handle, name))==NULL)
@@ -488,7 +487,6 @@ long __stdcall RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_co
 
 long __stdcall RegSetValueExA(long key, const char* name, long v1, long v2, const void* data, long size)
 {
-    struct reg_value* t;
     char* c;
     TRACE("Request to set value %s %d\n", name, *(const int*)data);
     if(!regs)
