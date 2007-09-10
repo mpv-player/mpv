@@ -11,11 +11,11 @@
 #include "pe_image.h"
 
 
-typedef struct WINE_PACKED {
+typedef struct {
     BYTE type;
     BYTE flags;
     BYTE segnum;
-    WORD offs;
+    WORD offs WINE_PACKED;
 } ET_ENTRY;
 
 typedef struct {
@@ -57,12 +57,12 @@ typedef struct
 } SELFLOADHEADER;
 
   /* Parameters for LoadModule() */
-typedef struct WINE_PACKED
+typedef struct
 {
     HGLOBAL16 hEnvironment;         /* Environment segment */
-    SEGPTR    cmdLine;  /* Command-line */
-    SEGPTR    showCmd;  /* Code for ShowWindow() */
-    SEGPTR    reserved;
+    SEGPTR    cmdLine WINE_PACKED;  /* Command-line */
+    SEGPTR    showCmd WINE_PACKED;  /* Code for ShowWindow() */
+    SEGPTR    reserved WINE_PACKED;
 } LOADPARAMS16;
 
 typedef struct 

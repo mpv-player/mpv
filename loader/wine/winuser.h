@@ -172,14 +172,14 @@ typedef struct
   HWND        hwnd;
 } CWPRETSTRUCT, *LPCWPRETSTRUCT;
 
-typedef struct WINE_PACKED
+typedef struct
 {
     UINT   length;
     UINT   flags;
     UINT   showCmd;
-    POINT  ptMinPosition;
-    POINT  ptMaxPosition;
-    RECT   rcNormalPosition;
+    POINT  ptMinPosition WINE_PACKED;
+    POINT  ptMaxPosition WINE_PACKED;
+    RECT   rcNormalPosition WINE_PACKED;
 } WINDOWPLACEMENT, *LPWINDOWPLACEMENT;
 
 
@@ -2545,7 +2545,7 @@ typedef struct
 #define	DSS_MONO	0x0080
 #define	DSS_RIGHT	0x8000
 
-typedef struct  WINE_PACKED
+typedef struct
 {
     UINT      CtlType;
     UINT      CtlID;
@@ -2554,8 +2554,8 @@ typedef struct  WINE_PACKED
     UINT      itemState;
     HWND      hwndItem;
     HDC       hDC;
-    RECT      rcItem;
-    DWORD     itemData;
+    RECT      rcItem WINE_PACKED;
+    DWORD       itemData WINE_PACKED;
 } DRAWITEMSTRUCT, *PDRAWITEMSTRUCT, *LPDRAWITEMSTRUCT;
 
 
@@ -2836,15 +2836,15 @@ typedef struct
 
 /* DragObject stuff */
 
-typedef struct  WINE_PACKED
+typedef struct
 {
     HWND16     hWnd;
     HANDLE16   hScope;
     WORD       wFlags;
     HANDLE16   hList;
     HANDLE16   hOfStruct;
-    POINT16    pt;
-    LONG       l;
+    POINT16 pt WINE_PACKED;
+    LONG       l WINE_PACKED;
 } DRAGINFO, *LPDRAGINFO;
 
 #define DRAGOBJ_PROGRAM		0x0001

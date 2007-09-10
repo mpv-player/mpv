@@ -536,14 +536,14 @@ typedef struct tagMEMORYSTATUS
 
 
 /* Debugging support (DEBUG SYSTEM ONLY) */
-typedef struct WINE_PACKED
+typedef struct
 {
     UINT16  flags;
-    DWORD   dwOptions;
-    DWORD   dwFilter;
-    CHAR    achAllocModule[8];
-    DWORD   dwAllocBreak;
-    DWORD   dwAllocCount;
+    DWORD   dwOptions WINE_PACKED;
+    DWORD   dwFilter WINE_PACKED;
+    CHAR    achAllocModule[8] WINE_PACKED;
+    DWORD   dwAllocBreak WINE_PACKED;
+    DWORD   dwAllocCount WINE_PACKED;
 } WINDEBUGINFO, *LPWINDEBUGINFO;
 
 /* WINDEBUGINFO flags values */
