@@ -95,7 +95,6 @@ DS_AudioDecoder * DS_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* 
 
     /*try*/
     {
-        ALLOCATOR_PROPERTIES props, props1;
         this->m_pDS_Filter = DS_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType,&sampleProcData);
 	if( !this->m_pDS_Filter ) {
            free(this);
