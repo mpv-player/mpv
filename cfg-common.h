@@ -381,7 +381,6 @@ extern m_option_t demux_rawaudio_opts[];
 extern m_option_t demux_rawvideo_opts[];
 extern m_option_t cdda_opts[];
 
-extern char* audio_stream;
 extern char* sub_stream;
 extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
 extern int ts_prog;
