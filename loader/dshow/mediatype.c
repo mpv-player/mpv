@@ -34,9 +34,9 @@ void DisplayMediaType(const char * label,const AM_MEDIA_TYPE* pmt){
     
    
     Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"=======================\n");
-    if(label)
+    if(label){
         Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"AM_MEDIA_TYPE: %s\n",label);
-    else
+    }else
         Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"AM_MEDIA_TYPE:\n");
     Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"-(Ptr:%p)--------\n",pmt);
     for(i=0;i<sizeof(AM_MEDIA_TYPE);i++){
