@@ -337,8 +337,6 @@
 
 #include "config.h"
 
-extern int quiet;
-extern int verbose;
 extern char *mp_msg_charset;
 
 // codec/filter opts: (defined at libmpcodecs/vd.c)
