@@ -16,6 +16,7 @@
 
 #ifdef HAVE_TV_TELETEXT
 #include "stream/tv.h"
+#include "osdep/timer.h"
 #endif
 
 #include "mplayer.h"
