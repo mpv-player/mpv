@@ -296,7 +296,6 @@ void DMO_VideoDecoder_StopInternal(DMO_VideoDecoder *this)
 int DMO_VideoDecoder_DecodeInternal(DMO_VideoDecoder *this, const void* src, int size, int is_keyframe, char* imdata)
 {
 //    IMediaSample* sample = 0;
-    char* ptr;
     int result;
     unsigned long status; // to be ignored by M$ specs
     DMO_OUTPUT_DATA_BUFFER db;
@@ -363,7 +362,6 @@ int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int c
 {
     HRESULT result;
     int should_test=1;
-    int stoped = 0;   
     
     Debug printf("DMO_VideoDecoder_SetDestFmt (%p, %d, %d)\n",this,bits,(int)csp);
         
