@@ -265,7 +265,6 @@ void DS_VideoDecoder_Destroy(DS_VideoDecoder *this)
 
 void DS_VideoDecoder_StartInternal(DS_VideoDecoder *this)
 {
-    ALLOCATOR_PROPERTIES props, props1;
     Debug printf("DS_VideoDecoder_StartInternal\n");
     //cout << "DSSTART" << endl;
     this->m_pDS_Filter->m_pAll->vt->Commit(this->m_pDS_Filter->m_pAll);
