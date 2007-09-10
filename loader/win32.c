@@ -932,7 +932,6 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
     /* FIXME: better values for the two entries below... */
     static int cache = 0;
     static SYSTEM_INFO cachedsi;
-    unsigned int regs[4];
     dbgprintf("GetSystemInfo(%p) =>\n", si);
 
     if (cache) {
