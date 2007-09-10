@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r24216
+// In sync with r24423
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -2141,6 +2141,7 @@ static char help_text[]=
 #define MSGTR_TV_AvailableDrivers "Verfügbare Treiber:\n"
 #define MSGTR_TV_DriverInfo "Ausgewählter Treiber: %s\n Name: %s\n Autor: %s\n Kommentar: %s\n"
 #define MSGTR_TV_NoSuchDriver "Kein Treiber: %s\n"
+#define MSGTR_TV_DriverAutoDetectionFailed "Automatische Erkennung des TV-Treibers fehlgeschlagen.\n"
 #define MSGTR_TV_UnknownColorOption "Unbekannte Farboption (%d) angegeben!\n"
 #define MSGTR_TV_CurrentFrequency "Momentane Frequenz: %lu (%.3f)\n"
 #define MSGTR_TV_NoTeletext "Kein Videotext"
@@ -2156,4 +2157,6 @@ static char help_text[]=
 #define MSGTR_TV_Bt848ErrorSettingWidth "tvi_bsdbt848: Fehler beim Setzen der Bildbreite: %s\n"
 #define MSGTR_TV_Bt848ErrorSettingHeight "tvi_bsdbt848: Fehler beim Setzen der Bildhöhe: %s\n"
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Kann Aufnahme nicht stoppen. Fehler: %s\n"
+#define MSGTR_TV_TTSupportedLanguages "Unterstützte Videotextsprachen:\n"
+#define MSGTR_TV_TTSelectedLanguage "Gewählte Standardvideotextsprache: %s\n"
 

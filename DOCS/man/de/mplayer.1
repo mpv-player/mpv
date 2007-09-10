@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r24137
+.\" In sync with r24423
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1864,7 +1864,7 @@ In den meisten Fällen wird automute=100 ausreichen.
 Standardwert ist 0 (automute deaktiviert).
 .IPs driver=<Wert>
 Siehe \-tv driver=help für eine Liste eincompilierter TV-Eingabetreiber.
-mögliche Werte: dummy, v4l, v4l2, bsdbt848
+mögliche Werte: dummy, v4l, v4l2, bsdbt848 (Standard: automatische Erkennung)
 .IPs device=<Wert>
 Gibt ein anderes TV-Gerät als /dev/\:video0 an.
 .I ANMERKUNG:
@@ -2004,6 +2004,13 @@ Gib das Anzeigeformat für TV-Videotext an (Standard: 0):
 .REss
 .IPs tpage=<100-899>
 Gib initiale Seitenzahl für TV-Videotext an (Standard: 100).
+.IPs tlang=<\-1\-127>
+Gib den Standardsprachcode für Videotext an (Standard: 0), der als primäre
+Sprache verwendet wird, bis ein Typ-28-Paket empfangen wird.
+Nützlich, wenn der Videotext keine lateinischen Buchstaben verwendet, die
+Sprachcodes aus irgendwelchen Gründen aber nicht via Typ-28-Pakete
+übertragen werden.
+Setze diese Option auf \-1 für eine Liste der unterstützten Sprachcodes.
 .RE
 .
 .TP
@@ -2043,8 +2050,9 @@ Beim Abspielen von MPEG-TS-Streams benutzt MPlayer/\:MEncoder das erste
 Programm (falls vorhanden) mit dem gewählten Video-Stream.
 .
 .TP
-.B \-vivo <sub-Optionen> (DEBUG-CODE)
+.B \-vivo <Unteroptionen> (DEBUG-CODE)
 Erzwingt Audioparameter für den VIVO-Demuxer (nur für Debugging-Zwecke).
+FIXME: Dokumentiere dies.
 .
 .
 .
@@ -5973,7 +5981,7 @@ eine Gleichung wie "2+2*sin(PI*qp)"
 generischer Gleichungsänderungsfilter
 .RSs
 .IPs <Gleichung>
-Irgendeine Gleichung, z.B.\& 'p(W-X\,Y)' zum horizontalen Spiegeln des Bildes.
+Irgendeine Gleichung, z.B.\& 'p(W-X\\,Y)' zum horizontalen Spiegeln des Bildes.
 Du kannst Leerzeichen verwenden, um die Gleichung besser lesbar zu machen.
 Es gibt ein paar Konstanten, die in der Gleichung verwendet werden können:
 .RSss
@@ -9109,6 +9117,11 @@ Wenn du vcodec=mpeg2video angibst, kann dieser Wert 8, 9, 10 oder 11 sein.
 Schließt alle GOPs.
 Funktioniert momentan nur, wenn die Szenenwechselerkennung deaktiviert ist
 (sc_threshold=1000000000).
+.
+.TP
+.B (no)lowdelay
+Setzt den low-delay-Flag für MPEG-1/2 (deaktiviert B-Frames).
+.
 .TP
 .B vglobal=<0\-3>
 Kontrolliere das Schreiben globaler Videoheader.
