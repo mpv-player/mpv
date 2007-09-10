@@ -96,7 +96,7 @@ void DS_Filter_Destroy(DS_Filter* This)
 }
 
 static HRESULT STDCALL DS_Filter_CopySample(void* pUserData,IMediaSample* pSample){
-    char* pointer;
+    BYTE* pointer;
     int len;
     SampleProcUserData* pData=(SampleProcUserData*)pUserData;
     Debug printf("CopySample called(%p,%p)\n",pSample,pUserData);
@@ -182,20 +182,20 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	    em = "illegal or corrupt DirectShow DLL";
 	    break;
 	}
-	result = func(id, &IID_IClassFactory, (void**)&factory);
+	result = func(id, &IID_IClassFactory, (void*)&factory);
 	if (result || !factory)
 	{
 	    em = "no such class object";
 	    break;
 	}
-	result = factory->vt->CreateInstance(factory, 0, &IID_IUnknown, (void**)&object);
+	result = factory->vt->CreateInstance(factory, 0, &IID_IUnknown, (void*)&object);
 	factory->vt->Release((IUnknown*)factory);
 	if (result || !object)
 	{
 	    em = "class factory failure";
 	    break;
 	}
-	result = object->vt->QueryInterface(object, &IID_IBaseFilter, (void**)&This->m_pFilter);
+	result = object->vt->QueryInterface(object, &IID_IBaseFilter, (void*)&This->m_pFilter);
 	object->vt->Release((IUnknown*)object);
 	if (result || !This->m_pFilter)
 	{
@@ -216,14 +216,14 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 
 	for (i = 0; i < fetched; i++)
 	{
-	    int direction = -1;
+	    PIN_DIRECTION direction = -1;
 	    array[i]->vt->QueryDirection(array[i], (PIN_DIRECTION*)&direction);
-	    if (!This->m_pInputPin && direction == 0)
+	    if (!This->m_pInputPin && direction == PINDIR_INPUT)
 	    {
 		This->m_pInputPin = array[i];
 		This->m_pInputPin->vt->AddRef((IUnknown*)This->m_pInputPin);
 	    }
-	    if (!This->m_pOutputPin && direction == 1)
+	    if (!This->m_pOutputPin && direction == PINDIR_OUTPUT)
 	    {
 		This->m_pOutputPin = array[i];
 		This->m_pOutputPin->vt->AddRef((IUnknown*)This->m_pOutputPin);
@@ -242,7 +242,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	}
 	result = This->m_pInputPin->vt->QueryInterface((IUnknown*)This->m_pInputPin,
 						       &IID_IMemInputPin,
-						       (void**)&This->m_pImp);
+						       (void*)&This->m_pImp);
 	if (result)
 	{
 	    em = "could not get IMemInputPin interface";
