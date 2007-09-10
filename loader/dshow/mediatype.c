@@ -20,6 +20,7 @@
  *     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  *
  */
+#include <stdio.h>
 #include "mediatype.h"
 #include "mp_msg.h"
 #include "wine/winerror.h"
