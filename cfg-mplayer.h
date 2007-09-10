@@ -6,7 +6,6 @@
 
 extern int key_fifo_size;
 extern unsigned doubleclick_time;
-extern int noconsolecontrols;
 
 #ifdef HAVE_FBDEV
 extern char *fb_mode_cfgfile;
@@ -18,8 +17,6 @@ extern char *dfb_params;
 #ifdef USE_FAKE_MONO
 extern int fakemono; // defined in dec_audio.c
 #endif
-
-extern int volstep;
 
 #ifdef HAVE_LIRC
 extern char *lirc_configfile;
@@ -33,8 +30,6 @@ extern int opt_screen_size_x;
 extern int opt_screen_size_y;
 extern int fullscreen;
 extern int vidmode;
-
-extern int osd_level;
 
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
@@ -81,7 +76,6 @@ extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
 extern char* pp_help;
-extern int use_filedir_conf;
 
 m_option_t vd_conf[]={
 	{"help", "Use MPlayer with an appropriate video file instead of live partners to avoid vd.\n", CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
