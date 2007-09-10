@@ -499,11 +499,6 @@ extern m_config_t dvbin_opts_conf[];
 extern m_option_t lavfdopts_conf[];
 #endif
 
-#ifdef  USE_FRIBIDI
-extern char *fribidi_charset;
-extern int flip_hebrew;
-#endif
-
 #ifdef STREAMING_LIVE555
 extern int rtspStreamOverTCP;
 #endif
