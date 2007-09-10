@@ -346,8 +346,6 @@ extern float screen_size_xy;
 extern float movie_aspect;
 extern int softzoom;
 extern int flip;
-extern int vd_use_slices;
-extern int divx_quality;
 
 /* defined in codec-cfg.c */
 extern char * codecs_file;
