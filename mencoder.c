@@ -65,6 +65,7 @@
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/vf.h"
+#include "libmpcodecs/vd.h"
 
 // for MPEGLAYER3WAVEFORMAT:
 #include "libmpdemux/ms_hdr.h"
