@@ -67,9 +67,6 @@
 
 #define AdjustPtr(ptr,delta) ((char *)(ptr) + (delta))
 
-extern void* LookupExternal(const char* library, int ordinal);
-extern void* LookupExternalByName(const char* library, const char* name);
-
 static void dump_exports( HMODULE hModule )
 { 
   char		*Module;
