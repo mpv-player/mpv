@@ -241,4 +241,4 @@ typedef struct
 ** Used in video streams.
 */
 #endif /* NOAVIFMT */
-#endif
+#endif /* AVIFMT */

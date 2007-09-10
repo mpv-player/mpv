@@ -253,4 +253,4 @@ struct IRtConfig
 #define fccYVU9 mmioFOURCC('Y', 'V', 'U', '9')/* Planar 4:1:0 */
 #define fccIF09 mmioFOURCC('I', 'F', '0', '9')/* Planar 4:1:0 + delta */
 
-#endif
+#endif /* __LIBWIN32_H */

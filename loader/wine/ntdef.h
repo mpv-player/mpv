@@ -98,4 +98,4 @@ typedef OBJECT_ATTRIBUTES *POBJECT_ATTRIBUTES;
 
 #include "poppack.h"
 
-#endif
+#endif /* __WINE_NTDEF_H */
