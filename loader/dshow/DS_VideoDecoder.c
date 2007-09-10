@@ -408,7 +408,7 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
     HRESULT result;
     ALLOCATOR_PROPERTIES props,props1;
     int should_test=1;
-    int stoped = 0;   
+    int stopped = 0;
     
     Debug printf("DS_VideoDecoder_SetDestFmt (%p, %d, %d)\n",this,bits,(int)csp);
         
@@ -584,7 +584,7 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
     {
 	DS_VideoDecoder_StopInternal(this);
         this->iv.m_State = STOP;
-        stoped = true;
+        stopped = true;
     }
 
     this->m_pDS_Filter->m_pInputPin->vt->Disconnect(this->m_pDS_Filter->m_pInputPin);
@@ -625,7 +625,7 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
 	return -1;
     }
 
-    if (stoped)
+    if (stopped)
     {
 	DS_VideoDecoder_StartInternal(this);
         this->iv.m_State = START; 
