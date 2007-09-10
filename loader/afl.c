@@ -193,7 +193,6 @@ MMRESULT WINAPI acmDriverOpen(PHACMDRIVER phad, HACMDRIVERID hadid, DWORD fdwOpe
     PWINE_ACMDRIVERID	padid;
     PWINE_ACMDRIVER	pad;
     ICOPEN		icopen;
-    HDRVR		hdrv;
 
 
     TRACE("(%p, %x, %08lu)\n", phad, hadid, fdwOpen);
@@ -438,7 +437,7 @@ MMRESULT WINAPI acmStreamOpen(PHACMSTREAM phas, HACMDRIVER had, PWAVEFORMATEX pw
 	    goto errCleanUp;
     } else {
 	PWINE_ACMDRIVERID wadi;
-	short drv_tag;
+	//short drv_tag;
 	ret = ACMERR_NOTPOSSIBLE;
 /*	if(pwfxSrc->wFormatTag==1)//compression
 	    drv_tag=pwfxDst->wFormatTag;
