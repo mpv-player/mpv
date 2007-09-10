@@ -2097,7 +2097,6 @@ static HRSRC WINAPI expFindResourceA(HMODULE module, char* name, char* type)
     return result;
 }
 
-extern HRSRC WINAPI LoadResource(HMODULE, HRSRC);
 static HGLOBAL WINAPI expLoadResource(HMODULE module, HRSRC res)
 {
     HGLOBAL result=LoadResource(module, res);
@@ -2242,7 +2241,6 @@ static int WINAPI expGetACP(void)
     dbgprintf("GetACP() => 0\n");
     return 0;
 }
-extern WINE_MODREF *MODULE32_LookupHMODULE(HMODULE m);
 static int WINAPI expGetModuleFileNameA(int module, char* s, int len)
 {
     WINE_MODREF *mr;
