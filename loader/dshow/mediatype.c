@@ -20,7 +20,6 @@
  *     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  *
  */
-#include <stdio.h>
 #include "mediatype.h"
 #include "mp_msg.h"
 #include "wine/winerror.h"
@@ -44,7 +43,7 @@ void DisplayMediaType(const char * label,const AM_MEDIA_TYPE* pmt){
         Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"%02x ",(BYTE)((BYTE*)pmt)[i]);
         if((i+1)%8==0) Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"\n");
     }
-    if((i)%8!=0) printf("\n");
+    if((i)%8!=0) Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"\n");
     Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"-(Ptr:%p)--(%02d)--\n",pmt->pbFormat,pmt->cbFormat);
     for(i=0;i<pmt->cbFormat;i++){
         Debug mp_msg(MSGT_LOADER,MSGL_DBG4,"%02x ",(BYTE)pmt->pbFormat[i]);
