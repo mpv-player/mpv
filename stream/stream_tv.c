@@ -40,7 +40,7 @@ tv_param_t stream_tv_defaults = {
     -1,            //normid
 #endif
     NULL,          //device
-    "dummy",       //driver
+    NULL,          //driver
     -1,            //width
     -1,            //height
     0,             //input, used in v4l and bttv

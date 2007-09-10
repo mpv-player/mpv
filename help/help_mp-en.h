@@ -2081,6 +2081,7 @@ static char help_text[]=
 #define MSGTR_TV_AvailableDrivers "Available drivers:\n"
 #define MSGTR_TV_DriverInfo "Selected driver: %s\n name: %s\n author: %s\n comment: %s\n"
 #define MSGTR_TV_NoSuchDriver "No such driver: %s\n"
+#define MSGTR_TV_DriverAutoDetectionFailed "TV driver autodetection failed.\n"
 #define MSGTR_TV_UnknownColorOption "Unknown color option (%d) specified!\n"
 #define MSGTR_TV_CurrentFrequency "Current frequency: %lu (%.3f)\n"
 #define MSGTR_TV_NoTeletext "No teletext"

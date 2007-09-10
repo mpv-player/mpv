@@ -52,17 +52,18 @@ extern tvi_info_t tvi_info_v4l2;
 extern tvi_info_t tvi_info_bsdbt848;
 #endif
 
+/** List of drivers in autodetection order */
 static const tvi_info_t* tvi_driver_list[]={
-    &tvi_info_dummy,
-#ifdef HAVE_TV_V4L1
-    &tvi_info_v4l,
-#endif
 #ifdef HAVE_TV_V4L2
     &tvi_info_v4l2,
+#endif
+#ifdef HAVE_TV_V4L1
+    &tvi_info_v4l,
 #endif
 #ifdef HAVE_TV_BSDBT848
     &tvi_info_bsdbt848,
 #endif
+    &tvi_info_dummy,
     NULL
 };
 
@@ -560,7 +561,7 @@ static tvi_handle_t *tv_begin(tv_param_t* tv_param)
 {
     int i;
     tvi_handle_t* h;
-    if(!strcmp(tv_param->driver,"help")){
+    if(tv_param->driver && !strcmp(tv_param->driver,"help")){
         mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_AvailableDrivers);
         for(i=0;tvi_driver_list[i];i++){
 	    mp_msg(MSGT_TV,MSGL_INFO," %s\t%s",tvi_driver_list[i]->short_name,tvi_driver_list[i]->name);
@@ -572,20 +573,29 @@ static tvi_handle_t *tv_begin(tv_param_t* tv_param)
     }
 
     for(i=0;tvi_driver_list[i];i++){
-        if (!strcmp(tvi_driver_list[i]->short_name, tv_param->driver)){
+        if (!tv_param->driver || !strcmp(tvi_driver_list[i]->short_name, tv_param->driver)){
             h=tvi_driver_list[i]->tvi_init(tv_param);
-            if(!h) return NULL;
+            //Requested driver initialization failed
+            if (!h && tv_param->driver)
+                return NULL;
+            //Driver initialization failed during autodetection process.
+            if (!h)
+                continue;
 
             h->tv_param=tv_param;
             mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_DriverInfo, tvi_driver_list[i]->short_name,
             tvi_driver_list[i]->name,
             tvi_driver_list[i]->author,
             tvi_driver_list[i]->comment?tvi_driver_list[i]->comment:"");
+            tv_param->driver=strdup(tvi_driver_list[i]->short_name);
             return h;
         }
     }
     
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_NoSuchDriver, tv_param->driver); 
+    if(tv_param->driver)
+        mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_NoSuchDriver, tv_param->driver); 
+    else
+        mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_DriverAutoDetectionFailed);
     return(NULL);
 }
 
