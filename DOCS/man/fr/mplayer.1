@@ -1,4 +1,4 @@
-.\" synced with r24329
+.\" synced with r24423
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -1860,7 +1860,7 @@ Dans la plupart des cas, automute=100 devrait convenir.
 .IPs driver=<valeur>
 Voir \-tv driver=help pour avoir la liste des pilotes d'entrée TV activés
 à la compilation.
-disponibles: dummy, v4l, v4l2, bsdbt848
+disponibles: dummy, v4l, v4l2, bsdbt848 (par défaut\ : auto-détecté)
 .IPs device=<valeur>
 Défini un périphérique TV (par défaut /dev/\:video0).
 .I NOTE\ :
@@ -2003,12 +2003,11 @@ Défini le mode d'affichage télétexte  (par défaut\ : 0).
 .IPs tpage=<100-999>
 Défini le numéro de page de télétexte au démarage (par défaut\ : 100).
 .IPs tlang=<\-1\-127>
-Défini le code du langage télétexte par défaut (par défaut\ : 0).
-La valeur donnée sera utilisée comme langue primaire jusqu'à ce que le
-paquet 28 est reçu.
+Défini le code du langage télétexte par défaut (par défaut\ : 0), qui sera
+utilisée comme langue primaire jusqu'à ce que le paquet de type 28 est reçu.
 Utile lorsque le système télétexte utilise un ensemble de caractères non
 latins, et que le code du langage n'est pas transmis par le paquet
-télétexte 28 pour une raison quelconque.
+télétexte de type 28 pour une raison quelconque.
 La liste des langues gérées et affichée lorsque cette option est mise
 à \-1.
 .RE
@@ -9173,6 +9172,10 @@ Si vous utilisez vcodec=mpeg2video cette valeur peut être 8, 9, 10 ou 11.
 Ferme tous les GOPs (groupes de trames).
 Ne fonctionne pour le moment que si la détection de changement de scène
 est désactivée (sc_threshold=1000000000).
+.
+.TP
+.B (no)lowdelay
+Active le drapeau de délais pour MPEG-1/2 (désactive les trames-B).
 .
 .TP
 .B vglobal=<0\-3>
