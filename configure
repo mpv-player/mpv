@@ -1282,7 +1282,10 @@ else # if test -z "$_target"
     mingw32msvc) system_name=MINGW32 ;;
   esac
   # We need to convert underscores so that values like k6-2 and pentium-mmx can be passed
-  host_arch=`echo $_target | cut -d '-' -f 1 | tr '_' '-'`
+  host_arch=`echo $_target | cut -d '-' -f 1`
+  if test `echo $host_arch` != "x86_64" ; then
+    host_arch=`echo $host_arch | tr '_' '-'`
+  fi
 fi
 
 echo "Detected operating system: $system_name"
