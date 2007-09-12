@@ -10,7 +10,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#ifndef __WINE_WINGDI_H
 
 typedef struct __attribute__((__packed__))
 {
@@ -43,7 +42,6 @@ typedef struct {
 } BITMAPINFO, *LPBITMAPINFO;
 #endif
 
-#endif
 #define VFWAPI	
 #define VFWAPIV	
 #ifndef __WINE_WINDEF_H
