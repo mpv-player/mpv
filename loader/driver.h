@@ -4,8 +4,8 @@
  * $Id$
  */
 
-#ifndef loader_driver_h
-#define	loader_driver_h
+#ifndef LOADER_DRIVER_H
+#define LOADER_DRIVER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,4 +25,4 @@ void DrvClose(HDRVR hdrvr);
 }
 #endif
 
-#endif
+#endif /* LOADER_DRIVER_H */

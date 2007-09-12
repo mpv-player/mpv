@@ -4,8 +4,8 @@
  * $Id$
  */
 
-#ifndef loader_win32_h
-#define loader_win32_h
+#ifndef LOADER_WIN32_H
+#define LOADER_WIN32_H
 
 #include <time.h>
 
@@ -41,4 +41,4 @@ typedef struct tls_s tls_t;
 extern void* LookupExternal(const char* library, int ordinal);
 extern void* LookupExternalByName(const char* library, const char* name);
 
-#endif
+#endif /* LOADER_WIN32_H */
