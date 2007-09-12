@@ -3,10 +3,10 @@
  *  AVIFMT - AVI file format definitions
  *
  ****************************************************************************/
-#ifndef AVIFMT 
-#define AVIFMT
+#ifndef WINE_AVIFMT_H
+#define WINE_AVIFMT_H
 
-#ifndef NOAVIFMT 
+#ifndef WINE_NOAVIFMT_H
 
 #ifndef  __WINE_WINDEF_H
 #include "wine/windef.h"
@@ -240,5 +240,5 @@ typedef struct
 **
 ** Used in video streams.
 */
-#endif /* NOAVIFMT */
-#endif /* AVIFMT */
+#endif /* WINE_NOAVIFMT_H */
+#endif /* WINE_AVIFMT_H */
