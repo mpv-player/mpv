@@ -63,6 +63,7 @@
 #include "libaf/af_format.h"
 #include "libmpcodecs/img_format.h"
 #include "tv.h"
+#include "help_mp.h"
 #include "mp_msg.h"
 
 static tvi_handle_t *tvi_init_bsdbt848(tv_param_t* tv_param);
