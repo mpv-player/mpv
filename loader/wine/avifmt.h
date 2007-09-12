@@ -8,9 +8,7 @@
 
 #ifndef WINE_NOAVIFMT_H
 
-#ifndef  __WINE_WINDEF_H
 #include "wine/windef.h"
-#endif
 
 #ifndef __WINE_MMSYSTEM_H
 #ifndef __WINE_MSACM_H
