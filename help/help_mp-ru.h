@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r24341
+// Synced with help_mp-en.h: r24423
 
 // ========================= MPlayer help ===========================
 
@@ -2078,6 +2078,7 @@ static char help_text[]=
 #define MSGTR_TV_AvailableDrivers "Доступные драйверы:\n"
 #define MSGTR_TV_DriverInfo "Выбран драйвер: %s\n название: %s\n автор: %s\n комментарий %s\n"
 #define MSGTR_TV_NoSuchDriver "Нет такого драйвера: %s\n"
+#define MSGTR_TV_DriverAutoDetectionFailed "Автоматически определить TV драйвер не удалось.\n"
 #define MSGTR_TV_UnknownColorOption "Указана неизвестная опция цвета (%d)!\n"
 #define MSGTR_TV_CurrentFrequency "Текущая частота: %lu (%.3f)\n"
 #define MSGTR_TV_NoTeletext "Нет телетекста"
