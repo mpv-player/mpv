@@ -93,27 +93,27 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
     if(mpi->w==mpi->stride[0] && dmpi->w*(dmpi->bpp>>3)==dmpi->stride[0]){
 	// no stride conversion needed
-	switch(dmpi->imgfmt&255){
+	switch(IMGFMT_RGB_DEPTH(dmpi->imgfmt)){
 	case 15:
-	    if (dmpi->flags & MP_IMGFLAG_SWAPPED)
+	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		palette8tobgr15(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
 		palette8torgb15(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	case 16:
-	    if (dmpi->flags & MP_IMGFLAG_SWAPPED)
+	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		palette8tobgr16(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
 		palette8torgb16(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	case 24:
-	    if (dmpi->flags & MP_IMGFLAG_SWAPPED)
+	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		palette8tobgr24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
 		palette8torgb24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	case 32:
-	    if (dmpi->flags & MP_IMGFLAG_SWAPPED)
+	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		palette8tobgr32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
 		palette8torgb32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
@@ -124,27 +124,27 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	for(y=0;y<mpi->h;y++){
 	    unsigned char* src=mpi->planes[0]+y*mpi->stride[0];
 	    unsigned char* dst=dmpi->planes[0]+y*dmpi->stride[0];
-	    switch(dmpi->imgfmt&255){
+	    switch(IMGFMT_RGB_DEPTH(dmpi->imgfmt)){
 	    case 15:
-		if (dmpi->flags & MP_IMGFLAG_SWAPPED)
+		if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		    palette8tobgr15(src,dst,mpi->w,mpi->planes[1]);
 		else
 		    palette8torgb15(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    case 16:
-		if (dmpi->flags & MP_IMGFLAG_SWAPPED)
+		if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		    palette8tobgr16(src,dst,mpi->w,mpi->planes[1]);
 		else
 		    palette8torgb16(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    case 24:
-		if (dmpi->flags & MP_IMGFLAG_SWAPPED)
+		if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		    palette8tobgr24(src,dst,mpi->w,mpi->planes[1]);
 		else
 		    palette8torgb24(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    case 32:
-		if (dmpi->flags & MP_IMGFLAG_SWAPPED)
+		if (IMGFMT_IS_BGR(dmpi->imgfmt))
 		    palette8tobgr32(src,dst,mpi->w,mpi->planes[1]);
 		else
 		    palette8torgb32(src,dst,mpi->w,mpi->planes[1]);
