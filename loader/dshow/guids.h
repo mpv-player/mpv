@@ -1,26 +1,26 @@
 #ifndef DS_GUIDS_H
 #define DS_GUIDS_H
 
+/*
+this will be defined if <ole2.h> already included before this file
+under MinGW
+*/
+
+#ifndef GUID_DEFINED
 #include "com.h"
+#endif
+
+#ifndef VFWAPI
 #include "wine/module.h"
 #include "wine/windef.h"
 #include "wine/vfw.h"
+#endif
+
+#include "mediatype.h"
 
 //#define Debug if(1)
 #define Debug if(0)
 
-typedef struct __attribute__((__packed__)) _MediaType
-{
-    GUID	majortype;		//0x0
-    GUID	subtype;		//0x10
-    int		bFixedSizeSamples;	//0x20
-    int		bTemporalCompression;	//0x24
-    unsigned long lSampleSize;		//0x28
-    GUID	formattype;		//0x2c
-    IUnknown*	pUnk;			//0x3c
-    unsigned long cbFormat;		//0x40
-    char*	pbFormat;		//0x44
-} AM_MEDIA_TYPE;
 
 typedef long long REFERENCE_TIME;
 

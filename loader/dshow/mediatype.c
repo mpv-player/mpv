@@ -20,10 +20,10 @@
  *     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  *
  */
-#include "mediatype.h"
 #include "mp_msg.h"
 #include "wine/winerror.h"
 #include "com.h"
+#include "mediatype.h"
 #include "libwin32.h"
 
 void DisplayMediaType(const char * label,const AM_MEDIA_TYPE* pmt){
