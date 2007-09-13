@@ -1637,10 +1637,10 @@ mp_input_set_section(char *name) {
   cmd_binds_default=NULL;
   if(section) free(section);
   if(name) section=strdup(name); else section=strdup("default");
-  if(bind_section=mp_input_get_bind_section(section))
+  if((bind_section=mp_input_get_bind_section(section)))
     cmd_binds=bind_section->cmd_binds;
   if(strcmp(section,"default")==0) return;
-  if(bind_section=mp_input_get_bind_section(NULL))
+  if((bind_section=mp_input_get_bind_section(NULL)))
     cmd_binds_default=bind_section->cmd_binds;
 }
 

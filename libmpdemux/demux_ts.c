@@ -2792,7 +2792,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 						if(dvdsub_lang)
 						{
-							if(lang = pid_lang_from_pmt(priv, pid))
+							if ((lang = pid_lang_from_pmt(priv, pid)))
 								asgn = (strncmp(lang, dvdsub_lang, 3) == 0);
 						}
 						else		//no language specified with -slang

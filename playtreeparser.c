@@ -520,7 +520,7 @@ parse_smil(play_tree_parser_t* p) {
     pos = line;
    while (pos) {
     if (!entrymode) { // all entries filled so far 
-     while (pos=strchr(pos, '<')) {
+     while ((pos=strchr(pos, '<'))) {
       if (strncasecmp(pos,"<video",6)==0  || strncasecmp(pos,"<audio",6)==0 || strncasecmp(pos,"<media",6)==0) {
           entrymode=1;
           break; // Got a valid tag, exit '<' search loop

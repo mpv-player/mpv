@@ -391,7 +391,7 @@ static int mga_init(int width,int height,unsigned int format){
 	{
 		// try whether we have a G550
 		int ret;
-		if(ret = ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
+		if ((ret = ioctl(f,MGA_VID_CONFIG,&mga_vid_config)))
 		{
 			if(mga_vid_config.card_type != MGA_G550)
 			{
