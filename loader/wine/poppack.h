@@ -1,5 +1,5 @@
-#ifdef __WINE_PSHPACK_H
-#undef __WINE_PSHPACK_H
+#ifdef WINE_PSHPACK_H
+#undef WINE_PSHPACK_H
 
 #if (defined(__GNUC__) || defined(__SUNPRO_C)) && !defined(__APPLE__)
 #pragma pack()
@@ -10,6 +10,6 @@
 #error "Restoration of the previous alignment isn't supported by the compiler"
 #endif /* defined(__GNUC__) || defined(__SUNPRO_C) ; !defined(RC_INVOKED) */
 
-#else /* defined(__WINE_PSHPACK_H) */
+#else /* defined(WINE_PSHPACK_H) */
 #error "Popping alignment isn't possible since no alignment has been pushed"
-#endif /* defined(__WINE_PSHPACK_H) */
+#endif /* defined(WINE_PSHPACK_H) */

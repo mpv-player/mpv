@@ -1,5 +1,5 @@
-#ifndef __WINE_PE_IMAGE_H
-#define __WINE_PE_IMAGE_H
+#ifndef WINE_PE_IMAGE_H
+#define WINE_PE_IMAGE_H
 
 #include "winnt.h"
 #include "winbase.h"
@@ -78,4 +78,4 @@ extern struct _wine_modref *ELF_LoadLibraryExA( LPCSTR libname, DWORD flags);
 extern void ELF_UnloadLibrary(struct _wine_modref *);
 extern FARPROC ELF_FindExportedFunction(struct _wine_modref *wm, LPCSTR funcName);
 
-#endif /* __WINE_PE_IMAGE_H */
+#endif /* WINE_PE_IMAGE_H */

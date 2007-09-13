@@ -1,5 +1,5 @@
-#ifndef __LIBWIN32_H
-#define __LIBWIN32_H
+#ifndef LIBWIN32_H
+#define LIBWIN32_H
 
 #define VFW_E_NOT_RUNNING               0x80040226
 
@@ -253,4 +253,4 @@ struct IRtConfig
 #define fccYVU9 mmioFOURCC('Y', 'V', 'U', '9')/* Planar 4:1:0 */
 #define fccIF09 mmioFOURCC('I', 'F', '0', '9')/* Planar 4:1:0 + delta */
 
-#endif /* __LIBWIN32_H */
+#endif /* LIBWIN32_H */

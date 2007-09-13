@@ -31,7 +31,7 @@ long __stdcall RegCreateKeyExA(long key, const char* name, long reserved,
 long __stdcall RegSetValueExA(long key, const char* name, long v1, long v2,
 		    const void* data, long size);
 
-#ifdef __WINE_WINERROR_H
+#ifdef WINE_WINERROR_H
 
 long __stdcall RegEnumKeyExA(HKEY hKey, DWORD dwIndex, LPSTR lpName, LPDWORD lpcbName,
 		   LPDWORD lpReserved, LPSTR lpClass, LPDWORD lpcbClass,

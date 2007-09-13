@@ -1,5 +1,5 @@
-#ifndef __WINE_WINDOWS_H
-#define __WINE_WINDOWS_H
+#ifndef WINE_WINDOWS_H
+#define WINE_WINDOWS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,4 +35,4 @@ typedef KANJISTRUCT *PKANJISTRUCT;
 }
 #endif
 
-#endif  /* __WINE_WINDOWS_H */
+#endif  /* WINE_WINDOWS_H */

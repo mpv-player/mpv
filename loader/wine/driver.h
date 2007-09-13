@@ -2,8 +2,8 @@
  * Drivers definitions
  */
 
-#ifndef __WINE_DRIVER_H
-#define __WINE_DRIVER_H
+#ifndef WINE_DRIVER_H
+#define WINE_DRIVER_H
 
 #include "windef.h"
 
@@ -107,4 +107,4 @@ DWORD WINAPI GetDriverFlags( HDRVR hDriver );
 #define WINE_GDF_EXIST	0x80000000
 #define WINE_GDF_16BIT	0x10000000
 
-#endif  /* __WINE_DRIVER_H */
+#endif  /* WINE_DRIVER_H */

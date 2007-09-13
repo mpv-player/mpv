@@ -1,5 +1,5 @@
-#ifndef __WINE_WINERROR_H
-#define __WINE_WINERROR_H
+#ifndef WINE_WINERROR_H
+#define WINE_WINERROR_H
 
 
 extern int WIN32_LastError;
@@ -1655,4 +1655,4 @@ extern int WIN32_LastError;
 #define OLEOBJ_E_INVALIDVERB            0x00040181L
 #define OLEOBJ_S_INVALIDVERB            0x00040180L
 
-#endif  /* __WINE_WINERROR_H */
+#endif  /* WINE_WINERROR_H */

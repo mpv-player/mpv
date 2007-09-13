@@ -1,5 +1,5 @@
-#ifndef __WINE_WINESTRING_H
-#define __WINE_WINESTRING_H
+#ifndef WINE_WINESTRING_H
+#define WINE_WINESTRING_H
 
 #include "windef.h"
 
@@ -10,4 +10,4 @@ LPSTR       WINAPI lstrcpynWtoA(LPSTR,LPCWSTR,INT);
 
 #define lstrncmpiA strncasecmp
 
-#endif /* __WINE_WINESTRING_H */
+#endif /* WINE_WINESTRING_H */

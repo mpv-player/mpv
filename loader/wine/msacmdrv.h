@@ -2,8 +2,8 @@
  *      msacmdrv.h   -       Declarations for MSACM driver
  */
 
-#ifndef __WINE_MSACMDRV_H
-#define __WINE_MSACMDRV_H
+#ifndef WINE_MSACMDRV_H
+#define WINE_MSACMDRV_H
 
 #include "windef.h"
 #include "msacm.h"
@@ -200,4 +200,4 @@ typedef struct _ACMDRVFORMATSUGGEST
   DWORD           cbwfxDst;
 } ACMDRVFORMATSUGGEST, *PACMDRVFORMATSUGGEST;
 
-#endif  /* __WINE_MSACMDRV_H */
+#endif  /* WINE_MSACMDRV_H */

@@ -4,8 +4,8 @@
  * Copyright 1995 Alexandre Julliard
  */
 
-#ifndef __WINE_LDT_H
-#define __WINE_LDT_H
+#ifndef WINE_LDT_H
+#define WINE_LDT_H
 
 #include "windef.h"
 enum seg_type
@@ -95,4 +95,4 @@ extern unsigned char ldt_flags_copy[LDT_SIZE];
 #ifdef __cplusplus
 }
 #endif
-#endif  /* __WINE_LDT_H */
+#endif  /* WINE_LDT_H */

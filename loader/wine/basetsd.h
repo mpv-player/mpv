@@ -9,8 +9,8 @@
  * $Id$
  */
 
-#ifndef __WINE_BASETSD_H
-#define __WINE_BASETSD_H
+#ifndef WINE_BASETSD_H
+#define WINE_BASETSD_H
 
 #include "config.h"
 
@@ -170,7 +170,4 @@ typedef UINT_PTR SIZE_T, *PSIZE_T;
 } /* extern "C" */
 #endif /* defined(__cplusplus) */
 
-#endif /* !defined(__WINE_BASETSD_H) */
-
-
-
+#endif /* !defined(WINE_BASETSD_H) */

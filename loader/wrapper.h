@@ -1,5 +1,5 @@
-#ifndef _WRAPPER_H
-#define _WRAPPER_H
+#ifndef WRAPPER_H
+#define WRAPPER_H
 
 #include <inttypes.h>
 
@@ -16,5 +16,5 @@ extern void (*wrapper_target)(void);
 extern int wrapper(void);
 extern int null_call(void);
 
-#endif /* _WRAPPER_H */
+#endif /* WRAPPER_H */
 

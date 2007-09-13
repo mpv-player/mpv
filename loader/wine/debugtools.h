@@ -1,6 +1,6 @@
 
-#ifndef __WINE_DEBUGTOOLS_H
-#define __WINE_DEBUGTOOLS_H
+#ifndef WINE_DEBUGTOOLS_H
+#define WINE_DEBUGTOOLS_H
 
 #include <stdarg.h>
 #include "config.h"
@@ -86,4 +86,4 @@ extern int dbg_printf(const char *format, ...);
 #define DPRINTF dbg_printf
 #define MESSAGE dbg_printf
 
-#endif  /* __WINE_DEBUGTOOLS_H */
+#endif  /* WINE_DEBUGTOOLS_H */

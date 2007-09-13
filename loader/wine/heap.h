@@ -4,8 +4,8 @@
  * Copyright 1996 Alexandre Julliard
  */
 
-#ifndef __WINE_HEAP_H
-#define __WINE_HEAP_H
+#ifndef WINE_HEAP_H
+#define WINE_HEAP_H
 
 #include "config.h"
 
@@ -53,4 +53,4 @@ typedef struct
 
 extern SYSTEM_HEAP_DESCR *SystemHeapDescr;
 
-#endif  /* __WINE_HEAP_H */
+#endif  /* WINE_HEAP_H */

@@ -4,8 +4,8 @@
  * $Id$
  */
 
-#ifndef __WINE_VFW_H
-#define __WINE_VFW_H
+#ifndef WINE_VFW_H
+#define WINE_VFW_H
 //#include "pshpack1.h"
 #ifdef __cplusplus
 extern "C" {
@@ -44,7 +44,7 @@ typedef struct {
 
 #define VFWAPI	
 #define VFWAPIV	
-#ifndef __WINE_WINDEF_H
+#ifndef WINE_WINDEF_H
 typedef long (__stdcall__ *DRIVERPROC)(long,HDRVR,unsigned int,long,long);
 #endif
 
@@ -669,4 +669,4 @@ typedef struct {
 #ifdef __cplusplus
 }
 #endif
-#endif /* __WINE_VFW_H */
+#endif /* WINE_VFW_H */

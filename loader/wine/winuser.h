@@ -1,5 +1,5 @@
-#ifndef _WINE_WINUSER_H
-#define _WINE_WINUSER_H
+#ifndef WINE_WINUSER_H
+#define WINE_WINUSER_H
 
 #ifndef RC_INVOKED
 #include <stdarg.h>
@@ -2926,4 +2926,4 @@ VOID        WINAPI ScreenSwitchEnable16(WORD);
 }
 #endif
 
-#endif /* _WINE_WINUSER_H */
+#endif /* WINE_WINUSER_H */

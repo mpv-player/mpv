@@ -10,7 +10,7 @@
 
 #include "windef.h"
 
-#ifndef __WINE_MSACM_H
+#ifndef WINE_MSACM_H
 typedef DWORD FOURCC;
 #endif
 
