@@ -826,7 +826,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    }   
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "\nty:actual current offset %"PRIx64"\n", ( stream_tell( demux->stream ) - 
-		0x20000 ) );
+		CHUNKSIZE ) );
 
 
    // Let's make a Video Demux Stream for MPlayer
