@@ -233,16 +233,16 @@ while(1){
 	  
       print_avisuperindex_chunk(s,MSGL_V);
       
-      if( ((chunksize/4)/s->wLongsPerEntry) < s->nEntriesInUse){
-        mp_msg (MSGT_HEADER, MSGL_WARN, "Broken super index chunk\n");
-        s->nEntriesInUse = (chunksize/4)/s->wLongsPerEntry;
-      }
-
       // Check and fix this useless crap
       if(s->wLongsPerEntry != sizeof (avisuperindex_entry)/4) {
           mp_msg (MSGT_HEADER, MSGL_WARN, "Broken super index chunk size: %u\n",s->wLongsPerEntry);
           s->wLongsPerEntry = sizeof(avisuperindex_entry)/4;
       }
+      if( ((chunksize/4)/s->wLongsPerEntry) < s->nEntriesInUse){
+        mp_msg (MSGT_HEADER, MSGL_WARN, "Broken super index chunk\n");
+        s->nEntriesInUse = (chunksize/4)/s->wLongsPerEntry;
+      }
+
       s->aIndex = calloc(s->nEntriesInUse, sizeof (avisuperindex_entry));
       s->stdidx = calloc(s->nEntriesInUse, sizeof (avistdindex_chunk));
 
