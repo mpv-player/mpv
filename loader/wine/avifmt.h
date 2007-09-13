@@ -8,7 +8,7 @@
 
 #ifndef WINE_NOAVIFMT_H
 
-#include "wine/windef.h"
+#include "windef.h"
 
 #ifndef __WINE_MSACM_H
 typedef DWORD FOURCC;
