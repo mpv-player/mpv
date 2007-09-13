@@ -759,6 +759,8 @@ no_audio:
     tv_set_color_options(tvh, TV_COLOR_SATURATION, tvh->tv_param->saturation);
     tv_set_color_options(tvh, TV_COLOR_CONTRAST, tvh->tv_param->contrast);
 
+    funcs->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+
     return demuxer;
 }
 
