@@ -912,17 +912,10 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       // ================================================================
 		else if ( type == 0x02 )
 		{
-			unsigned char b1;
-			unsigned char b2;
+			int b = AV_RB24(recPtr) >> 4;
+			b &= 0x7f7f;
 
-			b1 = ( ( ( recPtr[ 0 ] & 0x0f ) << 4 ) | 
-				( ( recPtr[ 1 ] & 0xf0 ) >> 4 ) );
-			b1 &= 0x7f;
-			b2 = ( ( ( recPtr[ 1 ] & 0x0f ) << 4 ) | 
-				( ( recPtr[ 2 ] & 0xf0 ) >> 4 ) );
-			b2 &= 0x7f;
-
-         mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:XDS %x %x\n", b1, b2 );
+         mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:XDS %04x\n", b);
 
 			lastXDS[ 0x00 ] = 0x00;
 			lastXDS[ 0x01 ] = 0x00;
@@ -931,8 +924,8 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 			lastXDS[ 0x04 ] = 'T';
 			lastXDS[ 0x05 ] = 'Y';
 			lastXDS[ 0x06 ] = 0x02;
-			lastXDS[ 0x07 ] = b1;
-			lastXDS[ 0x08 ] = b2;
+			lastXDS[ 0x07 ] = b >> 8;
+			lastXDS[ 0x08 ] = b;
          if ( subcc_enabled )
 			   demux_ty_CopyToDemuxPacket( TY_V, tivo, demux->video, lastXDS, 0x09,
 				   ( demux->filepos + offset ), tivo->lastVideoPTS );
