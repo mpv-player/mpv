@@ -137,14 +137,12 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    char    *name;
    char    *sizestr;
    int     size;
-   int     count;
    off_t   offset;
    off_t   totalsize;
    off_t   skip;
    int     parts = 0;
    int     isty;
    int     index;
-   int     ok;
 
    offset = 0;
    totalsize = demux->stream->end_pos;
@@ -152,16 +150,12 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    mp_msg( MSGT_DEMUX, MSGL_DBG3, "Dumping tar contents\n" );
    while (1)
    {
-      ok = stream_seek( demux->stream, offset );
-      if ( offset + 512 == totalsize )
-         break;
-      if ( ok == 0 )
+      if (!stream_seek(demux->stream, offset))
       { 
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "Seek bad %"PRId64"\n", (int64_t)offset );
          break;
       }
-      count = stream_read( demux->stream, header, 512 );
-      if ( count < 512 )
+      if (stream_read(demux->stream, header, 512) < 512)
       { 
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "Read bad\n" );
          break;
@@ -176,9 +170,7 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       skip = 512 + ((size + 511) & ~511);
 
       if ( offset + skip > totalsize )
-      {
          size = totalsize - offset;
-      }
 
       isty = ty_extensionis( name, ".ty" );
 
@@ -218,10 +210,9 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          parts++;
       }
 
-      if ( ( offset + skip ) > totalsize )
+      if (offset + skip >= totalsize)
          break;
-      else
-         offset += skip;
+      offset += skip;
    }
    tivo->tmf_totalparts = parts;
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
