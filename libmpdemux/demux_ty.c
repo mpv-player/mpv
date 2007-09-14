@@ -122,26 +122,6 @@ void ty_ClearOSD( int start );
 // ===========================================================================
 #define TMF_SIG "showing.xml"
 
-int ty_octaltodecimal( char *num )
-{
-   int i;
-   int result = 0;
-   int len;
-   int mult;
-
-   len = strlen( num );
-   mult = 1;
-
-   for ( i = ( len - 1 ) ; i >= 0 ; i-- )
-   {
-      result += ( ( num[ i ] - '0') * mult );
-      mult *= 8;
-   }
-   return( result );
-}
-
-
-
 // ===========================================================================
 int ty_extensionis( char *name, char *ext )
 {
@@ -204,7 +184,7 @@ int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       }
       av_strlcpy( name, &header[ 0 ], 100 );
       av_strlcpy( sizestr, &header[ 124 ], 12 );
-      size = ty_octaltodecimal( sizestr );
+      size = strtol(sizestr, NULL, 8);
 
       blocks = size / 512;
       if ( ( size % 512 ) > 0 ) blocks++;
