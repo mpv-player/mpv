@@ -71,9 +71,6 @@ extern int sub_justify;
 #define CHUNKSIZE        ( 128 * 1024 )
 #define MAX_AUDIO_BUFFER ( 16 * 1024 )
 
-#define PTS_MHZ          90
-#define PTS_KHZ          ( PTS_MHZ * 1000 )
-
 #define TY_V             1
 #define TY_A             2
 
@@ -96,11 +93,11 @@ typedef struct sTivoInfo
 
    int             tivoType;           // 1 = SA, 2 = DTiVo
 
-   float           firstAudioPTS;
-   float           firstVideoPTS;
+   int64_t        firstAudioPTS;
+   int64_t        firstVideoPTS;
 
-   float           lastAudioPTS;
-   float           lastVideoPTS;
+   int64_t        lastAudioPTS;
+   int64_t        lastVideoPTS;
 
    int             headerOk;
    unsigned int    pesFileId;          // Should be 0xf5467abd
@@ -353,18 +350,16 @@ static int IsValidAudioPacket( int size, int *ptsOffset, int *ptsLen )
 }
 
 
-static float get_ty_pts( unsigned char *buf )
+static int64_t get_ty_pts( unsigned char *buf )
 {
   int a = buf[0] & 0xe;
   int b = AV_RB16(buf + 1);
   int c = AV_RB16(buf + 3);
-  uint64_t pts;
 
   if (!(1 & a & b & c)) // invalid MPEG timestamp
-    return 0;
+    return MP_NOPTS_VALUE;
   a >>= 1; b >>= 1; c >>= 1;
-  pts = (((uint64_t)a) << 30) | (b << 15) | c;
-  return (float)pts / PTS_KHZ;
+  return (((uint64_t)a) << 30) | (b << 15) | c;
 }
 
 static void demux_ty_AddToAudioBuffer( TiVoInfo *tivo, unsigned char *buffer, 
@@ -392,13 +387,14 @@ static void demux_ty_CopyToDemuxPacket( int type, TiVoInfo *tivo, demux_stream_t
 
    dp = new_demux_packet( size );
    memcpy( dp->buffer, buffer, size );
-   dp->pts = pts;
+   if (pts != MP_NOPTS_VALUE)
+   dp->pts = pts / 90000.0;
    dp->pos = pos;
    dp->flags = 0;
    ds_add_packet( ds, dp );
-	if ( type == TY_V  && tivo->firstVideoPTS == -1 )
+	if ( type == TY_V  && tivo->firstVideoPTS == MP_NOPTS_VALUE )
 			tivo->firstVideoPTS = pts;
-	if ( type == TY_A && tivo->firstAudioPTS == -1 )
+	if ( type == TY_A && tivo->firstAudioPTS == MP_NOPTS_VALUE )
 			tivo->firstAudioPTS = pts;
 }
 
@@ -511,8 +507,8 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       demux->a_streams[ MAX_A_STREAMS - 1 ] = malloc( sizeof( TiVoInfo ) );
       tivo = demux->a_streams[ MAX_A_STREAMS - 1 ];
       memset( tivo, 0, sizeof( TiVoInfo ) );
-      tivo->firstAudioPTS = -1;
-      tivo->firstVideoPTS = -1;
+      tivo->firstAudioPTS = MP_NOPTS_VALUE;
+      tivo->firstVideoPTS = MP_NOPTS_VALUE;
    }
    else
    {
@@ -750,12 +746,8 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
             demux_ty_FindESHeader( ty_VideoPacket, 4, &chunk[ offset ], 
                size, &esOffset1 );
             if ( esOffset1 != -1 )
-            {
                tivo->lastVideoPTS = get_ty_pts( 
                   &chunk[ offset + esOffset1 + 9 ] );
-               mp_msg( MSGT_DEMUX, MSGL_DBG3, "Video PTS %7.1f\n", 
-                  tivo->lastVideoPTS );
-            }
 
             // Do NOT Pass the PES Header onto the MPEG2 Decode
             if( nybbleType != 0x06 )
@@ -851,8 +843,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                   tivo->tivoType = 1;
                   tivo->lastAudioPTS = get_ty_pts( &chunk[ offset + 
                      SERIES2_PTS_OFFSET ] );
-                  mp_msg( MSGT_DEMUX, MSGL_DBG3, "SA Audio PTS %7.1f\n", 
-                     tivo->lastAudioPTS );
                }
                else
                // DTiVo Audio with PES Header
@@ -880,8 +870,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
                         tivo->lastAudioPTS = get_ty_pts( 
                            &tivo->lastAudio[ esOffset1 + ptsOffset ] );
-                        mp_msg( MSGT_DEMUX, MSGL_DBG3, 
-                           "MPEG Audio PTS %7.1f\n", tivo->lastAudioPTS );
 
                         demux_ty_CopyToDemuxPacket
                         ( 
@@ -942,8 +930,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
                      tivo->lastAudioPTS = get_ty_pts( 
                         &tivo->lastAudio[ esOffset1 + ptsOffset ] );
-                     mp_msg( MSGT_DEMUX, MSGL_DBG3, 
-                        "AC3 Audio PTS %7.1f\n", tivo->lastAudioPTS );
 
                      // AC3 Decoder WANTS the PTS
                      demux_ty_CopyToDemuxPacket
@@ -1105,8 +1091,8 @@ static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, float audio_
    {
       tivo = demuxer->a_streams[ MAX_A_STREAMS - 1 ];
       tivo->lastAudioEnd = 0;
-      tivo->lastAudioPTS = 0;
-      tivo->lastVideoPTS = 0;
+      tivo->lastAudioPTS = MP_NOPTS_VALUE;
+      tivo->lastVideoPTS = MP_NOPTS_VALUE;
    }
    //
    //================= seek in MPEG ==========================
