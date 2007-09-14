@@ -285,7 +285,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #undef CPUID_STEPPING
 
 
-#if defined(__linux__) && defined(_POSIX_SOURCE)
+#if defined(__linux__) && defined(_POSIX_SOURCE) && !defined(ARCH_X86_64)
 static void sigill_handler_sse( int signal, struct sigcontext sc )
 {
    mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
