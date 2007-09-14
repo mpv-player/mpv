@@ -45,6 +45,7 @@
 #include "stheader.h"
 #include "sub_cc.h"
 #include "libavutil/avstring.h"
+#include "libavutil/intreadwrite.h"
 
 extern void skip_audio_frame( sh_audio_t *sh_audio );
 extern int sub_justify;
@@ -354,21 +355,16 @@ static int IsValidAudioPacket( int size, int *ptsOffset, int *ptsLen )
 
 static float get_ty_pts( unsigned char *buf )
 {
-   float result = 0;
-   unsigned char temp;
+  int a = buf[0] & 0xe;
+  int b = AV_RB16(buf + 1);
+  int c = AV_RB16(buf + 3);
+  uint64_t pts;
 
-   temp = ( buf[ 0 ] & 0xE ) >> 1;
-   result = ( (float) temp ) * ( (float) ( 1L << 30 ) ) / ( (float)PTS_KHZ );
-   temp = buf[ 1 ];
-   result += ( (float) temp ) * ( (float) ( 1L << 22 ) ) / ( (float)PTS_KHZ );
-   temp = ( buf[ 2 ] & 0xFE ) >> 1;
-   result += ( (float) temp ) * ( (float) ( 1L << 15 ) ) / ( (float)PTS_KHZ );
-   temp = buf[ 3 ];
-   result += ( (float) temp ) * ( (float) ( 1L << 7 ) ) / ( (float)PTS_KHZ );
-   temp = ( buf[ 4 ] & 0xFE ) >> 1;
-   result += ( (float) temp ) / ( (float)PTS_MHZ );
-
-   return result;
+  if (!(1 & a & b & c)) // invalid MPEG timestamp
+    return 0;
+  a >>= 1; b >>= 1; c >>= 1;
+  pts = (((uint64_t)a) << 30) | (b << 15) | c;
+  return (float)pts / PTS_KHZ;
 }
 
 static void demux_ty_AddToAudioBuffer( TiVoInfo *tivo, unsigned char *buffer, 
