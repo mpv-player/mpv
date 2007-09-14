@@ -123,7 +123,7 @@ void ty_ClearOSD( int start );
 #define TMF_SIG "showing.xml"
 
 // ===========================================================================
-int ty_extensionis( char *name, char *ext )
+static int ty_extensionis( char *name, char *ext )
 {
    char *ptr;
 
@@ -136,7 +136,7 @@ int ty_extensionis( char *name, char *ext )
 
 
 // ===========================================================================
-int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
+static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 {
    char    header[ 512 ];
    char    name[ 100 ];
@@ -272,7 +272,7 @@ int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 
 
 // ===========================================================================
-void tmf_filetooffset( TiVoInfo *tivo, int chunk, off_t *offset )
+static void tmf_filetooffset( TiVoInfo *tivo, int chunk, off_t *offset )
 {
    int index;
 
@@ -303,7 +303,7 @@ void tmf_filetooffset( TiVoInfo *tivo, int chunk, off_t *offset )
 
 
 // ===========================================================================
-int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo, 
+static int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo, 
    unsigned char *buff, int size, int readChunk )
 {
    off_t fileoffset;
@@ -1316,7 +1316,7 @@ static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, float audio_
 	}
 }
 
-int demux_ty_control( demuxer_t *demuxer,int cmd, void *arg )
+static int demux_ty_control( demuxer_t *demuxer,int cmd, void *arg )
 {
    demux_stream_t *d_video = demuxer->video;
    sh_video_t     *sh_video = d_video->sh;
