@@ -111,7 +111,6 @@ typedef struct sTivoInfo
    int             tmf;
    tmf_fileParts   tmfparts[ MAX_TMF_PARTS ];
    int             tmf_totalparts;
-   off_t           tmf_totalsize;
 } TiVoInfo;
 
 off_t vstream_streamsize( );
@@ -217,12 +216,6 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    tivo->tmf_totalparts = parts;
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "tmf_filetoparts(): No More Part Files %d\n", parts );
-
-   tivo->tmf_totalsize = 0;
-   for( index = 0 ; index < tivo->tmf_totalparts ; index++ )
-      tivo->tmf_totalsize += tivo->tmfparts[ index ].fileSize;
-   mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "tmf_filetoparts():total size %"PRId64"\n", (int64_t)tivo->tmf_totalsize );
 
    return 1;
 }
