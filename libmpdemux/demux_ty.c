@@ -140,7 +140,6 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    char    *sizestr;
    int     size;
    int     count;
-   int     blocks;
    int     done;
    off_t   offset;
    off_t   totalsize;
@@ -185,9 +184,8 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       sizestr[11] = 0;
       size = strtol(sizestr, NULL, 8);
 
-      blocks = size / 512;
-      if ( size % 512 > 0 ) blocks++;
-      skip = ( blocks + 1 ) * 512;
+      // size rounded up to blocks + header size
+      skip = 512 + ((size + 511) & ~511);
 
       if ( offset + skip > totalsize )
       {
@@ -204,8 +202,7 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          tivo->tmfparts[ parts ].fileNo = parts;
          tivo->tmfparts[ parts ].fileSize = size;
          tivo->tmfparts[ parts ].startOffset = offset + 512;
-         tivo->tmfparts[ parts ].chunks = 
-            tivo->tmfparts[ parts ].fileSize / CHUNKSIZE;
+         tivo->tmfparts[ parts ].chunks = size / CHUNKSIZE;
          mp_msg
          ( 
             MSGT_DEMUX, MSGL_DBG3,
@@ -251,7 +248,7 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    for( index = 0 ; index < tivo->tmf_totalparts ; index++ )
    {
       tivo->tmf_totalsize += tivo->tmfparts[ index ].fileSize;
-      tivo->tmf_totalchunks += tivo->tmfparts[ index ].fileSize / CHUNKSIZE;
+      tivo->tmf_totalchunks += tivo->tmfparts[ index ].chunks;
    }
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "tmf_filetoparts():total size %"PRId64"\n", (int64_t)tivo->tmf_totalsize );
