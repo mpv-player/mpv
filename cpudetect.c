@@ -305,25 +305,6 @@ static void sigill_handler_sse( int signal, struct sigcontext sc )
 
    gCpuCaps.hasSSE=0;
 }
-
-static void sigfpe_handler_sse( int signal, struct sigcontext sc )
-{
-   mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGFPE, " );
-
-   if ( sc.fpstate->magic != 0xffff ) {
-      /* Our signal context has the extended FPU state, so reset the
-       * divide-by-zero exception mask and clear the divide-by-zero
-       * exception bit.
-       */
-      sc.fpstate->mxcsr |= 0x00000200;
-      sc.fpstate->mxcsr &= 0xfffffffb;
-   } else {
-      /* If we ever get here, we're completely hosed.
-       */
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "\n\n" );
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "SSE enabling test failed badly!" );
-   }
-}
 #endif /* __linux__ && _POSIX_SOURCE && X86_FXSR_MAGIC */
 
 #ifdef WIN32
@@ -417,10 +398,8 @@ static void check_os_katmai_support( void )
    /* Save the original signal handlers.
     */
    sigaction( SIGILL, NULL, &saved_sigill );
-   sigaction( SIGFPE, NULL, &saved_sigfpe );
 
    signal( SIGILL, (void (*)(int))sigill_handler_sse );
-   signal( SIGFPE, (void (*)(int))sigfpe_handler_sse );
 
    /* Emulate test for OSFXSR in CR4.  The OS will set this bit if it
     * supports the extended FPU save and restore required for SSE.  If
@@ -444,7 +423,6 @@ static void check_os_katmai_support( void )
    /* Restore the original signal handlers.
     */
    sigaction( SIGILL, &saved_sigill, NULL );
-   sigaction( SIGFPE, &saved_sigfpe, NULL );
 
    /* If we've gotten to here and the XMM CPUID bit is still set, we're
     * safe to go ahead and hook out the SSE code throughout Mesa.
