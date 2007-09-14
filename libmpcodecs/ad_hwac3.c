@@ -178,7 +178,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 }
 
 
-static int DTS_SAMPLEFREQS[16] =
+static const int DTS_SAMPLEFREQS[16] =
 {
   0,
   8000,
@@ -198,7 +198,7 @@ static int DTS_SAMPLEFREQS[16] =
   192000
 };
 
-static int DTS_BITRATES[30] =
+static const int DTS_BITRATES[30] =
 {
   32000,
   56000,
