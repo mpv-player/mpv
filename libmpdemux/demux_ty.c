@@ -321,28 +321,21 @@ static int IsValidAudioPacket( int size, int *ptsOffset, int *ptsLen )
       {
          *ptsOffset = SERIES1_PTS_OFFSET;
          *ptsLen = SERIES1_PTS_LENGTH;
-         break;
+         return 1;
       }
    }
-   if ( *ptsOffset == 0 )
-   {
       for( count = 0 ; count < NUMBER_DIFFERENT_AUDIO_SIZES ; count++ )
       {
          if ( size == Series2AudioWithPTS[ count ] )
          {
             *ptsOffset = SERIES2_PTS_OFFSET;
             *ptsLen = SERIES2_PTS_LENGTH;
-            break;
+            return 1;
          }
       }
-   }
-   if ( *ptsOffset == 0 )
-   {
       mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Tossing Audio Packet Size %d\n", 
          size );
       return 0;
-   }
-   return 1;
 }
 
 
