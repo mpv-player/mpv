@@ -589,8 +589,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                   pesFileId = AV_RB32(chunk);
                   if ( pesFileId == TIVO_PES_FILEID )
                   {
-                     size = AV_RB32(chunk + 12);
-                     size /= 256;
+                     size = AV_RB24(chunk + 12);
                      size -= 4;
                      size *= CHUNKSIZE;
                      tivo->size = numberParts * TIVO_PART_LENGTH;
