@@ -260,27 +260,15 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 
 
 // ===========================================================================
-static void tmf_filetooffset( TiVoInfo *tivo, int chunk, off_t *offset )
+static off_t tmf_filetooffset(TiVoInfo *tivo, int chunk)
 {
-   int index;
-
-   *offset = 0;
-
-   for( index = 0 ; index < tivo->tmf_totalparts ; index++ )
-   {
-      if ( chunk >= tivo->tmfparts[ index ].chunks )
-         chunk -= tivo->tmfparts[ index ].chunks;
-      else
-         break;
-   }
-   if ( chunk < tivo->tmfparts[ index ].chunks )
-      *offset = tivo->tmfparts[ index ].startOffset +
-         chunk * CHUNKSIZE;
-   mp_msg
-   ( 
-      MSGT_DEMUX, MSGL_DBG3, 
-      "tmf_filetooffset() offset %"PRIx64"\n", *offset
-   );
+  int i;
+  for (i = 0; i < tivo->tmf_totalparts; i++) {
+    if (chunk < tivo->tmfparts[i].chunks)
+      return tivo->tmfparts[i].startOffset + chunk * CHUNKSIZE;
+    chunk -= tivo->tmfparts[i].chunks;
+  }
+  return -1;
 }
 
 
@@ -305,7 +293,7 @@ static int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo,
       return( 0 );
    }
 
-   tmf_filetooffset( tivo, readChunk, &fileoffset );
+   fileoffset = tmf_filetooffset(tivo, readChunk);
 
    if ( stream_seek( demux->stream, fileoffset ) != 1 )
    {
