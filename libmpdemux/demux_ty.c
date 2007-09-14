@@ -363,7 +363,7 @@ static int demux_ty_FindESHeader( unsigned char *header,
    unsigned char *buffer, int bufferSize )
 {
    int count;
-   for( count = 0 ; count < bufferSize ; count++ )
+   for( count = 0 ; count + 3 < bufferSize ; count++ )
    {
       if ( buffer[ count + 0 ] == header[ 0 ] &&
            buffer[ count + 1 ] == header[ 1 ] &&
