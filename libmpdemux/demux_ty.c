@@ -359,22 +359,17 @@ static void demux_ty_CopyToDemuxPacket( int type, TiVoInfo *tivo, demux_stream_t
 			tivo->firstAudioPTS = pts;
 }
 
-static int demux_ty_FindESHeader( unsigned char *header, int headerSize, 
-   unsigned char *buffer, int bufferSize, int *esOffset1 )
+static int demux_ty_FindESHeader( unsigned char *header,
+   unsigned char *buffer, int bufferSize )
 {
    int count;
-
-   *esOffset1 = -1;
    for( count = 0 ; count < bufferSize ; count++ )
    {
       if ( buffer[ count + 0 ] == header[ 0 ] &&
            buffer[ count + 1 ] == header[ 1 ] &&
            buffer[ count + 2 ] == header[ 2 ] &&
            buffer[ count + 3 ] == header[ 3 ] )
-      {
-         *esOffset1 = count;
-         return 1;
-      }
+         return count;
    }
    return -1;
 }
@@ -652,8 +647,8 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
             }
             printf( "\n" );
 #endif
-            demux_ty_FindESHeader( ty_VideoPacket, 4, &chunk[ offset ], 
-               size, &esOffset1 );
+            esOffset1 = demux_ty_FindESHeader( ty_VideoPacket, &chunk[ offset ], 
+               size);
             if ( esOffset1 != -1 )
                tivo->lastVideoPTS = get_ty_pts( 
                   &chunk[ offset + esOffset1 + 9 ] );
@@ -745,8 +740,8 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
             {
                int esOffset1, esOffset2;
                if ( nybbleType == 0x03 )
-               demux_ty_FindESHeader( ty_MPEGAudioPacket, 4, &chunk[ offset ], 
-                  size, &esOffset1 );
+               esOffset1 = demux_ty_FindESHeader( ty_MPEGAudioPacket, &chunk[ offset ], 
+                  size);
 
                // SA PES Header, No Audio Data
                // ================================================
