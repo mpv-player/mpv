@@ -736,9 +736,9 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 								   TY_A,
 								   tivo,
                            demux->audio, 
-                           &( tivo->lastAudio[ esOffset1 + headerSize ] ), 
-                           ( packetSize - headerSize ),
-                           ( demux->filepos + offset ), 
+                           &tivo->lastAudio[ esOffset1 + headerSize ],
+                           packetSize - headerSize,
+                           demux->filepos + offset,
                            tivo->lastAudioPTS 
                         );
 
@@ -781,7 +781,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 			lastXDS[ 0x08 ] = b;
          if ( subcc_enabled )
 			   demux_ty_CopyToDemuxPacket( TY_V, tivo, demux->video, lastXDS, 0x09,
-				   ( demux->filepos + offset ), tivo->lastVideoPTS );
+				   demux->filepos + offset, tivo->lastVideoPTS );
 		}
       // ================================================================
       // Unknown
