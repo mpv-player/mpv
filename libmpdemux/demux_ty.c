@@ -485,22 +485,12 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    unsigned char    lastCC[ 16 ];
    unsigned char    lastXDS[ 16 ];
 
-   TiVoInfo         *tivo = 0;
+   TiVoInfo         *tivo = demux->priv;
 
    if ( demux->stream->type == STREAMTYPE_DVD )
 		return 0;
 
    mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:ty processing\n" );
-   if ( demux->a_streams[ MAX_A_STREAMS - 1 ] == 0 )
-   {
-      demux->a_streams[ MAX_A_STREAMS - 1 ] = malloc( sizeof( TiVoInfo ) );
-      tivo = demux->a_streams[ MAX_A_STREAMS - 1 ];
-      memset( tivo, 0, sizeof( TiVoInfo ) );
-      tivo->firstAudioPTS = MP_NOPTS_VALUE;
-      tivo->firstVideoPTS = MP_NOPTS_VALUE;
-   }
-   else
-      tivo = demux->a_streams[ MAX_A_STREAMS - 1 ];
 
    if( demux->stream->eof ) return 0;
  
@@ -1044,17 +1034,13 @@ static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, float audio_
    sh_video_t     *sh_video = d_video->sh;
    off_t          newpos;
    off_t          res;
-   TiVoInfo       *tivo = 0;
+   TiVoInfo       *tivo = demuxer->priv;
 
    mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Seeking to %7.1f\n", rel_seek_secs );
 
-   if ( demuxer->a_streams[ MAX_A_STREAMS - 1 ] != 0 )
-   {
-      tivo = demuxer->a_streams[ MAX_A_STREAMS - 1 ];
       tivo->lastAudioEnd = 0;
       tivo->lastAudioPTS = MP_NOPTS_VALUE;
       tivo->lastVideoPTS = MP_NOPTS_VALUE;
-   }
    //
    //================= seek in MPEG ==========================
    demuxer->filepos = stream_tell( demuxer->stream );
@@ -1145,20 +1131,19 @@ static int demux_ty_control( demuxer_t *demuxer,int cmd, void *arg )
 
 static void demux_close_ty( demuxer_t *demux )
 {
-   TiVoInfo         *tivo = 0;
+   TiVoInfo         *tivo = demux->priv;
 
-   if ( demux->a_streams[ MAX_A_STREAMS - 1 ] != 0 )
-   {
-      tivo = demux->a_streams[ MAX_A_STREAMS - 1 ];
       free( tivo );
-      demux->a_streams[ MAX_A_STREAMS - 1 ] = 0;
 	   sub_justify = 0;
-   }
 }
 
 
 static int ty_check_file(demuxer_t* demuxer)
 {
+  TiVoInfo *tivo = calloc(1, sizeof(TiVoInfo));
+  tivo->firstAudioPTS = MP_NOPTS_VALUE;
+  tivo->firstVideoPTS = MP_NOPTS_VALUE;
+  demuxer->priv = tivo;
   return ds_fill_buffer(demuxer->video) ? DEMUXER_TYPE_MPEG_TY : 0;
 }
 
