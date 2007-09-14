@@ -353,10 +353,10 @@ static void demux_ty_CopyToDemuxPacket( int type, TiVoInfo *tivo, demux_stream_t
 			tivo->firstAudioPTS = pts;
 }
 
-static int demux_ty_FindESHeader( unsigned char *header,
+static int demux_ty_FindESHeader( uint8_t nal,
    unsigned char *buffer, int bufferSize )
 {
-   uint32_t search = AV_RB32(header);
+   uint32_t search = 0x00000100 | nal;
    uint32_t found = -1;
    uint8_t *p = buffer;
    uint8_t *end = p + bufferSize;
@@ -369,24 +369,24 @@ static int demux_ty_FindESHeader( unsigned char *header,
    return -1;
 }
 
-static void demux_ty_FindESPacket( unsigned char *header, 
+static void demux_ty_FindESPacket( uint8_t nal, 
    unsigned char *buffer, int bufferSize, int *esOffset1, int *esOffset2 )
 {
-  *esOffset1 = demux_ty_FindESHeader(header, buffer, bufferSize);
+  *esOffset1 = demux_ty_FindESHeader(nal, buffer, bufferSize);
   if (*esOffset1 == -1) {
     *esOffset2 = -1;
     return;
   }
   buffer += *esOffset1 + 1;
   bufferSize -= *esOffset1 + 1;
-  *esOffset2 = demux_ty_FindESHeader(header, buffer, bufferSize);
+  *esOffset2 = demux_ty_FindESHeader(nal, buffer, bufferSize);
   if (*esOffset2 != -1)
     *esOffset2 += *esOffset1 + 1;
 }
 
-static unsigned char ty_VideoPacket[] = { 0x00, 0x00, 0x01, 0xe0 };
-static unsigned char ty_MPEGAudioPacket[] = { 0x00, 0x00, 0x01, 0xc0 };
-static unsigned char ty_AC3AudioPacket[] = { 0x00, 0x00, 0x01, 0xbd };
+#define VIDEO_NAL 0xe0
+#define AUDIO_NAL 0xc0
+#define AC3_NAL 0xbd
 
 static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 {
@@ -608,7 +608,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       {
          if ( size > 0 && size + offset <= CHUNKSIZE )
          {
-            int esOffset1 = demux_ty_FindESHeader( ty_VideoPacket, &chunk[ offset ], 
+            int esOffset1 = demux_ty_FindESHeader( VIDEO_NAL, &chunk[ offset ], 
                size);
             if ( esOffset1 != -1 )
                tivo->lastVideoPTS = get_ty_pts( 
@@ -692,7 +692,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
             {
                int esOffset1, esOffset2;
                if ( nybbleType == 0x03 )
-               esOffset1 = demux_ty_FindESHeader( ty_MPEGAudioPacket, &chunk[ offset ], 
+               esOffset1 = demux_ty_FindESHeader( AUDIO_NAL, &chunk[ offset ], 
                   size);
 
                // SA PES Header, No Audio Data
@@ -710,7 +710,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                   tivo->tivoType = 2;
 
                   demux_ty_AddToAudioBuffer( tivo, &chunk[ offset ], size );
-                  demux_ty_FindESPacket( nybbleType == 9 ? ty_AC3AudioPacket : ty_MPEGAudioPacket,
+                  demux_ty_FindESPacket( nybbleType == 9 ? AC3_NAL : AUDIO_NAL,
                      tivo->lastAudio, tivo->lastAudioEnd, &esOffset1,
                      &esOffset2 );
 
