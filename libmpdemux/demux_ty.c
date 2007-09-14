@@ -200,9 +200,7 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       if ( isty )
       {
          tivo->tmfparts[ parts ].fileNo = parts;
-			// HACK - Ignore last chunk of a Part File
-			// Why?  I have no idea.
-         tivo->tmfparts[ parts ].fileSize = size - CHUNKSIZE;
+         tivo->tmfparts[ parts ].fileSize = size;
          tivo->tmfparts[ parts ].startOffset = offset + 512;
          tivo->tmfparts[ parts ].chunks = 
             tivo->tmfparts[ parts ].fileSize / CHUNKSIZE;
