@@ -182,7 +182,7 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       name = header;
       name[99] = 0;
       sizestr = &header[124];
-      sizestr[12] = 0;
+      sizestr[11] = 0;
       size = strtol(sizestr, NULL, 8);
 
       blocks = size / 512;
