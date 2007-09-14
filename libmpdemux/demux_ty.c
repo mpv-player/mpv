@@ -138,11 +138,9 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    char    *sizestr;
    int     size;
    int     count;
-   int     done;
    off_t   offset;
    off_t   totalsize;
    off_t   skip;
-   int     error = 0;
    int     parts = 0;
    int     isty;
    int     index;
@@ -151,29 +149,21 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    offset = 0;
    totalsize = demux->stream->end_pos;
 
-   done = 0;
    mp_msg( MSGT_DEMUX, MSGL_DBG3, "Dumping tar contents\n" );
-   while ( done == 0 )
+   while (1)
    {
       ok = stream_seek( demux->stream, offset );
       if ( offset + 512 == totalsize )
-      {
-         done = 1;
          break;
-      }
       if ( ok == 0 )
       { 
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "Seek bad %"PRId64"\n", (int64_t)offset );
-         done = 1;
-         error = 1;
          break;
       }
       count = stream_read( demux->stream, header, 512 );
       if ( count < 512 )
       { 
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "Read bad\n" );
-         done = 1;
-         error = 1;
          break;
       }
       name = header;
@@ -229,16 +219,10 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       }
 
       if ( ( offset + skip ) > totalsize )
-      {
-         done = 1;
-         error = 1;
-      }
+         break;
       else
          offset += skip;
    }
-   if ( error )
-      mp_msg( MSGT_DEMUX, MSGL_DBG3, 
-         "WARNING : tmf parse error, not intact\n" );
    tivo->tmf_totalparts = parts;
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "tmf_filetoparts(): No More Part Files %d\n", parts );
