@@ -425,30 +425,18 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    int              invalidType = 0;
    int              errorHeader = 0;
    int              recordsDecoded = 0;
-   off_t            filePos = 0;
 
    unsigned char    chunk[ CHUNKSIZE ];
-   int              whichChunk;
    int              readSize;
 
    int              numberRecs;
    unsigned char    *recPtr;
    int              offset;
-   int              size;
-
-   int              type;
-   int              nybbleType;
 
    int              counter;
 
    int              aid;
-   demux_stream_t   *ds = NULL;
    
-   int              esOffset1;
-   int              esOffset2;
-
-   unsigned char    lastXDS[ 16 ];
-
    TiVoInfo         *tivo = demux->priv;
 
    if ( demux->stream->type == STREAMTYPE_DVD )
@@ -478,6 +466,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       // extract program did the "right thing"
       if ( tivo->readHeader == 0 )
       {
+         off_t filePos;
          tivo->readHeader = 1;
          tivo->size = demux->stream->end_pos;
 
@@ -530,7 +519,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
                if ( readSize == CHUNKSIZE && AV_RB32(chunk) == TIVO_PES_FILEID )
                {
-                     size = AV_RB24(chunk + 12);
+                     int size = AV_RB24(chunk + 12);
                      size -= 4;
                      size *= CHUNKSIZE;
                      tivo->size = numberParts * TIVO_PART_LENGTH;
@@ -575,7 +564,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       // Make sure we are on a 128k boundary
       if ( demux->filepos % CHUNKSIZE != 0 )
       {
-         whichChunk = demux->filepos / CHUNKSIZE;
+         int whichChunk = demux->filepos / CHUNKSIZE;
          if ( demux->filepos % CHUNKSIZE > CHUNKSIZE / 2 )
             whichChunk++;
          stream_seek( demux->stream, whichChunk * CHUNKSIZE );
@@ -626,7 +615,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    if( demux->video->id == -1 ) demux->video->id = aid;
    if( demux->video->id == aid )
    {
-      ds = demux->video;
+      demux_stream_t *ds = demux->video;
       if( !ds->sh ) ds->sh = demux->v_streams[ aid ];
    }
 
@@ -639,9 +628,9 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    offset = numberRecs * 16 + 4;
    for ( counter = 0 ; counter < numberRecs ; counter++ )
    {
-      size = AV_RB24(recPtr) >> 4;
-      type = recPtr[ 3 ];
-      nybbleType = recPtr[ 2 ] & 0x0f;
+      int size = AV_RB24(recPtr) >> 4;
+      int type = recPtr[ 3 ];
+      int nybbleType = recPtr[ 2 ] & 0x0f;
       recordsDecoded++;
 
       mp_msg( MSGT_DEMUX, MSGL_DBG3,
@@ -654,6 +643,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       {
          if ( size > 0 && size + offset <= CHUNKSIZE )
          {
+            int esOffset1;
 #if 0
             printf( "Video Chunk Header " );
             for( count = 0 ; count < 24 ; count++ )
@@ -713,7 +703,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                if( !demux->a_streams[ aid ] ) new_sh_audio( demux, aid );
                if( demux->audio->id == aid )
                {
-                  ds = demux->audio;
+                  demux_stream_t *ds = demux->audio;
                   if( !ds->sh ) {
                     sh_audio_t* sh_a;
                     ds->sh = demux->a_streams[ aid ];
@@ -753,6 +743,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
             // ================================================
             if ( nybbleType == 0x03 || nybbleType == 0x09 )
             {
+               int esOffset1, esOffset2;
                if ( nybbleType == 0x03 )
                demux_ty_FindESHeader( ty_MPEGAudioPacket, 4, &chunk[ offset ], 
                   size, &esOffset1 );
