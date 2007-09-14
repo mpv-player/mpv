@@ -938,35 +938,16 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 				   ( demux->filepos + offset ), tivo->lastVideoPTS );
 		}
       // ================================================================
-      // Found a 0x03 on Droid's TiVo, I have no idea what it is
-      // ================================================================
-		else if ( type == 0x03 )
-		{
-         if ( size > 0 && size + offset <= CHUNKSIZE )
-            offset += size;
-		}
-      // ================================================================
-      // Found a 0x03 on Hermit's TiVo, I have no idea what it is
-      // ================================================================
-		else if ( type == 0x03 )
-		{
-         if ( size > 0 && size + offset <= CHUNKSIZE )
-            offset += size;
-		}
-      // ================================================================
       // Unknown
       // ================================================================
-		else if ( type == 0x05 )
-		{
-         if ( size > 0 && size + offset <= CHUNKSIZE )
-            offset += size;
-		}
 		else
 		{
          if ( size > 0 && size + offset <= CHUNKSIZE )
             offset += size;
+         if (type != 3 && type != 5) {
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Invalid Type %x\n", type );
 			invalidType++;
+         }
 		}
      recPtr += 16;
    }
