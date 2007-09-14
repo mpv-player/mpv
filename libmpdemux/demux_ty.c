@@ -141,7 +141,6 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    off_t   skip;
    int     parts = 0;
    int     isty;
-   int     index;
 
    offset = 0;
    totalsize = demux->stream->end_pos;
