@@ -748,16 +748,18 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                }
             }
 
-            // MPEG Audio with PES Header, either SA or DTiVo
+            // 3 - MPEG Audio with PES Header, either SA or DTiVo
+            // 9 - DTiVo AC3 Audio Data with PES Header
             // ================================================
-            if ( nybbleType == 0x03 )
+            if ( nybbleType == 0x03 || nybbleType == 0x09 )
             {
+               if ( nybbleType == 0x03 )
                demux_ty_FindESHeader( ty_MPEGAudioPacket, 4, &chunk[ offset ], 
                   size, &esOffset1 );
 
                // SA PES Header, No Audio Data
                // ================================================
-               if ( esOffset1 == 0 && size == 16 )
+               if ( nybbleType == 0x03 && esOffset1 == 0 && size == 16 )
                {
                   tivo->tivoType = 1;
                   tivo->lastAudioPTS = get_ty_pts( &chunk[ offset + 
@@ -770,7 +772,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                   tivo->tivoType = 2;
 
                   demux_ty_AddToAudioBuffer( tivo, &chunk[ offset ], size );
-                  demux_ty_FindESPacket( ty_MPEGAudioPacket, 4,
+                  demux_ty_FindESPacket( nybbleType == 9 ? ty_AC3AudioPacket : ty_MPEGAudioPacket, 4,
                      tivo->lastAudio, tivo->lastAudioEnd, &esOffset1,
                      &esOffset2 );
 
@@ -790,6 +792,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                         tivo->lastAudioPTS = get_ty_pts( 
                            &tivo->lastAudio[ esOffset1 + ptsOffset ] );
 
+                        if (nybbleType == 9) headerSize = 0;
                         demux_ty_CopyToDemuxPacket
                         ( 
 								   TY_A,
@@ -823,54 +826,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 						tivo->lastAudioPTS );
             }
 
-            // DTiVo AC3 Audio Data with PES Header
-            // ================================================
-            if ( nybbleType == 0x09 )
-            {
-               tivo->tivoType = 2;
-
-               demux_ty_AddToAudioBuffer( tivo, &chunk[ offset ], size );
-               demux_ty_FindESPacket( ty_AC3AudioPacket, 4,
-                  tivo->lastAudio, tivo->lastAudioEnd, &esOffset1,
-                  &esOffset2 );
-
-               if ( esOffset1 != -1 && esOffset2 != -1 )
-               {
-                  int packetSize = esOffset2 - esOffset1;
-                  int headerSize;
-                  int ptsOffset;
-
-                  if ( IsValidAudioPacket( packetSize, &ptsOffset, 
-                        &headerSize ) )
-                  {
-                     mp_msg( MSGT_DEMUX, MSGL_DBG3,
-                        "ty:Adding DTiVo Audio Packet Size %d\n", 
-                        packetSize );
-
-                     tivo->lastAudioPTS = get_ty_pts( 
-                        &tivo->lastAudio[ esOffset1 + ptsOffset ] );
-
-                     // AC3 Decoder WANTS the PTS
-                     demux_ty_CopyToDemuxPacket
-                     ( 
-							   TY_A,
-							   tivo,
-                        demux->audio, 
-                        &tivo->lastAudio[ esOffset1 ], 
-                        packetSize,
-                        demux->filepos + offset, 
-                        tivo->lastAudioPTS 
-                     );
-
-                  }
-
-                  // Collapse the Audio Buffer
-                  memmove( &tivo->lastAudio[ 0 ], 
-                     &tivo->lastAudio[ esOffset2 ], 
-                     tivo->lastAudioEnd - esOffset2 );
-                  tivo->lastAudioEnd -= esOffset2;
-               }
-            }
             offset += size;
          }
 			else
