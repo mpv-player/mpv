@@ -127,15 +127,9 @@ static int ty_extensionis(const char *name, const char *ext )
 // ===========================================================================
 static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 {
-   char    header[ 512 ];
-   char    *name;
-   char    *sizestr;
-   int     size;
    off_t   offset;
    off_t   totalsize;
-   off_t   skip;
    int     parts = 0;
-   int     isty;
 
    offset = 0;
    totalsize = demux->stream->end_pos;
@@ -143,6 +137,12 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    mp_msg( MSGT_DEMUX, MSGL_DBG3, "Dumping tar contents\n" );
    while (1)
    {
+      char    header[ 512 ];
+      char    *name;
+      char    *sizestr;
+      int     size;
+      off_t   skip;
+      int     isty;
       if (!stream_seek(demux->stream, offset))
       {
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "Seek bad %"PRId64"\n", (int64_t)offset );
