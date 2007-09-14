@@ -197,6 +197,10 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 
       if ( isty )
       {
+         if ( parts >= MAX_TMF_PARTS ) {
+            mp_msg( MSGT_DEMUX, MSGL_ERR, "ty:tmf too big\n" );
+            break;
+         }
          tivo->tmfparts[ parts ].fileNo = parts;
          tivo->tmfparts[ parts ].fileSize = size;
          tivo->tmfparts[ parts ].startOffset = offset + 512;
@@ -222,8 +226,6 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
            tivo->tmfparts[ parts ].startOffset
          );
          parts++;
-         if ( parts > MAX_TMF_PARTS )
-            mp_msg( MSGT_DEMUX, MSGL_ERR, "ty:tmf too big\n" );
       }
 
       if ( ( offset + skip ) > totalsize )
