@@ -454,12 +454,6 @@ static void demux_ty_FindESPacket( unsigned char *header, int headerSize,
    }
 }
 
-static int tivobuffer2hostlong( unsigned char *buffer )
-{
-   return
-      buffer[ 0 ] << 24 | buffer[ 1 ] << 16 | buffer[ 2 ] << 8 | buffer[ 3 ];
-}
-
 static unsigned char ty_VideoPacket[] = { 0x00, 0x00, 0x01, 0xe0 };
 static unsigned char ty_MPEGAudioPacket[] = { 0x00, 0x00, 0x01, 0xc0 };
 static unsigned char ty_AC3AudioPacket[] = { 0x00, 0x00, 0x01, 0xbd };
@@ -555,9 +549,9 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
          if ( readSize == CHUNKSIZE )
          {
-            tivo->pesFileId = tivobuffer2hostlong( &chunk[ 0x00 ] );
-            tivo->streamType = tivobuffer2hostlong( &chunk[ 0x04 ] );
-            tivo->chunkSize = tivobuffer2hostlong( &chunk[ 0x08 ] );
+            tivo->pesFileId = AV_RB32(chunk);
+            tivo->streamType = AV_RB32(chunk + 4);
+            tivo->chunkSize = AV_RB32(chunk + 8);
 
             if ( tivo->pesFileId == TIVO_PES_FILEID )
             {
@@ -592,10 +586,10 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
                if ( readSize == CHUNKSIZE )
                {
-                  pesFileId = tivobuffer2hostlong( &chunk[ 0x00 ] );
+                  pesFileId = AV_RB32(chunk);
                   if ( pesFileId == TIVO_PES_FILEID )
                   {
-                     size = tivobuffer2hostlong( &chunk[ 0x0c ] );
+                     size = AV_RB32(chunk + 12);
                      size /= 256;
                      size -= 4;
                      size *= CHUNKSIZE;
@@ -665,7 +659,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    }
 
    // We found a part header, skip it
-   pesFileId = tivobuffer2hostlong( &chunk[ 0x00 ] );
+   pesFileId = AV_RB32(chunk);
    if( pesFileId == TIVO_PES_FILEID )
    {
       mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Skipping PART Header\n" );
