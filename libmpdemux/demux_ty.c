@@ -374,7 +374,7 @@ static int demux_ty_FindESHeader( unsigned char *header,
    return -1;
 }
 
-static void demux_ty_FindESPacket( unsigned char *header, int headerSize, 
+static void demux_ty_FindESPacket( unsigned char *header, 
    unsigned char *buffer, int bufferSize, int *esOffset1, int *esOffset2 )
 {
    int count;
@@ -758,7 +758,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                   tivo->tivoType = 2;
 
                   demux_ty_AddToAudioBuffer( tivo, &chunk[ offset ], size );
-                  demux_ty_FindESPacket( nybbleType == 9 ? ty_AC3AudioPacket : ty_MPEGAudioPacket, 4,
+                  demux_ty_FindESPacket( nybbleType == 9 ? ty_AC3AudioPacket : ty_MPEGAudioPacket,
                      tivo->lastAudio, tivo->lastAudioEnd, &esOffset1,
                      &esOffset2 );
 
