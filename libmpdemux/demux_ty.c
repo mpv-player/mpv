@@ -733,9 +733,9 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
             // SA DTiVo Audio Data, no PES
             // ================================================
-            if ( nybbleType == 0x02 )
+            if ( nybbleType == 0x02 || nybbleType == 0x04 )
             {
-               if ( tivo->tivoType == 2 )
+               if ( nybbleType == 0x02 && tivo->tivoType == 2 )
                   demux_ty_AddToAudioBuffer( tivo, &chunk[ offset ], size );
                else
                {
@@ -813,17 +813,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                      tivo->lastAudioEnd -= esOffset2;
                   }
                }
-            }
-
-            // SA Audio with no PES Header
-            // ================================================
-            if ( nybbleType == 0x04 )
-            {
-               mp_msg( MSGT_DEMUX, MSGL_DBG3,
-                  "ty:Adding Audio Packet Size %d\n", size );
-               demux_ty_CopyToDemuxPacket( TY_A, tivo, demux->audio, 
-						&chunk[ offset ], size, ( demux->filepos + offset ), 
-						tivo->lastAudioPTS );
             }
 
             offset += size;
