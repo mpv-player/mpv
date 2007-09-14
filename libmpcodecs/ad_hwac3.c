@@ -159,14 +159,11 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
   }
   else if(isdts == 0)
   {
-    buf[0] = 0x72;
-    buf[1] = 0xF8;
-    buf[2] = 0x1F;
-    buf[3] = 0x4E;
-    buf[4] = 0x01; //(length) ? data_type : 0; /* & 0x1F; */
-    buf[5] = 0x00;
-    buf[6] = (len << 3) & 0xFF;
-    buf[7] = (len >> 5) & 0xFF;
+    uint16_t *buf16 = (uint16_t *)buf;
+    buf16[0] = 0xF872;
+    buf16[1] = 0x4E1F;
+    buf16[2] = 0x0001;
+    buf16[3] = len << 3;
 #ifdef WORDS_BIGENDIAN
     memcpy(buf + 8, sh_audio->a_in_buffer, len);  // untested
 #else
@@ -327,6 +324,7 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
   int sfreq;
   int burst_len;
   int nr_samples;
+  uint16_t *buf16 = (uint16_t *)buf;
 
   fsize = dts_decode_header(indata_ptr, &rate, &nblks, &sfreq);
   if(fsize < 0)
@@ -335,27 +333,25 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
   burst_len = fsize * 8;
   nr_samples = nblks * 32;
 
-  buf[0] = 0x72; buf[1] = 0xf8; /* iec 61937     */
-  buf[2] = 0x1f; buf[3] = 0x4e; /*  syncword     */
+  buf16[0] = 0xf872; /* iec 61937     */
+  buf16[1] = 0x431f; /*  syncword     */
   switch(nr_samples) 
   {
   case 512:
-    buf[4] = 0x0b;      /* DTS-1 (512-sample bursts) */
+    buf16[2] = 0x000b;      /* DTS-1 (512-sample bursts) */
     break;
   case 1024:
-    buf[4] = 0x0c;      /* DTS-2 (1024-sample bursts) */
+    buf16[2] = 0x000c;      /* DTS-2 (1024-sample bursts) */
     break;
   case 2048:
-    buf[4] = 0x0d;      /* DTS-3 (2048-sample bursts) */
+    buf16[2] = 0x000d;      /* DTS-3 (2048-sample bursts) */
     break;
   default:
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: %d-sample bursts not supported\n", nr_samples);
-    buf[4] = 0x00;
+    buf16[2] = 0x0000;
     break;
   }
-  buf[5] = 0;                      /* ?? */    
-  buf[6] = (burst_len) & 0xff;   
-  buf[7] = (burst_len >> 8) & 0xff;
+  buf16[3] = burst_len;
  
   if(fsize + 8 > nr_samples * 2 * 2)
   {
