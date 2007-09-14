@@ -251,7 +251,7 @@ static int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo,
    if ( stream_seek( demux->stream, fileoffset ) != 1 )
    {
       mp_msg( MSGT_DEMUX, MSGL_ERR, "Read past EOF()\n" );
-      return( 0 );
+      return 0;
    }
    count = stream_read( demux->stream, buff, size );
 	demux->filepos = stream_tell( demux->stream );
@@ -345,8 +345,7 @@ static int IsValidAudioPacket( int size, int *ptsOffset, int *ptsLen )
          size );
       return 0;
    }
-   else
-      return 1;
+   return 1;
 }
 
 
@@ -511,9 +510,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       tivo->firstVideoPTS = MP_NOPTS_VALUE;
    }
    else
-   {
       tivo = demux->a_streams[ MAX_A_STREAMS - 1 ];
-   }
 
    if( demux->stream->eof ) return 0;
  
@@ -635,13 +632,10 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "\nty:wanted current offset %"PRIx64"\n", (int64_t)stream_tell( demux->stream ) );
 
-   if ( tivo->size > 0 )
+   if ( tivo->size > 0 && stream_tell( demux->stream ) > tivo->size )
    {
-      if ( stream_tell( demux->stream ) > tivo->size )
-      {
          demux->stream->eof = 1;
-         return( 0 );
-      }
+         return 0;
    }
 
    if ( tivo->tmf != 1 )
@@ -651,9 +645,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       {
          whichChunk = demux->filepos / CHUNKSIZE;
          if ( demux->filepos % CHUNKSIZE > CHUNKSIZE / 2 )
-         {
             whichChunk++;
-         }
          stream_seek( demux->stream, whichChunk * CHUNKSIZE );
       }
 
@@ -661,9 +653,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       tivo->whichChunk = demux->filepos / CHUNKSIZE;
       readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
       if ( readSize != CHUNKSIZE )
-      {
-         return( 0 );
-      }
+         return 0;
    }
    else
    {
@@ -692,9 +682,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       }
 
       if ( readSize != CHUNKSIZE )
-      {
          return 0;
-      }
    }   
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "\nty:actual current offset %"PRIx64"\n", stream_tell( demux->stream ) - 
@@ -1059,15 +1047,11 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
       // Invalid MPEG ES Size Check
       if ( errorHeader > numberRecs / 2 )
-      {
          return 0;
-      }
 
       // Invalid MPEG Stream Type Check
       if ( invalidType > numberRecs / 2 )
-      {
          return 0;
-		}
    }
 
    demux->filepos = stream_tell( demux->stream );
@@ -1101,10 +1085,8 @@ static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, float audio_
    newpos = ( flags & 1 ) ? demuxer->movi_start : demuxer->filepos;
 	
    if( flags & 2 )
-   {
 	   // float seek 0..1
 	   newpos += ( demuxer->movi_end - demuxer->movi_start ) * rel_seek_secs;
-   } 
    else 
    {
 	   // time seek (secs)
