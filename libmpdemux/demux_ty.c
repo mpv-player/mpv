@@ -282,18 +282,12 @@ static int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo,
    mp_msg( MSGT_DEMUX, MSGL_DBG3, "\ntmf_load_chunk() begin %d\n", 
       readChunk );
 
-   if ( tivo->tmf_totalparts <= 0 )
-   {
-      return( 0 );
-   }
-
-   if ( readChunk >= tivo->tmf_totalchunks )
-   {
-      mp_msg( MSGT_DEMUX, MSGL_ERR, "Read past EOF()\n" );
-      return( 0 );
-   }
-
    fileoffset = tmf_filetooffset(tivo, readChunk);
+
+   if (fileoffset == -1) {
+      mp_msg(MSGT_DEMUX, MSGL_ERR, "Read past EOF()\n");
+      return 0;
+   }
 
    if ( stream_seek( demux->stream, fileoffset ) != 1 )
    {
