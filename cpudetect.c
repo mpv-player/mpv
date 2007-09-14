@@ -37,7 +37,6 @@ CpuCaps gCpuCaps;
 #include <proto/exec.h>
 #endif
 
-//#define X86_FXSR_MAGIC
 /* Thanks to the FreeBSD project for some of this cpuid code, and 
  * help understanding how to use it.  Thanks to the Mesa 
  * team for SSE support detection and more cpu detect code.
@@ -286,7 +285,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #undef CPUID_STEPPING
 
 
-#if defined(__linux__) && defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
+#if defined(__linux__) && defined(_POSIX_SOURCE)
 static void sigill_handler_sse( int signal, struct sigcontext sc )
 {
    mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
@@ -305,7 +304,7 @@ static void sigill_handler_sse( int signal, struct sigcontext sc )
 
    gCpuCaps.hasSSE=0;
 }
-#endif /* __linux__ && _POSIX_SOURCE && X86_FXSR_MAGIC */
+#endif /* __linux__ && _POSIX_SOURCE */
 
 #ifdef WIN32
 LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
@@ -391,7 +390,7 @@ static void check_os_katmai_support( void )
       else mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
    }
 #elif defined(__linux__)
-#if defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
+#if defined(_POSIX_SOURCE)
    struct sigaction saved_sigill;
    struct sigaction saved_sigfpe;
 
@@ -438,7 +437,7 @@ static void check_os_katmai_support( void )
     */
    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "Cannot test OS support for SSE, disabling to be safe.\n" );
    gCpuCaps.hasSSE=0;
-#endif /* _POSIX_SOURCE && X86_FXSR_MAGIC */
+#endif /* _POSIX_SOURCE */
 #else
    /* Do nothing on other platforms for now.
     */
