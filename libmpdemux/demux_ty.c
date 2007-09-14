@@ -340,13 +340,7 @@ static void demux_ty_AddToAudioBuffer( TiVoInfo *tivo, unsigned char *buffer,
 static void demux_ty_CopyToDemuxPacket( int type, TiVoInfo *tivo, demux_stream_t *ds, 
 	unsigned char *buffer, int size, off_t pos, float pts )
 {
-   demux_packet_t   *dp;
-
-   // mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Calling ds_add_packet() %7.1f\n", pts );
-   // printf( "%x %x %x %x\n", 
-   //    buffer[ 0 ], buffer[ 1 ], buffer[ 2 ], buffer[ 3 ] );
-
-   dp = new_demux_packet( size );
+   demux_packet_t *dp = new_demux_packet( size );
    memcpy( dp->buffer, buffer, size );
    if (pts != MP_NOPTS_VALUE)
    dp->pts = pts / 90000.0;
@@ -445,9 +439,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
          filePos = demux->filepos;
          stream_seek( demux->stream, 0 );
-
-         // mp_msg( MSGT_DEMUX, MSGL_DBG3, 
-			// 	"ty:Reading a chunk %d\n", __LINE__ );
 
          readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
 
@@ -616,16 +607,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       {
          if ( size > 0 && size + offset <= CHUNKSIZE )
          {
-            int esOffset1;
-#if 0
-            printf( "Video Chunk Header " );
-            for( count = 0 ; count < 24 ; count++ )
-            {
-               printf( "%2.2x ", chunk[ offset + count ] );
-            }
-            printf( "\n" );
-#endif
-            esOffset1 = demux_ty_FindESHeader( ty_VideoPacket, &chunk[ offset ], 
+            int esOffset1 = demux_ty_FindESHeader( ty_VideoPacket, &chunk[ offset ], 
                size);
             if ( esOffset1 != -1 )
                tivo->lastVideoPTS = get_ty_pts( 
@@ -648,15 +630,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       {
          if ( size > 0 && size + offset <= CHUNKSIZE )
          {
-#if 0
-            printf( "Audio Chunk Header " );
-            for( count = 0 ; count < 24 ; count++ )
-            {
-               printf( "%2.2x ", chunk[ offset + count ] );
-            }
-            printf( "\n" );
-#endif
-
             if( demux->audio->id == -1 )
             {
                if ( nybbleType == 0x02 )
