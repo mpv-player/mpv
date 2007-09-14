@@ -441,31 +441,6 @@ static void check_os_katmai_support( void )
       }
    }
 
-   /* Emulate test for OSXMMEXCPT in CR4.  The OS will set this bit if
-    * it supports unmasked SIMD FPU exceptions.  If we unmask the
-    * exceptions, do a SIMD divide-by-zero and get a SIGILL, the OS
-    * doesn't support unmasked SIMD FPU exceptions.  If we get a SIGFPE
-    * as expected, we're okay but we need to clean up after it.
-    *
-    * Are we being too stringent in our requirement that the OS support
-    * unmasked exceptions?  Certain RedHat 2.2 kernels enable SSE by
-    * setting CR4.OSFXSR but don't support unmasked exceptions.  Win98
-    * doesn't even support them.  We at least know the user-space SSE
-    * support is good in kernels that do support unmasked exceptions,
-    * and therefore to be safe I'm going to leave this test in here.
-    */
-   if ( gCpuCaps.hasSSE ) {
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE unmasked exceptions... " );
-
-//      test_os_katmai_exception_support();
-
-      if ( gCpuCaps.hasSSE ) {
-	 mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
-      } else {
-	 mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
-      }
-   }
-
    /* Restore the original signal handlers.
     */
    sigaction( SIGILL, &saved_sigill, NULL );
