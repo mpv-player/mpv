@@ -396,7 +396,6 @@ static void demux_ty_CopyToDemuxPacket( int type, TiVoInfo *tivo, demux_stream_t
    dp->pos = pos;
    dp->flags = 0;
    ds_add_packet( ds, dp );
-	ds->pts = pts;
 	if ( type == TY_V  && tivo->firstVideoPTS == -1 )
 			tivo->firstVideoPTS = pts;
 	if ( type == TY_A && tivo->firstAudioPTS == -1 )
