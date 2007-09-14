@@ -356,14 +356,15 @@ static void demux_ty_CopyToDemuxPacket( int type, TiVoInfo *tivo, demux_stream_t
 static int demux_ty_FindESHeader( unsigned char *header,
    unsigned char *buffer, int bufferSize )
 {
-   int count;
-   for( count = 0 ; count + 3 < bufferSize ; count++ )
-   {
-      if ( buffer[ count + 0 ] == header[ 0 ] &&
-           buffer[ count + 1 ] == header[ 1 ] &&
-           buffer[ count + 2 ] == header[ 2 ] &&
-           buffer[ count + 3 ] == header[ 3 ] )
-         return count;
+   uint32_t search = AV_RB32(header);
+   uint32_t found = -1;
+   uint8_t *p = buffer;
+   uint8_t *end = p + bufferSize;
+   while (p < end) {
+      found <<= 8;
+      found |= *p++;
+      if (found == search)
+         return p - buffer - 4;
    }
    return -1;
 }
