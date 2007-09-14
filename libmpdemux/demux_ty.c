@@ -377,38 +377,16 @@ static int demux_ty_FindESHeader( unsigned char *header,
 static void demux_ty_FindESPacket( unsigned char *header, 
    unsigned char *buffer, int bufferSize, int *esOffset1, int *esOffset2 )
 {
-   int count;
-
-   *esOffset1 = -1;
-   *esOffset2 = -1;
-
-   for( count = 0 ; count < bufferSize ; count++ )
-   {
-      if ( buffer[ count + 0 ] == header[ 0 ] &&
-           buffer[ count + 1 ] == header[ 1 ] &&
-           buffer[ count + 2 ] == header[ 2 ] &&
-           buffer[ count + 3 ] == header[ 3 ] )
-      {
-         *esOffset1 = count;
-         break;
-      }
-   }
-
-   if ( *esOffset1 != -1 )
-   {
-      for( count = *esOffset1 + 1 ; 
-         count < bufferSize ; count++ )
-      {
-         if ( buffer[ count + 0 ] == header[ 0 ] &&
-              buffer[ count + 1 ] == header[ 1 ] &&
-              buffer[ count + 2 ] == header[ 2 ] &&
-              buffer[ count + 3 ] == header[ 3 ] )
-         {
-            *esOffset2 = count;
-            break;
-         }
-      }
-   }
+  *esOffset1 = demux_ty_FindESHeader(header, buffer, bufferSize);
+  if (*esOffset1 == -1) {
+    *esOffset2 = -1;
+    return;
+  }
+  buffer += *esOffset1 + 1;
+  bufferSize -= *esOffset1 + 1;
+  *esOffset2 = demux_ty_FindESHeader(header, buffer, bufferSize);
+  if (*esOffset2 != -1)
+    *esOffset2 += *esOffset1 + 1;
 }
 
 static unsigned char ty_VideoPacket[] = { 0x00, 0x00, 0x01, 0xe0 };
