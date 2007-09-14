@@ -334,7 +334,7 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
   nr_samples = nblks * 32;
 
   buf16[0] = 0xf872; /* iec 61937     */
-  buf16[1] = 0x431f; /*  syncword     */
+  buf16[1] = 0x4e1f; /*  syncword     */
   switch(nr_samples) 
   {
   case 512:
