@@ -203,9 +203,9 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          parts++;
       }
 
-      if (offset + skip >= totalsize)
-         break;
       offset += skip;
+      if (offset >= totalsize)
+         break;
    }
    tivo->tmf_totalparts = parts;
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
@@ -745,10 +745,10 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                      }
 
                      // Collapse the Audio Buffer
+                     tivo->lastAudioEnd -= esOffset2;
                      memmove( &tivo->lastAudio[ 0 ], 
                         &tivo->lastAudio[ esOffset2 ], 
-                        tivo->lastAudioEnd - esOffset2 );
-                     tivo->lastAudioEnd -= esOffset2;
+                        tivo->lastAudioEnd );
                   }
                }
             }
