@@ -136,8 +136,8 @@ static int ty_extensionis(const char *name, const char *ext )
 static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 {
    char    header[ 512 ];
-   char    name[ 100 ];
-   char    sizestr[ 80 ];
+   char    *name;
+   char    *sizestr;
    int     size;
    int     count;
    int     blocks;
@@ -179,8 +179,10 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          error = 1;
          break;
       }
-      av_strlcpy( name, &header[ 0 ], 100 );
-      av_strlcpy( sizestr, &header[ 124 ], 12 );
+      name = header;
+      name[99] = 0;
+      sizestr = &header[124];
+      sizestr[12] = 0;
       size = strtol(sizestr, NULL, 8);
 
       blocks = size / 512;
