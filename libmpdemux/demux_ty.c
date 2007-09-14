@@ -279,30 +279,8 @@ static int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo,
 #define AC3_PTS_LENGTH               16
 #define AC3_PTS_OFFSET                9
 
-#define NUMBER_DIFFERENT_AUDIO_SIZES  7
-static int Series1AudioWithPTS[ NUMBER_DIFFERENT_AUDIO_SIZES ] = 
-{ 
-   336 + SERIES1_PTS_LENGTH, 
-   384 + SERIES1_PTS_LENGTH, 
-   480 + SERIES1_PTS_LENGTH, 
-   576 + SERIES1_PTS_LENGTH, 
-   768 + SERIES1_PTS_LENGTH, 
-   864 + SERIES1_PTS_LENGTH 
-};
-static int Series2AudioWithPTS[ NUMBER_DIFFERENT_AUDIO_SIZES ] = 
-{ 
-   336 + SERIES2_PTS_LENGTH, 
-   384 + SERIES2_PTS_LENGTH, 
-   480 + SERIES2_PTS_LENGTH, 
-   576 + SERIES2_PTS_LENGTH, 
-   768 + SERIES2_PTS_LENGTH, 
-   864 + SERIES2_PTS_LENGTH 
-};
-
 static int IsValidAudioPacket( int size, int *ptsOffset, int *ptsLen )
 {
-   int count;
-
    *ptsOffset = 0;
    *ptsLen = 0;
 
@@ -315,24 +293,18 @@ static int IsValidAudioPacket( int size, int *ptsOffset, int *ptsLen )
    }
 
    // MPEG
-   for( count = 0 ; count < NUMBER_DIFFERENT_AUDIO_SIZES ; count++ )
-   {
-      if ( size == Series1AudioWithPTS[ count ] )
+      if ( (size & 15) == (SERIES1_PTS_LENGTH & 15) )
       {
          *ptsOffset = SERIES1_PTS_OFFSET;
          *ptsLen = SERIES1_PTS_LENGTH;
          return 1;
       }
-   }
-      for( count = 0 ; count < NUMBER_DIFFERENT_AUDIO_SIZES ; count++ )
-      {
-         if ( size == Series2AudioWithPTS[ count ] )
+         if ( (size & 15) == (SERIES2_PTS_LENGTH & 15) )
          {
             *ptsOffset = SERIES2_PTS_OFFSET;
             *ptsLen = SERIES2_PTS_LENGTH;
             return 1;
          }
-      }
       mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Tossing Audio Packet Size %d\n", 
          size );
       return 0;
