@@ -5051,9 +5051,9 @@ if test "$_esd" = auto ; then
 
 cat > $TMPC << EOF
 #include <esd.h>
-int main(void) { return 0; }
+int main(void) { int fd = esd_open_sound("test"); return fd; }
 EOF
-cc_check `esd-config --libs` `esd-config --cflags` && tmp_run && _esd=yes
+cc_check `esd-config --libs` `esd-config --cflags` && _esd=yes
 
   fi
 fi
