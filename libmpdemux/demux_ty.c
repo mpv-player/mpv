@@ -790,7 +790,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       {
          if ( size > 0 && size + offset <= CHUNKSIZE )
             offset += size;
-         if (type != 3 && type != 5) {
+         if (type != 3 && type != 5 && (type != 0 || size > 0)) {
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Invalid Type %x\n", type );
          invalidType++;
          }
