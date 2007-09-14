@@ -160,12 +160,12 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
   else if(isdts == 0)
   {
     uint16_t *buf16 = (uint16_t *)buf;
-    buf16[0] = 0xF872;
-    buf16[1] = 0x4E1F;
-    buf16[2] = 0x0001;
-    buf16[3] = len << 3;
+    buf16[0] = 0xF872;   // iec 61937 syncword 1
+    buf16[1] = 0x4E1F;   // iec 61937 syncword 2
+    buf16[2] = 0x0001;   // data-type ac3
+    buf16[3] = len << 3; // number of bits in payload
 #ifdef WORDS_BIGENDIAN
-    memcpy(buf + 8, sh_audio->a_in_buffer, len);  // untested
+    memcpy(buf + 8, sh_audio->a_in_buffer, len);
 #else
     swab(sh_audio->a_in_buffer, buf + 8, len);
 #endif
@@ -358,7 +358,7 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: more data than fits\n");
   }
 #ifdef WORDS_BIGENDIAN
-  memcpy(&buf[8], indata_ptr, fsize);  // untested
+  memcpy(&buf[8], indata_ptr, fsize);
 #else
   //TODO if fzise is odd, swab doesn't copy the last byte
   swab(indata_ptr, &buf[8], fsize);
