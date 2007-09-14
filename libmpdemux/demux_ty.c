@@ -100,9 +100,6 @@ typedef struct sTivoInfo
    int64_t        lastVideoPTS;
 
    int             headerOk;
-   unsigned int    pesFileId;          // Should be 0xf5467abd
-   int             streamType;         // Should be 0x02
-   int             chunkSize;          // Should always be 128k
    off_t           size;
    int             readHeader;
    
@@ -468,7 +465,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    unsigned char    chunk[ CHUNKSIZE ];
    int              whichChunk;
    int              readSize;
-   unsigned int     pesFileId = 0;
 
    int              numberRecs;
    unsigned char    *recPtr;
@@ -547,14 +543,8 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
             readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE, 0 );
          }
 
-         if ( readSize == CHUNKSIZE )
+         if ( readSize == CHUNKSIZE && AV_RB32(chunk) == TIVO_PES_FILEID )
          {
-            tivo->pesFileId = AV_RB32(chunk);
-            tivo->streamType = AV_RB32(chunk + 4);
-            tivo->chunkSize = AV_RB32(chunk + 8);
-
-            if ( tivo->pesFileId == TIVO_PES_FILEID )
-            {
                off_t numberParts;
 
                readSize = 0;
@@ -584,11 +574,8 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                      CHUNKSIZE );
                }
 
-               if ( readSize == CHUNKSIZE )
+               if ( readSize == CHUNKSIZE && AV_RB32(chunk) == TIVO_PES_FILEID )
                {
-                  pesFileId = AV_RB32(chunk);
-                  if ( pesFileId == TIVO_PES_FILEID )
-                  {
                      size = AV_RB24(chunk + 12);
                      size -= 4;
                      size *= CHUNKSIZE;
@@ -596,9 +583,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                      tivo->size += size;
                      mp_msg( MSGT_DEMUX, MSGL_DBG3, 
                         "ty:Header Calc Stream Size %"PRId64"\n", tivo->size );
-                  }
                }
-            }
          }
          if ( tivo->size > demux->stream->end_pos )
             tivo->size = demux->stream->end_pos;
@@ -658,8 +643,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    }
 
    // We found a part header, skip it
-   pesFileId = AV_RB32(chunk);
-   if( pesFileId == TIVO_PES_FILEID )
+   if( AV_RB32(chunk) == TIVO_PES_FILEID )
    {
       mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Skipping PART Header\n" );
       if ( tivo->tmf != 1 )
