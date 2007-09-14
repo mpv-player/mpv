@@ -685,7 +685,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    offset = numberRecs * 16 + 4;
    for ( counter = 0 ; counter < numberRecs ; counter++ )
    {
-      size = ( recPtr[ 0 ] << 8 | recPtr[ 1 ] ) << 4 | ( recPtr[ 2 ] >> 4 );
+      size = AV_RB24(recPtr) >> 4;
       type = recPtr[ 3 ];
       nybbleType = recPtr[ 2 ] & 0x0f;
       recordsDecoded++;
