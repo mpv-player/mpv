@@ -123,15 +123,12 @@ void ty_ClearOSD( int start );
 #define TMF_SIG "showing.xml"
 
 // ===========================================================================
-static int ty_extensionis( char *name, char *ext )
+static int ty_extensionis(const char *name, const char *ext )
 {
-   char *ptr;
-
-   if ( strlen( ext ) > strlen( name ) ) return( 0 );
-   ptr = name;
-   ptr += ( strlen( name ) - strlen( ext ) );
-   if ( strcmp( ptr, ext ) == 0 ) return( 1 );
-   return( 0 );
+   int delta = strlen(name) - strlen(ext);
+   if (delta < 0) return 0;
+   name += delta;
+   return strcmp(name, ext) == 0;
 }
 
 
