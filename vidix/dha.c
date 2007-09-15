@@ -185,6 +185,7 @@ void unmap_phys_mem(void *ptr, unsigned long size)
 
 #endif /* Generic mmap (not win32, nor os2) */
 
+#if !defined(__alpha__) && !defined(__powerpc__)
 unsigned char INPORT8(unsigned idx)
 {
   return inb(idx);
@@ -214,3 +215,4 @@ void OUTPORT32(unsigned idx,unsigned val)
 {
   outl(idx,val);
 }
+#endif
