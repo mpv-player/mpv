@@ -187,7 +187,7 @@ static off_t tmf_filetooffset(TiVoInfo *tivo, int chunk)
 
 // ===========================================================================
 static int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo,
-   unsigned char *buff, int size, int readChunk )
+   unsigned char *buff, int readChunk )
 {
    off_t fileoffset;
    int    count;
@@ -201,7 +201,7 @@ static int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo,
       mp_msg( MSGT_DEMUX, MSGL_ERR, "Read past EOF()\n" );
       return 0;
    }
-   count = stream_read( demux->stream, buff, size );
+   count = stream_read( demux->stream, buff, CHUNKSIZE );
    demux->filepos = stream_tell( demux->stream );
 
    mp_msg( MSGT_DEMUX, MSGL_DBG3, "tmf_load_chunk() count %x\n",
@@ -391,7 +391,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
             mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Detected a tmf\n" );
             tivo->tmf = 1;
             ty_tmf_filetoparts( demux, tivo );
-            readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE, 0 );
+            readSize = tmf_load_chunk( demux, tivo, chunk, 0 );
          }
 
          if ( readSize == CHUNKSIZE && AV_RB32(chunk) == TIVO_PES_FILEID )
@@ -420,7 +420,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                {
                   numberParts = tivo->tmf_totalparts;
                   offset = numberParts * TIVO_PART_LENGTH;
-                  readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE,
+                  readSize = tmf_load_chunk( demux, tivo, chunk,
                      numberParts * ( TIVO_PART_LENGTH - CHUNKSIZE ) /
                      CHUNKSIZE );
                }
@@ -484,8 +484,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    }
    else
    {
-      readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE,
-         tivo->whichChunk );
+      readSize = tmf_load_chunk( demux, tivo, chunk, tivo->whichChunk );
       if ( readSize != CHUNKSIZE )
          return 0;
       tivo->whichChunk++;
@@ -502,8 +501,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       }
       else
       {
-         readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE,
-            tivo->whichChunk );
+         readSize = tmf_load_chunk( demux, tivo, chunk, tivo->whichChunk );
          tivo->whichChunk++;
       }
 
