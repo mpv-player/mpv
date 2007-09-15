@@ -334,7 +334,7 @@ static void demux_ty_AddToAudioBuffer( TiVoInfo *tivo, unsigned char *buffer,
 }
 
 static void demux_ty_CopyToDemuxPacket( demux_stream_t *ds,
-       unsigned char *buffer, int size, off_t pos, float pts )
+       unsigned char *buffer, int size, off_t pos, int64_t pts )
 {
    demux_packet_t *dp = new_demux_packet( size );
    memcpy( dp->buffer, buffer, size );
