@@ -333,7 +333,7 @@ static void demux_ty_AddToAudioBuffer( TiVoInfo *tivo, unsigned char *buffer,
          "ty:WARNING - Would have blown my audio buffer\n" );
 }
 
-static void demux_ty_CopyToDemuxPacket( int type, TiVoInfo *tivo, demux_stream_t *ds,
+static void demux_ty_CopyToDemuxPacket( demux_stream_t *ds,
        unsigned char *buffer, int size, off_t pos, float pts )
 {
    demux_packet_t *dp = new_demux_packet( size );
@@ -608,7 +608,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
             // Do NOT Pass the PES Header onto the MPEG2 Decode
             if( nybbleType != 0x06 )
-               demux_ty_CopyToDemuxPacket( TY_V, tivo, demux->video,
+               demux_ty_CopyToDemuxPacket( demux->video,
                   &chunk[ offset ], size, demux->filepos + offset,
                   tivo->lastVideoPTS );
             offset += size;
@@ -671,7 +671,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 
                   mp_msg( MSGT_DEMUX, MSGL_DBG3,
                      "ty:Adding Audio Packet Size %d\n", size );
-                  demux_ty_CopyToDemuxPacket( TY_A, tivo, demux->audio,
+                  demux_ty_CopyToDemuxPacket( demux->audio,
                      &chunk[ offset ], size, ( demux->filepos + offset ),
                      tivo->lastAudioPTS );
                }
@@ -725,8 +725,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                         if (nybbleType == 9) headerSize = 0;
                         demux_ty_CopyToDemuxPacket
                         (
-                           TY_A,
-                           tivo,
                            demux->audio,
                            &tivo->lastAudio[ esOffset1 + headerSize ],
                            packetSize - headerSize,
@@ -772,7 +770,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
          lastXDS[ 0x07 ] = b >> 8;
          lastXDS[ 0x08 ] = b;
          if ( subcc_enabled )
-            demux_ty_CopyToDemuxPacket( TY_V, tivo, demux->video, lastXDS, 0x09,
+            demux_ty_CopyToDemuxPacket( demux->video, lastXDS, 0x09,
                demux->filepos + offset, tivo->lastVideoPTS );
       }
       // ================================================================
