@@ -465,6 +465,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
          return 0;
    }
 
+   do {
    if ( tivo->tmf != 1 )
    {
       // Make sure we are on a 128k boundary
@@ -489,25 +490,10 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
          return 0;
       tivo->whichChunk++;
    }
-
-   // We found a part header, skip it
-   if( AV_RB32(chunk) == TIVO_PES_FILEID )
-   {
+   if (AV_RB32(chunk) == TIVO_PES_FILEID)
       mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Skipping PART Header\n" );
-      if ( tivo->tmf != 1 )
-      {
-         demux->filepos = stream_tell( demux->stream );
-         readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
-      }
-      else
-      {
-         readSize = tmf_load_chunk( demux, tivo, chunk, tivo->whichChunk );
-         tivo->whichChunk++;
-      }
+   } while (AV_RB32(chunk) == TIVO_PES_FILEID);
 
-      if ( readSize != CHUNKSIZE )
-         return 0;
-   }
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "\nty:actual current offset %"PRIx64"\n", stream_tell( demux->stream ) -
       CHUNKSIZE );
