@@ -200,7 +200,7 @@ void getch2(void)
                     goto found;
                 }
             }
-            if (c == '[' || c == 'O' && getch2_len >= 3) {
+            if ((c == '[' || c == 'O') && getch2_len >= 3) {
                 int c = getch2_buf[2];
                 const short ctable[] = {
                     KEY_UP, KEY_DOWN, KEY_RIGHT, KEY_LEFT, 0,
