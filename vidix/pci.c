@@ -521,7 +521,10 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 {
     unsigned int idx = 0;
     struct pci_config_reg pcr;
-    int do_mode1_scan = 0, do_mode2_scan = 0;
+    int do_mode1_scan = 0;
+#if !defined(__alpha__) && !defined(__powerpc__)
+    int do_mode2_scan = 0;
+#endif
     int func, hostbridges=0;
     int ret = -1;
     
