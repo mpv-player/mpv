@@ -74,7 +74,7 @@ extern int sub_justify;
 #define TY_V             1
 #define TY_A             2
 
-typedef struct stmf_fileParts
+typedef struct
 {
    off_t startOffset;
    off_t fileSize;
@@ -83,7 +83,7 @@ typedef struct stmf_fileParts
 
 #define MAX_TMF_PARTS 16
 
-typedef struct sTivoInfo
+typedef struct
 {
    int             whichChunk;
 
