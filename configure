@@ -4195,8 +4195,7 @@ _vidix_drv_unichrome=no
 if test "$_vidix_internal" = auto ; then
   _vidix_internal=no
   x86 && _vidix_internal=yes
-  # this is broken currently, undefined references to inw, outw etc.
-  #ppc && linux && _vidix_internal=yes
+  ppc && linux && _vidix_internal=yes
   alpha && linux && _vidix_internal=yes
   qnx || beos || darwin && _vidix_internal=no
 fi
