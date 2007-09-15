@@ -17,10 +17,6 @@ typedef struct {
 typedef struct {
   dvdnav_t *       dvdnav;              /* handle to libdvdnav stuff */
   char *           filename;            /* path */
-  int              ignore_timers;       /* should timers be skipped? */
-  int              sleeping;            /* are we sleeping? */
-  unsigned int     sleep_until;         /* timer */
-  int              started;             /* Has mplayer initialization finished? */
   unsigned int     duration;            /* in milliseconds */
   int              mousex, mousey;
   int              title;
