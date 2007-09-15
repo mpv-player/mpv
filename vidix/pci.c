@@ -56,6 +56,7 @@
 #include <string.h>
 #include <stdio.h>
 #ifdef __unix__
+#define __USE_UNIX98
 #include <unistd.h>
 #endif
 #include "AsmMacros.h"
