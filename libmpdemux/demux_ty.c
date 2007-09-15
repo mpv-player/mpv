@@ -76,10 +76,9 @@ extern int sub_justify;
 
 typedef struct stmf_fileParts
 {
-   int   fileNo;
+   off_t startOffset;
    off_t fileSize;
    int   chunks;
-   off_t startOffset;
 } tmf_fileParts;
 
 #define MAX_TMF_PARTS 16
@@ -172,16 +171,14 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
             mp_msg( MSGT_DEMUX, MSGL_ERR, "ty:tmf too big\n" );
             break;
          }
-         tivo->tmfparts[ parts ].fileNo = parts;
          tivo->tmfparts[ parts ].fileSize = size;
          tivo->tmfparts[ parts ].startOffset = offset + 512;
          tivo->tmfparts[ parts ].chunks = size / CHUNKSIZE;
          mp_msg
          (
             MSGT_DEMUX, MSGL_DBG3,
-           "tmf_filetoparts(): index %d, file %d, chunks %d\n",
+           "tmf_filetoparts(): index %d, chunks %d\n",
             parts,
-            tivo->tmfparts[ parts ].fileNo,
             tivo->tmfparts[ parts ].chunks
          );
          mp_msg
