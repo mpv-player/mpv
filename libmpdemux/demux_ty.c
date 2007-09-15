@@ -380,7 +380,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       {
          off_t filePos;
          tivo->readHeader = 1;
-         tivo->size = demux->stream->end_pos;
 
          filePos = demux->filepos;
          stream_seek( demux->stream, 0 );
@@ -437,8 +436,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                         "ty:Header Calc Stream Size %"PRId64"\n", tivo->size );
                }
          }
-         if ( tivo->size > demux->stream->end_pos )
-            tivo->size = demux->stream->end_pos;
 
          if ( demux->stream->start_pos > 0 )
             filePos = demux->stream->start_pos;
