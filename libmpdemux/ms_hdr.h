@@ -26,7 +26,7 @@ typedef struct __attribute__((__packed__)) mpeglayer3waveformat_tag {
 } MPEGLAYER3WAVEFORMAT;
 #endif /* _MPEGLAYER3WAVEFORMAT_ */
 
-#ifndef _BITMAPINFOHEADER_
+#if !defined(_BITMAPINFOHEADER_) && !defined(_WINGDI_H)
 #define _BITMAPINFOHEADER_
 typedef struct __attribute__((__packed__))
 {
