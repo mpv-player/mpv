@@ -232,9 +232,6 @@ static int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo,
 
 static int IsValidAudioPacket( int size, int *ptsOffset, int *ptsLen )
 {
-   *ptsOffset = 0;
-   *ptsLen = 0;
-
    // AC-3
    if ( size == 1550 || size == 1552 )
    {
