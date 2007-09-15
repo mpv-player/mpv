@@ -149,24 +149,12 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          tivo->tmfparts[ parts ].fileSize = size;
          tivo->tmfparts[ parts ].startOffset = stream_tell(demux->stream);
          tivo->tmfparts[ parts ].chunks = size / CHUNKSIZE;
-         mp_msg
-         (
-            MSGT_DEMUX, MSGL_DBG3,
-           "tmf_filetoparts(): index %d, chunks %d\n",
-            parts,
-            tivo->tmfparts[ parts ].chunks
-         );
-         mp_msg
-         (
-            MSGT_DEMUX, MSGL_DBG3,
-           "tmf_filetoparts(): size %"PRId64"\n",
-           tivo->tmfparts[ parts ].fileSize
-         );
-         mp_msg
-         (
-            MSGT_DEMUX, MSGL_DBG3,
+         mp_msg(MSGT_DEMUX, MSGL_DBG3,
+           "tmf_filetoparts(): index %d, chunks %d\n"
+           "tmf_filetoparts(): size %"PRId64"\n"
            "tmf_filetoparts(): startOffset %"PRId64"\n",
-           tivo->tmfparts[ parts ].startOffset
+           parts, tivo->tmfparts[ parts ].chunks,
+           tivo->tmfparts[ parts ].fileSize, tivo->tmfparts[ parts ].startOffset
          );
          parts++;
       }
