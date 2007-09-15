@@ -110,16 +110,6 @@ void ty_ClearOSD( int start );
 #define TMF_SIG "showing.xml"
 
 // ===========================================================================
-static int ty_extension(const char *name, const char *ext )
-{
-   int delta = strlen(name) - strlen(ext);
-   if (delta < 0) return 0;
-   name += delta;
-   return strcmp(name, ext) == 0;
-}
-
-
-// ===========================================================================
 static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 {
    off_t   offset;
@@ -134,6 +124,7 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
    {
       char    header[ 512 ];
       char    *name;
+      char    *extension;
       char    *sizestr;
       int     size;
       off_t   skip;
@@ -160,7 +151,8 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       if ( offset + skip > totalsize )
          size = totalsize - offset;
 
-      isty = ty_extension( name, ".ty" );
+      extension = strrchr(name, '.');
+      isty = extension && strcmp(extension, ".ty") == 0;
 
       mp_msg( MSGT_DEMUX, MSGL_DBG3, "name %-20.20s size %-12.12s %d %d\n",
          name, sizestr, size, isty );
