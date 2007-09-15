@@ -168,6 +168,11 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     memcpy(buf + 8, sh_audio->a_in_buffer, len);
 #else
     swab(sh_audio->a_in_buffer, buf + 8, len);
+    if (len & 1) {
+      buf[8+len-1] = 0;
+      buf[8+len] = sh_audio->a_in_buffer[len-1];
+      len++;
+    }
 #endif
     memset(buf + 8 + len, 0, 6144 - 8 - len);
 
@@ -361,8 +366,11 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
   memcpy(&buf[8], indata_ptr, fsize);
 #else
   swab(indata_ptr, &buf[8], fsize);
-  if (fsize & 1)
-    buf[8+fsize-1] = indata_ptr[fsize-1];
+  if (fsize & 1) {
+    buf[8+fsize-1] = 0;
+    buf[8+fsize] = indata_ptr[fsize-1];
+    fsize++;
+  }
 #endif
   memset(&buf[fsize + 8], 0, nr_samples * 2 * 2 - (fsize + 8));
 
