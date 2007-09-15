@@ -45,8 +45,6 @@ static struct m_struct_st stream_opts = {
   stream_opts_fields
 };
 
-int dvd_nav_still=0;            /* are we on a still picture? */
-
 static int seek(stream_t *s, off_t newpos);
 
 static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
@@ -145,12 +143,6 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
   *len=-1;
   if (!priv) return -1;
   if (!buf) return -1;
-
-  if (dvd_nav_still) {
-    mp_msg(MSGT_OPEN,MSGL_V, "%s: got a stream_read while I should be asleep!\n",__FUNCTION__);
-    *len=0;
-    return -1;
-  }
 
   if (dvdnav_get_next_block(priv->dvdnav,buf,&event,len)!=DVDNAV_STATUS_OK) {
     mp_msg(MSGT_OPEN,MSGL_V, "Error getting next block from DVD %d (%s)\n",event, dvdnav_err_to_string(priv->dvdnav) );
