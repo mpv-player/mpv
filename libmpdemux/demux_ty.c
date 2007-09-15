@@ -93,13 +93,9 @@ typedef struct sTivoInfo
 
    int             tivoType;           // 1 = SA, 2 = DTiVo
 
-   int64_t        firstAudioPTS;
-   int64_t        firstVideoPTS;
-
    int64_t        lastAudioPTS;
    int64_t        lastVideoPTS;
 
-   int             headerOk;
    off_t           size;
    int             readHeader;
 
@@ -347,10 +343,6 @@ static void demux_ty_CopyToDemuxPacket( int type, TiVoInfo *tivo, demux_stream_t
    dp->pos = pos;
    dp->flags = 0;
    ds_add_packet( ds, dp );
-   if ( type == TY_V  && tivo->firstVideoPTS == MP_NOPTS_VALUE )
-      tivo->firstVideoPTS = pts;
-   if ( type == TY_A && tivo->firstAudioPTS == MP_NOPTS_VALUE )
-      tivo->firstAudioPTS = pts;
 }
 
 static int demux_ty_FindESHeader( uint8_t nal,
@@ -933,8 +925,6 @@ static void demux_close_ty( demuxer_t *demux )
 static int ty_check_file(demuxer_t* demuxer)
 {
   TiVoInfo *tivo = calloc(1, sizeof(TiVoInfo));
-  tivo->firstAudioPTS = MP_NOPTS_VALUE;
-  tivo->firstVideoPTS = MP_NOPTS_VALUE;
   demuxer->priv = tivo;
   return ds_fill_buffer(demuxer->video) ? DEMUXER_TYPE_MPEG_TY : 0;
 }
