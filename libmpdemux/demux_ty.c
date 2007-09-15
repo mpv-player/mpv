@@ -112,15 +112,12 @@ void ty_ClearOSD( int start );
 // ===========================================================================
 static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 {
-   off_t   offset;
-   off_t   totalsize;
    int     parts = 0;
 
-   offset = 0;
-   totalsize = demux->stream->end_pos;
+   stream_seek(demux->stream, 0);
 
    mp_msg( MSGT_DEMUX, MSGL_DBG3, "Dumping tar contents\n" );
-   while (1)
+   while (!demux->stream->eof)
    {
       char    header[ 512 ];
       char    *name;
@@ -128,12 +125,6 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       char    *sizestr;
       int     size;
       off_t   skip;
-      int     isty;
-      if (!stream_seek(demux->stream, offset))
-      {
-         mp_msg( MSGT_DEMUX, MSGL_DBG3, "Seek bad %"PRId64"\n", (int64_t)offset );
-         break;
-      }
       if (stream_read(demux->stream, header, 512) < 512)
       {
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "Read bad\n" );
@@ -145,26 +136,18 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       sizestr[11] = 0;
       size = strtol(sizestr, NULL, 8);
 
-      // size rounded up to blocks + header size
-      skip = 512 + ((size + 511) & ~511);
-
-      if ( offset + skip > totalsize )
-         size = totalsize - offset;
+      mp_msg( MSGT_DEMUX, MSGL_DBG3, "name %-20.20s size %-12.12s %d\n",
+         name, sizestr, size );
 
       extension = strrchr(name, '.');
-      isty = extension && strcmp(extension, ".ty") == 0;
-
-      mp_msg( MSGT_DEMUX, MSGL_DBG3, "name %-20.20s size %-12.12s %d %d\n",
-         name, sizestr, size, isty );
-
-      if ( isty )
+      if (extension && strcmp(extension, ".ty") == 0)
       {
          if ( parts >= MAX_TMF_PARTS ) {
             mp_msg( MSGT_DEMUX, MSGL_ERR, "ty:tmf too big\n" );
             break;
          }
          tivo->tmfparts[ parts ].fileSize = size;
-         tivo->tmfparts[ parts ].startOffset = offset + 512;
+         tivo->tmfparts[ parts ].startOffset = stream_tell(demux->stream);
          tivo->tmfparts[ parts ].chunks = size / CHUNKSIZE;
          mp_msg
          (
@@ -188,10 +171,11 @@ static int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          parts++;
       }
 
-      offset += skip;
-      if (offset >= totalsize)
-         break;
+      // size rounded up to blocks
+      skip = (size + 511) & ~511;
+      stream_skip(demux->stream, skip);
    }
+   stream_reset(demux->stream);
    tivo->tmf_totalparts = parts;
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "tmf_filetoparts(): No More Part Files %d\n", parts );
