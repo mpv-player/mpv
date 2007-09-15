@@ -658,7 +658,11 @@ static void nv_getscreenproperties(struct rivatv_info *info){
   else info->depth = 0x04 << bpp;
   /*get screen width*/
   VID_WR08(info->chip.PCIO, 0x03D4, 0x1);
-  info->screen_x = (1 + VID_RD08(info->chip.PCIO, 0x3D5)) * 8;
+  info->screen_x = VID_RD08(info->chip.PCIO, 0x3D5);
+  /* NV_PCRTC_HORIZ_EXTRA_DISPLAY_END_8 */
+  VID_WR08 (info->chip.PCIO, 0x3D4, 0x2D);
+  info->screen_x |= (VID_RD08 (info->chip.PCIO, 0x3D5) & 0x02) << 7;
+  info->screen_x = (info->screen_x + 1) << 3;
   /*get screen height*/
   /* get first 8 bits in VT_DISPLAY_END*/
   VID_WR08(info->chip.PCIO, 0x03D4, 0x12);
@@ -669,6 +673,12 @@ static void nv_getscreenproperties(struct rivatv_info *info){
   /* and the 10th in CRTC_OVERFLOW*/
   info->screen_y |=(VID_RD08(info->chip.PCIO,0x03D5) &0x40)<<3;
   ++info->screen_y;
+  /* NV_PCRTC_EXTRA_VERT_DISPLAY_END_10 */
+  VID_WR08(info->chip.PCIO,0x03D4,0x25);
+  info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x02)<<9;
+  /* NV_PCRTC_???_VERT_DISPLAY_END_11 */
+  VID_WR08(info->chip.PCIO,0x03D4,0x41);
+  info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x04)<<9;
 
   /* NV_PCRTC_OFFSET */
   VID_WR08 (info->chip.PCIO, 0x3D4, 0x13);
