@@ -4221,6 +4221,11 @@ if test "$_vidix" = yes ; then
   test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 savage sis unichrome"
   test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
 
+  # some vidix drivers are not meant to work on powerpc, discard them
+  ppc && _vidix_drivers=`echo $_vidix_drivers | sed s/cyberblade//`
+  ppc && _vidix_drivers=`echo $_vidix_drivers | sed s/sis//`
+  ppc && _vidix_drivers=`echo $_vidix_drivers | sed s/unichrome//`
+
   for driver in $_vidix_drivers ; do
     uc_driver=`echo $driver | tr '[a-z]' '[A-Z]'`
     eval _vidix_drv_${driver}=yes
