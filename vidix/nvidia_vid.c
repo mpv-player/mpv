@@ -505,8 +505,8 @@ static void rivatv_lock_nv03 (struct rivatv_chip *chip, int LockUnlock){
 }
 
 static void rivatv_lock_nv04 (struct rivatv_chip *chip, int LockUnlock){
-	VID_WR08 (chip->PCIO, 0x3C4, 0x06);
-	VID_WR08 (chip->PCIO, 0x3C5, LockUnlock ? 0x99 : 0x57);
+	VID_WR08 (chip->PVIO, 0x3C4, 0x06);
+	VID_WR08 (chip->PVIO, 0x3C5, LockUnlock ? 0x99 : 0x57);
 	VID_WR08 (chip->PCIO, 0x3D4, 0x1F);
 	VID_WR08 (chip->PCIO, 0x3D5, LockUnlock ? 0x99 : 0x57);
 }
