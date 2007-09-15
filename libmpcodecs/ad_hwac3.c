@@ -163,6 +163,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     buf16[0] = 0xF872;   // iec 61937 syncword 1
     buf16[1] = 0x4E1F;   // iec 61937 syncword 2
     buf16[2] = 0x0001;   // data-type ac3
+    buf16[2] |= (sh_audio->a_in_buffer[5] & 0x7) << 8; // bsmod
     buf16[3] = len << 3; // number of bits in payload
 #ifdef WORDS_BIGENDIAN
     memcpy(buf + 8, sh_audio->a_in_buffer, len);
