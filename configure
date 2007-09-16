@@ -4222,9 +4222,7 @@ if test "$_vidix" = yes ; then
   test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
 
   # some vidix drivers are not meant to work on powerpc, discard them
-  ppc && _vidix_drivers=`echo $_vidix_drivers | sed s/cyberblade//`
-  ppc && _vidix_drivers=`echo $_vidix_drivers | sed s/sis//`
-  ppc && _vidix_drivers=`echo $_vidix_drivers | sed s/unichrome//`
+  ppc && _vidix_drivers=`echo $_vidix_drivers | sed -e s/cyberblade// -e s/sis// -e s/unichrome//`
 
   for driver in $_vidix_drivers ; do
     uc_driver=`echo $driver | tr '[a-z]' '[A-Z]'`
