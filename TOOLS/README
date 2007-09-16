@@ -498,7 +498,7 @@ Usage:        vfw2menc -f <fourcc> -d <codec.dll> -s <settingsfile.mcf>
               -c|--check filename  - load and show setting in filename
               -v|--view            - displays the config dialog and do nothing
 
-Notes:        Works on Windows/x86 only.
+Notes:        Works on x86 only.
 
 
 modify_reg.c
