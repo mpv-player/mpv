@@ -41,6 +41,7 @@ MPlayer (1.0)
     * support -noidx with libavformat demuxer
     * support for channel navigation with PVR input
     * text subtitles should now work with libavformat demuxer
+    * cleaned up tivo demuxer
 
     Streaming:
     * authentication for Real RTSP streams
