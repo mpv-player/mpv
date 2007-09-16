@@ -91,7 +91,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
        af->data->bps == data->bps)
       return AF_DETACH;
 
-    // Check for errors in configuraton
+    // Check for errors in configuration
     if((AF_OK != check_bps(data->bps)) ||
        (AF_OK != check_format(data->format)) ||
        (AF_OK != check_bps(af->data->bps)) ||
