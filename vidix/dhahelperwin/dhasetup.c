@@ -1,9 +1,29 @@
-/* dhahelper setup program (c) 2004 Sascha Sommer */
-/* compile with gcc -o dhasetup.exe dhasetup.c    */
-/* LICENSE: GPL                                   */
+/*  dhasetup - dhahelper setup program
+ *
+ *  Copyright (c) 2004 - 2007 Sascha Sommer (MPlayer)
+ *
+ *  Some parts from dhasetup.c source code <http://svn.tilp.info/cgi-bin/viewcvs.cgi/libticables/trunk/src/win32/dha/>
+ *
+ *  Copyright (C) 2007 Romain Lievin (tilp)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 #include <windows.h>
 #include <stdio.h>
+#include <winioctl.h>
 
 static void print_last_error(char *s){
         LPTSTR lpMsgBuf;
@@ -14,6 +34,8 @@ static void print_last_error(char *s){
 		NULL, GetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR) & lpMsgBuf, 0, NULL);
+	if(strlen(lpMsgBuf) >= 2)
+		lpMsgBuf[strlen(lpMsgBuf)-2] = 0;
 
         printf("%s (%i -> %s)\n", s, GetLastError(), lpMsgBuf);
 		LocalFree(lpMsgBuf);
@@ -57,6 +79,11 @@ int main(int argc,char* argv[]){
       print_last_error("Unable to register DhaHelper Service");
       return 1;
     }
+	
+    if(!StartService(hService, 0, NULL)){
+       print_last_error("Error while starting service");
+       return 1;
+    }
 
     printf("Success!\n");
   }
@@ -81,6 +108,5 @@ int main(int argc,char* argv[]){
   }
   CloseServiceHandle(hService);
   CloseServiceHandle(hSCManager);
-  printf("Please reboot to let the changes take effect.\n");
   return 0;
 }
