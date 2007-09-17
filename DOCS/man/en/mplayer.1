@@ -631,8 +631,10 @@ explicitly specified on the command line.
 See '\-msglevel help' for a list of all modules.
 .br
 .I NOTE:
-Messages printed before the command line is parsed can be controlled only
-by the MPLAYER_VERBOSE environment variable, which applies to all modules.
+Some messages are printed before the command line is parsed and are
+therefore not affected by \-msglevel.
+To control these messages you have to use the MPLAYER_VERBOSE environment
+variable, see its description below for details.
 .br
 Available levels:
 .PD 0
