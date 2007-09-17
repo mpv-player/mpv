@@ -243,7 +243,7 @@ typedef struct DVD_READ_STRUCTURE {
     UCHAR LayerNumber;
 } DVD_READ_STRUCTURE, *PDVD_READ_STRUCTURE;
 
-typedef struct _DVD_COPYRIGHT_DESCRIPTOR {
+typedef struct DVD_COPYRIGHT_DESCRIPTOR {
     UCHAR CopyrightProtectionType;
     UCHAR RegionManagementInformation;
     USHORT Reserved;
@@ -262,7 +262,7 @@ typedef enum
     DvdInvalidateAGID = 0x3f
 } DVD_KEY_TYPE;
 
-typedef struct _DVD_COPY_PROTECT_KEY
+typedef struct DVD_COPY_PROTECT_KEY
 {
     ULONG KeyLength;
     DVD_SESSION_ID SessionId;
@@ -280,14 +280,14 @@ typedef struct _DVD_COPY_PROTECT_KEY
     UCHAR KeyData[0];
 } DVD_COPY_PROTECT_KEY, *PDVD_COPY_PROTECT_KEY;
 
-typedef struct _DVD_ASF
+typedef struct DVD_ASF
 {
     UCHAR Reserved0[3];
     UCHAR SuccessFlag:1;
     UCHAR Reserved1:7;
 } DVD_ASF, * PDVD_ASF;
 
-typedef struct _DVD_RPC_KEY
+typedef struct DVD_RPC_KEY
 {
     UCHAR UserResetsAvailable:3;
     UCHAR ManufacturerResetsAvailable:3;
@@ -297,7 +297,7 @@ typedef struct _DVD_RPC_KEY
     UCHAR Reserved2[1];
 } DVD_RPC_KEY, * PDVD_RPC_KEY;
 
-typedef struct _SCSI_PASS_THROUGH_DIRECT
+typedef struct SCSI_PASS_THROUGH_DIRECT
 {
     USHORT Length;
     UCHAR ScsiStatus;

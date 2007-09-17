@@ -27,9 +27,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA.
  */
 
-#ifndef _DVDCSS_DVDCSS_H
+#ifndef DVDCSS_DVDCSS_H
 #ifndef _DOXYGEN_SKIP_ME
-#define _DVDCSS_DVDCSS_H 1
+#define DVDCSS_DVDCSS_H 1
 #endif
 
 #ifdef __cplusplus
