@@ -5,9 +5,23 @@
 #include <windows.h>
 #include <stdio.h>
 
+static void print_last_error(char *s){
+        LPTSTR lpMsgBuf;
+
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, GetLastError(),
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR) & lpMsgBuf, 0, NULL);
+
+        printf("%s (%i -> %s)\n", s, GetLastError(), lpMsgBuf);
+		LocalFree(lpMsgBuf);
+}
+
 int main(int argc,char* argv[]){
-  SC_HANDLE hSCManager;
-  SC_HANDLE hService;
+  SC_HANDLE hSCManager = NULL;
+  SC_HANDLE hService = NULL;
   char path[MAX_PATH];
   printf("dhasetup (c) 2004 Sascha Sommer\n");
   GetWindowsDirectory(path,MAX_PATH);
@@ -20,7 +34,7 @@ int main(int argc,char* argv[]){
   }
   hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
   if(!strcmp(argv[1],"install")){
-    printf("Installing dhahelper...\n");
+    printf("Installing dhahelper...");
     if(!CopyFile("dhahelper.sys",path,FALSE)){
       printf("Copying dhahelper.sys failed.\nEither dhahelper.sys is not in the current directory or you lack sufficient\nprivileges to write to %s.", path);
       return 1;
@@ -40,16 +54,27 @@ int main(int argc,char* argv[]){
                              NULL,
                              NULL);
     if(!hService){
-      printf("Unable to register DHAHELPER Service (0x%x).\n",GetLastError());
+      print_last_error("Unable to register DhaHelper Service");
+      return 1;
     }
+
+    printf("Success!\n");
   }
   else if(!strcmp(argv[1],"remove")){
     SERVICE_STATUS ServiceStatus;
-    printf("Removing dhahelper...\n");
+
+    printf("Removing dhahelper... ");
     hService = OpenService(hSCManager, "DHAHELPER", SERVICE_ALL_ACCESS);
-    ControlService(hService, SERVICE_CONTROL_STOP, &ServiceStatus);
-    DeleteService(hService);
+    if(!hService){
+      print_last_error("Error opening dhahelper service");
+      return 1;
+    }
+    if(!ControlService(hService, SERVICE_CONTROL_STOP, &ServiceStatus))
+      print_last_error("Error while stopping service");
+    if(!DeleteService(hService))
+      print_last_error("Error while deleting service");
     DeleteFile(path);
+    printf("Done!\n");
   }
   else {
     printf("unknown parameter: %s\n",argv[1]);
