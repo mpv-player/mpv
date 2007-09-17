@@ -142,7 +142,6 @@
  * The variable itself contains the exact version number of the library,
  * which can be useful for specific feature needs.
  */
-LIBDVDCSS_EXPORT char * dvdcss_interface_2;
 char * dvdcss_interface_2 = VERSION;
 
 /**
