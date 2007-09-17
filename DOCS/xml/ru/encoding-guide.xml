@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24089 -->
+<!-- synced with r24549 -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
@@ -4663,7 +4663,7 @@ compdata настроек битпотока:
 mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceable>trailer.flv</replaceable> \
 -ovc vfw -xvfwopts codec=vp6vfw.dll:compdata=onepass.mcf -oac mp3lame \
 -lameopts cbr:br=64 -af lavcresample=22050 -vf yadif,scale=320:240,flip \
--of lavf -lavfopts i_certify_that_my_video_stream_does_not_use_b_frames
+-of lavf
 </screen>
 </para>
 </informalexample>
