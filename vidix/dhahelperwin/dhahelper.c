@@ -1,6 +1,8 @@
 /******************************************************************************
  * dhahelper.c: direct hardware access under Windows NT/2000/XP
  * Copyright (c) 2004 Sascha Sommer <saschasommer@freenet.de>.
+ * Patched to compile with MinGW by Kevin Kofler:
+ * Copyright (c) 2007 Kevin Kofler
  *
  * This file is part of MPlayer.
  *
@@ -21,7 +23,18 @@
  *****************************************************************************/
 
 
+#if defined(_MSC_VER)
 #include <ntddk.h>
+#ifndef STDCALL
+#define STDCALL /* nothing */
+#endif
+#elif defined(__MINGW32__)
+#include <ddk/ntddk.h>
+#define NO_SEH /* FIXME */
+#else
+#error Unsupported compiler. This driver requires MSVC+DDK or MinGW to build.
+#endif
+
 #include "dhahelper.h"
 
 #define OutputDebugString DbgPrint
@@ -47,20 +60,20 @@ static unsigned int alloccount=0;
 
 
 
-static NTSTATUS dhahelperdispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp);
-static void dhahelperunload(IN PDRIVER_OBJECT DriverObject);
-static NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress);
-static NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG PhysMemSizeInBytes,PVOID *PhysMemLin);
+static STDCALL NTSTATUS dhahelperdispatch(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp);
+static STDCALL void dhahelperunload(IN PDRIVER_OBJECT DriverObject);
+static STDCALL NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress);
+static STDCALL NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG PhysMemSizeInBytes,PVOID *PhysMemLin);
 
-void Ke386SetIoAccessMap(int, IOPM *);
-void Ke386QueryIoAccessMap(int, IOPM *);
-void Ke386IoSetAccessProcess(PEPROCESS, int);
+void STDCALL Ke386SetIoAccessMap(int, IOPM *);
+void STDCALL Ke386QueryIoAccessMap(int, IOPM *);
+void STDCALL Ke386IoSetAccessProcess(PEPROCESS, int);
 
 
 
 
 //entry point
-NTSTATUS DriverEntry (IN PDRIVER_OBJECT DriverObject,IN PUNICODE_STRING RegistryPath){
+STDCALL NTSTATUS DriverEntry (IN PDRIVER_OBJECT DriverObject,IN PUNICODE_STRING RegistryPath){
   UNICODE_STRING  DeviceNameUnicodeString;
   UNICODE_STRING  DeviceLinkUnicodeString;
   NTSTATUS        ntStatus;
@@ -106,7 +119,7 @@ NTSTATUS DriverEntry (IN PDRIVER_OBJECT DriverObject,IN PUNICODE_STRING Registry
 
 // Process the IRPs sent to this device
 
-static NTSTATUS dhahelperdispatch(IN PDEVICE_OBJECT DeviceObject,IN PIRP Irp){
+static STDCALL NTSTATUS dhahelperdispatch(IN PDEVICE_OBJECT DeviceObject,IN PIRP Irp){
   PIO_STACK_LOCATION IrpStack;
   ULONG              dwInputBufferLength;
   ULONG              dwOutputBufferLength;
@@ -207,7 +220,7 @@ static NTSTATUS dhahelperdispatch(IN PDEVICE_OBJECT DeviceObject,IN PIRP Irp){
 
 // Delete the associated device and return
 
-static void dhahelperunload(IN PDRIVER_OBJECT DriverObject){
+static STDCALL void dhahelperunload(IN PDRIVER_OBJECT DriverObject){
   UNICODE_STRING DeviceLinkUnicodeString;
   NTSTATUS ntStatus=STATUS_SUCCESS;
   OutputDebugString ("dhahelper: entering dhahelperunload");
@@ -240,7 +253,7 @@ static void dhahelperunload(IN PDRIVER_OBJECT DriverObject){
 //I'm not sure what the limitations of ZwMapViewOfSection are but mapping 128MB videoram (that is probably already mapped by the gfxcard driver)
 //won't work so it is generally a good idea to map only the memory you really need
 
-static NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG PhysMemSizeInBytes,PVOID *PhysMemLin){
+static STDCALL NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG PhysMemSizeInBytes,PVOID *PhysMemLin){
   alloc_priv* alloclisttmp;
   PMDL Mdl=NULL;
   PVOID SystemVirtualAddress=NULL;
@@ -248,8 +261,14 @@ static NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG PhysMemS
   PHYSICAL_ADDRESS   pStartPhysAddress;
   OutputDebugString ("dhahelper: entering MapPhysicalMemoryToLinearSpace");
     
+#ifdef _WIN64
   pStartPhysAddress.QuadPart = (ULONGLONG)pPhysAddress;
+#else
+  pStartPhysAddress.QuadPart = (ULONGLONG)(ULONG)pPhysAddress;
+#endif
+#ifndef NO_SEH
   __try {
+#endif
     SystemVirtualAddress=MmMapIoSpace(pStartPhysAddress,PhysMemSizeInBytes, /*MmWriteCombined*/MmNonCached);
     if(!SystemVirtualAddress){
       OutputDebugString("dhahelper: MmMapIoSpace failed");
@@ -263,18 +282,24 @@ static NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG PhysMemS
     }
     OutputDebugString("dhahelper: Mdl 0x%x",Mdl);
     MmBuildMdlForNonPagedPool(Mdl);
+#ifdef _WIN64
+	UserVirtualAddress = (PVOID)(((ULONGLONG)PAGE_ALIGN(MmMapLockedPages(Mdl,UserMode))) + MmGetMdlByteOffset(Mdl));
+#else
     UserVirtualAddress = (PVOID)(((ULONG)PAGE_ALIGN(MmMapLockedPages(Mdl,UserMode))) + MmGetMdlByteOffset(Mdl));
+#endif
     if(!UserVirtualAddress){
       OutputDebugString("dhahelper: MmMapLockedPages failed");
       return STATUS_INSUFFICIENT_RESOURCES;
     }
     OutputDebugString("dhahelper: UserVirtualAddress 0x%x",UserVirtualAddress);
+#ifndef NO_SEH
   }__except(EXCEPTION_EXECUTE_HANDLER){  
        NTSTATUS           ntStatus; 
        ntStatus = GetExceptionCode(); 
        OutputDebugString("dhahelper: MapPhysicalMemoryToLinearSpace failed due to exception 0x%0x\n", ntStatus);
        return ntStatus;       
   }
+#endif
 
   
   OutputDebugString("dhahelper: adding data to internal allocation list");
@@ -304,7 +329,7 @@ static NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG PhysMemS
   return STATUS_SUCCESS;
 }
 
-static NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress){
+static STDCALL NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress){
   unsigned int i;
   unsigned int x=0;
   unsigned int alloccounttmp=alloccount;
@@ -327,16 +352,20 @@ static NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress){
     }
     else if(alloclist[i].UserVirtualAddress==UserVirtualAddress){
       if(x==i){
+#ifndef NO_SEH
         __try {
+#endif
           MmUnmapLockedPages(alloclist[x].UserVirtualAddress, alloclist[x].Mdl); 
           IoFreeMdl(alloclist[x].Mdl);
           MmUnmapIoSpace(alloclist[x].SystemVirtualAddress,alloclist[x].PhysMemSizeInBytes);       
+#ifndef NO_SEH
         }__except(EXCEPTION_EXECUTE_HANDLER){  
           NTSTATUS           ntStatus; 
           ntStatus = GetExceptionCode(); 
           OutputDebugString("dhahelper: UnmapPhysicalMemory failed due to exception 0x%0x (Mdl 0x%x)\n", ntStatus,alloclist[x].Mdl);
           return ntStatus;       
         }
+#endif
       }
       alloccounttmp--;
     }

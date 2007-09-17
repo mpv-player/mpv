@@ -3,4 +3,4 @@ TARGETPATH=.
 TARGETTYPE=DRIVER
 NTDEBUG=ntsd
 
-SOURCES= dhahelper.c
+SOURCES= dhahelper.c dhahelper.rc
