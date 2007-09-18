@@ -1343,6 +1343,7 @@ static void measure_text(void)
 				max_desc = cur->desc;
 		}
 	}
+	text_info.height += (text_info.n_lines - 1) * double_to_d6(global_settings->line_spacing);
 }
 
 /**
