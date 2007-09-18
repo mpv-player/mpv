@@ -675,12 +675,12 @@ static void nv_getscreenproperties(struct rivatv_info *info){
   ++info->screen_y;
 
   if(info->chip.arch >= NV_ARCH_10){
-  /* NV_PCRTC_EXTRA_VERT_DISPLAY_END_10 */
-  VID_WR08(info->chip.PCIO,0x03D4,0x25);
-  info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x02)<<9;
-  /* NV_PCRTC_???_VERT_DISPLAY_END_11 */
-  VID_WR08(info->chip.PCIO,0x03D4,0x41);
-  info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x04)<<9;
+    /* NV_PCRTC_EXTRA_VERT_DISPLAY_END_10 */
+    VID_WR08(info->chip.PCIO,0x03D4,0x25);
+    info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x02)<<9;
+    /* NV_PCRTC_???_VERT_DISPLAY_END_11 */
+    VID_WR08(info->chip.PCIO,0x03D4,0x41);
+    info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x04)<<9;
   }
 
   /* NV_PCRTC_OFFSET */
