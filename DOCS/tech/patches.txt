@@ -34,6 +34,8 @@ that your patch will be included.
     use 'diff -uwbBE' to help you remove them. Don't forget to check the
     patch to make sure diff didn't ignore some important change and remove
     any remaining cosmetics!
+    To use these options directly with svn, use this command:
+    svn diff --diff-cmd diff -x -uwbBE
 
  6. Comment parts that really need it (tricky side-effects etc).
     Always document string operations! Comment on what you are doing
