@@ -228,6 +228,7 @@ void ass_configure(ass_renderer_t* priv, int w, int h, int unscaled) {
 	else
 		hinting = ass_hinting & 3;
 	ass_set_hinting(priv, hinting);
+	ass_set_line_spacing(priv, ass_line_spacing);
 }
 
 void ass_configure_fonts(ass_renderer_t* priv) {

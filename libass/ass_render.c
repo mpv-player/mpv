@@ -2063,6 +2063,11 @@ void ass_set_hinting(ass_renderer_t* priv, ass_hinting_t ht)
 	}
 }
 
+void ass_set_line_spacing(ass_renderer_t* priv, double line_spacing)
+{
+	priv->settings.line_spacing = line_spacing;
+}
+
 int ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* default_family)
 {
 	if (priv->settings.default_font)
