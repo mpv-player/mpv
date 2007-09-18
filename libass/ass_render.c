@@ -1317,7 +1317,6 @@ static void get_bitmap_glyph(glyph_info_t* info)
 /**
  * This function goes through text_info and calculates text parameters.
  * The following text_info fields are filled:
- *   n_lines
  *   height
  *   lines[].height
  *   lines[].asc
