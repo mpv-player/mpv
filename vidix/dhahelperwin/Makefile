@@ -3,38 +3,35 @@ include ../../config.mak
 all: dhasetup.exe dhahelper.sys
 
 dhasetup.exe: dhasetup.c
-	$(CC) -o dhasetup.exe dhasetup.c
+	$(CC) -o $@ $<
 
 dhahelper.o: dhahelper.c dhahelper.h
-	$(CC) -Wall -Os -c dhahelper.c -o dhahelper.o
+	$(CC) -Wall -Os -c $< -o $@
 
 dhahelper-rc.o: dhahelper.rc common.ver ntverp.h
-	windres -I. dhahelper.rc $@
+	windres -I. $< $@
 
 base.tmp: dhahelper.o dhahelper-rc.o
-	$(CC)   -Wl,--base-file,base.tmp \
+	$(CC)   -Wl,--base-file,$@ \
 		-Wl,--entry,_DriverEntry@8 \
 		-nostartfiles -nostdlib \
-		-o junk.tmp \
-		dhahelper.o dhahelper-rc.o \
-		-lntoskrnl
+		-o junk.tmp $^ -lntoskrnl
 	-rm -f junk.tmp
 
 temp.exp: base.tmp
-	dlltool --dllname dhahelper.sys --base-file base.tmp --output-exp temp.exp
+	dlltool --dllname dhahelper.sys --base-file $< --output-exp $@
 
-dhahelper.sys: dhahelper.o dhahelper-rc.o temp.exp
+dhahelper.sys: temp.exp dhahelper.o dhahelper-rc.o
 	$(CC)	-Wl,--subsystem,native \
 		-Wl,--image-base,0x10000 \
 		-Wl,--file-alignment,0x1000 \
 		-Wl,--section-alignment,0x1000 \
 		-Wl,--entry,_DriverEntry@8 \
-		-Wl,temp.exp \
+		-Wl,$< \
 		-mdll -nostartfiles -nostdlib \
-		-o dhahelper.sys \
-		dhahelper.o dhahelper-rc.o \
+		-o $@ dhahelper.o dhahelper-rc.o \
 		-lntoskrnl
-	strip dhahelper.sys
+	strip $@
 
 clean:
 	rm -f *.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp
