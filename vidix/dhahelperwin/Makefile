@@ -37,3 +37,5 @@ clean:
 	rm -f *.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp
 
 distclean: clean
+
+.PHONY: all clean distclean
