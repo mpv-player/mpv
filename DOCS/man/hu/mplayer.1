@@ -1,4 +1,4 @@
-.\" Synced with r24423
+.\" Synced with r24558
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 09. 12." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 09. 18." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -630,8 +630,10 @@ Az 'all' modul minden más, explicit nem megadott modul beszédességét beállítja.
 Lásd a '\-msglevel help' kimenetét a modulok listájához.
 .br
 .I MEGJEGYZÉS:
-A parancssor értelmezése elõtti kiírás csak az MPLAYER_VERBOSE
-környezeti változóval vezérelhetõ, ami az összes modulra vonatkozik.
+Egyes üzenetek a parancssor értelmezése elõtt kerülnek kiírásra, ezért
+a \-msglevel nem érinti azokat.
+Ezen üzenetek szabályozásához az MPLAYER_VERBOSE környezeti változót
+kell használnod, a leírását lásd lejjebb.
 .br
 Használható szintek:
 .PD 0
@@ -649,7 +651,7 @@ rövid tanácsok
 .IPs 4
 információs üzenetek
 .IPs 5
-státusz üzenetek (amiket elrejt a -quiet)
+státusz üzenetek (alapértelmezett)
 .IPs 6
 bõbeszédû üzenetek
 .IPs 7
@@ -10203,10 +10205,9 @@ A könyvtár, ahol az MPlayer a felhasználói beállításokat keresi.
 .
 .TP
 .B MPLAYER_VERBOSE (lásd még \-v és \-msglevel)
-Beállítja a kezdeti beszédességi szintet az összes modulban
-(alapértelmezett: 0).
-A negatív értékek kevesebb üzenetet eredményeznek, míg a pozitívak
-többet.
+Beállítja a kezdeti beszédességi szintet az összes modulban (alapértelmezett: 0).
+A végleges beszédességi szint megfelel a \-msglevel 5 plusz az
+MPLAYER_VERBOSE értékének.
 .
 .SS libaf:
 .
