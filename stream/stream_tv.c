@@ -72,6 +72,7 @@ tv_param_t stream_tv_defaults = {
     0,             //contrast
     0,             //hue
     0,             //saturation
+    -1,            //gain
     NULL,          //tdevice
     0,             //tformat
     100,           //tpage

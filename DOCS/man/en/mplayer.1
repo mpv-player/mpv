@@ -1854,6 +1854,11 @@ These options set parameters of the mixer on the video capture card.
 They will have no effect, if your card does not have one.
 For v4l2 50 maps to the default value of the
 control, as reported by the driver.
+.IPs "gain=<0\-100> (v4l2)"
+Set gain control for video devices (usually webcams) to the desired
+value and switch off automatic control.
+A value of 0 enables automatic control.
+If this option is omitted, gain control will not be modified.
 .IPs immediatemode=<bool>
 A value of 0 means capture and buffer audio and video together
 (default for MEncoder).

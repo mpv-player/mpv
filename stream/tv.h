@@ -47,6 +47,7 @@ typedef struct tv_param_s {
     int contrast;
     int hue;
     int saturation;
+    int gain;
     char *tdevice;  ///< teletext device
     int tformat;    ///< teletext display format
     int tpage;      ///< start teletext page
@@ -151,6 +152,8 @@ typedef struct {
 #define TVI_CONTROL_VID_SET_CONTRAST	0x11c
 #define TVI_CONTROL_VID_GET_PICTURE	0x11d
 #define TVI_CONTROL_VID_SET_PICTURE	0x11e
+#define TVI_CONTROL_VID_SET_GAIN	0x11f
+#define TVI_CONTROL_VID_GET_GAIN	0x120
 
 /* TUNER controls */
 #define TVI_CONTROL_TUN_GET_FREQ	0x201

@@ -478,7 +478,6 @@ static int set_mute(priv_t *priv, int value)
 */
 static int set_control(priv_t *priv, struct v4l2_control *control, int val_signed) {
     struct v4l2_queryctrl        qctrl;
-
     qctrl.id = control->id;
     if (ioctl(priv->video_fd, VIDIOC_QUERYCTRL, &qctrl) < 0) {
         mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl query control failed: %s\n",
@@ -806,6 +805,40 @@ static int control(priv_t *priv, int cmd, void *arg)
             control.id = V4L2_CID_SATURATION;
             control.value = *(int *)arg;
             return set_control(priv, &control, 1);
+        case TVI_CONTROL_VID_GET_GAIN:
+        {
+
+            control.id = V4L2_CID_AUTOGAIN;
+            if(get_control(priv,&control,0)!=TVI_CONTROL_TRUE)
+                return TVI_CONTROL_FALSE;
+
+            if(control.value){ //Auto Gain control is enabled
+                *(int*)arg=0;
+                return TVI_CONTROL_TRUE;
+            }
+
+            //Manual Gain control
+            control.id = V4L2_CID_GAIN;
+            if(get_control(priv,&control,0)!=TVI_CONTROL_TRUE)
+                return TVI_CONTROL_FALSE;
+
+            *(int*)arg=control.value?control.value:1;
+
+            return TVI_CONTROL_TRUE;
+        }
+        case TVI_CONTROL_VID_SET_GAIN:
+        {
+            //value==0 means automatic gain control
+	    int value=*(int*)arg;
+
+            if (value < 0 || value>100)
+                return TVI_CONTROL_FALSE;
+
+            control.id=value?V4L2_CID_GAIN:V4L2_CID_AUTOGAIN;
+            control.value=value?value:1;
+
+            return set_control(priv,&control,0);
+        }
         case TVI_CONTROL_VID_GET_CONTRAST:
             control.id = V4L2_CID_CONTRAST;
             if (get_control(priv, &control, 1) == TVI_CONTROL_TRUE) {

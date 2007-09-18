@@ -759,6 +759,10 @@ no_audio:
     tv_set_color_options(tvh, TV_COLOR_SATURATION, tvh->tv_param->saturation);
     tv_set_color_options(tvh, TV_COLOR_CONTRAST, tvh->tv_param->contrast);
 
+    if(tvh->tv_param->gain!=-1)
+        if(funcs->control(tvh->priv,TVI_CONTROL_VID_SET_GAIN,&tvh->tv_param->gain)!=TVI_CONTROL_TRUE)
+            mp_msg(MSGT_TV,MSGL_WARN,"Unable to set gain control!\n");
+
     funcs->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
 
     return demuxer;
