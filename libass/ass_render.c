@@ -1474,7 +1474,7 @@ static void wrap_lines_smart(int max_text_width)
 			int height = text_info.lines[cur_line - 1].desc + text_info.lines[cur_line].asc;
 			cur_line ++;
 			pen_shift_x = - cur->pos.x;
-			pen_shift_y += d6_to_int(height) + global_settings->line_spacing;
+			pen_shift_y += d6_to_int(height + double_to_d6(global_settings->line_spacing));
 			mp_msg(MSGT_ASS, MSGL_DBG2, "shifting from %d to %d by (%d, %d)\n", i, text_info.length - 1, pen_shift_x, pen_shift_y);
 		}
 		cur->pos.x += pen_shift_x;
