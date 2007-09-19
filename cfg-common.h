@@ -74,6 +74,9 @@
         {"sdp", "-sdp has been removed, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
         {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#elif defined (LIBNEMESI)
+        {"rtsp-stream-over-tcp", &rtsp_transport_tcp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"rtsp-stream-over-sctp", &rtsp_transport_sctp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
 	{"rtsp-stream-over-tcp", "-rtsp-stream-over-tcp requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
@@ -501,6 +504,10 @@ extern m_option_t lavfdopts_conf[];
 
 #ifdef STREAMING_LIVE555
 extern int rtspStreamOverTCP;
+#endif
+#ifdef LIBNEMESI
+extern int rtsp_transport_tcp;
+extern int rtsp_transport_sctp;
 #endif
 extern int rtsp_port;
 extern char *rtsp_destination;

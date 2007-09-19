@@ -255,6 +255,7 @@ Optional features:
   --enable-winsock2      enable winsock2 [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-live          enable LIVE555 Streaming Media [autodetect]
+  --enable-nemesi        enable Nemesi Streaming Media [autodetect]
   --disable-dvdnav       disable libdvdnav [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
   --disable-dvdread-internal  disable internal libdvdread [autodetect]
@@ -587,6 +588,8 @@ _libdvdcss_internal=auto
 _xanim=auto
 _real=auto
 _live=auto
+_nemesi=auto
+_native_rtsp=yes
 _xinerama=auto
 _mga=no
 _xmga=auto
@@ -944,6 +947,8 @@ for ac_option do
   --disable-real)	_real=no	;;
   --enable-live)	_live=yes	;;
   --disable-live)	_live=no	;;
+  --enable-nemesi)	_nemesi=yes	;;
+  --disable-nemesi)	_nemesi=no	;;
   --enable-xinerama)	_xinerama=yes	;;
   --disable-xinerama)	_xinerama=no	;;
   --enable-mga)		_mga=yes	;;
@@ -6222,6 +6227,24 @@ else
 fi
 echores "$_qtx"
 
+echocheck "Nemesi Streaming Media libraries"
+if test "$_nemesi" = auto  && test "$_network" = yes ; then
+    _nemesi=no
+    if $_pkg_config --exists libnemesi ; then
+        _ld_extra="$_ld_extra `$_pkg_config --libs libnemesi`"
+        _nemesi=yes
+    fi
+fi
+echores "$_nemesi"
+
+if test "$_nemesi" = yes; then
+    _native_rtsp=no
+    _def_nemesi='#define LIBNEMESI 1'
+    _inputmodules="nemesi $_inputmodules"
+else
+    _def_nemesi='#undef LIBNEMESI'
+    _noinputmodules="nemesi $_noinputmodules"
+fi
 
 echocheck "LIVE555 Streaming Media libraries"
 if test "$_live" = auto  && test "$_network" = yes ; then
@@ -6254,11 +6277,11 @@ EOF
       fi
   fi
 fi
-if test "$_live" = yes && test "$_network" = yes ; then
+if test "$_live" = yes && test "$_network" = yes && test "$_nemesi" = no; then
   _res_comment="using $_livelibdir"
   _def_live='#define STREAMING_LIVE555 1'
  _inputmodules="live555 $_inputmodules"
-elif test "$_live_dist" = yes && test "$_network" = yes ; then
+elif test "$_live_dist" = yes && test "$_network" = yes && test "$_nemesi" = no; then
   _res_comment="using distribution version"
   _live="yes"
   _def_live='#define STREAMING_LIVE555 1'
@@ -7519,6 +7542,8 @@ EXESUF = $_exesuf
 MPLAYER_NETWORK = $_network
 FTP = $_ftp
 STREAMING_LIVE555 = $_live
+LIBNEMESI = $_nemesi
+NATIVE_RTSP = $_native_rtsp
 VSTREAM = $_vstream
 STREAM_CACHE = $_stream_cache
 DVBIN = $_dvbin
@@ -8083,6 +8108,9 @@ $_def_real_path
 
 /* LIVE555 Streaming Media library support */
 $_def_live
+
+/* libnemesi Streaming Media library support */
+$_def_nemesi
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_def_fastmemcpy

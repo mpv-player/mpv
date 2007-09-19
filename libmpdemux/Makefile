@@ -48,6 +48,7 @@ SRCS_COMMON = asfheader.c \
 SRCS_COMMON-$(GIF)                     += demux_gif.c
 SRCS_COMMON-$(LIBAVFORMAT)             += demux_lavf.c
 SRCS_COMMON-$(LIBDV)                   += demux_rawdv.c
+SRCS_COMMON-$(LIBNEMESI)               += demux_nemesi.c
 SRCS_COMMON-$(LIBNUT)                  += demux_nut.c
 SRCS_COMMON-$(LIBVORBIS)               += demux_ogg.c
 SRCS_COMMON-$(MUSEPACK)                += demux_mpc.c

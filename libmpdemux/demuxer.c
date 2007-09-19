@@ -116,7 +116,7 @@ demuxer_desc_t* demuxer_list[] = {
 #endif
   &demuxer_desc_audio,
   &demuxer_desc_mpeg_ty,
-#ifdef STREAMING_LIVE555
+#if defined(STREAMING_LIVE555) || defined(LIBNEMESI)
   &demuxer_desc_rtp,
 #endif
 #ifdef USE_LIBAVFORMAT

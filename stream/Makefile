@@ -28,19 +28,22 @@ SRCS_COMMON-$(MPLAYER_NETWORK)   += stream_netstream.c     \
                                     udp.c                  \
                                     tcp.c                  \
                                     stream_rtp.c           \
-                                    stream_rtsp.c          \
                                     stream_udp.c           \
+                                    realrtsp/asmrp.c       \
+                                    realrtsp/real.c        \
+                                    realrtsp/rmff.c        \
+                                    realrtsp/sdpplin.c     \
+                                    realrtsp/xbuffer.c     \
+
+SRCS_COMMON-$(NATIVE_RTSP)       += stream_rtsp.c          \
                                     freesdp/common.c       \
                                     freesdp/errorlist.c    \
                                     freesdp/parser.c       \
                                     librtsp/rtsp.c         \
                                     librtsp/rtsp_rtp.c     \
                                     librtsp/rtsp_session.c \
-                                    realrtsp/asmrp.c       \
-                                    realrtsp/real.c        \
-                                    realrtsp/rmff.c        \
-                                    realrtsp/sdpplin.c     \
-                                    realrtsp/xbuffer.c     \
+
+SRCS_COMMON-$(LIBNEMESI)         += stream_nemesi.c
 
 SRCS_COMMON-$(PVR)               += stream_pvr.c
 SRCS_COMMON-$(RADIO)             += stream_radio.c
