@@ -60,14 +60,14 @@ Documentation translations:
     * Russian: Vladimir Voroshilov
 
 Platforms/ports:
-    * Debian packaging: None
+    * Debian packaging: Diego Biurrun
     * Red Hat/RPM packaging: Dominik Mierzejewski
     * FreeBSD: Vladimir Kushnir, Nexus
     * BSD/OS: Steven Schultz
     * NetBSD: Bernd Ernesti
     * OpenBSD: Björn Sandell
     * Solaris: Derek Lewis
-    * Win32/Cygwin/MinGW: Sascha Sommer, Joey Parrish, Diego Biurrun
+    * Win32/Cygwin/MinGW: Sascha Sommer, Joey Parrish
     * Mac OS X: Nicolas Plourde
     * AIX: Derek Lewis
 
@@ -90,7 +90,7 @@ MPlayer code:
     * EDL code: Reynaldo H. Verdejo Pinochet, Oded Shimon
 
 Imported libs/projects:
-    * libavcodec, libavformat: Michael Niedermayer
+    * FFmpeg: Michael Niedermayer
     * VIDIX core: Benjamin Zores
     * mp3lib: None
     * loader: None
