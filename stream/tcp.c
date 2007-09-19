@@ -193,7 +193,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	tv.tv_usec = 500000;
 	FD_ZERO( &set );
 	FD_SET( socket_server_fd, &set );
-	// When the connection will be made, we will have a writable fd
+	// When the connection will be made, we will have a writeable fd
 	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
 	      if( ret<0 ) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_SelectFailed);
 	      else if(ret > 0) break;
@@ -201,7 +201,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 		if(count > 30)
 		  mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnTimeout);
 		else
-		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interuppted by user\n");
+		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interrupted by user\n");
 		return TCP_ERROR_TIMEOUT;
 	      }
 	      count++;
@@ -218,7 +218,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	val = 0;
 	ioctlsocket( socket_server_fd, FIONBIO, &val );
 #endif
-	// Check if there were any error
+	// Check if there were any errors
 	err_len = sizeof(int);
 	ret =  getsockopt(socket_server_fd,SOL_SOCKET,SO_ERROR,&err,&err_len);
 	if(ret < 0) {

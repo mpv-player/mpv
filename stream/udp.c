@@ -126,7 +126,7 @@ udp_open_socket (URL_t *url)
     if (!hp)
     {
       mp_msg (MSGT_NETWORK, MSGL_ERR,
-              "Counldn't resolve name: %s\n", url->hostname);
+              "Could not resolve name: %s\n", url->hostname);
       closesocket (socket_server_fd);
       return -1;
     }
