@@ -1,4 +1,4 @@
-.\" Synced with r24558
+.\" Synced with r24573
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 09. 18." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 09. 20." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1865,6 +1865,11 @@ A felvevõkártya audió kimenetei közötti választás, ha több van.
 Ezekkel az opciókkal a felvevõkártya mixerének egyes paraméterei állíthatók.
 Ha nincs neki, az opció hatástalan.
 A v4l2 esetén az 50 az alapértelmezett érték, amit a vezérlõ ad.
+.IPs "gain=<0\-100> (v4l2)"
+Beállítja a gain control-t a videó eszközön (általában webcam) a megadott
+értékre és kikapcsolja az automatikus vezérlést.
+A 0 érték engedélyezi az automatikus vezérlést.
+Ha ez az opció elmarad, a gain control nem módosul.
 .IPs immediatemode=<bool>
 A 0-ás érték az audió és videó egyszerre felvételét jelenti (mencoder-nél
 alapértelmezett). Az 1-es érték (mplayer-nél alapértelmezett) csak videó
