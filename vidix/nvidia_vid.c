@@ -1128,3 +1128,32 @@ VDXDriver nvidia_drv = {
   .set_eq = nv_set_eq,
   .set_gkey = nv_set_gkeys,
 };
+
+
+#if 0
+//gcc -o nvidia_vid nvidia_vid.c -I ../ -lm ../vidix/libvidix.a
+
+int main(int argc,char* argv[]){
+  if(nv_probe(0,0)){
+        printf("no supported chip found\n");
+        return 1;
+  }
+  if(nv_init()){
+	printf("could not init\n");
+	return 1;
+  }
+  if(info->chip.arch >= NV_ARCH_10){
+    printf("NV_PVIDEO_BASE (0x900) 0x%x\n",VID_RD32(info->chip.PVIDEO, 0x900));
+    printf("NV_PVIDEO_LIMIT (0x908) 0x%x\n",VID_RD32(info->chip.PVIDEO, 0x908));
+    printf("NV_PVIDEO_OFFSET (0x920) 0x%x\n",VID_RD32(info->chip.PVIDEO, 0x920));
+    printf("NV_PVIDEO_FORMAT (0x958) 0x%x\n",VID_RD32(info->chip.PVIDEO, 0x958));
+    printf("NV_PVIDEO_STOP (0x704) 0x%x\n",VID_RD32(info->chip.PVIDEO, 0x704));
+    printf("NV_PVIDEO_BUFFER (0x700) 0x%x\n",VID_RD32(info->chip.PVIDEO, 0x700));
+  }
+
+  nv_destroy();
+  return 0;
+}
+
+#endif
+
