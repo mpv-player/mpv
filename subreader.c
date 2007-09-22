@@ -1255,7 +1255,9 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block,
 		 */
 
 		/* timed sub fps correction ::atmos */
-		if(sub_fps) {	
+		/* the frame-based case is handled in mpcommon.c
+		 * where find_sub is called */
+		if(sub_uses_time && sub_fps) {	
 			sub->start *= sub_fps/fps;
 			sub->end   *= sub_fps/fps;
 		}
