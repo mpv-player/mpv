@@ -642,9 +642,12 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 	init_pos = stream_tell(demuxer->stream);
 	mp_msg(MSGT_DEMUXER, MSGL_V, "PROBING UP TO %"PRIu64", PROG: %d\n", (uint64_t) param->probe, param->prog);
 	end_pos = init_pos + (param->probe ? param->probe : TS_MAX_PROBE_SIZE);
-	while((pos <= end_pos) && (! demuxer->stream->eof))
+	while(1)
 	{
 		pos = stream_tell(demuxer->stream);
+		if(pos > end_pos || demuxer->stream->eof)
+			break;
+
 		if(ts_parse(demuxer, &es, tmp, 1))
 		{
 			//Non PES-aligned A52 audio may escape detection if PMT is not present;
