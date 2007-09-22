@@ -1723,7 +1723,7 @@ static uint16_t get_mp4_desc_len(uint8_t *buf, int *len)
 }
 
 
-static uint16_t parse_mp4_slconfig_descriptor(pmt_t *pmt, uint8_t *buf, int len, void *elem)
+static uint16_t parse_mp4_slconfig_descriptor(uint8_t *buf, int len, void *elem)
 {
 	int i = 0;
 	mp4_es_descr_t *es;
@@ -1883,7 +1883,7 @@ static uint16_t parse_mp4_decoder_config_descriptor(pmt_t *pmt, uint8_t *buf, in
 	return len;
 }
 
-static uint16_t parse_mp4_decoder_specific_descriptor(pmt_t *pmt, uint8_t *buf, int len, void *elem)
+static uint16_t parse_mp4_decoder_specific_descriptor(uint8_t *buf, int len, void *elem)
 {
 	int i;
 	mp4_decoder_config_t *dec;
@@ -1912,7 +1912,7 @@ static uint16_t parse_mp4_decoder_specific_descriptor(pmt_t *pmt, uint8_t *buf, 
 	return len;
 }
 
-static uint16_t parse_mp4_es_descriptor(pmt_t *pmt, uint8_t *buf, int len, void *elem)
+static uint16_t parse_mp4_es_descriptor(pmt_t *pmt, uint8_t *buf, int len)
 {
 	int i = 0, j = 0, k, found;
 	uint8_t flag;
@@ -2052,16 +2052,16 @@ static int parse_mp4_descriptors(pmt_t *pmt, uint8_t *buf, int len, void *elem)
 				parse_mp4_iod(pmt, &(buf[i]), descr_len, elem);
 				break;
 			case 0x3:
-				parse_mp4_es_descriptor(pmt, &(buf[i]), descr_len, elem);
+				parse_mp4_es_descriptor(pmt, &(buf[i]), descr_len);
 				break;
 			case 0x4:
 				parse_mp4_decoder_config_descriptor(pmt, &buf[i], descr_len, elem);
 				break;
 			case 0x05:
-				parse_mp4_decoder_specific_descriptor(pmt, &buf[i], descr_len, elem);
+				parse_mp4_decoder_specific_descriptor(&buf[i], descr_len, elem);
 				break;
 			case 0x6:
-				parse_mp4_slconfig_descriptor(pmt, &buf[i], descr_len, elem);
+				parse_mp4_slconfig_descriptor(&buf[i], descr_len, elem);
 				break;
 			default:
 				mp_msg(MSGT_DEMUX, MSGL_V, "Unsupported mp4 descriptor 0x%x\n", tag);
@@ -2234,7 +2234,7 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 	return 1;
 }
 
-static int parse_sl_section(pmt_t *pmt, ts_section_t *section, uint16_t progid, uint16_t pid, int is_start, unsigned char *buff, int size)
+static int parse_sl_section(pmt_t *pmt, ts_section_t *section, int is_start, unsigned char *buff, int size)
 {
 	int tid, len, skip;
 	uint8_t *ptr;
@@ -2889,7 +2889,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				if(pmt->es[k].mp4_es_id == mp4_es_id)
 				{
 					section = &(tss->section);
-					parse_sl_section(pmt, section, progid, pid, is_start, &packet[base], buf_size);
+					parse_sl_section(pmt, section, is_start, &packet[base], buf_size);
 				}
 			}
 			continue;
