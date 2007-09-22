@@ -6235,16 +6235,17 @@ if test "$_nemesi" = auto  && test "$_network" = yes ; then
         _nemesi=yes
     fi
 fi
-echores "$_nemesi"
-
 if test "$_nemesi" = yes; then
     _native_rtsp=no
     _def_nemesi='#define LIBNEMESI 1'
     _inputmodules="nemesi $_inputmodules"
 else
+    _native_rtsp="$_network"
+    _nemesi=no
     _def_nemesi='#undef LIBNEMESI'
     _noinputmodules="nemesi $_noinputmodules"
 fi
+echores "$_nemesi"
 
 echocheck "LIVE555 Streaming Media libraries"
 if test "$_live" = auto  && test "$_network" = yes ; then
@@ -6290,6 +6291,7 @@ elif test "$_live_dist" = yes && test "$_network" = yes && test "$_nemesi" = no;
              -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  _inputmodules="live555 $_inputmodules"
 else
+  _live=no
   _def_live='#undef STREAMING_LIVE555'
   _noinputmodules="live555 $_noinputmodules"
 fi
