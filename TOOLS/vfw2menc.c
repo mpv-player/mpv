@@ -298,6 +298,6 @@ cleanup:
     if (fourcc) free(fourcc);
     if (filename) free(filename);
     if (hDriver) CloseDriver(hDriver, 0, 0);
-    if (coinit == S_OK) CoUninitialize();
+    if ((coinit == S_OK) || coinit == S_FALSE) CoUninitialize();
     return ret;
 }
