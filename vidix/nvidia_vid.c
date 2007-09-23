@@ -444,6 +444,16 @@ struct rivatv_info {
 };
 typedef struct rivatv_info rivatv_info;
 
+uint8_t nvReadVGA (struct rivatv_chip *chip, int index) {
+	VID_WR08 (chip->PCIO, 0x3D4, index);
+	return VID_RD08 (chip->PCIO, 0x3D5);
+}
+
+void nvWriteVGA (struct rivatv_chip *chip, int index, int data) {
+	VID_WR08 (chip->PCIO, 0x3D4, index);
+	VID_WR08 (chip->PCIO, 0x3D5, data);
+}
+
 //framebuffer size funcs
 static unsigned long rivatv_fbsize_nv03 (struct rivatv_chip *chip){
 	if (VID_RD32 (chip->PFB, 0) & 0x00000020) {
@@ -506,8 +516,7 @@ static void rivatv_lock_nv03 (struct rivatv_chip *chip, int LockUnlock){
 
 static void rivatv_lock_nv04 (struct rivatv_chip *chip, int LockUnlock){
 	rivatv_lock_nv03 (chip, LockUnlock);
-	VID_WR08 (chip->PCIO, 0x3D4, 0x1F);
-	VID_WR08 (chip->PCIO, 0x3D5, LockUnlock ? 0x99 : 0x57);
+	nvWriteVGA (chip, 0x1F, LockUnlock ? 0x99 : 0x57);
 }
 
 
@@ -591,14 +600,10 @@ static void rivatv_overlay_stop (struct rivatv_info *info) {
 static uint32_t rivatv_overlay_pan (struct rivatv_info *info){
 	uint32_t pan;
 	info->chip.lock (&info->chip, 0);
-	VID_WR08 (info->chip.PCIO, 0x3D4, 0x0D);
-	pan = VID_RD08 (info->chip.PCIO, 0x3D5);
-	VID_WR08 (info->chip.PCIO, 0x3D4, 0x0C);
-	pan |= VID_RD08 (info->chip.PCIO, 0x3D5) << 8;
-	VID_WR08 (info->chip.PCIO, 0x3D4, 0x19);
-	pan |= (VID_RD08 (info->chip.PCIO, 0x3D5) & 0x1F) << 16;
-	VID_WR08 (info->chip.PCIO, 0x3D4, 0x2D);
-	pan |= (VID_RD08 (info->chip.PCIO, 0x3D5) & 0x60) << 16;
+	pan  =  nvReadVGA (&info->chip, 0x0D);
+	pan |=  nvReadVGA (&info->chip, 0x0C) << 8;
+	pan |= (nvReadVGA (&info->chip, 0x19) & 0x1F) << 16;
+	pan |= (nvReadVGA (&info->chip, 0x2D) & 0x60) << 16;
 	return pan << 2;
 }
 
@@ -651,46 +656,36 @@ static void nv_getscreenproperties(struct rivatv_info *info){
   uint32_t bpp=0,x;
   info->chip.lock(&info->chip, 0);
   /*get screen depth*/
-  VID_WR08(info->chip.PCIO, 0x03D4,0x28);
-  bpp = VID_RD08(info->chip.PCIO,0x03D5)&0x3;
+  bpp = nvReadVGA (&info->chip, 0x28) & 0x3;
   if((bpp == 2) && (VID_RD32(info->chip.PVIDEO,0x600) & 0x00001000) == 0x0)info->depth=15;
   else info->depth = 0x04 << bpp;
   /*get screen width*/
-  VID_WR08(info->chip.PCIO, 0x03D4, 0x1);
-  info->screen_x = VID_RD08(info->chip.PCIO, 0x3D5);
+  info->screen_x = nvReadVGA (&info->chip, 0x1);
   /* NV_PCRTC_HORIZ_EXTRA_DISPLAY_END_8 */
-  VID_WR08 (info->chip.PCIO, 0x3D4, 0x2D);
-  info->screen_x |= (VID_RD08 (info->chip.PCIO, 0x3D5) & 0x02) << 7;
+  info->screen_x |= (nvReadVGA (&info->chip, 0x2D) & 0x02) << 7;
   info->screen_x = (info->screen_x + 1) << 3;
   /*get screen height*/
   /* get first 8 bits in VT_DISPLAY_END*/
-  VID_WR08(info->chip.PCIO, 0x03D4, 0x12);
-  info->screen_y = VID_RD08(info->chip.PCIO,0x03D5);
-  VID_WR08(info->chip.PCIO,0x03D4,0x07);
+  info->screen_y = nvReadVGA (&info->chip, 0x12);
   /* get 9th bit in CRTC_OVERFLOW*/
-  info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x02)<<7;
+  info->screen_y |= (nvReadVGA (&info->chip, 0x07) & 0x02) << 7;
   /* and the 10th in CRTC_OVERFLOW*/
-  info->screen_y |=(VID_RD08(info->chip.PCIO,0x03D5) &0x40)<<3;
+  info->screen_y |= (nvReadVGA (&info->chip, 0x07) & 0x40) << 3;
   ++info->screen_y;
 
   if(info->chip.arch >= NV_ARCH_10){
     /* NV_PCRTC_EXTRA_VERT_DISPLAY_END_10 */
-    VID_WR08(info->chip.PCIO,0x03D4,0x25);
-    info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x02)<<9;
+    info->screen_y |= (nvReadVGA (&info->chip, 0x25) & 0x02) << 9;
     /* NV_PCRTC_???_VERT_DISPLAY_END_11 */
-    VID_WR08(info->chip.PCIO,0x03D4,0x41);
-    info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x04)<<9;
+    info->screen_y |= (nvReadVGA (&info->chip, 0x41) & 0x04) << 9;
   }
 
   /* NV_PCRTC_OFFSET */
-  VID_WR08 (info->chip.PCIO, 0x3D4, 0x13);
-  x = VID_RD08 (info->chip.PCIO, 0x3D5);
+  x  =  nvReadVGA (&info->chip, 0x13);
   /* NV_PCRTC_REPAINT0_OFFSET_10_8 */
-  VID_WR08 (info->chip.PCIO, 0x3D4, 0x19);
-  x |= (VID_RD08 (info->chip.PCIO, 0x3D5) & 0xE0) << 3;
+  x |= (nvReadVGA (&info->chip, 0x19) & 0xE0) << 3;
   /* NV_PCRTC_EXTRA_OFFSET_11 */
-  VID_WR08 (info->chip.PCIO, 0x3D4, 0x25);
-  x |= (VID_RD08 (info->chip.PCIO, 0x3D5) & 0x20) << 6; x <<= 3;
+  x |= (nvReadVGA (&info->chip, 0x25) & 0x20) << 6; x <<= 3;
   info->bps = x * bpp;
 }
 
