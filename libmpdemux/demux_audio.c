@@ -26,7 +26,7 @@
 
 typedef struct da_priv {
   int frmt;
-  float last_pts;
+  double next_pts;
 } da_priv_t;
 
 //! rather arbitrary value for maximum length of wav-format headers
@@ -521,7 +521,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
 
   priv = malloc(sizeof(da_priv_t));
   priv->frmt = frmt;
-  priv->last_pts = -1;
+  priv->next_pts = 0;
   demuxer->priv = priv;
   demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
@@ -570,6 +570,8 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   if(s->eof)
     return 0;
 
+  double this_pts = priv->next_pts;
+
   switch(priv->frmt) {
   case MP3 :
     while(1) {
@@ -590,7 +592,7 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
 	  free_demux_packet(dp);
 	  return 0;
 	}
-	priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + sh_audio->audio.dwScale/(float)sh_audio->samplerate;
+	priv->next_pts += sh_audio->audio.dwScale/(double)sh_audio->samplerate;
 	break;
       }
     } break;
@@ -606,14 +608,15 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
       l = (l + align - 1) / align * align;
     dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
-    priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
+    priv->next_pts += l/(double)sh_audio->i_bps;
     break;
   }
   case fLaC: {
     l = 65535;
     dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
-    priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
+    /* FLAC is not a constant-bitrate codec. These values will be wrong. */
+    priv->next_pts += l/(double)sh_audio->i_bps;
     break;
   }
   default:
@@ -622,7 +625,7 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   }
 
   resize_demux_packet(dp, l);
-  dp->pts = priv->last_pts;
+  dp->pts = this_pts;
   ds_add_packet(ds, dp);
   return 1;
 }
@@ -642,7 +645,7 @@ static void high_res_mp3_seek(demuxer_t *demuxer,float time) {
       continue;
     }
     stream_skip(demuxer->stream,len-4);
-    priv->last_pts += sh->audio.dwScale/(float)sh->samplerate;
+    priv->next_pts += sh->audio.dwScale/(double)sh->samplerate;
     nf--;
   }
 }
@@ -660,11 +663,11 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_
   priv = demuxer->priv;
 
   if(priv->frmt == MP3 && hr_mp3_seek && !(flags & 2)) {
-    len = (flags & 1) ? rel_seek_secs - priv->last_pts : rel_seek_secs;
+    len = (flags & 1) ? rel_seek_secs - priv->next_pts : rel_seek_secs;
     if(len < 0) {
       stream_seek(s,demuxer->movi_start);
-      len = priv->last_pts + len;
-      priv->last_pts = 0;
+      len = priv->next_pts + len;
+      priv->next_pts = 0;
     }
     if(len > 0)
       high_res_mp3_seek(demuxer,len);
@@ -682,15 +685,13 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_
   } else if(pos < demuxer->movi_start)
     pos = demuxer->movi_start;
 
-  priv->last_pts = (pos-demuxer->movi_start)/(float)sh_audio->i_bps;
+  priv->next_pts = (pos-demuxer->movi_start)/(double)sh_audio->i_bps;
   
   switch(priv->frmt) {
   case WAV:
     pos -= (pos - demuxer->movi_start) %
             (sh_audio->wf->nBlockAlign ? sh_audio->wf->nBlockAlign :
              (sh_audio->channels * sh_audio->samplesize));
-    // We need to decrease the pts by one step to make it the "last one"
-    priv->last_pts -= sh_audio->wf->nAvgBytesPerSec/(float)sh_audio->i_bps;
     break;
   }
 
@@ -719,7 +720,7 @@ static int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
 	case DEMUXER_CTRL_GET_PERCENT_POS:
 	    if (audio_length<=0) 
     		return DEMUXER_CTRL_DONTKNOW;
-    	    *((int *)arg)=(int)( (priv->last_pts*100)  / audio_length);
+    	    *((int *)arg)=(int)( (priv->next_pts*100)  / audio_length);
 	    return DEMUXER_CTRL_OK;
 
 	default:
