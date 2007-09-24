@@ -13,9 +13,6 @@
 #include "libavutil/intreadwrite.h"
 
 #include <string.h>
-#ifdef MP_DEBUG
-#include <assert.h>
-#endif
 
 #define MP3 1
 #define WAV 2
@@ -284,10 +281,6 @@ static int demux_audio_open(demuxer_t* demuxer) {
   // mp3_hdrs list is sorted first by next_frame_pos and then by frame_pos
   mp3_hdr_t *mp3_hdrs = NULL, *mp3_found = NULL;
   da_priv_t* priv;
-#ifdef MP_DEBUG
-  assert(demuxer != NULL);
-  assert(demuxer->stream != NULL);
-#endif
   
   s = demuxer->stream;
 
@@ -557,11 +550,6 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   demuxer_t* demux;
   da_priv_t* priv;
   stream_t* s;
-#ifdef MP_DEBUG
-  assert(ds != NULL);
-  assert(ds->sh != NULL);
-  assert(ds->demuxer != NULL);
-#endif
   sh_audio = ds->sh;
   demux = ds->demuxer;
   priv = demux->priv;
