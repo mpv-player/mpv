@@ -546,19 +546,14 @@ static int demux_audio_open(demuxer_t* demuxer) {
 static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   int l;
   demux_packet_t* dp;
-  sh_audio_t* sh_audio;
-  demuxer_t* demux;
-  da_priv_t* priv;
-  stream_t* s;
-  sh_audio = ds->sh;
-  demux = ds->demuxer;
-  priv = demux->priv;
-  s = demux->stream;
+  sh_audio_t* sh_audio = ds->sh;
+  demuxer_t* demux = ds->demuxer;
+  da_priv_t* priv = demux->priv;
+  double this_pts = priv->next_pts;
+  stream_t* s = demux->stream;
 
   if(s->eof)
     return 0;
-
-  double this_pts = priv->next_pts;
 
   switch(priv->frmt) {
   case MP3 :
