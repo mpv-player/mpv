@@ -861,8 +861,8 @@ static int get_space(void)
     }
     
     ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
-    if (ret > MAX_OUTBURST)
-	    ret = MAX_OUTBURST;
+    if (ret > ao_data.buffersize)  // Buffer underrun?
+	ret = ao_data.buffersize;
     return(ret);
 }
 
