@@ -1101,11 +1101,12 @@ int vo_update_osd(int dxs,int dys){
     } else {
        if (!vo_font) 
            load_font_ft(dxs, dys, &vo_font, font_name);
-       if (!sub_font) 
+       if (!sub_font) {
            if (sub_font_name)
                load_font_ft(dxs, dys, &sub_font, sub_font_name);
            else
                sub_font = vo_font;
+       }
     }
 #endif
 
