@@ -190,4 +190,98 @@ mencoder -tv driver=v4l:width=768:height=576 \
 </para></informalexample>
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="tv-teletext">
+<title>Телетекст</title>
+
+<para>
+На данный момент телетекст доступен только в MPlayer для v4l и v4l2 драйверов.
+</para>
+
+<sect2 id="tv-teletext-implementation-notes">
+<title>Замечания реализации</title>
+
+<para>
+<application>MPlayer</application> поддерживает обычный текст, псевдографику и
+навигационные ссылки.
+К сожалению, цветные страницы поддерживаются пока не полностью - все страницы
+отображаются оттенками серого.
+Страницы с субтитрами (еще известные как Closed Captions) тоже поддерживаются.
+</para>
+
+<para>
+<application>MPlayer</application> начинает кешировать все страницы телетекста
+с момента начала просмотра TV, так что вам не потребуется ожидать загрузки
+интересующий страницы.
+</para>
+
+<para>
+Замечание: Использование телетекста с <option>-vo xv</option> приводит к появлению странных цветов.
+</para>
+</sect2>
+
+<sect2 id="tv-teletext-usage">
+<title>Использование телетекста</title>
+
+<para>
+Чтобы включить декодирование телетекста, вы должны указать VBI устройство, из которого
+следует читать данные (обычно <filename>/dev/vbi0</filename> в Linux).
+Это можно сделать, указав <option>tdevice</option> в вашем файле конфигурации:
+<screen>tv=tdevice=/dev/vbi0</screen>
+</para>
+
+<para>
+Вам может потребоваться указать код языка телетекста для вашей страны.
+Чтобы получить список всех доступных языковых кодов, используйте
+<screen>tv=tdevice=/dev/vbi0:tlang=<replaceable>-1</replaceable></screen>
+Вот пример для Русского:
+<screen>tv=tdevice=/dev/vbi0:tlang=<replaceable>33</replaceable></screen>
+</para>
+
+<para>
+</para>
+</sect2>
+
+<sect2 id="tv-teletext-hotkeys">
+<title>Горячие клавиши телетекста</title>
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row>
+  <entry>Клавиша</entry>
+  <entry>Описание</entry>
+</row>
+</thead>
+<tbody>
+<row>
+  <entry>X</entry>
+  <entry>Включает/выключает отображение телетекста</entry>
+</row>
+<row>
+  <entry>C</entry>
+  <entry>Циклически переключает режими отрисовки (непрозрачный, прозрачный, инфертированный непрозрачный,
+  инвертированный прозрачный</entry>
+</row>
+<row>
+  <entry>Left/Right</entry>
+  <entry>Переходит к предыдущей/следующей странице телетекста</entry>
+</row>
+<row>
+  <entry>PageUp/PageDown</entry>
+  <entry>Перходит к следующей/предыдущей дополнительной странице телетекста</entry>
+</row>
+<row>
+  <entry>Цифры</entry>
+  <entry>Вводят номер страницы для перехода к ней</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</sect2>
+</sect1>
 </chapter>
