@@ -857,12 +857,13 @@ static int init_audio(radio_priv_t *priv)
         mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AudioInSetupFailed, strerror(errno));
         return STREAM_ERROR;
     }
+#ifdef USE_OSS_AUDIO
     if(is_oss)
         ioctl(priv->audio_in.oss.audio_fd, SNDCTL_DSP_NONBLOCK, 0);
+#endif
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
-    else{
+    if(!is_oss)
         snd_pcm_nonblock(priv->audio_in.alsa.handle,1);
-    }
 #endif
 
     priv->audio_buffer_size = seconds*priv->audio_in.samplerate*priv->audio_in.channels*
