@@ -1,4 +1,4 @@
-.\" Synced with r24573
+.\" Synced with r24592
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 09. 20." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 09. 24." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -2432,7 +2432,8 @@ A felirat szövegének autoscale értéke a képernyõméret százalékában
 A felirat fájl framerátájának megadása (alapértelmezett: a film fps-e).
 .br
 .I MEGJEGYZÉS:
-Csak a képkocka alapú feliratoknál használható, pl.\& MicroDVD formátum.
+Ha a <ráta> > film fps-e, a felirat felgyorsul a képkocka alapú felirat fájloknál
+és lelassul az idõ alapúaknál.
 .
 .TP
 .B \-subpos <0\-100> (hasznos a \-vf expand opcióval)
