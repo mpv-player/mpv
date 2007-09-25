@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r24423
+.\" In sync with r24592
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -658,9 +658,10 @@ Module.
 Siehe '\-msglevel help' für eine Liste der verfügbaren Module.
 .br
 .I ANMERKUNG:
-Meldungen, die vor der Auswertung der Kommandozeile ausgegeben werden,
-können nur von MPLAYER_VERBOSE gesteuert werden, welches sich auf alle Module
-bezieht.
+Manche Meldungen werden ausgegeben, bevor die Kommandozeile eingelesen wird,
+und bleiben daher von \-msglevel unberührt.
+Um diese Meldungen zu kontrollieren, musst du die Umgebungsvariable
+MPLAYER_VERBOSE verwenden, für Details siehe deren Beschreibung unten.
 .br
 Verfügbare Levels:
 .PD 0
@@ -678,7 +679,7 @@ Kurze Hinweise
 .IPs 4
 Informationen
 .IPs 5
-Statusmeldungen (die von \-quiet unterdrückten)
+Statusmeldungen (Standard)
 .IPs 6
 Ausführliche Meldungen
 .IPs 7
@@ -1960,6 +1961,12 @@ Diese Optionen setzen Parameter des Mixers auf der Capture-Karte.
 Sie haben keinen Effekt, wenn deine Karte keinen Mixer hat.
 Bei V4L2 steht 50 für den vom
 Treiber angegebenen Default-Wert.
+.IPs "gain=<0\-100> (v4l2)"
+Setze die Kontrolle der Verstärkung für Videogeräte (normalerweise Webcams)
+auf den gewünschten Wert und schalte die automatische Kontrolle aus.
+Der Wert 0 aktiviert automatische Kontrolle.
+Wird diese Option ausgelassen, wird die Verstärkungskontrolle nicht
+geändert.
 .IPs immediatemode=<bool>
 Ein Wert von 0 bedeutet: Nimm Audio und Video zusammen in einem Puffer auf
 (Standard für MEncoder).
@@ -2540,8 +2547,8 @@ prozentualen Anteil der Anzeigegröße (Standard: 5).
 Gibt die Framerate der Untertitel an (Standard: Framerate des Films).
 .br
 .I ANMERKUNG:
-Funktioniert nur bei bildbasierten Untertitelformaten wie z.B.\& dem
-MicroDVD-Format.
+<Rate> > Film-Fps beschleunigt Untertitel bei bildbasierten
+Untertitel-Dateien und verlangsamt sie bei zeitbasierten.
 .
 .TP
 .B \-subpos <0\-100> (nützlich mit \-vf expand)
@@ -10724,8 +10731,8 @@ Verzeichnis, in dem MPlayer nach dem Benutzereinstellungen sucht.
 .B MPLAYER_VERBOSE (siehe auch \-v und \-msglevel)
 Setze das initiale Ausführlichkeitslevel quer durch alle
 Benachrichtigungsmodule (Standard: 0).
-Negative Werte führen zu weniger Mitteilungen, während positive Werte zu mehr
-führen.
+Das resultierende Ausführlichkeitslevel entspricht dem von \-msglevel 5 plus
+dem Wert von MPLAYER_VERBOSE.
 .
 .SS libaf:
 .
