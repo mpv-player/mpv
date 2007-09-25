@@ -120,7 +120,7 @@ static int net_stream_fill_buffer(client_t* cl,uint16_t max_len) {
     return 1;
   }
   if(max_len == 0) {
-    if(!write_error(cl->fd,"Fill buffer called with 0 lenght\n"))
+    if(!write_error(cl->fd,"Fill buffer called with 0 length\n"))
       return 0;
     return 1;
   }

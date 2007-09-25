@@ -774,7 +774,7 @@ static int from_ulaw(void* in, void* out, int len, int bps, int format)
   return AF_OK;
 }
 
-/* Convert from singed int8 to singned int32 or float to ulaw */
+/* Convert from signed int8 to signed int32 or float to ulaw */
 static int to_ulaw(void* in, void* out, int len, int bps, int format)
 {
   register int i;

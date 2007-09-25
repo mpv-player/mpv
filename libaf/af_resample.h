@@ -20,7 +20,7 @@
 #undef FIR
 #undef ADDQUE
 
-/* The lenght Lxx definition selects the length of each poly phase
+/* The length Lxx definition selects the length of each poly phase
    component. Valid definitions are L8 and L16 where the number
    defines the nuber of taps. This definition affects the
    computational complexity, the performance and the memory usage.

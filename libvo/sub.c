@@ -790,8 +790,8 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 
 
 #ifdef NEW_SPLITTING
-		// minimum holds the 'sum of the differences in lenght among the lines',
-		// a measure of the eveness of the lenghts of the lines
+		// minimum holds the 'sum of the differences in length among the lines',
+		// a measure of the evenness of the lengths of the lines
 		for (tmp_otp = otp; tmp_otp->next != NULL; tmp_otp = tmp_otp->next) {
 		    pmt = tmp_otp->next;
 		    while (pmt != NULL) {
@@ -806,7 +806,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 
 		    exit = 0;
 		    // until the last word of a line can be moved to the beginning of following line
-		    // reducing the 'sum of the differences in lenght among the lines', it is done
+		    // reducing the 'sum of the differences in length among the lines', it is done
 		    while (exit == 0) {
 			hold = NULL;
 			exit = 1;

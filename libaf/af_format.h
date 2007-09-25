@@ -8,7 +8,7 @@
 #error af_format.h needs config.h
 #endif
 
-// Endianess
+// Endianness
 #define AF_FORMAT_BE		(0<<0) // Big Endian
 #define AF_FORMAT_LE		(1<<0) // Little Endian
 #define AF_FORMAT_END_MASK	(1<<0)

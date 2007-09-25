@@ -16,7 +16,7 @@ The file starts with a variable size header:
 		0x4:  BITMAPINFOHEADER
 		0x8:  QT's ImageDesc
 		0x16: indicates 32-bit chunk size before every data chunk
-16-bit	Lenght of headers
+16-bit	Length of headers
 
 There's strict rule in the follow-up of the codec-headers.
 Depending on flags,

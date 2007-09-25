@@ -47,7 +47,7 @@ static int fmt2sgial(int *format, int *width) {
   int smpfmt = AL_SAMPFMT_TWOSCOMP;
 
   /* SGI AL only supports float and signed integers in native
-   * endianess. If this is something else, we must rely on the audio
+   * endianness. If this is something else, we must rely on the audio
    * filter to convert it to a compatible format. */
 
   /* 24-bit audio is supported, but only with 32-bit alignment.

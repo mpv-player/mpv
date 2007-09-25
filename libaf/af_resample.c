@@ -20,7 +20,7 @@
    Valid definitions are L8 and L16, where the number denotes the
    length of the filter. This definition affects the computational
    complexity (see play()), the performance (see filter.h) and the
-   memory usage. The filterlenght is choosen to 8 if the machine is
+   memory usage. The filterlength is choosen to 8 if the machine is
    slow and to 16 if the machine is fast and has MMX.  
 */
 

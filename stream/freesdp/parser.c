@@ -393,7 +393,7 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
      a=<attribute>:<value> */
   while (!strncmp (p, "a=", 2))
   {
-    /* The "9" lenght specifier of the first string is subject to
+    /* The "9" length specifier of the first string is subject to
        changes */
     if (sscanf
         (p, "a=%9[^:\r\n]:%" MSFLENS "[^\r\n]", fsdp_buf[0],

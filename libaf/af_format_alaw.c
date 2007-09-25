@@ -262,7 +262,7 @@ static int from_alaw(void* in, void* out, int len, int bps, int format)
   return AF_OK;
 }
 
-/* Convert from singed int8 to singned int32 or float to alaw */
+/* Convert from signed int8 to signed int32 or float to alaw */
 static int to_alaw(void* in, void* out, int len, int bps, int format)
 {
   register int i;

@@ -37,7 +37,7 @@
 
 #include "libavutil/common.h"
 
-//no chanse xinerama to be suported in near future
+//no chance for xinerama to be supported in the near future
 #undef HAVE_XINERAMA
 
 #undef NDEBUG 
