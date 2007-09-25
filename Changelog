@@ -32,16 +32,16 @@ MPlayer (1.0)
     * Implemented switch_video and switch_program consistently with switch_audio
       (default keys are "_" and TAB, respectively). For the time being program
       switching is only available in TS streams handled by demux_ts.c (not
-      lavf), while video switching is also handled by demux_lavf.c and
+      libavformat), while video switching is also handled by demux_lavf.c and
       demux_avi.c.
     * audio and video switching for the AVI demuxer (video switching untested)
     * GIF demuxer improvements, should work with all GIFs now
-    * support for VC1 in MPEG-TS and MPEG-PS files (BD,HD)-DVD
+    * support for VC-1 in MPEG-TS and MPEG-PS files (BD,HD)-DVD
     * support for EVO demuxing
     * support -noidx with libavformat demuxer
     * support for channel navigation with PVR input
     * text subtitles should now work with libavformat demuxer
-    * cleaned up tivo demuxer
+    * cleaned up TiVo demuxer
 
 
     Streaming:
@@ -78,6 +78,11 @@ MPlayer (1.0)
     * DTS/DCA audio decoder
     * Atrac 3 audio decoder
     * MPEG-1/2 speedups
+    * RoQ muxer, video and audio encoder
+    * QTRLE encoder
+    * AC-3 decoder
+    * Matroska muxer
+    * Monkey's Audio demuxer and decoder
 
     libmpeg2:
     * iWMMXt-accelerated DCT and motion compensation for ARM processors
@@ -105,6 +110,7 @@ MPlayer (1.0)
     * fixed internal VIDIX in Solaris/x86, also auto-enabled
     * rework of internal VIDIX, now a fully static library with builtin drivers
     * VIDIX now also supports ATI R350 (Radeon 9600) to R520 (Radeon X1900)
+    * Sun XVR-100 video output driver
 
     Others:
     * monitorpixelaspect=1 is now default. Set monitoraspect=4/3 to get the old
@@ -125,6 +131,7 @@ MPlayer (1.0)
     * ability to turn loop on/off during playback
     * Apple Remote support
     * libdvdread updated to 0.9.7
+    * many compiler warning fixes
 
 
   rc1: "Codename intentionally left blank" October 22, 2006
