@@ -164,6 +164,7 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
     rtpState->firstSyncTime.tv_sec = rtpState->firstSyncTime.tv_usec = 0;
     demuxer->priv = rtpState;
 
+    int audiofound = 0;
     // Create RTP receivers (sources) for each subsession:
     MediaSubsessionIterator iter(*mediaSession);
     MediaSubsession* subsession;
@@ -171,6 +172,10 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
     while ((subsession = iter.next()) != NULL) {
       // Ignore any subsession that's not audio or video:
       if (strcmp(subsession->mediumName(), "audio") == 0) {
+	if (audiofound) {
+	  fprintf(stderr, "Additional subsession \"audio/%s\" skipped\n", subsession->codecName());
+	  continue;
+	}
 	desiredReceiveBufferSize = 100000;
       } else if (strcmp(subsession->mediumName(), "video") == 0) {
 	desiredReceiveBufferSize = 2000000;
@@ -203,6 +208,8 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
 	  // Issue a RTSP "SETUP" command on the chosen subsession:
 	  if (!rtspClient->setupMediaSubsession(*subsession, False,
 						rtspStreamOverTCP)) break;
+	  if (!strcmp(subsession->mediumName(), "audio"))
+	    audiofound = 1;
 	}
       }
     }
