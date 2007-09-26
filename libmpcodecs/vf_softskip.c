@@ -46,6 +46,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 	return vf_next_control(vf, request, data);
 }
 
+#if 0
 static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 {
 	/* FIXME - figure out which other formats work */
@@ -57,6 +58,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	}
 	return 0;
 }
+#endif
 
 static void uninit(struct vf_instance_s* vf)
 {

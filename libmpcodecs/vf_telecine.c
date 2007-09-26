@@ -87,6 +87,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return 0;
 }
 
+#if 0
 static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 {
 	/* FIXME - figure out which other formats work */
@@ -105,6 +106,7 @@ static int config(struct vf_instance_s* vf,
 {
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
+#endif
 
 static void uninit(struct vf_instance_s* vf)
 {

@@ -429,6 +429,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 	return ret;
 }
 
+#if 0
 static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 {
 	/* FIXME - figure out which other formats work */
@@ -440,6 +441,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	}
 	return 0;
 }
+#endif
 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
