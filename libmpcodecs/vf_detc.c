@@ -53,25 +53,6 @@ enum {
 	TC_IL2
 };
 
-static unsigned int hash_pic(unsigned char *img, int w, int h, int stride)
-{
-	int step = w*h/1024;
-	unsigned int hash=0;
-	int x=0, y;
-
-	step -= step % 3;
-
-	for (y=0; y<h; y++) {
-		for (; x<w; x+=step) {
-			hash = hash ^ (hash<<4) ^ img[x];
-		}
-		x -= w;
-		img += stride;
-	}
-	
-	return hash;
-}
-
 static void block_diffs(struct metrics *m, unsigned char *old, unsigned char *new, int os, int ns)
 {
 	int x, y, even=0, odd=0, noise, temp;
