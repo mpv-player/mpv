@@ -109,7 +109,7 @@ MPlayer (1.0)
       if the user-specified default device name tries to clear it
     * fixed internal VIDIX in Solaris/x86, also auto-enabled
     * rework of internal VIDIX, now a fully static library with builtin drivers
-    * VIDIX now also supports ATI R350 (Radeon 9600) to R520 (Radeon X1900)
+    * updated VIDIX ATI drivers
     * Sun XVR-100 video output driver
 
     Others:
