@@ -78,6 +78,7 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 }
 
 
+#if 0
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
 	struct pullup_context *c = vf->priv->ctx;
@@ -102,6 +103,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	mpi->flags |= MP_IMGFLAG_DIRECT;
 	mpi->flags &= ~MP_IMGFLAG_DRAW_CALLBACK;
 }
+#endif
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
