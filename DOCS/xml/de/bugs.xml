@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20083 -->
+<!-- in sync with r21537 -->
+<!-- missing cosmetic commit 21537 -->
 <appendix id="bugs">
   <title>Bekannte Fehler</title>
   <sect1 id="bugs-special">

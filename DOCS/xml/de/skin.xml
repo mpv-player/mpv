@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r19081 -->
+<!-- in sync with r21537 -->
+<!-- missing cosmetic commit 21537 -->
 <appendix id="skin">
   <title><application>MPlayer</application>s Skinformat</title>
 
