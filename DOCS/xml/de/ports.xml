@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21537 -->
+<!-- in sync with r21612 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="ports" xreflabel="Ports">
   <title>Portierungen</title>
@@ -112,7 +112,7 @@
     
     <para>
       Um Win32-DLLs mit <application>MPlayer</application> zu nutzen, musst du
-      den Kernel mit &quot;<envar>option USER_LDT</envar>&quot; recompilieren
+      den Kernel mit "<envar>option USER_LDT</envar>" recompilieren
       (es sei denn du lässt FreeBSD-CURRENT laufen, wobei dies die
       Standard-Einstellung ist).
     </para>
@@ -122,7 +122,7 @@
       <title>FreeBSD</title>
       <para>
         Besitzt deine CPU SSE, recompiliere deinen Kernel mit
-        &quot;<envar>options CPU_ENABLE_SSE</envar>&quot; (FreeBSD-STABLE oder
+        "<envar>options CPU_ENABLE_SSE</envar>" (FreeBSD-STABLE oder
         Kernel-Patches erforderlich).
       </para>
     </sect2>
@@ -221,10 +221,10 @@ make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen</scr
       
       <para>
         Das <filename>configure</filename>-Script versucht herauszufinden, welches
-        Assembler-Programm von deinem &quot;gcc&quot;-Befehl genutzt wird (falls die
+        Assembler-Programm von deinem "gcc"-Befehl genutzt wird (falls die
         automatische Erkennung fehlschlägt, nimm die Option
         <option>--as=<replaceable>/pfad/zum/installierten/gnu-as</replaceable></option>,
-        um dem <filename>configure</filename>-Script zu zeigen, wo es GNU &quot;as&quot; auf
+        um dem <filename>configure</filename>-Script zu zeigen, wo es GNU "as" auf
         deinem System finden kann).
       </para>
       
@@ -243,7 +243,7 @@ Please upgrade(downgrade) binutils to 2.10.1...</screen>
           
           <para>
             Ein typischer Fehler, den du bekommst, wenn du mit einem GNU C Compiler arbeitest, der
-            GNU &quot;as&quot; nicht verwendet:
+            GNU "as" nicht verwendet:
 <screen>% gmake
 ...
 gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math

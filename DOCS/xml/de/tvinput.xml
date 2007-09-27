@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21537 -->
+<!-- in sync with r21612 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="tv">
   <title>TV</title>
@@ -47,7 +47,7 @@
             <screen>-tv channels=26-MTV1,23-TV2</screen>
             Erklärung: Durch Verwendung dieser Option sind nur die Kanäle 26 und 23 in Gebrauch,
             und es wird beim Kanalwechsel einen netten OSD-Text geben, der den Namen des Kanals
-            anzeigt. Leerzeichen im Kanalnamen müssen durch das Zeichen	&quot;_&quot; ersetzt werden.
+            anzeigt. Leerzeichen im Kanalnamen müssen durch das Zeichen	"_" ersetzt werden.
           </para>
         </listitem>
 

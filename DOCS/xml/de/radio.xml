@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21537 -->
+<!-- in sync with r21612 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="radio">
   <title>Radio</title>
@@ -42,7 +42,7 @@
             Benutze die Option <option>channels</option>. Ein Beispiel:
             <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
             Erklärung: Mit dieser Option sind nur die Frequenzen 104.4 und 103.9 in Gebrauch. Ein netter OSD-Text wird beim Kanalwechsel den Namen des Kanals angeben.
-            Leerzeichen im Kanalnamen müssen ersetzt werden durch das Zeichen &quot;_&quot;.
+            Leerzeichen im Kanalnamen müssen ersetzt werden durch das Zeichen "_".
           </para>
         </listitem>
 

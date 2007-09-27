@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21537 -->
+<!-- in sync with r21612 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
@@ -79,7 +79,7 @@ Memory at d8000000 (32-bit, prefetchable)<!--
   (<literal>base=0xd8000000</literal>) mit 32MB RAM (<literal>size=0x2000000</literal>)
   führst du einfach folgendes aus:
 <screen>
-echo &quot;base=0xd8000000 size=0x2000000 type=write-combining&quot; &gt; /proc/mtrr
+echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr
 </screen>
 </para>
 
@@ -951,7 +951,7 @@ make<!--
   <screen>cat /dev/mga_vid</screen>
   ausgelesen werden, um ein paar Informationen über
   den aktuellen Zustand zu erhalten. Die Helligkeit kann zusätzlich mit z.B.
-  <screen>echo &quot;brightness=120&quot; &gt; /dev/mga_vid</screen>
+  <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
   angepasst werden.
 </para>
 </sect2>
@@ -1474,11 +1474,11 @@ make<!--
   werden kann, weil der Treiber unter Umgehung des X-Treibers direkt auf
   die Hardware zugreift. Du kannst das dadurch verhindern, dass du die von
   X verwendete Menge des Grafikspeichers verringerst. Benutze dafür
-  die Option &quot;VideoRam&quot; in der &quot;device&quot;-Sektion der
+  die Option "VideoRam" in der "device"-Sektion der
   <filename>XF86Config</filename>. Du solltest da die installierte Menge
   Grafikspeicher minus 4MB eintragen. Wenn du über weniger als 8MB
   Grafikspeicher verfügst, dann solltest du stattdessen die Option
-  &quot;XaaNoPixmapCache&quot; in der &quot;screen&quot;-Sektion verwenden.
+  "XaaNoPixmapCache" in der "screen"-Sektion verwenden.
   </para></listitem>
 <listitem><para>
   Es gibt einen VIDIX-Treiber für die Konsole: <option>-vo cvidix</option>.
@@ -1600,7 +1600,7 @@ make<!--
 </para></step>
 <step><para>
   Wenn du die Sourcen von der svgalib-Seite heruntergeladen hast, dann musst
-  du den Kommentar vor der CFLAGS-Zeile entfernen, die &quot;svgalib_helper&quot;
+  du den Kommentar vor der CFLAGS-Zeile entfernen, die "svgalib_helper"
   enthält, und die sich in <filename class="directory">libdha/Makefile</filename>
   befindet.
 </para></step>
@@ -1678,7 +1678,7 @@ make<!--
 
 <para>
   Er wurde auf SiS 650/651/740 getestet (die verbreitetsten Chipsets in den
-  SiS-Versionen der Boxen von &quot;Shuttle XPC&quot;-Barebones)
+  SiS-Versionen der Boxen von "Shuttle XPC"-Barebones)
 </para>
 
 <para>
@@ -1690,9 +1690,9 @@ make<!--
 <sect2 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
-  &quot;DirectFB ist eine Grafikbibliothek, deren Zielplattform eingebettete
+  "DirectFB ist eine Grafikbibliothek, deren Zielplattform eingebettete
   Systeme sind. Sie bietet maximale Hardwarebeschleunigung bei minimalem
-  Ressourcenverbrauch und minimalem Overhead.&quot; - Zitat von
+  Ressourcenverbrauch und minimalem Overhead." - Zitat von
   <ulink url="http://www.directfb.org"/>.
 </para></blockquote>
 
@@ -1701,7 +1701,7 @@ make<!--
 </para>
 
 <para>
-  Obwohl <application>MPlayer</application> nicht als &quot;Videoprovider&quot;
+  Obwohl <application>MPlayer</application> nicht als "Videoprovider"
   bei DirectFB unterstützt wird, bietet dieser Treiber Videowiedergabe mittels
   DirectFB. Die Wiedergabe ist - natürlich - hardwarebeschleunigt. Bei
   meiner Matrox G400 war der DirectFB genauso schnell wie XVideo.
@@ -2218,7 +2218,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   Befehl konvertiert das Video erst nach MPEG4 (das ist leider
   erforderlich) und wendet dann den expand-Filter an, der zwar das
   Bild nicht vergrößert (-1: = Standardwerte) aber dafür das normale
-  OSD auf das Bild stanzt (die &quot;1&quot; am Ende).
+  OSD auf das Bild stanzt (die "1" am Ende).
 </para></listitem>
 </varlistentry>
 
@@ -2646,7 +2646,7 @@ EndSection
   erreicht werden kann.
   Du musst vesafb in deinen Kernel compiliert haben und der
   Kernel-Befehlszeile folgende Parameter übergeben:
-  <option>append=&quot;video=vesafb:ywrap,mtrr&quot; vga=791</option>.
+  <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
   Du solltest <application>X</application> starten, dann in den
   Consolen-Modus z.B. mit
   <keycap>STRG</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap> wechseln.

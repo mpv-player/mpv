@@ -286,7 +286,7 @@ ENTER pt_step 1 1<!--
 		<para>
 			Wenn du das LIRC-Paket installiert hast, wird <filename>configure</filename>
 			dies automatisch erkennen. Wenn alles gut lief, wird <application>MPlayer</application>
-			beim Start &quot;<systemitem>Initialisiere LIRC-Unterstützung...</systemitem>&quot; ausgeben.
+			beim Start "<systemitem>Initialisiere LIRC-Unterstützung...</systemitem>" ausgeben.
 			Wenn ein Fehler auftritt, wird er dir das sagen. Wenn keine Mitteilung über LIRC erscheint,
 			ist die entsprechende Unterstützung nicht eincompiliert. Das ist es schon :-)
 		</para>

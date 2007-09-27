@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21537 -->
+<!-- in sync with r21612 -->
 <!-- missing cosmetic commit 21537 -->
 <appendix id="skin">
   <title><application>MPlayer</application>s Skinformat</title>
@@ -566,7 +566,7 @@ end
         <varlistentry>
           <term>
             <literal>
-              <anchor id="skin-slabel"/>slabel = X, Y, fontid, &quot;text&quot;
+              <anchor id="skin-slabel"/>slabel = X, Y, fontid, "text"
             </literal>
           </term>
           <listitem>
@@ -575,7 +575,7 @@ end
               <literal>text</literal> wird mittels der identifizierten
               <literal>fontid</literal> angezeigt. Der Text ist einfach ein
               eine Ausgangszeichenkette (<literal>$x</literal>-Variablen funktionieren nicht),
-              eingeschlossen von doppelten Anführungszeichen (das &quot;-Zeichen kann jedoch
+              eingeschlossen von doppelten Anführungszeichen (das "-Zeichen kann jedoch
               nicht Teil des Textes sein).
               Das Label wird mittels der über die <literal>fontid</literal> identifizierten
               Schrift angezeigt.
@@ -586,7 +586,7 @@ end
         <varlistentry>
           <term>
             <literal>
-              <anchor id="skin-dlabel"/>dlabel = X, Y, length, align, fontid, &quot;text&quot;
+              <anchor id="skin-dlabel"/>dlabel = X, Y, length, align, fontid, "text"
             </literal>
           </term>
           <listitem>
@@ -605,7 +605,7 @@ end
             </para>
             <para>
               Der anzuzeigende Text wird mit <literal>text</literal> festgelegt:
-              Er muss zwischen doppelten Anführungszeichen stehen (das &quot;-Zeichen kann jedoch
+              Er muss zwischen doppelten Anführungszeichen stehen (das "-Zeichen kann jedoch
               nicht Teil des Textes sein).
               Das Label wird mittels der über die <literal>fontid</literal> identifizierten
               Schrift angezeigt.
@@ -877,7 +877,7 @@ end
       Wobei <literal><replaceable>image</replaceable></literal> der Name der für
       die Schrift anzuwendenden Grafikdatei ist (du musst keine Erweiterung angeben).
       <anchor id="skin-font-char"/>
-      <programlisting>&quot;char&quot; = X, Y, width, hight</programlisting>
+      <programlisting>"char" = X, Y, width, hight</programlisting>
       Hier legen <literal>X</literal> und <literal>Y</literal> die Position des
       <literal>char</literal>-Zeichens innerhalb der Grafik fest
       (<literal>0,0</literal> steht für die obere linke Ecke).
@@ -889,13 +889,13 @@ end
       Dieses Beispiel definiert die Zeichen A, B, C unter Anwendung von
       <filename>font.png</filename>.
       <programlisting>
-; Kann eine &quot;Schrift&quot; anstatt &quot;font.png&quot; sein.
+; Kann eine "Schrift" anstatt "font.png" sein.
 image = font.png
 
 ; Drei Zeichen reichen zu Demonstrationszwecken :-)
-&quot;A&quot; =  0,0, 7,13
-&quot;B&quot; =  7,0, 7,13
-&quot;C&quot; = 14,0, 7,13<!--
+"A" =  0,0, 7,13
+"B" =  7,0, 7,13
+"C" = 14,0, 7,13<!--
       --></programlisting>
     </para>
 
