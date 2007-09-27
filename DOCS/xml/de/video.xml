@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r22402 -->
+<!-- in sync with r22800 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
@@ -878,11 +878,16 @@ mplayer -vm -fbmode <replaceable>Modusname</replaceable> <replaceable>Dateiname<
 <title>Matrox-Framebuffer (mga_vid)</title>
 
 <para>
-  Dies ist eine Kombination aus Linux-Kernelmodul und einem Videoausgabetreiber
-  für die Matrox G200/G400/G450/G550 BES (Back-End Scaler, Hardwareskalierungseinheit).
-  Es bietet Unterstützung für Hardware-VSYNC und Dreifachpufferung.
+  <systemitem>mga_vid</systemitem> ist eine Kombination aus einem Videoausgabetreiber
+  und Linux-Kernelmodul, das die Matrox G200/G400/G450/G550 Scaler-/Overlay-Einheit
+  verwendet, um YUV->RGB-Farbraumkonvertierungen und beliebige Videoskalierungen durchzuführen.
+  <systemitem>mga_vid</systemitem> bietet Unterstützung für Hardware-VSYNC und Dreifachpufferung.
   Dieser Treiber funktioniert sowohl unter der Framebufferconsole als auch unter X,
   jedoch nur mit Linux 2.4.x.
+</para>
+
+<para>
+  Für eine Version für Linux 2.6.x gehe auf <ulink url="http://attila.kinali.ch/mga/"/>.
 </para>
 
 <procedure>
@@ -896,9 +901,10 @@ make<!--
 --></screen>
   </para></step>
 <step><para>
-  Jetzt erstelle das Gerät <filename>/dev/mga_vid</filename>:
-  <screen>mknod /dev/mga_vid c 178 0</screen>
-  und lade das Kernelmodul:
+    Führe dann (als <systemitem class="username">root</systemitem>) folgenden Befehl aus:
+    <screen>make install</screen>
+    Dies sollte das Modul installieren und das Device-Node für dich erstellen.
+    Lade den Treiber mit
   <screen>insmod mga_vid.o</screen>
   </para></step>
 <step><para>
@@ -915,17 +921,10 @@ make<!--
   <filename>/etc/modules.conf</filename> ein:
 
   <programlisting>alias char-major-178 mga_vid</programlisting>
-
-  Jetzt kopiere <filename>mga_vid.o</filename> in das entsprechende Verzeichnis
-  unterhalb von
-  <filename>/lib/modules/<replaceable>kernel_version</replaceable>/<replaceable>/irgendwo</replaceable></filename>.
-  </para><para>
-  Jetzt gib ein:
-  <screen>depmod -a</screen>
   </para></step>
 <step><para>
   Schließlich musst du noch <application>MPlayer</application> (erneut) compilieren.
-  <filename>configure</filename> wird automatisch <filename>/dev/mga_vid</filename>
+  <command>configure</command> wird automatisch <filename>/dev/mga_vid</filename>
   finden und den 'mga'-Treiber erstellen. Die entsprechende Option für
   <application>MPlayer</application> lautet <option>-vo mga</option>, wenn du mit
   dem matroxfb auf der Console arbeitest, oder <option>-vo xmga</option>, wenn du
@@ -945,6 +944,12 @@ make<!--
   <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
   angepasst werden.
 </para>
+
+<para>
+  Es gibt ein Testprogramm namens <command>mga_vid_test</command> im selben Verzeichnis.
+  Es sollte 256x256 große Bilder auf den Schirm zeichnen, wenn alles gut funktioniert.
+</para>
+
 </sect2>
 
 
@@ -978,15 +983,15 @@ make<!--
     Compiliere <filename>tdfx_vid.o</filename>:
 <screen>
 cd drivers
-make tdfx_vid.o</screen>
+make</screen>
   </para>
 </step>
 <step>
   <para>
-    Erstelle dann das Gerät <filename>/dev/tdfx_vid</filename>:
-    <screen>mknod /dev/tdfx_vid c 178 0</screen>
-    und lade den Treiber mit
-    <screen>insmod tdfx_vid.o</screen>
+    Führe dann (als <systemitem class="username">root</systemitem>) folgenden Befehl aus:
+    <screen>make install</screen>
+    Dies sollte das Modul installieren und das Device-Node für dich erstellen.
+    Lade den Treiber mit <screen>insmod tdfx_vid.o</screen>
   </para>
 </step>
 <step>
@@ -995,15 +1000,14 @@ make tdfx_vid.o</screen>
     am Ende von <filename>/etc/modules.conf</filename> hinzu:
 
     <programlisting>alias char-major-178 tdfx_vid</programlisting>
-
-    Kopiere dann das <filename>tdfx_vid.o</filename>-Modul in das entsprechende
-    Verzeichnis
-    <filename>/lib/modules/<replaceable>Kernelversion</replaceable>/<replaceable>irgendwo</replaceable></filename>
-    und führe <screen>depmod -a</screen> aus.
   </para>
 </step>
 </procedure>
 
+<para>
+  Es gibt ein Testprogramm namens <command>tdfx_vid_test</command> im selben Verzeichnis.
+  Es sollte nützliche Informationen ausgeben, wenn alles gut funktioniert.
+</para>
 </sect2>
 
 <!-- ********** -->
@@ -1640,10 +1644,8 @@ make tdfx_vid.o</screen>
   nach <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
 </para></step>
 <step><para>
-  Wenn du die Sourcen von der svgalib-Seite heruntergeladen hast, dann musst
-  du den Kommentar vor der CFLAGS-Zeile entfernen, die "svgalib_helper"
-  enthält, und die sich in <filename class="directory">libdha/Makefile</filename>
-  befindet.
+    Entferne den Kommentar vor der CFLAGS-Zeile, die "svgalib_helper" enthält
+    aus der Datei <filename class="directory">libdha/Makefile</filename>.
 </para></step>
 <step><para>
   Compiliere erneut und installiere libdha.
