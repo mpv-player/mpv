@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21737 -->
+<!-- synced with r21930 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -100,7 +100,9 @@
             Compilierung bricht mit einer Fehlermeldung ab, und <application>gcc</application>
             gibt irgendeine kryptische Nachricht aus, die den Ausdruck
             <systemitem>internal compiler error</systemitem> oder
-            <systemitem>unable to find a register to spill</systemitem> enthält.
+            <systemitem>unable to find a register to spill</systemitem> oder
+            <systemitem>can't find a register in class `GENERAL_REGS' while reloading `asm'</systemitem>
+            enthält.
           </para>
         </question>
         <answer>

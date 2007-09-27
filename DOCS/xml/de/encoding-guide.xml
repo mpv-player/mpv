@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21934 -->
+<!-- in sync with r22140 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -4805,7 +4805,7 @@ mp4creator -optimize narnia.mp4</screen>
                 <entry>vp6vfw.dll</entry>
                 <entry>On2 VP6 Personal Codec (VP60)</entry>
                 <entry>04d635a364243013898fd09484f913fb</entry>
-                <entry>stürzt unter Linux ab</entry>
+                <entry></entry>
               </row>
               <row>
                 <entry>vp7vfw.dll</entry>

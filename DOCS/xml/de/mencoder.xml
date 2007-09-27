@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21744 -->
+<!-- in sync with r22129 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="mencoder">
   <title>Allgemeiner Gebrauch von <application>MEncoder</application></title>
@@ -12,8 +12,10 @@
     <ulink url="../../tech/encoding-tips.txt">Encodier-Tipps (im Moment nur auf englisch)</ulink>,
     die aus verschiedenen Mailing-Listen-Threads von MPlayer-Nutzern
     zusammengestellt wurden.
-    Durchsuche die
-    <ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">Archive</ulink>
+    Durchsuche die Archive
+    <ulink url="http://lists.mplayerhq.hu/pipermail/mencoder-users/">hier</ulink>
+    und für ältere Dinge besonders
+    <ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">hier</ulink>
     nach einer Fülle von Diskussionen über alle Aspekte und Probleme mit
     der Encodierung mittels <application>MEncoder</application>.
   </para>

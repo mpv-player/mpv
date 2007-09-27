@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21896 -->
+<!-- in sync with r21897 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
@@ -878,21 +878,12 @@ mplayer -vm -fbmode <replaceable>Modusname</replaceable> <replaceable>Dateiname<
 <title>Matrox-Framebuffer (mga_vid)</title>
 
 <para>
-  Dieser Abschnitt beschäftigt sich mit der Unterstützung für
-  den BES (Back-End Scaler, Hardwareskalierungseinheit) bei Karten mit dem
-  Matrox-G200/G400/G450/G550-Chip durch das <systemitem>mga_vid</systemitem>-Kernelmodul.
-  Es bietet Unterstützung für Hardware-
-  VSYNC und Dreifachpufferung. Dieser Treiber funktioniert sowohl unter der
-  Framebufferconsole als auch unter X.
+  Dies ist eine Kombination aus Linux-Kernelmodul und einem Videoausgabetreiber
+  für die Matrox G200/G400/G450/G550 BES (Back-End Scaler, Hardwareskalierungseinheit).
+  Es bietet Unterstützung für Hardware-VSYNC und Dreifachpufferung.
+  Dieser Treiber funktioniert sowohl unter der Framebufferconsole als auch unter X,
+  jedoch nur mit Linux 2.4.x.
 </para>
-
-<warning>
-<para>
-  Das Modul ist nur für Linux-Systeme verfügbar!
-  Auf nicht-Linux-Systemen solltest du statt dessen <link linkend="vidix">VIDIX</link>
-  benutzen!
-</para>
-</warning>
 
 <procedure>
 <title>Installation:</title>
