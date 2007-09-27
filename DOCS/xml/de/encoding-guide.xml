@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21849 -->
+<!-- in sync with r21934 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -1548,9 +1548,8 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
             der Encodiergeschwindigkeit - um in typischen Fällen etwa 40-60% -
             bei wenn überhaupt geringer Bildverschlechterung verwendet werden.
             <systemitem class="library">x264</systemitem> erlaubt ebenfalls
-            Multi-Thread-Encodierung, was im Moment das Encodieren um 15-30% beschleunigt
-            (abhängig von den Encodier-Einstellungen) bei gleichzeitiger Verringerung des
-            PSNR um etwa 0.05dB.
+            Multi-Thread-Encodierung, was das Encodieren momentan um 94% beschleunigt
+            bei gleichzeitiger Verringerung des PSNR um einen Wert zwischen 0.005dB und 0.01dB.
           </para>
         </listitem>
 
@@ -3021,15 +3020,15 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <option>filmdint</option> anwenden müssen.
       </para>
 
-      <para>
+      <para id="menc-feat-dvd-mpeg4-example-crop">
         Als Nächstes wollen wir das passende Ausschnittsrechteck bestimmen, also
-        verwenden wir den crop-Erkennungsfilter:
+        verwenden wir den cropdetect-Filter:
 
         <screen>mplayer dvd://1 -vf cropdetect</screen>
 
         Stelle sicher, dass du einen voll gefüllten Frame anstrebst (wie zum
-        Beispiel eine helle Szene), und dass du diese Ausgabe in
-        <application>MPlayer</application>s Konsole siehst:
+        Beispiel eine helle Szene, nach den Eröffnungs-Credits und Filmlogos),
+        und dass du diese Ausgabe in <application>MPlayer</application>s Konsole siehst:
 
         <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
 
@@ -3822,7 +3821,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       </sect3>
 
       <sect3 id="menc-feat-x264-encoding-options-speedvquality">
-        <title>Optionen die primär Geschwindigkeit und Qualität betreffen</title>
+        <title>Optionen, die primär Geschwindigkeit und Qualität betreffen</title>
 
         <itemizedlist>
           <listitem>
@@ -3848,7 +3847,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
               Dies ist gewöhnlich ausreichend, um sichtbar zu werden.
             </para>
             <para>
-              <option>subq=6</option> ist der langsamste Modus mit der höchsten
+              <option>subq=6</option> ist langsamer und führt bei erträglichen Kosten zu besserer
               Qualität.
               Im Vergleich zu <option>subq=5</option> gewinnt sie gewöhnlich 0.1-0.4 dB
               globalen PSNR mit Geschwindigkeitseinbußen, die sich zwischen 25%-100%
@@ -3864,6 +3863,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
               <option>bframes</option> immer auf etwas anderes als null
               zu setzen (siehe unten).
             </para>
+             <para>
+               <option>subq=7</option> ist der langsamste Modus mit der höchsten Qualität.
+               Im Vergleich zu <option>subq=6</option> erreicht er normalerweise zwischen 0.01-0.05 dB
+               Zuwachs des globalen PSNR bei Geschwindigkeitseinbußen variierend von 15%-33%.
+               Da der Kompromiss zwischen Zeit gegenüber Qualität recht gering ist, solltest
+               du ihn nur benutzen, wenn du jedes mögliche Bit einsparen möchtest und
+               Encodierzeit keine Rolle spielt.
+             </para>
           </listitem>
           <listitem>
             <para>
@@ -4058,6 +4065,21 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
               <option>nob_adapt</option> zu deinen x264encopts hinzuzufügen, falls
               du erwartest, dass Fades einen großen Effekt in deinem jeweiligen
               Videoclip erzeugen.
+            </para>
+          </listitem>
+          <listitem id="menc-feat-x264-encoding-options-speedvquality-threads">
+            <para>
+              <emphasis role="bold">threads</emphasis>:
+              Diese Option erlaubt es, mehrere Threads zu erstellen, um parallel auf mehreren
+              CPUs zu encodieren. Du kannst die Anzahl der Threads manuell wählen oder,
+              besser, setze <option>threads=auto</option> und lasse
+              <systemitem class="library">x264</systemitem> erkennen, wie viele CPUs
+              verfügbar sind, und die passende Anzahl Threads automatisch wählen.
+              Wenn du eine Multi-Prozessor-Maschine hast, solltest du wirklich in Erwägung
+              ziehen, dies zu benutzen, da es die Encodiergeschwindigkeit linear in
+              der Anzahl der CPU-Kerne (ca. 94% pro CPU-Kern) erhöhen kann, bei sehr
+              geringem Qualitätsverlust (ca. 0.005dB bei Dualprozessor, ca. 0.01dB bei
+              einer Quad-Prozessor-Maschine).
             </para>
           </listitem>
         </itemizedlist>
@@ -4329,6 +4351,340 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
     </sect2>
 
   </sect1>
+
+
+  <sect1 id="menc-feat-quicktime-7">
+    <title>
+      <application>MEncoder</application> benutzen, um <application>QuickTime</application>-kompatible Dateien zu erstellen
+    </title>
+
+    <sect2 id="menc-feat-quicktime-7-why-use-it">
+      <title>
+        Warum sollte jemand <application>QuickTime</application>-kompatible Dateien erstellen wollen?
+      </title>
+
+      <para>
+        Es gibt mehrere Gründe, warum das Erstellen von <application>QuickTime</application>-kompatiblen
+        Dateien wünschenswert sein kann.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Du willst, dass jeder Computeranalphabet deine Encodierung auf jeder größeren
+            Plattform (Windows, Mac OS X, Unices &hellip;) anschauen kann.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <application>QuickTime</application> kann von mehr Features der Hardware- und
+            Softwarebeschleunigung von Max OS X gebrauch machen als plattformunabhängige
+            Player wie <application>MPlayer</application> oder <application>VLC</application>.
+            Das heißt, dass deine Encodierungen eine bessere Chance haben, auf älteren
+            G4-Machinen flüssig abgespielt werden zu können.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <application>QuickTime</application> 7 unterstützt den Next-Generation-Codec H.264,
+            der deutlich bessere Bildqualität erreicht als vorige Codecgenerationen
+            (MPEG-2, MPEG-4 &hellip;).
+          </para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+
+    <sect2 id="menc-feat-quicktime-7-constraints">
+      <title>Beschränkungen von <application>QuickTime</application> 7</title>
+
+      <para>
+        <application>QuickTime</application> 7 unterstützt H.264 Video und AAC Audio,
+        aber es unterstützt diese nicht gemuxt im AVI-Containerformat.
+        Du kannst jedoch <application>MEncoder</application> verwenden, um Video
+        und Audio zu encodieren, und dann ein separates Programm wie
+        <application>mp4creator</application> (Teil des
+        <ulink url="http://mpeg4ip.sourceforge.net/">MPEG4IP-Pakets</ulink>)
+        verwenden, um Video- und Tonspuren in einen MP4-Container zu muxen.
+      </para>
+
+      <para>
+        <application>QuickTime</application>s Unterstützung für H.264 ist begrenzt,
+        daher wirst du ein paar fortgeschrittene Features weglassen müssen.
+        Wenn du dein Video mit Features encodierst, die
+        <application>QuickTime</application> 7 nicht unterstützt, werden dir
+        <application>QuickTime</application>-basierte Player ein ziemlich weißes
+        Bild zeigen an Stelle des erwarteten Videos.
+      </para>
+
+      <itemizedlist>
+        <listitem>
+          <para>
+            <emphasis role="bold">B-Frames</emphasis>:
+            <application>QuickTime</application> 7 unterstützt maximal einen B-Frame, z.B.
+            <option>-x264encopts bframes=1</option>. Dies bedeutet, dass
+            <option>b_pyramid</option> and <option>weight_b</option> keine Auswirkungen
+            haben werden, da sie <option>bframes</option> größer als 1 erwarten.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis role="bold">Macroblöcke</emphasis>:
+            <application>QuickTime</application> 7 unterstützt keine 8x8 DCT Macroblöcke.
+            Diese Option (<option>8x8dct</option>) ist per Voreinstellung aus, stelle daher sicher,
+            dass du sie nicht explizit aktiviert.
+            Dies bedeutet auch, dass die Option <option>i8x8</option> keine Auswirkungen haben
+            wird, denn sie benötigt <option>8x8dct</option>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis role="bold">Seitenverhältnis</emphasis>:
+            <application>QuickTime</application> 7 unterstützt Informationen über
+            SAR (sample aspect ratio) nicht; es nimmt SAR=1 an.
+            Lies <link linkend="menc-feat-quicktime-7-scale">den Abschnitt über Skalierung</link>
+            für eine Umgehung dieses Problems.
+          </para>
+        </listitem>
+      </itemizedlist>
+
+      </sect2>
+
+      <sect2 id="menc-feat-quicktime-7-crop">
+        <title>Beschneidung der Ränder (Cropping)</title>
+
+        <para>
+          Angenommen, du willst deine nagelneu gekaufte Kopie von "Chroniken von Narnia"
+          rippen. Deine DVD ist Region 1, d.h. sie ist in NTSC.
+          Das weiter unten stehende Beispiel kann man auch auf PAL anwenden, nur
+          dass du dann <option>-ofps 24000/1001</option> weglassen und etwas andere
+          Maße für <option>crop</option> und <option>scale</option> verwenden musst.
+        </para>
+
+        <para>
+          Nach dem Ausführen von <option>mplayer dvd://1</option> folgst du den Anweisungen,
+          die detailliert im Abschnitt
+          <link linkend="menc-feat-telecine">Wie mit telecine und interlacing in NTSC-DVDs umgehen</link>
+          beschrieben sind, und stellst fest, dass es sich um
+          24000/1001 fps progressives Video handelt. Das vereinfacht das Vorgehen etwas,
+          da du keinen inverse telecine Filter wie <option>pullup</option> oder einen
+          Deinterlacing-Filter wie <option>yadif</option> anwenden musst.
+        </para>
+
+        <para>
+          Als nächstes musst du die schwarzen Streifen oben und unten vom Video entfernen
+          wie in <link linkend="menc-feat-dvd-mpeg4-example-crop">vorigem</link>
+          Abschnitt beschrieben.
+        </para>
+
+      </sect2>
+
+      <sect2 id="menc-feat-quicktime-7-scale">
+        <title>Skalierung</title>
+
+        <para>
+          Der nächste Schritt ist wirklich herzzerreißend.
+          <application>QuickTime</application> 7 unterstützt keine MPEG-4-Videos
+          mit einer sample aspect ratio ungleich 1, daher wirst du das Video auf quadratische
+          Pixel hochskalieren (was eine Menge Platz verschwendet) oder herunterskalieren
+          (was ein paar Details der Quelle verliert) müssen.
+          Beides ist höchst ineffizient, jedoch einfach nicht zu vermeiden, wenn
+          dein Video von <application>QuickTime</application> 7 abspielbar sein soll.
+          <application>MEncoder</application> kann die passende Hoch- oder Herunterskalierung
+          durchführen bei Angabe von <option>-vf scale=-10:-1</option> oder
+          <option>-vf scale=-1:-10</option> respektive.
+          Dies wird dein Video auf die für die geschnittene Höhe korrekte Breite
+          schneiden, gerundet auf das nächste Vielfache von 16 für optimale Kompression.
+          Beachte, dass wenn du schneidest, solltest du zuerst schneiden und erst dann skalieren:
+          <screen>-vf crop=720:352:0:62,scale=-10:-1</screen>
+        </para>
+
+      </sect2>
+
+      <sect2 id="menc-feat-quicktime-7-avsync">
+        <title>A/V-Synchronisation</title>
+
+        <para>
+          Weil du in einen anderen Container muxen wirst, solltest du immer die Option
+          <option>harddup</option> verwenden, um sicherzustellen, dass doppelte
+          Frames in der Videoausgabe tatsächlich dupliziert werden.
+          Ohne diese Option wird <application>MEncoder</application> einfach eine Markierung
+          im Videostream machen, dass ein doppelter Frame vorkommt, und sich darauf
+          verlassen, dass die Software dafür sorgt, dass derselbe Frame zweimal
+          angezeigt wird. Leider überlebt diese "weiche Duplikation" das Remuxen
+          nicht, daher wird der Ton langsam Synchronisation zum Video verlieren.
+        </para>
+
+        <para>
+          Die endgültige Filterkette sieht so aus:
+          <screen>-vf crop=720:352:0:62,scale=-10:-1,harddup</screen>
+        </para>
+
+      </sect2>
+
+      <sect2 id="menc-feat-quicktime-7-bitrate">
+        <title>Bitrate</title>
+
+        <para>
+          Wie immer geht es bei der Wahl der Bitrate sowohl um technische Gegebenheiten
+          der Quelle, wie <link linkend="menc-feat-dvd-mpeg4-resolution-bitrate">hier</link>
+          erklärt wird, als auch um persönlichen Geschmack.
+          Dieser Film enthält durchaus einige Actionszenen und viele Details, aber
+          H.264-Video sieht gut aus auch bei viel geringeren Bitraten als XviD oder
+          andere MPEG-4-Codecs.
+          Nach vielem Experimentieren hat der Autor dieser Anleitung beschlossen,
+          den Film bei 900kbps zu encodieren, und dachte, er sehe ziemlich gut aus.
+          Du kannst die Bitrate verringern, um Platz zu sparen, oder erhöhen, um
+          die Qualität zu verbessern.
+        </para>
+
+      </sect2>
+
+      <sect2 id="menc-feat-quicktime-7-example">
+        <title>Encoding-Beispiel</title>
+
+        <para>
+          Du bist jetzt soweit, das Video zu encodieren. Da du auf Qualität Wert legst,
+          wirst du natürlich eine Encodierung mit zwei Durchläufen machen.
+          Um etwas Encodierzeit zu sparen, kannst du die Option <option>turbo</option>
+          beim ersten Durchlauf angeben; dies verringert <option>subq</option> und
+          <option>frameref</option> auf 1. Um etwas Platz zu sparen, kannst du die
+          Option <option>ss</option> verwenden, um die ersten Sekunden des Videos zu
+          überspringen. (Ich fand, dass dieser bestimmte Film 32 Sekunden Vorspann hat.)
+          <option>bframes</option> kann 0 oder 1 sein.
+          Die anderen Optionen werden in
+          <link linkend="menc-feat-x264-encoding-options-speedvquality">Encodierung mit dem <systemitem class="library">x264</systemitem>-Codec</link>
+          und der Manpage beschrieben.
+
+<screen>mencoder dvd://1 -o /dev/null -ss 32 -ovc x264 \
+-x264encopts pass=1:turbo:bitrate=900:bframes=1:\
+me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
+-vf crop=720:352:0:62,scale=-10:-1,harddup \
+-oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-ofps 24000/1001</screen>
+
+          Wenn du einen Rechner mit mehreren Prozessoren hast, nutze die Chance, den
+          Encodierungsvorgang dramatisch zu beschleunigen, indem du
+          <link linkend="menc-feat-x264-encoding-options-speedvquality-threads">
+            <systemitem class="library">x264</systemitem>'s Multithreading-Modus
+          </link>
+          verwendest, indem du die Option <option>threads=auto</option> der
+          <option>x264encopts</option>-Kommandozeile hinzufügst.
+        </para>
+
+        <para>
+          Der zweite Durchlauf ist derselbe, außer dass du die Ausgabedatei angibst
+          und <option>pass=2</option> setzt.
+
+<screen>mencoder dvd://1 <emphasis role="bold">-o narnia.avi</emphasis> -ss 32 -ovc x264 \
+-x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
+me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
+-vf crop=720:352:0:62,scale=-10:-1,harddup \
+-oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-ofps 24000/1001</screen>
+          </para>
+          <para>
+            Das resultierende AVI sollte in <application>MPlayer</application>
+            perfekt abspielbar sein, aber natürlich kann <application>QuickTime</application>
+            es nicht abspielen. Denn es unterstützt H264 in AVI nicht.
+            Der nächste Schritt ist also, das Video in einen MP4-Container zu muxen.
+
+          </para>
+
+        </sect2>
+
+        <sect2 id="menc-feat-quicktime-7-remux">
+          <title>Remuxen zu MP4</title>
+
+          <para>
+            Es gibt mehrere Möglichkeiten, AVI-Dateien nach MP4 zu muxen. Du kannst
+            <application>mp4creator</application> verwenden, welches Teil des
+            <ulink url="http://mpeg4ip.sourceforge.net/">MPEG4IP-Pakets</ulink> ist.
+          </para>
+
+          <para>
+            Demuxe das AVI <application>MPlayer</application> zuerst in separate Audio- und Videostreams.
+
+<screen>mplayer narnia.avi -dumpaudio -dumpfile narnia.aac
+mplayer narnia.avi -dumpvideo -dumpfile narnia.h264</screen>
+          Die Dateinamen sind wichtig; <application>mp4creator</application>
+          verlangt, dass AAC-Audiostreams <systemitem>.aac</systemitem> und
+          H.264-Videostreams <systemitem>.h264</systemitem> heißen.
+        </para>
+
+        <para>
+          Benutze nun <application>mp4creator</application>, um aus Audio- und
+          Videostreams eine MP4-Datei zu erzeugen.
+
+ <screen>mp4creator -create=narnia.aac narnia.mp4
+mp4creator -create=narnia.h264 -rate=23.976 narnia.mp4</screen>
+
+          Anders als bei der Encodierung musst du die Framerate als Dezimalzahl
+          (23.976) und nicht als Bruch (24000/1001) angeben.
+        </para>
+
+        <para>
+          Diese Datei <systemitem>narnia.mp4</systemitem> sollte nun mit jeder
+          <application>QuickTime</application> 7 Anwendung wie dem
+          <application>QuickTime Player</application> oder
+          <application>iTunes</application> abspielbar sein.
+          Wenn du vorhast, das Video mit einem <application>QuickTime</application>-Plugin
+          im Browser anzuschauen, solltest du den Film außerdem "hinten", so dass
+          das <application>QuickTime</application>-Plugin während des Downloads
+          die Wiedergabe starten kann.
+          <application>mp4creator</application> kann diese Art Tracks erstellen:
+
+<screen>mp4creator -hint=1 narnia.mp4
+mp4creator -hint=2 narnia.mp4
+mp4creator -optimize narnia.mp4</screen>
+
+          Du kannst das Ergebnis überprüfen, um sicherzustellen, dass die Hint-Tracks
+          erfolgreich erstellt wurden:
+          <screen>mp4creator -list narnia.mp4</screen>
+
+          Du solltest eine Auflistung der Tracks sehen:
+          1 Audio-, 1 Video- und 2 Hint-Tracks.
+
+<screen>Track   Type    Info
+1       audio   MPEG-4 AAC LC, 8548.714 secs, 190 kbps, 48000 Hz
+2       video   H264 Main@5.1, 8549.132 secs, 899 kbps, 848x352 @ 23.976001 fps
+3       hint    Payload mpeg4-generic for track 1
+4       hint    Payload H264 for track 2
+</screen>
+
+          </para>
+
+        </sect2>
+
+        <sect2 id="menc-feat-quicktime-7-metadata">
+          <title>Metadata-Tags hinzufügen</title>
+
+          <para>
+            Wenn du deinem Video Tags hinzufügen möchtest, die in iTunes angezeigt werden,
+            kannst du dazu
+            <ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>
+            verwenden.
+
+            <screen>AtomicParsley narnia.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
+
+            Die Option <option>--metaEnema</option> entfernt jegliche existierenden Metadaten
+            (<application>mp4creator</application> fügt seinen Namen im Tag
+            "encoding tool" hinzu), und <option>--freefree</option> macht den frei
+            gewordenen Platz geltend.
+            Die Option <option>--stik</option> setzt den Videotyp
+            (wie z.B. Film und Serie), den iTunes verwendet, um verwandte Videodateien
+            zu gruppieren.
+            Die Option <option>--overWrite</option> überschreibt die ursprüngliche Datei.
+            Ohne sie erstellt <application>AtomicParsley</application> eine automatisch
+            benannte Datei im selben Verzeichnis und lässt die Originaldatei unberührt.
+          </para>
+
+        </sect2>
+
+      </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 
   <sect1 id="menc-feat-video-for-windows">
     <title>Encodieren mit der <systemitem class="library">Video for Windows</systemitem> Codecfamilie</title>
@@ -4883,7 +5239,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
           </listitem>
           <listitem>
             <para>
-              <emphasis role="bold">vtrict</emphasis>:
+              <emphasis role="bold">vstrict</emphasis>:
               <option>vstrict</option>=0 sollte verwendet werden, um DVDs zu erstellen.
               Ohne diese Option erzeugt <application>MPlayer</application> einen Stream, der von
               manchen standalone DVD-Playern nicht korrekt decodiert werden kann.
