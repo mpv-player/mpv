@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21612 -->
+<!-- in sync with r21849 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -508,7 +508,7 @@
       <orderedlist>
         <listitem>
           <para>
-            MPEG-Kompression hängt ebenso in höchstem Maße von den
+            MPEG-Kompression hängt in höchstem Maße von den
             Frequenzbereichs-Transformationen ab, insbesondere von der
             Discrete Cosine Transform (DCT), die der Fourier Transform ähnelt.
             Diese Art Encodierung ist für darstellende Muster und weiche
@@ -1188,7 +1188,7 @@
           <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">Xvid</systemitem></link>
           aufgelisteten sollten es möglich machen, dieselbe Qualität mit einem CQ im Bereich
           von 0.18 bis 0.20 für einen 1 CD-Rip und 0.24 bis 0.26 für einen 2 CD-Rip zu erreichen.
-          Mit den MPEG-4 ASP-Codecs wie <systemitem class="library">x264</systemitem>,
+          Mit den MPEG-4 AVC-Codecs wie <systemitem class="library">x264</systemitem>,
           kannst du einen CQ im Bereich von 0.14 bis 0.16 mit Standard-Encodieroptionen
           verwenden, und solltest bis auf 0.10 bis 0.12 mit den
           <link linkend="menc-feat-x264-example-settings">erweiterten Encodieroptionen von <systemitem class="library">x264</systemitem></link>
@@ -4731,7 +4731,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
         <para>
           2.35:1 oder "Cinemascope" PAL
-          <screen>-vf scale="720:432,expand=720:576 -lavcopts aspect=16/9</screen>
+          <screen>-vf scale=720:432,expand=720:576 -lavcopts aspect=16/9</screen>
           Um die korrekte Skalierungsgröße zu berechnen, verwende die
           erweiterte PAL-Breite von 1024/2.35 = 432
         </para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21612 -->
+<!-- in sync with r21760 -->
 <!-- missing cosmetic commit 21537 -->
 
 <appendix id="bugreports">
@@ -55,9 +55,8 @@
     </para>
     <para>
       Zuerst musst du dir MPlayers Sourcenverzeichnis aus dem Subversion-Repository besorgen.
-      Eine Anleitung hierzu kann unten auf
-      <ulink url="http://www.mplayerhq.hu/dload.html">dieser Seite</ulink>
-      gefunden werden.
+      Eine Anleitung hierzu findest du im
+      <ulink url="http://www.mplayerhq.hu/design7/dload.html#svn">Subversion-Abschnitt der Downloadseite</ulink>.
     </para>
     <para>
       Du wirst dann im mplayer/-Verzeichnis ein Abbild des Subversion-Baums auf der Client-Seite

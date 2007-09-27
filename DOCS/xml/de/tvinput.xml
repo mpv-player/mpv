@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21612 -->
+<!-- in sync with r21748 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="tv">
   <title>TV</title>
@@ -39,7 +39,6 @@
       <para>
         Die vollständige Liste der Optionen ist in der Manpage verfügbar.
         Hier sind nur ein paar Tipps:
-      </para>
       <itemizedlist>
         <listitem>
           <para>
@@ -155,6 +154,7 @@
           </para>
         </listitem>
       </itemizedlist>
+    </para>
     </sect2>
 
 
