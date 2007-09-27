@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21537 -->
+<!-- in sync with r21599 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -4881,6 +4881,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
               einer Stunde Video auf einer Single-Layer DVD zwingen würde.
             </para>
           </listitem>
+          <listitem>
+            <para>
+              <emphasis role="bold">vtrict</emphasis>:
+              <option>vstrict</option>=0 sollte verwendet werden, um DVDs zu erstellen.
+              Ohne diese Option erzeugt <application>MPlayer</application> einen Stream, der von
+              manchen standalone DVD-Playern nicht korrekt decodiert werden kann.
+            </para>
+          </listitem>
         </itemizedlist>
       </sect3>
 
@@ -4905,7 +4913,7 @@ keyint=15:acodec=mp2</screen>
         <para>
           DVD:
 <screen>-lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:\
-keyint=15:acodec=ac3</screen>
+keyint=15:vstrict=0:acodec=ac3</screen>
         </para>
 
       </sect3>
@@ -4930,7 +4938,7 @@ keyint=15:acodec=ac3</screen>
         <para>
 <screen>-lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=8000:\
 keyint=15:trell:mbd=2:precmp=2:subcmp=2:cmp=2:dia=-10:predia=-10:cbp:mv0:\
-vqmin=1:lmin=1:dc=10</screen>
+vqmin=1:lmin=1:dc=10:vstrict=0</screen>
         </para>
 
       </sect3>
@@ -5005,7 +5013,7 @@ vqmin=1:lmin=1:dc=10</screen>
         <para>
 <screen>mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:576,\
 harddup -srate 48000 -af lavcresample=48000 -lavcopts vcodec=mpeg2video:\
-vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=15:acodec=ac3:\
+vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=15:vstrict=0:acodec=ac3:\
 abitrate=192:aspect=16/9 -ofps 25 \
 -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable></screen>
         </para>
@@ -5016,7 +5024,7 @@ abitrate=192:aspect=16/9 -ofps 25 \
         <para>
 <screen>mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:480,\
   harddup -srate 48000 -af lavcresample=48000 -lavcopts vcodec=mpeg2video:\
-  vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=18:acodec=ac3:\
+  vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=18:vstrict=0:acodec=ac3:\
   abitrate=192:aspect=16/9 -ofps 30000/1001 \
   -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable></screen>
         </para>
@@ -5029,7 +5037,7 @@ abitrate=192:aspect=16/9 -ofps 25 \
           erneut zu encodieren.
 <screen>mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:576,\
   harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
-  vbitrate=5000:keyint=15:aspect=16/9 -ofps 25 \
+  vbitrate=5000:keyint=15:vstrict=0:aspect=16/9 -ofps 25 \
   -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable></screen>
         </para>
       </sect3>
@@ -5040,7 +5048,7 @@ abitrate=192:aspect=16/9 -ofps 25 \
           Hat die Quelle bereits AC3-Audio und ist NTSC @ 24000/1001 fps:
 <screen>mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
   -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\
-  vrc_maxrate=9800:vbitrate=5000:keyint=15:aspect=16/9 -ofps 24000/1001 \
+  vrc_maxrate=9800:vbitrate=5000:keyint=15:vstrict=0:aspect=16/9 -ofps 24000/1001 \
   -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable></screen>
         </para>
       </sect3>
