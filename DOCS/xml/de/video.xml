@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21612 -->
+<!-- in sync with r21736 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
@@ -630,8 +630,8 @@ EndSection
 <listitem><para>
   Einige Treiber schaffen es manchmal einfach nicht, in die vorherige
   Auflösung zurückzuschalten. Benutze in solch einem Fall
-  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> und
-  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>,
+  <keycombo><keycap>Strg</keycap><keycap>Alt</keycap><keycap>Keypad +</keycap></keycombo> und
+  <keycombo><keycap>Strg</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>,
   um manuell die Auflösung zu ändern.
 </para></listitem>
 <listitem><para>
@@ -1372,7 +1372,7 @@ make<!--
   Oftmals siehst du nur einen <emphasis role="bold">schwarzen Bildschirm</emphasis>,
   wenn der VESA-Treiber beendet wird. Um die Anzeige wieder in den richtigen Zustand
   zu versetzen, wechsele einfach zu einer anderen Console (mit
-  <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>) und wieder zurück.
+  <keycombo><keycap>Alt</keycap><keycap>F&lt;x&gt;</keycap></keycombo>) und wieder zurück.
 </para></listitem>
 <listitem><para>
   Um eine <emphasis role="bold">funktionierende TV-Ausgabe</emphasis> zu erhalten,
@@ -1420,9 +1420,9 @@ make<!--
 </para></listitem>
 <listitem><para>
   Unter XFree86 3.x.x musst du mit
-  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap>
+  <keycombo><keycap>Strg</keycap><keycap>Alt</keycap><keycap>Keypad +</keycap></keycombo>
   und
-  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
+  <keycombo><keycap>Strg</keycap><keycap>Alt</keycap><keycap>Keypad -</keycap></keycombo>
   die Auflösung ändern.
 </para></listitem>
 </itemizedlist>
@@ -2475,7 +2475,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>Dateiname</replaceabl
    --></screen>
 
   (Wenn du X benutzt, dann wechsle jetzt auf den matroxfb mit z.B.
-  <keycap>STRG</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>!)
+  <keycombo><keycap>STRG</keycap><keycap>ALT</keycap><keycap>F1</keycap></keycombo>!)
   Ändere die <literal>640</literal> und <literal>512</literal>, wenn
   du eine andere Auflösung verwendest.
 </para></step>
@@ -2649,7 +2649,7 @@ EndSection
   <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
   Du solltest <application>X</application> starten, dann in den
   Consolen-Modus z.B. mit
-  <keycap>STRG</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap> wechseln.
+  <keycombo><keycap>STRG</keycap><keycap>ALT</keycap><keycap>F1</keycap></keycombo> wechseln.
   Misslingt der Start von <application>X</application> vor dem von
   <application>MPlayer</application> in der Console, wird das Video
   langsam und abgehackt (Erklärungen sind willkommen).
@@ -2660,7 +2660,7 @@ EndSection
   Jetzt solltest du den Film im Konsolen-Modus laufen sehen.
   Er wird etwa die Hälfte des LCD-Bildschirms deines Laptops ausfüllen.
   Um auf TV zu wechseln, drücke dreimal
-  <keycap>Fn</keycap>+<keycap>F5</keycap>.
+  <keycombo><keycap>Fn</keycap><keycap>F5</keycap></keycombo>.
   Getestet auf einem Tecra 8000, 2.6.15 Kernel mit vesafb, ALSA v1.0.10.
 </para></listitem>
 <listitem><para>

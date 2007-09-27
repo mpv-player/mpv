@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21612 -->
+<!-- in sync with r21737 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="codecs">
   <title>Codecs</title>
@@ -90,7 +90,7 @@
       </para>
 
     <para>
-      Für eine vollständige Liste unterstützter 
+      Für eine vollständige Liste unterstützter
       <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">Video-</ulink>
       und <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">Audio</ulink>codecs
       besuche bitte die FFmpeg-Homepage.
@@ -245,7 +245,7 @@
       </para>
       <para>
         Zumindest bei <systemitem class="library">x264</systemitem> sind die Anforderungen
-        für die Encodierung nicht so viel schlimmer als das, was du von 
+        für die Encodierung nicht so viel schlimmer als das, was du von
         MPEG-4 ASP bereits kennst.
         Beispielsweise läuft eine DVD-Encodierung auf einem 1733 MHz Athlon bei
         etwa 5-15 fps.
@@ -261,7 +261,7 @@
     <sect3 id="codec-x264-playback">
       <title>Wie kann ich H.264-Videos mit <application>MPlayer</application> abspielen?</title>
       <para>
-        <application>MPlayer</application> benutzt den H.264-Decoder von 
+        <application>MPlayer</application> benutzt den H.264-Decoder von
         <systemitem class="library">libavcodec</systemitem>.
         <systemitem class="library">libavcodec</systemitem> hat minimal nutzbare
         H.264-Decodierung seit etwa Juli 2004, seitdem wurden jedoch große Änderungen
@@ -595,7 +595,8 @@ mv c-code libavcodec/amrwb_float<!--
           Starte <command>graphedit.exe</command>.
         </para></step>
       <step><para>
-          Wähle aus dem Menü Graph -> Insert Filters.
+          Wähle aus dem Menü
+          <menuchoice><guimenu>Graph</guimenu><guisubmenu>Insert Filters</guisubmenu></menuchoice>.
         </para></step>
       <step><para>
           Klappe den Eintrag <systemitem>DirectShow Filters</systemitem> aus.
@@ -617,7 +618,7 @@ mv c-code libavcodec/amrwb_float<!--
     <note>
       <para>
         Wenn dort kein <systemitem>Filename</systemitem> ist und
-        <systemitem>DisplayName</systemitem> etwas wie 
+        <systemitem>DisplayName</systemitem> etwas wie
         <systemitem>device:dmo</systemitem> enthält, handelt es sich um einen DMO-Codec.
       </para>
     </note>
@@ -631,7 +632,7 @@ mv c-code libavcodec/amrwb_float<!--
           Starte <command>regedit</command>.
         </para></step>
       <step><para>
-          Drücke <keycap>Strg</keycap>+<keycap>F</keycap>, deaktiviere die ersten beiden
+          Drücke <keycombo><keycap>Strg</keycap><keycap>F</keycap></keycombo>, deaktiviere die ersten beiden
           Checkboxen und aktiviere die dritte. Gib den fourcc des Codecs ein (z.B.
           <userinput>TM20</userinput>).
         </para></step>
@@ -643,8 +644,8 @@ mv c-code libavcodec/amrwb_float<!--
           Da du jetzt die Datei hast, benötigen wir die GUID. Probiere erneut die
           Suche, nun aber nach dem Codecnamen, nicht dem fourcc. Dessen Name kann man
           herausfinden, indem man während der Wiedergabe mit Media Player den Eintrag von
-          <guimenu>Datei</guimenu> -&gt; <guisubmenu>Eigenschaften</guisubmenu> -&gt;
-          <guimenuitem>Erweitert</guimenuitem> überprüft.
+          <menuchoice><guimenu>File</guimenu> <guisubmenu>Properties</guisubmenu>
+            <guimenuitem>Advanced</guimenuitem></menuchoice> überprüft.
           Wenn dies nicht klappt, hast du Pech. Versuche raten (suche z.B. nach TrueMotion).
         </para></step>
       <step><para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21537 -->
+<!-- in sync with r21705 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="install">
   <title>Installation</title>
@@ -383,7 +383,7 @@ make install</screen>
         <listitem>
           <para>
             starte <application>MPlayer</application> mit folgendem Beispiel:
-            <screen>$ mplayer -menu <replaceable>datei.avi</replaceable></screen>
+            <screen>mplayer -menu <replaceable>datei.avi</replaceable></screen>
           </para>
         </listitem>
         <listitem>
