@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21736 -->
+<!-- in sync with r21896 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
@@ -966,6 +966,56 @@ make<!--
   <screen>./configure --enable-tdfxfb</screen>
 </para>
 </sect2>
+
+<sect2 id="tdfx_vid">
+<title>tdfx_vid</title>
+
+<para>
+  Dies ist eine Kombination aus Linux-Kernelmodul und einem Videoausgabetreiber,
+  ähnlich <link linkend="mga_vid">mga_vid</link>.
+  Du wirst einen 2.4.x-Kernel mit dem <systemitem>agpgart</systemitem>-Treiber
+  brauchen, denn <systemitem>tdfx_vid</systemitem> verwendet AGP.
+  Übergib <option>--enable-tdfxfb</option> an <command>configure</command>, um
+  den Videoausgabetreiber zu erstellen, und erzeuge das Kernelmodul nach folgenden
+  Anweisungen.
+</para>
+
+<procedure>
+<title>Das tdfx_vid.o-Kernelmodul installieren:</title>
+<step>
+  <para>
+    Compiliere <filename>tdfx_vid.o</filename>:
+<screen>
+cd drivers
+make tdfx_vid.o</screen>
+  </para>
+</step>
+<step>
+  <para>
+    Erstelle dann das Gerät <filename>/dev/tdfx_vid</filename>:
+    <screen>mknod /dev/tdfx_vid c 178 0</screen>
+    und lade den Treiber mit
+    <screen>insmod tdfx_vid.o</screen>
+  </para>
+</step>
+<step>
+  <para>
+    Um es automatisch nach Bedarf zu laden bzw. zu entfernen, füge folgende Zeile
+    am Ende von <filename>/etc/modules.conf</filename> hinzu:
+
+    <programlisting>alias char-major-178 tdfx_vid</programlisting>
+
+    Kopiere dann das <filename>tdfx_vid.o</filename>-Modul in das entsprechende
+    Verzeichnis
+    <filename>/lib/modules/<replaceable>Kernelversion</replaceable>/<replaceable>irgendwo</replaceable></filename>
+    und führe <screen>depmod -a</screen> aus.
+  </para>
+</step>
+</procedure>
+
+</sect2>
+
+<!-- ********** -->
 
 
 <sect2 id="opengl">
