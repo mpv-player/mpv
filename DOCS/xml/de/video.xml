@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21897 -->
+<!-- in sync with r22402 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
@@ -1824,10 +1824,10 @@ make tdfx_vid.o</screen>
 </para>
 
 <formalpara>
-<title>BEDIENUNG</title>
+<title>GEBRAUCH</title>
 <para>
-  Hardwaredecodierung (Abspielen von Standard-MPEG1/2-Dateien) geschieht mit
-  diesem Kommando:
+  Hardwaredecodierung von Streams, die MPEG-1/2 Video und/oder MPEG-Audio enthalten,
+  geschieht mit diesem Kommando:
 </para>
 </formalpara>
 
@@ -1837,8 +1837,10 @@ make tdfx_vid.o</screen>
 </para>
 
 <para>
-  Softwaredecodierung oder die Transcodierung verschiedener Formate nach
-  MPEG1 klappt so:
+  Decodierung jeder Art Videostream verlangt Transcodierung zu MPEG-1, daher ist
+  es langsam und den Ärger möglicherweise nicht wert, vor allem, wenn dein
+  Computer langsam ist.
+  Es kann folgenderweise gemacht werden:
 </para>
 <para>
 <screen>
@@ -1982,6 +1984,11 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   alle gezeigten pids enbinden, plus pid 0 (welche das PAT enthält).
   Binde ruhig in jede Spalte die PMT pid für den
   korrespondierenden Kanal ein (falls du ihn kennst).
+  Du kannst auch 8192 angeben; dies wird alle pids auf dieser Frequenz wählen,
+  und du kannst dann zwischen ihnen mit TAB wechseln.
+  Das mag mehr Bandbreite benötigen, billige Karten übertragen jedoch
+  alle Kanäle zumindest bis zum Kernel, daher macht es für diese keinen
+  großen Unterschied.
   Andere mögliche Anwendungen sind: televideo pid, zweiter Audio-Track, etc.
 </para>
 
@@ -2091,7 +2098,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 
 <variablelist>
-<title>BEDIENUNG</title>
+<title>GEBRAUCH</title>
 <varlistentry>
 <term><option>-vo dxr2</option></term>
 <listitem><para>Aktiviere TV-Ausgabe.</para></listitem>
@@ -2141,7 +2148,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <!-- FIXME: find a more clear presentation -->
 <variablelist>
-<title>BEDIENUNG</title>
+<title>GEBRAUCH</title>
 <varlistentry>
 <term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>device</replaceable></option></term>
 <listitem>

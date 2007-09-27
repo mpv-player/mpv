@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r22141 -->
+<!-- in sync with r22570 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -4496,10 +4496,60 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       </para>
       <informalexample>
         <para>
-          Ein Beispiel mit VP3-Kompression:
-          <screen>mencoder dvd://2 -o title2.avi -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy</screen>
+          Ein Beispiel für die Konvertierung eines ISO DVD Trailers in eine
+          VP5-Flash-Videodatei unter Benutzung der compdata-Bitrateneinstellungen:
+<screen>mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceable>trailer.flv</replaceable> \
+-ovc vfw -xvfwopts codec=vp6vfw.dll:compdata=onepass.mcf -oac mp3lame \
+-lameopts cbr:br=64 -af lavcresample=22050 -vf yadif,scale=320:240,flip \
+-of lavf -lavfopts i_certify_that_my_video_stream_does_not_use_b_frames
+</screen>
         </para>
       </informalexample>
+
+    </sect2>
+
+    <sect2 id="menc-feat-video-for-windows-bitrate-settings">
+      <title>Benutzung von vfw2menc, um eine Datei für Codeceinstellungen zu erzeugen</title>
+
+      <para>
+        Um mit Video für Windows Codecs zu encodieren, musst du Bitrate und andere
+        Optionen setzen. Nach dem Stand der Dinge funktioniert dies für x86
+        sowohl unter *NIX als auch unter Windows.
+      </para>
+
+      <para>
+        Zuerst musst du das <application>vfw2menc</application>-Programm erzeugen.
+        Es befindet sich im Ordner <filename class="directory">TOOLS</filename>
+        des MPlayer-Sourcebaums.
+        Um es unter Linux zu erstellen, kann <application>Wine</application> benutzt werden:
+
+        <screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
+
+        Unter <application>MinGW</application> oder <application>Cygwin</application> verwende:
+
+        <screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
+
+        Um es unter <application>MSVC</application> zu erstellen, wirst du getopt brauchen.
+        Getopt findest du im Original-<application>vfw2menc</application>-Archiv, das
+        es hier gibt:
+        Das Projekt <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer on win32</ulink>.
+      </para>
+
+      <informalexample>
+        <para>
+          Unten steht ein Beispiel für den VP6-Codec.
+          <screen>vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf</screen>
+          Dies wird den Konfigurationsdialog des VP6-Codecs öffnen.
+          Wiederhole diesen Schritt für den zweiten Durchlauf und benutze
+          <option>-s <replaceable>secondpass.mcf</replaceable></option>.
+        </para>
+      </informalexample>
+
+      <para>
+        Windows-Benutzer können
+        <option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option>
+        verwenden, damit der Dialog angezeigt wird, bevor die Encodierung startet.
+      </para>
     </sect2>
   </sect1>
 
