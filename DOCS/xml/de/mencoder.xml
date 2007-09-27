@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21612 -->
+<!-- in sync with r21744 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="mencoder">
   <title>Allgemeiner Gebrauch von <application>MEncoder</application></title>
@@ -596,6 +596,12 @@ mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=j
 </screen>
           </para>
         </informalexample>
+
+        Du kannst verschiedene Bildtypen mischen, dabei ist egal, welche Methode du verwendest
+        &mdash; individuelle Dateinamen, Wildcard oder eine Datei mit einer Liste &mdash;
+        vorausgesetzt natürlich, dass sie dieselben Abmessungen haben.
+        Du kannst also den Titel von einer PNG-Datei nehmen und daran eine Diashow
+        aus JPEG-Bildern anhängen.
 
         <informalexample>
           <para>
