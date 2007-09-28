@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21705 -->
+<!-- in sync with r23226 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="install">
   <title>Installation</title>
@@ -65,13 +65,13 @@
       <listitem>
         <para>
           <emphasis role="bold">libjpeg</emphasis> - optionaler JPEG-En-/Decoder,
-          benötigt für den JPEG-Videoausgabetreiber und Decodierung von MJPEG-Video
+          benötigt für den JPEG-Videoausgabetreiber
         </para>
       </listitem>
       <listitem>
         <para>
           <emphasis role="bold">libpng</emphasis> - optionaler (M)PNG-En-/Decoder,
-          benötigt für die GUI und den PNG-Videoausgabetreiber
+          benötigt für den PNG-Videoausgabetreiber
         </para>
       </listitem>
       <listitem>
@@ -170,14 +170,11 @@ make install</screen>
     </para>
 
     <para>
-      Zu diesem Zeitpunkt ist <application>MPlayer</application> benutzbar. Das Verzeichnis
-      <filename class="directory">$PREFIX/share/mplayer</filename> enthält die Datei
-      <filename>codecs.conf</filename>, die dem Programm mitteilt, welche
-      Codecs verfügbar sind und was diese können. Du brauchst die Datei nur, wenn du
-      Eigenschaften ändern möchtest, da die ausführbare Datei intern eine eigene
-      Kopie enthält. Überprüfe, ob du eine Kopie von <filename>codecs.conf</filename> einer
-      älteren <application>MPlayer</application>-Version in deinem
-      Home-Verzeichnis (<filename>~/.mplayer/codecs.conf</filename>) hast, und entferne diese.
+      Zu diesem Zeitpunkt ist <application>MPlayer</application> benutzbar.
+      Überprüfe, ob du eine Datei namens <filename>codecs.conf</filename> in deinem
+      Benutzerverzeichnis unter (<filename>~/.mplayer/codecs.conf</filename>)
+      von alten <application>MPlayer</application>-Versionen hast.
+      Wenn du einer findest, entferne sie.
     </para>
 
     <para>

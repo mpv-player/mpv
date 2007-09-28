@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21737 -->
+<!-- in sync with r23100 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="codecs">
   <title>Codecs</title>
@@ -494,6 +494,9 @@ make install<!--
       Die Referenzimplementierung ist auf
       <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
       erhältlich (frei - wie in Freibier - für private Benutzung).
+      Um die Unterstützung zu aktieren, lade die Bibliotheken für
+      <ulink url="http://www.penguin.cz/~utx/amr">AMR-NB and AMR-WB</ulink>
+      runter und installiere sie, indem du die Anweisungen auf dieser Seite befolgst.
     </para>
     <para>
       Für Unterstützung müssen die Codecs

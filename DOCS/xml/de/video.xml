@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r22800 -->
+<!-- in sync with r22854 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
@@ -90,9 +90,7 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt; /proc/mtrr
 </para>
 </sect1>
 
-<sect1 id="output-trad">
-<title>Videoausgabegeräte für traditionelle Grafikkarten</title>
-<sect2 id="xv">
+<sect1 id="xv">
 <title>Xv</title>
 
 <para>
@@ -179,7 +177,7 @@ screen #0
 </orderedlist>
 </para>
 
-<sect3 id="tdfx">
+<sect2 id="tdfx">
 <title>3dfx-Karten</title>
 
 <para>
@@ -199,10 +197,10 @@ screen #0
   tdfxfb-Treiber mit <option>-vo tdfxfb</option> verwenden!
   Lies dazu die <link linkend="tdfxfb">tdfxfb</link>-Sektion.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="s3">
+<sect2 id="s3">
 <title>S3-Karten</title>
 
 <para>
@@ -229,10 +227,10 @@ screen #0
   freundlich nach einem Treiber, der MMX/3DNow unterstützt.
 </para>
 </note>
-</sect3>
+</sect2>
 
 
-<sect3 id="nvidia">
+<sect2 id="nvidia">
 <title>nVidia-Karten</title>
 
 <para>
@@ -257,10 +255,10 @@ screen #0
   Informationen findest du in der
   <link linkend="vidix-nvidia">nVidia-VIDIX</link>-Sektion.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ati">
+<sect2 id="ati">
 <title>ATI-Karten</title>
 
 <para>
@@ -282,10 +280,10 @@ screen #0
   und es werden dabei nicht einmal weitere Bibliotheken oder X selber benötigt.
   Lies dazu die <link linkend="vidix">VIDIX-Sektion</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="neomagic">
+<sect2 id="neomagic">
 <title>NeoMagic-Karten</title>
 
 <para>
@@ -317,10 +315,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="trident">
+<sect2 id="trident">
 <title>Trident-Karten</title>
 <para>
   Wenn du Xv mit einer Trident-Grafikkarte benutzen willst, dann installiere
@@ -333,22 +331,22 @@ EndSection<!--
   <link linkend="vidix">VIDIX</link>-Treiber für the Cyberblade/i1-Karten.
 </para>
 
-</sect3>
+</sect2>
 
 
-<sect3 id="kyro">
+<sect2 id="kyro">
 <title>Kyro/PowerVR-Karten</title>
 <para>
   Wenn du Xv mit einer Kyro-basierten Karte (wie z.B. der Hercules Prophet 4000XT)
   verwenden möchstest, dann solltest du die Treiber von der
   <ulink url="http://www.powervr.com/">PowerVR-Seite</ulink> herunterladen.
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dga">
+<sect1 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -654,12 +652,12 @@ EndSection
 </para></listitem>
 </itemizedlist>
 
-</sect2>
+</sect1>
 <!--</sect1>-->
 
 <!-- ********** -->
 
-<sect2 id="sdl">
+<sect1 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -696,10 +694,10 @@ EndSection
   des Films auf den schwarzen Balken (sofern diese vorhanden sind).
 </para>
 
-</sect2>
+</sect1>
 
 
-<sect2 id="svgalib">
+<sect1 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -777,10 +775,10 @@ EndSection
   Du kannst das OSD und Untertitel mit dem <option>expand</option>-Filter
   aktivieren. Die Manpage enthält die exakten Parameter.
 </para>
-</sect2>
+</sect1>
 
 
-<sect2 id="fbdev">
+<sect1 id="fbdev">
 <title>Framebuffer-Ausgabe (FBdev)</title>
 
 <para>
@@ -871,10 +869,10 @@ mplayer -vm -fbmode <replaceable>Modusname</replaceable> <replaceable>Dateiname<
   keine Einschränkung seitens <application>MPlayer</application>.
 </para>
 </note>
-</sect2>
+</sect1>
 
 
-<sect2 id="mga_vid">
+<sect1 id="mga_vid">
 <title>Matrox-Framebuffer (mga_vid)</title>
 
 <para>
@@ -950,10 +948,10 @@ make<!--
   Es sollte 256x256 große Bilder auf den Schirm zeichnen, wenn alles gut funktioniert.
 </para>
 
-</sect2>
+</sect1>
 
 
-<sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect1 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>3dfx-YUV-Unterstützung (tdfxfb)</title>
 <para>
   Dieser Treiber verwendet den tdfx-Framebuffertreiber des Kernels, um Filme
@@ -961,9 +959,9 @@ make<!--
   mit tdfxfb-Unterstütztung. Danach musst du MPlayer compilieren mit
   <screen>./configure --enable-tdfxfb</screen>
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="tdfx_vid">
+<sect1 id="tdfx_vid">
 <title>tdfx_vid</title>
 
 <para>
@@ -1008,12 +1006,12 @@ make</screen>
   Es gibt ein Testprogramm namens <command>tdfx_vid_test</command> im selben Verzeichnis.
   Es sollte nützliche Informationen ausgeben, wenn alles gut funktioniert.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
 
-<sect2 id="opengl">
+<sect1 id="opengl">
 <title>OpenGL-Ausgabe</title>
 
 <para>
@@ -1048,10 +1046,10 @@ make</screen>
 <command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
 
-</sect2>
+</sect1>
 
 
-<sect2 id="aalib">
+<sect1 id="aalib">
 <title>AAlib - Ausgabe im Textmodus</title>
 
 <para>
@@ -1181,10 +1179,10 @@ make</screen>
   besten Modus herauszufinden. Lies
   <ulink url="http://aa-project.sf.net/tune"/> für weitere Tuningtipps.
 </para>
-</sect2>
+</sect1>
 
 
-<sect2 id="caca">
+<sect1 id="caca">
 <title><systemitem class="library">libcaca</systemitem> - Color ASCII Art-Bibliothek</title>
 
 <para>
@@ -1279,10 +1277,10 @@ make</screen>
   genug für die Darstellung aller Frames ist.
 </para>
 
-</sect2>
+</sect1>
 
 
-<sect2 id="vesa">
+<sect1 id="vesa">
 <title>VESA-Ausgabe über das VESA-BIOS</title>
 
 <para>
@@ -1425,10 +1423,10 @@ make</screen>
   nur einmal während der POST-Phase initialisiert wird.
 </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2 id="x11">
+<sect1 id="x11">
 <title>X11</title>
 
 <para>
@@ -1479,10 +1477,10 @@ make</screen>
   niedrigen Pixelclock-Werte benutzen, die für niedrige Auflösungen
   vonnöten sind.
 </para>
-</sect2>
+</sect1>
 
 
-<sect2 id="vidix">
+<sect1 id="vidix">
 <title>VIDIX</title>
 
 <formalpara>
@@ -1652,7 +1650,7 @@ make</screen>
 </para></step>
 </procedure>
 
-<sect3 id="vidix-ati">
+<sect2 id="vidix-ati">
 <title>ATI-Karten</title>
 <para>
   Momentan werden die meisten ATI-Karten unterstützt, von der Mach64
@@ -1665,9 +1663,9 @@ make</screen>
   der beiden erzwingen oder das VIDIX-System automatisch alle verfügbaren
   Treiber ausprobieren lassen.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="vidix-mga">
+<sect2 id="vidix-mga">
 <title>Matrox-Karten</title>
 <para>
   Matrox G200, G400, G450 und G550 sollen funktionieren.
@@ -1677,9 +1675,9 @@ make</screen>
   Der Treiber unterstützt Videoequalizer und sollte fast genauso schnell
   wie der <link linkend="mga_vid">Matrox-Framebuffer</link> sein.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="vidix-trident">
+<sect2 id="vidix-trident">
 <title>Trident-Karten</title>
 <para>
   Es gibt einen Treiber für den Trident Cyberblade/i1-Chipsatz, der auf
@@ -1690,17 +1688,17 @@ make</screen>
   Der Treiber wurde geschrieben und wird weiterentwickelt von
   <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="vidix-3dlabs">
+<sect2 id="vidix-3dlabs">
 <title>3DLabs-Karten</title>
 <para>
   Auch wenn es einen Treiber für 3DLabs GLINT R3-Chips und Permedia3-Chips
   gibt, so hat noch niemand diese getestet. Feedback wird deswegen gern gesehen.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="vidix-nvidia">
+<sect2 id="vidix-nvidia">
 <title>nVidia-Karten</title>
 
 <para>
@@ -1711,9 +1709,9 @@ make</screen>
   <screen>mplayer -vo cvidix <replaceable>example.avi</replaceable></screen>
 </para>
 
-</sect3>
+</sect2>
 
-<sect3 id="vidix-sis">
+<sect2 id="vidix-sis">
 <title>SiS-Karten</title>
 <para>
   Dies ist ein sehr experimenteller Code, ähnlich nvidia_vid.
@@ -1727,10 +1725,10 @@ make</screen>
 <para>
   Berichte erwartet!
 </para>
-</sect3>
 </sect2>
+</sect1>
 
-<sect2 id="directfb">
+<sect1 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
   "DirectFB ist eine Grafikbibliothek, deren Zielplattform eingebettete
@@ -1757,9 +1755,9 @@ make</screen>
   <option>-vo directfb:2</option> (Layer -1 ist der Standardwert: automatische
   Layerauswahl).
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="dfbmga">
+<sect1 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
   Bitte lies die
@@ -1788,7 +1786,6 @@ make</screen>
   <link linkend="mga_vid">mga_vid</link> ist bereits in Arbeit.
   <ulink url="../../tech/patches.txt">Patches</ulink> sind willkommen.
 </para></note>
-</sect2>
 </sect1>
 
 <sect1 id="mpeg_decoders">

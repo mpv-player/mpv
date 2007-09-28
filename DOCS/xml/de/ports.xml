@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r22499 -->
+<!-- in sync with r23161 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="ports" xreflabel="Ports">
   <title>Portierungen</title>
@@ -322,14 +322,10 @@ MPlayer interrupted by signal 11 in module: init_audio_codec
       <para>
         Oder du kannst die mit IRIX 6.5 gelieferte Standard-Installation verwenden, falls
         du das <filename>Makefile</filename> ein bisschen von Hand editieren willst.
-        Ändere folgende beiden Zeilen von:
-<programlisting>$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-$(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf</programlisting>
-        nach:
-<programlisting>$(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-$(INSTALL) -m 644 codecs.conf $(CONFDIR)/</programlisting>
-        Mache dann (vom <application>MPlayer</application>-Quellverzeichnis aus)
-        <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
+        Ändere die folgende Zeile von:
+        <programlisting>$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1</programlisting>
+        zu:
+        <programlisting>$(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/</programlisting>
         und fahre dann fort mit Compilierung und Installation.
       </para>
     </sect2>
