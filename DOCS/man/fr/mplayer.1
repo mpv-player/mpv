@@ -1,4 +1,4 @@
-.\" synced with r24423
+.\" synced with r24646
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -664,9 +664,10 @@ Le module 'all' change le niveau de verbosité de tous les modules
 Tapez '-msglevel help' pour avoir la liste de tous les modules.
 .br
 NOTE\ :
-Les messages affichés avant que la ligne de commande soit chargée ne
-peuvent être contrôlés que par la variable d'environnement $MPLAYER_VERBOSE,
-qui s'applique à tous les modules.
+Certains messages sont affichés avant que la ligne de commande est
+analysée et ne sont par conséquent pas affectés par \-msglevel.
+Pour contrôler ces messages, vous devez utiliser la variable d'environnement
+MPLAYER_VERBOSE, voir sa description plus bas pour plus de détails.
 .br
 Niveaux disponibles\ :
 .PD 0
@@ -685,7 +686,7 @@ quelques conseils
 .IPs " 4"
 messages informatifs
 .IPs " 5"
-messages de status (ceux cachés par \-quiet)
+messages de status (par défaut)
 .IPs " 6"
 messages verbeux
 .IPs " 7"
@@ -1957,6 +1958,10 @@ Elles n'auront aucun effet si votre carte ne dispose pas d'un mixeur.
 Pour v4l1, 0\-65535 est un intervalle valide.
 Pour v4l2, l'intervalle valide est 0 à 100, et 50 correspond à la valeur par
 défaut du contrôle, tel que reporté par le pilote.
+.IPs "gain=<0\-100> (v4l2)"
+Défini le contrôle de gain pour le périphérique vidéo (généralement une
+webcam) à la valeure voulue et désactive le contrôle de gain automatique.
+La valeur 0 active le contrôle automatique.
 .IPs immediatemode=<bool>
 Un valeur de 0 signifie capturer et mettre en cache l'audio et la vidéo
 ensemble (par défaut pour MEncoder).
@@ -2531,14 +2536,14 @@ Fixe le coefficient de mise à l'échelle automatique (en pourcentage de la
 taille de l'écran) (par défaut\ : 5).
 .
 .TP
-.B \-subfps <flottant>
-Définit le rapport trame/\:sec du sous-titre (par défaut\ : le même rapport
-que celui du film)
+.B \-subfps <ratio>
+Définit le rapport trame/\:sec (fps) du sous-titre (par défaut\ : le même
+rapport que celui du film)
 .br
-.I NOTE:
-.br
-Uniquement pour les fichiers de sous-titres basés sur des trames,
-comme le format MicroDVD.
+.I NOTE\ :
+<ratio> > fps du film accélère les sous-titres pour les fichiers de
+sous-titres basés sur le numéro d'image, et les ralentis pour ceux basés
+sur le temps.
 .
 .TP
 .B \-subpos <0\-100> (utile avec \-vf expand)
@@ -10689,6 +10694,10 @@ Les mêmes contraites que pour vbuf_size existent avec cette option.
 .SS Démultiplexeurs de libavformat de FFmpeg (\-lavfdopts)
 .
 .TP
+.B format=<valeur>
+Force l'utilisation d'un dé-multiplexeur libavformat spécifique.
+.
+.TP
 .B probesize=<valeur>
 Quantité maximal de données à lire lors de la phase de détection.
 Dans le cas de MPEG-TS, cette valeur correspond au nombre maximal
@@ -10776,8 +10785,8 @@ Le répertoire où MPlayer lit la configuration de l'utilisateur.
 .B MPLAYER_VERBOSE (voir aussi \-v et \-msglevel)
 Définit le niveau initial de verbosité de tous les messages des
 modules (par défaut\ : 0).
-Les valeurs négatives résultent en moins de messages alors que
-les valeurs positives résultent en plus.
+Le niveau de verbosité final sera celui de \-msglevel 5 plus la valueur
+de MPLAYER_VERBOSE.
 .
 .SS libaf:
 .
