@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21930 -->
+<!-- synced with r23608 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -194,8 +194,7 @@
             <filename>xlibs-dev</filename> und bei Debian Sarge <filename>libx11-dev</filename>.
             Überprüfe auch, ob die Symlinks
             <filename class="directory">/usr/X11</filename> und
-            <filename class="directory">/usr/include/X11</filename> existieren
-            (das kann ein Problem auf Mandrake-Systemen sein).
+            <filename class="directory">/usr/include/X11</filename> existieren.
           </para>
         </answer>
       </qandaentry>
