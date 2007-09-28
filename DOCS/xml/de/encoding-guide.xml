@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r22570 -->
+<!-- in sync with r22752 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -2563,6 +2563,21 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
               <row><entry>ljpeg</entry><entry>
                   Verlustfreies JPEG
                 </entry></row>
+              <row><entry>jpegls</entry><entry>
+                  JPEG LS
+                </entry></row>
+              <row><entry>targa</entry><entry>
+                  Targa-Bild
+                </entry></row>
+              <row><entry>gif</entry><entry>
+                  GIF-Bild
+                </entry></row>
+              <row><entry>png</entry><entry>
+                  PNG-Bild
+                </entry></row>
+              <row><entry>bmp</entry><entry>
+                  BMP-Bild
+                </entry></row>
               <row><entry>h261</entry><entry>
                   H.261
                 </entry></row>
@@ -2577,6 +2592,9 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
                 </entry></row>
               <row><entry>msmpeg4</entry><entry>
                   Pre-Standard MPEG-4 Variante von MS, v3 (AKA DivX3)
+                </entry></row>
+              <row><entry>msmpeg4v1</entry><entry>
+                  Pre-Standard MPEG-4 von MS, v1
                 </entry></row>
               <row><entry>msmpeg4v2</entry><entry>
                   Pre-Standard MPEG-4 von MS, v2 (in alten ASF-Dateien verwendet)
@@ -2602,11 +2620,17 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
               <row><entry>huffyuv</entry><entry>
                   Verlustfreie (lossless) Kompression
                 </entry></row>
+              <row><entry>ffvhuff</entry><entry>
+                  FFmpeg-modifizierter huffyuv, verlustfrei
+                </entry></row>
               <row><entry>asv1</entry><entry>
                   ASUS Video v1
                 </entry></row>
               <row><entry>asv2</entry><entry>
                   ASUS Video v2
+                </entry></row>
+              <row><entry>vcr1</entry><entry>
+                  ATI VCR1 codec
                 </entry></row>
               <row><entry>ffv1</entry><entry>
                   FFmpeg's verlustfreier (lossless) Videocodec
@@ -2617,11 +2641,20 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
               <row><entry>flv</entry><entry>
                   Sorenson H.263, der in Flash Video benutzt wird
                 </entry></row>
+              <row><entry>flashsv</entry><entry>
+                  Flash Screen Video
+                </entry></row>
               <row><entry>dvvideo</entry><entry>
                   Sony Digital Video
                 </entry></row>
               <row><entry>snow</entry><entry>
                   FFmpeg's experimenteller Wavelet-basierter Codec
+                </entry></row>
+              <row><entry>zbmv</entry><entry>
+                  Zip Blocks Motion Video
+                </entry></row>
+              <row><entry>cljr</entry><entry>
+                  Cirrus Logic AccuPak Codec
                 </entry></row>
             </tbody>
           </tgroup>
@@ -2662,7 +2695,23 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
               </row>
               <row>
                 <entry>sonic</entry>
-                <entry>experimenteller verlustbehafteter/verlustfreier Codec</entry>
+                <entry>experimenteller verlustbehafteter FFmpeg-Codec</entry>
+              </row>
+              <row>
+                <entry>sonicls</entry>
+                <entry>experimenteller verlustfreier FFmpeg-Codec</entry>
+              </row>
+              <row>
+                <entry>vorbis</entry>
+                <entry>Xiph Ogg Vorbis Codec</entry>
+              </row>
+              <row>
+                <entry>wma1</entry>
+                <entry>Windows Media Audio v1 Codec</entry>
+              </row>
+              <row>
+                <entry>wma2</entry>
+                <entry>Windows Media Audio v2 Codec</entry>
               </row>
             </tbody>
           </tgroup>
