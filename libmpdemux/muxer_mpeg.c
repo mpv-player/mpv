@@ -1683,7 +1683,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 					if(((s->buffer[i+4] & 0xf0) == 0x20))
 					{
 						if(priv->patch_sde)
-							patch_panscan(priv, se_ptr);
+							patch_panscan(priv, &(s->buffer[i+4]));
 					}
 					if((s->buffer[i+4] & 0xf0) == 0x80)
 					{
