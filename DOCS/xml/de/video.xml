@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r22854 -->
+<!-- in sync with r23271 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
@@ -1639,14 +1639,15 @@ make</screen>
 </para></step>
 <step><para>
   Verschiebe das Verzeichnis <filename class="directory">svgalib_helper</filename>
-  nach <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
+  in das <filename class="directory">vidix</filename>-Unterverzeichnis des
+  <application>MPlayer</application>-Quellbaums.
 </para></step>
 <step><para>
     Entferne den Kommentar vor der CFLAGS-Zeile, die "svgalib_helper" enthält
-    aus der Datei <filename class="directory">libdha/Makefile</filename>.
+    aus <filename class="directory">vidix/Makefile</filename>.
 </para></step>
 <step><para>
-  Compiliere erneut und installiere libdha.
+  Compiliere erneut.
 </para></step>
 </procedure>
 

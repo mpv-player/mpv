@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r22129 -->
+<!-- in sync with r23342 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="mencoder">
   <title>Allgemeiner Gebrauch von <application>MEncoder</application></title>
@@ -249,8 +249,8 @@
       wiedergegeben werden kann.
     </para>
 
-    <informalexample>
-      <para>Beispiel:</para>
+    <example id="encode_to_macromedia_flash_format">
+      <title>Encodieren in das Macromedia Flash-Format</title>
       <para>
         Erzeugen eines Macromedia Flash Videos, das in einem Web-Browser mit dem
         Macromedia Flash Plugin abgespielt werden kann:
@@ -261,7 +261,7 @@
           -srate 22050
         </screen>
       </para>
-    </informalexample>
+    </example>
 
   </sect1>
 

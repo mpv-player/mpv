@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21612 -->
+<!-- in sync with r23517 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="radio">
   <title>Radio</title>
@@ -13,11 +13,11 @@
 
     <sect2 id="radio-compilation">
       <title>Kompilierung</title>
-      
+
       <procedure>
         <step>
           <para>
-            Zuerst muss MPlayer neu kompiliert werden mittels <filename>./configure</filename> mit
+            Zuerst muss <application>MPlayer</application> neu kompiliert werden mittels <filename>./configure</filename> mit
             <option>--enable-radio</option> und (falls Aufzeichnen untersttzt werden soll)
             <option>--enable-radio-capture</option>.
           </para>
@@ -94,8 +94,9 @@
       <informalexample>
         <para>
           Leiten des Sounds über den PCI-Bus vom internen ADC des Radio-Empfängers.
-          In diesem Beispiel wird der Empfänger als zweite Soundkarte genutzt (ALSA device hw:1,0). Für saa7134-basierte Karten muss entweder das
-          Modul  saa7134-alsa oder saa7134-oss geladen werden.
+          In diesem Beispiel wird der Empfänger als zweite Soundkarte genutzt (ALSA device hw:1,0).
+          Für saa7134-basierte Karten muss entweder das Modul
+          <systemitem>saa7134-alsa</systemitem> oder <systemitem>saa7134-oss</systemitem> geladen werden.
           <note>
             <para>Werden ALSA-Gerätenamen benutzt, so müssen Doppelpunkte durch Gleichheitszeichen und Kommata durch Punkte ersetzt werden.
               <screen>mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture</screen>

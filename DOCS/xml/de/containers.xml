@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r21612 -->
+<!-- in sync with r23538 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="containers">
   <title>Containerformate</title>
@@ -236,7 +236,7 @@
         <filename>.MPG</filename> oder <filename>.MP4</filename> daher.
         (Interessanterweise sind bei diesen Dateien die Video- und Audiostreams
         richtige MPG- und AAC-Dateien. Mit den den Optionen <option>-dumpvideo</option>
-        und <option>-dumpaudio</option> kannst du sie sogar extrahieren.).
+        und <option>-dumpaudio</option> kannst du sie sogar extrahieren).
       </para>
 
     </sect2>
