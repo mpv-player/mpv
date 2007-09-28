@@ -81,7 +81,7 @@
 #define PROFILE_S   (PROFILE_4MV)
 #define PROFILE_AS  (PROFILE_4MV|PROFILE_ADAPTQUANT|PROFILE_BVOP|PROFILE_MPEGQUANT|PROFILE_INTERLACE|PROFILE_QPEL|PROFILE_GMC)
 
-typedef struct
+typedef const struct
 {
 	char *name;                  ///< profile name
 	int id;                      ///< mpeg-4 profile id; iso/iec 14496-2:2001 table G-1
@@ -105,7 +105,7 @@ typedef struct
 
 /* default vbv_occupancy is (64/170)*vbv_buffer_size */
 
-const profile_t profiles[] =
+static profile_t profiles[] =
 {
 	/*   name               p@l    w    h    fps  obj Tvmv  vmv     vcv  ac%   vbv        pkt     bps    vbv_peak dbf  flags */
 	/* unrestricted profile (default) */
