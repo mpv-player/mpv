@@ -215,6 +215,9 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                 } else if (!strcmp(format_name, "H264")) {
                     bih->biCompression =
                         sh_video->format = mmioFOURCC('H','2','6','4');
+                } else if (!strcmp(format_name, "H263-1998")) {
+                    bih->biCompression =
+                        sh_video->format = mmioFOURCC('H','2','6','3');
                 } else {
                     mp_msg(MSGT_DEMUX, MSGL_WARN,
                         "Unknown MPlayer format code for MIME"
