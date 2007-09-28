@@ -1611,7 +1611,8 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 	if(se_ptr)
 		se_ptr[1] &= 0xf7;
 	
-	pce_ptr[3] = (pce_ptr[3] & 0xfd) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
+	//disable tff and rff and overwrite them with the value in bff_mask
+	pce_ptr[3] = (pce_ptr[3] & 0x7d) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
 	pce_ptr[4] |= 0x80;	//sets progressive frame
 	
 	vpriv->display_frame += n;
@@ -1677,9 +1678,10 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 						break;
 					}
 					mp_header_process_extension(&(spriv->picture), &(s->buffer[i+4]));
+					if(((s->buffer[i+4] & 0xf0) == 0x10))
+						se_ptr = &(s->buffer[i+4]);
 					if(((s->buffer[i+4] & 0xf0) == 0x20))
 					{
-						se_ptr = &(s->buffer[i+4]);
 						if(priv->patch_sde)
 							patch_panscan(priv, se_ptr);
 					}
