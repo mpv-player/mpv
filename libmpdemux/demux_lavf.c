@@ -250,7 +250,7 @@ static int lavf_check_preferred_file(demuxer_t *demuxer){
 static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     AVFormatContext *avfc;
     AVFormatParameters ap;
-    AVOption *opt;
+    const AVOption *opt;
     lavf_priv_t *priv= demuxer->priv;
     int i,g;
     char mp_filename[256]="mp:";
