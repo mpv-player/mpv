@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r24646
+.\" synced with r24656
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -243,7 +243,7 @@ MPlayer имеет полностью настраиваемый, основанный на командах, слой управления, 
 Подстраивает баланс, усиливая левый/\:правый канал.
 .IPs "m\ \ \ \ "
 Выключает звук.
-.IPs "_ (только MPEG-TS и libavformat)"
+.IPs "_ (только MPEG-TS, AVI и libavformat)"
 Циклически переключает доступные видео дорожки.
 .IPs "# (только DVD, MPEG, Matroska, AVI и libavformat)"
 Циклически переключает доступные аудио дорожки.
@@ -10357,6 +10357,11 @@ pes1 и pes2 весьма сильно испорченные форматы (без заголовка упаковки и
 .
 .
 .SS Демультиплексоры FFmpeg libavformat (\-lavfdopts)
+.
+.TP
+.B analyzeduration=<значение>
+Максимальный размер (в секундах) части, используемой для определения
+свойств потока.
 .
 .TP
 .B format=<значение>
