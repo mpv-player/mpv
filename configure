@@ -1342,7 +1342,6 @@ if aix ; then
   _ld_extra="$_ld_extra -lC"
 fi
 
-# If IRIX we must use ar instead of ranlib (not present on IRIX systems)
 if irix ; then
   _ranlib='ar -r'
 elif linux ; then
