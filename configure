@@ -1315,15 +1315,6 @@ rm -f "$TMPLOG"
 echo configuration: $_configuration > "$TMPLOG"
 echo >> "$TMPLOG"
 
-# config files
-
-# FIXME: A lot of stuff is installed under /usr/local
-# NK: But we should never use this stuff implicitly since we call compiler
-# from /usr we should be sure that there no effects from other compilers
-# (libraries) which might be installed into /usr/local.  Let users use this
-# stuff explicitly as command line argument.  In other words: It would be
-# resonable to have only /usr/include or only /usr/local/include.
-
 if openbsd ; then
   _ldconfig="ldconfig -R"
 fi
