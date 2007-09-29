@@ -392,7 +392,7 @@ int mp_input_ar_read(int fd)
             (*hidDeviceInterface)->close(hidDeviceInterface);
             hidDeviceIsOpen = 0;
 
-            // read out all pending events
+            // Read out all pending events.
             while (result == kIOReturnSuccess)
                 result = (*queue)->getNextEvent(queue, &event, zeroTime, 0);
         }
