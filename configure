@@ -1300,20 +1300,6 @@ if test "$_runtime_cpudetection" = yes && not x86 && not ppc; then
   die "Runtime CPU detection only works for x86, x86-64 and PPC!"
 fi
 
-for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
-  test "$I" && break
-done
-
-TMPLOG="configure.log"
-TMPC="$I/mplayer-conf-$RANDOM-$$.c"
-TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
-TMPEXE="$I/mplayer-conf-$RANDOM-$$"
-TMPH="$I/mplayer-conf-$RANDOM-$$.h"
-TMPS="$I/mplayer-conf-$RANDOM-$$.S"
-
-rm -f "$TMPLOG"
-echo configuration: $_configuration > "$TMPLOG"
-echo >> "$TMPLOG"
 
 if openbsd ; then
   _ldconfig="ldconfig -R"
@@ -1366,6 +1352,23 @@ fi
 if qnx ; then
   _ld_extra="$_ld_extra -lph"
 fi
+
+for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
+  test "$I" && break
+done
+
+
+TMPLOG="configure.log"
+TMPC="$I/mplayer-conf-$RANDOM-$$.c"
+TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
+TMPEXE="$I/mplayer-conf-$RANDOM-$$"
+TMPH="$I/mplayer-conf-$RANDOM-$$.h"
+TMPS="$I/mplayer-conf-$RANDOM-$$.S"
+
+rm -f "$TMPLOG"
+echo configuration: $_configuration > "$TMPLOG"
+echo >> "$TMPLOG"
+
 
 # Check how to call 'head' and 'tail'. Newer versions spit out warnings
 # if used as 'head -1' instead of 'head -n 1', but older versions don't
