@@ -83,6 +83,7 @@ MPlayer (1.0)
     * AC-3 decoder
     * Matroska muxer
     * Monkey's Audio demuxer and decoder
+    * Flac encoder and decoder speedups
 
     libmpeg2:
     * iWMMXt-accelerated DCT and motion compensation for ARM processors
