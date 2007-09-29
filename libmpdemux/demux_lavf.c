@@ -270,9 +270,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     ap.prealloced_context = 1;
     if(opt_probesize) {
-        double d = (double) opt_probesize;
-        opt = av_set_double(avfc, "probesize", opt_probesize);
-        if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option probesize to %.3f\r\n", d);
+        opt = av_set_int(avfc, "probesize", opt_probesize);
+        if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option probesize to %u\n", opt_probesize);
     }
 
     if(demuxer->stream->url)
