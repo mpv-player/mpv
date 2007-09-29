@@ -1,4 +1,4 @@
-.\" Synced with r24592
+.\" Synced with r24656
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 09. 24." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 09. 29." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -244,7 +244,7 @@ Beállítja az audió egyensúlyt a bal/\:jobb csatornának megfelelõen.
 Beállítja az audió egyensúlyt a bal/\:jobb csatornának megfelelõen.
 .IPs "m\ \ \ \ "
 Hang elnémítása.
-.IPs "_ (csak MPEG-TS és libavformat mellett)"
+.IPs "_ (csak MPEG-TS, AVI és libavformat mellett)"
 Váltás az elérhetõ videó sávok között.
 .IPs "# (csak DVD, MPEG, Matroska, AVI és libavformat mellett)"
 Váltás az elérhetõ audió sávok között.
@@ -10120,6 +10120,14 @@ Ugyan az érvényes rá, mint a vbuf_size kapcsolóra.
 .
 .
 .SS FFmpeg libavformat demuxer-ek (\-lavfdopts)
+.
+.TP
+.B analyzeduration=<érték>
+A folyam tulajdonságainak megállapításához maximálisan analizálndó hossz másodpercben.
+.
+.TP
+.B format=<érték>
+Kényszeríti a megadott libavformat demuxer-t.
 .
 .TP
 .B probesize=<érték>
