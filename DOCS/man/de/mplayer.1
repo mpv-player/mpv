@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r24592
+.\" In sync with r24656
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -255,7 +255,7 @@ Verringert/\:erhöht die Lautstärke.
 Passt Ton-Balance an bezüglich dem linken/\:rechten Kanal.
 .IPs "m\ \ \ \ "
 Ton-Stummschaltung.
-.IPs "_ (nur bei MPEG-TS und libavformat)"
+.IPs "_ (nur bei MPEG-TS, AVI und libavformat)"
 Wechselt zwischen den verfügbaren Videospuren.
 .IPs "# (nur bei DVD, MPEG, Matroska, AVI und libavformat)"
 Wechselt zwischen den verfügbaren Audiospuren.
@@ -10594,6 +10594,15 @@ Es gilt das gleiche Prinzip wie für vbuf_size.
 .
 .
 .SS FFmpeg-libavformat-Demuxer (\-lavfdopts)
+.
+.TP
+.B analyzeduration=<Wert>
+Maximale Länge in Sekunden, die verwendet wird, um Streameigenschaften
+zu analysieren.
+.
+.TP
+.B format=<Wert>
+Gib einen speziellen libavformat-Demuxer an.
 .
 .TP
 .B probesize=<Wert>

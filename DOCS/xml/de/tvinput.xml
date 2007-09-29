@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r23536 -->
+<!-- in sync with r24604 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="tv">
   <title>TV</title>
@@ -210,6 +210,97 @@ mencoder -tv driver=v4l:width=768:height=576 \
           Richtung durchführen.
         </para>
       </informalexample>
+    </sect2>
+  </sect1>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+  <sect1 id="tv-teletext">
+    <title>Videotext</title>
+
+    <para>Videotext ist momentan nur in MPlayer verfügbar, für die Treiber v4l und v4l2.</para>
+
+    <sect2 id="tv-teletext-implementation-notes">
+      <title>Anmerkungen zur Implementierung</title>
+
+      <para>
+        <application>MPlayer</application> unterstützt regulären Text, Grafiken und Navigationslinks.
+        Leider werden farbige Seiten momentan nicht vollständig unterstützt - alle Seiten erscheinen
+        in Graustufen. Untertitelseiten (auch bekannt als "Closed Captions") werden auch unterstützt.
+      </para>
+
+      <para>
+        <application>MPlayer</application> beginnt beim Beginn vom TV-Empfang damit, alle Videoseiten
+        zwischenzuspeichern, damit du nicht warten musst, bis die gewünschte Seite geladen ist.
+      </para>
+
+      <para>
+        Anmerkung: Benutzung von Videotext mit <option>-vo xv</option> verursacht komische Farben.
+      </para>
+
+    </sect2>
+
+    <sect2 id="tv-teletext-usage">
+      <title>Videotext verwenden</title>
+
+      <para>
+        Um Decodierung von Videotext zu aktivieren, musst du das VBI-Gerät angeben,
+        von dem die Videotextdaten empfangen werden (üblicherweise
+        <filename>/dev/vbi0</filename> unter Linux). Dies kann erreicht werden durch Angabe
+        der Option <option>tdevice</option> in deiner Konfigurationsdatei, siehe unten:
+        <screen>tv=tdevice=/dev/vbi0</screen>
+      </para>
+
+      <para>
+        Du musst möglicherweise den Videotextsprachcode für dein Land angeben.
+        Um dir alle Sprachcodes anzeigen zu lassen, verwende
+        <screen>tv=tdevice=/dev/vbi0:tlang=<replaceable>-1</replaceable></screen>
+        Hier ist ein Beispiel für russisch:
+        <screen>tv=tdevice=/dev/vbi0:tlang=<replaceable>33</replaceable></screen>
+      </para>
+
+      <para>
+      </para>
+
+    </sect2>
+
+    <sect2 id="tv-teletext-hotkeys">
+      <title>Videotext-Hotkeys</title>
+
+      <informaltable frame="all">
+        <tgroup cols="2">
+          <thead>
+            <row>
+              <entry>Taste</entry>
+              <entry>Beschreibung</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>X</entry>
+              <entry>Videotextanzeige an-/ausschalten</entry>
+            </row>
+            <row>
+              <entry>C</entry>
+              <entry>Durch die verschiedenen Zeichnungsmodi wechseln (deckend, transparent,
+                umgekehrt deckend, umgekehrt transparent</entry>
+            </row>
+            <row>
+              <entry>Links/Rechts</entry>
+              <entry>Go to previous/next teletext page</entry>
+            </row>
+            <row>
+              <entry>BildHoch/BildRunter</entry>
+              <entry>Gehe zur nächsten/vorigen Videotextseite</entry>
+            </row>
+            <row>
+              <entry>Ziffern</entry>
+              <entry>Gib die Seitenzahl an, zu der gesprungen werden soll</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </sect2>
   </sect1>
 

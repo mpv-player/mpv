@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- in sync with r23537 -->
+<!-- in sync with r24082 -->
 <!-- missing cosmetic commit 21537 -->
 <chapter id="codecs">
   <title>Codecs</title>
@@ -497,6 +497,7 @@ make install<!--
       Um die Unterstützung zu aktiveren, lade die Bibliotheken für
       <ulink url="http://www.penguin.cz/~utx/amr">AMR-NB and AMR-WB</ulink>
       runter und installiere sie, indem du die Anweisungen auf dieser Seite befolgst.
+      Compiliere MPlayer danach erneut.
     </para>
     <para>
       Für Unterstützung müssen die Codecs
