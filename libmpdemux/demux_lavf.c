@@ -47,11 +47,13 @@
 
 extern char *audio_lang;
 static unsigned int opt_probesize = 0;
+static unsigned int opt_analyzeduration = 0;
 static char *opt_format;
 
 m_option_t lavfdopts_conf[] = {
 	{"probesize", &(opt_probesize), CONF_TYPE_INT, CONF_RANGE, 32, INT_MAX, NULL},
 	{"format",    &(opt_format),    CONF_TYPE_STRING,       0,  0,       0, NULL},
+	{"analyzeduration",    &(opt_analyzeduration),    CONF_TYPE_INT,       CONF_RANGE,  0,       INT_MAX, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -272,6 +274,10 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     if(opt_probesize) {
         opt = av_set_int(avfc, "probesize", opt_probesize);
         if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option probesize to %u\n", opt_probesize);
+    }
+    if(opt_analyzeduration) {
+        opt = av_set_int(avfc, "analyzeduration", opt_analyzeduration * AV_TIME_BASE);
+        if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option analyzeduration to %u\n", opt_analyzeduration);
     }
 
     if(demuxer->stream->url)
