@@ -5913,12 +5913,12 @@ int main(void)
   return 0;
 }
 EOF
-  for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora"; do
+  for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora -logg"; do
     cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" \
                          && _theora=yes && break
   done
   if test "$_theora" = no && test "$_tremor_internal" = yes; then
-    for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora"; do
+    for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora -logg"; do
       cc_check -I. tremor/bitwise.c $_ld_theora \
         && _ld_extra="$_ld_extra $_ld_theora" && theora=yes && break
     done
