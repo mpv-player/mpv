@@ -1,4 +1,4 @@
-.\" synced with r24646
+.\" synced with r24656
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -256,7 +256,7 @@ Réduit/\:augmente le volume.
 Ajuste la balance audio en faveur du canal de gauche/\:droite.
 .IPs "m\ \ \ \ "
 Coupe le son (mute).
-.IPs "_ (MPEG-TS et libavformat uniquement)"
+.IPs "_ (MPEG-TS, AVI et libavformat uniquement)"
 Alterne entre les pistes vidéos disponibles.
 .IPs "# (DVD, MPEG, Matroska, AVI et libavformat uniquement)"
 Alterne entre les pistes audio disponibles.
@@ -10692,6 +10692,10 @@ Les mêmes contraites que pour vbuf_size existent avec cette option.
 .
 .
 .SS Démultiplexeurs de libavformat de FFmpeg (\-lavfdopts)
+.
+.TP
+.B analyzeduration=<valeur>
+Durée maximale (en secondes) pour analyser les propriétés du flux.
 .
 .TP
 .B format=<valeur>
