@@ -1306,13 +1306,13 @@ for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
 done
 
 TMPLOG="configure.log"
-rm -f "$TMPLOG"
 TMPC="$I/mplayer-conf-$RANDOM-$$.c"
 TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
 TMPEXE="$I/mplayer-conf-$RANDOM-$$"
 TMPH="$I/mplayer-conf-$RANDOM-$$.h"
 TMPS="$I/mplayer-conf-$RANDOM-$$.S"
 
+rm -f "$TMPLOG"
 echo configuration: $_configuration > "$TMPLOG"
 echo >> "$TMPLOG"
 
