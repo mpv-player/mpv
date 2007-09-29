@@ -1300,7 +1300,6 @@ if test "$_runtime_cpudetection" = yes && not x86 && not ppc; then
   die "Runtime CPU detection only works for x86, x86-64 and PPC!"
 fi
 
-# LGB: temporary files
 for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
   test "$I" && break
 done
