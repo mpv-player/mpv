@@ -494,7 +494,7 @@ make install<!--
       Die Referenzimplementierung ist auf
       <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
       erhältlich (frei - wie in Freibier - für private Benutzung).
-      Um die Unterstützung zu aktieren, lade die Bibliotheken für
+      Um die Unterstützung zu aktiveren, lade die Bibliotheken für
       <ulink url="http://www.penguin.cz/~utx/amr">AMR-NB and AMR-WB</ulink>
       runter und installiere sie, indem du die Anweisungen auf dieser Seite befolgst.
     </para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23608 -->
+<!-- synced with r24035 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -873,6 +873,14 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
           </para>
         </question>
         <answer>
+          <para>
+            Viele FLV-Dateien werden nur mit <option>-correct-pts</option> korrekt wiedergegeben.
+            Leider hat <application>MEncoder</application> diese Option nicht.
+            Du kannst aber versuchen, die <option>-fps</option>-Option zu setzen, um den
+            richtigen Wert manuell, wenn du ihn kennst.
+          </para>
+        </listitem>
+        <listitem>
           <para>
             Deine Maschine ist zu langsam, oder dein Soundkartentreiber ist kaputt.
             Konsultiere die Dokumentation, um herauszufinden, wie du die Performance verbessern kannst.
