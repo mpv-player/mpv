@@ -364,7 +364,7 @@ Video output:
   --enable-v4l2            enable V4L2 Decoder audio/video output [autodetect]
   --enable-dvb             enable DVB video output [autodetect]
   --enable-dvbhead         enable DVB video output (HEAD version) [autodetect]
-  --enable-mga             enable mga_vid video output [disable]
+  --enable-mga             enable mga_vid video output [autodetect]
   --enable-xmga            enable mga_vid X11 video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
   --enable-xvmc            enable XvMC acceleration [disable]
@@ -591,7 +591,7 @@ _live=auto
 _nemesi=auto
 _native_rtsp=yes
 _xinerama=auto
-_mga=no
+_mga=auto
 _xmga=auto
 _vm=auto
 _xf86keysym=auto
@@ -4252,10 +4252,10 @@ else
 fi
 
 
-echocheck "mga_vid"
+echocheck "/dev/mga_vid"
 if test "$_mga" = auto ; then
   _mga=no
-  linux && _mga=yes
+  test -c /dev/mga_vid && _mga=yes
 fi
 if test "$_mga" = yes ; then
   _def_mga='#define HAVE_MGA 1'
