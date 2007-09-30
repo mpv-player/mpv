@@ -64,6 +64,7 @@ MPlayer (1.0)
     * fine tuning for tv://
     * driver autodetection for tv://
     * libnemesi RTSP/RTP support
+    * EOF detection for RTSP (live555)
 
     FFmpeg/libavcodec:
     * Intel Music coder audio decoder
