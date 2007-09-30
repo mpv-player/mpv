@@ -6222,7 +6222,7 @@ echores "$_qtx"
 echocheck "Nemesi Streaming Media libraries"
 if test "$_nemesi" = auto  && test "$_network" = yes ; then
     _nemesi=no
-    if $_pkg_config --exists libnemesi ; then
+    if $_pkg_config libnemesi --atleast-version=0.6.2 ; then
         _ld_extra="$_ld_extra `$_pkg_config --libs libnemesi`"
         _nemesi=yes
     fi
