@@ -392,7 +392,6 @@ static void check_os_katmai_support( void )
 #elif defined(__linux__)
 #if defined(_POSIX_SOURCE)
    struct sigaction saved_sigill;
-   struct sigaction saved_sigfpe;
 
    /* Save the original signal handlers.
     */
