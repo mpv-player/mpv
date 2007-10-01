@@ -874,12 +874,6 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | gr
         </question>
         <answer>
           <para>
-            Viele FLV-Dateien werden nur mit <option>-correct-pts</option> korrekt wiedergegeben.
-            Leider hat <application>MEncoder</application> diese Option nicht.
-            Du kannst aber versuchen, die <option>-fps</option>-Option zu setzen, um den
-            richtigen Wert manuell, wenn du ihn kennst.
-          </para>
-          <para>
             Deine Maschine ist zu langsam, oder dein Soundkartentreiber ist kaputt.
             Konsultiere die Dokumentation, um herauszufinden, wie du die Performance verbessern kannst.
           </para>
@@ -983,6 +977,14 @@ Starte Wiedergabe...<!--
                   Deine CPU <emphasis>und/oder</emphasis> Grafikkarte <emphasis>und/oder</emphasis>
                   Bus ist zu langsam. <application>MPlayer</application> zeigt eine Nachricht an,
                   wenn dies der Fall ist (und der Zähler der ausgelassenen Frames schnell hochzählt).
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  Viele FLV-Dateien werden nur mit <option>-correct-pts</option> korrekt wiedergegeben.
+                  Leider hat <application>MEncoder</application> diese Option nicht.
+                  Du kannst aber versuchen die <option>-fps</option>-Option manuell auf den
+                  richtigen Wert zu setzen, wenn du ihn kennst.
                 </para>
               </listitem>
               <listitem>
