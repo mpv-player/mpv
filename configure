@@ -2301,6 +2301,25 @@ fi
 echores $_named_asm_args
 
 
+if darwin && test "$cc_vendor" = "gnu" ; then
+echocheck "GCC support of -mstackrealign"
+# GCC 4.2 and some earlier Apple versions support this flag on x86. Since
+# Mac OS X/Intel has an ABI different from Windows this is needed to avoid
+# crashes when loading Win32 DLLs. Unfortunately some gcc versions create
+# wrong code with this flag, but this can be worked around by adding
+# -fno-unit-at-a-time as described in the blog post at
+# http://www.dribin.org/dave/blog/archives/2006/12/05/missing_third_param/
+cat > $TMPC << EOF
+__attribute__((noinline)) static int foo3(int i1, int i2, int i3) { return i3; }
+int main(void) { return foo3(1,2,3) == 3 ? 0 : 1; }
+EOF
+  cc_check -O4 -mstackrealign && tmp_run && _stackrealign=-mstackrealign
+  test -z "$_stackrealign" && cc_check -O4 -mstackrealign -fno-unit-at-a-time \
+    && tmp_run && _stackrealign="-mstackrealign -fno-unit-at-a-time"
+  test -n "$_stackrealign" && echores "yes" || echores "no"
+fi # if darwin && test "$cc_vendor" = "gnu" ; then
+
+
 # Checking for CFLAGS
 _install_strip="-s"
 if test "$_profile" != "" || test "$_debug" != "" ; then
@@ -7527,6 +7546,7 @@ EXTRA_INC = $_inc_extra
 EXTRAXX_INC = $_inc_extra $_inc_extraxx
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
+CFLAG_STACKREALIGN = $_stackrealign
 INSTALLSTRIP = $_install_strip
 CHARSET = $_charset
 HELP_FILE = $_mp_help
