@@ -15,7 +15,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-typedef struct _fli_frames_t {
+typedef struct {
   int num_frames;
   int current_frame;
   off_t *filepos;
