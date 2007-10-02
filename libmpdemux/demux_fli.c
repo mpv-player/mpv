@@ -80,7 +80,7 @@ static demuxer_t* demux_open_fli(demuxer_t* demuxer){
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream, 0);
 
-  header = malloc(sizeof(BITMAPINFOHEADER) + 128);
+  header = calloc(1, sizeof(BITMAPINFOHEADER) + 128);
   stream_read(demuxer->stream, header + sizeof(BITMAPINFOHEADER), 128);
   stream_seek(demuxer->stream, 0);
 
