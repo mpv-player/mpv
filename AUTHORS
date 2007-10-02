@@ -362,7 +362,7 @@ Hoffmann, Jens <hoffmajs@gmx.de>
     * found the big BITMAPINFOHEADER problem -> solved ASV2 pixelization
 
 Hoffman, Marc <mmh@pleasantst.com>
-    * Altivec, color space converter
+    * AltiVec, color space converter
     * Blackfin, DSP optimizations
 
 Holm, David (dholm, mswitch) <dholm@telia.com>

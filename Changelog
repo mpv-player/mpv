@@ -821,7 +821,7 @@ MPlayer (1.0)
     * hrtf audio filter to convert multichannel audio to 2 channel output
       for headphones, preserving the spatiality of the sound
     * big-endian fixes in rgb2rgb converter
-    * yuv2rgb Altivec optimization fixes
+    * yuv2rgb AltiVec optimization fixes
     * support for LADSPA plugins
 
     GUI:
