@@ -128,6 +128,8 @@ static demuxer_t* demux_open_fli(demuxer_t* demuxer){
   // pass extradata to codec
   sh_video->bih = (BITMAPINFOHEADER*)header;
   sh_video->bih->biSize = sizeof(BITMAPINFOHEADER) + 128;
+  sh_video->bih->biWidth = sh_video->disp_w;
+  sh_video->bih->biHeight = sh_video->disp_h;
     
   // skip the video depth and flags
   stream_skip(demuxer->stream, 4);
