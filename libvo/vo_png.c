@@ -32,7 +32,7 @@ static vo_info_t info =
 
 LIBVO_EXTERN (png)
 
-int z_compression = Z_NO_COMPRESSION;
+static int z_compression = Z_NO_COMPRESSION;
 static int framenum = 0;
 
 struct pngdata {
