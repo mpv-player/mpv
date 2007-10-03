@@ -93,6 +93,7 @@ SRCS_COMMON = native/nuppelvideo.c \
               vf_yuvcsp.c \
               vf_yuy2.c \
               vf_yvu9.c \
+              vf_ow.c \
 
 # These filters use private headers and do not work with shared libavcodec.
 SRCS_COMMON-$(LIBAVCODEC_A)          += vf_fspp.c \
