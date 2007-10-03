@@ -159,7 +159,7 @@ static uint32_t draw_image(mp_image_t* mpi){
     
     snprintf (buf, 100, "%08d.png", ++framenum);
 
-    png = create_png(buf, mpi->w, mpi->h, mpi->flags&MP_IMGFLAG_SWAPPED);
+    png = create_png(buf, mpi->w, mpi->h, IMGFMT_IS_BGR(mpi->imgfmt));
 
     if(png.status){
  	    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_PNG_ErrorInCreatePng);
