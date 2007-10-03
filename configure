@@ -1988,7 +1988,7 @@ EOF
     _target_arch='ARCH_SPARC = yes'
     _vis='yes'
     iproc='sparc'
-    proc='v9'
+    proc='ultrasparc'
     _march=''
     _mcpu="-mcpu=$proc"
     _optimizing="$proc"
