@@ -6593,7 +6593,6 @@ EOF
 fi
 
 if test "$_x264" = yes ; then
-  _x264=yes
   _def_x264='#define HAVE_X264 1'
   _codecmodules="x264 $_codecmodules"
   if echo $_libavencoders | grep -q X264 ; then
@@ -6605,7 +6604,6 @@ if test "$_x264" = yes ; then
     _def_lavc_x264='#undef CONFIG_LIBX264'
   fi
 else
-  _x264=no
   _lavc_x264=no
   _def_x264='#undef HAVE_X264'
   _def_lavc_x264='#undef CONFIG_LIBX264'
