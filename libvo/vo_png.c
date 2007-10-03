@@ -52,8 +52,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
  		    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_PNG_Warning3);
 	    }	    
     
-    if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Compression level %i\n", z_compression); }
+    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Compression level %i\n", z_compression);
 	  	
     return 0;
 }
@@ -73,15 +72,13 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
     png.info_ptr = png_create_info_struct(png.png_ptr);
    
     if (!png.png_ptr) {
-       if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-           mp_msg(MSGT_VO,MSGL_DBG2, "PNG Failed to init png pointer\n"); }
+       mp_msg(MSGT_VO,MSGL_DBG2, "PNG Failed to init png pointer\n");
        png.status = ERROR;
        return png;
     }   
     
     if (!png.info_ptr) {
-       if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-           mp_msg(MSGT_VO,MSGL_DBG2, "PNG Failed to init png infopointer\n"); }
+       mp_msg(MSGT_VO,MSGL_DBG2, "PNG Failed to init png infopointer\n");
        png_destroy_write_struct(&png.png_ptr,
          (png_infopp)NULL);
        png.status = ERROR;
@@ -89,8 +86,7 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
     }
     
     if (setjmp(png.png_ptr->jmpbuf)) {
-	if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-            mp_msg(MSGT_VO,MSGL_DBG2, "PNG Internal error!\n"); }
+        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Internal error!\n");
         png_destroy_write_struct(&png.png_ptr, &png.info_ptr);
         fclose(png.fp);
         png.status = ERROR;
@@ -104,8 +100,7 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
        	return png;
     }	    
     
-    if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Init IO\n"); }
+    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Init IO\n");
     png_init_io(png.png_ptr, png.fp);
 
     /* set the zlib compression level */
@@ -119,13 +114,11 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
        8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
        PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     
-    if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write Info\n"); }
+    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write Info\n");
     png_write_info(png.png_ptr, png.info_ptr);
     
     if(swapped) {
-    	if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-            mp_msg(MSGT_VO,MSGL_DBG2, "PNG Set BGR Conversion\n"); }
+        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Set BGR Conversion\n");
     	png_set_bgr(png.png_ptr);
     }	
 
@@ -135,12 +128,10 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
        
 static uint8_t destroy_png(struct pngdata png) {
 	    
-    if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write End\n"); }
+    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write End\n");
     png_write_end(png.png_ptr, png.info_ptr);
 
-    if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Destroy Write Struct\n"); }
+    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Destroy Write Struct\n");
     png_destroy_write_struct(&png.png_ptr, &png.info_ptr);
     
     fclose (png.fp);
@@ -166,8 +157,7 @@ static uint32_t draw_image(mp_image_t* mpi){
 	    return 1;
     }	     
 
-    if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
-        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Creating Row Pointers\n"); }
+    mp_msg(MSGT_VO,MSGL_DBG2, "PNG Creating Row Pointers\n");
     for ( k = 0; k < mpi->h; k++ )
 	row_pointers[k] = mpi->planes[0]+mpi->stride[0]*k;
 
