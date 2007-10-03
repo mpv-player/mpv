@@ -2146,6 +2146,14 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 				mp_msg(MSGT_DEMUX, MSGL_DBG2, "DVB A52 Descriptor\n");
 			}
 		}
+		else if(ptr[j] == 0x7b)	//DVB DTS Descriptor
+		{
+			if(es->type == 0x6)
+			{
+				es->type = AUDIO_DTS;
+				mp_msg(MSGT_DEMUX, MSGL_DBG2, "DVB DTS Descriptor\n");
+			}
+		}
 		else if(ptr[j] == 0x59)	//Subtitling Descriptor
 		{
 			uint8_t subtype;
