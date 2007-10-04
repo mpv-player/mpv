@@ -930,6 +930,7 @@ if(!demuxer->seekable){
     // clear demux buffers:
     if(sh_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}
     ds_free_packs(d_video);
+    ds_free_packs(demuxer->sub);
     
     demuxer->stream->eof=0; // clear eof flag
     demuxer->video->eof=0;
