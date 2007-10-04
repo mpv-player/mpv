@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r23920
+// Updated to help_mp-en.h r24423
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -1315,7 +1315,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Impossibile inizializzare i controlli del joystick\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "Impossibile fare stat di %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Impossibile aprire %s: %s\n"
-#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Impossibile inizializzare i Apple Remote.\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Impossibile inizializzare l'Apple Remote.\n"
 
 // ========================== LIBMPDEMUX ===================================
 
@@ -1962,10 +1962,10 @@ static char help_text[]=
 #define MSGTR_RADIO_UsingFreq "[radio] Uso la frequenza: %.2f.\n"
 #define MSGTR_RADIO_AudioInInitFailed "[radio] audio_in_init fallito.\n"
 #define MSGTR_RADIO_BufferString "[radio] %s: in buffer=%d scartati=%d\n"
-#define MSGTR_RADIO_AudioInSetupFailed "[radio] chiamata a audio_in_setup fallita: %s\n"
+#define MSGTR_RADIO_AudioInSetupFailed "[radio] Chiamata a audio_in_setup fallita: %s\n"
 #define MSGTR_RADIO_CaptureStarting "[radio] Inizio la parte di cattura.\n"
 #define MSGTR_RADIO_ClearBufferFailed "[radio] Pulizia buffer fallita: %s\n"
-#define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Chiamata a stream_enable_cache fallito: %s\n"
+#define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Chiamata a stream_enable_cache fallita: %s\n"
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Nome driver sconosciuto: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Uso l'interfaccia radio V4Lv2.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Uso l'interfaccia radio V4Lv1.\n"
@@ -2068,6 +2068,21 @@ static char help_text[]=
 #define MSGTR_TV_AvailableDrivers "Driver disponibili:\n"
 #define MSGTR_TV_DriverInfo "Scelto driver: %s\n nome: %s\n autore: %s\n commento: %s\n"
 #define MSGTR_TV_NoSuchDriver "Driver non trovato: %s\n"
+#define MSGTR_TV_DriverAutoDetectionFailed "Rilevazione automatica del driver TV fallita.\n"
 #define MSGTR_TV_UnknownColorOption "Specificata un'opzione colore (%d) sonosciuta!\n"
 #define MSGTR_TV_CurrentFrequency "Frequenza attuale: %lu (%.3f)\n"
 #define MSGTR_TV_NoTeletext "Segnale televideo assente"
+#define MSGTR_TV_Bt848IoctlFailed "tvi_bsdbt848: Chiamata a ioctl %s fallita. Errore: %s\n"
+#define MSGTR_TV_Bt848InvalidAudioRate "tvi_bsdbt848: Frequenza audio non valida. Errore: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningBktrDev "tvi_bsdbt848: Impossibile aprire il dispositivo bktr. Errore: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningTunerDev "tvi_bsdbt848: Impossibile aprire il dispositivo del tuner. Errore: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningDspDev "tvi_bsdbt848: Impossibile aprire il dispositivo dsp. Errore: %s\n"
+#define MSGTR_TV_Bt848ErrorConfiguringDsp "tvi_bsdbt848: Configurazione di dsp fallita. Errore: %s\n"
+#define MSGTR_TV_Bt848ErrorReadingAudio "tvi_bsdbt848: Errore leggendo i dati audio. Errore: %s\n"
+#define MSGTR_TV_Bt848MmapFailed "tvi_bsdbt848: mmap fallita. Errore: %s\n"
+#define MSGTR_TV_Bt848FrameBufAllocFailed "tvi_bsdbt848: Allocazione frame buffer non riuscita. Errore: %s\n"
+#define MSGTR_TV_Bt848ErrorSettingWidth "tvi_bsdbt848: Errore impostando la larghezza immagine. Errore: %s\n"
+#define MSGTR_TV_Bt848ErrorSettingHeight "tvi_bsdbt848: Errore impostando l'altezza immagine. Errore: %s\n"
+#define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Impossibile interrompere l'aquisizione. Errore: %s\n"
+#define MSGTR_TV_TTSupportedLanguages "Lingue del televideo utilizzabili:\n"
+#define MSGTR_TV_TTSelectedLanguage "Selezionata la lingua di default del televideo: %s\n"
