@@ -1,4 +1,4 @@
-.\" synced with r23996
+.\" synced with r24136
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -1103,18 +1103,18 @@ posizionamento potrebbe essere inesatto.
 .
 .TP
 .B \-a52drc <livello>
-Seleziona il livello di Rapporto di Compressione Dinamica (Dynamic Range Compression) per
-i flussi audio AC3.
+Seleziona il livello di Rapporto di Compressione Dinamica (Dynamic Range
+Compression) per i flussi audio AC-3.
 <livello> è un valore in decimale da 0 a 1, dove 0 indica nessuna compressione
-e 1 (che è il default) indica compressione completa (rende i passaggi forti / rumorosi più
-silenziosi e viceversa)
-Questa opzione ha effetto solo se il flusso AC3 contiene le informazioni
-di compressione necessarie.
+e 1 (che è il default) indica compressione completa (rende i passaggi
+forti / rumorosi più silenziosi e viceversa).
+Questa opzione ha effetto solo se il flusso AC-3 contiene le informazioni
+necessarie per il rapporto di compressione.
 .
 .TP
 .B \-aid <ID> (vedi anche \-alang)
 Seleziona il canale audio (MPEG: 0\-31, AVI/\:OGM: 1\-99, ASF/\:RM: 0\-127,
-VOB(AC3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
+VOB(AC-3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
 MPlayer stampa gli id audio disponibili se viene lanciato in modalità
 verbosa (\-v).
 Quando si riproduce un flusso MPEG-TS, MPlayer/\:MEncoder useranno il primo
@@ -1239,14 +1239,14 @@ MPlayer chiede al decoder di decodificare l'audio in tanti canali quanti sono
 quelli impostati.
 A questo punto è compito del decoder adempiere alla richiesta.
 Questo è generalmente importante solo quando si riproducono filmati con audio
-AC3 (come i DVD).
+AC-3 (come i DVD).
 In questo caso liba52 effettua la decodifica per default e correttamente
 sottomiscela l'audio nel numero di canali richiesti.
 Per controllare direttamente il numero dei canali di uscita indipendentemente
 da quanti canali vengono decodificati, usa il filtro channel.
 .br
 .I NOTA:
-Questa opzione è onorata dai codec (solo AC3), filtri (surround) e driver di
+Questa opzione è onorata dai codec (solo AC-3), filtri (surround) e driver di
 uscita audio (almeno OSS).
 .sp 1
 Le opzioni disponibili sono:
@@ -1310,7 +1310,7 @@ libmpdemux/\:demuxer.h.
 .
 .TP
 .B \-dumpaudio (solo MPlayer)
-Scrive il flusso audio compresso grezzo su ./stream.dump (utile con MPEG/\:AC3,
+Scrive il flusso audio compresso grezzo su ./stream.dump (utile con MPEG/\:AC-3,
 nella maggior parte degli altri casi il file ottenuto non sarà riproducibile).
 Se passi sulla linea di comando più di una opzione \-dumpaudio, \-dumpvideo,
 \-dumpstream solo l'ultima verrà considerata.
@@ -1669,7 +1669,7 @@ Questa opzione ti permette di riprodurre file audio grezzi.
 Devi usare anche l'opzione \-demuxer rawaudio.
 Può anche essere usata per riprodurre CD audio che non siano codificati in PCM
 a 44kHz 16-bit stereo.
-Per riprodurre flussi grezzi AC3 utilizza \-rawaudio on:format=0x2000
+Per riprodurre flussi grezzi AC-3 utilizza \-rawaudio on:format=0x2000
 \-demuxer rawaudio.
 .sp 1
 Le opzioni disponibili sono:
@@ -1968,6 +1968,28 @@ Specifica il formato di visualizzazione del televideo:
 .REss
 .IPs tpage=<100-899> (default: 100)
 Specifica la pagina iniziale del televideo TV.
+.RE
+.
+.TP
+.B \-tvscan <opzione1:opzione2:...> (solo TV e MPlayer)
+Imposta lo scanner dei canali TV.
+MPlayer emetterà anche dei valori per l'opzione "-tv channels=", includendo
+canali esistenti e appena trovati.
+.sp 1
+Le sotto opzioni disponibili sono:
+.RSs
+.IPs autostart
+Inizia la ricerca dei canali appena dopo l'avvio (default: disabilitata).
+.IPs period=<0.1-2.0>
+Specifica il ritardo in secondi prima di passare al canale successivo
+(default: 0.5).
+Valori più bassi accellerano la ricerca, ma possono rilevare canali TV
+inattivi come se fossero attivi.
+.IPs threshold=<1-100>
+Valore limiti per la potenza del segnale (in percentuale), come riportato dal
+dispositivo (default: 50).
+Un valore di potenza del segnale più alto di questo valore indicherà che il
+canale attualmente rilevato è attivo.
 .RE
 .
 .TP
@@ -4203,8 +4225,8 @@ Forza il codec MP3 l3codeca.acm.
 .IPs "\-ac mad,"
 Prova libmad prima, poi passa agli altri.
 .IPs "\-ac hwac3,a52,"
-Prova prima il decodificatore hardware AC3 (AC3 passthrough), poi il
-codec software AC3, poi gli altri.
+Prova prima il decodificatore hardware AC-3 (AC-3 passthrough), poi il
+codec software AC-3, poi gli altri.
 .IPs "\-ac hwdts,"
 Prova prima il decodificatore hardware DTS (DTS passthrough), poi gli altri.
 .IPs "\-ac -ffmp3,"
@@ -7595,16 +7617,38 @@ Leggi i sorgenti per avere i dettagli completi.
 codec audio (default: mp2)
 .PD 0
 .RSs
-.IPs "mp2\ \ "
-MPEG Layer 2
-.IPs "mp3\ \ "
-MPEG Layer 3
 .IPs "ac3\ \ "
-AC3
-.IPs adpcm_ima_wav
-IMA Adaptive PCM (4bits per campione, compressione 4:1)
-.IPs "sonic\ "
-Codec sperimentale con/senza perdita
+Dolby Digital (AC-3)
+.IPs adpcm_*
+Formati PCM adattivi - vedi la documentazione HTML per i dettagli.
+.IPs "flac\ "
+Free Lossless Audio Codec (FLAC)
+.IPs "g726\ "
+G.726 ADPCM
+.IPs libamr_nb
+3GPP Adaptive Multi-Rate (AMR) narrow-band
+.IPs libamr_wb
+3GPP Adaptive Multi-Rate (AMR) wide-band
+.IPs libfaac
+Advanced Audio Coding (AAC) - usando FAAC
+.IPs libmp3lame
+MPEG-1 audio layer 3 (MP3) - usando LAME
+.IPs "mp2\ \ "
+MPEG-1 audio layer 2 (MP2)
+.IPs pcm_*
+Formati PCM - vedi la documentazione HTML per i dettagli.
+.IPs roq_dpcm
+Id Software RoQ DPCM
+.IPs sonic
+Codec sperimentale con perdita
+.IPs sonicls
+Codec sperimentale senza perdita
+.IPs vorbis
+Vorbis
+.IPs wmav1
+Windows Media Audio v1
+.IPs wmav2
+Windows Media Audio v2
 .RE
 .PD 1
 .
@@ -7638,51 +7682,59 @@ Può avere un leggero effetto negativo sulla stima del movimento.
 Impiega il codec (video) specificato (default: mpeg4).
 .PD 0
 .RSs
-.IPs mjpeg
-Motion JPEG (JPEG per i filmati)
-.IPs ljpeg
-Lossless JPEG (JPEG senza perdita)
+.IPs "asv1\ "
+ASUS Video v1
+.IPs "asv2\ "
+ASUS Video v2
+.IPs dvvideo
+Sony Digital Video
+.IPs "ffv1\ "
+codec video di FFmpeg senza perdita
+.IPs ffvhuff
+codifica HuffYUV non standard che utilizza YV12 ed ottiene file
+più piccoli del 20%
+.IPs "flv\ \ "
+Sorenson H.263 usato nei Flash Video
 .IPs "h261\ "
 H.261
 .IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
+.IPs huffyuv
+HuffYUV
+.IPs libtheora
+Theora
+.IPs libx264
+x264 H.264/AVC MPEG-4 Parte 10
+.IPs libxvid
+Xvid MPEG-4 Parte 2 (ASP)
+.IPs ljpeg
+Lossless JPEG (JPEG senza perdita)
+.IPs mjpeg
+Motion JPEG (JPEG per i filmati)
+.IPs mpeg1video
+MPEG-1 video
+.IPs mpeg2video
+MPEG-2 video
 .IPs mpeg4
 MPEG-4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
+.IPs roqvideo
+ID Software RoQ Video
+.IPs "rv10\ "
+un vecchio codec RealVideo
+.IPs "snow (vedi anche: vstrict)"
+codec video sperimentale di FFmpeg basato su wavelet
+.IPs "svq1\ "
+Apple Sorenson Video 1
 .IPs "wmv1\ "
 Windows Media Video, versione 1 (conosciuto anche come WMV7)
 .IPs "wmv2\ "
 Windows Media Video, versione 2 (conosciuto anche come WMV8)
-.IPs "rv10\ "
-un vecchio codec RealVideo
-.IPs mpeg1video
-MPEG-1 video
-.IPs mpeg2video
-MPEG-2 video
-.IPs huffyuv
-HuffYUV
-.IPs ffvhuff
-codifica HuffYUV non standard che utilizza YV12 ed ottiene file
-più piccoli del 20%
-.IPs "asv1\ "
-ASUS Video v1
-.IPs "asv2\ "
-ASUS Video v2
-.IPs "ffv1\ "
-codec video di FFmpeg senza perdita
-.IPs "flv\ \ "
-Sorenson H.263 usato nei Flash Video
-.IPs dvvideo
-Sony Digital Video
-.IPs "svq1\ "
-Apple Sorenson Video 1
-.IPs "snow (vedi anche: vstrict)"
-codec video sperimentale di FFmpeg basato su wavelet
 .RE
 .PD 1
 .
