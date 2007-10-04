@@ -17,7 +17,7 @@
 */
 
 /**
- * @todo change to float or int
+ * @todo try to change to int
  * @todo try lifting based implementation
  * @todo optimize optimize optimize
  * @todo hard tresholding
@@ -60,7 +60,7 @@ struct vf_priv_s {
     float delta;
     int mode;
     int depth;
-    double *plane[16][4];
+    float *plane[16][4];
     int stride;
 };
 
@@ -105,7 +105,7 @@ static inline int mirror(int x, int w){
     return x;
 }
 
-static inline void decompose(double *dstL, double *dstH, double *src, int stride, int w){
+static inline void decompose(float *dstL, float *dstH, float *src, int stride, int w){
     int x, i;
     for(x=0; x<w; x++){
         double sumL= src[x*stride] * coeff[0][0];
@@ -121,7 +121,7 @@ static inline void decompose(double *dstL, double *dstH, double *src, int stride
     }
 }
 
-static inline void compose(double *dst, double *srcL, double *srcH, int stride, int w){
+static inline void compose(float *dst, float *srcL, float *srcH, int stride, int w){
     int x, i;
     for(x=0; x<w; x++){
         double sumL= srcL[x*stride] * icoeff[0][0];
@@ -137,27 +137,27 @@ static inline void compose(double *dst, double *srcL, double *srcH, int stride, 
     }
 }
 
-static inline void decompose2D(double *dstL, double *dstH, double *src, int xstride, int ystride, int step, int w, int h){
+static inline void decompose2D(float *dstL, float *dstH, float *src, int xstride, int ystride, int step, int w, int h){
     int y, x;
     for(y=0; y<h; y++)
         for(x=0; x<step; x++)
             decompose(dstL + ystride*y + xstride*x, dstH + ystride*y + xstride*x, src + ystride*y + xstride*x, step*xstride, (w-x+step-1)/step);
 }
 
-static inline void compose2D(double *dst, double *srcL, double *srcH, int xstride, int ystride, int step, int w, int h){
+static inline void compose2D(float *dst, float *srcL, float *srcH, int xstride, int ystride, int step, int w, int h){
     int y, x;
     for(y=0; y<h; y++)
         for(x=0; x<step; x++)
             compose(dst + ystride*y + xstride*x, srcL + ystride*y + xstride*x, srcH + ystride*y + xstride*x, step*xstride, (w-x+step-1)/step);
 }
 
-static void decompose2D2(double *dst[4], double *src, double *temp[2], int stride, int step, int w, int h){
+static void decompose2D2(float *dst[4], float *src, float *temp[2], int stride, int step, int w, int h){
     decompose2D(temp[0], temp[1], src    , 1, stride, step  , w, h);
     decompose2D( dst[0],  dst[1], temp[0], stride, 1, step  , h, w);
     decompose2D( dst[2],  dst[3], temp[1], stride, 1, step  , h, w);
 }
 
-static void compose2D2(double *dst, double *src[4], double *temp[2], int stride, int step, int w, int h){
+static void compose2D2(float *dst, float *src[4], float *temp[2], int stride, int step, int w, int h){
     compose2D(temp[0],  src[0],  src[1], stride, 1, step  , h, w);
     compose2D(temp[1],  src[2],  src[3], stride, 1, step  , h, w);
     compose2D(dst    , temp[0], temp[1], 1, stride, step  , w, h);
