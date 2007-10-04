@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23272 -->
+<!-- synced with r24056 -->
 <chapter id="video">
 <title>Dispositivi di uscita video</title>
 
@@ -2188,7 +2188,7 @@ con <option>:sync</option>.
 <varlistentry>
   <term><option>-ac hwac3</option></term>
   <listitem><para>
-  L'em8300 supporta la riproduzione audio AC3 (in surround) attraverso l'uscita
+  L'em8300 supporta la riproduzione audio AC-3 (in surround) attraverso l'uscita
   digitale della scheda. Vedi l'opzione <option>-ao oss</option> più sopra,
   deve essere usata per specificare l'uscita DXR3 al posto di una scheda audio.
   </para></listitem>

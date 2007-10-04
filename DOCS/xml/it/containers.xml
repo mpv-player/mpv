@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21741 $ -->
+<!-- synced with r24056 -->
 <chapter id="containers">
 <title>Contenitori</title>
 
@@ -63,8 +63,8 @@ I file MPEG sono di diverse guise:
 <listitem><para>
   VOB: Questo è il formato file MPEG sui <emphasis role="bold">DVD</emphasis>.
   E' lo stesso che MPG, con in più la possibilità di contenere sottotitoli o
-  audio non-MPEG (AC3). Contiene video codificato in MPEG-2 e di solito audio
-  AC3, ma anche DTS, MP2 e LPCM non compresso sono permessi.
+  audio non-MPEG (AC-3). Contiene video codificato in MPEG-2 e di solito audio
+  AC-3, ma anche DTS, MP2 e LPCM non compresso sono permessi.
   <emphasis role="bold">Leggi la sezione <link linkend="dvd">DVD</link></emphasis>!
 </para></listitem>
 <listitem><para>

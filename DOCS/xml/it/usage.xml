@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22951 -->
+<!-- synced with r24056 -->
 <chapter id="usage">
 <title>Utilizzo</title>
 
@@ -556,10 +556,10 @@ spiegazione.
 
 
 <sect3 id="advaudio-surround-passthrough">
-<title>AC3/DTS Passthrough</title>
+<title>AC-3/DTS Passthrough</title>
 
 <para>
-I DVD solitamente hanno un audio surround codificato in formato AC3
+I DVD solitamente hanno un audio surround codificato in formato AC-3
 (Dolby Digital) o DTS (Digital Theater System). Alcuni equipaggiamenti audio
 moderni sono capaci di decodificare internamente questi formati.
 <application>MPlayer</application> può esser configurato in modo da far
@@ -568,7 +568,7 @@ connettore S/PDIF (Sony/Philips Digital Interface) sulla tua scheda audio.
 </para>
 
 <para>
-Se il tuo equipaggiamento audio può decodificare sua AC3 che DTS, puoi
+Se il tuo equipaggiamento audio può decodificare sua AC-3 che DTS, puoi
 tranquillamente abilitare il passthrough per ambi i formati. In caso contrario,
 abilita il passthrough solo per il formato che il tuo equipaggiamento supporta.
 </para>
@@ -576,13 +576,13 @@ abilita il passthrough solo per il formato che il tuo equipaggiamento supporta.
 <itemizedlist>
 <title>Per abilitare il passthrough dalla riga comando:</title>
 <listitem><para>
-  Per solo AC3, usa <option>-ac hwac3</option>
+  Per solo AC-3, usa <option>-ac hwac3</option>
 </para></listitem>
 <listitem><para>
   Per solo DTS, usa <option>-ac hwdts</option>
 </para></listitem>
 <listitem><para>
-  Per AC3 e DTS, usa <option>-afm hwac3</option>
+  Per AC-3 e DTS, usa <option>-afm hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -590,13 +590,13 @@ abilita il passthrough solo per il formato che il tuo equipaggiamento supporta.
 <title>Per abilitare il passthrough nel file di configurazione di
   <application>MPlayer</application>:</title>
 <listitem><para>
-  Per solo AC3, usa <option>ac=hwac3,</option>
+  Per solo AC-3, usa <option>ac=hwac3,</option>
 </para></listitem>
 <listitem><para>
   Per solo DTS, usa <option>ac=hwdts,</option>
 </para></listitem>
 <listitem><para>
-  Per AC3 e DTS, usa <option>afm=hwac3</option>
+  Per AC-3 e DTS, usa <option>afm=hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -604,7 +604,7 @@ abilita il passthrough solo per il formato che il tuo equipaggiamento supporta.
 Nota che c'è una virgola (",") alla fine di <option>ac=hwac3,</option> e
 <option>ac=hwdts,</option>. Ciò farà sì che
 <application>MPlayer</application> ricada sui codec che utilizza di solito
-quando riproduce un file che non ha audio AC3 o DTS.
+quando riproduce un file che non ha audio AC-3 o DTS.
 Per <option>afm=hwac3</option> non serve una virgola;
 <application>MPlayer</application> gestirà comunque la situazione quando viene
 specificata una famiglia audio.
@@ -726,7 +726,7 @@ impostazioni del tuo mixer con un programma apposito come
 
 <para>
 Sfortunatamente, non c'è uno standard per come i canali siano ordinati.
-Gli ordinamenti sotto elencati sono quelli dell'AC3 e sono abbastanza tipici;
+Gli ordinamenti sotto elencati sono quelli dell'AC-3 e sono abbastanza tipici;
 provali e vedi se la tua sorgente corrisponde. I canali sono numerati a partire
 dallo 0.
 
@@ -1026,7 +1026,7 @@ Il decodificatore di <application>MPlayer</application> per PCM a 6 canali non
   bisogno di preparere due gruppi; i rimanenti quattro gruppi possono essere
   omessi. Attenzione che non tutti i file audio multicanale hanno lo stesso
   ordine dei canali! Questo esempio mostra il sottomissaggio di un file con gli
-  stessi canali di AC3 5.1:
+  stessi canali di AC-3 5.1:
   <programlisting>
 0 - frontale sinistro
 1 - frontale destro
