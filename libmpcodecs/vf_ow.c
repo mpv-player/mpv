@@ -167,15 +167,19 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
     int x,y, i, j;
     double sum=0;
     double s= p->strength[!is_luma];
+    int depth= p->depth;
+
+    while(1<<depth > width || 1<<depth > height)
+        depth--;
 
     for(y=0; y<height; y++)
         for(x=0; x<width; x++)
             p->plane[0][0][x + y*p->stride]= src[x + y*src_stride];
 
-    for(i=0; i<p->depth; i++){
+    for(i=0; i<depth; i++){
         decompose2D2(p->plane[i+1], p->plane[i][0], p->plane[0]+1,p->stride, 1<<i, width, height);
     }
-    for(i=0; i<p->depth; i++){
+    for(i=0; i<depth; i++){
         for(j=1; j<4; j++){
             for(y=0; y<height; y++){
                 for(x=0; x<width; x++){
@@ -188,7 +192,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
             }
         }
     }
-    for(i=p->depth-1; i>=0; i--){
+    for(i=depth-1; i>=0; i--){
         compose2D2(p->plane[i][0], p->plane[i+1], p->plane[0]+1, p->stride, 1<<i, width, height);
     }
 
