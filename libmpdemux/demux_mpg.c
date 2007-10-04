@@ -636,7 +636,7 @@ static inline void update_stats(int head)
   else if(head==0x1BD || (0x1C0<=head && head<=0x1EF))
     num_elementary_packetsPES++;
   else if(head>=0x120 && head<=0x12F) ++num_elementary_packets12x;
-  else if(head>=0x100 && head<0x1B0)
+  if(head>=0x100 && head<0x1B0)
   {
     if((head&~0x60) == 0x101) ++num_h264_slice;
     else if((head&~0x60) == 0x102) ++num_h264_dpa;
