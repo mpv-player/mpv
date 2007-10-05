@@ -3629,6 +3629,13 @@ Useful for benchmarking.
 ASCII art video output driver that works on a text console.
 You can get a list and an explanation of available suboptions executing
 .I mplayer \-vo aa:help
+.br
+.I NOTE:
+Driver does not not handle \-aspect correctly.
+.br
+.I HINT:
+You probably have to specify \-monitorpixelaspect. Try
+.I mplayer -vo aa -monitorpixelaspect 8/15.
 .
 .TP
 .B "caca\ \ \ "
