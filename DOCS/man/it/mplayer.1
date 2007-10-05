@@ -1,4 +1,4 @@
-.\" synced with r24136
+.\" synced with r24656
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -257,7 +257,7 @@ Diminuisce/\:aumenta il volume.
 Diminuisce/\:aumenta il volume.
 .IPs "m\ \ \ \ "
 Suono muto.
-.IPs "_ (solo MPEG-TS e libavformat)"
+.IPs "_ (solo MPEG-TS, AVI e libavformat)"
 Passa attraverso tutte le tracce video disponibili.
 .IPs "# (solo DVD, MPEG, Matroska, AVI e libavformat)" 
 Passa attraverso tutte le tracce audio disponibili.
@@ -655,9 +655,10 @@ specificati sulla riga comando.
 Vedi '\-msglevel help' per una lista di tutti i moduli.
 .br
 .I NOTA:
-I messaggi emessi prima che venga interpretata la riga di comando possono essere
-controllati solo dalla variabile d'ambiente MPLAYER_VERBOSE, che influenza tutti
-i moduli.
+Alcuni messaggi sono emessi prima che venga interpretata la riga di comando e
+sono perciò non influenzati da \-msglevel.
+Per controllarli devi usare la variabile d'ambiente MPLAYER_VERBOSE, per i
+dettagli leggi la sua descrizione sotto.
 .br
 Livelli disponibili:
 .PD 0
@@ -675,7 +676,7 @@ suggerimenti brevi
 .IPs " 4"
 messaggi informativi
 .IPs " 5"
-messaggi di stato (quelli nascosti da \-quiet)
+messaggi di stato (default)
 .IPs " 6"
 messaggi verbosi
 .IPs " 7"
@@ -1008,7 +1009,7 @@ Disabilita il supporto per il joystick.
 Disabilita il supporto per LIRC.
 .
 .TP
-.B \-nomouseinput (solo X11)
+.B \-nomouseinput
 Disabilita la gestione dell'ingresso della pressione/\:rilascio dei bottoni
 del mouse (i menu del contesto di mozplayerxp si basano su questa opzione).
 .
@@ -1155,8 +1156,13 @@ visualizza un filmato.
 .
 .TP
 .B \-audiofile-cache <KBytes>
-Abilita il caching per il flusso usato da \-audiofile, utilizzando la quantità di
-memoria specificata.
+Abilita il caching per il flusso usato da \-audiofile, utilizzando la quantità
+di memoria specificata.
+.
+.TP
+.B \-reuse-socket (solo udp://)
+Permette ad un socket di essere riutilizzato da altri processi appena viene
+chiuso.
 .
 .TP
 .B \-bandwidth <valore> (solo rete)
@@ -1628,12 +1634,16 @@ sincronizzazione, che rendono spiacevole l'attività.
 Le opzioni disponibili sono:
 .RSs
 .IPs device=<valore>
-Dispositivo radio da usare (default: /dev/radio0).
+Dispositivo radio da usare (default: /dev/radio0 in Linux e /dev/tuner in *BSD).
 .IPs driver=<valore>
 Driver radio da usare (default: v4l2 se disponibile, altrimenti v4l).
 Attualmente sono supportati i driver v4l e v4l2.
 .IPs volume=<0..100>
 volume audio del dispositivo radio (default: 100)
+.IPs "freq_min=<valore> (solo *BSD BT848)"
+frequenza minima permessa (default: 87.50)
+.IPs "freq_max=<valore> (solo *BSD BT848)"
+frequenza massima permessa (default: 108.00)
 .IPs channels=<frequenza>\-<nome>,<frequenza>\-<nome>,...
 Imposta la lista dei canali.
 Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
@@ -1645,13 +1655,13 @@ del canale nella lista dei canali.
 .br
 .I ESEMPIO:
 radio://1, radio://104.4, radio_set_channel 1
-.IPs adevice=<valore> (con cattura (capture) radio abilitata)
+.IPs adevice=<valore> (solo acquisizione (capture) radio)
 Nome del dispositivo da cui catturare l'audio.
 Senza tale nome la cattura sarà disabilitata anche se la parola
 chiave 'capture' appare nell'URL.
 Per i dispositivi ALSA deve essere usato nella forma hw=<scheda>.<dispositivo>.
 Se il nome contiene un '=', il modulo userà ALSA per la cattura, se no OSS.
-.IPs arate=<valore> (con cattura radio abilitata)
+.IPs arate=<valore> (solo acquisizione radio)
 Frequenza in campioni per secondo (default: 44100).
 .br
 .I NOTA:
@@ -1659,7 +1669,7 @@ Quando usi la cattura audio, imposta anche l'opzione \-rawaudio rate=<valore>
 con lo stesso valore di arate.
 Se hai problemi colla velocità audio (va troppo veloce), prova la riproduzione
 con valori di frequenza differenti (per es.\& 48000,44100,32000,...).
-.IPs achannels=<valore> (con cattura radio abilitata)
+.IPs achannels=<valore> (solo acquisizione radio)
 Numero di canali audio da catturare.
 .RE
 .
@@ -1823,7 +1833,7 @@ Le opzioni disponibili sono:
 .RSs
 .IPs noaudio
 niente suono
-.IPs automute=<0-255> (solo v4l e v4l2)
+.IPs "automute=<0-255> (solo v4l e v4l2)"
 Se la potenza del segnale riportata dal dispositivo è minore di questo valore,
 l'audio ed il video verranno disattivati.
 Nella maggior parte dei casi automute=100 sarà sufficente.
@@ -1923,6 +1933,11 @@ video.
 Non hanno alcun effetto se la tua scheda non ne ha uno.
 Per v4l2 50 viene mappato sul valore di
 default del rispettivo controllo, come riportato dal driver.
+.IPs "gain=<0\-100> (v4l2)"
+Imposta il controllo del guadagno per i dispositivi video (solitamente webcam)
+al valore voluto e disabilita il controllo automatico.
+Un valore di 0 abilita il controllo automatico.
+Se questa opzione viene omessa, il controllo del guadagno non viene modificato.
 .IPs immediatemode=<boolean>
 Il valore 0 indica di catturare e bufferizzare audio e video insieme
 (default per MEncoder).
@@ -1953,10 +1968,10 @@ di compressione MJPEG.
 .IPs quality=<0\-100>
 Seleziona la qualità della compressione JPEG
 (per la dimensione completa è raccomandato un valore < 60).
-.IPs tdevice=<valore>  (default: nessuno)
-Specifica il dispositivo televideo (esempio: /dev/\:vbi0).
-.IPs tformat=<formato> (default: 0)
-Specifica il formato di visualizzazione del televideo:
+.IPs tdevice=<valore>
+Specifica il dispositivo televideo (esempio: /dev/\:vbi0) (default: nessuno).
+.IPs tformat=<formato>
+Specifica il formato di visualizzazione del televideo (default: 0):
 .RSss
 0: opaco
 .br
@@ -1966,14 +1981,22 @@ Specifica il formato di visualizzazione del televideo:
 .br
 3: trasparente a colori invertiti
 .REss
-.IPs tpage=<100-899> (default: 100)
-Specifica la pagina iniziale del televideo TV.
+.IPs tpage=<100-899>
+Specifica la pagina iniziale del televideo TV (default: 100).
+.RE
+.IPs tlang=<\-1\-127>
+Specifica la lingua di default per il televideo (default: 0), che verrà usata
+come lingua principale fino alla ricezione di un pacchetto di tipo 28.
+Utile quando il sistema televideo usa un set di caratteri non latino, ma i
+codici di lingua per qualche ragion non vengono trasmessi via televideo con
+pacchetti di tipo 28.
+Imposta l'opzione a \-1 per ottenere la lista dei codici di lingua utilizzabili.
 .RE
 .
 .TP
 .B \-tvscan <opzione1:opzione2:...> (solo TV e MPlayer)
 Imposta lo scanner dei canali TV.
-MPlayer emetterà anche dei valori per l'opzione "-tv channels=", includendo
+MPlayer emetterà anche dei valori per l'opzione "\-tv channels=", includendo
 canali esistenti e appena trovati.
 .sp 1
 Le sotto opzioni disponibili sono:
@@ -2009,6 +2032,7 @@ primo programma (se presente) con il flusso video prescelto.
 .TP
 .B \-vivo <sotto-opzioni> (CODICE DI DEBUG)
 Forza i parametri audio per il demuxer VIVO (per scopi di debug).
+FIXME: Da documentare.
 .
 .
 .\" --------------------------------------------------------------------------
@@ -2212,7 +2236,7 @@ Visualizza solo i sottotitoli forzati (forced subtitles) per il flusso dei
 sottotitoli del DVD specificato ad esempio con \-slang.
 .
 .TP
-.B \-fribidi-charset <nome charset> (solo FriBiDi)
+.B \-fribidi-charset <nome del set caratteri> (solo FriBiDi)
 Specifica il charset che sarà passato a FriBiDi quando si decodifica un
 sottotitolo non-UTF8 (default: ISO8859-8).
 .
@@ -2498,7 +2522,8 @@ Specifica la velocità in fotogrammi/\:sec del file dei sottotitoli
 (default: stesso valore di fps del filmato).
 .br
 .I NOTA:
-Solo per file dei sottotitoli basati sui fotogrammi, p.es.\& formato MicroDVD.
+Con <frequenza> > frequenza del filmato, accellera i sottotitoli basati su
+fotogrammi e rallenta quelli basati sul tempo.
 .
 .TP
 .B \-subpos <0\-100> (utile con \-vf expand)
@@ -4128,7 +4153,7 @@ Specifica la directory dove salvare i file (default: ./).
 .IPs subdirs=<prefisso>
 Crea sottodirectory numerate con il prefisso specificato in cui salvare i file
 invece che nella directory corrente.
-.IPs maxfiles=<valore>
+.IPs "maxfiles=<valore> (solo sottodirectory)"
 Numero massimo di file da scrivere in ogni sottodirectory.
 Deve essere uguale o maggiore di 1 (default: 1000).
 .RE
@@ -4160,7 +4185,7 @@ Se non specificata tutti i file verranno salvati nella directory corrente.
 .IPs subdirs=<prefisso>
 Crea sottodirectory numerate con il prefisso specificato in cui salvare i file
 invece che nella directory corrente.
-.IPs maxfiles=<valore>
+.IPs "maxfiles=<valore> (solo sottodirectory)"
 Numero massimo di file da scrivere in ogni sottodirectory.
 Deve essere uguale o maggiore di 1 (default: 1000).
 .RE
@@ -4471,7 +4496,7 @@ se la larghezza del video è maggiore od uguale a <l>.
 Salta il numero indicato di righe di macroblocchi in basso.
 .IPs "st=<numero> (solo MPEG-2)"
 Salta il numero indicato di righe di macroblocchi in alto.
-.IPs skiploopfilter=<valore_salto> (solo H.264)
+.IPs "skiploopfilter=<valore_salto> (solo H.264)"
 Salta il filtro loop (anche detto deblocking) durante la decodifica H.264.
 Dato che il fotogramma filtrato si suppone venga usato come riferimento
 per la decodifica dei fotogrammi dipendenti, questo ha un effetto peggiore
@@ -4702,15 +4727,15 @@ di post elaborazione (\-vf pp) ed il decoder (\-vfm ffmpeg) al suo posto.
 filtri interni di post elaborazione di Xvid:
 .PD 0
 .RSs
-.IPs deblock-chroma (vedi anche \-vf pp)
+.IPs "deblock-chroma (vedi anche \-vf pp)"
 filtro di de-block della crominanza
-.IPs deblock-luma (vedi anche \-vf pp)
+.IPs "deblock-luma (vedi anche \-vf pp)"
 filtro di de-block della luminanza
-.IPs dering-luma (vedi anche \-vf pp)
+.IPs "dering-luma (vedi anche \-vf pp)"
 filtro di eliminazione degli effetti ad anello della luminanza
-.IPs dering-chroma (vedi anche \-vf pp)
+.IPs "dering-chroma (vedi anche \-vf pp)"
 filtro di eliminazione degli effetti ad anello della crominanza
-.IPs filmeffect (vedi anche \-vf noise)
+.IPs "filmeffect (vedi anche \-vf noise)"
 Aggiunge una grana artificiale al video.
 Può migliorare la qualità percepita, anche se abbassa l'effettiva qualità.
 .RE
@@ -5935,7 +5960,7 @@ circolari ma immagine più sfocata)
 Cambia il filtro del parametro di quantizzazione QP
 .RSs
 .IPs <equazione>
-qualche equazione tipo "2+2*sin(PI*qp)"
+una qualche equazione tipo "2+2*sin(PI*qp)"
 .RE
 .
 .TP
@@ -5943,7 +5968,7 @@ qualche equazione tipo "2+2*sin(PI*qp)"
 filtro fd modifica con equazione generica 
 .RSs
 .IPs <equazione>
-Una qualche equazione, per es.\& 'p(W-X\,Y)' per ribaltare l'immagine
+Una qualche equazione, per es.\& 'p(W-X\\,Y)' per ribaltare l'immagine
 orizzontalmente.
 Puoi utilizzare spazi bianchi per rendere più leggibile l'equazione.
 Ci sono un paio di costanti che possono essere utilizzate nell'equazione:
@@ -5987,10 +6012,6 @@ Veloce e di migliore qualità rispetto a \-vf fame.
 forza il numero di fps (frame per second, fotogrammi al secondo) di uscita (valore
 decimale) (default: 0, trovato automaticamente basandosi sull'altezza)
 .RE
-.
-.TP
-.B "fame\ \ \ "
-Conversione software veloce da YV12 a MPEG-1 con libfame da usare con DVB/\:DXR3/\:IVTV.
 .
 .TP
 .B dvbscale[=aspetto]
@@ -9060,6 +9081,10 @@ Attualmente funziona solo se la rilevazione del cambio scena è disattivata
 (sc_threshold=1000000000).
 .
 .TP
+.B (no)lowdelay
+Imposta il flag di basso ritardo per MPEG-1/2 (disabilita i fotogrammi B).
+.
+.TP
 .B vglobal=<0\-3>
 Controlla la scrittura delle intestazioni video globali.
 .PD 0
@@ -10388,6 +10413,11 @@ che non si voglia codificare con un qualche oscuro codec di frontiera.
 .B codec=<nome>
 Il nome del file del codec binario che si vuole utilizzare.
 .
+.TP
+.B compdata=<file>
+Il nome del file delle impostazioni codec (come firstpass.mcf) creato da
+vfw2menc.
+.
 .
 .SS MPEG muxer (\-mpegopts)
 .
@@ -10526,6 +10556,14 @@ Valgono le stesse regole di vbuf_size.
 .SS FFmpeg libavformat demuxer (\-lavfdopts)
 .
 .TP
+.B analyzeduration=<valore>
+Durata massima in secondi per analizzare le proprietà del flusso.
+.
+.TP
+.B format=<valore>
+Forza uno specifico demuxer di libavformat.
+.
+.TP
 .B probesize=<valore>
 Massima dimensione dei dati da testare durante la fase di rilevazione.
 Nel caso di MPEG-TS questo valore indentifica il massimo numero di pacchetti
@@ -10620,7 +10658,8 @@ Directory in cui MPlayer cerca le impostazioni utente.
 .B MPLAYER_VERBOSE (vedi anche \-v e \-msglevel)
 Imposta il livello iniziale di verbosità di tutti i moduli dei messaggi
 (default: 0).
-Valori negativi portano meno messaggi, mentre valori positivi ne portano di più.
+Il valore risultante corrisponde a quello di \-msglevel 5 più il valore di
+MPLAYER_VERBOSE.
 .
 .SS libaf:
 .
