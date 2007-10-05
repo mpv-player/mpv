@@ -1873,8 +1873,7 @@ and you only need to specify which card to use.
 <para>
 Make sure that you have have <emphasis>only</emphasis> Free to Air
 channels in your <filename>channels.conf</filename> file, or
-<application>MPlayer</application> will try to skip to the next visible one,
-but it may take long if there are many consecutive encrypted channels.
+<application>MPlayer</application> will wait for an unencrypted transmission.
 </para>
 
 <para>

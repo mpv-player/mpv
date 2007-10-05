@@ -1971,9 +1971,8 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 <para>
   Stelle sicher, dass du <emphasis>nur</emphasis> frei ausgestrahlte
   Kanäle in deiner Datei <filename>channels.conf</filename> hast, oder
-  <application>MPlayer</application> wird versuchen, den als nächstes
-  sichtbaren zu überspringen, wobei es lange dauern kann, wenn es
-  viele aufeinander folgende verschlüsselte Kanäle gibt.
+  <application>MPlayer</application> wird auf eine unverschlüsselte
+  Übertragung warten.
 </para>
 
 <para>
