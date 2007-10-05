@@ -1871,7 +1871,7 @@ and you only need to specify which card to use.
 </para>
 
 <para>
-Make sure that you have have <emphasis>only</emphasis> Free to Air
+Make sure that you have <emphasis>only</emphasis> Free to Air
 channels in your <filename>channels.conf</filename> file, or
 <application>MPlayer</application> will wait for an unencrypted transmission.
 </para>
