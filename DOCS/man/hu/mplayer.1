@@ -1,4 +1,4 @@
-.\" Synced with r24656
+.\" Synced with r24711
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 09. 29." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 10. 05." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1688,7 +1688,7 @@ meglásd, melyik IP címhez próbál kapcsolódni az MPlayer és helyette próbálj
 ki inkább egy olyat, ami a számítógépedhez van rendelve.
 .
 .TP
-.B \-rtsp-stream-over-tcp (csak LIVE555)
+.B \-rtsp-stream-over-tcp (csak LIVE555 és NEMESI)
 rtsp:// URL-ekkel használandó, azt adja meg hogy a bejövõ RTP és RTCP
 csomagok TCP-n keresztül jöjjenek (ugyan azt a TCP kapcsolatot használva,
 mint az RTSP). Olyan internet kapcsolat esetében hasznos, amely nem
@@ -3656,6 +3656,13 @@ ASCII art kimeneti videó vezérlõ, ami mûködik szöveges konzolon.
 Az elérhetõ alopciók listáját és azok leírását megkaphatod egy
 .I mplayer \-vo aa:help
 paranccsal.
+.br
+.I MEGJEGYZÉS:
+A vezérlõ nem kezeli jól a \-aspect opciót.
+.br
+.I TANÁCS:
+Valószínûleg meg kell adnod a \-monitorpixelaspect opciót. Próbáld ezt:
+.I mplayer -vo aa -monitorpixelaspect 8/15.
 .
 .TP
 .B "caca\ \ \ "

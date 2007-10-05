@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24180 -->
+<!-- synced with r24710 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1881,9 +1881,8 @@ fájlok használatát a <filename>~/.mplayer/channels.conf</filename> helyett
 
 <para>
 Győződj meg róla, hogy <emphasis>csak</emphasis> Free to Air
-csatornák vannak a <filename>channels.conf</filename> fájlodban, vagy
-az <application>MPlayer</application> a következő nézhetőig ugrik,
-de ez sokáig tart, ha egymás után sok kódolt csatorna van.
+csatornák vannak a <filename>channels.conf</filename> fájlodban,
+különben <application>MPlayer</application> kódolatlan átvitelre fog várni.
 </para>
 
 <para>
