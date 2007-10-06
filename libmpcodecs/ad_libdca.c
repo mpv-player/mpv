@@ -183,7 +183,7 @@ static void channels_info(int flags)
         mp_msg(MSGT_DECAUDIO, MSGL_V, "2.%d (stereo%s)", lfe, lfestr);
         break;
     case DTS_3F:
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "3%d (3f%s)", lfe, lfestr);
+        mp_msg(MSGT_DECAUDIO, MSGL_V, "3.%d (3f%s)", lfe, lfestr);
         break;
     case DTS_2F2R:
         mp_msg(MSGT_DECAUDIO, MSGL_V, "4.%d (2f+2r%s)", lfe, lfestr);
