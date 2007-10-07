@@ -1,6 +1,7 @@
 MPlayer (1.0)
 
-  rc2
+  rc2: "AreWeThereYet?" October 7, 2006
+  (SVN revisions: MPlayer r24722, FFmpeg r10677)
 
     DOCS:
     * console messages and XML documentation converted to UTF-8
