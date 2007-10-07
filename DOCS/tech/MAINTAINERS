@@ -197,7 +197,7 @@ libvo drivers:
     * vo_zr.c - Rik Snel
     * vo_zr2.c - Rik Snel
 
-    * x11_common.c - Alexander Strasser
+    * x11_common.c - Alexander Strasser, Reimar Döffinger
     * w32_common.c - Reimar Döffinger
 
 libao2 drivers:
