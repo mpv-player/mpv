@@ -140,6 +140,18 @@ MPlayer (1.0)
     * many compiler warning fixes
 
 
+  rc1try3: June 5, 2007 (unreleased)
+
+    Security:
+    * stack overflow in stream_cddb.c fixed
+
+
+  rc1try2: December 31, 2006 (unreleased)
+
+    Security:
+    * buffer overflow in asmrp.c fixed
+
+
   rc1: "Codename intentionally left blank" October 22, 2006
   (SVN revisions: MPlayer r20372, FFmpeg r6767)
 
