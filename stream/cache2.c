@@ -29,6 +29,7 @@ static DWORD WINAPI ThreadProc(void* s);
 
 #include "stream.h"
 #include "input/input.h"
+extern int use_gui;
 
 int stream_fill_buffer(stream_t *s);
 int stream_seek_long(stream_t *s,off_t pos);
@@ -305,6 +306,9 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 static DWORD WINAPI ThreadProc(void*s){
 #endif
   
+#ifdef HAVE_NEW_GUI
+  use_gui = 0; // mp_msg may not use gui stuff in forked code
+#endif
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
   while(1){

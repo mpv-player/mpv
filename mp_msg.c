@@ -16,6 +16,7 @@ extern char* get_term_charset(void);
 
 #if defined(FOR_MENCODER)
 #undef HAVE_NEW_GUI
+int use_gui;
 #endif
 
 #ifdef HAVE_NEW_GUI
