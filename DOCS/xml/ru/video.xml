@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24180 -->
+<!-- synced with r24710 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -1885,9 +1885,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 Убедитесь, что в <filename>channels.conf</filename> находятся каналы
 !-- FIXME Free to Air -->
 <emphasis>только</emphasis> для обычного телевидения[Free to Air], иначе
-переход <application>MPlayer</application> к следующему видимому
-может занять длительное время, если в файле окажется много подряд идущих 
-зашифрованных.
+<application>MPlayer</application> будет ожидать передачи незашифрованных данных.
 </para>
 
 <para>
