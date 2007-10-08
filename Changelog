@@ -1,5 +1,10 @@
 MPlayer (1.0)
 
+  rc3:
+    Filters:
+    * vf_ow new overcomplete wavelet denoiser
+
+
   rc2: "AreWeThereYet?" October 7, 2007
   (SVN revisions: MPlayer r24722, FFmpeg r10677)
 
