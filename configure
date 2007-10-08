@@ -1411,7 +1411,7 @@ if test "$_gcc_check" = yes ; then
   esac
   echores "$cc_version"
  else
- for _cc in "$_cc" gcc gcc-3.4 gcc-3.3 gcc-3.2 gcc-3.1 gcc3 gcc-3.0 cc ; do
+ for _cc in "$_cc" gcc cc ; do
   echocheck "$_cc version"
   cc_vendor=gnu
   cc_name=`$_cc -v 2>&1 | _tail 1 | cut -d ' ' -f 1`
