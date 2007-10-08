@@ -3817,6 +3817,7 @@ EOF
     if test "$_dfb_version" -ge `dfb_version 0 9 13`; then
 	_def_directfb_version="#define DIRECTFBVERSION $_dfb_version"
 	_res_comment="$_directfb_version"
+        test "$_dfb_version" -ge `dfb_version 0 9 15` && _dfbmga=yes
     else
         _def_directfb_version='#undef DIRECTFBVERSION'
 	_directfb=no
@@ -3834,18 +3835,17 @@ if test "$_directfb" = yes ; then
   _vosrc="$_vosrc vo_directfb2.c"
   _vomodules="directfb $_vomodules"
   _libs_mplayer="$_libs_mplayer -ldirectfb"
-
-  if test "$_dfb_version" -ge `dfb_version 0 9 15`; then
-    _vosrc="$_vosrc vo_dfbmga.c"
-    _vomodules="dfbmga $_vomodules"
-    _def_dfbmga='#define HAVE_DFBMGA 1'
-  else
-    _novomodules="dfbmga $_novomodules"
-    _def_dfbmga='#undef HAVE_DFBMGA'
-  fi
 else
   _def_directfb='#undef HAVE_DIRECTFB'
-  _novomodules="dfbmga directfb $_novomodules"
+  _novomodules="directfb $_novomodules"
+fi
+if test "$_dfbmga" = yes; then
+  _vosrc="$_vosrc vo_dfbmga.c"
+  _vomodules="dfbmga $_vomodules"
+  _def_dfbmga='#define HAVE_DFBMGA 1'
+else
+  _novomodules="dfbmga $_novomodules"
+  _def_dfbmga='#undef HAVE_DFBMGA'
 fi
 
 
