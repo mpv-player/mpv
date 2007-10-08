@@ -3798,7 +3798,7 @@ EOF
 fi
 
 dfb_version() {
-	expr $1 \* 65536 + $2 \* 256 + $3
+  expr $1 \* 65536 + $2 \* 256 + $3
 }
 
 if test "$_directfb" = yes; then
@@ -3815,13 +3815,13 @@ EOF
     _dfb_micro=`echo $_directfb_version | cut -d . -f 3`
     _dfb_version=`dfb_version $_dfb_major $_dfb_minor $_dfb_micro`
     if test "$_dfb_version" -ge `dfb_version 0 9 13`; then
-	_def_directfb_version="#define DIRECTFBVERSION $_dfb_version"
-	_res_comment="$_directfb_version"
-        test "$_dfb_version" -ge `dfb_version 0 9 15` && _dfbmga=yes
+      _def_directfb_version="#define DIRECTFBVERSION $_dfb_version"
+      _res_comment="$_directfb_version"
+      test "$_dfb_version" -ge `dfb_version 0 9 15` && _dfbmga=yes
     else
-        _def_directfb_version='#undef DIRECTFBVERSION'
-	_directfb=no
-	_res_comment="version >=0.9.13 required"
+      _def_directfb_version='#undef DIRECTFBVERSION'
+      _directfb=no
+      _res_comment="version >=0.9.13 required"
     fi
   else
     _directfb=no
