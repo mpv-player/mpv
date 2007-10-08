@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r23536 -->
 <chapter id="tv">
 <title>TV</title>
 <sect1 id="tv-input" xreflabel="TV vstup">
@@ -44,8 +44,8 @@ Zde je jen několik typů:
 <listitem><para>
   Použijte volbu <option>channels</option>. Příklad:
   <screen>-tv channels=26-MTV1,23-TV2</screen>
-  Vysvětlení: použití této volby, použitelné budou pouze kanály 26 a 23 a
-  bude zde rovněž krásný OSD text po přepnutí kanálů, zobrazující jméno
+  Vysvětlení: Při použití této volby budou použitelné pouze kanály 26 a 23 a
+  budete také mít krásný OSD text po přepnutí kanálů, zobrazující jméno
   kanálu. Mezery ve jméně kanálu musí být nahrazeny znakem
   "_".
 </para></listitem>

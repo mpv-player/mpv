@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21760 -->
+<!-- synced with r23225 -->
 <appendix id="bugreports">
 <title>Jak hlásit chyby</title>
 
@@ -99,7 +99,7 @@ Pokud to čte nějaký neprogramátor, nejrychlejší metodou, jak se dostat
 k bodu, kde problém nastal, je použití binárního vyhledávání &ndash; to je
 vyhledávání data poruchy opakovaným dělením vyhledávacího intervalu napůl.
 Například pokud problém nastal v 2003, začneme v polovině roku a ptáme se,
-"Už je tu problém?".
+„Už je tu problém?“.
 Pokud ano, vraťte se na prvního dubna; pokud ne, běžte na prvního října
 a tak dále.
 </para>
@@ -291,7 +291,6 @@ ld -v<!--
   <itemizedlist>
     <listitem><para>verze GTK</para></listitem>
     <listitem><para>verze GLIB</para></listitem>
-    <listitem><para>verze libpng</para></listitem>
     <listitem><para>GUI situace kdy se chyba projevila</para></listitem>
   </itemizedlist>
 </para></listitem>

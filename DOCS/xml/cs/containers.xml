@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21741 -->
+<!-- synced with r24056 -->
 <chapter id="containers">
 <title>Nosné formáty (Containers)</title>
 
@@ -7,14 +7,14 @@
 Považujeme za důležité vyjasnit všeobecný omyl. Když lidé vidí soubor s příponou
 <filename>.AVI</filename>, automaticky se domnívají, že to není MPEG soubor.
 To však není pravda. Aspoň ne úplně. Narozdíl od všeobecného mínění tyto
-soubory <emphasis>mohou</emphasis> obsahovat MPEG-1 video.
+soubory <emphasis>mohou</emphasis> obsahovat MPEG–1 video.
 </para>
 
 <para>
 Jak vidíte, <emphasis role="bold">kodek</emphasis> není to samé jako
 <emphasis role="bold">nosný formát</emphasis>.
 Příklady video <emphasis role="bold">kodeků</emphasis> jsou:
-MPEG-1, MPEG-2, MPEG-4 (DivX), Indeo5, 3ivx.
+MPEG–1, MPEG–2, MPEG–4 (DivX), Indeo5, 3ivx.
 Příklady nosných <emphasis role="bold">formátů</emphasis> jsou:
 MPG, AVI, ASF.
 </para>
@@ -22,10 +22,10 @@ MPG, AVI, ASF.
 <para>
 Teoreticky můžete vložit OpenDivX video a MP3 audio
 do <emphasis role="bold">nosného formátu MPG</emphasis>. Většina přehrávačů jej
-však nepřehraje, jelikož zde očekávají MPEG-1 video a MP2 audio (narozdíl od
+však nepřehraje, jelikož zde očekávají MPEG–1 video a MP2 audio (narozdíl od
 <emphasis role="bold">AVI</emphasis>, <emphasis role="bold">MPG</emphasis>
 nemá potřebná pole k popisu svých video a audio datových proudů).
-Nebo můžete vložit MPEG-1 video do AVI souboru.
+Nebo můžete vložit MPEG–1 video do AVI souboru.
 <ulink url="http://ffmpeg.org/">FFmpeg</ulink> a
 <link linkend="mencoder"><application>MEncoder</application></link>
 mohou tyto soubory vytvořit.
@@ -48,7 +48,7 @@ MPEG soubory se vyskytují v různých obálkách:
 <itemizedlist>
 <listitem><para>
   MPG: Toto je <emphasis role="bold">nejjednodušší</emphasis> forma souborových
-  formátů MPEG. Obsahuje MPEG-1 video a MP2 (MPEG-1 layer 2) nebo méně často
+  formátů MPEG. Obsahuje MPEG–1 video a MP2 (MPEG–1 layer 2) nebo méně často
   MP1 audio.
 </para></listitem>
 <listitem><para>
@@ -61,7 +61,7 @@ MPEG soubory se vyskytují v různých obálkách:
 <listitem><para>
   VOB: Toto je souborový formát MPEG na <emphasis role="bold">DVD</emphasis>.
   Je stejný jako MPG, plus schopnost obsahovat titulky nebo ne-MPEG
-  (AC3) audio. Obsahuje video enkódované do MPEG-2 a obvykle AC3 audio, ale DTS,
+  (AC–3) audio. Obsahuje video enkódované do MPEG–2 a obvykle AC–3 audio, ale DTS,
   MP2 a nekomprimovaný LPCM jsou rovněž povoleny. <emphasis role="bold">Přečtěte
   si <link linkend="dvd">DVD</link> sekci</emphasis>!
 </para></listitem>
@@ -99,7 +99,7 @@ nebo přehrávány s volbou <option>-aspect</option>.
 <para>
 Navrženy Microsoftem, 
 <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
-je rozšířený víceúčelový formát. V současnosti je většinou používaný pro MPEG-4
+je rozšířený víceúčelový formát. V současnosti je většinou používaný pro MPEG–4
 (DivX a DivX4) video.
 Má mnoho známých nedostatků a nedokonalostí (například ve streamování).
 Podporuje jeden video datový proud a 0 až 99 audio proudů a může být veliký až
@@ -203,7 +203,7 @@ s příponou <filename>.WMA</filename> nebo <filename>.WMV</filename>.
 Tyto formáty byly vytvořeny v Apple a mohou obsahovat jakýkoli kodek, CBR nebo
 VBR. Obvykle mají příponu <filename>.QT</filename> nebo
 <filename>.MOV</filename>. Poznamenejme, že vzhledem k tomu, že si skupina
-MPEG-4 vybrala QuickTime jako doporučený formát souboru pro MPEG-4,
+MPEG–4 vybrala QuickTime jako doporučený formát souboru pro MPEG–4,
 jejich MOV soubory mají příponu <filename>.MPG</filename> nebo
 <filename>.MP4</filename> (Zajímavé je, že video a audio proudy v těchto
 souborech jsou skutečné MPG a AAC soubory. Dokonce je můžete extrahovat pomocí
@@ -272,7 +272,7 @@ soubory mohou obsahovat nekomprimované YV12, YV12+RTJpeg komprimované,
 YV12 RTJpeg+lzo komprimované a YV12+lzo komprimované snímky.
 <application>MPlayer</application> je dekóduje (a také je všechny
 <emphasis role="bold">enkóduje</emphasis>
-<application>MEncoder</application>em do MPEG-4 (DivX)/atd.!).
+<application>MEncoder</application>em do MPEG–4 (DivX)/atd.!).
 Převíjení funguje.
 </para>
 </sect2>

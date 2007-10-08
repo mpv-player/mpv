@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r24082 -->
 <chapter id="codecs">
 <title>Kodeky</title>
 
@@ -238,8 +238,8 @@ jelikož poskytuje vyšší rychlost.
 H.264 je jeden z názvů nového kodeku digitálního videa vyvíjeného společně
 skupinami ITU a MPEG.
 Rovněž může být zprávně nazýván těžkopádně jako
-"ISO/IEC 14496-10" nebo "MPEG-4 Part 10".
-Častěji je nazýván jako "MPEG-4 AVC" nebo jen "AVC".
+„ISO/IEC 14496-10“ nebo „MPEG-4 Part 10“.
+Častěji je nazýván jako „MPEG-4 AVC“ nebo jen „AVC“.
 </para>
 <para>
 Ať už mu říkáte jakkoli, H.264 stojí za vyzkoušení, protože obvykle
@@ -307,7 +307,7 @@ kdykoli nastane změna API v <systemitem class="library">x264</systemitem>,
 takže vždy doporučujeme používat také Subversion verzi
 <application>MPlayer</application>u.
 Tato situace se snad změní, až
-<systemitem class="library">x264</systemitem> dospěje k "vydání".
+<systemitem class="library">x264</systemitem> dospěje k „vydání“.
 Mezi tím by měla být <systemitem class="library">x264</systemitem> považována
 za velmi nestabilní v tom smyslu, že se její programové rozhraní neustále
 mění.
@@ -355,11 +355,11 @@ požadavky pro <systemitem class="library">x264</systemitem>.
   Windows Media Audio 9 (WMAv3) (používá DMO DLL)
 </para></listitem>
 <listitem><para>
-  AC3 Dolby audio (<emphasis role="bold">nativní</emphasis> kód, s
+  AC–3 Dolby audio (<emphasis role="bold">nativní</emphasis> kód, s
   MMX/SSE/3DNow! optimalizací)
 </para></listitem>
 <listitem><para>
-  AC3 tunelování přes hardware zvukové karty
+  AC–3 tunelování přes hardware zvukové karty
 </para></listitem>
 <listitem><para>
   AAC
@@ -368,7 +368,7 @@ požadavky pro <systemitem class="library">x264</systemitem>.
   Ogg Vorbis audio kodek (<emphasis role="bold">nativní</emphasis> knihovna)
 </para></listitem>
 <listitem><para>
-  RealAudio: DNET (AC3 s nízkým datovým tokem), Cook, Sipro a ATRAC3
+  RealAudio: DNET (AC–3 s nízkým datovým tokem), Cook, Sipro a ATRAC–3
 </para></listitem>
 <listitem><para>
   QuickTime: Qualcomm a QDesign audio kodeky
@@ -391,17 +391,17 @@ požadavky pro <systemitem class="library">x264</systemitem>.
 <!-- ********** -->
 
 <sect2 id="swac3">
-<title>Softwarové dekódování AC3</title>
+<title>Softwarové dekódování AC–3</title>
 
 <para>
-Toto je výchozí dekodér používaný pro soubory s AC3 zvukem.
+Toto je výchozí dekodér používaný pro soubory s AC–3 zvukem.
 </para>
 
 <para>
-AC3 dekodér umí vytvořit zvukový výstup pro 2, 4, nebo 6 reproduktorů.
-Pokud je nakonfigurován na 6 kanálů, pak tento dekodér posílá všechny AC3
+AC–3 dekodér umí vytvořit zvukový výstup pro 2, 4, nebo 6 reproduktorů.
+Pokud je nakonfigurován na 6 kanálů, pak tento dekodér posílá všechny AC–3
 kanály odděleně na rozhraní ovladače zvukové karty, což umožňuje vychutnávat
-plně prostorový zvuk bez nutnosti mít externí AC3 dekodér nutný k použití
+plně prostorový zvuk bez nutnosti mít externí AC–3 dekodér nutný k použití
 hwac3 kodeku.
 </para>
 
@@ -411,7 +411,7 @@ Zadejte volbu <option>-channels 2</option> pro mixování na stereo. Chcete-li
 čtyřkanálový zvuk (Levý Čelní, Pravý Čelní, Levý Surround a Pravý Surround
 výstup), zadejte volbu <option>-channels 4</option>.  V tom případě bude
 jakýkoli středový kanál odpovídajícím způsobem namixován do čelních kanálů.
-Volbou <option>-channels 6</option> dostanete plný počet AC3 kanálů tak jak
+Volbou <option>-channels 6</option> dostanete plný počet AC–3 kanálů tak jak
 jsou enkódovány &ndash; v pořadí Levý, Pravý, Levý Surround, Pravý Surround, Střed a
 LFE.
 </para>
@@ -432,12 +432,12 @@ bude rovněž fungovat).
 <!-- ********** -->
 
 <sect2 id="hwac3">
-<title>Hardwarové dekódování AC3</title>
+<title>Hardwarové dekódování AC–3</title>
 
 <para>
-Potřebujete zvukovou kartu schopnou AC3, s digitálním výstupem(S/PDIF).
-Ovladač karty musí správně podporovat formát AFMT_AC3 (C-Media ano). Připojte
-svůj AC3 dekodér na výstup S/PDIF a zadejte volbu <option>-ac hwac3</option>.
+Potřebujete zvukovou kartu schopnou AC–3, s digitálním výstupem(S/PDIF).
+Ovladač karty musí správně podporovat formát AFMT_AC–3 (C-Media ano). Připojte
+svůj AC–3 dekodér na výstup S/PDIF a zadejte volbu <option>-ac hwac3</option>.
 Je to experimentální, ale víme že pracuje s C-Media kartami a
 Soundblaster Live! + ALSA (ale ne OSS) ovladači a dekodérovými kartami
 DXR3/Hollywood+ MPEG.
@@ -527,28 +527,11 @@ mobilních telefonů.
 Referenční implementace je dostupná od
 <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
 (zdarma pro osobní použití).
-</para>
-
-<para>
-Pro zapnutí podpory si stáhněte zdrojový kód
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
-a
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
-kodeků, umístěte je do adresáře, kde jste si rozbalili zdrojový kód
-<application>MPlayer</application>u a spusťte následující příkazy:
-<screen>
-unzip 26104-610.zip
-unzip 26104-610_ANSI_C_source_code.zip
-mv c-code libavcodec/amr_float
-unzip 26204-600.zip
-unzip 26204-600_ANSI-C_source_code.zip
-mv c-code libavcodec/amrwb_float
-</screen>
-Pak proveďte obvyklou <link linkend="features">kompilační proceduru</link>
-<application>MPlayer</application>u.
+Pro zapnutí podpory si stáhněte podpůrné knihovny pro
+<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB a AMR-WB</ulink>
+a následujte instrukce na stránce. Potom znovu zkompilujte MPlayer.
 </para>
 </sect2>
-
 
 </sect1>
 
@@ -593,8 +576,9 @@ kodeku mailem a nahrajte tyto soubory na FTP server:
 <systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/<replaceable>&lt;codecname&gt;</replaceable>/</systemitem>
 </para>
 
-<note><para>Ve Windows NT/2000/XP hledejte tyto informace v registrech,
-zde hledáte "VIDC.HFYU". Jak to udělat se dozvíte níže v sekci
+<note><para>
+Ve Windows NT/2000/XP hledejte tyto informace v registrech,
+zde hledáte „VIDC.HFYU“. Jak to udělat se dozvíte níže v sekci
 DirectShow Stará metoda.
 </para></note>
 </sect2>

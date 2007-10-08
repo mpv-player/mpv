@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r21741 -->
+<!-- Synced with r24087 -->
 <chapter id="install">
 <title>Instalace</title>
 
@@ -44,16 +44,24 @@ prostudujte si prosím tuto dokumentaci a naleznete své odpovědi.
   3.79.x nebo vyšší. Pro sestavení XML dokumentace potřebujete 3.80.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">FreeType</emphasis> &ndash; volitelná,
-  vyžadována pro font pro OSD a titulky. Vyžaduje se verze aspoň 2.0.9.
+  <emphasis role="bold">FreeType</emphasis> &ndash; vyžaduje se aspoň
+  verze 2.0.9 pro OSD a titulky.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> &ndash; volitelný JPEG en/dekodér,
-  vyžadovaný JPEG video výstupem a dokódování MJPEG videa.
+  <emphasis role="bold">ALSA</emphasis> – volitelnmá, pro podporu zvukového
+  výstupu do ALSA. Vyžaduje se aspoň verze 0.9.0rc4.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> &ndash; volitelný (M)PNG en/dekodér,
-  vyžadovaný pro GUI a PNG video výstupem.
+  <emphasis role="bold">libjpeg</emphasis> –
+  vyžadována pro volitelné JPEG video výstupní rozhraní
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">libpng</emphasis> –
+  vyžadována pro volitelné PNG video výstupní rozhraní
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">directfb</emphasis> – volitelný, 0.9.13 nebo pozdější
+  vyžadovaný pro directfb video výstupní rozhraní
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> &ndash; doporučená verze 3.90 a vyšší,
@@ -68,10 +76,6 @@ prostudujte si prosím tuto dokumentaci a naleznete své odpovědi.
   &ndash; volitelná, nutná pro přehrávání RTSP/RTP datových proudů.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> &ndash; volitelný,
-  použijte 0.9.13 a vyšší.
-</para></listitem>
-<listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> &ndash; volitelná, pro podporu CDDA
 </para></listitem>
 <listitem><para>
@@ -80,11 +84,7 @@ prostudujte si prosím tuto dokumentaci a naleznete své odpovědi.
   Vyžadujeme aspoň 1.2.7.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libsmb</emphasis> &ndash; volitelná, pro podporu smb sítí.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">ALSA</emphasis> &ndash; volitelná, pro podporu ALSA
-  zvukového výstupu. Vyžadujeme aspoň 0.9.0rc4.
+  <emphasis role="bold">libsmb</emphasis> &ndash; volitelná, pro podporu SMB sítí.
 </para></listitem>
 </itemizedlist>
 </sect1>
@@ -134,27 +134,9 @@ make install
 
 <para>
   V tuto chvíli máte <application>MPlayer</application> připraven k použití.
-  Adresář <filename class="directory">$PREFIX/share/mplayer</filename>
-  obsahuje soubor <filename>codecs.conf</filename>. Ten se používá pro oznámení
-  všech kodeků a jejich schopností. Tento soubor je potřeba pouze pokud chcete
-  tyto předvolby změnit, protože
-  jeho kopie je součástí vlastního programu.
-  Zjistěte jestli máte v domácím adresáři soubor
-  <filename>codecs.conf</filename> 
-  (<filename>~/.mplayer/codecs.conf</filename>) ze starých verzí
-  <application>MPlayer</application>u a odstraňte ho.
-</para>
-
-<para>
-  Poznamenejme že pokud umístíte <filename>codecs.conf</filename> do
-  <filename>~/.mplayer/</filename>, vestavěný a systémový
-  <filename>codecs.conf</filename> budou zcela ignorovány.
-  Nedělejte to pokud nechcete ošidit přednastavení
-  <application>MPlayer</application>u, což může způsobit mnoho problémů.
-  Pokud jen chcete změnit pořadí vyhledávání kodeků,
-  použijte volby <option>-vc</option>, <option>-ac</option>,
-  <option>-vfm</option> nebo <option>-afm</option> v příkazovém řádku,
-  nebo konfiguračním souboru (viz manuálová stránka).
+  Ověřte si, zda nemáte soubor <filename>codecs.conf</filename> v domovském
+  adresáři (<filename>~/.mplayer/codecs.conf</filename>) ze staré verze
+  <application>MPlayer</application>u. Pokud jej najdete, odstraňte ho.
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r22499 -->
+<!-- Synced with r24327 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -353,20 +353,14 @@ nedali do globální cesty) odkázat na jeho umístění pomocí:
 <para>
 nebo můžete použít výchozí install dodávaný s IRIXem 6.5. V tom případě
 budete muset ručně upravit <filename>Makefile</filename>.
-Změňte následující dva řádky:
+Změňte následující řádek:
 <programlisting>
 $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-
-$(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 </programlisting>
 na:
 <programlisting>
 $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-
-$(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
-Pak spusťte (z adresáře se zdrojovými kódy <application>MPlayer</application>u):
-<screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 a pokračujte kompilací a instalací.
 </para>
 </sect2>
@@ -610,7 +604,7 @@ url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">
 <ulink
 url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (s podporou MTRR)</ulink>
 a zkopírujte jej do adresáře
-<filename class="directory">libdha/dhahelperwin</filename> ve svém stromě se
+<filename class="directory">vidix/dhahelperwin</filename> ve svém stromě se
 zdrojovými kódy <application>MPlayer</application>u.
 Otevřete konzoli a přesuňte se do tohoto adresáře. Pak zadejte
 <screen>gcc -o dhasetup.exe dhasetup.c</screen>

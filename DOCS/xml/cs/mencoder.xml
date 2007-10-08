@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r22129 -->
+<!-- Synced with r24342 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -237,6 +237,10 @@ knihovny <systemitem class="library">libavformat</systemitem>.
   <entry>dv</entry>
   <entry>Sony Digital Video</entry>
 </row>
+<row>
+  <entry>mkv</entry>
+  <entry>Otevřený nosný audio/video formát Matroska</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -251,7 +255,7 @@ a soubor lze správně přehrát i jinými přehrávači, než
 <application>MPlayer</application>.
 </para>
 
-<example>
+<example id="encode_to_macromedia_flash_format">
 <title>Enkódování do formátu Macromedia Flash</title>
 <para>
 Vytvoření Macromedia Flash videa vhodného pro přehrávání ve webovém prohlížeči
@@ -400,7 +404,7 @@ Budete-li respektovat následující omezení, neměli byste narazit na potíže
 <screen>
 mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
     -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
-    -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+    -lavfopts format=psp \
     <replaceable>vstupní.video</replaceable> -o <replaceable>výstupní.psp</replaceable>
 </screen>
 Poznamenejme, že můžete nastavit jméno videa pomocí
@@ -447,8 +451,7 @@ mencoder <replaceable>vstupní.avi</replaceable> -of mpeg -mpegopts format=mpeg1
 To samé, ale použijeme <systemitem class="library">libavformat</systemitem> MPEG muxer:
 <screen>
 mencoder <replaceable>vstupní.avi</replaceable> -o <replaceable>VCD.mpg</replaceable> -ofps 25 -vf scale=352:288,harddup -of lavf \
-    -lavfopts format=mpg:i_certify_that_my_video_stream_does_not_use_b_frames \
-    -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
+    -lavfopts format=mpg -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
     -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0
 </screen>
 </para>

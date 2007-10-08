@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r22753 -->
+<!-- synced with r24549 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -1441,14 +1441,14 @@ Seznam podporovaných kodeků najdete v sekci
 <para>
 Zvuk je mnohem jednodušší problém k řešení: pokud prahnete po kvalitě, prostě
 jej nechte jak je.
-Dokonce i AC3 5.1 datové proudy mají nanejvýš 448Kbitů/s a stojí za každý bit.
+Dokonce i AC–3 5.1 datové proudy mají nanejvýš 448Kbitů/s a stojí za každý bit.
 Možná jste v pokušení převést zvuk do Ogg Vorbis při vysoké kvalitě, ale jen
-proto, že dnes nemáte A/V receiver pro hardwarové dekódování AC3 neznamená,
+proto, že dnes nemáte A/V receiver pro hardwarové dekódování AC–3 neznamená,
 že jej nebudete mít zítra. Připravte své DVD ripy na budoucnost zachováním
-AC3 datových proudů.
-Datový proud AC3 můžete zachovat buď jeho zkopírováním přímo do video proudu
+AC–3 datových proudů.
+Datový proud AC–3 můžete zachovat buď jeho zkopírováním přímo do video proudu
 <link linkend="menc-feat-mpeg4">během enkódování</link>.
-Také můžete extrahovat AC3 proud, abyste jej pak namixovali do nosičů jako je
+Také můžete extrahovat AC–3 proud, abyste jej pak namixovali do nosičů jako je
 NUT nebo Matroska.
 <screen>
 mplayer <replaceable>zdrojový_soubor.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>zvuk.ac3</replaceable>
@@ -1492,7 +1492,7 @@ díky chybějícím či nadbývajícím audio vzorkům.
 Správným způsobem jak toto řešit, je vložení ticha nebo odstřižení zvuku na
 těchto místech.
 <application>MPlayer</application> to však neumí, takže pokud demuxujete
-AC3 zvuk a enkódujete jej zvláštní aplikací (nebo jej dumpnete do PCM
+AC–3 zvuk a enkódujete jej zvláštní aplikací (nebo jej dumpnete do PCM
 <application>MPlayer</application>em), zůstanou zmíněné vady jak jsou a
 jediný způsob jak je opravit je zahodit/namnožit video snímky v těchto
 místech.
@@ -1647,7 +1647,7 @@ Navíc k této neefektivitě má AVI také následující hlavní omezení:
   Naneštěstí ten nejefektivnější kodek, Vorbis, nesplňuje ani jeden z těchto
   požadavků.
   Pokud tedy plánujete uložit svůj film do AVI, budete muset použít méně
-  efektivní kodek, jako MP3 nebo AC3.
+  efektivní kodek, jako MP3 nebo AC–3.
 </para></listitem>
 </orderedlist>
 
@@ -2484,12 +2484,52 @@ mencoder dvd://2 -o <replaceable>titul2.avi</replaceable> -ovc lavc -lavcopts vc
 </thead>
 <tbody>
 <row>
-  <entry>mp2</entry>
-  <entry>MPEG Layer 2</entry>
+  <entry>ac3</entry>
+  <entry>Dolby Digital (AC-3)</entry>
 </row>
 <row>
-  <entry>ac3</entry>
-  <entry>AC3, alias Dolby Digital</entry>
+  <entry>adpcm_*</entry>
+  <entry>Adaptivní PCM formáty – viz pomocnou tabulku</entry>
+</row>
+<row>
+  <entry>flac</entry>
+  <entry>Free Lossless Audio Codec (FLAC)</entry>
+</row>
+<row>
+  <entry>g726</entry>
+  <entry>G.726 ADPCM</entry>
+</row>
+<row>
+  <entry>libamr_nb</entry>
+  <entry>3GPP Adaptive Multi-Rate (AMR) narrow-band</entry>
+</row>
+<row>
+  <entry>libamr_wb</entry>
+  <entry>3GPP Adaptive Multi-Rate (AMR) wide-band</entry>
+</row>
+<row>
+  <entry>libfaac</entry>
+  <entry>Advanced Audio Coding (AAC) – používá FAAC</entry>
+</row>
+<row>
+  <entry>libgsm</entry>
+  <entry>ETSI GSM 06.10 plný rozsah</entry>
+</row>
+<row>
+  <entry>libgsm_ms</entry>
+  <entry>Microsoft GSM</entry>
+</row>
+<row>
+  <entry>libmp3lame</entry>
+  <entry>MPEG-1 audio layer 3 (MP3) – používá LAME</entry>
+</row>
+<row>
+  <entry>mp2</entry>
+  <entry>MPEG-1 audio layer 2 (MP2)</entry>
+</row>
+<row>
+  <entry>pcm_*</entry>
+  <entry>PCM formáty – viz pomocnou tabulku</entry>
 </row>
 <row>
   <entry>adpcm_ima_wav</entry>
@@ -2500,20 +2540,24 @@ mencoder dvd://2 -o <replaceable>titul2.avi</replaceable> -ovc lavc -lavcopts vc
   <entry>experimentální FFmpeg ztrátový kodek</entry>
 </row>
 <row>
+  <entry>roq_dpcm</entry>
+  <entry>Id Software RoQ DPCM</entry>
+</row>
+<row>
   <entry>sonicls</entry>
   <entry>experimentální FFmpeg bezztrátový kodek</entry>
 </row>
 <row>
   <entry>vorbis</entry>
-  <entry>Xiph Ogg Vorbis kodek</entry>
+  <entry>Vorbis</entry>
 </row>
 <row>
   <entry>wmav1</entry>
-  <entry>Windows Media Audio v1 kodek</entry>
+  <entry>Windows Media Audio v1</entry>
 </row>
 <row>
   <entry>wmav2</entry>
-  <entry>Windows Media Audio v2 kodek</entry>
+  <entry>Windows Media Audio v2</entry>
 </row>
 </tbody>
 </tgroup>
@@ -2524,8 +2568,10 @@ Vprvním sloupci naleznate jména kodeků, které byste měli přiřadit paramet
 </para>
 
 <informalexample><para>
-Příklad s kompresí AC3:
+Příklad s kompresí AC–3:
+<screen>
 mencoder dvd://2 -o <replaceable>titul2.avi</replaceable> -oac lavc -lavcopts acodec=ac3 -ovc copy
+</screen>
 </para></informalexample>
 
 <para>
@@ -2539,6 +2585,167 @@ bez potíží všude, kde máte <application>MEncoder</application> se
 zakompilovanou knihovnou <systemitem class="library">libavcodec</systemitem>
 (což je naprostá většina případů) a nezávisejí na externích knihovnách.
 </para>
+
+<sect3 id="menc-feat-enc-libavcodec-audio-codecs-pcmadpcm">
+<title>Pomocná tabulka pro PCM/ADPCM formát</title>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Název PCM/ADPCM kodeku</entry><entry>Popis</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>pcm_s32le</entry>
+  <entry>signed 32-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s32be</entry>
+  <entry>signed 32-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u32le</entry>
+  <entry>unsigned 32-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u32be</entry>
+  <entry>unsigned 32-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s24le</entry>
+  <entry>signed 24-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s24be</entry>
+  <entry>signed 24-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u24le</entry>
+  <entry>unsigned 24-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u24be</entry>
+  <entry>unsigned 24-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s16le</entry>
+  <entry>signed 16-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_s16be</entry>
+  <entry>signed 16-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_u16le</entry>
+  <entry>unsigned 16-bit little-endian</entry>
+</row>
+<row>
+  <entry>pcm_u16be</entry>
+  <entry>unsigned 16-bit big-endian</entry>
+</row>
+<row>
+  <entry>pcm_s8</entry>
+  <entry>signed 8-bit</entry>
+</row>
+<row>
+  <entry>pcm_u8</entry>
+  <entry>unsigned 8-bit</entry>
+</row>
+<row>
+  <entry>pcm_alaw</entry>
+  <entry>G.711 A-LAW </entry>
+</row>
+<row>
+  <entry>pcm_mulaw</entry>
+  <entry>G.711 &mu;-LAW</entry>
+</row>
+<row>
+  <entry>pcm_s24daud</entry>
+  <entry>signed 24-bit D-Cinema Audio format</entry>
+</row>
+<row>
+  <entry>pcm_zork</entry>
+  <entry>Activision Zork Nemesis</entry>
+</row>
+<row>
+  <entry>adpcm_ima_qt</entry>
+  <entry>Apple QuickTime</entry>
+</row>
+<row>
+  <entry>adpcm_ima_wav</entry>
+  <entry>Microsoft/IBM WAVE</entry>
+</row>
+<row>
+  <entry>adpcm_ima_dk3</entry>
+  <entry>Duck DK3</entry>
+</row>
+<row>
+  <entry>adpcm_ima_dk4</entry>
+  <entry>Duck DK4</entry>
+</row>
+<row>
+  <entry>adpcm_ima_ws</entry>
+  <entry>Westwood Studios</entry>
+</row>
+<row>
+  <entry>adpcm_ima_smjpeg</entry>
+  <entry>SDL Motion JPEG</entry>
+</row>
+<row>
+  <entry>adpcm_ms</entry>
+  <entry>Microsoft</entry>
+</row>
+<row>
+  <entry>adpcm_4xm</entry>
+  <entry>4X Technologies</entry>
+</row>
+<row>
+  <entry>adpcm_xa</entry>
+  <entry>Phillips Yellow Book CD-ROM eXtended Architecture</entry>
+</row>
+<row>
+  <entry>adpcm_ea</entry>
+  <entry>Electronic Arts</entry>
+</row>
+<row>
+  <entry>adpcm_ct</entry>
+  <entry>Creative 16->4-bit</entry>
+</row>
+<row>
+  <entry>adpcm_swf</entry>
+  <entry>Adobe Shockwave Flash</entry>
+</row>
+<row>
+  <entry>adpcm_yamaha</entry>
+  <entry>Yamaha</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_4</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->4-bit</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_3</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->2.6-bit</entry>
+</row>
+<row>
+  <entry>adpcm_sbpro_2</entry>
+  <entry>Creative VOC SoundBlaster Pro 8->2-bit</entry>
+</row>
+<row>
+  <entry>adpcm_thp</entry>
+  <entry>Nintendo GameCube FMV THP</entry>
+</row>
+<row>
+  <entry>adpcm_adx</entry>
+  <entry>Sega/CRI ADX</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect3>
+
 </sect2>
 
 <!-- ********** -->
@@ -4179,7 +4386,7 @@ s použitím compdata nastavení datového toku:
 mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceable>upoutavka.flv</replaceable> \
 -ovc vfw -xvfwopts codec=vp6vfw.dll:compdata=onepass.mcf -oac mp3lame \
 -lameopts cbr:br=64 -af lavcresample=22050 -vf yadif,scale=320:240,flip \
--of lavf -lavfopts i_certify_that_my_video_stream_does_not_use_b_frames
+-of lavf
 </screen>
 </para>
 </informalexample>
@@ -4426,7 +4633,7 @@ dialogové okno kodeku před zahájením enkódování.
 -x264encopts pass=1:turbo:bitrate=900:bframes=1:\
 me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
 -vf crop=720:352:0:62,scale=-10:-1,harddup \
--oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-oac faac -faacopts br=192:mpeg=4:object=2 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 
   Pokud máte víceprocesorový stroj, nenechte si ujít příležitost podstatně zvýšit
@@ -4445,7 +4652,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 -x264encopts <emphasis role="bold">pass=2</emphasis>:turbo:bitrate=900:frameref=5:bframes=1:\
 me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 \
 -vf crop=720:352:0:62,scale=-10:-1,harddup \
--oac faac -faacopts br=192:mpeg=4:object=1 -channels 2 -srate 48000 \
+-oac faac -faacopts br=192:mpeg=4:object=2 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 </para>
 
@@ -4603,7 +4810,7 @@ nebo přidat černé okraje, aby byl kompatibilní.
   <entry>MPEG-2</entry>
   <entry>9800 kbps</entry>
   <entry>48000 Hz</entry>
-  <entry>AC3,PCM</entry>
+  <entry>AC–3,PCM</entry>
   <entry>1536 kbps (max)</entry>
   <entry>30000/1001, 24000/1001</entry>
   <entry>4:3, 16:9 (pouze pro 720x480)</entry>
@@ -4616,7 +4823,7 @@ nebo přidat černé okraje, aby byl kompatibilní.
   <entry>MPEG-1</entry>
   <entry>1856 kbps</entry>
   <entry>48000 Hz</entry>
-  <entry>AC3,PCM</entry>
+  <entry>AC–3,PCM</entry>
   <entry>1536 kbps (max)</entry>
   <entry>30000/1001, 24000/1001</entry>
   <entry>4:3, 16:9</entry>
@@ -4649,7 +4856,7 @@ nebo přidat černé okraje, aby byl kompatibilní.
   <entry>MPEG-2</entry>
   <entry>9800 kbps</entry>
   <entry>48000 Hz</entry>
-  <entry>MP2,AC3,PCM</entry>
+  <entry>MP2,AC–3,PCM</entry>
   <entry>1536 kbps (max)</entry>
   <entry>25</entry>
   <entry>4:3, 16:9 (pouze pro 720x576)</entry>
@@ -4660,7 +4867,7 @@ nebo přidat černé okraje, aby byl kompatibilní.
   <entry>MPEG-1</entry>
   <entry>1856 kbps</entry>
   <entry>48000 Hz</entry>
-  <entry>MP2,AC3,PCM</entry>
+  <entry>MP2,AC–3,PCM</entry>
   <entry>1536 kbps (max)</entry>
   <entry>25</entry>
   <entry>4:3, 16:9</entry>
@@ -5018,7 +5225,7 @@ nemusí dobře podporovat.
 </para>
 
 <para>
-Pro DVD zvuk se používá AC3 kodek z
+Pro DVD zvuk se používá AC–3 kodek z
 <systemitem class="library">libavcodec</systemitem>.
 </para>
 
@@ -5105,10 +5312,10 @@ keyint=18:vstrict=0:acodec=ac3:abitrate=192:aspect=16/9 -ofps 30000/1001 \
 
 
 <sect3 id="menc-feat-vcd-dvd-all-pal-ac3-copy">
-<title>PAL AVI obsahující AC3 zvuk do DVD</title>
+<title>PAL AVI obsahující AC–3 zvuk do DVD</title>
 
 <para>
-Pokud již má zdroj AC3 zvuk, použijte -oac copy místo reenkódování.
+Pokud již má zdroj AC–3 zvuk, použijte -oac copy místo reenkódování.
 <screen>
 mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf \
   -vf scale=720:576,harddup -ofps 25 \
@@ -5120,10 +5327,10 @@ keyint=15:vstrict=0:aspect=16/9 -o <replaceable>film.mpg</replaceable> <replacea
 
 
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
-<title>NTSC AVI obsahující AC3 zvuk do DVD</title>
+<title>NTSC AVI obsahující AC–3 zvuk do DVD</title>
 
 <para>
-Pokud již má zdroj AC3 zvuk a video je NTSC @ 24000/1001 fps:
+Pokud již má zdroj AC–3 zvuk a video je NTSC @ 24000/1001 fps:
 <screen>
 mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
   -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\

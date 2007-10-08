@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21686 -->
+<!-- synced with r23516 -->
 <appendix id="bugs">
 <title>Známé chyby</title>
 
@@ -112,7 +112,7 @@
   <listitem>
     <para>
     <option>-delay</option> nebo <keycap>+</keycap>/<keycap>-</keycap>
-    klávesy za běhu pro nastavení zpoždění
+        klávesy za běhu pro nastavení zpoždění
     </para>
   </listitem>
   </itemizedlist>

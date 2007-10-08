@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r24346 -->
 <chapter id="cd-dvd">
 <title>Použití CD/DVD</title>
 
@@ -63,7 +63,7 @@ programu <command>hdparm</command> pro podrobné vysvětlení).
 
 <para>
 Prostudujte si
-"<filename>/proc/ide/<replaceable>(cdrom zařízení)</replaceable>/settings</filename>"
+„<filename>/proc/ide/<replaceable>(cdrom zařízení)</replaceable>/settings</filename>“
 pro jemné doladění vaší CD-ROM.
 </para>
 
@@ -142,71 +142,44 @@ Některé RPC-2 mechaniky mohou rovněž vyžadovat nastavení region kódu.
 </para></note>
 
 <formalpara>
-<title>Struktura DVD</title>
+<title>Dekódování DVD</title>
 <para>
-DVD disky mají 2048 bajtů na sektor s ECC/CRC. Obvykle mají souborový systém UDF
-v jediné stopě, obsahující různé soubory (malé .IFO a .BUK soubory a velké (1GB)
-.VOB soubory). Jsou to reálné soubory a mohou být kopírovány/přehrávány
-z připojeného systému souborů nešifrovaného DVD.
+Dekódování DVD provádí <systemitem>libdvdcss</systemitem>. Metodu
+můžete zvolit pomocí proměnné prostředí <envar>DVDCSS_METHOD</envar>,
+detaIly viz manuálová stránka.
 </para>
 </formalpara>
 
+<sect2 id="region_code">
+<title>Kód regionu</title>
 <para>
-Soubory .IFO obsahují informace pro navigaci ve filmu (kapitola/titul/mapa úhlů,
-tabulka jazyků, atd) a jsou potřeba pro čtení a interpretaci obsahu .VOBu
-(filmu). Soubory .BUK jsou jejich zálohami. Všude používají
-<emphasis role="bold">sektory</emphasis>, takže musíte použít surové (RAW)
-adresování sektorů na disku, abyste se mohli navigovat v DVD, nebo dekryptovat
-jeho obsah.
+DVD mechaniky v současnosti přicházejí s nesmyslným omezením nazvaným
+<ulink url="http://en.wikipedia.org/wiki/DVD_region_code">kód regionu</ulink>.
+To je způsob jak přinutit DVD mechaniku akceptovat pouze DVD vyrobené pro
+jeden ze šesti různých regionů na které byl rozdělen svět. Jak si může skupina lidí
+zasednout ke kulatému stolu, přijít s takovým nápadem a čekat, že se svět
+21. století skloní před jejich vůlí je naprosto nepochopitelné
 </para>
 
 <para>
-Podpora DVD vyžaduje přímý sektorově-orientovaný přístup k zařízení. Naneštěstí
-musíte (pod Linuxem) být root, abyste dostali adresu sektoru souboru.
-To je důvod proč vůbec nepoužíváme modul souborového systému z kernelu a místo
-něj jej implementujeme v uživatelském prostoru.
-To zajistí <systemitem>libdvdread</systemitem> 0.9.x.
-UDF ovladač z kernelu není potřeba, jelikož tyto knihovny mají zabudován svůj
-vlastní. Rovněž nemusí být DVD přimountováno vzhledem k tomu že používáme
-pouze přímý sektorově orientovaný přístup.
+Mechaniky, které vynucují nastavení regionu poze softwarově jsou známy také jako
+RPC-1 a ty, které to dělají v hardware jako RPC-2. Mechaniky RPC-2 umožňují změnu
+kódu regionu pětkrát a pak zůstane pevný.
+V Linuxu můžete použít nástroj
+<ulink url="http://linvdr.org/projects/regionset/">regionset</ulink>
+pro nastavení kódu regionu vaší DVD mechaniky.
 </para>
 
 <para>
-Někdy <filename>/dev/dvd</filename> nemůže být čteno uživateli, proto autoři
-<systemitem>libdvdread</systemitem> implementovali emulační vrstvu, která
-převádí sektorové adresy na soubor+offset za účelem emulace raw přístupu
-nad připojeným souborovým systémem nebo dokonce i hard diskem.
+Naštěstí je možné konvertovat RPC-2 mechaniky na RPC-1 pomocí
+upgrade firmware. Vyplňte modelové číslo vaší DVD mechaniky do svého oblíbeného
+vyhledávače, nebo se podívejte do fóra a sekce download
+<ulink url="http://www.rpc1.org/">„Firmware stránek“</ulink>.
+Ačkoli platí obvyklé „kazy“ upgradů fimware, zkušenosti se zbavením se
+vynucování region kódů jsou obecně kladné.
 </para>
+</sect2>
 
-<para>
-<systemitem>libdvdread</systemitem> dokonce přijme bod připojení (mountpoint)
-místo názvu zařízení pro přímý přístup a podívá se do
-<filename>/proc/mounts</filename> na jméno zařízení. To bylo vyvinuto pro
-Solaris, kde jsou názvy souborů dynamicky alokovány.
-</para>
-
-<formalpara>
-<title>Dešifrování DVD</title>
-<para>
-Dešifrování DVD provádí <systemitem>libdvdcss</systemitem>. Metoda
-může být zvolena pomocí proměnné prostředí <envar>DVDCSS_METHOD</envar>,
-detaily viz manuálovou stránku.
-</para>
-</formalpara>
-
-<para>
-RPC-1 DVD mechaniky chrání nastavení regionu pouze softwarově. RPC-2 mechaniky
-mají hardwarovou ochranu umožňující pouze 5 změn. Může být potřeba/doporučeno
-provést upgrade firmwaru na RPC-1 pokud máte RPC-2 DVD mechaniku.
-Můžete zkusit najít upgrady firmwaru pro svou mechaniku na internetu,
-<ulink url="http://forum.rpc-1.com/dl_all.php">toto firmwarové fórum</ulink>
-může být dobrým začátkem pro vaše hledání.
-Pokud pro vaši mechaniku není k dispozici upgrade firmwaru, použijte
-<ulink url="http://linvdr.org/projects/regionset/">nástroj regionset</ulink>
-pro nastavení region kódu vaší DVD mechaniky (pod Linux).
-<emphasis role="bold">Varování</emphasis>: Region můžete přenastavit pouze
-pětkrát.
-</para>
 </sect1>
 
 
@@ -279,7 +252,7 @@ třída 1 a 2:
 
 <listitem><para>
   Definice standardu Video CD se nazývá
-  Philips "White Book" a není obecně přístupná online, ale musí být zakoupena
+  Philips „White Book“ a není obecně přístupná online, ale musí být zakoupena
   od Philipsu. Podrobnější informace o Video CD můžete nalézt
   <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">v dokumentaci programu vcdimager</ulink>.
 </para></listitem>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r21748  -->
+<!-- Synced with r24056  -->
 <chapter id="usage">
 <title>Použití</title>
 
@@ -432,67 +432,6 @@ protokoly, jako MMS, RTSP, a tak dále.
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="mpst" xreflabel="Remote streams">
-<title>Vzdálené datové proudy</title>
-
-<para>
-Vzdálené datové proudy umožňují přístup k většině <application>MPlayer</application>em
-podporovaných proudů ze vzdáleného počítače. Hlavní určení této funkce je umožnit
-přímo použít CD nebo DVD mechaniku jiného počítače na síti (předpokladem je,
-že máte dostatečně rychlé připojení). Na spodní hranici nejsou některé typy datových
-proudů (v současnosti TV a MF) použitelné přes síť protože jsou implementovány na úrovni
-demuxeru. Je to škoda pro MF ale TV proudy by tak jako tak vyžadovaly šíleně
-vysokou rychlost
-</para>
-
-<!-- ********** -->
-
-<sect2 id="compile_mpst_server">
-<title>Kompilace serveru</title>
-
-<para>
-Poté co zkompilujete <application>MPlayer</application> běžte do adresáře
-<filename>TOOLS/netstream</filename> a proveďte
-<application>make</application> pro sestavení serverové binárky.
-Potom můžete zkopírovat program <application>netstream</application>
-na správné místo v systému (v Linuxu obvykle
-<filename class="directory">/usr/local/bin</filename>).
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="use_mpst">
-<title>Použití vzdálených datových proudů</title>
-
-<para>
-Nejprve spusťte server na počítači na který se chcete připojit ze sítě.
-Server je zatím velmi jednoduchý a nemá žádné volby příkazového řádku,
-proto jen zadejte <filename>netstream</filename>. Teď můžete například
-přehrát druhou stopu na VCD na serveru:
-<screen>
-mplayer -cache 5000 <replaceable>mpst://jméno_serveru/vcd://2</replaceable>
-</screen>
-Taky můžete přistupovat k souborům na tomto serveru:
-<screen>
-mplayer -cache 5000 <replaceable>mpst://jmeno_serveru//usr/local/filmy/lol.avi</replaceable>
-</screen>
-Poznamenejme, že cesty nezačínající / jsou relativní k adresáři kde byl spuštěn server.
-Volba <option>-cache</option> není nutná, ale velmi ji doporučujeme.
-</para>
-
-<para>
-Berte na vědomí že v současnosti není tento server vůbec bezpečný. Nenadávejte
-tedy na množství průniků do systému, které je s ním možné. Místo toho raději
-zašlete (dobrý) patch který by jej vylepšil, nebo napište svůj vlastní server.
-</para>
-</sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
 <sect1 id="edl" xreflabel="Seznamy editačních zásahů (EDL)">
 <title>Seznamy editačních zásahů (EDL)</title>
 
@@ -609,10 +548,10 @@ Vysvětlení naleznete v sekci
 
 
 <sect3 id="advaudio-surround-passthrough">
-<title>AC3/DTS Passthrough</title>
+<title>AC–3/DTS Passthrough</title>
 
 <para>
-DVD mají obvykle surround zvuk enkódovaný ve formátu AC3 (Dolby Digital) nebo
+DVD mají obvykle surround zvuk enkódovaný ve formátu AC–3 (Dolby Digital) nebo
 DTS (Digital Theater System). Některá moderní zařízení jsou schopna dekódovat
 tyto formáty interně. <application>MPlayer</application> lze nakonfigurovat
 tak, aby přenesl zvuková data bez dekódování. To bude fungovat pouze pokud máte
@@ -620,7 +559,7 @@ S/PDIF (Sony/Philips Digital Interface) jack ve zvukové kartě.
 </para>
 
 <para>
-Pokud vaše zařízení umí dekódovat jak AC3, tak DTS, můžete bezpečně zapnout
+Pokud vaše zařízení umí dekódovat jak AC–3, tak DTS, můžete bezpečně zapnout
 passthrough pro oba formáty. Jinak zapněte passthrough pouze pro formát, který
 vaše zařízení podporuje.
 </para>
@@ -628,13 +567,13 @@ vaše zařízení podporuje.
 <itemizedlist>
 <title>Zapnutí passthrough z příkazového řádku:</title>
 <listitem><para>
-  Jen pro AC3 použijte <option>-ac hwac3</option>
+  Jen pro AC–3 použijte <option>-ac hwac3</option>
 </para></listitem>
 <listitem><para>
   Jen pro DTS použijte <option>-ac hwdts</option>
 </para></listitem>
 <listitem><para>
-  Pro oba (AC3 i DTS) použijte <option>-afm hwac3</option>
+  Pro oba (AC–3 i DTS) použijte <option>-afm hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -642,13 +581,13 @@ vaše zařízení podporuje.
 <title>Zapnutí passthrough v konfiguračním souboru
   <application>MPlayer</application>u: </title>
 <listitem><para>
-  Jen pro AC3 použijte <option>ac=hwac3,</option>
+  Jen pro AC–3 použijte <option>ac=hwac3,</option>
 </para></listitem>
 <listitem><para>
   Jen pro DTS použijte <option>ac=hwdts,</option>
 </para></listitem>
 <listitem><para>
-  Pro oba (AC3 i DTS) použijte <option>afm=hwac3</option>
+  Pro oba (AC–3 i DTS) použijte <option>afm=hwac3</option>
 </para></listitem>
 </itemizedlist>
 
@@ -656,7 +595,7 @@ vaše zařízení podporuje.
 Povšimněte si čárky (",") na konci
 <option>ac=hwac3,</option> a <option>ac=hwdts,</option>. To umožní
 <application>MPlayer</application>u použít normální kodek, když přehrávaný
-soubor nemá AC3 nebo DTS zvuk. Volba <option>afm=hwac3</option> nevyžaduje
+soubor nemá AC–3 nebo DTS zvuk. Volba <option>afm=hwac3</option> nevyžaduje
 čárku; <application>MPlayer</application> se zařídí podle potřeby automaticky,
 pokud je zvolena rodina audio kodeků.
 </para>
@@ -755,7 +694,7 @@ audio výstupy jsou často vypnuty a nastaveny na nulovou hlasitost jako výchoz
 
 <para>
 Naneštěstí neexistuje standard pro řazení kanálů. Následující řazení jsou
-používaná v AC3 a jsou poměrně typická; zkuste je a uvidíte, zda tomu váš zdroj
+používaná v AC–3 a jsou poměrně typická; zkuste je a uvidíte, zda tomu váš zdroj
 odpovídá. Kanály jsou číslovány od 0.
 
 <orderedlist spacing="compact">
@@ -1040,7 +979,7 @@ Máme však možnost k tomu použít <option>pan</option>:
   však zajímá pouze výstup z prvních dvou kanálů, vystačíme s pouhými dvěma
   sadami; zbývající čtyři sady můžeme vynechat. Pozor na to, že ne všechny
   vícekanálové zvukové soubory mají stejné řazení kanálů! Tento příklad
-  demonstruje podmixování souboru se stejným řazením kanálů jako má AC3 5.1:
+  demonstruje podmixování souboru se stejným řazením kanálů jako má AC–3 5.1:
   <programlisting>
 0 - levý přední
 1 - pravý přední

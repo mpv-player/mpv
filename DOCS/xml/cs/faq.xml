@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r21930  -->
+<!-- Synced with r24035  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -80,7 +80,8 @@ záhadnou zprávu obsahující frázi
 <systemitem>internal compiler error</systemitem> nebo
 <systemitem>unable to find a register to spill</systemitem> nebo
 <systemitem>can't find a register in class `GENERAL_REGS'
-while reloading `asm'</systemitem>.</para></question>
+while reloading `asm'</systemitem>.
+</para></question>
 <answer><para>
 Právě jste narazili na chybu v <application>gcc</application>.
 <ulink url="http://gcc.gnu.org/bugs.html">Nahlaste ji prosím týmu gcc</ulink>,
@@ -147,14 +148,14 @@ V Red Hatu se nazývá <filename>XFree86-devel*</filename>,
 v Debianu Woody je to <filename>xlibs-dev</filename>,
 v Debianu Sarge je to <filename>libx11-dev</filename>. Také se přesvědčte,
 že symlinky <filename class="directory">/usr/X11</filename> a
-<filename class="directory">/usr/include/X11</filename> existují (to může být
-problém v systémech Mandrake).
+<filename class="directory">/usr/include/X11</filename> existují.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Kompilace na Mac OS 10.3 vede k několika linkovacím chybám</para></question>
+Kompilace na Mac OS 10.3 vede k několika linkovacím chybám.
+</para></question>
 <answer>
 <para>
 Chyba linkování, kterou zakoušíte vypadá nejspíš takto:
@@ -797,6 +798,12 @@ Pokud je to AVI, možná je špatně prokládané. Zkuste to obejít
 volbou <option>-ni</option>.
 Nebo může mít špatnou hlavičku, v tom případě může pomoci
 <option>-nobps</option> a/nebo <option>-mc 0</option>.
+</para></listitem>
+<listitem><para>
+  Mnoho FLV souborů bude správně hrát s <option>-correct-pts</option>.
+  Naneštěstí <application>MEncoder</application> takovou volbu nemá,
+  ale můžete zkusit nastavit <option>-fps</option> na zprávnou hodnotu ručně,
+  pokud ji znáte.
 </para></listitem>
 <listitem><para>
 Ovladač vaší zvukové karty je vadný.

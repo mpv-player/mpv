@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synced with r20572 -->
+<!-- Synced with r24180 -->
 <chapter id="video">
 <title>Výstupní video zařízení/rozhraní</title>
 
@@ -89,17 +89,18 @@ stepping 0) nemají MTRR, ale stepping 12 je mají
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="output-trad">
-<title>Video výstupy pro tradiční video karty</title>
 
-<sect2 id="xv">
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="xv">
 <title>Xv</title>
 
 <para>
 Pod XFree86 4.0.2, nebo novějším, můžete použít hardwarové YUV rutiny karty
 pomocí rozšíření XVideo. Přesně toto používá volba
 <option>-vo xv</option>. Toto rozhraní také podporuje nastavování
-jasu/kontrastu/barevného tónu atd. (pokud nepoužíváte strarý, pomalý DirectShow
+jasu/kontrastu/barevného tónu/atd. (pokud nepoužíváte strarý, pomalý DirectShow
 DivX kodek, který to podporuje všude), viz man stránka.
 </para>
 
@@ -165,14 +166,14 @@ screen #0
 </para>
 
 
-<sect3 id="tdfx">
+<sect2 id="tdfx">
 <title>Karty 3dfx</title>
 
 <para>
-Starší ovladače 3dfx byly známy svými problémy s XVideo akcelerací.
-Nepodporovaly ani YUY2 ani YV12, atp. Ověřte, že máte XFree86
-verze 4.2.0 nebo vyšší, které pracuje dobře s YV12 a YUY2. Předchozí verze,
-včetně 4.1.0, <emphasis role="bold">padá s YV12</emphasis>.
+Starší ovladače 3dfx byly známy svými problémy s XVideo akcelerací a
+nepodporovaly barevné prostory YUY2 ani YV12. Ověřte, že máte XFree86
+verze 4.2.0 nebo vyšší, které pracuje dobře s YV12 a YUY2, zatímco předchozí
+verze, včetně 4.1.0, <emphasis role="bold">padá s YV12</emphasis>.
 Pokud zažívate podivné situace při používání <option>-vo xv</option>, zkuste SDL
 (má rovněž XVideo) a uvidíte, zda to pomůže. Prostudujte si sekci
 <link linkend="sdl">SDL</link> pro více informací.
@@ -183,10 +184,10 @@ Pokud zažívate podivné situace při používání <option>-vo xv</option>, zk
 <option>-vo tdfxfb</option> rozhraní! Viz sekce
 <link linkend="tdfxfb">tdfxfb</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="s3">
+<sect2 id="s3">
 <title>Karty S3</title>
 
 <para>
@@ -208,10 +209,10 @@ Zatím není jasné, kterým modelům Savage chybí podpora YV12 a konvertují
 ovladačem (pomalé). Pokud podezříváte kartu, opatřete si novější ovladač, nebo
 slušně požádejte v konferenci MPlayer-users o ovladač s MMX/3DNow!.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="nvidia">
+<sect2 id="nvidia">
 <title>Karty nVidia</title>
 
 <para>
@@ -233,10 +234,10 @@ Ačkoli <application>MPlayer</application> obsahuje
 ve stavu beta verze a má jisté nedostatky. Více informací naleznete v sekci
 <link linkend="vidix-nvidia">nVidia VIDIX</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ati">
+<sect2 id="ati">
 <title>Karty ATI</title>
 
 <para>
@@ -256,10 +257,10 @@ vyšší. Není zde podpora pro TV out. Samozřejmě s
 <emphasis role="bold">TV výstupu</emphasis> a nepotřebujete žádné X knihovny.
 Přečtěte si sekci <link linkend="vidix">VIDIX</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="neomagic">
+<sect2 id="neomagic">
 <title>Karty NeoMagic</title>
 
 <para>
@@ -289,10 +290,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="trident">
+<sect2 id="trident">
 <title>Karty Trident</title>
 
 <para>
@@ -305,10 +306,10 @@ pro kartu Cyberblade XP.
 Alternativně, <application>MPlayer</application> obsahuje
 <link linkend="vidix">VIDIX</link> ovladač pro kartu Cyberblade/i1.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="kyro">
+<sect2 id="kyro">
 <title>Karty Kyro/PowerVR</title>
 
 <para>
@@ -316,12 +317,36 @@ Pokud chcete používat Xv s kartou založenou na čipu Kyro (například Hercul
 Prophet 4000XT), měli byste si stáhnout ovladače z
 <ulink url="http://www.powervr.com/">PowerVR serveru</ulink>.
 </para>
-</sect3>
 </sect2>
+
+
+<sect2 id="intel">
+<title>Karty Intel</title>
+
+<para>
+Tyto karty lze nalézt v mnoha laptopech. Doporučujeme aktuální Xorg.
+</para>
+
+<para>
+Abyste umožnili přehrávání obsahu velikosti DVD (a větší), změňte svůj XF86Config/xorg.conf takto:
+<programlisting>
+Section "Device"
+    [...]
+    Driver "intel"
+    <emphasis>Option "LinearAlloc" "6144"</emphasis>
+    [...]
+EndSection
+</programlisting>
+Vynechání této volby obvykle vede k chybě jako
+<screen>X11 error: BadAlloc (insufficient resources for operation)</screen>
+při pokusu použít <option>-vo xv</option>.
+</para>
+</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dga">
+<sect1 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -607,11 +632,11 @@ ovladači pro XFree.
 </para></listitem>
 </itemizedlist>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="sdl">
+<sect1 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -640,11 +665,11 @@ Rovněž pomáhá s některými chybnými ovladači/kartami, pokud je video rozt
 SDL video rozhraní podporuje zobrazování titulků pod filmem, v (pokud je) černém
 okraji.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="svgalib">
+<sect1 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -716,11 +741,11 @@ vzorkovací kmitočet zvuku, protože zvuk pří 44kHz byl vadný:
 Zapnout OSD a titulky můžete pouze v kombinaci s <option>expand</option>
 filtrem, viz man stránka pro přesné parametry.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="fbdev">
+<sect1 id="fbdev">
 <title>Výstup na Framebuffer (FBdev)</title>
 
 <para>
@@ -745,27 +770,27 @@ Výstup FBdev přijímá několik dodatečných voleb:
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
-  <listitem><para>
+    <listitem><para>
     nastaví zařízení framebufferu k použití (výchozí: <filename>/dev/fb0</filename>)
-  </para></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmode</option></term>
-  <listitem><para>
+    <listitem><para>
     název režimu k použití (podle <filename>/etc/fb.modes</filename>)
-  </para></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
-  <listitem><para>
+    <listitem><para>
     config soubor režimů (výchozí: <filename>/etc/fb.modes</filename>)
-  </para></listitem>
+    </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-monitor-hfreq</option></term>
   <term><option>-monitor-vfreq</option></term>
   <term><option>-monitor-dotclock</option></term>
-  <listitem><para>
+    <listitem><para>
     <emphasis role="bold">důležité</emphasis> hodnoty, viz
     <filename>example.conf</filename>
     </para></listitem>
@@ -792,7 +817,7 @@ mplayer -vm -fbmode <replaceable>name_of_mode</replaceable> <replaceable>soubor<
 <listitem><para>
   Volba <option>-zoom</option> není podporována
   (použijte <option>-vf scale</option>). Nelze použít režimy 8bpp (nebo nižší).
-  </para></listitem>
+</para></listitem>
 <listitem><para>
   Pravděpodobně budete chtít vypnout kursor:
   <screen>echo -e '\033[?25l'</screen>
@@ -804,7 +829,7 @@ mplayer -vm -fbmode <replaceable>name_of_mode</replaceable> <replaceable>soubor<
   <screen>echo -e '\033[?25h'</screen>
   nebo
   <screen>setterm -cursor on</screen>
-  </para></listitem>
+</para></listitem>
 </itemizedlist>
 
 <note><para>
@@ -812,11 +837,11 @@ Změna videorežimu FBdev <emphasis>nepracuje</emphasis> ve VESA
 framebufferu a nechtějte to po nás, jelikož to není omezení
 <application>MPlayer</application>u.
 </para></note>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="mga_vid">
+<sect1 id="mga_vid">
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
@@ -893,11 +918,11 @@ Ve stejném adresáři je i testovací aplikace jménem
 256x256 bodů, pokud vše pracuje jak má.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect1 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>Podpora 3Dfx YUV</title>
 
 <para>
@@ -906,11 +931,11 @@ filmů s YUV akcelerací. Budete potřebovat jádro s podporou tdfxfb a
 rekompilovat s
 <screen>./configure --enable-tdfxfb</screen>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="tdfx_vid">
+<sect1 id="tdfx_vid">
 <title>tdfx_vid</title>
 
 <para>
@@ -952,11 +977,11 @@ Ve stejném adresáři je testovací aplikace jménem
 informací, pokud vše dobře pracuje.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="opengl">
+<sect1 id="opengl">
 <title>Rozhraní OpenGL</title>
 
 <para>
@@ -987,11 +1012,11 @@ prostředí (aspoň na nVidii):
 <para>
 <command>export __GL_SYNC_TO_VBLANK=1</command>
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="aalib">
+<sect1 id="aalib">
 <title>AAlib &ndash; zobrazování v textovém režimu</title>
 
 <para>
@@ -1114,11 +1139,11 @@ potřebovat práva k zápisu do
 Aalib to nedetekuje, ale vo_aa zkouší najít nejlepší režim.
 Pro více ladících možností viz <ulink url="http://aa-project.sf.net/tune"/>.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="caca">
+<sect1 id="caca">
 <title>
 <systemitem class="library">libcaca</systemitem> &ndash; Barevná ASCII Art knihovna
 </title>
@@ -1210,11 +1235,11 @@ Použijte volbu <option>-framedrop</option>, pokud váš počítač není dost r
 pro renderování všech snímků.
 </para>
 
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="vesa">
+<sect1 id="vesa">
 <title>VESA - výstup do VESA BIOSu</title>
 
 <para>
@@ -1346,11 +1371,11 @@ Nefunguje!
   inicializuje pouze jednou během POST procedury.
 </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="x11">
+<sect1 id="x11">
 <title>X11</title>
 
 <para>
@@ -1393,11 +1418,11 @@ Pokud nemůžete najír rozlišení, která jste vložili, pročtěte si výstup
 Některé ovladače nezvládnou nízké bodové kmitočty potřebné pro režimy s nízkým
 rozlišením videa.
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="vidix">
+<sect1 id="vidix">
 <title>VIDIX</title>
 
 <formalpara><title>PŘEDMLUVA</title>
@@ -1496,7 +1521,6 @@ zná následující volby: <option>-fs -zoom -x -y -double</option>.
 
 <para>
 Rovněž můžete uvést VIDIXový ovladač jako třetí podvolbu na příkazovém řádku:
-
 <screen>
 mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>soubor.avi</replaceable>
 </screen>
@@ -1504,7 +1528,6 @@ nebo
 <screen>
 mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>soubor.avi</replaceable>
 </screen>
-
 Ale je to nebezpečné a neměli byste to dělat. V tomto případě bude zadaný
 ovladač vynucen a výsledek je nepředvídatelný (může vám
 <emphasis role="bold">zatuhnout</emphasis> počítač). Měli byste to použít
@@ -1526,7 +1549,7 @@ Alternativně můžete použít speciální jaderný modul, například:
   Stáhněte si
   <ulink url="http://www.arava.co.il/matan/svgalib/">vývojovou verzi</ulink>
   svgalib (například 1.9.17), <emphasis role="bold">NEBO</emphasis> si
-  stáhněte verzi vatvořenou Alexem speciálně pro použití s
+  stáhněte verzi vytvořenou Alexem speciálně pro použití s
   <application>MPlayer</application>em (ke kompilaci nepotřebuje zdrojový kód
   svgalib) z
   <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">odtud</ulink>.
@@ -1545,19 +1568,20 @@ Alternativně můžete použít speciální jaderný modul, například:
 </para></step>
 <step><para>
   Přesuňte adresář <filename class="directory">svgalib_helper</filename> do
-  <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
+  podadresáře <filename class="directory">vidix</filename> zdrojových
+  kódů <application>MPlayer</application>u.
 </para></step>
 <step><para>
  Odkomentujte řádek CFLAGS obsahující text "svgalib_helper"
- v souboru <filename class="directory">libdha/Makefile</filename>.
+ v souboru <filename class="directory">vidix/Makefile</filename>.
 </para></step>
 <step><para>
-  Překompilujte a nainstalujte libdha.
+  Překompilujte.
 </para></step>
 </procedure>
 
 
-<sect3 id="vidix-ati">
+<sect2 id="vidix-ati">
 <title>Karty ATI</title>
 
 <para>
@@ -1570,10 +1594,10 @@ Existují dvě skompilované binárky: <filename>radeon_vid</filename> pro Radeo
 <filename>rage128_vid</filename> pro karty Rage 128. Můžete některou vynutit,
  nebo nechat VIDIX rozhraní autodetekovat všechny dostupné ovladače.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-mga">
+<sect2 id="vidix-mga">
 <title>Karty Matrox</title>
 
 <para>
@@ -1584,10 +1608,10 @@ Matrox G200, G400, G450 a G550 jsou hlášeny jako funkční.
 Ovladač podporuje video ekvalizéry a měl by být téměř tak rychlý jako
 <link linkend="mga_vid">Matrox framebuffer</link>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-trident">
+<sect2 id="vidix-trident">
 <title>Karty Trident</title>
 
 <para>
@@ -1599,20 +1623,20 @@ motherboardech VIA Epia.
 Ovladač byl napsán a je udržován
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastairem M. Robinsonem</ulink>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-3dlabs">
+<sect2 id="vidix-3dlabs">
 <title>Karty 3DLabs</title>
 
 <para>
 Ačkoli existuje ovladač pro čipy 3DLabs GLINT R3 a Permedia3, nikdo je
 netestoval, takže hlášení vítáme.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-nvidia">
+<sect2 id="vidix-nvidia">
 <title>Karty nVidia</title>
 <para>
 Unikátní vlastností ovladače nvidia_vid je jeho schopnost zobrazit video na
@@ -1622,10 +1646,10 @@ použít video rozhraní <option>cvidix</option>, jak to ukazuje následující
 příklad:
 <screen>mplayer -vo cvidix <replaceable>příklad.avi</replaceable></screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix-sis">
+<sect2 id="vidix-sis">
 <title>Karty SiS</title>
 
 <para>
@@ -1640,26 +1664,26 @@ verzích "Shuttle XPC" barebones boxes out there)
 <para>
 Hlášení očekávána!
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="directfb">
+<sect1 id="directfb">
 <title>DirectFB</title>
 
 <blockquote><para>
-"DirectFB je grafická knihovna navržená se zřetelem na vestavěné systémy.
+„DirectFB je grafická knihovna navržená se zřetelem na vestavěné systémy.
 Nabízí maximálně hardwarově akcelerovaný výkon při minimální spotřebě
-zdrojů a zatížení." &ndash; citováno z <ulink url="http://www.directfb.org"/>
+zdrojů a zatížení.“ &ndash; citováno z <ulink url="http://www.directfb.org"/>
 </para></blockquote>
 
 <para>Vlastnosti DirectFB v této sekci vynechám.</para>
 
 <para>
 
-Ačkoli <application>MPlayer</application> není podporován jako "video
-provider" v DirectFB, toto video rozhraní umožní přehrávání videa přes
+Ačkoli <application>MPlayer</application> není podporován jako „video
+provider“ v DirectFB, toto video rozhraní umožní přehrávání videa přes
 DirectFB. Bude to samozřejmě akcelerované. Na mém Matroxu G400 byla rychlost
 DirectFB stejná jako XVideo.
 </para>
@@ -1670,11 +1694,11 @@ DirectFB na příkazovém řádku pomocí volby <option>-dfbopts</option>. Volbu
 vrstvy lze provést metodou podzařízení, např.: <option>-vo directfb:2</option>
 (výchozí je vrstva -1: autodetekce)
 </para>
-</sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="dfbmga">
+<sect1 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 
 <para>
@@ -1704,7 +1728,6 @@ patch z výše uvedeného URL). Portace CRTC2 kódu do
 <link linkend="mga_vid">mga_vid</link> bylo plánováno léta,
 <ulink url="../../tech/patches.txt">patche</ulink> vítáme.
 </para></note>
-</sect2>
 </sect1>
 
 
@@ -1720,7 +1743,8 @@ patch z výše uvedeného URL). Portace CRTC2 kódu do
 <para>
 <application>MPlayer</application> podporuje karty s čipsetem Siemens DVB od
 výrobců jako Siemens, Technotrend, Galaxis nebo Hauppauge. Poslední DVB
-ovladače jsou dostupné na <ulink url="http://www.linuxtv.org">Linux TV serveru</ulink>.
+ovladače jsou dostupné na
+<ulink url="http://www.linuxtv.org">Linux TV serveru</ulink>.
 Pokud chcete provádět softwarové transkódování, měli byste mít aspoň 1GHz CPU.
 </para>
 
@@ -1735,16 +1759,16 @@ Pak kompilujte a instalujte obvyklým způsobem.</para>
 
 <formalpara><title>POUŽITÍ</title>
 <para>
-Hardwarové dekódování proudů obsahujících MPEG-1/2 video a/nebo audio lze
+Hardwarové dekódování proudů obsahujících MPEG–1/2 video a/nebo audio lze
 provést tímto příkazem:
 <screen>
-mplayer -ao mpegpes -vo mpegpes <replaceable>file.mpg|vob</replaceable>
+mplayer -ao mpegpes -vo mpegpes <replaceable>soubor.mpg|vob</replaceable>
 </screen>
 </para>
 </formalpara>
 
 <para>
-Dekódování jakéhokoli jiného typu video proudu vyžaduje transkódování MPEG-1,
+Dekódování jakéhokoli jiného typu video proudu vyžaduje transkódování MPEG–1,
 což je pomalé a nemusí stát za to, zvlášť s pomalým počítačem.
 Můžete jej dosáhnout příkazem podobným tomuto:
 <screen>
@@ -1759,21 +1783,21 @@ přidáním <option>scale=šířka:výška</option> s šířkou a výškou, kter
 do volby <option>-vf</option>. DVB karty akceptují různé šířky jako 720, 704,
 640, 512, 480, 352 atd, a provádí hardwarově vodorovné škálování,
 takže ve většině případů nemusíte vodorovně škálovat.
-Pro 512x384 (poměr stran 4:3) MPEG-4 (DivX) zkuste:
+Pro 512x384 (poměr stran 4:3) MPEG–4 (DivX) zkuste:
 <screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen>
 </para>
 
 <para>
 Pokud máte širokoúhlý film a nechcete jej škálovat na plnou výšku, můžete
 použít filtr <option>expand=š:v</option> pro přidání černých okrajů. Pro
-promítání 640x384 MPEG-4 (DivX), zkuste:
+promítání 640x384 MPEG–4 (DivX), zkuste:
 <screen>
 mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 <replaceable>soubor.avi</replaceable>
 </screen>
 </para>
 
 <para>
-Pokud je váš procesor příliš slabý pro 720x576 MPEG-4 (DivX), zkuste podškálovat:
+Pokud je váš procesor příliš slabý pro 720x576 MPEG–4 (DivX), zkuste podškálovat:
 <screen>
 mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 <replaceable>soubor.avi</replaceable>
 </screen>
@@ -1802,7 +1826,7 @@ na pomalém CPU, přidejte volbu <option>-framedrop</option>.
 </para>
 
 <para>
-Chcete-li zachovat poměr stran MPEG-4 (DivX) souborů a dosáhnout optimálních
+Chcete-li zachovat poměr stran MPEG–4 (DivX) souborů a dosáhnout optimálních
 škálovacích parametrů (hardwarové horizontální škálování a softwarové vertikální
 škálování zatímco zachováte správný poměr stran), použijte filtr dvbscale:
 <screen>
@@ -1871,7 +1895,7 @@ Další možná použití jsou: televideo pid, druhá audio stopa, atd.
 Pokud <application>MPlayer</application> často protestuje o
 <screen>Příliš mnoha video/audio paketech ve vyrovnávací paměti</screen> nebo
 pokud si povšimnete rostoucí desynchronizace mezi zvukem a
-videem, zkuste použít MPEG-TS demuxer z libavformat přidáím
+videem, zkuste použít MPEG–TS demuxer z libavformat přidáním
 <option>-demuxer lavf -lavfdopts probesize=128</option>
 na příkazovém řádku.
 </para>
@@ -1883,17 +1907,17 @@ Pro zobrazení prvního z kanálů uvedeného v seznamu, spusťte
 
 <para>
 Pokud chcete sledovat určitý kanál, například R1, spusťte
-<screen>mplayer dvb://R1</screen>
+<screen>mplayer dvb://<replaceable>R1</replaceable></screen>
 </para>
 
 <para>
 Pokud máte více než jednu kartu, musíte rovněž uvést číslo karty, na které lze
 kanál sledovat (např. 2). Syntyxe je:
-<screen>mplayer dvb://2@R1</screen>
+<screen>mplayer dvb://<replaceable>2@R1</replaceable></screen>
 </para>
 
 <para>
-Pro změnu kanálu stiskněte klávesu <keycap>h</keycap> (další) a
+Pro změnu kanálu stiskněte klávesu <keycap>h</keycap> (další) nebo
 <keycap>k</keycap> (předchozí), nebo použijte
 <link linkend="osdmenu">OSD menu</link>.
 </para>
@@ -1917,7 +1941,7 @@ mplayer -dumpfile <replaceable>r1.ts</replaceable> -dumpstream dvb://<replaceabl
 
 <para>
 Pokud jej chcete zaznamenat v odlišném formátu (reenkódovat jej), spusťte
-místo toho příkaz podobný následujícímu
+místo toho příkaz podobný následujícímu:
 <screen>
 mencoder -o <replaceable>r1.avi</replaceable> -ovc xvid -xvidencopts bitrate=800\
     -oac mp3lame -lameopts cbr:br=128 -pp=ci dvb://<replaceable>R1</replaceable>
@@ -1941,7 +1965,7 @@ e-mailové konferenci. Pamatujte prosím, že jazykem konference je angličtina.
 <para>
 V budoucnu můžete očekávat schopnost zobrazovat OSD a titulky pomocí nativní
 podpory OSD v DVB kartách, stejně jako plynulejší přehrávání filmů s jinou
-snímkovou rychlostí, než 25 fps a transkódování MPEG-2 na MPEG-4 v reálném čase
+snímkovou rychlostí, než 25 fps a transkódování MPEG–2 na MPEG–4 v reálném čase
 (částečná dekomprese).
 </para>
 </sect2>
@@ -2025,11 +2049,13 @@ si můžete hrát s nastavením overlay a pozorovat změny v reálném čase. Sn
 tato funkce časem dostupná z GUI <application>MPlayer</application>u. Jakmile
 máte správně nastaveno overlay, není již nutné používat dxr3view.
 <option>prebuf</option> zapíná prebuffering. Prebuffering je vlastnost čipu
-em8300, terá mu umožňuje podržet si více než jeden videosnímek v daném čase.
-To znamená, že pokud jej máte zapnutý, snaží se <application>MPlayer</application>
-udržet vyrovnávací paměť videa (buffer) naplněný daty. Pokud jej provozujete na
-pomalém stroji, použije <application>MPlayer</application> téměř nebo přesně
-100% výkonu CPU. To je zvlášť časté, pokud přehráváte čisté MPEG datové proudy
+em8300, která mu umožňuje podržet si více než jeden videosnímek současně.
+To znamená, že pokud jej máte zapnutý, snaží se
+<application>MPlayer</application> udržet vyrovnávací paměť videa (buffer)
+naplněný daty.
+Pokud jej provozujete na pomalém stroji, použije
+<application>MPlayer</application> téměř nebo přesně 100% výkonu CPU.
+To je zvlášť časté, pokud přehráváte čisté MPEG datové proudy
 (jako DVD, SVCD atp.) jelikož je <application>MPlayer</application> nemusí
 převádět do MPEG, naplní buffer velmi rychle.
 S prebufferingem je přehrávání videa <emphasis role="bold">mnohem</emphasis>
@@ -2038,7 +2064,7 @@ si aplikace neuzme CPU na dlouhou dobu.
 Pokud přehráváte bez prebufferingu, je em8300 mnohem citlivější na vytížení CPU,
 takže doporučujeme zapnout <application>MPlayer</application>ovu volbu
 <option>-framedrop</option> pro zachování synchronizace.
-<option>sync</option> zapíná nový sync-engine. To je zatím experimentální
+<option>sync</option> zapíná nový sync–engine. To je zatím experimentální
 vlastnost. Se zapnutým sync budou vnitřní hodiny em8300 neustále sledovány a
 pokud se začnou rozcházet s časovačem <application>MPlayer</application>u,
 budou resetovány, což způsobí, že em8300 zahodí veškeré snímky, které čekají ve
@@ -2051,9 +2077,9 @@ podle snímkové rychlosti filmu. norm = 0 (výchozí) nezmění aktuální norm
 <option><replaceable>device</replaceable></option> = číslo zařízení, které se
 má použít, pokud máte více než jednu em8300 kartu.
 Jakoukoli z těchto voleb můžete vynechat.
-Volby <option>:prebuf:sync</option> zdá se pracují skvěle při přehrávání filmů
-v MPEG-4 (DivX). Lidé však hlásili potíže s volbou prebuf při přehrávání souborů
-v MPEG-1/2.
+Volba <option>:prebuf:sync</option>, zdá se, pracuje skvěle při přehrávání filmů
+v MPEG–4 (DivX). Lidé však hlásili potíže s volbou prebuf při přehrávání souborů
+v MPEG–1/2.
 Měli byste je nejprve zkusit přehrát bez dodatečných voleb a pokud
 narazíte na potíže se synchronizací nebo DVD titulky, zkuste to s volbou
 <option>:sync</option>.
@@ -2083,8 +2109,8 @@ narazíte na potíže se synchronizací nebo DVD titulky, zkuste to s volbou
 <varlistentry>
   <term><option>-vf lavc/fame</option></term>
   <listitem><para>
-  Pro přehrávání ne-MPEG obsahu na em8300 (např. MPEG-4 (DivX) nebo RealVideo)
-  musíte nastavit MPEG-1 video filtr jako
+  Pro přehrávání ne–MPEG obsahu na em8300 (např. MPEG–4 (DivX) nebo RealVideo)
+  musíte nastavit MPEG–1 video filtr jako
   <systemitem class="library">libavcodec</systemitem> (lavc).
   Viz manuál pro další informace o <option>-vf lavc</option>.
   V tuto chvíli není možné nastavit snímkovou rychlost em8300, což znamená,
@@ -2102,19 +2128,19 @@ narazíte na potíže se synchronizací nebo DVD titulky, zkuste to s volbou
 <varlistentry>
   <term><option>-vf expand=-1:-1:-1:-1:1</option></term>
   <listitem><para>
-  Ačkoli DXR3 ovladač umí dodat OSD do MPEG-1/2/4 videa, má to mnohem nižší
+  Ačkoli DXR3 ovladač umí dodat OSD do MPEG–1/2/4 videa, má to mnohem nižší
   kvalitu než tradiční OSD <application>MPlayer</application>u a má i různé
   problémy s obnovováním. Výše uvedený příkazový řádek nejprve převede vstupní
-  video do MPEG-4 (je to nutné, sorry), pak aplikuje filtr expand, který však
+  video do MPEG–4 (je to nutné, sorry), pak aplikuje filtr expand, který však
   nic neexpanduje (-1: výchozí), ale doplní normální OSD do obrazu
-  (na to je ta "1" na konci).
+  (na to je ta „1“ na konci).
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><option>-ac hwac3</option></term>
   <listitem><para>
-  Čip em8300 podporuje přehrávání zvuku v AC3 (prostorový zvuk) přes digitální
+  Čip em8300 podporuje přehrávání zvuku v AC–3 (prostorový zvuk) přes digitální
   audio výstup na kartě. Viz výš volbu <option>-ao oss</option>. Ta musí být
   použita pro nastavení výstupu do DXR3 místo zvukové karty.
   </para></listitem>
@@ -2248,7 +2274,7 @@ Na Arcade video můžete vidět výstupní rozhraní Blinkenlights v akci v 00:0
 
 
 <sect1 id="tvout">
-<title>pODPORA TV výstupu</title>
+<title>Podpora TV výstupu</title>
 
 <sect2 id="tvout-mga-g400">
 <title>Karty Matrox G400</title>
@@ -2355,7 +2381,8 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>soubor</replaceable><
    --></screen>
 
       (Pokud používáte X, přepněte se nyní do matroxfb pomocí například
-      <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>F1</keycap></keycombo>.)
+
+<keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>F1</keycap></keycombo>.)
       Změňte <literal>640</literal> a <literal>512</literal> pokud máte
       nastaveno jiné rozlišení...
     </para></step>
@@ -2368,7 +2395,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>soubor</replaceable><
 </varlistentry>
 </variablelist>
 
-<formalpara><title>Výroba kabelu pro Matrox TV-out</title>
+<formalpara><title>Výroba kabelu pro Matrox TV–out</title>
 <para>
 Zříkáme se jakékoli odpovědnosti nebo záruky za jakékoli poškození způsobené
 touto dokumentací.
@@ -2474,7 +2501,7 @@ jednou během POST procedury.
 <title>nVidia</title>
 
 <para>
-Nejprve si MUSÍTE stáhnout closed-source ovladače z
+Nejprve si MUSÍTE stáhnout closed–source ovladače z
 <ulink url="http://nvidia.com"/>.
 Nebudu zde popisovat instalaci a konfiguraci, jelikož je to mimo rámec této
 dokumentace.

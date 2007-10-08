@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21748 -->
+<!-- synced with r23520 -->
 <chapter id="radio">
 <title>Rádio</title>
 
@@ -19,9 +19,9 @@ Popis voleb a ovládání z klávesnice naleznete v man stránce.
 
 <procedure>
 <step><para>
-  Nejprve musíte spustit <filename>./configure</filename>
-  s <option>--enable-radio</option> a (pokud chcete i nahrávat)
-  <option>--enable-radio-capture</option> a znovu přeložit MPlayer.
+  Nejprve musíte znovupřeložit <application>MPlayer</application> pomocí
+  <filename>./configure</filename> s <option>--enable-radio</option> a
+  (pokud chcete i nahrávat) <option>--enable-radio-capture</option>.
 </para></step>
 <step><para>
   Ujistěte se, že váš tuner pracuje s jiným softwarem v Linuxu, například
@@ -90,13 +90,15 @@ Přehrávání druhé stanice ze seznamu:
 Průchod zvuku přes PCI sběrnici z interního ADC rádio karty.
 V tomto příkladu se tuner používá jako druhá zvuková karta
 (ALSA zařízení hw:1,0). Pro zařízení založené na saa7134 musí
-být zaveden buď modul saa7134-alsa nebo modul saa7134-oss.
+být zaveden buď modul <systemitem>saa7134-alsa</systemitem> nebo
+modul <systemitem>saa7134-oss</systemitem>.
 <screen>
 mplayer -rawaudio rate=32000 radio://2/capture \
     -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm
 </screen>
-<note><para>Když používáte názvy zařízení ALSA, dvojtečky musí být
-nahrazeny zkaky rovnáse, čárky tečkami.
+<note><para>
+Když používáte názvy zařízení ALSA, dvojtečky musí být
+nahrazeny znaky rovnáse, čárky tečkami.
 </para></note>
 </para>
 </informalexample>
