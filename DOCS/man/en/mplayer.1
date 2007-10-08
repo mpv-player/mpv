@@ -5827,6 +5827,21 @@ High precision/\:quality version of the denoise3d filter.
 Parameters and usage are the same.
 .
 .TP
+.B ow[=depth:luma_strength:chroma_strength]
+Overcomplete Wavelet denoiser.
+.PD 0
+.RSs
+.IPs <depth>
+Larger depth values will denoise lower frequency components more, but
+slow down filtering (default: 8).
+.IPs <luma_strength>
+luma strength (default: 1.0)
+.IPs <chroma_strength>
+chroma strength (default: 1.0)
+.RE
+.PD 1
+.
+.TP
 .B eq[=brightness:contrast] (OBSOLETE)
 Software equalizer with interactive controls just like the hardware
 equalizer, for cards/\:drivers that do not support brightness and
