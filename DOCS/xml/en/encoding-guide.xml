@@ -2564,6 +2564,10 @@ You can encode to the following codecs (more or less up to date):
   <entry>zbmv</entry>
   <entry>Zip Blocks Motion Video</entry>
 </row>
+<row>
+  <entry>dnxhd</entry>
+  <entry>AVID DNxHD</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
