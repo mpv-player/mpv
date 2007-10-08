@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.cz
 //                 Jiri Heryan
-// Synced with r21367
+// Synced with r24423
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -158,7 +158,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Selhala inicializace menu.\n"
 #define MSGTR_Getch2InitializedTwice "VAROVÁNÍ: getch2_init volána dvakrát!\n"
 #define MSGTR_DumpstreamFdUnavailable "Nemohu uložit (dump) tento proud - žádný deskriptor souboru není dostupný.\n"
-#define MSGTR_FallingBackOnPlaylist "Ustupuji od pokusu o zpracování playlistu %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Nemohu otevřít video filtr libmenu s kořenovým menu %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Chyba při předinicializaci řetězce audio filtrů!\n"
 #define MSGTR_LinuxRTCReadError "Chyba při čtení z Linuxových RTC: %s\n"
@@ -225,8 +224,10 @@ static char help_text[]=
 #define MSGTR_Contrast "Kontrast"
 #define MSGTR_Saturation "Sytost"
 #define MSGTR_Hue "Odstín"
+#define MSGTR_Balance "Stereováha"
 
 // property state
+#define MSGTR_LoopStatus "Loop: %s"
 #define MSGTR_MuteStatus "Ztišení: %s"
 #define MSGTR_AVDelayStatus "A-V odchylka: %s"
 #define MSGTR_OnTopStatus "Zůstat navrchu: %s"
@@ -238,6 +239,7 @@ static char help_text[]=
 #define MSGTR_SubPosStatus "Umístění titulků: %s/100"
 #define MSGTR_SubAlignStatus "Zarovnání titulků: %s"
 #define MSGTR_SubDelayStatus "Zpoždění titulků: %s"
+#define MSGTR_SubScale "Zvětšení titulků: %s"
 #define MSGTR_SubVisibleStatus "Titulky: %s"
 #define MSGTR_SubForcedOnlyStatus "Pouze vynucené titulky: %s"
  
@@ -530,6 +532,11 @@ static char help_text[]=
 #define MSGTR_CantOpenDVD "Nelze otevřít DVD zařízení: %s\n"
 
 // stream_dvd.c
+#define MSGTR_DVDspeedCantOpen "Nemohu otevřít DVD zařízení pro zápis, změna DVD rychlosti vyžaduje právo zápisu.\n"
+#define MSGTR_DVDrestoreSpeed "Obnovuji DVD rychlost... "
+#define MSGTR_DVDlimitSpeed "Omezuji DVD rychlost na %dKB/s... "
+#define MSGTR_DVDlimitFail "selhalo\n"
+#define MSGTR_DVDlimitOk "úspěch\n"
 #define MSGTR_NoDVDSupport "MPlayer byl zkompilován bez podpory DVD, končím.\n"
 #define MSGTR_DVDnumTitles "Na tomto DVD je %d titul(ů).\n"
 #define MSGTR_DVDinvalidTitle "Neplatné číslo DVD titulu: %d\n"
@@ -622,6 +629,10 @@ static char help_text[]=
 #define MSGTR_NoBindFound "Tlačítko '%s' nemá přiřazenu žádnou funkci."
 #define MSGTR_FailedToOpen "Selhalo otevření %s.\n"
 
+#define MSGTR_VideoID "Nalezen video proud [%s], -vid %d\n"
+#define MSGTR_AudioID "Nalezen audio proud [%s], -aid %d\n"
+#define MSGTR_SubtitleID "Nalezen titulkový proud [%s], -sid %d\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nelze otevřít kodek.\n"
 #define MSGTR_CantCloseCodec "Nelze uzavřít kodek.\n"
@@ -690,6 +701,7 @@ static char help_text[]=
 
 #define MSGTR_InsertingAfVolume "[Mixer] Hardwarový mixér není k dispozici, vkládám filtr pro hlasitost.\n"
 #define MSGTR_NoVolume "[Mixer] Řízení hlasitosti není dostupné.\n"
+#define MSGTR_NoBalance "[Mixer] Řízení stereováhy není dostupné.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -996,7 +1008,8 @@ static char help_text[]=
 // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "Vybrané video_out zařízení je nekompatibilní s tímto kodekem.\n"\
-                "Zkuste přidat filtr scale, čili -vf spp,scale namísto -vf spp.\n"
+                "Zkuste přidat filtr scale do svého řetězce filtrů,\n"\
+                "čili -vf spp,scale namísto -vf spp.\n"
 #define MSGTR_VO_GenericError "Tato chyba nastala"
 #define MSGTR_VO_UnableToAccess "Nemám přístup k"
 #define MSGTR_VO_ExistsButNoDirectory "již existuje, ale není to adresář."
@@ -1060,6 +1073,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Volume "Hlasitost"
 #define MSGTR_VO_SUB_Brightness "Jas"
 #define MSGTR_VO_SUB_Hue "Barevný tón"
+#define MSGTR_VO_SUB_Balance "Vyvažování"
 
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "Rozměry zdrojového obrazu jsou příliš velké: %ux%u (maximum je %ux%u)\n"
@@ -1189,8 +1203,6 @@ static char help_text[]=
 "[AO_ALSA]   device=<název_zařízení>\n"\
 "[AO_ALSA]     Nastaví zařízení (změňte , za . a : za =)\n"
 #define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d kanálů není podporováno.\n"
-#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] Nelze číst konfiguraci ALSA: %s\n"
-#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] Nelze zkopírovat konfiguraci: %s\n"
 #define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] Otevření v neblokujícím režimu selhalo, zkouším otevřít v blokujícím.\n"
 #define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Chyba otevření přehrávání: %s\n"
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Chyba nastavení blokujícího režimu %s.\n"
@@ -1346,6 +1358,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Po hlavičce nenásleduje žádný datový chunk!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: ani audio ani video hlavičky nebyly nalezeny - vadný soubor?\n"
 #define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Nesprávná délka v hlavičce ASF!\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "DRM Licence URL: %s\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "Tento soubor byl zatížen DRM šifrou, v MPlayeru nelze přehrát!\n"
 
 // asf_mmst_streaming.c
 
@@ -1548,6 +1562,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_XMMS_FoundPlugin "Nalezen plugin: %s (%s).\n"
 #define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Uzavírám plugin: %s.\n"
+#define MSGTR_MPDEMUX_XMMS_WaitForStart "Čekám až XMMS plugin zahájí přehrávání '%s'...\n"
 
 // ========================== LIBMPMENU ===================================
 
@@ -1589,7 +1604,8 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Při definici podmenu je potřeba uvést atribut 'menu'.\n"
-#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Preferenční položka menu vyžaduje korektní atribut 'property' (řádka %d).\n"
+#define MSGTR_LIBMENU_InvalidProperty "[MENU] Neplatná vlastnost '%s' v pref menu. (řádek %d).\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Preferenční položka menu vyžaduje korektní atribut 'property' nebo 'txt' (řádek %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Preferenční menu vyžaduje argument.\n"
 
 // libmenu/menu_pt.c
@@ -1954,12 +1970,12 @@ static char help_text[]=
 #define MSGTR_RADIO_CaptureStarting "[radio] Zahajuji zachytávání obsahu.\n"
 #define MSGTR_RADIO_ClearBufferFailed "[radio] Vypráznění vyrovnávací paměti selhalo: %s\n"
 #define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Volání do stream_enable_cache selhalo: %s\n"
-#define MSGTR_RADIO_DriverUnknownId "[radio] Neznámé ID ovladače: %d\n"
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Neznámé jméno ovladače: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Používám V4Lv2 rádio rozhraní.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Používám V4Lv1 rádio rozhraní.\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[radio] Používám *BSD BT848 rádio rozhraní.\n"
- 
+#define MSGTR_RADIO_AvailableDrivers "[radio] Dostupné ovladače: "
+
 // ================================== LIBASS ====================================
 
 // ass_bitmap.c
@@ -2000,6 +2016,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_FcDirSave "[ass] FcDirSave selhalo.\n"
 #define MSGTR_LIBASS_FcConfigAppFontAddDirFailed "[ass] FcConfigAppFontAddDir selhalo\n"
 #define MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed "[ass] Fontconfig zakázán, bude použit jen výchozí font.\n"
+#define MSGTR_LIBASS_FunctionCallFailed "[ass] %s selhalo\n"
 
 // ass_render.c
 #define MSGTR_LIBASS_NeitherPlayResXNorPlayResYDefined "[ass] Není definována PlayResX ani PlayResY. Předpokládám 384x288.\n"
@@ -2016,7 +2033,6 @@ static char help_text[]=
 #define MSGTR_LIBASS_EmptyEvent "[ass] Prázdná událost!\n"
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] Dosaženo MAX_GLYPHS: událost %d, start = %llu, trvání = %llu\n Text = %s\n"
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Varování! Změněna výška události!  \n"
-#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Příliš mnoho událostí současně!\n"
 
 // ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyf 0x%X nenalezen, měním font pro (%s, %d, %d)\n"
