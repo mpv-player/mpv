@@ -3831,13 +3831,9 @@ echores "$_directfb"
 
 if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
-  if test "$_dfb_version" -ge `dfb_version 0 9 13`; then
     _vosrc="$_vosrc vo_directfb2.c"
     _vomodules="directfb $_vomodules"
     _libs_mplayer="$_libs_mplayer -ldirectfb"
-  else
-    _novomodules="directfb $_novomodules"
-  fi
 
   if test "$_dfb_version" -ge `dfb_version 0 9 15`; then
     _vosrc="$_vosrc vo_dfbmga.c"
