@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23579 -->
+<!-- synced with r24293 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Il Visualizzatore di film</title>
@@ -161,14 +161,6 @@ in altri formati sempre visualizzabili da <application>MPlayer</application>
 </para></listitem>
 <listitem><para>
   Può codificare sottotitoli DVD in formato VOBsub
-</para></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>Caratteristiche pianificate</title>
-<listitem><para>
-  Ancora una maggior varietà di formati/codec di de/codifica
-  (creazione di file VOB con flussi DivX4/Indeo5/VIVO :).
 </para></listitem>
 </itemizedlist>
 
