@@ -2561,8 +2561,8 @@ You can encode to the following codecs (more or less up to date):
   <entry>FFmpeg's experimental wavelet-based codec</entry>
 </row>
 <row>
-  <entry>zbmv</entry>
-  <entry>Zip Blocks Motion Video</entry>
+  <entry>zmbv</entry>
+  <entry>Zip Motion Blocks Video</entry>
 </row>
 <row>
   <entry>dnxhd</entry>
