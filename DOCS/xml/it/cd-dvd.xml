@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23690 -->
+<!-- synced with r24344 -->
 <chapter id="cd-dvd">
 <title>Utilizzo CD/DVD</title>
 
@@ -144,52 +144,6 @@ Nel caso di problemi di decodifica di DVD, prova a disabilitare il supermount,
 o qualsiasi altra utilità. Alcuni lettori RPC-2 possono anche aver bisogno di
 avere il codice di zona impostato.
 </para></note>
-
-<formalpara>
-<title>Struttura DVD</title>
-<para>
-I dischi DVD hanno 2048 byte per settore con ECC/CRC. Di solito hanno un
-filesystem UDF su una sola traccia, contenente svariati file (piccoli file
-.IFO e .BUP e grossi (1GB) file .VOB). Questi sono file veri e possono esser
-copiati/riprodotti dal filesystem montato di un DVD non criptato.
-</para>
-</formalpara>
-
-<para>
-I file .IFO contengono le informazioni per navigare nel film
-(capitoli/titoli/angolazioni, tabella lingue, etc) e sono necessari per leggere
-ed interpretare il contenuto .VOB (il film). I file .BUP sono dei loro backup.
-Usano <emphasis role="bold">sectors</emphasis> dappertutto, per cui hai bisogno
-di usare un indirizzamento dei settori del disco a basso livello per
-implementare la navigazione DVD o decrittarne il contenuto.
-</para>
-
-<para>
-Il supporto per DVD ha bisogno di un accesso di basso livello basato su settori
-al dispositivo. Sfortunatamente devi (sotto Linux) essere root per ottenere
-l'indirizzamento del settore in un file. Per questo non usiamo proprio il
-filesystem del kernel, piuttosto lo reimplementiamo nello spazio utente di
-esecuzione. <systemitem>libdvdread</systemitem> 0.9.x fa ciò. Non serve il
-driver del kernel per il filesystem UDF visto che ha già il suo driver
-integrato per il filesystem UDF. Inoltre non serve che il DVD sia montato visto
-che viene utilizzato solo l'accesso di basso livello a settori.
-</para>
-
-<para>
-Alcune volte <filename>/dev/dvd</filename> non può esser letto dagli utenti,
-perciò gli autori di <systemitem>libdvdread</systemitem> hanno implementato un
-livello di emulazione che traduce gli indirizzi dei settori in
-nomifile+posizioni relative, per emulare un accesso di basso livello su di un
-filesystem montato o anche su un disco fisso.
-</para>
-
-<para>
-<systemitem>libdvdread</systemitem> accetta anche il nome del punto di mount al
-posto del nome del dispositivo per l'accesso di basso livello e controlla in
-<filename>/proc/mounts</filename> per definire il nome del dispositivo.
-E' stato sviluppato per Solaris, dove i nomi dei dispositivi sono allocati
-dinamicamente.
-</para>
 
 <formalpara>
 <title>Decrittazione DVD</title>
