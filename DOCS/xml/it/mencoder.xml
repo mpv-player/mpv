@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23983 -->
+<!-- synced with r24342 -->
 <chapter id="mencoder">
 <title>Utilizzo base di <application>MEncoder</application></title>
 
@@ -233,6 +233,10 @@ Puoi forzare un formato contenitore specifico con l'opzione
 <row>
   <entry>dv</entry>
   <entry>contenitore Sony Digital Video</entry>
+</row>
+<row>
+  <entry>mkv</entry>
+  <entry>contenitore "aperto" audio/video Matroska</entry>
 </row>
 </tbody>
 </tgroup>
