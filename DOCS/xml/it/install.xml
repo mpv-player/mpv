@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23226 -->
+<!-- synced with r24087 -->
 <chapter id="install">
 <title>Installazione</title>
 
@@ -48,17 +48,24 @@ risposte.
   3.79.x o successiva. Per creare la documentazione XML ti serve la 3.80.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">FreeType</emphasis> - facoltativo,
-  richiesto per avere un font per gli OSD e i sottotitoli.
-  Richiesta almeno la versione 2.0.9.
+  <emphasis role="bold">FreeType</emphasis> - per l'OSD e i sottotitoli è
+  richiesta la versione 2.0.9 o successiva.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libjpeg</emphasis> - de/codificatore JPEG facoltativo,
-  richiesto per il driver di uscita video JPEG
+  <emphasis role="bold">ALSA</emphasis> - facoltativo, per il supporto di
+  uscita audio ALSA. Richiesta almeno la 0.9.0rc4.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libpng</emphasis> - de/codificatore (M)PNG facoltativo,
-  richiesto per il driver di uscita video PNG
+  <emphasis role="bold">libjpeg</emphasis> -
+  richiesto per il driver opzionale di uscita video JPEG.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">libpng</emphasis> -
+  richiesto per il driver opzionale di uscita video PNG.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">directfb</emphasis> - facoltativo, richiesta la
+  versione 0.9.13 o successiva per il driver di uscita video directfb.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - 3.90 o successivo consigliato,
@@ -73,10 +80,6 @@ risposte.
   - facoltativo, necessario per alcuni flussi RTSP/RTP
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> - facoltativo, usa 0.9.13 o
-  successivo.
-</para></listitem>
-<listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - facoltativo, per supporto CDDA
 </para></listitem>
 <listitem><para>
@@ -85,11 +88,7 @@ risposte.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - facoltativo, per il supporto di
-  rete smb
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">ALSA</emphasis> - facoltativo, per il supporto di
-  uscita audio ALSA. Richiesta almeno la 0.9.0rc4.
+  rete SMB
 </para></listitem>
 </itemizedlist>
 </sect1>
