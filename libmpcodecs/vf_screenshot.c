@@ -12,8 +12,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <png.h>
-
 #include "mp_msg.h"
 
 #include "img_format.h"
@@ -22,6 +20,12 @@
 #include "vf_scale.h"
 
 #include "libswscale/swscale.h"
+
+#ifdef USE_LIBAVCODEC_SO
+#include <ffmpeg/avcodec.h>
+#else
+#include "libavcodec/avcodec.h"
+#endif
 
 struct vf_priv_s {
     int frameno;
@@ -34,6 +38,9 @@ struct vf_priv_s {
     int dw, dh, stride;
     uint8_t *buffer;
     struct SwsContext *ctx;
+    AVCodecContext *avctx;
+    uint8_t *outbuffer;
+    int outbuffer_size;
 };
 
 //===========================================================================//
@@ -43,8 +50,14 @@ static int config(struct vf_instance_s* vf,
 		  unsigned int flags, unsigned int outfmt)
 {
     vf->priv->ctx=sws_getContextFromCmdLine(width, height, outfmt,
-				 d_width, d_height, IMGFMT_BGR24);
+				 d_width, d_height, IMGFMT_RGB24);
 
+    vf->priv->outbuffer_size = d_width * d_height * 3 * 2;
+    vf->priv->outbuffer = realloc(vf->priv->outbuffer, vf->priv->outbuffer_size);
+    vf->priv->avctx->width = d_width;
+    vf->priv->avctx->height = d_height;
+    vf->priv->avctx->pix_fmt = PIX_FMT_RGB24;
+    vf->priv->avctx->compression_level = 0;
     vf->priv->dw = d_width;
     vf->priv->dh = d_height;
     vf->priv->stride = (3*vf->priv->dw+15)&~15;
@@ -55,23 +68,12 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void write_png(char *fname, unsigned char *buffer, int width, int height, int stride)
+static void write_png(struct vf_priv_s *priv)
 {
+    char *fname = priv->fname;
     FILE * fp;
-    png_structp png_ptr;
-    png_infop info_ptr;
-    png_byte **row_pointers;
-    int k;
-
-    png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    info_ptr = png_create_info_struct(png_ptr);
-    fp = NULL;
-
-    if (setjmp(png_ptr->jmpbuf)) {
-	png_destroy_write_struct(&png_ptr, &info_ptr);
-	fclose(fp);
-	return;
-    }
+    AVFrame pic;
+    int size;
 
     fp = fopen (fname, "wb");
     if (fp == NULL) {
@@ -79,28 +81,11 @@ static void write_png(char *fname, unsigned char *buffer, int width, int height,
 	return;
     }
         
-    png_init_io(png_ptr, fp);
-    png_set_compression_level(png_ptr, 0);
-
-    png_set_IHDR(png_ptr, info_ptr, width, height,
-		 8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
-		 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-
-    png_write_info(png_ptr, info_ptr);
-        
-    png_set_bgr(png_ptr);
-
-    row_pointers = malloc(height*sizeof(png_byte*));
-    for (k = 0; k < height; k++) {
-	unsigned char* s=buffer + stride*k;
-	row_pointers[k] = s;
-    }
-
-    png_write_image(png_ptr, row_pointers);
-    png_write_end(png_ptr, info_ptr);
-    png_destroy_write_struct(&png_ptr, &info_ptr);
-
-    free(row_pointers);
+    pic.data[0] = priv->buffer;
+    pic.linesize[0] = priv->stride;
+    size = avcodec_encode_video(priv->avctx, priv->outbuffer, priv->outbuffer_size, &pic);
+    if (size > 0)
+        fwrite(priv->outbuffer, size, 1, fp);
 
     fclose (fp);
 }
@@ -217,7 +202,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	if (vf->priv->fname[0]) {
 	    if (!vf->priv->store_slices)
 	      scale_image(vf->priv, dmpi);
-	    write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
+	    write_png(vf->priv);
 	}
 	vf->priv->store_slices = 0;
     }
@@ -292,7 +277,14 @@ static int screenshot_open(vf_instance_t *vf, char* args)
     vf->priv->shot=0;
     vf->priv->store_slices=0;
     vf->priv->buffer=0;
+    vf->priv->outbuffer=0;
     vf->priv->ctx=0;
+    vf->priv->avctx = avcodec_alloc_context();
+    avcodec_register_all();
+    if (avcodec_open(vf->priv->avctx, avcodec_find_encoder(CODEC_ID_PNG))) {
+        mp_msg(MSGT_VFILTER, MSGL_FATAL, "Could not open libavcodec PNG encoder\n");
+        return 0;
+    }
     return 1;
 }
 
@@ -300,6 +292,7 @@ static void uninit(vf_instance_t *vf)
 {
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
     if (vf->priv->buffer) free(vf->priv->buffer);
+    free(vf->priv->outbuffer);
     free(vf->priv);
 }
 
