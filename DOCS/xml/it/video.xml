@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24056 -->
+<!-- synced with r24710 -->
 <chapter id="video">
 <title>Dispositivi di uscita video</title>
 
@@ -323,6 +323,33 @@ Alternativamente, <application>MPlayer</application> contiene un driver
 Se vuoi usare Xv con una scheda basata su Kyro (per esempio la Hercules
 Prophet 4000XT), dovresti scaricare i driver dal
 <ulink url="http://www.powervr.com/">sito di PowerVR</ulink>.
+</para>
+</sect2>
+</sect1>
+
+
+<sect2 id="intel">
+<title>Schede Intel</title>
+
+<para>
+Queste schede si possono trovare in molti portatili. Si consiglia un Xorg
+recente.
+</para>
+
+<para>
+Per permettere la riproduzione di contenuti a dimensione DVD (o superiore)
+modifica il tuo file di configurazione XF86Config/xorg.conf nel modo seguente:
+<programlisting>
+Section "Device"
+    [...]
+    Driver "intel"
+    <emphasis>Option "LinearAlloc" "6144"</emphasis>
+    [...]
+EndSection
+</programlisting>
+L'assenza di questa opzione di solito porta a un errore del tipo
+<screen>X11 error: BadAlloc (insufficient resources for operation)</screen>
+quando si cerca di usare <option>-vo xv</option>.
 </para>
 </sect2>
 </sect1>
@@ -1912,9 +1939,8 @@ e devi solamente specificare quale scheda usare.
 <para>
 Assicurati di avere <emphasis>solo</emphasis> canali in chiaro nel tuo file
 <filename>channels.conf</filename>, altrimenti
-<application>MPlayer</application> cercherà di saltare al canale visibile
-successivo, ma potrebbe impiegarci molto se ci fossero tanti canali criptati
-consecutivi.
+<application>MPlayer</application> resterà in attesa di una trasmissione non
+criptata.
 </para>
 
 <para>
