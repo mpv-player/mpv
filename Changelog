@@ -4,6 +4,8 @@ MPlayer (1.0)
     Filters:
     * vf_ow new overcomplete wavelet denoiser
 
+    FFmpeg/libavcodec:
+    * DNxHD (SMPTE VC-3) encoder
 
   rc2: "AreWeThereYet?" October 7, 2007
   (SVN revisions: MPlayer r24722, FFmpeg r10677)
