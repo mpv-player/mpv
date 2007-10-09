@@ -6,6 +6,7 @@ MPlayer (1.0)
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
+    * H.264 PAFF decoding
 
   rc2: "AreWeThereYet?" October 7, 2007
   (SVN revisions: MPlayer r24722, FFmpeg r10677)
