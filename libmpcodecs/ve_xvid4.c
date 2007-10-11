@@ -1174,7 +1174,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 	// parse zones
 	if (xvidenc_zones != NULL && doZones > 0) // do not apply zones in CQ, and first pass mode (xvid vfw doesn't allow them in those modes either)
 	{
-		void *p;
+		char *p;
 		int i;
 		p = xvidenc_zones;
 		create->num_zones = 0; // set the number of zones back to zero, this overwrites the zone defined for CQ - desired because each zone has to be specified on the commandline even in cq mode
