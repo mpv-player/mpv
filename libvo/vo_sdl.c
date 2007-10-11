@@ -622,7 +622,7 @@ static void set_fullmode (int mode)
 	/* change to given fullscreen mode and hide the mouse cursor */
 	newsurface = SDL_SetVideoMode(priv->fullmodes[mode]->w - waspect, priv->fullmodes[mode]->h - haspect, priv->bpp, priv->sdlfullflags);
 	
-	/* if we were successfull hide the mouse cursor and save the mode */
+	/* if we were successful hide the mouse cursor and save the mode */
 	if (newsurface) {
 		if (priv->surface)
 	    	    SDL_FreeSurface(priv->surface);
@@ -749,7 +749,7 @@ static void set_fullmode (int mode) {
 
 
 	
-	/* if creation of new surface was successfull, save it and hide mouse cursor */
+	/* if creation of new surface was successful, save it and hide mouse cursor */
 	if(newsurface) {
 		if (priv->surface)
 	    	    SDL_FreeSurface(priv->surface);
