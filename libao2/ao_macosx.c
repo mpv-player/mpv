@@ -45,6 +45,8 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -52,6 +54,7 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
+#include "osdep/timer.h"
 
 static ao_info_t info =
   {
@@ -72,8 +75,24 @@ LIBAO_EXTERN(macosx)
 
 typedef struct ao_macosx_s
 {
+  AudioDeviceID i_selected_dev;             /* Keeps DeviceID of the selected device. */
+  int b_supports_digital;                   /* Does the currently selected device support digital mode? */
+  int b_digital;                            /* Are we running in digital mode? */
+
   /* AudioUnit */
   AudioUnit theOutputUnit;
+
+  /* CoreAudio SPDIF mode specific */
+  pid_t i_hog_pid;                          /* Keeps the pid of our hog status. */
+  AudioStreamID i_stream_id;                /* The StreamID that has a cac3 streamformat */
+  int i_stream_index;                       /* The index of i_stream_id in an AudioBufferList */
+  AudioStreamBasicDescription stream_format;/* The format we changed the stream to */
+  AudioStreamBasicDescription sfmt_revert;  /* The original format of the stream */
+  int b_revert;                             /* Whether we need to revert the stream format */
+  int b_changed_mixing;                     /* Whether we need to set the mixing mode back */
+  int b_stream_format_changed;              /* Flag for main thread to reset stream's format to digital and reset buffer */
+
+  /* Original common part */
   int packetSize;
   int paused;
 
@@ -177,6 +196,10 @@ Float32 vol;
 	switch (cmd) {
 	case AOCONTROL_GET_VOLUME:
 		control_vol = (ao_control_vol_t*)arg;
+		if (ao->b_digital) {
+			// Digital output has no volume adjust.
+			return CONTROL_FALSE;
+		}
 		err = AudioUnitGetParameter(ao->theOutputUnit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, &vol);
 
 		if(err==0) {
@@ -185,10 +208,17 @@ Float32 vol;
 			return CONTROL_TRUE;
 		}
 		else {
+			ao_msg(MSGT_AO, MSGL_WARN, "could not get HAL output volume: [%4.4s]\n", (char *)&err);
 			return CONTROL_FALSE;
 		}
 
 	case AOCONTROL_SET_VOLUME:
+		if (ao->b_digital)
+			// Digital output can not set volume. Here we have to return true
+			// to make mixer forget it. Else mixer will add a soft filter,
+			// that's not we expected and the filter not support ac3 stream
+			// will cause mplayer die.
+			return CONTROL_TRUE;
 		control_vol = (ao_control_vol_t*)arg;
 		
 		vol=(control_vol->left+control_vol->right)*4.0/200.0;
@@ -198,6 +228,7 @@ Float32 vol;
 			return CONTROL_TRUE;
 		}
 		else {
+			ao_msg(MSGT_AO, MSGL_WARN, "could not set HAL output volume: [%4.4s]\n", (char *)&err);
 			return CONTROL_FALSE;
 		}
 	  /* Everything is currently unimplemented */
@@ -208,32 +239,46 @@ Float32 vol;
 }
 
 
-static void print_format(const char* str,AudioStreamBasicDescription *f){
+static void print_format(int lev, const char* str, const AudioStreamBasicDescription *f){
     uint32_t flags=(uint32_t) f->mFormatFlags;
-    ao_msg(MSGT_AO,MSGL_V, "%s %7.1fHz %dbit [%c%c%c%c] %s %s %s%s%s%s\n",
+    ao_msg(MSGT_AO,lev, "%s %7.1fHz %lubit [%c%c%c%c][%lu][%lu][%lu][%lu][%lu] %s %s %s%s%s%s\n",
 	    str, f->mSampleRate, f->mBitsPerChannel,
 	    (int)(f->mFormatID & 0xff000000) >> 24,
 	    (int)(f->mFormatID & 0x00ff0000) >> 16,
 	    (int)(f->mFormatID & 0x0000ff00) >>  8,
 	    (int)(f->mFormatID & 0x000000ff) >>  0,
+	    f->mFormatFlags, f->mBytesPerPacket,
+	    f->mFramesPerPacket, f->mBytesPerFrame,
+	    f->mChannelsPerFrame,
 	    (flags&kAudioFormatFlagIsFloat) ? "float" : "int",
 	    (flags&kAudioFormatFlagIsBigEndian) ? "BE" : "LE",
 	    (flags&kAudioFormatFlagIsSignedInteger) ? "S" : "U",
 	    (flags&kAudioFormatFlagIsPacked) ? " packed" : "",
 	    (flags&kAudioFormatFlagIsAlignedHigh) ? " aligned" : "",
 	    (flags&kAudioFormatFlagIsNonInterleaved) ? " ni" : "" );
-
-    ao_msg(MSGT_AO,MSGL_DBG2, "%5d mBytesPerPacket\n",
-	    (int)f->mBytesPerPacket);
-    ao_msg(MSGT_AO,MSGL_DBG2, "%5d mFramesPerPacket\n",
-	    (int)f->mFramesPerPacket);
-    ao_msg(MSGT_AO,MSGL_DBG2, "%5d mBytesPerFrame\n",
-	    (int)f->mBytesPerFrame);
-    ao_msg(MSGT_AO,MSGL_DBG2, "%5d mChannelsPerFrame\n",
-	    (int)f->mChannelsPerFrame);
-
 }
 
+
+static int AudioDeviceSupportsDigital( AudioDeviceID i_dev_id );
+static int AudioStreamSupportsDigital( AudioStreamID i_stream_id );
+static int OpenSPDIF();
+static int AudioStreamChangeFormat( AudioStreamID i_stream_id, AudioStreamBasicDescription change_format );
+static OSStatus RenderCallbackSPDIF( AudioDeviceID inDevice,
+                                    const AudioTimeStamp * inNow,
+                                    const void * inInputData,
+                                    const AudioTimeStamp * inInputTime,
+                                    AudioBufferList * outOutputData,
+                                    const AudioTimeStamp * inOutputTime,
+                                    void * threadGlobals );
+static OSStatus StreamListener( AudioStreamID inStream,
+                                UInt32 inChannel,
+                                AudioDevicePropertyID inPropertyID,
+                                void * inClientData );
+static OSStatus DeviceListener( AudioDeviceID inDevice,
+                                UInt32 inChannel,
+                                Boolean isInput,
+                                AudioDevicePropertyID inPropertyID,
+                                void* inClientData );
 
 static int init(int rate,int channels,int format,int flags)
 {
@@ -242,14 +287,76 @@ ComponentDescription desc;
 Component comp; 
 AURenderCallbackStruct renderCallback;
 OSStatus err;
-UInt32 size, maxFrames;
+UInt32 size, maxFrames, i_param_size;
+char *psz_name;
 int aoIsCreated = ao != NULL;
+AudioDeviceID devid_def = 0;
+int b_alive;
 
-	if (!aoIsCreated)	ao = malloc(sizeof(ao_macosx_t));
+    ao_msg(MSGT_AO,MSGL_V, "init([%dHz][%dch][%s][%d])\n", rate, channels, af_fmt2str_short(format), flags);
+
+    if (!aoIsCreated) { ao = malloc(sizeof(ao_macosx_t)); ao->buffer = NULL;}
+
+    ao->i_selected_dev = 0;
+    ao->b_supports_digital = 0;
+    ao->b_digital = 0;
+    ao->b_stream_format_changed = 0;
+    ao->i_hog_pid = -1;
+    ao->i_stream_id = 0;
+    ao->i_stream_index = -1;
+    ao->b_revert = 0;
+    ao->b_changed_mixing = 0;
+
+    /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
+    if ((format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3)
+    {
+        /* Find the ID of the default Device. */
+        i_param_size = sizeof(AudioDeviceID);
+        err = AudioHardwareGetProperty(kAudioHardwarePropertyDefaultOutputDevice,
+                                       &i_param_size, &devid_def);
+        if (err != noErr)
+        {
+            ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device: [%4.4s]\n", (char *)&err);
+            return CONTROL_FALSE;
+        }
+
+        /* Retrieve the length of the device name. */
+        i_param_size = 0;
+        err = AudioDeviceGetPropertyInfo(devid_def, 0, 0,
+                                         kAudioDevicePropertyDeviceName,
+                                         &i_param_size, NULL);
+        if (err != noErr)
+        {
+            ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device name length: [%4.4s]\n", (char *)&err);
+            return CONTROL_FALSE;
+        }
+
+        /* Retrieve the name of the device. */
+        psz_name = (char *)malloc(i_param_size);
+        err = AudioDeviceGetProperty(devid_def, 0, 0,
+                                     kAudioDevicePropertyDeviceName,
+                                     &i_param_size, psz_name);
+        if (err != noErr)
+        {
+            ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device name: [%4.4s]\n", (char *)&err);
+            return CONTROL_FALSE;
+        }
+
+        ao_msg(MSGT_AO,MSGL_V, "got default audio output device ID: %#lx Name: %s\n", devid_def, psz_name );
+
+        if (AudioDeviceSupportsDigital(devid_def))
+        {
+            ao->b_supports_digital = 1;
+            ao->i_selected_dev = devid_def;
+        }
+        ao_msg(MSGT_AO,MSGL_V, "probe default audio output device whether support digital s/pdif output:%d\n", ao->b_supports_digital );
+
+        free( psz_name);
+    }
 
 	// Build Description for the input format
 	inDesc.mSampleRate=rate;
-	inDesc.mFormatID=kAudioFormatLinearPCM;
+	inDesc.mFormatID=ao->b_supports_digital ? kAudioFormat60958AC3 : kAudioFormatLinearPCM;
 	inDesc.mChannelsPerFrame=channels;
 	switch(format&AF_FORMAT_BITS_MASK){
 	case AF_FORMAT_8BIT:
@@ -282,14 +389,54 @@ int aoIsCreated = ao != NULL;
 	// unsigned int
 		inDesc.mFormatFlags = kAudioFormatFlagIsPacked;
     }
-  
-    if((format&AF_FORMAT_END_MASK)==AF_FORMAT_BE)
-		inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
+    if ((format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3) {
+        // Currently ac3 input (comes from hwac3) is always in native byte-order.
+#ifdef WORDS_BIGENDIAN
+        inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
+#endif
+    }
+    else if ((format & AF_FORMAT_END_MASK) == AF_FORMAT_BE)
+        inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
 
     inDesc.mFramesPerPacket = 1;
     ao->packetSize = inDesc.mBytesPerPacket = inDesc.mBytesPerFrame = inDesc.mFramesPerPacket*channels*(inDesc.mBitsPerChannel/8);
-    print_format("source: ",&inDesc);
+    print_format(MSGL_V, "source:",&inDesc);
 
+    if (ao->b_supports_digital)
+    {
+        b_alive = 1;
+        i_param_size = sizeof(b_alive);
+        err = AudioDeviceGetProperty(ao->i_selected_dev, 0, FALSE,
+                                     kAudioDevicePropertyDeviceIsAlive,
+                                     &i_param_size, &b_alive);
+        if (err != noErr)
+            ao_msg(MSGT_AO, MSGL_WARN, "could not check whether device is alive: [%4.4s]\n", (char *)&err);
+        if (!b_alive)
+            ao_msg(MSGT_AO, MSGL_WARN, "device is not alive\n" );
+        /* S/PDIF output need device in HogMode. */
+        i_param_size = sizeof(ao->i_hog_pid);
+        err = AudioDeviceGetProperty(ao->i_selected_dev, 0, FALSE,
+                                     kAudioDevicePropertyHogMode,
+                                     &i_param_size, &ao->i_hog_pid);
+
+        if (err != noErr)
+        {
+            /* This is not a fatal error. Some drivers simply don't support this property. */
+            ao_msg(MSGT_AO, MSGL_WARN, "could not check whether device is hogged: [%4.4s]\n",
+                     (char *)&err);
+            ao->i_hog_pid = -1;
+        }
+
+        if (ao->i_hog_pid != -1 && ao->i_hog_pid != getpid())
+        {
+            ao_msg(MSGT_AO, MSGL_WARN, "Selected audio device is exclusively in use by another program.\n" );
+            return CONTROL_FALSE;
+        }
+        ao->stream_format = inDesc;
+        return OpenSPDIF();
+    }
+
+	/* original analog output code */
 	if (!aoIsCreated) {
 	desc.componentType = kAudioUnitType_Output;
 	desc.componentSubType = kAudioUnitSubType_DefaultOutput;
@@ -305,14 +452,14 @@ int aoIsCreated = ao != NULL;
 		
 	err = OpenAComponent(comp, &(ao->theOutputUnit));  //gains access to the services provided by the component
 	if (err) {
-		ao_msg(MSGT_AO, MSGL_WARN, "Unable to open Output Unit component (err=%d)\n", err);
+		ao_msg(MSGT_AO, MSGL_WARN, "Unable to open Output Unit component: [%4.4s]\n", (char *)&err);
 		return CONTROL_FALSE;
 	}
 
 	// Initialize AudioUnit 
 	err = AudioUnitInitialize(ao->theOutputUnit);
 	if (err) {
-		ao_msg(MSGT_AO, MSGL_WARN, "Unable to initialize Output Unit component (err=%d)\n", err);
+		ao_msg(MSGT_AO, MSGL_WARN, "Unable to initialize Output Unit component: [%4.4s]\n", (char *)&err);
 		return CONTROL_FALSE;
 	}
 	}
@@ -321,7 +468,7 @@ int aoIsCreated = ao != NULL;
 	err = AudioUnitSetProperty(ao->theOutputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &inDesc, size);
 
 	if (err) {
-		ao_msg(MSGT_AO, MSGL_WARN, "Unable to set the input format (err=%d)\n", err);
+		ao_msg(MSGT_AO, MSGL_WARN, "Unable to set the input format: [%4.4s]\n", (char *)&err);
 		return CONTROL_FALSE;
 	}
 
@@ -330,7 +477,7 @@ int aoIsCreated = ao != NULL;
 	
 	if (err)
 	{
-		ao_msg(MSGT_AO,MSGL_WARN, "AudioUnitGetProperty returned %d when getting kAudioDevicePropertyBufferSize\n", (int)err);
+		ao_msg(MSGT_AO,MSGL_WARN, "AudioUnitGetProperty returned [%4.4s] when getting kAudioDevicePropertyBufferSize\n", (char *)&err);
 		return CONTROL_FALSE;
 	}
 
@@ -353,7 +500,7 @@ int aoIsCreated = ao != NULL;
     renderCallback.inputProcRefCon = 0;
     err = AudioUnitSetProperty(ao->theOutputUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &renderCallback, sizeof(AURenderCallbackStruct));
 	if (err) {
-		ao_msg(MSGT_AO, MSGL_WARN, "Unable to set the render callback (err=%d)\n", err);
+		ao_msg(MSGT_AO, MSGL_WARN, "Unable to set the render callback: [%4.4s]\n", (char *)&err);
 		return CONTROL_FALSE;
 	}
 
@@ -362,13 +509,489 @@ int aoIsCreated = ao != NULL;
     return CONTROL_OK;
 }
 
+/*****************************************************************************
+ * Setup a encoded digital stream (SPDIF)
+ *****************************************************************************/
+static int OpenSPDIF()
+{
+    OSStatus                err = noErr;
+    UInt32                  i_param_size, b_mix = 0;
+    Boolean                 b_writeable = 0;
+    AudioStreamID           *p_streams = NULL;
+    int                     i, i_streams = 0;
+
+    /* Start doing the SPDIF setup process. */
+    ao->b_digital = 1;
+
+    /* Hog the device. */
+    i_param_size = sizeof(ao->i_hog_pid);
+    ao->i_hog_pid = getpid() ;
+
+    err = AudioDeviceSetProperty(ao->i_selected_dev, 0, 0, FALSE,
+                                 kAudioDevicePropertyHogMode, i_param_size, &ao->i_hog_pid);
+
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "failed to set hogmode: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    /* Set mixable to false if we are allowed to. */
+    err = AudioDeviceGetPropertyInfo(ao->i_selected_dev, 0, FALSE,
+                                     kAudioDevicePropertySupportsMixing,
+                                     &i_param_size, &b_writeable);
+    err = AudioDeviceGetProperty(ao->i_selected_dev, 0, FALSE,
+                                 kAudioDevicePropertySupportsMixing,
+                                 &i_param_size, &b_mix);
+    if (err != noErr && b_writeable)
+    {
+        b_mix = 0;
+        err = AudioDeviceSetProperty(ao->i_selected_dev, 0, 0, FALSE,
+                                     kAudioDevicePropertySupportsMixing,
+                                     i_param_size, &b_mix);
+        ao->b_changed_mixing = 1;
+    }
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    /* Get a list of all the streams on this device. */
+    err = AudioDeviceGetPropertyInfo(ao->i_selected_dev, 0, FALSE,
+                                     kAudioDevicePropertyStreams,
+                                     &i_param_size, NULL);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "could not get number of streams: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    i_streams = i_param_size / sizeof(AudioStreamID);
+    p_streams = (AudioStreamID *)malloc(i_param_size);
+    if (p_streams == NULL)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "out of memory\n" );
+        return CONTROL_FALSE;
+    }
+
+    err = AudioDeviceGetProperty(ao->i_selected_dev, 0, FALSE,
+                                 kAudioDevicePropertyStreams,
+                                 &i_param_size, p_streams);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "could not get number of streams: [%4.4s]\n", (char *)&err);
+        if (p_streams) free(p_streams);
+        return CONTROL_FALSE;
+    }
+
+    ao_msg(MSGT_AO, MSGL_V, "current device stream number: %d\n", i_streams);
+
+    for (i = 0; i < i_streams && ao->i_stream_index < 0; ++i)
+    {
+        /* Find a stream with a cac3 stream. */
+        AudioStreamBasicDescription *p_format_list = NULL;
+        int i_formats = 0, j = 0, b_digital = 0;
+
+        /* Retrieve all the stream formats supported by each output stream. */
+        err = AudioStreamGetPropertyInfo(p_streams[i], 0,
+                                         kAudioStreamPropertyPhysicalFormats,
+                                         &i_param_size, NULL);
+        if (err != noErr)
+        {
+            ao_msg(MSGT_AO, MSGL_WARN, "could not get number of streamformats: [%4.4s]\n", (char *)&err);
+            continue;
+        }
+
+        i_formats = i_param_size / sizeof(AudioStreamBasicDescription);
+        p_format_list = (AudioStreamBasicDescription *)malloc(i_param_size);
+        if (p_format_list == NULL)
+        {
+            ao_msg(MSGT_AO, MSGL_WARN, "could not malloc the memory\n" );
+            continue;
+        }
+
+        err = AudioStreamGetProperty(p_streams[i], 0,
+                                     kAudioStreamPropertyPhysicalFormats,
+                                     &i_param_size, p_format_list);
+        if (err != noErr)
+        {
+            ao_msg(MSGT_AO, MSGL_WARN, "could not get the list of streamformats: [%4.4s]\n", (char *)&err);
+            if (p_format_list) free(p_format_list);
+            continue;
+        }
+
+        /* Check if one of the supported formats is a digital format. */
+        for (j = 0; j < i_formats; ++j)
+        {
+            if (p_format_list[j].mFormatID == 'IAC3' ||
+                  p_format_list[j].mFormatID == kAudioFormat60958AC3)
+            {
+                b_digital = 1;
+                break;
+            }
+        }
+
+        if (b_digital)
+        {
+            /* If this stream supports a digital (cac3) format, then set it. */
+            int i_requested_rate_format = -1;
+            int i_current_rate_format = -1;
+            int i_backup_rate_format = -1;
+
+            ao->i_stream_id = p_streams[i];
+            ao->i_stream_index = i;
+
+            if (ao->b_revert == 0)
+            {
+                /* Retrieve the original format of this stream first if not done so already. */
+                i_param_size = sizeof(ao->sfmt_revert);
+                err = AudioStreamGetProperty(ao->i_stream_id, 0,
+                                             kAudioStreamPropertyPhysicalFormat,
+                                             &i_param_size,
+                                             &ao->sfmt_revert);
+                if (err != noErr)
+                {
+                    ao_msg(MSGT_AO, MSGL_WARN, "could not retrieve the original streamformat: [%4.4s]\n", (char *)&err);
+                    if (p_format_list) free(p_format_list);
+                    continue;
+                }
+                ao->b_revert = 1;
+            }
+
+            for (j = 0; j < i_formats; ++j)
+                if (p_format_list[j].mFormatID == 'IAC3' ||
+                      p_format_list[j].mFormatID == kAudioFormat60958AC3)
+                {
+                    if (p_format_list[j].mSampleRate == ao->stream_format.mSampleRate)
+                    {
+                        i_requested_rate_format = j;
+                        break;
+                    }
+                    if (p_format_list[j].mSampleRate == ao->sfmt_revert.mSampleRate)
+                        i_current_rate_format = j;
+                    else if (i_backup_rate_format < 0 || p_format_list[j].mSampleRate > p_format_list[i_backup_rate_format].mSampleRate)
+                        i_backup_rate_format = j;
+                }
+
+            if (i_requested_rate_format >= 0) /* We prefer to output at the samplerate of the original audio. */
+                ao->stream_format = p_format_list[i_requested_rate_format];
+            else if (i_current_rate_format >= 0) /* If not possible, we will try to use the current samplerate of the device. */
+                ao->stream_format = p_format_list[i_current_rate_format];
+            else ao->stream_format = p_format_list[i_backup_rate_format]; /* And if we have to, any digital format will be just fine (highest rate possible). */
+        }
+        if (p_format_list) free(p_format_list);
+    }
+    if (p_streams) free(p_streams);
+
+    if (ao->i_stream_index < 0)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "can not find any digital output stream format when OpenSPDIF().\n");
+        return CONTROL_FALSE;
+    }
+
+    print_format(MSGL_V, "original stream format:", &ao->sfmt_revert);
+
+    if (!AudioStreamChangeFormat(ao->i_stream_id, ao->stream_format))
+        return CONTROL_FALSE;
+
+    err = AudioDeviceAddPropertyListener(ao->i_selected_dev,
+                                         kAudioPropertyWildcardChannel,
+                                         0,
+                                         kAudioDevicePropertyDeviceHasChanged,
+                                         DeviceListener,
+                                         NULL);
+    if (err != noErr)
+        ao_msg(MSGT_AO, MSGL_WARN, "AudioDeviceAddPropertyListener for kAudioDevicePropertyDeviceHasChanged failed: [%4.4s]\n", (char *)&err);
+
+
+    /* FIXME: If output stream is not native byte-order, we need change endian somewhere. */
+    /*        Although there's no such case reported.                                     */
+#ifdef WORDS_BIGENDIAN
+    if (!(ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian))
+#else
+    if (ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian)
+#endif
+        ao_msg(MSGT_AO, MSGL_WARN, "output stream has a no-native byte-order, digital output may failed.\n", (char *)&err);
+
+    /* For ac3/dts, just use packet size 6144 bytes as chunk size. */
+    ao->chunk_size = ao->stream_format.mBytesPerPacket;
+
+    ao_data.samplerate = ao->stream_format.mSampleRate;
+    ao_data.channels = ao->stream_format.mChannelsPerFrame;
+    ao_data.bps = ao_data.samplerate * (ao->stream_format.mBytesPerPacket/ao->stream_format.mFramesPerPacket);
+    ao_data.outburst = ao->chunk_size;
+    ao_data.buffersize = ao_data.bps;
+
+    ao->num_chunks = (ao_data.bps+ao->chunk_size-1)/ao->chunk_size;
+    ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
+    ao->buffer = NULL!=ao->buffer ? realloc(ao->buffer,(ao->num_chunks + 1)*ao->chunk_size)
+                                  : calloc(ao->num_chunks + 1, ao->chunk_size);
+
+    ao_msg(MSGT_AO,MSGL_V, "using %5d chunks of %d bytes (buffer len %d bytes)\n", (int)ao->num_chunks, (int)ao->chunk_size, (int)ao->buffer_len);
+
+
+    /* Add IOProc callback. */
+    err = AudioDeviceAddIOProc(ao->i_selected_dev,
+                               (AudioDeviceIOProc)RenderCallbackSPDIF,
+                               (void *)ao);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "AudioDeviceAddIOProc failed: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    reset();
+
+    return CONTROL_TRUE;
+}
+
+/*****************************************************************************
+ * AudioDeviceSupportsDigital: Check i_dev_id for digital stream support.
+ *****************************************************************************/
+static int AudioDeviceSupportsDigital( AudioDeviceID i_dev_id )
+{
+    OSStatus                    err = noErr;
+    UInt32                      i_param_size = 0;
+    AudioStreamID               *p_streams = NULL;
+    int                         i = 0, i_streams = 0;
+    int                         b_return = CONTROL_FALSE;
+
+    /* Retrieve all the output streams. */
+    err = AudioDeviceGetPropertyInfo(i_dev_id, 0, FALSE,
+                                     kAudioDevicePropertyStreams,
+                                     &i_param_size, NULL);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO,MSGL_V, "could not get number of streams: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    i_streams = i_param_size / sizeof(AudioStreamID);
+    p_streams = (AudioStreamID *)malloc(i_param_size);
+    if (p_streams == NULL)
+    {
+        ao_msg(MSGT_AO,MSGL_V, "out of memory\n");
+        return CONTROL_FALSE;
+    }
+
+    err = AudioDeviceGetProperty(i_dev_id, 0, FALSE,
+                                 kAudioDevicePropertyStreams,
+                                 &i_param_size, p_streams);
+
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO,MSGL_V, "could not get number of streams: [%4.4s]\n", (char *)&err);
+        free(p_streams);
+        return CONTROL_FALSE;
+    }
+
+    for (i = 0; i < i_streams; ++i)
+    {
+        if (AudioStreamSupportsDigital(p_streams[i]))
+            b_return = CONTROL_OK;
+    }
+
+    free(p_streams);
+    return b_return;
+}
+
+/*****************************************************************************
+ * AudioStreamSupportsDigital: Check i_stream_id for digital stream support.
+ *****************************************************************************/
+static int AudioStreamSupportsDigital( AudioStreamID i_stream_id )
+{
+    OSStatus err = noErr;
+    UInt32 i_param_size;
+    AudioStreamBasicDescription *p_format_list = NULL;
+    int i, i_formats, b_return = CONTROL_FALSE;
+
+    /* Retrieve all the stream formats supported by each output stream. */
+    err = AudioStreamGetPropertyInfo(i_stream_id, 0,
+                                     kAudioStreamPropertyPhysicalFormats,
+                                     &i_param_size, NULL);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO,MSGL_V, "could not get number of streamformats: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    i_formats = i_param_size / sizeof(AudioStreamBasicDescription);
+    p_format_list = (AudioStreamBasicDescription *)malloc(i_param_size);
+    if (p_format_list == NULL)
+    {
+        ao_msg(MSGT_AO,MSGL_V, "could not malloc the memory\n" );
+        return CONTROL_FALSE;
+    }
+
+    err = AudioStreamGetProperty(i_stream_id, 0,
+                                 kAudioStreamPropertyPhysicalFormats,
+                                 &i_param_size, p_format_list);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO,MSGL_V, "could not get the list of streamformats: [%4.4s]\n", (char *)&err);
+        free(p_format_list);
+        return CONTROL_FALSE;
+    }
+
+    for (i = 0; i < i_formats; ++i)
+    {
+        print_format(MSGL_V, "supported format:", &p_format_list[i]);
+
+        if (p_format_list[i].mFormatID == 'IAC3' ||
+                  p_format_list[i].mFormatID == kAudioFormat60958AC3)
+            b_return = CONTROL_OK;
+    }
+
+    free(p_format_list);
+    return b_return;
+}
+
+/*****************************************************************************
+ * AudioStreamChangeFormat: Change i_stream_id to change_format
+ *****************************************************************************/
+static int AudioStreamChangeFormat( AudioStreamID i_stream_id, AudioStreamBasicDescription change_format )
+{
+    OSStatus err = noErr;
+    UInt32 i_param_size = 0;
+    int i;
+
+    struct timeval now;
+    struct timespec timeout;
+    struct { pthread_mutex_t lock; pthread_cond_t cond; } w;
+
+    print_format(MSGL_V, "setting stream format:", &change_format);
+
+    /* Condition because SetProperty is asynchronious. */
+    pthread_cond_init(&w.cond, NULL);
+    pthread_mutex_init(&w.lock, NULL);
+    pthread_mutex_lock(&w.lock);
+
+    /* Install the callback. */
+    err = AudioStreamAddPropertyListener(i_stream_id, 0,
+                                         kAudioStreamPropertyPhysicalFormat,
+                                         StreamListener, (void *)&w);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "AudioStreamAddPropertyListener failed: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    /* Change the format. */
+    err = AudioStreamSetProperty(i_stream_id, 0, 0,
+                                 kAudioStreamPropertyPhysicalFormat,
+                                 sizeof(AudioStreamBasicDescription),
+                                 &change_format);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "could not set the stream format: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    /* The AudioStreamSetProperty is not only asynchronious (requiring the locks),
+     * it is also not Atomic, in its behaviour.
+     * Therefore we check 5 times before we really give up.
+     * FIXME: failing isn't actually implemented yet. */
+    for (i = 0; i < 5; ++i)
+    {
+        AudioStreamBasicDescription actual_format;
+
+        gettimeofday(&now, NULL);
+        timeout.tv_sec = now.tv_sec;
+        timeout.tv_nsec = (now.tv_usec + 500000) * 1000;
+
+        if (pthread_cond_timedwait(&w.cond, &w.lock, &timeout))
+            ao_msg(MSGT_AO, MSGL_V, "reached timeout\n" );
+
+        i_param_size = sizeof(AudioStreamBasicDescription);
+        err = AudioStreamGetProperty(i_stream_id, 0,
+                                     kAudioStreamPropertyPhysicalFormat,
+                                     &i_param_size,
+                                     &actual_format);
+
+        print_format(MSGL_V, "actual format in use:", &actual_format);
+        if (actual_format.mSampleRate == change_format.mSampleRate &&
+            actual_format.mFormatID == change_format.mFormatID &&
+            actual_format.mFramesPerPacket == change_format.mFramesPerPacket)
+        {
+            /* The right format is now active. */
+            break;
+        }
+        /* We need to check again. */
+    }
+
+    /* Removing the property listener. */
+    err = AudioStreamRemovePropertyListener(i_stream_id, 0,
+                                            kAudioStreamPropertyPhysicalFormat,
+                                            StreamListener);
+    if (err != noErr)
+    {
+        ao_msg(MSGT_AO, MSGL_WARN, "AudioStreamRemovePropertyListener failed: [%4.4s]\n", (char *)&err);
+        return CONTROL_FALSE;
+    }
+
+    /* Destroy the lock and condition. */
+    pthread_mutex_unlock(&w.lock);
+    pthread_mutex_destroy(&w.lock);
+    pthread_cond_destroy(&w.cond);
+
+    return CONTROL_TRUE;
+}
+
+/*****************************************************************************
+ * RenderCallbackSPDIF: callback for SPDIF audio output
+ *****************************************************************************/
+static OSStatus RenderCallbackSPDIF( AudioDeviceID inDevice,
+                                    const AudioTimeStamp * inNow,
+                                    const void * inInputData,
+                                    const AudioTimeStamp * inInputTime,
+                                    AudioBufferList * outOutputData,
+                                    const AudioTimeStamp * inOutputTime,
+                                    void * threadGlobals )
+{
+    int amt = buf_used();
+    int req = outOutputData->mBuffers[ao->i_stream_index].mDataByteSize;
+
+    if (amt > req)
+        amt = req;
+    if (amt)
+        read_buffer((unsigned char *)outOutputData->mBuffers[ao->i_stream_index].mData, amt);
+
+    return noErr;
+}
+
 
 static int play(void* output_samples,int num_bytes,int flags)
 {  
-int wrote=write_buffer(output_samples, num_bytes);
+    int wrote, b_digital;
 
-	audio_resume();
-  return wrote;
+    // Check whether we need to reset the digital output stream.
+    if (ao->b_digital && ao->b_stream_format_changed)
+    {
+        ao->b_stream_format_changed = 0;
+        b_digital = AudioStreamSupportsDigital(ao->i_stream_id);
+        if (b_digital)
+        {
+            /* Current stream support digital format output, let's set it. */
+            ao_msg(MSGT_AO, MSGL_V, "detected current stream support digital, try to restore digital output...\n");
+
+            if (!AudioStreamChangeFormat(ao->i_stream_id, ao->stream_format))
+            {
+                ao_msg(MSGT_AO, MSGL_WARN, "restore digital output failed.\n");
+            }
+            else
+            {
+                ao_msg(MSGT_AO, MSGL_WARN, "restore digital output succeed.\n");
+                reset();
+            }
+        }
+        else
+            ao_msg(MSGT_AO, MSGL_V, "detected current stream do not support digital.\n");
+    }
+
+    wrote=write_buffer(output_samples, num_bytes);
+    audio_resume();
+    return wrote;
 }
 
 /* set variables and buffer to initial state */
@@ -402,16 +1025,63 @@ static float get_delay(void)
 /* unload plugin and deregister from coreaudio */
 static void uninit(int immed)
 {
+  OSStatus            err = noErr;
+  UInt32              i_param_size = 0;
 
   if (!immed) {
     long long timeleft=(1000000LL*buf_used())/ao_data.bps;
-    ao_msg(MSGT_AO,MSGL_DBG2, "%d bytes left @%d bps (%ld usec)\n", buf_used(), ao_data.bps, (int)timeleft);
+    ao_msg(MSGT_AO,MSGL_DBG2, "%d bytes left @%d bps (%d usec)\n", buf_used(), ao_data.bps, (int)timeleft);
     usec_sleep((int)timeleft);
   }
 
-  AudioOutputUnitStop(ao->theOutputUnit);
-  AudioUnitUninitialize(ao->theOutputUnit);
-  CloseComponent(ao->theOutputUnit);
+  if (!ao->b_digital) {
+      AudioOutputUnitStop(ao->theOutputUnit);
+      AudioUnitUninitialize(ao->theOutputUnit);
+      CloseComponent(ao->theOutputUnit);
+  }
+  else {
+      /* Stop device. */
+      err = AudioDeviceStop(ao->i_selected_dev,
+                            (AudioDeviceIOProc)RenderCallbackSPDIF);
+      if (err != noErr)
+          ao_msg(MSGT_AO, MSGL_WARN, "AudioDeviceStop failed: [%4.4s]\n", (char *)&err);
+
+      /* Remove IOProc callback. */
+      err = AudioDeviceRemoveIOProc(ao->i_selected_dev,
+                                    (AudioDeviceIOProc)RenderCallbackSPDIF);
+      if (err != noErr)
+          ao_msg(MSGT_AO, MSGL_WARN, "AudioDeviceRemoveIOProc failed: [%4.4s]\n", (char *)&err);
+
+      if (ao->b_revert)
+          AudioStreamChangeFormat(ao->i_stream_id, ao->sfmt_revert);
+
+      if (ao->b_changed_mixing && ao->sfmt_revert.mFormatID != kAudioFormat60958AC3)
+      {
+          int b_mix;
+          Boolean b_writeable;
+          /* Revert mixable to true if we are allowed to. */
+          err = AudioDeviceGetPropertyInfo(ao->i_selected_dev, 0, FALSE, kAudioDevicePropertySupportsMixing,
+                                           &i_param_size, &b_writeable);
+          err = AudioDeviceGetProperty(ao->i_selected_dev, 0, FALSE, kAudioDevicePropertySupportsMixing,
+                                       &i_param_size, &b_mix);
+          if (err != noErr && b_writeable)
+          {
+              b_mix = 1;
+              err = AudioDeviceSetProperty(ao->i_selected_dev, 0, 0, FALSE,
+                                           kAudioDevicePropertySupportsMixing, i_param_size, &b_mix);
+          }
+          if (err != noErr)
+              ao_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n", (char *)&err);
+      }
+      if (ao->i_hog_pid == getpid())
+      {
+          ao->i_hog_pid = -1;
+          i_param_size = sizeof(ao->i_hog_pid);
+          err = AudioDeviceSetProperty(ao->i_selected_dev, 0, 0, FALSE,
+                                       kAudioDevicePropertyHogMode, i_param_size, &ao->i_hog_pid);
+          if (err != noErr) ao_msg(MSGT_AO, MSGL_WARN, "Could not release hogmode: [%4.4s]\n", (char *)&err);
+      }
+  }
 
   free(ao->buffer);
   free(ao);
@@ -422,27 +1092,87 @@ static void uninit(int immed)
 /* stop playing, keep buffers (for pause) */
 static void audio_pause(void)
 {
-  OSErr status=noErr;
+    OSErr err=noErr;
 
-  /* stop callback */
-  status=AudioOutputUnitStop(ao->theOutputUnit);
-  if (status)
-    ao_msg(MSGT_AO,MSGL_WARN, "AudioOutputUnitStop returned %d\n",
-	   (int)status);
-  ao->paused=1;
+    /* Stop callback. */
+    if (!ao->b_digital)
+    {
+        err=AudioOutputUnitStop(ao->theOutputUnit);
+        if (err != noErr)
+            ao_msg(MSGT_AO,MSGL_WARN, "AudioOutputUnitStop returned [%4.4s]\n", (char *)&err);
+    }
+    else
+    {
+        err = AudioDeviceStop(ao->i_selected_dev, (AudioDeviceIOProc)RenderCallbackSPDIF);
+        if (err != noErr)
+            ao_msg(MSGT_AO, MSGL_WARN, "AudioDeviceStop failed: [%4.4s]\n", (char *)&err);
+    }
+    ao->paused = 1;
 }
 
 
 /* resume playing, after audio_pause() */
 static void audio_resume(void)
 {
-  if(ao->paused) {
-  OSErr status=noErr;
-	  /* start callback */
-  status=AudioOutputUnitStart(ao->theOutputUnit);
-  if (status)
-    ao_msg(MSGT_AO,MSGL_WARN, "AudioOutputUnitStart returned %d\n",
-	   (int)status);
-	  ao->paused=0;
-  }
+    OSErr err=noErr;
+
+    if (!ao->paused)
+        return;
+
+    /* Start callback. */
+    if (!ao->b_digital)
+    {
+        err = AudioOutputUnitStart(ao->theOutputUnit);
+        if (err != noErr)
+            ao_msg(MSGT_AO,MSGL_WARN, "AudioOutputUnitStart returned [%4.4s]\n", (char *)&err);
+    }
+    else
+    {
+        err = AudioDeviceStart(ao->i_selected_dev, (AudioDeviceIOProc)RenderCallbackSPDIF);
+        if (err != noErr)
+            ao_msg(MSGT_AO, MSGL_WARN, "AudioDeviceStart failed: [%4.4s]\n", (char *)&err);
+    }
+    ao->paused = 0;
+}
+
+/*****************************************************************************
+ * StreamListener
+ *****************************************************************************/
+static OSStatus StreamListener( AudioStreamID inStream,
+                                UInt32 inChannel,
+                                AudioDevicePropertyID inPropertyID,
+                                void * inClientData )
+{
+    struct { pthread_mutex_t lock; pthread_cond_t cond; } * w = inClientData;
+
+    switch (inPropertyID)
+    {
+        case kAudioStreamPropertyPhysicalFormat:
+            if (NULL!=w)
+            {
+                pthread_mutex_lock(&w->lock);
+                pthread_cond_signal(&w->cond);
+                pthread_mutex_unlock(&w->lock);
+            }
+        default:
+            break;
+    }
+    return noErr;
+}
+
+static OSStatus DeviceListener( AudioDeviceID inDevice,
+                                UInt32 inChannel,
+                                Boolean isInput,
+                                AudioDevicePropertyID inPropertyID,
+                                void* inClientData )
+{
+    switch (inPropertyID)
+    {
+        case kAudioDevicePropertyDeviceHasChanged:
+            ao_msg(MSGT_AO, MSGL_WARN, "got notify kAudioDevicePropertyDeviceHasChanged.\n");
+            ao->b_stream_format_changed = 1;
+        default:
+            break;
+    }
+    return noErr;
 }
