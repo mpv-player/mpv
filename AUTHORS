@@ -809,6 +809,7 @@ Voroshilov, Vladimir <voroshil@gmail.com>
     * Radio support
     * Russian documentation translation
     * Russian man page translation
+    * TV support for win32 (dshow driver)
 
 Wigren, Per <wigren@home.se>
     * bmovl - Bitmap Overlay video filter
