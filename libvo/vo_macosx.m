@@ -247,6 +247,7 @@ static void uninit(void)
     
     if(mpGLView)
     {
+        mpGLView = nil;
         [autoreleasepool release];
     }
 }
