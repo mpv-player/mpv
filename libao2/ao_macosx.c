@@ -712,7 +712,7 @@ static int OpenSPDIF()
 #else
     if (ao->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian)
 #endif
-        ao_msg(MSGT_AO, MSGL_WARN, "output stream has a no-native byte-order, digital output may failed.\n", (char *)&err);
+        ao_msg(MSGT_AO, MSGL_WARN, "output stream has a no-native byte-order, digital output may failed.\n");
 
     /* For ac3/dts, just use packet size 6144 bytes as chunk size. */
     ao->chunk_size = ao->stream_format.mBytesPerPacket;
