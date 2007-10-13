@@ -30,7 +30,6 @@
 #include <sys/poll.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <error.h>
 #include <time.h>
 #include <errno.h>
 #include "config.h"
