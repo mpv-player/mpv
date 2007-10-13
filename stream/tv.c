@@ -208,7 +208,7 @@ static int norm_from_string(tvi_handle_t *tvh, char* norm)
 {
     if (1
 #ifdef HAVE_TV_V4L2
-        && strcmp(tvh->tv_param->driver, "v4l2") != 0 &&
+        && strcmp(tvh->tv_param->driver, "v4l2") != 0
 #endif
 #ifdef HAVE_TV_DSHOW
         && strcmp(tvh->tv_param->driver, "dshow") != 0
