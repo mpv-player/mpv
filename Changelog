@@ -4,6 +4,9 @@ MPlayer (1.0)
     Filters:
     * vf_ow new overcomplete wavelet denoiser
 
+    Streaming:
+    * tv:// support for win32
+
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
     * H.264 PAFF decoding
