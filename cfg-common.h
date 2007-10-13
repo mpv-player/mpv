@@ -426,7 +426,7 @@ m_option_t tvopts_conf[]={
 	{"chanlist", &stream_tv_defaults.chanlist, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"norm", &stream_tv_defaults.norm, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"automute", &stream_tv_defaults.automute, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
-#ifdef HAVE_TV_V4L2
+#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
 	{"normid", &stream_tv_defaults.normid, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
 	{"width", &stream_tv_defaults.width, CONF_TYPE_INT, 0, 0, 4096, NULL},
@@ -440,9 +440,12 @@ m_option_t tvopts_conf[]={
 	{"hue", &stream_tv_defaults.hue, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
 	{"saturation", &stream_tv_defaults.saturation, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
 	{"gain", &stream_tv_defaults.gain, CONF_TYPE_INT, CONF_RANGE, -1, 100, NULL},
-#if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
+#if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
+	{"buffersize", &stream_tv_defaults.buffer_size, CONF_TYPE_INT, CONF_RANGE, 16, 1024, NULL},
 	{"amode", &stream_tv_defaults.amode, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 	{"volume", &stream_tv_defaults.volume, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
+#endif
+#if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
 	{"bass", &stream_tv_defaults.bass, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
 	{"treble", &stream_tv_defaults.treble, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
 	{"balance", &stream_tv_defaults.balance, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
@@ -464,6 +467,16 @@ m_option_t tvopts_conf[]={
 	{"tlang", &stream_tv_defaults.tlang, CONF_TYPE_INT, CONF_RANGE, -1, 0x7f, NULL},
 #endif /* HAVE_TV_TELETEXT */
 	{"audioid", &stream_tv_defaults.audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
+#ifdef HAVE_TV_DSHOW
+	{"hidden_video_renderer", &stream_tv_defaults.hidden_video_renderer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nohidden_video_renderer", &stream_tv_defaults.hidden_video_renderer, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"hidden_vp_renderer", &stream_tv_defaults.hidden_vp_renderer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nohidden_vp_renderer", &stream_tv_defaults.hidden_vp_renderer, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"system_clock", &stream_tv_defaults.system_clock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nosystem_clock", &stream_tv_defaults.system_clock, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"normalize_audio_chunks", &stream_tv_defaults.normalize_audio_chunks, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nonormalize_audio_chunks", &stream_tv_defaults.normalize_audio_chunks, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif /* USE_TV */

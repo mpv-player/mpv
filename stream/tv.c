@@ -42,6 +42,9 @@ char *tv_channel_last_real;
 
 /* enumerating drivers (like in stream.c) */
 extern tvi_info_t tvi_info_dummy;
+#ifdef HAVE_TV_DSHOW
+extern tvi_info_dshow;
+#endif
 #ifdef HAVE_TV_V4L1
 extern tvi_info_t tvi_info_v4l;
 #endif
@@ -62,6 +65,9 @@ static const tvi_info_t* tvi_driver_list[]={
 #endif
 #ifdef HAVE_TV_BSDBT848
     &tvi_info_bsdbt848,
+#endif
+#ifdef HAVE_TV_DSHOW
+    &tvi_info_dshow,
 #endif
     &tvi_info_dummy,
     NULL
@@ -200,9 +206,14 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 
 static int norm_from_string(tvi_handle_t *tvh, char* norm)
 {
+    if (1
 #ifdef HAVE_TV_V4L2
-    if (strcmp(tvh->tv_param->driver, "v4l2") != 0) {
+        && strcmp(tvh->tv_param->driver, "v4l2") != 0 &&
 #endif
+#ifdef HAVE_TV_DSHOW
+        && strcmp(tvh->tv_param->driver, "dshow") != 0
+#endif
+    ) {
     if (!strcasecmp(norm, "pal"))
 	return TV_NORM_PAL;
     else if (!strcasecmp(norm, "ntsc"))
@@ -221,7 +232,7 @@ static int norm_from_string(tvi_handle_t *tvh, char* norm)
 	mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_BogusNormParameter, norm, "PAL");
 	return TV_NORM_PAL;
     }
-#ifdef HAVE_TV_V4L2
+#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
     } else {
 	tvi_functions_t *funcs = tvh->functions;
 	char str[8];
@@ -361,8 +372,15 @@ static int open_tv(tvi_handle_t *tvh)
     /* set some params got from cmdline */
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tvh->tv_param->input);
 
+#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
+    if (0 
 #ifdef HAVE_TV_V4L2
-    if (!strcmp(tvh->tv_param->driver, "v4l2") && tvh->tv_param->normid >= 0) {
+    || (!strcmp(tvh->tv_param->driver, "v4l2") && tvh->tv_param->normid >= 0)
+#endif
+#ifdef HAVE_TV_DSHOW
+    || (!strcmp(tvh->tv_param->driver, "dshow") && tvh->tv_param->normid >= 0)
+#endif
+    ) {
 	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNormId, tvh->tv_param->normid);
 	if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->tv_param->normid) != TVI_CONTROL_TRUE) {
 	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
@@ -376,7 +394,7 @@ static int open_tv(tvi_handle_t *tvh)
     if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
     }
-#ifdef HAVE_TV_V4L2
+#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
     }
 #endif
 

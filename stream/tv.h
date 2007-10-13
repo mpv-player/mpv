@@ -11,7 +11,7 @@ typedef struct tv_param_s {
     char *chanlist;
     char *norm;
     int automute;
-#ifdef HAVE_TV_V4L2
+#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
     int normid;
 #endif
     char *device;
@@ -26,15 +26,18 @@ typedef struct tv_param_s {
     int immediate;
     int audiorate;
     int audio_id;
-#if defined(HAVE_TV_V4L)
+#if defined(HAVE_TV_V4L) || defined(HAVE_TV_DSHOW)
     int amode;
     int volume;
+#if defined(HAVE_TV_V4L)
     int bass;
     int treble;
     int balance;
     int forcechan;
     int force_audio;
+#endif
     int buffer_size;
+#if defined(HAVE_TV_V4L)
     int mjpeg;
     int decimation;
     int quality;
@@ -43,6 +46,7 @@ typedef struct tv_param_s {
 #endif
 #endif
     char* adevice;
+#endif
     int brightness;
     int contrast;
     int hue;
@@ -56,6 +60,35 @@ typedef struct tv_param_s {
     int scan;
     int scan_threshold;
     float scan_period;
+
+#ifdef HAVE_TV_DSHOW
+    /**
+      Terminate stream with video renderer instead of Null renderer 
+      Will help if video freezes but audio does not.
+      May not work with -vo directx and -vf crop combination.
+    */
+    int hidden_video_renderer;
+    /**
+      For VIVO cards VP pin have to be rendered too.
+      This tweak will cause VidePort pin stream to be terminated with video renderer 
+      instead of removing it from graph.
+      Use if your card have vp pin and video is still choppy.
+      May not work with -vo directx and -vf crop combination.
+    */
+    int hidden_vp_renderer;
+    /**
+      Use system clock as sync source instead of default graph clock (usually the clock 
+      from one of live sources in graph.
+    */
+    int system_clock;
+    /**
+      Some audio cards creates audio chunks with about 0.5 sec size.
+      This can cause choppy video when using mplayer with immediatemode=0
+      Use followingtweak to decrease audio chunk sizes.
+      It will create audio chunks with time length equal to one video frame time.
+    */
+    int normalize_audio_chunks;
+#endif
 } tv_param_t;
   
 extern tv_param_t stream_tv_defaults;

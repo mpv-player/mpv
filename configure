@@ -612,6 +612,7 @@ _tv=yes
 _tv_v4l1=auto
 _tv_v4l2=auto
 _tv_bsdbt848=auto
+_tv_dshow=auto
 _tv_teletext=auto
 _pvr=auto
 _network=yes
@@ -975,6 +976,8 @@ for ac_option do
   --disable-tv-v4l1)	_tv_v4l1=no	;;
   --enable-tv-v4l2)	_tv_v4l2=yes	;;
   --disable-tv-v4l2)	_tv_v4l2=no	;;
+  --enable-tv-dshow)	_tv_dshow=yes	;;
+  --disable-tv-dshow)	_tv_dshow=no	;;
   --enable-tv-teletext)    _tv_teletext=yes        ;;
   --disable-tv-teletext)    _tv_teletext=no        ;;
   --enable-radio)       _radio=yes	;;
@@ -6805,6 +6808,32 @@ EOF
 fi #if bsd
 
 
+echocheck "DirectShow TV interface"
+if test "$_tv_dshow" = auto ; then
+  _tv_dshow=no
+  if test "$_tv" = yes && win32 ; then
+    cat > $TMPC <<EOF
+#include <ole2.h>
+int main(void) { 
+    void* p;
+    CoCreateInstance((GUID*)&GUID_NULL, NULL, CLSCTX_INPROC_SERVER, &GUID_NULL, &p);
+    return 0; 
+}
+EOF
+    cc_check -lole32 -luuid && _tv_dshow=yes
+  fi
+fi
+if test "$_tv_dshow" = yes ; then
+  _inputmodules="tv-dshow $_inputmodules"
+  _def_tv_dshow='#define HAVE_TV_DSHOW 1'
+  _ld_extra="$_ld_extra -lole32 -luuid"
+else
+  _noinputmodules="tv-dshow $_noinputmodules"
+  _def_tv_dshow='#undef HAVE_TV_DSHOW'
+fi
+echores "$_tv_dshow"
+
+
 echocheck "Video 4 Linux TV interface"
 if test "$_tv_v4l1" = auto ; then
   _tv_v4l1=no
@@ -6859,8 +6888,8 @@ echores "$_tv_v4l2"
 echocheck "TV teletext interface"
 if test "$_tv_teletext" = auto ; then
   _tv_teletext=no
-  if test "$_freetype" = yes && test "$_pthreads" = yes ; then
-    if test "$_tv_v4l2" = yes || test "$_v4l" = yes ; then
+  if test "$_freetype" = yes && test "$_pthreads" = yes; then
+    if test "$_tv_v4l2" = yes || test "$_v4l" = yes || test "$_tv_dshow" = yes; then
       _tv_teletext=yes
     fi
   fi
@@ -7621,6 +7650,7 @@ TV = $_tv
 TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
 TV_V4L2 = $_tv_v4l2
+TV_DSHOW = $_tv_dshow
 TV_BSDBT848 = $_tv_bsdbt848
 TV_TELETEXT = $_tv_teletext
 AUDIO_INPUT = $_audio_input
@@ -8166,6 +8196,9 @@ $_def_tv_v4l1
 
 /* Enable Video 4 Linux 2 TV interface support */
 $_def_tv_v4l2
+
+/* Enable DirectShow TV interface support */
+$_def_tv_dshow
 
 /* *BSD BrookTree headers */
 $_def_ioctl_meteor_h_name
