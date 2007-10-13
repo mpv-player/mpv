@@ -8,6 +8,9 @@ MPlayer (1.0)
     * DNxHD (SMPTE VC-3) encoder
     * H.264 PAFF decoding
 
+    Others:
+    * many compiler warning fixes
+
   rc2: "AreWeThereYet?" October 7, 2007
   (SVN revisions: MPlayer r24722, FFmpeg r10677)
 
