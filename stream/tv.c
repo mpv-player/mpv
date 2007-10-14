@@ -207,7 +207,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 static int norm_from_string(tvi_handle_t *tvh, char* norm)
 {
     tvi_functions_t *funcs = tvh->functions;
-    char str[8];
+    char str[20];
     int ret;
 
     strncpy(str, norm, sizeof(str)-1);
