@@ -1045,7 +1045,7 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 {
     tvh->norm = norm_from_string(tvh, norm);
 
-    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, tvh->tv_param->norm);
+    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, norm);
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
 	return 0;
