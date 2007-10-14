@@ -206,14 +206,20 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 
 static int norm_from_string(tvi_handle_t *tvh, char* norm)
 {
-    if (1
-#ifdef HAVE_TV_V4L2
-        && strcmp(tvh->tv_param->driver, "v4l2") != 0
-#endif
-#ifdef HAVE_TV_DSHOW
-        && strcmp(tvh->tv_param->driver, "dshow") != 0
-#endif
-    ) {
+	tvi_functions_t *funcs = tvh->functions;
+	char str[8];
+	int ret;
+	strncpy(str, norm, sizeof(str)-1);
+	str[sizeof(str)-1] = '\0';
+        ret=funcs->control(tvh->priv, TVI_CONTROL_SPC_GET_NORMID, str);
+	if(ret==TVI_CONTROL_TRUE)
+	return *(int *)str;
+	if(ret!=TVI_CONTROL_UNKNOWN)
+        {
+	    mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_BogusNormParameter, norm,"default");
+	    return 0;
+        }
+
     if (!strcasecmp(norm, "pal"))
 	return TV_NORM_PAL;
     else if (!strcasecmp(norm, "ntsc"))
@@ -232,20 +238,6 @@ static int norm_from_string(tvi_handle_t *tvh, char* norm)
 	mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_BogusNormParameter, norm, "PAL");
 	return TV_NORM_PAL;
     }
-#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
-    } else {
-	tvi_functions_t *funcs = tvh->functions;
-	char str[8];
-	strncpy(str, norm, sizeof(str)-1);
-	str[sizeof(str)-1] = '\0';
-        if (funcs->control(tvh->priv, TVI_CONTROL_SPC_GET_NORMID, str) != TVI_CONTROL_TRUE)
-        {
-	    mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_BogusNormParameter, norm,"default");
-	    return 0;
-        }
-	return *(int *)str;
-    }
-#endif
 }
 
 static void parse_channels(tvi_handle_t *tvh)
