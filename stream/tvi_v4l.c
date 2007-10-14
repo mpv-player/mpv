@@ -693,7 +693,9 @@ static int uninit(priv_t *priv)
         pthread_mutex_destroy(&priv->skew_mutex);
     }
     pthread_mutex_destroy(&priv->video_buffer_mutex);
-    pthread_join(priv->video_grabber_thread, NULL);
+    if(priv->video_grabber_thread)
+        pthread_join(priv->video_grabber_thread, NULL);
+
     mp_msg(MSGT_TV, MSGL_V, "done\n");
 
     if (priv->capability.audios) {
