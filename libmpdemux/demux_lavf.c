@@ -49,11 +49,13 @@ extern char *audio_lang;
 static unsigned int opt_probesize = 0;
 static unsigned int opt_analyzeduration = 0;
 static char *opt_format;
+static char *opt_cryptokey;
 
 m_option_t lavfdopts_conf[] = {
 	{"probesize", &(opt_probesize), CONF_TYPE_INT, CONF_RANGE, 32, INT_MAX, NULL},
 	{"format",    &(opt_format),    CONF_TYPE_STRING,       0,  0,       0, NULL},
 	{"analyzeduration",    &(opt_analyzeduration),    CONF_TYPE_INT,       CONF_RANGE,  0,       INT_MAX, NULL},
+	{"cryptokey", &(opt_cryptokey), CONF_TYPE_STRING,       0,  0,       0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -250,6 +252,23 @@ static int lavf_check_preferred_file(demuxer_t *demuxer){
     return 0;
 }
     
+static uint8_t char2int(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return 0;
+}
+
+static void parse_cryptokey(AVFormatContext *avfc, const char *str) {
+    int len = strlen(str) / 2;
+    uint8_t *key = av_mallocz(len);
+    int i;
+    avfc->keylen = len;
+    avfc->key = key;
+    for (i = 0; i < len; i++, str += 2)
+        *key++ = (char2int(str[0]) << 4) | char2int(str[1]);
+}
+
 static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     AVFormatContext *avfc;
     AVFormatParameters ap;
@@ -266,6 +285,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     avfc = av_alloc_format_context();
 
+    if (opt_cryptokey)
+        parse_cryptokey(avfc, opt_cryptokey);
     if (correct_pts)
         avfc->flags |= AVFMT_FLAG_GENPTS;
     if (index_mode == 0)
@@ -668,6 +689,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
     if (priv){
         if(priv->avfc)
        {
+         av_freep(&priv->avfc->key);
          av_close_input_file(priv->avfc); priv->avfc= NULL;
         }
         free(priv); demuxer->priv= NULL;
