@@ -380,12 +380,9 @@ static int open_tv(tvi_handle_t *tvh)
 	if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->tv_param->normid) != TVI_CONTROL_TRUE) {
 	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
 	}
-    } else {
+    } else
 #endif
     tv_set_norm(tvh,tvh->tv_param->norm);
-#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
-    }
-#endif
 
 #ifdef HAVE_TV_V4L1
     if ( tvh->tv_param->mjpeg )
