@@ -206,37 +206,40 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 
 static int norm_from_string(tvi_handle_t *tvh, char* norm)
 {
-	tvi_functions_t *funcs = tvh->functions;
-	char str[8];
-	int ret;
-	strncpy(str, norm, sizeof(str)-1);
-	str[sizeof(str)-1] = '\0';
-        ret=funcs->control(tvh->priv, TVI_CONTROL_SPC_GET_NORMID, str);
-	if(ret==TVI_CONTROL_TRUE)
-	return *(int *)str;
-	if(ret!=TVI_CONTROL_UNKNOWN)
-        {
-	    mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_BogusNormParameter, norm,"default");
-	    return 0;
-        }
+    tvi_functions_t *funcs = tvh->functions;
+    char str[8];
+    int ret;
+
+    strncpy(str, norm, sizeof(str)-1);
+    str[sizeof(str)-1] = '\0';
+    ret=funcs->control(tvh->priv, TVI_CONTROL_SPC_GET_NORMID, str);
+
+    if(ret==TVI_CONTROL_TRUE)
+        return *(int *)str;
+
+    if(ret!=TVI_CONTROL_UNKNOWN)
+    {
+        mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_BogusNormParameter, norm,"default");
+        return 0;
+    }
 
     if (!strcasecmp(norm, "pal"))
-	return TV_NORM_PAL;
+        return TV_NORM_PAL;
     else if (!strcasecmp(norm, "ntsc"))
-	return TV_NORM_NTSC;
+        return TV_NORM_NTSC;
     else if (!strcasecmp(norm, "secam"))
-	return TV_NORM_SECAM;
+        return TV_NORM_SECAM;
     else if (!strcasecmp(norm, "palnc"))
-	return TV_NORM_PALNC;
+        return TV_NORM_PALNC;
     else if (!strcasecmp(norm, "palm"))
-	return TV_NORM_PALM;
+        return TV_NORM_PALM;
     else if (!strcasecmp(norm, "paln"))
-	return TV_NORM_PALN;
+        return TV_NORM_PALN;
     else if (!strcasecmp(norm, "ntscjp"))
-	return TV_NORM_NTSCJP;
+        return TV_NORM_NTSCJP;
     else {
-	mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_BogusNormParameter, norm, "PAL");
-	return TV_NORM_PAL;
+        mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_BogusNormParameter, norm, "PAL");
+        return TV_NORM_PAL;
     }
 }
 
