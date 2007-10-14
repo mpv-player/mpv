@@ -382,13 +382,7 @@ static int open_tv(tvi_handle_t *tvh)
 	}
     } else {
 #endif
-    /* select video norm */
-    tvh->norm = norm_from_string(tvh, tvh->tv_param->norm);
-
-    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, tvh->tv_param->norm);
-    if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
-	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
-    }
+    tv_set_norm(tvh,tvh->tv_param->norm);
 #if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
     }
 #endif
