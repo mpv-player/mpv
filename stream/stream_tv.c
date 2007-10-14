@@ -36,9 +36,7 @@ tv_param_t stream_tv_defaults = {
     "europe-east", //chanlist
     "pal",         //norm
     0,             //automute
-#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
     -1,            //normid
-#endif
     NULL,          //device
     NULL,          //driver
     -1,            //width
@@ -51,27 +49,19 @@ tv_param_t stream_tv_defaults = {
     0,             //immediate;
     44100,         //audiorate;
     0,             //audio_id
-#if defined(HAVE_TV_V4L) || defined(HAVE_TV_DSHOW)
     -1,            //amode
     -1,            //volume
-#if defined(HAVE_TV_V4L)
     -1,            //bass
     -1,            //treble
     -1,            //balance
     -1,            //forcechan
     0,             //force_audio
-#endif
     -1,            //buffer_size
-#if defined(HAVE_TV_V4L)
     0,             //mjpeg
     2,             //decimation
     90,            //quality
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
     0,             //alsa
-#endif
-#endif
     NULL,          //adevice
-#endif
     0,             //brightness
     0,             //contrast
     0,             //hue
@@ -81,16 +71,13 @@ tv_param_t stream_tv_defaults = {
     0,             //tformat
     100,           //tpage
     0,             //tlang
-
     0,             //scan_autostart
     50,            //scan_threshold
     0.5,            //scan_period
-#ifdef HAVE_TV_DSHOW
     0,             //hidden_video_renderer;
     0,             //hidden_vp_renderer;
     0,             //system_clock;
     0              //normalize_audio_chunks;
-#endif
 };
 
 #define ST_OFF(f) M_ST_OFF(tv_param_t,f)

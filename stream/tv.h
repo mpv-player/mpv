@@ -11,9 +11,7 @@ typedef struct tv_param_s {
     char *chanlist;
     char *norm;
     int automute;
-#if defined(HAVE_TV_V4L2) || defined(HAVE_TV_DSHOW)
     int normid;
-#endif
     char *device;
     char *driver;
     int width;
@@ -26,27 +24,19 @@ typedef struct tv_param_s {
     int immediate;
     int audiorate;
     int audio_id;
-#if defined(HAVE_TV_V4L) || defined(HAVE_TV_DSHOW)
     int amode;
     int volume;
-#if defined(HAVE_TV_V4L)
     int bass;
     int treble;
     int balance;
     int forcechan;
     int force_audio;
-#endif
     int buffer_size;
-#if defined(HAVE_TV_V4L)
     int mjpeg;
     int decimation;
     int quality;
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
     int alsa;
-#endif
-#endif
     char* adevice;
-#endif
     int brightness;
     int contrast;
     int hue;
@@ -60,8 +50,6 @@ typedef struct tv_param_s {
     int scan;
     int scan_threshold;
     float scan_period;
-
-#ifdef HAVE_TV_DSHOW
     /**
       Terminate stream with video renderer instead of Null renderer 
       Will help if video freezes but audio does not.
@@ -88,7 +76,6 @@ typedef struct tv_param_s {
       It will create audio chunks with time length equal to one video frame time.
     */
     int normalize_audio_chunks;
-#endif
 } tv_param_t;
   
 extern tv_param_t stream_tv_defaults;
