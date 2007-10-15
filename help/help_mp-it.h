@@ -4,8 +4,6 @@
 
 // Updated to help_mp-en.h r24423
 
-// TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
-//
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -75,7 +73,7 @@ static char help_text[]=
 #define MSGTR_FPSnotspecified "FPS non specificato (o non valido) nell'intestazione! Usa l'opzione -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Cerco di forzare l'uso della famiglia dei driver dei codec audio %s...\n"
 #define MSGTR_CantFindAudioCodec "Impossibile trovare il codec per il formato audio 0x%X!\n"
-#define MSGTR_RTFMCodecs "Leggi DOCS/HTML/en/codecs.html!\n"
+#define MSGTR_RTFMCodecs "Leggi DOCS/HTML/it/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Cerco di forzare l'uso della famiglia dei driver dei codec video %s...\n"
 #define MSGTR_CantFindVideoCodec "Impossibile trovare il codec per il formato video 0x%X!\n"
 #define MSGTR_CannotInitVO "FATALE: Impossibile inizializzare il driver video!\n"
@@ -101,8 +99,8 @@ static char help_text[]=
 "  - Prova -cache 8192.\n"\
 "- Stai usando -cache per riprodurre un file AVI senza interleave?\n"\
 "  - Prova con -nocache.\n"\
-"Leggi DOCS/HTML/en/video.html per suggerimenti su regolazione/accelerazione.\n"\
-"Se nulla di ciò ti aiuta, allora leggi DOCS/HTML/en/bugreports.html!\n\n"
+"Leggi DOCS/HTML/it/video.html per suggerimenti su regolazione/accelerazione.\n"\
+"Se nulla di ciò ti aiuta, allora leggi DOCS/HTML/it/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer è stato compilato senza il supporto della GUI!\n"
 #define MSGTR_GuiNeedsX "La GUI di MPlayer richiede X11!\n"
@@ -131,7 +129,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
 "  Potrebbe essere un errore nel codice di rilevamento tipo di processore...\n"\
-"  leggi DOCS/HTML/en/bugreports.html.\n"
+"  leggi DOCS/HTML/it/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
 "  Solitamente questo avviene quando si esegue il programma su un processore\n"\
@@ -140,12 +138,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer è stato interrotto per un errore nell'uso della CPU/FPU/RAM.\n"\
 "  Ricompila MPlayer con --enable-debug e crea un backtrace ed un disassemblato\n"\
-"  con 'gdb'. Per dettagli DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
+"  con 'gdb'. Per dettagli DOCS/HTML/it/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer è andato in crash. Questo non dovrebbe accadere.\n"\
 "  Può essere un errore nel codice di MPlayer _o_ nei tuoi driver _o_ nella tua\n"\
 "  versione di gcc. Se ritieni sia colpa di MPlayer, per favore leggi\n"\
-"  DOCS/HTML/en/bugreports.html e segui quelle istruzioni. Non possiamo\n"\
+"  DOCS/HTML/it/bugreports.html e segui quelle istruzioni. Non possiamo\n"\
 "  aiutarti, e non lo faremo, se non ci dai queste informazioni quando segnali\n"\
 "  un possibile problema.\n"
 #define MSGTR_LoadingConfig "Carico configurazione '%s'\n"
@@ -1918,7 +1916,7 @@ static char help_text[]=
 "[VO_XV] driver di uscita video.\n"
 #define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] Sembra non sia disponibile il supporto Xvideo per la tua scheda video.\n"\
 "[VO_XV] Esegui 'xvinfo' per verificare il supporto Xv e leggi\n"\
-"[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
+"[VO_XV] DOCS/HTML/it/video.html#xv!\n"\
 "[VO_XV] Vedi 'mplayer -vo help' per altri (non-xv) driver di uscita video.\n"\
 "[VO_XV] Prova con -vo x11.\n"
  
