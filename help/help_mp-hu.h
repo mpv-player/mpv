@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r24423 (2007. 09. 12.)
+// Sync'ed with help_mp-en.h r24772 (2007. 10. 15.)
 
 // ========================= MPlayer help ===========================
 
@@ -2098,3 +2098,49 @@ static char help_text[]=
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Nem lehet leállítani a mentést. Hiba: %s\n"
 #define MSGTR_TV_TTSupportedLanguages "Támogatott Teletext nyelvek:\n"
 #define MSGTR_TV_TTSelectedLanguage "Kiválasztott alapértelmezett teletext nyelv: %s\n"
+
+//tvi_dshow.c
+#define MSGTR_TVI_DS_UnableConnectInputVideoDecoder "Sikertelen a megadott input videó dekódolóhoz csatolása. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableConnectInputAudioDecoder "Sikertelen a megadott input audió dekódolóhoz csatolása. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectVideoFormat "tvi_dshow: Sikertelen a videó formátum kiválasztása. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectAudioFormat "tvi_dshow: Sikertelen az audió formátum kiválasztása. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetMediaControlInterface "tvi_dshow: Sikertelen az IMediaControl interfész lefoglalása. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableStartGraph "tvi_dshow: Sikertelen a graph indítása! Hiba:0x%x\n"
+#define MSGTR_TVI_DS_DeviceNotFound "tvi_dshow: #%d számú eszköz nem található\n"
+#define MSGTR_TVI_DS_UnableGetDeviceName "tvi_dshow: #%d számú eszköz nevének lekérdezése sikertelen\n"
+#define MSGTR_TVI_DS_UsingDevice "tvi_dshow: #%d eszköz használata: %s\n"
+#define MSGTR_TVI_DS_DeviceName "tvi_dshow: #%d eszköz: %s\n"
+#define MSGTR_TVI_DS_DirectGetFreqFailed "tvi_dshow: Sikertelen a frekvencia közvetlen lekérdezése. Az OS beépített csatorna táblázata lesz használva.\n"
+#define MSGTR_TVI_DS_DirectSetFreqFailed "tvi_dshow: Sikertelen a frekvencia közvetlen beállítása. Az OS beépített csatorna táblázata lesz használva.\n"
+#define MSGTR_TVI_DS_SupportedNorms "tvi_dshow: támogatott normák:"
+#define MSGTR_TVI_DS_AvailableVideoInputs "tvi_dshow: használható videó bemenetek:"
+#define MSGTR_TVI_DS_AvailableAudioInputs "tvi_dshow: használható audió bemenetek:"
+//following phrase will be printed near the selected audio/video input
+#define MSGTR_TVI_DS_InputSelected "(kiválasztva)"
+#define MSGTR_TVI_DS_UnableExtractFreqTable "tvi_dshow: Sikertelen a frekvenciatáblázat betöltése a kstvtune-ból.\n"
+#define MSGTR_TVI_DS_WrongDeviceParam "tvi_dshow: Hibás eszköz paraméter: %s\n"
+#define MSGTR_TVI_DS_WrongDeviceIndex "tvi_dshow: Hibás eszköz index: %d\n"
+#define MSGTR_TVI_DS_WrongADeviceParam "tvi_dshow: Hibás adevice paraméter: %s\n"
+#define MSGTR_TVI_DS_WrongADeviceIndex "tvi_dshow: Hibás adevice index: %d\n"
+
+#define MSGTR_TVI_DS_SamplerateNotsupported "tvi_dshow: A(z) %d mintavételi rátát nem támogatja az eszköz. Visszalépés az első elérhetőre.\n"
+#define MSGTR_TVI_DS_VideoAdjustigNotSupported "tvi_dshow: A fényerő/színárnyalat/telítettség/kontraszt állítását nem támogatja az eszköz\n"
+
+#define MSGTR_TVI_DS_ChangingWidthHeightNotSupported "tvi_dshow: A videó szélesség/magasság változtatását nem támogatja az eszköz.\n"
+#define MSGTR_TVI_DS_SelectingInputNotSupported  "tvi_dshow: A mentési forrás kiválasztását nem támogatja az eszköz\n"
+#define MSGTR_TVI_DS_FreqTableLoaded "tvi_dshow: a rendszer (%s) frekvencia táblázata betöltve az ország id=%d (csatornák:%d).\n"
+#define MSGTR_TVI_DS_ErrorParsingAudioFormatStruct "tvi_dshow: Nem értelmezhető az audió formátum struktúrája.\n"
+#define MSGTR_TVI_DS_ErrorParsingVideoFormatStruct "tvi_dshow: Nem értelmezhető a videó formátum struktúrája.\n"
+#define MSGTR_TVI_DS_UnableSetAudioMode "tvi_dshow: %d audió mód beállítása sikertelen. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnsupportedMediaType "tvi_dshow: Nem támogatott média típus átadva ide: %s\n"
+#define MSGTR_TVI_DS_UnableGetsupportedVideoFormats "tvi_dshow: Nem lehet lekérdezni a támogatott média formátumokat a video pin-ről. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetsupportedAudioFormats "tvi_dshow: Nem lehet lekérdezni a támogatott média formátumokat az audio pin-ről. Hiba:0x%x Audió letiltva.\n"
+#define MSGTR_TVI_DS_UnableFindNearestChannel "tvi_dshow: Nem található a legközelebbi csatorna a rendszer frekvencia táblázatában\n"
+#define MSGTR_TVI_DS_UnableToSetChannel "tvi_dshow: Nem lehet a legközelebbi csatornára váltani a rendszer frekvencia táblázatában. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableTerminateVPPin "tvi_dshow: A VideoPort pin nem szakítható meg, ha szűrő van a graph-on. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVideoSubGraph "tvi_dshow: A mentési graph videó lánca nem építhető fel. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildAudioSubGraph "tvi_dshow: A mentési graph audió lánca nem építhető fel. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVBISubGraph "tvi_dshow: A mentési graph VBI lánca nem építhető fel. Hiba:0x%x\n"
+#define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Directshow graph inicializálás sikertelen.\n"
+#define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: A videó mentési eszköz nem található\n"
+#define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Az audió mentési eszköz nem található\n"

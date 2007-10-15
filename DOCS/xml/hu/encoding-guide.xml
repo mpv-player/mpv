@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24549 -->
+<!-- synced with r24751 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2534,8 +2534,12 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   <entry>az FFmpeg kísérleti wavelet-alapú codecja</entry>
 </row>
 <row>
-  <entry>zbmv</entry>
-  <entry>Zip Blocks Motion Video</entry>
+  <entry>zmbv</entry>
+  <entry>Zip Motion Blocks Video</entry>
+</row>
+<row>
+  <entry>dnxhd</entry>
+  <entry>AVID DNxHD</entry>
 </row>
 </tbody>
 </tgroup>

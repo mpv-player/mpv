@@ -1,4 +1,4 @@
-.\" Synced with r24727
+.\" Synced with r24785
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 10. 07." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 10. 15." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1918,6 +1918,25 @@ az elsõdleges nyelvként lesz használva, amíg egy 28-as típusú csomag érkezik.
 Hasznos, ha a teletext rendszer nem-latin karakterkészletet használ,
 de valamiért a nyelv kód nem kerül átvitelre 28-as típusú teletext csomagon belül.
 A támogatott nyelvek listájához állítsd be ezt az opciót \-1 értékre.
+.IPs "hidden_video_renderer (csak dshow)"
+A folyamot a videó rendererrel szakítja meg a Null renderer helyett (alapértelmezett: kikapcsolva).
+Segít, ha a videó megáll, de az audio nem.
+.I MEGJEGYZÉS:
+Nem biztos, hogy mûködik a \-vo directx és \-vf crop kombinációval.
+.IPs "hidden_vp_renderer (csak dshow)"
+A videó rendererrel szakítja meg a VideoPort csatlakozón folyamot
+az egyszerû eltávolítás helyett (alapértelmezett: off).
+Hasznos, ha a kártyádon van VideoPort csatlakozó és a videó érdes.
+.I MEGJEGYZÉS:
+Nem biztos, hogy mûködik a \-vo directx és \-vf crop kombinációval.
+.IPs "system_clock (csak dshow)"
+A rendszerórát használja a forrás szinkronizálásához az alapértelmezett
+graph óra helyett (általában a graph-ban lévõ valamelyik élõ forrás órája).
+.IPs "normalize_audio_chunks (csak dshow)"
+A videó kockával azonos hosszúságú audió csonkokat készít
+(alapértelmezett: kikapcsolva).
+Némelyik hangkártya kb. 0.5s méretû audió csonkokat készít, érdes videót
+eredményezve, ha immediatemode=0-t használsz.
 .RE
 .
 .TP
@@ -3654,15 +3673,14 @@ Haszos sebességméréshez.
 .B "aa\ \ \ \ \ "
 ASCII art kimeneti videó vezérlõ, ami mûködik szöveges konzolon.
 Az elérhetõ alopciók listáját és azok leírását megkaphatod egy
-.I mplayer \-vo aa:help
-paranccsal.
+'mplayer \-vo aa:help' paranccsal.
 .br
 .I MEGJEGYZÉS:
 A vezérlõ nem kezeli jól a \-aspect opciót.
 .br
 .I TANÁCS:
-Valószínûleg meg kell adnod a \-monitorpixelaspect opciót. Próbáld ezt:
-.I mplayer -vo aa -monitorpixelaspect 0.5.
+Valószínûleg meg kell adnod a \-monitorpixelaspect opciót.
+Próbáld ezt: 'mplayer -vo aa -monitorpixelaspect 0.5'.
 .
 .TP
 .B "caca\ \ \ "
@@ -5852,6 +5870,21 @@ idõbeli chroma erõsítés (alapértelmezett: luma_tmp*chroma_spatial/luma_spatial)
 .B hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]
 A denoise3d szûrõ nagy precízitású/\:minõségû változata.
 A paraméterek és a használat ugyan olyan.
+.
+.TP
+.B ow[=mélység:luma_erõsség:telítettség_erõsség]
+Wavelet zajmentesítõ.
+.PD 0
+.RSs
+.IPs <mélység>
+A nagyobb mélységi érték jobban zajmentesíti az alacsony frekvenciákat,
+de lelassítja a szûrést (alapértelmezett: 8).
+.IPs <luma_erõsség>
+luma erõsség (alapértelmezett: 1.0)
+.IPs <telítettség_erõsség>
+színtelítettség erõssége (alapértelmezett: 1.0)
+.RE
+.PD 1
 .
 .TP
 .B eq[=fényerõsség:kontraszt] (IDEJÉTMÚLT)
@@ -10142,6 +10175,10 @@ A detektálási folyamatban használt adat maximális mennyisége.
 MPEG-TS esetén ez az érték az átvizsgálandó TS csomagok számát
 adja meg.
 .
+.TP
+.B cryptokey=<hexa sztring>
+Kódolási kulcs, amit a demuxer-nek használnia kell.
+Ez a kulcs nyers bináris adata hexadecimális karakterlánccá konvertálva.
 .
 .
 .SS FFmpeg libavformat muxer-ek (\-lavfopts) (lásd még \-of lavf)
