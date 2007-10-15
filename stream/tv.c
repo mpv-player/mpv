@@ -88,6 +88,14 @@ static void tv_scan(tvi_handle_t *tvh)
     tv_scan_t* scan;
     int found=0, index=1;
 
+    //Channel scanner without tuner is useless and causes crash due to uninitialized chanlist_s
+    if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) != TVI_CONTROL_TRUE)
+    {
+        mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_ScannerNotAvailableWithoutTuner);
+        tvh->tv_param->scan=0;
+        return;
+    }
+
     scan = tvh->scan;
     now=GetTimer();
     if (!scan) {

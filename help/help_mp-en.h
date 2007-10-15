@@ -2099,6 +2099,7 @@ static char help_text[]=
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Unable to stop capture. Error: %s\n"
 #define MSGTR_TV_TTSupportedLanguages "Supported Teletext languages:\n"
 #define MSGTR_TV_TTSelectedLanguage "Selected default teletext language: %s\n"
+#define MSGTR_TV_ScannerNotAvailableWithoutTuner "Channel scanner is not available without tuner\n"
 
 //tvi_dshow.c
 #define MSGTR_TVI_DS_UnableConnectInputVideoDecoder  "Unable to connect given input to video decoder. Error:0x%x\n"
