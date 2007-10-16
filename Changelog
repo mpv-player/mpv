@@ -6,9 +6,11 @@ MPlayer (1.0)
 
     Filters:
     * vf_ow new overcomplete wavelet denoiser
+    * change vf_screenshot dependency from libpng to lavc
 
     Streaming:
     * tv:// support for win32
+    * fix teletext on some systems
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
@@ -17,6 +19,10 @@ MPlayer (1.0)
 
     Others:
     * many compiler warning fixes
+
+    Ports:
+    * small crash with vo_macosx fixed
+    * AC3/DTS passthrough for ao_macosx
 
   rc2: "AreWeThereYet?" October 7, 2007
   (SVN revisions: MPlayer r24722, FFmpeg r10677)
