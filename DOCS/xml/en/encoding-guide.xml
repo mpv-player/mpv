@@ -4488,7 +4488,7 @@ if a codec fails or gives wrong output.
   <entry>vp7vfw.dll</entry>
   <entry>On2 VP7 Personal Codec (VP70)</entry>
   <entry>cb4cc3d4ea7c94a35f1d81c3d750bc8d</entry>
-  <entry>wrong FourCC?</entry>
+  <entry><option>-ffourcc VP70</option></entry>
 </row>
 <row>
   <entry>ViVD2.dll</entry>
