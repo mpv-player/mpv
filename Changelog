@@ -1,6 +1,9 @@
 MPlayer (1.0)
 
   rc3:
+    Decoders:
+    * Nellymoser audio decoding via lavc
+
     Filters:
     * vf_ow new overcomplete wavelet denoiser
 
@@ -10,6 +13,7 @@ MPlayer (1.0)
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
     * H.264 PAFF decoding
+    * Nellymoser audio codec
 
     Others:
     * many compiler warning fixes
