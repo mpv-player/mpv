@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r24772 (2007. 10. 15.)
+// Sync'ed with help_mp-en.h r24790 (2007. 10. 16.)
 
 // ========================= MPlayer help ===========================
 
@@ -2098,6 +2098,7 @@ static char help_text[]=
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Nem lehet leállítani a mentést. Hiba: %s\n"
 #define MSGTR_TV_TTSupportedLanguages "Támogatott Teletext nyelvek:\n"
 #define MSGTR_TV_TTSelectedLanguage "Kiválasztott alapértelmezett teletext nyelv: %s\n"
+#define MSGTR_TV_ScannerNotAvailableWithoutTuner "A csatorna kereső nem érhető el tuner nélkül\n"
 
 //tvi_dshow.c
 #define MSGTR_TVI_DS_UnableConnectInputVideoDecoder "Sikertelen a megadott input videó dekódolóhoz csatolása. Hiba:0x%x\n"

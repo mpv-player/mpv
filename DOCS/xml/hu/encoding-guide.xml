@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24751 -->
+<!-- synced with r24795 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -4451,7 +4451,7 @@ opciókat, ha a codec hibázik vagy rossz kimenetet ad.
   <entry>vp7vfw.dll</entry>
   <entry>On2 VP7 Personal Codec (VP70)</entry>
   <entry>cb4cc3d4ea7c94a35f1d81c3d750bc8d</entry>
-  <entry>hibás FourCC?</entry>
+  <entry><option>-ffourcc VP70</option></entry>
 </row>
 <row>
   <entry>ViVD2.dll</entry>
