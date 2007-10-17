@@ -19,6 +19,8 @@
 //#include "loader/wine/mmreg.h"
 #include "loader/wine/vfw.h"
 #include "loader/wine/avifmt.h"
+#include "loader/wine/winerror.h"
+#include "loader/wine/objbase.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -31,6 +33,7 @@
 
 static char *vfw_param_codec = NULL;
 static char *vfw_param_compdata = NULL;
+static HRESULT CoInitRes = -1;
 
 #include "m_option.h"
 
@@ -63,7 +66,7 @@ static BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, char *compdatafile, BI
 //sh_video = malloc(sizeof(sh_video_t));
 
   mp_msg(MSGT_WIN32,MSGL_V,"======= Win32 (VFW) VIDEO Encoder init =======\n");
-
+  CoInitRes = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 //  memset(&sh_video->o_bih, 0, sizeof(BITMAPINFOHEADER));
 //  output_bih->biSize = sizeof(BITMAPINFOHEADER);
 
@@ -295,6 +298,24 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     return 1;
 }
 
+static void uninit(struct vf_instance_s* vf)
+{
+    HRESULT ret;
+
+    if(encoder_hic){
+        if(encoder_buf){
+            ret=ICCompressEnd(encoder_hic);
+            if(ret) mp_msg(MSGT_WIN32, MSGL_WARN, "ICCompressEnd failed: %ld\n", ret);
+            free(encoder_buf);
+            encoder_buf=NULL;
+        }
+        ret=ICClose(encoder_hic);
+        if(ret) mp_msg(MSGT_WIN32, MSGL_WARN, "ICClose failed: %ld\n", ret);
+        encoder_hic=0;
+        if ((CoInitRes == S_OK) || (CoInitRes == S_FALSE)) CoUninitialize();
+    }
+}
+
 //===========================================================================//
 
 static int vf_open(vf_instance_t *vf, char* args){
@@ -303,6 +324,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->control=control;
     vf->query_format=query_format;
     vf->put_image=put_image;
+    vf->uninit=uninit;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
     vf->priv->mux=(muxer_stream_t*)args;

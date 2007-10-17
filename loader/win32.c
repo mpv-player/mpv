@@ -38,6 +38,7 @@ for DLL to know too much about its environment.
 #include "wine/debugtools.h"
 #include "wine/module.h"
 #include "wine/winuser.h"
+#include "wine/objbase.h"
 
 #include <stdio.h>
 #include "win32.h"
@@ -3816,6 +3817,12 @@ static int WINAPI expDuplicateHandle(HANDLE hSourceProcessHandle,  // handle to 
     return 1;
 }
 
+static HRESULT WINAPI expCoInitializeEx(LPVOID lpReserved, DWORD dwCoInit)
+{
+    dbgprintf("CoInitializeEx(%p, %d) called\n", lpReserved, dwCoInit);
+    return S_OK;
+}
+
 // required by PIM1 codec (used by win98 PCTV Studio capture sw)
 static HRESULT WINAPI expCoInitialize(
 				      LPVOID lpReserved	/* [in] pointer to win32 malloc interface
@@ -3825,7 +3832,26 @@ static HRESULT WINAPI expCoInitialize(
     /*
      * Just delegate to the newer method.
      */
-    return 0; //CoInitializeEx(lpReserved, COINIT_APARTMENTTHREADED);
+    return expCoInitializeEx(lpReserved, COINIT_APARTMENTTHREADED);
+}
+
+static void WINAPI expCoUninitialize(void)
+{
+    dbgprintf("CoUninitialize() called\n");
+} 
+
+/* allow static linking */
+HRESULT WINAPI CoInitializeEx(LPVOID lpReserved, DWORD dwCoInit)
+{
+    return expCoInitializeEx(lpReserved, dwCoInit);
+}
+HRESULT WINAPI CoInitialize(LPVOID lpReserved)
+{
+    return expCoInitialize(lpReserved); 
+}
+void WINAPI CoUninitialize(void)
+{
+    return expCoUninitialize();
 }
 
 static DWORD WINAPI expSetThreadAffinityMask
@@ -5132,6 +5158,8 @@ struct exports exp_ole32[]={
     FF(CoCreateFreeThreadedMarshaler,-1)
     FF(CoCreateInstance, -1)
     FF(CoInitialize, -1)
+    FF(CoInitializeEx, -1)
+    FF(CoUninitialize, -1)
     FF(CoTaskMemAlloc, -1)
     FF(CoTaskMemFree, -1)
     FF(StringFromGUID2, -1)
