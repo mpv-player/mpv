@@ -51,23 +51,6 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
-    if(mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
-    // ok, we can do pp in-place (or pp disabled):
-    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-        mpi->type, mpi->flags, mpi->w, mpi->h);
-    mpi->planes[0]=vf->dmpi->planes[0];
-    mpi->stride[0]=vf->dmpi->stride[0];
-    mpi->width=vf->dmpi->width;
-    if(mpi->flags&MP_IMGFLAG_PLANAR){
-        mpi->planes[1]=vf->dmpi->planes[1];
-        mpi->planes[2]=vf->dmpi->planes[2];
-        mpi->stride[1]=vf->dmpi->stride[1];
-        mpi->stride[2]=vf->dmpi->stride[2];
-    }
-    mpi->flags|=MP_IMGFLAG_DIRECT;
-}
-
 static inline double getpix(struct vf_instance_s* vf, double x, double y, int plane){
     int xi, yi;
     mp_image_t *mpi= vf->priv->mpi;
