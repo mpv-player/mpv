@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     unsigned char mode = 0;
     DWORD dwFCC = 0;
     ICOPEN icopen;
-    HRESULT coinit = S_FALSE;
+    HRESULT coinit = -1;
     /* ICINFO icinfo; */
 
     wchar_t drvfile[MAX_PATH];
