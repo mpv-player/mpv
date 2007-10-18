@@ -19,15 +19,15 @@ OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
 STATIC_OBJS := $(OBJS) $(STATIC_OBJS)
 SHARED_OBJS := $(OBJS) $(SHARED_OBJS)
 
-all: $(EXTRADEPS) $(LIB) $(SLIBNAME)
+all: $(LIBNAME) $(SLIBNAME)
 
-$(LIB): $(STATIC_OBJS)
+$(LIBNAME): $(STATIC_OBJS)
 	rm -f $@
 	$(AR) rc $@ $^ $(EXTRAOBJS)
 	$(RANLIB) $@
 
 $(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
-	ln -sf $^ $@
+	$(LN_S) $^ $@
 
 $(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
 	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
@@ -39,15 +39,21 @@ $(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
 %.o: %.S
 	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
 
-%: %.o $(LIB)
+%: %.o $(LIBNAME)
 	$(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+
+%.ho: %.h
+	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -Wno-unused -c -o $@ -x c $<
+
+ALLHEADERS = $(subst $(VPATH)/,,$(wildcard $(VPATH)/*.h))
+checkheaders: $(filter-out %_template.ho,$(ALLHEADERS:.h=.ho))
 
 depend dep: $(SRCS)
 	$(CC) -MM $(CFLAGS) $^ 1>.depend
 
 clean::
 	rm -f *.o *~ *.a *.lib *.so *.so.* *.dylib *.dll \
-	      *.def *.dll.a *.exp
+	      *.def *.dll.a *.exp *.ho
 
 distclean: clean
 	rm -f .depend
@@ -64,37 +70,38 @@ install: install-libs install-headers
 install-libs: $(INSTLIBTARGETS)
 
 install-lib-shared: $(SLIBNAME)
-	install -d "$(shlibdir)"
-	install -m 755 $(SLIBNAME) "$(shlibdir)/$(SLIBNAME_WITH_VERSION)"
-	$(STRIP) "$(shlibdir)/$(SLIBNAME_WITH_VERSION)"
-	cd "$(shlibdir)" && \
-		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME_WITH_MAJOR)
-	cd "$(shlibdir)" && \
-		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME)
+	install -d "$(SHLIBDIR)"
+	install -m 755 $(SLIBNAME) "$(SHLIBDIR)/$(SLIBNAME_WITH_VERSION)"
+	$(STRIP) "$(SHLIBDIR)/$(SLIBNAME_WITH_VERSION)"
+	cd "$(SHLIBDIR)" && \
+		$(LN_S) $(SLIBNAME_WITH_VERSION) $(SLIBNAME_WITH_MAJOR)
+	cd "$(SHLIBDIR)" && \
+		$(LN_S) $(SLIBNAME_WITH_VERSION) $(SLIBNAME)
 	$(SLIB_INSTALL_EXTRA_CMD)
 
-install-lib-static: $(LIB)
-	install -d "$(libdir)"
-	install -m 644 $(LIB) "$(libdir)"
+install-lib-static: $(LIBNAME)
+	install -d "$(LIBDIR)"
+	install -m 644 $(LIBNAME) "$(LIBDIR)"
 	$(LIB_INSTALL_EXTRA_CMD)
 
 install-headers:
-	install -d "$(incdir)"
-	install -d "$(libdir)/pkgconfig"
-	install -m 644 $(addprefix $(SRC_DIR)/,$(HEADERS)) "$(incdir)"
-	install -m 644 $(BUILD_ROOT)/lib$(NAME).pc "$(libdir)/pkgconfig"
+	install -d "$(INCDIR)"
+	install -d "$(LIBDIR)/pkgconfig"
+	install -m 644 $(addprefix $(SRC_DIR)/,$(HEADERS)) "$(INCDIR)"
+	install -m 644 $(BUILD_ROOT)/lib$(NAME).pc "$(LIBDIR)/pkgconfig"
 
 uninstall: uninstall-libs uninstall-headers
 
 uninstall-libs:
-	-rm -f "$(shlibdir)/$(SLIBNAME_WITH_MAJOR)" \
-	       "$(shlibdir)/$(SLIBNAME)"            \
-	       "$(shlibdir)/$(SLIBNAME_WITH_VERSION)"
-	-rm -f "$(libdir)/$(LIB)"
+	-rm -f "$(SHLIBDIR)/$(SLIBNAME_WITH_MAJOR)" \
+	       "$(SHLIBDIR)/$(SLIBNAME)"            \
+	       "$(SHLIBDIR)/$(SLIBNAME_WITH_VERSION)"
+	-$(SLIB_UNINSTALL_EXTRA_CMD)
+	-rm -f "$(LIBDIR)/$(LIBNAME)"
 
 uninstall-headers::
-	rm -f $(addprefix "$(incdir)/",$(HEADERS))
-	rm -f "$(libdir)/pkgconfig/lib$(NAME).pc"
+	rm -f $(addprefix "$(INCDIR)/",$(HEADERS))
+	rm -f "$(LIBDIR)/pkgconfig/lib$(NAME).pc"
 
 .PHONY: all depend dep clean distclean install* uninstall*
 
