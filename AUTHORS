@@ -637,7 +637,7 @@ Plourde, Nicolas <nicolas.plourde@gmail.com>
     * Darwin VCD/SVCD support
 
 Poettering, Lennart <mzzcynlre@0pointer.de>
-    * audio driver for the Polypaudio sound server
+    * audio driver for the PulseAudio sound server
 
 Poirier, Guillaume (poirierg) <poirierg@gmail.com>
     * French documentation translation and synchronization

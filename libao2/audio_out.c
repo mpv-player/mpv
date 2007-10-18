@@ -25,8 +25,8 @@ extern ao_functions_t audio_out_arts;
 #ifdef USE_ESD
 extern ao_functions_t audio_out_esd;
 #endif
-#ifdef USE_POLYP
-extern ao_functions_t audio_out_polyp;
+#ifdef USE_PULSE
+extern ao_functions_t audio_out_pulse;
 #endif
 #ifdef USE_JACK
 extern ao_functions_t audio_out_jack;
@@ -112,8 +112,8 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef USE_ESD
         &audio_out_esd,
 #endif
-#ifdef USE_POLYP
-        &audio_out_polyp,
+#ifdef USE_PULSE
+        &audio_out_pulse,
 #endif
 #ifdef USE_JACK
         &audio_out_jack,
