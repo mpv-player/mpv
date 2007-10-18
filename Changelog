@@ -17,6 +17,9 @@ MPlayer (1.0)
     * H.264 PAFF decoding
     * Nellymoser audio codec
 
+    Drivers:
+    * Replace PolypAudio by PulseAudio (-ao pulse)
+
     Others:
     * many compiler warning fixes
 
