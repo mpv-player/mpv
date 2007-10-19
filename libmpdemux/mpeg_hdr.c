@@ -26,7 +26,7 @@ static float frameratecode2framerate[16] = {
 };
 
 
-int mp_header_process_sequence_header (mp_mpeg_header_t * picture, unsigned char * buffer)
+int mp_header_process_sequence_header (mp_mpeg_header_t * picture, const unsigned char * buffer)
 {
     int width, height;
 

@@ -20,7 +20,7 @@ typedef struct {
     int picture_type;
 } mp_mpeg_header_t;
 
-int mp_header_process_sequence_header (mp_mpeg_header_t * picture, unsigned char * buffer);
+int mp_header_process_sequence_header (mp_mpeg_header_t * picture, const unsigned char * buffer);
 int mp_header_process_extension (mp_mpeg_header_t * picture, unsigned char * buffer);
 float mpeg12_aspect_info(mp_mpeg_header_t *picture);
 int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer);
