@@ -16,6 +16,8 @@
 #define uint16 unsigned short
 #define uint8 unsigned char
 
+/* FIXME: these all belong in the context, not as globals! */
+
 static uint32 colorMask = 0xF7DEF7DE;
 static uint32 lowPixelMask = 0x08210821;
 static uint32 qcolorMask = 0xE79CE79C;
