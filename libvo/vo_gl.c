@@ -907,8 +907,8 @@ static int control(uint32_t request, void *data, ...)
       if (scaled_osd) {r->w = image_width; r->h = image_height;}
       else if (vo_fs) {
         r->w = vo_screenwidth; r->h = vo_screenheight;
-        r->ml = r->mr = ass_border_x > 0 ? ass_border_x : 0;
-        r->mt = r->mb = ass_border_y > 0 ? ass_border_y : 0;
+        r->ml = r->mr = ass_border_x;
+        r->mt = r->mb = ass_border_y;
       } else {
         r->w = vo_dwidth; r->h = vo_dheight;
       }

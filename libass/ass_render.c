@@ -184,6 +184,8 @@ typedef struct frame_context_s {
 	int width, height; // screen dimensions
 	int orig_height; // frame height ( = screen height - margins )
 	int orig_width; // frame width ( = screen width - margins )
+	int orig_height_nocrop; // frame height ( = screen height - margins + cropheight)
+	int orig_width_nocrop; // frame width ( = screen width - margins + cropwidth)
 	ass_track_t* track;
 	long long time; // frame's timestamp, ms
 	double font_scale;
@@ -446,28 +448,33 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
  * \brief Mapping between script and screen coordinates
  */
 static int x2scr(int x) {
-	return x*frame_context.orig_width / frame_context.track->PlayResX + global_settings->left_margin;
+	return x*frame_context.orig_width_nocrop / frame_context.track->PlayResX +
+		FFMAX(global_settings->left_margin, 0);
 }
 /**
  * \brief Mapping between script and screen coordinates
  */
 static int y2scr(int y) {
-	return y * frame_context.orig_height / frame_context.track->PlayResY + global_settings->top_margin;
+	return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY +
+		FFMAX(global_settings->top_margin, 0);
 }
 // the same for toptitles
 static int y2scr_top(int y) {
 	if (global_settings->use_margins)
-		return y * frame_context.orig_height / frame_context.track->PlayResY;
+		return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY;
 	else
-		return y * frame_context.orig_height / frame_context.track->PlayResY + global_settings->top_margin;
+		return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY +
+			FFMAX(global_settings->top_margin, 0);
 }
 // the same for subtitles
 static int y2scr_sub(int y) {
 	if (global_settings->use_margins)
-		return y * frame_context.orig_height / frame_context.track->PlayResY +
-		       global_settings->top_margin + global_settings->bottom_margin;
+		return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY +
+			FFMAX(global_settings->top_margin, 0) +
+			FFMAX(global_settings->bottom_margin, 0);
 	else
-		return y * frame_context.orig_height / frame_context.track->PlayResY + global_settings->top_margin;
+		return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY +
+			FFMAX(global_settings->top_margin, 0);
 }
 
 static void compute_string_bbox( text_info_t* info, FT_BBox *abbox ) {
@@ -2101,6 +2108,12 @@ static int ass_start_frame(ass_renderer_t *priv, ass_track_t* track, long long n
 	frame_context.height = global_settings->frame_height;
 	frame_context.orig_width = global_settings->frame_width - global_settings->left_margin - global_settings->right_margin;
 	frame_context.orig_height = global_settings->frame_height - global_settings->top_margin - global_settings->bottom_margin;
+	frame_context.orig_width_nocrop = global_settings->frame_width -
+		FFMAX(global_settings->left_margin, 0) -
+		FFMAX(global_settings->right_margin, 0);
+	frame_context.orig_height_nocrop = global_settings->frame_height -
+		FFMAX(global_settings->top_margin, 0) -
+		FFMAX(global_settings->bottom_margin, 0);
 	frame_context.track = track;
 	frame_context.time = now;
 
