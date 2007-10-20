@@ -4,6 +4,9 @@ MPlayer (1.0)
     Decoders:
     * Nellymoser audio decoding via lavc
 
+    Demuxers:
+    * -lavfdopts cryptokey allows decrypting MXF and ASF files
+
     Filters:
     * vf_ow new overcomplete wavelet denoiser
     * change vf_screenshot dependency from libpng to lavc
