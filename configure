@@ -7713,6 +7713,7 @@ CONFIG_LIBAMR_WB=$_libamr_wb
 `echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 CONFIG_LIBFAAC=$_lavc_faac
 CONFIG_LIBMP3LAME=$_lavc_mp3lame
+CONFIG_LIBVORBIS=$_libvorbis
 CONFIG_LIBXVID=$_lavc_xvid
 CONFIG_LIBX264=$_lavc_x264
 CONFIG_ZLIB=$_zlib
