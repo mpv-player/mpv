@@ -25,6 +25,7 @@
 #include "codebook.h"
 #include "misc.h"
 #include "os.h"
+#include "block.h"
 
 #define LSP_FRACBITS 14
 

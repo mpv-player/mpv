@@ -25,6 +25,7 @@
 #include "window.h"
 #include "registry.h"
 #include "misc.h"
+#include "block.h"
 
 static int ilog(unsigned int v){
   int ret=0;

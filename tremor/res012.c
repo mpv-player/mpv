@@ -25,6 +25,7 @@
 #include "codebook.h"
 #include "misc.h"
 #include "os.h"
+#include "block.h"
 
 typedef struct {
   vorbis_info_residue0 *info;
