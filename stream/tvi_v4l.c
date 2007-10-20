@@ -169,20 +169,32 @@ static const char *device_palette2name[] = {
 };
 #define PALETTE(x) ((x < sizeof(device_palette2name)/sizeof(char*)) ? device_palette2name[x] : "UNKNOWN")
 
+static const struct {
+    char* name;
+    int normid;
+    int tuner_flags;
+    int tuner_mode;
+    int input_norm;
+    float fps;
+} supported_norms[]={
+    {"pal",   TV_NORM_PAL,    VIDEO_TUNER_PAL,   VIDEO_MODE_PAL,  VIDEO_MODE_PAL,  PAL_FPS },
+    {"ntsc",  TV_NORM_NTSC,   VIDEO_TUNER_NTSC,  VIDEO_MODE_NTSC, VIDEO_MODE_NTSC, NTSC_FPS},
+    {"secam", TV_NORM_SECAM,  VIDEO_TUNER_SECAM, VIDEO_MODE_SECAM,VIDEO_MODE_SECAM,PAL_FPS },
+    {"palnc", TV_NORM_PALNC,  VIDEO_TUNER_PAL,   VIDEO_MODE_PAL,  3,               PAL_FPS },
+    {"palm",  TV_NORM_PALM,   VIDEO_TUNER_NTSC,  VIDEO_MODE_NTSC, 4,               NTSC_FPS},
+    {"paln",  TV_NORM_PALN,   VIDEO_TUNER_PAL,   VIDEO_MODE_PAL,  5,               PAL_FPS },
+    {"ntscjp",TV_NORM_NTSCJP, VIDEO_TUNER_NTSC,  VIDEO_MODE_NTSC, 6,               NTSC_FPS},
+    {"auto",  -1,             -1,                -1,              VIDEO_MODE_AUTO, -1      },
+    {NULL,    -1,             -1,                -1,              -1      }
+};
+
 static const char *norm2name(int mode)
 {
-    switch (mode) {
-    case VIDEO_MODE_PAL:
-        return "pal";
-    case VIDEO_MODE_SECAM:
-        return "secam";
-    case VIDEO_MODE_NTSC:
-        return "ntsc";
-    case VIDEO_MODE_AUTO:
-        return "auto";
-    default:
-        return "unknown";
-    }
+    int i;
+    for(i=0;supported_norms[i].name; i++)
+        if(supported_norms[i].input_norm==mode)
+            return supported_norms[i].name;
+    return "unknown";
 };
 
 static const char *audio_mode2name(int mode)
@@ -1338,10 +1350,12 @@ static int control(priv_t *priv, int cmd, void *arg)
         case TVI_CONTROL_TUN_SET_NORM:
         {
             int req_mode = *(int *)arg;
+            int norm_index;
+            for(norm_index=0;supported_norms[norm_index].name; norm_index++)
+                if(req_mode==supported_norms[norm_index].normid)
+                    break;
 
-            if ((req_mode != TV_NORM_PAL) && (req_mode != TV_NORM_NTSC) && (req_mode != TV_NORM_SECAM)
-                && (req_mode != TV_NORM_PALNC) && (req_mode != TV_NORM_PALM) && (req_mode != TV_NORM_PALN)
-                && (req_mode != TV_NORM_NTSCJP)) {
+            if(!supported_norms[norm_index].name) {
                 mp_msg(MSGT_TV, MSGL_ERR, "Unknown norm!\n");
                 return(TVI_CONTROL_FALSE);
             }
@@ -1350,13 +1364,7 @@ static int control(priv_t *priv, int cmd, void *arg)
                 int prev_mode;
 
                 control(priv, TVI_CONTROL_TUN_GET_TUNER, 0);
-                if (((req_mode == TV_NORM_PAL
-                      || req_mode == TV_NORM_PALNC
-                      || req_mode == TV_NORM_PALN) && !(priv->tuner.flags & VIDEO_TUNER_PAL)) ||
-                    ((req_mode == TV_NORM_NTSC
-                      || req_mode == TV_NORM_NTSCJP
-                      || req_mode == TV_NORM_PALM) && !(priv->tuner.flags & VIDEO_TUNER_NTSC)) ||
-                    ((req_mode == TV_NORM_SECAM) && !(priv->tuner.flags & VIDEO_TUNER_SECAM)))
+                if(!(priv->tuner.flags & supported_norms[norm_index].tuner_flags))
                 {
                     mp_msg(MSGT_TV, MSGL_ERR, "Tuner isn't capable to set norm!\n");
                     return(TVI_CONTROL_FALSE);
@@ -1364,21 +1372,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
                 prev_mode = priv->tuner.mode;
 
-                switch(req_mode) {
-                case TV_NORM_PAL:
-                case TV_NORM_PALNC:
-                case TV_NORM_PALN:
-                    priv->tuner.mode = VIDEO_MODE_PAL;
-                    break;
-                case TV_NORM_NTSC:
-                case TV_NORM_NTSCJP:
-                case TV_NORM_PALM:
-                    priv->tuner.mode = VIDEO_MODE_NTSC;
-                    break;
-                case TV_NORM_SECAM:
-                    priv->tuner.mode = VIDEO_MODE_SECAM;
-                    break;
-                }
+                priv->tuner.mode = supported_norms[norm_index].tuner_mode;
 
                 if (control(priv, TVI_CONTROL_TUN_SET_TUNER, &priv->tuner) != TVI_CONTROL_TRUE) {
                     // norm setting failed, but maybe it's only because it's fixed
@@ -1387,29 +1381,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 
             }
 
-            switch(req_mode) {
-            case TV_NORM_PAL:
-                priv->channels[priv->act_channel].norm = VIDEO_MODE_PAL;
-                break;
-            case TV_NORM_NTSC:
-                priv->channels[priv->act_channel].norm = VIDEO_MODE_NTSC;
-                break;
-            case TV_NORM_SECAM:
-                priv->channels[priv->act_channel].norm = VIDEO_MODE_SECAM;
-                break;
-            case TV_NORM_PALNC:
-                priv->channels[priv->act_channel].norm = 3;
-                break;
-            case TV_NORM_PALM:
-                priv->channels[priv->act_channel].norm = 4;
-                break;
-            case TV_NORM_PALN:
-                priv->channels[priv->act_channel].norm = 5;
-                break;
-            case TV_NORM_NTSCJP:
-                priv->channels[priv->act_channel].norm = 6;
-                break;
-            }
+            priv->channels[priv->act_channel].norm = supported_norms[norm_index].input_norm;
+
             if (ioctl(priv->video_fd, VIDIOCSCHAN, &priv->channels[priv->act_channel]) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl set chan failed: %s\n", strerror(errno));
@@ -1421,13 +1394,7 @@ static int control(priv_t *priv, int cmd, void *arg)
                 return(TVI_CONTROL_FALSE);
             }
 
-            if(req_mode == TV_NORM_PAL || req_mode == TV_NORM_SECAM || req_mode == TV_NORM_PALN || req_mode == TV_NORM_PALNC) {
-                priv->fps = PAL_FPS;
-            }
-
-            if(req_mode == TV_NORM_NTSC || req_mode == TV_NORM_NTSCJP || req_mode == TV_NORM_PALM) {
-                priv->fps = NTSC_FPS;
-            }
+            priv->fps = supported_norms[norm_index].fps;
 
             if(priv->height > priv->capability.maxheight) {
                 priv->height = priv->capability.maxheight;
