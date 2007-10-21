@@ -3560,7 +3560,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     if (strstr(cs1, "WINNOV.bmp"))
     {
 	int r;
-	r=open("/dev/null", 0);
+	r=open("/dev/null", O_RDONLY);
 	return r;
     }
 
