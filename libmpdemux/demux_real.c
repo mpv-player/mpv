@@ -143,20 +143,6 @@ static void get_str(int isbyte, demuxer_t *demuxer, char *buf, int buf_size)
     mp_msg(MSGT_DEMUX, MSGL_V, "read_str: %d bytes read\n", len);
 }
 
-static void skip_str(int isbyte, demuxer_t *demuxer)
-{
-    int len;
-
-    if (isbyte)
-	len = stream_read_char(demuxer->stream);
-    else
-	len = stream_read_word(demuxer->stream);
-
-    stream_skip(demuxer->stream, len);    
-
-    mp_msg(MSGT_DEMUX, MSGL_V, "skip_str: %d bytes skipped\n", len);
-}
-
 static void dump_index(demuxer_t *demuxer, int stream_id)
 {
     real_priv_t *priv = demuxer->priv;
