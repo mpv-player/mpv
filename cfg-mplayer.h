@@ -61,7 +61,6 @@ extern m_option_t dxr2_opts[];
 
 #ifdef HAVE_NEW_GUI
 extern char * skinName;
-extern int enqueue;
 extern int guiWinID;
 #endif
 
