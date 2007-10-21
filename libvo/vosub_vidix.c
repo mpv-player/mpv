@@ -195,35 +195,6 @@ static uint32_t vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h
     return -1;
 }
 
-static uint32_t vidix_draw_slice_410_fast(uint8_t *image[], int stride[], int w, int h, int x, int y)
-{
-    uint8_t *src;
-    uint8_t *dest;
-
-    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += dstrides.y*y + x;
-    src = image[0];
-    memcpy(dest, src, dstrides.y*h*9/8);
-    return 0;
-}
-
-static uint32_t vidix_draw_slice_400(uint8_t *image[], int stride[], int w,int h,int x,int y)
-{
-    uint8_t *src;
-    uint8_t *dest;
-    int i;
-
-    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += dstrides.y*y + x;
-    src = image[0];
-    for(i=0;i<h;i++){
-        memcpy(dest,src,w);
-        src+=stride[0];
-        dest += dstrides.y;
-    }
-    return 0;
-}
-
 static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
@@ -360,42 +331,6 @@ int vidix_grkey_set(const vidix_grkey_t *gr_key)
     return(vdlSetGrKeys(vidix_handler, gr_key));
 }
 
-
-static int  vidix_get_video_eq(vidix_video_eq_t *info)
-{
-  if(!video_on) return EPERM;
-  return vdlPlaybackGetEq(vidix_handler, info);
-}
-
-static int  vidix_set_video_eq(const vidix_video_eq_t *info)
-{
-  if(!video_on) return EPERM;
-  return vdlPlaybackSetEq(vidix_handler, info);
-}
-
-static int  vidix_get_num_fx(unsigned *info)
-{
-  if(!video_on) return EPERM;
-  return vdlQueryNumOemEffects(vidix_handler, info);
-}
-
-static int  vidix_get_oem_fx(vidix_oem_fx_t *info)
-{
-  if(!video_on) return EPERM;
-  return vdlGetOemEffect(vidix_handler, info);
-}
-
-static int  vidix_set_oem_fx(const vidix_oem_fx_t *info)
-{
-  if(!video_on) return EPERM;
-  return vdlSetOemEffect(vidix_handler, info);
-}
-
-static int  vidix_set_deint(const vidix_deinterlace_t *info)
-{
-  if(!video_on) return EPERM;
-  return vdlPlaybackSetDeint(vidix_handler, info);
-}
 
 static int is_422_planes_eq=0;
 int      vidix_init(unsigned src_width,unsigned src_height,
