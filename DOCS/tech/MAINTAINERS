@@ -215,6 +215,7 @@ libao2 drivers:
     * ao_oss.c - None
     * ao_pcm.c - None
     * ao_plugin.c - None
+    * ao_pulse.c - Reimar Döffinger
     * ao_sdl.c - None
     * ao_sgi.c - None
     * ao_sun.c - None
