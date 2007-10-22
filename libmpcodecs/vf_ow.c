@@ -165,7 +165,7 @@ static void compose2D2(float *dst, float *src[4], float *temp[2], int stride, in
 
 static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stride, int src_stride, int width, int height, int is_luma){
     int x,y, i, j;
-    double sum=0;
+//    double sum=0;
     double s= p->strength[!is_luma];
     int depth= p->depth;
 
