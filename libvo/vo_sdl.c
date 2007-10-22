@@ -1274,8 +1274,8 @@ static void check_events (void)
                                 /*case SDLK_o: mplayer_put_key('o');break;
                                 case SDLK_SPACE: mplayer_put_key(' ');break;
                                 case SDLK_p: mplayer_put_key('p');break;*/
-				case SDLK_7: mplayer_put_key(shift_key?'/':'7');
-                                case SDLK_PLUS: mplayer_put_key(shift_key?'*':'+');
+                                case SDLK_7: mplayer_put_key(shift_key?'/':'7');break;
+                                case SDLK_PLUS: mplayer_put_key(shift_key?'*':'+');break;
                                 case SDLK_KP_PLUS: mplayer_put_key('+');break;
                                 case SDLK_MINUS:
                                 case SDLK_KP_MINUS: mplayer_put_key('-');break;
