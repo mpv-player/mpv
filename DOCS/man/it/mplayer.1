@@ -1,4 +1,4 @@
-.\" synced with r24656
+.\" synced with r24820
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -1753,7 +1753,7 @@ indirizzo IP MPlayer cerca di usare e prova piuttosto a forzarne uno
 assegnato al tuo computer.
 .
 .TP
-.B \-rtsp-stream-over-tcp (solo LIVE555)
+.B \-rtsp-stream-over-tcp (solo LIVE555 e NEMESI)
 Utilizzato con URL del tipo 'rtsp://' per specificare che i pacchetti RTP o RTCP
 devono essere fatti passare su TCP (utilizzando la stessa connessione di RTSP).
 Questa opzione può essere utile se hai una connessione internet che non gestisce
@@ -1840,7 +1840,7 @@ Nella maggior parte dei casi automute=100 sarà sufficente.
 Il valore di default è 0 (automute disabilitato).
 .IPs driver=<valore>
 Vedi \-tv driver=help per una lista dei driver di ingresso TV compilati.
-disponibili: dummy, v4l, v4l2, bsdbt848
+disponibili: dummy, v4l, v4l2, bsdbt848 (default: rilevato automaticamente)
 .IPs device=<valore>
 Specifica il dispositivo TV (default: /dev/\:video0).
 .I NOTA:
@@ -1990,6 +1990,26 @@ Utile quando il sistema televideo usa un set di caratteri non latino, ma i
 codici di lingua per qualche ragion non vengono trasmessi via televideo con
 pacchetti di tipo 28.
 Imposta l'opzione a \-1 per ottenere la lista dei codici di lingua utilizzabili.
+.IPs "hidden_video_renderer (solo dshow)"
+Termina il flusso col renderizzatore video invece che con quello Null
+(default: off).
+Aiuta quando il video si blocca e l'audio no.
+.I NOTA:
+Potrebbe non funzionare con la combinazione di \-vo directx e \-vf crop.
+.IPs "hidden_vp_renderer (solo dshow)"
+Chiude il pin VideoPort col renderizzatore video invece di rimuoverlo dal
+graph (default: off).
+Utile se la tua scheda ha un pin VideoPort e il video è disturbato.
+.I NOTA:
+Potrebbe non funzionare con la combinazione di \-vo directx e \-vf crop.
+.IPs "system_clock (solo dshow)"
+Usa l'orologio di sistema come riferimento per la sincronia invece dell'orologio
+di default di graph (solitamente quello da una delle sorgenti dirette di graph).
+.IPs "normalize_audio_chunks (solo dshow)"
+Crea blocchi audio con una durata uguale alla durata del fotogramma video
+(default: off).
+Alcune schede audio generano blocchi audio di circa 0.5s, che portano video
+disturbato usando immediatemode=0.
 .RE
 .
 .TP
@@ -2743,8 +2763,18 @@ uscita audio attraverso NAS
 driver di uscita audio nativo per Mac OS X
 .
 .TP
-.B openal
-Sperimentale, driver di uscita audio OpenAL incompleto (riprodurrà in mono)
+.B "openal\ "
+driver di uscita audio OpenAL sperimentale
+.
+.TP
+.B "pulse\ \ "
+driver di uscita audio PulseAudio
+.PD 0
+.RSs
+.IPs "<host>[:<sink di uscita>]"
+specifica l'host e facoltativamente il sink di uscita da usare
+.RE
+.PD 1
 .
 .TP
 .B sgi (solo SGI)
@@ -3710,7 +3740,7 @@ Valida solo per modalità yuv 2, 3, 4 e 6.
 .RSss
 0: Usa un filtraggio lineare semplice (default).
 .br
-1: Usa un filtraggio bicubico (migliore qualità).
+1: Usa un filtraggio bicubico B-spline (migliore qualità).
 Richiede un'unità supplementare di texture.
 Schede video vecchie non saranno in grado di gestire questo per la crominanza,
 perlomeno in modalità a schermo intero.
@@ -3794,8 +3824,14 @@ Utile per benchmarking (prove di velocità).
 .B "aa\ \ \ \ \ "
 Driver di uscita video ASCII art che funziona su una console di testo.
 Puoi avere una lista ed una spiegazione delle sotto opzioni disponibili
-eseguendo
-.I mplayer \-vo aa:help
+eseguendo 'mplayer \-vo aa:help'.
+.br
+.I NOTA:
+Il driver non gestisce correttamente \-aspect.
+.br
+.I CONSIGLIO:
+Probabilmente dovrai specificare \-monitorpixelaspect.
+Prova con 'mplayer \-vo aa \-monitorpixelaspect 0.5'.
 .
 .TP
 .B "caca\ \ \ "
@@ -4528,7 +4564,7 @@ Questo diminuisce molto la qualità in quasi tutti i casi
 Salta completamente la decodifica dei fotogrammi.
 Accelera molto, ma porta movimenti scattosi e ogni tanto brutti artefatti
 (vedi skiploopfilter per i valori_salto disponibili).
-.IPs "threads=<1\-8> (solo MPEG-1/2)"
+.IPs "threads=<1\-8> (solo MPEG-1/2 e H.264)"
 numero di thread da usare per la decodifica (default: 1)
 .IPs vismv=<valore>
 Visualizza i vettori di movimento.
@@ -6078,6 +6114,21 @@ intensità temporale della crominanza
 .B hqdn3d[=lumin_spaziale:cromin_spaziale:lumin_temp:cromin_temp]
 Versione ad alta precisione/\:qualità del filtro denoise3d.
 Parametri ed utilizzo sono gli stessi.
+.
+.TP
+.B ow[=profondità:intensità_lumin:intensità_cromin]
+Eliminatore di disturbo Overcomplete Wavelet.
+.PD 0
+.RSs
+.IPs <profondità>
+Valori più alti di profondità elimineranno maggiormente il disturbo nei
+componenti a frequenza inferiore, ma rallenteranno il filtraggio (default: 8).
+.IPs <intensità_lumin>
+intensità della luminanza (default: 1.0)
+.IPs <chroma_strength>
+intensità della crominanza (default: 1.0)
+.RE
+.PD 1
 .
 .TP
 .B eq[=luminosità:contrasto] (OBSOLETO)
@@ -10567,6 +10618,11 @@ Forza uno specifico demuxer di libavformat.
 Massima dimensione dei dati da testare durante la fase di rilevazione.
 Nel caso di MPEG-TS questo valore indentifica il massimo numero di pacchetti
 TS da scansionare.
+.
+.TP
+.B cryptokey=<stringa_esadecimale>
+Chiave criptografica che dovrebbe usare il demuxer.
+Questi sono i dati binari grezzi della chiave convertiti in stringa esadecimale.
 .
 .
 .
