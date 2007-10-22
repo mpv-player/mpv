@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r24423
+// Updated to help_mp-en.h r24790
 
 // ========================= MPlayer help ===========================
 
@@ -2084,3 +2084,50 @@ static char help_text[]=
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Impossibile interrompere l'aquisizione. Errore: %s\n"
 #define MSGTR_TV_TTSupportedLanguages "Lingue del televideo utilizzabili:\n"
 #define MSGTR_TV_TTSelectedLanguage "Selezionata la lingua di default del televideo: %s\n"
+#define MSGTR_TV_ScannerNotAvailableWithoutTuner "La scansione automatica canali non è disponibile senza un sintonizzatore\n"
+
+//tvi_dshow.c
+#define MSGTR_TVI_DS_UnableConnectInputVideoDecoder  "Impossibile collegare al decodificatore video l'ingresso indicato. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableConnectInputAudioDecoder  "Impossibile collegare al decodificatore audio l'ingresso indicato. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectVideoFormat "tvi_dshow: Impossibile selezionare il formato video. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectAudioFormat "tvi_dshow: Impossibile selezionare il formato audio. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetMediaControlInterface "tvi_dshow: Impossibile ricavare l'interfaccia IMediaControl. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableStartGraph "tvi_dshow: Impossibile avviare graph! Errore:0x%x\n"
+#define MSGTR_TVI_DS_DeviceNotFound "tvi_dshow: Dispositivo #%d non trovato\n"
+#define MSGTR_TVI_DS_UnableGetDeviceName "tvi_dshow: Impossibile ricavare il nome per il dispositivo #%d\n"
+#define MSGTR_TVI_DS_UsingDevice "tvi_dshow: Uso il dispositivo #%d: %s\n"
+#define MSGTR_TVI_DS_DeviceName  "tvi_dshow: Dispositivo #%d: %s\n"
+#define MSGTR_TVI_DS_DirectGetFreqFailed "tvi_dshow: Impossibile ricavare direttamente la frequenza. Sarà usata la la tabella di sistema dei canali.\n"
+#define MSGTR_TVI_DS_DirectSetFreqFailed "tvi_dshow: Impossibile impostare direttamente la frequenza. Sarà usata la la tabella di sistema dei canali.\n"
+#define MSGTR_TVI_DS_SupportedNorms "tvi_dshow: norme disponibili:"
+#define MSGTR_TVI_DS_AvailableVideoInputs "tvi_dshow: ingressi video disponibili:"
+#define MSGTR_TVI_DS_AvailableAudioInputs "tvi_dshow: ingressi audio disponibili:"
+//following phrase will be printed near the selected audio/video input
+#define MSGTR_TVI_DS_InputSelected "(selezionato)"
+#define MSGTR_TVI_DS_UnableExtractFreqTable "tvi_dshow: Impossibile leggere la tabella delle frequenze da kstvtune.ax\n"
+#define MSGTR_TVI_DS_WrongDeviceParam "tvi_dshow: Parametro device errato: %s\n"
+#define MSGTR_TVI_DS_WrongDeviceIndex "tvi_dshow: Indice di device errato: %d\n"
+#define MSGTR_TVI_DS_WrongADeviceParam "tvi_dshow: Parametro adevice errato: %s\n"
+#define MSGTR_TVI_DS_WrongADeviceIndex "tvi_dshow: Indice di adevice errato: %d\n"
+
+#define MSGTR_TVI_DS_SamplerateNotsupported "tvi_dshow: Campionamento %d non supportato dal dispositivo. Provo con il primo disponibile.\n"
+#define MSGTR_TVI_DS_VideoAdjustigNotSupported "tvi_dshow: Impostazione di luminosità/tonalità/saturazione/contrasto non disponibile per il dispositivo\n"
+
+#define MSGTR_TVI_DS_ChangingWidthHeightNotSupported "tvi_dshow: Modifica di larghezza/altezza video non disponibile per il dispositivo.\n"
+#define MSGTR_TVI_DS_SelectingInputNotSupported  "tvi_dshow: Selezione della sorgente di acquisizione non disponibile per il dispositivo.\n"
+#define MSGTR_TVI_DS_FreqTableLoaded "tvi_dshow: caricata la tabella delle frequenze di sistema (%s) per la zona id=%d (canali:%d).\n"
+#define MSGTR_TVI_DS_ErrorParsingAudioFormatStruct "tvi_dshow: Impossibile interpretare la struttura del formato audio.\n"
+#define MSGTR_TVI_DS_ErrorParsingVideoFormatStruct "tvi_dshow: Impossibile interpretare la struttura del formato video.\n"
+#define MSGTR_TVI_DS_UnableSetAudioMode "tvi_dshow: Impossibile impostare la modalità audio %d. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnsupportedMediaType "tvi_dshow: Tipo di media non gestibile passato a %s\n"
+#define MSGTR_TVI_DS_UnableGetsupportedVideoFormats "tvi_dshow: Impossibile ricavare dal pin video i formati media supportati. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetsupportedAudioFormats "tvi_dshow: Impossibile ricavare dal pin audio i formati media supportati. Errore:0x%x Disabilito l'audio.\n"
+#define MSGTR_TVI_DS_UnableFindNearestChannel "tvi_dshow: Impossibile trovare il prossimo canale nella tabella di frequenze di sistema.\n"
+#define MSGTR_TVI_DS_UnableToSetChannel "tvi_dshow: Impossibile passare al prossimo canale nella tabella di frequenze di sistema. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableTerminateVPPin "tvi_dshow: Impossibile chiudere il pin VideoPort pin con alcun filtro in graph. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVideoSubGraph "tvi_dshow: Impossibile costruire la catena video di acquisizione graph. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildAudioSubGraph "tvi_dshow: Impossibile costruire la catena audio di acquisizione graph. Errore:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVBISubGraph "tvi_dshow: Impossibile costruire la catena VBI di acquisizione graph. Errore:0x%x\n"
+#define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Inizializzazione graph di Directshow fallita.\n"
+#define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: Impossibile trovare il dispositivo di acquisizione video.\n"
+#define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Impossibile trovare il dispositivo di acquisizione audio.\n"
