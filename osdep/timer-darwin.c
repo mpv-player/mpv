@@ -61,7 +61,8 @@ unsigned int GetTimer()
 /* current time in milliseconds */
 unsigned int GetTimerMS()
 {
-  return (unsigned int)(GetTimer() / 1000);
+  return (unsigned int)((mach_absolute_time() * timebase_ratio - startup_time)
+                        * 1e3);
 }
 
 /* time spent between now and last call in seconds */
