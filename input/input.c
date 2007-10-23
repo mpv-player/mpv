@@ -754,8 +754,8 @@ mp_input_parse_cmd(char* str) {
   ptr = str;
 
   for(i=0; ptr && i < MP_CMD_MAX_ARGS; i++) {
-    ptr = strchr(ptr,' ');
-    if(!ptr) break;
+    while(ptr[0] != ' ' && ptr[0] != '\t' && ptr[0] != '\0') ptr++;
+    if(ptr[0] == '\0') break;
     while(ptr[0] == ' ' || ptr[0] == '\t') ptr++;
     if(ptr[0] == '\0') break;
     cmd->args[i].type = cmd_def->args[i].type;
