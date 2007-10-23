@@ -250,7 +250,7 @@ void     vidix_flip_page(void)
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
     uint32_t apitch,bespitch;
-    void *lvo_mem;
+    char *lvo_mem;
     lvo_mem = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
     apitch = vidix_play.dest.pitch.y-1;
     switch(vidix_play.fourcc){
