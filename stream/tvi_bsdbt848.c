@@ -36,6 +36,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <string.h>
+#include <errno.h>
 
 #include <sys/param.h>
 #ifdef USE_SUN_AUDIO
