@@ -1,4 +1,4 @@
-.\" Synced with r24785
+.\" Synced with r24841
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 10. 15." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 10. 24." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -2664,8 +2664,18 @@ NAS-on keresztüli audió kimenet
 natív Mac OS X audió kimeneti vezérlõ
 .
 .TP
-.B openal
-kísérleti, nem befejezett (lemixel mono-ra) OpenAL audió kimeneti vezérlõ
+.B "openal\ "
+Kísérleti OpenAL audió kimeneti vezérlõ
+.
+ .TP
+.B "pulse\ \ "
+PulseAudio audió kimeneti vezérlõ
+.PD 0
+.RSs
+.IPs "<hoszt>[:<kimenet csökkenés>]"
+Megadja a használandó hosztot és opcionálisan a kimenet csökkenést.
+.RE
+.PD 1
 .
 .TP
 .B sgi (csak SGI)
@@ -3587,7 +3597,7 @@ Csak a 2-es, 3-as, 4-es és 6-os yuv módoknál helyes.
 .RSss
 0: Egyszerû lineáris szûrés használata (alapértelmezett)
 .br
-1: Bicubic szûrõ használata (jobb minõség).
+1: Bicubic B-spline szûrõ használata (jobb minõség).
 További egy textúra egység kell hozzá.
 A régi kártyák nem tudják használni ezt a telítettséget, legalábbis teljes képernyõnél.
 .br
@@ -5872,7 +5882,7 @@ A denoise3d szûrõ nagy precízitású/\:minõségû változata.
 A paraméterek és a használat ugyan olyan.
 .
 .TP
-.B ow[=mélység:luma_erõsség:telítettség_erõsség]
+.B ow[=mélység[:luma_erõsség[:telítettség_erõsség]]]
 Wavelet zajmentesítõ.
 .PD 0
 .RSs
