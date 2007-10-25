@@ -793,7 +793,7 @@ static int grab_audio_frame(radio_priv_t *priv, char *buffer, int len)
        1000ms delay will happen only at first buffer filling. At next call function
        just fills buffer until either buffer full or no data from driver available.
     */
-    for (i=0;i<1000 && priv->audio_cnt<priv->audio_buffer_size; i++){
+    for (i=0;i<1000 && !priv->audio_cnt; i++){
         //read_chunk fills exact priv->blocksize bytes
         if(read_chunk(&priv->audio_in, priv->audio_ringbuffer+priv->audio_tail) < 0){
             //sleppeing only when waiting first block to fill empty buffer
