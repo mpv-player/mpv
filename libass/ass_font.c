@@ -294,11 +294,13 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_GlyphNotFoundReselectingFont,
 		       ch, font->desc.family, font->desc.bold, font->desc.italic);
 		face_idx = add_face(fontconfig_priv, font, ch);
+		if (face_idx >= 0) {
 		face = font->faces[face_idx];
 		index = FT_Get_Char_Index(face, ch);
 		if (index == 0) {
 			mp_msg(MSGT_ASS, MSGL_ERR, MSGTR_LIBASS_GlyphNotFound,
 			       ch, font->desc.family, font->desc.bold, font->desc.italic);
+		}
 		}
 	}
 #endif
