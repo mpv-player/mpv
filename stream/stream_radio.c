@@ -883,6 +883,7 @@ static int init_audio(radio_priv_t *priv)
     priv->audio_cnt = 0;
     priv->audio_drop = 0;
 
+    audio_in_start_capture(&priv->audio_in);
 
     priv->audio_inited = 1;
 
