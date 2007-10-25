@@ -526,20 +526,18 @@ void ds_free_packs(demux_stream_t *ds){
 }
 
 int ds_get_packet(demux_stream_t *ds,unsigned char **start){
-    while(1){
-        int len;
-        if(ds->buffer_pos>=ds->buffer_size){
-          if(!ds_fill_buffer(ds)){
+    int len;
+    if(ds->buffer_pos>=ds->buffer_size){
+	if(!ds_fill_buffer(ds)){
             // EOF
             *start = NULL;
             return -1;
-          }
-        }
-        len=ds->buffer_size-ds->buffer_pos;
-        *start = &ds->buffer[ds->buffer_pos];
-        ds->buffer_pos+=len;
-        return len;
+	}
     }
+    len=ds->buffer_size-ds->buffer_pos;
+    *start = &ds->buffer[ds->buffer_pos];
+    ds->buffer_pos+=len;
+    return len;
 }
 
 int ds_get_packet_pts(demux_stream_t *ds,unsigned char **start, double *pts)
@@ -564,18 +562,16 @@ int ds_get_packet_pts(demux_stream_t *ds,unsigned char **start, double *pts)
 }
 
 int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start){
-    while(1){
-        int len;
-        if(ds->buffer_pos>=ds->buffer_size){
-          *start = NULL;
-          if(!ds->packs) return -1; // no sub
-          if(!ds_fill_buffer(ds)) return -1; // EOF
-        }
-        len=ds->buffer_size-ds->buffer_pos;
-        *start = &ds->buffer[ds->buffer_pos];
-        ds->buffer_pos+=len;
-        return len;
+    int len;
+    if(ds->buffer_pos>=ds->buffer_size){
+	*start = NULL;
+	if(!ds->packs) return -1; // no sub
+	if(!ds_fill_buffer(ds)) return -1; // EOF
     }
+    len=ds->buffer_size-ds->buffer_pos;
+    *start = &ds->buffer[ds->buffer_pos];
+    ds->buffer_pos+=len;
+    return len;
 }
 
 double ds_get_next_pts(demux_stream_t *ds)
