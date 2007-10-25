@@ -30,6 +30,7 @@ MPlayer (1.0)
     Ports:
     * small crash with vo_macosx fixed
     * AC3/DTS passthrough for ao_macosx
+    * Fix frozen OSD on Mac OS X (thanks Ulion!)
 
   rc2: "AreWeThereYet?" October 7, 2007
   (SVN revisions: MPlayer r24722, FFmpeg r10677)
