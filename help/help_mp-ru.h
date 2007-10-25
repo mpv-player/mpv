@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r24423
+// Synced with help_mp-en.h: r24790
 
 // ========================= MPlayer help ===========================
 
@@ -2096,4 +2096,51 @@ static char help_text[]=
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Невозможно остановить захват. Ошибка: %s\n"
 #define MSGTR_TV_TTSupportedLanguages "Поддерживаемые языки Телетекста:\n"
 #define MSGTR_TV_TTSelectedLanguage "Выбран язык Телетекста по умолчанию: %s\n"
+#define MSGTR_TV_ScannerNotAvailableWithoutTuner "Сканер каналов недоступен, если нет тюнера\n"
+
+//tvi_dshow.c
+#define MSGTR_TVI_DS_UnableConnectInputVideoDecoder  "Невозможно присоединить данный вход к видео декодеру. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableConnectInputAudioDecoder  "Невозможно присоединить данный вход к аудио декодеру. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectVideoFormat "tvi_dshow: Невозможно выбрать видео формат. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectAudioFormat "tvi_dshow: Невозможно выбрать аудио формат. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetMediaControlInterface "tvi_dshow: Невозможно получить IMediaControl интерфейс. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableStartGraph "tvi_dshow: Невозможно запустить граф! Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_DeviceNotFound "tvi_dshow: Устройство #%d не найдено\n"
+#define MSGTR_TVI_DS_UnableGetDeviceName "tvi_dshow: Невозможно получить название устройства #%d\n"
+#define MSGTR_TVI_DS_UsingDevice "tvi_dshow: Использкется устройство #%d: %s\n"
+#define MSGTR_TVI_DS_DeviceName  "tvi_dshow: Устройство #%d: %s\n"
+#define MSGTR_TVI_DS_DirectGetFreqFailed "tvi_dshow: Невозможно получить частоту напрямую. Будет испольоваться таблица каналов ОС.\n"
+#define MSGTR_TVI_DS_DirectSetFreqFailed "tvi_dshow: Невозможно установить частоту напрямую. Будет использоваться таблица каналов ОС.\n"
+#define MSGTR_TVI_DS_SupportedNorms "tvi_dshow: поддерживаемые стандарты:"
+#define MSGTR_TVI_DS_AvailableVideoInputs "tvi_dshow: доступные видео входы:"
+#define MSGTR_TVI_DS_AvailableAudioInputs "tvi_dshow: доступные аудио входы:"
+//following phrase will be printed near the selected audio/video input
+#define MSGTR_TVI_DS_InputSelected "(выбран)"
+#define MSGTR_TVI_DS_UnableExtractFreqTable "tvi_dshow: Невозможно загрузить таблицу частот из kstvtune.ax\n"
+#define MSGTR_TVI_DS_WrongDeviceParam "tvi_dshow: Неверный параметр device: %s\n"
+#define MSGTR_TVI_DS_WrongDeviceIndex "tvi_dshow: Неверный индекс device: %d\n"
+#define MSGTR_TVI_DS_WrongADeviceParam "tvi_dshow: Неверный параметр adevice: %s\n"
+#define MSGTR_TVI_DS_WrongADeviceIndex "tvi_dshow: Неверный индекс adevice: %d\n"
+
+#define MSGTR_TVI_DS_SamplerateNotsupported "tvi_dshow: Частота дискретизации %d не поддерживается устройством. Устанавливается первая доступгая.\n"
+#define MSGTR_TVI_DS_VideoAdjustigNotSupported "tvi_dshow: Подстройка яркости/цветности/насыщенности/контраста не поддерживается устройством\n"
+
+#define MSGTR_TVI_DS_ChangingWidthHeightNotSupported "tvi_dshow: Изменение ширины/высоты видео не поддерживается устройством.\n"
+#define MSGTR_TVI_DS_SelectingInputNotSupported  "tvi_dshow: Выбор источника захвата не поддерживается устройством\n"
+#define MSGTR_TVI_DS_FreqTableLoaded "tvi_dshow: загружена системная (%s) таблица частот для страны id=%d (каналов:%d).\n"
+#define MSGTR_TVI_DS_ErrorParsingAudioFormatStruct "tvi_dshow: Невозможно разобрать структуру аудио формата.\n"
+#define MSGTR_TVI_DS_ErrorParsingVideoFormatStruct "tvi_dshow: Невозможно разобрать структуру видео формата.\n"
+#define MSGTR_TVI_DS_UnableSetAudioMode "tvi_dshow: Невозможно установить аудио режим %d. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnsupportedMediaType "tvi_dshow: Неподдерживаемый медиа тип передан в %s\n"
+#define MSGTR_TVI_DS_UnableGetsupportedVideoFormats "tvi_dshow: Невозможно получить поддерживаемые медиа форматы у видео коннектора. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetsupportedAudioFormats "tvi_dshow: Невозможно получить поддерживаемые медиа форматы у аудио коннектора. Ошибка:0x%x Отключение аудио.\n"
+#define MSGTR_TVI_DS_UnableFindNearestChannel "tvi_dshow: Невозможно найти ближайший канал в системной таблице частот\n"
+#define MSGTR_TVI_DS_UnableToSetChannel "tvi_dshow: Невозможно переключиться на ближайший канал в системой таблице частот. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableTerminateVPPin "tvi_dshow: Невозможно подсоединить к VideoPort коннектору ни один фильтр из графа. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVideoSubGraph "tvi_dshow: Невозможно выстроить цепочку для видео в графе. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildAudioSubGraph "tvi_dshow: Невозможно выстроить цепочку для аудио в графе. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVBISubGraph "tvi_dshow: Невозможно выстроить VBI цепочку в графе. Ошибка:0x%x\n"
+#define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Ошибка инициализации Directshow графа.\n"
+#define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: Невозможно найти устройство захвата видео\n"
+#define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Невозможно найти устройство захвата аудио\n"
 
