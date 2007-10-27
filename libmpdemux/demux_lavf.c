@@ -50,6 +50,7 @@ static unsigned int opt_probesize = 0;
 static unsigned int opt_analyzeduration = 0;
 static char *opt_format;
 static char *opt_cryptokey;
+extern int ts_prog;
 
 m_option_t lavfdopts_conf[] = {
 	{"probesize", &(opt_probesize), CONF_TYPE_INT, CONF_RANGE, 32, INT_MAX, NULL},
@@ -71,6 +72,7 @@ typedef struct lavf_priv_t{
     int astreams[MAX_A_STREAMS];
     int vstreams[MAX_V_STREAMS];
     int sstreams[MAX_S_STREAMS];
+    int cur_program;
 }lavf_priv_t;
 
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
@@ -491,6 +493,33 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 //    if(avfc->track       ) demux_info_add(demuxer, "track"    , avfc->track    );
     if(avfc->genre    [0]) demux_info_add(demuxer, "genre"    , avfc->genre    );
 
+    if(avfc->nb_programs) {
+        int p, start=0, found=0;
+
+        if(ts_prog) {
+            for(p=0; p<avfc->nb_programs; p++) {
+                if(avfc->programs[p]->id == ts_prog) {
+                    start = p;
+                    found = 1;
+                    break;
+                }
+            }
+            if(!found) {
+                mp_msg(MSGT_HEADER,MSGL_ERR,"DEMUX_LAVF: program %d doesn't seem to be present\n", ts_prog);
+                return NULL;
+            }
+        }
+        p = start;
+        do {
+            AVProgram *program = avfc->programs[p];
+            mp_msg(MSGT_HEADER,MSGL_INFO,"LAVF: Program %d %s\n", program->id, (program->name ? program->name : ""));
+            for(i=0; i<program->nb_stream_indexes; i++)
+                handle_stream(demuxer, avfc, program->stream_index[i]);
+            if(!priv->cur_program && (demuxer->video->sh || demuxer->audio->sh))
+                priv->cur_program = program->id;
+            p = (p + 1) % avfc->nb_programs;
+        } while(p!=start);
+    } else
     for(i=0; i<avfc->nb_streams; i++)
         handle_stream(demuxer, avfc, i);
     
