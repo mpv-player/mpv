@@ -520,8 +520,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             p = (p + 1) % avfc->nb_programs;
         } while(p!=start);
     } else
-    for(i=0; i<avfc->nb_streams; i++)
-        handle_stream(demuxer, avfc, i);
+        for(i=0; i<avfc->nb_streams; i++)
+            handle_stream(demuxer, avfc, i);
     
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: %d audio and %d video streams found\n",priv->audio_streams,priv->video_streams);
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: build %d\n", LIBAVFORMAT_BUILD);
@@ -700,10 +700,10 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	    {
 	        ds_free_packs(ds);
 	        if(ds->id >= 0)
-	        priv->avfc->streams[ds->id]->discard = AVDISCARD_ALL;
+	            priv->avfc->streams[ds->id]->discard = AVDISCARD_ALL;
 	        *((int*)arg) = ds->id = newid;
 	        if(newid >= 0)
-	        priv->avfc->streams[newid]->discard = AVDISCARD_NONE;
+	            priv->avfc->streams[newid]->discard = AVDISCARD_NONE;
 	        return DEMUXER_CTRL_OK;
 	    }
         }
