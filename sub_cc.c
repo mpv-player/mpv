@@ -37,6 +37,14 @@ static unsigned int cursor_pos=0;
 
 static int inited=0;
 
+#define CC_ROLLON 1
+#define CC_ROLLUP 2
+
+static int cc_mode=CC_ROLLON;
+static int cc_lines=4; ///< number of visible rows in CC roll-up mode, not used in CC roll-on mode
+
+static void display_buffer(subtitle * buf);
+
 static void build_char_table(void)
 {
   int i;
@@ -64,6 +72,26 @@ static void clear_buffer(subtitle *buf)
 }
 
 
+/**
+ \brief scroll buffer one line up
+ \param buf buffer to scroll
+*/
+static void scroll_buffer(subtitle* buf)
+{
+	int i;
+
+	while(buf->lines > cc_lines)
+	{
+		if(buf->text[0]) free(buf->text[0]);
+
+		for(i = 0; i < (buf->lines - 1); i++) buf->text[i] = buf->text[i+1];
+
+		buf->text[buf->lines-1] = NULL;
+		buf->lines--;
+	}
+}
+ 
+ 
 void subcc_init(void)
 {
 	int i;
@@ -90,7 +118,13 @@ static void append_char(char c)
 	if(c=='\n')
 	{
 		if(cursor_pos>0 && bb->lines < SUB_MAX_TEXT)
+		{
 			bb->lines++;cursor_pos=0;
+			if(cc_mode==CC_ROLLUP){ //Carriage return - scroll buffer one line up
+				bb->text[bb->lines - 1]=calloc(1, CC_MAX_LINE_LENGTH);
+				scroll_buffer(bb);
+			}
+		}
 	}
 	else 
 	{
@@ -101,6 +135,8 @@ static void append_char(char c)
 		}
 		bb->text[bb->lines - 1][cursor_pos++]=c;
 	}
+	//In CC roll-up mode data should be shown immediately
+	if(cc_mode==CC_ROLLUP) display_buffer(bb);
 }
 
 
@@ -159,6 +195,15 @@ static void cc_decode_EIA608(unsigned short int data)
 				case 0x14:
 					switch(c2)
 					{
+						case 0x00: //CC roll-on mode
+							   cc_mode=CC_ROLLON;
+							   break;
+						case 0x25: //CC roll-up, 2 rows
+						case 0x26: //CC roll-up, 3 rows
+						case 0x27: //CC roll-up, 4 rows
+							   cc_lines=c2-0x23;
+							   cc_mode=CC_ROLLUP;
+							   break;
 						case 0x2C: display_buffer(NULL); //EDM
 							   clear_buffer(fb); break;
 						case 0x2d: append_char('\n');	//carriage return
