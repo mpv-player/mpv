@@ -632,8 +632,14 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	        nstreams = priv->audio_streams;
 	        pstreams = priv->astreams;
 	    }
-	    if(ds->id == -2)
-	        return DEMUXER_CTRL_NOTIMPL;
+	    if(id == -2)
+	    {
+	        if(ds->id >= 0)
+	            priv->avfc->streams[ds->id]->discard = AVDISCARD_ALL;
+	        ds_free_packs(ds);
+	        *((int*)arg) = ds->id = -2;
+	        return DEMUXER_CTRL_OK;
+	    } 
 	    for(i = 0; i < nstreams; i++)
 	    {
 	        if(pstreams[i] == ds->id) //current stream id
@@ -659,13 +665,15 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 		    }
 	        }
 	    }
-	    if(newid == -2 || i == curridx)
+	    if(i == curridx)
 	        return DEMUXER_CTRL_NOTIMPL;
 	    else
 	    {
 	        ds_free_packs(ds);
+	        if(ds->id >= 0)
 	        priv->avfc->streams[ds->id]->discard = AVDISCARD_ALL;
 	        *((int*)arg) = ds->id = newid;
+	        if(newid >= 0)
 	        priv->avfc->streams[newid]->discard = AVDISCARD_NONE;
 	        return DEMUXER_CTRL_OK;
 	    }
