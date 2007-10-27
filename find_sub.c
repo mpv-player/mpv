@@ -18,6 +18,7 @@ static int current_sub=0;
 //static subtitle* subtitles=NULL;
 static int nosub_range_start=-1;
 static int nosub_range_end=-1;
+static const sub_data *last_sub_data = NULL;
 
 extern float sub_delay;
 extern float  sub_fps;
@@ -58,6 +59,13 @@ void find_sub(sub_data* subd,int key){
     if ( !subd || subd->sub_num == 0) return;
     subs = subd->subtitles;
     
+    if (last_sub_data != subd) {
+        // Sub data changed, reset nosub range.
+        last_sub_data = subd;
+        nosub_range_start = -1;
+        nosub_range_end = -1;
+    }
+
     if(vo_sub){
       if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
     } else {
