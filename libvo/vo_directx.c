@@ -1176,15 +1176,15 @@ static void flip_page(void)
         g_lpddsPrimary->lpVtbl->Blt(g_lpddsPrimary, &rd, g_lpddsBack, NULL, DDBLT_WAIT, &ddbltfx);
 	}
 	if (g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT , NULL) == DD_OK) {
-    if(vo_directrendering && (dstride != ddsdsf.lPitch)){
-      mp_msg(MSGT_VO,MSGL_WARN,"<vo_directx><WARN>stride changed !!!! disabling direct rendering\n");
-      vo_directrendering=0;
-    }
-	if (tmp_image)
-		free(tmp_image);
-	tmp_image = NULL;
-	dstride = ddsdsf.lPitch;
-    image = ddsdsf.lpSurface;
+	    if(vo_directrendering && (dstride != ddsdsf.lPitch)){
+	        mp_msg(MSGT_VO,MSGL_WARN,"<vo_directx><WARN>stride changed !!!! disabling direct rendering\n");
+	        vo_directrendering=0;
+	    }
+	    if (tmp_image)
+		    free(tmp_image);
+	    tmp_image = NULL;
+	    dstride = ddsdsf.lPitch;
+	    image = ddsdsf.lpSurface;
 	} else if (!tmp_image) {
 		mp_msg(MSGT_VO, MSGL_WARN, "<vo_directx><WARN>Locking the surface failed, rendering to a hidden surface!\n");
 		tmp_image = image = calloc(1, image_height * dstride * 2);
@@ -1391,9 +1391,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	memset(&ddsdsf, 0,sizeof(DDSURFACEDESC2));
 	ddsdsf.dwSize = sizeof (DDSURFACEDESC2);
 	if (g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL) == DD_OK) {
-	dstride = ddsdsf.lPitch;
-    image = ddsdsf.lpSurface;
-	return 0;
+        dstride = ddsdsf.lPitch;
+        image = ddsdsf.lpSurface;
+        return 0;
 	}
 	mp_msg(MSGT_VO, MSGL_V, "<vo_directx><ERROR>Initial Lock on the Surface failed.\n");
 	return 1;
