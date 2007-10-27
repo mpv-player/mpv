@@ -598,7 +598,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
           double d= (next_pts != MP_NOPTS_VALUE) ? next_pts - d_video->pts : d_video->pts-pts1;
           if(d>=0){
             frame_time = d;
-          } 
+          }
         }
       break;
       case DEMUXER_TYPE_REAL:
@@ -612,8 +612,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     }
 
     if(video_codec == VIDEO_MPEG12){
-
-
         sh_video->pts+=frame_time;
         if(picture_coding_type<=2 && sh_video->i_pts){
             sh_video->pts=sh_video->i_pts;
