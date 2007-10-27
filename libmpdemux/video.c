@@ -402,12 +402,12 @@ static void process_userdata(unsigned char* buf,int len){
        return;
     }
     if(verbose<2) return;
-    printf( "user_data: len=%3d  %02X %02X %02X %02X '",
+    fprintf(stderr, "user_data: len=%3d  %02X %02X %02X %02X '",
       len, buf[0], buf[1], buf[2], buf[3]);
     for(i=0;i<len;i++)
-//    if(buf[i]>=32 && buf[i]<127) putchar(buf[i]);
-      if(buf[i]&0x60) putchar(buf[i]&0x7F);
-    printf("'\n");
+//    if(buf[i]>=32 && buf[i]<127) fputc(buf[i], stderr);
+      if(buf[i]&0x60) fputc(buf[i]&0x7F, stderr);
+    fprintf(stderr, "'\n");
 }
 
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps){
