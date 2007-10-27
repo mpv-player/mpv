@@ -270,6 +270,164 @@ static void parse_cryptokey(AVFormatContext *avfc, const char *str) {
         *key++ = (char2int(str[0]) << 4) | char2int(str[1]);
 }
 
+static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
+    lavf_priv_t *priv= demuxer->priv;
+    AVStream *st= avfc->streams[i];
+    AVCodecContext *codec= st->codec;
+    int g;
+
+    switch(codec->codec_type){
+        case CODEC_TYPE_AUDIO:{
+            WAVEFORMATEX *wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
+            sh_audio_t* sh_audio;
+            if(priv->audio_streams >= MAX_A_STREAMS)
+                break;
+            sh_audio=new_sh_audio(demuxer, i);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", i);
+            if(!sh_audio)
+                break;
+            priv->astreams[priv->audio_streams] = i;
+            priv->audio_streams++;
+            // mp4a tag is used for all mp4 files no matter what they actually contain
+            if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
+                codec->codec_tag= 0;
+            if(codec->codec_id == CODEC_ID_ADPCM_IMA_AMV)
+                codec->codec_tag= MKTAG('A','M','V','A');
+            if(!codec->codec_tag)
+                codec->codec_tag= av_codec_get_tag(mp_wav_taglists, codec->codec_id);
+            wf->wFormatTag= codec->codec_tag;
+            wf->nChannels= codec->channels;
+            wf->nSamplesPerSec= codec->sample_rate;
+            wf->nAvgBytesPerSec= codec->bit_rate/8;
+            wf->nBlockAlign= codec->block_align ? codec->block_align : 1;
+            wf->wBitsPerSample= codec->bits_per_sample;
+            wf->cbSize= codec->extradata_size;
+            if(codec->extradata_size)
+                memcpy(wf + 1, codec->extradata, codec->extradata_size);
+            sh_audio->wf= wf;
+            sh_audio->audio.dwSampleSize= codec->block_align;
+            if(codec->frame_size && codec->sample_rate){
+                sh_audio->audio.dwScale=codec->frame_size;
+                sh_audio->audio.dwRate= codec->sample_rate;
+            }else{
+                sh_audio->audio.dwScale= codec->block_align ? codec->block_align*8 : 8;
+                sh_audio->audio.dwRate = codec->bit_rate;
+            }
+            g= ff_gcd(sh_audio->audio.dwScale, sh_audio->audio.dwRate);
+            sh_audio->audio.dwScale /= g;
+            sh_audio->audio.dwRate  /= g;
+//          printf("sca:%d rat:%d fs:%d sr:%d ba:%d\n", sh_audio->audio.dwScale, sh_audio->audio.dwRate, codec->frame_size, codec->sample_rate, codec->block_align);
+            sh_audio->ds= demuxer->audio;
+            sh_audio->format= codec->codec_tag;
+            sh_audio->channels= codec->channels;
+            sh_audio->samplerate= codec->sample_rate;
+            sh_audio->i_bps= codec->bit_rate/8;
+            switch (codec->codec_id) {
+                case CODEC_ID_PCM_S8:
+                case CODEC_ID_PCM_U8:
+                    sh_audio->samplesize = 1;
+                    break;
+                case CODEC_ID_PCM_S16LE:
+                case CODEC_ID_PCM_S16BE:
+                case CODEC_ID_PCM_U16LE:
+                case CODEC_ID_PCM_U16BE:
+                    sh_audio->samplesize = 2;
+                    break;
+                case CODEC_ID_PCM_ALAW:
+                    sh_audio->format = 0x6;
+                    break;
+                case CODEC_ID_PCM_MULAW:
+                    sh_audio->format = 0x7;
+                    break;
+            }
+            if(mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf, MSGL_V);
+            if((audio_lang && st->language[0] && !strncmp(audio_lang, st->language, 3))
+                || (demuxer->audio->id == i || demuxer->audio->id == -1)) {
+                demuxer->audio->id = i;
+                demuxer->audio->sh= demuxer->a_streams[i];
+            } else
+                st->discard= AVDISCARD_ALL;
+            break;
+        }
+        case CODEC_TYPE_VIDEO:{
+            sh_video_t* sh_video;
+            BITMAPINFOHEADER *bih;
+            if(priv->video_streams >= MAX_V_STREAMS)
+                break;
+            sh_video=new_sh_video(demuxer, i);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", i);
+            if(!sh_video) break;
+            priv->vstreams[priv->video_streams] = i;
+            priv->video_streams++;
+            bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
+
+            if(!codec->codec_tag)
+                codec->codec_tag= av_codec_get_tag(mp_bmp_taglists, codec->codec_id);
+            bih->biSize= sizeof(BITMAPINFOHEADER) + codec->extradata_size;
+            bih->biWidth= codec->width;
+            bih->biHeight= codec->height;
+            bih->biBitCount= codec->bits_per_sample;
+            bih->biSizeImage = bih->biWidth * bih->biHeight * bih->biBitCount/8;
+            bih->biCompression= codec->codec_tag;
+            sh_video->bih= bih;
+            sh_video->disp_w= codec->width;
+            sh_video->disp_h= codec->height;
+            if (st->time_base.den) { /* if container has time_base, use that */
+                sh_video->video.dwRate= st->time_base.den;
+                sh_video->video.dwScale= st->time_base.num;
+            } else {
+                sh_video->video.dwRate= codec->time_base.den;
+                sh_video->video.dwScale= codec->time_base.num;
+            }
+            sh_video->fps=av_q2d(st->r_frame_rate);
+            sh_video->frametime=1/av_q2d(st->r_frame_rate);
+            sh_video->format=bih->biCompression;
+            sh_video->aspect=codec->width * codec->sample_aspect_ratio.num 
+                               / (float)(codec->height * codec->sample_aspect_ratio.den);
+            sh_video->i_bps=codec->bit_rate/8;
+            mp_msg(MSGT_DEMUX,MSGL_DBG2,"aspect= %d*%d/(%d*%d)\n", 
+                codec->width, codec->sample_aspect_ratio.num,
+                codec->height, codec->sample_aspect_ratio.den);
+
+            sh_video->ds= demuxer->video;
+            if(codec->extradata_size)
+                memcpy(sh_video->bih + 1, codec->extradata, codec->extradata_size);
+            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_video->bih, MSGL_V);
+            /*
+                short biPlanes;
+                int  biXPelsPerMeter;
+                int  biYPelsPerMeter;
+                int biClrUsed;
+                int biClrImportant;
+            */
+            if(demuxer->video->id != i && demuxer->video->id != -1)
+                st->discard= AVDISCARD_ALL;
+            else{
+                demuxer->video->id = i;
+                demuxer->video->sh= demuxer->v_streams[i];
+            }
+            break;
+        }
+        case CODEC_TYPE_SUBTITLE:{
+            sh_sub_t* sh_sub;
+            if(priv->sub_streams >= MAX_S_STREAMS)
+                break;
+            /* only support text subtitles for now */
+            if(codec->codec_id != CODEC_ID_TEXT)
+                break;
+            sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
+            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "lavf", priv->sub_streams);
+            if(!sh_sub) break;
+            priv->sstreams[priv->sub_streams] = i;
+            sh_sub->type = 't';
+            demuxer->sub->sh = demuxer->s_streams[priv->sub_streams++];
+            break;
+        }
+        default:
+            st->discard= AVDISCARD_ALL;
+    }
+}
+
 static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     AVFormatContext *avfc;
     AVFormatParameters ap;
@@ -333,162 +491,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 //    if(avfc->track       ) demux_info_add(demuxer, "track"    , avfc->track    );
     if(avfc->genre    [0]) demux_info_add(demuxer, "genre"    , avfc->genre    );
 
-    for(i=0; i<avfc->nb_streams; i++){
-        AVStream *st= avfc->streams[i];
-        AVCodecContext *codec= st->codec;
-
-        switch(codec->codec_type){
-        case CODEC_TYPE_AUDIO:{
-            WAVEFORMATEX *wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
-            sh_audio_t* sh_audio;
-            if(priv->audio_streams >= MAX_A_STREAMS)
-                break;
-            sh_audio=new_sh_audio(demuxer, i);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", i);
-            if(!sh_audio)
-                break;
-            priv->astreams[priv->audio_streams] = i;
-            priv->audio_streams++;
-            // mp4a tag is used for all mp4 files no matter what they actually contain
-            if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
-                codec->codec_tag= 0;
-            if(codec->codec_id == CODEC_ID_ADPCM_IMA_AMV)
-                codec->codec_tag= MKTAG('A','M','V','A');
-            if(!codec->codec_tag)
-                codec->codec_tag= av_codec_get_tag(mp_wav_taglists, codec->codec_id);
-            wf->wFormatTag= codec->codec_tag;
-            wf->nChannels= codec->channels;
-            wf->nSamplesPerSec= codec->sample_rate;
-            wf->nAvgBytesPerSec= codec->bit_rate/8;
-            wf->nBlockAlign= codec->block_align ? codec->block_align : 1;
-            wf->wBitsPerSample= codec->bits_per_sample;
-            wf->cbSize= codec->extradata_size;
-            if(codec->extradata_size){
-                memcpy(
-                    wf + 1, 
-                    codec->extradata,
-                    codec->extradata_size);
-            }
-            sh_audio->wf= wf;
-            sh_audio->audio.dwSampleSize= codec->block_align;
-            if(codec->frame_size && codec->sample_rate){
-                sh_audio->audio.dwScale=codec->frame_size;
-                sh_audio->audio.dwRate= codec->sample_rate;
-            }else{
-                sh_audio->audio.dwScale= codec->block_align ? codec->block_align*8 : 8;
-                sh_audio->audio.dwRate = codec->bit_rate;
-            }
-            g= ff_gcd(sh_audio->audio.dwScale, sh_audio->audio.dwRate);
-            sh_audio->audio.dwScale /= g;
-            sh_audio->audio.dwRate  /= g;
-//            printf("sca:%d rat:%d fs:%d sr:%d ba:%d\n", sh_audio->audio.dwScale, sh_audio->audio.dwRate, codec->frame_size, codec->sample_rate, codec->block_align);
-            sh_audio->ds= demuxer->audio;
-            sh_audio->format= codec->codec_tag;
-            sh_audio->channels= codec->channels;
-            sh_audio->samplerate= codec->sample_rate;
-            sh_audio->i_bps= codec->bit_rate/8;
-            switch (codec->codec_id) {
-              case CODEC_ID_PCM_S8:
-              case CODEC_ID_PCM_U8:
-                sh_audio->samplesize = 1;
-                break;
-              case CODEC_ID_PCM_S16LE:
-              case CODEC_ID_PCM_S16BE:
-              case CODEC_ID_PCM_U16LE:
-              case CODEC_ID_PCM_U16BE:
-                sh_audio->samplesize = 2;
-                break;
-              case CODEC_ID_PCM_ALAW:
-                sh_audio->format = 0x6;
-                break;
-              case CODEC_ID_PCM_MULAW:
-                sh_audio->format = 0x7;
-                break;
-            }
-            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf, MSGL_V);
-	    if((audio_lang && st->language[0] && !strncmp(audio_lang, st->language, 3))
-	        || (demuxer->audio->id == i || demuxer->audio->id == -1)
-	    ) {
-	        demuxer->audio->id = i;
-                demuxer->audio->sh= demuxer->a_streams[i];
-	    }
-            else
-                st->discard= AVDISCARD_ALL;
-            break;}
-        case CODEC_TYPE_VIDEO:{
-            sh_video_t* sh_video;
-            BITMAPINFOHEADER *bih;
-            if(priv->video_streams >= MAX_V_STREAMS)
-                break;
-            sh_video=new_sh_video(demuxer, i);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", i);
-            if(!sh_video) break;
-            priv->vstreams[priv->video_streams] = i;
-            priv->video_streams++;
-            bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
-
-            if(!codec->codec_tag)
-                codec->codec_tag= av_codec_get_tag(mp_bmp_taglists, codec->codec_id);
-            bih->biSize= sizeof(BITMAPINFOHEADER) + codec->extradata_size;
-            bih->biWidth= codec->width;
-            bih->biHeight= codec->height;
-            bih->biBitCount= codec->bits_per_sample;
-            bih->biSizeImage = bih->biWidth * bih->biHeight * bih->biBitCount/8;
-            bih->biCompression= codec->codec_tag;
-            sh_video->bih= bih;
-            sh_video->disp_w= codec->width;
-            sh_video->disp_h= codec->height;
-            if (st->time_base.den) { /* if container has time_base, use that */
-                sh_video->video.dwRate= st->time_base.den;
-                sh_video->video.dwScale= st->time_base.num;
-            } else {
-            sh_video->video.dwRate= codec->time_base.den;
-            sh_video->video.dwScale= codec->time_base.num;
-            }
-            sh_video->fps=av_q2d(st->r_frame_rate);
-            sh_video->frametime=1/av_q2d(st->r_frame_rate);
-            sh_video->format = bih->biCompression;
-            sh_video->aspect=   codec->width * codec->sample_aspect_ratio.num 
-                              / (float)(codec->height * codec->sample_aspect_ratio.den);
-            sh_video->i_bps= codec->bit_rate/8;
-            mp_msg(MSGT_DEMUX,MSGL_DBG2,"aspect= %d*%d/(%d*%d)\n", 
-                codec->width, codec->sample_aspect_ratio.num,
-                codec->height, codec->sample_aspect_ratio.den);
-
-            sh_video->ds= demuxer->video;
-            if(codec->extradata_size)
-                memcpy(sh_video->bih + 1, codec->extradata, codec->extradata_size);
-            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_video->bih, MSGL_V);
-/*    short 	biPlanes;
-    int  	biXPelsPerMeter;
-    int  	biYPelsPerMeter;
-    int 	biClrUsed;
-    int 	biClrImportant;*/
-            if(demuxer->video->id != i && demuxer->video->id != -1)
-                st->discard= AVDISCARD_ALL;
-            else{
-                demuxer->video->id = i;
-                demuxer->video->sh= demuxer->v_streams[i];
-            }
-            break;}
-        case CODEC_TYPE_SUBTITLE:{
-            sh_sub_t* sh_sub;
-            if(priv->sub_streams >= MAX_S_STREAMS)
-                break;
-            /* only support text subtitles for now */
-            if(codec->codec_id != CODEC_ID_TEXT)
-                break;
-            sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
-            mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "lavf", priv->sub_streams);
-            if(!sh_sub) break;
-            priv->sstreams[priv->sub_streams] = i;
-            sh_sub->type = 't';
-            demuxer->sub->sh = demuxer->s_streams[priv->sub_streams++];
-            break;}
-        default:
-            st->discard= AVDISCARD_ALL;
-        }
-    }
+    for(i=0; i<avfc->nb_streams; i++)
+        handle_stream(demuxer, avfc, i);
     
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: %d audio and %d video streams found\n",priv->audio_streams,priv->video_streams);
     mp_msg(MSGT_HEADER,MSGL_V,"LAVF: build %d\n", LIBAVFORMAT_BUILD);
