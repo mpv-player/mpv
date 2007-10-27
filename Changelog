@@ -7,6 +7,7 @@ MPlayer (1.0)
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
     * support for wavpack in matroska
+    * demux_lavf permits program switching
 
     Filters:
     * vf_ow new overcomplete wavelet denoiser
