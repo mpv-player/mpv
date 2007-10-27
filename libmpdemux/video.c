@@ -42,44 +42,54 @@ static mp_mpeg_header_t picture;
 static int telecine=0;
 static float telecine_cnt=-2.5;
 
-int video_read_properties(sh_video_t *sh_video){
-demux_stream_t *d_video=sh_video->ds;
-
-enum {
+typedef enum {
 	VIDEO_MPEG12,
 	VIDEO_MPEG4,
 	VIDEO_H264,
 	VIDEO_VC1,
 	VIDEO_OTHER
-} video_codec;
+} video_codec_t;
 
-if((d_video->demuxer->file_format == DEMUXER_TYPE_PVA) ||
-   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_ES) ||
-   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_GXF) ||
-   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PES) ||
-   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS && ((! sh_video->format) || (sh_video->format==0x10000001) || (sh_video->format==0x10000002))) ||
-   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TY) ||
-   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
+static video_codec_t find_video_codec(sh_video_t *sh_video)
+{
+  demux_stream_t *d_video=sh_video->ds;
+  int fmt = d_video->demuxer->file_format;
+
+  if(
+    (fmt == DEMUXER_TYPE_PVA) ||
+    (fmt == DEMUXER_TYPE_MPEG_ES) ||
+    (fmt == DEMUXER_TYPE_MPEG_GXF) ||
+    (fmt == DEMUXER_TYPE_MPEG_PES) ||
+    (
+      (fmt == DEMUXER_TYPE_MPEG_PS || fmt == DEMUXER_TYPE_MPEG_TS) &&
+      ((! sh_video->format) || (sh_video->format==0x10000001) || (sh_video->format==0x10000002))
+    ) ||
+    (fmt == DEMUXER_TYPE_MPEG_TY)
 #ifdef STREAMING_LIVE555
-  || ((d_video->demuxer->file_format == DEMUXER_TYPE_RTP) && demux_is_mpeg_rtp_stream(d_video->demuxer))
+    || ((fmt == DEMUXER_TYPE_RTP) && demux_is_mpeg_rtp_stream(d_video->demuxer))
 #endif
   )
-    video_codec = VIDEO_MPEG12;
-  else if((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG4_ES) ||
-    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004)) ||
-    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000004))
+    return VIDEO_MPEG12;
+  else if((fmt == DEMUXER_TYPE_MPEG4_ES) ||
+    ((fmt == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004)) ||
+    ((fmt == DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000004))
   )
-    video_codec = VIDEO_MPEG4;
-  else if((d_video->demuxer->file_format == DEMUXER_TYPE_H264_ES) ||
-    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005)) ||
-    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000005))
+    return VIDEO_MPEG4;
+  else if((fmt == DEMUXER_TYPE_H264_ES) ||
+    ((fmt == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005)) ||
+    ((fmt == DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000005))
   )
-    video_codec = VIDEO_H264;
-  else if((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS || d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==mmioFOURCC('W', 'V', 'C', '1')))
-    video_codec = VIDEO_VC1;
+    return VIDEO_H264;
+  else if((fmt == DEMUXER_TYPE_MPEG_PS ||  fmt == DEMUXER_TYPE_MPEG_TS) &&
+    (sh_video->format==mmioFOURCC('W', 'V', 'C', '1')))
+    return VIDEO_VC1;
   else
-    video_codec = VIDEO_OTHER;
-    
+    return VIDEO_OTHER;
+}
+
+int video_read_properties(sh_video_t *sh_video){
+demux_stream_t *d_video=sh_video->ds;
+video_codec_t video_codec = find_video_codec(sh_video);
 // Determine image properties:
 switch(video_codec){
  case VIDEO_OTHER: {
@@ -412,20 +422,11 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     float pts=0;
     int picture_coding_type=0;
     int in_size=0;
+    video_codec_t video_codec = find_video_codec(sh_video);
     
     *start=NULL;
 
-  if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || 
-     demuxer->file_format==DEMUXER_TYPE_MPEG_GXF ||
-     demuxer->file_format==DEMUXER_TYPE_MPEG_PES ||
-  	(demuxer->file_format==DEMUXER_TYPE_MPEG_PS && ((! sh_video->format) || (sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
-		  || demuxer->file_format==DEMUXER_TYPE_PVA || 
-		  ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
-		  || demuxer->file_format==DEMUXER_TYPE_MPEG_TY
-#ifdef STREAMING_LIVE555
-    || (demuxer->file_format==DEMUXER_TYPE_RTP && demux_is_mpeg_rtp_stream(demuxer))
-#endif
-  ){
+  if(video_codec == VIDEO_MPEG12){
         int in_frame=0;
         //float newfps;
         //videobuf_len=0;
@@ -490,9 +491,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	    telecine=1;
 	}
 
-  } else if((demuxer->file_format==DEMUXER_TYPE_MPEG4_ES) || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004)) ||
-            ((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000004))
-  ){
+  } else if(video_codec == VIDEO_MPEG4){
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
           if(!i) return -1;
@@ -502,9 +501,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	*start=videobuffer; in_size=videobuf_len;
 	videobuf_len=0;
 
-  } else if(demuxer->file_format==DEMUXER_TYPE_H264_ES || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005)) ||
-            ((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000005))
-  ){
+  } else if(video_codec == VIDEO_H264){
         int in_picture = 0;
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
@@ -546,7 +543,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	*start=videobuffer; in_size=videobuf_len;
 	videobuf_len=0;
 
-  }  else if((demuxer->file_format==DEMUXER_TYPE_MPEG_PS || demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==mmioFOURCC('W', 'V', 'C', '1'))) {
+  }  else if(video_codec == VIDEO_VC1) {
        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE) {
          int i=sync_video_packet(d_video);
          if(!i) return -1;
