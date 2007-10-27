@@ -707,6 +707,60 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	        return DEMUXER_CTRL_OK;
 	    }
         }
+        case DEMUXER_CTRL_IDENTIFY_PROGRAM:
+        {
+            demux_program_t *prog = arg;
+            AVProgram *program;
+            int p, i;
+
+            if(priv->avfc->nb_programs < 2)
+                return DEMUXER_CTRL_NOTIMPL;
+
+            if(prog->progid == -1)
+            {
+                p = 0;
+                while(p<priv->avfc->nb_programs && priv->avfc->programs[p]->id != priv->cur_program)
+                    p++;
+                p = (p + 1) % priv->avfc->nb_programs;
+            }
+            else
+            {
+                for(i=0; i<priv->avfc->nb_programs; i++)
+                    if(priv->avfc->programs[i]->id == prog->progid)
+                        break;
+                if(i==priv->avfc->nb_programs)
+                    return DEMUXER_CTRL_NOTIMPL;
+                p = i;
+            }
+            prog->vid = prog->aid = prog->sid = -2;	//no audio and no video by default
+redo:
+            program = priv->avfc->programs[p];
+            for(i=0; i<program->nb_stream_indexes; i++)
+            {
+                switch(priv->avfc->streams[program->stream_index[i]]->codec->codec_type)
+                {
+                    case CODEC_TYPE_VIDEO:
+                        if(prog->vid == -2)
+                            prog->vid = program->stream_index[i];
+                        break;
+                    case CODEC_TYPE_AUDIO:
+                        if(prog->aid == -2)
+                            prog->aid = program->stream_index[i];
+                        break;
+                    case CODEC_TYPE_SUBTITLE:
+                        if(prog->sid == -2 && priv->avfc->streams[program->stream_index[i]]->codec->codec_id == CODEC_ID_TEXT)
+                            prog->sid = program->stream_index[i];
+                        break;
+                }
+            }
+            if(prog->progid == -1 && prog->vid == -2 && prog->aid == -2)
+            {
+                p = (p + 1) % priv->avfc->nb_programs;
+                goto redo;
+            }
+            priv->cur_program = prog->progid = program->id;
+            return DEMUXER_CTRL_OK;
+        }
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }
