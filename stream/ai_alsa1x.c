@@ -91,16 +91,11 @@ int ai_alsa_setup(audio_in_t *ai)
 
     snd_pcm_sw_params_current(ai->alsa.handle, swparams);
     err = snd_pcm_sw_params_set_sleep_min(ai->alsa.handle, swparams,0);
-    assert(err >= 0);
     err = snd_pcm_sw_params_set_avail_min(ai->alsa.handle, swparams, ai->alsa.chunk_size);
-    assert(err >= 0);
 
     err = snd_pcm_sw_params_set_start_threshold(ai->alsa.handle, swparams, 0);
-    assert(err >= 0);
     err = snd_pcm_sw_params_set_stop_threshold(ai->alsa.handle, swparams, buffer_size);
-    assert(err >= 0);
 
-    assert(err >= 0);
     if (snd_pcm_sw_params(ai->alsa.handle, swparams) < 0) {
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams);
 	snd_pcm_sw_params_dump(swparams, ai->alsa.log);
