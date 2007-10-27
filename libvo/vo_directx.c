@@ -417,7 +417,6 @@ static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, L
 static uint32_t Directx_InitDirectDraw()
 {
 	HRESULT    (WINAPI *OurDirectDrawCreateEx)(GUID *,LPVOID *, REFIID,IUnknown FAR *);
- 	LPDIRECTDRAW lpDDraw;
 	DDSURFACEDESC2 ddsd;
 	LPDIRECTDRAWENUMERATEEX OurDirectDrawEnumerateEx;
 	HINSTANCE user32dll=LoadLibrary("user32.dll");
@@ -1122,7 +1121,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 {
 	uint8_t *s;
     uint8_t *d;
-    uint32_t i=0, uvstride=dstride/2;
+    uint32_t uvstride=dstride/2;
 	// copy Y
     d=image+dstride*y+x;                
     s=src[0];                           
@@ -1237,7 +1236,6 @@ static uint32_t get_image(mp_image_t *mpi)
   
 static uint32_t put_image(mp_image_t *mpi){
 
-    uint32_t  i = 0;
     uint8_t   *d;
 	uint8_t   *s;
     uint32_t x = mpi->x;
