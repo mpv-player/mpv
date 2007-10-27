@@ -69,6 +69,7 @@ static HCURSOR              mplayercursor = NULL;   // Handle to mplayer cursor
 static uint32_t image_width, image_height;          //image width and height
 static uint32_t d_image_width, d_image_height;      //image width and height zoomed 
 static uint8_t  *image=NULL;                        //image data
+static void* tmp_image = NULL;
 static uint32_t image_format=0;                       //image format
 static uint32_t primary_image_format;
 static uint32_t vm_height=0;
@@ -679,7 +680,7 @@ static uint32_t Directx_ManageDisplay()
         dwUpdateFlags = DDOVER_SHOW | DDOVER_DDFX;
         /*if hardware can't do colorkeying set the window on top*/
 		if(capsDrv.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY) dwUpdateFlags |= DDOVER_KEYDESTOVERRIDE;
-        else vo_ontop = 1;
+        else if (!tmp_image) vo_ontop = 1;
 	}
     else
     {
@@ -1155,6 +1156,12 @@ static void flip_page(void)
 		{
 			mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR><vo_directx><INFO>Restoring Surface\n");
 			g_lpddsBack->lpVtbl->Restore( g_lpddsBack );
+			// restore overlay and primary before calling
+			// Directx_ManageDisplay() to avoid error messages
+			g_lpddsOverlay->lpVtbl->Restore( g_lpddsOverlay );
+			g_lpddsPrimary->lpVtbl->Restore( g_lpddsPrimary );
+			// update overlay in case we return from screensaver
+			Directx_ManageDisplay();
 		    dxresult = g_lpddsOverlay->lpVtbl->Flip( g_lpddsOverlay,NULL, DDFLIP_WAIT);
 		}
 		if(dxresult != DD_OK)mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>can't flip page\n");
@@ -1167,14 +1174,21 @@ static void flip_page(void)
         ddbltfx.dwSize = sizeof(DDBLTFX);
         ddbltfx.dwDDFX = DDBLTFX_NOTEARING;
         g_lpddsPrimary->lpVtbl->Blt(g_lpddsPrimary, &rd, g_lpddsBack, NULL, DDBLT_WAIT, &ddbltfx);
-    }	
-	g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT , NULL);
+	}
+	if (g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT , NULL) == DD_OK) {
     if(vo_directrendering && (dstride != ddsdsf.lPitch)){
       mp_msg(MSGT_VO,MSGL_WARN,"<vo_directx><WARN>stride changed !!!! disabling direct rendering\n");
       vo_directrendering=0;
     }
+	if (tmp_image)
+		free(tmp_image);
+	tmp_image = NULL;
 	dstride = ddsdsf.lPitch;
     image = ddsdsf.lpSurface;
+	} else if (!tmp_image) {
+		mp_msg(MSGT_VO, MSGL_WARN, "<vo_directx><WARN>Locking the surface failed, rendering to a hidden surface!\n");
+		tmp_image = image = calloc(1, image_height * dstride * 2);
+	}
 }
 
 static int draw_frame(uint8_t *src[])
@@ -1376,10 +1390,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	Directx_ManageDisplay();
 	memset(&ddsdsf, 0,sizeof(DDSURFACEDESC2));
 	ddsdsf.dwSize = sizeof (DDSURFACEDESC2);
-	g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL);
+	if (g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL) == DD_OK) {
 	dstride = ddsdsf.lPitch;
     image = ddsdsf.lpSurface;
 	return 0;
+	}
+	mp_msg(MSGT_VO, MSGL_V, "<vo_directx><ERROR>Initial Lock on the Surface failed.\n");
+	return 1;
 }
 
 //function to set color controls
