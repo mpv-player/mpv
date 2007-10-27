@@ -568,9 +568,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
        if(d_video->pts>0 && pts1>0 && d_video->pts>pts1)
          frame_time=d_video->pts-pts1;
         break;
-#ifdef USE_TV
       case DEMUXER_TYPE_TV:
-#endif
       case DEMUXER_TYPE_MOV:
       case DEMUXER_TYPE_FILM:
       case DEMUXER_TYPE_VIVO:
