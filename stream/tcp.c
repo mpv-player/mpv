@@ -39,7 +39,7 @@ int   network_prefer_ipv4 = 0;
 
 // Converts an address family constant to a string
 
-const char *af2String(int af) {
+static const char *af2String(int af) {
 	switch (af) {
 		case AF_INET:	return "AF_INET";
 		
@@ -56,7 +56,7 @@ const char *af2String(int af) {
 // return -2 for fatal error, like unable to resolve name, connection timeout...
 // return -1 is unable to connect to a particular port
 
-int
+static int
 connect2Server_with_af(char *host, int port, int af,int verb) {
 	int socket_server_fd;
 	int err;
