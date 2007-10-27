@@ -455,14 +455,12 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 
         *start=videobuffer; in_size=videobuf_len;
 
-#if 1
     // get mpeg fps:
     if(sh_video->fps!=picture.fps) if(!force_fps && !telecine){
             mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,picture.fps,sh_video->fps-picture.fps,picture.frame_rate_code);
             sh_video->fps=picture.fps;
             sh_video->frametime=1.0/picture.fps;
     }
-#endif
 
     // fix mpeg2 frametime:
     frame_time=(picture.display_time)*0.01f;
