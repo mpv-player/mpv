@@ -611,11 +611,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
       break;
     }
 
-    if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
-       demuxer->file_format==DEMUXER_TYPE_MPEG_PES ||
-       ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002))) ||
-       demuxer->file_format==DEMUXER_TYPE_MPEG_ES ||
-       demuxer->file_format==DEMUXER_TYPE_MPEG_TY){
+    if(video_codec == VIDEO_MPEG12){
 
 
         sh_video->pts+=frame_time;
