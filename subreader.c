@@ -1287,17 +1287,14 @@ const char* guess_buffer_cp(unsigned char* buffer, int buflen,  char *preferred_
     mp_msg(MSGT_SUBREADER, MSGL_V, "\n");
     
     for (i = 0; i < langcnt; i++) {
-	const char *tmp;
-	
 	if (strcasecmp(languages[i], preferred_language) != 0) continue;
 	analyser = enca_analyser_alloc(languages[i]);
 	encoding = enca_analyse_const(analyser, buffer, buflen);
-	tmp = enca_charset_name(encoding.charset, ENCA_NAME_STYLE_ICONV);
-	if (tmp && encoding.charset != ENCA_CS_UNKNOWN) {
-	    detected_sub_cp = tmp;
-	    mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detected charset: %s\n", tmp);
-	}
 	enca_analyser_free(analyser);
+	if (encoding.charset != ENCA_CS_UNKNOWN) {
+	    detected_sub_cp = enca_charset_name(encoding.charset, ENCA_NAME_STYLE_ICONV);
+	    break;
+	}
     }
     
     free(languages);
@@ -1305,6 +1302,8 @@ const char* guess_buffer_cp(unsigned char* buffer, int buflen,  char *preferred_
     if (!detected_sub_cp) {
 	detected_sub_cp = fallback;
 	mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detection failed: fallback to %s\n", fallback);
+    }else{
+	mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detected charset: %s\n", detected_sub_cp);
     }
 
     return detected_sub_cp;
