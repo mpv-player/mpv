@@ -1,4 +1,4 @@
-.\" synced with r24656
+.\" synced with r24875
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -260,7 +260,7 @@ Coupe le son (mute).
 Alterne entre les pistes vidéos disponibles.
 .IPs "# (DVD, MPEG, Matroska, AVI et libavformat uniquement)"
 Alterne entre les pistes audio disponibles.
-.IPs "TAB (MPEG-TS uniquement)"
+.IPs "TAB (MPEG-TS et libavformat  uniquement)"
 Alterne entre les différents programmes disponibles.
 Cycle through the available programs.
 .IPs "f\ \ \ \ "
@@ -2015,6 +2015,25 @@ latins, et que le code du langage n'est pas transmis par le paquet
 télétexte de type 28 pour une raison quelconque.
 La liste des langues gérées et affichée lorsque cette option est mise
 à \-1.
+.IPs "hidden_video_renderer (dshow uniquement)"
+Termine le flux avec un moteur de rendu vidéo au lieu de Null.
+Aide à traiter le cas où la vidéo se fige et pas l'audio.
+.I NOTE:
+Peut ne pas fonctionner avec la combinaison \-vo directx et \-vf crop.
+.IPs "hidden_vp_renderer (dshow uniquement)"
+Termine le flux VideoPort pin avec un moteur de rendu vidéo au lieu de
+l'enlever du graphe.
+Utile si votre carte dispone d'une pin VideoPort et que la vidéo est hachée.
+.I NOTE\ :
+Peut ne pas fonctionner avec la combinaison \-vo directx et \-vf crop.
+.IPs "system_clock (dshow uniquement)"
+Utilise l'horloge systéme comme source de synchronisation à la place de
+celle du graphe par défaut (généralement l'horloge d'une des sources du
+graphe).
+.IPs "normalize_audio_chunks (dshow uniquement)"
+Crée des morceaux audios avec une durée égale à la taille de la trame vidéo.
+Certaines cartes son créent des morceaux audios dont la durée est 0.5s,
+débouchant à une vidéo haché avec l'option immediatemode=0.
 .RE
 .
 .TP
@@ -2786,9 +2805,18 @@ sortie audio par NAS
 .B macosx (Mac OS X uniquement)
 pilote de sortie audio natif de Mac OS X
 .TP
-.B openal
-pilote de sortie audio OpenAL expérimental et non terminé (mixe
-vers un son mono)
+.B "openal\ "
+Pilote de sortie audio OpenAL expérimental.
+.
+.TP
++.B "pulse\ \ "
+Pilote de sortie audio PulseAudio
+.PD 0
+.RSs
+.IPs "<hôte>[:<récepteur>]"
+Défini l'hôte et optionnellement le récepteur à utiliser.
+.RE
+.PD 1
 .
 .TP
 .B sgi (SGI uniquement)
@@ -3743,7 +3771,7 @@ Valide uniquement pour les modes yuv 2, 3, 4 et 6.
 .RSss
 0: Utilise un simple fitrage linéraire (par défaut)
 .br
-1: Utilise un fitrage bicubique (meilleure qualité).
+1: Utilise un fitrage bicubique B-spline (meilleure qualité).
 Nécessite une unité de texture supplémentaire.
 Les cartes plus anciennes ne pourront pas gérer le chroma, tout du moins
 pas en mode plein écran.
@@ -3836,10 +3864,16 @@ Utile pour les benchmarks.
 .TP
 .B "aa\ \ \ \ \ "
 Pilote de sortie vidéo art ASCII fonctionnant dans une console texte.
-Vous pouvez obtenir une liste et des explications sur les options disponibles
-en exécutant
-.I mplayer \-vo aa:help
-.
+Vous pouvez obtenir une liste et des explications sur les sous-options
+disponibles en exécutant 'mplayer \-vo aa:help'.
+.br
+.I NOTE\ :
+Ce pilote ne gère pas \-aspect correctement.
+.br
+.I ASTUCE:
+Vous allez probablement devoir spécifier \-monitorpixelaspect.
+Essayez 'mplayer \-vo aa \-monitorpixelaspect 0.5'.
+ .
 .
 .TP
 .B "caca\ \ \ "
@@ -6144,6 +6178,21 @@ force temporelle du chroma (par défaut\ : luma_tmp*chroma_spatial/luma_spatial)
 .B "hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]"
 Version haute précision\/:qualité du filtre denoise3d.
 Les paramètres et le comportement sont les mêmes.
+.
+.TP
+.B ow[=profondeur[:force_luminance[:force_chrominance]]]
+Débruiteur "Overcomplete Wavelet".
+.PD 0
+.RSs
+.IPs <profondeur>
+Une plus grand profondeur débruitera plus les basses fréquences, mais
+ralentira le filtrage (par défaut\ : 8).
+.IPs <force_luminance>
+force luminance (défaut\ : 1.0)
+.IPs <force_chrominance>
+force chrominance (défaut\ : 1.0)
+.RE
+.PD 1
 .
 .TP
 .B eq[=lumi:cont] (OBSOLÈTE)
@@ -10706,6 +10755,11 @@ Force l'utilisation d'un dé-multiplexeur libavformat spécifique.
 Quantité maximal de données à lire lors de la phase de détection.
 Dans le cas de MPEG-TS, cette valeur correspond au nombre maximal
 de paquets TS à scanner.
+.
+.TP
+.B cryptokey=<chaîne hexdécimale>
+Donne la clée de chiffrement à utiliser.
+La chaîne hexa doit être le contenu brut de la clée, convertie en hexa.
 .
 .
 .SS Multiplexeurs de libavformat de FFmpeg (\-lavfopts) (voir aussi \-of lavf)
