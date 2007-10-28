@@ -804,7 +804,7 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 	assert(codepage);
 
 	{
-		char* cp_tmp = codepage ? strdup(codepage) : 0;
+		const char* cp_tmp = codepage;
 #ifdef HAVE_ENCA
 		char enca_lang[3], enca_fallback[100];
 		if (sscanf(codepage, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
@@ -816,9 +816,6 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 			mp_msg(MSGT_ASS,MSGL_V,"LIBSUB: opened iconv descriptor.\n");
 		} else
 			mp_msg(MSGT_ASS,MSGL_ERR,MSGTR_LIBASS_ErrorOpeningIconvDescriptor);
-#ifdef HAVE_ENCA
-		if (cp_tmp) free(cp_tmp);
-#endif
 	}
 
 	{

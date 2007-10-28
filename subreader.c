@@ -1083,15 +1083,13 @@ void	subcp_open (stream_t *st)
 	char *tocp = "UTF-8";
 
 	if (sub_cp){
-		char *cp_tmp = sub_cp;
+		const char *cp_tmp = sub_cp;
 #ifdef HAVE_ENCA
 		char enca_lang[3], enca_fallback[100];
-		int free_cp_tmp = 0;
 		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
 		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
 		  if (st && st->flags & STREAM_SEEK ) {
 		    cp_tmp = guess_cp(st, enca_lang, enca_fallback);
-		    free_cp_tmp = 1;
 		  } else {
 		    cp_tmp = enca_fallback;
 		    if (st)
@@ -1104,9 +1102,6 @@ void	subcp_open (stream_t *st)
 			sub_utf8 = 2;
 		} else
 			mp_msg(MSGT_SUBREADER,MSGL_ERR,"SUB: error opening iconv descriptor.\n");
-#ifdef HAVE_ENCA
-		if (free_cp_tmp && cp_tmp) free(cp_tmp);
-#endif
 	}
 }
 
@@ -1275,13 +1270,13 @@ struct subreader {
 };
 
 #ifdef HAVE_ENCA
-void* guess_buffer_cp(unsigned char* buffer, int buflen, char *preferred_language, char *fallback)
+const char* guess_buffer_cp(unsigned char* buffer, int buflen,  char *preferred_language, const char *fallback)
 {
     const char **languages;
     size_t langcnt;
     EncaAnalyser analyser;
     EncaEncoding encoding;
-    char *detected_sub_cp = NULL;
+    const char *detected_sub_cp = NULL;
     int i;
 
     languages = enca_get_languages(&langcnt);
@@ -1299,7 +1294,7 @@ void* guess_buffer_cp(unsigned char* buffer, int buflen, char *preferred_languag
 	encoding = enca_analyse_const(analyser, buffer, buflen);
 	tmp = enca_charset_name(encoding.charset, ENCA_NAME_STYLE_ICONV);
 	if (tmp && encoding.charset != ENCA_CS_UNKNOWN) {
-	    detected_sub_cp = strdup(tmp);
+	    detected_sub_cp = tmp;
 	    mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detected charset: %s\n", tmp);
 	}
 	enca_analyser_free(analyser);
@@ -1308,7 +1303,7 @@ void* guess_buffer_cp(unsigned char* buffer, int buflen, char *preferred_languag
     free(languages);
 
     if (!detected_sub_cp) {
-	detected_sub_cp = strdup(fallback);
+	detected_sub_cp = fallback;
 	mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detection failed: fallback to %s\n", fallback);
     }
 
@@ -1316,11 +1311,11 @@ void* guess_buffer_cp(unsigned char* buffer, int buflen, char *preferred_languag
 }
 
 #define MAX_GUESS_BUFFER_SIZE (256*1024)
-void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
+const char* guess_cp(stream_t *st, char *preferred_language, const char *fallback)
 {
     size_t buflen;
     unsigned char *buffer;
-    char *detected_sub_cp = NULL;
+    const char *detected_sub_cp = NULL;
 
     buffer = malloc(MAX_GUESS_BUFFER_SIZE);
     buflen = stream_read(st,buffer, MAX_GUESS_BUFFER_SIZE);
