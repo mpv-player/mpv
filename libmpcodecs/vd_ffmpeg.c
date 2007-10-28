@@ -760,22 +760,19 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
        || sh->format == mmioFOURCC('R', 'V', '2', '0')
        || sh->format == mmioFOURCC('R', 'V', '3', '0')
        || sh->format == mmioFOURCC('R', 'V', '4', '0'))
-    if(sh->bih->biSize>=sizeof(*sh->bih)+8){
-        int i;
+    {
         dp_hdr_t *hdr= (dp_hdr_t*)data;
-        uint32_t *offsets = (uint32_t*)(data + hdr->chunktab) + 1;
-        char *end = data + len;
+        uint32_t *offsets = (uint32_t*)(data + hdr->chunktab);
+        uint8_t *offstab = av_malloc((hdr->chunks+1) * 8);
+        uint8_t *buf = data;
+        int chunks = hdr->chunks;
+        int dlen = hdr->len;
 
-        if(avctx->slice_offset==NULL) 
-            avctx->slice_offset= av_malloc(sizeof(int)*1000);
-        
-//        for(i=0; i<25; i++) printf("%02X ", ((uint8_t*)data)[i]);
-        
-        avctx->slice_count= FFMIN(hdr->chunks+1, 1000);
-        for(i=0; i<avctx->slice_count && end >= &offsets[2*i+1]; i++)
-            avctx->slice_offset[i]= offsets[2*i];
-	len=hdr->len;
-        data+= sizeof(dp_hdr_t);
+        buf[0] = chunks;
+        memcpy(offstab, offsets, (chunks + 1) * 8);
+        memmove(buf + 1 + (chunks + 1) * 8, data + sizeof(dp_hdr_t), dlen);
+        memcpy(buf + 1, offstab, (chunks + 1) * 8);
+        av_free(offstab);
     }
 
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "vd_ffmpeg data: %04x, %04x, %04x, %04x\n",
