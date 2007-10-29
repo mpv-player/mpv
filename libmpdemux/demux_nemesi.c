@@ -43,7 +43,7 @@ static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
                                         rtp_buff * buff, unsigned int * fps)
 {
     extern float force_fps;
-    rtp_ssrc *ssrc;
+    rtp_ssrc *ssrc = NULL;
     rtsp_ctrl * ctl = ndsd->rtsp;
     rtp_frame * fr = &ndsd->first_pkt[stype];
     rtp_buff trash_buff;
@@ -54,15 +54,8 @@ static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
         buff = &trash_buff;
 
     if ( (buff != NULL) || (fps != NULL) ) {
-        rtp_fill_buffers(rtsp_get_rtp_th(ctl));
-        for (ssrc = rtp_active_ssrc_queue(rtsp_get_rtp_queue(ctl));
-             ssrc;
-             ssrc = rtp_next_active_ssrc(ssrc)) {
-            if (ssrc->rtp_sess == sess) {
-                rtp_fill_buffer(ssrc, fr, buff);
-                break;
-            }
-        }
+        while ( !(ssrc = rtp_session_get_ssrc(sess, ctl)) );
+        rtp_fill_buffer(ssrc, fr, buff);
 
         if ( (force_fps == 0.0) && (fps != NULL) ) {
             rtp_fill_buffers(rtsp_get_rtp_th(ctl));
@@ -184,6 +177,7 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                 demux_stream_t* d_video;
                 int fps = 0;
                 rtp_buff buff;
+                memset(&buff, 0, sizeof(rtp_buff));
 
                 mp_msg(MSGT_DEMUX, MSGL_INFO, "Detected as VIDEO stream...\n");
 
