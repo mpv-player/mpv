@@ -21,6 +21,7 @@
 #define HAVE_STRUCT_SOCKADDR_STORAGE
 #include "nemesi/rtsp.h"
 #include "nemesi/rtp.h"
+#include <sched.h>
 
 int rtsp_transport_tcp = 0;
 int rtsp_transport_sctp = 0;
@@ -54,8 +55,13 @@ static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
         buff = &trash_buff;
 
     if ( (buff != NULL) || (fps != NULL) ) {
-        while ( !(ssrc = rtp_session_get_ssrc(sess, ctl)) );
-        rtp_fill_buffer(ssrc, fr, buff);
+        while ( !(ssrc = rtp_session_get_ssrc(sess, ctl)) ) //Wait for the ssrc to be registered
+            sched_yield();
+
+        rtp_fill_buffer(ssrc, fr, buff); //Prefetch the first packet
+
+        while ( !(rtp_get_pkt(ssrc, NULL)) ) //Wait for the second packet to calculate FPS
+            sched_yield();
 
         if ( (force_fps == 0.0) && (fps != NULL) ) {
             rtp_fill_buffers(rtsp_get_rtp_th(ctl));
@@ -199,8 +205,10 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                 d_video->sh = sh_video;
                 sh_video->ds = d_video;
 
-                if (fps)
+                if (fps) {
                     sh_video->fps = fps;
+                    sh_video->frametime = 1.0/fps;
+                }
 
                 //List of known video formats
                 if (!strcmp(format_name, "MPV")) {
