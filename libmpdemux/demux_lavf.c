@@ -435,7 +435,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     AVFormatParameters ap;
     const AVOption *opt;
     lavf_priv_t *priv= demuxer->priv;
-    int i,g;
+    int i;
     char mp_filename[256]="mp:";
 
     memset(&ap, 0, sizeof(AVFormatParameters));
