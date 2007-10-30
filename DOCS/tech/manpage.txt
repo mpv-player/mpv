@@ -165,10 +165,11 @@ General:
                      .nh, .ad, .hy, macro definitions, comments and some more
     - Don't forget the quotation marks around expressions, etc...
     - Each new sentence should start on a line of its own.
-    - Put a backslash before a '-' if it denotes a range (1\-10), an option
-      (\-fs), stdin (\-) or a dash (mplayer \- movie player).
-      Use just '-' if it is a hyphen (A-V) or a minus (-1). Please note that
-      it should be \-dvd-device and not \-dvd\-device.
+    - There is a typographical difference between a hyphen, a minus and an
+      en-dash or em-dash. For the man page this means that you should put a
+      backslash before a '-' if it denotes a range (1\-10), an option (\-fs),
+      stdin (\-), a dash (mplayer \- movie player) or a minus (-1). Use just
+      '-' if it is a hyphen (A-V).
     - Don't start a line with "'" or ".", nroff treats them specially.
     - To quickly check a manual page for markup errors, just run
         man DOCS/man/XX/mplayer.1 > /dev/null
