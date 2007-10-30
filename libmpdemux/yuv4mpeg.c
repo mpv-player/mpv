@@ -143,6 +143,7 @@ void y4m_copy_xtag_list(y4m_xtag_list_t *dest, const y4m_xtag_list_t *src)
 
 
 
+#if 0
 static int y4m_snprint_xtags(char *s, int maxn, y4m_xtag_list_t *xtags)
 {
   int i, room;
@@ -157,6 +158,7 @@ static int y4m_snprint_xtags(char *s, int maxn, y4m_xtag_list_t *xtags)
   s[1] = '\0';  /* ...and end-of-string           */
   return Y4M_OK;
 }
+#endif
 
 
 int y4m_xtag_count(const y4m_xtag_list_t *xtags)
