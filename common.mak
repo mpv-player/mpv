@@ -16,12 +16,10 @@ CFLAGS += -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
 
 SRCS := $(OBJS:.o=.c) $(ASM_OBJS:.o=.S) $(CPPOBJS:.o=.cpp)
 OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
-STATIC_OBJS := $(OBJS) $(STATIC_OBJS)
-SHARED_OBJS := $(OBJS) $(SHARED_OBJS)
 
 all: $(LIBNAME) $(SLIBNAME)
 
-$(LIBNAME): $(STATIC_OBJS)
+$(LIBNAME): $(OBJS)
 	rm -f $@
 	$(AR) rc $@ $^ $(EXTRAOBJS)
 	$(RANLIB) $@
@@ -29,7 +27,7 @@ $(LIBNAME): $(STATIC_OBJS)
 $(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
 	$(LN_S) $^ $@
 
-$(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
+$(SLIBNAME_WITH_MAJOR): $(OBJS)
 	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
 	$(SLIB_EXTRA_CMD)
 
@@ -58,16 +56,12 @@ clean::
 distclean: clean
 	rm -f .depend
 
-ifeq ($(BUILD_SHARED),yes)
-INSTLIBTARGETS += install-lib-shared
-endif
-ifeq ($(BUILD_STATIC),yes)
-INSTLIBTARGETS += install-lib-static
-endif
+INSTALL_TARGETS-$(BUILD_SHARED) += install-lib-shared
+INSTALL_TARGETS-$(BUILD_STATIC) += install-lib-static
 
 install: install-libs install-headers
 
-install-libs: $(INSTLIBTARGETS)
+install-libs: $(INSTALL_TARGETS-yes)
 
 install-lib-shared: $(SLIBNAME)
 	install -d "$(SHLIBDIR)"
