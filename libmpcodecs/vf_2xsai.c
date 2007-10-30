@@ -76,47 +76,6 @@ int Init_2xSaI(int d)
 }
 
 
-static int GetResult1(uint32 A, uint32 B, uint32 C, uint32 D)
-{
-	int x = 0;
-	int y = 0;
-	int r = 0;
-	if (A == C)
-		x += 1;
-	else if (B == C)
-		y += 1;
-	if (A == D)
-		x += 1;
-	else if (B == D)
-		y += 1;
-	if (x <= 1)
-		r += 1;
-	if (y <= 1)
-		r -= 1;
-	return r;
-}
-
-static int GetResult2(uint32 A, uint32 B, uint32 C, uint32 D, uint32 E)
-{
-	int x = 0;
-	int y = 0;
-	int r = 0;
-	if (A == C)
-		x += 1;
-	else if (B == C)
-		y += 1;
-	if (A == D)
-		x += 1;
-	else if (B == D)
-		y += 1;
-	if (x <= 1)
-		r -= 1;
-	if (y <= 1)
-		r += 1;
-	return r;
-}
-
-
 #define GET_RESULT(A, B, C, D) ((A != C || A != D) - (B != C || B != D))
 
 #define INTERPOLATE(A, B) (((A & colorMask) >> 1) + ((B & colorMask) >> 1) + (A & B & lowPixelMask))
