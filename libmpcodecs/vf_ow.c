@@ -293,21 +293,6 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static unsigned int fmt_list[]={
-    IMGFMT_YVU9,
-    IMGFMT_IF09,
-    IMGFMT_YV12,
-    IMGFMT_I420,
-    IMGFMT_IYUV,
-    IMGFMT_CLPL,
-    IMGFMT_Y800,
-    IMGFMT_Y8,
-    IMGFMT_444P,
-    IMGFMT_422P,
-    IMGFMT_411P,
-    0
-};
-
 
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;

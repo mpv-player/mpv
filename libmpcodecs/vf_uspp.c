@@ -331,15 +331,6 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static unsigned int fmt_list[]={
-	IMGFMT_YV12,
-	IMGFMT_I420,
-	IMGFMT_IYUV,
-	IMGFMT_Y800,
-	IMGFMT_Y8,
-	0
-};
-
 static int control(struct vf_instance_s* vf, int request, void* data){
     switch(request){
     case VFCTRL_QUERY_MAX_PP_LEVEL:
