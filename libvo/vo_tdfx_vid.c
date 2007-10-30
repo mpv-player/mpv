@@ -75,6 +75,7 @@ static int use_overlay = 1;
 static tdfx_vid_overlay_t tdfx_ov;
 
 // FIXME
+#if 0
 static void clear_screen(void) {
   tdfx_vid_agp_move_t mov;
 
@@ -94,6 +95,7 @@ static void clear_screen(void) {
     mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen);
   
 }
+#endif
 
 static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
