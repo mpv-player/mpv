@@ -116,8 +116,8 @@ m_option_t dvbin_opts_conf[] = {
 extern int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype);
 extern int dvb_demux_stop(int fd);
 extern int dvb_get_tuner_type(int fd);
-int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt, int *pids);
-int dvb_fix_demuxes(dvb_priv_t *priv, int cnt, int *pids);
+int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt);
+int dvb_fix_demuxes(dvb_priv_t *priv, int cnt);
 
 extern int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
@@ -504,7 +504,7 @@ int dvb_set_channel(dvb_priv_t *priv, int card, int n)
 		if(priv->card != card)
 		{
 			dvbin_close(stream);
-			if(! dvb_open_devices(priv, devno, channel->pids_cnt, channel->pids))
+			if(! dvb_open_devices(priv, devno, channel->pids_cnt))
 			{
 				mp_msg(MSGT_DEMUX, MSGL_ERR, "DVB_SET_CHANNEL, COULDN'T OPEN DEVICES OF CARD: %d, EXIT\n", card);
 				return 0;
@@ -512,13 +512,13 @@ int dvb_set_channel(dvb_priv_t *priv, int card, int n)
 		}
 		else	//close all demux_fds with pos > pids required for the new channel or open other demux_fds if we have too few
 		{	
-			if(! dvb_fix_demuxes(priv, channel->pids_cnt, channel->pids))
+			if(! dvb_fix_demuxes(priv, channel->pids_cnt))
 				return 0;
 		}
 	}
 	else
 	{
-		if(! dvb_open_devices(priv, devno, channel->pids_cnt, channel->pids))
+		if(! dvb_open_devices(priv, devno, channel->pids_cnt))
 		{
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "DVB_SET_CHANNEL2, COULDN'T OPEN DEVICES OF CARD: %d, EXIT\n", card);
 			return 0;

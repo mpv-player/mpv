@@ -40,7 +40,6 @@
 	char* dvb_frontenddev[4]={"/dev/dvb/adapter0/frontend0","/dev/dvb/adapter1/frontend0","/dev/dvb/adapter2/frontend0","/dev/dvb/adapter3/frontend0"};
 	char* dvb_dvrdev[4]={"/dev/dvb/adapter0/dvr0","/dev/dvb/adapter1/dvr0","/dev/dvb/adapter2/dvr0","/dev/dvb/adapter3/dvr0"};
 	char* dvb_demuxdev[4]={"/dev/dvb/adapter0/demux0","/dev/dvb/adapter1/demux0","/dev/dvb/adapter2/demux0","/dev/dvb/adapter3/demux0"};
-//	static char* dvb_secdev[4]={"","","",""};	//UNUSED, ONLY FOR UNIFORMITY
 #else
 	#include <ost/dmx.h>
 	#include <ost/sec.h>
@@ -101,7 +100,7 @@ int dvb_get_tuner_type(int fe_fd)
 
 int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype);
 
-int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt, int *pids)
+int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 {
 	int i;
 	
@@ -151,7 +150,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt, int *pids)
 }
 
 
-int dvb_fix_demuxes(dvb_priv_t *priv, int cnt, int *pids)
+int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 {
 	int i;
 	
