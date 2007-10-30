@@ -13,8 +13,7 @@
  *    Felix Buenemann <atmosfear@users.sourceforge.net>
  *
  *  This file is a video out driver using the SDL library (http://libsdl.org/),
- *  to be used with MPlayer [The Movie Player for Linux] project, further info
- *  from http://www.mplayerhq.hu
+ *  to be used with MPlayer, further info from http://www.mplayerhq.hu
  *
  *  -- old disclaimer --
  *
