@@ -7128,12 +7128,16 @@ echocheck "inet6"
 if test "$_inet6" = auto ; then
   cat > $TMPC << EOF
 #include <sys/types.h>
+#if !defined(_WIN32) || defined(__CYGWIN__)
 #include <sys/socket.h>
 #include <netinet/in.h>
+#else
+#include <ws2tcpip.h>
+#endif
 int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); }
 EOF
   _inet6=no
-  if cc_check ; then
+  if cc_check $_ld_sock ; then
     _inet6=yes
   fi
 fi
