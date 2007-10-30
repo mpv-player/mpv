@@ -32,6 +32,7 @@
 #include "mpbswap.h"
 #include "font_load.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 #include "mplayer.h"
 #include "get_path.h"
 #include "osd_font.h"
@@ -904,7 +905,7 @@ static int load_sub_face(const char *name, FT_Face *face)
 	if (err) {
 	    err = FT_New_Face(library, MPLAYER_DATADIR "/subfont.ttf", 0, face);
 	    if (err) {
-	        mp_msg(MSGT_OSD, MSGL_ERR, "New_Face failed. Maybe the font path is wrong.\nPlease supply the text font file (~/.mplayer/subfont.ttf).\n" );
+	        mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed);
 		return -1;
 	    }
 	}
@@ -915,7 +916,7 @@ static int load_sub_face(const char *name, FT_Face *face)
 static int load_osd_face(FT_Face *face)
 {
     if ( FT_New_Memory_Face(library, osd_font_pfb, sizeof(osd_font_pfb), 0, face) ) {
-	mp_msg(MSGT_OSD, MSGL_ERR, "New_Memory_Face failed..\n");
+	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed);
 	return -1;
     }
     return 0;
@@ -1002,7 +1003,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
     /* generate the subtitle font */
     err = load_sub_face(fname, &face);
     if (err) {
-	mp_msg(MSGT_OSD, MSGL_WARN, "subtitle font: load_sub_face failed.\n");
+	mp_msg(MSGT_OSD, MSGL_WARN, MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed);
 	goto gen_osd;
     }
     desc->face_cnt++;
@@ -1019,7 +1020,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
     }
 
     if (charset_size < 0) {
-	mp_msg(MSGT_OSD, MSGL_ERR, "subtitle font: prepare_charset failed.\n");
+	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed);
 	goto err_out;
     }
 #else
@@ -1033,7 +1034,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
 		       subtitle_font_thickness, subtitle_font_radius);
 
     if (err) {
-	mp_msg(MSGT_OSD, MSGL_ERR, "Cannot prepare subtitle font.\n");
+	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont);
 	goto err_out;
     }
 
@@ -1051,14 +1052,14 @@ gen_osd:
 		       subtitle_font_thickness, subtitle_font_radius);
     
     if (err) {
-	mp_msg(MSGT_OSD, MSGL_ERR, "Cannot prepare OSD font.\n");
+	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont);
 	goto err_out;
     }
 
     err = generate_tables(desc, subtitle_font_thickness, subtitle_font_radius);
     
     if (err) {
-	mp_msg(MSGT_OSD, MSGL_ERR, "Cannot generate tables.\n");
+	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables);
 	goto err_out;
     }
 
@@ -1113,7 +1114,7 @@ int done_freetype(void)
     
     err = FT_Done_FreeType(library);
     if (err) {
-	mp_msg(MSGT_OSD, MSGL_ERR, "FT_Done_FreeType failed.\n");
+	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed);
 	return -1;
     }
 

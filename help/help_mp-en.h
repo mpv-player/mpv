@@ -1767,6 +1767,17 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Xcorrection: %d.\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Failed to set signal mix!\n"
 
+// libvo/font_load_ft.c
+
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "New_Face failed. Maybe the font path is wrong.\nPlease supply the text font file (~/.mplayer/subfont.ttf).\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "New_Memory_Face failed..\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "subtitle font: load_sub_face failed.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "subtitle font: prepare_charset failed.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Cannot prepare subtitle font.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Cannot prepare OSD font.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Cannot generate tables.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType failed.\n"
+
 // libvo/vo_mga.c
 
 #define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): resized to %dx%d.\n"
