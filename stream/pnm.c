@@ -850,19 +850,6 @@ static int pnm_read (pnm_t *this, char *data, int len) {
   return len;
 }
 
-static int pnm_peek_header (pnm_t *this, char *data) {
-
-  memcpy (data, this->header, this->header_len);
-  return this->header_len;
-}
-
-static void pnm_close(pnm_t *p) {
-
-  if (p->s >= 0) closesocket(p->s);
-  free(p->path);
-  free(p);
-}
-
 static int pnm_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl ) {
 	return pnm_read(stream_ctrl->data, buffer, size);
 }
