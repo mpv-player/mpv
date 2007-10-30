@@ -521,7 +521,7 @@ If you wish to have a configuration file for a file called 'movie.avi', create a
 named 'movie.avi.conf' with the file-specific options in it and put it in
 ~/.mplayer/.
 You can also put the configuration file in the same directory as the file to
-be played, as long as you give the \-use-filedir-conf option (either on the
+be played, as long as you give the \-use\-filedir\-conf option (either on the
 command line or in your global config file).
 .PP
 .I EXAMPLE MPLAYER CONFIGURATION FILE:
@@ -600,7 +600,7 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .SH "GENERAL OPTIONS"
 .
 .TP
-.B \-codecs-file <filename> (also see \-afm, \-ac, \-vfm, \-vc)
+.B \-codecs\-file <filename> (also see \-afm, \-ac, \-vfm, \-vc)
 Override the standard search path and use the specified file
 instead of the builtin codecs.conf.
 .
@@ -609,7 +609,7 @@ instead of the builtin codecs.conf.
 Specify configuration file to be parsed after the default ones.
 .
 .TP
-.B \-list-options
+.B \-list\-options
 Prints all available options.
 .
 .TP
@@ -690,16 +690,16 @@ Using realtime priority can cause system lockup.
 Use the given profile(s), \-profile help displays a list of the defined profiles.
 .
 .TP
-.B \-really-quiet (also see \-quiet)
+.B \-really\-quiet (also see \-quiet)
 Display even less output and status messages than with \-quiet.
 Also suppresses the GUI error message boxes.
 .
 .TP
-.B \-show-profile <profile>
+.B \-show\-profile <profile>
 Show the description and content of a profile.
 .
 .TP
-.B \-use-filedir-conf
+.B \-use\-filedir\-conf
 Look for a file-specific configuration file in the same directory as
 the file that is being played.
 .br
@@ -766,22 +766,22 @@ xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
 .TP
-.B \-correct-pts (experimental)
+.B \-correct\-pts (experimental)
 Switches MPlayer to an experimental mode where timestamps for video frames
 are calculated differently and video filters which add new frames or
 modify timestamps of existing ones are supported.
 The more accurate timestamps can be visible for example when playing
 subtitles timed to scene changes with the \-ass option.
-Without \-correct-pts the subtitle timing will typically be off by some frames.
+Without \-correct\-pts the subtitle timing will typically be off by some frames.
 This option does not work correctly with some demuxers and codecs.
 .
 .TP
-.B \-crash-debug (DEBUG CODE)
+.B \-crash\-debug (DEBUG CODE)
 Automatically attaches gdb upon crash or SIGTRAP.
-Support must be compiled in by configuring with \-\-enable-crash-debug.
+Support must be compiled in by configuring with \-\-enable\-crash\-debug.
 .
 .TP
-.B \-doubleclick-time
+.B \-doubleclick\-time
 Time in milliseconds to recognize two consecutive button presses as
 a double-click (default: 300).
 Set to 0 to let your windowing system decide what a double-click is
@@ -805,7 +805,7 @@ Enqueue files given on the command line in the playlist instead of playing them
 immediately.
 .
 .TP
-.B \-fixed-vo
+.B \-fixed\-vo
 Enforces a fixed video system for multiple files (one (un)initialization for
 all files).
 Therefore only one window will be opened for all files.
@@ -888,7 +888,7 @@ several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 .PD 1
 .
 .TP
-.B \-key-fifo-size <2\-65000>
+.B \-key\-fifo\-size <2\-65000>
 Specify the size of the FIFO that buffers key events (default: 7).
 A FIFO of size n can buffer (n-1) events.
 If it is too small some events may be lost
@@ -903,7 +903,7 @@ set it to 2 for Linux or 1024 for Windows.
 Specifies a configuration file for LIRC (default: ~/.lircrc).
 .
 .TP
-.B \-list-properties
+.B \-list\-properties
 Print a list of the available properties.
 .
 .TP
@@ -916,36 +916,36 @@ Loops movie playback <number> times.
 Turn on OSD menu support.
 .
 .TP
-.B \-menu-cfg <filename> (OSD menu only)
+.B \-menu\-cfg <filename> (OSD menu only)
 Use an alternative menu.conf.
 .
 .TP
-.B \-menu-chroot <path> (OSD menu only)
+.B \-menu\-chroot <path> (OSD menu only)
 Chroot the file selection menu to a specific location.
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
-.IPs "\-menu-chroot=/home"
+.IPs "\-menu\-chroot=/home"
 Will restrict the file selection menu to /\:home and downward (i.e.\& no
 access to / will be possible, but /home/user_name will).
 .RE
 .PD 1
 .
 .TP
-.B \-menu-keepdir (OSD menu only)
+.B \-menu\-keepdir (OSD menu only)
 File browser starts from the last known location instead of current directory.
 .
 .TP
-.B \-menu-root <value> (OSD menu only)
+.B \-menu\-root <value> (OSD menu only)
 Specify the main menu.
 .
 .TP
-.B \-menu-startup (OSD menu only)
+.B \-menu\-startup (OSD menu only)
 Display the main menu at MPlayer startup.
 .
 .TP
-.B \-mouse-movements
+.B \-mouse\-movements
 Permit MPlayer to receive pointer events reported by the video
 output driver (currently only derivatives of X11 are supported).
 Necessary to select the buttons in DVD menus.
@@ -982,7 +982,7 @@ Useless with modern Linux kernels configured for desktop use as they already
 wake up the process with similar accuracy when using normal timed sleep.
 .
 .TP
-.B \-playing-msg <string>
+.B \-playing\-msg <string>
 Print out a string before starting playback.
 The following expansions are supported:
 .RSs
@@ -1004,7 +1004,7 @@ only to the elements of this playlist.
 FIXME: This needs to be clarified and documented thoroughly.
 .
 .TP
-.B \-rtc-device <device>
+.B \-rtc\-device <device>
 Use the specified device for RTC timing.
 .
 .TP
@@ -1089,13 +1089,13 @@ Plays a Matroska file in Japanese.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <[+]name> (\-audiofile only)
+.B \-audio\-demuxer <[+]name> (\-audiofile only)
 Force audio demuxer type for \-audiofile.
 Use a '+' before the name to force it, this will skip some checks!
-Give the demuxer name as printed by \-audio-demuxer help.
+Give the demuxer name as printed by \-audio\-demuxer help.
 For backward compatibility it also accepts the demuxer ID as defined in
 libmpdemux/\:demuxer.h.
-\-audio-demuxer audio or \-audio-demuxer 17 forces MP3.
+\-audio\-demuxer audio or \-audio\-demuxer 17 forces MP3.
 .
 .TP
 .B \-audiofile <filename>
@@ -1103,12 +1103,12 @@ Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
 movie.
 .
 .TP
-.B \-audiofile-cache <kBytes>
+.B \-audiofile\-cache <kBytes>
 Enables caching for the stream used by \-audiofile, using the specified
 amount of memory.
 .
 .TP
-.B \-reuse-socket (udp:// only)
+.B \-reuse\-socket (udp:// only)
 Allows a socket to be reused by other processes as soon as it is closed.
 .
 .TP
@@ -1130,12 +1130,12 @@ Especially useful on slow media.
 Turns off caching.
 .
 .TP
-.B \-cache-min <percentage>
+.B \-cache\-min <percentage>
 Playback will start when the cache has been filled up to <percentage>
 of the total.
 .
 .TP
-.B \-cache-seek-min <percentage>
+.B \-cache\-seek\-min <percentage>
 If a seek is to be made to a position within <percentage> of the cache size
 from the current position, MPlayer will wait for the cache to be filled to
 this position rather than performing a stream seek (default: 50).
@@ -1176,7 +1176,7 @@ May be negative.
 .RE
 .
 .TP
-.B \-cdrom-device <path to device>
+.B \-cdrom\-device <path to device>
 Specify the CD-ROM device (default: /dev/\:cdrom).
 .
 .TP
@@ -1218,7 +1218,7 @@ Optionally specify which chapter to end playing at (default: 1).
 Send cookies when making HTTP requests.
 .
 .TP
-.B \-cookies-file <filename> (network only)
+.B \-cookies\-file <filename> (network only)
 Read HTTP cookies from <filename> (default: ~/.mozilla/ and ~/.netscape/)
 and skip reading from default locations.
 The file is assumed to be in Netscape format.
@@ -1228,19 +1228,19 @@ The file is assumed to be in Netscape format.
 audio delay in seconds (positive or negative float value)
 .br
 Negative values delay the audio, and positive values delay the video.
-Note that this is the exact opposite of the \-audio-delay MEncoder option.
+Note that this is the exact opposite of the \-audio\-delay MEncoder option.
 .br
 .I NOTE:
 When used with MEncoder, this is not guaranteed to work correctly
-with \-ovc copy; use \-audio-delay instead.
+with \-ovc copy; use \-audio\-delay instead.
 .
 .TP
-.B \-ignore-start
+.B \-ignore\-start
 Ignore the specified starting time for streams in AVI files.
 In MPlayer, this nullifies stream delays in files encoded with
-the \-audio-delay option.
+the \-audio\-delay option.
 During encoding, this option prevents MEncoder from transferring
-original stream start times to the new file; the \-audio-delay option is
+original stream start times to the new file; the \-audio\-delay option is
 not affected.
 Note that MEncoder sometimes adjusts stream starting times
 automatically to compensate for anticipated decoding delays, so do not
@@ -1299,7 +1299,7 @@ frequency before giving up (default: 30).
 .PD 1
 .
 .TP
-.B \-dvd-device <path to device> (DVD only)
+.B \-dvd\-device <path to device> (DVD only)
 Specify the DVD device (default: /dev/\:dvd).
 You can also specify a directory that contains files previously copied directly
 from a DVD (with e.g.\& vobcopy).
@@ -1307,14 +1307,14 @@ Note that using \-dumpstream is usually a better way to
 copy DVD titles in the first place (see the examples).
 .
 .TP
-.B \-dvd-speed <factor or speed in KB/s> (DVD only)
+.B \-dvd\-speed <factor or speed in KB/s> (DVD only)
 Try to limit DVD speed (default: 0, no change).
 DVD base speed is about 1350KB/s, so a 8x drive can read at speeds up to
 10800KB/s.
 Slower speeds make the drive more quiet, for watching DVDs 2700KB/s should be
 quiet and fast enough.
 MPlayer resets the speed to the drive default value on close.
-Values less than 100 mean multiples of 1350KB/s, i.e.\& \-dvd-speed 8 selects
+Values less than 100 mean multiples of 1350KB/s, i.e.\& \-dvd\-speed 8 selects
 10800KB/s.
 .br
 .I NOTE:
@@ -1378,7 +1378,7 @@ Useful if the original value is wrong or missing.
 Play/\:convert only first <number> frames, then quit.
 .
 .TP
-.B \-hr-mp3-seek (MP3 only)
+.B \-hr\-mp3-seek (MP3 only)
 Hi-res MP3 seeking.
 Enabled when playing from an external MP3 file, as we need to seek
 to the very exact position to keep A/V sync.
@@ -1461,12 +1461,12 @@ Always falls back on content-based demuxer selection.
 Specify password for HTTP authentication.
 .
 .TP
-.B \-prefer-ipv4 (network only)
+.B \-prefer\-ipv4 (network only)
 Use IPv4 on network connections.
 Falls back on IPv6 automatically.
 .
 .TP
-.B \-prefer-ipv6 (IPv6 network only)
+.B \-prefer\-ipv6 (IPv6 network only)
 Use IPv6 on network connections.
 Falls back on IPv4 automatically.
 .
@@ -1661,13 +1661,13 @@ Play a raw YUV sample.
 .PD 1
 .
 .TP
-.B \-rtsp-port
+.B \-rtsp\-port
 Used with 'rtsp://' URLs to force the client's port number.
 This option may be useful if you are behind a router and want to forward
 the RTSP stream from the server to a specific client.
 .
 .TP
-.B \-rtsp-destination
+.B \-rtsp\-destination
 Used with 'rtsp://' URLs to force the destination IP address to be bound.
 This option may be useful with some RTSP server which do not
 send RTP packets to the right interface.
@@ -1676,7 +1676,7 @@ which IP address MPlayer tries to bind to and try to force
 it to one assigned to your computer instead.
 .
 .TP
-.B \-rtsp-stream-over-tcp (LIVE555 and NEMESI only)
+.B \-rtsp\-stream\-over\-tcp (LIVE555 and NEMESI only)
 Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
 packets be streamed over TCP (using the same TCP connection as RTSP).
 This option may be useful if you have a broken internet connection that does
@@ -1707,7 +1707,7 @@ Selects the output sample rate to be used
 If the sample frequency selected is different from that
 of the current media, the resample or lavcresample audio filter will be inserted
 into the audio filter layer to compensate for the difference.
-The type of resampling can be controlled by the \-af-adv option.
+The type of resampling can be controlled by the \-af\-adv option.
 The default is fast resampling that may cause distortion.
 .
 .TP
@@ -1956,7 +1956,7 @@ currently scanning channel is active.
 Specify username for HTTP authentication.
 .
 .TP
-.B \-user-agent <string>
+.B \-user\-agent <string>
 Use <string> as user agent for HTTP streaming.
 .
 .TP
@@ -1984,37 +1984,37 @@ external subtitles and Matroska tracks.
 You may also want to use \-embeddedfonts.
 .
 .TP
-.B \-ass-border-color <value>
+.B \-ass\-border\-color <value>
 Sets the border (outline) color for text subtitles.
 The color format is RRGGBBAA.
 .
 .TP
-.B \-ass-bottom-margin <value>
+.B \-ass\-bottom\-margin <value>
 Adds a black band at the bottom of the frame.
-The SSA/ASS renderer can place subtitles there (with \-ass-use-margins).
+The SSA/ASS renderer can place subtitles there (with \-ass\-use\-margins).
 .
 .TP
-.B \-ass-color <value>
+.B \-ass\-color <value>
 Sets the color for text subtitles.
 The color format is RRGGBBAA.
 .
 .TP
-.B \-ass-font-scale <value>
+.B \-ass\-font\-scale <value>
 Set the scale coefficient to be used for fonts in the SSA/ASS renderer.
 .
 .TP
-.B \-ass-force-style <[Style.]Param=Value[,...]>
+.B \-ass\-force\-style <[Style.]Param=Value[,...]>
 Override some style parameters.
 .sp
 .I EXAMPLE:
 .PD 0
 .RSs
-\-ass-force-style FontName=Arial,Default.Bold=1
+\-ass\-force\-style FontName=Arial,Default.Bold=1
 .RE
 .PD 1
 .
 .TP
-.B \-ass-hinting <type>
+.B \-ass\-hinting <type>
 Set hinting type.
 .PD 0
 .RSs
@@ -2035,23 +2035,23 @@ The default value is 7 (use native hinter for unscaled OSD and no hinting otherw
 .PD 1
 .
 .TP
-.B \-ass-line-spacing <value>
+.B \-ass\-line\-spacing <value>
 Set line spacing value for SSA/ASS renderer.
 .
 .TP
-.B \-ass-styles <filename>
+.B \-ass\-styles <filename>
 Load all SSA/ASS styles found in the specified file and use them for
 rendering text subtitles.
 The syntax of the file is exactly like the
 [V4 Styles] / [V4+ Styles] section of SSA/ASS.
 .
 .TP
-.B \-ass-top-margin <value>
+.B \-ass\-top\-margin <value>
 Adds a black band at the top of the frame.
-The SSA/ASS renderer can place toptitles there (with \-ass-use-margins).
+The SSA/ASS renderer can place toptitles there (with \-ass\-use\-margins).
 .
 .TP
-.B \-ass-use-margins
+.B \-ass\-use\-margins
 Enables placing toptitles and subtitles in black borders when they
 are available.
 .
@@ -2126,11 +2126,11 @@ bold black outline
 .PD 1
 .
 .TP
-.B \-flip-hebrew (FriBiDi only)
+.B \-flip\-hebrew (FriBiDi only)
 Turns on flipping subtitles using FriBiDi.
 .
 .TP
-.B \-noflip-hebrew-commas
+.B \-noflip\-hebrew\-commas
 Change FriBiDi's assumptions about the placements of commas in subtitles.
 Use this if commas in subtitles are shown at the start of a sentence
 instead of at the end.
@@ -2166,7 +2166,7 @@ Display only forced subtitles for the DVD subtitle stream selected by e.g.\&
 \-slang.
 .
 .TP
-.B \-fribidi-charset <charset name> (FriBiDi only)
+.B \-fribidi\-charset <charset name> (FriBiDi only)
 Specifies the character set that will be passed to FriBiDi when
 decoding non-UTF-8 subtitles (default: ISO8859-8).
 .
@@ -2180,7 +2180,7 @@ subtitles.
 Turns off automatic subtitle file loading.
 .
 .TP
-.B \-osd-duration <time>
+.B \-osd\-duration <time>
 Set the duration of the OSD messages in ms (default: 1000).
 .
 .TP
@@ -2279,28 +2279,28 @@ Use/\:display these subtitle files.
 Only one file can be displayed at the same time.
 .
 .TP
-.B \-sub-bg-alpha <0\-255>
+.B \-sub\-bg\-alpha <0\-255>
 Specify the alpha channel value for subtitles and OSD backgrounds.
 Big values mean more transparency.
 0 means completely transparent.
 .
 .TP
-.B \-sub-bg-color <0\-255>
+.B \-sub\-bg\-color <0\-255>
 Specify the color value for subtitles and OSD backgrounds.
 Currently subtitles are grayscale so this value is equivalent to the
 intensity of the color.
 255 means white and 0 black.
 .
 .TP
-.B \-sub-demuxer <[+]name> (\-subfile only) (BETA CODE)
+.B \-sub\-demuxer <[+]name> (\-subfile only) (BETA CODE)
 Force subtitle demuxer type for \-subfile.
 Use a '+' before the name to force it, this will skip some checks!
-Give the demuxer name as printed by \-sub-demuxer help.
+Give the demuxer name as printed by \-sub\-demuxer help.
 For backward compatibility it also accepts the demuxer ID as defined in
 subreader.h.
 .
 .TP
-.B \-sub-fuzziness <mode>
+.B \-sub\-fuzziness <mode>
 Adjust matching fuzziness when searching for subtitles:
 .PD 0
 .RSs
@@ -2314,7 +2314,7 @@ Load all subs in the current directory.
 .PD 1
 .
 .TP
-.B \-sub-no-text-pp
+.B \-sub\-no\-text\-pp
 Disables any kind of text post processing done after loading the subtitles.
 Used for debug purposes.
 .
@@ -2391,7 +2391,7 @@ Sets the subtitle font.
 If no \-subfont is given, \-font is used.
 .
 .TP
-.B \-subfont-autoscale <0\-3> (FreeType only)
+.B \-subfont\-autoscale <0\-3> (FreeType only)
 Sets the autoscale mode.
 .br
 .I NOTE:
@@ -2413,25 +2413,25 @@ proportional to movie diagonal (default)
 .PD 1
 .
 .TP
-.B \-subfont-blur <0\-8> (FreeType only)
+.B \-subfont\-blur <0\-8> (FreeType only)
 Sets the font blur radius (default: 2).
 .
 .TP
-.B \-subfont-encoding <value> (FreeType only)
+.B \-subfont\-encoding <value> (FreeType only)
 Sets the font encoding.
 When set to 'unicode', all the glyphs from the font file will be rendered and
 unicode will be used (default: unicode).
 .
 .TP
-.B \-subfont-osd-scale <0\-100> (FreeType only)
+.B \-subfont\-osd\-scale <0\-100> (FreeType only)
 Sets the autoscale coefficient of the OSD elements (default: 6).
 .
 .TP
-.B \-subfont-outline <0\-8> (FreeType only)
+.B \-subfont\-outline <0\-8> (FreeType only)
 Sets the font outline thickness (default: 2).
 .
 .TP
-.B \-subfont-text-scale <0\-100> (FreeType only)
+.B \-subfont\-text\-scale <0\-100> (FreeType only)
 Sets the subtitle text autoscale coefficient as percentage of the
 screen size (default: 5).
 .
@@ -2455,12 +2455,12 @@ Useful for TV-out.
 The value is the width of the subtitle in % of the screen width.
 .
 .TP
-.B \-noterm-osd
+.B \-noterm\-osd
 Disable the display of OSD messages on the console when no video output is
 available.
 .
 .TP
-.B \-term-osd-esc <escape sequence>
+.B \-term\-osd\-esc <escape sequence>
 Specify the escape sequence to use before writing an OSD message on the
 console.
 The escape sequence should move the pointer to the beginning of the line
@@ -2505,7 +2505,7 @@ Use a mixer device different from the default /dev/\:mixer.
 For ALSA this is the mixer name.
 .
 .TP
-.B \-mixer-channel <mixer line>[,mixer index] (\-ao oss and \-ao alsa only)
+.B \-mixer\-channel <mixer line>[,mixer index] (\-ao oss and \-ao alsa only)
 This option will tell MPlayer to use a different channel for controlling
 volume than the default PCM.
 Options for OSS include
@@ -2527,7 +2527,7 @@ Force the use of the software mixer, instead of using the sound card
 mixer.
 .
 .TP
-.B \-softvol-max <10.0\-10000.0>
+.B \-softvol\-max <10.0\-10000.0>
 Set the maximum amplification level in percent (default: 110).
 A value of 200 will allow you to adjust the volume up to a maximum of
 double the current level.
@@ -2907,7 +2907,7 @@ Fullscreen playback (centers movie, and paints black bands around it).
 Not supported by all video output drivers.
 .
 .TP
-.B \-fsmode-dontuse <0\-31> (OBSOLETE, use the \-fs option)
+.B \-fsmode\-dontuse <0\-31> (OBSOLETE, use the \-fs option)
 Try this option if you still experience fullscreen problems.
 .
 .TP
@@ -2998,15 +2998,15 @@ You can get a colored negative of the image with this option.
 Not supported by all video output drivers.
 .
 .TP
-.B \-monitor-dotclock <range[,range,...]> (\-vo fbdev and vesa only)
+.B \-monitor\-dotclock <range[,range,...]> (\-vo fbdev and vesa only)
 Specify the dotclock or pixelclock range of the monitor.
 .
 .TP
-.B \-monitor-hfreq <range[,range,...]> (\-vo fbdev and vesa only)
+.B \-monitor\-hfreq <range[,range,...]> (\-vo fbdev and vesa only)
 Specify the horizontal frequency range of the monitor.
 .
 .TP
-.B \-monitor-vfreq <range[,range,...]> (\-vo fbdev and vesa only)
+.B \-monitor\-vfreq <range[,range,...]> (\-vo fbdev and vesa only)
 Specify the vertical frequency range of the monitor.
 .
 .TP
@@ -3104,7 +3104,7 @@ Specify the horizontal screen resolution for video output drivers which
 do not know the screen resolution like fbdev, x11 and TVout.
 .
 .TP
-.B \-stop-xscreensaver (X11 only)
+.B \-stop\-xscreensaver (X11 only)
 Turns off xscreensaver at startup and turns it on again on exit.
 .
 .TP
@@ -3941,7 +3941,7 @@ images and stores it in a file (default: ./stream.yuv).
 The format is the same as the one employed by mjpegtools, so this is
 useful if you want to process the video with the mjpegtools suite.
 It supports the YV12, RGB (24 bpp) and BGR (24 bpp) format.
-You can combine it with the \-fixed-vo option to concatenate files
+You can combine it with the \-fixed\-vo option to concatenate files
 with the same dimensions and fps value.
 .PD 0
 .RSs
@@ -4108,7 +4108,7 @@ Skip FFmpeg's MP3 decoder.
 .PD 1
 .
 .TP
-.B \-af-adv <force=(0\-7):list=(filters)> (also see \-af)
+.B \-af\-adv <force=(0\-7):list=(filters)> (also see \-af)
 Specify advanced audio filter options:
 .RSs
 .IPs force=<0\-7>
@@ -4181,7 +4181,7 @@ incorrect or missing in the file being played.
 Disable automatic movie aspect ratio compensation.
 .
 .TP
-.B "\-field-dominance <-1\-1>"
+.B "\-field\-dominance <-1\-1>"
 Set first field for interlaced content.
 Useful for deinterlacers that double the framerate: \-vf tfields=1,
 \-vf yadif=1 and \-vo xvmc:bobdeint.
@@ -5170,21 +5170,21 @@ Video filters are managed in lists.
 There are a few commands to manage the filter list.
 .
 .TP
-.B \-vf-add <filter1[,filter2,...]>
+.B \-vf\-add <filter1[,filter2,...]>
 Appends the filters given as arguments to the filter list.
 .
 .TP
-.B \-vf-pre <filter1[,filter2,...]>
+.B \-vf\-pre <filter1[,filter2,...]>
 Prepends the filters given as arguments to the filter list.
 .
 .TP
-.B \-vf-del <index1[,index2,...]>
+.B \-vf\-del <index1[,index2,...]>
 Deletes the filters at the given indexes.
 Index numbers start at 0, negative numbers address the end of the
 list (-1 is the last).
 .
 .TP
-.B \-vf-clr
+.B \-vf\-clr
 Completely empties the filter list.
 .PP
 With filters that support it, you can access parameters by their name.
@@ -6522,7 +6522,7 @@ in the filter chain, otherwise it falls back to 0 (top field first).
 .br
 .I NOTE:
 This option will possibly be removed in a future version.
-Use \-field-dominance instead.
+Use \-field\-dominance instead.
 .RE
 .PD 1
 .
@@ -6544,7 +6544,7 @@ Operates like tfields.
 .br
 .I NOTE:
 This option will possibly be removed in a future version.
-Use \-field-dominance instead.
+Use \-field\-dominance instead.
 .RE
 .PD 1
 .
@@ -6792,7 +6792,7 @@ simplify finding the right x,y,w,h parameters.
 .PD 1
 .
 .TP
-.B remove-logo=/path/to/logo_bitmap_file_name.pgm
+.B remove\-logo=/path/to/logo_bitmap_file_name.pgm
 Suppresses a TV station logo, using a PGM or PPM image
 file to determine which pixels comprise the logo.
 The width and height of the image file must match
@@ -6878,7 +6878,7 @@ Threshold below which a pixel value is considered black (default: 32).
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
 .
 .TP
-.B \-audio-delay <any floating-point number>
+.B \-audio\-delay <any floating-point number>
 Delays either audio or video by setting a delay field in the header
 (default: 0.0).
 This does not delay either stream while encoding, but the player will
@@ -6886,20 +6886,20 @@ see the delay field and compensate accordingly.
 Positive values delay the audio, and negative values delay the video.
 Note that this is the exact opposite of the \-delay option.
 For example, if a video plays correctly with \-delay 0.2, you can
-fix the video with MEncoder by using \-audio-delay -0.2.
+fix the video with MEncoder by using \-audio\-delay -0.2.
 .sp 1
 Currently, this option only works with the default muxer (\-of avi).
 If you are using a different muxer, then you must use \-delay instead.
 .
 .TP
-.B \-audio-density <1\-50>
+.B \-audio\-density <1\-50>
 Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
 .br
 .I NOTE:
 CBR only, VBR ignores this as it puts each packet in a new chunk.
 .
 .TP
-.B \-audio-preload <0.0\-2.0>
+.B \-audio\-preload <0.0\-2.0>
 Sets up the audio buffering time interval (default: 0.5s).
 .
 .TP
@@ -6927,12 +6927,12 @@ Will have the output file contain 'div3' as video fourcc.
 .PD 1
 .
 .TP
-.B \-force-avi-aspect <0.2\-3.0>
+.B \-force\-avi\-aspect <0.2\-3.0>
 Override the aspect stored in the AVI OpenDML vprp header.
 This can be used to change the aspect ratio with '\-ovc copy'.
 .
 .TP
-.B \-frameno-file <filename> (DEPRECATED)
+.B \-frameno\-file <filename> (DEPRECATED)
 Specify the name of the audio file with framenumber mappings created in
 the first (audio only) pass of a special three pass encoding mode.
 .br
@@ -6943,7 +6943,7 @@ It is kept for backwards compatibility only and will possibly
 be removed in a future version.
 .
 .TP
-.B \-hr-edl-seek
+.B \-hr\-edl\-seek
 Use a more precise, but much slower method for skipping areas.
 Areas marked for skipping are not seeked over, instead all
 frames are decoded, but only the necessary frames are encoded.
@@ -10568,13 +10568,13 @@ mplayer dvd://1 \-dvdangle 2
 .PP
 .B Play from a different DVD device:
 .nf
-mplayer dvd://1 \-dvd-device /dev/\:dvd2
+mplayer dvd://1 \-dvd\-device /dev/\:dvd2
 .fi
 .
 .PP
 .B Play DVD video from a directory with VOB files:
 .nf
-mplayer dvd://1 \-dvd-device /path/\:to/\:directory/
+mplayer dvd://1 \-dvd\-device /path/\:to/\:directory/
 .fi
 .
 .PP
