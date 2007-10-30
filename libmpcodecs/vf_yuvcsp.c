@@ -63,9 +63,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 //===========================================================================//
 
+/*
 static void uninit(struct vf_instance_s* vf){
 	free(vf->priv);
 }
+*/
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     switch(fmt){
