@@ -192,9 +192,9 @@ Option descriptions:
     - Put examples and notes at the end of the description (before suboptions).
     - The end of the suboptions _always_ has to be followed by a paragraph
       (BUG).
-    - For flag options just document the non-default one of -XXX and -noXXX, if
-      the option is not a flag, describe both, one below the other (this is an
-      exception to the alphabetical order).
+    - For flag options just document the non-default one of \-XXX and \-noXXX.
+      If the option is not a flag, describe both, one below the other (this is
+      an exception to the alphabetical order).
 
 
 Macro definitions (see beginning of man page):
@@ -273,7 +273,7 @@ Options, suboptions, examples structure:
       .I EXAMPLE:
       .PD 0
       .RSs
-      .IP "-option used parameters"
+      .IP "\-option used parameters"
       description
       [...]
       .RE
