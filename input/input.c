@@ -757,7 +757,7 @@ mp_input_parse_cmd(char* str) {
     while(ptr[0] != ' ' && ptr[0] != '\t' && ptr[0] != '\0') ptr++;
     if(ptr[0] == '\0') break;
     while(ptr[0] == ' ' || ptr[0] == '\t') ptr++;
-    if(ptr[0] == '\0') break;
+    if(ptr[0] == '\0' || ptr[0] == '#') break;
     cmd->args[i].type = cmd_def->args[i].type;
     switch(cmd_def->args[i].type) {
     case MP_CMD_ARG_INT:
