@@ -664,13 +664,6 @@ may want to put them in your config file.
 
 <note>
 <para>
-On Windows the runtime CPU detection disables SSE support
-because of recurring and hard-to-trace SSE-related crashes. If you
-wish to have SSE support under Windows, you will have to compile without
-runtime CPU-detection.
-</para>
-
-<para>
 If you have a Pentium 4 and are experiencing a crash using the
 RealPlayer codecs, you may need to disable hyperthreading support.
 </para>
