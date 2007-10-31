@@ -535,7 +535,7 @@ flip=yes
 # start with mf://filemask
 mf=type=png:fps=25
 # Eerie negative images are cool.
-vf=eq2=1.0:-0.8
+vf=eq2=1.0:\-0.8
 .fi
 .PP
 .I "EXAMPLE MENCODER CONFIGURATION FILE:"
@@ -639,7 +639,7 @@ variable, see its description below for details.
 Available levels:
 .PD 0
 .RSs
-.IPs "-1"
+.IPs "\-1"
 complete silence
 .IPs " 0"
 fatal messages only
@@ -890,7 +890,7 @@ several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 .TP
 .B \-key\-fifo\-size <2\-65000>
 Specify the size of the FIFO that buffers key events (default: 7).
-A FIFO of size n can buffer (n-1) events.
+A FIFO of size n can buffer (n\-1) events.
 If it is too small some events may be lost
 (leading to "stuck mouse buttons" and similar effects).
 If it is too big, MPlayer may seem to hang while it
@@ -1378,7 +1378,7 @@ Useful if the original value is wrong or missing.
 Play/\:convert only first <number> frames, then quit.
 .
 .TP
-.B \-hr\-mp3-seek (MP3 only)
+.B \-hr\-mp3\-seek (MP3 only)
 Hi-res MP3 seeking.
 Enabled when playing from an external MP3 file, as we need to seek
 to the very exact position to keep A/V sync.
@@ -1400,7 +1400,7 @@ Skip rebuilding index file.
 MEncoder skips writing the index with this option.
 .
 .TP
-.B \-ipv4-only-proxy (network only)
+.B \-ipv4\-only\-proxy (network only)
 Skip the proxy for IPv6 addresses.
 It will still be used for IPv4 connections.
 .
@@ -1754,7 +1754,7 @@ Available options are:
 .RSs
 .IPs noaudio
 no sound
-.IPs "automute=<0-255> (v4l and v4l2 only)"
+.IPs "automute=<0\-255> (v4l and v4l2 only)"
 If signal strength reported by device is less than this value,
 audio and video will be muted.
 In most cases automute=100 will be enough.
@@ -1816,7 +1816,7 @@ beginning with 1.
 .br
 .I EXAMPLE:
 tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
-.IPs [brightness|contrast|hue|saturation]=<-100\-100>
+.IPs [brightness|contrast|hue|saturation]=<\-100\-100>
 Set the image equalizer on the card.
 .IPs audiorate=<value>
 Set audio capture bitrate.
@@ -1901,7 +1901,7 @@ Specify TV teletext display format (default: 0):
 .br
 3: transparent with inverted colors
 .REss
-.IPs tpage=<100-899>
+.IPs tpage=<100\-899>
 Specify initial TV teletext page number (default: 100).
 .IPs tlang=<\-1\-127>
 Specify default teletext language code (default: 0), which will be used
@@ -1940,11 +1940,11 @@ Available suboptions are:
 .RSs
 .IPs autostart
 Begin channel scanning immediately after startup (default: disabled).
-.IPs period=<0.1-2.0>
+.IPs period=<0.1\-2.0>
 Specify delay in seconds before switching to next channel (default: 0.5).
 Lower values will cause faster scanning, but can detect
 inactive TV channels as active.
-.IPs threshold=<1-100>
+.IPs threshold=<1\-100>
 Threshold value for the signal strength (in percent), as reported
 by the device (default: 50).
 A signal strength higher than this value will indicate that the
@@ -2027,7 +2027,7 @@ Set hinting type.
 .br
 3: Font native hinter.
 .br
-0-3 + 4: The same, but hinting will only be performed if OSD is rendered at
+0\-3 + 4: The same, but hinting will only be performed if OSD is rendered at
 screen resolution and, therefore, will not be scaled.
 .br
 The default value is 7 (use native hinter for unscaled OSD and no hinting otherwise).
@@ -2253,11 +2253,11 @@ uses swscaler gaussian blur (looks very good)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2>
+.B \-spualign <\-1\-2>
 Specify how SPU (DVD/\:VOBsub) subtitles should be aligned.
 .PD 0
 .RSs
-.IPs "-1"
+.IPs "\-1"
 original position
 .IPs " 0"
 Align at top (original behavior, default).
@@ -2779,12 +2779,12 @@ decorations.
 Supported by the directx video output driver.
 .
 .TP
-.B \-brightness <-100\-100>
+.B \-brightness <\-100\-100>
 Adjust the brightness of the video signal (default: 0).
 Not supported by all video output drivers.
 .
 .TP
-.B \-contrast <-100\-100>
+.B \-contrast <\-100\-100>
 Adjust the contrast of the video signal (default: 0).
 Not supported by all video output drivers.
 .
@@ -2878,7 +2878,7 @@ Update cached overlay settings.
 Enable overlay onscreen display.
 .IPs nool-osd
 Disable overlay onscreen display (default).
-.IPs ol[h|w|x|y]-cor=<-20\-20>
+.IPs ol[h|w|x|y]-cor=<\-20\-20>
 Adjust the overlay size (h,w) and position (x,y) in case it does not
 match the window perfectly (default: 0).
 .IPs overlay
@@ -2992,7 +2992,7 @@ of the video, which is useful to embed a mini-GUI in a browser (with the
 MPlayer plugin for instance).
 .
 .TP
-.B \-hue <-100\-100>
+.B \-hue <\-100\-100>
 Adjust the hue of the video signal (default: 0).
 You can get a colored negative of the image with this option.
 Not supported by all video output drivers.
@@ -3063,16 +3063,16 @@ Only works with the xv, xmga, mga, gl, gl2, quartz, macosx and xvidix
 video output drivers.
 .br
 .I NOTE:
-Values between -1 and 0 are allowed as well, but highly experimental
+Values between \-1 and 0 are allowed as well, but highly experimental
 and may crash or worse.
 Use at your own risk!
 .
 .TP
-.B \-panscanrange <-19.0\-99.0> (experimental)
+.B \-panscanrange <\-19.0\-99.0> (experimental)
 Change the range of the pan-and-scan functionality (default: 1).
 Positive values mean multiples of the default range.
 Negative numbers mean you can zoom in up to a factor of \-panscanrange+1.
-E.g. \-panscanrange -3 allows a zoom factor of up to 4.
+E.g. \-panscanrange \-3 allows a zoom factor of up to 4.
 This feature is experimental.
 Do not report bugs unless you are using \-vo gl.
 .
@@ -3088,7 +3088,7 @@ Desktop background images may cover the movie window, though.
 Only works with the x11, xv, xmga, xvidix, quartz, macosx and directx video output drivers.
 .
 .TP
-.B \-saturation <-100\-100>
+.B \-saturation <\-100\-100>
 Adjust the saturation of the video signal (default: 0).
 You can get grayscale output with this option.
 Not supported by all video output drivers.
@@ -3555,7 +3555,7 @@ Provides brightness, contrast, saturation, hue and gamma control.
 Gamma can also be set independently for red, green and blue.
 .br
 5: Use ATI-specific method (for older cards).
-This uses an ATI-specific extension (GL_ATI_fragment_shader - not
+This uses an ATI-specific extension (GL_ATI_fragment_shader \- not
 GL_ARB_fragment_shader!).
 At least three texture units are needed.
 Provides saturation and hue control.
@@ -3715,7 +3715,7 @@ like most MPEG movies are.
 You need to enable this option if you have tearing issues or unsmooth
 motions watching interlaced film material.
 .IPs layer=N
-Will force layer with ID N for playback (default: -1 - auto).
+Will force layer with ID N for playback (default: \-1 \- auto).
 .IPs dfbopts=<list>
 Specify a parameter list for DirectFB.
 .RE
@@ -4052,7 +4052,7 @@ Each file takes the frame number padded with leading zeros as name.
 24bpp RGB and BGR formats are supported.
 .PD 0
 .RSs
-.IPs z=<0-9>
+.IPs z=<0\-9>
 Specifies the compression level.
 0 is no compression, 9 is maximum compression.
 .RE
@@ -4102,7 +4102,7 @@ Try libmad first, then fall back on others.
 Try hardware AC-3 passthrough, software AC-3, then others.
 .IPs "\-ac hwdts,"
 Try hardware DTS passthrough, then fall back on others.
-.IPs "\-ac -ffmp3,"
+.IPs "\-ac \-ffmp3,"
 Skip FFmpeg's MP3 decoder.
 .RE
 .PD 1
@@ -4181,13 +4181,13 @@ incorrect or missing in the file being played.
 Disable automatic movie aspect ratio compensation.
 .
 .TP
-.B "\-field\-dominance <-1\-1>"
+.B "\-field\-dominance <\-1\-1>"
 Set first field for interlaced content.
 Useful for deinterlacers that double the framerate: \-vf tfields=1,
 \-vf yadif=1 and \-vo xvmc:bobdeint.
 .PD 0
 .RSs
-.IPs -1
+.IPs \-1
 auto (default): If the decoder does not export the appropriate information,
 it falls back to 0 (top field first).
 .IPs 0
@@ -4433,9 +4433,9 @@ Specifies software scaler parameters.
 gaussian blur filter (luma)
 .IPs cgb=<0\-100>
 gaussian blur filter (chroma)
-.IPs ls=<-100\-100>
+.IPs ls=<\-100\-100>
 sharpen filter (luma)
-.IPs cs=<-100\-100>
+.IPs cs=<\-100\-100>
 sharpen filter (chroma)
 .IPs chs=<h>
 chroma horizontal shifting
@@ -4515,7 +4515,7 @@ See \-vc help for a full list of available codecs.
 .RSs
 .IPs "\-vc divx"
 Force Win32/\:VfW DivX codec, no fallback.
-.IPs "\-vc -divxds,-divx,"
+.IPs "\-vc \-divxds,\-divx,"
 Skip Win32 DivX codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
 Try libavcodec's MPEG-1/2 codec, then libmpeg2, then others.
@@ -4687,7 +4687,7 @@ log2 of the number of polyphase entries
 (..., 10->1024, 11->2048, 12->4096, ...)
 (default: 10->1024)
 .IPs <cutoff>
-cutoff frequency (0.0-1.0), default set depending upon filter length
+cutoff frequency (0.0\-1.0), default set depending upon filter length
 .RE
 .PD 1
 .
@@ -4767,14 +4767,14 @@ using the resample filter before it reaches this filter.
 .RSs
 .IPs <g1>:<g2>:<g3>:...:<g10>
 floating point numbers representing the gain in dB
-for each frequency band (-12\-12)
+for each frequency band (\-12\-12)
 .RE
 .sp 1
 .RS
 .I EXAMPLE:
 .RE
 .RSs
-.IPs "mplayer \-af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi"
+.IPs "mplayer \-af equalizer=11:11:10:5:0:\-12:0:5:12:12 media.avi"
 Would amplify the sound in the upper and lower frequency region
 while canceling it almost completely around 1kHz.
 .RE
@@ -4863,7 +4863,7 @@ once for every audio stream.
 .RSs
 .IPs "<v>\ \ "
 Sets the desired gain in dB for all channels in the stream
-from -200dB to +60dB, where -200dB mutes the sound
+from \-200dB to +60dB, where \-200dB mutes the sound
 completely and +60dB equals a gain of 1000 (default: 0).
 .IPs "<sc>\ "
 Turns soft clipping on (1) or off (0).
@@ -5024,7 +5024,7 @@ There is no point in compensating for the subwoofer (you will not hear the
 difference anyway).
 .IP 2. 3
 Subtract the distances s1 to s5 from the maximum distance,
-i.e.\& s[i] = max(s) - s[i]; i = 1...5.
+i.e.\& s[i] = max(s) \- s[i]; i = 1...5.
 .IP 3.
 Calculate the required delays in ms as d[i] = 1000*s[i]/342; i = 1...5.
 .RE
@@ -5079,7 +5079,7 @@ which adds some sort of "live" effect to playback.
 .IPs <mul>
 Sets the difference coefficient (default: 2.5).
 0.0 means mono sound (average of both channels), with 1.0 sound will be
-unchanged, with -1.0 left and right channels will be swapped.
+unchanged, with \-1.0 left and right channels will be swapped.
 .RE
 .PD 1
 .
@@ -5159,7 +5159,7 @@ The syntax is:
 Setup a chain of video filters.
 .PP
 Many parameters are optional and set to default values if omitted.
-To explicitly use a default value set a parameter to '-1'.
+To explicitly use a default value set a parameter to '\-1'.
 Parameters w:h means width x height in pixels, x:y means x;y position counted
 from the upper left corner of the bigger image.
 .br
@@ -5181,7 +5181,7 @@ Prepends the filters given as arguments to the filter list.
 .B \-vf\-del <index1[,index2,...]>
 Deletes the filters at the given indexes.
 Index numbers start at 0, negative numbers address the end of the
-list (-1 is the last).
+list (\-1 is the last).
 .
 .TP
 .B \-vf\-clr
@@ -5239,10 +5239,10 @@ that takes two parameters.
 .PD 0
 .RSs
 .IPs <w>,<h>
-width and height (default: -1, maximum possible width where boundaries
+width and height (default: \-1, maximum possible width where boundaries
 are still visible.)
 .IPs <x>,<y>
-top left corner position (default: -1, uppermost leftmost)
+top left corner position (default: \-1, uppermost leftmost)
 .RE
 .PD 1
 .
@@ -5259,7 +5259,7 @@ Negative values for w and h are treated as offsets to the original size.
 .I EXAMPLE:
 .PD 0
 .RSs
-.IP expand=0:-50:0:0
+.IP expand=0:\-50:0:0
 Adds a 50 pixel border to the bottom of the picture.
 .RE
 .PD 1
@@ -5325,11 +5325,11 @@ incapable of scaling, it defaults to d_width/\:d_height!
 .RSss
  0:   scaled d_width/\:d_height
 .br
--1:   original width/\:height
+\-1:   original width/\:height
 .br
--2:   Calculate w/h using the other dimension and the prescaled aspect ratio.
+\-2:   Calculate w/h using the other dimension and the prescaled aspect ratio.
 .br
--3:   Calculate w/h using the other dimension and the original aspect ratio.
+\-3:   Calculate w/h using the other dimension and the original aspect ratio.
 .br
 -(n+8): Like -n above, but rounding the dimension to the closest multiple of 16.
 .REss
@@ -5425,26 +5425,26 @@ Can also be these special values:
 .RSss
  0:   original display width and height
 .br
--1:   original video width and height (default)
+\-1:   original video width and height (default)
 .br
--2:   Calculate w/h using the other dimension and the original display
+\-2:   Calculate w/h using the other dimension and the original display
 aspect ratio.
 .br
--3:   Calculate w/h using the other dimension and the original video
+\-3:   Calculate w/h using the other dimension and the original video
 aspect ratio.
 .REss
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
-.IP dsize=800:-2
+.IP dsize=800:\-2
 Specifies a display resolution of 800x600 for a 4/3 aspect video, or
 800x450 for a 16/9 aspect video.
 .RE
 .IPs <aspect-method>
 Modifies width and height according to original aspect ratios.
 .RSss
--1: Ignore original aspect ratio (default).
+\-1: Ignore original aspect ratio (default).
 .br
  0: Keep display aspect ratio by using <w> and <h> as maximum
 resolution.
@@ -5633,10 +5633,10 @@ Median deinterlacing filter that deinterlaces the given block
 by applying a median filter to every second line.
 .IPs fd/ffmpegdeint
 FFmpeg deinterlacing filter that deinterlaces the given block
-by filtering every second line with a (-1 4 2 4 -1) filter.
+by filtering every second line with a (\-1 4 2 4 \-1) filter.
 .IPs l5/lowpass5
 Vertically applied FIR lowpass deinterlacing filter that deinterlaces
-the given block by filtering all lines with a (-1 2 6 2 -1) filter.
+the given block by filtering all lines with a (\-1 2 6 2 \-1) filter.
 .IPs fq/forceQuant[:quantizer]
 Overrides the quantizer table from the input with the constant
 quantizer you specify.
@@ -5712,7 +5712,7 @@ faster version of the simple postprocessing filter
 4\-5 (equivalent to spp; default: 4)
 .IPs "<qp>\ "
 Force quantization parameter (default: 0, use QP from video).
-.IPs <-15\-32>
+.IPs <\-15\-32>
 Filter strength, lower values mean more details but also more artifacts,
 while higher values make the image smoother but also blurrier (default:
 0 \- PSNR optimal).
@@ -5806,7 +5806,7 @@ Control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
 .RE
 .PD 0
 .RSs
-.IPs "\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc"
+.IPs "\-vf dvbscale,scale=\-1:0,expand=\-1:576:\-1:\-1:1,lavc"
 FIXME: Explain what this does.
 .RE
 .PD 1
@@ -5880,9 +5880,9 @@ movies, or for slightly reducing contrast to mask artifacts and get by
 with lower bitrates.
 .PD 0
 .RSs
-.IPs <-100\-100>
+.IPs <\-100\-100>
 initial brightness
-.IPs <-100\-100>
+.IPs <\-100\-100>
 initial contrast
 .RE
 .PD 1
@@ -5899,10 +5899,10 @@ The parameters are given as floating point values.
 .RSs
 .IPs <0.1\-10>
 initial gamma value (default: 1.0)
-.IPs <-2\-2>
+.IPs <\-2\-2>
 initial contrast, where negative values result in a
 negative image (default: 1.0)
-.IPs <-1\-1>
+.IPs <\-1\-1>
 initial brightness (default: 0.0)
 .IPs <0\-3>
 initial saturation (default: 1.0)
@@ -5928,9 +5928,9 @@ equalizer, for cards/\:drivers that do not support hue and
 saturation controls in hardware.
 .PD 0
 .RSs
-.IPs <-180\-180>
+.IPs <\-180\-180>
 initial hue (default: 0.0)
-.IPs <-100\-100>
+.IPs <\-100\-100>
 initial saturation, where negative values result
 in a negative chroma (default: 1.0)
 .RE
@@ -6088,7 +6088,7 @@ width and height of the matrix, odd sized in both directions
 (min = 3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
 .IPs amount
 Relative amount of sharpness/\:blur to add to the image
-(a sane range should be -1.5\-1.5).
+(a sane range should be \-1.5\-1.5).
 .RSss
 <0: blur
 .br
@@ -6186,7 +6186,7 @@ Analysis mode.
 Set initial frame number in sequence.
 0\-2 are the three clean progressive frames; 3 and 4 are the two
 interlaced frames.
-The default, -1, means 'not in telecine sequence'.
+The default, \-1, means 'not in telecine sequence'.
 The number specified here is the type for the imaginary previous
 frame before the movie starts.
 .IPs "<t0>, <t1>, <t2>, <t3>"
@@ -6232,7 +6232,7 @@ Setting this option to 1 will reduce the chances of
 pullup generating an occasional mismatched frame, but it may also
 cause an excessive number of frames to be dropped during high motion
 sequences.
-Conversely, setting it to -1 will make pullup match fields more
+Conversely, setting it to \-1 will make pullup match fields more
 easily.
 This may help processing of video where there is slight blurring
 between the fields, but may also cause there to be interlaced frames
@@ -6396,7 +6396,7 @@ to fix the possible juddering at the beginning.
 The first pass of the two pass mode also uses this, so if you save the output
 from the first pass, you get constant phase result.
 .IPs deghost=<value>
-Set the deghosting threshold (0\-255 for one pass mode, -255\-255 for two pass
+Set the deghosting threshold (0\-255 for one pass mode, \-255\-255 for two pass
 mode, default 0).
 If nonzero, deghosting mode is used.
 This is for video that has been deinterlaced by blending the fields
@@ -6511,7 +6511,7 @@ desired (double) framerate!
 .br
 4: Translate fields by 1/4 pixel with 4tap filter (higher quality) (default).
 .IPs <field_dominance>\ (DEPRECATED)
--1: auto (default)
+\-1: auto (default)
 Only works if the decoder exports the appropriate information and
 no other filters which discard that information come before tfields
 in the filter chain, otherwise it falls back to 0 (top field first).
@@ -6605,9 +6605,9 @@ smart blur
 .IPs <radius>
 blur filter strength (~0.1\-5.0) (slower if larger)
 .IPs <strength>
-blur (0.0\-1.0) or sharpen (-1.0\-0.0)
+blur (0.0\-1.0) or sharpen (\-1.0\-0.0)
 .IPs <threshold>
-filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
+filter all (0), filter flat areas (0\-30) or filter edges (\-30\-0)
 .RE
 .PD 1
 .
@@ -6698,14 +6698,14 @@ image/area size
 Start blitting at position x/y.
 .IPs <alpha>
 Set alpha difference.
-If you set this to -255 you can then send a sequence of ALPHA-commands to set
-the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
+If you set this to \-255 you can then send a sequence of ALPHA-commands to set
+the area to \-225, \-200, \-175 etc for a nice fade-in-effect! ;)
 .RSss
 0:    same as original
 .br
 255:  Make everything opaque.
 .br
--255: Make everything transparent.
+\-255: Make everything transparent.
 .REss
 .IPs <clear>
 Clear the framebuffer before blitting.
@@ -6786,7 +6786,7 @@ top left corner of the logo
 width and height of the cleared rectangle
 .IPs <t>
 Thickness of the fuzzy edge of the rectangle (added to w and h).
-When set to -1, a green rectangle is drawn on the screen to
+When set to \-1, a green rectangle is drawn on the screen to
 simplify finding the right x,y,w,h parameters.
 .RE
 .PD 1
@@ -6840,7 +6840,7 @@ commands that can be bound to keypresses.
 See the slave mode documentation and the INTERACTIVE CONTROL
 section for details.
 Files named 'shotNNNN.png' will be saved in the working directory,
-using the first available number - no files will be overwritten.
+using the first available number \- no files will be overwritten.
 The filter has no overhead when not used and accepts an arbitrary
 colorspace, so it is safe to add it to the configuration file.
 .RE
@@ -6886,7 +6886,7 @@ see the delay field and compensate accordingly.
 Positive values delay the audio, and negative values delay the video.
 Note that this is the exact opposite of the \-delay option.
 For example, if a video plays correctly with \-delay 0.2, you can
-fix the video with MEncoder by using \-audio\-delay -0.2.
+fix the video with MEncoder by using \-audio\-delay \-0.2.
 .sp 1
 Currently, this option only works with the default muxer (\-of avi).
 If you are using a different muxer, then you must use \-delay instead.
@@ -7205,14 +7205,14 @@ This results in slightly lower quality and higher bitrates.
 .B highpassfreq=<freq>
 Set a highpass filtering frequency in Hz.
 Frequencies below the specified one will be cut off.
-A value of -1 will disable filtering, a value of 0
+A value of \-1 will disable filtering, a value of 0
 will let LAME choose values automatically.
 .
 .TP
 .B lowpassfreq=<freq>
 Set a lowpass filtering frequency in Hz.
 Frequencies above the specified one will be cut off.
-A value of -1 will disable filtering, a value of 0
+A value of \-1 will disable filtering, a value of 0
 will let LAME choose values automatically.
 .
 .TP
@@ -7259,7 +7259,7 @@ when in VBR mode it is the minimum bitrate allowed per frame.
 VBR mode will not work with a value below 112.
 .
 .TP
-.B vbr=<-50\-50> (VBR only)
+.B vbr=<\-50\-50> (VBR only)
 variability range; if negative the encoder shifts the average bitrate
 towards the lower limit, if positive towards the higher.
 When set to 0 CBR is used (default).
@@ -7273,7 +7273,7 @@ maximum bitrate allowed per frame, in kbps
 (default: mono for 1-channel audio, stereo otherwise)
 .
 .TP
-.B psy=<-1\-4>
+.B psy=<\-1\-4>
 psychoacoustic model (default: 2)
 .
 .TP
@@ -7355,7 +7355,7 @@ audio codec (default: mp2)
 .IPs "ac3\ \ "
 Dolby Digital (AC-3)
 .IPs adpcm_*
-Adaptive PCM formats - see the HTML documentation for details.
+Adaptive PCM formats \- see the HTML documentation for details.
 .IPs "flac\ "
 Free Lossless Audio Codec (FLAC)
 .IPs "g726\ "
@@ -7365,13 +7365,13 @@ G.726 ADPCM
 .IPs libamr_wb
 3GPP Adaptive Multi-Rate (AMR) wide-band
 .IPs libfaac
-Advanced Audio Coding (AAC) - using FAAC
+Advanced Audio Coding (AAC) \- using FAAC
 .IPs libmp3lame
-MPEG-1 audio layer 3 (MP3) - using LAME
+MPEG-1 audio layer 3 (MP3) \- using LAME
 .IPs "mp2\ \ "
 MPEG-1 audio layer 2 (MP2)
 .IPs pcm_*
-PCM formats - see the HTML documentation for details.
+PCM formats \- see the HTML documentation for details.
 .IPs roq_dpcm
 Id Software RoQ DPCM
 .IPs sonic
@@ -7522,7 +7522,7 @@ Maximum macroblock-level Lagrange multiplier for ratecontrol
 .TP
 .B vqscale=<0\-31>
 Constant quantizer /\: constant quality encoding (selects fixed quantizer mode).
-A lower value means better quality but larger files (default: -1).
+A lower value means better quality but larger files (default: \-1).
 In case of snow codec, value 0 means lossless encoding.
 Since the other codecs do not support this, vqscale=0 will have an undefined
 effect.
@@ -7633,7 +7633,7 @@ loop filter (H.263+)
 note, this is broken
 .
 .TP
-.B inter_threshold <-1000\-1000>
+.B inter_threshold <\-1000\-1000>
 Does absolutely nothing at the moment.
 .
 .TP
@@ -7642,7 +7642,7 @@ maximum interval between keyframes in frames (default: 250 or one
 keyframe every ten seconds in a 25fps movie.
 This is the recommended default for MPEG-4).
 Most codecs require regular keyframes in order to limit the accumulation of mismatch error.
-Keyframes are also needed for seeking, as seeking is only possible to a keyframe - but
+Keyframes are also needed for seeking, as seeking is only possible to a keyframe \- but
 keyframes need more space than other frames, so larger numbers here mean
 slightly smaller files but less precise seeking.
 0 is equivalent to 1, which makes every frame a keyframe.
@@ -7651,11 +7651,11 @@ decoder, encoder and luck.
 It is a common for MPEG-1/2 to use values <=30.
 .
 .TP
-.B sc_threshold=<-1000000000\-1000000000>
+.B sc_threshold=<\-1000000000\-1000000000>
 Threshold for scene change detection.
 A keyframe is inserted by libavcodec when it detects a scene change.
 You can specify the sensitivity of the detection with this option.
--1000000000 means there is a scene change detected at every frame,
+\-1000000000 means there is a scene change detected at every frame,
 1000000000 means no scene changes are detected (default: 0).
 .
 .TP
@@ -7869,19 +7869,19 @@ with support for Xvid 1.1 or higher).
 .PD 1
 .
 .TP
-.B vb_qfactor=<-31.0\-31.0>
+.B vb_qfactor=<\-31.0\-31.0>
 quantizer factor between B- and non-B-frames (pass 1/2) (default: 1.25)
 .
 .TP
-.B vi_qfactor=<-31.0\-31.0>
+.B vi_qfactor=<\-31.0\-31.0>
 quantizer factor between I- and non-I-frames (pass 1/2) (default: 0.8)
 .
 .TP
-.B vb_qoffset=<-31.0\-31.0>
+.B vb_qoffset=<\-31.0\-31.0>
 quantizer offset between B- and non-B-frames (pass 1/2) (default: 1.25)
 .
 .TP
-.B vi_qoffset=<-31.0\-31.0>
+.B vi_qoffset=<\-31.0\-31.0>
 (pass 1/2) (default: 0.0)
 .br
 if v{b|i}_qfactor > 0
@@ -8010,7 +8010,7 @@ The options are <start-frame>, <end-frame>, <quality>[/<start-frame>,
 .RSs
 .IPs "quality (2\-31)"
 quantizer
-.IPs "quality (-500\-0)"
+.IPs "quality (\-500\-0)"
 quality correction in %
 .RE
 .PD 1
@@ -8036,23 +8036,23 @@ Use a nice differentiable function (default).
 .PD 1
 .
 .TP
-.B vlelim=<-1000\-1000>
+.B vlelim=<\-1000\-1000>
 Sets single coefficient elimination threshold for luminance.
-Negative values will also consider the DC coefficient (should be at least -4
+Negative values will also consider the DC coefficient (should be at least \-4
 or lower for encoding at quant=1):
 .PD 0
 .RSs
 .IPs 0
 disabled (default)
-.IPs -4
+.IPs \-4
 JVT recommendation
 .RE
 .PD 1
 .
 .TP
-.B vcelim=<-1000\-1000>
+.B vcelim=<\-1000\-1000>
 Sets single coefficient elimination threshold for chrominance.
-Negative values will also consider the DC coefficient (should be at least -4
+Negative values will also consider the DC coefficient (should be at least \-4
 or lower for encoding at quant=1):
 .PD 0
 .RSs
@@ -8064,7 +8064,7 @@ JVT recommendation
 .PD 1
 .
 .TP
-.B vstrict=<-2|-1|0|1>
+.B vstrict=<\-2|\-1|0|1>
 strict standard compliance
 .PD 0
 .RSs
@@ -8073,9 +8073,9 @@ disabled
 .IPs 1
 Only recommended if you want to feed the output into the
 MPEG-4 reference decoder.
-.IPs -1
+.IPs \-1
 Allow libavcodec specific extensions (default).
-.IPs -2
+.IPs \-2
 Enables experimental codecs and features which may not be playable
 with future MPlayer versions (snow).
 .RE
@@ -8323,10 +8323,10 @@ Use interlaced motion estimation (mutually exclusive with qpel).
 Use alternative scantable.
 .
 .TP
-.B "top=<-1\-1>\ \ \ "
+.B "top=<\-1\-1>\ \ \ "
 .PD 0
 .RSs
-.IPs -1
+.IPs \-1
 automatic
 .IPs 0
 bottom field first
@@ -8499,11 +8499,11 @@ You may find this useful if you prefer to keep some noise in your encoded
 video rather than filtering it away before encoding (default: 8).
 .
 .TP
-.B predia=<-99\-6>
+.B predia=<\-99\-6>
 diamond type and size for motion estimation pre-pass
 .
 .TP
-.B dia=<-99\-6>
+.B dia=<\-99\-6>
 Diamond type & size for motion estimation.
 Motion search is an iterative process.
 Using a small diamond does not limit the search to finding only small
@@ -8521,11 +8521,11 @@ Shape-adaptive diamonds are a good tradeoff between speed and quality.
 The sizes of the normal diamonds and shape adaptive ones do not have
 the same meaning.
 .RSs
-.IPs -3
+.IPs \-3
 shape adaptive (fast) diamond with size 3
-.IPs -2
+.IPs \-2
 shape adaptive (fast) diamond with size 2
-.IPs -1
+.IPs \-1
 uneven multi-hexagon search (slow)
 .IPs  1
 normal size=1 diamond (default) =EPZS type diamond
@@ -8665,7 +8665,7 @@ unlimited MVs (H.263+ only)
 Allows encoding of arbitrarily long MVs.
 .
 .TP
-.B ibias=<-256\-256>
+.B ibias=<\-256\-256>
 intra quantizer bias (256 equals 1.0, MPEG style quantizer default: 96,
 H.263 style quantizer default: 0)
 .br
@@ -8674,16 +8674,16 @@ The H.263 MMX quantizer cannot handle positive biases (set vfdct=1 or 2),
 the MPEG MMX quantizer cannot handle negative biases (set vfdct=1 or 2).
 .
 .TP
-.B pbias=<-256\-256>
+.B pbias=<\-256\-256>
 inter quantizer bias (256 equals 1.0, MPEG style quantizer default: 0,
-H.263 style quantizer default: -64)
+H.263 style quantizer default: \-64)
 .br
 .I NOTE:
 The H.263 MMX quantizer cannot handle positive biases (set vfdct=1 or 2),
 the MPEG MMX quantizer cannot handle negative biases (set vfdct=1 or 2).
 .br
 .I HINT:
-A more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR.
+A more positive bias (\-32 \- \-16 instead of \-64) seems to improve the PSNR.
 .
 .TP
 .B nr=<0\-100000>
@@ -9089,11 +9089,11 @@ Maximum number of B-frames to put between I/P-frames (default: 2).
 quantizer ratio between B- and non-B-frames, 150=1.50 (default: 150)
 .
 .TP
-.B bquant_offset=<-1000\-1000>
+.B bquant_offset=<\-1000\-1000>
 quantizer offset between B- and non-B-frames, 100=1.00 (default: 100)
 .
 .TP
-.B bf_threshold=<-255\-255>
+.B bf_threshold=<\-255\-255>
 This setting allows you to specify what priority to place on the use of
 B-frames.
 The higher the value, the higher the probability of B-frames being used
@@ -9477,13 +9477,13 @@ IDR-frames restrict subsequent P-frames from referring to any frame
 prior to the IDR-frame.
 .
 .TP
-.B scenecut=<-1\-100>
+.B scenecut=<\-1\-100>
 Controls how aggressively to insert extra I-frames (default: 40).
 With small values of scenecut, the codec often has to force an I-frame
 when it would exceed keyint.
 Good values of scenecut may find a better location for the I-frame.
 Large values use more I-frames than necessary, thus wasting bits.
--1 disables scene-cut detection, so I-frames are inserted only once
+\-1 disables scene-cut detection, so I-frames are inserted only once
 every other keyint frames, even if a scene-cut occurs earlier.
 This is not recommended and wastes bitrate as scenecuts encoded as P-frames
 are just as big as I-frames, but do not reset the "keyint counter".
@@ -9508,7 +9508,7 @@ specified above (default: on).
 If this option is disabled, then the maximum number of B-frames is used.
 .
 .TP
-.B b_bias=<-100\-100>
+.B b_bias=<\-100\-100>
 Controls the decision performed by b_adapt.
 A higher b_bias produces more B-frames (default: 0).
 .
@@ -9536,7 +9536,7 @@ As it takes very little time compared to its quality gain, it is not
 recommended to disable it.
 .
 .TP
-.B deblock=<-6\-6>,<-6\-6>
+.B deblock=<\-6\-6>,<\-6\-6>
 The first parameter is AlphaC0 (default: 0).
 This adjusts thresholds for the H.264 in-loop deblocking filter.
 First, this parameter adjusts the maximum amount of change that the filter is
@@ -9558,7 +9558,7 @@ you would like to remove, it may be a good idea to turn it up a little bit.
 .TP
 .B (no)cabac
 Use CABAC (Context-Adaptive Binary Arithmetic Coding) (default: on).
-Slightly slows down encoding and decoding, but should save 10-15% bitrate.
+Slightly slows down encoding and decoding, but should save 10\-15% bitrate.
 Unless you are looking for decoding speed, you should not disable it.
 .
 .TP
@@ -9856,9 +9856,9 @@ Given its small impact on speed, you might want to prefer to use this over
 filtering noise away with video filters like denoise3d or hqdn3d.
 .
 .TP
-.B chroma_qp_offset=<-12\-12>
+.B chroma_qp_offset=<\-12\-12>
 Use a different quantizer for chroma as compared to luma.
-Useful values are in the range <-2\-2> (default: 0).
+Useful values are in the range <\-2\-2> (default: 0).
 .
 .TP
 .B cqm=<flat|jvt|<filename>>
@@ -9916,7 +9916,7 @@ values in the 1\-255 range.
 .TP
 .B level_idc=<10\-51>
 Set the bitstream's level as defined by annex A of the H.264 standard
-(default: 51 - Level 5.1).
+(default: 51 \- level 5.1).
 This is used for telling the decoder what capabilities it needs to support.
 Use this parameter only if you know what it means,
 and you have a need to set it.
@@ -9940,11 +9940,11 @@ The default behavior causes SPS and PPS to repeat prior to each IDR frame.
 Treat the video content as interlaced.
 .
 .TP
-.B log=<-1\-3>
+.B log=<\-1\-3>
 Adjust the amount of logging info printed to the screen.
 .PD 0
 .RSs
-.IPs "-1"
+.IPs "\-1"
 none
 .IPs " 0"
 Print errors only.
@@ -10550,13 +10550,13 @@ mplayer dvd://1 \-alang ja \-slang en
 .PP
 .B Play only chapters 5, 6, 7:
 .nf
-mplayer dvd://1 \-chapter 5-7
+mplayer dvd://1 \-chapter 5\-7
 .fi
 .
 .PP
 .B Play only titles 5, 6, 7:
 .nf
-mplayer dvd://5-7
+mplayer dvd://5\-7
 .fi
 .
 .PP
@@ -10637,7 +10637,7 @@ increase volume or avoid clipping.
 .PP
 .B checkerboard invert with geq filter:
 .nf
-mplayer \-vf geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+mplayer \-vf geq='128+(p(X\,Y)\-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
 .fi
 .
 .
@@ -10646,7 +10646,7 @@ mplayer \-vf geq='128+(p(X\,Y)-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/S
 .PP
 .B Encode DVD title #2, only selected chapters:
 .nf
-mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+mencoder dvd://2 \-chapter 10\-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .fi
 .
 .PP
