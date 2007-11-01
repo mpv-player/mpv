@@ -6725,6 +6725,7 @@ if bsd; then
             "dev/ic/bt8xx.h" ; do
     cat > $TMPC <<EOF
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <$file>
 int main(void) {
  ioctl(0, TVTUNER_GETFREQ, 0);
