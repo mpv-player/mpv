@@ -261,6 +261,11 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     offset_in += fill_queue(af, data, offset_in);
   }
 
+  // This filter can have a negative delay when scale > 1:
+  // output corresponding to some length of input can be decided and written
+  // after receiving only a part of that input.
+  af->delay = s->bytes_queued - s->bytes_to_slide;
+
   data->audio = af->data->audio;
   data->len   = pout - (int8_t *)af->data->audio;
   return data;

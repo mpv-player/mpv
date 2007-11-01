@@ -542,7 +542,7 @@ double af_calc_filter_multiplier(af_stream_t* s)
   return mul;
 }
 
-/* Calculate the total delay [ms] caused by the filters */
+/* Calculate the total delay [bytes output] caused by the filters */
 double af_calc_delay(af_stream_t* s)
 {
   af_instance_t* af=s->first; 
@@ -550,6 +550,7 @@ double af_calc_delay(af_stream_t* s)
   // Iterate through all filters 
   while(af){
     delay += af->delay;
+    delay *= af->mul;
     af=af->next;
   }
   return delay;

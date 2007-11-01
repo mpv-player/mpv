@@ -1589,9 +1589,16 @@ static double written_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio)
     // Decoded but not filtered
     a_pts -= sh_audio->a_buffer_len / (double)sh_audio->o_bps;
 
+    // Data buffered in audio filters, measured in bytes of "missing" output
+    double buffered_output = af_calc_delay(sh_audio->afilter);
+
     // Data that was ready for ao but was buffered because ao didn't fully
     // accept everything to internal buffers yet
-    a_pts -= sh_audio->a_out_buffer_len * playback_speed / (double)ao_data.bps;
+    buffered_output += sh_audio->a_out_buffer_len;
+
+    // Filters divide audio length by playback_speed, so multiply by it
+    // to get the length in original units without speedup or slowdown
+    a_pts -= buffered_output * playback_speed / ao_data.bps;
 
     return a_pts;
 }

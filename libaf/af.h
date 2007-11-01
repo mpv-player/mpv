@@ -54,7 +54,8 @@ typedef struct af_instance_s
   af_data_t* data; // configuration for outgoing data stream
   struct af_instance_s* next;
   struct af_instance_s* prev;  
-  double delay; // Delay caused by the filter [ms]
+  double delay; /* Delay caused by the filter, in units of bytes read without
+		 * corresponding output */
   double mul; /* length multiplier: how much does this instance change
 		 the length of the buffer. */
 }af_instance_t;
@@ -196,7 +197,7 @@ double af_calc_filter_multiplier(af_stream_t* s);
 
 /**
  * \brief Calculate the total delay caused by the filters
- * \return delay in seconds
+ * \return delay in bytes of "missing" output
  */
 double af_calc_delay(af_stream_t* s);
 

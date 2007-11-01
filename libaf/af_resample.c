@@ -254,7 +254,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
 
     // Set multiplier and delay
-    af->delay = (double)(1000*L/2)/((double)n->rate);
+    af->delay = 0; // not set correctly, but shouldn't be too large anyway
     af->mul = (double)s->up / s->dn;
     return rv;
   }

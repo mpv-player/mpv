@@ -48,7 +48,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->format = AF_FORMAT_S16_NE;
     af->data->bps    = 2;
     af->mul = (double)af->data->rate / data->rate;
-    af->delay = 500*s->filter_length/(double)min(af->data->rate, data->rate);
+    af->delay = af->data->nch * s->filter_length / min(af->mul, 1); // *bps*.5
 
     if(s->avrctx) av_resample_close(s->avrctx);
     s->avrctx= av_resample_init(af->data->rate, /*in_rate*/data->rate, s->filter_length, s->phase_shift, s->linear, s->cutoff);

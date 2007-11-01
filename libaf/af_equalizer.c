@@ -106,7 +106,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       bp2(s->a[k],s->b[k],F[k]/((float)af->data->rate),Q);
 
     // Calculate how much this plugin adds to the overall time delay
-    af->delay += 2000.0/((float)af->data->rate);
+    af->delay = 2 * af->data->nch * af->data->bps;
     
     // Calculate gain factor to prevent clipping at output
     for(k=0;k<AF_NCH;k++)
