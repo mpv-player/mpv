@@ -434,7 +434,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     *(float*)arg = s->scale;
     return AF_OK;
   case AF_CONTROL_COMMAND_LINE:{
-    strarg_t speed;
+    strarg_t speed = {};
     opt_t subopts[] = {
       {"scale",   OPT_ARG_FLOAT, &s->scale_nominal, NULL},
       {"stride",  OPT_ARG_FLOAT, &s->ms_stride, NULL},
