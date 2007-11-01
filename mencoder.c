@@ -914,10 +914,9 @@ mux_a->codec=out_audio_codec;
 ao_data.samplerate = force_srate;
 ao_data.channels = 0;
 ao_data.format = audio_output_format;
-if(!preinit_audio_filters(sh_audio,
+if(!init_audio_filters(sh_audio,
    // input:
    new_srate,
-   sh_audio->channels, sh_audio->sample_format,
    // output:
    &ao_data.samplerate, &ao_data.channels, &ao_data.format)) {
      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
@@ -932,9 +931,8 @@ if(mux_a->codec != ACODEC_COPY) {
     if(!aencoder)
         mencoder_exit(1, NULL);
     if(!init_audio_filters(sh_audio, 
-        new_srate, sh_audio->channels, sh_audio->sample_format,  
-        &aparams.sample_rate, &aparams.channels, &aencoder->input_format, 
-        aencoder->min_buffer_size, aencoder->max_buffer_size)) {
+        new_srate,
+        &aparams.sample_rate, &aparams.channels, &aencoder->input_format)) {
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_NoMatchingFilter);
       mencoder_exit(1,NULL);
     }
@@ -1031,11 +1029,9 @@ else {
 		int out_srate = mux_a->wf->nSamplesPerSec;
 		int out_channels = mux_a->wf->nChannels;
 		int out_format = aencoder->input_format;
-		int out_minsize = aencoder->min_buffer_size;
-		int out_maxsize = aencoder->max_buffer_size;
-		if (!init_audio_filters(sh_audio, new_srate, sh_audio->channels,
-					sh_audio->sample_format, &out_srate, &out_channels,
-					&out_format, out_minsize, out_maxsize)) {
+		if (!init_audio_filters(sh_audio, new_srate,
+					&out_srate, &out_channels,
+					&out_format)) {
 			mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoMatchingFilter);
 			mencoder_exit(1, NULL);
 		}

@@ -313,19 +313,8 @@ void uninit_audio(sh_audio_t *sh_audio)
 }
 
 
-int preinit_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
-			  int in_channels, int in_format, int *out_samplerate,
-			  int *out_channels, int *out_format)
-{
-    return init_audio_filters(sh_audio, in_samplerate, in_channels, in_format,
-			      out_samplerate, out_channels, out_format, 0, 0);
-}
-
-
 int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
-		       int in_channels, int in_format, int *out_samplerate,
-		       int *out_channels, int *out_format,
-		       int out_minsize, int out_maxsize)
+		       int *out_samplerate, int *out_channels, int *out_format)
 {
     af_stream_t *afs = sh_audio->afilter;
     if (!afs) {
@@ -334,8 +323,8 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     }
     // input format: same as codec's output format:
     afs->input.rate   = in_samplerate;
-    afs->input.nch    = in_channels;
-    afs->input.format = in_format;
+    afs->input.nch    = sh_audio->channels;
+    afs->input.format = sh_audio->sample_format;
     af_fix_parameters(&(afs->input));
 
     // output format: same as ao driver's input format (if missing, fallback to input)

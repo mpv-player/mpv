@@ -1213,9 +1213,7 @@ int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
     playback_speed = (float)new_srate / (float)sh_audio->samplerate;
   }
   result =  init_audio_filters(sh_audio, new_srate,
-           sh_audio->channels, sh_audio->sample_format,
-           &ao_data->samplerate, &ao_data->channels, &ao_data->format,
-           ao_data->outburst * 4, ao_data->buffersize);
+           &ao_data->samplerate, &ao_data->channels, &ao_data->format);
   mpctx->mixer.afilter = sh_audio->afilter;
 #ifdef HAVE_NEW_GUI
   if (use_gui) guiGetEvent(guiSetAfilter, (char *)sh_audio->afilter);
@@ -1495,10 +1493,9 @@ if(mpctx->sh_audio){
   ao_data.format=audio_output_format;
 #if 1
   // first init to detect best values
-  if(!preinit_audio_filters(mpctx->sh_audio,
+  if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
         // input:
         (int)(mpctx->sh_audio->samplerate*playback_speed),
-	mpctx->sh_audio->channels, mpctx->sh_audio->sample_format,
 	// output:
 	&ao_data.samplerate, &ao_data.channels, &ao_data.format)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
