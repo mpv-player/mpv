@@ -526,19 +526,9 @@ int af_lencalc(double mul, af_data_t* d)
   return d->len * mul + t + 1;
 }
 
-/* Calculate how long the input IN to the filters should be to produce
-   a certain output length OUT but with the following three constraints:
-   1. IN <= max_insize, where max_insize is the maximum possible input
-      block length
-   2. OUT <= max_outsize, where max_outsize is the maximum possible
-      output block length
-   3. If possible OUT >= len. 
-   Return -1 in case of error */ 
-int af_calc_insize_constrained(af_stream_t* s, int len,
-			       int max_outsize,int max_insize)
+// Calculate average ratio of filter output size to input size
+double af_calc_filter_multiplier(af_stream_t* s)
 {
-  int t   = s->input.bps*s->input.nch;
-  int in  = 0;
   af_instance_t* af=s->first; 
   double mul = 1;
   // Iterate through all filters and calculate total multiplication factor
@@ -547,14 +537,7 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
       af=af->next;
   }while(af);
 
-  if (len > max_outsize)
-      len = max_outsize;
-
-  in = len / t / mul * t;
-
-  if(in>max_insize) in=t*(max_insize/t);
-
-  return in;
+  return mul;
 }
 
 /* Calculate the total delay [ms] caused by the filters */

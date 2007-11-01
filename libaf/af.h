@@ -189,22 +189,10 @@ af_data_t* af_play(af_stream_t* s, af_data_t* data);
 af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg);
 
 /**
- * \brief calculate required input length for desired output size
- * \param len desired minimum output length
- * \param max_outsize maximum output length
- * \param max_insize maximum input length
- * \return input length or -1 on error
- *
-   Calculate how long the input IN to the filters should be to produce
-   a certain output length OUT but with the following three constraints:
-   1. IN <= max_insize, where max_insize is the maximum possible input
-      block length
-   2. OUT <= max_outsize, where max_outsize is the maximum possible
-      output block length
-   3. If possible OUT >= len. 
- */ 
-int af_calc_insize_constrained(af_stream_t* s, int len,
-			       int max_outsize,int max_insize);
+ * \brief calculate average ratio of filter output lenth to input length
+ * \return the ratio
+ */
+double af_calc_filter_multiplier(af_stream_t* s);
 
 /**
  * \brief Calculate the total delay caused by the filters

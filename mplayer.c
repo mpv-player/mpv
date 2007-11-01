@@ -1779,22 +1779,12 @@ static int fill_audio_out_buffers(void)
 	// Fill buffer if needed:
 	current_module="decode_audio";
 	t = GetTimer();
-	while (sh_audio->a_out_buffer_len < playsize) {
-	    int buflen = sh_audio->a_out_buffer_len;
-	    int ret = decode_audio(sh_audio, &sh_audio->a_out_buffer[buflen],
-				   playsize - buflen, // min bytes
-				   sh_audio->a_out_buffer_size - buflen // max
-				   );
-	    if (ret <= 0) { // EOF?
-		if (mpctx->d_audio->eof) {
-		    audio_eof = 1;
-		    if (sh_audio->a_out_buffer_len == 0)
-			return 0;
-		}
-		break;
+	if (decode_audio(sh_audio, playsize) < 0) // EOF or error
+	    if (mpctx->d_audio->eof) {
+		audio_eof = 1;
+		if (sh_audio->a_out_buffer_len == 0)
+		    return 0;
 	    }
-	    sh_audio->a_out_buffer_len += ret;
-	}
 	t = GetTimer() - t;
 	tt = t*0.000001f; audio_time_usage+=tt;
 	if (playsize > sh_audio->a_out_buffer_len) {

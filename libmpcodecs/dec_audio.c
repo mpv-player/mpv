@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -380,86 +381,113 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     return 1;
 }
 
-int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
-		 int maxlen)
+static int filter_n_bytes(sh_audio_t *sh, int len)
 {
-    int declen;
-    af_data_t afd;		// filter input
-    af_data_t *pafd;		// filter output
-    ad_functions_t *mpadec = sh_audio->ad_driver;
+    assert(len-1 + sh->audio_out_minsize <= sh->a_buffer_size);
 
+    int error = 0;
+
+    // Decode more bytes if needed
+    while (sh->a_buffer_len < len) {
+	unsigned char *buf = sh->a_buffer + sh->a_buffer_len;
+	int minlen = len - sh->a_buffer_len;
+	int maxlen = sh->a_buffer_size - sh->a_buffer_len;
+	int ret = sh->ad_driver->decode_audio(sh, buf, minlen, maxlen);
+	if (ret <= 0) {
+	    error = -1;
+	    len = sh->a_buffer_len;
+	    break;
+	}
+	sh->a_buffer_len += ret;
+    }
+
+    // Filter
+    af_data_t filter_input = {
+	.audio = sh->a_buffer,
+	.len = len,
+	.rate = sh->samplerate,
+	.nch = sh->channels,
+	.format = sh->sample_format
+    };
+    af_fix_parameters(&filter_input);
+    af_data_t *filter_output = af_play(sh->afilter, &filter_input);
+    if (!filter_output)
+	return -1;
+    if (sh->a_out_buffer_size < sh->a_out_buffer_len + filter_output->len) {
+	int newlen = sh->a_out_buffer_len + filter_output->len;
+	mp_msg(MSGT_DECAUDIO, MSGL_V, "Increasing filtered audio buffer size "
+	       "from %d to %d\n", sh->a_out_buffer_size, newlen);
+	sh->a_out_buffer = realloc(sh->a_out_buffer, newlen);
+	sh->a_out_buffer_size = newlen;
+    }
+    memcpy(sh->a_out_buffer + sh->a_out_buffer_len, filter_output->audio,
+	   filter_output->len);
+    sh->a_out_buffer_len += filter_output->len;
+
+    // remove processed data from decoder buffer:
+    sh->a_buffer_len -= len;
+    memmove(sh->a_buffer, sh->a_buffer + len, sh->a_buffer_len);
+
+    return error;
+}
+
+/* Try to get at least minlen decoded+filtered bytes in sh_audio->a_out_buffer
+ * (total length including possible existing data).
+ * Return 0 on success, -1 on error/EOF (not distinguished).
+ * In the former case sh_audio->a_out_buffer_len is always >= minlen
+ * on return. In case of EOF/error it might or might not be.
+ * Can reallocate sh_audio->a_out_buffer if needed to fit all filter output. */
+int decode_audio(sh_audio_t *sh_audio, int minlen)
+{
     if (!sh_audio->inited || !sh_audio->afilter)
 	abort();
 
-    declen = af_calc_insize_constrained(sh_audio->afilter, minlen, maxlen,
-					sh_audio->a_buffer_size -
-					sh_audio->audio_out_minsize);
+    // Decoded audio must be cut at boundaries of this many bytes
+    int unitsize = sh_audio->channels * sh_audio->samplesize;
 
-    mp_msg(MSGT_DECAUDIO, MSGL_DBG2,
-	   "\ndecaudio: minlen=%d maxlen=%d declen=%d (max=%d)\n", minlen,
-	   maxlen, declen, sh_audio->a_buffer_size);
+    /* Filter output size will be about filter_multiplier times input size.
+     * If some filter buffers audio in big blocks this might only hold
+     * as average over time. */
+    double filter_multiplier = af_calc_filter_multiplier(sh_audio->afilter);
 
-    if (declen <= 0)
-	return -1;		// error!
+    /* If the decoder set audio_out_minsize then it can do the equivalent of
+     * "while (output_len < target_len) output_len += audio_out_minsize;",
+     * so we must guarantee there is at least audio_out_minsize-1 bytes
+     * more space in the output buffer than the minimum length we try to
+     * decode. */
+    int max_decode_len = sh_audio->a_buffer_size - sh_audio->audio_out_minsize;
+    max_decode_len -= max_decode_len % unitsize;
 
-    while (declen > sh_audio->a_buffer_len) {
-	int len = declen - sh_audio->a_buffer_len;
-	int maxlen = sh_audio->a_buffer_size - sh_audio->a_buffer_len;
-
-	mp_msg(MSGT_DECAUDIO, MSGL_DBG2,
-	       "decaudio: decoding %d bytes, max: %d (%d)\n", len, maxlen,
-	       sh_audio->audio_out_minsize);
-
-	// When a decoder sets audio_out_minsize that should guarantee it can
-	// write up to audio_out_minsize bytes at a time until total >= minlen
-	// without checking maxlen. Thus maxlen must be at least minlen +
-	// audio_out_minsize. Check that to guard against buffer overflows.
-	if (maxlen < len + sh_audio->audio_out_minsize)
-	    break;
-
-	len = mpadec->decode_audio(sh_audio,
-				   sh_audio->a_buffer + sh_audio->a_buffer_len,
-				   len, maxlen);
-	if (len <= 0)
-	    break;		// EOF?
-	sh_audio->a_buffer_len += len;
+    while (sh_audio->a_out_buffer_len < minlen) {
+	int declen = (minlen - sh_audio->a_out_buffer_len) / filter_multiplier
+	    + (unitsize << 5); // some extra for possible filter buffering
+	if (declen > max_decode_len) {  // Do it in several steps
+	    if (filter_n_bytes(sh_audio, max_decode_len) < 0)
+		return -1;
+	    continue;
+	}
+	declen -= declen % unitsize;
+	if (filter_n_bytes(sh_audio, declen) < 0)
+	    return -1;
+	if (sh_audio->a_out_buffer_len >= minlen)
+	    return 0;
+	/* Some filter must be doing significant buffering if the estimated
+	 * input length didn't produce enough output from filters.
+	 * Feed the filters 2k bytes at a time until we have enough output.
+	 * Very small amounts could make filtering inefficient while large
+	 * amounts can make MPlayer demux the file unnecessarily far ahead
+	 * to get audio data and buffer video frames in memory while doing
+	 * so. However the performance impact of either is probably not too
+	 * significant as long as the value is not completely insane. */
+	declen = min(2000, max_decode_len);
+	declen -= declen % unitsize;
+	while (sh_audio->a_out_buffer_len < minlen) {
+	    if (filter_n_bytes(sh_audio, declen) < 0)
+		return -1;
+	}
+	return 0;
     }
-    if (declen > sh_audio->a_buffer_len)
-	declen = sh_audio->a_buffer_len;   // still no enough data (EOF) :(
-
-    // run the filters:
-    afd.audio = sh_audio->a_buffer;
-    afd.len = declen;
-    afd.rate = sh_audio->samplerate;
-    afd.nch = sh_audio->channels;
-    afd.format = sh_audio->sample_format;
-    af_fix_parameters(&afd);
-    pafd = af_play(sh_audio->afilter, &afd);
-
-    if (!pafd)
-	return -1;   // error
-
-    mp_msg(MSGT_DECAUDIO, MSGL_DBG2, "decaudio: declen=%d out=%d (max %d)\n",
-	   declen, pafd->len, maxlen);
-
-    // copy filter==>out:
-    if (maxlen < pafd->len) {
-	af_stream_t *afs = sh_audio->afilter;
-	maxlen -= maxlen % (afs->output.nch * afs->output.bps);
-	mp_msg(MSGT_DECAUDIO, MSGL_WARN,
-	     "%i bytes of audio data lost due to buffer overflow, len = %i\n",
-	       pafd->len - maxlen, pafd->len);
-    } else
-	maxlen = pafd->len;
-    memmove(buf, pafd->audio, maxlen);
-
-    // remove processed data from decoder buffer:
-    sh_audio->a_buffer_len -= declen;
-    if (sh_audio->a_buffer_len > 0)
-	memmove(sh_audio->a_buffer, sh_audio->a_buffer + declen,
-		sh_audio->a_buffer_len);
-
-    return maxlen;
+    return 0;
 }
 
 void resync_audio_stream(sh_audio_t *sh_audio)
