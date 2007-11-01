@@ -388,13 +388,8 @@ int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
     af_data_t *pafd;		// filter output
     ad_functions_t *mpadec = sh_audio->ad_driver;
 
-    if (!sh_audio->inited)
-	return -1;		// no codec
-    if (!sh_audio->afilter) {
-	// no filter, just decode:
-	// FIXME: don't drop initial decoded data in a_buffer!
-	return mpadec->decode_audio(sh_audio, buf, minlen, maxlen);
-    }
+    if (!sh_audio->inited || !sh_audio->afilter)
+	abort();
 
     declen = af_calc_insize_constrained(sh_audio->afilter, minlen, maxlen,
 					sh_audio->a_buffer_size -
