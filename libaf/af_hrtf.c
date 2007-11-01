@@ -293,8 +293,7 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
 	af->data->format = AF_FORMAT_S16_NE;
 	af->data->bps    = 2;
 	test_output_res = af_test_output(af, (af_data_t*)arg);
-	af->mul.n = 2;
-	af->mul.d = af->data->nch;
+	af->mul = 2.0 / af->data->nch;
 	// after testing input set the real output format
 	af->data->nch = 2;
 	s->print_flag = 1;
@@ -560,7 +559,7 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data)
 
     /* Set output data */
     data->audio = af->data->audio;
-    data->len   = (data->len * af->mul.n) / af->mul.d;
+    data->len   = data->len / data->nch * 2;
     data->nch   = 2;
 
     return data;
@@ -597,8 +596,7 @@ static int af_open(af_instance_t* af)
     af->control = control;
     af->uninit = uninit;
     af->play = play;
-    af->mul.n = 1;
-    af->mul.d = 1;
+    af->mul = 1;
     af->data = calloc(1, sizeof(af_data_t));
     af->setup = calloc(1, sizeof(af_hrtf_t));
     if((af->data == NULL) || (af->setup == NULL))

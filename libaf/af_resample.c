@@ -184,9 +184,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       s->step=((uint64_t)n->rate<<STEPACCURACY)/(uint64_t)af->data->rate+1LL;
       af_msg(AF_MSG_DEBUG0,"[resample] Linear interpolation step: 0x%016"PRIX64".\n",
 	     s->step);
-      af->mul.n = af->data->rate;
-      af->mul.d = n->rate;
-      af_frac_cancel(&af->mul);
+      af->mul = (double)af->data->rate / n->rate;
       return rv;
     }
 
@@ -256,8 +254,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     // Set multiplier and delay
     af->delay = (double)(1000*L/2)/((double)n->rate);
-    af->mul.n = s->up;
-    af->mul.d = s->dn;
+    af->mul = (double)s->up / s->dn;
     return rv;
   }
   case AF_CONTROL_COMMAND_LINE:{
@@ -359,8 +356,7 @@ static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul.n=1;
-  af->mul.d=1;
+  af->mul=1;
   af->data=calloc(1,sizeof(af_data_t));
   af->setup=calloc(1,sizeof(af_resample_t));
   if(af->data == NULL || af->setup == NULL)

@@ -47,13 +47,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if (af->data->nch > AF_NCH) af->data->nch = AF_NCH;
     af->data->format = AF_FORMAT_S16_NE;
     af->data->bps    = 2;
-    af->mul.n = af->data->rate;
-    af->mul.d = data->rate;
-    af_frac_cancel(&af->mul);
+    af->mul = (double)af->data->rate / data->rate;
     af->delay = 500*s->filter_length/(double)min(af->data->rate, data->rate);
 
     if(s->avrctx) av_resample_close(s->avrctx);
-    s->avrctx= av_resample_init(af->mul.n, /*in_rate*/af->mul.d, s->filter_length, s->phase_shift, s->linear, s->cutoff);
+    s->avrctx= av_resample_init(af->data->rate, /*in_rate*/data->rate, s->filter_length, s->phase_shift, s->linear, s->cutoff);
 
     // hack to make af_test_output ignore the samplerate change
     out_rate = af->data->rate;
@@ -99,7 +97,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   int16_t *out;
   int chans   = data->nch;
   int in_len  = data->len/(2*chans);
-  int out_len = (in_len*af->mul.n) / af->mul.d + 10;
+  int out_len = in_len * af->mul + 10;
   int16_t tmp[AF_NCH][out_len];
     
   if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
@@ -168,8 +166,7 @@ static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul.n=1;
-  af->mul.d=1;
+  af->mul=1;
   af->data=calloc(1,sizeof(af_data_t));
   s->filter_length= 16;
   s->cutoff= max(1.0 - 6.5/(s->filter_length+8), 0.80);

@@ -40,9 +40,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->format = AF_FORMAT_FLOAT_NE;
     af->data->bps    = 4;
     af->data->nch    = s->nch ? s->nch: ((af_data_t*)arg)->nch;
-    af->mul.n        = af->data->nch;
-    af->mul.d	     = ((af_data_t*)arg)->nch;
-    af_frac_cancel(&af->mul);
+    af->mul          = (double)af->data->nch / ((af_data_t*)arg)->nch;
 
     if((af->data->format != ((af_data_t*)arg)->format) || 
        (af->data->bps != ((af_data_t*)arg)->bps)){
@@ -175,7 +173,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 
   // Set output data
   c->audio = l->audio;
-  c->len   = (c->len*af->mul.n)/af->mul.d;
+  c->len   = c->len / c->nch * l->nch;
   c->nch   = l->nch;
 
   return c;
@@ -186,8 +184,7 @@ static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul.n=1;
-  af->mul.d=1;
+  af->mul=1;
   af->data=calloc(1,sizeof(af_data_t));
   af->setup=calloc(1,sizeof(af_pan_t));
   if(af->data == NULL || af->setup == NULL)

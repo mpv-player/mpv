@@ -40,8 +40,7 @@ static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul.d=1;
-  af->mul.n=1;
+  af->mul=1;
   af->data=malloc(sizeof(af_data_t));
   if(af->data == NULL)
     return AF_ERROR;

@@ -65,7 +65,7 @@ typedef struct af_instance_s
   struct af_instance_s* next;
   struct af_instance_s* prev;  
   double delay; // Delay caused by the filter [ms]
-  frac_t mul; /* length multiplier: how much does this instance change
+  double mul; /* length multiplier: how much does this instance change
 		 the length of the buffer. */
 }af_instance_t;
 
@@ -238,7 +238,7 @@ int af_resize_local_buffer(af_instance_t* af, af_data_t* data);
 /* Helper function used to calculate the exact buffer length needed
    when buffers are resized. The returned length is >= than what is
    needed */
-int af_lencalc(frac_t mul, af_data_t* data);
+int af_lencalc(double mul, af_data_t* data);
 
 /**
  * \brief convert dB to gain value

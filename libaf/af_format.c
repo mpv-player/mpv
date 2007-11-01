@@ -104,9 +104,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     af->data->rate = data->rate;
     af->data->nch  = data->nch;
-    af->mul.n      = af->data->bps;
-    af->mul.d      = data->bps;
-    af_frac_cancel(&af->mul);
+    af->mul        = (double)af->data->bps / data->bps;
     
     af->play = play; // set default
     
@@ -309,8 +307,7 @@ static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul.n=1;
-  af->mul.d=1;
+  af->mul=1;
   af->data=calloc(1,sizeof(af_data_t));
   if(af->data == NULL)
     return AF_ERROR;

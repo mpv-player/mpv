@@ -243,7 +243,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data){
 
   // Set output data
   data->audio = af->data->audio;
-  data->len   = (data->len*af->mul.n)/af->mul.d;
+  data->len   *= 2;
   data->nch   = af->data->nch;
 
   return data;
@@ -253,8 +253,7 @@ static int af_open(af_instance_t* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul.n=2;
-  af->mul.d=1;
+  af->mul=2;
   af->data=calloc(1,sizeof(af_data_t));
   af->setup=calloc(1,sizeof(af_surround_t));
   if(af->data == NULL || af->setup == NULL)

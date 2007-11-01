@@ -516,12 +516,14 @@ af_data_t* af_play(af_stream_t* s, af_data_t* data)
   return data;
 }
 
-/* Helper function used to calculate the exact buffer length needed
-   when buffers are resized. The returned length is >= than what is
-   needed */
-inline int af_lencalc(frac_t mul, af_data_t* d){
-  register int t = d->bps*d->nch;
-  return t*(((d->len/t)*mul.n)/mul.d + 1);
+/* Calculate the minimum output buffer size for given input data d
+ * when using the RESIZE_LOCAL_BUFFER macro. The +t+1 part ensures the
+ * value is >= len*mul rounded upwards to whole samples even if the
+ * double 'mul' is inexact. */
+int af_lencalc(double mul, af_data_t* d)
+{
+  int t = d->bps * d->nch;
+  return d->len * mul + t + 1;
 }
 
 /* Calculate how long the input IN to the filters should be to produce
@@ -537,34 +539,21 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
 {
   int t   = s->input.bps*s->input.nch;
   int in  = 0;
-  int out = 0;
   af_instance_t* af=s->first; 
-  frac_t mul = {1,1};
+  double mul = 1;
   // Iterate through all filters and calculate total multiplication factor
   do{
-    af_frac_mul(&mul, &af->mul);
-    af=af->next;
+      mul *= af->mul;
+      af=af->next;
   }while(af);
-  // Sanity check 
-  if(!mul.n || !mul.d) 
-    return -1;
 
-  in = t * (((len/t) * mul.d - 1)/mul.n);
-  
+  if (len > max_outsize)
+      len = max_outsize;
+
+  in = len / t / mul * t;
+
   if(in>max_insize) in=t*(max_insize/t);
 
-  // Try to meet constraint nr 3. 
-  while((out=t * (((in/t+1)*mul.n - 1)/mul.d)) <= max_outsize && in<=max_insize){
-    if( (t * (((in/t)*mul.n))/mul.d) >= len) return in;
-    in+=t;
-  }
-  
-  // Could no meet constraint nr 3.
-  while(out > max_outsize || in > max_insize){
-    in-=t;
-    if(in<t) return -1; // Input parameters are probably incorrect
-    out = t * (((in/t)*mul.n + 1)/mul.d);
-  }
   return in;
 }
 
