@@ -363,19 +363,8 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     *out_channels = afs->output.nch;
     *out_format = afs->output.format;
 
-    if (out_maxsize || out_minsize) {
-	// allocate the a_out_* buffers:
-	if (out_maxsize < out_minsize)
-	    out_maxsize = out_minsize;
-	if (out_maxsize < 8192)
-	    out_maxsize = MAX_OUTBURST;	// not sure this is ok
+    sh_audio->a_out_buffer_len = 0;
 
-	sh_audio->a_out_buffer_size = out_maxsize;
-	free(sh_audio->a_out_buffer);
-	sh_audio->a_out_buffer = memalign(16, sh_audio->a_out_buffer_size);
-	memset(sh_audio->a_out_buffer, 0, sh_audio->a_out_buffer_size);
-	sh_audio->a_out_buffer_len = 0;
-    }
     // ok!
     sh_audio->afilter = (void *) afs;
     return 1;
