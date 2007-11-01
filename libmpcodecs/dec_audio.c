@@ -120,9 +120,9 @@ int init_audio_codec(sh_audio_t *sh_audio)
 	   "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
 	   sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels);
 
-    sh_audio->a_out_buffer_size = sh_audio->a_buffer_size;
-    sh_audio->a_out_buffer = sh_audio->a_buffer;
-    sh_audio->a_out_buffer_len = sh_audio->a_buffer_len;
+    sh_audio->a_out_buffer_size = 0;
+    sh_audio->a_out_buffer = NULL;
+    sh_audio->a_out_buffer_len = 0;
 
     return 1;
 }
@@ -299,8 +299,7 @@ void uninit_audio(sh_audio_t *sh_audio)
 #endif
 	sh_audio->inited = 0;
     }
-    if (sh_audio->a_out_buffer != sh_audio->a_buffer)
-	free(sh_audio->a_out_buffer);
+    free(sh_audio->a_out_buffer);
     sh_audio->a_out_buffer = NULL;
     sh_audio->a_out_buffer_size = 0;
     if (sh_audio->a_buffer)
@@ -370,8 +369,7 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
 	    out_maxsize = MAX_OUTBURST;	// not sure this is ok
 
 	sh_audio->a_out_buffer_size = out_maxsize;
-	if (sh_audio->a_out_buffer != sh_audio->a_buffer)
-	    free(sh_audio->a_out_buffer);
+	free(sh_audio->a_out_buffer);
 	sh_audio->a_out_buffer = memalign(16, sh_audio->a_out_buffer_size);
 	memset(sh_audio->a_out_buffer, 0, sh_audio->a_out_buffer_size);
 	sh_audio->a_out_buffer_len = 0;
