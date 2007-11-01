@@ -524,39 +524,6 @@ inline int af_lencalc(frac_t mul, af_data_t* d){
   return t*(((d->len/t)*mul.n)/mul.d + 1);
 }
 
-/* Calculate how long the output from the filters will be given the
-   input length "len". The calculated length is >= the actual
-   length. */
-int af_outputlen(af_stream_t* s, int len)
-{
-  int t = s->input.bps*s->input.nch;
-  af_instance_t* af=s->first; 
-  frac_t mul = {1,1};
-  // Iterate through all filters 
-  do{
-    af_frac_mul(&mul, &af->mul);
-    af=af->next;
-  }while(af);
-  return t * (((len/t)*mul.n + 1)/mul.d);
-}
-
-/* Calculate how long the input to the filters should be to produce a
-   certain output length, i.e. the return value of this function is
-   the input length required to produce the output length "len". The
-   calculated length is <= the actual length */
-int af_inputlen(af_stream_t* s, int len)
-{
-  int t = s->input.bps*s->input.nch;
-  af_instance_t* af=s->first; 
-  frac_t mul = {1,1};
-  // Iterate through all filters 
-  do{
-    af_frac_mul(&mul, &af->mul);
-    af=af->next;
-  }while(af);
-  return t * (((len/t) * mul.d - 1)/mul.n);
-}
-
 /* Calculate how long the input IN to the filters should be to produce
    a certain output length OUT but with the following three constraints:
    1. IN <= max_insize, where max_insize is the maximum possible input

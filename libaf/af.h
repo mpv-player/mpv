@@ -199,24 +199,6 @@ af_data_t* af_play(af_stream_t* s, af_data_t* data);
 af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg);
 
 /**
- * \brief Calculate how long the output from the filters will be for a given
- *        input length.
- * \param len input lenght for which to calculate output length
- * \return calculated output length, will always be >= the resulting
- *         length when actually calling af_play.
- */
-int af_outputlen(af_stream_t* s, int len);
-
-/**
- * \brief Calculate how long the input to the filters should be to produce a
- *        certain output length
- * \param len wanted output length
- * \return input length required to produce the output length "len". Possibly
- *         smaller to avoid overflow of output buffer
- */
-int af_inputlen(af_stream_t* s, int len);
-
-/**
  * \brief calculate required input length for desired output size
  * \param len desired minimum output length
  * \param max_outsize maximum output length
