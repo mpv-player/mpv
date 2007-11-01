@@ -62,7 +62,7 @@ int af_str2fmt(const char* str)
   return format;
 }
 
-inline int af_fmt2bits(int format)
+int af_fmt2bits(int format)
 {
     return (format & AF_FORMAT_BITS_MASK)+8;
 //    return (((format & AF_FORMAT_BITS_MASK)>>3)+1) * 8;
@@ -79,7 +79,7 @@ inline int af_fmt2bits(int format)
     return -1;
 }
 
-inline int af_bits2fmt(int bits)
+int af_bits2fmt(int bits)
 {
     return (bits/8 - 1) << 3;
 }

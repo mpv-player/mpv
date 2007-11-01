@@ -2566,7 +2566,7 @@ int vo_xv_init_colorkey(void)
  * It doesn't call XFlush.
  *
  */
-inline void vo_xv_draw_colorkey(  int32_t x,  int32_t y,
+void vo_xv_draw_colorkey(  int32_t x,  int32_t y,
                                   int32_t w,  int32_t h  )
 {
   if( xv_ck_info.method == CK_METHOD_MANUALFILL ||

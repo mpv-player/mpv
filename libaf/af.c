@@ -572,7 +572,7 @@ double af_calc_delay(af_stream_t* s)
 
 /* Helper function called by the macro with the same name this
    function should not be called directly */
-inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
+int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
 {
   // Calculate new length
   register int len = af_lencalc(af->mul,data);

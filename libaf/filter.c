@@ -46,7 +46,7 @@ inline _ftype_t af_filter_fir(register unsigned int n, _ftype_t* w, _ftype_t* x)
    y  output buffer
    s  output buffer stride
 */
-inline _ftype_t* af_filter_pfir(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** w, _ftype_t** x, _ftype_t* y, unsigned int s)
+_ftype_t* af_filter_pfir(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** w, _ftype_t** x, _ftype_t* y, unsigned int s)
 {
   register _ftype_t* xt = *x + xi;
   register _ftype_t* wt = *w;
@@ -65,7 +65,7 @@ inline _ftype_t* af_filter_pfir(unsigned int n, unsigned int d, unsigned int xi,
    at the new samples, xi current index in xq and n the length of the
    filter. xq must be n*2 by k big, s is the index for in.
 */
-inline int af_filter_updatepq(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** xq, _ftype_t* in, unsigned int s)  
+int af_filter_updatepq(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** xq, _ftype_t* in, unsigned int s)
 {
   register _ftype_t* txq = *xq + xi;
   register int nt = n*2;
