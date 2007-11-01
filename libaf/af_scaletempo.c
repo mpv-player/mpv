@@ -79,7 +79,8 @@ typedef struct af_scaletempo_s
   short   speed_pitch;
 } af_scaletempo_t;
 
-int fill_queue(struct af_instance_s* af, af_data_t* data, int offset) {
+static int fill_queue(struct af_instance_s* af, af_data_t* data, int offset)
+{
   af_scaletempo_t* s = af->setup;
   int bytes_in = data->len - offset;
   int offset_unchanged = offset;
@@ -115,7 +116,8 @@ int fill_queue(struct af_instance_s* af, af_data_t* data, int offset) {
   return offset - offset_unchanged;
 }
 
-int _best_overlap_offset_float(af_scaletempo_t* s) {
+static int best_overlap_offset_float(af_scaletempo_t* s)
+{
   float *pw, *po, *ppc, *search_start;
   float best_corr = INT_MIN;
   int best_off = 0;
@@ -146,7 +148,8 @@ int _best_overlap_offset_float(af_scaletempo_t* s) {
   return best_off * 4 * s->num_channels;
 }
 
-int _best_overlap_offset_s16(af_scaletempo_t* s) {
+static int best_overlap_offset_s16(af_scaletempo_t* s)
+{
   int32_t *pw, *ppc;
   int16_t *po, *search_start;
   int32_t best_corr = INT_MIN;
@@ -178,7 +181,9 @@ int _best_overlap_offset_s16(af_scaletempo_t* s) {
   return best_off * 2 * s->num_channels;
 }
 
-void _output_overlap_float(af_scaletempo_t* s, int8_t* buf_out, int bytes_off) {
+static void output_overlap_float(af_scaletempo_t* s, int8_t* buf_out,
+				  int bytes_off)
+{
   float* pout = (float*)buf_out;
   float* pb   = (float*)s->table_blend;
   float* po   = (float*)s->buf_overlap;
@@ -188,7 +193,9 @@ void _output_overlap_float(af_scaletempo_t* s, int8_t* buf_out, int bytes_off) {
     *pout++ = *po - *pb++ * ( *po - *pin++ ); po++;
   }
 }
-void _output_overlap_s16(af_scaletempo_t* s, int8_t* buf_out, int bytes_off) {
+static void output_overlap_s16(af_scaletempo_t* s, int8_t* buf_out,
+			       int bytes_off)
+{
   int16_t* pout = (int16_t*)buf_out;
   int32_t* pb   = (int32_t*)s->table_blend;
   int16_t* po   = (int16_t*)s->buf_overlap;
@@ -255,7 +262,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   }
 
   data->audio = af->data->audio;
-  data->len   = (int)pout - (int)af->data->audio;
+  data->len   = pout - (int8_t *)af->data->audio;
   return data;
 }
 
@@ -330,7 +337,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
           }
           blend += 65536;  // 2^16
         }
-        s->output_overlap = _output_overlap_s16;
+        s->output_overlap = output_overlap_s16;
       } else {
         float* pb = (float*)s->table_blend;
         for (i=0; i<frames_overlap; i++) {
@@ -339,7 +346,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
             *pb++ = v;
           }
         }
-        s->output_overlap = _output_overlap_float;
+        s->output_overlap = output_overlap_float;
       }
     }
 
@@ -365,7 +372,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
           }
         }
         s->shift_corr = av_log2( 2*(s->samples_overlap - nch) - 1 );
-        s->best_overlap_offset = _best_overlap_offset_s16;
+        s->best_overlap_offset = best_overlap_offset_s16;
       } else {
         float* pw;
         s->buf_pre_corr = realloc(s->buf_pre_corr, s->bytes_overlap);
@@ -381,7 +388,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
             *pw++ = v;
           }
         }
-        s->best_overlap_offset = _best_overlap_offset_float;
+        s->best_overlap_offset = best_overlap_offset_float;
       }
     }
 
