@@ -35,7 +35,7 @@ typedef struct {
   int a_out_buffer_len;
   int a_out_buffer_size;
 //  void* audio_out;        // the audio_out handle, used for this audio stream
-  void* afilter;          // the audio filter stream
+  struct af_stream_s *afilter;          // the audio filter stream
   struct ad_functions_s* ad_driver;
 #ifdef DYNAMIC_PLUGINS
   void *dec_handle;
@@ -78,8 +78,7 @@ typedef struct {
   int disp_w,disp_h;      // display size (filled by fileformat parser)
   // output driver/filters: (set by libmpcodecs core)
   unsigned int outfmtidx;
-  void* video_out;        // the video_out handle, used for this video stream
-  void* vfilter;          // the video filter chain, used for this video stream
+  struct vf_instance_s *vfilter;          // the video filter chain, used for this video stream
   int vf_inited;
 #ifdef DYNAMIC_PLUGINS
   void *dec_handle;

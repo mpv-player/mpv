@@ -778,7 +778,6 @@ mux_v->codec=out_video_codec;
 mux_v->bih=NULL;
 }
 sh_video->codec=NULL;
-sh_video->video_out=NULL;
 sh_video->vfilter=NULL; // fixme!
 
 switch(mux_v->codec){

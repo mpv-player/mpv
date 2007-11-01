@@ -1900,7 +1900,6 @@ int reinit_video_chain(void) {
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
       goto err_out;
     }
-    sh_video->video_out=mpctx->video_out;
     inited_flags|=INITED_VO;
   }
 
