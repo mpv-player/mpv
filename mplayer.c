@@ -1495,7 +1495,7 @@ if(mpctx->sh_audio){
   // first init to detect best values
   if(!init_audio_filters(mpctx->sh_audio,   // preliminary init
         // input:
-        (int)(mpctx->sh_audio->samplerate*playback_speed),
+        mpctx->sh_audio->samplerate,
 	// output:
 	&ao_data.samplerate, &ao_data.channels, &ao_data.format)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
