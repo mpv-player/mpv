@@ -26,16 +26,6 @@ typedef struct af_data_s
   int bps; 	// bytes per sample
 } af_data_t;
 
-// Fraction, used to calculate buffer lengths
-typedef struct frac_s
-{
-  int n; // Numerator
-  int d; // Denominator
-} frac_t;
-
-int af_gcd(register int a, register int b);
-void af_frac_cancel(frac_t *f);
-void af_frac_mul(frac_t *out, const frac_t *in);
 
 // Flags used for defining the behavior of an audio filter
 #define AF_FLAGS_REENTRANT 	0x00000000

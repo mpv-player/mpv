@@ -604,53 +604,6 @@ af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
   return NULL;
 }
 
-/**
- * \brief calculate greatest common divisior of a and b.
- * \ingroup af_filter
- *
- *   If both are 0 the result is 1.
- */
-int af_gcd(register int a, register int b) {
-  while (b != 0) {
-    a %= b;
-    if (a == 0)
-      break;
-    b %= a;
-  }
-  // the result is either in a or b. As the other one is 0 just add them.
-  a += b;
-  if (!a)
-    return 1;
-  return a;
-}
-
-/**
- * \brief cancel down a fraction f
- * \param f fraction to cancel down
- * \ingroup af_filter
- */
-void af_frac_cancel(frac_t *f) {
-  int gcd = af_gcd(f->n, f->d);
-  f->n /= gcd;
-  f->d /= gcd;
-}
-
-/**
- * \brief multiply out by in and store result in out.
- * \param out [inout] fraction to multiply by in
- * \param in [in] fraction to multiply out by
- * \ingroup af_filter
- *
- *        the resulting fraction will be cancelled down
- *        if in and out were.
- */
-void af_frac_mul(frac_t *out, const frac_t *in) {
-  int gcd1 = af_gcd(out->n, in->d);
-  int gcd2 = af_gcd(in->n, out->d);
-  out->n = (out->n / gcd1) * (in->n / gcd2);
-  out->d = (out->d / gcd2) * (in->d / gcd1);
-}
-
 void af_help (void) {
   int i = 0;
   af_msg(AF_MSG_INFO, "Available audio filters:\n");
