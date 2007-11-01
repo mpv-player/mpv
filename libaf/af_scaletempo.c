@@ -143,7 +143,7 @@ int _best_overlap_offset_float(af_scaletempo_t* s) {
     search_start += s->num_channels;
   }
 
-  return best_off * 4;
+  return best_off * 4 * s->num_channels;
 }
 
 int _best_overlap_offset_s16(af_scaletempo_t* s) {
@@ -175,7 +175,7 @@ int _best_overlap_offset_s16(af_scaletempo_t* s) {
     search_start += s->num_channels;
   }
 
-  return best_off * 2;
+  return best_off * 2 * s->num_channels;
 }
 
 void _output_overlap_float(af_scaletempo_t* s, int8_t* buf_out, int bytes_off) {
