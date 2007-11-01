@@ -31,6 +31,7 @@ extern af_info_t af_info_ladspa;
 extern af_info_t af_info_center;
 extern af_info_t af_info_sinesuppress;
 extern af_info_t af_info_karaoke;
+extern af_info_t af_info_scaletempo;
 
 static af_info_t* filter_list[]={ 
    &af_info_dummy,
@@ -61,6 +62,7 @@ static af_info_t* filter_list[]={
    &af_info_center,
    &af_info_sinesuppress,
    &af_info_karaoke,
+   &af_info_scaletempo,
    NULL 
 };
 

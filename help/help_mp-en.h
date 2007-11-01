@@ -1254,6 +1254,7 @@ static char help_text[]=
 // ======================= AF Audio Filters ================================
 
 // libaf 
+#define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
 

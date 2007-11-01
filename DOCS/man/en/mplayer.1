@@ -5148,6 +5148,79 @@ Beware that this filter will turn your signal into mono.
 Works well for 2 channel tracks; do not bother trying it
 on anything but 2 channel stereo.
 .
+.TP
+.B scaletempo[=option1:option2:...]
+Scales audio tempo without altering pitch, optionally synced to playback
+speed (default).
+.br
+This works by playing \'stride\' ms of audio at normal speed then
+consuming \'stride*scale\' ms of input audio.
+It pieces the strides together by blending 'overlap'% of stride with
+audio following the previous stride.
+It optionally performs a short statistical analysis on the next \'search\'
+ms of audio to determine the best overlap position.
+.PD 0
+.RSs
+.IPs scale=<amount>
+Nominal amount to scale tempo.
+Scales this amount in addition to speed.
+(default: 1.0)
+.IPs stride=<amount>
+Length in milliseconds to output each stride.
+Too high of value will cause noticable skips at high scale amounts and
+an echo at low scale amounts.
+Very low values will alter pitch.
+Increasing improves performance.
+(default: 60)
+.IPs overlap=<percent>
+Percentage of stride to overlap.
+Decreasing improves performance.
+(default: .20)
+.IPs search=<amount>
+Length in milliseconds to search for best overlap position.
+Decreasing improves performance greatly.
+On slow systems, you will probably want to set this very low.
+(default: 14)
+.IPs speed=<tempo|pitch|both|none>
+Set response to speed change.
+.RSss
+.IPs tempo
+Scale tempo in sync with speed (default)
+.IPs pitch
+Reverses effect of filter.
+Scales pitch without altering tempo.
+Add \'[ speed_mult 0.9438743126816935\' and \'] speed_mult 1.059463094352953\'
+to your input.conf to step by musical semi-tones.
+.I WARNING:
+Looses synch with video.
+.IPs both
+Scale both tempo and pitch
+.IPs none
+Ignore speed changes
+.RE
+.RE
+.sp 1
+.RS
+.I EXAMPLE:
+.RE
+.RSs
+.IPs "mplayer \-af scaletempo \-speed 1.2 media.ogg"
+Would playback media at 1.2x normal speed, with audio at normal pitch.
+Changing playback speed, would change audio tempo to match.
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=none \-speed 1.2 media.ogg"
+Would playback media at 1.2x normal speed, with audio at normal pitch,
+but changing playback speed has no effect on audio tempo.
+.IPs "mplayer \-af scaletempo=stride=30:overlap=.50:search=10 media.ogg"
+Would tweak the quality and performace parameters.
+.IPs "mplayer \-af format=floatne,scaletempo media.ogg"
+Would make scaletempo use float code.
+Maybe faster on some platforms.
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=pitch audio.ogg"
+Would playback audio file at 1.2x normal speed, with audio at normal pitch.
+Changing playback speed, would change pitch, leaving audio tempo at 1.2x.
+.RE
+.PD 1
+.
 .
 .
 .SH "VIDEO FILTERS"

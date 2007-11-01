@@ -1203,14 +1203,20 @@ int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
     mpctx->mixer.afilter = NULL;
     return 0;
   }
-  new_srate = sh_audio->samplerate * playback_speed;
-  if (new_srate != ao_data->samplerate) {
-    // limits are taken from libaf/af_resample.c
-    if (new_srate < 8000)
-      new_srate = 8000;
-    if (new_srate > 192000)
-      new_srate = 192000;
-    playback_speed = (float)new_srate / (float)sh_audio->samplerate;
+  if(af_control_any_rev(sh_audio->afilter,
+                        AF_CONTROL_PLAYBACK_SPEED | AF_CONTROL_SET,
+                        &playback_speed)) {
+    new_srate = sh_audio->samplerate;
+  } else {
+    new_srate = sh_audio->samplerate * playback_speed;
+    if (new_srate != ao_data->samplerate) {
+      // limits are taken from libaf/af_resample.c
+      if (new_srate < 8000)
+        new_srate = 8000;
+      if (new_srate > 192000)
+        new_srate = 192000;
+      playback_speed = (float)new_srate / (float)sh_audio->samplerate;
+    }
   }
   result =  init_audio_filters(sh_audio, new_srate,
            &ao_data->samplerate, &ao_data->channels, &ao_data->format);

@@ -30,6 +30,7 @@ SRCS_COMMON = asxparser.c \
               playtreeparser.c \
               spudec.c \
               sub_cc.c \
+              subopt-helper.c \
               subreader.c \
               vobsub.c \
 
@@ -41,7 +42,6 @@ SRCS_MPLAYER = mplayer.c \
                mp_msg.c \
                mixer.c \
                parser-mpcmd.c \
-               subopt-helper.c \
                command.c \
 
 SRCS_MENCODER = mencoder.c \
