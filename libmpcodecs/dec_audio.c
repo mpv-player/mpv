@@ -53,7 +53,7 @@ void afm_help(void)
 		   mpcodecs_ad_drivers[i]->info->name);
 }
 
-int init_audio_codec(sh_audio_t *sh_audio)
+static int init_audio_codec(sh_audio_t *sh_audio)
 {
     if ((af_cfg.force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT) {
 	int fmt = AF_FORMAT_FLOAT_NE;
@@ -127,7 +127,8 @@ int init_audio_codec(sh_audio_t *sh_audio)
     return 1;
 }
 
-int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm, int status)
+static int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm,
+		      int status)
 {
     unsigned int orig_fourcc = sh_audio->wf ? sh_audio->wf->wFormatTag : 0;
     int force = 0;
