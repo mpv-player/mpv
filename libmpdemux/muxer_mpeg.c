@@ -647,14 +647,9 @@ static int write_mpeg_psm(muxer_t *muxer, char *buff)
 			buff[len++] = priv->psm_info.streams[i].type;
 			buff[len++] = priv->psm_info.streams[i].id;
 			buff[len++] = 0;	//len of descriptor upper ...
-			buff[len++] = 6;	//... lower
+			buff[len++] = 0;	//... lower
 			
-			//registration descriptor
-			buff[len++] = 0x5;	//tag
-			buff[len++] = 4;	//length: 4 bytes
-			memcpy(&(buff[len]), (char*) &(priv->psm_info.streams[i].format), 4);
-			len += 4;
-			dlen += 10;
+			dlen += 4;
 		}
 	}
 	*(uint16_t *)(&buff[10]) = be2me_16(dlen);	//length of the es descriptors
