@@ -159,7 +159,7 @@ typedef struct {
 
 
 typedef struct {
-	int has_pts, has_dts, pes_is_aligned, type, min_pes_hlen, psm_fixed;
+	int has_pts, has_dts, pes_is_aligned, type, min_pes_hlen;
 	int delay_rff;
 	uint64_t pts, last_pts, last_dts, dts, size, frame_duration, delta_pts, nom_delta_pts, last_saved_pts;
 	uint32_t buffer_size;
