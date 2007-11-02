@@ -2272,6 +2272,9 @@ static void fix_parameters(muxer_stream_t *stream)
 			spriv->is_ready = 0;
 		else
 			spriv->is_ready = 1;
+
+		if(!is_mpeg1(stream_format) && !is_mpeg2(stream_format))
+			priv->use_psm = 1;
 	}
 	
 	if(priv->is_genmpeg2)
@@ -2323,8 +2326,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 		{
 			spriv->is_mpeg12 = 0;
 			spriv->telecine = 0;
-			if(spriv->size == 0)
-				priv->use_psm = 1;
 			if(len)
 				sz = parse_mpeg4_video(s, priv, spriv, fps, len);
 			else
