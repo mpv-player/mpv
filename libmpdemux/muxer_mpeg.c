@@ -2277,7 +2277,7 @@ static void fix_parameters(muxer_stream_t *stream)
 			priv->use_psm = 1;
 	}
 	
-	if(priv->is_genmpeg2)
+	if(priv->is_genmpeg2 && priv->use_psm)
 	{
 		add_to_psm(priv, spriv->id, stream_format);
 		priv->psm_streams_cnt++;
