@@ -1557,6 +1557,7 @@ if(mpctx->sh_audio){
 // ao so far.
 static double written_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio)
 {
+    double buffered_output;
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
     if (a_pts != MP_NOPTS_VALUE)
@@ -1590,7 +1591,7 @@ static double written_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio)
     a_pts -= sh_audio->a_buffer_len / (double)sh_audio->o_bps;
 
     // Data buffered in audio filters, measured in bytes of "missing" output
-    double buffered_output = af_calc_delay(sh_audio->afilter);
+    buffered_output = af_calc_delay(sh_audio->afilter);
 
     // Data that was ready for ao but was buffered because ao didn't fully
     // accept everything to internal buffers yet
