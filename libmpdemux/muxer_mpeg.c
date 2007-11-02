@@ -142,6 +142,7 @@ typedef struct {
 	off_t headers_size, data_size;
 	uint64_t scr;
 	uint64_t delta_scr;
+	uint64_t last_psm_scr;
 	uint32_t muxrate;
 	uint8_t *buff;
 	uint32_t headers_cnt;
@@ -663,6 +664,11 @@ static int write_mpeg_psm(muxer_t *muxer, char *buff)
 	return len;
 }
 
+static int psm_is_late(muxer_priv_t *priv)
+{
+	return (priv->scr >= priv->last_psm_scr + 27000000ULL);
+}
+
 static int write_mpeg_pes_header(muxer_headers_t *h, uint8_t *pes_id, uint8_t *buff, uint16_t plen, int stuffing_len, int mux_type)
 {
 	int len;
@@ -795,6 +801,11 @@ static int write_nav_pack(uint8_t *buff)
         len += 0x03fa;
 
 	return len;
+}
+
+static unsigned int calc_psm_len(muxer_priv_t *priv)
+{
+	return 16 + 4*(priv->psm_info.cnt);
 }
 
 static uint32_t calc_pes_hlen(int format, muxer_headers_t *h, muxer_priv_t *priv)
@@ -1042,6 +1053,8 @@ static int get_packet_stats(muxer_priv_t *priv, muxer_stream_t *s, pack_stats_t 
 		pack_hlen = 12;
 	else
 		pack_hlen = 14;
+	if(priv->use_psm && psm_is_late(priv))
+		pack_hlen += calc_psm_len(priv);
 
 	if(find_packet_timestamps(priv, s, pack_hlen, &dts, &pts))
 	{
@@ -1122,6 +1135,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	muxer_headers_t *spriv = (muxer_headers_t *) s->priv;
 	int len, m, n, dvd_pack = 0;
+	int write_psm = 0;
 	mpeg_frame_t *frm;
 	pack_stats_t p;
 
@@ -1144,6 +1158,13 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 			spriv->pack_offset += write_mpeg_system_header(muxer, &spriv->pack[spriv->pack_offset]);
 			priv->update_system_header = 0;
 		}
+
+		if(priv->use_psm && psm_is_late(priv))
+		{
+			spriv->pack_offset += write_mpeg_psm(muxer, &spriv->pack[spriv->pack_offset]);
+			write_psm = 1;
+		}
+
 		spriv->pes_set = 0;
 		spriv->pes_offset = spriv->pack_offset;
 		spriv->payload_offset = 0;
@@ -1273,6 +1294,8 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 	spriv->pack_offset = 0;
 	spriv->pes_set = 0;
 	spriv->frames = 0;
+	if(write_psm)
+		priv->last_psm_scr = priv->scr;
 	
 	return len;
 }
