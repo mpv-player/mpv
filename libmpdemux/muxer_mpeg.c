@@ -666,7 +666,7 @@ static int write_mpeg_psm(muxer_t *muxer, char *buff)
 
 static int psm_is_late(muxer_priv_t *priv)
 {
-	return (priv->scr >= priv->last_psm_scr + 27000000ULL);
+	return (!priv->data_size || (priv->scr >= priv->last_psm_scr + 27000000ULL));
 }
 
 static int write_mpeg_pes_header(muxer_headers_t *h, uint8_t *pes_id, uint8_t *buff, uint16_t plen, int stuffing_len, int mux_type)
@@ -2227,9 +2227,11 @@ static void fix_parameters(muxer_stream_t *stream)
 	muxer_headers_t *spriv = stream->priv;
 	muxer_t *muxer = stream->muxer;
 	muxer_priv_t *priv = muxer->priv;
+	uint32_t stream_format;
 
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
+		stream_format = stream->wf->wFormatTag;
 		spriv->is_ready = 1;
 		if(conf_abuf_size)
 			spriv->max_buffer_size = conf_abuf_size*1024;
@@ -2251,6 +2253,7 @@ static void fix_parameters(muxer_stream_t *stream)
 	}
 	else	//video
 	{
+		stream_format = stream->bih->biCompression;
 		if(conf_vbuf_size)
 			spriv->max_buffer_size = conf_vbuf_size*1024;
 		else
@@ -2269,6 +2272,12 @@ static void fix_parameters(muxer_stream_t *stream)
 			spriv->is_ready = 0;
 		else
 			spriv->is_ready = 1;
+	}
+	
+	if(priv->is_genmpeg2)
+	{
+		add_to_psm(priv, spriv->id, stream_format);
+		priv->psm_streams_cnt++;
 	}
 }
 
@@ -2369,16 +2378,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 			if(! spriv->vframes)
 				mp_msg(MSGT_MUXER, MSGL_INFO, "AINIT: %.3lf\r\n", (double) spriv->last_pts/27000000.0f);	
 		}
-	}
-
-
-	if(spriv->psm_fixed == 0)
-	{
-		add_to_psm(priv, spriv->id, stream_format);
-		spriv->psm_fixed = 1;
-		priv->psm_streams_cnt++;
-		if((priv->psm_streams_cnt == muxer->num_videos + muxer->num_audios) && priv->use_psm)
-			write_psm_block(muxer, muxer->stream);
 	}
 
 	flush_buffers(muxer, 0);
