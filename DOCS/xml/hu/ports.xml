@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23271 -->
+<!-- synced with r24907 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -663,13 +663,6 @@ be a konfigurációs fájlodba.
 </para>
   
 <note>
-<para>
-Windows-on a futásidejű CPU-detektálás letiltja az SSE támogatást
-visszatérő és nehezen követhető SSE-vel kapcsolatos fagyások miatt. Ha
-szeretnél SSE támogatást, futás idejű CPU-detektálás nélkül kell
-fordítanod.
-</para>
-
 <para>
 Ha Pentium 4-ed van és fagyásokat tapasztalsz a RealPlayer
 codec-ekkel, le kell tiltanod a hyperthread támogatást.

@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r24790 (2007. 10. 16.)
+// Sync'ed with help_mp-en.h r24924 (2007. 11. 02.)
 
 // ========================= MPlayer help ===========================
 
@@ -1253,6 +1253,7 @@ static char help_text[]=
 // ======================= AF Audio Filters ================================
 
 // libaf 
+#define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
 
@@ -1765,6 +1766,17 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] Xoffset: %d.\n"
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Xcorrection: %d.\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Sikertelen a kevert jel beállítása!\n"
+
+// libvo/font_load_ft.c
+
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "New_Face sikertelen. Talán hibás a betűtípus útvonala.\nKérlek add meg a szöveges betűtípus fájlt (~/.mplayer/subfont.ttf).\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "New_Memory_Face sikertelen.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "subtitle font: load_sub_face sikertelen.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "subtitle font: prepare_charset sikertelen.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Nem lehet előkészíteni a felirat betűtípusát.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Nem lehet előkészíteni az OSD betűtípusát.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Nem generálhatóak a táblázatok.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType sikertelen.\n"
 
 // libvo/vo_mga.c
 
