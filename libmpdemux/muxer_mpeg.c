@@ -2348,17 +2348,20 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 		
 		if(s->b_buffer_size - s->b_buffer_len < len)
 		{
+			void *tmp;
+
 			if(s->b_buffer_len > SIZE_MAX - len)
 			{
 				mp_msg(MSGT_MUXER, MSGL_FATAL, "\nFATAL! couldn't realloc, integer overflow\n");
 				return;
 			}
-			s->b_buffer = realloc(s->b_buffer, len  + s->b_buffer_len);
-			if(s->b_buffer == NULL)
+			tmp = realloc(s->b_buffer, len  + s->b_buffer_len);
+			if(!tmp)
 			{
 				mp_msg(MSGT_MUXER, MSGL_FATAL, "\nFATAL! couldn't realloc %d bytes\n", len  + s->b_buffer_len);
 				return;
 			}
+			s->b_buffer = tmp;
 			
 			s->b_buffer_size = len  + s->b_buffer_len;
 			mp_msg(MSGT_MUXER, MSGL_DBG2, "REALLOC(%d) bytes to AUDIO backbuffer\n", s->b_buffer_size);
