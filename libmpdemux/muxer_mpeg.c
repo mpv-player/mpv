@@ -2228,6 +2228,7 @@ static void fix_parameters(muxer_stream_t *stream)
 	muxer_t *muxer = stream->muxer;
 	muxer_priv_t *priv = muxer->priv;
 	uint32_t stream_format;
+	int needs_psm = 0;
 
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
@@ -2247,7 +2248,7 @@ static void fix_parameters(muxer_stream_t *stream)
 			spriv->max_buffer_size = 16*1024;
 		}
 		else if(stream->wf->wFormatTag == AUDIO_AAC1 || stream->wf->wFormatTag == AUDIO_AAC2)
-			priv->use_psm = 1;
+			needs_psm = 1;
 		else if(stream->wf->wFormatTag == AUDIO_MP2 || stream->wf->wFormatTag == AUDIO_MP3)
 			spriv->is_ready = 0;
 	}
@@ -2274,11 +2275,12 @@ static void fix_parameters(muxer_stream_t *stream)
 			spriv->is_ready = 1;
 
 		if(!is_mpeg1(stream_format) && !is_mpeg2(stream_format))
-			priv->use_psm = 1;
+			needs_psm = 1;
 	}
 	
-	if(priv->is_genmpeg2 && priv->use_psm)
+	if(priv->is_genmpeg2 && needs_psm)
 	{
+		priv->use_psm = 1;
 		add_to_psm(priv, spriv->id, stream_format);
 		priv->psm_streams_cnt++;
 	}
