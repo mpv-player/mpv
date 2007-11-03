@@ -587,7 +587,7 @@ profile-desc="MPEG4 encoding"
 ovc=lacv=yes
 lavcopts=vcodec=mpeg4:vbitrate=1200
 
-[mpeg4-hq]
+[mpeg4\-hq]
 profile-desc="HQ MPEG4 encoding"
 profile=mpeg4
 lavcopts=mbd=2:trell=yes:v4mv=yes
@@ -5407,7 +5407,7 @@ incapable of scaling, it defaults to d_width/\:d_height!
 .br
 \-3:   Calculate w/h using the other dimension and the original aspect ratio.
 .br
-\-(n+8): Like -n above, but rounding the dimension to the closest multiple of 16.
+\-(n+8): Like \-n above, but rounding the dimension to the closest multiple of 16.
 .REss
 .IPs <ilaced>
 Toggle interlaced scaling.
@@ -5735,7 +5735,7 @@ high quality pp filter combination (ha:a:128:7,va:a,dr:a)
 .IPs "\-vf pp=hb/vb/dr/al"
 horizontal and vertical deblocking, deringing and automatic
 brightness/\:contrast
-.IPs "\-vf pp=de/-al"
+.IPs "\-vf pp=de/\-al"
 default filters without brightness/\:contrast correction
 .IPs "\-vf pp=default/tmpnoise:1:2:3"
 Enable default filters & temporal denoiser.
@@ -7967,7 +7967,7 @@ I/B-frame quantizer = P-frame quantizer * v{b|i}_qfactor + v{b|i}_qoffset
 else
 .br
 do normal ratecontrol (do not lock to next P-frame quantizer) and
-set q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+set q= \-q * v{b|i}_qfactor + v{b|i}_qoffset
 .br
 .I HINT:
 To do constant quantizer encoding with different quantizers for
