@@ -300,7 +300,7 @@ static int get_space(void) {
     pa_threaded_mainloop_lock(mainloop);
     l = pa_stream_writable_size(stream);
     pa_threaded_mainloop_unlock(mainloop);
-    return l < 0 ? 0 : l;
+    return l;
 }
 
 /** Return the current latency in seconds */
