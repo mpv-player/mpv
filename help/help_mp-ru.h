@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r24790
+// Synced with help_mp-en.h: r24924
 
 // ========================= MPlayer help ===========================
 
@@ -1249,6 +1249,7 @@ static char help_text[]=
 // ======================= AF Audio Filters ================================
 
 // libaf 
+#define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
 
@@ -1877,6 +1878,17 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] смещение по X: %d.\n"
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] коррекция по X: %d.\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Не могу установить сигнал mix!\n"
+
+// libvo/font_load_ft.c
+
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "Сбой New_Face. Возможно неверен путь к шрифту.\nУкажите, пожалуйста, файл шрифта для текста (~/.mplayer/subfont.ttf).\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "Сбой New_Memory_Face.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "шрифт субтитров: сбой load_sub_face.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "шрифт субтитров: сбой prepare_charset.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Невозможно подготовить шрифт субтитров.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Невозможно подготовить шрифт OSD.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Невозможно сгенерировать таблицы.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "Сбой FT_Done_FreeType.\n"
 
 // libvo/vo_mga.c
 
