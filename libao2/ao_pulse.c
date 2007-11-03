@@ -126,11 +126,9 @@ static int init(int rate_hz, int channels, int format, int flags) {
     char *sink = NULL;
 
     if (ao_subdevice) {
-        int i = strcspn(ao_subdevice, ":");
         host = strdup(ao_subdevice);
-        if (host[i] == ':')
-            sink = &host[i + 1];
-        host[i] = 0;
+        sink = strchr(host, ':');
+        if (sink) *sink++ = 0;
     }
 
     ss.channels = channels;
