@@ -39,9 +39,6 @@ static ao_info_t info = {
     ""
 };
 
-/** The sink to connect to */
-static char *sink;
-
 /** PulseAudio playback stream object */
 static struct pa_stream *stream;
 
@@ -126,6 +123,7 @@ static int init(int rate_hz, int channels, int format, int flags) {
     struct pa_channel_map map;
     const struct format_map_s *fmt_map;
     char *host = NULL;
+    char *sink = NULL;
 
     if (ao_subdevice) {
         int i = strcspn(ao_subdevice, ":");
