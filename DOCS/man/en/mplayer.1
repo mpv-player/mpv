@@ -232,8 +232,8 @@ Pressing once will pause movie, every consecutive press will play one frame
 and then go into pause mode again (any other key unpauses).
 .IPs "q / ESC"
 Stop playing and quit.
-.IPs "+ and -"
-Adjust audio delay by +/- 0.1 seconds.
+.IPs "+ and \-"
+Adjust audio delay by +/\- 0.1 seconds.
 .IPs "/ and *"
 Decrease/\:increase volume.
 .IPs "9 and 0"
@@ -270,7 +270,7 @@ Toggle displaying "forced subtitles".
 .IPs "a\ \ \ \ "
 Toggle subtitle alignment: top / middle / bottom.
 .IPs "x and z"
-Adjust subtitle delay by +/- 0.1 seconds.
+Adjust subtitle delay by +/\- 0.1 seconds.
 .IPs "r and t"
 Move subtitles up/down.
 .IPs "i (\-edlout mode only)"
@@ -4083,10 +4083,10 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .SH "DECODING/FILTERING OPTIONS"
 .
 .TP
-.B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
+.B \-ac <[\-|+]codec1,[\-|+]codec2,...[,]>
 Specify a priority list of audio codecs to be used, according to their codec
 name in codecs.conf.
-Use a '-' before the codec name to omit it.
+Use a '\-' before the codec name to omit it.
 Use a '+' before the codec name to force it, this will likely crash!
 If the list has a trailing ',' MPlayer will fall back on codecs not
 contained in the list.
@@ -4502,10 +4502,10 @@ The description of the scale video filter has further information.
 .RE
 .
 .TP
-.B \-vc <[-|+]codec1,[-|+]codec2,...[,]>
+.B \-vc <[\-|+]codec1,[\-|+]codec2,...[,]>
 Specify a priority list of video codecs to be used, according to their codec
 name in codecs.conf.
-Use a '-' before the codec name to omit it.
+Use a '\-' before the codec name to omit it.
 Use a '+' before the codec name to force it, this will likely crash!
 If the list has a trailing ',' MPlayer will fall back on codecs not
 contained in the list.
@@ -5407,7 +5407,7 @@ incapable of scaling, it defaults to d_width/\:d_height!
 .br
 \-3:   Calculate w/h using the other dimension and the original aspect ratio.
 .br
--(n+8): Like -n above, but rounding the dimension to the closest multiple of 16.
+\-(n+8): Like -n above, but rounding the dimension to the closest multiple of 16.
 .REss
 .IPs <ilaced>
 Toggle interlaced scaling.
@@ -5567,7 +5567,7 @@ RGB 24/32 <\-> BGR 24/32 colorspace conversion.
 .PD 0
 .RSs
 .IPs "swap\ "
-Also perform  R <-> B swapping.
+Also perform  R <\-> B swapping.
 .RE
 .PD 1
 .
@@ -5606,7 +5606,7 @@ format name like rgb15, bgr24, yv12, etc (default: yv12)
 .PD 1
 .
 .TP
-.B pp[=filter1[:option1[:option2...]]/[-]filter2...] (also see \-pphelp)
+.B pp[=filter1[:option1[:option2...]]/[\-]filter2...] (also see \-pphelp)
 Enables the specified chain of postprocessing subfilters.
 Subfilters must be separated by '/' and can be disabled by
 prepending a '\-'.
@@ -8023,7 +8023,7 @@ with qcomp 0.5 or something like that (default)
 infix operators:
 .RE
 .RSs
-.IPs +,-,*,/,^
+.IPs +,\-,*,/,^
 .RE
 .PP
 .RS
@@ -9528,7 +9528,7 @@ partition analysis modes.
 Level 1 can increase first pass speed up to 2x with no change in the global
 PSNR of the final pass compared to a full quality first pass.
 .br
-Level 2 can increase first pass speed up to 4x with about +/- 0.05dB change
+Level 2 can increase first pass speed up to 4x with about +/\- 0.05dB change
 in the global PSNR of the final pass compared to a full quality first pass.
 .REss
 .
@@ -10713,7 +10713,7 @@ increase volume or avoid clipping.
 .PP
 .B checkerboard invert with geq filter:
 .nf
-mplayer \-vf geq='128+(p(X\,Y)\-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+mplayer \-vf geq='128+(p(X\,Y)\-128)*(0.5\-gt(mod(X/SW\,128)\,64))*(0.5\-gt(mod(Y/SH\,128)\,64))*4'
 .fi
 .
 .
