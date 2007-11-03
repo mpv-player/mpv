@@ -97,7 +97,7 @@ mf://[fájlmaszk|@listafájl]
 .
 .br
 .B mplayer
-[cdda|cddb]://sáv[-végsáv][:sebesség][/eszköznév]
+[cdda|cddb]://sáv[\-végsáv][:sebesség][/eszköznév]
 [opciók]
 .
 .br
@@ -167,7 +167,7 @@ harderes nagyítást, így a filmjeidet teljes képernyõs módban élvezheted.
 .PP
 Az MPlayernek van onscreen display (OSD) funkciója is a státuszinformációk
 és a szép, élsímított, árnyékolt feliratok megjelenítéséhez és a billentyûzetrõl
-érkezõ jelek visszajelzéséhez. Európai/\:ISO8859-1,2 (magyar, angol, cseh, stb.),
+érkezõ jelek visszajelzéséhez. Európai/\:ISO8859\-1,2 (magyar, angol, cseh, stb.),
 cirill és koreai betûtípusok mind támogatottak 12 felirat formátummal (MicroDVD,
 SubRip, OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS és a mi
 sajátunk: MPsub) és DVD felirattal (SPU streams, VOBsub és Closed Captions)
@@ -233,7 +233,7 @@ Egyszer megnyomva megállítja a filmet, majd minden egyes megnyomásra egy
 képkockát lejátszik és újra megáll (bármelyik másik gombbal elindul újra).
 .IPs "q / ESC"
 Lejátszás megállítása és kilépés.
-.IPs "+ és -"
+.IPs "+ és \-"
 Audió késleltetés állítása ± 0.1 másodperccel.
 .IPs "/ and *"
 Hangerõ csökkentése/\:növelése.
@@ -584,7 +584,7 @@ profile-desc="MPEG4 kódolás"
 ovc=lacv=yes
 lavcopts=vcodec=mpeg4:vbitrate=1200
 
-[mpeg4-hq]
+[mpeg4\-hq]
 profile-desc="HQ MPEG4 kódolás"
 profile=mpeg4
 lavcopts=mbd=2:trell=yes:v4mv=yes
@@ -733,10 +733,10 @@ A/V korrekciós algoritmust.
 Olyan, páratlan számú framerátájú filmeknél, melyek a \-nosound opcióval
 helyesen játszódnak le, hasznos lehet ezen opció 1-nél nagyobb értékre
 állítása.
-Minél nagyobb az érték, az idõzítés annál közelebb lesz a \-nosound-hoz.
+Minél nagyobb az érték, az idõzítés annál közelebb lesz a \-nosound\-hoz.
 Az \-autosync 30 opciót érdemes kipróbálni, amennyiben a hangkártya
 meghajtója nem, vagy hibásan támogatja az audio késlekedés mérését.
-Ezen érték megadásával, ha nagy az A/V szinkron eltérés értéke, 1-2
+Ezen érték megadásával, ha nagy az A/V szinkron eltérés értéke, 1\-2
 másodperc alatt helyreáll a helyes szinkron.
 Ez a reagálásbeli késés a váratlan A/V eltéréseknél az egyetlen
 mellékhatása ennek az opciónak, minden hangkártya esetében.
@@ -778,7 +778,7 @@ Ez az opció nem mûködik jól néhány demuxer-rel és codec-kel.
 .TP
 .B \-crash\-debug (DEBUG KÓD)
 Automatikusan kapcsolódik a gdb-hez összeomlásnál vagy SIGTRAP-nál.
-A támogatását be kell fordítani a configure \-\-enable-crash-debug kapcsolójával.
+A támogatását be kell fordítani a configure \-\-enable\-crash\-debug kapcsolójával.
 .
 .TP
 .B \-doubleclick\-time
@@ -1077,8 +1077,8 @@ programot (ha van) fogja használni a kiválaszott audió folyammal.
 .B \-alang <nyelv kód[,nyelv kód,...]> (lásd még \-aid)
 A használni kívánt nyelvek priorítás listája.
 A különbözõ konténer formátumok különbözõ nyelv kódokat alkalmaznak.
-A DVD-k az ISO 639-1 két betûs nyelv kódokat, a Matroska, az MPEG-TS és
-a NUT az ISO 639-2 három betûs nyelv kódokat, míg az az OGM egy egyéni
+A DVD-k az ISO 639\-1 két betûs nyelv kódokat, a Matroska, az MPEG-TS és
+a NUT az ISO 639\-2 három betûs nyelv kódokat, míg az az OGM egy egyéni
 azonosítót használ. Az MPlayer kiírja a használható nyelveket ha
 bõbeszédû (\-v) módban fut.
 .sp 1
@@ -1095,7 +1095,7 @@ Japánul játszik le egy Matroska fájlt.
 .
 .TP
 .B \-audio\-demuxer <[+]név> (csak \-audiofile mellett)
-Audió demuxer-t ír elõ az \-audiofile -hoz.
+Audió demuxer-t ír elõ az \-audiofile \-hoz.
 A név elé írt '+' jellel kényszerítheted, így elmarad pár ellenõrzés!
 A demuxer nevét kell megadni a \-audio\-demuxer help listának megfelelõen.
 Kompatibilítási okokból elfogadja a demuxer ID-t is, ahogy
@@ -1665,9 +1665,9 @@ képkockák mérete bájtban
 .RE
 .PD 0
 .RSs
-.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif"
+.IPs "mplayer foreman.qcif \-demuxer rawvideo \-rawvideo qcif"
 Lejátsza a népszerû "foreman" minta videót.
-.IPs "mplayer sample-720x576.yuv -demuxer rawvideo -rawvideo w=720:h=576"
+.IPs "mplayer sample-720x576.yuv \-demuxer rawvideo \-rawvideo w=720:h=576"
 Nyers YUV minta lejátszása.
 .RE
 .PD 1
@@ -1683,7 +1683,7 @@ RTSP folyamot a szerverrõl egy megadott kliensre.
 rtsp:// URL-ekkel használandó a cél IP címek kötéséhez.
 Ez az opció pár olyan RTSP szerver esetén hasznos, melyek nem a megfelelõ
 interfésznek küldik az RTP csomagokat.
-Ha az RTSP szerverhez sikertelen a kapcsolódás, használd a -v kapcsolót, hogy
+Ha az RTSP szerverhez sikertelen a kapcsolódás, használd a \-v kapcsolót, hogy
 meglásd, melyik IP címhez próbál kapcsolódni az MPlayer és helyette próbálj
 ki inkább egy olyat, ami a számítógépedhez van rendelve.
 .
@@ -1779,7 +1779,7 @@ TV eszköz megadása (alapértelmezett: /dev/\:video0).
 .I MEGJEGYZÉS:
 A bsdbt848 vezérlõnek megadhatod mind a bktr, mind a tuner eszköz nevét
 vesszõvel elválasztva, tuner a bktr után
-(pl.\& -tv device=/dev/bktr1,/dev/tuner1).
+(pl.\& \-tv device=/dev/bktr1,/dev/tuner1).
 .IPs input=<érték>
 Input megadása (alapértelmezett: 0 (TV), lásd a konzol kimenetet az elérhetõ inputokért).
 .IPs freq=<érték>
@@ -1991,7 +1991,7 @@ Lásd még a \-vf expand opciót.
 Bekapcsolja az SSA/ASS felirat renderelést.
 Ezzel az opcióval a libass lesz használva az SSA/ASS
 külsõ feliratokhoz és matroska sávokhoz.
-Ajánlott még a -embeddedfonts engedélyezése is.
+Ajánlott még a \-embeddedfonts engedélyezése is.
 .
 .TP
 .B \-ass\-border\-color <érték>
@@ -2001,7 +2001,7 @@ A színformátum RRGGBBAA.
 .TP
 .B \-ass\-bottom\-margin <érték>
 Egy fekete sávot ad a kocka aljához.
-Az SSA/ASS renderelõ a feliratokat ide tudja tenni (a \-ass-use-margins kapcsolóval).
+Az SSA/ASS renderelõ a feliratokat ide tudja tenni (a \-ass\-use\-margins kapcsolóval).
 .
 .TP
 .B \-ass\-color <érték>
@@ -2013,7 +2013,7 @@ A színformátum RRGGBBAA.
 Beállítja a betûtípusokhoz használt arány együtthatót az SSA/ASS renderelõben.
 .
 .TP
-.B \-ass>\-force\-style <[Stílus.]Param=Érték[,...]>
+.B \-ass\-force\-style <[Stílus.]Param=Érték[,...]>
 Felülír pár stílus paramétert.
 .sp
 .I PÉLDA:
@@ -2058,7 +2058,7 @@ A fájl szintaxisa ugyan olyan, mint az SSA/ASS
 .TP
 .B \-ass\-top\-margin <érték>
 Egy fekete sávot ad a kocka tetejéhez.
-Az SSA/ASS renderelõ a felsõ feliratokat ide tudja tenni (a \-ass-use-margins kapcsolóval).
+Az SSA/ASS renderelõ a felsõ feliratokat ide tudja tenni (a \-ass\-use\-margins kapcsolóval).
 .
 .TP
 .B \-ass\-use\-margins
@@ -2178,7 +2178,7 @@ egy \-slang kapcsolóval kiválasztva.
 .TP
 .B \-fribidi\-charset <karakterkészlet neve> (csak FriBiDi)
 Nem UTF8 felirat esetén itt adható meg a FriBiDi-nek adandó karakterkészlet
-neve. (alapértelmezett: "ISO8859-8").
+neve. (alapértelmezett: "ISO8859\-8").
 .
 .TP
 .B \-ifo <VOBsub ifo fájl>
@@ -2226,7 +2226,7 @@ Ha a feliratok valamelyikét nem tudod kiválasztani a DVD_n, próbáld ki a
 .B \-slang <nyelv kód[,nyelv kód,...]> (lásd még \-sid)
 Felirat nyelvek priorítási listájának megadására használható.
 A különbözõ konténer formátumok különbözõ nyelvi kódokat használnak.
-A DVD-k az ISO 639-1 két betûs nyelv kódokat, a Matroska az ISO 639-2
+A DVD-k az ISO 639\-1 két betûs nyelv kódokat, a Matroska az ISO 639\-2
 három betûs kódokat, míg az OGM egy egyedi azonosítót használ.
 Az MPlayer kiírja az elérhetõ nyelvek listáját, ha beszédes (\-v) módban fut.
 .sp 1
@@ -3160,7 +3160,7 @@ Csak a bemeneti kép kiválasztott részének megjelenítése, valamint
 többszöri használatával kapcsolható be a cinerama mód is.
 Cinerama módban a film több mint egy TV-n lesz megjelenítve a nagyobb
 kép létrehozásához.
-Az n\-edik -zrcrop opció utáni opciók az n\-edig MJPEG kártyára vonatkoznak,
+Az n\-edik \-zrcrop opció utáni opciók az n\-edig MJPEG kártyára vonatkoznak,
 mindegyik kártyához meg kell adni legalább egy \-zrdev opciót a \-zrcrop
 mellé. Példákért lásd a \-zrhelp kimenetét és a Zr részt a dokumentációban.
 .
@@ -3484,7 +3484,7 @@ Csak natív rajzolási függvények használata.
 Ez kikapcsolja a direkt renderelést, az OSD-t és a hardveres gyorsítást.
 .IPs retrace
 Képkocka váltás kényszerítése függõleges visszatérésnél.
-Csak a \-double-lel használható.
+Csak a \-double\-lel használható.
 Ugyan az a hatása, mint a \-vsync opciónak.
 .IPs "sq\ \ \ "
 Videó mód kiválasztása négyzet pixelekkel.
@@ -3690,7 +3690,7 @@ A vezérlõ nem kezeli jól a \-aspect opciót.
 .br
 .I TANÁCS:
 Valószínûleg meg kell adnod a \-monitorpixelaspect opciót.
-Próbáld ezt: 'mplayer -vo aa -monitorpixelaspect 0.5'.
+Próbáld ezt: 'mplayer \-vo aa \-monitorpixelaspect 0.5'.
 .
 .TP
 .B "caca\ \ \ "
@@ -4105,10 +4105,10 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .SH "DEKÓDOLÓ/SZÛRÕ OPCIÓK"
 .
 .TP
-.B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
+.B \-ac <[\-|+]codec1,[\-|+]codec2,...[,]>
 Használandó audió codec-ek priorításos listája, a codecs.conf-ban lévõ neveik
 alapján.
-A név elé írt '-' jel kikapcsolja az adott codec használatát.
+A név elé írt '\-' jel kikapcsolja az adott codec használatát.
 A név elé írt '+' jel kényszeríti a használatát, ez valószínûleg összeomlást okoz!
 Ha a lista végén van egy ',', az MPlayer próbálkozik a listában nem
 szereplõ codec-okkal is.
@@ -4526,10 +4526,10 @@ Lásd a scale videó szûrõ leírását a további információkért.
 .RE
 .
 .TP
-.B \-vc <[-|+]codec1,[-|+]codec2,...[,]>
+.B \-vc <[\-|+]codec1,[\-|+]codec2,...[,]>
 A használandó videó codec-ek priorítási listáját adja meg, a codecs.conf-ban
 szereplõ nevüknek megfelelõen.
-A név elé írt '-' jel kikapcsolja az adott codec használatát.
+A név elé írt '\-' jel kikapcsolja az adott codec használatát.
 A név elé írt '+' jel kényszeríti a használatát, ez valószínûleg összeomlást okoz!
 Ha a lista végén egy ',' van, az MPlayer visszalép a listában nem
 szereplõ codec-ekre sikertelenség esetén.
@@ -5010,7 +5010,7 @@ hangot. Legalább négy csatornát támogató hangkártya kell hozzá.
 .PD 0
 .RSs
 .IPs <késleltetés>
-késleltetési idõ ms-ben a hátsó hangszórókhoz (0-1000) (alapértelmezett: 20)
+késleltetési idõ ms-ben a hátsó hangszórókhoz (0\-1000) (alapértelmezett: 20)
 Ez a késleltetés a következõképpen állítandó be: Ha d1 a távolság
 a hallgatási pozíciótól az elülsõ hangszórókig és d2 a hallgatási pozíció és
 a hátsó hangszórók távolsága, akkor a késleltetést 15ms-re kell állítani,
@@ -5431,7 +5431,7 @@ méretezni, alapértelmezett lesz a d_width/\:d_height!
 .br
 \-3:   Számított w/h a másik dimenzió és az eredeti képarány segítségével.
 .br
--(n+8): Mint a -n fent, csak a dimenziót 16 legközelebbi többszörösére kerekíti.
+\-(n+8): Mint a \-n fent, csak a dimenziót 16 legközelebbi többszörösére kerekíti.
 .REss
 .IPs <ilaced>
 Beállítja az átlapolt méretezést.
@@ -5627,7 +5627,7 @@ formátum név, mint pl. rgb15, bgr24, yv12, stb. (alapértelmezett: yv12)
 .PD 1
 .
 .TP
-.B pp[=szûrõ1[:opció1[:opció2...]]/[-]szûrõ2...] (lásd még \-pphelp)
+.B pp[=szûrõ1[:opció1[:opció2...]]/[\-]szûrõ2...] (lásd még \-pphelp)
 Engedélyezi az utófeldolgozó alszûrõk megadott láncolatát.
 Az alszûrõket egy '/' jellel kell elválasztani, letiltani pedig egy
 megelõzõ '\-' jellel lehet.
@@ -5705,11 +5705,11 @@ deringing szûrõ
 .IPs tn/tmpnoise[:küszöb1[:küszöb2[:küszöb3]]]
 idõleges zajcsökkentõ
 .RSss
-<küszöb1>: nagyobb -> erõsebb szûrés
+<küszöb1>: nagyobb \-> erõsebb szûrés
 .br
-<küszöb2>: nagyobb -> erõsebb szûrés
+<küszöb2>: nagyobb \-> erõsebb szûrés
 .br
-<küszöb3>: nagyobb -> erõsebb szûrés
+<küszöb3>: nagyobb \-> erõsebb szûrés
 .REss
 .IPs al/autolevels[:f/fullyrange]
 automatikus fényerõ / kontraszt javítás
@@ -5757,7 +5757,7 @@ jó minõségû pp szûrõ kombináció (ha:a:128:7,va:a,dr:a)
 .IPs "\-vf pp=hb/vb/dr/al"
 vízszintes és függõleges deblocking, deringing és automatikus
 fényerõ/\:kontraszt
-.IPs "\-vf pp=de/-al"
+.IPs "\-vf pp=de/\-al"
 alapértelmezett szûrõk fényerõ/\:kontraszt korrekció nélkül
 .IPs "\-vf pp=default/tmpnoise:1:2:3"
 Alapértelmezett szûrõk bekapcsolása & idõleges zajcsökkentõ.
@@ -7176,7 +7176,7 @@ helyett két lépéses kódolásnál.
 .TP
 .B \-skiplimit <érték>
 Egy nem átugrott képkocka utáni átugorható képkockák száma
-(a -noskiplimit opcióval végtelen).
+(a \-noskiplimit opcióval végtelen).
 .
 .TP
 .B \-vobsubout <alapnév>
@@ -7984,7 +7984,7 @@ I/B-kockák kvantálója = P-kocka kvantálója * v{b|i}_qfactor + v{b|i}_qoffset
 különben
 .br
 normális ratecontrol (nem köti meg a következõ P-kocka kvantálót) és
-q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+q= \-q * v{b|i}_qfactor + v{b|i}_qoffset
 .br
 .I TANÁCS:
 Konstans kvantálási kódoláshoz különbözõ kvantálókkal az I/P- és B-kockákhoz
@@ -9537,7 +9537,7 @@ minden partíció analizáló módot.
 Az 1. szint akár 2x-esére is gyorsíthatja az elsõ lépést úgy, hogy az utolsó
 lépés globális PSNR-je változatlan marad a teljes minõségû elsõ lépéshez képest.
 .br
-A 2. szint akár a 4x-esére is gyorsíthatja az elsõ lépést, kb. +/- 0.05dB
+A 2. szint akár a 4x-esére is gyorsíthatja az elsõ lépést, kb. +/\- 0.05dB
 változással a globális PSNR-ben az utolsó lépésben a teljes minõségû elsõ
 lépéshez képest.
 .REss

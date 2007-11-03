@@ -210,7 +210,7 @@ móg³ ogl±daæ filmy na pe³nym ekranie.
 MPlayer obs³uguje OSD do pokazywania stanu, wizualne sprzê¿enie ze sterowaniem
 przy pomocy klawiatury i wy¶wietla ³adne, du¿e, antyaliasowane i cieniowane
 napisy.
-Obs³ugiwane s± czcionki europejskie/\:ISO 8859-1,2 (polskie, czeskie, angielskie
+Obs³ugiwane s± czcionki europejskie/\:ISO 8859\-1,2 (polskie, czeskie, angielskie
 itp.), koreañskie i cyrylica oraz 12 formatów napisów (MicroDVD, SubRip, OGM,
 SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS i nasz w³asny: MPsub)
 i napisów DVD (strumienie SPU, VOBSub i Closed Captions).
@@ -405,7 +405,7 @@ Ma on nastêpuj±cy format:
 .br
 .I PRZYK£AD:
 .br
-mplayer -ao pcm:file=%10%C:test.wav test.avi
+mplayer \-ao pcm:file=%10%C:test.wav test.avi
 .PP
 Mo¿esz umie¶ciæ wszystkie opcje w zbiorach konfiguracyjnych, z których
 MPlayer/MEncoder bêd± czyta³y przy ka¿dym uruchomieniu.
@@ -433,7 +433,7 @@ flip=yes
 # zaczynaj od mf://maskazbiorów
 mf=type=png:fps=25
 # Dziwne negatywy s± fajne
-vf=eq2=1.0:-0.8
+vf=eq2=1.0:\-0.8
 .fi
 .PP
 Mo¿esz te¿ napisaæ zbiór konfiguracyjny dla konkretnego pliku.
@@ -446,7 +446,7 @@ w ~/.mplayer/ lub w tym samym katalogu, co film.
 .SH "OPCJE OGÓLNE"
 .
 .TP
-.B \-codecs-file <plik> (zobacz tak¿e \-afm, \-ac, \-vfm i \-vc)
+.B \-codecs\-file <plik> (zobacz tak¿e \-afm, \-ac, \-vfm i \-vc)
 Pomija standardow± ¶cie¿kê poszukiwania i u¿ywa podanego pliku zamiast
 dostêpnego w systemie lub wbudowanego codecs.conf.
 .
@@ -546,9 +546,9 @@ winvidix, xmga, xvidix, xover, xv (zobacz tak¿e \-vo xv:ck),
 xvmc (zobacz tak¿e \-vo xv:ck) i directx.
 .
 .TP
-.B \-crash-debug (kod do debugowania)
+.B \-crash\-debug (kod do debugowania)
 Automatycznie pod³±cza gdb przy b³edzie lub SIGTRAP.
-Obs³uga musi zostaæ wkompilowana poprzez podanie --enable-crash-debug lub
+Obs³uga musi zostaæ wkompilowana poprzez podanie \-\-enable\-crash\-debug lub
 posiadanie zbioru .developer w katalogu przy konfiguracji.
 .
 .TP
@@ -566,7 +566,7 @@ Dodaje zbiory podane w wierszu poleceñ do listy odtwarzania, zamiast odtwarzaæ
 je od razu.
 .
 .TP
-.B \-fixed-vo (KOD BETA!)
+.B \-fixed\-vo (KOD BETA!)
 Wymusza ustawienie jednego systemu video dla wszystkich zbiorów (jedna
 (de)inicjalizacja dla wszystkich zbiorów).
 Dlatego te¿ tylko jedno okno zostanie otwarte dla wszystkich zbiorów.
@@ -642,7 +642,7 @@ kilkukrotnie napisaæ "echo "seek 10" > mp_pipe" i kolejka bêdzie dzia³aæ.
 .PD 1
 .
 .TP
-.B \-key-fifo-size <2\-65000>
+.B \-key\-fifo\-size <2\-65000>
 Ustala wielko¶æ kolejki buforuj±cej naci¶niêcia klawiszy (domy¶lnie: 10).
 Kolejka wielko¶ci n mo¿e zbuforowaæ (n-1) zdarzeñ.
 Je¶li jest zbyt ma³e niektóre zdarzenia mog± zagin±æ
@@ -657,7 +657,7 @@ ustaw 2 dla Linuksa i 1024 dla Windows.
 Wskazuje plik konfiguracyjny dla LIRC (domy¶lnie: ~/\:.lircrc).
 .
 .TP
-.B \-list-options
+.B \-list\-options
 Wy¶wietla wszystkie dostêpne opcje.
 .
 .TP
@@ -670,15 +670,15 @@ Powtarza film <ilo¶æ> razy.
 W³±cza menu OSD.
 .
 .TP
-.B \-menu-cfg <plik> (tylko z menu OSD)
+.B \-menu\-cfg <plik> (tylko z menu OSD)
 Wskazuje alternatywny plik konfiguracyjny menu.conf.
 .
 .TP
-.B \-menu-root <warto¶æ> (tylko z menu OSD)
+.B \-menu\-root <warto¶æ> (tylko z menu OSD)
 Wybiera menu g³ówne.
 .
 .TP
-.B \-menu-startup (tylko z menu OSD)
+.B \-menu\-startup (tylko z menu OSD)
 Wy¶wietla g³ówne menu zaraz po uruchomieniu MPlayera.
 .
 .TP
@@ -721,11 +721,11 @@ odnosz± siê tylko do zbiorów na tej li¶cie.
 FIXME: Musi to byæ bardziej przejrzyste i dok³adnie udokumentowane.
 .
 .TP
-.B \-really-quiet (zobacz tak¿e \-quiet)
+.B \-really\-quiet (zobacz tak¿e \-quiet)
 Wy¶wietla jeszcze mniej komunikatów wyj¶ciowych i stanu ni¿ z opcj± \-quiet.
 .
 .TP
-.B \-rtc-device <urz±dzenie>
+.B \-rtc\-device <urz±dzenie>
 Korzysta z okre¶lonego urz±dzenia do synchronizacji przez RTC.
 .
 .TP
@@ -799,8 +799,8 @@ programu (je¿eli jest dostêpny) z wybranym strumieniem.
 .B \-alang <kod\ jêzyka[,kod\ jêzyka,...]> (zobacz tak¿e \-aid)
 Okre¶la priorytetow± listê jêzyków, w których audio ma byæ odtwarzane.
 Ró¿ne formaty u¿ywaj± ró¿nych kodów.
-DVD korzysta z dwuliterowych w standardzie ISO 639-1, Matroska i NUT operuj± na
-trzyliterowych ISO 639-2, a OGM korzysta z dowolnego identyfikatora.
+DVD korzysta z dwuliterowych w standardzie ISO 639\-1, Matroska i NUT operuj± na
+trzyliterowych ISO 639\-2, a OGM korzysta z dowolnego identyfikatora.
 MPlayer wy¶wietli dostêpne jêzyki,
 je¶li jest uruchomiony w trybie gatatliwym (\-v).
 .sp 1
@@ -816,13 +816,13 @@ Odtwarza film w formacie Matroska w jêzyku japoñskim.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <[+]nazwa> (tylko z opcj± \-audiofile)
+.B \-audio\-demuxer <[+]nazwa> (tylko z opcj± \-audiofile)
 Wymusza typ demuxera audio dla \-audiofile.
 U¿ycie "+" przed nazw± wymusza j±, wy³±cza to niektóre testy.
-Podaj nazwê demuksera wypisan± przez \-audio-demuxer help.
+Podaj nazwê demuksera wypisan± przez \-audio\-demuxer help.
 Dla kompatybilno¶ci z poprzednimi wersjami akceptuje te¿ 
 ID demuxera zdefiniowane w zbiorze libmpdemux/\:demuxer.h.
-\-audio-demuxer audio albo \-audio-demuxer 17 wymusza MP3.
+\-audio\-demuxer audio albo \-audio\-demuxer 17 wymusza MP3.
 .
 .TP
 .B \-audiofile <nazwa\ zbioru>
@@ -830,7 +830,7 @@ Otwórz audio z zewnêtrznego zbioru (WAV, MP3 lub Ogg Vorbis) podczas
 odtwarzania filmu.
 .
 .TP
-.B \-audiofile-cache <kBajty>
+.B \-audiofile\-cache <kBajty>
 W³±cza cache dla strumienia u¿ywanego przez \-audiofile, u¿ywaj±c okre¶lonej
 ilo¶ci pamiêci.
 .
@@ -848,11 +848,11 @@ buforowania zbioru lub URL.
 Szczególnie przydatne przy powolnych no¶nikach.
 .
 .TP
-.B \-cache-min <procent>
+.B \-cache\-min <procent>
 Odtwarzanie rozpocznie siê gdy bufor zostanie wype³niony w podanym stopniu.
 .
 .TP
-.B \-cache-seek-min <procent> (jeszcze nie zaimplementowane)
+.B \-cache\-seek\-min <procent> (jeszcze nie zaimplementowane)
 Je¶li wykonano przewijanie do pozycji w promieniu <procent> wielko¶ci cache od
 aktualnej pozycji, MPlayer poczeka na wype³nienie cache zamiast wykonywaæ
 przewijanie (domy¶lnie: 50).
@@ -894,7 +894,7 @@ Warto¶æ mo¿e byæ ujemna.
 .RE
 .
 .TP
-.B \-cdrom-device <¶cie¿ka\ do\ urz±dzenia>
+.B \-cdrom\-device <¶cie¿ka\ do\ urz±dzenia>
 Ustawia ¶cie¿kê do urz±dzenia CD-ROM (domy¶lnie: /dev/\:cdrom).
 .
 .TP
@@ -937,7 +937,7 @@ Mo¿e te¿ okre¶liæ numer rozdzia³u na którym nale¿y skoñczyæ odtwarzanie
 Wysy³a cookies przy ¿±daniach HTTP.
 .
 .TP
-.B \-cookies-file <nazwa\ zbioru> (tylko z sieci±)
+.B \-cookies\-file <nazwa\ zbioru> (tylko z sieci±)
 Czyta HTTP cookies z <nazwa zbioru> (domy¶lnie ~/.mozilla/ i ~/.netscape/)
 i nie czytaj z miejsc standardowych.
 Zak³ada ¿e zbiór jest w formacie Netscape.
@@ -1001,7 +1001,7 @@ Twojej karty) lub w ostateczno¶ci ~/.mplayer/\:channels.conf.
 .PD 1
 .
 .TP
-.B \-dvd-device <¶cie¿ka\ do\ urz±dzenia> (tylko DVD)
+.B \-dvd\-device <¶cie¿ka\ do\ urz±dzenia> (tylko DVD)
 Podaje ¶cie¿kê do urz±dzenia DVD (domy¶lnie: /dev/\:dvd).
 Mo¿esz równie¿ okre¶liæ katalog z plikami uprzednio skopiowanymi prosto z
 DVD (np. przez vobcopy).
@@ -1043,7 +1043,7 @@ Przydatne je¶li warto¶æ w nag³ówku jest z³a/\:nie istnieje.
 Odtwarza/\:konwertuje tylko pierwsze <ilo¶æ> klatek, potem wychodzi.
 .
 .TP
-.B \-hr-mp3-seek (tylko z MP3)
+.B \-hr\-mp3\-seek (tylko z MP3)
 Dok³adne przeszukiwanie MP3.
 W³±czone gdy odtwarzamy z zewnêtrznego zbioru MP3, gdy¿ potrzebujemy
 znale¼æ bardzo dok³adn± pozycjê do utrzymania synchronizacji A/\:V.
@@ -1062,7 +1062,7 @@ Opcji tej mo¿na u¿ywaæ tylko je¶li dany no¶nik obs³uguje wyszukiwanie
 (czyli nie stdin, kolejka itp.).
 .
 .TP
-.B \-ipv4-only-proxy (tylko z sieci±)
+.B \-ipv4\-only\-proxy (tylko z sieci±)
 Ignoruje proxy dla adresów IPv6.
 Bêdzie on nadal u¿ywany dla adresów IPv4.
 .
@@ -1123,12 +1123,12 @@ Zawsze wraca do wyboru demuxera w oparciu o zawarto¶æ.
 Podaje has³o dla autoryzacji HTTP.
 .
 .TP
-.B \-prefer-ipv4
+.B \-prefer\-ipv4
 U¿ywa IPv4 do po³±czeñ sieciowych.
 Je¶li siê nie da, automatycznie przestawia na IPv6.
 .
 .TP
-.B \-prefer-ipv6
+.B \-prefer\-ipv6
 U¿ywa IPv6 do po³±czeñ sieciowych.
 Je¶li siê nie da, automatycznie przestawia na IPv4.
 .
@@ -1185,7 +1185,7 @@ rozmiar ramki w bajtach
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (tylko z LIVE.COM)
+.B \-rtsp\-stream\-over\-tcp (tylko z LIVE.COM)
 U¿ywane z URLami "rtsp://" dla okre¶lenia, ¿e nadchodz±ce pakiety RTP i RTCP
 maj± byæ przesy³ane przez TCP (u¿ywaj±c tego samego po³±czenia co RTSP).
 Przydatne przy uszkodzonym po³±czeniu internetowym, które nie przepuszcza
@@ -1217,7 +1217,7 @@ Wybiera czêstotliwo¶æ próbkowania, która bêdzie dalej wykorzystywana
 Je¿eli wybrana czêstotliwo¶æ jest inna ni¿ w obecnie przetwarzanym strumieniu,
 w wartwie d¼wiêkowej zostanie zastosowany filtr resample lub lavcresample,
 aby zniwelowaæ ró¿nicê.
-Opcja \-af-adv steruje typem przepróbkowywania.
+Opcja \-af\-adv steruje typem przepróbkowywania.
 Domy¶lne jest szybkie przepróbkowywanie, które mo¿e zniekszta³ciæ d¼wiêk.
 .
 .TP
@@ -1267,7 +1267,7 @@ dostêpne sterowniki: dummy, v4l, v4l2, bsdbt848
 .IPs device=<warto¶æ>
 Podaje urz±dzenie TV (domy¶lnie: /dev/\:video0).
 .IPs input=<warto¶æ>
-Wybiera wej¶cie (domy¶lnie: 0 - TV, lista jest wypisywana na konsoli).
+Wybiera wej¶cie (domy¶lnie: 0 \- TV, lista jest wypisywana na konsoli).
 .IPs freq=<warto¶æ>
 Podaje czêstotliwo¶æ na któr± nale¿y ustawiæ tuner (np.\& 511.250).
 Nie dzia³a z parametrem channels.
@@ -1308,7 +1308,7 @@ Numer kana³u bêdzie pozycj± na li¶cie kana³ów, licz±c od 1.
 .br
 .I PRZYK£AD:
 tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
-.IPs [brightness|contrast|hue|saturation]=<-100\-100>
+.IPs [brightness|contrast|hue|saturation]=<\-100\-100>
 Ustawia korekcjê obrazu na karcie.
 .IPs audiorate=<warto¶æ>
 Ustawia tempo bitowe przechwytywania audio.
@@ -1381,7 +1381,7 @@ Wybiera jako¶æ kompresji JPEG
 Podaje nazwê u¿ytkownika do uwierzytelnienia HTTP.
 .
 .TP
-.B \-user-agent <ci±g>
+.B \-user\-agent <ci±g>
 Zg³asza <ci±g> jako program u¿ytkownika (user agent) w strumieniowaniu HTTP.
 .
 .TP
@@ -1414,7 +1414,7 @@ Tworzy w bie¿±cym katalogu zbiór dumpsub.sub.
 .
 .TP
 .B \-dumpmpsub (tylko MPlayer)
-Konwertuje podane (przy pomocy opcji \-sub) napisy na format MPlayera - MPsub.
+Konwertuje podane (przy pomocy opcji \-sub) napisy na format MPlayera \- MPsub.
 Tworzy w bie¿±cym katalogu zbiór dumpsub.mpsub.
 .
 .TP
@@ -1452,11 +1452,11 @@ pogrubiony czarny zarys
 .PD 1
 .
 .TP
-.B \-flip-hebrew (tylko z FriBiDi)
+.B \-flip\-hebrew (tylko z FriBiDi)
 W³±cza obracanie napisów przy u¿yciu FriBiDi
 .
 .TP
-.B \-noflip-hebrew-commas
+.B \-noflip\-hebrew\-commas
 Zmienia przypuszczenia FriBiDi na temat umiejscowiania przecinków w napisach.
 U¿ywaj, je¶li przecinki s± umieszczane na pocz±tku zdania zamiast na koñcu.
 .
@@ -1491,9 +1491,9 @@ Wy¶wietla tylko wymuszone napisy ze strumienia napisów DVD wybranego przez
 np.\& \-slang.
 .
 .TP
-.B \-fribidi-charset <nazwa\ zestawu> (tylko z FriBiDi)
+.B \-fribidi\-charset <nazwa\ zestawu> (tylko z FriBiDi)
 Ustala zestaw znaków który zostanie przekazany do FriBiDi przy dekodowaniu
-napisów w innym formacie ni¿ UTF-8 (domy¶lnie: ISO8859-8).
+napisów w innym formacie ni¿ UTF-8 (domy¶lnie: ISO8859\-8).
 .
 .TP
 .B \-ifo <zbior\ ifo\ VOBsub>
@@ -1535,8 +1535,8 @@ Je¶li nie mo¿esz wybraæ napisów na DVD, wypróbuj \-vobsubid.
 .B \-slang <kod\ jêzyka[,kod\ jêzyka,...]> (zobacz tak¿e \-sid)
 Okre¶la priorytetow± listê jêzyków, w których napisy maj± byæ wy¶wietlane.
 Ró¿ne formaty u¿ywaj± ró¿nych kodów.
-DVD korzysta z dwuliterowych w standardzie ISO 639-1, Matroska operuje na
-trzyliterowych ISO 639-2, a OGM korzysta z dowolnego identyfikatora.
+DVD korzysta z dwuliterowych w standardzie ISO 639\-1, Matroska operuje na
+trzyliterowych ISO 639\-2, a OGM korzysta z dowolnego identyfikatora.
 MPlayer wy¶wietli dostêpne jêzyki,
 je¶li jest uruchomiony w trybie gatatliwym (\-v).
 .sp 1
@@ -1573,11 +1573,11 @@ rozmycie Gaussa (bardzo ³adne)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2> (tylko OSD)
+.B \-spualign <\-1\-2> (tylko OSD)
 Ustala jak powinny byæ wyrównane napisy SPU (DVD/\:VOBsub).
 .PD 0
 .RSs
-.IPs "-1"
+.IPs "\-1"
 oryginalna pozycja
 .IPs " 0"
 Wyrównaj na górze (oryginalne/\:domy¶lne zachowanie).
@@ -1599,27 +1599,27 @@ U¿ywa/\:wy¶wietla te zbiory napisów.
 Tylko jeden zbiór mo¿e wyæ wy¶wietlany w danej chwili.
 .
 .TP
-.B \-sub-bg-alpha <0\-255>
+.B \-sub\-bg\-alpha <0\-255>
 Ustawia warto¶æ kana³u alfa dla napisów i t³a OSD.
 Wiêksze warto¶ci oznaczaj± wiêksz± przezroczysto¶æ.
 0 oznacza pe³n± przezroczysto¶æ.
 .
 .TP
-.B \-sub-bg-color <0\-255>
+.B \-sub\-bg\-color <0\-255>
 Ustawia kolor t³a napisów i OSD.
 Obecnie napisy s± w skali szaro¶ci, wiêc jest to odpowiednik nasycenia koloru.
 Warto¶æ 255 oznacza biel a 0 czerñ.
 .
 .TP
-.B \-sub-demuxer <[+]nazwa> (tylko \-subfile) (KOD BETA)
+.B \-sub\-demuxer <[+]nazwa> (tylko \-subfile) (KOD BETA)
 Wymusza typ demuxera napisów dla \-subfile.
 U¿ycie "+" przed nazw± wymusza j±, wy³±cza to niektóre testy.
-Podaj nazwê demuksera wypisan± przez \-audio-demuxer help.
+Podaj nazwê demuksera wypisan± przez \-audio\-demuxer help.
 Dla kompatybilno¶ci z poprzednimi wersjami akceptuje te¿
 ID demuxera zdefiniowane w zbiorze libmpdemux/\:demuxer.h.
 .
 .TP
-.B \-sub-fuzziness <tryb>
+.B \-sub\-fuzziness <tryb>
 Dostosowuje niedok³adno¶æ dopasowywania przy szukaniu napisów:
 .PD 0
 .RSs
@@ -1633,7 +1633,7 @@ Wczytaj wszystkie napisy z aktualnego katalogu.
 .PD 1
 .
 .TP
-.B \-sub-no-text-pp
+.B \-sub\-no\-text\-pp
 Wy³±cza wszelkie przetwarzanie tekstu po wczytaniu napisów.
 Stosowane w celach wy³apywania b³êdów.
 .
@@ -1705,7 +1705,7 @@ Aktualnie bezu¿yteczne.
 To samo co \-audiofile, ale dla strumieni napisów (OggDS?).
 .
 .TP
-.B \-subfont-autoscale <0\-3> (tylko z obs³ug± FreeType)
+.B \-subfont\-autoscale <0\-3> (tylko z obs³ug± FreeType)
 Ustawia tryb autoskalowania.
 .br
 .I INFORMACJA:
@@ -1727,25 +1727,25 @@ proporcjonalny do przek±tnej filmu (domy¶lne)
 .PD 1
 .
 .TP
-.B \-subfont-blur <0\-8> (tylko FreeType)
+.B \-subfont\-blur <0\-8> (tylko FreeType)
 Ustawia promieñ rozmycia czcionki (domy¶lnie: 2).
 .
 .TP
-.B \-subfont-encoding <warto¶æ> (tylko FreeType)
+.B \-subfont\-encoding <warto¶æ> (tylko FreeType)
 Ustawia kodowanie czcionki.
 Warto¶æ "unicode" oznacza, ¿e bêd± wy¶wietlane wszystkie znaki ze zbioru i
 bêdzie u¿ywany unicode (domy¶lnie: unicode).
 .
 .TP
-.B \-subfont-osd-scale <0\-100> (tylko FreeType)
+.B \-subfont\-osd\-scale <0\-100> (tylko FreeType)
 Ustawia wspó³czynnik automatycznego skalowania elementów OSD (domy¶lnie: 6).
 .
 .TP
-.B \-subfont-outline <0\-8> (tylko FreeType)
+.B \-subfont\-outline <0\-8> (tylko FreeType)
 Ustawia grubo¶æ linii zewnêtrznej czcionki (domy¶lnie: 2)
 .
 .TP
-.B \-subfont-text-scale <0\-100> (tylko FreeType)
+.B \-subfont\-text\-scale <0\-100> (tylko FreeType)
 Ustawia wska¼nik automatycznego skalowania napisów jako procent rozmiaru ekranu
 (domy¶lnie: 5).
 .
@@ -1806,7 +1806,7 @@ Korzysta z miksera innego ni¿ domy¶lny /dev/\:mixer.
 Przy ALSA jest to nazwa miksera.
 .
 .TP
-.B \-mixer-channel <linia miksera>[, indeks miksera] (tylko \-ao oss i \-ao alsa)
+.B \-mixer\-channel <linia miksera>[, indeks miksera] (tylko \-ao oss i \-ao alsa)
 Ta opcja mówi MPlayerowi, ¿eby u¿y³ innego kana³u do sterowania g³o¶no¶ci± ni¿
 domy¶lne PCM.
 Czê¶æ mo¿liwo¶ci dla OSS to
@@ -1826,7 +1826,7 @@ Nazwy kana³ów miksera ALSA z do³±czonym numerem musz± byæ zapisane w formacie
 Wymusza u¿ycie programowego miksera, zamiast tego w karcie d¼wiêkowej.
 .
 .TP
-.B \-softvol-max <10.0\-10000.0>
+.B \-softvol\-max <10.0\-10000.0>
 Ustawia maksymalny poziom wzmocnienia w procentach (domy¶lnie: 110).
 Warto¶æ 200 pozwoli na podniesienie g³o¶no¶ci do maksimum dwukrotno¶ci
 aktualnego poziomu.
@@ -1902,7 +1902,7 @@ Ustawia urz±dzenie wyj¶ciowe d¼wiêku (domy¶lnie: /dev/\:dsp).
 .
 .TP
 .B "sdl\ \ \ \ "
-sterownik dla biblioteki wysoce niezale¿nej od platformy - SDL (Simple
+sterownik dla biblioteki wysoce niezale¿nej od platformy \- SDL (Simple
 Directmedia Layer)
 .PD 0
 .RSs
@@ -2028,12 +2028,12 @@ Wymusza inn± g³êbiê kolorów ni¿ wykryta.
 Obs³ugiwane tylko przez sterowniki wyj¶cia video fbdev, dga, svga i vesa.
 .
 .TP
-.B \-brightness <-100\-100>
+.B \-brightness <\-100\-100>
 Modyfikuje jasno¶æ wyj¶cia video (domy¶lnie: 0).
 Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .
 .TP
-.B \-contrast <-100\-100>
+.B \-contrast <\-100\-100>
 Modyfikuje kontrast wyj¶cia video (domy¶lnie: 0).
 Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .
@@ -2128,7 +2128,7 @@ Uaktualnia zapisane ustawienia nak³adki.
 W³±cza osd w nak³adce.
 .IPs nool-osd
 Wy³±cza osd w nak³adce (domy¶lne).
-.IPs ol[h|w|x|y]-cor=<-20\-20>
+.IPs ol[h|w|x|y]-cor=<\-20\-20>
 Modyfikuje rozmiar (h,w) i pozycjê (x,y) nak³adki w przypadku gdy nie pasuje
 ona do okna (domy¶lnie: 0).
 .IPs overlay
@@ -2156,7 +2156,7 @@ Odtwarzanie pe³noekranowe (film w centrum i czarne obramowanie wokó³ niego).
 Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .
 .TP
-.B \-fsmode-dontuse <0\-31> (PRZESTARZA£E, u¿ywaj opcji \-fs)
+.B \-fsmode\-dontuse <0\-31> (PRZESTARZA£E, u¿ywaj opcji \-fs)
 Wypróbuj tê opcjê, je¿eli masz problemy z trybem pe³noekranowym.
 .
 .TP
@@ -2240,21 +2240,21 @@ ekranu video, co jest przydatne by osadziæ mini-GUI w przegl±darce
 (u¿ywaj±cej na przyk³ad wtyczki MPlayer).
 .
 .TP
-.B \-hue <-100\-100>
+.B \-hue <\-100\-100>
 Modyfikuje barwê sygna³u video (domy¶lnie: 0).
 Dziêki tej opcji mo¿esz otrzymaæ kolorowy negatyw obrazu.
 Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
 .
 .TP
-.B \-monitor-dotclock <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
+.B \-monitor\-dotclock <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
 Okre¶la zakres dotclock lub pixelclock monitora.
 .
 .TP
-.B \-monitor-hfreq <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
+.B \-monitor\-hfreq <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
 Okre¶la zakres czêstotliwo¶ci poziomej monitora.
 .
 .TP
-.B \-monitor-vfreq <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
+.B \-monitor\-vfreq <zakres[,zakres,...]> (tylko \-vo fbdev i vesa)
 Okre¶la zakres czêstotliwo¶ci pionowej monitora.
 .
 .TP
@@ -2314,7 +2314,7 @@ Jednak obrazki t³a na pulpicie mog± przes³aniaæ okno filmu.
 Dzia³a tylko ze sterownikami wyj¶cia video x11, xv, xmga, xvidix, quartz, macosx i directx.
 .
 .TP
-.B \-saturation <-100\-100>
+.B \-saturation <\-100\-100>
 Modyfikuje nasycenie sygna³u wyj¶cia video (domy¶lnie: 0).
 Dziêki tej opcji mo¿na uzyskaæ obraz w skali szaro¶ci.
 Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
@@ -2330,7 +2330,7 @@ Podaje poziom± rozdzielczo¶æ ekranu dla sterowników wyj¶cia video które nie
 znaj± rozdzielczo¶ci ekranu, jak fbdev, x11 i TVout.
 .
 .TP
-.B \-stop-xscreensaver (tylko X11)
+.B \-stop\-xscreensaver (tylko X11)
 Wy³±cza wygaszacz ekranu przy starcie i w³±cza go ponownie podczas wychodzenia.
 .
 .TP
@@ -2552,7 +2552,7 @@ Wykorzystuje sprzêtowo wspomagany skalator (domy¶lnie: hwaccel).
 .
 .TP
 .B "vidix\ \ "
-VIDIX (VIDeo Interface for *niX - interfejs video dla *niX) to interfejs do
+VIDIX (VIDeo Interface for *niX \- interfejs video dla *niX) to interfejs do
 mo¿liwo¶ci przyspieszaj±cych w ró¿nych kartach graficznych.
 Bardzo szybki sterownik wyj¶cia video na kartach, które go obs³uguj±.
 .PD 0
@@ -2876,7 +2876,7 @@ filmów MPEG).
 Musisz w³±czyæ tê opcjê, je¿eli masz problemy z rozrywaniem/\:brakiem p³ynno¶ci
 ruchów podczas ogl±dania materia³u z przeplotem.
 .IPs layer=N
-Wymusi wybranie warstwy o ID N do odtwarzania (domy¶lnie: -1 - auto).
+Wymusi wybranie warstwy o ID N do odtwarzania (domy¶lnie: \-1 \- auto).
 .IPs dfbopts=<lista>
 Podaje listê parametrów dla DirectFB.
 .RE
@@ -2896,7 +2896,7 @@ tak samo jak directfb (domy¶lnie: triple)
 .IPs fieldparity=top|bottom
 tak samo jak directfb
 .IPs (no)bes
-W³±cza Matrox BES (backend scaler - koñcowy system skaluj±cy)
+W³±cza Matrox BES (backend scaler \- koñcowy system skaluj±cy)
 (domy¶lnie: wy³±czony).
 Daje bardzo dobre rezultaty bior±c pod uwagê zarówno szybko¶æ jak i wyj¶ciow±
 jako¶æ, jako ¿e interpolowana obróbka obrazu jest przeprowadzana sprzêtowo.
@@ -2983,7 +2983,7 @@ Wybiera podsterownik video u¿ywany jako nak³adka (x11, xv).
 .
 .TP
 .B dxr3 (tylko DXR3)
-Sterownik wyj¶cia video przeznaczony dla chipu dekoduj±cego MPEG - Sigma
+Sterownik wyj¶cia video przeznaczony dla chipu dekoduj±cego MPEG \- Sigma
 Designs em8300 (Creative DXR3, Sigma Designs Hollywood Plus).
 Sprawd¼ równie¿ filtr video lavc.
 .PD 0
@@ -3073,7 +3073,7 @@ i przechowuje j± w pliku (domy¶lnie: ./stream.yuv).
 Format jest taki sam jak ten stosowany przez mjpegtools, wiêc jest to przydatne
 je¶li chcesz poddaæ film obróbce przy pomocy tego pakietu.
 Obs³uguje formaty YV12, RGB (24 bpp) i BGR (24bpp).
-Mo¿esz tego u¿yæ z opcj± \-fixed-vo ¿eby po³±czyæ zbiory o tych samych
+Mo¿esz tego u¿yæ z opcj± \-fixed\-vo ¿eby po³±czyæ zbiory o tych samych
 wymiarach i ilo¶ci klatek na sekundê.
 .PD 0
 .RSs
@@ -3183,7 +3183,7 @@ Ka¿dy plik dostaje jako nazwê numer klatki poprzedzony zerami.
 Obs³uguje formaty RGB i BGR z 24 bpp.
 .PD 0
 .RSs
-.IPs z=<0-9>
+.IPs z=<0\-9>
 Okre¶la poziom kompresji.
 0 oznacza jej brak, a 9 maksymaln±.
 .RE
@@ -3211,7 +3211,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .SH "OPCJE DEKODOWANIA/\:FILTROWANIA"
 .
 .TP
-.B \-ac <[-|+]kodek1,[-|+]kodek2,...[,]>
+.B \-ac <[\-|+]kodek1,[\-|+]kodek2,...[,]>
 Ustala priorytetow± listê u¿ywanych kodeków audio, wed³ug ich nazw
 w codecs.conf.
 U¿yj "-" przed nazw± kodeka aby go pomin±æ.
@@ -3231,13 +3231,13 @@ Wymusza kodek MP3 l3codeca.acm.
 Próbuje najpierw libmad, pó¼niej pozosta³e.
 .IPs "\-ac hwac3,a52,"
 W³±cza sprzêtowe AC3, programowy kodek AC3, potem pozosta³e.
-.IPs "\-ac -ffmp3,"
+.IPs "\-ac \-ffmp3,"
 Pomija kodek MP3 FFmpeg.
 .RE
 .PD 1
 .
 .TP
-.B \-af-adv <force=(0\-7):list=(filters)> (zobacz tak¿e \-af)
+.B \-af\-adv <force=(0\-7):list=(filters)> (zobacz tak¿e \-af)
 Podaje zaawansowane opcje filtrów audio:
 .RSs
 .IPs force=<0\-7>
@@ -3622,7 +3622,7 @@ Wiêcej informacji jest w opisie filtra video scale.
 .RE
 .
 .TP
-.B \-vc <[-|+]kodek1,[-|+]kodek2,...[,]>
+.B \-vc <[\-|+]kodek1,[\-|+]kodek2,...[,]>
 Ustala priorytetow± listê u¿ywanych kodeków video, wed³ug ich nazw
 w codecs.conf.
 U¿yj "-" przed nazw± kodeka aby go pomin±æ.
@@ -3640,7 +3640,7 @@ Mo¿esz pobraæ listê dostêpnych kodeków poprzez \-vc help.
 Wymusza kodek Win32/\:VfW DivX.
 .IPs "\-vc divx4,"
 Próbuj najpierw kodek divx4linux, pó¼niej pozosta³e.
-.IPs "\-vc -divxds,-divx,"
+.IPs "\-vc \-divxds,\-divx,"
 Pomija kodeki Win32 DivX.
 .IPs "\-vc ffmpeg12,mpeg12,"
 Próbuj kodeki libavcodec MPEG-1/\:2, pó¼niej libmpeg2, potem inne.
@@ -3889,14 +3889,14 @@ filtru korektora.
 .RSs
 .IPs <g1>:<g2>:<g3>:...:<g10>
 Liczby rzeczywiste okre¶laj±ce przyrost w dB dla ka¿dego pasma czêstotliwo¶ci
-(-12\-12).
+(\-12\-12).
 .RE
 .sp 1
 .RS
 .I PRZYK£AD:
 .RE
 .RSs
-.IPs "mplayer \-af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi"
+.IPs "mplayer \-af equalizer=11:11:10:5:0:\-12:0:5:12:12 media.avi"
 Wzmocni d¼wiêk w wy¿szych i ni¿szych zakresach czêstotliwo¶ci, wyciszaj±c
 go jednocze¶nie oko³o 1kHz.
 .RE
@@ -3982,7 +3982,7 @@ audio.
 .RSs
 .IPs "<v>\ \ "
 Ustawia wzmocnienie w dB dla wszystkich kana³ów w strumieniu od
-warto¶ci -200dB do +60dB, gdzie -200dB oznacza ca³kowite wyciszenie
+warto¶ci \-200dB do +60dB, gdzie \-200dB oznacza ca³kowite wyciszenie
 a +60dB 1000-krotne wzmocnienie (domy¶lnie: 0).
 .IPs "<sc>\ "
 W³±cza (1) lub wy³±cza (2) soft-clipping (miêkkie obcinanie).
@@ -4069,7 +4069,7 @@ Zauwa¿, ¿e liczb± kana³ów zwiêkszy siê do <kan>, je¿eli zajdzie taka potrzeba.
 .I PRZYK£AD:
 .RE
 .RSs
-.IPs "mplayer \-af sub=100:4 -channels 5 media.avi"
+.IPs "mplayer \-af sub=100:4 \-channels 5 media.avi"
 Doda kana³ subwoofera z ustawion± czêstotliwo¶ci± graniczn± na 100Hz
 do 4 kana³u wyj¶ciowego.
 .RE
@@ -4139,7 +4139,7 @@ warto¶ci od s1 do s5 (dla systemu 5.1).
 Nie ma sensu braæ pod uwagê subwoofera (i tak nie us³yszysz ró¿nicy).
 .IP 2. 3
 Odejmij odleg³o¶æ od s1 do s5 od odleg³o¶ci maksymalnej
-tzn. s[i] = max(s) - s[i]; i = 1...5.
+tzn. s[i] = max(s) \- s[i]; i = 1...5.
 .IP 3.
 Oblicz ¿±dane opó¼nienia w ms jako d[i] = 1000*s[i]/342; i = 1...5.
 .RE
@@ -4198,7 +4198,7 @@ dodaj±c efekt "przekazu na ¿ywo" do odtwarzania.
 Okre¶la wspó³czynnik ró¿nicy wyra¿ony liczb± rzeczywist± (domy¶lnie: 2.5).
 Je¶li podasz mu warto¶æ 0.0, d¼wiêk bêdzie odtwarzany w trybie mono
 (¶rednia z dwóch kana³ów), przy 1.0, d¼wiêk pozostanie niezmieniony, a je¶li
-podasz -1.0, lewy kana³ zostanie zamieniony z prawym.
+podasz \-1.0, lewy kana³ zostanie zamieniony z prawym.
 .RE
 .PD 1
 .
@@ -4278,7 +4278,7 @@ Odradzane na rzecz \-vf.
 .PP
 Wiele parametrów jest opcjonalnych i je¿eli zostan± pominiête, ich warto¶ci
 ustawiane s± na domy¶lne.
-U¿yj "-1", aby wyra¼nie nakazaæ ustawiania warto¶ci domy¶lnej.
+U¿yj "\-1", aby wyra¼nie nakazaæ ustawiania warto¶ci domy¶lnej.
 Parametry w:h oznaczaj± szeroko¶æ x wysoko¶æ w pikselach, x:y oznacza pozycjê
 od lewego górnego rogu wiêkszego obrazu.
 .br
@@ -4289,21 +4289,21 @@ Filtry obrazu s± zorganizowane w listy.
 Jest kilka poleceñ zarz±dzaj±cych list± filtrów.
 .
 .TP
-.B \-vf-add <filtr1[,filtr2,...]>
+.B \-vf\-add <filtr1[,filtr2,...]>
 Dodaje podane jako parametry filtry do listy filtrów.
 .
 .TP
-.B \-vf-pre <filtr1[,filtr2,...]>
+.B \-vf\-pre <filtr1[,filtr2,...]>
 Poprzedza listê filtrów podanymi filtrami.
 .
 .TP
-.B \-vf-del <poz1[,poz2,...]>
+.B \-vf\-del <poz1[,poz2,...]>
 Usuwa filtry na podanych pozycjach.
 Pozycje rozpoczynaj± siê od 0, ujemne liczby odnosz± siê do koñca listy
-(-1 to ostani).
+(\-1 to ostani).
 .
 .TP
-.B \-vf-clr
+.B \-vf\-clr
 Usuwa wszystkie filtry.
 .PP
 Je¶li filtr to obs³uguje mo¿esz odnosiæ siê do parametrów podaj±c ich nazwy.
@@ -4357,10 +4357,10 @@ input.conf.
 .PD 0
 .RSs
 .IPs <w>,<h>
-szeroko¶æ i wysoko¶æ (domy¶lnie: -1, maksymalny mo¿liwy rozmiar przy którym
+szeroko¶æ i wysoko¶æ (domy¶lnie: \-1, maksymalny mo¿liwy rozmiar przy którym
 granice wci±¿ s± widoczne.)
 .IPs <x>,<y>
-pozycja lewego górnego rogu (domy¶lnie: -1, najwy¿ej i najbardziej w lewo jak
+pozycja lewego górnego rogu (domy¶lnie: \-1, najwy¿ej i najbardziej w lewo jak
 to tylko mo¿liwe)
 .RE
 .PD 1
@@ -4378,7 +4378,7 @@ Ujemne warto¶ci traktowane s± jak zmiany oryginalnej wielko¶ci
 .I PRZYK£AD:
 .PD 0
 .RSs
-.IP expand=0:-50:0:0
+.IP expand=0:\-50:0:0
 Dodaje 50 pixeli ramki na dole obrazka.
 .RE
 .PD 1
@@ -4445,13 +4445,13 @@ skalowaæ, domy¶lnie jest d_width/\:d_height!
 .RSss
  0:   skalowana d_width/\:d_height
 .br
--1:   oryginalna wysoko¶æ/\:szeroko¶æ
+\-1:   oryginalna wysoko¶æ/\:szeroko¶æ
 .br
--2:   Oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i preskalowanych proporcji.
+\-2:   Oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i preskalowanych proporcji.
 .br
--3:   Oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i oryginalnych proporcji.
+\-3:   Oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i oryginalnych proporcji.
 .br
--(n+8): Jak -n powy¿ej, ale zaokr±gla wymiar do najbli¿szej wielokrotno¶ci 16.
+\-(n+8): Jak \-n powy¿ej, ale zaokr±gla wymiar do najbli¿szej wielokrotno¶ci 16.
 .REss
 .IPs <przeplot>
 Prze³±cza skalowanie z przeplotem.
@@ -4526,26 +4526,26 @@ Mo¿e byæ jedn± z tych specjalnych warto¶ci:
 .RSss
  0:   oryginalna wysoko¶æ i szeroko¶æ wy¶wietlania
 .br
--1:   oryginalna wysoko¶æ\:/szeroko¶æ filmu (domy¶lne)
+\-1:   oryginalna wysoko¶æ\:/szeroko¶æ filmu (domy¶lne)
 .br
--2:   Oblicza w/\:h na podstawie drugiej wielko¶ci i oryginalnych proporcji
+\-2:   Oblicza w/\:h na podstawie drugiej wielko¶ci i oryginalnych proporcji
 wy¶wietlania.
 .br
--3:   Oblicza w/\:h na podstawie drugiej wielko¶ci i oryginalnych proporcji
+\-3:   Oblicza w/\:h na podstawie drugiej wielko¶ci i oryginalnych proporcji
 filmu.
 .REss
 .sp 1
 .I PRZYK£AD:
 .PD 0
 .RSs
-.IP dsize=800:-2
+.IP dsize=800:\-2
 Daje rozdzielczo¶æ wyj¶ciow± 800x600 dla filmu w proporcji 4/3,
 lub 800x450 dla filmu w proporcji 16/9.
 .RE
 .IPs <metoda-proporcji>
 Zmienia wysoko¶æ i szeroko¶æ wed³ug oryginalnych proporcji.
 .RSss
--1: Ignoruje oryginalne proporcje (domy¶lne).
+\-1: Ignoruje oryginalne proporcje (domy¶lne).
 .br
  0: Utrzymaj proporcje wy¶wietlania u¿ywaj±c <w> i <h> jako maksymalnej
 rozdzielczo¶ci.
@@ -4637,7 +4637,7 @@ nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yv12)
 .PD 1
 .
 .TP
-.B pp[=filtr1[:opcja1[:opcja2...]]/\:[-]filtr2...] (zobacz tak¿e \-pphelp)
+.B pp[=filtr1[:opcja1[:opcja2...]]/\:[\-]filtr2...] (zobacz tak¿e \-pphelp)
 Ta opcja uruchamia okre¶lony ³añcuch podfiltrów postprocessingu.
 Podfiltry musz± byæ oddzielone znakiem "/" i mog± byæ wy³±czone przez
 poprzedzenie ich znakiem "\-".
@@ -4714,11 +4714,11 @@ filtr usuwania efektu dzwonienia
 .IPs tn/tmpnoise[:próg1[:próg2[:próg3]]]
 redukcja szumów czasowych
 .RSss
-<próg1>: wiêkszy -> mocniejsze filtrowanie
+<próg1>: wiêkszy \-> mocniejsze filtrowanie
 .br
-<próg2>: wiêkszy -> mocniejsze filtrowanie
+<próg2>: wiêkszy \-> mocniejsze filtrowanie
 .br
-<próg3>: wiêkszy -> mocniejsze filtrowanie
+<próg3>: wiêkszy \-> mocniejsze filtrowanie
 .REss
 .IPs al/autolevels[:f/fullyrange]
 automatyczna korekta jasno¶ci / kontrastu
@@ -4739,10 +4739,10 @@ Medianowy filtr usuwania przeplotu, który usuwa przeplot z danego
 bloku stosuj±c do co drugiej linii filtr medianowy.
 .IPs fd/ffmpegdeint
 Filtr usuwania przeplotu z FFmpeg, który usuwa przeplot z danego
-bloku stosuj±c do co drugiej linii filtr (-1 4 2 4 -1).
+bloku stosuj±c do co drugiej linii filtr (\-1 4 2 4 \-1).
 .IPs l5/lowpass5
 Pionowo stosowany dolnoprzepustowy fir FIR usuwania przeplotu, który usuwa
-przeplot z danego bloku stosuj±c do wszystkich linii filtr (-1 2 6 2 -1).
+przeplot z danego bloku stosuj±c do wszystkich linii filtr (\-1 2 6 2 \-1).
 .IPs fq/forceQuant[:kwantyzator]
 Wymusza zastosowanie podanego kwantyzatora zamiast tego z wej¶cia.
 .RSss
@@ -4764,7 +4764,7 @@ kombinacja filtrów wysokiej jako¶ci (ha:a:128:7,va:a,dr:a)
 .IPs "\-vf pp=hb/vb/dr/al"
 odblokowywanie poziome i pionowe, usuwanie efektu dzwonienia
 i automatyczna korekcja jasno¶ci/\:kontrastu
-.IPs "\-vf pp=de/-al"
+.IPs "\-vf pp=de/\-al"
 domy¶lne filtry bez korekty jasno¶ci/\:kontrastu
 .IPs "\-vf pp=default/tmpnoise:1:2:3"
 domy¶lne filtry i czasowy odszumiacz
@@ -4798,7 +4798,7 @@ szybsza wersja prostego filtru postprocesingu
 4\-5 (to samo co w spp; domy¶lnie: 4)
 .IPs "<qp>\ "
 Wymusza parametr kwantyzacji (domy¶lnie: 0, parametr QP z video).
-.IPs <-15\-32>
+.IPs <\-15\-32>
 Si³a filtru, mniejsze warto¶ci daj± wiêcej szczegó³ów ale te¿ wiêcej
 artefaktów, podczas gdy wiêksze warto¶ci wyg³adzaj± obraz ali i rozmywaj±
 (domy¶lnie: 0 \- optymalnie pod wzglêdem PSNR).
@@ -4873,7 +4873,7 @@ Kontroluje proporcje, wyliczane przez wzór DVB_HEIGHT*ASPECTRATIO
 .RE
 .PD 0
 .RSs
-.IPs "\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc"
+.IPs "\-vf dvbscale,scale=\-1:0,expand=\-1:576:\-1:\-1:1,lavc"
 FIXME: Wyt³umaczyæ co to robi.
 .RE
 .PD 1
@@ -4930,9 +4930,9 @@ filmów, lub te¿ w celu lekkiego zmniejszenia kontrastu, by ukryæ artefakty
 powsta³e z winy niskiego tempa bitowego.
 .PD 0
 .RSs
-.IPs <-100\-100>
+.IPs <\-100\-100>
 pocz±tkowa jasno¶æ
-.IPs <-100\-100>
+.IPs <\-100\-100>
 pocz±tkowy kontrast
 .RE
 .PD 1
@@ -4949,9 +4949,9 @@ Parametry s± podane jako liczby rzeczywiste.
 .RSs
 .IPs <0.1\-10>
 pocz±tkowa warto¶æ gamma (domy¶lnie: 1.0)
-.IPs <-2\-2>
+.IPs <\-2\-2>
 pocz±tkowy kontrast, ujemne warto¶ci daj± negatyw obrazu (domy¶lnie: 1.0)
-.IPs <-1\-1>
+.IPs <\-1\-1>
 pocz±tkowa jasno¶æ (domy¶lnie: 1.0)
 .IPs <0\-3>
 pocz±tkowe nasycenie (domy¶lnie: 1.0)
@@ -4976,9 +4976,9 @@ Korektor programowy z interaktywnym sterowaniem, taki jak korektor sprzêtowy,
 dla kart/\:sterowników nie obs³uguj±cych sprzêtowo korekty barwy i nasycenia.
 .PD 0
 .RSs
-.IPs <-180\-180>
+.IPs <\-180\-180>
 pocz±tkowa barwa (domy¶lnie: 0.0)
-.IPs <-100\-100>
+.IPs <\-100\-100>
 domy¶lne nasycenie, liczby ujemne daj± przeciwne barwy (domy¶lnie: 1.0)
 .RE
 .PD 1
@@ -5133,7 +5133,7 @@ szeroko¶æ i wysoko¶æ macierzy, nieparzysty rozmiar w obu kierunkach
 (min = 3x3, max = 13x11 lub 11x13, zazwyczaj co¶ pomiêdzy 3x3 i 7x7)
 .IPs ilo¶æ
 Wzglêdny wspó³czynnik wyostrzenia/\:rozmycia obrazu
-(rozs±dna warto¶æ powinna byæ w zakresie -1.5\-1.5).
+(rozs±dna warto¶æ powinna byæ w zakresie \-1.5\-1.5).
 .RSss
 <0: rozmycie
 .br
@@ -5152,7 +5152,7 @@ Celem tego filtra jest dodanie mo¿liwo¶ci przetwarzania przeplatanych obrazów
 pojedynczymi obrazami bez usuwania przeplotu.
 Mo¿esz filtrowaæ swoje DVD z przeplotem i odtwarzaæ na telewizorze nie psuj±c
 przeplotu.
-Podczas gdy przeplot usuwany jest na sta³e (filtrami postprocesingu -
+Podczas gdy przeplot usuwany jest na sta³e (filtrami postprocesingu \-
 wyg³adzaj±c, u¶redniaj±c, itp.), rozdzielanie przeplotu dzieli klatkê na 2 pola
 (tak zwane pó³obrazy), mo¿na wiêc je przetwarzaæ (filtrowaæ) niezale¿nie,
 a nastêpnie po³±czyæ z powrotem w jeden obraz.
@@ -5232,7 +5232,7 @@ Tryb analizy.
 Ustawia numer pocz±tkowej klatki w sekwencji.
 0\-2 to trzy nastêpuj±ce po sobie klatki bez przeplotu; 3 i 4 to dwie klatki
 z przeplotem.
-Domy¶lne -1 oznacza "poza sekwencj± telecine".
+Domy¶lne \-1 oznacza "poza sekwencj± telecine".
 Liczba podana tutaj odnosi siê do hipotetycznej klatki przed pocz±tkiem filmu.
 .IPs "<t0>, <t1>, <t2>, <t3>"
 Warto¶ci progowe u¿ywane w niektórych trybach.
@@ -5269,10 +5269,10 @@ po lewej, prawej, u góry i na dole obrazu.
 Lewo/\:prawo s± w jednostkach 8 pikseli, natomiast góra/\:dó³ s± w jednostkach
 2 linii.
 Domy¶lnie jest to 8 pikseli z ka¿dej strony.
-Ustawiaj±c opcjê sb (strict breaks - sta³e przerwy) na 1, zmniejsza siê
+Ustawiaj±c opcjê sb (strict breaks \- sta³e przerwy) na 1, zmniejsza siê
 szansa, ¿e pullup stworzy niepasuj±c± klatkê, ale mo¿e równie¿ prowadziæ do
 ominiêcia wielu ramek podczas scen z du¿± ilo¶ci± ruchu.
-Odwrotnie, je¶li ustawisz na -1, to pullup ³atwiej bêdzie dopasowywa³ pola.
+Odwrotnie, je¶li ustawisz na \-1, to pullup ³atwiej bêdzie dopasowywa³ pola.
 Mo¿e to pomóc przy przetwarzaniu filmu, w którym jest delikatne rozmazanie
 miêdzy polami, ale mo¿e równie¿ sprawiæ, ¿e w wyj¶ciu znajd± siê klatki
 z przeplotem.
@@ -5430,7 +5430,7 @@ pozbycie siê szumu na pocz±tku.
 Poza tym, pierwszy przebieg trybu dwuprzebiegowego te¿ korzysta z tej opcji,
 wiêc je¿eli zachowasz wyj¶cie to otrzymasz w efekcie sta³a fazê.
 .IPs deghost=<warto¶æ>
-Ustawia próg deghostingu (0\-255 dla trybu jednoprzebiegowego, -255\-255 dla
+Ustawia próg deghostingu (0\-255 dla trybu jednoprzebiegowego, \-255\-255 dla
 trybu dwuprzebiegowego, domy¶lnie: 0).
 Je¿eli warto¶æ jest ró¿na od 0, tryb deghostingu jest w³±czony.
 Opcja przeznaczona jest dla filmów, z których usuniêto przeplot poprzez
@@ -5530,10 +5530,10 @@ szybko¶æ klatek pozostaje niezmieniona.
 .
 .TP
 .B tfields[=tryb]
-Tymczasowy separator pola - dzieli pola na klatki, podwajaj±c szybko¶æ
+Tymczasowy separator pola \- dzieli pola na klatki, podwajaj±c szybko¶æ
 klatek.
 Podobnie jak filtr telecine, tfields bêdzie poprawnie dzia³a³ tylko z
-MEncoderem i tylko gdy oba -fps i -ofps bêd± ustawione na po¿±dan±
+MEncoderem i tylko gdy oba \-fps i \-ofps bêd± ustawione na po¿±dan±
 (podwójn±) szybko¶æ klatek!
 Dostêpne tryby:
 .PD 0
@@ -5586,10 +5586,10 @@ eleganckie rozmycie
 .IPs <promieñ>
 si³a filtru rozmycia (~0.1\-5.0) (wolniejsze je¿eli wiêksze)
 .IPs <si³a>
-rozmycie (0.0\-1.0) lub wyostrzenie (-1.0\-0.0)
+rozmycie (0.0\-1.0) lub wyostrzenie (\-1.0\-0.0)
 .IPs <zakres>
 filtruj wszystko (0), filtruj p³askie obszary (0\-30)
-lub filtruj krawêdzie (-30\-0)
+lub filtruj krawêdzie (\-30\-0)
 .RE
 .PD 1
 .
@@ -5681,15 +5681,15 @@ wymiary obrazu/obszaru
 Rozpoczyna blitting w punkcie o wspó³rzêdnych xpoz/ypoz.
 .IPs <alfa>
 Ustawia ró¿nicê alfa.
-Je¿eli ustawisz na -255, mo¿esz pó¼niej wysy³aæ sekwencjê komend ALPHA,
-aby zmieniæ warto¶æ na -225, -200, -175 itd.\& \- uzyskasz ciekawy efekt
+Je¿eli ustawisz na \-255, mo¿esz pó¼niej wysy³aæ sekwencjê komend ALPHA,
+aby zmieniæ warto¶æ na \-225, \-200, \-175 itd.\& \- uzyskasz ciekawy efekt
 przenikania ! ;)
 .RSss
 0:    tak jak orygina³
 .br
 255:  Zmienia wszystko na nieprzezroczyste.
 .br
--255: Zmienia wszystko na przezroczyste.
+\-255: Zmienia wszystko na przezroczyste.
 .REss
 .IPs <clear>
 czy¶ci bufor przed blittingiem
@@ -5771,7 +5771,7 @@ pozycja lewego, górnego rogu logo
 szeroko¶æ i wysoko¶æ czyszczonego prostok±ta
 .IPs <t>
 Grubo¶æ niewyra¼nej krawêdzi (dodana do w i h).
-Kiedy ustawiona zostanie na -1, zielony prostok±t zostanie narysowany na
+Kiedy ustawiona zostanie na \-1, zielony prostok±t zostanie narysowany na
 ekranie, aby upro¶ciæ odnalezienie w³a¶ciwych parametrów x,y,w,h.
 .RE
 .PD 1
@@ -5820,7 +5820,7 @@ Parametr fd nakazuje filtrowi zawsze stosowaæ dziesi±tkowanie (okropne).
 Pozwala na otrzymywanie zrzutów klatek z filmu u¿ywaj±c polecenia screenshot
 (domy¶lnie przypisanego do klawisza "s").
 Zapisuje zbiory o nazwach "shotNNNN.png" w bie¿±cym katalogu, u¿ywaj±c
-pierwszego dostêpnego numeru - nie zama¿e ¿adnych zbiorów.
+pierwszego dostêpnego numeru \- nie zama¿e ¿adnych zbiorów.
 Filtr nie ma ¿adnego narzutu je¶li nie jest u¿ywany i akceptuje dowolne
 przestrzenie kolorów, wiêc mo¿na go bezpiecznie dodaæ do pliku
 konfiguracyjnego.
@@ -5831,14 +5831,14 @@ konfiguracyjnego.
 .SH "OGÓLNE OPCJE KODOWANIA (TYLKO MENCODER)"
 .
 .TP
-.B \-audio-delay <0.0\-...>
+.B \-audio\-delay <0.0\-...>
 Ustawia opó¼nienie audio w nag³ówku.
 Domy¶lnie jest 0.0, ujemne warto¶ci nie dzia³aj±.
 Opcja nie opó¼nia d¼wiêku podczas kodowania, ale odtwarzacz, gdy wykryje
-domy¶lne opó¼nienie audio, wyrêcza Ciê z u¿ycia opcji -delay.
+domy¶lne opó¼nienie audio, wyrêcza Ciê z u¿ycia opcji \-delay.
 .
 .TP
-.B \-audio-density <1\-50>
+.B \-audio\-density <1\-50>
 Liczba kawa³ków audio na sekundê (domy¶lnie jest 2 przy kawa³kach audio
 o d³ugo¶ci 0.5s).
 .br
@@ -5846,7 +5846,7 @@ o d³ugo¶ci 0.5s).
 Tylko dla CBR, VBR ignoruje j± gdy¿ dok³ada kolejny pakiet w nowym kawa³ku.
 .
 .TP
-.B \-audio-preload <0.0\-2.0>
+.B \-audio\-preload <0.0\-2.0>
 Ustawia przerwê czasu buforowania audio (domy¶lnie: 0.5s).
 .
 .TP
@@ -5894,22 +5894,22 @@ Da plik wyj¶ciowy zawieraj±cy "div3" jako video fourcc.
 .PD 1
 .
 .TP
-.B \-force-avi-aspect <0.2\-3.0>
+.B \-force\-avi\-aspect <0.2\-3.0>
 Nadpisuje aspekt zawarty w nag³ówku vprp AVI OpenDML.
 Opcja ta mo¿e byæ u¿yta do zmiany proporcji przy "\-ovc copy".
 .
 .TP
-.B \-frameno-file <nazwa pliku> (ODRADZANE)
+.B \-frameno\-file <nazwa pliku> (ODRADZANE)
 Okre¶la nazwê pliku audio z mapowaniem numerów klatek utworzonego w pierwszym
 (tylko audio) przebiegu specjalnego kodowania trzyprzebiegowego.
 .br
 .I INFORMACJA:
 Je¶li korzystasz z tego trybu prawdopodobnie uzyskasz desynchronizacjê A-V.
-Nie u¿ywaj tej opcji - jest ona trzymana tylko dla wstecznej kompatybilno¶ci
+Nie u¿ywaj tej opcji \- jest ona trzymana tylko dla wstecznej kompatybilno¶ci
 i przypuszczalnie zostanie usuniêta w przysz³ych wydaniach.
 .
 .TP
-.B \-hr-edl-seek (tylko EDL)
+.B \-hr\-edl\-seek (tylko EDL)
 U¿ywa dok³adniejszej, ale o wiele wolniejszej metody przeskakiwania.
 Obszary przeznaczone do pominiêcia nie s± przeskakiwane, zamiast tego
 dekodowane s± wszystkie ramki ale tylko potrzebne s± kodowane.
@@ -5973,7 +5973,7 @@ Zapisuje wyj¶cie do podanego pliku, zamiast domy¶lnego "test.avi".
 Koduje podanym kodekiem audio (brak warto¶ci domy¶lnej).
 .br
 .I INFORMACJA:
-U¿yj -oac help, aby otrzymaæ listê dostêpnych kodeków.
+U¿yj \-oac help, aby otrzymaæ listê dostêpnych kodeków.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -6247,14 +6247,14 @@ Skutkuje to nieznacznie ni¿sz± jako¶ci± i wiêkszymi warto¶ciami bitrate.
 .B highpassfreq=<czêstotliwo¶æ>
 Ustawia czêstotliwo¶æ w Hz wysokoprzej¶ciowego filtrowania (highpass filtering).
 Czêstotliwo¶ci poni¿ej podanej bêd± obcinane.
-Warto¶æ -1 wy³±czy filtrowanie, warto¶æ 0
+Warto¶æ \-1 wy³±czy filtrowanie, warto¶æ 0
 pozwoli LAME wykryæ warto¶ci automatycznie.
 .
 .TP
 .B lowpassfreq=<czêstotliwo¶æ>
 Ustawia czêstotliwo¶æ w Hz niskoprzej¶ciowego filtrowania (lowpass filtering).
 Czêstotliwo¶ci powy¿ej podanej bêd± obcinane.
-Warto¶æ -1 wy³±czy filtrowanie, warto¶æ 0
+Warto¶æ \-1 wy³±czy filtrowanie, warto¶æ 0
 pozwoli LAME wykryæ warto¶ci automatycznie.
 .
 .TP
@@ -6301,7 +6301,7 @@ natomiast w trybie VBR jest to minimalny bitrate na ramkê.
 Tryb VBR nie zadzia³a z warto¶ci± mniejsz± ni¿ 112.
 .
 .TP
-.B vbr=<-50\-50> (tylko VBR)
+.B vbr=<\-50\-50> (tylko VBR)
 Przedzia³ zmienno¶ci; je¶li ujemny koder przesuwa ¶redni bitrate w stronê
 dolnej granicy, je¶li dodatni w stronê górnej.
 Je¶li ustawione na 0 jest u¿ywany tryb CBR (domy¶lne).
@@ -6315,7 +6315,7 @@ maksymalny bitrate dozwolony na ramkê, w kbps
 (domy¶lnie: mono dla d¼wiêku jednokana³owego, w przeciwnym wypadku stereo)
 .
 .TP
-.B psy=<-1\-4>
+.B psy=<\-1\-4>
 model psychoakustyczny (domy¶lnie: 2)
 .
 .TP
@@ -6619,7 +6619,7 @@ filtr pêtli (H.263+)
 nie dzia³a
 .
 .TP
-.B inter_threshold <-1000\-1000>
+.B inter_threshold <\-1000\-1000>
 Na razie nie robi kompletnie nic.
 .
 .TP
@@ -6636,11 +6636,11 @@ dekodera, kodera i szczê¶cia.
 Dla utrzymania pe³nej zgodno¶ci z MPEG-1/\:2/\:4 warto¶ci powinny byæ <=132.
 .
 .TP
-.B sc_threshold=<-1000000000\-1000000000>
+.B sc_threshold=<\-1000000000\-1000000000>
 Próg do wykrywania zmiany sceny.
 Libavcodec wstawia klatkê kluczow± je¿eli wykryje zmianê sceny.
 T± opcj± mo¿esz okre¶liæ czu³o¶æ tej detekcji.
--1000000000 oznacza, ¿e zmiana sceny wykrywana jest w ka¿dej klatce,
+\-1000000000 oznacza, ¿e zmiana sceny wykrywana jest w ka¿dej klatce,
 1000000000 oznacza, ¿e ¿adne zmiany nie bêd± wykryte (domy¶lnie: 0).
 .
 .TP
@@ -6791,22 +6791,22 @@ obecnie bezu¿yteczne
 Zarezerwowane na przysz³o¶æ.
 .
 .TP
-.B vb_qfactor=<-31.0\-31.0>
+.B vb_qfactor=<\-31.0\-31.0>
 wspó³czynnik kwantyzatora pomiêdzy ramkami B a innymi ni¿ B (przebieg\ 1/\:2)
 (domy¶lnie: 1.25)
 .
 .TP
-.B vi_qfactor=<-31.0\-31.0>
+.B vi_qfactor=<\-31.0\-31.0>
 wspó³czynnik kwantyzatora pomiêdzy ramkami I a innymi ni¿ I (przebieg\ 1/\:2)
 (domy¶lnie: 0.8)
 .
 .TP
-.B vb_qoffset=<-31.0\-31.0>
+.B vb_qoffset=<\-31.0\-31.0>
 offset kwantyzatora pomiêdzy ramkami B a innymi ni¿ B (przebieg\ 1/\:2)
 (domy¶lnie: 1.25)
 .
 .TP
-.B vi_qoffset=<-31.0\-31.0>
+.B vi_qoffset=<\-31.0\-31.0>
 (przebieg\ 1/\:2) (domy¶lnie: 0.0)
 .br
 je¿eli v{b|i}_qfactor > 0
@@ -6817,7 +6817,7 @@ v{b|i}_qoffset
 w przeciwnym wypadku
 .br
 normalnie kontroluj tempo (nie blokuj kwantyzatora wed³ug nastêpnej ramki P)
-i ustaw q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+i ustaw q= \-q * v{b|i}_qfactor + v{b|i}_qoffset
 .br
 .I WSKAZÓWKA:
 Aby kodowaæ ze sta³ym kwantyzatorem, ale ró¿nym
@@ -6907,7 +6907,7 @@ z³o¿ono¶æ czasowa
 .IPs qComp
 qcomp z wiersza poleceñ
 .IPs "isI, isP, isB"
-Wynosi 1 je¿eli typ obrazu to I/\:P/\:B w przeciwnym wypadku - 0.
+Wynosi 1 je¿eli typ obrazu to I/\:P/\:B w przeciwnym wypadku \- 0.
 .IPs "Pi,E\ "
 Przejrzyj swoj± ulubion± ksi±¿kê do matematyki.
 .RE
@@ -6937,7 +6937,7 @@ Opcje to <klatka-pocz±tkowa>, <klatka-koñcowa>, <jako¶æ>[/\:<klatka-pocz±tkowa>,
 .RSs
 .IPs "quality (2\-31)"
 kwantyzator
-.IPs "quality (-500\-0)"
+.IPs "quality (\-500\-0)"
 korekcja jako¶ci w %
 .RE
 .PD 1
@@ -6963,24 +6963,24 @@ U¿ywa ³adnej, ró¿niczkowalnej funkcji (domy¶lne).
 .PD 1
 .
 .TP
-.B vlelim=<-1000\-1000>
+.B vlelim=<\-1000\-1000>
 Ustawia próg eliminowania pojedynczych wspó³czynników jasno¶ci.
 Warto¶ci ujemne bêd± bra³y pod uwagê tak¿e wspó³czynnik DC
-(powinny byæ równe co najmniej -4 lub ni¿ej dla kodowania z quant=1):
+(powinny byæ równe co najmniej \-4 lub ni¿ej dla kodowania z quant=1):
 .PD 0
 .RSs
 .IPs 0
 wy³±czony (domy¶lne)
-.IPs -4
+.IPs \-4
 zalecane przez JVT
 .RE
 .PD 1
 .
 .TP
-.B vcelim=<-1000\-1000>
+.B vcelim=<\-1000\-1000>
 Ustawia próg eliminowania pojedynczych wspó³czynników barwy.
 Warto¶ci ujemne bêd± bra³y pod uwagê tak¿e wspó³czynnik DC
-(powinny byæ równe co najmniej -4 lub ni¿ej dla kodowania z quant=1):
+(powinny byæ równe co najmniej \-4 lub ni¿ej dla kodowania z quant=1):
 .PD 0
 .RSs
 .IPs 0
@@ -6991,7 +6991,7 @@ zalecane przez JVT
 .PD 1
 .
 .TP
-.B vstrict=<-2|-1|0|1>
+.B vstrict=<\-2|\-1|0|1>
 ¶cis³a zgodno¶æ ze standardami
 .PD 0
 .RSs
@@ -7000,9 +7000,9 @@ wy³±czona
 .IPs 1
 Zalecane tylko w przypadku, je¿eli chcesz przekazaæ wyj¶cie do referencyjnego
 dekodera MPEG-4.
-.IPs -1
+.IPs \-1
 Pozwala na rozszerzenia libavcodec (domy¶lne).
-.IPs -2
+.IPs \-2
 W³±cza eksperymentalne kodeki i mo¿liwo¶ci które mog± nie byæ obs³ugiwane
 przez przysz³e wersje MPlayera (snow, ffvhuff, ffv1).
 .RE
@@ -7040,7 +7040,7 @@ Rozmiar pakietu video, poprawia odporno¶æ na b³êdy.
 .RSs
 .IPs "0\ \ \ \ "
 wy³±czone (domy¶lne)
-.IPs 100-1000
+.IPs 100\-1000
 dobry wybór
 .RE
 .PD 1
@@ -7171,7 +7171,7 @@ starannie dobrana.
 .B scplx_mask=<0.0\-1.0>
 Maskowanie z³o¿ono¶ci przestrzennej.
 Wiêksze warto¶ci pomagaj± przy blokowaniu, je¿eli ¿aden filtr odblokowania nie
-jest stosowany przy dekodowaniu - nie jest to najlepszy pomys³.
+jest stosowany przy dekodowaniu \- nie jest to najlepszy pomys³.
 .br
 Wyobra¼ sobie scenê z traw± (która ma zazwyczaj du¿± kompleksowo¶æ
 przestrzenn±), niebieskim niebem i domem;
@@ -7235,10 +7235,10 @@ siê z qpel).
 Korzysta z alternatywnej scantable.
 .
 .TP
-.B "top=<-1\-1>\ \ \ "
+.B "top=<\-1\-1>\ \ \ "
 .PD 0
 .RSs
-.IPs -1
+.IPs \-1
 automatycznie
 .IPs 0
 najpierw dolne pole
@@ -7404,11 +7404,11 @@ Mo¿e Ci siê on przydaæ, je¶li wolisz zachowaæ jakie¶ szumy w zakodowanym video,
 ni¿ przefiltrowaæ je przed kodowaniem (domy¶lnie: 8).
 .
 .TP
-.B predia=<-99\-6>
+.B predia=<\-99\-6>
 typ i rozmiar diamentu dla wstêpnego przebiegu przewidywania ruchu
 .
 .TP
-.B dia=<-99\-6>
+.B dia=<\-99\-6>
 Typ i rozmiar diamentu dla przewidywania ruchu
 Proces wyszukiwania ruchu jest iteracyjny.
 Korzystanie z ma³ego diamentu nie ogranicza przeszukiwania tylko do ma³ych
@@ -7426,12 +7426,12 @@ a jako¶ci±.
 Rozmiary normalnych diamentów i tych przystosowuj±cych kszta³ty nie maj±
 takiego samego efektu.
 .RSs
-.IPs -3
+.IPs \-3
 diament przystosowuj±cy kszta³t (szybkie) o rozmiarze 3
-.IPs -2
+.IPs \-2
 diament przystosowuj±cy kszta³t (szybkie) o rozmiarze 2
-.IPs -1
-trochê wyj±tkowy: Mo¿e byæ wolniejszy i/lub lepszy ni¿ dia=-2.
+.IPs \-1
+trochê wyj±tkowy: Mo¿e byæ wolniejszy i/lub lepszy ni¿ dia=\-2.
 .IPs  1
 normalny diament o rozmiarze=1 (domy¶lny) =diament typu EPZS
 .nf
@@ -7550,7 +7550,7 @@ nieograniczona liczba MV (tylko H.263+)
 Zezwala na kodowanie z dowolnie d³ugimi MV.
 .
 .TP
-.B ibias=<-256\-256>
+.B ibias=<\-256\-256>
 bias kwantyzatora intra (256 odpowiada 1.0,
 domy¶lny kwantyzator w stylu MPEG: 96, domy¶lny kwantyzator w stylu H.263: 0)
 .br
@@ -7561,9 +7561,9 @@ kwantyzator MMX MPEG nie umie obs³u¿yæ ujemnych warto¶ci bias (ustaw
 vfdct=1 lub 2).
 .
 .TP
-.B pbias=<-256\-256>
+.B pbias=<\-256\-256>
 bias kwantyzatora inter (256 odpowiada 1.0,
-domy¶lny kwantyzator w stylu MPEG: 0, domy¶lny kwantyzator w stylu H.263: -64)
+domy¶lny kwantyzator w stylu MPEG: 0, domy¶lny kwantyzator w stylu H.263: \-64)
 .br
 .I INFORMACJA:
 Kwantyzator MMX H.263 nie umie obs³u¿yæ dodatnich warto¶ci bias (ustaw
@@ -7572,7 +7572,7 @@ kwantyzator MMX MPEG nie umie obs³u¿yæ ujemnych warto¶ci bias (ustaw
 vfdct=1 lub 2).
 .br
 .I WSKAZÓWKA:
-Wiêksza warto¶æ bias (-32 \- -16 zamiast -64) wydaje siê polepszaæ PSNR.
+Wiêksza warto¶æ bias (\-32 \- \-16 zamiast \-64) wydaje siê polepszaæ PSNR.
 .
 .TP
 .B nr=<0\-100000>
@@ -7750,7 +7750,7 @@ Je¿eli korzystasz z materia³u filmowego z przeplotem, w³±cz tê opcjê.
 .I INFORMACJA:
 Je¶li chcia³by¶ przeskalowaæ film, potrzebowa³by¶ filtru skaluj±cego,
 który wiedzia³by, ¿e ma do czyniena z materia³em zawieraj±cym przeplot,
-mo¿esz go uruchomiæ przez -vf scale=<szeroko¶æ>:<wysoko¶æ>:1.
+mo¿esz go uruchomiæ przez \-vf scale=<szeroko¶æ>:<wysoko¶æ>:1.
 .
 .TP
 .B "4mv\ \ \ \ "
@@ -7901,12 +7901,12 @@ proporcja kwantyzatora miêdzy ramkmi typu B i pozosta³ymi, 150=1.50
 (domy¶lnie: 150)
 .
 .TP
-.B bquant_offset=<-1000\-1000>
+.B bquant_offset=<\-1000\-1000>
 wspó³czynnik offsetu kwantyzatora pomiêdzy ramkami B a pozosta³ymi,
 100=1.00 (domy¶lnie: 100)
 .
 .TP
-.B bf_threshold=<-255\-255>
+.B bf_threshold=<\-255\-255>
 Ten parametr umo¿liwia Ci okre¶lenie, jaki ma byæ priorytet u¿ycia klatek B.
 Im wy¿sza warto¶æ, tym wiêksze prawdopodobieñstwo u¿ycia klatek B
 (domy¶lnie: 0).
@@ -8130,7 +8130,7 @@ Xvid pozwala u¿ytkownikom na ustawienie wielko¶ci nadwy¿ki
 przypadaj±cej na ramkê, któr± generuje klatka video (podaj tylko
 u¶rednion± warto¶æ na ramkê).
 0 ma specjalne znaczenie, pozwala Xvid'owi na u¿ycie jego w³asnych
-warto¶ci domy¶lnych (domy¶lnie: 24 - ¶rednia nadwy¿ka AVI).
+warto¶ci domy¶lnych (domy¶lnie: 24 \- ¶rednia nadwy¿ka AVI).
 .
 .TP
 .B profile=<opjca>
@@ -8185,8 +8185,8 @@ wiêkszo¶æ rozpoznaje DivX.
 .
 .TP
 .B par=<tryb>
-Okre¶la tryb Wspó³czynnika Proporcji Piksela (Pixel Aspect Ratio - PAR)
-(nie myliæ z Wspó³czynnikiem Proporcji Obrazu (Display Aspect Ratio - DAR)).
+Okre¶la tryb Wspó³czynnika Proporcji Piksela (Pixel Aspect Ratio \- PAR)
+(nie myliæ z Wspó³czynnikiem Proporcji Obrazu (Display Aspect Ratio \- DAR)).
 PAR to stosunek szeroko¶ci do wysoko¶ci pojedynczego piksela.
 Wiêc oba s± zwi±zane: DAR = PAR * (szeroko¶æ/wysoko¶æ).
 .br
@@ -8199,7 +8199,7 @@ Mo¿e byæ podany jeden z 5 standardowych trybów:
 zwyczajny PAR dla PC
 Piksele s± jednostk± kwadratow±.
 .IPs pal43
-standard dla PAL - 4:3 PAR
+standard dla PAL \- 4:3 PAR
 Piksele s± prostok±tami.
 .IPs pal169
 jak wy¿ej
@@ -8349,7 +8349,7 @@ globalnego PSNR ostatniego przej¶cia w porównaniu z pierwszym przebiegiem
 pe³nej jako¶ci.
 .br
 Poziom 2 mo¿e czterokrotnie przyspieszyæ pierwszy przebieg zmieniaj±c 
-globalne PSNR ostatniego przej¶cia o +/- 0.05dB w porównaniu z pierwszym
+globalne PSNR ostatniego przej¶cia o +/\- 0.05dB w porównaniu z pierwszym
 przebiegiem pe³nej jako¶ci.
 .REss
 .
@@ -8374,13 +8374,13 @@ Ramki IDR ograniczaj± odnoszenie siê ramki P do jakiejkolwiek ramki
 poprzedzaj±cej ramkê IDR.
 .
 .TP
-.B scenecut=<-1\-100>
+.B scenecut=<\-1\-100>
 Kontroluje agresywno¶æ wstawiania klatek I (domy¶lnie: 40).
 Ma³e warto¶ci powoduj±, ¿e kodek czêsto musi wymuszaæ ramkê I, je¶li
 przekroczy warto¶æ keyint.
 Poprawne warto¶ci mog± odszukaæ lepsze miejsca dla ramki I,
 wy¿sze powoduj± marnowanie bitów.
--1 wy³±cza wykrywanie obciêæ scen (scenecut), wiêc ramki I s± wstawiane tylko
+\-1 wy³±cza wykrywanie obciêæ scen (scenecut), wiêc ramki I s± wstawiane tylko
 raz po ka¿dych innych klatkach keyint, nawet je¶li takie obciêcie zdarzy siê
 wcze¶niej.
 Nie jest to zalecane i marnuje bitrate, jako ¿e obciêcia scen (scenecut) s±
@@ -8409,7 +8409,7 @@ ograniczonej dopuszczalnym maksimum okre¶lonym przez parametr powy¿ej
 Je¿eli opcja ta jest wy³±czona, u¿yta jest maksymalna liczba klatek B.
 .
 .TP
-.B b_bias=<-100\-100>
+.B b_bias=<\-100\-100>
 Kontroluje decycyzje podejmowane przez b_adapt.
 Wy¿szy wspó³czynnik b_bias generuje wiêksz± liczbê klatek B (domy¶lnie: 0).
 .
@@ -8436,7 +8436,7 @@ Jako, ¿e zabiera ma³o czasu procesora w porównaniu ze wzrostem jako¶ci,
 jaki daje, nie jest zalecane wy³±czanie go.
 .
 .TP
-.B deblockalpha=<-6\-6>
+.B deblockalpha=<\-6\-6>
 Parametr AlphaC0 dla filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
 Opcja ta dostosowuje zakresy dla filtru in-loop deblocking H.264.
 Po pierwsze parametr ten okre¶la maksymaln± ilo¶æ zmian jak± filtr mo¿e
@@ -8452,7 +8452,7 @@ efektu bloków, które chcia³by¶ usun±æ, dobrym pomys³em bêdzie nieco wiêksze
 zwiêkszenie warto¶ci parametru.
 .
 .TP
-.B deblockbeta=<-6\-6>
+.B deblockbeta=<\-6\-6>
 Parametr Beta filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
 Ma wp³yw na próg detali.
 Bloki zawieraj±ce du¿± liczbê detali nie bêd± filtrowane,
@@ -8463,7 +8463,7 @@ oryginalny efekt blokowy.
 .B (no)cabac
 Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding)
 (domy¶lnie: w³±czony).
-Nieco spowalnia kodowanie i dekodowanie, ale oszczêdza oko³o 10-15% bitów.
+Nieco spowalnia kodowanie i dekodowanie, ale oszczêdza oko³o 10\-15% bitów.
 Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y Ci na szybko¶ci dekodowania.
 .
 .TP
@@ -8694,9 +8694,9 @@ Bierze pod uwagê informacje o barwie podczas szukania ruchu podpikseli
 Wymaga subq>=5.
 .
 .TP
-.B chroma_qp_offset=<-12\-12>
+.B chroma_qp_offset=<\-12\-12>
 U¿ywa innego kwantyzatora do barw w porównaniu do jasno¶ci.
-Sensowne warto¶ci s± w zakresie <-2\-2> (domy¶lnie: 0).
+Sensowne warto¶ci s± w zakresie <\-2\-2> (domy¶lnie: 0).
 .
 .TP
 .B cqm=<flat|jvt|<nazwapliku>>
@@ -8757,7 +8757,7 @@ oddzielone przecinkami warto¶ci w zakresie 1\-255.
 .TP
 .B level_idc=<10\-51>
 Ustawia parametr level strumienia bitów, wed³ug definicji w aneksie A standardu
-H.264 (domy¶lnie: 40 - Level 4.0).
+H.264 (domy¶lnie: 40 \- Level 4.0).
 U¿ywane ¿eby przekazaæ dekoderowi jakie mo¿liwo¶ci musi obs³ugiwaæ.
 U¿ywaj tylko je¶li wiesz co to znaczy i musisz tego u¿yæ.
 .
@@ -8770,11 +8770,11 @@ Wymaga ¿eby libx264 by³a skompilowana z obs³ug± pthread; je¶li tak nie jest
 opcja ta wy¶wietli ostrze¿enie i w³±czy paski ale nie wielow±tkowo¶æ.
 .
 .TP
-.B log=<-1\-3>
+.B log=<\-1\-3>
 Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .PD 0
 .RSs
-.IPs -1
+.IPs \-1
 ¿adne
 .IPs " 0"
 Wy¶wietla tylko b³êdy.
@@ -9013,11 +9013,11 @@ mplayer dvd://1 \-alang ja \-slang en
 .
 .TP
 .B Odtwarza tylko rozdzia³y 5, 6, 7:
-mplayer dvd://1 \-chapter 5-7
+mplayer dvd://1 \-chapter 5\-7
 .
 .TP
 .B Odtwarza tylko tytu³y 5, 6, 7:
-mplayer dvd://5-7
+mplayer dvd://5\-7
 .
 .TP
 .B Odtwarza DVD z ró¿nych ujêæ:
@@ -9025,11 +9025,11 @@ mplayer dvd://1 \-dvdangle 2
 .
 .TP
 .B Odtwarza z innego urz±dzenia DVD:
-mplayer dvd://1 \-dvd-device /dev/\:dvd2
+mplayer dvd://1 \-dvd\-device /dev/\:dvd2
 .
 .TP
 .B Odtwarza DVD z katalogu zawieraj±cego pliki VOB:
-mplayer dvd://1 \-dvd-device /¶cie¿ka/\:do/\:katalogu/
+mplayer dvd://1 \-dvd\-device /¶cie¿ka/\:do/\:katalogu/
 .
 .TP
 .B Kopiuje tytu³ DVD na twardy dysk, zapisuj±c go to "title1.vob":
@@ -9076,7 +9076,7 @@ przez jaka¶ liczbê), aby zwiêkszyæ g³o¶no¶æ albo unikn±æ trzasków.
 .
 .TP
 .B Kodowanie tytu³u #2 DVD, tylko wybrane rozdzia³y:
-mencoder dvd://2 \-chapter 10-15 \-o tytul2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+mencoder dvd://2 \-chapter 10\-15 \-o tytul2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .
 .TP
 .B Kodowanie tytu³u #2 DVD, zmiana rozmiaru do 640x480:
