@@ -2659,8 +2659,11 @@ Experimental OpenAL audio output driver
 PulseAudio audio output driver
 .PD 0
 .RSs
-.IPs "<host>[:<output sink>]"
+.IPs "[<host>][:<output sink>]"
 Specify the host and optionally output sink to use.
+An empty <host> string uses local connection.
+Using "localhost" as <host> uses network transfer (most likely
+not what you want).
 .RE
 .PD 1
 .
