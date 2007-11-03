@@ -1,4 +1,4 @@
-//Synced with help_mp-en.h r23920
+//Synced with help_mp-en.h r24924
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -1248,6 +1248,7 @@ static char help_text[]=
 // ======================= AF Audio Filters ================================
 
 // libaf 
+#define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
 
@@ -1761,6 +1762,17 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] 设置覆盖窗口大小失败!\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] 设置信号混合失败!\n"
 
+// libvo/font_load_ft.c
+
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "调用 New_Face 失败。可能字体文件的路径不对。\n请提供文本字体文件（~/.mplayer/subfont.tt）。\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "调用 New_Memory_Face 失败。\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "字幕字体：调用 load_sub_face 失败。\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "字幕字体：调用 prepare_charset 失败。\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "无法准备好字幕字体。\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "无法准备好 OSD 字体。\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "无法生成映射表。\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "调用 FT_Done_FreeType 失败。\n"
+
 // libvo/vo_mga.c
 
 #define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): 改变大小为 %dx%d。\n"
@@ -2074,6 +2086,68 @@ static char help_text[]=
 #define MSGTR_TV_AvailableDrivers "可用驱动：\n"
 #define MSGTR_TV_DriverInfo "已选择驱动：%s\n 名称：%s\n 作者：%s\n 注释：%s\n"
 #define MSGTR_TV_NoSuchDriver "没有这种驱动：%s\n"
+#define MSGTR_TV_DriverAutoDetectionFailed "自动侦测电视驱动失败。\n"
 #define MSGTR_TV_UnknownColorOption "使用了未知色彩选项（%d）！\n"
 #define MSGTR_TV_CurrentFrequency "当前频率：%lu（%.3f）\n"
 #define MSGTR_TV_NoTeletext "无电视字幕"
+#define MSGTR_TV_Bt848IoctlFailed "tvi_bsdbt848：调用 %s ioctl 失败。错误信息：%s\n"
+#define MSGTR_TV_Bt848InvalidAudioRate "tvi_bsdbt848：无效的音频码率值。错误信息：%s\n"
+#define MSGTR_TV_Bt848ErrorOpeningBktrDev "tvi_bsdbt848：无法打开 bktr 设备。错误信息：%s\n"
+#define MSGTR_TV_Bt848ErrorOpeningTunerDev "tvi_bsdbt848：无法打开调谐设备。错误信息：%s\n"
+#define MSGTR_TV_Bt848ErrorOpeningDspDev "tvi_bsdbt848：无法打开 dsp 设备。错误信息：%s\n"
+#define MSGTR_TV_Bt848ErrorConfiguringDsp "tvi_bsdbt848：配置 dsp 失败。错误信息：%s\n"
+#define MSGTR_TV_Bt848ErrorReadingAudio "tvi_bsdbt848：读取音频数据错误。错误信息：%s\n"
+#define MSGTR_TV_Bt848MmapFailed "tvi_bsdbt848：调用 mmap 失败。错误信息：%s\n"
+#define MSGTR_TV_Bt848FrameBufAllocFailed "tvi_bsdbt848：分配帧缓冲失败。错误信息：%s\n"
+#define MSGTR_TV_Bt848ErrorSettingWidth "tvi_bsdbt848：设置画面宽度错误。错误信息：%s\n"
+#define MSGTR_TV_Bt848ErrorSettingHeight "tvi_bsdbt848：设置画面高度错误。错误信息：%s\n"
+#define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848：无法停止捕捉视频。错误信息：%s\n"
+#define MSGTR_TV_TTSupportedLanguages "支持的电视字幕语言：\n"
+#define MSGTR_TV_TTSelectedLanguage "所选的默认电视字幕语言：%s\n"
+#define MSGTR_TV_ScannerNotAvailableWithoutTuner "没有调谐器不能使用频道搜索器\n"
+
+//tvi_dshow.c
+#define MSGTR_TVI_DS_UnableConnectInputVideoDecoder  "无法将所给输入连接至视频解码器。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableConnectInputAudioDecoder  "无法将所给输入连接至音频解码器。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectVideoFormat "tvi_dshow：无法选用视频格式。错误代码：Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectAudioFormat "tvi_dshow：无法选用音频格式。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableGetMediaControlInterface "tvi_dshow：无法调用 IMediaControl 接口。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableStartGraph "tvi_dshow：无法启动流程图！错误代码：0x%x\n"
+#define MSGTR_TVI_DS_DeviceNotFound "tvi_dshow：未找到设备 #%d\n"
+#define MSGTR_TVI_DS_UnableGetDeviceName "tvi_dshow：无法获取设备 #%d 的名称\n"
+#define MSGTR_TVI_DS_UsingDevice "tvi_dshow：使用设备 #%d：%s\n"
+#define MSGTR_TVI_DS_DeviceName  "tvi_dshow: 设备 #%d：%s\n"
+#define MSGTR_TVI_DS_DirectGetFreqFailed "tvi_dshow：无法直接获取频率值。将使用操作系统内置的频道表。\n"
+#define MSGTR_TVI_DS_DirectSetFreqFailed "tvi_dshow：无法直接设置频率值。将使用操作系统内置的频道表。\n"
+#define MSGTR_TVI_DS_SupportedNorms "tvi_dshow：支持的规格化模式："
+#define MSGTR_TVI_DS_AvailableVideoInputs "tvi_dshow：可用的视频输入："
+#define MSGTR_TVI_DS_AvailableAudioInputs "tvi_dshow：可用的音频输入："
+//following phrase will be printed near the selected audio/video input
+#define MSGTR_TVI_DS_InputSelected "（已选用）"
+#define MSGTR_TVI_DS_UnableExtractFreqTable "tvi_dshow：无法从 kstvtune.ax 加载频率对照表\n"
+#define MSGTR_TVI_DS_WrongDeviceParam "tvi_dshow：设备参数错误：%s\n"
+#define MSGTR_TVI_DS_WrongDeviceIndex "tvi_dshow：设备索引值错误：%d\n"
+#define MSGTR_TVI_DS_WrongADeviceParam "tvi_dshow：音频设备参数错误：%s\n"
+#define MSGTR_TVI_DS_WrongADeviceIndex "tvi_dshow：音频设备索引值错误：%d\n"
+
+#define MSGTR_TVI_DS_SamplerateNotsupported "tvi_dshow：设备不支持 %d 采样率。退回到第一个可用的值。\n"
+#define MSGTR_TVI_DS_VideoAdjustigNotSupported "tvi_dshow：设备不支持调整亮度/色度/饱和度/对比度\n"
+
+#define MSGTR_TVI_DS_ChangingWidthHeightNotSupported "tvi_dshow：设备不支持改变视频的宽度/高度。\n"
+#define MSGTR_TVI_DS_SelectingInputNotSupported  "tvi_dshow：设备不支持选取视频捕捉的来源\n"
+#define MSGTR_TVI_DS_FreqTableLoaded "tvi_dshow：载入系统（%s）的频率对照表，对应国家 id=%d（频道数：%d）\n"
+#define MSGTR_TVI_DS_ErrorParsingAudioFormatStruct "tvi_dshow：无法解析音频格式的结构。\n"
+#define MSGTR_TVI_DS_ErrorParsingVideoFormatStruct "tvi_dshow：无法解析视频格式的结构。\n"
+#define MSGTR_TVI_DS_UnableSetAudioMode "tvi_dshow：无法设置音频模式 %d。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnsupportedMediaType "tvi_dshow：不支持传递为 %s 的媒体格式\n"
+#define MSGTR_TVI_DS_UnableGetsupportedVideoFormats "tvi_dshow：无法从视频端获取可支持的媒体格式。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableGetsupportedAudioFormats "tvi_dshow：无法从音频端获取可支持的媒体格式。错误代码：0x%x 禁用音频。\n"
+#define MSGTR_TVI_DS_UnableFindNearestChannel "tvi_dshow：无法在系统频率对照表中找到最接近的频道\n"
+#define MSGTR_TVI_DS_UnableToSetChannel "tvi_dshow：无法切换至系统频率对照表所标出的最接近的频道。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableTerminateVPPin "tvi_dshow：无法使用流程图中的任何过滤器终止 VideoPort 端。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVideoSubGraph "tvi_dshow：无法建立捕捉流程图中的视频处理链。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildAudioSubGraph "tvi_dshow：无法建立捕捉流程图中的音频处理链。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVBISubGraph "tvi_dshow：无法建立捕捉流程图中的 VBI 链。错误代码：0x%x\n"
+#define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow：Directshow 流程图初始化失败。\n"
+#define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow：无法找到视频捕捉设备\n"
+#define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow：无法找到音频捕捉设备\n"
