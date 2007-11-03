@@ -417,9 +417,6 @@ static int filter_n_bytes(sh_audio_t *sh, int len)
  * Can reallocate sh_audio->a_out_buffer if needed to fit all filter output. */
 int decode_audio(sh_audio_t *sh_audio, int minlen)
 {
-    if (!sh_audio->inited || !sh_audio->afilter)
-	abort();
-
     // Decoded audio must be cut at boundaries of this many bytes
     int unitsize = sh_audio->channels * sh_audio->samplesize;
 
