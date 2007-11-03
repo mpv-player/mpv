@@ -11,6 +11,10 @@ To try slave mode out by hand, run
 
 and type slave commands into the console window.
 
+You can also use a fifo file:
+
+  mplayer -input file=<fifofile> <movie>
+
 Most slave mode commands are equivalent to command line options, though not
 necessarily under the same name. Detailed descriptions can be found in the
 man page.
