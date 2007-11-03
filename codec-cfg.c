@@ -349,7 +349,7 @@ static int validate_codec(codecs_t *c, int type)
 	}
 
 #if 0
-#warning codec->driver == 4;... <- this shouldn't be put in here...
+#warning codec->driver == 4;... <- this should not be put in here...
 #warning Where are they defined ????????????
 	if (!c->dll && (c->driver == 4 ||
 				(c->driver == 2 && type == TYPE_VIDEO))) {
