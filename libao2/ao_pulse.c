@@ -122,13 +122,15 @@ static int init(int rate_hz, int channels, int format, int flags) {
     struct pa_sample_spec ss;
     struct pa_channel_map map;
     const struct format_map_s *fmt_map;
+    char *devarg = NULL;
     char *host = NULL;
     char *sink = NULL;
 
     if (ao_subdevice) {
-        host = strdup(ao_subdevice);
-        sink = strchr(host, ':');
+        devarg = strdup(ao_subdevice);
+        sink = strchr(devarg, ':');
         if (sink) *sink++ = 0;
+        if (devarg[0]) host = devarg;
     }
 
     ss.channels = channels;
@@ -202,7 +204,7 @@ static int init(int rate_hz, int channels, int format, int flags) {
 
     pa_threaded_mainloop_unlock(mainloop);
 
-    free(host);
+    free(devarg);
     return 1;
 
 unlock_and_fail:
@@ -213,7 +215,7 @@ unlock_and_fail:
 fail:
     if (context)
         GENERIC_ERR_MSG(context, "Init failed");
-    free(host);
+    free(devarg);
     uninit(1);
     return 0;
 }
