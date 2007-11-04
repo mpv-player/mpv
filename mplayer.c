@@ -3019,7 +3019,9 @@ if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_D
       maxid = FFMAX(maxid, ((sh_sub_t *)mpctx->demuxer->s_streams[i])->sid);
   mpctx->global_sub_size += maxid + 1;
 }
-if (mpctx->global_sub_size <= dvdsub_id) mpctx->global_sub_size = dvdsub_id + 1;
+// Make dvdsub_id always selectable if set.
+if (mpctx->global_sub_size <= mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id)
+  mpctx->global_sub_size = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id + 1;
 
 current_module="demux_open2";
 
