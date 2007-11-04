@@ -1,4 +1,4 @@
-.\" Synced with r24909
+.\" Synced with r24954
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 11. 02." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 11. 04." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -234,7 +234,7 @@ képkockát lejátszik és újra megáll (bármelyik másik gombbal elindul újra).
 .IPs "q / ESC"
 Lejátszás megállítása és kilépés.
 .IPs "+ és \-"
-Audió késleltetés állítása ± 0.1 másodperccel.
+Audió késleltetés állítása +/\- 0.1 másodperccel.
 .IPs "/ and *"
 Hangerõ csökkentése/\:növelése.
 .IPs "9 és 0"
@@ -272,7 +272,7 @@ Elõre/hátra lépés a felirat listában.
 .IPs "a\ \ \ \ "
 Felirat igazítás állítása: fent / középen / lent.
 .IPs "x és z"
-Felirat késleltetés állítása ± 0.1 másodperccel.
+Felirat késleltetés állítása +/\- 0.1 másodperccel.
 .IPs "r és t"
 Felirat mozgatása fel/le.
 .IPs "i (csak \-edlout módban)"
@@ -2672,8 +2672,11 @@ Kísérleti OpenAL audió kimeneti vezérlõ
 PulseAudio audió kimeneti vezérlõ
 .PD 0
 .RSs
-.IPs "<hoszt>[:<kimenet csökkenés>]"
+.IPs "[<hoszt>][:<kimenet csökkenés>]"
 Megadja a használandó hosztot és opcionálisan a kimenet csökkenést.
+Az üres <hoszt> karakterlánc egy helyi kapcsolatot használ.
+A "localhost" hosztként való megadása hálózati átvitelt használ (valószínûleg
+nem ezt akarod).
 .RE
 .PD 1
 .
@@ -5588,7 +5591,7 @@ RGB 24/32 <\-> BGR 24/32 színtér konvertálás.
 .PD 0
 .RSs
 .IPs "swap\ "
-R <-> B cserét is végrehajt.
+R <\-> B cserét is végrehajt.
 .RE
 .PD 1
 .
@@ -8040,7 +8043,7 @@ qcomp 0.5-tel vagy hasonlóval (alapértelmezett)
 infix operátorok:
 .RE
 .RSs
-.IPs +,-,*,/,^
+.IPs +,\-,*,/,^
 .RE
 .PP
 .RS
@@ -10730,7 +10733,7 @@ hangerõ növeléséhez vagy a kattogás elkerüléséhez.
 .PP
 .B checkerboard invertálás geq szûrõvel:
 .nf
-mplayer \-vf geq='128+(p(X\,Y)\-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+mplayer \-vf geq='128+(p(X\,Y)\-128)*(0.5\-gt(mod(X/SW\,128)\,64))*(0.5\-gt(mod(Y/SH\,128)\,64))*4'
 .fi
 .
 .
