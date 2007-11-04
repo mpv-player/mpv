@@ -1186,8 +1186,8 @@ static uint32_t get_image(mp_image_t *mpi)
        if (!frame) {
             if(mpi->flags&MP_IMGFLAG_PLANAR){
 		mpi->planes[0]= dst + yoffset * pitch + xoffset;
-		mpi->planes[1]+= ((yoffset * pitch) >> 2) + (xoffset >> 1);
-		mpi->planes[2]+= ((yoffset * pitch) >> 2) + (xoffset >> 1);
+		mpi->planes[1]+= (yoffset * pitch) >> (2 + xoffset) >> 1;
+		mpi->planes[2]+= (yoffset * pitch) >> (2 + xoffset) >> 1;
 	    } else {
 		mpi->planes[0]=dst + yoffset * pitch + xoffset * (mpi->bpp >> 3);
 	    }		   
