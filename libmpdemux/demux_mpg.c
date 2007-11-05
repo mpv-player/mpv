@@ -576,7 +576,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       resize_demux_packet(dp, l);
     len = l;
     if(set_pts)
-    dp->pts=pts/90000.0f;
+      dp->pts=pts/90000.0f;
     dp->pos=demux->filepos;
     /*
       workaround:
