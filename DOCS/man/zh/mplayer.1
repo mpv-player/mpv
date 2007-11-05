@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r24137
+.\" sync with en/mplayer.1 r24954
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -11,8 +11,8 @@
 .\" 视频滤镜、通用编解码器选项、特定编解码器专用选项三个章节由
 .\" JRaSH <jrash06 AT 163.com>重新翻译
 .\" 参于翻译本中文手册页的有: 
-.\"   Lu Ran <hephooey@fastmail.fm>,
-.\"   Sheldon Jin <jinsh2 AT yahoo.com>, JRaSH <jrash06 AT 163.com>
+.\"   JRaSH <jrash06 AT 163.com>,
+.\"   Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2 AT yahoo.com>, 
 .
 .\" --------------------------------------------------------------------------
 .\" 宏定义
@@ -174,7 +174,7 @@ DirectFB, Quartz, Mac OS X CoreVideo, 也能使用 GGI, SDL (及它们的所有�
 .PP
 MPlayer 具有 OSD(屏上显示) 功能显示状态信息, 有
 抗锯齿带阴影的漂亮大字幕和键盘控制的可视反馈。
-支持的字体包括欧洲语种/\:ISO8859\-1,2 (匈牙利语, 英语, 捷克语等等),
+支持的字体包括欧洲语种/\:ISO8859\-1,2 (匈牙利语, 英语, 捷克语等等), 
 西里尔语和韩语, 可以播放 12 种格式的字幕文件 (MicroDVD, SubRip, OGM,
 SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS 
 及我们自己的: MPsub) 和 DVD 字幕 (SPU 流, VOBsub 及隐藏式 CC 字幕)。
@@ -245,11 +245,11 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 调整有利用于左/\:右声道的声音平衡。
 .IPs "m\ \ \ \ "
 静音。
-.IPs "_ (仅用于MPEG-TS和libav库格式)"
+.IPs "_ (仅用于 MPEG-TS、AVI 和 libav 库格式)"
 循环可用的像轨。
-.IPs "# (仅用于DVD、MPEG、Matroska、AVI和libav库格式)"
+.IPs "# (仅用于 DVD、MPEG、Matroska、AVI 和 libav 库格式)"
 循环可用的音轨。
-.IPs "TAB (仅用于MPEG-TS)"
+.IPs "TAB（仅用于 MPEG-TS 和 libav 库格式）"
 循环可用的节目。
 .IPs "f\ \ \ \ "
 切换全屏 (也请参见 \-fs)。
@@ -511,7 +511,7 @@ MEncoder 的配置文件是 "mencoder.conf" 位于你的配置目录
 如果你希望一个特定文件 "movie.avi" 有个配置文件, 就新建文件, 
 名为 "movie.avi.conf", 写上该特定文件的选项并放在目录 ~/.mplayer/ 下。
 你也可以把配置文件放在与播放该特定文件时该特定文件相同的目录之下, 
-只要你(要么在命令行或者在全局配置文件中)给定 \-use\-filedir\-conf 选项。
+只要你（要么在命令行或者在全局配置文件中）给出 \-use\-filedir\-conf 选项。
 .PP
 .I MPLAYER 配置文件示例:
 .sp 1
@@ -587,7 +587,7 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .SH "通用选项"
 .
 .TP
-.B \-codecs\-file <文件名> (也请参见 \-afm, \-ac, \-vfm, \-vc)
+.B \-codecs\-file <文件名>（也请参见 \-afm，\-ac，\-vfm，\-vc）
 重载标准的搜索路径并使用指定的文件代替内置的 codecs.conf。
 .
 .TP
@@ -615,8 +615,8 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 查看所有模块的列表请参见于 "\-msglevel help"。
 .br
 .I 注意:
-消息是在命令行解析之前打印的, 仅受到能应用于所有模块的
-环境变量 MPLAYER_VERBOSE 的控制。
+有些消息在解析命令行之前就打印出来，因而不受 \-msglevel 影响。
+要控制这些消息的话，你得使用 MPLAYER_VERBOSE 环境变量，参见下面的解释以获取详细信息。
 .br
 可用级别:
 .PD 0
@@ -634,7 +634,7 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .IPs " 4"
 信息消息
 .IPs " 5"
-状态消息 (隐藏用 \-quiet)
+状态消息（默认值）
 .IPs " 6"
 冗赘消息
 .IPs " 7"
@@ -735,7 +735,7 @@ xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 .
 .TP
-.B \-correct\-pts (试验)
+.B \-correct\-pts（用于试验）
 切换 MPlayer 到试验模式, 
 其中视频帧的时戳计算不同, 且支持视频过滤器添加新的帧或修改已有的时戳。
 可以看到更精确的时戳, 例如通过 \-ass 选项修改播放字幕与镜头同步。
@@ -748,7 +748,7 @@ xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 此支持必须已编译进配置 \-\-enable\-crash\-debug。
 .
 .TP 
-.B \-doubleclick\-time
+.B \-doubleclick\-time 
 以毫秒为单位的时间值，用以判定两次连续的按键动作是否为一次双击动作（默认值：
 300）。
 设为0则让你的窗体系统判断什么样动作的是双击（仅当 \-vo directx 时）。
@@ -844,7 +844,7 @@ wrapper(封套) 脚本 TOOLS/\:midentify 能抑制 MPlayer 的其它输出
 .TP
 .B \-key\-fifo\-size <2\-65000>
 指定 FIFO 大小供缓冲按键事件（默认值：7）。
-n 大小的 FIFO 能容纳 (n-1) 缓冲事件。
+n 大小的 FIFO 能容纳 (n\-1) 缓冲事件。
 如果太小会丢失一些事件
 (导致 "鼠标键卡住" 或类似效果)。
 如果太大, MPlayer 处理缓冲的事件时可能看上去挂住了。
@@ -1229,7 +1229,7 @@ HTTP 请求时发送 cookies。
 首先注意使用 \-dumpstream 通常是更好的拷贝 DVD 的方法(请参见示例)。
 .
 .TP
-.B \-dvd\-speed <以KB/s为单位的因数或速度值> （仅适用于DVD）
+.B \-dvd\-speed <以KB/s为单位的因数或速度值> （仅适用于DVD） 
 尝试限制DVD的传输速度（默认值：0，代表不作更改）。
 DVD的基础速率约为1350KB/s，所以一台8倍速的驱动器能以最高10800KB/s的速度读取
 数据。
@@ -1572,7 +1572,7 @@ radio://1, radio://104.4, radio_set_channel 1
 哪个 IP 地址, 然后试试用它强制分配到你的计算机。
 .
 .TP
-.B \-rtsp\-stream\-over\-tcp (仅适用于 LIVE555)
+.B \-rtsp\-stream\-over\-tcp（仅用于 LIVE555 和 NEMESI）
 与 "rtsp://" 的 URL 地址一起用来指定让 RTP 和 RTCP 进入包流过 TCP 
 (使用与 RTSP 相同的 TCP 连接)。
 如果你的破 internet 连接不传递 UDP 进入包, 此选项可能有用 
@@ -1649,7 +1649,7 @@ radio://1, radio://104.4, radio_set_channel 1
 默认值为0（禁用automute）。
 .IPs driver=<参数值>
 参见\-tv driver=help以获取内置TV输入驱动的列表。
-可用参数: dummy, v4l, bsdbt848
+可用参数: dummy, v4l, bsdbt848（默认值：自动侦测）
 .IPs device=<参数值>
 指定 TV 设备 (默认是: /dev/\:video0）。
 .I 注意：
@@ -1732,6 +1732,10 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 这些选项用来设置视频捕捉卡上的混音器参数。
 如果你的卡没有混音器, 它们将没有效果。
 对于 v4l2 50 根据驱动器的报告影射到控制器上的默认值。
+.IPs "gain=<0\-100>（仅用于v4l2）"
+将视频设备（通常是网络摄像头）的增益控制设置为所要的值，并且关闭自动控制模式。
+值为 0 启用自动控制模式。
+如果忽略这个选项，将不修改增益控制模式。
 .IPs immediatemode=<布尔值>
 参数值为 0 表示同时捕捉和缓冲音频和视频 (MEncoder 的默认值)。
 参数值为 1 (MPlayer 的默认值)表示只捕捉视频
@@ -1772,6 +1776,28 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .REss
 .IPs tpage=<100\-899>
 指定初始电视字幕的页面号（默认值：100）。
+.IPs tlang=<\-1\-127>
+设置默认电视字幕语言代码（默认值：0），该值将作为首选语言，直至收到一个类型 28 的数据
+包。
+当电视字幕系统使用非拉丁字符集，但语言代码因为某些原因，并非通过类型 28 的数据包传输时
+很有用。
+要查看支持的语言代码列表，则将该选项设为 \-1。
+.IPs "hidden_video_renderer（仅用于 dshow）"
+使用视频渲染器终止媒体流，而不是使用 Null 渲染器（默认值：关闭）。
+当视频卡住但音频没有时会有用。
+.I 注意：
+可能在与 \-vo directx 和 \-vf crop 一起使用时无法生效。
+.IPs "hidden_vp_renderer（仅用于 dshow）"
+使用视频渲染器终止 VideoPort 端媒体流，而不是将其从流程图中移除（默认值：关闭）。
+当你的视频有 VideoPort 端口，而视频有拖延时很有用。
+.I 注意：
+可能在与 \-vo directx 和 \-vf crop 一起使用时无法生效。
+.IPs "system_clock（仅用于 dshow）"
+使用系统时钟作为同步信号来源，而不是用默认的流程图中的时钟（通常是流程图中某个实时来源
+的时钟）。
+.IPs "normalize_audio_chunks（仅用于 dshow）"
+创建的音频数据块具有与视频帧相同的时间长度（默认值：关闭）。
+某些音频卡创建的音频数据块大小约为0.5秒，这导致使用 immediatemode=0 时视频拖延。
 .RE
 .
 .TP
@@ -2110,7 +2136,7 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 .B \-sub\-demuxer <[+]名称> (仅用于 \-subfile) (BETA 代码)
 锁定 \-subfile 的字幕分路器类型。
 在名称前使用 "+" 锁定类型, 跳过某些核查!
-按照 \-demuxer help 打印出来的指定分路器类型。
+按照 \-sub\-demuxer help 打印出来的指定分路器类型。
 为了向后兼容, 也接受定义在 subreader.h 的分路器标识。
 .
 .TP
@@ -2247,7 +2273,8 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 指定字幕文件的帧率(默认是: 电影的帧率)。
 .br
 .I 注意:
-仅用于基于帧的字幕文件, 即 MicroDVD 格式。
+<速率> > 电影的帧率时，将使基于帧的字幕文件加速播放字幕，而使基于时间的字幕文件减慢播
+放字幕。
 .
 .TP
 .B \-subpos <0\-100> (用于 \-vf expand)
@@ -2442,8 +2469,20 @@ OSS 音频输出驱动
 原生 Mac OS X 音频输出驱动
 .
 .TP
-.B openal
-试验性的, 未完成的 (会低端混音成单声道) OpenAL 音频输出驱动
+.B "openal\ "
+实验性的 OpenAL 音频输出驱动
+.
+.TP
+.B "pulse\ \ "
+PulseAudio 音频输出驱动
+.PD 0
+.RSs
+.IPs "<主机>[:<输出泄漏值>]"
+指定所使用的主机，并选择性地指定所使用的输出泄漏值。
+<主机>字符串为空的话，则使用本地连接。
+使用“localhost”作为<主机>的话，则使用网络传输（很可能不是你所希望的）。
+.RE
+.PD 1
 .
 .TP
 .B sgi (仅用于 SGI)
@@ -2794,7 +2833,7 @@ gl, gl2, directx 和 tdfxfb 视频输出驱动支持。
 .
 .TP
 .B \-monitorpixelaspect <宽高比> (也请参见 \-aspect)
-设置监视器或电视屏幕的单像素宽高比 (默认是停用的)。
+设置监视器或电视屏幕的单像素宽高比（默认值：1）。
 值 1 表示正方形像素((几乎?)对所有的 LCD 是正确的)。
 .
 .TP
@@ -2828,7 +2867,7 @@ ggi 和 gl2 的都支持此功能。
 视频输出驱动一起工作。
 .br
 .I 注意：
-也允许\-1和0间的值，但这些值处于高度试验阶段，从而可能导致崩溃或更糟。
+也允许 \-1 和 0 间的值，但这些值处于高度试验阶段，从而可能导致崩溃或更糟。
 使用后果自负！
 .
 .TP
@@ -3278,9 +3317,9 @@ OSD 颜色 (默认是: 0xffffff, 对应白色)。
 提供亮度, 对比度, 饱和度, 色调和 gamma 控制。
 对红, 绿和蓝色, Gamma 也能被独立设置。
 .br
-5: 使用 ATI-specific method (供较旧的卡)。
-这里使用 ATI 专用的扩展 (GL_ATI_fragment_shader \- 不是
-GL_ARB_fragment_shader!)。至少需要三个纹理单位。提供饱和度和色调的控制。
+5: 使用 ATI 专用的方式（用于较老的显卡）。
+这里使用 ATI 专用的扩展（GL_ATI_fragment_shader——不是 
+GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度和色调的控制。
 此方法快速但不精确。
 .br
 6: 使用 3D 纹理通过查询做转换。
@@ -3296,7 +3335,7 @@ GL_ARB_fragment_shader!)。至少需要三个纹理单位。提供饱和度和�
 .RSss
 0: 使用简单线性过滤 (默认)。
 .br
-1：使用双立体过滤 (较好的质量)。
+1：使用双立方体B曲线过滤 (较好的质量)。
 需要一个额外的纹理单位。
 至少在全屏模式, 较旧的卡不能处理色度。
 .br
@@ -3373,9 +3412,14 @@ gamma 的设置只能是通过全局的 X 服务器的设置才有效。
 .TP
 .B "aa\ \ \ \ \ "
 ASCII art 视频输出驱动工作于文字控制台。
-执行 
-.I mplayer \-vo aa:help
-, 你能得到可用子选项的列表和解释。
+通过执行 \-vo aa:help，你能得到可用子选项的列表和解释。
+.br
+.I 注意：
+该驱动不能正确处理 \-aspect 选项。
+.br
+.I 提示：
+你很可能得指定 \-monitorpixelaspect 选项。
+试试‘mplayer \-vo aa \-monitorpixelaspect 0.5’。
 .
 .TP
 .B "caca\ \ \ "
@@ -3422,7 +3466,7 @@ GGI 图形系统视频输出驱动
 此选项对逐行(像大多数 MPEG)影片不影响。
 如果观看交错影片时遇到撕裂问题或动作不顺畅, 需启用此选项。
 .IPs layer=N
-锁定回放的层标识 N (默认是: \-1 \- 自动)。
+锁定回放的层标识 N (默认值：\-1——自动)。
 .IPs dfbopts=<list>
 指定 DirectFB 参数列表。
 .RE
@@ -3767,7 +3811,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .TP
 .B \-ac <[\-|+]编解码器1,[\-|+]编解码器2,...[,]>
 按照在 codecs.conf 中音频编解码器的名称, 指定使用它们的优先级列表。
-编解码器名称前使用 "-" 表示忽略它。
+编解码器名称前使用 "\-" 表示忽略它。
 编解码器名称前使用 "+" 表示锁定它, 这有可能会崩溃!
 如果列表尾有 "," MPlayer 使用没有列出的编解码器作为后备。
 .br
@@ -4044,7 +4088,7 @@ all: 跳过所有的帧。
 完全跳过解码帧。
 大的提速, 但是有痉挛的动作或有时糟糕的图像 
 (可用的跳略值请参见 skiploopfilter)。
-.IPs "threads=<1\-8>（仅用于MPEG-1/2）"
+.IPs "threads=<1\-8>（仅用于 MPEG-1/2 和 H.264）"
 用于解码的线程数 (默认是: 1)
 .IPs vismv=<参数值>
 可视化运动矢量。
@@ -4174,7 +4218,7 @@ lanczos
 .TP
 .B \-vc <[\-|+]编解码器1,[\-|+]编解码器2,...[,]>
 按照在 codecs.conf 中视频编解码器的名称, 指定使用它们的优先级列表。
-编解码器名称前使用 "-" 表示忽略它。
+编解码器名称前使用 "\-" 表示忽略它。
 编解码器名称前使用 "+" 表示锁定它, 这有可能会崩溃!
 如果列表尾有 "," MPlayer 使用没有列出的编解码器作为后备。
 .br
@@ -4504,7 +4548,7 @@ s8, floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 和 imaadpcm。
 .PD 0
 .RSs
 .IPs "<v>\ \ "
-设置所有声道中流所需的增益分贝(dB) :  范围从 \-200dB 至 +60dB,
+设置所有声道中流所需的增益分贝(dB) :  范围从 \-200dB 至 +60dB, 
 其中 \-200dB 完全靜音而 +60dB 等于增益 1000 (默认是: 0)。
 .IPs "<sc>\ "
 打开 (1) 或关闭 (0) 软剪切。
@@ -4753,6 +4797,76 @@ unsigned long long counter   /*用于保持同步, 更新每次
 小心此过滤器会把信号变成单声道。
 对 2-声道音轨工作得很好; 在非 2-声道立体声上别费劲去尝试。
 .
+.TP
+.B scaletempo[=选项1:选项2:...]
+改变音频的节奏但不改变声音间隔，可选性地与播放速度同步（默认值）。
+.br
+该过滤器的工作方式是以正常速度播放 \'stride\' ms 的音频，而消耗的是 
+\'stride*scale\' ms 的输入音频。
+通过把一个跨度域内的 'overlap'% 的内容，与紧接着前一个跨度域的音频混合在一起，把各个
+跨度域拼接在一起。
+也可以让该选项对后 \'search\' ms 的音频作一个短小的统计性分析，以判定最佳的重叠位置。
+.PD 0
+.RSs
+.IPs scale=<数量值>
+要改变节奏的标称数量。
+使播放速度改变这个数量。
+（默认值：1.0）
+.IPs stride=<数量值>
+以毫秒为单位的所输出的每个跨度域的长度。
+值设得太高会在节奏改变量很高时产生可观的跳音现象，而在节奏改变量很小时产生回音。
+值设得太低会改变声音间隔。
+值越大性能越好。
+（默认值：60）
+.IPs overlap=<百分比值>
+跨度域之间重叠的百分比。
+值越小性能越好。
+（默认值：.20）
+.IPs search=<数量值>
+单位为毫秒的用以搜索最佳重叠位置的搜索长度。
+值越小性能越是大幅度提升。
+在较慢的系统上，你可能希望把这个值设得非常低。
+（默认值：14）
+.IPs speed=<tempo|pitch|both|none>
+设置播放速度改变时的反应。
+.RSss
+.IPs tempo
+改变音频节奏以使其与播放速度同步（默认值）
+.IPs pitch
+抵消过滤器产生的效果。
+改变声音间隔而不改变音频节奏。
+在你的 input.conf 中加入 \'[ speed_mult 0.9438743126816935\' 和 
+\'] speed_mult 1.059463094352953\' 使其能够以音乐学中的半音为步进改变。
+.I 警告：
+与视频的同步变差。
+.IPs both
+同时改变节奏和间隔
+.IPs none
+忽略速度的改变
+.RE
+.RE
+.sp 1
+.RS
+.I 示例：
+.RE
+.RSs
+.IPs "mplayer \-af scaletempo \-speed 1.2 media.ogg"
+将以 1.2 倍的正常速度播放媒体，音频的间隔值保持正常。改变播放速度只改变音频的节奏以与
+播放速度匹配。
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=none \-speed 1.2 media.ogg"
+将以 1.2 倍的正常速度播放媒体，音频的间隔值保持正常，但改变播放速度对音频的节奏无影
+响。
+.IPs "mplayer \-af scaletempo=stride=30:overlap=.50:search=10 media.ogg"
+将扭曲质量和性能参数。
+.IPs "mplayer \-af format=floatne,scaletempo media.ogg"
+将使 scaletempo 使用浮点值代码。
+可能在一些平台上运行较快。
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=pitch audio.ogg"
+将以 1.2 倍的正常速度播放媒体，音频的间隔值保持正常。改变播放速度只改变声音间隔，而把
+音频节奏保持在 1.2 倍速的水平。
+.RE
+.PD 1
+.
 .
 .
 .SH "视频滤镜"
@@ -4929,7 +5043,7 @@ d_宽/\:d_高！
 .br
 \-3：  使用另一个尺寸的值和原始的宽高比计算w/h。
 .br
--(n+8)：与以上的-n相似，但舍入尺寸值至最接近的16的倍数。
+\-(n+8)：与以上的\-n相似，但舍入尺寸值至最接近的16的倍数。
 .REss
 .IPs <ilaced>
 触发隔行扫描视频的缩放方式。
@@ -5077,7 +5191,7 @@ RGB 24/32 <\-> BGR 24/32色彩空间转换。
 .PD 0
 .RSs
 .IPs "swap\ "
-同样是执行R <-> B转换。
+同样是执行R <\-> B转换。
 .RE
 .PD 1
 .
@@ -5328,7 +5442,7 @@ spp滤镜的变种，与使用7顶点DCT的spp=6相似，在这种情况下只�
 通用方程式变换滤镜
 .RSs
 .IPs <equation>
-某种方程式，例如用以水平翻转图像的‘p(W-X\,Y)’。
+某种方程式，例如用以水平翻转图像的‘p(W\-X\\,Y)’。
 你可以使用空白分隔符使方程式更容易读懂。
 有一些常量可以在方程式中使用：
 .RSss
@@ -5431,6 +5545,21 @@ FIXME：解释一下这个是干什么的。
 .B hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]
 denoise3d滤镜的高精确/\:质量版本。
 参数与用法与denoise3d相同。
+.
+.TP
+.B ow[=depth[:luma_strength[:chroma_strength]]]
+过补偿小波降噪滤镜。
+.PD 0
+.RSs
+.IPs <depth>
+depth 值越大将去除越是更多地去除越是低频率的部分的噪音，但同时越是减慢过滤速度（默认
+值：8）。
+.IPs <luma_strength>
+亮度强度（默认值：1.0）
+.IPs <chroma_strength>
+色度强度（默认值：1.0）
+.RE
+.PD 1
 .
 .TP
 .B eq[=brightness:contrast]（已被淘汰）
@@ -6281,7 +6410,7 @@ h参数值。
 .PD 1
 .
 .TP
-.B remove-logo=/path/to/logo_bitmap_file_name.pgm
+.B remove\-logo=/path/to/logo_bitmap_file_name.pgm
 去除电视台台标，使用PGM或PPM图像文件来判断哪些像素组成
 了台标。
 图像文件的宽度和高度必须与所处理的视频流的宽高相
@@ -8144,6 +8273,10 @@ denoise3d或hqdn3d之类的视频滤镜来过滤噪声。
 当前该选项只有当场景切换侦测功能禁用时才能工作（sc_threshold=1000000000）。
 .
 .TP
+.B (no)lowdelay
+设置用于 MPEG-1/2 的低延迟标志（禁用B帧）。
+.
+.TP
 .B vglobal=<0\-3>
 控制写入全局视频头部信息的方式。
 .PD 0
@@ -9184,7 +9317,7 @@ Windows CMD.EXE的用户如果尝试使用全部CQM列表时，可能在解析�
 .
 .TP
 .B level_idc=<10\-51>
-将比特率的等级设置为H.264标准附件A中定义的值（默认值：51 \- 5.1级）。
+将比特率的等级设置为H.264标准附件A中定义的值（默认值：51——5.1级）。
 该选项用于告诉解码器其需要支持怎么样的性能。
 只有当你知道这个参数是什么意思，并且需要设置它时，才使用这个参数。
 .
@@ -9405,9 +9538,22 @@ PAL至NTSC的电视图像化处理
 .SS FFmpeg libavformat demuxers（\-lavfdopts）
 .
 .TP
+.B analyzeduration=<value>
+单位为秒的分析媒体流属性时的最大长度。
+.
+.TP
+.B format=<value>
+强制使用一个特定的 libav 格式库的分离器。
+.
+.TP
 .B probesize=<value>
 在侦测阶段所探测的最大数据量。
 在MPEG-TS的情况下，这个值指定了所扫描TS包的最大个数。
+.
+.TP
+.B cryptokey=<hexstring>
+分离器要使用的加密密钥。
+该值是密钥的原始二进制数据转换后得到十六进制字符串。
 .
 .
 .
@@ -9491,7 +9637,7 @@ MPlayer 寻找设置的目录。
 .TP
 .B MPLAYER_VERBOSE (也请参见 \-v 和 \-msglevel)
 对所有的消息模块设置初始冗赘级别 (默认是: 0)。
-负的值结果是越少的消息而正的值会越多。
+最终的冗赘级别是 \-msglevel 5 的级别再加上 MPLAYER_VERBOSE 的值。
 .
 .SS libaf:
 .
@@ -9859,7 +10005,7 @@ mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06
 .PP
 .B 使用geq滤镜产生的颠倒的棋盘：
 .nf
-mplayer \-vf geq='128+(p(X\,Y)\-128)*(0.5-gt(mod(X/SW\,128)\,64))*(0.5-gt(mod(Y/SH\,128)\,64))*4'
+mplayer \-vf geq='128+(p(X\,Y)\-128)*(0.5\-gt(mod(X/SW\,128)\,64))*(0.5\-gt(mod(Y/SH\,128)\,64))*4'
 .fi
 .
 .
@@ -9939,8 +10085,8 @@ MPlayer 是 (C) 2000\-2007 The MPlayer Team (MPlayer 团队) 所有
 由 Diego Biurrun 维护。
 视频滤镜、通用编解码器选项、特定编解码器专用选项三个章节由
 JRaSH <jrash06 AT 163.com> 重新翻译
-参于翻译本中文手册页的有: Lu Ran <hephooey AT fastmail.fm>, 
-Sheldon Jin <jinsh2 AT yahoo.com>, JRaSH<jrash06 At 163.com> 等。
+参于翻译本中文手册页的有: JRaSH<jrash06 At 163.com>, 
+Sheldon Jin <jinsh2 AT yahoo.com>, Lu Ran <hephooey AT fastmail.fm> 等。
 有关本文的联系请发送邮件到 MPlayer-DOCS 邮件列表。
 与翻译相关的邮件属于 MPlayer-translations 邮件列表。
 .\" end of file
