@@ -788,6 +788,7 @@ static void demux_close_tv(demuxer_t *demuxer)
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
     if (!tvh) return;
     tv_uninit(tvh);
+    free(tvh);
     demuxer->priv=NULL;
 }
 
