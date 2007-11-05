@@ -617,7 +617,10 @@ static int tv_uninit(tvi_handle_t *tvh)
     if(!tvh) return 1;
     if (!tvh->priv) return 1;
     res=tvh->functions->uninit(tvh->priv);
-    if(res) tvh->priv=NULL;
+    if(res) {
+        free(tvh->priv);
+        tvh->priv=NULL;
+    }
     return res;
 }
 
@@ -784,7 +787,7 @@ static void demux_close_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
     if (!tvh) return;
-    tvh->functions->uninit(tvh->priv);
+    tv_uninit(tvh);
     demuxer->priv=NULL;
 }
 
