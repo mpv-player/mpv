@@ -276,7 +276,7 @@ static int preinit(const char *arg)
 
 #if DIRECTFBVERSION < DFB_VERSION(0,9,17)
         if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN)) {
-            mp_msg(MSGT_VO, MSGL_WARN,"DirectFB: Warning - cannot swith to fullscreen mode");
+            mp_msg(MSGT_VO, MSGL_WARN,"DirectFB: Warning - cannot switch to fullscreen mode");
         };
 #endif
 	
@@ -613,7 +613,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	ret = layer->SetCooperativeLevel (layer, DLSCL_EXCLUSIVE);
 
         if (DFB_OK != ret) {
-	    mp_msg(MSGT_VO, MSGL_WARN,"DirectFB: Warning - cannot swith layer to exclusive mode. This could cause\nproblems. You may need to select correct pixel format manually!\n");
+	    mp_msg(MSGT_VO, MSGL_WARN,"DirectFB: Warning - cannot switch layer to exclusive mode. This could cause\nproblems. You may need to select correct pixel format manually!\n");
 	    DirectFBError("MPlayer - Switch layer to exlusive mode.",ret);
 	};
 #endif
@@ -702,7 +702,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 				    if (ret) {
 					DirectFBError("MPlayer - VM - Layer->GetConfiguration",ret);
 					} else {
-				        mp_msg(MSGT_VO, MSGL_DBG2,"DirectFB: Layer has now pixelformat [%x]\n",dlc.pixelformat);
+				        mp_msg(MSGT_VO, MSGL_DBG2,"DirectFB: Layer now has pixelformat [%x]\n",dlc.pixelformat);
 					};
 
 				    // check if we were succesful
@@ -1297,7 +1297,7 @@ static uint32_t put_image(mp_image_t *mpi){
 
     // already out?
     if((mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))) {
-//        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - nothing todo\n");
+//        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - nothing to do\n");
 	return VO_TRUE;
     }
 
@@ -1393,7 +1393,7 @@ static uint32_t put_image(mp_image_t *mpi){
 	unsigned int pitch;
         void *dst;
 
-//        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - non planar branch\n");
+//        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - non-planar branch\n");
 	if (frame) {
 		DFBCHECK (frame->Lock(frame,DSLF_WRITE,&dst,&pitch));
 		framelocked = 1;
