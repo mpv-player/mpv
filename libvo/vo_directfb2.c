@@ -109,7 +109,7 @@ static int framelocked = 0;
 static int flipping = 0; 
 // scaling flag
 static int stretch = 0;
-// pictrure position
+// picture position
 static int xoffset=0,yoffset=0;
 // picture size
 static int out_width=0,out_height=0;
@@ -185,7 +185,7 @@ static int preinit(const char *arg)
 
     //mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Preinit entered\n");
 
-    if (dfb) return 0; // we are already inited!
+    if (dfb) return 0; // we are already initialized!
 
     // set defaults
     buffer_mode = 1 + vo_doublebuffering; // honor -double switch
@@ -256,10 +256,10 @@ static int preinit(const char *arg)
    * (set options)
    */
 	
-//	uncomment this if you do not wish to create a new vt for DirectFB
+//	uncomment this if you do not wish to create a new VT for DirectFB
 //        DFBCHECK (DirectFBSetOption ("no-vt-switch",""));
 
-//	uncomment this if you want to allow vt switching
+//	uncomment this if you want to allow VT switching
 //       DFBCHECK (DirectFBSetOption ("vt-switching",""));
 
 //	uncomment this if you want to hide gfx cursor (req dfb >=0.9.9)
@@ -300,7 +300,7 @@ static int preinit(const char *arg)
    */
   if (keyboard) DFBCHECK (keyboard->CreateEventBuffer (keyboard, &buffer));
 
-  // just to start with clean ...
+  // just to start clean ...
   if (buffer) buffer->Reset(buffer);
 
   //mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Preinit OK\n");
@@ -409,12 +409,12 @@ DFBEnumerationResult test_format_callback( unsigned int                 id,
 
 static int query_format(uint32_t format)
 {
-	int ret = VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD; // osd should be removed in future -> will be handled outside...
+	int ret = VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD; // osd should be removed the in future -> will be handled outside...
 	enum1_t params;
 
 
 	if (!convformat(format)) return 0;
-// temporary disable YV12
+// temporarily disable YV12
 //	if (format == IMGFMT_YV12) return 0;
 //	if (format == IMGFMT_I420) return 0;
 	if (format == IMGFMT_IYUV) return 0;
@@ -506,7 +506,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	mp_msg(MSGT_VO, MSGL_DBG2,"DirectFB: Config entered [%ix%i]\n",s_width,s_height);
 	mp_msg(MSGT_VO, MSGL_DBG2,"DirectFB: With requested format: %s\n",vo_format_name(format));
 	
-// initial clean-up
+// initial cleanup
 	if (frame) {
 	    frame->Release(frame);
 	    frame=NULL;
@@ -566,7 +566,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	    }
 	} // vm end
 
-// just for sure clear primary layer
+// just to be sure clear primary layer
 #if DIRECTFBVERSION > DFB_VERSION(0,9,13)
         ret = dfb->GetDisplayLayer( dfb, DLID_PRIMARY, &layer);
 	if (ret==DFB_OK) {
@@ -631,8 +631,8 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	    };
 	}
 
-        // look if we need to change pixel fromat of layer
-	// and just for sure fetch also all layer propreties
+        // look if we need to change the pixel format of the layer
+	// and just to be sure also fetch all layer properties
 	dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_OPTIONS | DLCONF_BUFFERMODE;
 
 	ret = layer->GetConfiguration(layer,&dlc);
@@ -660,7 +660,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		mp_msg(MSGT_VO, MSGL_ERR,"DirectFB: ConfigError in layer configuration (format, flags=%x)\n",dlc.flags);
 		DirectFBError("MPlayer - layer pixelformat change",ret);
 
-		// ugly fbdev workabout - try to switch pixelformat via videomode change
+		// ugly fbdev workaround - try to switch pixelformat via videomode change
 		switch (dlc.pixelformat) {
 		    case DSPF_ARGB: 
 		    case DSPF_RGB32: bpp=32;break;
@@ -705,7 +705,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 				        mp_msg(MSGT_VO, MSGL_DBG2,"DirectFB: Layer has now pixelformat [%x]\n",dlc.pixelformat);
 					};
 
-				    // check if we were succesfull
+				    // check if we were succesful
 				    if ((dlc.pixelformat != convformat(params.format)) || (ret != DFB_OK)) {
 				        mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Recovery failed!.\n");
 					return CONFIG_ERROR;
@@ -720,7 +720,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	};
 
 // flipping of layer
-// try triple, \double... buffering
+// try triple, double... buffering
 
 	dlc.flags = DLCONF_BUFFERMODE;
 #ifdef TRIPLE
@@ -784,7 +784,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	
 	if (ret) {
 	    mp_msg(MSGT_VO, MSGL_ERR,"DirectFB: ConfigError - could not get surface\n");
-	    return CONFIG_ERROR; // what shall we report on fail?
+	    return CONFIG_ERROR; // what shall we report on failure?
 	}
 
 // test surface for flipping	
@@ -923,7 +923,7 @@ if (buffer) {
     };
 // empty buffer, because of repeating (keyboard repeat is faster than key handling
 // and this causes problems during seek)
-// temporary workabout should be solved in the future
+// temporary workaround should be solved in the future
     buffer->Reset(buffer);
 
 }
@@ -964,7 +964,7 @@ static void flip_page(void)
 		    break;
 	    case 2: DFBCHECK (primary->Flip (primary, NULL, DSFLIP_ONSYNC));
 		    break;
-	    default:; // should never reach here
+	    default:; // should never be reached
 	}
 #else
     if (flipping) { 
