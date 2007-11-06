@@ -178,7 +178,7 @@ static inline int convert_key(UInt32 key, UInt32 charcode)
 		case QZ_RIGHT: return KEY_RIGHT;
 		case QZ_KP_MULTIPLY: return '*';
 		case QZ_KP_DIVIDE: return '/';
-		case QZ_KP_ENTER: return KEY_BACKSPACE;
+		case QZ_KP_ENTER: return KEY_KPENTER;
 		case QZ_KP_PERIOD: return KEY_KPDEC;
 		case QZ_KP0: return KEY_KP0;
 		case QZ_KP1: return KEY_KP1;
