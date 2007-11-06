@@ -396,7 +396,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 
 	if(url_fopen(&priv->oc->pb, mp_filename, URL_WRONLY))
 	{
-		mp_msg(MSGT_MUXER, MSGL_FATAL, "Coulnd't open outfile\n");
+		mp_msg(MSGT_MUXER, MSGL_FATAL, "Could not open outfile\n");
 		goto fail;
         }
 	
