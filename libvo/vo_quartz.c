@@ -334,9 +334,15 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 				{
 					switch(button)
 					{ 
-						case 1: mplayer_put_key(MOUSE_BTN0);break;
-						case 2: mplayer_put_key(MOUSE_BTN2);break;
-						case 3: mplayer_put_key(MOUSE_BTN1);break;
+						case kEventMouseButtonPrimary:
+							mplayer_put_key(MOUSE_BTN0);
+							break;
+						case kEventMouseButtonSecondary:
+							mplayer_put_key(MOUSE_BTN1);
+							break;
+						case kEventMouseButtonTertiary:
+							mplayer_put_key(MOUSE_BTN2);
+							break;
 				
 						default:result = eventNotHandledErr;break;
 					}
