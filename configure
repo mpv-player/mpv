@@ -5983,11 +5983,13 @@ if test "$_libdca" = auto ; then
 #include <dts.h>
 int main(void) { dts_init (0); return 0; }
 EOF
-  cc_check -ldts $_ld_lm && _libdca=yes
+  for _ld_dca in -ldts -ldca ; do
+    cc_check $_ld_dca $_ld_lm && _ld_extra="$_ld_extra $_ld_dca" \
+      && _libdca=yes && break
+  done
 fi
 if test "$_libdca" = yes ; then
   _def_libdca='#define USE_LIBDCA 1'
-  _ld_extra="$_ld_extra -ldts"
   _codecmodules="libdca $_codecmodules"
 else
   _def_libdca='#undef USE_LIBDCA'
