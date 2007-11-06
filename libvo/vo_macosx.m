@@ -664,7 +664,7 @@ static int control(uint32_t request, void *data, ...)
 - (void) render
 {
 	int curTime;
-	static int lastTime;
+	static int lastTime = 0;
 
 	glClear(GL_COLOR_BUFFER_BIT);	
 	
@@ -722,7 +722,6 @@ static int control(uint32_t request, void *data, ...)
 	//update activity every 30 seconds to prevent
 	//screensaver from starting up.
 	curTime  = TickCount()/60;
-	lastTime = 0;
 		
 	if( ((curTime - lastTime) >= 30) || (lastTime == 0) )
 	{
