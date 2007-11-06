@@ -2699,7 +2699,10 @@ if(!noconsolecontrols && !slave_mode){
 	usec_sleep(20000);
 	guiEventHandling();
 	guiGetEvent( guiReDraw,NULL );
-	if ( (cmd = mp_input_get_cmd(0,0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
+	if ( (cmd = mp_input_get_cmd(0,0,0)) != NULL) {
+	  guiGetEvent(guiIEvent, (char *)cmd->id);
+	  mp_cmd_free(cmd);
+	}
        } 
       guiGetEvent( guiSetParameters,NULL );
       if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM )
