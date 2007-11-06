@@ -506,6 +506,25 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	CFStringRef movMenuTitle;
 	CFStringRef aspMenuTitle;
  
+    const EventTypeSpec win_events[] = {
+        { kEventClassWindow, kEventWindowClosed },
+		{ kEventClassWindow, kEventWindowBoundsChanged },
+        { kEventClassCommand, kEventCommandProcess }
+    };
+
+    const EventTypeSpec key_events[] = {
+		{ kEventClassKeyboard, kEventRawKeyDown },
+		{ kEventClassKeyboard, kEventRawKeyRepeat }
+    };
+
+	const EventTypeSpec mouse_events[] = {
+		{ kEventClassMouse, kEventMouseMoved },
+		{ kEventClassMouse, kEventMouseWheelMoved },
+		{ kEventClassMouse, kEventMouseDown },
+		{ kEventClassMouse, kEventMouseUp },
+		{ kEventClassMouse, kEventMouseDragged }
+	};
+
 	SetRect(&winRect, 0, 0, d_width, d_height);
 	SetRect(&oldWinRect, 0, 0, d_width, d_height);
 	SetRect(&dstRect, 0, 0, d_width, d_height);
@@ -534,9 +553,9 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	AppendMenuItemTextWithCFString(movMenu, CFSTR("Full Size"), 0, kFullScreenCmd, &index);
 	SetMenuItemCommandKey(movMenu, index, 0, 'F');
 	
-	AppendMenuItemTextWithCFString(movMenu, NULL, kMenuItemAttrSeparator, NULL, &index);
+	AppendMenuItemTextWithCFString(movMenu, NULL, kMenuItemAttrSeparator, 0, &index);
 
-	AppendMenuItemTextWithCFString(movMenu, CFSTR("Aspect Ratio"), 0, NULL, &index);
+	AppendMenuItemTextWithCFString(movMenu, CFSTR("Aspect Ratio"), 0, 0, &index);
 	
 	////Create Aspect Ratio Sub Menu
 	CreateNewMenu (0, 0, &aspectMenu);
@@ -548,7 +567,7 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	CheckMenuItem (aspectMenu, 1, vo_keepaspect);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Pan-Scan"), 0, kPanScanCmd, &index);
 	CheckMenuItem (aspectMenu, 2, vo_panscan);
-	AppendMenuItemTextWithCFString(aspectMenu, NULL, kMenuItemAttrSeparator, NULL, &index);
+	AppendMenuItemTextWithCFString(aspectMenu, NULL, kMenuItemAttrSeparator, 0, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Original"), 0, kAspectOrgCmd, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("4:3"), 0, kAspectFullCmd, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("16:9"), 0, kAspectWideCmd, &index);
@@ -571,25 +590,6 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	CFRelease(windowTitle);
   
 	//Install event handler
-    const EventTypeSpec win_events[] = {
-        { kEventClassWindow, kEventWindowClosed },
-		{ kEventClassWindow, kEventWindowBoundsChanged },
-        { kEventClassCommand, kEventCommandProcess }
-    };
-
-    const EventTypeSpec key_events[] = {
-		{ kEventClassKeyboard, kEventRawKeyDown },
-		{ kEventClassKeyboard, kEventRawKeyRepeat }
-    };
-
-	const EventTypeSpec mouse_events[] = {
-		{ kEventClassMouse, kEventMouseMoved },
-		{ kEventClassMouse, kEventMouseWheelMoved },
-		{ kEventClassMouse, kEventMouseDown },
-		{ kEventClassMouse, kEventMouseUp },
-		{ kEventClassMouse, kEventMouseDragged }
-	};
-	
 	InstallApplicationEventHandler (NewEventHandlerUPP (KeyEventHandler), GetEventTypeCount(key_events), key_events, NULL, NULL);
 	InstallApplicationEventHandler (NewEventHandlerUPP (MouseEventHandler), GetEventTypeCount(mouse_events), mouse_events, NULL, NULL);
 	InstallWindowEventHandler (theWindow, NewEventHandlerUPP (WindowEventHandler), GetEventTypeCount(win_events), win_events, theWindow, NULL);
@@ -1122,7 +1122,7 @@ static int preinit(const char *arg)
 #if !defined (MACOSX_FINDER_SUPPORT) || !defined (HAVE_SDL)
 	//this chunk of code is heavily based off SDL_macosx.m from SDL 
 	//it uses an Apple private function to request foreground operation
-
+{
 	void CPSEnableForegroundOperation(ProcessSerialNumber* psn);
 	ProcessSerialNumber myProc, frProc;
 	Boolean sameProc;
@@ -1138,6 +1138,7 @@ static int preinit(const char *arg)
 			SetFrontProcess(&myProc);
 		}
 	}
+}
 #endif
 
     return 0;
@@ -1360,7 +1361,7 @@ void window_fullscreen()
 			
 			if(fs_res_x != 0 || fs_res_y != 0)
 			{
-				BeginFullScreen( &restoreState, deviceHdl, &fs_res_x, &fs_res_y, NULL, NULL, NULL);
+				BeginFullScreen( &restoreState, deviceHdl, &fs_res_x, &fs_res_y, NULL, NULL, 0);
 				
 				//Get Main device info///////////////////////////////////////////////////
 				deviceRect = (*deviceHdl)->gdRect;
@@ -1390,7 +1391,7 @@ void window_fullscreen()
 		vo_quartz_fs = 0;
 		if(restoreState != NULL)
 		{
-			EndFullScreen(restoreState, NULL);
+			EndFullScreen(restoreState, 0);
 		
 			//Get Main device info///////////////////////////////////////////////////
 			deviceRect = (*deviceHdl)->gdRect;
@@ -1399,7 +1400,7 @@ void window_fullscreen()
 			device_height = deviceRect.bottom;
 			restoreState = NULL;
 		}
-		SetSystemUIMode( kUIModeNormal, NULL);
+		SetSystemUIMode( kUIModeNormal, 0);
 
 		//show mouse cursor
 		CGDisplayShowCursor(kCGDirectMainDisplay);
