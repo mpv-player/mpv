@@ -308,6 +308,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 			break;
 			
 			case kEventMouseDown:
+			case kEventMouseUp:
 			{
 				EventMouseButton button;
 				short part;
@@ -317,7 +318,26 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 				GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(EventMouseButton), 0, &button);
 				
 				part = FindWindow(mousePos,&tmpWin);
+				if(kind == kEventMouseUp)
+				{
+					if (part != inContent)
+						break;
+					switch(button)
+					{ 
+						case kEventMouseButtonPrimary:
+							mplayer_put_key(MOUSE_BTN0);
+							break;
+						case kEventMouseButtonSecondary:
+							mplayer_put_key(MOUSE_BTN1);
+							break;
+						case kEventMouseButtonTertiary:
+							mplayer_put_key(MOUSE_BTN2);
+							break;
 				
+						default:result = eventNotHandledErr;break;
+					}
+					break;
+				}
 				if( (winMousePos.h > (bounds.right - 15)) && (winMousePos.v > (bounds.bottom)) )
 				{
 					if(!vo_quartz_fs)
@@ -335,22 +355,19 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 					switch(button)
 					{ 
 						case kEventMouseButtonPrimary:
-							mplayer_put_key(MOUSE_BTN0);
+							mplayer_put_key(MOUSE_BTN0 | MP_KEY_DOWN);
 							break;
 						case kEventMouseButtonSecondary:
-							mplayer_put_key(MOUSE_BTN1);
+							mplayer_put_key(MOUSE_BTN1 | MP_KEY_DOWN);
 							break;
 						case kEventMouseButtonTertiary:
-							mplayer_put_key(MOUSE_BTN2);
+							mplayer_put_key(MOUSE_BTN2 | MP_KEY_DOWN);
 							break;
 				
 						default:result = eventNotHandledErr;break;
 					}
 				}
 			}		
-			break;
-			
-			case kEventMouseUp:
 			break;
 			
 			case kEventMouseDragged:
