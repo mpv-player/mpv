@@ -251,7 +251,7 @@ int stream_fill_buffer(stream_t *s){
   switch(s->type){
   case STREAMTYPE_STREAM:
 #ifdef MPLAYER_NETWORK
-    if( s->streaming_ctrl!=NULL ) {
+    if( s->streaming_ctrl!=NULL && s->streaming_ctrl->streaming_read ) {
 	    len=s->streaming_ctrl->streaming_read(s->fd,s->buffer,STREAM_BUFFER_SIZE, s->streaming_ctrl);break;
     } else {
       len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
