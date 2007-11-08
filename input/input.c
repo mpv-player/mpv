@@ -1294,8 +1294,13 @@ mp_input_get_cmd(int time, int paused, int peek_only) {
   if(!ret) return NULL;
 
   for(cf = cmd_filters ; cf ; cf = cf->next) {
-    if(cf->filter(ret,paused,cf->ctx))
+    if(cf->filter(ret,paused,cf->ctx)) {
+      if (peek_only && from_queue)
+        // The filter ate the cmd, so we remove it from queue
+        ret = mp_input_get_queued_cmd(0);
+      mp_cmd_free(ret);
       return NULL;
+    }
   }
 
   if (!from_queue && peek_only)
