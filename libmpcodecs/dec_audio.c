@@ -417,6 +417,8 @@ static int filter_n_bytes(sh_audio_t *sh, int len)
  * Can reallocate sh_audio->a_out_buffer if needed to fit all filter output. */
 int decode_audio(sh_audio_t *sh_audio, int minlen)
 {
+    // Indicates that a filter seems to be buffering large amounts of data
+    int huge_filter_buffer = 0;
     // Decoded audio must be cut at boundaries of this many bytes
     int unitsize = sh_audio->channels * sh_audio->samplesize;
 
@@ -436,16 +438,7 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
     while (sh_audio->a_out_buffer_len < minlen) {
 	int declen = (minlen - sh_audio->a_out_buffer_len) / filter_multiplier
 	    + (unitsize << 5); // some extra for possible filter buffering
-	if (declen > max_decode_len) {  // Do it in several steps
-	    if (filter_n_bytes(sh_audio, max_decode_len) < 0)
-		return -1;
-	    continue;
-	}
-	declen -= declen % unitsize;
-	if (filter_n_bytes(sh_audio, declen) < 0)
-	    return -1;
-	if (sh_audio->a_out_buffer_len >= minlen)
-	    return 0;
+	if (huge_filter_buffer)
 	/* Some filter must be doing significant buffering if the estimated
 	 * input length didn't produce enough output from filters.
 	 * Feed the filters 2k bytes at a time until we have enough output.
@@ -454,13 +447,16 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
 	 * to get audio data and buffer video frames in memory while doing
 	 * so. However the performance impact of either is probably not too
 	 * significant as long as the value is not completely insane. */
-	declen = min(2000, max_decode_len);
+	    declen = 2000;
 	declen -= declen % unitsize;
-	while (sh_audio->a_out_buffer_len < minlen) {
-	    if (filter_n_bytes(sh_audio, declen) < 0)
-		return -1;
-	}
-	return 0;
+	if (declen > max_decode_len)
+	    declen = max_decode_len;
+	else
+	    /* if this iteration does not fill buffer, we must have lots
+	     * of buffering in filters */
+	    huge_filter_buffer = 1;
+	if (filter_n_bytes(sh_audio, declen) < 0)
+	    return -1;
     }
     return 0;
 }
