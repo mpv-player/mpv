@@ -456,6 +456,7 @@ parse_smil(play_tree_parser_t* p) {
       return NULL; //line not smil exit
   }
 
+  if (!line) return NULL;
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected smil playlist format\n");
   play_tree_parser_stop_keeping(p);
 
