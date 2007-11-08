@@ -56,17 +56,13 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
 
   switch(cmd->id) {
   case MP_CMD_PAUSE :
-#if 0
-    /* disabled because of
-     * http://lists.mplayerhq.hu/pipermail/mplayer-dev-eng/2003-March/017281.html
-     * Subject: -menu & pause bug fix?
-     * Date: Sun Mar 23 11:00:49 CET 2003
-     */
+    if (!priv->current->show &&
+        (!priv->current->parent || !priv->current->parent->show))
+      break;
     if(!paused && !go2pause) { // Initial pause cmd -> wait the next put_image
       go2pause = 1;
       return 1;
     }
-#endif
     if(go2pause == 2) // Msg resent by put_image after saving the image
       go2pause = 0;
     break;
