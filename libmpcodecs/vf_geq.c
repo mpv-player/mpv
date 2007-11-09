@@ -31,13 +31,9 @@
 #include "mp_image.h"
 #include "vf.h"
 
-// Needed to bring in lrintf.
 #define HAVE_AV_CONFIG_H
-
 #include "libavcodec/avcodec.h"
-#include "libavcodec/dsputil.h"
 #include "libavcodec/eval.h"
-#include "libavutil/common.h"
 
 struct vf_priv_s {
     AVEvalExpr * e[3];
