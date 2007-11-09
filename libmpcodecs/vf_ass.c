@@ -51,7 +51,7 @@
 #define rgba2v(c)  ( (( 450*_r(c) - 376*_g(c) -  73*_b(c)) >> 10) + 128 )
 
 
-static struct vf_priv_s {
+static const struct vf_priv_s {
 	int outh, outw;
 
 	unsigned int outfmt;
@@ -64,7 +64,7 @@ static struct vf_priv_s {
 
 	unsigned char* planes[3];
 	unsigned char* dirty_rows;
-} const vf_priv_dflt;
+} vf_priv_dflt;
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;
@@ -372,7 +372,7 @@ static void uninit(struct vf_instance_s* vf)
 		free(vf->priv->dirty_rows);
 }
 
-static unsigned int fmt_list[]={
+static const unsigned int fmt_list[]={
 	IMGFMT_YV12,
 	IMGFMT_I420,
 	IMGFMT_IYUV,
@@ -405,19 +405,19 @@ static int open(vf_instance_t *vf, char* args)
 }
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
-static m_option_t vf_opts_fields[] = {
+static const m_option_t vf_opts_fields[] = {
 	{"auto", ST_OFF(auto_insert), CONF_TYPE_FLAG, 0 , 0, 1, NULL},
 	{ NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
-static m_struct_t vf_opts = {
+static const m_struct_t vf_opts = {
 	"ass",
 	sizeof(struct vf_priv_s),
 	&vf_priv_dflt,
 	vf_opts_fields
 };
 
-vf_info_t vf_info_ass = {
+const vf_info_t vf_info_ass = {
 	"Render ASS/SSA subtitles",
 	"ass",
 	"Evgeniy Stepanov",

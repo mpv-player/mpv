@@ -76,7 +76,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     int w = mpi->w, h = mpi->h;
     int bthresh = vf->priv->bthresh;
     int bamount = vf->priv->bamount;
-    static const char *picttypes[4] = { "unknown", "I", "P", "B" };
+    static const char *const picttypes[4] = { "unknown", "I", "P", "B" };
 
     for (y=1; y<=h; y++) {
 	    for (x=0; x<w; x++)
@@ -138,7 +138,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_blackframe = {
+const vf_info_t vf_info_blackframe = {
     "detects black frames",
     "blackframe",
     "Brian J. Murrell, Julian Hall, Ivo van Poorten",

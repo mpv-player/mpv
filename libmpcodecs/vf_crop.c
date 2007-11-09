@@ -13,10 +13,10 @@
 #include "m_option.h"
 #include "m_struct.h"
 
-static struct vf_priv_s {
+static const struct vf_priv_s {
     int crop_w,crop_h;
     int crop_x,crop_y;
-} const vf_priv_dflt = {
+} vf_priv_dflt = {
   -1,-1,
   -1,-1
 };
@@ -166,7 +166,7 @@ static int open(vf_instance_t *vf, char* args){
 }
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
-static m_option_t vf_opts_fields[] = {
+static const m_option_t vf_opts_fields[] = {
   {"w", ST_OFF(crop_w), CONF_TYPE_INT, M_OPT_MIN,0 ,0, NULL},
   {"h", ST_OFF(crop_h), CONF_TYPE_INT, M_OPT_MIN,0 ,0, NULL},
   {"x", ST_OFF(crop_x), CONF_TYPE_INT, M_OPT_MIN,-1 ,0, NULL},
@@ -174,14 +174,14 @@ static m_option_t vf_opts_fields[] = {
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
-static m_struct_t vf_opts = {
+static const m_struct_t vf_opts = {
   "crop",
   sizeof(struct vf_priv_s),
   &vf_priv_dflt,
   vf_opts_fields
 };
 
-vf_info_t vf_info_crop = {
+const vf_info_t vf_info_crop = {
     "cropping",
     "crop",
     "A'rpi",

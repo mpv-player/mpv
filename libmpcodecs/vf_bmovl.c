@@ -469,7 +469,7 @@ vf_open(vf_instance_t* vf, char* args)
     return TRUE;
 }
 
-vf_info_t vf_info_bmovl = {
+const vf_info_t vf_info_bmovl = {
     "Read bitmaps from a FIFO and display them in window",
     "bmovl",
     "Per Wigren",
