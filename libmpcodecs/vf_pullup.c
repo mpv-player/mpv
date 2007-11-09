@@ -24,25 +24,6 @@ struct vf_priv_s {
 	char *qbuf;
 };
 
-static inline void *il_memcpy_pic(void *dst, void *src0, void *src1, int w, int h, int ds, int ss)
-{
-	int i;
-	void *retval=dst;
-	ss += ss;
-
-	for(i=h>>1; i; i--)
-	{
-		fast_memcpy(dst, src0, w);
-		src0 += ss;
-		dst += ds;
-		fast_memcpy(dst, src1, w);
-		src1 += ss;
-		dst += ds;
-	}
-
-	return retval;
-}
-
 static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 {
 	struct pullup_context *c = vf->priv->ctx;
@@ -204,24 +185,6 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 			break;
 		}
 		/* Direct render fields into output buffer */
-#if 0
-		/* Write-order copy seems to have worse cache performance
-		 * than read-order, but both should be checked on
-		 * various cpus to see which is actually better...*/
-		il_memcpy_pic(dmpi->planes[0], f->ofields[0]->planes[0],
-			f->ofields[1]->planes[0] + c->stride[0],
-			mpi->w, mpi->h, dmpi->stride[0], c->stride[0]);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			il_memcpy_pic(dmpi->planes[1], f->ofields[0]->planes[1],
-				f->ofields[1]->planes[1] + c->stride[1],
-				mpi->chroma_width, mpi->chroma_height,
-				dmpi->stride[1], c->stride[1]);
-			il_memcpy_pic(dmpi->planes[2], f->ofields[0]->planes[2],
-				f->ofields[1]->planes[2] + c->stride[2],
-				mpi->chroma_width, mpi->chroma_height,
-				dmpi->stride[2], c->stride[2]);
-		}
-#else
 		my_memcpy_pic(dmpi->planes[0], f->ofields[0]->planes[0],
 			mpi->w, mpi->h/2, dmpi->stride[0]*2, c->stride[0]*2);
 		my_memcpy_pic(dmpi->planes[0] + dmpi->stride[0],
@@ -243,7 +206,6 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, c->stride[2]*2);
 		}
-#endif
 		pullup_release_frame(f);
 		if (mpi->qscale) {
 			dmpi->qscale = vf->priv->qbuf;
