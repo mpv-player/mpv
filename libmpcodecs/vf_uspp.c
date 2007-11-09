@@ -29,7 +29,6 @@
 #include "cpudetect.h"
 
 #include "libavcodec/avcodec.h"
-#include "libavcodec/dsputil.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
