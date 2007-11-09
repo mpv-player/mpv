@@ -26,28 +26,19 @@
 
 #include "mp_msg.h"
 #include "cpudetect.h"
-
-// Needed to bring in lrintf.
-#define HAVE_AV_CONFIG_H
-
-#include "libavcodec/avcodec.h"
-#include "libavcodec/dsputil.h"
-#include "libavcodec/eval.h"
-#include "libavutil/common.h"
-
-/* FIXME: common.h defines fprintf away when HAVE_AV_CONFIG
- * is defined, but mp_image.h needs fprintf.
- */
-#undef fprintf
-
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
+
+// Needed to bring in lrintf.
+#define HAVE_AV_CONFIG_H
+#include "libavcodec/avcodec.h"
+#include "libavcodec/eval.h"
+
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 
 
 struct vf_priv_s {
