@@ -207,8 +207,8 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(14, "xtpr", "xTPR Disable"),
       CPUID_FEATURE_DEF(15, "pdcm", "Perf/Debug Capability MSR"),
       CPUID_FEATURE_DEF(18, "dca", "Direct Cache Access"),
-      CPUID_FEATURE_DEF(19, "sse41", "SSE4.1 Extensions"),
-      CPUID_FEATURE_DEF(20, "sse42", "SSE4.2 Extensions"),
+      CPUID_FEATURE_DEF(19, "sse4_1", "SSE4.1 Extensions"),
+      CPUID_FEATURE_DEF(20, "sse4_2", "SSE4.2 Extensions"),
       CPUID_FEATURE_DEF(23, "popcnt", "Pop Count Instruction"),
       { -1 }
     };
@@ -243,6 +243,9 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(8, "3dnowprefetch", "3DNow! Prefetch/PrefetchW"),
       CPUID_FEATURE_DEF(9, "osvw", "OS Visible Workaround"),
       CPUID_FEATURE_DEF(10, "ibs", "Instruction Based Sampling"),
+      CPUID_FEATURE_DEF(11, "sse5", "SSE5 Extensions"),
+      CPUID_FEATURE_DEF(12, "skinit", "SKINIT, STGI, and DEV Support"),
+      CPUID_FEATURE_DEF(13, "wdt", "Watchdog Timer Support"),
       { -1 }
     };
     unsigned int family, model, stepping;
