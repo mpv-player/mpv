@@ -3,6 +3,7 @@ MPlayer (1.0)
   rc3:
     Decoders:
     * Nellymoser audio decoding via lavc
+    * Support for X8 frame (fixes "J-type picture is not supported" for WMV2)
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
