@@ -323,7 +323,7 @@ static int control(uint32_t request, void *data, ...)
 		case VOCTRL_PAUSE: return (int_pause=1);
 		case VOCTRL_RESUME: return (int_pause=0);
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
-		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); [mpGLView ontop]; return VO_TRUE;
+		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); if(!shared_buffer){ [mpGLView ontop]; } else { [mplayerosxProxy ontop]; } return VO_TRUE;
 		case VOCTRL_ROOTWIN: vo_rootwin = (!(vo_rootwin)); [mpGLView rootwin]; return VO_TRUE;
 		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); if(!shared_buffer){ [mpGLView fullscreen: NO]; } else { [mplayerosxProxy toggleFullscreen]; } return VO_TRUE;
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
