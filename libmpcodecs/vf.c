@@ -184,9 +184,7 @@ static vf_info_t* filter_list[]={
     &vf_info_divtc,
     &vf_info_harddup,
     &vf_info_softskip,
-#ifdef HAVE_PNG
     &vf_info_screenshot,
-#endif
 #ifdef USE_ASS
     &vf_info_ass,
 #endif
