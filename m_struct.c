@@ -11,8 +11,8 @@
 #include "m_struct.h"
 #include "mp_msg.h"
 
-m_option_t*
-m_struct_get_field(m_struct_t* st,const char* f) {
+const m_option_t*
+m_struct_get_field(const m_struct_t* st,const char* f) {
   int i;
 
   for(i = 0 ; st->fields[i].name ; i++) {
@@ -23,7 +23,7 @@ m_struct_get_field(m_struct_t* st,const char* f) {
 }
 
 void*
-m_struct_alloc(m_struct_t* st) {
+m_struct_alloc(const m_struct_t* st) {
   int i;
   void* r;
 
@@ -51,8 +51,8 @@ m_struct_alloc(m_struct_t* st) {
 }
 
 int
-m_struct_set(m_struct_t* st, void* obj, char* field, char* param) {
-  m_option_t* f = m_struct_get_field(st,field);
+m_struct_set(const m_struct_t* st, void* obj, char* field, char* param) {
+  const m_option_t* f = m_struct_get_field(st,field);
 
   if(!f) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s doesn't have any %s field\n",
@@ -70,8 +70,8 @@ m_struct_set(m_struct_t* st, void* obj, char* field, char* param) {
 }
 
 void
-m_struct_reset(m_struct_t* st, void* obj, const char* field) {
-  m_option_t* f;
+m_struct_reset(const m_struct_t* st, void* obj, const char* field) {
+  const m_option_t* f;
 
   if(!field) { // Reset all options
     int i;
@@ -92,7 +92,7 @@ m_struct_reset(m_struct_t* st, void* obj, const char* field) {
 
 /// Free an allocated struct
 void
-m_struct_free(m_struct_t* st, void* obj) {
+m_struct_free(const m_struct_t* st, void* obj) {
   int i;
 
   for(i = 0 ; st->fields[i].name ; i++)
@@ -101,7 +101,7 @@ m_struct_free(m_struct_t* st, void* obj) {
 }
 
 void*
-m_struct_copy(m_struct_t* st, void* obj) {
+m_struct_copy(const m_struct_t* st, void* obj) {
   void* r = malloc(st->size);
   int i;
   

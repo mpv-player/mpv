@@ -21,39 +21,39 @@ struct m_struct_st;
 ///////////////////////////// Options types declarations ////////////////////////////
 
 // Simple types
-extern m_option_type_t m_option_type_flag;
-extern m_option_type_t m_option_type_int;
-extern m_option_type_t m_option_type_float;
-extern m_option_type_t m_option_type_double;
-extern m_option_type_t m_option_type_string;
-extern m_option_type_t m_option_type_string_list;
-extern m_option_type_t m_option_type_position;
-extern m_option_type_t m_option_type_time;
-extern m_option_type_t m_option_type_time_size;
+extern const m_option_type_t m_option_type_flag;
+extern const m_option_type_t m_option_type_int;
+extern const m_option_type_t m_option_type_float;
+extern const m_option_type_t m_option_type_double;
+extern const m_option_type_t m_option_type_string;
+extern const m_option_type_t m_option_type_string_list;
+extern const m_option_type_t m_option_type_position;
+extern const m_option_type_t m_option_type_time;
+extern const m_option_type_t m_option_type_time_size;
 
-extern m_option_type_t m_option_type_print;
-extern m_option_type_t m_option_type_print_indirect;
-extern m_option_type_t m_option_type_print_func;
-extern m_option_type_t m_option_type_subconfig;
-extern m_option_type_t m_option_type_imgfmt;
-extern m_option_type_t m_option_type_afmt;
+extern const m_option_type_t m_option_type_print;
+extern const m_option_type_t m_option_type_print_indirect;
+extern const m_option_type_t m_option_type_print_func;
+extern const m_option_type_t m_option_type_subconfig;
+extern const m_option_type_t m_option_type_imgfmt;
+extern const m_option_type_t m_option_type_afmt;
 
 // Func-based types
-extern m_option_type_t m_option_type_func_full;
-extern m_option_type_t m_option_type_func_param;
-extern m_option_type_t m_option_type_func;
+extern const m_option_type_t m_option_type_func_full;
+extern const m_option_type_t m_option_type_func_param;
+extern const m_option_type_t m_option_type_func;
 
 /// Callback used to reset func options.
-typedef void (*m_opt_default_func_t)(m_option_t *, char*);
+typedef void (*m_opt_default_func_t)(const m_option_t *, const char*);
 
 /// Callback used by m_option_type_func_full options.
-typedef int (*m_opt_func_full_t)(m_option_t *, char *, char *);
+typedef int (*m_opt_func_full_t)(const m_option_t *, const char *, char *);
 
 /// Callback used by m_option_type_func_param options.
-typedef int (*m_opt_func_param_t)(m_option_t *, char *);
+typedef int (*m_opt_func_param_t)(const m_option_t *, const char *);
 
 /// Callback used by m_option_type_func options.
-typedef int (*m_opt_func_t)(m_option_t *);
+typedef int (*m_opt_func_t)(const m_option_t *);
 
 // Backwards compatibility
 typedef m_opt_default_func_t cfg_default_func_t;
@@ -95,7 +95,7 @@ typedef struct m_obj_settings {
  *  field (\ref m_option::priv) must point to a \ref m_obj_list_t describing
  *  the available object types.
  */
-extern m_option_type_t m_option_type_obj_settings_list;
+extern const m_option_type_t m_option_type_obj_settings_list;
 
 /// Extra definition needed for \ref m_option_type_obj_presets options.
 typedef struct {
@@ -116,18 +116,18 @@ typedef struct {
  *  The option priv field (\ref m_option::priv) must point to a correctly
  *  filled \ref m_obj_presets_t.
  */
-extern m_option_type_t m_option_type_obj_presets;
+extern const m_option_type_t m_option_type_obj_presets;
 
 /// Parse an URL into a struct.
 /** The option priv field (\ref m_option::priv) must point to a
  *  \ref m_struct_st describing which fields of the URL must be used.
  */
-extern m_option_type_t m_option_type_custom_url;
+extern const m_option_type_t m_option_type_custom_url;
 
 /// Extra definition needed for \ref m_option_type_obj_params options.
 typedef struct {
   /// Field descriptions.
-  struct m_struct_st* desc;
+  const struct m_struct_st* desc;
   /// Field separator to use.
   char separator;
 } m_obj_params_t;
@@ -137,14 +137,14 @@ typedef struct {
  *  successively sets a field from the struct. The option priv field
  *  (\ref m_option::priv) must point to a \ref m_obj_params_t.
  */
-extern m_option_type_t m_option_type_obj_params;
+extern const m_option_type_t m_option_type_obj_params;
 
 typedef struct {
   int start;
   int end;
 } m_span_t;
 /// Ready made settings to parse a \ref m_span_t with a start-end syntax.
-extern m_obj_params_t m_span_params_def;
+extern const m_obj_params_t m_span_params_def;
 
 
 // FIXME: backward compatibility
@@ -196,7 +196,7 @@ struct m_option_type {
    *  \return On error a negative value is returned, on success the number of arguments
    *          consumed. For details see \ref OptionParserReturn.
    */
-  int (*parse)(m_option_t* opt,char *name, char *param, void* dst, int src);
+  int (*parse)(const m_option_t* opt,const char *name, char *param, void* dst, int src);
   
   /// Print back a value in string form.
   /** \param opt The option to print.
@@ -204,7 +204,7 @@ struct m_option_type {
    *  \return An allocated string containing the text value or (void*)-1
    *          on error.
    */
-  char* (*print)(m_option_t* opt,  void* val);
+  char* (*print)(const m_option_t* opt,  void* val);
 
   /** \name
    *  These functions are called to save/set/restore the status of the
@@ -219,21 +219,21 @@ struct m_option_type {
    *  \param dst Pointer to the destination memory.
    *  \param src Pointer to the source memory.
    */
-  void (*save)(m_option_t* opt,void* dst, void* src);
+  void (*save)(const m_option_t* opt,void* dst, void* src);
   
   /// Set the value in the program (dst) from a save slot.
   /** \param opt The option to copy.
    *  \param dst Pointer to the destination memory.
    *  \param src Pointer to the source memory.
    */
-  void (*set)(m_option_t* opt,void* dst, void* src);
+  void (*set)(const m_option_t* opt,void* dst, void* src);
 
   /// Copy the data between two save slots. If NULL and size is > 0 a memcpy will be used.
   /** \param opt The option to copy.
    *  \param dst Pointer to the destination memory.
    *  \param src Pointer to the source memory.
    */
-  void (*copy)(m_option_t* opt,void* dst, void* src);
+  void (*copy)(const m_option_t* opt,void* dst, void* src);
   //@}
 
   /// Free the data allocated for a save slot.
@@ -251,7 +251,7 @@ struct m_option_type {
  */
 struct m_option {
   /// Option name.
-  char *name;
+  const char *name;
   
   /// Reserved for higher level APIs, it shouldn't be used by parsers.
   /** The suboption parser and func types do use it. They should instead
@@ -261,7 +261,7 @@ struct m_option {
   void *p;
   
   /// Option type.
-  m_option_type_t* type;
+  const m_option_type_t* type;
   
   /// See \ref OptionFlags.
   unsigned int flags;
@@ -451,17 +451,17 @@ struct m_option {
  *  \param name Name of the option.
  *  \return The matching option or NULL.
  */
-m_option_t* m_option_list_find(m_option_t* list,const char* name);
+const m_option_t* m_option_list_find(const m_option_t* list,const char* name);
 
 /// Helper to parse options, see \ref m_option_type::parse.
 inline static int
-m_option_parse(m_option_t* opt,char *name, char *param, void* dst, int src) {
+m_option_parse(const m_option_t* opt,const char *name, char *param, void* dst, int src) {
   return opt->type->parse(opt,name,param,dst,src);
 }
 
 /// Helper to print options, see \ref m_option_type::print.
 inline static  char*
-m_option_print(m_option_t* opt,  void* val_ptr) {
+m_option_print(const m_option_t* opt,  void* val_ptr) {
   if(opt->type->print)
     return opt->type->print(opt,val_ptr);
   else
@@ -470,21 +470,21 @@ m_option_print(m_option_t* opt,  void* val_ptr) {
 
 /// Helper around \ref m_option_type::save.
 inline static  void
-m_option_save(m_option_t* opt,void* dst, void* src) {
+m_option_save(const m_option_t* opt,void* dst, void* src) {
   if(opt->type->save)
     opt->type->save(opt,dst,src);
 }
 
 /// Helper around \ref m_option_type::set.
 inline static  void
-m_option_set(m_option_t* opt,void* dst, void* src) {
+m_option_set(const m_option_t* opt,void* dst, void* src) {
   if(opt->type->set)
     opt->type->set(opt,dst,src);
 }
 
 /// Helper around \ref m_option_type::copy.
 inline  static void
-m_option_copy(m_option_t* opt,void* dst, void* src) {
+m_option_copy(const m_option_t* opt,void* dst, void* src) {
   if(opt->type->copy)
     opt->type->copy(opt,dst,src);
   else if(opt->type->size > 0)
@@ -493,7 +493,7 @@ m_option_copy(m_option_t* opt,void* dst, void* src) {
 
 /// Helper around \ref m_option_type::free.
 inline static void
-m_option_free(m_option_t* opt,void* dst) {
+m_option_free(const m_option_t* opt,void* dst) {
   if(opt->type->free)
     opt->type->free(dst);
 }
