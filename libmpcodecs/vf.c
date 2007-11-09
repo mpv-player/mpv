@@ -23,85 +23,85 @@
 
 #include "libvo/fastmemcpy.h"
 
-extern vf_info_t vf_info_vo;
-extern vf_info_t vf_info_rectangle;
-extern vf_info_t vf_info_bmovl;
-extern vf_info_t vf_info_crop;
-extern vf_info_t vf_info_expand;
-extern vf_info_t vf_info_pp;
-extern vf_info_t vf_info_scale;
-extern vf_info_t vf_info_format;
-extern vf_info_t vf_info_noformat;
-extern vf_info_t vf_info_yuy2;
-extern vf_info_t vf_info_flip;
-extern vf_info_t vf_info_rgb2bgr;
-extern vf_info_t vf_info_rotate;
-extern vf_info_t vf_info_mirror;
-extern vf_info_t vf_info_palette;
-extern vf_info_t vf_info_lavc;
-extern vf_info_t vf_info_zrmjpeg;
-extern vf_info_t vf_info_dvbscale;
-extern vf_info_t vf_info_cropdetect;
-extern vf_info_t vf_info_test;
-extern vf_info_t vf_info_noise;
-extern vf_info_t vf_info_yvu9;
-extern vf_info_t vf_info_lavcdeint;
-extern vf_info_t vf_info_eq;
-extern vf_info_t vf_info_eq2;
-extern vf_info_t vf_info_halfpack;
-extern vf_info_t vf_info_dint;
-extern vf_info_t vf_info_1bpp;
-extern vf_info_t vf_info_2xsai;
-extern vf_info_t vf_info_unsharp;
-extern vf_info_t vf_info_swapuv;
-extern vf_info_t vf_info_il;
-extern vf_info_t vf_info_fil;
-extern vf_info_t vf_info_boxblur;
-extern vf_info_t vf_info_sab;
-extern vf_info_t vf_info_smartblur;
-extern vf_info_t vf_info_perspective;
-extern vf_info_t vf_info_down3dright;
-extern vf_info_t vf_info_field;
-extern vf_info_t vf_info_denoise3d;
-extern vf_info_t vf_info_hqdn3d;
-extern vf_info_t vf_info_detc;
-extern vf_info_t vf_info_telecine;
-extern vf_info_t vf_info_tinterlace;
-extern vf_info_t vf_info_tfields;
-extern vf_info_t vf_info_ivtc;
-extern vf_info_t vf_info_ilpack;
-extern vf_info_t vf_info_dsize;
-extern vf_info_t vf_info_decimate;
-extern vf_info_t vf_info_softpulldown;
-extern vf_info_t vf_info_pullup;
-extern vf_info_t vf_info_filmdint;
-extern vf_info_t vf_info_framestep;
-extern vf_info_t vf_info_tile;
-extern vf_info_t vf_info_delogo;
-extern vf_info_t vf_info_remove_logo;
-extern vf_info_t vf_info_hue;
-extern vf_info_t vf_info_spp;
-extern vf_info_t vf_info_uspp;
-extern vf_info_t vf_info_fspp;
-extern vf_info_t vf_info_pp7;
-extern vf_info_t vf_info_yuvcsp;
-extern vf_info_t vf_info_kerndeint;
-extern vf_info_t vf_info_rgbtest;
-extern vf_info_t vf_info_qp;
-extern vf_info_t vf_info_phase;
-extern vf_info_t vf_info_divtc;
-extern vf_info_t vf_info_harddup;
-extern vf_info_t vf_info_softskip;
-extern vf_info_t vf_info_screenshot;
-extern vf_info_t vf_info_ass;
-extern vf_info_t vf_info_mcdeint;
-extern vf_info_t vf_info_yadif;
-extern vf_info_t vf_info_blackframe;
-extern vf_info_t vf_info_geq;
-extern vf_info_t vf_info_ow;
+extern const vf_info_t vf_info_vo;
+extern const vf_info_t vf_info_rectangle;
+extern const vf_info_t vf_info_bmovl;
+extern const vf_info_t vf_info_crop;
+extern const vf_info_t vf_info_expand;
+extern const vf_info_t vf_info_pp;
+extern const vf_info_t vf_info_scale;
+extern const vf_info_t vf_info_format;
+extern const vf_info_t vf_info_noformat;
+extern const vf_info_t vf_info_yuy2;
+extern const vf_info_t vf_info_flip;
+extern const vf_info_t vf_info_rgb2bgr;
+extern const vf_info_t vf_info_rotate;
+extern const vf_info_t vf_info_mirror;
+extern const vf_info_t vf_info_palette;
+extern const vf_info_t vf_info_lavc;
+extern const vf_info_t vf_info_zrmjpeg;
+extern const vf_info_t vf_info_dvbscale;
+extern const vf_info_t vf_info_cropdetect;
+extern const vf_info_t vf_info_test;
+extern const vf_info_t vf_info_noise;
+extern const vf_info_t vf_info_yvu9;
+extern const vf_info_t vf_info_lavcdeint;
+extern const vf_info_t vf_info_eq;
+extern const vf_info_t vf_info_eq2;
+extern const vf_info_t vf_info_halfpack;
+extern const vf_info_t vf_info_dint;
+extern const vf_info_t vf_info_1bpp;
+extern const vf_info_t vf_info_2xsai;
+extern const vf_info_t vf_info_unsharp;
+extern const vf_info_t vf_info_swapuv;
+extern const vf_info_t vf_info_il;
+extern const vf_info_t vf_info_fil;
+extern const vf_info_t vf_info_boxblur;
+extern const vf_info_t vf_info_sab;
+extern const vf_info_t vf_info_smartblur;
+extern const vf_info_t vf_info_perspective;
+extern const vf_info_t vf_info_down3dright;
+extern const vf_info_t vf_info_field;
+extern const vf_info_t vf_info_denoise3d;
+extern const vf_info_t vf_info_hqdn3d;
+extern const vf_info_t vf_info_detc;
+extern const vf_info_t vf_info_telecine;
+extern const vf_info_t vf_info_tinterlace;
+extern const vf_info_t vf_info_tfields;
+extern const vf_info_t vf_info_ivtc;
+extern const vf_info_t vf_info_ilpack;
+extern const vf_info_t vf_info_dsize;
+extern const vf_info_t vf_info_decimate;
+extern const vf_info_t vf_info_softpulldown;
+extern const vf_info_t vf_info_pullup;
+extern const vf_info_t vf_info_filmdint;
+extern const vf_info_t vf_info_framestep;
+extern const vf_info_t vf_info_tile;
+extern const vf_info_t vf_info_delogo;
+extern const vf_info_t vf_info_remove_logo;
+extern const vf_info_t vf_info_hue;
+extern const vf_info_t vf_info_spp;
+extern const vf_info_t vf_info_uspp;
+extern const vf_info_t vf_info_fspp;
+extern const vf_info_t vf_info_pp7;
+extern const vf_info_t vf_info_yuvcsp;
+extern const vf_info_t vf_info_kerndeint;
+extern const vf_info_t vf_info_rgbtest;
+extern const vf_info_t vf_info_qp;
+extern const vf_info_t vf_info_phase;
+extern const vf_info_t vf_info_divtc;
+extern const vf_info_t vf_info_harddup;
+extern const vf_info_t vf_info_softskip;
+extern const vf_info_t vf_info_screenshot;
+extern const vf_info_t vf_info_ass;
+extern const vf_info_t vf_info_mcdeint;
+extern const vf_info_t vf_info_yadif;
+extern const vf_info_t vf_info_blackframe;
+extern const vf_info_t vf_info_geq;
+extern const vf_info_t vf_info_ow;
 
 // list of available filters:
-static vf_info_t* filter_list[]={
+static const vf_info_t* const filter_list[]={
     &vf_info_rectangle,
 #ifdef HAVE_POSIX_SELECT
     &vf_info_bmovl,
@@ -196,7 +196,7 @@ static vf_info_t* filter_list[]={
 
 // For the vf option
 m_obj_settings_t* vf_settings = NULL;
-m_obj_list_t vf_obj_list = {
+const m_obj_list_t vf_obj_list = {
   (void**)filter_list,
   M_ST_OFF(vf_info_t,name),
   M_ST_OFF(vf_info_t,info),
@@ -426,7 +426,7 @@ static int vf_default_query_format(struct vf_instance_s* vf, unsigned int fmt){
   return vf_next_query_format(vf,fmt);
 }
 
-vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, const char *name, char **args){
+vf_instance_t* vf_open_plugin(const vf_info_t* const* filter_list, vf_instance_t* next, const char *name, char **args){
     vf_instance_t* vf;
     int i;
     for(i=0;;i++){
@@ -447,7 +447,7 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, cons
     vf->default_caps=VFCAP_ACCEPT_STRIDE;
     vf->default_reqs=0;
     if(vf->info->opts) { // vf_vo get some special argument
-      m_struct_t* st = vf->info->opts;
+      const m_struct_t* st = vf->info->opts;
       void* vf_priv = m_struct_alloc(st);
       int n;
       for(n = 0 ; args && args[2*n] ; n++)
@@ -512,9 +512,9 @@ vf_instance_t* vf_add_before_vo(vf_instance_t **vf, char *name, char **args) {
 
 //============================================================================
 
-unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int preferred){
+unsigned int vf_match_csp(vf_instance_t** vfp,const unsigned int* list,unsigned int preferred){
     vf_instance_t* vf=*vfp;
-    unsigned int* p;
+    const unsigned int* p;
     unsigned int best=0;
     int ret;
     if((p=list)) while(*p){
