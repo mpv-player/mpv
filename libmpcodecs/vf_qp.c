@@ -27,18 +27,12 @@
 #include "mp_msg.h"
 #include "cpudetect.h"
 
-#if 1
-double ff_eval(char *s, double *const_value, const char **const_name,
-               double (**func1)(void *, double), const char **func1_name,
-               double (**func2)(void *, double, double), char **func2_name,
-               void *opaque);
-#endif
-
 // Needed to bring in lrintf.
 #define HAVE_AV_CONFIG_H
 
 #include "libavcodec/avcodec.h"
 #include "libavcodec/dsputil.h"
+#include "libavcodec/eval.h"
 #include "libavutil/common.h"
 
 /* FIXME: common.h defines fprintf away when HAVE_AV_CONFIG
