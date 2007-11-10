@@ -1085,6 +1085,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     *file_format = DEMUXER_TYPE_MPEG_PS;
     mp_msg(MSGT_DVD,MSGL_V,"DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
     stream->priv = (void*)d;
+    if(stream_cache_size > 0)
+      mp_msg(MSGT_DVD,MSGL_INFO,"[stream_dvd] Warning! the cache is enabled. Seeking won't work correctly\n");
     return STREAM_OK;
 
 fail:
