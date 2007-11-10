@@ -774,6 +774,7 @@ static void exit_sighandler(int x){
         gdb_pid = fork();
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forked...\n");
         if (gdb_pid == 0) { // We are the child
+          getch2_disable(); // allow terminal to work properly with gdb
           if (execlp("gdb", "gdb", prog_path, spid, NULL) == -1)
             mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't start gdb\n");
         } else if (gdb_pid < 0) 
