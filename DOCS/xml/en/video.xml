@@ -1923,6 +1923,31 @@ To change channels press the <keycap>h</keycap> (next) and
 </para>
 
 <para>
+To disable temporarily the audio or the video stream copy to
+<filename>~/.mplayer/input.conf</filename> the following rows:
+<screen>
+% set_property switch_video -2
+& step_property switch_video
+? set_property switch_audio -2
+^ step_property switch_audio
+</screen>
+(overriding the action keys as preferred); when pressing the key
+corresponding to switch_x -2 the associated stream will be closed;
+when pressing the key relative to step_x the stream will be reopened.
+Notice that this switching mechanism won't work as expected when there
+are multiple audio and video streams in the multiplex.
+</para>
+
+<para>
+During playback (not during recording), in order to prevent stuttering
+and error messages such as 'Your system is too slow' it's advisable to add
+<screen>
+-mc 10 -speed 0.97 -af scaletempo
+</screen>
+to your command line, adjusting the scaletempo parameters as preferred.
+</para>
+
+<para>
 If your <filename>~/.mplayer/menu.conf</filename> contains a
 <literal>&lt;dvbsel&gt;</literal> entry, such as the one in the example
 file <filename>etc/dvb-menu.conf</filename> (that you can use to overwrite
