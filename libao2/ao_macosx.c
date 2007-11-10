@@ -44,9 +44,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include <pthread.h>
 #include <sys/types.h>
-#include <sys/time.h>
 #include <unistd.h>
 
 #include "config.h"
@@ -857,21 +855,16 @@ static int AudioStreamChangeFormat( AudioStreamID i_stream_id, AudioStreamBasicD
     UInt32 i_param_size = 0;
     int i;
 
-    struct timeval now;
-    struct timespec timeout;
-    struct { pthread_mutex_t lock; pthread_cond_t cond; } w;
+    static volatile int stream_format_changed;
+    stream_format_changed = 0;
 
     print_format(MSGL_V, "setting stream format:", &change_format);
-
-    /* Condition because SetProperty is asynchronious. */
-    pthread_cond_init(&w.cond, NULL);
-    pthread_mutex_init(&w.lock, NULL);
-    pthread_mutex_lock(&w.lock);
 
     /* Install the callback. */
     err = AudioStreamAddPropertyListener(i_stream_id, 0,
                                          kAudioStreamPropertyPhysicalFormat,
-                                         StreamListener, (void *)&w);
+                                         StreamListener,
+                                         (void *)&stream_format_changed);
     if (err != noErr)
     {
         ao_msg(MSGT_AO, MSGL_WARN, "AudioStreamAddPropertyListener failed: [%4.4s]\n", (char *)&err);
@@ -889,19 +882,19 @@ static int AudioStreamChangeFormat( AudioStreamID i_stream_id, AudioStreamBasicD
         return CONTROL_FALSE;
     }
 
-    /* The AudioStreamSetProperty is not only asynchronious (requiring the locks),
+    /* The AudioStreamSetProperty is not only asynchronious,
      * it is also not Atomic, in its behaviour.
      * Therefore we check 5 times before we really give up.
      * FIXME: failing isn't actually implemented yet. */
     for (i = 0; i < 5; ++i)
     {
         AudioStreamBasicDescription actual_format;
-
-        gettimeofday(&now, NULL);
-        timeout.tv_sec = now.tv_sec;
-        timeout.tv_nsec = (now.tv_usec + 500000) * 1000;
-
-        if (pthread_cond_timedwait(&w.cond, &w.lock, &timeout))
+        int j;
+        for (j = 0; !stream_format_changed && j < 50; ++j)
+            usec_sleep(10000);
+        if (stream_format_changed)
+            stream_format_changed = 0;
+        else
             ao_msg(MSGT_AO, MSGL_V, "reached timeout\n" );
 
         i_param_size = sizeof(AudioStreamBasicDescription);
@@ -930,11 +923,6 @@ static int AudioStreamChangeFormat( AudioStreamID i_stream_id, AudioStreamBasicD
         ao_msg(MSGT_AO, MSGL_WARN, "AudioStreamRemovePropertyListener failed: [%4.4s]\n", (char *)&err);
         return CONTROL_FALSE;
     }
-
-    /* Destroy the lock and condition. */
-    pthread_mutex_unlock(&w.lock);
-    pthread_mutex_destroy(&w.lock);
-    pthread_cond_destroy(&w.cond);
 
     return CONTROL_TRUE;
 }
@@ -1144,17 +1132,12 @@ static OSStatus StreamListener( AudioStreamID inStream,
                                 AudioDevicePropertyID inPropertyID,
                                 void * inClientData )
 {
-    struct { pthread_mutex_t lock; pthread_cond_t cond; } * w = inClientData;
-
     switch (inPropertyID)
     {
         case kAudioStreamPropertyPhysicalFormat:
-            if (NULL!=w)
-            {
-                pthread_mutex_lock(&w->lock);
-                pthread_cond_signal(&w->cond);
-                pthread_mutex_unlock(&w->lock);
-            }
+            ao_msg(MSGT_AO, MSGL_V, "got notify kAudioStreamPropertyPhysicalFormat changed.\n");
+            if (inClientData)
+                *(volatile int *)inClientData = 1;
         default:
             break;
     }
