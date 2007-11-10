@@ -313,7 +313,7 @@ sub_visibility [value]
 forced_subs_only [value]
     Toggle/set forced subtitles only.
 
-switch_audio [value] (MPEG and Matroska only)
+switch_audio [value] (currently MPEG*, AVI, Matroska and streams handled by libavformat)
     Switch to the audio track with the id [value]. Cycle through the
     available tracks if [value] is omitted or negative.
 
