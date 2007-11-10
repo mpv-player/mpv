@@ -1923,7 +1923,7 @@ To change channels press the <keycap>h</keycap> (next) and
 </para>
 
 <para>
-To disable temporarily the audio or the video stream copy to
+To temporarily disable the audio or the video stream copy to
 <filename>~/.mplayer/input.conf</filename> the following rows:
 <screen>
 % set_property switch_video -2
