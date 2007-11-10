@@ -1927,7 +1927,7 @@ To temporarily disable the audio or the video stream copy to
 <filename>~/.mplayer/input.conf</filename> the following rows:
 <screen>
 % set_property switch_video -2
-& step_property switch_video
+&amp; step_property switch_video
 ? set_property switch_audio -2
 ^ step_property switch_audio
 </screen>
