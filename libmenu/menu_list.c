@@ -78,30 +78,32 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   need_h = count * (mpriv->vspace + vo_font->height) - mpriv->vspace;
   if( need_h + th > dh) {
     int start,end;
-    int maxl = (dh + mpriv->vspace - th) / (mpriv->vspace + vo_font->height);
-    if(maxl < 4) {
+    mpriv->disp_lines = (dh + mpriv->vspace - th) / (mpriv->vspace + vo_font->height);
+    if(mpriv->disp_lines < 4) {
       th = 0;
-      maxl = (dh + mpriv->vspace) / ( vo_font->height + mpriv->vspace);
+      mpriv->disp_lines = (dh + mpriv->vspace) / ( vo_font->height + mpriv->vspace);
     }
     // Too smoll
-    if(maxl < 1) return;
-    need_h = maxl*(mpriv->vspace + vo_font->height) - mpriv->vspace;
+    if(mpriv->disp_lines < 1) return;
+    need_h = mpriv->disp_lines*(mpriv->vspace + vo_font->height) - mpriv->vspace;
 
-    start = sidx - (maxl/2);
+    start = sidx - (mpriv->disp_lines/2);
     if(start < 0) start = 0;
-    end = start + maxl;
+    end = start + mpriv->disp_lines;
     if(end > count) {
       end = count;
-      if(end - start < maxl)
-	start = end - maxl < 0 ? 0 : end - maxl;
+      if(end - start < mpriv->disp_lines)
+	start = end - mpriv->disp_lines < 0 ? 0 : end - mpriv->disp_lines;
     }
     m = mpriv->menu;
     for(i = 0 ; m->next && i < start ; ) {
       if(!m->hide) i++;
       m = m->next;
     }
-  } else
+  } else {
     m = mpriv->menu;
+    mpriv->disp_lines = count;
+  }
 
   bg_w = need_w+2*mpriv->minb;
   if(th > 0) {
@@ -219,13 +221,13 @@ void menu_list_read_key(menu_t* menu,int c,int jump_to) {
       mpriv->current = m;
     break;
   case KEY_PAGE_UP:
-    for(i = 0, m = mpriv->current ; m && m->prev && i < 10 ; m = m->prev, i++)
+    for(i = 0, m = mpriv->current ; m && m->prev && i < mpriv->disp_lines ; m = m->prev, i++)
       /**/;
     if(m)
       mpriv->current = m;
     break;
   case KEY_PAGE_DOWN:
-    for(i = 0, m = mpriv->current ; m && m->next && i < 10 ; m = m->next, i++)
+    for(i = 0, m = mpriv->current ; m && m->next && i < mpriv->disp_lines ; m = m->next, i++)
       /**/;
     if(m)
       mpriv->current = m;

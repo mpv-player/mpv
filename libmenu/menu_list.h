@@ -28,6 +28,7 @@ typedef struct menu_priv_s {
   int x,y;
   int w,h;
   int vspace, minb;
+  int disp_lines;
   char* ptr;
   int title_bg,title_bg_alpha;
   int item_bg,item_bg_alpha;
@@ -55,6 +56,7 @@ extern const menu_list_priv_t menu_list_priv_dflt;
   -1,-1, \
   0,0, \
   5, 3, \
+  0, \
   NULL, \
   0xFF, 0xFF, \
   0xFF, 0xFF, \
