@@ -165,11 +165,11 @@ static int read_buffer(unsigned char* data,int len){
   if (first_len > len) first_len = len;
   // till end of buffer
   if (data) {
-  memcpy (data, &ao->buffer[ao->buf_read_pos], first_len);
-  if (len > first_len) { // we have to wrap around
-    // remaining part from beginning of buffer
-    memcpy (&data[first_len], ao->buffer, len - first_len);
-  }
+    memcpy (data, &ao->buffer[ao->buf_read_pos], first_len);
+    if (len > first_len) { // we have to wrap around
+      // remaining part from beginning of buffer
+      memcpy (&data[first_len], ao->buffer, len - first_len);
+    }
   }
   ao->buf_read_pos = (ao->buf_read_pos + len) % ao->buffer_len;
   return len;
