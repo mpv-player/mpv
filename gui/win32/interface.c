@@ -59,6 +59,8 @@ static gui_t *mygui = NULL;
 static int update_subwindow(void);
 static RECT old_rect;
 static DWORD style;
+static HANDLE hThread;
+static unsigned threadId;
 ao_functions_t *audio_out = NULL;
 vo_functions_t *video_out = NULL;
 mixer_t *mixer = NULL;
@@ -459,7 +461,7 @@ void mplFullScreen( void )
     if(sub_window) ShowWindow(mygui->subwindow, SW_SHOW);
 }
 
-static DWORD WINAPI GuiThread(void)
+static unsigned __stdcall GuiThread(void* param)
 {
     MSG msg;
 
@@ -473,9 +475,8 @@ static DWORD WINAPI GuiThread(void)
        gtkAutoSync = autosync;
     }
 
-    while(mygui)
+    while(GetMessage(&msg, NULL, 0, 0))
     {
-        GetMessage(&msg, NULL, 0, 0);
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
@@ -486,12 +487,11 @@ static DWORD WINAPI GuiThread(void)
 
 void guiInit(void)
 {
-    DWORD threadId;
     memset(&guiIntfStruct, 0, sizeof(guiIntfStruct));
     /* Create The gui thread */
     if (!mygui)
     {
-        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) GuiThread, NULL, 0, &threadId);
+        hThread = _beginthreadex(NULL, 0, GuiThread, NULL, 0, &threadId);
         mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] Creating GUI Thread 0x%04x\n", threadId);
     }
 
@@ -506,9 +506,11 @@ void guiDone(void)
     {
         fprintf(stderr, "[GUI] Closed by main mplayer window\n");
         fflush(stderr);
+        PostThreadMessage(threadId, WM_QUIT, 0, 0);
+        WaitForSingleObject(hThread, INFINITE);
+        CloseHandle(hThread);
         mygui->uninit(mygui);
         free(mygui);
-        TerminateThread(GuiThread, 0);
         mygui = NULL;
     }
     /* Remove tray icon */
