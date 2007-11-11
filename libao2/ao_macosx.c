@@ -77,6 +77,7 @@ typedef struct ao_macosx_s
   AudioDeviceID i_selected_dev;             /* Keeps DeviceID of the selected device. */
   int b_supports_digital;                   /* Does the currently selected device support digital mode? */
   int b_digital;                            /* Are we running in digital mode? */
+  int b_muted;                              /* Are we muted in digital mode? */
 
   /* AudioUnit */
   AudioUnit theOutputUnit;
@@ -163,10 +164,12 @@ static int read_buffer(unsigned char* data,int len){
   if (len > buffered) len = buffered;
   if (first_len > len) first_len = len;
   // till end of buffer
+  if (data) {
   memcpy (data, &ao->buffer[ao->buf_read_pos], first_len);
   if (len > first_len) { // we have to wrap around
     // remaining part from beginning of buffer
     memcpy (&data[first_len], ao->buffer, len - first_len);
+  }
   }
   ao->buf_read_pos = (ao->buf_read_pos + len) % ao->buffer_len;
   return len;
@@ -212,13 +215,22 @@ Float32 vol;
 		}
 
 	case AOCONTROL_SET_VOLUME:
-		if (ao->b_digital)
+		control_vol = (ao_control_vol_t*)arg;
+
+		if (ao->b_digital) {
 			// Digital output can not set volume. Here we have to return true
 			// to make mixer forget it. Else mixer will add a soft filter,
 			// that's not we expected and the filter not support ac3 stream
 			// will cause mplayer die.
+
+			// Although not support set volume, but at least we support mute.
+			// MPlayer set mute by set volume to zero, we handle it.
+			if (control_vol->left == 0 && control_vol->right == 0)
+				ao->b_muted = 1;
+			else
+				ao->b_muted = 0;
 			return CONTROL_TRUE;
-		control_vol = (ao_control_vol_t*)arg;
+		}
 		
 		vol=(control_vol->left+control_vol->right)*4.0/200.0;
 		err = AudioUnitSetParameter(ao->theOutputUnit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, vol, 0);
@@ -299,6 +311,7 @@ int b_alive;
     ao->i_selected_dev = 0;
     ao->b_supports_digital = 0;
     ao->b_digital = 0;
+    ao->b_muted = 0;
     ao->b_stream_format_changed = 0;
     ao->i_hog_pid = -1;
     ao->i_stream_id = 0;
@@ -944,7 +957,7 @@ static OSStatus RenderCallbackSPDIF( AudioDeviceID inDevice,
     if (amt > req)
         amt = req;
     if (amt)
-        read_buffer((unsigned char *)outOutputData->mBuffers[ao->i_stream_index].mData, amt);
+        read_buffer(ao->b_muted ? NULL : (unsigned char *)outOutputData->mBuffers[ao->i_stream_index].mData, amt);
 
     return noErr;
 }
