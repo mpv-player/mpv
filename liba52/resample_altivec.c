@@ -17,6 +17,21 @@ static inline vector signed short convert16_altivec(vector signed int v1, vector
   return result;
 }
 
+static void unaligned_store(vector signed short value, int off, int16_t *dst)
+{
+    register vector unsigned char align = vec_lvsr(0, dst),
+                                  mask = vec_lvsl(0, dst);
+    register vector signed short t0,t1, edges;
+
+    t0 = vec_ld(0+off, dst);
+    t1 = vec_ld(15+off, dst);
+    edges = vec_perm(t1 ,t0, mask);
+    t1 = vec_perm(value, edges, align);
+    t0 = vec_perm(edges, value, align);
+    vec_st(t1, 15+off, dst);
+    vec_st(t0, 0+off, dst);
+}
+
 static int a52_resample_STEREO_to_2_altivec(float * _f, int16_t * s16){
 #if 0
   int i;
@@ -44,9 +59,9 @@ static int a52_resample_STEREO_to_2_altivec(float * _f, int16_t * s16){
 
     r0 = vec_mergeh(reven, rodd);
     r1 = vec_mergel(reven, rodd);
-    
-    vec_st(r0, 0, s16);
-    vec_st(r1, 16, s16);
+    // FIXME can be merged to spare some I/O
+    unaligned_store(r0, 0, s16);
+    unaligned_store(r1, 16, s16);
 
     f += 8;
     s16 += 16;
