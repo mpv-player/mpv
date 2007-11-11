@@ -68,10 +68,6 @@ LIBAO_EXTERN(macosx)
 /* Prefix for all mp_msg() calls */
 #define ao_msg(a, b, c...) mp_msg(a, b, "AO: [macosx] " c)
 
-/* This is large, but best (maybe it should be even larger).
- * CoreAudio supposedly has an internal latency in the order of 2ms */
-#define NUM_BUFS 32
-
 typedef struct ao_macosx_s
 {
   AudioDeviceID i_selected_dev;             /* Keeps DeviceID of the selected device. */
