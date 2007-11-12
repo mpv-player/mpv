@@ -84,11 +84,17 @@ static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
             buff = &trash_buff;
 
         rtp_fill_buffer(ssrc, fr, buff); //Prefetch the first packet
-        while ( !(rtp_get_pkt(ssrc, NULL)) ) //Wait second pkt to calculate FPS
-            sched_yield();
 
-        if ( (force_fps == 0.0) && (fps != NULL) )
-            *fps = rtp_get_fps(ssrc);
+        /* Packet prefecthing must be done anyway or we won't be
+           able to get the metadata, but fps calculation happens
+           only if the user didn't specify the FPS */
+        if (!force_fps) {
+            while ( *fps <= 0 ) {
+                //Wait more pkts to calculate FPS and try again
+                sched_yield();
+                *fps = rtp_get_fps(ssrc);
+            }
+        }
     }
 }
 
