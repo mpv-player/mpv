@@ -88,7 +88,7 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 		   uint32_t width, uint32_t height, int sbpp) {
 
 	unsigned int x, y;
-	unsigned long color[16];
+	uint32_t color[16];
 
 	/* Point to the first 3 lines. */
 	src_line[0] = src;
@@ -109,13 +109,13 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 		color[12] = *sbp;    color[13] = color[12];   color[14] = *(sbp + 1); color[15] = *(sbp + 2);
 	}
 	else {
-		unsigned long *lbp;
-		lbp = (unsigned long*)src_line[0];
+		uint32_t *lbp;
+		lbp = (uint32_t*)src_line[0];
 		color[0] = *lbp;       color[1] = color[0];   color[2] = color[0];    color[3] = color[0];
 		color[4] = color[0];   color[5] = color[0];   color[6] = *(lbp + 1);  color[7] = *(lbp + 2);
-		lbp = (unsigned long*)src_line[2];
+		lbp = (uint32_t*)src_line[2];
 		color[8] = *lbp;     color[9] = color[8];     color[10] = *(lbp + 1); color[11] = *(lbp + 2);
-		lbp = (unsigned long*)src_line[3];
+		lbp = (uint32_t*)src_line[3];
 		color[12] = *lbp;    color[13] = color[12];   color[14] = *(lbp + 1); color[15] = *(lbp + 2);
 	}
 
@@ -127,7 +127,7 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 		/* Todo: x = width - 2, x = width - 1 */
 		
 		for (x = 0; x < width; x++) {
-			unsigned long product1a, product1b, product2a, product2b;
+			uint32_t product1a, product1b, product2a, product2b;
 
 //---------------------------------------  B0 B1 B2 B3    0  1  2  3
 //                                         4  5* 6  S2 -> 4  5* 6  7
@@ -191,14 +191,14 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 				product1a = color[5];
 	
 			if (PixelsPerMask == 2) {
-				*((unsigned long *) (&dst_line[0][x * 4])) = product1a | (product1b << 16);
-				*((unsigned long *) (&dst_line[1][x * 4])) = product2a | (product2b << 16);
+				*((uint32_t *) (&dst_line[0][x * 4])) = product1a | (product1b << 16);
+				*((uint32_t *) (&dst_line[1][x * 4])) = product2a | (product2b << 16);
 			}
 			else {
-				*((unsigned long *) (&dst_line[0][x * 8])) = product1a;
-				*((unsigned long *) (&dst_line[0][x * 8 + 4])) = product1b;
-				*((unsigned long *) (&dst_line[1][x * 8])) = product2a;
-				*((unsigned long *) (&dst_line[1][x * 8 + 4])) = product2b;
+				*((uint32_t *) (&dst_line[0][x * 8])) = product1a;
+				*((uint32_t *) (&dst_line[0][x * 8 + 4])) = product1b;
+				*((uint32_t *) (&dst_line[1][x * 8])) = product2a;
+				*((uint32_t *) (&dst_line[1][x * 8 + 4])) = product2b;
 			}
 			
 			/* Move color matrix forward */
@@ -215,10 +215,10 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 					color[15] = *(((unsigned short*)src_line[3]) + x);
 				}
 				else {
-					color[3] = *(((unsigned long*)src_line[0]) + x);
-					color[7] = *(((unsigned long*)src_line[1]) + x);
-					color[11] = *(((unsigned long*)src_line[2]) + x);
-					color[15] = *(((unsigned long*)src_line[3]) + x);
+					color[3] = *(((uint32_t*)src_line[0]) + x);
+					color[7] = *(((uint32_t*)src_line[1]) + x);
+					color[11] = *(((uint32_t*)src_line[2]) + x);
+					color[15] = *(((uint32_t*)src_line[3]) + x);
 				}
 				x -= 3;
 			}
@@ -248,14 +248,14 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 			color[12] = *sbp;    color[13] = color[12];  color[14] = *(sbp + 1); color[15] = *(sbp + 2);
 		}
 		else {
-			unsigned long *lbp;
-			lbp = (unsigned long*)src_line[0];
+			uint32_t *lbp;
+			lbp = (uint32_t*)src_line[0];
 			color[0] = *lbp;     color[1] = color[0];    color[2] = *(lbp + 1);  color[3] = *(lbp + 2);
-			lbp = (unsigned long*)src_line[1];
+			lbp = (uint32_t*)src_line[1];
 			color[4] = *lbp;     color[5] = color[4];    color[6] = *(lbp + 1);  color[7] = *(lbp + 2);
-			lbp = (unsigned long*)src_line[2];
+			lbp = (uint32_t*)src_line[2];
 			color[8] = *lbp;     color[9] = color[9];    color[10] = *(lbp + 1); color[11] = *(lbp + 2);
-			lbp = (unsigned long*)src_line[3];
+			lbp = (uint32_t*)src_line[3];
 			color[12] = *lbp;    color[13] = color[12];  color[14] = *(lbp + 1); color[15] = *(lbp + 2);
 		}
 		
