@@ -74,7 +74,7 @@ static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
     rtp_ssrc *ssrc = NULL;
     rtp_frame * fr = &ndsd->first_pkt[stype];
     rtp_buff trash_buff;
-    int must_prefecth = ((fps != NULL) || (buff != NULL)) ? 1 : 0;
+    int must_prefetch = ((fps != NULL) || (buff != NULL)) ? 1 : 0;
 
     ndsd->session[stype] = sess;
 
@@ -156,10 +156,13 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
     for (; media; media=media->next) {
         sdp_medium_info * info = media->medium_info;
         rtp_session * sess = media->rtp_sess;
+        rtp_buff buff;
 
         int media_format = atoi(info->fmts);
         rtp_pt * ptinfo = rtp_get_pt_info(sess, media_format);
         char const * format_name = ptinfo ? ptinfo->name : NULL;
+
+        memset(&buff, 0, sizeof(rtp_buff));
 
         if (sess->parsers[media_format] == NULL) {
             mp_msg(MSGT_DEMUX, MSGL_ERR,
@@ -176,13 +179,21 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
         if (ptinfo->type == AU) {
             if (ndsd->session[NEMESI_SESSION_AUDIO] == NULL) {
                 sh_audio_t* sh_audio = new_sh_audio(demuxer,0);
-                WAVEFORMATEX* wf = calloc(1,sizeof(WAVEFORMATEX));
+                WAVEFORMATEX* wf;
                 demux_stream_t* d_audio = demuxer->audio;
 
                 mp_msg(MSGT_DEMUX, MSGL_INFO, "Detected as AUDIO stream...\n");
 
                 link_session_and_fetch_conf(ndsd, NEMESI_SESSION_AUDIO,
-                                            sess, NULL, NULL);
+                                            sess, &buff, NULL);
+
+                if (buff.len) {
+                    wf = calloc(1,sizeof(WAVEFORMATEX)+buff.len);
+                    wf->cbSize = buff.len;
+                    memcpy(wf+1, buff.data, buff.len);
+                } else {
+                    wf = calloc(1,sizeof(WAVEFORMATEX));
+                }
 
                 sh_audio->wf = wf;
                 d_audio->sh = sh_audio;
@@ -211,8 +222,6 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                 BITMAPINFOHEADER* bih;
                 demux_stream_t* d_video;
                 int fps = 0;
-                rtp_buff buff;
-                memset(&buff, 0, sizeof(rtp_buff));
 
                 mp_msg(MSGT_DEMUX, MSGL_INFO, "Detected as VIDEO stream...\n");
 
