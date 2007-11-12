@@ -12,18 +12,14 @@
 
 //===========================================================================//
 
-#define uint32 unsigned long
-#define uint16 unsigned short
-#define uint8 unsigned char
-
 /* FIXME: these all belong in the context, not as globals! */
 
-static uint32 colorMask = 0xF7DEF7DE;
-static uint32 lowPixelMask = 0x08210821;
-static uint32 qcolorMask = 0xE79CE79C;
-static uint32 qlowpixelMask = 0x18631863;
-static uint32 redblueMask = 0xF81F;
-static uint32 greenMask = 0x7E0;
+static uint32_t colorMask = 0xF7DEF7DE;
+static uint32_t lowPixelMask = 0x08210821;
+static uint32_t qcolorMask = 0xE79CE79C;
+static uint32_t qlowpixelMask = 0x18631863;
+static uint32_t redblueMask = 0xF81F;
+static uint32_t greenMask = 0x7E0;
 static int PixelsPerMask = 2;
 static int xsai_depth = 0;
 
@@ -87,9 +83,9 @@ int Init_2xSaI(int d)
 static unsigned char *src_line[4];
 static unsigned char *dst_line[2];
 
-void Super2xSaI_ex(uint8 *src, uint32 src_pitch, 
-		   uint8 *dst, uint32 dst_pitch,
-		   uint32 width, uint32 height, int sbpp) {
+void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch, 
+		   uint8_t *dst, uint32_t dst_pitch,
+		   uint32_t width, uint32_t height, int sbpp) {
 
 	unsigned int x, y;
 	unsigned long color[16];
