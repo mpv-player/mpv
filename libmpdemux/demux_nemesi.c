@@ -38,6 +38,33 @@ typedef struct {
     double seek;
 } Nemesi_DemuxerStreamData;
 
+
+#define STYPE_TO_DS(demuxer, stype) \
+    ((stype) == NEMESI_SESSION_VIDEO ? (demuxer)->video : (demuxer)->audio)
+
+#define DS_TO_STYPE(demuxer, ds) \
+    ((ds) == (demuxer)->video ? NEMESI_SESSION_VIDEO : NEMESI_SESSION_AUDIO)
+
+#define INVERT_STYPE(stype) ((stype + 1) % 2)
+
+
+static rtp_ssrc *wait_for_packets(Nemesi_DemuxerStreamData * ndsd, Nemesi_SessionType stype)
+{
+    rtp_ssrc *ssrc = NULL;
+
+    /* Wait for prebuffering (prebuffering must be enabled in nemesi) */
+    int terminated = rtp_fill_buffers(rtsp_get_rtp_th(ndsd->rtsp));
+
+    /* Wait for the ssrc to be registered, if prebuffering is on in nemesi
+       this will just get immediatly the correct ssrc */
+    if (!terminated) {
+        while ( !(ssrc = rtp_session_get_ssrc(ndsd->session[stype], ndsd->rtsp)) )
+            sched_yield();
+    }
+
+    return ssrc;
+}
+
 static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
                                         Nemesi_SessionType stype,
                                         rtp_session * sess,
@@ -45,28 +72,23 @@ static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
 {
     extern float force_fps;
     rtp_ssrc *ssrc = NULL;
-    rtsp_ctrl * ctl = ndsd->rtsp;
     rtp_frame * fr = &ndsd->first_pkt[stype];
     rtp_buff trash_buff;
 
     ndsd->session[stype] = sess;
 
-    if (buff == NULL)
-        buff = &trash_buff;
+    ssrc = wait_for_packets(ndsd, stype);
 
-    if ( (buff != NULL) || (fps != NULL) ) {
-        while ( !(ssrc = rtp_session_get_ssrc(sess, ctl)) ) //Wait for the ssrc to be registered
-            sched_yield();
+    if ( (ssrc) && (fps != NULL) ) {
+        if (buff == NULL)
+            buff = &trash_buff;
 
         rtp_fill_buffer(ssrc, fr, buff); //Prefetch the first packet
-
-        while ( !(rtp_get_pkt(ssrc, NULL)) ) //Wait for the second packet to calculate FPS
+        while ( !(rtp_get_pkt(ssrc, NULL)) ) //Wait second pkt to calculate FPS
             sched_yield();
 
-        if ( (force_fps == 0.0) && (fps != NULL) ) {
-            rtp_fill_buffers(rtsp_get_rtp_th(ctl));
+        if ( (force_fps == 0.0) && (fps != NULL) )
             *fps = rtp_get_fps(ssrc);
-        }
     }
 }
 
@@ -241,75 +263,63 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
 }
 
 static int get_data_for_session(Nemesi_DemuxerStreamData * ndsd,
-                                Nemesi_SessionType stype, rtp_frame * fr)
+                                Nemesi_SessionType stype, rtp_ssrc * ssrc,
+                                rtp_frame * fr)
 {
-    rtsp_ctrl * ctl = ndsd->rtsp;
-    rtp_ssrc *ssrc = NULL;
-
-    for (ssrc = rtp_active_ssrc_queue(rtsp_get_rtp_queue(ctl));
-         ssrc;
-         ssrc = rtp_next_active_ssrc(ssrc)) {
-        if (ssrc->rtp_sess == ndsd->session[stype]) {
-            if (ndsd->first_pkt[stype].len != 0) {
-                fr->data = ndsd->first_pkt[stype].data;
-                fr->time_sec = ndsd->first_pkt[stype].time_sec;
-                fr->len = ndsd->first_pkt[stype].len;
-                ndsd->first_pkt[stype].len = 0;
-                return RTP_FILL_OK;
-            } else {
-                rtp_buff buff;
-                return rtp_fill_buffer(ssrc, fr, &buff);
-            }
-        }
+    if (ndsd->first_pkt[stype].len != 0) {
+        fr->data = ndsd->first_pkt[stype].data;
+        fr->time_sec = ndsd->first_pkt[stype].time_sec;
+        fr->len = ndsd->first_pkt[stype].len;
+        ndsd->first_pkt[stype].len = 0;
+        return RTP_FILL_OK;
+    } else {
+        rtp_buff buff;
+        return rtp_fill_buffer(ssrc, fr, &buff);
     }
+}
 
-    return RTP_SSRC_NOTVALID;
+static void stream_add_packet(Nemesi_DemuxerStreamData * ndsd, 
+                              Nemesi_SessionType stype,
+                              demux_stream_t* ds, rtp_frame * fr)
+{
+    demux_packet_t* dp = new_demux_packet(fr->len);
+    memcpy(dp->buffer, fr->data, fr->len);
+
+    fr->time_sec += ndsd->seek;
+    ndsd->time[stype] = dp->pts = fr->time_sec;
+
+    ds_add_packet(ds, dp);
 }
 
 int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds)
 {
     Nemesi_DemuxerStreamData * ndsd = demuxer->priv;
     Nemesi_SessionType stype;
-    rtsp_ctrl * ctl = ndsd->rtsp;
-    rtp_thread * rtp_th = rtsp_get_rtp_th(ctl);
+    rtp_ssrc * ssrc;
     rtp_frame fr;
 
-    demux_packet_t* dp;
-
-    if ( (!ctl->rtsp_queue) || (demuxer->stream->eof) || (rtp_fill_buffers(rtp_th)) ) {
+    if ( (!ndsd->rtsp->rtsp_queue) || (demuxer->stream->eof) ) {
         mp_msg(MSGT_DEMUX, MSGL_INFO, "End of Stream...\n");
         demuxer->stream->eof = 1;
         return 0;
     }
 
-    if (ds == demuxer->video)
-        stype = NEMESI_SESSION_VIDEO;
-    else if (ds == demuxer->audio)
-        stype = NEMESI_SESSION_AUDIO;
-    else
+    stype = DS_TO_STYPE(demuxer, ds);
+    if ( (ssrc = wait_for_packets(ndsd, stype)) == NULL ) {
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "Bye...\n");
+        demuxer->stream->eof = 1;
         return 0;
-
-    if(!get_data_for_session(ndsd, stype, &fr)) {
-        dp = new_demux_packet(fr.len);
-        memcpy(dp->buffer, fr.data, fr.len);
-        fr.time_sec += ndsd->seek;
-        ndsd->time[stype] = dp->pts = fr.time_sec;
-        ds_add_packet(ds, dp);
     }
-    else {
-        stype = (stype + 1) % 2;
-        if (stype == NEMESI_SESSION_VIDEO)
-            ds = demuxer->video;
-        else
-            ds = demuxer->audio;
 
-        if(!get_data_for_session(ndsd, stype, &fr)) {
-            dp = new_demux_packet(fr.len);
-            memcpy(dp->buffer, fr.data, fr.len);
-            fr.time_sec += ndsd->seek;
-            ndsd->time[stype] = dp->pts = fr.time_sec;
-            ds_add_packet(ds, dp);
-        }
+    if(!get_data_for_session(ndsd, stype, ssrc, &fr))
+        stream_add_packet(ndsd, stype, ds, &fr);
+    else {
+        stype = INVERT_STYPE(stype);
+        ds = STYPE_TO_DS(demuxer, stype);
+        ssrc = wait_for_packets(ndsd, stype);
+
+        if(!get_data_for_session(ndsd, stype, ssrc, &fr))
+            stream_add_packet(ndsd, stype, ds, &fr);
     }
 
     return 1;
