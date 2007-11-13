@@ -13,7 +13,7 @@ MPlayer (1.0)
     Filters:
     * vf_ow new overcomplete wavelet denoiser
     * change vf_screenshot dependency from libpng to lavc
-    * add vf_scaletempo
+    * add af_scaletempo
     * rewrite dec_audio to support more filters
     * cleanup libaf
 
