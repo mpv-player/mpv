@@ -1147,6 +1147,8 @@ static int uninit(priv_t *priv)
             free(priv->audio_skew_buffer);
         if (priv->audio_skew_delta_buffer)
             free(priv->audio_skew_delta_buffer);
+
+        audio_in_uninit(&priv->audio_in);
     }
 
     /* show some nice statistics ;-) */
