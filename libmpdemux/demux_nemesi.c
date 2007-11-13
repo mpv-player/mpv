@@ -334,6 +334,11 @@ int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds)
         stream_add_packet(ndsd, stype, ds, &fr);
     else {
         stype = INVERT_STYPE(stype);
+
+        //Must check if we actually have a stream of the other type
+        if (!ndsd->session[stype])
+            return 1;
+
         ds = STYPE_TO_DS(demuxer, stype);
         ssrc = wait_for_packets(ndsd, stype);
 
