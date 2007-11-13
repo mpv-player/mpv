@@ -217,7 +217,7 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                        " ignoring...\n");
             }
         } else if (ptinfo->type == VI) {
-            if (ndsd->session[NEMESI_SESSION_AUDIO] == NULL) {
+            if (ndsd->session[NEMESI_SESSION_VIDEO] == NULL) {
                 sh_video_t* sh_video;
                 BITMAPINFOHEADER* bih;
                 demux_stream_t* d_video;
