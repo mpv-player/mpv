@@ -445,7 +445,6 @@ int b_alive;
     }
 
 	/* original analog output code */
-	if (!aoIsCreated) {
 	desc.componentType = kAudioUnitType_Output;
 	desc.componentSubType = kAudioUnitSubType_DefaultOutput;
 	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
@@ -469,7 +468,6 @@ int b_alive;
 	if (err) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to initialize Output Unit component: [%4.4s]\n", (char *)&err);
 		return CONTROL_FALSE;
-	}
 	}
 
 	size =  sizeof(AudioStreamBasicDescription);
