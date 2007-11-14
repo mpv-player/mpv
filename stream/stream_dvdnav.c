@@ -496,7 +496,6 @@ int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
   uint8_t format, lg;
   uint16_t lang, lcode;;
 
-  //this macro is defined only in libdvdnav-cvs
   while(language && strlen(language)>=2) {
     lcode = (language[0] << 8) | (language[1]);
     for(k=0; k<32; k++) {
