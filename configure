@@ -7526,16 +7526,11 @@ EOF
   _dvdnav=no
   _dvdnavdir=`$_dvdnavconfig --cflags`
   _dvdnavlibs=`$_dvdnavconfig --libs`
-  _dvdnavvsn=`$_dvdnavconfig --version | sed "s/\.//g"`
-  _dvdnavmajor=`echo $_dvdnavvsn | cut -d. -f2`
-  test "$_dvdnavmajor" -ge 2 -o "$_dvdnavvsn" -ge 0110 && \
        cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
   _def_dvdnav='#define USE_DVDNAV 1'
-  _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
-  _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
   _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
   _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
   _inputmodules="dvdnav $_inputmodules"
@@ -8054,7 +8049,6 @@ $_def_lircc
 
 /* DVD navigation support using libdvdnav */
 $_def_dvdnav
-$_def_dvdnav_version
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires a FAST CPU!) */
 #define MPEG12_POSTPROC 1
