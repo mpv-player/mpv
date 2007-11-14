@@ -104,6 +104,8 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   else 
      if ( !strcasecmp( mf_type,"png" )) sh_video->format = mmioFOURCC('M', 'P', 'N', 'G' );
   else
+     if ( !strcasecmp( mf_type,"tif" )) sh_video->format = mmioFOURCC('t', 'i', 'f', 'f' );
+  else 
      if ( !strcasecmp( mf_type,"tga" )) sh_video->format = mmioFOURCC('M', 'T', 'G', 'A' );
   else
      if ( !strcasecmp( mf_type,"bmp" )) sh_video->format = mmioFOURCC('b', 'm', 'p', ' ' );
