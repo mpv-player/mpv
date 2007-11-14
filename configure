@@ -5868,7 +5868,6 @@ else
 fi
 if test "$_libvorbis" = no ; then
   _libavencoders=`echo $_libavencoders | sed -e s/LIBVORBIS_ENCODER// `
-  _libavmuxers=`echo $_libavmuxers | sed -e s/LIBOGG_MUXER// `
 fi
 echores "$_vorbis"
 
