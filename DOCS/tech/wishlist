@@ -129,7 +129,7 @@ Enhancements:
 
 Difficult stuff:
 
- * RE all closed source codecs (QDMC, WMA9, Indeo 4/5, sipr, ...)
+ * RE all closed source codecs (QDMC, WMA9, Indeo 4/5, ...)
 
  * support for Bink codec
 
@@ -140,8 +140,6 @@ Difficult stuff:
  * unify live555 and Real RTSP
 
  * real mmsu:// support
-
- * MEncoder output support for MKV, NUT, MXF
 
  * top notch DVD navigation like a hardware player
 
