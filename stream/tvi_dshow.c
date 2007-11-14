@@ -2667,7 +2667,6 @@ static int init(priv_t * priv)
 		       chanlist2country(priv->tv_param->chanlist));
             if(FAILED(hr)){
                 mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: Call to put_CountryCode failed. Error:0x%x\n",(unsigned int)hr);
-                break;
             }
 
             hr = OLE_CALL_ARGS(priv->pTVTuner, put_Mode, AMTUNER_MODE_TV);
