@@ -63,8 +63,6 @@ Filters:
 
  * eq filter should support RGB in addition to YUV
 
- * pitch audio filter
- 
  * move filters into ffmpeg
 
  * autocrop filter
@@ -123,7 +121,7 @@ Enhancements:
 
  * rotate/position osd
 
- * support all image formats in mf:// (tiff)
+ * support all image formats in mf:// (tiff, jpeg2000)
 
  * make -noborder work with all video outputs
 
@@ -131,7 +129,7 @@ Enhancements:
 
 Difficult stuff:
 
- * RE all closed source codecs (QDMC, WMA9, RV30, RV40, sipr, ...)
+ * RE all closed source codecs (QDMC, WMA9, Indeo 4/5, sipr, ...)
 
  * support for Bink codec
 
@@ -143,7 +141,7 @@ Difficult stuff:
 
  * real mmsu:// support
 
- * MEncoder output support for OGM, MKV, NUT
+ * MEncoder output support for MKV, NUT, MXF
 
  * top notch DVD navigation like a hardware player
 
@@ -155,9 +153,7 @@ Difficult stuff:
 
  * support for pausing/resuming of encoding in MEncoder
 
- * finish TV support under Windows
-
- * DRM support (divx.com, WMV, WMA, iTunes)
+ * DRM support (divx.com, Real.com, iTunes)
 
  * variable-fps output support for MEncoder
 
