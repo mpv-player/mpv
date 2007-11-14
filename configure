@@ -7526,7 +7526,7 @@ EOF
   _dvdnav=no
   _dvdnavdir=`$_dvdnavconfig --cflags`
   _dvdnavlibs=`$_dvdnavconfig --libs`
-       cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
+  cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
