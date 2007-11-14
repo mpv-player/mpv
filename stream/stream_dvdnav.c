@@ -324,7 +324,6 @@ static int control(stream_t *stream, int cmd, void* arg) {
       *((double *)arg) = !ar ? 4.0/3.0 : 16.0/9.0;
       return 1;
     }
-#ifdef MP_DVDNAV
     case STREAM_CTRL_GET_CURRENT_TIME:
     {
       double tm;
@@ -343,7 +342,6 @@ static int control(stream_t *stream, int cmd, void* arg) {
         return 1;
       break;
     }
-#endif
   }
 
   return STREAM_UNSUPPORTED;
@@ -498,7 +496,6 @@ int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
   uint8_t format, lg;
   uint16_t lang, lcode;;
 
-#ifdef DVDNAV_FORMAT_AC3
   //this macro is defined only in libdvdnav-cvs
   while(language && strlen(language)>=2) {
     lcode = (language[0] << 8) | (language[1]);
@@ -525,7 +522,6 @@ int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
     language += 2;
     while(language[0]==',' || language[0]==' ') ++language;
   }
-#endif
   return -1;
 }
 
