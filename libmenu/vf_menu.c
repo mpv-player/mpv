@@ -21,6 +21,7 @@
 #include "libvo/fastmemcpy.h"
 #include "libvo/video_out.h"
 #include "libvo/font_load.h"
+#include "libvo/sub.h"
 #include "input/input.h"
 #include "m_struct.h"
 #include "menu.h"
@@ -55,17 +56,6 @@ void vf_menu_pause_update(struct vf_instance_s* vf) {
 static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
 
   switch(cmd->id) {
-  case MP_CMD_PAUSE :
-    if (!priv->current->show &&
-        (!priv->current->parent || !priv->current->parent->show))
-      break;
-    if(!paused && !go2pause) { // Initial pause cmd -> wait the next put_image
-      go2pause = 1;
-      return 1;
-    }
-    if(go2pause == 2) // Msg resent by put_image after saving the image
-      go2pause = 0;
-    break;
   case MP_CMD_MENU : {  // Convert txt cmd from the users into libmenu stuff
     char* arg = cmd->args[0].v.s;
     
@@ -134,8 +124,6 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     return vf_next_put_image(vf,dmpi, pts);
   }
 
-  if(vf->priv->current->show 
-  || (vf->priv->current->parent && vf->priv->current->parent->show)) {
   // Close all menu who requested it
   while(vf->priv->current->cl && vf->priv->current != vf->priv->root) {
     menu_t* m = vf->priv->current;
@@ -143,30 +131,23 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     menu_close(m);
   }
 
-  // Step 1 : save the picture
-  while(go2pause == 1) {
-    static char delay = 0; // Hack : wait the 2 frame to be sure to show the right picture
-    delay ^= 1; // after a seek
-    if(!delay) break;
-
+    // Try to capture the last frame before pause, or fallback to use
+    // last captured frame.
     if(pause_mpi && (mpi->w != pause_mpi->w || mpi->h != pause_mpi->h ||
 		     mpi->imgfmt != pause_mpi->imgfmt)) {
       free_mp_image(pause_mpi);
       pause_mpi = NULL;
     }
-    if(!pause_mpi)
-      pause_mpi = alloc_mpi(mpi->w,mpi->h,mpi->imgfmt);
+  if (!pause_mpi) {
+    pause_mpi = alloc_mpi(mpi->w,mpi->h,mpi->imgfmt);
     copy_mpi(pause_mpi,mpi);
-    mp_input_queue_cmd(mp_input_parse_cmd("pause"));
-    go2pause = 2;
-    break;
   }
+  else if (mpctx_get_osd_function(vf->priv->root->ctx) == OSD_PAUSE)
+    copy_mpi(pause_mpi,mpi);
 
-  // Grab // Ungrab the keys
-  if(!mp_input_key_cb && vf->priv->current->show)
-    mp_input_key_cb = key_cb;
-  if(mp_input_key_cb && !vf->priv->current->show)
-    mp_input_key_cb = NULL;
+  if (vf->priv->current->show) {
+    if (!mp_input_key_cb)
+      mp_input_key_cb = key_cb;
 
   if(mpi->flags&MP_IMGFLAG_DIRECT)
     dmpi = mpi->priv;

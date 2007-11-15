@@ -402,6 +402,11 @@ int mpctx_get_global_sub_size(MPContext *mpctx)
     return mpctx->global_sub_size;
 }
 
+int mpctx_get_osd_function(MPContext *mpctx)
+{
+    return mpctx->osd_function;
+}
+
 static int is_valid_metadata_type (metadata_t type) {
   switch (type)
   {
