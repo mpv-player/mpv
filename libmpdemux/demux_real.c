@@ -1491,6 +1491,8 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    ++a_streams;
 	  } else if (strstr(mimet,"x-ralf-mpeg4")) {
 		 mp_msg(MSGT_DEMUX,MSGL_ERR,"Real lossless audio not supported yet\n");
+	  } else if (strstr(mimet,"x-pn-encrypted-ra")) {
+		 mp_msg(MSGT_DEMUX,MSGL_ERR,"Encrypted audio is not supported\n");
 	  } else {
 		 mp_msg(MSGT_DEMUX,MSGL_V,"Unknown audio stream format\n");
 		}
