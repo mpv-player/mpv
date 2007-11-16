@@ -3272,7 +3272,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 		return TVI_CONTROL_FALSE;
 	    Vhdr = (VIDEOINFOHEADER *) priv->pmtVideo->pbFormat;
 	    *(float *) arg =
-		(1.0 * Vhdr->dwBitRate) / Vhdr->bmiHeader.biSizeImage;
+		(1.0 * Vhdr->dwBitRate) / (Vhdr->bmiHeader.biSizeImage * 8);
 	    return TVI_CONTROL_TRUE;
 	}
     case TVI_CONTROL_IMMEDIATE:
